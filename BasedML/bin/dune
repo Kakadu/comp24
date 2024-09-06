@@ -1,0 +1,4 @@
+(executable
+ (public_name BasedML)
+ (name main)
+ (libraries BasedML))

@@ -1,0 +1,6 @@
+# dune init project BasedML
+# OCAMLPARAM: unset
+# Shared cache: disabled
+# Shared cache location: /home/pasha/.cache/dune/db
+# Workspace root: /home/pasha/comp24/BasedML
+# Auto-detected concurrency: 20
