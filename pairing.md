@@ -3,4 +3,4 @@
 | BasedML                                                                                                 | Аверин Павел           | Ефремов Алексей
 | ZimbabweML                                                                                              | Нурмухаметов Рафик     | Мелашенко Ксения
 | [AzimMuradov/miniml-compiler-haskell-spbu](https://github.com/AzimMuradov/miniml-compiler-haskell-spbu) | Азим Мурадов           |
-
+| XaxaML                                                                                                  | Якшигулов Вадим        | Артем Демченко
