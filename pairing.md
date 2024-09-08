@@ -4,3 +4,4 @@
 | ZimbabweML                                                                                              | Нурмухаметов Рафик     | Мелашенко Ксения
 | [AzimMuradov/miniml-compiler-haskell-spbu](https://github.com/AzimMuradov/miniml-compiler-haskell-spbu) | Азим Мурадов           |
 | XaxaML                                                                                                  | Якшигулов Вадим        | Артем Демченко
+| HamsterML                                                                                               | Зайцев Дмитрий         | Шмаков Александр
