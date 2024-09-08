@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/BDSML/META"
+  "_build/install/default/lib/BDSML/dune-package"
+  "_build/install/default/lib/BDSML/opam"
+]
+bin: [
+  "_build/install/default/bin/BDSML"
+]
