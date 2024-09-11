@@ -1,0 +1,221 @@
+name: Build PR
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+env:
+  OPAMROOT: /home/user/.opam
+  OPAMCONFIRMLEVEL: unsafe-yes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: kakadu18/ocaml:llvm14
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Print
+        run: env | sort
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0                # fix me later
+
+      - name: Pin linter to the latest version
+        if: false  # HACK!
+        run: |
+          opam pin add https://github.com/Kakadu/zanuda.git --no-action
+          opam reinstall zanuda --yes
+
+      - name: List installed OPAM packages
+        run: opam list
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Print Ref brach name
+        run: |
+          echo "${{ steps.branch-name.outputs.ref_branch }}"
+
+      #- run: git remote -vvv
+      #- run: git branch -vvv
+
+      ############# Detecting and compiling
+      # Smart link about setting environment variables
+      # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - name: Detect latest directory with changes in ${{ github.event.repository.name }}
+        run: |
+          opam exec -- ocaml .github/detect_latest_pr.ml -v "pull/${{ steps.branch-name.outputs.ref_branch }}" -repo ${{ github.event.repository.name }} >> $GITHUB_ENV
+          echo "${{ env.latest }}"
+        #if: ${{ github.event.pull_request.user.login == 'fp2022-helper' }}
+
+      - name: Installing dependencies for ${{ env.latest }}
+        if: false  # HACK!
+        run: |
+          sudo apt-get update
+          opam update
+          opam install ./${{ env.latest }} --depext-only --with-test --with-doc
+          opam install ./${{ env.latest }} --deps-only --with-test --with-doc
+
+      - name: List installed OPAM packages
+        run: opam list
+
+      - name: Naive linting
+        run: |
+          cd ${{ env.latest }}
+          python ../.github/lint_filesystem.py ${{ env.latest }}
+
+
+      - name: Compiling ${{ env.latest }} (profile=release)...
+        run: |
+          cd ${{ env.latest }}
+          opam exec -- dune build --profile=release
+
+      - name: Running tests in ${{ env.latest }}...
+        run: |
+          cd ${{ env.latest }}
+          opam exec -- dune runtest --profile=release
+
+      - name: Setting the environment
+        env:
+          LINTS_PATH: _build/default/_found_lints
+        run: |
+          echo "RDJSON_DIR_PATH=${{ env.LINTS_PATH }}" >> $GITHUB_ENV
+          echo "RDJSON_FILE_PATH=${{ env.LINTS_PATH }}/lints.rdjsonl" >> $GITHUB_ENV
+          cd ${{ env.latest }} && mkdir -p ${{ env.LINTS_PATH }}
+          echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
+
+      - name: Running linter in ${{ env.latest }}...
+        run: |
+          cd ${{ env.latest }}
+          opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
+
+      - run: cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }}
+      - name: Preparing lints tarball
+        run: |
+          echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
+          echo ${{ github.event.pull_request.user.login }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/piarast.txt
+          echo ${{ github.event.number }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PR_number.txt
+          echo ${{ github.event.pull_request.head.sha }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
+      # we use commit previous from head because HEAD is merge commit by some reason
+      # TODO: maybe PR_number is not required
+
+      - name: Upload linter (review.zip) artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: review
+          path: |
+            ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}
+
+      - run: echo $(git rev-parse HEAD)
+      - run: echo $(git rev-parse HEAD~1)
+      - run: echo ${{ github.event.pull_request.head.sha }}
+      - run: PAGER= git log
+
+      # Omitted. It is in docker image already
+      #- name: Installing a clone detector
+      #  run: npm install jscpd
+
+      #- run: which jscpd || exit 0
+      #- run: ls ~/.local/bin || exit 0
+      #- run: pwd ~ || exit 0
+
+      - name: Looking for clones
+        if: false
+        run: |
+          echo ${{ env.latest }} > projectname.txt
+          python ./find_clones.py ${{ env.latest }}
+          #python3 -m trace --trace ./find_clones.py ${{ env.latest }}
+
+      - run: echo ${{ github.event.number }} > PR_number.txt
+
+      - run: cat jscpd_report.txt
+        if: false
+
+      - name: Update JSCPD artifact
+        uses: actions/upload-artifact@v4
+        if: false
+        with:
+          name: jscpd_report
+          path: |
+            jscpd_report.txt
+            PR_number.txt
+            projectname.txt
+
+      ###################### Coverage #####################################
+
+      - name: Calculating coverage (1/2)
+        run: |
+          mkdir -p ${{ env.BISECT_DIR }}
+          cd ${{ env.latest }} && opam exec -- dune runtest --instrument-with bisect_ppx --force
+        env:
+          BISECT_DIR: /tmp/bisect_ppx_data
+          BISECT_FILE: /tmp/bisect_ppx_data/data
+
+      #- run: ls ${{ env.BISECT_DIR }}
+      #  env:
+      #    BISECT_DIR: /tmp/bisect_ppx_data
+      #    BISECT_FILE: /tmp/bisect_ppx_data/data
+
+      - name: Calculating coverage (2/2)
+        id: calc-coverage
+        run: |
+            cd ${{ env.latest }}
+            mkdir -p ${{ env.BISECT_DIR }}
+            opam exec -- bisect-ppx-report html --coverage-path ${{ env.BISECT_DIR }}
+            opam exec -- bisect-ppx-report summary --coverage-path ${{ env.BISECT_DIR }}
+            opam exec -- bisect-ppx-report summary --coverage-path ${{ env.BISECT_DIR }} | cut -f3 | xargs -I{} echo "percent={}" >> $GITHUB_OUTPUT
+            opam exec -- bisect-ppx-report summary --coverage-path ${{ env.BISECT_DIR }} | cut -f3 -d' ' | xargs -I{} echo "{}" > _coverage/percent.txt
+            ls ${{ env.BISECT_DIR }}
+            ls _coverage
+        env:
+          BISECT_DIR: /tmp/bisect_ppx_data
+          BISECT_FILE: /tmp/bisect_ppx_data/data
+
+      - run: echo ${{ env.latest }} > ${{ env.latest }}/_coverage/projectname.txt
+
+      - name: Update coverage artifact ${{ steps.calc-coverage.outputs.percent }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ${{ env.latest }}/_coverage
+
+      ###################### Upload Docs #####################################
+      - run: ls $(opam exec -- odig cache path)/html
+        continue-on-error: true
+
+      - name: Build API documentation for ${{ env.latest }}...
+        run: |
+          cd ${{ env.latest }}
+          opam exec -- dune b @install --profile=release
+          opam exec -- dune install
+          opam exec -- dune install
+          opam exec -- odig odoc --odoc-theme=odig.gruvbox.light --no-tag-index --no-pkg-deps ${{ env.latest }}
+
+      - run: ls $(opam exec -- odig cache path)/html
+
+      - name: Prepare artifact part for ${{ env.latest }} API ...
+        run: |
+          cp $(opam exec -- odig cache path)/html _html -r
+          rm _html/index.html
+          echo ${{ env.latest }}          > projectname.txt
+          echo ${{ github.event.number }} > PR_number.txt
+          cp ${{ env.latest }}/_coverage/percent.txt percent.txt
+
+      - name: Update docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: |
+            _html
+            projectname.txt
+            PR_number.txt
+            percent.txt
+          #${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
