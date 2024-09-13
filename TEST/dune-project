@@ -1,6 +1,6 @@
 (lang dune 3.8)
 
-(name demo)
+(name TEST)
 
 (generate_opam_files true)
 
