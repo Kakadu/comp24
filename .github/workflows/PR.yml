@@ -31,7 +31,8 @@ jobs:
         #if: false  # HACK!
         run: |
           opam pin add https://github.com/Kakadu/zanuda.git --no-action
-          opam reinstall zanuda --yes
+          opam reinstall zanuda odig --yes
+          # TODO: Move odig into image
 
       - name: List installed OPAM packages
         run: opam list
