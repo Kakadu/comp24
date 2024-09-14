@@ -1,0 +1,24 @@
+(lang dune 3.16)
+
+(name BDSML)
+
+(generate_opam_files true)
+
+(source
+ (github Kuarni/BDSML))
+
+(authors "Kuarni" "LeonidElkin")
+
+(maintainers "Kuarni" "LeonidElkin")
+
+(license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
+
+(documentation https://url/to/documentation)
+
+(package
+ (name BDSML)
+ (synopsis "Basic Development Sadistic Meta Language")
+ (description "Basic Development Sadistic Meta Language")
+ (depends ocaml dune)
+ (tags
+  (topics "to describe" your project)))
