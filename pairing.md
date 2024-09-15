@@ -6,3 +6,4 @@
 | XaxaML                                                                                                  | Якшигулов Вадим    | Артем Демченко
 | HamsterML                                                                                               | Зайцев Дмитрий     | Шмаков Александр
 | [Lamagraph/interaction-nets-in-fpga](https://github.com/Lamagraph/interaction-nets-in-fpga)             | Кубышкин Ефим      | Пономарев Николай
+| NeML                                                                                                    | Павлушкин Дмитрий  | Сухарев Андрей
