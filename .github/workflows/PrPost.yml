@@ -88,7 +88,7 @@ jobs:
           external_repository: Kakadu/fp2021-ci-artifacts
           publish_branch: master
           keep_files: true
-          destination_dir: 2024fp/${{ env.LANG_NAME }}/
+          destination_dir: 2024comp/${{ env.LANG_NAME }}/
           # generate new token
           # https://github.com/settings/tokens
           # put it here
@@ -207,8 +207,8 @@ jobs:
   upload_docs:
     if: ${{( github.event.workflow_run.event == 'pull_request') && (github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-latest
-    container:
-      image: kakadu18/ocaml:fp2024  # At the moment OCaml is not required (July 2024)
+    #container:
+    #  image: kakadu18/ocaml:fp2024  # At the moment OCaml is not required (July 2024)
 
     steps:
       - name: Print
@@ -242,14 +242,14 @@ jobs:
       - name: Deploy documentation for ${{ env.LANG_NAME }}
         uses: peaceiris/actions-gh-pages@v4
         with:
-          personal_token: ${{ secrets.FP2024_UPLOAD_LINTS }}
+          github_token: ${{ secrets.FP2024_UPLOAD_LINTS }}
           publish_branch: gh-pages
           publish_dir: ./_docs/_html
           destination_dir: docs/
           enable_jekyll: false
           keep_files: true
           commit_message: >
-            Deploying documentation for ${{ env.LANG_NAME }}: https://kakadu.github.io/${{ github.event.repository.name }}/docs/${{ env.LANG_NAME }}
+            Deploying documentation for ${{ env.LANG_NAME }}: https://kakadu.github.io/${{ github.event.repository.name }}/docs/${{ env.LANG_NAME }} [skip ci]
           user_name: '${{ github.event.repository.name }}[bot]'
           user_email: '${{ github.event.repository.name }}[bot]@users.noreply.github.com'
 
@@ -343,13 +343,13 @@ jobs:
           keep_files: true
           destination_dir: cov/${{ env.LANG_NAME }}
           commit_message: >
-            Deploying coverage for ${{ env.LANG_NAME }}: https://kakadu.github.io/${{ github.event.repository.name }}/cov/${{ env.LANG_NAME }}
+            Deploying coverage for ${{ env.LANG_NAME }}: https://kakadu.github.io/${{ github.event.repository.name }}/cov/${{ env.LANG_NAME }} [skip ci]
           user_name: '${{ github.event.repository.name }}[bot]'
           user_email: '${{ github.event.repository.name }}[bot]@users.noreply.github.com'
           # generate new token
           # https://github.com/settings/tokens
           # put it here
-          # https://github.com/Kakadu/fp2024/settings/secrets/actions/new
+          # https://github.com/Kakadu/comp24/settings/secrets/actions/new
 
   ###################################################################################################
   process_clones:
