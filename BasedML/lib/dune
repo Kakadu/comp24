@@ -1,2 +1,6 @@
 (library
- (name BasedML))
+ (name BasedML)
+ (libraries base angstrom)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test ppx_deriving.show ppx_expect)))
