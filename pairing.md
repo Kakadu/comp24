@@ -8,3 +8,4 @@
 | [Lamagraph/interaction-nets-in-fpga](https://github.com/Lamagraph/interaction-nets-in-fpga)             | Кубышкин Ефим      | Пономарев Николай
 | NeML                                                                                                    | Павлушкин Дмитрий  | Сухарев Андрей
 | KreML                                                                                                   | Пожарский Роман    | 
+| HTML                                                                                                    | Ахмедов Давид      | Парфёнов Данил
