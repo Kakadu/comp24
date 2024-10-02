@@ -55,8 +55,10 @@ type expr =
 [@@deriving show { with_path = false }]
 
 (* Let binding/declarations *)
-type let_declaration = DLet of rec_flag * pattern * expr
+type let_declaration =
+  | DLet of rec_flag * pattern * expr
+  | DMutualRecDecl of let_declaration list
 [@@deriving show { with_path = false }]
 
 (* A collections of let declarations*)
-type declarations = let_declaration list [@@deriving show { with_path = false }]
+type declarations = let_declaration list list [@@deriving show { with_path = false }]
