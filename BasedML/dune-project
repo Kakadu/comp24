@@ -1,26 +1,26 @@
-(lang dune 3.16)
+(lang dune 3.8)
 
 (name BasedML)
 
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github Salvatore112/comp24))
 
-(authors "Author Name")
+(authors "Salvatore112", "Osogi")
 
-(maintainers "Maintainer Name")
+(maintainers "Salvatore112", "Osogi")
 
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+(license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
 
 (package
  (name BasedML)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
- (tags
-  (topics "to describe" your project)))
+ (synopsis "A small MiniML compiler ")
+ (depends
+  ocaml
+  dune
+  bisect_ppx
+  (llvm
+   (= "16.0.6+nnp"))))
 
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
