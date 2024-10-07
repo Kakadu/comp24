@@ -16,6 +16,12 @@ repos:
         language: system
         files: ^XaxaML/
 
+    -   id: fmt
+        name: build
+        entry: bash -c 'cd XaxaML && dune fmt'
+        language: system
+        files: ^XaxaML/
+
     -   id: runtests
         name: runtests
         entry: bash -c 'cd XaxaML && dune runtest'
