@@ -1,0 +1,29 @@
+fail_fast: true
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+
+-   repo: local
+    hooks:
+    -   id: build
+        name: build
+        entry: bash -c 'cd XaxaML && dune build'
+        language: system
+        files: ^XaxaML/
+
+    -   id: runtests
+        name: runtests
+        entry: bash -c 'cd XaxaML && dune runtest'
+        language: system
+        files: ^XaxaML/
+
+    -   id: zanuda
+        name: zanuda
+        entry: bash -c 'cd XaxaML && zanuda -no-top_file_license -dir .'
+        language: system
+        files: ^XaxaML/
