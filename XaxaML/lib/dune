@@ -1,0 +1,6 @@
+(library
+ (name XaxaML)
+ (public_name XaxaML.Lib)
+ (modules Ast)
+ (preprocess
+  (pps ppx_deriving.show)))
