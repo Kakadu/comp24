@@ -1,0 +1,7 @@
+(library
+ (name parser)
+ (public_name BasedML.Parser)
+ (libraries base angstrom ast)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test ppx_expect)))
