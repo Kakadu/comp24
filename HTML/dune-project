@@ -1,0 +1,34 @@
+(lang dune 3.8)
+
+(name HTML)
+
+(generate_opam_files true)
+
+(cram enable)
+
+(source
+ (github Parzival-05/comp24))
+
+(authors "David Akhmedov, Danil Parfyonov")
+
+(maintainers "David Akhmedov, Danil Parfyonov")
+
+(license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
+
+(package
+ (name HTML)
+ (synopsis "MiniML compiler")
+ (version 0.1)
+ (depends
+  ocaml
+  dune
+  bisect_ppx
+  (llvm
+   (= "16.0.6+nnp"))
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  (odoc :with-doc)
+  (ocamlformat :build)))
