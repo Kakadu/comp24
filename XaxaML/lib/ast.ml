@@ -1,6 +1,6 @@
 (** Copyright 2024, aartdem, toadharvard *)
 
-(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 type const =
   | Int of int (** 1 *)
