@@ -5,22 +5,27 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github toadharvard/XaxaML))
 
-(authors "Author Name")
+(authors "Artem Demchenko" "Vadim Yakshigulov")
 
-(maintainers "Maintainer Name")
+(maintainers "Artem Demchenko" "Vadim Yakshigulov")
 
-(license LICENSE)
+(homepage "https://github.com/toadharvard/XaxaML")
 
-(documentation https://url/to/documentation)
+(license LGPL-2.1-or-later)
 
 (package
  (name XaxaML)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
- (tags
-  (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
+ (synopsis "Compiler for XaXaML")
+ (description "Compiler for the XaXa Mini Language")
+(depends
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  (odoc :with-doc)
+  (ocamlformat :build)
+  ))
