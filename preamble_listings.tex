@@ -1,0 +1,225 @@
+% color options
+\definecolor{YellowGreen} {HTML}{B5C28C}
+\definecolor{ForestGreen} {HTML}{009B55}
+\definecolor{MyPurple}{HTML}{7f007f}
+\definecolor{CommentColor}{HTML}{3f7f5f}
+\def\HaskellTypeclassColor\PYG{k+kt}
+\def\HaskellCommentColor\PYG{c+c1}
+
+\newif\ifminted
+\newif\iflistings
+
+\listingstrue
+%\mintedtrue
+
+\iflistings
+    \usepackage{listings}
+    %\input{../ss24/riscv-asm.tex}
+    %\newcommand{\inline}[1]{\lstinline{haskell}{#1}}
+    % TODO: https://tex.stackexchange.com/questions/4198/emphasize-word-beginning-with-uppercase-letters-in-code-with-lstlisting-package
+    \definecolor{eclipseGreen}{RGB}{63,127,95}
+
+    % https://tex.stackexchange.com/a/4199
+    \makeatletter
+    \newcommand*\ocamlidstyle{%
+            \expandafter\id@style\the\lst@token\relax
+    }
+    \def\id@style#1#2\relax{%
+            \ifcat#1\relax\else
+                    \ifnum`#1=\uccode`#1%
+                             \ttfamily\bfseries\color{MyPurple}
+                    \else
+                                                \ttfamily
+                    \fi
+            \fi
+    }
+    \makeatother
+
+    \lstdefinelanguage{none}{ identifierstyle= }
+    \lstdefinelanguage{menhir}
+      { identifierstyle=
+      , morecomment=[s]{/*}{*/}
+      , commentstyle=\color{eclipseGreen} % style of comments
+      , classoffset=0
+      , keywords={ left, nonassoc, start,  token, type
+      }
+      , keywordstyle=\ttfamily\bfseries\color{MyPurple}
+    }
+    \lstdefinelanguage{ocamllex}
+      { identifierstyle=
+      , morecomment=[s]{/*}{*/}
+      , commentstyle=\color{eclipseGreen} % style of comments
+      , classoffset=0
+      , keywords={ and, rule, parsem if, then, else, eof, as, raise, parse
+      }
+      , keywordstyle=\ttfamily\bfseries\color{MyPurple}
+      , stringstyle=\color{blue}
+      , morestring=*[d]{"}
+      , morestring=*[d]{'}
+    }
+    \ifxetexorluatex
+    \lstdefinelanguage{ocaml}{
+        basicstyle=\ttfamily   % Вот тут надо стиль ставить, а не у идентификаторов
+        %, identifierstyle=\ocamlidstyle
+        , identifierstyle=\ttfamily
+        %, commentstyle=\HaskellCommentColor\itshape\HaskellCommentColor
+        , sensitive=true
+        %
+        , classoffset=0
+        , keywords={ fun, function, and, let, rec, in, match, with, when
+            , class, type, of, do, done, as, val
+            , inherit, module, struct, sig, include
+            , if, then, else, while
+            , try, exception, raise
+            , mod
+            , assert, true, false, begin, end, lazy
+            , @@deriving
+            , Some, None
+        }
+        , keywordstyle=\ttfamily\bfseries\color{MyPurple} %\underbar
+        , classoffset=1
+        , morekeywords={pure,empty,select,branch,oneOf}
+        , keywordstyle=\color{MyPurple}
+        , classoffset=2
+        , morekeywords={Monad,Applicative,Selective,String
+            ,Either,Left,Right
+            ,Maybe,Some,None
+        }
+        , keywordstyle=\ttfamily\bfseries\color{MyPurple}
+        , classoffset=0,
+        %keywordstyle=[2]{\color{orange}},
+        otherkeywords={::},
+        %identifierstyle=\fontfamily{cmtt}\selectfont\ttfamily,
+        %basewidth={0.5em,0.5em},
+        columns=fixed,
+        %fontadjust=true,
+        %literate={->}{{$\to$}}3 {===}{{$\equiv$}}1 {=/=}{{$\not\equiv$}}1 {|>}{{$\triangleright$}}3 {\\/}{{$\vee$}}2 {/\\}{{$\wedge$}}2 {>=}{{$\ge$}}1 {<=}{{$\le$}} 1,
+        , morecomment=[s]{(*}{*)}
+        , commentstyle=\color{eclipseGreen} % style of comments
+        %, literate={\$}{{\textcolor{blue}{\$}}}1
+        %, literate={<\$>}{{\textcolor{RawSienna}{\ <\$>\ } }}1
+        %           {>?>}{{\textcolor{RawSienna}{\ >?>\ } }}1
+        , string = [d]{"}
+        , showstringspaces=false
+        , stringstyle = \color{black}
+        %, morestring = [d][\color{orange}]{'}
+        %, moredelim={[s][\color{orange}\ttfamily]{'}{'}}
+    }
+    \else
+        \lstdefinelanguage{ocaml}{
+            % modified minial style for pdflatex
+            basicstyle=\ttfamily
+            , identifierstyle=\ttfamily
+            , sensitive=true
+            , classoffset=0
+            , extendedchars=true
+            , literate=
+                {а}{{a}}1 {б}{{b}}1 {в}{{v}}1 {г}{{g}}1 {д}{{d}}1
+                {е}{{e}}1 {ё}{{e}}1 {ж}{{zh}}1 {з}{{z}}1 {и}{{i}}1 {й}{{j}}1
+                       {к}{{k}}1 {л}{{l}}1 {м}{{m}}1 {н}{{n}}1 {о}{{o}}1
+                       {п}{{p}}1 {р}{{r}}1 {с}{{s}}1 {т}{{t}}1 {у}{{u}}1
+                       {ф}{{f}}1 {х}{{h}}1 {ц}{{ts}}1 {ч}{{ch}}1 {ш}{{sh}}1
+                       {щ}{{sch}}1 {ъ}{{}}1 {ы}{{y}}1 {ь}{{}}1 {э}{{e}}1
+                       {ю}{{u}}1  {я}{{a}}1
+                {А}{{a}}1 {Б}{{b}}1 {В}{{v}}1 {Г}{{g}}1 {Д}{{d}}1
+                {Е}{{e}}1 {Ё}{{e}}1 {Ж}{{zh}}1 {З}{{z}}1 {И}{{i}}1
+                {Й}{{j}}1 {К}{{k}}1 {Л}{{l}}1 {М}{{m}}1 {Н}{{n}}1
+                {О}{{o}}1 {П}{{p}}1 {Р}{{r}}1 {С}{{s}}1 {Т}{{t}}1
+                {У}{{u}}1 {Ф}{{f}}1 {х}{{h}}1 {ц}{{ts}}1 {Ч}{{ch}}1
+                {Ш}{{sh}}1 {Щ}{{sch}}1 {Ъ}{{}}1 {Ы}{{y}}1 {Ь}{{}}1
+                {Э}{{e}}1 {Ю}{{u}}1  {Я}{{a}}1
+            , keywords={ fun, function, and, let, rec, in, match, with, when
+                , class, type, of, do, done, as, val
+                , inherit, module, struct, sig, include
+                , if, then, else, while
+                , try, exception, raise
+                , mod
+                , assert, true, false, begin, end, lazy
+                , @@deriving
+                , Some, None
+            }
+            , keywordstyle=\ttfamily\bfseries\color{MyPurple} %\underbar
+            , morecomment=[s]{(*}{*)}
+            , commentstyle=\color{eclipseGreen} % style of comments
+            , string = [d]{"}
+            , showstringspaces=false
+            , stringstyle = \color{black}
+            %, moredelim={[s][\color{eclipseGreen}\ttfamily]{'}{'}}
+        }
+    \fi
+    \lstset{ language=ocaml }
+    \lstnewenvironment{mlisting}[1][]{\lstset{inputencoding=latin1, language=ocaml,#1}%
+    }{%
+    }
+
+    \lstdefinelanguage{csharp}
+      { basicstyle=\ttfamily   % Вот тут надо стиль ставить, а не у идентификаторов
+      , identifierstyle=\ttfamily
+      , sensitive=true
+      , keywords={ new, var, in, foreach }
+      , keywordstyle=\ttfamily\bfseries\color{MyPurple}
+      , commentstyle=\color{eclipseGreen}
+      , morecomment=[f][\color{eclipseGreen}][0]{//},
+      }
+
+
+% https://github.com/cansik/kotlin-latex-listing
+\lstdefinelanguage{Kotlin}{
+  comment=[l]{//},
+  commentstyle={\color{gray}\ttfamily},
+  emph={filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println},
+  emphstyle={\color{OrangeRed}},
+  identifierstyle=\color{black},
+  keywords={!in, !is, abstract, actual, annotation, as, as?, break, by, catch, class, companion, const, constructor, continue, crossinline, data, delegate, do, dynamic, else, enum, expect, external, false, field, file, final, finally, for, fun, get, if, import, in, infix, init, inline, inner, interface, internal, is, lateinit, noinline, null, object, open, operator, out, override, package, param, private, property, protected, public, receiveris, reified, return, return@, sealed, set, setparam, super, suspend, tailrec, this, throw, true, try, typealias, typeof, val, var, vararg, when, where, while},
+  keywordstyle={\color{MyPurple}\bfseries},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[s]{"""*}{*"""},
+  ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Any, Unit, Nothing},
+  ndkeywordstyle={\color{MyPurple}\bfseries},
+  sensitive=true,
+  stringstyle={\color{ForestGreen}\ttfamily},
+}
+
+    %\def\mlinline[1]{\lstinline[langauge=ocaml]{#1}} % is not possible
+
+    \lstdefinelanguage{Kotlin}{
+      comment=[l]{//},
+      commentstyle={\color{gray}\ttfamily},
+      emph={filter, first, firstOrNull, forEach, lazy, map, mapNotNull, println},
+      emphstyle={\color{blue}},
+      identifierstyle=\color{black},
+      keywords={!in, !is, abstract, actual, annotation, as, as?, break, by, catch, class, companion, const, constructor, continue, crossinline, data, delegate, do, dynamic, else, enum, expect, external, false, field, file, final, finally, for, fun, get, if, import, in, infix, init, inline, inner, interface, internal, is, lateinit, noinline, null, object, open, operator, out, override, package, param, private, property, protected, public, receiveris, reified, return, return@, sealed, set, setparam, super, suspend, tailrec, this, throw, true, try, typealias, typeof, val, var, vararg, when, where, while},
+      keywordstyle={\color{blue}\bfseries},
+      morecomment=[s]{/*}{*/},
+      morestring=[b]",
+      morestring=[s]{"""*}{*"""},
+      ndkeywords={@Deprecated, @JvmField, @JvmName, @JvmOverloads, @JvmStatic, @JvmSynthetic, Array, Byte, Double, Float, Int, Integer, Iterable, Long, Runnable, Short, String, Any, Unit, Nothing},
+      ndkeywordstyle={\color{blue}\bfseries},
+      sensitive=true,
+      stringstyle={\color{ForestGreen}\ttfamily},
+    }
+    \ifpdftex
+        \usepackage{etoolbox}
+        \expandafter\patchcmd\csname \string\lstinline\endcsname{%
+            \leavevmode
+            \bgroup
+        }{%
+            \leavevmode
+            \ifmmode\hbox\fi
+            \bgroup
+        }{}{%
+            \typeout{Patching of \string\lstinline\space failed!}%
+        }
+    \fi
+\fi
+
+\ifminted
+    \usepackage[cache=true]{minted}
+    \usemintedstyle{perldoc}
+    \def\hsinline{\mintinline{haskell}}
+    \def\mlinline{\mintinline[escapeinside=||]{ocaml}}
+
+%\def\hsinline{\mintinline{haskell}}
+%\def\inline{\hsinline}
+\fi

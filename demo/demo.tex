@@ -1,0 +1,205 @@
+% !TEX TS-program = pdflatex
+% !TeX spellcheck = ru_RU
+% !TEX root = demo.tex
+\documentclass[aspectratio=169
+  %, draft      % speedup compilation
+  %, handout    % eliminate pauses
+  , xcolor={svgnames}
+  , russian  % This line affects translation of theorem titles
+  ]{beamer}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{../preamble}
+\bibliography{../bibliography.bib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title[Компиляторы. ANF]{Компиляторы.  ANF}
+\date{\DTMDate{2024-09-28}}
+
+
+\AtBeginSection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Оглавление}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\begin{document}
+\maketitle
+
+\defverbatim[colored]{\ANFInput}{
+\begin{lstlisting}[language=ocaml]
+type expr =
+| Num of int
+| Id of string
+| Plus of expr * expr
+| Minus of expr * expr
+| Let of string * expr * expr
+\end{lstlisting}
+}
+
+\defverbatim[colored]{\ANFI}{
+\begin{lstlisting}[language=ocaml]
+type immexpr =
+| ImmNum of int
+| ImmId of string
+
+type cexpr =
+| CPlus of immexpr * immexpr
+
+type aexpr =
+| ALet of string * cexpr * aexpr
+\end{lstlisting}
+}
+
+\begin{frame}{ANF ---~упрощенное представление программ}
+Мы будем упрощать выражения, чтобы аргументами функций были \enquote{атомарные} (immediate) выражения (константы, имена и т.д.)
+
+\begin{minipage}{0.35\linewidth}
+\begin{minipage}{3cm}\ANFInput\end{minipage}
+\end{minipage}$\Huge \quad \Longrightarrow \quad $
+\begin{minipage}{0.35\linewidth}
+\begin{minipage}{3cm}\ANFI\end{minipage}
+\end{minipage}
+\footnotetext{Впервые упомянуты в 1993 в статье \foreignquote{english}{The Essence of Compiling with Continuations}~\cite{Flanagan1993} }
+\end{frame}
+
+\defverbatim[colored]{\ANFII}{
+\begin{lstlisting}[escapechar=!, language=ocaml]
+type cexpr =
+| CPlus of immexpr * immexpr
+| !\tikzmark{s1}!CImmExpr of immexpr!\tikzmark{e1}!
+
+type aexpr =
+| ALet of string * cexpr * aexpr
+| !\tikzmark{s2}!ACExpr of cexpr!\tikzmark{e2}!
+\end{lstlisting}
+}
+
+
+\begin{frame}{ANF: Примеры и уточнения}
+\begin{columns}[T]
+\begin{column}[t]{.49\textwidth}
+\begin{enumerate}
+\item \lstinline|(5 + 4) - 2|\\
+  \uncover<2->{ \lstinline|let v1 = 5 + 4 in v1 - 2| }
+\item \lstinline|let x = 5 in x|
+\end{enumerate}
+\end{column}
+\begin{column}[t]{.49\textwidth}
+  \begin{minipage}{3cm}\ANFI\end{minipage}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{ANF представление --- новые конструкторы}
+  \begin{minipage}{3cm}\ANFII\end{minipage}
+
+  \begin{tikzpicture}[use tikzmark]
+      \tikzHighlight(s1)(e1);
+      \tikzHighlight(s2)(e2);
+  \end{tikzpicture}
+\end{frame}
+
+\defverbatim[colored]{\ANFImplI}{
+\begin{lstlisting}[language=ocaml]
+let rec anf (e : expr) (expr_with_hole : immexpr -> aexpr) = function
+  | Num n -> expr_with_hole (ImmNum n)
+  | Id x -> expr_with_hole (ImmId x)
+  (* | ... *)
+\end{lstlisting}
+}
+\defverbatim[colored]{\ANFImplII}{
+\begin{lstlisting}[language=ocaml]
+  | Plus(left, right) ->
+      anf left (fun limm ->
+        anf right (fun rimm ->
+\end{lstlisting}
+}
+\defverbatim[colored]{\ANFImplIII}{
+\begin{lstlisting}[language=ocaml]
+          (* bad *) CPlus (limm, rimm)
+\end{lstlisting}
+}
+\defverbatim[colored]{\ANFImplIV}{
+\begin{lstlisting}[language=ocaml]
+          (* OK *) ALet("result_of_plus",
+                     CPlus(limm, rimm),
+                     expr_with_hole (ImmId "result_of_plus"))
+      ))
+\end{lstlisting}
+}
+\begin{frame}{ANF представление --- сложный случай}
+\lstinline|Plus(..., ...)|\\
+
+Не совсем понятно, что делать с результатами левого и правого слагаемого, так как там могут появиться много \lstinline=let=.
+Мэтчиться по ним не хочется. Поэтому...
+
+\ANFImplI \pause
+\vspace{-1em}
+\ANFImplII
+\vspace{-1em}
+\uncover<2> { \ANFImplIII }
+\uncover<3> { \ANFImplIV }
+\end{frame}
+
+%\newcommand{\xarr}[1]{\ensuremath{\xrightarrow{#1}}}
+\newcommand{\pure}{\ensuremath{\xrightarrow{pure}}}
+
+\defverbatim[colored]{\mlPlusSign}{
+\begin{lstlisting}[escapeinside={!}{!}, language=ocaml]
+val (+): int !\pure! int !\pure! int
+\end{lstlisting}
+}
+
+\begin{frame}{Заключение про ANF}
+\begin{itemize}
+\item ANF пригодится, когда дойдете до LLVM
+\item Можно написать много разных реализаций, самое нетривиальные места --- \lstinline|let| и \lstinline|if|
+
+\item Часто будут появляться ненужные переменные, например, \lstinline|let x1 = x3 in x1|. Можно пытаться такое не порождать, а можно упрощать отдельным проходом
+
+\item В контексте miniML могут появляться каверзные случаи, типа  \lstinline|let temp1 = (+) x1 in temp1 x2| вместо \lstinline|x1 + x2|. \\
+Используя информацию об уже объявленных функциях, нужно не создавать такие ANF
+\begin{minipage}{.5\textwidth}
+\mlPlusSign
+\end{minipage}
+\item Вывод: если сделать проверку типов до ANF, то будут менее \enquote{мусорные} ANF
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Просто картинка}
+\framesubtitle{}
+\begin{columns}[T]
+\begin{column}{.65\textwidth}
+
+Не пихайте все tikz в один файл. Лучше создать отдельный PDF, либо tikzexternalize
+
+  \begin{definition}[Граф потока управления]
+  $\langle V, E, Entry\rangle$, где
+  \begin{itemize}
+  \item $V$ вершины для представления инструкций или базовых блоков
+  \item $E$ рёбра потенциального потока управления, $E\subseteq V\times V$
+  \item $Entry\in V$ --- уникальная точка входа
+  \end{itemize}
+  \end{definition}
+
+\end{column}\hspace{1em}
+\begin{column}{.3\textwidth}
+  \vspace{-1em}
+  \includegraphics[scale=1.2]{../misc/cfg1.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}%[allowframebreaks]
+\frametitle<presentation>{Ссылки \& Acknowledgements}
+\phantom{\cite*{PolitzANF2016, Flanagan1993}}
+\vspace{-1em}
+\printbibliography
+\end{frame}
+
+
+\end{document}
