@@ -8,21 +8,6 @@ type rec_flag =
   | NotRec
 [@@deriving show { with_path = false }]
 
-(* Standard binary operations *)
-type binop =
-  | Add
-  | Sub
-  | Mul
-  | Div
-  | Eq
-  | NotEq
-  | Gr
-  | GrOrEq
-  | Ls
-  | LsOrEq
-  | Cons
-[@@deriving show { with_path = false }]
-
 (* Standard data types (constants): integers, bools*)
 type constant =
   | CInt of int
@@ -43,7 +28,6 @@ type pattern =
 (* Standard expressions *)
 type expr =
   | EConstant of constant
-  | EBinop of expr * binop * expr
   | EIdentifier of string
   | EFunction of pattern * expr
   | EApplication of expr * expr

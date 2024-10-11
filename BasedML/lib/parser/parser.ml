@@ -156,6 +156,36 @@ let p_tuple p_exp constructor =
 let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x)
 let p_tuple_pattern p_exp = p_tuple p_exp (fun x -> PTuple x)
 
+let binary_operation op func =
+  skip_whitespace
+  *> Angstrom.string op
+  *> return (fun operand1 operand2 ->
+    EApplication (func, EApplication (operand1, operand2)))
+;;
+
+let add_func = EIdentifier "( + )"
+let sub_func = EIdentifier "( - )"
+let mul_func = EIdentifier "( * )"
+let div_func = EIdentifier "( / )"
+let gr_func = EIdentifier "( > )"
+let gr_or_eq_func = EIdentifier "( >= )"
+let ls_func = EIdentifier "( < )"
+let ls_or_eq_func = EIdentifier "( <= )"
+let eq_func = EIdentifier "( = )"
+let not_eq_func = EIdentifier "( <> )"
+let cons_func = EIdentifier "( :: )"
+let cons_delim_expr = binary_operation "::" cons_func
+let not_eq_delim = binary_operation "<>" not_eq_func
+let eq_delim = binary_operation "=" eq_func
+let gr_delim = binary_operation ">" gr_func
+let gr_or_eq_delim = binary_operation ">=" gr_or_eq_func
+let ls_delim = binary_operation "<" ls_func
+let ls_or_eq_delim = binary_operation "<=" ls_or_eq_func
+let add_delim = binary_operation "+" add_func
+let sub_delim = binary_operation "-" sub_func
+let mul_delim = binary_operation "*" mul_func
+let div_delim = binary_operation "/" div_func
+
 (* Binary operations parsers & delimiter for chains*)
 
 let app_delim = return (fun operand1 operand2 -> EApplication (operand1, operand2))
@@ -164,72 +194,6 @@ let cons_delim_pattern =
   skip_whitespace
   *> Angstrom.string "::"
   *> return (fun operand1 operand2 -> PCons (operand1, operand2))
-;;
-
-let cons_delim_expr =
-  skip_whitespace
-  *> Angstrom.string "::"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Cons, operand2))
-;;
-
-let mul_delim =
-  skip_whitespace
-  *> Angstrom.string "*"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Mul, operand2))
-;;
-
-let div_delim =
-  skip_whitespace
-  *> Angstrom.string "/"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Div, operand2))
-;;
-
-let add_delim =
-  skip_whitespace
-  *> Angstrom.string "+"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Add, operand2))
-;;
-
-let sub_delim =
-  skip_whitespace
-  *> Angstrom.string "-"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Sub, operand2))
-;;
-
-let eq_delim =
-  skip_whitespace
-  *> Angstrom.string "="
-  *> return (fun operand1 operand2 -> EBinop (operand1, Eq, operand2))
-;;
-
-let gr_delim =
-  skip_whitespace
-  *> Angstrom.string ">"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Gr, operand2))
-;;
-
-let gr_or_eq_delim =
-  skip_whitespace
-  *> Angstrom.string ">="
-  *> return (fun operand1 operand2 -> EBinop (operand1, GrOrEq, operand2))
-;;
-
-let ls_delim =
-  skip_whitespace
-  *> Angstrom.string "<"
-  *> return (fun operand1 operand2 -> EBinop (operand1, Ls, operand2))
-;;
-
-let ls_or_eq_delim =
-  skip_whitespace
-  *> Angstrom.string "<="
-  *> return (fun operand1 operand2 -> EBinop (operand1, LsOrEq, operand2))
-;;
-
-let not_eq_delim =
-  skip_whitespace
-  *> Angstrom.string "<>"
-  *> return (fun operand1 operand2 -> EBinop (operand1, NotEq, operand2))
 ;;
 
 (* final pattern parsers*)
@@ -393,12 +357,25 @@ let x = (5 + 5) * 6 + (5 + 5) / 2
   [%expect
     {|
     [[(DLet (NotRec, (PIdentifier "x"),
-         (EBinop (
-            (EBinop ((EBinop ((EConstant (CInt 5)), Add, (EConstant (CInt 5)))),
-               Mul, (EConstant (CInt 6)))),
-            Add,
-            (EBinop ((EBinop ((EConstant (CInt 5)), Add, (EConstant (CInt 5)))),
-               Div, (EConstant (CInt 2))))
+         (EApplication ((EIdentifier "( + )"),
+            (EApplication (
+               (EApplication ((EIdentifier "( * )"),
+                  (EApplication (
+                     (EApplication ((EIdentifier "( + )"),
+                        (EApplication ((EConstant (CInt 5)), (EConstant (CInt 5))
+                           ))
+                        )),
+                     (EConstant (CInt 6))))
+                  )),
+               (EApplication ((EIdentifier "( / )"),
+                  (EApplication (
+                     (EApplication ((EIdentifier "( + )"),
+                        (EApplication ((EConstant (CInt 5)), (EConstant (CInt 5))
+                           ))
+                        )),
+                     (EConstant (CInt 2))))
+                  ))
+               ))
             ))
          ))
        ]
@@ -412,7 +389,9 @@ let x = if 5 > 4 then true else false
   [%expect
     {|
     [[(DLet (NotRec, (PIdentifier "x"),
-         (EIfThenElse ((EBinop ((EConstant (CInt 5)), Gr, (EConstant (CInt 4)))),
+         (EIfThenElse (
+            (EApplication ((EIdentifier "( > )"),
+               (EApplication ((EConstant (CInt 5)), (EConstant (CInt 4)))))),
             (EConstant (CBool true)), (EConstant (CBool false))))
          ))
        ]
@@ -427,7 +406,9 @@ let succ = fun n -> n + 1
     {|
     [[(DLet (NotRec, (PIdentifier "succ"),
          (EFunction ((PIdentifier "n"),
-            (EBinop ((EIdentifier "n"), Add, (EConstant (CInt 1))))))
+            (EApplication ((EIdentifier "( + )"),
+               (EApplication ((EIdentifier "n"), (EConstant (CInt 1))))))
+            ))
          ))
        ]
       ] |}]
@@ -479,11 +460,19 @@ let rec fac = fun n -> if n = 0 then 1 else n * (fac (n - 1))
     {|
     [[(DLet (Rec, (PIdentifier "fac"),
          (EFunction ((PIdentifier "n"),
-            (EIfThenElse ((EBinop ((EIdentifier "n"), Eq, (EConstant (CInt 0)))),
+            (EIfThenElse (
+               (EApplication ((EIdentifier "( = )"),
+                  (EApplication ((EIdentifier "n"), (EConstant (CInt 0)))))),
                (EConstant (CInt 1)),
-               (EBinop ((EIdentifier "n"), Mul,
-                  (EApplication ((EIdentifier "fac"),
-                     (EBinop ((EIdentifier "n"), Sub, (EConstant (CInt 1))))))
+               (EApplication ((EIdentifier "( * )"),
+                  (EApplication ((EIdentifier "n"),
+                     (EApplication ((EIdentifier "fac"),
+                        (EApplication ((EIdentifier "( - )"),
+                           (EApplication ((EIdentifier "n"), (EConstant (CInt 1))
+                              ))
+                           ))
+                        ))
+                     ))
                   ))
                ))
             ))
@@ -502,14 +491,23 @@ let rec facCPS = fun n k -> if n = 0 then k 1 else facCPS (n - 1) (fun t -> k (n
          (EFunction ((PIdentifier "n"),
             (EFunction ((PIdentifier "k"),
                (EIfThenElse (
-                  (EBinop ((EIdentifier "n"), Eq, (EConstant (CInt 0)))),
+                  (EApplication ((EIdentifier "( = )"),
+                     (EApplication ((EIdentifier "n"), (EConstant (CInt 0)))))),
                   (EApplication ((EIdentifier "k"), (EConstant (CInt 1)))),
                   (EApplication (
                      (EApplication ((EIdentifier "facCPS"),
-                        (EBinop ((EIdentifier "n"), Sub, (EConstant (CInt 1)))))),
+                        (EApplication ((EIdentifier "( - )"),
+                           (EApplication ((EIdentifier "n"), (EConstant (CInt 1))
+                              ))
+                           ))
+                        )),
                      (EFunction ((PIdentifier "t"),
                         (EApplication ((EIdentifier "k"),
-                           (EBinop ((EIdentifier "n"), Mul, (EIdentifier "t")))))
+                           (EApplication ((EIdentifier "( * )"),
+                              (EApplication ((EIdentifier "n"), (EIdentifier "t")
+                                 ))
+                              ))
+                           ))
                         ))
                      ))
                   ))
@@ -537,9 +535,12 @@ let rec map = fun f list -> match list with
                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
                      (EApplication (
                         (EApplication ((EIdentifier "map"), (EIdentifier "f"))),
-                        (EBinop (
-                           (EApplication ((EIdentifier "f"), (EIdentifier "h"))),
-                           Cons, (EIdentifier "tl")))
+                        (EApplication ((EIdentifier "( :: )"),
+                           (EApplication (
+                              (EApplication ((EIdentifier "f"), (EIdentifier "h")
+                                 )),
+                              (EIdentifier "tl")))
+                           ))
                         )))
                     ]
                   ))
@@ -568,12 +569,16 @@ let rec facCPS = fun n k -> match n with
                     ((PIdentifier "n"),
                      (EApplication (
                         (EApplication ((EIdentifier "facCPS"),
-                           (EBinop ((EIdentifier "n"), Sub, (EConstant (CInt 1))
+                           (EApplication ((EIdentifier "( - )"),
+                              (EApplication ((EIdentifier "n"),
+                                 (EConstant (CInt 1))))
                               ))
                            )),
                         (EFunction ((PIdentifier "t"),
                            (EApplication ((EIdentifier "k"),
-                              (EBinop ((EIdentifier "n"), Mul, (EIdentifier "t")
+                              (EApplication ((EIdentifier "( * )"),
+                                 (EApplication ((EIdentifier "n"),
+                                    (EIdentifier "t")))
                                  ))
                               ))
                            ))
@@ -613,19 +618,25 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
                           (PWildCard,
                            (EApplication (
                               (EApplication ((EIdentifier "fiboCPS"),
-                                 (EBinop ((EIdentifier "n"), Sub,
-                                    (EConstant (CInt 1))))
+                                 (EApplication ((EIdentifier "( - )"),
+                                    (EApplication ((EIdentifier "n"),
+                                       (EConstant (CInt 1))))
+                                    ))
                                  )),
                               (EFunction ((PIdentifier "x"),
                                  (EApplication (
                                     (EApplication ((EIdentifier "fiboCPS"),
-                                       (EBinop ((EIdentifier "n"), Sub,
-                                          (EConstant (CInt 2))))
+                                       (EApplication ((EIdentifier "( - )"),
+                                          (EApplication ((EIdentifier "n"),
+                                             (EConstant (CInt 2))))
+                                          ))
                                        )),
                                     (EFunction ((PIdentifier "y"),
                                        (EApplication ((EIdentifier "acc"),
-                                          (EBinop ((EIdentifier "x"), Add,
-                                             (EIdentifier "y")))
+                                          (EApplication ((EIdentifier "( + )"),
+                                             (EApplication ((EIdentifier "x"),
+                                                (EIdentifier "y")))
+                                             ))
                                           ))
                                        ))
                                     ))
@@ -663,7 +674,10 @@ and odd = fun n -> match n with
                [((PConstant (CInt 0)), (EConstant (CBool true)));
                  ((PIdentifier "x"),
                   (EApplication ((EIdentifier "odd"),
-                     (EBinop ((EIdentifier "x"), Sub, (EConstant (CInt 1)))))))
+                     (EApplication ((EIdentifier "( - )"),
+                        (EApplication ((EIdentifier "x"), (EConstant (CInt 1))))
+                        ))
+                     )))
                  ]
                ))
             ))
@@ -674,7 +688,10 @@ and odd = fun n -> match n with
                 [((PConstant (CInt 0)), (EConstant (CBool false)));
                   ((PIdentifier "x"),
                    (EApplication ((EIdentifier "even"),
-                      (EBinop ((EIdentifier "x"), Sub, (EConstant (CInt 1)))))))
+                      (EApplication ((EIdentifier "( - )"),
+                         (EApplication ((EIdentifier "x"), (EConstant (CInt 1))))
+                         ))
+                      )))
                   ]
                 ))
              ))
