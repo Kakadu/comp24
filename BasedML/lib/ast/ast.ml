@@ -45,4 +45,4 @@ type let_declaration =
 [@@deriving show { with_path = false }]
 
 (* A collections of let declarations*)
-type declarations = let_declaration list list [@@deriving show { with_path = false }]
+type declarations = let_declaration list [@@deriving show { with_path = false }]
