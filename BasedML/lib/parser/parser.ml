@@ -63,6 +63,44 @@ let chainl1 e op =
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
+(* Type parsers *)
+
+let p_basic_type : typeName t =
+  string "int" *> return TInt
+  <|> char '\''
+      *> (satisfy (fun _ -> true)
+          >>= fun typeNameChar -> return (TPoly ("'" ^ String.make 1 typeNameChar)))
+;;
+
+let p_tuple_type p_type =
+  let* fst_component = skip_whitespace *> p_type in
+  let* exp_list = many1 (skip_whitespace *> char '*' *> skip_whitespace *> p_type) in
+  return (TTuple (fst_component :: exp_list))
+;;
+
+let p_function_type p_type =
+  chainr1
+    p_type
+    (skip_whitespace
+     *> string "->"
+     *> skip_whitespace
+     *> return (fun arg ret -> TFunction (arg, ret)))
+;;
+
+let rec p_list_type t =
+  let* base = t in
+  let* _ = skip_whitespace *> string "list" in
+  p_list_type (return (TList base)) <|> return (TList base)
+;;
+
+let p_type : typeName t =
+  fix (fun p_type ->
+    let atomic_type = p_basic_type <|> between_parens p_type in
+    let list_type = p_list_type atomic_type <|> atomic_type <|> p_list_type p_type in
+    let tuple_type = p_tuple_type list_type <|> list_type in
+    p_function_type tuple_type <|> tuple_type)
+;;
+
 (* Constant parsers*)
 let p_cint =
   let* sign =
@@ -199,7 +237,7 @@ let cons_delim_pattern =
 (* final pattern parsers*)
 let p_cons_pattern p_pattern = chainl1 p_pattern cons_delim_pattern
 
-let p_pattern =
+let p_pattern_without_type =
   fix (fun p_pattern ->
     let atomic_pat = p_ident_pattern <|> p_const_pattern <|> between_parens p_pattern in
     let list_pat = p_list_pattern atomic_pat <|> atomic_pat in
@@ -208,6 +246,18 @@ let p_pattern =
     let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
     tuple_pat)
 ;;
+
+let p_pattern_with_type =
+  let* pattern = skip_whitespace *> Angstrom.string "(" *> p_pattern_without_type in
+  let* constr =
+    skip_whitespace *> Angstrom.string ":" *> skip_whitespace *> p_type
+    <* skip_whitespace
+    <* Angstrom.string ")"
+  in
+  return (PConstraint (pattern, constr))
+;;
+
+let p_pattern = p_pattern_with_type <|> p_pattern_without_type
 
 (* functions parser *)
 let p_function p_expr =
@@ -284,6 +334,16 @@ let p_exp =
     other_exp)
 ;;
 
+let p_exp_with_type =
+  let* exp = skip_whitespace *> Angstrom.string "(" *> p_exp in
+  let* constr =
+    skip_whitespace *> Angstrom.string ":" *> skip_whitespace *> p_type
+    <* skip_whitespace
+    <* Angstrom.string ")"
+  in
+  return (EConstraint (exp, constr))
+;;
+
 (* let declarations parser*)
 let p_let_decl p_exp =
   skip_whitespace
@@ -319,8 +379,31 @@ let parse_program =
   parse
     (sep_by
        (Angstrom.string ";;" <|> Angstrom.string "\n")
-       (p_mutully_rec_decl <|> p_let_decl p_exp)
+       (p_mutully_rec_decl <|> p_let_decl (p_exp <|> p_exp_with_type))
      <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
+;;
+
+let parse_type input = parse_string (p_type <* end_of_input) input
+let%test _ = parse p_type "int" = Ok TInt
+let%test _ = parse p_type "'a" = Ok (TPoly "'a")
+let%test _ = parse p_type "'b" = Ok (TPoly "'b")
+let%test _ = parse p_type "int * int" = Ok (TTuple [ TInt; TInt ])
+let%test _ = parse p_type "int * 'a * int" = Ok (TTuple [ TInt; TPoly "'a"; TInt ])
+let%test _ = parse p_type "int list" = Ok (TList TInt)
+let%test _ = parse p_type "'a list" = Ok (TList (TPoly "'a"))
+
+let%test _ =
+  parse p_type "int -> 'a -> int -> 'b"
+  = Ok (TFunction (TInt, TFunction (TPoly "'a", TFunction (TInt, TPoly "'b"))))
+;;
+
+let%test _ =
+  parse p_type "('a list list -> ('a * 'b) list) -> int"
+  = Ok
+      (TFunction
+         ( TFunction
+             (TList (TList (TPoly "'a")), TList (TTuple [ TPoly "'a"; TPoly "'b" ]))
+         , TInt ))
 ;;
 
 (* parser testing function *)
@@ -689,5 +772,29 @@ and odd = fun n -> match n with
                 ))
              ))
           ])
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse
+    {|
+let (x : ('b * int -> int * 'a) list list) = ([[fun1; fun2]] : ('b * int -> int * 'a) list list)|};
+  [%expect
+    {|
+    [(DLet (NotRec,
+        (PConstraint ((PIdentifier "x"),
+           (TList
+              (TList
+                 (TFunction ((TTuple [(TPoly "'b"); TInt]),
+                    (TTuple [TInt; (TPoly "'a")])))))
+           )),
+        (EConstraint (
+           (EList [(EList [(EIdentifier "fun1"); (EIdentifier "fun2")])]),
+           (TList
+              (TList
+                 (TFunction ((TTuple [(TPoly "'b"); TInt]),
+                    (TTuple [TInt; (TPoly "'a")])))))
+           ))
+        ))
       ] |}]
 ;;

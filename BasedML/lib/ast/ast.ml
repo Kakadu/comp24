@@ -2,6 +2,15 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
+(* Standard types: ints, functions, tuples, lists *)
+type typeName =
+  | TInt
+  | TPoly of string
+  | TTuple of typeName list
+  | TFunction of typeName * typeName
+  | TList of typeName
+[@@deriving show { with_path = false }]
+
 (* Flag to tell implicitely tell if let is recurisve *)
 type rec_flag =
   | Rec
@@ -23,6 +32,7 @@ type pattern =
   | PTuple of pattern list
   | PList of pattern list
   | PConstant of constant
+  | PConstraint of pattern * typeName
 [@@deriving show { with_path = false }]
 
 (* Standard expressions *)
@@ -36,6 +46,7 @@ type expr =
   | ETuple of expr list
   | EList of expr list
   | EMatch of pattern * (pattern * expr) list
+  | EConstraint of expr * typeName
 [@@deriving show { with_path = false }]
 
 (* Let binding/declarations *)
