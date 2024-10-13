@@ -39,12 +39,12 @@ type pattern =
 type expr =
   | EConstant of constant
   | EIdentifier of string
+  | ENil
   | EFunction of pattern * expr
   | EApplication of expr * expr
   | EIfThenElse of expr * expr * expr
   | ELetIn of rec_flag * pattern * expr * expr
   | ETuple of expr list
-  | EList of expr list
   | EMatch of pattern * (pattern * expr) list
   | EConstraint of expr * typeName
 [@@deriving show { with_path = false }]

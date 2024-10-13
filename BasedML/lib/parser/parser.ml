@@ -161,26 +161,41 @@ let p_ident_pattern =
 ;;
 
 (* List parsers *)
-let p_list p_exp constructor =
+
+let p_list_no_constr p_exp =
   let* fst_component = skip_whitespace *> Angstrom.string "[" *> p_exp in
   let* exp_list =
     many (skip_whitespace *> Angstrom.char ';' *> p_exp) <* Angstrom.string "]"
   in
-  fst_component :: exp_list |> constructor |> return
+  return (fst_component :: exp_list)
 ;;
 
-let p_list_expr p_exp = p_list p_exp (fun x -> EList x)
+let rec pat_cons_list_builder = function
+  | [] -> PNil
+  | h :: tl -> PCons (h, pat_cons_list_builder tl)
+;;
+
+let rec exp_cons_list_builder = function
+  | [] -> ENil
+  | h :: tl ->
+    EApplication (EIdentifier "( :: )", EApplication (h, exp_cons_list_builder tl))
+;;
+
+let p_list_not_empty_exp p_exp =
+  let* exp_list = p_list_no_constr p_exp in
+  return (exp_cons_list_builder exp_list)
+;;
+
+let p_list_not_empty_pattern p_pattern =
+  let* pat_list = p_list_no_constr p_pattern in
+  return (pat_cons_list_builder pat_list)
+;;
+
+let p_pnil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return PNil
+let p_enil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return ENil
+let p_list_pattern p_pattern = p_list_not_empty_pattern p_pattern <|> p_pnil
+let p_list_exp p_exp = p_list_not_empty_exp p_exp <|> p_enil
 let p_wild_card_pattern = skip_whitespace *> Angstrom.string "_" *> return PWildCard
-
-let p_list_pattern p_exp =
-  p_list p_exp (fun x -> PList x)
-  <|> skip_whitespace
-      *> Angstrom.string "["
-      *> skip_whitespace
-      *> Angstrom.string "]"
-      *> return PNil
-;;
-
 (* Tuple parsers *)
 
 let p_tuple p_exp constructor =
@@ -239,9 +254,13 @@ let p_cons_pattern p_pattern = chainl1 p_pattern cons_delim_pattern
 
 let p_pattern_without_type =
   fix (fun p_pattern ->
-    let atomic_pat = p_ident_pattern <|> p_const_pattern <|> between_parens p_pattern in
-    let list_pat = p_list_pattern atomic_pat <|> atomic_pat in
-    let w_card_pat = p_wild_card_pattern <|> list_pat in
+    let atomic_pat =
+      p_ident_pattern
+      <|> p_const_pattern
+      <|> between_parens p_pattern
+      <|> p_list_pattern p_pattern
+    in
+    let w_card_pat = p_wild_card_pattern <|> atomic_pat in
     let cons_pat = p_cons_pattern w_card_pat <|> w_card_pat in
     let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
     tuple_pat)
@@ -309,13 +328,23 @@ let p_match p_pattern p_expr =
 
 (* expression parser *)
 let p_exp =
+  let p_exp_with_type p_exp =
+    let* exp = skip_whitespace *> Angstrom.string "(" *> p_exp in
+    let* constr =
+      skip_whitespace *> Angstrom.string ":" *> skip_whitespace *> p_type
+      <* skip_whitespace
+      <* Angstrom.string ")"
+    in
+    return (EConstraint (exp, constr))
+  in
   fix (fun p_exp ->
     let atomic_exp =
       p_const_expr
       <|> p_ident
       <|> p_function p_exp
       <|> between_parens p_exp
-      <|> p_list_expr p_exp
+      <|> p_list_exp p_exp
+      <|> p_exp_with_type p_exp
     in
     let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
     let app_term = chainl1 cons_term app_delim <|> cons_term in
@@ -332,16 +361,6 @@ let p_exp =
       <|> gr_ls_eq_term
     in
     other_exp)
-;;
-
-let p_exp_with_type =
-  let* exp = skip_whitespace *> Angstrom.string "(" *> p_exp in
-  let* constr =
-    skip_whitespace *> Angstrom.string ":" *> skip_whitespace *> p_type
-    <* skip_whitespace
-    <* Angstrom.string ")"
-  in
-  return (EConstraint (exp, constr))
 ;;
 
 (* let declarations parser*)
@@ -382,7 +401,7 @@ let parse_program =
   parse
     (sep_by
        (Angstrom.string ";;" <|> Angstrom.string "\n")
-       (p_mutully_rec_decl <|> p_let_decl (p_exp <|> p_exp_with_type))
+       (p_mutully_rec_decl <|> p_let_decl p_exp)
      <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
 ;;
 
@@ -534,7 +553,13 @@ let x :: y = [1; 2]
     {|
     [(DSingleLet
         (DLet (NotRec, (PCons ((PIdentifier "x"), (PIdentifier "y"))),
-           (EList [(EConstant (CInt 1)); (EConstant (CInt 2))]))))
+           (EApplication ((EIdentifier "( :: )"),
+              (EApplication ((EConstant (CInt 1)),
+                 (EApplication ((EIdentifier "( :: )"),
+                    (EApplication ((EConstant (CInt 2)), ENil))))
+                 ))
+              ))
+           )))
       ] |}]
 ;;
 
@@ -804,7 +829,16 @@ let (x : ('b * int -> int * 'a) list list) = ([[fun1; fun2]] : ('b * int -> int 
                        (TTuple [TInt; (TPoly "'a")])))))
               )),
            (EConstraint (
-              (EList [(EList [(EIdentifier "fun1"); (EIdentifier "fun2")])]),
+              (EApplication ((EIdentifier "( :: )"),
+                 (EApplication (
+                    (EApplication ((EIdentifier "( :: )"),
+                       (EApplication ((EIdentifier "fun1"),
+                          (EApplication ((EIdentifier "( :: )"),
+                             (EApplication ((EIdentifier "fun2"), ENil))))
+                          ))
+                       )),
+                    ENil))
+                 )),
               (TList
                  (TList
                     (TFunction ((TTuple [(TPoly "'b"); TInt]),
