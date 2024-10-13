@@ -50,9 +50,12 @@ type expr =
 [@@deriving show { with_path = false }]
 
 (* Let binding/declarations *)
+type singleLet = DLet of rec_flag * pattern * expr
+[@@deriving show { with_path = false }]
+
 type let_declaration =
-  | DLet of rec_flag * pattern * expr
-  | DMutualRecDecl of let_declaration list
+  | DSingleLet of singleLet
+  | DMutualRecDecl of singleLet list
 [@@deriving show { with_path = false }]
 
 (* A collections of let declarations*)
