@@ -6,7 +6,7 @@ type id = string [@@deriving show { with_path = false }]
 
 type const =
   | CInt of int (** 1 *)
-  | Cbool of bool (** true *)
+  | CBool of bool (** true *)
 [@@deriving show { with_path = false }]
 
 type rec_flag =
@@ -19,7 +19,7 @@ type pattern =
   | PConst of const (** 1 || true *)
   | PIdentifier of id (** x *)
   | PTuple of pattern list (** (x, y, z) *)
-  | PNil (** [] *)
+  | PNill (** [] *)
   | PCons of pattern * pattern (** hd :: tl*)
 [@@deriving show { with_path = false }]
 
@@ -56,3 +56,14 @@ type expression =
 
 type declaration = rec_flag * pattern * expression [@@deriving show { with_path = false }]
 type program = declaration list [@@deriving show { with_path = false }]
+
+let cint x = CInt x
+let cbool x = CBool x
+
+(* Constructors for patterns *)
+let pany _ = PAny
+let pnill _ = PNill
+let pconst c = PConst c
+let pident v = PIdentifier v
+let pcons l r = PCons (l, r)
+let ptuple l = PTuple l

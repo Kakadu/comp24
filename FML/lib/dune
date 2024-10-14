@@ -3,7 +3,7 @@
 (library
  (name lib)
  (public_name FML.Lib)
- (modules Ast)
+ (modules Ast Parser)
  (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show)))
