@@ -1,0 +1,20 @@
+(lang dune 3.16)
+
+(name BDSML)
+
+(generate_opam_files true)
+
+(source
+ (github Kuarni/BDSML))
+
+(authors "Arseniy Kuznetsov" "Leonid Elkin")
+
+(maintainers "Arseniy Kuznetsov" "Leonid Elkin")
+
+(license LGPL-2.1)
+
+(package
+ (name BDSML)
+ (synopsis "Based Development Sadistic Meta Language")
+ (description "A compiler for BDSML")
+ (depends ocaml dune ppx_deriving))
