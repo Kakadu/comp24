@@ -42,7 +42,7 @@ let is_keyword = function
 
 let skip_wspace = skip_while is_whitespace
 let parens p = skip_wspace *> char '(' *> skip_wspace *> p <* skip_wspace <* char ')'
-let sqr_br p = skip_wspace *> char '(' *> skip_wspace *> p <* skip_wspace <* char ')'
+let sqr_br p = skip_wspace *> char '[' *> skip_wspace *> p <* skip_wspace <* char ']'
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
