@@ -1,0 +1,10 @@
+(library
+ (name shaitanml_lib)
+ (public_name ShaitanML.Lib)
+ (modules Ast Parser Infer Interpreter Typedtree)
+ (inline_tests)
+ (libraries base angstrom)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
