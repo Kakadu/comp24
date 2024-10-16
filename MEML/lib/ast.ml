@@ -26,10 +26,17 @@ type binary_op =
   | Greq (** >= *)
 [@@deriving show { with_path = false }]
 
+type type_of_var = 
+  | TInt
+  | TBool
+  | TString
+  | TUnknown 
+[@@deriving show { with_path = false }]
+
 type pattern =
   | PWild (** _ *)
   | PConst of const (** constant pattern *)
-  | PVar of name (** varuable pattern*)
+  | PVar of name * type_of_var (** variable pattern*)
 [@@deriving show { with_path = false }]
 
 type rec_flag = 
@@ -37,9 +44,10 @@ type rec_flag =
   | Notrec (** let z = ...*)
 [@@deriving show { with_path = false }]
 
+
 type expression =
   | EConst of const (** constant *)
-  | EVar of name (** variable *)
+  | EVar of name * type_of_var (** variable *)
   | EBinaryOp of binary_op * expression * expression (** binary operation *)
   | EApp of expression * expression (** application *)
   | EIfElse of expression * expression * expression (** if z then v else n*)

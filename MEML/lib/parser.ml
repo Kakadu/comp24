@@ -95,7 +95,7 @@ let var cond =
   else if is_keyword v
   then fail ("You can not use" ^ v ^ "keywords as vars")
   else if Char.is_digit @@ String.get v 0
-  then fail "Identifier first sumbol is letter, not digit"
+  then fail "Identifier first simbol is letter, not digit"
   else return v
 ;;
 
@@ -107,5 +107,6 @@ let p_var =
 ;;
 
 let parse_Const = (fun v -> PConst v) <$> parse_const
-let parse_var = (fun v -> PVar v) <$> p_var
+let parse_var = (fun v -> PVar (v, TUnknown)) <$> p_var
 let parse_wild = (fun _ -> PWild) <$> pstrtoken "_"
+
