@@ -34,3 +34,10 @@ let%expect_test _ =
   start_test parse_const show_const test;
   [%expect {| (CInt 951753) |}]
 ;;
+
+
+let%expect_test _ =
+  let test = "varida" in
+  start_test parse_var show_pattern test;
+  [%expect {| (PVar ("varida", TUnknown)) |}]
+;;
