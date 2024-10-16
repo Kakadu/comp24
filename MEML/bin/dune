@@ -1,4 +1,22 @@
+(library
+ (name LL)
+ (public_name demo.LL)
+ (modules LL)
+ (wrapped false)
+ (libraries
+  llvm
+  llvm.analysis
+  llvm.executionengine
+  ;
+  ))
+
 (executable
- (public_name MEML)
+ (public_name demo)
  (name main)
- (libraries MEML.Lib))
+ (modules main)
+ (libraries LL)
+ (instrumentation
+  (backend bisect_ppx)))
+
+(cram
+ (deps ./main.exe runtime.c))
