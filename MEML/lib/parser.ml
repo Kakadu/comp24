@@ -42,6 +42,11 @@ let is_keyword = function
   | _ -> false
 ;;
 
+let is_type = function
+  | "int" | "bool" | "string" -> true
+  | _ -> false
+;;
+
 let is_whitespace = function
   | ' ' | '\n' | '\t' | '\r' -> true
   | _ -> false
@@ -66,6 +71,8 @@ let chainl1 e op =
   e >>= fun init -> go init
 ;;
 
+(* Const parsers *)
+
 let parse_bool =
   parse_white_space
   *> ((fun _ -> CBool true)
@@ -85,32 +92,41 @@ let parse_str =
   >>| fun a -> CString a
 ;;
 
-let parse_const = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
+(* Var parsers*)
 
-let var cond =
+let parse_type =
+  parse_white_space
+  *> char ':'
+  *> parse_white_space
+  *> ((fun _ -> TInt)
+      <$> string "int"
+      <|> ((fun _ -> TBool) <$> string "bool")
+      <|> ((fun _ -> TString) <$> string "string"))
+;;
+
+let check_var cond =
   parse_white_space *> take_while1 cond
   >>= fun v ->
-  if phys_equal (String.length v) 0
-  then fail "Not identifier"
-  else if is_keyword v
+  if is_keyword v
   then fail ("You can not use" ^ v ^ "keywords as vars")
   else if Char.is_digit @@ String.get v 0
-  then fail "Identifier first simbol is letter, not digit"
+  then fail "Identifier first symbol is letter, not digit"
   else return v
 ;;
 
-let p_var =
+let parse_var =
   let is_entry = function
     | c -> is_char c || is_underscore c || is_digit c
   in
-  var is_entry
+  check_var is_entry
 ;;
 
-let parse_var = (fun v -> PVar (v, TUnknown)) <$> p_var
+let parse_pattern_var =
+  (fun a -> PVar (a, TUnknown))
+  <$> parse_var
+  <|> parens @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+;;
+
+let parse_const = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
 let parse_wild = (fun _ -> PWild) <$> pstrtoken "_"
-let parse_pattern = choice [ parse_wild; parse_const; parse_var ]
-
-
-
-
-
+let parse_pattern = choice [ parse_wild; parse_const; parse_pattern_var ]
