@@ -1,20 +1,20 @@
 (lang dune 3.8)
 
-(name demo)
+(name MEML)
 
 (generate_opam_files true)
 
 (source
- (github Kakadu/comp24))
+ (github Urtix/comp24))
 
-(authors "Kakadu")
+(authors "Dyachkov, Perevalov")
 
-(maintainers "Kakadu")
+(maintainers "Dyachkov, Perevalov")
 
 (license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
 
 (package
- (name demo)
+ (name MEML)
  (synopsis "A short LLVM demo")
  (depends
   ocaml
