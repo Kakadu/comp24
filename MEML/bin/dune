@@ -1,6 +1,6 @@
 (library
  (name LL)
- (public_name demo.LL)
+ (public_name MEML.LL)
  (modules LL)
  (wrapped false)
  (libraries
@@ -11,7 +11,7 @@
   ))
 
 (executable
- (public_name demo)
+ (public_name MEML)
  (name main)
  (modules main)
  (libraries LL)
