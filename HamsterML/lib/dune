@@ -1,2 +1,12 @@
 (library
- (name HamsterML))
+ (modules Ast)
+ (libraries llvm)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
+ (inline_tests)
+ (instrumentation
+  (backend bisect_ppx))
+ (name HamsterML)
+ (public_name HamsterML))
+
+(include_subdirs unqualified)
