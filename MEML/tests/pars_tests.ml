@@ -35,7 +35,6 @@ let%expect_test _ =
   [%expect {| (CInt 951753) |}]
 ;;
 
-
 let%expect_test _ =
   let test = "varida" in
   start_test parse_var show_pattern test;

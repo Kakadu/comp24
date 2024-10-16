@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-
 open Angstrom
 open Ast
 open Base
@@ -81,16 +80,17 @@ let parse_int =
 ;;
 
 let parse_str =
-  char '"' *> take_while (fun a -> not (phys_equal a '"')) <* char '"' >>| fun a -> CString a
+  char '"' *> take_while (fun a -> not (phys_equal a '"'))
+  <* char '"'
+  >>| fun a -> CString a
 ;;
 
-let parse_const = choice [ parse_int; parse_bool; parse_str ]
-
+let parse_const = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
 
 let var cond =
   parse_white_space *> take_while1 cond
   >>= fun v ->
-  if (phys_equal (String.length v) 0)
+  if phys_equal (String.length v) 0
   then fail "Not identifier"
   else if is_keyword v
   then fail ("You can not use" ^ v ^ "keywords as vars")
@@ -106,7 +106,11 @@ let p_var =
   var is_entry
 ;;
 
-let parse_Const = (fun v -> PConst v) <$> parse_const
 let parse_var = (fun v -> PVar (v, TUnknown)) <$> p_var
 let parse_wild = (fun _ -> PWild) <$> pstrtoken "_"
+let parse_pattern = choice [ parse_wild; parse_const; parse_var ]
+
+
+
+
 
