@@ -2,6 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+
 open Angstrom
 open Ast
 open Base
@@ -38,6 +39,7 @@ let is_keyword = function
   | "false"
   | "match"
   | "with"
+<<<<<<< HEAD
   | "val"
   | "in"
   | "and" -> true
@@ -46,6 +48,9 @@ let is_keyword = function
 
 let is_type = function
   | "int" | "bool" | "string" -> true
+=======
+  | "in" -> true
+>>>>>>> 2a9e608 (feat: Start develop parser)
   | _ -> false
 ;;
 
@@ -73,10 +78,8 @@ let brackets_or_not p = brackets p <|> p
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= go
+  e >>= fun init -> go init
 ;;
-
-(** Const parsers *)
 
 let parse_bool =
   parse_white_space
@@ -112,19 +115,20 @@ let parse_type =
   <|> ((fun _ -> TUnknown) <$> string "")
 ;;
 
-let check_var cond =
+
+let var cond =
   parse_white_space *> take_while1 cond
   >>= fun v ->
-  if is_keyword v
-  then fail ("You can not use \"" ^ v ^ "\" keywords as vars")
+  if (phys_equal (String.length v) 0)
+  then fail "Not identifier"
+  else if is_keyword v
+  then fail ("You can not use" ^ v ^ "keywords as vars")
   else if Char.is_digit @@ String.get v 0
-  then fail "Identifier first symbol is letter, not digit"
+  then fail "Identifier first sumbol is letter, not digit"
   else return v
 ;;
 
-let parse_var =
-  parse_white_space
-  *>
+let p_var =
   let is_entry = function
     | c -> is_char c || is_underscore c || is_digit c
   in
