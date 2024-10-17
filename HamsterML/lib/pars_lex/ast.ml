@@ -18,6 +18,7 @@ type bop =
   | LTE (** <= *)
   | AND (** && *)
   | OR (** || *)
+  | CONCAT (** ^ *)
 
 type uop =
   | MINUS (** -1 *)
