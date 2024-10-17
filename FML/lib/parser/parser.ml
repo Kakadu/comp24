@@ -71,6 +71,7 @@ let parse_bool =
   skip_wspace *> string "true" <|> string "false" >>| bool_of_string >>| cbool
 ;;
 
+
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Type annotations parsers *)
@@ -169,3 +170,19 @@ let parse_etuple p_expr =
        p_expr
        (many1 (skip_wspace *> string "," *> p_expr))
 ;;
+
+(* ------------------------- *)
+
+(* Expressions bin_op *)
+
+let add = string "+" *> return Add
+let sub = string "-" *> return Sub
+let div = string "/" *> return Div
+let eq = string "=" *> return Eq
+let neq = (string "!=" *> return NEq) <|> (string "<>" *> return NEq)
+let gt = string ">" *> return Gt
+let gte = string ">=" *> return Gte
+let lt = string "<" *> return Lt
+let lte = string "<=" *> return Lte
+let and_ = string "&&" *> return And
+let or_ = string "||" *> return Or
