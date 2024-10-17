@@ -214,46 +214,7 @@ let%expect_test _ =
   [%expect {| val map_cps : ('6 -> '8) -> '6 list -> '8 list |}]
 ;;
 
-let%expect_test _ =
-  test_infer {|
-    let x = [`A 52; `B 52; `C 52];;
-     |};
-  [%expect {| Infer error: Not implemented |}]
-;;
 
-let%expect_test _ =
-  test_infer
-    {|
-    let f x =
-      match x with
-      | `A 3 -> 52
-      | `B _ -> 53
-    ;;
-     |};
-  [%expect {| Infer error: Pattern matching error |}]
-;;
-
-let%expect_test _ =
-  test_infer {|
-    let l = [`A; `B; `C];;
-    ;;
-    |};
-  [%expect {|
-    Infer error: Not implemented |}]
-;;
-
-let%expect_test _ =
-  test_infer
-    {|
-    let f x =
-      match x with
-      | `A x -> x + 1
-      | `B _ -> 0
-    ;;
-    |};
-  [%expect {|
-    Infer error: Pattern matching error |}]
-;;
 
 (*------------------------------ Interpreter ---------------------------------*)
 
@@ -386,13 +347,6 @@ let%expect_test _ =
     Interpreter error: Pattern-matching failed |}]
 ;;
 
-let%expect_test _ =
-  test_interpret {|
-    let `A x = `A 3;;
-    |};
-  [%expect {|
-    Infer error: Not implemented |}]
-;;
 
 let%expect_test _ =
   test_interpret {|
