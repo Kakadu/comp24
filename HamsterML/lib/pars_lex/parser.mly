@@ -51,8 +51,8 @@
 %token GREATER_THAN_EQUAL   // ">="
 %token LESS_THAN            // "<"
 %token LESS_THAN_EQUAL      // "<"
-%token LET_ASSIGNMENT       // "let x = 1"
 %token LET_AND              // "let x = 1 and y = 2"
+%token ASSIGNMENT       // "let x = 1"
 %token AND                  // "AND"
 %token OR                   // "OR"
 %token NOT                  // "NOT"
@@ -83,7 +83,16 @@
 prog : p = expr EOF { p }
 
 expr:
-    | op = bop; 
+    | op = bop; le = expr; re = expt { BinOp (op, le, re) }
+    | op = uop; e = expr {UnOp (op, e)}
+    | v = value { Value v }
+    | LET; REC; id = IDENTIFIER; vls = list(value); ASSIGNMENT ; e = expr { Let (Recursive, id, vls, e) }
+    | LET; id = IDENTIFIER; vls = list(value); ASSIGNMENT ; e = expr { Let (Nonrecursive, id, vls, e) }
+    | FUN; vls = list(value); ARROW; e = expr { Fun (vls, e) }
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr {If (e1, e2, e3)}
+    // TODO: MATCH
+    // TODO: LetIn
+    | e1 = expr; e2 = expr { Application (e1, e2) }
 
 dataType:
     | i = INT {Int i}
@@ -109,7 +118,8 @@ value:
     | list = list {List list}
     | v1 = value; DOUBLE_COLON; v2 = value { ListConcat (v1, v2) }
     | tuple = tuple {Tuple tuple}
-    
+    | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS { v }
+        
 %inline bop:
     | PLUS { ADD }                 
     | MINUS { Sub }        
