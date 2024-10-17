@@ -140,13 +140,34 @@ let%expect_test _ =
        (EConst (CInt 1)), (EConst (CInt 3)))) |}]
 ;;
 
+(* EFun *)
+
+let%expect_test _ =
+  let test = "fun x -> 3 + x" in
+  start_test parse_efun show_expression test;
+  [%expect
+    {|
+    (EFun ((PVar ("x", TUnknown)),
+       (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
+;;
+
+let%expect_test _ =
+   let test = "fun x y -> y + x" in
+   start_test parse_efun show_expression test;
+   [%expect
+    {|
+    (EFun ((PVar ("x", TUnknown)),
+       (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
+   ;;
+
+
 (* Run time test*)
 
 (* let%expect_test _ =
-  let test = "if n = 1 then 1 else 3" in
-  start_test parse_eifelse show_expression test;
-  [%expect
+   let test = "fun x y -> y + x" in
+   start_test parse_efun show_expression test;
+   [%expect
     {|
-    (EBinaryOp (Add, (EConst (CInt 1)),
-       (EBinaryOp (Div, (EVar ("a", TUnknown)), (EConst (CInt 3)))))) |}]
-;; *)
+    (EFun ((PVar ("x", TUnknown)),
+       (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
+   ;; *)

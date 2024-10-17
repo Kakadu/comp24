@@ -61,11 +61,15 @@ let is_underscore = function
 
 let parse_white_space = take_while is_whitespace
 let parse_white_space1 = take_while1 is_whitespace
-let parse_token s = parse_white_space *> s
-let parse_token1 s = parse_white_space1 *> s
-let pstrtoken s = parse_white_space *> string s
-let pstrtoken1 s = parse_white_space1 *> string s
-let parens p = pstrtoken "(" *> p <* pstrtoken ")"
+let token s = parse_white_space *> s
+let token1 s = parse_white_space1 *> s
+let stoken s = parse_white_space *> string s
+let stoken1 s = parse_white_space1 *> string s
+let brackets p = stoken "(" *> p <* stoken ")"
+let square_brackets p = stoken "[" *> p <* stoken "]"
+let angle_brackets p = char '<' *> p <* char '>'
+let quotes p = stoken "\"" *> p <* stoken "\""
+let brackets_or_not p = brackets p <|> p
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
@@ -82,7 +86,7 @@ let parse_bool =
 ;;
 
 let parse_int =
-  let ps = parse_token (option "" (pstrtoken "-" <|> pstrtoken "+")) in
+  let ps = token (option "" (stoken "-" <|> stoken "+")) in
   let pd = take_while1 is_digit in
   lift2 (fun sign digit -> CInt (Int.of_string @@ sign ^ digit)) ps pd
 ;;
@@ -127,12 +131,11 @@ let parse_var =
 let parse_pattern_var =
   (fun a -> PVar (a, TUnknown))
   <$> parse_var
-  <|> parens @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
-  <|> lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  <|> brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
 ;;
 
 let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
-let parse_wild = (fun _ -> PWild) <$> pstrtoken "_"
+let parse_wild = (fun _ -> PWild) <$> stoken "_"
 let parse_pattern = parse_wild <|> parse_pconst <|> parse_pattern_var
 
 (** Expression type *)
@@ -146,16 +149,13 @@ let parse_econst = (fun v -> EConst v) <$> choice [ parse_int; parse_bool; parse
 let parse_evar =
   (fun a -> EVar (a, TUnknown))
   <$> parse_var
-  <|> parens @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type
+  <|> brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type
   <|> lift2 (fun a b -> EVar (a, b)) parse_var parse_type
 ;;
 
 (* EBinaryOp *)
 
-let parse_op char_op op =
-  pstrtoken char_op *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
-;;
-
+let parse_op char_op op = stoken char_op *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
 let pmulti = parse_op "*" Mul <|> parse_op "/" Div <|> parse_op "%" Mod
 let padd = parse_op "+" Add <|> parse_op "-" Sub
 
@@ -183,24 +183,36 @@ let parse_ebinop = parse_binop @@ (parse_econst <|> parse_evar)
 (* EIfElse *)
 
 let parse_eifelse =
-  fix
-  @@ fun _ ->
   lift3
     (fun e1 e2 e3 -> EIfElse (e1, e2, e3))
-    (pstrtoken "if" *> parse_ebinop)
-    (pstrtoken "then" *> parse_ebinop)
-    (pstrtoken "else" *> parse_ebinop)
+    (stoken "if" *> parse_ebinop)
+    (stoken "then" *> parse_ebinop)
+    (stoken "else" *> parse_ebinop)
+;;
+
+(* EFun *)
+
+let constr_efun pl e = List.fold_right ~init:e ~f:(fun p e -> EFun (p, e)) pl
+
+let parse_fun_args =
+  brackets_or_not @@ many1 parse_pattern 
+;;
+
+let parse_efun =
+  lift2
+    constr_efun
+    (stoken "fun" *> parse_fun_args)
+    (stoken "->" *> parse_ebinop)
 ;;
 
 (* ELetIn *)
 
 let parse_rec =
-  parse_white_space *> pstrtoken "let" *> option "false" (pstrtoken1 "rec")
+  parse_white_space *> stoken "let" *> option "false" (stoken1 "rec")
   >>| fun x -> if String.( <> ) x "false" then Rec else Notrec
 ;;
 
-(* EFun *)
-
 (* Expression parsers *)
+
 
 (** Binding type *)
