@@ -61,6 +61,8 @@ let is_underscore = function
 
 let parse_white_space = take_while is_whitespace
 let parse_white_space1 = take_while1 is_whitespace
+let parse_empty e = parse_white_space *> e <* parse_white_space
+let wspaces_str str = parse_empty @@ string_ci str
 let token s = parse_white_space *> s
 let token1 s = parse_white_space1 *> s
 let stoken s = parse_white_space *> string s
@@ -231,4 +233,30 @@ let parse_eletin =
 
 (* Expression parsers *)
 
+let parse_expression =
+  parse_eletin
+  <|> parse_eifelse
+  <|> parse_efun
+  <|> parse_ebinop
+  <|> parse_econst
+  <|> parse_evar
+  <|> parse_eapp
+;;
+
 (** Binding type *)
+
+let parse_let parse =
+  lift4
+    (fun flag name args body ->
+      let body = constr_efun args body in
+      Let (flag, name, body))
+    parse_rec
+    parse_var
+    (parse_white_space *> many (parse_pattern <|> brackets parse_pattern))
+    (stoken "=" *> parse)
+;;
+
+let expr_main = (fun expr -> Expression expr) <$> parse_expression
+let parse_bindings =  parse_let @@ parse_expression <|> expr_main
+let parse_statements = sep_by (wspaces_str ";;" <|> parse_white_space) parse_bindings
+let parse program = parse_string parse_statements program
