@@ -80,7 +80,7 @@ let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
 let parse_pcons p_pattern =
-  let cons_helper = skip_wspace *> string "::" *> return (fun op1 op2 -> pcons op1 op2) in
+  let cons_helper = skip_wspace *> string "::" *> return pcons in
   chainl1 p_pattern cons_helper
 ;;
 
@@ -93,14 +93,20 @@ let parse_ptuple p_pattern =
 ;;
 
 (*FIXME add list cons pattern*)
-let parse_pattern =
+let parse_pattern_wout_type =
   fix
   @@ fun self ->
-  let primitive_patterns =
-    choice [ parse_pidentifier; parse_pany; parse_pconst; parse_pnill ]
+  let patt =
+    choice
+      [ parens self
+      ; parse_pidentifier
+      ; parse_pany
+      ; parse_pconst
+      ; parse_pnill
+      ; parse_ptuple self
+      ]
   in
-  let helper = primitive_patterns <|> parse_ptuple self in
-  helper
+  parse_pcons patt <|> patt
 ;;
 
 (* ------------------------- *)
