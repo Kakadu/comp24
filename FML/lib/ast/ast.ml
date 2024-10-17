@@ -52,6 +52,7 @@ type expression =
   | EApplication of expression * expression (** E1 E2*)
   | EFun of pattern * expression (** fun P -> E*)
   | ELetIn of rec_flag * pattern * expression * expression (** let f x = E1 *)
+  | ETuple of expression list
 [@@deriving show { with_path = false }]
 
 type declaration = rec_flag * pattern * expression [@@deriving show { with_path = false }]
@@ -67,3 +68,11 @@ let pconst c = PConst c
 let pident v = PIdentifier v
 let pcons l r = PCons (l, r)
 let ptuple l = PTuple l
+
+(* ------------------------- *)
+
+(* Constructors for expressions *)
+
+let econst c = EConst c
+let eidentifier v = EIdentifier v
+let etuple l = ETuple l

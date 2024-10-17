@@ -75,7 +75,7 @@ let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
-let p_pidentifier = parse_identifier pident
+let parse_pidentifier = parse_identifier pident
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
@@ -90,4 +90,30 @@ let parse_ptuple p_pattern =
        (fun h tl -> ptuple @@ (h :: tl))
        p_pattern
        (many1 (skip_wspace *> string "," *> p_pattern))
+;;
+
+(*FIXME add list cons pattern*)
+let parse_pattern =
+  fix
+  @@ fun self ->
+  let primitive_patterns =
+    choice [ parse_pidentifier; parse_pany; parse_pconst; parse_pnill ]
+  in
+  let helper = primitive_patterns <|> parse_ptuple self in
+  helper
+;;
+
+(* ------------------------- *)
+
+(* Expressions parsers *)
+
+let parse_econst = parse_const econst
+let parse_identifier = parse_identifier eidentifier
+
+let parse_etuple p_expr =
+  parens
+  @@ lift2
+       (fun h tl -> etuple @@ (h :: tl))
+       p_expr
+       (many1 (skip_wspace *> string "," *> p_expr))
 ;;
