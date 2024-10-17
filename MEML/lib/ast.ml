@@ -44,7 +44,6 @@ type rec_flag =
   | Notrec (** let z = ...*)
 [@@deriving show { with_path = false }]
 
-
 type expression =
   | EConst of const (** constant *)
   | EVar of name * type_of_var (** variable *)
@@ -57,7 +56,8 @@ type expression =
 
 (** Binding type *)
 type bindings =
-  | ELet of rec_flag * name * expression (** An expression for let declaration: let id = expr *)
+  | Let of rec_flag * name * expression (** An expression for let declaration: let id = expr *)
+  | Expression of expression
   (** An expression for let rec declaration: let rec id = expr *)
 [@@deriving show { with_path = false }]
 
