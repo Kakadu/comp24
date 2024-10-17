@@ -73,10 +73,8 @@ let const = choice [ pcint; pcbool; pcstring; pcunit; pcnil ]
 
 let pconst c = PConst c
 let pvar x = PVar x
-let ppoly t p = PPoly (t, p)
 let pcons p1 p2 = PCons (p1, p2)
 let ptuple ps = PTuple ps
-let ppoly t p = PPoly (t, p)
 let ppconst = const >>| pconst
 let ppany = token "_" *> return PAny
 
@@ -114,20 +112,10 @@ let chainr1 e op =
   e >>= go
 ;;
 
-let pppoly (p : pattern t) =
-  both (many1 tagname) (option None (p >>| fun p -> Some p))
-  >>| fun (tags, pat) ->
-  List.fold_right
-    (List.drop_last_exn tags)
-    ~f:(fun tag pat -> ppoly tag (Some pat))
-    ~init:(PPoly (List.last_exn tags, pat))
-;;
-
 let pattern =
   fix (fun pat ->
     let term = choice [ ppconst; ppvar; ppany; pplist pat; parens pat ] in
-    let poly = pppoly term <|> term in
-    let cons = chainr1 poly (dcol *> return pcons) in
+    let cons = chainr1 term (dcol *> return pcons) in
     let tuple = pptuple cons <|> cons in
     tuple)
 ;;
@@ -143,7 +131,6 @@ let efun p e = EFun (p, e)
 let etuple el = ETuple el
 let econs e1 e2 = ECons (e1, e2)
 let eapply e1 e2 = EApply (e1, e2)
-let epoly t e = EPoly (t, e)
 let peconst = const >>| econst
 let pevar = varname >>| evar
 
@@ -162,7 +149,6 @@ let pematch pe =
   lift2 ematch pexpr (sep_by1 grd pcase)
 ;;
 
-let pepoly p = lift2 epoly tagname (option None (p >>| fun e -> Some e))
 let petuple p = lift2 List.cons p (many1 (comma *> p)) >>| etuple
 let pelist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:econs ~init:(econst CNil)
 let efunf ps e = List.fold_right ps ~f:efun ~init:e
@@ -193,8 +179,7 @@ let expr =
   fix (fun expr ->
     let term = choice [ pevar; peconst; pelist expr; parens expr ] in
     let apply = chainl1 term (return eapply) in
-    let poly = pepoly apply <|> apply in
-    let fact = chainl1 poly (pmul <|> pdiv) in
+    let fact = chainl1 apply (pmul <|> pdiv) in
     let sum = chainl1 fact (padd <|> psub) in
     let cons = chainr1 sum (dcol *> return econs) in
     let cmp1 = chainl1 cons (choice [ plte; pneq; plt; peq ]) in
