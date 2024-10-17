@@ -303,7 +303,6 @@ let infer_pat =
           pl
       in
       return (env, tuple_typ (List.rev tl))
-    | _ -> fail `Pattern_matching_error
   in
   helper
 ;;

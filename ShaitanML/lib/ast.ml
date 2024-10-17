@@ -40,7 +40,6 @@ type pattern =
   | PVar of id (** x *)
   | PTuple of pattern list (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
-  | PPoly of id * pattern option (** `Tag_name p *)
 [@@deriving show { with_path = false }]
 
 type expr =
@@ -54,7 +53,6 @@ type expr =
   | ETuple of expr list (** a, b, c *)
   | ECons of expr * expr (** x :: xs | [x1; x2]*)
   | EApply of expr * expr (** f e *)
-  | EPoly of id * expr option (** `Tag_name expr *)
 [@@deriving show { with_path = false }]
 
 (** Used in {match} expr *)
