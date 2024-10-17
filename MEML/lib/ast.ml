@@ -51,7 +51,7 @@ type expression =
   | EBinaryOp of binary_op * expression * expression (** binary operation *)
   | EApp of expression * expression (** application *)
   | EIfElse of expression * expression * expression (** if z then v else n*)
-  | ELetIn of rec_flag * expression * expression
+  | ELetIn of rec_flag * name * expression * expression
   | EFun of pattern * expression (** fun z -> z + z *)
 [@@deriving show { with_path = false }]
 
