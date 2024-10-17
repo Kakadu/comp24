@@ -124,6 +124,20 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  let test = "1 + a" in
+  start_test parse_ebinop show_expression test;
+  [%expect {|
+    (EBinaryOp (Add, (EConst (CInt 1)), (EVar ("a", TUnknown)))) |}]
+;;
+
+let%expect_test _ =
+  let test = "1 + a" in
+  start_test parse_ebinop show_expression test;
+  [%expect {|
+    (EBinaryOp (Add, (EConst (CInt 1)), (EVar ("a", TUnknown)))) |}]
+;;
+
+let%expect_test _ =
   let test = "true || false" in
   start_test parse_ebinop show_expression test;
   [%expect {| (EBinaryOp (Or, (EConst (CBool true)), (EConst (CBool false)))) |}]
@@ -152,22 +166,58 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-   let test = "fun x y -> y + x" in
-   start_test parse_efun show_expression test;
-   [%expect
+  let test = "(fun x -> 3 + x)" in
+  start_test parse_efun show_expression test;
+  [%expect
     {|
     (EFun ((PVar ("x", TUnknown)),
        (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
-   ;;
+;;
 
+let%expect_test _ =
+  let test = "fun x y -> y + x" in
+  start_test parse_efun show_expression test;
+  [%expect
+    {|
+    (EFun ((PVar ("x", TUnknown)),
+       (EFun ((PVar ("y", TUnknown)),
+          (EBinaryOp (Add, (EVar ("y", TUnknown)), (EVar ("x", TUnknown))))))
+       )) |}]
+;;
+
+(* EApp *)
+
+let%expect_test _ =
+  let test = "in_popka yes no" in
+  start_test parse_eapp show_expression test;
+  [%expect
+    {|
+    (EApp ((EApp ((EVar ("in_popka", TUnknown)), (EVar ("yes", TUnknown)))),
+       (EVar ("no", TUnknown)))) |}]
+;;
+
+(* ELetIn *)
+
+let%expect_test _ =
+  let test = "let sum a b = a + b in five 2 3" in
+  start_test parse_eletin show_expression test;
+  [%expect
+    {|
+    (ELetIn (Notrec, "sum",
+       (EFun ((PVar ("a", TUnknown)),
+          (EFun ((PVar ("b", TUnknown)),
+             (EBinaryOp (Add, (EVar ("a", TUnknown)), (EVar ("b", TUnknown))))))
+          )),
+       (EApp ((EApp ((EVar ("five", TUnknown)), (EConst (CInt 2)))),
+          (EConst (CInt 3))))
+       )) |}]
+;;
 
 (* Run time test*)
 
-(* let%expect_test _ =
-   let test = "fun x y -> y + x" in
-   start_test parse_efun show_expression test;
-   [%expect
-    {|
-    (EFun ((PVar ("x", TUnknown)),
-       (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
-   ;; *)
+let%expect_test _ =
+  let test = "five a" in
+  start_test parse_eapp show_expression test;
+  [%expect {|
+    (EApp ((EVar ("five", TUnknown)), (EVar ("a", TUnknown)))) |}]
+;;
