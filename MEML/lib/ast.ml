@@ -11,8 +11,8 @@ type const =
 [@@deriving show { with_path = false }]
 
 type binary_op =
-  | Add (** 1 + 2 *)
-  | Sub (** 1 - 2 *)
+  | Add (** + *)
+  | Sub (** - *)
   | Mul (** * *)
   | Div (** / *)
   | Mod (** % *)

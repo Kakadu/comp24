@@ -43,6 +43,12 @@ let is_keyword = function
   | _ -> false
 ;;
 
+let is_op = function
+  | ">=" | "<=" | ">" | "<" | "<>" | "=" | "||" | "&&" | "%" | "/" | "*" | "-" | "+" ->
+    true
+  | _ -> false
+;;
+
 let is_type = function
   | "int" | "bool" | "string" -> true
   | _ -> false
@@ -218,6 +224,26 @@ let parse_rec =
   >>| fun x -> if String.( <> ) x "false" then Rec else Notrec
 ;;
 
+let parse_rename =
+  brackets @@ parse_white_space
+  *> choice
+       [ string "=" *> return "Eq"
+       ; string "<>" *> return "Neq"
+       ; string "&&" *> return "And"
+       ; string "||" *> return "Or"
+       ; string "*" *> return "Mul"
+       ; string "/" *> return "Div"
+       ; string "%" *> return "Mod"
+       ; string "+" *> return "Add"
+       ; string "-" *> return "Sub"
+       ; string ">=" *> return "Greq"
+       ; string ">" *> return "Gre"
+       ; string "<=" *> return "Leq"
+       ; string "<" *> return "Less"
+       ]
+  <* parse_white_space
+;;
+
 let parse_eletin =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
@@ -225,7 +251,7 @@ let parse_eletin =
       let expr = constr_efun args expr1 in
       ELetIn (is_rec, name, expr, expr2))
     parse_rec
-    parse_var
+    (parse_rename <|> parse_var)
     (many parse_pattern)
     (stoken "=" *> parse_ebinop)
     (stoken "in" *> parse_eapp)
@@ -251,12 +277,12 @@ let parse_let parse =
       let body = constr_efun args body in
       Let (flag, name, body))
     parse_rec
-    parse_var
+    (parse_rename <|> parse_var)
     (parse_white_space *> many (parse_pattern <|> brackets parse_pattern))
     (stoken "=" *> parse)
 ;;
 
 let expr_main = (fun expr -> Expression expr) <$> parse_expression
-let parse_bindings =  parse_let @@ parse_expression <|> expr_main
+let parse_bindings = parse_let @@ parse_expression <|> expr_main
 let parse_statements = sep_by (wspaces_str ";;" <|> parse_white_space) parse_bindings
 let parse program = parse_string parse_statements program
