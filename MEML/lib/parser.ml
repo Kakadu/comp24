@@ -120,6 +120,8 @@ let check_var cond =
 ;;
 
 let parse_var =
+  parse_white_space
+  *>
   let is_entry = function
     | c -> is_char c || is_underscore c || is_digit c
   in
@@ -178,8 +180,6 @@ let parse_binop x =
 
 let parse_ebinop = parse_binop @@ (parse_econst <|> parse_evar)
 
-(* EApp *)
-
 (* EIfElse *)
 
 let parse_eifelse =
@@ -193,16 +193,20 @@ let parse_eifelse =
 (* EFun *)
 
 let constr_efun pl e = List.fold_right ~init:e ~f:(fun p e -> EFun (p, e)) pl
-
-let parse_fun_args =
-  brackets_or_not @@ many1 parse_pattern 
-;;
+let parse_fun_args = brackets_or_not @@ many1 parse_pattern
 
 let parse_efun =
+  brackets_or_not
+  @@ lift2 constr_efun (stoken "fun" *> parse_fun_args) (stoken "->" *> parse_ebinop)
+;;
+
+(* EApp *)
+
+let parse_eapp =
   lift2
-    constr_efun
-    (stoken "fun" *> parse_fun_args)
-    (stoken "->" *> parse_ebinop)
+    (fun f args -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg)) args)
+    (parse_evar <|> brackets @@ parse_efun)
+    (many1 (parse_evar <|> parse_econst))
 ;;
 
 (* ELetIn *)
@@ -212,7 +216,19 @@ let parse_rec =
   >>| fun x -> if String.( <> ) x "false" then Rec else Notrec
 ;;
 
-(* Expression parsers *)
+let parse_eletin =
+  let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
+  lift5
+    (fun is_rec name args expr1 expr2 ->
+      let expr = constr_efun args expr1 in
+      ELetIn (is_rec, name, expr, expr2))
+    parse_rec
+    parse_var
+    (many parse_pattern)
+    (stoken "=" *> parse_ebinop)
+    (stoken "in" *> parse_eapp)
+;;
 
+(* Expression parsers *)
 
 (** Binding type *)
