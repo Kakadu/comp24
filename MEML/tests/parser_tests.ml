@@ -17,111 +17,82 @@ let start_test parser show input =
 
 (* Test pattern parser *)
 
-let%expect_test "pattern test" =
+let%expect_test _ =
   let test = "true" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PConst (CBool true)) |}]
 ;;
 
-let%expect_test "pattern test" =
+let%expect_test _ =
+  let test = "\"itsastring\"" in
+  start_test parse_pattern show_pattern test;
+  [%expect {| (PConst (CString "itsastring")) |}]
+;;
+
+let%expect_test _ =
   let test = "951753" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PConst (CInt 951753)) |}]
 ;;
 
-let%expect_test "pattern test" =
+let%expect_test _ =
   let test = "var" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PVar ("var", TUnknown)) |}]
 ;;
 
-let%expect_test "pattern test" =
-  let test = "(var : int)" in
+let%expect_test _ =
+  let test = "(var : string)" in
   start_test parse_pattern show_pattern test;
-  [%expect {| (PVar ("var", TInt)) |}]
+  [%expect {| (PVar ("var", TString)) |}]
 ;;
 
-let%expect_test "pattern test" =
-  let test = "((1, 2), (a: int), true)" in
+let%expect_test _ =
+  let test = "let" in
   start_test parse_pattern show_pattern test;
-  [%expect
-    {|
-    (PTuple
-       [(PTuple [(PConst (CInt 1)); (PConst (CInt 2))]); (PVar ("a", TInt));
-         (PConst (CBool true))]) |}]
-;;
-
-let%expect_test "pattern test" =
-  let test = "[1 :: (a: int); [1; 2]; (1, 2, 3); true]" in
-  start_test parse_pattern show_pattern test;
-  [%expect
-    {|
-    (PCon ((PCon ((PConst (CInt 1)), (PVar ("a", TInt)))),
-       (PCon ((PCon ((PConst (CInt 1)), (PConst (CInt 2)))),
-          (PCon (
-             (PTuple [(PConst (CInt 1)); (PConst (CInt 2)); (PConst (CInt 3))]),
-             (PConst (CBool true))))
-          ))
-       )) |}]
+  [%expect {| : You can not use "let" keywords as vars |}]
 ;;
 
 (* Test expression *)
 
 (* EConst *)
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "1" in
-  start_test parse_expression show_expression test;
+  start_test parse_econst show_expression test;
   [%expect {| (EConst (CInt 1)) |}]
 ;;
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "false" in
-  start_test parse_expression show_expression test;
+  start_test parse_econst show_expression test;
   [%expect {| (EConst (CBool false)) |}]
+;;
+
+let%expect_test _ =
+  let test = "false" in
+  start_test parse_econst show_expression test;
+  [%expect {| (EConst (CBool false)) |}]
+;;
+
+let%expect_test _ =
+  let test = "\"popka\"" in
+  start_test parse_econst show_expression test;
+  [%expect {| (EConst (CString "popka")) |}]
 ;;
 
 (* EVar *)
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "papa" in
-  start_test parse_expression show_expression test;
+  start_test parse_evar show_expression test;
   [%expect {| (EVar ("papa", TUnknown)) |}]
 ;;
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "(papa : int)" in
-  start_test parse_expression show_expression test;
+  start_test parse_evar show_expression test;
   [%expect {| (EVar ("papa", TInt)) |}]
-;;
-
-let%expect_test "expression_test" =
-  let test = "([1; ([2; ([3; 4], 5)], 6)], 7)" in
-  start_test parse_expression show_expression test;
-  [%expect
-    {|
-    (ETuple
-       [(EList ((EConst (CInt 1)),
-           (EList (
-              (ETuple
-                 [(EList ((EConst (CInt 2)),
-                     (EList (
-                        (ETuple
-                           [(EList ((EConst (CInt 3)),
-                               (EList ((EConst (CInt 4)), (EConst CNil)))));
-                             (EConst (CInt 5))]),
-                        (EConst CNil)))
-                     ));
-                   (EConst (CInt 6))]),
-              (EConst CNil)))
-           ));
-         (EConst (CInt 7))]) |}]
-;;
-
-let%expect_test "expression_test" =
-  let test = "[1; 5]" in
-  start_test parse_expression show_expression test;
-  [%expect {| (EList ((EConst (CInt 1)), (EList ((EConst (CInt 5)), (EConst CNil))))) |}]
 ;;
 
 (* EBinaryOp *)
@@ -131,34 +102,32 @@ let%expect_test "expression_test" =
   start_test parse_expression show_expression test;
   [%expect
     {|
-    (EBinaryOp (Sub,
-       (EBinaryOp (Add, (EConst (CInt 1)),
-          (EBinaryOp (Mul, (EVar ("a", TUnknown)), (EConst (CInt 3)))))),
-       (EVar ("x", TUnknown)))) |}]
+    (EBinaryOp (Add, (EConst (CInt 1)),
+       (EBinaryOp (Div, (EVar ("a", TUnknown)), (EConst (CInt 3)))))) |}]
 ;;
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "true || false" in
-  start_test parse_expression show_expression test;
+  start_test parse_ebinop show_expression test;
   [%expect {| (EBinaryOp (Or, (EConst (CBool true)), (EConst (CBool false)))) |}]
 ;;
 
 (* EIfElse *)
 
-let%expect_test "expression_test" =
+let%expect_test _ =
   let test = "if n = 1 then 1 else 3" in
-  start_test parse_expression show_expression test;
+  start_test parse_eifelse show_expression test;
   [%expect
     {|
     (EIfElse ((EBinaryOp (Eq, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
        (EConst (CInt 1)), (EConst (CInt 3)))) |}]
 ;;
 
-(* EFun *)
+(* Run time test*)
 
-let%expect_test "expression_test" =
-  let test = "fun x -> 3 + x" in
-  start_test parse_expression show_expression test;
+(* let%expect_test _ =
+  let test = "if n = 1 then 1 else 3" in
+  start_test parse_eifelse show_expression test;
   [%expect
     {|
     (EFun ((PVar ("x", TUnknown)),

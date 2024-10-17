@@ -39,7 +39,6 @@ let is_keyword = function
   | "false"
   | "match"
   | "with"
-<<<<<<< HEAD
   | "val"
   | "in"
   | "and" -> true
@@ -48,9 +47,6 @@ let is_keyword = function
 
 let is_type = function
   | "int" | "bool" | "string" -> true
-=======
-  | "in" -> true
->>>>>>> 2a9e608 (feat: Start develop parser)
   | _ -> false
 ;;
 
