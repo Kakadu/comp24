@@ -256,6 +256,18 @@ let%expect_test _ =
     (Expression (EBinaryOp (Add, (EConst (CInt 4)), (EConst (CInt 3))))) |}]
 ;;
 
+let%expect_test _ =
+  let test = "let (+) x y = x - y" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Let (Notrec, "Add",
+       (EFun ((PVar ("x", TUnknown)),
+          (EFun ((PVar ("y", TUnknown)),
+             (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
+          ))
+       ))|}]
+;;
+
 (* Run time test*)
 
 (* let%expect_test _ =
