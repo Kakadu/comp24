@@ -194,6 +194,11 @@ let parse_eifelse =
 
 (* ELetIn *)
 
+let parse_rec =
+  parse_white_space *> pstrtoken "let" *> option "false" (pstrtoken1 "rec")
+  >>| fun x -> if String.( <> ) x "false" then Rec else Notrec
+;;
+
 (* EFun *)
 
 (* Expression parsers *)
