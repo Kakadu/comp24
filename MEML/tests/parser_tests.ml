@@ -213,11 +213,55 @@ let%expect_test _ =
        )) |}]
 ;;
 
-(* Run time test*)
+(** Test bindings *)
 
 let%expect_test _ =
-  let test = "five a" in
-  start_test parse_eapp show_expression test;
+  let test = "let plusfive x = let five a = a + 5 in five x" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Let (Notrec, "plusfive",
+       (EFun ((PVar ("x", TUnknown)),
+          (ELetIn (Notrec, "five",
+             (EFun ((PVar ("a", TUnknown)),
+                (EBinaryOp (Add, (EVar ("a", TUnknown)), (EConst (CInt 5)))))),
+             (EApp ((EVar ("five", TUnknown)), (EVar ("x", TUnknown))))))
+          ))
+       )) |}]
+;;
+
+let%expect_test _ =
+  let test = "let sex papa mama = if mama = true && papa = true then true else false" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Let (Notrec, "sex",
+       (EFun ((PVar ("papa", TUnknown)),
+          (EFun ((PVar ("mama", TUnknown)),
+             (EIfElse (
+                (EBinaryOp (And,
+                   (EBinaryOp (Eq, (EVar ("mama", TUnknown)),
+                      (EConst (CBool true)))),
+                   (EBinaryOp (Eq, (EVar ("papa", TUnknown)),
+                      (EConst (CBool true))))
+                   )),
+                (EConst (CBool true)), (EConst (CBool false))))
+             ))
+          ))
+       )) |}]
+;;
+
+let%expect_test _ =
+  let test = "4 + 3" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Expression (EBinaryOp (Add, (EConst (CInt 4)), (EConst (CInt 3))))) |}]
+;;
+
+(* Run time test*)
+
+(* let%expect_test _ =
+  let test = "let plusfive x = let five a = a + 5 in five x" in
+  start_test parse_bindings show_bindings test;
   [%expect {|
     (EApp ((EVar ("five", TUnknown)), (EVar ("a", TUnknown)))) |}]
-;;
+;; *)
+
