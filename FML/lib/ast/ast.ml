@@ -14,13 +14,23 @@ type rec_flag =
   | NoRec
 [@@deriving show { with_path = false }]
 
+type type_annotation =
+  | AUnit
+  | AInt
+  | ABool
+  | AList of type_annotation
+  | ATuple of type_annotation list
+  | AFunction of type_annotation * type_annotation
+[@@deriving show { with_path = false }]
+
 type pattern =
+  | PNill (** [] *)
   | PAny (**  _ *)
   | PConst of const (** 1 || true *)
   | PIdentifier of id (** x *)
   | PTuple of pattern list (** (x, y, z) *)
-  | PNill (** [] *)
   | PCons of pattern * pattern (** hd :: tl*)
+  | PConstraint of pattern * type_annotation
 [@@deriving show { with_path = false }]
 
 type bin_op =
@@ -68,6 +78,7 @@ let pconst c = PConst c
 let pident v = PIdentifier v
 let pcons l r = PCons (l, r)
 let ptuple l = PTuple l
+let pconstraint p t = PConstraint (p, t)
 
 (* ------------------------- *)
 

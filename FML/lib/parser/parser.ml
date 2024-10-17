@@ -73,6 +73,44 @@ let parse_bool =
 
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
+(* Type annotations parsers *)
+let parse_primitive_type =
+  skip_wspace
+  *> choice
+       [ string "int" *> return AInt
+       ; string "bool" *> return ABool
+       ; char '(' *> skip_wspace *> char ')' *> return AUnit
+       ]
+;;
+
+let parse_list_type p_type =
+  p_type <* skip_wspace <* string "list" >>= fun l -> return @@ AList l
+;;
+
+let parse_tuple_type p_type =
+  lift2
+    (fun h tl -> ATuple (h :: tl))
+    p_type
+    (many1 (skip_wspace *> string "*" *> p_type))
+;;
+
+let parse_function_type p_type =
+  let fun_helper =
+    skip_wspace *> string "->" *> return (fun arg ret -> AFunction (arg, ret))
+  in
+  chainr1 p_type fun_helper
+;;
+
+let parse_type =
+  let typ =
+    fix @@ fun self -> choice [ parens self; parse_primitive_type; parse_list_type self ]
+  in
+  let typ = parse_tuple_type typ <|> typ in
+  parse_function_type typ <|> typ
+;;
+
+(* ------------------------ *)
+
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
 let parse_pidentifier = parse_identifier pident
@@ -87,12 +125,11 @@ let parse_pcons p_pattern =
 let parse_ptuple p_pattern =
   parens
   @@ lift2
-       (fun h tl -> ptuple @@ (h :: tl))
+       (fun h tl -> ptuple (h :: tl))
        p_pattern
        (many1 (skip_wspace *> string "," *> p_pattern))
 ;;
 
-(*FIXME add list cons pattern*)
 let parse_pattern_wout_type =
   fix
   @@ fun self ->
@@ -109,6 +146,15 @@ let parse_pattern_wout_type =
   parse_pcons patt <|> patt
 ;;
 
+let parse_pattern_with_type =
+  lift2
+    pconstraint
+    (skip_wspace *> char '(' *> parse_pattern_wout_type)
+    (skip_wspace *> char ':' *> parse_type <* char ')')
+;;
+
+let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
+
 (* ------------------------- *)
 
 (* Expressions parsers *)
@@ -119,7 +165,7 @@ let parse_identifier = parse_identifier eidentifier
 let parse_etuple p_expr =
   parens
   @@ lift2
-       (fun h tl -> etuple @@ (h :: tl))
+       (fun h tl -> etuple (h :: tl))
        p_expr
        (many1 (skip_wspace *> string "," *> p_expr))
 ;;
