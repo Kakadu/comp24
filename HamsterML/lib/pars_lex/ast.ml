@@ -19,6 +19,7 @@ type bop =
   | AND (** && *)
   | OR (** || *)
   | CONCAT (** ^ *)
+  | ASSIGN (** = *)
 
 type uop =
   | MINUS (** -1 *)
