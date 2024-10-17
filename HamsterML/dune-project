@@ -1,5 +1,7 @@
 (lang dune 3.16)
 
+(using menhir 2.1)
+
 (name HamsterML)
 
 (generate_opam_files true)

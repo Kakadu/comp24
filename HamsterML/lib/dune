@@ -1,5 +1,5 @@
 (library
- (modules Ast)
+ (modules Ast Parser lexer)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
