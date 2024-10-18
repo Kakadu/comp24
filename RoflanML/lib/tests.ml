@@ -16,13 +16,13 @@ module ParserTests = struct
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f x = x";
-    [%expect {| (ELet (NonRec, "f", (EFun ("x", (EVar "x"))), None)) |}]
+    [%expect {| (ELet (NonRec, "f", (EFun ([("x", TUnknown)], (EVar "x"))), None)) |}]
   ;;
 
   let%expect_test _ =
     pp pp_expr parse_expr "if f x then x else 0";
     [%expect
-      {| (EBranch ((EApp ((EVar "f"), (EVar "x"))), (EVar "x"), (EConst (CInt 0)))) |}]
+      {| (EBranch ((EApp ((EVar "f"), [(EVar "x")])), (EVar "x"), (EConst (CInt 0)))) |}]
   ;;
 
   let%expect_test _ =
@@ -82,17 +82,53 @@ module ParserTests = struct
     pp pp_expr parse_expr "let f (x : bool) (y: int)= x * y";
     [%expect
       {|
-    (ELet (NonRec, [("f", TUnit); ("x", TBool); ("y", TInt)],
-       (EBinop (Mul, (EVar "x"), (EVar "y"))), None))  |}]
+      (ELet (NonRec, "f",
+         (EFun ([("x", TBool); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
+            )),
+         None))
+      |}]
   ;;
 
   let%expect_test _ =
     pp pp_expr parse_expr "let (+) = fun (x: int) (y: int) -> x * y";
     [%expect
       {|
-      (ELet (NonRec, [("+", TUnit)],
+      (ELet (NonRec, "+",
          (EFun ([("x", TInt); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
             )),
-         None)) |}]
+         None)) 
+      |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let (+) (x: int) y = let (-) x (y: int) = x + y in x - y";
+    [%expect
+      {|
+      (ELet (NonRec, "+",
+         (EFun ([("x", TInt); ("y", TUnknown)],
+            (ELet (NonRec, "-",
+               (EFun ([("x", TUnknown); ("y", TInt)],
+                  (EBinop (Add, (EVar "x"), (EVar "y"))))),
+               (Some (EBinop (Sub, (EVar "x"), (EVar "y"))))))
+            )),
+         None)) 
+      |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let fix f = f (fix f) x in fix g";
+    [%expect
+      {|
+      (ELet (NonRec, "fix",
+         (EFun ([("f", TUnknown)],
+            (EApp ((EVar "f"), [(EApp ((EVar "fix"), [(EVar "f")])); (EVar "x")]))
+            )),
+         (Some (EApp ((EVar "fix"), [(EVar "g")])))))
+      |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y";
+    [%expect {| TODO |}]
   ;;
 end

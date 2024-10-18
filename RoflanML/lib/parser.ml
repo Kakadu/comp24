@@ -99,9 +99,7 @@ let ptype =
     let pint_type = pstoken "int" *> return TInt in
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
-    let pfun_type =
-      pparens (lift2 (fun t1 t2 -> TFun (t1, t2)) (ptype <* pstoken "->") ptype)
-    in
+    let pfun_type = lift2 (fun t1 t2 -> TFun (t1, t2)) (ptype <* pstoken "->") ptype in
     let plist_type = pparens (ptype <* pstoken "list") >>| fun t -> TList t in
     let pwrapped_type = pparens ptype in
     choice [ pint_type; pbool_type; punit_type; pfun_type; plist_type; pwrapped_type ])
@@ -109,24 +107,32 @@ let ptype =
 
 let ptyped_var =
   pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, ty)
-  <|> (pid >>| fun id -> id, TUnit)
+  <|> (pid >>| fun id -> id, TUnknown)
 ;;
 
-let plet pexpr =
+let plet_no_args pexpr =
   pstoken "let"
   *> lift4
-       (fun r vars e1 e2 -> ELet (r, vars, e1, e2))
+       (fun r id e1 e2 -> ELet (r, id, e1, e2))
        (pstoken "rec" *> return Rec <|> return NonRec)
-       (many1
-          ((* Парсим оператор или переменную с типом, или просто переменную *)
-           poperator
-           >>| (fun op -> op, TUnit) (* Оператор в скобках *)
-           <|> ptyped_var (* Переменная с аннотацией типа *)
-           <|> (pid >>| fun id -> id, TUnit) (* Обычная переменная *)))
+       (poperator <|> pstoken "()" <|> pid)
        (pstoken "=" *> pexpr)
-       (pstoken "in" *> pexpr >>| Option.some <|> return None)
-  <?> "let expression"
+       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
 ;;
+
+let plet_with_args pexpr =
+  let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
+  pstoken "let"
+  *> lift5
+       (fun r id args e1 e2 -> ELet (r, id, EFun (args, e1), e2))
+       (pstoken "rec" *> return Rec <|> return NonRec)
+       (poperator <|> pstoken "()" <|> pid)
+       (many1 ptyped_var)
+       (pstoken "=" *> pexpr)
+       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
+;;
+
+let plet pexpr = choice [ plet_no_args pexpr; plet_with_args pexpr ]
 
 let pbranch pexpr =
   ptoken
@@ -212,7 +218,10 @@ let pexpr =
   let pe = choice [ pparens pexpr; pconst; pvar; plist pexpr; pfun pexpr ] in
   let pe =
     lift2
-      (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
+      (fun f args ->
+        match args with
+        | [] -> f
+        | _ -> EApp (f, args))
       pe
       (many (char ' ' *> ptoken pe))
   in
@@ -232,27 +241,3 @@ let pexpr =
 
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse = parse_string ~consume:Consume.All (many1 (plet pexpr) <* pspaces)
-
-let pp printer parser input =
-  match parser input with
-  | Result.Ok res -> Stdlib.Format.printf "%a\n" printer res
-  | Result.Error msg -> Stdlib.print_endline ("Failed to parse: " ^ msg)
-;;
-
-let%expect_test _ =
-  pp pp_expr parse_expr "let f (x : bool) (y: int)= x * y";
-  [%expect
-    {|
-    (ELet (NonRec, [("f", TUnit); ("x", TBool); ("y", TInt)],
-       (EBinop (Mul, (EVar "x"), (EVar "y"))), None))  |}]
-;;
-
-let%expect_test _ =
-  pp pp_expr parse_expr "let (+) = fun (x: int) (y: int) -> x * y";
-  [%expect
-    {|
-      (ELet (NonRec, [("+", TUnit)],
-         (EFun ([("x", TInt); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
-            )),
-         None)) |}]
-;;

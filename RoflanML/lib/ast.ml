@@ -40,12 +40,15 @@ type is_rec =
 [@@deriving show { with_path = false }]
 
 type type_id =
+  | TUnknown (** Argument without mentioned type *)
   | TInt (** Type int *)
   | TBool (** Type bool *)
   | TUnit (** Type unit () *)
   | TFun of type_id * type_id (** Function type t1 -> t2 *)
   | TList of type_id (** List type t list *)
 [@@deriving show { with_path = false }]
+
+type typed_arg = id * type_id [@@deriving show { with_path = false }]
 
 type expr =
   | EConst of const (** Consts *)
@@ -56,9 +59,9 @@ type expr =
   | EList of expr list (** Lists [1; 2; 3], ... *)
   | EBranch of expr * expr * expr (** if [cond] then [a] else [b] *)
   | EMatch of expr * (pattern * expr) list (** match [x] with | [p1] -> [e1] | ... *)
-  | ELet of is_rec * (id * type_id) list * expr * expr option (** let rec f: t1 -> t2 *)
-  | EFun of (id * type_id) list * expr (** Anonymous function with typed arguments *)
-  | EApp of expr * expr (** Application f x *)
+  | ELet of is_rec * id * expr * expr option (** let rec f: t1 -> t2 *)
+  | EFun of typed_arg list * expr (** Anonymous function with typed arguments *)
+  | EApp of expr * expr list (** Application f x y z *)
 [@@deriving show { with_path = false }]
 
 type program = expr list [@@deriving show { with_path = false }]
