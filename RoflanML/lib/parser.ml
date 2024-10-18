@@ -1,14 +1,6 @@
-(** Copyright 2021-2023, Ilya Syresenkov *)
+(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-
-(* let rec fac x = if x = 1 then x else x * (fac x) *)
-
-(*
-   Type anotations
-   let f : int -> int -> bool = fun x y -> x = y
-   let f (x : int) (y : int) : bool = x = y
-*)
 
 open Angstrom
 open Base
@@ -247,7 +239,6 @@ let pp printer parser input =
   | Result.Error msg -> Stdlib.print_endline ("Failed to parse: " ^ msg)
 ;;
 
-(* Тесты *)
 let%expect_test _ =
   pp pp_expr parse_expr "let f (x : bool) (y: int)= x * y";
   [%expect
