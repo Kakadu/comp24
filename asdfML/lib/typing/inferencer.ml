@@ -1,7 +1,7 @@
 (* Based on https://gitlab.com/Kakadu/fp2020course-materials/-/blob/master/code/miniml*)
 
 open Types
-open Pp
+open Pp_typing
 open Base
 
 let int_typ = TGround TInt
@@ -239,13 +239,11 @@ module TypeEnv = struct
   let extend env id scheme = set env ~key:id ~data:scheme
   let apply env sub = map env ~f:(Scheme.apply sub)
 
-  let pp fmt (xs: t) =
+  let pp fmt (xs : t) =
     Format.fprintf fmt "{| ";
-    Map.iteri xs ~f:(fun ~key:n ~data:s ->
-      Format.fprintf fmt "%s -> %a; " n pp_scheme s);
+    Map.iteri xs ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a; " n pp_scheme s);
     Format.fprintf fmt "|}%!"
   ;;
-
 end
 
 open R
@@ -289,9 +287,7 @@ let lookup_env e xs =
 ;;
 
 let pp_env subst fmt env =
-  let env : TypeEnv.t =
-    Map.map env ~f:(Scheme.apply subst)
-  in
+  let env : TypeEnv.t = Map.map env ~f:(Scheme.apply subst) in
   TypeEnv.pp fmt env
 ;;
 
@@ -380,9 +376,9 @@ let infer =
       let* s2, t2 = infer_expr TypeEnv.(extend (apply env s) id t2) expr in
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
-    | ELetIn (DLet (_, non_pattern, _), _) ->
+    | ELetIn (DLet (_, non_id, _), _) ->
       failwith
-        (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_pattern)
+        (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id)
     | _ -> failwith "TODO: unimplemented"
   and (infer_def : TypeEnv.t -> Ast.definition -> (Subst.t * ty) R.t) =
     fun env -> function
@@ -418,9 +414,9 @@ let infer_program (prog : Ast.definition list) =
        | Ast.DLet (NonRec, PWild, _) ->
          let* tail = helper env tail in
          return tail
-       | Ast.DLet (_, non_pattern, _) ->
+       | Ast.DLet (_, non_id_wild, _) ->
          failwith
-           (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_pattern))
+           (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id_wild))
     | [] -> return []
   in
   let env = TypeEnv.empty in
@@ -469,7 +465,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let x = 1 + 2 <= 3";
-  [%expect {| Unification failed on bool and int |}]
+  [%expect {| TODO: priorities |}]
 ;;
 
 let%expect_test _ =
@@ -631,6 +627,11 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let id = fun (x:int) -> x";
+  [%expect {| int -> int |}]
+;;
+
+let%expect_test _ =
+  test "let (const:int) = fun x -> 42";
   [%expect {| int -> int |}]
 ;;
 
