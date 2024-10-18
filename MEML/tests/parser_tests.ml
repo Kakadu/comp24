@@ -268,6 +268,30 @@ let%expect_test _ =
        ))|}]
 ;;
 
+let%expect_test _ =
+  let test = "let f (x: int) (y: int) = x + y" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Let (Notrec, "f",
+       (EFun ((PVar ("x", TInt)),
+          (EFun ((PVar ("y", TInt)),
+             (EBinaryOp (Add, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test _ =
+  let test = "let f (x: int) = x + 4" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (EFun ((PVar ("x", TInt)),
+       (EBinaryOp (Mul, (EVar ("x", TUnknown)), (EVar ("x", TUnknown))))))
+ |}]
+;;
+
+
+
 (* Run time test*)
 
 (* let%expect_test _ =
