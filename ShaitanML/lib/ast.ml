@@ -48,7 +48,7 @@ type type_annot =
 type pattern =
   | PAny (** _ *)
   | PConst of const (** 123, true, "string" *)
-  | PVar of id * type_annot option(** x *)
+  | PVar of id * type_annot option (** x *)
   | PTuple of pattern list (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
 [@@deriving show { with_path = false }]
@@ -59,7 +59,7 @@ type expr =
   | EBin_op of bin_op * expr * expr (** 1 + 2 *)
   | EIf of expr * expr * expr (** if e1 then e2 else e3 *)
   | EMatch of expr * case list (** match e with p1 -> e1 |...| pn -> en *)
-  | ELet of rec_flag * binding * expr (** let x = e1 in e2 *)
+  | ELet of rec_flag * binding list * expr (** let x = e1 in e2 *)
   | EFun of pattern * expr (** fun p -> e *)
   | ETuple of expr list (** a, b, c *)
   | ECons of expr * expr (** x :: xs | [x1; x2]*)
@@ -74,7 +74,7 @@ and binding = pattern * expr [@@deriving show { with_path = false }]
 
 type str_item =
   | SEval of expr (** Some expression *)
-  | SValue of rec_flag * binding (** let [rec] p = e *)
+  | SValue of rec_flag * binding list (** let [rec] p1 = e1 and p2 = e2 and ... *)
 [@@deriving show { with_path = false }]
 
 (** Sequence of structure items *)

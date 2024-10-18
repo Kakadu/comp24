@@ -1,4 +1,4 @@
-(** Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(* Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -10,6 +10,7 @@ let is_idc c = Char.is_alphanum c || Char.equal c '_'
 
 let is_keyword = function
   | "let"
+  | "and"
   | "rec"
   | "in"
   | "fun"
@@ -148,13 +149,10 @@ let ppvar =
     return (PVar (name, None))
   in
   let pvar_with_type =
-    let pvar = (fun name annot -> PVar (name, annot)) in
-    lift2
-    pvar
-    (lp *> varname)
-    (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
+    let pvar name annot = PVar (name, annot) in
+    lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
   in
-  choice [pvar_with_type; pvar]
+  choice [ pvar_with_type; pvar ]
 ;;
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
@@ -174,7 +172,7 @@ let evar x = EVar x
 let ebinop op e1 e2 = EBin_op (op, e1, e2)
 let eif e1 e2 e3 = EIf (e1, e2, e3)
 let ematch e cl = EMatch (e, cl)
-let elet f b e = ELet (f, b, e)
+let elet f bl e = ELet (f, bl, e)
 let efun p e = EFun (p, e)
 let etuple el = ETuple el
 let econs e1 e2 = ECons (e1, e2)
@@ -206,7 +204,7 @@ let pelet pe =
   lift3
     elet
     (token "let" *> option Nonrec (token "rec" *> return Rec))
-    (both pattern (lift2 efunf (many pattern <* token "=") pe))
+    (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") pe)))
     (token "in" *> pe)
 ;;
 
@@ -243,12 +241,12 @@ let expr =
 
 let str_item =
   let pseval = expr >>| fun e -> SEval e in
-  let svalue f b = SValue (f, b) in
+  let svalue f bl = SValue (f, bl) in
   let psvalue =
     lift2
       svalue
       (token "let" *> option Nonrec (token "rec" *> return Rec))
-      (both pattern (lift2 efunf (many pattern <* token "=") expr))
+      (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") expr)))
   in
   choice [ pseval; psvalue ]
 ;;
