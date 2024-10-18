@@ -14,9 +14,6 @@ open Angstrom
 open Base
 open Ast
 
-
-
-
 let is_space = function
   | ' ' | '\t' | '\n' | '\r' -> true
   | _ -> false
@@ -64,7 +61,6 @@ let is_operator_char = function
   | _ -> false
 ;;
 
-
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 let chainl1 e op =
@@ -76,10 +72,7 @@ let pspaces = skip_while is_space
 let ptoken p = skip_while is_space *> p
 let pstoken s = ptoken (Angstrom.string s)
 let pparens p = pstoken "(" *> p <* pstoken ")"
-
-let poperator =
-  pparens (take_while1 is_operator_char) >>= fun op -> return op
-;;
+let poperator = pparens (take_while1 is_operator_char) >>= fun op -> return op
 
 let pid =
   let pfirst =
@@ -87,14 +80,13 @@ let pid =
   in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
   ptoken (lift2 (fun x y -> x ^ y) pfirst plast)
-  >>= fun s -> if is_keyword s then fail ("Keyword identifiers are forbidden: " ^ s) else return s
-  <?> "identifier"
+  >>= fun s ->
+  if is_keyword s
+  then fail ("Keyword identifiers are forbidden: " ^ s)
+  else return s <?> "identifier"
 ;;
 
-let pint =
-  ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x))
-  <?> "integer"
-;;
+let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
 
 let pbool =
   ptoken
@@ -122,30 +114,27 @@ let ptype =
     let pwrapped_type = pparens ptype in
     choice [ pint_type; pbool_type; punit_type; pfun_type; plist_type; pwrapped_type ])
 ;;
-  
-let ptyped_var =
-  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> (id, ty))
-  <|> (pid >>| fun id -> (id, TUnit))
-;;
 
+let ptyped_var =
+  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, ty)
+  <|> (pid >>| fun id -> id, TUnit)
+;;
 
 let plet pexpr =
   pstoken "let"
   *> lift4
        (fun r vars e1 e2 -> ELet (r, vars, e1, e2))
        (pstoken "rec" *> return Rec <|> return NonRec)
-       (many1 (
-          (* Парсим оператор или переменную с типом, или просто переменную *)
-          (poperator >>| fun op -> (op, TUnit))  (* Оператор в скобках *)
-          <|> ptyped_var                         (* Переменная с аннотацией типа *)
-          <|> (pid >>| fun id -> (id, TUnit))    (* Обычная переменная *)
-        ))
+       (many1
+          ((* Парсим оператор или переменную с типом, или просто переменную *)
+           poperator
+           >>| (fun op -> op, TUnit) (* Оператор в скобках *)
+           <|> ptyped_var (* Переменная с аннотацией типа *)
+           <|> (pid >>| fun id -> id, TUnit) (* Обычная переменная *)))
        (pstoken "=" *> pexpr)
        (pstoken "in" *> pexpr >>| Option.some <|> return None)
   <?> "let expression"
 ;;
-
-  
 
 let pbranch pexpr =
   ptoken
@@ -212,9 +201,6 @@ let pfun pexpr =
   pstoken "fun" *> pbody pexpr
 ;;
 
-
-
-
 let pebinop chain1 e pbinop = chain1 e (pbinop >>| fun op e1 e2 -> EBinop (op, e1, e2))
 let plbinop = pebinop chainl1
 let padd = pstoken "+" *> return Add
@@ -252,10 +238,8 @@ let pexpr =
   choice [ plet pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe ]
 ;;
 
-
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse = parse_string ~consume:Consume.All (many1 (plet pexpr) <* pspaces)
-
 
 let pp printer parser input =
   match parser input with
@@ -266,16 +250,18 @@ let pp printer parser input =
 (* Тесты *)
 let%expect_test _ =
   pp pp_expr parse_expr "let f (x : bool) (y: int)= x * y";
-  [%expect {|
+  [%expect
+    {|
     (ELet (NonRec, [("f", TUnit); ("x", TBool); ("y", TInt)],
        (EBinop (Mul, (EVar "x"), (EVar "y"))), None))  |}]
 ;;
 
 let%expect_test _ =
   pp pp_expr parse_expr "let (+) = fun (x: int) (y: int) -> x * y";
-    [%expect {|
+  [%expect
+    {|
       (ELet (NonRec, [("+", TUnit)],
          (EFun ([("x", TInt); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
             )),
-         None)) |}] 
+         None)) |}]
 ;;

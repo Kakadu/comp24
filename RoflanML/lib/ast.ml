@@ -46,13 +46,13 @@ type type_id =
   | TFun of type_id * type_id (** Function type t1 -> t2 *)
   | TList of type_id (** List type t list *)
 [@@deriving show { with_path = false }]
- 
 
 type expr =
   | EConst of const (** Consts *)
   | EVar of id (** Variables with their names *)
   | EBinop of binop * expr * expr (** e1 binop e2 *)
-  | ETuple of expr * expr * expr list (** Tuples of 2 or more elements, separated by ',' *)
+  | ETuple of expr * expr * expr list
+  (** Tuples of 2 or more elements, separated by ',' *)
   | EList of expr list (** Lists [1; 2; 3], ... *)
   | EBranch of expr * expr * expr (** if [cond] then [a] else [b] *)
   | EMatch of expr * (pattern * expr) list (** match [x] with | [p1] -> [e1] | ... *)
@@ -60,6 +60,5 @@ type expr =
   | EFun of (id * type_id) list * expr (** Anonymous function with typed arguments *)
   | EApp of expr * expr (** Application f x *)
 [@@deriving show { with_path = false }]
-
 
 type program = expr list [@@deriving show { with_path = false }]
