@@ -147,7 +147,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "if n = 1 then 1 else 3" in
-  start_test parse_eifelse show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (EIfElse ((EBinaryOp (Eq, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
@@ -158,7 +158,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "fun x -> 3 + x" in
-  start_test parse_efun show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (EFun ((PVar ("x", TUnknown)),
@@ -167,7 +167,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "(fun x -> 3 + x)" in
-  start_test parse_efun show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (EFun ((PVar ("x", TUnknown)),
@@ -176,7 +176,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "fun x y -> y + x" in
-  start_test parse_efun show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (EFun ((PVar ("x", TUnknown)),
@@ -189,7 +189,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "in_popka yes no" in
-  start_test parse_eapp show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (EApp ((EApp ((EVar ("in_popka", TUnknown)), (EVar ("yes", TUnknown)))),
@@ -200,7 +200,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "let sum a b = a + b in five 2 3" in
-  start_test parse_eletin show_expression test;
+  start_test parse_expression show_expression test;
   [%expect
     {|
     (ELetIn (Notrec, "sum",
@@ -230,23 +230,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "let sex papa mama = if mama = true && papa = true then true else false" in
-  start_test parse_bindings show_bindings test;
+  let test = "if n = 1 then 1 else 2" in
+  start_test parse_expression show_expression test;
   [%expect {|
-    (Let (Notrec, "sex",
-       (EFun ((PVar ("papa", TUnknown)),
-          (EFun ((PVar ("mama", TUnknown)),
-             (EIfElse (
-                (EBinaryOp (And,
-                   (EBinaryOp (Eq, (EVar ("mama", TUnknown)),
-                      (EConst (CBool true)))),
-                   (EBinaryOp (Eq, (EVar ("papa", TUnknown)),
-                      (EConst (CBool true))))
-                   )),
-                (EConst (CBool true)), (EConst (CBool false))))
-             ))
-          ))
-       )) |}]
+    (EIfElse ((EBinaryOp (Eq, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
+       (EConst (CInt 1)), (EConst (CInt 2)))) |}]
 ;;
 
 let%expect_test _ =
@@ -294,10 +282,34 @@ let%expect_test _ =
 
 
 let%expect_test _ =
-  let test = "4" in
-  start_test parse_exp show_expression test;
+  let test = "2 * (4 + 4) * 1" in
+  start_test parse_expression show_expression test;
   [%expect {|
-    (EConst (CInt 4))
+    (EBinaryOp (Mul,
+       (EBinaryOp (Mul, (EConst (CInt 2)),
+          (EBinaryOp (Add, (EConst (CInt 4)), (EConst (CInt 4)))))),
+       (EConst (CInt 1))))
+ |}]
+;;
+
+let%expect_test _ =
+  let test = "let rec fib n = if n < 1 then 1 else fib (n - 1) + fib (n - 2)" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Let (Rec, "fib",
+       (EFun ((PVar ("n", TUnknown)),
+          (EIfElse (
+             (EBinaryOp (Less, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
+             (EConst (CInt 1)),
+             (EBinaryOp (Add,
+                (EApp ((EVar ("fib", TUnknown)),
+                   (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 1)))))),
+                (EApp ((EVar ("fib", TUnknown)),
+                   (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 2))))))
+                ))
+             ))
+          ))
+       ))
  |}]
 ;;
 
