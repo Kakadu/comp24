@@ -13,7 +13,7 @@ let frac = '.' digit*
 let float = digit* frac
 let int = ('-' | '+')? digit+
 
-let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '[' ']' '{' '}' ',' '.']
+let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '[' ']' '{' '}' ',' '.' ' ']
 let char = ''' sym '''
 let string  = '\"' sym* '\"'
 
@@ -43,16 +43,18 @@ rule read =
     | "and"     { LET_AND }              
     | "not"     { NOT }
     | "&&"      { AND }                 
-    | "||"      { OR  }              
+    | "||"      { OR  }
+    | "|"       { BAR }              
     | '_'       { WILDCARD }
     | '('       { LEFT_PARENTHESIS }
     | ')'       { LEFT_PARENTHESIS }
     | '['       { LEFT_SQ_BRACKET }
     | ']'       { RIGHT_SQ_BRACKET }
-    | ':'       { COLON }
     | "::"      { DOUBLE_COLON }
+    | ':'       { COLON }
     | ','       { COMMA }
     | '+'       { PLUS }
+    | "->"      { ARROW }
     | '-'       { MINUS }
     | '*'       { ASTERISK }
     | '/'       { SLASH }

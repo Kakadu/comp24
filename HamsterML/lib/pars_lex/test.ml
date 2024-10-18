@@ -64,21 +64,53 @@ let rec print_list f lst =
     print_list f xs
 ;;
 
-let get_token_str code =
-  let lexbuf = Lexing.from_string code in
-  token_to_string (Lexer.read lexbuf)
-;;
+(* let%test _ =
+   let real =
+   get_tokens
+   "let rec sum list =\n\
+   \   match list with\n\
+   \   | [] -> 0\n\
+   \   | head :: tail -> head + sum tail"
+   in
+   print_list token_to_string real;
+   true
+   ;; *)
+
+let%test _ = get_tokens "\"rofl\"" = [ Parser.STRING "rofl" ]
+let%test _ = get_tokens "228" = [ Parser.INT 228 ]
+let%test _ = get_tokens "'a'" = [ Parser.CHAR 'a' ]
+let%test _ = get_tokens "228.337" = [ Parser.FLOAT 228.337 ]
+let%test _ = get_tokens "true" = [ Parser.BOOL true ]
+let%test _ = get_tokens "false" = [ Parser.BOOL false ]
+let%test _ = get_tokens "add" = [ Parser.IDENTIFIER "add" ]
 
 let%test _ =
-  let real = get_tokens "asdf dfas" in
-  print_list token_to_string real;
-  true
+  get_tokens
+    "let rec sum list =\n\
+    \   match list with\n\
+    \   | [] -> 0\n\
+    \   | head :: tail -> head + sum tail"
+  = [ Parser.LET
+    ; Parser.REC
+    ; Parser.IDENTIFIER "sum"
+    ; Parser.IDENTIFIER "list"
+    ; Parser.EQUAL
+    ; Parser.MATCH
+    ; Parser.IDENTIFIER "list"
+    ; Parser.WITH
+    ; Parser.BAR
+    ; Parser.LEFT_SQ_BRACKET
+    ; Parser.RIGHT_SQ_BRACKET
+    ; Parser.ARROW
+    ; Parser.INT 0
+    ; Parser.BAR
+    ; Parser.IDENTIFIER "head"
+    ; Parser.DOUBLE_COLON
+    ; Parser.IDENTIFIER "tail"
+    ; Parser.ARROW
+    ; Parser.IDENTIFIER "head"
+    ; Parser.PLUS
+    ; Parser.IDENTIFIER "sum"
+    ; Parser.IDENTIFIER "tail"
+    ]
 ;;
-
-let%test _ = get_token_str "\"rofl\"" = "STRING <rofl>"
-let%test _ = get_token_str "228" = "INT <228>"
-let%test _ = get_token_str "'a'" = "CHAR <a>"
-let%test _ = get_token_str "228.337" = "FLOAT <228.337>"
-let%test _ = get_token_str "true" = "BOOL <true>"
-let%test _ = get_token_str "false" = "BOOL <false>"
-let%test _ = get_token_str "add" = "IDENTIFIER <add>"
