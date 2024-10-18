@@ -25,15 +25,18 @@ type constant =
 [@@deriving show { with_path = false }]
 
 (* Lists, tuples, identifiers, wild card patterns*)
-type pattern =
+type pattern_no_constraint =
   | PWildCard
   | PNil
-  | PCons of pattern * pattern
+  | PCons of pattern_no_constraint * pattern_no_constraint
   | PIdentifier of string
-  | PTuple of pattern list
-  | PList of pattern list
+  | PTuple of pattern_no_constraint list
   | PConstant of constant
-  | PConstraint of pattern * typeName
+[@@deriving show { with_path = false }]
+
+and pattern =
+  | PConstraint of pattern_no_constraint * typeName
+  | PNConstraint of pattern_no_constraint
 [@@deriving show { with_path = false }]
 
 (* Standard expressions *)
@@ -54,7 +57,7 @@ type expr =
 type singleLet = DLet of rec_flag * pattern * expr
 [@@deriving show { with_path = false }]
 
-type let_declaration =
+and let_declaration =
   | DSingleLet of singleLet
   | DMutualRecDecl of singleLet list
 [@@deriving show { with_path = false }]
