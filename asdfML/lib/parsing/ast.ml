@@ -7,7 +7,7 @@ type rec_flag =
 
 type constant =
   | CInt of int (** 42 *)
-  | CBool of bool (** true / false *)
+  | CBool of bool (** true | false *)
   | CUnit (** () *)
 [@@deriving show { with_path = false }]
 
@@ -28,7 +28,18 @@ type binary_operator =
   | Or (** || *)
 [@@deriving show { with_path = false }]
 
-type pattern = PIdent of id [@@deriving show { with_path = false }]
+type type_ann =
+  | TInt (** int *)
+  | TBool (** bool *)
+  | TUnit (** () *)
+  | TFun of type_ann * type_ann (** 'a -> 'b *)
+[@@deriving show { with_path = false }]
+
+type pattern = 
+  | PConst of constant 
+  | PWild (** _ *)
+  | PIdent of id * type_ann option (** x | (x:int) *)
+[@@deriving show { with_path = false }]
 
 type expr =
   | EConst of constant (** 42, true, ()*)
@@ -42,12 +53,13 @@ type expr =
 [@@deriving show { with_path = false }]
 
 and definition =
-  | DLet of rec_flag * id * expr (** let [rec] x = y *)
+  | DLet of rec_flag * pattern * expr (** let [rec] x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]
 
-let p_ident i = PIdent i
+let p_ident i = PIdent(i, None)
+let p_ident i ty = PIdent(i, ty)
 let e_var v = EVar v
 let e_constant c = EConst c
 let e_var v = EVar v
@@ -57,4 +69,4 @@ let e_app e1 e2 = EApp (e1, e2)
 let e_if_else c t e = EIfElse (c, t, e)
 let e_fun p e = EFun (p, e)
 let e_let_in d e = ELetIn (d, e)
-let d_let r i e = DLet (r, i, e)
+let d_let r p e = DLet (r, p, e)

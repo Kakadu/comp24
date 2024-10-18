@@ -19,6 +19,7 @@ rule token = parse
   | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | bool { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | "()" { UNIT }
+  | "_" { WILDCARD }
   | "let rec" { LETREC }
   | "let" { LET }
   | "in" { IN }
@@ -38,9 +39,13 @@ rule token = parse
   | "<" { LT }
   | ">=" { GE }
   | "<=" { LE }
+  | "&&" { AND }
+  | "||" { OR }
+  | "not" { NOT }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | id { IDENT (Lexing.lexeme lexbuf) }
+  | ":" { COLON }
   | ";;" { SS }
   | eof { EOF }
   | _ { raise (SyntaxError ("Character not allowed in source text: '" ^ Lexing.lexeme lexbuf ^ "'")) }

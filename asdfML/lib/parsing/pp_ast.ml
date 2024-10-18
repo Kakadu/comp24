@@ -24,8 +24,17 @@ and pp_binary_operator fmt = function
   | And -> fprintf fmt "&&"
   | Or -> fprintf fmt "||"
 
+and pp_type_ann fmt = function 
+  | TInt -> fprintf fmt "int"
+  | TBool -> fprintf fmt "bool"
+  | TUnit -> fprintf fmt "()"
+  | TFun(a,b) ->  fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
+
 and pp_pattern fmt = function
-  | PIdent id -> fprintf fmt "%s" id
+  | PConst(c) ->  fprintf fmt "%a" pp_const c
+  | PWild -> fprintf fmt "_"
+  | PIdent (id, None) -> fprintf fmt "%s" id
+  | PIdent (id, Some(ty)) -> fprintf fmt "(%s:%a)" id pp_type_ann ty
 
 and pp_expr fmt = function
   | EConst c -> fprintf fmt "%a" pp_const c
@@ -39,6 +48,6 @@ and pp_expr fmt = function
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
 
 and pp_definition fmt = function
-  | DLet (NonRec, id, e) -> fprintf fmt "let %s = %a" id pp_expr e
-  | DLet (Rec, id, e) -> fprintf fmt "let rec %s = %a" id pp_expr e
+  | DLet (NonRec, pat, e) -> fprintf fmt "let %a = %a" pp_pattern pat pp_expr e
+  | DLet (Rec, pat, e) -> fprintf fmt "let rec %a = %a" pp_pattern pat pp_expr e
 ;;

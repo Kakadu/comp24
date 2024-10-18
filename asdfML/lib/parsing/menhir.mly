@@ -7,6 +7,7 @@
 %token <string> IDENT
 %token <bool> BOOL
 %token UNIT
+%token WILDCARD
 
 %token PLUS 
 %token MINUS 
@@ -19,8 +20,12 @@
 %token LT
 %token GE
 %token LE
+%token AND
+%token OR
+%token NOT
 
 %token LPAREN RPAREN
+%token COLON
 
 %token LET 
 %token LETREC
@@ -40,8 +45,8 @@
 program : p = list(definition) EOF { p }
 
 definition: 
-| LETREC id = identifier EQ e = expr { DLet(Rec, id, e) }
-| LET id = identifier EQ e = expr { DLet(NonRec, id, e) }
+| LETREC pat = pattern EQ e = expr { DLet(Rec, pat, e) }
+| LET pat = pattern EQ e = expr { DLet(NonRec, pat, e) }
 
 expr: 
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
@@ -54,8 +59,14 @@ expr:
 | v = identifier { EVar(v) }
 | LPAREN e = expr RPAREN { e }
 
+//TODO:  
+type_ann:
+| { None }
+
 pattern: 
-| id = identifier { PIdent(id) }
+| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, ty) }
+| WILDCARD { PWild }
+| id = identifier { PIdent(id, None) }
 
 application :
 | l = application r = app_expr { EApp(l, r) }
@@ -80,12 +91,15 @@ op_binary:
 | LT { Lt }
 | GE { Ge }
 | LE { Le }
+| AND { And }
+| OR { Or }
 
 expr_unary:
 | op = op_unary arg = constant {EUnaryOp (op, EConst(arg))}
 
 op_unary: 
-| MINUS { Neg}
+| MINUS { Neg }
+| NOT { Not }
 
 constant: 
 | i = INT { CInt i }
