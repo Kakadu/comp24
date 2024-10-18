@@ -50,7 +50,7 @@ let is_valid_fst_char_poly_type = function
 ;;
 
 let is_identifier_char = function
-  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' -> true
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
   | _ -> false
 ;;
 
@@ -84,6 +84,7 @@ let p_ident_string p_valid_fst_char =
 
 let p_basic_type : typeName t =
   string "int" *> return TInt
+  <|> string "bool" *> return TBool
   <|> char '\''
       *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
          return (TPoly ("'" ^ typeNameChar))
@@ -815,6 +816,20 @@ and odd = fun n -> match n with
                 ))
              ))
           ])
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+let (x : int -> bool -> 'loooong) = some_func
+|};
+  [%expect
+    {|
+    [(DSingleLet
+        (DLet (NotRec,
+           (PConstraint ((PIdentifier "x"),
+              (TFunction (TInt, (TFunction (TBool, (TPoly "'loooong"))))))),
+           (EIdentifier "some_func"))))
       ] |}]
 ;;
 

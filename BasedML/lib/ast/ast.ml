@@ -5,6 +5,7 @@
 (* Standard types: ints, functions, tuples, lists *)
 type typeName =
   | TInt
+  | TBool
   | TPoly of string
   | TTuple of typeName list
   | TFunction of typeName * typeName
