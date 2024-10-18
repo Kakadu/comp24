@@ -4,6 +4,11 @@
  (libraries core)
  (inline_tests)
  (preprocess
-  (pps ppx_deriving.show ppx_deriving.eq ppx_inline_test ppx_expect ppx_sexp_conv)))
+  (pps
+   ppx_deriving.show
+   ppx_deriving.eq
+   ppx_inline_test
+   ppx_expect
+   ppx_sexp_conv)))
 
 (include_subdirs unqualified)

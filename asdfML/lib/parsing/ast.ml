@@ -11,7 +11,10 @@ type constant =
   | CUnit (** () *)
 [@@deriving show { with_path = false }]
 
-type unary_operator = Neg | Not [@@deriving show { with_path = false }]
+type unary_operator =
+  | Neg
+  | Not
+[@@deriving show { with_path = false }]
 
 type binary_operator =
   | Add (** + *)
@@ -29,14 +32,14 @@ type binary_operator =
 [@@deriving show { with_path = false }]
 
 type type_ann =
-  | TInt (** int *)
-  | TBool (** bool *)
-  | TUnit (** () *)
-  | TFun of type_ann * type_ann (** 'a -> 'b *)
+  | TAInt (** int *)
+  | TABool (** bool *)
+  | TAUnit (** () *)
+  | TAFun of type_ann * type_ann (** 'a -> 'b *)
 [@@deriving show { with_path = false }]
 
-type pattern = 
-  | PConst of constant 
+type pattern =
+  | PConst of constant
   | PWild (** _ *)
   | PIdent of id * type_ann option (** x | (x:int) *)
 [@@deriving show { with_path = false }]
@@ -52,14 +55,13 @@ type expr =
   | ELetIn of definition * expr (** let x = y in z *)
 [@@deriving show { with_path = false }]
 
-and definition =
-  | DLet of rec_flag * pattern * expr (** let [rec] x = y *)
+and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]
 
-let p_ident i = PIdent(i, None)
-let p_ident i ty = PIdent(i, ty)
+let p_ident i = PIdent (i, None)
+let p_ident i ty = PIdent (i, ty)
 let e_var v = EVar v
 let e_constant c = EConst c
 let e_var v = EVar v

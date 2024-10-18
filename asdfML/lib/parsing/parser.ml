@@ -95,7 +95,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = let x = 42 in x";
-  [%expect {|
+  [%expect
+    {|
     (DLet (NonRec, PWild,
        (ELetIn ((DLet (NonRec, (PIdent ("x", None)), (EConst (CInt 42)))),
           (EVar "x")))
@@ -109,7 +110,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let id = fun x -> x";
-  [%expect {|
+  [%expect
+    {|
     (DLet (NonRec, (PIdent ("id", None)),
        (EFun ((PIdent ("x", None)), (EVar "x"))))) |}]
 ;;
@@ -171,19 +173,23 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let one = 1 let two = 2";
-  [%expect {|
+  [%expect
+    {|
     (DLet (NonRec, (PIdent ("one", None)), (EConst (CInt 1))))
     (DLet (NonRec, (PIdent ("two", None)), (EConst (CInt 2)))) |}]
 ;;
 
 let%expect_test _ =
   test "let (x:int) = 42";
-  [%expect {| (DLet (NonRec, (PIdent ("x", (Some TInt))), (EConst (CInt 42)))) |}]
+  [%expect {| (DLet (NonRec, (PIdent ("x", (Some TAInt))), (EConst (CInt 42)))) |}]
 ;;
 
 let%expect_test _ =
   test "let (id:int->int) = fun (x:int) -> x";
-  [%expect {|
-    (DLet (NonRec, (PIdent ("id", (Some (TFun (TInt, TInt))))),
-       (EFun ((PIdent ("x", (Some TInt))), (EVar "x"))))) |}]
+  [%expect
+    {|
+    (DLet (NonRec, (PIdent ("id", (Some (TAFun (TAInt, TAInt))))),
+       (EFun ((PIdent ("x", (Some TAInt))), (EVar "x"))))) |}]
 ;;
+
+(* TODO: more tests for patterns and type annotations *)

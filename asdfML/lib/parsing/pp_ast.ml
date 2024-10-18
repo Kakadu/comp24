@@ -24,17 +24,17 @@ and pp_binary_operator fmt = function
   | And -> fprintf fmt "&&"
   | Or -> fprintf fmt "||"
 
-and pp_type_ann fmt = function 
-  | TInt -> fprintf fmt "int"
-  | TBool -> fprintf fmt "bool"
-  | TUnit -> fprintf fmt "()"
-  | TFun(a,b) ->  fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
+and pp_type_ann fmt = function
+  | TAInt -> fprintf fmt "int"
+  | TABool -> fprintf fmt "bool"
+  | TAUnit -> fprintf fmt "()"
+  | TAFun (a, b) -> fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
 
 and pp_pattern fmt = function
-  | PConst(c) ->  fprintf fmt "%a" pp_const c
+  | PConst c -> fprintf fmt "%a" pp_const c
   | PWild -> fprintf fmt "_"
   | PIdent (id, None) -> fprintf fmt "%s" id
-  | PIdent (id, Some(ty)) -> fprintf fmt "(%s:%a)" id pp_type_ann ty
+  | PIdent (id, Some ty) -> fprintf fmt "(%s:%a)" id pp_type_ann ty
 
 and pp_expr fmt = function
   | EConst c -> fprintf fmt "%a" pp_const c

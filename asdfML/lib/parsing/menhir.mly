@@ -62,12 +62,12 @@ expr:
 type_ann:
 | id = identifier { 
     match id with 
-    | "int" -> TInt
-    | "bool" -> TBool
-    | "()" -> TUnit
+    | "int" -> TAInt
+    | "bool" -> TABool
+    | "()" -> TAUnit
     | _ -> failwith "TODO"
   }
-| hd = type_ann ARROW tl = type_ann { TFun(hd, tl) }
+| hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
 
 pattern: 
 | LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
