@@ -40,8 +40,8 @@
 program : p = list(definition) EOF { p }
 
 definition: 
-| LETREC id = identifier EQ e = expr { DLetRec(id, e) }
-| LET id = identifier EQ e = expr { DLet(id, e) }
+| LETREC id = identifier EQ e = expr { DLet(Rec, id, e) }
+| LET id = identifier EQ e = expr { DLet(NonRec, id, e) }
 
 expr: 
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }

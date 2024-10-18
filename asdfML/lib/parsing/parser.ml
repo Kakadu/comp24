@@ -39,35 +39,35 @@ let test code =
 
 let%expect_test _ =
   test "let _ = 12";
-  [%expect {| (DLet ("_", (EConst (CInt 12)))) |}]
+  [%expect {| (DLet (NonRec, "_", (EConst (CInt 12)))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = -12";
-  [%expect {| (DLet ("_", (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
+  [%expect {| (DLet (NonRec, "_", (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = (12)";
-  [%expect {| (DLet ("_", (EConst (CInt 12)))) |}]
+  [%expect {| (DLet (NonRec, "_", (EConst (CInt 12)))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = (-12)";
-  [%expect {| (DLet ("_", (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
+  [%expect {| (DLet (NonRec, "_", (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = 1+2";
   [%expect
-    {| (DLet ("_", (EBinaryOp (Add, (EConst (CInt 1)), (EConst (CInt 2)))))) |}]
+    {| (DLet (NonRec, "_", (EBinaryOp (Add, (EConst (CInt 1)), (EConst (CInt 2)))))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = 1 + -2";
   [%expect
     {|
-    (DLet ("_",
+    (DLet (NonRec, "_",
        (EBinaryOp (Add, (EConst (CInt 1)), (EUnaryOp (Neg, (EConst (CInt 2))))))
        )) |}]
 ;;
@@ -76,7 +76,7 @@ let%expect_test _ =
   test "let _ = (-1 - -3) * (-2 + 4 / 2)";
   [%expect
     {|
-    (DLet ("_",
+    (DLet (NonRec, "_",
        (EBinaryOp (Mul,
           (EBinaryOp (Sub, (EUnaryOp (Neg, (EConst (CInt 1)))),
              (EUnaryOp (Neg, (EConst (CInt 3)))))),
@@ -88,35 +88,39 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let x = 42";
-  [%expect {| (DLet ("x", (EConst (CInt 42)))) |}]
+  [%expect {| (DLet (NonRec, "x", (EConst (CInt 42)))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = let x = 42 in x";
-  [%expect {| (DLet ("_", (ELetIn ((DLet ("x", (EConst (CInt 42)))), (EVar "x"))))) |}]
+  [%expect {|
+    (DLet (NonRec, "_",
+       (ELetIn ((DLet (NonRec, "x", (EConst (CInt 42)))), (EVar "x"))))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = ()";
-  [%expect {| (DLet ("_", (EConst CUnit))) |}]
+  [%expect {| (DLet (NonRec, "_", (EConst CUnit))) |}]
 ;;
 
 let%expect_test _ =
   test "let id = fun x -> x";
-  [%expect {| (DLet ("id", (EFun ((PIdent "x"), (EVar "x"))))) |}]
+  [%expect {| (DLet (NonRec, "id", (EFun ((PIdent "x"), (EVar "x"))))) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = fun x -> somefunc x";
   [%expect
-    {| (DLet ("_", (EFun ((PIdent "x"), (EApp ((EVar "somefunc"), (EVar "x"))))))) |}]
+    {|
+      (DLet (NonRec, "_",
+         (EFun ((PIdent "x"), (EApp ((EVar "somefunc"), (EVar "x"))))))) |}]
 ;;
 
 let%expect_test _ =
   test "let max = fun x -> fun y -> if x < y then y else x";
   [%expect
     {|
-    (DLet ("max",
+    (DLet (NonRec, "max",
        (EFun ((PIdent "x"),
           (EFun ((PIdent "y"),
              (EIfElse ((EBinaryOp (Lt, (EVar "x"), (EVar "y"))), (EVar "y"),
@@ -130,7 +134,7 @@ let%expect_test _ =
   test "let rec factorial = fun x -> if x > 1 then x * (factorial (x-1)) else 1";
   [%expect
     {|
-      (DLetRec ("factorial",
+      (DLet (Rec, "factorial",
          (EFun ((PIdent "x"),
             (EIfElse ((EBinaryOp (Gt, (EVar "x"), (EConst (CInt 1)))),
                (EBinaryOp (Mul, (EVar "x"),
@@ -146,9 +150,9 @@ let%expect_test _ =
   test "let plus_one = fun x -> let one = 1 in x + one";
   [%expect
     {|
-      (DLet ("plus_one",
+      (DLet (NonRec, "plus_one",
          (EFun ((PIdent "x"),
-            (ELetIn ((DLet ("one", (EConst (CInt 1)))),
+            (ELetIn ((DLet (NonRec, "one", (EConst (CInt 1)))),
                (EBinaryOp (Add, (EVar "x"), (EVar "one")))))
             ))
          )) |}]
@@ -156,12 +160,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let bool = true";
-  [%expect {| (DLet ("bool", (EConst (CBool true)))) |}]
+  [%expect {| (DLet (NonRec, "bool", (EConst (CBool true)))) |}]
 ;;
 
 let%expect_test _ =
   test "let one = 1 let two = 2";
   [%expect {|
-    (DLet ("one", (EConst (CInt 1))))
-    (DLet ("two", (EConst (CInt 2)))) |}]
+    (DLet (NonRec, "one", (EConst (CInt 1))))
+    (DLet (NonRec, "two", (EConst (CInt 2)))) |}]
 ;;

@@ -1,13 +1,17 @@
 type id = string [@@deriving eq, show { with_path = false }]
 
-type constant =
-  | CInt of int
-  | CBool of bool
-  | CUnit
-(* | CString of string *)
+type rec_flag =
+  | Rec
+  | NonRec
 [@@deriving show { with_path = false }]
 
-type unary_operator = Neg [@@deriving show { with_path = false }]
+type constant =
+  | CInt of int (** 42 *)
+  | CBool of bool (** true / false *)
+  | CUnit (** () *)
+[@@deriving show { with_path = false }]
+
+type unary_operator = Neg | Not [@@deriving show { with_path = false }]
 
 type binary_operator =
   | Add (** + *)
@@ -20,6 +24,8 @@ type binary_operator =
   | Lt (** < *)
   | Ge (** >= *)
   | Le (** <= *)
+  | And (** && *)
+  | Or (** || *)
 [@@deriving show { with_path = false }]
 
 type pattern = PIdent of id [@@deriving show { with_path = false }]
@@ -36,8 +42,7 @@ type expr =
 [@@deriving show { with_path = false }]
 
 and definition =
-  | DLet of id * expr (** let x = y *)
-  | DLetRec of id * expr (** let rec x = y *)
+  | DLet of rec_flag * id * expr (** let [rec] x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]
@@ -52,5 +57,4 @@ let e_app e1 e2 = EApp (e1, e2)
 let e_if_else c t e = EIfElse (c, t, e)
 let e_fun p e = EFun (p, e)
 let e_let_in d e = ELetIn (d, e)
-let d_let i e = DLet (i, e)
-let d_let_rec i e = DLetRec(i, e)
+let d_let r i e = DLet (r, i, e)

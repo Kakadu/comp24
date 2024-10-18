@@ -8,6 +8,7 @@ let rec pp_const fmt = function
 
 and pp_unary_operator fmt = function
   | Neg -> fprintf fmt "-"
+  | Not -> fprintf fmt "not "
 
 and pp_binary_operator fmt = function
   | Add -> fprintf fmt "+"
@@ -20,6 +21,8 @@ and pp_binary_operator fmt = function
   | Lt -> fprintf fmt "<"
   | Ge -> fprintf fmt ">="
   | Le -> fprintf fmt "<="
+  | And -> fprintf fmt "&&"
+  | Or -> fprintf fmt "||"
 
 and pp_pattern fmt = function
   | PIdent id -> fprintf fmt "%s" id
@@ -36,6 +39,6 @@ and pp_expr fmt = function
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
 
 and pp_definition fmt = function
-  | DLet (id, e) -> fprintf fmt "let %s = %a" id pp_expr e
-  | DLetRec (id, e) -> fprintf fmt "let rec %s = %a" id pp_expr e
+  | DLet (NonRec, id, e) -> fprintf fmt "let %s = %a" id pp_expr e
+  | DLet (Rec, id, e) -> fprintf fmt "let rec %s = %a" id pp_expr e
 ;;
