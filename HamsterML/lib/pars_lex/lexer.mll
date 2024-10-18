@@ -12,8 +12,10 @@ let digit = ['0'-'9']
 let frac = '.' digit*
 let float = digit* frac
 let int = ('-' | '+')? digit+
-let char = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '\' '[' ']' '{' '}' ',' '.']
-let string  = '"' char* '"'
+
+let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '[' ']' '{' '}' ',' '.']
+let char = ''' sym '''
+let string  = '\"' sym* '\"'
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
@@ -21,12 +23,12 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 rule read =
     parse
     | white     { read lexbuf }
-    | newline   { next_line lexbuf; read lexbuf }
+    | newline   { new_line lexbuf; read lexbuf }
     | int       { INT (int_of_string (Lexing.lexeme lexbuf)) }
     | float     { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-    | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
-    | char      { CHAR (get (Lexing.lexeme lexbuf) 0)}
-    | string    { STRING (Lexing.lexeme lexbuf)}
+    | char      { CHAR (String.get (Lexing.lexeme lexbuf) 1)}
+    | string    { let str = Lexing.lexeme lexbuf in
+                    STRING (String.sub str 1 (String.length str - 2))}
     | "true"    { BOOL (true) }
     | "false"   { BOOL (false) }
     | "if"      { IF } 
@@ -39,9 +41,9 @@ rule read =
     | "match"   { MATCH }
     | "with"    { WITH }
     | "and"     { LET_AND }              
+    | "not"     { NOT }
     | "&&"      { AND }                 
     | "||"      { OR  }              
-    | "not"     { NOT }
     | '_'       { WILDCARD }
     | '('       { LEFT_PARENTHESIS }
     | ')'       { LEFT_PARENTHESIS }
@@ -61,5 +63,6 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
     | eof      { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
