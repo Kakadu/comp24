@@ -8,6 +8,19 @@ type constant =
   | Const_string of string (** String literal, e.g. ["something"] *)
 [@@deriving show { with_path = false }]
 
+type decl_type =
+  | Type_params of decl_type * string (** e.g. [int list] *)
+  | Type_tuple of decl_type list (** e.g. [int * int] *)
+  | Type_single of string (** e.g. [int] *)
+  | Type_fun of decl_type * decl_type (** e.g. [int -> int] *)
+
+(** Var name and type of it, e.g. [(a: int)]*)
+type ident =
+  { name : string
+  ; id_type : decl_type option
+  }
+[@@deriving show { with_path = false }]
+
 type rec_flag =
   | Nonrecursive
   | Recursive
@@ -15,10 +28,10 @@ type rec_flag =
 
 type pattern =
   | Pat_any (** Pattern any [_] *)
-  | Pat_var of string (** Var pattern, e.g. [x] *)
+  | Pat_var of ident (** Var pattern, e.g. [x] *)
   | Pat_constant of constant (** Constant patterns, e.g. [69], ['m'], ["something"] *)
   | Pat_tuple of pattern list
-  (** Pattern for many elements, e.g. [(P1, ..., Pn)] ([n >= 2]) *)
+  (** Pattern for many elements, e.g. [P1, ..., Pn] ([n >= 2]) *)
   | Pat_or of pattern * pattern (** Pattern for one of elements, e.g. [P1 | P2] *)
   | Pat_construct of string * pattern option
   (** [Pat_construct(C, args)] represents:
@@ -39,8 +52,8 @@ and case =
 [@@deriving show { with_path = false }]
 
 and expression =
-  | Exp_ident of string (** Identifiers, e.g. [some_var] *)
-  | Exp_constant of constant (** Expression constant, e.g. [69], [m'], ["something"] *)
+  | Exp_ident of ident (** Identifiers, e.g. [some_var] *)
+  | Exp_constant of constant (** Expression constant, e.g. [69], ['m'], ["something"] *)
   | Exp_let of rec_flag * value_binding list * expression
   (** [Exp_let(flag, [(P1,E1) ; ... ; (Pn,En)], E)] represents:
       - [let P1 = E1 and ... and Pn = EN in E]     when [flag] is [Nonrecursive]
@@ -64,3 +77,14 @@ and expression =
   | Exp_if of expression * expression * expression option (** [if E1 then E2 else E3] *)
   | Exp_sequence of expression * expression (** [E1; E2] *)
 [@@deriving show { with_path = false }]
+
+type structure_item =
+  | Str_eval of expression (** [Expression] *)
+  | Str_value of rec_flag * value_binding list
+  (** [Str_value(flag, [(P1, E1) ; ... ; (Pn, En)])] represents:
+      - [let P1 = E1 and ... and Pn = EN]      when [flag] is [Nonrecursive]
+      - [let rec P1 = E1 and ... and Pn = EN ] when [flag] is [Recursive].
+        Invariant: [n >= 1] *)
+[@@deriving show { with_path = false }]
+
+type structure = structure_item list [@@deriving show { with_path = false }]
