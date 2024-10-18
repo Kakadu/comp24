@@ -87,3 +87,4 @@ let pconstraint p t = PConstraint (p, t)
 let econst c = EConst c
 let eidentifier v = EIdentifier v
 let etuple l = ETuple l
+let efun arg expr = EFun (arg, expr)

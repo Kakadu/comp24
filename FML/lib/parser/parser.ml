@@ -71,7 +71,6 @@ let parse_bool =
   skip_wspace *> string "true" <|> string "false" >>| bool_of_string >>| cbool
 ;;
 
-
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Type annotations parsers *)
@@ -171,6 +170,21 @@ let parse_etuple p_expr =
        (many1 (skip_wspace *> string "," *> p_expr))
 ;;
 
+let parse_efun p_expr =
+  let* args = skip_wspace *> string "fun" *> many1 parse_pattern in
+  let* expr = skip_wspace *> string "->" *> p_expr in
+  match List.rev args with
+  | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
+  | _ -> fail "Syntax errror"
+;;
+
+let parse_expr =
+  fix
+  @@ fun self ->
+  choice
+    [ parens self; parse_econst; parse_identifier; parse_etuple self; parse_efun self ]
+;;
+
 (* ------------------------- *)
 
 (* Expressions bin_op *)
@@ -179,10 +193,14 @@ let add = string "+" *> return Add
 let sub = string "-" *> return Sub
 let div = string "/" *> return Div
 let eq = string "=" *> return Eq
-let neq = (string "!=" *> return NEq) <|> (string "<>" *> return NEq)
+let neq = string "!=" *> return NEq <|> string "<>" *> return NEq
 let gt = string ">" *> return Gt
 let gte = string ">=" *> return Gte
 let lt = string "<" *> return Lt
 let lte = string "<=" *> return Lte
 let and_ = string "&&" *> return And
 let or_ = string "||" *> return Or
+
+(* Declaration parser *)
+(* let parse_declaration =  skip_wspace *> string "let" *> parse_pattern >>= *)
+(* ------------------ *)
