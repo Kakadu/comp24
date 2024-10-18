@@ -13,6 +13,7 @@ type decl_type =
   | Type_tuple of decl_type list (** e.g. [int * int] *)
   | Type_single of string (** e.g. [int] *)
   | Type_fun of decl_type * decl_type (** e.g. [int -> int] *)
+[@@deriving show { with_path = false }]
 
 (** Var name and type of it, e.g. [(a: int)]*)
 type ident =
@@ -32,6 +33,8 @@ type pattern =
   | Pat_constant of constant (** Constant patterns, e.g. [69], ['m'], ["something"] *)
   | Pat_tuple of pattern list
   (** Pattern for many elements, e.g. [P1, ..., Pn] ([n >= 2]) *)
+  | Pat_list of pattern list
+  | Pat_cons of pattern * pattern
   | Pat_or of pattern * pattern (** Pattern for one of elements, e.g. [P1 | P2] *)
   | Pat_construct of string * pattern option
   (** [Pat_construct(C, args)] represents:
