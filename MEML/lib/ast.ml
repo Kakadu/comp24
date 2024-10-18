@@ -26,20 +26,20 @@ type binary_op =
   | Greq (** >= *)
 [@@deriving show { with_path = false }]
 
-type type_of_var = 
-  | TInt
-  | TBool
-  | TString
-  | TUnknown 
+type type_of_var =
+  | TInt (** int type for variable *)
+  | TBool (** bool type for variable *)
+  | TString (** string type for variable *)
+  | TUnknown (** unknown type for variable *)
 [@@deriving show { with_path = false }]
 
 type pattern =
   | PWild (** _ *)
   | PConst of const (** constant pattern *)
-  | PVar of name * type_of_var (** variable pattern*)
+  | PVar of name * type_of_var (** variable pattern *)
 [@@deriving show { with_path = false }]
 
-type rec_flag = 
+type rec_flag =
   | Rec (** let rec v = ... *)
   | Notrec (** let z = ...*)
 [@@deriving show { with_path = false }]
@@ -56,9 +56,8 @@ type expression =
 
 (** Binding type *)
 type bindings =
-  | Let of rec_flag * name * expression (** An expression for let declaration: let id = expr *)
-  | Expression of expression
-  (** An expression for let rec declaration: let rec id = expr *)
+  | Let of rec_flag * name * expression (** let id = expr *)
+  | Expression of expression (** simple expressions *)
 [@@deriving show { with_path = false }]
 
 (** Statements type *)

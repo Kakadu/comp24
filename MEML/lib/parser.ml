@@ -43,12 +43,6 @@ let is_keyword = function
   | _ -> false
 ;;
 
-let is_op = function
-  | ">=" | "<=" | ">" | "<" | "<>" | "=" | "||" | "&&" | "%" | "/" | "*" | "-" | "+" ->
-    true
-  | _ -> false
-;;
-
 let is_type = function
   | "int" | "bool" | "string" -> true
   | _ -> false
@@ -67,16 +61,12 @@ let is_underscore = function
 
 let parse_white_space = take_while is_whitespace
 let parse_white_space1 = take_while1 is_whitespace
-let parse_empty e = parse_white_space *> e <* parse_white_space
-let wspaces_str str = parse_empty @@ string_ci str
+let parse_white_space_str str = parse_white_space *> string_ci str <* parse_white_space
 let token s = parse_white_space *> s
 let token1 s = parse_white_space1 *> s
 let stoken s = parse_white_space *> string s
 let stoken1 s = parse_white_space1 *> string s
 let brackets p = stoken "(" *> p <* stoken ")"
-let square_brackets p = stoken "[" *> p <* stoken "]"
-let angle_brackets p = char '<' *> p <* char '>'
-let quotes p = stoken "\"" *> p <* stoken "\""
 let brackets_or_not p = brackets p <|> p
 
 let chainl1 e op =
@@ -176,7 +166,7 @@ let peq = parse_op "=" Eq <|> parse_op "<>" Neq
 let pconj = parse_op "&&" And
 let pdisj = parse_op "||" Or
 
-let parse_binop x =
+let parse_ebinop x =
   let multi = chainl1 x pmulti in
   let add = chainl1 multi padd in
   let comp = chainl1 add pcomp in
@@ -184,8 +174,6 @@ let parse_binop x =
   let conj = chainl1 eq pconj in
   chainl1 conj pdisj <* parse_white_space
 ;;
-
-let parse_ebinop = parse_binop @@ (parse_econst <|> parse_evar)
 
 (* EIfElse *)
 
@@ -209,7 +197,7 @@ let parse_efun expr =
 
 (* EApp *)
 
-let parse_eapp e1 e2=
+let parse_eapp e1 e2 =
   lift2
     (fun f args -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg)) args)
     (parse_evar <|> brackets @@ e1)
@@ -224,22 +212,23 @@ let parse_rec =
 ;;
 
 let parse_rename =
-  brackets @@ parse_white_space
-  *> choice
-       [ string "=" *> return "Eq"
-       ; string "<>" *> return "Neq"
-       ; string "&&" *> return "And"
-       ; string "||" *> return "Or"
-       ; string "*" *> return "Mul"
-       ; string "/" *> return "Div"
-       ; string "%" *> return "Mod"
-       ; string "+" *> return "Add"
-       ; string "-" *> return "Sub"
-       ; string ">=" *> return "Greq"
-       ; string ">" *> return "Gre"
-       ; string "<=" *> return "Leq"
-       ; string "<" *> return "Less"
-       ]
+  brackets
+  @@ (parse_white_space
+      *> choice
+           [ string "=" *> return "Eq"
+           ; string "<>" *> return "Neq"
+           ; string "&&" *> return "And"
+           ; string "||" *> return "Or"
+           ; string "*" *> return "Mul"
+           ; string "/" *> return "Div"
+           ; string "%" *> return "Mod"
+           ; string "+" *> return "Add"
+           ; string "-" *> return "Sub"
+           ; string ">=" *> return "Greq"
+           ; string ">" *> return "Gre"
+           ; string "<=" *> return "Leq"
+           ; string "<" *> return "Less"
+           ])
   <* parse_white_space
 ;;
 
@@ -258,39 +247,6 @@ let parse_eletin expr =
 
 (* Expression parsers *)
 
-(* let parse_expression =
-  parse_eletin
-  <|> parse_eifelse
-  <|> parse_ebinop
-  <|> parse_econst
-  <|> parse_evar
-  <|> parse_eapp
-;; *)
-
-let ebinop_p expr =
-  let helper p op = parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2)) in
-  let add_p = helper (char '+') Add in
-  let sub_p = helper (char '-') Sub in
-  let mul_p = helper (char '*') Mul in
-  let div_p = helper (char '/') Div in
-  let and_p = helper (string "&&") And in
-  let or_p = helper (string "||") Or in
-  let eq_p = helper (char '=') Eq in
-  let neq_p = helper (string "<>") Neq in
-  let gt_p = helper (char '>') Gre in
-  let lt_p = helper (char '<') Less in
-  let gte_p = helper (string ">=") Greq in
-  let lte_p = helper (string "<=") Less in
-  let muldiv_op = chainl1 expr (mul_p <|> div_p) in
-  let addsub_op = chainl1 muldiv_op (add_p <|> sub_p) in
-  let compare_op =
-    chainl1 addsub_op (neq_p <|> gte_p <|> gt_p <|> lte_p <|> lt_p <|> eq_p)
-  in
-  let and_op = chainl1 compare_op and_p in
-  let or_op = chainl1 and_op or_p in
-  or_op
-;;
-
 type edispatch =
   { evar : edispatch -> expression t
   ; econst : edispatch -> expression t
@@ -298,85 +254,85 @@ type edispatch =
   ; ebinop : edispatch -> expression t
   ; efun : edispatch -> expression t
   ; eifelse : edispatch -> expression t
-  ; eapply : edispatch -> expression t
-  ; expr : edispatch -> expression t
+  ; eapp : edispatch -> expression t
+  ; expression : edispatch -> expression t
   }
+
 let pack =
   let econst pack = fix @@ fun _ -> parse_econst <|> brackets @@ pack.econst pack in
   let evar pack = fix @@ fun _ -> parse_evar <|> brackets @@ pack.evar pack in
-  let letsin pack = pack.eletin pack in
-  let expr pack =
+  let expression pack =
     pack.ebinop pack
-    <|> pack.eapply pack
+    <|> pack.eapp pack
     <|> pack.eifelse pack
     <|> pack.efun pack
-    <|> letsin pack
+    <|> pack.eletin pack
   in
   let eifelse pack =
     fix
     @@ fun _ ->
-    let econd_parser =
+    let parse_if =
       pack.ebinop pack
       <|> brackets
             (pack.ebinop pack
-             <|> letsin pack
-             <|> pack.eapply pack
+             <|> pack.eletin pack
+             <|> pack.eapp pack
              <|> pack.eifelse pack)
     in
-    parse_eifelse econd_parser (pack.expr pack) <|> brackets @@ pack.eifelse pack
+    parse_eifelse parse_if (pack.expression pack) <|> brackets @@ pack.eifelse pack
   in
   let ebinop pack =
     fix
     @@ fun _ ->
-    let ebinop_parse =
-      letsin pack
-      <|> pack.eapply pack
+    let parse_binop =
+      pack.eletin pack
+      <|> pack.eapp pack
       <|> brackets @@ pack.eifelse pack
       <|> brackets @@ pack.ebinop pack
       <|> pack.evar pack
       <|> pack.econst pack
     in
-    ebinop_p ebinop_parse <|> brackets @@ pack.ebinop pack
+    parse_ebinop parse_binop <|> brackets @@ pack.ebinop pack
   in
   let efun pack =
     fix
     @@ fun _ ->
     let efun_parse =
       pack.ebinop pack
-      <|> pack.eapply pack
+      <|> pack.eapp pack
       <|> pack.eifelse pack
       <|> pack.efun pack
-      <|> letsin pack
+      <|> pack.eletin pack
     in
     parse_efun efun_parse <|> brackets @@ pack.efun pack
   in
-  let eapply pack =
+  let eapp pack =
     fix
     @@ fun _ ->
-    let eapply_fun pack =
+    let left pack =
       pack.evar pack
       <|> brackets
-            (pack.eifelse pack <|> pack.efun pack <|> pack.eapply pack <|> letsin pack)
+            (pack.eifelse pack <|> pack.efun pack <|> pack.eapp pack <|> pack.eletin pack)
     in
-    let eapply_parse pack =
+    let right pack =
       brackets
         (pack.ebinop pack
-        <|> pack.eifelse pack
-         <|> pack.eapply pack
+         <|> pack.eifelse pack
+         <|> pack.eapp pack
          <|> pack.efun pack
-         <|> letsin pack)
+         <|> pack.eletin pack)
       <|> pack.evar pack
       <|> pack.econst pack
     in
-    parse_eapp (eapply_fun pack) (eapply_parse pack) <|> brackets @@ pack.eapply pack
+    parse_eapp (left pack) (right pack) <|> brackets @@ pack.eapp pack
   in
   let eletin pack =
-    fix @@ fun _ -> parse_eletin @@ pack.expr pack <|> brackets @@ pack.eletin pack
+    fix @@ fun _ -> parse_eletin @@ pack.expression pack <|> brackets @@ pack.eletin pack
   in
-  { evar; econst; ebinop; eifelse; efun; eletin; eapply; expr }
+  { evar; econst; ebinop; eifelse; efun; eletin; eapp; expression }
 ;;
 
-let parse_expression = pack.expr pack
+let parse_expression = pack.expression pack
 
 (** Binding type *)
 
@@ -387,11 +343,15 @@ let parse_let parse =
       Let (flag, name, body))
     parse_rec
     (parse_rename <|> parse_var)
-    (parse_white_space *> many (parse_pattern <|> brackets parse_pattern))
+    (parse_white_space *> many (brackets_or_not @@ parse_pattern))
     (stoken "=" *> parse)
 ;;
 
 let expr_main = (fun expr -> Expression expr) <$> parse_expression
 let parse_bindings = parse_let @@ parse_expression <|> expr_main
-let parse_statements = sep_by (wspaces_str ";;" <|> parse_white_space) parse_bindings
+
+let parse_statements =
+  sep_by (parse_white_space_str ";;" <|> parse_white_space) parse_bindings
+;;
+
 let parse program = parse_string parse_statements program
