@@ -285,11 +285,21 @@ let%expect_test _ =
   let test = "let f (x: int) = x + 4" in
   start_test parse_bindings show_bindings test;
   [%expect {|
-    (EFun ((PVar ("x", TInt)),
-       (EBinaryOp (Mul, (EVar ("x", TUnknown)), (EVar ("x", TUnknown))))))
+    (Let (Notrec, "f",
+       (EFun ((PVar ("x", TInt)),
+          (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 4))))))
+       ))
  |}]
 ;;
 
+
+let%expect_test _ =
+  let test = "4" in
+  start_test parse_exp show_expression test;
+  [%expect {|
+    (EConst (CInt 4))
+ |}]
+;;
 
 
 (* Run time test*)

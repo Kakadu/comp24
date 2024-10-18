@@ -141,7 +141,7 @@ let parse_var =
 let parse_pvar =
   (fun a -> PVar (a, TUnknown))
   <$> parse_var
-  <|> brackets @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  <|> brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
 ;;
 
 let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
