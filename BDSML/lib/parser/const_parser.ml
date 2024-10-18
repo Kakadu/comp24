@@ -11,7 +11,7 @@ let parse_int =
 
 let parse_char = char '\'' *> any_char <* char '\'' >>| fun c -> Const_char c
 
-let string =
+let parse_string =
   char '\"'
   *> take_till (function
     | '\"' -> true
@@ -19,3 +19,5 @@ let string =
   <* char '\"'
   >>| fun s -> Const_string s
 ;;
+
+let parse_const = choice [ parse_int; parse_char; parse_string ]
