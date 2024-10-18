@@ -99,10 +99,9 @@ let ptype =
     let pint_type = pstoken "int" *> return TInt in
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
-    let pfun_type = lift2 (fun t1 t2 -> TFun (t1, t2)) (ptype <* pstoken "->") ptype in
-    let plist_type = pparens (ptype <* pstoken "list") >>| fun t -> TList t in
     let pwrapped_type = pparens ptype in
-    choice [ pint_type; pbool_type; punit_type; pfun_type; plist_type; pwrapped_type ])
+    let simple_type = choice [ pint_type; pbool_type; punit_type; pwrapped_type ] in
+    chainr1 simple_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
 ;;
 
 let ptyped_var =

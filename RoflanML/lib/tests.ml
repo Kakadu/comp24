@@ -129,6 +129,12 @@ module ParserTests = struct
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y";
-    [%expect {| TODO |}]
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun (
+            [("g", (TFun (TInt, (TFun (TInt, TInt))))); ("x", TInt); ("y", TInt)],
+            (EApp ((EVar "g"), [(EVar "x"); (EVar "y")])))),
+         None)) |}]
   ;;
 end
