@@ -1,6 +1,7 @@
 (library
  (name parser)
  (public_name BasedML.Parser)
+ (modules parser)
  (libraries base angstrom ast)
  (inline_tests)
  (preprocess
