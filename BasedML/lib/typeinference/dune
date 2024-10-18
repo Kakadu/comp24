@@ -1,0 +1,8 @@
+(library
+ (name typeinference)
+ (public_name BasedML.Typeinference)
+ (modules constraint typeinference statementInfer)
+ (libraries base angstrom ast common parser)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test ppx_expect ppx_deriving.show)))
