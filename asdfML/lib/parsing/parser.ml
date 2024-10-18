@@ -175,3 +175,15 @@ let%expect_test _ =
     (DLet (NonRec, (PIdent ("one", None)), (EConst (CInt 1))))
     (DLet (NonRec, (PIdent ("two", None)), (EConst (CInt 2)))) |}]
 ;;
+
+let%expect_test _ =
+  test "let (x:int) = 42";
+  [%expect {| (DLet (NonRec, (PIdent ("x", (Some TInt))), (EConst (CInt 42)))) |}]
+;;
+
+let%expect_test _ =
+  test "let (id:int->int) = fun (x:int) -> x";
+  [%expect {|
+    (DLet (NonRec, (PIdent ("id", (Some (TFun (TInt, TInt))))),
+       (EFun ((PIdent ("x", (Some TInt))), (EVar "x"))))) |}]
+;;

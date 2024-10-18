@@ -59,12 +59,18 @@ expr:
 | v = identifier { EVar(v) }
 | LPAREN e = expr RPAREN { e }
 
-//TODO:  
 type_ann:
-| { None }
+| id = identifier { 
+    match id with 
+    | "int" -> TInt
+    | "bool" -> TBool
+    | "()" -> TUnit
+    | _ -> failwith "TODO"
+  }
+| hd = type_ann ARROW tl = type_ann { TFun(hd, tl) }
 
 pattern: 
-| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, ty) }
+| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
 | WILDCARD { PWild }
 | id = identifier { PIdent(id, None) }
 
