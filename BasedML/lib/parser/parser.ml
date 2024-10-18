@@ -39,8 +39,13 @@ let is_quotes = function
   | _ -> false
 ;;
 
-let is_valid_fst_char = function
+let is_valid_fst_char_ident = function
   | 'a' .. 'z' | '_' -> true
+  | _ -> false
+;;
+
+let is_valid_fst_char_poly_type = function
+  | 'a' .. 'z' -> true
   | _ -> false
 ;;
 
@@ -64,12 +69,24 @@ let chainl1 e op =
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 (* Type parsers *)
+let p_ident_string p_valid_fst_char =
+  skip_whitespace
+  *>
+  let* fst_char = peek_char in
+  match fst_char with
+  | Some c when p_valid_fst_char c ->
+    let* identifier = take_while is_identifier_char in
+    if is_keyword identifier
+    then fail "Identifier parsing failed: identifier can't be a keyword"
+    else return identifier
+  | _ -> fail "Identifier parsing failed: first character must start with [a-z]"
+;;
 
 let p_basic_type : typeName t =
   string "int" *> return TInt
   <|> char '\''
-      *> (satisfy (fun _ -> true)
-          >>= fun typeNameChar -> return (TPoly ("'" ^ String.make 1 typeNameChar)))
+      *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
+         return (TPoly ("'" ^ typeNameChar))
 ;;
 
 let p_tuple_type p_type =
@@ -137,26 +154,13 @@ let p_if_then_else p_expr =
 ;;
 
 (* Identifiers (Vars) parsers *)
-let p_ident_string =
-  skip_whitespace
-  *>
-  let* fst_char = peek_char in
-  match fst_char with
-  | Some c when is_valid_fst_char c ->
-    let* identifier = take_while is_identifier_char in
-    if is_keyword identifier
-    then fail "Identifier parsing failed: identifier can't be a keyword"
-    else return identifier
-  | _ -> fail "Identifier parsing failed: first character must start with [a-z]"
-;;
-
 let p_ident =
-  let* ident_name = p_ident_string in
+  let* ident_name = p_ident_string is_valid_fst_char_ident in
   return @@ EIdentifier ident_name
 ;;
 
 let p_ident_pattern =
-  let* ident_name = p_ident_string in
+  let* ident_name = p_ident_string is_valid_fst_char_ident in
   return @@ PIdentifier ident_name
 ;;
 
@@ -817,7 +821,7 @@ and odd = fun n -> match n with
 let%expect_test _ =
   test_parse
     {|
-let (x : ('b * int -> int * 'a) list list) = ([[fun1; fun2]] : ('b * int -> int * 'a) list list)|};
+let (x : ('b * int -> int * 'pa) list list) = ([[fun1; fun2]] : ('b * int -> int * 'a) list list)|};
   [%expect
     {|
     [(DSingleLet
@@ -826,7 +830,7 @@ let (x : ('b * int -> int * 'a) list list) = ([[fun1; fun2]] : ('b * int -> int 
               (TList
                  (TList
                     (TFunction ((TTuple [(TPoly "'b"); TInt]),
-                       (TTuple [TInt; (TPoly "'a")])))))
+                       (TTuple [TInt; (TPoly "'pa")])))))
               )),
            (EConstraint (
               (EApplication ((EIdentifier "( :: )"),
