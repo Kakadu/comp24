@@ -15,7 +15,9 @@ let ws1 =
 ;;
 
 let remove_parents x = char '(' *> x <* char ')'
+let remove_square_brackets x = char '[' *> x <* char ']'
 let rec_remove_parents m = fix (fun t -> remove_parents t <|> m)
+let rec_remove_square_brackets m = fix (fun t -> remove_square_brackets t <|> m)
 
 let is_keyword = function
   | "and"
@@ -124,3 +126,9 @@ let parse_capitalized_ident =
 ;;
 
 let parse_ident_name = parse_lowercase_ident <* ws
+let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
+
+let chainl1 e op =
+  let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
+  e >>= fun init -> go init
+;;
