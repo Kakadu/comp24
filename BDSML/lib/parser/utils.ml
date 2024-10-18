@@ -12,14 +12,16 @@ let skip_comments =
 ;;
 
 let ws = many skip_comments *> skip_ws
+let check_char c = ws *> char c
+let check_string s = ws *> string s
 
 let ws1 =
   let skip_ws1 = take_while1 Char.is_whitespace *> return () in
   (skip_ws1 *> many skip_comments <|> many1 skip_comments) *> return ()
 ;;
 
-let remove_parents x = char '(' *> x <* char ')'
-let remove_square_brackets x = char '[' *> x <* char ']'
+let remove_parents x = check_char '(' *> x <* check_char ')'
+let remove_square_brackets x = check_char '[' *> x <* check_char ']'
 let rec_remove_parents m = fix (fun t -> remove_parents t <|> m)
 let rec_remove_square_brackets m = fix (fun t -> remove_square_brackets t <|> m)
 
