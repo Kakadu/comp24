@@ -52,9 +52,9 @@
 %token LESS_THAN            // "<"
 %token LESS_THAN_EQUAL      // "<"
 %token LET_AND              // "let x = 1 and y = 2"
-%token AND                  // "AND"
-%token OR                   // "OR"
-%token NOT                  // "NOT"
+%token AND                  // "&&"
+%token OR                   // "||"
+%token NOT                  // "not"
 
 // End Of File
 %token EOF
@@ -71,9 +71,9 @@
 %left NOT_EQUAL
 %left EQUAL
 
-%token CONCAT
+%left CARET
 %left PLUS, MINUS
-%left MUL, DIV
+%left ASTERISK, SLASH
 
 // --- Parsing ---
 %start <expr option> prog
@@ -82,11 +82,11 @@
 prog : p = expr EOF { p }
 
 expr:
-    | op = bop; le = expr; re = expt { BinOp (op, le, re) }
+    | op = bop; le = expr; re = expr { BinOp (op, le, re) }
     | op = uop; e = expr {UnOp (op, e)}
     | v = value { Value v }
-    | LET; REC; id = IDENTIFIER; vls = list(value); ASSIGNMENT ; e = expr { Let (Recursive, id, vls, e) }
-    | LET; id = IDENTIFIER; vls = list(value); ASSIGNMENT ; e = expr { Let (Nonrecursive, id, vls, e) }
+    | LET; REC; id = IDENTIFIER; vls = list(value); EQUAL ; e = expr { Let (Recursive, id, vls, e) }
+    | LET; id = IDENTIFIER; vls = list(value); EQUAL ; e = expr { Let (Nonrecursive, id, vls, e) }
     | FUN; vls = list(value); ARROW; e = expr { Fun (vls, e) }
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr {If (e1, e2, e3)}
     // TODO: MATCH
@@ -122,18 +122,18 @@ value:
 %inline bop:
     | PLUS { ADD }                 
     | MINUS { Sub }        
-    | MUL { MUL }                  
-    | DIV { DIV }                  
-    | CONCAT { CONCAT }               
+    | ASTERISK { MUL }                  
+    | SLASH{ DIV }                  
+    | CARET { CONCAT }               
     | EQUAL { EQ }                
     | NOT_EQUAL { NEQ }           
     | GREATER_THAN { GT }       
     | GREATER_THAN_EQUAL { GTE }  
-    | LESS_THAN {LT }      
+    | LESS_THAN { LT }      
     | LESS_THAN_EQUAL { LTE }     
     | AND { AND }            
     | OR { OR }            
-    | LET_ASSIGNMENT { ASSIGN }
+    | EQUAL { ASSIGN }
 
 %inline uop:
     | MINUS { MINUS }
