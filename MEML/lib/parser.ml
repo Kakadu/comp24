@@ -138,15 +138,15 @@ let parse_var =
 
 (** Pattern parsers *)
 
-let parse_pattern_var =
+let parse_pvar =
   (fun a -> PVar (a, TUnknown))
   <$> parse_var
-  <|> brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  <|> brackets @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
 ;;
 
 let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
-let parse_pattern = parse_wild <|> parse_pconst <|> parse_pattern_var
+let parse_pattern = parse_wild <|> parse_pconst <|> parse_pvar
 
 (** Expression type *)
 
@@ -160,7 +160,6 @@ let parse_evar =
   (fun a -> EVar (a, TUnknown))
   <$> parse_var
   <|> brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type
-  <|> lift2 (fun a b -> EVar (a, b)) parse_var parse_type
 ;;
 
 (* EBinaryOp *)
@@ -268,6 +267,56 @@ let parse_expression =
   <|> parse_evar
   <|> parse_eapp
 ;;
+
+let ebinop_p expr =
+  let helper p op = parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2)) in
+  let add_p = helper (char '+') Add in
+  let sub_p = helper (char '-') Sub in
+  let mul_p = helper (char '*') Mul in
+  let div_p = helper (char '/') Div in
+  let and_p = helper (string "&&") And in
+  let or_p = helper (string "||") Or in
+  let eq_p = helper (char '=') Eq in
+  let neq_p = helper (string "<>") Neq in
+  let gt_p = helper (char '>') Gre in
+  let lt_p = helper (char '<') Less in
+  let gte_p = helper (string ">=") Greq in
+  let lte_p = helper (string "<=") Less in
+  let muldiv_op = chainl1 expr (mul_p <|> div_p) in
+  let addsub_op = chainl1 muldiv_op (add_p <|> sub_p) in
+  let compare_op =
+    chainl1 addsub_op (neq_p <|> gte_p <|> gt_p <|> lte_p <|> lt_p <|> eq_p)
+  in
+  let and_op = chainl1 compare_op and_p in
+  let or_op = chainl1 and_op or_p in
+  or_op
+;;
+
+type edispatch =
+  { 
+    econst : edispatch -> expression t
+    ; evar : edispatch -> expression t
+    ; ebinop : edispatch -> expression t
+    ; expr : edispatch -> expression t
+  }
+let pack =
+  let econst pack = fix @@ fun _ -> parse_econst <|> brackets @@ pack.econst pack in
+  let evar pack = fix @@ fun _ -> parse_evar <|> brackets @@ pack.evar pack in
+  let expr pack = pack.ebinop pack in
+  let ebinop pack =
+    fix
+    @@ fun _ ->
+    let ebinop_parse =
+      brackets @@ pack.ebinop pack
+      <|> pack.evar pack
+      <|> pack.econst pack
+    in
+    ebinop_p ebinop_parse <|> brackets @@ pack.ebinop pack
+  in 
+  {evar; econst; ebinop; expr}
+;;
+
+let parse_exp = pack.expr pack
 
 (** Binding type *)
 
