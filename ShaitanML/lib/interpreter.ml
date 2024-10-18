@@ -97,7 +97,7 @@ end = struct
     | PConst (CBool b1), VBool b2 when Bool.equal b1 b2 -> Some env
     | PConst (CString s1), VString s2 when String.equal s1 s2 -> Some env
     | PConst CNil, VList [] -> Some env
-    | PVar x, v -> Some (extend env x v)
+    | PVar (x, _), v -> Some (extend env x v)
     | PTuple pl, VTuple vl ->
       let env =
         List.fold2
@@ -176,7 +176,7 @@ end = struct
           | [] -> fail `Pattern_mathing_failed
         in
         match_helper env v cl
-      | ELet (Rec, (PVar x, e1), e2) ->
+      | ELet (Rec, (PVar (x, _), e1), e2) ->
         let* v = helper env e1 in
         let env1 = extend env x v in
         let v =
@@ -186,7 +186,7 @@ end = struct
         in
         let env2 = extend env x v in
         helper env2 e2
-      | ELet (Nonrec, (PVar x, e1), e2) ->
+      | ELet (Nonrec, (PVar (x, _), e1), e2) ->
         let* v = helper env e1 in
         let env = extend env x v in
         helper env e2
@@ -229,11 +229,11 @@ end = struct
     | SEval e ->
       let* _ = eval_expr env e in
       return env
-    | SValue (Nonrec, (PVar x, e)) ->
+    | SValue (Nonrec, (PVar (x, _), e)) ->
       let* v = eval_expr env e in
       let env = extend env x v in
       return env
-    | SValue (Rec, (PVar x, e)) ->
+    | SValue (Rec, (PVar (x, _), e)) ->
       let* v = eval_expr env e in
       let env1 = extend env x v in
       let v =

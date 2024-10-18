@@ -69,10 +69,60 @@ let pcunit = token "()" *> return CUnit
 let pcnil = token "[]" *> return CNil
 let const = choice [ pcint; pcbool; pcstring; pcunit; pcnil ]
 
+(*--------------------------------- Types ------------------------------------*)
+
+let chainl1 e op =
+  let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
+  e >>= go
+;;
+
+let chainr1 e op =
+  let rec go acc = lift2 (fun f x -> f acc x) op (e >>= go) <|> return acc in
+  e >>= go
+;;
+
+let annot_primitive =
+  let tvar =
+    char '\''
+    *> (satisfy is_idc >>= fun varname -> return (AVar ("'" ^ String.make 1 varname)))
+  in
+  choice
+    [ string "int" *> return AInt
+    ; string "string" *> return AString
+    ; string "bool" *> return ABool
+    ; string "unit" *> return AUnit
+    ; tvar
+    ]
+;;
+
+let annot_tuple p =
+  let* t = ws *> p in
+  let* ts = many1 (ws *> char '*' *> ws *> p) in
+  return (ATuple (t :: ts))
+;;
+
+let annot_fun p =
+  chainr1 p (ws *> string "->" *> ws *> return (fun arg ret -> AFun (arg, ret)))
+;;
+
+let rec annot_list t =
+  let* base = t in
+  let* _ = ws *> string "list" in
+  annot_list (return (AList base)) <|> return (AList base)
+;;
+
+let annot =
+  fix (fun annot ->
+    let single = annot_primitive <|> parens annot in
+    let list_type = annot_list single <|> single <|> annot_list annot in
+    let tuple_type = annot_tuple list_type <|> list_type in
+    annot_fun tuple_type <|> tuple_type)
+;;
+
 (*------------------------------ Patterns ------------------------------------*)
 
 let pconst c = PConst c
-let pvar x = PVar x
+let pvar x a = PVar (x, a)
 let pcons p1 p2 = PCons (p1, p2)
 let ptuple ps = PTuple ps
 let ppconst = const >>| pconst
@@ -92,25 +142,23 @@ let varname =
   | _ as name -> return name
 ;;
 
-let tagname =
-  let* fst = token "`" *> satisfy Char.is_uppercase in
-  let* rest = take_while is_idc in
-  return @@ String.of_char fst ^ rest
+let ppvar =
+  let pvar =
+    let* name = varname in
+    return (PVar (name, None))
+  in
+  let pvar_with_type =
+    let pvar = (fun name annot -> PVar (name, annot)) in
+    lift2
+    pvar
+    (lp *> varname)
+    (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
+  in
+  choice [pvar_with_type; pvar]
 ;;
 
-let ppvar = varname >>| pvar
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
-
-let chainl1 e op =
-  let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= go
-;;
-
-let chainr1 e op =
-  let rec go acc = lift2 (fun f x -> f acc x) op (e >>= go) <|> return acc in
-  e >>= go
-;;
 
 let pattern =
   fix (fun pat ->
