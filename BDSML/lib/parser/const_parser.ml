@@ -1,6 +1,5 @@
 open Base
 open Angstrom
-open Utils
 open Ast
 
 let parse_int =

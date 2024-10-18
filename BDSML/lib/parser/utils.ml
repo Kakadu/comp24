@@ -1,4 +1,4 @@
-open! Base
+open Base
 open Angstrom
 
 let skip_ws = skip_while Char.is_whitespace *> return ()
@@ -14,23 +14,66 @@ let ws1 =
   (skip_ws1 *> many skip_comments <|> many1 skip_comments) *> return ()
 ;;
 
+let remove_parents x = char '(' *> x <* char ')'
+let rec_remove_parents m = fix (fun t -> remove_parents t <|> m)
+
 let is_keyword = function
   | "and"
+  | "as"
+  | "assert"
+  | "asr"
+  | "begin"
+  | "class"
+  | "constraint"
+  | "do"
+  | "done"
+  | "downto"
   | "else"
+  | "end"
   | "exception"
+  | "external"
   | "false"
+  | "for"
   | "fun"
   | "function"
+  | "functor"
   | "if"
   | "in"
+  | "include"
+  | "inherit"
+  | "initializer"
+  | "land"
+  | "lazy"
   | "let"
+  | "lor"
+  | "lsl"
+  | "lsr"
+  | "lxor"
   | "match"
-  | "try"
+  | "method"
+  | "mod"
+  | "module"
+  | "mutable"
+  | "new"
+  | "nonrec"
+  | "object"
+  | "of"
+  | "open"
+  | "or"
+  | "private"
   | "rec"
+  | "sig"
+  | "struct"
   | "then"
+  | "to"
   | "true"
-  | "with"
+  | "try"
   | "type"
+  | "val"
+  | "virtual"
+  | "when"
+  | "while"
+  | "with"
   | "|" -> true
   | _ -> false
 ;;
@@ -45,3 +88,39 @@ let is_operator_char = function
   | _ as x when is_core_operator_char x -> true
   | _ -> false
 ;;
+
+let parse_lowercase_ident =
+  let parse_first =
+    satisfy (function
+      | 'a' .. 'z' | '_' -> true
+      | _ -> false)
+    >>| Char.escaped
+  in
+  let parse_rest =
+    take_while (function
+      | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '\'' -> true
+      | _ -> false)
+  in
+  lift2 String.( ^ ) parse_first parse_rest
+  >>= fun name ->
+  if not (is_keyword name)
+  then return name
+  else fail (name ^ " keyword can't be used as ident")
+;;
+
+let parse_capitalized_ident =
+  let parse_first =
+    satisfy (function
+      | 'A' .. 'Z' -> true
+      | _ -> false)
+    >>| String.of_char
+  in
+  let parse_rest =
+    take_while (function
+      | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '\'' -> true
+      | _ -> false)
+  in
+  lift2 String.( ^ ) parse_first parse_rest
+;;
+
+let parse_ident_name = parse_lowercase_ident <* ws
