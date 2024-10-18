@@ -6,8 +6,6 @@ open Angstrom
 open Base
 open Ast
 
-(* --- Вспомогательные функции --- *)
-
 let is_space = function
   | ' ' | '\t' | '\n' | '\r' -> true
   | _ -> false
@@ -30,6 +28,7 @@ let is_digit = function
 
 let is_letter x = is_lowercase x || is_uppercase x
 
+(* Not all keywords are forbidden *)
 let is_keyword = function
   | "let"
   | "rec"
@@ -41,7 +40,6 @@ let is_keyword = function
   | "match"
   | "with"
   | "in"
-  | "and"
   | "fun"
   | "type"
   | "int"
@@ -51,7 +49,7 @@ let is_keyword = function
 ;;
 
 let is_operator_char = function
-  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' | ':' -> true
+  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' -> true
   | _ -> false
 ;;
 
@@ -59,27 +57,27 @@ let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|>
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= go
+  e >>= fun init -> go init
 ;;
 
 let pspaces = skip_while is_space
 let ptoken p = skip_while is_space *> p
 let pstoken s = ptoken (Angstrom.string s)
-let pparens p = pstoken "(" *> take_while is_space *> p <* pstoken ")"
-let poperator = pparens (take_while1 is_operator_char) >>= return
+let pparens p = pstoken "(" *> p <* pstoken ")"
+let poperator = pparens (take_while1 is_operator_char) >>= fun op -> return op
 
-(* Парсер идентификатора: разрешаем также операторы и "()" как имена *)
 let pid =
-  let pfirst = satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| Char.escaped in
+  let pfirst =
+    satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| fun ch -> Char.escaped ch
+  in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
-  ptoken (lift2 ( ^ ) pfirst plast)
+  ptoken (lift2 (fun x y -> x ^ y) pfirst plast)
   >>= fun s ->
   if is_keyword s
   then fail ("Keyword identifiers are forbidden: " ^ s)
   else return s <?> "identifier"
 ;;
 
-let pbind_id = poperator <|> pstoken "()" <|> pid
 let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
 
 let pbool =
@@ -94,71 +92,47 @@ let pbool =
 
 let punit = pstoken "()" *> return CUnit <?> "unit"
 let pconst = choice [ pint; pbool; punit ] >>| fun x -> EConst x
-let pvar = pbind_id >>| fun e -> EVar e
-let poperatorvar = poperator >>| fun op -> EVar op
-
-(* --- Парсер типов (упрощённо) --- *)
+let pvar = pid >>| fun e -> EVar e
 
 let ptype =
   fix (fun ptype ->
     let pint_type = pstoken "int" *> return TInt in
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
-    let simple_type = choice [ pint_type; pbool_type; punit_type; pparens ptype ] in
-    let list_type = simple_type >>= fun t -> pstoken "list" *> return (TList t) in
-    let tuple_type =
-      lift3
-        (fun t1 t2 ts -> TTuple (t1, t2, ts))
-        (choice [ list_type; simple_type ])
-        (pstoken "*" *> choice [ list_type; simple_type ])
-        (many (pstoken "*" *> choice [ list_type; simple_type ]))
-    in
-    let composed_type = choice [ tuple_type; list_type; simple_type ] in
-    chainr1 composed_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
+    let pfun_type = lift2 (fun t1 t2 -> TFun (t1, t2)) (ptype <* pstoken "->") ptype in
+    let plist_type = pparens (ptype <* pstoken "list") >>| fun t -> TList t in
+    let pwrapped_type = pparens ptype in
+    choice [ pint_type; pbool_type; punit_type; pfun_type; plist_type; pwrapped_type ])
 ;;
 
 let ptyped_var =
-  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, Some ty)
-  <|> (pid >>= fun id -> return (id, None))
+  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, ty)
+  <|> (pid >>| fun id -> id, TUnknown)
 ;;
 
-let parse_binding pexpr =
-  let rec pbody pexpr =
-    ptyped_var
-    >>= fun (id, ty_opt) ->
-    pbody pexpr <|> pstoken "=" *> pexpr >>| fun e -> EFun ((id, ty_opt), e)
-  in
-  pbind_id >>= fun id -> pstoken "=" *> pexpr <|> pbody pexpr >>| fun expr -> id, expr
-;;
-
-let parse_bindings pexpr =
-  lift2
-    (fun first rest -> first :: rest)
-    (parse_binding pexpr)
-    (many (pstoken "and" *> parse_binding pexpr))
-;;
-
-let plet_decl pexpr =
+let plet_no_args pexpr =
   pstoken "let"
-  *> lift2
-       (fun r bindings ->
-         match bindings with
-         | [ (id, e) ] -> DLet (r, id, e)
-         | binds -> DMutualLet (r, binds))
-       (choice [ pstoken "rec" *> return Rec; return NonRec ])
-       (parse_bindings pexpr)
+  *> lift4
+       (fun r id e1 e2 -> ELet (r, id, e1, e2))
+       (pstoken "rec" *> return Rec <|> return NonRec)
+       (poperator <|> pstoken "()" <|> pid)
+       (pstoken "=" *> pexpr)
+       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
 ;;
 
-let plet_in pexpr =
+let plet_with_args pexpr =
+  let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   pstoken "let"
-  *> lift3
-       (fun r binding body ->
-         let id, e = binding in
-         ELetIn (r, id, e, body))
-       (choice [ pstoken "rec" *> return Rec; return NonRec ])
-       (parse_binding pexpr)
-       (pstoken "in" *> pexpr)
+  *> lift5
+       (fun r id args e1 e2 -> ELet (r, id, EFun (args, e1), e2))
+       (pstoken "rec" *> return Rec <|> return NonRec)
+       (poperator <|> pstoken "()" <|> pid)
+       (many1 ptyped_var)
+       (pstoken "=" *> pexpr)
+       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
 ;;
+
+let plet pexpr = choice [ plet_no_args pexpr; plet_with_args pexpr ]
 
 let pbranch pexpr =
   ptoken
@@ -171,51 +145,47 @@ let pbranch pexpr =
 
 let plist pexpr =
   let psqparens p = pstoken "[" *> p <* pstoken "]" in
-  psqparens (sep_by (pstoken ";") pexpr) >>| fun x -> EList x
+  psqparens @@ sep_by (pstoken ";") pexpr >>| fun x -> EList x
 ;;
 
-let ppconst = choice [ pint; pbool; punit ] >>| fun x -> PConst x
+let ppconst = choice [ pint; pbool ] >>| fun x -> PConst x
 let ppvar = pid >>| fun x -> PVar x
 
 let ppattern =
-  fix (fun ppattern ->
-    let ppt =
-      choice
-        [ pparens
-            (sep_by1 (pstoken ",") ppattern
-             >>= function
-             | [ p ] -> return p
-             | p1 :: p2 :: ps -> return (PTuple (p1, p2, ps))
-             | [] -> fail "Unexpected empty list in tuple pattern")
-        ; ppconst
-        ; (pstoken "_" >>| fun _ -> PWild)
-        ; (pstoken "[]" >>| fun _ -> PEmpty)
-        ; ppvar
-        ]
-    in
-    let ppt =
-      lift2
-        (fun p1 rest ->
-          match rest with
-          | h :: tl -> PCons (p1, h, tl)
-          | [] -> p1)
-        ppt
-        (many (pstoken "::" *> ppt))
-    in
+  fix
+  @@ fun ppattern ->
+  let ppt =
+    choice
+      [ pparens ppattern
+      ; ppconst
+      ; (pstoken "_" >>| fun _ -> PWild)
+      ; (pstoken "[]" >>| fun _ -> PEmpty)
+      ; ppvar
+      ]
+  in
+  let ppt =
     lift2
-      (fun p1 rest ->
-        match rest with
-        | h :: tl -> POr (p1, h, tl)
-        | [] -> p1)
+      (fun p1 -> function
+        | h :: tl -> PCons (p1, h, tl)
+        | _ -> p1)
       ppt
-      (many (pstoken "|" *> ppt)))
-;;
-
-let pcase ppattern pexpr =
-  lift2 (fun p e -> p, e) (pstoken "|" *> ppattern) (pstoken "->" *> pexpr)
+      (many (pstoken "::" *> ppt))
+  in
+  let ppt =
+    lift2
+      (fun p1 -> function
+        | h :: tl -> POr (p1, h, tl)
+        | _ -> p1)
+      ppt
+      (many (pstoken "|" *> ppt))
+  in
+  ppt
 ;;
 
 let pmatch pexpr =
+  let pcase ppattern pexpr =
+    lift2 (fun p e -> p, e) (pstoken "|" *> ppattern) (pstoken "->" *> pexpr)
+  in
   lift2
     (fun expr cases -> EMatch (expr, cases))
     (pstoken "match" *> pexpr <* pstoken "with")
@@ -223,65 +193,51 @@ let pmatch pexpr =
 ;;
 
 let pfun pexpr =
-  let rec pbody pexpr =
-    ptyped_var
-    >>= fun id -> pbody pexpr <|> pstoken "->" *> pexpr >>| fun e -> EFun (id, e)
+  let pbody pexpr =
+    many1 ptyped_var >>= fun vars -> pstoken "->" *> pexpr >>| fun e -> EFun (vars, e)
   in
   pstoken "fun" *> pbody pexpr
 ;;
 
-let pebinop chain1 e pbinop =
-  chain1 e (pbinop >>| fun op e1 e2 -> EApp (EApp (EVar op, e1), e2))
-;;
-
+let pebinop chain1 e pbinop = chain1 e (pbinop >>| fun op e1 e2 -> EBinop (op, e1, e2))
 let plbinop = pebinop chainl1
-let prbinop = pebinop chainr1
-let padd = pstoken "+" *> return "+"
-let psub = pstoken "-" *> return "-"
-let pmul = pstoken "*" *> return "*"
-let pdiv = pstoken "/" *> return "/"
-let peq = pstoken "=" *> return "="
-let pneq = pstoken "<>" *> return "<>"
-let ples = pstoken "<" *> return "<"
-let pleq = pstoken "<=" *> return "<="
-let pgre = pstoken ">" *> return ">"
-let pgeq = pstoken ">=" *> return ">="
-let pand = pstoken "&&" *> return "&&"
-let por = pstoken "||" *> return "||"
-let pcons = pstoken "::" *> return "::"
+let padd = pstoken "+" *> return Add
+let psub = pstoken "-" *> return Sub
+let pmul = pstoken "*" *> return Mul
+let pdiv = pstoken "/" *> return Div
+let peq = pstoken "=" *> return Eq
+let pneq = pstoken "<>" *> return Neq
+let ples = pstoken "<" *> return Les
+let pleq = pstoken "<=" *> return Leq
+let pgre = pstoken ">" *> return Gre
+let pgeq = pstoken ">=" *> return Geq
 
-let pexpr_fun () =
-  fix (fun pexpr ->
-    let pe_base =
-      choice [ pparens pexpr; pconst; poperatorvar; pvar; plist pexpr; pfun pexpr ]
-    in
-    let pe_app =
-      lift2
-        (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
-        pe_base
-        (many (char ' ' *> ptoken pe_base))
-    in
-    let pe_bin =
-      let op_bin pe ops = plbinop pe ops in
-      let pe1 = pe_app in
-      let pe2 = op_bin pe1 (pmul <|> pdiv) in
-      let pe3 = op_bin pe2 (padd <|> psub) in
-      op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
-    in
-    let pe_cons = prbinop pe_bin pcons in
-    let pe_tuple =
-      lift2
-        (fun e1 rest ->
-          match rest with
-          | [] -> e1
-          | hd :: tl -> ETuple (e1, hd, tl))
-        pe_cons
-        (many (pstoken "," *> pe_cons))
-    in
-    choice [ plet_in pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe_tuple ])
+let pexpr =
+  fix
+  @@ fun pexpr ->
+  let pe = choice [ pparens pexpr; pconst; pvar; plist pexpr; pfun pexpr ] in
+  let pe =
+    lift2
+      (fun f args ->
+        match args with
+        | [] -> f
+        | _ -> EApp (f, args))
+      pe
+      (many (char ' ' *> ptoken pe))
+  in
+  let pe = plbinop pe (pmul <|> pdiv) in
+  let pe = plbinop pe (padd <|> psub) in
+  let pe = plbinop pe (choice [ peq; pneq; pgeq; pleq; ples; pgre ]) in
+  let pe =
+    lift2
+      (fun e1 -> function
+        | h :: tl -> ETuple (e1, h, tl)
+        | _ -> e1)
+      pe
+      (many (pstoken "," *> pe))
+  in
+  choice [ plet pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe ]
 ;;
 
-let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
-let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)
+let parse = parse_string ~consume:Consume.All (many1 (plet pexpr) <* pspaces)
