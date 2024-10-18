@@ -1,0 +1,33 @@
+(lang dune 3.13)
+
+(name AsdfML)
+
+(generate_opam_files true)
+
+(source
+ (github ArtemKhel/comp24))
+
+(authors "Artem Khelmianov")
+
+(maintainers "https://github.com/ArtemKhel")
+
+(homepage "https://github.com/ArtemKhel/")
+
+(cram enable)
+
+(using menhir 2.0)
+
+(package
+ (name AsdfML)
+ (synopsis "A short synopsis")
+ (description "A longer description")
+ (depends
+  ocaml
+  dune
+  core
+  angstrom
+  bisect_ppx
+  ppx_deriving
+  ppx_expect
+  (ppx_inline_test :with-test))
+ (tags ()))
