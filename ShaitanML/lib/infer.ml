@@ -282,7 +282,7 @@ let infer_pat =
        | CNil ->
          let* fresh = fresh_var in
          return (env, list_typ fresh))
-    | PVar x ->
+    | PVar (x, _) ->
       let* fresh = fresh_var in
       let env = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
       return (env, fresh)
@@ -366,14 +366,14 @@ let infer_exp =
           cl
       in
       return (sub, t)
-    | ELet (Nonrec, (PVar x, e1), e2) ->
+    | ELet (Nonrec, (PVar (x, _), e1), e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
       let* s2, t2 = helper (TypeEnv.extend env x s) e2 in
       let* s = Subst.compose s1 s2 in
       return (s, t2)
-    | ELet (Rec, (PVar x, e1), e2) ->
+    | ELet (Rec, (PVar (x, _), e1), e2) ->
       let* fresh = fresh_var in
       let env1 = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
       let* s, t = helper env1 e1 in
@@ -423,7 +423,7 @@ let infer_exp =
 ;;
 
 let infer_str_item env = function
-  | SValue (Rec, (PVar x, e)) ->
+  | SValue (Rec, (PVar (x, _), e)) ->
     let* fresh = fresh_var in
     let sc = S (VarSet.empty, fresh) in
     let env = TypeEnv.extend env x sc in
@@ -435,7 +435,7 @@ let infer_str_item env = function
     let sc = generalize_rec env t2 x in
     let env = TypeEnv.extend env x sc in
     return env
-  | SValue (Nonrec, (PVar x, e)) ->
+  | SValue (Nonrec, (PVar (x, _), e)) ->
     let* s, t = infer_exp env e in
     let env = TypeEnv.apply s env in
     let sc = generalize env t in
