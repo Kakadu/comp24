@@ -34,10 +34,21 @@ type const =
   | CNil (** [] *)
 [@@deriving show { with_path = false }]
 
+type type_annot =
+  | AInt
+  | ABool
+  | AString
+  | AUnit
+  | AList of type_annot
+  | AFun of type_annot * type_annot
+  | ATuple of type_annot list
+  | AVar of id
+[@@deriving show { with_path = false }]
+
 type pattern =
   | PAny (** _ *)
   | PConst of const (** 123, true, "string" *)
-  | PVar of id (** x *)
+  | PVar of id * type_annot option (** x *)
   | PTuple of pattern list (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
 [@@deriving show { with_path = false }]
