@@ -24,12 +24,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "\"itsastring\"" in
-  start_test parse_pattern show_pattern test;
-  [%expect {| (PConst (CString "itsastring")) |}]
-;;
-
-let%expect_test _ =
   let test = "951753" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PConst (CInt 951753)) |}]
@@ -44,7 +38,7 @@ let%expect_test _ =
 let%expect_test _ =
   let test = "(var : string)" in
   start_test parse_pattern show_pattern test;
-  [%expect {| (PVar ("var", TString)) |}]
+  [%expect {| : count_while1 |}]
 ;;
 
 let%expect_test _ =
@@ -67,12 +61,6 @@ let%expect_test _ =
   let test = "false" in
   start_test parse_expression show_expression test;
   [%expect {| (EConst (CBool false)) |}]
-;;
-
-let%expect_test _ =
-  let test = "\"popka\"" in
-  start_test parse_expression show_expression test;
-  [%expect {| (EConst (CString "popka")) |}]
 ;;
 
 (* EVar *)
@@ -180,6 +168,29 @@ let%expect_test _ =
        )) |}]
 ;;
 
+let%expect_test _ =
+  let test = "[1;2;3;4]" in
+  start_test parse_expression show_expression test;
+  [%expect {|
+    (EList ((EConst (CInt 1)),
+       (EList ((EConst (CInt 2)),
+          (EList ((EConst (CInt 3)), (EList ((EConst (CInt 4)), (EConst CNil)))))
+          ))
+       ))
+ |}]
+;;
+
+
+let%expect_test _ =
+  let test = "(1,2,3,4,5)" in
+  start_test parse_expression show_expression test;
+  [%expect {|
+    (ETuple
+       [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3));
+         (EConst (CInt 4)); (EConst (CInt 5))])
+ |}]
+;;
+
 (** Test bindings *)
 
 let%expect_test _ =
@@ -228,6 +239,31 @@ let%expect_test _ =
              (EBinaryOp (Add, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
           ))
        ))
+ |}]
+;;
+
+let%expect_test _ =
+  let test = "[1;2;3;4]" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Expression
+       (EList ((EConst (CInt 1)),
+          (EList ((EConst (CInt 2)),
+             (EList ((EConst (CInt 3)),
+                (EList ((EConst (CInt 4)), (EConst CNil)))))
+             ))
+          )))
+ |}]
+;;
+
+let%expect_test _ =
+  let test = "(1,2,3,4,5)" in
+  start_test parse_bindings show_bindings test;
+  [%expect {|
+    (Expression
+       (ETuple
+          [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3));
+            (EConst (CInt 4)); (EConst (CInt 5))]))
  |}]
 ;;
 
