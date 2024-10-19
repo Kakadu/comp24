@@ -7,6 +7,59 @@ open Angstrom
 open Ast
 open Utils
 
+type associativity = Left | Right | Unspec
+type args = Unary | Binary
+
+type op_data =  {
+  args : args;
+  assoc : associativity;
+  priority : int;
+}
+
+(**https://ocaml.org/manual/5.2/api/Ocaml_operators.html*)
+let get_prefix_symbol_op_data_next_need = function
+| '~'-> Some({args = Unary; assoc = Unspec priority = 20})
+| '#'-> Some({args = Binary; assoc = Left priority = 18})
+| _ -> None
+
+let get_prefix_symbol_op_data_next_unneed = function
+| '!'-> Some({args = Unary; assoc = Unspec; priority = 20})
+| '*'-> Some({args = Binary; assoc = Left, priority =14})
+| '/'-> Some({args = Binary; assoc = Left, priority =14})
+| '%'-> Some({args = Binary; assoc = Left, priority =14})
+| '+'-> Some({args = Binary; assoc = Left, priority =13})
+| '-'-> Some({args = Binary; assoc = Left, priority =13})
+| '@'-> Some({args = Binary; assoc = Right priority =11})
+| '^'-> Some({args = Binary; assoc = Right priority =11})
+| '='-> Some({args = Binary; assoc = Left, priority =10})
+| '<'-> Some({args = Binary; assoc = Left, priority =10})
+| '>'-> Some({args = Binary; assoc = Left, priority =10})
+| '|'-> Some({args = Binary; assoc = Left, priority =10})
+| '&'-> Some({args = Binary; assoc = Left, priority =10})
+| '$'-> Some({args = Binary; assoc = Left, priority =10})
+| _ -> None
+
+let get_prefix_two_symbols_op_data = function
+| "**" -> Some({args = Binary; assoc = Right, priority =15})
+| ':' -> Some({args = Binary; assoc = Right, priority =12})
+| _ -> None
+
+let get_single_op_data = function
+| "-" -> Some({args = Binary; assoc = Unspec; priority = 16})
+| "-." -> Some({args = Binary; assoc = Unspec; priority = 16})
+| "::" -> Some({args = Binary; assoc = Right, priority =12})
+| "!=" -> Some({args = Binary; assoc = Left, priority =10})
+| "&" -> Some({args = Binary; assoc = Right, priority =9})
+| "&&" -> Some({args = Binary; assoc = Right, priority =9})
+| "or" -> Some({args = Binary; assoc = Right, priority =8})
+| "||" -> Some({args = Binary; assoc = Right, priority =8})
+| "," -> Some({args = Binary; assoc = Unspec, priority =7})
+| "<-" -> Some({args = Binary; assoc = Right, priority =6})
+| ":=" -> Some({args = Binary; assoc = Right, priority =6})
+| ";" -> Some({args = Binary; assoc = Right, priority =4})
+| _ -> None
+
+let get_operator_data = 
 let prefix_op =
   let is_first_char_need_following = function
     | '?' | '~' -> true
@@ -75,6 +128,8 @@ let binary_op =
   in
   case1 <|> case2
 ;;
+
+let a = and+ char 'a' in char 'b'
 
 let parse_ident =
   let+ ident = parse_lowercase_ident in
