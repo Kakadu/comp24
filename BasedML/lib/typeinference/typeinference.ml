@@ -207,7 +207,7 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
   in
   map_list help pat_exp_lst *> return tp
 
-and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) t =
+and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.typeName) t =
   fun rec_f pat exp ->
   let* prev_env = read_env in
   let* tv_count = read_tv_num in
@@ -231,20 +231,62 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
   let* _ = write_subst p_tp exp_tp in
   let* subs = read_subs in
   let free_vars = get_free_vars subs tv_count p_tp in
-  generalise free_vars (pat_remove_constr pat) p_tp
+  generalise free_vars (pat_remove_constr pat) p_tp *> return p_tp
+;;
+
+let infer_let_decl : Ast.let_declaration -> (state, Ast.typeName) t = function
+  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp
+  | Ast.DMutualRecDecl _decl_lst -> fail "boba"
+;;
+
+type res_map = Ast.typeName MapString.t [@@deriving show { with_path = false }]
+
+let infer_declarations : Ast.declarations -> (state, res_map) t =
+  fun dec_lst ->
+  map_list infer_let_decl dec_lst
+  *> let* env = read_env in
+     let lst = MapString.bindings env in
+     let* restored_lst =
+       map_list
+         (fun (name, _) ->
+           let* var_tp = read_var_type name in
+           match var_tp with
+           | Some x -> restore_type x >>= fun tp -> return (name, tp)
+           | None -> fail "unreachable error: can not find name from env in env")
+         lst
+     in
+     return (MapString.of_seq (List.to_seq restored_lst))
+;;
+
+let infer_prog decls =
+  let _, res = run (infer_declarations decls) start_state in
+  res
 ;;
 
 let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (_, substs, _), res = run ((infer_expr exp) >>= restore_type ) (MapString.empty, [], 0) in
+    let (_, substs, _), res =
+      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0)
+    in
     (match res with
      | Result.Ok tp ->
        Format.printf
          "res: %s@\n substs: %s"
          (Ast.show_typeName tp)
          (show_subs_state substs)
+     | Result.Error s -> Format.printf "Infer error: %s" s)
+  | Result.Error e -> Format.printf "Parser error: %s" e
+;;
+
+let test_infer_prog string_exp =
+  let res = Parser.parse_program string_exp in
+  match res with
+  | Result.Ok prog ->
+    let _, res = run (infer_declarations prog) (MapString.empty, [], 0) in
+    (match res with
+     | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
@@ -334,13 +376,13 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_infer_exp {|let id = fun x -> x in ((id 1), (id "w"))|};
+  test_infer_exp {|let id = fun x -> x in ((id 1), (id true))|};
   [%expect {| Parser error: : string |}]
 ;;
 
 let%expect_test _ =
   test_infer_exp
-    {|let (x, y) :('a*'a) = ((fun x-> x), (fun (x, y) -> (x, x))) in ((x 1), (x "str")|};
+    {|let (x, y) :('a * 'a) = ((fun x-> x), (fun (x, y) -> (x, x))) in ((x 1), (x true)|};
   [%expect {| Parser error: : string |}]
 ;;
 
@@ -351,3 +393,30 @@ let%expect_test _ =
 | x -> x) in days_until_typecheker_finish 1|};
   [%expect {| Parser error: : string |}]
 ;;
+
+
+let%expect_test _ =
+  test_infer_prog
+    {|let x = 1;;
+    let y = 2;;|};
+  [%expect {|
+    [""x"": TInt,
+     ""y"": TInt,
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|let id = fun x-> x;;|};
+  [%expect {|
+    [""id"": (TFunction ((TPoly "_p0"), (TPoly "_p0"))),
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|let id = fun x-> x;;
+    let (x, y) = (id true, id 2);;|};
+  [%expect {| |}]
+;; 
+
