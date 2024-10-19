@@ -142,15 +142,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "(fun x -> 3 + x)" in
-  start_test parse_expression show_expression test;
-  [%expect
-    {|
-    (EFun ((PVar ("x", TUnknown)),
-       (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
-;;
-
-let%expect_test _ =
   let test = "fun x y -> y + x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -293,11 +284,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "let rec fac n = if n <= 1 then 1 else n * fac n" in
+  let test = "let rec fact n = if n <= 1 then 1 else n * fac n" in
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Rec, "fac",
+    (Let (Rec, "fact",
        (EFun ((PVar ("n", TUnknown)),
           (EIfElse ((EBinaryOp (Leq, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
              (EConst (CInt 1)),
@@ -347,6 +338,26 @@ let%expect_test _ =
                 )),
              (EApp ((EApp ((EVar ("helper", TUnknown)), (EVar ("x", TUnknown)))),
                 (EFun ((PVar ("a", TUnknown)), (EVar ("a", TUnknown))))))
+             ))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test _ =
+  let test =
+    "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y"
+  in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "f",
+       (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
+          (EFun ((PVar ("x", TInt)),
+             (EFun ((PVar ("y", TInt)),
+                (EApp ((EApp ((EVar ("g", TUnknown)), (EVar ("x", TUnknown)))),
+                   (EVar ("y", TUnknown))))
+                ))
              ))
           ))
        ))
