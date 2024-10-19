@@ -631,8 +631,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test "let (const:int) = fun x -> 42";
-  [%expect {| int -> int |}]
+  test "let (const:int) = (fun x -> 42) ()";
+  [%expect {| int |}]
 ;;
 
 (* TODO: more tests for patterns and type annotations *)

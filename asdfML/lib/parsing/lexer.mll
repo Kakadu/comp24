@@ -46,6 +46,7 @@ rule token = parse
   | ")" { RPAREN }
   | id { IDENT (Lexing.lexeme lexbuf) }
   | ":" { COLON }
+  | "," { COMMA }
   | ";;" { SS }
   | eof { EOF }
   | _ { raise (SyntaxError ("Character not allowed in source text: '" ^ Lexing.lexeme lexbuf ^ "'")) }

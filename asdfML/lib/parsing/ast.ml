@@ -42,6 +42,7 @@ type pattern =
   | PConst of constant
   | PWild (** _ *)
   | PIdent of id * type_ann option (** x | (x:int) *)
+  | PTuple of pattern list
 [@@deriving show { with_path = false }]
 
 type expr =
@@ -53,6 +54,7 @@ type expr =
   | EIfElse of expr * expr * expr (** if x then y else z *)
   | EFun of pattern * expr (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
+  | ETuple of expr list
 [@@deriving show { with_path = false }]
 
 and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)

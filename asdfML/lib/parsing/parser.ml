@@ -193,3 +193,11 @@ let%expect_test _ =
 ;;
 
 (* TODO: more tests for patterns and type annotations *)
+
+
+let%expect_test _ =
+  test "let _ = (1, true, ())";
+  [%expect {|  
+    (DLet (NonRec, PWild,
+       (ETuple [(EConst (CInt 1)); (EConst (CBool true)); (EConst CUnit)])))|}]
+;;

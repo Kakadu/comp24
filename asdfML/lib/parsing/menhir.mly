@@ -26,6 +26,7 @@
 
 %token LPAREN RPAREN
 %token COLON
+%token COMMA
 
 %token LET 
 %token LETREC
@@ -58,6 +59,7 @@ expr:
 | c = constant { EConst(c) }
 | v = identifier { EVar(v) }
 | LPAREN e = expr RPAREN { e }
+| LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
 
 type_ann:
 | id = identifier { 
