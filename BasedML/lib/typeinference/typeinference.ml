@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 include StatementInfer
 
-open Constraint
+open Substitution
 
 let const2type : Ast.constant -> Ast.typeName = function
   | Ast.CBool _ -> Ast.TBool
@@ -28,21 +28,19 @@ let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
       fail (Format.sprintf "Variable %s is bound several times in this matching" name)
   and infer_add_pconstant c tp =
     let const_tp = const2type c in
-    write_constr (create_constr tp const_tp) *> return const_tp
+    write_subst tp const_tp *> return const_tp
   and infer_add_ptupple p_lst tp rec_fun =
     let* t_lst = map_list rec_fun p_lst in
     let tuple_tp = Ast.TTuple t_lst in
-    write_constr (create_constr tp tuple_tp) *> return tuple_tp
+    write_subst tp tuple_tp *> return tuple_tp
   and infer_add_pcons (p_head, p_tail) tp rec_fun =
     let* head_tp = rec_fun p_head in
     let* tail_tp = rec_fun p_tail in
-    write_constr (create_constr tp tail_tp)
-    *> write_constr (create_constr (Ast.TList head_tp) tail_tp)
-    *> return tail_tp
+    write_subst tp tail_tp *> write_subst (Ast.TList head_tp) tail_tp *> return tail_tp
   and infer_add_pnil tp =
     let* tv = fresh_tv in
     let list_tp = Ast.TList tv in
-    write_constr (create_constr tp list_tp) *> return list_tp
+    write_subst tp list_tp *> return list_tp
   in
   let rec help cp =
     let* pat, tp = get_pat_and_type cp in
@@ -102,7 +100,7 @@ let rec infer_expr : Ast.expr -> (state, Ast.typeName) t = function
   | Ast.EMatch (scrutin, pat_exp_lst) -> infer_match scrutin pat_exp_lst
   | Ast.EConstraint (exp, tp) ->
     let* exp_tp = infer_expr exp in
-    write_constr (create_constr exp_tp tp) *> return exp_tp
+    write_subst exp_tp tp *> return exp_tp
 
 and infer_ident : string -> (state, Ast.typeName) t =
   fun name ->
@@ -123,7 +121,7 @@ and infer_app : Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
   let* self_tp = fresh_tv in
   let* func_tp = infer_expr func_exp in
   let* arg_tp = infer_expr args_exp in
-  write_constr (create_constr func_tp (Ast.TFunction (arg_tp, self_tp))) *> return self_tp
+  write_subst func_tp (Ast.TFunction (arg_tp, self_tp)) *> return self_tp
 
 and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
   fun e1 e2 e3 ->
@@ -132,10 +130,7 @@ and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.typeName)
   let* t1 = infer_expr e1 <* write_env cur_env in
   let* t2 = infer_expr e2 <* write_env cur_env in
   let* t3 = infer_expr e3 <* write_env cur_env in
-  write_constr (create_constr t1 Ast.TInt)
-  *> write_constr (create_constr tp t2)
-  *> write_constr (create_constr tp t3)
-  *> return tp
+  write_subst t1 Ast.TInt *> write_subst tp t2 *> write_subst tp t3 *> return tp
 
 and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.typeName) t =
   fun scrutin pat_exp_lst ->
@@ -145,10 +140,7 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
   let help (pat, exp) =
     let* pat_tp = infer_pattern PMAdd pat in
     let* exp_tp = infer_expr exp in
-    write_constr (create_constr pat_tp scr_tp)
-    *> write_constr (create_constr exp_tp tp)
-    *> return ()
-    <* write_env cur_env
+    write_subst pat_tp scr_tp *> write_subst exp_tp tp *> return () <* write_env cur_env
   in
   map_list help pat_exp_lst *> return tp
 ;;
@@ -157,16 +149,14 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (env, constrs, _), res =
-      run (infer_expr exp) (MapString.empty, ConstraintSet.empty, 0)
-    in
+    let (env, substs, _), res = run (infer_expr exp) (MapString.empty, [], 0) in
     (match res with
      | Result.Ok tp ->
        Format.printf
-         "res: %s @\nenv: %s@\n constrs: %s"
+         "res: %s @\nenv: %s@\n substs: %s"
          (Ast.show_typeName tp)
          (show_env_map env)
-         (show_constr_set constrs)
+         (show_subs_state substs)
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
@@ -179,8 +169,7 @@ let%expect_test _ =
     env: [""x"": (TFFlat (TPoly "_p0")),
      ""y"": (TFFlat (TPoly "_p1")),
      ]
-     constrs: [((TTuple [TInt; TBool]), (TTuple [(TPoly "_p0"); (TPoly "_p1")]))
-     ] |}]
+     substs: [("_p1", TBool); ("_p0", TInt)] |}]
 ;;
 
 let%expect_test _ =
@@ -191,28 +180,21 @@ let%expect_test _ =
     env: [""x"": (TFFlat (TPoly "_p0")),
      ""y"": (TFFlat (TPoly "_p1")),
      ]
-     constrs: [((TPoly "_p1"), (TList TInt))
-     ((TPoly "_p1"), (TList (TPoly "_p0")))
-     ] |}]
+     substs: [("_p0", TInt); ("_p1", (TList TInt))] |}]
 ;;
 
 let%expect_test _ =
-  test_infer_exp {|fun f list -> match list with
+  test_infer_exp {|fun f (list: int) -> match list with
   | [] -> list
   | h :: tl -> h|};
-  [%expect {|
-    res: (TFunction ((TPoly "_p0"), (TFunction ((TPoly "_p1"), (TPoly "_p2")))))
+  [%expect
+    {|
+    res: (TFunction ((TPoly "_p0"), (TFunction (TInt, (TPoly "_p1")))))
     env: [""f"": (TFFlat (TPoly "_p0")),
-     ""list"": (TFFlat (TPoly "_p1")),
+     ""list"": (TFFlat TInt),
      ]
-     constrs: [((TPoly "_p1"), (TPoly "_p2"))
-     ((TPoly "_p2"), (TPoly "_p7"))
-     ((TPoly "_p3"), (TPoly "_p8"))
-     ((TPoly "_p3"), (TList (TPoly "_p5")))
-     ((TPoly "_p4"), (TList (TPoly "_p5")))
-     ((TPoly "_p6"), (TPoly "_p8"))
-     ((TPoly "_p8"), (TList (TPoly "_p7")))
-     ] |}]
+     substs: [("_p4", TInt); ("_p6", TInt); ("_p7", (TList TInt)); ("_p5", (TList TInt));
+      ("_p1", TInt); ("_p2", (TList TInt)); ("_p3", (TList TInt))] |}]
 ;;
 
 let%expect_test _ =
@@ -222,3 +204,18 @@ let%expect_test _ =
   [%expect {| Infer error: Unbound value nolist |}]
 ;;
 
+let%expect_test _ =
+  test_infer_exp {|(fun f x -> f)(fun f x -> f)|};
+  [%expect {|
+    res: (TPoly "_p0")
+    env: [""f"": (TFFlat (TPoly "_p3")),
+     ""x"": (TFFlat (TPoly "_p4")),
+     ]
+     substs: [("_p0",
+      (TFunction ((TPoly "_p2"),
+         (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))
+         )));
+      ("_p1",
+       (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3"))))))
+      ] |}]
+;;
