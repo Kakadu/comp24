@@ -105,8 +105,8 @@ let ptype =
 ;;
 
 let ptyped_var =
-  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, ty)
-  <|> (pid >>| fun id -> id, TUnknown)
+  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, Some ty)
+  <|> (pid >>| fun id -> id, None)
 ;;
 
 let plet_no_args pexpr =

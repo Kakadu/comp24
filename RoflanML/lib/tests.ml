@@ -16,7 +16,7 @@ module ParserTests = struct
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f x = x";
-    [%expect {| (ELet (NonRec, "f", (EFun ([("x", TUnknown)], (EVar "x"))), None)) |}]
+    [%expect {| (ELet (NonRec, "f", (EFun ([("x", None)], (EVar "x"))), None)) |}]
   ;;
 
   let%expect_test _ =
@@ -83,8 +83,8 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "f",
-         (EFun ([("x", TBool); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
-            )),
+         (EFun ([("x", (Some TBool)); ("y", (Some TInt))],
+            (EBinop (Mul, (EVar "x"), (EVar "y"))))),
          None))
       |}]
   ;;
@@ -94,9 +94,9 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "+",
-         (EFun ([("x", TInt); ("y", TInt)], (EBinop (Mul, (EVar "x"), (EVar "y")))
-            )),
-         None)) 
+         (EFun ([("x", (Some TInt)); ("y", (Some TInt))],
+            (EBinop (Mul, (EVar "x"), (EVar "y"))))),
+         None))
       |}]
   ;;
 
@@ -105,9 +105,9 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "+",
-         (EFun ([("x", TInt); ("y", TUnknown)],
+         (EFun ([("x", (Some TInt)); ("y", None)],
             (ELet (NonRec, "-",
-               (EFun ([("x", TUnknown); ("y", TInt)],
+               (EFun ([("x", None); ("y", (Some TInt))],
                   (EBinop (Add, (EVar "x"), (EVar "y"))))),
                (Some (EBinop (Sub, (EVar "x"), (EVar "y"))))))
             )),
@@ -120,7 +120,7 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "fix",
-         (EFun ([("f", TUnknown)],
+         (EFun ([("f", None)],
             (EApp ((EVar "f"), [(EApp ((EVar "fix"), [(EVar "f")])); (EVar "x")]))
             )),
          (Some (EApp ((EVar "fix"), [(EVar "g")])))))
@@ -133,7 +133,8 @@ module ParserTests = struct
       {|
       (ELet (NonRec, "f",
          (EFun (
-            [("g", (TFun (TInt, (TFun (TInt, TInt))))); ("x", TInt); ("y", TInt)],
+            [("g", (Some (TFun (TInt, (TFun (TInt, TInt)))))); ("x", (Some TInt));
+              ("y", (Some TInt))],
             (EApp ((EVar "g"), [(EVar "x"); (EVar "y")])))),
          None)) |}]
   ;;

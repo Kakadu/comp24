@@ -40,7 +40,6 @@ type is_rec =
 [@@deriving show { with_path = false }]
 
 type type_id =
-  | TUnknown (** Argument without mentioned type *)
   | TInt (** Type int *)
   | TBool (** Type bool *)
   | TUnit (** Type unit () *)
@@ -48,7 +47,7 @@ type type_id =
   | TList of type_id (** List type t list *)
 [@@deriving show { with_path = false }]
 
-type typed_arg = id * type_id [@@deriving show { with_path = false }]
+type typed_arg = id * type_id option [@@deriving show { with_path = false }]
 
 type expr =
   | EConst of const (** Consts *)
