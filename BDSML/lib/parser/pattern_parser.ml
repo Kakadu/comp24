@@ -4,38 +4,42 @@ open Const_parser
 open Ast
 
 let parse_any = check_char '_' *> return Pat_any
-let parse_pconst p = rec_remove_parents p <|> (parse_const >>| fun c -> Pat_constant c)
+let parse_pconst = parse_const >>| fun c -> Pat_constant c
 
 let parse_ptuple p =
-  sep_by (check_char ',') p
+  sep_by (check_char ',') (parse_pconst <|> parse_any <|> p)
   >>= function
-  | [] -> p
+  | [] -> fail "It cannot be this way"
   | [ h ] -> return h
   | h :: tl -> return (Pat_tuple (h :: tl))
 ;;
 
+let parse_plist p =
+  let parse_list =
+    sep_by (check_char ';') (parse_ptuple p)
+    >>| fun l ->
+    let rec helper = function
+      | h :: tl -> Pat_construct ("::", Some (Pat_tuple [ h; helper tl ]))
+      | [] -> Pat_construct ("[]", None)
+    in
+    helper l
+  in
+  remove_square_brackets (return (Pat_construct ("[]", None)))
+  <|> remove_square_brackets parse_list
+  <|> parse_ptuple p
+;;
+
 let parse_pcons p =
-  let helper = check_string "::" *> return (fun ptr1 ptr2 -> Pat_cons (ptr1, ptr2)) in
-  chainr1 p helper
+  let helper =
+    check_string "::"
+    *> return (fun p1 p2 -> Pat_construct ("::", Some (Pat_tuple [ p1; p2 ])))
+  in
+  chainr1 (parse_plist p) helper
 ;;
 
 let parse_por p =
   let helper = check_char '|' *> return (fun ptr1 ptr2 -> Pat_or (ptr1, ptr2)) in
-  chainl1 p helper
+  chainl1 (parse_pcons p) helper
 ;;
 
-let parse_plist p =
-  remove_square_brackets (sep_by (check_char ';') p >>| fun l -> Pat_list l)
-;;
-
-let parse_pattern =
-  fix
-  @@ fun p ->
-  let pattern = parse_pconst p in
-  let pattern = parse_any <|> pattern in
-  let pattern = parse_por pattern <|> pattern in
-  let pattern = parse_plist pattern <|> pattern in
-  let pattern = parse_pcons pattern <|> pattern in
-  let pattern = parse_ptuple pattern <|> pattern in
-  pattern
-;;
+let parse_pattern = fix @@ fun p -> remove_parents (parse_por p) <|> parse_por p

@@ -5,6 +5,7 @@
 open Base
 open Angstrom
 open Ast
+open Utils
 
 let parse_int =
   take_while1 (function
@@ -24,4 +25,4 @@ let parse_string =
   >>| fun s -> Const_string s
 ;;
 
-let parse_const = choice [ parse_int; parse_char; parse_string ]
+let parse_const = ws *> choice [ parse_int; parse_char; parse_string ]
