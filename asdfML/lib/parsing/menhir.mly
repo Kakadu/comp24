@@ -9,17 +9,12 @@
 %token UNIT
 %token WILDCARD
 
-%token PLUS 
-%token MINUS 
-%token MUL 
-%token DIV
+%token PLUS MINUS 
+%token MUL DIV
 %token EQ
 %token EQEQ
 %token NE
-%token GT
-%token LT
-%token GE
-%token LE
+%token GT LT GE LE
 %token AND
 %token OR
 %token NOT
@@ -36,6 +31,12 @@
 
 %token SS
 %token EOF
+
+// Priorities https://ocaml.org/manual/5.1/api/Ocaml_operators.html
+// Low to high (menhir man 4.1.4)
+%left GT LT GE LE
+%left PLUS MINUS 
+%left MUL DIV
 
 %type <program> program
 
@@ -88,11 +89,11 @@ app_expr:
 expr_binary: 
 | left = expr op = op_binary right = expr { EBinaryOp(op, left, right) }
 
-op_binary:
-| MUL {Mul}
-| DIV {Div}
-| PLUS {Add}
-| MINUS {Sub}
+%inline op_binary:
+| MUL { Mul }
+| DIV { Div }
+| PLUS { Add }
+| MINUS { Sub }
 | EQEQ { Eq }
 | NE { Ne }
 | GT { Gt }

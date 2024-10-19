@@ -465,7 +465,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let x = 1 + 2 <= 3";
-  [%expect {| TODO: priorities |}]
+  [%expect {| bool |}]
 ;;
 
 let%expect_test _ =
