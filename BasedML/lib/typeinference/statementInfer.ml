@@ -17,7 +17,7 @@ end
 
 type type_form =
   | TFFlat of Ast.typeName
-  | TFSchem of string list * Ast.typeName
+  | TFSchem of unit MapString.t * Ast.typeName
 [@@deriving show { with_path = false }]
 
 type env_map = type_form MapString.t [@@deriving show { with_path = false }]
@@ -35,11 +35,47 @@ let write_env : env_map -> (state, unit) t =
   write (env, substs, tv)
 ;;
 
+let restore_fresh_tv_num name =
+  try Some (Scanf.sscanf name "_p%x" (fun x -> x)) with
+  | Scanf.Scan_failure _ -> None
+;;
+
+let fresh_tv : (state, Ast.typeName) t =
+  let* env, substs, tv = read in
+  return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
+;;
+
+let specialise : unit MapString.t * Ast.typeName -> (state, Ast.typeName) t =
+  fun (free_vars, stp) ->
+  let map = MapString.bindings free_vars in
+  let* v2v_lst =
+    map_list
+      (fun (s, _) ->
+        let* new_v = fresh_tv in
+        return (s, new_v))
+      map
+  in
+  let v2v = MapString.of_seq (List.to_seq v2v_lst) in
+  let rec traverse = function
+    | Ast.TPoly x as old_t ->
+      (match MapString.find_opt x v2v with
+       | Some x -> x
+       | None -> old_t)
+    | Ast.TFunction (t1, t2) -> Ast.TFunction (traverse t1, traverse t2)
+    | Ast.TTuple t_lst -> Ast.TTuple (List.map traverse t_lst)
+    | Ast.TList t1 -> Ast.TList (traverse t1)
+    | x -> x
+  in
+  return (traverse stp)
+;;
+
 let read_var_type : string -> (state, Ast.typeName option) t =
   fun name ->
   let* env = read_env in
   match MapString.find_opt name env with
-  | Some (TFSchem _) -> fail "Schem isn't supported"
+  | Some (TFSchem (fv, stp)) ->
+    let* tp = specialise (fv, stp) in
+    return (Some tp)
   | Some (TFFlat x) -> return (Some x)
   | None -> return None
 ;;
@@ -80,7 +116,8 @@ let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
   | Result.Ok _tp -> write_subs new_subs
 ;;
 
-let fresh_tv : (state, Ast.typeName) t =
-  let* env, substs, tv = read in
-  return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
+let read_tv_num : (state, int) t =
+  let* _env, _substs, tv = read in
+  return tv
 ;;
+
