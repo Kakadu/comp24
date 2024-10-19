@@ -304,14 +304,7 @@ let parse_tuple_expr parser =
 
 (* Expression parsers *)
 
-(* let parse_expression =
-   parse_eletin
-   <|> parse_eifelse
-   <|> parse_ebinop
-   <|> parse_econst
-   <|> parse_evar
-   <|> parse_eapp
-   ;; *)
+let constr_case pat expr = pat, expr
 
 let ebinop_p expr =
   let helper p op =

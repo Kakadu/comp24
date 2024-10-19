@@ -32,6 +32,7 @@ type ty =
 
 type error =
   [ `Occurs_check
+  | `Empty_pattern
   | `No_variable of string
   | `Unification_failed of ty * ty
   ]
@@ -77,10 +78,11 @@ let print_typ typ =
 ;;
 
 let pp_error ppf : error -> _ = function
-  | `Occurs_check -> Format.fprintf ppf "Occurs check failed"
-  | `No_variable s -> Format.fprintf ppf "Undefined variable '%s'" s
+  | `Empty_pattern -> Format.fprintf ppf "Error: Occurs check failed"
+  | `Occurs_check -> Format.fprintf ppf "Error: Empty pattern"
+  | `No_variable s -> Format.fprintf ppf "Error: Undefined variable '%s'" s
   | `Unification_failed (l, r) ->
-    Format.fprintf ppf "unification failed on %a and %a" pp_typ l pp_typ r
+    Format.fprintf ppf "Error: Unification failed on %a and %a" pp_typ l pp_typ r
 ;;
 
 let print_typ_err e =
