@@ -238,7 +238,7 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (_, substs, _), res = run (infer_expr exp) (MapString.empty, [], 0) in
+    let (_, substs, _), res = run ((infer_expr exp) >>= restore_type ) (MapString.empty, [], 0) in
     (match res with
      | Result.Ok tp ->
        Format.printf
@@ -253,7 +253,7 @@ let%expect_test _ =
   test_infer_exp "fun ((x, y): (int*bool)) -> y";
   [%expect
     {|
-    res: (TFunction ((TTuple [(TPoly "_p0"); (TPoly "_p1")]), (TPoly "_p1")))
+    res: (TFunction ((TTuple [TInt; TBool]), TBool))
      substs: [("_p1", TBool); ("_p0", TInt)] |}]
 ;;
 
@@ -261,7 +261,7 @@ let%expect_test _ =
   test_infer_exp "fun ((x::y): (int list)) -> y";
   [%expect
     {|
-    res: (TFunction ((TPoly "_p1"), (TPoly "_p1")))
+    res: (TFunction ((TList TInt), (TList TInt)))
      substs: [("_p0", TInt); ("_p1", (TList TInt))] |}]
 ;;
 
@@ -271,7 +271,7 @@ let%expect_test _ =
   | h :: tl -> h|};
   [%expect
     {|
-    res: (TFunction ((TPoly "_p0"), (TFunction (TInt, (TPoly "_p1")))))
+    res: (TFunction ((TPoly "_p0"), (TFunction (TInt, TInt))))
      substs: [("_p4", TInt); ("_p6", TInt); ("_p7", (TList TInt)); ("_p5", (TList TInt));
       ("_p1", TInt); ("_p2", (TList TInt)); ("_p3", (TList TInt))] |}]
 ;;
@@ -287,7 +287,8 @@ let%expect_test _ =
   test_infer_exp {|(fun f x -> f)(fun f x -> f)|};
   [%expect
     {|
-    res: (TPoly "_p0")
+    res: (TFunction ((TPoly "_p2"),
+       (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))))
      substs: [("_p0",
       (TFunction ((TPoly "_p2"),
          (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))
@@ -321,7 +322,7 @@ let%expect_test _ =
       in fiboCPS 2 (fun x -> x)|};
   [%expect
     {|
-    res: (TPoly "_p11")
+    res: TInt
      substs: [("_p11", TInt); ("_pa", TInt); ("_p13", TInt);
       ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p1", TInt);
       ("_p9", TInt); ("_pd", TInt); ("_p10", TInt); ("_pf", TInt);
