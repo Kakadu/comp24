@@ -63,6 +63,8 @@ type expression =
   | EFun of pattern * expression (** fun P -> E*)
   | ELetIn of rec_flag * pattern * expression * expression (** let f x = E1 *)
   | ETuple of expression list
+  | EIf of expression * expression * expression (** if e1 then e2 else e3 *)
+  | EMatch of expression * (pattern * expression) list (** match e with p1 -> e1 |...| pn -> en *)
 [@@deriving show { with_path = false }]
 
 type declaration = rec_flag * pattern * expression [@@deriving show { with_path = false }]

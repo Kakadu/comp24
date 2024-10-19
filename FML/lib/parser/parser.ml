@@ -185,6 +185,15 @@ let parse_expr =
     [ parens self; parse_econst; parse_identifier; parse_etuple self; parse_efun self ]
 ;;
 
+let parse_eif arg =
+  skip_while is_whitespace *>
+    (lift3
+       (fun i t e -> EIf (i, t, e))
+       (skip_wspace *> string "if" *> arg)
+       (skip_wspace *> string "then" *> arg)
+       (skip_wspace *> string "else" *> arg))
+;;
+
 (* ------------------------- *)
 
 (* Expressions bin_op *)
