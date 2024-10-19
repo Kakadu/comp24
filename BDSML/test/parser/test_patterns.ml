@@ -150,3 +150,20 @@ let%expect_test "or test" =
        ))
     |}]
 ;;
+
+let%expect_test "or inside of list test" =
+  test_pattern "[1|2; 3]";
+  [%expect {|
+    (Pat_construct ("::",
+       (Some (Pat_tuple
+                [(Pat_or ((Pat_constant (Const_int 1)),
+                    (Pat_constant (Const_int 2))));
+                  (Pat_construct ("::",
+                     (Some (Pat_tuple
+                              [(Pat_constant (Const_int 3));
+                                (Pat_construct ("[]", None))]))
+                     ))
+                  ]))
+       ))
+    |}]
+;;
