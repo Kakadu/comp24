@@ -11,7 +11,9 @@ depends: [
   "ocaml"
   "dune" {>= "3.16"}
   "ppx_deriving"
+  "ppx_inline_test" {with-test}
   "odoc" {with-doc}
+  "ocamlformat" {build}
 ]
 build: [
   ["dune" "subst"] {dev}

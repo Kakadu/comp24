@@ -17,4 +17,10 @@
  (name BDSML)
  (synopsis "Based Development Sadistic Meta Language")
  (description "A compiler for BDSML")
- (depends ocaml dune ppx_deriving))
+ (depends
+  ocaml
+  dune
+  ppx_deriving
+  (ppx_inline_test :with-test)
+  (odoc :with-doc)
+  (ocamlformat :build)))
