@@ -59,6 +59,7 @@ let between left right exp = left *> exp <* right
 
 let between_parens exp =
   skip_whitespace *> between (Angstrom.char '(') (Angstrom.char ')') exp
+  <* skip_whitespace
 ;;
 
 let chainl1 e op =
@@ -115,7 +116,7 @@ let rec p_list_type t =
 let p_type : typeName t =
   fix (fun p_type ->
     let atomic_type = p_basic_type <|> between_parens p_type in
-    let list_type = p_list_type atomic_type <|> atomic_type <|> p_list_type p_type in
+    let list_type = p_list_type atomic_type <|> atomic_type in
     let tuple_type = p_tuple_type list_type <|> list_type in
     p_function_type tuple_type <|> tuple_type)
 ;;
