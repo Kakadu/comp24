@@ -169,7 +169,6 @@ let pattern =
 (*----------------------------- Expressions ----------------------------------*)
 let econst c = EConst c
 let evar x = EVar x
-let ebinop op e1 e2 = EBin_op (op, e1, e2)
 let eif e1 e2 e3 = EIf (e1, e2, e3)
 let ematch e cl = EMatch (e, cl)
 let elet f bl e = ELet (f, bl, e)
@@ -208,18 +207,31 @@ let pelet pe =
     (token "in" *> pe)
 ;;
 
-let pmul = token "*" *> return (ebinop Mul)
-let pdiv = token "/" *> return (ebinop Div)
-let padd = token "+" *> return (ebinop Add)
-let psub = token "-" *> return (ebinop Sub)
-let peq = token "=" *> return (ebinop Eq)
-let plt = token "<" *> return (ebinop Lt)
-let plte = token "<=" *> return (ebinop Lte)
-let pneq = token "<>" *> return (ebinop Neq)
-let pgt = token ">" *> return (ebinop Gt)
-let pgte = token ">=" *> return (ebinop Gte)
-let pand = token "&&" *> return (ebinop And)
-let por = token "||" *> return (ebinop Or)
+let op_starts_with s =
+  let* start = token s in
+  let* rest = take_while
+       (function
+         | '*' | '/' | '+' | '-' | '=' | '<' | '>' | '&' | '|' -> true
+         | _ -> false)
+in
+return (start ^ rest )
+;;
+
+let parse_op start =
+  let* op = op_starts_with start in
+ return (fun e1 e2 -> EApply (EApply (EVar op, e1), e2))
+let pmul = parse_op "*"
+let pdiv = parse_op "/"
+let padd = parse_op "+"
+let psub = parse_op "-"
+let peq = parse_op "="
+let plt = parse_op "<"
+let plte = parse_op "<="
+let pneq = parse_op "<>"
+let pgt = parse_op ">"
+let pgte = parse_op ">="
+let pand = parse_op "&"
+let por = parse_op "|"
 
 let expr =
   fix (fun expr ->
