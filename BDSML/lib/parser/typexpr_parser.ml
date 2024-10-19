@@ -8,10 +8,9 @@ open Angstrom
 open Utils
 
 (** [int] *)
-let parse_single s =
-  (let+ id = parse_ident_name in
-   Type_single id)
-  <|> s
+let parse_single =
+  let+ id = parse_ident_name in
+  Type_single id
 ;;
 
 (** [int t list] *)
@@ -22,7 +21,7 @@ let parse_params s =
     >>= go
     <|> return acc
   in
-  let* init = parse_single s in
+  let* init = parse_single <|> s in
   go init
 ;;
 
@@ -44,11 +43,7 @@ let parse_fun s =
   | _ -> fail "invalid state in function type"
 ;;
 
-let parse_type = fix (fun s -> remove_parents @@ parse_fun s <|> parse_fun s)
-
-(** [a:int] *)
-let parse_ident =
-  let* name = parse_ident_name in
-  let+ id_type = char ':' *> parse_type >>| Option.some <|> return None in
-  { name; id_type }
+(** [:int] *)
+let parse_typexpr : typexpr t =
+  check_char ':' *> fix (fun s -> remove_parents @@ parse_fun s <|> parse_fun s)
 ;;

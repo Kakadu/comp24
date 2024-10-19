@@ -5,4 +5,4 @@
 open Angstrom
 open Ast
 
-val parse_ident : ident t
+val parse_typexpr : typexpr t

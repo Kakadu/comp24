@@ -8,18 +8,11 @@ type constant =
   | Const_string of string (** String literal, e.g. ["something"] *)
 [@@deriving show { with_path = false }]
 
-type decl_type =
-  | Type_params of decl_type * string (** e.g. [int list] *)
-  | Type_tuple of decl_type list (** e.g. [int * int] *)
+type typexpr =
+  | Type_params of typexpr * string (** e.g. [int list] *)
+  | Type_tuple of typexpr list (** e.g. [int * int] *)
   | Type_single of string (** e.g. [int] *)
-  | Type_fun of decl_type list (** e.g. [int -> int] *)
-[@@deriving show { with_path = false }]
-
-(** Var name and type of it, e.g. [(a: int)]*)
-type ident =
-  { name : string
-  ; id_type : decl_type option
-  }
+  | Type_fun of typexpr list (** e.g. [int -> int] *)
 [@@deriving show { with_path = false }]
 
 type rec_flag =
@@ -29,7 +22,8 @@ type rec_flag =
 
 type pattern =
   | Pat_any (** Pattern any [_] *)
-  | Pat_var of ident (** Var pattern, e.g. [x] *)
+  | Pat_var of string (** Var pattern, e.g. [x] *)
+  | Par_type of string * typexpr (**Pattern with type, e.g. [x:int]*)
   | Pat_constant of constant (** Constant patterns, e.g. [69], ['m'], ["something"] *)
   | Pat_tuple of pattern list
   (** Pattern for many elements, e.g. [P1, ..., Pn] ([n >= 2]) *)
@@ -54,8 +48,9 @@ and case =
 [@@deriving show { with_path = false }]
 
 and expression =
-  | Exp_ident of ident (** Identifiers, e.g. [some_var] *)
+  | Exp_ident of string (** Identifiers, e.g. [some_var] *)
   | Exp_constant of constant (** Expression constant, e.g. [69], ['m'], ["something"] *)
+  | Exp_type of expression * typexpr (** Expression with type, e.g. [69:int] *)
   | Exp_let of rec_flag * value_binding list * expression
   (** [Exp_let(flag, [(P1,E1) ; ... ; (Pn,En)], E)] represents:
       - [let P1 = E1 and ... and Pn = EN in E]     when [flag] is [Nonrecursive]
