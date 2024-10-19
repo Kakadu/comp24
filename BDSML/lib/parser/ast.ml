@@ -23,7 +23,7 @@ type rec_flag =
 type pattern =
   | Pat_any (** Pattern any [_] *)
   | Pat_var of string (** Var pattern, e.g. [x] *)
-  | Par_type of string * typexpr (**Pattern with type, e.g. [x:int]*)
+  | Pat_type of pattern * typexpr (**Pattern with type, e.g. [x:int]*)
   | Pat_constant of constant (** Constant patterns, e.g. [69], ['m'], ["something"] *)
   | Pat_tuple of pattern list
   (** Pattern for many elements, e.g. [P1, ..., Pn] ([n >= 2]) *)
