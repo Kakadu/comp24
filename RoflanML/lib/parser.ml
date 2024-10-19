@@ -99,14 +99,24 @@ let ptype =
     let pint_type = pstoken "int" *> return TInt in
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
-    let pwrapped_type = pparens ptype in
-    let simple_type = choice [ pint_type; pbool_type; punit_type; pwrapped_type ] in
-    chainr1 simple_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
+    let simple_type = choice [ pint_type; pbool_type; punit_type; pparens ptype ] in
+    let list_type = simple_type >>= fun t -> pstoken "list" *> return (TList t) in
+    let tuple_type =
+      chainl1
+        (choice [ list_type; simple_type ])
+        (pstoken "*"
+         *> return (fun t1 t2 ->
+           match t1, t2 with
+           | TTuple lst1, TTuple lst2 -> TTuple (lst1 @ lst2)
+           | TTuple lst, t -> TTuple (lst @ [ t ])
+           | t1, t2 -> TTuple [ t1; t2 ]))
+    in
+    chainr1 tuple_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
 ;;
 
 let ptyped_var =
   pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, Some ty)
-  <|> (pid >>| fun id -> id, None)
+  <|> (pid >>= fun id -> return (id, None))
 ;;
 
 let plet_no_args pexpr =

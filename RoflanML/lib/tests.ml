@@ -138,4 +138,38 @@ module ParserTests = struct
             (EApp ((EVar "g"), [(EVar "x"); (EVar "y")])))),
          None)) |}]
   ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f (x: int * bool) = x";
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun ([("x", (Some (TTuple [TInt; TBool])))], (EVar "x"))), None)) |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f (x: (int * bool) -> unit) = x";
+    [%expect
+      {|
+    (ELet (NonRec, "f",
+       (EFun ([("x", (Some (TFun ((TTuple [TInt; TBool]), TUnit))))], (EVar "x")
+          )),
+       None)) |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f (x: int list) = x";
+    [%expect
+      {|
+    (ELet (NonRec, "f", (EFun ([("x", (Some (TList TInt)))], (EVar "x"))), None)) |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f (x: int * bool list) = x";
+    [%expect
+      {|
+    (ELet (NonRec, "f",
+       (EFun ([("x", (Some (TTuple [TInt; (TList TBool)])))], (EVar "x"))), None
+       )) |}]
+  ;;
 end
