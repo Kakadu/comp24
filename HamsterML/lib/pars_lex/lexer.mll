@@ -52,6 +52,7 @@ rule read =
     | ']'       { RIGHT_SQ_BRACKET }
     | "::"      { DOUBLE_COLON }
     | ':'       { COLON }
+    | ';'       { SEMICOLON }
     | ','       { COMMA }
     | '+'       { PLUS }
     | "->"      { ARROW }
