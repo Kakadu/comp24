@@ -143,7 +143,7 @@ let%expect_test _ =
 (* EApp *)
 
 let%expect_test _ =
-  let test = "in_popka yes no" in
+  let test = "is_something yes no" in
   start_test parse_expression show_expression test;
   [%expect
     {|
