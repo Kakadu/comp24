@@ -131,7 +131,7 @@ let parse_capitalized_ident =
   lift2 String.( ^ ) parse_first parse_rest
 ;;
 
-let parse_ident_name = parse_lowercase_ident <* ws
+let parse_ident_name = ws *> parse_lowercase_ident
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 let chainl1 e op =

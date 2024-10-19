@@ -12,7 +12,7 @@ type decl_type =
   | Type_params of decl_type * string (** e.g. [int list] *)
   | Type_tuple of decl_type list (** e.g. [int * int] *)
   | Type_single of string (** e.g. [int] *)
-  | Type_fun of decl_type * decl_type (** e.g. [int -> int] *)
+  | Type_fun of decl_type list (** e.g. [int -> int] *)
 [@@deriving show { with_path = false }]
 
 (** Var name and type of it, e.g. [(a: int)]*)
