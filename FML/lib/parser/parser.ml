@@ -76,10 +76,7 @@ let parse_int =
   skip_wspace *> take_while1 is_digit <* skip_wspace >>| int_of_string >>| cint
 ;;
 
-let parse_bool =
-  token "true" <|> string "false" >>| bool_of_string >>| cbool
-;;
-
+let parse_bool = token "true" <|> string "false" >>| bool_of_string >>| cbool
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Type annotations parsers *)
@@ -97,16 +94,11 @@ let parse_list_type p_type =
 ;;
 
 let parse_tuple_type p_type =
-  lift2
-    (fun h tl -> ATuple (h :: tl))
-    p_type
-    (many1 (token "*" *> p_type))
+  lift2 (fun h tl -> ATuple (h :: tl)) p_type (many1 (token "*" *> p_type))
 ;;
 
 let parse_function_type p_type =
-  let fun_helper =
-    token "->" *> return (fun arg ret -> AFunction (arg, ret))
-  in
+  let fun_helper = token "->" *> return (fun arg ret -> AFunction (arg, ret)) in
   chainr1 p_type fun_helper
 ;;
 
@@ -133,10 +125,7 @@ let parse_pcons p_pattern =
 
 let parse_ptuple p_pattern =
   parens
-  @@ lift2
-       (fun h tl -> ptuple (h :: tl))
-       p_pattern
-       (many1 (token "," *> p_pattern))
+  @@ lift2 (fun h tl -> ptuple (h :: tl)) p_pattern (many1 (token "," *> p_pattern))
 ;;
 
 let parse_pattern_wout_type =
@@ -166,17 +155,28 @@ let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
 
 (* ------------------------- *)
 
+(* Expressions bin_op *)
+
+let add = string "+" *> return Add
+let sub = string "-" *> return Sub
+let mul = string "*" *> return Mul
+let div = string "/" *> return Div
+let eq = string "=" *> return Eq
+let neq = string "!=" *> return NEq <|> string "<>" *> return NEq
+let gt = string ">" *> return Gt
+let gte = string ">=" *> return Gte
+let lt = string "<" *> return Lt
+let lte = string "<=" *> return Lte
+let and_ = string "&&" *> return And
+let or_ = string "||" *> return Or
+
 (* Expressions parsers *)
 
 let parse_econst = parse_const econst
 let parse_identifier = parse_identifier eidentifier
 
 let parse_etuple p_expr =
-  parens
-  @@ lift2
-       (fun h tl -> etuple (h :: tl))
-       p_expr
-       (many1 (token "," *> p_expr))
+  parens @@ lift2 (fun h tl -> etuple (h :: tl)) p_expr (many1 (token "," *> p_expr))
 ;;
 
 let parse_efun p_expr =
@@ -196,16 +196,19 @@ let rec parse_bundle pexpr =
   expr_with_pattern <|> token "fun" *> parse_efun pexpr
 ;;
 
-let parse_ebinop chain1 e parse_binop = chain1 e (parse_binop >>| fun op e1 e2 -> EBinaryOperation (op, e1, e2))
+let parse_ebinop chain1 e parse_binop =
+  chain1 e (parse_binop >>| fun op e1 e2 -> EBinaryOperation (op, e1, e2))
+;;
+
 let parse_lbinop = parse_ebinop chainl1
 
 let parse_eif arg =
-  skip_while is_whitespace *>
-    (lift3
+  skip_while is_whitespace
+  *> lift3
        (fun i t e -> EIf (i, t, e))
        (token "if" *> arg)
        (token "then" *> arg)
-       (token "else" *> arg))
+       (token "else" *> arg)
 ;;
 
 let parse_match pexpr =
@@ -223,33 +226,34 @@ let parse_let pexpr =
   *> lift4
        (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
        (token "rec" *> return Rec <|> return NoRec)
-       (skip_while is_whitespace *> (token "()") <|> identifier >>| fun var -> PIdentifier var)
-       (skip_while is_whitespace *> (token "=") *> pexpr <|> parse_bundle pexpr)
+       (skip_while is_whitespace *> token "()"
+        <|> identifier
+        >>| fun var -> PIdentifier var)
+       (skip_while is_whitespace *> token "=" *> pexpr <|> parse_bundle pexpr)
        (token "in" *> pexpr)
 ;;
 
 let parse_expr =
   fix
-  @@ fun self ->
-  choice
-    [ parens self; parse_econst; parse_identifier; parse_etuple self; parse_efun self ]
+  @@ fun expr ->
+  let expr =
+    choice
+      [ parens expr; parse_econst; parse_identifier; parse_etuple expr; parse_efun expr ]
+  in
+  let apply =
+    lift2
+      (fun f args ->
+        Base.List.fold_left ~f:(fun f arg -> EApplication (f, arg)) ~init:f args)
+      expr
+      (many (char ' ' *> skip_while is_whitespace *> expr))
+  in
+  let expr = parse_lbinop apply (mul <|> div) in
+  let expr = parse_lbinop expr (add <|> sub) in
+  let expr = parse_lbinop expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
+  choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
 ;;
 
 (* ------------------------- *)
-
-(* Expressions bin_op *)
-
-let add = string "+" *> return Add
-let sub = string "-" *> return Sub
-let div = string "/" *> return Div
-let eq = string "=" *> return Eq
-let neq = string "!=" *> return NEq <|> string "<>" *> return NEq
-let gt = string ">" *> return Gt
-let gte = string ">=" *> return Gte
-let lt = string "<" *> return Lt
-let lte = string "<=" *> return Lte
-let and_ = string "&&" *> return And
-let or_ = string "||" *> return Or
 
 (* Declaration parser *)
 let parse_declaration =
