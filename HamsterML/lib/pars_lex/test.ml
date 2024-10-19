@@ -1,6 +1,3 @@
-(* open Lexer
-   open Lexing *)
-
 let token_to_string = function
   | Parser.IF -> "IF"
   | Parser.THEN -> "THEN"
@@ -75,6 +72,7 @@ let rec print_list f lst =
    print_list token_to_string real;
    true
    ;; *)
+
 
 let%test _ = get_tokens "\"rofl\"" = [ Parser.STRING "rofl" ]
 let%test _ = get_tokens "228" = [ Parser.INT 228 ]
