@@ -84,17 +84,25 @@ type fresh = int
 module Type = struct
   type t = ty
 
-  let rec occurs_in v = function
+  let rec occurs_in v =
+    let occurs_in_list ts =
+      List.fold ts ~init:false ~f:(fun acc t -> acc || occurs_in v t)
+    in
+    function
     | TVar (b, _) -> b = v
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
-    | TInt | TString | TBool | TUnknown -> false
+    | TList t -> occurs_in v t
+    | TTuple ts -> occurs_in_list ts
+    | TInt | TString | TBool | TUnknown | TPrim _ -> false
   ;;
 
   let free_vars =
     let rec helper acc = function
       | TVar (b, _) -> VarSet.add b acc
       | TArrow (l, r) -> helper (helper acc l) r
-      | TInt | TBool | TString | TUnknown -> acc
+      | TTuple ts -> List.fold ts ~init:acc ~f:helper
+      | TList t -> helper acc t
+      | TInt | TBool | TString | TUnknown | TPrim _ -> acc
     in
     helper VarSet.empty
   ;;
@@ -162,22 +170,30 @@ end = struct
   ;;
 
   let rec unify l r =
+    let unify_lists l1 l2 =
+      let subs =
+        List.fold2 l1 l2 ~init:(return empty) ~f:(fun subs a b ->
+          let* subs = subs in
+          let sa = apply subs a in
+          let sb = apply subs b in
+          let* sub1 = unify sa sb in
+          compose subs sub1)
+      in
+      match subs with
+      | Ok res -> res
+      | Unequal_lengths -> fail (`Unification_failed (l, r))
+    in
     match l, r with
     | TInt, TInt | TBool, TBool -> return empty
     | TVar (a, _), TVar (b, _) when Int.equal a b -> return empty
-    | TVar (b, _), t | t, TVar (b, _) ->
-      Format.printf "%s\n" (show_ty l);
-      Format.printf "%s\n" (show_ty r);
-      singleton b t
+    | TVar (b, _), t | t, TVar (b, _) -> singleton b t
     | TArrow (l1, r1), TArrow (l2, r2) ->
       let* subs1 = unify l1 l2 in
       let* subs2 = unify (apply subs1 r1) (apply subs1 r2) in
       compose subs1 subs2
-    | _ ->
-      Format.printf "%s\n" (show_ty l);
-      Format.printf "%s\n" (show_ty r);
-      Format.printf "%s\n" "asdf";
-      fail (`Unification_failed (l, r))
+    | TList a, TList b -> unify a b
+    | TTuple a, TTuple b -> unify_lists a b
+    | _ -> fail (`Unification_failed (l, r))
 
   and extend s (k, v) =
     match find k s with
@@ -284,12 +300,47 @@ let lookup_env e xs =
   match Map.find_exn xs e with
   | (exception Stdlib.Not_found) | (exception Not_found_s _) -> fail (`No_variable e)
   | scheme ->
-    (* Format.printf "%s" (show_scheme scheme); *)
     let* ans = instantiate scheme in
     return (Subst.empty, ans)
 ;;
 
 let infer =
+  let rec (pattern_helper : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t) =
+    fun env ->
+    let rec eval_list_helper envpat =
+      let* env, patterns = envpat in
+      match patterns with
+      | [] -> return (env, [])
+      | hd :: tl ->
+        let* envhd, tyhd = pattern_helper env hd in
+        let new_envpat = return (envhd, tl) in
+        let* envtl, tytl = eval_list_helper new_envpat in
+        return (envtl, tyhd :: tytl)
+    in
+    function
+    | PCon (head, tail) ->
+      let* env, ty1 = pattern_helper env head in
+      let ty1 = list_typ ty1 in
+      let* env, ty2 = pattern_helper env tail in
+      let* subst = unify ty1 ty2 in
+      let finenv = TypeEnv.apply subst env in
+      return (finenv, Subst.apply subst ty1)
+    | PConst const ->
+      (match const with
+       | CBool _ -> return (env, TPrim "bool")
+       | CInt _ -> return (env, TPrim "int")
+       | CNil -> return (env, TPrim "'a list"))
+    | PVar (id, _) ->
+      let* tv = fresh_var in
+      let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
+      return (env, tv)
+    | PTuple tuple ->
+      let* finenv, fintys = eval_list_helper @@ return (env, tuple) in
+      return (finenv, tuple_typ fintys)
+    | PWild ->
+      let* ty = fresh_var in
+      return (env, ty)
+  in
   let rec (helper : TypeEnv.t -> Ast.expression -> (Subst.t * ty) R.t) =
     fun env -> function
     | EBinaryOp (bin_op, l, r) ->
@@ -311,37 +362,11 @@ let infer =
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
          return (sres, bool_typ))
     | EVar (x, _) -> lookup_env x env
-    (* | EVar (x, TInt) ->
-       let* a, _ = lookup_env x env
-       in
-       return (a, int_typ)
-       | EVar (_, TBool) -> return (Subst.empty, bool_typ)
-       | EVar (_, TString) -> return (Subst.empty, str_typ) *)
     | EFun (p, e1) ->
-      let* tv = fresh_var in
-      let* env2 =
-        match p with
-        | PVar (x, TUnknown) -> return (TypeEnv.extend env (x, S (VarSet.empty, tv)))
-        | PVar (x, TInt) ->
-          (* let print_map = function
-             | a, b , _ -> Format.printf "%s" (a); Format.printf "%s" (show_scheme b);
-             in
-             print_map env; *)
-          let* a = get_fresh in
-          return (TypeEnv.extend env (x, S (VarSet.empty, TVar (a, TInt))))
-        (* | PVar (x, TInt) -> return (TypeEnv.extend env (x, S (VarSet.empty, int_typ)))
-           | PVar (x, TBool) -> return (TypeEnv.extend env (x, S (VarSet.empty, bool_typ))) *)
-        | PVar (x, TString) ->
-          let* a = get_fresh in
-          return (TypeEnv.extend env (x, S (VarSet.empty, TVar (a, TString))))
-        | PVar (x, TBool) ->
-          let* a = get_fresh in
-          return (TypeEnv.extend env (x, S (VarSet.empty, TVar (a, TBool))))
-        | _ -> return env
-      in
-      let* s, ty = helper env2 e1 in
-      let trez = TArrow (Subst.apply s tv, ty) in
-      return (s, trez)
+      let* env, t1 = pattern_helper env p in
+      let* s, t2 = helper env e1 in
+      let typedres = TArrow (Subst.apply s t1, t2) in
+      return (s, typedres)
     | EApp (e1, e2) ->
       let* s1, t1 = helper env e1 in
       let* s2, t2 = helper (TypeEnv.apply s1 env) e2 in
@@ -354,7 +379,28 @@ let infer =
       (match n with
        | CInt _ -> return (Subst.empty, int_typ)
        | CBool _ -> return (Subst.empty, bool_typ)
-       | CString _ -> return (Subst.empty, str_typ))
+       | CNil ->
+         let* var = fresh_var in
+         return (Subst.empty, list_typ var))
+    | EList (h, t) ->
+      let* s1, t1 = helper env h in
+      let t1 = list_typ t1 in
+      let* s2, t2 = helper env t in
+      let* s3 = unify t1 t2 in
+      let* subst = Subst.compose_all [ s1; s2; s3 ] in
+      return (subst, Subst.apply subst t1)
+    | ETuple tuple ->
+      let* s, t =
+        List.fold
+          tuple
+          ~init:(return (Subst.empty, []))
+          ~f:(fun acc expr ->
+            let* tuple_s, tuple = acc in
+            let* s, t = helper env expr in
+            let* subst = Subst.compose s tuple_s in
+            return (subst, t :: tuple))
+      in
+      return (s, tuple_typ (List.rev t))
     | EIfElse (c, th, el) ->
       let* s1, t1 = helper env c in
       let* s2, t2 = helper env th in

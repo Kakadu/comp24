@@ -19,12 +19,15 @@ end
 type binder_set = VarSet.t [@@deriving show { with_path = false }]
 
 type ty =
+  | TPrim of string
   | TBool
   | TInt
   | TString
   | TUnknown
   | TVar of binder * ty
   | TArrow of ty * ty
+  | TList of ty
+  | TTuple of ty list
 [@@deriving eq, show { with_path = false }]
 
 type error =
@@ -39,15 +42,24 @@ let arrow l r = TArrow (l, r)
 let int_typ = TInt
 let bool_typ = TBool
 let str_typ = TString
+let list_typ l = TList l
+let tuple_typ t = TTuple t
 let unit_typ = TUnknown
 let v x = TVar (x, TUnknown)
 let v1 x t = TVar (x, t)
 
+let pp_list helper l sep =
+  Format.pp_print_list ~pp_sep:(fun ppf _ -> Format.fprintf ppf sep) helper l
+;;
+
 let rec pp_typ ppf = function
+  | TPrim s -> pp_print_string ppf s
   | TVar (n, _) -> fprintf ppf "%s" @@ "'" ^ Char.escaped (Char.chr (n + 97))
   | TInt -> fprintf ppf "int"
   | TBool -> fprintf ppf "bool"
   | TString -> fprintf ppf "string"
+  | TList t -> fprintf ppf "%a list" pp_typ t
+  | TTuple ts -> fprintf ppf "(%a)" (fun ppf -> pp_list pp_typ ppf " * ") ts
   | TArrow (l, r) ->
     (match l with
      | TArrow (_, _) -> fprintf ppf "(%a) -> %a" pp_typ l pp_typ r

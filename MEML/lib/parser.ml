@@ -90,22 +90,8 @@ let parse_int =
   lift2 (fun sign digit -> CInt (Int.of_string @@ sign ^ digit)) ps pd
 ;;
 
-let parse_str =
-  char '"' *> take_while (fun a -> not (phys_equal a '"'))
-  <* char '"'
-  >>| fun a -> CString a
-;;
-
-let tint = stoken "int" *> return TInt
-
 (* Var parsers *)
-let constr_type =
-  (fun _ -> TInt)
-  <$> string "int"
-  <|> ((fun _ -> TBool) <$> string "bool")
-  <|> ((fun _ -> TString) <$> string "string")
-;;
-
+let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool")
 let parse_arrow = parse_empty @@ stoken "->"
 
 let parse_types =
@@ -142,15 +128,66 @@ let parse_pvar =
   <|> brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
 ;;
 
-let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_str ]
+let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool ]
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
+
+let parse_tuple parser =
+  lift2 (fun a b -> PTuple (a :: b)) (token parser) (many1 (stoken "," *> parser))
+;;
+
+let rec constr_con = function
+  | [] -> PConst CNil
+  | hd :: [] when equal_pattern hd (PConst CNil) -> PConst CNil
+  | [ f; s ] -> PCon (f, s)
+  | hd :: tl -> PCon (hd, constr_con tl)
+;;
+
+let parser_con c =
+  lift2
+    (fun a b -> constr_con @@ (a :: b))
+    (c <* stoken "::" <|> (brackets c <* stoken "::"))
+    (sep_by (stoken "::") (c <|> brackets c))
+;;
+
+let parse_con_2 parser constructor =
+  constructor <$> (stoken "[" *> sep_by1 (stoken ";") parser <* stoken "]")
+;;
+
 let parse_pattern = parse_wild <|> parse_pconst <|> parse_pvar
+
+type pdispatch =
+  { value : pdispatch -> pattern t
+  ; tuple : pdispatch -> pattern t
+  ; con : pdispatch -> pattern t
+  ; pattern : pdispatch -> pattern t
+  }
+
+let pack =
+  let pattern pack = choice [ pack.con pack; pack.tuple pack; pack.value pack ] in
+  let parse pack = choice [ pack.value pack; brackets @@ pack.tuple pack ] in
+  let con pack =
+    fix
+    @@ fun _ ->
+    parser_con (parse pack <|> brackets @@ pack.con pack)
+    <|> parse_con_2 (parse pack <|> brackets @@ pack.con pack) constr_con
+  in
+  let value pack =
+    fix
+    @@ fun _ -> parse_wild <|> parse_pconst <|> parse_pvar <|> brackets @@ pack.value pack
+  in
+  let tuple pack =
+    fix @@ fun _ -> parse_tuple (parse pack <|> brackets @@ pack.tuple pack)
+  in
+  { value; tuple; pattern; con }
+;;
+
+let pat = pack.pattern pack
 
 (** Expression type *)
 
 (* EConst *)
 
-let parse_econst = (fun v -> EConst v) <$> choice [ parse_int; parse_bool; parse_str ]
+let parse_econst = (fun v -> EConst v) <$> choice [ parse_int; parse_bool ]
 
 (* EVar *)
 
@@ -196,7 +233,11 @@ let parse_eifelse i expr =
 (* EFun *)
 
 let constr_efun pl e = List.fold_right ~init:e ~f:(fun p e -> EFun (p, e)) pl
-let parse_fun_args = brackets_or_not @@ many1 parse_pattern
+
+let parse_fun_args =
+  fix
+  @@ fun p -> many1 (pack.con pack <|> pack.value pack <|> pack.value pack) <|> brackets p
+;;
 
 let parse_efun expr =
   brackets_or_not
@@ -253,7 +294,50 @@ let parse_eletin expr =
     (stoken "in" *> expr)
 ;;
 
+let parse_cons_semicolon_expr parser constructor =
+  constructor <$> (stoken "[" *> sep_by1 (stoken ";") parser <* stoken "]")
+;;
+
+let parse_tuple_expr parser =
+  lift2 (fun a b -> ETuple (a :: b)) (parser <* stoken ",") (sep_by1 (stoken ",") parser)
+;;
+
 (* Expression parsers *)
+
+(* let parse_expression =
+   parse_eletin
+   <|> parse_eifelse
+   <|> parse_ebinop
+   <|> parse_econst
+   <|> parse_evar
+   <|> parse_eapp
+   ;; *)
+
+let ebinop_p expr =
+  let helper p op =
+    parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
+  in
+  let add_p = helper (char '+') Add in
+  let sub_p = helper (char '-') Sub in
+  let mul_p = helper (char '*') Mul in
+  let div_p = helper (char '/') Div in
+  let and_p = helper (string "&&") And in
+  let or_p = helper (string "||") Or in
+  let eq_p = helper (char '=') Eq in
+  let neq_p = helper (string "<>") Neq in
+  let gt_p = helper (char '>') Gre in
+  let lt_p = helper (char '<') Less in
+  let gte_p = helper (string ">=") Greq in
+  let lte_p = helper (string "<=") Less in
+  let muldiv_op = chainl1 expr (mul_p <|> div_p) in
+  let addsub_op = chainl1 muldiv_op (add_p <|> sub_p) in
+  let compare_op =
+    chainl1 addsub_op (neq_p <|> gte_p <|> gt_p <|> lte_p <|> lt_p <|> eq_p)
+  in
+  let and_op = chainl1 compare_op and_p in
+  let or_op = chainl1 and_op or_p in
+  or_op
+;;
 
 type edispatch =
   { evar : edispatch -> expression t
@@ -264,6 +348,8 @@ type edispatch =
   ; eifelse : edispatch -> expression t
   ; eapp : edispatch -> expression t
   ; expression : edispatch -> expression t
+  ; lists : edispatch -> expression t
+  ; tuples : edispatch -> expression t
   }
 
 let pack =
@@ -275,6 +361,8 @@ let pack =
     <|> pack.eifelse pack
     <|> pack.efun pack
     <|> pack.eletin pack
+    <|> brackets @@ choice [ pack.tuples pack; pack.ebinop pack ]
+    <|> pack.lists pack
   in
   let eifelse pack =
     fix
@@ -288,6 +376,16 @@ let pack =
              <|> pack.eifelse pack)
     in
     parse_eifelse parse_if (pack.expression pack) <|> brackets @@ pack.eifelse pack
+  in
+  let lists pack =
+    fix
+    @@ fun _ ->
+    let rec create_cons_sc = function
+      | [] -> EConst CNil
+      | hd :: [] when equal_expression hd (EConst CNil) -> EConst CNil
+      | hd :: tl -> EList (hd, create_cons_sc tl)
+    in
+    parse_cons_semicolon_expr (expression pack) create_cons_sc
   in
   let ebinop pack =
     fix
@@ -314,6 +412,7 @@ let pack =
     in
     parse_efun efun_parse <|> brackets @@ pack.efun pack
   in
+  let tuples pack = fix @@ fun _ -> parse_tuple_expr (expression pack) in
   let eapp pack =
     fix
     @@ fun _ ->
@@ -337,7 +436,7 @@ let pack =
   let eletin pack =
     fix @@ fun _ -> parse_eletin @@ pack.expression pack <|> brackets @@ pack.eletin pack
   in
-  { evar; econst; ebinop; eifelse; efun; eletin; eapp; expression }
+  { evar; econst; ebinop; eifelse; efun; eletin; eapp; expression; lists; tuples }
 ;;
 
 let parse_expression = pack.expression pack
