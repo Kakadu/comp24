@@ -83,24 +83,29 @@ let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
         | Some x -> fail (Format.sprintf "Unbound value %s" x))
 ;;
 
-let rec infer_expr : Ast.expr -> (state, Ast.typeName) t = function
-  | Ast.EConstant c -> return (const2type c)
-  | Ast.EIdentifier name -> infer_ident name
-  | Ast.ENil ->
-    let* tv = fresh_tv in
-    return (Ast.TList tv)
-  | Ast.EFunction (arg, body) -> infer_func arg body
-  | Ast.EApplication (fun_exp, arg_exp) -> infer_app fun_exp arg_exp
-  | Ast.EIfThenElse (e1, e2, e3) -> infer_ifthenelse e1 e2 e3
-  | Ast.ELetIn (_rec_flag, _pattern, _expr_val, _expr_in) ->
-    fail "boba should be implemented"
-  | Ast.ETuple exp_lst ->
-    let* t_lst = map_list infer_expr exp_lst in
-    return (Ast.TTuple t_lst)
-  | Ast.EMatch (scrutin, pat_exp_lst) -> infer_match scrutin pat_exp_lst
-  | Ast.EConstraint (exp, tp) ->
-    let* exp_tp = infer_expr exp in
-    write_subst exp_tp tp *> return exp_tp
+let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
+  fun expr ->
+  let help = function
+    | Ast.EConstant c -> return (const2type c)
+    | Ast.EIdentifier name -> infer_ident name
+    | Ast.ENil ->
+      let* tv = fresh_tv in
+      return (Ast.TList tv)
+    | Ast.EFunction (arg, body) -> infer_func arg body
+    | Ast.EApplication (fun_exp, arg_exp) -> infer_app fun_exp arg_exp
+    | Ast.EIfThenElse (e1, e2, e3) -> infer_ifthenelse e1 e2 e3
+    | Ast.ELetIn (_rec_flag, _pattern, _expr_val, _expr_in) ->
+      fail "boba should be implemented"
+    | Ast.ETuple exp_lst ->
+      let* t_lst = map_list infer_expr exp_lst in
+      return (Ast.TTuple t_lst)
+    | Ast.EMatch (scrutin, pat_exp_lst) -> infer_match scrutin pat_exp_lst
+    | Ast.EConstraint (exp, tp) ->
+      let* exp_tp = infer_expr exp in
+      write_subst exp_tp tp *> return exp_tp
+  in
+  let* env = read_env in
+  help expr <* write_env env
 
 and infer_ident : string -> (state, Ast.typeName) t =
   fun name ->
@@ -126,10 +131,9 @@ and infer_app : Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
 and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
   fun e1 e2 e3 ->
   let* tp = fresh_tv in
-  let* cur_env = read_env in
-  let* t1 = infer_expr e1 <* write_env cur_env in
-  let* t2 = infer_expr e2 <* write_env cur_env in
-  let* t3 = infer_expr e3 <* write_env cur_env in
+  let* t1 = infer_expr e1 in
+  let* t2 = infer_expr e2 in
+  let* t3 = infer_expr e3 in
   write_subst t1 Ast.TInt *> write_subst tp t2 *> write_subst tp t3 *> return tp
 
 and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.typeName) t =
@@ -149,13 +153,12 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (env, substs, _), res = run (infer_expr exp) (MapString.empty, [], 0) in
+    let (_, substs, _), res = run (infer_expr exp) (MapString.empty, [], 0) in
     (match res with
      | Result.Ok tp ->
        Format.printf
-         "res: %s @\nenv: %s@\n substs: %s"
+         "res: %s@\n substs: %s"
          (Ast.show_typeName tp)
-         (show_env_map env)
          (show_subs_state substs)
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e
@@ -166,9 +169,6 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TTuple [(TPoly "_p0"); (TPoly "_p1")]), (TPoly "_p1")))
-    env: [""x"": (TFFlat (TPoly "_p0")),
-     ""y"": (TFFlat (TPoly "_p1")),
-     ]
      substs: [("_p1", TBool); ("_p0", TInt)] |}]
 ;;
 
@@ -177,9 +177,6 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TPoly "_p1"), (TPoly "_p1")))
-    env: [""x"": (TFFlat (TPoly "_p0")),
-     ""y"": (TFFlat (TPoly "_p1")),
-     ]
      substs: [("_p0", TInt); ("_p1", (TList TInt))] |}]
 ;;
 
@@ -190,9 +187,6 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TPoly "_p0"), (TFunction (TInt, (TPoly "_p1")))))
-    env: [""f"": (TFFlat (TPoly "_p0")),
-     ""list"": (TFFlat TInt),
-     ]
      substs: [("_p4", TInt); ("_p6", TInt); ("_p7", (TList TInt)); ("_p5", (TList TInt));
       ("_p1", TInt); ("_p2", (TList TInt)); ("_p3", (TList TInt))] |}]
 ;;
@@ -206,11 +200,9 @@ let%expect_test _ =
 
 let%expect_test _ =
   test_infer_exp {|(fun f x -> f)(fun f x -> f)|};
-  [%expect {|
+  [%expect
+    {|
     res: (TPoly "_p0")
-    env: [""f"": (TFFlat (TPoly "_p3")),
-     ""x"": (TFFlat (TPoly "_p4")),
-     ]
      substs: [("_p0",
       (TFunction ((TPoly "_p2"),
          (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))
