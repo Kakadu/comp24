@@ -31,6 +31,7 @@ type type_of_var =
   | TBool (** bool type for variable *)
   | TString (** string type for variable *)
   | TUnknown (** unknown type for variable *)
+  | TArrow of type_of_var * type_of_var (** type int -> int...  *)
 [@@deriving show { with_path = false }]
 
 type pattern =
