@@ -24,6 +24,8 @@ type env_map = type_form MapString.t [@@deriving show { with_path = false }]
 type tv_num = int
 type state = env_map * substitution_list * tv_num
 
+let start_state = MapString.empty, [], 0
+
 let read_env : (state, env_map) t =
   let* env, _, _ = read in
   return env
@@ -66,7 +68,9 @@ let specialise : unit MapString.t * Ast.typeName -> (state, Ast.typeName) t =
     | Ast.TList t1 -> Ast.TList (traverse t1)
     | x -> x
   in
-  return (traverse stp)
+  let new_tp = traverse stp in 
+  (* let _ = Format.printf "[spec]: %s\n" (Ast.show_typeName new_tp) in *)
+  return new_tp
 ;;
 
 let read_var_type : string -> (state, Ast.typeName option) t =
@@ -120,4 +124,3 @@ let read_tv_num : (state, int) t =
   let* _env, _substs, tv = read in
   return tv
 ;;
-
