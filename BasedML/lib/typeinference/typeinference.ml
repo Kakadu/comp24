@@ -44,13 +44,15 @@ let get_free_vars : substitution_list -> int -> Ast.typeName -> unit MapString.t
     | Ast.TTuple t_lst -> List.fold_left traverse acc t_lst
   in
   let used_tvs = traverse MapString.empty tp in
-  let free_tvs = MapString.filter (fun name _ -> List.mem_assoc name subs) used_tvs in
+  let free_tvs =
+    MapString.filter (fun name _ -> not (List.mem_assoc name subs)) used_tvs
+  in
   let loc_tvs =
     (* a little cringe *)
     MapString.filter
       (fun name _ ->
         match restore_fresh_tv_num name with
-        | Some x -> x > tv_num
+        | Some x -> x >= tv_num
         | None -> false)
       free_tvs
   in
@@ -61,7 +63,6 @@ let rec generalise
   : unit MapString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
   =
   fun free_vars pattern tp ->
-  let* tp = restore_type tp in
   let rec_call = generalise free_vars in
   match pattern, tp with
   | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
@@ -230,6 +231,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.ty
   in
   let* _ = write_subst p_tp exp_tp in
   let* subs = read_subs in
+  let* p_tp = restore_type p_tp in
   let free_vars = get_free_vars subs tv_count p_tp in
   generalise free_vars (pat_remove_constr pat) p_tp *> return p_tp
 ;;
@@ -351,7 +353,7 @@ let%expect_test _ =
   test_infer_exp {|let id = fun x -> x in id|};
   [%expect
     {|
-    res: (TFunction ((TPoly "_p0"), (TPoly "_p0")))
+    res: (TFunction ((TPoly "_p2"), (TPoly "_p2")))
      substs: [("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
 ;;
 
@@ -365,14 +367,18 @@ let%expect_test _ =
   [%expect
     {|
     res: TInt
-     substs: [("_p11", TInt); ("_pa", TInt); ("_p13", TInt);
-      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p1", TInt);
-      ("_p9", TInt); ("_pd", TInt); ("_p10", TInt); ("_pf", TInt);
-      ("_pe", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p8", TInt);
-      ("_pc", TInt); ("_pb", (TFunction ((TFunction (TInt, TInt)), TInt)));
-      ("_p0", (TFunction (TInt, (TFunction ((TFunction (TInt, TInt)), TInt)))));
-      ("_p6", TInt); ("_p7", TInt); ("_p3", TInt); ("_p4", TInt);
-      ("_p2", (TFunction (TInt, TInt))); ("_p5", TInt)] |}]
+     substs: [("_p11", TInt); ("_p14", TInt); ("_p15", TInt);
+      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p13", TInt);
+      ("_p9", TInt); ("_pd", (TPoly "_pa")); ("_p10", (TPoly "_pa"));
+      ("_pf", TInt);
+      ("_pe", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
+      ("_p8", (TPoly "_pa")); ("_pc", TInt);
+      ("_pb", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
+      ("_p0",
+       (TFunction ((TPoly "_p1"),
+          (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))))));
+      ("_p6", (TPoly "_pa")); ("_p7", TInt); ("_p3", (TPoly "_pa"));
+      ("_p4", TInt); ("_p2", (TFunction (TInt, (TPoly "_pa")))); ("_p5", TInt)] |}]
 ;;
 
 let%expect_test _ =
@@ -394,10 +400,8 @@ let%expect_test _ =
   [%expect {| Parser error: : string |}]
 ;;
 
-
 let%expect_test _ =
-  test_infer_prog
-    {|let x = 1;;
+  test_infer_prog {|let x = 1;;
     let y = 2;;|};
   [%expect {|
     [""x"": TInt,
@@ -406,17 +410,19 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_infer_prog
-    {|let id = fun x-> x;;|};
+  test_infer_prog {|let id = fun x-> x;;|};
   [%expect {|
-    [""id"": (TFunction ((TPoly "_p0"), (TPoly "_p0"))),
+    [""id"": (TFunction ((TPoly "_p2"), (TPoly "_p2"))),
      ] |}]
 ;;
 
 let%expect_test _ =
-  test_infer_prog
-    {|let id = fun x-> x;;
+  test_infer_prog {|let id = fun x-> x;;
     let (x, y) = (id true, id 2);;|};
-  [%expect {| |}]
-;; 
-
+  [%expect
+    {|
+    [""id"": (TFunction ((TPoly "_p9"), (TPoly "_p9"))),
+     ""x"": TBool,
+     ""y"": TInt,
+     ] |}]
+;;
