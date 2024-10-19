@@ -46,7 +46,6 @@
 %token SLASH                // "/"
 %token CARET                // "^"
 %token EQUAL                // "="
-%token ASSIGN               // "=" (let a = 1)
 %token NOT_EQUAL            // "!=" || "<>" TODO: check semantics
 %token GREATER_THAN         // ">"
 %token GREATER_THAN_EQUAL   // ">="
@@ -87,12 +86,17 @@ expr:
     | le = expr; bop = bop; re = expr { BinOp (bop, le, re) }
     | le = expr; re = expr { Application (le,re) }
     | uop = uop; e = expr { UnOp (uop, e) }
-    | LET; exprs = separated_nonempty_list(LET_AND, expr); IN; e = expr { LetIn (exprs, e) }
-    | MATCH; input_e = expr; WITH; match_cases = nonempty_list(match_case) { Match (input_e, match_cases) }
     | LET; REC; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
     | LET; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
+    | LET; id = IDENTIFIER; EQUAL; e = expr {BinOp(ASSIGN, Value(VarId id), e) }
+    | LET; exprs = separated_nonempty_list(LET_AND, assign); IN; e = expr { LetIn (exprs, e) }
+    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
     | FUN; vls = nonempty_list(value); ARROW; e = expr { Fun (vls, e) }
+    // TODO: change to make possible to omit else clause
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { If (e1, e2, e3) }
+
+inline assign: 
+    | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
 
 %inline match_case: 
     | BAR; v = value; ARROW; e = expr { (v, e) }
@@ -114,11 +118,12 @@ value:
     | varId = identifier { VarId varId }
     | typedVarId = identifier; COLON; varType = dataType  {TypedVarID (typedVarId, varType)}
     | WILDCARD {Wildcard}
+    | tpl = tuple_dt {Tuple tpl}
     | lst = list_dt {List lst}
     | v1 = value ; DOUBLE_COLON; v2 = value  { ListConcat (v1, v2) }
-    | LEFT_PARENTHESIS; tuple = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {Tuple tuple}
     | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS { v }
 
+%inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
 %inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
 
 
@@ -136,7 +141,6 @@ value:
     | LESS_THAN_EQUAL { LTE }     
     | AND { AND }            
     | OR { OR }            
-    | ASSIGN { ASSIGN }
 
 %inline uop:
     | MINUS { MINUS }

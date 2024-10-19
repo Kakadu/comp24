@@ -19,7 +19,7 @@ type bop =
   | AND (** && *)
   | OR (** || *)
   | CONCAT (** ^ *)
-  | ASSIGN (** = *)
+  | ASSIGN (** =  { let a = 1 } *)
 
 type uop =
   | MINUS (** -1 *)
@@ -42,6 +42,7 @@ type expr =
   | Value of value
   | Let of funType * string * value list * expr (** let id a = a *)
   | Fun of value list * expr (** (fun a -> a + 1) *)
+  (* TODO: change to make possible for "if a then b" without else clause *)
   | If of expr * expr * expr
   | Match of expr * (value * expr) list
   | LetIn of expr list * expr (** let a = 1 and b = 2 in a + b *)
