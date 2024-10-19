@@ -61,6 +61,7 @@ let is_underscore = function
 
 let parse_white_space = take_while is_whitespace
 let parse_white_space1 = take_while1 is_whitespace
+let parse_empty s = parse_white_space *> s <* parse_white_space
 let parse_white_space_str str = parse_white_space *> string_ci str <* parse_white_space
 let token s = parse_white_space *> s
 let token1 s = parse_white_space1 *> s
@@ -95,17 +96,24 @@ let parse_str =
   >>| fun a -> CString a
 ;;
 
-(* Var parsers *)
+let tint = stoken "int" *> return TInt
 
-let parse_type =
-  parse_white_space
-  *> char ':'
-  *> parse_white_space
-  *> ((fun _ -> TInt)
-      <$> string "int"
-      <|> ((fun _ -> TBool) <$> string "bool")
-      <|> ((fun _ -> TString) <$> string "string"))
+(* Var parsers *)
+let constr_type =
+  (fun _ -> TInt)
+  <$> string "int"
+  <|> ((fun _ -> TBool) <$> string "bool")
+  <|> ((fun _ -> TString) <$> string "string")
 ;;
+
+let parse_arrow = parse_empty @@ stoken "->"
+
+let parse_types =
+  fix (fun next ->
+    lift3 (fun t1 _ t2 -> TArrow (t1, t2)) constr_type parse_arrow next <|> constr_type)
+;;
+
+let parse_type = parse_white_space *> char ':' *> parse_white_space *> parse_types
 
 let check_var cond =
   parse_white_space *> take_while1 cond
