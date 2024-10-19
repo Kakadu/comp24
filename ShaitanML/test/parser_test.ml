@@ -4,13 +4,87 @@
 
 open Shaitanml_lib
 open Parser
+
+let%expect_test _ =
+  test_parse {|
+      let a b c = a && b || b && c
+      |};
+  [%expect
+    {|
+    [(SValue (Nonrec,
+        [((PVar ("x", None)),
+          (EApply ((EApply ((EVar "++"), (EVar "x"))), (EConst (CInt 1)))))]
+        ))
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+      let f x y = x + y
+      and
+      g x y = x - y
+      and
+      h x y = x * y
+      in
+      f 2 (g 1 (h 2 3))
+;;
+      |};
+  [%expect
+    {|
+    [(SEval
+        (ELet (Nonrec,
+           [((PVar ("f", None)),
+             (EFun ((PVar ("x", None)),
+                (EFun ((PVar ("y", None)),
+                   (EApply ((EApply ((EVar "+"), (EVar "x"))), (EVar "y")))))
+                )));
+             ((PVar ("g", None)),
+              (EFun ((PVar ("x", None)),
+                 (EFun ((PVar ("y", None)),
+                    (EApply ((EApply ((EVar "-"), (EVar "x"))), (EVar "y")))))
+                 )));
+             ((PVar ("h", None)),
+              (EFun ((PVar ("x", None)),
+                 (EFun ((PVar ("y", None)),
+                    (EApply ((EApply ((EVar "*"), (EVar "x"))), (EVar "y")))))
+                 )))
+             ],
+           (EApply ((EApply ((EVar "f"), (EConst (CInt 2)))),
+              (EApply ((EApply ((EVar "g"), (EConst (CInt 1)))),
+                 (EApply ((EApply ((EVar "h"), (EConst (CInt 2)))),
+                    (EConst (CInt 3))))
+                 ))
+              ))
+           )))
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+      let rec f x = x + 1 and g x = x + 1
+;;
+      |};
+  [%expect
+    {|
+    [(SValue (Rec,
+        [((PVar ("f", None)),
+          (EFun ((PVar ("x", None)),
+             (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))));
+          ((PVar ("g", None)),
+           (EFun ((PVar ("x", None)),
+              (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))))
+          ]
+        ))
+      ] |}]
+;;
+
 let%expect_test _ =
   test_parse {|
       let (x : int) = 3;;
       |};
   [%expect
     {|
-    [(SValue (Nonrec, ((PVar ("x", (Some AInt))), (EConst (CInt 3)))))] |}]
+    [(SValue (Nonrec, [((PVar ("x", (Some AInt))), (EConst (CInt 3)))]))] |}]
 ;;
 
 let%expect_test _ =
@@ -20,7 +94,7 @@ let%expect_test _ =
   [%expect
     {|
     [(SValue (Nonrec,
-        ((PVar ("x", (Some (AList (AFun (AInt, AInt)))))), (EVar "f"))))
+        [((PVar ("x", (Some (AList (AFun (AInt, AInt)))))), (EVar "f"))]))
       ] |}]
 ;;
 
@@ -31,12 +105,11 @@ let%expect_test _ =
   [%expect
     {|
     [(SValue (Nonrec,
-        ((PVar ("x", (Some (AFun (AInt, (AFun (AInt, (AFun (AInt, AInt))))))))),
-         (EVar "f"))
+        [((PVar ("x", (Some (AFun (AInt, (AFun (AInt, (AFun (AInt, AInt))))))))),
+          (EVar "f"))]
         ))
       ] |}]
 ;;
-
 
 let%expect_test _ =
   test_parse
@@ -47,28 +120,34 @@ let%expect_test _ =
   [%expect
     {|
     [(SValue (Rec,
-        ((PVar ("fix", None)),
-         (EFun ((PVar ("f", None)),
-            (EFun ((PVar ("x", None)),
-               (EApply (
-                  (EApply ((EVar "f"), (EApply ((EVar "fix"), (EVar "f"))))),
-                  (EVar "x")))
-               ))
-            )))
-        ));
-      (SValue (Nonrec,
-         ((PVar ("fac_", None)),
-          (EFun ((PVar ("fac", None)),
-             (EFun ((PVar ("n", None)),
-                (EIf ((EBin_op (Eq, (EVar "n"), (EConst (CInt 1)))),
-                   (EConst (CInt 1)),
-                   (EBin_op (Mul, (EVar "n"),
-                      (EApply ((EVar "fac"),
-                         (EBin_op (Sub, (EVar "n"), (EConst (CInt 1))))))
-                      ))
-                   ))
+        [((PVar ("fix", None)),
+          (EFun ((PVar ("f", None)),
+             (EFun ((PVar ("x", None)),
+                (EApply (
+                   (EApply ((EVar "f"), (EApply ((EVar "fix"), (EVar "f"))))),
+                   (EVar "x")))
                 ))
              )))
+          ]
+        ));
+      (SValue (Nonrec,
+         [((PVar ("fac_", None)),
+           (EFun ((PVar ("fac", None)),
+              (EFun ((PVar ("n", None)),
+                 (EIf (
+                    (EApply ((EApply ((EVar "="), (EVar "n"))), (EConst (CInt 1))
+                       )),
+                    (EConst (CInt 1)),
+                    (EApply ((EApply ((EVar "*"), (EVar "n"))),
+                       (EApply ((EVar "fac"),
+                          (EApply ((EApply ((EVar "-"), (EVar "n"))),
+                             (EConst (CInt 1))))
+                          ))
+                       ))
+                    ))
+                 ))
+              )))
+           ]
          ))
       ] |}]
 ;;
@@ -80,11 +159,13 @@ let%expect_test _ =
   [%expect
     {|
       [(SValue (Nonrec,
-          ((PVar ("n", None)),
-           (EFun ((PVar ("y", None)),
-              (EIf ((EBin_op (Gt, (EVar "y"), (EConst (CInt 0)))),
-                 (EConst (CInt 1)), (EConst (CInt 2))))
-              )))
+          [((PVar ("n", None)),
+            (EFun ((PVar ("y", None)),
+               (EIf (
+                  (EApply ((EApply ((EVar ">"), (EVar "y"))), (EConst (CInt 0)))),
+                  (EConst (CInt 1)), (EConst (CInt 2))))
+               )))
+            ]
           ))
         ] |}]
 ;;
@@ -96,16 +177,20 @@ let%expect_test _ =
   [%expect
     {|
     [(SValue (Rec,
-        ((PVar ("fac", None)),
-         (EFun ((PVar ("n", None)),
-            (EIf ((EBin_op (Lt, (EVar "n"), (EConst (CInt 2)))),
-               (EConst (CInt 1)),
-               (EBin_op (Mul, (EVar "n"),
-                  (EApply ((EVar "fac"),
-                     (EBin_op (Sub, (EVar "n"), (EConst (CInt 1))))))
-                  ))
-               ))
-            )))
+        [((PVar ("fac", None)),
+          (EFun ((PVar ("n", None)),
+             (EIf (
+                (EApply ((EApply ((EVar "<"), (EVar "n"))), (EConst (CInt 2)))),
+                (EConst (CInt 1)),
+                (EApply ((EApply ((EVar "*"), (EVar "n"))),
+                   (EApply ((EVar "fac"),
+                      (EApply ((EApply ((EVar "-"), (EVar "n"))),
+                         (EConst (CInt 1))))
+                      ))
+                   ))
+                ))
+             )))
+          ]
         ))
       ] |}]
 ;;
@@ -123,24 +208,28 @@ let%expect_test _ =
   [%expect
     {|
       [(SValue (Nonrec,
-          ((PVar ("f", None)),
-           (ELet (Nonrec,
-              ((PVar ("g", None)),
-               (EFun ((PVar ("x", None)),
-                  (EBin_op (Add, (EVar "x"), (EConst (CInt 1))))))),
-              (EVar "g"))))
+          [((PVar ("f", None)),
+            (ELet (Nonrec,
+               [((PVar ("g", None)),
+                 (EFun ((PVar ("x", None)),
+                    (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1))))
+                    )))
+                 ],
+               (EVar "g"))))
+            ]
           ));
         (SValue (Rec,
-           ((PVar ("len", None)),
-            (EFun ((PVar ("l", None)),
-               (EMatch ((EVar "l"),
-                  [((PConst CNil), (EConst (CInt 0)));
-                    ((PCons (PAny, (PVar ("xs", None)))),
-                     (EBin_op (Add, (EConst (CInt 1)),
-                        (EApply ((EVar "len"), (EVar "xs"))))))
-                    ]
-                  ))
-               )))
+           [((PVar ("len", None)),
+             (EFun ((PVar ("l", None)),
+                (EMatch ((EVar "l"),
+                   [((PConst CNil), (EConst (CInt 0)));
+                     ((PCons (PAny, (PVar ("xs", None)))),
+                      (EApply ((EApply ((EVar "+"), (EConst (CInt 1)))),
+                         (EApply ((EVar "len"), (EVar "xs"))))))
+                     ]
+                   ))
+                )))
+             ]
            ))
         ] |}]
 ;;
@@ -157,15 +246,18 @@ let%expect_test _ =
     {|
       [(SEval
           (ELet (Nonrec,
-             ((PVar ("f", None)),
-              (EApply (
-                 (EFun ((PVar ("x", None)),
-                    (EBin_op (Add, (EVar "x"), (EConst (CInt 1)))))),
-                 (EConst (CInt 123))))),
+             [((PVar ("f", None)),
+               (EApply (
+                  (EFun ((PVar ("x", None)),
+                     (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1))
+                        ))
+                     )),
+                  (EConst (CInt 123)))))
+               ],
              (EVar "f"))));
         (SValue (Nonrec,
-           ((PTuple [(PVar ("x", None)); (PVar ("y", None)); (PVar ("z", None))]),
-            (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))
+           [((PTuple [(PVar ("x", None)); (PVar ("y", None)); (PVar ("z", None))]),
+             (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
            ))
         ] |}]
 ;;
