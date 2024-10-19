@@ -14,6 +14,64 @@ type patern_mode =
   | PMAdd
   | PMCheck
 
+type infer_let_mode =
+  | Common of Ast.rec_flag
+  | OnlyPattern
+  | AlreadyPattern of Ast.typeName
+
+let pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint = function
+  | Ast.PConstraint (p, _) -> p
+  | Ast.PNConstraint p -> p
+;;
+
+let restore_type : Ast.typeName -> (state, Ast.typeName) t =
+  fun tp ->
+  let* subs = read_subs in
+  return (apply_substs subs tp)
+;;
+
+let get_free_vars : substitution_list -> int -> Ast.typeName -> unit MapString.t =
+  fun subs tv_num tp ->
+  let rec traverse acc = function
+    | Ast.TBool | Ast.TInt -> acc
+    | Ast.TPoly x -> MapString.add x () acc
+    | Ast.TFunction (t1, t2) ->
+      MapString.union
+        (fun _ _ _ -> Some ())
+        (traverse acc t1)
+        (traverse MapString.empty t2)
+    | Ast.TList t1 -> traverse acc t1
+    | Ast.TTuple t_lst -> List.fold_left traverse acc t_lst
+  in
+  let used_tvs = traverse MapString.empty tp in
+  let free_tvs = MapString.filter (fun name _ -> List.mem_assoc name subs) used_tvs in
+  let loc_tvs =
+    (* a little cringe *)
+    MapString.filter
+      (fun name _ ->
+        match restore_fresh_tv_num name with
+        | Some x -> x > tv_num
+        | None -> false)
+      free_tvs
+  in
+  loc_tvs
+;;
+
+let rec generalise
+  : unit MapString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  =
+  fun free_vars pattern tp ->
+  let* tp = restore_type tp in
+  let rec_call = generalise free_vars in
+  match pattern, tp with
+  | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
+  | PIdentifier x, tp -> write_var_type x (TFSchem (free_vars, tp))
+  | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
+  | PTuple p_lst, TTuple t_lst ->
+    map_list (fun (p, t) -> rec_call p t) (List.combine p_lst t_lst) *> return ()
+  | _ -> fail "something strange during generealisetion"
+;;
+
 let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
   fun pm cpat ->
   let get_pat_and_type = function
@@ -94,8 +152,9 @@ let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
     | Ast.EFunction (arg, body) -> infer_func arg body
     | Ast.EApplication (fun_exp, arg_exp) -> infer_app fun_exp arg_exp
     | Ast.EIfThenElse (e1, e2, e3) -> infer_ifthenelse e1 e2 e3
-    | Ast.ELetIn (_rec_flag, _pattern, _expr_val, _expr_in) ->
-      fail "boba should be implemented"
+    | Ast.ELetIn (rec_flag, pattern, expr_val, expr_in) ->
+      let* _let_tp = infer_let_common rec_flag pattern expr_val in
+      infer_expr expr_in
     | Ast.ETuple exp_lst ->
       let* t_lst = map_list infer_expr exp_lst in
       return (Ast.TTuple t_lst)
@@ -147,6 +206,32 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
     write_subst pat_tp scr_tp *> write_subst exp_tp tp *> return () <* write_env cur_env
   in
   map_list help pat_exp_lst *> return tp
+
+and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) t =
+  fun rec_f pat exp ->
+  let* prev_env = read_env in
+  let* tv_count = read_tv_num in
+  let* p_tp, exp_tp =
+    match rec_f with
+    | NotRec ->
+      let* exp_tp = infer_expr exp in
+      let* _ = write_env prev_env in
+      let* p_tp = infer_pattern PMAdd pat in
+      return (p_tp, exp_tp)
+    | Rec ->
+      (match pat with
+       | Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _) ->
+         let* p_tp = infer_pattern PMAdd pat in
+         let* prev_env = read_env in
+         let* exp_tp = infer_expr exp in
+         let* _ = write_env prev_env in
+         return (p_tp, exp_tp)
+       | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
+  in
+  let* _ = write_subst p_tp exp_tp in
+  let* subs = read_subs in
+  let free_vars = get_free_vars subs tv_count p_tp in
+  generalise free_vars (pat_remove_constr pat) p_tp
 ;;
 
 let test_infer_exp string_exp =
@@ -210,4 +295,58 @@ let%expect_test _ =
       ("_p1",
        (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3"))))))
       ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp {|let x = 1 in x|};
+  [%expect {|
+    res: TInt
+     substs: [("_p0", TInt)] |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp {|let id = fun x -> x in id|};
+  [%expect
+    {|
+    res: (TFunction ((TPoly "_p0"), (TPoly "_p0")))
+     substs: [("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp
+    {|let rec fiboCPS = fun n acc -> match n with
+    | 0 -> acc 0
+    | 1 -> acc 1
+    | _ -> fiboCPS n (fun x -> fiboCPS n (fun y -> acc x))
+      in fiboCPS 2 (fun x -> x)|};
+  [%expect
+    {|
+    res: (TPoly "_p11")
+     substs: [("_p11", TInt); ("_pa", TInt); ("_p13", TInt);
+      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p1", TInt);
+      ("_p9", TInt); ("_pd", TInt); ("_p10", TInt); ("_pf", TInt);
+      ("_pe", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p8", TInt);
+      ("_pc", TInt); ("_pb", (TFunction ((TFunction (TInt, TInt)), TInt)));
+      ("_p0", (TFunction (TInt, (TFunction ((TFunction (TInt, TInt)), TInt)))));
+      ("_p6", TInt); ("_p7", TInt); ("_p3", TInt); ("_p4", TInt);
+      ("_p2", (TFunction (TInt, TInt))); ("_p5", TInt)] |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp {|let id = fun x -> x in ((id 1), (id "w"))|};
+  [%expect {| Parser error: : string |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp
+    {|let (x, y) :('a*'a) = ((fun x-> x), (fun (x, y) -> (x, x))) in ((x 1), (x "str")|};
+  [%expect {| Parser error: : string |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp
+    {|let rec days_until_typecheker_finish = fun t -> (match t with
+| x when x > 1 -> days_until_typecheker_finish (x-1)
+| x -> x) in days_until_typecheker_finish 1|};
+  [%expect {| Parser error: : string |}]
 ;;
