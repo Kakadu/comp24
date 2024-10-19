@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 include Common.StateMonad
-open Constraint
+open Substitution
 
 module MapString = struct
   include Map.Make (String)
@@ -21,9 +21,8 @@ type type_form =
 [@@deriving show { with_path = false }]
 
 type env_map = type_form MapString.t [@@deriving show { with_path = false }]
-type constr_set = ConstraintSet.t [@@deriving show { with_path = false }]
 type tv_num = int
-type state = env_map * constr_set * tv_num
+type state = env_map * substitution_list * tv_num
 
 let read_env : (state, env_map) t =
   let* env, _, _ = read in
@@ -32,8 +31,8 @@ let read_env : (state, env_map) t =
 
 let write_env : env_map -> (state, unit) t =
   fun env ->
-  let* _, constrs, tv = read in
-  write (env, constrs, tv)
+  let* _, substs, tv = read in
+  write (env, substs, tv)
 ;;
 
 let read_var_type : string -> (state, Ast.typeName option) t =
@@ -47,23 +46,41 @@ let read_var_type : string -> (state, Ast.typeName option) t =
 
 let write_var_type : string -> type_form -> (state, unit) t =
   fun name tf ->
-  let* env, constrs, tv_num = read in
+  let* env, substs, tv_num = read in
   let new_env = MapString.add name tf env in
-  write (new_env, constrs, tv_num)
+  write (new_env, substs, tv_num)
 ;;
 
 let write_flat_var_type : string -> Ast.typeName -> (state, unit) t =
   fun s tp -> write_var_type s (TFFlat tp)
 ;;
 
-let write_constr : Constraint.t -> (state, unit) t =
-  fun constr ->
-  let* env, constrs, tv = read in
-  let new_constrs = ConstraintSet.add constr constrs in
-  write (env, new_constrs, tv)
+let read_subs : (state, subs_state) t =
+  let* _, subs, _ = read in
+  return subs
+;;
+
+let write_subs : subs_state -> (state, unit) t =
+  fun subs ->
+  let* env, _, tv = read in
+  write (env, subs, tv)
+;;
+
+let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
+  fun tp1 tp2 ->
+  (* DEBUG PRINT
+     let _ =
+     Format.printf "[add]: %s %s\n" (Ast.show_typeName tp1) (Ast.show_typeName tp2)
+     in *)
+  let tp1, tp2 = if tp1 < tp2 then tp1, tp2 else tp2, tp1 in
+  let* subs = read_subs in
+  let new_subs, res = run (unify tp1 tp2) subs in
+  match res with
+  | Result.Error x -> fail x
+  | Result.Ok _tp -> write_subs new_subs
 ;;
 
 let fresh_tv : (state, Ast.typeName) t =
-  let* env, constr, tv = read in
-  return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, constr, tv + 1)
+  let* env, substs, tv = read in
+  return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
 ;;

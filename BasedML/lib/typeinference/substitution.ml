@@ -20,6 +20,9 @@ type subs_state = substitution_list [@@deriving show { with_path = false }]
 
 let rec apply_subst (stv, stp) tp =
   let rec_call = apply_subst (stv, stp) in
+  (* DEBUG PRINT
+     let _ = Format.printf "[apply]: change %s in %s\n" stv (Ast.show_typeName tp) in
+  *)
   match tp with
   | TPoly tv when stv = tv -> stp
   | TTuple t_lst -> TTuple (List.map rec_call t_lst)
@@ -89,6 +92,7 @@ and insert_subst : string * typeName -> (subs_state, typeName) t =
     let* tp = unify tp stp in
     return tp
   | None ->
+    let stp = apply_substs sub_lst stp in
     let new_sub_lst =
       List.map
         (fun (tv, tp) ->
