@@ -56,12 +56,15 @@ let%expect_test _ =
 
 let%expect_test _ =
   print_result
-     (ETuple
-       [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3));
-         (EConst (CInt 4)); (EConst (CInt 5))]);
+    (ETuple
+       [ EConst (CInt 1)
+       ; EConst (CInt 2)
+       ; EConst (CInt 3)
+       ; EConst (CInt 4)
+       ; EConst (CInt 5)
+       ]);
   [%expect {| (int * int * int * int * int) |}]
 ;;
-
 
 let%expect_test "let plusfive x = let five a = a + 5 in five x" =
   print_prog_result

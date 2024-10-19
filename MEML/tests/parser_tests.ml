@@ -147,7 +147,7 @@ let%expect_test _ =
   start_test parse_expression show_expression test;
   [%expect
     {|
-    (EApp ((EApp ((EVar ("in_popka", TUnknown)), (EVar ("yes", TUnknown)))),
+    (EApp ((EApp ((EVar ("is_something", TUnknown)), (EVar ("yes", TUnknown)))),
        (EVar ("no", TUnknown)))) |}]
 ;;
 
@@ -168,10 +168,13 @@ let%expect_test _ =
        )) |}]
 ;;
 
+(**  List and tuple *)
+
 let%expect_test _ =
   let test = "[1;2;3;4]" in
   start_test parse_expression show_expression test;
-  [%expect {|
+  [%expect
+    {|
     (EList ((EConst (CInt 1)),
        (EList ((EConst (CInt 2)),
           (EList ((EConst (CInt 3)), (EList ((EConst (CInt 4)), (EConst CNil)))))
@@ -180,11 +183,11 @@ let%expect_test _ =
  |}]
 ;;
 
-
 let%expect_test _ =
   let test = "(1,2,3,4,5)" in
   start_test parse_expression show_expression test;
-  [%expect {|
+  [%expect
+    {|
     (ETuple
        [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3));
          (EConst (CInt 4)); (EConst (CInt 5))])
@@ -245,7 +248,8 @@ let%expect_test _ =
 let%expect_test _ =
   let test = "[1;2;3;4]" in
   start_test parse_bindings show_bindings test;
-  [%expect {|
+  [%expect
+    {|
     (Expression
        (EList ((EConst (CInt 1)),
           (EList ((EConst (CInt 2)),
@@ -259,7 +263,8 @@ let%expect_test _ =
 let%expect_test _ =
   let test = "(1,2,3,4,5)" in
   start_test parse_bindings show_bindings test;
-  [%expect {|
+  [%expect
+    {|
     (Expression
        (ETuple
           [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3));
@@ -381,9 +386,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test =
-    "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y"
-  in
+  let test = "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y" in
   start_test parse_bindings show_bindings test;
   [%expect
     {|
