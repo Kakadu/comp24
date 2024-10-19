@@ -93,12 +93,15 @@ and insert_subst : string * typeName -> (subs_state, typeName) t =
     return tp
   | None ->
     let stp = apply_substs sub_lst stp in
-    let new_sub_lst =
-      List.map
-        (fun (tv, tp) ->
-          let new_tp = apply_subst (stv, stp) tp in
-          tv, new_tp)
-        sub_lst
-    in
-    write ((stv, stp) :: new_sub_lst) *> return stp
+    if TPoly stv = stp
+    then return stp
+    else (
+      let new_sub_lst =
+        List.map
+          (fun (tv, tp) ->
+            let new_tp = apply_subst (stv, stp) tp in
+            tv, new_tp)
+          sub_lst
+      in
+      write ((stv, stp) :: new_sub_lst) *> return stp)
 ;;
