@@ -18,4 +18,14 @@ let%test _ =
 ;;
 
 let%test _ = parse "[1; 2]" = Value (List [ Const (Int 1); Const (Int 2) ])
-let%test _ = parse "1::2" = Value (ListConcat (Const (Int 1), Const (Int 2)))
+let%test _ = parse "1::[2]" = Value (ListConcat (Const (Int 1), List [ Const (Int 2) ]))
+let%test _ = parse "let a = 1" = BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))
+
+(* let%test _ =
+  parse "let a = 1 and b = 2"
+  = LetIn
+      ( [ BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))
+        ; BinOp (ASSIGN, Value (VarId "b"), Value (Const (Int 2)))
+        ]
+      , None )
+;; *)

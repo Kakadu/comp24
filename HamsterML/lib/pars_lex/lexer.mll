@@ -47,7 +47,7 @@ rule read =
     | "|"       { BAR }              
     | '_'       { WILDCARD }
     | '('       { LEFT_PARENTHESIS }
-    | ')'       { LEFT_PARENTHESIS }
+    | ')'       { RIGHT_PARENTHESIS }
     | '['       { LEFT_SQ_BRACKET }
     | ']'       { RIGHT_SQ_BRACKET }
     | "::"      { DOUBLE_COLON }
