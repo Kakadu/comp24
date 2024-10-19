@@ -186,12 +186,12 @@ let parse_expr =
 ;;
 
 let parse_eif arg =
-  skip_while is_whitespace *>
-    (lift3
+  skip_while is_whitespace
+  *> lift3
        (fun i t e -> EIf (i, t, e))
        (skip_wspace *> string "if" *> arg)
        (skip_wspace *> string "then" *> arg)
-       (skip_wspace *> string "else" *> arg))
+       (skip_wspace *> string "else" *> arg)
 ;;
 
 (* ------------------------- *)
@@ -211,5 +211,26 @@ let and_ = string "&&" *> return And
 let or_ = string "||" *> return Or
 
 (* Declaration parser *)
-(* let parse_declaration =  skip_wspace *> string "let" *> parse_pattern >>= *)
+let parse_declaration =
+  skip_wspace
+  *> string "let"
+  *> lift3
+       ddeclaration
+       (skip_wspace *> string "rec" *> return Rec <|> return NoRec)
+       parse_pattern
+       (let* args = skip_wspace *> many parse_pattern in
+        let* expr = skip_wspace *> string "=" *> parse_expr in
+        match List.rev args with
+        | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
+        | _ -> return expr)
+;;
+
 (* ------------------ *)
+
+let parse input =
+  parse_string
+    ~consume:All
+    (sep_by (string ";;" <|> string "\n") parse_declaration
+     <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
+    input
+;;

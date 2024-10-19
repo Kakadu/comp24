@@ -64,10 +64,13 @@ type expression =
   | ELetIn of rec_flag * pattern * expression * expression (** let f x = E1 *)
   | ETuple of expression list
   | EIf of expression * expression * expression (** if e1 then e2 else e3 *)
-  | EMatch of expression * (pattern * expression) list (** match e with p1 -> e1 |...| pn -> en *)
+  | EMatch of expression * (pattern * expression) list
+  (** match e with p1 -> e1 |...| pn -> en *)
 [@@deriving show { with_path = false }]
 
-type declaration = rec_flag * pattern * expression [@@deriving show { with_path = false }]
+type declaration = DDeclaration of rec_flag * pattern * expression
+[@@deriving show { with_path = false }]
+
 type program = declaration list [@@deriving show { with_path = false }]
 
 let cint x = CInt x
@@ -90,3 +93,8 @@ let econst c = EConst c
 let eidentifier v = EIdentifier v
 let etuple l = ETuple l
 let efun arg expr = EFun (arg, expr)
+
+(* ---------------------------- *)
+
+(* Constructor for declaration *)
+let ddeclaration rec_f pat expr = DDeclaration (rec_f, pat, expr)
