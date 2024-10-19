@@ -5,8 +5,13 @@
 open Ast
 open Base
 open Angstrom
-
+(* open List *)
 let is_idc c = Char.is_alphanum c || Char.equal c '_'
+let is_op c = match List.find [ '*' ; '/' ; '+' ; '-' ; '=' ; '<' ; '>' ; '&' ; '|'] ~f:(Char.equal c) with
+  | None -> false
+  | _ -> true
+  
+(* | pattern -> pattern *)
 
 let is_keyword = function
   | "let"
@@ -142,6 +147,7 @@ let varname =
   | s when is_keyword s -> fail "Keyword can't be used as identifier"
   | _ as name -> return name
 ;;
+let opname_ = let* op = ws *> lp *> ws *> take_while is_op <* ws <* rp in return op;;
 
 let ppvar =
   let pvar =
@@ -152,8 +158,11 @@ let ppvar =
     let pvar name annot = PVar (name, annot) in
     lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
   in
-  choice [ pvar_with_type; pvar ]
+  let opname = let* op = opname_ in return (PVar (op, None)) in
+  choice [ pvar_with_type; pvar;  opname]
 ;;
+
+(* let ppvar = choice [varname >>| pvar; opname_ >>| pvar] *)
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
