@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-(* open Ast *)
 open StatementInfer
 open Help
 

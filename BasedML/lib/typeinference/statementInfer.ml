@@ -74,12 +74,12 @@ let write_flat_var_type : string -> Ast.typeName -> (state, unit) t =
   fun s tp -> write_var_type s (TFFlat tp)
 ;;
 
-let read_subs : (state, subs_state) t =
+let read_subs : (state, substitution_list) t =
   let* _, subs, _ = read in
   return subs
 ;;
 
-let write_subs : subs_state -> (state, unit) t =
+let write_subs : substitution_list -> (state, unit) t =
   fun subs ->
   let* env, _, tv = read in
   write (env, subs, tv)
