@@ -68,7 +68,7 @@ let parse_int =
   skip_wspace *> take_while1 is_digit <* skip_wspace >>| int_of_string >>| cint
 ;;
 
-let parse_bool = token "true" <|> string "false" >>| bool_of_string >>| cbool
+let parse_bool = token "true" <|> token "false" >>| bool_of_string >>| cbool
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Type annotations parsers *)

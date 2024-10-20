@@ -11,14 +11,26 @@ let parse_with_print input =
   | Error message -> Format.printf "Error: %s\n" message
 ;;
 
-let%expect_test _ = parse_with_print {| let n = 5|};
+let%expect_test _ =
+  parse_with_print {| let n = 5|};
   [%expect {| [(DDeclaration (NoRec, (PIdentifier "n"), (EConst (CInt 5))))] |}]
-let%expect_test _ = parse_with_print {| let flag = true|};
+;;
+
+let%expect_test _ =
+  parse_with_print {| let flag = true|};
   [%expect {| [(DDeclaration (NoRec, (PIdentifier "flag"), (EConst (CBool true))))] |}]
-let%expect_test _ = parse_with_print {| let flag = false|};
-  [%expect {| Error: : end_of_input |}]
-let%expect_test _ = parse_with_print {| let h::tl = lst|};
-  [%expect {|
+;;
+
+let%expect_test _ =
+  parse_with_print {| let flag = false|};
+  [%expect {| [(DDeclaration (NoRec, (PIdentifier "flag"), (EConst (CBool false))))] |}]
+;;
+
+let%expect_test _ =
+  parse_with_print {| let (h::tl) = lst|};
+  [%expect
+    {|
     [(DDeclaration (NoRec, (PCons ((PIdentifier "h"), (PIdentifier "tl"))),
         (EIdentifier "lst")))
       ] |}]
+;;
