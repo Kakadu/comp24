@@ -10,9 +10,6 @@ type subs_state = substitution_list
 
 let rec apply_subst (stv, stp) tp =
   let rec_call = apply_subst (stv, stp) in
-  (* DEBUG PRINT
-     let _ = Format.printf "[apply]: change %s in %s\n" stv (Ast.show_typeName tp) in
-  *)
   match tp with
   | TPoly tv when stv = tv -> stp
   | TTuple t_lst -> TTuple (List.map rec_call t_lst)
