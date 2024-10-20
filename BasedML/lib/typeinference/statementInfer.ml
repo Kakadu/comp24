@@ -48,7 +48,6 @@ let specialise : SetString.t * Ast.typeName -> (state, Ast.typeName) t =
     | x -> x
   in
   let new_tp = traverse stp in
-  (* let _ = Format.printf "[spec]: %s\n" (Ast.show_typeName new_tp) in *)
   return new_tp
 ;;
 
@@ -87,10 +86,6 @@ let write_subs : substitution_list -> (state, unit) t =
 
 let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
   fun tp1 tp2 ->
-  (* DEBUG PRINT
-     let _ =
-     Format.printf "[add]: %s %s\n" (Ast.show_typeName tp1) (Ast.show_typeName tp2)
-     in *)
   let tp1, tp2 = if tp1 < tp2 then tp1, tp2 else tp2, tp1 in
   let* subs = read_subs in
   let new_subs, res = run (unify tp1 tp2) subs in
