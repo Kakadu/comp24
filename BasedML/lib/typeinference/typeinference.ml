@@ -247,7 +247,7 @@ let test_infer_exp string_exp =
        Format.printf
          "res: %s@\n substs: %s"
          (Ast.show_typeName tp)
-         (show_subs_state substs)
+         (show_substitution_list substs)
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
@@ -547,7 +547,8 @@ let%expect_test _ =
   ;;
   let mulTwo = (fun i -> (i * 2));;
   let doubleList = fun lst -> map mulTwo lst;;|};
-  [%expect {|
+  [%expect
+    {|
      [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
       ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
       ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
@@ -574,7 +575,8 @@ let%expect_test _ =
 let%expect_test _ =
   test_infer_prog start_state {|
   let (a, b) = ((true < false), (3 < 4));;|};
-  [%expect {|
+  [%expect
+    {|
      [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
       ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
       ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),

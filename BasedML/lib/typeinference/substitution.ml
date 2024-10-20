@@ -5,18 +5,8 @@ include Common.StateMonad
 
 open Ast
 
-module MapString = struct
-  include Map.Make (String)
-
-  let pp pp_v ppf m =
-    Format.fprintf ppf "@[[@[";
-    iter (fun k v -> Format.fprintf ppf "@[\"%S\": %a@],@\n" k pp_v v) m;
-    Format.fprintf ppf "@]]@]"
-  ;;
-end
-
 type substitution_list = (string * typeName) list [@@deriving show { with_path = false }]
-type subs_state = substitution_list [@@deriving show { with_path = false }]
+type subs_state = substitution_list
 
 let rec apply_subst (stv, stp) tp =
   let rec_call = apply_subst (stv, stp) in
