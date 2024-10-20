@@ -29,35 +29,55 @@ let restore_type : Ast.typeName -> (state, Ast.typeName) t =
   return (apply_substs subs tp)
 ;;
 
-let get_free_vars : env_map -> SetString.t =
-  fun env ->
-  let rec traverse acc = function
-    | Ast.TBool | Ast.TInt -> acc
-    | Ast.TPoly x -> MapString.add x () acc
-    | Ast.TFunction (t1, t2) ->
-      MapString.union
-        (fun _ _ _ -> Some ())
-        (traverse acc t1)
-        (traverse MapString.empty t2)
-    | Ast.TList t1 -> traverse acc t1
-    | Ast.TTuple t_lst -> List.fold_left traverse acc t_lst
-  in
-  let _ = traverse, env in
-  SetString.empty
+let rec get_tv_from_tp acc = function
+  | Ast.TBool | Ast.TInt -> acc
+  | Ast.TPoly x -> SetString.add x acc
+  | Ast.TFunction (t1, t2) ->
+    SetString.union (get_tv_from_tp acc t1) (get_tv_from_tp SetString.empty t2)
+  | Ast.TList t1 -> get_tv_from_tp acc t1
+  | Ast.TTuple t_lst -> List.fold_left get_tv_from_tp acc t_lst
 ;;
 
-let rec generalise
+let get_tv_from_env : env_map -> SetString.t =
+  fun env ->
+  MapString.fold
+    (fun _var_name tp acc ->
+      match tp with
+      | TFFlat tp -> get_tv_from_tp acc tp
+      | TFSchem _ -> acc)
+    env
+    SetString.empty
+;;
+
+let rec write_scheme_for_pattern
   : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
   =
   fun free_vars pattern tp ->
-  let rec_call = generalise free_vars in
+  let rec_call = write_scheme_for_pattern free_vars in
   match pattern, tp with
   | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
-  | PIdentifier x, tp -> write_var_type x (TFSchem (free_vars, tp))
+  | PIdentifier x, tp ->
+    let used_tvs = get_tv_from_tp SetString.empty tp in
+    let new_free_vars = SetString.inter used_tvs free_vars in
+    write_var_type x (TFSchem (new_free_vars, tp))
   | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
   | PTuple p_lst, TTuple t_lst ->
     map_list (fun (p, t) -> rec_call p t) (List.combine p_lst t_lst) *> return ()
   | _ -> fail "something strange during generealisetion"
+;;
+
+let generalise
+  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  =
+  fun bound_vars pat tp ->
+  let* tp = restore_type tp in
+  let* subs = read_subs in
+  let used_vars = get_tv_from_tp SetString.empty tp in
+  let unbound_vars = SetString.diff used_vars bound_vars in
+  let free_vars =
+    SetString.filter (fun name -> not (List.mem_assoc name subs)) unbound_vars
+  in
+  write_scheme_for_pattern free_vars pat tp
 ;;
 
 let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
@@ -141,7 +161,7 @@ let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
     | Ast.EApplication (fun_exp, arg_exp) -> infer_app fun_exp arg_exp
     | Ast.EIfThenElse (e1, e2, e3) -> infer_ifthenelse e1 e2 e3
     | Ast.ELetIn (rec_flag, pattern, expr_val, expr_in) ->
-      let* _let_tp = infer_let_common rec_flag pattern expr_val in
+      let* _ = infer_let_common rec_flag pattern expr_val in
       infer_expr expr_in
     | Ast.ETuple exp_lst ->
       let* t_lst = map_list infer_expr exp_lst in
@@ -195,7 +215,7 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
   in
   map_list help pat_exp_lst *> return tp
 
-and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.typeName) t =
+and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) t =
   fun rec_f pat exp ->
   let* prev_env = read_env in
   let* p_tp, exp_tp =
@@ -216,9 +236,8 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.ty
        | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
   in
   let* _ = write_subst p_tp exp_tp in
-  let* p_tp = restore_type p_tp in
-  let free_vars = get_free_vars prev_env in
-  generalise free_vars (pat_remove_constr pat) p_tp *> return p_tp
+  let external_tvs = get_tv_from_env prev_env in
+  generalise external_tvs (pat_remove_constr pat) p_tp
 ;;
 
 (* let infer_mr_let: mode_mr_let-> Ast.pattern -> Ast.expr = fun mode, pat, exp ->
@@ -226,7 +245,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.ty
    | LOnlyPattern -> *)
 
 let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
-  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp *> return ()
+  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp
   | Ast.DMutualRecDecl decl_lst ->
     (match decl_lst with
      | [] -> fail "unreachable error: empty mutual rec?!!"
