@@ -14,10 +14,9 @@ type patern_mode =
   | PMAdd
   | PMCheck
 
-type infer_let_mode =
-  | Common of Ast.rec_flag
-  | OnlyPattern
-  | AlreadyPattern of Ast.typeName
+type mode_mr_let =
+  | LOnlyPattern
+  | LAlreadyPattern of Ast.typeName
 
 let pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint = function
   | Ast.PConstraint (p, _) -> p
@@ -236,9 +235,23 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.ty
   generalise free_vars (pat_remove_constr pat) p_tp *> return p_tp
 ;;
 
-let infer_let_decl : Ast.let_declaration -> (state, Ast.typeName) t = function
-  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp
-  | Ast.DMutualRecDecl _decl_lst -> fail "boba"
+(* let infer_mr_let: mode_mr_let-> Ast.pattern -> Ast.expr = fun mode, pat, exp ->
+   match mode with
+   | LOnlyPattern -> *)
+
+let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
+  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp *> return ()
+  | Ast.DMutualRecDecl decl_lst ->
+    (match decl_lst with
+     | [] -> fail "unreachable error: empty mutual rec?!!"
+     | Ast.DLet (Ast.NotRec, _, _) :: _ ->
+       map_list
+         (fun dlet ->
+           let (Ast.DLet (_rec_flag, pat, exp)) = dlet in
+           infer_let_common Ast.NotRec pat exp)
+         decl_lst
+       *> return ()
+     | Ast.DLet (Ast.Rec, _, _) :: _ -> fail "boba")
 ;;
 
 type res_map = Ast.typeName MapString.t [@@deriving show { with_path = false }]
@@ -383,7 +396,11 @@ let%expect_test _ =
 
 let%expect_test _ =
   test_infer_exp {|let id = fun x -> x in ((id 1), (id true))|};
-  [%expect {| Parser error: : string |}]
+  [%expect
+    {|
+    res: (TTuple [TInt; TBool])
+     substs: [("_p4", TBool); ("_p5", TBool); ("_p2", TInt); ("_p3", TInt);
+      ("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
 ;;
 
 let%expect_test _ =
@@ -392,13 +409,7 @@ let%expect_test _ =
   [%expect {| Parser error: : string |}]
 ;;
 
-let%expect_test _ =
-  test_infer_exp
-    {|let rec days_until_typecheker_finish = fun t -> (match t with
-| x when x > 1 -> days_until_typecheker_finish (x-1)
-| x -> x) in days_until_typecheker_finish 1|};
-  [%expect {| Parser error: : string |}]
-;;
+(* Declarations *)
 
 let%expect_test _ =
   test_infer_prog {|let x = 1;;
@@ -425,4 +436,17 @@ let%expect_test _ =
      ""x"": TBool,
      ""y"": TInt,
      ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog {|let rec f = fun x -> f;;|};
+  [%expect
+    {|
+    Infer error: The type variable _p0 occurs inside (TFunction ((TPoly "_p1"), (TPoly "_p0"))) |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog {|let rec id = fun x -> x and dup = fun x y -> (id x, id y);;|};
+  [%expect {|
+    Infer error: boba |}]
 ;;
