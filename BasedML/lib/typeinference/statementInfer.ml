@@ -4,37 +4,11 @@
 
 include Common.StateMonad
 open Substitution
-
-module MapString = struct
-  include Map.Make (String)
-
-  let pp pp_v ppf m =
-    Format.fprintf ppf "@[[@[";
-    iter (fun k v -> Format.fprintf ppf "@[\"%S\": %a@],@\n" k pp_v v) m;
-    Format.fprintf ppf "@]]@]"
-  ;;
-end
-
-module SetString = struct
-  include Set.Make (String)
-
-  let pp ppf m =
-    Format.fprintf ppf "@[[@[";
-    iter (fun s -> Format.fprintf ppf "(%s)@\n" s) m;
-    Format.fprintf ppf "@]]@]"
-  ;;
-end
-
-type type_form =
-  | TFFlat of Ast.typeName
-  | TFSchem of SetString.t * Ast.typeName
-[@@deriving show { with_path = false }]
+open Help
 
 type env_map = type_form MapString.t [@@deriving show { with_path = false }]
 type tv_num = int
 type state = env_map * substitution_list * tv_num
-
-let start_state = MapString.empty, [], 0
 
 let read_env : (state, env_map) t =
   let* env, _, _ = read in
@@ -45,11 +19,6 @@ let write_env : env_map -> (state, unit) t =
   fun env ->
   let* _, substs, tv = read in
   write (env, substs, tv)
-;;
-
-let restore_fresh_tv_num name =
-  try Some (Scanf.sscanf name "_p%x" (fun x -> x)) with
-  | Scanf.Scan_failure _ -> None
 ;;
 
 let fresh_tv : (state, Ast.typeName) t =
@@ -130,7 +99,36 @@ let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
   | Result.Ok _tp -> write_subs new_subs
 ;;
 
-let read_tv_num : (state, int) t =
-  let* _env, _substs, tv = read in
-  return tv
+let rec write_scheme_for_pattern
+  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  =
+  fun free_vars pattern tp ->
+  let rec_call = write_scheme_for_pattern free_vars in
+  match pattern, tp with
+  | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
+  | PIdentifier x, tp ->
+    let used_tvs = get_tv_from_tp SetString.empty tp in
+    let new_free_vars = SetString.inter used_tvs free_vars in
+    write_var_type x (TFSchem (new_free_vars, tp))
+  | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
+  | PTuple p_lst, TTuple t_lst ->
+    map_list (fun (p, t) -> rec_call p t) (List.combine p_lst t_lst) *> return ()
+  | _ -> fail "something strange during generealisetion"
+;;
+
+let restore_type : Ast.typeName -> (state, Ast.typeName) t =
+  fun tp ->
+  let* subs = read_subs in
+  return (apply_substs subs tp)
+;;
+
+let get_tv_from_env : env_map -> SetString.t =
+  fun env ->
+  MapString.fold
+    (fun _var_name tp acc ->
+      match tp with
+      | TFFlat tp -> get_tv_from_tp acc tp
+      | TFSchem _ -> acc)
+    env
+    SetString.empty
 ;;
