@@ -34,11 +34,6 @@ let is_whitespace = function
   | _ -> false
 ;;
 
-let is_quotes = function
-  | '\"' -> true
-  | _ -> false
-;;
-
 let is_valid_fst_char_ident = function
   | 'a' .. 'z' | '_' -> true
   | _ -> false
@@ -334,11 +329,6 @@ let p_let_in p_exp =
      return (ELetIn (flag, pattern, let_expr, body_expr))
 ;;
 
-(* application parser *)
-let p_app p_exp =
-  chainl1 p_exp (return (fun operand1 operand2 -> EApplication (operand1, operand2)))
-;;
-
 (* match parser *)
 let p_match p_pattern p_expr =
   let p_match_case p_pattern p_expr =
@@ -432,8 +422,6 @@ let parse_program =
        (p_mutully_rec_decl <|> p_let_decl p_exp)
      <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
 ;;
-
-let parse_type input = parse_string (p_type <* end_of_input) input
 
 (* parser testing function *)
 let test_parse input =
