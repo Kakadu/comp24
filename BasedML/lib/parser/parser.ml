@@ -358,6 +358,8 @@ let p_exp =
       <|> p_exp_with_type p_exp
       <|> p_let_in p_exp
       <|> p_tuple_expr p_exp
+      <|> p_if_then_else p_exp
+      <|> p_match p_pattern p_exp
     in
     let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
     let app_term = chainl1 cons_term app_delim <|> cons_term in
@@ -366,10 +368,7 @@ let p_exp =
     let eq_term = chainl1 low_pr_op_term (eq_delim <|> not_eq_delim) in
     let gr_ls_term = chainl1 eq_term (gr_or_eq_delim <|> ls_or_eq_delim) in
     let gr_ls_eq_term = chainl1 gr_ls_term (gr_delim <|> ls_delim) in
-    let other_exp =
-      p_if_then_else gr_ls_eq_term <|> p_match p_pattern gr_ls_eq_term <|> gr_ls_eq_term
-    in
-    other_exp)
+    gr_ls_eq_term)
 ;;
 
 (* let declarations parser*)
