@@ -356,6 +356,7 @@ let p_exp =
       <|> between_parens p_exp
       <|> p_list_exp p_exp
       <|> p_exp_with_type p_exp
+      <|> p_let_in p_exp
     in
     let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
     let app_term = chainl1 cons_term app_delim <|> cons_term in
@@ -366,7 +367,6 @@ let p_exp =
     let gr_ls_eq_term = chainl1 gr_ls_term (gr_delim <|> ls_delim) in
     let other_exp =
       p_tuple_expr gr_ls_eq_term
-      <|> p_let_in gr_ls_eq_term
       <|> p_if_then_else gr_ls_eq_term
       <|> p_match p_pattern gr_ls_eq_term
       <|> gr_ls_eq_term
