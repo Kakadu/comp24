@@ -14,10 +14,6 @@ type patern_mode =
   | PMAdd
   | PMCheck
 
-type mode_mr_let =
-  | LOnlyPattern
-  | LAlreadyPattern of Ast.typeName
-
 let pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint = function
   | Ast.PConstraint (p, _) -> p
   | Ast.PNConstraint p -> p
@@ -223,16 +219,13 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
     match rec_f with
     | NotRec ->
       let* exp_tp = infer_expr exp in
-      let* _ = write_env prev_env in
       let* p_tp = infer_pattern PMAdd pat in
       return (p_tp, exp_tp)
     | Rec ->
       (match pat with
        | Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _) ->
          let* p_tp = infer_pattern PMAdd pat in
-         let* prev_env = read_env in
          let* exp_tp = infer_expr exp in
-         let* _ = write_env prev_env in
          return (p_tp, exp_tp)
        | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
   in
@@ -241,9 +234,11 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
   generalise external_tvs (pat_remove_constr pat) p_tp
 ;;
 
-(* let infer_mr_let: mode_mr_let-> Ast.pattern -> Ast.expr = fun mode, pat, exp ->
-   match mode with
-   | LOnlyPattern -> *)
+let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.typeName) t = function
+  | (Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _)) as pat
+    -> infer_pattern PMAdd pat
+  | _ -> fail " Only variables are allowed as left-hand side of `let rec'"
+;;
 
 let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
   | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp
@@ -257,7 +252,27 @@ let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
            infer_let_common Ast.NotRec pat exp)
          decl_lst
        *> return ()
-     | Ast.DLet (Ast.Rec, _, _) :: _ -> fail "boba")
+     | Ast.DLet (Ast.Rec, _, _) :: _ ->
+       let* prev_env = read_env in
+       let* p_tp_lst =
+         map_list (fun (Ast.DLet (_, pat, _)) -> infer_mr_let_only_pat pat) decl_lst
+       in
+       let* exp_tp_lst =
+         map_list (fun (Ast.DLet (_, _, exp)) -> infer_expr exp) decl_lst
+       in
+       let* _ =
+         map_list
+           (fun (p_tp, exp_tp) -> write_subst p_tp exp_tp)
+           (List.combine p_tp_lst exp_tp_lst)
+       in
+       let external_tvs = get_tv_from_env prev_env in
+       let* _ =
+         map_list
+           (fun (Ast.DLet (_, pat, _), tp) ->
+             generalise external_tvs (pat_remove_constr pat) tp)
+           (List.combine decl_lst p_tp_lst)
+       in
+       return ())
 ;;
 
 type res_map = Ast.typeName MapString.t [@@deriving show { with_path = false }]
@@ -333,8 +348,7 @@ let%expect_test _ =
     {|fun (tuper_var: int) -> match tuper_var with
   | ([]: 'a list) -> tuper_var
   | (h :: tl: 'a list) -> h|};
-  [%expect
-    {|
+  [%expect {|
     Infer error: Can not unify `TInt` and `(TList (TPoly "_p2"))` |}]
 ;;
 
@@ -418,12 +432,6 @@ let%expect_test _ =
       ("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
 ;;
 
-let%expect_test _ =
-  test_infer_exp
-    {|let (x, y) :('a * 'a) = ((fun x-> x), (fun (x, y) -> (x, x))) in ((x 1), (x true)|};
-  [%expect {| Parser error: : string |}]
-;;
-
 (* Declarations *)
 
 let%expect_test _ =
@@ -462,6 +470,86 @@ let%expect_test _ =
 
 let%expect_test _ =
   test_infer_prog {|let rec id = fun x -> x and dup = fun x y -> (id x, id y);;|};
-  [%expect {|
-    Infer error: boba |}]
+  [%expect
+    {|
+    [""dup"": (TFunction ((TPoly "_p7"),
+                 (TFunction ((TPoly "_p7"),
+                    (TTuple [(TPoly "_p7"); (TPoly "_p7")])))
+                 )),
+     ""id"": (TFunction ((TPoly "_p8"), (TPoly "_p8"))),
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)));;
+  let (a, b) = ((x (1, 2)), (x (true, false)));;|};
+  [%expect
+    {|
+    [""a"": (TTuple [TInt; TInt]),
+     ""b"": (TTuple [TBool; TBool]),
+     ""x"": (TFunction ((TTuple [(TPoly "_pd"); (TPoly "_pd")]),
+               (TTuple [(TPoly "_pd"); (TPoly "_pd")]))),
+     ""y"": (TFunction ((TTuple [(TPoly "_pe"); (TPoly "_pe")]),
+               (TTuple [(TPoly "_pe"); (TPoly "_pe")]))),
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)));;
+  let (a, b) = ((x 1), (y (true, false)));;|};
+  [%expect
+    {|
+    Infer error: Can not unify `TInt` and `(TTuple [(TPoly "_p7"); (TPoly "_p7")])` |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|
+let rec even = fun n -> match n with
+    | 0 -> true
+    | x -> odd (x)
+and odd = fun n -> match n with
+    | 0 -> false
+    | x -> even (x)
+|};
+  [%expect
+    {|
+    [""even"": (TFunction (TInt, TBool)),
+     ""odd"": (TFunction (TInt, TBool)),
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|
+let (-) = fun (a:int) (b:int)->  a;;
+
+let rec even = fun n -> match n with
+    | 0 -> true
+    | x -> odd (x - 1)
+and odd = fun n -> match n with
+    | 0 -> false
+    | x -> even (x - 1)
+|};
+  [%expect {| |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog
+    {|
+let (-) = fun (a:int) (b:int)->  a;;
+
+let fibo n =
+  let rec fiboCPS n acc =
+    match n with
+    | 0 -> acc 0
+    | 1 -> acc 1
+    | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
+  in
+  fiboCPS n (fun x -> x)
+;;
+|};
+  [%expect {|  |}]
 ;;
