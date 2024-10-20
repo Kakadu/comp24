@@ -29,8 +29,8 @@ let restore_type : Ast.typeName -> (state, Ast.typeName) t =
   return (apply_substs subs tp)
 ;;
 
-let get_free_vars : substitution_list -> int -> Ast.typeName -> unit MapString.t =
-  fun subs tv_num tp ->
+let get_free_vars : env_map -> SetString.t =
+  fun env ->
   let rec traverse acc = function
     | Ast.TBool | Ast.TInt -> acc
     | Ast.TPoly x -> MapString.add x () acc
@@ -42,24 +42,12 @@ let get_free_vars : substitution_list -> int -> Ast.typeName -> unit MapString.t
     | Ast.TList t1 -> traverse acc t1
     | Ast.TTuple t_lst -> List.fold_left traverse acc t_lst
   in
-  let used_tvs = traverse MapString.empty tp in
-  let free_tvs =
-    MapString.filter (fun name _ -> not (List.mem_assoc name subs)) used_tvs
-  in
-  let loc_tvs =
-    (* a little cringe *)
-    MapString.filter
-      (fun name _ ->
-        match restore_fresh_tv_num name with
-        | Some x -> x >= tv_num
-        | None -> false)
-      free_tvs
-  in
-  loc_tvs
+  let _ = traverse, env in
+  SetString.empty
 ;;
 
 let rec generalise
-  : unit MapString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
   =
   fun free_vars pattern tp ->
   let rec_call = generalise free_vars in
@@ -210,7 +198,6 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
 and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.typeName) t =
   fun rec_f pat exp ->
   let* prev_env = read_env in
-  let* tv_count = read_tv_num in
   let* p_tp, exp_tp =
     match rec_f with
     | NotRec ->
@@ -229,9 +216,8 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, Ast.ty
        | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
   in
   let* _ = write_subst p_tp exp_tp in
-  let* subs = read_subs in
   let* p_tp = restore_type p_tp in
-  let free_vars = get_free_vars subs tv_count p_tp in
+  let free_vars = get_free_vars prev_env in
   generalise free_vars (pat_remove_constr pat) p_tp *> return p_tp
 ;;
 
