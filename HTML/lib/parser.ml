@@ -14,12 +14,11 @@ let parse_space = take_while is_space
 let parse_space1 = take_while1 is_space
 let parse_token p = parse_space *> p
 let parse_token1 p = parse_space1 *> p
-let parse_next_token p = parse_token1 p < parse_space1
 let parse_stoken s = parse_token @@ string s
 let parse_stoken1 s = parse_token1 @@ string s
 let parse_next_stoken p = parse_stoken1 p <* parse_space1
 let parse_parens p = parse_stoken "(" *> p <* parse_stoken ")"
-let spaces = skip_while is_space
+let parse_parens_or_non p = parse_parens p <|> p
 
 let is_digit = function
   | '0' .. '9' -> true
@@ -57,85 +56,141 @@ let keywords =
   ; "bool"
   ; "when"
   ; "function"
+  ; "and"
   ]
 ;;
 
 let is_keyword s = List.mem s keywords
-
+let ( =?*> ) string parser = parse_stoken string *> parser
+let ( =?>>| ) string value = parse_stoken string *> return value
 (****************************************************** Consts ******************************************************)
+
 let parse_int =
-  parse_token
-    (lift (fun hd -> CInt (int_of_string hd)) (take_while1 (fun ch -> is_digit ch)))
+  parse_token (lift (fun hd -> CInt (int_of_string hd)) (take_while1 is_digit))
 ;;
 
 let parse_bool =
-  choice [ parse_stoken "true" *> return true; parse_stoken "false" *> return false ]
+  choice [ "true" =?>>| true; "false" =?>>| false ]
   >>= fun res_bool -> return @@ CBool res_bool
 ;;
 
-let parse_const = choice [ parse_bool; parse_int ]
-let parse_const_expr = parse_const >>= fun res -> return @@ EConst res
+let parse_unit = "(" =?*> (")" =?>>| CUnit)
+let parse_const = choice [ parse_bool; parse_int; parse_unit ]
+let parse_const_expr = parse_const >>| econst
 
 (****************************************************** Operators ******************************************************)
-let parse_satisfy_op_and_run op parser =
-  parse_space
-  *>
-  let* chars =
-    take_while (fun c ->
-      not (is_digit c || is_ident_char c || c = '(' || is_space c || c = '"' || c = '['))
-  in
-  if chars = op then parser else fail "The operators don't match"
+let prohibited_ops = [ "|"; "->" ]
+let first_unop_strings = [ "?"; "~"; "!" ]
+
+let suffix_unop_strings =
+  [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<" ]
 ;;
 
-let parse_unary_op =
+let base_unops = [ "-"; "+"; "not" ]
+
+let first_binop_strings =
+  [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<"; "#" ]
+;;
+
+let suffix_binop_strings =
+  [ "$"
+  ; "&"
+  ; "*"
+  ; "+"
+  ; "-"
+  ; "/"
+  ; "="
+  ; ">"
+  ; "@"
+  ; "^"
+  ; "|"
+  ; "%"
+  ; "<"
+  ; "!"
+  ; "."
+  ; ":"
+  ; "?"
+  ; "~"
+  ]
+;;
+
+let base_binops = [ "+"; "-"; "*"; "/"; "<="; "<"; ">="; ">"; "=="; "!="; "&&"; "||" ]
+
+let parse_op first suffix base_ops =
+  let rec helper = function
+    | hd :: tl -> hd =?*> return hd <|> helper tl
+    | [] -> fail "Can't parse operator"
+  in
   choice
-    [ parse_satisfy_op_and_run "+" (return Plus)
-    ; parse_satisfy_op_and_run "-" (return Minus)
-    ; parse_satisfy_op_and_run "not" (return Not)
+    [ (let* first_string = helper first in
+       let* suffix_string_list = many (helper suffix) in
+       let res_string = String.concat "" (first_string :: suffix_string_list) in
+       if List.mem res_string prohibited_ops
+       then fail ("Can't use " ^ res_string ^ " as custom operator")
+       else return res_string)
+    ; helper base_ops
     ]
+;;
+
+let parse_unary_op = parse_op first_unop_strings suffix_unop_strings base_unops
+let parse_binary_op = parse_op first_binop_strings suffix_binop_strings base_binops
+let parse_op = parse_binary_op <|> parse_unary_op
+
+type priority_group =
+  { group : string list
+  ; left_associative : bool
+  }
+
+let first_priority_group =
+  { group = [ "$"; "&"; "<"; "="; ">"; "|" ]; left_associative = true }
+;;
+
+let second_priority_group = { group = [ "@"; "^" ]; left_associative = false }
+let third_priority_group = { group = [ "+"; "-" ]; left_associative = true }
+let fourth_priority_group = { group = [ "%"; "*"; "/" ]; left_associative = true }
+let fifth_priority_group = { group = [ "#" ]; left_associative = true }
+
+let priority_groups =
+  [ first_priority_group
+  ; second_priority_group
+  ; third_priority_group
+  ; fourth_priority_group
+  ; fifth_priority_group
+  ]
+;;
+
+let get_priority_group first_string =
+  let rec helper = function
+    | priority_group :: _ when List.mem first_string priority_group.group ->
+      Some priority_group
+    | [] -> None
+    | _ :: tl -> helper tl
+  in
+  helper priority_groups
 ;;
 
 (****************************************************** Tuple ******************************************************)
 
-let parse_tuple parser wrap =
-  let* list_res = sep_by1 (parse_stoken ",") parser in
+let parse_tuple ?(sep = ",") parser wrap =
+  let* list_res = sep_by1 (parse_stoken sep) parser in
   match list_res with
-  | [ e ] -> return e
-  | _ -> return (wrap list_res)
+  | [ _ ] -> fail ""
+  | _ -> return @@ wrap list_res
 ;;
 
 let parse_tuple_expr parse_expr = parse_tuple parse_expr etuple
-let parse_tuple_pat parse_pat = parse_tuple parse_pat ptuple
 
 (****************************************************** Branching ******************************************************)
 
 let parse_branching parse_expr =
   lift3
     eif
-    (parse_stoken "if" *> parse_token1 parse_expr)
-    (parse_stoken1 "then" *> parse_token1 parse_expr)
-    (parse_stoken1 "else" *> parse_token1 parse_expr)
+    ("if" =?*> parse_token1 parse_expr)
+    ("then" =?*> parse_token1 parse_expr)
+    ("else" =?*> parse_token1 parse_expr)
 ;;
 
 (****************************************************** Application, unary, binary ops ******************************************************)
-
-let binop_binder str_op bin_op =
-  let helper bin_op x y = ebinop x bin_op y in
-  parse_satisfy_op_and_run str_op (return @@ helper bin_op)
-;;
-
-let add = binop_binder "+" Add
-let sub = binop_binder "-" Sub
-let mul = binop_binder "*" Mul
-let div = binop_binder "/" Div
-let geq = binop_binder ">=" Geq
-let gre = binop_binder ">" Gre
-let leq = binop_binder "<=" Leq
-let less = binop_binder "<" Less
-let eq = binop_binder "=" Eq
-let neq = binop_binder "!=" Neq
-let and_l = binop_binder "&&" And
-let or_l = binop_binder "||" Or
 
 let chainl1 parse_e op =
   let rec go acc = lift2 (fun f x -> f acc x) op parse_e >>= go <|> return acc in
@@ -143,10 +198,30 @@ let chainl1 parse_e op =
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
-let app_binder = return eapp
+
+let binop_binder group =
+  let* bin_op = parse_binary_op in
+  let rec helper = function
+    | group_string :: tl ->
+      if String.starts_with ~prefix:group_string bin_op then return () else helper tl
+    | [] -> fail "There is no matching operator"
+  in
+  let ebinop_helper x y = eapp (eapp (eid bin_op) x) y in
+  helper group *> return ebinop_helper
+;;
+
+let get_chain e priority_group =
+  let binop_binder = binop_binder priority_group.group in
+  let chain =
+    match priority_group.left_associative with
+    | true -> chainl1
+    | false -> chainr1
+  in
+  chain e binop_binder
+;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op in
+  let* unop = parse_token parse_unary_op <|> parse_parens parse_op in
   let* expr =
     choice
       [ parse_expr
@@ -154,23 +229,22 @@ let rec parse_un_op_app parse_expr =
       ; parse_space1 *> parse_un_op_app parse_expr
       ]
   in
-  return @@ eunop unop expr
+  return @@ eapp (eid unop) expr
 ;;
 
 let parse_bin_op_app parse_expr =
   fix (fun parse_bin_op_app ->
     let parse_bin_op parse_expr =
-      let term = chainr1 parse_expr and_l in
-      let term = chainr1 term or_l in
-      let term = chainl1 term (mul <|> div) in
-      let term = chainl1 term (add <|> sub) in
-      chainr1
-        (choice [ term; parse_bin_op_app ])
-        (choice [ geq; gre; leq; less; eq; neq ])
-    and parse_app parse_expr =
-      let term = chainl1 parse_expr app_binder in
+      let term = get_chain parse_expr fifth_priority_group in
+      let term = get_chain term fourth_priority_group in
+      let term = get_chain term third_priority_group in
+      let term = get_chain term second_priority_group in
+      get_chain (choice [ term; parse_bin_op_app ]) first_priority_group
+    in
+    let parse_app parse_expr =
+      let term = chainl1 parse_expr (return eapp) in
       let term = choice [ parse_un_op_app term; term ] in
-      let cons = parse_satisfy_op_and_run "::" (return elist) in
+      let cons = "::" =?*> return elist in
       chainr1 term cons
     in
     parse_bin_op (parse_app parse_expr))
@@ -178,21 +252,19 @@ let parse_bin_op_app parse_expr =
 
 (****************************************************** List ******************************************************)
 
-let parse_list parser wrap init =
+let parse_list_semicolon parser wrap init =
   let* expr_list =
     choice
-      [ parse_stoken "[" *> parse_space *> parse_stoken "]" *> return []
-      ; parse_stoken "[" *> sep_by (parse_stoken ";") parser <* parse_stoken "]"
+      [ "[" =?*> parse_stoken "]" *> return []
+      ; "[" =?*> sep_by (parse_stoken ";") parser <* parse_stoken "]"
       ]
   in
   return (List.fold_right wrap expr_list init)
 ;;
 
-let parse_list_expr parse_expr = parse_list parse_expr elist (econst CNil)
-let parse_list_pat parse_pat = parse_list parse_pat plist (pconst CNil)
+let parse_list_expr parse_expr = parse_list_semicolon parse_expr elist (econst CNil)
 
-(****************************************************** Identifiers, let-bindings, anonymous functions ******************************************************)
-
+(****************************************************** Patterns, types ******************************************************)
 let parse_letters =
   lift2
     (fun hd tl -> String.make 1 hd ^ tl)
@@ -201,154 +273,192 @@ let parse_letters =
 ;;
 
 let parse_identifier =
-  parse_token parse_letters
-  >>= fun ident -> if is_keyword ident then fail "invalid syntax" else return ident
+  choice
+    [ (parse_token parse_letters
+       >>= fun ident ->
+       if is_keyword ident then fail @@ ident ^ "invalid syntax" else return ident)
+    ; parse_parens parse_op
+    ]
 ;;
 
 let parse_identifier_expr = parse_identifier >>| eid
 
-let parse_pattern =
-  fix (fun parse_pattern ->
-    let parse_pattern =
-      choice
-        [ parse_identifier >>| pid
-        ; parse_parens (parse_tuple_pat parse_pattern)
-        ; parse_const >>| pconst
-        ]
-    in
-    choice [ parse_parens parse_pattern; parse_pattern ])
+let parse_ground_type =
+  choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]
 ;;
 
-let parse_pattern_with_list =
-  fix (fun parse_pattern_with_list ->
-    let parse_list_pattern = parse_satisfy_op_and_run "::" (return plist) in
-    chainr1
-      (choice
-         [ parse_parens parse_pattern_with_list
-         ; parse_pattern
-         ; parse_list_pat parse_pattern_with_list
-         ])
-      parse_list_pattern)
+let parse_generic_type = "'" =?*> parse_letters >>| tvar
+let parse_base_types = choice [ parse_generic_type; parse_ground_type ]
+let parse_tuple_type parse_type = parse_tuple ~sep:"*" parse_type ttuple
+
+let parse_arrow_type parse_type =
+  let* typ1 = parse_type in
+  let* typ2 = "->" =?*> parse_type in
+  return @@ tarrow typ1 typ2
 ;;
 
-let parse_params =
-  let parse_param =
+let parse_list_type parse_type =
+  let* typ = parse_type in
+  "list" =?*> return @@ tlist typ
+;;
+
+let parse_type =
+  fix (fun parse_type ->
     choice
-      [ parse_pattern
-      ; parse_parens parse_pattern_with_list
-      ; parse_list_pat parse_pattern_with_list
-      ]
+      [ parse_parens @@ parse_arrow_type parse_type
+      ; parse_parens @@ parse_tuple_type parse_type
+      ; parse_parens @@ parse_list_type parse_type
+      ; parse_parens_or_non parse_base_types
+      ])
+;;
+
+let parse_pat_typed parse_pat =
+  let parse_pattern_typed parse_pat =
+    lift2
+      (fun pat typ -> p_typed ~typ pat)
+      parse_pat
+      ((let* parsed_typ = ":" =?*> parse_type in
+        return (Some parsed_typ))
+       <|> return None)
   in
-  sep_by parse_space1 parse_param
+  let parse_pat_not_typed parse_pat = lift p_typed parse_pat in
+  choice [ parse_parens (parse_pattern_typed parse_pat); parse_pat_not_typed parse_pat ]
 ;;
 
-let parse_fun op parse_expr =
+let parse_ident_pat = parse_identifier >>| pid
+
+let parse_list_pat_semicolon parse_pat =
+  parse_list_semicolon
+    (parse_pat_typed parse_pat)
+    (fun hd tl -> p_typed @@ plist hd tl)
+    (p_typed (pconst CNil))
+  >>| fst
+;;
+
+let parse_list_pat_colons parse_pat =
+  chainr1
+    (parse_pat_typed parse_pat)
+    ("::" =?*> return (fun hd tl -> p_typed (plist hd tl)))
+  >>| fst
+;;
+
+let parse_tuple_pat parse_pat = parse_tuple (parse_pat_typed parse_pat) ptuple
+let parse_base_pats = choice [ parse_ident_pat; parse_const >>| pconst ]
+
+let parse_lrf_pats parse_pat =
+  (* lrf === left-recursion free *)
+  fix (fun parse_pat_fix -> choice [ parse_pat; parse_list_pat_semicolon parse_pat_fix ])
+;;
+
+let parse_pattern_typed =
+  parse_pat_typed
+  @@ fix (fun parse_pattern_fix ->
+    choice
+      [ parse_lrf_pats parse_base_pats
+      ; parse_parens (parse_list_pat_colons parse_pattern_fix)
+      ; parse_parens (parse_lrf_pats parse_pattern_fix)
+      ; parse_parens (parse_tuple_pat parse_pattern_fix)
+      ])
+;;
+
+(****************************************************** Functions ******************************************************)
+let parse_params = sep_by parse_space parse_pattern_typed
+
+let parse_fun_decl parse_expr =
   let* params = parse_params in
-  let* expr = parse_satisfy_op_and_run op parse_expr in
-  return @@ List.fold_right (fun parameter acc -> efun parameter acc) params expr
-;;
-
-let parse_fun_decl = parse_fun "="
-let parse_fun_anon = parse_fun "->"
-
-let parse_closure parse_expr =
-  parse_stoken "let"
-  *> lift4
-       (fun rec_flag ident expr_clsr expr -> eclsr (dlet rec_flag ident expr_clsr) expr)
-       (parse_next_stoken "rec" *> return Recursive <|> return Not_recursive)
-       (parse_token parse_identifier)
-       (parse_fun_decl parse_expr <* parse_stoken "in")
-       parse_expr
+  let* typ = choice [ (":" =?*> parse_type >>| fun typ -> Some typ); return None ] in
+  let* expr = "=" =?*> parse_expr in
+  return @@ (List.fold_right efun params expr, typ)
 ;;
 
 let parse_fun_anon_expr parse_expr =
-  parse_stoken "fun" *> parse_space1 *> parse_fun_anon parse_expr
+  "fun"
+  =?*> parse_space1
+       *>
+       let* params = parse_params in
+       let* expr = "->" =?*> parse_expr in
+       return @@ List.fold_right efun params expr
 ;;
 
-(****************************************************** List matching ******************************************************)
+(****************************************************** Pattern matching ******************************************************)
 
 let parse_match parse_expr =
+  "match"
+  =?*>
   let parse_case =
-    let* case =
-      choice
-        [ parse_pattern_with_list; parse_pattern; parse_list_pat parse_pattern_with_list ]
-    in
-    let* value = parse_stoken "->" *> parse_expr in
+    let* case = parse_pattern_typed in
+    let* value = "->" =?*> parse_expr in
     return (case, value)
   in
-  parse_stoken "match"
-  *> lift2
-       ematch
-       (parse_token1 parse_expr
-        <* (parse_stoken "with" <* choice [ parse_stoken1 "|"; parse_space ]))
-       (sep_by1 (parse_stoken "|") parse_case)
+  lift2
+    ematch
+    (parse_token1 parse_expr
+     <* (parse_stoken "with" <* choice [ parse_stoken1 "|"; parse_space ]))
+    (sep_by1 (parse_stoken "|") parse_case)
 ;;
 
-(****************************************************** Expression parsing ******************************************************)
+(****************************************************** Decl, expression parsing ******************************************************)
+let parse_rec_flag = parse_next_stoken "rec" *> return Recursive <|> return Not_recursive
+
+let parse_let_body parse_expr =
+  lift2
+    (fun ident (expr, typ) -> ident, expr, typ)
+    (parse_token parse_identifier)
+    (parse_fun_decl parse_expr)
+;;
+
+let let_decl parse_expr =
+  let parse_let_decl =
+    "let"
+    =?*> lift2
+           (fun rec_flag (ident, expr, typ) -> dlet rec_flag ident expr typ)
+           parse_rec_flag
+           (parse_let_body parse_expr)
+  in
+  parse_let_decl
+;;
+
+let parse_closure parse_decl parse_expr =
+  lift2 (fun decl expr -> eclsr decl expr) parse_decl ("in" =?*> parse_expr)
+;;
+
+let parse_let_decl parse_expr =
+  let* let_decl = let_decl parse_expr in
+  let* let_decls_mut = many ("and" =?*> parse_let_body parse_expr) in
+  match let_decls_mut with
+  | [] -> return let_decl
+  | decls ->
+    (match let_decl with
+     | DLet (rec_flag, ident, expr, typ) ->
+       return (dletmut rec_flag ((ident, expr, typ) :: decls))
+     | DLetMut (_, _) ->
+       raise
+         (Failure "This shouldn't be happening, but you've got DLetMut in parse_let_decl"))
+;;
+
 let parse_expr =
-  fix (fun parse_expr ->
-    let parser_ehelper =
+  fix (fun parse_expr_fix ->
+    let parse_expr_inner =
       choice
-        [ parse_stoken "(" *> parse_stoken ")" *> return CUnit >>| econst
-        ; parse_parens parse_expr
-        ; parse_const_expr
+        [ parse_const_expr
+        ; parse_parens parse_expr_fix
         ; parse_identifier_expr
-        ; parse_fun_anon_expr parse_expr
-        ; parse_branching parse_expr
-        ; parse_closure parse_expr
-        ; parse_match parse_expr
-        ; parse_list_expr parse_expr
+        ; parse_fun_anon_expr parse_expr_fix
+        ; parse_closure (parse_let_decl parse_expr_fix) parse_expr_fix
+        ; parse_branching parse_expr_fix
+        ; parse_match parse_expr_fix
+        ; parse_list_expr parse_expr_fix
         ]
     in
-    let parser_ehelper = parse_bin_op_app parser_ehelper in
-    let parser_ehelper = parse_tuple_expr parser_ehelper in
-    choice ~failure_msg:"Can't parse expr" [ parser_ehelper ])
-;;
-
-let rec postprocess_expr =
-  let postprocess_list el = List.map postprocess_expr el in
-  function
-  | EBinop (e1, bop, e2) ->
-    let e1 = postprocess_expr e1 in
-    let e2 = postprocess_expr e2 in
-    (match bop with
-     | Geq -> ebinop e2 Leq e1
-     | Gre -> ebinop e2 Less e1
-     | Neq -> eunop Not (ebinop e1 Eq e2)
-     | Or -> eunop Not (ebinop (eunop Not e1) And (eunop Not e2))
-     | _ -> ebinop e1 bop e2)
-  | EUnop (uop, e) -> eunop uop (postprocess_expr e)
-  | EFun (id, e) -> efun id (postprocess_expr e)
-  | EApp (EId "not", e2) -> eunop Not (postprocess_expr e2)
-  | EApp (e1, e2) -> eapp (postprocess_expr e1) (postprocess_expr e2)
-  | EIf (i, t, e) -> eif (postprocess_expr i) (postprocess_expr t) (postprocess_expr e)
-  | EList (hd, tl) -> elist (postprocess_expr hd) (postprocess_expr tl)
-  | ETuple e -> etuple @@ postprocess_list e
-  | EClsr (DLet (rec_flag, id, e_let), e) ->
-    eclsr (DLet (rec_flag, id, postprocess_expr e_let)) (postprocess_expr e)
-  | EMatch (e1, e2) ->
-    ematch (postprocess_expr e1) (List.map (fun (x, y) -> x, postprocess_expr y) e2)
-  | a -> a
-;;
-
-let parse_expr =
-  let* expr = parse_expr in
-  return @@ postprocess_expr expr
-;;
-
-(****************************************************** Declaration ******************************************************)
-
-let parse_decl_let parse_expr =
-  parse_stoken "let"
-  *> lift3
-       (fun rec_flag ident expr -> dlet rec_flag ident expr)
-       (parse_next_stoken "rec" *> return Recursive <|> return Not_recursive)
-       (parse_token parse_identifier)
-       (parse_fun_decl parse_expr)
+    let parse_expr_inner = parse_bin_op_app parse_expr_inner in
+    let parse_expr_inner =
+      choice [ parse_tuple_expr parse_expr_inner; parse_expr_inner ]
+    in
+    choice ~failure_msg:"Can't parse expr" [ parse_expr_inner ])
 ;;
 
 let parse_decls =
-  lift prog (many (parse_decl_let parse_expr <* (parse_stoken ";;" <|> parse_space)))
+  lift prog (many (parse_let_decl parse_expr <* (parse_stoken ";;" <|> parse_space)))
 ;;
 
 let parse_program s =
