@@ -247,14 +247,13 @@ let parse_expr =
 
 (* Declaration parser *)
 let parse_declaration =
-  skip_wspace
-  *> string "let"
+  token "let"
   *> lift3
        ddeclaration
-       (skip_wspace *> string "rec" *> return Rec <|> return NoRec)
+       (token "rec" *> return Rec <|> return NoRec)
        parse_pattern
-       (let* args = skip_wspace *> many parse_pattern in
-        let* expr = skip_wspace *> string "=" *> parse_expr in
+       (let* args = many parse_pattern in
+        let* expr = token "=" *> parse_expr in
         match List.rev args with
         | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
         | _ -> return expr)

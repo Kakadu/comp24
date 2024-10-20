@@ -34,3 +34,20 @@ let%expect_test _ =
         (EIdentifier "lst")))
       ] |}]
 ;;
+
+let%expect_test _ =
+  parse_with_print {| let fix f = let rec g x = f (g x) in g|};
+  [%expect
+    {|
+    [(DDeclaration (NoRec, (PIdentifier "fix"),
+        (EFun ((PIdentifier "f"),
+           (ELetIn (Rec, (PIdentifier "g"),
+              (EFun ((PIdentifier "x"),
+                 (EApplication ((EIdentifier "f"),
+                    (EApplication ((EIdentifier "g"), (EIdentifier "x")))))
+                 )),
+              (EIdentifier "g")))
+           ))
+        ))
+      ] |}]
+;;
