@@ -1,80 +1,16 @@
 (** Copyright 2024-2025, Pavel Averin, Alexey Efremov *)
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
-include StatementInfer
 
+open StatementInfer
 open Substitution
-
-let const2type : Ast.constant -> Ast.typeName = function
-  | Ast.CBool _ -> Ast.TBool
-  | Ast.CInt _ -> Ast.TInt
-;;
+open StartState
+open Help
+open Generalise
 
 type patern_mode =
   | PMAdd
   | PMCheck
-
-let pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint = function
-  | Ast.PConstraint (p, _) -> p
-  | Ast.PNConstraint p -> p
-;;
-
-let restore_type : Ast.typeName -> (state, Ast.typeName) t =
-  fun tp ->
-  let* subs = read_subs in
-  return (apply_substs subs tp)
-;;
-
-let rec get_tv_from_tp acc = function
-  | Ast.TBool | Ast.TInt -> acc
-  | Ast.TPoly x -> SetString.add x acc
-  | Ast.TFunction (t1, t2) ->
-    SetString.union (get_tv_from_tp acc t1) (get_tv_from_tp SetString.empty t2)
-  | Ast.TList t1 -> get_tv_from_tp acc t1
-  | Ast.TTuple t_lst -> List.fold_left get_tv_from_tp acc t_lst
-;;
-
-let get_tv_from_env : env_map -> SetString.t =
-  fun env ->
-  MapString.fold
-    (fun _var_name tp acc ->
-      match tp with
-      | TFFlat tp -> get_tv_from_tp acc tp
-      | TFSchem _ -> acc)
-    env
-    SetString.empty
-;;
-
-let rec write_scheme_for_pattern
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
-  =
-  fun free_vars pattern tp ->
-  let rec_call = write_scheme_for_pattern free_vars in
-  match pattern, tp with
-  | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
-  | PIdentifier x, tp ->
-    let used_tvs = get_tv_from_tp SetString.empty tp in
-    let new_free_vars = SetString.inter used_tvs free_vars in
-    write_var_type x (TFSchem (new_free_vars, tp))
-  | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
-  | PTuple p_lst, TTuple t_lst ->
-    map_list (fun (p, t) -> rec_call p t) (List.combine p_lst t_lst) *> return ()
-  | _ -> fail "something strange during generealisetion"
-;;
-
-let generalise
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
-  =
-  fun bound_vars pat tp ->
-  let* tp = restore_type tp in
-  let* subs = read_subs in
-  let used_vars = get_tv_from_tp SetString.empty tp in
-  let unbound_vars = SetString.diff used_vars bound_vars in
-  let free_vars =
-    SetString.filter (fun name -> not (List.mem_assoc name subs)) unbound_vars
-  in
-  write_scheme_for_pattern free_vars pat tp
-;;
 
 let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
   fun pm cpat ->
@@ -539,17 +475,15 @@ and odd = fun n -> match n with
 let%expect_test _ =
   test_infer_prog
     {|
-let (-) = fun (a:int) (b:int)->  a;;
+    let (-) = fun (a:int) (b:int)->  a;;
+    let (+) = fun (a:int) (b:int)->  a;;
 
-let fibo n =
-  let rec fiboCPS n acc =
-    match n with
+
+  let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
     | 0 -> acc 0
     | 1 -> acc 1
     | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
-  in
-  fiboCPS n (fun x -> x)
-;;
-|};
+      in fiboCPS n (fun x -> x)
+  |};
   [%expect {|  |}]
 ;;

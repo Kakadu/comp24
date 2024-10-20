@@ -1,7 +1,13 @@
 (library
  (name typeinference)
  (public_name BasedML.Typeinference)
- (modules typeinference statementInfer substitution)
+ (modules
+  typeinference
+  statementInfer
+  substitution
+  startState
+  help
+  generalise)
  (libraries base angstrom ast common parser)
  (inline_tests)
  (preprocess
