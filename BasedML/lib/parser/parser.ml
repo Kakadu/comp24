@@ -104,8 +104,8 @@ let p_infix_ident =
 (* Type parsers *)
 
 let p_basic_type : typeName t =
-  string "int" *> return TInt
-  <|> string "bool" *> return TBool
+  Angstrom.string "int" *> return TInt
+  <|> Angstrom.string "bool" *> return TBool
   <|> char '\''
       *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
          return (TPoly ("'" ^ typeNameChar))
@@ -121,14 +121,14 @@ let p_function_type p_type =
   chainr1
     p_type
     (skip_whitespace
-     *> string "->"
+     *> Angstrom.string "->"
      *> skip_whitespace
      *> return (fun arg ret -> TFunction (arg, ret)))
 ;;
 
 let rec p_list_type t =
   let* base = t in
-  let* _ = skip_whitespace *> string "list" in
+  let* _ = skip_whitespace *> Angstrom.string "list" in
   p_list_type (return (TList base)) <|> return (TList base)
 ;;
 
@@ -282,7 +282,7 @@ let binary_operation op func =
   skip_whitespace
   *> Angstrom.string op
   *> return (fun operand1 operand2 ->
-    EApplication (func, EApplication (operand1, operand2)))
+    EApplication (func, operand1) |> fun app1 -> EApplication (app1, operand2))
 ;;
 
 let app_delim = return (fun operand1 operand2 -> EApplication (operand1, operand2))
@@ -479,25 +479,25 @@ let x = (5 + 5) * 6 + (5 + 5) / 2
     {|
     [(DSingleLet
         (DLet (NotRec, (PNConstraint (PIdentifier "x")),
-           (EApplication ((EIdentifier "( + )"),
+           (EApplication (
+              (EApplication ((EIdentifier "( + )"),
+                 (EApplication (
+                    (EApplication ((EIdentifier "( * )"),
+                       (EApplication (
+                          (EApplication ((EIdentifier "( + )"),
+                             (EConstant (CInt 5)))),
+                          (EConstant (CInt 5))))
+                       )),
+                    (EConstant (CInt 6))))
+                 )),
               (EApplication (
-                 (EApplication ((EIdentifier "( * )"),
-                    (EApplication (
-                       (EApplication ((EIdentifier "( + )"),
-                          (EApplication ((EConstant (CInt 5)),
-                             (EConstant (CInt 5))))
-                          )),
-                       (EConstant (CInt 6))))
-                    )),
                  (EApplication ((EIdentifier "( / )"),
                     (EApplication (
-                       (EApplication ((EIdentifier "( + )"),
-                          (EApplication ((EConstant (CInt 5)),
-                             (EConstant (CInt 5))))
+                       (EApplication ((EIdentifier "( + )"), (EConstant (CInt 5))
                           )),
-                       (EConstant (CInt 2))))
-                    ))
-                 ))
+                       (EConstant (CInt 5))))
+                    )),
+                 (EConstant (CInt 2))))
               ))
            )))
       ] |}]
@@ -512,8 +512,9 @@ let x = if 5 > 4 then true else false
     [(DSingleLet
         (DLet (NotRec, (PNConstraint (PIdentifier "x")),
            (EIfThenElse (
-              (EApplication ((EIdentifier "( > )"),
-                 (EApplication ((EConstant (CInt 5)), (EConstant (CInt 4)))))),
+              (EApplication (
+                 (EApplication ((EIdentifier "( > )"), (EConstant (CInt 5)))),
+                 (EConstant (CInt 4)))),
               (EConstant (CBool true)), (EConstant (CBool false))))
            )))
       ] |}]
@@ -528,8 +529,9 @@ let succ = fun n -> n + 1
     [(DSingleLet
         (DLet (NotRec, (PNConstraint (PIdentifier "succ")),
            (EFunction ((PNConstraint (PIdentifier "n")),
-              (EApplication ((EIdentifier "( + )"),
-                 (EApplication ((EIdentifier "n"), (EConstant (CInt 1))))))
+              (EApplication (
+                 (EApplication ((EIdentifier "( + )"), (EIdentifier "n"))),
+                 (EConstant (CInt 1))))
               ))
            )))
       ] |}]
@@ -591,17 +593,17 @@ let rec fac = fun n -> if n = 0 then 1 else n * (fac (n - 1))
         (DLet (Rec, (PNConstraint (PIdentifier "fac")),
            (EFunction ((PNConstraint (PIdentifier "n")),
               (EIfThenElse (
-                 (EApplication ((EIdentifier "( = )"),
-                    (EApplication ((EIdentifier "n"), (EConstant (CInt 0)))))),
+                 (EApplication (
+                    (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
+                    (EConstant (CInt 0)))),
                  (EConstant (CInt 1)),
-                 (EApplication ((EIdentifier "( * )"),
-                    (EApplication ((EIdentifier "n"),
-                       (EApplication ((EIdentifier "fac"),
-                          (EApplication ((EIdentifier "( - )"),
-                             (EApplication ((EIdentifier "n"),
-                                (EConstant (CInt 1))))
-                             ))
-                          ))
+                 (EApplication (
+                    (EApplication ((EIdentifier "( * )"), (EIdentifier "n"))),
+                    (EApplication ((EIdentifier "fac"),
+                       (EApplication (
+                          (EApplication ((EIdentifier "( - )"), (EIdentifier "n")
+                             )),
+                          (EConstant (CInt 1))))
                        ))
                     ))
                  ))
@@ -621,22 +623,23 @@ let rec facCPS = fun n k -> if n = 0 then k 1 else facCPS (n - 1) (fun t -> k (n
            (EFunction ((PNConstraint (PIdentifier "n")),
               (EFunction ((PNConstraint (PIdentifier "k")),
                  (EIfThenElse (
-                    (EApplication ((EIdentifier "( = )"),
-                       (EApplication ((EIdentifier "n"), (EConstant (CInt 0)))))),
+                    (EApplication (
+                       (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
+                       (EConstant (CInt 0)))),
                     (EApplication ((EIdentifier "k"), (EConstant (CInt 1)))),
                     (EApplication (
                        (EApplication ((EIdentifier "facCPS"),
-                          (EApplication ((EIdentifier "( - )"),
-                             (EApplication ((EIdentifier "n"),
-                                (EConstant (CInt 1))))
-                             ))
+                          (EApplication (
+                             (EApplication ((EIdentifier "( - )"),
+                                (EIdentifier "n"))),
+                             (EConstant (CInt 1))))
                           )),
                        (EFunction ((PNConstraint (PIdentifier "t")),
                           (EApplication ((EIdentifier "k"),
-                             (EApplication ((EIdentifier "( * )"),
-                                (EApplication ((EIdentifier "n"),
-                                   (EIdentifier "t")))
-                                ))
+                             (EApplication (
+                                (EApplication ((EIdentifier "( * )"),
+                                   (EIdentifier "n"))),
+                                (EIdentifier "t")))
                              ))
                           ))
                        ))
@@ -666,12 +669,12 @@ let rec map = fun f list -> match list with
                           (PCons ((PIdentifier "h"), (PIdentifier "tl")))),
                        (EApplication (
                           (EApplication ((EIdentifier "map"), (EIdentifier "f"))),
-                          (EApplication ((EIdentifier "( :: )"),
-                             (EApplication (
+                          (EApplication (
+                             (EApplication ((EIdentifier "( :: )"),
                                 (EApplication ((EIdentifier "f"),
-                                   (EIdentifier "h"))),
-                                (EIdentifier "tl")))
-                             ))
+                                   (EIdentifier "h")))
+                                )),
+                             (EIdentifier "tl")))
                           )))
                       ]
                     ))
@@ -700,17 +703,17 @@ let rec facCPS = fun n k -> match n with
                       ((PNConstraint (PIdentifier "n")),
                        (EApplication (
                           (EApplication ((EIdentifier "facCPS"),
-                             (EApplication ((EIdentifier "( - )"),
-                                (EApplication ((EIdentifier "n"),
-                                   (EConstant (CInt 1))))
-                                ))
+                             (EApplication (
+                                (EApplication ((EIdentifier "( - )"),
+                                   (EIdentifier "n"))),
+                                (EConstant (CInt 1))))
                              )),
                           (EFunction ((PNConstraint (PIdentifier "t")),
                              (EApplication ((EIdentifier "k"),
-                                (EApplication ((EIdentifier "( * )"),
-                                   (EApplication ((EIdentifier "n"),
-                                      (EIdentifier "t")))
-                                   ))
+                                (EApplication (
+                                   (EApplication ((EIdentifier "( * )"),
+                                      (EIdentifier "n"))),
+                                   (EIdentifier "t")))
                                 ))
                              ))
                           )))
@@ -749,26 +752,27 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
                             ((PNConstraint PWildCard),
                              (EApplication (
                                 (EApplication ((EIdentifier "fiboCPS"),
-                                   (EApplication ((EIdentifier "( - )"),
-                                      (EApplication ((EIdentifier "n"),
-                                         (EConstant (CInt 1))))
-                                      ))
+                                   (EApplication (
+                                      (EApplication ((EIdentifier "( - )"),
+                                         (EIdentifier "n"))),
+                                      (EConstant (CInt 1))))
                                    )),
                                 (EFunction ((PNConstraint (PIdentifier "x")),
                                    (EApplication (
                                       (EApplication ((EIdentifier "fiboCPS"),
-                                         (EApplication ((EIdentifier "( - )"),
-                                            (EApplication ((EIdentifier "n"),
-                                               (EConstant (CInt 2))))
-                                            ))
+                                         (EApplication (
+                                            (EApplication ((EIdentifier "( - )"),
+                                               (EIdentifier "n"))),
+                                            (EConstant (CInt 2))))
                                          )),
                                       (EFunction (
                                          (PNConstraint (PIdentifier "y")),
                                          (EApplication ((EIdentifier "acc"),
-                                            (EApplication ((EIdentifier "( + )"),
-                                               (EApplication ((EIdentifier "x"),
-                                                  (EIdentifier "y")))
-                                               ))
+                                            (EApplication (
+                                               (EApplication (
+                                                  (EIdentifier "( + )"),
+                                                  (EIdentifier "x"))),
+                                               (EIdentifier "y")))
                                             ))
                                          ))
                                       ))
@@ -808,10 +812,10 @@ and odd = fun n -> match n with
                   [((PNConstraint (PConstant (CInt 0))), (EConstant (CBool true)));
                     ((PNConstraint (PIdentifier "x")),
                      (EApplication ((EIdentifier "odd"),
-                        (EApplication ((EIdentifier "( - )"),
-                           (EApplication ((EIdentifier "x"), (EConstant (CInt 1))
-                              ))
-                           ))
+                        (EApplication (
+                           (EApplication ((EIdentifier "( - )"),
+                              (EIdentifier "x"))),
+                           (EConstant (CInt 1))))
                         )))
                     ]
                   ))
@@ -824,10 +828,10 @@ and odd = fun n -> match n with
                      (EConstant (CBool false)));
                      ((PNConstraint (PIdentifier "x")),
                       (EApplication ((EIdentifier "even"),
-                         (EApplication ((EIdentifier "( - )"),
-                            (EApplication ((EIdentifier "x"),
-                               (EConstant (CInt 1))))
-                            ))
+                         (EApplication (
+                            (EApplication ((EIdentifier "( - )"),
+                               (EIdentifier "x"))),
+                            (EConstant (CInt 1))))
                          )))
                      ]
                    ))
