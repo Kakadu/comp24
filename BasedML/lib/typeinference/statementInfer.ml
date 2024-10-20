@@ -15,9 +15,19 @@ module MapString = struct
   ;;
 end
 
+module SetString = struct
+  include Set.Make (String)
+
+  let pp ppf m =
+    Format.fprintf ppf "@[[@[";
+    iter (fun s -> Format.fprintf ppf "(%s)@\n" s) m;
+    Format.fprintf ppf "@]]@]"
+  ;;
+end
+
 type type_form =
   | TFFlat of Ast.typeName
-  | TFSchem of unit MapString.t * Ast.typeName
+  | TFSchem of SetString.t * Ast.typeName
 [@@deriving show { with_path = false }]
 
 type env_map = type_form MapString.t [@@deriving show { with_path = false }]
@@ -47,15 +57,15 @@ let fresh_tv : (state, Ast.typeName) t =
   return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
 ;;
 
-let specialise : unit MapString.t * Ast.typeName -> (state, Ast.typeName) t =
+let specialise : SetString.t * Ast.typeName -> (state, Ast.typeName) t =
   fun (free_vars, stp) ->
-  let map = MapString.bindings free_vars in
+  let names = SetString.elements free_vars in
   let* v2v_lst =
     map_list
-      (fun (s, _) ->
+      (fun s ->
         let* new_v = fresh_tv in
         return (s, new_v))
-      map
+      names
   in
   let v2v = MapString.of_seq (List.to_seq v2v_lst) in
   let rec traverse = function
@@ -68,7 +78,7 @@ let specialise : unit MapString.t * Ast.typeName -> (state, Ast.typeName) t =
     | Ast.TList t1 -> Ast.TList (traverse t1)
     | x -> x
   in
-  let new_tp = traverse stp in 
+  let new_tp = traverse stp in
   (* let _ = Format.printf "[spec]: %s\n" (Ast.show_typeName new_tp) in *)
   return new_tp
 ;;
