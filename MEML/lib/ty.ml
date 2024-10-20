@@ -22,7 +22,6 @@ type ty =
   | TPrim of string
   | TBool
   | TInt
-  | TString
   | TUnknown
   | TVar of binder * ty
   | TArrow of ty * ty
@@ -42,7 +41,6 @@ type scheme = S of binder_set * ty [@@deriving show { with_path = false }]
 let arrow l r = TArrow (l, r)
 let int_typ = TInt
 let bool_typ = TBool
-let str_typ = TString
 let list_typ l = TList l
 let tuple_typ t = TTuple t
 let unit_typ = TUnknown
@@ -58,7 +56,6 @@ let rec pp_typ ppf = function
   | TVar (n, _) -> fprintf ppf "%s" @@ "'" ^ Char.escaped (Char.chr (n + 97))
   | TInt -> fprintf ppf "int"
   | TBool -> fprintf ppf "bool"
-  | TString -> fprintf ppf "string"
   | TList t -> fprintf ppf "%a list" pp_typ t
   | TTuple ts -> fprintf ppf "(%a)" (fun ppf -> pp_list pp_typ ppf " * ") ts
   | TArrow (l, r) ->
@@ -78,8 +75,8 @@ let print_typ typ =
 ;;
 
 let pp_error ppf : error -> _ = function
-  | `Empty_pattern -> Format.fprintf ppf "Error: Occurs check failed"
-  | `Occurs_check -> Format.fprintf ppf "Error: Empty pattern"
+  | `Empty_pattern -> Format.fprintf ppf "Error: Empty pattern"
+  | `Occurs_check -> Format.fprintf ppf "Error: Occurs check failed"
   | `No_variable s -> Format.fprintf ppf "Error: Undefined variable '%s'" s
   | `Unification_failed (l, r) ->
     Format.fprintf ppf "Error: Unification failed on %a and %a" pp_typ l pp_typ r

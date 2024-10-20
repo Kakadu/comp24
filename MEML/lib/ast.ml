@@ -29,7 +29,6 @@ type binary_op =
 type type_of_var =
   | TInt (** int type for variable *)
   | TBool (** bool type for variable *)
-  | TString (** string type for variable *)
   | TUnknown (** unknown type for variable *)
   | TArrow of type_of_var * type_of_var (** type int -> int... *)
 [@@deriving eq, show { with_path = false }]

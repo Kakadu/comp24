@@ -93,7 +93,7 @@ module Type = struct
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TList t -> occurs_in v t
     | TTuple ts -> occurs_in_list ts
-    | TInt | TString | TBool | TUnknown | TPrim _ -> false
+    | TInt | TBool | TUnknown | TPrim _ -> false
   ;;
 
   let free_vars =
@@ -102,7 +102,7 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TTuple ts -> List.fold ts ~init:acc ~f:helper
       | TList t -> helper acc t
-      | TInt | TBool | TString | TUnknown | TPrim _ -> acc
+      | TInt | TBool | TUnknown | TPrim _ -> acc
     in
     helper VarSet.empty
   ;;
@@ -305,42 +305,6 @@ let lookup_env e xs =
 ;;
 
 let infer =
-  let rec (pattern_helper : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t) =
-    fun env ->
-    let rec eval_list_helper envpat =
-      let* env, patterns = envpat in
-      match patterns with
-      | [] -> return (env, [])
-      | hd :: tl ->
-        let* envhd, tyhd = pattern_helper env hd in
-        let new_envpat = return (envhd, tl) in
-        let* envtl, tytl = eval_list_helper new_envpat in
-        return (envtl, tyhd :: tytl)
-    in
-    function
-    | PCon (head, tail) ->
-      let* env, ty1 = pattern_helper env head in
-      let ty1 = list_typ ty1 in
-      let* env, ty2 = pattern_helper env tail in
-      let* subst = unify ty1 ty2 in
-      let finenv = TypeEnv.apply subst env in
-      return (finenv, Subst.apply subst ty1)
-    | PConst const ->
-      (match const with
-       | CBool _ -> return (env, TPrim "bool")
-       | CInt _ -> return (env, TPrim "int")
-       | CNil -> return (env, TPrim "'a list"))
-    | PVar (id, _) ->
-      let* tv = fresh_var in
-      let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
-      return (env, tv)
-    | PTuple tuple ->
-      let* finenv, fintys = eval_list_helper @@ return (env, tuple) in
-      return (finenv, tuple_typ fintys)
-    | PWild ->
-      let* ty = fresh_var in
-      return (env, ty)
-  in
   let rec (helper : TypeEnv.t -> Ast.expression -> (Subst.t * ty) R.t) =
     fun env -> function
     | EBinaryOp (bin_op, l, r) ->
@@ -363,10 +327,23 @@ let infer =
          return (sres, bool_typ))
     | EVar (x, _) -> lookup_env x env
     | EFun (p, e1) ->
-      let* env, t1 = pattern_helper env p in
-      let* s, t2 = helper env e1 in
-      let typedres = TArrow (Subst.apply s t1, t2) in
-      return (s, typedres)
+      let* tv = fresh_var in
+      let* v, env2 =
+        match p with
+        | PVar (x, TUnknown) -> return (tv, TypeEnv.extend env (x, S (VarSet.empty, tv)))
+        | PVar (x, TInt) ->
+          let* a = get_fresh in
+          let v = TVar (a, TInt) in
+          return (v, TypeEnv.extend env (x, S (VarSet.empty, v)))
+        | PVar (x, TBool) ->
+          let* a = get_fresh in
+          let v = TVar (a, TBool) in
+          return (v, TypeEnv.extend env (x, S (VarSet.empty, v)))
+        | _ -> return (tv, env)
+      in
+      let* s, ty = helper env2 e1 in
+      let trez = TArrow (Subst.apply s v, ty) in
+      return (s, trez)
     | EApp (e1, e2) ->
       let* s1, t1 = helper env e1 in
       let* s2, t2 = helper (TypeEnv.apply s1 env) e2 in
