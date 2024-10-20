@@ -6,7 +6,7 @@ type const =
   | CInt of int (** int *)
   | CBool of bool (** bool *)
   | CNil (** [] *)
-  | CUnit (*** () *)
+  | CUnit (** () *)
 [@@deriving eq, show { with_path = false }]
 
 type ident = string [@@deriving eq, show { with_path = false }]

@@ -6,7 +6,7 @@ type const =
   | CInt of int (** int *)
   | CBool of bool (** bool *)
   | CNil (** [] *)
-  | CUnit (*** () *)
+  | CUnit (** () *)
 
 val equal_const : const -> const -> bool
 val pp_const : Format.formatter -> const -> unit
