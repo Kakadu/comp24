@@ -54,6 +54,16 @@ let is_identifier_char = function
   | _ -> false
 ;;
 
+let is_op_symb = function
+  | "-" | "+" | "/" | "*" | "<" | "<=" | ">=" | "<>" | ">" | "::" | "=" -> true
+  | _ -> false
+;;
+
+let is_inf_op_symb = function
+  | '-' | '+' | '/' | '*' | '<' | '>' | ':' | '=' -> true
+  | _ -> false
+;;
+
 let skip_whitespace = skip_while is_whitespace
 let between left right exp = left *> exp <* right
 
@@ -80,6 +90,15 @@ let p_ident_string p_valid_fst_char =
     then fail "Identifier parsing failed: identifier can't be a keyword"
     else return identifier
   | _ -> fail "Identifier parsing failed: first character must start with [a-z]"
+;;
+
+let p_infix_ident =
+  let* some_str =
+    between_parens (skip_whitespace *> take_while1 is_inf_op_symb <* skip_whitespace)
+  in
+  if some_str |> is_op_symb
+  then return (PIdentifier ("( " ^ some_str ^ " )"))
+  else fail "Parsed string wasn't an supported operator"
 ;;
 
 (* Type parsers *)
@@ -233,6 +252,7 @@ let p_pattern_without_type =
     let atomic_pat =
       p_ident_pattern
       <|> p_const_pattern
+      <|> p_infix_ident
       <|> between_parens p_pattern
       <|> p_list_pattern p_pattern
     in
