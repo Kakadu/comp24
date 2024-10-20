@@ -64,14 +64,6 @@ let parse_identifier constr =
   else fail "Syntax error: invalid identifier name"
 ;;
 
-let identifier =
-  parse_name
-  >>= fun name ->
-  if ((not @@ is_keyword name) && is_lower name.[0]) || name.[0] = '_'
-  then return name
-  else fail "Syntax error: invalid identifier name"
-;;
-
 let parse_int =
   skip_wspace *> take_while1 is_digit <* skip_wspace >>| int_of_string >>| cint
 ;;
@@ -114,6 +106,7 @@ let parse_type =
 
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
+let parse_punit = token "(" *> token ")" >>| punit
 let parse_pidentifier = parse_identifier pident
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
@@ -188,12 +181,11 @@ let parse_efun p_expr =
 ;;
 
 let rec parse_bundle pexpr =
-  let pattern_expr = identifier >>| fun var -> PIdentifier var in
   let expr_with_pattern =
-    pattern_expr
+    parse_pattern
     >>= fun pat -> parse_bundle pexpr <|> token "=" *> pexpr >>| fun e -> EFun (pat, e)
   in
-  expr_with_pattern <|> token "fun" *> parse_efun pexpr
+  expr_with_pattern
 ;;
 
 let parse_ebinop chain1 e parse_binop =
@@ -203,7 +195,7 @@ let parse_ebinop chain1 e parse_binop =
 let parse_lbinop = parse_ebinop chainl1
 
 let parse_eif arg =
-  skip_while is_whitespace
+  skip_wspace
   *> lift3
        (fun i t e -> EIf (i, t, e))
        (token "if" *> arg)
@@ -212,13 +204,13 @@ let parse_eif arg =
 ;;
 
 let parse_match pexpr =
-  let pcase patterns pexpr =
-    lift2 (fun p e -> p, e) (token "|" *> patterns) (token "->" *> pexpr)
+  let pcase pexpr =
+    lift2 (fun p e -> p, e) (token "|" *> parse_pattern) (token "->" *> pexpr)
   in
   lift2
     (fun expr cases -> EMatch (expr, cases))
     (token "match" *> pexpr <* token "with")
-    (many1 (pcase parse_pattern pexpr))
+    (many1 (pcase pexpr))
 ;;
 
 let parse_let pexpr =
@@ -226,10 +218,8 @@ let parse_let pexpr =
   *> lift4
        (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
        (token "rec" *> return Rec <|> return NoRec)
-       (skip_while is_whitespace *> token "()"
-        <|> identifier
-        >>| fun var -> PIdentifier var)
-       (skip_while is_whitespace *> token "=" *> pexpr <|> parse_bundle pexpr)
+       (parse_punit <|> parse_pidentifier)
+       (token "=" *> pexpr <|> parse_bundle pexpr)
        (token "in" *> pexpr)
 ;;
 

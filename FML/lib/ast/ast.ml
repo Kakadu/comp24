@@ -26,6 +26,7 @@ type type_annotation =
 type pattern =
   | PNill (** [] *)
   | PAny (**  _ *)
+  | PUnit (** () *)
   | PConst of const (** 1 || true *)
   | PIdentifier of id (** x *)
   | PTuple of pattern list (** (x, y, z) *)
@@ -79,6 +80,7 @@ let cbool x = CBool x
 (* Constructors for patterns *)
 let pany _ = PAny
 let pnill _ = PNill
+let punit _ = PUnit
 let pconst c = PConst c
 let pident v = PIdentifier v
 let pcons l r = PCons (l, r)
