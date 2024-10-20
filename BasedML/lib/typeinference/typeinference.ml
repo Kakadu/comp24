@@ -135,18 +135,19 @@ let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
        in
        write_env new_env *> return tp
      | PMCheck ->
-       let not_found =
-         MapString.fold
-           (fun name _ acc ->
-             match acc with
-             | None when not (MapString.mem name glob_env) -> Some name
-             | x -> x)
-           loc_env
-           None
-       in
-       (match not_found with
-        | None -> write_env glob_env *> return tp
-        | Some x -> fail (Format.sprintf "Unbound value %s" x))
+       let* _ = write_env glob_env in
+       let loc_vars = MapString.bindings loc_env in
+       map_list
+         (fun (name, tp) ->
+           match tp with
+           | TFFlat tp ->
+             let* opt_tp = read_var_type name in
+             (match opt_tp with
+              | Some x -> write_subst x tp
+              | None -> fail (Format.sprintf "Unbound value %s" name))
+           | TFSchem _ -> fail "Unreacheble error: getschem type in pattern")
+         loc_vars
+       *> return tp
 ;;
 
 let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
@@ -328,14 +329,23 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_infer_exp {|fun f (list: int) -> match list with
-  | [] -> list
-  | h :: tl -> h|};
+  test_infer_exp
+    {|fun (tuper_var: int) -> match tuper_var with
+  | ([]: 'a list) -> tuper_var
+  | (h :: tl: 'a list) -> h|};
   [%expect
     {|
-    res: (TFunction ((TPoly "_p0"), (TFunction (TInt, TInt))))
-     substs: [("_p4", TInt); ("_p6", TInt); ("_p7", (TList TInt)); ("_p5", (TList TInt));
-      ("_p1", TInt); ("_p2", (TList TInt)); ("_p3", (TList TInt))] |}]
+    Infer error: Can not unify `TInt` and `(TList (TPoly "_p2"))` |}]
+;;
+
+let%expect_test _ =
+  test_infer_exp
+    {|fun tuper_var -> match tuper_var with
+  | ([]: 'a list) -> tuper_var
+  | (h :: tl: 'a list) -> h|};
+  [%expect
+    {|
+    Infer error: The type variable _p4 occurs inside (TList (TPoly "_p4")) |}]
 ;;
 
 let%expect_test _ =
@@ -385,18 +395,18 @@ let%expect_test _ =
   [%expect
     {|
     res: TInt
-     substs: [("_p11", TInt); ("_p14", TInt); ("_p15", TInt);
-      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p13", TInt);
-      ("_p9", TInt); ("_pd", (TPoly "_pa")); ("_p10", (TPoly "_pa"));
-      ("_pf", TInt);
+     substs: [("_p11", TInt); ("_p13", TInt); ("_p14", TInt);
+      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p9", TInt);
+      ("_pd", (TPoly "_pa")); ("_p10", (TPoly "_pa")); ("_pf", TInt);
       ("_pe", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
       ("_p8", (TPoly "_pa")); ("_pc", TInt);
       ("_pb", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
       ("_p0",
-       (TFunction ((TPoly "_p1"),
+       (TFunction (TInt,
           (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))))));
       ("_p6", (TPoly "_pa")); ("_p7", TInt); ("_p3", (TPoly "_pa"));
-      ("_p4", TInt); ("_p2", (TFunction (TInt, (TPoly "_pa")))); ("_p5", TInt)] |}]
+      ("_p4", TInt); ("_p2", (TFunction (TInt, (TPoly "_pa")))); ("_p5", TInt);
+      ("_p1", TInt)] |}]
 ;;
 
 let%expect_test _ =
