@@ -1,2 +1,3 @@
 (library
- (name BasedML))
+ (name lib)
+ (public_name BasedML.Lib))
