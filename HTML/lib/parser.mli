@@ -86,7 +86,6 @@ val parse_let_body
   :  Ast.expr Angstrom.t
   -> (string * Ast.expr * Ast.typ option) Angstrom.t
 
-val let_decl : Ast.expr Angstrom.t -> Ast.decl Angstrom.t
 val parse_closure : Ast.decl Angstrom.t -> Ast.expr Angstrom.t -> Ast.expr Angstrom.t
 val parse_let_decl : Ast.expr Angstrom.t -> Ast.decl Angstrom.t
 val parse_expr : Ast.expr Angstrom.t
