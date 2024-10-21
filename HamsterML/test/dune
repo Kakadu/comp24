@@ -1,2 +1,5 @@
-(test
- (name test_HamsterML))
+(library
+  (name foo)
+  (inline_tests)
+  (preprocess (pps ppx_inline_test))
+  (libraries HamsterML))
