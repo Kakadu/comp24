@@ -41,9 +41,6 @@ and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = fals
 
 type expr =
   | EConst of const (** Const. Examples: 100; true *)
-  | EBinop of expr * ident * expr
-  (** Binary operation. Examples: 2 + 2; (234 * 234) + 234 *)
-  | EUnop of ident * expr (** Unary operation. Examples: -(1); (+b) *)
   | EId of ident (** Identifier. Examples: a, b, c *)
   | EFun of pattern_typed * expr (** Function. Examples: fun x -> x + 1 *)
   | EApp of expr * expr (** Application. Examples: f (x - 1) *)
