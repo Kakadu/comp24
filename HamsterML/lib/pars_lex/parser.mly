@@ -1,5 +1,5 @@
 %{
-    open Ast
+    open Ast    
 %}
 
 // --- Tokens ---
@@ -51,7 +51,7 @@
 %token GREATER_THAN_EQUAL   // ">="
 %token LESS_THAN            // "<"
 %token LESS_THAN_EQUAL      // "<"
-%token LET_AND              // "let x = 1 and y = 2"
+%token LET_AND              // "let x = 1 and y = 2" 
 %token AND                  // "&&"
 %token OR                   // "||"
 %token NOT                  // "not"
@@ -76,22 +76,30 @@
 %left ASTERISK, SLASH
 
 // --- Parsing ---
-%start <expr option> prog
+%start <Ast.expr> prog
 %%
 
 prog : p = expr EOF { p }
 
 expr:
-    | op = bop; le = expr; re = expr { BinOp (op, le, re) }
-    | op = uop; e = expr {UnOp (op, e)}
     | v = value { Value v }
-    | LET; REC; id = IDENTIFIER; vls = list(value); EQUAL ; e = expr { Let (Recursive, id, vls, e) }
-    | LET; id = IDENTIFIER; vls = list(value); EQUAL ; e = expr { Let (Nonrecursive, id, vls, e) }
-    | FUN; vls = list(value); ARROW; e = expr { Fun (vls, e) }
-    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr {If (e1, e2, e3)}
-    // TODO: MATCH
-    // TODO: LetIn
-    | e1 = expr; e2 = expr { Application (e1, e2) }
+    | le = expr; bop = bop; re = expr { BinOp (bop, le, re) }
+    | le = expr; re = expr { Application (le,re) }
+    | uop = uop; e = expr { UnOp (uop, e) }
+    | LET; REC; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
+    | LET; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
+    | LET; id = IDENTIFIER; EQUAL; e = expr {BinOp(ASSIGN, Value(VarId id), e) }
+    | LET; exprs = separated_nonempty_list(LET_AND, assign); IN; e = expr { LetIn (exprs, e) }
+    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
+    | FUN; vls = nonempty_list(value); ARROW; e = expr { Fun (vls, e) }
+    // TODO: change to make possible to omit else clause
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { If (e1, e2, e3) }
+
+assign: 
+    | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
+
+%inline match_case: 
+    | BAR; v = value; ARROW; e = expr { (v, e) }
 
 dataType:
     | i = INT {Int i}
@@ -105,23 +113,23 @@ identifier:
     | name = IDENTIFIER { name }
     | LEFT_PARENTHESIS; name = identifier; RIGHT_PARENTHESIS { name }
 
-tuple: LEFT_PARENTHESIS; els = list(value); RIGHT_PARENTHESIS { els }
-
-list: LEFT_SQ_BRACKET; els = list(value); RIGHT_SQ_BRACKET { els }
-
 value:
     | const = dataType {Const const} 
-    | varId = identifier { VarId var }
-    | typedVarId = identifier; varType = dataType  {TypedVarID (typedVarId, varType)}
+    | varId = identifier { VarId varId }
+    | typedVarId = identifier; COLON; varType = dataType  {TypedVarID (typedVarId, varType)}
     | WILDCARD {Wildcard}
-    | list = list {List list}
-    | v1 = value; DOUBLE_COLON; v2 = value { ListConcat (v1, v2) }
-    | tuple = tuple {Tuple tuple}
+    | tpl = tuple_dt {Tuple tpl}
+    | lst = list_dt {List lst}
+    | v1 = value ; DOUBLE_COLON; v2 = value  { ListConcat (v1, v2) }
     | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS { v }
-        
+
+%inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
+%inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
+
+
 %inline bop:
     | PLUS { ADD }                 
-    | MINUS { Sub }        
+    | MINUS { SUB }        
     | ASTERISK { MUL }                  
     | SLASH{ DIV }                  
     | CARET { CONCAT }               
@@ -133,12 +141,10 @@ value:
     | LESS_THAN_EQUAL { LTE }     
     | AND { AND }            
     | OR { OR }            
-    | EQUAL { ASSIGN }
 
 %inline uop:
     | MINUS { MINUS }
-    | NOT { NOT }    
-
+    | NOT { NOT }   
 
 /** 
     OCaml:
