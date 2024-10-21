@@ -402,33 +402,23 @@ let parse_let_body parse_expr =
     (parse_fun_decl parse_expr)
 ;;
 
-let let_decl parse_expr =
-  let parse_let_decl =
-    "let"
-    =?*> lift2
-           (fun rec_flag (ident, expr, typ) -> dlet rec_flag ident expr typ)
-           parse_rec_flag
-           (parse_let_body parse_expr)
-  in
-  parse_let_decl
-;;
-
 let parse_closure parse_decl parse_expr =
   lift2 (fun decl expr -> eclsr decl expr) parse_decl ("in" =?*> parse_expr)
 ;;
 
 let parse_let_decl parse_expr =
-  let* let_decl = let_decl parse_expr in
+  let* let_decl =
+    "let"
+    =?*> lift2
+           (fun rec_flag (ident, expr, typ) -> rec_flag, ident, expr, typ)
+           parse_rec_flag
+           (parse_let_body parse_expr)
+  in
   let* let_decls_mut = many ("and" =?*> parse_let_body parse_expr) in
-  match let_decls_mut with
-  | [] -> return let_decl
-  | decls ->
-    (match let_decl with
-     | DLet (rec_flag, ident, expr, typ) ->
-       return (dletmut rec_flag ((ident, expr, typ) :: decls))
-     | DLetMut (_, _) ->
-       raise
-         (Failure "This shouldn't be happening, but you've got DLetMut in parse_let_decl while parsing DLetMut"))
+  match let_decl, let_decls_mut with
+  | (rec_flag, ident, expr, typ), [] -> return @@ dlet rec_flag ident expr typ
+  | (rec_flag, ident, expr, typ), decls ->
+    return (dletmut rec_flag ((ident, expr, typ) :: decls))
 ;;
 
 let parse_expr =
