@@ -228,7 +228,7 @@ let parse_expr =
   @@ fun expr ->
   let expr =
     choice
-      [ parens expr; parse_econst; parse_identifier; parse_etuple expr; parse_efun expr ]
+      [ parens expr; parse_econst; parse_identifier; parse_etuple expr; parse_efun expr; parse_match expr ]
   in
   let apply =
     lift2

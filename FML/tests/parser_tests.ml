@@ -36,6 +36,18 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  parse_with_print {| let mymatch x =
+        match x with
+          | 1 -> true
+          | _ -> false|};
+  [%expect
+    {|
+    [(DDeclaration (NoRec, (PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+        (EIdentifier "lst")))
+      ] |}]
+;;
+
+let%expect_test _ =
   parse_with_print {| let fix f = let rec g x = f (g x) in g|};
   [%expect
     {|
