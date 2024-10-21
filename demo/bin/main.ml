@@ -17,7 +17,7 @@ let () =
   let module LL = (val LL.make context builder the_module) in
   let i64_type = Llvm.i64_type context in
   let void_type = Llvm.void_type context in
-  let ptr_type = Llvm.pointer_type2 context in
+  let ptr_type = Llvm.pointer_type context in
   let prepare_main () =
     let ft =
       (* TODO main has special args *)
