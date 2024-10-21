@@ -52,7 +52,7 @@ let make context builder module_ =
     let build_store a b = Llvm.build_store a b builder
 
     let build_call typ ?(name = "") f args =
-      build_call2 typ f (Array.of_list args) name builder
+      build_call typ f (Array.of_list args) name builder
     ;;
 
     let has_toplevel_func fname =
