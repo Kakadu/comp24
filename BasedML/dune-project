@@ -7,9 +7,9 @@
 (source
  (github Salvatore112/comp24))
 
-(authors "Salvatore112", "Osogi")
+(authors "Salvatore112" , "Osogi")
 
-(maintainers "Salvatore112", "Osogi")
+(maintainers "Salvatore112" , "Osogi")
 
 (license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
 
