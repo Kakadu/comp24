@@ -134,7 +134,7 @@ let parse_op first suffix base_ops =
 
 let parse_unary_op = parse_op first_unop_strings suffix_unop_strings base_unops
 let parse_binary_op = parse_op first_binop_strings suffix_binop_strings base_binops
-let parse_op = parse_binary_op <|> parse_unary_op
+let parse_op = parse_binary_op >>| iobinop <|> (parse_unary_op >>| iounop)
 
 type priority_group =
   { group : string list
@@ -206,7 +206,7 @@ let binop_binder group =
       if String.starts_with ~prefix:group_string bin_op then return () else helper tl
     | [] -> fail "There is no matching operator"
   in
-  let ebinop_helper x y = eapp (eapp (eid bin_op) x) y in
+  let ebinop_helper x y = eapp (eapp (eid (iobinop bin_op)) x) y in
   helper group *> return ebinop_helper
 ;;
 
@@ -221,7 +221,7 @@ let get_chain e priority_group =
 ;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op <|> parse_parens parse_op in
+  let* unop = parse_token parse_unary_op >>| iounop <|> parse_parens parse_op in
   let* expr =
     choice
       [ parse_expr
@@ -276,12 +276,24 @@ let parse_identifier =
   choice
     [ (parse_token parse_letters
        >>= fun ident ->
-       if is_keyword ident then fail @@ ident ^ "invalid syntax" else return ident)
-    ; parse_parens parse_op
+       if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident)
+    ; parse_parens parse_binary_op
     ]
 ;;
 
-let parse_identifier_expr = parse_identifier >>| eid
+let is_operator =
+  Base.String.exists ~f:(fun c -> not (is_digit c || is_letter c || c == '_'))
+;;
+
+let parse_identifier_expr =
+  parse_identifier
+  >>| fun ident ->
+  eid
+  @@
+  match is_operator ident with
+  | true -> iobinop ident
+  | false -> ioident ident
+;;
 
 let parse_ground_type =
   choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]
