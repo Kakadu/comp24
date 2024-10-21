@@ -290,12 +290,7 @@ let parse_ground_type =
 let parse_generic_type = "'" =?*> parse_letters >>| tvar
 let parse_base_types = choice [ parse_generic_type; parse_ground_type ]
 let parse_tuple_type parse_type = parse_tuple ~sep:"*" parse_type ttuple
-
-let parse_arrow_type parse_type =
-  let* typ1 = parse_type in
-  let* typ2 = "->" =?*> parse_type in
-  return @@ tarrow typ1 typ2
-;;
+let parse_arrow_type parse_type = lift2 tarrow parse_type ("->" =?*> parse_type)
 
 let parse_list_type parse_type =
   let* typ = parse_type in
@@ -312,14 +307,15 @@ let parse_type =
       ])
 ;;
 
+let parse_get_explicit_typ =
+  (let* parsed_typ = ":" =?*> parse_type in
+   return (Some parsed_typ))
+  <|> return None
+;;
+
 let parse_pat_typed parse_pat =
   let parse_pattern_typed parse_pat =
-    lift2
-      (fun pat typ -> p_typed ~typ pat)
-      parse_pat
-      ((let* parsed_typ = ":" =?*> parse_type in
-        return (Some parsed_typ))
-       <|> return None)
+    lift2 (fun pat typ -> p_typed ~typ pat) parse_pat parse_get_explicit_typ
   in
   let parse_pat_not_typed parse_pat = lift p_typed parse_pat in
   choice [ parse_parens (parse_pattern_typed parse_pat); parse_pat_not_typed parse_pat ]
@@ -365,19 +361,20 @@ let parse_pattern_typed =
 let parse_params = sep_by parse_space parse_pattern_typed
 
 let parse_fun_decl parse_expr =
-  let* params = parse_params in
-  let* typ = choice [ (":" =?*> parse_type >>| fun typ -> Some typ); return None ] in
-  let* expr = "=" =?*> parse_expr in
-  return @@ (List.fold_right efun params expr, typ)
+  lift3
+    (fun params typ expr -> List.fold_right efun params expr, typ)
+    parse_params
+    parse_get_explicit_typ
+    ("=" =?*> parse_expr)
 ;;
 
 let parse_fun_anon_expr parse_expr =
   "fun"
   =?*> parse_space1
-       *>
-       let* params = parse_params in
-       let* expr = "->" =?*> parse_expr in
-       return @@ List.fold_right efun params expr
+       *> lift2
+            (fun params expr -> List.fold_right efun params expr)
+            parse_params
+            ("->" =?*> parse_expr)
 ;;
 
 (****************************************************** Pattern matching ******************************************************)
@@ -386,9 +383,7 @@ let parse_match parse_expr =
   "match"
   =?*>
   let parse_case =
-    let* case = parse_pattern_typed in
-    let* value = "->" =?*> parse_expr in
-    return (case, value)
+    lift2 (fun case value -> case, value) parse_pattern_typed ("->" =?*> parse_expr)
   in
   lift2
     ematch
@@ -433,7 +428,7 @@ let parse_let_decl parse_expr =
        return (dletmut rec_flag ((ident, expr, typ) :: decls))
      | DLetMut (_, _) ->
        raise
-         (Failure "This shouldn't be happening, but you've got DLetMut in parse_let_decl"))
+         (Failure "This shouldn't be happening, but you've got DLetMut in parse_let_decl while parsing DLetMut"))
 ;;
 
 let parse_expr =
