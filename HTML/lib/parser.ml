@@ -174,7 +174,7 @@ let get_priority_group first_string =
 let parse_tuple ?(sep = ",") parser wrap =
   let* list_res = sep_by1 (parse_stoken sep) parser in
   match list_res with
-  | [ _ ] -> fail ""
+  | [ _ ] -> fail "Tuple arity must be greater than 1"
   | _ -> return @@ wrap list_res
 ;;
 
