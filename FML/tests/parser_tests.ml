@@ -47,7 +47,7 @@ let%expect_test _ =
         (EFun ((PIdentifier "x"),
            (EMatch ((EIdentifier "x"),
               [((PConst (CInt 1)), (EConst (CBool true)));
-                ((PIdentifier "_"), (EConst (CBool false)))]
+                (PAny, (EConst (CBool false)))]
               ))
            ))
         ))
@@ -84,4 +84,30 @@ let%expect_test _ =
            ))
         ))
       ] |}]
+;;
+
+let%expect_test _ =
+  parse_with_print {|
+        let add_one (x: int) = 1 + x|};
+  [%expect
+    {|
+        [(DDeclaration (NoRec, (PIdentifier "add_one"),
+            (EFun ((PConstraint ((PIdentifier "x"), AInt)),
+               (EBinaryOperation (Add, (EConst (CInt 1)), (EIdentifier "x")))))
+            ))
+          ]
+    |}]
+;;
+
+let%expect_test _ =
+  parse_with_print {|
+        let (+) a = 1 + a |};
+  [%expect
+    {|
+        [(DDeclaration (NoRec, (PIdentifier "Add"),
+            (EFun ((PIdentifier "a"),
+               (EBinaryOperation (Add, (EConst (CInt 1)), (EIdentifier "a")))))
+            ))
+          ]
+    |}]
 ;;
