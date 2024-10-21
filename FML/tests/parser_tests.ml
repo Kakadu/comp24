@@ -36,15 +36,37 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| let mymatch x =
+  parse_with_print
+    {| let mymatch x =
         match x with
           | 1 -> true
           | _ -> false|};
   [%expect
     {|
-    [(DDeclaration (NoRec, (PCons ((PIdentifier "h"), (PIdentifier "tl"))),
-        (EIdentifier "lst")))
+    [(DDeclaration (NoRec, (PIdentifier "mymatch"),
+        (EFun ((PIdentifier "x"),
+           (EMatch ((EIdentifier "x"),
+              [((PConst (CInt 1)), (EConst (CBool true)));
+                ((PIdentifier "_"), (EConst (CBool false)))]
+              ))
+           ))
+        ))
       ] |}]
+;;
+
+let%expect_test _ =
+  parse_with_print {|
+        let a = 4::[5; 6]|};
+  [%expect
+    {|
+        [(DDeclaration (NoRec, (PIdentifier "a"),
+            (EList ((EConst (CInt 4)),
+               (EList ((EConst (CInt 5)), (EList ((EConst (CInt 6)), (EConst CNil)))
+                  ))
+               ))
+            ))
+          ]
+    |}]
 ;;
 
 let%expect_test _ =

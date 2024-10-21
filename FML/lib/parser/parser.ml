@@ -203,7 +203,7 @@ let parse_eif arg =
        (token "else" *> arg)
 ;;
 
-let parse_match pexpr =
+let parse_ematch pexpr =
   let pcase pexpr =
     lift2 (fun p e -> p, e) (token "|" *> parse_pattern) (token "->" *> pexpr)
   in
@@ -212,6 +212,19 @@ let parse_match pexpr =
     (token "match" *> pexpr <* token "with")
     (many1 (pcase pexpr))
 ;;
+
+let parse_elist arg =
+  token "["
+  *> fix (fun x ->
+    choice
+      [ (arg <* skip_wspace <* char ']' >>| fun expr -> EList (expr, EConst CNil))
+      ; (arg <* skip_wspace <* char ';' >>= fun expr -> x >>| fun l -> EList (expr, l))
+      ])
+;;
+
+let parse_cons = token "::" *> return (fun e1 e2 -> EList (e1, e2))
+let parse_cnill = token "[]" >>| fun _ -> EConst CNil
+let parse_elist arg = parse_cnill <|> parse_elist arg
 
 let parse_let pexpr =
   token "let"
@@ -228,7 +241,14 @@ let parse_expr =
   @@ fun expr ->
   let expr =
     choice
-      [ parens expr; parse_econst; parse_identifier; parse_etuple expr; parse_efun expr; parse_match expr ]
+      [ parens expr
+      ; parse_econst
+      ; parse_identifier
+      ; parse_etuple expr
+      ; parse_efun expr
+      ; parse_ematch expr
+      ; parse_elist expr
+      ]
   in
   let apply =
     lift2
@@ -239,6 +259,7 @@ let parse_expr =
   in
   let expr = parse_lbinop apply (mul <|> div) in
   let expr = parse_lbinop expr (add <|> sub) in
+  let expr = chainl1 expr parse_cons in
   let expr = parse_lbinop expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
   choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
 ;;
