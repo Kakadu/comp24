@@ -21,8 +21,10 @@ module ParsingTests = struct
     [%expect
       {|
       [(DLet (Not_recursive, "a",
-          (EApp ((EApp ((EId "++"), (EConst (CInt 2)))),
-             (EApp ((EApp ((EId "**"), (EConst (CInt 2)))), (EConst (CInt 2)))))),
+          (EApp ((EApp ((EId (IOBinOp "++")), (EConst (CInt 2)))),
+             (EApp ((EApp ((EId (IOBinOp "**")), (EConst (CInt 2)))),
+                (EConst (CInt 2))))
+             )),
           (Some (TGround GInt))))
         ] |}]
   ;;
@@ -33,8 +35,9 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, "a",
           (EApp (
-             (EApp ((EId "**"),
-                (EApp ((EApp ((EId "++"), (EConst (CInt 2)))), (EConst (CInt 2))))
+             (EApp ((EId (IOBinOp "**")),
+                (EApp ((EApp ((EId (IOBinOp "++")), (EConst (CInt 2)))),
+                   (EConst (CInt 2))))
                 )),
              (EConst (CInt 2)))),
           None))
@@ -47,8 +50,8 @@ module ParsingTests = struct
       {| 
       [(DLet (Not_recursive, "a",
           (EClsr (
-             (DLet (Not_recursive, "f", (EFun (((PId "x"), None), (EId "x"))), None
-                )),
+             (DLet (Not_recursive, "f",
+                (EFun (((PId "x"), None), (EId (IOIdent "x")))), None)),
              (EConst (CInt 13)))),
           (Some (TGround GInt))))
         ]
@@ -60,7 +63,9 @@ module ParsingTests = struct
     [%expect
       {| 
       [(DLet (Not_recursive, "+=",
-          (EApp ((EApp ((EId "-$"), (EId "x"))), (EConst (CInt 1)))), None))
+          (EApp ((EApp ((EId (IOBinOp "-$")), (EId (IOIdent "x")))),
+             (EConst (CInt 1)))),
+          None))
         ]
       |}]
   ;;
@@ -70,7 +75,9 @@ module ParsingTests = struct
     [%expect
       {| 
       [(DLet (Not_recursive, "a",
-          (EApp ((EApp ((EId "+"), (EId "x"))), (EId "y"))), None))
+          (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "x")))),
+             (EId (IOIdent "y")))),
+          None))
         ]
       |}]
   ;;
@@ -80,18 +87,22 @@ module ParsingTests = struct
     [%expect
       {| 
       [(DLet (Not_recursive, "a",
-          (EApp ((EId "+"), (EApp ((EId "x"), (EId "y"))))), None))
+          (EApp ((EId (IOBinOp "+")),
+             (EApp ((EId (IOIdent "x")), (EId (IOIdent "y")))))),
+          None))
         ]
       |}]
   ;;
 
   let%expect_test _ =
-    parse_test {| let ( += ) a b = (-$) 1 |};
+    parse_test {| let ( += ) a b = (~-) 1 |};
     [%expect
       {| 
       [(DLet (Not_recursive, "+=",
           (EFun (((PId "a"), None),
-             (EFun (((PId "b"), None), (EApp ((EId "-$"), (EConst (CInt 1)))))))),
+             (EFun (((PId "b"), None),
+                (EApp ((EId (IOUnOp "~-")), (EConst (CInt 1))))))
+             )),
           None))
         ]|}]
   ;;
@@ -102,7 +113,7 @@ module ParsingTests = struct
       {| 
       [(DLet (Not_recursive, "f",
           (EFun (((PId "lst"), (Some (TArr ((TGround GInt), (TGround GInt))))),
-             (EId "g"))),
+             (EId (IOIdent "g")))),
           None))
         ]
       |}]
@@ -116,11 +127,15 @@ module ParsingTests = struct
           (EClsr (
              (DLet (Not_recursive, "f",
                 (EFun (((PId "x"), None),
-                   (EApp ((EApp ((EId "+"), (EId "x"))), (EConst (CInt 1)))))),
+                   (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "x")))),
+                      (EConst (CInt 1))))
+                   )),
                 None)),
              (EClsr ((DLet (Not_recursive, "b", (EConst (CInt 5)), None)),
-                (EApp ((EId "f"),
-                   (EApp ((EApp ((EId "+"), (EId "b"))), (EConst (CInt 1))))))
+                (EApp ((EId (IOIdent "f")),
+                   (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "b")))),
+                      (EConst (CInt 1))))
+                   ))
                 ))
              )),
           None))
@@ -172,9 +187,9 @@ module ParsingTests = struct
     [%expect
       {|
       [(DLet (Not_recursive, "a",
-          (EMatch ((EId "l"),
+          (EMatch ((EId (IOIdent "l")),
              [(((PTuple [((PId "hd"), None); ((PId "tl"), None)]), None),
-               (EId "hd")); (((PId "_"), None), (EConst (CInt 0)))]
+               (EId (IOIdent "hd"))); (((PId "_"), None), (EConst (CInt 0)))]
              )),
           None))
         ]|}]
@@ -185,14 +200,18 @@ module ParsingTests = struct
     [%expect
       {|
       [(DLet (Not_recursive, "f",
-          (EFun (((PId "lst"), (Some (TList (TVar "b")))), (EId "lst"))), None))
+          (EFun (((PId "lst"), (Some (TList (TVar "b")))), (EId (IOIdent "lst")))),
+          None))
         ]|}]
   ;;
 
   let%expect_test _ =
     parse_test "let a = - 3";
     [%expect
-      {| [(DLet (Not_recursive, "a", (EApp ((EId "-"), (EConst (CInt 3)))), None))] |}]
+      {|
+        [(DLet (Not_recursive, "a", (EApp ((EId (IOUnOp "-")), (EConst (CInt 3)))),
+            None))
+          ] |}]
   ;;
 
   let%expect_test _ =
@@ -205,8 +224,10 @@ module ParsingTests = struct
     [%expect
       {|
       [(DLet (Not_recursive, "a",
-          (EApp ((EApp ((EId "+"), (EApp ((EId "f"), (EId "a"))))),
-             (EApp ((EId "f"), (EId "b"))))),
+          (EApp (
+             (EApp ((EId (IOBinOp "+")),
+                (EApp ((EId (IOIdent "f")), (EId (IOIdent "a")))))),
+             (EApp ((EId (IOIdent "f")), (EId (IOIdent "b")))))),
           None))
         ] |}]
   ;;
@@ -217,9 +238,11 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, "a",
           (EApp (
-             (EApp ((EId "-"),
-                (EApp ((EId "-"), (EApp ((EId "f"), (EConst (CInt 3)))))))),
-             (EApp ((EId "f"), (EConst (CInt 4)))))),
+             (EApp ((EId (IOBinOp "-")),
+                (EApp ((EId (IOUnOp "-")),
+                   (EApp ((EId (IOIdent "f")), (EConst (CInt 3))))))
+                )),
+             (EApp ((EId (IOIdent "f")), (EConst (CInt 4)))))),
           None))
         ]|}]
   ;;
@@ -241,7 +264,9 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, "f",
           (EFun (((PTuple [((PId "x"), None); ((PId "y"), None)]), None),
-             (EApp ((EApp ((EId "+"), (EId "x"))), (EId "y"))))),
+             (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "x")))),
+                (EId (IOIdent "y"))))
+             )),
           None))
         ] |}]
   ;;
@@ -253,7 +278,9 @@ module ParsingTests = struct
       [(DLet (Not_recursive, "f",
           (EFun (
              ((PTuple [((PId "x"), (Some (TVar "a"))); ((PId "y"), None)]), None),
-             (EApp ((EApp ((EId "*"), (EId "x"))), (EId "y"))))),
+             (EApp ((EApp ((EId (IOBinOp "*")), (EId (IOIdent "x")))),
+                (EId (IOIdent "y"))))
+             )),
           None))
         ] |}]
   ;;
@@ -268,9 +295,13 @@ module ParsingTests = struct
                  [((PId "g"), (Some (TArr ((TGround GInt), (TGround GInt)))));
                    ((PId "y"), None)]),
               None),
-             (EApp ((EApp ((EId "+"), (EApp ((EId "g"), (EId "y"))))),
-                (EApp ((EId "g"),
-                   (EApp ((EApp ((EId "+"), (EId "y"))), (EConst (CInt 1))))))
+             (EApp (
+                (EApp ((EId (IOBinOp "+")),
+                   (EApp ((EId (IOIdent "g")), (EId (IOIdent "y")))))),
+                (EApp ((EId (IOIdent "g")),
+                   (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "y")))),
+                      (EConst (CInt 1))))
+                   ))
                 ))
              )),
           None))
@@ -307,10 +338,12 @@ module ParsingTests = struct
                 [("f",
                   (EFun (((PId "x"), None),
                      (EIf (
-                        (EApp ((EApp ((EId ">"), (EId "x"))), (EConst (CInt 0)))),
-                        (EApp ((EId "g"),
-                           (EApp ((EApp ((EId "-"), (EId "x"))), (EConst (CInt 1))
-                              ))
+                        (EApp ((EApp ((EId (IOBinOp ">")), (EId (IOIdent "x")))),
+                           (EConst (CInt 0)))),
+                        (EApp ((EId (IOIdent "g")),
+                           (EApp (
+                              (EApp ((EId (IOBinOp "-")), (EId (IOIdent "x")))),
+                              (EConst (CInt 1))))
                            )),
                         (EConst (CInt 1))))
                      )),
@@ -318,16 +351,20 @@ module ParsingTests = struct
                   ("g",
                    (EFun (((PId "x"), None),
                       (EIf (
-                         (EApp ((EApp ((EId ">"), (EId "x"))), (EConst (CInt 0)))),
+                         (EApp ((EApp ((EId (IOBinOp ">")), (EId (IOIdent "x")))),
+                            (EConst (CInt 0)))),
                          (EApp (
-                            (EApp ((EId "+"),
-                               (EApp ((EId "f"),
-                                  (EApp ((EApp ((EId "-"), (EId "x"))),
+                            (EApp ((EId (IOBinOp "+")),
+                               (EApp ((EId (IOIdent "f")),
+                                  (EApp (
+                                     (EApp ((EId (IOBinOp "-")),
+                                        (EId (IOIdent "x")))),
                                      (EConst (CInt 1))))
                                   ))
                                )),
-                            (EApp ((EId "g"),
-                               (EApp ((EApp ((EId "-"), (EId "x"))),
+                            (EApp ((EId (IOIdent "g")),
+                               (EApp (
+                                  (EApp ((EId (IOBinOp "-")), (EId (IOIdent "x")))),
                                   (EConst (CInt 2))))
                                ))
                             )),
@@ -336,7 +373,7 @@ module ParsingTests = struct
                    None)
                   ]
                 )),
-             (EApp ((EId "f"), (EConst (CInt 10)))))),
+             (EApp ((EId (IOIdent "f")), (EConst (CInt 10)))))),
           (Some (TGround GInt))))
         ] |}]
   ;;
@@ -370,7 +407,7 @@ module ParsingTests = struct
       [(DLet (Not_recursive, "xor",
           (EFun (((PId "x"), (Some (TGround GBool))),
              (EFun (((PId "y"), (Some (TGround GBool))),
-                (EMatch ((ETuple [(EId "x"); (EId "y")]),
+                (EMatch ((ETuple [(EId (IOIdent "x")); (EId (IOIdent "y"))]),
                    [(((PTuple
                          [((PConst (CBool true)), None);
                            ((PConst (CBool true)), None)]),
@@ -405,27 +442,29 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, "a",
           (EClsr (
-             (DLet (Not_recursive, "f", (EFun (((PId "x"), None), (EId "x"))), None
-                )),
+             (DLet (Not_recursive, "f",
+                (EFun (((PId "x"), None), (EId (IOIdent "x")))), None)),
              (EApp (
-                (EApp ((EId "+"),
-                   (EApp ((EId "f"),
+                (EApp ((EId (IOBinOp "+")),
+                   (EApp ((EId (IOIdent "f")),
                       (EApp (
-                         (EApp ((EId "+"),
-                            (EApp ((EId "f"),
+                         (EApp ((EId (IOBinOp "+")),
+                            (EApp ((EId (IOIdent "f")),
                                (EApp (
-                                  (EApp ((EId "+"),
-                                     (EApp ((EId "f"),
+                                  (EApp ((EId (IOBinOp "+")),
+                                     (EApp ((EId (IOIdent "f")),
                                         (EApp (
-                                           (EApp ((EId "+"),
+                                           (EApp ((EId (IOBinOp "+")),
                                               (EApp (
-                                                 (EApp ((EId "+"),
+                                                 (EApp ((EId (IOBinOp "+")),
                                                     (EApp (
-                                                       (EApp ((EId "+"),
+                                                       (EApp ((EId (IOBinOp "+")),
                                                           (EApp (
-                                                             (EApp ((EId "+"),
+                                                             (EApp (
+                                                                (EId (IOBinOp "+")),
                                                                 (EConst (CInt 5)))),
-                                                             (EApp ((EId "f"),
+                                                             (EApp (
+                                                                (EId (IOIdent "f")),
                                                                 (EConst (CInt 5))))
                                                              ))
                                                           )),
@@ -433,7 +472,9 @@ module ParsingTests = struct
                                                     )),
                                                  (EConst (CInt 5))))
                                               )),
-                                           (EApp ((EId "f"), (EConst (CInt 5))))))
+                                           (EApp ((EId (IOIdent "f")),
+                                              (EConst (CInt 5))))
+                                           ))
                                         ))
                                      )),
                                   (EConst (CInt 5))))

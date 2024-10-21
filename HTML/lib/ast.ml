@@ -11,6 +11,12 @@ type const =
 
 type ident = string [@@deriving eq, show { with_path = false }]
 
+type ident_or_op =
+  | IOIdent of ident (* ident letters and _ *)
+  | IOBinOp of ident (* ident for bin ops *)
+  | IOUnOp of ident (* ident for unary ops *)
+[@@deriving eq, show { with_path = false }]
+
 type rec_flag =
   | Recursive (** Recursive *)
   | Not_recursive (** Not recursive *)
@@ -41,7 +47,7 @@ and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = fals
 
 type expr =
   | EConst of const (** Const. Examples: 100; true *)
-  | EId of ident (** Identifier. Examples: a, b, c *)
+  | EId of ident_or_op (** Identifier. Examples: a, b, c *)
   | EFun of pattern_typed * expr (** Function. Examples: fun x -> x + 1 *)
   | EApp of expr * expr (** Application. Examples: f (x - 1) *)
   | EIf of expr * expr * expr
@@ -60,6 +66,9 @@ and decl =
 
 type prog = decl list [@@deriving eq, show { with_path = false }]
 
+let ioident s = IOIdent s
+let iobinop s = IOBinOp s
+let iounop s = IOUnOp s
 let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit

@@ -33,7 +33,7 @@ val base_binops : string list
 val parse_op : string list -> string list -> string list -> string Angstrom.t
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
-val parse_op : string Angstrom.t
+val parse_op : Ast.ident_or_op Angstrom.t
 
 type priority_group =
   { group : string list
@@ -60,6 +60,7 @@ val parse_list_semicolon : 'a Angstrom.t -> ('a -> 'b -> 'b) -> 'b -> 'b Angstro
 val parse_list_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
 val parse_letters : string Angstrom.t
 val parse_identifier : string Angstrom.t
+val is_operator : string -> bool
 val parse_identifier_expr : Ast.expr Angstrom.t
 val parse_ground_type : Ast.typ Angstrom.t
 val parse_generic_type : Ast.typ Angstrom.t
@@ -68,6 +69,7 @@ val parse_tuple_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
 val parse_arrow_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
 val parse_list_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
 val parse_type : Ast.typ Angstrom.t
+val parse_get_explicit_typ : Ast.typ option Angstrom.t
 val parse_pat_typed : Ast.pattern Angstrom.t -> Ast.pattern_typed Angstrom.t
 val parse_ident_pat : Ast.pattern Angstrom.t
 val parse_list_pat_semicolon : Ast.pattern Angstrom.t -> Ast.pattern Angstrom.t
