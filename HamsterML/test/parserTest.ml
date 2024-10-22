@@ -28,24 +28,45 @@ let%test _ = parse "'1'" = Value (Const (Char '1'))
 let%test _ = parse "\"Nike pro\"" = Value (Const (String "Nike pro"))
 
 (* Values *)
+(* Variables *)
 let%test _ = parse "sigma_nike_pro_228" = Value (VarId "sigma_nike_pro_228")
 let%test _ = parse "pick_me:int" = Value (TypedVarID ("pick_me", Int))
 let%test _ = parse "sigma : float" = Value (TypedVarID ("sigma", Float))
 let%test _ = parse "kfc_boss: string" = Value (TypedVarID ("kfc_boss", String))
 let%test _ = parse "roblox : char" = Value (TypedVarID ("roblox", Char))
 let%test _ = parse "( roblox : bool )" = Value (TypedVarID ("roblox", Bool))
-let%test _ = parse "[1; 2]" = Value (List [ Const (Int 1); Const (Int 2) ])
-let%test _ = parse "1::[2]" = Value (ListConcat (Const (Int 1), List [ Const (Int 2) ]))
-let%test _ = parse "let a = 1" = BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))
+
+(* Patterns *)
+let%test _ =
+  parse "[1; 2; 3; 4]"
+  = Value (List [ Const (Int 1); Const (Int 2); Const (Int 3); Const (Int 4) ])
+;;
+
+let%test _ =
+  parse "1::[2; 3; 4]"
+  = Value
+      (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3); Const (Int 4) ]))
+;;
+
+let%test _ =
+  parse "('a', 'b', 'c', 'd')"
+  = Value
+      (Tuple [ Const (Char 'a'); Const (Char 'b'); Const (Char 'c'); Const (Char 'd') ])
+;;
+
+let%test _ = parse "(_)" = Value Wildcard
+
+(* Expr *)
+(* bop *)
 let%test _ = parse "1 + 2" = BinOp (ADD, Value (Const (Int 1)), Value (Const (Int 2)))
 let%test _ = parse "1 - 2" = BinOp (SUB, Value (Const (Int 1)), Value (Const (Int 2)))
 
 let%test _ =
-  parse "1 + 2 - 3"
+  parse "1 + 2 - -3"
   = BinOp
       ( SUB
       , BinOp (ADD, Value (Const (Int 1)), Value (Const (Int 2)))
-      , Value (Const (Int 3)) )
+      , Value (Const (Int (-3))) )
 ;;
 
 let%test _ =
@@ -55,3 +76,34 @@ let%test _ =
       , Value (Const (Int 1))
       , BinOp (SUB, Value (Const (Int 2)), Value (Const (Int 3))) )
 ;;
+
+(* uop *)
+let%test _ = parse "not true" = UnOp (NOT, Value (Const (Bool true)))
+
+(* fun *)
+let%test _ =
+  parse "fun x y z -> true"
+  = Fun ([ VarId "x"; VarId "y"; VarId "z" ], Value (Const (Bool true)))
+;;
+
+(* if *)
+let%test _ =
+  parse "if x = y then \"nike_pro\" else \"sigma\""
+  = If
+      ( BinOp (EQ, Value (VarId "x"), Value (VarId "y"))
+      , Value (Const (String "nike_pro"))
+      , Value (Const (String "sigma")) )
+;;
+
+(* match *)
+let%test _ =
+  parse "match rofl with \n  | 228 -> true\n  | 337 -> true\n  | _ -> false"
+  = Match
+      ( Value (VarId "rofl")
+      , [ Const (Int 228), Value (Const (Bool true))
+        ; Const (Int 337), Value (Const (Bool true))
+        ; Wildcard, Value (Const (Bool false))
+        ] )
+;;
+
+let%test _ = parse "let a = 1" = BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))

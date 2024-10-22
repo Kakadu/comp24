@@ -33,20 +33,17 @@ type bop =
   | ASSIGN (** =  { let a = 1 } *)
 [@@deriving show]
 
-type uop =
-  | MINUS (** -1 *)
-  | NOT (** not true *)
-[@@deriving show]
+type uop = NOT (** not true *) [@@deriving show]
 
 (* Value is a value (dataType -> dataStructure) *)
 type value =
   | Const of dataType
   | VarId of string
-  | TypedVarID of string * paramType (** (a: int) *)
-  | Wildcard  (* _ *)
-  | Tuple of value list (** check types with typecheker *)
-  | List of value list
-  | ListConcat of value * value (** a :: [b;c]*)
+  | TypedVarID of string * paramType (* (a: int) *)
+  | Wildcard (* _ *)
+  | Tuple of value list (* (1, 2, 3) *)
+  | List of value list (* [1; 2; 3] *)
+  | ListConcat of value * value (* a :: [b;c]*)
 [@@deriving show]
 
 type expr =

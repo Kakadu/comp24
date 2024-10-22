@@ -109,6 +109,7 @@ assign:
 %inline match_case: 
     | BAR; v = value; ARROW; e = expr { (v, e) }
 
+
 dataType:
     | i = TYPE_INT {Int i}
     | f = TYPE_FLOAT {Float f}
@@ -134,7 +135,6 @@ value:
 %inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
 %inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
 
-
 %inline paramType:
     | INT { Int }
     | FLOAT { Float }
@@ -158,7 +158,6 @@ value:
     | OR { OR }            
 
 %inline uop:
-    | MINUS { MINUS }
     | NOT { NOT }   
 
 /** 
