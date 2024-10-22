@@ -69,7 +69,7 @@ let between_parens exp =
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
@@ -98,7 +98,7 @@ let p_infix_ident =
 
 (* Type parsers *)
 
-let p_basic_type : typeName t =
+let p_basic_type : type_name t =
   Angstrom.string "int" *> return TInt
   <|> Angstrom.string "bool" *> return TBool
   <|> char '\''
@@ -127,7 +127,7 @@ let rec p_list_type t =
   p_list_type (return (TList base)) <|> return (TList base)
 ;;
 
-let p_type : typeName t =
+let p_type : type_name t =
   fix (fun p_type ->
     let atomic_type = p_basic_type <|> between_parens p_type in
     let list_type = p_list_type atomic_type <|> atomic_type in

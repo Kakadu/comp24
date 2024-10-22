@@ -1,12 +1,12 @@
 (** Copyright 2024-2025, Pavel Averin, Alexey Efremov *)
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
-open StatementInfer
 
+open StatementInfer
 open Help
 
 let generalise
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  : SetString.t -> Ast.pattern_no_constraint -> Ast.type_name -> (state, unit) t
   =
   fun bound_vars pat tp ->
   let* tp = restore_type tp in

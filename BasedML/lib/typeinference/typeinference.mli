@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-type res_map = Ast.typeName Help.MapString.t
+type res_map = Ast.type_name Help.MapString.t
 
 val pp_res_map : Format.formatter -> res_map -> unit
 val show_res_map : res_map -> string

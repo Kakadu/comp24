@@ -12,7 +12,7 @@ type patern_mode =
   | PMAdd
   | PMCheck
 
-let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
+let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.type_name) t =
   fun pm cpat ->
   let get_pat_and_type = function
     | Ast.PNConstraint pat -> fresh_tv >>= fun t -> return (pat, t)
@@ -58,8 +58,7 @@ let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
      | PMAdd ->
        let new_env =
          MapString.merge
-           (fun _ old_el new_el ->
-             match new_el with
+           (fun _ old_el -> function
              | Some x -> Some x
              | None -> old_el)
            glob_env
@@ -82,7 +81,7 @@ let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.typeName) t =
        *> return tp
 ;;
 
-let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
+let rec infer_expr : Ast.expr -> (state, Ast.type_name) t =
   fun expr ->
   let help = function
     | Ast.EConstant c -> return (const2type c)
@@ -107,28 +106,28 @@ let rec infer_expr : Ast.expr -> (state, Ast.typeName) t =
   let* env = read_env in
   help expr <* write_env env
 
-and infer_ident : string -> (state, Ast.typeName) t =
+and infer_ident : string -> (state, Ast.type_name) t =
   fun name ->
   let* vt_opt = read_var_type name in
   match vt_opt with
   | None -> fail (Format.sprintf "Unbound value: %s" name)
   | Some tp -> return tp
 
-and infer_func : Ast.pattern -> Ast.expr -> (state, Ast.typeName) t =
+and infer_func : Ast.pattern -> Ast.expr -> (state, Ast.type_name) t =
   fun pat exp ->
   let* arg_tp = infer_pattern PMAdd pat in
   let* exp_tp = infer_expr exp in
   let fcn_tp = Ast.TFunction (arg_tp, exp_tp) in
   return fcn_tp
 
-and infer_app : Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
+and infer_app : Ast.expr -> Ast.expr -> (state, Ast.type_name) t =
   fun func_exp args_exp ->
   let* self_tp = fresh_tv in
   let* func_tp = infer_expr func_exp in
   let* arg_tp = infer_expr args_exp in
   write_subst func_tp (Ast.TFunction (arg_tp, self_tp)) *> return self_tp
 
-and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.typeName) t =
+and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.type_name) t =
   fun e1 e2 e3 ->
   let* tp = fresh_tv in
   let* t1 = infer_expr e1 in
@@ -136,7 +135,8 @@ and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.typeName)
   let* t3 = infer_expr e3 in
   write_subst t1 Ast.TInt *> write_subst tp t2 *> write_subst tp t3 *> return tp
 
-and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.typeName) t =
+and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.type_name) t
+  =
   fun scrutin pat_exp_lst ->
   let* tp = fresh_tv in
   let* scr_tp = infer_pattern PMCheck scrutin in
@@ -170,7 +170,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
   generalise external_tvs (pat_remove_constr pat) p_tp
 ;;
 
-let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.typeName) t = function
+let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.type_name) t = function
   | (Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _)) as pat
     -> infer_pattern PMAdd pat
   | _ -> fail " Only variables are allowed as left-hand side of `let rec'"
@@ -211,7 +211,7 @@ let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
        return ())
 ;;
 
-type res_map = Ast.typeName MapString.t [@@deriving show { with_path = false }]
+type res_map = Ast.type_name MapString.t [@@deriving show { with_path = false }]
 
 let infer_declarations : Ast.declarations -> (state, res_map) t =
   fun dec_lst ->
@@ -246,7 +246,7 @@ let test_infer_exp string_exp =
      | Result.Ok tp ->
        Format.printf
          "res: %s@\n substs: %s"
-         (Ast.show_typeName tp)
+         (Ast.show_type_name tp)
          (show_substitution_list substs)
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e

@@ -23,11 +23,11 @@ module SetString = struct
 end
 
 type type_form =
-  | TFFlat of Ast.typeName
-  | TFSchem of SetString.t * Ast.typeName
+  | TFFlat of Ast.type_name
+  | TFSchem of SetString.t * Ast.type_name
 [@@deriving show { with_path = false }]
 
-let const2type : Ast.constant -> Ast.typeName = function
+let const2type : Ast.constant -> Ast.type_name = function
   | Ast.CBool _ -> Ast.TBool
   | Ast.CInt _ -> Ast.TInt
 ;;

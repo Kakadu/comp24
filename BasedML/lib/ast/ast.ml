@@ -3,13 +3,13 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 (* Standard types: ints, functions, tuples, lists *)
-type typeName =
+type type_name =
   | TInt
   | TBool
   | TPoly of string
-  | TTuple of typeName list
-  | TFunction of typeName * typeName
-  | TList of typeName
+  | TTuple of type_name list
+  | TFunction of type_name * type_name
+  | TList of type_name
 [@@deriving show { with_path = false }]
 
 (* Flag to tell implicitely tell if let is recurisve *)
@@ -34,8 +34,8 @@ type pattern_no_constraint =
   | PConstant of constant
 [@@deriving show { with_path = false }]
 
-and pattern =
-  | PConstraint of pattern_no_constraint * typeName
+type pattern =
+  | PConstraint of pattern_no_constraint * type_name
   | PNConstraint of pattern_no_constraint
 [@@deriving show { with_path = false }]
 
@@ -50,16 +50,16 @@ type expr =
   | ELetIn of rec_flag * pattern * expr * expr
   | ETuple of expr list
   | EMatch of pattern * (pattern * expr) list
-  | EConstraint of expr * typeName
+  | EConstraint of expr * type_name
 [@@deriving show { with_path = false }]
 
 (* Let binding/declarations *)
-type singleLet = DLet of rec_flag * pattern * expr
+type single_let = DLet of rec_flag * pattern * expr
 [@@deriving show { with_path = false }]
 
-and let_declaration =
-  | DSingleLet of singleLet
-  | DMutualRecDecl of singleLet list
+type let_declaration =
+  | DSingleLet of single_let
+  | DMutualRecDecl of single_let list
 [@@deriving show { with_path = false }]
 
 (* A collections of let declarations*)

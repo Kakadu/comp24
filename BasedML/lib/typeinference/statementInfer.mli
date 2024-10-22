@@ -24,20 +24,20 @@ val show_env_map : env_map -> string
 type tv_num = int
 type state = env_map * Substitution.substitution_list * tv_num
 
-val fresh_tv : (state, Ast.typeName) Substitution.t
+val fresh_tv : (state, Ast.type_name) Substitution.t
 val read_env : (state, env_map) Substitution.t
 val write_env : env_map -> (state, unit) Substitution.t
-val read_var_type : string -> (state, Ast.typeName option) Substitution.t
+val read_var_type : string -> (state, Ast.type_name option) Substitution.t
 val write_var_type : string -> Help.type_form -> (state, unit) Substitution.t
-val write_flat_var_type : string -> Ast.typeName -> (state, unit) Substitution.t
+val write_flat_var_type : string -> Ast.type_name -> (state, unit) Substitution.t
 
 val write_scheme_for_pattern
   :  Help.SetString.t
   -> Ast.pattern_no_constraint
-  -> Ast.typeName
+  -> Ast.type_name
   -> (state, unit) Substitution.t
 
 val read_subs : (state, Substitution.substitution_list) Substitution.t
-val write_subst : Ast.typeName -> Ast.typeName -> (state, unit) Substitution.t
-val restore_type : Ast.typeName -> (state, Ast.typeName) Substitution.t
+val write_subst : Ast.type_name -> Ast.type_name -> (state, unit) Substitution.t
+val restore_type : Ast.type_name -> (state, Ast.type_name) Substitution.t
 val get_tv_from_env : env_map -> Help.SetString.t

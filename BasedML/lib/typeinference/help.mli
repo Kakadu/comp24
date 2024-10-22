@@ -99,11 +99,11 @@ module SetString : sig
 end
 
 type type_form =
-  | TFFlat of Ast.typeName
-  | TFSchem of SetString.t * Ast.typeName
+  | TFFlat of Ast.type_name
+  | TFSchem of SetString.t * Ast.type_name
 
 val pp_type_form : Format.formatter -> type_form -> unit
 val show_type_form : type_form -> string
-val const2type : Ast.constant -> Ast.typeName
+val const2type : Ast.constant -> Ast.type_name
 val pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint
-val get_tv_from_tp : SetString.t -> Ast.typeName -> SetString.t
+val get_tv_from_tp : SetString.t -> Ast.type_name -> SetString.t

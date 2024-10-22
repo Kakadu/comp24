@@ -5,7 +5,7 @@
 open StatementInfer
 open Help
 
-type start_bin_op = string * Ast.typeName * Ast.typeName * Ast.typeName
+type start_bin_op = string * Ast.type_name * Ast.type_name * Ast.type_name
 
 let add_bin_op : start_bin_op -> (state, unit) t =
   fun (name, arg1, arg2, ret) ->

@@ -21,12 +21,12 @@ let write_env : env_map -> (state, unit) t =
   write (env, substs, tv)
 ;;
 
-let fresh_tv : (state, Ast.typeName) t =
+let fresh_tv : (state, Ast.type_name) t =
   let* env, substs, tv = read in
   return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
 ;;
 
-let specialise : SetString.t * Ast.typeName -> (state, Ast.typeName) t =
+let specialise : SetString.t * Ast.type_name -> (state, Ast.type_name) t =
   fun (free_vars, stp) ->
   let names = SetString.elements free_vars in
   let* v2v_lst =
@@ -51,7 +51,7 @@ let specialise : SetString.t * Ast.typeName -> (state, Ast.typeName) t =
   return new_tp
 ;;
 
-let read_var_type : string -> (state, Ast.typeName option) t =
+let read_var_type : string -> (state, Ast.type_name option) t =
   fun name ->
   let* env = read_env in
   match MapString.find_opt name env with
@@ -69,7 +69,7 @@ let write_var_type : string -> type_form -> (state, unit) t =
   write (new_env, substs, tv_num)
 ;;
 
-let write_flat_var_type : string -> Ast.typeName -> (state, unit) t =
+let write_flat_var_type : string -> Ast.type_name -> (state, unit) t =
   fun s tp -> write_var_type s (TFFlat tp)
 ;;
 
@@ -84,7 +84,7 @@ let write_subs : substitution_list -> (state, unit) t =
   write (env, subs, tv)
 ;;
 
-let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
+let write_subst : Ast.type_name -> Ast.type_name -> (state, unit) t =
   fun tp1 tp2 ->
   let tp1, tp2 = if tp1 < tp2 then tp1, tp2 else tp2, tp1 in
   let* subs = read_subs in
@@ -95,7 +95,7 @@ let write_subst : Ast.typeName -> Ast.typeName -> (state, unit) t =
 ;;
 
 let rec write_scheme_for_pattern
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.typeName -> (state, unit) t
+  : SetString.t -> Ast.pattern_no_constraint -> Ast.type_name -> (state, unit) t
   =
   fun free_vars pattern tp ->
   let rec_call = write_scheme_for_pattern free_vars in
@@ -111,7 +111,7 @@ let rec write_scheme_for_pattern
   | _ -> fail "something strange during generealisetion"
 ;;
 
-let restore_type : Ast.typeName -> (state, Ast.typeName) t =
+let restore_type : Ast.type_name -> (state, Ast.type_name) t =
   fun tp ->
   let* subs = read_subs in
   return (apply_substs subs tp)

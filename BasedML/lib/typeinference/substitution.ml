@@ -1,11 +1,11 @@
 (** Copyright 2024-2025, Pavel Averin, Alexey Efremov *)
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
-include Common.StateMonad
 
+include Common.StateMonad
 open Ast
 
-type substitution_list = (string * typeName) list [@@deriving show { with_path = false }]
+type substitution_list = (string * type_name) list [@@deriving show { with_path = false }]
 type subs_state = substitution_list
 
 let rec apply_subst (stv, stp) tp =
@@ -18,9 +18,7 @@ let rec apply_subst (stv, stp) tp =
   | _ as t -> t
 ;;
 
-let apply_substs sub_lst tp =
-  List.fold_right (fun subst tp -> apply_subst subst tp) sub_lst tp
-;;
+let apply_substs sub_lst tp = List.fold_right apply_subst sub_lst tp
 
 type occurs_status =
   | Found
@@ -43,7 +41,7 @@ let rec occurs_check tv tp =
   | TBool | TInt | TPoly _ -> NotFound
 ;;
 
-let rec unify : typeName -> typeName -> (subs_state, typeName) t =
+let rec unify : type_name -> type_name -> (subs_state, type_name) t =
   fun tp1 tp2 ->
   match tp1, tp2 with
   | tp1, tp2 when tp1 = tp2 -> return tp1
@@ -53,7 +51,8 @@ let rec unify : typeName -> typeName -> (subs_state, typeName) t =
        let* ret_tp = insert_subst (tv, tp) in
        return ret_tp
      | Found ->
-       fail (Format.sprintf "The type variable %s occurs inside %s" tv (show_typeName tp)))
+       fail
+         (Format.sprintf "The type variable %s occurs inside %s" tv (show_type_name tp)))
   | TTuple t_lst1, TTuple t_lst2 ->
     let* new_t_lst =
       map_list (fun (tp1, tp2) -> unify tp1 tp2) (List.combine t_lst1 t_lst2)
@@ -68,10 +67,10 @@ let rec unify : typeName -> typeName -> (subs_state, typeName) t =
     fail
       (Format.sprintf
          "Can not unify `%s` and `%s`"
-         (show_typeName tp1)
-         (show_typeName tp2))
+         (show_type_name tp1)
+         (show_type_name tp2))
 
-and insert_subst : string * typeName -> (subs_state, typeName) t =
+and insert_subst : string * type_name -> (subs_state, type_name) t =
   fun (stv, stp) ->
   let* sub_lst = read in
   match List.assoc_opt stv sub_lst with
