@@ -85,7 +85,7 @@ let suffix_unop_strings =
   [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<" ]
 ;;
 
-let base_unops = [ "-"; "+"; "not" ]
+let base_unops = [ "-"; "+" ]
 
 let first_binop_strings =
   [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<"; "#" ]
@@ -148,15 +148,6 @@ let second_priority_group = { group = [ "@"; "^" ]; left_associative = false }
 let third_priority_group = { group = [ "+"; "-" ]; left_associative = true }
 let fourth_priority_group = { group = [ "%"; "*"; "/" ]; left_associative = true }
 let fifth_priority_group = { group = [ "#" ]; left_associative = true }
-
-let priority_groups =
-  [ first_priority_group
-  ; second_priority_group
-  ; third_priority_group
-  ; fourth_priority_group
-  ; fifth_priority_group
-  ]
-;;
 
 (****************************************************** Tuple ******************************************************)
 
