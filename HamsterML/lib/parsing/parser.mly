@@ -94,6 +94,7 @@ expr:
     | FUN; vls = nonempty_list(value); ARROW; e = expr { Fun (vls, e) }
     // TODO: change to make possible to omit else clause
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { If (e1, e2, e3) }
+    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS { e }
 
 assign: 
     | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
