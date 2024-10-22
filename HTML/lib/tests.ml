@@ -87,8 +87,8 @@ module ParsingTests = struct
     [%expect
       {| 
       [(DLet (Not_recursive, "a",
-          (EApp ((EId (IOBinOp "+")),
-             (EApp ((EId (IOIdent "x")), (EId (IOIdent "y")))))),
+          (EApp ((EApp ((EId (IOBinOp "+")), (EId (IOIdent "x")))),
+             (EId (IOIdent "y")))),
           None))
         ]
       |}]

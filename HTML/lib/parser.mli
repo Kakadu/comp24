@@ -60,7 +60,6 @@ val parse_list_semicolon : 'a Angstrom.t -> ('a -> 'b -> 'b) -> 'b -> 'b Angstro
 val parse_list_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
 val parse_letters : string Angstrom.t
 val parse_identifier : string Angstrom.t
-val is_operator : string -> bool
 val parse_identifier_expr : Ast.expr Angstrom.t
 val parse_ground_type : Ast.typ Angstrom.t
 val parse_generic_type : Ast.typ Angstrom.t
