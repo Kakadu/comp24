@@ -4,6 +4,7 @@ type dataType =
   | Bool of bool
   | Char of char
   | String of string
+[@@deriving show]
 
 type bop =
   | ADD (** + *)
@@ -20,10 +21,12 @@ type bop =
   | OR (** || *)
   | CONCAT (** ^ *)
   | ASSIGN (** =  { let a = 1 } *)
+[@@deriving show]
 
 type uop =
   | MINUS (** -1 *)
   | NOT (** not true *)
+[@@deriving show]
 
 (* Value is a value (dataType -> dataStructure) *)
 type value =
@@ -34,6 +37,7 @@ type value =
   | Tuple of value list (** check types with typecheker *)
   | List of value list
   | ListConcat of value * value (** a :: [b;c]*)
+[@@deriving show]
 
 type expr =
   | BinOp of bop * expr * expr
@@ -46,7 +50,9 @@ type expr =
   | If of expr * expr * expr
   | Match of expr * (value * expr) list
   | LetIn of expr list * expr (** let a = 1 and b = 2 in a + b *)
+[@@deriving show]
 
 and funType =
   | Recursive
   | Nonrecursive
+[@@deriving show]
