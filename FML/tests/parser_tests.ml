@@ -107,7 +107,7 @@ let%expect_test _ =
         let (+) a = 1 + a |};
   [%expect
     {|
-        [(DDeclaration (NoRec, (PIdentifier "Add"),
+        [(DDeclaration (NoRec, (PIdentifier "( + )"),
             (EFun ((PIdentifier "a"),
                (EApplication (
                   (EApplication ((EIdentifier "( + )"), (EConst (CInt 1)))),

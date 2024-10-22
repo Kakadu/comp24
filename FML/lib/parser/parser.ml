@@ -102,12 +102,35 @@ let parse_type =
   parse_function_type typ <|> typ
 ;;
 
+let parse_operators =
+  parens
+  @@ (skip_wspace
+      *> choice
+           [ string "+" *> return "( + )"
+           ; string "-" *> return "( - )"
+           ; string ">=" *> return "( >= )"
+           ; string ">" *> return "( > )"
+           ; string "<=" *> return "( <= )"
+           ; string "<" *> return "( < )"
+           ; string "=" *> return "( = )"
+           ; string "<>" *> return "( <> )"
+           ; string "!=" *> return "( != )"
+           ; string "&&" *> return "( && )"
+           ; string "||" *> return "( || )"
+           ; string "*" *> return "( * )"
+           ; string "/" *> return "( / )"
+           ] <* skip_wspace)
+  <* skip_wspace
+;;
+
 (* ------------------------ *)
 
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
-let parse_pidentifier = parse_identifier pident
+let parse_pidentifier =
+  parse_operators >>| (fun x -> PIdentifier x) <|> parse_identifier pident
+;;
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
