@@ -118,7 +118,6 @@ let%expect_test _ =
     |}]
 ;;
 
-
 let%expect_test _ =
   parse_with_print {|
         let f a b = b + a |};

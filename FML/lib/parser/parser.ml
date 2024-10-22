@@ -128,7 +128,11 @@ let parse_type =
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
-let parse_pidentifier = (parse_operators >>| fun x -> PIdentifier x) <|> parse_identifier pident
+
+let parse_pidentifier =
+  parse_operators >>| (fun x -> PIdentifier x) <|> parse_identifier pident
+;;
+
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
@@ -248,14 +252,28 @@ let parse_cons = token "::" *> return (fun e1 e2 -> EList (e1, e2))
 let parse_cnill = token "[]" >>| fun _ -> EConst CNil
 let parse_elist arg = parse_cnill <|> parse_elist arg
 
+(* let parse_let pexpr =
+   token "let"
+   *> lift4
+   (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
+   (token "rec" *> return Rec <|> return NoRec)
+   (parse_punit <|> parse_pidentifier)
+   (token "=" *> pexpr <|> parse_bundle pexpr)
+   (token "in" *> pexpr)
+   ;; *)
+
 let parse_let pexpr =
-  token "let"
-  *> lift4
-       (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
-       (token "rec" *> return Rec <|> return NoRec)
-       (parse_punit <|> parse_pidentifier)
-       (token "=" *> pexpr <|> parse_bundle pexpr)
-       (token "in" *> pexpr)
+  let* rec_flag = token "let" *> (token "rec" *> return Rec <|> return NoRec) in
+  let* decl = parse_pattern in
+  let* expression =
+    let* args = many parse_pattern in
+    let* expr = token "=" *> pexpr in
+    match List.rev args with
+    | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
+    | _ -> return expr
+  in
+  let* in_expression = token "in" *> pexpr in
+  return @@ ELetIn (rec_flag, decl, expression, in_expression)
 ;;
 
 let parse_expr =
@@ -289,7 +307,7 @@ let parse_expr =
 (* ------------------------- *)
 
 (* Declaration parser *)
-let parse_declaration =
+(* let parse_declaration =
   token "let"
   *> lift3
        ddeclaration
@@ -300,6 +318,19 @@ let parse_declaration =
         match List.rev args with
         | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
         | _ -> return expr)
+;; *)
+
+let parse_declaration =
+  let* rec_flag = token "let" *> (token "rec" *> return Rec <|> return NoRec) in
+  let* decl = parse_pattern in
+  let* expression =
+    let* args = many parse_pattern in
+    let* expr = token "=" *> parse_expr in
+    match List.rev args with
+    | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
+    | _ -> return expr
+  in
+  return @@ ddeclaration rec_flag decl expression
 ;;
 
 (* ------------------ *)
@@ -308,6 +339,7 @@ let parse input =
   parse_string
     ~consume:All
     (sep_by (string ";;" <|> string "\n") parse_declaration
-     <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n") <* skip_wspace)
+     <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n")
+     <* skip_wspace)
     input
 ;;
