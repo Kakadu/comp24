@@ -73,17 +73,14 @@ let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
 (* Type annotations parsers *)
 let parse_primitive_type =
-  skip_wspace
-  *> choice
-       [ string "int" *> return AInt
-       ; string "bool" *> return ABool
-       ; char '(' *> skip_wspace *> char ')' *> return AUnit
-       ]
+  choice
+    [ token "int" *> return AInt
+    ; token "bool" *> return ABool
+    ; token "(" *> token ")" *> return AUnit
+    ]
 ;;
 
-let parse_list_type p_type =
-  p_type <* skip_wspace <* string "list" >>= fun l -> return @@ AList l
-;;
+let parse_list_type p_type = p_type <* token "list" >>= fun l -> return @@ AList l
 
 let parse_tuple_type p_type =
   lift2 (fun h tl -> ATuple (h :: tl)) p_type (many1 (token "*" *> p_type))
@@ -104,33 +101,35 @@ let parse_type =
 
 let parse_operators =
   parens
-  @@ (skip_wspace
-      *> choice
-           [ string "+" *> return "( + )"
-           ; string "-" *> return "( - )"
-           ; string ">=" *> return "( >= )"
-           ; string ">" *> return "( > )"
-           ; string "<=" *> return "( <= )"
-           ; string "<" *> return "( < )"
-           ; string "=" *> return "( = )"
-           ; string "<>" *> return "( <> )"
-           ; string "!=" *> return "( != )"
-           ; string "&&" *> return "( && )"
-           ; string "||" *> return "( || )"
-           ; string "*" *> return "( * )"
-           ; string "/" *> return "( / )"
-           ] <* skip_wspace)
+  @@ (choice
+        [ token "+" *> return "( + )"
+        ; token "-" *> return "( - )"
+        ; token ">=" *> return "( >= )"
+        ; token ">" *> return "( > )"
+        ; token "<=" *> return "( <= )"
+        ; token "<" *> return "( < )"
+        ; token "=" *> return "( = )"
+        ; token "<>" *> return "( <> )"
+        ; token "!=" *> return "( != )"
+        ; token "&&" *> return "( && )"
+        ; token "||" *> return "( || )"
+        ; token "*" *> return "( * )"
+        ; token "/" *> return "( / )"
+        ]
+      <* skip_wspace)
   <* skip_wspace
 ;;
 
 (* ------------------------ *)
 
 (* Pattern parsers*)
-let parse_pany = skip_wspace *> char '_' >>| pany
+let parse_pany = token "_" >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
+
 let parse_pidentifier =
   parse_operators >>| (fun x -> PIdentifier x) <|> parse_identifier pident
 ;;
+
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
@@ -174,8 +173,7 @@ let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
 (* Binary operations parsers *)
 
 let bin_op op func =
-  skip_wspace
-  *> Angstrom.string op
+  token op
   *> return (fun op1 op2 ->
     EApplication (func, op1) |> fun app1 -> EApplication (app1, op2))
 ;;
@@ -319,7 +317,7 @@ let parse_expr =
 ;; *)
 
 let parse_declaration =
-  let* rec_flag = token "let" *> (token "rec" *> return Rec <|> return NoRec) in
+  let* rec_flag = token "rec" *> return Rec <|> return NoRec in
   let* decl = parse_pattern in
   let* expression =
     let* args = many parse_pattern in
@@ -331,13 +329,24 @@ let parse_declaration =
   return @@ ddeclaration rec_flag decl expression
 ;;
 
+let parse_single_declaration = token "let" *> parse_declaration >>| fun x -> SingleDecl x
+
+let parse_mutable_rec_declaration =
+  token "let" *> parse_declaration
+  >>= fun first_decl ->
+  many1 (token "and" *> parse_declaration)
+  >>= fun lst -> return @@ MutableRecDecl (first_decl :: lst)
+;;
+
+let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration ]
+
 (* ------------------ *)
 
 let parse input =
   parse_string
     ~consume:All
-    (sep_by (string ";;" <|> string "\n") parse_declaration
-     <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n")
+    (sep_by (token ";;" <|> token "\n") parse_program
+     <* option "" (token ";;" <|> token "\n")
      <* skip_wspace)
     input
 ;;

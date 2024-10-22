@@ -54,7 +54,12 @@ type expression =
   (** match e with p1 -> e1 |...| pn -> en *)
 [@@deriving show { with_path = false }]
 
-type declaration = DDeclaration of rec_flag * pattern * expression
+type single_declaration = DDeclaration of rec_flag * pattern * expression
+[@@deriving show { with_path = false }]
+
+type declaration =
+  | SingleDecl of single_declaration
+  | MutableRecDecl of single_declaration list
 [@@deriving show { with_path = false }]
 
 type program = declaration list [@@deriving show { with_path = false }]
