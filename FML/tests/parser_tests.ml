@@ -60,8 +60,8 @@ let%expect_test _ =
   [%expect
     {|
         [(DDeclaration (NoRec, (PIdentifier "a"),
-            (EList ((EConst (CInt 4)),
-               (EList ((EConst (CInt 5)), (EList ((EConst (CInt 6)), (EConst CNil)))
+            (ECons ((EConst (CInt 4)),
+               (ECons ((EConst (CInt 5)), (ECons ((EConst (CInt 6)), (EConst CNil)))
                   ))
                ))
             ))
