@@ -100,18 +100,19 @@ let ptype =
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
     let simple_type = choice [ pint_type; pbool_type; punit_type; pparens ptype ] in
+    (* Парсер для списков, обязательно должен идти после обработки кортежей *)
     let list_type = simple_type >>= fun t -> pstoken "list" *> return (TList t) in
+    (* Парсер для кортежей с минимум двумя элементами *)
     let tuple_type =
-      chainl1
+      lift3
+        (fun t1 t2 ts -> TTuple (t1, t2, ts))
         (choice [ list_type; simple_type ])
-        (pstoken "*"
-         *> return (fun t1 t2 ->
-           match t1, t2 with
-           | TTuple lst1, TTuple lst2 -> TTuple (lst1 @ lst2)
-           | TTuple lst, t -> TTuple (lst @ [ t ])
-           | t1, t2 -> TTuple [ t1; t2 ]))
+        (pstoken "*" *> choice [ list_type; simple_type ])
+        (many (pstoken "*" *> choice [ list_type; simple_type ]))
     in
-    chainr1 tuple_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
+    (* Обработка кортежей и функциональных типов *)
+    let composed_type = choice [ tuple_type; list_type; simple_type ] in
+    chainr1 composed_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
 ;;
 
 let ptyped_var =
