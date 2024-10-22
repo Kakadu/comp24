@@ -18,7 +18,7 @@ let ( >>= ) : 's 'a 'b. ('s, 'a) t -> ('a -> ('s, 'b) t) -> ('s, 'b) t =
 
 let read : ('st, 'st) t = fun st -> st, Result.ok st
 let write : 'st -> ('st, unit) t = fun s _oldstate -> s, Result.ok ()
-let run : ('st, 'a) t -> 'st -> 'st * ('a, string) Result.t = fun f st -> f st
+let run (f : ('st, 'a) t) : 'st -> 'st * ('a, string) Result.t = f
 let ( let* ) = ( >>= )
 let ( *> ) l r = l >>= fun _ -> r
 let ( >>| ) l r = l >>= fun x -> return (r x)

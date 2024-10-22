@@ -183,9 +183,8 @@ let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
      | [] -> fail "unreachable error: empty mutual rec?!!"
      | Ast.DLet (Ast.NotRec, _, _) :: _ ->
        map_list
-         (fun dlet ->
-           let (Ast.DLet (_rec_flag, pat, exp)) = dlet in
-           infer_let_common Ast.NotRec pat exp)
+         (function
+           | Ast.DLet (_rec_flag, pat, exp) -> infer_let_common Ast.NotRec pat exp)
          decl_lst
        *> return ()
      | Ast.DLet (Ast.Rec, _, _) :: _ ->
