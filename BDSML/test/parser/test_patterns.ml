@@ -1,3 +1,7 @@
+(** Copyright 2024, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 let test_pattern =
   Test_utils.pp_parse_result Parser.Pattern_parser.parse_pattern Parser.Ast.pp_pattern
 ;;
@@ -153,7 +157,8 @@ let%expect_test "or test" =
 
 let%expect_test "or inside of list test" =
   test_pattern "[1|2; 3]";
-  [%expect {|
+  [%expect
+    {|
     (Pat_construct ("::",
        (Some (Pat_tuple
                 [(Pat_or ((Pat_constant (Const_int 1)),
