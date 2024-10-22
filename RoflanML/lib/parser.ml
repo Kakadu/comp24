@@ -120,29 +120,18 @@ let ptyped_var =
   <|> (pid >>= fun id -> return (id, None))
 ;;
 
-let plet_no_args pexpr =
+let plet pexpr =
+  let rec pbody pexpr =
+    ptyped_var >>= fun id -> pbody pexpr <|> pstoken "=" *> pexpr >>| fun e -> EFun (id, e)
+  in
   pstoken "let"
   *> lift4
        (fun r id e1 e2 -> ELet (r, id, e1, e2))
        (pstoken "rec" *> return Rec <|> return NonRec)
        (poperator <|> pstoken "()" <|> pid)
-       (pstoken "=" *> pexpr)
+       (pstoken "=" *> pexpr <|> pbody pexpr)
        (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
 ;;
-
-let plet_with_args pexpr =
-  let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
-  pstoken "let"
-  *> lift5
-       (fun r id args e1 e2 -> ELet (r, id, EFun (args, e1), e2))
-       (pstoken "rec" *> return Rec <|> return NonRec)
-       (poperator <|> pstoken "()" <|> pid)
-       (many1 ptyped_var)
-       (pstoken "=" *> pexpr)
-       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
-;;
-
-let plet pexpr = choice [ plet_no_args pexpr; plet_with_args pexpr ]
 
 let pbranch pexpr =
   ptoken
@@ -203,8 +192,9 @@ let pmatch pexpr =
 ;;
 
 let pfun pexpr =
-  let pbody pexpr =
-    many1 ptyped_var >>= fun vars -> pstoken "->" *> pexpr >>| fun e -> EFun (vars, e)
+  let rec pbody pexpr =
+    ptyped_var
+    >>= fun id -> pbody pexpr <|> pstoken "->" *> pexpr >>| fun e -> EFun (id, e)
   in
   pstoken "fun" *> pbody pexpr
 ;;
@@ -228,10 +218,7 @@ let pexpr =
   let pe = choice [ pparens pexpr; pconst; pvar; plist pexpr; pfun pexpr ] in
   let pe =
     lift2
-      (fun f args ->
-        match args with
-        | [] -> f
-        | _ -> EApp (f, args))
+      (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
       pe
       (many (char ' ' *> ptoken pe))
   in

@@ -16,13 +16,13 @@ module ParserTests = struct
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f x = x";
-    [%expect {| (ELet (NonRec, "f", (EFun ([("x", None)], (EVar "x"))), None)) |}]
+    [%expect {| (ELet (NonRec, "f", (EFun (("x", None), (EVar "x"))), None)) |}]
   ;;
 
   let%expect_test _ =
     pp pp_expr parse_expr "if f x then x else 0";
     [%expect
-      {| (EBranch ((EApp ((EVar "f"), [(EVar "x")])), (EVar "x"), (EConst (CInt 0)))) |}]
+      {| (EBranch ((EApp ((EVar "f"), (EVar "x"))), (EVar "x"), (EConst (CInt 0)))) |}]
   ;;
 
   let%expect_test _ =
@@ -83,8 +83,8 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "f",
-         (EFun ([("x", (Some TBool)); ("y", (Some TInt))],
-            (EBinop (Mul, (EVar "x"), (EVar "y"))))),
+         (EFun (("x", (Some TBool)),
+            (EFun (("y", (Some TInt)), (EBinop (Mul, (EVar "x"), (EVar "y"))))))),
          None))
       |}]
   ;;
@@ -94,8 +94,8 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "+",
-         (EFun ([("x", (Some TInt)); ("y", (Some TInt))],
-            (EBinop (Mul, (EVar "x"), (EVar "y"))))),
+         (EFun (("x", (Some TInt)),
+            (EFun (("y", (Some TInt)), (EBinop (Mul, (EVar "x"), (EVar "y"))))))),
          None))
       |}]
   ;;
@@ -105,11 +105,15 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "+",
-         (EFun ([("x", (Some TInt)); ("y", None)],
-            (ELet (NonRec, "-",
-               (EFun ([("x", None); ("y", (Some TInt))],
-                  (EBinop (Add, (EVar "x"), (EVar "y"))))),
-               (Some (EBinop (Sub, (EVar "x"), (EVar "y"))))))
+         (EFun (("x", (Some TInt)),
+            (EFun (("y", None),
+               (ELet (NonRec, "-",
+                  (EFun (("x", None),
+                     (EFun (("y", (Some TInt)),
+                        (EBinop (Add, (EVar "x"), (EVar "y")))))
+                     )),
+                  (Some (EBinop (Sub, (EVar "x"), (EVar "y"))))))
+               ))
             )),
          None)) 
       |}]
@@ -120,10 +124,11 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "fix",
-         (EFun ([("f", None)],
-            (EApp ((EVar "f"), [(EApp ((EVar "fix"), [(EVar "f")])); (EVar "x")]))
+         (EFun (("f", None),
+            (EApp ((EApp ((EVar "f"), (EApp ((EVar "fix"), (EVar "f"))))),
+               (EVar "x")))
             )),
-         (Some (EApp ((EVar "fix"), [(EVar "g")])))))
+         (Some (EApp ((EVar "fix"), (EVar "g"))))))
       |}]
   ;;
 
@@ -132,11 +137,14 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "f",
-         (EFun (
-            [("g", (Some (TFun (TInt, (TFun (TInt, TInt)))))); ("x", (Some TInt));
-              ("y", (Some TInt))],
-            (EApp ((EVar "g"), [(EVar "x"); (EVar "y")])))),
-         None)) |}]
+         (EFun (("g", (Some (TFun (TInt, (TFun (TInt, TInt)))))),
+            (EFun (("x", (Some TInt)),
+               (EFun (("y", (Some TInt)),
+                  (EApp ((EApp ((EVar "g"), (EVar "x"))), (EVar "y")))))
+               ))
+            )),
+         None))
+      |}]
   ;;
 
   let%expect_test _ =
@@ -144,33 +152,35 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "f",
-         (EFun ([("x", (Some (TTuple (TInt, TBool, []))))], (EVar "x"))), None)) |}]
+         (EFun (("x", (Some (TTuple (TInt, TBool, [])))), (EVar "x"))), None))
+      |}]
   ;;
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f (x: (int * bool) -> unit) = x";
     [%expect
       {|
-    (ELet (NonRec, "f",
-       (EFun ([("x", (Some (TFun ((TTuple (TInt, TBool, [])), TUnit))))],
-          (EVar "x"))),
-       None)) |}]
+      (ELet (NonRec, "f",
+         (EFun (("x", (Some (TFun ((TTuple (TInt, TBool, [])), TUnit)))),
+            (EVar "x"))),
+         None))
+      |}]
   ;;
 
   let%expect_test _ =
     pp pp_expr parse_expr "let f (x: int list) = x";
     [%expect
-      {|
-    (ELet (NonRec, "f", (EFun ([("x", (Some (TList TInt)))], (EVar "x"))), None)) |}]
+      {| (ELet (NonRec, "f", (EFun (("x", (Some (TList TInt))), (EVar "x"))), None)) |}]
   ;;
 
   let%expect_test _ =
-    pp pp_expr parse_expr "let f (x: int * bool list) = x";
+    pp pp_expr parse_expr "let f (x: int * bool list * bool) = x";
     [%expect
       {|
-    (ELet (NonRec, "f",
-       (EFun ([("x", (Some (TTuple (TInt, (TList TBool), []))))], (EVar "x"))),
-       None)) |}]
+      (ELet (NonRec, "f",
+         (EFun (("x", (Some (TTuple (TInt, (TList TBool), [TBool])))), (EVar "x"))),
+         None))
+      |}]
   ;;
 end
 

@@ -60,8 +60,8 @@ type expr =
   | EBranch of expr * expr * expr (** if [cond] then [a] else [b] *)
   | EMatch of expr * (pattern * expr) list (** match [x] with | [p1] -> [e1] | ... *)
   | ELet of is_rec * id * expr * expr option (** let rec f: t1 -> t2 *)
-  | EFun of typed_arg list * expr (** Anonymous function with typed arguments *)
-  | EApp of expr * expr list (** Application f x y z *)
+  | EFun of typed_arg * expr (** Anonymous function with typed arguments *)
+  | EApp of expr * expr (** Application f x y z *)
 [@@deriving show { with_path = false }]
 
 type program = expr list [@@deriving show { with_path = false }]
