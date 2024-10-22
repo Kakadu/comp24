@@ -35,21 +35,6 @@ type pattern =
   | PConstraint of pattern * type_annotation
 [@@deriving show { with_path = false }]
 
-type bin_op =
-  | Add (** + *)
-  | Sub (** - *)
-  | Mul (** * *)
-  | Div (** / *)
-  | Eq (** = *)
-  | NEq (** <> or != *)
-  | Gt (** > *)
-  | Gte (** >= *)
-  | Lt (** < *)
-  | Lte (** <= *)
-  | And (** && *)
-  | Or (** || *)
-[@@deriving show { with_path = false }]
-
 type un_op =
   | Not (** not *)
   | Minus (** - *)
@@ -59,8 +44,6 @@ type un_op =
 type expression =
   | EConst of const
   | EIdentifier of id
-  | EBinaryOperation of bin_op * expression * expression (** E1 + E2*)
-  | EUnaryOperation of un_op * expression (** - E1 *)
   | EApplication of expression * expression (** E1 E2*)
   | EFun of pattern * expression (** fun P -> E*)
   | ELetIn of rec_flag * pattern * expression * expression (** let f x = E1 *)

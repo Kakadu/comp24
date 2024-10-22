@@ -169,20 +169,27 @@ let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
 
 (* ------------------------- *)
 
-(* Expressions bin_op *)
+(* Binary operations parsers *)
 
-let add = string "+" *> return Add
-let sub = string "-" *> return Sub
-let mul = string "*" *> return Mul
-let div = string "/" *> return Div
-let eq = string "=" *> return Eq
-let neq = string "!=" *> return NEq <|> string "<>" *> return NEq
-let gt = string ">" *> return Gt
-let gte = string ">=" *> return Gte
-let lt = string "<" *> return Lt
-let lte = string "<=" *> return Lte
-let and_ = string "&&" *> return And
-let or_ = string "||" *> return Or
+let bin_op op func =
+  skip_wspace
+  *> Angstrom.string op
+  *> return (fun op1 op2 ->
+    EApplication (func, op1) |> fun app1 -> EApplication (app1, op2))
+;;
+
+let add = bin_op "+" (EIdentifier "( + )")
+let sub = bin_op "-" (EIdentifier "( - )")
+let mul = bin_op "*" (EIdentifier "( * )")
+let div = bin_op "/" (EIdentifier "( / )")
+let eq = bin_op "=" (EIdentifier "( = )")
+let neq = bin_op "!=" (EIdentifier "( != )") <|> bin_op "<>" (EIdentifier "( <> )")
+let gt = bin_op ">" (EIdentifier "( > )")
+let gte = bin_op ">=" (EIdentifier "( >= )")
+let lt = bin_op "<" (EIdentifier "( < )")
+let lte = bin_op "<=" (EIdentifier "( <= )")
+let and_ = bin_op "&&" (EIdentifier "( && )")
+let or_ = bin_op "||" (EIdentifier "( || )")
 
 (* Expressions parsers *)
 
@@ -208,12 +215,6 @@ let rec parse_bundle pexpr =
   in
   expr_with_pattern
 ;;
-
-let parse_ebinop chain1 e parse_binop =
-  chain1 e (parse_binop >>| fun op e1 e2 -> EBinaryOperation (op, e1, e2))
-;;
-
-let parse_lbinop = parse_ebinop chainl1
 
 let parse_eif arg =
   skip_wspace
@@ -263,12 +264,12 @@ let parse_expr =
   let expr =
     choice
       [ parens expr
-      ; parse_econst
-      ; parse_identifier
       ; parse_etuple expr
       ; parse_efun expr
       ; parse_ematch expr
       ; parse_elist expr
+      ; parse_identifier
+      ; parse_econst
       ]
   in
   let apply =
@@ -278,10 +279,10 @@ let parse_expr =
       expr
       (many (char ' ' *> skip_while is_whitespace *> expr))
   in
-  let expr = parse_lbinop apply (mul <|> div) in
-  let expr = parse_lbinop expr (add <|> sub) in
+  let expr = chainl1 apply (mul <|> div) in
+  let expr = chainl1 expr (add <|> sub) in
   let expr = chainl1 expr parse_cons in
-  let expr = parse_lbinop expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
+  let expr = chainl1 expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
   choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
 ;;
 

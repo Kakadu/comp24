@@ -93,7 +93,10 @@ let%expect_test _ =
     {|
         [(DDeclaration (NoRec, (PIdentifier "add_one"),
             (EFun ((PConstraint ((PIdentifier "x"), AInt)),
-               (EBinaryOperation (Add, (EConst (CInt 1)), (EIdentifier "x")))))
+               (EApplication (
+                  (EApplication ((EIdentifier "( + )"), (EConst (CInt 1)))),
+                  (EIdentifier "x")))
+               ))
             ))
           ]
     |}]
@@ -106,7 +109,29 @@ let%expect_test _ =
     {|
         [(DDeclaration (NoRec, (PIdentifier "Add"),
             (EFun ((PIdentifier "a"),
-               (EBinaryOperation (Add, (EConst (CInt 1)), (EIdentifier "a")))))
+               (EApplication (
+                  (EApplication ((EIdentifier "( + )"), (EConst (CInt 1)))),
+                  (EIdentifier "a")))
+               ))
+            ))
+          ]
+    |}]
+;;
+
+
+let%expect_test _ =
+  parse_with_print {|
+        let f a b = b + a |};
+  [%expect
+    {|
+        [(DDeclaration (NoRec, (PIdentifier "f"),
+            (EFun ((PIdentifier "a"),
+               (EFun ((PIdentifier "b"),
+                  (EApplication (
+                     (EApplication ((EIdentifier "( + )"), (EIdentifier "b"))),
+                     (EIdentifier "a")))
+                  ))
+               ))
             ))
           ]
     |}]
