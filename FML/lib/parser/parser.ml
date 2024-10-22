@@ -261,15 +261,20 @@ let parse_elist arg = parse_cnill <|> parse_elist arg
 let parse_let pexpr =
   let* rec_flag = token "let" *> (token "rec" *> return Rec <|> return NoRec) in
   let* decl = parse_pattern in
+  let* args = many parse_pattern in
+  let* expr = token "=" *> pexpr in
   let* expression =
-    let* args = many parse_pattern in
-    let* expr = token "=" *> pexpr in
     match List.rev args with
     | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
     | _ -> return expr
   in
   let* in_expression = token "in" *> pexpr in
-  return @@ ELetIn (rec_flag, decl, expression, in_expression)
+  match decl with
+  | PIdentifier _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
+  | _ ->
+    if List.length args > 0
+    then fail "Syntax error"
+    else return @@ ELetIn (rec_flag, decl, expression, in_expression)
 ;;
 
 let parse_expr =
@@ -319,14 +324,19 @@ let parse_expr =
 let parse_declaration =
   let* rec_flag = token "rec" *> return Rec <|> return NoRec in
   let* decl = parse_pattern in
+  let* args = many parse_pattern in
+  let* expr = token "=" *> parse_expr in
   let* expression =
-    let* args = many parse_pattern in
-    let* expr = token "=" *> parse_expr in
     match List.rev args with
     | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
     | _ -> return expr
   in
-  return @@ ddeclaration rec_flag decl expression
+  match decl with
+  | PIdentifier _ -> return @@ ddeclaration rec_flag decl expression
+  | _ ->
+    if List.length args > 0
+    then fail "Syntax error"
+    else return @@ ddeclaration rec_flag decl expression
 ;;
 
 let parse_single_declaration = token "let" *> parse_declaration >>| fun x -> SingleDecl x
