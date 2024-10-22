@@ -47,7 +47,6 @@ val second_priority_group : priority_group
 val third_priority_group : priority_group
 val fourth_priority_group : priority_group
 val fifth_priority_group : priority_group
-val priority_groups : priority_group list
 val parse_tuple : ?sep:string -> 'a Angstrom.t -> ('a list -> 'b) -> 'b Angstrom.t
 val parse_tuple_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
 val parse_branching : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
