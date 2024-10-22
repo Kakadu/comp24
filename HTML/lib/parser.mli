@@ -17,7 +17,6 @@ val is_lower : char -> bool
 val is_upper : char -> bool
 val is_letter : char -> bool
 val is_ident_char : char -> bool
-val is_sign : char -> bool
 val keywords : string list
 val is_keyword : string -> bool
 val ( =?*> ) : string -> 'a Angstrom.t -> 'a Angstrom.t
@@ -34,7 +33,6 @@ val base_unops : string list
 val first_binop_strings : string list
 val suffix_binop_strings : string list
 val base_binops : string list
-val parse_op : string list -> string list -> string list -> string Angstrom.t
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
 val parse_op : Ast.ident_or_op Angstrom.t
@@ -50,7 +48,6 @@ val third_priority_group : priority_group
 val fourth_priority_group : priority_group
 val fifth_priority_group : priority_group
 val priority_groups : priority_group list
-val get_priority_group : string -> priority_group option
 val parse_tuple : ?sep:string -> 'a Angstrom.t -> ('a list -> 'b) -> 'b Angstrom.t
 val parse_tuple_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
 val parse_branching : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
