@@ -144,7 +144,7 @@ module ParserTests = struct
     [%expect
       {|
       (ELet (NonRec, "f",
-         (EFun ([("x", (Some (TTuple [TInt; TBool])))], (EVar "x"))), None)) |}]
+         (EFun ([("x", (Some (TTuple (TInt, TBool, []))))], (EVar "x"))), None)) |}]
   ;;
 
   let%expect_test _ =
@@ -152,8 +152,8 @@ module ParserTests = struct
     [%expect
       {|
     (ELet (NonRec, "f",
-       (EFun ([("x", (Some (TFun ((TTuple [TInt; TBool]), TUnit))))], (EVar "x")
-          )),
+       (EFun ([("x", (Some (TFun ((TTuple (TInt, TBool, [])), TUnit))))],
+          (EVar "x"))),
        None)) |}]
   ;;
 
@@ -169,8 +169,8 @@ module ParserTests = struct
     [%expect
       {|
     (ELet (NonRec, "f",
-       (EFun ([("x", (Some (TTuple [TInt; (TList TBool)])))], (EVar "x"))), None
-       )) |}]
+       (EFun ([("x", (Some (TTuple (TInt, (TList TBool), []))))], (EVar "x"))),
+       None)) |}]
   ;;
 end
 
