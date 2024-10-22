@@ -78,11 +78,30 @@ let operators =
 ;;
 
 let parse_ident =
-  let+ ident = parse_lowercase_ident in
+  let+ ident = ws *> parse_lowercase_ident in
   Exp_ident ident
 ;;
 
 let parse_const =
   let+ const = Const_parser.parse_const in
   Exp_constant const
+;;
+
+let parse_expr =
+  let parse_op (op : string t) =
+    let+ parsed = ws *> op in
+    let ident = Exp_ident parsed in
+    fun a b -> Exp_apply (ident, Exp_tuple [ a; b ])
+  in
+  let op_iter prev = function
+    | Infix Right, el -> chainr1 prev (parse_op el)
+    | Infix Left, el -> chainl1 prev (parse_op el)
+    | Prefix, _ -> prev (* TODO *)
+  in
+  let rec parse_exp_ prev = function
+    | h :: tl -> parse_exp_ (op_iter prev h) tl
+    | [] -> prev
+  in
+  let init = parse_const <|> parse_ident in
+  parse_exp_ init operators
 ;;
