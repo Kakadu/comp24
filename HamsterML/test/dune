@@ -1,6 +1,7 @@
 (library
-  (modules ParserTest LexerTest)
-  (name HamsterTest)
-  (inline_tests)
-  (preprocess (pps ppx_inline_test))
-  (libraries HamsterML))
+ (modules ParserTest LexerTest)
+ (name HamsterTest)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test))
+ (libraries HamsterML))

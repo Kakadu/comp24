@@ -9,8 +9,12 @@ let lex code =
 
 let%test _ = lex "\"rofl\"" = [ STRING "rofl" ]
 let%test _ = lex "228" = [ INT 228 ]
+let%test _ = lex "+228" = [ INT 228 ]
+let%test _ = lex "-228" = [ INT (-228) ]
 let%test _ = lex "'a'" = [ CHAR 'a' ]
 let%test _ = lex "228.337" = [ FLOAT 228.337 ]
+let%test _ = lex "+228.337" = [ FLOAT 228.337 ]
+let%test _ = lex "-228.337" = [ FLOAT (-228.337) ]
 let%test _ = lex "true" = [ BOOL true ]
 let%test _ = lex "false" = [ BOOL false ]
 let%test _ = lex "add" = [ IDENTIFIER "add" ]

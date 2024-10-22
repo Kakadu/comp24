@@ -10,7 +10,7 @@ let white = [' ' '\t']+
 
 let digit = ['0'-'9']
 let frac = '.' digit*
-let float = digit* frac
+let float = ('-' | '+')? digit* frac
 let int = ('-' | '+')? digit+
 
 let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '[' ']' '{' '}' ',' '.' ' ']
