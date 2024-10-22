@@ -22,13 +22,14 @@ jobs:
       - name: Print
         run: env | sort
 
+      - run: sudo apt update
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0                # fix me later
 
       - name: Pin linter to the latest version
-        #if: false  # HACK!
         run: |
           opam pin add https://github.com/Kakadu/zanuda.git --no-action
           opam reinstall zanuda odig --yes
@@ -45,8 +46,6 @@ jobs:
         run: |
           echo "${{ steps.branch-name.outputs.ref_branch }}"
 
-      #- run: git remote -vvv
-      #- run: git branch -vvv
 
       ############# Detecting and compiling
       # Smart link about setting environment variables
@@ -58,9 +57,7 @@ jobs:
         #if: ${{ github.event.pull_request.user.login == 'fp2022-helper' }}
 
       - name: Installing dependencies for ${{ env.latest }}
-        if: false  # HACK!
         run: |
-          sudo apt-get update
           opam update
           opam install ./${{ env.latest }} --depext-only --with-test --with-doc
           opam install ./${{ env.latest }} --deps-only --with-test --with-doc
