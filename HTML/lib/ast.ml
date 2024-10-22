@@ -12,7 +12,7 @@ type const =
 type ident = string [@@deriving eq, show { with_path = false }]
 
 type ident_or_op =
-  | IOIdent of ident (* ident letters and _ *)
+  | IOIdent of ident (* ident of letters, digits and _ *)
   | IOBinOp of ident (* ident for bin ops *)
   | IOUnOp of ident (* ident for unary ops *)
 [@@deriving eq, show { with_path = false }]

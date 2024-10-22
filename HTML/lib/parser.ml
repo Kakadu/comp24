@@ -221,7 +221,7 @@ let get_chain e priority_group =
 ;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op >>| iounop <|> parse_parens parse_op in
+  let* unop = parse_token parse_unary_op >>| iounop in
   let* expr =
     choice
       [ parse_expr
@@ -277,22 +277,31 @@ let parse_identifier =
     [ (parse_token parse_letters
        >>= fun ident ->
        if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident)
-    ; parse_parens parse_binary_op
+    ; parse_parens (parse_binary_op <|> parse_unary_op)
     ]
 ;;
 
-let is_operator =
-  Base.String.exists ~f:(fun c -> not (is_digit c || is_letter c || c == '_'))
-;;
-
 let parse_identifier_expr =
-  parse_identifier
-  >>| fun ident ->
-  eid
-  @@
-  match is_operator ident with
-  | true -> iobinop ident
-  | false -> ioident ident
+  let is_operator s =
+    Base.String.exists ~f:(fun c -> not (is_ident_char c || c == '_')) s
+  in
+  let is_unop s =
+    let rec helper = function
+      | hd :: tl -> String.starts_with ~prefix:hd s || helper tl
+      | [] -> false
+    in
+    helper first_unop_strings
+  in
+  let* ident = parse_identifier in
+  return
+    (eid
+     @@
+     match is_operator ident with
+     | false -> ioident ident
+     | true ->
+       (match is_unop ident with
+        | true -> iounop ident
+        | false -> iobinop ident))
 ;;
 
 let parse_ground_type =
@@ -438,8 +447,8 @@ let parse_expr =
     let parse_expr_inner =
       choice
         [ parse_const_expr
-        ; parse_parens parse_expr_fix
         ; parse_identifier_expr
+        ; parse_parens parse_expr_fix
         ; parse_fun_anon_expr parse_expr_fix
         ; parse_closure (parse_let_decl parse_expr_fix) parse_expr_fix
         ; parse_branching parse_expr_fix
