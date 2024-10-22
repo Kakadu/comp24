@@ -20,8 +20,7 @@
 %token NOT
 
 %token LPAREN RPAREN
-%token COLON
-%token COMMA
+%token COLON COMMA
 
 %token LET 
 %token LETREC
@@ -32,8 +31,7 @@
 %token SS
 %token EOF
 
-// Priorities https://ocaml.org/manual/5.1/api/Ocaml_operators.html
-// Low to high (menhir man 4.1.4)
+// Priorities (low to high)
 %left GT LT GE LE
 %left PLUS MINUS 
 %left MUL DIV

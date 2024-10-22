@@ -9,13 +9,13 @@ bug-reports: "https://github.com/ArtemKhel/comp24/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.13"}
-  "core"
-  "angstrom"
   "bisect_ppx"
   "ppx_deriving"
   "ppx_expect"
   "ppx_inline_test" {with-test}
   "odoc" {with-doc}
+  "ocamlformat" {build}
+  "llvm" {= "16.0.6+nnp"}
 ]
 build: [
   ["dune" "subst"] {dev}

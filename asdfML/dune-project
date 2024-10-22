@@ -24,10 +24,12 @@
  (depends
   ocaml
   dune
-  core
-  angstrom
   bisect_ppx
   ppx_deriving
   ppx_expect
-  (ppx_inline_test :with-test))
+  (ppx_inline_test :with-test)
+  (odoc :with-doc)
+  (ocamlformat :build)
+  (llvm (= "16.0.6+nnp"))
+  )
  (tags ()))

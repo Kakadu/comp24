@@ -1,5 +1,6 @@
 open Ast
 open Format
+open Base
 
 let rec pp_const fmt = function
   | CInt i -> fprintf fmt "%d" i
@@ -35,6 +36,10 @@ and pp_pattern fmt = function
   | PWild -> fprintf fmt "_"
   | PIdent (id, None) -> fprintf fmt "%s" id
   | PIdent (id, Some ty) -> fprintf fmt "(%s:%a)" id pp_type_ann ty
+  | PTuple xs ->
+    fprintf fmt "(";
+    pp_print_list pp_pattern fmt xs;
+    fprintf fmt ")"
 
 and pp_expr fmt = function
   | EConst c -> fprintf fmt "%a" pp_const c
@@ -46,6 +51,10 @@ and pp_expr fmt = function
   | EIfElse (c, t, e) -> fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
   | EFun (p, e) -> fprintf fmt "fun %a -> %a" pp_pattern p pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
+  | ETuple xs ->
+    fprintf fmt "(";
+    pp_print_list pp_expr fmt xs;
+    fprintf fmt ")"
 
 and pp_definition fmt = function
   | DLet (NonRec, pat, e) -> fprintf fmt "let %a = %a" pp_pattern pat pp_expr e

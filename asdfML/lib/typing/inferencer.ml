@@ -3,6 +3,7 @@
 open Types
 open Pp_typing
 open Base
+open Utils
 
 let int_typ = TGround TInt
 let bool_typ = TGround TBool
@@ -105,6 +106,7 @@ module Type = struct
     | TVar b -> b = v
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TGround _ -> false
+    | TTuple xs -> List.exists xs ~f:(occurs_in v)
   ;;
 
   let free_vars =
@@ -112,6 +114,7 @@ module Type = struct
       | TVar b -> Set.add acc b
       | TArrow (l, r) -> helper (helper acc l) r
       | TGround _ -> acc
+      | TTuple xs -> List.fold xs ~init:VarSet.empty ~f:helper
     in
     helper VarSet.empty
   ;;
@@ -219,8 +222,8 @@ module Scheme = struct
   ;;
 
   let apply sub (names, ty) =
-    let s2 = VarSet.fold names ~init:sub ~f:(fun s k -> Subst.remove s k) in
-    names, Subst.apply s2 ty
+    let sub' = VarSet.fold names ~init:sub ~f:Subst.remove in
+    names, Subst.apply sub' ty
   ;;
 end
 
@@ -286,8 +289,8 @@ let lookup_env e xs =
     return (Subst.empty, ans)
 ;;
 
-let pp_env subst fmt env =
-  let env : TypeEnv.t = Map.map env ~f:(Scheme.apply subst) in
+let pp_env sub fmt env =
+  let env : TypeEnv.t = Map.map env ~f:(Scheme.apply sub) in
   TypeEnv.pp fmt env
 ;;
 
@@ -357,7 +360,7 @@ let infer =
     | ELetIn ((DLet (NonRec, PIdent (id, an_ty), _) as def), expr) ->
       let* subst_def, typ_def = infer_def env def in
       let* typ_def = unify_ann an_ty typ_def in
-      (* let () = Format.printf "subst_def: %a\n" Subst.pp subst_def in *)
+      (* let () = dbg "subst_def: %a\n" Subst.pp subst_def in *)
       let env' = TypeEnv.apply env subst_def in
       let typ_id = generalize env' typ_def in
       let env'' = TypeEnv.extend env' id typ_id in
@@ -377,9 +380,9 @@ let infer =
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
     | ELetIn (DLet (_, non_id, _), _) ->
-      failwith
-        (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id)
-    | _ -> failwith "TODO: unimplemented"
+      fail
+        (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
+    | _ -> fail (`TODO "unimplemented")
   and (infer_def : TypeEnv.t -> Ast.definition -> (Subst.t * ty) R.t) =
     fun env -> function
     | DLet (_, _, expr) ->
@@ -439,62 +442,62 @@ let test code =
 ;;
 
 let%expect_test _ =
-  test "let x = ()";
+  test {| let x = () |};
   [%expect {| () |}]
 ;;
 
 let%expect_test _ =
-  test "let x = true";
+  test {| let x = true |};
   [%expect {| bool |}]
 ;;
 
 let%expect_test _ =
-  test "let x = 42";
+  test {| let x = 42 |};
   [%expect {| int |}]
 ;;
 
 let%expect_test _ =
-  test "let x = 1 + 2";
+  test {| let x = 1 + 2 |};
   [%expect {| int |}]
 ;;
 
 let%expect_test _ =
-  test "let x = (1 + 2) <= 3";
+  test {| let x = (1 + 2) <= 3 |};
   [%expect {| bool |}]
 ;;
 
 let%expect_test _ =
-  test "let x = 1 + 2 <= 3";
+  test {| let x = 1 + 2 <= 3 |};
   [%expect {| bool |}]
 ;;
 
 let%expect_test _ =
-  test "let id = fun x -> x";
+  test {| let id = fun x -> x |};
   [%expect {| 'a -> 'a |}]
 ;;
 
 let%expect_test _ =
-  test "let const = fun x -> 42";
+  test {| let const = fun x -> 42 |};
   [%expect {| 'a -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let plus_one = fun x -> x + 1";
+  test {| let plus_one = fun x -> x + 1 |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let muladd = fun x -> fun y -> fun z -> x * y + z";
+  test {| let muladd = fun x -> fun y -> fun z -> x * y + z |};
   [%expect {| int -> int -> int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let apply = func arg";
+  test {| let apply = func arg |};
   [%expect {| Undefined variable 'func' |}]
 ;;
 
 let%expect_test _ =
-  test "let apply = let plus_one = (fun x -> x + 1) in plus_one 2";
+  test {| let apply = let plus_one = (fun x -> x + 1) in plus_one 2 |};
   [%expect {| int |}]
 ;;
 
@@ -510,27 +513,27 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test "let compose = let func = fun x -> 42 in let func = fun x -> true in func";
+  test {| let compose = let func = fun x -> 42 in let func = fun x -> true in func |};
   [%expect {| 'c -> bool |}]
 ;;
 
 let%expect_test _ =
-  test "let cond = if true then 42 else false";
+  test {| let cond = if true then 42 else false |};
   [%expect {| Unification failed on int and bool |}]
 ;;
 
 let%expect_test _ =
-  test "let cond = if true then 42 else 0";
+  test {| let cond = if true then 42 else 0 |};
   [%expect {| int |}]
 ;;
 
 let%expect_test _ =
-  test "let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1)";
+  test {| let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1) |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let rec oc = fun x -> x x";
+  test {| let rec oc = fun x -> x x |};
   [%expect {| Occurs check failed |}]
 ;;
 
@@ -606,33 +609,53 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test "let (x:int) = 42";
+  test {| let (x:int) = 42 |};
   [%expect {| int |}]
 ;;
 
 let%expect_test _ =
-  test "let (x:int) = true";
+  test {| let (x:int) = true |};
   [%expect {| Unification failed on int and bool |}]
 ;;
 
 let%expect_test _ =
-  test "let (id:int->int) = fun (x:int) -> x";
+  test {| let (id:int->int) = fun (x:int) -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let (id:int->int) = fun x -> x";
+  test {| let (id:int->int) = fun x -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let id = fun (x:int) -> x";
+  test {| let id = fun (x:int) -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test "let (const:int) = (fun x -> 42) ()";
+  test {| let (const:int) = (fun x -> 42) () |};
   [%expect {| int |}]
 ;;
 
 (* TODO: more tests for patterns and type annotations *)
+
+let%expect_test _ =
+  test {|let f = fun (f: int -> int -> int) -> fun x -> fun y -> f x y|};
+  [%expect {| (int -> int -> int) -> int -> int -> int |}]
+;;
+
+let%expect_test _ =
+  test {|let compose = fun f -> fun g -> fun x -> f (g x)|};
+  [%expect {| ('d -> 'e) -> ('c -> 'd) -> 'c -> 'e  |}]
+;;
+
+let%expect_test _ =
+  test {|let choose = fun l -> fun r -> fun b -> if b then l else r|};
+  [%expect {| 'b -> 'b -> bool -> 'b |}]
+;;
+
+let%expect_test _ =
+  test {|let choose = fun (l:bool) -> fun r -> fun b -> if b then l else r|};
+  [%expect {| bool -> bool -> bool -> bool |}]
+;;

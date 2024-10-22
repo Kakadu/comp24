@@ -13,13 +13,14 @@ type ty =
   | TGround of ground
   | TVar of var_id
   | TArrow of ty * ty
+  | TTuple of ty list
 [@@deriving show { with_path = false }]
 
 type error =
   [ `Occurs_check
   | `No_variable of string
   | `Unification_failed of ty * ty
-  | `TODO
+  | `TODO of string
   ]
 
 let arrow l r = TArrow (l, r)

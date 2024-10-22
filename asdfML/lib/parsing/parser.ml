@@ -1,6 +1,6 @@
 open Lexing
 open Lexer
-open Core
+open Base
 open Ast
 
 (* Prints the line number and character number where the error occurred.*)
@@ -155,6 +155,27 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  test "let rec factorial = fun x -> fun cont -> if x > 1 then factorial (n - 1) (fun n -> cont (x * n)) else cont 1 ";
+  [%expect {|
+    (DLet (Rec, (PIdent ("factorial", None)),
+       (EFun ((PIdent ("x", None)),
+          (EFun ((PIdent ("cont", None)),
+             (EIfElse ((EBinaryOp (Gt, (EVar "x"), (EConst (CInt 1)))),
+                (EApp (
+                   (EApp ((EVar "factorial"),
+                      (EBinaryOp (Sub, (EVar "n"), (EConst (CInt 1)))))),
+                   (EFun ((PIdent ("n", None)),
+                      (EApp ((EVar "cont"),
+                         (EBinaryOp (Mul, (EVar "x"), (EVar "n")))))
+                      ))
+                   )),
+                (EApp ((EVar "cont"), (EConst (CInt 1))))))
+             ))
+          ))
+       )) |}]
+;;
+
+let%expect_test _ =
   test "let plus_one = fun x -> let one = 1 in x + one";
   [%expect
     {|
@@ -201,3 +222,46 @@ let%expect_test _ =
     (DLet (NonRec, PWild,
        (ETuple [(EConst (CInt 1)); (EConst (CBool true)); (EConst CUnit)])))|}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let add = fun x -> fun y -> x + y
+    let add_one = add 1
+    let x = add_one 2
+  |};
+  [%expect {|
+    (DLet (NonRec, (PIdent ("add", None)),
+       (EFun ((PIdent ("x", None)),
+          (EFun ((PIdent ("y", None)), (EBinaryOp (Add, (EVar "x"), (EVar "y")))
+             ))
+          ))
+       ))
+    (DLet (NonRec, (PIdent ("add_one", None)),
+       (EApp ((EVar "add"), (EConst (CInt 1))))))
+    (DLet (NonRec, (PIdent ("x", None)),
+       (EApp ((EVar "add_one"), (EConst (CInt 2))))))
+  |}]
+;;
+
+let%expect_test _ =
+  test "let _ = (1 + 2 * 3) / 4 - (5 * -6 + -7) / 8 * 9";
+  [%expect {|
+    (DLet (NonRec, PWild,
+       (EBinaryOp (Sub,
+          (EBinaryOp (Div,
+             (EBinaryOp (Add, (EConst (CInt 1)),
+                (EBinaryOp (Mul, (EConst (CInt 2)), (EConst (CInt 3)))))),
+             (EConst (CInt 4)))),
+          (EBinaryOp (Mul,
+             (EBinaryOp (Div,
+                (EBinaryOp (Add,
+                   (EBinaryOp (Mul, (EConst (CInt 5)),
+                      (EUnaryOp (Neg, (EConst (CInt 6)))))),
+                   (EUnaryOp (Neg, (EConst (CInt 7)))))),
+                (EConst (CInt 8)))),
+             (EConst (CInt 9))))
+          ))
+       )) |}]
+;;
+
