@@ -1,9 +1,19 @@
+(* default types *)
 type dataType =
   | Int of int
   | Float of float
   | Bool of bool
   | Char of char
   | String of string
+[@@deriving show]
+
+(* let f (a: Int) (b: Int) = ...*)
+type paramType =
+  | Int
+  | Float
+  | Bool
+  | Char
+  | String
 [@@deriving show]
 
 type bop =
@@ -32,8 +42,8 @@ type uop =
 type value =
   | Const of dataType
   | VarId of string
-  | TypedVarID of string * dataType (** (a: int) *)
-  | Wildcard
+  | TypedVarID of string * paramType (** (a: int) *)
+  | Wildcard  (* _ *)
   | Tuple of value list (** check types with typecheker *)
   | List of value list
   | ListConcat of value * value (** a :: [b;c]*)

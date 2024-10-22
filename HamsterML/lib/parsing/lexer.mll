@@ -24,13 +24,18 @@ rule read =
     parse
     | white     { read lexbuf }
     | newline   { new_line lexbuf; read lexbuf }
-    | int       { INT (int_of_string (Lexing.lexeme lexbuf)) }
-    | float     { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-    | char      { CHAR (String.get (Lexing.lexeme lexbuf) 1)}
+    | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
+    | float     { TYPE_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+    | char      { TYPE_CHAR (String.get (Lexing.lexeme lexbuf) 1)}
     | string    { let str = Lexing.lexeme lexbuf in
-                    STRING (String.sub str 1 (String.length str - 2))}
-    | "true"    { BOOL (true) }
-    | "false"   { BOOL (false) }
+                    TYPE_STRING (String.sub str 1 (String.length str - 2))}
+    | "true"    { TYPE_BOOL (true) }
+    | "false"   { TYPE_BOOL (false) }
+    | "int"     { INT }
+    | "float"   { FLOAT }
+    | "char"    { CHAR }
+    | "string"  { STRING }
+    | "bool"    { BOOL }
     | "if"      { IF } 
     | "then"    { THEN }
     | "else"    { ELSE }

@@ -5,11 +5,18 @@
 // --- Tokens ---
 
 // Data Types
-%token <int> INT
-%token <float> FLOAT
-%token <bool> BOOL
-%token <char> CHAR
-%token <string> STRING
+%token <int> TYPE_INT
+%token <float> TYPE_FLOAT
+%token <bool> TYPE_BOOL
+%token <char> TYPE_CHAR
+%token <string> TYPE_STRING
+
+// Param Types
+%token INT
+%token FLOAT
+%token BOOL
+%token CHAR
+%token STRING
 
 %token <string> IDENTIFIER
 
@@ -103,11 +110,11 @@ assign:
     | BAR; v = value; ARROW; e = expr { (v, e) }
 
 dataType:
-    | i = INT {Int i}
-    | f = FLOAT {Float f}
-    | b = BOOL {Bool b}
-    | c = CHAR {Char c}
-    | s = STRING {String s}
+    | i = TYPE_INT {Int i}
+    | f = TYPE_FLOAT {Float f}
+    | b = TYPE_BOOL {Bool b}
+    | c = TYPE_CHAR {Char c}
+    | s = TYPE_STRING {String s}
     | LEFT_PARENTHESIS; data = dataType; RIGHT_PARENTHESIS { data } // (10), ("10"), etc...
 
 identifier:
@@ -116,8 +123,8 @@ identifier:
 
 value:
     | const = dataType {Const const} 
+    | typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType)}
     | varId = identifier { VarId varId }
-    | typedVarId = identifier; COLON; varType = dataType  {TypedVarID (typedVarId, varType)}
     | WILDCARD {Wildcard}
     | tpl = tuple_dt {Tuple tpl}
     | lst = list_dt {List lst}
@@ -127,6 +134,13 @@ value:
 %inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
 %inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
 
+
+%inline paramType:
+    | INT { Int }
+    | FLOAT { Float }
+    | BOOL { Bool }
+    | CHAR { Char }
+    | STRING { String }
 
 %inline bop:
     | PLUS { ADD }                 

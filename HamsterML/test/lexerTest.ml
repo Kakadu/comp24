@@ -7,16 +7,16 @@ let lex code =
   build_list (Lexing.from_string code)
 ;;
 
-let%test _ = lex "\"rofl\"" = [ STRING "rofl" ]
-let%test _ = lex "228" = [ INT 228 ]
-let%test _ = lex "+228" = [ INT 228 ]
-let%test _ = lex "-228" = [ INT (-228) ]
-let%test _ = lex "'a'" = [ CHAR 'a' ]
-let%test _ = lex "228.337" = [ FLOAT 228.337 ]
-let%test _ = lex "+228.337" = [ FLOAT 228.337 ]
-let%test _ = lex "-228.337" = [ FLOAT (-228.337) ]
-let%test _ = lex "true" = [ BOOL true ]
-let%test _ = lex "false" = [ BOOL false ]
+let%test _ = lex "\"rofl\"" = [ TYPE_STRING "rofl" ]
+let%test _ = lex "228" = [ TYPE_INT 228 ]
+let%test _ = lex "+228" = [ TYPE_INT 228 ]
+let%test _ = lex "-228" = [ TYPE_INT (-228) ]
+let%test _ = lex "'a'" = [ TYPE_CHAR 'a' ]
+let%test _ = lex "228.337" = [ TYPE_FLOAT 228.337 ]
+let%test _ = lex "+228.337" = [ TYPE_FLOAT 228.337 ]
+let%test _ = lex "-228.337" = [ TYPE_FLOAT (-228.337) ]
+let%test _ = lex "true" = [ TYPE_BOOL true ]
+let%test _ = lex "false" = [ TYPE_BOOL false ]
 let%test _ = lex "add" = [ IDENTIFIER "add" ]
 
 let%test _ =
@@ -37,7 +37,7 @@ let%test _ =
     ; LEFT_SQ_BRACKET
     ; RIGHT_SQ_BRACKET
     ; ARROW
-    ; INT 0
+    ; TYPE_INT 0
     ; BAR
     ; IDENTIFIER "head"
     ; DOUBLE_COLON
