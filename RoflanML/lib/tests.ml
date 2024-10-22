@@ -202,7 +202,7 @@ module TypecheckerTests = struct
 
   let%expect_test _ =
     pp_parse_and_infer "let x = (42, false, fun x -> x)";
-    [%expect {| int * bool * ('0 -> '0) |}]
+    [%expect {| int * bool * ('a -> 'a) |}]
   ;;
 
   let%expect_test _ =
@@ -218,7 +218,7 @@ module TypecheckerTests = struct
   let%expect_test _ =
     pp_parse_and_infer
       "let rec fact x useless_var = if x = 1 then x else x * fact (x - 1) useless_var";
-    [%expect {| int -> '2 -> int |}]
+    [%expect {| int -> 'a -> int |}]
   ;;
 
   let%expect_test _ =
@@ -228,7 +228,7 @@ module TypecheckerTests = struct
 
   let%expect_test _ =
     pp_parse_and_infer "let f x = match x with | (h :: tl1) :: tl2 -> true | _ -> false";
-    [%expect {| '2 list list -> bool |}]
+    [%expect {| 'a list list -> bool |}]
   ;;
 
   let%expect_test _ =
@@ -238,7 +238,7 @@ module TypecheckerTests = struct
       | []   -> acc
       | h :: t -> fold_left op (op acc h) t
       |};
-    [%expect {| ('12 -> '6 -> '12) -> '12 -> '6 list -> '12 |}]
+    [%expect {| ('b -> 'a -> 'b) -> 'b -> 'a list -> 'b |}]
   ;;
 
   let%expect_test _ =
@@ -247,7 +247,7 @@ module TypecheckerTests = struct
     let split xs = match xs with 
       | a :: b :: tl -> a, b, tl
     |};
-    [%expect {| '3 list -> '3 * '3 * '3 list |}]
+    [%expect {| 'a list -> 'a * 'a * 'a list |}]
   ;;
 
   let%expect_test _ =
@@ -258,22 +258,22 @@ module TypecheckerTests = struct
     | h :: [] -> false
     | _ -> true
     |};
-    [%expect {| '7 list -> bool |}]
+    [%expect {| 'a list -> bool |}]
   ;;
 
   let%expect_test _ =
     pp_parse_and_infer "[(fun x y -> x = y); (fun x y -> x <> y)]";
-    [%expect {| ('3 -> '3 -> bool) list |}]
+    [%expect {| ('a -> 'a -> bool) list |}]
   ;;
 
   let%expect_test _ =
     pp_parse_and_infer "fun x -> x, fun x y -> x, y";
-    [%expect {| '0 -> '0 * ('1 -> '2 -> '1 * '2) |}]
+    [%expect {| 'a -> 'a * ('b -> 'c -> 'b * 'c) |}]
   ;;
 
   let%expect_test _ =
     pp_parse_and_infer "(fun x -> x), (fun x y -> x, y)";
-    [%expect {| ('0 -> '0) * ('1 -> '2 -> '1 * '2) |}]
+    [%expect {| ('a -> 'a) * ('b -> 'c -> 'b * 'c) |}]
   ;;
 
   let%expect_test _ =
@@ -296,6 +296,17 @@ module TypecheckerTests = struct
     [%expect {| int -> bool -> int -> int * bool * int |}]
   ;;
 
+  let%expect_test _ =
+    pp_parse_and_infer "let not_apply (g: int -> int) x = g";
+    [%expect {| (int -> int) -> 'a -> int -> int |}]
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_infer
+      "let _ (f: (int -> int) -> unit) (g: int -> int -> int) (x: int) = f (g x)";
+    [%expect {| ((int -> int) -> unit) -> (int -> int -> int) -> int -> unit |}]
+  ;;
+
   (* Errors *)
 
   let%expect_test _ =
@@ -305,7 +316,7 @@ module TypecheckerTests = struct
 
   let%expect_test _ =
     pp_parse_and_infer "let rec f x = f";
-    [%expect {| The type variable '0 occurs inside '1 -> '0 |}]
+    [%expect {| The type variable 'a occurs inside 'b -> 'a |}]
   ;;
 
   let%expect_test _ =
@@ -326,7 +337,7 @@ module TypecheckerTests = struct
   let%expect_test _ =
     pp_parse_and_infer
       "let f x = match x with | a :: b -> a | ((a :: true) :: c) :: tl -> c ";
-    [%expect {| Failed to unify types '4 list and bool |}]
+    [%expect {| Failed to unify types 'a list and bool |}]
   ;;
 
   let%expect_test _ =
@@ -339,5 +350,10 @@ module TypecheckerTests = struct
     pp_parse_and_infer "let f x = match x with | a :: 1 :: _ | a :: false :: _ -> a";
     [%expect
       {| Variable a has different types in 'or' patterns: int and bool are not equal |}]
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_infer "let apply (g: int -> int) (x: bool) = g x";
+    [%expect {| Failed to unify types int and bool |}]
   ;;
 end
