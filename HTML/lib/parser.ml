@@ -37,7 +37,6 @@ let is_upper = function
 
 let is_letter c = is_lower c || is_upper c
 let is_ident_char c = is_digit c || is_letter c
-let is_sign c = c = '+' || c = '-'
 
 let keywords =
   [ "if"
@@ -157,16 +156,6 @@ let priority_groups =
   ; fourth_priority_group
   ; fifth_priority_group
   ]
-;;
-
-let get_priority_group first_string =
-  let rec helper = function
-    | priority_group :: _ when List.mem first_string priority_group.group ->
-      Some priority_group
-    | [] -> None
-    | _ :: tl -> helper tl
-  in
-  helper priority_groups
 ;;
 
 (****************************************************** Tuple ******************************************************)
