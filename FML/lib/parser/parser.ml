@@ -71,27 +71,6 @@ let parse_int =
 let parse_bool = token "true" <|> token "false" >>| bool_of_string >>| cbool
 let parse_const constr = choice [ parse_int; parse_bool ] >>| constr
 
-let parse_operators =
-  parens
-  @@ (skip_wspace
-      *> choice
-           [ string "+" *> return "Add"
-           ; string "-" *> return "Sub"
-           ; string ">=" *> return "Gte"
-           ; string ">" *> return "Gt"
-           ; string "<=" *> return "Lte"
-           ; string "<" *> return "Lt"
-           ; string "=" *> return "Eq"
-           ; string "<>" *> return "Neq"
-           ; string "!=" *> return "Neq"
-           ; string "&&" *> return "And"
-           ; string "||" *> return "Or"
-           ; string "*" *> return "Mul"
-           ; string "/" *> return "Div"
-           ])
-  <* skip_wspace
-;;
-
 (* Type annotations parsers *)
 let parse_primitive_type =
   skip_wspace
@@ -128,11 +107,7 @@ let parse_type =
 (* Pattern parsers*)
 let parse_pany = skip_wspace *> char '_' >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
-
-let parse_pidentifier =
-  parse_operators >>| (fun x -> PIdentifier x) <|> parse_identifier pident
-;;
-
+let parse_pidentifier = parse_identifier pident
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
