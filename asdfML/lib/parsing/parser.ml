@@ -155,8 +155,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test "let rec factorial = fun x -> fun cont -> if x > 1 then factorial (n - 1) (fun n -> cont (x * n)) else cont 1 ";
-  [%expect {|
+  test
+    "let rec factorial = fun x -> fun cont -> if x > 1 then factorial (n - 1) (fun n -> \
+     cont (x * n)) else cont 1 ";
+  [%expect
+    {|
     (DLet (Rec, (PIdent ("factorial", None)),
        (EFun ((PIdent ("x", None)),
           (EFun ((PIdent ("cont", None)),
@@ -230,7 +233,8 @@ let%expect_test _ =
     let add_one = add 1
     let x = add_one 2
   |};
-  [%expect {|
+  [%expect
+    {|
     (DLet (NonRec, (PIdent ("add", None)),
        (EFun ((PIdent ("x", None)),
           (EFun ((PIdent ("y", None)), (EBinaryOp (Add, (EVar "x"), (EVar "y")))
@@ -246,7 +250,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = (1 + 2 * 3) / 4 - (5 * -6 + -7) / 8 * 9";
-  [%expect {|
+  [%expect
+    {|
     (DLet (NonRec, PWild,
        (EBinaryOp (Sub,
           (EBinaryOp (Div,
@@ -265,3 +270,54 @@ let%expect_test _ =
        )) |}]
 ;;
 
+let%expect_test _ =
+  test {| let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |};
+  [%expect
+    {|
+    (DLet (NonRec, (PIdent ("tuple", None)),
+       (ETuple
+          [(EConst (CBool true)); (EConst (CInt 42));
+            (EFun ((PIdent ("x", None)), (EVar "x")));
+            (ETuple [(EConst (CInt 1)); (EConst (CInt 2))]);
+            (EIfElse ((EConst (CBool true)), (EConst (CBool false)),
+               (EConst (CBool true))))
+            ])
+       )) |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+  let rec fib = fun (n:int) -> match n with
+  | 0 -> 0
+  | 1 -> 1
+  | _ -> (fib (n - 1)) + (fib (n - 2))
+  |};
+  [%expect
+    {|
+    (DLet (Rec, (PIdent ("fib", None)),
+       (EFun ((PIdent ("n", (Some TAInt))),
+          (EMatch ((PIdent ("n", None)),
+             [((PConst (CInt 0)), (EConst (CInt 0)));
+               ((PConst (CInt 1)), (EConst (CInt 1)));
+               (PWild,
+                (EBinaryOp (Add,
+                   (EApp ((EVar "fib"),
+                      (EBinaryOp (Sub, (EVar "n"), (EConst (CInt 1)))))),
+                   (EApp ((EVar "fib"),
+                      (EBinaryOp (Sub, (EVar "n"), (EConst (CInt 2))))))
+                   )))
+               ]
+             ))
+          ))
+       ))
+     |}]
+;;
+
+let%expect_test _ =
+  test {| let (x, y) = (1, 2) |};
+  [%expect
+    {|
+    (DLet (NonRec, (PTuple [(PIdent ("x", None)); (PIdent ("y", None))]),
+       (ETuple [(EConst (CInt 1)); (EConst (CInt 2))]))) |}]
+;;

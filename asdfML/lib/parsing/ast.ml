@@ -35,7 +35,8 @@ type type_ann =
   | TAInt (** int *)
   | TABool (** bool *)
   | TAUnit (** () *)
-  | TAFun of type_ann * type_ann (** 'a -> 'b *)
+  | TATuple of type_ann list
+  | TAFun of type_ann * type_ann (** int -> bool *)
 [@@deriving show { with_path = false }]
 
 type pattern =
@@ -54,7 +55,8 @@ type expr =
   | EIfElse of expr * expr * expr (** if x then y else z *)
   | EFun of pattern * expr (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
-  | ETuple of expr list
+  | ETuple of expr list (** (x, fun x -> x, 42) *)
+  | EMatch of pattern * (pattern * expr) list (***)
 [@@deriving show { with_path = false }]
 
 and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)

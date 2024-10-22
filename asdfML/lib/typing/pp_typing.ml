@@ -6,11 +6,11 @@ let type_id_to_name n =
     match n with
     | _ when n < 0 -> invalid_arg "Id must be >= 0"
     | n when n < 26 ->
-        let char = Char.chr (n + Char.code 'a') in
-        Char.escaped char ^ acc
+      let char = Char.chr (n + Char.code 'a') in
+      Char.escaped char ^ acc
     | _ ->
-        let char = Char.chr ((n mod 26) + Char.code 'a') in
-        helper (n / 26 - 1) (Char.escaped char ^ acc)
+      let char = Char.chr ((n mod 26) + Char.code 'a') in
+      helper ((n / 26) - 1) (Char.escaped char ^ acc)
   in
   helper n ""
 ;;

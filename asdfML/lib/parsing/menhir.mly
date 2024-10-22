@@ -21,12 +21,14 @@
 
 %token LPAREN RPAREN
 %token COLON COMMA
+%token CONS
 
 %token LET 
 %token LETREC
 %token IN
 %token FUN ARROW
 %token IF THEN ELSE
+%token MATCH WITH BAR
 
 %token SS
 %token EOF
@@ -49,16 +51,17 @@ definition:
 | LET pat = pattern EQ e = expr { DLet(NonRec, pat, e) }
 
 expr: 
+| c = constant { EConst(c) }
+| v = identifier { EVar(v) }
+| e = expr_unary { e }
+| e = expr_binary { e }
+| app = application { app }
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
 | FUN pat = pattern ARROW body = expr { EFun(pat, body) }
 | def = definition IN body = expr { ELetIn(def, body) }
-| app = application { app }
-| e = expr_unary { e }
-| e = expr_binary { e }
-| c = constant { EConst(c) }
-| v = identifier { EVar(v) }
-| LPAREN e = expr RPAREN { e }
 | LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
+| m = match_ { m }
+| LPAREN e = expr RPAREN { e }
 
 type_ann:
 | id = identifier { 
@@ -66,14 +69,22 @@ type_ann:
     | "int" -> TAInt
     | "bool" -> TABool
     | "()" -> TAUnit
-    | _ -> failwith "TODO"
+    | _ -> failwith "unknown type annotation"
   }
 | hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
+| LPAREN es = separated_nonempty_list(COMMA, type_ann) RPAREN { TATuple(es) }
 
 pattern: 
-| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
+| c = constant { PConst(c) }
 | WILDCARD { PWild }
 | id = identifier { PIdent(id, None) }
+| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
+| LPAREN es = separated_nonempty_list(COMMA, pattern) RPAREN { PTuple(es) }
+
+match_:
+| MATCH p = pattern WITH cs = nonempty_list(case) { EMatch(p, cs) }
+case:
+| BAR p = pattern ARROW e = expr { (p, e) }
 
 application :
 | l = application r = app_expr { EApp(l, r) }

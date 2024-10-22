@@ -30,6 +30,10 @@ and pp_type_ann fmt = function
   | TABool -> fprintf fmt "bool"
   | TAUnit -> fprintf fmt "()"
   | TAFun (a, b) -> fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
+  | TATuple xs ->
+    fprintf fmt "(";
+    pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt ", ") pp_type_ann fmt xs;
+    fprintf fmt ")"
 
 and pp_pattern fmt = function
   | PConst c -> fprintf fmt "%a" pp_const c
@@ -55,6 +59,13 @@ and pp_expr fmt = function
     fprintf fmt "(";
     pp_print_list pp_expr fmt xs;
     fprintf fmt ")"
+  | EMatch (p, pe_list) ->
+    fprintf fmt "match %a with\n" pp_pattern p;
+    pp_print_list
+      ~pp_sep:Format.pp_print_newline
+      (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p pp_expr e)
+      fmt
+      pe_list
 
 and pp_definition fmt = function
   | DLet (NonRec, pat, e) -> fprintf fmt "let %a = %a" pp_pattern pat pp_expr e

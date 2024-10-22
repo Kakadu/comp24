@@ -28,6 +28,9 @@ rule token = parse
   | "if" { IF }
   | "then" { THEN }
   | "else" { ELSE }
+  | "match" { MATCH }
+  | "with" { WITH }
+  | "|" { BAR }
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { MUL }
@@ -45,6 +48,7 @@ rule token = parse
   | "(" { LPAREN }
   | ")" { RPAREN }
   | id { IDENT (Lexing.lexeme lexbuf) }
+  | "::" { CONS }
   | ":" { COLON }
   | "," { COMMA }
   | ";;" { SS }
