@@ -89,19 +89,18 @@
 prog : p = expr EOF { p }
 
 expr:
+    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS { e }
     | v = value { Value v }
-    | le = expr; bop = bop; re = expr { BinOp (bop, le, re) }
-    | le = expr; re = expr { Application (le,re) }
     | uop = uop; e = expr { UnOp (uop, e) }
-    | LET; REC; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
-    | LET; id = IDENTIFIER; vls = nonempty_list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
-    | LET; id = IDENTIFIER; EQUAL; e = expr {BinOp(ASSIGN, Value(VarId id), e) }
-    | LET; exprs = separated_nonempty_list(LET_AND, assign); IN; e = expr { LetIn (exprs, e) }
+    | le = expr; bop = bop; re = expr { BinOp (bop, le, re) }
+    | LET; REC; l = let_rec_def { l }
+    | LET; l = let_in_def { l }
+    | LET; l = let_def { l }
     | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
     | FUN; vls = nonempty_list(value); ARROW; e = expr { Fun (vls, e) }
-    // TODO: change to make possible to omit else clause
-    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { If (e1, e2, e3) }
-    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS { e }
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr { If (e1, e2, Some e3) }
+    | IF; e1 = expr; THEN; e2 = expr { If (e1, e2, None) }
+    | le = expr; re = expr { Application (le,re) }
 
 assign: 
     | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
@@ -109,6 +108,17 @@ assign:
 %inline match_case: 
     | BAR; v = value; ARROW; e = expr { (v, e) }
 
+(* <id> <value1> <value2> ... = <expr> *)
+%inline let_rec_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
+%inline let_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
+
+let_bind: (* a = 10 and b = 20 and ... *)
+    | l = let_def { [l] }
+    | h = let_def; LET_AND; tl = let_bind { h :: tl }
+
+let_in_def:
+    | e1 = let_def; IN; e2 = expr { LetIn ([e1], e2) } (* without and *)
+    | exs = let_bind; IN; e = expr { LetIn (exs, e) } (* with and *)
 
 dataType:
     | i = TYPE_INT {Int i}
@@ -116,31 +126,37 @@ dataType:
     | b = TYPE_BOOL {Bool b}
     | c = TYPE_CHAR {Char c}
     | s = TYPE_STRING {String s}
-    | LEFT_PARENTHESIS; data = dataType; RIGHT_PARENTHESIS { data } // (10), ("10"), etc...
 
-identifier:
+%inline identifier:
     | name = IDENTIFIER { name }
-    | LEFT_PARENTHESIS; name = identifier; RIGHT_PARENTHESIS { name }
 
 value:
-    | const = dataType {Const const} 
-    | typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType)}
-    | varId = identifier { VarId varId }
-    | WILDCARD {Wildcard}
-    | tpl = tuple_dt {Tuple tpl}
-    | lst = list_dt {List lst}
-    | v1 = value ; DOUBLE_COLON; v2 = value  { ListConcat (v1, v2) }
     | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS { v }
+    | WILDCARD {Wildcard}
+    | t_v = typed_var { t_v }
+    | v = const_or_var { v }
+    | p = pattern { p }
+
+const_or_var: (* Const or variable *)
+    | const = dataType {Const const} 
+    | varId = identifier { VarId varId }
+
+typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType)}
+
+pattern:
+    | tpl = tuple_dt {Tuple tpl} (* (1, 2, 3, ...) *)
+    | lst = list_dt {List lst}  (* [1; 2; 3; ...] *)
+    | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
 
 %inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
 %inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
 
 %inline paramType:
-    | INT { Int }
-    | FLOAT { Float }
-    | BOOL { Bool }
-    | CHAR { Char }
-    | STRING { String }
+    | INT { PInt }
+    | FLOAT { PFloat }
+    | BOOL { PBool }
+    | CHAR { PChar }
+    | STRING { PString }
 
 %inline bop:
     | PLUS { ADD }                 

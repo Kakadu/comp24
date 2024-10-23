@@ -1,3 +1,5 @@
+type id = string [@@deriving show]
+
 (* default types *)
 type dataType =
   | Int of int
@@ -9,11 +11,11 @@ type dataType =
 
 (* let f (a: Int) (b: Int) = ...*)
 type paramType =
-  | Int
-  | Float
-  | Bool
-  | Char
-  | String
+  | PInt
+  | PFloat
+  | PBool
+  | PChar
+  | PString
 [@@deriving show]
 
 type bop =
@@ -38,8 +40,8 @@ type uop = NOT (** not true *) [@@deriving show]
 (* Value is a value (dataType -> dataStructure) *)
 type value =
   | Const of dataType
-  | VarId of string
-  | TypedVarID of string * paramType (* (a: int) *)
+  | VarId of id
+  | TypedVarID of id * paramType (* (a: int) *)
   | Wildcard (* _ *)
   | Tuple of value list (* (1, 2, 3) *)
   | List of value list (* [1; 2; 3] *)
@@ -51,12 +53,11 @@ type expr =
   | UnOp of uop * expr
   | Application of expr * expr
   | Value of value
-  | Let of funType * string * value list * expr (** let id a = a *)
-  | Fun of value list * expr (** (fun a -> a + 1) *)
-  (* TODO: change to make possible for "if a then b" without else clause *)
-  | If of expr * expr * expr
+  | Let of funType * id * value list * expr (* let id a = a *)
+  | Fun of value list * expr (* (fun a -> a + 1) *)
+  | If of expr * expr * expr option (* if a = b then c (else d) *)
   | Match of expr * (value * expr) list
-  | LetIn of expr list * expr (** let a = 1 and b = 2 in a + b *)
+  | LetIn of expr list * expr (* let a = 1 and b = 2 in a + b *)
 [@@deriving show]
 
 and funType =

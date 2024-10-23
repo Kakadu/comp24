@@ -30,11 +30,11 @@ let%test _ = parse "\"Nike pro\"" = Value (Const (String "Nike pro"))
 (* Values *)
 (* Variables *)
 let%test _ = parse "sigma_nike_pro_228" = Value (VarId "sigma_nike_pro_228")
-let%test _ = parse "pick_me:int" = Value (TypedVarID ("pick_me", Int))
-let%test _ = parse "sigma : float" = Value (TypedVarID ("sigma", Float))
-let%test _ = parse "kfc_boss: string" = Value (TypedVarID ("kfc_boss", String))
-let%test _ = parse "roblox : char" = Value (TypedVarID ("roblox", Char))
-let%test _ = parse "( roblox : bool )" = Value (TypedVarID ("roblox", Bool))
+let%test _ = parse "pick_me:int" = Value (TypedVarID ("pick_me", PInt))
+let%test _ = parse "sigma : float" = Value (TypedVarID ("sigma", PFloat))
+let%test _ = parse "kfc_boss: string" = Value (TypedVarID ("kfc_boss", PString))
+let%test _ = parse "roblox : char" = Value (TypedVarID ("roblox", PChar))
+let%test _ = parse "( roblox : bool )" = Value (TypedVarID ("roblox", PBool))
 
 (* Patterns *)
 let%test _ =
@@ -92,7 +92,15 @@ let%test _ =
   = If
       ( BinOp (EQ, Value (VarId "x"), Value (VarId "y"))
       , Value (Const (String "nike_pro"))
-      , Value (Const (String "sigma")) )
+      , Some (Value (Const (String "sigma"))) )
+;;
+
+let%test _ =
+  parse "if x = y then \"nike_pro\""
+  = If
+      ( BinOp (EQ, Value (VarId "x"), Value (VarId "y"))
+      , Value (Const (String "nike_pro"))
+      , None )
 ;;
 
 (* match *)
@@ -106,4 +114,31 @@ let%test _ =
         ] )
 ;;
 
-let%test _ = parse "let a = 1" = BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))
+(* let *)
+let%test _ = parse "let a = 1" = Let (Nonrecursive, "a", [], Value (Const (Int 1)))
+
+let%test _ =
+  parse "let rec f a b = true"
+  = Let (Recursive, "f", [ VarId "a"; VarId "b" ], Value (Const (Bool true)))
+;;
+
+let%test _ =
+  parse "let f a b = 10 and g c d = 20 and e = 30 in nike_pro"
+  = LetIn
+      ( [ Let (Nonrecursive, "f", [ VarId "a"; VarId "b" ], Value (Const (Int 10)))
+        ; Let (Nonrecursive, "g", [ VarId "c"; VarId "d" ], Value (Const (Int 20)))
+        ; Let (Nonrecursive, "e", [], Value (Const (Int 30)))
+        ]
+      , Value (VarId "nike_pro") )
+;;
+
+let%test _ =
+  parse "let a = 10 and b = 20 in let c = 30 in nike_pro"
+  = LetIn
+      ( [ Let (Nonrecursive, "a", [], Value (Const (Int 10)))
+        ; Let (Nonrecursive, "b", [], Value (Const (Int 20)))
+        ]
+      , LetIn
+          ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
+          , Value (VarId "nike_pro") ) )
+;;
