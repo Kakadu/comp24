@@ -223,15 +223,13 @@ let p_unit constr =
   *> Angstrom.string "("
   *> skip_whitespace
   *> Angstrom.string ")"
-  *> return (constr CUnit)
+  *> return (constr [])
 ;;
 
-let p_tuple_expr p_exp =
-  p_tuple p_exp (fun x -> ETuple x) <|> p_unit (fun x -> EConstant x)
-;;
+let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x) <|> p_unit (fun x -> ETuple x)
 
 let p_tuple_pattern p_exp =
-  p_tuple p_exp (fun x -> PTuple x) <|> p_unit (fun x -> PConstant x)
+  p_tuple p_exp (fun x -> PTuple x) <|> p_unit (fun x -> PTuple x)
 ;;
 
 let rec pat_cons_list_builder (ls : pattern list) =

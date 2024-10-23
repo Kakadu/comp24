@@ -22,7 +22,6 @@ type rec_flag =
 type constant =
   | CInt of int
   | CBool of bool
-  | CUnit
 [@@deriving show { with_path = false }]
 
 (* Lists, tuples, identifiers, wild card patterns*)
@@ -32,7 +31,6 @@ type pattern =
   | PCons of pattern * pattern
   | PIdentifier of string
   | PTuple of pattern list
-  | PList of pattern list
   | PConstant of constant
   | PConstraint of pattern * type_name
 [@@deriving show { with_path = false }]
