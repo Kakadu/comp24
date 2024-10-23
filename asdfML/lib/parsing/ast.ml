@@ -27,10 +27,11 @@ type type_ann =
 type pattern =
   | PConst of constant
   | PWild (** _ *)
-  | PIdent of id * type_ann option (** x | (x:int) *)
+  | PIdent of id (** x *)
   | PTuple of pattern list
   | PList of pattern list (** [1, 2, 3] *)
   | PCons of pattern * pattern (** hd :: tl *)
+  | PAnn of pattern * type_ann (** (x:int) *)
 [@@deriving show { with_path = false }]
 
 type expr =

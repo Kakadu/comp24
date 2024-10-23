@@ -130,14 +130,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test "let (x:int) = 42";
-  [%expect {| let (x:int) = 42 |}]
+  test "let (x: int) = 42";
+  [%expect {| let (x: int) = 42 |}]
 ;;
 
 let%expect_test _ =
-  test "let (id:int->int) = fun (x:int) -> x";
+  test "let (id: int->int) = fun (x: int) -> x";
   [%expect {|
-    let (id:int -> int) = fun (x:int) -> x |}]
+    let (id: int -> int) = fun (x: int) -> x |}]
 ;;
 
 (* TODO: more tests for patterns and type annotations *)
@@ -180,14 +180,14 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {| 
-  let rec fib = fun (n:int) -> match n with
+  let rec fib = fun (n: int) -> match n with
   | 0 -> 0
   | 1 -> 1
   | _ -> (fib (n - 1)) + (fib (n - 2))
   |};
   [%expect
     {|
-    let rec fib = fun (n:int) -> match n with
+    let rec fib = fun (n: int) -> match n with
     | 0 -> 0
     | 1 -> 1
     | _ -> (( + ) (fib (( - ) n 1)) (fib (( - ) n 2)))
@@ -202,12 +202,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| 
-  let (+) = fun (x:bool) -> fun (y:bool) -> x || y 
+  let (+) = fun (x: bool) -> fun (y: bool) -> x || y 
   let x = true + false
   |};
   [%expect
     {|
-    let ( + ) = fun (x:bool) -> fun (y:bool) -> (( || ) x y)
+    let ( + ) = fun (x: bool) -> fun (y: bool) -> (( || ) x y)
     let x = (( + ) true false) |}]
 ;;
 

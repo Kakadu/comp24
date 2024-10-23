@@ -275,9 +275,9 @@ module TypeEnv = struct
   ;;
 
   let pp fmt (xs : t) =
-    Format.fprintf fmt "{| ";
-    Map.iteri xs ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a; " n pp_scheme s);
-    Format.fprintf fmt "|}%!"
+    Format.fprintf fmt "{|\n";
+    Map.iteri xs ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a\n" n pp_scheme s);
+    Format.fprintf fmt "\n|}%!"
   ;;
 end
 
@@ -285,15 +285,6 @@ open R
 open R.Syntax
 
 let unify = Subst.unify
-
-let unify_ann an_ty ty =
-  match an_ty with
-  | Some an_ty ->
-    let* u = unify (an_ty_to_ty an_ty) ty in
-    return (Subst.apply u ty)
-  | None -> return ty
-;;
-
 let fresh_var = fresh >>| fun n -> TVar n
 
 let instantiate : scheme -> ty R.t =
@@ -334,14 +325,21 @@ let infer =
     | Ast.CInt _ -> int_typ
     | Ast.CUnit -> unit_typ
   in
-  let infer_pattern : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t =
+  let rec infer_pattern : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t =
     fun env -> function
     | PConst c -> return (env, infer_const c)
     | PWild -> fresh_var >>| fun v -> env, v
-    | PIdent (x, ta) -> fail (`TODO "")
-    | PTuple xs -> fail (`TODO "")
-    | PList x -> fail (`TODO "")
-    | PCons (l, r) -> fail (`TODO "")
+    | PIdent x ->
+      let* fv = fresh_var in
+      let env' = TypeEnv.extend env x (VarSet.empty, fv) in
+      return (env', fv)
+    | PTuple xs -> fail (`TODO "infer_pattern PTuple")
+    | PList x -> fail (`TODO "infer_pattern PList")
+    | PCons (l, r) -> fail (`TODO "infer_pattern PCons")
+    | PAnn (pat, ann_ty) ->
+      let* pat_env, ty = infer_pattern env pat in
+      let* sub = unify ty (an_ty_to_ty ann_ty) in
+      return (TypeEnv.apply pat_env sub, Subst.apply sub ty)
   in
   let rec (infer_expr : TypeEnv.t -> Ast.expr -> (Subst.t * ty) R.t) =
     fun env -> function
@@ -363,28 +361,23 @@ let infer =
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       return (final_subst, Subst.apply s5 t2)
-    | EFun (PIdent (x, an_ty), e1) ->
-      let* tv = fresh_var in
-      let* tv = unify_ann an_ty tv in
-      let env2 = TypeEnv.extend env x (VarSet.empty, tv) in
-      let* s, ty = infer_expr env2 e1 in
-      let trez = TArrow (Subst.apply s tv, ty) in
-      return (s, trez)
-    | ELetIn ((DLet (NonRec, PIdent (id, an_ty), _) as def), expr) ->
+    | EFun (pat, exp) ->
+      let* env', pat_ty = infer_pattern env pat in
+      let* s, exp_ty = infer_expr env' exp in
+      let ty = Subst.apply s (pat_ty ^-> exp_ty) in
+      return (s, ty)
+    | ELetIn ((DLet (NonRec, PIdent id, _) as def), expr) ->
       let* subst_def, typ_def = infer_def env def in
-      let* typ_def = unify_ann an_ty typ_def in
-      (* let () = dbg "subst_def: %a\n" Subst.pp subst_def in *)
       let env' = TypeEnv.apply env subst_def in
       let typ_id = generalize env' typ_def in
       let env'' = TypeEnv.extend env' id typ_id in
       let* subst_expr, typ_expr = infer_expr env'' expr in
       let* final_subst = Subst.compose subst_def subst_expr in
       return (final_subst, typ_expr)
-    | ELetIn ((DLet (Rec, PIdent (id, an_ty), _) as def), expr) ->
+    | ELetIn ((DLet (Rec, PIdent id, _) as def), expr) ->
       let* tvar = fresh_var in
       let env = TypeEnv.extend env id (VarSet.empty, tvar) in
       let* s1, t1 = infer_def env def in
-      let* t1 = unify_ann an_ty t1 in
       let* s2 = unify (Subst.apply s1 tvar) t1 in
       let* s = Subst.compose s2 s1 in
       let env = TypeEnv.apply env s in
@@ -451,18 +444,16 @@ let infer_program (prog : Ast.definition list) =
   let rec helper env = function
     | head :: tail ->
       (match head with
-       | Ast.DLet (NonRec, PIdent (id, an_ty), _) ->
+       | Ast.DLet (NonRec, PIdent id, _) ->
          let* _, ty = infer env head in
-         let* ty = unify_ann an_ty ty in
          let t = generalize env ty in
          let env = TypeEnv.extend env id t in
          let* tail = helper env tail in
          return ((id, t) :: tail)
-       | Ast.DLet (Rec, PIdent (id, an_ty), _) ->
+       | Ast.DLet (Rec, PIdent id, _) ->
          let* type_variable = fresh_var in
          let env = TypeEnv.extend env id (VarSet.empty, type_variable) in
          let* subst, ty = infer env head in
-         let* ty = unify_ann an_ty ty in
          let* subst' = unify (Subst.apply subst type_variable) ty in
          let* final_subst = Subst.compose subst' subst in
          let env = TypeEnv.apply env final_subst in
@@ -473,8 +464,9 @@ let infer_program (prog : Ast.definition list) =
          let* tail = helper env tail in
          return tail
        | Ast.DLet (_, non_id_wild, _) ->
-         failwith
-           (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id_wild))
+         fail
+           (`TODO
+             (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id_wild)))
     | [] -> return []
   in
   let env = TypeEnv.default in
@@ -680,32 +672,32 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let (x:int) = 42 |};
+  test {| let (x: int) = 42 |};
   [%expect {| int |}]
 ;;
 
 let%expect_test _ =
-  test {| let (x:int) = true |};
+  test {| let (x: int) = true |};
   [%expect {| Unification failed on int and bool |}]
 ;;
 
 let%expect_test _ =
-  test {| let (id:int->int) = fun (x:int) -> x |};
+  test {| let (id: int->int) = fun (x: int) -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test {| let (id:int->int) = fun x -> x |};
+  test {| let (id: int->int) = fun x -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test {| let id = fun (x:int) -> x |};
+  test {| let id = fun (x: int) -> x |};
   [%expect {| int -> int |}]
 ;;
 
 let%expect_test _ =
-  test {| let (const:int) = (fun x -> 42) () |};
+  test {| let (const: int) = (fun x -> 42) () |};
   [%expect {| int |}]
 ;;
 
@@ -727,7 +719,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|let choose = fun (l:bool) -> fun r -> fun b -> if b then l else r|};
+  test {|let choose = fun (l: bool) -> fun r -> fun b -> if b then l else r|};
   [%expect {| bool -> bool -> bool -> bool |}]
 ;;
 
@@ -765,10 +757,10 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {| 
-      let rec fib = fun (n:int) -> match n with
+      let rec fib = fun (n: int) -> match n with
       | 0 -> 0
       | 1 -> 1
       | _ -> (fib (n - 1)) + (fib (n - 2))
   |};
-  [%expect {| |}]
+  [%expect {| int -> int |}]
 ;;

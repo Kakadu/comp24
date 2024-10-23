@@ -85,9 +85,9 @@ type_ann:
 pattern: 
 | c = constant { PConst(c) }
 | WILDCARD { PWild }
-| id = identifier { PIdent(id, None) }
-| LPAREN op = op_binary RPAREN { PIdent(op, None) }
-| LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
+| id = identifier { PIdent(id) }
+| LPAREN op = op_binary RPAREN { PIdent(op) }
+| LPAREN pat = pattern COLON ty = type_ann RPAREN { PAnn(pat, ty) }
 | LPAREN es = separated_nonempty_list(COMMA, pattern) RPAREN { PTuple(es) }
 | LBRACK es = separated_nonempty_list(SEMI, pattern) RBRACK { PList(es) }
 | l = pattern CONS r = pattern { PCons(l, r) }

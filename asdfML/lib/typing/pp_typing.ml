@@ -40,7 +40,7 @@ let pp_error fmt : error -> _ = function
   | `No_variable s -> fprintf fmt "Undefined variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf fmt "Unification failed on %a and %a" pp_typ l pp_typ r
-  | `TODO s -> fprintf fmt "TODO %s" s
+  | `TODO s -> fprintf fmt "TODO: %s" s
 ;;
 
 module VarSet = struct

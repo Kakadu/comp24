@@ -22,11 +22,11 @@ and pp_type_ann fmt = function
 and pp_pattern fmt = function
   | PConst c -> fprintf fmt "%a" pp_const c
   | PWild -> fprintf fmt "_"
-  | PIdent (id, None) -> fprintf fmt "%s" id
-  | PIdent (id, Some ty) -> fprintf fmt "(%s:%a)" id pp_type_ann ty
+  | PIdent id -> fprintf fmt "%s" id
   | PTuple xs -> pp_list ~sep:", " fmt pp_pattern xs
   | PList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_pattern xs
   | PCons (l, r) -> fprintf fmt "%a :: %a" pp_pattern l pp_pattern r
+  | PAnn (pat, ty) -> fprintf fmt "(%a: %a)" pp_pattern pat pp_type_ann ty
 
 and pp_expr fmt = function
   | EConst c -> fprintf fmt "%a" pp_const c
