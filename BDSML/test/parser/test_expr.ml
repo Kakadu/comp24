@@ -227,6 +227,29 @@ let%expect_test "test by Andrey Sukharev" =
     |}]
 ;;
 
+let%expect_test "test tuple" =
+  test_expr "1, 2";
+  [%expect {| (Exp_tuple [(Exp_constant (Const_int 1)); (Exp_constant (Const_int 2))]) |}]
+;;
+
+let%expect_test "test tuple parents" =
+  test_expr "(1, 2)";
+  [%expect {| (Exp_tuple [(Exp_constant (Const_int 1)); (Exp_constant (Const_int 2))]) |}]
+;;
+
+let%expect_test "test tuple in tuple" =
+  test_expr "((1, 3), 2+4)";
+  [%expect
+    {|
+    (Exp_tuple
+       [(Exp_tuple [(Exp_constant (Const_int 1)); (Exp_constant (Const_int 3))]);
+         (Exp_apply ((Exp_ident "+"),
+            (Exp_tuple
+               [(Exp_constant (Const_int 2)); (Exp_constant (Const_int 4))])
+            ))
+         ]) |}]
+;;
+
 let%expect_test "test empty constructor" =
   test_expr "BDSML";
   [%expect {| (Exp_construct ("BDSML", None)) |}]
@@ -235,4 +258,23 @@ let%expect_test "test empty constructor" =
 let%expect_test "test trivial constructor" =
   test_expr "BDSML 1";
   [%expect {| (Exp_construct ("BDSML", (Some (Exp_constant (Const_int 1))))) |}]
+;;
+
+let%expect_test "test tuple constructor" =
+  test_expr "BDSML (1, 2)";
+  [%expect
+    {|
+    (Exp_construct ("BDSML",
+       (Some (Exp_tuple
+                [(Exp_constant (Const_int 1)); (Exp_constant (Const_int 2))]))
+       )) |}]
+;;
+
+let%expect_test "test tuple constructor" =
+  test_expr "BDSML 1, 2";
+  [%expect
+    {|
+    (Exp_tuple
+       [(Exp_construct ("BDSML", (Some (Exp_constant (Const_int 1)))));
+         (Exp_constant (Const_int 2))]) |}]
 ;;

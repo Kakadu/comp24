@@ -93,6 +93,14 @@ let constructor prev =
   Exp_construct (ident, arg)
 ;;
 
+let tuple prev =
+  sep_by1 (ws *> char ',') prev
+  >>= function
+  | _ :: _ :: _ as l -> return @@ Exp_tuple l
+  | [ e ] -> return e
+  | _ -> fail ""
+;;
+
 let choice_or_prev parsers_list prev =
   choice @@ List.map (fun el -> el prev) parsers_list <|> prev
 ;;
@@ -113,6 +121,7 @@ let operators =
     @@ choice [ parse_infix_with_prefixes [ "="; "<"; ">"; "|"; "&"; "$" ]; string "!=" ]
   ; infix_right_op @@ choice [ string "&"; string "&&" ]
   ; infix_right_op @@ choice [ string "or"; string "||" ]
+  ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
   ; infix_right_op @@ string ";"
   ]
