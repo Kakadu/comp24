@@ -181,6 +181,15 @@ end = struct
       let* subs1 = unify l1 l2 in
       let* subs2 = unify (apply subs1 r1) (apply subs1 r2) in
       compose subs1 subs2
+    | TTuple t1, TTuple t2 ->
+      (match
+         List.fold2 t1 t2 ~init:(return empty) ~f:(fun acc l r ->
+           let* acc = acc in
+           let* sub = unify l r in
+           compose acc sub)
+       with
+       | List.Or_unequal_lengths.Ok x -> x
+       | List.Or_unequal_lengths.Unequal_lengths -> fail (`Unification_failed (l, r)))
     | _ -> fail (`Unification_failed (l, r))
 
   and extend k v s =
@@ -258,9 +267,9 @@ module TypeEnv = struct
   ;;
 
   let default =
-    List.fold bin_op_list ~init:empty ~f:(fun acc (op, ty) ->
-      let fv = Type.free_vars ty in
-      extend acc op (fv, ty))
+    List.fold bin_op_list ~init:empty ~f:(fun env (op, ty) ->
+      let fv = VarSet.diff (Type.free_vars ty) (free_vars env) in
+      extend env op (fv, ty))
   ;;
 
   let pp fmt (xs : t) =
@@ -374,10 +383,19 @@ let infer =
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
     | ELetIn (DLet (_, non_id, _), _) ->
-      fail (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
-    | ETuple ts -> fail (`TODO "unimplemented")
-    | EList ts -> 
-      (* let* s1, t1 = infer_expr env ts in *)
+      fail
+        (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
+    | ETuple xs ->
+      List.fold_right
+        xs
+        ~init:(return (Subst.empty, []))
+        ~f:(fun x acc ->
+          let* acc_sub, acc_t = acc in
+          let* s, t = infer_expr env x in
+          let* s' = Subst.compose acc_sub s in
+          return (s', t :: acc_t))
+      >>| fun (s, t) -> s, TTuple (List.map t ~f:(Subst.apply s))
+    | EList xs ->
       fail (`TODO "unimplemented")
     | EMatch (p, pe) -> fail (`TODO "unimplemented")
     (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> fail (`TODO "") *)
@@ -462,8 +480,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let x = (1, 2, 3) |};
-  [%expect {| () |}]
+  test {| let x = (1, true, fun x -> x, (1, 2)) |};
+  [%expect {| (int, bool, 'a -> 'a, (int, int)) |}]
 ;;
 
 let%expect_test _ =
