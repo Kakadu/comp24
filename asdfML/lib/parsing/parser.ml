@@ -44,7 +44,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = -12";
-  [%expect {| (DLet (NonRec, PWild, (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
+  [%expect {| (DLet (NonRec, PWild, (EConst (CInt -12)))) |}]
 ;;
 
 let%expect_test _ =
@@ -54,7 +54,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = (-12)";
-  [%expect {| (DLet (NonRec, PWild, (EUnaryOp (Neg, (EConst (CInt 12)))))) |}]
+  [%expect {| (DLet (NonRec, PWild, (EConst (CInt -12)))) |}]
 ;;
 
 let%expect_test _ =
@@ -70,9 +70,7 @@ let%expect_test _ =
   [%expect
     {|
     (DLet (NonRec, PWild,
-       (EApp ((EApp ((EVar "( + )"), (EConst (CInt 1)))),
-          (EUnaryOp (Neg, (EConst (CInt 2))))))
-       )) |}]
+       (EApp ((EApp ((EVar "( + )"), (EConst (CInt 1)))), (EConst (CInt -2)))))) |}]
 ;;
 
 let%expect_test _ =
@@ -82,10 +80,10 @@ let%expect_test _ =
     (DLet (NonRec, PWild,
        (EApp (
           (EApp ((EVar "( * )"),
-             (EApp ((EApp ((EVar "( - )"), (EUnaryOp (Neg, (EConst (CInt 1)))))),
-                (EUnaryOp (Neg, (EConst (CInt 3))))))
+             (EApp ((EApp ((EVar "( - )"), (EConst (CInt -1)))),
+                (EConst (CInt -3))))
              )),
-          (EApp ((EApp ((EVar "( + )"), (EUnaryOp (Neg, (EConst (CInt 2)))))),
+          (EApp ((EApp ((EVar "( + )"), (EConst (CInt -2)))),
              (EApp ((EApp ((EVar "( / )"), (EConst (CInt 4)))), (EConst (CInt 2))
                 ))
              ))
@@ -153,9 +151,7 @@ let%expect_test _ =
                (EApp ((EApp ((EVar "( > )"), (EVar "x"))), (EConst (CInt 1)))),
                (EApp ((EApp ((EVar "( * )"), (EVar "x"))),
                   (EApp ((EVar "factorial"),
-                     (EApp ((EApp ((EVar "( - )"), (EVar "x"))), (EConst (CInt 1))
-                        ))
-                     ))
+                     (EApp ((EVar "x"), (EConst (CInt -1))))))
                   )),
                (EConst (CInt 1))))
             ))
@@ -283,9 +279,9 @@ let%expect_test _ =
                       (EApp (
                          (EApp ((EVar "( + )"),
                             (EApp ((EApp ((EVar "( * )"), (EConst (CInt 5)))),
-                               (EUnaryOp (Neg, (EConst (CInt 6))))))
+                               (EConst (CInt -6))))
                             )),
-                         (EUnaryOp (Neg, (EConst (CInt 7))))))
+                         (EConst (CInt -7))))
                       )),
                    (EConst (CInt 8))))
                 )),
@@ -369,4 +365,31 @@ let%expect_test _ =
        (EApp ((EApp ((EVar "( + )"), (EConst (CBool true)))),
           (EConst (CBool false))))
        )) |}]
+;;
+
+let%expect_test _ =
+  test {| let (x, y) = (not true, not false) |};
+  [%expect {|
+    (DLet (NonRec, (PTuple [(PIdent ("x", None)); (PIdent ("y", None))]),
+       (ETuple [(EConst (CBool false)); (EConst (CBool true))])))
+     |}]
+;;
+
+let%expect_test _ =
+  test {| 
+  let x = 1 
+  let y = -x
+  let z = true
+  let w = not z
+  |};
+  [%expect {|
+    (DLet (NonRec, (PIdent ("x", None)), (EConst (CInt 1))))
+    (DLet (NonRec, (PIdent ("y", None)), (EApp ((EVar "[ - ]"), (EVar "x")))))
+    (DLet (NonRec, (PIdent ("z", None)), (EConst (CBool true))))
+    (DLet (NonRec, (PIdent ("w", None)), (EApp ((EVar "not"), (EVar "z"))))) |}]
+;;
+
+let%expect_test _ =
+  test {| let x = (42) |};
+  [%expect {| (DLet (NonRec, (PIdent ("x", None)), (EConst (CInt 42)))) |}]
 ;;

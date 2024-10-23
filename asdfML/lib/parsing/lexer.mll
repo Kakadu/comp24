@@ -10,14 +10,11 @@ let digit_nz = ['1'-'9']
 let alpha = ['a'-'z' 'A'-'Z']
 
 let id = (alpha | '_') (alpha | digit | '_')* 
-let int = digit*  
-let bool = "true" | "false"
+let int = "-"? digit*  
+let bool = "not "? ("true" | "false")
 
 
 rule token = parse
-  | whitespace { token lexbuf }
-  | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-  | bool { BOOL (bool_of_string (Lexing.lexeme lexbuf)) }
   | "()" { UNIT }
   | "_" { WILDCARD }
   | "let rec" { LETREC }
@@ -44,9 +41,18 @@ rule token = parse
   | "<=" { LE }
   | "&&" { AND }
   | "||" { OR }
-  | "not" { NOT }
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | whitespace { token lexbuf }
+  | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | bool { 
+    BOOL (String.split_on_char ' ' (Lexing.lexeme lexbuf) |> 
+    function
+    | [ "not"; b ] -> not (bool_of_string b)
+    | [ b ] -> bool_of_string b
+    | _ -> failwith "") 
+  }
+  (* | "not" { NOT } *)
   | id { IDENT (Lexing.lexeme lexbuf) }
   | "::" { CONS }
   | ":" { COLON }

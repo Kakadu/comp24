@@ -38,6 +38,8 @@
 %left PLUS MINUS 
 %left MUL DIV
 
+%right AND OR
+
 %type <program> program
 
 %start program
@@ -53,8 +55,8 @@ definition:
 expr: 
 | c = constant { EConst(c) }
 | v = identifier { EVar(v) }
-| e = expr_unary { e }
 | e = expr_binary { e }
+| e = expr_unary { e }
 | app = application { app }
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
 | FUN pat = pattern ARROW body = expr { EFun(pat, body) }
@@ -113,12 +115,12 @@ expr_binary:
 | AND { "( && )" }
 | OR { "( || )" }
 
-expr_unary:
-| op = op_unary arg = constant {EUnaryOp (op, EConst(arg))}
+expr_unary: 
+| op = op_unary e = expr { EApp(EVar(op), e) }
 
-op_unary: 
-| MINUS { Neg }
-| NOT { Not }
+%inline op_unary:
+| MINUS { "[ - ]" }
+// | NOT { "[ not ]" }
 
 constant: 
 | i = INT { CInt i }

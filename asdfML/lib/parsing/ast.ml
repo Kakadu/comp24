@@ -49,7 +49,6 @@ type pattern =
 type expr =
   | EConst of constant (** 42, true, ()*)
   | EVar of id (** x *)
-  | EUnaryOp of unary_operator * expr (** -x *)
   | EApp of expr * expr (** f x *)
   | EIfElse of expr * expr * expr (** if x then y else z *)
   | EFun of pattern * expr (** fun x -> y *)
@@ -68,7 +67,6 @@ let p_ident i ty = PIdent (i, ty)
 let e_var v = EVar v
 let e_constant c = EConst c
 let e_var v = EVar v
-let e_unary_op op e = EUnaryOp (op, e)
 let e_app e1 e2 = EApp (e1, e2)
 let e_if_else c t e = EIfElse (c, t, e)
 let e_fun p e = EFun (p, e)

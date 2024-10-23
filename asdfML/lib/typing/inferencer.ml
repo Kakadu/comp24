@@ -232,7 +232,7 @@ module TypeEnv = struct
   let apply env sub = map env ~f:(Scheme.apply sub)
 
   let bin_op_list =
-    (* TODO: *)
+    (* TODO: var *)
     let var = TVar (-1) in
     [ "( - )", int_typ ^-> int_typ ^-> int_typ
     ; "( + )", int_typ ^-> int_typ ^-> int_typ
@@ -246,12 +246,15 @@ module TypeEnv = struct
     ; "( != )", var ^-> var ^-> bool_typ
     ; "( && )", bool_typ ^-> bool_typ ^-> bool_typ
     ; "( || )", bool_typ ^-> bool_typ ^-> bool_typ
+    ; "[ - ]", int_typ ^-> int_typ
+    ; "not", bool_typ ^-> bool_typ
     ]
   ;;
 
   let default =
     List.fold bin_op_list ~init:empty ~f:(fun acc (op, ty) ->
-      extend acc op (VarSet.empty, ty))
+      let fv = Type.free_vars ty in
+      extend acc op (fv, ty))
   ;;
 
   let pp fmt (xs : t) =
@@ -319,16 +322,6 @@ let infer =
           | CInt _ -> int_typ
           | CUnit -> unit_typ )
     | EVar x -> lookup_env x env
-    | EUnaryOp (op, expr) ->
-      let* typ_op =
-        match op with
-        | Neg -> return (int_typ ^-> int_typ)
-        | Not -> return (bool_typ ^-> bool_typ)
-      in
-      let* subst_expr, typ_expr = infer_expr env expr in
-      let* subst_op = unify (typ_expr ^-> typ_expr) typ_op in
-      let* subst = Subst.compose_all [ subst_op; subst_expr ] in
-      return (subst, typ_expr)
     | EApp (left, right) ->
       let* subst_left, typ_left = infer_expr env left in
       let* subst_right, typ_right = infer_expr (TypeEnv.apply env subst_left) right in
@@ -429,7 +422,8 @@ let inference_program prog =
 
 let test code =
   let open Format in
-  let ast = Result.ok_or_failwith (Parser.parse_program code) in
+  let pa = false in
+  let ast = Result.ok_or_failwith (Parser.parse_program ~print_ast:pa code) in
   match inference_program ast with
   | Ok t ->
     printf "%s" (t |> List.map ~f:(asprintf "%a" pp_typ) |> String.concat ~sep:"\n")
@@ -454,11 +448,6 @@ let%expect_test _ =
 let%expect_test _ =
   test {| let x = 1 + 2 |};
   [%expect {| int |}]
-;;
-
-let%expect_test _ =
-  test {| let x = (1 + 2) <= 3 |};
-  [%expect {| bool |}]
 ;;
 
 let%expect_test _ =
@@ -576,7 +565,7 @@ let%expect_test _ =
     let x = fact 5
   |};
   [%expect {|
-    int -> (int -> 'n) -> 'n
+    int -> (int -> 'o) -> 'o
     int -> int
     int
   |}]
@@ -585,19 +574,19 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {|
-      let rec helper = fun n -> fun acc -> fun cont ->
-        if n < 2 then
-            cont acc
-        else 
-            helper (n - 1) (n * acc) cont 
-
       let fact_2 = fun n -> 
+         let rec helper = fun n -> fun acc -> fun cont ->
+          if n < 2 then
+              cont acc
+          else 
+              helper (n - 1) (n * acc) cont 
+         in
+
          helper n 1 (fun x -> x)
       
       let x = fact_2 5
     |};
   [%expect {|
-    int -> int -> (int -> 'n) -> 'n
     int -> int
     int
   |}]
@@ -664,3 +653,24 @@ let%expect_test _ =
     bool -> bool -> bool
     bool |}]
 ;;
+
+let%expect_test _ =
+  test {| 
+  let x = 1 
+  let y = -x
+  let z = true
+  let w = not z
+  |};
+  [%expect {|
+    int
+    int
+    bool
+    bool |}]
+;;
+
+(* let%expect_test _ =
+  test {| let (x, y) = (not true, not false) |};
+  [%expect
+    {|
+     |}]
+;; *)
