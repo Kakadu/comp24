@@ -96,8 +96,41 @@ let%expect_test "test unary prefix op" =
 
 let%expect_test "test several unary prefix op" =
   test_pattern "! ! 4";
-  [%expect {|
+  [%expect
+    {|
     (Exp_apply ((Exp_ident "!"),
        (Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4))))))
+    |}]
+;;
+
+let%expect_test "test parents priority" =
+  test_pattern "4 + (5 + 6)";
+  [%expect
+    {|
+    (Exp_apply ((Exp_ident "+"),
+       (Exp_tuple
+          [(Exp_constant (Const_int 4));
+            (Exp_apply ((Exp_ident "+"),
+               (Exp_tuple
+                  [(Exp_constant (Const_int 5)); (Exp_constant (Const_int 6))])
+               ))
+            ])
+       ))
+    |}]
+;;
+
+let%expect_test "test parents priority different operators" =
+  test_pattern "4 * (5 + 6)";
+  [%expect
+    {|
+    (Exp_apply ((Exp_ident "*"),
+       (Exp_tuple
+          [(Exp_constant (Const_int 4));
+            (Exp_apply ((Exp_ident "+"),
+               (Exp_tuple
+                  [(Exp_constant (Const_int 5)); (Exp_constant (Const_int 6))])
+               ))
+            ])
+       ))
     |}]
 ;;
