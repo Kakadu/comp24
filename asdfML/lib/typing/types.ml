@@ -23,9 +23,20 @@ type error =
   | `TODO of string
   ]
 
+let int_typ = TGround TInt
+let bool_typ = TGround TBool
+let unit_typ = TGround TUnit
 let arrow l r = TArrow (l, r)
 let var x = TVar x
-let ( => ) = arrow
+let ( ^-> ) = arrow
 
 type var_id_set = (var_id, Int.comparator_witness) Set.t
 type scheme = var_id_set * ty
+
+let rec an_ty_to_ty = function
+  | Ast.TAInt -> int_typ
+  | Ast.TABool -> bool_typ
+  | Ast.TAUnit -> unit_typ
+  | Ast.TAFun (l, r) -> TArrow (an_ty_to_ty l, an_ty_to_ty r)
+  | Ast.TATuple xs -> TTuple (List.map xs an_ty_to_ty)
+;;

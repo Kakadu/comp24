@@ -5,17 +5,6 @@ open Pp_typing
 open Base
 open Utils
 
-let int_typ = TGround TInt
-let bool_typ = TGround TBool
-let unit_typ = TGround TUnit
-
-let rec an_ty_to_ty = function
-  | Ast.TAInt -> int_typ
-  | Ast.TABool -> bool_typ
-  | Ast.TAUnit -> unit_typ
-  | Ast.TAFun (l, r) -> TArrow (an_ty_to_ty l, an_ty_to_ty r)
-;;
-
 module R : sig
   type 'a t
 
@@ -242,6 +231,29 @@ module TypeEnv = struct
   let extend env id scheme = set env ~key:id ~data:scheme
   let apply env sub = map env ~f:(Scheme.apply sub)
 
+  let bin_op_list =
+    (* TODO: *)
+    let var = TVar (-1) in
+    [ "( - )", int_typ ^-> int_typ ^-> int_typ
+    ; "( + )", int_typ ^-> int_typ ^-> int_typ
+    ; "( / )", int_typ ^-> int_typ ^-> int_typ
+    ; "( * )", int_typ ^-> int_typ ^-> int_typ
+    ; "( > )", var ^-> var ^-> bool_typ
+    ; "( < )", var ^-> var ^-> bool_typ
+    ; "( >= )", var ^-> var ^-> bool_typ
+    ; "( <= )", var ^-> var ^-> bool_typ
+    ; "( == )", var ^-> var ^-> bool_typ
+    ; "( != )", var ^-> var ^-> bool_typ
+    ; "( && )", bool_typ ^-> bool_typ ^-> bool_typ
+    ; "( || )", bool_typ ^-> bool_typ ^-> bool_typ
+    ]
+  ;;
+
+  let default =
+    List.fold bin_op_list ~init:empty ~f:(fun acc (op, ty) ->
+      extend acc op (VarSet.empty, ty))
+  ;;
+
   let pp fmt (xs : t) =
     Format.fprintf fmt "{| ";
     Map.iteri xs ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a; " n pp_scheme s);
@@ -310,27 +322,27 @@ let infer =
     | EUnaryOp (op, expr) ->
       let* typ_op =
         match op with
-        | Neg -> return (int_typ => int_typ)
-        | Not -> return (bool_typ => bool_typ)
+        | Neg -> return (int_typ ^-> int_typ)
+        | Not -> return (bool_typ ^-> bool_typ)
       in
       let* subst_expr, typ_expr = infer_expr env expr in
-      let* subst_op = unify (typ_expr => typ_expr) typ_op in
+      let* subst_op = unify (typ_expr ^-> typ_expr) typ_op in
       let* subst = Subst.compose_all [ subst_op; subst_expr ] in
       return (subst, typ_expr)
     | EBinaryOp (op, left, right) ->
       let* typ_op =
         match op with
-        | Add | Sub | Mul | Div -> return (int_typ => int_typ => int_typ)
-        | Gt | Lt | Ge | Le -> return (int_typ => int_typ => bool_typ)
-        | And | Or -> return (bool_typ => bool_typ => bool_typ)
+        | Add | Sub | Mul | Div -> return (int_typ ^-> int_typ ^-> int_typ)
+        | Gt | Lt | Ge | Le -> return (int_typ ^-> int_typ ^-> bool_typ)
+        | And | Or -> return (bool_typ ^-> bool_typ ^-> bool_typ)
         | Eq | Ne ->
           let* tvar = fresh_var in
-          return (tvar => tvar => bool_typ)
+          return (tvar ^-> tvar ^-> bool_typ)
       in
       let* subst_left, typ_left = infer_expr env left in
       let* subst_right, typ_right = infer_expr env right in
       let* typ = fresh_var in
-      let* subst_op = unify (typ_left => typ_right => typ) typ_op in
+      let* subst_op = unify (typ_left ^-> typ_right ^-> typ) typ_op in
       let* subst = Subst.compose_all [ subst_op; subst_left; subst_right ] in
       let typ = Subst.apply subst typ in
       return (subst, typ)
@@ -422,7 +434,7 @@ let infer_program (prog : Ast.definition list) =
            (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id_wild))
     | [] -> return []
   in
-  let env = TypeEnv.empty in
+  let env = TypeEnv.default in
   helper env prog
 ;;
 
@@ -581,7 +593,7 @@ let%expect_test _ =
     let x = fact 5
   |};
   [%expect {|
-    int -> (int -> 'k) -> 'k
+    int -> (int -> 'n) -> 'n
     int -> int
     int
   |}]
@@ -602,7 +614,7 @@ let%expect_test _ =
       let x = fact_2 5
     |};
   [%expect {|
-    int -> int -> (int -> 'k) -> 'k
+    int -> int -> (int -> 'n) -> 'n
     int -> int
     int
   |}]
@@ -658,4 +670,14 @@ let%expect_test _ =
 let%expect_test _ =
   test {|let choose = fun (l:bool) -> fun r -> fun b -> if b then l else r|};
   [%expect {| bool -> bool -> bool -> bool |}]
+;;
+
+let%expect_test _ =
+  test {|
+  let (+) = fun a -> fun b -> a || b 
+  let a = true + false
+  |};
+  [%expect {|
+    bool -> bool -> bool
+    bool |}]
 ;;
