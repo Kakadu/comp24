@@ -130,7 +130,8 @@ let annot =
 (*------------------------------ Patterns ------------------------------------*)
 
 let pconst c = PConst c
-let pvar x a = PVar (x, a)
+let pvar x = PVar x
+
 let pcons p1 p2 = PCons (p1, p2)
 let ptuple ps = PTuple ps
 let ppconst = const >>| pconst
@@ -155,28 +156,34 @@ let opname_ =
   return op
 ;;
 
-let ppvar =
-  let pvar =
-    let* name = varname in
-    return (PVar (name, None))
-  in
-  let pvar_with_type =
-    let pvar name annot = PVar (name, annot) in
-    lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
-  in
-  let opname =
-    let* op = opname_ in
-    return (PVar (op, None))
-  in
-  choice [ pvar_with_type; pvar; opname ]
-;;
+let ppvar = varname >>| pvar
+(* let ppvar =
+   let pvar =
+   let* name = varname in
+   return (PVar (name, None))
+   in
+   let pvar_with_type =
+   let pvar name annot = PVar (name, annot) in
+   lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
+   in
+   let opname =
+   let* op = opname_ in
+   return (PVar (op, None))
+   in
+   choice [ pvar_with_type; pvar; opname ]
+   ;; *)
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
 
 let pattern =
+  let pattern_with_type ppat =
+    let* pat = ws *> lp *> ppat in
+    let* constr = ws *> token ":" *> ws *> annot <* ws <* rp in
+    return (PConstraint (pat, constr))
+  in
   fix (fun pat ->
-    let term = choice [ ppconst; ppvar; ppany; pplist pat; parens pat ] in
+    let term = choice [ ppconst; ppvar; ppany; pplist pat; pattern_with_type pat; parens pat ] in
     let cons = chainr1 term (dcol *> return pcons) in
     let tuple = pptuple cons <|> cons in
     tuple)

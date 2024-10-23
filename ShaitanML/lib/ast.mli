@@ -33,9 +33,10 @@ type type_annot =
 type pattern =
   | PAny (** _ *)
   | PConst of const (** 123, true, "string" *)
-  | PVar of id * type_annot option (** x *)
+  | PVar of id (** x *)
   | PTuple of pattern list (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
+  | PConstraint of pattern * type_annot
 [@@deriving show { with_path = false }]
 
 type expr =
