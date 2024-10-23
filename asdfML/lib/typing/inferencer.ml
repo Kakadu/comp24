@@ -190,6 +190,7 @@ end = struct
        with
        | List.Or_unequal_lengths.Ok x -> x
        | List.Or_unequal_lengths.Unequal_lengths -> fail (`Unification_failed (l, r)))
+    | TList t1, TList t2 -> unify t1 t2
     | _ -> fail (`Unification_failed (l, r))
 
   and extend k v s =
@@ -396,7 +397,18 @@ let infer =
           return (s', t :: acc_t))
       >>| fun (s, t) -> s, TTuple (List.map t ~f:(Subst.apply s))
     | EList xs ->
-      fail (`TODO "unimplemented")
+      (match xs with
+       | [] ->
+         let* fv = fresh_var in
+         return (Subst.empty, TList fv)
+       | hd :: tl ->
+         List.fold tl ~init:(infer_expr env hd) ~f:(fun acc x ->
+           let* acc_sub, acc_t = acc in
+           let* s, t = infer_expr env x in
+           let* s' = unify acc_t t in
+           let* sub = Subst.compose_all [ acc_sub; s; s' ] in
+           return (sub, acc_t)))
+      >>| fun (s, t) -> s, TList t
     | EMatch (p, pe) -> fail (`TODO "unimplemented")
     (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> fail (`TODO "") *)
     | _ -> fail (`TODO "unimplemented")
@@ -475,8 +487,18 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let x = [1;2;3] |};
-  [%expect {| () |}]
+  test {| let x = [1; 2; 3] |};
+  [%expect {| int list |}]
+;;
+
+let%expect_test _ =
+  test {| let x = [true; 2; 3] |};
+  [%expect {| Unification failed on bool and int |}]
+;;
+
+let%expect_test _ =
+  test {| let x = [[1]; [2]; [3]] |};
+  [%expect {| int list list |}]
 ;;
 
 let%expect_test _ =
