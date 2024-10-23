@@ -11,7 +11,8 @@ let%expect_test "test just sum" =
   [%expect
     {|
     (Exp_apply ((Exp_ident "+"),
-       (Exp_tuple [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))]))) |}]
+       (Exp_tuple [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))])))
+    |}]
 ;;
 
 let%expect_test "test sum priority" =
@@ -25,7 +26,8 @@ let%expect_test "test sum priority" =
                  [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))])
               ));
             (Exp_constant (Const_int 6))])
-       )) |}]
+       ))
+    |}]
 ;;
 
 let%expect_test "test sum subs priority" =
@@ -61,7 +63,7 @@ let%expect_test "test sum mult priority" =
                ))
             ])
        ))
-   |}]
+    |}]
 ;;
 
 let%expect_test "test my operator" =
@@ -70,7 +72,7 @@ let%expect_test "test my operator" =
     {|
     (Exp_apply ((Exp_ident "+=="),
        (Exp_tuple [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))])))
-   |}]
+    |}]
 ;;
 
 let%expect_test "test right associativity" =
@@ -86,12 +88,12 @@ let%expect_test "test right associativity" =
                ))
             ])
        ))
-   |}]
+    |}]
 ;;
 
 let%expect_test "test unary prefix op" =
   test_pattern "! 4";
-  [%expect {| (Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4)))) |}]
+  [%expect {| (Exp_apply ((Exp_ident "!"), (Exp_tuple [(Exp_constant (Const_int 4))]))) |}]
 ;;
 
 let%expect_test "test several unary prefix op" =
@@ -99,7 +101,8 @@ let%expect_test "test several unary prefix op" =
   [%expect
     {|
     (Exp_apply ((Exp_ident "!"),
-       (Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4))))))
+       (Exp_tuple [(Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4))))])
+       ))
     |}]
 ;;
 
@@ -131,6 +134,33 @@ let%expect_test "test parents priority different operators" =
                   [(Exp_constant (Const_int 5)); (Exp_constant (Const_int 6))])
                ))
             ])
+       ))
+    |}]
+;;
+
+let%expect_test "test application" =
+  test_pattern "camel by camel";
+  [%expect {|
+    (Exp_apply ((Exp_ident "camel"),
+       (Exp_tuple [(Exp_ident "by"); (Exp_ident "camel")])))
+    |}]
+;;
+
+let%expect_test "test prefix two args application" =
+  test_pattern "! 1 2";
+  [%expect {|
+    (Exp_apply ((Exp_ident "!"),
+       (Exp_tuple [(Exp_constant (Const_int 1)); (Exp_constant (Const_int 2))])))
+    |}]
+;;
+
+let%expect_test "test prefix two args application" =
+  test_pattern "! ! 1 2 4";
+  [%expect {|
+    (Exp_apply ((Exp_ident "!"),
+       (Exp_tuple
+          [(Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 1))));
+            (Exp_constant (Const_int 2)); (Exp_constant (Const_int 4))])
        ))
     |}]
 ;;
