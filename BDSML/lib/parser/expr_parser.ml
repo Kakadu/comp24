@@ -87,16 +87,23 @@ let parse_const =
   Exp_constant const
 ;;
 
+let rec unary_chain (func : string t) arg_parser =
+  let* parsed_func = ws *> func in
+  let+ arg = unary_chain func arg_parser <|> arg_parser in
+  let ident = Exp_ident parsed_func in
+  Exp_apply (ident, arg)
+;;
+
 let parse_expr =
-  let parse_op (op : string t) =
+  let parse_bop (op : string t) =
     let+ parsed = ws *> op in
     let ident = Exp_ident parsed in
     fun a b -> Exp_apply (ident, Exp_tuple [ a; b ])
   in
   let op_iter prev = function
-    | Infix Right, el -> chainr1 prev (parse_op el)
-    | Infix Left, el -> chainl1 prev (parse_op el)
-    | Prefix, _ -> prev (* TODO *)
+    | Infix Right, el -> chainr1 prev (parse_bop el)
+    | Infix Left, el -> chainl1 prev (parse_bop el)
+    | Prefix, el -> unary_chain el prev <|> prev
   in
   let rec parse_exp_ prev = function
     | h :: tl -> parse_exp_ (op_iter prev h) tl
