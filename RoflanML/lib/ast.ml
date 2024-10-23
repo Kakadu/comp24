@@ -5,20 +5,6 @@
 (** Identifiers for variables and functions names *)
 type id = string [@@deriving show { with_path = false }]
 
-(** Binary operators *)
-type binop =
-  | Add (** [+] operator *)
-  | Sub (** [-] operator *)
-  | Div (** [/] operator *)
-  | Mul (** [*] operator *)
-  | Eq (** [=] operator *)
-  | Neq (** [<>] operator *)
-  | Les (** [<] operator *)
-  | Leq (** [<=] operator *)
-  | Gre (** [>] operator *)
-  | Geq (** [>=] operator *)
-[@@deriving show { with_path = false }]
-
 type const =
   | CInt of int (** Integers 1, 2, ... *)
   | CBool of bool (** Boolean true or false *)
@@ -53,7 +39,6 @@ type typed_arg = id * type_id option [@@deriving show { with_path = false }]
 type expr =
   | EConst of const (** Consts *)
   | EVar of id (** Variables with their names *)
-  | EBinop of binop * expr * expr (** e1 binop e2 *)
   | ETuple of expr * expr * expr list
   (** Tuples of 2 or more elements, separated by ',' *)
   | EList of expr list (** Lists [1; 2; 3], ... *)
