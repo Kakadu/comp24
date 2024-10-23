@@ -44,6 +44,8 @@ type pattern =
   | PWild (** _ *)
   | PIdent of id * type_ann option (** x | (x:int) *)
   | PTuple of pattern list
+  | PList of pattern list (** [1, 2, 3] *)
+  | PCons of pattern * pattern (** hd :: tl *)
 [@@deriving show { with_path = false }]
 
 type expr =
@@ -54,6 +56,7 @@ type expr =
   | EFun of pattern * expr (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
   | ETuple of expr list (** (x, fun x -> x, 42) *)
+  | EList of expr list (** [1; 2; 3] *)
   | EMatch of pattern * (pattern * expr) list (***)
 [@@deriving show { with_path = false }]
 
@@ -61,14 +64,3 @@ and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]
-
-let p_ident i = PIdent (i, None)
-let p_ident i ty = PIdent (i, ty)
-let e_var v = EVar v
-let e_constant c = EConst c
-let e_var v = EVar v
-let e_app e1 e2 = EApp (e1, e2)
-let e_if_else c t e = EIfElse (c, t, e)
-let e_fun p e = EFun (p, e)
-let e_let_in d e = ELetIn (d, e)
-let d_let r p e = DLet (r, p, e)

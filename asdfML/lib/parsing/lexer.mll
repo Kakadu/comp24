@@ -43,6 +43,8 @@ rule token = parse
   | "||" { OR }
   | "(" { LPAREN }
   | ")" { RPAREN }
+  | "[" { LBRACK }
+  | "]" { RBRACK }
   | whitespace { token lexbuf }
   | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | bool { 
@@ -58,5 +60,6 @@ rule token = parse
   | ":" { COLON }
   | "," { COMMA }
   | ";;" { SS }
+  | ";" { SEMI }
   | eof { EOF }
   | _ { raise (SyntaxError ("Character not allowed in source text: '" ^ Lexing.lexeme lexbuf ^ "'")) }

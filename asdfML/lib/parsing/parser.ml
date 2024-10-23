@@ -393,3 +393,27 @@ let%expect_test _ =
   test {| let x = (42) |};
   [%expect {| (DLet (NonRec, (PIdent ("x", None)), (EConst (CInt 42)))) |}]
 ;;
+
+let%expect_test _ =
+  test {| 
+  let [x; y; z] = [1; 2; 3] 
+  let w = true :: [not true]
+  let _ = match w with
+  | [true; false] -> true
+  | _ -> false
+  |};
+  [%expect {|
+    (DLet (NonRec,
+       (PList [(PIdent ("x", None)); (PIdent ("y", None)); (PIdent ("z", None))]),
+       (EList [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))])))
+    (DLet (NonRec, (PIdent ("w", None)),
+       (EApp ((EApp ((EVar "( :: )"), (EConst (CBool true)))),
+          (EList [(EConst (CBool false))])))
+       ))
+    (DLet (NonRec, PWild,
+       (EMatch ((PIdent ("w", None)),
+          [((PList [(PConst (CBool true)); (PConst (CBool false))]),
+            (EConst (CBool true))); (PWild, (EConst (CBool false)))]
+          ))
+       )) |}]
+;;

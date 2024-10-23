@@ -20,6 +20,7 @@
 %token NOT
 
 %token LPAREN RPAREN
+%token LBRACK RBRACK
 %token COLON COMMA
 %token CONS
 
@@ -30,7 +31,7 @@
 %token IF THEN ELSE
 %token MATCH WITH BAR
 
-%token SS
+%token SEMI SS
 %token EOF
 
 // Priorities (low to high)
@@ -62,6 +63,7 @@ expr:
 | FUN pat = pattern ARROW body = expr { EFun(pat, body) }
 | def = definition IN body = expr { ELetIn(def, body) }
 | LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
+| LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
 | m = match_ { m }
 | LPAREN e = expr RPAREN { e }
 
@@ -83,6 +85,8 @@ pattern:
 | LPAREN op = op_binary RPAREN { PIdent(op, None) }
 | LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
 | LPAREN es = separated_nonempty_list(COMMA, pattern) RPAREN { PTuple(es) }
+| LBRACK es = separated_nonempty_list(SEMI, pattern) RBRACK { PList(es) }
+| l = pattern CONS r = pattern { PCons(l, r) }
 
 match_:
 | MATCH p = pattern WITH cs = nonempty_list(case) { EMatch(p, cs) }
@@ -114,6 +118,7 @@ expr_binary:
 | LE { "( <= )" }
 | AND { "( && )" }
 | OR { "( || )" }
+| CONS { "( :: )" }
 
 expr_unary: 
 | op = op_unary e = expr { EApp(EVar(op), e) }
