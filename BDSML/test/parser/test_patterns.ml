@@ -142,15 +142,13 @@ let%expect_test "or test" =
   [%expect
     {|
     (Pat_or ((Pat_constant (Const_int 1)),
-       (Pat_construct ("::",
-          (Some (Pat_tuple
-                   [(Pat_constant (Const_int 2));
-                     (Pat_tuple
-                        [(Pat_constant (Const_int 1));
-                          (Pat_constant (Const_int 2));
-                          (Pat_constant (Const_int 3))])
-                     ]))
-          ))
+       (Pat_tuple
+          [(Pat_construct ("::",
+              (Some (Pat_tuple
+                       [(Pat_constant (Const_int 2));
+                         (Pat_constant (Const_int 1))]))
+              ));
+            (Pat_constant (Const_int 2)); (Pat_constant (Const_int 3))])
        ))
     |}]
 ;;
@@ -180,7 +178,8 @@ let%expect_test "var" =
 
 let%expect_test "var hard" =
   test_pattern "[a | b; c]";
-  [%expect {|
+  [%expect
+    {|
     (Pat_construct ("::",
        (Some (Pat_tuple
                 [(Pat_or ((Pat_var "a"), (Pat_var "b")));
@@ -190,4 +189,11 @@ let%expect_test "var hard" =
                      ))
                   ]))
        )) |}]
+;;
+
+let%expect_test "var hard" =
+  test_pattern "->";
+  [%expect
+    {|
+    Error: It cannot be this way |}]
 ;;
