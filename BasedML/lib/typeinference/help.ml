@@ -32,7 +32,6 @@ let const2type : Ast.constant -> Ast.type_name = function
   | Ast.CInt _ -> Ast.TInt
 ;;
 
-
 let rec get_tv_from_tp acc = function
   | Ast.TBool | Ast.TInt -> acc
   | Ast.TPoly x -> SetString.add x acc
