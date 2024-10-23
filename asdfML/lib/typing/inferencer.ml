@@ -144,7 +144,8 @@ end = struct
       "[ %a ]"
       (pp_print_list
          ~pp_sep:(fun fmt () -> fprintf fmt ", ")
-         (fun fmt (k, v) -> fprintf fmt "%d -> %a" k pp_typ v))
+         (* (fun fmt (k, v) -> fprintf fmt "%d -> %a" k pp_typ v)) *)
+           (fun fmt (k, v) -> fprintf fmt "'%s -> %a" (type_id_to_name k) pp_typ v))
       (Map.to_alist subst)
   ;;
 
@@ -328,15 +329,23 @@ let pp_env sub fmt env =
 open Types
 
 let infer =
+  let infer_const = function
+    | Ast.CBool _ -> bool_typ
+    | Ast.CInt _ -> int_typ
+    | Ast.CUnit -> unit_typ
+  in
+  let infer_pattern : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t =
+    fun env -> function
+    | PConst c -> return (env, infer_const c)
+    | PWild -> fresh_var >>| fun v -> env, v
+    | PIdent (x, ta) -> fail (`TODO "")
+    | PTuple xs -> fail (`TODO "")
+    | PList x -> fail (`TODO "")
+    | PCons (l, r) -> fail (`TODO "")
+  in
   let rec (infer_expr : TypeEnv.t -> Ast.expr -> (Subst.t * ty) R.t) =
     fun env -> function
-    | EConst c ->
-      return
-        ( Subst.empty
-        , match c with
-          | CBool _ -> bool_typ
-          | CInt _ -> int_typ
-          | CUnit -> unit_typ )
+    | EConst c -> return (Subst.empty, infer_const c)
     | EVar x -> lookup_env x env
     | EApp (left, right) ->
       let* subst_left, typ_left = infer_expr env left in
@@ -409,9 +418,26 @@ let infer =
            let* sub = Subst.compose_all [ acc_sub; s; s' ] in
            return (sub, acc_t)))
       >>| fun (s, t) -> s, TList t
-    | EMatch (p, pe) -> fail (`TODO "unimplemented")
-    (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> fail (`TODO "") *)
-    | _ -> fail (`TODO "unimplemented")
+    | EMatch (e, pe) ->
+      let* match_sub, match_ty = infer_expr env e in
+      let* fv = fresh_var in
+      let* s', t' =
+        List.fold
+          pe
+          ~init:(return (match_sub, fv))
+          ~f:(fun acc (p, e) ->
+            let* acc_sub, acc_ty = acc in
+            let* pat_env, pat_ty = infer_pattern env p in
+            let* pat_sub = unify match_ty pat_ty in
+            let* exp_sub, exp_ty = infer_expr pat_env e in
+            let* sub'' = unify acc_ty exp_ty in
+            let* final_subst = Subst.compose_all [ acc_sub; pat_sub; exp_sub; sub'' ] in
+            return (final_subst, Subst.apply final_subst acc_ty))
+      in
+      let* final_subst = Subst.compose match_sub s' in
+      return (final_subst, Subst.apply final_subst t')
+    (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> *)
+    | _ -> fail (`TODO "unimplemented (infer_expr)")
   and (infer_def : TypeEnv.t -> Ast.definition -> (Subst.t * ty) R.t) =
     fun env -> function
     | DLet (_, _, expr) ->
@@ -735,3 +761,14 @@ let%expect_test _ =
     {|
      |}]
 ;; *)
+
+let%expect_test _ =
+  test
+    {| 
+      let rec fib = fun (n:int) -> match n with
+      | 0 -> 0
+      | 1 -> 1
+      | _ -> (fib (n - 1)) + (fib (n - 2))
+  |};
+  [%expect {| |}]
+;;

@@ -42,7 +42,7 @@ type expr =
   | ELetIn of definition * expr (** let x = y in z *)
   | ETuple of expr list (** (x, fun x -> x, 42) *)
   | EList of expr list (** [1; 2; 3] *)
-  | EMatch of pattern * (pattern * expr) list (***)
+  | EMatch of expr * (pattern * expr) list (***)
 [@@deriving show { with_path = false }]
 
 and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)

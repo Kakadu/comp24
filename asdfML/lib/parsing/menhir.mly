@@ -93,7 +93,7 @@ pattern:
 | l = pattern CONS r = pattern { PCons(l, r) }
 
 match_:
-| MATCH p = pattern WITH cs = nonempty_list(case) { EMatch(p, cs) }
+| MATCH e = expr WITH cs = nonempty_list(case) { EMatch(e, cs) }
 case:
 | BAR p = pattern ARROW e = expr { (p, e) }
 

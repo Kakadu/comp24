@@ -44,8 +44,8 @@ and pp_expr fmt = function
   | EFun (p, e) -> fprintf fmt "fun %a -> %a" pp_pattern p pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
   | ETuple xs -> pp_list ~sep:", " fmt pp_expr xs
-  | EMatch (p, pe_list) ->
-    fprintf fmt "match %a with\n" pp_pattern p;
+  | EMatch (e, pe_list) ->
+    fprintf fmt "match %a with\n" pp_expr e;
     pp_print_list
       ~pp_sep:Format.pp_print_newline
       (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p pp_expr e)
