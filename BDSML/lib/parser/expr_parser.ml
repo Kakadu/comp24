@@ -82,10 +82,19 @@ let infix_left_op parser prev = chainl1 prev (parse_bop parser)
 let infix_right_op parser prev = chainr1 prev (parse_bop parser)
 
 let application prev =
-  (let+ name = parse_ident
-   and+ args = many1 prev in
-   Exp_apply (name, Exp_tuple args))
-  <|> prev
+  let+ name = parse_ident
+  and+ args = many1 prev in
+  Exp_apply (name, Exp_tuple args)
+;;
+
+let constructor prev =
+  let+ ident = parse_capitalized_ident
+  and+ arg = prev >>| Option.some <|> return None in
+  Exp_construct (ident, arg)
+;;
+
+let choice_or_prev parsers_list prev =
+  choice @@ List.map (fun el -> el prev) parsers_list <|> prev
 ;;
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
@@ -93,7 +102,7 @@ let application prev =
 let operators =
   [ prefix_op @@ parse_prefix_op
   ; infix_left_op @@ parse_infix_op "#"
-  ; application
+  ; choice_or_prev [ application; constructor ]
   ; infix_right_op @@ parse_infix_op "**"
   ; prefix_op @@ choice [ string "-."; string "-" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]

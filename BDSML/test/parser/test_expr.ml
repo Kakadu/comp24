@@ -201,7 +201,8 @@ let%expect_test "test just identifier" =
 
 let%expect_test "test by Andrey Sukharev" =
   test_expr "a >>= b ++ c ** d !+ e";
-  [%expect {|
+  [%expect
+    {|
     (Exp_apply ((Exp_ident ">>="),
        (Exp_tuple
           [(Exp_ident "a");
@@ -224,4 +225,14 @@ let%expect_test "test by Andrey Sukharev" =
             ])
        ))
     |}]
+;;
+
+let%expect_test "test empty constructor" =
+  test_expr "BDSML";
+  [%expect {| (Exp_construct ("BDSML", None)) |}]
+;;
+
+let%expect_test "test trivial constructor" =
+  test_expr "BDSML 1";
+  [%expect {| (Exp_construct ("BDSML", (Some (Exp_constant (Const_int 1))))) |}]
 ;;
