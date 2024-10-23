@@ -138,3 +138,15 @@ let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
   e >>= fun init -> go init
 ;;
+
+let choice_pass_prev parsers_list prev =
+  choice @@ List.map ~f:(fun el -> el prev) parsers_list
+;;
+
+let parse_by_priority priority init =
+  let rec parse_priority prev = function
+    | h :: tl -> parse_priority (h prev) tl
+    | [] -> prev
+  in
+  parse_priority init priority
+;;
