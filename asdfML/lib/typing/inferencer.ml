@@ -329,23 +329,6 @@ let infer =
       let* subst_op = unify (typ_expr ^-> typ_expr) typ_op in
       let* subst = Subst.compose_all [ subst_op; subst_expr ] in
       return (subst, typ_expr)
-    | EBinaryOp (op, left, right) ->
-      let* typ_op =
-        match op with
-        | Add | Sub | Mul | Div -> return (int_typ ^-> int_typ ^-> int_typ)
-        | Gt | Lt | Ge | Le -> return (int_typ ^-> int_typ ^-> bool_typ)
-        | And | Or -> return (bool_typ ^-> bool_typ ^-> bool_typ)
-        | Eq | Ne ->
-          let* tvar = fresh_var in
-          return (tvar ^-> tvar ^-> bool_typ)
-      in
-      let* subst_left, typ_left = infer_expr env left in
-      let* subst_right, typ_right = infer_expr env right in
-      let* typ = fresh_var in
-      let* subst_op = unify (typ_left ^-> typ_right ^-> typ) typ_op in
-      let* subst = Subst.compose_all [ subst_op; subst_left; subst_right ] in
-      let typ = Subst.apply subst typ in
-      return (subst, typ)
     | EApp (left, right) ->
       let* subst_left, typ_left = infer_expr env left in
       let* subst_right, typ_right = infer_expr (TypeEnv.apply env subst_left) right in

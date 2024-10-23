@@ -1,20 +1,6 @@
 %{
   [@@@coverage exclude_file]
   open Ast
-
-  let op_to_name = function
-    | Add -> "( + )"
-    | Sub -> "( - )"
-    | Mul -> "( * )"
-    | Div -> "( / )"
-    | Eq -> "( == )"
-    | Ne -> "( != )"
-    | Gt -> "( > )"
-    | Lt -> "( < )"
-    | Ge -> "( >= )"
-    | Le -> "( <= )"
-    | And -> "( && )"
-    | Or -> "( || )"
 %}
 
 %token <int> INT
@@ -92,7 +78,7 @@ pattern:
 | c = constant { PConst(c) }
 | WILDCARD { PWild }
 | id = identifier { PIdent(id, None) }
-| LPAREN op = op_binary RPAREN { PIdent(op_to_name op, None) }
+| LPAREN op = op_binary RPAREN { PIdent(op, None) }
 | LPAREN id = identifier COLON ty = type_ann RPAREN { PIdent(id, Some(ty)) }
 | LPAREN es = separated_nonempty_list(COMMA, pattern) RPAREN { PTuple(es) }
 
@@ -111,21 +97,21 @@ app_expr:
 | v = identifier { EVar(v) }
 
 expr_binary: 
-| left = expr op = op_binary right = expr { EApp(EApp(EVar(op_to_name op), left), right) }
+| left = expr op = op_binary right = expr { EApp(EApp(EVar(op), left), right) }
 
 %inline op_binary:
-| MUL { Mul }
-| DIV { Div }
-| PLUS { Add }
-| MINUS { Sub }
-| EQEQ { Eq }
-| NE { Ne }
-| GT { Gt }
-| LT { Lt }
-| GE { Ge }
-| LE { Le }
-| AND { And }
-| OR { Or }
+| MUL { "( * )" }
+| DIV { "( / )" }
+| PLUS { "( + )" }
+| MINUS { "( - )" }
+| EQEQ { "( == )" }
+| NE { "( != )" }
+| GT { "( > )" }
+| LT { "( < )" }
+| GE { "( >= )" }
+| LE { "( <= )" }
+| AND { "( && )" }
+| OR { "( || )" }
 
 expr_unary:
 | op = op_unary arg = constant {EUnaryOp (op, EConst(arg))}
