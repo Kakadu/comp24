@@ -400,7 +400,7 @@ let p_let_decl p_exp =
      in
      let* pattern = skip_whitespace *> p_pattern in
      let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-     return @@ DSingleLet (DLet (flag, pattern, expr))
+     return @@ DSingleLet (flag, DLet (pattern, expr))
 ;;
 
 let p_mutually_rec_decl =
@@ -411,13 +411,13 @@ let p_mutually_rec_decl =
     *>
     let* pattern = skip_whitespace *> p_pattern in
     let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-    return (DLet (NotRec, pattern, expr))
+    return (DLet (pattern, expr))
   in
   let* fst_dcl = p_let_decl p_exp in
   match fst_dcl with
-  | DSingleLet x ->
+  | DSingleLet (flag, x) ->
     let* other_lets = skip_whitespace *> many1 (p_mut_rec_decl p_exp) in
-    return @@ DMutualRecDecl (x :: other_lets)
+    return @@ DMutualRecDecl (flag, x :: other_lets)
   | _ -> fail "Error"
 ;;
 
