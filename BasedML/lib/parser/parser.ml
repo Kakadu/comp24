@@ -194,7 +194,8 @@ let p_list_no_constr p_exp =
 let rec exp_cons_list_builder = function
   | [] -> ENil
   | h :: tl ->
-    EApplication (EIdentifier "( :: )", EApplication (h, exp_cons_list_builder tl))
+    EApplication (EIdentifier "( :: )", h)
+    |> fun app1 -> EApplication (app1, exp_cons_list_builder tl)
 ;;
 
 let p_list_not_empty_exp p_exp =
@@ -561,11 +562,11 @@ let x :: y = [1; 2]
     [(DSingleLet
         (DLet (NotRec,
            (PNConstraint (PCons ((PIdentifier "x"), (PIdentifier "y")))),
-           (EApplication ((EIdentifier "( :: )"),
-              (EApplication ((EConstant (CInt 1)),
-                 (EApplication ((EIdentifier "( :: )"),
-                    (EApplication ((EConstant (CInt 2)), ENil))))
-                 ))
+           (EApplication (
+              (EApplication ((EIdentifier "( :: )"), (EConstant (CInt 1)))),
+              (EApplication (
+                 (EApplication ((EIdentifier "( :: )"), (EConstant (CInt 2)))),
+                 ENil))
               ))
            )))
       ] |}]
@@ -858,16 +859,18 @@ let (x : ('b * int -> int * 'pa) list list) = ([[fun1; fun2]] : ('b * int -> int
                        (TTuple [TInt; (TPoly "'pa")])))))
               )),
            (EConstraint (
-              (EApplication ((EIdentifier "( :: )"),
-                 (EApplication (
-                    (EApplication ((EIdentifier "( :: )"),
-                       (EApplication ((EIdentifier "fun1"),
+              (EApplication (
+                 (EApplication ((EIdentifier "( :: )"),
+                    (EApplication (
+                       (EApplication ((EIdentifier "( :: )"),
+                          (EIdentifier "fun1"))),
+                       (EApplication (
                           (EApplication ((EIdentifier "( :: )"),
-                             (EApplication ((EIdentifier "fun2"), ENil))))
-                          ))
-                       )),
-                    ENil))
-                 )),
+                             (EIdentifier "fun2"))),
+                          ENil))
+                       ))
+                    )),
+                 ENil)),
               (TList
                  (TList
                     (TFunction ((TTuple [(TPoly "'b"); TInt]),
