@@ -419,7 +419,7 @@ let p_mutually_rec_decl =
   match fst_dcl with
   | DSingleLet x ->
     let* other_lets = skip_whitespace *> many1 (p_mut_rec_decl p_exp) in
-    return @@ DMutualRecDecl ([ x ] @ other_lets)
+    return @@ DMutualRecDecl (x :: other_lets)
   | _ -> fail "Error"
 ;;
 
