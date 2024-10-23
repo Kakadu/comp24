@@ -7,6 +7,7 @@ type dataType =
   | Bool of bool
   | Char of char
   | String of string
+  | Unit
 [@@deriving show]
 
 (* let f (a: Int) (b: Int) = ...*)

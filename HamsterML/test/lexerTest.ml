@@ -18,6 +18,8 @@ let%test _ = lex "-228.337" = [ TYPE_FLOAT (-228.337) ]
 let%test _ = lex "true" = [ TYPE_BOOL true ]
 let%test _ = lex "false" = [ TYPE_BOOL false ]
 let%test _ = lex "add" = [ IDENTIFIER "add" ]
+let%test _ = lex "()" = [ TYPE_UNIT ]
+let%test _ = lex "( )" = [ TYPE_UNIT ]
 
 let%test _ =
   lex

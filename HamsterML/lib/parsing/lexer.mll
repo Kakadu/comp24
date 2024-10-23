@@ -19,6 +19,7 @@ let string  = '\"' sym* '\"'
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
+let unit = '(' (' ')*? ')'
 
 rule read =
     parse
@@ -64,6 +65,7 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
     | float     { TYPE_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
     | char      { TYPE_CHAR (String.get (Lexing.lexeme lexbuf) 1)}
@@ -72,5 +74,5 @@ rule read =
     | "true"    { TYPE_BOOL (true) }
     | "false"   { TYPE_BOOL (false) }
     | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
-    | eof      { EOF }
+    | eof       { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

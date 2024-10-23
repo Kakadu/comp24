@@ -33,10 +33,7 @@ let%test _ =
   = Value (List [ Const (Int 1); Const (Int 2); Const (Int 3); Const (Int 4) ])
 ;;
 
-let%test _ =
-  parse "[]"
-  = Value (List [])
-;;
+let%test _ = parse "[]" = Value (List [])
 
 let%test _ =
   parse "1::[2; 3; 4]"
@@ -50,6 +47,8 @@ let%test _ =
       (Tuple [ Const (Char 'a'); Const (Char 'b'); Const (Char 'c'); Const (Char 'd') ])
 ;;
 
+let%test _ = parse "( )" = Value (Const Unit)
+let%test _ = parse "( )" = parse "()"
 let%test _ = parse "(_)" = Value Wildcard
 
 (* Expr *)
