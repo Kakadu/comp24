@@ -334,3 +334,24 @@ let%expect_test "test num + let" =
        ))
      |}]
 ;;
+
+let%expect_test "test fun" =
+  test_expr "fun a b -> a+b";
+  [%expect
+    {|
+    (Exp_fun ([(Pat_var "a"); (Pat_var "b")],
+       (Exp_apply ((Exp_ident "+"),
+          (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
+       ))
+     |}]
+;;
+
+let%expect_test "test fun tuple" =
+  test_expr "4, fun a -> a";
+  [%expect
+    {|
+    (Exp_tuple
+       [(Exp_constant (Const_int 4));
+         (Exp_fun ([(Pat_var "a")], (Exp_ident "a")))])
+     |}]
+;;

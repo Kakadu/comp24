@@ -94,7 +94,7 @@ let constructor prev =
 ;;
 
 let tuple prev =
-  sep_by1 (ws *> char ',') prev
+  sep_by1 (check_char ',') prev
   >>= function
   | _ :: _ :: _ as l -> return @@ Exp_tuple l
   | [ e ] -> return e
@@ -102,26 +102,32 @@ let tuple prev =
 ;;
 
 let let_parser prev =
-  let+ _ = ws *> string "let"
-  and+ rec_flag = ws *> string "rec" *> return Recursive <|> return Nonrecursive
+  let+ _ = check_string "let"
+  and+ rec_flag = check_string "rec" *> return Recursive <|> return Nonrecursive
   and+ bindings =
     let pat_expr =
       let+ pat = ws *> Pattern_parser.parse_pattern
-      and+ _ = ws *> char '='
+      and+ _ = check_char '='
       and+ expr = prev in
       { pat; expr }
     in
-    sep_by1 (ws *> string "and") pat_expr
-  and+ _ = ws *> string "in"
+    sep_by1 (check_string "and") pat_expr
+  and+ _ = check_string "in"
   and+ expr = prev in
   Exp_let (rec_flag, bindings, expr)
 ;;
 
-let spec_parser = [ let_parser ]
-
-let choice_pass_prev parsers_list prev =
-  choice @@ List.map (fun el -> el prev) parsers_list
+let fun_parser prev =
+  let+ _ = check_string "fun"
+  and+ args =
+    let arg = Pattern_parser.parse_pattern in
+    sep_by1 ws1 arg
+  and+ _ = check_string "->"
+  and+ expr = prev in
+  Exp_fun (args, expr)
 ;;
+
+let spec_parser = [ let_parser; fun_parser ]
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
     by priority from higher to lower*)
@@ -148,15 +154,11 @@ let priority =
 
 let parse_expr =
   fix (fun self ->
-    let rec parse_priority prev = function
-      | h :: tl -> parse_priority (h prev) tl
-      | [] -> prev
-    in
-    let init =
-      parse_const
-      <|> parse_ident
-      <|> remove_parents self
-      <|> choice_pass_prev spec_parser self
-    in
-    parse_priority init priority)
+    parse_by_priority priority
+    @@ choice
+         [ parse_const
+         ; parse_ident
+         ; remove_parents self
+         ; choice_pass_prev spec_parser self
+         ])
 ;;
