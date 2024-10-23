@@ -332,7 +332,7 @@ let p_let_in p_exp =
   skip_whitespace
   *> Angstrom.string "let"
   *> let* flag =
-       skip_whitespace *> Angstrom.string "rec" *> return Rec <|> return NotRec
+       skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
      let* let_expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
@@ -398,7 +398,7 @@ let p_let_decl p_exp =
   *> Angstrom.string "let"
   *> skip_whitespace
   *> let* flag =
-       skip_whitespace *> Angstrom.string "rec" *> return Rec <|> return NotRec
+       skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
      let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
@@ -890,4 +890,25 @@ let%expect_test _ =
   test_parse {|
 let () = ()|};
   [%expect {| [(DSingleLet (DLet (NotRec, (PConstant CUnit), (EConstant CUnit))))] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+let recfib = fun n -> if n=1 then 1 else fib (n-1)|};
+  [%expect
+    {|
+    [(DSingleLet
+        (DLet (NotRec, (PIdentifier "recfib"),
+           (EFunction ((PIdentifier "n"),
+              (EIfThenElse (
+                 (EApplication (
+                    (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
+                    (EConstant (CInt 1)))),
+                 (EConstant (CInt 1)),
+                 (EApplication ((EIdentifier "fib"),
+                    (EApplication ((EIdentifier "n"), (EConstant (CInt -1))))))
+                 ))
+              ))
+           )))
+      ] |}]
 ;;
