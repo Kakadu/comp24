@@ -6,20 +6,64 @@ open Shaitanml_lib
 open Parser
 
 let%expect_test _ =
-  test_parse {|
-      let a b c = a && b || b && c
+  test_parse
+    {|
+   let rec fold_left f acc l =
+      match l with
+      | [] -> acc
+      | h :: tl -> fold_left f (f acc h) tl
+   ;;
       |};
   [%expect
     {|
-    [(SValue (Nonrec,
-        [((PVar ("x", None)),
-          (EApply ((EApply ((EVar "++"), (EVar "x"))), (EConst (CInt 1)))))]
+    [(SValue (Rec,
+        [((PVar ("fold_left", None)),
+          (EFun ((PVar ("f", None)),
+             (EFun ((PVar ("acc", None)),
+                (EFun ((PVar ("l", None)),
+                   (EMatch ((EVar "l"),
+                      [((PConst CNil), (EVar "acc"));
+                        ((PCons ((PVar ("h", None)), (PVar ("tl", None)))),
+                         (EApply (
+                            (EApply ((EApply ((EVar "fold_left"), (EVar "f"))),
+                               (EApply ((EApply ((EVar "f"), (EVar "acc"))),
+                                  (EVar "h")))
+                               )),
+                            (EVar "tl"))))
+                        ]
+                      ))
+                   ))
+                ))
+             )))
+          ]
         ))
       ] |}]
 ;;
 
 let%expect_test _ =
   test_parse {|
+      let a b c = a && b || b && c
+      |};
+  [%expect
+    {|
+    [(SValue (Nonrec,
+        [((PVar ("a", None)),
+          (EFun ((PVar ("b", None)),
+             (EFun ((PVar ("c", None)),
+                (EApply (
+                   (EApply ((EVar "||"),
+                      (EApply ((EApply ((EVar "&&"), (EVar "a"))), (EVar "b"))))),
+                   (EApply ((EApply ((EVar "&&"), (EVar "b"))), (EVar "c")))))
+                ))
+             )))
+          ]
+        ))
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse
+    {|
       let f x y = x + y
       and
       g x y = x - y
