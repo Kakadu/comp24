@@ -172,3 +172,22 @@ let%expect_test "or inside of list test" =
        ))
     |}]
 ;;
+
+let%expect_test "var" =
+  test_pattern "a";
+  [%expect {| (Pat_var "a") |}]
+;;
+
+let%expect_test "var hard" =
+  test_pattern "[a | b; c]";
+  [%expect {|
+    (Pat_construct ("::",
+       (Some (Pat_tuple
+                [(Pat_or ((Pat_var "a"), (Pat_var "b")));
+                  (Pat_construct ("::",
+                     (Some (Pat_tuple
+                              [(Pat_var "c"); (Pat_construct ("[]", None))]))
+                     ))
+                  ]))
+       )) |}]
+;;

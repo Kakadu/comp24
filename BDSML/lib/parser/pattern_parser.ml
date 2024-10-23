@@ -3,11 +3,16 @@ open Angstrom
 open Const_parser
 open Ast
 
-let parse_any = check_char '_' *> return Pat_any
+let parse_any = ws *> check_char '_' *> return Pat_any
 let parse_pconst = parse_const >>| fun c -> Pat_constant c
 
+let parse_var =
+  let+ ident = ws *> parse_lowercase_ident in
+  Pat_var ident
+;;
+
 let parse_ptuple p =
-  sep_by (check_char ',') (parse_pconst <|> parse_any <|> p)
+  sep_by (check_char ',') (parse_pconst <|> parse_any <|> parse_var <|> p)
   >>= function
   | [] -> fail "It cannot be this way"
   | [ h ] -> return h
