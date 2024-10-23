@@ -74,9 +74,7 @@ and insert_subst : string * type_name -> (subs_state, type_name) t =
   fun (stv, stp) ->
   let* sub_lst = read in
   match List.assoc_opt stv sub_lst with
-  | Some tp ->
-    let* tp = unify tp stp in
-    return tp
+  | Some tp -> unify tp stp
   | None ->
     let stp = apply_substs sub_lst stp in
     if TPoly stv = stp

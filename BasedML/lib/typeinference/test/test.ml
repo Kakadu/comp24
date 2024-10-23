@@ -18,6 +18,15 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  test_infer_exp "fun (x, y) -> if x then x else y";
+  [%expect
+    {|
+    res: (TFunction ((TTuple [TBool; TBool]), TBool))
+     substs: [("_p2", TBool); ("_p3", TBool); ("_p1", TBool);
+      ("_p0", (TTuple [TBool; TBool]))] |}]
+;;
+
+let%expect_test _ =
   test_infer_exp
     {|fun (tuper_var: int) -> match tuper_var with
   | ([]: 'a list) -> tuper_var

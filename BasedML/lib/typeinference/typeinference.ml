@@ -8,11 +8,11 @@ open StartState
 open Help
 open Generalise
 
-type patern_mode =
+type pattern_mode =
   | PMAdd
   | PMCheck
 
-let infer_pattern : patern_mode -> Ast.pattern -> (state, Ast.type_name) t =
+let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
   fun pm cpat ->
   let get_pat_and_type = function
     | Ast.PNConstraint pat -> fresh_tv >>= fun t -> return (pat, t)
@@ -133,7 +133,7 @@ and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.type_name
   let* t1 = infer_expr e1 in
   let* t2 = infer_expr e2 in
   let* t3 = infer_expr e3 in
-  write_subst t1 Ast.TInt *> write_subst tp t2 *> write_subst tp t3 *> return tp
+  write_subst t1 Ast.TBool *> write_subst tp t2 *> write_subst tp t3 *> return tp
 
 and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.type_name) t
   =
@@ -144,7 +144,7 @@ and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.ty
   let help (pat, exp) =
     let* pat_tp = infer_pattern PMAdd pat in
     let* exp_tp = infer_expr exp in
-    write_subst pat_tp scr_tp *> write_subst exp_tp tp *> return () <* write_env cur_env
+    write_subst pat_tp scr_tp *> write_subst exp_tp tp *> write_env cur_env
   in
   map_list help pat_exp_lst *> return tp
 
