@@ -63,7 +63,7 @@ let chainl1 e op =
 let pspaces = skip_while is_space
 let ptoken p = skip_while is_space *> p
 let pstoken s = ptoken (Angstrom.string s)
-let pparens p = pstoken "(" *> p <* pstoken ")"
+let pparens p = pstoken "(" *> take_while is_space *> p <* pstoken ")"
 let poperator = pparens (take_while1 is_operator_char) >>= fun op -> return op
 
 let pid =
@@ -93,6 +93,7 @@ let pbool =
 let punit = pstoken "()" *> return CUnit <?> "unit"
 let pconst = choice [ pint; pbool; punit ] >>| fun x -> EConst x
 let pvar = pid >>| fun e -> EVar e
+let poperatorvar = poperator >>| fun op -> EVar op
 
 let ptype =
   fix (fun ptype ->
@@ -199,23 +200,28 @@ let pfun pexpr =
   pstoken "fun" *> pbody pexpr
 ;;
 
-let pebinop chain1 e pbinop = chain1 e (pbinop >>| fun op e1 e2 -> EBinop (op, e1, e2))
+let pebinop chain1 e pbinop =
+  chain1 e (pbinop >>| fun op e1 e2 -> EApp (EApp (EVar op, e1), e2))
+;;
+
 let plbinop = pebinop chainl1
-let padd = pstoken "+" *> return Add
-let psub = pstoken "-" *> return Sub
-let pmul = pstoken "*" *> return Mul
-let pdiv = pstoken "/" *> return Div
-let peq = pstoken "=" *> return Eq
-let pneq = pstoken "<>" *> return Neq
-let ples = pstoken "<" *> return Les
-let pleq = pstoken "<=" *> return Leq
-let pgre = pstoken ">" *> return Gre
-let pgeq = pstoken ">=" *> return Geq
+let padd = pstoken "+" *> return "+"
+let psub = pstoken "-" *> return "-"
+let pmul = pstoken "*" *> return "*"
+let pdiv = pstoken "/" *> return "/"
+let peq = pstoken "=" *> return "="
+let pneq = pstoken "<>" *> return "<>"
+let ples = pstoken "<" *> return "<"
+let pleq = pstoken "<=" *> return "<="
+let pgre = pstoken ">" *> return ">"
+let pgeq = pstoken ">=" *> return ">="
 
 let pexpr =
   fix
   @@ fun pexpr ->
-  let pe = choice [ pparens pexpr; pconst; pvar; plist pexpr; pfun pexpr ] in
+  let pe =
+    choice [ pparens pexpr; pconst; poperatorvar; pvar; plist pexpr; pfun pexpr ]
+  in
   let pe =
     lift2
       (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)

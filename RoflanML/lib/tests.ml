@@ -28,13 +28,13 @@ module ParserTests = struct
   let%expect_test _ =
     pp pp_expr parse_expr "[1 + 2; 1 * 2; 1 - 2; 1 / 2]";
     [%expect
-      {| 
-    (EList
-       [(EBinop (Add, (EConst (CInt 1)), (EConst (CInt 2))));
-         (EBinop (Mul, (EConst (CInt 1)), (EConst (CInt 2))));
-         (EBinop (Sub, (EConst (CInt 1)), (EConst (CInt 2))));
-         (EBinop (Div, (EConst (CInt 1)), (EConst (CInt 2))))]) 
-    |}]
+      {|
+      (EList
+         [(EApp ((EApp ((EVar "+"), (EConst (CInt 1)))), (EConst (CInt 2))));
+           (EApp ((EApp ((EVar "*"), (EConst (CInt 1)))), (EConst (CInt 2))));
+           (EApp ((EApp ((EVar "-"), (EConst (CInt 1)))), (EConst (CInt 2))));
+           (EApp ((EApp ((EVar "/"), (EConst (CInt 1)))), (EConst (CInt 2))))])
+      |}]
   ;;
 
   let%expect_test _ =
@@ -44,14 +44,14 @@ module ParserTests = struct
       {|match x with | h1 :: h2 :: tl -> if h1 >= h2 then h1 else h2 | h1 :: [] -> h1 | _ -> 0|};
     [%expect
       {|
-        (EMatch ((EVar "x"),
-           [((PCons ((PVar "h1"), (PVar "h2"), [(PVar "tl")])),
-             (EBranch ((EBinop (Geq, (EVar "h1"), (EVar "h2"))), (EVar "h1"),
-                (EVar "h2"))));
-             ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
-             (PWild, (EConst (CInt 0)))]
-           )) 
-    |}]
+      (EMatch ((EVar "x"),
+         [((PCons ((PVar "h1"), (PVar "h2"), [(PVar "tl")])),
+           (EBranch ((EApp ((EApp ((EVar ">="), (EVar "h1"))), (EVar "h2"))),
+              (EVar "h1"), (EVar "h2"))));
+           ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
+           (PWild, (EConst (CInt 0)))]
+         ))
+      |}]
   ;;
 
   let%expect_test _ =
@@ -84,7 +84,9 @@ module ParserTests = struct
       {|
       (ELet (NonRec, "f",
          (EFun (("x", (Some TBool)),
-            (EFun (("y", (Some TInt)), (EBinop (Mul, (EVar "x"), (EVar "y"))))))),
+            (EFun (("y", (Some TInt)),
+               (EApp ((EApp ((EVar "*"), (EVar "x"))), (EVar "y")))))
+            )),
          None))
       |}]
   ;;
@@ -95,13 +97,15 @@ module ParserTests = struct
       {|
       (ELet (NonRec, "+",
          (EFun (("x", (Some TInt)),
-            (EFun (("y", (Some TInt)), (EBinop (Mul, (EVar "x"), (EVar "y"))))))),
+            (EFun (("y", (Some TInt)),
+               (EApp ((EApp ((EVar "*"), (EVar "x"))), (EVar "y")))))
+            )),
          None))
       |}]
   ;;
 
   let%expect_test _ =
-    pp pp_expr parse_expr "let (+) (x: int) y = let (-) x (y: int) = x + y in x - y";
+    pp pp_expr parse_expr "let ( + ) (x: int) y = let ( - ) x (y: int) = x + y in x - y";
     [%expect
       {|
       (ELet (NonRec, "+",
@@ -110,9 +114,9 @@ module ParserTests = struct
                (ELet (NonRec, "-",
                   (EFun (("x", None),
                      (EFun (("y", (Some TInt)),
-                        (EBinop (Add, (EVar "x"), (EVar "y")))))
+                        (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "y")))))
                      )),
-                  (Some (EBinop (Sub, (EVar "x"), (EVar "y"))))))
+                  (Some (EApp ((EApp ((EVar "-"), (EVar "x"))), (EVar "y"))))))
                ))
             )),
          None)) 
@@ -179,6 +183,39 @@ module ParserTests = struct
       {|
       (ELet (NonRec, "f",
          (EFun (("x", (Some (TTuple (TInt, (TList TBool), [TBool])))), (EVar "x"))),
+         None))
+      |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let f x y = ( > ) x y";
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun (("x", None),
+            (EFun (("y", None),
+               (EApp ((EApp ((EVar ">"), (EVar "x"))), (EVar "y")))))
+            )),
+         None))
+      |}]
+  ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let x = let f g x y = g x y in f ( + ) 7 8";
+    [%expect
+      {|
+      (ELet (NonRec, "x",
+         (ELet (NonRec, "f",
+            (EFun (("g", None),
+               (EFun (("x", None),
+                  (EFun (("y", None),
+                     (EApp ((EApp ((EVar "g"), (EVar "x"))), (EVar "y")))))
+                  ))
+               )),
+            (Some (EApp (
+                     (EApp ((EApp ((EVar "f"), (EVar "+"))), (EConst (CInt 7)))),
+                     (EConst (CInt 8)))))
+            )),
          None))
       |}]
   ;;
