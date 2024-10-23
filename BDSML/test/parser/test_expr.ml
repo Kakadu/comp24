@@ -278,3 +278,59 @@ let%expect_test "test tuple constructor" =
        [(Exp_construct ("BDSML", (Some (Exp_constant (Const_int 1)))));
          (Exp_constant (Const_int 2))]) |}]
 ;;
+
+let%expect_test "test let in" =
+  test_expr "let 4 = 4 in b";
+  [%expect
+    {|
+    (Exp_let (Nonrecursive,
+       [{ pat = (Pat_constant (Const_int 4)); expr = (Exp_constant (Const_int 4))
+          }
+         ],
+       (Exp_ident "b")))
+     |}]
+;;
+
+let%expect_test "test let several" =
+  test_expr "let rec a = 4 and b = 6 in a+b";
+  [%expect
+    {|
+    (Exp_let (Recursive,
+       [{ pat = (Pat_var "a"); expr = (Exp_constant (Const_int 4)) };
+         { pat = (Pat_var "b"); expr = (Exp_constant (Const_int 6)) }],
+       (Exp_apply ((Exp_ident "+"),
+          (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
+       ))
+     |}]
+;;
+
+let%expect_test "test let in let" =
+  test_expr "let a = let b = 4 in b in a";
+  [%expect
+    {|
+    (Exp_let (Nonrecursive,
+       [{ pat = (Pat_var "a");
+          expr =
+          (Exp_let (Nonrecursive,
+             [{ pat = (Pat_var "b"); expr = (Exp_constant (Const_int 4)) }],
+             (Exp_ident "b")))
+          }
+         ],
+       (Exp_ident "a")))
+     |}]
+;;
+
+let%expect_test "test num + let" =
+  test_expr "4 + let a = 5 in a";
+  [%expect
+    {|
+    (Exp_apply ((Exp_ident "+"),
+       (Exp_tuple
+          [(Exp_constant (Const_int 4));
+            (Exp_let (Nonrecursive,
+               [{ pat = (Pat_var "a"); expr = (Exp_constant (Const_int 5)) }],
+               (Exp_ident "a")))
+            ])
+       ))
+     |}]
+;;
