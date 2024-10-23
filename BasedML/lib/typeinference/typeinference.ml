@@ -175,36 +175,31 @@ let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.type_name) t = function
 ;;
 
 let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
-  | Ast.DSingleLet (DLet (rec_f, pat, exp)) -> infer_let_common rec_f pat exp
-  | Ast.DMutualRecDecl decl_lst ->
-    (match decl_lst with
-     | [] -> fail "unreachable error: empty mutual rec?!!"
-     | Ast.DLet (Ast.NotRec, _, _) :: _ ->
-       map_list
-         (function
-           | Ast.DLet (_rec_flag, pat, exp) -> infer_let_common Ast.NotRec pat exp)
-         decl_lst
-       *> return ()
-     | Ast.DLet (Ast.Rec, _, _) :: _ ->
-       let* prev_env = read_env in
-       let* p_tp_lst =
-         map_list (fun (Ast.DLet (_, pat, _)) -> infer_mr_let_only_pat pat) decl_lst
-       in
-       let* exp_tp_lst =
-         map_list (fun (Ast.DLet (_, _, exp)) -> infer_expr exp) decl_lst
-       in
-       let* _ =
-         map_list
-           (fun (p_tp, exp_tp) -> write_subst p_tp exp_tp)
-           (List.combine p_tp_lst exp_tp_lst)
-       in
-       let external_tvs = get_tv_from_env prev_env in
-       let* _ =
-         map_list
-           (fun (Ast.DLet (_, pat, _), tp) -> generalise external_tvs pat tp)
-           (List.combine decl_lst p_tp_lst)
-       in
-       return ())
+  | Ast.DSingleLet (rec_f, DLet (pat, exp)) -> infer_let_common rec_f pat exp
+  | Ast.DMutualRecDecl (Ast.NotRec, decl_lst) ->
+    map_list
+      (function
+        | Ast.DLet (pat, exp) -> infer_let_common Ast.NotRec pat exp)
+      decl_lst
+    *> return ()
+  | Ast.DMutualRecDecl (Ast.Rec, decl_lst) ->
+    let* prev_env = read_env in
+    let* p_tp_lst =
+      map_list (fun (Ast.DLet (pat, _)) -> infer_mr_let_only_pat pat) decl_lst
+    in
+    let* exp_tp_lst = map_list (fun (Ast.DLet (_, exp)) -> infer_expr exp) decl_lst in
+    let* _ =
+      map_list
+        (fun (p_tp, exp_tp) -> write_subst p_tp exp_tp)
+        (List.combine p_tp_lst exp_tp_lst)
+    in
+    let external_tvs = get_tv_from_env prev_env in
+    let* _ =
+      map_list
+        (fun (Ast.DLet (pat, _), tp) -> generalise external_tvs pat tp)
+        (List.combine decl_lst p_tp_lst)
+    in
+    return ()
 ;;
 
 type res_map = Ast.type_name MapString.t [@@deriving show { with_path = false }]
