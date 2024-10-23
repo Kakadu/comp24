@@ -218,8 +218,21 @@ let p_tuple p_exp constructor =
   fst_component :: exp_list |> constructor |> return
 ;;
 
-let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x)
-let p_tuple_pattern p_exp = p_tuple p_exp (fun x -> PTuple x)
+let p_unit constr =
+  skip_whitespace
+  *> Angstrom.string "("
+  *> skip_whitespace
+  *> Angstrom.string ")"
+  *> return (constr CUnit)
+;;
+
+let p_tuple_expr p_exp =
+  p_tuple p_exp (fun x -> ETuple x) <|> p_unit (fun x -> EConstant x)
+;;
+
+let p_tuple_pattern p_exp =
+  p_tuple p_exp (fun x -> PTuple x) <|> p_unit (fun x -> PConstant x)
+;;
 
 let rec pat_cons_list_builder (ls : pattern list) =
   match ls with
@@ -859,4 +872,22 @@ let (x : ('b * int -> int * 'pa) list list) = ([[fun1; fun2]] : ('b * int -> int
               ))
            )))
       ] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+let ((x : int) : int) = 5|};
+  [%expect
+    {|
+    [(DSingleLet
+        (DLet (NotRec,
+           (PConstraint ((PConstraint ((PIdentifier "x"), TInt)), TInt)),
+           (EConstant (CInt 5)))))
+      ] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+let () = ()|};
+  [%expect {| [(DSingleLet (DLet (NotRec, (PConstant CUnit), (EConstant CUnit))))] |}]
 ;;
