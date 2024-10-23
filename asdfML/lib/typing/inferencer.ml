@@ -1,3 +1,7 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 (* Based on https://gitlab.com/Kakadu/fp2020course-materials/-/blob/master/code/miniml*)
 
 open Types
@@ -96,6 +100,7 @@ module Type = struct
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TGround _ -> false
     | TTuple xs -> List.exists xs ~f:(occurs_in v)
+    | TList t -> occurs_in v t
   ;;
 
   let free_vars =
@@ -104,6 +109,7 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TGround _ -> acc
       | TTuple xs -> List.fold xs ~init:VarSet.empty ~f:helper
+      | TList t -> helper acc t
     in
     helper VarSet.empty
   ;;
@@ -368,8 +374,13 @@ let infer =
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
     | ELetIn (DLet (_, non_id, _), _) ->
-      fail
-        (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
+      fail (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
+    | ETuple ts -> fail (`TODO "unimplemented")
+    | EList ts -> 
+      (* let* s1, t1 = infer_expr env ts in *)
+      fail (`TODO "unimplemented")
+    | EMatch (p, pe) -> fail (`TODO "unimplemented")
+    (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> fail (`TODO "") *)
     | _ -> fail (`TODO "unimplemented")
   and (infer_def : TypeEnv.t -> Ast.definition -> (Subst.t * ty) R.t) =
     fun env -> function
@@ -443,6 +454,16 @@ let%expect_test _ =
 let%expect_test _ =
   test {| let x = 42 |};
   [%expect {| int |}]
+;;
+
+let%expect_test _ =
+  test {| let x = [1;2;3] |};
+  [%expect {| () |}]
+;;
+
+let%expect_test _ =
+  test {| let x = (1, 2, 3) |};
+  [%expect {| () |}]
 ;;
 
 let%expect_test _ =

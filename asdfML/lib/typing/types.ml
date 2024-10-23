@@ -1,3 +1,7 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 (* Based on https://gitlab.com/Kakadu/fp2020course-materials/-/blob/master/code/miniml*)
 open Base
 
@@ -14,6 +18,7 @@ type ty =
   | TVar of var_id
   | TArrow of ty * ty
   | TTuple of ty list
+  | TList of ty 
 [@@deriving show { with_path = false }]
 
 type error =

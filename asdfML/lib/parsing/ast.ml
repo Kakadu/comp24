@@ -1,3 +1,7 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 type id = string [@@deriving eq, show { with_path = false }]
 
 type rec_flag =
@@ -11,32 +15,13 @@ type constant =
   | CUnit (** () *)
 [@@deriving show { with_path = false }]
 
-type unary_operator =
-  | Neg
-  | Not
-[@@deriving show { with_path = false }]
-
-type binary_operator =
-  | Add (** + *)
-  | Sub (** - *)
-  | Mul (** * *)
-  | Div (** / *)
-  | Eq (** == *)
-  | Ne (** != *)
-  | Gt (** > *)
-  | Lt (** < *)
-  | Ge (** >= *)
-  | Le (** <= *)
-  | And (** && *)
-  | Or (** || *)
-[@@deriving show { with_path = false }]
-
 type type_ann =
   | TAInt (** int *)
   | TABool (** bool *)
   | TAUnit (** () *)
   | TATuple of type_ann list
   | TAFun of type_ann * type_ann (** int -> bool *)
+  (* TODO: lists *)
 [@@deriving show { with_path = false }]
 
 type pattern =

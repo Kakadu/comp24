@@ -1,3 +1,5 @@
+(** Copyright 2024, Artem Khelmianov *)
 
-let () = print_endline "Hello, World!";;
+(** SPDX-License-Identifier: LGPL-2.1 *)
 
+let () = print_endline "Hello, World!"

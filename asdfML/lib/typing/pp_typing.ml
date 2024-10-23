@@ -1,5 +1,10 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 open Types
 open Format
+open Utils
 
 let type_id_to_name n =
   let rec helper n acc =
@@ -26,10 +31,8 @@ let rec pp_typ fmt = function
     (match left with
      | TArrow (_, _) -> fprintf fmt "(%a) -> %a" pp_typ left pp_typ right
      | _ -> fprintf fmt "%a -> %a" pp_typ left pp_typ right)
-  | TTuple xs ->
-    fprintf fmt "(";
-    pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt ", ") pp_typ fmt xs;
-    fprintf fmt ")"
+  | TTuple xs -> pp_list fmt pp_typ xs
+  | TList t -> fprintf fmt "%a list" pp_typ t
 ;;
 
 let pp_error fmt : error -> _ = function
