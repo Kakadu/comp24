@@ -101,16 +101,34 @@ let tuple prev =
   | _ -> fail ""
 ;;
 
-let choice_or_prev parsers_list prev =
-  choice @@ List.map (fun el -> el prev) parsers_list <|> prev
+let let_parser prev =
+  let+ _ = ws *> string "let"
+  and+ rec_flag = ws *> string "rec" *> return Recursive <|> return Nonrecursive
+  and+ bindings =
+    let pat_expr =
+      let+ pat = ws *> Pattern_parser.parse_pattern
+      and+ _ = ws *> char '='
+      and+ expr = prev in
+      { pat; expr }
+    in
+    sep_by1 (ws *> string "and") pat_expr
+  and+ _ = ws *> string "in"
+  and+ expr = prev in
+  Exp_let (rec_flag, bindings, expr)
+;;
+
+let spec_parser = [ let_parser ]
+
+let choice_pass_prev parsers_list prev =
+  choice @@ List.map (fun el -> el prev) parsers_list
 ;;
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
     by priority from higher to lower*)
-let operators =
+let priority =
   [ prefix_op @@ parse_prefix_op
   ; infix_left_op @@ parse_infix_op "#"
-  ; choice_or_prev [ application; constructor ]
+  ; choice_pass_prev [ application; constructor; Fun.id ]
   ; infix_right_op @@ parse_infix_op "**"
   ; prefix_op @@ choice [ string "-."; string "-" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
@@ -124,6 +142,7 @@ let operators =
   ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
   ; infix_right_op @@ string ";"
+  ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
 ;;
 
@@ -133,6 +152,11 @@ let parse_expr =
       | h :: tl -> parse_priority (h prev) tl
       | [] -> prev
     in
-    let init = parse_const <|> parse_ident <|> remove_parents self in
-    parse_priority init operators)
+    let init =
+      parse_const
+      <|> parse_ident
+      <|> remove_parents self
+      <|> choice_pass_prev spec_parser self
+    in
+    parse_priority init priority)
 ;;
