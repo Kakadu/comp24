@@ -25,18 +25,15 @@ type constant =
 [@@deriving show { with_path = false }]
 
 (* Lists, tuples, identifiers, wild card patterns*)
-type pattern_no_constraint =
+type pattern =
   | PWildCard
   | PNil
-  | PCons of pattern_no_constraint * pattern_no_constraint
+  | PCons of pattern * pattern
   | PIdentifier of string
-  | PTuple of pattern_no_constraint list
+  | PTuple of pattern list
+  | PList of pattern list
   | PConstant of constant
-[@@deriving show { with_path = false }]
-
-type pattern =
-  | PConstraint of pattern_no_constraint * type_name
-  | PNConstraint of pattern_no_constraint
+  | PConstraint of pattern * type_name
 [@@deriving show { with_path = false }]
 
 (* Standard expressions *)

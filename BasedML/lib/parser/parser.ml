@@ -221,7 +221,7 @@ let p_tuple p_exp constructor =
 let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x)
 let p_tuple_pattern p_exp = p_tuple p_exp (fun x -> PTuple x)
 
-let rec pat_cons_list_builder (ls : pattern_no_constraint list) =
+let rec pat_cons_list_builder (ls : pattern list) =
   match ls with
   | [] -> PNil
   | h :: tl -> PCons (h, pat_cons_list_builder tl)
@@ -243,23 +243,8 @@ let p_list_pattern p_pattern = p_list_not_empty_pattern p_pattern <|> p_pnil
 (* final pattern parsers*)
 let p_cons_pattern p_pattern = chainl1 p_pattern cons_delim_pattern
 
-let p_pattern_without_type =
-  fix (fun p_pattern ->
-    let atomic_pat =
-      p_ident_pattern
-      <|> p_const_pattern
-      <|> p_infix_ident
-      <|> between_parens p_pattern
-      <|> p_list_pattern p_pattern
-    in
-    let w_card_pat = p_wild_card_pattern <|> atomic_pat in
-    let cons_pat = p_cons_pattern w_card_pat <|> w_card_pat in
-    let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
-    tuple_pat)
-;;
-
-let p_pattern_with_type =
-  let* pattern = skip_whitespace *> Angstrom.string "(" *> p_pattern_without_type in
+let p_pattern_with_type p_pat =
+  let* pattern = skip_whitespace *> Angstrom.string "(" *> p_pat in
   let* constr =
     skip_whitespace *> Angstrom.string ":" *> skip_whitespace *> p_type
     <* skip_whitespace
@@ -269,7 +254,19 @@ let p_pattern_with_type =
 ;;
 
 let p_pattern =
-  p_pattern_with_type <|> (p_pattern_without_type >>= fun pat -> return (PNConstraint pat))
+  fix (fun p_pattern ->
+    let atomic_pat =
+      p_ident_pattern
+      <|> p_const_pattern
+      <|> p_infix_ident
+      <|> between_parens p_pattern
+      <|> p_list_pattern p_pattern
+      <|> p_pattern_with_type p_pattern
+    in
+    let w_card_pat = p_wild_card_pattern <|> atomic_pat in
+    let cons_pat = p_cons_pattern w_card_pat <|> w_card_pat in
+    let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
+    tuple_pat)
 ;;
 
 (* Binary operations parsers & delimiter for chains*)
@@ -437,11 +434,7 @@ let%expect_test _ =
   test_parse {|
 let x = 5
 |};
-  [%expect
-    {|
-    [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "x")), (EConstant (CInt 5)))))
-      ] |}]
+  [%expect {| [(DSingleLet (DLet (NotRec, (PIdentifier "x"), (EConstant (CInt 5)))))] |}]
 ;;
 
 let%expect_test _ =
@@ -451,13 +444,8 @@ let y = false
 |};
   [%expect
     {|
-    [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "x")), (EConstant (CBool true))
-           )));
-      (DSingleLet
-         (DLet (NotRec, (PNConstraint (PIdentifier "y")),
-            (EConstant (CBool false)))))
-      ] |}]
+    [(DSingleLet (DLet (NotRec, (PIdentifier "x"), (EConstant (CBool true)))));
+      (DSingleLet (DLet (NotRec, (PIdentifier "y"), (EConstant (CBool false)))))] |}]
 ;;
 
 let%expect_test _ =
@@ -467,7 +455,7 @@ let x = (5 + 5) * 6 + (5 + 5) / 2
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "x")),
+        (DLet (NotRec, (PIdentifier "x"),
            (EApplication (
               (EApplication ((EIdentifier "( + )"),
                  (EApplication (
@@ -499,7 +487,7 @@ let x = if 5 > 4 then true else false
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "x")),
+        (DLet (NotRec, (PIdentifier "x"),
            (EIfThenElse (
               (EApplication (
                  (EApplication ((EIdentifier "( > )"), (EConstant (CInt 5)))),
@@ -516,8 +504,8 @@ let succ = fun n -> n + 1
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "succ")),
-           (EFunction ((PNConstraint (PIdentifier "n")),
+        (DLet (NotRec, (PIdentifier "succ"),
+           (EFunction ((PIdentifier "n"),
               (EApplication (
                  (EApplication ((EIdentifier "( + )"), (EIdentifier "n"))),
                  (EConstant (CInt 1))))
@@ -533,9 +521,9 @@ let x = let y = 5 in y
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "x")),
-           (ELetIn (NotRec, (PNConstraint (PIdentifier "y")),
-              (EConstant (CInt 5)), (EIdentifier "y")))
+        (DLet (NotRec, (PIdentifier "x"),
+           (ELetIn (NotRec, (PIdentifier "y"), (EConstant (CInt 5)),
+              (EIdentifier "y")))
            )))
       ] |}]
 ;;
@@ -547,8 +535,7 @@ let (x, y) = (1, 2)
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec,
-           (PNConstraint (PTuple [(PIdentifier "x"); (PIdentifier "y")])),
+        (DLet (NotRec, (PTuple [(PIdentifier "x"); (PIdentifier "y")]),
            (ETuple [(EConstant (CInt 1)); (EConstant (CInt 2))]))))
       ] |}]
 ;;
@@ -560,8 +547,7 @@ let x :: y = [1; 2]
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec,
-           (PNConstraint (PCons ((PIdentifier "x"), (PIdentifier "y")))),
+        (DLet (NotRec, (PCons ((PIdentifier "x"), (PIdentifier "y"))),
            (EApplication (
               (EApplication ((EIdentifier "( :: )"), (EConstant (CInt 1)))),
               (EApplication (
@@ -579,8 +565,8 @@ let rec fac = fun n -> if n = 0 then 1 else n * (fac (n - 1))
   [%expect
     {|
     [(DSingleLet
-        (DLet (Rec, (PNConstraint (PIdentifier "fac")),
-           (EFunction ((PNConstraint (PIdentifier "n")),
+        (DLet (Rec, (PIdentifier "fac"),
+           (EFunction ((PIdentifier "n"),
               (EIfThenElse (
                  (EApplication (
                     (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
@@ -608,9 +594,9 @@ let rec facCPS = fun n k -> if n = 0 then k 1 else facCPS (n - 1) (fun t -> k (n
   [%expect
     {|
     [(DSingleLet
-        (DLet (Rec, (PNConstraint (PIdentifier "facCPS")),
-           (EFunction ((PNConstraint (PIdentifier "n")),
-              (EFunction ((PNConstraint (PIdentifier "k")),
+        (DLet (Rec, (PIdentifier "facCPS"),
+           (EFunction ((PIdentifier "n"),
+              (EFunction ((PIdentifier "k"),
                  (EIfThenElse (
                     (EApplication (
                        (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
@@ -623,7 +609,7 @@ let rec facCPS = fun n k -> if n = 0 then k 1 else facCPS (n - 1) (fun t -> k (n
                                 (EIdentifier "n"))),
                              (EConstant (CInt 1))))
                           )),
-                       (EFunction ((PNConstraint (PIdentifier "t")),
+                       (EFunction ((PIdentifier "t"),
                           (EApplication ((EIdentifier "k"),
                              (EApplication (
                                 (EApplication ((EIdentifier "( * )"),
@@ -649,13 +635,12 @@ let rec map = fun f list -> match list with
   [%expect
     {|
     [(DSingleLet
-        (DLet (Rec, (PNConstraint (PIdentifier "map")),
-           (EFunction ((PNConstraint (PIdentifier "f")),
-              (EFunction ((PNConstraint (PIdentifier "list")),
-                 (EMatch ((PNConstraint (PIdentifier "list")),
-                    [((PNConstraint PNil), (EIdentifier "list"));
-                      ((PNConstraint
-                          (PCons ((PIdentifier "h"), (PIdentifier "tl")))),
+        (DLet (Rec, (PIdentifier "map"),
+           (EFunction ((PIdentifier "f"),
+              (EFunction ((PIdentifier "list"),
+                 (EMatch ((PIdentifier "list"),
+                    [(PNil, (EIdentifier "list"));
+                      ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
                        (EApplication (
                           (EApplication ((EIdentifier "map"), (EIdentifier "f"))),
                           (EApplication (
@@ -683,13 +668,13 @@ let rec facCPS = fun n k -> match n with
   [%expect
     {|
     [(DSingleLet
-        (DLet (Rec, (PNConstraint (PIdentifier "facCPS")),
-           (EFunction ((PNConstraint (PIdentifier "n")),
-              (EFunction ((PNConstraint (PIdentifier "k")),
-                 (EMatch ((PNConstraint (PIdentifier "n")),
-                    [((PNConstraint (PConstant (CInt 0))),
+        (DLet (Rec, (PIdentifier "facCPS"),
+           (EFunction ((PIdentifier "n"),
+              (EFunction ((PIdentifier "k"),
+                 (EMatch ((PIdentifier "n"),
+                    [((PConstant (CInt 0)),
                       (EApplication ((EIdentifier "k"), (EConstant (CInt 1)))));
-                      ((PNConstraint (PIdentifier "n")),
+                      ((PIdentifier "n"),
                        (EApplication (
                           (EApplication ((EIdentifier "facCPS"),
                              (EApplication (
@@ -697,7 +682,7 @@ let rec facCPS = fun n k -> match n with
                                    (EIdentifier "n"))),
                                 (EConstant (CInt 1))))
                              )),
-                          (EFunction ((PNConstraint (PIdentifier "t")),
+                          (EFunction ((PIdentifier "t"),
                              (EApplication ((EIdentifier "k"),
                                 (EApplication (
                                    (EApplication ((EIdentifier "( * )"),
@@ -726,19 +711,19 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
   [%expect
     {|
     [(DSingleLet
-        (DLet (NotRec, (PNConstraint (PIdentifier "fibo")),
-           (EFunction ((PNConstraint (PIdentifier "n")),
-              (ELetIn (Rec, (PNConstraint (PIdentifier "fiboCPS")),
-                 (EFunction ((PNConstraint (PIdentifier "n")),
-                    (EFunction ((PNConstraint (PIdentifier "acc")),
-                       (EMatch ((PNConstraint (PIdentifier "n")),
-                          [((PNConstraint (PConstant (CInt 0))),
+        (DLet (NotRec, (PIdentifier "fibo"),
+           (EFunction ((PIdentifier "n"),
+              (ELetIn (Rec, (PIdentifier "fiboCPS"),
+                 (EFunction ((PIdentifier "n"),
+                    (EFunction ((PIdentifier "acc"),
+                       (EMatch ((PIdentifier "n"),
+                          [((PConstant (CInt 0)),
                             (EApplication ((EIdentifier "acc"),
                                (EConstant (CInt 0)))));
-                            ((PNConstraint (PConstant (CInt 1))),
+                            ((PConstant (CInt 1)),
                              (EApplication ((EIdentifier "acc"),
                                 (EConstant (CInt 1)))));
-                            ((PNConstraint PWildCard),
+                            (PWildCard,
                              (EApplication (
                                 (EApplication ((EIdentifier "fiboCPS"),
                                    (EApplication (
@@ -746,7 +731,7 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
                                          (EIdentifier "n"))),
                                       (EConstant (CInt 1))))
                                    )),
-                                (EFunction ((PNConstraint (PIdentifier "x")),
+                                (EFunction ((PIdentifier "x"),
                                    (EApplication (
                                       (EApplication ((EIdentifier "fiboCPS"),
                                          (EApplication (
@@ -754,8 +739,7 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
                                                (EIdentifier "n"))),
                                             (EConstant (CInt 2))))
                                          )),
-                                      (EFunction (
-                                         (PNConstraint (PIdentifier "y")),
+                                      (EFunction ((PIdentifier "y"),
                                          (EApplication ((EIdentifier "acc"),
                                             (EApplication (
                                                (EApplication (
@@ -773,9 +757,7 @@ let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
                     )),
                  (EApplication (
                     (EApplication ((EIdentifier "fiboCPS"), (EIdentifier "n"))),
-                    (EFunction ((PNConstraint (PIdentifier "x")),
-                       (EIdentifier "x")))
-                    ))
+                    (EFunction ((PIdentifier "x"), (EIdentifier "x")))))
                  ))
               ))
            )))
@@ -795,11 +777,11 @@ and odd = fun n -> match n with
   [%expect
     {|
     [(DMutualRecDecl
-        [(DLet (Rec, (PNConstraint (PIdentifier "even")),
-            (EFunction ((PNConstraint (PIdentifier "n")),
-               (EMatch ((PNConstraint (PIdentifier "n")),
-                  [((PNConstraint (PConstant (CInt 0))), (EConstant (CBool true)));
-                    ((PNConstraint (PIdentifier "x")),
+        [(DLet (Rec, (PIdentifier "even"),
+            (EFunction ((PIdentifier "n"),
+               (EMatch ((PIdentifier "n"),
+                  [((PConstant (CInt 0)), (EConstant (CBool true)));
+                    ((PIdentifier "x"),
                      (EApplication ((EIdentifier "odd"),
                         (EApplication (
                            (EApplication ((EIdentifier "( - )"),
@@ -810,12 +792,11 @@ and odd = fun n -> match n with
                   ))
                ))
             ));
-          (DLet (NotRec, (PNConstraint (PIdentifier "odd")),
-             (EFunction ((PNConstraint (PIdentifier "n")),
-                (EMatch ((PNConstraint (PIdentifier "n")),
-                   [((PNConstraint (PConstant (CInt 0))),
-                     (EConstant (CBool false)));
-                     ((PNConstraint (PIdentifier "x")),
+          (DLet (NotRec, (PIdentifier "odd"),
+             (EFunction ((PIdentifier "n"),
+                (EMatch ((PIdentifier "n"),
+                   [((PConstant (CInt 0)), (EConstant (CBool false)));
+                     ((PIdentifier "x"),
                       (EApplication ((EIdentifier "even"),
                          (EApplication (
                             (EApplication ((EIdentifier "( - )"),
