@@ -6,15 +6,6 @@ let parse (s : string) : expr =
   ast
 ;;
 
-(* let%test _ =
-   parse "let a = 1 and b = 2"
-   = LetIn
-   ( [ BinOp (ASSIGN, Value (VarId "a"), Value (Const (Int 1)))
-        ; BinOp (ASSIGN, Value (VarId "b"), Value (Const (Int 2)))
-        ]
-   , None )
-   ;; *)
-
 (* Data Type tests *)
 let%test _ = parse "+228" = parse "228"
 let%test _ = parse "228" = Value (Const (Int 228))
@@ -141,4 +132,16 @@ let%test _ =
       , LetIn
           ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
           , Value (VarId "nike_pro") ) )
+;;
+
+(* application *)
+
+let%test _ =
+  parse "f x y"
+  = Application (Value (VarId "f"), Application (Value (VarId "x"), Value (VarId "y")))
+;;
+
+let%test _ =
+  print_string (show_expr (parse "1-1"));
+  false
 ;;
