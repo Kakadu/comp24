@@ -1,0 +1,33 @@
+(lang dune 3.8)
+
+(name AefjnvMl)
+
+(generate_opam_files true)
+
+(source
+ (github ItIsMrLaG/aefjnvMl))
+
+(authors "ItIsMrLaG, Artem-Rzhankoff")
+
+(maintainers "ItIsMrLaG, Artem-Rzhankoff")
+
+(license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
+
+(package
+ (name AefjnvMl)
+ (synopsis "A short LLVM demo")
+ (depends
+  dune
+  base
+  ocaml
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  (odoc :with-doc)
+  (ocamlformat :build)
+  (llvm
+   (= "16.0.6+nnp"))))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
