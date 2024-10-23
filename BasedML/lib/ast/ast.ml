@@ -12,7 +12,7 @@ type type_name =
   | TList of type_name
 [@@deriving show { with_path = false }]
 
-(* Flag to tell implicitely tell if let is recurisve *)
+(* Flag to implicitely tell if let is recurisve *)
 type rec_flag =
   | Rec
   | NotRec

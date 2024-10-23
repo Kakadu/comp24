@@ -405,7 +405,7 @@ let p_let_decl p_exp =
      return @@ DSingleLet (DLet (flag, pattern, expr))
 ;;
 
-let p_mutully_rec_decl =
+let p_mutually_rec_decl =
   let p_mut_rec_decl p_exp =
     skip_whitespace
     *> Angstrom.string "and"
@@ -425,12 +425,12 @@ let p_mutully_rec_decl =
 
 let parse p s = parse_string ~consume:All p s
 
-(* takes in code in OCamal and returns its AST*)
+(* takes in code in OCaml and returns its AST*)
 let parse_program =
   parse
     (sep_by
        (Angstrom.string ";;" <|> Angstrom.string "\n")
-       (p_mutully_rec_decl <|> p_let_decl p_exp)
+       (p_mutually_rec_decl <|> p_let_decl p_exp)
      <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
 ;;
 
