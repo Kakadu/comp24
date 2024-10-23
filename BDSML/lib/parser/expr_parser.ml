@@ -6,6 +6,16 @@ open Angstrom
 open Ast
 open Utils
 
+let parse_ident =
+  let+ ident = ws *> parse_lowercase_ident in
+  Exp_ident ident
+;;
+
+let parse_const =
+  let+ const = Const_parser.parse_const in
+  Exp_constant const
+;;
+
 (** https://ocaml.org/manual/5.2/lex.html#sss:lex-ops-symbols *)
 let is_core_operator_char = function
   | '$' | '&' | '*' | '+' | '-' | '/' | '=' | '>' | '@' | '^' | '|' -> true
@@ -49,44 +59,6 @@ let parse_infix_op prefix =
   if String.equal check_prefix prefix then case1 <|> case2 else fail ""
 ;;
 
-type associativity =
-  | Left
-  | Right
-
-type op_type =
-  | Prefix
-  | Infix of associativity
-
-(** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
-    by priority from higher to lower*)
-let operators =
-  let parse_infix_with_prefixes prefixes = choice (List.map parse_infix_op prefixes) in
-  [ Prefix, parse_prefix_op
-  ; Infix Left, parse_infix_op "#"
-  ; Prefix, string "-." <|> string "-"
-  ; Infix Right, parse_infix_op "**"
-  ; Infix Left, parse_infix_with_prefixes [ "*"; "/"; "%" ]
-  ; Infix Left, parse_infix_with_prefixes [ "+"; "-" ]
-  ; Infix Right, string "::"
-  ; Infix Right, parse_infix_with_prefixes [ "@"; "^" ]
-  ; Infix Left, parse_infix_with_prefixes [ "="; "<"; ">"; "|"; "&"; "$" ] <|> string "!="
-  ; Infix Right, string "&" <|> string "&&"
-  ; Infix Right, string "or" <|> string "||"
-  ; Infix Right, string "<-" <|> string ":="
-  ; Infix Right, string ";"
-  ]
-;;
-
-let parse_ident =
-  let+ ident = ws *> parse_lowercase_ident in
-  Exp_ident ident
-;;
-
-let parse_const =
-  let+ const = Const_parser.parse_const in
-  Exp_constant const
-;;
-
 let rec unary_chain (func : string t) arg_parser =
   let* parsed_func = ws *> func in
   let+ arg = unary_chain func arg_parser <|> arg_parser in
@@ -94,21 +66,44 @@ let rec unary_chain (func : string t) arg_parser =
   Exp_apply (ident, arg)
 ;;
 
+let parse_infix_with_prefixes prefixes = choice (List.map parse_infix_op prefixes)
+
+let parse_bop (op : string t) =
+  let+ parsed = ws *> op in
+  let ident = Exp_ident parsed in
+  fun a b -> Exp_apply (ident, Exp_tuple [ a; b ])
+;;
+
+let prefix_op parser prev = unary_chain parser prev <|> prev
+let infix_left_op parser prev = chainl1 prev (parse_bop parser)
+let infix_right_op parser prev = chainr1 prev (parse_bop parser)
+
+(** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
+    by priority from higher to lower*)
+let operators =
+  [ prefix_op @@ parse_prefix_op
+  ; infix_left_op @@ parse_infix_op "#"
+  ; prefix_op @@ choice [ string "-."; string "-" ]
+  ; infix_right_op @@ parse_infix_op "**"
+  ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
+  ; infix_left_op @@ parse_infix_with_prefixes [ "+"; "-" ]
+  ; infix_right_op @@ string "::"
+  ; infix_right_op @@ parse_infix_with_prefixes [ "@"; "^" ]
+  ; infix_left_op
+    @@ choice [ parse_infix_with_prefixes [ "="; "<"; ">"; "|"; "&"; "$" ]; string "!=" ]
+  ; infix_right_op @@ choice [ string "&"; string "&&" ]
+  ; infix_right_op @@ choice [ string "or"; string "||" ]
+  ; infix_right_op @@ choice [ string "<-"; string ":=" ]
+  ; infix_right_op @@ string ";"
+  ]
+;;
+
 let parse_expr =
-  let parse_bop (op : string t) =
-    let+ parsed = ws *> op in
-    let ident = Exp_ident parsed in
-    fun a b -> Exp_apply (ident, Exp_tuple [ a; b ])
-  in
-  let op_iter prev = function
-    | Infix Right, el -> chainr1 prev (parse_bop el)
-    | Infix Left, el -> chainl1 prev (parse_bop el)
-    | Prefix, el -> unary_chain el prev <|> prev
-  in
-  let rec parse_exp_ prev = function
-    | h :: tl -> parse_exp_ (op_iter prev h) tl
-    | [] -> prev
-  in
-  let init = parse_const <|> parse_ident in
-  parse_exp_ init operators
+  fix (fun self ->
+    let rec parse_priority prev = function
+      | h :: tl -> parse_priority (h prev) tl
+      | [] -> prev
+    in
+    let init = parse_const <|> parse_ident <|> remove_parents self in
+    parse_priority init operators)
 ;;
