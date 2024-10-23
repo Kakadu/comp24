@@ -6,11 +6,6 @@ open Angstrom
 open Ast
 open Utils
 
-let parse_ident =
-  let+ ident = ws *> parse_lowercase_ident in
-  Exp_ident ident
-;;
-
 let parse_const =
   let+ const = Const_parser.parse_const in
   Exp_constant const
@@ -59,6 +54,14 @@ let parse_infix_op prefix =
   if String.equal check_prefix prefix then case1 <|> case2 else fail ""
 ;;
 
+let parse_ident =
+  let+ ident =
+    ws
+    *> (parse_lowercase_ident <|> parse_prefix_op <|> remove_parents @@ parse_infix_op "")
+  in
+  Exp_ident ident
+;;
+
 let rec unary_chain (func : string t) arg_parser =
   let* parsed_func = ws *> func in
   let+ arg = unary_chain func arg_parser <|> arg_parser in
@@ -79,7 +82,7 @@ let infix_left_op parser prev = chainl1 prev (parse_bop parser)
 let infix_right_op parser prev = chainr1 prev (parse_bop parser)
 
 let application prev =
-  (let+ name = parse_ident <|> (parse_prefix_op >>| fun a -> Exp_ident a)
+  (let+ name = parse_ident
    and+ args = many1 prev in
    Exp_apply (name, Exp_tuple args))
   <|> prev
