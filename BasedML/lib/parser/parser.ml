@@ -431,7 +431,7 @@ let parse_program =
     (sep_by
        (Angstrom.string ";;" <|> Angstrom.string "\n")
        (p_mutually_rec_decl <|> p_let_decl p_exp)
-     <* option "" (Angstrom.string ";;" <|> Angstrom.string "\n"))
+     <* option "" (Angstrom.string ";;" <|> take_while1 is_whitespace))
 ;;
 
 (* parser testing function *)
@@ -453,6 +453,21 @@ let x = 5
 let%expect_test _ =
   test_parse {|
 let x = true;;
+let y = false
+|};
+  [%expect
+    {|
+    [(DSingleLet (DLet (NotRec, (PIdentifier "x"), (EConstant (CBool true)))));
+      (DSingleLet (DLet (NotRec, (PIdentifier "y"), (EConstant (CBool false)))))] |}]
+;;
+
+let%expect_test _ =
+  test_parse {|
+let x = true;;
+
+
+
+
 let y = false
 |};
   [%expect
