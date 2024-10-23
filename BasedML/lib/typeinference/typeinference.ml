@@ -14,10 +14,6 @@ type pattern_mode =
 
 let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
   fun pm cpat ->
-  let get_pat_and_type = function
-    | Ast.PNConstraint pat -> fresh_tv >>= fun t -> return (pat, t)
-    | Ast.PConstraint (pat, tp) -> return (pat, tp)
-  in
   let infer_add_pident name tp =
     let* var_tp = read_var_type name in
     match var_tp with
@@ -40,16 +36,19 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
     let list_tp = Ast.TList tv in
     write_subst tp list_tp *> return list_tp
   in
-  let rec help cp =
-    let* pat, tp = get_pat_and_type cp in
+  let rec help pat =
+    let* tp = fresh_tv in
     match pat with
     | Ast.PIdentifier name -> infer_add_pident name tp
     | Ast.PConstant c -> infer_add_pconstant c tp
-    | Ast.PTuple p_lst -> infer_add_ptupple p_lst tp help_no_constraint
-    | Ast.PCons (p_head, p_tail) -> infer_add_pcons (p_head, p_tail) tp help_no_constraint
+    | Ast.PTuple p_lst -> infer_add_ptupple p_lst tp help
+    | Ast.PCons (p_head, p_tail) -> infer_add_pcons (p_head, p_tail) tp help
     | Ast.PNil -> infer_add_pnil tp
     | Ast.PWildCard -> return tp
-  and help_no_constraint ncp = help (PNConstraint ncp) in
+    | Ast.PConstraint (pat, ctp) ->
+      let* new_tp = help pat in
+      write_subst new_tp ctp *> return ctp
+  in
   let* glob_env = read_env in
   write_env MapString.empty
   *> let* tp = help cpat in
@@ -159,7 +158,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
       return (p_tp, exp_tp)
     | Rec ->
       (match pat with
-       | Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _) ->
+       | Ast.PIdentifier _ ->
          let* p_tp = infer_pattern PMAdd pat in
          let* exp_tp = infer_expr exp in
          return (p_tp, exp_tp)
@@ -167,12 +166,11 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
   in
   let* _ = write_subst p_tp exp_tp in
   let external_tvs = get_tv_from_env prev_env in
-  generalise external_tvs (pat_remove_constr pat) p_tp
+  generalise external_tvs pat p_tp
 ;;
 
 let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.type_name) t = function
-  | (Ast.PConstraint (Ast.PIdentifier _, _) | Ast.PNConstraint (Ast.PIdentifier _)) as pat
-    -> infer_pattern PMAdd pat
+  | Ast.PIdentifier _ as pat -> infer_pattern PMAdd pat
   | _ -> fail " Only variables are allowed as left-hand side of `let rec'"
 ;;
 
@@ -203,8 +201,7 @@ let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
        let external_tvs = get_tv_from_env prev_env in
        let* _ =
          map_list
-           (fun (Ast.DLet (_, pat, _), tp) ->
-             generalise external_tvs (pat_remove_constr pat) tp)
+           (fun (Ast.DLet (_, pat, _), tp) -> generalise external_tvs pat tp)
            (List.combine decl_lst p_tp_lst)
        in
        return ())

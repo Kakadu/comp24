@@ -5,9 +5,7 @@
 open StatementInfer
 open Help
 
-let generalise
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.type_name -> (state, unit) t
-  =
+let generalise : SetString.t -> Ast.pattern -> Ast.type_name -> (state, unit) t =
   fun bound_vars pat tp ->
   let* tp = restore_type tp in
   let* subs = read_subs in

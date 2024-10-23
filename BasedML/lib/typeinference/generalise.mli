@@ -4,6 +4,6 @@
 
 val generalise
   :  Help.SetString.t
-  -> Ast.pattern_no_constraint
+  -> Ast.pattern
   -> Ast.type_name
   -> (StatementInfer.state, unit) StatementInfer.t

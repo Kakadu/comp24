@@ -105,5 +105,4 @@ type type_form =
 val pp_type_form : Format.formatter -> type_form -> unit
 val show_type_form : type_form -> string
 val const2type : Ast.constant -> Ast.type_name
-val pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint
 val get_tv_from_tp : SetString.t -> Ast.type_name -> SetString.t

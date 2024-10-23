@@ -6,7 +6,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TTuple [TInt; TBool]), TBool))
-     substs: [("_p1", TBool); ("_p0", TInt)] |}]
+     substs: [("_p3", TBool); ("_p2", TInt); ("_p1", (TTuple [TInt; TBool]))] |}]
 ;;
 
 let%expect_test _ =
@@ -14,7 +14,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TList TInt), (TList TInt)))
-     substs: [("_p0", TInt); ("_p1", (TList TInt))] |}]
+     substs: [("_p2", TInt); ("_p3", (TList TInt)); ("_p1", (TList TInt))] |}]
 ;;
 
 let%expect_test _ =
@@ -32,7 +32,7 @@ let%expect_test _ =
   | ([]: 'a list) -> tuper_var
   | (h :: tl: 'a list) -> h|};
   [%expect {|
-    Infer error: Can not unify `TInt` and `(TList (TPoly "_p2"))` |}]
+    Infer error: Can not unify `TInt` and `(TList (TPoly "'a"))` |}]
 ;;
 
 let%expect_test _ =
@@ -42,7 +42,7 @@ let%expect_test _ =
   | (h :: tl: 'a list) -> h|};
   [%expect
     {|
-    Infer error: The type variable _p4 occurs inside (TList (TPoly "_p4")) |}]
+    Infer error: The type variable _p5 occurs inside (TList (TPoly "_p5")) |}]
 ;;
 
 let%expect_test _ =
@@ -174,10 +174,10 @@ let%expect_test _ =
     {|
     [""a"": (TTuple [TInt; TInt]),
      ""b"": (TTuple [TBool; TBool]),
-     ""x"": (TFunction ((TTuple [(TPoly "_pd"); (TPoly "_pd")]),
-               (TTuple [(TPoly "_pd"); (TPoly "_pd")]))),
-     ""y"": (TFunction ((TTuple [(TPoly "_pe"); (TPoly "_pe")]),
-               (TTuple [(TPoly "_pe"); (TPoly "_pe")]))),
+     ""x"": (TFunction ((TTuple [(TPoly "_pf"); (TPoly "_pf")]),
+               (TTuple [(TPoly "_pf"); (TPoly "_pf")]))),
+     ""y"": (TFunction ((TTuple [(TPoly "_p10"); (TPoly "_p10")]),
+               (TTuple [(TPoly "_p10"); (TPoly "_p10")]))),
      ] |}]
 ;;
 
@@ -188,7 +188,7 @@ let%expect_test _ =
   let (a, b) = ((x 1), (y (true, false)));;|};
   [%expect
     {|
-    Infer error: Can not unify `TInt` and `(TTuple [(TPoly "_p7"); (TPoly "_p7")])` |}]
+    Infer error: Can not unify `TInt` and `(TTuple [(TPoly "_p9"); (TPoly "_p9")])` |}]
 ;;
 
 let%expect_test _ =

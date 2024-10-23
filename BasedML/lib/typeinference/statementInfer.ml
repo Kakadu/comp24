@@ -95,7 +95,7 @@ let write_subst : Ast.type_name -> Ast.type_name -> (state, unit) t =
 ;;
 
 let rec write_scheme_for_pattern
-  : SetString.t -> Ast.pattern_no_constraint -> Ast.type_name -> (state, unit) t
+  : SetString.t -> Ast.pattern -> Ast.type_name -> (state, unit) t
   =
   fun free_vars pattern tp ->
   let rec_call = write_scheme_for_pattern free_vars in
@@ -108,6 +108,7 @@ let rec write_scheme_for_pattern
   | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
   | PTuple p_lst, TTuple t_lst ->
     map_list (fun (p, t) -> rec_call p t) (List.combine p_lst t_lst) *> return ()
+  | PConstraint (pat, _), _ -> rec_call pat tp
   | _ -> fail "something strange during generealisetion"
 ;;
 

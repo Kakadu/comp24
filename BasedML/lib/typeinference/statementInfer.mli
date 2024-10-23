@@ -33,7 +33,7 @@ val write_flat_var_type : string -> Ast.type_name -> (state, unit) Substitution.
 
 val write_scheme_for_pattern
   :  Help.SetString.t
-  -> Ast.pattern_no_constraint
+  -> Ast.pattern
   -> Ast.type_name
   -> (state, unit) Substitution.t
 

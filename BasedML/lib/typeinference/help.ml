@@ -32,10 +32,6 @@ let const2type : Ast.constant -> Ast.type_name = function
   | Ast.CInt _ -> Ast.TInt
 ;;
 
-let pat_remove_constr : Ast.pattern -> Ast.pattern_no_constraint = function
-  | Ast.PConstraint (p, _) -> p
-  | Ast.PNConstraint p -> p
-;;
 
 let rec get_tv_from_tp acc = function
   | Ast.TBool | Ast.TInt -> acc
