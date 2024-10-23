@@ -5,13 +5,15 @@
 open Ast
 open Base
 open Angstrom
+
 (* open List *)
 let is_idc c = Char.is_alphanum c || Char.equal c '_'
-let is_op c = match List.find [ '*' ; '/' ; '+' ; '-' ; '=' ; '<' ; '>' ; '&' ; '|'] ~f:(Char.equal c) with
+
+let is_op c =
+  match List.find [ '*'; '/'; '+'; '-'; '='; '<'; '>'; '&'; '|' ] ~f:(Char.equal c) with
   | None -> false
   | _ -> true
-  
-(* | pattern -> pattern *)
+;;
 
 let is_keyword = function
   | "let"
@@ -147,7 +149,11 @@ let varname =
   | s when is_keyword s -> fail "Keyword can't be used as identifier"
   | _ as name -> return name
 ;;
-let opname_ = let* op = ws *> lp *> ws *> take_while is_op <* ws <* rp in return op;;
+
+let opname_ =
+  let* op = ws *> lp *> ws *> take_while is_op <* ws <* rp in
+  return op
+;;
 
 let ppvar =
   let pvar =
@@ -158,11 +164,12 @@ let ppvar =
     let pvar name annot = PVar (name, annot) in
     lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
   in
-  let opname = let* op = opname_ in return (PVar (op, None)) in
-  choice [ pvar_with_type; pvar;  opname]
+  let opname =
+    let* op = opname_ in
+    return (PVar (op, None))
+  in
+  choice [ pvar_with_type; pvar; opname ]
 ;;
-
-(* let ppvar = choice [varname >>| pvar; opname_ >>| pvar] *)
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
@@ -218,17 +225,19 @@ let pelet pe =
 
 let op_starts_with s =
   let* start = token s in
-  let* rest = take_while
-       (function
-         | '*' | '/' | '+' | '-' | '=' | '<' | '>' | '&' | '|' -> true
-         | _ -> false)
-in
-return (start ^ rest )
+  let* rest =
+    take_while (function
+      | '*' | '/' | '+' | '-' | '=' | '<' | '>' | '&' | '|' -> true
+      | _ -> false)
+  in
+  return (start ^ rest)
 ;;
 
 let parse_op start =
   let* op = op_starts_with start in
- return (fun e1 e2 -> EApply (EApply (EVar op, e1), e2))
+  return (fun e1 e2 -> EApply (EApply (EVar op, e1), e2))
+;;
+
 let pmul = parse_op "*"
 let pdiv = parse_op "/"
 let padd = parse_op "+"
@@ -239,8 +248,8 @@ let plte = parse_op "<="
 let pneq = parse_op "<>"
 let pgt = parse_op ">"
 let pgte = parse_op ">="
-let pand = parse_op "&"
-let por = parse_op "|"
+let pand = parse_op "&&"
+let por = parse_op "||"
 
 let expr =
   fix (fun expr ->

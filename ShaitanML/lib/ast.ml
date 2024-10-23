@@ -11,21 +11,6 @@ type rec_flag =
   | Nonrec
 [@@deriving show { with_path = false }]
 
-type bin_op =
-  | Mul (** * *)
-  | Div (** / *)
-  | Add (** + *)
-  | Sub (** -  *)
-  | Eq (** = *)
-  | Neq (** <> *)
-  | Lt (** < *)
-  | Lte (** <= *)
-  | Gt (** > *)
-  | Gte (** >= *)
-  | And (** && *)
-  | Or (** || *)
-[@@deriving show { with_path = false }]
-
 type const =
   | CInt of int (** 123 *)
   | CBool of bool (** true | false *)
@@ -56,7 +41,6 @@ type pattern =
 type expr =
   | EConst of const (** 123, true, "string" *)
   | EVar of id (** x *)
-  | EBin_op of bin_op * expr * expr (** 1 + 2 *)
   | EIf of expr * expr * expr (** if e1 then e2 else e3 *)
   | EMatch of expr * case list (** match e with p1 -> e1 |...| pn -> en *)
   | ELet of rec_flag * binding list * expr (** let x = e1 in e2 *)

@@ -7,9 +7,38 @@ open Infer
 
 let%expect_test _ =
   test_infer {|
+    let f (x : 'a) (y : 'b) = x;;
+     |};
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val x : int |}]
+;;
+
+let%expect_test _ =
+  test_infer {|
       let rec fix f x = f (fix f) x ;;
      |};
-  [%expect {| val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3 |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3 |}]
 ;;
 
 let%expect_test _ =
@@ -21,21 +50,54 @@ let%expect_test _ =
       | h :: tl -> fold_left f (f acc h) tl
    ;;
      |};
-  [%expect {| val fold_left : ('11 -> '5 -> '11) -> '11 -> '5 list -> '11 |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val fold_left : ('11 -> '5 -> '11) -> '11 -> '5 list -> '11 |}]
 ;;
 
 let%expect_test _ =
   test_infer {|
     let f x y = (x + y, [x; y])]
      |};
-  [%expect {| val f : int -> int -> (int * int list) |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val f : int -> int -> (int * int list) |}]
 ;;
 
 let%expect_test _ =
   test_infer {|
       let fs = ((fun x -> x), (fun x y -> x + y))
      |};
-  [%expect {| val fs : (('0 -> '0) * (int -> int -> int)) |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val fs : (('0 -> '0) * (int -> int -> int)) |}]
 ;;
 
 let%expect_test _ =
@@ -52,14 +114,36 @@ let%expect_test _ =
          let y = 3 in
          x + y;;
      |};
-  [%expect {| val f : int -> int |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val f : int -> int |}]
 ;;
 
 let%expect_test _ =
   test_infer {|
     let f a b c d e = a b c d e;;
      |};
-  [%expect {| val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5 |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5 |}]
 ;;
 
 let%expect_test _ =
@@ -74,5 +158,16 @@ let%expect_test _ =
         helper (fun x -> x) l
       ;;
      |};
-  [%expect {| val map_cps : ('6 -> '8) -> '6 list -> '8 list |}]
+  [%expect {|
+    val * : int -> int -> int
+    val + : int -> int -> int
+    val - : int -> int -> int
+    val / : int -> int -> int
+    val < : '1 -> '1 -> bool
+    val <= : '1 -> '1 -> bool
+    val <> : '1 -> '1 -> bool
+    val = : '1 -> '1 -> bool
+    val > : '1 -> '1 -> bool
+    val >= : '1 -> '1 -> bool
+    val map_cps : ('6 -> '8) -> '6 list -> '8 list |}]
 ;;
