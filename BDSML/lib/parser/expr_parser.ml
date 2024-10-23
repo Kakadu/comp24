@@ -78,13 +78,21 @@ let prefix_op parser prev = unary_chain parser prev <|> prev
 let infix_left_op parser prev = chainl1 prev (parse_bop parser)
 let infix_right_op parser prev = chainr1 prev (parse_bop parser)
 
+let application prev =
+  (let+ name = parse_ident <|> (parse_prefix_op >>| fun a -> Exp_ident a)
+   and+ args = many1 prev in
+   Exp_apply (name, Exp_tuple args))
+  <|> prev
+;;
+
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
     by priority from higher to lower*)
 let operators =
   [ prefix_op @@ parse_prefix_op
   ; infix_left_op @@ parse_infix_op "#"
-  ; prefix_op @@ choice [ string "-."; string "-" ]
+  ; application
   ; infix_right_op @@ parse_infix_op "**"
+  ; prefix_op @@ choice [ string "-."; string "-" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "+"; "-" ]
   ; infix_right_op @@ string "::"
