@@ -34,6 +34,11 @@ let%test _ =
 ;;
 
 let%test _ =
+  parse "[]"
+  = Value (List [])
+;;
+
+let%test _ =
   parse "1::[2; 3; 4]"
   = Value
       (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3); Const (Int 4) ]))
@@ -139,9 +144,4 @@ let%test _ =
 let%test _ =
   parse "f x y"
   = Application (Value (VarId "f"), Application (Value (VarId "x"), Value (VarId "y")))
-;;
-
-let%test _ =
-  print_string (show_expr (parse "1-1"));
-  false
 ;;

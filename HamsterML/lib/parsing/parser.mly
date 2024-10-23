@@ -102,24 +102,6 @@ expr:
     | IF; e1 = expr; THEN; e2 = expr { If (e1, e2, None) }
     | le = expr; re = expr { Application (le,re) }
 
-assign: 
-    | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
-
-%inline match_case: 
-    | BAR; v = value; ARROW; e = expr { (v, e) }
-
-(* <id> <value1> <value2> ... = <expr> *)
-%inline let_rec_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
-%inline let_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
-
-let_bind: (* a = 10 and b = 20 and ... *)
-    | l = let_def { [l] }
-    | h = let_def; LET_AND; tl = let_bind { h :: tl }
-
-let_in_def:
-    | e1 = let_def; IN; e2 = expr { LetIn ([e1], e2) } (* without and *)
-    | exs = let_bind; IN; e = expr { LetIn (exs, e) } (* with and *)
-
 dataType:
     | i = TYPE_INT {Int i}
     | f = TYPE_FLOAT {Float f}
@@ -137,19 +119,37 @@ value:
     | v = const_or_var { v }
     | p = pattern { p }
 
+pattern:
+    | tpl = tuple_dt {Tuple tpl} (* (1, 2, 3, ...) *)
+    | lst = list_dt {List lst}  (* [1; 2; 3; ...] *)
+    | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
+
 const_or_var: (* Const or variable *)
     | const = dataType {Const const} 
     | varId = identifier { VarId varId }
 
 typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType)}
 
-pattern:
-    | tpl = tuple_dt {Tuple tpl} (* (1, 2, 3, ...) *)
-    | lst = list_dt {List lst}  (* [1; 2; 3; ...] *)
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
-
 %inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS {val_list}
-%inline list_dt: LEFT_SQ_BRACKET; val_list = separated_nonempty_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
+%inline list_dt: LEFT_SQ_BRACKET; val_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET { val_list }
+
+assign: 
+    | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
+
+%inline match_case: 
+    | BAR; v = value; ARROW; e = expr { (v, e) }
+
+(* <id> <value1> <value2> ... = <expr> *)
+%inline let_rec_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Recursive, id, vls, e) }
+%inline let_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr { Let (Nonrecursive, id, vls, e) }
+
+let_bind: (* a = 10 and b = 20 and ... *)
+    | l = let_def { [l] }
+    | h = let_def; LET_AND; tl = let_bind { h :: tl }
+
+let_in_def: 
+    | e1 = let_def; IN; e2 = expr { LetIn ([e1], e2) } (* without and *)
+    | exs = let_bind; IN; e = expr { LetIn (exs, e) } (* with and *)
 
 %inline paramType:
     | INT { PInt }
@@ -175,24 +175,3 @@ pattern:
 
 %inline uop:
     | NOT { NOT }   
-
-/** 
-    OCaml:
-
-    let a = 1 in
-        let x b = a + b in
-            let () = print_int x 1
-
-    AST:
-
-    LetIn(
-        [BinOp
-            (
-                ASSIGN, 
-                Value(VarID("a")), 
-                Value(Const(Int(1))
-            )   
-        ],
-        LetIn(...) 
-    )
-*/

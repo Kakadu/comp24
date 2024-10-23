@@ -24,13 +24,6 @@ rule read =
     parse
     | white     { read lexbuf }
     | newline   { new_line lexbuf; read lexbuf }
-    | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
-    | float     { TYPE_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-    | char      { TYPE_CHAR (String.get (Lexing.lexeme lexbuf) 1)}
-    | string    { let str = Lexing.lexeme lexbuf in
-                    TYPE_STRING (String.sub str 1 (String.length str - 2))}
-    | "true"    { TYPE_BOOL (true) }
-    | "false"   { TYPE_BOOL (false) }
     | "int"     { INT }
     | "float"   { FLOAT }
     | "char"    { CHAR }
@@ -71,6 +64,13 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
+    | float     { TYPE_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+    | char      { TYPE_CHAR (String.get (Lexing.lexeme lexbuf) 1)}
+    | string    { let str = Lexing.lexeme lexbuf in
+                    TYPE_STRING (String.sub str 1 (String.length str - 2))}
+    | "true"    { TYPE_BOOL (true) }
+    | "false"   { TYPE_BOOL (false) }
     | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
     | eof      { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
