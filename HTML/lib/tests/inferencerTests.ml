@@ -1,0 +1,156 @@
+(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open HTML_lib
+
+module InferenceTests = struct
+  let infer_test s =
+    match Parser.parse_program s with
+    | Ok actual ->
+      let env = HTML_lib.Inferencer.run_inference actual in
+      Inferencer.print_env env
+    | Error err -> Format.printf "%s\n" err
+  ;;
+
+  let%expect_test _ =
+    infer_test {| let a = 3 |};
+    [%expect {| val a : int |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {| let a: bool = 3 |};
+    [%expect
+      {| Typecheck error: This expression has type int but an expression was expected of type bool |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {| let a (x: int): bool = 3 |};
+    [%expect
+      {| Typecheck error: This expression has type int but an expression was expected of type bool |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {| let a = ( + ) 5|};
+    [%expect {| val a : int -> int |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {| 
+  let a = ( + ) 5;; 
+  let ( + ) = (fun x y -> x || y);;|};
+    [%expect {|
+    val + : bool -> bool -> bool
+    val a : int -> int |}]
+  ;;
+
+  (* todo: again, better fail *)
+  let%expect_test _ =
+    infer_test {|let f (x :: (x, y)) = 3|};
+    [%expect
+      {|
+    Typecheck error: This expression has type 'a list but an expression was expected of type 'b * 'c |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f (x :: (x, y)) = 3|};
+    [%expect
+      {|
+    Typecheck error: This expression has type 'a list but an expression was expected of type 'b * 'c |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f (a: 'a) = a |};
+    [%expect {| val f : 'a -> 'a |}]
+  ;;
+
+  (* возможно семантика двух тестов тут говно, но надеюсь понятен смысл *)
+  let%expect_test "test_polymorphic_types" =
+    infer_test
+      {|let f (g: ('a -> 'b)) (x: 'b) = 100
+  let res = f (fun x -> true) false;;|};
+    [%expect {|
+      val f : ('a -> 'b) -> 'b -> int
+      val res : int |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f (g: ('a -> 'b)) (x: 'b) = 100
+    let res = f (fun x -> true) 5;;|};
+    [%expect
+      {| Typecheck error: This expression has type int but an expression was expected of type bool |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f (g: ('a -> 'a)) (h: ('c -> 'b)) (x: 'b) = g h x;;|};
+    [%expect {| val f : (('a -> 'a) -> 'a -> 'a) -> ('a -> 'a) -> 'a -> 'a |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f (h: ('c -> 'b)) (x: 'b) = h x;;|};
+    [%expect {| val f : ('a -> 'a) -> 'a -> 'a |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test
+      {| let rec map f lst = 
+      match lst with 
+        | [] -> []
+        | (x::xs) -> f x :: map f xs |};
+    [%expect {| val map : ('a -> 'b) -> 'a list -> 'b list |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {| let a =([3;3], [4;4]) :: [([5;5],[6;6]);([7;7],[8;8])] |};
+    [%expect {| val a : (int list * int list) list |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test
+      {| let f x = x;; let a = match [3;4;5] with | (hd::tl) -> (2, f true) | hd -> (f 2, false) |};
+    [%expect {|
+    val a : int * bool
+    val f : 'a -> 'a
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test
+      {|let rec even x =
+        if x = 0 then true
+        else odd (x - 1)
+      and odd x =
+        if x = 0 then false
+        else even (x - 1)
+;;|};
+    [%expect {|
+      val even : int -> bool
+      val odd : int -> bool |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec x = [1, 2, 3]
+    and y = [x]|};
+    [%expect
+      {|
+      val x : (int * int * int) list
+      val y : (int * int * int) list list |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let x = [1, 2, 3]
+    and y = [x]|};
+    [%expect {|
+    Typecheck error: Unbound value x |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec f x = x 
+and g () = f 2 
+and h () = f true;;|};
+    [%expect {|
+  val f : 'a -> 'a
+  val g : Unit -> int
+  val h : Unit -> bool |}]
+  ;;
+end
