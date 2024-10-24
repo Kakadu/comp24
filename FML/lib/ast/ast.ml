@@ -35,12 +35,6 @@ type pattern =
   | PConstraint of pattern * type_annotation
 [@@deriving show { with_path = false }]
 
-type un_op =
-  | Not (** not *)
-  | Minus (** - *)
-  | Plus (** +*)
-[@@deriving show { with_path = false }]
-
 type expression =
   | EConst of const
   | EIdentifier of id
