@@ -193,7 +193,15 @@ let%expect_test "var hard" =
 
 let%expect_test "var hard" =
   test_pattern "->";
-  [%expect
-    {|
+  [%expect {|
     Error: It cannot be this way |}]
+;;
+
+let%expect_test "pat type" =
+  test_pattern "([a]: int list)";
+  [%expect {|
+    (Pat_type (
+       (Pat_construct ("::",
+          (Some (Pat_tuple [(Pat_var "a"); (Pat_construct ("[]", None))])))),
+       (Type_params ((Type_single "int"), "list")))) |}]
 ;;

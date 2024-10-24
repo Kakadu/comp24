@@ -50,6 +50,14 @@ let parse_plist p =
   <|> remove_square_brackets parse_list
 ;;
 
+let pat_typexpr p =
+  remove_parents
+  @@
+  let+ pat = p
+  and+ typexpr = Typexpr_parser.parse_typexpr in
+  Pat_type (pat, typexpr)
+;;
+
 (** https://ocaml.org/manual/5.2/patterns.html#start-section *)
 let priority =
   [ parse_pcons; choice_pass_prev [ parse_plist; Fun.id ]; parse_ptuple; parse_por ]
@@ -59,5 +67,11 @@ let parse_pattern =
   fix (fun self ->
     parse_by_priority priority
     @@ choice
-         [ parse_any; parse_pconst; parse_var; remove_parents self; parse_plist self ])
+         [ parse_any
+         ; parse_pconst
+         ; parse_var
+         ; pat_typexpr self
+         ; remove_parents self
+         ; parse_plist self
+         ])
 ;;
