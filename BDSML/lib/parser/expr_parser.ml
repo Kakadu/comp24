@@ -11,9 +11,10 @@ let parse_const =
   Exp_constant const
 ;;
 
-(** https://ocaml.org/manual/5.2/lex.html#sss:lex-ops-symbols *)
+(** https://ocaml.org/manual/5.2/lex.html#sss:lex-ops-symbols
+    '|' moved from core by purpose *)
 let is_core_operator_char = function
-  | '$' | '&' | '*' | '+' | '-' | '/' | '=' | '>' | '@' | '^' | '|' -> true
+  | '$' | '&' | '*' | '+' | '-' | '/' | '=' | '>' | '@' | '^' -> true
   | _ -> false
 ;;
 
@@ -21,7 +22,7 @@ let is_operator_char a =
   is_core_operator_char a
   ||
   match a with
-  | '~' | '!' | '?' | '%' | '<' | ':' | '.' -> true
+  | '~' | '!' | '?' | '%' | '<' | ':' | '.' | '|' -> true
   | _ -> false
 ;;
 
@@ -41,7 +42,7 @@ let parse_prefix_op =
 
 let parse_infix_op prefix =
   let case1 =
-    let+ first_el = char '#'
+    let+ first_el = char '#' <|> char '|'
     and+ other_el = take_while1 is_operator_char in
     Char.escaped first_el ^ other_el
   in
@@ -117,8 +118,25 @@ let let_parser prev =
   Exp_let (rec_flag, bindings, expr)
 ;;
 
+let parse_cases prev =
+  let case =
+    let+ left = Pattern_parser.parse_pattern
+    and+ _ = check_string "->"
+    and+ right = prev in
+    { left; right }
+  in
+  sep_by1 (check_char '|') case
+;;
+
+let function_parser prev =
+  let+ _ = check_string "function"
+  and+ _ = check_char '|' <|> return ' '
+  and+ cases = parse_cases prev in
+  Exp_function cases
+;;
+
 let fun_parser prev =
-  let+ _ = check_string "fun"
+  let+ _ = check_string "fun" <* ws1
   and+ args =
     let arg = Pattern_parser.parse_pattern in
     sep_by1 ws1 arg
@@ -127,7 +145,7 @@ let fun_parser prev =
   Exp_fun (args, expr)
 ;;
 
-let spec_parser = [ let_parser; fun_parser ]
+let spec_parser = [ let_parser; fun_parser; function_parser ]
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
     by priority from higher to lower*)
