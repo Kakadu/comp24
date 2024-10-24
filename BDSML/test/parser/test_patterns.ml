@@ -2,8 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let test_pattern =
-  Test_utils.pp_parse_result Parser.Pattern_parser.parse_pattern Parser.Ast.pp_pattern
+open Test_utils
+
+let test_pattern str =
+  Test_utils.pp_result Parser.Ast.pp_pattern
+  @@ parse_with_parser Parser.Pattern_parser.parse_pattern str
 ;;
 
 let%expect_test "test any" =
@@ -199,7 +202,8 @@ let%expect_test "var hard" =
 
 let%expect_test "pat type" =
   test_pattern "([a]: int list)";
-  [%expect {|
+  [%expect
+    {|
     (Pat_type (
        (Pat_construct ("::",
           (Some (Pat_tuple [(Pat_var "a"); (Pat_construct ("[]", None))])))),

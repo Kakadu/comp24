@@ -2,11 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let parse parser str = Angstrom.parse_string ~consume:Angstrom.Consume.All parser str
+let parse_with_parser parser str =
+  Angstrom.parse_string ~consume:Angstrom.Consume.All parser str
+;;
 
-let pp_parse_result parser printer str =
-  parse parser str
-  |> function
+let pp_result printer = function
   | Result.Ok res -> Format.printf "%a" printer res
   | Result.Error s -> Format.eprintf "Error%s" s
 ;;
