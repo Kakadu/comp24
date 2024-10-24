@@ -143,7 +143,7 @@ let pp_error fmt err =
   | UnificationFailed (t1, t2) ->
     fprintf
       fmt
-      "This expression has type %a but an expression was expected of %a"
+      "This expression has type %a but an expression was expected of type %a"
       pp_type
       t1
       pp_type
@@ -151,7 +151,7 @@ let pp_error fmt err =
   | ParserAvoidedError ->
     fprintf
       fmt
-      "Use the parser to get the AST: the parser does some transformations of expressions"
+      "Use parser to get the AST: the parser does some transformations of expressions"
   | WildcardNotExpected -> fprintf fmt {| wildcard " _ " not expected |}
 ;;
 
