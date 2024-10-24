@@ -63,7 +63,7 @@ let chainl1 e op =
 let pspaces = skip_while is_space
 let ptoken p = skip_while is_space *> p
 let pstoken s = ptoken (Angstrom.string s)
-let pparens p = pstoken "(" *> p <* pstoken ")"
+let pparens p = pstoken "(" *> take_while is_space *> p <* pstoken ")"
 let poperator = pparens (take_while1 is_operator_char) >>= fun op -> return op
 
 let pid =
@@ -93,45 +93,46 @@ let pbool =
 let punit = pstoken "()" *> return CUnit <?> "unit"
 let pconst = choice [ pint; pbool; punit ] >>| fun x -> EConst x
 let pvar = pid >>| fun e -> EVar e
+let poperatorvar = poperator >>| fun op -> EVar op
 
 let ptype =
   fix (fun ptype ->
     let pint_type = pstoken "int" *> return TInt in
     let pbool_type = pstoken "bool" *> return TBool in
     let punit_type = pstoken "unit" *> return TUnit in
-    let pwrapped_type = pparens ptype in
-    let simple_type = choice [ pint_type; pbool_type; punit_type; pwrapped_type ] in
-    chainr1 simple_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
+    let simple_type = choice [ pint_type; pbool_type; punit_type; pparens ptype ] in
+    (* Парсер для списков, обязательно должен идти после обработки кортежей *)
+    let list_type = simple_type >>= fun t -> pstoken "list" *> return (TList t) in
+    (* Парсер для кортежей с минимум двумя элементами *)
+    let tuple_type =
+      lift3
+        (fun t1 t2 ts -> TTuple (t1, t2, ts))
+        (choice [ list_type; simple_type ])
+        (pstoken "*" *> choice [ list_type; simple_type ])
+        (many (pstoken "*" *> choice [ list_type; simple_type ]))
+    in
+    (* Обработка кортежей и функциональных типов *)
+    let composed_type = choice [ tuple_type; list_type; simple_type ] in
+    chainr1 composed_type (pstoken "->" *> return (fun t1 t2 -> TFun (t1, t2))))
 ;;
 
 let ptyped_var =
-  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, ty)
-  <|> (pid >>| fun id -> id, TUnknown)
+  pparens (pid >>= fun id -> pstoken ":" *> ptype >>| fun ty -> id, Some ty)
+  <|> (pid >>= fun id -> return (id, None))
 ;;
 
-let plet_no_args pexpr =
+let plet pexpr =
+  let rec pbody pexpr =
+    ptyped_var >>= fun id -> pbody pexpr <|> pstoken "=" *> pexpr >>| fun e -> EFun (id, e)
+  in
   pstoken "let"
   *> lift4
        (fun r id e1 e2 -> ELet (r, id, e1, e2))
        (pstoken "rec" *> return Rec <|> return NonRec)
        (poperator <|> pstoken "()" <|> pid)
-       (pstoken "=" *> pexpr)
+       (pstoken "=" *> pexpr <|> pbody pexpr)
        (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
 ;;
-
-let plet_with_args pexpr =
-  let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
-  pstoken "let"
-  *> lift5
-       (fun r id args e1 e2 -> ELet (r, id, EFun (args, e1), e2))
-       (pstoken "rec" *> return Rec <|> return NonRec)
-       (poperator <|> pstoken "()" <|> pid)
-       (many1 ptyped_var)
-       (pstoken "=" *> pexpr)
-       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
-;;
-
-let plet pexpr = choice [ plet_no_args pexpr; plet_with_args pexpr ]
 
 let pbranch pexpr =
   ptoken
@@ -192,35 +193,38 @@ let pmatch pexpr =
 ;;
 
 let pfun pexpr =
-  let pbody pexpr =
-    many1 ptyped_var >>= fun vars -> pstoken "->" *> pexpr >>| fun e -> EFun (vars, e)
+  let rec pbody pexpr =
+    ptyped_var
+    >>= fun id -> pbody pexpr <|> pstoken "->" *> pexpr >>| fun e -> EFun (id, e)
   in
   pstoken "fun" *> pbody pexpr
 ;;
 
-let pebinop chain1 e pbinop = chain1 e (pbinop >>| fun op e1 e2 -> EBinop (op, e1, e2))
+let pebinop chain1 e pbinop =
+  chain1 e (pbinop >>| fun op e1 e2 -> EApp (EApp (EVar op, e1), e2))
+;;
+
 let plbinop = pebinop chainl1
-let padd = pstoken "+" *> return Add
-let psub = pstoken "-" *> return Sub
-let pmul = pstoken "*" *> return Mul
-let pdiv = pstoken "/" *> return Div
-let peq = pstoken "=" *> return Eq
-let pneq = pstoken "<>" *> return Neq
-let ples = pstoken "<" *> return Les
-let pleq = pstoken "<=" *> return Leq
-let pgre = pstoken ">" *> return Gre
-let pgeq = pstoken ">=" *> return Geq
+let padd = pstoken "+" *> return "+"
+let psub = pstoken "-" *> return "-"
+let pmul = pstoken "*" *> return "*"
+let pdiv = pstoken "/" *> return "/"
+let peq = pstoken "=" *> return "="
+let pneq = pstoken "<>" *> return "<>"
+let ples = pstoken "<" *> return "<"
+let pleq = pstoken "<=" *> return "<="
+let pgre = pstoken ">" *> return ">"
+let pgeq = pstoken ">=" *> return ">="
 
 let pexpr =
   fix
   @@ fun pexpr ->
-  let pe = choice [ pparens pexpr; pconst; pvar; plist pexpr; pfun pexpr ] in
+  let pe =
+    choice [ pparens pexpr; pconst; poperatorvar; pvar; plist pexpr; pfun pexpr ]
+  in
   let pe =
     lift2
-      (fun f args ->
-        match args with
-        | [] -> f
-        | _ -> EApp (f, args))
+      (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
       pe
       (many (char ' ' *> ptoken pe))
   in

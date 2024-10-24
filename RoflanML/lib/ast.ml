@@ -5,20 +5,6 @@
 (** Identifiers for variables and functions names *)
 type id = string [@@deriving show { with_path = false }]
 
-(** Binary operators *)
-type binop =
-  | Add (** [+] operator *)
-  | Sub (** [-] operator *)
-  | Div (** [/] operator *)
-  | Mul (** [*] operator *)
-  | Eq (** [=] operator *)
-  | Neq (** [<>] operator *)
-  | Les (** [<] operator *)
-  | Leq (** [<=] operator *)
-  | Gre (** [>] operator *)
-  | Geq (** [>=] operator *)
-[@@deriving show { with_path = false }]
-
 type const =
   | CInt of int (** Integers 1, 2, ... *)
   | CBool of bool (** Boolean true or false *)
@@ -40,28 +26,27 @@ type is_rec =
 [@@deriving show { with_path = false }]
 
 type type_id =
-  | TUnknown (** Argument without mentioned type *)
   | TInt (** Type int *)
   | TBool (** Type bool *)
   | TUnit (** Type unit () *)
   | TFun of type_id * type_id (** Function type t1 -> t2 *)
   | TList of type_id (** List type t list *)
+  | TTuple of type_id * type_id * type_id list (** Tuple type (t1 * t2 * ... * tn) *)
 [@@deriving show { with_path = false }]
 
-type typed_arg = id * type_id [@@deriving show { with_path = false }]
+type typed_arg = id * type_id option [@@deriving show { with_path = false }]
 
 type expr =
   | EConst of const (** Consts *)
   | EVar of id (** Variables with their names *)
-  | EBinop of binop * expr * expr (** e1 binop e2 *)
   | ETuple of expr * expr * expr list
   (** Tuples of 2 or more elements, separated by ',' *)
   | EList of expr list (** Lists [1; 2; 3], ... *)
   | EBranch of expr * expr * expr (** if [cond] then [a] else [b] *)
   | EMatch of expr * (pattern * expr) list (** match [x] with | [p1] -> [e1] | ... *)
   | ELet of is_rec * id * expr * expr option (** let rec f: t1 -> t2 *)
-  | EFun of typed_arg list * expr (** Anonymous function with typed arguments *)
-  | EApp of expr * expr list (** Application f x y z *)
+  | EFun of typed_arg * expr (** Anonymous function with typed arguments *)
+  | EApp of expr * expr (** Application f x y z *)
 [@@deriving show { with_path = false }]
 
 type program = expr list [@@deriving show { with_path = false }]
