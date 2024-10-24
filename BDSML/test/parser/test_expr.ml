@@ -551,16 +551,26 @@ let%expect_test "test typexpr 2" =
 
 let%expect_test "test typexpr fun" =
   test_expr "fun a:(int) -> a";
-  [%expect {|
+  [%expect
+    {|
     (Exp_fun ([(Pat_var "a")], (Exp_type ((Exp_ident "a"), (Type_single "int")))
        )) |}]
 ;;
 
 let%expect_test "test typexpr fun fun" =
   test_expr "fun a: (int -> int) -> a";
-  [%expect {|
+  [%expect
+    {|
     (Exp_fun ([(Pat_var "a")],
        (Exp_type ((Exp_ident "a"),
           (Type_fun [(Type_single "int"); (Type_single "int")])))
        )) |}]
+;;
+
+let%expect_test "test typexpr fun arg" =
+  test_expr "fun (a:int): int -> a";
+  [%expect
+    {|
+    (Exp_fun ([(Pat_type ((Pat_var "a"), (Type_single "int")))],
+       (Exp_type ((Exp_ident "a"), (Type_single "int"))))) |}]
 ;;
