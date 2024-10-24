@@ -2,8 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let test_expr =
-  Test_utils.pp_parse_result Parser.Expr_parser.parse_expr Parser.Ast.pp_expression
+open Test_utils
+
+let test_expr str =
+  pp_result Parser.Ast.pp_expression
+  @@ parse_with_parser Parser.Expr_parser.parse_expr str
 ;;
 
 let%expect_test "test just sum" =

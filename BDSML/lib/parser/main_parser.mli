@@ -5,5 +5,4 @@
 open Angstrom
 open Ast
 
-val parse_let_main_part : expression t -> (rec_flag * let_binding list) t
-val parse_expr : expression t
+val parse : string -> (structure_item list, string) result

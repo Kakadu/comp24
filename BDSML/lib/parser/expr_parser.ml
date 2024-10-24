@@ -102,7 +102,7 @@ let tuple prev =
   | _ -> fail ""
 ;;
 
-let let_parse_main_part prev =
+let parse_let_main_part prev =
   let+ _ = check_string "let" <* ws1
   and+ rec_flag = check_string "rec" *> return Recursive <* ws1 <|> return Nonrecursive
   and+ bindings =
@@ -135,7 +135,7 @@ let let_parse_main_part prev =
 ;;
 
 let let_parser prev =
-  let+ rec_flag, bindings = let_parse_main_part prev
+  let+ rec_flag, bindings = parse_let_main_part prev
   and+ _ = check_string "in" <* ws1
   and+ expr = prev in
   Exp_let (rec_flag, bindings, expr)
