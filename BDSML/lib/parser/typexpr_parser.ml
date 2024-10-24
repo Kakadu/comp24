@@ -14,20 +14,19 @@ let parse_single =
 ;;
 
 (** [int t list] *)
-let parse_params s =
+let parse_typeconstr prev =
   let rec go acc =
     (let+ main_type = ws1 *> parse_ident_name in
      Type_params (acc, main_type))
     >>= go
     <|> return acc
   in
-  let* init = parse_single <|> s in
-  go init
+  prev >>= go
 ;;
 
 (** [int * string * int] *)
-let parse_tuple s =
-  sep_by1 (check_char '*') @@ parse_params s
+let parse_tuple prev =
+  sep_by1 (check_char '*') prev
   >>= function
   | _ :: _ :: _ as t_list -> return @@ Type_tuple t_list
   | [ t ] -> return t
@@ -35,15 +34,28 @@ let parse_tuple s =
 ;;
 
 (** [int -> int] *)
-let parse_fun s =
-  sep_by1 (check_string "->") @@ parse_tuple s
+let parse_fun prev =
+  sep_by1 (check_string "->") prev
   >>= function
   | _ :: _ :: _ as t_list -> return @@ Type_fun t_list
   | [ t ] -> return t
   | _ -> fail "invalid state in function type"
 ;;
 
-(** [:int] *)
-let parse_typexpr : typexpr t =
-  check_char ':' *> fix (fun s -> remove_parents @@ parse_fun s <|> parse_fun s)
+(** https://ocaml.org/manual/5.2/types.html#typexpr *)
+let priority = [ parse_typeconstr; parse_tuple; parse_fun ]
+
+let parse_typexpr_by_prior =
+  fix (fun self ->
+    parse_by_priority priority @@ choice [ parse_single; remove_parents self ])
 ;;
+
+(** for [fun pat: typexpr -> expr] parse *)
+let parse_skip_fun =
+  check_char ':'
+  *> (parse_by_priority [ parse_typeconstr; parse_tuple ]
+      @@ choice [ parse_single; remove_parents parse_typexpr_by_prior ])
+;;
+
+(** [:int] *)
+let parse_typexpr : typexpr t = check_char ':' *> parse_typexpr_by_prior

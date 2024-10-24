@@ -538,12 +538,29 @@ let%expect_test "test typexpr" =
   [%expect {| (Exp_type ((Exp_constant (Const_int 4)), (Type_single "int"))) |}]
 ;;
 
-let%expect_test "test typexpr" =
+let%expect_test "test typexpr 2" =
   test_expr "(4 + 5: int)";
-  [%expect {|
+  [%expect
+    {|
     (Exp_type (
        (Exp_apply ((Exp_ident "+"),
           (Exp_tuple [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))])
           )),
        (Type_single "int"))) |}]
+;;
+
+let%expect_test "test typexpr fun" =
+  test_expr "fun a:(int) -> a";
+  [%expect {|
+    (Exp_fun ([(Pat_var "a")], (Exp_type ((Exp_ident "a"), (Type_single "int")))
+       )) |}]
+;;
+
+let%expect_test "test typexpr fun fun" =
+  test_expr "fun a: (int -> int) -> a";
+  [%expect {|
+    (Exp_fun ([(Pat_var "a")],
+       (Exp_type ((Exp_ident "a"),
+          (Type_fun [(Type_single "int"); (Type_single "int")])))
+       )) |}]
 ;;

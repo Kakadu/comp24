@@ -5,4 +5,5 @@
 open Angstrom
 open Ast
 
+val parse_skip_fun : typexpr t
 val parse_typexpr : typexpr t
