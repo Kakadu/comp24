@@ -18,6 +18,7 @@
 %token BOOL
 %token CHAR
 %token STRING
+%token <string> POLYMORPHIC_NAME // (x: `a) (y: `b)
 
 %token <string> IDENTIFIER
 
@@ -127,11 +128,12 @@ pattern:
     | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
 
 %inline paramType:
-    | INT       { PInt }
-    | FLOAT     { PFloat }
-    | BOOL      { PBool }
-    | CHAR      { PChar }
-    | STRING    { PString }
+    | INT                   { PInt }
+    | FLOAT                 { PFloat }
+    | BOOL                  { PBool }
+    | CHAR                  { PChar }
+    | STRING                { PString }
+    | n = POLYMORPHIC_NAME  { Poly n }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -159,9 +161,6 @@ typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (type
 
 %inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { val_list }
 %inline list_dt: LEFT_SQ_BRACKET; val_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { val_list }
-
-assign: 
-    | id = IDENTIFIER; EQUAL; e = expr  {BinOp (ASSIGN, Value(VarId id), e)}
 
 %inline match_case: 
     | BAR; v = value; ARROW; e = expr { (v, e) }

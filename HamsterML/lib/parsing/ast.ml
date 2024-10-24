@@ -17,6 +17,7 @@ type paramType =
   | PBool
   | PChar
   | PString
+  | Poly of string (* (a: `a) (b: `b) *)
 [@@deriving show]
 
 type bop =

@@ -16,15 +16,19 @@ let int = ('-' | '+')? digit+
 let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '?' '/' '[' ']' '{' '}' ',' '.' ' ']
 let char = ''' sym '''
 let string  = '\"' sym* '\"'
+let poly = '`' ['a'-'z' 'A'-'Z']+
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
-let unit = '(' (' ')*? ')'
+let comment = '(' '*' sym* '*' ')'
+
+let unit = '(' (' ')* ')'
 
 rule read =
     parse
     | white     { read lexbuf }
     | newline   { new_line lexbuf; read lexbuf }
+    | comment   { read lexbuf }
     | "int"     { INT }
     | "float"   { FLOAT }
     | "char"    { CHAR }
@@ -73,6 +77,8 @@ rule read =
                     TYPE_STRING (String.sub str 1 (String.length str - 2))}
     | "true"    { TYPE_BOOL (true) }
     | "false"   { TYPE_BOOL (false) }
+    | poly      { (let str = Lexing.lexeme lexbuf in
+                    POLYMORPHIC_NAME (String.sub str 1 ((String.length str) - 1))) }
     | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
     | eof       { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
