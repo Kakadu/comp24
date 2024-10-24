@@ -15,7 +15,7 @@ type error =
   | `No_variable of id
   | `Unification_failed of ty * ty
   | `Pattern_matching_error
-  | `Not_implemented (** polymorphic variants are not supported *)
+  | `Not_implemented of id (** polymorphic variants are not supported *)
   | `Empty_let
   ]
 
@@ -27,7 +27,7 @@ let pp_error ppf : error -> _ =
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
   | `Pattern_matching_error -> fprintf ppf "Pattern matching error"
-  | `Not_implemented -> fprintf ppf "Not implemented"
+  | `Not_implemented place -> fprintf ppf "Not implemented '%s'" place
   | `Empty_let -> fprintf ppf "Let with empty body"
 ;;
 
@@ -74,7 +74,7 @@ end = struct
   ;;
 
   let fail e st = st, Result.fail e
-  let return x last = last, Result.return x
+  let return x last = last, Base.Result.return x
   let bind x ~f = x >>= f
 
   let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
@@ -228,9 +228,11 @@ module Scheme = struct
 end
 
 module TypeEnv = struct
+  open Base
+
   type t = (id, scheme, String.comparator_witness) Map.t
 
-  let extend e k v = Map.update e k ~f:(fun _ -> v)
+  let extend env (v, scheme) = Map.update env v ~f:(fun _ -> scheme)
   let remove e k = Map.remove e k
   let empty = Map.empty (module String)
 
@@ -241,6 +243,22 @@ module TypeEnv = struct
 
   let apply s env = Map.map env ~f:(Scheme.apply s)
   let find x env = Map.find env x
+
+  let rec ext_by_pat (S (sub, type_var) as schema) env_ pat =
+    match pat, type_var with
+    | PVar v, _ -> extend env_ (v, schema)
+    | PCons (h, tl), TList t ->
+      let env = ext_by_pat (S (sub, t)) env_ h in
+      ext_by_pat (S (sub, type_var)) env tl
+    | PTuple es, TTuple ts ->
+      let new_env =
+        List.fold2 es ts ~init:env_ ~f:(fun env_ e t -> ext_by_pat (S (sub, t)) env_ e)
+      in
+      (match new_env with
+       | Ok env_ -> env_
+       | _ -> env_)
+    | _ -> env_
+  ;;
 end
 
 open R
@@ -279,13 +297,17 @@ let rec annot_to_ty = function
   | AFun (a1, a2) -> arrow (annot_to_ty a1) (annot_to_ty a2)
   | ATuple al -> tuple_typ (List.map al ~f:annot_to_ty)
   | AVar id -> TVar (Hashtbl.hash id)
+;;
 
 let unify_annot an ty =
   match an with
-| Some an ->
-  let* sub = Subst.unify (annot_to_ty an) ty in
-  return (Subst.apply sub ty)
-| None -> return ty
+  | Some an ->
+    let* sub = Subst.unify (annot_to_ty an) ty in
+    return (Subst.apply sub ty)
+  | None -> return ty
+;;
+
+open R
 
 let infer_pat =
   let rec helper env = function
@@ -301,9 +323,9 @@ let infer_pat =
        | CNil ->
          let* fresh = fresh_var in
          return (env, list_typ fresh))
-    | PVar (x) ->
+    | PVar x ->
       let* fresh = fresh_var in
-      let env = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
+      let env = TypeEnv.extend env (x, S (VarSet.empty, fresh)) in
       return (env, fresh)
     | PCons (p1, p2) ->
       let* env1, t1 = helper env p1 in
@@ -322,8 +344,19 @@ let infer_pat =
           pl
       in
       return (env, tuple_typ (List.rev tl))
+    | PConstraint (pat, an) ->
+      let* env1, t1 = helper env pat in
+      let* sub = Subst.unify t1 (annot_to_ty an) in
+      let env = TypeEnv.apply sub env1 in
+      return (env, Subst.apply sub t1)
   in
   helper
+;;
+
+let rec muni pat archiki =
+  match pat with
+  | PConstraint (p, _) -> muni p archiki
+  | _ as namaa -> namaa
 ;;
 
 let infer_exp =
@@ -371,26 +404,39 @@ let infer_exp =
       in
       return (sub, t)
     | ELet (_, [], _) -> fail `Empty_let
-    | ELet (Nonrec, [ (PVar (x), e1) ], e2) ->
+    | ELet (Nonrec, [ (pattern_, e1) ], e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
-      let* s2, t2 = helper (TypeEnv.extend env x s) e2 in
-      let* s = Subst.compose s1 s2 in
+      let* env1, t2 = infer_pat env pattern_ in
+      let env2 = TypeEnv.ext_by_pat s env1 pattern_ in
+      let* sub = Subst.unify t2 t1 in
+      let* sub1 = Subst.compose sub s1 in
+      let env3 = TypeEnv.apply sub1 env2 in
+      let* s2, t2 = helper env3 e2 in
+      let* s = Subst.compose sub1 s2 in
       return (s, t2)
-    | ELet (Rec, [ (PVar (x), e1) ], e2) ->
-      let* fresh = fresh_var in
-      let env1 = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
-      let* s, t = helper env1 e1 in
-      let* s1 = Subst.unify (Subst.apply s fresh) t in
-      let* s2 = Subst.compose s s1 in
-      let env = TypeEnv.apply s2 env in
-      let t = Subst.apply s2 t in
-      let s = generalize_rec env t x in
-      let env = TypeEnv.extend env x s in
-      let* sub, t = helper env e2 in
-      let* sub = Subst.compose s2 sub in
-      return (sub, t)
+    | ELet (Rec, [ (pat, e1) ], e2) ->
+      let p = muni pat pat in
+      (match p with
+       | PVar x ->
+         let* fresh = fresh_var in
+         let* e, t = infer_pat env pat in
+         let* ss = Subst.unify fresh t in
+         let env = TypeEnv.apply ss e in
+         let fresh = Subst.apply ss fresh in
+         let env1 = TypeEnv.extend env (x, S (VarSet.empty, fresh)) in
+         let* s, t = helper env1 e1 in
+         let* s1 = Subst.unify (Subst.apply s fresh) t in
+         let* s2 = Subst.compose s s1 in
+         let env = TypeEnv.apply s2 env in
+         let t = Subst.apply s2 t in
+         let s = generalize_rec env t x in
+         let env = TypeEnv.extend env (x, s) in
+         let* sub, t = helper env e2 in
+         let* sub = Subst.compose s2 sub in
+         return (sub, t)
+       | _ -> fail (`Not_implemented "in infer_exp"))
     | EFun (p, e) ->
       let* env, t = infer_pat env p in
       let* sub, t1 = helper env e in
@@ -422,34 +468,38 @@ let infer_exp =
       let* sub = Subst.compose_all [ s1; s2; s3 ] in
       let t = Subst.apply sub fresh in
       return (sub, t)
-    | _ -> fail `Not_implemented
+    | _ -> fail (`Not_implemented "in infer_exp")
   in
   helper
 ;;
 
 let infer_str_item env = function
-  | SValue (Rec, [ (PVar (x), e) ]) ->
+  | SValue (Rec, [ (PVar x, e) ]) ->
     let* fresh = fresh_var in
     let sc = S (VarSet.empty, fresh) in
-    let env = TypeEnv.extend env x sc in
+    let env = TypeEnv.extend env (x, sc) in
     let* s1, t1 = infer_exp env e in
     let* s2 = Subst.unify (Subst.apply s1 fresh) t1 in
     let* s3 = Subst.compose s1 s2 in
     let env = TypeEnv.apply s3 env in
     let t2 = Subst.apply s3 t1 in
     let sc = generalize_rec env t2 x in
-    let env = TypeEnv.extend env x sc in
+    let env = TypeEnv.extend env (x, sc) in
     return env
-  | SValue (Nonrec, [ (PVar (x), e) ]) ->
-    let* s, t = infer_exp env e in
+  | SValue (Nonrec, [ (pattern_, e) ]) ->
+    let* s, type1 = infer_exp env e in
     let env = TypeEnv.apply s env in
-    let sc = generalize env t in
-    let env = TypeEnv.extend env x sc in
-    return env
+    let sc = generalize env type1 in
+    let* env1, type2 = infer_pat env pattern_ in
+    let env2 = TypeEnv.ext_by_pat sc env1 pattern_ in
+    let* sub = Subst.unify type1 type2 in
+    let* sub1 = Subst.compose s sub in
+    let env3 = TypeEnv.apply sub1 env2 in
+    return env3
   | SEval e ->
     let* _, _ = infer_exp env e in
     return env
-  | _ -> fail `Not_implemented
+  | _ -> fail (`Not_implemented "in infer_str_item")
 ;;
 
 let start_env =
@@ -467,7 +517,7 @@ let start_env =
     ]
   in
   let env = TypeEnv.empty in
-  let bind env id typ = TypeEnv.extend env id (generalize env typ) in
+  let bind env id typ = TypeEnv.extend env (id, generalize env typ) in
   List.fold_left bin_op_list ~init:env ~f:(fun env (id, typ) -> bind env id typ)
 ;;
 
