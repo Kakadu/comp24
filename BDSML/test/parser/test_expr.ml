@@ -510,7 +510,8 @@ let%expect_test "test list inside parents" =
 
 let%expect_test "test list ops inside" =
   test_expr "[ 4 > 3; 3 > 2 ]";
-  [%expect {|
+  [%expect
+    {|
     (Exp_construct ("::",
        (Some (Exp_tuple
                 [(Exp_apply ((Exp_ident ">"),
@@ -531,4 +532,19 @@ let%expect_test "test list ops inside" =
        ))
     
      |}]
+;;
+
+let%expect_test "test typexpr" =
+  test_expr "(4: int)";
+  [%expect {| (Exp_type ((Exp_constant (Const_int 4)), (Type_single "int"))) |}]
+;;
+
+let%expect_test "test typexpr" =
+  test_expr "(4 + 5: int)";
+  [%expect {|
+    (Exp_type (
+       (Exp_apply ((Exp_ident "+"),
+          (Exp_tuple [(Exp_constant (Const_int 4)); (Exp_constant (Const_int 5))])
+          )),
+       (Type_single "int"))) |}]
 ;;
