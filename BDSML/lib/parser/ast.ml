@@ -35,10 +35,9 @@ type pattern =
       - [C P] when [args] is [Some P] *)
 [@@deriving show { with_path = false }]
 
-type value_binding =
-  { pat : pattern
-  ; expr : expression
-  }
+type let_binding =
+  | Pat_binding of pattern * expression
+  | Val_binding of string * pattern list * expression
 [@@deriving show { with_path = false }]
 
 and case =
@@ -51,7 +50,7 @@ and expression =
   | Exp_ident of string (** Identifiers, e.g. [some_var] *)
   | Exp_constant of constant (** Expression constant, e.g. [69], ['m'], ["something"] *)
   | Exp_type of expression * typexpr (** Expression with type, e.g. [69:int] *)
-  | Exp_let of rec_flag * value_binding list * expression
+  | Exp_let of rec_flag * let_binding list * expression
   (** [Exp_let(flag, [(P1,E1) ; ... ; (Pn,En)], E)] represents:
       - [let P1 = E1 and ... and Pn = EN in E]     when [flag] is [Nonrecursive]
       - [let rec P1 = E1 and ... and Pn = EN in E] when [flag] is [Recursive].
@@ -77,7 +76,7 @@ and expression =
 
 type structure_item =
   | Str_eval of expression (** [Expression] *)
-  | Str_value of rec_flag * value_binding list
+  | Str_value of rec_flag * let_binding list
   (** [Str_value(flag, [(P1, E1) ; ... ; (Pn, En)])] represents:
       - [let P1 = E1 and ... and Pn = EN]      when [flag] is [Nonrecursive]
       - [let rec P1 = E1 and ... and Pn = EN ] when [flag] is [Recursive].

@@ -102,17 +102,39 @@ let tuple prev =
   | _ -> fail ""
 ;;
 
-let let_parser prev =
+let let_parse_main_part prev =
   let+ _ = check_string "let" <* ws1
   and+ rec_flag = check_string "rec" *> return Recursive <* ws1 <|> return Nonrecursive
   and+ bindings =
     let pat_expr =
-      let+ pat = ws *> Pattern_parser.parse_pattern
-      and+ _ = check_char '='
-      and+ expr = prev in
-      { pat; expr }
+      let parse_expr =
+        let+ typexpr = option None (Typexpr_parser.parse_typexpr >>| Option.some)
+        and+ _ = check_char '='
+        and+ expr = prev in
+        match typexpr with
+        | Some typexpr -> Exp_type (expr, typexpr)
+        | _ -> expr
+      in
+      let pat_bind =
+        let+ pat = ws *> Pattern_parser.parse_pattern
+        and+ expr = parse_expr in
+        Pat_binding (pat, expr)
+      in
+      let val_bind =
+        let+ ident = parse_ident_name
+        and+ pats = sep_by ws1 Pattern_parser.parse_pattern
+        and+ expr = parse_expr in
+        Val_binding (ident, pats, expr)
+      in
+      pat_bind <|> val_bind
     in
     sep_by1 (check_string "and" <* ws1) pat_expr
+  in
+  rec_flag, bindings
+;;
+
+let let_parser prev =
+  let+ rec_flag, bindings = let_parse_main_part prev
   and+ _ = check_string "in" <* ws1
   and+ expr = prev in
   Exp_let (rec_flag, bindings, expr)
@@ -143,10 +165,12 @@ let fun_parser prev =
   and+ typexpr = option None (Typexpr_parser.parse_typexpr >>| Option.some)
   and+ _ = check_string "->"
   and+ expr = prev in
-  let exp_fun = Exp_fun (args, expr) in
-  match typexpr with
-  | Some typexpr -> Exp_type (exp_fun, typexpr)
-  | _ -> exp_fun
+  let expr =
+    match typexpr with
+    | Some typexpr -> Exp_type (expr, typexpr)
+    | _ -> expr
+  in
+  Exp_fun (args, expr)
 ;;
 
 let match_parser prev =
