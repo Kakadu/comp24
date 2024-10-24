@@ -20,14 +20,14 @@ type const =
 [@@deriving show { with_path = false }]
 
 type type_annot =
-  | AInt
-  | ABool
-  | AString
-  | AUnit
-  | AList of type_annot
-  | AFun of type_annot * type_annot
-  | ATuple of type_annot list
-  | AVar of id
+  | AInt (** x : int *)
+  | ABool (** b : bool *)
+  | AString (** s : string *)
+  | AUnit (** u : unit*)
+  | AList of type_annot (** l : int list *)
+  | AFun of type_annot * type_annot (** f : int -> int list *)
+  | ATuple of type_annot list (** t : int * int *)
+  | AVar of id (** x : 'a *)
 [@@deriving show { with_path = false }]
 
 type pattern =
@@ -36,7 +36,7 @@ type pattern =
   | PVar of id (** x *)
   | PTuple of pattern list (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
-  | PConstraint of pattern * type_annot
+  | PConstraint of pattern * type_annot (** p : int list *)
 [@@deriving show { with_path = false }]
 
 type expr =

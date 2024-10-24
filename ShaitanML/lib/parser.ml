@@ -32,9 +32,14 @@ let is_keyword = function
 ;;
 
 let ws = take_while Char.is_whitespace
-let obligatory_ws = ws >>= fun res -> match res with
-| "" -> fail "There is no whitespace"
-| _ -> (return res)
+
+let obligatory_ws =
+  ws
+  >>= fun res ->
+  match res with
+  | "" -> fail "There is no whitespace"
+  | _ -> return res
+;;
 
 let token s = ws *> string s
 let lp = token "("
@@ -135,7 +140,6 @@ let annot =
 
 let pconst c = PConst c
 let pvar x = PVar x
-
 let pcons p1 p2 = PCons (p1, p2)
 let ptuple ps = PTuple ps
 let ppconst = const >>| pconst
@@ -187,7 +191,9 @@ let pattern =
     return (PConstraint (pat, constr))
   in
   fix (fun pat ->
-    let term = choice [ ppconst; ppvar; ppany; pplist pat; pattern_with_type pat; parens pat ] in
+    let term =
+      choice [ ppconst; ppvar; ppany; pplist pat; pattern_with_type pat; parens pat ]
+    in
     let cons = chainr1 term (dcol *> return pcons) in
     let tuple = pptuple cons <|> cons in
     tuple)
@@ -230,7 +236,7 @@ let pelet pe =
   lift3
     elet
     (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
-    (sep_by (token "and") (both pattern (lift2 efunf ( many pattern <* token "=") pe)))
+    (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") pe)))
     (token "in" *> pe)
 ;;
 
