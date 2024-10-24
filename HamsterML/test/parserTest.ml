@@ -26,8 +26,8 @@ let%test _ = parse "sigma : float" = Value (TypedVarID ("sigma", PFloat))
 let%test _ = parse "kfc_boss: string" = Value (TypedVarID ("kfc_boss", PString))
 let%test _ = parse "roblox : char" = Value (TypedVarID ("roblox", PChar))
 let%test _ = parse "( roblox : bool )" = Value (TypedVarID ("roblox", PBool))
-let%test _ = parse "( roblox : `a )" = Value (TypedVarID ("roblox", Poly("a")))
-let%test _ = parse "( roblox : `a )" = Value (TypedVarID ("roblox", Poly("a")))
+let%test _ = parse "( roblox : `a )" = Value (TypedVarID ("roblox", Poly "a"))
+let%test _ = parse "( roblox : `a )" = Value (TypedVarID ("roblox", Poly "a"))
 
 (* Patterns *)
 let%test _ =
