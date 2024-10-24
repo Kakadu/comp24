@@ -103,8 +103,8 @@ let tuple prev =
 ;;
 
 let let_parser prev =
-  let+ _ = check_string "let"
-  and+ rec_flag = check_string "rec" *> return Recursive <|> return Nonrecursive
+  let+ _ = check_string "let" <* ws1
+  and+ rec_flag = check_string "rec" *> return Recursive <* ws1 <|> return Nonrecursive
   and+ bindings =
     let pat_expr =
       let+ pat = ws *> Pattern_parser.parse_pattern
@@ -112,8 +112,8 @@ let let_parser prev =
       and+ expr = prev in
       { pat; expr }
     in
-    sep_by1 (check_string "and") pat_expr
-  and+ _ = check_string "in"
+    sep_by1 (check_string "and" <* ws1) pat_expr
+  and+ _ = check_string "in" <* ws1
   and+ expr = prev in
   Exp_let (rec_flag, bindings, expr)
 ;;
@@ -130,7 +130,7 @@ let parse_cases prev =
 
 let function_parser prev =
   let+ _ = check_string "function"
-  and+ _ = check_char '|' <|> return ' '
+  and+ _ = check_char '|' <|> ws1 *> return ' '
   and+ cases = parse_cases prev in
   Exp_function cases
 ;;
@@ -143,6 +143,21 @@ let fun_parser prev =
   and+ _ = check_string "->"
   and+ expr = prev in
   Exp_fun (args, expr)
+;;
+
+let if_parser prev =
+  let+ _ = check_string "if" <* ws1
+  and+ expr1 = prev
+  and+ _ = check_string "then" <* ws1
+  and+ expr2 = prev
+  and+ else_res =
+    option None
+    @@
+    let+ _ = check_string "else" <* ws1
+    and+ expr3 = prev in
+    Some expr3
+  in
+  Exp_if (expr1, expr2, else_res)
 ;;
 
 let spec_parser = [ let_parser; fun_parser; function_parser ]
@@ -165,6 +180,7 @@ let priority =
   ; infix_right_op @@ choice [ string "or"; string "||" ]
   ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
+  ; choice_pass_prev @@ [ if_parser; Fun.id ]
   ; infix_right_op @@ string ";"
   ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
@@ -178,5 +194,6 @@ let parse_expr =
          ; parse_ident
          ; remove_parents self
          ; choice_pass_prev spec_parser self
+         ; if_parser self
          ])
 ;;
