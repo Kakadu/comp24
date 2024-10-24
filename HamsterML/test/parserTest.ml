@@ -143,6 +143,6 @@ let%test _ =
 (* application *)
 
 let%test _ =
-  parse "f x y"
+  parse "(*123*) f x y (*123*)"
   = Application (Value (VarId "f"), Application (Value (VarId "x"), Value (VarId "y")))
 ;;

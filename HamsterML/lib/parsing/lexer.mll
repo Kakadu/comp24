@@ -20,7 +20,7 @@ let poly = '`' ['a'-'z' 'A'-'Z']+
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
-let comment = '(' '*' sym* '*' ')'
+let comment = '(' '*' ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '?' '/' '[' ']' '{' '}' ',' '.' ' ']* '*' ')'
 
 let unit = '(' (' ')* ')'
 
@@ -28,7 +28,6 @@ rule read =
     parse
     | white     { read lexbuf }
     | newline   { new_line lexbuf; read lexbuf }
-    | comment   { read lexbuf }
     | "int"     { INT }
     | "float"   { FLOAT }
     | "char"    { CHAR }
@@ -69,6 +68,7 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | comment   { read lexbuf }
     | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
     | float     { TYPE_FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
