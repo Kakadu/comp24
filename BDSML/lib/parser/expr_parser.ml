@@ -140,9 +140,13 @@ let fun_parser prev =
   and+ args =
     let arg = Pattern_parser.parse_pattern in
     sep_by1 ws1 arg
+  and+ typexpr = option None (Typexpr_parser.parse_typexpr >>| Option.some)
   and+ _ = check_string "->"
   and+ expr = prev in
-  Exp_fun (args, expr)
+  let exp_fun = Exp_fun (args, expr) in
+  match typexpr with
+  | Some typexpr -> Exp_type (exp_fun, typexpr)
+  | _ -> exp_fun
 ;;
 
 let match_parser prev =
@@ -190,6 +194,14 @@ let list_parser prev =
   remove_square_brackets @@ sep_by (check_char ';') prev >>| helper
 ;;
 
+let typexpr_parser prev =
+  remove_parents
+  @@
+  let+ expr = prev
+  and+ typexpr = Typexpr_parser.parse_typexpr in
+  Exp_type (expr, typexpr)
+;;
+
 let spec_parser = [ let_parser; fun_parser; function_parser; match_parser ]
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
@@ -227,5 +239,6 @@ let parse_expr =
          ; choice_pass_prev spec_parser self
          ; if_parser self
          ; list_parser self
+         ; typexpr_parser self
          ])
 ;;
