@@ -284,8 +284,8 @@ let%expect_test "test let in" =
   [%expect
     {|
     (Exp_let (Nonrecursive,
-       [{ pat = (Pat_constant (Const_int 4)); expr = (Exp_constant (Const_int 4))
-          }
+       [(Pat_binding ((Pat_constant (Const_int 4)), (Exp_constant (Const_int 4))
+           ))
          ],
        (Exp_ident "b")))
      |}]
@@ -296,8 +296,8 @@ let%expect_test "test let several" =
   [%expect
     {|
     (Exp_let (Recursive,
-       [{ pat = (Pat_var "a"); expr = (Exp_constant (Const_int 4)) };
-         { pat = (Pat_var "b"); expr = (Exp_constant (Const_int 6)) }],
+       [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 4))));
+         (Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
        (Exp_apply ((Exp_ident "+"),
           (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
        ))
@@ -309,12 +309,11 @@ let%expect_test "test let in let" =
   [%expect
     {|
     (Exp_let (Nonrecursive,
-       [{ pat = (Pat_var "a");
-          expr =
-          (Exp_let (Nonrecursive,
-             [{ pat = (Pat_var "b"); expr = (Exp_constant (Const_int 4)) }],
-             (Exp_ident "b")))
-          }
+       [(Pat_binding ((Pat_var "a"),
+           (Exp_let (Nonrecursive,
+              [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 4))))],
+              (Exp_ident "b")))
+           ))
          ],
        (Exp_ident "a")))
      |}]
@@ -328,7 +327,7 @@ let%expect_test "test num + let" =
        (Exp_tuple
           [(Exp_constant (Const_int 4));
             (Exp_let (Nonrecursive,
-               [{ pat = (Pat_var "a"); expr = (Exp_constant (Const_int 5)) }],
+               [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 5))))],
                (Exp_ident "a")))
             ])
        ))
