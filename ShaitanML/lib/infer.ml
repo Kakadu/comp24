@@ -301,9 +301,8 @@ let infer_pat =
        | CNil ->
          let* fresh = fresh_var in
          return (env, list_typ fresh))
-    | PVar (x, an) ->
+    | PVar (x) ->
       let* fresh = fresh_var in
-      let* fresh = unify_annot an fresh in
       let env = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
       return (env, fresh)
     | PCons (p1, p2) ->
@@ -372,20 +371,18 @@ let infer_exp =
       in
       return (sub, t)
     | ELet (_, [], _) -> fail `Empty_let
-    | ELet (Nonrec, [ (PVar (x, an), e1) ], e2) ->
+    | ELet (Nonrec, [ (PVar (x), e1) ], e2) ->
       let* s1, t1 = helper env e1 in
-      let* t1 = unify_annot an t1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
       let* s2, t2 = helper (TypeEnv.extend env x s) e2 in
       let* s = Subst.compose s1 s2 in
       return (s, t2)
-    | ELet (Rec, [ (PVar (x, an), e1) ], e2) ->
+    | ELet (Rec, [ (PVar (x), e1) ], e2) ->
       let* fresh = fresh_var in
       let env1 = TypeEnv.extend env x (S (VarSet.empty, fresh)) in
       let* s, t = helper env1 e1 in
-      let* t1 = unify_annot an t in
-      let* s1 = Subst.unify (Subst.apply s fresh) t1 in
+      let* s1 = Subst.unify (Subst.apply s fresh) t in
       let* s2 = Subst.compose s s1 in
       let env = TypeEnv.apply s2 env in
       let t = Subst.apply s2 t in
@@ -431,12 +428,11 @@ let infer_exp =
 ;;
 
 let infer_str_item env = function
-  | SValue (Rec, [ (PVar (x, an), e) ]) ->
+  | SValue (Rec, [ (PVar (x), e) ]) ->
     let* fresh = fresh_var in
     let sc = S (VarSet.empty, fresh) in
     let env = TypeEnv.extend env x sc in
     let* s1, t1 = infer_exp env e in
-    let* t1 = unify_annot an t1 in
     let* s2 = Subst.unify (Subst.apply s1 fresh) t1 in
     let* s3 = Subst.compose s1 s2 in
     let env = TypeEnv.apply s3 env in
@@ -444,9 +440,8 @@ let infer_str_item env = function
     let sc = generalize_rec env t2 x in
     let env = TypeEnv.extend env x sc in
     return env
-  | SValue (Nonrec, [ (PVar (x, an), e) ]) ->
+  | SValue (Nonrec, [ (PVar (x), e) ]) ->
     let* s, t = infer_exp env e in
-    let* t = unify_annot an t in
     let env = TypeEnv.apply s env in
     let sc = generalize env t in
     let env = TypeEnv.extend env x sc in
