@@ -145,6 +145,15 @@ let fun_parser prev =
   Exp_fun (args, expr)
 ;;
 
+let match_parser prev =
+  let+ _ = check_string "match" <* ws1
+  and+ expr = prev
+  and+ _ = check_string "with"
+  and+ _ = check_char '|' <|> ws1 *> return ' '
+  and+ cases = parse_cases prev in
+  Exp_match (expr, cases)
+;;
+
 let if_parser prev =
   let+ _ = check_string "if" <* ws1
   and+ expr1 = prev
@@ -165,7 +174,23 @@ let exp_sequence prev =
   chainr1 prev del
 ;;
 
-let spec_parser = [ let_parser; fun_parser; function_parser ]
+let exp_list_cons prev =
+  let del =
+    check_string "::"
+    *> return (fun a b -> Exp_construct ("::", Some (Exp_tuple [ a; b ])))
+  in
+  chainr1 prev del
+;;
+
+let list_parser prev =
+  let rec helper = function
+    | h :: tl -> Exp_construct ("::", Some (Exp_tuple [ h; helper tl ]))
+    | [] -> Exp_construct ("[]", None)
+  in
+  remove_square_brackets @@ sep_by (check_char ';') prev >>| helper
+;;
+
+let spec_parser = [ let_parser; fun_parser; function_parser; match_parser ]
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
     by priority from higher to lower*)
@@ -177,7 +202,7 @@ let priority =
   ; prefix_op @@ choice [ string "-."; string "-" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "+"; "-" ]
-  ; infix_right_op @@ string "::"
+  ; exp_list_cons
   ; infix_right_op @@ parse_infix_with_prefixes [ "@"; "^" ]
   ; infix_left_op
     @@ choice [ parse_infix_with_prefixes [ "="; "<"; ">"; "|"; "&"; "$" ]; string "!=" ]
@@ -185,7 +210,8 @@ let priority =
   ; infix_right_op @@ choice [ string "or"; string "||" ]
   ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
-  ; choice_pass_prev @@ [ if_parser; Fun.id ]
+  ; choice_pass_prev [ if_parser; Fun.id ]
+  ; choice_pass_prev [ list_parser; Fun.id ]
   ; exp_sequence
   ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
@@ -200,5 +226,6 @@ let parse_expr =
          ; remove_parents self
          ; choice_pass_prev spec_parser self
          ; if_parser self
+         ; list_parser self
          ])
 ;;
