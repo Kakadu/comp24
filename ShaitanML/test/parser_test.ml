@@ -6,11 +6,11 @@ open Shaitanml_lib
 open Parser
 
 let%expect_test _ =
-  test_parse
-    {|
+  test_parse {|
       let f ((x : int) : int) ((y : int) : int) = x + y;;
       |};
-  [%expect {|
+  [%expect
+    {|
     [(SValue (Nonrec,
         [((PVar "f"),
           (EFun ((PConstraint ((PConstraint ((PVar "x"), AInt)), AInt)),
