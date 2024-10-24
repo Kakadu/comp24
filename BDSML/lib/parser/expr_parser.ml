@@ -160,6 +160,11 @@ let if_parser prev =
   Exp_if (expr1, expr2, else_res)
 ;;
 
+let exp_sequence prev =
+  let del = check_string ";" *> return (fun a b -> Exp_sequence (a, b)) in
+  chainr1 prev del
+;;
+
 let spec_parser = [ let_parser; fun_parser; function_parser ]
 
 (** https://ocaml.org/manual/5.2/expr.html#ss%3Aprecedence-and-associativity
@@ -181,7 +186,7 @@ let priority =
   ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
   ; choice_pass_prev @@ [ if_parser; Fun.id ]
-  ; infix_right_op @@ string ";"
+  ; exp_sequence
   ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
 ;;
