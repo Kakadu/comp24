@@ -3,7 +3,7 @@
 (library
  (name fml_lib)
  (public_name FML.Lib)
- (modules Ast Parser)
+ (modules Ast Parser Inf_errors Inferencer Typedtree)
  (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show)))
