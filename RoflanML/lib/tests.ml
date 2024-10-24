@@ -219,6 +219,25 @@ module ParserTests = struct
          None))
       |}]
   ;;
+
+  let%expect_test _ =
+    pp pp_expr parse_expr "let ( ^-^ ) x y z = x = y = z";
+    [%expect
+      {|
+      (ELet (NonRec, "^-^",
+         (EFun (("x", None),
+            (EFun (("y", None),
+               (EFun (("z", None),
+                  (EApp (
+                     (EApp ((EVar "="),
+                        (EApp ((EApp ((EVar "="), (EVar "x"))), (EVar "y"))))),
+                     (EVar "z")))
+                  ))
+               ))
+            )),
+         None))
+      |}]
+  ;;
 end
 
 module TypecheckerTests = struct
@@ -342,6 +361,16 @@ module TypecheckerTests = struct
     pp_parse_and_infer
       "let _ (f: (int -> int) -> unit) (g: int -> int -> int) (x: int) = f (g x)";
     [%expect {| ((int -> int) -> unit) -> (int -> int -> int) -> int -> unit |}]
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_infer "let ( + ) x y z = x * y * z in 1 + 2";
+    [%expect {| int -> int |}]
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_infer "let ( ^-^ ) x y z = x = y = z";
+    [%expect {| 'a -> 'a -> bool -> bool |}]
   ;;
 
   (* Errors *)

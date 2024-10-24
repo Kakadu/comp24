@@ -68,7 +68,7 @@ module Type = struct
       match l, r with
       | TBase l, TBase r -> l = r
       | TVar _, TVar _ -> true
-      | TArrow (l1, r1), TArrow (l2, r2) -> helper l1 r1 && helper r2 l2
+      | TArrow (l1, r1), TArrow (l2, r2) -> helper l1 l2 && helper r1 r2
       | TTuple (l1, l2, ls), TTuple (r1, r2, rs) ->
         helper l1 r1
         && helper l2 r2
@@ -251,6 +251,43 @@ let lookup_env : TypeEnv.t -> id -> (Subst.t * ty, error) R.t =
   | None -> fail (UndeclaredVariable id)
 ;;
 
+let create_base_env ?(env = TypeEnv.empty) =
+  let int2int_binops = [ "+"; "-"; "*"; "/" ] in
+  let poly2bool_binops = [ "="; "<>"; ">"; ">="; "<"; "<=" ] in
+  let* env =
+    Base.List.fold
+      ~init:(return env)
+      ~f:(fun env op ->
+        let* env = env in
+        return
+          (TypeEnv.extend
+             env
+             (op, S (VarSet.empty, TArrow (TBase BInt, TArrow (TBase BInt, TBase BInt))))))
+      int2int_binops
+  in
+  let* env =
+    Base.List.fold
+      ~init:(return env)
+      ~f:(fun env op ->
+        let* env = env in
+        let* tv = fresh_var in
+        let* tv_id =
+          match tv with
+          | TVar id -> return id
+          | _ -> fail NotReachable
+        in
+        return
+          (TypeEnv.extend
+             env
+             ( op
+             , S
+                 ( VarSet.singleton (module Base.Int) tv_id
+                 , TArrow (tv, TArrow (tv, TBase BBool)) ) )))
+      poly2bool_binops
+  in
+  return env
+;;
+
 let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) R.t =
   let rec helper env = function
     | PWild ->
@@ -317,7 +354,7 @@ let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) R.t =
   helper
 ;;
 
-let infer : TypeEnv.t -> expr -> (Subst.t * ty, error) R.t =
+let infer env ty =
   let rec helper env = function
     | EConst c ->
       (match c with
@@ -339,19 +376,19 @@ let infer : TypeEnv.t -> expr -> (Subst.t * ty, error) R.t =
       let* s = Subst.compose s subst in
       let res_ty = TArrow (Subst.apply s tv, ty) in
       return (s, res_ty)
-    | EBinop (op, l, r) ->
-      let* l_subst, l_ty = helper env l in
-      let* r_subst, r_ty = helper env r in
-      (match op with
+    (* | EBinop (op, l, r) ->
+       let* l_subst, l_ty = helper env l in
+       let* r_subst, r_ty = helper env r in
+       (match op with
        | Eq | Neq | Les | Leq | Gre | Geq ->
-         let* subst = unify l_ty r_ty in
-         let* final_subst = Subst.compose_all [ l_subst; r_subst; subst ] in
-         return (final_subst, TBase BBool)
+       let* subst = unify l_ty r_ty in
+       let* final_subst = Subst.compose_all [ l_subst; r_subst; subst ] in
+       return (final_subst, TBase BBool)
        | _ ->
-         let* subst1 = unify l_ty (TBase BInt) in
-         let* subst2 = unify r_ty (TBase BInt) in
-         let* final_subst = Subst.compose_all [ l_subst; r_subst; subst1; subst2 ] in
-         return (final_subst, TBase BInt))
+       let* subst1 = unify l_ty (TBase BInt) in
+       let* subst2 = unify r_ty (TBase BInt) in
+       let* final_subst = Subst.compose_all [ l_subst; r_subst; subst1; subst2 ] in
+       return (final_subst, TBase BInt)) *)
     | EApp (e1, e2) ->
       let* subst1, ty1 = helper env e1 in
       let* subst2, ty2 = helper (TypeEnv.apply env subst1) e2 in
@@ -444,7 +481,8 @@ let infer : TypeEnv.t -> expr -> (Subst.t * ty, error) R.t =
       let* final_subst = Subst.compose c_subst e_subst in
       return (final_subst, Subst.apply final_subst e_ty)
   in
-  helper
+  let* env = create_base_env ~env in
+  helper env ty
 ;;
 
 let run_infer ?(env = TypeEnv.empty) e = Result.map snd (run (infer env e))

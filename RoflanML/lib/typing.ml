@@ -98,6 +98,8 @@ type error =
   | OrPatternBoundsDiff of id (** Variable id doesn't occure in some of Or patterns *)
   | OrPatternTypeDiff of id * ty * ty (** Types of some bounds in Or pattern differ *)
   | NotImplemented (** Still not implemented features *)
+  | NotReachable
+  (** For non reachable code. If it is reached, there are serious problems in your typechecker *)
 
 let pp_error fmt = function
   | OccursCheckFailed (tv, ty) ->
@@ -123,4 +125,7 @@ let pp_error fmt = function
       pp_ty
       ty2
   | NotImplemented -> Stdlib.print_endline "Expression contains not implemented features"
+  | NotReachable ->
+    Stdlib.print_endline
+      "This code must be not reachable. There are serious problems in your program"
 ;;
