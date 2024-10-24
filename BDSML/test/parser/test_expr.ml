@@ -585,3 +585,24 @@ let%expect_test "test typexpr let" =
          ],
        (Exp_apply ((Exp_ident "a"), (Exp_tuple [(Exp_ident "b")]))))) |}]
 ;;
+
+let%expect_test "test redefine operator" =
+  test_expr "let (+) a b = a - b in let (!) m = m in a + !b";
+  [%expect
+    {|
+    (Exp_let (Nonrecursive,
+       [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
+           (Exp_apply ((Exp_ident "-"),
+              (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
+           ))
+         ],
+       (Exp_let (Nonrecursive,
+          [(Val_binding ("!", [(Pat_var "m")], (Exp_ident "m")))],
+          (Exp_apply ((Exp_ident "+"),
+             (Exp_tuple
+                [(Exp_ident "a");
+                  (Exp_apply ((Exp_ident "!"), (Exp_tuple [(Exp_ident "b")])))])
+             ))
+          ))
+       )) |}]
+;;
