@@ -32,6 +32,10 @@ let is_keyword = function
 ;;
 
 let ws = take_while Char.is_whitespace
+let obligatory_ws = ws >>= fun res -> match res with
+| "" -> fail "There is no whitespace"
+| _ -> (return res)
+
 let token s = ws *> string s
 let lp = token "("
 let rp = token ")"
@@ -225,8 +229,8 @@ let pefun pe = lift2 efun (token "fun" *> pattern) (lift2 efunf (many pattern <*
 let pelet pe =
   lift3
     elet
-    (token "let" *> option Nonrec (token "rec" *> return Rec))
-    (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") pe)))
+    (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
+    (sep_by (token "and") (both pattern (lift2 efunf ( many pattern <* token "=") pe)))
     (token "in" *> pe)
 ;;
 
@@ -282,7 +286,7 @@ let str_item =
   let psvalue =
     lift2
       svalue
-      (token "let" *> option Nonrec (token "rec" *> return Rec))
+      (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
       (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") expr)))
   in
   choice [ pseval; psvalue ]
