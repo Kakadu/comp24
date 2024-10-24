@@ -22,8 +22,6 @@ let ws1 =
 
 let remove_parents x = check_char '(' *> x <* check_char ')'
 let remove_square_brackets x = check_char '[' *> x <* check_char ']'
-let rec_remove_parents m = fix (fun t -> remove_parents t <|> m)
-let rec_remove_square_brackets m = fix (fun t -> remove_square_brackets t <|> m)
 
 let is_keyword = function
   | "and"
@@ -83,17 +81,6 @@ let is_keyword = function
   | "while"
   | "with"
   | "|" -> true
-  | _ -> false
-;;
-
-let is_core_operator_char = function
-  | '$' | '&' | '*' | '+' | '-' | '/' | '=' | '>' | '@' | '^' | '|' -> true
-  | _ -> false
-;;
-
-let is_operator_char = function
-  | '~' | '!' | '?' | '%' | '<' | ':' | '.' -> true
-  | _ as x when is_core_operator_char x -> true
   | _ -> false
 ;;
 
