@@ -2,8 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-(* open Ast
-   open Typedtree *)
+(* open Ast *)
+open Typedtree
 open Inf_errors
 
 module R : sig
@@ -81,4 +81,27 @@ end = struct
 
   (* Run and get the internal value. *)
   let run m = snd (m 0)
+end
+
+module Type = struct
+  type t = typ
+
+  let rec occurs_in v = function
+    | TVar b -> b = v
+    | TFunction (l, r) -> occurs_in v l || occurs_in v r
+    | TList t -> occurs_in v t
+    | TTuple ts -> List.fold_left (fun acc item -> acc || occurs_in v item) false ts
+    | _ -> false
+  ;;
+
+  let type_vars =
+    let rec helper acc = function
+      | TVar b -> VarSet.add b acc
+      | TFunction (l, r) -> helper (helper acc l) r
+      | TList t -> helper acc t
+      | TTuple ts -> List.fold_left helper acc ts
+      | TBool | TInt -> acc
+    in
+    helper VarSet.empty
+  ;;
 end
