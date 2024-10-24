@@ -162,7 +162,7 @@ let fun_parser prev =
   and+ args =
     let arg = Pattern_parser.parse_pattern in
     sep_by1 ws1 arg
-  and+ typexpr = option None (Typexpr_parser.parse_typexpr >>| Option.some)
+  and+ typexpr = option None (Typexpr_parser.parse_skip_fun >>| Option.some)
   and+ _ = check_string "->"
   and+ expr = prev in
   let expr =
