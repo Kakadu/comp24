@@ -574,3 +574,14 @@ let%expect_test "test typexpr fun arg" =
     (Exp_fun ([(Pat_type ((Pat_var "a"), (Type_single "int")))],
        (Exp_type ((Exp_ident "a"), (Type_single "int"))))) |}]
 ;;
+
+let%expect_test "test typexpr let" =
+  test_expr "let a (b:int): int = b in a b";
+  [%expect
+    {|
+    (Exp_let (Nonrecursive,
+       [(Val_binding ("a", [(Pat_type ((Pat_var "b"), (Type_single "int")))],
+           (Exp_type ((Exp_ident "b"), (Type_single "int")))))
+         ],
+       (Exp_apply ((Exp_ident "a"), (Exp_tuple [(Exp_ident "b")]))))) |}]
+;;
