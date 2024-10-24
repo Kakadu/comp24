@@ -6,7 +6,7 @@ type error =
   [ `No_variable of string
   | `Occurs_check
   | `Pattern_matching_error
-  | `Not_implemented
+  | `Not_implemented of string
   | `Unification_failed of Typedtree.ty * Typedtree.ty
   | `Empty_let
   ]
