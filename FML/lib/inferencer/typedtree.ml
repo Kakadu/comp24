@@ -16,3 +16,8 @@ module TVarSet = Stdlib.Set.Make (Int)
 module VarSet = Stdlib.Set.Make (String)
 
 type scheme = Scheme of TVarSet.t * typ
+
+let tvar t = TVar t
+let tfunction l r = TFunction (l, r)
+let ttuple t = TTuple t
+let tlist t = TList t
