@@ -355,3 +355,26 @@ let%expect_test "test fun tuple" =
          (Exp_fun ([(Pat_var "a")], (Exp_ident "a")))])
      |}]
 ;;
+
+let%expect_test "test function case 1" =
+  test_expr "function | a -> a | _ -> b";
+  [%expect
+    {|
+    (Exp_function
+       [{ left = (Pat_var "a"); right = (Exp_ident "a") };
+         { left = Pat_any; right = (Exp_ident "b") }])
+     |}]
+;;
+
+let%expect_test "test function case 2" =
+  test_expr "function a -> a | 1 | 2 -> b";
+  [%expect
+    {|
+    (Exp_function
+       [{ left = (Pat_var "a"); right = (Exp_ident "a") };
+         { left =
+           (Pat_or ((Pat_constant (Const_int 1)), (Pat_constant (Const_int 2))));
+           right = (Exp_ident "b") }
+         ])
+     |}]
+;;

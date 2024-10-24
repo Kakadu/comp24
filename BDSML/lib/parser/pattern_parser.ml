@@ -50,6 +50,7 @@ let parse_plist p =
   <|> remove_square_brackets parse_list
 ;;
 
+(** https://ocaml.org/manual/5.2/patterns.html#start-section *)
 let priority =
   [ parse_pcons; choice_pass_prev [ parse_plist; Fun.id ]; parse_ptuple; parse_por ]
 ;;
