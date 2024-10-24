@@ -378,3 +378,57 @@ let%expect_test "test function case 2" =
          ])
      |}]
 ;;
+
+let%expect_test "test if" =
+  test_expr "if a then b else c";
+  [%expect
+    {|
+    (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c"))))
+     |}]
+;;
+
+let%expect_test "test if without else" =
+  test_expr "if a then b";
+  [%expect {|
+    (Exp_if ((Exp_ident "a"), (Exp_ident "b"), None))
+     |}]
+;;
+
+let%expect_test "test if in expr" =
+  test_expr "4 + if a then b else c";
+  [%expect
+    {|
+    (Exp_apply ((Exp_ident "+"),
+       (Exp_tuple
+          [(Exp_constant (Const_int 4));
+            (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c"))))])
+       ))
+     |}]
+;;
+
+let%expect_test "test for if by Andrey Sukhorev 1" =
+  test_expr "if a then b; c";
+  [%expect
+    {|
+    (Exp_apply ((Exp_ident ";"),
+       (Exp_tuple
+          [(Exp_if ((Exp_ident "a"), (Exp_ident "b"), None)); (Exp_ident "c")])
+       ))
+     |}]
+;;
+
+let%expect_test "test for if by Andrey Sukhorev 2" =
+  test_expr "if a then b; c else d";
+  [%expect {| Error: end_of_input |}]
+;;
+
+let%expect_test "test for if by Andrey Sukhorev 3" =
+  test_expr "if a then b else c; d";
+  [%expect {|
+    (Exp_apply ((Exp_ident ";"),
+       (Exp_tuple
+          [(Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c"))));
+            (Exp_ident "d")])
+       ))
+     |}]
+;;
