@@ -422,9 +422,113 @@ let%expect_test "test for if by Andrey Sukhorev 2" =
 
 let%expect_test "test for if by Andrey Sukhorev 3" =
   test_expr "if a then b else c; d";
-  [%expect {|
+  [%expect
+    {|
     (Exp_sequence (
        (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c")))),
        (Exp_ident "d")))
+     |}]
+;;
+
+let%expect_test "test match" =
+  test_expr "match 4 with|4 -> 1";
+  [%expect
+    {|
+    (Exp_match ((Exp_constant (Const_int 4)),
+       [{ left = (Pat_constant (Const_int 4));
+          right = (Exp_constant (Const_int 1)) }
+         ]
+       ))
+     |}]
+;;
+
+let%expect_test "test cons list" =
+  test_expr "1 :: 2 :: []";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_constant (Const_int 1));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_constant (Const_int 2));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
+       ))
+     |}]
+;;
+
+let%expect_test "test list" =
+  test_expr "[ 1; 2 ]";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_constant (Const_int 1));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_constant (Const_int 2));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
+       ))
+     |}]
+;;
+
+let%expect_test "test list inside" =
+  test_expr "[ fun c -> c; fun b -> b ]";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_fun ([(Pat_var "c")],
+                    (Exp_sequence ((Exp_ident "c"),
+                       (Exp_fun ([(Pat_var "b")], (Exp_ident "b")))))
+                    ));
+                  (Exp_construct ("[]", None))]))
+       ))
+     |}]
+;;
+
+let%expect_test "test list inside parents" =
+  test_expr "[ (fun c -> c); (fun b -> b) ]";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_fun ([(Pat_var "c")], (Exp_ident "c")));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_fun ([(Pat_var "b")], (Exp_ident "b")));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
+       ))
+     |}]
+;;
+
+let%expect_test "test list ops inside" =
+  test_expr "[ 4 > 3; 3 > 2 ]";
+  [%expect {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_apply ((Exp_ident ">"),
+                    (Exp_tuple
+                       [(Exp_constant (Const_int 4));
+                         (Exp_constant (Const_int 3))])
+                    ));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_apply ((Exp_ident ">"),
+                                  (Exp_tuple
+                                     [(Exp_constant (Const_int 3));
+                                       (Exp_constant (Const_int 2))])
+                                  ));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
+       ))
+    
      |}]
 ;;
