@@ -376,19 +376,6 @@ let infer env ty =
       let* s = Subst.compose s subst in
       let res_ty = TArrow (Subst.apply s tv, ty) in
       return (s, res_ty)
-    (* | EBinop (op, l, r) ->
-       let* l_subst, l_ty = helper env l in
-       let* r_subst, r_ty = helper env r in
-       (match op with
-       | Eq | Neq | Les | Leq | Gre | Geq ->
-       let* subst = unify l_ty r_ty in
-       let* final_subst = Subst.compose_all [ l_subst; r_subst; subst ] in
-       return (final_subst, TBase BBool)
-       | _ ->
-       let* subst1 = unify l_ty (TBase BInt) in
-       let* subst2 = unify r_ty (TBase BInt) in
-       let* final_subst = Subst.compose_all [ l_subst; r_subst; subst1; subst2 ] in
-       return (final_subst, TBase BInt)) *)
     | EApp (e1, e2) ->
       let* subst1, ty1 = helper env e1 in
       let* subst2, ty2 = helper (TypeEnv.apply env subst1) e2 in
