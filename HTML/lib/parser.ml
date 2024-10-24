@@ -444,7 +444,12 @@ let parse_expr =
 ;;
 
 let parse_decls =
-  lift prog (many (parse_let_decl parse_expr <* (parse_stoken ";;" <|> parse_space)))
+  lift
+    prog
+    (many
+       (parse_let_decl parse_expr
+        <* choice [ parse_stoken ";;"; peek_string 0 ]
+        <* parse_space))
 ;;
 
 let parse_program s =
