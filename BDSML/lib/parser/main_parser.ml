@@ -16,5 +16,6 @@ let parse_str_eval =
   Str_eval res
 ;;
 
-let parse_structure = many (parse_str_value <|> parse_str_eval) <* ws
+let semicolon_opt = many (ws *> string ";;")
+let parse_structure = many (parse_str_value <|> parse_str_eval <* semicolon_opt) <* ws
 let parse str = Angstrom.parse_string ~consume:Angstrom.Consume.All parse_structure str
