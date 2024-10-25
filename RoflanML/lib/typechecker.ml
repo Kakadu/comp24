@@ -172,7 +172,7 @@ module Scheme = struct
   let free_vars : t -> VarSet.t = fun (S (s, ty)) -> VarSet.diff (Type.free_vars ty) s
 
   let apply (S (s, ty)) subst =
-    let subst2 = VarSet.fold s ~init:subst ~f:(fun acc k -> Base.Map.remove acc k) in
+    let subst2 = VarSet.fold s ~init:subst ~f:Base.Map.remove in
     S (s, Subst.apply subst2 ty)
   ;;
 
