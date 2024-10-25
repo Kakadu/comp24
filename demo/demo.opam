@@ -11,6 +11,8 @@ depends: [
   "dune" {>= "3.8"}
   "bisect_ppx"
   "llvm" {= "16.0.6+nnp"}
+  "qcheck" {with-tests}
+  "ppx_deriving_qcheck" {with-tests}
   "odoc" {with-doc}
 ]
 build: [
