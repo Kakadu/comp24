@@ -57,21 +57,19 @@ let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|>
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 let pspaces = skip_while is_space
 let ptoken p = skip_while is_space *> p
 let pstoken s = ptoken (Angstrom.string s)
 let pparens p = pstoken "(" *> take_while is_space *> p <* pstoken ")"
-let poperator = pparens (take_while1 is_operator_char) >>= fun op -> return op
+let poperator = pparens (take_while1 is_operator_char) >>= return
 
 let pid =
-  let pfirst =
-    satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| fun ch -> Char.escaped ch
-  in
+  let pfirst = satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| Char.escaped in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
-  ptoken (lift2 (fun x y -> x ^ y) pfirst plast)
+  ptoken (lift2 ( ^ ) pfirst plast)
   >>= fun s ->
   if is_keyword s
   then fail ("Keyword identifiers are forbidden: " ^ s)
