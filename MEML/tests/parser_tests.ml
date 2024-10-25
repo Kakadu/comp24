@@ -36,15 +36,33 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "(var : string)" in
+  let test = "(var : int)" in
   start_test parse_pattern show_pattern test;
-  [%expect {| : count_while1 |}]
+  [%expect {| (PVar ("var", TInt)) |}]
 ;;
 
 let%expect_test _ =
-  let test = "let" in
+  let test = "((1, 2), (a: int), true)" in
   start_test parse_pattern show_pattern test;
-  [%expect {| : You can not use "let" keywords as vars |}]
+  [%expect
+    {|
+    (PTuple
+       [(PTuple [(PConst (CInt 1)); (PConst (CInt 2))]); (PVar ("a", TInt));
+         (PConst (CBool true))]) |}]
+;;
+
+let%expect_test _ =
+  let test = "[1 :: (a: int); [1; 2]; (1, 2, 3); true]" in
+  start_test parse_pattern show_pattern test;
+  [%expect
+    {|
+    (PCon ((PCon ((PConst (CInt 1)), (PVar ("a", TInt)))),
+       (PCon ((PCon ((PConst (CInt 1)), (PConst (CInt 2)))),
+          (PCon (
+             (PTuple [(PConst (CInt 1)); (PConst (CInt 2)); (PConst (CInt 3))]),
+             (PConst (CBool true))))
+          ))
+       )) |}]
 ;;
 
 (* Test expression *)
