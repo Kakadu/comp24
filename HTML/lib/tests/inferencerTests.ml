@@ -30,6 +30,14 @@ module InferenceTests = struct
       {| Typecheck error: This expression has type int but an expression was expected of type bool |}]
   ;;
 
+  let%expect_test "test_op_def" =
+    infer_test {| 
+  let ( -$ ) a b = ( / ) a b|};
+    [%expect {| 
+    val -$ : int -> int -> int
+    |}]
+  ;;
+
   let%expect_test _ =
     infer_test {| let a = ( + ) 5|};
     [%expect {| val a : int -> int |}]
@@ -145,12 +153,47 @@ module InferenceTests = struct
   ;;
 
   let%expect_test _ =
+    infer_test {|let f (a: int): int = a
+and g (b: bool): bool = b;;|};
+    [%expect {|
+  val f : int -> int
+  val g : bool -> bool |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec id = fun x -> x and dup x y = (id x, id y);;|};
+    [%expect
+      {| 
+            val dup : 'a -> 'a -> 'a * 'a
+            val id : 'a -> 'a
+            |}]
+  ;;
+
+  let%expect_test _ =
     infer_test {|let rec f x = x 
 and g () = f 2 
 and h () = f true;;|};
-    [%expect {|
-  val f : 'a -> 'a
-  val g : Unit -> int
-  val h : Unit -> bool |}]
+    [%expect
+      {|
+Typecheck error: This expression has type bool but an expression was expected of type int |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec f x = g x 1 
+                and g x y = x + y;;|};
+    [%expect
+      {| 
+          val f : int -> int
+          val g : int -> int -> int
+          |}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec ( += ) x = x -$ 1 
+and (-$) = fun x y -> ( + ) x y;;|};
+    [%expect {| 
+  val += : int ->int
+  val -$ : int -> int -> int
+  |}]
   ;;
 end
