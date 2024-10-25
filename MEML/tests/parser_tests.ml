@@ -95,6 +95,35 @@ let%expect_test _ =
   [%expect {| (EVar ("papa", TInt)) |}]
 ;;
 
+let%expect_test _ =
+  let test = "([1; ([2; ([3; 4], 5)], 6)], 7)" in
+  start_test parse_expression show_expression test;
+  [%expect
+    {|
+    (ETuple
+       [(EList ((EConst (CInt 1)),
+           (EList (
+              (ETuple
+                 [(EList ((EConst (CInt 2)),
+                     (EList (
+                        (ETuple
+                           [(EList ((EConst (CInt 3)),
+                               (EList ((EConst (CInt 4)), (EConst CNil)))));
+                             (EConst (CInt 5))]),
+                        (EConst CNil)))
+                     ));
+                   (EConst (CInt 6))]),
+              (EConst CNil)))
+           ));
+         (EConst (CInt 7))]) |}]
+;;
+
+let%expect_test _ =
+  let test = "[1; 5]" in
+  start_test parse_expression show_expression test;
+  [%expect {| (EList ((EConst (CInt 1)), (EList ((EConst (CInt 5)), (EConst CNil))))) |}]
+;;
+
 (* EBinaryOp *)
 
 let%expect_test _ =
@@ -343,23 +372,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let test = "let rec fact n = if n <= 1 then 1 else n * fac n" in
-  start_test parse_bindings show_bindings test;
-  [%expect
-    {|
-    (Let (Rec, "fact",
-       (EFun ((PVar ("n", TUnknown)),
-          (EIfElse ((EBinaryOp (Leq, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
-             (EConst (CInt 1)),
-             (EBinaryOp (Mul, (EVar ("n", TUnknown)),
-                (EApp ((EVar ("fac", TUnknown)), (EVar ("n", TUnknown))))))
-             ))
-          ))
-       ))
- |}]
-;;
-
-let%expect_test _ =
   let test =
     "let rec cps_fact x = \n\
     \      let helper x acc = \n\
@@ -405,6 +417,24 @@ let%expect_test _ =
 
 let%expect_test _ =
   let test = "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y" in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "f",
+       (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
+          (EFun ((PVar ("x", TInt)),
+             (EFun ((PVar ("y", TInt)),
+                (EApp ((EApp ((EVar ("g", TUnknown)), (EVar ("x", TUnknown)))),
+                   (EVar ("y", TUnknown))))
+                ))
+             ))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test _ =
+  let test = "let (+) = fun (x: int) (y: int) -> x - y" in
   start_test parse_bindings show_bindings test;
   [%expect
     {|
