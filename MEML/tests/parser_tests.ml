@@ -438,14 +438,10 @@ let%expect_test _ =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "f",
-       (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
-          (EFun ((PVar ("x", TInt)),
-             (EFun ((PVar ("y", TInt)),
-                (EApp ((EApp ((EVar ("g", TUnknown)), (EVar ("x", TUnknown)))),
-                   (EVar ("y", TUnknown))))
-                ))
-             ))
+    (Let (Notrec, "Add",
+       (EFun ((PVar ("x", TInt)),
+          (EFun ((PVar ("y", TInt)),
+             (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
           ))
        ))
  |}]

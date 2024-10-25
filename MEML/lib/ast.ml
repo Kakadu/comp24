@@ -11,8 +11,8 @@ type const =
 [@@deriving eq, show { with_path = false }]
 
 type binary_op =
-  | Add (** + *)
-  | Sub (** - *)
+  | Add (** 1 + 2 *)
+  | Sub (** 2 - 1 *)
   | Mul (** * *)
   | Div (** / *)
   | Mod (** % *)
