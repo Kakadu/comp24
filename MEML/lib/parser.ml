@@ -137,12 +137,12 @@ let parse_tuple parser =
 
 let rec constr_con = function
   | [] -> PConst CNil
-  | hd :: [] when equal_pattern hd (PConst CNil) -> PConst CNil
+  | hd :: [] -> hd
   | [ f; s ] -> PCon (f, s)
   | hd :: tl -> PCon (hd, constr_con tl)
 ;;
 
-let parser_con c =
+let parse_con c =
   lift2
     (fun a b -> constr_con @@ (a :: b))
     (c <* stoken "::" <|> (brackets c <* stoken "::"))
@@ -153,35 +153,18 @@ let parse_con_2 parser constructor =
   constructor <$> (stoken "[" *> sep_by1 (stoken ";") parser <* stoken "]")
 ;;
 
-let parse_pattern = parse_wild <|> parse_pconst <|> parse_pvar
-
-type pdispatch =
-  { value : pdispatch -> pattern t
-  ; tuple : pdispatch -> pattern t
-  ; con : pdispatch -> pattern t
-  ; pattern : pdispatch -> pattern t
-  }
-
-let pack =
-  let pattern pack = choice [ pack.con pack; pack.tuple pack; pack.value pack ] in
-  let parse pack = choice [ pack.value pack; brackets @@ pack.tuple pack ] in
-  let con pack =
-    fix
-    @@ fun _ ->
-    parser_con (parse pack <|> brackets @@ pack.con pack)
-    <|> parse_con_2 (parse pack <|> brackets @@ pack.con pack) constr_con
+let parse_pattern =
+  fix
+  @@ fun pack ->
+  let value = parse_wild <|> parse_pconst <|> parse_pvar
   in
-  let value pack =
-    fix
-    @@ fun _ -> parse_wild <|> parse_pconst <|> parse_pvar <|> brackets @@ pack.value pack
+  let tuple = brackets @@ parse_tuple (value <|> pack) in
+  let con =
+    parse_con (tuple <|> parse_con_2 pack constr_con <|> value )
+    <|> parse_con_2 (tuple <|> pack) constr_con
   in
-  let tuple pack =
-    fix @@ fun _ -> parse_tuple (parse pack <|> brackets @@ pack.tuple pack)
-  in
-  { value; tuple; pattern; con }
+  choice [con; tuple; value]
 ;;
-
-let pat = pack.pattern pack
 
 (** Expression type *)
 
@@ -236,7 +219,7 @@ let constr_efun pl e = List.fold_right ~init:e ~f:(fun p e -> EFun (p, e)) pl
 
 let parse_fun_args =
   fix
-  @@ fun p -> many1 (pack.con pack <|> pack.value pack <|> pack.value pack) <|> brackets p
+  @@ fun p -> many1 (parse_pattern) <|> brackets p
 ;;
 
 let parse_efun expr =
@@ -304,7 +287,7 @@ let parse_tuple_expr parser =
 
 (* Expression parsers *)
 
-let constr_case pat expr = pat, expr
+let constr_case parse_pattern expr = parse_pattern, expr
 
 let ebinop_p expr =
   let helper p op =
