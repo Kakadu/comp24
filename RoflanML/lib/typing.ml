@@ -20,7 +20,7 @@ type ty =
   | TTuple of ty * ty * ty list (** Type of tuple *)
   | TList of ty (** Type of list *)
 
-let map_type =
+let map_type ast_type =
   let rec helper ast_type =
     match ast_type with
     | TInt -> TBase BInt
@@ -31,7 +31,7 @@ let map_type =
     | TTuple (ty1, ty2, tys) ->
       TTuple (helper ty1, helper ty2, Base.List.map tys ~f:helper)
   in
-  helper
+  helper ast_type
 ;;
 
 let map_var_types typ =
