@@ -156,14 +156,13 @@ let parse_con_2 parser constructor =
 let parse_pattern =
   fix
   @@ fun pack ->
-  let value = parse_wild <|> parse_pconst <|> parse_pvar
-  in
+  let value = parse_wild <|> parse_pconst <|> parse_pvar in
   let tuple = brackets @@ parse_tuple (value <|> pack) in
   let con =
-    parse_con (tuple <|> parse_con_2 pack constr_con <|> value )
+    parse_con (tuple <|> parse_con_2 pack constr_con <|> value)
     <|> parse_con_2 (tuple <|> pack) constr_con
   in
-  choice [con; tuple; value]
+  choice [ con; tuple; value ]
 ;;
 
 (** Expression type *)
@@ -216,11 +215,7 @@ let parse_eifelse i expr =
 (* EFun *)
 
 let constr_efun pl e = List.fold_right ~init:e ~f:(fun p e -> EFun (p, e)) pl
-
-let parse_fun_args =
-  fix
-  @@ fun p -> many1 (parse_pattern) <|> brackets p
-;;
+let parse_fun_args = fix @@ fun p -> many1 parse_pattern <|> brackets p
 
 let parse_efun expr =
   brackets_or_not
@@ -277,145 +272,128 @@ let parse_eletin expr =
     (stoken "in" *> expr)
 ;;
 
+(* EList *)
+
 let parse_cons_semicolon_expr parser constructor =
   constructor <$> (stoken "[" *> sep_by1 (stoken ";") parser <* stoken "]")
 ;;
 
+let rec create_cons_sc = function
+  | [] -> EConst CNil
+  | hd :: [] when equal_expression hd (EConst CNil) -> EConst CNil
+  | hd :: tl -> EList (hd, create_cons_sc tl)
+;;
+
+(* ETuple *)
+
 let parse_tuple_expr parser =
-  lift2 (fun a b -> ETuple (a :: b)) (parser <* stoken ",") (sep_by1 (stoken ",") parser)
+  brackets
+  @@ lift2
+       (fun a b -> ETuple (a :: b))
+       (parser <* stoken ",")
+       (sep_by1 (stoken ",") parser)
 ;;
 
 (* Expression parsers *)
-
-let constr_case parse_pattern expr = parse_pattern, expr
 
 let ebinop_p expr =
   let helper p op =
     parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
   in
-  let add_p = helper (char '+') Add in
-  let sub_p = helper (char '-') Sub in
-  let mul_p = helper (char '*') Mul in
-  let div_p = helper (char '/') Div in
+  let add = helper (char '+') Add in
+  let sub = helper (char '-') Sub in
+  let mul = helper (char '*') Mul in
+  let div = helper (char '/') Div in
   let and_p = helper (string "&&") And in
   let or_p = helper (string "||") Or in
-  let eq_p = helper (char '=') Eq in
-  let neq_p = helper (string "<>") Neq in
-  let gt_p = helper (char '>') Gre in
-  let lt_p = helper (char '<') Less in
-  let gte_p = helper (string ">=") Greq in
-  let lte_p = helper (string "<=") Less in
-  let muldiv_op = chainl1 expr (mul_p <|> div_p) in
-  let addsub_op = chainl1 muldiv_op (add_p <|> sub_p) in
-  let compare_op =
-    chainl1 addsub_op (neq_p <|> gte_p <|> gt_p <|> lte_p <|> lt_p <|> eq_p)
-  in
-  let and_op = chainl1 compare_op and_p in
+  let eq = helper (char '=') Eq in
+  let neq = helper (string "<>") Neq in
+  let gre = helper (char '>') Gre in
+  let less = helper (char '<') Less in
+  let greq = helper (string ">=") Greq in
+  let leq = helper (string "<=") Leq in
+  let muldiv = chainl1 expr (mul <|> div) in
+  let addsub = chainl1 muldiv (add <|> sub) in
+  let compare = chainl1 addsub (neq <|> gre <|> greq <|> less <|> leq <|> eq) in
+  let and_op = chainl1 compare and_p in
   let or_op = chainl1 and_op or_p in
   or_op
 ;;
 
-type edispatch =
-  { evar : edispatch -> expression t
-  ; econst : edispatch -> expression t
-  ; eletin : edispatch -> expression t
-  ; ebinop : edispatch -> expression t
-  ; efun : edispatch -> expression t
-  ; eifelse : edispatch -> expression t
-  ; eapp : edispatch -> expression t
-  ; expression : edispatch -> expression t
-  ; lists : edispatch -> expression t
-  ; tuples : edispatch -> expression t
-  }
-
-let pack =
-  let econst pack = fix @@ fun _ -> parse_econst <|> brackets @@ pack.econst pack in
-  let evar pack = fix @@ fun _ -> parse_evar <|> brackets @@ pack.evar pack in
+let parse_expression =
+  fix
+  @@ fun pack ->
+  let econst = brackets_or_not parse_econst in
+  let evar = brackets_or_not parse_evar in
+  let tuples =
+    parse_tuple_expr
+      (econst
+       <|> evar
+       <|> parse_tuple_expr pack
+       <|> parse_cons_semicolon_expr pack create_cons_sc)
+  in
+  let lists =
+    parse_cons_semicolon_expr
+      (econst <|> evar <|> tuples <|> parse_cons_semicolon_expr pack create_cons_sc)
+      create_cons_sc
+  in
+  let parse_if =
+    parse_ebinop pack
+    <|> brackets (parse_ebinop pack <|> parse_eletin pack <|> parse_eapp pack pack)
+  in
   let expression pack =
-    pack.ebinop pack
-    <|> pack.eapp pack
-    <|> pack.eifelse pack
-    <|> pack.efun pack
-    <|> pack.eletin pack
-    <|> brackets @@ choice [ pack.tuples pack; pack.ebinop pack ]
-    <|> pack.lists pack
+    parse_ebinop pack
+    <|> parse_eapp pack pack
+    <|> brackets_or_not @@ parse_eifelse parse_if pack
+    <|> parse_efun pack
+    <|> parse_eletin pack
+    <|> brackets @@ choice [ tuples; parse_ebinop pack ]
+    <|> lists
   in
-  let eifelse pack =
-    fix
-    @@ fun _ ->
-    let parse_if =
-      pack.ebinop pack
-      <|> brackets
-            (pack.ebinop pack
-             <|> pack.eletin pack
-             <|> pack.eapp pack
-             <|> pack.eifelse pack)
-    in
-    parse_eifelse parse_if (pack.expression pack) <|> brackets @@ pack.eifelse pack
+  let app_left pack =
+    evar
+    <|> brackets
+          (brackets_or_not @@ parse_eifelse parse_if (expression pack)
+           <|> parse_efun pack
+           <|> parse_eapp pack pack
+           <|> parse_eletin pack)
   in
-  let lists pack =
-    fix
-    @@ fun _ ->
-    let rec create_cons_sc = function
-      | [] -> EConst CNil
-      | hd :: [] when equal_expression hd (EConst CNil) -> EConst CNil
-      | hd :: tl -> EList (hd, create_cons_sc tl)
-    in
-    parse_cons_semicolon_expr (expression pack) create_cons_sc
+  let app_right pack =
+    brackets
+      (parse_ebinop pack
+       <|> brackets_or_not @@ parse_eifelse parse_if (expression pack)
+       <|> parse_eapp pack pack
+       <|> parse_efun pack
+       <|> parse_eletin pack)
+    <|> evar
+    <|> econst
   in
-  let ebinop pack =
-    fix
-    @@ fun _ ->
-    let parse_binop =
-      pack.eletin pack
-      <|> pack.eapp pack
-      <|> brackets @@ pack.eifelse pack
-      <|> brackets @@ pack.ebinop pack
-      <|> pack.evar pack
-      <|> pack.econst pack
-    in
-    parse_ebinop parse_binop <|> brackets @@ pack.ebinop pack
+  let eapp =
+    parse_eapp (app_left pack) (app_right pack) <|> brackets @@ parse_ebinop pack
   in
-  let efun pack =
-    fix
-    @@ fun _ ->
-    let efun_parse =
-      pack.ebinop pack
-      <|> pack.eapp pack
-      <|> pack.eifelse pack
-      <|> pack.efun pack
-      <|> pack.eletin pack
-    in
-    parse_efun efun_parse <|> brackets @@ pack.efun pack
+  let eifelse = parse_eifelse parse_if (expression pack) in
+  let efun =
+    brackets_or_not
+    @@ parse_efun
+         (parse_ebinop pack
+          <|> parse_eapp (app_left pack) (app_right pack)
+          <|> brackets_or_not @@ parse_eifelse parse_if (expression pack)
+          <|> parse_efun pack
+          <|> parse_eletin pack)
   in
-  let tuples pack = fix @@ fun _ -> parse_tuple_expr (expression pack) in
-  let eapp pack =
-    fix
-    @@ fun _ ->
-    let left pack =
-      pack.evar pack
-      <|> brackets
-            (pack.eifelse pack <|> pack.efun pack <|> pack.eapp pack <|> pack.eletin pack)
-    in
-    let right pack =
-      brackets
-        (pack.ebinop pack
-         <|> pack.eifelse pack
-         <|> pack.eapp pack
-         <|> pack.efun pack
-         <|> pack.eletin pack)
-      <|> pack.evar pack
-      <|> pack.econst pack
-    in
-    parse_eapp (left pack) (right pack) <|> brackets @@ pack.eapp pack
+  let ebinop =
+    brackets_or_not
+    @@ parse_ebinop
+         (parse_eletin pack
+          <|> parse_eapp (app_left pack) (app_right pack)
+          <|> brackets @@ brackets_or_not @@ parse_eifelse parse_if (expression pack)
+          <|> brackets @@ parse_ebinop pack
+          <|> evar
+          <|> econst)
   in
-  let eletin pack =
-    fix @@ fun _ -> parse_eletin @@ pack.expression pack <|> brackets @@ pack.eletin pack
-  in
-  { evar; econst; ebinop; eifelse; efun; eletin; eapp; expression; lists; tuples }
+  let eletin = parse_eletin @@ expression pack <|> brackets @@ parse_eletin pack in
+  choice [ eletin; efun; ebinop; eifelse; eapp; lists; tuples; evar; econst ]
 ;;
-
-let parse_expression = pack.expression pack
 
 (** Binding type *)
 
