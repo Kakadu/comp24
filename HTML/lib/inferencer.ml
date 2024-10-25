@@ -402,6 +402,17 @@ let rec infer env = function
     let* type_variable = fresh_var in
     check_cases type_variable typ_e subst_e patmatch
 
+and infer_rec_decl env id expr annotated_type = 
+  let* type_variable = fresh_var in
+  let env = TypeEnv.extend env id (Scheme.empty, type_variable) in
+  let* s1, typ = infer env expr in
+  let* subst = unify_annotated_type (get_return_type typ) annotated_type in
+  let* subst = Subst.compose subst s1 in
+  let* subst_2 = unify (Subst.apply subst type_variable) typ in
+  let* subst = Subst.compose subst_2 subst in
+  let type_variable = Subst.apply subst type_variable in
+  return (type_variable, subst, env)
+
 and infer_decl env = function
   | DLet (Not_recursive, id, expr, annotated_type) ->
     let* _, typ = infer env expr in
@@ -409,17 +420,10 @@ and infer_decl env = function
     let env = TypeEnv.extend env id (generalize env typ) in
     return (subst, env)
   | DLet (Recursive, id, expr, annotated_type) ->
-    let* type_variable = fresh_var in
-    let env = TypeEnv.extend env id (Scheme.empty, type_variable) in
-    let* _, typ = infer env expr in
-    let* subst = unify_annotated_type (get_return_type typ) annotated_type in
-    let* subst_2 = unify (Subst.apply subst type_variable) typ in
-    let* subst = Subst.compose subst_2 subst in
-    let type_variable = Subst.apply subst type_variable in
-    let scheme = generalize env type_variable in
+    let* typ, subst, env = infer_rec_decl env id expr annotated_type in
+    let scheme = generalize env typ in
     return (subst, TypeEnv.extend env id scheme)
   | DLetMut (Not_recursive, let_list) ->
-    (* todo: type annotation*)
     let rec helper start_env acc_env substs = function
       | hd :: tl ->
         let ident, expr, annotated_type = hd in
@@ -430,17 +434,17 @@ and infer_decl env = function
         helper start_env acc_env substitutions tl
       | [] -> return (substs, acc_env)
     in
-    (* todo: named arguments *)
+    (* todo: named arguments for helper function
+       for some i'm lost in types :( *)
     let* substs, env = helper env env Subst.empty let_list in
     return (substs, env)
   | DLetMut (Recursive, let_list) ->
-    (* todo: type annotation*)
-    let helper smth (ident, expr, typ) =
-      let dlet = DLet (Recursive, ident, expr, typ) in
+    let helper smth (ident, expr, annotated_type) =
       let* (sub : Subst.t), (env : TypeEnv.t) = smth in
-      let* sub_res, env_res = infer_decl env dlet in
-      let* sub_final = Subst.compose sub_res sub in
-      return (sub_final, TypeEnv.apply sub_res env_res)
+      let* typ, subst, env = infer_rec_decl env ident expr annotated_type in
+      let env = TypeEnv.extend env ident (Scheme.empty, typ) in
+      let* sub_final = Subst.compose subst sub in
+      return (sub_final, TypeEnv.apply sub_final env)
     in
     let* env =
       List.fold_left
@@ -452,7 +456,7 @@ and infer_decl env = function
         let_list
     in
     let* sub, env = List.fold_left helper (return (Subst.empty, env)) let_list in
-    return (sub, env)
+    return (sub, TypeEnv.apply sub env)
 ;;
 
 (* todo: better env typess*)
