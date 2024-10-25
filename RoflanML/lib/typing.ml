@@ -29,7 +29,7 @@ let map_type =
     | TFun (l, r) -> TArrow (helper l, helper r)
     | TList typ -> TList (helper typ)
     | TTuple (ty1, ty2, tys) ->
-      TTuple (helper ty1, helper ty2, Base.List.map tys ~f:(fun typ -> helper typ))
+      TTuple (helper ty1, helper ty2, Base.List.map tys ~f:helper)
   in
   helper
 ;;
@@ -44,7 +44,7 @@ let map_var_types typ =
     | TTuple (ty1, ty2, tys) ->
       let vars1 = find_vars vars ty1 in
       let vars2 = find_vars vars1 ty2 in
-      Base.List.fold_left ~init:vars2 ~f:(fun vars typ -> find_vars vars typ) tys
+      Base.List.fold_left ~init:vars2 ~f:find_vars tys
     | TList typ -> find_vars vars typ
   in
   let vars = Base.Set.elements (find_vars (Base.Set.empty (module Base.Int)) typ) in
