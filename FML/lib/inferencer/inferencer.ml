@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-(* open Ast *)
+open Ast
 open Typedtree
 open Inf_errors
 
@@ -100,7 +100,7 @@ module Type = struct
       | TFunction (l, r) -> helper (helper acc l) r
       | TList t -> helper acc t
       | TTuple ts -> List.fold_left helper acc ts
-      | TBool | TInt -> acc
+      | TBool | TInt | TUnit -> acc
     in
     helper TVarSet.empty
   ;;
@@ -156,7 +156,7 @@ end = struct
   (* Try to unify two types into a single type. *)
   let rec unify l r =
     match l, r with
-    | TInt, TInt | TBool, TBool -> return empty
+    | TInt, TInt | TBool, TBool | TUnit, TUnit -> return empty
     | TVar a, TVar b when a = b -> return empty
     | TVar a, t | t, TVar a -> singleton a t
     | TFunction (left1, right1), TFunction (left2, right2) ->
@@ -204,8 +204,109 @@ module Scheme = struct
   ;;
 
   let apply sub = function
-    | Scheme (bind_vars, ty) ->
+    | Scheme (bind_vars, typ) ->
       let sub2 = TVarSet.fold (fun sub key -> Subst.remove key sub) bind_vars sub in
-      Scheme (bind_vars, Subst.apply sub2 ty)
+      Scheme (bind_vars, Subst.apply sub2 typ)
   ;;
 end
+
+module TypeEnv = struct
+  (* A type enviroment is a map, the key of each element of which is a string,
+     which is the name of the let-binding or effect-declration,
+     and the key is the schema of the type of expression to which the name is bound. *)
+  type t = (string, scheme, Base.String.comparator_witness) Base.Map.t
+
+  let empty : t = Base.Map.empty (module Base.String)
+
+  (* Free vars of a type environment is the set of all non-quantified
+     type variables of all expressions in a given environment. *)
+  let free_vars env =
+    Base.Map.fold
+      ~init:TVarSet.empty
+      ~f:(fun ~key:_ ~data acc -> TVarSet.union acc (Scheme.free_vars data))
+      env
+  ;;
+
+  (* Apply the substitution to each scheme from the enviroment. *)
+  let apply env sub = Base.Map.map env ~f:(Scheme.apply sub)
+  let extend env key schema = Base.Map.update ~f:(fun _ -> schema) env key
+  let find env key = Base.Map.find env key
+end
+
+open R
+open R.Syntax
+
+(* Take out a new state, which is a new “type variable”
+   from the monad and wrap it in a type variable constructor. *)
+let fresh_var = fresh >>| fun name -> tvar name (* *)
+
+(* Create an expression type by using the altered scheme as follows:
+   we take all the quantified variables in the type and replace them
+   one by one with some type variable. *)
+let instantiate : scheme -> typ R.t =
+  fun (Scheme (bind_var, ty)) ->
+  TVarSet.fold
+    (fun var_name acc ->
+      let* acc = acc in
+      let* fv = fresh_var in
+      let* sub = Subst.singleton var_name fv in
+      return (Subst.apply sub acc))
+    bind_var
+    (return ty)
+;;
+
+(* Reverse process: create a scheme by using a given type and environment. *)
+let generalize : TypeEnv.t -> Type.t -> scheme =
+  fun env ty ->
+  let free = TVarSet.diff (Type.type_vars ty) (TypeEnv.free_vars env) in
+  Scheme (free, ty)
+;;
+
+let lookup_env env name =
+  (* If the passed name is defined in the enviroment,
+     create its type according to the scheme and return it.
+     Otherwise issue an error. *)
+  match TypeEnv.find env name with
+  | Some scheme ->
+    let* ty = instantiate scheme in
+    return (Subst.empty, ty)
+    (* An empty substitution is needed here only for type matching. *)
+  | None -> fail (`Unbound_variable name)
+;;
+
+let annotation_to_type =
+  (* Convert a type annotation to a real type. *)
+  let rec helper = function
+    | AInt -> tint
+    | ABool -> tbool
+    | AUnit -> tunit
+    | AFunction (l, r) -> tfunction (helper l) (helper r)
+    | AList a -> tlist (helper a)
+    | ATuple a -> ttuple @@ List.map (fun x -> helper x) a
+  in
+  helper
+;;
+
+let check_unique_vars =
+  (* Checks that all variables in the pattern are unique.
+     Used to detect severeal bound errors in tuple patterns,
+     list constructor patterns, and effects with arguments. *)
+  let rec helper var_set = function
+    | PIdentifier v ->
+      if VarSet.mem v var_set
+      then
+        (* If at least one variable is found twice, we raise an error. *)
+        fail (`Several_bounds v)
+      else return (VarSet.add v var_set)
+    | PAny -> return var_set
+    | PNill -> return var_set
+    | PUnit -> return var_set
+    | PConst _ -> return var_set
+    | PTuple pattern_list -> RList.fold_left pattern_list ~init:(return var_set) ~f:helper
+    | PCons (l, r) ->
+      let* left_set = helper var_set l in
+      helper left_set r
+    | PConstraint (pat, _) -> helper var_set pat
+  in
+  helper VarSet.empty
+;;
