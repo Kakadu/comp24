@@ -73,9 +73,7 @@ let%expect_test _ =
         [(SingleDecl
             (DDeclaration (NoRec, (PIdentifier "a"),
                (ECons ((EConst (CInt 4)),
-                  (ECons ((EConst (CInt 5)),
-                     (ECons ((EConst (CInt 6)), (EConst CNil)))))
-                  ))
+                  (ECons ((EConst (CInt 5)), (ECons ((EConst (CInt 6)), ENill))))))
                )))
           ]
     |}]

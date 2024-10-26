@@ -241,14 +241,14 @@ let parse_elist arg =
   token "["
   *> fix (fun x ->
     choice
-      [ (arg <* skip_wspace <* char ']' >>| fun expr -> ECons (expr, EConst CNil))
+      [ (arg <* skip_wspace <* char ']' >>| fun expr -> ECons (expr, ENill))
       ; (arg <* skip_wspace <* char ';' >>= fun expr -> x >>| fun l -> ECons (expr, l))
       ])
 ;;
 
 let parse_cons = token "::" *> return (fun e1 e2 -> ECons (e1, e2))
-let parse_cnill = token "[]" >>| fun _ -> EConst CNil
-let parse_elist arg = parse_cnill <|> parse_elist arg
+let parse_enill = token "[]" >>| fun _ -> ENill
+let parse_elist arg = parse_enill <|> parse_elist arg
 
 (* let parse_let pexpr =
    token "let"

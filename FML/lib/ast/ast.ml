@@ -7,7 +7,6 @@ type id = string [@@deriving show { with_path = false }]
 type const =
   | CInt of int (** 1 *)
   | CBool of bool (** true *)
-  | CNil (** [] *)
 [@@deriving show { with_path = false }]
 
 type rec_flag =
@@ -36,6 +35,7 @@ type pattern =
 [@@deriving show { with_path = false }]
 
 type expression =
+  | ENill
   | EConst of const
   | EIdentifier of id
   | EApplication of expression * expression (** E1 E2*)
