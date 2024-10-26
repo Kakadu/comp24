@@ -197,3 +197,15 @@ end = struct
   (* Composition of an arbitrary number of substitutions. *)
   let compose_all sub_list = RList.fold_left sub_list ~init:(return empty) ~f:compose
 end
+
+module Scheme = struct
+  let free_vars = function
+    | Scheme (bind_vars, typ) -> TVarSet.diff (Type.type_vars typ) bind_vars
+  ;;
+
+  let apply sub = function
+    | Scheme (bind_vars, ty) ->
+      let sub2 = TVarSet.fold (fun sub key -> Subst.remove key sub) bind_vars sub in
+      Scheme (bind_vars, Subst.apply sub2 ty)
+  ;;
+end
