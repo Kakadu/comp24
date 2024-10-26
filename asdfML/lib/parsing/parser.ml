@@ -65,6 +65,13 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  test "let _ = (1 + 2 * 3) / 4 - (5 * -6 + -7) / 8 * 9";
+  [%expect
+    {|
+    let _ = (( - ) (( / ) (( + ) 1 (( * ) 2 3)) 4) (( * ) (( / ) (( + ) (( * ) 5 -6) -7) 8) 9)) |}]
+;;
+
+let%expect_test _ =
   test "let _ = let x = 42 in x";
   [%expect {|
     let _ = let x = 42
@@ -161,13 +168,6 @@ let%expect_test _ =
     let add_one = (add 1)
     let x = (add_one 2)
   |}]
-;;
-
-let%expect_test _ =
-  test "let _ = (1 + 2 * 3) / 4 - (5 * -6 + -7) / 8 * 9";
-  [%expect
-    {|
-    let _ = (( - ) (( / ) (( + ) 1 (( * ) 2 3)) 4) (( * ) (( / ) (( + ) (( * ) 5 -6) -7) 8) 9)) |}]
 ;;
 
 let%expect_test _ =

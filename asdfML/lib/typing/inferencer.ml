@@ -173,6 +173,7 @@ end = struct
   ;;
 
   let rec unify l r =
+    (* dbg "Unifing %a and %a\n" pp_typ l pp_typ r; *)
     match l, r with
     | TGround l, TGround r when equal_ground l r -> return empty
     | TGround _, TGround _ -> fail (`Unification_failed (l, r))
@@ -246,6 +247,19 @@ module TypeEnv = struct
   ;;
 
   let extend env id scheme = set env ~key:id ~data:scheme
+
+  let rec extend_pat (env : t) (pat : Ast.pattern) (scheme : Scheme.t) =
+    match pat with
+    | PConst _ -> env
+    | PWild -> env
+    | PIdent x -> extend env x scheme
+    | PTuple xs -> List.fold xs ~init:env ~f:(fun acc x -> extend_pat acc x scheme)
+    | PList xs -> List.fold xs ~init:env ~f:(fun acc x -> extend_pat acc x scheme)
+    | PCons (l, r) -> extend_pat (extend_pat env l scheme) r scheme
+    | PAnn (x, _) -> extend_pat env x scheme
+  (* | _ -> failwith "extend_pat" *)
+  ;;
+
   let apply env sub = map env ~f:(Scheme.apply sub)
 
   let bin_op_list =
@@ -274,10 +288,11 @@ module TypeEnv = struct
       extend env op (fv, ty))
   ;;
 
-  let pp fmt (xs : t) =
+  let pp ?(no_default = true) fmt (xs : t) =
     Format.fprintf fmt "{|\n";
-    Map.iteri xs ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a\n" n pp_scheme s);
-    Format.fprintf fmt "\n|}%!"
+    (if no_default then default |> Map.keys |> List.fold ~init:xs ~f:Map.remove else xs)
+    |> Map.iteri ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a\n" n pp_scheme s);
+    Format.fprintf fmt "|}%!"
   ;;
 end
 
@@ -366,28 +381,11 @@ let infer =
       let* s, exp_ty = infer_expr env' exp in
       let ty = Subst.apply s (pat_ty ^-> exp_ty) in
       return (s, ty)
-    | ELetIn ((DLet (NonRec, PIdent id, _) as def), expr) ->
-      let* subst_def, typ_def = infer_def env def in
-      let env' = TypeEnv.apply env subst_def in
-      let typ_id = generalize env' typ_def in
-      let env'' = TypeEnv.extend env' id typ_id in
-      let* subst_expr, typ_expr = infer_expr env'' expr in
-      let* final_subst = Subst.compose subst_def subst_expr in
-      return (final_subst, typ_expr)
-    | ELetIn ((DLet (Rec, PIdent id, _) as def), expr) ->
-      let* tvar = fresh_var in
-      let env = TypeEnv.extend env id (VarSet.empty, tvar) in
-      let* s1, t1 = infer_def env def in
-      let* s2 = unify (Subst.apply s1 tvar) t1 in
-      let* s = Subst.compose s2 s1 in
-      let env = TypeEnv.apply env s in
-      let t2 = generalize env (Subst.apply s tvar) in
-      let* s2, t2 = infer_expr TypeEnv.(extend (apply env s) id t2) expr in
-      let* final_subst = Subst.compose s s2 in
-      return (final_subst, t2)
-    | ELetIn (DLet (_, non_id, _), _) ->
-      fail
-        (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id))
+    | ELetIn (def, expr) ->
+      let* let_env, let_sub, _ = infer_def env def in
+      let* exp_sub, exp_ty = infer_expr let_env expr in
+      let* sub = Subst.compose let_sub exp_sub in
+      return (sub, exp_ty)
     | ETuple xs ->
       List.fold_right
         xs
@@ -429,13 +427,39 @@ let infer =
       in
       let* final_subst = Subst.compose match_sub s' in
       return (final_subst, Subst.apply final_subst t')
-    (* | EFun ((PWild | PConst _ | PTuple _ | PList _ | PCons (_, _)), _) -> *)
     | _ -> fail (`TODO "unimplemented (infer_expr)")
-  and (infer_def : TypeEnv.t -> Ast.definition -> (Subst.t * ty) R.t) =
+  and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
-    | DLet (_, _, expr) ->
-      let* subst, typ_expr = infer_expr env expr in
-      return (subst, typ_expr)
+    | DLet (NonRec, pat, expr) ->
+      let* exp_sub, exp_ty = infer_expr env expr in
+      (* dbg "ty: %a\nSUB: %a\n" pp_typ exp_ty  Subst.pp exp_sub; *)
+      let env' = TypeEnv.apply env exp_sub in
+      let scheme = generalize env' exp_ty in
+      (* dbg "scheme: %a\n" pp_scheme scheme; *)
+      let* pat_env, pat_ty = infer_pattern env pat in
+      let pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      (* dbg "before: %a\nafter:  %a\n" TypeEnv.pp pat_env TypeEnv.pp pat_env'; *)
+      let* sub = Subst.unify pat_ty exp_ty in
+      (* dbg "sub: %a\n" Subst.pp sub; *)
+      let* final_sub = Subst.compose sub exp_sub in
+      let final_env = TypeEnv.apply pat_env' final_sub in
+      let final_ty = Subst.apply final_sub exp_ty in
+      return (final_env, final_sub, final_ty)
+    | DLet (Rec, (PIdent _ as pat), expr) | DLet (Rec, (PAnn _ as pat), expr) ->
+      (* TODO: check (copy-paste from NonRec case) *)
+      let* pat_env, pat_ty = infer_pattern env pat in
+      let* exp_sub, exp_ty = infer_expr pat_env expr in
+      let env' = TypeEnv.apply env exp_sub in
+      let scheme = generalize env' exp_ty in
+      let pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      let* sub = Subst.unify pat_ty exp_ty in
+      let* final_sub = Subst.compose exp_sub sub in
+      let final_env = TypeEnv.apply pat_env' final_sub in
+      let final_ty = Subst.apply final_sub exp_ty in
+      return (final_env, final_sub, final_ty)
+    | DLet (_, pat, _) ->
+      fail
+        (`TODO (Format.asprintf "Can't use %a in let rec expression" Ast.pp_pattern pat))
   in
   infer_def
 ;;
@@ -444,39 +468,30 @@ let infer_program (prog : Ast.definition list) =
   let rec helper env = function
     | head :: tail ->
       (match head with
-       | Ast.DLet (NonRec, PIdent id, _) ->
-         let* _, ty = infer env head in
-         let t = generalize env ty in
-         let env = TypeEnv.extend env id t in
-         let* tail = helper env tail in
-         return ((id, t) :: tail)
-       | Ast.DLet (Rec, PIdent id, _) ->
-         let* type_variable = fresh_var in
-         let env = TypeEnv.extend env id (VarSet.empty, type_variable) in
-         let* subst, ty = infer env head in
-         let* subst' = unify (Subst.apply subst type_variable) ty in
-         let* final_subst = Subst.compose subst' subst in
-         let env = TypeEnv.apply env final_subst in
-         let generalized_type = generalize env (Subst.apply final_subst type_variable) in
-         let* tail = helper (TypeEnv.extend env id generalized_type) tail in
-         return ((id, generalized_type) :: tail)
+       | Ast.DLet (_, PIdent id, _) | Ast.DLet (_, PAnn (PIdent id, _), _) ->
+         let* env', _, ty = infer env head in
+         let* tail = helper env' tail in
+         return ((id, ty) :: tail)
        | Ast.DLet (NonRec, PWild, _) ->
+         let* _ = infer env head in
          let* tail = helper env tail in
          return tail
-       | Ast.DLet (_, non_id_wild, _) ->
+       | Ast.DLet (_, pat, _) ->
          fail
-           (`TODO
-             (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern non_id_wild)))
+           (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern pat)))
     | [] -> return []
   in
   let env = TypeEnv.default in
   helper env prog
 ;;
 
-let inference_definition ast = Result.map (run (infer TypeEnv.empty ast)) snd
+let inference_definition ast =
+  Result.map (run (infer TypeEnv.empty ast)) (fun (_, _, x) -> x)
+;;
 
 let inference_program prog =
-  run (infer_program prog) |> Result.map ~f:(List.map ~f:(fun x -> snd (snd x)))
+  (* run (infer_program prog) |> Result.map ~f:(List.map ~f:(fun x -> snd (snd x))) *)
+  run (infer_program prog)
 ;;
 
 let test code =
@@ -485,28 +500,32 @@ let test code =
   let ast = Result.ok_or_failwith (Parser.parse_program ~print_ast:pa code) in
   match inference_program ast with
   | Ok t ->
-    printf "%s" (t |> List.map ~f:(asprintf "%a" pp_typ) |> String.concat ~sep:"\n")
+    printf
+      "%s"
+      (t
+       |> List.map ~f:(fun (s, t) -> asprintf "%s: %a" s pp_typ t)
+       |> String.concat ~sep:"\n")
   | Error e -> eprintf "%a" pp_error e
 ;;
 
 let%expect_test _ =
   test {| let x = () |};
-  [%expect {| () |}]
+  [%expect {| x: () |}]
 ;;
 
 let%expect_test _ =
   test {| let x = true |};
-  [%expect {| bool |}]
+  [%expect {| x: bool |}]
 ;;
 
 let%expect_test _ =
   test {| let x = 42 |};
-  [%expect {| int |}]
+  [%expect {| x: int |}]
 ;;
 
 let%expect_test _ =
   test {| let x = [1; 2; 3] |};
-  [%expect {| int list |}]
+  [%expect {| x: int list |}]
 ;;
 
 let%expect_test _ =
@@ -516,42 +535,42 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let x = [[1]; [2]; [3]] |};
-  [%expect {| int list list |}]
+  [%expect {| x: int list list |}]
 ;;
 
 let%expect_test _ =
   test {| let x = (1, true, fun x -> x, (1, 2)) |};
-  [%expect {| (int, bool, 'a -> 'a, (int, int)) |}]
+  [%expect {| x: (int, bool, 'a -> 'a, (int, int)) |}]
 ;;
 
 let%expect_test _ =
   test {| let x = 1 + 2 |};
-  [%expect {| int |}]
+  [%expect {| x: int |}]
 ;;
 
 let%expect_test _ =
   test {| let x = 1 + 2 <= 3 |};
-  [%expect {| bool |}]
+  [%expect {| x: bool |}]
 ;;
 
 let%expect_test _ =
   test {| let id = fun x -> x |};
-  [%expect {| 'a -> 'a |}]
+  [%expect {| id: 'a -> 'a |}]
 ;;
 
 let%expect_test _ =
   test {| let const = fun x -> 42 |};
-  [%expect {| 'a -> int |}]
+  [%expect {| const: 'a -> int |}]
 ;;
 
 let%expect_test _ =
   test {| let plus_one = fun x -> x + 1 |};
-  [%expect {| int -> int |}]
+  [%expect {| plus_one: int -> int |}]
 ;;
 
 let%expect_test _ =
   test {| let muladd = fun x -> fun y -> fun z -> x * y + z |};
-  [%expect {| int -> int -> int -> int |}]
+  [%expect {| muladd: int -> int -> int -> int |}]
 ;;
 
 let%expect_test _ =
@@ -561,7 +580,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let apply = let plus_one = (fun x -> x + 1) in plus_one 2 |};
-  [%expect {| int |}]
+  [%expect {| apply: int |}]
 ;;
 
 let%expect_test _ =
@@ -572,12 +591,12 @@ let%expect_test _ =
       let is_neg = fun x -> x < 0 in
       fun x -> is_neg (plus_one x)
   |};
-  [%expect {| int -> bool |}]
+  [%expect {| compose: int -> bool |}]
 ;;
 
 let%expect_test _ =
   test {| let compose = let func = fun x -> 42 in let func = fun x -> true in func |};
-  [%expect {| 'c -> bool |}]
+  [%expect {| compose: 'e -> bool |}]
 ;;
 
 let%expect_test _ =
@@ -587,12 +606,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let cond = if true then 42 else 0 |};
-  [%expect {| int |}]
+  [%expect {| cond: int |}]
 ;;
 
 let%expect_test _ =
   test {| let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1) |};
-  [%expect {| int -> int |}]
+  [%expect {| fact: int -> int |}]
 ;;
 
 let%expect_test _ =
@@ -606,8 +625,8 @@ let%expect_test _ =
     let is_neg = fun x -> x < 0
   |};
   [%expect {|
-    int -> int
-    int -> bool 
+    plus_one: int -> int
+    is_neg: int -> bool 
   |}]
 ;;
 
@@ -620,12 +639,13 @@ let%expect_test _ =
     let x = add_one 3
     let y = add_two 3
   |};
-  [%expect {|
-    int -> int -> int
-    int -> int
-    int -> int
-    int
-    int
+  [%expect
+    {|
+    add: int -> int -> int
+    add_one: int -> int
+    add_two: int -> int
+    x: int
+    y: int
   |}]
 ;;
 
@@ -644,9 +664,9 @@ let%expect_test _ =
     let x = fact 5
   |};
   [%expect {|
-    int -> (int -> 'o) -> 'o
-    int -> int
-    int
+    helper: int -> (int -> 'o) -> 'o
+    fact: int -> int
+    x: int
   |}]
 ;;
 
@@ -666,14 +686,14 @@ let%expect_test _ =
       let x = fact_2 5
     |};
   [%expect {|
-    int -> int
-    int
+    fact_2: int -> int
+    x: int
   |}]
 ;;
 
 let%expect_test _ =
   test {| let (x: int) = 42 |};
-  [%expect {| int |}]
+  [%expect {| x: int |}]
 ;;
 
 let%expect_test _ =
@@ -682,55 +702,66 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let (id: int->int) = fun (x: int) -> x |};
-  [%expect {| int -> int |}]
+  test {| let (id: int->int) = fun x -> x |};
+  [%expect {| id: int -> int |}]
 ;;
 
 let%expect_test _ =
-  test {| let (id: int->int) = fun x -> x |};
-  [%expect {| int -> int |}]
+  test {| let (id: int->int) = fun (x: int) -> x |};
+  [%expect {| id: int -> int |}]
+;;
+
+let%expect_test _ =
+  test {| let (id: int->int) = fun (x: bool) -> x |};
+  [%expect {| Unification failed on int and bool |}]
 ;;
 
 let%expect_test _ =
   test {| let id = fun (x: int) -> x |};
-  [%expect {| int -> int |}]
+  [%expect {| id: int -> int |}]
 ;;
 
 let%expect_test _ =
   test {| let (const: int) = (fun x -> 42) () |};
-  [%expect {| int |}]
+  [%expect {| const: int |}]
 ;;
 
 (* TODO: more tests for patterns and type annotations *)
 
 let%expect_test _ =
   test {|let f = fun (f: int -> int -> int) -> fun x -> fun y -> f x y|};
-  [%expect {| (int -> int -> int) -> int -> int -> int |}]
+  [%expect {| f: (int -> int -> int) -> int -> int -> int |}]
 ;;
 
 let%expect_test _ =
   test {|let compose = fun f -> fun g -> fun x -> f (g x)|};
-  [%expect {| ('d -> 'e) -> ('c -> 'd) -> 'c -> 'e  |}]
+  [%expect {| compose: ('d -> 'e) -> ('c -> 'd) -> 'c -> 'e  |}]
 ;;
 
 let%expect_test _ =
   test {|let choose = fun l -> fun r -> fun b -> if b then l else r|};
-  [%expect {| 'b -> 'b -> bool -> 'b |}]
+  [%expect {| choose: 'b -> 'b -> bool -> 'b |}]
 ;;
 
 let%expect_test _ =
   test {|let choose = fun (l: bool) -> fun r -> fun b -> if b then l else r|};
-  [%expect {| bool -> bool -> bool -> bool |}]
+  [%expect {| choose: bool -> bool -> bool -> bool |}]
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
   let (+) = fun a -> fun b -> a || b 
   let a = true + false
+  let (*) = fun a -> fun b -> fun c -> a * b * c 
+  let b = (2 * 3) 4
   |};
-  [%expect {|
-    bool -> bool -> bool
-    bool |}]
+  [%expect
+    {|
+    ( + ): bool -> bool -> bool
+    a: bool
+    ( * ): int -> int -> int -> int
+    b: int |}]
 ;;
 
 let%expect_test _ =
@@ -741,18 +772,11 @@ let%expect_test _ =
   let w = not z
   |};
   [%expect {|
-    int
-    int
-    bool
-    bool |}]
+    x: int
+    y: int
+    z: bool
+    w: bool |}]
 ;;
-
-(* let%expect_test _ =
-  test {| let (x, y) = (not true, not false) |};
-  [%expect
-    {|
-     |}]
-;; *)
 
 let%expect_test _ =
   test
@@ -762,5 +786,15 @@ let%expect_test _ =
       | 1 -> 1
       | _ -> (fib (n - 1)) + (fib (n - 2))
   |};
-  [%expect {| int -> int |}]
+  [%expect {| fib: int -> int |}]
+;;
+
+let%expect_test _ =
+  test {| let rec fix = fun f -> fun x -> f (fix f) x |};
+  [%expect {| fix: (('c -> 'f) -> 'c -> 'f) -> 'c -> 'f |}]
+;;
+
+let%expect_test _ =
+  test {| let (x, y) = (not true, not false) |};
+  [%expect {| |}]
 ;;
