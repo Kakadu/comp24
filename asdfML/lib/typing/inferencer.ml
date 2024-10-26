@@ -257,7 +257,6 @@ module TypeEnv = struct
     | PList xs -> List.fold xs ~init:env ~f:(fun acc x -> extend_pat acc x scheme)
     | PCons (l, r) -> extend_pat (extend_pat env l scheme) r scheme
     | PAnn (x, _) -> extend_pat env x scheme
-  (* | _ -> failwith "extend_pat" *)
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
@@ -348,9 +347,17 @@ let infer =
       let* fv = fresh_var in
       let env' = TypeEnv.extend env x (VarSet.empty, fv) in
       return (env', fv)
-    | PTuple xs -> fail (`TODO "infer_pattern PTuple")
-    | PList x -> fail (`TODO "infer_pattern PList")
-    | PCons (l, r) -> fail (`TODO "infer_pattern PCons")
+    | PTuple xs ->
+      List.fold_right
+        xs
+        ~init:(return (env, []))
+        ~f:(fun x acc ->
+          let* env, fvs = acc in
+          let* env', fv = infer_pattern env x in
+          return (env', fv :: fvs))
+      >>| fun (env, fvs) -> env, TTuple fvs
+    | PList _ -> fail (`TODO "infer_pattern PList")
+    | PCons (_, _) -> fail (`TODO "infer_pattern PCons")
     | PAnn (pat, ann_ty) ->
       let* pat_env, ty = infer_pattern env pat in
       let* sub = unify ty (an_ty_to_ty ann_ty) in
@@ -427,7 +434,6 @@ let infer =
       in
       let* final_subst = Subst.compose match_sub s' in
       return (final_subst, Subst.apply final_subst t')
-    | _ -> fail (`TODO "unimplemented (infer_expr)")
   and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
     | DLet (NonRec, pat, expr) ->
@@ -464,21 +470,35 @@ let infer =
   infer_def
 ;;
 
+let rec ids_from_pattern pat =
+  let open Format in
+  match pat with
+  | Ast.PWild -> "_"
+  | PIdent x -> x
+  | PTuple xs ->
+    xs
+    |> List.map ~f:ids_from_pattern
+    |> List.intersperse ~sep:", "
+    |> List.fold ~init:"" ~f:( ^ )
+    |> asprintf "(%s)"
+  | PAnn (x, _) -> asprintf "%s" (ids_from_pattern x)
+  | _ -> failwith "unreachable?"
+;;
+
 let infer_program (prog : Ast.definition list) =
   let rec helper env = function
     | head :: tail ->
       (match head with
-       | Ast.DLet (_, PIdent id, _) | Ast.DLet (_, PAnn (PIdent id, _), _) ->
+       | Ast.DLet (_, pat, _) ->
+         (* TODO: litit to wild,idnet,tuple,ann *)
          let* env', _, ty = infer env head in
          let* tail = helper env' tail in
+         let id = ids_from_pattern pat in
          return ((id, ty) :: tail)
-       | Ast.DLet (NonRec, PWild, _) ->
-         let* _ = infer env head in
-         let* tail = helper env tail in
-         return tail
-       | Ast.DLet (_, pat, _) ->
-         fail
-           (`TODO (Format.asprintf "Can't use %a in let expression" Ast.pp_pattern pat)))
+         (* | Ast.DLet (NonRec, PWild, _) ->
+            let* _ = infer env head in
+            let* tail = helper env tail in
+            return tail *))
     | [] -> return []
   in
   let env = TypeEnv.default in
@@ -795,6 +815,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let (x, y) = (not true, not false) |};
-  [%expect {| |}]
+  test {| let (x, y, z) = (not true, not false, 42) |};
+  [%expect {| (x, y, z): (bool, bool, int) |}]
 ;;
