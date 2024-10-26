@@ -41,9 +41,11 @@ let is_keyword = function
 ;;
 
 let skip_wspace = skip_while is_whitespace
+let skip_wspace1 = take_while1 is_whitespace *> return ()
 let parens p = skip_wspace *> char '(' *> skip_wspace *> p <* skip_wspace <* char ')'
 let sqr_br p = skip_wspace *> char '[' *> skip_wspace *> p <* skip_wspace <* char ']'
 let token s = skip_wspace *> string s
+let keyword s = skip_wspace *> string s <* skip_wspace1
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
@@ -259,7 +261,7 @@ let parse_elist arg = parse_cnill <|> parse_elist arg
    ;; *)
 
 let parse_let pexpr =
-  let* rec_flag = token "let" *> (token "rec" *> return Rec <|> return NoRec) in
+  let* rec_flag = keyword "let" *> (keyword "rec" *> return Rec <|> return NoRec) in
   let* decl = parse_pattern in
   let* args = many parse_pattern in
   let* expr = token "=" *> pexpr in
@@ -268,7 +270,7 @@ let parse_let pexpr =
     | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
     | _ -> return expr
   in
-  let* in_expression = token "in" *> pexpr in
+  let* in_expression = keyword "in" *> pexpr in
   match decl with
   | PIdentifier _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
   | _ ->
@@ -322,7 +324,7 @@ let parse_expr =
 ;; *)
 
 let parse_declaration =
-  let* rec_flag = token "rec" *> return Rec <|> return NoRec in
+  let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
   let* decl = parse_pattern in
   let* args = many parse_pattern in
   let* expr = token "=" *> parse_expr in
@@ -339,12 +341,14 @@ let parse_declaration =
     else return @@ ddeclaration rec_flag decl expression
 ;;
 
-let parse_single_declaration = token "let" *> parse_declaration >>| fun x -> SingleDecl x
+let parse_single_declaration =
+  keyword "let" *> parse_declaration >>| fun x -> SingleDecl x
+;;
 
 let parse_mutable_rec_declaration =
-  token "let" *> parse_declaration
+  keyword "let" *> parse_declaration
   >>= fun first_decl ->
-  many1 (token "and" *> parse_declaration)
+  many1 (keyword "and" *> parse_declaration)
   >>= fun lst -> return @@ MutableRecDecl (first_decl :: lst)
 ;;
 
