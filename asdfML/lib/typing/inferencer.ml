@@ -248,15 +248,25 @@ module TypeEnv = struct
 
   let extend env id scheme = set env ~key:id ~data:scheme
 
-  let rec extend_pat (env : t) (pat : Ast.pattern) (scheme : Scheme.t) =
-    match pat with
-    | PConst _ -> env
-    | PWild -> env
-    | PIdent x -> extend env x scheme
-    | PTuple xs -> List.fold xs ~init:env ~f:(fun acc x -> extend_pat acc x scheme)
-    | PList xs -> List.fold xs ~init:env ~f:(fun acc x -> extend_pat acc x scheme)
-    | PCons (l, r) -> extend_pat (extend_pat env l scheme) r scheme
-    | PAnn (x, _) -> extend_pat env x scheme
+  let rec extend_pat (env : t) (pat : Ast.pattern) (scheme : Scheme.t) : t R.t =
+    let open R in
+    let open R.Syntax in
+    match pat, scheme with
+    | PWild, _ -> return env
+    | PIdent x, _ -> extend env x scheme |> return
+    | PTuple xs, (vars, (TTuple ys as ty)) ->
+      List.fold2 xs ys ~init:(return env) ~f:(fun acc x y ->
+        let* acc = acc in
+        extend_pat acc x (vars, y))
+      |> (function
+       | List.Or_unequal_lengths.Ok env' -> env'
+       | _ -> fail (`Arg_num_mismatch (pat, ty)))
+    | PAnn (x, _), _ -> extend_pat env x scheme
+    | _ ->
+      fail
+        (`Syntax_error
+          "only identifiers, tuples, wildcards and type annotations are supported in let \
+           bindings")
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
@@ -287,12 +297,14 @@ module TypeEnv = struct
       extend env op (fv, ty))
   ;;
 
-  let pp ?(no_default = true) fmt (xs : t) =
+  let _pp ?(no_default = true) fmt (xs : t) =
     Format.fprintf fmt "{|\n";
     (if no_default then default |> Map.keys |> List.fold ~init:xs ~f:Map.remove else xs)
     |> Map.iteri ~f:(fun ~key:n ~data:s -> Format.fprintf fmt "%s -> %a\n" n pp_scheme s);
     Format.fprintf fmt "|}%!"
   ;;
+
+  let pp = _pp ~no_default:true
 end
 
 open R
@@ -437,13 +449,14 @@ let infer =
   and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
     | DLet (NonRec, pat, expr) ->
+      (* TODO: limit to wild, idnet, tuple, ann (in parser?). no const, list, cons *)
       let* exp_sub, exp_ty = infer_expr env expr in
       (* dbg "ty: %a\nSUB: %a\n" pp_typ exp_ty  Subst.pp exp_sub; *)
       let env' = TypeEnv.apply env exp_sub in
       let scheme = generalize env' exp_ty in
       (* dbg "scheme: %a\n" pp_scheme scheme; *)
       let* pat_env, pat_ty = infer_pattern env pat in
-      let pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
       (* dbg "before: %a\nafter:  %a\n" TypeEnv.pp pat_env TypeEnv.pp pat_env'; *)
       let* sub = Subst.unify pat_ty exp_ty in
       (* dbg "sub: %a\n" Subst.pp sub; *)
@@ -451,13 +464,14 @@ let infer =
       let final_env = TypeEnv.apply pat_env' final_sub in
       let final_ty = Subst.apply final_sub exp_ty in
       return (final_env, final_sub, final_ty)
-    | DLet (Rec, (PIdent _ as pat), expr) | DLet (Rec, (PAnn _ as pat), expr) ->
+    | DLet (Rec, (PIdent _ as pat), expr) | DLet (Rec, (PAnn (PIdent _, _) as pat), expr)
+      ->
       (* TODO: check (copy-paste from NonRec case) *)
       let* pat_env, pat_ty = infer_pattern env pat in
       let* exp_sub, exp_ty = infer_expr pat_env expr in
       let env' = TypeEnv.apply env exp_sub in
       let scheme = generalize env' exp_ty in
-      let pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
       let* sub = Subst.unify pat_ty exp_ty in
       let* final_sub = Subst.compose exp_sub sub in
       let final_env = TypeEnv.apply pat_env' final_sub in
@@ -490,7 +504,6 @@ let infer_program (prog : Ast.definition list) =
     | head :: tail ->
       (match head with
        | Ast.DLet (_, pat, _) ->
-         (* TODO: litit to wild,idnet,tuple,ann *)
          let* env', _, ty = infer env head in
          let* tail = helper env' tail in
          let id = ids_from_pattern pat in
@@ -503,10 +516,6 @@ let infer_program (prog : Ast.definition list) =
   in
   let env = TypeEnv.default in
   helper env prog
-;;
-
-let inference_definition ast =
-  Result.map (run (infer TypeEnv.empty ast)) (fun (_, _, x) -> x)
 ;;
 
 let inference_program prog =
@@ -815,6 +824,22 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| let (x, y, z) = (not true, not false, 42) |};
-  [%expect {| (x, y, z): (bool, bool, int) |}]
+  test
+    {| 
+    let (x, y, z) = (not true, 42, fun x -> if x > 0 then true else false)
+    let a = x
+    let b = y
+    let c = z
+  |};
+  [%expect
+    {|
+    (x, y, z): (bool, int, int -> bool)
+    a: bool
+    b: int
+    c: int -> bool |}]
+;;
+
+let%expect_test _ =
+  test {| let (x, y, z) = (not true, 42) |};
+  [%expect {| Unification failed on (x, y, z) and (bool, int) |}]
 ;;

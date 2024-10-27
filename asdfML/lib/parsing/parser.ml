@@ -67,8 +67,7 @@ let%expect_test _ =
 let%expect_test _ =
   test "let _ = (1 + 2 * 3) / 4 - (5 * -6 + -7) / 8 * 9";
   [%expect
-    {|
-    let _ = (( - ) (( / ) (( + ) 1 (( * ) 2 3)) 4) (( * ) (( / ) (( + ) (( * ) 5 -6) -7) 8) 9)) |}]
+    {| let _ = (( - ) (( / ) (( + ) 1 (( * ) 2 3)) 4) (( * ) (( / ) (( + ) (( * ) 5 -6) -7) 8) 9)) |}]
 ;;
 
 let%expect_test _ =
@@ -85,27 +84,23 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let id = fun x -> x";
-  [%expect {|
-    let id = fun x -> x |}]
+  [%expect {| let id = fun x -> x |}]
 ;;
 
 let%expect_test _ =
   test "let _ = fun x -> somefunc x";
-  [%expect {|
-      let _ = fun x -> (somefunc x) |}]
+  [%expect {| let _ = fun x -> (somefunc x) |}]
 ;;
 
 let%expect_test _ =
   test "let max = fun x -> fun y -> if x < y then y else x";
-  [%expect {|
-    let max = fun x -> fun y -> if (( < ) x y) then y else x |}]
+  [%expect {| let max = fun x -> fun y -> if (( < ) x y) then y else x |}]
 ;;
 
 let%expect_test _ =
   test "let rec factorial = fun x -> if x > 1 then x * (factorial (x - 1)) else 1";
   [%expect
-    {|
-      let rec factorial = fun x -> if (( > ) x 1) then (( * ) x (factorial (( - ) x 1))) else 1 |}]
+    {| let rec factorial = fun x -> if (( > ) x 1) then (( * ) x (factorial (( - ) x 1))) else 1 |}]
 ;;
 
 let%expect_test _ =
@@ -113,8 +108,7 @@ let%expect_test _ =
     "let rec factorial = fun x -> fun cont -> if x > 1 then factorial (n - 1) (fun n -> \
      cont (x * n)) else cont 1 ";
   [%expect
-    {|
-    let rec factorial = fun x -> fun cont -> if (( > ) x 1) then (factorial (( - ) n 1) fun n -> (cont (( * ) x n))) else (cont 1) |}]
+    {| let rec factorial = fun x -> fun cont -> if (( > ) x 1) then (factorial (( - ) n 1) fun n -> (cont (( * ) x n))) else (cont 1) |}]
 ;;
 
 let%expect_test _ =
@@ -172,9 +166,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |};
-  [%expect
-    {|
-    let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |}]
+  [%expect {| let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |}]
 ;;
 
 let%expect_test _ =
@@ -201,7 +193,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
   let (+) = fun (x: bool) -> fun (y: bool) -> x || y 
   let x = true + false
   |};

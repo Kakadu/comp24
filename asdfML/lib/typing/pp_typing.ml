@@ -40,6 +40,15 @@ let pp_error fmt : error -> _ = function
   | `No_variable s -> fprintf fmt "Undefined variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf fmt "Unification failed on %a and %a" pp_typ l pp_typ r
+  | `Arg_num_mismatch (pat, ty) ->
+    fprintf
+      fmt
+      "Mismatched number of arguments in pattern %a and expression %a"
+      Pp_ast.pp_pattern
+      pat
+      pp_typ
+      ty
+  | `Syntax_error s -> fprintf fmt "Syntax error: %s" s
   | `TODO s -> fprintf fmt "TODO: %s" s
 ;;
 

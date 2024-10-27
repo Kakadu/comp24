@@ -31,7 +31,7 @@ type pattern =
   | PTuple of pattern list
   | PList of pattern list (** [1, 2, 3] *)
   | PCons of pattern * pattern (** hd :: tl *)
-  | PAnn of pattern * type_ann (** (x:int) *)
+  | PAnn of pattern * type_ann (** (x: int) *)
 [@@deriving show { with_path = false }]
 
 type expr =
@@ -43,10 +43,10 @@ type expr =
   | ELetIn of definition * expr (** let x = y in z *)
   | ETuple of expr list (** (x, fun x -> x, 42) *)
   | EList of expr list (** [1; 2; 3] *)
-  | EMatch of expr * (pattern * expr) list (***)
+  | EMatch of expr * (pattern * expr) list (** match x with ... *)
 [@@deriving show { with_path = false }]
 
-and definition = DLet of rec_flag * pattern * expr (** let [rec] x = y *)
+and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]

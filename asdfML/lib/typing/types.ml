@@ -18,13 +18,15 @@ type ty =
   | TVar of var_id
   | TArrow of ty * ty
   | TTuple of ty list
-  | TList of ty 
+  | TList of ty
 [@@deriving show { with_path = false }]
 
 type error =
   [ `Occurs_check
   | `No_variable of string
   | `Unification_failed of ty * ty
+  | `Arg_num_mismatch of Ast.pattern * ty
+  | `Syntax_error of string
   | `TODO of string
   ]
 
