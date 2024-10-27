@@ -238,7 +238,7 @@ open R.Syntax
 
 (* Take out a new state, which is a new “type variable”
    from the monad and wrap it in a type variable constructor. *)
-let fresh_var = fresh >>| fun name -> tvar name (* *)
+let fresh_var = fresh >>| tvar
 
 (* Create an expression type by using the altered scheme as follows:
    we take all the quantified variables in the type and replace them
@@ -309,4 +309,66 @@ let check_unique_vars =
     | PConstraint (pat, _) -> helper var_set pat
   in
   helper VarSet.empty
+;;
+
+let infer_const c =
+  let ty =
+    match c with
+    | CBool _ -> tbool
+    | CInt _ -> tint
+  in
+  return (Subst.empty, ty)
+;;
+
+let infer_id env id =
+  (* '_' - reserved for expressions whose result is not important to us. *)
+  match id with
+  | "_" ->
+    let* fv = fresh_var in
+    return (Subst.empty, fv)
+  | _ -> lookup_env env id
+;;
+
+let infer_pattern =
+  let rec helper env = function
+    | PIdentifier i ->
+      let* fv = fresh_var in
+      let schema = Scheme (TVarSet.empty, fv) in
+      let env = TypeEnv.extend env i schema in
+      return (fv, env)
+    | PAny | PNill ->
+      let* fv = fresh_var in
+      return (fv, env)
+    | PConst c ->
+      let* _, ty = infer_const c in
+      return (ty, env)
+    | PTuple pattern_list as tuple_p ->
+      let* _ = check_unique_vars tuple_p in
+      (* Check several bounds *)
+      let* ty, env =
+        (* Here is the list of types in reverse order. *)
+        RList.fold_left
+          pattern_list
+          ~init:(return ([], env))
+          ~f:(fun (acc, env) pattern ->
+            let* ty1, env1 = helper env pattern in
+            return (ty1 :: acc, env1))
+      in
+      let ty = ttuple (List.rev ty) in
+      return (ty, env)
+    | PCons (p1, p2) as cons_p ->
+      let* _ = check_unique_vars cons_p in
+      let* t1, env1 = helper env p1 in
+      let* t2, env2 = helper env1 p2 in
+      let* fv = fresh_var in
+      let* sub1 = Subst.unify (tlist t1) fv in
+      let* sub2 = Subst.unify t2 fv in
+      let* sub3 = Subst.compose sub1 sub2 in
+      let env = TypeEnv.apply env2 sub3 in
+      let ty3 = Subst.apply sub3 fv in
+      return (ty3, env)
+      (* TODO PConstraint*)
+    | _ -> return (TVar 0, env)
+  in
+  helper
 ;;
