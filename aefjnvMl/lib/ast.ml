@@ -47,7 +47,7 @@ type expression =
   | Exp_match of expression * (pattern * expression) list
   (** [match E0 with P1 -> E1 | .. | Pn -> En] *)
   | Exp_ifthenelse of expression * expression * expression (** [if E1 then E2 else E3] *)
-  | Exp_apply of expression * expression list (** [E0 E1 ... En]
+  | Exp_apply of expression * expression (** [E0 E1]
   Invariant: n > 1 *)
   | Exp_list of expression * expression
   (** The expression such as [E1::E2]
