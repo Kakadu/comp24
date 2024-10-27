@@ -449,17 +449,12 @@ let infer =
   and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
     | DLet (NonRec, pat, expr) ->
-      (* TODO: limit to wild, idnet, tuple, ann (in parser?). no const, list, cons *)
       let* exp_sub, exp_ty = infer_expr env expr in
-      (* dbg "ty: %a\nSUB: %a\n" pp_typ exp_ty  Subst.pp exp_sub; *)
       let env' = TypeEnv.apply env exp_sub in
       let scheme = generalize env' exp_ty in
-      (* dbg "scheme: %a\n" pp_scheme scheme; *)
       let* pat_env, pat_ty = infer_pattern env pat in
       let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
-      (* dbg "before: %a\nafter:  %a\n" TypeEnv.pp pat_env TypeEnv.pp pat_env'; *)
       let* sub = Subst.unify pat_ty exp_ty in
-      (* dbg "sub: %a\n" Subst.pp sub; *)
       let* final_sub = Subst.compose sub exp_sub in
       let final_env = TypeEnv.apply pat_env' final_sub in
       let final_ty = Subst.apply final_sub exp_ty in
@@ -479,7 +474,8 @@ let infer =
       return (final_env, final_sub, final_ty)
     | DLet (_, pat, _) ->
       fail
-        (`TODO (Format.asprintf "Can't use %a in let rec expression" Ast.pp_pattern pat))
+        (`Syntax_error
+          (Format.asprintf "Can't use %a in let rec expression" Ast.pp_pattern pat))
   in
   infer_def
 ;;
@@ -755,8 +751,6 @@ let%expect_test _ =
   [%expect {| const: int |}]
 ;;
 
-(* TODO: more tests for patterns and type annotations *)
-
 let%expect_test _ =
   test {|let f = fun (f: int -> int -> int) -> fun x -> fun y -> f x y|};
   [%expect {| f: (int -> int -> int) -> int -> int -> int |}]
@@ -841,5 +835,5 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let (x, y, z) = (not true, 42) |};
-  [%expect {| Unification failed on (x, y, z) and (bool, int) |}]
+  [%expect {| Mismatched number of arguments in pattern (x, y, z) and expression (bool, int) |}]
 ;;
