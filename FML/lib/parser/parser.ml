@@ -137,7 +137,7 @@ let parse_pnill = sqr_br skip_wspace >>| pnill
 
 let parse_pcons p_pattern =
   let cons_helper = token "::" *> return pcons in
-  chainl1 p_pattern cons_helper
+  chainr1 p_pattern cons_helper
 ;;
 
 let parse_ptuple p_pattern =
@@ -273,10 +273,8 @@ let parse_let pexpr =
   let* in_expression = keyword "in" *> pexpr in
   match decl with
   | PIdentifier _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
-  | _ ->
-    if List.length args > 0
-    then fail "Syntax error"
-    else return @@ ELetIn (rec_flag, decl, expression, in_expression)
+  | _ when List.length args <> 0 -> fail "Syntax error"
+  | _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
 ;;
 
 let parse_expr =
@@ -302,7 +300,7 @@ let parse_expr =
   in
   let expr = chainl1 apply (mul <|> div) in
   let expr = chainl1 expr (add <|> sub) in
-  let expr = chainl1 expr parse_cons in
+  let expr = chainr1 expr parse_cons in
   let expr = chainl1 expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
   choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
 ;;
@@ -335,10 +333,8 @@ let parse_declaration =
   in
   match decl with
   | PIdentifier _ -> return @@ ddeclaration rec_flag decl expression
-  | _ ->
-    if List.length args > 0
-    then fail "Syntax error"
-    else return @@ ddeclaration rec_flag decl expression
+  | _ when List.length args <> 0 -> fail "Syntax error"
+  | _ -> return @@ ddeclaration rec_flag decl expression
 ;;
 
 let parse_single_declaration =

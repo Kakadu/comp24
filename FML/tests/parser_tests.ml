@@ -188,3 +188,15 @@ and second x = first (x + 1);;
           ])
       ] |}]
 ;;
+
+let%expect_test _ = parse_with_print {|
+        let h::x::tl = 5::6::4::[]|};
+  [%expect {|
+    [(SingleDecl
+        (DDeclaration (NoRec,
+           (PCons ((PIdentifier "h"),
+              (PCons ((PIdentifier "x"), (PIdentifier "tl"))))),
+           (ECons ((EConst (CInt 5)),
+              (ECons ((EConst (CInt 6)), (ECons ((EConst (CInt 4)), ENill))))))
+           )))
+      ] |}]
