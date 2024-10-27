@@ -1,0 +1,9 @@
+(library
+ (name kreml_lib)
+ (modules Ast Parser)
+ (inline_tests)
+ (libraries base ppx_show.runtime angstrom)
+ (preprocess
+  (pps ppx_show ppx_expect))
+ (instrumentation
+  (backend bisect_ppx)))

@@ -1,0 +1,34 @@
+(lang dune 3.8)
+
+(cram enable)
+
+(name kreml)
+
+(generate_opam_files true)
+
+(source
+ (github oveeernight/comp24))
+
+(authors "oveeernight")
+
+(maintainers "oveeernight")
+
+(license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
+
+(package
+ (name kreml)
+ (synopsis "A KreML compiler")
+ (version 0.1)
+ (depends
+  base
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_show
+  (odoc :with-doc)
+  (ocamlformat :build)
+  (llvm
+   (= "16.0.6+nnp"))))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
