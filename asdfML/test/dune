@@ -1,2 +1,8 @@
-; (test
-;  (name test_AsdfML))
+(library
+ (name tests)
+ (libraries AsdfML.Lib)
+ (preprocess
+  (pps
+   ppx_inline_test
+   ppx_expect ))
+ (inline_tests))
