@@ -13,6 +13,7 @@ type constant =
   | CInt of int (** 42 *)
   | CBool of bool (** true | false *)
   | CUnit (** () *)
+  | CNil (** [] *)
 [@@deriving show { with_path = false }]
 
 type type_ann =

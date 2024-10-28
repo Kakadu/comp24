@@ -6,22 +6,28 @@ open Types
 open Format
 open Utils
 
-let type_id_to_name n =
-  let rec helper n acc =
+let rec type_id_to_name n =
+  let rec helper n =
     match n with
-    | _ when n < 0 -> invalid_arg "Id must be >= 0"
-    | n when n < 26 ->
-      let char = Char.chr (n + Char.code 'a') in
-      Char.escaped char ^ acc
+    | _ when n < 0 -> helper (26 - n) 
+    | n when n < 26 -> "'" ^ String.make 1 (Char.chr (n + Char.code 'a'))
     | _ ->
-      let char = Char.chr ((n mod 26) + Char.code 'a') in
-      helper ((n / 26) - 1) (Char.escaped char ^ acc)
+      type_id_to_name ((n / 26) - 1)
+      ^ String.make 1 (Char.chr ((n mod 26) + Char.code 'a'))
   in
-  helper n ""
+  helper n 
+;;
+
+let rec int_to_alphabet_str n =
+  if n < 26
+  then "'" ^ String.make 1 (Char.chr (n + Char.code 'a'))
+  else
+    int_to_alphabet_str ((n / 26) - 1)
+    ^ String.make 1 (Char.chr ((n mod 26) + Char.code 'a'))
 ;;
 
 let rec pp_typ fmt = function
-  | TVar var -> fprintf fmt "'%s" (type_id_to_name var)
+  | TVar var -> fprintf fmt "%s" (type_id_to_name var)
   | TGround x ->
     (match x with
      | TInt -> fprintf fmt "int"
@@ -57,7 +63,7 @@ module VarSet = struct
 
   let pp ppf s =
     fprintf ppf "VarSet = [ ";
-    Base.Set.iter s (fprintf ppf "%d; ");
+    Base.Set.iter s (fun x -> fprintf ppf "%s; " (type_id_to_name x));
     fprintf ppf "]"
   ;;
 end

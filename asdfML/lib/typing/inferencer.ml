@@ -143,9 +143,8 @@ end = struct
       fmt
       "[ %a ]"
       (pp_print_list
-         ~pp_sep:(fun fmt () -> fprintf fmt ", ")
-         (* (fun fmt (k, v) -> fprintf fmt "%d -> %a" k pp_typ v)) *)
-           (fun fmt (k, v) -> fprintf fmt "'%s -> %a" (type_id_to_name k) pp_typ v))
+         ~pp_sep:(fun fmt () -> fprintf fmt "\n")
+         (fun fmt (k, v) -> fprintf fmt "%s -> %a" (type_id_to_name k) pp_typ v))
       (Map.to_alist subst)
   ;;
 
@@ -157,8 +156,8 @@ end = struct
     Map.set empty ~key:k ~data:v |> return
   ;;
 
-  let find xs k = Map.find xs k
-  let remove xs k = Map.remove xs k
+  let find = Map.find
+  let remove = Map.remove
 
   let apply s =
     let rec helper = function
@@ -166,8 +165,10 @@ end = struct
         (match find s b with
          | None -> ty
          | Some x -> x)
-      | TArrow (l, r) -> TArrow (helper l, helper r)
-      | other -> other
+      | TArrow (l, r) -> helper l ^-> helper r
+      | TList x -> TList (helper x)
+      | TTuple xs -> TTuple (List.map xs ~f:helper)
+      | TGround _ as g -> g
     in
     helper
   ;;
@@ -176,7 +177,6 @@ end = struct
     (* dbg "Unifing %a and %a\n" pp_typ l pp_typ r; *)
     match l, r with
     | TGround l, TGround r when equal_ground l r -> return empty
-    | TGround _, TGround _ -> fail (`Unification_failed (l, r))
     | TVar a, TVar b when Int.equal a b -> return empty
     | TVar b, t | t, TVar b -> singleton b t
     | TArrow (l1, r1), TArrow (l2, r2) ->
@@ -288,6 +288,7 @@ module TypeEnv = struct
     ; "( || )", bool_typ ^-> bool_typ ^-> bool_typ
     ; "[ - ]", int_typ ^-> int_typ
     ; "not", bool_typ ^-> bool_typ
+    ; "( :: )", var ^-> TList var ^-> TList var
     ]
   ;;
 
@@ -338,22 +339,22 @@ let lookup_env e xs =
     return (Subst.empty, ans)
 ;;
 
-let pp_env sub fmt env =
-  let env : TypeEnv.t = Map.map env ~f:(Scheme.apply sub) in
-  TypeEnv.pp fmt env
-;;
-
 open Types
 
 let infer =
   let infer_const = function
-    | Ast.CBool _ -> bool_typ
-    | Ast.CInt _ -> int_typ
-    | Ast.CUnit -> unit_typ
+    | Ast.CBool _ -> return bool_typ
+    | Ast.CInt _ -> return int_typ
+    | Ast.CUnit -> return unit_typ
+    | Ast.CNil ->
+      let* fv = fresh_var in
+      return (TList fv)
   in
   let rec infer_pattern : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t =
     fun env -> function
-    | PConst c -> return (env, infer_const c)
+    | PConst c ->
+      let* c = infer_const c in
+      return (env, c)
     | PWild -> fresh_var >>| fun v -> env, v
     | PIdent x ->
       let* fv = fresh_var in
@@ -368,25 +369,46 @@ let infer =
           let* env', fv = infer_pattern env x in
           return (env', fv :: fvs))
       >>| fun (env, fvs) -> env, TTuple fvs
-    | PList _ -> fail (`TODO "infer_pattern PList")
-    | PCons (_, _) -> fail (`TODO "infer_pattern PCons")
+    | PList xs ->
+      let* fv = fresh_var in
+      List.fold
+        xs
+        ~init:(return (env, fv))
+        ~f:(fun acc x ->
+          let* env, fv = acc in
+          let* env', ty = infer_pattern env x in
+          let* sub = unify fv ty in
+          let env'' = TypeEnv.apply env' sub in
+          let ty = Subst.apply sub fv in
+          return (env'', ty))
+    | PCons (hd, tl) ->
+      let* env', ty' = infer_pattern env hd in
+      let* env'', ty'' = infer_pattern env' tl in
+      let* sub = Subst.unify (TList ty') ty'' in
+      let final_env = TypeEnv.apply env'' sub in
+      let final_ty = Subst.apply sub ty'' in
+      return (final_env, final_ty)
     | PAnn (pat, ann_ty) ->
       let* pat_env, ty = infer_pattern env pat in
       let* sub = unify ty (an_ty_to_ty ann_ty) in
-      return (TypeEnv.apply pat_env sub, Subst.apply sub ty)
+      let final_env = TypeEnv.apply pat_env sub in
+      let final_ty = Subst.apply sub ty in
+      return (final_env, final_ty)
   in
   let rec (infer_expr : TypeEnv.t -> Ast.expr -> (Subst.t * ty) R.t) =
     fun env -> function
-    | EConst c -> return (Subst.empty, infer_const c)
+    | EConst c ->
+      let* c = infer_const c in
+      return (Subst.empty, c)
     | EVar x -> lookup_env x env
     | EApp (left, right) ->
-      let* subst_left, typ_left = infer_expr env left in
-      let* subst_right, typ_right = infer_expr (TypeEnv.apply env subst_left) right in
-      let* tvar = fresh_var in
-      let* subst = unify (Subst.apply subst_right typ_left) (TArrow (typ_right, tvar)) in
-      let final_typ = Subst.apply subst tvar in
-      let* final_subst = Subst.compose_all [ subst; subst_right; subst_left ] in
-      return (final_subst, final_typ)
+      let* left_sub, left_ty = infer_expr env left in
+      let* right_sub, right_ty = infer_expr (TypeEnv.apply env left_sub) right in
+      let* fv = fresh_var in
+      let* sub = unify (Subst.apply right_sub left_ty) (right_ty ^-> fv) in
+      let final_ty = Subst.apply sub fv in
+      let* sub = Subst.compose_all [ left_sub; right_sub; sub ] in
+      return (sub, final_ty)
     | EIfElse (cond, th, el) ->
       let* s1, t1 = infer_expr env cond in
       let* s2, t2 = infer_expr env th in
@@ -431,7 +453,7 @@ let infer =
     | EMatch (e, pe) ->
       let* match_sub, match_ty = infer_expr env e in
       let* fv = fresh_var in
-      let* s', t' =
+      let* sub, ty =
         List.fold
           pe
           ~init:(return (match_sub, fv))
@@ -439,13 +461,14 @@ let infer =
             let* acc_sub, acc_ty = acc in
             let* pat_env, pat_ty = infer_pattern env p in
             let* pat_sub = unify match_ty pat_ty in
-            let* exp_sub, exp_ty = infer_expr pat_env e in
-            let* sub'' = unify acc_ty exp_ty in
-            let* final_subst = Subst.compose_all [ acc_sub; pat_sub; exp_sub; sub'' ] in
-            return (final_subst, Subst.apply final_subst acc_ty))
+            let pat_env' = TypeEnv.apply pat_env pat_sub in
+            let* exp_sub, exp_ty = infer_expr pat_env' e in
+            let* sub = unify exp_ty acc_ty in
+            let* final_subst = Subst.compose_all [ acc_sub; pat_sub; exp_sub; sub ] in
+            let final_ty = Subst.apply final_subst acc_ty in
+            return (final_subst, final_ty))
       in
-      let* final_subst = Subst.compose match_sub s' in
-      return (final_subst, Subst.apply final_subst t')
+      return (sub, ty)
   and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
     | DLet (NonRec, pat, expr) ->
@@ -459,19 +482,18 @@ let infer =
       let final_env = TypeEnv.apply pat_env' final_sub in
       let final_ty = Subst.apply final_sub exp_ty in
       return (final_env, final_sub, final_ty)
-    | DLet (Rec, (PIdent _ as pat), expr) | DLet (Rec, (PAnn (PIdent _, _) as pat), expr)
+    | DLet (Rec, (PIdent x as pat), expr) | DLet (Rec, (PAnn (PIdent x, _) as pat), expr)
       ->
-      (* TODO: check (copy-paste from NonRec case) *)
       let* pat_env, pat_ty = infer_pattern env pat in
       let* exp_sub, exp_ty = infer_expr pat_env expr in
-      let env' = TypeEnv.apply env exp_sub in
-      let scheme = generalize env' exp_ty in
-      let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      let pat_ty = Subst.apply exp_sub pat_ty in
       let* sub = Subst.unify pat_ty exp_ty in
-      let* final_sub = Subst.compose exp_sub sub in
-      let final_env = TypeEnv.apply pat_env' final_sub in
-      let final_ty = Subst.apply final_sub exp_ty in
-      return (final_env, final_sub, final_ty)
+      let* sub' = Subst.compose exp_sub sub in
+      let env = TypeEnv.apply pat_env sub' in
+      let final_ty = Subst.apply sub' exp_ty in
+      let scheme = generalize (TypeEnv.remove env x) final_ty in
+      let env = TypeEnv.extend env x scheme in
+      return (env, sub', final_ty)
     | DLet (_, pat, _) ->
       fail
         (`Syntax_error
@@ -501,8 +523,8 @@ let infer_program (prog : Ast.definition list) =
       (match head with
        | Ast.DLet (_, pat, _) ->
          let* env', _, ty = infer env head in
-         let* tail = helper env' tail in
          let id = ids_from_pattern pat in
+         let* tail = helper env' tail in
          return ((id, ty) :: tail)
          (* | Ast.DLet (NonRec, PWild, _) ->
             let* _ = infer env head in
@@ -835,5 +857,42 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let (x, y, z) = (not true, 42) |};
-  [%expect {| Mismatched number of arguments in pattern (x, y, z) and expression (bool, int) |}]
+  [%expect
+    {| Mismatched number of arguments in pattern (x, y, z) and expression (bool, int) |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+    let rec map = fun f -> fun list -> match list with
+    | [] -> []
+    | hd::tl -> (f hd) :: (map f tl)
+
+    let rec fold =
+      fun init -> fun f -> fun list -> 
+      match list with
+      | [] -> init
+      | hd :: tl -> fold (f init hd) f tl
+
+    let rec filter = fun f -> fun list ->
+      match list with
+      | [] -> []
+      | hd :: tl -> if f hd then hd :: filter f tl else filter f tl 
+    
+    let gt0 = filter (fun x -> x > 0) 
+    let sq = map (fun x -> x * x)
+    let sum = fold 0 (fun acc -> fun x -> acc + x)
+    let x = [1;2;3]
+    let x = sum (sq (gt0 x))
+  |};
+  [%expect
+    {|
+    map: ('e -> 'f) -> 'e list -> 'f list
+    fold: 's -> ('s -> 't -> 's) -> 't list -> 's
+    filter: ('af -> bool) -> 'af list -> 'af list
+    gt0: int list -> int list
+    sq: int list -> int list
+    sum: int list -> int
+    x: int list
+    x: int |}]
 ;;

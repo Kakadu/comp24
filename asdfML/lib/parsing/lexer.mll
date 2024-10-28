@@ -20,6 +20,7 @@ let bool = "not "? ("true" | "false")
 
 rule token = parse
   | "()" { UNIT }
+  | "[]" { NIL }
   | "_" { WILDCARD }
   | "let rec" { LETREC }
   | "let" { LET }

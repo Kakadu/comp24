@@ -11,6 +11,7 @@
 %token <string> IDENT
 %token <bool> BOOL
 %token UNIT
+%token NIL
 %token WILDCARD
 
 %token PLUS MINUS 
@@ -135,6 +136,7 @@ constant:
 | i = INT { CInt i }
 | b = BOOL { CBool b }
 | UNIT { CUnit }
+| NIL { CNil }
 
 identifier: 
 | id = IDENT { id }

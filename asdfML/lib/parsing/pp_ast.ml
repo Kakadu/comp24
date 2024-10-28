@@ -11,6 +11,7 @@ let rec pp_const fmt = function
   | CInt i -> fprintf fmt "%d" i
   | CBool b -> fprintf fmt "%b" b
   | CUnit -> fprintf fmt "()"
+  | CNil -> fprintf fmt "[]"
 
 and pp_type_ann fmt = function
   | TAInt -> fprintf fmt "int"
