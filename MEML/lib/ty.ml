@@ -83,6 +83,5 @@ let pp_error ppf : error -> _ = function
 ;;
 
 let print_typ_err e =
-  let s = Format.asprintf "%a" pp_error e in
-  Format.printf "%s\n" s
+ Format.printf "%a\n" pp_error e
 ;;
