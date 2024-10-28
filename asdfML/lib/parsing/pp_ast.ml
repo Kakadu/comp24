@@ -19,6 +19,7 @@ and pp_type_ann fmt = function
   | TAUnit -> fprintf fmt "()"
   | TAFun (a, b) -> fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
   | TATuple xs -> pp_list fmt pp_type_ann xs
+  | TAList x -> fprintf fmt "%a list" pp_type_ann x
 
 and pp_pattern fmt = function
   | PConst c -> fprintf fmt "%a" pp_const c

@@ -100,12 +100,22 @@ let%expect_test _ =
     let (id: int -> int) = fun (x: int) -> x |}]
 ;;
 
-(* TODO: more tests for patterns and type annotations *)
-
 let%expect_test _ =
   test "let _ = (1, true, ())";
   [%expect {|  
     let _ = (1, true, ())|}]
+;;
+
+let%expect_test _ =
+  test "let (x: int list) = [1;2;3]";
+  [%expect {|  
+    let (x: int list) = [1; 2; 3]|}]
+;;
+
+let%expect_test _ =
+  test "let (x: int list list) = [[1]; [2]; [3]]";
+  [%expect {|  
+    let (x: int list list) = [[1]; [2]; [3]]|}]
 ;;
 
 let%expect_test _ =
@@ -205,4 +215,55 @@ let%expect_test _ =
     let _ = match w with
     | [true; false] -> true
     | _ -> false |}]
+;;
+
+let%expect_test _ =
+  test {| 
+    let rec map = fun f -> fun list -> match list with
+    | [] -> []
+    | hd::tl -> (f hd) :: (map f tl)
+
+    let rec fold =
+      fun init -> fun f -> fun list -> 
+      match list with
+      | [] -> init
+      | hd :: tl -> fold (f init hd) f tl
+
+    let rec filter = fun f -> fun list ->
+      match list with
+      | [] -> []
+      | hd :: tl -> if f hd then hd :: filter f tl else filter f tl 
+    
+    let gt0 = filter (fun x -> x > 0) 
+    let sq = map (fun x -> x * x)
+    let sum = fold 0 (fun acc -> fun x -> acc + x)
+    let x = [1;2;3]
+    let x = sum (sq (gt0 x))
+  |};
+  [%expect {|
+    let rec map = fun f -> fun list -> match list with
+    | [] -> []
+    | hd :: tl -> (( :: ) (f hd) (map f tl))
+    let rec fold = fun init -> fun f -> fun list -> match list with
+    | [] -> init
+    | hd :: tl -> (fold (f init hd) f tl)
+    let rec filter = fun f -> fun list -> match list with
+    | [] -> []
+    | hd :: tl -> if (f hd) then (( :: ) hd (filter f tl)) else (filter f tl)
+    let gt0 = (filter fun x -> (( > ) x 0))
+    let sq = (map fun x -> (( * ) x x))
+    let sum = (fold 0 fun acc -> fun x -> (( + ) acc x))
+    let x = [1; 2; 3]
+    let x = (sum (sq (gt0 x))) |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+    let ((x, y, z):(bool * int * int->bool)) = (not true, 42, fun x -> if x > 0 then true else false)
+  |};
+  [%expect
+    {|
+    let ((x, y, z): (bool, int, int -> bool)) = (false, 42, fun x -> if (( > ) x 0) then true else false)
+    |}]
 ;;

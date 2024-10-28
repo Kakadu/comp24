@@ -287,7 +287,7 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {| 
-    let (x, y, z) = (not true, 42, fun x -> if x > 0 then true else false)
+    let ((x, y, z):(bool * int * int->bool)) = (not true, 42, fun x -> if x > 0 then true else false)
     let a = x
     let b = y
     let c = z
@@ -340,4 +340,33 @@ let%expect_test _ =
     sum: int list -> int
     x: int list
     x: int |}]
+;;
+
+let%expect_test _ =
+  test "let (x: int list) = []";
+  [%expect {|  
+    x: int list|}]
+;;
+
+let%expect_test _ =
+  test "let (x: int list list) = [[1]; []]";
+  [%expect {|  
+    x: int list list|}]
+;;
+
+let%expect_test _ =
+  test "let (x: int list list) = [[[]]]";
+  [%expect {|  
+    Unification failed on int and 'a list|}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let rec map = fun f -> fun (list: int list) -> match list with
+    | [] -> []
+    | hd::tl -> (f hd) :: (map f tl) 
+    |};
+  [%expect {|  
+    map: (int -> 'f) -> int list -> 'f list|}]
 ;;

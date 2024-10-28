@@ -73,6 +73,13 @@ expr:
 | LPAREN e = expr RPAREN { e }
 
 type_ann:
+| hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
+| LPAREN es = separated_nonempty_list(MUL, type_ann) RPAREN { TATuple(es) }
+| ann = type_ann id = identifier { 
+    if String.equal id "list" 
+    then TAList ann
+    else (failwith "list type ann")
+  }
 | id = identifier { 
     match id with 
     | "int" -> TAInt
@@ -80,8 +87,6 @@ type_ann:
     | "()" -> TAUnit
     | _ -> failwith "unknown type annotation"
   }
-| hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
-| LPAREN es = separated_nonempty_list(COMMA, type_ann) RPAREN { TATuple(es) }
 
 pattern: 
 | c = constant { PConst(c) }
