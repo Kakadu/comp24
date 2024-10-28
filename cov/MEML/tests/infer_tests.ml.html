@@ -313,18 +313,18 @@ open MEML_lib
 open Ast
 open Inferencer
 
-let%expect_test _ =
+let%expect_test "Econst_ty_test" =
   <span data-count="1">p</span>rint_result (EConst (CInt 1));
   <span data-count="1">[</span>%expect {| int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "Econst_ty_test" =
   <span data-count="1">p</span>rint_result (EConst (CBool false));
   <span data-count="1">[</span>%expect {| bool |}<span data-count="7">]</span>
 ;;
 
 (* fun x y -&gt; y + x *)
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   <span data-count="1">p</span>rint_result
     (EFun
        ( PVar ("x", TUnknown)
@@ -335,13 +335,13 @@ let%expect_test _ =
 ;;
 
 (* fun (x: Int) -&gt; x + x *)
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   <span data-count="1">p</span>rint_result
     (EFun (PVar ("x", TInt), EBinaryOp (Mul, EVar ("x", TUnknown), EVar ("x", TUnknown))));
   <span data-count="1">[</span>%expect {| int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   <span data-count="1">p</span>rint_result
     (EFun
        ( PVar ("x", TUnknown)
@@ -351,7 +351,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {| int -&gt; int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "EList_ty_test" =
   <span data-count="1">p</span>rint_result
     (EList
        ( EConst (CInt 1)
@@ -361,7 +361,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {| int list |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "ETuple_ty_test" =
   <span data-count="1">p</span>rint_result
     (ETuple
        [ EConst (CInt 1)

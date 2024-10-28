@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>parser.ml &mdash; Coverage report</title>
-    <meta name="description" content="87.11% coverage in lib/parser.ml">
+    <meta name="description" content="87.08% coverage in lib/parser.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/</span>parser.ml
         </a>
       </h1>
-      <h2>87.11%</h2>
+      <h2>87.08%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:5.02%"></span>
@@ -134,7 +134,7 @@
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span class="visited"> </span>
-<a id="L75"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
@@ -952,7 +952,7 @@ let is_type = function
 ;;
 
 let is_whitespace = function
-  | <span data-count="3031">'</span> ' | <span data-count="135">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="3027">'</span> ' | <span data-count="135">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
   | <span data-count="6555">_</span> -&gt; false
 ;;
 
@@ -975,7 +975,7 @@ let brackets_or_not p = <span data-count="168">b</span>racket<span data-count="1
 
 let chainl1 e op =
   <span data-count="696">l</span>et rec go acc = <span data-count="676">l</span>ift<span data-count="676">2</span> (fun f x -&gt; <span data-count="27">f</span> acc x) op e &gt;&gt;<span data-count="676">=</span> go &lt;|&gt; retur<span data-count="676">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="649">g</span>o init
+  e &gt;&gt;= go
 ;;
 
 (** Const parsers *)
@@ -1130,14 +1130,14 @@ let parse_efun expr =
 let parse_eapp e1 e2 =
   <span data-count="80">l</span>ift2
     (fun f args -&gt; <span data-count="10">L</span>ist.fold_left ~init:f ~f:(fun f arg -&gt; <span data-count="15">E</span>App (f, arg)) args)
-    (parse_evar &lt;|<span data-count="80">&gt;</span> bracket<span data-count="80">s</span> @@ e1)
+    (parse_evar &lt;|<span data-count="80">&gt;</span> bracket<span data-count="80">s</span> e1)
     (many<span data-count="80">1</span> (parse_evar &lt;|<span data-count="80">&gt;</span> e2))
 ;;
 
 (* ELetIn *)
 
 let parse_rec =
-  parse_white_space *<span data-count="4">&gt;</span> stoke<span data-count="4">n</span> "let" *<span data-count="4">&gt;</span> optio<span data-count="4">n</span> "false" (stoken<span data-count="4">1</span> "rec")
+  parse_white_space *<span data-count="4">&gt;</span> stoke<span data-count="4">n</span> "let" *<span data-count="4">&gt;</span> optio<span data-count="4">n</span> "false" (stoken<span data-count="4">1</span> "rec ")
   &gt;&gt;<span data-count="4">|</span> fun x -&gt; <span data-count="11">i</span>f String.( &lt;&gt; ) x "false" then <span data-count="2">R</span>ec else <span data-count="9">N</span>otrec
 ;;
 
@@ -1307,12 +1307,12 @@ let parse_let parse =
       <span data-count="8">L</span>et (flag, name, body))
     parse_rec
     (parse_rename &lt;|<span data-count="4">&gt;</span> parse_var)
-    (parse_white_space *<span data-count="4">&gt;</span> man<span data-count="4">y</span> (brackets_or_no<span data-count="4">t</span> @@ parse_pattern))
+    (parse_white_space *<span data-count="4">&gt;</span> man<span data-count="4">y</span> (brackets_or_no<span data-count="4">t</span> parse_pattern))
     (stoke<span data-count="4">n</span> "=" *<span data-count="4">&gt;</span> parse)
 ;;
 
 let expr_main = (fun expr -&gt; <span data-count="4">E</span>xpression expr) &lt;$<span data-count="4">&gt;</span> parse_expression
-let parse_bindings = parse_le<span data-count="4">t</span> @@ parse_expression &lt;|<span data-count="4">&gt;</span> expr_main
+let parse_bindings = parse_le<span data-count="4">t</span> parse_expression &lt;|<span data-count="4">&gt;</span> expr_main
 
 let parse_statements =
   sep_b<span data-count="4">y</span> (parse_white_space_st<span data-count="4">r</span> ";;" &lt;|<span data-count="4">&gt;</span> parse_white_space) parse_bindings

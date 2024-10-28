@@ -1190,7 +1190,7 @@ end = struct
 
   let find_exn k xs = <span data-count="0">B</span>ase.Map.find_exn xs k
   let find k xs = <span data-count="42">B</span>ase.Map.find xs k
-  let remove xs k = <span data-count="0">B</span>ase.Map.remove xs k
+  let remove = fun xs k -&gt;  <span data-count="0">B</span>ase.Map.remove xs k
 
   let apply s =
     <span data-count="57">l</span>et rec helper = function

@@ -943,31 +943,31 @@ let start_test parser show input =
 
 (* Test pattern parser *)
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "true" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect {| (PConst (CBool true)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "951753" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect {| (PConst (CInt 951753)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "var" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect {| (PVar ("var", TUnknown)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "(var : int)" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect {| (PVar ("var", TInt)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "((1, 2), (a: int), true)" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect
@@ -977,7 +977,7 @@ let%expect_test _ =
          (PConst (CBool true))]) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   <span data-count="1">l</span>et test = "[1 :: (a: int); [1; 2]; (1, 2, 3); true]" in
   start_test parse_pattern show_pattern test;
   <span data-count="1">[</span>%expect
@@ -995,13 +995,13 @@ let%expect_test _ =
 
 (* EConst *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "1" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EConst (CInt 1)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "false" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EConst (CBool false)) |}<span data-count="7">]</span>
@@ -1009,19 +1009,19 @@ let%expect_test _ =
 
 (* EVar *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "papa" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EVar ("papa", TUnknown)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "(papa : int)" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EVar ("papa", TInt)) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "([1; ([2; ([3; 4], 5)], 6)], 7)" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1044,7 +1044,7 @@ let%expect_test _ =
          (EConst (CInt 7))]) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "[1; 5]" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EList ((EConst (CInt 1)), (EList ((EConst (CInt 5)), (EConst CNil))))) |}<span data-count="7">]</span>
@@ -1052,7 +1052,7 @@ let%expect_test _ =
 
 (* EBinaryOp *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "3 + 2 * 4 - 1" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1063,7 +1063,7 @@ let%expect_test _ =
        (EConst (CInt 1)))) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "1 + (a * 3) - x" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1074,7 +1074,7 @@ let%expect_test _ =
        (EVar ("x", TUnknown)))) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "true || false" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect {| (EBinaryOp (Or, (EConst (CBool true)), (EConst (CBool false)))) |}<span data-count="7">]</span>
@@ -1082,7 +1082,7 @@ let%expect_test _ =
 
 (* EIfElse *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "if n = 1 then 1 else 3" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1093,7 +1093,7 @@ let%expect_test _ =
 
 (* EFun *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "fun x -&gt; 3 + x" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1102,7 +1102,7 @@ let%expect_test _ =
        (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "fun x y -&gt; y + x" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1115,7 +1115,7 @@ let%expect_test _ =
 
 (* EApp *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "is_something yes no" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1126,7 +1126,7 @@ let%expect_test _ =
 
 (* ELetIn *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "let sum a b = a + b in sum 2 3" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1143,7 +1143,7 @@ let%expect_test _ =
 
 (**  List and tuple *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "[1;2;3;4]" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1156,7 +1156,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   <span data-count="1">l</span>et test = "(1,2,3,4,5)" in
   start_test parse_expression show_expression test;
   <span data-count="1">[</span>%expect
@@ -1169,7 +1169,7 @@ let%expect_test _ =
 
 (** Test bindings *)
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let plusfive x = let five a = a + 5 in five x" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1184,14 +1184,14 @@ let%expect_test _ =
        )) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "4 + 3" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect {|
     (Expression (EBinaryOp (Add, (EConst (CInt 4)), (EConst (CInt 3))))) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let (+) x y = x - y" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1204,7 +1204,7 @@ let%expect_test _ =
        ))|}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let f (x: int) (y: int) = x + y" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1218,7 +1218,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "[1;2;3;4]" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1233,7 +1233,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "(1,2,3,4,5)" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1245,7 +1245,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let f (x: int) = x + 4" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1257,7 +1257,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "2 * (4 + 4) * 1" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1270,7 +1270,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test =
     "let rec fib n = \n\
     \      if n &lt; 1 \n\
@@ -1297,7 +1297,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test =
     "let rec cps_fact x = \n\
     \      let helper x acc = \n\
@@ -1341,7 +1341,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let f = fun (g: int -&gt; int -&gt; int) (x: int) (y: int) -&gt; g x y" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
@@ -1359,7 +1359,7 @@ let%expect_test _ =
  |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   <span data-count="1">l</span>et test = "let (+) = fun (x: int) (y: int) -&gt; x - y" in
   start_test parse_bindings show_bindings test;
   <span data-count="1">[</span>%expect
