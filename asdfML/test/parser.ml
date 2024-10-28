@@ -1,5 +1,11 @@
 open Lib.Parser
 
+let test code =
+  match parse_program code ~print_ast:true with
+  | Ok _ -> ()
+  | Error e -> print_endline e
+;;
+
 let%expect_test _ =
   test "let _ = 12";
   test "let _ = -12";
@@ -218,7 +224,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
     let rec map = fun f -> fun list -> match list with
     | [] -> []
     | hd::tl -> (f hd) :: (map f tl)
@@ -240,7 +247,8 @@ let%expect_test _ =
     let x = [1;2;3]
     let x = sum (sq (gt0 x))
   |};
-  [%expect {|
+  [%expect
+    {|
     let rec map = fun f -> fun list -> match list with
     | [] -> []
     | hd :: tl -> (( :: ) (f hd) (map f tl))

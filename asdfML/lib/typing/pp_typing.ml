@@ -9,13 +9,13 @@ open Utils
 let rec type_id_to_name n =
   let rec helper n =
     match n with
-    | _ when n < 0 -> helper (26 - n) 
+    | _ when n < 0 -> helper (26 - n)
     | n when n < 26 -> "'" ^ String.make 1 (Char.chr (n + Char.code 'a'))
     | _ ->
       type_id_to_name ((n / 26) - 1)
       ^ String.make 1 (Char.chr ((n mod 26) + Char.code 'a'))
   in
-  helper n 
+  helper n
 ;;
 
 let rec int_to_alphabet_str n =

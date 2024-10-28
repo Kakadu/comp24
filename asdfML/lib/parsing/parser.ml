@@ -34,9 +34,3 @@ let parse_program ?(print_ast = false) (code : string)
     in
     Error error_msg
 ;;
-
-let test code =
-  match parse_program code ~print_ast:true with
-  | Ok _ -> ()
-  | Error e -> print_endline e
-;;

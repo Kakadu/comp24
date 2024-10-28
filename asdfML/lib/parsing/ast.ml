@@ -22,7 +22,7 @@ type type_ann =
   | TAUnit (** () *)
   | TATuple of type_ann list
   | TAFun of type_ann * type_ann (** int -> bool *)
-  | TAList of type_ann 
+  | TAList of type_ann
 [@@deriving show { with_path = false }]
 
 type pattern =

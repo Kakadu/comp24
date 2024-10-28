@@ -1,4 +1,20 @@
 open Lib.Inferencer
+open Lib.Pp_typing
+open Base
+
+let test code =
+  let open Format in
+  let pa = false in
+  let ast = Result.ok_or_failwith (Lib.Parser.parse_program ~print_ast:pa code) in
+  match inference_program ast with
+  | Ok t ->
+    printf
+      "%s"
+      (t
+       |> List.map ~f:(fun (s, t) -> asprintf "%s: %a" s pp_typ t)
+       |> String.concat ~sep:"\n")
+  | Error e -> eprintf "%a" pp_error e
+;;
 
 let%expect_test _ =
   test {| let x = () |};
