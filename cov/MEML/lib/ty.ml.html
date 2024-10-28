@@ -18,35 +18,35 @@
       <h2>25.49%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:8.05%"></span>
-      <span class="unvisited" style="top:14.94%"></span>
-      <span class="unvisited" style="top:16.09%"></span>
-      <span class="unvisited" style="top:17.24%"></span>
-      <span class="unvisited" style="top:21.84%"></span>
-      <span class="unvisited" style="top:24.14%"></span>
-      <span class="unvisited" style="top:25.29%"></span>
-      <span class="unvisited" style="top:26.44%"></span>
-      <span class="unvisited" style="top:27.59%"></span>
-      <span class="unvisited" style="top:28.74%"></span>
-      <span class="unvisited" style="top:29.89%"></span>
-      <span class="unvisited" style="top:31.03%"></span>
-      <span class="unvisited" style="top:32.18%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="unvisited" style="top:44.83%"></span>
-      <span class="unvisited" style="top:47.13%"></span>
-      <span class="unvisited" style="bottom:45.98%"></span>
-      <span class="unvisited" style="bottom:44.83%"></span>
-      <span class="unvisited" style="bottom:36.78%"></span>
-      <span class="unvisited" style="bottom:35.63%"></span>
-      <span class="unvisited" style="bottom:27.59%"></span>
-      <span class="unvisited" style="bottom:25.29%"></span>
-      <span class="unvisited" style="bottom:20.69%"></span>
-      <span class="unvisited" style="bottom:11.49%"></span>
-      <span class="unvisited" style="bottom:10.34%"></span>
-      <span class="unvisited" style="bottom:9.20%"></span>
-      <span class="unvisited" style="bottom:8.05%"></span>
-      <span class="unvisited" style="bottom:6.90%"></span>
-      <span class="unvisited" style="bottom:1.15%"></span>
+      <span class="unvisited" style="top:8.24%"></span>
+      <span class="unvisited" style="top:15.29%"></span>
+      <span class="unvisited" style="top:16.47%"></span>
+      <span class="unvisited" style="top:17.65%"></span>
+      <span class="unvisited" style="top:22.35%"></span>
+      <span class="unvisited" style="top:24.71%"></span>
+      <span class="unvisited" style="top:25.88%"></span>
+      <span class="unvisited" style="top:27.06%"></span>
+      <span class="unvisited" style="top:28.24%"></span>
+      <span class="unvisited" style="top:29.41%"></span>
+      <span class="unvisited" style="top:30.59%"></span>
+      <span class="unvisited" style="top:31.76%"></span>
+      <span class="unvisited" style="top:32.94%"></span>
+      <span class="unvisited" style="top:34.12%"></span>
+      <span class="unvisited" style="top:45.88%"></span>
+      <span class="unvisited" style="top:48.24%"></span>
+      <span class="unvisited" style="bottom:44.71%"></span>
+      <span class="unvisited" style="bottom:43.53%"></span>
+      <span class="unvisited" style="bottom:35.29%"></span>
+      <span class="unvisited" style="bottom:34.12%"></span>
+      <span class="unvisited" style="bottom:25.88%"></span>
+      <span class="unvisited" style="bottom:23.53%"></span>
+      <span class="unvisited" style="bottom:18.82%"></span>
+      <span class="unvisited" style="bottom:9.41%"></span>
+      <span class="unvisited" style="bottom:8.24%"></span>
+      <span class="unvisited" style="bottom:7.06%"></span>
+      <span class="unvisited" style="bottom:5.88%"></span>
+      <span class="unvisited" style="bottom:4.71%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -135,9 +135,7 @@
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
-<a id="L85"></a><span > </span>
-<a id="L86"></a><span class="unvisited"> </span>
-<a id="L87"></a><span > </span>
+<a id="L85"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -227,8 +225,6 @@
 <a href="#L83">83</a>
 <a href="#L84">84</a>
 <a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
 
@@ -314,9 +310,7 @@ let pp_error ppf : error -&gt; _ = <span data-count="0">f</span>unction
     Format.fprintf ppf "Error: Unification failed on %a and %a" pp_typ l pp_typ r
 ;;
 
-let print_typ_err e =
- <span data-count="0">F</span>ormat.printf "%a\n" pp_error e
-;;
+let print_typ_err e = <span data-count="0">F</span>ormat.printf "%a\n" pp_error e
 </code></pre>
       </div>
     </div>
