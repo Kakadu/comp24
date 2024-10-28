@@ -6,18 +6,18 @@ open MEML_lib
 open Ast
 open Inferencer
 
-let%expect_test _ =
+let%expect_test "Econst_ty_test" =
   print_result (EConst (CInt 1));
   [%expect {| int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Econst_ty_test" =
   print_result (EConst (CBool false));
   [%expect {| bool |}]
 ;;
 
 (* fun x y -> y + x *)
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   print_result
     (EFun
        ( PVar ("x", TUnknown)
@@ -28,13 +28,13 @@ let%expect_test _ =
 ;;
 
 (* fun (x: Int) -> x + x *)
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   print_result
     (EFun (PVar ("x", TInt), EBinaryOp (Mul, EVar ("x", TUnknown), EVar ("x", TUnknown))));
   [%expect {| int -> int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "EFun_ty_test" =
   print_result
     (EFun
        ( PVar ("x", TUnknown)
@@ -44,7 +44,7 @@ let%expect_test _ =
   [%expect {| int -> int -> int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "EList_ty_test" =
   print_result
     (EList
        ( EConst (CInt 1)
@@ -54,7 +54,7 @@ let%expect_test _ =
   [%expect {| int list |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "ETuple_ty_test" =
   print_result
     (ETuple
        [ EConst (CInt 1)

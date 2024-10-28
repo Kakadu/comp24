@@ -17,31 +17,31 @@ let start_test parser show input =
 
 (* Test pattern parser *)
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "true" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PConst (CBool true)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "951753" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PConst (CInt 951753)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "var" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PVar ("var", TUnknown)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "(var : int)" in
   start_test parse_pattern show_pattern test;
   [%expect {| (PVar ("var", TInt)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "((1, 2), (a: int), true)" in
   start_test parse_pattern show_pattern test;
   [%expect
@@ -51,7 +51,7 @@ let%expect_test _ =
          (PConst (CBool true))]) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern test" =
   let test = "[1 :: (a: int); [1; 2]; (1, 2, 3); true]" in
   start_test parse_pattern show_pattern test;
   [%expect
@@ -69,13 +69,13 @@ let%expect_test _ =
 
 (* EConst *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "1" in
   start_test parse_expression show_expression test;
   [%expect {| (EConst (CInt 1)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "false" in
   start_test parse_expression show_expression test;
   [%expect {| (EConst (CBool false)) |}]
@@ -83,19 +83,19 @@ let%expect_test _ =
 
 (* EVar *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "papa" in
   start_test parse_expression show_expression test;
   [%expect {| (EVar ("papa", TUnknown)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "(papa : int)" in
   start_test parse_expression show_expression test;
   [%expect {| (EVar ("papa", TInt)) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "([1; ([2; ([3; 4], 5)], 6)], 7)" in
   start_test parse_expression show_expression test;
   [%expect
@@ -118,7 +118,7 @@ let%expect_test _ =
          (EConst (CInt 7))]) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "[1; 5]" in
   start_test parse_expression show_expression test;
   [%expect {| (EList ((EConst (CInt 1)), (EList ((EConst (CInt 5)), (EConst CNil))))) |}]
@@ -126,7 +126,7 @@ let%expect_test _ =
 
 (* EBinaryOp *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "3 + 2 * 4 - 1" in
   start_test parse_expression show_expression test;
   [%expect
@@ -137,7 +137,7 @@ let%expect_test _ =
        (EConst (CInt 1)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "1 + (a * 3) - x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -148,7 +148,7 @@ let%expect_test _ =
        (EVar ("x", TUnknown)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "true || false" in
   start_test parse_expression show_expression test;
   [%expect {| (EBinaryOp (Or, (EConst (CBool true)), (EConst (CBool false)))) |}]
@@ -156,7 +156,7 @@ let%expect_test _ =
 
 (* EIfElse *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "if n = 1 then 1 else 3" in
   start_test parse_expression show_expression test;
   [%expect
@@ -167,7 +167,7 @@ let%expect_test _ =
 
 (* EFun *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "fun x -> 3 + x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -176,7 +176,7 @@ let%expect_test _ =
        (EBinaryOp (Add, (EConst (CInt 3)), (EVar ("x", TUnknown)))))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "fun x y -> y + x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -189,7 +189,7 @@ let%expect_test _ =
 
 (* EApp *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "is_something yes no" in
   start_test parse_expression show_expression test;
   [%expect
@@ -200,7 +200,7 @@ let%expect_test _ =
 
 (* ELetIn *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "let sum a b = a + b in sum 2 3" in
   start_test parse_expression show_expression test;
   [%expect
@@ -217,7 +217,7 @@ let%expect_test _ =
 
 (**  List and tuple *)
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "[1;2;3;4]" in
   start_test parse_expression show_expression test;
   [%expect
@@ -230,7 +230,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "expression_test" =
   let test = "(1,2,3,4,5)" in
   start_test parse_expression show_expression test;
   [%expect
@@ -243,7 +243,7 @@ let%expect_test _ =
 
 (** Test bindings *)
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let plusfive x = let five a = a + 5 in five x" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -258,14 +258,14 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "4 + 3" in
   start_test parse_bindings show_bindings test;
   [%expect {|
     (Expression (EBinaryOp (Add, (EConst (CInt 4)), (EConst (CInt 3))))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let (+) x y = x - y" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -278,7 +278,7 @@ let%expect_test _ =
        ))|}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let f (x: int) (y: int) = x + y" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -292,7 +292,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "[1;2;3;4]" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -307,7 +307,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "(1,2,3,4,5)" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -319,7 +319,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let f (x: int) = x + 4" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -331,7 +331,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "2 * (4 + 4) * 1" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -344,7 +344,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test =
     "let rec fib n = \n\
     \      if n < 1 \n\
@@ -371,7 +371,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test =
     "let rec cps_fact x = \n\
     \      let helper x acc = \n\
@@ -415,7 +415,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y" in
   start_test parse_bindings show_bindings test;
   [%expect
@@ -433,7 +433,7 @@ let%expect_test _ =
  |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bindings_test" =
   let test = "let (+) = fun (x: int) (y: int) -> x - y" in
   start_test parse_bindings show_bindings test;
   [%expect
