@@ -82,6 +82,4 @@ let pp_error ppf : error -> _ = function
     Format.fprintf ppf "Error: Unification failed on %a and %a" pp_typ l pp_typ r
 ;;
 
-let print_typ_err e =
- Format.printf "%a\n" pp_error e
-;;
+let print_typ_err e = Format.printf "%a\n" pp_error e
