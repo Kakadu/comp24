@@ -72,7 +72,7 @@ let brackets_or_not p = brackets p <|> p
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 (** Const parsers *)
@@ -227,14 +227,14 @@ let parse_efun expr =
 let parse_eapp e1 e2 =
   lift2
     (fun f args -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg)) args)
-    (parse_evar <|> brackets @@ e1)
+    (parse_evar <|> brackets e1)
     (many1 (parse_evar <|> e2))
 ;;
 
 (* ELetIn *)
 
 let parse_rec =
-  parse_white_space *> stoken "let" *> option "false" (stoken1 "rec")
+  parse_white_space *> stoken "let" *> option "false" (stoken1 "rec ")
   >>| fun x -> if String.( <> ) x "false" then Rec else Notrec
 ;;
 
@@ -404,12 +404,12 @@ let parse_let parse =
       Let (flag, name, body))
     parse_rec
     (parse_rename <|> parse_var)
-    (parse_white_space *> many (brackets_or_not @@ parse_pattern))
+    (parse_white_space *> many (brackets_or_not parse_pattern))
     (stoken "=" *> parse)
 ;;
 
 let expr_main = (fun expr -> Expression expr) <$> parse_expression
-let parse_bindings = parse_let @@ parse_expression <|> expr_main
+let parse_bindings = parse_let parse_expression <|> expr_main
 
 let parse_statements =
   sep_by (parse_white_space_str ";;" <|> parse_white_space) parse_bindings

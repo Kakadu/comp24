@@ -155,7 +155,7 @@ end = struct
 
   let find_exn k xs = Base.Map.find_exn xs k
   let find k xs = Base.Map.find xs k
-  let remove xs k = Base.Map.remove xs k
+  let remove = fun xs k ->  Base.Map.remove xs k
 
   let apply s =
     let rec helper = function
