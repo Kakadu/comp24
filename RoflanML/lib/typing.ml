@@ -21,8 +21,7 @@ type ty =
   | TList of ty (** Type of list *)
 
 let map_type ast_type =
-  let rec helper ast_type =
-    match ast_type with
+  let rec helper = function
     | TInt -> TBase BInt
     | TBool -> TBase BBool
     | TUnit -> TBase BUnit
