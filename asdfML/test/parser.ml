@@ -275,3 +275,9 @@ let%expect_test _ =
     let ((x, y, z): (bool, int, int -> bool)) = (false, 42, fun x -> if (( > ) x 0) then true else false)
     |}]
 ;;
+
+let%expect_test _ =
+  test {|let compose f g x = f (g x)|};
+  [%expect {| let compose = fun f g x -> (f (g x))  |}]
+;;
+

@@ -399,3 +399,17 @@ let%expect_test _ =
     fac: (int -> int) -> int -> int   
     |}]
 ;;
+
+
+let%expect_test _ =
+  test
+    {|
+    let rec fix f x = f (fix f) x
+    let fac self n = if n <= 1 then 1 else n * self (n - 1)
+    |};
+  [%expect
+    {|  
+    fix: (('c -> 'f) -> 'c -> 'f) -> 'c -> 'f
+    fac: (int -> int) -> int -> int   
+    |}]
+;;

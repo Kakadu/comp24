@@ -55,8 +55,16 @@
 program : p = list(definition) EOF { p }
 
 definition: 
-| LETREC pat = pattern EQ e = expr { DLet(Rec, pat, e) }
-| LET pat = pattern EQ e = expr { DLet(NonRec, pat, e) }
+| LETREC pat = pattern args = list(pattern) EQ e = expr { 
+    match args with 
+    | [] -> DLet(Rec, pat, e)
+    | xs -> DLet(Rec, pat, EFun(xs, e))
+  }
+| LET pat = pattern args = list(pattern) EQ e = expr { 
+    match args with 
+    | [] -> DLet(NonRec, pat, e)
+    | xs -> DLet(NonRec, pat, EFun(xs, e))
+  }
 
 expr: 
 | c = constant { EConst(c) }

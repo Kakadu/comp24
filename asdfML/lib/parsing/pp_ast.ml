@@ -30,6 +30,8 @@ and pp_pattern fmt = function
   | PCons (l, r) -> fprintf fmt "%a :: %a" pp_pattern l pp_pattern r
   | PAnn (pat, ty) -> fprintf fmt "(%a: %a)" pp_pattern pat pp_type_ann ty
 
+and pp_pattern_list fmt p = pp_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p;
+
 and pp_expr fmt = function
   | EConst c -> fprintf fmt "%a" pp_const c
   | EVar v -> fprintf fmt "%s" v
@@ -45,7 +47,7 @@ and pp_expr fmt = function
   | EIfElse (c, t, e) -> fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
   | EFun (p, e) ->
     fprintf fmt "fun ";
-    pp_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p;
+    pp_pattern_list fmt p;
     fprintf fmt " -> %a" pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
   | ETuple xs -> pp_list ~sep:", " fmt pp_expr xs
