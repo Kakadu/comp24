@@ -40,7 +40,7 @@ type expr =
   | EVar of id (** x *)
   | EApp of expr * expr (** f x *)
   | EIfElse of expr * expr * expr (** if x then y else z *)
-  | EFun of pattern * expr (** fun x -> y *)
+  | EFun of pattern list * expr (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
   | ETuple of expr list (** (x, fun x -> x, 42) *)
   | EList of expr list (** [1; 2; 3] *)

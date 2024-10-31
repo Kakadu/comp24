@@ -43,7 +43,10 @@ and pp_expr fmt = function
        fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
      | _ -> fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2)
   | EIfElse (c, t, e) -> fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
-  | EFun (p, e) -> fprintf fmt "fun %a -> %a" pp_pattern p pp_expr e
+  | EFun (p, e) ->
+    fprintf fmt "fun ";
+    pp_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p;
+    fprintf fmt " -> %a" pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
   | ETuple xs -> pp_list ~sep:", " fmt pp_expr xs
   | EMatch (e, pe_list) ->

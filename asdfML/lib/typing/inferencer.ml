@@ -144,7 +144,7 @@ end = struct
       "[ %a ]"
       (pp_print_list
          ~pp_sep:(fun fmt () -> fprintf fmt "\n")
-         (fun fmt (k, v) -> fprintf fmt "%s -> %a" (type_id_to_name k) pp_typ v))
+         (fun fmt (k, v) -> fprintf fmt "%s => %a" (type_id_to_name k) pp_typ v))
       (Map.to_alist subst)
   ;;
 
@@ -418,9 +418,18 @@ let infer =
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       return (final_subst, Subst.apply s5 t2)
     | EFun (pat, exp) ->
-      let* env', pat_ty = infer_pattern env pat in
+      let* env', pat_ty =
+        List.fold
+          pat
+          ~init:(return (env, []))
+          ~f:(fun acc pat ->
+            let* acc_env, acc_ty = acc in
+            let* env, ty = infer_pattern acc_env pat in
+            return (env, ty :: acc_ty))
+      in
       let* s, exp_ty = infer_expr env' exp in
-      let ty = Subst.apply s (pat_ty ^-> exp_ty) in
+      let final_ty = exp_ty :: pat_ty |> List.reduce_exn ~f:(fun l r -> r ^-> l) in
+      let ty = Subst.apply s final_ty in
       return (s, ty)
     | ELetIn (def, expr) ->
       let* let_env, let_sub, _ = infer_def env def in
@@ -497,7 +506,7 @@ let infer =
     | DLet (_, pat, _) ->
       fail
         (`Syntax_error
-          (Format.asprintf "Can't use %a in let rec expression" Ast.pp_pattern pat))
+          (Format.asprintf "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
   in
   infer_def
 ;;

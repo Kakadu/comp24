@@ -65,7 +65,7 @@ expr:
 | e = expr_unary { e }
 | app = application { app }
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
-| FUN pat = pattern ARROW body = expr { EFun(pat, body) }
+| FUN pat = nonempty_list(pattern) ARROW body = expr { EFun(pat, body) }
 | def = definition IN body = expr { ELetIn(def, body) }
 | LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
 | LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
