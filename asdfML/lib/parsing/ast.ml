@@ -51,3 +51,20 @@ and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
 [@@deriving show { with_path = false }]
 
 and program = definition list [@@deriving show { with_path = false }]
+
+let p_const c = PConst c
+let p_wild = PWild
+let p_ident x = PIdent x
+let p_tuple ps = PTuple ps
+let p_list ps = PList ps
+let p_cons hd tl = PCons (hd, tl)
+let p_ann p t = PAnn (p, t)
+let e_const c = EConst c
+let e_var x = EVar x
+let e_app f x = EApp (f, x)
+let e_if_else cond e_true e_false = EIfElse (cond, e_true, e_false)
+let e_fun p e = EFun (p, e)
+let e_let_in def e = ELetIn (def, e)
+let e_tuple exprs = ETuple exprs
+let e_list exprs = EList exprs
+let e_match e branches = EMatch (e, branches)

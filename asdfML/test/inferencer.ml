@@ -393,9 +393,9 @@ let%expect_test _ =
     let rec fix = fun f x -> f (fix f) x
     let fac = fun self n -> if n <= 1 then 1 else n * self (n - 1)
     |};
-    [%expect {|  
+  [%expect
+    {|  
     fix: (('c -> 'f) -> 'c -> 'f) -> 'c -> 'f
     fac: (int -> int) -> int -> int   
     |}]
 ;;
-
