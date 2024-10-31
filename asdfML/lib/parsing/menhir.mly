@@ -119,6 +119,7 @@ app_expr:
 | LPAREN e = expr RPAREN { e }
 | c = constant { EConst(c) }
 | v = identifier { EVar(v) }
+| op = op_binary { EVar(op) }
 
 expr_binary: 
 | left = expr op = op_binary right = expr { EApp(EApp(EVar(op), left), right) }

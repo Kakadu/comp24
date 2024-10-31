@@ -281,3 +281,8 @@ let%expect_test _ =
   [%expect {| let compose = fun f g x -> (f (g x))  |}]
 ;;
 
+let%expect_test _ =
+  test {|let x = (+) 1 2 |};
+  [%expect {| let x = (( + ) 1 2)  |}]
+;;
+
