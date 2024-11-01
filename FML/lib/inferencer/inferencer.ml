@@ -279,6 +279,11 @@ let generalize : TypeEnv.t -> Type.t -> scheme =
   Scheme (free, ty)
 ;;
 
+let generalize_rec env ty x =
+  let env = Base.Map.remove env x in
+  generalize env ty
+;;
+
 let lookup_env env name =
   (* If the passed name is defined in the enviroment,
      create its type according to the scheme and return it.
@@ -470,7 +475,38 @@ let infer_expr =
         return (sub, ty)
       in
       RList.fold_left cases ~init:(return (sub1, fv)) ~f
-    | _ -> fail `Not_impl
+    | ELetIn (NoRec, pat, e1, e2) ->
+      let* s1, t1 = helper env e1 in
+      let env = TypeEnv.apply env s1 in
+      let s = generalize env t1 in
+      let* t2, env1 = infer_pattern env pat in
+      let env2 = TypeEnv.ext_by_pat env1 pat s in
+      let* sub = Subst.unify t1 t2 in
+      let* sub1 = Subst.compose sub s1 in
+      let env3 = TypeEnv.apply env2 sub1 in
+      let* s2, t2 = helper env3 e2 in
+      let* s = Subst.compose sub1 s2 in
+      return (s, t2)
+    | ELetIn (Rec, pat, e1, e2) ->
+      (match pat with
+       | PIdentifier x ->
+         let* fresh = fresh_var in
+         let* t, e = infer_pattern env pat in
+         let* ss = Subst.unify fresh t in
+         let env = TypeEnv.apply e ss in
+         let fresh = Subst.apply ss fresh in
+         let env1 = TypeEnv.extend env x (Scheme (TVarSet.empty, fresh)) in
+         let* s, t = helper env1 e1 in
+         let* s1 = Subst.unify (Subst.apply s fresh) t in
+         let* s2 = Subst.compose s s1 in
+         let env = TypeEnv.apply env s2 in
+         let t = Subst.apply s2 t in
+         let s = generalize_rec env t x in
+         let env = TypeEnv.extend env x s in
+         let* sub, t = helper env e2 in
+         let* sub = Subst.compose s2 sub in
+         return (sub, t)
+       | _ -> fail `Not_impl)
   in
   helper
 ;;
