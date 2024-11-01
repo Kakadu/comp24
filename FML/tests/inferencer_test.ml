@@ -38,3 +38,13 @@ let%expect_test _ =
   inference {| let f a b = a + b|};
   [%expect {| val f : int -> int -> int |}]
 ;;
+
+let%expect_test _ =
+  inference {| let id x = x;;
+let fst (a, _) = a;;
+let snd (_, a) = a;; |};
+  [%expect {|
+    val snd : 'a * 'b -> 'b
+    val fst : 'a * 'b -> 'a
+    val id : 'a -> 'a |}]
+;;

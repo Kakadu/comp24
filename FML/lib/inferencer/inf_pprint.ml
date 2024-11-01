@@ -4,44 +4,34 @@
 
 open Typedtree
 
-(* let pp_const_type ppf = function
-   | Int -> Format.fprintf ppf "int"
-   | Bool -> Format.fprintf ppf "bool"
-   | Unit -> Format.fprintf ppf "unit"
-   | Char -> Format.fprintf ppf "char"
-   | String -> Format.fprintf ppf "string"
-   ;; *)
-
-(* let recalculate_vars typ =
-   let insert (old_v, new_v) acc =
-   match Base.Map.find acc old_v with
-   | Some _ -> new_v, acc
-   | None -> new_v + 1, Base.Map.update acc old_v ~f:(fun _ -> new_v)
-   in
-   let new_vars =
-   let rec helper (last_v, acc) = function
-   | TVar n -> insert (n, last_v) acc
-   | TList t | TEffect t | TContinuation t -> helper (last_v, acc) t
-   | TTuple l -> List.fold_left helper (last_v, acc) l
-   | TArr (l, r) ->
-   let new_last_v, new_acc = helper (last_v, acc) l in
-   helper (new_last_v, new_acc) r
-   | TPrim _ | TContinuePoint -> last_v, acc
-   in
-   let _, res = helper (0, Base.Map.empty (module Base.Int)) typ in
-   res
-   in
-   let rec helper = function
-   | TVar n -> tvar (Base.Map.find_exn new_vars n)
-   | TList t -> tlist (helper t)
-   | TTuple l -> ttuple (List.map helper l)
-   | TEffect t -> teffect (helper t)
-   | TContinuation t -> tcontinuation (helper t)
-   | TArr (l, r) -> tarrow (helper l) (helper r)
-   | other -> other
-   in
-   helper typ
-   ;; *)
+let recalculate_vars typ =
+  let insert (old_v, new_v) acc =
+    match Base.Map.find acc old_v with
+    | Some _ -> new_v, acc
+    | None -> new_v + 1, Base.Map.update acc old_v ~f:(fun _ -> new_v)
+  in
+  let new_vars =
+    let rec helper (last_v, acc) = function
+      | TVar n -> insert (n, last_v) acc
+      | TList t -> helper (last_v, acc) t
+      | TTuple l -> List.fold_left helper (last_v, acc) l
+      | TFunction (l, r) ->
+        let new_last_v, new_acc = helper (last_v, acc) l in
+        helper (new_last_v, new_acc) r
+      | TInt | TBool | TUnit -> last_v, acc
+    in
+    let _, res = helper (0, Base.Map.empty (module Base.Int)) typ in
+    res
+  in
+  let rec helper = function
+    | TVar n -> tvar (Base.Map.find_exn new_vars n)
+    | TList t -> tlist (helper t)
+    | TTuple l -> ttuple (List.map helper l)
+    | TFunction (l, r) -> tfunction (helper l) (helper r)
+    | other -> other
+  in
+  helper typ
+;;
 
 let pp_type ppf typ =
   let rec helper ppf = function
@@ -71,7 +61,7 @@ let pp_type ppf typ =
              | _ -> helper ppf ty))
         tl
   in
-  helper ppf typ
+  helper ppf (recalculate_vars typ)
 ;;
 
 let pp_error ppf = function
