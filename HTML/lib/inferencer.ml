@@ -445,26 +445,29 @@ and infer_decl env = function
     return (sub, TypeEnv.apply sub env)
 ;;
 
-(* todo: better env typess*)
 let init_env =
+  let bin_op a b res = tarrow a @@ tarrow b res in
   [ "print_int", tarrow tint tunit
   ; "print_newline", tarrow tunit tunit
-  ; "-", tarrow tint @@ tarrow tint tint
-  ; "+", tarrow tint @@ tarrow tint tint
-  ; "/", tarrow tint @@ tarrow tint tint
-  ; "*", tarrow tint @@ tarrow tint tint
-  ; "<=", tarrow tint @@ tarrow tint tbool
-  ; ">=", tarrow tint @@ tarrow tint tbool
-  ; ">=", tarrow tint @@ tarrow tint tbool
-  ; "||", tarrow tbool @@ tarrow tbool tbool
-  ; "&&", tarrow tbool @@ tarrow tbool tbool
-  ; ">", tarrow tint @@ tarrow tint tbool
-  ; "=", tarrow tint @@ tarrow tint tbool
+  ; "+", bin_op tint tint tint
+  ; "-", bin_op tint tint tint
+  ; "*", bin_op tint tint tint
+  ; "/", bin_op tint tint tint
+  ; "<=", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "<", bin_op (tvar "_a") (tvar "_a") tbool
+  ; ">=", bin_op (tvar "_a") (tvar "_a") tbool
+  ; ">", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "=", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "!=", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "&&", bin_op tbool tbool tbool
+  ; "||", bin_op tbool tbool tbool
   ]
 ;;
 
+[ "+"; "-"; "*"; "/"; "<="; "<"; ">="; ">"; "=="; "!="; "&&"; "||" ]
+
 let init_env =
-  let bind env id typ = TypeEnv.extend env id (Scheme.empty, typ) in
+  let bind env id typ = TypeEnv.extend env id (generalize env typ) in
   let env = TypeEnv.empty in
   List.fold_left (fun env (id, typ) -> bind env id typ) env init_env
 ;;

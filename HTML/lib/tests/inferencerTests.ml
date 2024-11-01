@@ -259,4 +259,18 @@ Typecheck error: Occurs check failed
 Typecheck error: Occurs check failed
 |}]
   ;;
+
+  let%expect_test _ =
+    infer_test {|let f x y = (=) x y;;|};
+    [%expect {| 
+val f : 'a -> 'a -> bool
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f x y = (x > false) || (y > 2);;|};
+    [%expect {| 
+val f : bool -> int -> bool
+|}]
+  ;;
 end
