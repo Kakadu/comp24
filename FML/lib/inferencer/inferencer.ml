@@ -511,6 +511,18 @@ let infer_expr =
   helper
 ;;
 
+let add_to_list =
+  let rec helper ps = function
+    | PIdentifier id -> id :: ps
+    | PTuple ps -> List.fold_left (fun acc p -> helper acc p) [] ps
+    | PCons (h, tl) ->
+      let ps1 = helper ps h in
+      helper ps1 tl
+    | _ -> ps
+  in
+  helper []
+;;
+
 let infer_single_decl env (DDeclaration (rec_flag, pat, expr)) =
   match rec_flag with
   | NoRec ->
@@ -519,10 +531,11 @@ let infer_single_decl env (DDeclaration (rec_flag, pat, expr)) =
     let scheme = generalize env t1 in
     let* t2, env1 = infer_pattern env pat in
     let env2 = TypeEnv.ext_by_pat env1 pat scheme in
+    let names_list = add_to_list pat in
     let* s1 = Subst.unify t1 t2 in
     let* sub = Subst.compose s s1 in
     let env3 = TypeEnv.apply env2 sub in
-    return env3
+    return (env3, List.rev names_list)
   | Rec -> fail `Not_impl
 ;;
 
@@ -553,10 +566,10 @@ let start_env =
 let infer_program program =
   Base.List.fold_left
     ~f:(fun acc item ->
-      let* env = acc in
-      let* env = infer_decl env item in
-      return env)
-    ~init:(return start_env)
+      let* env, lst = acc in
+      let* env, names_list = infer_decl env item in
+      return (env, names_list @ lst))
+    ~init:(return (start_env, []))
     program
 ;;
 
