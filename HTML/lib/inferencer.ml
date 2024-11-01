@@ -374,19 +374,13 @@ let rec infer env = function
     let rec check_cases typ_res typ_e subst_e = function
       | (pat, expr_res) :: tl ->
         let* env_new, typ_pat = infer_ptrn pat ~env in
-        let* subst_pat =
-          match run (unify typ_pat typ_e) with
-          | Ok subst_pat -> return subst_pat
-          | Error _ -> fail @@ MismatchValues (typ_pat, typ_e)
-        in
+        let* subst_pat = unify typ_pat typ_e in
         let* subst_res_2, typ_res_2 = infer (TypeEnv.apply subst_pat env_new) expr_res in
         let* subst_u = unify typ_res_2 (Subst.apply subst_res_2 typ_res) in
         let* subst_e = Subst.compose_all [ subst_e; subst_u; subst_res_2; subst_pat ] in
         let typ_res_2 = Subst.apply subst_e typ_res_2 in
-        (match tl with
-         | [] -> return (subst_e, typ_res_2)
-         | _ -> check_cases typ_res_2 (Subst.apply subst_e typ_pat) subst_e tl)
-      | [] -> fail ParserAvoidedError
+        check_cases typ_res_2 typ_e subst_e tl
+      | [] -> return (subst_e, typ_res)
     in
     let* subst_e, typ_e = infer env e in
     let* type_variable = fresh_var in
