@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-type type_variable_number = int
+type type_variable_number = string
 
 type ground =
   | GInt
@@ -14,7 +14,7 @@ val pp_ground : Format.formatter -> ground -> unit
 val show_ground : ground -> string
 
 type typ =
-  | TVar of type_variable_number
+  | TVar of string
   | TArr of typ * typ
   | TTuple of typ list
   | TList of typ
@@ -26,7 +26,7 @@ val tunit : typ
 val tarrow : typ -> typ -> typ
 val ttuple : typ list -> typ
 val tlist : typ -> typ
-val tvar : type_variable_number -> typ
+val tvar : string -> typ
 val edit_numbers_in_typ : typ -> typ
 val pp_type : Format.formatter -> typ -> unit
 val print_typ : Format.formatter -> ?carriage:bool -> typ -> unit

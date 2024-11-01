@@ -4,7 +4,7 @@
 
 open Ast
 
-type type_variable_number = int
+type type_variable_number = string
 
 type ground =
   | GInt (** Int *)
@@ -41,7 +41,7 @@ let rec pp_type fmt typ =
      | GUnit -> fprintf fmt "Unit")
   | TVar var ->
     let ascii_code_of_a = 97 in
-    fprintf fmt "%s" ("'" ^ Char.escaped (Char.chr (var + ascii_code_of_a)))
+    fprintf fmt "%s" ("'" ^ Char.escaped (Char.chr (int_of_string var + ascii_code_of_a)))
   | TTuple value_list ->
     let pp_tuple value_list =
       let pp_el fmt typ =
@@ -75,7 +75,7 @@ let rec pp_type fmt typ =
 ;;
 
 let edit_numbers_in_typ typ =
-  let empty = Base.Map.empty (module Base.Int) in
+  let empty = Base.Map.empty (module Base.String) in
   let add map old_n new_n = Base.Map.update map old_n ~f:(fun _ -> new_n) in
   let lookup map key = Base.Map.find map key in
   let rec helper typ total map =
@@ -86,7 +86,7 @@ let edit_numbers_in_typ typ =
         | None -> total, total + 1, add map x total
         | Some n -> n, total, map
       in
-      TVar n, total, map
+      TVar (string_of_int n), total, map
     | TGround _ -> typ, total, map
     | TTuple xs ->
       let res, total, map =

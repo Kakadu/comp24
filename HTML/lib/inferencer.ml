@@ -10,7 +10,7 @@ open Typing
 module R = struct
   open Base.Result
 
-  type 'a t = int -> int * ('a, error) Result.t
+  type 'a t = string -> string * ('a, error) Result.t
 
   let ( >>= ) monad f state =
     let last, result = monad state in
@@ -35,11 +35,15 @@ module R = struct
     ;;
   end
 
-  let fresh last = last + 1, Ok last
-  let run monad = snd (monad 0)
+  let fresh last =
+    let fresh_int = int_of_string last in
+    string_of_int (fresh_int + 1), Ok last
+  ;;
+
+  let run monad = snd (monad "0")
 end
 
-type fresh = int
+type fresh = string
 
 module Type = struct
   type t = typ
@@ -53,7 +57,7 @@ module Type = struct
   ;;
 
   let free_vars =
-    let empty = Base.Set.empty (module Base.Int) in
+    let empty = Base.Set.empty (module Base.String) in
     let rec helper acc = function
       | TVar n -> Base.Set.add acc n
       | TArr (left, right) -> helper (helper acc left) right
@@ -73,9 +77,9 @@ module Subst = struct
   open R
   open R.Syntax
 
-  type t = (fresh, typ, Base.Int.comparator_witness) Base.Map.t
+  type t = (fresh, typ, Base.String.comparator_witness) Base.Map.t
 
-  let empty = Base.Map.empty (module Base.Int)
+  let empty = Base.Map.empty (module Base.String)
 
   let mapping key value =
     if Type.occurs_in key value then fail OccursCheck else return (key, value)
@@ -151,12 +155,12 @@ module Subst = struct
   ;;
 end
 
-type scheme = (type_variable_number, Base.Int.comparator_witness) Base.Set.t * typ
+type scheme = (type_variable_number, Base.String.comparator_witness) Base.Set.t * typ
 
 module Scheme = struct
   type t = scheme
 
-  let empty = Base.Set.empty (module Base.Int)
+  let empty = Base.Set.empty (module Base.String)
   let occurs_in key (set, typ) = (not (Base.Set.mem set key)) && Type.occurs_in key typ
   let free_vars (set, typ) = Base.Set.diff set (Type.free_vars typ)
 
@@ -172,9 +176,9 @@ module TypeEnv = struct
   let extend env id scheme = Base.Map.update env id ~f:(fun _ -> scheme)
   let empty = Base.Map.empty (module Base.String)
 
-  let free_vars : t -> (type_variable_number, Base.Int.comparator_witness) Base.Set.t =
+  let free_vars : t -> (type_variable_number, Base.String.comparator_witness) Base.Set.t =
     Base.Map.fold
-      ~init:(Base.Set.empty (module Base.Int))
+      ~init:(Base.Set.empty (module Base.String))
       ~f:(fun ~key:_ ~data acc -> Base.Set.union acc (Scheme.free_vars data))
   ;;
 
@@ -241,21 +245,7 @@ let rec convert_type = function
   | Ast.TList t ->
     let* t = convert_type t in
     return @@ tlist t
-  | Ast.TVar id ->
-    (* todo: better handling of polymorphic type annotations
-       maybe Typ.TVar should use string? *)
-    let hash s =
-      let len = String.length s in
-      let rec helper hash idx =
-        if idx >= len
-        then hash
-        else (
-          let hash = (hash * 33) + Char.code (String.get s idx) in
-          helper hash (idx + 1))
-      in
-      helper 5381 0
-    in
-    return @@ tvar (hash id)
+  | Ast.TVar var -> return @@ tvar var
 ;;
 
 let unify_annotated_type typ t =
@@ -441,15 +431,12 @@ and infer_decl env = function
       let* typ, sub_infer, env = infer_common_decl env expr annotated_type in
       let* sub =
         match Base.Map.find env ident with
-        | Some (_, TVar n) ->
-          (match Subst.find n sub_init with
-           | Some init_type_var -> unify typ init_type_var
-           | None -> return Subst.empty)
+        | Some (_, init_type) -> unify typ init_type
         | _ -> return Subst.empty
       in
       let env = TypeEnv.extend env ident (Scheme.empty, typ) in
       let* sub_final = Subst.compose_all [ sub_init; sub_infer; sub ] in
-      return (sub_final, env)
+      return (sub_final, TypeEnv.apply sub_final env)
     in
     let* env =
       List.fold_left
