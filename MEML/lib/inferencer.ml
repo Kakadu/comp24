@@ -1,19 +1,11 @@
-(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0 *)
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Base
 open Ast
 open Ty
 module Format = Stdlib.Format (* silencing a warning *)
-
-let use_logging = false
-
-let log fmt =
-  if use_logging
-  then Format.kasprintf (fun s -> Format.printf "%s\n%!" s) fmt
-  else Format.ifprintf Format.std_formatter fmt
-;;
 
 module R : sig
   type 'a t
@@ -93,7 +85,7 @@ module Type = struct
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TList t -> occurs_in v t
     | TTuple ts -> occurs_in_list ts
-    | TInt | TBool | TUnknown | TPrim _ -> false
+    | TInt | TBool -> false
   ;;
 
   let free_vars =
@@ -102,32 +94,13 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TTuple ts -> List.fold ts ~init:acc ~f:helper
       | TList t -> helper acc t
-      | TInt | TBool | TUnknown | TPrim _ -> acc
+      | TInt | TBool -> acc
     in
     helper VarSet.empty
   ;;
 end
 
-module Subst : sig
-  type t
-
-  val pp : Stdlib.Format.formatter -> t -> unit
-  val empty : t
-  val singleton : fresh -> ty -> t R.t
-
-  (** Getting value from substitution. May raise [Not_found] *)
-  val find_exn : fresh -> t -> ty
-
-  val find : fresh -> t -> ty option
-  val apply : t -> ty -> ty
-  val unify : ty -> ty -> t R.t
-
-  (** Compositon of substitutions *)
-  val compose : t -> t -> t R.t
-
-  val compose_all : t list -> t R.t
-  val remove : t -> fresh -> t
-end = struct
+module Subst = struct
   open R
   open R.Syntax
 
@@ -232,11 +205,7 @@ module VarSet = struct
 end
 
 module Scheme = struct
-  type t = scheme [@@deriving show { with_path = false }]
-
-  let occurs_in v = function
-    | S (xs, t) -> (not (VarSet.mem v xs)) && Type.occurs_in v t
-  ;;
+  type t = scheme
 
   let free_vars = function
     | S (bs, t) -> VarSet.diff (Type.free_vars t) bs
@@ -246,8 +215,6 @@ module Scheme = struct
     let s2 = VarSet.fold (fun k s -> Subst.remove s k) names sub in
     S (names, Subst.apply s2 ty)
   ;;
-
-  let pp = pp_scheme
 end
 
 module TypeEnv = struct
@@ -262,14 +229,6 @@ module TypeEnv = struct
   ;;
 
   let apply s env = Map.map env ~f:(Scheme.apply s)
-
-  let pp ppf xs =
-    Stdlib.Format.fprintf ppf "{| ";
-    Map.iter xs ~f:(fun (n, s) -> Stdlib.Format.fprintf ppf "%s -> %a; " n pp_scheme s);
-    Stdlib.Format.fprintf ppf "|}%!"
-  ;;
-
-  let find_exn name xs = Map.find_exn ~equal:String.equal xs name
 end
 
 open R
@@ -312,19 +271,19 @@ let infer =
       let* sr, tr = helper env r in
       (match bin_op with
        | Add | Sub | Mul | Div | Mod ->
-         let* s1 = unify tl int_typ in
-         let* s2 = unify tr int_typ in
+         let* s1 = unify tl TInt in
+         let* s2 = unify tr TInt in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
-         return (sres, int_typ)
+         return (sres, TInt)
        | Less | Leq | Gre | Greq | Eq | Neq ->
          let* s1 = unify tl tr in
          let* sres = Subst.compose_all [ s1; sl; sr ] in
-         return (sres, bool_typ)
+         return (sres, TBool)
        | And | Or ->
-         let* s1 = unify tl bool_typ in
-         let* s2 = unify tr bool_typ in
+         let* s1 = unify tl TBool in
+         let* s2 = unify tr TBool in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
-         return (sres, bool_typ))
+         return (sres, TBool))
     | EVar (x, _) -> lookup_env x env
     | EFun (p, e1) ->
       let* tv = fresh_var in
@@ -354,14 +313,14 @@ let infer =
       return (final_subst, trez)
     | EConst n ->
       (match n with
-       | CInt _ -> return (Subst.empty, int_typ)
-       | CBool _ -> return (Subst.empty, bool_typ)
+       | CInt _ -> return (Subst.empty, TInt)
+       | CBool _ -> return (Subst.empty, TBool)
        | CNil ->
          let* var = fresh_var in
-         return (Subst.empty, list_typ var))
+         return (Subst.empty, TList var))
     | EList (h, t) ->
       let* s1, t1 = helper env h in
-      let t1 = list_typ t1 in
+      let t1 = TList t1 in
       let* s2, t2 = helper env t in
       let* s3 = unify t1 t2 in
       let* subst = Subst.compose_all [ s1; s2; s3 ] in
@@ -377,12 +336,12 @@ let infer =
             let* subst = Subst.compose s tuple_s in
             return (subst, t :: tuple))
       in
-      return (s, tuple_typ (List.rev t))
+      return (s, TTuple (List.rev t))
     | EIfElse (c, th, el) ->
       let* s1, t1 = helper env c in
       let* s2, t2 = helper env th in
       let* s3, t3 = helper env el in
-      let* s4 = unify t1 bool_typ in
+      let* s4 = unify t1 TBool in
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       R.return (final_subst, Subst.apply s5 t2)

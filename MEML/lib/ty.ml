@@ -1,10 +1,10 @@
-(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0 *)
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Format
 
-type binder = int [@@deriving eq, show { with_path = false }]
+type binder = int
 
 module VarSet = struct
   include Stdlib.Set.Make (Int)
@@ -16,18 +16,15 @@ module VarSet = struct
   ;;
 end
 
-type binder_set = VarSet.t [@@deriving show { with_path = false }]
+type binder_set = VarSet.t
 
 type ty =
-  | TPrim of string
   | TBool
   | TInt
-  | TUnknown
-  | TVar of binder * ty
+  | TVar of binder * Ast.type_of_var
   | TArrow of ty * ty
   | TList of ty
   | TTuple of ty list
-[@@deriving eq, show { with_path = false }]
 
 type error =
   [ `Occurs_check
@@ -36,23 +33,13 @@ type error =
   | `Unification_failed of ty * ty
   ]
 
-type scheme = S of binder_set * ty [@@deriving show { with_path = false }]
-
-let arrow l r = TArrow (l, r)
-let int_typ = TInt
-let bool_typ = TBool
-let list_typ l = TList l
-let tuple_typ t = TTuple t
-let unit_typ = TUnknown
-let v x = TVar (x, TUnknown)
-let v1 x t = TVar (x, t)
+type scheme = S of binder_set * ty
 
 let pp_list helper l sep =
   Format.pp_print_list ~pp_sep:(fun ppf _ -> Format.fprintf ppf sep) helper l
 ;;
 
 let rec pp_typ ppf = function
-  | TPrim s -> pp_print_string ppf s
   | TVar (n, _) -> fprintf ppf "%s" @@ "'" ^ Char.escaped (Char.chr (n + 97))
   | TInt -> fprintf ppf "int"
   | TBool -> fprintf ppf "bool"
@@ -62,7 +49,6 @@ let rec pp_typ ppf = function
     (match l with
      | TArrow (_, _) -> fprintf ppf "(%a) -> %a" pp_typ l pp_typ r
      | _ -> fprintf ppf "%a -> %a" pp_typ l pp_typ r)
-  | TUnknown -> fprintf ppf "()"
 ;;
 
 let pp_scheme ppf = function
