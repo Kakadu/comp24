@@ -231,6 +231,23 @@ module TypeEnv = struct
   let apply env sub = Base.Map.map env ~f:(Scheme.apply sub)
   let extend env key schema = Base.Map.update ~f:(fun _ -> schema) env key
   let find env key = Base.Map.find env key
+
+  let rec ext_by_pat env pat (Scheme (fvs, ty) as scheme) =
+    match pat, ty with
+    | PIdentifier id, _ -> extend env id scheme
+    | PTuple ps, TTuple ts ->
+      let env1 =
+        Base.List.fold2 ps ts ~init:env ~f:(fun acc p t ->
+          ext_by_pat acc p (Scheme (fvs, t)))
+      in
+      (match env1 with
+       | Ok env -> env
+       | _ -> env)
+    | PCons (h, tl), TList t ->
+      let env1 = ext_by_pat env h (Scheme (fvs, t)) in
+      ext_by_pat env1 tl (Scheme (fvs, ty))
+    | _ -> env
+  ;;
 end
 
 open R
@@ -457,3 +474,14 @@ let infer_expr =
   in
   helper
 ;;
+
+(* let infer_decl  env (DDeclaration (rec_flag, pat, expr)) =
+   match rec_flag with
+   | NoRec ->
+   let* s, type1 = infer_expr env expr in
+   let env = TypeEnv.apply env s in
+   let sc = generalize env type1 in
+   let* type2, env1 = infer_pattern env pat in
+   let env2 = TypeEnv.ext_by_pat env1 pat sc in
+
+   | Rec -> fail `Not_impl *)
