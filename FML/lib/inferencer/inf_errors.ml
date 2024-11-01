@@ -10,4 +10,5 @@ type error =
   | `Unification_failed of typ * typ
   | `Unbound_variable of string
   | `Several_bounds of string
+  | `Not_impl
   ]

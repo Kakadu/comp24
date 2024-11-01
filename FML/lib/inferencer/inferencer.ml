@@ -342,6 +342,7 @@ let infer_pattern =
     | PConst c ->
       let* _, ty = infer_const c in
       return (ty, env)
+    | PUnit -> return (tunit, env)
     | PTuple pattern_list as tuple_p ->
       let* _ = check_unique_vars tuple_p in
       (* Check several bounds *)
@@ -367,8 +368,92 @@ let infer_pattern =
       let env = TypeEnv.apply env2 sub3 in
       let ty3 = Subst.apply sub3 fv in
       return (ty3, env)
-      (* TODO PConstraint*)
-    | _ -> return (TVar 0, env)
+    | PConstraint (pat, an) ->
+      let* ty, env1 = helper env pat in
+      let* sub = Subst.unify ty (annotation_to_type an) in
+      let env2 = TypeEnv.apply env1 sub in
+      let ty2 = Subst.apply sub ty in
+      return (ty2, env2)
+  in
+  helper
+;;
+
+let infer_expr =
+  let rec helper env = function
+    | EConst c -> infer_const c
+    | EIdentifier id -> infer_id env id
+    | ENill ->
+      let* fv = fresh_var in
+      return (Subst.empty, tlist fv)
+    | EFun (pat, expr) ->
+      let* ty1, env1 = infer_pattern env pat in
+      let* sub, ty2 = helper env1 expr in
+      let ty = tfunction ty1 ty2 in
+      let result = Subst.apply sub ty in
+      return (sub, result)
+    | EApplication (f, arg) ->
+      let* sub1, f_ty = helper env f in
+      let env1 = TypeEnv.apply env sub1 in
+      let* sub2, arg_ty = helper env1 arg in
+      let* res_type = fresh_var in
+      let ty1 = Subst.apply sub2 f_ty in
+      let ty2 = tfunction arg_ty res_type in
+      let* sub3 = Subst.unify ty1 ty2 in
+      let* sub = Subst.compose_all [ sub1; sub2; sub3 ] in
+      let ty = Subst.apply sub res_type in
+      return (sub, ty)
+    | ECons (t1, t2) ->
+      let* sub1, ty1 = helper env t1 in
+      let env1 = TypeEnv.apply env sub1 in
+      let* sub2, ty2 = helper env1 t2 in
+      let* fv = fresh_var in
+      let* sub3 = Subst.unify (tlist ty1) fv in
+      let* sub4 = Subst.unify ty2 fv in
+      let* sub = Subst.compose_all [ sub1; sub2; sub3; sub4 ] in
+      let ty = Subst.apply sub fv in
+      return (sub, ty)
+    | EIf (cond, b1, b2) ->
+      let* sub1, ty1 = helper env cond in
+      let* sub2, ty2 = helper env b1 in
+      let* sub3, ty3 = helper env b2 in
+      let* sub4 = Subst.unify ty1 tbool in
+      let* sub5 = Subst.unify ty2 ty3 in
+      let* sub = Subst.compose_all [ sub1; sub2; sub3; sub4; sub5 ] in
+      let ty = Subst.apply sub ty3 in
+      return (sub, ty)
+    | ETuple exprs ->
+      let rec infer_tuple acc = function
+        | [] -> return acc
+        | hd :: tl ->
+          let* sub1, ty1 = helper env hd in
+          let acc_sub, acc_ty = acc in
+          let* sub2 = Subst.compose sub1 acc_sub in
+          let new_acc = sub2, ty1 :: acc_ty in
+          infer_tuple new_acc tl
+      in
+      let acc = Subst.empty, [] in
+      let* sub, ty = infer_tuple acc exprs in
+      let ty_list = List.rev_map (Subst.apply sub) ty in
+      let ty = ttuple ty_list in
+      return (sub, ty)
+    | EMatch (expr, cases) ->
+      let* sub1, ty1 = helper env expr in
+      let env1 = TypeEnv.apply env sub1 in
+      let* fv = fresh_var in
+      let f acc case =
+        let acc_sub, acc_ty = acc in
+        let pat, expr = case in
+        let* pat_ty, pat_env = infer_pattern env1 pat in
+        let* sub2 = Subst.unify ty1 pat_ty in
+        let env2 = TypeEnv.apply pat_env sub2 in
+        let* expr_sub, expr_ty = helper env2 expr in
+        let* sub3 = Subst.unify expr_ty acc_ty in
+        let* sub = Subst.compose_all [ acc_sub; expr_sub; sub2; sub3 ] in
+        let ty = Subst.apply sub acc_ty in
+        return (sub, ty)
+      in
+      RList.fold_left cases ~init:(return (sub1, fv)) ~f
+    | _ -> fail `Not_impl
   in
   helper
 ;;
