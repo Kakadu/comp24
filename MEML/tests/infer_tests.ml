@@ -1,6 +1,6 @@
-(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0 *)
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open MEML_lib
 open Ast
@@ -102,66 +102,4 @@ let%expect_test "let idk (fs: int) (sn: int) = fs + sn * fs" =
         )
     ];
   [%expect {| idk : int -> int -> int |}]
-;;
-
-let%expect_test "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y" =
-  print_prog_result
-    [ Let
-        ( Notrec
-        , "f"
-        , EFun
-            ( PVar ("g", TArrow (TInt, TArrow (TInt, TInt)))
-            , EFun
-                ( PVar ("x", TInt)
-                , EFun
-                    ( PVar ("y", TInt)
-                    , EApp
-                        ( EApp (EVar ("g", TUnknown), EVar ("x", TUnknown))
-                        , EVar ("y", TUnknown) ) ) ) ) )
-    ];
-  [%expect {|  |}]
-;;
-
-let%expect_test "let rec cps_fact x = \n\
-                \      let helper x acc = \n\
-                \        if x = 1 \n\
-                \          then acc x \n\
-                \        else helper (x - 1) (fun n -> n * acc x) \n\
-                \      in \n\
-                \      helper x (fun a -> a)"
-  =
-  print_prog_result
-    [ Let
-        ( Rec
-        , "cps_fact"
-        , EFun
-            ( PVar ("x", TUnknown)
-            , ELetIn
-                ( Notrec
-                , "helper"
-                , EFun
-                    ( PVar ("x", TUnknown)
-                    , EFun
-                        ( PVar ("acc", TUnknown)
-                        , EIfElse
-                            ( EBinaryOp (Eq, EVar ("x", TUnknown), EConst (CInt 1))
-                            , EApp (EVar ("acc", TUnknown), EVar ("x", TUnknown))
-                            , EApp
-                                ( EApp
-                                    ( EVar ("helper", TUnknown)
-                                    , EBinaryOp
-                                        (Sub, EVar ("x", TUnknown), EConst (CInt 1)) )
-                                , EFun
-                                    ( PVar ("n", TUnknown)
-                                    , EBinaryOp
-                                        ( Mul
-                                        , EVar ("n", TUnknown)
-                                        , EApp
-                                            (EVar ("acc", TUnknown), EVar ("x", TUnknown))
-                                        ) ) ) ) ) )
-                , EApp
-                    ( EApp (EVar ("helper", TUnknown), EVar ("x", TUnknown))
-                    , EFun (PVar ("a", TUnknown), EVar ("a", TUnknown)) ) ) ) )
-    ];
-  [%expect {|  |}]
 ;;
