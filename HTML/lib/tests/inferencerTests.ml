@@ -198,15 +198,6 @@ and (-$) = fun x y -> ( + ) x y;;|};
   ;;
 
   let%expect_test _ =
-    infer_test {|let rec ( += ) x = x -$ 1 
-and (-$) = fun x y -> ( + ) x y;;|};
-    [%expect {| 
-val += : int -> int
-val -$ : int -> int -> int
-|}]
-  ;;
-
-  let%expect_test _ =
     infer_test
       {|let rec factorial = fun (n: int) -> 
   if n = 0 then 1 
@@ -225,11 +216,21 @@ and f2 x = f3 (x - 1)
 and f3 x = f1 (x - 1)
 
 let result = f1 5;;|};
-    [%expect {| 
+    [%expect
+      {| 
 val f1 : int -> 'a
 val f2 : int -> 'a
 val f3 : int -> 'a
 val result : 'a
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let rec ( += ) x = x -$ 1 
+and (-$) = fun x y -> ( + ) x y;;|};
+    [%expect {| 
+val += : int -> int
+val -$ : int -> int -> int
 |}]
   ;;
 end
