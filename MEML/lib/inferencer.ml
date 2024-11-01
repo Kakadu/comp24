@@ -1,19 +1,11 @@
-(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0 *)
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Base
 open Ast
 open Ty
 module Format = Stdlib.Format (* silencing a warning *)
-
-let use_logging = false
-
-let log fmt =
-  if use_logging
-  then Format.kasprintf (fun s -> Format.printf "%s\n%!" s) fmt
-  else Format.ifprintf Format.std_formatter fmt
-;;
 
 module R : sig
   type 'a t
@@ -93,7 +85,7 @@ module Type = struct
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TList t -> occurs_in v t
     | TTuple ts -> occurs_in_list ts
-    | TInt | TBool | TUnknown -> false
+    | TInt | TBool -> false
   ;;
 
   let free_vars =
@@ -102,32 +94,13 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TTuple ts -> List.fold ts ~init:acc ~f:helper
       | TList t -> helper acc t
-      | TInt | TBool | TUnknown -> acc
+      | TInt | TBool -> acc
     in
     helper VarSet.empty
   ;;
 end
 
-module Subst : sig
-  type t
-
-  val pp : Stdlib.Format.formatter -> t -> unit
-  val empty : t
-  val singleton : fresh -> ty -> t R.t
-
-  (** Getting value from substitution. May raise [Not_found] *)
-  val find_exn : fresh -> t -> ty
-
-  val find : fresh -> t -> ty option
-  val apply : t -> ty -> ty
-  val unify : ty -> ty -> t R.t
-
-  (** Compositon of substitutions *)
-  val compose : t -> t -> t R.t
-
-  val compose_all : t list -> t R.t
-  val remove : t -> fresh -> t
-end = struct
+module Subst = struct
   open R
   open R.Syntax
 
@@ -232,11 +205,7 @@ module VarSet = struct
 end
 
 module Scheme = struct
-  type t = scheme [@@deriving show { with_path = false }]
-
-  let occurs_in v = function
-    | S (xs, t) -> (not (VarSet.mem v xs)) && Type.occurs_in v t
-  ;;
+  type t = scheme
 
   let free_vars = function
     | S (bs, t) -> VarSet.diff (Type.free_vars t) bs
@@ -246,8 +215,6 @@ module Scheme = struct
     let s2 = VarSet.fold (fun k s -> Subst.remove s k) names sub in
     S (names, Subst.apply s2 ty)
   ;;
-
-  let pp = pp_scheme
 end
 
 module TypeEnv = struct
@@ -262,14 +229,6 @@ module TypeEnv = struct
   ;;
 
   let apply s env = Map.map env ~f:(Scheme.apply s)
-
-  let pp ppf xs =
-    Stdlib.Format.fprintf ppf "{| ";
-    Map.iter xs ~f:(fun (n, s) -> Stdlib.Format.fprintf ppf "%s -> %a; " n pp_scheme s);
-    Stdlib.Format.fprintf ppf "|}%!"
-  ;;
-
-  let find_exn name xs = Map.find_exn ~equal:String.equal xs name
 end
 
 open R
