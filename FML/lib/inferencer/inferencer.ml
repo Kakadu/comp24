@@ -511,13 +511,53 @@ let infer_expr =
   helper
 ;;
 
-(* let infer_decl  env (DDeclaration (rec_flag, pat, expr)) =
-   match rec_flag with
-   | NoRec ->
-   let* s, type1 = infer_expr env expr in
-   let env = TypeEnv.apply env s in
-   let sc = generalize env type1 in
-   let* type2, env1 = infer_pattern env pat in
-   let env2 = TypeEnv.ext_by_pat env1 pat sc in
+let infer_single_decl env (DDeclaration (rec_flag, pat, expr)) =
+  match rec_flag with
+  | NoRec ->
+    let* s, t1 = infer_expr env expr in
+    let env = TypeEnv.apply env s in
+    let scheme = generalize env t1 in
+    let* t2, env1 = infer_pattern env pat in
+    let env2 = TypeEnv.ext_by_pat env1 pat scheme in
+    let* s1 = Subst.unify t1 t2 in
+    let* sub = Subst.compose s s1 in
+    let env3 = TypeEnv.apply env2 sub in
+    return env3
+  | Rec -> fail `Not_impl
+;;
 
-   | Rec -> fail `Not_impl *)
+let infer_decl env = function
+  | SingleDecl declaration -> infer_single_decl env declaration
+  | MutableRecDecl _ -> fail `Not_impl
+;;
+
+let start_env =
+  let bin_op_list =
+    [ "( + )", TFunction (TInt, TFunction (TInt, TInt))
+    ; "( - )", TFunction (TInt, TFunction (TInt, TInt))
+    ; "( / )", TFunction (TInt, TFunction (TInt, TInt))
+    ; "( * )", TFunction (TInt, TFunction (TInt, TInt))
+    ; "( < )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( > )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( <= )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( >= )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( <> )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( = )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ]
+  in
+  let env = TypeEnv.empty in
+  let bind env id typ = TypeEnv.extend env id (generalize env typ) in
+  Base.List.fold_left bin_op_list ~init:env ~f:(fun env (id, typ) -> bind env id typ)
+;;
+
+let infer_program program =
+  Base.List.fold_left
+    ~f:(fun acc item ->
+      let* env = acc in
+      let* env = infer_decl env item in
+      return env)
+    ~init:(return start_env)
+    program
+;;
+
+let run_program_inferencer program = run (infer_program program)
