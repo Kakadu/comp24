@@ -52,14 +52,6 @@ module InferenceTests = struct
     val a : int -> int |}]
   ;;
 
-  (* todo: again, better fail *)
-  let%expect_test _ =
-    infer_test {|let f (x :: (x, y)) = 3|};
-    [%expect
-      {|
-    Typecheck error: This expression has type 'a list but an expression was expected of type 'b * 'c |}]
-  ;;
-
   let%expect_test _ =
     infer_test {|let f (x :: (x, y)) = 3|};
     [%expect
