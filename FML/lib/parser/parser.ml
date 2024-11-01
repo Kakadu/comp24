@@ -301,25 +301,11 @@ let parse_expr =
   let expr = chainl1 apply (mul <|> div) in
   let expr = chainl1 expr (add <|> sub) in
   let expr = chainr1 expr parse_cons in
-  let expr = chainl1 expr (choice [ lt; lte; gt; gte; eq; neq; or_; and_ ]) in
+  let expr = chainl1 expr (choice [ lte; lt; gte; gt; eq; neq; or_; and_ ]) in
   choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
 ;;
 
 (* ------------------------- *)
-
-(* Declaration parser *)
-(* let parse_declaration =
-  token "let"
-  *> lift3
-       ddeclaration
-       (token "rec" *> return Rec <|> return NoRec)
-       parse_pattern
-       (let* args = many parse_pattern in
-        let* expr = token "=" *> parse_expr in
-        match List.rev args with
-        | h :: tl -> return @@ List.fold_left (fun acc x -> efun x acc) (efun h expr) tl
-        | _ -> return expr)
-;; *)
 
 let parse_declaration =
   let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in

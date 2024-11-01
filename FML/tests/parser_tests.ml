@@ -200,3 +200,33 @@ let%expect_test _ = parse_with_print {|
               (ECons ((EConst (CInt 6)), (ECons ((EConst (CInt 4)), ENill))))))
            )))
       ] |}]
+;;
+
+let%expect_test _ =
+  parse_with_print {|
+        let rec factorial n = if n < 1 then 1 else n * factorial (n - 1) |};
+  [%expect
+    {|
+        [(SingleDecl
+            (DDeclaration (Rec, (PIdentifier "factorial"),
+               (EFun ((PIdentifier "n"),
+                  (EIf (
+                     (EApplication (
+                        (EApplication ((EIdentifier "( < )"), (EIdentifier "n"))),
+                        (EConst (CInt 1)))),
+                     (EConst (CInt 1)),
+                     (EApplication (
+                        (EApplication ((EIdentifier "( * )"), (EIdentifier "n"))),
+                        (EApplication ((EIdentifier "factorial"),
+                           (EApplication (
+                              (EApplication ((EIdentifier "( - )"), (EIdentifier "n")
+                                 )),
+                              (EConst (CInt 1))))
+                           ))
+                        ))
+                     ))
+                  ))
+               )))
+          ]
+    |}]
+;;
