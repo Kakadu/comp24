@@ -252,6 +252,7 @@ module TypeEnv = struct
     let open R in
     let open R.Syntax in
     match pat, scheme with
+    | PConst CUnit, _ -> return env
     | PWild, _ -> return env
     | PIdent x, _ -> extend env x scheme |> return
     | PTuple xs, (vars, (TTuple ys as ty)) ->
@@ -262,7 +263,7 @@ module TypeEnv = struct
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
     | PAnn (x, _), _ -> extend_pat env x scheme
-    | _ ->
+    | PConst _, _ | PList _, _ | PCons (_, _), _ | PTuple _, _ ->
       fail
         (`Syntax_error
           "only identifiers, tuples, wildcards and type annotations are supported in let \
@@ -282,13 +283,14 @@ module TypeEnv = struct
     ; "( < )", var ^-> var ^-> bool_typ
     ; "( >= )", var ^-> var ^-> bool_typ
     ; "( <= )", var ^-> var ^-> bool_typ
-    ; "( == )", var ^-> var ^-> bool_typ
-    ; "( != )", var ^-> var ^-> bool_typ
+    ; "( = )", var ^-> var ^-> bool_typ
+    ; "( <> )", var ^-> var ^-> bool_typ
     ; "( && )", bool_typ ^-> bool_typ ^-> bool_typ
     ; "( || )", bool_typ ^-> bool_typ ^-> bool_typ
     ; "[ - ]", int_typ ^-> int_typ
     ; "not", bool_typ ^-> bool_typ
     ; "( :: )", var ^-> TList var ^-> TList var
+    ; "print_int", int_typ ^-> unit_typ (* for tests *)
     ]
   ;;
 
@@ -407,7 +409,7 @@ let infer =
       let* fv = fresh_var in
       let* sub = unify (Subst.apply right_sub left_ty) (right_ty ^-> fv) in
       let final_ty = Subst.apply sub fv in
-      let* sub = Subst.compose_all [ left_sub; right_sub; sub ] in
+      let* sub = Subst.compose_all [ sub; right_sub; left_sub ] in
       return (sub, final_ty)
     | EIfElse (cond, th, el) ->
       let* s1, t1 = infer_expr env cond in
@@ -456,7 +458,7 @@ let infer =
            let* acc_sub, acc_t = acc in
            let* s, t = infer_expr env x in
            let* s' = unify acc_t t in
-           let* sub = Subst.compose_all [ acc_sub; s; s' ] in
+           let* sub = Subst.compose_all [ s'; s; acc_sub ] in
            return (sub, acc_t)))
       >>| fun (s, t) -> s, TList t
     | EMatch (e, pe) ->
@@ -534,11 +536,7 @@ let infer_program (prog : Ast.definition list) =
          let* env', _, ty = infer env head in
          let id = ids_from_pattern pat in
          let* tail = helper env' tail in
-         return ((id, ty) :: tail)
-         (* | Ast.DLet (NonRec, PWild, _) ->
-            let* _ = infer env head in
-            let* tail = helper env tail in
-            return tail *))
+         return ((id, ty) :: tail))
     | [] -> return []
   in
   let env = TypeEnv.default in
@@ -546,6 +544,5 @@ let infer_program (prog : Ast.definition list) =
 ;;
 
 let inference_program prog =
-  (* run (infer_program prog) |> Result.map ~f:(List.map ~f:(fun x -> snd (snd x))) *)
   run (infer_program prog)
 ;;

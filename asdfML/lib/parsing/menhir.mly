@@ -17,6 +17,7 @@
 %token PLUS MINUS 
 %token MUL DIV
 %token EQ
+%token LTGT
 %token EQEQ
 %token NE
 %token GT LT GE LE
@@ -75,10 +76,16 @@ expr:
 | IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
 | FUN pat = nonempty_list(pattern) ARROW body = expr { EFun(pat, body) }
 | def = definition IN body = expr { ELetIn(def, body) }
-| LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
-| LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
+| t = tuple { t }
+| l = list_ { l }
 | m = match_ { m }
 | LPAREN e = expr RPAREN { e }
+
+tuple:
+| LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
+
+list_:
+| LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
 
 type_ann:
 | hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
@@ -107,19 +114,22 @@ pattern:
 | l = pattern CONS r = pattern { PCons(l, r) }
 
 match_:
-| MATCH e = expr WITH cs = nonempty_list(case) { EMatch(e, cs) }
+| MATCH e = expr WITH option(BAR) cs = separated_nonempty_list(BAR, case) { EMatch(e, cs) }
 case:
-| BAR p = pattern ARROW e = expr { (p, e) }
+| p = pattern ARROW e = expr { (p, e) }
 
 application :
 | l = application r = app_expr { EApp(l, r) }
 | a = app_expr { a }
+| op = op_binary { EVar(op) }  // todo: cons
 
 app_expr: 
 | LPAREN e = expr RPAREN { e }
 | c = constant { EConst(c) }
+| t = tuple { t }
+| l = list_ { l }
 | v = identifier { EVar(v) }
-| op = op_binary { EVar(op) }
+// | op = op_binary { EVar(op) }  // todo: cons
 
 expr_binary: 
 | left = expr op = op_binary right = expr { EApp(EApp(EVar(op), left), right) }
@@ -129,8 +139,10 @@ expr_binary:
 | DIV { "( / )" }
 | PLUS { "( + )" }
 | MINUS { "( - )" }
-| EQEQ { "( == )" }
-| NE { "( != )" }
+| EQ { "( = )" }
+| LTGT { "( <> )" }
+| EQEQ { "( = )" }  // <- todo
+| NE { "( <> )" }
 | GT { "( > )" }
 | LT { "( < )" }
 | GE { "( >= )" }
@@ -140,7 +152,11 @@ expr_binary:
 | CONS { "( :: )" }
 
 expr_unary: 
-| op = op_unary e = expr { EApp(EVar(op), e) }
+| op = op_unary e = expr { 
+    match op, e with
+    | "[ - ]", EConst(CInt(x)) -> EConst(CInt(-x))
+    | _ -> EApp(EVar(op), e)
+  }
 
 %inline op_unary:
 | MINUS { "[ - ]" }

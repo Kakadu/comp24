@@ -14,7 +14,7 @@ let digit_nz = ['1'-'9']
 let alpha = ['a'-'z' 'A'-'Z']
 
 let id = (alpha | '_') (alpha | digit | '_')* 
-let int = "-"? digit*  
+let int = digit*  
 let bool = "not "? ("true" | "false")
 
 
@@ -38,6 +38,7 @@ rule token = parse
   | "*" { MUL }
   | "/" { DIV }
   | "=" { EQ }
+  | "<>" { LTGT }
   | "==" { EQEQ }
   | "!=" { NE }
   | ">" { GT }
