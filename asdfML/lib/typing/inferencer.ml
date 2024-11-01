@@ -543,6 +543,4 @@ let infer_program (prog : Ast.definition list) =
   helper env prog
 ;;
 
-let inference_program prog =
-  run (infer_program prog)
-;;
+let inference_program prog = run (infer_program prog)

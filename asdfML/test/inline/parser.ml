@@ -1,10 +1,7 @@
 open Lib.Parser
+open Test.Utils
 
-let test code =
-  match parse_program code ~print_ast:true with
-  | Ok _ -> ()
-  | Error e -> print_endline e
-;;
+let test = test_parser
 
 let%expect_test _ =
   test "let _ = 12";
@@ -49,23 +46,23 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let id = fun x -> x";
-  [%expect {| let id = fun x -> x |}]
+  [%expect {| let id = (fun x -> x) |}]
 ;;
 
 let%expect_test _ =
   test "let _ = fun x -> somefunc x";
-  [%expect {| let _ = fun x -> (somefunc x) |}]
+  [%expect {| let _ = (fun x -> (somefunc x)) |}]
 ;;
 
 let%expect_test _ =
   test "let max = fun x -> fun y -> if x < y then y else x";
-  [%expect {| let max = fun x -> fun y -> if (( < ) x y) then y else x |}]
+  [%expect {| let max = (fun x -> (fun y -> if (( < ) x y) then y else x)) |}]
 ;;
 
 let%expect_test _ =
   test "let rec factorial = fun x -> if x > 1 then x * (factorial (x - 1)) else 1";
   [%expect
-    {| let rec factorial = fun x -> if (( > ) x 1) then (( * ) x (factorial (( - ) x 1))) else 1 |}]
+    {| let rec factorial = (fun x -> if (( > ) x 1) then (( * ) x (factorial (( - ) x 1))) else 1) |}]
 ;;
 
 let%expect_test _ =
@@ -73,14 +70,14 @@ let%expect_test _ =
     "let rec factorial = fun x -> fun cont -> if x > 1 then factorial (n - 1) (fun n -> \
      cont (x * n)) else cont 1 ";
   [%expect
-    {| let rec factorial = fun x -> fun cont -> if (( > ) x 1) then (factorial (( - ) n 1) fun n -> (cont (( * ) x n))) else (cont 1) |}]
+    {| let rec factorial = (fun x -> (fun cont -> if (( > ) x 1) then (factorial (( - ) n 1) (fun n -> (cont (( * ) x n)))) else (cont 1))) |}]
 ;;
 
 let%expect_test _ =
   test "let plus_one = fun x -> let one = 1 in x + one";
   [%expect {|
-      let plus_one = fun x -> let one = 1
-       in (( + ) x one) |}]
+      let plus_one = (fun x -> let one = 1
+       in (( + ) x one)) |}]
 ;;
 
 let%expect_test _ =
@@ -103,7 +100,7 @@ let%expect_test _ =
 let%expect_test _ =
   test "let (id: int->int) = fun (x: int) -> x";
   [%expect {|
-    let (id: int -> int) = fun (x: int) -> x |}]
+    let (id: int -> int) = (fun (x: int) -> x) |}]
 ;;
 
 let%expect_test _ =
@@ -133,7 +130,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let add = fun x -> fun y -> (( + ) x y)
+    let add = (fun x -> (fun y -> (( + ) x y)))
     let add_one = (add 1)
     let x = (add_one 2)
   |}]
@@ -141,7 +138,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |};
-  [%expect {| let tuple = (true, 42, fun x -> x, (1, 2), if true then false else true) |}]
+  [%expect
+    {| let tuple = (true, 42, (fun x -> x), (1, 2), if true then false else true) |}]
 ;;
 
 let%expect_test _ =
@@ -154,10 +152,10 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let rec fib = fun (n: int) -> match n with
+    let rec fib = (fun (n: int) -> match n with
     | 0 -> 0
     | 1 -> 1
-    | _ -> (( + ) (fib (( - ) n 1)) (fib (( - ) n 2)))
+    | _ -> (( + ) (fib (( - ) n 1)) (fib (( - ) n 2))))
      |}]
 ;;
 
@@ -175,7 +173,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ( + ) = fun (x: bool) -> fun (y: bool) -> (( || ) x y)
+    let ( + ) = (fun (x: bool) -> (fun (y: bool) -> (( || ) x y)))
     let x = (( + ) true false) |}]
 ;;
 
@@ -249,18 +247,18 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let rec map = fun f -> fun list -> match list with
+    let rec map = (fun f -> (fun list -> match list with
     | [] -> []
-    | hd :: tl -> (( :: ) (f hd) (map f tl))
-    let rec fold = fun init -> fun f -> fun list -> match list with
+    | hd :: tl -> (( :: ) (f hd) (map f tl))))
+    let rec fold = (fun init -> (fun f -> (fun list -> match list with
     | [] -> init
-    | hd :: tl -> (fold (f init hd) f tl)
-    let rec filter = fun f -> fun list -> match list with
+    | hd :: tl -> (fold (f init hd) f tl))))
+    let rec filter = (fun f -> (fun list -> match list with
     | [] -> []
-    | hd :: tl -> if (f hd) then (( :: ) hd (filter f tl)) else (filter f tl)
-    let gt0 = (filter fun x -> (( > ) x 0))
-    let sq = (map fun x -> (( * ) x x))
-    let sum = (fold 0 fun acc -> fun x -> (( + ) acc x))
+    | hd :: tl -> if (f hd) then (( :: ) hd (filter f tl)) else (filter f tl)))
+    let gt0 = (filter (fun x -> (( > ) x 0)))
+    let sq = (map (fun x -> (( * ) x x)))
+    let sum = (fold 0 (fun acc -> (fun x -> (( + ) acc x))))
     let x = [1; 2; 3]
     let x = (sum (sq (gt0 x))) |}]
 ;;
@@ -272,17 +270,16 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ((x, y, z): (bool, int, int -> bool)) = (false, 42, fun x -> if (( > ) x 0) then true else false)
+    let ((x, y, z): (bool, int, int -> bool)) = (false, 42, (fun x -> if (( > ) x 0) then true else false))
     |}]
 ;;
 
 let%expect_test _ =
   test {|let compose f g x = f (g x)|};
-  [%expect {| let compose = fun f g x -> (f (g x))  |}]
+  [%expect {| let compose = (fun f g x -> (f (g x)))  |}]
 ;;
 
 let%expect_test _ =
   test {|let x = (+) 1 2 |};
   [%expect {| let x = (( + ) 1 2)  |}]
 ;;
-
