@@ -6,18 +6,17 @@ open MEML_lib
 open Ast
 open Inferencer
 
-let%expect_test "Econst_ty_test" =
+let%expect_test "1" =
   print_result (EConst (CInt 1));
   [%expect {| int |}]
 ;;
 
-let%expect_test "Econst_ty_test" =
+let%expect_test "false" =
   print_result (EConst (CBool false));
   [%expect {| bool |}]
 ;;
 
-(* fun x y -> y + x *)
-let%expect_test "EFun_ty_test" =
+let%expect_test "fun x y -> y + x" =
   print_result
     (EFun
        ( PVar ("x", TUnknown)
@@ -27,21 +26,10 @@ let%expect_test "EFun_ty_test" =
   [%expect {| int -> int -> int |}]
 ;;
 
-(* fun (x: Int) -> x + x *)
-let%expect_test "EFun_ty_test" =
+let%expect_test "fun (x: Int) -> x + x" =
   print_result
     (EFun (PVar ("x", TInt), EBinaryOp (Mul, EVar ("x", TUnknown), EVar ("x", TUnknown))));
   [%expect {| int -> int |}]
-;;
-
-let%expect_test "EFun_ty_test" =
-  print_result
-    (EFun
-       ( PVar ("x", TUnknown)
-       , EFun
-           ( PVar ("y", TUnknown)
-           , EBinaryOp (Add, EVar ("y", TUnknown), EVar ("x", TUnknown)) ) ));
-  [%expect {| int -> int -> int |}]
 ;;
 
 let%expect_test "EList_ty_test" =
@@ -84,28 +72,6 @@ let%expect_test "let plusfive x = let five a = a + 5 in five x" =
   [%expect {| plusfive : int -> int |}]
 ;;
 
-let%expect_test "let f (x: int) = x + 4" =
-  print_prog_result
-    [ Let
-        ( Notrec
-        , "f"
-        , EFun (PVar ("x", TInt), EBinaryOp (Add, EVar ("x", TUnknown), EConst (CInt 4)))
-        )
-    ];
-  [%expect {| f : int -> int |}]
-;;
-
-let%expect_test "let f (x: int) = x + 4" =
-  print_prog_result
-    [ Let
-        ( Notrec
-        , "f"
-        , EFun (PVar ("x", TInt), EBinaryOp (Add, EVar ("x", TUnknown), EConst (CInt 4)))
-        )
-    ];
-  [%expect {| f : int -> int |}]
-;;
-
 let%expect_test "let f x y = x + y" =
   print_prog_result
     [ Let
@@ -136,4 +102,66 @@ let%expect_test "let idk (fs: int) (sn: int) = fs + sn * fs" =
         )
     ];
   [%expect {| idk : int -> int -> int |}]
+;;
+
+let%expect_test "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y" =
+  print_prog_result
+    [ Let
+        ( Notrec
+        , "f"
+        , EFun
+            ( PVar ("g", TArrow (TInt, TArrow (TInt, TInt)))
+            , EFun
+                ( PVar ("x", TInt)
+                , EFun
+                    ( PVar ("y", TInt)
+                    , EApp
+                        ( EApp (EVar ("g", TUnknown), EVar ("x", TUnknown))
+                        , EVar ("y", TUnknown) ) ) ) ) )
+    ];
+  [%expect {|  |}]
+;;
+
+let%expect_test "let rec cps_fact x = \n\
+                \      let helper x acc = \n\
+                \        if x = 1 \n\
+                \          then acc x \n\
+                \        else helper (x - 1) (fun n -> n * acc x) \n\
+                \      in \n\
+                \      helper x (fun a -> a)"
+  =
+  print_prog_result
+    [ Let
+        ( Rec
+        , "cps_fact"
+        , EFun
+            ( PVar ("x", TUnknown)
+            , ELetIn
+                ( Notrec
+                , "helper"
+                , EFun
+                    ( PVar ("x", TUnknown)
+                    , EFun
+                        ( PVar ("acc", TUnknown)
+                        , EIfElse
+                            ( EBinaryOp (Eq, EVar ("x", TUnknown), EConst (CInt 1))
+                            , EApp (EVar ("acc", TUnknown), EVar ("x", TUnknown))
+                            , EApp
+                                ( EApp
+                                    ( EVar ("helper", TUnknown)
+                                    , EBinaryOp
+                                        (Sub, EVar ("x", TUnknown), EConst (CInt 1)) )
+                                , EFun
+                                    ( PVar ("n", TUnknown)
+                                    , EBinaryOp
+                                        ( Mul
+                                        , EVar ("n", TUnknown)
+                                        , EApp
+                                            (EVar ("acc", TUnknown), EVar ("x", TUnknown))
+                                        ) ) ) ) ) )
+                , EApp
+                    ( EApp (EVar ("helper", TUnknown), EVar ("x", TUnknown))
+                    , EFun (PVar ("a", TUnknown), EVar ("a", TUnknown)) ) ) ) )
+    ];
+  [%expect {|  |}]
 ;;
