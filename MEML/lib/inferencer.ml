@@ -93,7 +93,7 @@ module Type = struct
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TList t -> occurs_in v t
     | TTuple ts -> occurs_in_list ts
-    | TInt | TBool | TUnknown | TPrim _ -> false
+    | TInt | TBool | TUnknown -> false
   ;;
 
   let free_vars =
@@ -102,7 +102,7 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TTuple ts -> List.fold ts ~init:acc ~f:helper
       | TList t -> helper acc t
-      | TInt | TBool | TUnknown | TPrim _ -> acc
+      | TInt | TBool | TUnknown -> acc
     in
     helper VarSet.empty
   ;;
@@ -312,19 +312,19 @@ let infer =
       let* sr, tr = helper env r in
       (match bin_op with
        | Add | Sub | Mul | Div | Mod ->
-         let* s1 = unify tl int_typ in
-         let* s2 = unify tr int_typ in
+         let* s1 = unify tl TInt in
+         let* s2 = unify tr TInt in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
-         return (sres, int_typ)
+         return (sres, TInt)
        | Less | Leq | Gre | Greq | Eq | Neq ->
          let* s1 = unify tl tr in
          let* sres = Subst.compose_all [ s1; sl; sr ] in
-         return (sres, bool_typ)
+         return (sres, TBool)
        | And | Or ->
-         let* s1 = unify tl bool_typ in
-         let* s2 = unify tr bool_typ in
+         let* s1 = unify tl TBool in
+         let* s2 = unify tr TBool in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
-         return (sres, bool_typ))
+         return (sres, TBool))
     | EVar (x, _) -> lookup_env x env
     | EFun (p, e1) ->
       let* tv = fresh_var in
@@ -354,14 +354,14 @@ let infer =
       return (final_subst, trez)
     | EConst n ->
       (match n with
-       | CInt _ -> return (Subst.empty, int_typ)
-       | CBool _ -> return (Subst.empty, bool_typ)
+       | CInt _ -> return (Subst.empty, TInt)
+       | CBool _ -> return (Subst.empty, TBool)
        | CNil ->
          let* var = fresh_var in
-         return (Subst.empty, list_typ var))
+         return (Subst.empty, TList var))
     | EList (h, t) ->
       let* s1, t1 = helper env h in
-      let t1 = list_typ t1 in
+      let t1 = TList t1 in
       let* s2, t2 = helper env t in
       let* s3 = unify t1 t2 in
       let* subst = Subst.compose_all [ s1; s2; s3 ] in
@@ -377,12 +377,12 @@ let infer =
             let* subst = Subst.compose s tuple_s in
             return (subst, t :: tuple))
       in
-      return (s, tuple_typ (List.rev t))
+      return (s, TTuple (List.rev t))
     | EIfElse (c, th, el) ->
       let* s1, t1 = helper env c in
       let* s2, t2 = helper env th in
       let* s3, t3 = helper env el in
-      let* s4 = unify t1 bool_typ in
+      let* s4 = unify t1 TBool in
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       R.return (final_subst, Subst.apply s5 t2)
