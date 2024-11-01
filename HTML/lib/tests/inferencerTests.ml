@@ -225,4 +225,38 @@ val += : int -> int
 val -$ : int -> int -> int
 |}]
   ;;
+
+  let%expect_test _ =
+    infer_test
+      {|let final_value (x: 'a) (y: 'b): 'c =
+  let double_x: int = x * 2 in
+  let incremented_y: int = y + 1 in
+  let result: int = double_x + incremented_y in
+  result * result
+;;|};
+    [%expect {| 
+val final_value : int -> int -> int
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let a = let f x = x + 1 in let b = 5 in f (b + 1);;|};
+    [%expect {| 
+val a : int
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let f x = x x;;|};
+    [%expect {| 
+Typecheck error: Occurs check failed
+|}]
+  ;;
+
+  let%expect_test _ =
+    infer_test {|let a = fun f -> (fun x -> f (x x)) (fun x -> f (x x));;|};
+    [%expect {| 
+Typecheck error: Occurs check failed
+|}]
+  ;;
 end
