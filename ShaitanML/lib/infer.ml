@@ -151,8 +151,10 @@ end = struct
     return (Map.singleton (module Int) k v)
   ;;
 
-  let find s k = Map.find s k
-  let remove s k = Map.remove s k
+  (* let find s k = Map.find s k *)
+  let find = Map.find
+  (* let remove s k = Map.remove s k *)
+  let remove = Map.remove
 
   let apply s =
     let rec helper = function
@@ -233,7 +235,8 @@ module TypeEnv = struct
   type t = (id, scheme, String.comparator_witness) Map.t
 
   let extend env (v, scheme) = Map.update env v ~f:(fun _ -> scheme)
-  let remove e k = Map.remove e k
+  (* let remove e k = Map.remove e k *)
+  let remove = Map.remove
   let empty = Map.empty (module String)
 
   let free_vars : t -> VarSet.t =

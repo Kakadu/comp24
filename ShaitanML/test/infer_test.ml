@@ -5,7 +5,7 @@
 open Shaitanml_lib
 open Infer
 
-let%expect_test _ =
+let%expect_test "function with narrowing type annotation" =
   test_infer {|
      let (f : int -> int) = fun x -> x;;
      |};
@@ -24,7 +24,7 @@ let%expect_test _ =
     val f : int -> int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "annotation for rec" =
   test_infer {|
      let x = let rec (f : int -> int) = fun x -> x in f 3;;
      |};
@@ -43,7 +43,7 @@ let%expect_test _ =
     val x : int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list pattern in let" =
   test_infer {|
     let a::b = [1; 2; 3];;
      |};
@@ -59,11 +59,11 @@ let%expect_test _ =
     val = : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val a : int 
+    val a : int
     val b : int list|}]
 ;;
 
-let%expect_test _ =
+let%expect_test "nested annotation" =
   test_infer {|
     let f = let ((x : int):int) = 5 in x;;
      |};
@@ -82,7 +82,7 @@ let%expect_test _ =
     val f : int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "nested annotation unmatch" =
   test_infer {|
     let f ((x : int):int) (((y : int):string):int) = x;;
      |};
@@ -90,7 +90,7 @@ let%expect_test _ =
     Infer error: Unification failed on int and string |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "simple annotation" =
   test_infer {|
     let (x:int) = 5;;
      |};
@@ -109,7 +109,7 @@ let%expect_test _ =
     val x : int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "fixed point combinator" =
   test_infer {|
       let rec fix f x = f (fix f) x ;;
      |};
@@ -128,7 +128,7 @@ let%expect_test _ =
     val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3 |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list folding" =
   test_infer
     {|
    let rec fold_left f acc l =
@@ -152,7 +152,7 @@ let%expect_test _ =
     val fold_left : ('4 -> '5 -> '4) -> '4 -> '5 list -> '4 |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "complex tuple" =
   test_infer {|
     let f x y = (x + y, [x; y])]
      |};
@@ -168,10 +168,10 @@ let%expect_test _ =
     val = : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : int -> int -> (int * int list) |}]
+    val f : int -> int -> int * int list |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "tuple of functions" =
   test_infer {|
       let fs = ((fun x -> x), (fun x y -> x + y))
      |};
@@ -187,10 +187,10 @@ let%expect_test _ =
     val = : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val fs : (('0 -> '0) * (int -> int -> int)) |}]
+    val fs : ('0 -> '0) * (int -> int -> int) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "unbound variable check" =
   test_infer {|
       let f x = x + y;;
       let y = 3;;
@@ -198,7 +198,7 @@ let%expect_test _ =
   [%expect {| Infer error: Unbound variable 'y' |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "inner let expr" =
   test_infer {|
       let f x =
          let y = 3 in
@@ -219,7 +219,7 @@ let%expect_test _ =
     val f : int -> int |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "multiple args as functions" =
   test_infer {|
     let f a b c d e = a b c d e;;
      |};
@@ -238,7 +238,7 @@ let%expect_test _ =
     val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5 |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "cps function" =
   test_infer
     {|
       let map_cps f l =
