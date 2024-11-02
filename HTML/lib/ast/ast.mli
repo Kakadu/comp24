@@ -18,15 +18,6 @@ val equal_ident : ident -> ident -> bool
 val pp_ident : Format.formatter -> ident -> unit
 val show_ident : ident -> string
 
-type ident_or_op =
-  | IOIdent of ident (* ident letters and _ *)
-  | IOBinOp of ident (* ident for bin ops *)
-  | IOUnOp of ident (* ident for unary ops *)
-
-val equal_ident_or_op : ident_or_op -> ident_or_op -> bool
-val pp_ident_or_op : Format.formatter -> ident_or_op -> unit
-val show_ident_or_op : ident_or_op -> string
-
 type rec_flag =
   | Recursive (** Recursive *)
   | Not_recursive (** Not recursive *)
@@ -72,7 +63,7 @@ val show_pattern_typed : pattern_typed -> string
 
 type expr =
   | EConst of const (** Const. Examples: 100; true *)
-  | EId of ident_or_op (** Identifier. Examples: a, b, c *)
+  | EId of ident (** Identifier. Examples: a, b, c *)
   | EFun of pattern_typed * expr (** Function. Examples: fun x -> x + 1 *)
   | EApp of expr * expr (** Application. Examples: f (x - 1) *)
   | EIf of expr * expr * expr
@@ -99,9 +90,6 @@ type prog = decl list
 val equal_prog : prog -> prog -> bool
 val pp_prog : Format.formatter -> prog -> unit
 val show_prog : prog -> string
-val ioident : ident -> ident_or_op
-val iobinop : ident -> ident_or_op
-val iounop : ident -> ident_or_op
 val tint : typ
 val tbool : typ
 val tunit : typ
@@ -115,7 +103,7 @@ val plist : pattern_typed -> pattern_typed -> pattern
 val p_typed : ?typ:typ option -> pattern -> pattern_typed
 val pconst : const -> pattern
 val econst : const -> expr
-val eid : ident_or_op -> expr
+val eid : ident -> expr
 val efun : pattern_typed -> expr -> expr
 val eapp : expr -> expr -> expr
 val eif : expr -> expr -> expr -> expr
