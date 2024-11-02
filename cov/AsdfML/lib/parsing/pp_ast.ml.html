@@ -186,7 +186,7 @@ and pp_type_ann fmt = function
 and pp_pattern fmt = function
   | <span data-count="37">P</span>Const c -&gt; fprintf fmt "%a" pp_const c
   | <span data-count="15">P</span>Wild -&gt; fprintf fmt "_"
-  | <span data-count="212">P</span>Ident id -&gt; fprintf fmt "%s" id
+  | <span data-count="213">P</span>Ident id -&gt; fprintf fmt "%s" id
   | <span data-count="5">P</span>Tuple xs -&gt; pp_list ~sep:", " fmt pp_pattern xs
   | <span data-count="2">P</span>List xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_pattern xs
   | <span data-count="19">P</span>Cons (l, r) -&gt; fprintf fmt "%a :: %a" pp_pattern l pp_pattern r
@@ -196,13 +196,13 @@ and pp_pattern_list fmt p = <span data-count="62">p</span>p_list ~op:"" ~cl:"" ~
 
 and pp_expr fmt = function
   | <span data-count="166">E</span>Const c -&gt; fprintf fmt "%a" pp_const c
-  | <span data-count="327">E</span>Var v -&gt; fprintf fmt "%s" v
-  | <span data-count="173">E</span>App (e1, e2) -&gt;
+  | <span data-count="330">E</span>Var v -&gt; fprintf fmt "%s" v
+  | <span data-count="174">E</span>App (e1, e2) -&gt;
     (match e1 with
-     | <span data-count="103">E</span>App (_, _) -&gt;
+     | <span data-count="104">E</span>App (_, _) -&gt;
        let rec pp_rest fmt = function
-         | <span data-count="123">E</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_expr e2
-         | <span data-count="103">e</span> -&gt; fprintf fmt "(%a" pp_expr e
+         | <span data-count="124">E</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_expr e2
+         | <span data-count="104">e</span> -&gt; fprintf fmt "(%a" pp_expr e
        in
        fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
      | <span data-count="70">_</span> -&gt; fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2)
@@ -223,7 +223,7 @@ and pp_expr fmt = function
   | <span data-count="14">E</span>List xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | <span data-count="94">D</span>Let (NonRec, pat, e) -&gt; fprintf fmt "let %a = %a\n" pp_pattern pat pp_expr e
+  | <span data-count="95">D</span>Let (NonRec, pat, e) -&gt; fprintf fmt "let %a = %a\n" pp_pattern pat pp_expr e
   | <span data-count="19">D</span>Let (Rec, pat, e) -&gt; fprintf fmt "let rec %a = %a\n" pp_pattern pat pp_expr e
 ;;
 </code></pre>

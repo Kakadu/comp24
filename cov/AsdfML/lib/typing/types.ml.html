@@ -147,7 +147,7 @@ open Base
 
 <span data-count="0">t</span>ype ground =
   <span data-count="178">|</span> TInt
-  <span data-count="24">|</span> TBool
+  <span data-count="26">|</span> TBool
   <span data-count="22">|</span> TUnit
 [@@deriving show { with_path = false }, eq]
 
@@ -171,7 +171,7 @@ type error =
 let int_typ = TGround TInt
 let bool_typ = TGround TBool
 let unit_typ = TGround TUnit
-let arrow l r = <span data-count="34529">T</span>Arrow (l, r)
+let arrow l r = <span data-count="34707">T</span>Arrow (l, r)
 let var x = <span data-count="0">T</span>Var x
 let ( ^-&gt; ) = arrow
 

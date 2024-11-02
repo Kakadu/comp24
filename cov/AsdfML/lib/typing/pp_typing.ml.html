@@ -214,16 +214,16 @@ let rec int_to_alphabet_str n =
 
 let rec pp_typ fmt = function
   | <span data-count="81">T</span>Var var -&gt; fprintf fmt "%s" (type_id_to_nam<span data-count="81">e</span> var)
-  | <span data-count="178">T</span>Ground x -&gt;
+  | <span data-count="181">T</span>Ground x -&gt;
     (match x with
-     | <span data-count="141">T</span>Int -&gt; fprintf fmt "int"
-     | <span data-count="28">T</span>Bool -&gt; fprintf fmt "bool"
+     | <span data-count="143">T</span>Int -&gt; fprintf fmt "int"
+     | <span data-count="29">T</span>Bool -&gt; fprintf fmt "bool"
      | <span data-count="9">T</span>Unit -&gt; fprintf fmt "()")
   | <span data-count="145">T</span>Arrow (left, right) -&gt;
     (match left with
      | <span data-count="22">T</span>Arrow (_, _) -&gt; fprintf fmt "(%a) -&gt; %a" pp_typ left pp_typ right
      | <span data-count="123">_</span> -&gt; fprintf fmt "%a -&gt; %a" pp_typ left pp_typ right)
-  | <span data-count="5">T</span>Tuple xs -&gt; pp_list fmt pp_typ xs
+  | <span data-count="6">T</span>Tuple xs -&gt; pp_list fmt pp_typ xs
   | <span data-count="34">T</span>List t -&gt; fprintf fmt "%a list" pp_typ t
 ;;
 

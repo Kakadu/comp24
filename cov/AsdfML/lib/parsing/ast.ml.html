@@ -206,8 +206,8 @@
 <span data-count="0">t</span>ype id = <span data-count="0">s</span>tring [@@deriving eq, show { with_path = false }]
 
 <span data-count="0">t</span>ype rec_flag =
-  | Rec
-  | NonRec
+  | Rec (** recursive *)
+  | NonRec (** non-recursive *)
 [@@deriving show { with_path = false }]
 
 <span data-count="0">t</span>ype constant =
@@ -221,16 +221,16 @@
   | TAInt (** int *)
   | TABool (** bool *)
   | TAUnit (** () *)
-  | TATuple of <span data-count="0">t</span>ype_ann lis<span data-count="0">t</span>
+  | TATuple of <span data-count="0">t</span>ype_ann lis<span data-count="0">t</span> (** int * bool *)
   | TAFun of type_ann * type_ann (** int -&gt; bool *)
-  | TAList of type_ann
+  | TAList of type_ann (** %type% list *)
 [@@deriving show { with_path = false }]
 
 <span data-count="0">t</span>ype pattern =
   | PConst of constant
   | PWild (** _ *)
   | PIdent of id (** x *)
-  | PTuple of <span data-count="0">p</span>attern lis<span data-count="0">t</span>
+  | PTuple of <span data-count="0">p</span>attern lis<span data-count="0">t</span> (** (a, b) *)
   | PList of <span data-count="0">p</span>attern lis<span data-count="0">t</span> (** [1, 2, 3] *)
   | PCons of pattern * pattern (** hd :: tl *)
   | PAnn of pattern * type_ann (** (x: int) *)
@@ -251,7 +251,7 @@
 <span data-count="0">a</span>nd definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
 [@@deriving show { with_path = false }]
 
-<span data-count="0">a</span>nd program = <span data-count="0">d</span>efinition lis<span data-count="0">t</span> [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype program = <span data-count="0">d</span>efinition lis<span data-count="0">t</span> [@@deriving show { with_path = false }]
 
 let p_const c = <span data-count="0">P</span>Const c
 let p_wild = PWild
