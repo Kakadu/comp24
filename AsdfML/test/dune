@@ -4,12 +4,26 @@
  (modules utils)
  (preprocess
   (pps ppx_inline_test ppx_expect))
+ (instrumentation
+  (backend bisect_ppx))
+ (inline_tests))
+
+(library
+ (name inline)
+ (libraries AsdfML.Lib test)
+ (modules Inline_inferencer Inline_parser)
+ (preprocess
+  (pps ppx_inline_test ppx_expect))
+ (instrumentation
+  (backend bisect_ppx))
  (inline_tests))
 
 (executable
  (name many_parser)
  (modules many_parser)
  (public_name many_parser)
+ (instrumentation
+  (backend bisect_ppx))
  (libraries AsdfML.Lib test))
 
 (cram
@@ -36,6 +50,8 @@
  (name many_inferencer)
  (modules many_inferencer)
  (public_name many_inferencer)
+ (instrumentation
+  (backend bisect_ppx))
  (libraries AsdfML.Lib test))
 
 (cram
