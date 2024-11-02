@@ -318,10 +318,13 @@ let rec infer env = function
       | CUnit -> return tunit
     in
     return (Subst.empty, typ)
-  | EId (IOBinOp ident | IOUnOp ident | IOIdent ident) ->
+  | EId (IOBinOp ident | IOUnOp ident | IOIdent ident) as expr ->
     (match ident with
      | "_" -> fail WildcardNotExpected
-     (* todo: handle unary and binary "-" *)
+     | "-" | "+" ->
+       if expr = EId (IOUnOp ident)
+       then return (Subst.empty, tarrow tint tint)
+       else lookup_env ident env
      | _ -> lookup_env ident env)
   | EApp (e1, e2) ->
     let* subst_1, typ_1 = infer env e1 in
