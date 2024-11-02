@@ -1,0 +1,7 @@
+(library
+ (name inferncer_tests)
+ (modules inferencerTests)
+ (libraries Parser Inferencer)
+ (preprocess
+  (pps ppx_expect))
+ (inline_tests))

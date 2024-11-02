@@ -1,9 +1,0 @@
-(library
- (name HTML_lib)
- (public_name HTML.Lib)
- (modules Ast Parser Typing Inferencer)
- (libraries base angstrom)
- (preprocess
-  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
- (instrumentation
-  (backend bisect_ppx)))
