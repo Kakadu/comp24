@@ -5,7 +5,7 @@
 open Shaitanml_lib
 open Parser
 
-let%expect_test _ =
+let%expect_test "nested annotations for multiple args" =
   test_parse {|
       let f ((x : int) : int) ((y : int) : int) = x + y;;
       |};
@@ -22,7 +22,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list folding" =
   test_parse
     {|
    let rec fold_left f acc l =
@@ -57,7 +57,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "binary operators precedence check" =
   test_parse {|
       let a b c = a && b || b && c
       |};
@@ -78,7 +78,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "mutual let bindings" =
   test_parse
     {|
       let f x y = x + y
@@ -120,7 +120,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "mutual let bindings" =
   test_parse {|
       let rec f x = x + 1 and g x = x + 1
 ;;
@@ -139,7 +139,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "simple annotation" =
   test_parse {|
       let (x : int) = 3;;
       |};
@@ -148,7 +148,7 @@ let%expect_test _ =
     [(SValue (Nonrec, [((PConstraint ((PVar "x"), AInt)), (EConst (CInt 3)))]))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "complex annotation" =
   test_parse {|
       let (x : (int -> int) list) = f;;
       |};
@@ -159,7 +159,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "complex annotation" =
   test_parse {|
       let (x : int -> int -> (int -> int)) = f;;
       |};
@@ -173,7 +173,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "factorial with fix" =
   test_parse
     {|
         let rec fix f x = f (fix f) x;;
@@ -214,7 +214,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "if then else" =
   test_parse {|
       let n = fun y -> if y > 0 then 1 else 2
     |};
@@ -232,7 +232,7 @@ let%expect_test _ =
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "factorial" =
   test_parse {|
     let rec fac n = if n < 2 then 1 else n * fac(n - 1);;
     |};
@@ -257,7 +257,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "several let bindings" =
   test_parse
     {|
     let f = let g x = x + 1 in g;;
@@ -296,7 +296,7 @@ let%expect_test _ =
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "more complex let bindings" =
   test_parse
     {|
 
