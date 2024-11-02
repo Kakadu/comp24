@@ -3,12 +3,10 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 type error =
-  [ `No_variable of string
-  | `Occurs_check
-  | `Pattern_matching_error
-  | `Not_implemented of string
-  | `Unification_failed of Typedtree.ty * Typedtree.ty
-  | `Empty_let
+  [ `Occurs_check (** Type variable occurs inside type it must be unified with *)
+  | `Unbound_variable of Ast.id (** Unbound variable *)
+  | `Unification_failed of Typedtree.ty * Typedtree.ty (** Failed to unify two types *)
+  | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
   ]
 
 val pp_error : Format.formatter -> error -> unit

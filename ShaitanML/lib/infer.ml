@@ -11,24 +11,20 @@ open Typedtree
 open Base
 
 type error =
-  [ `Occurs_check
-  | `No_variable of id
-  | `Unification_failed of ty * ty
-  | `Pattern_matching_error
-  | `Not_implemented of id (** polymorphic variants are not supported *)
-  | `Empty_let
+  [ `Occurs_check (** Type variable occurs inside type it must be unified with *)
+  | `Unbound_variable of id (** Unbound variable *)
+  | `Unification_failed of ty * ty (** Failed to unify two types *)
+  | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
   ]
 
 let pp_error ppf : error -> _ =
   let open Stdlib.Format in
   function
   | `Occurs_check -> fprintf ppf "Occurs check failed"
-  | `No_variable s -> fprintf ppf "Unbound variable '%s'" s
+  | `Unbound_variable s -> fprintf ppf "Unbound variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
-  | `Pattern_matching_error -> fprintf ppf "Pattern matching error"
-  | `Not_implemented place -> fprintf ppf "Not implemented '%s'" place
-  | `Empty_let -> fprintf ppf "Let with empty body"
+  | `Unreachable_state place -> fprintf ppf "Unreachable state: '%s'" place
 ;;
 
 type id = string
@@ -153,6 +149,7 @@ end = struct
 
   (* let find s k = Map.find s k *)
   let find = Map.find
+
   (* let remove s k = Map.remove s k *)
   let remove = Map.remove
 
@@ -235,6 +232,7 @@ module TypeEnv = struct
   type t = (id, scheme, String.comparator_witness) Map.t
 
   let extend env (v, scheme) = Map.update env v ~f:(fun _ -> scheme)
+
   (* let remove e k = Map.remove e k *)
   let remove = Map.remove
   let empty = Map.empty (module String)
@@ -356,12 +354,6 @@ let infer_pat =
   helper
 ;;
 
-let rec muni pat archiki =
-  match pat with
-  | PConstraint (p, _) -> muni p archiki
-  | _ as namaa -> namaa
-;;
-
 let infer_exp =
   let rec helper env = function
     | EConst c ->
@@ -378,7 +370,7 @@ let infer_exp =
        | Some s ->
          let* t = instantiate s in
          return (Subst.empty, t)
-       | None -> fail (`No_variable x))
+       | None -> fail (`Unbound_variable x))
     | EIf (i, t, e) ->
       let* sub1, t1 = helper env i in
       let* sub2, t2 = helper (TypeEnv.apply sub1 env) t in
@@ -406,7 +398,6 @@ let infer_exp =
           cl
       in
       return (sub, t)
-    | ELet (_, [], _) -> fail `Empty_let
     | ELet (Nonrec, [ (pattern_, e1) ], e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
@@ -420,8 +411,11 @@ let infer_exp =
       let* s = Subst.compose sub1 s2 in
       return (s, t2)
     | ELet (Rec, [ (pat, e1) ], e2) ->
-      let p = muni pat pat in
-      (match p with
+      let rec extract_nested = function
+        | PConstraint (p, _) -> extract_nested p
+        | _ as namaa -> namaa
+      in
+      (match extract_nested pat with
        | PVar x ->
          let* fresh = fresh_var in
          let* e, t = infer_pat env pat in
@@ -439,7 +433,7 @@ let infer_exp =
          let* sub, t = helper env e2 in
          let* sub = Subst.compose s2 sub in
          return (sub, t)
-       | _ -> fail (`Not_implemented "in infer_exp"))
+       | _ -> fail (`Unreachable_state __FUNCTION__))
     | EFun (p, e) ->
       let* env, t = infer_pat env p in
       let* sub, t1 = helper env e in
@@ -471,7 +465,7 @@ let infer_exp =
       let* sub = Subst.compose_all [ s1; s2; s3 ] in
       let t = Subst.apply sub fresh in
       return (sub, t)
-    | _ -> fail (`Not_implemented "in infer_exp")
+    | _ -> fail (`Unreachable_state __FUNCTION__)
   in
   helper
 ;;
@@ -502,7 +496,7 @@ let infer_str_item env = function
   | SEval e ->
     let* _, _ = infer_exp env e in
     return env
-  | _ -> fail (`Not_implemented "in infer_str_item")
+  | _ -> fail (`Unreachable_state __FUNCTION__)
 ;;
 
 let start_env =
