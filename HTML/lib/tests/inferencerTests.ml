@@ -273,4 +273,9 @@ val f : 'a -> 'a -> bool
 val f : bool -> int -> bool
 |}]
   ;;
+
+  let%expect_test _ =
+    infer_test "let a = +4 + (-3)";
+    [%expect {| val a : int |}]
+  ;;
 end
