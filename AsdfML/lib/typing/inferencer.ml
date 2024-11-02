@@ -525,7 +525,9 @@ let rec ids_from_pattern pat =
     |> List.fold ~init:"" ~f:( ^ )
     |> asprintf "(%s)"
   | PAnn (x, _) -> asprintf "%s" (ids_from_pattern x)
-  | _ -> failwith "unreachable?"
+  | _ ->
+    failwith
+      "unreachable? will fail either in TypeEnv.extend_pat (NonRec) or infer_def (Rec)"
 ;;
 
 let infer_program (prog : Ast.definition list) =

@@ -5,8 +5,8 @@
 type id = string [@@deriving eq, show { with_path = false }]
 
 type rec_flag =
-  | Rec
-  | NonRec
+  | Rec (** recursive *)
+  | NonRec (** non-recursive *)
 [@@deriving show { with_path = false }]
 
 type constant =
@@ -20,16 +20,16 @@ type type_ann =
   | TAInt (** int *)
   | TABool (** bool *)
   | TAUnit (** () *)
-  | TATuple of type_ann list
+  | TATuple of type_ann list (** int * bool *)
   | TAFun of type_ann * type_ann (** int -> bool *)
-  | TAList of type_ann
+  | TAList of type_ann (** %type% list *)
 [@@deriving show { with_path = false }]
 
 type pattern =
   | PConst of constant
   | PWild (** _ *)
   | PIdent of id (** x *)
-  | PTuple of pattern list
+  | PTuple of pattern list (** (a, b) *)
   | PList of pattern list (** [1, 2, 3] *)
   | PCons of pattern * pattern (** hd :: tl *)
   | PAnn of pattern * type_ann (** (x: int) *)
@@ -50,7 +50,7 @@ type expr =
 and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
 [@@deriving show { with_path = false }]
 
-and program = definition list [@@deriving show { with_path = false }]
+type program = definition list [@@deriving show { with_path = false }]
 
 let p_const c = PConst c
 let p_wild = PWild

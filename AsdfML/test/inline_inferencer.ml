@@ -1,3 +1,7 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 open Test.Utils
 
 let test = test_inferencer
@@ -257,17 +261,20 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
   let x = 1 
   let y = -x
   let z = true
   let w = not z
+  let v = not (not z)
   |};
   [%expect {|
     x: int
     y: int
     z: bool
-    w: bool |}]
+    w: bool
+    v: bool |}]
 ;;
 
 let%expect_test _ =
@@ -401,6 +408,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {|
+    let _ = ( 1,2 )
     |};
-  [%expect {| |}]
+  [%expect {| _: (int, int) |}]
 ;;

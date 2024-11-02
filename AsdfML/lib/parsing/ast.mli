@@ -5,45 +5,46 @@
 type id = string
 
 type rec_flag =
-  | Rec
-  | NonRec
+  | Rec (** recursive *)
+  | NonRec (** non-recursive *)
 
 type constant =
-  | CInt of int
-  | CBool of bool
-  | CUnit
-  | CNil
+  | CInt of int (** 42 *)
+  | CBool of bool (** true | false *)
+  | CUnit (** () *)
+  | CNil (** [] *)
 
 type type_ann =
-  | TAInt
-  | TABool
-  | TAUnit
-  | TATuple of type_ann list
-  | TAFun of type_ann * type_ann
-  | TAList of type_ann
+  | TAInt (** int *)
+  | TABool (** bool *)
+  | TAUnit (** () *)
+  | TATuple of type_ann list (** int * bool *)
+  | TAFun of type_ann * type_ann (** int -> bool *)
+  | TAList of type_ann (** %type% list *)
 
 type pattern =
   | PConst of constant
-  | PWild
-  | PIdent of id
-  | PTuple of pattern list
-  | PList of pattern list
-  | PCons of pattern * pattern
-  | PAnn of pattern * type_ann
+  | PWild (** _ *)
+  | PIdent of id (** x *)
+  | PTuple of pattern list (** (a, b) *)
+  | PList of pattern list (** [1, 2, 3] *)
+  | PCons of pattern * pattern (** hd :: tl *)
+  | PAnn of pattern * type_ann (** (x: int) *)
 
 type expr =
-  | EConst of constant
-  | EVar of id
-  | EApp of expr * expr
-  | EIfElse of expr * expr * expr
-  | EFun of pattern list * expr
-  | ELetIn of definition * expr
-  | ETuple of expr list
-  | EList of expr list
-  | EMatch of expr * (pattern * expr) list
+  | EConst of constant (** 42, true, () *)
+  | EVar of id (** x *)
+  | EApp of expr * expr (** f x *)
+  | EIfElse of expr * expr * expr (** if x then y else z *)
+  | EFun of pattern list * expr (** fun x -> y *)
+  | ELetIn of definition * expr (** let x = y in z *)
+  | ETuple of expr list (** (x, fun x -> x, 42) *)
+  | EList of expr list (** [1; 2; 3] *)
+  | EMatch of expr * (pattern * expr) list (** match x with ... *)
 
-and definition = DLet of rec_flag * pattern * expr
-and program = definition list
+and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
+
+type program = definition list
 
 val p_const : constant -> pattern
 val p_wild : pattern

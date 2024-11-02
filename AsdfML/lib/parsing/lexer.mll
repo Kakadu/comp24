@@ -15,7 +15,7 @@ let alpha = ['a'-'z' 'A'-'Z']
 
 let id = (alpha | '_') (alpha | digit | '_')* 
 let int = digit*  
-let bool = "not "? ("true" | "false")
+let bool = ("not" whitespace+)? ("true" | "false")
 
 
 rule token = parse
@@ -58,7 +58,7 @@ rule token = parse
     function
     | [ "not"; b ] -> not (bool_of_string b)
     | [ b ] -> bool_of_string b
-    | _ -> failwith "") 
+    | x -> raise (SyntaxError ("bool: " ^ Lexing.lexeme lexbuf))) 
   }
   (* | "not" { NOT } *)
   | id { IDENT (Lexing.lexeme lexbuf) }

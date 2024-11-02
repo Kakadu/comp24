@@ -1,3 +1,7 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 open Lib.Parser
 open Test.Utils
 
@@ -185,17 +189,21 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
   let x = 1 
   let y = -x
   let z = true
   let w = not z
+  let v = not not z
   |};
-  [%expect {|
+  [%expect
+    {|
     let x = 1
     let y = ([ - ] x)
     let z = true
-    let w = (not z) |}]
+    let w = (not z) 
+    let v = (not not z) |}]
 ;;
 
 let%expect_test _ =

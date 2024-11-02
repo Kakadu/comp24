@@ -56,12 +56,12 @@
 program : p = list(definition) EOF { p }
 
 definition: 
-| LETREC pat = pattern args = list(pattern) EQ e = expr { 
+| LETREC pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(Rec, pat, e)
     | xs -> DLet(Rec, pat, EFun(xs, e))
   }
-| LET pat = pattern args = list(pattern) EQ e = expr { 
+| LET pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(NonRec, pat, e)
     | xs -> DLet(NonRec, pat, EFun(xs, e))
