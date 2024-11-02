@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>pp_typing.ml &mdash; Coverage report</title>
+    <meta name="description" content="60.42% coverage in lib/typing/pp_typing.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/typing/</span>pp_typing.ml
+        </a>
+      </h1>
+      <h2>60.42%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:16.44%"></span>
+      <span class="unvisited" style="top:30.14%"></span>
+      <span class="unvisited" style="top:31.51%"></span>
+      <span class="unvisited" style="top:34.25%"></span>
+      <span class="unvisited" style="top:35.62%"></span>
+      <span class="unvisited" style="bottom:21.92%"></span>
+      <span class="unvisited" style="bottom:20.55%"></span>
+      <span class="unvisited" style="bottom:10.96%"></span>
+      <span class="unvisited" style="bottom:9.59%"></span>
+      <span class="unvisited" style="bottom:8.22%"></span>
+      <span class="unvisited" style="bottom:1.37%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="some-visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span class="unvisited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span class="unvisited"> </span>
+<a id="L67"></a><span class="unvisited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+open Types
+open Format
+open Utils
+
+let rec type_id_to_name n =
+  <span data-count="99">l</span>et rec helper n =
+    <span data-count="99">m</span>atch n with
+    | <span data-count="99">_</span> when n &lt; 0 -&gt; <span data-count="0">h</span>elper (26 - n)
+    | <span data-count="99">n</span> when n &lt; 26 -&gt; <span data-count="81">"</span>'" ^ String.mak<span data-count="81">e</span> 1 (Char.ch<span data-count="81">r</span> (n + Char.cod<span data-count="81">e</span> 'a'))
+    | <span data-count="18">_</span> -&gt;
+      type_id_to_nam<span data-count="18">e</span> ((n / 26) - 1)
+      ^ String.mak<span data-count="18">e</span> 1 (Char.ch<span data-count="18">r</span> ((n mod 26) + Char.cod<span data-count="18">e</span> 'a'))
+  in
+  helper n
+;;
+
+let rec int_to_alphabet_str n =
+  <span data-count="0">i</span>f n &lt; 26
+  then <span data-count="0">"</span>'" ^ String.mak<span data-count="0">e</span> 1 (Char.ch<span data-count="0">r</span> (n + Char.cod<span data-count="0">e</span> 'a'))
+  else
+    <span data-count="0">i</span>nt_to_alphabet_st<span data-count="0">r</span> ((n / 26) - 1)
+    ^ String.mak<span data-count="0">e</span> 1 (Char.ch<span data-count="0">r</span> ((n mod 26) + Char.cod<span data-count="0">e</span> 'a'))
+;;
+
+let rec pp_typ fmt = function
+  | <span data-count="81">T</span>Var var -&gt; fprintf fmt "%s" (type_id_to_nam<span data-count="81">e</span> var)
+  | <span data-count="178">T</span>Ground x -&gt;
+    (match x with
+     | <span data-count="141">T</span>Int -&gt; fprintf fmt "int"
+     | <span data-count="28">T</span>Bool -&gt; fprintf fmt "bool"
+     | <span data-count="9">T</span>Unit -&gt; fprintf fmt "()")
+  | <span data-count="145">T</span>Arrow (left, right) -&gt;
+    (match left with
+     | <span data-count="22">T</span>Arrow (_, _) -&gt; fprintf fmt "(%a) -&gt; %a" pp_typ left pp_typ right
+     | <span data-count="123">_</span> -&gt; fprintf fmt "%a -&gt; %a" pp_typ left pp_typ right)
+  | <span data-count="5">T</span>Tuple xs -&gt; pp_list fmt pp_typ xs
+  | <span data-count="34">T</span>List t -&gt; fprintf fmt "%a list" pp_typ t
+;;
+
+let pp_error fmt : error -&gt; _ = <span data-count="8">f</span>unction
+  | <span data-count="1">`</span>Occurs_check -&gt; fprintf fmt "Occurs check failed"
+  | <span data-count="1">`</span>No_variable s -&gt; fprintf fmt "Undefined variable '%s'" s
+  | <span data-count="5">`</span>Unification_failed (l, r) -&gt;
+    fprintf fmt "Unification failed on %a and %a" pp_typ l pp_typ r
+  | <span data-count="1">`</span>Arg_num_mismatch (pat, ty) -&gt;
+    fprintf
+      fmt
+      "Mismatched number of arguments in pattern %a and expression %a"
+      Pp_ast.pp_pattern
+      pat
+      pp_typ
+      ty
+  | <span data-count="0">`</span>Syntax_error s -&gt; fprintf fmt "Syntax error: %s" s
+  | <span data-count="0">`</span>TODO s -&gt; fprintf fmt "TODO: %s" s
+;;
+
+module VarSet = struct
+  include Set
+
+  let pp ppf s =
+    <span data-count="0">f</span>printf ppf "VarSet = [ ";
+    <span data-count="0">B</span>ase.Set.iter s (fun x -&gt; <span data-count="0">f</span>printf ppf "%s; " (type_id_to_nam<span data-count="0">e</span> x));
+    <span data-count="0">f</span>printf ppf "]"
+  ;;
+end
+
+let pp_scheme fmt = function
+  | <span data-count="0">x</span>s, ty -&gt; fprintf fmt "forall %a . %a" VarSet.pp xs pp_typ ty
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
