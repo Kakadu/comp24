@@ -2,13 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open HTML_lib
-
 module InferenceTests = struct
   let infer_test s =
     match Parser.parse_program s with
     | Ok actual ->
-      let env = HTML_lib.Inferencer.run_inference actual in
+      let env = Inferencer.run_inference actual in
       Inferencer.print_env env
     | Error err -> Format.printf "%s\n" err
   ;;

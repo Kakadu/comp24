@@ -1,0 +1,6 @@
+(library
+ (name Ast)
+ (modules Ast)
+ (libraries base)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq)))

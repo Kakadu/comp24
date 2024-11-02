@@ -1,0 +1,6 @@
+(library
+ (name Inferencer)
+ (modules Inferencer Typing)
+ (libraries Ast)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq)))

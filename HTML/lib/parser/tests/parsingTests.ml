@@ -2,8 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open HTML_lib
-
 module ParsingTests = struct
   let parse_test s =
     match Parser.parse_program s with

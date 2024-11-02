@@ -1,0 +1,7 @@
+(library
+ (name parser_tests)
+ (modules parsingTests)
+ (libraries Parser)
+ (preprocess
+  (pps ppx_expect))
+ (inline_tests))
