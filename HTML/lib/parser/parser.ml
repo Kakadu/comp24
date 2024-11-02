@@ -78,6 +78,7 @@ let parse_const = choice [ parse_bool; parse_int; parse_unit ]
 let parse_const_expr = parse_const >>| econst
 
 (****************************************************** Operators ******************************************************)
+
 let prohibited_ops = [ "|"; "->" ]
 let first_unop_strings = [ "?"; "~"; "!" ]
 
@@ -131,9 +132,23 @@ let parse_op first suffix base_ops =
     ]
 ;;
 
-let parse_unary_op = parse_op first_unop_strings suffix_unop_strings base_unops
+let parse_unary_op =
+  parse_op first_unop_strings suffix_unop_strings base_unops
+  >>| function
+  | op when op = "+" || op = "-" -> String.cat "~ " op
+  | op -> op
+;;
+
 let parse_binary_op = parse_op first_binop_strings suffix_binop_strings base_binops
-let parse_op = parse_binary_op >>| iobinop <|> (parse_unary_op >>| iounop)
+
+let parse_any_op =
+  parse_op
+    (first_unop_strings @ first_binop_strings)
+    (suffix_unop_strings @ suffix_binop_strings)
+    base_binops
+;;
+
+let parse_op = parse_binary_op <|> parse_unary_op
 
 type priority_group =
   { group : string list
@@ -186,7 +201,7 @@ let binop_binder group =
       if String.starts_with ~prefix:group_string bin_op then return () else helper tl
     | [] -> fail "There is no matching operator"
   in
-  let ebinop_helper x y = eapp (eapp (eid (iobinop bin_op)) x) y in
+  let ebinop_helper x y = eapp (eapp (eid bin_op) x) y in
   helper group *> return ebinop_helper
 ;;
 
@@ -201,7 +216,7 @@ let get_chain e priority_group =
 ;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op >>| iounop in
+  let* unop = parse_token parse_unary_op in
   let* expr =
     choice
       [ parse_expr
@@ -227,7 +242,12 @@ let parse_bin_op_app parse_expr =
       let cons = "::" =?*> return elist in
       chainr1 term cons
     in
-    parse_bin_op (parse_app parse_expr))
+    let parse_bin_op_parens =
+      let* op = parse_parens parse_op in
+      let parse_expr = choice [ parse_const_expr; parse_parens parse_bin_op_app ] in
+      lift2 (fun e1 e2 -> eapp (eapp (eid op) e1) e2) parse_expr parse_expr
+    in
+    parse_bin_op @@ choice [ parse_bin_op_parens; parse_app parse_expr ])
 ;;
 
 (****************************************************** List ******************************************************)
@@ -257,32 +277,11 @@ let parse_identifier =
     [ (parse_token parse_letters
        >>= fun ident ->
        if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident)
-    ; parse_parens (parse_binary_op <|> parse_unary_op)
+    ; parse_parens parse_any_op
     ]
 ;;
 
-let parse_identifier_expr =
-  let is_operator s =
-    Base.String.exists ~f:(fun c -> not (is_ident_char c || c == '_')) s
-  in
-  let is_unop s =
-    let rec helper = function
-      | hd :: tl -> String.starts_with ~prefix:hd s || helper tl
-      | [] -> false
-    in
-    helper first_unop_strings
-  in
-  let* ident = parse_identifier in
-  return
-    (eid
-     @@
-     match is_operator ident with
-     | false -> ioident ident
-     | true ->
-       (match is_unop ident with
-        | true -> iounop ident
-        | false -> iobinop ident))
-;;
+let parse_identifier_expr = parse_identifier >>| eid
 
 let parse_ground_type =
   choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]

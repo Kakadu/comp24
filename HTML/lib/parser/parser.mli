@@ -35,7 +35,7 @@ val suffix_binop_strings : string list
 val base_binops : string list
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
-val parse_op : Ast.ident_or_op Angstrom.t
+val parse_op : Ast.ident Angstrom.t
 
 type priority_group =
   { group : string list
