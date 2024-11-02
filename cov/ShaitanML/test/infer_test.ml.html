@@ -566,7 +566,7 @@
 open Shaitanml_lib
 open Infer
 
-let%expect_test _ =
+let%expect_test "function with narrowing type annotation" =
   <span data-count="1">t</span>est_infer {|
      let (f : int -&gt; int) = fun x -&gt; x;;
      |};
@@ -585,7 +585,7 @@ let%expect_test _ =
     val f : int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "annotation for rec" =
   <span data-count="1">t</span>est_infer {|
      let x = let rec (f : int -&gt; int) = fun x -&gt; x in f 3;;
      |};
@@ -604,7 +604,7 @@ let%expect_test _ =
     val x : int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "list pattern in let" =
   <span data-count="1">t</span>est_infer {|
     let a::b = [1; 2; 3];;
      |};
@@ -620,11 +620,11 @@ let%expect_test _ =
     val = : '1 -&gt; '1 -&gt; bool
     val &gt; : '1 -&gt; '1 -&gt; bool
     val &gt;= : '1 -&gt; '1 -&gt; bool
-    val a : int 
+    val a : int
     val b : int list|}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "nested annotation" =
   <span data-count="1">t</span>est_infer {|
     let f = let ((x : int):int) = 5 in x;;
      |};
@@ -643,7 +643,7 @@ let%expect_test _ =
     val f : int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "nested annotation unmatch" =
   <span data-count="1">t</span>est_infer {|
     let f ((x : int):int) (((y : int):string):int) = x;;
      |};
@@ -651,7 +651,7 @@ let%expect_test _ =
     Infer error: Unification failed on int and string |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "simple annotation" =
   <span data-count="1">t</span>est_infer {|
     let (x:int) = 5;;
      |};
@@ -670,7 +670,7 @@ let%expect_test _ =
     val x : int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "fixed point combinator" =
   <span data-count="1">t</span>est_infer {|
       let rec fix f x = f (fix f) x ;;
      |};
@@ -689,7 +689,7 @@ let%expect_test _ =
     val fix : (('2 -&gt; '3) -&gt; '2 -&gt; '3) -&gt; '2 -&gt; '3 |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "list folding" =
   <span data-count="1">t</span>est_infer
     {|
    let rec fold_left f acc l =
@@ -713,7 +713,7 @@ let%expect_test _ =
     val fold_left : ('4 -&gt; '5 -&gt; '4) -&gt; '4 -&gt; '5 list -&gt; '4 |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "complex tuple" =
   <span data-count="1">t</span>est_infer {|
     let f x y = (x + y, [x; y])]
      |};
@@ -729,10 +729,10 @@ let%expect_test _ =
     val = : '1 -&gt; '1 -&gt; bool
     val &gt; : '1 -&gt; '1 -&gt; bool
     val &gt;= : '1 -&gt; '1 -&gt; bool
-    val f : int -&gt; int -&gt; (int * int list) |}<span data-count="7">]</span>
+    val f : int -&gt; int -&gt; int * int list |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "tuple of functions" =
   <span data-count="1">t</span>est_infer {|
       let fs = ((fun x -&gt; x), (fun x y -&gt; x + y))
      |};
@@ -748,10 +748,10 @@ let%expect_test _ =
     val = : '1 -&gt; '1 -&gt; bool
     val &gt; : '1 -&gt; '1 -&gt; bool
     val &gt;= : '1 -&gt; '1 -&gt; bool
-    val fs : (('0 -&gt; '0) * (int -&gt; int -&gt; int)) |}<span data-count="7">]</span>
+    val fs : ('0 -&gt; '0) * (int -&gt; int -&gt; int) |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "unbound variable check" =
   <span data-count="1">t</span>est_infer {|
       let f x = x + y;;
       let y = 3;;
@@ -759,7 +759,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {| Infer error: Unbound variable 'y' |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "inner let expr" =
   <span data-count="1">t</span>est_infer {|
       let f x =
          let y = 3 in
@@ -780,7 +780,7 @@ let%expect_test _ =
     val f : int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "multiple args as functions" =
   <span data-count="1">t</span>est_infer {|
     let f a b c d e = a b c d e;;
      |};
@@ -799,7 +799,7 @@ let%expect_test _ =
     val f : ('1 -&gt; '2 -&gt; '3 -&gt; '4 -&gt; '5) -&gt; '1 -&gt; '2 -&gt; '3 -&gt; '4 -&gt; '5 |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "cps function" =
   <span data-count="1">t</span>est_infer
     {|
       let map_cps f l =
