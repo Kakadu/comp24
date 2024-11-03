@@ -9,11 +9,11 @@ let test3 a b c =
 let test10 a b c d e f g h i j = a + b + c + d + e + f + g + h + i + j
 
 let main =
-  let temp0 =
+  let rez =
       (wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000
          1000000000)
   in
-  let temp1 = print_int temp0 in
+  let () = print_int temp0 in
   let temp2 = wrap test3 1 10 100 in
   0
 
