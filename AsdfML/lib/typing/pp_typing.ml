@@ -29,10 +29,12 @@ let rec int_to_alphabet_str n =
 let rec pp_typ fmt = function
   | TVar var -> fprintf fmt "%s" (type_id_to_name var)
   | TGround x ->
-    (match x with
-     | TInt -> fprintf fmt "int"
-     | TBool -> fprintf fmt "bool"
-     | TUnit -> fprintf fmt "()")
+    fprintf
+      fmt
+      (match x with
+       | TInt -> "int"
+       | TBool -> "bool"
+       | TUnit -> "()")
   | TArrow (left, right) ->
     (match left with
      | TArrow (_, _) -> fprintf fmt "(%a) -> %a" pp_typ left pp_typ right

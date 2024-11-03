@@ -18,7 +18,7 @@ and pp_type_ann fmt = function
   | TABool -> fprintf fmt "bool"
   | TAUnit -> fprintf fmt "()"
   | TAFun (a, b) -> fprintf fmt "%a -> %a" pp_type_ann a pp_type_ann b
-  | TATuple xs -> pp_list fmt pp_type_ann xs
+  | TATuple xs -> pp_list ~sep:" * " fmt pp_type_ann xs
   | TAList x -> fprintf fmt "%a list" pp_type_ann x
 
 and pp_pattern fmt = function
