@@ -7,9 +7,9 @@ let length_tail =
   let rec helper acc xs =
   match xs with
   | [] -> acc
-  | h::tl -> helper acc tl
+  | h::tl -> helper (acc + 1) tl
   in
-  helper []
+  helper 0
 
 let rec map f xs =
   match xs with
