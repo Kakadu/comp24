@@ -274,11 +274,11 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {| 
-    let ((x, y, z):(bool * int * int->bool)) = (not true, 42, fun x -> if x > 0 then true else false)
+    let ((x, y, z): (bool * int * int -> bool)) = (false, 42, (fun x -> if (( > ) x 0) then true else false))
   |};
   [%expect
     {|
-    let ((x, y, z): (bool, int, int -> bool)) = (false, 42, (fun x -> if (( > ) x 0) then true else false))
+    let ((x, y, z): (bool * int * int -> bool)) = (false, 42, (fun x -> if (( > ) x 0) then true else false))
     |}]
 ;;
 

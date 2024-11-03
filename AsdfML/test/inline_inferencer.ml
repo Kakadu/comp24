@@ -38,7 +38,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let x = (1, true, fun x -> x, (1, 2)) |};
-  [%expect {| x: (int, bool, 'a -> 'a, (int, int)) |}]
+  [%expect {| x: (int * bool * 'a -> 'a * (int * int)) |}]
 ;;
 
 let%expect_test _ =
@@ -303,7 +303,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    (x, y, z): (bool, int, int -> bool)
+    (x, y, z): (bool * int * int -> bool)
     a: bool
     b: int
     c: int -> bool |}]
@@ -312,7 +312,7 @@ let%expect_test _ =
 let%expect_test _ =
   test {| let (x, y, z) = (not true, 42) |};
   [%expect
-    {| Mismatched number of arguments in pattern (x, y, z) and expression (bool, int) |}]
+    {| Mismatched number of arguments in pattern (x, y, z) and expression (bool * int) |}]
 ;;
 
 let%expect_test _ =
@@ -410,5 +410,5 @@ let%expect_test _ =
   test {|
     let _ = ( 1,2 )
     |};
-  [%expect {| _: (int, int) |}]
+  [%expect {| _: (int * int) |}]
 ;;

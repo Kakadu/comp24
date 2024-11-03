@@ -42,10 +42,10 @@ $ dune exec many_inferencer < manytests/typed/015tuples.ml
 
   $ dune exec many_inferencer < manytests/typed/016lists.ml
   length: 'd list -> int
-  length_tail: 'k -> 'u -> 'v list -> 'u
-  map: ('aa -> 'ab) -> 'aa list -> 'ab list
-  append: 'bs list -> 'bs list -> 'bs list
-  concat: 'cl list list -> 'cl list
-  iter: ('cr -> ()) -> 'cr list -> ()
-  cartesian: 'db list -> 'di list -> ('db, 'di) list
+  length_tail: 'u list -> int
+  map: ('ab -> 'ac) -> 'ab list -> 'ac list
+  append: 'bt list -> 'bt list -> 'bt list
+  concat: 'cm list list -> 'cm list
+  iter: ('cs -> ()) -> 'cs list -> ()
+  cartesian: 'dc list -> 'dj list -> ('dc * 'dj) list
   main: int

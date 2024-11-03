@@ -516,18 +516,24 @@ let infer =
 let rec ids_from_pattern pat =
   let open Format in
   match pat with
-  | Ast.PWild -> "_"
-  | PIdent x -> x
+  | Ast.PWild -> "_" |> return
+  | PIdent x -> x |> return
   | PTuple xs ->
     xs
-    |> List.map ~f:ids_from_pattern
-    |> List.intersperse ~sep:", "
-    |> List.fold ~init:"" ~f:( ^ )
-    |> asprintf "(%s)"
-  | PAnn (x, _) -> asprintf "%s" (ids_from_pattern x)
+    |> List.fold ~init:(return []) ~f:(fun acc x ->
+      let* acc = acc in
+      let* id = ids_from_pattern x in
+      return (id :: acc))
+    >>| List.rev
+    >>| List.intersperse ~sep:", "
+    >>| List.fold ~init:"" ~f:( ^ )
+    >>| asprintf "(%s)"
+  | PAnn (x, _) -> ids_from_pattern x >>| asprintf "%s"
   | _ ->
-    failwith
-      "unreachable? will fail either in TypeEnv.extend_pat (NonRec) or infer_def (Rec)"
+    fail
+      (`TODO
+        "unreachable? should fail before this either in TypeEnv.extend_pat (NonRec) or \
+         infer_def (Rec)")
 ;;
 
 let infer_program (prog : Ast.definition list) =
@@ -536,7 +542,7 @@ let infer_program (prog : Ast.definition list) =
       (match head with
        | Ast.DLet (_, pat, _) ->
          let* env', _, ty = infer env head in
-         let id = ids_from_pattern pat in
+         let* id = ids_from_pattern pat in
          let* tail = helper env' tail in
          return ((id, ty) :: tail))
     | [] -> return []

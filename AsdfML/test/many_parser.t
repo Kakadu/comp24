@@ -29,8 +29,8 @@ $ dune exec many_parser < manytests/typed/003fib.ml
    in let c = (print_int c)
    in 0)
   let test10 = (fun a b c d e f g h i j -> (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) a b) c) d) e) f) g) h) i) j))
-  let main = let temp0 = (wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
-   in let temp1 = (print_int temp0)
+  let main = let rez = (wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
+   in let () = (print_int rez)
    in let temp2 = (wrap test3 1 10 100)
    in 0
   $ dune exec many_parser < manytests/typed/005fix.ml
@@ -77,10 +77,10 @@ $ dune exec many_parser < manytests/typed/015tuples.ml
   let rec length = (fun xs -> match xs with
   | [] -> 0
   | h :: tl -> (( + ) 1 (length tl)))
-  let rec length_tail = (fun xs -> let rec helper = (fun acc xs -> match xs with
+  let length_tail = let rec helper = (fun acc xs -> match xs with
   | [] -> acc
-  | h :: tl -> (helper acc tl))
-   in helper)
+  | h :: tl -> (helper (( + ) acc 1) tl))
+   in (helper 0)
   let rec map = (fun f xs -> match xs with
   | [] -> []
   | a :: [] -> [(f a)]
