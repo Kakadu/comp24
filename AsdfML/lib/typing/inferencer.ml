@@ -279,7 +279,7 @@ module TypeEnv = struct
   ;;
 
   let default =
-    List.fold bin_op_list ~init:empty ~f:(fun env (op, ty) ->
+    List.fold builtins ~init:empty ~f:(fun env (op, ty) ->
       let fv = VarSet.diff (Type.free_vars ty) (free_vars env) in
       extend env op (fv, ty))
   ;;
@@ -492,6 +492,7 @@ let infer =
       let env = TypeEnv.extend env x scheme in
       return (env, sub', final_ty)
     | DLet (_, pat, _) ->
+      (* TODO: check in parser *)
       fail
         (`Syntax_error
           (Format.asprintf "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))

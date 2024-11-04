@@ -8,9 +8,19 @@ let dbg fmt =
   else Format.ifprintf Format.std_formatter fmt
 ;;
 
+open Base
+
 let pp_list ?(op = "(") ?(cl = ")") ?(sep = ", ") fmt pp_inner list =
   let open Format in
   fprintf fmt "%s" op;
   pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "%s" sep) pp_inner fmt list;
   fprintf fmt "%s" cl
 ;;
+
+let set_to_string xs =
+  xs |> Set.to_list |> String.concat ~sep:", " |> Format.asprintf "{%s}"
+;;
+let list_to_string xs =
+  xs |> String.concat ~sep:"; " |> Format.asprintf "[%s]"
+;;
+
