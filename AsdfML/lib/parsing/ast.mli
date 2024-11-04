@@ -62,3 +62,7 @@ val e_let_in : definition -> expr -> expr
 val e_tuple : expr list -> expr
 val e_list : expr list -> expr
 val e_match : expr -> (pattern * expr) list -> expr
+val d_let_flag : rec_flag -> pattern -> expr -> definition
+val d_let : pattern -> expr -> definition
+val d_let_rec : pattern -> expr -> definition
+val equal_id : id -> id -> bool
