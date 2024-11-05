@@ -23,13 +23,13 @@ type rec_flag =
 type constant =
   | CInt of int
   | CBool of bool
+  | CNil
   | CUnit
 [@@deriving show { with_path = false }]
 
 (* Lists, tuples, identifiers, wild card patterns*)
 type pattern =
   | PWildCard
-  | PNil
   | PCons of pattern * pattern
   | PIdentifier of string
   | PTuple of pattern list
@@ -41,7 +41,6 @@ type pattern =
 type expr =
   | EConstant of constant
   | EIdentifier of string
-  | ENil
   | EFunction of pattern * expr
   | EApplication of expr * expr
   | EIfThenElse of expr * expr * expr
