@@ -109,7 +109,7 @@
             (EApplication ((EIdentifier "( :: )"), (EConstant (CInt 1)))),
             (EApplication (
                (EApplication ((EIdentifier "( :: )"), (EConstant (CInt 2)))),
-               ENil))
+               (EConstant CNil)))
             ))
          ))
       ))
@@ -186,7 +186,7 @@
          (EFunction ((PIdentifier "f"),
             (EFunction ((PIdentifier "list"),
                (EMatch ((PIdentifier "list"),
-                  [(PNil, (EIdentifier "list"));
+                  [((PConstant CNil), (EIdentifier "list"));
                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
                      (EApplication (
                         (EApplication ((EIdentifier "map"), (EIdentifier "f"))),
@@ -316,10 +316,10 @@
                      (EApplication (
                         (EApplication ((EIdentifier "( :: )"),
                            (EIdentifier "fun2"))),
-                        ENil))
+                        (EConstant CNil)))
                      ))
                   )),
-               ENil)),
+               (EConstant CNil))),
             (TList
                (TList
                   (TFunction ((TTuple [(TPoly "'b"); TInt]),
