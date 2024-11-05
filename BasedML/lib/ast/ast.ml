@@ -4,6 +4,7 @@
 
 (* Standard types: ints, functions, tuples, lists *)
 type type_name =
+  | TUnit 
   | TInt
   | TBool
   | TPoly of string
@@ -22,6 +23,7 @@ type rec_flag =
 type constant =
   | CInt of int
   | CBool of bool
+  | CUnit
 [@@deriving show { with_path = false }]
 
 (* Lists, tuples, identifiers, wild card patterns*)
