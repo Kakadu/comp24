@@ -192,7 +192,7 @@ let p_list_no_constr p_exp =
 ;;
 
 let rec exp_cons_list_builder = function
-  | [] -> ENil
+  | [] -> EConstant CNil
   | h :: tl ->
     EApplication (EIdentifier "( :: )", h)
     |> fun app1 -> EApplication (app1, exp_cons_list_builder tl)
@@ -203,8 +203,14 @@ let p_list_not_empty_exp p_exp =
   return (exp_cons_list_builder exp_list)
 ;;
 
-let p_pnil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return PNil
-let p_enil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return ENil
+let p_pnil =
+  skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return (PConstant CNil)
+;;
+
+let p_enil =
+  skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return (EConstant CNil)
+;;
+
 let p_list_exp p_exp = p_list_not_empty_exp p_exp <|> p_enil
 let p_wild_card_pattern = skip_whitespace *> Angstrom.string "_" *> return PWildCard
 
@@ -234,7 +240,7 @@ let p_tuple_pattern p_exp =
 
 let rec pat_cons_list_builder (ls : pattern list) =
   match ls with
-  | [] -> PNil
+  | [] -> PConstant CNil
   | h :: tl -> PCons (h, pat_cons_list_builder tl)
 ;;
 
