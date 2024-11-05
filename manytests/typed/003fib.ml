@@ -8,10 +8,10 @@ let rec fib_acc a b n =
 let rec fib n =
   if n<2
   then n
-  else fib (n - 1) + fib (n - 2) )
+  else fib (n - 1) + fib (n - 2) 
 
 let main =
-  let () = print (fib_acc 0 1 4) in
-  let () = print (fib 4) in
+  let () = print_int (fib_acc 0 1 4) in
+  let () = print_int (fib 4) in
   0
 
