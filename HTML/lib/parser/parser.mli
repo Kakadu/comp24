@@ -21,11 +21,11 @@ val keywords : string list
 val is_keyword : string -> bool
 val ( =?*> ) : string -> 'a Angstrom.t -> 'a Angstrom.t
 val ( =?>>| ) : string -> 'a -> 'a Angstrom.t
-val parse_int : Ast.const Angstrom.t
-val parse_bool : Ast.const Angstrom.t
-val parse_unit : Ast.const Angstrom.t
-val parse_const : Ast.const Angstrom.t
-val parse_const_expr : Ast.expr Angstrom.t
+val parse_int : AstLib.Ast.const Angstrom.t
+val parse_bool : AstLib.Ast.const Angstrom.t
+val parse_unit : AstLib.Ast.const Angstrom.t
+val parse_const : AstLib.Ast.const Angstrom.t
+val parse_const_expr : AstLib.Ast.expr Angstrom.t
 val prohibited_ops : string list
 val first_unop_strings : string list
 val suffix_unop_strings : string list
@@ -35,7 +35,7 @@ val suffix_binop_strings : string list
 val base_binops : string list
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
-val parse_op : Ast.ident Angstrom.t
+val parse_op : AstLib.Ast.ident Angstrom.t
 
 type priority_group =
   { group : string list
@@ -48,47 +48,63 @@ val third_priority_group : priority_group
 val fourth_priority_group : priority_group
 val fifth_priority_group : priority_group
 val parse_tuple : ?sep:string -> 'a Angstrom.t -> ('a list -> 'b) -> 'b Angstrom.t
-val parse_tuple_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
-val parse_branching : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
+val parse_tuple_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
+val parse_branching : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val chainl1 : 'a Angstrom.t -> ('a -> 'a -> 'a) Angstrom.t -> 'a Angstrom.t
 val chainr1 : 'a Angstrom.t -> ('a -> 'a -> 'a) Angstrom.t -> 'a Angstrom.t
-val binop_binder : string list -> (Ast.expr -> Ast.expr -> Ast.expr) Angstrom.t
-val get_chain : Ast.expr Angstrom.t -> priority_group -> Ast.expr Angstrom.t
-val parse_un_op_app : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
-val parse_bin_op_app : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
+
+val binop_binder
+  :  string list
+  -> (AstLib.Ast.expr -> AstLib.Ast.expr -> AstLib.Ast.expr) Angstrom.t
+
+val get_chain : AstLib.Ast.expr Angstrom.t -> priority_group -> AstLib.Ast.expr Angstrom.t
+val parse_un_op_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
+val parse_bin_op_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val parse_list_semicolon : 'a Angstrom.t -> ('a -> 'b -> 'b) -> 'b -> 'b Angstrom.t
-val parse_list_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
+val parse_list_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val parse_letters : string Angstrom.t
 val parse_identifier : string Angstrom.t
-val parse_identifier_expr : Ast.expr Angstrom.t
-val parse_ground_type : Ast.typ Angstrom.t
-val parse_generic_type : Ast.typ Angstrom.t
-val parse_base_types : Ast.typ Angstrom.t
-val parse_tuple_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
-val parse_arrow_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
-val parse_list_type : Ast.typ Angstrom.t -> Ast.typ Angstrom.t
-val parse_type : Ast.typ Angstrom.t
-val parse_get_explicit_typ : Ast.typ option Angstrom.t
-val parse_pat_typed : Ast.pattern Angstrom.t -> Ast.pattern_typed Angstrom.t
-val parse_ident_pat : Ast.pattern Angstrom.t
-val parse_list_pat_semicolon : Ast.pattern Angstrom.t -> Ast.pattern Angstrom.t
-val parse_list_pat_colons : Ast.pattern Angstrom.t -> Ast.pattern Angstrom.t
-val parse_tuple_pat : Ast.pattern Angstrom.t -> Ast.pattern Angstrom.t
-val parse_base_pats : Ast.pattern Angstrom.t
-val parse_lrf_pats : Ast.pattern Angstrom.t -> Ast.pattern Angstrom.t
-val parse_pattern_typed : Ast.pattern_typed Angstrom.t
-val parse_params : Ast.pattern_typed list Angstrom.t
-val parse_fun_decl : Ast.expr Angstrom.t -> (Ast.expr * Ast.typ option) Angstrom.t
-val parse_fun_anon_expr : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
-val parse_match : Ast.expr Angstrom.t -> Ast.expr Angstrom.t
-val parse_rec_flag : Ast.rec_flag Angstrom.t
+val parse_identifier_expr : AstLib.Ast.expr Angstrom.t
+val parse_ground_type : AstLib.Ast.typ Angstrom.t
+val parse_generic_type : AstLib.Ast.typ Angstrom.t
+val parse_base_types : AstLib.Ast.typ Angstrom.t
+val parse_tuple_type : AstLib.Ast.typ Angstrom.t -> AstLib.Ast.typ Angstrom.t
+val parse_arrow_type : AstLib.Ast.typ Angstrom.t -> AstLib.Ast.typ Angstrom.t
+val parse_list_type : AstLib.Ast.typ Angstrom.t -> AstLib.Ast.typ Angstrom.t
+val parse_type : AstLib.Ast.typ Angstrom.t
+val parse_get_explicit_typ : AstLib.Ast.typ option Angstrom.t
+val parse_pat_typed : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern_typed Angstrom.t
+val parse_ident_pat : AstLib.Ast.pattern Angstrom.t
+
+val parse_list_pat_semicolon
+  :  AstLib.Ast.pattern Angstrom.t
+  -> AstLib.Ast.pattern Angstrom.t
+
+val parse_list_pat_colons : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
+val parse_tuple_pat : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
+val parse_base_pats : AstLib.Ast.pattern Angstrom.t
+val parse_lrf_pats : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
+val parse_pattern_typed : AstLib.Ast.pattern_typed Angstrom.t
+val parse_params : AstLib.Ast.pattern_typed list Angstrom.t
+
+val parse_fun_decl
+  :  AstLib.Ast.expr Angstrom.t
+  -> (AstLib.Ast.expr * AstLib.Ast.typ option) Angstrom.t
+
+val parse_fun_anon_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
+val parse_match : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
+val parse_rec_flag : AstLib.Ast.rec_flag Angstrom.t
 
 val parse_let_body
-  :  Ast.expr Angstrom.t
-  -> (string * Ast.expr * Ast.typ option) Angstrom.t
+  :  AstLib.Ast.expr Angstrom.t
+  -> (string * AstLib.Ast.expr * AstLib.Ast.typ option) Angstrom.t
 
-val parse_closure : Ast.decl Angstrom.t -> Ast.expr Angstrom.t -> Ast.expr Angstrom.t
-val parse_let_decl : Ast.expr Angstrom.t -> Ast.decl Angstrom.t
-val parse_expr : Ast.expr Angstrom.t
-val parse_decls : Ast.prog Angstrom.t
-val parse_program : string -> (Ast.prog, string) result
+val parse_closure
+  :  AstLib.Ast.decl Angstrom.t
+  -> AstLib.Ast.expr Angstrom.t
+  -> AstLib.Ast.expr Angstrom.t
+
+val parse_let_decl : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.decl Angstrom.t
+val parse_expr : AstLib.Ast.expr Angstrom.t
+val parse_decls : AstLib.Ast.prog Angstrom.t
+val parse_program : string -> (AstLib.Ast.prog, string) result

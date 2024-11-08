@@ -4,7 +4,7 @@
 
 (** ref: https://gitlab.com/Kakadu/fp2020course-materials/-/blob/master/code/miniml/inferencer.ml **)
 
-open Ast
+open AstLib.Ast
 open Typing
 
 module R = struct
@@ -221,7 +221,9 @@ let lookup_env id map =
     return (Subst.empty, ans)
 ;;
 
-let rec convert_type = function
+let rec convert_type =
+  let open AstLib in
+  function
   | Ast.TGround g ->
     let ground =
       match g with
