@@ -449,8 +449,8 @@ let init_env =
   let bin_op a b res = tarrow a @@ tarrow b res in
   [ "print_int", tarrow tint tunit
   ; "print_newline", tarrow tunit tunit
-  ; "~ +", un_op tint tint
-  ; "~ -", un_op tint tint
+  ; "base +", un_op tint tint
+  ; "base -", un_op tint tint
   ; "+", bin_op tint tint tint
   ; "-", bin_op tint tint tint
   ; "*", bin_op tint tint tint

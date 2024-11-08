@@ -205,7 +205,9 @@ module ParsingTests = struct
     parse_test "let a = - 3";
     [%expect
       {|
-        [(DLet (Not_recursive, "a", (EApp ((EId "~ -"), (EConst (CInt 3)))), None))] |}]
+        [(DLet (Not_recursive, "a", (EApp ((EId "base -"), (EConst (CInt 3)))), None
+            ))
+          ] |}]
   ;;
 
   let%expect_test _ =
@@ -231,7 +233,7 @@ module ParsingTests = struct
       [(DLet (Not_recursive, "a",
           (EApp (
              (EApp ((EId "-"),
-                (EApp ((EId "~ -"), (EApp ((EId "f"), (EConst (CInt 3)))))))),
+                (EApp ((EId "base -"), (EApp ((EId "f"), (EConst (CInt 3)))))))),
              (EApp ((EId "f"), (EConst (CInt 4)))))),
           None))
         ]|}]

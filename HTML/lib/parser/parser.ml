@@ -132,13 +132,7 @@ let parse_op first suffix base_ops =
     ]
 ;;
 
-let parse_unary_op =
-  parse_op first_unop_strings suffix_unop_strings base_unops
-  >>| function
-  | op when op = "+" || op = "-" -> String.cat "~ " op
-  | op -> op
-;;
-
+let parse_unary_op = parse_op first_unop_strings suffix_unop_strings base_unops
 let parse_binary_op = parse_op first_binop_strings suffix_binop_strings base_binops
 
 let parse_any_op =
@@ -146,6 +140,17 @@ let parse_any_op =
     (first_unop_strings @ first_binop_strings)
     (suffix_unop_strings @ suffix_binop_strings)
     base_binops
+;;
+
+let convert_op_to_base = function
+  | op when op = "+" || op = "-" -> "base " ^ op
+  | op -> op
+;;
+
+let parse_op =
+  let parse_bin_or_un_op = parse_binary_op <|> parse_unary_op in
+  let parse_base_op = parse_bin_or_un_op >>| convert_op_to_base in
+  parse_base_op
 ;;
 
 let parse_op = parse_binary_op <|> parse_unary_op
@@ -216,13 +221,10 @@ let get_chain e priority_group =
 ;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op in
+  let* unop = parse_token parse_unary_op >>| convert_op_to_base in
   let* expr =
     choice
-      [ parse_expr
-      ; parse_parens (parse_un_op_app parse_expr)
-      ; parse_space1 *> parse_un_op_app parse_expr
-      ]
+      [ parse_expr; parse_parens parse_expr; parse_space1 *> parse_un_op_app parse_expr ]
   in
   return @@ eapp (eid unop) expr
 ;;
