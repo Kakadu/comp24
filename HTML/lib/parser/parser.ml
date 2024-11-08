@@ -79,42 +79,7 @@ let parse_const_expr = parse_const >>| econst
 
 (****************************************************** Operators ******************************************************)
 
-let prohibited_ops = [ "|"; "->" ]
-let first_unop_strings = [ "?"; "~"; "!" ]
-
-let suffix_unop_strings =
-  [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<" ]
-;;
-
-let base_unops = [ "-"; "+" ]
-
-let first_binop_strings =
-  [ "$"; "&"; "*"; "+"; "-"; "/"; "="; ">"; "@"; "^"; "|"; "%"; "<"; "#" ]
-;;
-
-let suffix_binop_strings =
-  [ "$"
-  ; "&"
-  ; "*"
-  ; "+"
-  ; "-"
-  ; "/"
-  ; "="
-  ; ">"
-  ; "@"
-  ; "^"
-  ; "|"
-  ; "%"
-  ; "<"
-  ; "!"
-  ; "."
-  ; ":"
-  ; "?"
-  ; "~"
-  ]
-;;
-
-let base_binops = [ "+"; "-"; "*"; "/"; "<="; "<"; ">="; ">"; "=="; "!="; "&&"; "||" ]
+open Common.Ops
 
 let parse_op first suffix base_ops =
   let rec helper = function
