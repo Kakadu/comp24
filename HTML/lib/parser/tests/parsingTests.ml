@@ -5,7 +5,7 @@
 module ParsingTests = struct
   let parse_test s =
     match Parser.parse_program s with
-    | Ok actual -> Format.printf "%a\n" Ast.pp_prog actual
+    | Ok actual -> Format.printf "%a\n" AstLib.Ast.pp_prog actual
     | Error err -> Format.printf "%s\n" err
   ;;
 
