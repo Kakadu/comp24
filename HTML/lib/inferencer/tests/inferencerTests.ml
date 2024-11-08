@@ -16,6 +16,25 @@ module InferenceTests = struct
     [%expect {| val a : int |}]
   ;;
 
+  let%expect_test "Base minus" =
+    infer_test {| 
+      let ( - ) a = a = 100;;
+      let a = (+) (-7) 5;;
+    |};
+    [%expect {| 
+    val - : int -> bool
+    val a : int 
+    |}]
+  ;;
+
+  let%expect_test "Use redefined minus" =
+    infer_test {| 
+      let ( - ) a = a = 100
+      let a = (+) ((-) 7) 5;;
+    |};
+    [%expect {|  Typecheck error: This expression has type bool but an expression was expected of type int |}]
+  ;;
+
   let%expect_test _ =
     infer_test {| let a: bool = 3 |};
     [%expect
