@@ -26,13 +26,6 @@ val parse_bool : AstLib.Ast.const Angstrom.t
 val parse_unit : AstLib.Ast.const Angstrom.t
 val parse_const : AstLib.Ast.const Angstrom.t
 val parse_const_expr : AstLib.Ast.expr Angstrom.t
-val prohibited_ops : string list
-val first_unop_strings : string list
-val suffix_unop_strings : string list
-val base_unops : string list
-val first_binop_strings : string list
-val suffix_binop_strings : string list
-val base_binops : string list
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
 val parse_op : AstLib.Ast.ident Angstrom.t
