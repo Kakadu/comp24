@@ -1,6 +1,6 @@
-(library
- (name Inferencer)
- (modules Inferencer Typing)
- (libraries AstLib)
- (preprocess
-  (pps ppx_deriving.show ppx_deriving.eq)))
+; (library
+;  (name Inferencer)
+;  (modules Inferencer Typing)
+;  (libraries AstLib)
+;  (preprocess
+;   (pps ppx_deriving.show ppx_deriving.eq)))

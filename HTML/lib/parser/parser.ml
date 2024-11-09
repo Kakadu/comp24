@@ -107,14 +107,14 @@ let parse_any_op =
     base_binops
 ;;
 
-let convert_op_to_base = function
-  | op when op = "+" || op = "-" -> "base " ^ op
-  | op -> op
+let convert_op_to_ident = function
+  | op when op = "+" || op = "-" -> ident_of_base_op (if op = "+" then Plus else Minus)
+  | op -> op |> ident_op |> ident_of_definable
 ;;
 
 let parse_op =
   let parse_bin_or_un_op = parse_binary_op <|> parse_unary_op in
-  let parse_base_op = parse_bin_or_un_op >>| convert_op_to_base in
+  let parse_base_op = parse_bin_or_un_op >>| convert_op_to_ident in
   parse_base_op
 ;;
 
@@ -165,13 +165,17 @@ let chainl1 parse_e op =
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 let binop_binder group =
-  let* bin_op = parse_binary_op in
+  let* bin_op_string = parse_binary_op in
   let rec helper = function
     | group_string :: tl ->
-      if String.starts_with ~prefix:group_string bin_op then return () else helper tl
+      if String.starts_with ~prefix:group_string bin_op_string
+      then return ()
+      else helper tl
     | [] -> fail "There is no matching operator"
   in
-  let ebinop_helper x y = eapp (eapp (eid bin_op) x) y in
+  let ebinop_helper x y =
+    eapp (eapp (eid (bin_op_string |> ident_op |> ident_of_definable)) x) y
+  in
   helper group *> return ebinop_helper
 ;;
 
@@ -186,7 +190,7 @@ let get_chain e priority_group =
 ;;
 
 let rec parse_un_op_app parse_expr =
-  let* unop = parse_token parse_unary_op >>| convert_op_to_base in
+  let* unop = parse_token parse_unary_op >>| convert_op_to_ident in
   let* expr =
     choice
       [ parse_expr; parse_parens parse_expr; parse_space1 *> parse_un_op_app parse_expr ]
@@ -212,7 +216,10 @@ let parse_bin_op_app parse_expr =
     let parse_bin_op_parens =
       let* op = parse_parens parse_op in
       let parse_expr = choice [ parse_const_expr; parse_parens parse_bin_op_app ] in
-      lift2 (fun e1 e2 -> eapp (eapp (eid op) e1) e2) parse_expr parse_expr
+      lift2
+        (fun e1 e2 -> eapp (eapp (eid (op |> ident_op |> ident_of_definable)) e1) e2)
+        parse_expr
+        parse_expr
     in
     parse_bin_op @@ choice [ parse_bin_op_parens; parse_app parse_expr ])
 ;;
@@ -239,16 +246,18 @@ let parse_letters =
     (take_while (fun ch -> ch = '_' || is_ident_char ch))
 ;;
 
-let parse_identifier =
-  choice
-    [ (parse_token parse_letters
-       >>= fun ident ->
-       if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident)
-    ; parse_parens parse_any_op
-    ]
+let parse_identifier_letters =
+  parse_token parse_letters
+  >>= fun ident ->
+  if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident
 ;;
 
-let parse_identifier_expr = parse_identifier >>| eid
+let parse_identifier_definable =
+  choice
+    [ parse_identifier_letters >>| ident_letters; parse_parens parse_any_op >>| ident_op ]
+;;
+
+let parse_identifier_expr = parse_identifier_definable >>| ident_of_definable >>| eid
 
 let parse_ground_type =
   choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]
@@ -288,7 +297,7 @@ let parse_pat_typed parse_pat =
   choice [ parse_parens (parse_pattern_typed parse_pat); parse_pat_not_typed parse_pat ]
 ;;
 
-let parse_ident_pat = parse_identifier >>| pid
+let parse_ident_pat = parse_identifier_letters >>| pid
 
 let parse_list_pat_semicolon parse_pat =
   parse_list_semicolon
@@ -365,7 +374,7 @@ let parse_rec_flag = parse_next_stoken "rec" *> return Recursive <|> return Not_
 let parse_let_body parse_expr =
   lift2
     (fun ident (expr, typ) -> ident, expr, typ)
-    (parse_token parse_identifier)
+    (parse_token parse_identifier_definable)
     (parse_fun_decl parse_expr)
 ;;
 

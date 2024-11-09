@@ -9,7 +9,23 @@ type const =
   | CUnit (** () *)
 [@@deriving eq, show { with_path = false }]
 
-type ident = string [@@deriving eq, show { with_path = false }]
+type base_op =
+  | Plus (** + *)
+  | Minus (** - *)
+[@@deriving eq, show { with_path = false }]
+
+type ident_letters = string [@@deriving eq, show { with_path = false }]
+type ident_op = string [@@deriving eq, show { with_path = false }]
+
+type ident_definable =
+  | IdentLetters of ident_letters (** a, b, c, ...*)
+  | IdentOp of ident_op (** <, >, =, any ops... ...*)
+[@@deriving eq, show { with_path = false }]
+
+type ident =
+  | IdentOfDefinable of ident_definable (** definable idents *)
+  | IdentOfBaseOp of base_op (** base ops *)
+[@@deriving eq, show { with_path = false }]
 
 type rec_flag =
   | Recursive (** Recursive *)
@@ -23,7 +39,7 @@ type ground =
 [@@deriving eq, show { with_path = false }]
 
 type typ =
-  | TVar of string (** 'a, 'b, ... *)
+  | TVar of ident_letters (** 'a, 'b, ... *)
   | TArr of typ * typ (** 'a -> 'b *)
   | TTuple of typ list (** 'a * 'b *)
   | TList of typ (** 'a list *)
@@ -31,7 +47,7 @@ type typ =
 [@@deriving eq, show { with_path = false }]
 
 type pattern =
-  | PId of ident (** x *)
+  | PId of ident_letters (** x *)
   | PTuple of pattern_typed list (** (x, y) *)
   | PList of pattern_typed * pattern_typed (** x :: xs *)
   | PConst of const (** 3 *)
@@ -54,12 +70,16 @@ type expr =
 [@@deriving eq, show { with_path = false }]
 
 and decl =
-  | DLet of rec_flag * ident * expr * typ option (** Let declarations *)
-  | DLetMut of rec_flag * (ident * expr * typ option) list
+  | DLet of rec_flag * ident_definable * expr * typ option (** Let declarations *)
+  | DLetMut of rec_flag * (ident_definable * expr * typ option) list
 [@@deriving eq, show { with_path = false }]
 
 type prog = decl list [@@deriving eq, show { with_path = false }]
 
+let ident_letters (s : ident_letters) = IdentLetters s
+let ident_op (s: ident_op) = IdentOp s
+let ident_of_definable s = IdentOfDefinable s
+let ident_of_base_op b = IdentOfBaseOp b
 let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit
@@ -67,13 +87,13 @@ let tarrow left_type right_type = TArr (left_type, right_type)
 let ttuple type_list = TTuple type_list
 let tlist typ = TList typ
 let tvar n = TVar n
-let pid id = PId id
+let pid (id: ident_letters) = PId id
 let ptuple p_list = PTuple p_list
 let plist hd tl = PList (hd, tl)
 let p_typed ?(typ = None) (p : pattern) : pattern_typed = p, typ
 let pconst c = PConst c
 let econst c = EConst c
-let eid i = EId i
+let  eid i = EId i
 let efun pat e = EFun (pat, e)
 let eapp f args = EApp (f, args)
 let eif e1 e2 e3 = EIf (e1, e2, e3)

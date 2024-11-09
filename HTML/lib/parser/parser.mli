@@ -26,9 +26,13 @@ val parse_bool : AstLib.Ast.const Angstrom.t
 val parse_unit : AstLib.Ast.const Angstrom.t
 val parse_const : AstLib.Ast.const Angstrom.t
 val parse_const_expr : AstLib.Ast.expr Angstrom.t
+val parse_op : string list -> string list -> string list -> string Angstrom.t
 val parse_unary_op : string Angstrom.t
 val parse_binary_op : string Angstrom.t
+val parse_any_op : string Angstrom.t
+val convert_op_to_ident : string -> AstLib.Ast.ident
 val parse_op : AstLib.Ast.ident Angstrom.t
+val parse_op : string Angstrom.t
 
 type priority_group =
   { group : string list
@@ -56,7 +60,8 @@ val parse_bin_op_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val parse_list_semicolon : 'a Angstrom.t -> ('a -> 'b -> 'b) -> 'b -> 'b Angstrom.t
 val parse_list_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val parse_letters : string Angstrom.t
-val parse_identifier : string Angstrom.t
+val parse_identifier_letters : string Angstrom.t
+val parse_identifier_definable : AstLib.Ast.ident_definable Angstrom.t
 val parse_identifier_expr : AstLib.Ast.expr Angstrom.t
 val parse_ground_type : AstLib.Ast.typ Angstrom.t
 val parse_generic_type : AstLib.Ast.typ Angstrom.t
@@ -90,7 +95,7 @@ val parse_rec_flag : AstLib.Ast.rec_flag Angstrom.t
 
 val parse_let_body
   :  AstLib.Ast.expr Angstrom.t
-  -> (string * AstLib.Ast.expr * AstLib.Ast.typ option) Angstrom.t
+  -> (AstLib.Ast.ident_definable * AstLib.Ast.expr * AstLib.Ast.typ option) Angstrom.t
 
 val parse_closure
   :  AstLib.Ast.decl Angstrom.t

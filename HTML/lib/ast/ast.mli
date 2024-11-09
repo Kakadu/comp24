@@ -12,7 +12,37 @@ val equal_const : const -> const -> bool
 val pp_const : Format.formatter -> const -> unit
 val show_const : const -> string
 
-type ident = string
+type base_op =
+  | Plus (** + *)
+  | Minus (** - *)
+
+val equal_base_op : base_op -> base_op -> bool
+val pp_base_op : Format.formatter -> base_op -> unit
+val show_base_op : base_op -> string
+
+type ident_letters = string
+
+val equal_ident_letters : ident_letters -> ident_letters -> bool
+val pp_ident_letters : Format.formatter -> ident_letters -> unit
+val show_ident_letters : ident_letters -> string
+
+type ident_op = ident_letters
+
+val equal_ident_op : ident_op -> ident_op -> bool
+val pp_ident_op : Format.formatter -> ident_op -> unit
+val show_ident_op : ident_op -> string
+
+type ident_definable =
+  | IdentLetters of ident_letters (** a, b, c, ...*)
+  | IdentOp of ident_op (** <, >, =, any ops... ...*)
+
+val equal_ident_definable : ident_definable -> ident_definable -> bool
+val pp_ident_definable : Format.formatter -> ident_definable -> unit
+val show_ident_definable : ident_definable -> string
+
+type ident =
+  | IdentOfDefinable of ident_definable (** definable idents *)
+  | IdentOfBaseOp of base_op (** base ops *)
 
 val equal_ident : ident -> ident -> bool
 val pp_ident : Format.formatter -> ident -> unit
@@ -36,7 +66,7 @@ val pp_ground : Format.formatter -> ground -> unit
 val show_ground : ground -> string
 
 type typ =
-  | TVar of string (** 'a, 'b, ... *)
+  | TVar of ident_letters (** 'a, 'b, ... *)
   | TArr of typ * typ (** 'a -> 'b *)
   | TTuple of typ list (** 'a * 'b *)
   | TList of typ (** 'a list *)
@@ -47,7 +77,7 @@ val pp_typ : Format.formatter -> typ -> unit
 val show_typ : typ -> string
 
 type pattern =
-  | PId of ident (** x *)
+  | PId of ident_letters (** x *)
   | PTuple of pattern_typed list (** (x, y) *)
   | PList of pattern_typed * pattern_typed (** x :: xs *)
   | PConst of const (** 3 *)
@@ -75,9 +105,8 @@ type expr =
   (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 
 and decl =
-  | DLet of rec_flag * ident * expr * typ option (** Let declarations *)
-  | DLetMut of rec_flag * (ident * expr * typ option) list
-
+  | DLet of rec_flag * ident_definable * expr * typ option (** Let declarations *)
+  | DLetMut of rec_flag * (ident_definable * expr * typ option) list
 val equal_expr : expr -> expr -> bool
 val equal_decl : decl -> decl -> bool
 val pp_expr : Format.formatter -> expr -> unit
@@ -90,6 +119,10 @@ type prog = decl list
 val equal_prog : prog -> prog -> bool
 val pp_prog : Format.formatter -> prog -> unit
 val show_prog : prog -> string
+val ident_letters : ident_letters -> ident_definable
+val ident_op : ident_op -> ident_definable
+val ident_of_definable : ident_definable -> ident
+val ident_of_base_op : base_op -> ident
 val tint : typ
 val tbool : typ
 val tunit : typ
@@ -97,7 +130,7 @@ val tarrow : typ -> typ -> typ
 val ttuple : typ list -> typ
 val tlist : typ -> typ
 val tvar : string -> typ
-val pid : ident -> pattern
+val pid : ident_letters -> pattern
 val ptuple : pattern_typed list -> pattern
 val plist : pattern_typed -> pattern_typed -> pattern
 val p_typed : ?typ:typ option -> pattern -> pattern_typed
@@ -111,6 +144,6 @@ val elist : expr -> expr -> expr
 val etuple : expr list -> expr
 val eclsr : decl -> expr -> expr
 val ematch : expr -> (pattern_typed * expr) list -> expr
-val dlet : rec_flag -> ident -> expr -> typ option -> decl
-val dletmut : rec_flag -> (ident * expr * typ option) list -> decl
+val dlet : rec_flag -> ident_definable -> expr -> typ option -> decl
+val dletmut : rec_flag -> (ident_definable * expr * typ option) list -> decl
 val prog : decl list -> prog
