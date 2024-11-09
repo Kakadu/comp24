@@ -1,0 +1,7 @@
+(library
+ (name restore_src)
+ (public_name BasedML.Ast.RestoreSrc)
+ (libraries ast)
+ (modules RestoreSrc)
+ (preprocess
+  (pps ppx_deriving.show)))
