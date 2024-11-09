@@ -10,7 +10,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TTuple [TInt; TBool]), TBool))
-     substs: [("_p3", TBool); ("_p2", TInt); ("_p1", (TTuple [TInt; TBool]))] |}]
+     substs: [("_p3", bool); ("_p2", int); ("_p1", (int * bool))] |}]
 ;;
 
 let%expect_test _ =
@@ -18,7 +18,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TList TInt), (TList TInt)))
-     substs: [("_p2", TInt); ("_p3", (TList TInt)); ("_p1", (TList TInt))] |}]
+     substs: [("_p2", int); ("_p3", (int list)); ("_p1", (int list))] |}]
 ;;
 
 let%expect_test _ =
@@ -26,8 +26,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TTuple [TBool; TBool]), TBool))
-     substs: [("_p2", TBool); ("_p3", TBool); ("_p1", TBool);
-      ("_p0", (TTuple [TBool; TBool]))] |}]
+     substs: [("_p2", bool); ("_p3", bool); ("_p1", bool); ("_p0", (bool * bool))] |}]
 ;;
 
 let%expect_test _ =
@@ -62,20 +61,15 @@ let%expect_test _ =
     {|
     res: (TFunction ((TPoly "_p2"),
        (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))))
-     substs: [("_p0",
-      (TFunction ((TPoly "_p2"),
-         (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))
-         )));
-      ("_p1",
-       (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3"))))))
-      ] |}]
+     substs: [("_p0", ('_p2 -> ('_p3 -> ('_p4 -> '_p3))));
+      ("_p1", ('_p3 -> ('_p4 -> '_p3)))] |}]
 ;;
 
 let%expect_test _ =
   test_infer_exp {|let x = 1 in x|};
   [%expect {|
     res: TInt
-     substs: [("_p0", TInt)] |}]
+     substs: [("_p0", int)] |}]
 ;;
 
 let%expect_test _ =
@@ -83,7 +77,7 @@ let%expect_test _ =
   [%expect
     {|
     res: (TFunction ((TPoly "_p2"), (TPoly "_p2")))
-     substs: [("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
+     substs: [("_p1", ('_p0 -> '_p0))] |}]
 ;;
 
 let%expect_test _ =
@@ -96,18 +90,13 @@ let%expect_test _ =
   [%expect
     {|
     res: TInt
-     substs: [("_p11", TInt); ("_p13", TInt); ("_p14", TInt);
-      ("_p12", (TFunction ((TFunction (TInt, TInt)), TInt))); ("_p9", TInt);
-      ("_pd", (TPoly "_pa")); ("_p10", (TPoly "_pa")); ("_pf", TInt);
-      ("_pe", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
-      ("_p8", (TPoly "_pa")); ("_pc", TInt);
-      ("_pb", (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))));
-      ("_p0",
-       (TFunction (TInt,
-          (TFunction ((TFunction (TInt, (TPoly "_pa"))), (TPoly "_pa"))))));
-      ("_p6", (TPoly "_pa")); ("_p7", TInt); ("_p3", (TPoly "_pa"));
-      ("_p4", TInt); ("_p2", (TFunction (TInt, (TPoly "_pa")))); ("_p5", TInt);
-      ("_p1", TInt)] |}]
+     substs: [("_p11", int); ("_p13", int); ("_p14", int);
+      ("_p12", ((int -> int) -> int)); ("_p9", int); ("_pd", '_pa);
+      ("_p10", '_pa); ("_pf", int); ("_pe", ((int -> '_pa) -> '_pa));
+      ("_p8", '_pa); ("_pc", int); ("_pb", ((int -> '_pa) -> '_pa));
+      ("_p0", (int -> ((int -> '_pa) -> '_pa))); ("_p6", '_pa); ("_p7", int);
+      ("_p3", '_pa); ("_p4", int); ("_p2", (int -> '_pa)); ("_p5", int);
+      ("_p1", int)] |}]
 ;;
 
 let%expect_test _ =
@@ -115,8 +104,8 @@ let%expect_test _ =
   [%expect
     {|
     res: (TTuple [TInt; TBool])
-     substs: [("_p4", TBool); ("_p5", TBool); ("_p2", TInt); ("_p3", TInt);
-      ("_p1", (TFunction ((TPoly "_p0"), (TPoly "_p0"))))] |}]
+     substs: [("_p4", bool); ("_p5", bool); ("_p2", int); ("_p3", int);
+      ("_p1", ('_p0 -> '_p0))] |}]
 ;;
 
 (* Declarations *)
@@ -125,22 +114,22 @@ let%expect_test _ =
   test_infer_prog empty_state {|let x = 1;;
     let y = 2;;|};
   [%expect {|
-    [""x"": TInt,
-     ""y"": TInt,
+    [""x"": int,
+     ""y"": int,
      ] |}]
 ;;
 
 let%expect_test _ =
   test_infer_prog empty_state {|let a = fun s -> ();;|};
   [%expect {|
-    [""a"": (TFunction ((TPoly "_p2"), TUnit)),
+    [""a"": ('_p2 -> unit),
      ] |}]
 ;;
 
 let%expect_test _ =
   test_infer_prog empty_state {|let (a: ('a -> unit)) = fun s -> s;;|};
   [%expect {|
-    [""a"": (TFunction (TUnit, TUnit)),
+    [""a"": (unit -> unit),
      ]
     |}]
 ;;
@@ -148,7 +137,7 @@ let%expect_test _ =
 let%expect_test _ =
   test_infer_prog empty_state {|let id = fun x-> x;;|};
   [%expect {|
-    [""id"": (TFunction ((TPoly "_p2"), (TPoly "_p2"))),
+    [""id"": ('_p2 -> '_p2),
      ] |}]
 ;;
 
@@ -157,9 +146,9 @@ let%expect_test _ =
     let (x, y) = (id true, id 2);;|};
   [%expect
     {|
-    [""id"": (TFunction ((TPoly "_p9"), (TPoly "_p9"))),
-     ""x"": TBool,
-     ""y"": TInt,
+    [""id"": ('_p9 -> '_p9),
+     ""x"": bool,
+     ""y"": int,
      ] |}]
 ;;
 
@@ -176,11 +165,8 @@ let%expect_test _ =
     {|let rec id = fun x -> x and dup = fun x y -> (id x, id y);;|};
   [%expect
     {|
-    [""dup"": (TFunction ((TPoly "_p7"),
-                 (TFunction ((TPoly "_p7"),
-                    (TTuple [(TPoly "_p7"); (TPoly "_p7")])))
-                 )),
-     ""id"": (TFunction ((TPoly "_p8"), (TPoly "_p8"))),
+    [""dup"": ('_p7 -> ('_p7 -> ('_p7 * '_p7))),
+     ""id"": ('_p8 -> '_p8),
      ] |}]
 ;;
 
@@ -191,12 +177,10 @@ let%expect_test _ =
   let (a, b) = ((x (1, 2)), (x (true, false)));;|};
   [%expect
     {|
-    [""a"": (TTuple [TInt; TInt]),
-     ""b"": (TTuple [TBool; TBool]),
-     ""x"": (TFunction ((TTuple [(TPoly "_pf"); (TPoly "_pf")]),
-               (TTuple [(TPoly "_pf"); (TPoly "_pf")]))),
-     ""y"": (TFunction ((TTuple [(TPoly "_p10"); (TPoly "_p10")]),
-               (TTuple [(TPoly "_p10"); (TPoly "_p10")]))),
+    [""a"": (int * int),
+     ""b"": (bool * bool),
+     ""x"": (('_pf * '_pf) -> ('_pf * '_pf)),
+     ""y"": (('_p10 * '_p10) -> ('_p10 * '_p10)),
      ] |}]
 ;;
 
@@ -223,8 +207,8 @@ and odd = fun n -> match n with
 |};
   [%expect
     {|
-    [""even"": (TFunction (TInt, TBool)),
-     ""odd"": (TFunction (TInt, TBool)),
+    [""even"": (int -> bool),
+     ""odd"": (int -> bool),
      ] |}]
 ;;
 
@@ -243,9 +227,9 @@ and odd = fun n -> match n with
 |};
   [%expect
     {|
-    [""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""even"": (TFunction (TInt, TBool)),
-     ""odd"": (TFunction (TInt, TBool)),
+    [""( - )"": (int -> (int -> int)),
+     ""even"": (int -> bool),
+     ""odd"": (int -> bool),
      ] |}]
 ;;
 
@@ -265,9 +249,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""fibo"": (TFunction (TInt, TInt)),
+    [""( + )"": (int -> (int -> int)),
+     ""( - )"": (int -> (int -> int)),
+     ""fibo"": (int -> int),
      ] |}]
 ;;
 
@@ -283,23 +267,18 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""( / )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-     ""( :: )"": (TFunction ((TPoly "_p1d"),
-                    (TFunction ((TList (TPoly "_p1d")), (TList (TPoly "_p1d"))))
-                    )),
-     ""( < )"": (TFunction ((TPoly "_p1e"), (TFunction ((TPoly "_p1e"), TBool)))),
-     ""( <= )"": (TFunction ((TPoly "_p1f"), (TFunction ((TPoly "_p1f"), TBool))
-                    )),
-     ""( <> )"": (TFunction ((TPoly "_p20"), (TFunction ((TPoly "_p20"), TBool))
-                    )),
-     ""( = )"": (TFunction ((TPoly "_p21"), (TFunction ((TPoly "_p21"), TBool)))),
-     ""( > )"": (TFunction ((TPoly "_p22"), (TFunction ((TPoly "_p22"), TBool)))),
-     ""( >= )"": (TFunction ((TPoly "_p23"), (TFunction ((TPoly "_p23"), TBool))
-                    )),
-     ""fibo"": (TFunction (TInt, TInt)),
+    [""( * )"": (int -> (int -> int)),
+     ""( + )"": (int -> (int -> int)),
+     ""( - )"": (int -> (int -> int)),
+     ""( / )"": (int -> (int -> int)),
+     ""( :: )"": ('_p1d -> (('_p1d list) -> ('_p1d list))),
+     ""( < )"": ('_p1e -> ('_p1e -> bool)),
+     ""( <= )"": ('_p1f -> ('_p1f -> bool)),
+     ""( <> )"": ('_p20 -> ('_p20 -> bool)),
+     ""( = )"": ('_p21 -> ('_p21 -> bool)),
+     ""( > )"": ('_p22 -> ('_p22 -> bool)),
+     ""( >= )"": ('_p23 -> ('_p23 -> bool)),
+     ""fibo"": (int -> int),
      ] |}]
 ;;
 
@@ -315,26 +294,20 @@ let%expect_test _ =
   let doubleList = fun lst -> map mulTwo lst;;|};
   [%expect
     {|
-     [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( / )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( :: )"": (TFunction ((TPoly "_p1b"),
-                     (TFunction ((TList (TPoly "_p1b")), (TList (TPoly "_p1b"))))
-                     )),
-      ""( < )"": (TFunction ((TPoly "_p1c"), (TFunction ((TPoly "_p1c"), TBool)))),
-      ""( <= )"": (TFunction ((TPoly "_p1d"), (TFunction ((TPoly "_p1d"), TBool))
-                     )),
-      ""( <> )"": (TFunction ((TPoly "_p1e"), (TFunction ((TPoly "_p1e"), TBool))
-                     )),
-      ""( = )"": (TFunction ((TPoly "_p1f"), (TFunction ((TPoly "_p1f"), TBool)))),
-      ""( > )"": (TFunction ((TPoly "_p20"), (TFunction ((TPoly "_p20"), TBool)))),
-      ""( >= )"": (TFunction ((TPoly "_p21"), (TFunction ((TPoly "_p21"), TBool))
-                     )),
-      ""doubleList"": (TFunction ((TList TInt), (TList TInt))),
-      ""map"": (TFunction ((TFunction ((TPoly "_p22"), (TPoly "_p23"))),
-                  (TFunction ((TList (TPoly "_p22")), (TList (TPoly "_p23")))))),
-      ""mulTwo"": (TFunction (TInt, TInt)),
+     [""( * )"": (int -> (int -> int)),
+      ""( + )"": (int -> (int -> int)),
+      ""( - )"": (int -> (int -> int)),
+      ""( / )"": (int -> (int -> int)),
+      ""( :: )"": ('_p1b -> (('_p1b list) -> ('_p1b list))),
+      ""( < )"": ('_p1c -> ('_p1c -> bool)),
+      ""( <= )"": ('_p1d -> ('_p1d -> bool)),
+      ""( <> )"": ('_p1e -> ('_p1e -> bool)),
+      ""( = )"": ('_p1f -> ('_p1f -> bool)),
+      ""( > )"": ('_p20 -> ('_p20 -> bool)),
+      ""( >= )"": ('_p21 -> ('_p21 -> bool)),
+      ""doubleList"": ((int list) -> (int list)),
+      ""map"": (('_p22 -> '_p23) -> (('_p22 list) -> ('_p23 list))),
+      ""mulTwo"": (int -> int),
       ] |}]
 ;;
 
@@ -343,20 +316,19 @@ let%expect_test _ =
   let (a, b) = ((true < false), (3 < 4));;|};
   [%expect
     {|
-     [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( / )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-      ""( :: )"": (TFunction ((TPoly "_p9"),
-                     (TFunction ((TList (TPoly "_p9")), (TList (TPoly "_p9")))))),
-      ""( < )"": (TFunction ((TPoly "_pa"), (TFunction ((TPoly "_pa"), TBool)))),
-      ""( <= )"": (TFunction ((TPoly "_pb"), (TFunction ((TPoly "_pb"), TBool)))),
-      ""( <> )"": (TFunction ((TPoly "_pc"), (TFunction ((TPoly "_pc"), TBool)))),
-      ""( = )"": (TFunction ((TPoly "_pd"), (TFunction ((TPoly "_pd"), TBool)))),
-      ""( > )"": (TFunction ((TPoly "_pe"), (TFunction ((TPoly "_pe"), TBool)))),
-      ""( >= )"": (TFunction ((TPoly "_pf"), (TFunction ((TPoly "_pf"), TBool)))),
-      ""a"": TBool,
-      ""b"": TBool,
+     [""( * )"": (int -> (int -> int)),
+      ""( + )"": (int -> (int -> int)),
+      ""( - )"": (int -> (int -> int)),
+      ""( / )"": (int -> (int -> int)),
+      ""( :: )"": ('_p9 -> (('_p9 list) -> ('_p9 list))),
+      ""( < )"": ('_pa -> ('_pa -> bool)),
+      ""( <= )"": ('_pb -> ('_pb -> bool)),
+      ""( <> )"": ('_pc -> ('_pc -> bool)),
+      ""( = )"": ('_pd -> ('_pd -> bool)),
+      ""( > )"": ('_pe -> ('_pe -> bool)),
+      ""( >= )"": ('_pf -> ('_pf -> bool)),
+      ""a"": bool,
+      ""b"": bool,
       ] |}]
 ;;
 
