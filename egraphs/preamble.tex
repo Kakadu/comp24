@@ -1,0 +1,252 @@
+\makeatletter
+\@ifclassloaded{beamer}{
+  \usefonttheme{professionalfonts}
+  \usepackage[svgnames]{xcolor}
+  \usetheme{CambridgeUS}
+  \setbeamertemplate{enumerate items}[circle]
+  % get rid of header navigation bar
+  \setbeamertemplate{headline}{}
+  % get rid of bottom navigation symbols
+  \setbeamertemplate{navigation symbols}{}
+  % get rid of footer
+  %\setbeamertemplate{footline}{}
+  \setbeamertemplate{section in toc} {\inserttocsectionnumber.~\inserttocsection}
+  \institute{матмех}
+
+  \titlegraphic{
+        \hspace{5cm}
+        {\tiny Дата сборки: \today}
+        \hspace{1.8cm}
+    \includegraphics[scale=.8]{../by.eps}
+  }
+%  \addtobeamertemplate{title page}{}{
+%    \begin{center}
+%        {\tiny Дата сборки: \today}
+%    \end{center}
+%  }
+}
+{}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{ifxetex,ifluatex}
+\newif\ifxetexorluatex
+    \ifxetex
+        \xetexorluatextrue
+    \else
+        \ifluatex
+            \xetexorluatextrue
+        \else
+            \xetexorluatexfalse
+        \fi
+    \fi
+
+
+\author{Аверин Павел}
+
+\ifxetexorluatex
+    \usepackage{fontspec}
+%    \usepackage{unicode-math} % Allow TTF and OTF fonts in math and allow direct typing unicode math characters.
+    \usepackage{euler-math}
+    %\setmainfont[Ligatures=TeX]{CMU Serif}
+    %\setsansfont[Ligatures=TeX]{CMU Sans Serif}
+    \setmainfont[Ligatures=TeX]{Liberation Serif}
+    \setsansfont[Ligatures=TeX]{Liberation Sans}
+%    \setmathfont{Latin Modern Math}
+%    \setmathfont{NotoSansMath-Regular.ttf}
+%    \setmathfont{FiraMath-Regular.otf} % from texlive-fonts-extra
+%    \setmathfont{TeX Gyre Pagella Math} % Doesn't have \setminus
+%    \setmathfont[Scale=MatchUppercase]{Asana Math}
+%    \setmainfont{TeX Gyre Bonum}
+%    \setmathfont{TeX Gyre Bonum Math}
+%\setmonofont{Fira Code}[Contextuals=AlternateOff,Ligatures=Common]
+%\setmonofont{Fira Code}[Contextuals=Alternate,Scale=0.9]
+    \setmonofont{Monaco for Powerline}[Scale=0.9]
+    %\setmonofont{Latin Modern Mono}[Scale=1]
+
+    \usepackage{polyglossia}
+    \setmainlanguage{russian}
+    \setotherlanguage{english}
+\else
+    \usepackage[utf8]{inputenc}
+    \usepackage[T2A]{fontenc}
+    \usepackage[russian,english]{babel}
+    \usepackage{euler}
+    %\usepackage{lmodern}
+\fi
+\usepackage{movie15}
+\usepackage{fontawesome}
+% \newfontfamily{\FA}{Font Awesome 5 Free} % some glyphs missing
+\expandafter\def\csname faicon@facebook\endcsname{{\FA\symbol{"F09A}}}
+\def\faQuestionSign{{\FA\symbol{"F059}}}
+\def\faQuestion{{\FA\symbol{"F128}}}
+\def\faExclamation{{\FA\symbol{"F12A}}}
+\def\faUploadAlt{{\FA\symbol{"F093}}}
+\def\faLemon{{\FA\symbol{"F094}}}
+\def\faPhone{{\FA\symbol{"F095}}}
+\def\faCheckEmpty{{\FA\symbol{"F096}}}
+\def\faBookmarkEmpty{{\FA\symbol{"F097}}}
+
+\newcommand{\faGood}{\textcolor{ForestGreen}{\faThumbsUp}}
+\newcommand{\faBad}{\textcolor{red}{\faThumbsODown}}
+\newcommand{\faWrong}{\textcolor{red}{\faTimes}}
+\newcommand{\faMaybe}{\textcolor{blue}{\faQuestion}}
+\newcommand{\faCheckGreen}{\textcolor{ForestGreen}{\faCheck}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% https://latex.org/forum/viewtopic.php?t=34345
+\usepackage[backend=biber,sorting=none]{biblatex}
+
+\makeatletter
+\@ifclassloaded{beamer}{
+    %% Set the icons
+    \setbeamertemplate{bibliography item}{%
+    \ifboolexpr{ test {\ifentrytype{book}} or test {\ifentrytype{mvbook}}
+      or test {\ifentrytype{collection}} or test {\ifentrytype{mvcollection}}
+      or test {\ifentrytype{reference}} or test {\ifentrytype{mvreference}} }
+      {\setbeamertemplate{bibliography item}[book]}
+      {\ifentrytype{online}
+        {\setbeamertemplate{bibliography item}[online]}
+        {\setbeamertemplate{bibliography item}[article]}}%
+    \usebeamertemplate{bibliography item}}
+
+    \defbibenvironment{bibliography}
+    {\list{}
+       {\settowidth{\labelwidth}{\usebeamertemplate{bibliography item}}%
+        \setlength{\leftmargin}{\labelwidth}%
+        \setlength{\labelsep}{\biblabelsep}%
+        \addtolength{\leftmargin}{\labelsep}%
+        \setlength{\itemsep}{\bibitemsep}%
+        \setlength{\parsep}{\bibparsep}}}
+    {\endlist}
+    {\item}
+     % http://codydunne.blogspot.com/2012/01/suppressing-bibtex-fields-for-specific.html
+     \AtEveryBibitem{% Clean up the bibtex rather than editing it
+     \clearlist{address}
+     \clearfield{booktitle}
+     \clearfield{date}
+     \clearfield{doi}
+     \clearname{editor}
+     \clearfield{eprint}
+     \clearfield{isbn}
+     \clearfield{issn}
+     \clearlist{location}
+     \clearfield{month}
+     \clearfield{pages}
+     \clearlist{publisher}
+     \clearfield{series}
+    }
+}
+{}
+\makeatother
+%%%%%%%%%%%%%%%%%%%%
+\usepackage{relsize} % \mathlarger{..}
+\usepackage{hyperref}
+\hypersetup{colorlinks,citecolor={blue},linkcolor=blue,urlcolor=DarkBlue}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\usepackage{soul} % for \st that strikes through
+\usepackage[normalem]{ulem} % \sout
+
+\usepackage{stmaryrd}
+\newcommand{\sem}[1]{\ensuremath{\llbracket #1\rrbracket}}
+
+% We should use the following commands as \ocaml{} to prevent chewing
+% extra space
+\newcommand{\Linux}{\textsc{Linux}}
+\newcommand{\ocaml}{\textsc{OCaml}}
+\newcommand{\OCaml}{\ocaml}
+\newcommand{\haskell}{\textsc{Haskell}}
+\newcommand{\Haskell}{\haskell}
+\newcommand{\Rust}{\textsc{Rust}}
+\newcommand{\Coq}{\textsc{Coq}}
+\newcommand{\Java}{\textsc{Java}}
+\newcommand{\CXX}{\textsc{C++}}
+\newcommand{\Scheme}{\textsc{Scheme}}
+\newcommand{\Kotlin}{\textsc{kotlin}}
+\newcommand{\CSharp}{\textsc{C\#}}
+
+
+
+
+%\let\thefootnote\relax\footnotetext{Put your text here}
+\DeclareMathOperator{\arr}{\rightarrow}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz}
+\usetikzlibrary{cd}
+\usepackage{tikz-cd}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+
+
+
+\usepackage[useregional]{datetime2}
+% https://tex.stackexchange.com/a/132994/171947
+\usepackage{amsthm}
+\newtheorem{exercise}[theorem]{Упражнение}
+
+\ifxetexorluatex
+\else
+\patchcmd{\definition}{Definition}{Определение}{}{}
+\fi
+
+\usepackage{scalerel}
+\DeclareMathOperator*{\myvee}{\scalerel*{\vee}{\sum}}
+\DeclareMathOperator*{\mywedge}{\scalerel*{\wedge}{\sum}}
+
+\usepackage{array}
+\usepackage{makecell}
+%\newcolumntype{MC}[1]{>{\centering\arraybackslash}p{#1}}
+%
+%\usepackage{tabulary}
+% https://tex.stackexchange.com/questions/380799/warning-when-adding-package-minted
+\usepackage[autostyle]{csquotes}
+\ifxetexorluatex
+\else
+% https://tex.stackexchange.com/a/377117/171947
+\renewcommand\thempfootnote{\alph{mpfootnote}}
+\fi
+
+
+\input{../preamble_listings.tex}
+
+\usepackage{tikz} % Мощный пакет для создание рисунков, однако может очень сильно замедлять компиляцию
+\usetikzlibrary{decorations.pathreplacing,calc,shapes,positioning,tikzmark}
+\newcounter{tmkcount}
+
+\tikzset{
+    use tikzmark/.style={
+        remember picture,
+        overlay,
+        execute at end picture={
+            \stepcounter{tmkcount}
+        },
+    },
+    tikzmark suffix={-\thetmkcount}
+}
+%\newcommand\centerarc{} % just for safety
+\def\tikzHighlight(#1)(#2){
+  \draw[fill=gray,opacity=0.1]
+    ([shift={(-3pt,2ex)}]pic cs:#1)
+    rectangle
+    ([shift={(3pt,-0.65ex)}]pic cs:#2);
+}
+
+
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\theta}{\vartheta}
+\renewcommand{\kappa}{\varkappa}
+\renewcommand{\rho}{\varrho} % remember my teacher and friend Adalberto!
+\renewcommand{\phi}{\varphi} % TODO(Kakadu): sometimes we need to repeat it in the beginning of the slide
+
+
+% For every picture that defines or uses external nodes, you'll have to
+% apply the 'remember picture' style. To avoid some typing, we'll apply
+% the style to all pictures.
+\tikzstyle{every picture}+=[remember picture]
+
+% By default all math in TikZ nodes are set in inline mode. Change this to
+% displaystyle so that we don't get small fractions.
+\everymath{\displaystyle}
