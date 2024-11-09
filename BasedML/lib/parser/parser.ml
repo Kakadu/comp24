@@ -101,6 +101,7 @@ let p_infix_ident =
 let p_basic_type : type_name t =
   Angstrom.string "int" *> return TInt
   <|> Angstrom.string "bool" *> return TBool
+  <|> Angstrom.string "unit" *> return TUnit
   <|> char '\''
       *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
          return (TPoly ("'" ^ typeNameChar))
@@ -229,14 +230,11 @@ let p_unit constr =
   *> Angstrom.string "("
   *> skip_whitespace
   *> Angstrom.string ")"
-  *> return (constr [])
+  *> return constr
 ;;
 
-let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x) <|> p_unit (fun x -> ETuple x)
-
-let p_tuple_pattern p_exp =
-  p_tuple p_exp (fun x -> PTuple x) <|> p_unit (fun x -> PTuple x)
-;;
+let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x) <|> p_unit (EConstant CUnit)
+let p_tuple_pattern p_exp = p_tuple p_exp (fun x -> PTuple x) <|> p_unit (PConstant CUnit)
 
 let rec pat_cons_list_builder (ls : pattern list) =
   match ls with

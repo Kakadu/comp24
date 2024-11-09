@@ -341,7 +341,7 @@
   $ dune exec parser_demo << EOF
   > let () = ()
   > EOF
-  [(DSingleLet (NotRec, (DLet ((PTuple []), (ETuple [])))))]
+  [(DSingleLet (NotRec, (DLet ((PConstant CUnit), (EConstant CUnit)))))]
 
   $ dune exec parser_demo << EOF
   > let recfib = fun n -> if n=1 then 1 else fib (n-1)
