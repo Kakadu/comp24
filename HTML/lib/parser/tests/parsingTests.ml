@@ -84,26 +84,25 @@ module ParsingTests = struct
     [%expect
       {| 
       [(DLetMut (Recursive,
-          [((IdentOp "+="),
-            (EFun (((PId "x"), None),
-               (EApp (
-                  (EApp ((EId (IdentOfDefinable (IdentOp "-$"))),
-                     (EId (IdentOfDefinable (IdentLetters "x"))))),
-                  (EConst (CInt 1))))
-               )),
-            None);
-            ((IdentOp "-$"),
-             (EFun (((PId "x"), None),
-                (EFun (((PId "y"), None),
-                   (EApp (
-                      (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
-                         (EId (IdentOfDefinable (IdentLetters "x"))))),
-                      (EId (IdentOfDefinable (IdentLetters "y")))))
-                   ))
-                )),
-             None)
-            ]
-          ))
+          ((IdentOp "+="),
+           (EFun (((PId "x"), None),
+              (EApp (
+                 (EApp ((EId (IdentOfDefinable (IdentOp "-$"))),
+                    (EId (IdentOfDefinable (IdentLetters "x"))))),
+                 (EConst (CInt 1))))
+              )),
+           None),
+          ((IdentOp "-$"),
+           (EFun (((PId "x"), None),
+              (EFun (((PId "y"), None),
+                 (EApp (
+                    (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
+                       (EId (IdentOfDefinable (IdentLetters "x"))))),
+                    (EId (IdentOfDefinable (IdentLetters "y")))))
+                 ))
+              )),
+           None),
+          []))
         ]
       |}]
   ;;
@@ -222,10 +221,9 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, (IdentLetters "a"),
           (EMatch ((EId (IdentOfDefinable (IdentLetters "l"))),
-             [(((PTuple (((PId "hd"), None), ((PId "tl"), None), [])), None),
-               (EId (IdentOfDefinable (IdentLetters "hd"))));
-               (((PId "_"), None), (EConst (CInt 0)))]
-             )),
+             (((PTuple (((PId "hd"), None), ((PId "tl"), None), [])), None),
+              (EId (IdentOfDefinable (IdentLetters "hd")))),
+             [(((PId "_"), None), (EConst (CInt 0)))])),
           None))
         ]|}]
   ;;
@@ -387,51 +385,49 @@ module ParsingTests = struct
       [(DLet (Not_recursive, (IdentLetters "blst"),
           (EClsr (
              (DLetMut (Recursive,
-                [((IdentLetters "f"),
-                  (EFun (((PId "x"), None),
-                     (EIf (
-                        (EApp (
-                           (EApp ((EId (IdentOfDefinable (IdentOp ">"))),
-                              (EId (IdentOfDefinable (IdentLetters "x"))))),
-                           (EConst (CInt 0)))),
-                        (EApp ((EId (IdentOfDefinable (IdentLetters "g"))),
-                           (EApp (
-                              (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
-                                 (EId (IdentOfDefinable (IdentLetters "x"))))),
-                              (EConst (CInt 1))))
-                           )),
-                        (EConst (CInt 1))))
-                     )),
-                  None);
-                  ((IdentLetters "g"),
-                   (EFun (((PId "x"), None),
-                      (EIf (
-                         (EApp (
-                            (EApp ((EId (IdentOfDefinable (IdentOp ">"))),
-                               (EId (IdentOfDefinable (IdentLetters "x"))))),
-                            (EConst (CInt 0)))),
-                         (EApp (
-                            (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
-                               (EApp ((EId (IdentOfDefinable (IdentLetters "f"))),
-                                  (EApp (
-                                     (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
-                                        (EId (IdentOfDefinable (IdentLetters "x")))
-                                        )),
-                                     (EConst (CInt 1))))
-                                  ))
-                               )),
-                            (EApp ((EId (IdentOfDefinable (IdentLetters "g"))),
-                               (EApp (
-                                  (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
-                                     (EId (IdentOfDefinable (IdentLetters "x"))))),
-                                  (EConst (CInt 2))))
-                               ))
-                            )),
-                         (EConst (CInt 1))))
-                      )),
-                   None)
-                  ]
-                )),
+                ((IdentLetters "f"),
+                 (EFun (((PId "x"), None),
+                    (EIf (
+                       (EApp (
+                          (EApp ((EId (IdentOfDefinable (IdentOp ">"))),
+                             (EId (IdentOfDefinable (IdentLetters "x"))))),
+                          (EConst (CInt 0)))),
+                       (EApp ((EId (IdentOfDefinable (IdentLetters "g"))),
+                          (EApp (
+                             (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
+                                (EId (IdentOfDefinable (IdentLetters "x"))))),
+                             (EConst (CInt 1))))
+                          )),
+                       (EConst (CInt 1))))
+                    )),
+                 None),
+                ((IdentLetters "g"),
+                 (EFun (((PId "x"), None),
+                    (EIf (
+                       (EApp (
+                          (EApp ((EId (IdentOfDefinable (IdentOp ">"))),
+                             (EId (IdentOfDefinable (IdentLetters "x"))))),
+                          (EConst (CInt 0)))),
+                       (EApp (
+                          (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
+                             (EApp ((EId (IdentOfDefinable (IdentLetters "f"))),
+                                (EApp (
+                                   (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
+                                      (EId (IdentOfDefinable (IdentLetters "x"))))),
+                                   (EConst (CInt 1))))
+                                ))
+                             )),
+                          (EApp ((EId (IdentOfDefinable (IdentLetters "g"))),
+                             (EApp (
+                                (EApp ((EId (IdentOfDefinable (IdentOp "-"))),
+                                   (EId (IdentOfDefinable (IdentLetters "x"))))),
+                                (EConst (CInt 2))))
+                             ))
+                          )),
+                       (EConst (CInt 1))))
+                    )),
+                 None),
+                [])),
              (EApp ((EId (IdentOfDefinable (IdentLetters "f"))), (EConst (CInt 10))
                 ))
              )),
@@ -470,14 +466,14 @@ module ParsingTests = struct
                 (EMatch (
                    (ETuple ((EId (IdentOfDefinable (IdentLetters "x"))),
                       (EId (IdentOfDefinable (IdentLetters "y"))), [])),
+                   (((PTuple (((PConst (CBool true)), None),
+                        ((PConst (CBool true)), None), [])),
+                     None),
+                    (EConst (CBool false))),
                    [(((PTuple (((PConst (CBool true)), None),
-                         ((PConst (CBool true)), None), [])),
+                         ((PConst (CBool false)), None), [])),
                       None),
-                     (EConst (CBool false)));
-                     (((PTuple (((PConst (CBool true)), None),
-                          ((PConst (CBool false)), None), [])),
-                       None),
-                      (EConst (CBool true)));
+                     (EConst (CBool true)));
                      (((PTuple (((PConst (CBool false)), None),
                           ((PConst (CBool true)), None), [])),
                        None),
