@@ -361,11 +361,14 @@ let parse_match parse_expr =
   let parse_case =
     lift2 (fun case value -> case, value) parse_pattern_typed ("->" =?*> parse_expr)
   in
-  lift2
-    ematch
-    (parse_token1 parse_expr
-     <* (parse_stoken "with" <* choice [ parse_stoken1 "|"; parse_space ]))
-    (sep_by1 (parse_stoken "|") parse_case)
+  let* expr =
+    parse_token1 parse_expr
+    <* (parse_stoken "with" <* choice [ parse_stoken1 "|"; parse_space ])
+  in
+  let* cases = sep_by1 (parse_stoken "|") parse_case in
+  match cases with
+  | [] -> fail "Pattern matching with 0 patterns?!"
+  | hd :: tl -> return @@ ematch expr hd tl
 ;;
 
 (****************************************************** Decl, expression parsing ******************************************************)
@@ -393,8 +396,8 @@ let parse_let_decl parse_expr =
   let* let_decls_mut = many ("and" =?*> parse_let_body parse_expr) in
   match let_decl, let_decls_mut with
   | (rec_flag, ident, expr, typ), [] -> return @@ dlet rec_flag ident expr typ
-  | (rec_flag, ident, expr, typ), decls ->
-    return (dletmut rec_flag ((ident, expr, typ) :: decls))
+  | (rec_flag, ident1, expr1, typ1), (ident2, expr2, typ2) :: tl_decls ->
+    return (dletmut rec_flag (ident1, expr1, typ1) (ident2, expr2, typ2) tl_decls)
 ;;
 
 let parse_expr =
