@@ -4,7 +4,7 @@
 
 (* Standard types: ints, functions, tuples, lists *)
 type type_name =
-  | TUnit 
+  | TUnit
   | TInt
   | TBool
   | TPoly of string
@@ -12,6 +12,34 @@ type type_name =
   | TFunction of type_name * type_name
   | TList of type_name
 [@@deriving show { with_path = false }]
+
+let rec pp_type_name ppf tp =
+  let rec_call tp = pp_type_name ppf tp in
+  let fprintf x = Format.fprintf ppf x in
+  match tp with
+  | TUnit -> fprintf "unit"
+  | TInt -> fprintf "int"
+  | TBool -> fprintf "bool"
+  | TPoly name -> fprintf "'%s" name
+  | TTuple lst ->
+    fprintf "(";
+    List.iteri
+      (fun i tp ->
+        if i != 0 then fprintf " * " else ();
+        rec_call tp)
+      lst;
+    fprintf ")"
+  | TFunction (tp_arg, tp_ret) ->
+    fprintf "(";
+    rec_call tp_arg;
+    fprintf " -> ";
+    rec_call tp_ret;
+    fprintf ")"
+  | TList tp ->
+    fprintf "(";
+    rec_call tp;
+    fprintf " list)"
+;;
 
 (* Flag to implicitely tell if let is recurisve *)
 type rec_flag =
