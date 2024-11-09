@@ -139,8 +139,8 @@ let fifth_priority_group = { group = [ "#" ]; left_associative = true }
 let parse_tuple ?(sep = ",") parser wrap =
   let* list_res = sep_by1 (parse_stoken sep) parser in
   match list_res with
-  | [ _ ] -> fail "Tuple arity must be greater than 1"
-  | _ -> return @@ wrap list_res
+  | [ _ ] | [] -> fail "Tuple arity must be greater than 1"
+  | e1 :: e2 :: tl -> return (wrap e1 e2 tl)
 ;;
 
 let parse_tuple_expr parse_expr = parse_tuple parse_expr etuple
