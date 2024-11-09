@@ -131,6 +131,23 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  test_infer_prog empty_state {|let a = fun s -> ();;|};
+  [%expect
+    {|
+    [""a"": (TFunction ((TPoly "_p2"), (TTuple []))), 
+    Should be UNIT!!!!!
+     ] |}]
+;;
+
+let%expect_test _ =
+  test_infer_prog empty_state {|let a: ('a -> unit) = fun s -> s;;|};
+  [%expect {|
+    Parser error: : end_of_input 
+    Shoud be parsed!
+    |}]
+;;
+
+let%expect_test _ =
   test_infer_prog empty_state {|let id = fun x-> x;;|};
   [%expect {|
     [""id"": (TFunction ((TPoly "_p2"), (TPoly "_p2"))),
