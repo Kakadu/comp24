@@ -41,14 +41,14 @@ type ground =
 type typ =
   | TVar of ident_letters (** 'a, 'b, ... *)
   | TArr of typ * typ (** 'a -> 'b *)
-  | TTuple of typ list (** 'a * 'b *)
+  | TTuple of typ * typ * typ list (** 'a * 'b *)
   | TList of typ (** 'a list *)
   | TGround of ground (** ground *)
 [@@deriving eq, show { with_path = false }]
 
 type pattern =
   | PId of ident_letters (** x *)
-  | PTuple of pattern_typed list (** (x, y) *)
+  | PTuple of pattern_typed * pattern_typed * pattern_typed list (** (x, y) *)
   | PList of pattern_typed * pattern_typed (** x :: xs *)
   | PConst of const (** 3 *)
 [@@deriving eq, show { with_path = false }]
@@ -63,10 +63,10 @@ type expr =
   | EIf of expr * expr * expr
   (** If-then-else. Examples: if x >= y then x - y else y - x *)
   | EList of expr * expr (** Lists. Examples: [1; 2; 3] *)
-  | ETuple of expr list (** Tuple. Examples: (1, 2, 3) *)
+  | ETuple of expr * expr * expr list (** Tuple. Examples: (1, 2, 3) *)
   | EClsr of decl * expr (** Closure. Examples: let inc x = x + 1 in inc 5*)
   | EMatch of expr * (pattern_typed * expr) list
-  (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
+    (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
 and decl =
@@ -77,28 +77,28 @@ and decl =
 type prog = decl list [@@deriving eq, show { with_path = false }]
 
 let ident_letters (s : ident_letters) = IdentLetters s
-let ident_op (s: ident_op) = IdentOp s
+let ident_op (s : ident_op) = IdentOp s
 let ident_of_definable s = IdentOfDefinable s
 let ident_of_base_op b = IdentOfBaseOp b
 let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit
 let tarrow left_type right_type = TArr (left_type, right_type)
-let ttuple type_list = TTuple type_list
+let ttuple t1 t2 type_list = TTuple (t1, t2, type_list)
 let tlist typ = TList typ
 let tvar n = TVar n
-let pid (id: ident_letters) = PId id
-let ptuple p_list = PTuple p_list
+let pid (id : ident_letters) = PId id
+let ptuple p1 p2 p_list = PTuple (p1, p2, p_list)
 let plist hd tl = PList (hd, tl)
 let p_typed ?(typ = None) (p : pattern) : pattern_typed = p, typ
 let pconst c = PConst c
 let econst c = EConst c
-let  eid i = EId i
+let eid i = EId i
 let efun pat e = EFun (pat, e)
 let eapp f args = EApp (f, args)
 let eif e1 e2 e3 = EIf (e1, e2, e3)
 let elist hd tl = EList (hd, tl)
-let etuple l = ETuple l
+let etuple e1 e2 l = ETuple (e1, e2, l)
 let eclsr d e = EClsr (d, e)
 let ematch e cl = EMatch (e, cl)
 let dlet rf i e_let typ = DLet (rf, i, e_let, typ)

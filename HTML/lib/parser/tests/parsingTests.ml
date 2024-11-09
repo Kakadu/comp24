@@ -183,26 +183,26 @@ module ParsingTests = struct
       {| 
     [(DLet (Not_recursive, (IdentLetters "a"),
         (EList (
-           (ETuple
-              [(EList ((EConst (CInt 3)),
-                  (EList ((EConst (CInt 3)), (EConst CNil)))));
-                (EList ((EConst (CInt 4)),
-                   (EList ((EConst (CInt 4)), (EConst CNil)))))
-                ]),
+           (ETuple (
+              (EList ((EConst (CInt 3)),
+                 (EList ((EConst (CInt 3)), (EConst CNil))))),
+              (EList ((EConst (CInt 4)),
+                 (EList ((EConst (CInt 4)), (EConst CNil))))),
+              [])),
            (EList (
-              (ETuple
-                 [(EList ((EConst (CInt 5)),
-                     (EList ((EConst (CInt 5)), (EConst CNil)))));
-                   (EList ((EConst (CInt 6)),
-                      (EList ((EConst (CInt 6)), (EConst CNil)))))
-                   ]),
+              (ETuple (
+                 (EList ((EConst (CInt 5)),
+                    (EList ((EConst (CInt 5)), (EConst CNil))))),
+                 (EList ((EConst (CInt 6)),
+                    (EList ((EConst (CInt 6)), (EConst CNil))))),
+                 [])),
               (EList (
-                 (ETuple
-                    [(EList ((EConst (CInt 7)),
-                        (EList ((EConst (CInt 7)), (EConst CNil)))));
-                      (EList ((EConst (CInt 8)),
-                         (EList ((EConst (CInt 8)), (EConst CNil)))))
-                      ]),
+                 (ETuple (
+                    (EList ((EConst (CInt 7)),
+                       (EList ((EConst (CInt 7)), (EConst CNil))))),
+                    (EList ((EConst (CInt 8)),
+                       (EList ((EConst (CInt 8)), (EConst CNil))))),
+                    [])),
                  (EConst CNil)))
               ))
            )),
@@ -222,7 +222,7 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, (IdentLetters "a"),
           (EMatch ((EId (IdentOfDefinable (IdentLetters "l"))),
-             [(((PTuple [((PId "hd"), None); ((PId "tl"), None)]), None),
+             [(((PTuple (((PId "hd"), None), ((PId "tl"), None), [])), None),
                (EId (IdentOfDefinable (IdentLetters "hd"))));
                (((PId "_"), None), (EConst (CInt 0)))]
              )),
@@ -307,7 +307,7 @@ module ParsingTests = struct
     [%expect
       {|
       [(DLet (Not_recursive, (IdentLetters "f"),
-          (EFun (((PTuple [((PId "x"), None); ((PId "y"), None)]), None),
+          (EFun (((PTuple (((PId "x"), None), ((PId "y"), None), [])), None),
              (EApp (
                 (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
                    (EId (IdentOfDefinable (IdentLetters "x"))))),
@@ -323,7 +323,8 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, (IdentLetters "f"),
           (EFun (
-             ((PTuple [((PId "x"), (Some (TVar "a"))); ((PId "y"), None)]), None),
+             ((PTuple (((PId "x"), (Some (TVar "a"))), ((PId "y"), None), [])),
+              None),
              (EApp (
                 (EApp ((EId (IdentOfDefinable (IdentOp "*"))),
                    (EId (IdentOfDefinable (IdentLetters "x"))))),
@@ -339,9 +340,8 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, (IdentLetters "f"),
           (EFun (
-             ((PTuple
-                 [((PId "g"), (Some (TArr ((TGround GInt), (TGround GInt)))));
-                   ((PId "y"), None)]),
+             ((PTuple (((PId "g"), (Some (TArr ((TGround GInt), (TGround GInt))))),
+                 ((PId "y"), None), [])),
               None),
              (EApp (
                 (EApp ((EId (IdentOfDefinable (IdentOp "+"))),
@@ -367,7 +367,7 @@ module ParsingTests = struct
       [(DLet (Not_recursive, (IdentLetters "f"),
           (EFun (
              ((PList (((PId "x"), None),
-                 ((PTuple [((PId "x"), None); ((PId "y"), None)]), None))),
+                 ((PTuple (((PId "x"), None), ((PId "y"), None), [])), None))),
               None),
              (EConst (CInt 3)))),
           None))
@@ -445,9 +445,8 @@ module ParsingTests = struct
       {|
       [(DLet (Not_recursive, (IdentLetters "f"),
           (EFun (
-             ((PTuple
-                 [((PId "x"), None);
-                   ((PList (((PId "y"), None), ((PId "ys"), None))), None)]),
+             ((PTuple (((PId "x"), None),
+                 ((PList (((PId "y"), None), ((PId "ys"), None))), None), [])),
               None),
              (EConst (CInt 3)))),
           None))
@@ -469,27 +468,22 @@ module ParsingTests = struct
           (EFun (((PId "x"), (Some (TGround GBool))),
              (EFun (((PId "y"), (Some (TGround GBool))),
                 (EMatch (
-                   (ETuple
-                      [(EId (IdentOfDefinable (IdentLetters "x")));
-                        (EId (IdentOfDefinable (IdentLetters "y")))]),
-                   [(((PTuple
-                         [((PConst (CBool true)), None);
-                           ((PConst (CBool true)), None)]),
+                   (ETuple ((EId (IdentOfDefinable (IdentLetters "x"))),
+                      (EId (IdentOfDefinable (IdentLetters "y"))), [])),
+                   [(((PTuple (((PConst (CBool true)), None),
+                         ((PConst (CBool true)), None), [])),
                       None),
                      (EConst (CBool false)));
-                     (((PTuple
-                          [((PConst (CBool true)), None);
-                            ((PConst (CBool false)), None)]),
+                     (((PTuple (((PConst (CBool true)), None),
+                          ((PConst (CBool false)), None), [])),
                        None),
                       (EConst (CBool true)));
-                     (((PTuple
-                          [((PConst (CBool false)), None);
-                            ((PConst (CBool true)), None)]),
+                     (((PTuple (((PConst (CBool false)), None),
+                          ((PConst (CBool true)), None), [])),
                        None),
                       (EConst (CBool true)));
-                     (((PTuple
-                          [((PConst (CBool false)), None);
-                            ((PConst (CBool false)), None)]),
+                     (((PTuple (((PConst (CBool false)), None),
+                          ((PConst (CBool false)), None), [])),
                        None),
                       (EConst (CBool false)))
                      ]
