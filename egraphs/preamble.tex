@@ -17,7 +17,7 @@
         \hspace{5cm}
         {\tiny Дата сборки: \today}
         \hspace{1.8cm}
-    \includegraphics{../by-sa.png}
+    \includegraphics[scale=.8]{../by.eps}
   }
 %  \addtobeamertemplate{title page}{}{
 %    \begin{center}
@@ -41,7 +41,7 @@
     \fi
 
 
-\author{Косарев Дмитрий}
+\author{Аверин Павел}
 
 \ifxetexorluatex
     \usepackage{fontspec}
@@ -73,7 +73,7 @@
     \usepackage{euler}
     %\usepackage{lmodern}
 \fi
-
+\usepackage{movie15}
 \usepackage{fontawesome}
 % \newfontfamily{\FA}{Font Awesome 5 Free} % some glyphs missing
 \expandafter\def\csname faicon@facebook\endcsname{{\FA\symbol{"F09A}}}
@@ -93,7 +93,7 @@
 \newcommand{\faCheckGreen}{\textcolor{ForestGreen}{\faCheck}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % https://latex.org/forum/viewtopic.php?t=34345
-\usepackage[backend=bibtex,sorting=none]{biblatex}
+\usepackage[backend=biber,sorting=none]{biblatex}
 
 \makeatletter
 \@ifclassloaded{beamer}{
