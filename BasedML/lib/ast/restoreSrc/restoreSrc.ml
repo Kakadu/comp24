@@ -20,11 +20,11 @@ let rec frestore_pattern ppf pat =
   match pat with
   | PWildCard -> fprintf "_"
   | PCons (h_pat, t_pat) ->
-    fprintf "[";
+    fprintf "(";
     rec_call h_pat;
     fprintf " :: ";
     rec_call t_pat;
-    fprintf "]"
+    fprintf ")"
   | PIdentifier x -> fprintf "%s" x
   | PTuple lst ->
     fprintf "(";
@@ -55,10 +55,11 @@ let rec frestore_expr ppf exp =
   | EConstant c -> frestore_constant ppf c
   | EIdentifier s -> fprintf "%s" s
   | EFunction (pat, exp) ->
-    fprintf "fun ";
+    fprintf "(fun ";
     frestore_pattern ppf pat;
     fprintf " -> ";
-    rec_call exp
+    rec_call exp;
+    fprintf ")"
   | EApplication (exp1, exp2) ->
     fprintf "(";
     rec_call exp1;
