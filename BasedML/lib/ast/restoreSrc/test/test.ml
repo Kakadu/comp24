@@ -28,7 +28,7 @@ let%expect_test "Patterns" =
   test_restore_src
     {| let r = match x with 
   | _ -> 0
-  | [head :: lst] -> 1
+  | head :: lst -> 1
   | a -> 2
   | (f, s) -> 3
   | 2 -> 4
@@ -37,7 +37,7 @@ let%expect_test "Patterns" =
     {|
     let  r = (match x with
     | _ -> 0
-    | [[head :: lst] :: []] -> 1
+    | (head :: lst) :: []) -> 1
     | a -> 2
     | (f, s) -> 3
     | 2 -> 4
@@ -59,7 +59,8 @@ let%expect_test "Expresions" =
   | _-> 2;;
   let constriant = (true: int);;
   let constant = 2;;|};
-  [%expect {|
+  [%expect
+    {|
     let  id = constant;;
     let  funct = fun x -> x;;
     let  app = (funct id);;
@@ -81,7 +82,8 @@ let%expect_test "Declarations" =
   let rec b = b + a;;
   let c = 2 and d = 0;;
   let rec e = 2 * h and h = 3 * e;;|};
-  [%expect {|
+  [%expect
+    {|
     let  a = 2;;
     let rec b = ((( + ) b) a);;
     let  c = 2 and d = 0;;
