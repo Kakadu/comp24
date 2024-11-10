@@ -31,5 +31,8 @@ let%expect_test _ =
   QCheck_runner.set_seed 42;
   let _ = QCheck_runner.run_tests parser_qtests in
   ();
-  [%expect {| |}]
+  [%expect {|
+    random seed: 42
+    ================================================================================
+    [32;1msuccess[0m (ran 1 tests) |}]
 ;;

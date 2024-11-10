@@ -37,7 +37,7 @@ module Generator = struct
             let* tp2 = gen_type (n / 2) in
             return (Ast.TFunction (tp1, tp2)) )
         ; ( 1
-          , let* tp1 = gen_type (n - 1) in
+          , let* tp1 = gen_type (n / 2) in
             return (Ast.TList tp1) )
         ]
   ;;
