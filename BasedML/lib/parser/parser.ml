@@ -152,13 +152,19 @@ let p_cbool =
   return (CBool (bool_val |> bool_of_string))
 ;;
 
+let p_cunit =
+  Angstrom.char '(' *> skip_whitespace *> return CUnit
+  <* skip_whitespace
+  <* Angstrom.char ')'
+;;
+
 let p_const_expr =
-  let* const = p_cint <|> p_cbool in
+  let* const = p_cint <|> p_cbool <|> p_cunit in
   return (EConstant const)
 ;;
 
 let p_const_pattern =
-  let* const = p_cint <|> p_cbool in
+  let* const = p_cint <|> p_cbool <|> p_cunit in
   return (PConstant const)
 ;;
 
