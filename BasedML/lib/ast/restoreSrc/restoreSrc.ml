@@ -71,9 +71,9 @@ let rec frestore_expr ppf exp =
     rec_call exp_cond;
     fprintf ") then ";
     rec_call exp_then;
-    fprintf " else ";
+    fprintf " else (";
     rec_call exp_else;
-    fprintf ")"
+    fprintf "))"
   | ELetIn (rec_f, pat, exp_val, exp_body) ->
     fprintf "(let ";
     frestore_rec_flag ppf rec_f;
