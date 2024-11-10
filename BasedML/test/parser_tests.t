@@ -1,7 +1,7 @@
   $ dune exec parser_demo << EOF
-  > let x = 5
+  > let rec false = ();;
   > EOF
-  [(DSingleLet (NotRec, (DLet ((PIdentifier "x"), (EConstant (CInt 5))))))]
+  [(DSingleLet (Rec, (DLet ((PIdentifier "false"), (EConstant CUnit)))))]
 
   $ dune exec parser_demo << EOF
   > let x = true;;

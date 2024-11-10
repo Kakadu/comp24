@@ -401,7 +401,9 @@ let p_let_decl p_exp =
        skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
-     let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
+     let* expr =
+       skip_whitespace *> Angstrom.string "=" *> p_exp <* option "" (Angstrom.string ";;")
+     in
      return @@ DSingleLet (flag, DLet (pattern, expr))
 ;;
 
