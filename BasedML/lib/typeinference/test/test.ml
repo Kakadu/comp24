@@ -5,7 +5,7 @@
 open Typeinference
 open Typeinference__StartState
 
-let%expect_test _ =
+let%expect_test "" =
   test_infer_exp "fun ((x, y): (int*bool)) -> y";
   [%expect
     {|
@@ -13,7 +13,7 @@ let%expect_test _ =
      substs: [("_p3", bool); ("_p2", int); ("_p1", (int * bool))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test list type" =
   test_infer_exp "fun ((x::y): (int list)) -> y";
   [%expect
     {|
@@ -21,7 +21,7 @@ let%expect_test _ =
      substs: [("_p2", int); ("_p3", (int list)); ("_p1", (int list))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test if then else" =
   test_infer_exp "fun (x, y) -> if x then x else y";
   [%expect
     {|
@@ -29,7 +29,7 @@ let%expect_test _ =
      substs: [("_p2", bool); ("_p3", bool); ("_p1", bool); ("_p0", (bool * bool))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test match (with error)" =
   test_infer_exp
     {|fun (tuper_var: int) -> match tuper_var with
   | ([]: 'a list) -> tuper_var
@@ -38,7 +38,7 @@ let%expect_test _ =
     Infer error: Can not unify `TInt` and `(TList (TPoly "a"))` |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test occurs check" =
   test_infer_exp
     {|fun tuper_var -> match tuper_var with
   | ([]: 'a list) -> tuper_var
@@ -47,14 +47,14 @@ let%expect_test _ =
     Infer error: The type variable a occurs inside (TList (TPoly "a")) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test unbound val" =
   test_infer_exp {|fun f list -> match nolist with
   | [] -> list
   | h :: tl -> h|};
   [%expect {| Infer error: Unbound value nolist |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test some combinator" =
   test_infer_exp {|(fun f x -> f)(fun f x -> f)|};
   [%expect
     {|
@@ -64,14 +64,14 @@ let%expect_test _ =
       ("_p1", ('_p3 -> ('_p4 -> '_p3)))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test let in" =
   test_infer_exp {|let x = 1 in x|};
   [%expect {|
     res: TInt
      substs: [("_p0", int)] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test id fun" =
   test_infer_exp {|let id = fun x -> x in id|};
   [%expect
     {|
@@ -79,7 +79,7 @@ let%expect_test _ =
      substs: [("_p1", ('_p0 -> '_p0))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test pseudo fiboCPS" =
   test_infer_exp
     {|let rec fiboCPS = fun n acc -> match n with
     | 0 -> acc 0
@@ -98,7 +98,7 @@ let%expect_test _ =
       ("_p1", int)] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test simplest generalise" =
   test_infer_exp {|let id = fun x -> x in ((id 1), (id true))|};
   [%expect
     {|
@@ -109,7 +109,7 @@ let%expect_test _ =
 
 (* Declarations *)
 
-let%expect_test _ =
+let%expect_test "Test simple declarations" =
   test_infer_prog empty_state {|let x = 1;;
     let y = 2;;|};
   [%expect {|
@@ -118,14 +118,14 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test function decl" =
   test_infer_prog empty_state {|let a = fun s -> ();;|};
   [%expect {|
     [""a"": ('_p2 -> unit),
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test declaration with constraint" =
   test_infer_prog empty_state {|let (a: ('a -> unit)) = fun s -> s;;|};
   [%expect {|
     [""a"": (unit -> unit),
@@ -133,14 +133,14 @@ let%expect_test _ =
     |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test id declaration" =
   test_infer_prog empty_state {|let id = fun x-> x;;|};
   [%expect {|
     [""id"": ('_p2 -> '_p2),
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test declaration with generalise" =
   test_infer_prog empty_state {|let id = fun x-> x;;
     let (x, y) = (id true, id 2);;|};
   [%expect {|
@@ -150,14 +150,14 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test occurs check declaration" =
   test_infer_prog empty_state {|let rec f = fun x -> f;;|};
   [%expect
     {|
     Infer error: The type variable _p0 occurs inside (TFunction ((TPoly "_p1"), (TPoly "_p0"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test generalise in one scope" =
   test_infer_prog
     empty_state
     {|let rec id = fun x -> x and dup = fun x y -> (id x, id y);;|};
@@ -168,7 +168,7 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test generalise scope 1" =
   test_infer_prog
     empty_state
     {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)));;
@@ -182,7 +182,7 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test generalise scope 2" =
   test_infer_prog
     empty_state
     {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)));;
@@ -192,7 +192,7 @@ let%expect_test _ =
     Infer error: Can not unify `TInt` and `(TTuple [(TPoly "_p9"); (TPoly "_p9")])` |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test pseudo EvenOrOdd" =
   test_infer_prog
     empty_state
     {|
@@ -209,7 +209,7 @@ and odd = fun n -> match n with
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test pseudo EvenOrOdd (with minus decl)" =
   test_infer_prog
     empty_state
     {|
@@ -230,7 +230,7 @@ and odd = fun n -> match n with
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test pseudo Fibo (with `+` and `-` decl)" =
   test_infer_prog
     empty_state
     {|
@@ -252,7 +252,7 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test pseudo Fibo" =
   test_infer_prog
     start_state
     {|
@@ -279,7 +279,7 @@ let%expect_test _ =
      ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test partial application" =
   test_infer_prog
     start_state
     {|
@@ -308,7 +308,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test default binops" =
   test_infer_prog start_state {|
   let (a, b) = ((true < false), (3 < 4));;|};
   [%expect
@@ -329,7 +329,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "Test binops overriding" =
   test_infer_prog
     start_state
     {|

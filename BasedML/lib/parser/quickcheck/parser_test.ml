@@ -27,7 +27,7 @@ let parser_qtests =
   ]
 ;;
 
-let%expect_test _ =
+let%expect_test "QuickCheck test" =
   QCheck_runner.set_seed 42;
   let _ = QCheck_runner.run_tests parser_qtests in
   ();
