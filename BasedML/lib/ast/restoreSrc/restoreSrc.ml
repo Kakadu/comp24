@@ -67,21 +67,23 @@ let rec frestore_expr ppf exp =
     rec_call exp2;
     fprintf ")"
   | EIfThenElse (exp_cond, exp_then, exp_else) ->
-    fprintf "if (";
+    fprintf "(if (";
     rec_call exp_cond;
     fprintf ") then ";
     rec_call exp_then;
     fprintf " else ";
-    rec_call exp_else
+    rec_call exp_else;
+    fprintf ")"
   | ELetIn (rec_f, pat, exp_val, exp_body) ->
-    fprintf "let ";
+    fprintf "(let ";
     frestore_rec_flag ppf rec_f;
     fprintf " ";
     frestore_pattern ppf pat;
     fprintf " = ";
     rec_call exp_val;
     fprintf " in ";
-    rec_call exp_body
+    rec_call exp_body;
+    fprintf ")"
   | ETuple lst ->
     fprintf "(";
     List.iteri
