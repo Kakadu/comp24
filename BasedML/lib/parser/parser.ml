@@ -256,7 +256,7 @@ let cons_delim_pattern =
 let p_list_pattern p_pattern = p_list_not_empty_pattern p_pattern <|> p_pnil
 
 (* final pattern parsers*)
-let p_cons_pattern p_pattern = chainl1 p_pattern cons_delim_pattern
+let p_cons_pattern p_pattern = chainr1 p_pattern cons_delim_pattern
 
 let p_pattern_with_type p_pat =
   let* pattern = skip_whitespace *> Angstrom.string "(" *> p_pat in
