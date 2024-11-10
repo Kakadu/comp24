@@ -6,8 +6,14 @@ module Generator = struct
   open QCheck.Gen
 
   let gen_rec_flag = frequency [ 1, return Ast.NotRec; 1, return Ast.Rec ]
-  let gen_name = string_size ~gen:(char_range 'a' 'z') (int_range 1 10)
-  (*may be need to add check on keywords, but i am lazy*)
+
+  let gen_name =
+    fix
+      (fun self () ->
+        let* nm = string_size ~gen:(char_range 'a' 'z') (int_range 1 10) in
+        if Parser.is_keyword nm then self () else return nm)
+      ()
+  ;;
 
   let rec gen_type = function
     | 0 ->
