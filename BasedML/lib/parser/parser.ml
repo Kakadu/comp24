@@ -16,6 +16,8 @@ let is_keyword = function
   | "rec"
   | "match"
   | "fun"
+  | "false"
+  | "true"
   | "then"
   | "and"
   | "in" -> true
@@ -414,7 +416,9 @@ let p_mutually_rec_decl =
     *> skip_whitespace
     *>
     let* pattern = skip_whitespace *> p_pattern in
-    let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
+    let* expr =
+      skip_whitespace *> Angstrom.string "=" *> p_exp <* option "" (Angstrom.string ";;")
+    in
     return (DLet (pattern, expr))
   in
   let* fst_dcl = p_let_decl p_exp in
