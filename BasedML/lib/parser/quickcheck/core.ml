@@ -161,8 +161,32 @@ end
 module Shrinker = struct
   open QCheck.Iter
 
-  let shrink_slet (Ast.DLet (_pat, _exp)) = empty
-  (* return (Ast.DLet (pat, exp)) *)
+  let shrink_pat = function
+    | Ast.PCons (p1, p2) -> of_list [ p1; p2 ]
+    | Ast.PTuple p_lst -> of_list p_lst
+    | Ast.PConstraint (p, _tp) -> return p
+    | _ -> empty
+  ;;
+
+  let shrink_exp = function
+    | Ast.EFunction (pat, exp) ->
+      let* p = shrink_pat pat in
+      of_list [ Ast.EFunction (p, exp); exp ]
+    | Ast.EApplication (e1, e2) -> of_list [ e1; e2 ]
+    | Ast.EIfThenElse (e1, e2, e3) -> of_list [ e1; e2; e3 ]
+    | Ast.ELetIn (rf, pat, exp1, exp2) ->
+      let* p = shrink_pat pat in
+      of_list [ exp1; exp2; Ast.ELetIn (rf, p, exp1, exp2) ]
+    | Ast.EMatch (_p, p_e_lst) -> of_list (List.map (fun (_p, e) -> e) p_e_lst)
+    | Ast.EConstraint (exp, _tp) -> return exp
+    | _ -> empty
+  ;;
+
+  let shrink_slet (Ast.DLet (pat, exp)) =
+    let* e = shrink_exp exp in
+    let* p = shrink_pat pat in
+    of_list [ Ast.DLet (pat, e); Ast.DLet (p, exp) ]
+  ;;
 
   let shrink_let_decl = function
     | Ast.DSingleLet (rf, slet) ->
