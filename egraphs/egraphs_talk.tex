@@ -1,6 +1,8 @@
-% !TEX TS-program = pdflatex
+% !TEX TS-program = xelatex
 % !TeX spellcheck = ru_RU
-% !TEX root = demo.tex
+% !TEX root = egraphs_talk.tex
+% !BIB program = bibtex
+
 \documentclass[aspectratio=169
   %, draft      % speedup compilation
   %, handout    % eliminate pauses
@@ -10,12 +12,12 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \input{../preamble}
-\bibliography{../bibliography.bib}
+\bibliography{egraphs_talk.bib}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title[E-Graphs. ]{E-Graphs. Их применение в компиляторах и не только}
+\title[E-Graphs]{E-Graphs. Их применение в компиляторах и не только}
 \date{\DTMDate{2024-09-28}}
 
-
+\definecolor{ForestGreen} {HTML}{009B55}
 \AtBeginSection[]
 {
   \begin{frame}<beamer>
@@ -37,30 +39,6 @@
 \begin{document}
 \maketitle
 
-\defverbatim[colored]{\ANFInput}{
-\begin{lstlisting}[language=ocaml]
-type expr =
-| Num of int
-| Id of string
-| Plus of expr * expr
-| Minus of expr * expr
-| Let of string * expr * expr
-\end{lstlisting}
-}
-
-\defverbatim[colored]{\ANFI}{
-\begin{lstlisting}[language=ocaml]
-type immexpr =
-| ImmNum of int
-| ImmId of string
-
-type cexpr =
-| CPlus of immexpr * immexpr
-
-type aexpr =
-| ALet of string * cexpr * aexpr
-\end{lstlisting}
-}
 
 \begin{frame}{Переписывание выражений}
 
@@ -113,15 +91,15 @@ type aexpr =
 
 % Columns for b1 and b2
 \begin{multicols}{2}
-    \textcolor{green}{Полезные правила переписывания}
+    \textcolor{ForestGreen}{Полезные правила переписывания}
     \begin{itemize}
         \item $(x\; * \;y) \;/ \;z \;= \;x\; * \;(y \;/ \;z)$
         \item $x \; / \; x \; = \; 1$
-        \item $x \; * \; 1 \; = \; x$ 
+        \item $x \; * \; 1 \; = \; x$
     \end{itemize}
 
     \columnbreak
-    
+
     {\fontsize{13.1}{12}\selectfont \textcolor{red}{Бесполезные правила переписывания}}
     \begin{itemize}
         \item $x\; * \;2 \; = \;  x \; << \; 1$
@@ -139,15 +117,15 @@ type aexpr =
     \Huge{ \centering
     $(a \; *\; 2)\; / \;2$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
+
     {\fontsize{16.1}{12}\selectfont \textcolor{green}{Полезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $(x\; * \;y) \;/ \;z \;= \;x\; * \;(y \;/ \;z)$
         \item $x \; / \; x \; = \; 1$
-        \item $x \; * \; 1 \; = \; x$ 
+        \item $x \; * \; 1 \; = \; x$
     \end{itemize}
     }
 }
@@ -157,15 +135,15 @@ type aexpr =
     \Huge{ \centering
     $(a \; *\; 2)\; / \;2 \rightarrow a \;*\; (2\; /\; 2)$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
-    {\fontsize{16.1}{12}\selectfont \textcolor{green}{Полезные правила переписывания}}
+
+    {\fontsize{16.1}{12}\selectfont \textcolor{ForestGreen}{Полезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $(x\; * \;y) \;/ \;z \;= \;x\; * \;(y \;/ \;z)$
         \item $x \; / \; x \; = \; 1$
-        \item $x \; * \; 1 \; = \; x$ 
+        \item $x \; * \; 1 \; = \; x$
     \end{itemize}
     }
 }
@@ -175,15 +153,15 @@ type aexpr =
     \Huge{ \centering
     $(a \; *\; 2)\; / \;2 \rightarrow a \;*\; (2\; /\; 2) \rightarrow a \;*\; 1$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
-    {\fontsize{16.1}{12}\selectfont \textcolor{green}{Полезные правила переписывания}}
+
+    {\fontsize{16.1}{12}\selectfont \textcolor{ForestGreen}{Полезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $(x\; * \;y) \;/ \;z \;= \;x\; * \;(y \;/ \;z)$
         \item $x \; / \; x \; = \; 1$
-        \item $x \; * \; 1 \; = \; x$ 
+        \item $x \; * \; 1 \; = \; x$
     \end{itemize}
     }
 }
@@ -193,15 +171,15 @@ type aexpr =
     \Huge{ \centering
     $(a \; *\; 2)\; / \;2 \rightarrow a \;*\; (2\; /\; 2) \rightarrow a \;*\; 1 \rightarrow a$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
-    {\fontsize{16.1}{12}\selectfont \textcolor{green}{Полезные правила переписывания}}
+
+    {\fontsize{16.1}{12}\selectfont \textcolor{ForestGreen}{Полезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $(x\; * \;y) \;/ \;z \;= \;x\; * \;(y \;/ \;z)$
         \item $x \; / \; x \; = \; 1$
-        \item $x \; * \; 1 \; = \; x$ 
+        \item $x \; * \; 1 \; = \; x$
     \end{itemize}
     }
 }
@@ -214,15 +192,15 @@ type aexpr =
     \LARGE{ \centering
     $(a \; *\; 2)\; / \;2 \rightarrow (a \;<<\; 1) \;/ \;2 \rightarrow \textcolor{red}{\Huge \times}$
     } \newline \newline
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
+
     {\fontsize{15.1}{12}\selectfont \textcolor{red}{Бесполезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $x\; * \;2 \; = \;  x \; << \; 1$
         \item $x \;*\; y \;= \;y \;* \;x$
-        \item $x \;= \;x \;* \;1$ 
+        \item $x \;= \;x \;* \;1$
     \end{itemize}
     }
 }
@@ -235,15 +213,15 @@ type aexpr =
     \LARGE{ \centering
     $\textcolor{blue}{(a \;*\; 2) \;/\; 2} \rightarrow (2 \;*\; a) \;/\; 2 \rightarrow \textcolor{blue}{(a \;*\; 2) \;/\; 2}$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
+
     {\fontsize{15.1}{12}\selectfont \textcolor{red}{Бесполезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
         \item $x\; * \;2 \; = \;  x \; << \; 1$
         \item $x \;*\; y \;= \;y \;* \;x$
-        \item $x \;= \;x \;* \;1$ 
+        \item $x \;= \;x \;* \;1$
     \end{itemize}
     }
 }
@@ -259,15 +237,15 @@ type aexpr =
     \LARGE{ \centering
     $a \rightarrow a \; * \; 1 \rightarrow a \; * \; 1 \;*\; 1 \rightarrow .\;.\;.$
     }
-    
+
     \vspace{1cm} % Adds some space between the expression and the bullet list
-    
+
     {\fontsize{15.1}{12}\selectfont \textcolor{red}{Бесполезные правила переписывания}}
     {\fontsize{16.1}{12}\selectfont % Adjust the font size here
     \begin{itemize}
     \item $x\; * \;2 \; = \;  x \; << \; 1$
     \item $x \;*\; y \;= \;y \;* \;x$
-    \item $x \;= \;x \;* \;1$ 
+    \item $x \;= \;x \;* \;1$
     \end{itemize}
     }
 }
@@ -278,96 +256,96 @@ type aexpr =
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-0.jpg}
-   } 
+   }
    \only<2>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images//naive/n-1.jpg}
-   } 
+   }
    \only<3>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-2.jpg}
-   } 
+   }
    \only<4>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-3.jpg}
-   } 
+   }
     \only<5>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-4.jpg}
-   } 
+   }
     \only<6>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-5.jpg}
-   } 
+   }
    \only<7>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-6.jpg}
-   } 
+   }
    \only<8>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-7.jpg}
-   } 
+   }
    \only<9>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-8.jpg}
-   } 
+   }
    \only<10>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-9.jpg}
-   } 
+   }
    \only<11>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-10.jpg}
-   } 
+   }
    \only<12>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-11.jpg}
-   } 
+   }
    \only<13>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-12.jpg}
-   } 
+   }
    \only<14>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-13.jpg}
-   } 
+   }
    \only<15>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-14.jpg}
-   } 
+   }
    \only<16>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-15.jpg}
-   } 
+   }
    \only<17>
     {
         \centering
         \includegraphics[width=13cm, height=5cm]{misc/egraphs_images/naive/n-16.jpg}
-   } 
+   }
 \end{frame}
 
 \begin{frame}{Решение проблемы 2/3}
     \begin{center}
-            \includegraphics[width=3.2cm, height=4.2cm]{misc/egraphs_images/1_11new.png} 
-            \hspace{0.5cm} 
+            \includegraphics[width=3.2cm, height=4.2cm]{misc/egraphs_images/1_11new.png}
+            \hspace{0.5cm}
             \raisebox{11.5ex}{$\xrightarrow{\text{\fontsize{10.0}{12} $a = b$}}$}
-            \hspace{0.5cm}  
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/1_22new.jpg} 
+            \hspace{0.5cm}
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/1_22new.jpg}
     \end{center}
 \end{frame}
 
@@ -382,30 +360,14 @@ type aexpr =
 \end{frame}
 
 
-%\begin{frame}{Equality Saturation}
-%    \only<1>
-%{
-%    \centering
-%    \textbf{\Large Какие правила и когда применять?} \\
-%}
-% \only<2>
-%{
-%    \centering
-%    \textbf{\Large Какие правила и когда применять?} \\
-%    \vspace{1cm}
-%    \textbf{\Huge Equality Saturation} \\
-%    \vspace{1cm}
-%    \underline{\Huge Все и всегда!} \\
-%    \vspace{0.5cm}
-%}
-%\end{frame}
+
 
 
 \begin{frame}{E-Graphs}
     \begin{block}{Определение}
         E-Graph --- это структура данных, предназначенная для хранения отношений эквивалентности над выражениями некоторого языка.
     \end{block}
-    
+
     \begin{columns}
         \begin{column}{0.5\textwidth}
             \centering
@@ -423,17 +385,17 @@ type aexpr =
     \only<1>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_1.png} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_1.png}
         \end{center}
     }
     \only<2>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_1.png} 
-            \hspace{0.5cm} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_1.png}
+            \hspace{0.5cm}
             \raisebox{11.5ex}{$\xrightarrow{\text{\fontsize{10.0}{12} $x\; * \;2 \; = \; x \; << \; 1$}}$}
-            \hspace{0.5cm}  
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg} 
+            \hspace{0.5cm}
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg}
         \end{center}
     }
 \end{frame}
@@ -442,17 +404,17 @@ type aexpr =
     \only<1>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg}
         \end{center}
     }
     \only<2>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg} 
-            \hspace{0.5cm} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_2.jpg}
+            \hspace{0.5cm}
             \raisebox{11.5ex}{$\xrightarrow{\text{\fontsize{9.4}{12} $(x*y)/z = x*(y/z)$}}$}
-            \hspace{0.5cm}  
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg} 
+            \hspace{0.5cm}
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg}
         \end{center}
     }
 \end{frame}
@@ -461,31 +423,31 @@ type aexpr =
     \only<1>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg}
         \end{center}
     }
     \only<2>
     {
         \begin{center}
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg} 
-            \hspace{0.5cm} 
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraph_3.jpg}
+            \hspace{0.5cm}
             \raisebox{11.5ex}
             {$\xrightarrow[\text{\fontsize{10.4}{12} $x / x = 1$}]{\text{\fontsize{10.4}{12} $x * 1 = x$}}$}
-            \hspace{0.5cm}  
-            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraphs4.jpg} 
-            
+            \hspace{0.5cm}
+            \includegraphics[width=5.2cm, height=4.2cm]{misc/egraphs_images/egraphs4.jpg}
+
         \end{center}
 
         \begin{center}
            \textbf{Так же содержит циклы, $a * 1$, $a * 1 * 1$ ...} \\
         \end{center}
-        
+
     }
 \end{frame}
 
 \begin{frame}{Equality saturation}
     \begin{center}
-        \includegraphics[width=15.2cm, height=5.2cm]{misc/egraphs_images/equality_saturation1.jpeg} 
+        \includegraphics[width=15.2cm, height=5.2cm]{misc/egraphs_images/equality_saturation1.jpeg}
     \end{center}
 
     \begin{center}
@@ -493,9 +455,9 @@ type aexpr =
            \item \textbf{Инвариант: если $a = b$, то $f(a) = f(b)$} \\
            \item \textbf{Извлечение} --- NP-complete проблема \\
        \end{itemize}
-       
-       
-    \end{center}    
+
+
+    \end{center}
 \end{frame}
 
 \begin{frame}{E-graphs Community}
@@ -586,7 +548,7 @@ type aexpr =
     \newline
     \item \textbf{\fontsize{14.1}{12} CSE for Arrays (Удаление избыточного доступа к массиву) }
     \newline
-    \item \textbf{\fontsize{14.1}{12}  Loop Peeling (Вытаскиваем первую итерацию цикла)} 
+    \item \textbf{\fontsize{14.1}{12}  Loop Peeling (Вытаскиваем первую итерацию цикла)}
     \newline
     \item \textbf{\fontsize{14.1}{12}  Tail-call elimination}
     \newline
@@ -622,7 +584,7 @@ type aexpr =
     \item \textbf{\fontsize{14.1}{12} Deep learning (Graph rewriting)\cite{Deep_learning}}
     \newline
     \item \textbf{\fontsize{14.1}{12} SMT-solvers\cite{CMT} }
-    \newline 
+    \newline
     \item \textbf{\fontsize{14.1}{12} ... }
     \end{itemize}
 \end{frame}
@@ -631,11 +593,11 @@ type aexpr =
     \begin{itemize}
     \item \textbf{\fontsize{14.1}{12} 1. Переписывние выражений. Правила переписывания. Полезные и бесполезные правила. Примеры. }
     \newline
-    \item \textbf{\fontsize{14.1}{12} 
+    \item \textbf{\fontsize{14.1}{12}
 2. E-графы. Equality saturation. Примеры оптимизаций выразимых с помощью equality saturation и е-графов.}
     \newline
     \item \textbf{\fontsize{14.1}{12} 3. Изобразить е-граф для выражения $(a + 0) + (a * 1)$ и примененить к нему следующие правила: $a + 0 = a$, $a * 1 = a$ }
-    \newline 
+    \newline
     \item \textbf{\fontsize{14.1}{12} 4. Приемущества и недостатки equality saturation и e-графов
  }
     \end{itemize}
@@ -643,6 +605,7 @@ type aexpr =
 
 \begin{frame}%[allowframebreaks]
 \frametitle<presentation>{Ссылки \& Acknowledgements}
+\phantom{\cite*{Deep_learning,CMT,Lean}}
 \vspace{-1em}
 \printbibliography
 \end{frame}

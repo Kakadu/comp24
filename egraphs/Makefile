@@ -31,14 +31,14 @@ endif
 endef
 
 LECTURES  = 
-LECTURES += demo
+LECTURES += egraphs_talk
 
 $(foreach i,$(LECTURES),$(eval $(call WRAP,$(i)) ) )
 
 celan: clean
 clean:
 	@$(RM) -r _minted*
-	@$(RM) *.aux *.bbl *.blg *.dvi *.log *.nav *.out *.snm *.toc *.vrb *.synctex.gz *.xdv *.run.xml *fls *.fdb_latexmk *.bcf
+	@$(RM) *.aux *.bbl *.blg *.dvi *.log *.nav *.out *.snm *.toc *.vrb *.synctex.gz *.xdv *.run.xml *fls *.fdb_latexmk *.bcf *-blx.bib
 	$(RM) *.pdf *.fmt
 
 DEBS += texlive-font-utils texlive-fonts-extra
