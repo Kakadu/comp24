@@ -60,7 +60,7 @@ type pattern =
   | PWildCard
   | PCons of pattern * pattern
   | PIdentifier of string
-  | PTuple of pattern list
+  | PTuple of pattern list (**List.length >= 2 *)
   | PConstant of constant
   | PConstraint of pattern * type_name
 [@@deriving show { with_path = false }]
@@ -73,7 +73,7 @@ type expr =
   | EApplication of expr * expr
   | EIfThenElse of expr * expr * expr
   | ELetIn of rec_flag * pattern * expr * expr
-  | ETuple of expr list
+  | ETuple of expr list (**List.length >= 2 *)
   | EMatch of pattern * (pattern * expr) list
   | EConstraint of expr * type_name
 [@@deriving show { with_path = false }]
@@ -83,7 +83,7 @@ type single_let = DLet of pattern * expr [@@deriving show { with_path = false }]
 
 type let_declaration =
   | DSingleLet of rec_flag * single_let
-  | DMutualRecDecl of rec_flag * single_let list
+  | DMutualRecDecl of rec_flag * single_let list (**List.length >= 2 *)
 [@@deriving show { with_path = false }]
 
 (* A collections of let declarations*)
