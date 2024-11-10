@@ -6,8 +6,24 @@ open Core
 
 let parser_qtests =
   [ QCheck.(
-      Test.make ~count:100 arbitrary_ast (fun l ->
-        Result.ok l = Parser.parse_program (Restore_src.RestoreSrc.restore_declarations l)))
+      Test.make ~count:100 arbitrary_ast (fun before ->
+        let src = Restore_src.RestoreSrc.restore_declarations before in
+        let res = Parser.parse_program src in
+        match res with
+        | Result.Ok after when after = before -> true
+        | Result.Ok decls ->
+          Format.printf "\n\n[!]: Different AST!\n\n";
+          Format.printf
+            "###Paser ast ### \n%s\n########\n\n"
+            (Ast.show_declarations decls);
+          Format.printf
+            "###Orig ast ### \n%s\n########\n\n"
+            (Ast.show_declarations before);
+          false
+        | Result.Error s ->
+          Format.printf "\n\n[!]: Parser error: %s\n" s;
+          Format.printf "On test:\n %s\n" src;
+          false))
   ]
 ;;
 
