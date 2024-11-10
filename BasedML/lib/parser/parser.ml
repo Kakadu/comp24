@@ -283,11 +283,11 @@ let p_pattern =
       <|> between_parens p_pattern
       <|> p_list_pattern p_pattern
       <|> p_pattern_with_type p_pattern
+      <|> p_tuple_pattern p_pattern
     in
     let w_card_pat = p_wild_card_pattern <|> atomic_pat in
     let cons_pat = p_cons_pattern w_card_pat <|> w_card_pat in
-    let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
-    tuple_pat)
+    cons_pat)
 ;;
 
 (* Binary operations parsers & delimiter for chains*)
