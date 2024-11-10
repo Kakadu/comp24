@@ -35,7 +35,7 @@ let%expect_test _ =
   | ([]: 'a list) -> tuper_var
   | (h :: tl: 'a list) -> h|};
   [%expect {|
-    Infer error: Can not unify `TInt` and `(TList (TPoly "'a"))` |}]
+    Infer error: Can not unify `TInt` and `(TList (TPoly "a"))` |}]
 ;;
 
 let%expect_test _ =
@@ -45,7 +45,7 @@ let%expect_test _ =
   | (h :: tl: 'a list) -> h|};
   [%expect
     {|
-    Infer error: The type variable _p5 occurs inside (TList (TPoly "_p5")) |}]
+    Infer error: The type variable a occurs inside (TList (TPoly "a")) |}]
 ;;
 
 let%expect_test _ =
