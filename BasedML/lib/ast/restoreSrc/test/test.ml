@@ -37,7 +37,7 @@ let%expect_test "Patterns" =
     {|
     let  r = (match x with
     | _ -> 0
-    | (head :: lst) :: []) -> 1
+    | (head :: lst) -> 1
     | a -> 2
     | (f, s) -> 3
     | 2 -> 4
@@ -62,7 +62,7 @@ let%expect_test "Expresions" =
   [%expect
     {|
     let  id = constant;;
-    let  funct = fun x -> x;;
+    let  funct = (fun x -> x);;
     let  app = (funct id);;
     let  ifthen = if (((( = ) id) 2)) then true else false;;
     let  letinval = let  a = 4 in ((( * ) a) 4);;
