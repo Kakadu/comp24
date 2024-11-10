@@ -6,8 +6,35 @@ module Generator = struct
   open QCheck.Gen
 
   let gen_rec_flag = frequency [ 1, return Ast.NotRec; 1, return Ast.Rec ]
-  (* let gen_name = string_of (char_range 'a' 'z')
-     let gen_type = frequency [ 1, return Ast.TUnit; 1, return Ast.TInt; 1, return Ast.TBool ] *)
+  let gen_name = string_size ~gen:(char_range 'a' 'z') (int_range 1 10)
+  (*may be need to add check on keywords, but i am lazy*)
+
+  let rec gen_type = function
+    | 0 ->
+      frequency
+        [ 1, return Ast.TUnit
+        ; 1, return Ast.TInt
+        ; 1, return Ast.TBool
+        ; ( 1
+          , let* nm = gen_name in
+            return (Ast.TPoly nm) )
+        ]
+    | n ->
+      frequency
+        [ ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / len in
+            let* tp_lst = list_repeat len (gen_type sub_n) in
+            return (Ast.TTuple tp_lst) )
+        ; ( 1
+          , let* tp1 = gen_type (n / 2) in
+            let* tp2 = gen_type (n / 2) in
+            return (Ast.TFunction (tp1, tp2)) )
+        ; ( 1
+          , let* tp1 = gen_type (n - 1) in
+            return (Ast.TList tp1) )
+        ]
+  ;;
 
   let gen_constatnt =
     frequency
@@ -19,24 +46,89 @@ module Generator = struct
   ;;
 
   let rec gen_pat = function
-    | 0 -> frequency [ (1, gen_constatnt >|= fun x -> Ast.PConstant x) ]
-    | n -> gen_pat (n - 1)
+    | 0 ->
+      frequency
+        [ (1, gen_constatnt >|= fun x -> Ast.PConstant x)
+        ; 1, return Ast.PWildCard
+        ; ( 1
+          , let* nm = gen_name in
+            return (Ast.PIdentifier nm) )
+        ]
+    | n ->
+      frequency
+        [ ( 1
+          , let* p1 = gen_pat (n / 2) in
+            let* p2 = gen_pat (n / 2) in
+            return (Ast.PCons (p1, p2)) )
+        ; ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / len in
+            let* p_lst = list_repeat len (gen_pat sub_n) in
+            return (Ast.PTuple p_lst) )
+        ; ( 1
+          , let* p = gen_pat (n / 2) in
+            let* t = gen_type (n / 2) in
+            return (Ast.PConstraint (p, t)) )
+        ]
   ;;
 
   let rec gen_exp = function
-    | 0 -> frequency [ (1, gen_constatnt >|= fun x -> Ast.EConstant x) ]
-    | n -> gen_exp (n - 1)
-  ;;
-
-  let rec gen_slet = function
     | 0 ->
       frequency
-        [ ( 1
-          , let* pat = gen_pat 0 in
-            let* exp = gen_exp 0 in
-            return (Ast.DLet (pat, exp)) )
+        [ (1, gen_constatnt >|= fun x -> Ast.EConstant x)
+        ; ( 1
+          , let* nm = gen_name in
+            return (Ast.EIdentifier nm) )
         ]
-    | n -> gen_slet (n - 1)
+    | n ->
+      frequency
+        [ ( 1
+          , let* p = gen_pat (n / 2) in
+            let* e = gen_exp (n / 2) in
+            return (Ast.EFunction (p, e)) )
+        ; ( 1
+          , let* e1 = gen_exp (n / 2) in
+            let* e2 = gen_exp (n / 2) in
+            return (Ast.EApplication (e1, e2)) )
+        ; ( 1
+          , let* e1 = gen_exp (n / 3) in
+            let* e2 = gen_exp (n / 3) in
+            let* e3 = gen_exp (n / 3) in
+            return (Ast.EIfThenElse (e1, e2, e3)) )
+        ; ( 1
+          , let* rf = gen_rec_flag in
+            let* p = gen_pat (n / 3) in
+            let* he = gen_exp (n / 3) in
+            let* be = gen_exp (n / 3) in
+            return (Ast.ELetIn (rf, p, he, be)) )
+        ; ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / len in
+            let* e_lst = list_repeat len (gen_exp sub_n) in
+            return (Ast.ETuple e_lst) )
+        ; ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / ((len * 2) + 1) in
+            let* hp = gen_pat sub_n in
+            let* p_e_lst =
+              list_repeat
+                len
+                (let* p = gen_pat sub_n in
+                 let* e = gen_exp sub_n in
+                 return (p, e))
+            in
+            return (Ast.EMatch (hp, p_e_lst)) )
+        ; ( 1
+          , let* e = gen_exp (n / 2) in
+            let* t = gen_type (n / 2) in
+            return (Ast.EConstraint (e, t)) )
+        ]
+  ;;
+
+  let gen_slet n =
+    let* pat = gen_pat (n / 2) in
+    let* exp = gen_exp (n / 2) in
+    return (Ast.DLet (pat, exp))
   ;;
 
   let gen_let_decl n =
