@@ -43,8 +43,7 @@ let%expect_test _ =
     {|fun tuper_var -> match tuper_var with
   | ([]: 'a list) -> tuper_var
   | (h :: tl: 'a list) -> h|};
-  [%expect
-    {|
+  [%expect {|
     Infer error: The type variable a occurs inside (TList (TPoly "a")) |}]
 ;;
 
@@ -144,8 +143,7 @@ let%expect_test _ =
 let%expect_test _ =
   test_infer_prog empty_state {|let id = fun x-> x;;
     let (x, y) = (id true, id 2);;|};
-  [%expect
-    {|
+  [%expect {|
     [""id"": ('_p9 -> '_p9),
      ""x"": bool,
      ""y"": int,
@@ -205,8 +203,7 @@ and odd = fun n -> match n with
     | 0 -> false
     | x -> even (x)
 |};
-  [%expect
-    {|
+  [%expect {|
     [""even"": (int -> bool),
      ""odd"": (int -> bool),
      ] |}]
