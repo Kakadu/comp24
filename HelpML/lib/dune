@@ -1,0 +1,26 @@
+(library
+ (name helpml_lib)
+ (public_name HelpML.Lib)
+ (modules
+ Typ
+ Ast
+ AstPrinter
+ Llast
+ LlastPrinter
+ RestrictedAst
+ Parser
+ Inferencer
+ StdlibFunc
+ Closure
+ Counter
+ LambdaLifting
+ Anf
+ AnfPrinter
+ LlvmCompiler
+ )
+ (libraries base angstrom llvm)
+ (instrumentation
+  (backend bisect_ppx))
+ (preprocess
+  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
+ (inline_tests))

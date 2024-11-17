@@ -1,0 +1,8 @@
+(executable
+ (name inferencerTests)
+ (modules inferencerTests)
+ (public_name inferencerTests)
+ (libraries helpml_lib stdio))
+
+(cram
+ (deps ./inferencerTests.exe))
