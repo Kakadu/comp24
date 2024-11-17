@@ -133,3 +133,4 @@
     %app_02 = load i64, ptr %app_0, align 4
     ret i64 0
   }
+
