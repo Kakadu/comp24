@@ -16,12 +16,12 @@ let codegen_imm = function
   | ImmUnit -> ok (const_int int_64 0)
   | ImmId id ->
     (match Hashtbl.find_opt named_values id with
-     | Some v -> ok (build_load2 int_64 v id builder)
+     | Some v -> ok (build_load int_64 v id builder)
      | None ->
        (match lookup_function id the_module with
         | Some v ->
           ok
-            (build_call2
+            (build_call
                (function_type int_64 [| int_64; int_64 |])
                (Option.get (lookup_function "addNewPAppliClosure" the_module))
                [| build_pointercast v int_64 "cast_pointer_to_int" builder
@@ -59,7 +59,7 @@ let rec codegen_cexpr = function
     let* callee = codegen_imm func in
     let* arg = codegen_imm argument in
     ok
-      (build_call2
+      (build_call
          (function_type int_64 [| int_64; int_64 |])
          (Option.get (lookup_function "applyPAppli" the_module))
          [| callee; arg |]
