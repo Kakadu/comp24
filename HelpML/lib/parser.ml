@@ -225,8 +225,6 @@ let pack =
   { evar; econst; op; condition; func; bind_in; app; expr }
 ;;
 
-(* let expr = pack.expr pack *)
-
 (**  Binding parser *)
 let bind =
   fix

@@ -107,8 +107,3 @@ let prog_conversion program =
   in
   List.rev (fst @@ closured program)
 ;;
-(* 
-let print_expr_result decl =
-  let buf = closure_conversion (Set.empty (module String)) decl in
-  Stdlib.Format.printf "%s" (Ast.show_binding buf)
-;; *)

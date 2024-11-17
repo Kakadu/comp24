@@ -350,17 +350,4 @@ let infer_prog prog =
   helper env_init prog []
 ;;
 
-(* let w e = Result.map (run (infer TypeEnv.empty e)) ~f:snd *)
 let run_prog_inference prog = run (infer_prog prog)
-
-(* let print_prog_result prog =
-  match run_prog_inference prog with
-  | Ok l -> List.iter l ~f:(fun (id, t) -> Stdlib.Format.printf "%s : %a\n" id pp_typ t)
-  | Error e -> print_typ_err e
-;;
-
-let print_result expression =
-  match w expression with
-  | Ok typ -> print_typ typ
-  | Error e -> print_typ_err e
-;; *)

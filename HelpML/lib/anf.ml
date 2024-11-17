@@ -1,7 +1,6 @@
 open RestrictedAst
 open Llast
 open Ast
-(* open AnfPrinter *)
 open Counter
 open StdlibFunc
 open IState
@@ -83,21 +82,3 @@ let anf_program (binds : llbinding list) =
   let env = List.fold_left (fun acc (id, _) -> Base.Set.add acc id) env stdlib in
   List.map (fun bind -> snd @@ IState.runState ~init:0 (anf_binding env bind)) binds
 ;;
-
-(* let print_anf_prog llbinds =
-  let res = anf_program llbinds in
-  Format.printf "%a" pp_prexpr res
-;;
-
-let print_anf_expr llexpr =
-  let res =
-    snd
-    @@ IState.runState
-         ~init:0
-         (anf_expr
-            (Base.Set.empty (module Base.String))
-            llexpr
-            (fun ie -> return (ACExpr (CImmExpr ie))))
-  in
-  Format.printf "%a" pp_aexpr res
-;; *)

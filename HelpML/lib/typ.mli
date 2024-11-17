@@ -16,7 +16,6 @@ type typ =
   | TUnit
   | TVar of binder
   | TArrow of typ * typ
-(* [@@deriving show { with_path = false }] *)
 
 type err =
   [ `Occurs_check

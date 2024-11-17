@@ -7,7 +7,6 @@ let context = global_context ()
 let the_module = create_module context "HelpML"
 let builder = builder context
 let int_64 = i64_type context
-(* let void = void_type context *)
 let named_values : (string, llvalue) Hashtbl.t = Hashtbl.create 20
 let ( let* ) = bind
 
