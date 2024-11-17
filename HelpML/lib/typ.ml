@@ -47,10 +47,10 @@ let rec pp_typ ppf = function
 ;;
 
 let pp_scheme ppf = function
-  |S (xs, t) -> fprintf ppf "forall %a . %a" VarSet.pp xs pp_typ t
+  | S (xs, t) -> fprintf ppf "forall %a . %a" VarSet.pp xs pp_typ t
 ;;
 
-let print_typ typ = 
+let print_typ typ =
   let s = Format.asprintf "%a" pp_typ typ in
   Format.printf "%s\n" s
 ;;

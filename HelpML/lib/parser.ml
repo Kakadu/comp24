@@ -54,13 +54,13 @@ let parrow = str_token "->"
 let pbinding = str_token "let"
 let pwild = str_token "_"
 
-let pcint = 
+let pcint =
   let ps = token (option "" (str_token "-" <|> str_token "+")) in
   let pd = take_while1 is_digit in
   lift2 (fun sign digit -> constr_cint (Int.of_string @@ sign ^ digit)) ps pd
 ;;
 
-let pcbool = 
+let pcbool =
   lift (fun b -> constr_cbool @@ Bool.of_string b) (str_token "false" <|> str_token "true")
 ;;
 
@@ -88,7 +88,6 @@ let ppwild = constr_pwild <$> pwild
 let ppconst = constr_pconst <$> pconst
 let ppvar = constr_pvar <$> pident
 let pattern = fix @@ fun m -> choice [ ppwild; ppconst; ppvar ] <|> pparens m
-
 let pop ch op = str_token ch *> return (constr_ebinop op)
 let pmulti = choice [ pop "*" Mul; pop "/" Div; pop "%" Mod ]
 let padd = pop "+" Add <|> pop "-" Sub

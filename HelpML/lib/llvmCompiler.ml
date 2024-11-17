@@ -60,11 +60,11 @@ let rec codegen_cexpr = function
     let* arg = codegen_imm argument in
     ok
       (build_call2
-        (function_type int_64 [| int_64; int_64 |])
-        (Option.get (lookup_function "applyPAppli" the_module))
-        [| callee; arg |]
-        "PAppliApplication"
-        builder)
+         (function_type int_64 [| int_64; int_64 |])
+         (Option.get (lookup_function "applyPAppli" the_module))
+         [| callee; arg |]
+         "PAppliApplication"
+         builder)
   | CIf (cond, then_, else_) ->
     let* cond = codegen_imm cond in
     let cond = cond in
@@ -150,7 +150,10 @@ let codegen_program prog =
         "addNewPAppliClosure"
         (function_type int_64 [| int_64; int_64 |])
         the_module
-    ; declare_function "applyPAppli" (function_type int_64 [| int_64; int_64 |]) the_module
+    ; declare_function
+        "applyPAppli"
+        (function_type int_64 [| int_64; int_64 |])
+        the_module
     ; declare_function "print_int" (function_type int_64 [| int_64 |]) the_module
     ; declare_function "print_bool" (function_type int_64 [| int_64 |]) the_module
     ]
