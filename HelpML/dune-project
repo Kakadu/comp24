@@ -22,7 +22,7 @@
  (depends
   ocaml
   dune
-  angstrom
+  (angstrom (<= "0.15.0"))
   (ppx_inline_test :with-test)
   qcheck-core
   ppx_expect

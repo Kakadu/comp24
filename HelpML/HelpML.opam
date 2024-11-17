@@ -11,7 +11,7 @@ bug-reports: "https://github.com/naniduan/HelpML"
 depends: [
   "ocaml"
   "dune" {>= "2.8"}
-  "angstrom"
+  "angstrom" {<= "0.15.0"}
   "ppx_inline_test" {with-test}
   "qcheck-core"
   "ppx_expect"
