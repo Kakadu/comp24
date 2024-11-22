@@ -6,31 +6,8 @@ open Base
 open Ast
 open Cf_ast
 
-module State = struct
-  type 'a t = int -> 'a * int
-
-  let fresh last = last, last + 1
-  let return x st = x, st
-
-  let run m = fst (m 0)
-
-  let bind (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun s ->
-    let a, s' = m s in
-    f a s'
-  ;;
-
-  let ( >>= ) = bind
-  let ( let* ) = bind
-
-  let ( >>| ) : 'a t -> ('a -> 'b) -> 'b t =
-    fun m f state ->
-    let value, st = m state in
-    f value, st
-  ;;
-end
-
-open State
+open State.IntStateM
+open State.IntStateM.Syntax
 
 let remove_patterns pat exp =
   let generate_unique_arg_name used =
