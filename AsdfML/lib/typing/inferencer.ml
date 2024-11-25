@@ -273,26 +273,9 @@ module TypeEnv = struct
 
   let apply env sub = map env ~f:(Scheme.apply sub)
 
-  let bin_op_list =
-    (* TODO: var *)
-    let var = TVar (-1) in
-    [ "( - )", int_typ ^-> int_typ ^-> int_typ
-    ; "( + )", int_typ ^-> int_typ ^-> int_typ
-    ; "( / )", int_typ ^-> int_typ ^-> int_typ
-    ; "( * )", int_typ ^-> int_typ ^-> int_typ
-    ; "( > )", var ^-> var ^-> bool_typ
-    ; "( < )", var ^-> var ^-> bool_typ
-    ; "( >= )", var ^-> var ^-> bool_typ
-    ; "( <= )", var ^-> var ^-> bool_typ
-    ; "( = )", var ^-> var ^-> bool_typ
-    ; "( <> )", var ^-> var ^-> bool_typ
-    ; "( && )", bool_typ ^-> bool_typ ^-> bool_typ
-    ; "( || )", bool_typ ^-> bool_typ ^-> bool_typ
-    ; "[ - ]", int_typ ^-> int_typ
-    ; "not", bool_typ ^-> bool_typ
-    ; "( :: )", var ^-> TList var ^-> TList var
-    ; "print_int", int_typ ^-> unit_typ (* for tests *)
-    ]
+  let builtins =
+    let open Std in
+    stdlib |> List.map ~f:(fun x -> x.name, x.typ)
   ;;
 
   let default =
