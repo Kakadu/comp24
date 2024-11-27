@@ -4,7 +4,7 @@
 
 (name kreml)
 
-(generate_opam_files true)
+(generate_opam_files false)
 
 (source
  (github oveeernight/comp24))
