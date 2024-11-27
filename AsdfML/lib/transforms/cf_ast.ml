@@ -10,7 +10,7 @@ type cf_expr =
   | CFApp of cf_expr * cf_expr
   | CFIfElse of cf_expr * cf_expr * cf_expr
   | CFFun of id list * cf_expr
-  | CFLetIn of id * cf_expr * cf_expr (* TODO: <- *)
+  | CFLetIn of cf_definition * cf_expr 
   | CFTuple of cf_expr list
   | CFList of cf_expr list
   | CFMatch of cf_expr * (pattern * cf_expr) list
@@ -24,7 +24,7 @@ let cf_var v = CFVar v
 let cf_app f arg = CFApp (f, arg)
 let cf_if_else cond if_expr else_expr = CFIfElse (cond, if_expr, else_expr)
 let cf_fun args body = CFFun (args, body)
-let cf_let_in v expr body = CFLetIn (v, expr, body)
+let cf_let_in def exp = CFLetIn (def, exp)
 let cf_tuple exprs = CFTuple exprs
 let cf_list exprs = CFList exprs
 let cf_match expr cases = CFMatch (expr, cases)

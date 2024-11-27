@@ -23,7 +23,7 @@ let rec pp_expr fmt = function
     fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
   | CFFun (p, e) ->
     fprintf fmt "(fun %s -> %a)" (p |> String.concat ~sep:" ") pp_expr e
-  | CFLetIn (id, e1, e2) -> fprintf fmt "let %s = %a in %a" id pp_expr e1 pp_expr e2
+  | CFLetIn (def, exp) -> fprintf fmt "%a in %a" pp_definition def pp_expr exp
   | CFTuple xs -> pp_list ~sep:", " fmt pp_expr xs
   | CFMatch (e, pe_list) ->
     (* fprintf fmt "match %a with\n" pp_expr e;
