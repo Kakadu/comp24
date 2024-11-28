@@ -8,6 +8,7 @@ type parse_result =
 val pattern : pattern t
 val ident_as_expr : expr t
 val expr : expr t
+val program : structure t
 
 val expr_with_ops : expr t -> expr t
 

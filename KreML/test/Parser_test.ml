@@ -183,10 +183,117 @@ let%expect_test "simple expressions" =
                  (Some ((Ast.Expr_const (Ast.Const_int 2)),
                         (Ast.Expr_cons
                            (Some ((Ast.Expr_const (Ast.Const_int 3)),
-                                  (Ast.Expr_cons None))))))))))
+                                  (Ast.Expr_cons None))))))))))   
     (Ast.Expr_ite ((Ast.Expr_const (Ast.Const_bool true)),
        (Ast.Expr_var (Ast.Id "a")), (Ast.Expr_var (Ast.Id "b")))) |}]
 
 let%expect_test "let bindings" =
-   let cases = ["let a = 5 in a"; "let a = 5 in let b = 6 in a + b"] in
-   List.iter (fun input -> show_res ~input ~parser:expr ~to_string:show_expr |> print_endline) cases
+   let cases = ["let a = 5 in a"; "let a = 5 in let b = 6 in a + b"; "let f g h = g, h in f"] in
+   List.iter (fun input -> show_res ~input ~parser:expr ~to_string:show_expr |> print_endline) cases;
+  [%expect {|
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var (Ast.Id "a")), (Ast.Expr_const (Ast.Const_int 5))),
+       (Ast.Expr_var (Ast.Id "a"))))
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var (Ast.Id "a")), (Ast.Expr_const (Ast.Const_int 5))),
+       (Ast.Expr_let (Ast.NonRecursive,
+          ((Ast.Pat_var (Ast.Id "b")), (Ast.Expr_const (Ast.Const_int 6))),
+          (Ast.Expr_app ((Ast.Expr_var (Ast.Id "+")),
+             ((Ast.Expr_var (Ast.Id "a")), [(Ast.Expr_var (Ast.Id "b"))])))
+          ))
+       ))
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var (Ast.Id "f")),
+        (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "g")),
+           (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "h")),
+              (Ast.Expr_tuple ((Ast.Expr_var (Ast.Id "g")),
+                 (Ast.Expr_var (Ast.Id "h")), []))
+              ))
+           ))),
+       (Ast.Expr_var (Ast.Id "f")))) |}]
+
+let%expect_test "match" = 
+   let cases = ["match x with | 1 -> 1 | 2 -> 2 | _ -> 42";
+      "match l with | x::y::rest -> 1 | x::y -> 2 | _ -> 3";
+      "match (a, b) with | (5, 6) -> 1 | (_, 6) -> 6 | (5, _) -> 5 | (_, _)  -> 1337"] in
+   List.iter (fun input -> show_res ~input ~parser:expr ~to_string:show_expr |> print_endline) cases;
+  [%expect {|
+    (Ast.Expr_match ((Ast.Expr_var (Ast.Id "x")),
+       [((Ast.Pat_const (Ast.Const_int 1)), (Ast.Expr_const (Ast.Const_int 1)));
+         ((Ast.Pat_const (Ast.Const_int 2)), (Ast.Expr_const (Ast.Const_int 2)));
+         (Ast.Pat_wildcard, (Ast.Expr_const (Ast.Const_int 42)))]
+       ))
+    (Ast.Expr_match ((Ast.Expr_var (Ast.Id "l")),
+       [((Ast.Pat_cons ((Ast.Pat_var (Ast.Id "x")),
+            (Ast.Pat_cons ((Ast.Pat_var (Ast.Id "y")),
+               (Ast.Pat_var (Ast.Id "rest"))))
+            )),
+         (Ast.Expr_const (Ast.Const_int 1)));
+         ((Ast.Pat_cons ((Ast.Pat_var (Ast.Id "x")), (Ast.Pat_var (Ast.Id "y")))),
+          (Ast.Expr_const (Ast.Const_int 2)));
+         (Ast.Pat_wildcard, (Ast.Expr_const (Ast.Const_int 3)))]
+       ))
+    (Ast.Expr_match (
+       (Ast.Expr_tuple ((Ast.Expr_var (Ast.Id "a")), (Ast.Expr_var (Ast.Id "b")),
+          [])),
+       [((Ast.Pat_tuple ((Ast.Pat_const (Ast.Const_int 5)),
+            (Ast.Pat_const (Ast.Const_int 6)), [])),
+         (Ast.Expr_const (Ast.Const_int 1)));
+         ((Ast.Pat_tuple (Ast.Pat_wildcard, (Ast.Pat_const (Ast.Const_int 6)),
+             [])),
+          (Ast.Expr_const (Ast.Const_int 6)));
+         ((Ast.Pat_tuple ((Ast.Pat_const (Ast.Const_int 5)), Ast.Pat_wildcard,
+             [])),
+          (Ast.Expr_const (Ast.Const_int 5)));
+         ((Ast.Pat_tuple (Ast.Pat_wildcard, Ast.Pat_wildcard, [])),
+          (Ast.Expr_const (Ast.Const_int 1337)))
+         ]
+       )) |}]
+
+let%expect_test "complex expr" =
+   let cases = ["let f a b = if a > 0 then [a; a] else match b with | x::y::_ -> y | _ -> 42 in f 5 [6; 7]"] in
+   List.iter (fun input -> show_res ~input ~parser:expr ~to_string: show_expr |> print_endline) cases;
+  [%expect {|
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var (Ast.Id "f")),
+        (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "a")),
+           (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "b")),
+              (Ast.Expr_ite (
+                 (Ast.Expr_app ((Ast.Expr_var (Ast.Id ">")),
+                    ((Ast.Expr_var (Ast.Id "a")),
+                     [(Ast.Expr_const (Ast.Const_int 0))])
+                    )),
+                 (Ast.Expr_cons
+                    (Some ((Ast.Expr_var (Ast.Id "a")),
+                           (Ast.Expr_cons
+                              (Some ((Ast.Expr_var (Ast.Id "a")),
+                                     (Ast.Expr_cons None))))))),
+                 (Ast.Expr_match ((Ast.Expr_var (Ast.Id "b")),
+                    [((Ast.Pat_cons ((Ast.Pat_var (Ast.Id "x")),
+                         (Ast.Pat_cons ((Ast.Pat_var (Ast.Id "y")),
+                            Ast.Pat_wildcard))
+                         )),
+                      (Ast.Expr_var (Ast.Id "y")));
+                      (Ast.Pat_wildcard, (Ast.Expr_const (Ast.Const_int 42)))]
+                    ))
+                 ))
+              ))
+           ))),
+       (Ast.Expr_app ((Ast.Expr_var (Ast.Id "f")),
+          ((Ast.Expr_const (Ast.Const_int 5)),
+           [(Ast.Expr_cons
+               (Some ((Ast.Expr_const (Ast.Const_int 6)),
+                      (Ast.Expr_cons
+                         (Some ((Ast.Expr_const (Ast.Const_int 7)),
+                                (Ast.Expr_cons None)))))))
+             ])
+          ))
+       )) |}]
+
+let%expect_test "factorial" =
+   let input =
+       "let f n = if n > 0 then
+          n * f (n - 1)
+          else 1" in
+   show_res ~input ~parser:program ~to_string:show_structure |> print_endline
+

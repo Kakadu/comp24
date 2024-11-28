@@ -53,8 +53,11 @@ and case = pattern * expr
 
 type structure_item = 
     | Str_value of rec_flag * binding list
+[@@deriving show]
 
 type structure = structure_item list
+[@@deriving show]
+
 
 val eapp : expr -> fun_args -> expr
 
