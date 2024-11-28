@@ -100,7 +100,7 @@ let rec write_scheme_for_pattern
   fun free_vars pattern tp ->
   let rec_call = write_scheme_for_pattern free_vars in
   match pattern, tp with
-  | PWildCard, _ | PNil, _ | PConstant _, _ -> return ()
+  | PWildCard, _ | PConstant _, _ -> return ()
   | PIdentifier x, tp ->
     let used_tvs = get_tv_from_tp SetString.empty tp in
     let new_free_vars = SetString.inter used_tvs free_vars in
