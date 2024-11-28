@@ -21,11 +21,10 @@ let is_whitespace = function
   | _ -> false
 
 let is_keyword = function
-  | "let" | "rec" | "in" | "match" | "fun" | "if" | "then" | "else"
-  | "int" | "string"
+  | "let" | "rec" | "in" | "match" | "with" | "fun" | "if" | "then" | "else"
+  | "int" | "string" | "and"
   | "true" | "false" -> true
   | _ -> false
-
 let ws = take_while is_whitespace
 
 let number =
@@ -123,8 +122,8 @@ let elist p =
     List.fold_right econs elems enil
 
 let ematch expr =
-  let* matching_expr = keyword "match" *> ws *> expr in
-  let case = stoken "|" *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
+  let* matching_expr = keyword "match" *> ws *> expr <* ws <* keyword "with" in
+  let case = stoken "|" *> ws *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
   let* cases = many1 case in
   ematch matching_expr cases |> return
 
@@ -143,15 +142,26 @@ let letdef erhs =
 
 (* let list_expr t = (5 + 5 - 8) + (6 - 5) / 2::[] *)
 
+let anonymous_fun expr =
+  lift2 (fun args body -> List.fold_right efun args body)
+  (stoken "fun" *> many1 (ws *> pattern))
+  (stoken "->" *> ws *> expr)
+;;
+
 let expr =
   fix (fun self ->
     let ident = (ident >>= fun i -> Expr_var (Id i) |> return) in
     let const = (const >>= fun c -> Expr_const c |> return) in
     let list = elist self in
-    let simple_value = choice [ident; const; list; parens self] in
+    let app =
+      (lift3 (fun i fst_arg rest_args -> eapp i (fst_arg, rest_args))
+      ident
+      self
+      (many self)) in
+    let simple_value = choice [app; ident; const; list; parens self; anonymous_fun self;] in
     let simple_value_ops = expr_with_ops simple_value in
-    let complex_value = chainr1 simple_value_ops (stoken "::" *> return econs) in
-    let complex_value = 
+    let complex_value = chainr1 simple_value_ops (stoken "::" *> return econs) in (* cons*)
+    let complex_value = (* tuple *)
       (lift3 (fun fst snd rest -> etuple fst snd rest)
       complex_value
       (stoken "," *> ws *> complex_value)
@@ -159,9 +169,19 @@ let expr =
       <|> complex_value
     in
     parens self
-    <|> complex_value
-    <|> eite complex_value
-    <|> ematch complex_value
-    <|> (letdef self >>= fun (rec_flag, name, value) ->
-      stoken "in" *> self >>= fun scope -> elet ~rec_flag (name, value) scope |> return) 
+    <|> eite self (* ite *)
+    <|> ematch self (* match *)
+    <|> (letdef self >>= fun (rec_flag, name, value) -> (* local binding *)
+      stoken "in" *> self >>= fun scope -> elet ~rec_flag (name, value) scope |> return)
+    <|> complex_value (* atom *) 
+    <|> fail "undefined"
   )
+
+let program =
+  let str_item =
+    let* (is_rec, _, _) as fst = letdef expr in
+    let* rest = many (keyword "and" *> letdef expr) in
+    let bindings = Str_value(is_rec, (fst::rest) |> List.map (fun (_, name, e) -> name, e)) in
+    return bindings
+  in
+  many1 str_item >>= return
