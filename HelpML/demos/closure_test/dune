@@ -1,0 +1,8 @@
+(executable
+ (name closureTests)
+ (modules closureTests)
+ (public_name closureTests)
+ (libraries helpml_lib stdio))
+
+(cram
+ (deps ./closureTests.exe))
