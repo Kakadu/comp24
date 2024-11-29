@@ -9,14 +9,13 @@ open Vars
 
 (* TODO: clean debug prints *)
 
-
 let env_to_str env =
   Map.to_alist env
   |> List.map ~f:(fun (k, v) -> k ^ ": " ^ set_to_string v)
   |> String.concat ~sep:", "
 ;;
 
-let rec cc_expr globals env = function
+let rec cc_expr globals env ?(apply = true) = function
   | EConst _ as c -> c
   | EVar id as var ->
     (match Map.find env id with
@@ -32,18 +31,21 @@ let rec cc_expr globals env = function
     dbg "FVs %s in fun\n%a\n" (list_to_string fvs) Pp_ast.pp_expr func;
     let body' = cc_expr globals env body in
     (match fvs with
-     | [] -> func
+     | [] -> e_fun pat body'
      | _ ->
        dbg
-         "Creating closure with FVs %s\nand body %a\n"
+         "Creating (apply:%b) closure with FVs %s\nand body %a\n"
+         apply
          (list_to_string fvs)
          Pp_ast.pp_expr
          body';
        let pat = fvs |> List.map ~f:p_ident |> (Fn.flip List.append) pat in
        let closure_fun = e_fun pat body' in
-       fvs |> List.map ~f:e_var |> List.fold ~init:closure_fun ~f:e_app)
+       if apply
+       then fvs |> List.map ~f:e_var |> List.fold ~init:closure_fun ~f:e_app
+       else closure_fun)
   | ELetIn (def, exp) ->
-    let def', env', globals' = cc_def globals env def in
+    let def', env', globals' = cc_def globals env def ~apply:false in
     let exp' = cc_expr globals' env' exp in
     e_let_in def' exp'
   | ETuple xs -> List.map xs ~f:(cc_expr globals env) |> e_tuple
@@ -53,16 +55,15 @@ let rec cc_expr globals env = function
     let cases' = List.map cases ~f:(fun (p, e) -> p, cc_expr globals env e) in
     e_match exp' cases'
 
-and cc_def globals env = function
+and cc_def globals env ?(apply = true) = function
   (* TODO: other patterns *)
-  | DLet (flag, (PIdent id as pat), (EFun (fpat, body) as func)) as def ->
+  | DLet ((_ as flag), (PIdent id as pat), (EFun _ as func)) as def ->
     let fvs = Set.diff (free_vars_def def) globals in
-    let fpat' = fvs |> Set.to_list |> List.map ~f:p_ident |> (Fn.flip List.append) fpat in
     let env' = Map.set env ~key:id ~data:fvs in
-    let func = e_fun fpat' (cc_expr globals env' body) in
     let globals' = Set.add globals id in
+    let func = cc_expr globals' env' func ~apply in
     d_let_flag flag pat func, env', globals'
-  | DLet (flag, (PIdent id as pat), exp) as def ->
+  | DLet (flag, (PIdent _ as pat), exp) ->
     let exp' = cc_expr globals env exp in
     d_let_flag flag pat exp', env, globals
   | _ -> failwith "cc_def not implemented"
@@ -79,13 +80,9 @@ let closure_conversion ?(globals = default_globals) program =
   let helper prog =
     List.fold_map prog ~init:globals ~f:(fun globals ->
         function
-        | DLet (NonRec, pat, _) as def ->
+        | DLet (_, pat, _) as def ->
           let def', _, _ = cc_def globals env def in
           let globals' = Set.union globals (bound_vars_pat pat) in
-          globals', def'
-        | DLet (Rec, pat, _) as def ->
-          let globals' = Set.union globals (bound_vars_pat pat) in
-          let def', _, _ = cc_def globals' env def in
           globals', def')
   in
   helper program |> snd
