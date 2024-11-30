@@ -16,3 +16,4 @@ and aexpr =
   | ALet of id * cexpr * aexpr
   | ACExpr of cexpr
 
+type functions = id * id list * aexpr
