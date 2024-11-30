@@ -295,5 +295,97 @@ let%expect_test "factorial" =
        "let f n = if n > 0 then
           n * f (n - 1)
           else 1" in
-   show_res ~input ~parser:program ~to_string:show_structure |> print_endline
+   show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
+  [%expect {|
+    [(Ast.Str_value (Ast.NonRecursive,
+        [((Ast.Pat_var (Ast.Id "f")),
+          (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "n")),
+             (Ast.Expr_ite (
+                (Ast.Expr_app ((Ast.Expr_var (Ast.Id ">")),
+                   ((Ast.Expr_var (Ast.Id "n")),
+                    [(Ast.Expr_const (Ast.Const_int 0))])
+                   )),
+                (Ast.Expr_app ((Ast.Expr_var (Ast.Id "*")),
+                   ((Ast.Expr_var (Ast.Id "n")),
+                    [(Ast.Expr_app ((Ast.Expr_var (Ast.Id "f")),
+                        ((Ast.Expr_app ((Ast.Expr_var (Ast.Id "-")),
+                            ((Ast.Expr_var (Ast.Id "n")),
+                             [(Ast.Expr_const (Ast.Const_int 1))])
+                            )),
+                         [])
+                        ))
+                      ])
+                   )),
+                (Ast.Expr_const (Ast.Const_int 1))))
+             )))
+          ]
+        ))
+      ] |}]
+
+let%expect_test "even_odd" =
+   let input =
+      "let rec is_even n =
+         if n = 0 then true
+         else if n = 1 then false
+         else is_odd (n - 1)
+      and is_odd n =
+         if n = 1 then true
+         else if n = 0 then false
+         else is_odd (n - 1)" in
+   show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
+  [%expect {|
+    [(Ast.Str_value (Ast.Recursive,
+        [((Ast.Pat_var (Ast.Id "is_even")),
+          (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "n")),
+             (Ast.Expr_ite (
+                (Ast.Expr_app ((Ast.Expr_var (Ast.Id "=")),
+                   ((Ast.Expr_var (Ast.Id "n")),
+                    [(Ast.Expr_const (Ast.Const_int 0))])
+                   )),
+                (Ast.Expr_const (Ast.Const_bool true)),
+                (Ast.Expr_ite (
+                   (Ast.Expr_app ((Ast.Expr_var (Ast.Id "=")),
+                      ((Ast.Expr_var (Ast.Id "n")),
+                       [(Ast.Expr_const (Ast.Const_int 1))])
+                      )),
+                   (Ast.Expr_const (Ast.Const_bool false)),
+                   (Ast.Expr_app ((Ast.Expr_var (Ast.Id "is_odd")),
+                      ((Ast.Expr_app ((Ast.Expr_var (Ast.Id "-")),
+                          ((Ast.Expr_var (Ast.Id "n")),
+                           [(Ast.Expr_const (Ast.Const_int 1))])
+                          )),
+                       [])
+                      ))
+                   ))
+                ))
+             )));
+          ((Ast.Pat_var (Ast.Id "is_odd")),
+           (Ast.Expr_fun ((Ast.Pat_var (Ast.Id "n")),
+              (Ast.Expr_ite (
+                 (Ast.Expr_app ((Ast.Expr_var (Ast.Id "=")),
+                    ((Ast.Expr_var (Ast.Id "n")),
+                     [(Ast.Expr_const (Ast.Const_int 1))])
+                    )),
+                 (Ast.Expr_const (Ast.Const_bool true)),
+                 (Ast.Expr_ite (
+                    (Ast.Expr_app ((Ast.Expr_var (Ast.Id "=")),
+                       ((Ast.Expr_var (Ast.Id "n")),
+                        [(Ast.Expr_const (Ast.Const_int 0))])
+                       )),
+                    (Ast.Expr_const (Ast.Const_bool false)),
+                    (Ast.Expr_app ((Ast.Expr_var (Ast.Id "is_odd")),
+                       ((Ast.Expr_app ((Ast.Expr_var (Ast.Id "-")),
+                           ((Ast.Expr_var (Ast.Id "n")),
+                            [(Ast.Expr_const (Ast.Const_int 1))])
+                           )),
+                        [])
+                       ))
+                    ))
+                 ))
+              )))
+          ]
+        ))
+      ] |}]
+
+   
 
