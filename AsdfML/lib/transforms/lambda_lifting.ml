@@ -40,7 +40,15 @@ let remove_patterns pat exp =
   helper used exp [] pat
 ;;
 
-let rec ll_expr env lift = function
+let rec ll_expr env lift ?(name = None) =
+  let name_or_new () =
+    match name with
+    | Some x -> return x
+    | None ->
+      let* fresh = fresh in
+      return ("'ll_" ^ string_of_int fresh)
+  in
+  function
   | EConst c -> return (cf_const c, lift)
   | EVar id ->
     let id =
@@ -59,13 +67,12 @@ let rec ll_expr env lift = function
     let* e, lift = ll_expr env lift e in
     return (cf_if_else i t e, lift)
   | EFun (pat, exp) ->
-    let* fresh = fresh in
-    let name = "'ll_" ^ string_of_int fresh in
+    let* name = name_or_new () in
     let args, body = remove_patterns pat exp in
     let* body, lift = ll_expr env lift body in
     return (cf_var name, cf_def name (cf_fun args body) :: lift)
   | ELetIn (def, exp) ->
-    let* (def : cf_definition), lift = ll_def env lift def in
+    let* def, lift = ll_def env lift def in
     let* exp, lift = ll_expr env lift exp in
     return (cf_let_in def exp, lift)
   | ETuple xs -> failwith "todo ll_expr tuple"
@@ -75,11 +82,15 @@ let rec ll_expr env lift = function
 and ll_def env lift = function
   | DLet (Rec, PIdent id, (EFun _ as exp)) ->
     let* fresh = fresh in
-    (* TODO: +1 *)
-    let fresh = "'ll_" ^ string_of_int (fresh + 1) in
-    let env = Map.set env ~key:id ~data:fresh in
-    let* body, lift = ll_expr env lift exp in
+    let name = Format.sprintf "'ll_%d_%s" fresh id in
+    let env = Map.set env ~key:id ~data:name in
+    let* body, lift = ll_expr env lift exp ~name:(Some name) in
     return (cf_def id body, lift)
+  | DLet (NonRec, PIdent id, (EFun _ as exp)) ->
+    let* _, lift = ll_expr env lift exp ~name:(Some id) in
+    (match lift with
+     | hd :: tl -> return (hd, tl)
+     | _ -> failwith "should be fine because ll_expr will lift EFun")
   | DLet (is_rec, PIdent id, exp) ->
     let* body, lift = ll_expr env lift exp in
     return (cf_def id body, lift)
