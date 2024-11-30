@@ -4,11 +4,23 @@
 type ident = Id of string
 [@@deriving show]
 
+type type_id = int
+[@@deriving show]
+
+
+type typ =
+  | Typ_int
+  | Typ_bool
+  | Typ_var of type_id
+  | Typ_cons of typ * typ
+  | Typ_tuple of typ * typ * typ list
+  | Typ_fun of typ * typ
+[@@deriving show]
+
 
 type const =
     | Const_int of int (** [Const_int] represents integer constants like 42, 1337 *)
     | Const_bool of bool (** [Const_bool] represents boolean constants {true, false} *)
-    | Const_string of string (** [Const_string] represents string literals like "42", "John Doe" *)
 [@@deriving show]
 
 
@@ -18,6 +30,7 @@ type pattern =
     | Pat_cons of pattern * pattern (** [Pat_cons] corresponds to [::] constructor of [list] data structure *)
     | Pat_tuple of pattern * pattern * pattern list (** [Pat_tuple] corresponds to n-tuples like (a, b, c) *)
     | Pat_wildcard (** [Pat_wildcard] represents a _ pattern*)
+    | Pat_constrained of pattern * typ (** [Pat_constrained] represents typ constraint on pattern, like [(x: int, y: bool)]*)
 [@@deriving show]
 
 
@@ -40,6 +53,7 @@ type expr =
     | Expr_fun of pattern * expr (** [Expr_fun corresponds to anonymous function. {[Expr_fun(p, body)]} represents the {[fun p -> body]} *)
     | Expr_match of expr * case list (** [Expr_match] corresponds to match expressions like {[match x with | 0 -> 0 | 1 -> 1 | n -> n]} *)
     | Expr_app of expr * fun_args (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
+    | Expr_constrained of expr * typ (** Produced after typechecking routine*)
 [@@deriving show]
 
 and fun_args = expr * expr list

@@ -1,10 +1,21 @@
 type ident = Id of string
 [@@deriving show]
 
+type type_id = int
+[@@deriving show]
+
+type typ =
+  | Typ_int
+  | Typ_bool
+  | Typ_var of type_id
+  | Typ_cons of typ * typ
+  | Typ_tuple of typ * typ * typ list
+  | Typ_fun of typ * typ
+[@@deriving show]
+
 type const =
     | Const_int of int
     | Const_bool of bool
-    | Const_string of string
 [@@deriving show]
 
 
@@ -14,6 +25,7 @@ type pattern =
     | Pat_cons of pattern * pattern
     | Pat_tuple of pattern * pattern * pattern list
     | Pat_wildcard
+    | Pat_constrained of pattern * typ
 [@@deriving show]
 
 let pconst c = Pat_const c
@@ -35,6 +47,7 @@ type expr =
     | Expr_fun of pattern * expr
     | Expr_match of expr * case list
     | Expr_app of expr * fun_args
+    | Expr_constrained of expr * typ
 [@@deriving show]
 
 

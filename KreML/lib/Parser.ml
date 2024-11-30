@@ -34,8 +34,6 @@ let number =
   let* value = take_while1 is_digit in
   sign ^ value |> int_of_string |> return
 
-let string =
-  ws *> char '"' *> take_while (fun c -> c <> '"') <* char '"'
 
 let parens p = ws *> char '(' *> p <* char ')'
 
@@ -51,10 +49,10 @@ let ident =
        fail (Format.sprintf "Expected identifier, got keyword %s" i)
     else return i
 
-let stoken s = ws *> Angstrom.string s
+let stoken s = ws *> string s
 
 let keyword k =
-  let* _ = ws *> Angstrom.string k in
+  let* _ = ws *> string k in
   let* next = peek_char in
   match next with
   | Some v when is_letter v -> fail (Format.sprintf "Not a keyword %s" k)
@@ -73,8 +71,7 @@ let rec chainr1 e op =
 (** Patterns **)
 
 let const =
-  (string >>| fun s -> Const_string s)
-  <|> (number >>| fun n -> Const_int n)
+  (number >>| fun n -> Const_int n)
   <|> (keyword "true" *> (Const_bool true |> return ))
   <|> (keyword "false" *> (Const_bool false |> return ))
 
@@ -96,7 +93,7 @@ let pattern =
 
 (** Arithmetic  **)
 
-let bin_expr op_string op_expr = ws *> Angstrom.string op_string <*ws >>= fun _ -> return op_expr
+let bin_expr op_string op_expr = ws *> string op_string <*ws >>= fun _ -> return op_expr
 let op_list_to_parser l =
    List.map (fun (str, expr_op) -> bin_expr str expr_op) l
 
@@ -133,20 +130,17 @@ let eite expr =
   let* e = keyword "else" *> ws *> expr in
   eite cond t e |> return
 
-let letdef erhs =
+let letdef kw erhs =
   lift4 (fun is_rec name params rhs -> is_rec, name, List.fold_right efun params rhs)
-  (keyword "let" *> option NonRecursive (keyword "rec" *> return Recursive))
+  (kw *> option NonRecursive (keyword "rec" *> return Recursive))
   pattern
   (many pattern)
   (stoken "=" *> ws *> erhs)
-
-(* let list_expr t = (5 + 5 - 8) + (6 - 5) / 2::[] *)
 
 let anonymous_fun expr =
   lift2 (fun args body -> List.fold_right efun args body)
   (stoken "fun" *> many1 (ws *> pattern))
   (stoken "->" *> ws *> expr)
-;;
 
 let expr =
   fix (fun self ->
@@ -160,7 +154,7 @@ let expr =
       (many self)) in
     let simple_value = choice [app; ident; const; list; parens self; anonymous_fun self;] in
     let simple_value_ops = expr_with_ops simple_value in
-    let complex_value = chainr1 simple_value_ops (stoken "::" *> return econs) in (* cons*)
+    let complex_value = chainr1 simple_value_ops (stoken "::" *> return econs) in (* cons *)
     let complex_value = (* tuple *)
       (lift3 (fun fst snd rest -> etuple fst snd rest)
       complex_value
@@ -169,19 +163,19 @@ let expr =
       <|> complex_value
     in
     parens self
+    <|> complex_value (* atom *) 
     <|> eite self (* ite *)
     <|> ematch self (* match *)
-    <|> (letdef self >>= fun (rec_flag, name, value) -> (* local binding *)
+    <|> (letdef (keyword "let") self >>= fun (rec_flag, name, value) -> (* local binding *)
       stoken "in" *> self >>= fun scope -> elet ~rec_flag (name, value) scope |> return)
-    <|> complex_value (* atom *) 
     <|> fail "undefined"
   )
 
-let program =
+let program : structure t =
   let str_item =
-    let* (is_rec, _, _) as fst = letdef expr in
-    let* rest = many (keyword "and" *> letdef expr) in
+    let* (is_rec, _, _) as fst = letdef (keyword "let") expr in
+    let* rest = many (ws *> letdef (keyword "and")  expr) in
     let bindings = Str_value(is_rec, (fst::rest) |> List.map (fun (_, name, e) -> name, e)) in
     return bindings
   in
-  many1 str_item >>= return
+  many1 str_item
