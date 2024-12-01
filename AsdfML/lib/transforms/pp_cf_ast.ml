@@ -26,13 +26,12 @@ let rec pp_expr fmt = function
   | CFLetIn (def, exp) -> fprintf fmt "%a in %a" pp_definition def pp_expr exp
   | CFTuple xs -> pp_list ~sep:", " fmt pp_expr xs
   | CFMatch (e, pe_list) ->
-    (* fprintf fmt "match %a with\n" pp_expr e;
+    fprintf fmt "match %a with\n" pp_expr e;
        pp_print_list
        ~pp_sep:Format.pp_print_newline
-       (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p pp_expr e)
+       (fun fmt (p, e) -> fprintf fmt "| %a -> %a" Pp_ast.pp_pattern p pp_expr e)
        fmt
-       pe_list *)
-    failwith ""
+       pe_list
   | CFList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function

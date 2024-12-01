@@ -12,34 +12,6 @@ open State.IntStateM.Syntax
    - lifts in `let test = fun ... -> ...`
 *)
 
-let remove_patterns pat exp =
-  let generate_unique_arg_name used =
-    let start_number = Set.length used in
-    let rec find_unique current_number =
-      let current_name = "arg_" ^ string_of_int current_number in
-      match Set.find used ~f:(String.equal current_name) with
-      | None -> current_name
-      | _ -> find_unique (current_number + 1)
-    in
-    find_unique start_number
-  in
-  let rec helper used current_expr args_list = function
-    | head :: tail ->
-      (match head with
-       | PIdent id -> helper (Set.add used id) current_expr (id :: args_list) tail
-       | _ ->
-         let arg_name = generate_unique_arg_name used in
-         helper
-           (Set.add used arg_name)
-           (e_match (e_var arg_name) [ head, current_expr ])
-           (arg_name :: args_list)
-           tail)
-    | _ -> List.rev args_list, current_expr
-  in
-  let used = Vars.free_vars_expr exp in
-  helper used exp [] pat
-;;
-
 let rec ll_expr env lift ?(name = None) =
   let name_or_new () =
     match name with
@@ -68,16 +40,45 @@ let rec ll_expr env lift ?(name = None) =
     return (cf_if_else i t e, lift)
   | EFun (pat, exp) ->
     let* name = name_or_new () in
-    let args, body = remove_patterns pat exp in
-    let* body, lift = ll_expr env lift body in
+    let args =
+      List.map pat ~f:(function
+        | PIdent id -> id
+        | _ -> assert false)
+    in
+    let* body, lift = ll_expr env lift exp in
     return (cf_var name, cf_def name (cf_fun args body) :: lift)
   | ELetIn (def, exp) ->
     let* def, lift = ll_def env lift def in
     let* exp, lift = ll_expr env lift exp in
     return (cf_let_in def exp, lift)
-  | ETuple xs -> failwith "todo ll_expr tuple"
-  | EList xs -> failwith "todo ll_expr list"
-  | EMatch (e, c) -> failwith "todo ll_expr match"
+  | ETuple xs ->
+    List.fold
+      xs
+      ~init:(return ([], lift))
+      ~f:(fun acc x ->
+        let* acc, lift = acc in
+        let* x, lift = ll_expr env lift x in
+        return (x :: acc, lift))
+    >>| fun (xs, lift) -> cf_tuple (List.rev xs), lift
+  | EList xs ->
+    List.fold
+      xs
+      ~init:(return ([], lift))
+      ~f:(fun acc x ->
+        let* acc, lift = acc in
+        let* x, lift = ll_expr env lift x in
+        return (x :: acc, lift))
+    >>| fun (xs, lift) -> cf_list (List.rev xs), lift
+  | EMatch (exp, cases) ->
+    let* exp, lift = ll_expr env lift exp in
+    List.fold
+      cases
+      ~init:(return ([], lift))
+      ~f:(fun acc (pat, exp) ->
+        let* acc, lift = acc in
+        let* exp, lift = ll_expr env lift exp in
+        return ((pat, exp) :: acc, lift))
+    >>| fun (cases, lift) -> cf_match exp (List.rev cases), lift
 
 and ll_def env lift = function
   | DLet (Rec, PIdent id, (EFun _ as exp)) ->
