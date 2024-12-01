@@ -3,7 +3,15 @@ type reg =
   | Reg of string
   | Offset of reg * int
   | Temp of int
-(* | User of int *)
+
+let rec pp_reg ppf =
+  let open Format in
+  function
+  | SP -> fprintf ppf "sp"
+  | Reg s -> fprintf ppf "%s" s
+  | Offset (r, n) -> fprintf ppf "%a(%d)" pp_reg r n
+  | Temp n -> fprintf ppf "t%d" n
+;;
 
 type instr =
   | Add of reg * reg * reg
@@ -28,6 +36,33 @@ type instr =
   | Ret
   (* *)
   | Comment of string
+
+let pp_instr ppf =
+  let open Format in
+  function
+  | Add (rd, rs1, rs2) -> fprintf ppf "add %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Sub (rd, rs1, rs2) -> fprintf ppf "sub %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Mul (rd, rs1, rs2) -> fprintf ppf "mul %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Div (rd, rs1, rs2) -> fprintf ppf "div %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Addi (rd, rs, n) -> fprintf ppf "addi %a, %a, %d" pp_reg rd pp_reg rs n
+  (* *)
+  | And (rd, rs1, rs2) -> fprintf ppf "and %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Or (rd, rs1, rs2) -> fprintf ppf "or %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  (* *)
+  | Ld (rd, rs) -> fprintf ppf "ld %a, %a" pp_reg rd pp_reg rs
+  | Sd (rd, rs) -> fprintf ppf "sd %a, %a" pp_reg rd pp_reg rs
+  | Li (rd, n) -> fprintf ppf "li %a, %d" pp_reg rd n
+  (* *)
+  | Beq (rd, rs, where) -> fprintf ppf "beq %a, %a, %s" pp_reg rd pp_reg rs where
+  | Blt (rd, rs, where) -> fprintf ppf "blt %a, %a, %s" pp_reg rd pp_reg rs where
+  (* *)
+  | Label s -> fprintf ppf "%s:" s
+  | Call s -> fprintf ppf "call %s" s
+  | ECall -> fprintf ppf "ecall"
+  | Ret -> fprintf ppf "ret"
+  (* *)
+  | Comment s -> fprintf ppf "# %s" s
+;;
 
 let zero = Reg "zero"
 let ra = Reg "ra"
@@ -68,5 +103,17 @@ let comment k s = k (Comment s)
 
 open Base
 
-let code : (instr * string) Queue.t = Queue.create ()
-let emit ?(comm = "") instr = instr (fun i -> Queue.enqueue code (i, comm))
+let code : string Queue.t = Queue.create ()
+
+let emit ?(comm = "") instr =
+  instr (fun i ->
+    Queue.enqueue
+      code
+      (Format.asprintf
+         "%a%s"
+         pp_instr
+         i
+         (if String.(comm <> "") then Format.sprintf " # %s\n" comm else "\n")))
+;;
+
+let emit_str s = Queue.enqueue code s
