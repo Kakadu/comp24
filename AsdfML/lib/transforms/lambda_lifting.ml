@@ -4,6 +4,7 @@
 
 open Base
 open Ast
+open Utils
 open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
@@ -49,7 +50,9 @@ let rec ll_expr env lift ?(name = None) =
     let* exp, lift = ll_expr env lift exp in
     return (cf_var name, cf_def name (cf_fun args exp) :: lift)
   | ELetIn (def, exp) ->
+    (* dbg "Before: %a" Pp_ast.pp_definition def; *)
     let* def, lift = ll_def env lift def in
+    (* dbg "After : %a" Pp_cf_ast.pp_definition def; *)
     let* exp, lift = ll_expr env lift exp in
     return (cf_let_in def exp, lift)
   | ETuple xs ->
