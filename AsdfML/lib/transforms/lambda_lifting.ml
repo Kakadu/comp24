@@ -43,10 +43,11 @@ let rec ll_expr env lift ?(name = None) =
     let args =
       List.map pat ~f:(function
         | PIdent id -> id
+        | PWild -> "_"
         | _ -> assert false)
     in
-    let* body, lift = ll_expr env lift exp in
-    return (cf_var name, cf_def name (cf_fun args body) :: lift)
+    let* exp, lift = ll_expr env lift exp in
+    return (cf_var name, cf_def name (cf_fun args exp) :: lift)
   | ELetIn (def, exp) ->
     let* def, lift = ll_def env lift def in
     let* exp, lift = ll_expr env lift exp in
@@ -85,16 +86,11 @@ and ll_def env lift = function
     let* fresh = fresh in
     let name = Format.sprintf "'ll_%d_%s" fresh id in
     let env = Map.set env ~key:id ~data:name in
-    let* body, lift = ll_expr env lift exp ~name:(Some name) in
-    return (cf_def id body, lift)
-  | DLet (NonRec, PIdent id, (EFun _ as exp)) ->
-    let* _, lift = ll_expr env lift exp ~name:(Some id) in
-    (match lift with
-     | hd :: tl -> return (hd, tl)
-     | _ -> failwith "should be fine because ll_expr will lift EFun")
+    let* exp, lift = ll_expr env lift exp ~name:(Some name) in
+    return (cf_def id exp, lift)
   | DLet (is_rec, PIdent id, exp) ->
-    let* body, lift = ll_expr env lift exp in
-    return (cf_def id body, lift)
+    let* exp, lift = ll_expr env lift exp in
+    return (cf_def id exp, lift)
   | _ -> failwith "todo ll_decl"
 ;;
 
