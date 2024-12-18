@@ -1,5 +1,24 @@
 open Ast
 
+type error =
+  | Occurs_check of type_id * typ
+  | Unification_failed of typ * typ
+  | Tuple_unequal_lens of typ * typ
+
+module R : sig
+  type 'a t
+  val return : 'a -> 'a t
+  val fail: error -> 'a t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+  module Syntax : sig
+    val (let*) : 'a t -> ('a -> 'b t) -> 'b t
+    val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+  end
+
+  val foldl: 'a list -> init: 'b t -> f:('b -> 'a -> 'b t) -> 'b t
+  val fresh: type_id t
+end 
+
 module Varset : sig
   type t
 
@@ -17,7 +36,6 @@ module Type : sig
   val free_vars : typ -> Varset.t
 end
 
-type scheme = S of Varset.t * typ
 
 module Subst : sig
   type t
@@ -27,17 +45,28 @@ module Subst : sig
   val empty : t
   val singleton : type_id -> typ -> t
   val find : type_id -> t -> typ
+  val remove : type_id -> typ -> t -> t
   val unify : typ -> typ -> t
   val apply : typ -> t -> typ
   val compose : t -> t -> t
 end
 
-type error =
-  | Occures_check
-  | Unification_failed
+type scheme = Scheme of Varset.t * typ (** Forall quantified vars * [typ] *)
 
-type result =
-  | Ok of expr
-  | Err of error
+module Scheme : sig
+  type t
+  val free_vars : t -> Varset.t
+  val apply_subst : Subst.t -> t -> t
+end
 
-val check_program : structure -> result
+type var_name = string
+
+
+module TypeEnv : sig
+  type t
+  val free_vars: Varset.t
+  val extend : var_name -> Scheme.t -> t -> t
+end
+
+
+(* val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ ) R.t *)
