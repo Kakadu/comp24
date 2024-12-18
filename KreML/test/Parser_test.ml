@@ -8,7 +8,8 @@ let%expect_test "patterns test" =
     ; "a, b"; "a ,  b,  c"; "a, (b,c), true"; "((a, a), b), c"
     ; "(a, b)"; "((a, b), c, (5, true))"
     ; "x::xs"; "(a, (b, c))::rest"; "x::y::rest"; "1::y::_::xs"
-    ; "x::xs, y::ys"; "(x)::(xs)"; "a,b::xs"; "(a,b)::xs"]
+    ; "x::xs, y::ys"; "(x)::(xs)"; "a,b::xs"; "(a,b)::xs"
+    ; "a : int"; "a, b : int * bool"; "(a, b : int * int)"; "f : int -> int"; "f : int -> int -> bool"; "a : (int -> int) -> int"]
    in
     List.iter (fun i -> print_endline (show_res ~input:i ~parser:pattern ~to_string:show_pattern)) cases;
   [%expect {|
@@ -67,7 +68,22 @@ let%expect_test "patterns test" =
     (Ast.Pat_cons (
        (Ast.Pat_tuple ((Ast.Pat_var (Ast.Id "a")), (Ast.Pat_var (Ast.Id "b")),
           [])),
-       (Ast.Pat_var (Ast.Id "xs")))) |}]
+       (Ast.Pat_var (Ast.Id "xs"))))
+    (Ast.Pat_constrained ((Ast.Pat_var (Ast.Id "a")), Ast.Typ_int))
+    (Ast.Pat_constrained (
+       (Ast.Pat_tuple ((Ast.Pat_var (Ast.Id "a")), (Ast.Pat_var (Ast.Id "b")),
+          [])),
+       (Ast.Typ_tuple (Ast.Typ_int, Ast.Typ_bool, []))))
+    (Ast.Pat_constrained (
+       (Ast.Pat_tuple ((Ast.Pat_var (Ast.Id "a")), (Ast.Pat_var (Ast.Id "b")),
+          [])),
+       (Ast.Typ_tuple (Ast.Typ_int, Ast.Typ_int, []))))
+    (Ast.Pat_constrained ((Ast.Pat_var (Ast.Id "f")),
+       (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int))))
+    (Ast.Pat_constrained ((Ast.Pat_var (Ast.Id "f")),
+       (Ast.Typ_fun (Ast.Typ_int, (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_bool))))))
+    (Ast.Pat_constrained ((Ast.Pat_var (Ast.Id "a")),
+       (Ast.Typ_fun ((Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int)), Ast.Typ_int)))) |}]
 
 
 let%expect_test "operations" =
