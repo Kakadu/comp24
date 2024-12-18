@@ -22,7 +22,7 @@ let is_whitespace = function
 
 let is_keyword = function
   | "let" | "rec" | "in" | "match" | "with" | "fun" | "if" | "then" | "else"
-  | "int" | "string" | "and"
+  | "int" | "and"
   | "true" | "false" -> true
   | _ -> false
 let ws = take_while is_whitespace
@@ -75,6 +75,26 @@ let const =
   <|> (keyword "true" *> (Const_bool true |> return ))
   <|> (keyword "false" *> (Const_bool false |> return ))
 
+let tuple sep p =
+  lift3 (fun fst snd rest -> fst, snd, rest)
+  p
+  (sep *> ws *> p)
+  (many (sep *> ws *> p))
+
+let arrow p =
+  let make_arrow a b = Typ_fun(a, b) in
+  chainr1 p (stoken "->" *> return make_arrow)
+
+let typ =
+  fix (fun self ->
+    let int = stoken "int" >>| fun _-> Ast.Typ_int in
+    let bool = stoken "bool"  >>| fun _ -> Ast.Typ_bool in
+    let atom = int <|> bool <|> (parens self) in
+    let typ = (tuple (stoken "*") atom >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest)) <|> atom in
+    let typ = arrow typ in
+    typ
+    )
+
 let pattern =
   fix (fun self ->
         let atom =
@@ -82,13 +102,13 @@ let pattern =
           <|> (const >>| pconst)  (* const *)
           <|> (ident >>| fun i -> Id i |> pvar) (* identifier *)
           <|> (keyword "_"  *> return Pat_wildcard)) in (* wildcard *)
-        let cons_pat = chainr1 atom (stoken "::" *> return pcons) in
-        let tuple_pat = 
-          lift3 (fun fst snd rest -> ptuple fst snd rest)
-          cons_pat
-          (stoken "," *> cons_pat)
-          (many (stoken "," *> cons_pat)) in
-        tuple_pat <|> cons_pat
+        let pattern = chainr1 atom (stoken "::" *> return pcons) in (* cons *)
+        let pattern = (* try tuple *)
+           (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest)
+            <|> pattern in
+        let pattern = (pattern >>= fun p -> (stoken ":") *> typ >>= fun t -> Pat_constrained(p, t) |> return) (* try type *)
+          <|> pattern in
+        pattern
     )
 
 (** Arithmetic  **)
@@ -139,7 +159,7 @@ let letdef kw erhs =
 
 let anonymous_fun expr =
   lift2 (fun args body -> List.fold_right efun args body)
-  (stoken "fun" *> many1 (ws *> pattern))
+  (keyword "fun" *> many1 (ws *> pattern))
   (stoken "->" *> ws *> expr)
 
 let expr =
@@ -152,18 +172,18 @@ let expr =
       ident
       self
       (many self)) in
-    let simple_value = choice [app; ident; const; list; parens self; anonymous_fun self;] in
-    let simple_value_ops = expr_with_ops simple_value in
-    let complex_value = chainr1 simple_value_ops (stoken "::" *> return econs) in (* cons *)
-    let complex_value = (* tuple *)
+    let atom = choice [app; ident; const; list; parens self; anonymous_fun self;] in
+    let atom = expr_with_ops atom in
+    let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)
+    let atom = (* tuple *)
       (lift3 (fun fst snd rest -> etuple fst snd rest)
-      complex_value
-      (stoken "," *> ws *> complex_value)
-      (many (stoken "," *> ws *> complex_value ))) 
-      <|> complex_value
+      atom
+      (stoken "," *> ws *> atom)
+      (many (stoken "," *> ws *> atom))) 
+      <|> atom
     in
     parens self
-    <|> complex_value (* atom *) 
+    <|> atom (* atom *) 
     <|> eite self (* ite *)
     <|> ematch self (* match *)
     <|> (letdef (keyword "let") self >>= fun (rec_flag, name, value) -> (* local binding *)

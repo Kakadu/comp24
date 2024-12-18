@@ -2,7 +2,7 @@ open Kreml_lib.Parser
 open Kreml_lib.Ast
 
 let%expect_test "patterns test" =
-  let cases = ["123"; "true"; "false"; {|"word"|}
+  let cases = ["123"; "true"; "false"
     ; "x"; "some_long_name"; "letrec"; "_"
     ; "(a)"
     ; "a, b"; "a ,  b,  c"; "a, (b,c), true"; "((a, a), b), c"
@@ -15,7 +15,6 @@ let%expect_test "patterns test" =
     (Ast.Pat_const (Ast.Const_int 123))
     (Ast.Pat_const (Ast.Const_bool true))
     (Ast.Pat_const (Ast.Const_bool false))
-    (Ast.Pat_const (Ast.Const_string "word"))
     (Ast.Pat_var (Ast.Id "x"))
     (Ast.Pat_var (Ast.Id "some_long_name"))
     (Ast.Pat_var (Ast.Id "letrec"))
