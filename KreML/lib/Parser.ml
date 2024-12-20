@@ -90,7 +90,13 @@ let typ =
     let int = stoken "int" >>| fun _-> Ast.Typ_int in
     let bool = stoken "bool"  >>| fun _ -> Ast.Typ_bool in
     let atom = int <|> bool <|> (parens self) in
-    let typ = (tuple (stoken "*") atom >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest)) <|> atom in
+    let typ = 
+      (lift2 (fun elem dims -> Base.List.fold ~f:(fun acc _ -> Typ_list(acc)) ~init:elem dims)
+      atom
+      (many (stoken "list"))) in
+    let typ = 
+      (tuple (stoken "*") typ >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest))
+      <|> atom in
     let typ = arrow typ in
     typ
     )
@@ -98,11 +104,13 @@ let typ =
 let pattern =
   fix (fun self ->
         let atom =
-          ws *> (parens self (* parens *)
+          ws *> (parens ws >>= fun _ -> return pnil)
+          <|> parens self (* parens *)
           <|> (const >>| pconst)  (* const *)
-          <|> (ident >>| fun i -> Id i |> pvar) (* identifier *)
-          <|> (keyword "_"  *> return Pat_wildcard)) in (* wildcard *)
-        let pattern = chainr1 atom (stoken "::" *> return pcons) in (* cons *)
+          <|> (ident >>| pvar) (* identifier *)
+          <|> (keyword "_"  *> return Pat_wildcard) in (* wildcard *)
+        let nil = stoken "[" *> ws *> stoken "]" >>= fun _ -> return pnil in
+        let pattern = nil <|> chainr1 atom (stoken "::" *> return pcons) in (* cons *)
         let pattern = (* try tuple *)
            (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest)
             <|> pattern in
@@ -124,7 +132,7 @@ let prio = [["*", mul; "/", div]
           ; ["||", elor]]
   |> List.map (fun ops -> op_list_to_parser ops)
 
-let ident_as_expr = ws *> parens ident <|> ident >>| (fun i -> Expr_var (Id i))
+let ident_as_expr = ws *> parens ident <|> ident >>| (fun i -> Expr_var i)
 
 let expr_with_ops p =
    fix (fun self ->
@@ -164,7 +172,7 @@ let anonymous_fun expr =
 
 let expr =
   fix (fun self ->
-    let ident = (ident >>= fun i -> Expr_var (Id i) |> return) in
+    let ident = (ident >>= fun i -> Expr_var i |> return) in
     let const = (const >>= fun c -> Expr_const c |> return) in
     let list = elist self in
     let app =

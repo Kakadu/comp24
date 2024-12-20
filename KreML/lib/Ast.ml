@@ -1,4 +1,4 @@
-type ident = Id of string
+type ident = string
 [@@deriving show]
 
 type type_id = int
@@ -8,9 +8,10 @@ type typ =
   | Typ_int
   | Typ_bool
   | Typ_var of type_id
-  | Typ_cons of typ * typ
+  | Typ_list of typ
   | Typ_tuple of typ * typ * typ list
   | Typ_fun of typ * typ
+  | Typ_unit
 [@@deriving show]
 
 type const =
@@ -23,6 +24,7 @@ type pattern =
     | Pat_const of const
     | Pat_var of ident
     | Pat_cons of pattern * pattern
+    | Pat_nil
     | Pat_tuple of pattern * pattern * pattern list
     | Pat_wildcard
     | Pat_constrained of pattern * typ
@@ -31,6 +33,7 @@ type pattern =
 let pconst c = Pat_const c
 let pvar v = Pat_var v
 let pcons x xs = Pat_cons(x, xs)
+let pnil = Pat_nil
 let ptuple a b rest = Pat_tuple(a, b, rest)
 
 type rec_flag = Recursive | NonRecursive
@@ -77,14 +80,14 @@ let efun p body = Expr_fun(p, body)
 let elet ?(rec_flag = NonRecursive) (pattern, binding) where =
      Expr_let(rec_flag, (pattern, binding), where)
 let ematch expr bindings = Expr_match(expr, bindings)
-let eland x y = eapp (Expr_var (Id "&&")) (x, [y])
-let elor x y = eapp (Expr_var (Id "||")) (x, [y])
-let add x y = eapp (Expr_var (Id "+")) (x, [y])
-let mul x y = eapp (Expr_var (Id "*")) (x, [y])
-let div x y = eapp (Expr_var (Id "/")) (x, [y])
-let sub x y = eapp (Expr_var (Id "-")) (x, [y])
-let eqq x y = eapp (Expr_var (Id "=")) (x, [y])
-let ge x y = eapp (Expr_var (Id ">")) (x, [y])
-let le x y = eapp (Expr_var (Id "<")) (x, [y])
-let geq x y = eapp (Expr_var (Id ">=")) (x, [y])
-let leq x y = eapp (Expr_var (Id "<=")) (x, [y])
+let eland x y = eapp (Expr_var "&&") (x, [y])
+let elor x y = eapp (Expr_var "||") (x, [y])
+let add x y = eapp (Expr_var "+") (x, [y])
+let mul x y = eapp (Expr_var "*") (x, [y])
+let div x y = eapp (Expr_var "/") (x, [y])
+let sub x y = eapp (Expr_var "-") (x, [y])
+let eqq x y = eapp (Expr_var "=") (x, [y])
+let ge x y = eapp (Expr_var ">") (x, [y])
+let le x y = eapp (Expr_var "<") (x, [y])
+let geq x y = eapp (Expr_var  ">=") (x, [y])
+let leq x y = eapp (Expr_var "<=") (x, [y])

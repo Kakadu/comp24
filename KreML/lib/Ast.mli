@@ -1,7 +1,7 @@
 (** Abstract syntax tree for KreML and helper functions*)
 
 (** Represents an identifier of variable or function*)
-type ident = Id of string
+type ident = string
 [@@deriving show]
 
 type type_id = int
@@ -12,9 +12,10 @@ type typ =
   | Typ_int
   | Typ_bool
   | Typ_var of type_id
-  | Typ_cons of typ * typ
+  | Typ_list of typ
   | Typ_tuple of typ * typ * typ list
   | Typ_fun of typ * typ
+  | Typ_nil
 [@@deriving show]
 
 
@@ -28,6 +29,7 @@ type pattern =
     | Pat_const of const (** [Pat_const] corresponds to putting in constant values in pattern matching, e.g. {[match n with 0 -> ...]} *)
     | Pat_var of ident (** [Pat_var] coressponds to patterns which are variable identifiers, e.g. {[match n with  | ... | x -> ...]} *)
     | Pat_cons of pattern * pattern (** [Pat_cons] corresponds to [::] constructor of [list] data structure *)
+    | Pat_nil
     | Pat_tuple of pattern * pattern * pattern list (** [Pat_tuple] corresponds to n-tuples like (a, b, c) *)
     | Pat_wildcard (** [Pat_wildcard] represents a _ pattern*)
     | Pat_constrained of pattern * typ (** [Pat_constrained] represents typ constraint on pattern, like [(x: int, y: bool)]*)
@@ -37,6 +39,7 @@ type pattern =
 val pconst : const -> pattern
 val pvar : ident -> pattern
 val pcons : pattern -> pattern -> pattern
+val pnil : pattern
 val ptuple : pattern -> pattern -> pattern list -> pattern
 
 type rec_flag = Recursive | NonRecursive

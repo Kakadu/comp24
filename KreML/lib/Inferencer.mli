@@ -66,7 +66,8 @@ module TypeEnv : sig
   type t
   val free_vars: Varset.t
   val extend : var_name -> Scheme.t -> t -> t
+  val generalize: t -> typ -> Scheme.t
 end
 
 
-(* val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ ) R.t *)
+val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ) R.t
