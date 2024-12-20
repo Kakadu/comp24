@@ -14,6 +14,8 @@ type typ =
   | Typ_unit
 [@@deriving show]
 
+let tfun l r = Typ_fun(l, r)
+
 type const =
     | Const_int of int
     | Const_bool of bool
@@ -43,7 +45,8 @@ type rec_flag = Recursive | NonRecursive
 type expr =
     | Expr_const of const
     | Expr_var of ident
-    | Expr_cons of (expr * expr) option
+    | Expr_cons of expr * expr
+    | Expr_nil
     | Expr_tuple of expr * expr * expr list
     | Expr_let of rec_flag * binding * expr
     | Expr_ite of expr * expr * expr
@@ -72,8 +75,8 @@ type structure = structure_item list
 
 let eapp f args = Expr_app(f, args)
 
-let econs x y = Expr_cons(Some(x, y))
-let enil = Expr_cons None
+let econs x y = Expr_cons(x, y)
+let enil = Expr_nil
 let etuple fst snd rest = Expr_tuple(fst, snd, rest)
 let eite c e t = Expr_ite(c, e, t)
 let efun p body = Expr_fun(p, body)
