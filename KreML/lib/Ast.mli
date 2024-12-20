@@ -18,6 +18,8 @@ type typ =
   | Typ_nil
 [@@deriving show]
 
+val tfun : typ -> typ -> typ
+
 
 type const =
     | Const_int of int (** [Const_int] represents integer constants like 42, 1337 *)
@@ -48,8 +50,9 @@ type rec_flag = Recursive | NonRecursive
 type expr =
     | Expr_const of const (** Expresssion constants like [1], [true], ["asd"] *)
     | Expr_var of ident (** Variables like [x] *)
-    | Expr_cons of (expr * expr) option (** Lists like [1; 2] are represented with [Some(1, Some(2, None))],
+    | Expr_cons of expr * expr (** Lists like [1; 2] are represented with [Some(1, Some(2, None))],
                                    constructions like [1::xs] are represented with [Some (1, xs)] *)
+    | Expr_nil
     | Expr_tuple of expr * expr * expr list
     | Expr_let of rec_flag * binding * expr (** {[let rec? x1 = expr1 in expr2]} *)
     | Expr_ite of expr * expr * expr (** {[if cond then expr1 else expr2]}*)
