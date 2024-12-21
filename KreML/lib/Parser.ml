@@ -176,9 +176,8 @@ let expr =
     let const = (const >>= fun c -> Expr_const c |> return) in
     let list = elist self in
     let app =
-      (lift3 (fun i fst_arg rest_args -> eapp i (fst_arg, rest_args))
-      ident
-      self
+      (lift2 (fun f args -> eapp f args)
+      (ident <|> anonymous_fun self)
       (many self)) in
     let atom = choice [app; ident; const; list; parens self; anonymous_fun self;] in
     let atom = expr_with_ops atom in
