@@ -4,6 +4,8 @@ type error =
   | Occurs_check of type_id * typ
   | Unification_failed of typ * typ
   | Tuple_unequal_lens of typ * typ
+  | Variable_not_found of ident
+
 
 module R : sig
   type 'a t
@@ -44,11 +46,12 @@ module Subst : sig
 
   val empty : t
   val singleton : type_id -> typ -> t
-  val find : type_id -> t -> typ
-  val remove : type_id -> typ -> t -> t
-  val unify : typ -> typ -> t
+  val find : type_id -> t -> typ option
+  val remove : type_id -> t -> t
+  val unify_many : typ list -> (t * typ) R.t
+  val unify_one : typ -> typ -> t R.t
   val apply : typ -> t -> typ
-  val compose : t -> t -> t
+  val compose : t -> t -> t R.t
 end
 
 type scheme = Scheme of Varset.t * typ (** Forall quantified vars * [typ] *)
@@ -64,9 +67,9 @@ type var_name = string
 
 module TypeEnv : sig
   type t
-  val free_vars: Varset.t
+  val free_vars: t -> Varset.t
   val extend : var_name -> Scheme.t -> t -> t
-  val generalize: t -> typ -> Scheme.t
+  val generalize: typ -> t -> Scheme.t
 end
 
 

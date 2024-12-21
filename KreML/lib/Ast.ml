@@ -52,13 +52,11 @@ type expr =
     | Expr_ite of expr * expr * expr
     | Expr_fun of pattern * expr
     | Expr_match of expr * case list
-    | Expr_app of expr * fun_args
+    | Expr_app of expr * expr
     | Expr_constrained of expr * typ
 [@@deriving show]
 
 
-and fun_args = expr * expr list
-[@@deriving show]
 
 and binding = pattern * expr
 [@@deriving show]
@@ -73,7 +71,8 @@ type structure_item =
 type structure = structure_item list
 [@@deriving show]
 
-let eapp f args = Expr_app(f, args)
+let eapp func args =
+    Base.List.fold_left args ~init:func ~f:(fun acc arg -> Expr_app(arg, acc))
 
 let econs x y = Expr_cons(x, y)
 let enil = Expr_nil
@@ -83,14 +82,14 @@ let efun p body = Expr_fun(p, body)
 let elet ?(rec_flag = NonRecursive) (pattern, binding) where =
      Expr_let(rec_flag, (pattern, binding), where)
 let ematch expr bindings = Expr_match(expr, bindings)
-let eland x y = eapp (Expr_var "&&") (x, [y])
-let elor x y = eapp (Expr_var "||") (x, [y])
-let add x y = eapp (Expr_var "+") (x, [y])
-let mul x y = eapp (Expr_var "*") (x, [y])
-let div x y = eapp (Expr_var "/") (x, [y])
-let sub x y = eapp (Expr_var "-") (x, [y])
-let eqq x y = eapp (Expr_var "=") (x, [y])
-let ge x y = eapp (Expr_var ">") (x, [y])
-let le x y = eapp (Expr_var "<") (x, [y])
-let geq x y = eapp (Expr_var  ">=") (x, [y])
-let leq x y = eapp (Expr_var "<=") (x, [y])
+let eland x y = eapp (Expr_var "&&") [x; y]
+let elor x y = eapp (Expr_var "||") [x; y]
+let add x y = eapp (Expr_var "+") [x; y]
+let mul x y = eapp (Expr_var "*") [x; y]
+let div x y = eapp (Expr_var "/") [x; y]
+let sub x y = eapp (Expr_var "-") [x; y]
+let eqq x y = eapp (Expr_var "=") [x; y]
+let ge x y = eapp (Expr_var ">") [x; y]
+let le x y = eapp (Expr_var "<") [x; y]
+let geq x y = eapp (Expr_var  ">=") [x; y]
+let leq x y = eapp (Expr_var "<=") [x; y]

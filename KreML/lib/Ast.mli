@@ -15,7 +15,7 @@ type typ =
   | Typ_list of typ
   | Typ_tuple of typ * typ * typ list
   | Typ_fun of typ * typ
-  | Typ_nil
+  | Typ_unit
 [@@deriving show]
 
 val tfun : typ -> typ -> typ
@@ -58,12 +58,10 @@ type expr =
     | Expr_ite of expr * expr * expr (** {[if cond then expr1 else expr2]}*)
     | Expr_fun of pattern * expr (** [Expr_fun corresponds to anonymous function. {[Expr_fun(p, body)]} represents the {[fun p -> body]} *)
     | Expr_match of expr * case list (** [Expr_match] corresponds to match expressions like {[match x with | 0 -> 0 | 1 -> 1 | n -> n]} *)
-    | Expr_app of expr * fun_args (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
+    | Expr_app of expr * expr (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
     | Expr_constrained of expr * typ (** Produced after typechecking routine*)
 [@@deriving show]
 
-and fun_args = expr * expr list
-[@@deriving show]
 
 and binding = pattern * expr
 [@@deriving show]
@@ -79,7 +77,7 @@ type structure = structure_item list
 [@@deriving show]
 
 
-val eapp : expr -> fun_args -> expr
+val eapp : expr -> expr list -> expr
 
 val econs : expr -> expr -> expr
 val enil : expr

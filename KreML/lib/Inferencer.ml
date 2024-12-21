@@ -125,12 +125,12 @@ module Type = struct
   | Typ_fun(x, y) -> occurs id x || occurs id y
   | Typ_list(x) -> occurs id x
   | Typ_tuple(x, y, rest) -> Base.List.exists (x::y::rest) ~f:(occurs id)
-  | Typ_nil -> false
+  | Typ_unit -> false
 
 
   let free_vars t =
     let rec helper acc = function
-    | Typ_bool | Typ_int | Typ_nil -> acc
+    | Typ_bool | Typ_int | Typ_unit -> acc
     | Typ_var v -> Varset.add v acc
     | Typ_fun(x, y) -> let acc = helper acc x in helper acc y
     | Typ_list(x) -> helper acc x
@@ -295,7 +295,7 @@ end
 
 open R.Syntax
 
-let split_cons (Pat_cons(_, _) as cons) =
+let split_cons cons =
   let rec helper acc = function
   | Pat_cons(x, Pat_nil) -> acc @ [x], Pat_nil
   | Pat_cons(x, (Pat_var _ as tail)) -> acc @ [x], tail
@@ -366,8 +366,14 @@ let infer_expr env expr : (Subst.t * typ) R.t =
   | Expr_var id ->
     let lookup = TypeEnv.lookup id env in
     lookup
-  | Expr_cons(_, _) as cons ->
-    let elems, tail = flat_cons cons in
+  | Expr_cons(x,xs) ->
+    let* x_s, x_t = helper env x in
+    let* xs_s, xs_t = helper env xs in
+    let* composed = Subst.compose x_s xs_s in
+    let* uni = Subst.unify_one xs_t (Typ_list(x_t)) in
+    let* final_subst = Subst.compose composed uni in
+    R.return (final_subst, Subst.apply xs_t final_subst)
+    (* let elems, tail = flat_cons cons in
     let* (elem_s, elem_types) = R.foldr elems ~init:(R.return ([], [])) ~f: (fun elem (substs, types) ->
       let* s, t = helper env elem in
       R.return (s::substs, t::types)) in
@@ -376,7 +382,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let final_typ = Typ_list(representative) in
     let* tail_unification_subst = Subst.unify_one tail_typ final_typ in
     let* final_subst = Subst.compose_all (elem_s @ [elem_unification_subst; tail_s; tail_unification_subst]) in
-    R.return (final_subst, final_typ)
+    R.return (final_subst, final_typ) *)
   | Expr_tuple(fst, snd, rest) ->
       let infered = List.map (fst::snd::rest) ~f:(helper env) in
       let* substs, types = List.fold_right infered ~init:(R.return ([], [])) ~f:(fun r acc ->
@@ -388,12 +394,15 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       | _ -> unreachable() in
       let* composed_subst = Subst.compose_all substs in
       (composed_subst, typ) |> R.return
-  | Expr_let(NonRecursive, (p, v), scope) ->
-    let* env, t1 = infer_pattern env p in
-    let* subst, t2 = helper env v in
-    let* unified = Subst.unify_one t1 t2 in
+  | Expr_let(NonRecursive, (_, v), scope) ->
+    let* subst, _ = helper env v in
+    let env = TypeEnv.apply subst env in
+    (* let tv = TypeEnv.generalize tv env in
+    let env = TypeEnv exte
+    let* env, tp = infer_pattern env p in *)
+
     let* scope_subst, scope_typ = helper env scope in
-    let* final_subst = Subst.compose_all [subst; unified; scope_subst] in
+    let* final_subst = Subst.compose_all [subst; scope_subst] in
     R.return (final_subst, scope_typ)
   | Expr_ite(cond, th, el) ->
       let* cond_subst, cond_typ = helper env cond in
@@ -402,12 +411,12 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* cond_uni = Subst.unify_one cond_typ Typ_bool in
       let* values_uni = Subst.unify_one th_typ el_typ in
       let* final_subst = Subst.compose_all [cond_subst; th_subst; el_subst; cond_uni; values_uni] in
-      R.return (final_subst, th_typ)
+      R.return (final_subst, Subst.apply th_typ final_subst)
   | Expr_fun(param, expr) ->
     let* env, pat_typ = infer_pattern env param in
     let* s, expr_typ = helper env expr in
-    (* let env = TypeEnv.apply s env in *)
-    R.return (s, Typ_fun(pat_typ, expr_typ))
+    let refined = Subst.apply pat_typ s in
+    R.return (s, Typ_fun(refined, expr_typ))
   | Expr_match(expr, cases) ->
     let* expr_subst, expr_typ = helper env expr in
     let* pat_types, expr_types, substs =
@@ -419,24 +428,14 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* unified_values_subst, representative = Subst.unify_many expr_types in
     let* final_subst = Subst.compose_all (expr_subst::substs @ [unified_patterns_subst; unified_values_subst]) in
     R.return (final_subst, representative)
-  | Expr_app(id, (arg, args)) ->
+  | Expr_app(f, arg) ->
     let* body_typ = fresh_var() in
-    let args = arg::args in
-    let* id_s, id_t = helper env id in
-    let* arg_s, arg_types = R.foldr args ~init:(R.return (Subst.empty, [])) ~f:(fun arg (acc_s, types) ->
-      let* s, t = helper env arg in
-      let* composed = Subst.compose acc_s s in
-      R.return (composed, t::types)) in
-    let last_arg, rest_args =
-      match arg_types |> List.rev with
-      | [] -> unreachable()
-      | fst::rest -> fst, rest in
-    let fun_typ = List.fold_left rest_args ~init:(tfun last_arg body_typ) ~f:tfun in
-    let* f_s = Subst.unify_one id_t fun_typ in
-    let* final_subst = Subst.compose_all [id_s; arg_s; f_s] in
-    R.return (final_subst, fun_typ)
+    let* f_s, f_t = helper env f in
+    let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in
+    let fun_typ = Typ_fun(arg_t, body_typ) in
+    let* uni_subst = Subst.unify_one fun_typ f_t in
+    let* final_subst = Subst.compose_all [f_s; arg_s; uni_subst] in
+    R.return (final_subst, Subst.apply body_typ final_subst)
   | _  -> unreachable()
-    
   in helper env expr
-
 
