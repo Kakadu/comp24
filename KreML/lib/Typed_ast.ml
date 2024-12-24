@@ -1,14 +1,8 @@
-open Ast
 
 
-module Varset = struct
-  include Stdlib.Set.Make(Int)
+let rec is_even a =
+  is_odd (a - 1)
+and is_odd a =
+  is_even (a-1)
 
-  let pp ppf s =
-    Format.fprintf ppf "[ ";
-    iter (Format.fprintf ppf "%d; ") s;
-    Format.fprintf ppf "]"
-
-end
-
-type scheme = S of Varset.t * typ
+and x = 6

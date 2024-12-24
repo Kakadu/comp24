@@ -51,7 +51,7 @@ module Subst : sig
   val find : type_id -> t -> typ option
   val remove : type_id -> t -> t
   val unify_many : typ list -> (t * typ) R.t
-  val unify_one : typ -> typ -> t R.t
+  val unify_pair : typ -> typ -> t R.t
   val apply : typ -> t -> typ
   val compose : t -> t -> t R.t
   val pp : Stdlib.Format.formatter -> t -> unit
@@ -74,7 +74,7 @@ module TypeEnv : sig
   val empty : t
   val free_vars: t -> Varset.t
   val extend : var_name -> Scheme.t -> t -> t
-  val extend_pattern : pattern -> t -> t
+  val extend_pattern : pattern -> typ -> t -> t
   val generalize: typ -> t -> Scheme.t
   val pp : Stdlib.Format.formatter -> t -> unit
 end
@@ -82,4 +82,4 @@ end
 
 val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ) R.t
 
-val infer_program: structure -> (TypeEnv.t) R.t
+val infer_program: structure -> (Subst.t * TypeEnv.t) R.t
