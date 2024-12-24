@@ -295,7 +295,7 @@ let%expect_test "complex expr" =
 
 let%expect_test "fold" =
    let input = 
-      "let fold l folder init =
+      "let rec fold l folder init =
          match l with
          | x::xs ->
             let acc = folder init x in
@@ -304,7 +304,7 @@ let%expect_test "fold" =
    in
    show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
   [%expect {|
-    [(Ast.Str_value (Ast.NonRecursive,
+    [(Ast.Str_value (Ast.Recursive,
         [((Ast.Pat_var "fold"),
           (Ast.Expr_fun ((Ast.Pat_var "l"),
              (Ast.Expr_fun ((Ast.Pat_var "folder"),
