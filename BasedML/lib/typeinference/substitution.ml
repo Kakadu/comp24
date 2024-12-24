@@ -38,7 +38,7 @@ let rec occurs_check tv tp =
     List.fold_left (fun acc tp -> or_occurs_status acc (rec_call tp)) NotFound t_lst
   | TFunction (tp1, tp2) -> or_occurs_status (rec_call tp1) (rec_call tp2)
   | TList tp -> rec_call tp
-  | TBool | TInt | TPoly _ -> NotFound
+  | TBool | TInt | TPoly _ | TUnit -> NotFound
 ;;
 
 let rec unify : type_name -> type_name -> (subs_state, type_name) t =

@@ -1,0 +1,7 @@
+(library
+ (name restore_src_test)
+ (libraries base restore_src parser)
+ (modules test)
+ (preprocess
+  (pps ppx_expect))
+ (inline_tests))

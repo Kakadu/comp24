@@ -8,22 +8,17 @@
   >  | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
   >    in fiboCPS n (fun x -> x)
   > EOF
-  [""( * )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-   ""( + )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-   ""( - )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-   ""( / )"": (TFunction (TInt, (TFunction (TInt, TInt)))),
-   ""( :: )"": (TFunction ((TPoly "_p27"),
-                  (TFunction ((TList (TPoly "_p27")), (TList (TPoly "_p27"))))
-                  )),
-   ""( < )"": (TFunction ((TPoly "_p28"), (TFunction ((TPoly "_p28"), TBool)))),
-   ""( <= )"": (TFunction ((TPoly "_p29"), (TFunction ((TPoly "_p29"), TBool))
-                  )),
-   ""( <> )"": (TFunction ((TPoly "_p2a"), (TFunction ((TPoly "_p2a"), TBool))
-                  )),
-   ""( = )"": (TFunction ((TPoly "_p2b"), (TFunction ((TPoly "_p2b"), TBool)))),
-   ""( > )"": (TFunction ((TPoly "_p2c"), (TFunction ((TPoly "_p2c"), TBool)))),
-   ""( >= )"": (TFunction ((TPoly "_p2d"), (TFunction ((TPoly "_p2d"), TBool))
-                  )),
-   ""fibo"": (TFunction (TInt, TInt)),
+  [""( * )"": (int -> (int -> int)),
+   ""( + )"": (int -> (int -> int)),
+   ""( - )"": (int -> (int -> int)),
+   ""( / )"": (int -> (int -> int)),
+   ""( :: )"": ('_p27 -> (('_p27 list) -> ('_p27 list))),
+   ""( < )"": ('_p28 -> ('_p28 -> bool)),
+   ""( <= )"": ('_p29 -> ('_p29 -> bool)),
+   ""( <> )"": ('_p2a -> ('_p2a -> bool)),
+   ""( = )"": ('_p2b -> ('_p2b -> bool)),
+   ""( > )"": ('_p2c -> ('_p2c -> bool)),
+   ""( >= )"": ('_p2d -> ('_p2d -> bool)),
+   ""fibo"": (int -> int),
    ]
 
