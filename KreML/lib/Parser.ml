@@ -90,10 +90,10 @@ let typ =
     let int = stoken "int" >>| fun _-> Ast.Typ_int in
     let bool = stoken "bool"  >>| fun _ -> Ast.Typ_bool in
     let atom = int <|> bool <|> (parens self) in
-    let typ = 
-      (lift2 (fun elem dims -> Base.List.fold ~f:(fun acc _ -> Typ_list(acc)) ~init:elem dims)
+    let typ = chainl1 atom (stoken "list" *> return (fun acc _ -> Typ_list(acc)))  in
+      (* (lift2 (fun elem dims -> Base.List.fold ~f:(fun acc _ -> Typ_list(acc)) ~init:elem dims)
       atom
-      (many (stoken "list"))) in
+      (many (stoken "list"))) in *)
     let typ = 
       (tuple (stoken "*") typ >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest))
       <|> atom in
@@ -175,12 +175,9 @@ let expr =
     let ident = (ident >>= fun i -> Expr_var i |> return) in
     let const = (const >>= fun c -> Expr_const c |> return) in
     let list = elist self in
-    let app =
-      (lift2 (fun f args -> eapp f args)
-      (ident <|> anonymous_fun self)
-      (many self)) in
-    let atom = choice [app; ident; const; list; parens self; anonymous_fun self;] in
-    let atom = expr_with_ops atom in
+    let atom = choice [ident; const; list; parens self; anonymous_fun self;] in
+    let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) in
+    let atom = expr_with_ops try_app in
     let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)
     let atom = (* tuple *)
       (lift3 (fun fst snd rest -> etuple fst snd rest)
@@ -200,9 +197,9 @@ let expr =
 
 let program : structure t =
   let str_item =
-    let* (is_rec, _, _) as fst = letdef (keyword "let") expr in
+    let* is_rec, _, _ as fst = letdef (keyword "let") expr in
     let* rest = many (ws *> letdef (keyword "and")  expr) in
     let bindings = Str_value(is_rec, (fst::rest) |> List.map (fun (_, name, e) -> name, e)) in
     return bindings
   in
-  many1 str_item
+  many1 str_item <* ws

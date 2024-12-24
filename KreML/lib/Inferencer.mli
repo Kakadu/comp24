@@ -5,6 +5,7 @@ type error =
   | Unification_failed of typ * typ
   | Tuple_unequal_lens of typ * typ
   | Variable_not_found of ident
+[@@deriving show]
 
 
 module R : sig
@@ -19,6 +20,7 @@ module R : sig
 
   val foldl: 'a list -> init: 'b t -> f:('b -> 'a -> 'b t) -> 'b t
   val fresh: type_id t
+  val run : 'a t -> ('a, error) Result.t
 end 
 
 module Varset : sig
@@ -52,9 +54,11 @@ module Subst : sig
   val unify_one : typ -> typ -> t R.t
   val apply : typ -> t -> typ
   val compose : t -> t -> t R.t
+  val pp : Stdlib.Format.formatter -> t -> unit
 end
 
 type scheme = Scheme of Varset.t * typ (** Forall quantified vars * [typ] *)
+[@@deriving show]
 
 module Scheme : sig
   type t
@@ -67,10 +71,15 @@ type var_name = string
 
 module TypeEnv : sig
   type t
+  val empty : t
   val free_vars: t -> Varset.t
   val extend : var_name -> Scheme.t -> t -> t
+  val extend_pattern : pattern -> t -> t
   val generalize: typ -> t -> Scheme.t
+  val pp : Stdlib.Format.formatter -> t -> unit
 end
 
 
 val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ) R.t
+
+val infer_program: structure -> (TypeEnv.t) R.t
