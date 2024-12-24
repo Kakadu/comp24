@@ -80,91 +80,94 @@ let%expect_test "operations" =
   List.iter (fun i -> show_res ~input:i ~parser:(expr_with_ops ident_as_expr) ~to_string:show_expr |> print_endline ) inputs;
   [%expect {|
     (Ast.Expr_var "a")
-    (Ast.Expr_app ((Ast.Expr_var "b"),
-       (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))))
-    (Ast.Expr_app ((Ast.Expr_var "e"),
-       (Ast.Expr_app (
-          (Ast.Expr_app ((Ast.Expr_var "d"),
-             (Ast.Expr_app (
-                (Ast.Expr_app ((Ast.Expr_var "c"),
-                   (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_var "b"),
-                         (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))
-                         )),
-                      (Ast.Expr_var "+")))
-                   )),
-                (Ast.Expr_var "+")))
-             )),
-          (Ast.Expr_var "+")))
-       ))
+    (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+       (Ast.Expr_var "b")))
     (Ast.Expr_app (
-       (Ast.Expr_app ((Ast.Expr_var "c"),
-          (Ast.Expr_app ((Ast.Expr_var "b"), (Ast.Expr_var "*"))))),
-       (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))))
-    (Ast.Expr_app ((Ast.Expr_var "c"),
-       (Ast.Expr_app (
-          (Ast.Expr_app ((Ast.Expr_var "b"),
-             (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "/"))))),
-          (Ast.Expr_var "*")))
-       ))
-    (Ast.Expr_app ((Ast.Expr_var "d"),
-       (Ast.Expr_app (
-          (Ast.Expr_app ((Ast.Expr_var "c"),
-             (Ast.Expr_app (
-                (Ast.Expr_app ((Ast.Expr_var "b"),
-                   (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "*"))))),
-                (Ast.Expr_var "*")))
-             )),
-          (Ast.Expr_var "-")))
-       ))
-    (Ast.Expr_app ((Ast.Expr_var "b"),
-       (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "<=")))))
-    (Ast.Expr_app (
-       (Ast.Expr_app ((Ast.Expr_var "w"),
-          (Ast.Expr_app ((Ast.Expr_var "z"), (Ast.Expr_var "+"))))),
-       (Ast.Expr_app ((Ast.Expr_var "x"), (Ast.Expr_var "<=")))))
-    (Ast.Expr_app ((Ast.Expr_var "u"),
-       (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var "+"),
           (Ast.Expr_app (
-             (Ast.Expr_app ((Ast.Expr_var "y"),
-                (Ast.Expr_app ((Ast.Expr_var "x"), (Ast.Expr_var "+"))))),
-             (Ast.Expr_app (
-                (Ast.Expr_app ((Ast.Expr_var "c"),
-                   (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_var "b"),
-                         (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))
-                         )),
-                      (Ast.Expr_var "*")))
-                   )),
-                (Ast.Expr_var "-")))
-             )),
-          (Ast.Expr_var ">=")))
-       ))
-    (Ast.Expr_app (
-       (Ast.Expr_app ((Ast.Expr_var "b"),
-          (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "="))))),
-       (Ast.Expr_app (
-          (Ast.Expr_app (
-             (Ast.Expr_app ((Ast.Expr_var "k"),
+             (Ast.Expr_app ((Ast.Expr_var "+"),
                 (Ast.Expr_app (
-                   (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_var "w"),
-                         (Ast.Expr_app ((Ast.Expr_var "y"), (Ast.Expr_var "-")))
-                         )),
-                      (Ast.Expr_app ((Ast.Expr_var "x"), (Ast.Expr_var "+"))))),
-                   (Ast.Expr_var ">=")))
+                   (Ast.Expr_app ((Ast.Expr_var "+"),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_var "b")))
+                      )),
+                   (Ast.Expr_var "c")))
+                )),
+             (Ast.Expr_var "d")))
+          )),
+       (Ast.Expr_var "e")))
+    (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+       (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "*"), (Ast.Expr_var "b"))),
+          (Ast.Expr_var "c")))
+       ))
+    (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var "*"),
+          (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "/"), (Ast.Expr_var "a"))),
+             (Ast.Expr_var "b")))
+          )),
+       (Ast.Expr_var "c")))
+    (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var "-"),
+          (Ast.Expr_app (
+             (Ast.Expr_app ((Ast.Expr_var "*"),
+                (Ast.Expr_app (
+                   (Ast.Expr_app ((Ast.Expr_var "*"), (Ast.Expr_var "a"))),
+                   (Ast.Expr_var "b")))
+                )),
+             (Ast.Expr_var "c")))
+          )),
+       (Ast.Expr_var "d")))
+    (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "<="), (Ast.Expr_var "a"))),
+       (Ast.Expr_var "b")))
+    (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "<="), (Ast.Expr_var "x"))),
+       (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "z"))),
+          (Ast.Expr_var "w")))
+       ))
+    (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var ">="),
+          (Ast.Expr_app (
+             (Ast.Expr_app ((Ast.Expr_var "-"),
+                (Ast.Expr_app (
+                   (Ast.Expr_app ((Ast.Expr_var "*"),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_var "b")))
+                      )),
+                   (Ast.Expr_var "c")))
                 )),
              (Ast.Expr_app (
-                (Ast.Expr_app ((Ast.Expr_var "c"),
+                (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "x"))),
+                (Ast.Expr_var "y")))
+             ))
+          )),
+       (Ast.Expr_var "u")))
+    (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var "||"),
+          (Ast.Expr_app (
+             (Ast.Expr_app ((Ast.Expr_var "&&"),
+                (Ast.Expr_app (
+                   (Ast.Expr_app ((Ast.Expr_var "="),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_var "b")))
+                      )),
+                   (Ast.Expr_var "c")))
+                )),
+             (Ast.Expr_app (
+                (Ast.Expr_app ((Ast.Expr_var ">="),
                    (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_var "b"),
-                         (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))
-                         )),
-                      (Ast.Expr_var "=")))
+                      (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "x"))),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "-"), (Ast.Expr_var "y"))),
+                         (Ast.Expr_var "w")))
+                      ))
                    )),
-                (Ast.Expr_var "&&")))
-             )),
-          (Ast.Expr_var "||")))
+                (Ast.Expr_var "k")))
+             ))
+          )),
+       (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "="), (Ast.Expr_var "a"))),
+          (Ast.Expr_var "b")))
        )) |}]
 
 let%expect_test "simple expressions" =
@@ -178,10 +181,10 @@ let%expect_test "simple expressions" =
     (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 5)),
        (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 6)),
           (Ast.Expr_cons (
-             (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 8)),
-                (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 7)),
-                   (Ast.Expr_var "+")))
-                )),
+             (Ast.Expr_app (
+                (Ast.Expr_app ((Ast.Expr_var "+"),
+                   (Ast.Expr_const (Ast.Const_int 7)))),
+                (Ast.Expr_const (Ast.Const_int 8)))),
              Ast.Expr_nil))
           ))
        ))
@@ -203,8 +206,8 @@ let%expect_test "let bindings" =
        ((Ast.Pat_var "a"), (Ast.Expr_const (Ast.Const_int 5))),
        (Ast.Expr_let (Ast.NonRecursive,
           ((Ast.Pat_var "b"), (Ast.Expr_const (Ast.Const_int 6))),
-          (Ast.Expr_app ((Ast.Expr_var "b"),
-             (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var "+")))))
+          (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
+             (Ast.Expr_var "b")))
           ))
        ))
     (Ast.Expr_let (Ast.NonRecursive,
@@ -251,7 +254,8 @@ let%expect_test "match" =
        )) |}]
 
 let%expect_test "complex expr" =
-   let cases = ["let f a b = if a > 0 then [a; a] else match b with | x::y::_ -> y | _ -> 42 in f 5 [6; 7]"] in
+   let cases = ["let f a b = if a > 0 then [a; a] else match b with | x::y::_ -> y | _ -> 42 in f 5 [6; 7]"
+   ; "let f a = 5 + a in f 6"] in
    List.iter (fun input -> show_res ~input ~parser:expr ~to_string: show_expr |> print_endline) cases;
   [%expect {|
     (Ast.Expr_let (Ast.NonRecursive,
@@ -259,8 +263,9 @@ let%expect_test "complex expr" =
         (Ast.Expr_fun ((Ast.Pat_var "a"),
            (Ast.Expr_fun ((Ast.Pat_var "b"),
               (Ast.Expr_ite (
-                 (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 0)),
-                    (Ast.Expr_app ((Ast.Expr_var "a"), (Ast.Expr_var ">"))))),
+                 (Ast.Expr_app (
+                    (Ast.Expr_app ((Ast.Expr_var ">"), (Ast.Expr_var "a"))),
+                    (Ast.Expr_const (Ast.Const_int 0)))),
                  (Ast.Expr_cons ((Ast.Expr_var "a"),
                     (Ast.Expr_cons ((Ast.Expr_var "a"), Ast.Expr_nil)))),
                  (Ast.Expr_match ((Ast.Expr_var "b"),
@@ -273,11 +278,20 @@ let%expect_test "complex expr" =
               ))
            ))),
        (Ast.Expr_app (
+          (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_const (Ast.Const_int 5)))),
           (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 6)),
-             (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 7)), Ast.Expr_nil)))),
-          (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 5)), (Ast.Expr_var "f")))
+             (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 7)), Ast.Expr_nil))))
           ))
-       )) |}]
+       ))
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var "f"),
+        (Ast.Expr_fun ((Ast.Pat_var "a"),
+           (Ast.Expr_app (
+              (Ast.Expr_app ((Ast.Expr_var "+"),
+                 (Ast.Expr_const (Ast.Const_int 5)))),
+              (Ast.Expr_var "a")))
+           ))),
+       (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_const (Ast.Const_int 6)))))) |}]
 
 let%expect_test "fold" =
    let input = 
@@ -300,15 +314,15 @@ let%expect_test "fold" =
                         (Ast.Expr_let (Ast.NonRecursive,
                            ((Ast.Pat_var "acc"),
                             (Ast.Expr_app (
-                               (Ast.Expr_app ((Ast.Expr_var "x"),
+                               (Ast.Expr_app ((Ast.Expr_var "folder"),
                                   (Ast.Expr_var "init"))),
-                               (Ast.Expr_var "folder")))),
+                               (Ast.Expr_var "x")))),
                            (Ast.Expr_app (
                               (Ast.Expr_app (
-                                 (Ast.Expr_app ((Ast.Expr_var "acc"),
-                                    (Ast.Expr_var "folder"))),
-                                 (Ast.Expr_var "xs"))),
-                              (Ast.Expr_var "fold")))
+                                 (Ast.Expr_app ((Ast.Expr_var "fold"),
+                                    (Ast.Expr_var "xs"))),
+                                 (Ast.Expr_var "folder"))),
+                              (Ast.Expr_var "acc")))
                            )));
                         (Ast.Pat_nil, (Ast.Expr_var "init"))]
                       ))
@@ -330,15 +344,17 @@ let%expect_test "factorial" =
         [((Ast.Pat_var "f"),
           (Ast.Expr_fun ((Ast.Pat_var "n"),
              (Ast.Expr_ite (
-                (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 0)),
-                   (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var ">"))))),
                 (Ast.Expr_app (
-                   (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 1)),
-                         (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "-")))
-                         )),
-                      (Ast.Expr_var "f"))),
-                   (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "*"))))),
+                   (Ast.Expr_app ((Ast.Expr_var ">"), (Ast.Expr_var "n"))),
+                   (Ast.Expr_const (Ast.Const_int 0)))),
+                (Ast.Expr_app (
+                   (Ast.Expr_app ((Ast.Expr_var "*"), (Ast.Expr_var "n"))),
+                   (Ast.Expr_app ((Ast.Expr_var "f"),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "-"), (Ast.Expr_var "n"))),
+                         (Ast.Expr_const (Ast.Const_int 1))))
+                      ))
+                   )),
                 (Ast.Expr_const (Ast.Const_int 1))))
              )))
           ]
@@ -361,36 +377,40 @@ let%expect_test "even_odd" =
         [((Ast.Pat_var "is_even"),
           (Ast.Expr_fun ((Ast.Pat_var "n"),
              (Ast.Expr_ite (
-                (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 0)),
-                   (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "="))))),
+                (Ast.Expr_app (
+                   (Ast.Expr_app ((Ast.Expr_var "="), (Ast.Expr_var "n"))),
+                   (Ast.Expr_const (Ast.Const_int 0)))),
                 (Ast.Expr_const (Ast.Const_bool true)),
                 (Ast.Expr_ite (
-                   (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 1)),
-                      (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "="))))),
-                   (Ast.Expr_const (Ast.Const_bool false)),
                    (Ast.Expr_app (
-                      (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 1)),
-                         (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "-")))
-                         )),
-                      (Ast.Expr_var "is_odd")))
+                      (Ast.Expr_app ((Ast.Expr_var "="), (Ast.Expr_var "n"))),
+                      (Ast.Expr_const (Ast.Const_int 1)))),
+                   (Ast.Expr_const (Ast.Const_bool false)),
+                   (Ast.Expr_app ((Ast.Expr_var "is_odd"),
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "-"), (Ast.Expr_var "n"))),
+                         (Ast.Expr_const (Ast.Const_int 1))))
+                      ))
                    ))
                 ))
              )));
           ((Ast.Pat_var "is_odd"),
            (Ast.Expr_fun ((Ast.Pat_var "n"),
               (Ast.Expr_ite (
-                 (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 1)),
-                    (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "="))))),
+                 (Ast.Expr_app (
+                    (Ast.Expr_app ((Ast.Expr_var "="), (Ast.Expr_var "n"))),
+                    (Ast.Expr_const (Ast.Const_int 1)))),
                  (Ast.Expr_const (Ast.Const_bool true)),
                  (Ast.Expr_ite (
-                    (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 0)),
-                       (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "="))))),
-                    (Ast.Expr_const (Ast.Const_bool false)),
                     (Ast.Expr_app (
-                       (Ast.Expr_app ((Ast.Expr_const (Ast.Const_int 1)),
-                          (Ast.Expr_app ((Ast.Expr_var "n"), (Ast.Expr_var "-")))
-                          )),
-                       (Ast.Expr_var "is_odd")))
+                       (Ast.Expr_app ((Ast.Expr_var "="), (Ast.Expr_var "n"))),
+                       (Ast.Expr_const (Ast.Const_int 0)))),
+                    (Ast.Expr_const (Ast.Const_bool false)),
+                    (Ast.Expr_app ((Ast.Expr_var "is_odd"),
+                       (Ast.Expr_app (
+                          (Ast.Expr_app ((Ast.Expr_var "-"), (Ast.Expr_var "n"))),
+                          (Ast.Expr_const (Ast.Const_int 1))))
+                       ))
                     ))
                  ))
               )))

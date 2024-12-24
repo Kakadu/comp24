@@ -1,0 +1,9 @@
+(executable
+ (public_name comp)
+ (name comp)
+ (modules Comp)
+ (libraries kreml_lib angstrom)
+ (preprocess
+  (pps ppx_inline_test ppx_deriving.show ppx_expect))
+ (instrumentation
+  (backend bisect_ppx)))
