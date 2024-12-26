@@ -524,7 +524,7 @@ let%expect_test "typed" =
         (b: int * int * bool)
         (c: (int * int) list)
         (f : (int -> int) -> int -> int) : int =
-         todo"] in
+         todo";] in
    List.iter (fun i -> show_res ~input:i ~parser:program ~to_string:show_structure |> print_endline) cases;
   [%expect {|
     [(Ast.Str_value (Ast.Recursive,
