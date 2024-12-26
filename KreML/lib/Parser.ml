@@ -36,6 +36,7 @@ let number =
 
 
 let parens p = ws *> char '(' *> p <* char ')'
+let braces p = ws *> char '[' *> p <* char ']'
 
 let ident =
     ws *>
@@ -65,6 +66,17 @@ let chainl1 e op =
   in 
   e >>= fun init -> go init
 
+(* let chainl2 e op =
+  let open Stdlib.Format in
+  let fmt = std_formatter in
+  let rec go acc =
+    (lift2 (fun f x -> f acc x) op e >>= go) <|> return acc
+  in  
+  e >>= fun e1 ->
+    let() = fprintf fmt "fst " in op >>= fun o ->
+      let() = fprintf fmt "ws " in e >>= fun e2 ->
+        let() = fprintf fmt "snd " in go (o e1 e2) *)
+
 let rec chainr1 e op =
   e >>= fun lhs -> op >>= (fun o -> chainr1 e op >>| o lhs) <|> return lhs
 
@@ -87,30 +99,32 @@ let arrow p =
 
 let typ =
   fix (fun self ->
-    let int = stoken "int" >>| fun _-> Ast.Typ_int in
-    let bool = stoken "bool"  >>| fun _ -> Ast.Typ_bool in
-    let atom = int <|> bool <|> (parens self) in
-    let typ = chainl1 atom (stoken "list" *> return (fun acc _ -> Typ_list(acc)))  in
+    let int = keyword "int" >>| fun _-> Typ_int in
+    let bool = keyword "bool"  >>| fun _ -> Typ_bool in
+    let atom =  choice [int; bool; parens self] in
+    let typ =
+       lift2 (fun elem dims -> List.fold_left (fun t _ -> Typ_list(t)) elem dims)
+       atom
+      (many (stoken "list" <* ws)) in
       (* (lift2 (fun elem dims -> Base.List.fold ~f:(fun acc _ -> Typ_list(acc)) ~init:elem dims)
       atom
       (many (stoken "list"))) in *)
     let typ = 
       (tuple (stoken "*") typ >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest))
-      <|> atom in
-    let typ = arrow typ in
-    typ
+      <|> typ in
+    arrow typ
     )
 
 let pattern =
   fix (fun self ->
+        let nil =  ((parens ws <|> braces ws) >>| fun _ -> pnil) in
         let atom =
-          ws *> (parens ws >>= fun _ -> return pnil)
-          <|> parens self (* parens *)
-          <|> (const >>| pconst)  (* const *)
-          <|> (ident >>| pvar) (* identifier *)
-          <|> (keyword "_"  *> return Pat_wildcard) in (* wildcard *)
-        let nil = stoken "[" *> ws *> stoken "]" >>= fun _ -> return pnil in
-        let pattern = nil <|> chainr1 atom (stoken "::" *> return pcons) in (* cons *)
+          ws *> nil
+            <|> parens self (* parens *)
+            <|> (const >>| pconst)  (* const *)
+            <|> (ident >>| pvar) (* identifier *)
+            <|> (keyword "_"  *> return Pat_wildcard) in (* wildcard *)
+        let pattern = chainr1 atom (stoken "::" *> return pcons) in (* cons *)
         let pattern = (* try tuple *)
            (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest)
             <|> pattern in
@@ -129,7 +143,9 @@ let prio = [["*", mul; "/", div]
           ;["+", add; "-", sub]
           ; ["=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le]
           ; ["&&", eland]
-          ; ["||", elor]]
+          ; ["||", elor];
+           ["", (fun x y -> eapp x [y])]
+          ;]
   |> List.map (fun ops -> op_list_to_parser ops)
 
 let ident_as_expr = ws *> parens ident <|> ident >>| (fun i -> Expr_var i)
@@ -170,29 +186,33 @@ let anonymous_fun expr =
   (keyword "fun" *> many1 (ws *> pattern))
   (stoken "->" *> ws *> expr)
 
+(* let anon_app expr atom =
+  anonymous_fun expr >>= fun e -> ws *> many1 atom >>= fun l ->
+    eapp e l |> return *)
+
+let fun_app pexpr =
+  pexpr >>= fun t -> pexpr >>= fun ec -> eapp t [ec] |> return
+
 let expr =
   fix (fun self ->
-    let ident = (ident >>= fun i -> Expr_var i |> return) in
-    let const = (const >>= fun c -> Expr_const c |> return) in
+    let ident = (ident >>| fun i -> Expr_var i) in
+    let const = (const >>| fun c -> Expr_const c) in
     let list = elist self in
-    let atom = choice [ident; const; list; parens self; anonymous_fun self;] in
-    let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) in
+
+    let atom = choice [parens self; ident; const; list; anonymous_fun self;] in
+    let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) <|> atom in
     let atom = expr_with_ops try_app in
     let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)
     let atom = (* tuple *)
-      (lift3 (fun fst snd rest -> etuple fst snd rest)
-      atom
-      (stoken "," *> ws *> atom)
-      (many (stoken "," *> ws *> atom))) 
-      <|> atom
+      (tuple (stoken ",") atom >>| (fun (fst, snd, rest) -> etuple fst snd rest))
+       <|> atom
     in
-    parens self
-    <|> atom (* atom *) 
+    atom (* atom *) 
     <|> eite self (* ite *)
     <|> ematch self (* match *)
     <|> (letdef (keyword "let") self >>= fun (rec_flag, name, value) -> (* local binding *)
       stoken "in" *> self >>= fun scope -> elet ~rec_flag (name, value) scope |> return)
-    <|> fail "undefined"
+    <* ws
   )
 
 let program : structure t =

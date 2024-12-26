@@ -26,7 +26,7 @@ let ()=
          if n = 1 then true
          else if n = 0 then false
          else is_odd (n - 1)"; *)
-    "let rec fold l folder init =
+    (* "let rec fold l folder init =
          match l with
          | x::xs ->
             let acc = folder init x in
@@ -35,5 +35,10 @@ let ()=
     let mul x y = x * y 
 
     let f = fold [1;2;3;4] mul 1
-   "] in
+   "; *)
+   (* "let id x = x
+   
+    let i = id 5" *)
+    "let rec fix f x = f (fix f) x"
+    ] in
   List.iter (fun e -> parse_expr e) examples

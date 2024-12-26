@@ -75,14 +75,18 @@ module Type = struct
   | Typ_int -> fprintf fmt "int"
   | Typ_unit -> fprintf fmt "unit"
   | Typ_var id -> fprintf fmt "%d" id
+  | Typ_fun(Typ_fun(_, _) as farg, y) ->
+    fprintf fmt "(";
+    pp fmt farg;
+    fprintf fmt ")"; 
+    fprintf fmt " -> ";
+    pp fmt y;
   | Typ_fun(x, y) ->
-    let() =  fprintf fmt "(" in
-    let() = pp fmt x in
-    let() = fprintf fmt " -> " in
-    let () = pp fmt y in
-    fprintf fmt ")" 
+    pp fmt x;
+    fprintf fmt " -> ";
+    pp fmt y
   | Typ_list x ->
-    let() = pp fmt x in
+    pp fmt x;
     fprintf fmt " list"
   | Typ_tuple(fst, snd, rest) ->
     let rec print_types list sep =
@@ -90,7 +94,7 @@ module Type = struct
       | [x] -> pp fmt x
       | x::xs ->
         let() = pp fmt x in
-        let () = fprintf fmt sep in
+        fprintf fmt sep;
         print_types xs sep
       | _ -> unreachable() in
     print_types (fst::snd::rest) " *" |> ignore
