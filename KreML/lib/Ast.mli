@@ -35,6 +35,7 @@ type pattern =
     | Pat_tuple of pattern * pattern * pattern list (** [Pat_tuple] corresponds to n-tuples like (a, b, c) *)
     | Pat_wildcard (** [Pat_wildcard] represents a _ pattern*)
     | Pat_constrained of pattern * typ (** [Pat_constrained] represents typ constraint on pattern, like [(x: int, y: bool)]*)
+    | Pat_unit
 [@@deriving show]
 
 
@@ -60,6 +61,7 @@ type expr =
     | Expr_match of expr * case list (** [Expr_match] corresponds to match expressions like {[match x with | 0 -> 0 | 1 -> 1 | n -> n]} *)
     | Expr_app of expr * expr (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
     | Expr_constrained of expr * typ (** Produced after typechecking routine*)
+    | Expr_unit
 [@@deriving show]
 
 

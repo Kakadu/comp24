@@ -101,7 +101,8 @@ let typ =
   fix (fun self ->
     let int = keyword "int" >>| fun _-> Typ_int in
     let bool = keyword "bool"  >>| fun _ -> Typ_bool in
-    let atom =  choice [int; bool; parens self] in
+    let unit = keyword "unit" >>| fun _ -> Typ_unit in
+    let atom =  choice [int; bool; unit; parens self] in
     let typ =
        lift2 (fun elem dims -> List.fold_left (fun t _ -> Typ_list(t)) elem dims)
        atom
@@ -117,9 +118,10 @@ let typ =
 
 let pattern =
   fix (fun self ->
-        let nil =  ((parens ws <|> braces ws) >>| fun _ -> pnil) in
         let atom =
-          ws *> nil
+          ws *>
+            (parens ws >>| fun _ -> Pat_unit) (* unit *)
+            <|> (braces ws >>| fun _ -> pnil) (* nil *)
             <|> parens self (* parens *)
             <|> (const >>| pconst)  (* const *)
             <|> (ident >>| pvar) (* identifier *)
@@ -185,13 +187,6 @@ let anonymous_fun expr =
   lift2 (fun args body -> List.fold_right efun args body)
   (keyword "fun" *> many1 (ws *> pattern))
   (stoken "->" *> ws *> expr)
-
-(* let anon_app expr atom =
-  anonymous_fun expr >>= fun e -> ws *> many1 atom >>= fun l ->
-    eapp e l |> return *)
-
-let fun_app pexpr =
-  pexpr >>= fun t -> pexpr >>= fun ec -> eapp t [ec] |> return
 
 let expr =
   fix (fun self ->
