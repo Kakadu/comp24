@@ -388,6 +388,25 @@ let%expect_test "complex expr" =
        (Ast.Expr_app ((Ast.Expr_var "fix"), (Ast.Expr_const (Ast.Const_int 3))))
        )) |}]
 
+let%expect_test "map" =
+   let input = "
+     let rec map f xs =
+      match xs with
+      | [] -> []
+      | a::[] -> [f a]
+      | a::b::[] -> [f a; f b]
+      | a::b::c::[] -> [f a; f b; f c]
+      | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
+      
+     let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
+
+      " in
+   show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
+   [%expect {|
+    [(Ast.Str_value (Ast.Recursive |} ]
+
+
+
 let%expect_test "fold" =
    let input = 
       "let rec fold l folder init =
@@ -524,7 +543,12 @@ let%expect_test "typed" =
         (b: int * int * bool)
         (c: (int * int) list)
         (f : (int -> int) -> int -> int) : int =
-         todo";] in
+         todo";
+      "let addi = fun f g x -> (f x (g x: bool) : int)
+
+      let main =
+         let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start -> _start/2 = 0) 4) in
+         0";] in
    List.iter (fun i -> show_res ~input:i ~parser:program ~to_string:show_structure |> print_endline) cases;
   [%expect {|
     [(Ast.Str_value (Ast.Recursive,
@@ -587,6 +611,65 @@ let%expect_test "typed" =
              )))
           ]
         ))
+      ]
+    [(Ast.Str_value (Ast.NonRecursive,
+        [((Ast.Pat_var "addi"),
+          (Ast.Expr_fun ((Ast.Pat_var "f"),
+             (Ast.Expr_fun ((Ast.Pat_var "g"),
+                (Ast.Expr_fun ((Ast.Pat_var "x"),
+                   (Ast.Expr_constrained (
+                      (Ast.Expr_app (
+                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "x"))),
+                         (Ast.Expr_constrained (
+                            (Ast.Expr_app ((Ast.Expr_var "g"), (Ast.Expr_var "x")
+                               )),
+                            Ast.Typ_bool))
+                         )),
+                      Ast.Typ_int))
+                   ))
+                ))
+             )))
+          ]
+        ));
+      (Ast.Str_value (Ast.NonRecursive,
+         [((Ast.Pat_var "main"),
+           (Ast.Expr_let (Ast.NonRecursive,
+              (Ast.Pat_unit,
+               (Ast.Expr_app ((Ast.Expr_var "print_int"),
+                  (Ast.Expr_app (
+                     (Ast.Expr_app (
+                        (Ast.Expr_app ((Ast.Expr_var "addi"),
+                           (Ast.Expr_fun ((Ast.Pat_var "x"),
+                              (Ast.Expr_fun ((Ast.Pat_var "b"),
+                                 (Ast.Expr_ite ((Ast.Expr_var "b"),
+                                    (Ast.Expr_app (
+                                       (Ast.Expr_app ((Ast.Expr_var "+"),
+                                          (Ast.Expr_var "x"))),
+                                       (Ast.Expr_const (Ast.Const_int 1)))),
+                                    (Ast.Expr_app (
+                                       (Ast.Expr_app ((Ast.Expr_var "*"),
+                                          (Ast.Expr_var "x"))),
+                                       (Ast.Expr_const (Ast.Const_int 2))))
+                                    ))
+                                 ))
+                              ))
+                           )),
+                        (Ast.Expr_fun ((Ast.Pat_var "_start"),
+                           (Ast.Expr_app (
+                              (Ast.Expr_app ((Ast.Expr_var "="),
+                                 (Ast.Expr_app (
+                                    (Ast.Expr_app ((Ast.Expr_var "/"),
+                                       (Ast.Expr_var "_start"))),
+                                    (Ast.Expr_const (Ast.Const_int 2))))
+                                 )),
+                              (Ast.Expr_const (Ast.Const_int 0))))
+                           ))
+                        )),
+                     (Ast.Expr_const (Ast.Const_int 4))))
+                  ))),
+              (Ast.Expr_const (Ast.Const_int 0)))))
+           ]
+         ))
       ] |}]
 
 
