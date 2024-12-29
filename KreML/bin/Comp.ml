@@ -13,7 +13,7 @@ let parse_expr input =
       let () = Format.fprintf fmt "\n" in
       Subst.pp fmt s
     | Error e -> pp_error (Stdlib.Format.std_formatter) e)
-  | Error _ -> print_endline "3228"
+  | Error _ -> print_endline "Parser failed"
 
 let ()=
   let examples = [

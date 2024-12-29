@@ -41,10 +41,13 @@ let braces p = ws *> char '[' *> p <* char ']'
 let ident =
     ws *>
     let* i =
-      let* h = satisfy is_lc_letter in
+      let* h = satisfy (fun c -> is_lc_letter c || c = '_') in
       let allowed_char c = is_digit c || is_letter c || c = '_' in
-      let* tail = many (satisfy allowed_char) in
-      return (Base.String.of_char_list  (h::tail))
+      let* tail = if h = '_' then
+        many1 (satisfy allowed_char)
+      else
+        many (satisfy allowed_char) in 
+      return (Base.String.of_char_list (h::tail))
     in
     if is_keyword i then
        fail (Format.sprintf "Expected identifier, got keyword %s" i)
@@ -66,16 +69,9 @@ let chainl1 e op =
   in 
   e >>= fun init -> go init
 
-(* let chainl2 e op =
-  let open Stdlib.Format in
-  let fmt = std_formatter in
-  let rec go acc =
-    (lift2 (fun f x -> f acc x) op e >>= go) <|> return acc
-  in  
-  e >>= fun e1 ->
-    let() = fprintf fmt "fst " in op >>= fun o ->
-      let() = fprintf fmt "ws " in e >>= fun e2 ->
-        let() = fprintf fmt "snd " in go (o e1 e2) *)
+let _start f =
+  let __ = "saddsa" in
+  __ ^ f __
 
 let rec chainr1 e op =
   e >>= fun lhs -> op >>= (fun o -> chainr1 e op >>| o lhs) <|> return lhs
@@ -166,9 +162,11 @@ let elist p =
 
 let ematch expr =
   let* matching_expr = keyword "match" *> ws *> expr <* ws <* keyword "with" in
+  let fst_case = (stoken "|" <|> ws) *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
   let case = stoken "|" *> ws *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
-  let* cases = many1 case in
-  ematch matching_expr cases |> return
+  let* fst_case = fst_case in
+  let* rest_cases = many case in
+  ematch matching_expr (fst_case::rest_cases) |> return
 
 let eite expr =
   let* cond = keyword "if" *> ws *> expr in
@@ -192,9 +190,10 @@ let expr =
   fix (fun self ->
     let ident = (ident >>| fun i -> Expr_var i) in
     let const = (const >>| fun c -> Expr_const c) in
+    let nil = parens ws  >>| fun _ -> Expr_nil in
     let list = elist self in
 
-    let atom = choice [parens self; ident; const; list; anonymous_fun self;] in
+    let atom = choice [parens self; ident; const; nil; list; anonymous_fun self;] in
     let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) <|> atom in
     let atom = expr_with_ops try_app in
     let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)
@@ -202,6 +201,9 @@ let expr =
       (tuple (stoken ",") atom >>| (fun (fst, snd, rest) -> etuple fst snd rest))
        <|> atom
     in
+    let atom =
+      (atom >>= fun a -> stoken ":" *> typ >>= fun t -> Expr_constrained(a, t) |> return) (* try type *)
+      <|> atom in 
     atom (* atom *) 
     <|> eite self (* ite *)
     <|> ematch self (* match *)

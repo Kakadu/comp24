@@ -74,8 +74,9 @@ module TypeEnv : sig
   val empty : t
   val free_vars: t -> Varset.t
   val extend : var_name -> Scheme.t -> t -> t
-  val extend_pattern : pattern -> typ -> t -> t
   val generalize: typ -> t -> Scheme.t
+  val generalize_pattern : pattern -> typ -> t -> t
+
   val pp : Stdlib.Format.formatter -> t -> unit
 end
 

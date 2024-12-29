@@ -136,7 +136,7 @@ module Subst  = struct
     fprintf fmt "\n"; *)
 
     match t1, t2 with
-    | Typ_bool, Typ_bool | Typ_int, Typ_int -> return empty
+    | Typ_bool, Typ_bool | Typ_int, Typ_int | Typ_unit, Typ_unit -> return empty
     | Typ_var x, Typ_var y when x = y -> return empty
     | Typ_var x, (_ as y)
     | (_ as y), Typ_var x -> singleton_checked x y
@@ -207,7 +207,7 @@ module Subst  = struct
 end
 
 type scheme = Scheme of Varset.t * typ (** Forall quantified vars * [typ] *)
-[@@deriving show]
+[@@deriving show] 
 
 let fresh_var() =
   let open R.Syntax in
@@ -222,13 +222,13 @@ module Scheme = struct
     Varset.diff (Type.free_vars t) bs
     
   let apply_subst subst (Scheme(bs, t)) =
-    let t = Subst.apply t subst in
+    (* let t = Subst.apply t subst in
     let new_bs = Varset.fold (fun b acc ->
        Varset.union acc  (Subst.apply (Typ_var(b)) subst |> Type.free_vars))
        bs
-       Varset.empty in
+       Varset.empty in *)
     let partial_subst = Varset.fold (fun bounded_v acc -> Subst.remove bounded_v acc) bs subst in
-    Scheme(new_bs, Subst.apply t partial_subst)
+    Scheme(bs, Subst.apply t partial_subst)
 
   let instantiate (Scheme(bs, t)) : typ R.t =
     let open R.Syntax in
@@ -249,12 +249,23 @@ type var_name = string
 module TypeEnv = struct
   type t = (var_name, Scheme.t, String.comparator_witness) Base.Map.t
 
+  let pp fmt (env : t) =
+  let env = Map.to_alist env in
+  let open Stdlib.Format in
+  fprintf
+    fmt
+    "[ %a ]"
+    (pp_print_list
+        ~pp_sep:(fun ppf () -> fprintf ppf ", ")
+        (fun ppf (k, v) -> fprintf ppf "%s -> %a\n" k Scheme.pp v))
+    env
+
   let empty : t = Base.Map.empty(module Base.String)
 
   let default : t =
     let data = ["print_int", Scheme(Varset.empty, Typ_fun(Typ_int, Typ_unit))] in
     List.fold data ~init:empty ~f:(fun acc (k, v) -> Map.set acc ~key:k ~data:v)
-  (* let find_exn name env = Base.Map.find_exn env name *)
+  let find_exn name env = Base.Map.find_exn env name
 
   let find name env = Map.find env name
 
@@ -273,30 +284,36 @@ module TypeEnv = struct
       extend key refined acc)
 
   let generalize t env =
-    (* let fv = Type.free_vars t in *)
-    (* let() = Varset.pp Stdlib.Format.std_formatter fv in
-    let() = Varset.pp Stdlib.Format.std_formatter (free_vars env) in *)
+    (* let open Stdlib.Format in
+    pp std_formatter env;
+    fprintf std_formatter "\n";
+    Type.pp std_formatter t; *)
     let quantified = Varset.diff (Type.free_vars t) (free_vars env) in
     (* let() = Varset.pp Stdlib.Format.std_formatter quantified in *)
-    Scheme(quantified, t)
+    let s = Scheme(quantified, t) in
+    (* let open Stdlib.Format in 
+    fprintf std_formatter "\n generalized ";
+    Scheme.pp std_formatter s;
+    fprintf std_formatter "\n"; *)
+    s 
 
-  let rec extend_pattern p rhs_typ env =
-    match p, rhs_typ with
+  let rec generalize_pattern p typ env =
+    match p, typ with
     | Pat_var id, t ->
       let s = generalize t env in
       extend id s env
     | Pat_cons(px, pxs), Typ_list(element_typ) ->
-      let env = extend_pattern px element_typ env in
-      extend_pattern pxs rhs_typ env
+      let env = generalize_pattern px element_typ env in
+      generalize_pattern pxs typ env
     | Pat_nil, _ | Pat_wildcard, _ -> env
     | Pat_tuple(pfst, psnd, prest), Typ_tuple(tfst, tsnd, trest) ->
       let pats = pfst::psnd::prest in
       let types = tfst::tsnd::trest in
-      List.fold2_exn pats types ~init:env ~f:(fun acc p t -> extend_pattern p t acc)
-    | Pat_constrained(p, typ), _ -> (* it is safe since infer_pattern checked compatibility*)
-      extend_pattern p typ env
+      List.fold2_exn pats types ~init:env ~f:(fun acc p t -> generalize_pattern p t acc)
+    | Pat_constrained(p, typ), _ ->
+      generalize_pattern p typ env
     | Pat_unit, _ -> env
-    |_ -> failwith (Printf.sprintf "Unsupported pattern matching %s" (show_pattern p))
+    |_ -> failwith (Printf.sprintf "Unsupported pattern matching %s with type %s" (show_pattern p) (show_typ typ))
 
   let lookup var env : (Subst.t * typ) R.t =
     let open R.Syntax in
@@ -305,24 +322,16 @@ module TypeEnv = struct
     | Some scheme -> 
       let* t = Scheme.instantiate scheme in
       R.return (Subst.empty, t)
-
-  let pp fmt (env : t) =
-    let env = Map.to_alist env in
-    let open Stdlib.Format in
-    fprintf
-     fmt
-      "[ %a ]"
-      (pp_print_list
-         ~pp_sep:(fun ppf () -> fprintf ppf ", ")
-         (fun ppf (k, v) -> fprintf ppf "%s -> %a\n" k Scheme.pp v))
-      env
 end
 
 
 open R.Syntax
 
 let rec infer_pattern env p : (TypeEnv.t * typ) R.t  = match p with 
-  | Pat_constrained(_, t) -> R.return (env, t)
+  | Pat_constrained(p, type_constraint) ->
+    let* env, type_infered = infer_pattern env p in
+    let* uni = Subst.unify_pair type_infered type_constraint in
+    R.return (TypeEnv.apply uni env, Subst.apply type_infered uni)
   | Pat_const(Const_bool _) -> R.return (env, Typ_bool)
   | Pat_const(Const_int _) -> R.return (env, Typ_int)
   | Pat_unit -> R.return (env, Typ_unit)
@@ -354,8 +363,17 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t  = match p with
     let* fr = fresh_var() in
     R.return (env, Typ_list(fr))
   
+  let extend_env_with_pattern env p =
+    let* env, _ = infer_pattern env p in
+    R.return env
+  
 let infer_expr env expr : (Subst.t * typ) R.t =
   let rec helper env expr = match expr with 
+  | Expr_constrained(e, typ_constraint) ->
+    let* s, typ_infered = helper env e in
+    let* s_uni = Subst.unify_pair typ_infered typ_constraint in
+    let* final_subst = Subst.compose_all [s_uni; s] in
+     R.return (final_subst, Subst.apply typ_constraint final_subst)
   | Expr_const(Const_bool _) -> R.return (Subst.empty, Typ_bool)
   | Expr_const(Const_int _) -> R.return (Subst.empty, Typ_int)
   | Expr_var "*" | Expr_var "/" | Expr_var "+" | Expr_var "-" -> 
@@ -389,16 +407,22 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let fmt = std_formatter in
     fprintf fmt "infering expr %s\n" (show_expr expr); *)
     let* expr_subst, expr_typ = helper env v in
-    let* env, _ = infer_pattern (TypeEnv.apply expr_subst env) p in
-    let env = TypeEnv.extend_pattern p expr_typ env in
+    let* _, p_typ = infer_pattern (TypeEnv.apply expr_subst env) p in
+    let* uni = Subst.unify_pair expr_typ p_typ in
+    let* s = Subst.compose uni expr_subst in
+    let env = TypeEnv.generalize_pattern p (Subst.apply expr_typ s) (TypeEnv.apply s env) in
     let* scope_subst, scope_typ = helper env scope in
     let* final_subst = Subst.compose_all [scope_subst; expr_subst] in
     R.return (final_subst, Subst.apply scope_typ final_subst)
   | Expr_let(Recursive, (p, v), scope) ->
-    let* env, _ = infer_pattern env p in
+    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";
+    TypeEnv.pp Stdlib.Format.std_formatter env; *)
+    let* env = extend_env_with_pattern env p in
+    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "after extending\n";
+
+    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* expr_subst, expr_typ = helper env v in
-    let env = TypeEnv.apply expr_subst env in
-    let env = TypeEnv.extend_pattern p expr_typ env in
+    let env = TypeEnv.generalize_pattern p expr_typ (TypeEnv.apply expr_subst env) in
     let* scope_subst, scope_typ = helper env scope in
     let* final_subst = Subst.compose_all [scope_subst; expr_subst] in
     R.return (final_subst,  Subst.apply scope_typ final_subst)
@@ -416,8 +440,8 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     fprintf std_formatter "fun: %s\n" (show_expr f);
     TypeEnv.pp std_formatter env; *)
     let* s, expr_typ = helper env expr in
-    let refined = Subst.apply pat_typ s in
-    R.return (s, Typ_fun(refined,  expr_typ))
+    let refined_param = Subst.apply pat_typ s in
+    R.return (s, Typ_fun(refined_param,  expr_typ))
   | Expr_match(expr, cases) ->
     let* expr_subst, expr_typ = helper env expr in
     let* pat_types, expr_types, substs =
@@ -439,8 +463,9 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* f_s, f_t = helper env f in
     let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in
     let fun_typ = Typ_fun(arg_t, body_typ) in
-    let* uni_subst = Subst.unify_pair fun_typ f_t in
+    let* uni_subst = Subst.unify_pair fun_typ (Subst.apply f_t arg_s) in
     let* final_subst = Subst.compose_all [uni_subst; arg_s; f_s] in
+    (* fprintf fmt "-----infered it has type %s\n" (show_typ (Subst.apply body_typ final_subst)); *)
     R.return (final_subst, Subst.apply body_typ final_subst)
   | p  ->
     let() = pp_expr Stdlib.Format.std_formatter p in
@@ -451,20 +476,32 @@ let infer_program (p : structure) =
   let helper (s, env) = function
   | Str_value(NonRecursive, [(p, e)]) ->
     let* e_subst, e_typ = infer_expr env e in
-    let* env, _ = infer_pattern (TypeEnv.apply e_subst env) p in
-    let env = TypeEnv.extend_pattern p e_typ env in
-    let* final_subst = Subst.compose_all [e_subst; s] in
+    let* _, p_typ = infer_pattern env p in
+    let* uni = Subst.unify_pair e_typ p_typ in
+    let* s1 = Subst.compose uni e_subst in
+    let env = TypeEnv.generalize_pattern p (Subst.apply e_typ s) (TypeEnv.apply s env) in
+    let* final_subst = Subst.compose_all [s1; s] in
     R.return (final_subst, TypeEnv.apply final_subst env)
-  | Str_value(Recursive, bindings) -> 
+  | Str_value(Recursive, bindings) ->
+    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";
+    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* env = R.foldl bindings ~init:(R.return env) ~f:(fun acc (p, _) -> 
-      let* env, _ = infer_pattern acc p in
-      R.return env) in
+      extend_env_with_pattern acc p)
+     in
+    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "after extending\n";
+    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     R.foldl bindings ~init:(R.return (Subst.empty, env)) ~f:(fun (acc_s, acc_env) (p, e) ->
-      let* e_subst, e_typ = infer_expr acc_env e in
-      let* env, _ = infer_pattern (TypeEnv.apply e_subst env) p in
-      let env = TypeEnv.extend_pattern p e_typ env in
-      let* final_subst = Subst.compose_all [e_subst; acc_s] in
-      R.return (final_subst, TypeEnv.apply final_subst env))
+      match p with
+      | Pat_var id ->
+        let* e_subst, e_typ = infer_expr acc_env e in
+        let Scheme(_, t) = TypeEnv.find_exn id env in
+        let* uni = Subst.unify_pair t e_typ in
+        let* s1 = Subst.compose uni e_subst in
+        (* DO NOT APPLY SUBST TO ENV *)
+        let env = TypeEnv.generalize_pattern p (Subst.apply e_typ s1) acc_env in
+        let* final_subst = Subst.compose_all [s1; acc_s] in
+        R.return (final_subst, TypeEnv.apply final_subst env)
+      | _ -> (Stdlib.Format.sprintf "Unsupported rec pattern %s" (show_pattern p)) |> failwith)
   | _ -> unreachable()
     in R.foldl p ~init:(R.return (Subst.empty, TypeEnv.default)) ~f:helper
     
