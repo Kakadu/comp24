@@ -190,10 +190,10 @@ let expr =
   fix (fun self ->
     let ident = (ident >>| fun i -> Expr_var i) in
     let const = (const >>| fun c -> Expr_const c) in
-    let nil = parens ws  >>| fun _ -> Expr_nil in
+    let unit = parens ws  >>| fun _ -> Expr_unit in
     let list = elist self in
 
-    let atom = choice [parens self; ident; const; nil; list; anonymous_fun self;] in
+    let atom = choice [parens self; ident; const; unit; list; anonymous_fun self;] in
     let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) <|> atom in
     let atom = expr_with_ops try_app in
     let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)

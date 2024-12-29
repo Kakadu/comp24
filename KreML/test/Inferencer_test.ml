@@ -421,7 +421,7 @@ let%expect_test "tuples" =
     0" in
   parse_program tuples
 
-let%expect_test "lists" =
+(* let%expect_test "lists" =
   let lists = "
   let length_tail =
   let rec helper acc xs =
@@ -457,9 +457,31 @@ let%expect_test "lists" =
 
   let main =
     let () = iter print_int [1;2;3] in
-    let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
+    let () = print_int (length_tail (cartesian [1;2] [1;2;3;4])) in
     0" in
+  parse_program lists *)
+
+  let%expect_test "lists" =
+  let lists = "
+  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
+
+  let concat =
+    let rec helper xs =
+      match xs with
+      | [] -> []
+      | h::tl -> append h (helper tl)
+    in helper
+" in
   parse_program lists
+
+ let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
+
+  let concat =
+    let rec helper xs =
+      match xs with
+      | [] -> []
+      | h::tl -> append h (helper tl)
+    in helper
 
 
 

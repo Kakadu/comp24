@@ -180,7 +180,7 @@ module Subst  = struct
     let* acc = acc in
     compose acc s)
 
-  let unify_many types : (t * typ) R.t =
+  (* let unify_many types : (t * typ) R.t =
     let open R.Syntax in
     let rec helper (repr, s) = function
     | [] -> R.return (s, repr)
@@ -191,7 +191,7 @@ module Subst  = struct
     in
     match types with
     | x::xs -> helper (x, empty) xs
-    | _ -> unreachable()
+    | _ -> unreachable() *)
 
   let pp ppf (subst : t) =
     let subst = Map.to_alist subst in
@@ -298,8 +298,10 @@ module TypeEnv = struct
     s 
 
   let rec generalize_pattern p typ env =
+    (* let open Stdlib.Format in *)
+    (* fprintf std_formatter "generalizing pattern %s, typ %s \n" (show_pattern p) (show_typ typ); *)
     match p, typ with
-    | Pat_var id, t ->
+    | Pat_var id, t -> 
       let s = generalize t env in
       extend id s env
     | Pat_cons(px, pxs), Typ_list(element_typ) ->
@@ -374,6 +376,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* s_uni = Subst.unify_pair typ_infered typ_constraint in
     let* final_subst = Subst.compose_all [s_uni; s] in
      R.return (final_subst, Subst.apply typ_constraint final_subst)
+  | Expr_unit -> R.return (Subst.empty, Typ_unit)
   | Expr_const(Const_bool _) -> R.return (Subst.empty, Typ_bool)
   | Expr_const(Const_int _) -> R.return (Subst.empty, Typ_int)
   | Expr_var "*" | Expr_var "/" | Expr_var "+" | Expr_var "-" -> 
@@ -414,17 +417,19 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* scope_subst, scope_typ = helper env scope in
     let* final_subst = Subst.compose_all [scope_subst; expr_subst] in
     R.return (final_subst, Subst.apply scope_typ final_subst)
-  | Expr_let(Recursive, (p, v), scope) ->
+  | Expr_let(Recursive, (Pat_var id as p, v), scope) ->
     (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";
     TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* env = extend_env_with_pattern env p in
     (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "after extending\n";
-
     TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* expr_subst, expr_typ = helper env v in
-    let env = TypeEnv.generalize_pattern p expr_typ (TypeEnv.apply expr_subst env) in
+    let (Scheme(_, t)) = TypeEnv.find_exn id env in
+    let* uni = Subst.unify_pair t expr_typ in
+    let* composed = Subst.compose uni expr_subst in
+    let env = TypeEnv.generalize_pattern p (Subst.apply expr_typ composed) (TypeEnv.apply composed env) in
     let* scope_subst, scope_typ = helper env scope in
-    let* final_subst = Subst.compose_all [scope_subst; expr_subst] in
+    let* final_subst = Subst.compose_all [scope_subst; composed] in
     R.return (final_subst,  Subst.apply scope_typ final_subst)
   | Expr_ite(cond, th, el) ->
       let* cond_subst, cond_typ = helper env cond in
@@ -442,34 +447,30 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* s, expr_typ = helper env expr in
     let refined_param = Subst.apply pat_typ s in
     R.return (s, Typ_fun(refined_param,  expr_typ))
-  | Expr_match(expr, cases) ->
-    let* expr_subst, expr_typ = helper env expr in
-    let* pat_types, expr_types, substs =
-      R.foldr cases ~init:(R.return ([], [], [])) ~f:(fun (p, e) (pats, exprs, substs) ->
-        let* env, ptyp = infer_pattern env p in
-        let* subst, etyp = helper env e in
-        R.return (ptyp::pats, etyp::exprs, subst::substs)) in
-    let* unified_patterns_subst, _ = Subst.unify_many (expr_typ::pat_types) in
-    let* unified_values_subst, representative = Subst.unify_many expr_types in
-    let substs = expr_subst::substs @ [unified_patterns_subst; unified_values_subst] |> List.rev in
-    let* final_subst = Subst.compose_all substs in
-    R.return (final_subst, Subst.apply representative final_subst)
+  | Expr_match(match_expr, cases) ->
+    let* match_expr_subst, match_expr_typ = helper env match_expr in
+    let* fv = fresh_var() in
+    R.foldl cases ~init:(R.return (match_expr_subst, fv)) ~f:(fun (subst, typ) (p, e) ->
+      let* env, pat_typ = infer_pattern env p in
+      let* s1 = Subst.unify_pair pat_typ match_expr_typ in
+      let* expr_subst, expr_typ = helper env e in
+      let* s2 = Subst.unify_pair fv expr_typ in
+      let* final_subst = Subst.compose_all [s2; s1; expr_subst; subst] in
+      R.return (final_subst, Subst.apply typ final_subst)
+      )
   | Expr_app(f, arg) ->
     (* let open Stdlib.Format in
-    let fmt = std_formatter in
-    fprintf fmt "infering app %s\n" (show_expr expr); *)
-
+    let fmt = std_formatter in *)
     let* body_typ = fresh_var() in
     let* f_s, f_t = helper env f in
     let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in
     let fun_typ = Typ_fun(arg_t, body_typ) in
     let* uni_subst = Subst.unify_pair fun_typ (Subst.apply f_t arg_s) in
     let* final_subst = Subst.compose_all [uni_subst; arg_s; f_s] in
-    (* fprintf fmt "-----infered it has type %s\n" (show_typ (Subst.apply body_typ final_subst)); *)
+    (* fprintf fmt "infering app %s\n" (show_expr expr);
+    fprintf fmt "-----infered it has type %s\n" (show_typ (Subst.apply body_typ final_subst)); *)
     R.return (final_subst, Subst.apply body_typ final_subst)
-  | p  ->
-    let() = pp_expr Stdlib.Format.std_formatter p in
-     unreachable()
+  | _ -> failwith (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr)) 
   in helper env expr
 
 let infer_program (p : structure) =
