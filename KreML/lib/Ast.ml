@@ -100,3 +100,99 @@ let ge x y = eapp (Expr_var ">") [x; y]
 let le x y = eapp (Expr_var "<") [x; y]
 let geq x y = eapp (Expr_var  ">=") [x; y]
 let leq x y = eapp (Expr_var "<=") [x; y]
+
+
+
+open Stdlib.Format
+
+let kwd ppf s = fprintf ppf "%s" s
+
+let rec pp_tuple tuple_elems pp_elem pp_delim =
+    match tuple_elems with
+    | [] -> failwith "111"
+    | [e] -> pp_elem e
+    | e::es ->
+        pp_elem e;
+        pp_delim();
+        pp_tuple es pp_elem pp_delim
+
+
+let rec pp_typ fmt = function
+  | Typ_bool -> fprintf fmt "bool"
+  | Typ_int -> fprintf fmt "int"
+  | Typ_unit -> fprintf fmt "unit"
+  | Typ_var id -> fprintf fmt "%d" id
+  | Typ_fun(Typ_fun(_, _) as farg, y) -> fprintf fmt "(%a) -> %a" pp_typ farg pp_typ y;
+  | Typ_fun(x, y) -> fprintf fmt "%a -> %a" pp_typ x pp_typ y;
+  | Typ_list x -> fprintf fmt "%a list" pp_typ x
+  | Typ_tuple(fst, snd, rest) ->
+    pp_tuple (fst::snd::rest)
+    (fun e -> fprintf fmt "%a" pp_typ e)
+    (fun () -> fprintf fmt " * ")
+
+let rec pp_pat ppf = function
+    | Pat_nil -> fprintf ppf "[]"
+    | Pat_unit -> fprintf ppf "()"
+    | Pat_wildcard -> fprintf ppf "_"
+    | Pat_var id -> fprintf ppf "%s" id
+    | Pat_const(Const_bool b) -> fprintf ppf "%b" b
+    | Pat_const(Const_int i) -> fprintf ppf "%i" i
+    | Pat_tuple(fst, snd, rest) ->
+         pp_tuple (fst::snd::rest)
+         (fun e -> fprintf ppf "%a" pp_pat e)
+         (fun () -> fprintf ppf ", ")
+    | Pat_cons(x, xs) -> fprintf ppf "@[(%a::%a)@]" pp_pat x pp_pat xs
+    | Pat_constrained(x, typ) -> fprintf ppf "@[%a @:@ %a @]" pp_pat x pp_typ typ
+
+let rec pp_expr ppf = function
+    | Expr_nil -> fprintf ppf "[]"
+    | Expr_unit -> fprintf ppf "()"
+    | Expr_var id -> fprintf ppf "%s" id
+    | Expr_const(Const_bool b) -> fprintf ppf "%b" b
+    | Expr_const(Const_int i) -> fprintf ppf "%i" i
+    | Expr_cons(x, xs) -> fprintf ppf "@[%a::%a @]" pp_expr x pp_expr xs
+    | Expr_fun(f, arg) -> fprintf ppf "@[%a @ (%a) @ %a @ %a]"
+        kwd "fun" 
+        pp_pat f
+        kwd "->"
+        pp_expr arg
+    | Expr_tuple(fst, snd, rest) ->
+            pp_tuple (fst::snd::rest)
+            (fun e -> fprintf ppf "%a" pp_expr e)
+            (fun () -> fprintf ppf ", ")
+    | Expr_ite(c, t, e) ->
+        fprintf ppf "@[if %a then %a @, else %a @]" pp_expr c pp_expr t pp_expr e
+    | Expr_app(f, (Expr_nil | Expr_unit | Expr_var _ | Expr_const _ as arg)) ->
+        fprintf ppf "@[%a %a]" pp_expr f pp_expr arg
+    | Expr_app(f, arg) -> fprintf ppf "@[%a (%a)]" pp_expr f pp_expr arg
+    | Expr_let(NonRecursive, (p, e), scope) ->
+        fprintf ppf "@[let %a = %a in @, %a @]"
+        pp_pat p
+        pp_expr e
+        pp_expr scope
+    | Expr_let(Recursive, (p, e), scope) ->
+        fprintf ppf "@[let rec %a = %a in @, %a @]"
+        pp_pat p
+        pp_expr e
+        pp_expr scope
+    | Expr_constrained(e, t) -> fprintf ppf "@[%a : %a@]" pp_expr e pp_typ t
+    | Expr_match(e, cases) ->
+        fprintf ppf "@[match %a with @,@]" pp_expr e;
+        List.iter
+            (fun (p, e) -> fprintf ppf "@[| %a -> %a @,@]" pp_pat p pp_expr e)
+            cases
+
+let pp_structure ppf s =
+    let item_printer = function
+    | Str_value(NonRecursive, [id, e]) ->
+        fprintf ppf "@[let %a = @, %a @]" pp_pat id pp_expr e
+    | Str_value(Recursive, (p, e)::rest) ->
+        fprintf ppf "@[let %a = @, %a @,@]" pp_pat p pp_expr e;
+        List.iter
+         (fun (p, e) -> fprintf ppf "@[and %a = %a @,@]" pp_pat p pp_expr e)
+         rest
+    | _ -> Utils.unreachable in
+    List.iter item_printer s
+
+
+
