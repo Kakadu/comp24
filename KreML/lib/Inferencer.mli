@@ -50,7 +50,6 @@ module Subst : sig
   val singleton : type_id -> typ -> t
   val find : type_id -> t -> typ option
   val remove : type_id -> t -> t
-  val unify_many : typ list -> (t * typ) R.t
   val unify_pair : typ -> typ -> t R.t
   val apply : typ -> t -> typ
   val compose : t -> t -> t R.t
