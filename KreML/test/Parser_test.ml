@@ -403,7 +403,96 @@ let%expect_test "map" =
       " in
    show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
    [%expect {|
-    [(Ast.Str_value (Ast.Recursive |} ]
+    [(Ast.Str_value (Ast.Recursive,
+        [((Ast.Pat_var "map"),
+          (Ast.Expr_fun ((Ast.Pat_var "f"),
+             (Ast.Expr_fun ((Ast.Pat_var "xs"),
+                (Ast.Expr_match ((Ast.Expr_var "xs"),
+                   [(Ast.Pat_nil, Ast.Expr_nil);
+                     ((Ast.Pat_cons ((Ast.Pat_var "a"), Ast.Pat_nil)),
+                      (Ast.Expr_cons (
+                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
+                         Ast.Expr_nil)));
+                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
+                         (Ast.Pat_cons ((Ast.Pat_var "b"), Ast.Pat_nil)))),
+                      (Ast.Expr_cons (
+                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_cons (
+                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
+                               )),
+                            Ast.Expr_nil))
+                         )));
+                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
+                         (Ast.Pat_cons ((Ast.Pat_var "b"),
+                            (Ast.Pat_cons ((Ast.Pat_var "c"), Ast.Pat_nil))))
+                         )),
+                      (Ast.Expr_cons (
+                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_cons (
+                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
+                               )),
+                            (Ast.Expr_cons (
+                               (Ast.Expr_app ((Ast.Expr_var "f"),
+                                  (Ast.Expr_var "c"))),
+                               Ast.Expr_nil))
+                            ))
+                         )));
+                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
+                         (Ast.Pat_cons ((Ast.Pat_var "b"),
+                            (Ast.Pat_cons ((Ast.Pat_var "c"),
+                               (Ast.Pat_cons ((Ast.Pat_var "d"),
+                                  (Ast.Pat_var "tl")))
+                               ))
+                            ))
+                         )),
+                      (Ast.Expr_cons (
+                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
+                         (Ast.Expr_cons (
+                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
+                               )),
+                            (Ast.Expr_cons (
+                               (Ast.Expr_app ((Ast.Expr_var "f"),
+                                  (Ast.Expr_var "c"))),
+                               (Ast.Expr_cons (
+                                  (Ast.Expr_app ((Ast.Expr_var "f"),
+                                     (Ast.Expr_var "d"))),
+                                  (Ast.Expr_app (
+                                     (Ast.Expr_app ((Ast.Expr_var "map"),
+                                        (Ast.Expr_var "f"))),
+                                     (Ast.Expr_var "tl")))
+                                  ))
+                               ))
+                            ))
+                         )))
+                     ]
+                   ))
+                ))
+             )))
+          ]
+        ));
+      (Ast.Str_value (Ast.Recursive,
+         [((Ast.Pat_var "iter"),
+           (Ast.Expr_fun ((Ast.Pat_var "f"),
+              (Ast.Expr_fun ((Ast.Pat_var "xs"),
+                 (Ast.Expr_match ((Ast.Expr_var "xs"),
+                    [(Ast.Pat_nil, Ast.Expr_unit);
+                      ((Ast.Pat_cons ((Ast.Pat_var "h"), (Ast.Pat_var "tl"))),
+                       (Ast.Expr_let (Ast.NonRecursive,
+                          (Ast.Pat_unit,
+                           (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "h")
+                              ))),
+                          (Ast.Expr_app (
+                             (Ast.Expr_app ((Ast.Expr_var "iter"),
+                                (Ast.Expr_var "f"))),
+                             (Ast.Expr_var "tl")))
+                          )))
+                      ]
+                    ))
+                 ))
+              )))
+           ]
+         ))
+      ] |} ]
 
 
 

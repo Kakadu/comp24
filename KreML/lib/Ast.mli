@@ -78,6 +78,7 @@ type structure_item =
 type structure = structure_item list
 [@@deriving show]
 
+(* val pp : Format.formatter -> expr -> string *)
 
 val eapp : expr -> expr list -> expr
 
@@ -101,3 +102,9 @@ val ge : expr -> expr -> expr
 val le : expr -> expr -> expr
 val geq : expr -> expr -> expr
 val leq : expr -> expr -> expr
+
+val pp_typ : Format.formatter -> typ -> unit
+val pp_pat : Format.formatter -> pattern -> unit
+val pp_expr : Format.formatter -> expr -> unit
+val pp_structure : Format.formatter -> structure -> unit
+

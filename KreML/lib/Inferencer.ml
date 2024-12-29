@@ -70,34 +70,23 @@ module Type = struct
     | Typ_tuple(x, y, rest) -> List.fold_left (x::y::rest) ~init:acc ~f:helper
     in helper Varset.empty t
 
-  let rec pp fmt = let open Stdlib.Format in function
+  (* let rec pp fmt = function
   | Typ_bool -> fprintf fmt "bool"
   | Typ_int -> fprintf fmt "int"
   | Typ_unit -> fprintf fmt "unit"
   | Typ_var id -> fprintf fmt "%d" id
-  | Typ_fun(Typ_fun(_, _) as farg, y) ->
-    fprintf fmt "(";
-    pp fmt farg;
-    fprintf fmt ")"; 
-    fprintf fmt " -> ";
-    pp fmt y;
-  | Typ_fun(x, y) ->
-    pp fmt x;
-    fprintf fmt " -> ";
-    pp fmt y
-  | Typ_list x ->
-    pp fmt x;
-    fprintf fmt " list"
+  | Typ_fun(Typ_fun(_, _) as farg, y) -> fprintf fmt "(%a) -> %a" pp farg pp y;
+  | Typ_fun(x, y) -> fprintf fmt "%a -> %a" pp x pp y;
+  | Typ_list x -> fprintf fmt "%a list" pp x
   | Typ_tuple(fst, snd, rest) ->
-    let rec print_types list sep =
-      match list with
-      | [x] -> pp fmt x
-      | x::xs ->
-        let() = pp fmt x in
-        fprintf fmt sep;
-        print_types xs sep
-      | _ -> unreachable() in
-    print_types (fst::snd::rest) " *" |> ignore
+    let rec pp_typle l =
+      match l with
+      | [] -> failwith "111"
+      | [t] -> fprintf fmt "%a" pp t
+      | t::ts ->
+         fprintf fmt "%a * " pp t;
+         pp_typle ts; in
+    pp_typle (fst::snd::rest) *)
 end
 
  
@@ -130,9 +119,9 @@ module Subst  = struct
     (* let open Stdlib.Format in
     let fmt = std_formatter in
     fprintf fmt "unifying ";
-    Type.pp fmt t1;
+    pp_typ fmt t1;
     fprintf fmt " and ";
-    Type.pp fmt t2;
+    pp_typ fmt t2;
     fprintf fmt "\n"; *)
 
     match t1, t2 with
@@ -201,7 +190,7 @@ module Subst  = struct
       "[ %a ]"
       (pp_print_list
          ~pp_sep:(fun ppf () -> fprintf ppf ", ")
-         (fun ppf (k, v) -> fprintf ppf "%d -> %a\n" k Type.pp v))
+         (fun ppf (k, v) -> fprintf ppf "%d -> %a\n" k pp_typ v))
       subst
 
 end
@@ -241,7 +230,7 @@ module Scheme = struct
       (R.return t)
   let pp fmt (Scheme(bs, t)) =
     Varset.pp fmt bs;
-    Type.pp fmt t
+    pp_typ fmt t
 end
 
 type var_name = string
@@ -287,7 +276,7 @@ module TypeEnv = struct
     (* let open Stdlib.Format in
     pp std_formatter env;
     fprintf std_formatter "\n";
-    Type.pp std_formatter t; *)
+    pp_typ std_formatter t; *)
     let quantified = Varset.diff (Type.free_vars t) (free_vars env) in
     (* let() = Varset.pp Stdlib.Format.std_formatter quantified in *)
     let s = Scheme(quantified, t) in

@@ -41,6 +41,7 @@ let%expect_test "fac" =
     , 8 -> int -> int
     , 9 -> unit
     , 10 -> int
+    , 11 -> int
      ] |}]
 
 
@@ -77,6 +78,7 @@ let%expect_test "fac_cps" =
     , 16 -> (int -> int) -> int
     , 17 -> int
     , 18 -> int
+    , 19 -> int
      ] |}]
 
 let%expect_test "fib" =
@@ -104,24 +106,25 @@ let%expect_test "fib" =
     , main -> [ ]int
     , print_int -> [ ]int -> unit
      ]
-    [ 13 -> int -> int
-    , 14 -> int
-    , 15 -> bool
-    , 16 -> int -> bool
-    , 17 -> int
-    , 18 -> int -> int
+    [ 15 -> int -> int
+    , 16 -> int
+    , 17 -> bool
+    , 18 -> int -> bool
     , 19 -> int
-    , 20 -> int
-    , 21 -> int -> int
+    , 20 -> int -> int
+    , 21 -> int
     , 22 -> int
-    , 23 -> int
-    , 24 -> int -> int
-    , 25 -> unit
-    , 26 -> int
-    , 27 -> int -> int
-    , 28 -> int -> int -> int
-    , 29 -> unit
-    , 30 -> int
+    , 23 -> int -> int
+    , 24 -> int
+    , 25 -> int
+    , 26 -> int -> int
+    , 27 -> unit
+    , 28 -> int
+    , 29 -> int -> int
+    , 30 -> int -> int -> int
+    , 31 -> unit
+    , 32 -> int
+    , 33 -> int
      ] |}]
 
 let%expect_test "many_args" =
@@ -153,58 +156,62 @@ let%expect_test "many_args" =
      ]
     [ 1 -> bool
     , 2 -> int -> bool
-    , 3 -> int
+    , 3 -> 0 -> 0
     , 4 -> int
     , 5 -> int
-    , 6 -> unit
+    , 6 -> int
     , 7 -> unit
-    , 8 -> unit
-    , 9 -> int
-    , 10 -> int
-    , 11 -> int
-    , 12 -> int
-    , 13 -> int
+    , 9 -> unit
+    , 11 -> unit
+    , 13 -> int -> int -> int -> int
     , 14 -> int
     , 15 -> int
     , 16 -> int
     , 17 -> int
     , 18 -> int
     , 19 -> int
-    , 20 -> int -> int
+    , 20 -> int
     , 21 -> int
-    , 22 -> int -> int
+    , 22 -> int
     , 23 -> int
-    , 24 -> int -> int
-    , 25 -> int
-    , 26 -> int -> int
-    , 27 -> int
-    , 28 -> int -> int
-    , 29 -> int
-    , 30 -> int -> int
-    , 31 -> int
-    , 32 -> int -> int
-    , 33 -> int
-    , 34 -> int -> int
-    , 35 -> int
-    , 36 -> int -> int
-    , 37 -> int
-    , 38 -> int -> int
-    , 39 -> int -> int -> int
-    , 40 -> int -> int -> int -> int
-    , 41 -> int -> int -> int -> int -> int
-    , 42 -> int -> int -> int -> int -> int -> int
-    , 43 -> int -> int -> int -> int -> int -> int -> int
-    , 44 -> int -> int -> int -> int -> int -> int -> int -> int
-    , 45 -> int -> int -> int -> int -> int -> int -> int -> int -> int
-    , 46 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-    , 47 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-    , 48 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-    , 49 -> unit
-    , 50 -> int
-    , 51 -> int -> int
-    , 52 -> int -> int -> int
-    , 53 -> int -> int -> int -> int
-    , 54 -> int -> int -> int -> int
+    , 24 -> int
+    , 25 -> int -> int
+    , 26 -> int
+    , 27 -> int -> int
+    , 28 -> int
+    , 29 -> int -> int
+    , 30 -> int
+    , 31 -> int -> int
+    , 32 -> int
+    , 33 -> int -> int
+    , 34 -> int
+    , 35 -> int -> int
+    , 36 -> int
+    , 37 -> int -> int
+    , 38 -> int
+    , 39 -> int -> int
+    , 40 -> int
+    , 41 -> int -> int
+    , 42 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 43 -> int
+    , 44 -> int -> int
+    , 45 -> int -> int -> int
+    , 46 -> int -> int -> int -> int
+    , 47 -> int -> int -> int -> int -> int
+    , 48 -> int -> int -> int -> int -> int -> int
+    , 49 -> int -> int -> int -> int -> int -> int -> int
+    , 50 -> int -> int -> int -> int -> int -> int -> int -> int
+    , 51 -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 52 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 53 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 54 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 56 -> unit
+    , 57 -> int
+    , 58 -> int -> int
+    , 59 -> int -> int -> int
+    , 60 -> int -> int -> int -> int
+    , 61 -> int -> int -> int -> int
+    , 63 -> int
      ] |}]
 
 let rec fix f x = f (fix f) x
@@ -237,11 +244,13 @@ let%expect_test "fix" =
     , 12 -> int
     , 13 -> int
     , 14 -> int -> int
-    , 15 -> unit
-    , 16 -> int
-    , 17 -> int -> int
-    , 18 -> int
+    , 15 -> (int -> int) -> int -> int
+    , 16 -> unit
+    , 17 -> int
+    , 18 -> int -> int
     , 19 -> int
+    , 20 -> int
+    , 21 -> int
      ] |}]
 
 let%expect_test "partial" =
@@ -266,17 +275,20 @@ let%expect_test "partial" =
     , 4 -> int
     , 5 -> int
     , 6 -> int -> int
-    , 7 -> int
+    , 7 -> bool -> int -> int
     , 8 -> int
-    , 9 -> int -> int
-    , 10 -> int
-    , 11 -> int -> int
-    , 12 -> int
-    , 13 -> int -> int
-    , 14 -> int
-    , 15 -> int -> int
-    , 16 -> unit
-    , 17 -> int
+    , 9 -> int
+    , 10 -> int -> int
+    , 11 -> int
+    , 12 -> int -> int
+    , 13 -> int
+    , 14 -> int -> int
+    , 15 -> int
+    , 16 -> int -> int
+    , 17 -> int -> int
+    , 18 -> unit
+    , 19 -> int
+    , 20 -> int
      ] |}]
 
 let%expect_test "partial2" =
@@ -308,10 +320,12 @@ let%expect_test "partial2" =
     , 7 -> int -> int
     , 8 -> int
     , 9 -> int -> int
-    , 10 -> int -> int -> int
-    , 11 -> int -> int
-    , 12 -> int
-    , 13 -> unit
+    , 10 -> int -> int -> int -> int
+    , 11 -> int -> int -> int
+    , 13 -> int -> int
+    , 15 -> int
+    , 17 -> unit
+    , 18 -> int
      ] |}]
 
 let%expect_test "partial3" =
@@ -336,9 +350,11 @@ let%expect_test "partial3" =
     , 3 -> unit
     , 4 -> int
     , 5 -> unit
-    , 6 -> unit
-    , 7 -> int -> unit
-    , 8 -> int -> int -> unit
+    , 6 -> int -> int -> int -> unit
+    , 7 -> unit
+    , 8 -> int -> unit
+    , 9 -> int -> int -> unit
+    , 10 -> int
      ] |}]
 let somef f g x = f x ( g x : bool )
 
@@ -362,22 +378,24 @@ let%expect_test "ascription" =
     , 3 -> int
     , 4 -> bool -> int
     , 5 -> bool
-    , 6 -> unit
-    , 7 -> int
-    , 8 -> int -> int
-    , 9 -> (int -> bool) -> int -> int
-    , 10 -> int
+    , 6 -> (2 -> bool -> int) -> (2 -> bool) -> 2 -> int
+    , 7 -> unit
+    , 8 -> int
+    , 9 -> int -> int
+    , 10 -> (int -> bool) -> int -> int
     , 11 -> int
-    , 12 -> bool
-    , 13 -> int
-    , 14 -> int -> int
-    , 15 -> int
-    , 16 -> int -> int
-    , 17 -> int
-    , 18 -> bool
-    , 19 -> int -> bool
-    , 20 -> int
-    , 21 -> int -> int
+    , 12 -> int
+    , 13 -> bool
+    , 14 -> int
+    , 15 -> int -> int
+    , 16 -> int
+    , 17 -> int -> int
+    , 18 -> int
+    , 19 -> bool
+    , 20 -> int -> bool
+    , 21 -> int
+    , 22 -> int -> int
+    , 23 -> int
      ] |}]
 
  let%expect_test "poly" =
@@ -390,10 +408,11 @@ let%expect_test "ascription" =
      [ print_int -> [ ]int -> unit
      , temp -> [ ]int *bool
       ]
-     [ 1 -> int
-     , 2 -> int
-     , 3 -> bool
+     [ 2 -> int
+     , 3 -> int
      , 4 -> bool
+     , 5 -> bool
+     , 6 -> int *bool
       ] |}]
 let map f p = let (a, b) = p in (f a, f b)
 
@@ -419,7 +438,47 @@ let%expect_test "tuples" =
     let () = print_int (odd 3) in
     let () = print_int (even 4) in
     0" in
-  parse_program tuples
+  parse_program tuples;
+  [%expect {|
+    [ feven -> [ 31; ]31 -> int -> int
+    , fix -> [ 2; 3; ]((2 -> 3) -> 2 -> 3) -> 2 -> 3
+    , fixpoly -> [ 16; 26; 27; ]16 -> 26 -> 27 *26 -> 27
+    , fodd -> [ 41; ]41 -> int -> int
+    , main -> [ ]int
+    , map -> [ 7; 9; 11; ](9 -> 11) -> 7 -> 11 *11
+    , meven -> [ ]int -> int
+    , modd -> [ ]int -> int
+    , print_int -> [ ]int -> unit
+    , tie -> [ 53; 54; ]53 -> 54 *53 -> 54
+     ]
+    [ 58 -> int -> int
+    , 59 -> int -> int
+    , 60 -> int
+    , 61 -> bool
+    , 62 -> int -> bool
+    , 63 -> int
+    , 64 -> int
+    , 65 -> int -> int
+    , 66 -> int
+    , 67 -> bool
+    , 68 -> int -> bool
+    , 69 -> int
+    , 70 -> int
+    , 71 -> int -> int
+    , 72 -> unit
+    , 73 -> int
+    , 74 -> unit
+    , 75 -> int
+    , 80 -> unit
+    , 81 -> int
+    , 82 -> int
+    , 83 -> int
+    , 84 -> unit
+    , 85 -> int
+    , 86 -> int
+    , 87 -> int
+    , 88 -> int
+     ] |}]
 
 (* let%expect_test "lists" =
   let lists = "
@@ -472,7 +531,32 @@ let%expect_test "tuples" =
       | h::tl -> append h (helper tl)
     in helper
 " in
-  parse_program lists
+  parse_program lists;
+    [%expect {|
+      [ append -> [ 4; ]4 list -> 4 list -> 4 list
+      , concat -> [ 18; ]18 list list -> 18 list
+      , print_int -> [ ]int -> unit
+       ]
+      [ 0 -> 4 list -> 4 list -> 4 list
+      , 1 -> 4 list
+      , 2 -> 4 list
+      , 3 -> 4 list
+      , 5 -> 4
+      , 6 -> 4 list
+      , 7 -> 4 list
+      , 8 -> 4 list -> 4 list
+      , 9 -> 18 list list -> 18 list
+      , 10 -> 18 list list
+      , 11 -> 18 list
+      , 12 -> 18 list
+      , 13 -> 18
+      , 14 -> 18 list
+      , 15 -> 18 list list
+      , 16 -> 18 list
+      , 17 -> 18 list -> 18 list
+      , 19 -> 18 list
+      , 20 -> 18 list list -> 18 list
+       ] |}]
 
  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
 
