@@ -30,8 +30,8 @@ let rec frestore_pattern ppf pat =
     fprintf "(";
     List.iteri
       (fun i pat ->
-         if i != 0 then fprintf ", " else ();
-         rec_call pat)
+        if i != 0 then fprintf ", " else ();
+        rec_call pat)
       lst;
     fprintf ")"
   | PConstant c -> frestore_constant ppf c
@@ -88,8 +88,8 @@ let rec frestore_expr ppf exp =
     fprintf "(";
     List.iteri
       (fun i exp ->
-         if i <> 0 then fprintf ", " else ();
-         rec_call exp)
+        if i <> 0 then fprintf ", " else ();
+        rec_call exp)
       lst;
     fprintf ")"
   | EMatch (pat_head, pat_exp_lst) ->
@@ -98,10 +98,10 @@ let rec frestore_expr ppf exp =
     fprintf " with ";
     List.iter
       (fun (pat, exp) ->
-         fprintf "\n| ";
-         frestore_pattern ppf pat;
-         fprintf " -> ";
-         rec_call exp)
+        fprintf "\n| ";
+        frestore_pattern ppf pat;
+        fprintf " -> ";
+        rec_call exp)
       pat_exp_lst;
     fprintf ")"
   | EConstraint (exp, tp) ->
@@ -133,8 +133,8 @@ let frestore_let_declaration ppf decl =
     fprintf " ";
     List.iteri
       (fun i slet ->
-         if i != 0 then fprintf " and " else ();
-         frestore_single_let ppf slet)
+        if i != 0 then fprintf " and " else ();
+        frestore_single_let ppf slet)
       slet_lst;
     fprintf ";;\n"
 ;;
