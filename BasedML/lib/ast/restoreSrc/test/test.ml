@@ -12,12 +12,14 @@ let test_restore_src string_src =
 ;;
 
 let%expect_test "Consts" =
-  test_restore_src {|
+  test_restore_src
+    {|
   let a = 1;;
   let b = true;;
   let c = [];;
   let g = ();;|};
-  [%expect {|
+  [%expect
+    {|
     let  a = 1;;
     let  b = true;;
     let  c = [];;
@@ -44,7 +46,7 @@ let%expect_test "Patterns" =
     | (x : int) -> 5);; |}]
 ;;
 
-let%expect_test "Expresions" =
+let%expect_test "Expressions" =
   test_restore_src
     {|
   let id = constant;;
