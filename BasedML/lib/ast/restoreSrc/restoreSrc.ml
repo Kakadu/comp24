@@ -69,9 +69,9 @@ let rec frestore_expr ppf exp =
   | EIfThenElse (exp_cond, exp_then, exp_else) ->
     fprintf "(if (";
     rec_call exp_cond;
-    fprintf ") then ";
+    fprintf ") then (";
     rec_call exp_then;
-    fprintf " else (";
+    fprintf ") else (";
     rec_call exp_else;
     fprintf "))"
   | ELetIn (rec_f, pat, exp_val, exp_body) ->

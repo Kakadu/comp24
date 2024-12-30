@@ -66,7 +66,7 @@ let%expect_test "Expressions" =
     let  id = constant;;
     let  funct = (fun x -> x);;
     let  app = (funct id);;
-    let  ifthen = (if (((( = ) id) 2)) then true else (false));;
+    let  ifthen = (if (((( = ) id) 2)) then (true) else (false));;
     let  letinval = (let  a = 4 in ((( * ) a) 4));;
     let  tup = (1, []);;
     let  m = (match constant with
