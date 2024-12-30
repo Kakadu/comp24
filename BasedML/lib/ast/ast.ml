@@ -25,20 +25,13 @@ let rec pp_type_name ppf tp =
     fprintf "(";
     List.iteri
       (fun i tp ->
-        if i != 0 then fprintf " * " else ();
+        if i <> 0 then fprintf " * " else ();
         rec_call tp)
       lst;
     fprintf ")"
   | TFunction (tp_arg, tp_ret) ->
-    fprintf "(";
-    rec_call tp_arg;
-    fprintf " -> ";
-    rec_call tp_ret;
-    fprintf ")"
-  | TList tp ->
-    fprintf "(";
-    rec_call tp;
-    fprintf " list)"
+    fprintf "(%a -> %a)" pp_type_name tp_arg pp_type_name tp_ret
+  | TList tp -> fprintf "(%a list)" pp_type_name tp
 ;;
 
 (* Flag to implicitely tell if let is recurisve *)
