@@ -20,6 +20,7 @@ let is_keyword = function
   | "true"
   | "then"
   | "and"
+  | "_"
   | "in" -> true
   | _ -> false
 ;;
@@ -40,7 +41,7 @@ let is_valid_fst_char_ident = function
 ;;
 
 let is_valid_fst_char_poly_type = function
-  | 'a' .. 'z' -> true
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
   | _ -> false
 ;;
 
@@ -219,7 +220,15 @@ let p_enil =
 ;;
 
 let p_list_exp p_exp = p_list_not_empty_exp p_exp <|> p_enil
-let p_wild_card_pattern = skip_whitespace *> Angstrom.string "_" *> return PWildCard
+
+let p_wild_card_pattern =
+  skip_whitespace
+  *> Angstrom.string "_"
+  *> let* next = peek_char in
+     match next with
+     | Some c when is_identifier_char c -> fail "a"
+     | _ -> return PWildCard
+;;
 
 (* Tuple parsers *)
 
