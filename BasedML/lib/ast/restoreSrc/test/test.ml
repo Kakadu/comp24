@@ -12,14 +12,12 @@ let test_restore_src string_src =
 ;;
 
 let%expect_test "Consts" =
-  test_restore_src
-    {|
+  test_restore_src {|
   let a = 1;;
   let b = true;;
   let c = [];;
   let g = ();;|};
-  [%expect
-    {|
+  [%expect {|
     let  a = 1;;
     let  b = true;;
     let  c = [];;
