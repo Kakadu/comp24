@@ -8,7 +8,7 @@ open Base
 open Utils
 
 let rec pp_expr fmt = function
-  | CFConst c -> fprintf fmt "%a" Pp_ast.pp_const c
+  | CFConst c -> fprintf fmt "%a" Pp_ast.pp_constant c
   | CFVar v -> fprintf fmt "%s" v
   | CFApp (e1, e2) ->
     (match e1 with
