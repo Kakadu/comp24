@@ -37,6 +37,25 @@ let td_let_flag = function
   | NonRec -> td_let
 ;;
 
+open Base
+
+let rec strip_types_expr = function
+  | TEConst (_, c) -> EConst c
+  | TEVar (_, x) -> EVar x
+  | TEApp (_, f, x) -> EApp (strip_types_expr f, strip_types_expr x)
+  | TEIfElse (_, c, t, e) ->
+    EIfElse (strip_types_expr c, strip_types_expr t, strip_types_expr e)
+  | TEFun (_, p, e) -> EFun (p, strip_types_expr e)
+  | TELetIn (_, d, e) -> ELetIn (strip_types_def d, strip_types_expr e)
+  | TETuple (_, es) -> ETuple (List.map es ~f:strip_types_expr)
+  | TEList (_, es) -> EList (List.map es ~f:strip_types_expr)
+  | TEMatch (_, e, pes) ->
+    EMatch (strip_types_expr e, List.map ~f:(fun (p, e) -> p, strip_types_expr e) pes)
+
+and strip_types_def = function
+  | TDLet (_, flag, p, e) -> DLet (flag, p, strip_types_expr e)
+;;
+
 open Format
 open Utils
 

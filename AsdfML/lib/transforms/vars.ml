@@ -4,6 +4,7 @@
 
 open Base
 open Ast
+open Tast
 
 let bound_vars_pat, bound_vars_pat_list =
   let open Set.Poly in
@@ -44,3 +45,6 @@ and free_vars_def =
   | DLet (NonRec, _, exp) -> free_vars_expr exp
   | DLet (Rec, pat, exp) -> diff (free_vars_expr exp) (bound_vars_pat pat)
 ;;
+
+let free_vars_texpr e = strip_types_expr e |> free_vars_expr
+let free_vars_tdef d = strip_types_def d |> free_vars_def
