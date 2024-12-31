@@ -436,7 +436,7 @@ let infer =
           let* s, t, texp = infer_expr env x in
           let* s' = Subst.compose acc_sub s in
           return (s', t :: acc_t, texp :: acc_ty))
-      >>| fun (s, t, tes) -> s, TTuple (List.map t ~f:(Subst.apply s)), TETuple (t, tes)
+      >>| fun (s, t, tes) -> s, TTuple (List.map t ~f:(Subst.apply s)), TETuple (TTuple t, tes)
     | EList xs ->
       (match xs with
        | [] ->

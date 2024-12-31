@@ -10,7 +10,7 @@ type texpr =
   | TEIfElse of ty * texpr * texpr * texpr
   | TEFun of ty * pattern list * texpr
   | TELetIn of ty * tdefinition * texpr
-  | TETuple of ty list * texpr list
+  | TETuple of ty * texpr list
   | TEList of ty * texpr list
   | TEMatch of ty * texpr * (pattern * texpr) list
 [@@deriving show { with_path = false }]
@@ -38,6 +38,18 @@ let td_let_flag = function
 ;;
 
 open Base
+
+let texpr_type = function
+  | TEConst (t, _)
+  | TEVar (t, _)
+  | TEApp (t, _, _)
+  | TEIfElse (t, _, _, _)
+  | TEFun (t, _, _)
+  | TELetIn (t, _, _)
+  | TETuple (t, _)
+  | TEList (t, _)
+  | TEMatch (t, _, _) -> t
+;;
 
 let rec strip_types_expr = function
   | TEConst (_, c) -> EConst c
