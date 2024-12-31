@@ -1,51 +1,70 @@
-(** Copyright 2024, Artem Khelmianov *)
-
-(** SPDX-License-Identifier: LGPL-2.1 *)
-
 type id = string
 
+val equal_id : id -> id -> bool
+val pp_id : Format.formatter -> id -> unit
+val show_id : id -> string
+
 type rec_flag =
-  | Rec (** recursive *)
-  | NonRec (** non-recursive *)
+  | Rec
+  | NonRec
+
+val pp_rec_flag : Format.formatter -> rec_flag -> unit
+val show_rec_flag : rec_flag -> string
 
 type constant =
-  | CInt of int (** 42 *)
-  | CBool of bool (** true | false *)
-  | CUnit (** () *)
-  | CNil (** [] *)
+  | CInt of int
+  | CBool of bool
+  | CUnit
+  | CNil
+
+val pp_constant : Format.formatter -> constant -> unit
+val show_constant : constant -> string
 
 type type_ann =
-  | TAInt (** int *)
-  | TABool (** bool *)
-  | TAUnit (** () *)
-  | TATuple of type_ann list (** int * bool *)
-  | TAFun of type_ann * type_ann (** int -> bool *)
-  | TAList of type_ann (** %type% list *)
+  | TAInt
+  | TABool
+  | TAUnit
+  | TATuple of type_ann list
+  | TAFun of type_ann * type_ann
+  | TAList of type_ann
+
+val pp_type_ann : Format.formatter -> type_ann -> unit
+val show_type_ann : type_ann -> string
 
 type pattern =
   | PConst of constant
-  | PWild (** _ *)
-  | PIdent of id (** x *)
-  | PTuple of pattern list (** (a, b) *)
-  | PList of pattern list (** [1, 2, 3] *)
-  | PCons of pattern * pattern (** hd :: tl *)
-  | PAnn of pattern * type_ann (** (x: int) *)
+  | PWild
+  | PIdent of id
+  | PTuple of pattern list
+  | PList of pattern list
+  | PCons of pattern * pattern
+  | PAnn of pattern * type_ann
+
+val pp_pattern : Format.formatter -> pattern -> unit
+val show_pattern : pattern -> string
 
 type expr =
-  | EConst of constant (** 42, true, () *)
-  | EVar of id (** x *)
-  | EApp of expr * expr (** f x *)
-  | EIfElse of expr * expr * expr (** if x then y else z *)
-  | EFun of pattern list * expr (** fun x -> y *)
-  | ELetIn of definition * expr (** let x = y in z *)
-  | ETuple of expr list (** (x, fun x -> x, 42) *)
-  | EList of expr list (** [1; 2; 3] *)
-  | EMatch of expr * (pattern * expr) list (** match x with ... *)
+  | EConst of constant
+  | EVar of id
+  | EApp of expr * expr
+  | EIfElse of expr * expr * expr
+  | EFun of pattern list * expr
+  | ELetIn of definition * expr
+  | ETuple of expr list
+  | EList of expr list
+  | EMatch of expr * (pattern * expr) list
 
-and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
+and definition = DLet of rec_flag * pattern * expr
+
+val pp_expr : Format.formatter -> expr -> unit
+val show_expr : expr -> string
+val pp_definition : Format.formatter -> definition -> unit
+val show_definition : definition -> string
 
 type program = definition list
 
+val pp_program : Format.formatter -> program -> unit
+val show_program : program -> string
 val p_const : constant -> pattern
 val p_wild : pattern
 val p_ident : id -> pattern
@@ -62,7 +81,6 @@ val e_let_in : definition -> expr -> expr
 val e_tuple : expr list -> expr
 val e_list : expr list -> expr
 val e_match : expr -> (pattern * expr) list -> expr
-val d_let_flag : rec_flag -> pattern -> expr -> definition
 val d_let : pattern -> expr -> definition
 val d_let_rec : pattern -> expr -> definition
-val equal_id : id -> id -> bool
+val d_let_flag : rec_flag -> pattern -> expr -> definition

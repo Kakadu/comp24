@@ -7,7 +7,9 @@ open Format
 open Base
 open Utils
 
-let rec pp_const fmt = function
+let pp_id = Ast.pp_id
+
+let rec pp_constant fmt = function
   | CInt i -> fprintf fmt "%d" i
   | CBool b -> fprintf fmt "%b" b
   | CUnit -> fprintf fmt "()"
@@ -22,7 +24,7 @@ and pp_type_ann fmt = function
   | TAList x -> fprintf fmt "%a list" pp_type_ann x
 
 and pp_pattern fmt = function
-  | PConst c -> fprintf fmt "%a" pp_const c
+  | PConst c -> fprintf fmt "%a" pp_constant c
   | PWild -> fprintf fmt "_"
   | PIdent id -> fprintf fmt "%s" id
   | PTuple xs -> pp_list ~sep:", " fmt pp_pattern xs
@@ -33,7 +35,7 @@ and pp_pattern fmt = function
 and pp_pattern_list fmt p = pp_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p
 
 and pp_expr fmt = function
-  | EConst c -> fprintf fmt "%a" pp_const c
+  | EConst c -> fprintf fmt "%a" pp_constant c
   | EVar v -> fprintf fmt "%s" v
   | EApp (e1, e2) ->
     (match e1 with
