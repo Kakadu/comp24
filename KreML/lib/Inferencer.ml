@@ -1,4 +1,5 @@
 open Ast
+open Ast_printer
 open Base
 
 type error =

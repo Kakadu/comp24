@@ -103,8 +103,3 @@ val le : expr -> expr -> expr
 val geq : expr -> expr -> expr
 val leq : expr -> expr -> expr
 
-val pp_typ : Format.formatter -> typ -> unit
-val pp_pat : Format.formatter -> pattern -> unit
-val pp_expr : Format.formatter -> expr -> unit
-val pp_structure : Format.formatter -> structure -> unit
-

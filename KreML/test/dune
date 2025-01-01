@@ -1,6 +1,6 @@
 (library
  (name kreml_lib_test)
- (modules Parser_test Inferencer_test)
+ (modules Parser_test Inferencer_test Pp_test)
  (libraries base ppx_show.runtime kreml_lib)
  (preprocess
   (pps ppx_deriving.show ppx_expect))

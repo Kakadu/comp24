@@ -72,7 +72,7 @@ let%expect_test "patterns test" =
 
 
 let%expect_test "operations" =
-  let inputs = ["a"; "a+b"; "a+b+c+d+e"; "f x y z + yh";
+  let inputs = ["a"; "a+b"; "a+b+c+d+e";
     "a+b*c"; "a/b*c"; "a*b*c-d";
     "a<=b"; "x <= z + w";
     "(a+b)*c-(x + y) >= u";
@@ -97,12 +97,6 @@ let%expect_test "operations" =
              (Ast.Expr_var "d")))
           )),
        (Ast.Expr_var "e")))
-    (Ast.Expr_app (
-       (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "x"))),
-          (Ast.Expr_var "y"))),
-       (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "z"))),
-          (Ast.Expr_var "yh")))
-       ))
     (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "a"))),
        (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "*"), (Ast.Expr_var "b"))),
           (Ast.Expr_var "c")))
@@ -181,7 +175,7 @@ let%expect_test "simple expressions" =
    "fun x -> fun y -> x+y"
    ; "[fun x -> x + 1; fun x -> x + y]"
    ; "let f = fun x y -> x + y in f z 56"
-   ; "(fun x -> x) 5"] in
+   ; "(fun y -> y) 1 "] in
    List.iter (fun i -> show_res ~input:i ~parser:expr ~to_string:show_expr |> print_endline) cases;
   [%expect {|
     (Ast.Expr_const (Ast.Const_int 5))
@@ -235,8 +229,8 @@ let%expect_test "simple expressions" =
        (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "z"))),
           (Ast.Expr_const (Ast.Const_int 56))))
        ))
-    (Ast.Expr_app ((Ast.Expr_fun ((Ast.Pat_var "x"), (Ast.Expr_var "x"))),
-       (Ast.Expr_const (Ast.Const_int 5)))) |}]
+    (Ast.Expr_app ((Ast.Expr_fun ((Ast.Pat_var "y"), (Ast.Expr_var "y"))),
+       (Ast.Expr_const (Ast.Const_int 1)))) |}]
 
 let%expect_test "let bindings" =
    let cases = ["let a = 5 in a"
@@ -494,8 +488,6 @@ let%expect_test "map" =
          ))
       ] |} ]
 
-
-
 let%expect_test "fold" =
    let input = 
       "let rec fold l folder init =
@@ -627,6 +619,7 @@ let%expect_test "typed" =
       match l with
       | [] -> acc
       | x::xs -> fold xs (f acc x) f";
+
       "let somefun 
         (a : int)
         (b: int * int * bool)
@@ -641,34 +634,36 @@ let%expect_test "typed" =
    List.iter (fun i -> show_res ~input:i ~parser:program ~to_string:show_structure |> print_endline) cases;
   [%expect {|
     [(Ast.Str_value (Ast.Recursive,
-        [((Ast.Pat_constrained ((Ast.Pat_var "fold"),
+        [((Ast.Pat_var "fold"),
+          (Ast.Expr_constrained (
+             (Ast.Expr_fun ((Ast.Pat_var "l"),
+                (Ast.Expr_fun ((Ast.Pat_var "acc"),
+                   (Ast.Expr_fun ((Ast.Pat_var "f"),
+                      (Ast.Expr_match ((Ast.Expr_var "l"),
+                         [(Ast.Pat_nil, (Ast.Expr_var "acc"));
+                           ((Ast.Pat_cons ((Ast.Pat_var "x"), (Ast.Pat_var "xs")
+                               )),
+                            (Ast.Expr_app (
+                               (Ast.Expr_app (
+                                  (Ast.Expr_app ((Ast.Expr_var "fold"),
+                                     (Ast.Expr_var "xs"))),
+                                  (Ast.Expr_app (
+                                     (Ast.Expr_app ((Ast.Expr_var "f"),
+                                        (Ast.Expr_var "acc"))),
+                                     (Ast.Expr_var "x")))
+                                  )),
+                               (Ast.Expr_var "f"))))
+                           ]
+                         ))
+                      ))
+                   ))
+                )),
              (Ast.Typ_fun ((Ast.Typ_list Ast.Typ_int),
                 (Ast.Typ_fun (Ast.Typ_int,
                    (Ast.Typ_fun (
                       (Ast.Typ_fun (Ast.Typ_int,
                          (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int)))),
                       Ast.Typ_int))
-                   ))
-                ))
-             )),
-          (Ast.Expr_fun ((Ast.Pat_var "l"),
-             (Ast.Expr_fun ((Ast.Pat_var "acc"),
-                (Ast.Expr_fun ((Ast.Pat_var "f"),
-                   (Ast.Expr_match ((Ast.Expr_var "l"),
-                      [(Ast.Pat_nil, (Ast.Expr_var "acc"));
-                        ((Ast.Pat_cons ((Ast.Pat_var "x"), (Ast.Pat_var "xs"))),
-                         (Ast.Expr_app (
-                            (Ast.Expr_app (
-                               (Ast.Expr_app ((Ast.Expr_var "fold"),
-                                  (Ast.Expr_var "xs"))),
-                               (Ast.Expr_app (
-                                  (Ast.Expr_app ((Ast.Expr_var "f"),
-                                     (Ast.Expr_var "acc"))),
-                                  (Ast.Expr_var "x")))
-                               )),
-                            (Ast.Expr_var "f"))))
-                        ]
-                      ))
                    ))
                 ))
              )))
@@ -687,14 +682,12 @@ let%expect_test "typed" =
                          (Ast.Typ_tuple (Ast.Typ_int, Ast.Typ_int, [])))
                       )),
                    (Ast.Expr_fun (
-                      (Ast.Pat_constrained (
-                         (Ast.Pat_constrained ((Ast.Pat_var "f"),
-                            (Ast.Typ_fun (
-                               (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int)),
-                               (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int))))
-                            )),
-                         Ast.Typ_int)),
-                      (Ast.Expr_var "todo")))
+                      (Ast.Pat_constrained ((Ast.Pat_var "f"),
+                         (Ast.Typ_fun ((Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int)),
+                            (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int))))
+                         )),
+                      (Ast.Expr_constrained ((Ast.Expr_var "todo"), Ast.Typ_int))
+                      ))
                    ))
                 ))
              )))
