@@ -400,12 +400,13 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let fmt = std_formatter in
     fprintf fmt "infering expr %s\n" (show_expr expr); *)
     let* expr_subst, expr_typ = helper env v in
-    let* _, p_typ = infer_pattern (TypeEnv.apply expr_subst env) p in
+    let env = TypeEnv.apply expr_subst env in
+    let* _, p_typ = infer_pattern env p in
     let* uni = Subst.unify_pair expr_typ p_typ in
     let* s = Subst.compose uni expr_subst in
     let env = TypeEnv.generalize_pattern p (Subst.apply expr_typ s) (TypeEnv.apply s env) in
     let* scope_subst, scope_typ = helper env scope in
-    let* final_subst = Subst.compose_all [scope_subst; expr_subst] in
+    let* final_subst = Subst.compose_all [scope_subst; s] in
     R.return (final_subst, Subst.apply scope_typ final_subst)
   | Expr_let(Recursive, (Pat_var id as p, v), scope) ->
     (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";

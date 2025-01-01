@@ -3,8 +3,7 @@ open Ast
 
 let kwd ppf s = fprintf ppf "%s" s
 
-let pp_tuple ppf tuple_elems pp_elem pp_delim =
-    fprintf ppf "(";
+let pp_tuple tuple_elems pp_elem pp_delim =
     let rec helper = function 
     | [] -> Utils.unreachable()
     | [e] -> pp_elem e
@@ -12,8 +11,7 @@ let pp_tuple ppf tuple_elems pp_elem pp_delim =
         pp_elem e;
         pp_delim();
         helper es in
-    helper tuple_elems;
-    fprintf ppf ")"
+    helper tuple_elems
 
 let rec pp_typ ppf = function
   | Typ_bool -> fprintf ppf "bool"
@@ -22,10 +20,14 @@ let rec pp_typ ppf = function
   | Typ_var id -> fprintf ppf "%d" id
   | Typ_fun(Typ_fun(_, _) as farg, y) -> fprintf ppf "(%a) -> %a" pp_typ farg pp_typ y;
   | Typ_fun(x, y) -> fprintf ppf "%a -> %a" pp_typ x pp_typ y;
+  | Typ_list (Typ_fun _ | Typ_tuple _  as complex) -> fprintf ppf "(%a) list" pp_typ complex
   | Typ_list x -> fprintf ppf "%a list" pp_typ x
   | Typ_tuple(fst, snd, rest) ->
-    pp_tuple ppf (fst::snd::rest)
-    (fun e -> fprintf ppf "%a" pp_typ e)
+    pp_tuple (fst::snd::rest)
+    (fun e ->
+      (match e with
+      Typ_tuple _ | Typ_fun _ -> fprintf ppf "(%a)" pp_typ e
+      | e -> fprintf ppf "%a" pp_typ e))
     (fun () -> fprintf ppf " * ")
 
 
@@ -37,7 +39,7 @@ let rec pp_pat ppf = function
     | Pat_const(Const_bool b) -> fprintf ppf "%b" b
     | Pat_const(Const_int i) -> fprintf ppf "%i" i
     | Pat_tuple(fst, snd, rest) ->
-         pp_tuple ppf (fst::snd::rest)
+         pp_tuple (fst::snd::rest)
          (fun e -> fprintf ppf "%a" pp_pat e)
          (fun () -> fprintf ppf ", ")
     | Pat_cons(x, xs) -> fprintf ppf "@[(%a::%a) @]" pp_pat x pp_pat xs
@@ -65,7 +67,7 @@ let rec pp_expr ppf = function
         kwd "->"
         pp_expr arg
     | Expr_tuple(fst, snd, rest) ->
-            pp_tuple ppf (fst::snd::rest)
+            pp_tuple (fst::snd::rest)
             (fun e -> fprintf ppf "%a" pp_expr e)
             (fun () -> fprintf ppf ", ")
     | Expr_ite(c, t, e) ->
