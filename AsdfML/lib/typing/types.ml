@@ -51,3 +51,5 @@ let rec an_ty_to_ty = function
     TTuple (List.map xs an_ty_to_ty)
   | Ast.TAList x -> TList (an_ty_to_ty x)
 ;;
+
+let dummy_ty = TVar 0

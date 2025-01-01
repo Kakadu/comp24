@@ -7,6 +7,8 @@ open Ast
 open Base
 open Utils
 open Vars
+open Types
+
 
 let env_to_str env =
   Map.to_alist env
@@ -23,8 +25,8 @@ let rec cc_expr globals env ?(apply = true) = function
        dbg "FV in %s: %s\n" id (set_to_string fvs);
        fvs
        |> Set.to_list
-       |> List.map ~f:(te_var (TVar 0))
-       |> List.fold ~init:var ~f:(te_app (TVar 0)))
+       |> List.map ~f:(te_var dummy_ty)
+       |> List.fold ~init:var ~f:(te_app dummy_ty))
   | TEApp (ty, l, r) -> te_app ty (cc_expr globals env l) (cc_expr globals env r)
   | TEIfElse (ty, c, t, e) ->
     te_if_else ty (cc_expr globals env c) (cc_expr globals env t) (cc_expr globals env e)
@@ -46,8 +48,8 @@ let rec cc_expr globals env ?(apply = true) = function
        if apply
        then
          fvs
-         |> List.map ~f:(te_var (TVar 0))
-         |> List.fold ~init:closure_fun ~f:(te_app (TVar 0))
+         |> List.map ~f:(te_var dummy_ty)
+         |> List.fold ~init:closure_fun ~f:(te_app dummy_ty)
        else closure_fun)
   | TELetIn (ty, def, exp) ->
     let def', env', globals' = cc_def globals env def ~apply:false in
@@ -55,13 +57,8 @@ let rec cc_expr globals env ?(apply = true) = function
     te_let_in ty def' exp'
   | TETuple (ty, xs) -> List.map xs ~f:(cc_expr globals env) |> te_tuple ty
   | TEList (ty, xs) -> List.map xs ~f:(cc_expr globals env) |> te_list ty
-  (* 
-  TODO: SHOULD BE REMOVED BY NOW
-  | TEMatch (ty, exp, cases) ->
-    let exp' = cc_expr globals env exp in
-    let cases' = List.map cases ~f:(fun (p, e) -> p, cc_expr globals env e) in
-    e_match exp' cases' *)
-  | _ -> failwith "cc_expr not implemented"
+  | TEMatch _ -> failwith "removed by now"
+  (* | _ -> failwith "cc_expr not implemented" *)
 
 and cc_def globals env ?(apply = true) = function
   | TDLet ((TArrow _ as ty), (_ as flag), (PIdent id as pat), func) as def ->

@@ -68,39 +68,5 @@ and strip_types_def = function
   | TDLet (_, flag, p, e) -> DLet (flag, p, strip_types_expr e)
 ;;
 
-open Format
-open Utils
-
-let rec pp_texpr fmt = function
-  | TEConst (_, c) -> fprintf fmt "%a" pp_constant c
-  | TEVar (_, v) -> fprintf fmt "%s" v
-  | TEApp (_, e1, e2) ->
-    (match e1 with
-     | TEApp (_, _, _) ->
-       let rec pp_rest fmt = function
-         | TEApp (_, e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_texpr e2
-         | e -> fprintf fmt "(%a" pp_texpr e
-       in
-       fprintf fmt "%a %a)" pp_rest e1 pp_texpr e2
-     | _ -> fprintf fmt "(%a %a)" pp_texpr e1 pp_texpr e2)
-  | TEIfElse (_, e1, e2, e3) ->
-    fprintf fmt "if %a then %a else %a" pp_texpr e1 pp_texpr e2 pp_texpr e3
-  | TEFun (_, pats, e) ->
-    fprintf fmt "(fun ";
-    pp_pattern_list fmt pats;
-    fprintf fmt " -> %a)" pp_texpr e
-  | TELetIn (_, d, e) -> fprintf fmt "%a in %a" pp_tdefinition d pp_texpr e
-  | TETuple (_, es) -> pp_list ~sep:", " fmt pp_texpr es
-  | TEList (_, es) -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_texpr es
-  | TEMatch (_, e, pes) ->
-    fprintf fmt "match %a with\n" pp_texpr e;
-    pp_print_list
-      ~pp_sep:Format.pp_print_newline
-      (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p pp_texpr e)
-      fmt
-      pes
-
-and pp_tdefinition fmt = function
-  | TDLet (_, NonRec, pat, e) -> fprintf fmt "let %a = %a\n" pp_pattern pat pp_texpr e
-  | TDLet (_, Rec, pat, e) -> fprintf fmt "let rec %a = %a\n" pp_pattern pat pp_texpr e
-;;
+let pp_texpr fmt e = strip_types_expr e |> Pp_ast.pp_expr fmt
+and pp_tdefinition fmt d = strip_types_def d |> Pp_ast.pp_definition fmt

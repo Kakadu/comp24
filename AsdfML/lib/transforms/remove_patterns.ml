@@ -1,11 +1,12 @@
 open Base
 open Ast
 open Tast
+open Types
 open Vars
 
-let is_pident = function
+let is_simple = function
   | PIdent _ | PWild -> true
-  | _ -> failwith "remove_patterns: not implemented"
+  | _ -> false
 ;;
 
 let eliminate_arg_patterns body pattern_list =
@@ -28,7 +29,7 @@ let eliminate_arg_patterns body pattern_list =
            (Set.add used_names arg_name)
            (te_match
               (texpr_type current_expr)
-              (te_var (TVar 0) arg_name)
+              (te_var dummy_ty arg_name)
               [ head, current_expr ])
            (arg_name :: args_list)
            tail)
@@ -49,17 +50,27 @@ let remove_patterns =
     | TEFun (t, p, e) ->
       let p, e = eliminate_arg_patterns e p in
       te_fun t p e
-    | TELetIn (t, d, e) ->
-      (* TODO: let pattern = expr in => match expr with pattern -> ... *)
-      te_let_in t (helper_def d) (helper_expr e)
+    | TELetIn (t, def, body) ->
+      (* TODO: for complex patterns, transform
+         let pattern = expr in body
+         into
+         match expr with pattern -> body
+      *)
+      let body = helper_expr body in
+      (match def with
+       | TDLet (_, _, pat, exp) ->
+         if is_simple pat
+         then te_let_in t (helper_def def) body
+         else te_match t (helper_expr exp) [ pat, body ])
     | TETuple (t, xs) -> te_tuple t (List.map xs ~f:helper_expr)
     | TEList (t, xs) -> te_list t (List.map xs ~f:helper_expr)
     | TEMatch (t, e, c) ->
       te_match t (helper_expr e) (List.map c ~f:(fun (p, e) -> p, helper_expr e))
   and helper_def = function
     | TDLet (t, r, p, e) ->
-      (* TODO: for tuple patterns, bind to temp var and bind inner vars from it *)
-      let _ = is_pident p in
+      (* TODO: for tuple/list patterns, bind to temp var and bind inner vars from it *)
+      (* TODO: from here, a pattern in definition should be a single id (?) *)
+      assert (is_simple p);
       td_let_flag r t p (helper_expr e)
   in
   List.map ~f:helper_def
