@@ -406,13 +406,13 @@ let%expect_test "ascription" =
     parse_program poly;
    [%expect {|
      [ print_int -> [ ]int -> unit
-     , temp -> [ ](int * bool)
+     , temp -> [ ]int * bool
       ]
      [ 2 -> int
      , 3 -> int
      , 4 -> bool
      , 5 -> bool
-     , 6 -> (int * bool)
+     , 6 -> int * bool
       ] |}]
 let map f p = let (a, b) = p in (f a, f b)
 
@@ -442,14 +442,14 @@ let%expect_test "tuples" =
   [%expect {|
     [ feven -> [ 31; ]31 -> int -> int
     , fix -> [ 2; 3; ]((2 -> 3) -> 2 -> 3) -> 2 -> 3
-    , fixpoly -> [ 16; 26; 27; ]16 -> (26 -> 27 * 26 -> 27)
+    , fixpoly -> [ 16; 26; 27; ]16 -> (26 -> 27) * (26 -> 27)
     , fodd -> [ 41; ]41 -> int -> int
     , main -> [ ]int
-    , map -> [ 7; 9; 11; ](9 -> 11) -> 7 -> (11 * 11)
+    , map -> [ 7; 9; 11; ](9 -> 11) -> 7 -> 11 * 11
     , meven -> [ ]int -> int
     , modd -> [ ]int -> int
     , print_int -> [ ]int -> unit
-    , tie -> [ 53; 54; ](53 -> 54 * 53 -> 54)
+    , tie -> [ 53; 54; ](53 -> 54) * (53 -> 54)
      ]
     [ 58 -> int -> int
     , 59 -> int -> int

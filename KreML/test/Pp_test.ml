@@ -6,7 +6,7 @@ open Stdlib.Format
 
 let fmt = std_formatter
 
-let print_ast input =
+let check_ast input =
       match parse_string ~consume:Consume.All program input with
       | Ok original_struct ->
         let string = structure_as_string original_struct in
@@ -34,7 +34,7 @@ let%expect_test "map" =
      let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
 
       " in
-    print_ast input;
+    check_ast input;
   [%expect {|
     Ok |}]
 
@@ -50,7 +50,7 @@ let%expect_test "fold" =
             fold xs folder acc
          | [] -> init"
    in
-   print_ast input;
+   check_ast input;
   [%expect {| Ok |}]
 
 let%expect_test "factorial" =
@@ -58,7 +58,7 @@ let%expect_test "factorial" =
        "let f n = if n > 0 then
           n * f (n - 1)
           else 1" in
-   print_ast input;
+   check_ast input;
   [%expect {| Ok |}]
 
 
@@ -72,7 +72,7 @@ let%expect_test "even_odd" =
          if n = 1 then true
          else if n = 0 then false
          else is_odd (n - 1)" in
-   print_ast input;
+   check_ast input;
   [%expect {| Ok |}]
 
 let%expect_test "typed" =
@@ -89,6 +89,30 @@ let%expect_test "typed" =
         (f : (int -> int) -> int -> int) : int =
          todo";
      in
-   print_ast input;
+   check_ast input;
   [%expect {|
     Ok |}]
+
+(* let%expect_test "tuples" =
+    let tuples = "let rec fix f x = f (fix f) x
+  let map f p = let (a,b) = p in (f a, f b)
+  let fixpoly l =
+    fix (fun self l -> map (fun li x -> li (self l) x) l) l
+  let feven p n =
+    let (e, o) = p in
+    if n = 0 then 1 else o (n - 1)
+  let fodd p n =
+    let (e, o) = p in
+    if n = 0 then 0 else e (n - 1)
+  let tie = fixpoly (feven, fodd)
+
+  let rec meven n = if n = 0 then 1 else modd (n - 1)
+  and modd n = if n = 0 then 1 else meven (n - 1)
+  let main =
+    let () = print_int (modd 1) in
+    let () = print_int (meven 2) in
+    let (even,odd) = tie in
+    let () = print_int (odd 3) in
+    let () = print_int (even 4) in
+    0" in
+  check_ast tuples; *)
