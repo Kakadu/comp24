@@ -1,6 +1,5 @@
-let rec is_even a =
-  if a = 0 then true else is_odd (a - 1)
-and is_odd a =
-  if a = 1 then true else is_even ( a - 1)
 
-and c = (5, 6)
+
+let f p =
+  let a : int = p in
+  322

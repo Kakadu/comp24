@@ -34,12 +34,15 @@ let number =
   let* value = take_while1 is_digit in
   sign ^ value |> int_of_string |> return
 
+let stoken s = ws *> string s
 
-let parens p = ws *> char '(' *> p <* char ')'
+
+let parens p = ws *> stoken "(" *> p <* stoken ")"
 let braces p = ws *> char '[' *> p <* char ']'
 
+
 let ident =
-    ws *>
+    (ws *>
     let* i =
       let* h = satisfy (fun c -> is_lc_letter c || c = '_') in
       let allowed_char c = is_digit c || is_letter c || c = '_' in
@@ -51,9 +54,8 @@ let ident =
     in
     if is_keyword i then
        fail (Format.sprintf "Expected identifier, got keyword %s" i)
-    else return i
+    else return i)
 
-let stoken s = ws *> string s
 
 let keyword k =
   let* _ = ws *> string k in
@@ -68,10 +70,6 @@ let chainl1 e op =
     (lift2 (fun f x -> f acc x) op e >>= go) <|> return acc
   in 
   e >>= fun init -> go init
-
-let _start f =
-  let __ = "saddsa" in
-  __ ^ f __
 
 let rec chainr1 e op =
   e >>= fun lhs -> op >>= (fun o -> chainr1 e op >>| o lhs) <|> return lhs
@@ -103,9 +101,6 @@ let typ =
        lift2 (fun elem dims -> List.fold_left (fun t _ -> Typ_list(t)) elem dims)
        atom
       (many (stoken "list" <* ws)) in
-      (* (lift2 (fun elem dims -> Base.List.fold ~f:(fun acc _ -> Typ_list(acc)) ~init:elem dims)
-      atom
-      (many (stoken "list"))) in *)
     let typ = 
       (tuple (stoken "*") typ >>| fun (fst, snd, rest) -> Typ_tuple(fst, snd, rest))
       <|> typ in
@@ -126,9 +121,31 @@ let pattern =
         let pattern = (* try tuple *)
            (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest)
             <|> pattern in
-        let pattern = (pattern >>= fun p -> (stoken ":") *> typ >>= fun t -> Pat_constrained(p, t) |> return) (* try type *)
+        let pattern = (pattern >>= fun p ->
+           stoken ":" *> typ >>= fun t ->
+            Pat_constrained(p, t) |> return) (* try type *)
           <|> pattern in
         pattern
+    )
+
+
+(* we need this because typing of fun params is allowed only in parens, 
+otherwise type constraint belongs to expression
+for example, fun (x: int) : int -> ...
+let x : int = ... *)
+let untyped_pattern =
+  fix (fun self ->
+        let atom =
+          ws *>
+            (parens ws >>| fun _ -> Pat_unit) (* unit *)
+            <|> (braces ws >>| fun _ -> pnil) (* nil *)
+            <|> parens self (* parens *)
+            <|> (const >>| pconst)  (* const *)
+            <|> (ident >>| pvar) (* identifier *)
+            <|> (keyword "_"  *> return Pat_wildcard) in (* wildcard *)
+        let pattern = chainr1 atom (stoken "::" *> return pcons) in (* cons *)
+        (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest) (* try tuple *)
+        <|> pattern
     )
 
 (** Arithmetic  **)
@@ -141,9 +158,9 @@ let prio = [["*", mul; "/", div]
           ;["+", add; "-", sub]
           ; ["=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le]
           ; ["&&", eland]
-          ; ["||", elor];
-           ["", (fun x y -> eapp x [y])]
-          ;]
+          ; ["||", elor]
+          ; ["", fun f a -> eapp f [a]]
+          ]
   |> List.map (fun ops -> op_list_to_parser ops)
 
 let ident_as_expr = ws *> parens ident <|> ident >>| (fun i -> Expr_var i)
@@ -175,16 +192,28 @@ let eite expr =
   eite cond t e |> return
 
 let letdef kw erhs =
-  lift4 (fun is_rec name params rhs -> is_rec, name, List.fold_right efun params rhs)
+  (fun is_rec name params typ_constr rhs ->
+    let rhs = match typ_constr with
+    | Some t -> Expr_constrained(rhs, t)
+    | None -> rhs in
+     is_rec, name, List.fold_right efun params rhs) <$>
   (kw *> option NonRecursive (keyword "rec" *> return Recursive))
-  pattern
-  (many pattern)
-  (stoken "=" *> ws *> erhs)
+  <*> ((parens pattern) <|> untyped_pattern)
+  <*> (many ((parens pattern) <|> untyped_pattern))
+  <*> (option None (stoken ":" *> typ >>| fun t -> Some t))
+  <*> (stoken "=" *> ws *> erhs)
 
 let anonymous_fun expr =
-  lift2 (fun args body -> List.fold_right efun args body)
-  (keyword "fun" *> many1 (ws *> pattern))
+  lift3 (fun args typ_constr body -> match typ_constr with
+  | Some t -> List.fold_right efun args (Expr_constrained(body, t))
+  | None -> List.fold_right efun args body)
+  (keyword "fun" *> many1 (ws *> (parens pattern <|> untyped_pattern)))
+  (option None (stoken ":" *> typ >>| fun t -> Some t))
   (stoken "->" *> ws *> expr)
+
+let prefix_ops = choice [stoken "+"; stoken "-"; stoken "*"; stoken "/"; stoken "=";
+    stoken ">"; stoken ">="; stoken "<"; stoken "<=";
+    stoken "||"; stoken "&&" ] >>| fun id -> Expr_var id
 
 let expr =
   fix (fun self ->
@@ -192,23 +221,25 @@ let expr =
     let const = (const >>| fun c -> Expr_const c) in
     let unit = parens ws  >>| fun _ -> Expr_unit in
     let list = elist self in
-
     let atom = choice [parens self; ident; const; unit; list; anonymous_fun self;] in
-    let try_app = chainl1 atom (ws *> return (fun f a -> eapp f [a])) <|> atom in
-    let atom = expr_with_ops try_app in
-    let atom = chainr1 atom (stoken "::" *> return econs) in (* cons *)
-    let atom = (* tuple *)
-      (tuple (stoken ",") atom >>| (fun (fst, snd, rest) -> etuple fst snd rest))
-       <|> atom
+    let expr = chainl1 atom (ws *> return (fun f a -> eapp f [a])) in
+    let expr = expr_with_ops expr in (* should come after apply cause of [n * f (n-1)] *)
+    let expr = prefix_ops <|> expr in
+    let expr = chainr1 expr (stoken "::" *> return econs) in (* cons *)
+    let expr = (* tuple *)
+      (tuple (stoken ",") expr >>| (fun (fst, snd, rest) -> etuple fst snd rest))
+       <|> expr
     in
-    let atom =
-      (atom >>= fun a -> stoken ":" *> typ >>= fun t -> Expr_constrained(a, t) |> return) (* try type *)
-      <|> atom in 
-    atom (* atom *) 
+    let expr =
+      (expr >>= fun a -> stoken ":" *> typ >>= fun t -> Expr_constrained(a, t) |> return) (* try type *)
+      <|> expr in 
+    expr (* atom *) 
     <|> eite self (* ite *)
     <|> ematch self (* match *)
-    <|> (letdef (keyword "let") self >>= fun (rec_flag, name, value) -> (* local binding *)
-      stoken "in" *> self >>= fun scope -> elet ~rec_flag (name, value) scope |> return)
+    <|>
+      (let* rec_flag, name, value = letdef (keyword "let") self in (* local binding *)
+      let* scope = stoken "in" *> self in
+      elet ~rec_flag (name, value) scope |> return)
     <* ws
   )
 
@@ -216,7 +247,8 @@ let program : structure t =
   let str_item =
     let* is_rec, _, _ as fst = letdef (keyword "let") expr in
     let* rest = many (ws *> letdef (keyword "and")  expr) in
-    let bindings = Str_value(is_rec, (fst::rest) |> List.map (fun (_, name, e) -> name, e)) in
+    let bindings = Str_value(is_rec, (fst::rest) |> List.map (fun (_, name, e) ->
+       name, e)) in
     return bindings
   in
   many1 str_item <* ws
