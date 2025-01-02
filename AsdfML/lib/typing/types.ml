@@ -52,4 +52,4 @@ let rec an_ty_to_ty = function
   | Ast.TAList x -> TList (an_ty_to_ty x)
 ;;
 
-let dummy_ty = TVar 0
+let dummy_ty = TVar (-1)

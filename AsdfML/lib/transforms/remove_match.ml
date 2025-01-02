@@ -17,6 +17,9 @@ let list_field lst idx =
     (te_const dummy_ty (CInt idx))
 ;;
 
+(* TODO: arrow type for CC? *)
+let list_hd lst = te_app dummy_ty (te_var dummy_ty "`list_hd") lst
+let list_tl lst = te_app dummy_ty (te_var dummy_ty "`list_tl") lst
 let check_eq l r = TEApp (dummy_ty, TEApp (dummy_ty, TEVar (dummy_ty, "( = )"), l), r)
 
 let remove_match =
@@ -41,10 +44,16 @@ let remove_match =
             (List.foldi xs ~init:action ~f:(fun idx action x ->
                bind_pat_vars (tuple_field (te_var dummy_ty "`tuple") idx) x action))
         | PList xs ->
-          (* TODO: ^^^ *)
-          List.foldi xs ~init:action ~f:(fun idx action x ->
-            bind_pat_vars (list_field match_exp idx) x action)
-        | PCons (hd, tl) -> failwith "TODO bind_pat_vars cons"
+          te_let_in
+            dummy_ty
+            (td_let dummy_ty (p_ident "`list") match_exp)
+            (List.foldi xs ~init:action ~f:(fun idx action x ->
+               bind_pat_vars (list_field (te_var dummy_ty "`list") idx) x action))
+        | PCons (hd, tl) ->
+          bind_pat_vars
+            (list_hd match_exp)
+            hd
+            (bind_pat_vars (list_tl match_exp) tl action)
         | _ -> action
       in
       let case_matched match_exp = function

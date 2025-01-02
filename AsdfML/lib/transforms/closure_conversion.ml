@@ -75,7 +75,7 @@ and cc_def globals env ?(apply = true) = function
 
 let default_globals =
   let open Std in
-  Std.stdlib |> List.map ~f:(fun x -> x.name) |> Set.Poly.of_list
+  stdlib @ runtime |> List.map ~f:(fun x -> x.name) |> Set.Poly.of_list
 ;;
 
 let closure_conversion ?(globals = default_globals) (program : tdefinition list) =
