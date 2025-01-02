@@ -35,9 +35,13 @@ let remove_match =
         match pat with
         | PIdent _ -> te_let_in dummy_ty (td_let dummy_ty pat match_exp) action
         | PTuple xs ->
-          List.foldi xs ~init:action ~f:(fun idx action x ->
-            bind_pat_vars (tuple_field match_exp idx) x action)
+          te_let_in
+            dummy_ty
+            (td_let dummy_ty (p_ident "`tuple") match_exp)
+            (List.foldi xs ~init:action ~f:(fun idx action x ->
+               bind_pat_vars (tuple_field (te_var dummy_ty "`tuple") idx) x action))
         | PList xs ->
+          (* TODO: ^^^ *)
           List.foldi xs ~init:action ~f:(fun idx action x ->
             bind_pat_vars (list_field match_exp idx) x action)
         | PCons (hd, tl) -> failwith "TODO bind_pat_vars cons"
@@ -61,7 +65,7 @@ let remove_match =
             (fun else_branch ->
               cont
                 (te_if_else
-                   (texpr_type action)
+                   t
                    (case_matched match_exp pat)
                    (bind_pat_vars match_exp pat action)
                    else_branch))
