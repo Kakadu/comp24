@@ -9,13 +9,11 @@ type cf_expr =
   | CFVar of id
   | CFApp of cf_expr * cf_expr
   | CFIfElse of cf_expr * cf_expr * cf_expr
-  | CFFun of id list * cf_expr
-  | CFLetIn of cf_definition * cf_expr 
+  | CFLetIn of id * cf_expr * cf_expr
   | CFTuple of cf_expr list
   | CFList of cf_expr list
-  | CFMatch of cf_expr * (pattern * cf_expr) list
 
-and cf_definition = CFDLet of id * cf_expr
+and cf_definition = CFLet of id * id list * cf_expr
 
 type program = cf_definition list
 
@@ -23,9 +21,37 @@ let cf_const c = CFConst c
 let cf_var v = CFVar v
 let cf_app f arg = CFApp (f, arg)
 let cf_if_else cond if_expr else_expr = CFIfElse (cond, if_expr, else_expr)
-let cf_fun args body = CFFun (args, body)
-let cf_let_in def exp = CFLetIn (def, exp)
+let cf_let_in id body exp = CFLetIn (id, body, exp)
 let cf_tuple exprs = CFTuple exprs
 let cf_list exprs = CFList exprs
-let cf_match expr cases = CFMatch (expr, cases)
-let cf_def id expr = CFDLet (id, expr)
+let cf_def id args expr = CFLet (id, args, expr)
+
+open Format
+open Base
+open Utils
+
+let rec pp_expr fmt = function
+  | CFConst c -> fprintf fmt "%a" Pp_ast.pp_constant c
+  | CFVar v -> fprintf fmt "%s" v
+  | CFApp (e1, e2) ->
+    (match e1 with
+     | CFApp (_, _) ->
+       let rec pp_rest fmt = function
+         | CFApp (e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_expr e2
+         | e -> fprintf fmt "(%a" pp_expr e
+       in
+       fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
+     | _ -> fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2)
+  | CFIfElse (c, t, e) ->
+    fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
+  | CFLetIn (id, body, exp) ->
+    fprintf fmt "let %s = %a in\n%a" id pp_expr body pp_expr exp
+  | CFTuple xs -> pp_list ~sep:", " fmt pp_expr xs
+  | CFList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
+
+and pp_definition fmt = function
+  | CFLet (id, args, e) ->
+    (match args with
+     | [] -> fprintf fmt "let %s = %a\n" id pp_expr e
+     | _ -> fprintf fmt "let %s %s = %a\n" id (String.concat args ~sep:" ") pp_expr e)
+;;
