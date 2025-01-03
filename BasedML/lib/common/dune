@@ -1,0 +1,4 @@
+(library
+ (name common)
+ (public_name BasedML.Common)
+ (modules stateMonad))
