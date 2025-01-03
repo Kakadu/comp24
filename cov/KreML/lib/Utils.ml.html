@@ -18,13 +18,12 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:50.00%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
         <pre>
-<a id="L1"></a><span class="unvisited"> </span>
+<a id="L1"></a><span > </span>
 <a id="L2"></a><span class="unvisited"> </span>
 </pre>
       </div>
@@ -33,7 +32,7 @@
 <a href="#L1">1</a>
 <a href="#L2">2</a>
 </pre>
-<pre><code class="ocaml">let internalfail msg = <span data-count="0">f</span>ailwith msg
+<pre><code class="ocaml">let internalfail = failwith
 let unreachable () = <span data-count="0">i</span>nternalfail "Reached unreachable by assumption code"
 </code></pre>
       </div>

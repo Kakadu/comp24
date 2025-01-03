@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>Parser.ml &mdash; Coverage report</title>
-    <meta name="description" content="97.26% coverage in lib/Parser.ml">
+    <meta name="description" content="97.24% coverage in lib/Parser.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/</span>Parser.ml
         </a>
       </h1>
-      <h2>97.26%</h2>
+      <h2>97.24%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:2.10%"></span>
@@ -87,7 +87,7 @@
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span > </span>
@@ -126,7 +126,7 @@
 <a id="L93"></a><span > </span>
 <a id="L94"></a><span > </span>
 <a id="L95"></a><span class="visited"> </span>
-<a id="L96"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
 <a id="L97"></a><span > </span>
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span > </span>
@@ -760,7 +760,7 @@ let number =
        peek_char_fail
        &gt;&gt;<span data-count="5">|</span> function
        | <span data-count="5748">'</span>-' -&gt;
-         advance 1 |&gt; <span data-count="5748">i</span>gnore;
+         let _ = advance 1 in
          <span data-count="5748">"</span>-"
        | <span data-count="490704">_</span> -&gt; ""
      in
@@ -799,7 +799,7 @@ let keyword k =
 (** Helpers **)
 let chainl1 e op =
   <span data-count="95">l</span>et rec go acc = <span data-count="1795043">l</span>ift<span data-count="1795043">2</span> (fun f x -&gt; <span data-count="126972">f</span> acc x) op e &gt;&gt;<span data-count="1795043">=</span> go &lt;|&gt; retur<span data-count="1795043">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="1668071">g</span>o init
+  e &gt;&gt;= go
 ;;
 
 let rec chainr1 e op =
@@ -910,7 +910,7 @@ let prio =
   ; [ "||", elor ]
   ; [ ("", fun f a -&gt; <span data-count="41992">e</span>app f [ a ]) ]
   ]
-  |&gt; List.ma<span data-count="5">p</span> (fun ops -&gt; <span data-count="30">o</span>p_list_to_parser ops)
+  |&gt; List.ma<span data-count="5">p</span> op_list_to_parser
 ;;
 
 let ident_as_expr = ws *<span data-count="5">&gt;</span> paren<span data-count="5">s</span> ident &lt;|<span data-count="5">&gt;</span> ident &gt;&gt;<span data-count="5">|</span> fun i -&gt; <span data-count="38">E</span>xpr_var i
