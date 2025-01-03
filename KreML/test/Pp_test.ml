@@ -93,17 +93,3 @@ let%expect_test "typed" =
   [%expect {|
     Ok |}]
 
-let%expect_test  "asd " =
-     let e = "match wnPsvbc_Wek_ilur with | (true : unit -> int)  -> false ::true " in
-      match parse_string ~consume:Consume.All expr e with
-      | Ok original_struct ->
-        let string = expr_to_code original_struct in
-        (match parse_string ~consume:Consume.All expr string with
-        | Ok struct_from_ppf when original_struct = struct_from_ppf -> fprintf fmt "Ok"
-        | Ok struct_from_ppf ->
-          fprintf fmt "Ast do not match. Expected %s, but got %s"
-           (show_expr original_struct)
-           (show_expr struct_from_ppf)
-        | Error _ -> fprintf fmt "Could not parse pretting print program: \n %s" string)
-      | Error _ -> fprintf fmt "Could not parse input: \n %s" e;
-  [%expect {| Ok |}]
