@@ -7,12 +7,3 @@
  (instrumentation
   (backend bisect_ppx))
  (inline_tests))
-
- (executable
- (name test)
- (modules test)
- (public_name test)
- (libraries shaitanml_lib stdio))
-
-(cram
- (deps %{bin:test}))
