@@ -1,31 +1,31 @@
 open Kreml_lib.Parser
 open Kreml_lib.Inferencer
 
-  
 let parse_program input =
   let w p = R.run (infer_program p) in
   match Angstrom.parse_string ~consume:Angstrom.Consume.All program input with
   | Ok rest ->
-    let r = w rest in 
+    let r = w rest in
     (match r with
-    | Result.Ok (s, env) -> 
-      let fmt = Stdlib.Format.std_formatter in 
-      let() = TypeEnv.pp fmt env in
-      let () = Format.fprintf fmt "\n" in
-      Subst.pp fmt s
-    | Error e -> pp_error (Stdlib.Format.std_formatter) e)
+     | Result.Ok (s, env) ->
+       let fmt = Stdlib.Format.std_formatter in
+       let () = TypeEnv.pp fmt env in
+       let () = Format.fprintf fmt "\n" in
+       Subst.pp fmt s
+     | Error e -> pp_error Stdlib.Format.std_formatter e)
   | Error _ -> print_endline "Parser failed"
-
+;;
 
 let%expect_test "fac" =
-  let fac = 
-  "let rec fac n = if n<=1 then 1 else n * fac (n-1)
-
-   let main =
-     let () = print_int (fac 4) in
-     0" in
- parse_program fac;
-  [%expect {|
+  let fac =
+    "let rec fac n = if n<=1 then 1 else n * fac (n-1)\n\n\
+    \   let main =\n\
+    \     let () = print_int (fac 4) in\n\
+    \     0"
+  in
+  parse_program fac;
+  [%expect
+    {|
     [ fac -> [ ]int -> int
     , main -> [ ]int
     , print_int -> [ ]int -> unit
@@ -43,19 +43,20 @@ let%expect_test "fac" =
     , 10 -> int
     , 11 -> int
      ] |}]
-
+;;
 
 let%expect_test "fac_cps" =
-  let fac_cps = 
-  "let rec fac_cps n k =
-    if n=1 then k 1 else
-    fac_cps (n-1) (fun p -> k (p*n))
-
-  let main =
-    let () = print_int (fac_cps 4 (fun print_int -> print_int)) in
-    0" in
- parse_program fac_cps;
-  [%expect {|
+  let fac_cps =
+    "let rec fac_cps n k =\n\
+    \    if n=1 then k 1 else\n\
+    \    fac_cps (n-1) (fun p -> k (p*n))\n\n\
+    \  let main =\n\
+    \    let () = print_int (fac_cps 4 (fun print_int -> print_int)) in\n\
+    \    0"
+  in
+  parse_program fac_cps;
+  [%expect
+    {|
     [ fac_cps -> [ 6; ]int -> (int -> 6) -> 6
     , main -> [ ]int
     , print_int -> [ ]int -> unit
@@ -80,27 +81,29 @@ let%expect_test "fac_cps" =
     , 18 -> int
     , 19 -> int
      ] |}]
+;;
 
 let%expect_test "fib" =
-  let fib = "
-    let rec fib_acc a b n =
-      if n=1 then b
-      else
-        let n1 = n-1 in
-        let ab = a+b in
-        fib_acc b ab n1
-
-    let rec fib n =
-      if n<2
-      then n
-      else fib (n - 1) + fib (n - 2) 
-
-    let main =
-      let () = print_int (fib_acc 0 1 4) in
-      let () = print_int (fib 4) in
-      0" in
+  let fib =
+    "\n\
+    \    let rec fib_acc a b n =\n\
+    \      if n=1 then b\n\
+    \      else\n\
+    \        let n1 = n-1 in\n\
+    \        let ab = a+b in\n\
+    \        fib_acc b ab n1\n\n\
+    \    let rec fib n =\n\
+    \      if n<2\n\
+    \      then n\n\
+    \      else fib (n - 1) + fib (n - 2) \n\n\
+    \    let main =\n\
+    \      let () = print_int (fib_acc 0 1 4) in\n\
+    \      let () = print_int (fib 4) in\n\
+    \      0"
+  in
   parse_program fib;
-  [%expect {|
+  [%expect
+    {|
     [ fib -> [ ]int -> int
     , fib_acc -> [ ]int -> int -> int -> int
     , main -> [ ]int
@@ -126,28 +129,29 @@ let%expect_test "fib" =
     , 32 -> int
     , 33 -> int
      ] |}]
+;;
 
 let%expect_test "many_args" =
-  let many_args = "let wrap f = if 1 = 1 then f else f
-
-  let test3 a b c =
-    let a = print_int a in
-    let b = print_int b in
-    let c = print_int c in
-    0
-
-  let test10 a b c d e f g h i j = a + b + c + d + e + f + g + h + i + j
-
-  let main =
-    let rez =
-        (wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000
-          1000000000)
-    in
-    let () = print_int rez in
-    let temp2 = wrap test3 1 10 100 in
-    0" in
+  let many_args =
+    "let wrap f = if 1 = 1 then f else f\n\n\
+    \  let test3 a b c =\n\
+    \    let a = print_int a in\n\
+    \    let b = print_int b in\n\
+    \    let c = print_int c in\n\
+    \    0\n\n\
+    \  let test10 a b c d e f g h i j = a + b + c + d + e + f + g + h + i + j\n\n\
+    \  let main =\n\
+    \    let rez =\n\
+    \        (wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000\n\
+    \          1000000000)\n\
+    \    in\n\
+    \    let () = print_int rez in\n\
+    \    let temp2 = wrap test3 1 10 100 in\n\
+    \    0"
+  in
   parse_program many_args;
-  [%expect {|
+  [%expect
+    {|
     [ main -> [ ]int
     , print_int -> [ ]int -> unit
     , test10 -> [ ]int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
@@ -218,19 +222,22 @@ let%expect_test "many_args" =
     , 62 -> int
     , 63 -> int
      ] |}]
+;;
 
 let rec fix f x = f (fix f) x
 
 let%expect_test "fix" =
-  let fix = "
-    let rec fix f x = f (fix f) x
-    let fac self n = if n<=1 then 1 else n * self (n-1)
-
-  let main =
-    let () = print_int (fix fac 6) in
-    0" in
-    parse_program fix;
-  [%expect {|
+  let fix =
+    "\n\
+    \    let rec fix f x = f (fix f) x\n\
+    \    let fac self n = if n<=1 then 1 else n * self (n-1)\n\n\
+    \  let main =\n\
+    \    let () = print_int (fix fac 6) in\n\
+    \    0"
+  in
+  parse_program fix;
+  [%expect
+    {|
     [ fac -> [ ](int -> int) -> int -> int
     , fix -> [ 2; 3; ]((2 -> 3) -> 2 -> 3) -> 2 -> 3
     , main -> [ ]int
@@ -257,17 +264,20 @@ let%expect_test "fix" =
     , 20 -> int
     , 21 -> int
      ] |}]
+;;
 
 let%expect_test "partial" =
-    let partial = "
-    let foo1 b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)
-
-    let foo x = foo1 true (foo1 false (foo1 true (foo1 false x)))
-    let main =
-      let () = print_int (foo 11) in
-      0" in
-      parse_program partial;
-  [%expect {|
+  let partial =
+    "\n\
+    \    let foo1 b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)\n\n\
+    \    let foo x = foo1 true (foo1 false (foo1 true (foo1 false x)))\n\
+    \    let main =\n\
+    \      let () = print_int (foo 11) in\n\
+    \      0"
+  in
+  parse_program partial;
+  [%expect
+    {|
     [ foo -> [ ]int -> int
     , foo1 -> [ ]bool -> int -> int
     , main -> [ ]int
@@ -295,22 +305,25 @@ let%expect_test "partial" =
     , 19 -> int
     , 20 -> int
      ] |}]
+;;
 
 let%expect_test "partial2" =
-  let partial2 = "let foo a b c =
-  let () = print_int a in
-  let () = print_int b in
-  let () = print_int c in
-  a + b * c
-
-  let main =
-    let foo = foo 1 in
-    let foo = foo 2 in
-    let foo = foo 3 in
-    let () = print_int foo in
-    0" in
+  let partial2 =
+    "let foo a b c =\n\
+    \  let () = print_int a in\n\
+    \  let () = print_int b in\n\
+    \  let () = print_int c in\n\
+    \  a + b * c\n\n\
+    \  let main =\n\
+    \    let foo = foo 1 in\n\
+    \    let foo = foo 2 in\n\
+    \    let foo = foo 3 in\n\
+    \    let () = print_int foo in\n\
+    \    0"
+  in
   parse_program partial2;
-  [%expect {|
+  [%expect
+    {|
     [ foo -> [ ]int -> int -> int -> int
     , main -> [ ]int
     , print_int -> [ ]int -> unit
@@ -335,19 +348,22 @@ let%expect_test "partial2" =
     , 17 -> unit
     , 18 -> int
      ] |}]
+;;
 
 let%expect_test "partial3" =
-  let partial3 = "
-  let foo a =
-    let () = print_int a in fun b ->
-    let () = print_int b in fun c ->
-    print_int c
-
-  let main =
-    let () = foo 4 8 9 in
-    0" in
-    parse_program partial3;
-  [%expect {|
+  let partial3 =
+    "\n\
+    \  let foo a =\n\
+    \    let () = print_int a in fun b ->\n\
+    \    let () = print_int b in fun c ->\n\
+    \    print_int c\n\n\
+    \  let main =\n\
+    \    let () = foo 4 8 9 in\n\
+    \    0"
+  in
+  parse_program partial3;
+  [%expect
+    {|
     [ foo -> [ ]int -> int -> int -> unit
     , main -> [ ]int
     , print_int -> [ ]int -> unit
@@ -364,19 +380,22 @@ let%expect_test "partial3" =
     , 9 -> int -> int -> unit
     , 10 -> int
      ] |}]
-let somef f g x = f x ( g x : bool )
+;;
 
-
+let somef f g x = f x (g x : bool)
 
 let%expect_test "ascription" =
-  let ascription = "
-    let addi = fun f g x -> (f x (g x: bool) : int)
-
-    let main =
-      let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start -> _start/2 = 0) 4) in
-      0" in
+  let ascription =
+    "\n\
+    \    let addi = fun f g x -> (f x (g x: bool) : int)\n\n\
+    \    let main =\n\
+    \      let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start -> \
+     _start/2 = 0) 4) in\n\
+    \      0"
+  in
   parse_program ascription;
-  [%expect {|
+  [%expect
+    {|
     [ addi -> [ 2; ](2 -> bool -> int) -> (2 -> bool) -> 2 -> int
     , main -> [ ]int
     , print_int -> [ ]int -> unit
@@ -405,14 +424,13 @@ let%expect_test "ascription" =
     , 22 -> int -> int
     , 23 -> int
      ] |}]
+;;
 
- let%expect_test "poly" =
-    let poly = "
-    let temp =
-      let f = fun x -> x in
-      (f 1, f true)" in
-    parse_program poly;
-   [%expect {|
+let%expect_test "poly" =
+  let poly = "\n    let temp =\n      let f = fun x -> x in\n      (f 1, f true)" in
+  parse_program poly;
+  [%expect
+    {|
      [ print_int -> [ ]int -> unit
      , temp -> [ ]int * bool
       ]
@@ -423,32 +441,39 @@ let%expect_test "ascription" =
      , 5 -> bool
      , 6 -> int * bool
       ] |}]
-let map f p = let (a, b) = p in (f a, f b)
+;;
+
+let map f p =
+  let a, b = p in
+  f a, f b
+;;
 
 let%expect_test "tuples" =
-    let tuples = "let rec fix f x = f (fix f) x
-  let map f p = let (a,b) = p in (f a, f b)
-  let fixpoly l =
-    fix (fun self l -> map (fun li x -> li (self l) x) l) l
-  let feven p n =
-    let (e, o) = p in
-    if n = 0 then 1 else o (n - 1)
-  let fodd p n =
-    let (e, o) = p in
-    if n = 0 then 0 else e (n - 1)
-  let tie = fixpoly (feven, fodd)
-
-  let rec meven n = if n = 0 then 1 else modd (n - 1)
-  and modd n = if n = 0 then 1 else meven (n - 1)
-  let main =
-    let () = print_int (modd 1) in
-    let () = print_int (meven 2) in
-    let (even,odd) = tie in
-    let () = print_int (odd 3) in
-    let () = print_int (even 4) in
-    0" in
+  let tuples =
+    "let rec fix f x = f (fix f) x\n\
+    \  let map f p = let (a,b) = p in (f a, f b)\n\
+    \  let fixpoly l =\n\
+    \    fix (fun self l -> map (fun li x -> li (self l) x) l) l\n\
+    \  let feven p n =\n\
+    \    let (e, o) = p in\n\
+    \    if n = 0 then 1 else o (n - 1)\n\
+    \  let fodd p n =\n\
+    \    let (e, o) = p in\n\
+    \    if n = 0 then 0 else e (n - 1)\n\
+    \  let tie = fixpoly (feven, fodd)\n\n\
+    \  let rec meven n = if n = 0 then 1 else modd (n - 1)\n\
+    \  and modd n = if n = 0 then 1 else meven (n - 1)\n\
+    \  let main =\n\
+    \    let () = print_int (modd 1) in\n\
+    \    let () = print_int (meven 2) in\n\
+    \    let (even,odd) = tie in\n\
+    \    let () = print_int (odd 3) in\n\
+    \    let () = print_int (even 4) in\n\
+    \    0"
+  in
   parse_program tuples;
-  [%expect {|
+  [%expect
+    {|
     [ feven -> [ 32; ]32 * (int -> int) -> int -> int
     , fix -> [ 2; 3; ]((2 -> 3) -> 2 -> 3) -> 2 -> 3
     , fixpoly -> [ 25; 26; ]((25 -> 26) * (25 -> 26) -> 25 -> 26) * ((25 -> 26) * (25 -> 26) -> 25 -> 26) -> (25 -> 26) * (25 -> 26)
@@ -486,60 +511,62 @@ let%expect_test "tuples" =
     , 79 -> int
     , 80 -> int
      ] |}]
+;;
 
 (* let%expect_test "lists" =
-  let lists = "
-  let length_tail =
-  let rec helper acc xs =
-  match xs with
-  | [] -> acc
-  | h::tl -> helper (acc + 1) tl
+   let lists = "
+   let length_tail =
+   let rec helper acc xs =
+   match xs with
+   | [] -> acc
+   | h::tl -> helper (acc + 1) tl
+   in
+   helper 0
+
+   let rec map f xs =
+   match xs with
+   | [] -> []
+   | a::[] -> [f a]
+   | a::b::[] -> [f a; f b]
+   | a::b::c::[] -> [f a; f b; f c]
+   | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
+
+   let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
+
+   let concat =
+   let rec helper xs =
+   match xs with
+   | [] -> []
+   | h::tl -> append h (helper tl)
+   in helper
+
+   let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
+
+   let rec cartesian xs ys =
+   match xs with
+   | [] -> []
+   | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)
+
+   let main =
+   let () = iter print_int [1;2;3] in
+   let () = print_int (length_tail (cartesian [1;2] [1;2;3;4])) in
+   0" in
+   parse_program lists *)
+
+let%expect_test "lists" =
+  let lists =
+    "\n\
+    \  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)\n\n\
+    \  let concat =\n\
+    \    let rec helper xs =\n\
+    \      match xs with\n\
+    \      | [] -> []\n\
+    \      | h::tl -> append h (helper tl)\n\
+    \    in helper\n"
   in
-  helper 0
-
-  let rec map f xs =
-    match xs with
-    | [] -> []
-    | a::[] -> [f a]
-    | a::b::[] -> [f a; f b]
-    | a::b::c::[] -> [f a; f b; f c]
-    | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
-
-  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
-
-  let concat =
-    let rec helper xs =
-      match xs with
-      | [] -> []
-      | h::tl -> append h (helper tl)
-    in helper
-
-  let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
-
-  let rec cartesian xs ys =
-    match xs with
-    | [] -> []
-    | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)
-
-  let main =
-    let () = iter print_int [1;2;3] in
-    let () = print_int (length_tail (cartesian [1;2] [1;2;3;4])) in
-    0" in
-  parse_program lists *)
-
-  let%expect_test "lists" =
-  let lists = "
-  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
-
-  let concat =
-    let rec helper xs =
-      match xs with
-      | [] -> []
-      | h::tl -> append h (helper tl)
-    in helper
-" in
   parse_program lists;
-    [%expect {|
+  [%expect
+    {|
       [ append -> [ 4; ]4 list -> 4 list -> 4 list
       , concat -> [ 18; ]18 list list -> 18 list
       , print_int -> [ ]int -> unit
@@ -564,17 +591,19 @@ let%expect_test "tuples" =
       , 19 -> 18 list
       , 20 -> 18 list list -> 18 list
        ] |}]
+;;
 
- let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
+let rec append xs ys =
+  match xs with
+  | [] -> ys
+  | x :: xs -> x :: append xs ys
+;;
 
-  let concat =
-    let rec helper xs =
-      match xs with
-      | [] -> []
-      | h::tl -> append h (helper tl)
-    in helper
-
-
-
-
-
+let concat =
+  let rec helper xs =
+    match xs with
+    | [] -> []
+    | h :: tl -> append h (helper tl)
+  in
+  helper
+;;
