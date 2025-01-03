@@ -191,7 +191,7 @@ module Scheme = struct
 
   let apply_subst subst (Scheme (bs, t)) =
     let partial_subst =
-      Varset.fold (fun bounded_v acc -> Subst.remove bounded_v acc) bs subst
+      Varset.fold (fun bounded_v -> Subst.remove bounded_v) bs subst
     in
     Scheme (bs, Subst.apply t partial_subst)
   ;;
@@ -279,9 +279,8 @@ module TypeEnv = struct
     | Pat_constrained (p, typ), _ -> generalize_pattern p typ env
     | Pat_unit, _ -> env
     | _ ->
-      failwith
-        (Printf.sprintf
-           "Unsupported pattern matching %s with type %s"
+        Utils.internalfail
+           (Stdlib.Format.asprintf "Unsupported pattern matching %s with type %s"
            (show_pattern p)
            (show_typ typ))
   ;;
@@ -449,7 +448,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* final_subst = Subst.compose_all [ uni_subst; arg_s; f_s ] in
       R.return (final_subst, Subst.apply body_typ final_subst)
     | _ ->
-      failwith (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr))
+      Utils.internalfail (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr))
   in
   helper env expr
 ;;
@@ -487,7 +486,7 @@ let infer_program (p : structure) =
             R.return (final_subst, TypeEnv.apply final_subst env)
           | _ ->
             Stdlib.Format.sprintf "Unsupported rec pattern %s" (show_pattern p)
-            |> failwith)
+            |> Utils.internalfail)
     | _ -> Utils.unreachable ()
   in
   R.foldl p ~init:(R.return (Subst.empty, TypeEnv.default)) ~f:helper

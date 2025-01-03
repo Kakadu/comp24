@@ -57,6 +57,7 @@ let rec_flag = frequency [ 1, return Recursive; 1, return NonRecursive ]
 let pattern =
   sized
   @@ fix (fun self n ->
+    let s = self @@ (n / 64) in
     match n with
     | 0 ->
       frequency
@@ -66,16 +67,15 @@ let pattern =
         ; 1, return Pat_wildcard
         ; 2, map (fun c -> Pat_const c) const
         ]
-    | n ->
+    | _ ->
       frequency
-        [ ( 2
-          , map
+        [ 2, map
               (fun (fst, snd, rest) -> Pat_tuple (fst, snd, rest))
-              (tuple @@ self @@ (n / 2)) )
-        ; 2, map2 (fun x xs -> Pat_cons (x, xs)) (self @@ (n / 64)) (self @@ (n / 64))
-        ; 1, map2 (fun p t -> Pat_constrained (p, t)) (self @@ (n / 64)) typ
-        ])
-;;
+              (tuple @@ s)
+        ; 2, map2 (fun x xs -> Pat_cons (x, xs)) s s
+        ; 1, map2 (fun p t -> Pat_constrained (p, t)) s typ
+        ]
+  )
 
 let expr =
   sized

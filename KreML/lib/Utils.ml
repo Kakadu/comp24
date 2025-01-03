@@ -1,2 +1,2 @@
-let internalfail msg = failwith msg
+let internalfail = failwith
 let unreachable () = internalfail "Reached unreachable by assumption code"

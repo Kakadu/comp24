@@ -54,7 +54,7 @@ let number =
        peek_char_fail
        >>| function
        | '-' ->
-         advance 1 |> ignore;
+         let _ = advance 1 in
          "-"
        | _ -> ""
      in
@@ -93,7 +93,7 @@ let keyword k =
 (** Helpers **)
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 let rec chainr1 e op =
@@ -204,7 +204,7 @@ let prio =
   ; [ "||", elor ]
   ; [ ("", fun f a -> eapp f [ a ]) ]
   ]
-  |> List.map (fun ops -> op_list_to_parser ops)
+  |> List.map op_list_to_parser
 ;;
 
 let ident_as_expr = ws *> parens ident <|> ident >>| fun i -> Expr_var i
