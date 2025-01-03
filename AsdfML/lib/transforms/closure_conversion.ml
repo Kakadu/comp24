@@ -37,6 +37,7 @@ let rec cc_expr globals env ?(apply = true) = function
   | TEFun (_, pat, body) as func ->
     let fvs = Set.diff (free_vars_texpr func) globals |> Set.to_list in
     dbg "FVs %s in fun\n%a\n" (list_to_string fvs) Tast.pp_texpr func;
+    (* dbg "GLOBALS: %s\n" (set_to_string globals); *)
     let body' = cc_expr globals env body in
     (match fvs with
      | [] -> s_fun (pat_list_to_id_list pat) body'
@@ -55,6 +56,8 @@ let rec cc_expr globals env ?(apply = true) = function
   | TELetIn (_, def, exp) ->
     let def', env', globals' = cc_def globals env def ~apply:false in
     let exp' = cc_expr globals' env' exp in
+    (* let def', env', _ = cc_def globals env def ~apply:false in
+       let exp' = cc_expr globals env' exp in *)
     s_let_in def' exp'
   | TETuple (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_tuple
   | TEList (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_list
@@ -66,10 +69,10 @@ and cc_def globals env ?(apply = true) = function
     let env' = Map.set env ~key:id ~data:fvs in
     let globals' = Set.add globals id in
     let func = cc_expr globals' env' func ~apply in
-    s_let_flag flag id func, env', globals'
+    s_let true flag id func, env', globals'
   | TDLet (_, flag, PIdent id, exp) ->
     let exp' = cc_expr globals env exp in
-    s_let_flag flag id exp', env, globals
+    s_let false flag id exp', env, globals
   | _ -> failwith "cc_def not implemented"
 ;;
 

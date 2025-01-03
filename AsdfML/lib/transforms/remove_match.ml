@@ -2,6 +2,7 @@ open Base
 open Ast
 open Tast
 open Types
+open Utils
 
 let tuple_field lst idx =
   te_app
@@ -60,7 +61,7 @@ let remove_match =
         | PConst c -> check_eq match_exp (TEConst (dummy_ty, c))
         | PTuple xs -> failwith "TODO case_matched tuple"
         | PList xs -> failwith "TODO case_matched list"
-        | PCons (hd, tl) -> failwith "TODO case_matched cons"
+        | PCons (hd, tl) -> TEVar (dummy_ty, "(TODO: check cons pattern)") 
         | _ -> TEConst (dummy_ty, CBool true)
       in
       let rec gen_match cont cases =

@@ -473,7 +473,7 @@ let infer =
             let final_ty = Subst.apply final_subst acc_ty in
             return (final_subst, final_ty, (p, te) :: acc_te))
       in
-      return (sub, ty, TEMatch (ty, te, tes))
+      return (sub, ty, TEMatch (ty, te, List.rev tes))
   and (infer_def
         : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty * tdefinition) R.t)
     =

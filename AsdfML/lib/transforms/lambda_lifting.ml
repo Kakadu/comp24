@@ -13,16 +13,13 @@ open State.IntStateM.Syntax
 (* TODO:
    - lifts in `let test = fun ... -> ...`
 *)
+let fresh_id name =
+  let* fresh = fresh in
+  let fresh = string_of_int fresh in
+  return (if String.equal name "" then "`ll_" ^ fresh else "`" ^ name ^ "_" ^ fresh)
+;;
 
-let rec ll_expr env lift ?(name = None) =
-  let name_or_new () =
-    match name with
-    | Some x -> return x
-    | None ->
-      let* fresh = fresh in
-      return ("'ll_" ^ string_of_int fresh)
-  in
-  function
+let rec ll_expr env lift ?(name = None) = function
   | SConst c -> return (cf_const c, lift)
   | SVar id ->
     let id =
@@ -41,14 +38,22 @@ let rec ll_expr env lift ?(name = None) =
     let* e, lift = ll_expr env lift e in
     return (cf_if_else i t e, lift)
   | SFun (args, exp) ->
-    let* name = name_or_new () in
+    let* id =
+      match name with
+      | Some id -> return id
+      | None -> fresh_id ""
+    in
     let* exp, lift = ll_expr env lift exp in
-    return (cf_var name, cf_def name args exp :: lift)
-  | SLetIn (SLet (is_rec, id, body), exp) ->
-    (* TODO: flag *)
-    let* body, lift = ll_expr env lift body in
+    return (cf_var id, cf_def id args exp :: lift)
+  | SLetIn ((SLet (is_fun, is_rec, id, body) as def), exp) ->
+    (* let* body, lift = ll_expr env lift body in *)
+    let* def, lift, env = ll_def env lift def in
+    let id, body =
+      match def with
+      | CFLet (id, _, body) -> id, body
+    in
     let* exp, lift = ll_expr env lift exp in
-    return (cf_let_in id body exp, lift)
+    if is_fun then return (exp, lift) else return (cf_let_in id body exp, lift)
   | (STuple xs | SList xs) as exp ->
     let[@warning "-8"] constr =
       match exp with
@@ -64,23 +69,23 @@ let rec ll_expr env lift ?(name = None) =
         return (x :: acc, lift))
     >>| fun (xs, lift) -> constr (List.rev xs), lift
 
+(* TODO: let f x = ll_f x *)
 and ll_def env lift = function
-  | SLet (Rec, id, (SFun (args, _) as exp)) ->
-    let* fresh = fresh in
-    let name = Format.sprintf "'ll_%d_%s" fresh id in
-    let env = Map.set env ~key:id ~data:name in
-    let* exp, lift = ll_expr env lift exp ~name:(Some name) in
-    return (cf_def name args exp, lift)
-  | SLet (_, id, exp) ->
+  | SLet (true, is_rec, id, exp) ->
+    let* new_id = fresh_id id in
+    let env = Map.set env ~key:id ~data:new_id in
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
+    return (cf_def id [] exp, lift, env)
+  | SLet (false, is_rec, id, exp) ->
     let* exp, lift = ll_expr env lift exp in
-    return (cf_def id [] exp, lift)
+    return (cf_def id [] exp, lift, env)
 ;;
 
 let ll_program prog =
   let empty = Map.empty (module String) in
   List.fold prog ~init:(return []) ~f:(fun acc def ->
     let* acc = acc in
-    let* def, lift = ll_def empty [] def in
+    let* def, lift, _ = ll_def empty [] def in
     return ((def :: lift) @ acc))
   >>| List.rev
 ;;

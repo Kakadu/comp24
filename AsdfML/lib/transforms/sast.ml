@@ -1,6 +1,9 @@
 open Ast
 
 (* Simplified AST after pattern and match elimination and closure conversion *)
+type is_fun = bool
+[@@deriving show { with_path = false }]
+
 
 type sexpr =
   | SConst of constant
@@ -13,7 +16,7 @@ type sexpr =
   | SList of sexpr list
 [@@deriving show { with_path = false }]
 
-and sdefinition = SLet of Ast.rec_flag * id * sexpr
+and sdefinition = SLet of is_fun * Ast.rec_flag * id * sexpr
 [@@deriving show { with_path = false }]
 
 type sprogram = sdefinition list [@@deriving show { with_path = false }]
@@ -26,9 +29,7 @@ let s_fun p e = SFun (p, e)
 let s_let_in def e = SLetIn (def, e)
 let s_tuple exprs = STuple exprs
 let s_list exprs = SList exprs
-let s_let_flag r x e = SLet (r, x, e)
-let s_let x e = s_let_flag NonRec x e
-let s_let_rec x e = s_let_flag Rec x e
+let s_let f r x e = SLet (f, r, x, e)
 
 open Format
 open Utils
@@ -59,6 +60,6 @@ let rec pp_sexpr fmt = function
   | SList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_sexpr xs
 
 and pp_sdef fmt = function
-  | SLet (NonRec, name, e) -> fprintf fmt "let %s = %a\n" name pp_sexpr e
-  | SLet (Rec, name, e) -> fprintf fmt "let rec %s = %a\n" name pp_sexpr e
+  | SLet (_, NonRec, name, e) -> fprintf fmt "let %s = %a\n" name pp_sexpr e
+  | SLet (_, Rec, name, e) -> fprintf fmt "let rec %s = %a\n" name pp_sexpr e
 ;;

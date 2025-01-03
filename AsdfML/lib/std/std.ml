@@ -30,5 +30,6 @@ let runtime : std list =
   ; { name = "`list_field"; typ = dummy_ty }
   ; { name = "`list_hd"; typ = dummy_ty }
   ; { name = "`list_tl"; typ = dummy_ty }
+  ; { name = "(TODO: check cons pattern)"; typ = dummy_ty }
   ]
 ;;
