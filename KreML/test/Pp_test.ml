@@ -9,7 +9,7 @@ let fmt = std_formatter
 let check_ast input =
       match parse_string ~consume:Consume.All program input with
       | Ok original_struct ->
-        let string = structure_as_string original_struct in
+        let string = structure_to_code original_struct in
         (match parse_string ~consume:Consume.All program string with
         | Ok struct_from_ppf when original_struct = struct_from_ppf -> fprintf fmt "Ok"
         | Ok struct_from_ppf ->
@@ -93,26 +93,17 @@ let%expect_test "typed" =
   [%expect {|
     Ok |}]
 
-(* let%expect_test "tuples" =
-    let tuples = "let rec fix f x = f (fix f) x
-  let map f p = let (a,b) = p in (f a, f b)
-  let fixpoly l =
-    fix (fun self l -> map (fun li x -> li (self l) x) l) l
-  let feven p n =
-    let (e, o) = p in
-    if n = 0 then 1 else o (n - 1)
-  let fodd p n =
-    let (e, o) = p in
-    if n = 0 then 0 else e (n - 1)
-  let tie = fixpoly (feven, fodd)
-
-  let rec meven n = if n = 0 then 1 else modd (n - 1)
-  and modd n = if n = 0 then 1 else meven (n - 1)
-  let main =
-    let () = print_int (modd 1) in
-    let () = print_int (meven 2) in
-    let (even,odd) = tie in
-    let () = print_int (odd 3) in
-    let () = print_int (even 4) in
-    0" in
-  check_ast tuples; *)
+let%expect_test  "asd " =
+     let e = "match wnPsvbc_Wek_ilur with | (true : unit -> int)  -> false ::true " in
+      match parse_string ~consume:Consume.All expr e with
+      | Ok original_struct ->
+        let string = expr_to_code original_struct in
+        (match parse_string ~consume:Consume.All expr string with
+        | Ok struct_from_ppf when original_struct = struct_from_ppf -> fprintf fmt "Ok"
+        | Ok struct_from_ppf ->
+          fprintf fmt "Ast do not match. Expected %s, but got %s"
+           (show_expr original_struct)
+           (show_expr struct_from_ppf)
+        | Error _ -> fprintf fmt "Could not parse pretting print program: \n %s" string)
+      | Error _ -> fprintf fmt "Could not parse input: \n %s" e;
+  [%expect {| Ok |}]

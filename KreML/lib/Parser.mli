@@ -1,11 +1,9 @@
 open Ast
 open Angstrom
 
-type parse_result =
-    | Ok of expr
-    | Err of string
+val is_keyword : string -> bool
 
-val pattern : pattern t
+val typed_pattern : pattern t
 val ident_as_expr : expr t
 val expr : expr t
 val program : structure t

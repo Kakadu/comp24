@@ -1,9 +1,6 @@
 open Angstrom
 open Ast
 
-type parse_result =
-  | Ok of Ast.expr
-  | Err of string
 
 let show_res ~input:i ~parser:p ~to_string:ts =
       match Angstrom.parse_string ~consume:Consume.All p i with Ok rest -> ts rest | Error b  -> Format.sprintf "Parsing error, rest: %s" b
@@ -107,7 +104,7 @@ let typ =
     arrow typ
     )
 
-let pattern =
+let typed_pattern =
   fix (fun self ->
         let atom =
           ws *>
@@ -126,6 +123,7 @@ let pattern =
             Pat_constrained(p, t) |> return) (* try type *)
           <|> pattern in
         pattern
+        <* ws
     )
 
 
@@ -146,7 +144,10 @@ let untyped_pattern =
         let pattern = chainr1 atom (stoken "::" *> return pcons) in (* cons *)
         (tuple (stoken ",") pattern >>| fun (fst, snd, rest) -> ptuple fst snd rest) (* try tuple *)
         <|> pattern
+        <* ws
     )
+
+let fun_arg = (parens typed_pattern) <|> untyped_pattern
 
 (** Arithmetic  **)
 
@@ -179,8 +180,8 @@ let elist p =
 
 let ematch expr =
   let* matching_expr = keyword "match" *> ws *> expr <* ws <* keyword "with" in
-  let fst_case = (stoken "|" <|> ws) *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
-  let case = stoken "|" *> ws *> pattern >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
+  let fst_case = (stoken "|" <|> ws) *> fun_arg >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
+  let case = stoken "|" *> ws *> fun_arg >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e) in
   let* fst_case = fst_case in
   let* rest_cases = many case in
   ematch matching_expr (fst_case::rest_cases) |> return
@@ -198,8 +199,8 @@ let letdef kw erhs =
     | None -> rhs in
      is_rec, name, List.fold_right efun params rhs) <$>
   (kw *> option NonRecursive (keyword "rec" *> return Recursive))
-  <*> ((parens pattern) <|> untyped_pattern)
-  <*> (many ((parens pattern) <|> untyped_pattern))
+  <*> fun_arg
+  <*> (many fun_arg)
   <*> (option None (stoken ":" *> typ >>| fun t -> Some t))
   <*> (stoken "=" *> ws *> erhs)
 
@@ -207,7 +208,7 @@ let anonymous_fun expr =
   lift3 (fun args typ_constr body -> match typ_constr with
   | Some t -> List.fold_right efun args (Expr_constrained(body, t))
   | None -> List.fold_right efun args body)
-  (keyword "fun" *> many1 (ws *> (parens pattern <|> untyped_pattern)))
+  (keyword "fun" *> many1 (ws *> fun_arg))
   (option None (stoken ":" *> typ >>| fun t -> Some t))
   (stoken "->" *> ws *> expr)
 
@@ -242,6 +243,7 @@ let expr =
       elet ~rec_flag (name, value) scope |> return)
     <* ws
   )
+
 
 let program : structure t =
   let str_item =

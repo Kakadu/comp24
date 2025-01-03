@@ -5,13 +5,14 @@ let%expect_test "patterns test" =
   let cases = ["123"; "true"; "false"
     ; "x"; "some_long_name"; "letrec"; "_"
     ; "(a)"
+    ; "(s__tsiv_ayyzmh::4)"
     ; "a, b"; "a ,  b,  c"; "a, (b,c), true"; "((a, a), b), c"
     ; "(a, b)"; "((a, b), c, (5, true))"
     ; "x::xs"; "(a, (b, c))::rest"; "x::y::rest"; "1::y::_::xs"
     ; "x::xs, y::ys"; "(x)::(xs)"; "a,b::xs"; "(a,b)::xs"
     ; "a : int"; "a, b : int * bool"; "(a, b : int * int)"; "f : int -> int"; "f : int -> int -> bool"; "a : (int -> int) -> int"]
    in
-    List.iter (fun i -> print_endline (show_res ~input:i ~parser:pattern ~to_string:show_pattern)) cases;
+    List.iter (fun i -> print_endline (show_res ~input:i ~parser:typed_pattern ~to_string:show_pattern)) cases;
   [%expect {|
     (Ast.Pat_const (Ast.Const_int 123))
     (Ast.Pat_const (Ast.Const_bool true))
@@ -170,6 +171,7 @@ let%expect_test "operations" =
           (Ast.Expr_var "b")))
        )) |}]
 
+
 let%expect_test "simple expressions" =
    let cases = ["5"; "5, 6"; "x::xs"; "[5; 6; 7 + 8]"; "1::[2;3]"; "if true then a else b";
    "fun x -> fun y -> x+y"
@@ -234,6 +236,7 @@ let%expect_test "simple expressions" =
 
 let%expect_test "let bindings" =
    let cases = ["let a = 5 in a"
+   ; "( fun ((sc_aepb::_) ) -> w_dtuuu , (dqwfRwPnpsbZw__)::(79) )"
    ; "let a = 5 in let b = 6 in a + b"
    ; "let f x y = x::y in f 5 6"
    ; "let f g h = g, h in f"
@@ -282,7 +285,8 @@ let%expect_test "let bindings" =
 let%expect_test "match" = 
    let cases = ["match x with | 1 -> 1 | 2 -> 2 | _ -> 42";
       "match l with | x::y::rest -> 1 | x::y -> 2 | _ -> 3";
-      "match (a, b) with | (5, 6) -> 1 | (_, 6) -> 6 | (5, _) -> 5 | (_, _)  -> 1337"] in
+      "match (a, b) with | (5, 6) -> 1 | (_, 6) -> 6 | (5, _) -> 5 | (_, _)  -> 1337";
+      "match wnPsvbc_Wek_ilur with | (true : unit -> int)  -> false ::true "] in
    List.iter (fun input -> show_res ~input ~parser:expr ~to_string:show_expr |> print_endline) cases;
   [%expect {|
     (Ast.Expr_match ((Ast.Expr_var "x"),
@@ -312,13 +316,22 @@ let%expect_test "match" =
          ((Ast.Pat_tuple (Ast.Pat_wildcard, Ast.Pat_wildcard, [])),
           (Ast.Expr_const (Ast.Const_int 1337)))
          ]
+       ))
+    (Ast.Expr_match ((Ast.Expr_var "wnPsvbc_Wek_ilur"),
+       [((Ast.Pat_constrained ((Ast.Pat_const (Ast.Const_bool true)),
+            (Ast.Typ_fun (Ast.Typ_unit, Ast.Typ_int)))),
+         (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_bool false)),
+            (Ast.Expr_const (Ast.Const_bool true)))))
+         ]
        )) |}]
 
 let%expect_test "complex expr" =
    let cases = ["let f a b = if a > 0 then [a; a] else match b with | x::y::_ -> y | _ -> 42 in f 5 [6; 7]"
    ; "let f a = 5 + a in f 6"
    ; "let fix f = (fun x -> f (fun f -> x x f))  (fun x -> f (fun f -> x x f)) in
-      fix 3"] in
+      fix 3";
+      "(([], ()), (match true with | ((o_lgrghBka, 727)::(c_nN, zpAOfxkyuepulcdd))  -> jh_qsw_am
+                            | (3 : unit * unit -> bool list)  -> 3 ))"] in
    List.iter (fun input -> show_res ~input ~parser:expr ~to_string: show_expr |> print_endline) cases;
   [%expect {|
     (Ast.Expr_let (Ast.NonRecursive,

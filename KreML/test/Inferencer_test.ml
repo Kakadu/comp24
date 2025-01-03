@@ -161,8 +161,11 @@ let%expect_test "many_args" =
     , 5 -> int
     , 6 -> int
     , 7 -> unit
+    , 8 -> unit
     , 9 -> unit
+    , 10 -> unit
     , 11 -> unit
+    , 12 -> unit
     , 13 -> int -> int -> int -> int
     , 14 -> int
     , 15 -> int
@@ -205,12 +208,14 @@ let%expect_test "many_args" =
     , 52 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
     , 53 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
     , 54 -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+    , 55 -> int
     , 56 -> unit
     , 57 -> int
     , 58 -> int -> int
     , 59 -> int -> int -> int
     , 60 -> int -> int -> int -> int
     , 61 -> int -> int -> int -> int
+    , 62 -> int
     , 63 -> int
      ] |}]
 
@@ -322,8 +327,11 @@ let%expect_test "partial2" =
     , 9 -> int -> int
     , 10 -> int -> int -> int -> int
     , 11 -> int -> int -> int
+    , 12 -> int -> int -> int
     , 13 -> int -> int
+    , 14 -> int -> int
     , 15 -> int
+    , 16 -> int
     , 17 -> unit
     , 18 -> int
      ] |}]
@@ -408,7 +416,8 @@ let%expect_test "ascription" =
      [ print_int -> [ ]int -> unit
      , temp -> [ ]int * bool
       ]
-     [ 2 -> int
+     [ 1 -> 0 -> 0
+     , 2 -> int
      , 3 -> int
      , 4 -> bool
      , 5 -> bool
@@ -440,44 +449,42 @@ let%expect_test "tuples" =
     0" in
   parse_program tuples;
   [%expect {|
-    [ feven -> [ 31; ]31 -> int -> int
+    [ feven -> [ 32; ]32 * (int -> int) -> int -> int
     , fix -> [ 2; 3; ]((2 -> 3) -> 2 -> 3) -> 2 -> 3
-    , fixpoly -> [ 16; 26; 27; ]16 -> (26 -> 27) * (26 -> 27)
-    , fodd -> [ 41; ]41 -> int -> int
+    , fixpoly -> [ 25; 26; ]((25 -> 26) * (25 -> 26) -> 25 -> 26) * ((25 -> 26) * (25 -> 26) -> 25 -> 26) -> (25 -> 26) * (25 -> 26)
+    , fodd -> [ 43; ](int -> int) * 43 -> int -> int
     , main -> [ ]int
-    , map -> [ 7; 9; 11; ](9 -> 11) -> 7 -> 11 * 11
+    , map -> [ 9; 11; ](9 -> 11) -> 9 * 9 -> 11 * 11
     , meven -> [ ]int -> int
     , modd -> [ ]int -> int
     , print_int -> [ ]int -> unit
-    , tie -> [ 53; 54; ](53 -> 54) * (53 -> 54)
+    , tie -> [ ](int -> int) * (int -> int)
      ]
-    [ 58 -> int -> int
-    , 59 -> int -> int
-    , 60 -> int
-    , 61 -> bool
-    , 62 -> int -> bool
-    , 63 -> int
+    [ 56 -> int -> int
+    , 57 -> int -> int
+    , 58 -> int
+    , 59 -> bool
+    , 60 -> int -> bool
+    , 61 -> int
+    , 62 -> int
+    , 63 -> int -> int
     , 64 -> int
-    , 65 -> int -> int
-    , 66 -> int
-    , 67 -> bool
-    , 68 -> int -> bool
-    , 69 -> int
-    , 70 -> int
-    , 71 -> int -> int
+    , 65 -> bool
+    , 66 -> int -> bool
+    , 67 -> int
+    , 68 -> int
+    , 69 -> int -> int
+    , 70 -> unit
+    , 71 -> int
     , 72 -> unit
     , 73 -> int
-    , 74 -> unit
-    , 75 -> int
-    , 80 -> unit
-    , 81 -> int
-    , 82 -> int
-    , 83 -> int
-    , 84 -> unit
-    , 85 -> int
-    , 86 -> int
-    , 87 -> int
-    , 88 -> int
+    , 74 -> int -> int
+    , 75 -> int -> int
+    , 76 -> unit
+    , 77 -> int
+    , 78 -> unit
+    , 79 -> int
+    , 80 -> int
      ] |}]
 
 (* let%expect_test "lists" =
