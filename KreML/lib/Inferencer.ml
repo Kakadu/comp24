@@ -364,7 +364,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
   | Expr_constrained(e, typ_constraint) ->
     let* s, typ_infered = helper env e in
     let* s_uni = Subst.unify_pair typ_infered typ_constraint in
-    let* final_subst = Subst.compose_all [s_uni; s] in
+    let* final_subst = Subst.compose s_uni s in
      R.return (final_subst, Subst.apply typ_constraint final_subst)
   | Expr_unit -> R.return (Subst.empty, Typ_unit)
   | Expr_const(Const_bool _) -> R.return (Subst.empty, Typ_bool)
