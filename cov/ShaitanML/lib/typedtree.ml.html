@@ -127,35 +127,35 @@ type ty =
   | TTuple of ty list (** Tuple type *)
   | TList of ty (** List type *)
 
-let arrow l r = <span data-count="2029">T</span>Arrow (l, r)
+let arrow l r = <span data-count="3993">T</span>Arrow (l, r)
 let int_typ = TPrim "int"
 let bool_typ = TPrim "bool"
 let string_typ = TPrim "string"
 let unit_typ = TPrim "unit"
-let tuple_typ t = <span data-count="8">T</span>Tuple t
-let list_typ t = <span data-count="266">T</span>List t
+let tuple_typ t = <span data-count="13">T</span>Tuple t
+let list_typ t = <span data-count="532">T</span>List t
 
 let rec pp_typ ppf =
-  <span data-count="682">l</span>et open Format in
+  <span data-count="1307">l</span>et open Format in
   function
-  | <span data-count="172">T</span>Var n -&gt; fprintf ppf "'%d" n
-  | <span data-count="234">T</span>Prim s -&gt; fprintf ppf "%s" s
-  | <span data-count="269">T</span>Arrow (l, r) -&gt;
+  | <span data-count="330">T</span>Var n -&gt; fprintf ppf "'%d" n
+  | <span data-count="448">T</span>Prim s -&gt; fprintf ppf "%s" s
+  | <span data-count="516">T</span>Arrow (l, r) -&gt;
     (match l with
-     | <span data-count="5">T</span>Arrow _ -&gt; fprintf ppf "(%a) -&gt; %a" pp_typ l pp_typ r
-     | <span data-count="264">_</span> -&gt; fprintf ppf "%a -&gt; %a" pp_typ l pp_typ r)
-  | <span data-count="2">T</span>Tuple tl -&gt;
+     | <span data-count="10">T</span>Arrow _ -&gt; fprintf ppf "(%a) -&gt; %a" pp_typ l pp_typ r
+     | <span data-count="506">_</span> -&gt; fprintf ppf "%a -&gt; %a" pp_typ l pp_typ r)
+  | <span data-count="3">T</span>Tuple tl -&gt;
     fprintf
       ppf
       "%a"
-      (pp_print_lis<span data-count="2">t</span>
-         ~pp_sep:(fun _ _ -&gt; <span data-count="2">f</span>printf ppf " * ")
+      (pp_print_lis<span data-count="3">t</span>
+         ~pp_sep:(fun _ _ -&gt; <span data-count="3">f</span>printf ppf " * ")
          (fun ppf ty -&gt;
-           <span data-count="4">m</span>atch ty with
+           <span data-count="6">m</span>atch ty with
            | <span data-count="2">T</span>Arrow _ | <span data-count="0">T</span>Tuple _ -&gt; fprintf ppf "(%a)" pp_typ ty
-           | <span data-count="2">_</span> -&gt; fprintf ppf "%a" pp_typ ty))
+           | <span data-count="4">_</span> -&gt; fprintf ppf "%a" pp_typ ty))
       tl
-  | <span data-count="5">T</span>List t -&gt; fprintf ppf "%a list" pp_typ t
+  | <span data-count="10">T</span>List t -&gt; fprintf ppf "%a list" pp_typ t
 ;;
 </code></pre>
       </div>

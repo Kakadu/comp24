@@ -172,7 +172,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (** (a-z|_) {a-z|0-9|_}*)
-<span data-count="0">t</span>ype id = <span data-count="115">s</span>tring [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype id = <span data-count="230">s</span>tring [@@deriving show { with_path = false }]
 
 (** Used in {let} expr *)
 <span data-count="0">t</span>ype rec_flag =
@@ -180,15 +180,15 @@
   | Nonrec
 [@@deriving show { with_path = false }]
 
-<span data-count="48">t</span>ype const =
-  | CInt of in<span data-count="24">t</span> (** 123 *)
+<span data-count="96">t</span>ype const =
+  | CInt of in<span data-count="48">t</span> (** 123 *)
   | CBool of boo<span data-count="0">l</span> (** true | false *)
   | CString of strin<span data-count="0">g</span> (** "string" *)
   | CUnit (** () *)
   | CNil (** [] *)
 [@@deriving show { with_path = false }]
 
-<span data-count="6">t</span>ype type_annot =
+<span data-count="12">t</span>ype type_annot =
   | AInt (** x : int *)
   | ABool (** b : bool *)
   | AString (** s : string *)
@@ -199,40 +199,40 @@
   | AVar of id (** x : 'a *)
 [@@deriving show { with_path = false }]
 
-<span data-count="113">t</span>ype pattern =
+<span data-count="226">t</span>ype pattern =
   | PAny (** _ *)
   | PConst of const (** 123, true, "string" *)
   | PVar of id (** x *)
-  | PTuple of <span data-count="13">p</span>attern lis<span data-count="3">t</span> (** p1,..., pn *)
+  | PTuple of <span data-count="26">p</span>attern lis<span data-count="6">t</span> (** p1,..., pn *)
   | PCons of pattern * pattern (** p1 :: p2 *)
   | PConstraint of pattern * type_annot (** p : int list *)
 [@@deriving show { with_path = false }]
 
-<span data-count="270">t</span>ype expr =
+<span data-count="540">t</span>ype expr =
   | EConst of const (** 123, true, "string" *)
   | EVar of id (** x *)
   | EIf of expr * expr * expr (** if e1 then e2 else e3 *)
-  | EMatch of expr * <span data-count="20">c</span>ase lis<span data-count="6">t</span> (** match e with p1 -&gt; e1 |...| pn -&gt; en *)
-  | ELet of rec_flag * <span data-count="26">b</span>inding lis<span data-count="8">t</span> * expr (** let x = e1 in e2 *)
+  | EMatch of expr * <span data-count="40">c</span>ase lis<span data-count="12">t</span> (** match e with p1 -&gt; e1 |...| pn -&gt; en *)
+  | ELet of rec_flag * <span data-count="52">b</span>inding lis<span data-count="16">t</span> * expr (** let x = e1 in e2 *)
   | EFun of pattern * expr (** fun p -&gt; e *)
-  | ETuple of <span data-count="13">e</span>xpr lis<span data-count="3">t</span> (** a, b, c *)
+  | ETuple of <span data-count="26">e</span>xpr lis<span data-count="6">t</span> (** a, b, c *)
   | ECons of expr * expr (** x :: xs | [x1; x2]*)
   | EApply of expr * expr (** f e *)
 [@@deriving show { with_path = false }]
 
 (** Used in {match} expr *)
-<span data-count="0">a</span>nd case = <span data-count="8">p</span>attern * expr [@@deriving show { with_path = false }]
+<span data-count="0">a</span>nd case = <span data-count="16">p</span>attern * expr [@@deriving show { with_path = false }]
 
 (** Used in {let} expr *)
-<span data-count="0">a</span>nd binding = <span data-count="40">p</span>attern * expr [@@deriving show { with_path = false }]
+<span data-count="0">a</span>nd binding = <span data-count="80">p</span>attern * expr [@@deriving show { with_path = false }]
 
-<span data-count="18">t</span>ype str_item =
+<span data-count="36">t</span>ype str_item =
   | SEval of expr (** Some expression *)
-  | SValue of rec_flag * <span data-count="88">b</span>inding lis<span data-count="29">t</span> (** let [rec] p1 = e1 and p2 = e2 and ... *)
+  | SValue of rec_flag * <span data-count="176">b</span>inding lis<span data-count="58">t</span> (** let [rec] p1 = e1 and p2 = e2 and ... *)
 [@@deriving show { with_path = false }]
 
 (** Sequence of structure items *)
-<span data-count="0">t</span>ype structure = <span data-count="77">s</span>tr_item lis<span data-count="16">t</span> [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype structure = <span data-count="154">s</span>tr_item lis<span data-count="32">t</span> [@@deriving show { with_path = false }]
 </code></pre>
       </div>
     </div>
