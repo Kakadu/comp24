@@ -1,4 +1,5 @@
 open Shaitanml_lib
+
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
   match Parser.parse s with
