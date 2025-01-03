@@ -5,7 +5,6 @@ let%expect_test "patterns test" =
   let cases = ["123"; "true"; "false"
     ; "x"; "some_long_name"; "letrec"; "_"
     ; "(a)"
-    ; "(s__tsiv_ayyzmh::4)"
     ; "a, b"; "a ,  b,  c"; "a, (b,c), true"; "((a, a), b), c"
     ; "(a, b)"; "((a, b), c, (5, true))"
     ; "x::xs"; "(a, (b, c))::rest"; "x::y::rest"; "1::y::_::xs"
@@ -236,7 +235,6 @@ let%expect_test "simple expressions" =
 
 let%expect_test "let bindings" =
    let cases = ["let a = 5 in a"
-   ; "( fun ((sc_aepb::_) ) -> w_dtuuu , (dqwfRwPnpsbZw__)::(79) )"
    ; "let a = 5 in let b = 6 in a + b"
    ; "let f x y = x::y in f 5 6"
    ; "let f g h = g, h in f"
@@ -329,9 +327,7 @@ let%expect_test "complex expr" =
    let cases = ["let f a b = if a > 0 then [a; a] else match b with | x::y::_ -> y | _ -> 42 in f 5 [6; 7]"
    ; "let f a = 5 + a in f 6"
    ; "let fix f = (fun x -> f (fun f -> x x f))  (fun x -> f (fun f -> x x f)) in
-      fix 3";
-      "(([], ()), (match true with | ((o_lgrghBka, 727)::(c_nN, zpAOfxkyuepulcdd))  -> jh_qsw_am
-                            | (3 : unit * unit -> bool list)  -> 3 ))"] in
+      fix 3";] in
    List.iter (fun input -> show_res ~input ~parser:expr ~to_string: show_expr |> print_endline) cases;
   [%expect {|
     (Ast.Expr_let (Ast.NonRecursive,

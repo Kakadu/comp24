@@ -9,7 +9,6 @@ type error =
   | Variable_not_found of ident
 [@@deriving show]
 
-let unreachable() = failwith "Reached unreachable code"
 
 
 module R = struct
@@ -170,19 +169,6 @@ module Subst  = struct
     let* acc = acc in
     compose acc s)
 
-  (* let unify_many types : (t * typ) R.t =
-    let open R.Syntax in
-    let rec helper (repr, s) = function
-    | [] -> R.return (s, repr)
-    | t::ts ->
-      let* unified = unify_pair repr t in
-      let* composed = compose s unified in
-      helper (repr, composed) ts
-    in
-    match types with
-    | x::xs -> helper (x, empty) xs
-    | _ -> unreachable() *)
-
   let pp ppf (subst : t) =
     let subst = Map.to_alist subst in
     let open Stdlib.Format in
@@ -274,22 +260,10 @@ module TypeEnv = struct
       extend key refined acc)
 
   let generalize t env =
-    (* let open Stdlib.Format in
-    pp std_formatter env;
-    fprintf std_formatter "\n";
-    pp_typ std_formatter t; *)
     let quantified = Varset.diff (Type.free_vars t) (free_vars env) in
-    (* let() = Varset.pp Stdlib.Format.std_formatter quantified in *)
-    let s = Scheme(quantified, t) in
-    (* let open Stdlib.Format in 
-    fprintf std_formatter "\n generalized ";
-    Scheme.pp std_formatter s;
-    fprintf std_formatter "\n"; *)
-    s 
+    Scheme(quantified, t)
 
   let rec generalize_pattern p typ env =
-    (* let open Stdlib.Format in *)
-    (* fprintf std_formatter "generalizing pattern %s, typ %s \n" (show_pattern p) (show_typ typ); *)
     match p, typ with
     | Pat_var id, t -> 
       let s = generalize t env in
@@ -331,9 +305,6 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t  = match p with
     let* fr = fresh_var() in
     R.return (env, fr)
   | Pat_var id ->
-    (* (match TypeEnv.find id env with
-    | Some(Scheme(_, t)) -> R.return (env, t) (* todo seems incorrect *)
-    | None -> *)
       let* fr = fresh_var() in
       let env = TypeEnv.extend id (Scheme(Varset.empty, fr)) env in
       R.return (env, fr)
@@ -396,9 +367,6 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* final_subst = Subst.compose_all (fst_s::snd_s::substs |> List.rev) in
       R.return (final_subst, Subst.apply typ final_subst)
   | Expr_let(NonRecursive, (p, v), scope) ->
-    (* let open Stdlib.Format in
-    let fmt = std_formatter in
-    fprintf fmt "infering expr %s\n" (show_expr expr); *)
     let* expr_subst, expr_typ = helper env v in
     let env = TypeEnv.apply expr_subst env in
     let* _, p_typ = infer_pattern env p in
@@ -409,11 +377,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     let* final_subst = Subst.compose_all [scope_subst; s] in
     R.return (final_subst, Subst.apply scope_typ final_subst)
   | Expr_let(Recursive, (Pat_var id as p, v), scope) ->
-    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";
-    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* env = extend_env_with_pattern env p in
-    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "after extending\n";
-    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* expr_subst, expr_typ = helper env v in
     let (Scheme(_, t)) = TypeEnv.find_exn id env in
     let* uni = Subst.unify_pair t expr_typ in
@@ -432,9 +396,6 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       R.return (final_subst, Subst.apply th_typ final_subst)
   | Expr_fun(param, expr) ->
     let* env, pat_typ = infer_pattern env param in
-    (* let open Stdlib.Format in
-    fprintf std_formatter "fun: %s\n" (show_expr f);
-    TypeEnv.pp std_formatter env; *)
     let* s, expr_typ = helper env expr in
     let refined_param = Subst.apply pat_typ s in
     R.return (s, Typ_fun(refined_param,  expr_typ))
@@ -450,16 +411,12 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       R.return (final_subst, Subst.apply typ final_subst)
       )
   | Expr_app(f, arg) ->
-    (* let open Stdlib.Format in
-    let fmt = std_formatter in *)
     let* body_typ = fresh_var() in
     let* f_s, f_t = helper env f in
     let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in
     let fun_typ = Typ_fun(arg_t, body_typ) in
     let* uni_subst = Subst.unify_pair fun_typ (Subst.apply f_t arg_s) in
     let* final_subst = Subst.compose_all [uni_subst; arg_s; f_s] in
-    (* fprintf fmt "infering app %s\n" (show_expr expr);
-    fprintf fmt "-----infered it has type %s\n" (show_typ (Subst.apply body_typ final_subst)); *)
     R.return (final_subst, Subst.apply body_typ final_subst)
   | _ -> failwith (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr)) 
   in helper env expr
@@ -475,13 +432,9 @@ let infer_program (p : structure) =
     let* final_subst = Subst.compose_all [s1; s] in
     R.return (final_subst, TypeEnv.apply final_subst env)
   | Str_value(Recursive, bindings) ->
-    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "before extending\n";
-    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     let* env = R.foldl bindings ~init:(R.return env) ~f:(fun acc (p, _) -> 
       extend_env_with_pattern acc p)
      in
-    (* Stdlib.Format.fprintf Stdlib.Format.std_formatter "after extending\n";
-    TypeEnv.pp Stdlib.Format.std_formatter env; *)
     R.foldl bindings ~init:(R.return (Subst.empty, env)) ~f:(fun (acc_s, acc_env) (p, e) ->
       match p with
       | Pat_var id ->
@@ -494,6 +447,6 @@ let infer_program (p : structure) =
         let* final_subst = Subst.compose_all [s1; acc_s] in
         R.return (final_subst, TypeEnv.apply final_subst env)
       | _ -> (Stdlib.Format.sprintf "Unsupported rec pattern %s" (show_pattern p)) |> failwith)
-  | _ -> unreachable()
+  | _ -> Utils.unreachable()
     in R.foldl p ~init:(R.return (Subst.empty, TypeEnv.default)) ~f:helper
     
