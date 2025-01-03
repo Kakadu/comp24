@@ -1,3 +1,6 @@
+(** Copyright 2024-2025 KreML Compiler
+    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Ast_printer
 open Base
@@ -190,9 +193,7 @@ module Scheme = struct
   let free_vars (Scheme (bs, t)) = Varset.diff (Type.free_vars t) bs
 
   let apply_subst subst (Scheme (bs, t)) =
-    let partial_subst =
-      Varset.fold (fun bounded_v -> Subst.remove bounded_v) bs subst
-    in
+    let partial_subst = Varset.fold (fun bounded_v -> Subst.remove bounded_v) bs subst in
     Scheme (bs, Subst.apply t partial_subst)
   ;;
 
@@ -279,8 +280,9 @@ module TypeEnv = struct
     | Pat_constrained (p, typ), _ -> generalize_pattern p typ env
     | Pat_unit, _ -> env
     | _ ->
-        Utils.internalfail
-           (Stdlib.Format.asprintf "Unsupported pattern matching %s with type %s"
+      Utils.internalfail
+        (Stdlib.Format.asprintf
+           "Unsupported pattern matching %s with type %s"
            (show_pattern p)
            (show_typ typ))
   ;;
@@ -448,7 +450,8 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* final_subst = Subst.compose_all [ uni_subst; arg_s; f_s ] in
       R.return (final_subst, Subst.apply body_typ final_subst)
     | _ ->
-      Utils.internalfail (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr))
+      Utils.internalfail
+        (Stdlib.Format.sprintf "infer_expr: unexpected expr %s" (show_expr expr))
   in
   helper env expr
 ;;

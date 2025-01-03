@@ -1,3 +1,6 @@
+(** Copyright 2024-2025 KreML Compiler
+    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Kreml_lib.Ast
 open Kreml_lib.Parser
 open QCheck.Gen
@@ -69,13 +72,11 @@ let pattern =
         ]
     | _ ->
       frequency
-        [ 2, map
-              (fun (fst, snd, rest) -> Pat_tuple (fst, snd, rest))
-              (tuple @@ s)
+        [ 2, map (fun (fst, snd, rest) -> Pat_tuple (fst, snd, rest)) (tuple @@ s)
         ; 2, map2 (fun x xs -> Pat_cons (x, xs)) s s
         ; 1, map2 (fun p t -> Pat_constrained (p, t)) s typ
-        ]
-  )
+        ])
+;;
 
 let expr =
   sized
