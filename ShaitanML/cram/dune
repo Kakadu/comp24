@@ -4,5 +4,11 @@
  (public_name test)
  (libraries shaitanml_lib stdio))
 
+(executable
+ (name infer)
+ (modules infer)
+ (public_name infer)
+ (libraries shaitanml_lib stdio))
+
 (cram
- (deps %{bin:test}))
+ (deps %{bin:test} %{bin:infer}))
