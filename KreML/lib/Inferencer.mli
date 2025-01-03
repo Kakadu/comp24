@@ -27,12 +27,6 @@ module Varset : sig
   type t
 
   val pp : Stdlib.Format.formatter -> t -> unit
-
-  (* let pp ppf s =
-    Format.fprintf ppf "[ ";
-    iter (Format.fprintf ppf "%d; ") s;
-    Format.fprintf ppf "]" *)
-
 end
 
 module Type : sig
@@ -43,8 +37,6 @@ end
 
 module Subst : sig
   type t
-
-  (* val pp : Stdlib.Format.formatter -> t -> unit *)
 
   val empty : t
   val singleton : type_id -> typ -> t

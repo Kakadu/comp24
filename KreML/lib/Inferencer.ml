@@ -69,24 +69,6 @@ module Type = struct
     | Typ_list(x) -> helper acc x
     | Typ_tuple(x, y, rest) -> List.fold_left (x::y::rest) ~init:acc ~f:helper
     in helper Varset.empty t
-
-  (* let rec pp fmt = function
-  | Typ_bool -> fprintf fmt "bool"
-  | Typ_int -> fprintf fmt "int"
-  | Typ_unit -> fprintf fmt "unit"
-  | Typ_var id -> fprintf fmt "%d" id
-  | Typ_fun(Typ_fun(_, _) as farg, y) -> fprintf fmt "(%a) -> %a" pp farg pp y;
-  | Typ_fun(x, y) -> fprintf fmt "%a -> %a" pp x pp y;
-  | Typ_list x -> fprintf fmt "%a list" pp x
-  | Typ_tuple(fst, snd, rest) ->
-    let rec pp_typle l =
-      match l with
-      | [] -> failwith "111"
-      | [t] -> fprintf fmt "%a" pp t
-      | t::ts ->
-         fprintf fmt "%a * " pp t;
-         pp_typle ts; in
-    pp_typle (fst::snd::rest) *)
 end
 
  
@@ -116,14 +98,6 @@ module Subst  = struct
     in helper t
 
   let rec unify_pair t1 t2 =
-    (* let open Stdlib.Format in
-    let fmt = std_formatter in
-    fprintf fmt "unifying ";
-    pp_typ fmt t1;
-    fprintf fmt " and ";
-    pp_typ fmt t2;
-    fprintf fmt "\n"; *)
-
     match t1, t2 with
     | Typ_bool, Typ_bool | Typ_int, Typ_int | Typ_unit, Typ_unit -> return empty
     | Typ_var x, Typ_var y when x = y -> return empty
@@ -158,8 +132,6 @@ module Subst  = struct
           Map.set acc ~key ~data |> return)
 
   and compose before after =
-    (* let () = Stdlib.print_endline "subst: compose" in *)
-    (* let _ = pp_ident formater "4342334" in *)
     Map.fold after ~init:(return before) ~f:(fun ~key ~data acc ->
     let* acc = acc in 
     extend (key, data) acc)
@@ -198,11 +170,6 @@ module Scheme = struct
     Varset.diff (Type.free_vars t) bs
     
   let apply_subst subst (Scheme(bs, t)) =
-    (* let t = Subst.apply t subst in
-    let new_bs = Varset.fold (fun b acc ->
-       Varset.union acc  (Subst.apply (Typ_var(b)) subst |> Type.free_vars))
-       bs
-       Varset.empty in *)
     let partial_subst = Varset.fold (fun bounded_v acc -> Subst.remove bounded_v acc) bs subst in
     Scheme(bs, Subst.apply t partial_subst)
 

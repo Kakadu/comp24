@@ -74,11 +74,6 @@ type structure = structure_item list
 [@@deriving show]
 
 let eapp func args =
-    (* let fmt = Stdlib.Format.std_formatter in *)
-    (* let() = Format.fprintf fmt "fun:" in 
-    let() =  pp_expr  fmt func in
-    let() = Format.fprintf fmt "args:" in 
-    let () = List.iter (fun arg -> (pp_expr fmt arg)) args in *)
     Base.List.fold_left args ~init:func ~f:(fun acc arg -> Expr_app(acc, arg))
 
 let econs x y = Expr_cons(x, y)
