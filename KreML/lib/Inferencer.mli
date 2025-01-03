@@ -1,3 +1,6 @@
+(** Copyright 2024-2025 KreML Compiler
+    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 
 type error =
@@ -7,32 +10,27 @@ type error =
   | Variable_not_found of ident
 [@@deriving show]
 
-
 module R : sig
   type 'a t
+
   val return : 'a -> 'a t
-  val fail: error -> 'a t
+  val fail : error -> 'a t
   val bind : 'a t -> ('a -> 'b t) -> 'b t
+
   module Syntax : sig
-    val (let*) : 'a t -> ('a -> 'b t) -> 'b t
-    val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+    val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
+    val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
   end
 
-  val foldl: 'a list -> init: 'b t -> f:('b -> 'a -> 'b t) -> 'b t
-  val fresh: type_id t
+  val foldl : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
+  val fresh : type_id t
   val run : 'a t -> ('a, error) Result.t
-end 
+end
 
 module Varset : sig
   type t
 
   val pp : Stdlib.Format.formatter -> t -> unit
-
-  (* let pp ppf s =
-    Format.fprintf ppf "[ ";
-    iter (Format.fprintf ppf "%d; ") s;
-    Format.fprintf ppf "]" *)
-
 end
 
 module Type : sig
@@ -40,11 +38,8 @@ module Type : sig
   val free_vars : typ -> Varset.t
 end
 
-
 module Subst : sig
   type t
-
-  (* val pp : Stdlib.Format.formatter -> t -> unit *)
 
   val empty : t
   val singleton : type_id -> typ -> t
@@ -61,25 +56,23 @@ type scheme = Scheme of Varset.t * typ (** Forall quantified vars * [typ] *)
 
 module Scheme : sig
   type t
+
   val free_vars : t -> Varset.t
   val apply_subst : Subst.t -> t -> t
 end
 
 type var_name = string
 
-
 module TypeEnv : sig
   type t
-  val empty : t
-  val free_vars: t -> Varset.t
-  val extend : var_name -> Scheme.t -> t -> t
-  val generalize: typ -> t -> Scheme.t
-  val generalize_pattern : pattern -> typ -> t -> t
 
+  val empty : t
+  val free_vars : t -> Varset.t
+  val extend : var_name -> Scheme.t -> t -> t
+  val generalize : typ -> t -> Scheme.t
+  val generalize_pattern : pattern -> typ -> t -> t
   val pp : Stdlib.Format.formatter -> t -> unit
 end
 
-
-val infer_expr: TypeEnv.t ->  expr -> (Subst.t * typ) R.t
-
-val infer_program: structure -> (Subst.t * TypeEnv.t) R.t
+val infer_expr : TypeEnv.t -> expr -> (Subst.t * typ) R.t
+val infer_program : structure -> (Subst.t * TypeEnv.t) R.t
