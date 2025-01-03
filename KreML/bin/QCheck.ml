@@ -50,7 +50,7 @@ let typ =
     | _ ->
       frequency
         [ 1, map (fun t -> Typ_list t) s
-        ; 1, map (fun (fst, snd, rest) -> Typ_tuple (fst, snd, rest)) (tuple @@ s)
+        ; 1, map (fun (fst, snd, rest) -> Typ_tuple (fst, snd, rest)) (tuple s)
         ; 1, map2 (fun arg body -> Typ_fun (arg, body)) s s
         ])
 ;;
@@ -72,7 +72,7 @@ let pattern =
         ]
     | _ ->
       frequency
-        [ 2, map (fun (fst, snd, rest) -> Pat_tuple (fst, snd, rest)) (tuple @@ s)
+        [ 2, map (fun (fst, snd, rest) -> Pat_tuple (fst, snd, rest)) (tuple s)
         ; 2, map2 (fun x xs -> Pat_cons (x, xs)) s s
         ; 1, map2 (fun p t -> Pat_constrained (p, t)) s typ
         ])
@@ -93,7 +93,7 @@ let expr =
     | _ ->
       frequency
         [ 1, map2 (fun x xs -> Expr_cons (x, xs)) s s
-        ; 1, map (fun (fst, snd, rest) -> Expr_tuple (fst, snd, rest)) (tuple @@ s)
+        ; 1, map (fun (fst, snd, rest) -> Expr_tuple (fst, snd, rest)) (tuple s)
         ; ( 3
           , (fun rf pat value scope -> Expr_let (rf, (pat, value), scope))
             <$> rec_flag
