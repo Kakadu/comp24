@@ -26,8 +26,8 @@ let cf_tuple exprs = CFTuple exprs
 let cf_list exprs = CFList exprs
 let cf_def id args expr = CFLet (id, args, expr)
 
-open Format
 open Base
+open Format
 open Utils
 
 let rec pp_expr fmt = function
@@ -43,15 +43,30 @@ let rec pp_expr fmt = function
        fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
      | _ -> fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2)
   | CFIfElse (c, t, e) ->
-    fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
+    fprintf
+      fmt
+      "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"
+      pp_expr
+      c
+      pp_expr
+      t
+      pp_expr
+      e
   | CFLetIn (id, body, exp) ->
-    fprintf fmt "let %s = %a in\n%a" id pp_expr body pp_expr exp
+    fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_expr body pp_expr exp
   | CFTuple xs -> pp_list ~sep:", " fmt pp_expr xs
   | CFList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
   | CFLet (id, args, e) ->
     (match args with
-     | [] -> fprintf fmt "let %s = %a\n" id pp_expr e
-     | _ -> fprintf fmt "let %s %s = %a\n" id (String.concat args ~sep:" ") pp_expr e)
+     | [] -> fprintf fmt "@[<hov 2>let %s =@ %a@]\n" id pp_expr e
+     | _ ->
+       fprintf
+         fmt
+         "@[<hov 2>let %s %s =@ %a@]\n"
+         id
+         (String.concat args ~sep:" ")
+         pp_expr
+         e)
 ;;
