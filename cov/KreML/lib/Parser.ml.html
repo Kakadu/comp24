@@ -723,42 +723,42 @@ let show_res ~input:i ~parser:p ~to_string:ts =
 ;;
 
 let is_digit = function
-  | <span data-count="6832">'</span>0' .. '9' -&gt; true
-  | <span data-count="1131906">_</span> -&gt; false
+  | <span data-count="8450">'</span>0' .. '9' -&gt; true
+  | <span data-count="1145250">_</span> -&gt; false
 ;;
 
 let is_uc_letter = function
   | <span data-count="8">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="336742">_</span> -&gt; false
+  | <span data-count="339084">_</span> -&gt; false
 ;;
 
 let is_lc_letter = function
-  | <span data-count="633768">'</span>a' .. 'z' -&gt; true
-  | <span data-count="728717">_</span> -&gt; false
+  | <span data-count="637734">'</span>a' .. 'z' -&gt; true
+  | <span data-count="739973">_</span> -&gt; false
 ;;
 
-let is_letter l = <span data-count="658980">i</span>s_lc_lette<span data-count="658980">r</span> <span data-count="322230">l</span> || is_uc_letter l
+let is_letter l = <span data-count="663070">i</span>s_lc_lette<span data-count="663070">r</span> <span data-count="323978">l</span> || is_uc_letter l
 
 let is_whitespace = function
-  | <span data-count="27461231">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="431438">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="12487911">_</span> -&gt; false
+  | <span data-count="27467070">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="432888">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="12688773">_</span> -&gt; false
 ;;
 
 let is_keyword = function
-  | <span data-count="7244">"</span>let"
+  | <span data-count="7312">"</span>let"
   | <span data-count="0">"</span>rec"
-  | <span data-count="10712">"</span>in"
-  | <span data-count="5844">"</span>match"
-  | <span data-count="9384">"</span>with"
-  | <span data-count="1600">"</span>fun"
+  | <span data-count="10764">"</span>in"
+  | <span data-count="5860">"</span>match"
+  | <span data-count="9416">"</span>with"
+  | <span data-count="1664">"</span>fun"
   | <span data-count="1484">"</span>if"
   | <span data-count="2616">"</span>then"
   | <span data-count="2548">"</span>else"
   | <span data-count="0">"</span>int"
   | <span data-count="64">"</span>and"
-  | <span data-count="228">"</span>true"
-  | <span data-count="804">"</span>false" -&gt; true
-  | <span data-count="269778">_</span> -&gt; false
+  | <span data-count="232">"</span>true"
+  | <span data-count="808">"</span>false" -&gt; true
+  | <span data-count="271756">_</span> -&gt; false
 ;;
 
 let ws = take_whil<span data-count="5">e</span> is_whitespace
@@ -768,16 +768,16 @@ let number =
   *<span data-count="5">&gt;</span> let* sign =
        peek_char_fail
        &gt;&gt;<span data-count="5">|</span> function
-       | <span data-count="5748">'</span>-' -&gt;
+       | <span data-count="5876">'</span>-' -&gt;
          let _ = advance 1 in
-         <span data-count="5748">"</span>-"
-       | <span data-count="490704">_</span> -&gt; ""
+         <span data-count="5876">"</span>-"
+       | <span data-count="499932">_</span> -&gt; ""
      in
-     <span data-count="496452">l</span>et* value = take_while<span data-count="496452">1</span> is_digit in
-     <span data-count="6208">s</span>ign ^ value |&gt; int_of_string |&gt; <span data-count="6208">r</span>eturn
+     <span data-count="505808">l</span>et* value = take_while<span data-count="505808">1</span> is_digit in
+     <span data-count="7824">s</span>ign ^ value |&gt; int_of_string |&gt; <span data-count="7824">r</span>eturn
 ;;
 
-let stoken s = <span data-count="38812">w</span>s *&gt; strin<span data-count="38812">g</span> s
+let stoken s = <span data-count="39662">w</span>s *&gt; strin<span data-count="39662">g</span> s
 let parens p = <span data-count="60">w</span>s *<span data-count="60">&gt;</span> stoke<span data-count="60">n</span> "(" *<span data-count="60">&gt;</span> p &lt;* stoke<span data-count="60">n</span> ")"
 let braces p = <span data-count="10">w</span>s *<span data-count="10">&gt;</span> cha<span data-count="10">r</span> '[' *<span data-count="10">&gt;</span> p &lt;* cha<span data-count="10">r</span> ']'
 
@@ -785,47 +785,47 @@ let ident =
   ws
   *<span data-count="5">&gt;</span>
   let* i =
-    let* h = satisf<span data-count="5">y</span> (fun c -&gt; <span data-count="703505">i</span>s_lc_lette<span data-count="703505">r</span> <span data-count="311538">c</span> || c = '_<span data-count="792">'</span>) in
-    <span data-count="312330">l</span>et allowed_char c = <span data-count="635912">i</span>s_digi<span data-count="635912">t</span> <span data-count="368">c</span> || is_lette<span data-count="635544">r</span> <span data-count="322238">c</span> || c = '_<span data-count="1148">'</span> in
+    let* h = satisf<span data-count="5">y</span> (fun c -&gt; <span data-count="714637">i</span>s_lc_lette<span data-count="714637">r</span> <span data-count="313756">c</span> || c = '_<span data-count="792">'</span>) in
+    <span data-count="314548">l</span>et allowed_char c = <span data-count="639906">i</span>s_digi<span data-count="639906">t</span> <span data-count="370">c</span> || is_lette<span data-count="639536">r</span> <span data-count="323986">c</span> || c = '_<span data-count="1174">'</span> in
     let* tail =
-      if h = '_' then <span data-count="792">m</span>any<span data-count="792">1</span> (satisf<span data-count="792">y</span> allowed_char) else <span data-count="311538">m</span>an<span data-count="311538">y</span> (satisf<span data-count="311538">y</span> allowed_char)
+      if h = '_' then <span data-count="792">m</span>any<span data-count="792">1</span> (satisf<span data-count="792">y</span> allowed_char) else <span data-count="313756">m</span>an<span data-count="313756">y</span> (satisf<span data-count="313756">y</span> allowed_char)
     in
-    <span data-count="312306">r</span>eturn (Base.String.of_char_lis<span data-count="312306">t</span> (h :: tail))
+    <span data-count="314524">r</span>eturn (Base.String.of_char_lis<span data-count="314524">t</span> (h :: tail))
   in
-  <span data-count="312306">i</span>f is_keyword i
-  then <span data-count="42528">f</span>ail (Format.sprint<span data-count="42528">f</span> "Expected identifier, got keyword %s" i)
-  else <span data-count="269778">r</span>eturn i
+  <span data-count="314524">i</span>f is_keyword i
+  then <span data-count="42768">f</span>ail (Format.sprint<span data-count="42768">f</span> "Expected identifier, got keyword %s" i)
+  else <span data-count="271756">r</span>eturn i
 ;;
 
 let keyword k =
-  <span data-count="843">l</span>et* _ = ws *<span data-count="843">&gt;</span> strin<span data-count="843">g</span> k in
-  <span data-count="23459">l</span>et* next = peek_char in
-  <span data-count="23459">m</span>atch next with
-  | <span data-count="23436">S</span>ome v when is_lette<span data-count="23436">r</span> v -&gt; <span data-count="0">f</span>ail (Format.sprint<span data-count="0">f</span> "Not a keyword %s" k)
-  | <span data-count="23459">_</span> -&gt; return ()
+  <span data-count="855">l</span>et* _ = ws *<span data-count="855">&gt;</span> strin<span data-count="855">g</span> k in
+  <span data-count="23557">l</span>et* next = peek_char in
+  <span data-count="23557">m</span>atch next with
+  | <span data-count="23534">S</span>ome v when is_lette<span data-count="23534">r</span> v -&gt; <span data-count="0">f</span>ail (Format.sprint<span data-count="0">f</span> "Not a keyword %s" k)
+  | <span data-count="23557">_</span> -&gt; return ()
 ;;
 
 (** Helpers **)
 let chainl1 e op =
-  <span data-count="95">l</span>et rec go acc = <span data-count="1795043">l</span>ift<span data-count="1795043">2</span> (fun f x -&gt; <span data-count="126972">f</span> acc x) op e &gt;&gt;<span data-count="1795043">=</span> go &lt;|&gt; retur<span data-count="1795043">n</span> acc in
+  <span data-count="95">l</span>et rec go acc = <span data-count="1820119">l</span>ift<span data-count="1820119">2</span> (fun f x -&gt; <span data-count="127376">f</span> acc x) op e &gt;&gt;<span data-count="1820119">=</span> go &lt;|&gt; retur<span data-count="1820119">n</span> acc in
   e &gt;&gt;= go
 ;;
 
 let rec chainr1 e op =
-  <span data-count="66041">e</span> &gt;&gt;= fun lhs -&gt; <span data-count="203687">o</span>p &gt;&gt;<span data-count="203687">=</span> (fun o -&gt; <span data-count="66021">c</span>hainr<span data-count="66021">1</span> e op &gt;&gt;| <span data-count="66021">o</span> lhs) &lt;|&gt; retur<span data-count="203687">n</span> lhs
+  <span data-count="66083">e</span> &gt;&gt;= fun lhs -&gt; <span data-count="207173">o</span>p &gt;&gt;<span data-count="207173">=</span> (fun o -&gt; <span data-count="66063">c</span>hainr<span data-count="66063">1</span> e op &gt;&gt;| <span data-count="66063">o</span> lhs) &lt;|&gt; retur<span data-count="207173">n</span> lhs
 ;;
 
 (** Patterns **)
 
 let const =
   number
-  &gt;&gt;<span data-count="5">|</span> (fun n -&gt; <span data-count="6208">C</span>onst_int n)
+  &gt;&gt;<span data-count="5">|</span> (fun n -&gt; <span data-count="7824">C</span>onst_int n)
   &lt;|<span data-count="5">&gt;</span> keywor<span data-count="5">d</span> "true" *<span data-count="5">&gt;</span> (Const_bool true |&gt; retur<span data-count="5">n</span>)
   &lt;|<span data-count="5">&gt;</span> keywor<span data-count="5">d</span> "false" *<span data-count="5">&gt;</span> (Const_bool false |&gt; retur<span data-count="5">n</span>)
 ;;
 
 let tuple sep p =
-  <span data-count="20">l</span>ift3 (fun fst snd rest -&gt; <span data-count="752">f</span>st, snd, rest) p (sep *<span data-count="20">&gt;</span> ws *<span data-count="20">&gt;</span> p) (man<span data-count="20">y</span> (sep *<span data-count="20">&gt;</span> ws *<span data-count="20">&gt;</span> p))
+  <span data-count="20">l</span>ift3 (fun fst snd rest -&gt; <span data-count="1266">f</span>st, snd, rest) p (sep *<span data-count="20">&gt;</span> ws *<span data-count="20">&gt;</span> p) (man<span data-count="20">y</span> (sep *<span data-count="20">&gt;</span> ws *<span data-count="20">&gt;</span> p))
 ;;
 
 let arrow p =
@@ -888,8 +888,8 @@ let typed_pattern =
 let untyped_pattern =
   fi<span data-count="5">x</span> (fun self -&gt;
     <span data-count="5">l</span>et atom =
-      ws *<span data-count="5">&gt;</span> (paren<span data-count="5">s</span> ws &gt;&gt;<span data-count="5">|</span> fun _ -&gt; <span data-count="562">P</span>at_unit) (* unit *)
-      &lt;|<span data-count="5">&gt;</span> (brace<span data-count="5">s</span> ws &gt;&gt;<span data-count="5">|</span> fun _ -&gt; <span data-count="2348">p</span>nil) (* nil *)
+      ws *<span data-count="5">&gt;</span> (paren<span data-count="5">s</span> ws &gt;&gt;<span data-count="5">|</span> fun _ -&gt; <span data-count="568">P</span>at_unit) (* unit *)
+      &lt;|<span data-count="5">&gt;</span> (brace<span data-count="5">s</span> ws &gt;&gt;<span data-count="5">|</span> fun _ -&gt; <span data-count="2362">p</span>nil) (* nil *)
       &lt;|<span data-count="5">&gt;</span> paren<span data-count="5">s</span> self (* parens *)
       &lt;|<span data-count="5">&gt;</span> (const &gt;&gt;<span data-count="5">|</span> pconst) (* const *)
       &lt;|<span data-count="5">&gt;</span> (ident &gt;&gt;<span data-count="5">|</span> pvar) (* identifier *)
@@ -908,7 +908,7 @@ let fun_arg = paren<span data-count="5">s</span> typed_pattern &lt;|<span data-c
 
 (** Arithmetic  **)
 
-let bin_expr op_string op_expr = <span data-count="60">w</span>s *<span data-count="60">&gt;</span> strin<span data-count="60">g</span> op_string &lt;<span data-count="60">*</span> ws &gt;&gt;= fun _ -&gt; <span data-count="261717">r</span>eturn op_expr
+let bin_expr op_string op_expr = <span data-count="60">w</span>s *<span data-count="60">&gt;</span> strin<span data-count="60">g</span> op_string &lt;<span data-count="60">*</span> ws &gt;&gt;= fun _ -&gt; <span data-count="265253">r</span>eturn op_expr
 let op_list_to_parser l = <span data-count="30">L</span>ist.map (fun (str, expr_op) -&gt; <span data-count="60">b</span>in_expr str expr_op) l
 
 let prio =
@@ -935,22 +935,22 @@ let expr_with_ops p =
 let elist p =
   <span data-count="5">w</span>s *<span data-count="5">&gt;</span> cha<span data-count="5">r</span> '[' *<span data-count="5">&gt;</span> sep_b<span data-count="5">y</span> (ws *<span data-count="5">&gt;</span> cha<span data-count="5">r</span> ';' *<span data-count="5">&gt;</span> ws) p
   &lt;<span data-count="5">*</span> cha<span data-count="5">r</span> ']'
-  &gt;&gt;| fun elems -&gt; <span data-count="5688">L</span>ist.fold_right econs elems enil
+  &gt;&gt;| fun elems -&gt; <span data-count="5840">L</span>ist.fold_right econs elems enil
 ;;
 
 let ematch expr =
   <span data-count="5">l</span>et* matching_expr = keywor<span data-count="5">d</span> "match" *<span data-count="5">&gt;</span> ws *<span data-count="5">&gt;</span> expr &lt;<span data-count="5">*</span> ws &lt;<span data-count="5">*</span> keywor<span data-count="5">d</span> "with" in
-  <span data-count="1173">l</span>et fst_case =
-    (stoke<span data-count="1173">n</span> "|" &lt;|<span data-count="1173">&gt;</span> ws) *<span data-count="1173">&gt;</span> fun_arg
-    &gt;&gt;= fun p -&gt; <span data-count="1173">s</span>toke<span data-count="1173">n</span> "-&gt;" *<span data-count="1173">&gt;</span> ws *<span data-count="1173">&gt;</span> expr &gt;&gt;= fun e -&gt; <span data-count="1173">r</span>eturn (p, e)
+  <span data-count="1177">l</span>et fst_case =
+    (stoke<span data-count="1177">n</span> "|" &lt;|<span data-count="1177">&gt;</span> ws) *<span data-count="1177">&gt;</span> fun_arg
+    &gt;&gt;= fun p -&gt; <span data-count="1177">s</span>toke<span data-count="1177">n</span> "-&gt;" *<span data-count="1177">&gt;</span> ws *<span data-count="1177">&gt;</span> expr &gt;&gt;= fun e -&gt; <span data-count="1177">r</span>eturn (p, e)
   in
-  <span data-count="1173">l</span>et case =
-    stoke<span data-count="1173">n</span> "|" *<span data-count="1173">&gt;</span> ws *<span data-count="1173">&gt;</span> fun_arg
-    &gt;&gt;= fun p -&gt; <span data-count="1374">s</span>toke<span data-count="1374">n</span> "-&gt;" *<span data-count="1374">&gt;</span> ws *<span data-count="1374">&gt;</span> expr &gt;&gt;= fun e -&gt; <span data-count="1374">r</span>eturn (p, e)
+  <span data-count="1177">l</span>et case =
+    stoke<span data-count="1177">n</span> "|" *<span data-count="1177">&gt;</span> ws *<span data-count="1177">&gt;</span> fun_arg
+    &gt;&gt;= fun p -&gt; <span data-count="1381">s</span>toke<span data-count="1381">n</span> "-&gt;" *<span data-count="1381">&gt;</span> ws *<span data-count="1381">&gt;</span> expr &gt;&gt;= fun e -&gt; <span data-count="1381">r</span>eturn (p, e)
   in
-  <span data-count="1173">l</span>et* fst_case = fst_case in
-  <span data-count="1173">l</span>et* rest_cases = man<span data-count="1173">y</span> case in
-  <span data-count="1173">e</span>match matching_expr (fst_case :: rest_cases) |&gt; <span data-count="1173">r</span>eturn
+  <span data-count="1177">l</span>et* fst_case = fst_case in
+  <span data-count="1177">l</span>et* rest_cases = man<span data-count="1177">y</span> case in
+  <span data-count="1177">e</span>match matching_expr (fst_case :: rest_cases) |&gt; <span data-count="1177">r</span>eturn
 ;;
 
 let eite expr =
@@ -961,26 +961,26 @@ let eite expr =
 ;;
 
 let letdef kw erhs =
-  <span data-count="67">(</span>fun is_rec name params typ_constr rhs -&gt;
-    <span data-count="1394">l</span>et rhs =
+  <span data-count="73">(</span>fun is_rec name params typ_constr rhs -&gt;
+    <span data-count="1407">l</span>et rhs =
       match typ_constr with
       | <span data-count="4">S</span>ome t -&gt; Expr_constrained (rhs, t)
-      | <span data-count="1390">N</span>one -&gt; rhs
+      | <span data-count="1403">N</span>one -&gt; rhs
     in
-    is_rec, name, List.fold_righ<span data-count="1394">t</span> efun params rhs)
-  &lt;$<span data-count="67">&gt;</span> kw *<span data-count="67">&gt;</span> optio<span data-count="67">n</span> NonRecursive (keywor<span data-count="67">d</span> "rec" *<span data-count="67">&gt;</span> retur<span data-count="67">n</span> Recursive)
-  &lt;*<span data-count="67">&gt;</span> fun_arg
-  &lt;*<span data-count="67">&gt;</span> man<span data-count="67">y</span> fun_arg
-  &lt;*<span data-count="67">&gt;</span> optio<span data-count="67">n</span> None (stoke<span data-count="67">n</span> ":" *<span data-count="67">&gt;</span> typ &gt;&gt;<span data-count="67">|</span> fun t -&gt; <span data-count="4">S</span>ome t)
-  &lt;*&gt; stoke<span data-count="67">n</span> "=" *<span data-count="67">&gt;</span> ws *<span data-count="67">&gt;</span> erhs
+    is_rec, name, List.fold_righ<span data-count="1407">t</span> efun params rhs)
+  &lt;$<span data-count="73">&gt;</span> kw *<span data-count="73">&gt;</span> optio<span data-count="73">n</span> NonRecursive (keywor<span data-count="73">d</span> "rec" *<span data-count="73">&gt;</span> retur<span data-count="73">n</span> Recursive)
+  &lt;*<span data-count="73">&gt;</span> fun_arg
+  &lt;*<span data-count="73">&gt;</span> man<span data-count="73">y</span> fun_arg
+  &lt;*<span data-count="73">&gt;</span> optio<span data-count="73">n</span> None (stoke<span data-count="73">n</span> ":" *<span data-count="73">&gt;</span> typ &gt;&gt;<span data-count="73">|</span> fun t -&gt; <span data-count="4">S</span>ome t)
+  &lt;*&gt; stoke<span data-count="73">n</span> "=" *<span data-count="73">&gt;</span> ws *<span data-count="73">&gt;</span> erhs
 ;;
 
 let anonymous_fun expr =
   <span data-count="5">l</span>ift3
     (fun args typ_constr body -&gt;
-      <span data-count="1600">m</span>atch typ_constr with
+      <span data-count="1664">m</span>atch typ_constr with
       | <span data-count="0">S</span>ome t -&gt; List.fold_right efun args (Expr_constrained (body, t))
-      | <span data-count="1600">N</span>one -&gt; List.fold_right efun args body)
+      | <span data-count="1664">N</span>one -&gt; List.fold_right efun args body)
     (keywor<span data-count="5">d</span> "fun" *<span data-count="5">&gt;</span> many<span data-count="5">1</span> (ws *<span data-count="5">&gt;</span> fun_arg))
     (optio<span data-count="5">n</span> None (stoke<span data-count="5">n</span> ":" *<span data-count="5">&gt;</span> typ &gt;&gt;<span data-count="5">|</span> fun t -&gt; <span data-count="0">S</span>ome t))
     (stoke<span data-count="5">n</span> "-&gt;" *<span data-count="5">&gt;</span> ws *<span data-count="5">&gt;</span> expr)
@@ -1005,12 +1005,12 @@ let prefix_ops =
 
 let expr =
   fi<span data-count="5">x</span> (fun self -&gt;
-    <span data-count="5">l</span>et ident = ident &gt;&gt;| fun i -&gt; <span data-count="207076">E</span>xpr_var i in
-    <span data-count="5">l</span>et const = const &gt;&gt;| fun c -&gt; <span data-count="7204">E</span>xpr_const c in
-    <span data-count="5">l</span>et unit = paren<span data-count="5">s</span> ws &gt;&gt;| fun _ -&gt; <span data-count="264">E</span>xpr_unit in
+    <span data-count="5">l</span>et ident = ident &gt;&gt;| fun i -&gt; <span data-count="208852">E</span>xpr_var i in
+    <span data-count="5">l</span>et const = const &gt;&gt;| fun c -&gt; <span data-count="8828">E</span>xpr_const c in
+    <span data-count="5">l</span>et unit = paren<span data-count="5">s</span> ws &gt;&gt;| fun _ -&gt; <span data-count="268">E</span>xpr_unit in
     <span data-count="5">l</span>et list = elist self in
     <span data-count="5">l</span>et atom = choice [ paren<span data-count="5">s</span> self; ident; const; unit; list; anonymous_fu<span data-count="5">n</span> self ] in
-    <span data-count="5">l</span>et expr = chainl1 atom (ws *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> (fun f a -&gt; <span data-count="81924">e</span>app f [ a ])) in
+    <span data-count="5">l</span>et expr = chainl1 atom (ws *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> (fun f a -&gt; <span data-count="82312">e</span>app f [ a ])) in
     <span data-count="5">l</span>et expr = expr_with_ops expr in
     (* should come after apply cause of [n * f (n-1)] *)
     <span data-count="5">l</span>et expr = prefix_ops &lt;|&gt; expr in
@@ -1018,11 +1018,11 @@ let expr =
     (* cons *)
     <span data-count="5">l</span>et expr =
       (* tuple *)
-      tupl<span data-count="5">e</span> (stoke<span data-count="5">n</span> ",") expr &gt;&gt;<span data-count="5">|</span> (fun (fst, snd, rest) -&gt; <span data-count="36">e</span>tuple fst snd rest) &lt;|&gt; expr
+      tupl<span data-count="5">e</span> (stoke<span data-count="5">n</span> ",") expr &gt;&gt;<span data-count="5">|</span> (fun (fst, snd, rest) -&gt; <span data-count="550">e</span>tuple fst snd rest) &lt;|&gt; expr
     in
     <span data-count="5">l</span>et expr =
       expr
-      &gt;&gt;<span data-count="5">=</span> (fun a -&gt; <span data-count="22157">s</span>toke<span data-count="22157">n</span> ":" *<span data-count="22157">&gt;</span> typ &gt;&gt;= fun t -&gt; <span data-count="1156">E</span>xpr_constrained (a, t) |&gt; return)
+      &gt;&gt;<span data-count="5">=</span> (fun a -&gt; <span data-count="22969">s</span>toke<span data-count="22969">n</span> ":" *<span data-count="22969">&gt;</span> typ &gt;&gt;= fun t -&gt; <span data-count="1156">E</span>xpr_constrained (a, t) |&gt; return)
             (* try type *)
       &lt;|&gt; expr
     in
@@ -1031,17 +1031,17 @@ let expr =
     &lt;|<span data-count="5">&gt;</span> ematc<span data-count="5">h</span> self (* match *)
     &lt;|<span data-count="5">&gt;</span> (let* rec_flag, name, value = letde<span data-count="5">f</span> (keywor<span data-count="5">d</span> "let") self in
          (* local binding *)
-         <span data-count="1333">l</span>et* scope = stoke<span data-count="1333">n</span> "in" *<span data-count="1333">&gt;</span> self in
-         <span data-count="1333">e</span>let ~rec_flag (name, value) scope |&gt; <span data-count="1333">r</span>eturn)
+         <span data-count="1340">l</span>et* scope = stoke<span data-count="1340">n</span> "in" *<span data-count="1340">&gt;</span> self in
+         <span data-count="1340">e</span>let ~rec_flag (name, value) scope |&gt; <span data-count="1340">r</span>eturn)
     &lt;* ws)
 ;;
 
 let program : structure t =
   let str_item =
     let* ((is_rec, _, _) as fst) = letde<span data-count="5">f</span> (keywor<span data-count="5">d</span> "let") expr in
-    <span data-count="57">l</span>et* rest = man<span data-count="57">y</span> (ws *<span data-count="57">&gt;</span> letde<span data-count="57">f</span> (keywor<span data-count="57">d</span> "and") expr) in
-    <span data-count="57">l</span>et bindings =
-      Str_value (is_rec, fst :: rest |&gt; List.ma<span data-count="57">p</span> (fun (_, name, e) -&gt; <span data-count="61">n</span>ame, e))
+    <span data-count="63">l</span>et* rest = man<span data-count="63">y</span> (ws *<span data-count="63">&gt;</span> letde<span data-count="63">f</span> (keywor<span data-count="63">d</span> "and") expr) in
+    <span data-count="63">l</span>et bindings =
+      Str_value (is_rec, fst :: rest |&gt; List.ma<span data-count="63">p</span> (fun (_, name, e) -&gt; <span data-count="67">n</span>ame, e))
     in
     return bindings
   in

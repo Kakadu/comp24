@@ -253,8 +253,8 @@ let tfun l r = <span data-count="0">T</span>yp_fun (l, r)
 [@@deriving show]
 
 let pconst c = <span data-count="64">P</span>at_const c
-let pvar v = <span data-count="62664">P</span>at_var v
-let pcons x xs = <span data-count="33144">P</span>at_cons (x, xs)
+let pvar v = <span data-count="62866">P</span>at_var v
+let pcons x xs = <span data-count="33170">P</span>at_cons (x, xs)
 let pnil = Pat_nil
 let ptuple a b rest = <span data-count="129">P</span>at_tuple (a, b, rest)
 
@@ -285,23 +285,23 @@ let ptuple a b rest = <span data-count="129">P</span>at_tuple (a, b, rest)
 <span data-count="7">t</span>ype structure = <span data-count="43">s</span>tructure_item lis<span data-count="9">t</span> [@@deriving show]
 
 let eapp func args =
-  <span data-count="126972">B</span>ase.List.fold_left args ~init:func ~f:(fun acc arg -&gt; <span data-count="130028">E</span>xpr_app (acc, arg))
+  <span data-count="127376">B</span>ase.List.fold_left args ~init:func ~f:(fun acc arg -&gt; <span data-count="130448">E</span>xpr_app (acc, arg))
 ;;
 
-let econs x y = <span data-count="28816">E</span>xpr_cons (x, y)
+let econs x y = <span data-count="29252">E</span>xpr_cons (x, y)
 let enil = Expr_nil
-let etuple fst snd rest = <span data-count="36">E</span>xpr_tuple (fst, snd, rest)
+let etuple fst snd rest = <span data-count="550">E</span>xpr_tuple (fst, snd, rest)
 let eite c e t = <span data-count="327">E</span>xpr_ite (c, e, t)
-let efun p body = <span data-count="2117">E</span>xpr_fun (p, body)
+let efun p body = <span data-count="2191">E</span>xpr_fun (p, body)
 
 let elet ?(rec_flag = <span data-count="0">N</span>onRecursive) (pattern, binding) where =
-  <span data-count="1333">E</span>xpr_let (rec_flag, (pattern, binding), where)
+  <span data-count="1340">E</span>xpr_let (rec_flag, (pattern, binding), where)
 ;;
 
-let ematch expr bindings = <span data-count="1173">E</span>xpr_match (expr, bindings)
+let ematch expr bindings = <span data-count="1177">E</span>xpr_match (expr, bindings)
 let eland x y = <span data-count="1">e</span>app (Expr_var "&amp;&amp;") [ x; y ]
 let elor x y = <span data-count="1">e</span>app (Expr_var "||") [ x; y ]
-let add x y = <span data-count="883">e</span>app (Expr_var "+") [ x; y ]
+let add x y = <span data-count="899">e</span>app (Expr_var "+") [ x; y ]
 let mul x y = <span data-count="809">e</span>app (Expr_var "*") [ x; y ]
 let div x y = <span data-count="513">e</span>app (Expr_var "/") [ x; y ]
 let sub x y = <span data-count="247">e</span>app (Expr_var "-") [ x; y ]

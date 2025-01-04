@@ -297,38 +297,38 @@ open Ast
 let kwd ppf s = <span data-count="42">f</span>printf ppf "%s" s
 
 let pp_tuple ppf tuple_elems pp_elem pp_delim print_parens =
-  <span data-count="13">i</span>f print_parens then <span data-count="0">f</span>print<span data-count="0">f</span> ppf "(";
-  <span data-count="13">l</span>et rec helper = function
+  <span data-count="38">i</span>f print_parens then <span data-count="0">f</span>print<span data-count="0">f</span> ppf "(";
+  <span data-count="38">l</span>et rec helper = function
     | <span data-count="0">[</span>] -&gt; Utils.unreachable ()
-    | <span data-count="13">[</span> e ] -&gt; pp_elem e
-    | <span data-count="14">e</span> :: es -&gt;
+    | <span data-count="38">[</span> e ] -&gt; pp_elem e
+    | <span data-count="39">e</span> :: es -&gt;
       pp_elem e;
-      <span data-count="14">p</span>p_delim ();
-      <span data-count="14">h</span>elper es
+      <span data-count="39">p</span>p_delim ();
+      <span data-count="39">h</span>elper es
   in
   helper tuple_elems;
-  <span data-count="13">i</span>f print_parens then <span data-count="0">f</span>printf ppf ")"
+  <span data-count="38">i</span>f print_parens then <span data-count="0">f</span>printf ppf ")"
 ;;
 
 let rec pp_typ ppf = function
-  | <span data-count="34">T</span>yp_bool -&gt; fprintf ppf "bool"
-  | <span data-count="440">T</span>yp_int -&gt; fprintf ppf "int"
-  | <span data-count="42">T</span>yp_unit -&gt; fprintf ppf "unit"
-  | <span data-count="103">T</span>yp_var id -&gt; fprintf ppf "%d" id
-  | <span data-count="21">T</span>yp_fun ((Typ_fun (_, _) as farg), y) -&gt; fprintf ppf "(%a) -&gt; %a" pp_typ farg pp_typ y
-  | <span data-count="274">T</span>yp_fun (x, y) -&gt; fprintf ppf "%a -&gt; %a" pp_typ x pp_typ y
-  | Typ_list ((<span data-count="0">T</span>yp_fun _ | <span data-count="1">T</span>yp_tuple _) as complex) -&gt;
+  | <span data-count="43">T</span>yp_bool -&gt; fprintf ppf "bool"
+  | <span data-count="468">T</span>yp_int -&gt; fprintf ppf "int"
+  | <span data-count="48">T</span>yp_unit -&gt; fprintf ppf "unit"
+  | <span data-count="134">T</span>yp_var id -&gt; fprintf ppf "%d" id
+  | <span data-count="23">T</span>yp_fun ((Typ_fun (_, _) as farg), y) -&gt; fprintf ppf "(%a) -&gt; %a" pp_typ farg pp_typ y
+  | <span data-count="291">T</span>yp_fun (x, y) -&gt; fprintf ppf "%a -&gt; %a" pp_typ x pp_typ y
+  | Typ_list ((<span data-count="0">T</span>yp_fun _ | <span data-count="13">T</span>yp_tuple _) as complex) -&gt;
     fprintf ppf "(%a) list" pp_typ complex
-  | <span data-count="34">T</span>yp_list x -&gt; fprintf ppf "%a list" pp_typ x
-  | <span data-count="13">T</span>yp_tuple (fst, snd, rest) -&gt;
+  | <span data-count="22">T</span>yp_list x -&gt; fprintf ppf "%a list" pp_typ x
+  | <span data-count="38">T</span>yp_tuple (fst, snd, rest) -&gt;
     pp_tuple
       ppf
       (fst :: snd :: rest)
       (fun e -&gt;
-        <span data-count="27">m</span>atch e with
+        <span data-count="77">m</span>atch e with
         | <span data-count="0">T</span>yp_tuple _ | <span data-count="12">T</span>yp_fun _ -&gt; fprintf ppf "(%a)" pp_typ e
-        | <span data-count="15">e</span> -&gt; fprintf ppf "%a" pp_typ e)
-      (fun () -&gt; <span data-count="14">f</span>printf ppf " * ")
+        | <span data-count="65">e</span> -&gt; fprintf ppf "%a" pp_typ e)
+      (fun () -&gt; <span data-count="39">f</span>printf ppf " * ")
       false
 ;;
 
