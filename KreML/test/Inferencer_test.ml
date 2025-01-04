@@ -446,11 +446,6 @@ let%expect_test "poly" =
       ] |}]
 ;;
 
-let map f p =
-  let a, b = p in
-  f a, f b
-;;
-
 let%expect_test "tuples" =
   let tuples =
     "let rec fix f x = f (fix f) x\n\
@@ -516,96 +511,110 @@ let%expect_test "tuples" =
      ] |}]
 ;;
 
-(* let%expect_test "lists" =
-   let lists = "
-   let length_tail =
-   let rec helper acc xs =
-   match xs with
-   | [] -> acc
-   | h::tl -> helper (acc + 1) tl
-   in
-   helper 0
-
-   let rec map f xs =
-   match xs with
-   | [] -> []
-   | a::[] -> [f a]
-   | a::b::[] -> [f a; f b]
-   | a::b::c::[] -> [f a; f b; f c]
-   | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
-
-   let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
-
-   let concat =
-   let rec helper xs =
-   match xs with
-   | [] -> []
-   | h::tl -> append h (helper tl)
-   in helper
-
-   let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
-
-   let rec cartesian xs ys =
-   match xs with
-   | [] -> []
-   | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)
-
-   let main =
-   let () = iter print_int [1;2;3] in
-   let () = print_int (length_tail (cartesian [1;2] [1;2;3;4])) in
-   0" in
-   parse_program lists *)
-
 let%expect_test "lists" =
   let lists =
     "\n\
-    \  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)\n\n\
-    \  let concat =\n\
-    \    let rec helper xs =\n\
-    \      match xs with\n\
-    \      | [] -> []\n\
-    \      | h::tl -> append h (helper tl)\n\
-    \    in helper\n"
+    \   let length_tail =\n\
+    \   let rec helper acc xs =\n\
+    \   match xs with\n\
+    \   | [] -> acc\n\
+    \   | h::tl -> helper (acc + 1) tl\n\
+    \   in\n\
+    \   helper 0\n\n\
+    \   let rec map f xs =\n\
+    \   match xs with\n\
+    \   | [] -> []\n\
+    \   | a::[] -> [f a]\n\
+    \   | a::b::[] -> [f a; f b]\n\
+    \   | a::b::c::[] -> [f a; f b; f c]\n\
+    \   | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl\n\n\
+    \   let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)\n\n\
+    \   let concat =\n\
+    \   let rec helper xs =\n\
+    \   match xs with\n\
+    \   | [] -> []\n\
+    \   | h::tl -> append h (helper tl)\n\
+    \   in helper\n\n\
+    \   let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl\n\n\
+    \   let rec cartesian xs ys =\n\
+    \   match xs with\n\
+    \   | [] -> []\n\
+    \   | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)\n\n\
+    \   let main =\n\
+    \   let () = iter print_int [1;2;3] in\n\
+    \   let () = print_int (length_tail (cartesian [1;2] [1;2;3;4])) in\n\
+    \   0"
   in
   parse_program lists;
   [%expect
     {|
-      [ append -> [ 4; ]4 list -> 4 list -> 4 list
-      , concat -> [ 18; ]18 list list -> 18 list
-      , print_int -> [ ]int -> unit
-       ]
-      [ 0 -> 4 list -> 4 list -> 4 list
-      , 1 -> 4 list
-      , 2 -> 4 list
-      , 3 -> 4 list
-      , 5 -> 4
-      , 6 -> 4 list
-      , 7 -> 4 list
-      , 8 -> 4 list -> 4 list
-      , 9 -> 18 list list -> 18 list
-      , 10 -> 18 list list
-      , 11 -> 18 list
-      , 12 -> 18 list
-      , 13 -> 18
-      , 14 -> 18 list
-      , 15 -> 18 list list
-      , 16 -> 18 list
-      , 17 -> 18 list -> 18 list
-      , 19 -> 18 list
-      , 20 -> 18 list list -> 18 list
-       ] |}]
+    [ append -> [ 53; ]53 list -> 53 list -> 53 list
+    , cartesian -> [ 85; 94; ]85 list -> 94 list -> (85 * 94) list
+    , concat -> [ 69; ]69 list list -> 69 list
+    , iter -> [ 75; ](75 -> unit) -> 75 list -> unit
+    , length_tail -> [ 12; ]12 list -> int
+    , main -> [ ]int
+    , map -> [ 33; 43; ](33 -> 43) -> 33 list -> 43 list
+    , print_int -> [ ]int -> unit
+     ]
+    [ 81 -> 85 list -> 94 list -> (85 * 94) list
+    , 82 -> 85 list
+    , 83 -> 94 list
+    , 84 -> (85 * 94) list
+    , 86 -> 85 * 94
+    , 87 -> 85
+    , 88 -> 85 list
+    , 89 -> (85 * 94) list
+    , 90 -> (85 * 94) list -> (85 * 94) list
+    , 91 -> 85 * 94
+    , 92 -> (85 * 94) list
+    , 93 -> 94 list -> (85 * 94) list
+    , 95 -> 85 * 94
+    , 96 -> 94
+    , 97 -> (85 * 94) list
+    , 98 -> 94 list -> (85 * 94) list
+    , 99 -> unit
+    , 100 -> int list -> unit
+    , 101 -> int
+    , 102 -> int
+    , 103 -> unit
+    , 104 -> int
+    , 105 -> int * int
+    , 106 -> (int * int) list
+    , 107 -> int list -> (int * int) list
+    , 108 -> int
+    , 109 -> int
+    , 110 -> int
+    , 111 -> int
+    , 112 -> int
+     ] |}]
 ;;
 
-let rec append xs ys =
-  match xs with
-  | [] -> ys
-  | x :: xs -> x :: append xs ys
-;;
-
-let concat =
-  let rec helper = function
-    | [] -> []
-    | h :: tl -> append h (helper tl)
+let%expect_test "asdfd" =
+  let poly =
+    "let f =\n\
+    \    let rec helper a b = a, b in\n\
+    \    let temp = helper 5 6 in\n\
+    \    let temp2 = helper true false in\n\
+    \    helper\n"
   in
-  helper
+  parse_program poly;
+  [%expect
+    {|
+    [ f -> [ 13; 14; ]13 -> 14 -> 13 * 14
+    , print_int -> [ ]int -> unit
+     ]
+    [ 0 -> 1 -> 2 -> 1 * 2
+    , 3 -> int * int
+    , 4 -> int -> int * int
+    , 5 -> int
+    , 6 -> int
+    , 7 -> int * int
+    , 8 -> bool * bool
+    , 9 -> bool -> bool * bool
+    , 10 -> bool
+    , 11 -> bool
+    , 12 -> bool * bool
+    , 15 -> 13 -> 14 -> 13 * 14
+     ] |}]
 ;;

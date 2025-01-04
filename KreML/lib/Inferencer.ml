@@ -389,12 +389,12 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     | Expr_let (NonRecursive, (p, v), scope) ->
       let* expr_subst, expr_typ = helper env v in
       let env = TypeEnv.apply expr_subst env in
-      let* _, p_typ = infer_pattern env p in
+      let* env, p_typ = infer_pattern env p in
       let* uni = Subst.unify_pair expr_typ p_typ in
       let* s = Subst.compose uni expr_subst in
-      let env =
-        TypeEnv.generalize_pattern p (Subst.apply expr_typ s) (TypeEnv.apply s env)
-      in
+      (* DO NOT APPLY SUBST TO ENV *)
+      let env = TypeEnv.generalize_pattern p (Subst.apply expr_typ s) env in
+      let env = TypeEnv.apply s env in
       let* scope_subst, scope_typ = helper env scope in
       let* final_subst = Subst.compose_all [ scope_subst; s ] in
       R.return (final_subst, Subst.apply scope_typ final_subst)
@@ -404,12 +404,9 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let (Scheme (_, t)) = TypeEnv.find_exn id env in
       let* uni = Subst.unify_pair t expr_typ in
       let* composed = Subst.compose uni expr_subst in
-      let env =
-        TypeEnv.generalize_pattern
-          p
-          (Subst.apply expr_typ composed)
-          (TypeEnv.apply composed env)
-      in
+      (* DO NOT APPLY SUBST TO ENV *)
+      let env = TypeEnv.generalize_pattern p (Subst.apply expr_typ composed) env in
+      let env = TypeEnv.apply composed env in
       let* scope_subst, scope_typ = helper env scope in
       let* final_subst = Subst.compose_all [ scope_subst; composed ] in
       R.return (final_subst, Subst.apply scope_typ final_subst)
@@ -422,7 +419,7 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* final_subst =
         Subst.compose_all [ values_uni; cond_uni; el_subst; th_subst; cond_subst ]
       in
-      R.return (final_subst, Subst.apply th_typ final_subst)
+      R.return (final_subst, Subst.apply el_typ final_subst)
     | Expr_fun (param, expr) ->
       let* env, pat_typ = infer_pattern env param in
       let* s, expr_typ = helper env expr in
@@ -460,11 +457,11 @@ let infer_program (p : structure) =
   let helper (s, env) = function
     | Str_value (NonRecursive, [ (p, e) ]) ->
       let* e_subst, e_typ = infer_expr env e in
-      let* _, p_typ = infer_pattern env p in
+      let* env, p_typ = infer_pattern env p in
       let* uni = Subst.unify_pair e_typ p_typ in
       let* s1 = Subst.compose uni e_subst in
       let env =
-        TypeEnv.generalize_pattern p (Subst.apply e_typ s) (TypeEnv.apply s env)
+        TypeEnv.generalize_pattern p (Subst.apply e_typ s) (TypeEnv.apply e_subst env)
       in
       let* final_subst = Subst.compose_all [ s1; s ] in
       R.return (final_subst, TypeEnv.apply final_subst env)
@@ -484,7 +481,7 @@ let infer_program (p : structure) =
             let* uni = Subst.unify_pair t e_typ in
             let* s1 = Subst.compose uni e_subst in
             (* DO NOT APPLY SUBST TO ENV *)
-            let env = TypeEnv.generalize_pattern p (Subst.apply e_typ s1) acc_env in
+            let env = TypeEnv.generalize_pattern p (Subst.apply e_typ s1) env in
             let* final_subst = Subst.compose_all [ s1; acc_s ] in
             R.return (final_subst, TypeEnv.apply final_subst env)
           | _ ->
