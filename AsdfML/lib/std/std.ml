@@ -3,34 +3,90 @@ open Types
 type std =
   { name : string
   ; typ : ty
+  ; arity : int
   ; extern : string
   }
 
 let stdlib : std list =
-  [ { name = "( + )"; typ = int_typ ^-> int_typ ^-> int_typ; extern = "ml_add"}
-  ; { name = "( - )"; typ = int_typ ^-> int_typ ^-> int_typ; extern = "ml_sub"}
-  ; { name = "( * )"; typ = int_typ ^-> int_typ ^-> int_typ; extern = "ml_mul"}
-  ; { name = "( / )"; typ = int_typ ^-> int_typ ^-> int_typ; extern = "ml_div"}
-  ; { name = "( > )"; typ = int_typ ^-> int_typ ^-> bool_typ; extern = "ml_gt"}
-  ; { name = "( < )"; typ = int_typ ^-> int_typ ^-> bool_typ; extern = "ml_lt"}
-  ; { name = "( >= )"; typ = int_typ ^-> int_typ ^-> bool_typ; extern = "ml_ge"}
-  ; { name = "( <= )"; typ = int_typ ^-> int_typ ^-> bool_typ; extern = "ml_le"}
-  ; { name = "( = )"; typ = dummy_ty ^-> dummy_ty ^-> bool_typ; extern = "ml_eq"}
-  ; { name = "( <> )"; typ = dummy_ty ^-> dummy_ty ^-> bool_typ; extern = "ml_ne"}
-  ; { name = "( && )"; typ = bool_typ ^-> bool_typ ^-> bool_typ; extern = "ml_and"}
-  ; { name = "( || )"; typ = bool_typ ^-> bool_typ ^-> bool_typ; extern = "ml_or"}
-  ; { name = "[ - ]"; typ = int_typ ^-> int_typ; extern = "ml_neg"}
-  ; { name = "not"; typ = bool_typ ^-> bool_typ; extern = "ml_not"}
-  ; { name = "( :: )"; typ = dummy_ty ^-> TList dummy_ty ^-> TList dummy_ty; extern = "ml_cons"}
-  ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int"}
+  [ { name = "( + )"
+    ; typ = int_typ ^-> int_typ ^-> int_typ
+    ; extern = "ml_add"
+    ; arity = 0
+    }
+  ; { name = "( - )"
+    ; typ = int_typ ^-> int_typ ^-> int_typ
+    ; extern = "ml_sub"
+    ; arity = 0
+    }
+  ; { name = "( * )"
+    ; typ = int_typ ^-> int_typ ^-> int_typ
+    ; extern = "ml_mul"
+    ; arity = 0
+    }
+  ; { name = "( / )"
+    ; typ = int_typ ^-> int_typ ^-> int_typ
+    ; extern = "ml_div"
+    ; arity = 0
+    }
+  ; { name = "( > )"
+    ; typ = int_typ ^-> int_typ ^-> bool_typ
+    ; extern = "ml_gt"
+    ; arity = 0
+    }
+  ; { name = "( < )"
+    ; typ = int_typ ^-> int_typ ^-> bool_typ
+    ; extern = "ml_lt"
+    ; arity = 0
+    }
+  ; { name = "( >= )"
+    ; typ = int_typ ^-> int_typ ^-> bool_typ
+    ; extern = "ml_ge"
+    ; arity = 0
+    }
+  ; { name = "( <= )"
+    ; typ = int_typ ^-> int_typ ^-> bool_typ
+    ; extern = "ml_le"
+    ; arity = 0
+    }
+  ; { name = "( = )"
+    ; typ = dummy_ty ^-> dummy_ty ^-> bool_typ
+    ; extern = "ml_eq"
+    ; arity = 0
+    }
+  ; { name = "( <> )"
+    ; typ = dummy_ty ^-> dummy_ty ^-> bool_typ
+    ; extern = "ml_ne"
+    ; arity = 0
+    }
+  ; { name = "( && )"
+    ; typ = bool_typ ^-> bool_typ ^-> bool_typ
+    ; extern = "ml_and"
+    ; arity = 0
+    }
+  ; { name = "( || )"
+    ; typ = bool_typ ^-> bool_typ ^-> bool_typ
+    ; extern = "ml_or"
+    ; arity = 0
+    }
+  ; { name = "[ - ]"; typ = int_typ ^-> int_typ; extern = "ml_neg"; arity = 0 }
+  ; { name = "not"; typ = bool_typ ^-> bool_typ; extern = "ml_not"; arity = 0 }
+  ; { name = "( :: )"
+    ; typ = dummy_ty ^-> TList dummy_ty ^-> TList dummy_ty
+    ; extern = "ml_cons"
+    ; arity = 0
+    }
+  ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int"; arity = 0 }
   ]
+  |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
 
 let runtime : std list =
-  [ { name = "`tuple_field"; typ = dummy_ty; extern = "ml_tuple_field"}
-  ; { name = "`list_field"; typ = dummy_ty; extern = "ml_list_field"}
-  ; { name = "`list_hd"; typ = dummy_ty; extern = "ml_list_hd"}
-  ; { name = "`list_tl"; typ = dummy_ty; extern = "ml_list_tl"}
-  ; { name = "(TODO: check cons pattern)"; typ = dummy_ty; extern = "TODO:remove"}
+  let arg2 = dummy_ty ^-> dummy_ty ^-> dummy_ty in
+  [ { name = "`tuple_field"; typ = arg2; extern = "ml_tuple_field"; arity = 0 }
+  ; { name = "`list_field"; typ = arg2; extern = "ml_list_field"; arity = 0 }
+  ; { name = "`list_hd"; typ = arg2; extern = "ml_list_hd"; arity = 0 }
+  ; { name = "`list_tl"; typ = arg2; extern = "ml_list_tl"; arity = 0 }
+  ; { name = "(TODO: check cons pattern)"; typ = arg2; extern = "TODO:remove"; arity = 0 }
   ]
+  |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
