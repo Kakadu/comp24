@@ -38,11 +38,11 @@ module Generator = struct
         ; 1, return Shaitanml_lib.Ast.ABool
         ; 1, return Shaitanml_lib.Ast.AInt
         ; 1, return Shaitanml_lib.Ast.AString
-        (* ; ( 1
+          (* ; ( 1
           , let* nm = gen_typename in
             return (Ast.TPoly nm) ) *)
         ]
-        (* TODO check Poly type, why here needed string *)
+      (* TODO check Poly type, why here needed string *)
     | n ->
       frequency
         [ ( 1
@@ -59,6 +59,7 @@ module Generator = struct
             return (Shaitanml_lib.Ast.AList tp1) )
         ]
   ;;
+
   let gen_constatnt =
     frequency
       [ (1, small_int >|= fun x -> Shaitanml_lib.Ast.CInt x)
@@ -67,6 +68,7 @@ module Generator = struct
       ; 1, return Shaitanml_lib.Ast.CUnit
       ]
   ;;
+
   let rec gen_pat = function
     | 0 ->
       frequency
@@ -93,5 +95,92 @@ module Generator = struct
             return (Shaitanml_lib.Ast.PConstraint (p, t)) )
         ]
   ;;
-  
+
+  let rec gen_exp = function
+    | 0 ->
+      frequency
+        [ (1, gen_constatnt >|= fun x -> Shaitanml_lib.Ast.EConst x)
+        ; ( 1
+          , let* nm = gen_name in
+            return (Shaitanml_lib.Ast.EVar nm) )
+        ]
+    | n ->
+      frequency
+        [ ( 1
+          , let* p = gen_pat (n / 2) in
+            let* e = gen_exp (n / 2) in
+            return (Shaitanml_lib.Ast.EFun (p, e)) )
+        ; ( 1
+          , let* e1 = gen_exp (n / 2) in
+            let* e2 = gen_exp (n / 2) in
+            return (Shaitanml_lib.Ast.EApply (e1, e2)) )
+        ; ( 1
+          , let* e1 = gen_exp (n / 3) in
+            let* e2 = gen_exp (n / 3) in
+            let* e3 = gen_exp (n / 3) in
+            return (Shaitanml_lib.Ast.EIf (e1, e2, e3)) )
+        ; ( 1
+          , let gen_binding_list n =
+              let gen_binding n =
+                let* pat = gen_pat (n / 2) in
+                let* expr = gen_exp (n / 2) in
+                return (pat, expr)
+              in
+              let* len = int_range 2 5 in
+              let sub_n = n / ((len * 2) + 1) in
+              let* let_lst = list_repeat len (gen_binding sub_n) in
+              return let_lst
+            in
+            let* rf = gen_rec_flag in
+            let* b = gen_binding_list (n / 2) in
+            let* be = gen_exp (n / 2) in
+            return (Shaitanml_lib.Ast.ELet (rf, b, be)) )
+        ; ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / len in
+            let* e_lst = list_repeat len (gen_exp sub_n) in
+            return (Shaitanml_lib.Ast.ETuple e_lst) )
+        ; ( 1
+          , let* len = int_range 2 5 in
+            let sub_n = n / ((len * 2) + 1) in
+            let* hp = gen_exp sub_n in
+            let* p_e_lst =
+              list_repeat
+                len
+                (let* p = gen_pat sub_n in
+                 let* e = gen_exp sub_n in
+                 return (p, e))
+            in
+            return (Shaitanml_lib.Ast.EMatch (hp, p_e_lst)) )
+        ]
+  ;;
+
+  let gen_str_item n =
+    let gen_binding_list n =
+      let gen_binding n =
+        let* pat = gen_pat (n / 2) in
+        let* expr = gen_exp (n / 2) in
+        return (pat, expr)
+      in
+      let* len = int_range 2 5 in
+      let sub_n = n / ((len * 2) + 1) in
+      let* let_lst = list_repeat len (gen_binding sub_n) in
+      return let_lst
+    in
+    frequency
+      [ ( 1
+        , let* e = gen_exp n in
+          return (Shaitanml_lib.Ast.SEval e) )
+      ; ( 1
+        , let* rflag = gen_rec_flag in
+          let* b = gen_binding_list n in
+          return (Shaitanml_lib.Ast.SValue (rflag, b)) )
+      ]
+  ;;
+
+  let gen_struct n = 
+    let* len = int_range 1 10 in
+    let sub_n = n / len in
+    list_repeat len (gen_str_item sub_n)
+  ;; 
 end
