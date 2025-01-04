@@ -164,22 +164,18 @@ let opname_ =
   return op
 ;;
 
-let ppvar = varname >>| pvar
-(* let ppvar =
+(* let ppvar = varname >>| pvar *)
+let ppvar =
    let pvar =
    let* name = varname in
-   return (PVar (name, None))
-   in
-   let pvar_with_type =
-   let pvar name annot = PVar (name, annot) in
-   lift2 pvar (lp *> varname) (token ":" *> ws *> annot <* rp >>| fun x -> Some x)
+   return (PVar (name))
    in
    let opname =
    let* op = opname_ in
-   return (PVar (op, None))
+   return (PVar (op))
    in
-   choice [ pvar_with_type; pvar; opname ]
-   ;; *)
+   choice [pvar; opname ]
+   ;;
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
