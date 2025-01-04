@@ -37,31 +37,31 @@ type instr =
   (* *)
   | Comment of string
 
-let pp_instr ppf =
+let pp_instr fmt =
   let open Format in
   function
-  | Add (rd, rs1, rs2) -> fprintf ppf "add %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Sub (rd, rs1, rs2) -> fprintf ppf "sub %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Mul (rd, rs1, rs2) -> fprintf ppf "mul %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Div (rd, rs1, rs2) -> fprintf ppf "div %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Addi (rd, rs, n) -> fprintf ppf "addi %a, %a, %d" pp_reg rd pp_reg rs n
+  | Add (rd, rs1, rs2) -> fprintf fmt "    add %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Sub (rd, rs1, rs2) -> fprintf fmt "    sub %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Mul (rd, rs1, rs2) -> fprintf fmt "    mul %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Div (rd, rs1, rs2) -> fprintf fmt "    div %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Addi (rd, rs, n) -> fprintf fmt "    addi %a, %a, %d" pp_reg rd pp_reg rs n
   (* *)
-  | And (rd, rs1, rs2) -> fprintf ppf "and %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Or (rd, rs1, rs2) -> fprintf ppf "or %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | And (rd, rs1, rs2) -> fprintf fmt "    and %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Or (rd, rs1, rs2) -> fprintf fmt "    or %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
   (* *)
-  | Ld (rd, rs) -> fprintf ppf "ld %a, %a" pp_reg rd pp_reg rs
-  | Sd (rd, rs) -> fprintf ppf "sd %a, %a" pp_reg rd pp_reg rs
-  | Li (rd, n) -> fprintf ppf "li %a, %d" pp_reg rd n
+  | Ld (rd, rs) -> fprintf fmt "    ld %a, %a" pp_reg rd pp_reg rs
+  | Sd (rd, rs) -> fprintf fmt "    sd %a, %a" pp_reg rd pp_reg rs
+  | Li (rd, n) -> fprintf fmt "    li %a, %d" pp_reg rd n
   (* *)
-  | Beq (rd, rs, where) -> fprintf ppf "beq %a, %a, %s" pp_reg rd pp_reg rs where
-  | Blt (rd, rs, where) -> fprintf ppf "blt %a, %a, %s" pp_reg rd pp_reg rs where
+  | Beq (rd, rs, where) -> fprintf fmt "    beq %a, %a, %s" pp_reg rd pp_reg rs where
+  | Blt (rd, rs, where) -> fprintf fmt "    blt %a, %a, %s" pp_reg rd pp_reg rs where
   (* *)
-  | Label s -> fprintf ppf "%s:" s
-  | Call s -> fprintf ppf "call %s" s
-  | ECall -> fprintf ppf "ecall"
-  | Ret -> fprintf ppf "ret"
+  | Label s -> fprintf fmt "%s:" s
+  | Call s -> fprintf fmt "    call %s" s
+  | ECall -> fprintf fmt "    ecall"
+  | Ret -> fprintf fmt "    ret"
   (* *)
-  | Comment s -> fprintf ppf "# %s" s
+  | Comment s -> fprintf fmt " # %s" s
 ;;
 
 let zero = Reg "zero"
@@ -117,3 +117,12 @@ let emit ?(comm = "") instr =
 ;;
 
 let emit_str s = Queue.enqueue code s
+
+let emit_fn_decl name =
+  emit_str
+    (Format.sprintf {|
+    .globl %s
+    .type %s, @function
+%s:
+|} name name name)
+;;
