@@ -10,9 +10,6 @@ open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
 
-(* TODO:
-   - lifts in `let test = fun ... -> ...`
-*)
 let fresh_id name =
   let* fresh = fresh in
   let fresh = string_of_int fresh in
@@ -46,14 +43,15 @@ let rec ll_expr env lift ?(name = None) = function
     let* exp, lift = ll_expr env lift exp in
     return (cf_var id, cf_def id args exp :: lift)
   | SLetIn ((SLet (is_fun, is_rec, id, body) as def), exp) ->
-    (* let* body, lift = ll_expr env lift body in *)
-    let* def, lift, env = ll_def env lift def in
+    (* TODO: useless function defs *)
+    let* def, lift, _ = ll_def env lift def in
     let id, body =
       match def with
       | CFLet (id, _, body) -> id, body
     in
-    let* exp, lift = ll_expr env lift exp in
-    if is_fun then return (exp, lift) else return (cf_let_in id body exp, lift)
+    let env = Map.remove env id in
+    let* exp, lift = ll_expr env lift exp ~name in
+    return (cf_let_in id body exp, lift)
   | (STuple xs | SList xs) as exp ->
     let[@warning "-8"] constr =
       match exp with
@@ -69,15 +67,23 @@ let rec ll_expr env lift ?(name = None) = function
         return (x :: acc, lift))
     >>| fun (xs, lift) -> constr (List.rev xs), lift
 
-(* TODO: let f x = ll_f x *)
 and ll_def env lift = function
-  | SLet (true, is_rec, id, exp) ->
+  (* TODO:
+     let f x = ll_f x
+     simplify?
+     ~name
+     lifts in `let test = fun ... -> ...`
+  *)
+  (* | SLet (true, is_rec, id, exp) ->
+     let* new_id = fresh_id id in
+     let env = Map.set env ~key:id ~data:new_id in
+     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
+     return (cf_def id [] exp, lift, env) *)
+  | SLet (_, is_rec, id, exp) ->
+    (* TODO: new_id ?? *)
     let* new_id = fresh_id id in
     let env = Map.set env ~key:id ~data:new_id in
     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
-    return (cf_def id [] exp, lift, env)
-  | SLet (false, is_rec, id, exp) ->
-    let* exp, lift = ll_expr env lift exp in
     return (cf_def id [] exp, lift, env)
 ;;
 

@@ -54,10 +54,10 @@ let rec cc_expr globals env ?(apply = true) = function
        then fvs |> List.map ~f:s_var |> List.fold ~init:closure_fun ~f:s_app
        else closure_fun)
   | TELetIn (_, def, exp) ->
-    let def', env', globals' = cc_def globals env def ~apply:false in
-    let exp' = cc_expr globals' env' exp in
-    (* let def', env', _ = cc_def globals env def ~apply:false in
-       let exp' = cc_expr globals env' exp in *)
+    (* let def', env', globals' = cc_def globals env def ~apply:false in
+       let exp' = cc_expr globals' env' exp in *)
+    let def', env', _ = cc_def globals env def ~apply:false in
+    let exp' = cc_expr globals env' exp in
     s_let_in def' exp'
   | TETuple (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_tuple
   | TEList (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_list
