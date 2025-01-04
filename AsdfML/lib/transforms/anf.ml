@@ -56,13 +56,16 @@ let anf_def env (def : cf_definition) =
     let env = List.fold args ~init:env ~f:(fun acc x -> Map.set acc ~key:x ~data:x) in
     let env = Map.set env ~key:id ~data:id in
     let* aexpr = anf_expr env expr (fun x -> return @@ ACExpr (CImmExpr x)) in
-    return ((Fn (id, args, aexpr)), env)
+    return (Fn (id, args, aexpr), env)
 ;;
 
 let default_env =
   let env = Map.Poly.empty in
   let env =
     stdlib |> List.fold ~init:env ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
+  in
+  let env =
+    runtime |> List.fold ~init:env ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
   in
   env
 ;;
