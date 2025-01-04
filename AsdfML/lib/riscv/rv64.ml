@@ -126,3 +126,14 @@ let emit_fn_decl name =
 %s:
 |} name name name)
 ;;
+
+
+open Std
+
+let extern =
+  stdlib @ runtime
+  |> List.map ~f:(fun x -> Format.sprintf "    .extern %s" x.extern)
+  |> String.concat_lines
+;;
+
+

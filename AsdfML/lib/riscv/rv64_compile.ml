@@ -1,20 +1,9 @@
 open Base
 open Anf_ast
-open Std
 open Rv64
 
-let extern =
-  stdlib
-  |> List.map ~f:(fun x -> Format.sprintf "    .extern %s" x.extern)
-  |> String.concat_lines
-;;
-
-let section_data = {|
-    .section .data
-|}
-
-let rec gen_imm = function
-  | ImmInt n -> emit li a0 n
+let rec gen_imm dest = function
+  | ImmInt n -> emit li dest n
   | ImmBool b -> failwith "todo"
   | ImmId id -> failwith "todo"
   | ImmUnit -> failwith "todo"
@@ -22,14 +11,14 @@ let rec gen_imm = function
   | ImmTuple xs -> failwith "todo"
   | ImmList xs -> failwith "todo"
 
-and gen_cexpr = function
-  | CApp (e1, e2) -> failwith "todo"
+and gen_cexpr dest = function
+  | CApp (fn, arg) -> failwith "todo"
   | CIfElse (c, t, e) -> failwith "todo"
-  | CImmExpr e -> gen_imm e
+  | CImmExpr e -> gen_imm dest e
 
 and gen_aexpr = function
   | ALet (id, cexpr, aexpr) -> failwith "todo"
-  | ACExpr cexpr -> gen_cexpr cexpr
+  | ACExpr cexpr -> gen_cexpr a0 cexpr
 
 and gen_fn = function
   | Fn (id, args, aexpr) ->
