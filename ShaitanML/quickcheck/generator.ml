@@ -10,7 +10,7 @@ module Generator = struct
       (fun self () ->
          let* nm =
            string_size
-             ~gen:(frequency [ 20, char_range 'a' 'z'; 1, char_range '_' '_' ])
+             ~gen:(frequency [ 20, char_range 'a' 'z'; 1, return '_' ])
              (int_range 1 10)
          in
          if Shaitanml_lib.Parser.is_keyword nm then self () else return nm)
@@ -23,7 +23,7 @@ module Generator = struct
          let* first_char = char_range 'a' 'z' in
          let* suf =
            string_size
-             ~gen:(frequency [ 20, char_range 'a' 'z'; 1, char_range '_' '_' ])
+             ~gen:(frequency [ 20, char_range 'a' 'z'; 1,  return '_' ])
              (int_range 1 10)
          in
          let nm = String.make 1 first_char ^ suf in
@@ -60,7 +60,7 @@ module Generator = struct
         ]
   ;;
 
-  let gen_constatnt =
+  let gen_constant =
     frequency
       [ (1, small_int >|= fun x -> Shaitanml_lib.Ast.CInt x)
       ; (1, bool >|= fun x -> Shaitanml_lib.Ast.CBool x)
@@ -72,7 +72,7 @@ module Generator = struct
   let rec gen_pat = function
     | 0 ->
       frequency
-        [ (1, gen_constatnt >|= fun x -> Shaitanml_lib.Ast.PConst x)
+        [ (1, gen_constant >|= fun x -> Shaitanml_lib.Ast.PConst x)
         ; 1, return Shaitanml_lib.Ast.PAny
         ; ( 1
           , let* nm = gen_name in
@@ -96,10 +96,16 @@ module Generator = struct
         ]
   ;;
 
+  let gen_binding n gen_pat gen_exp =
+    let* pat = gen_pat (n / 2) in
+    let* exp = gen_exp (n / 2) in
+    return (pat, exp)
+
+
   let rec gen_exp = function
     | 0 ->
       frequency
-        [ (1, gen_constatnt >|= fun x -> Shaitanml_lib.Ast.EConst x)
+        [ (1, gen_constant >|= fun x -> Shaitanml_lib.Ast.EConst x)
         ; ( 1
           , let* nm = gen_name in
             return (Shaitanml_lib.Ast.EVar nm) )
@@ -178,9 +184,9 @@ module Generator = struct
       ]
   ;;
 
-  let gen_struct n = 
+  let gen_struct n =
     let* len = int_range 1 10 in
     let sub_n = n / len in
     list_repeat len (gen_str_item sub_n)
-  ;; 
+  ;;
 end
