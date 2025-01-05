@@ -1,0 +1,98 @@
+\subsection{CEK}
+
+\begin{frame}
+  \frametitle{CEK машина}
+  Состоит из трёх компонент
+  \begin{itemize}
+    \item Последовательность инструкций (\textbf{С}ontrol) показывает, что осталось исполнить
+    \item Окружение (\textbf{E}nvironment) даёт значения переменным
+    \item Продолжение (C[\textbf{K}]ontinuation) говорит машине, что делать после того, как кончится \textbf{C}
+  \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Окружение}
+  Окружение \textbf{E} сопоставляет переменной значение \texttt{W}, которое может быть либо числом, либо замкнутым $\lambda$-термом.
+
+  Если $\lambda$-терм не замкнутый, то создадим замыкание (\texttt{clos})
+  \begin{align*}
+    \mathtt{W} \Coloneqq & \quad n                              \\
+    \mid                 & \quad \mathtt{clos(\lambda x. M, E})
+  \end{align*}
+  Здесь \texttt{M}~--- тело, а  \texttt{E}~--- окружение замыкания
+\end{frame}
+
+\begin{frame}
+  \frametitle{Продолжение}
+  Продолжение (\textbf{K})~--- это стек фреймов, где фрейм это
+  % \begin{wide}
+  \begin{align*}
+    \mathtt{F}  \Coloneqq & \quad (\mathtt{W} \ \circ)             \\
+    \mid                  & \quad(\circ \ \mathtt{M} \ \mathtt{E})
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Команды}
+  \begin{absolutewide}
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l>{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily}r !{\vline height 1.5em depth 0.7em width 2pt} >{\color{teal}\ttfamily}l >{\color{myPurple}\ttfamily}c >{\color{myRed}\ttfamily}r@{}}
+        \multicolumn{3}{c!{\vline width 2pt}}{Machine state before} & \multicolumn{3}{c}{Machine state after}                                                                                                                                                 \\
+        Code                                                        & Env                                     & Stack                                        & Code                           & Env                          & Stack                          \\
+        \hline
+        x                                                           & e                                       & s                                            & e(x)                           & e                            & s                              \\
+        \hline
+        $\mathtt{M_1M_2}$                                           & e                                       & s                                            & $\mathtt{M_1}$                 & e                            & $\mathtt{(\circ \ M_2 \ e).s}$ \\
+        \hline
+        $\lambda x. M$                                              & e                                       & s                                            & $\mathtt{cl(\lambda x. M, e)}$ & e                            & s                              \\
+        \hline
+        W                                                           & $\mathtt{e_1}  $                        & $\mathtt{(\circ \ M \ e_2).s}$               & M                              & $\mathtt{e_2}$               & $\mathtt{(W \ \circ).s}$       \\
+        \hline
+        W                                                           & $\mathtt{e_1} $                         & $(\mathtt{cl(\lambda x. M, e_2) \ \circ).s}$ & M                              & $\mathtt{[x \mapsto W].e_2}$ & s                              \\
+        \hline
+      \end{tabular}
+    \end{table}
+  \end{absolutewide}
+  \begin{wide}
+    \begin{itemize}
+      \item $e(x)$~--- значение переменной $x$ в окружении $e$
+      \item $[x \mapsto W]$~--- присваивание переменной $x$ значение $W$
+    \end{itemize}
+  \end{wide}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Пример}
+  \begin{absolutewide}
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l !{\vline height 1.4em} >{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily} r }
+        Code                                               & Env                          & Stack                                                                    \\ \hline
+        $((\lambda x.\lambda y. x)1)2$                     & []                           & $\varnothing$                                                            \\
+        $(\lambda x.\lambda y. x)1$                        & []                           & $(\circ \ 2 \ [\ ])$                                                     \\
+        $\lambda x.\lambda y. x$                           & []                           & $(\circ \ 1 \ [\ ]).(\circ \ 2 \ [\ ])$                                  \\
+        $\mathtt{cl}(\lambda x.\lambda y. x, \varnothing)$ & []                           & $(\circ \ 1 \ [\ ]).(\circ \ 2 \ [\ ])$                                  \\
+        $1$                                                & []                           & $(\mathtt{cl}(\lambda x.\lambda y. x, [\ ]) \ \circ).(\circ \ 2 \ [\ ])$ \\
+        $\lambda y.x$                                      & $[x\mapsto 1]$               & $(\circ \ 2 \ [\ ])$                                                     \\
+        $\mathtt{cl}(\lambda y. x, [x \mapsto 1]) $        & $[x\mapsto 1]$               & $(\circ \ 2 \ [\ ])$                                                     \\
+        $2$                                                & []                           & $(\mathtt{cl}(\lambda y. x, [x \mapsto 1]) \ \circ)$                     \\
+        $x$                                                & $[x\mapsto 1].[y \mapsto 2]$ & $\varnothing$                                                            \\
+        $1$                                                & $[x\mapsto 1].[y \mapsto 2]$ & $\varnothing$
+      \end{tabular}
+    \end{table}
+  \end{absolutewide}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Особенности}
+  \begin{itemize}
+    \item Предназначена для интерпретации $\lambda$-исчисления
+    \item \texttt{Call-by-value}
+    \item Частичное применение из коробки
+    \item Слишком высокоуровневая, чтобы уметь в оптимизацию хвостовой рекурсии
+  \end{itemize}
+\end{frame}

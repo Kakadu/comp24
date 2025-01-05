@@ -1,0 +1,77 @@
+\subsection{Кривин}
+\begin{frame}
+  \frametitle{Машина Кривина}
+  Всё то же самое, что и у \textbf{SECD}
+  \begin{itemize}
+    \item Указатель на код
+    \item Окружение
+    \item Стек промежуточных результатов
+  \end{itemize}
+  Однако стек и окружение теперь содержат \textbf{thunks}: замыкания, которые не будут вычисляться до тех пор, пока не понадобятся.
+
+  Так что да, главная особенность~--- \texttt{call-by-name}
+\end{frame}
+
+\begin{frame}
+  \frametitle[И схема компиляции]{Инструкции}
+  \begin{itemize}
+    \item[\color{teal}\texttt{ACCESS(N)}] Начать вычислять \texttt{N}-ый \textbf{thunk}
+    \item[\color{teal}\texttt{PUSH(c)}] Положить \textbf{thunk} на стек с кодом \texttt{c}
+    \item[\color{teal}\texttt{GRAB}] Переложить аргумент из стека в окружение
+  \end{itemize}
+  \begin{align*}
+    \mathtt{\mathcal{C}(n)}         & = \mathtt{ACCESS(n)}                            \\
+    \mathtt{\mathcal{C}(\lambda a)} & = \mathtt{GRAB;\mathcal{C}(a)}                  \\
+    \mathtt{\mathcal{C}(a \ b)}     & = \mathtt{PUSH(\mathcal{C}(b)); \mathcal{C}(a)}
+  \end{align*}
+\end{frame}
+\begin{frame}
+  \frametitle{Исполнение инструкций}
+  \begin{absolutewide}
+
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}}l>{\color{myPurple}} c >{\color{myRed}}r !{\vline height 1.5em depth 0.7em width 2pt} >{\color{teal}}l >{\color{myPurple}}c >{\color{myRed}}r@{}}
+        \multicolumn{3}{c!{\vline width 2pt}}{Machine state before} & \multicolumn{3}{c}{Machine state after}                                                                               \\
+        Code                                                        & Env                                     & Stack    & Code & Env      & Stack                                          \\
+        \hline
+        ACCESS(N); c                                                & e                                       & s        & c'   & e'       & {\color{black}\lstinline{if e(N) == c'[e']}} s \\
+        \hline
+        GRAB; c                                                     & e                                       & c'[e'].s & c    & c'[e'].e & s                                              \\
+        \hline
+        PUSH(c'); c                                                 & e                                       & s        & c    & e        & c'[e].s                                        \\
+        \hline
+      \end{tabular}
+    \end{table}
+  \end{absolutewide}
+  Начальное состояние: $\langle \mathtt{C(a)}, \varnothing , \varepsilon\rangle$
+
+  Конечное состояние:  $\langle \mathtt{GRAB;c}, e, \varepsilon \rangle$
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Пример}
+  \begin{wide}
+    $(\lambda y . 1) ((\lambda x. x x)(\lambda x. x x)) \rightsquigarrow ((\lambda \mathbf{1}))((\lambda (1 \ 1))(\lambda (1 \ 1))) \rightsquigarrow \alt<2->{\mathtt{PUSH({\color{myRed} c_1}); GRAB; CONST(\mathbf{1})}}{\\ \rightsquigarrow \mathtt{PUSH(P(G; P(A(1)); A(1)); G; P(A(1); A(1))); GRAB; CONST(\mathbf{1})}}$
+    \onslide<2->{\begin{table}
+        \centering
+        \begin{tabular}{@{}>{\color{teal}\ttfamily}l !{\vline height 1.4em} >{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily} c }
+          Code                        & Env     & Stack         \\ \hline
+          PUSH($c_1$); GRAB; CONST(1) & []      & $\varnothing$ \\
+          GRAB; CONST(1)              & []      & $c_1$[]       \\
+          CONST(1)                    & $c_1$[] & $\varnothing$ \\
+          $\varepsilon$               & $c_1$[] & $1$
+        \end{tabular}
+      \end{table}}
+  \end{wide}
+\end{frame}
+
+\begin{frame}
+  \frametitle{На практике}
+  \begin{itemize}
+    \item Нужно думать о том, что некоторые операции, например, сложение всё-таки надо сделать строгими
+    \item Нужно думать о том, чтобы одинаковые подвыражения не высчитывались многократно
+  \end{itemize}
+  Короче, для \textsc{Haskell} машина Кривина не подойдёт
+\end{frame}
