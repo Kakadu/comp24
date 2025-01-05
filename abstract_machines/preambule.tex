@@ -31,15 +31,16 @@
   Ligatures=TeX,
   BoldFont={* Medium},
 ]{Fira Sans}
-\setmonofont[
-  Path = ./fonts/,
-  Scale = .9,
-  Extension = .ttf,
-  Contextuals=Alternate,
-  BoldFont={*-Bold},
-  UprightFont={*-Regular},
-]{Fira Code}
+%\setmonofont[
+%  Path = ./fonts/,
+%  Scale = .9,
+%  Extension = .ttf,
+%  Contextuals=Alternate,
+%  BoldFont={*-Bold},
+%  UprightFont={*-Regular},
+%]{Fira Code}
 
+    \setmonofont[Scale = .9]{Fira Code}
 
 \tikzset{bb/.style={draw=tcbcolframe,dash pattern=on 1mm off 1mm,dash phase=0.5mm,tcb@spec,segmentation@style}}
 \def\setlinetext#1{\small\color{tcbcolframe}\contourlength{1.5pt}\contour{tcbcolback}{#1}}
