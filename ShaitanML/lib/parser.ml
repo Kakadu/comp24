@@ -208,6 +208,18 @@ let eapply e1 e2 = EApply (e1, e2)
 let peconst = const >>| econst
 let pevar = varname >>| evar
 
+let pevar =
+   let pvar =
+   let* name = varname in
+   return (EVar (name))
+   in
+   let opname =
+   let* op = opname_ in
+   return (EVar (op))
+   in
+   choice [pvar; opname ]
+   ;;
+
 let peif pe =
   fix (fun peif ->
     lift3

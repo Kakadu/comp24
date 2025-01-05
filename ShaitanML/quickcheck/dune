@@ -1,6 +1,6 @@
 (library
  (name quickcheck)
- (modules generator)
+ (modules generator printer)
  (libraries base shaitanml_lib angstrom qcheck)
  (preprocess
   (pps ppx_inline_test ppx_expect)))
