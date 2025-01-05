@@ -1,0 +1,99 @@
+\subsection{SECD}
+
+\begin{frame}
+  \frametitle{SECD машина}
+  Состоит из четырёх компонент
+  \begin{itemize}
+    \item Стек (\textbf{S}tack) для хранения промежуточных результатов
+    \item Среда (\textbf{E}nvironment) даёт значения переменным
+    \item Последовательность инструкций (\textbf{C}ontrol) для того, чтобы понимать, что ещё осталось исполнить
+    \item Дамп (\textbf{D}ump) для хранения состояния возврата
+  \end{itemize}
+  Две из которых (\textbf{S} и \textbf{D}) будут представлены в одном стеке
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Инструкции}
+  \begin{itemize}
+    \item[\color{teal}\texttt{ACCESS(N)}] Положить на стек \texttt{N}-е поле окружения
+    \item[\color{teal}\texttt{CLOSURE(c)}] Положить на стек замыкание с кодом \texttt{c} и текущим окружением
+    \item[\color{teal}\texttt{LET}] Взять значения со стека и добавить к окружению
+    \item[\color{teal}\texttt{ENDLET}] Выбросить первую запись из окружения
+    \item[\color{teal}\texttt{APPLY}] Достать со стека замыкание и аргумент, выполнить применение
+    \item[\color{teal}\texttt{RETURN}] Прекратить выполнение текущей функции, вернуться к
+          вызывавшему
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Компиляция}
+  \textbf{SECD} работает с $\lambda$-термами в безымянной форме с использованием индексов де~Брёйна
+  \begin{wide}
+    \begin{align*}
+      \mathtt{\mathcal{C}(n)}                                 & = \mathtt{ACCESS(n)}                                  \\
+      \mathtt{\mathcal{C}(\lambda a)}                         & = \mathtt{CLOSURE(\mathcal{C}(a); RETURN)}            \\
+      \mathtt{\mathcal{C}(\mathbf{let} \ a \ \mathbf{in}\ b)} & = \mathtt{\mathcal{C}(a); LET; \mathcal{C}(b);ENDLET} \\
+      \mathtt{a \ b}                                          & = \mathtt{\mathcal{C}(a); \mathcal{C}(b); APPLY}
+    \end{align*}
+  \end{wide}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Иполнение инструкций}
+  \begin{wide}
+
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l>{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily}r !{\vline height 1.5em depth 0.7em width 2pt} >{\color{teal}\ttfamily}l >{\color{myPurple}\ttfamily}c >{\color{myRed}\ttfamily}r@{}}
+        \multicolumn{3}{c!{\vline width 2pt}}{Machine state before} & \multicolumn{3}{c}{Machine state after}                                      \\
+        Code                                                        & Env                                     & Stack      & Code & Env  & Stack   \\
+        \hline
+        LET; c                                                      & e                                       & v.s        & c    & v.e  & s       \\
+        \hline
+        ENDLET; c                                                   & v.e                                     & s          & c    & e    & s       \\
+        \hline
+        ACCESS(N); c                                                & e                                       & s          & c    & e    & e(N).s  \\
+        \hline
+        CLOSURE(c'); c                                              & e                                       & s          & c    & e    & c'[e].s \\
+        \hline
+        APPLY; c                                                    & e                                       & v.c'[e'].s & c'   & v.e' & c[e].s  \\
+        \hline
+        RETURN; c                                                   & e                                       & v.c'[e].s  & c'   & e'   & v.s     \\
+        \hline
+      \end{tabular}
+    \end{table}
+  \end{wide}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Пример}
+  \begin{wide}
+    $(\lambda x. (x + 1)) 2  \rightsquigarrow \mathtt{CLOSURE(ACCESS(1);CONST(1);ADD;RETURN);CONST(2);APPLY}$
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l !{\vline height 1.4em} >{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily} r }
+        Code                          & Env & Stack               \\ \hline
+        CLOSURE(c); CONST(2); APPLY   & []  & $\varnothing$       \\
+        CONST(2); APPLY               & []  & c[]                 \\
+        APPLY                         & []  & 2.c[]               \\
+        ACCESS(1);CONST(1);ADD;RETURN & 2   & $\varepsilon$[]     \\
+        CONST(1); ADD; RETURN         & 2   & 2.$\varepsilon$[]   \\
+        ADD; RETURN                   & 2   & 1.2.$\varepsilon$[] \\
+        RETURN                        & 2   & 3.$\varepsilon$[]   \\
+        $\varepsilon$                 & []  & 3
+      \end{tabular}
+    \end{table}
+  \end{wide}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Особенности}
+  \begin{itemize}
+    \item Очень простая
+    \item \texttt{Call-by-value}
+    \item Беды с каррированными функциями
+    \item Можно подправить совсем чуть-чуть и будет обработка хвостовой рекурсии
+  \end{itemize}
+\end{frame}

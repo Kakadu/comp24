@@ -1,0 +1,173 @@
+\subsection{ZAM}
+\begin{frame}
+  \frametitle{ZINC abstract machine}
+  \textbf{ZINC} (\textbf{Z}INC \textbf{I}s \textbf{N}ot \textbf{C}aml)~--- модель исполнения Caml Light и \texttt{OCaml}, скомпилированных в переносимый байткод.
+  \begin{itemize}
+    \item Подходит для каррированных функций
+    \item \texttt{Call-by-value}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}%%поправить
+  \frametitle{Eval-apply и push-enter}
+  Как вычисляется функция $f \ a$
+  \begin{itemize}
+    \item[Eval-apply] В \textbf{SECD} $\beta$-редукция выполняется \enquote{вызвавшей} стороной
+    \item[Push-enter] В машине Кривина $\beta$-редукция выполняется самой функцией
+  \end{itemize}
+  \textbf{ZAM} в некотором роде объединяет \textbf{SECD} и машину Кривина
+
+\end{frame}
+
+\begin{frame}
+  \frametitle[наглядно]{Eval-apply и push-enter}
+  \begin{wide}
+    Допустим $\mathtt{f \ a_1 \ a_2}$, где $\mathtt{f = \lambda.\lambda.b}$
+  \end{wide}
+  \begin{absolutewide}
+    \begin{center}
+      \begin{tabular}{c|c}
+        \textbf{Eval-apply} & \textbf{Push-enter} \\ \hline
+        \begin{tabular}[t]{@{}l@{}}
+          \texttt{eval} $\mathtt{f}$                                       \\
+          \texttt{eval} $\mathtt{a_1}$                                     \\
+          {\color{teal}\texttt{APPLY}}                                     \\
+          \hspace{3em}\rotatebox{-45}{$\rightarrow$}                       \\
+          \hspace{5em}{\color{teal}\texttt{CLOSURE}($\mathtt{\lambda.b}$)} \\
+          \hspace{5em}{\color{teal}\texttt{RETURN}}                        \\
+          \hspace{3em}\rotatebox{45}{$\leftarrow $}                        \\
+          \texttt{eval} $a_2$                                              \\
+          {\color{teal}\texttt{APPLY}}                                     \\
+          \hspace{3em}\rotatebox{-45}{$\rightarrow$}                       \\
+          \hspace{5em}\texttt{eval} $b$
+        \end{tabular}
+                            &
+        \begin{tabular}[t]{@{}l@{}}
+          \texttt{push} $\mathtt{a_2}$               \\
+          \texttt{push} $\mathtt{a_1}$               \\
+          \texttt{find \& enter} $\mathtt{f}$        \\
+          \hspace{8em}\rotatebox{-45}{$\rightarrow$} \\
+          \hspace{10em} {\color{teal}\texttt{GRAB}}  \\
+          \hspace{10em} {\color{teal}\texttt{GRAB}}  \\
+          \hspace{10em} \texttt{eval} $\mathtt{b}$
+        \end{tabular}
+      \end{tabular}
+    \end{center}
+  \end{absolutewide}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Инструкции}
+  \begin{wide}
+    \texttt{ACCESS(n), CLOSURE(C), ENDLET} такие же, как и в \textbf{SECD}
+  \end{wide}
+  \begin{itemize}
+    \item[\color{teal}\texttt{RETURN}] Прекратить выполнение текущей функции, вернуться к вызывавшему (как в \textbf{SECD}).
+          Или запомнить посчитанное на стеке значение и вернуться к вызывавшему
+    \item[\color{teal}\texttt{GRAB}] Переложить аргумент со стека в окружение (Кривин) или положить на стек частично применённую функцию
+    \item[\color{teal}\texttt{APPLY}] Достать со стека замыкание (даже проще, чем в \textbf{SECD})
+    \item[\color{teal}\texttt{PUSHRETADDR}] Положить на стек функцию и пометить точку применения функции
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Компиляция}
+  $\mathcal{T}$ для выражений в хвостовой рекурсии
+  \begin{wide}
+    \begin{align*}
+      \mathcal{T}\mathtt{(\lambda a)}                         & = \mathtt{GRAB;\mathcal{T}(a)}                                                         \\
+      \mathcal{T}\mathtt{(\mathbf{let}\ a \ \mathbf{in} \ b)} & = \mathtt{\mathcal{C}(a);GRAB;\mathcal{T}(b)}                                          \\
+      \mathcal{T}\mathtt{(a\ a_1 \dots a_n) }                 & = \mathtt{\mathcal{C}(a_n);\dots; \mathcal{C}(a_1);\mathcal{T}(a)}                     \\
+      \mathcal{T}\mathtt{(a)}                                 & = \mathtt{\mathcal{C}(a); RETURN}                                                      \\
+      \\
+      \mathcal{C}\mathtt{(n)}                                 & = \mathtt{ACCESS(n)}                                                                   \\
+      \mathcal{C}\mathtt{(\lambda a)}                         & = \mathtt{CLOSURE(GRAB;\mathcal{T}(a))}                                                \\
+      \mathcal{C}\mathtt{(\mathbf{let}\ a\ \mathbf{in}\ b)}   & = \mathtt{\mathcal{C}(a);GRAB;\mathcal{C}(b);ENDLET}                                   \\
+      \mathcal{C}\mathtt{(a\ a_1 \dots a_n)}                  & = \mathtt{PUSHRETADDR(k);\mathcal{C}(a_n);\dots;\mathcal{C}(a_1);\mathcal{C}(a);APPLY} \\
+    \end{align*}
+  \end{wide}
+  Здесь $\mathtt{k}$  обозначает код, который идёт после \texttt{APPLY}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Выполнение инструкций}
+  \begin{wide}
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l>{\color{myPurple}\ttfamily} c >{\color{myRed}}r !{\vline height 1.5em depth 0.7em width 2pt} >{\color{teal}\ttfamily}l >{\color{myPurple}\ttfamily}c >{\color{myRed}}r@{}}
+        \multicolumn{3}{c!{\vline width 2pt}}{Machine state before} & \multicolumn{3}{c}{Machine state after}                                                       \\
+        Code                                                        & Env                                     & Stack               & Code & Env & Stack            \\
+        \hline
+        GRAB; c                                                     & e                                       & v.s                 & c    & v.e & s                \\%% перекладываем значение со стека в окружение 
+        \hline
+        GRAB; c                                                     & e                                       & $\square$.c'.e'.s   & c'   & e'  & (GRAB;c)[e].s    \\%% кладём на стек частично применённую функцию
+        \hline
+        RETURN; c                                                   & e                                       & v.$\square$.c'.e'.s & c'   & e'  & v.s              \\%% даём посчитанные аргументы вызываемой функции
+        \hline
+        RETURN; c                                                   & e                                       & c'[e'].s            & c'   & e'  & s                \\%% возвращаем сразу результат и продолжаем вычисление (tail-apply)
+        \hline
+        PUSHRETADDR(c'); c                                          & e                                       & s                   & c    & e   & $\square$.c'.e.s \\%% помечаем точку входа функции, запоминаем текущее окружение
+        \hline
+        APPLY; c                                                    & e                                       & c'[e'].s            & c'   & e'  & s                \\%% передаёт контроль выполнения замыканию с посчитанным значением
+        \hline
+      \end{tabular}
+    \end{table}
+  \end{wide}
+\end{frame}
+
+\begin{frame}
+  \frametitle[Полное применение]{Пример}
+  \begin{wide}
+    $\mathtt{(\lambda.\lambda.\lambda.\mathbf{2})(1)(2)(3)}\rightsquigarrow$ \texttt{PUSHRETADDR($\varepsilon$);C(3);C(2);C(1);CLOSURE(a);APPLY}
+
+    где $\mathtt{a} = $ \texttt{GRAB; GRAB; GRAB; ACCESS($\mathbf{2}$); RETURN}
+  \end{wide}
+  \begin{absolutewide}
+
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l !{\vline height 1.2em} >{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily} r }
+        Code                                                            & Env   & Stack                              \\ \hline
+        PUSHRETADDR($\varepsilon$);C(3);C(2);C(1);CLOSURE(a);APPLY      & []    & $\varnothing$                      \\
+        C(3);C(2);C(1);CLOSURE(a);APPLY                                 & []    & $\square.\varepsilon.$[]           \\
+        C(2);C(1);CLOSURE(a);APPLY                                      & []    & 3.$\square.\varepsilon.$[]         \\
+        C(1);CLOSURE(a);APPLY                                           & []    & 2.3.$\square.\varepsilon.$[]       \\
+        CLOSURE(a);APPLY                                                & []    & 1.2.3.$\square.\varepsilon.$[]     \\
+        APPLY                                                           & []    & a[].1.2.3.$\square.\varepsilon.$[] \\
+        a                                                               & []    & 1.2.3.$\square.\varepsilon.$[]     \\
+        {\color{black}$\times3$GRAB $\to$} ACCESS($\mathbf{2}$); RETURN & 3.2.1 & $\square.\varepsilon.$[]           \\
+        RETURN                                                          & 3.2.1 & 2.$\square.\varepsilon.$[]         \\
+        $\varepsilon$                                                   & []    & 2
+      \end{tabular}
+    \end{table}
+  \end{absolutewide}
+\end{frame}
+
+\begin{frame}
+  \frametitle[Частичное применение]{Пример}
+  \begin{wide}
+    $\mathtt{(\lambda.\lambda.\lambda.\mathbf{2})(1)(2)}\rightsquigarrow$ \texttt{PUSHRETADDR($\varepsilon$);C(2);C(1);CLOSURE(a);APPLY}
+
+    где $\mathtt{a} = $ \texttt{GRAB; GRAB; GRAB; ACCESS($\mathbf{2}$); RETURN}
+  \end{wide}
+  \begin{absolutewide}
+
+    \begin{table}
+      \centering
+      \begin{tabular}{@{}>{\color{teal}\ttfamily}l !{\vline height 1.2em} >{\color{myPurple}\ttfamily} c >{\color{myRed}\ttfamily} r }
+        Code                                                                & Env & Stack                            \\ \hline
+        PUSHRETADDR($\varepsilon$);C(2);C(1);CLOSURE(a);APPLY               & []  & $\varnothing$                    \\
+        C(2);C(1);CLOSURE(a);APPLY                                          & []  & $\square.\varepsilon.$[]         \\
+        C(1);CLOSURE(a);APPLY                                               & []  & 2.$\square.\varepsilon.$[]       \\
+        CLOSURE(a);APPLY                                                    & []  & 1.2.$\square.\varepsilon.$[]     \\
+        APPLY                                                               & []  & a[].1.2.$\square.\varepsilon.$[] \\
+        a                                                                   & []  & 1.2.$\square.\varepsilon.$[]     \\
+        {\color{black}$\times2$GRAB $\to$} GRAB;ACCESS($\mathbf{2}$);RETURN & 2.1 & $\square.\varepsilon.$[]         \\
+        $\varepsilon$                                                       & []  & b[2.1]
+      \end{tabular}
+    \end{table}
+  \end{absolutewide}
+  \begin{wide}
+    $\mathtt{b} = $ \texttt{GRAB;ACCESS($\mathbf{2}$)}; RETURN
+  \end{wide}
+\end{frame}

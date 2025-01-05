@@ -1,0 +1,345 @@
+\ProvidesPackage{smile}[Smart Macros for an Improved LaTeX Experience]
+
+\RequirePackage{etoolbox}
+
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{family=smile,prefix=smile@}
+
+\DeclareBoolOption{color}
+\DeclareStringOption[blue]{coloraccent}
+
+\DeclareBoolOption{minted}
+\DeclareStringOption[aux]{mintedauxdir}
+
+\DeclareBoolOption{listings}
+
+\DeclareBoolOption{tikz}
+
+\DeclareStringOption[\@title]{pdftitle}
+\DeclareStringOption[\@author]{pdfauthor}
+\DeclareStringOption[\@title]{pdfsubject}
+
+\DeclareBoolOption{widowpenalties}
+
+\DeclareBoolOption{paragraph}
+
+\DeclareBoolOption{lists}
+\DeclareBoolOption{description}
+
+\DeclareBoolOption{htmlunderline}
+
+\DeclareBoolOption{footnote}
+
+\DeclareBoolOption{hyperref}
+\DeclareBoolOption{fullref}
+
+\ProcessKeyvalOptions*
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\@ifpackageloaded{xcolor}{}{\ifsmile@hyperref\RequirePackage[table, dvipsnames, hyperref]{xcolor}\else\RequirePackage[table, dvipsnames]{xcolor}\fi}
+
+\ifsmile@color
+	\definecolor{red}{HTML}{a51d2d}
+	\definecolor{green}{HTML}{26a269}
+	\definecolor{blue}{HTML}{1a5fb4}
+	\definecolor{cyan}{HTML}{25a8ff}
+	\definecolor{magenta}{HTML}{de3198}
+	\definecolor{yellow}{HTML}{f5c211}
+	\definecolor{black}{HTML}{241f31}
+	\definecolor{gray}{HTML}{c0bfbc}
+	\definecolor{darkgray}{HTML}{77767b}
+	\definecolor{lightgray}{HTML}{deddda}
+	\definecolor{white}{HTML}{ffffff}
+	\definecolor{brown}{HTML}{986a44}
+	\definecolor{lime}{HTML}{9bcf00}
+	\definecolor{olive}{HTML}{aba100}
+	\definecolor{orange}{HTML}{ff7800}
+	% \definecolor{pink}{HTML}{0,0,1}
+	\definecolor{purple}{HTML}{c061cb}
+	% \definecolor{teal}{HTML}{0,0,1}
+	\definecolor{violet}{HTML}{813d9c}
+	\definecolor{maroon}{HTML}{63452c}
+	\definecolor{darkmaroon}{HTML}{562b41}
+
+	\newcommand\showcolor[1]{\fboxsep1pt\fbox{\colorbox{#1}{\phantom{XX}}}}
+\else\fi
+
+\colorlet{accent}{\smile@coloraccent}
+
+
+\newlength\smile@linewidth\smile@linewidth1px
+\newlength\smile@rounding\smile@rounding1mm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ifsmile@minted
+	\RequirePackage[newfloat=true,cache=false,outputdir=\smile@mintedauxdir]{minted}
+	\setminted{
+		numbers=left,
+		autogobble=true,
+		breaklines=true,
+		breakbytoken=true,
+		breakbytokenanywhere=true,
+		breaksymbolleft=\tiny\ensuremath{\textcolor{gray}{\hookrightarrow}},
+		frame=lines,
+		samepage=true,
+		tabsize=2,
+		baselinestretch=1.2,
+		fontsize=\small,
+		numbersep=6pt,
+		highlightcolor=lightgray!50
+	}
+	\preto\listing{\appto\endminted\unskip}
+\else\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ifsmile@listings
+	\RequirePackage{listingsutf8}
+	\RequirePackage{lstautogobble}
+	\RequirePackage{accsupp}
+
+	\def\smile@listings@initcolors{
+		\colorlet{smile@lst@color@background}{yellow!40!red!10!gray!5}
+		\colorlet{smile@lst@color@rule}{gray}
+		\colorlet{smile@lst@color@lnnr}{gray}
+		\colorlet{smile@lst@color@string}{green}
+		\colorlet{smile@lst@color@kwa}{accent}
+		\colorlet{smile@lst@color@kwb}{accent}
+		\colorlet{smile@lst@color@kwc}{accent}
+		\colorlet{smile@lst@color@kwd}{accent}
+		\colorlet{smile@lst@color@comment}{gray}
+		\colorlet{smile@lst@color@number}{blue}
+	}\smile@listings@initcolors
+
+
+	\def\smile@lst@fsize@base{\dimexpr\f@size\p@\relax}
+	\def\smile@lst@fsize@lnnr{\dimexpr\smile@lst@fsize@base - 0.2\smile@lst@fsize@base\relax}
+
+	\def\smile@lst@nocopy#1{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+	\def\smile@lst@style@linenr{\fontsize{\smile@lst@fsize@lnnr}{\smile@lst@fsize@lnnr}\selectfont\color{smile@lst@color@lnnr}\sffamily}
+	\def\smile@lst@style@base{\fontsize{\smile@lst@fsize@base}{\smile@lst@fsize@base}\selectfont\ttfamily}
+	\def\smile@lst@style@string{\smile@lst@style@base\color{smile@lst@color@string}}
+	\def\smile@lst@style@kwa{\smile@lst@style@base\color{smile@lst@color@kwa}\bfseries}
+	\def\smile@lst@style@kwb{\smile@lst@style@base\color{smile@lst@color@kwb}}
+	\def\smile@lst@style@kwc{\smile@lst@style@base\color{smile@lst@color@kwc}}
+	\def\smile@lst@style@kwd{\smile@lst@style@base\color{smile@lst@color@kwd}}
+	\def\smile@lst@style@comment{\smile@lst@style@base\color{smile@lst@color@comment}\itshape}
+	\def\smile@lst@style@number#1{\ifnum\lst@mode=\lst@Pmode\relax{\smile@lst@style@base\color{smile@lst@color@number} #1}\else#1\fi}
+
+	% Holy shit, this took some trial and error. Expansion is like magic some times
+	\lst@Key{apptoliterate}{}{\xdef\lst@literate{\unexpanded\expandafter{\lst@literate}\unexpanded{#1}}}
+
+	\lstdefinestyle{smile@lst@base}{
+		backgroundcolor  = \color{smile@lst@color@background},
+		rulecolor        = \color{smile@lst@color@rule},
+		frame            = single,
+		framerule        = \smile@linewidth,
+		autogobble       = true,
+		stringstyle      = \smile@lst@style@string,
+		commentstyle     = \smile@lst@style@comment,
+		keywordstyle     = [1]{\smile@lst@style@kwa},
+		keywordstyle     = [2]{\smile@lst@style@kwb},
+		keywordstyle     = [3]{\smile@lst@style@kwc},
+		keywordstyle     = [4]{\smile@lst@style@kwd},
+		basicstyle       = \smile@lst@style@base,
+		numbers          = left,
+		numberstyle      = \smile@lst@style@linenr\smile@lst@nocopy,
+		breaklines       = true,
+		extendedchars    = true,
+		prebreak         = \rlap{\smile@lst@nocopy{$\hookleftarrow$}},
+		escapeinside     = {§}{§},
+		keepspaces       = false,
+		showstringspaces = false,
+		apptoliterate    =
+			{0}{{{\smile@lst@style@number{0}}}}1
+			{1}{{{\smile@lst@style@number{1}}}}1
+			{2}{{{\smile@lst@style@number{2}}}}1
+			{3}{{{\smile@lst@style@number{3}}}}1
+			{4}{{{\smile@lst@style@number{4}}}}1
+			{5}{{{\smile@lst@style@number{5}}}}1
+			{6}{{{\smile@lst@style@number{6}}}}1
+			{7}{{{\smile@lst@style@number{7}}}}1
+			{8}{{{\smile@lst@style@number{8}}}}1
+			{9}{{{\smile@lst@style@number{9}}}}1,
+	}
+
+	\lstdefinestyle{smile@lst@plain}{
+		style           = smile@lst@base,
+		numbers         = none,
+		frame           = none,
+		backgroundcolor = {},
+		xleftmargin     = \z@,
+		xrightmargin    = \z@,
+		numbersep       = \z@,
+	}
+
+	\lstset{style=smile@lst@base}
+\else\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\ifsmile@tikz
+	\RequirePackage{tikz}
+	\usetikzlibrary{backgrounds, shapes.geometric, arrows, arrows.meta, shapes, automata, positioning, positioning, fit, calc, fadings, shadows}
+	\tikzset{
+		lw/.style={line width=\smile@linewidth},
+		lcr/.style={line cap=round},
+		rnd/.style={rounded corners=\smile@rounding},
+		inline/.style={shape=rectangle,inner sep=\z@,text depth=\z@},
+		squarenode/.style={rectangle, fill=white, draw=black, lw},
+		roundednode/.style={squarenode, rnd},
+		roundnode/.style={squarenode, circle},
+		pill/.style={squarenode, rounded rectangle},
+		arrow/.style={lw,-{Latex[round]},lcr},
+		doublearrow/.style={arrow,<->},
+		textarrow/.style={arrow,darkgray,short=1mm,->,-{Kite[#1]}},
+		textarrow/.default=open,
+		short/.style n args={1}{shorten <=#1,shorten >=#1},
+		no shadows/.style={general shadow/.style=},
+		shadow/.style={drop shadow={shadow xshift=.2ex, shadow yshift=-.2ex}},
+		o/.style={remember picture,overlay}
+	}
+	% https://tex.stackexchange.com/a/321615/286979
+	\pgfdeclarelayer{foreground}
+	\pgfsetlayers{background,main,foreground}
+
+	\tikzset{%
+		on foreground layer/.style={%
+				execute at begin scope={%
+						\pgfonlayer{foreground}%
+						\let\tikz@options=\pgfutil@empty%
+						\tikzset{every on foreground layer/.try,#1}%
+						\tikz@options%
+					},
+				execute at end scope={\endpgfonlayer}
+			},
+		on layer/.code={%
+				\pgfonlayer{#1}\begingroup
+				\aftergroup\endpgfonlayer
+				\aftergroup\endgroup
+			},
+		node on layer/.code={%
+				\gdef\node@@on@layer{%
+					\setbox\tikz@tempbox=\hbox\bgroup\pgfonlayer{#1}\unhbox\tikz@tempbox\endpgfonlayer\egroup}
+				\aftergroup\node@on@layer
+			},
+	}
+
+	\def\node@on@layer{\aftergroup\node@@on@layer}
+\else\fi
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@ifpackageloaded{hyperref}{\AtEndPreamble{
+	\hypersetup{
+		pdfauthor=\smile@pdfauthor,
+		pdftitle=\smile@pdftitle,
+		pdfsubject=\smile@pdfsubject
+	}
+}}
+
+\AtBeginDocument{
+	\ifsmile@widowpenalties
+		% TODO: make number of lines customisable
+		\widowpenalties 4 10000 10000 10000 0
+		\clubpenalties 4 10000 10000 10000 0
+	\else\fi
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newcommand\fullcirc{\tikz[baseline=-0.6ex]\draw[fill] (0,0) circle (0.35ex);}
+\let\oldtextsubscript\textsubscript
+\renewcommand\textsubscript[1]{\scalebox{0.7}{#1}}
+
+
+\RequirePackage[normalem]{ulem}
+\ifsmile@htmlunderline
+	\RequirePackage{contour}
+	\renewcommand\ULdepth{1.8pt}
+	\contourlength{0.8pt}
+	\let\olduline\uline
+	\renewcommand\uline[1]{%
+		\olduline{\phantom{#1}}%
+		\llap{\contour{white}{#1}}%
+	}
+\else\fi
+
+
+\newcommand\isempty[1]{\relax\detokenize{#1}\relax}
+
+\newcommand\smile@ensurehelper[3]{%
+	\expandafter\def\csname @#1\endcsname{#3}%
+	\if\isempty{#2}%
+		\expandafter\def\csname @short#1\endcsname{#3}%
+	\else%
+		\expandafter\def\csname @short#1\endcsname{#2}%
+	\fi%
+}
+\newcommand\ensureinfocommand[1]{%
+	\ifcsname#1\endcsname%
+		\expandafter\renewcommand\csname#1\endcsname[2][]{\smile@ensurehelper{#1}{##1}{##2}}%
+	\else%
+		\expandafter\newcommand\csname#1\endcsname[2][]{\smile@ensurehelper{#1}{##1}{##2}}%
+	\fi%
+}
+
+
+\ifsmile@paragraph
+	\let\oldparagraph\paragraph
+	\renewcommand\paragraph[1]{\emph{#1}\hspace{0.5em}\textcolor{accent}{\fullcirc}\hspace{0.5em}}
+\else\fi
+
+
+\ifsmile@lists
+	\RequirePackage[inline]{enumitem}
+	\setlist[enumerate]{itemsep=-0.5\parskip}
+	\setlist[itemize]{itemsep=-0.5\parskip}
+	\ifsmile@description
+		\newcommand\adddot[1]{\normalfont\emph#1\hspace{0.5em}\color{accent}\fullcirc}
+		\setlist[description]{style=sameline, font=\adddot, labelsep=1em}
+	\else
+		\setlist[description]{style=sameline, labelsep=1em}
+	\fi
+\else
+	\ifsmile@description
+		\PackageError{smile}{Setting description has no effect without also
+		setting lists}
+	\else\fi
+\fi
+
+
+\ifsmile@footnote
+	\newcommand\@myfootnotemark{\guilsinglleft\textcolor{accent}{\arabic{footnote}}\guilsinglright}
+	\renewcommand\thefootnote\@myfootnotemark
+\else\fi
+
+
+\ifsmile@hyperref
+	\ifsmile@fullref\RequirePackage[nospace]{varioref}\else\fi
+	\@ifpackageloaded{}{\RequirePackage[hidelinks]{hyperref}}
+	\ifsmile@fullref
+		\RequirePackage{cleveref}
+		% TODO: more customisation
+		\renewcommand\fullref[1]{\hyperref[{#1}]{\autoref*{#1}~--~\nameref*{#1}~\vpageref{#1}}}
+	\else\fi
+\else\fi

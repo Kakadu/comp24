@@ -1,0 +1,97 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\input{preambule.tex}
+\input{title.tex}
+
+\begin{document}
+\maketitle
+
+\section{Введение}
+
+% \begin{frame}
+%   \frametitle[Что и зачем]{Абстрактные машины}
+%   Абстрактная машина~--- абстракция 
+% \begin{itemize}
+%   \item Что такое абстрактная машина и её роль в компиляции и интерпретации.
+%   \item Различие между абстрактными машинами и реальными архитектурами.
+%   \item Основные компоненты:
+%         \begin{itemize}
+%           \item Хранение состояния (стек, куча).
+%           \item Выполнение инструкций.
+%           \item Управление памятью и вычислениями.
+%         \end{itemize}
+% \end{itemize}
+% \end{frame}
+\begin{frame}{Что такое абстрактная машина?}
+  \textbf{Абстрактная машина}~--- теоретическая модель вычислительной системы
+
+  \begin{itemize}
+    \item Не такое низкоуровневое как компиляция, не такое высокоуровневое, как интерпретация
+    \item[$\Rightarrow$] Можно делать более или менее низкоуровневые, но машинно-независимые оптимизации
+  \end{itemize}
+  Придумать свою абстрактную машину можно легко, нужно придумать
+  \begin{itemize}
+    \item Представление памяти для промежуточных данных
+    \item Инструкции и правила исполнения этих инструкций
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Почему важны для функциональных языков?}
+  Для каждого языка удобно придумать свою абстрактную машину, чтобы она лучше отражала особенности языка
+  \begin{itemize}
+    \item Оптимизации, например, хвостовой рекурсии
+    \item Порядок вычисления
+    \item By design обработка каррированных функций
+  \end{itemize}
+\end{frame}
+
+\section{Конкретные абстрактные машины}
+
+\input{concrete-machines/secd.tex}
+\input{concrete-machines/krivine.tex}
+\input{concrete-machines/zinc.tex}
+\input{concrete-machines/cek.tex}
+
+\section{Выводы}
+
+\begin{frame}{Обобщение}
+  \begin{itemize}
+    \item[\textbf{SECD}] Простая в реализации, но глуповатая
+    \item[\textbf{Кривин}] Поддержка ленивых вычислений, но только \texttt{call-by-name} со всеми вытекающими
+    \item[\textbf{ZAM}] Оптимизированная и крутая, используется в \textsc{OCaml}, но довольно сложная
+    \item[\textbf{CEK}] Высокоуровневая и простая, но некоторые оптимизации из-за этого реализовать нельзя
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Сводная таблица}
+  \begin{absolutewide}
+    \begin{table}
+      \centering
+      {\small
+        \begin{tabular}{cccc}
+                           & \textbf{порядок вычисления} & \textbf{каррирование}   & \textbf{хвостовая рекурсия} \\ \midrule
+          \textbf{SECD}    & \texttt{call-by-value}      & {\color{myRed}\faTimes} & нужно докрутить             \\ \midrule
+          \textbf{Кривина} & \texttt{call-by-name}       & {\color{teal}\faCheck}  & {\color{myRed}\faTimes}     \\ \midrule
+          \textbf{ZAM}     & \texttt{call-by-value}      & {\color{teal}\faCheck}  & {\color{teal}\faCheck}      \\ \midrule
+          \textbf{CEK}     & \texttt{call-by-value}      & {\color{teal}\faCheck}  & {\color{myRed}\faTimes}     \\ \bottomrule
+        \end{tabular}
+      }
+    \end{table}
+  \end{absolutewide}
+\end{frame}
+
+
+\appendix
+\section{}
+\begin{frame}[plain, noframenumbering]
+  \frametitle{Вопросы}
+  \begin{enumerate}
+    \item Исполните данный $\lambda$-терм на подходящей машине: $(\lambda x.\lambda y.(y + y))((\lambda x. x x)(\lambda y. y y))(1)$
+    \item Какие преимущества каких абстрактных машин объединяет в себе \textbf{ZAM}?
+    \item Исполните данный $\lambda$-терм на подходящей машине: $(\lambda x, y, z.(x + y + z)) (1) (2)$
+    \item Используется ли машина Кривина в реализации \textsc{Haskell}? Почему?
+  \end{enumerate}
+\end{frame}
+% \input{references.tex}
+
+\end{document}
