@@ -2,14 +2,14 @@ type reg =
   | SP
   | Reg of string
   | Offset of reg * int
-  | Temp of int
+  | Temp of int (* TODO: remove? *)
 
 let rec pp_reg ppf =
   let open Format in
   function
   | SP -> fprintf ppf "sp"
   | Reg s -> fprintf ppf "%s" s
-  | Offset (r, n) -> fprintf ppf "%a(%d)" pp_reg r n
+  | Offset (r, n) -> fprintf ppf "%d(%a)" n pp_reg r 
   | Temp n -> fprintf ppf "t%d" n
 ;;
 
@@ -40,26 +40,26 @@ type instr =
 let pp_instr fmt =
   let open Format in
   function
-  | Add (rd, rs1, rs2) -> fprintf fmt "    add %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Sub (rd, rs1, rs2) -> fprintf fmt "    sub %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Mul (rd, rs1, rs2) -> fprintf fmt "    mul %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Div (rd, rs1, rs2) -> fprintf fmt "    div %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Addi (rd, rs, n) -> fprintf fmt "    addi %a, %a, %d" pp_reg rd pp_reg rs n
+  | Add (rd, rs1, rs2) -> fprintf fmt "    add %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Sub (rd, rs1, rs2) -> fprintf fmt "    sub %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Mul (rd, rs1, rs2) -> fprintf fmt "    mul %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Div (rd, rs1, rs2) -> fprintf fmt "    div %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Addi (rd,rs,n) -> fprintf fmt "    addi %a,%a,%d" pp_reg rd pp_reg rs n
   (* *)
-  | And (rd, rs1, rs2) -> fprintf fmt "    and %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
-  | Or (rd, rs1, rs2) -> fprintf fmt "    or %a, %a, %a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | And (rd,rs1,rs2) -> fprintf fmt "    and %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
+  | Or (rd,rs1,rs2) -> fprintf fmt "    or %a,%a,%a" pp_reg rd pp_reg rs1 pp_reg rs2
   (* *)
-  | Ld (rd, rs) -> fprintf fmt "    ld %a, %a" pp_reg rd pp_reg rs
-  | Sd (rd, rs) -> fprintf fmt "    sd %a, %a" pp_reg rd pp_reg rs
-  | Li (rd, n) -> fprintf fmt "    li %a, %d" pp_reg rd n
+  | Ld (rd,rs) -> fprintf fmt "    ld %a,%a" pp_reg rd pp_reg rs
+  | Sd (rd,rs) -> fprintf fmt "    sd %a,%a" pp_reg rd pp_reg rs
+  | Li (rd,n) -> fprintf fmt "    li %a,%d" pp_reg rd n
   (* *)
-  | Beq (rd, rs, where) -> fprintf fmt "    beq %a, %a, %s" pp_reg rd pp_reg rs where
-  | Blt (rd, rs, where) -> fprintf fmt "    blt %a, %a, %s" pp_reg rd pp_reg rs where
+  | Beq (rd,rs,where) -> fprintf fmt "    beq %a,%a,%s" pp_reg rd pp_reg rs where
+  | Blt (rd,rs,where) -> fprintf fmt "    blt %a,%a,%s" pp_reg rd pp_reg rs where
   (* *)
   | Label s -> fprintf fmt "%s:" s
   | Call s -> fprintf fmt "    call %s" s
   | ECall -> fprintf fmt "    ecall"
-  | Ret -> fprintf fmt "    ret"
+  | Ret -> fprintf fmt "    ret\n"
   (* *)
   | Comment s -> fprintf fmt " # %s" s
 ;;
@@ -67,6 +67,8 @@ let pp_instr fmt =
 let zero = Reg "zero"
 let ra = Reg "ra"
 let sp = SP
+let s0 = Reg "s0"
+let fp = s0
 let t0, t1, t2, t3, t4, t5, t6 = Temp 0, Temp 1, Temp 2, Temp 3, Temp 4, Temp 5, Temp 6
 
 let a0, a1, a2, a3, a4, a5, a6, a7 =
@@ -95,11 +97,12 @@ let blt k rd rs1 where = k (Blt (rd, rs1, where))
 (*  *)
 let label k s = k (Label s)
 let call k s = k (Call s)
-let call k = k ECall
+let ecall k = k ECall
 let ret k = k Ret
 
 (*  *)
 let comment k s = k (Comment s)
+let n_reg_args = 8
 
 open Base
 
@@ -117,23 +120,34 @@ let emit ?(comm = "") instr =
 ;;
 
 let emit_str s = Queue.enqueue code s
+let stack_size = 96 (* TODO: <- *)
 
-let emit_fn_decl name =
-  emit_str
-    (Format.sprintf {|
+let emit_fn_decl name (args : Ast.id list) =
+  if List.length args > 8
+  then failwith "TODO: stack arguments"
+  else (
+    emit_str
+      (Format.sprintf {|
     .globl %s
     .type %s, @function
 %s:
-|} name name name)
+|} name name name);
+    emit addi sp sp (-stack_size);
+    emit sd ra (Offset (sp, stack_size - 8));
+    emit sd fp (Offset (sp, stack_size - 16));
+    emit addi fp sp 96)
 ;;
 
-
-open Std
+let emit_fn_ret () =
+  emit ld s0 (Offset (sp, stack_size - 16));
+  emit ld ra (Offset (sp, stack_size - 8));
+  emit addi sp sp stack_size;
+  emit ret
+;;
 
 let extern =
+  let open Std in
   stdlib @ runtime
   |> List.map ~f:(fun x -> Format.sprintf "    .extern %s" x.extern)
   |> String.concat_lines
 ;;
-
-
