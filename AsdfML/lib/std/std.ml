@@ -90,3 +90,7 @@ let runtime : std list =
   ]
   |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
+
+let lookup_extern name =
+  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> x.extern)
+;;
