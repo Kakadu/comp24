@@ -6,7 +6,10 @@ edition = "2021"
 [dependencies]
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = [
+    # "cdylib", # .so
+    "staticlib", # .a
+]
 
 [profile.release]
 strip = true
