@@ -66,7 +66,7 @@ type expr =
         let rec? x1 = expr1 in expr2
       ]} *)
   | Expr_ite of expr * expr * expr
-   (** {[
+  (** {[
         if cond then expr1 else expr2
       ]}*)
   | Expr_fun of pattern * expr
@@ -75,7 +75,7 @@ type expr =
   (** [Expr_match] corresponds to match expressions like {[match x with | 0 -> 0 | 1 -> 1 | n -> n]} *)
   | Expr_app of expr * expr
   (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
-  | Expr_constrained of expr * typ (** Produced after typechecking routine*)
+  | Expr_constrained of expr * typ
   | Expr_unit
 [@@deriving show]
 
@@ -84,8 +84,6 @@ and case = pattern * expr [@@deriving show]
 
 type structure_item = Str_value of rec_flag * binding list [@@deriving show]
 type structure = structure_item list [@@deriving show]
-
-(* val pp : Format.formatter -> expr -> string *)
 
 val eapp : expr -> expr list -> expr
 val econs : expr -> expr -> expr
