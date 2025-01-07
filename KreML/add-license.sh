@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Define the license header as a single-line string for easier detection
-LICENSE_HEADER="(** Copyright 2024-2025 KreML Compiler
-* SPDX-License-Identifier: LGPL-3.0-or-later *)"
+LICENSE_HEADER="(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)"
 
 # Function to format the license in a given file
 format_license() {

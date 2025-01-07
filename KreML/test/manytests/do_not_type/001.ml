@@ -2,5 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-let internalfail = failwith
-let unreachable () = internalfail "Reached unreachable by assumption code"
+let recfac n = if n <= 1 then 1 else n * fac (n - 1)

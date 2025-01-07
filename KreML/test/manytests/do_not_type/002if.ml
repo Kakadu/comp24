@@ -2,5 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-let internalfail = failwith
-let unreachable () = internalfail "Reached unreachable by assumption code"
+let main = if true then 1 else false

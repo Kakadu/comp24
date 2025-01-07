@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast
 open Ast_printer
@@ -490,4 +491,9 @@ let infer_program (p : structure) =
     | _ -> Utils.unreachable ()
   in
   R.foldl p ~init:(R.return (Subst.empty, TypeEnv.default)) ~f:helper
+;;
+
+let run structure =
+  let w p = Result.map (R.run (infer_program p)) ~f:snd in
+  w structure
 ;;

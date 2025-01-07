@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Angstrom
 open Ast
@@ -7,7 +8,7 @@ open Ast
 let show_res ~input:i ~parser:p ~to_string:ts =
   match Angstrom.parse_string ~consume:Consume.All p i with
   | Ok rest -> ts rest
-  | Error b -> Format.sprintf "Parsing error, rest: %s" b
+  | Error s -> Format.sprintf "Parsing error, rest: %s" s
 ;;
 
 let is_digit = function
@@ -43,6 +44,7 @@ let is_keyword = function
   | "then"
   | "else"
   | "int"
+  | "bool"
   | "and"
   | "true"
   | "false" -> true
@@ -53,17 +55,12 @@ let ws = take_while is_whitespace
 
 let number =
   ws
-  *> let* sign =
-       peek_char_fail
-       >>| function
-       | '-' ->
-         let _ = advance 1 in
-         "-"
-       | _ -> ""
-     in
+  *> let* sign = char '-' *> return (-1) <|> return 1 in
      let* value = take_while1 is_digit in
-     sign ^ value |> int_of_string |> return
+     value |> int_of_string |> ( * ) sign |> return
 ;;
+
+(* let number = number <|> (ws *> char '-' *> ws *> number >>= fun n -> return (-n)) *)
 
 let stoken s = ws *> string s
 let parens p = ws *> stoken "(" *> p <* stoken ")"
@@ -163,7 +160,7 @@ let typed_pattern =
     let pattern =
       pattern
       >>= (fun p -> stoken ":" *> typ >>= fun t -> Pat_constrained (p, t) |> return)
-            (* try type *)
+      (* try type *)
       <|> pattern
     in
     pattern <* ws)
@@ -171,7 +168,7 @@ let typed_pattern =
 
 (* we need this because typing of fun params is allowed only in parens,
    otherwise type constraint belongs to expression
-   for example, fun (x: int) : int -> ...
+   for example, fun (x: int) y : int -> ...
    let x : int = ... *)
 let untyped_pattern =
   fix (fun self ->
@@ -192,20 +189,20 @@ let untyped_pattern =
     <* ws)
 ;;
 
-let fun_arg = parens typed_pattern <|> untyped_pattern
+let arg = parens typed_pattern <|> untyped_pattern
 
 (** Arithmetic  **)
 
-let bin_expr op_string op_expr = ws *> string op_string <* ws >>= fun _ -> return op_expr
+let bin_expr op_string op_expr = stoken op_string >>| fun _ -> op_expr
 let op_list_to_parser l = List.map (fun (str, expr_op) -> bin_expr str expr_op) l
 
 let prio =
-  [ [ "*", mul; "/", div ]
+  [ (* [ "", fun f a -> eapp f [a] ]; *)
+    [ "*", mul; "/", div ]
   ; [ "+", add; "-", sub ]
   ; [ "=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le ]
   ; [ "&&", eland ]
   ; [ "||", elor ]
-  ; [ ("", fun f a -> eapp f [ a ]) ]
   ]
   |> List.map op_list_to_parser
 ;;
@@ -214,7 +211,7 @@ let ident_as_expr = ws *> parens ident <|> ident >>| fun i -> Expr_var i
 
 let expr_with_ops p =
   fix (fun self ->
-    let atom = parens self <|> p in
+    let atom = p <|> parens self in
     List.fold_left (fun acc ops -> chainl1 acc (choice ops)) atom prio)
 ;;
 
@@ -229,11 +226,11 @@ let elist p =
 let ematch expr =
   let* matching_expr = keyword "match" *> ws *> expr <* ws <* keyword "with" in
   let fst_case =
-    (stoken "|" <|> ws) *> fun_arg
+    (stoken "|" <|> ws) *> arg
     >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e)
   in
   let case =
-    stoken "|" *> ws *> fun_arg
+    stoken "|" *> ws *> arg
     >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e)
   in
   let* fst_case = fst_case in
@@ -257,8 +254,8 @@ let letdef kw erhs =
     in
     is_rec, name, List.fold_right efun params rhs)
   <$> kw *> option NonRecursive (keyword "rec" *> return Recursive)
-  <*> fun_arg
-  <*> many fun_arg
+  <*> arg
+  <*> many arg
   <*> option None (stoken ":" *> typ >>| fun t -> Some t)
   <*> stoken "=" *> ws *> erhs
 ;;
@@ -269,7 +266,7 @@ let anonymous_fun expr =
       match typ_constr with
       | Some t -> List.fold_right efun args (Expr_constrained (body, t))
       | None -> List.fold_right efun args body)
-    (keyword "fun" *> many1 (ws *> fun_arg))
+    (keyword "fun" *> many1 (ws *> arg))
     (option None (stoken ":" *> typ >>| fun t -> Some t))
     (stoken "->" *> ws *> expr)
 ;;
@@ -291,37 +288,50 @@ let prefix_ops =
   >>| fun id -> Expr_var id
 ;;
 
+let app_sep =
+  ws *> peek_char
+  >>= function
+  | Some '(' | Some '[' | Some ')' -> return ()
+  | Some c when is_letter c || c = '_' -> return ()
+  | Some c when is_digit c -> return ()
+  | Some _ -> fail ""
+  | _ -> fail ""
+;;
+
 let expr =
   fix (fun self ->
     let ident = ident >>| fun i -> Expr_var i in
     let const = const >>| fun c -> Expr_const c in
     let unit = parens ws >>| fun _ -> Expr_unit in
     let list = elist self in
-    let atom = choice [ parens self; ident; const; unit; list; anonymous_fun self ] in
-    let expr = chainl1 atom (ws *> return (fun f a -> eapp f [ a ])) in
+    let atom =
+      choice [ ident; const; prefix_ops; unit; list; anonymous_fun self; parens self ]
+    in
+    let expr = chainl1 atom (app_sep *> return (fun f a -> eapp f [ a ])) in
+    (* lift2 (fun f args -> eapp f args)
+       atom
+       (many (app_sep *> atom)) in *)
     let expr = expr_with_ops expr in
-    (* should come after apply cause of [n * f (n-1)] *)
-    let expr = prefix_ops <|> expr in
+    (* let expr =
+       chainl1 expr (app_sep  *> return (fun f a -> eapp f [ a ])) in *)
     let expr = chainr1 expr (stoken "::" *> return econs) in
-    (* cons *)
     let expr =
-      (* tuple *)
       tuple (stoken ",") expr >>| (fun (fst, snd, rest) -> etuple fst snd rest) <|> expr
     in
     let expr =
       expr
       >>= (fun a -> stoken ":" *> typ >>= fun t -> Expr_constrained (a, t) |> return)
-            (* try type *)
       <|> expr
     in
-    expr (* atom *)
-    <|> eite self (* ite *)
-    <|> ematch self (* match *)
-    <|> (let* rec_flag, name, value = letdef (keyword "let") self in
-         (* local binding *)
-         let* scope = stoken "in" *> self in
-         elet ~rec_flag (name, value) scope |> return)
-    <* ws)
+    expr
+    <|> eite self
+    <|> ematch self
+    <|> let* rec_flag, name, value = letdef (keyword "let") self in
+        let* scope = keyword "in" *> self in
+        elet ~rec_flag (name, value) scope |> return)
+  <* ws
+  <|> let* rest = Angstrom.consumed any_char in
+      fail rest
 ;;
 
 let program : structure t =
@@ -334,4 +344,10 @@ let program : structure t =
     return bindings
   in
   many1 str_item <* ws
+;;
+
+let run input =
+  match parse_string ~consume:Consume.All program input with
+  | Ok s -> Result.ok s
+  | Error _ -> Result.error "Parsing error occured"
 ;;

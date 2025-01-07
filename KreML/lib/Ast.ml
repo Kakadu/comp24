@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 type ident = string [@@deriving show]
 type type_id = int [@@deriving show]

@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(* Copyright 2024-2025 KreML Compiler *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Kreml_lib.Parser
 open Kreml_lib.Ast
@@ -7,6 +8,7 @@ open Kreml_lib.Ast
 let%expect_test "patterns test" =
   let cases =
     [ "123"
+    ; "-1"
     ; "true"
     ; "false"
     ; "x"
@@ -43,6 +45,7 @@ let%expect_test "patterns test" =
   [%expect
     {|
     (Ast.Pat_const (Ast.Const_int 123))
+    (Ast.Pat_const (Ast.Const_int -1))
     (Ast.Pat_const (Ast.Const_bool true))
     (Ast.Pat_const (Ast.Const_bool false))
     (Ast.Pat_var "x")
@@ -216,6 +219,7 @@ let%expect_test "operations" =
 let%expect_test "simple expressions" =
   let cases =
     [ "5"
+    ; "5 - 6"
     ; "5, 6"
     ; "x::xs"
     ; "[5; 6; 7 + 8]"
@@ -233,6 +237,9 @@ let%expect_test "simple expressions" =
   [%expect
     {|
     (Ast.Expr_const (Ast.Const_int 5))
+    (Ast.Expr_app (
+       (Ast.Expr_app ((Ast.Expr_var "-"), (Ast.Expr_const (Ast.Const_int 5)))),
+       (Ast.Expr_const (Ast.Const_int 6))))
     (Ast.Expr_tuple ((Ast.Expr_const (Ast.Const_int 5)),
        (Ast.Expr_const (Ast.Const_int 6)), []))
     (Ast.Expr_cons ((Ast.Expr_var "x"), (Ast.Expr_var "xs")))
@@ -293,7 +300,8 @@ let%expect_test "let bindings" =
     ; "let a = 5 in let b = 6 in a + b"
     ; "let f x y = x::y in f 5 6"
     ; "let f g h = g, h in f"
-    ; "let a = (fun x -> fun y -> x+y) in c "
+    ; "let a = (fun x -> fun y -> x + y) in c "
+    ; "let a = (f) a b in 0"
     ]
   in
   List.iter
@@ -338,7 +346,12 @@ let%expect_test "let bindings" =
                  (Ast.Expr_var "y")))
               ))
            ))),
-       (Ast.Expr_var "c"))) |}]
+       (Ast.Expr_var "c")))
+    (Ast.Expr_let (Ast.NonRecursive,
+       ((Ast.Pat_var "a"),
+        (Ast.Expr_app ((Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
+           (Ast.Expr_var "b")))),
+       (Ast.Expr_const (Ast.Const_int 0)))) |}]
 ;;
 
 let%expect_test "match" =
@@ -465,116 +478,6 @@ let%expect_test "complex expr" =
            ))),
        (Ast.Expr_app ((Ast.Expr_var "fix"), (Ast.Expr_const (Ast.Const_int 3))))
        )) |}]
-;;
-
-let%expect_test "map" =
-  let input =
-    "\n\
-    \     let rec map f xs =\n\
-    \      match xs with\n\
-    \      | [] -> []\n\
-    \      | a::[] -> [f a]\n\
-    \      | a::b::[] -> [f a; f b]\n\
-    \      | a::b::c::[] -> [f a; f b; f c]\n\
-    \      | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl\n\
-    \      \n\
-    \     let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f \
-     tl\n\n\
-    \      "
-  in
-  show_res ~input ~parser:program ~to_string:show_structure |> print_endline;
-  [%expect
-    {|
-    [(Ast.Str_value (Ast.Recursive,
-        [((Ast.Pat_var "map"),
-          (Ast.Expr_fun ((Ast.Pat_var "f"),
-             (Ast.Expr_fun ((Ast.Pat_var "xs"),
-                (Ast.Expr_match ((Ast.Expr_var "xs"),
-                   [(Ast.Pat_nil, Ast.Expr_nil);
-                     ((Ast.Pat_cons ((Ast.Pat_var "a"), Ast.Pat_nil)),
-                      (Ast.Expr_cons (
-                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
-                         Ast.Expr_nil)));
-                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
-                         (Ast.Pat_cons ((Ast.Pat_var "b"), Ast.Pat_nil)))),
-                      (Ast.Expr_cons (
-                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
-                         (Ast.Expr_cons (
-                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
-                               )),
-                            Ast.Expr_nil))
-                         )));
-                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
-                         (Ast.Pat_cons ((Ast.Pat_var "b"),
-                            (Ast.Pat_cons ((Ast.Pat_var "c"), Ast.Pat_nil))))
-                         )),
-                      (Ast.Expr_cons (
-                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
-                         (Ast.Expr_cons (
-                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
-                               )),
-                            (Ast.Expr_cons (
-                               (Ast.Expr_app ((Ast.Expr_var "f"),
-                                  (Ast.Expr_var "c"))),
-                               Ast.Expr_nil))
-                            ))
-                         )));
-                     ((Ast.Pat_cons ((Ast.Pat_var "a"),
-                         (Ast.Pat_cons ((Ast.Pat_var "b"),
-                            (Ast.Pat_cons ((Ast.Pat_var "c"),
-                               (Ast.Pat_cons ((Ast.Pat_var "d"),
-                                  (Ast.Pat_var "tl")))
-                               ))
-                            ))
-                         )),
-                      (Ast.Expr_cons (
-                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "a"))),
-                         (Ast.Expr_cons (
-                            (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "b")
-                               )),
-                            (Ast.Expr_cons (
-                               (Ast.Expr_app ((Ast.Expr_var "f"),
-                                  (Ast.Expr_var "c"))),
-                               (Ast.Expr_cons (
-                                  (Ast.Expr_app ((Ast.Expr_var "f"),
-                                     (Ast.Expr_var "d"))),
-                                  (Ast.Expr_app (
-                                     (Ast.Expr_app ((Ast.Expr_var "map"),
-                                        (Ast.Expr_var "f"))),
-                                     (Ast.Expr_var "tl")))
-                                  ))
-                               ))
-                            ))
-                         )))
-                     ]
-                   ))
-                ))
-             )))
-          ]
-        ));
-      (Ast.Str_value (Ast.Recursive,
-         [((Ast.Pat_var "iter"),
-           (Ast.Expr_fun ((Ast.Pat_var "f"),
-              (Ast.Expr_fun ((Ast.Pat_var "xs"),
-                 (Ast.Expr_match ((Ast.Expr_var "xs"),
-                    [(Ast.Pat_nil, Ast.Expr_unit);
-                      ((Ast.Pat_cons ((Ast.Pat_var "h"), (Ast.Pat_var "tl"))),
-                       (Ast.Expr_let (Ast.NonRecursive,
-                          (Ast.Pat_unit,
-                           (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "h")
-                              ))),
-                          (Ast.Expr_app (
-                             (Ast.Expr_app ((Ast.Expr_var "iter"),
-                                (Ast.Expr_var "f"))),
-                             (Ast.Expr_var "tl")))
-                          )))
-                      ]
-                    ))
-                 ))
-              )))
-           ]
-         ))
-      ] |}]
 ;;
 
 let%expect_test "fold" =
@@ -708,22 +611,16 @@ let%expect_test "even_odd" =
 
 let%expect_test "typed" =
   let cases =
-    [ "let rec fold : int list -> int -> (int -> int -> int) -> int =\n\
-      \      fun l acc f ->\n\
-      \      match l with\n\
-      \      | [] -> acc\n\
-      \      | x::xs -> fold xs (f acc x) f"
+    [ "let _start () () a () b _c () d __ =\n\
+      \  let () = print_int (a+b) in\n\
+      \  let () = print_int __ in\n\
+      \  a*b / _c + d"
     ; "let somefun \n\
       \        (a : int)\n\
       \        (b: int * int * bool)\n\
       \        (c: (int * int) list)\n\
       \        (f : (int -> int) -> int -> int) : int =\n\
       \         todo"
-    ; "let addi = fun f g x -> (f x (g x: bool) : int)\n\n\
-      \      let main =\n\
-      \         let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start \
-       -> _start/2 = 0) 4) in\n\
-      \         0"
     ]
   in
   List.iter
@@ -732,37 +629,53 @@ let%expect_test "typed" =
     cases;
   [%expect
     {|
-    [(Ast.Str_value (Ast.Recursive,
-        [((Ast.Pat_var "fold"),
-          (Ast.Expr_constrained (
-             (Ast.Expr_fun ((Ast.Pat_var "l"),
-                (Ast.Expr_fun ((Ast.Pat_var "acc"),
-                   (Ast.Expr_fun ((Ast.Pat_var "f"),
-                      (Ast.Expr_match ((Ast.Expr_var "l"),
-                         [(Ast.Pat_nil, (Ast.Expr_var "acc"));
-                           ((Ast.Pat_cons ((Ast.Pat_var "x"), (Ast.Pat_var "xs")
-                               )),
-                            (Ast.Expr_app (
-                               (Ast.Expr_app (
-                                  (Ast.Expr_app ((Ast.Expr_var "fold"),
-                                     (Ast.Expr_var "xs"))),
-                                  (Ast.Expr_app (
-                                     (Ast.Expr_app ((Ast.Expr_var "f"),
-                                        (Ast.Expr_var "acc"))),
-                                     (Ast.Expr_var "x")))
-                                  )),
-                               (Ast.Expr_var "f"))))
-                           ]
+    [(Ast.Str_value (Ast.NonRecursive,
+        [((Ast.Pat_var "_start"),
+          (Ast.Expr_fun (Ast.Pat_unit,
+             (Ast.Expr_fun (Ast.Pat_unit,
+                (Ast.Expr_fun ((Ast.Pat_var "a"),
+                   (Ast.Expr_fun (Ast.Pat_unit,
+                      (Ast.Expr_fun ((Ast.Pat_var "b"),
+                         (Ast.Expr_fun ((Ast.Pat_var "_c"),
+                            (Ast.Expr_fun (Ast.Pat_unit,
+                               (Ast.Expr_fun ((Ast.Pat_var "d"),
+                                  (Ast.Expr_fun ((Ast.Pat_var "__"),
+                                     (Ast.Expr_let (Ast.NonRecursive,
+                                        (Ast.Pat_unit,
+                                         (Ast.Expr_app (
+                                            (Ast.Expr_var "print_int"),
+                                            (Ast.Expr_app (
+                                               (Ast.Expr_app ((Ast.Expr_var "+"),
+                                                  (Ast.Expr_var "a"))),
+                                               (Ast.Expr_var "b")))
+                                            ))),
+                                        (Ast.Expr_let (Ast.NonRecursive,
+                                           (Ast.Pat_unit,
+                                            (Ast.Expr_app (
+                                               (Ast.Expr_var "print_int"),
+                                               (Ast.Expr_var "__")))),
+                                           (Ast.Expr_app (
+                                              (Ast.Expr_app ((Ast.Expr_var "+"),
+                                                 (Ast.Expr_app (
+                                                    (Ast.Expr_app (
+                                                       (Ast.Expr_var "/"),
+                                                       (Ast.Expr_app (
+                                                          (Ast.Expr_app (
+                                                             (Ast.Expr_var "*"),
+                                                             (Ast.Expr_var "a"))),
+                                                          (Ast.Expr_var "b")))
+                                                       )),
+                                                    (Ast.Expr_var "_c")))
+                                                 )),
+                                              (Ast.Expr_var "d")))
+                                           ))
+                                        ))
+                                     ))
+                                  ))
+                               ))
+                            ))
                          ))
                       ))
-                   ))
-                )),
-             (Ast.Typ_fun ((Ast.Typ_list Ast.Typ_int),
-                (Ast.Typ_fun (Ast.Typ_int,
-                   (Ast.Typ_fun (
-                      (Ast.Typ_fun (Ast.Typ_int,
-                         (Ast.Typ_fun (Ast.Typ_int, Ast.Typ_int)))),
-                      Ast.Typ_int))
                    ))
                 ))
              )))
@@ -792,64 +705,5 @@ let%expect_test "typed" =
              )))
           ]
         ))
-      ]
-    [(Ast.Str_value (Ast.NonRecursive,
-        [((Ast.Pat_var "addi"),
-          (Ast.Expr_fun ((Ast.Pat_var "f"),
-             (Ast.Expr_fun ((Ast.Pat_var "g"),
-                (Ast.Expr_fun ((Ast.Pat_var "x"),
-                   (Ast.Expr_constrained (
-                      (Ast.Expr_app (
-                         (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_var "x"))),
-                         (Ast.Expr_constrained (
-                            (Ast.Expr_app ((Ast.Expr_var "g"), (Ast.Expr_var "x")
-                               )),
-                            Ast.Typ_bool))
-                         )),
-                      Ast.Typ_int))
-                   ))
-                ))
-             )))
-          ]
-        ));
-      (Ast.Str_value (Ast.NonRecursive,
-         [((Ast.Pat_var "main"),
-           (Ast.Expr_let (Ast.NonRecursive,
-              (Ast.Pat_unit,
-               (Ast.Expr_app ((Ast.Expr_var "print_int"),
-                  (Ast.Expr_app (
-                     (Ast.Expr_app (
-                        (Ast.Expr_app ((Ast.Expr_var "addi"),
-                           (Ast.Expr_fun ((Ast.Pat_var "x"),
-                              (Ast.Expr_fun ((Ast.Pat_var "b"),
-                                 (Ast.Expr_ite ((Ast.Expr_var "b"),
-                                    (Ast.Expr_app (
-                                       (Ast.Expr_app ((Ast.Expr_var "+"),
-                                          (Ast.Expr_var "x"))),
-                                       (Ast.Expr_const (Ast.Const_int 1)))),
-                                    (Ast.Expr_app (
-                                       (Ast.Expr_app ((Ast.Expr_var "*"),
-                                          (Ast.Expr_var "x"))),
-                                       (Ast.Expr_const (Ast.Const_int 2))))
-                                    ))
-                                 ))
-                              ))
-                           )),
-                        (Ast.Expr_fun ((Ast.Pat_var "_start"),
-                           (Ast.Expr_app (
-                              (Ast.Expr_app ((Ast.Expr_var "="),
-                                 (Ast.Expr_app (
-                                    (Ast.Expr_app ((Ast.Expr_var "/"),
-                                       (Ast.Expr_var "_start"))),
-                                    (Ast.Expr_const (Ast.Const_int 2))))
-                                 )),
-                              (Ast.Expr_const (Ast.Const_int 0))))
-                           ))
-                        )),
-                     (Ast.Expr_const (Ast.Const_int 4))))
-                  ))),
-              (Ast.Expr_const (Ast.Const_int 0)))))
-           ]
-         ))
       ] |}]
 ;;

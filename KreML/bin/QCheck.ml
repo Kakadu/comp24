@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Kreml_lib.Ast
 open Kreml_lib.Parser
@@ -127,20 +128,15 @@ let structure_item =
 
 let structure = list_size (int_range 1 structure_decls_limit) structure_item
 
-let check_ast_component ~parser ~to_code ~to_ast expected =
+let check_ast_component ~parser ~to_code ~ast_printer expected =
   let code = to_code expected in
   match Angstrom.parse_string ~consume:Angstrom.Consume.All parser code with
   | Ok actual when expected = actual -> true
-  | Ok actual ->
-    print_endline (to_code actual);
-    print_endline (to_ast actual);
-    print_endline (to_code expected);
-    print_endline (to_ast expected);
+  | Ok _ ->
+    print_endline "parsing succeeded";
     false
   | Error _ ->
-    print_endline "parsing errpr";
-    print_endline (to_ast expected);
-    print_endline (to_code expected);
+    print_endline (ast_printer expected);
     false
 ;;
 
@@ -168,7 +164,7 @@ let check_pattern =
     check_ast_component
       ~parser:Kreml_lib.Parser.typed_pattern
       ~to_code:Kreml_lib.Ast_printer.pattern_to_code
-      ~to_ast:(Format.asprintf "%a" pp_pattern)
+      ~ast_printer:show_pattern
   in
   QCheck.Test.make
     arbitrary_pattern
@@ -207,7 +203,7 @@ let check_expr =
     check_ast_component
       ~parser:Kreml_lib.Parser.expr
       ~to_code:Kreml_lib.Ast_printer.expr_to_code
-      ~to_ast:(Format.asprintf "%a" pp_expr)
+      ~ast_printer:show_expr
   in
   QCheck.Test.make
     arbitrary_expr
@@ -228,7 +224,7 @@ let check_structure =
     check_ast_component
       ~parser:Kreml_lib.Parser.program
       ~to_code:Kreml_lib.Ast_printer.structure_to_code
-      ~to_ast:(Format.asprintf "%a" pp_structure)
+      ~ast_printer:show_structure
   in
   QCheck.Test.make
     arbitary_structure

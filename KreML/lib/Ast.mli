@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (** Abstract syntax tree for KreML and helper functions*)
 
@@ -65,7 +66,7 @@ type expr =
         let rec? x1 = expr1 in expr2
       ]} *)
   | Expr_ite of expr * expr * expr
-  (** {[
+   (** {[
         if cond then expr1 else expr2
       ]}*)
   | Expr_fun of pattern * expr

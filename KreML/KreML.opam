@@ -2,9 +2,9 @@
 opam-version: "2.0"
 version: "0.1"
 synopsis: "A KreML compiler"
-maintainer: ["oveeernight"]
-authors: ["oveeernight"]
-license: ["LGPL-2.1-or-later" "WITH" "OCaml-LGPL-linking-exception"]
+maintainer: ["Roman Pozharskiy"]
+authors: ["Roman Pozharskiy"]
+license: "LGPL-3.0-or-later"
 homepage: "https://github.com/oveeernight/comp24"
 bug-reports: "https://github.com/oveeernight/comp24/issues"
 depends: [

@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Stdlib.Format
 open Ast
@@ -74,9 +75,9 @@ let rec pp_expr ppf = function
   | Expr_const (Const_int i) -> fprintf ppf "%i" i
   | Expr_cons (x, xs) -> fprintf ppf "@[<2>(%a)::(%a) @]" pp_expr x pp_expr xs
   | Expr_fun ((Pat_var _ as f), arg) ->
-    fprintf ppf "@[<2>%a@ %a@ %a@ %a @]" kwd "fun" pp_pat f kwd "->" pp_expr arg
+    fprintf ppf "@[<2>(%a@ %a@ %a@ %a)@]" kwd "fun" pp_pat f kwd "->" pp_expr arg
   | Expr_fun (f, arg) ->
-    fprintf ppf "@[<2> (%a@ (%a)@ %a@ %a) @]" kwd "fun" pp_pat f kwd "->" pp_expr arg
+    fprintf ppf "@[<2>(%a@ (%a)@ %a@ %a) @]" kwd "fun" pp_pat f kwd "->" pp_expr arg
   | Expr_tuple (fst, snd, rest) ->
     pp_tuple
       ppf
@@ -88,7 +89,7 @@ let rec pp_expr ppf = function
     fprintf ppf "@[<2>(if %a then %a @, else %a) @]" pp_expr c pp_expr t pp_expr e
   | Expr_app
       ((Expr_var _ as f), ((Expr_nil | Expr_unit | Expr_var _ | Expr_const _) as arg)) ->
-    fprintf ppf "@[<2>%a %a@]" pp_expr f pp_expr arg
+    fprintf ppf "@[<2>%a @ %a@]" pp_expr f pp_expr arg
   | Expr_app (f, ((Expr_nil | Expr_unit | Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>(%a) %a@]" pp_expr f pp_expr arg
   | Expr_app ((Expr_var _ as f), arg) -> fprintf ppf "@[%a (%a) @]" pp_expr f pp_expr arg
@@ -107,10 +108,10 @@ let rec pp_expr ppf = function
 let pp_structure ppf s =
   let item_printer = function
     | Str_value (NonRecursive, [ (id, e) ]) ->
-      fprintf ppf "@[let %a@, = %a@, @]" pp_pat id pp_expr e
+      fprintf ppf "@[let %a@, = @ %a@]@." pp_pat id pp_expr e
     | Str_value (Recursive, (p, e) :: rest) ->
-      fprintf ppf "@[let rec %a@  =@, %a@,@]" pp_pat p pp_expr e;
-      List.iter (fun (p, e) -> fprintf ppf "@[@ and %a = %a @,@]" pp_pat p pp_expr e) rest
+      fprintf ppf "@[let rec %a@  = @ %a@]@." pp_pat p pp_expr e;
+      List.iter (fun (p, e) -> fprintf ppf "@[@, and %a = %a@]@." pp_pat p pp_expr e) rest
     | _ -> Utils.unreachable ()
   in
   List.iter item_printer s

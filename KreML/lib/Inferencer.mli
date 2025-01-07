@@ -1,5 +1,6 @@
-(** Copyright 2024-2025 KreML Compiler
-    * SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast
 
@@ -76,3 +77,4 @@ end
 
 val infer_expr : TypeEnv.t -> expr -> (Subst.t * typ) R.t
 val infer_program : structure -> (Subst.t * TypeEnv.t) R.t
+val run : structure -> (TypeEnv.t, error) Result.t
