@@ -126,7 +126,13 @@ let structure_item =
     Str_value (rf, decls) |> return
 ;;
 
+
 let structure = list_size (int_range 1 structure_decls_limit) structure_item
+
+let rand = match Array.length Sys.argv with
+| 0 -> Random.State.make [| Sys.argv.(0) |> int_of_string |]
+| _ -> Random.State.make_self_init()
+;;
 
 let check_ast_component ~parser ~to_code ~ast_printer expected =
   let code = to_code expected in
@@ -173,7 +179,7 @@ let check_pattern =
     ~name:"pattern = parse @@ to_code @@ pattern"
 ;;
 
-QCheck_runner.run_tests [ check_pattern ]
+QCheck_runner.run_tests ~rand [ check_pattern ]
 
 let arbitrary_expr =
   let open QCheck.Iter in
@@ -212,7 +218,7 @@ let check_expr =
     ~name:"expr = parse @@ to code @@ expr"
 ;;
 
-QCheck_runner.run_tests [ check_expr ]
+QCheck_runner.run_tests ~rand [ check_expr ]
 
 let arbitary_structure =
   let print = Kreml_lib.Ast_printer.structure_to_code in
@@ -233,4 +239,4 @@ let check_structure =
     ~name:"structure = parse @@ pp @@ structure"
 ;;
 
-QCheck_runner.run_tests [ check_structure ]
+QCheck_runner.run_tests ~rand [ check_structure ]

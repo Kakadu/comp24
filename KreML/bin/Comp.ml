@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Kreml_lib.Parser
 open Kreml_lib.Inferencer
 
 let () =

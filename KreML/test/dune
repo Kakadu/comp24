@@ -27,21 +27,21 @@
 (cram
  (deps
   %{bin:parser}
-  manytests/do_not_type/001.ml
-  manytests/do_not_type/002if.ml
-  manytests/do_not_type/003occurs.ml
-  manytests/do_not_type/004let_poly.ml
-  manytests/do_not_type/015tuples.ml
-  manytests/typed/001fac.ml
-  manytests/typed/002fac.ml
-  manytests/typed/003fib.ml
-  manytests/typed/004manyargs.ml
-  manytests/typed/005fix.ml
-  manytests/typed/006partial.ml
-  manytests/typed/006partial2.ml
-  manytests/typed/006partial3.ml
-  manytests/typed/007order.ml
-  manytests/typed/008ascription.ml
-  manytests/typed/009let_poly.ml
-  manytests/typed/015tuples.ml
-  manytests/typed/016lists.ml))
+  %{project_root}/do_not_type/001.ml
+  %{project_root}/do_not_type/002if.ml
+  %{project_root}/do_not_type/003occurs.ml
+  %{project_root}/do_not_type/004let_poly.ml
+  %{project_root}/do_not_type/015tuples.ml
+  %{project_root}/typed/001fac.ml
+  %{project_root}/typed/002fac.ml
+  %{project_root}/typed/003fib.ml
+  %{project_root}/typed/004manyargs.ml
+  %{project_root}/typed/005fix.ml
+  %{project_root}/typed/006partial.ml
+  %{project_root}/typed/006partial2.ml
+  %{project_root}/typed/006partial3.ml
+  %{project_root}/typed/007order.ml
+  %{project_root}/typed/008ascription.ml
+  %{project_root}/typed/009let_poly.ml
+  %{project_root}/typed/015tuples.ml
+  %{project_root}/typed/016lists.ml))
