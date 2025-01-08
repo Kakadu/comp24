@@ -48,8 +48,7 @@ let rec pp_cexpr fmt = function
 
 and pp_aexpr fmt = function
   | ALet (id, cexpr, aexpr) ->
-    (* fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr *)
-    fprintf fmt "@[<hov 2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
+    fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
   | ACExpr cexpr -> pp_cexpr fmt cexpr
 ;;
 

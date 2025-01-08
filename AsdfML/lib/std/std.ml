@@ -86,11 +86,12 @@ let runtime : std list =
   ; { name = "`list_field"; typ = arg2; extern = "ml_list_field"; arity = 0 }
   ; { name = "`list_hd"; typ = arg2; extern = "ml_list_hd"; arity = 0 }
   ; { name = "`list_tl"; typ = arg2; extern = "ml_list_tl"; arity = 0 }
+  ; { name = "`create_closure"; typ = arg2; extern = "create_closure"; arity = 0 }
   ; { name = "(TODO: check cons pattern)"; typ = arg2; extern = "TODO:remove"; arity = 0 }
   ]
   |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
 
 let lookup_extern name =
-  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> x.extern)
+  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> (x.extern, x.arity))
 ;;
