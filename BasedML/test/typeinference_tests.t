@@ -2,23 +2,33 @@
   > let (-) = fun (a:int) (b:int)->  a;;
   > let (+) = fun (a:int) (b:int)->  a;;
   > 
-  > let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
+  > let fibo = fun n ->
+  >  let rec fiboCPS = fun n acc -> match n with
   >  | 0 -> acc 0
   >  | 1 -> acc 1
   >  | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
   >    in fiboCPS n (fun x -> x)
+  > ;;
+  > let __ = 5
+  > let __ = 5
+  > let ___ = 1
+  > let ___ = []
+  > let six = __ + 1
   > EOF
   [""( * )"": (int -> (int -> int)),
    ""( + )"": (int -> (int -> int)),
    ""( - )"": (int -> (int -> int)),
    ""( / )"": (int -> (int -> int)),
-   ""( :: )"": ('_p27 -> (('_p27 list) -> ('_p27 list))),
-   ""( < )"": ('_p28 -> ('_p28 -> bool)),
-   ""( <= )"": ('_p29 -> ('_p29 -> bool)),
-   ""( <> )"": ('_p2a -> ('_p2a -> bool)),
-   ""( = )"": ('_p2b -> ('_p2b -> bool)),
-   ""( > )"": ('_p2c -> ('_p2c -> bool)),
-   ""( >= )"": ('_p2d -> ('_p2d -> bool)),
+   ""( :: )"": ('_p2f -> (('_p2f list) -> ('_p2f list))),
+   ""( < )"": ('_p30 -> ('_p30 -> bool)),
+   ""( <= )"": ('_p31 -> ('_p31 -> bool)),
+   ""( <> )"": ('_p32 -> ('_p32 -> bool)),
+   ""( = )"": ('_p33 -> ('_p33 -> bool)),
+   ""( > )"": ('_p34 -> ('_p34 -> bool)),
+   ""( >= )"": ('_p35 -> ('_p35 -> bool)),
+   ""__"": int,
+   ""___"": ('_p36 list),
    ""fibo"": (int -> int),
+   ""six"": int,
    ]
 
