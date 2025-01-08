@@ -13,19 +13,19 @@ let emit ?(comm = "") instr =
          "%a%s"
          pp_instr
          i
-         (if String.(comm <> "") then Format.sprintf " # %s\n" comm else "\n")))
+         (if String.(comm <> "") then Format.sprintf "  # %s\n" comm else "\n")))
 ;;
 
 let emit_str s = Queue.enqueue code s
 
 let emit_store reg =
-  let stack_loc = (Offset (fp, !stack_pos)) in
+  let stack_loc = Offset (fp, !stack_pos) in
   emit sd reg stack_loc;
   stack_pos := !stack_pos - 8;
   stack_loc
 ;;
-(* let emit_load value = () ;; *)
 
+(* let emit_load value = () ;; *)
 
 let emit_fn_decl name (args : Ast.id list) =
   if List.length args > 8
@@ -40,14 +40,35 @@ let emit_fn_decl name (args : Ast.id list) =
     emit addi sp sp (-stack_size);
     emit sd ra (Offset (sp, stack_size - 8));
     emit sd fp (Offset (sp, stack_size - 16));
-    emit addi fp sp stack_size)
+    emit addi fp sp (stack_size - 24) ~comm:"Prologue ends")
 ;;
 
 let emit_fn_ret () =
-  emit ld fp (Offset (sp, stack_size - 16));
+  emit ld fp (Offset (sp, stack_size - 16)) ~comm:"Epilogue starts";
   emit ld ra (Offset (sp, stack_size - 8));
   emit addi sp sp stack_size;
   emit ret
+;;
+
+let emit_load dst = function
+  | AsmInt n -> emit li dst n
+  | AsmFn n -> emit la dst n
+  | AsmReg r ->
+    (match r with
+     | SP -> emit mv dst sp
+     | Reg _ -> if not (equal_reg r dst) then emit mv dst r
+     | Offset _ | Temp _ -> emit ld dst r)
+;;
+
+let emit_fn_call name (args : asm_value list) =
+  if List.length args > 8
+  then failwith "TODO: stack arguments"
+  else (
+    (* Utils.dbg "emit_fn_call %s(%a)\n" name (Format.pp_print_list pp_asm_value) args; *)
+    List.zip_exn (List.take arg_regs (List.length args)) args
+    |> List.iter ~f:(fun (reg, arg) -> emit_load reg arg);
+    emit call name;
+    a0 (* emit_store a0 *))
 ;;
 
 (* let extern =
