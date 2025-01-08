@@ -129,7 +129,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app ((Ast.Expr_var "fac"),
                       (Ast.Expr_const (Ast.Const_int 4))))
@@ -182,7 +182,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app (
                       (Ast.Expr_app ((Ast.Expr_var "fac_cps"),
@@ -280,7 +280,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app (
                       (Ast.Expr_app (
@@ -290,7 +290,7 @@
                       (Ast.Expr_const (Ast.Const_int 4))))
                    ))),
                (Ast.Expr_let (Ast.NonRecursive,
-                  (Ast.Pat_unit,
+                  ((Ast.Pat_const Ast.Const_unit),
                    (Ast.Expr_app ((Ast.Expr_var "print_int"),
                       (Ast.Expr_app ((Ast.Expr_var "fib"),
                          (Ast.Expr_const (Ast.Const_int 4))))
@@ -472,7 +472,7 @@
                       (Ast.Expr_const (Ast.Const_int 100000000)))),
                    (Ast.Expr_const (Ast.Const_int 1000000000))))),
                (Ast.Expr_let (Ast.NonRecursive,
-                  (Ast.Pat_unit,
+                  ((Ast.Pat_const Ast.Const_unit),
                    (Ast.Expr_app ((Ast.Expr_var "print_int"),
                       (Ast.Expr_var "rez")))),
                   (Ast.Expr_let (Ast.NonRecursive,
@@ -540,7 +540,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app (
                       (Ast.Expr_app ((Ast.Expr_var "fix"), (Ast.Expr_var "fac")
@@ -605,7 +605,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app ((Ast.Expr_var "foo"),
                       (Ast.Expr_const (Ast.Const_int 11))))
@@ -634,15 +634,15 @@
               (Ast.Expr_fun ((Ast.Pat_var "b"),
                  (Ast.Expr_fun ((Ast.Pat_var "c"),
                     (Ast.Expr_let (Ast.NonRecursive,
-                       (Ast.Pat_unit,
+                       ((Ast.Pat_const Ast.Const_unit),
                         (Ast.Expr_app ((Ast.Expr_var "print_int"),
                            (Ast.Expr_var "a")))),
                        (Ast.Expr_let (Ast.NonRecursive,
-                          (Ast.Pat_unit,
+                          ((Ast.Pat_const Ast.Const_unit),
                            (Ast.Expr_app ((Ast.Expr_var "print_int"),
                               (Ast.Expr_var "b")))),
                           (Ast.Expr_let (Ast.NonRecursive,
-                             (Ast.Pat_unit,
+                             ((Ast.Pat_const Ast.Const_unit),
                               (Ast.Expr_app ((Ast.Expr_var "print_int"),
                                  (Ast.Expr_var "c")))),
                              (Ast.Expr_app (
@@ -676,7 +676,7 @@
                       (Ast.Expr_app ((Ast.Expr_var "foo"),
                          (Ast.Expr_const (Ast.Const_int 3))))),
                      (Ast.Expr_let (Ast.NonRecursive,
-                        (Ast.Pat_unit,
+                        ((Ast.Pat_const Ast.Const_unit),
                          (Ast.Expr_app ((Ast.Expr_var "print_int"),
                             (Ast.Expr_var "foo")))),
                         (Ast.Expr_const (Ast.Const_int 0))))
@@ -698,12 +698,12 @@
          [((Ast.Pat_var "foo"),
            (Ast.Expr_fun ((Ast.Pat_var "a"),
               (Ast.Expr_let (Ast.NonRecursive,
-                 (Ast.Pat_unit,
+                 ((Ast.Pat_const Ast.Const_unit),
                   (Ast.Expr_app ((Ast.Expr_var "print_int"), (Ast.Expr_var "a")
                      ))),
                  (Ast.Expr_fun ((Ast.Pat_var "b"),
                     (Ast.Expr_let (Ast.NonRecursive,
-                       (Ast.Pat_unit,
+                       ((Ast.Pat_const Ast.Const_unit),
                         (Ast.Expr_app ((Ast.Expr_var "print_int"),
                            (Ast.Expr_var "b")))),
                        (Ast.Expr_fun ((Ast.Pat_var "c"),
@@ -719,7 +719,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app (
                    (Ast.Expr_app (
                       (Ast.Expr_app ((Ast.Expr_var "foo"),
@@ -751,17 +751,17 @@
    
    [(Ast.Str_value (Ast.NonRecursive,
          [((Ast.Pat_var "_start"),
-           (Ast.Expr_fun (Ast.Pat_unit,
-              (Ast.Expr_fun (Ast.Pat_unit,
+           (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
+              (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                  (Ast.Expr_fun ((Ast.Pat_var "a"),
-                    (Ast.Expr_fun (Ast.Pat_unit,
+                    (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                        (Ast.Expr_fun ((Ast.Pat_var "b"),
                           (Ast.Expr_fun ((Ast.Pat_var "_c"),
-                             (Ast.Expr_fun (Ast.Pat_unit,
+                             (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                                 (Ast.Expr_fun ((Ast.Pat_var "d"),
                                    (Ast.Expr_fun ((Ast.Pat_var "__"),
                                       (Ast.Expr_let (Ast.NonRecursive,
-                                         (Ast.Pat_unit,
+                                         ((Ast.Pat_const Ast.Const_unit),
                                           (Ast.Expr_app (
                                              (Ast.Expr_var "print_int"),
                                              (Ast.Expr_app (
@@ -771,7 +771,7 @@
                                                 (Ast.Expr_var "b")))
                                              ))),
                                          (Ast.Expr_let (Ast.NonRecursive,
-                                            (Ast.Pat_unit,
+                                            ((Ast.Pat_const Ast.Const_unit),
                                              (Ast.Expr_app (
                                                 (Ast.Expr_var "print_int"),
                                                 (Ast.Expr_var "__")))),
@@ -874,7 +874,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app (
                       (Ast.Expr_app (
@@ -1111,13 +1111,13 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app ((Ast.Expr_var "print_int"),
                    (Ast.Expr_app ((Ast.Expr_var "modd"),
                       (Ast.Expr_const (Ast.Const_int 1))))
                    ))),
                (Ast.Expr_let (Ast.NonRecursive,
-                  (Ast.Pat_unit,
+                  ((Ast.Pat_const Ast.Const_unit),
                    (Ast.Expr_app ((Ast.Expr_var "print_int"),
                       (Ast.Expr_app ((Ast.Expr_var "meven"),
                          (Ast.Expr_const (Ast.Const_int 2))))
@@ -1127,13 +1127,13 @@
                          (Ast.Pat_var "odd"), [])),
                       (Ast.Expr_var "tie")),
                      (Ast.Expr_let (Ast.NonRecursive,
-                        (Ast.Pat_unit,
+                        ((Ast.Pat_const Ast.Const_unit),
                          (Ast.Expr_app ((Ast.Expr_var "print_int"),
                             (Ast.Expr_app ((Ast.Expr_var "odd"),
                                (Ast.Expr_const (Ast.Const_int 3))))
                             ))),
                         (Ast.Expr_let (Ast.NonRecursive,
-                           (Ast.Pat_unit,
+                           ((Ast.Pat_const Ast.Const_unit),
                             (Ast.Expr_app ((Ast.Expr_var "print_int"),
                                (Ast.Expr_app ((Ast.Expr_var "even"),
                                   (Ast.Expr_const (Ast.Const_int 4))))
@@ -1363,10 +1363,10 @@
             (Ast.Expr_fun ((Ast.Pat_var "f"),
                (Ast.Expr_fun ((Ast.Pat_var "xs"),
                   (Ast.Expr_match ((Ast.Expr_var "xs"),
-                     [(Ast.Pat_nil, Ast.Expr_unit);
+                     [(Ast.Pat_nil, (Ast.Expr_const Ast.Const_unit));
                        ((Ast.Pat_cons ((Ast.Pat_var "h"), (Ast.Pat_var "tl"))),
                         (Ast.Expr_let (Ast.NonRecursive,
-                           (Ast.Pat_unit,
+                           ((Ast.Pat_const Ast.Const_unit),
                             (Ast.Expr_app ((Ast.Expr_var "f"),
                                (Ast.Expr_var "h")))),
                            (Ast.Expr_app (
@@ -1412,7 +1412,7 @@
        (Ast.Str_value (Ast.NonRecursive,
           [((Ast.Pat_var "main"),
             (Ast.Expr_let (Ast.NonRecursive,
-               (Ast.Pat_unit,
+               ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_app (
                    (Ast.Expr_app ((Ast.Expr_var "iter"),
                       (Ast.Expr_var "print_int"))),
@@ -1424,7 +1424,7 @@
                       ))
                    ))),
                (Ast.Expr_let (Ast.NonRecursive,
-                  (Ast.Pat_unit,
+                  ((Ast.Pat_const Ast.Const_unit),
                    (Ast.Expr_app ((Ast.Expr_var "print_int"),
                       (Ast.Expr_app ((Ast.Expr_var "length"),
                          (Ast.Expr_app (

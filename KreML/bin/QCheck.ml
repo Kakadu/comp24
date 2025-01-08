@@ -26,7 +26,11 @@ let ident =
 ;;
 
 let const =
-  frequency [ 4, map (fun i -> Const_int i) nat; 1, map (fun b -> Const_bool b) bool ]
+  frequency
+    [ 4, map (fun i -> Const_int i) nat
+    ; 1, map (fun b -> Const_bool b) bool
+    ; 1, return Const_unit
+    ]
 ;;
 
 let tuple e =
@@ -67,7 +71,6 @@ let pattern =
       frequency
         [ 5, map (fun id -> Pat_var id) ident
         ; 1, return Pat_nil
-        ; 1, return Pat_unit
         ; 1, return Pat_wildcard
         ; 2, map (fun c -> Pat_const c) const
         ]
@@ -88,7 +91,6 @@ let expr =
       frequency
         [ 2, map (fun c -> Expr_const c) const
         ; 2, map (fun id -> Expr_var id) ident
-        ; 1, return Expr_unit
         ; 1, return Expr_nil
         ]
     | _ ->
@@ -149,7 +151,7 @@ let check_ast_component ~parser ~to_code ~ast_printer expected =
 let arbitrary_pattern =
   let open QCheck.Iter in
   let rec shrink = function
-    | Pat_wildcard | Pat_unit | Pat_nil | Pat_const _ | Pat_var _ -> empty
+    | Pat_wildcard | Pat_nil | Pat_const _ | Pat_var _ -> empty
     | Pat_cons (x, xs) ->
       of_list [ x; xs ]
       <+> (shrink x >|= fun x' -> Pat_cons (x', xs))
@@ -184,7 +186,7 @@ QCheck_runner.run_tests ~rand [ check_pattern ]
 let arbitrary_expr =
   let open QCheck.Iter in
   let rec shrink = function
-    | Expr_unit | Expr_nil | Expr_const _ | Expr_var _ -> empty
+    | Expr_nil | Expr_const _ | Expr_var _ -> empty
     | Expr_cons (x, xs) ->
       of_list [ x; xs ]
       <+> (shrink x >|= fun x' -> Expr_cons (x', xs))

@@ -60,8 +60,6 @@ let number =
      value |> int_of_string |> ( * ) sign |> return
 ;;
 
-(* let number = number <|> (ws *> char '-' *> ws *> number >>= fun n -> return (-n)) *)
-
 let stoken s = ws *> string s
 let parens p = ws *> stoken "(" *> p <* stoken ")"
 let braces p = ws *> char '[' *> p <* char ']'
@@ -107,6 +105,7 @@ let const =
   >>| (fun n -> Const_int n)
   <|> keyword "true" *> (Const_bool true |> return)
   <|> keyword "false" *> (Const_bool false |> return)
+  <|> parens ws *> (Const_unit |> return)
 ;;
 
 let tuple sep p =
@@ -141,18 +140,15 @@ let typ =
 let typed_pattern =
   fix (fun self ->
     let atom =
-      ws *> (parens ws >>| fun _ -> Pat_unit) (* unit *)
-      <|> (braces ws >>| fun _ -> pnil) (* nil *)
-      <|> parens self (* parens *)
-      <|> (const >>| pconst) (* const *)
-      <|> (ident >>| pvar) (* identifier *)
+      braces ws
+      >>| (fun _ -> pnil)
+      <|> parens self
+      <|> (const >>| pconst)
+      <|> (ident >>| pvar)
       <|> keyword "_" *> return Pat_wildcard
     in
-    (* wildcard *)
     let pattern = chainr1 atom (stoken "::" *> return pcons) in
-    (* cons *)
     let pattern =
-      (* try tuple *)
       tuple (stoken ",") pattern
       >>| (fun (fst, snd, rest) -> ptuple fst snd rest)
       <|> pattern
@@ -160,7 +156,6 @@ let typed_pattern =
     let pattern =
       pattern
       >>= (fun p -> stoken ":" *> typ >>= fun t -> Pat_constrained (p, t) |> return)
-      (* try type *)
       <|> pattern
     in
     pattern <* ws)
@@ -173,18 +168,16 @@ let typed_pattern =
 let untyped_pattern =
   fix (fun self ->
     let atom =
-      ws *> (parens ws >>| fun _ -> Pat_unit) (* unit *)
-      <|> (braces ws >>| fun _ -> pnil) (* nil *)
-      <|> parens self (* parens *)
-      <|> (const >>| pconst) (* const *)
-      <|> (ident >>| pvar) (* identifier *)
+      braces ws
+      >>| (fun _ -> pnil)
+      <|> parens self
+      <|> (const >>| pconst)
+      <|> (ident >>| pvar)
       <|> keyword "_" *> return Pat_wildcard
     in
-    (* wildcard *)
     let pattern = chainr1 atom (stoken "::" *> return pcons) in
-    (* cons *)
     tuple (stoken ",") pattern
-    >>| (fun (fst, snd, rest) -> ptuple fst snd rest) (* try tuple *)
+    >>| (fun (fst, snd, rest) -> ptuple fst snd rest)
     <|> pattern
     <* ws)
 ;;
@@ -197,8 +190,7 @@ let bin_expr op_string op_expr = stoken op_string >>| fun _ -> op_expr
 let op_list_to_parser l = List.map (fun (str, expr_op) -> bin_expr str expr_op) l
 
 let prio =
-  [ (* [ "", fun f a -> eapp f [a] ]; *)
-    [ "*", mul; "/", div ]
+  [ [ "*", mul; "/", div ]
   ; [ "+", add; "-", sub ]
   ; [ "==", eqq; "=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le ]
   ; [ "&&", eland ]
@@ -302,18 +294,12 @@ let expr =
   fix (fun self ->
     let ident = ident >>| fun i -> Expr_var i in
     let const = const >>| fun c -> Expr_const c in
-    let unit = parens ws >>| fun _ -> Expr_unit in
     let list = elist self in
     let atom =
-      choice [ ident; const; prefix_ops; unit; list; anonymous_fun self; parens self ]
+      choice [ ident; const; prefix_ops; list; anonymous_fun self; parens self ]
     in
     let expr = chainl1 atom (app_sep *> return (fun f a -> eapp f [ a ])) in
-    (* lift2 (fun f args -> eapp f args)
-       atom
-       (many (app_sep *> atom)) in *)
     let expr = expr_with_ops expr in
-    (* let expr =
-       chainl1 expr (app_sep  *> return (fun f a -> eapp f [ a ])) in *)
     let expr = chainr1 expr (stoken "::" *> return econs) in
     let expr =
       tuple (stoken ",") expr >>| (fun (fst, snd, rest) -> etuple fst snd rest) <|> expr

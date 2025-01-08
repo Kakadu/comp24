@@ -279,7 +279,7 @@ module TypeEnv = struct
       let types = tfst :: tsnd :: trest in
       List.fold2_exn pats types ~init:env ~f:(fun acc p t -> generalize_pattern p t acc)
     | Pat_constrained (p, typ), _ -> generalize_pattern p typ env
-    | Pat_unit, _ -> env
+    | Pat_const _, _ -> env
     | _ ->
       Utils.internalfail
         (Stdlib.Format.asprintf
@@ -308,7 +308,7 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t =
     R.return (TypeEnv.apply uni env, Subst.apply type_infered uni)
   | Pat_const (Const_bool _) -> R.return (env, Typ_bool)
   | Pat_const (Const_int _) -> R.return (env, Typ_int)
-  | Pat_unit -> R.return (env, Typ_unit)
+  | Pat_const Const_unit -> R.return (env, Typ_unit)
   | Pat_wildcard ->
     let* fr = fresh_var () in
     R.return (env, fr)
@@ -353,9 +353,9 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* s_uni = Subst.unify_pair typ_infered typ_constraint in
       let* final_subst = Subst.compose s_uni s in
       R.return (final_subst, Subst.apply typ_constraint final_subst)
-    | Expr_unit -> R.return (Subst.empty, Typ_unit)
     | Expr_const (Const_bool _) -> R.return (Subst.empty, Typ_bool)
     | Expr_const (Const_int _) -> R.return (Subst.empty, Typ_int)
+    | Expr_const Const_unit -> R.return (Subst.empty, Typ_unit)
     | Expr_var "*" | Expr_var "/" | Expr_var "+" | Expr_var "-" ->
       (Subst.empty, Typ_fun (Typ_int, Typ_fun (Typ_int, Typ_int))) |> R.return
     | Expr_var ">=" | Expr_var ">" | Expr_var "<=" | Expr_var "<" | Expr_var "=" ->

@@ -1,4 +1,4 @@
-(* Copyright 2024-2025 KreML Compiler *)
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -631,17 +631,17 @@ let%expect_test "typed" =
     {|
     [(Ast.Str_value (Ast.NonRecursive,
         [((Ast.Pat_var "_start"),
-          (Ast.Expr_fun (Ast.Pat_unit,
-             (Ast.Expr_fun (Ast.Pat_unit,
+          (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
+             (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                 (Ast.Expr_fun ((Ast.Pat_var "a"),
-                   (Ast.Expr_fun (Ast.Pat_unit,
+                   (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                       (Ast.Expr_fun ((Ast.Pat_var "b"),
                          (Ast.Expr_fun ((Ast.Pat_var "_c"),
-                            (Ast.Expr_fun (Ast.Pat_unit,
+                            (Ast.Expr_fun ((Ast.Pat_const Ast.Const_unit),
                                (Ast.Expr_fun ((Ast.Pat_var "d"),
                                   (Ast.Expr_fun ((Ast.Pat_var "__"),
                                      (Ast.Expr_let (Ast.NonRecursive,
-                                        (Ast.Pat_unit,
+                                        ((Ast.Pat_const Ast.Const_unit),
                                          (Ast.Expr_app (
                                             (Ast.Expr_var "print_int"),
                                             (Ast.Expr_app (
@@ -650,7 +650,7 @@ let%expect_test "typed" =
                                                (Ast.Expr_var "b")))
                                             ))),
                                         (Ast.Expr_let (Ast.NonRecursive,
-                                           (Ast.Pat_unit,
+                                           ((Ast.Pat_const Ast.Const_unit),
                                             (Ast.Expr_app (
                                                (Ast.Expr_var "print_int"),
                                                (Ast.Expr_var "__")))),

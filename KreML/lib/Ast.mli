@@ -24,6 +24,7 @@ val tfun : typ -> typ -> typ
 type const =
   | Const_int of int (** [Const_int] represents integer constants like 42, 1337 *)
   | Const_bool of bool (** [Const_bool] represents boolean constants {true, false} *)
+  | Const_unit (** Unit *)
 [@@deriving show]
 
 type pattern =
@@ -39,7 +40,6 @@ type pattern =
   | Pat_wildcard (** [Pat_wildcard] represents a _ pattern*)
   | Pat_constrained of pattern * typ
   (** [Pat_constrained] represents typ constraint on pattern, like [(x: int, y: bool)]*)
-  | Pat_unit
 [@@deriving show]
 
 val pconst : const -> pattern
@@ -76,7 +76,6 @@ type expr =
   | Expr_app of expr * expr
   (** {[Expr_app(f, a, [b, c, d])]} corresponds to function application [f a b c d] *)
   | Expr_constrained of expr * typ
-  | Expr_unit
 [@@deriving show]
 
 and binding = pattern * expr [@@deriving show]

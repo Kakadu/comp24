@@ -20,6 +20,7 @@ let tfun l r = Typ_fun (l, r)
 type const =
   | Const_int of int
   | Const_bool of bool
+  | Const_unit
 [@@deriving show]
 
 type pattern =
@@ -30,7 +31,6 @@ type pattern =
   | Pat_tuple of pattern * pattern * pattern list
   | Pat_wildcard
   | Pat_constrained of pattern * typ
-  | Pat_unit
 [@@deriving show]
 
 let pconst c = Pat_const c
@@ -56,7 +56,6 @@ type expr =
   | Expr_match of expr * case list
   | Expr_app of expr * expr
   | Expr_constrained of expr * typ
-  | Expr_unit
 [@@deriving show]
 
 and binding = pattern * expr [@@deriving show]
