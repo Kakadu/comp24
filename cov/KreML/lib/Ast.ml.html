@@ -18,13 +18,13 @@
       <h2>85.19%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:5.38%"></span>
-      <span class="unvisited" style="top:6.45%"></span>
-      <span class="unvisited" style="top:19.35%"></span>
-      <span class="unvisited" style="top:45.16%"></span>
-      <span class="some-visited" style="bottom:33.33%"></span>
-      <span class="some-visited" style="bottom:32.26%"></span>
-      <span class="unvisited" style="bottom:16.13%"></span>
+      <span class="some-visited" style="top:5.43%"></span>
+      <span class="unvisited" style="top:6.52%"></span>
+      <span class="unvisited" style="top:19.57%"></span>
+      <span class="unvisited" style="top:45.65%"></span>
+      <span class="some-visited" style="bottom:33.70%"></span>
+      <span class="some-visited" style="bottom:32.61%"></span>
+      <span class="unvisited" style="bottom:16.30%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -53,13 +53,13 @@
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
-<a id="L31"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
@@ -89,27 +89,27 @@
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
-<a id="L61"></a><span > </span>
+<a id="L61"></a><span class="some-visited"> </span>
 <a id="L62"></a><span class="some-visited"> </span>
-<a id="L63"></a><span class="some-visited"> </span>
-<a id="L64"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span class="visited"> </span>
-<a id="L66"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
-<a id="L72"></a><span class="visited"> </span>
-<a id="L73"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span class="visited"> </span>
-<a id="L76"></a><span class="visited"> </span>
-<a id="L77"></a><span > </span>
-<a id="L78"></a><span class="unvisited"> </span>
-<a id="L79"></a><span class="visited"> </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span > </span>
 <a id="L80"></a><span > </span>
-<a id="L81"></a><span > </span>
+<a id="L81"></a><span class="visited"> </span>
 <a id="L82"></a><span class="visited"> </span>
 <a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span class="visited"> </span>
@@ -121,7 +121,6 @@
 <a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -218,7 +217,6 @@
 <a href="#L90">90</a>
 <a href="#L91">91</a>
 <a href="#L92">92</a>
-<a href="#L93">93</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
 
@@ -242,9 +240,10 @@ let tfun l r = <span data-count="0">T</span>yp_fun (l, r)
 <span data-count="368">t</span>ype const =
   | Const_int of in<span data-count="164">t</span>
   | Const_bool of boo<span data-count="20">l</span>
+  | Const_unit
 [@@deriving show]
 
-<span data-count="717">t</span>ype pattern =
+<span data-count="785">t</span>ype pattern =
   | Pat_const of const
   | Pat_var of ident
   | Pat_cons of pattern * pattern
@@ -252,10 +251,9 @@ let tfun l r = <span data-count="0">T</span>yp_fun (l, r)
   | Pat_tuple of pattern * pattern * <span data-count="90">p</span>attern lis<span data-count="54">t</span>
   | Pat_wildcard
   | Pat_constrained of pattern * typ
-  | Pat_unit
 [@@deriving show]
 
-let pconst c = <span data-count="68">P</span>at_const c
+let pconst c = <span data-count="142">P</span>at_const c
 let pvar v = <span data-count="5150">P</span>at_var v
 let pcons x xs = <span data-count="86">P</span>at_cons (x, xs)
 let pnil = Pat_nil
@@ -266,7 +264,7 @@ let ptuple a b rest = <span data-count="131">P</span>at_tuple (a, b, rest)
   | NonRecursive
 [@@deriving show]
 
-<span data-count="1988">t</span>ype expr =
+<span data-count="1990">t</span>ype expr =
   | Expr_const of const
   | Expr_var of ident
   | Expr_cons of expr * expr
@@ -278,7 +276,6 @@ let ptuple a b rest = <span data-count="131">P</span>at_tuple (a, b, rest)
   | Expr_match of expr * <span data-count="154">c</span>ase lis<span data-count="45">t</span>
   | Expr_app of expr * expr
   | Expr_constrained of expr * typ
-  | Expr_unit
 [@@deriving show]
 
 <span data-count="0">a</span>nd binding = <span data-count="218">p</span>attern * expr [@@deriving show]

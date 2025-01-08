@@ -94,7 +94,7 @@
       <span class="unvisited" style="bottom:29.26%"></span>
       <span class="unvisited" style="bottom:29.06%"></span>
       <span class="unvisited" style="bottom:28.86%"></span>
-      <span class="unvisited" style="bottom:28.66%"></span>
+      <span class="unvisited" style="bottom:28.26%"></span>
       <span class="unvisited" style="bottom:28.06%"></span>
       <span class="unvisited" style="bottom:27.66%"></span>
       <span class="unvisited" style="bottom:27.25%"></span>
@@ -508,9 +508,9 @@
 <a id="L353"></a><span class="unvisited"> </span>
 <a id="L354"></a><span class="unvisited"> </span>
 <a id="L355"></a><span class="unvisited"> </span>
-<a id="L356"></a><span class="unvisited"> </span>
+<a id="L356"></a><span class="visited"> </span>
 <a id="L357"></a><span class="visited"> </span>
-<a id="L358"></a><span class="visited"> </span>
+<a id="L358"></a><span class="unvisited"> </span>
 <a id="L359"></a><span class="unvisited"> </span>
 <a id="L360"></a><span > </span>
 <a id="L361"></a><span class="unvisited"> </span>
@@ -1437,7 +1437,7 @@ module TypeEnv = struct
       let types = tfst :: tsnd :: trest in
       List.fold2_exn pats types ~init:env ~f:(fun acc p t -&gt; <span data-count="0">g</span>eneralize_pattern p t acc)
     | <span data-count="0">P</span>at_constrained (p, typ), _ -&gt; generalize_pattern p typ env
-    | <span data-count="0">P</span>at_unit, _ -&gt; env
+    | <span data-count="0">P</span>at_const _, _ -&gt; env
     | <span data-count="0">_</span> -&gt;
       Utils.internalfail
         (Stdlib.Format.asprint<span data-count="0">f</span>
@@ -1466,7 +1466,7 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t =
     <span data-count="0">R</span>.return (TypeEnv.appl<span data-count="0">y</span> uni env, Subst.appl<span data-count="0">y</span> type_infered uni)
   | <span data-count="0">P</span>at_const (Const_bool _) -&gt; R.return (env, Typ_bool)
   | <span data-count="0">P</span>at_const (Const_int _) -&gt; R.return (env, Typ_int)
-  | <span data-count="0">P</span>at_unit -&gt; R.return (env, Typ_unit)
+  | <span data-count="0">P</span>at_const Const_unit -&gt; R.return (env, Typ_unit)
   | <span data-count="0">P</span>at_wildcard -&gt;
     let* fr = fresh_va<span data-count="0">r</span> () in
     <span data-count="0">R</span>.return (env, fr)
@@ -1511,9 +1511,9 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       <span data-count="0">l</span>et* s_uni = Subst.unify_pai<span data-count="0">r</span> typ_infered typ_constraint in
       <span data-count="0">l</span>et* final_subst = Subst.compos<span data-count="0">e</span> s_uni s in
       <span data-count="0">R</span>.return (final_subst, Subst.appl<span data-count="0">y</span> typ_constraint final_subst)
-    | <span data-count="0">E</span>xpr_unit -&gt; R.return (Subst.empty, Typ_unit)
     | <span data-count="2">E</span>xpr_const (Const_bool _) -&gt; R.return (Subst.empty, Typ_bool)
     | <span data-count="2">E</span>xpr_const (Const_int _) -&gt; R.return (Subst.empty, Typ_int)
+    | <span data-count="0">E</span>xpr_const Const_unit -&gt; R.return (Subst.empty, Typ_unit)
     | <span data-count="0">E</span>xpr_var "*" | <span data-count="0">E</span>xpr_var "/" | <span data-count="0">E</span>xpr_var "+" | <span data-count="0">E</span>xpr_var "-" -&gt;
       (Subst.empty, Typ_fun (Typ_int, Typ_fun (Typ_int, Typ_int))) |&gt; R.return
     | <span data-count="0">E</span>xpr_var "&gt;=" | <span data-count="0">E</span>xpr_var "&gt;" | <span data-count="0">E</span>xpr_var "&lt;=" | <span data-count="0">E</span>xpr_var "&lt;" | <span data-count="0">E</span>xpr_var "=" -&gt;
