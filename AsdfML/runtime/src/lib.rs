@@ -1,58 +1,58 @@
-macro_rules! make_int_binop {
+use env_logger;
+use log::LevelFilter;
+mod closure;
+pub use closure::*;
+
+/// Set up the logger with the default log level of `info`.
+/// This can be overridden by setting the `RUST_LOG` environment variable.
+#[no_mangle]
+pub extern "C" fn runtime_init() {
+    let _ = env_logger::Builder::new()
+        .filter_level(LevelFilter::Info)
+        .parse_default_env()
+        .try_init();
+}
+
+macro_rules! make_int_bin_op {
     ($name:ident, $op:tt) => {
         #[no_mangle]
-        pub extern "C" fn $name(lhs: i64, rhs: i64) -> i64 {
+        pub extern "C" fn $name(lhs: isize, rhs: isize) -> isize {
             lhs $op rhs
         }
     };
 }
 
-macro_rules! make_bool_binop {
+macro_rules! make_bool_bin_op {
     ($name:ident, $op:tt) => {
         #[no_mangle]
-        pub extern "C" fn $name(lhs: i64, rhs: i64) -> i64 {
-            (lhs $op rhs) as i64
+        pub extern "C" fn $name(lhs: isize, rhs: isize) -> isize {
+            (lhs $op rhs) as isize
         }
     };
 }
 
-make_int_binop!(ml_add, +);
-make_int_binop!(ml_sub, -);
-make_int_binop!(ml_mul, *);
+make_int_bin_op!(ml_add, +);
+make_int_bin_op!(ml_sub, -);
+make_int_bin_op!(ml_mul, *);
 #[no_mangle]
-pub extern "C" fn ml_div(lhs: i64, rhs: i64) -> i64 { lhs.checked_div(rhs).unwrap_or(0) }
+pub extern "C" fn ml_div(lhs: isize, rhs: isize) -> isize { lhs.checked_div(rhs).expect("Division by zero") }
 
-make_bool_binop!(ml_gt, >);
-make_bool_binop!(ml_lt, <);
-make_bool_binop!(ml_ge, >=);
-make_bool_binop!(ml_le, <=);
-make_bool_binop!(ml_eq, ==);
-make_bool_binop!(ml_ne, !=);
-make_bool_binop!(ml_and, &);
-make_bool_binop!(ml_or, |);
+make_bool_bin_op!(ml_gt, >);
+make_bool_bin_op!(ml_lt, <);
+make_bool_bin_op!(ml_ge, >=);
+make_bool_bin_op!(ml_le, <=);
+make_bool_bin_op!(ml_eq, ==);
+make_bool_bin_op!(ml_ne, !=);
+make_bool_bin_op!(ml_and, &);
+make_bool_bin_op!(ml_or, |);
 
-#[no_mangle]
 pub extern "C" fn print_int(int_ptr: usize) { unsafe { print!("{}", *(int_ptr as *const i64)) } }
 
-/*
 #[no_mangle]
-pub extern "C" fn ml_neg(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
+pub extern "C" fn ml_print_bool(b: isize) {
+    println!("{}", b != 0);
+}
 
 #[no_mangle]
-pub extern "C" fn ml_not(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-
-#[no_mangle]
-pub extern "C" fn ml_cons(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-
-#[no_mangle]
-pub extern "C" fn ml_tuple_field(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-
-#[no_mangle]
-pub extern "C" fn ml_list_field(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-
-#[no_mangle]
-pub extern "C" fn ml_list_hd(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-
-#[no_mangle]
-pub extern "C" fn ml_list_tl(lhs: u64, rhs: u64) -> u64 { lhs + rhs }
-*/
+pub extern "C" fn ml_neg(x: isize) -> isize { -x }
+pub extern "C" fn ml_not(x: isize) -> isize { !x }

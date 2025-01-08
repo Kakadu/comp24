@@ -3,6 +3,12 @@ type reg =
   | Reg of string
   | Offset of reg * int
   | Temp of int
+[@@deriving eq]
+
+type asm_value =
+  | AsmInt of int
+  | AsmFn of string
+  | AsmReg of reg
 
 let rec pp_reg ppf =
   let open Format in
@@ -11,6 +17,14 @@ let rec pp_reg ppf =
   | Reg src -> fprintf ppf "%s" src
   | Offset (r, n) -> fprintf ppf "%d(%a)" n pp_reg r
   | Temp n -> fprintf ppf "t%d" n
+;;
+
+let rec pp_asm_value ppf =
+  let open Format in
+  function
+  | AsmInt n -> fprintf ppf "%d" n
+  | AsmFn n -> fprintf ppf "%s" n
+  | AsmReg r -> pp_reg ppf r
 ;;
 
 type instr =
@@ -26,6 +40,8 @@ type instr =
   | Ld of reg * reg
   | Sd of reg * reg
   | Li of reg * int
+  | La of reg * string
+  | Mv of reg * reg
   (* *)
   | Beq of reg * reg * string
   | Blt of reg * reg * string
@@ -58,6 +74,8 @@ let pp_instr fmt =
   | Ld (dst, src) -> fprintf fmt "    ld %a,%a" pp_reg dst pp_reg src
   | Sd (dst, src) -> fprintf fmt "    sd %a,%a" pp_reg dst pp_reg src
   | Li (dst, n) -> fprintf fmt "    li %a,%d" pp_reg dst n
+  | La (dst, s) -> fprintf fmt "    la %a,%s" pp_reg dst s (* TODO: (l)la *)
+  | Mv (dst, src) -> fprintf fmt "    mv %a,%a" pp_reg dst pp_reg src
   (* *)
   | Beq (dst, src, where) -> fprintf fmt "    beq %a,%a,%s" pp_reg dst pp_reg src where
   | Blt (dst, src, where) -> fprintf fmt "    blt %a,%a,%s" pp_reg dst pp_reg src where
@@ -67,7 +85,7 @@ let pp_instr fmt =
   | ECall -> fprintf fmt "    ecall"
   | Ret -> fprintf fmt "    ret\n"
   (* *)
-  | Comment src -> fprintf fmt " # %s" src
+  | Comment src -> fprintf fmt "    # %s" src
 ;;
 
 let zero = Reg "zero"
@@ -81,6 +99,7 @@ let a0, a1, a2, a3, a4, a5, a6, a7 =
   Reg "a0", Reg "a1", Reg "a2", Reg "a3", Reg "a4", Reg "a5", Reg "a6", Reg "a7"
 ;;
 
+let arg_regs = [ a0; a1; a2; a3; a4; a5; a6; a7 ]
 let add k dst src1 src2 = k (Add (dst, src1, src2))
 let sub k dst src1 src2 = k (Sub (dst, src1, src2))
 let mul k dst src1 src2 = k (Mul (dst, src1, src2))
@@ -95,6 +114,8 @@ let or_ k dst src1 src2 = k (Or (dst, src1, src2))
 let ld k dst src = k (Ld (dst, src))
 let sd k src dst = k (Sd (src, dst))
 let li k dst n = k (Li (dst, n))
+let la k dst n = k (La (dst, n))
+let mv k dst src = k (Mv (dst, src))
 
 (*  *)
 let beq k dst src1 where = k (Beq (dst, src1, where))
