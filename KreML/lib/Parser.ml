@@ -200,7 +200,7 @@ let prio =
   [ (* [ "", fun f a -> eapp f [a] ]; *)
     [ "*", mul; "/", div ]
   ; [ "+", add; "-", sub ]
-  ; [ "=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le ]
+  ; [ "==", eqq; "=", eqq; ">=", geq; ">", ge; "<=", leq; "<", le ]
   ; [ "&&", eland ]
   ; [ "||", elor ]
   ]

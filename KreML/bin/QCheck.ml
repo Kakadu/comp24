@@ -126,12 +126,12 @@ let structure_item =
     Str_value (rf, decls) |> return
 ;;
 
-
 let structure = list_size (int_range 1 structure_decls_limit) structure_item
 
-let rand = match Array.length Sys.argv with
-| 0 -> Random.State.make [| Sys.argv.(0) |> int_of_string |]
-| _ -> Random.State.make_self_init()
+let rand =
+  match Array.length Sys.argv with
+  | 0 -> Random.State.make [| Sys.argv.(0) |> int_of_string |]
+  | _ -> Random.State.make_self_init ()
 ;;
 
 let check_ast_component ~parser ~to_code ~ast_printer expected =
