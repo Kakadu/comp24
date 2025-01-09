@@ -1,7 +1,7 @@
 open Base
 open Machine
 
-let stack_size = 96 (* TODO: <- *)
+let stack_size = 8 * 32 (* TODO: <- *)
 let stack_pos = ref 0
 let code : string Queue.t = Queue.create ()
 
@@ -25,8 +25,6 @@ let emit_store reg =
   stack_loc
 ;;
 
-(* let emit_load value = () ;; *)
-
 let emit_fn_decl name (args : Ast.id list) =
   if List.length args > 8
   then failwith "TODO: stack arguments"
@@ -40,7 +38,12 @@ let emit_fn_decl name (args : Ast.id list) =
     emit addi sp sp (-stack_size);
     emit sd ra (Offset (sp, stack_size - 8));
     emit sd fp (Offset (sp, stack_size - 16));
-    emit addi fp sp (stack_size - 24) ~comm:"Prologue ends")
+    emit addi fp sp (stack_size - 24) ~comm:"Prologue ends";
+    List.take arg_regs (List.length args)
+    |> List.zip_exn args
+    |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
+      let loc = emit_store reg in
+      (arg, loc) :: acc))
 ;;
 
 let emit_fn_ret () =

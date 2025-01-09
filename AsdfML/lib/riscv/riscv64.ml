@@ -20,6 +20,14 @@ let pp_fn_args fn_args =
   |> sprintf "{%s}"
 ;;
 
+let counter = ref 0
+
+let counter_next () =
+  let n = !counter in
+  counter := n + 1;
+  n
+;;
+
 let rec gen_imm fn_args env dest = function
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
@@ -51,6 +59,7 @@ and gen_cexpr fn_args env dest = function
   (* TODO:
      CApp with multiple arguments
      direct calls when possible (anf?)
+     IfElse with true/false
   *)
   | CApp (fn, arg) ->
     (* call create closure (needs fn ptr and number of args) *)
@@ -60,8 +69,16 @@ and gen_cexpr fn_args env dest = function
     gen_imm fn_args env a1 arg;
     let closure = emit_fn_call "apply_closure" [ AsmReg a0; AsmReg a1 ] in
     emit_load dest (AsmReg closure)
-    (* failwith "todo" *)
-  | CIfElse (c, t, e) -> failwith "todo: CIfElse"
+  | CIfElse (cond, then_, else_) ->
+    gen_imm fn_args env t0 cond;
+    let label_else = Format.sprintf ".else_%d" (counter_next ()) in
+    let label_end = Format.sprintf ".end_%d" (counter_next ()) in
+    emit beq t0 zero label_else;
+    gen_aexpr fn_args env dest then_;
+    emit j label_end;
+    emit label label_else;
+    gen_aexpr fn_args env dest else_;
+    emit label label_end;
   | CImmExpr e -> gen_imm fn_args env dest e
 
 and gen_aexpr fn_args env dest = function
@@ -72,7 +89,6 @@ and gen_aexpr fn_args env dest = function
     (* calc aexpr to dest *)
     gen_cexpr fn_args env a0 cexpr;
     let loc = emit_store a0 in
-    (* emit comment (Format.asprintf "Storing %s at %a" id pp_reg loc); *)
     let env = Map.set env ~key:id ~data:loc in
     gen_aexpr fn_args env dest aexpr
   | ACExpr cexpr -> gen_cexpr fn_args env a0 cexpr
@@ -80,12 +96,13 @@ and gen_aexpr fn_args env dest = function
 and gen_fn fn_args = function
   | Fn (id, args, aexpr) ->
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
-    emit_fn_decl id args;
+    let args_loc = emit_fn_decl id args in
     if String.equal id "main" then emit call "runtime_init";
-    let env = Map.Poly.empty in
     let env =
-      List.zip_exn (List.take arg_regs (List.length args)) args
-      |> List.fold ~init:env ~f:(fun env (reg, arg) -> Map.set env ~key:arg ~data:reg)
+      args_loc
+      |> List.fold
+           ~init:(Map.empty (module String))
+           ~f:(fun env (arg, reg) -> Map.set env ~key:arg ~data:reg)
     in
     (* add args to env (for stack ones emit_fn_decl should return list of offsets?) *)
     gen_aexpr fn_args env a0 aexpr;

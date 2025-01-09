@@ -1,0 +1,12 @@
+(rule
+ (targets libruntime.a)
+ (deps
+  (source_tree ./src/)
+  (source_tree ./.cargo/)
+  (glob_files Cargo.*)
+  rust-toolchain.toml)
+ (action
+  (no-infer
+   (progn
+    (system
+     "pushd ../../../runtime && cargo build --release && popd && cp ../../../runtime/target/riscv64gc-unknown-linux-gnu/release/libruntime.a .")))))

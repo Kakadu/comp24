@@ -42,8 +42,26 @@ pub extern "C" fn apply_closure(closure_ptr: *mut Closure, arg: isize) -> isize 
                 debug!("Result: {}", res);
                 res
             }
-            _ => {
-                unimplemented!()
+            3 => {
+                let func: fn(isize, isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
+                let res = func(closure.args[0], closure.args[1], closure.args[2]);
+                debug!("Result: {}", res);
+                res
+            }
+            4 => {
+                let func: fn(isize, isize, isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
+                let res = func(closure.args[0], closure.args[1], closure.args[2], closure.args[3]);
+                debug!("Result: {}", res);
+                res
+            }
+            5 => {
+                let func: fn(isize, isize, isize, isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
+                let res = func(closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4]);
+                debug!("Result: {}", res);
+                res
+            }
+            x => {
+                unimplemented!("Closure with size {x}")
             }
         }
     } else {
