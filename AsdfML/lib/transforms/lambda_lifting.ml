@@ -74,11 +74,6 @@ and ll_def env lift = function
      ~name
      lifts in `let test = fun ... -> ...`
   *)
-  (* | SLet (true, is_rec, id, exp) ->
-     let* new_id = fresh_id id in
-     let env = Map.set env ~key:id ~data:new_id in
-     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
-     return (cf_def id [] exp, lift, env) *)
   | SLet (_, is_rec, id, exp) ->
     (* TODO: new_id ?? *)
     let* new_id = fresh_id id in
@@ -96,4 +91,53 @@ let ll_program prog =
   >>| List.rev
 ;;
 
-let lambda_lifting program = run (ll_program program)
+(* TODO: *)
+let kostyli ast =
+  let env =
+    ast
+    |> List.fold
+         ~init:(Map.empty (module String))
+         ~f:(fun env (CFLet (id, args, _)) -> Map.set env ~key:id ~data:args)
+  in
+  let add_missing_args =
+    List.map ~f:(function
+      | CFLet (id, [], CFVar ll_id) ->
+        let args = Map.find_exn env ll_id in
+        CFLet (id, args, CFVar ll_id)
+      | x -> x)
+  in
+  let useless_defs =
+    List.filter_map ast ~f:(function
+      | CFLet (id, [], CFVar ll_id) -> Some (ll_id, id)
+      | _ -> None)
+  in
+  let remove_useless =
+    List.filter ~f:(function
+      | CFLet (_, [], CFVar _) -> false
+      | _ -> true)
+  in
+  let rec remap = function
+    | CFVar id ->
+      (match List.Assoc.find useless_defs ~equal:String.equal id with
+       | None -> CFVar id
+       | Some new_id -> CFVar new_id)
+    | CFApp (f, arg) -> CFApp (remap f, remap arg)
+    | CFIfElse (i, t, e) -> CFIfElse (remap i, remap t, remap e)
+    | CFLetIn (id, body, exp) -> CFLetIn (id, remap body, remap exp)
+    | CFTuple xs -> CFTuple (List.map xs ~f:remap)
+    | CFList xs -> CFList (List.map xs ~f:remap)
+    | x -> x
+  in
+  let rec remap_def = function
+    | CFLet (id, args, exp) -> 
+      let id = 
+      (match List.Assoc.find useless_defs ~equal:String.equal id with
+       | None -> id
+       | Some new_id -> new_id) in
+      CFLet (id, args, remap exp)
+  in
+  (* ast |> add_missing_args |> List.map ~f:remap_def *)
+  ast |> remove_useless |> List.map ~f:remap_def
+;;
+
+let lambda_lifting program = run (ll_program program) |> kostyli
