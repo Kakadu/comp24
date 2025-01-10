@@ -1,7 +1,11 @@
 use env_logger;
 use log::LevelFilter;
 mod closure;
+mod list;
+mod tuple;
 pub use closure::*;
+pub use list::*;
+pub use tuple::*;
 
 /// Set up the logger with the default log level of `info`.
 /// This can be overridden by setting the `RUST_LOG` environment variable.

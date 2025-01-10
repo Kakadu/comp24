@@ -53,7 +53,9 @@ let rec gen_imm fn_args env dest = function
   | ImmUnit -> failwith "todo: ImmUnit"
   | ImmNil -> failwith "todo: ImmNil"
   | ImmTuple xs -> failwith "todo: ImmTuple"
-  | ImmList xs -> failwith "todo: ImmList"
+  | ImmList xs ->
+    let list = emit_fn_call "create_list" [] in
+    failwith "todo: ImmList"
 
 and gen_cexpr fn_args env dest = function
   (* TODO:
@@ -62,33 +64,29 @@ and gen_cexpr fn_args env dest = function
      IfElse with true/false
   *)
   | CApp (fn, arg) ->
-    (* call create closure (needs fn ptr and number of args) *)
-    (* call apply closure *)
-    (* store closure in dest *)
     gen_imm fn_args env a0 fn;
     gen_imm fn_args env a1 arg;
     let closure = emit_fn_call "apply_closure" [ AsmReg a0; AsmReg a1 ] in
     emit_load dest (AsmReg closure)
+  | CIfElse (ImmBool true, then_, _) -> gen_aexpr fn_args env dest then_
+  | CIfElse (ImmBool false, _, else_) -> gen_aexpr fn_args env dest else_
   | CIfElse (cond, then_, else_) ->
     gen_imm fn_args env t0 cond;
-    let label_else = Format.sprintf ".else_%d" (counter_next ()) in
-    let label_end = Format.sprintf ".end_%d" (counter_next ()) in
+    let n = counter_next () in
+    let label_else = Format.sprintf ".else_%d" n in
+    let label_end = Format.sprintf ".end_%d" n in
     emit beq t0 zero label_else;
     gen_aexpr fn_args env dest then_;
     emit j label_end;
     emit label label_else;
     gen_aexpr fn_args env dest else_;
-    emit label label_end;
+    emit label label_end
   | CImmExpr e -> gen_imm fn_args env dest e
 
 and gen_aexpr fn_args env dest = function
   | ALet (id, cexpr, aexpr) ->
-    (* calc cexpr *)
-    (* save res on stack *)
-    (* update env *)
-    (* calc aexpr to dest *)
     gen_cexpr fn_args env a0 cexpr;
-    let loc = emit_store a0 in
+    let loc = emit_store a0 ~comm:id in
     let env = Map.set env ~key:id ~data:loc in
     gen_aexpr fn_args env dest aexpr
   | ACExpr cexpr -> gen_cexpr fn_args env a0 cexpr
@@ -128,6 +126,19 @@ let init_env ast =
   env
 ;;
 
+let peephole (code : (instr * string) Queue.t) =
+  let rec helper = function
+    | [] -> []
+    | (i, c) :: [] -> [ i, c ]
+    | (i1, c1) :: (i2, c2) :: tl ->
+      (match i1, i2 with
+       | Sd (src1, dst1), Ld (dst2, src2) when equal_reg src1 dst2 && equal_reg dst1 src2
+         -> (i1, c1) :: helper tl
+       | _ -> (i1, c1) :: helper ((i2, c2) :: tl))
+  in
+  code |> Queue.to_list |> helper |> Queue.of_list
+;;
+
 let compile ?(out_file = "/tmp/out.s") (ast : Anf_ast.program) =
   let open Format in
   (* dbg "ANF: %a\n" pp_program ast; *)
@@ -135,69 +146,16 @@ let compile ?(out_file = "/tmp/out.s") (ast : Anf_ast.program) =
     let fmt = formatter_of_out_channel out in
     let fn_args = init_env ast in
     gen_program fn_args ast;
-    Queue.iter ~f:(fprintf fmt "%s") code;
+    let code = peephole code in
+    Queue.iter
+      ~f:(fun (i, comm) ->
+        Format.fprintf
+          fmt
+          "%a%s"
+          pp_instr
+          i
+          (if String.(comm <> "") then Format.sprintf "  # %s\n" comm else "\n"))
+      code;
     ());
   Ok ()
 ;;
-(*
-   let rec gen_imm env dest = function
-   | ImmInt n -> emit li dest n
-   | ImmBool b -> emit li dest (if b then 1 else 0)
-   | ImmId id ->
-   (match Hashtbl.find env id with
-   | Some offset -> emit ld dest offset
-   | None -> failwith (Format.sprintf "unbound id: %s" id))
-   | ImmUnit -> failwith "todo: ImmUnit"
-   | ImmNil -> failwith "todo: ImmNil"
-   | ImmTuple xs -> failwith "todo: ImmTuple"
-   | ImmList xs -> failwith "todo: ImmList"
-
-   and gen_cexpr env dest = function
-   (* TODO:
-   CApp with multiple arguments
-   direct calls when possible (anf?)
-   *)
-   | CApp (fn, arg) ->
-   dbg "env: %s\n" (pp_env env);
-   dbg "lookup %s\n" fn;
-   let fn, n_args = Std.lookup_extern fn |> Option.value_exn in
-   (* let closure = emit_fn_call "create_closure" [ AsmFn fn; AsmInt n_args ] in
-   gen_imm env a1 arg;
-   let closure = emit_fn_call "apply_closure" [ AsmReg closure; AsmReg a1 ] in
-   emit ld dest closure; *)
-   (*
-   emit la a0 fn;
-   emit li a1 n_args;
-   emit call "create_closure";
-   gen_imm env a1 arg;
-   emit call "apply_closure";
-   *)
-   let closure = emit_fn_call "create_closure" [ AsmFn fn; AsmInt n_args ] in
-   gen_imm env a1 arg;
-   let closure = emit_fn_call "apply_closure" [ AsmReg closure; AsmReg a1 ] in
-   (* todo:store closure *)
-   ()
-   | CIfElse (c, t, e) -> failwith "todo: CIfElse"
-   | CImmExpr e -> gen_imm env dest e
-   | _ -> failwith "todo: gen_cexpr"
-
-   and gen_aexpr env dest = function
-   | ALet (id, cexpr, aexpr) ->
-   gen_cexpr env a0 cexpr;
-   let offset = emit_store a0 in
-   Hashtbl.set env ~key:id ~data:offset;
-   gen_aexpr env dest aexpr
-   | ACExpr cexpr -> gen_cexpr env a0 cexpr
-
-   and gen_fn env = function
-   | Fn (id, args, aexpr) ->
-   emit_fn_decl id args;
-   gen_aexpr env a0 aexpr;
-   emit_fn_ret ()
-   ;;
-
-   let gen_program (prog : Anf_ast.program) =
-   let (env : (id, reg) Base.Hashtbl.t) = Hashtbl.create (module String) in
-   List.iter prog ~f:(gen_fn env)
-   ;;
-*)
