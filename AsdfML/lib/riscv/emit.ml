@@ -1,7 +1,6 @@
 open Base
 open Machine
 
-let stack_size = 8 * 32 (* TODO: <- *)
 let stack_pos = ref 0
 let code : (instr * string) Queue.t = Queue.create ()
 let emit ?(comm = "") instr = instr (fun i -> Queue.enqueue code (i, comm))
@@ -13,7 +12,7 @@ let emit_store ?(comm = "") reg =
   stack_loc
 ;;
 
-let emit_fn_decl name (args : Ast.id list) =
+let emit_fn_decl name (args : Ast.id list) stack_size =
   if List.length args > 8
   then failwith "TODO: stack arguments"
   else (
@@ -33,7 +32,7 @@ let emit_fn_decl name (args : Ast.id list) =
       (arg, loc) :: acc))
 ;;
 
-let emit_fn_ret () =
+let emit_fn_ret stack_size =
   emit ld fp (Offset (sp, stack_size - 16)) ~comm:"Epilogue starts";
   emit ld ra (Offset (sp, stack_size - 8));
   emit addi sp sp stack_size;
@@ -60,4 +59,3 @@ let emit_fn_call name (args : asm_value list) =
     emit call name;
     a0 (* emit_store a0 *))
 ;;
-
