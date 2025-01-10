@@ -303,13 +303,6 @@ let p_pattern =
 ;;
 
 let p_patterns = sep_by (take_while1 is_whitespace) p_pattern
-
-let rec build_nested_expr args acc =
-  match args with
-  | [] -> acc
-  | h :: tl -> build_nested_expr tl (EFunction (h, acc))
-;;
-
 (* Binary operations parsers & delimiter for chains*)
 
 let binary_operation op func =
@@ -369,7 +362,11 @@ let p_let_in p_exp =
      let* let_expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
      let* body_expr = skip_whitespace *> Angstrom.string "in" *> p_exp in
      return
-       (ELetIn (flag, pattern, build_nested_expr (List.rev args) let_expr, body_expr))
+       (ELetIn
+          ( flag
+          , pattern
+          , List.fold_left (fun acc h -> EFunction (h, acc)) let_expr (List.rev args)
+          , body_expr ))
 ;;
 
 (* match parser *)
@@ -442,7 +439,12 @@ let p_let_decl p_exp =
      let* pattern = skip_whitespace *> p_pattern in
      let* args = p_patterns in
      let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-     return @@ DSingleLet (flag, DLet (pattern, build_nested_expr (List.rev args) expr))
+     return
+     @@ DSingleLet
+          ( flag
+          , DLet
+              ( pattern
+              , List.fold_left (fun acc h -> EFunction (h, acc)) expr (List.rev args) ) )
 ;;
 
 let p_mutually_rec_decl =
@@ -454,7 +456,9 @@ let p_mutually_rec_decl =
     let* pattern = skip_whitespace *> p_pattern in
     let* args = p_patterns in
     let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-    return (DLet (pattern, build_nested_expr (List.rev args) expr))
+    return
+      (DLet
+         (pattern, List.fold_left (fun acc h -> EFunction (h, acc)) expr (List.rev args)))
   in
   let* fst_dcl = p_let_decl p_exp in
   match fst_dcl with
