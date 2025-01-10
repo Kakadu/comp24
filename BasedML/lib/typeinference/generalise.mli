@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 val generalise
-  :  Help.SetString.t
+  :  Help.SetPolyType.t
   -> Ast.pattern
   -> Ast.type_name
   -> (StatementInfer.state, unit) StatementInfer.t

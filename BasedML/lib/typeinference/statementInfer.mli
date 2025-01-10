@@ -32,7 +32,7 @@ val write_var_type : string -> Help.type_form -> (state, unit) Substitution.t
 val write_flat_var_type : string -> Ast.type_name -> (state, unit) Substitution.t
 
 val write_scheme_for_pattern
-  :  Help.SetString.t
+  :  Help.SetPolyType.t
   -> Ast.pattern
   -> Ast.type_name
   -> (state, unit) Substitution.t
@@ -40,4 +40,4 @@ val write_scheme_for_pattern
 val read_subs : (state, Substitution.substitution_list) Substitution.t
 val write_subst : Ast.type_name -> Ast.type_name -> (state, unit) Substitution.t
 val restore_type : Ast.type_name -> (state, Ast.type_name) Substitution.t
-val get_tv_from_env : env_map -> Help.SetString.t
+val get_tv_from_env : env_map -> Help.SetPolyType.t
