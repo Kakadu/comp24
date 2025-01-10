@@ -269,6 +269,7 @@ let prefix_ops =
     ; stoken "-"
     ; stoken "*"
     ; stoken "/"
+    ; stoken "=="
     ; stoken "="
     ; stoken ">"
     ; stoken ">="

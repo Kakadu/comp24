@@ -103,3 +103,5 @@ val ge : expr -> expr -> expr
 val le : expr -> expr -> expr
 val geq : expr -> expr -> expr
 val leq : expr -> expr -> expr
+
+val binary_ops : ident list

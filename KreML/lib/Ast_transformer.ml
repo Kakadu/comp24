@@ -7,10 +7,9 @@ module Alpha_transformer = struct
   let empty : context = Base.Map.empty (module Base.String)
 
   let default =
-    let env = ["*"; "/"; "::"; "+"; "-"; "="; "=="; ">="; ">"; "<="; "<"; "||"; "&&"] in
     List.fold_left (fun map f -> Base.Map.set map ~key:f ~data:f)
     empty
-    env
+    Ast.binary_ops
 
   open Utils.Counter
   let rec transform_pattern id_gen ctx = function
@@ -112,16 +111,107 @@ module Alpha_transformer = struct
       s
 end
 
-(* module Anf_transformer = struct
-  let transform_pattern p = p
-  let transform_expr e = e
-  let transform_structure s = s
-end *)
+module Anf_transformer = struct
+  open Utils.Counter
+  (* let  rec expr_in_anf = function
+  | Expr_const _ | Expr_var _ | Expr_nil -> true
+  | Expr_constrained(e, _) -> expr_in_anf e
+  | Expr_app(x, y) | Expr_cons(x, y) -> expr_in_anf x && expr_in_anf y
+  | Expr_tuple(fst, snd, rest) -> List.for_all expr_in_anf (fst :: snd :: rest)
+  | Expr_fun(_, e) -> expr_in_anf e
+  | Expr_match(e, cases) ->
+    expr_in_anf e && List.for_all (fun (_, e) -> expr_in_anf e) cases
+  | Expr_ite((Expr_var _ | Expr_const _), t, e ) -> expr_in_anf t && expr_in_anf e
+  | Expr_ite _ -> false
+  | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
+  let rec transform_expr expr k : expr t =
+    let fresh_name = fresh_name "anf_t" in
+    let temp_binding name value scope =
+       Expr_let(NonRecursive, (Pat_var name, value), scope) in
+    match expr with
+    | Expr_const _ | Expr_var _ | Expr_nil as imm ->  imm |> k
+    | Expr_app(Expr_app(Expr_var op, x), y) when Base.List.exists Ast.binary_ops ~f:((=) op) ->
+      transform_expr x (fun x' ->
+      transform_expr y (fun y' ->
+      let* name = fresh_name in
+      let e' = Expr_app(Expr_app(Expr_var op, x'), y') in
+      let* scope = Expr_var name |> k in
+      temp_binding name e' scope |> return )) 
+    | Expr_app(f, a) ->
+      transform_expr f (fun f' ->
+      transform_expr a (fun a' ->
+      Expr_app(f', a') |> k))
+    | Expr_ite(c, t, e) ->
+      transform_expr c (fun c' ->
+      transform_expr t (fun t' ->
+      transform_expr e (fun e' ->
+      let*  name = fresh_name in
+      let value = Expr_ite(c', t', e') in
+      let* scope = (Expr_var name) |> k in
+      temp_binding name value scope |> return
+      )))
+    | Expr_cons(x, xs) ->
+      transform_expr x (fun x' ->
+      transform_expr xs (fun xs' ->
+      let* name = fresh_name in
+      let value = Expr_cons(x', xs') in
+      let* scope = Expr_var name |> k in
+      temp_binding name value scope |> return 
+      ))
+    | Expr_constrained(e, _) -> transform_expr e k (* dont care, program was type checked *)
+    | Expr_tuple(fst, snd, rest) ->
+      transform_expr fst (fun fst' ->
+      transform_expr snd (fun snd' ->
+      let* rest' = List.fold_right (fun e acc ->
+        let* acc = acc in
+        let* e' = transform_expr e (fun e' -> return e') in
+        return (e'::acc))
+      rest
+      (return []) in
+      Expr_tuple(fst', snd', rest') |> k
+      ))
+    | Expr_fun(p, e) ->
+      transform_expr e (fun e' ->
+      Expr_fun(p, e') |> k)
+    | Expr_let(rec_flag, (p, e), scope) ->
+      transform_expr e (fun e' ->
+      transform_expr scope (fun scope' ->
+      Expr_let(rec_flag, (p, e'), scope') |> return
+      ))
+    | Expr_match(e, cases) ->
+      transform_expr e (fun e' ->
+      let* cases = List.fold_right (fun (p, e) acc ->
+        let* acc = acc in
+        let* e' = transform_expr e (fun e' -> return e') in
+        return ((p, e')::acc))
+      cases
+      (return [])
+      in
+      Expr_match(e', cases) |> return
+      )
+      
+
+  let transform_structure s =
+    let transform_item (Str_value(rf, bindings)) acc_items =
+      let* acc_items = acc_items in
+      let transform_binding (p, e) acc_bindings =
+        let* acc_bindings = acc_bindings in
+        let* e' = transform_expr e (fun e' -> return e') in
+        (p, e')::acc_bindings |> return in
+      let* bindings = List.fold_right transform_binding bindings (return []) in
+      Str_value(rf, bindings)::acc_items |> return in
+    List.fold_right transform_item s (return [])
+      
+      
+
+end
 
 
 let transform_structure s =
-  let s = Alpha_transformer.transform_structure s in
-  Counter.run s 0 |> snd |> fst
-  (* Anf_transformer.transform_structure s *)
+  let alpha_s = Alpha_transformer.transform_structure s in
+  let alpha_s = Counter.run alpha_s 0 |> snd |> fst in
+  let anf_s = Anf_transformer.transform_structure alpha_s in
+  let anf_s = Counter.run anf_s 0 |> snd in
+  anf_s
 
 
