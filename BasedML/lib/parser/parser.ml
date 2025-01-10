@@ -379,11 +379,18 @@ let p_match p_pattern p_expr =
   in
   let* sub_pat =
     skip_whitespace *> Angstrom.string "match" *> skip_whitespace *> p_pattern
+    <* skip_whitespace
+    <* Angstrom.string "with"
   in
-  let* cases =
-    skip_whitespace *> Angstrom.string "with" *> many1 (p_match_case p_pattern p_expr)
+  let* fst_case =
+    let* pattern =
+      skip_whitespace *> option "" (Angstrom.string "|") *> skip_whitespace *> p_pattern
+    in
+    let* expr = skip_whitespace *> Angstrom.string "->" *> skip_whitespace *> p_expr in
+    return (pattern, expr)
   in
-  return @@ EMatch (sub_pat, cases)
+  let* cases = many1 (p_match_case p_pattern p_expr) in
+  return @@ EMatch (sub_pat, fst_case :: cases)
 ;;
 
 (* expression parser *)
@@ -401,14 +408,14 @@ let p_exp =
     let atomic_exp =
       p_const_expr
       <|> p_ident
+      <|> p_let_in p_exp
+      <|> p_match p_pattern p_exp
       <|> p_function p_exp
       <|> between_parens p_exp
       <|> p_list_exp p_exp
       <|> p_exp_with_type p_exp
-      <|> p_let_in p_exp
       <|> p_tuple_expr p_exp
       <|> p_if_then_else p_exp
-      <|> p_match p_pattern p_exp
     in
     let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
     let app_term = chainl1 cons_term app_delim <|> cons_term in
