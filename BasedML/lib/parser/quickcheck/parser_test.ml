@@ -29,11 +29,11 @@ let parser_qtests =
 
 let%expect_test "QuickCheck test" =
   QCheck_runner.set_seed 42;
-  let _ = QCheck_runner.run_tests parser_qtests in
+  let _ = QCheck_runner.run_tests ~colors:false parser_qtests in
   ();
   [%expect
     {|
     random seed: 42
     ================================================================================
-    [32;1msuccess[0m (ran 1 tests) |}]
+    success (ran 1 tests) |}]
 ;;
