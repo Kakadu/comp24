@@ -92,9 +92,11 @@ and gen_aexpr fn_args env dest = function
   | ACExpr cexpr -> gen_cexpr fn_args env a0 cexpr
 
 and gen_fn fn_args = function
-  | Fn (id, args, aexpr) ->
+  | Fn (id, args, aexpr) as fn ->
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
-    let args_loc = emit_fn_decl id args in
+    let stack_size = 8 * (3 + List.length args + Anf.count_bindings fn) in
+    (* dbg "FN %d: %a\n" n_bindings Anf_ast.pp_fn fn; *)
+    let args_loc = emit_fn_decl id args stack_size in
     if String.equal id "main" then emit call "runtime_init";
     let env =
       args_loc
@@ -104,7 +106,7 @@ and gen_fn fn_args = function
     in
     (* add args to env (for stack ones emit_fn_decl should return list of offsets?) *)
     gen_aexpr fn_args env a0 aexpr;
-    emit_fn_ret ()
+    emit_fn_ret stack_size
 ;;
 
 let gen_program fn_args (prog : Anf_ast.program) = List.iter prog ~f:(gen_fn fn_args)
