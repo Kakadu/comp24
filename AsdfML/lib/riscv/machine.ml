@@ -1,3 +1,5 @@
+let n_reg_args = 8
+
 type reg =
   | SP
   | Reg of string
@@ -53,6 +55,7 @@ type instr =
   | Ret
   (* *)
   | Comment of string
+  | Str of string
 
 let pp_instr fmt =
   let open Format in
@@ -88,6 +91,7 @@ let pp_instr fmt =
   | Ret -> fprintf fmt "    ret"
   (* *)
   | Comment src -> fprintf fmt "    # %s" src
+  | Str src -> fprintf fmt "%s" src
 ;;
 
 let zero = Reg "zero"
@@ -132,4 +136,5 @@ let ret k = k Ret
 
 (*  *)
 let comment k src = k (Comment src)
-let n_reg_args = 8
+let str k src = k (Str src)
+
