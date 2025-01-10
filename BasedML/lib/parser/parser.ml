@@ -409,6 +409,14 @@ let p_exp =
 ;;
 
 (* let declarations parser*)
+let p_patterns = sep_by (take_while1 is_whitespace) p_pattern
+
+let rec build_nested_expr args acc =
+  match args with
+  | [] -> acc
+  | h :: tl -> build_nested_expr tl (EFunction (h, acc))
+;;
+
 let p_let_decl p_exp =
   skip_whitespace
   *> Angstrom.string "let"
@@ -417,10 +425,9 @@ let p_let_decl p_exp =
        skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
-     let* expr =
-       skip_whitespace *> Angstrom.string "=" *> p_exp
-     in
-     return @@ DSingleLet (flag, DLet (pattern, expr))
+     let* args = p_patterns in
+     let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
+     return @@ DSingleLet (flag, DLet (pattern, build_nested_expr (List.rev args) expr))
 ;;
 
 let p_mutually_rec_decl =
@@ -430,10 +437,9 @@ let p_mutually_rec_decl =
     *> skip_whitespace
     *>
     let* pattern = skip_whitespace *> p_pattern in
-    let* expr =
-      skip_whitespace *> Angstrom.string "=" *> p_exp
-    in
-    return (DLet (pattern, expr))
+    let* args = p_patterns in
+    let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
+    return (DLet (pattern, build_nested_expr (List.rev args) expr))
   in
   let* fst_dcl = p_let_decl p_exp in
   match fst_dcl with
@@ -448,9 +454,7 @@ let parse p s = parse_string ~consume:All p s
 (* takes in code in OCaml and returns its AST*)
 let parse_program =
   parse
-    (sep_by
-       (take_while1 is_whitespace)
-       (p_mutually_rec_decl <|> p_let_decl p_exp)
+    (sep_by (take_while1 is_whitespace) (p_mutually_rec_decl <|> p_let_decl p_exp)
      <* option "" (take_while1 is_whitespace))
 ;;
 
