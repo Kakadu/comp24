@@ -346,7 +346,10 @@
                   (EConstant (CInt 1)))),
                (EConstant (CInt 1)),
                (EApplication ((EIdentifier "fib"),
-                  (EApplication ((EIdentifier "n"), (EConstant (CInt -1))))))
+                  (EApplication (
+                     (EApplication ((EIdentifier "( - )"), (EIdentifier "n"))),
+                     (EConstant (CInt 1))))
+                  ))
                ))
             ))
          ))

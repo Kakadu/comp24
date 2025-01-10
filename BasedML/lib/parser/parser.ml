@@ -138,11 +138,15 @@ let p_type : type_name t =
 
 (* Constant parsers*)
 let p_cint =
-  let* sign =
-    skip_whitespace *> option "" (Angstrom.string "-" <|> Angstrom.string "+")
+  let p_number = skip_whitespace *> take_while1 is_digit in
+  let p_signed =
+    between_parens
+      (let* sign = skip_whitespace *> (Angstrom.string "-" <|> Angstrom.string "+") in
+       let* num = p_number in
+       return (sign ^ num))
   in
-  let* number = take_while1 is_digit in
-  return @@ CInt (sign ^ number |> int_of_string)
+  let* number = p_number <|> p_signed in
+  return @@ CInt (number |> int_of_string)
 ;;
 
 let p_cbool =
