@@ -1,11 +1,11 @@
   $ dune exec parser_demo << EOF
-  > let    true = 3;;
+  > let    true = 3
   > EOF
   [(DSingleLet (NotRec, (DLet ((PConstant (CBool true)), (EConstant (CInt 3))))
       ))
     ]
   $ dune exec parser_demo << EOF
-  > let x = true;;
+  > let x = true
   > let y = false
   > EOF
   [(DSingleLet (NotRec, (DLet ((PIdentifier "x"), (EConstant (CBool true))))));
@@ -14,7 +14,7 @@
     ]
 
   $ dune exec parser_demo << EOF
-  > let x = true;;
+  > let x = true
   > 
   > 
   > let y = false

@@ -1,6 +1,6 @@
   $ dune exec typeinference_demo << EOF
-  > let (-) = fun (a:int) (b:int)->  a;;
-  > let (+) = fun (a:int) (b:int)->  a;;
+  > let (-) = fun (a:int) (b:int)->  a
+  > let (+) = fun (a:int) (b:int)->  a
   > 
   > let fibo = fun n ->
   >  let rec fiboCPS = fun n acc -> match n with
@@ -8,7 +8,7 @@
   >  | 1 -> acc 1
   >  | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
   >    in fiboCPS n (fun x -> x)
-  > ;;
+  > 
   > let __ = 5
   > let __ = 5
   > let ___ = 1

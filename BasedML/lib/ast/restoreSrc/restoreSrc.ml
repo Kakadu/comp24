@@ -85,7 +85,7 @@ let frestore_let_declaration ppf decl =
   let fprintf x = Format.fprintf ppf x in
   match decl with
   | DSingleLet (rec_f, slet) ->
-    fprintf "let %a %a;;\n" frestore_rec_flag rec_f frestore_single_let slet
+    fprintf "let %a %a\n" frestore_rec_flag rec_f frestore_single_let slet
   | DMutualRecDecl (rec_f, slet_lst) ->
     fprintf "let %a " frestore_rec_flag rec_f;
     List.iteri
@@ -93,7 +93,7 @@ let frestore_let_declaration ppf decl =
         if i <> 0 then fprintf " and " else ();
         frestore_single_let ppf slet)
       slet_lst;
-    fprintf ";;\n"
+    fprintf "\n"
 ;;
 
 let frestore_declarations ppf decls = List.iter (frestore_let_declaration ppf) decls

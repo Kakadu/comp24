@@ -65,7 +65,6 @@ let between left right exp = left *> exp <* right
 
 let between_parens exp =
   skip_whitespace *> between (Angstrom.char '(') (Angstrom.char ')') exp
-  <* skip_whitespace
 ;;
 
 let chainl1 e op =
@@ -419,7 +418,7 @@ let p_let_decl p_exp =
      in
      let* pattern = skip_whitespace *> p_pattern in
      let* expr =
-       skip_whitespace *> Angstrom.string "=" *> p_exp <* option "" (Angstrom.string ";;")
+       skip_whitespace *> Angstrom.string "=" *> p_exp
      in
      return @@ DSingleLet (flag, DLet (pattern, expr))
 ;;
@@ -432,7 +431,7 @@ let p_mutually_rec_decl =
     *>
     let* pattern = skip_whitespace *> p_pattern in
     let* expr =
-      skip_whitespace *> Angstrom.string "=" *> p_exp <* option "" (Angstrom.string ";;")
+      skip_whitespace *> Angstrom.string "=" *> p_exp
     in
     return (DLet (pattern, expr))
   in
@@ -450,9 +449,9 @@ let parse p s = parse_string ~consume:All p s
 let parse_program =
   parse
     (sep_by
-       (Angstrom.string ";;" <|> Angstrom.string "\n")
+       (take_while1 is_whitespace)
        (p_mutually_rec_decl <|> p_let_decl p_exp)
-     <* option "" (Angstrom.string ";;" <|> take_while1 is_whitespace))
+     <* option "" (take_while1 is_whitespace))
 ;;
 
 (* parser testing function *)
