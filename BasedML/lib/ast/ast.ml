@@ -7,8 +7,7 @@ type poly_type =
   | PTSystem of string
   | PTDefault of string
 
-let pp_poly_type ppf tp =
-  match tp with
+let pp_poly_type ppf = function
   | PTDefault s -> Format.fprintf ppf "%s" s
   | PTSystem s -> Format.fprintf ppf "_%s" s
 ;;

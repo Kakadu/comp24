@@ -1,6 +1,7 @@
 (** Copyright 2024-2025, Pavel Averin, Alexey Efremov *)
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
+
 module PolyType : sig
   type t = Ast.poly_type
 
