@@ -51,7 +51,7 @@ let is_identifier_char = function
 ;;
 
 let is_op_symb = function
-  | "-" | "+" | "/" | "*" | "<" | "<=" | ">=" | "<>" | ">" | "::" | "=" -> true
+  | "-" | "+" | "/" | "*" | "<" | "<=" | ">=" | "<>" | ">" | "::" | "=" | "==" -> true
   | _ -> false
 ;;
 
@@ -319,6 +319,8 @@ let ls_or_eq_func = EIdentifier "( <= )"
 let eq_func = EIdentifier "( = )"
 let not_eq_func = EIdentifier "( <> )"
 let cons_func = EIdentifier "( :: )"
+let double_eq_func = EIdentifier "( == )"
+let double_eq_expr = binary_operation "==" double_eq_func
 let cons_delim_expr = binary_operation "::" cons_func
 let not_eq_delim = binary_operation "<>" not_eq_func
 let eq_delim = binary_operation "=" eq_func
@@ -402,7 +404,7 @@ let p_exp =
     let app_term = chainl1 cons_term app_delim <|> cons_term in
     let high_pr_op_term = chainl1 app_term (mul_delim <|> div_delim) in
     let low_pr_op_term = chainl1 high_pr_op_term (add_delim <|> sub_delim) in
-    let eq_term = chainl1 low_pr_op_term (eq_delim <|> not_eq_delim) in
+    let eq_term = chainl1 low_pr_op_term (double_eq_expr <|> eq_delim <|> not_eq_delim) in
     let gr_ls_term = chainl1 eq_term (gr_or_eq_delim <|> ls_or_eq_delim) in
     let gr_ls_eq_term = chainl1 gr_ls_term (gr_delim <|> ls_delim) in
     gr_ls_eq_term)
