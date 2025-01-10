@@ -10,29 +10,24 @@ module Generator = struct
   let gen_name =
     fix
       (fun self () ->
-        let* nm =
-          string_size
-            ~gen:(oneof [ char_range 'a' 'z'; return '_'; ])
-            (int_range 1 10)
-        in
-        if Parser.is_keyword nm then self () else return nm)
+         let* nm =
+           string_size ~gen:(oneof [ char_range 'a' 'z'; return '_' ]) (int_range 1 10)
+         in
+         if Parser.is_keyword nm then self () else return nm)
       ()
   ;;
 
   let gen_typename =
     fix
       (fun self () ->
-        let* first_char = char_range 'a' 'z' in
-        let* suf =
-          string_size
-            ~gen:(oneof [ char_range 'a' 'z'; return '_'; ])
-            (int_range 1 10)
-        in
-        let nm = String.make 1 first_char ^ suf in
-        if Parser.is_keyword nm then self () else return nm)
+         let* first_char = char_range 'a' 'z' in
+         let* suf =
+           string_size ~gen:(oneof [ char_range 'a' 'z'; return '_' ]) (int_range 1 10)
+         in
+         let nm = String.make 1 first_char ^ suf in
+         if Parser.is_keyword nm then self () else return nm)
       ()
   ;;
-
 
   let rec gen_type = function
     | 0 ->
@@ -61,7 +56,7 @@ module Generator = struct
         ]
   ;;
 
-  let gen_constatnt =
+  let gen_constant =
     frequency
       [ (1, small_int >|= fun x -> Ast.CInt x)
       ; (1, bool >|= fun x -> Ast.CBool x)
@@ -73,7 +68,7 @@ module Generator = struct
   let rec gen_pat = function
     | 0 ->
       frequency
-        [ (1, gen_constatnt >|= fun x -> Ast.PConstant x)
+        [ (1, gen_constant >|= fun x -> Ast.PConstant x)
         ; 1, return Ast.PWildCard
         ; ( 1
           , let* nm = gen_name in
@@ -100,7 +95,7 @@ module Generator = struct
   let rec gen_exp = function
     | 0 ->
       frequency
-        [ (1, gen_constatnt >|= fun x -> Ast.EConstant x)
+        [ (1, gen_constant >|= fun x -> Ast.EConstant x)
         ; ( 1
           , let* nm = gen_name in
             return (Ast.EIdentifier nm) )
