@@ -60,12 +60,8 @@ let anf_def env (def : cf_definition) =
 ;;
 
 let default_env =
-  let env = Map.Poly.empty in
   let env =
-    stdlib |> List.fold ~init:env ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
-  in
-  let env =
-    runtime |> List.fold ~init:env ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
+    stdlib @ runtime |> List.fold ~init:(Map.empty (module String)) ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
   in
   env
 ;;

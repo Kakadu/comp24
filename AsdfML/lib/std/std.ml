@@ -76,6 +76,7 @@ let stdlib : std list =
     ; arity = 0
     }
   ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int"; arity = 0 }
+  ; { name = "print_bool"; typ = bool_typ ^-> unit_typ; extern = "ml_print_bool"; arity = 0 }
   ]
   |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;

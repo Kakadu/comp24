@@ -73,6 +73,7 @@ and cc_def globals env ?(apply = true) = function
   | TDLet (_, flag, PIdent id, exp) ->
     let exp' = cc_expr globals env exp in
     s_let false flag id exp', env, globals
+    (* TODO: wildcards *)
   | _ -> failwith "cc_def not implemented"
 ;;
 
