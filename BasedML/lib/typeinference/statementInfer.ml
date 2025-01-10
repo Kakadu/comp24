@@ -23,7 +23,7 @@ let write_env : env_map -> (state, unit) t =
 
 let fresh_tv : (state, Ast.type_name) t =
   let* env, substs, tv = read in
-  return (Ast.TPoly (Format.sprintf "_p%x" tv)) <* write (env, substs, tv + 1)
+  return (Ast.TPoly (Format.sprintf "p%x" tv)) <* write (env, substs, tv + 1)
 ;;
 
 let specialise : SetString.t * Ast.type_name -> (state, Ast.type_name) t =
