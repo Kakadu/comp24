@@ -149,8 +149,7 @@ let%expect_test "Test declaration with generalise" =
 
 let%expect_test "Test occurs check declaration" =
   test_infer_prog empty_state {|let rec f = fun x -> f|};
-  [%expect
-    {|
+  [%expect {|
     Infer error: The type variable _p0 occurs inside ('_p1 -> '_p0) |}]
 ;;
 
