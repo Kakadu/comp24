@@ -10,7 +10,11 @@ let () =
   match Kreml_lib.Parser.run input with
   | Ok structure ->
     (match Kreml_lib.Inferencer.run structure with
-     | Ok env -> TypeEnv.pp std_formatter env
+     | Ok env ->
+       TypeEnv.pp std_formatter env;
+       fprintf std_formatter "applying alpha conversion";
+       let s = Kreml_lib.Ast_transformer.transform_structure structure in
+       Kreml_lib.Ast_printer.pp_structure std_formatter s
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input
