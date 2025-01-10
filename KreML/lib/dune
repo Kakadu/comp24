@@ -1,6 +1,6 @@
 (library
  (name kreml_lib)
- (modules Ast Ast_printer Parser Inferencer Utils)
+ (modules Ast Ast_printer Ast_transformer Parser Inferencer Utils)
  (inline_tests)
  (libraries base ppx_show.runtime angstrom qcheck)
  (preprocess
