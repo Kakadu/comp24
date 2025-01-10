@@ -2,12 +2,23 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
+(* Type vars: 'a, '_p12, ...*)
+type poly_type =
+  | PTSystem of string
+  | PTDefault of string
+
+let pp_poly_type ppf tp =
+  match tp with
+  | PTDefault s -> Format.fprintf ppf "%s" s
+  | PTSystem s -> Format.fprintf ppf "_%s" s
+;;
+
 (* Standard types: ints, functions, tuples, lists *)
 type type_name =
   | TUnit
   | TInt
   | TBool
-  | TPoly of string
+  | TPoly of poly_type
   | TTuple of type_name list
   | TFunction of type_name * type_name
   | TList of type_name
@@ -20,7 +31,7 @@ let rec pp_type_name ppf tp =
   | TUnit -> fprintf "unit"
   | TInt -> fprintf "int"
   | TBool -> fprintf "bool"
-  | TPoly name -> fprintf "'%s" name
+  | TPoly name -> fprintf "'%a" pp_poly_type name
   | TTuple lst ->
     fprintf "(";
     List.iteri
