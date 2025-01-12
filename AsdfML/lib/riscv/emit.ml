@@ -28,7 +28,7 @@ let emit_fn_decl name (args : Ast.id list) stack_size =
     List.take arg_regs (List.length args)
     |> List.zip_exn args
     |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
-      let loc = emit_store reg in
+      let loc = emit_store reg ~comm:arg in
       (arg, loc) :: acc))
 ;;
 
