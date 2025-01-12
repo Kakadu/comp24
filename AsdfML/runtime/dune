@@ -3,8 +3,7 @@
  (deps
   (source_tree ./src/)
   (source_tree ./.cargo/)
-  (glob_files Cargo.*)
-  rust-toolchain.toml)
+  (glob_files Cargo.*))
  (action
   (no-infer
    (progn

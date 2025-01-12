@@ -30,48 +30,40 @@ pub extern "C" fn apply_closure(closure_ptr: *mut Closure, arg: isize) -> isize 
     debug!("Args: {:?}", closure.args);
     if closure.args.len() == closure.arity {
         debug!("Enough args");
-        match closure.arity {
+        let res = match closure.arity {
             1 => {
                 let func: fn(isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
-                let res = func(closure.args[0]);
-                debug!("Result: {}", res);
-                res
+                func(closure.args[0])
             }
             2 => {
                 let func: fn(isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
-                let res = func(closure.args[0], closure.args[1]);
-                debug!("Result: {}", res);
-                res
+                func(closure.args[0], closure.args[1])
             }
             3 => {
                 let func: fn(isize, isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
-                let res = func(closure.args[0], closure.args[1], closure.args[2]);
-                debug!("Result: {}", res);
-                res
+                func(closure.args[0], closure.args[1], closure.args[2])
             }
             4 => {
                 let func: fn(isize, isize, isize, isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
-                let res = func(closure.args[0], closure.args[1], closure.args[2], closure.args[3]);
-                debug!("Result: {}", res);
-                res
+                func(closure.args[0], closure.args[1], closure.args[2], closure.args[3])
             }
             5 => {
                 let func: fn(isize, isize, isize, isize, isize) -> isize =
                     unsafe { std::mem::transmute(closure.fn_ptr) };
-                let res = func(
+                func(
                     closure.args[0],
                     closure.args[1],
                     closure.args[2],
                     closure.args[3],
                     closure.args[4],
-                );
-                debug!("Result: {}", res);
-                res
+                )
             }
             x => {
                 unimplemented!("Closure with size {x}")
             }
-        }
+        };
+        debug!("Result: {}", res);
+        res
     } else {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
