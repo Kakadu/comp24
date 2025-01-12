@@ -35,7 +35,7 @@ module Alpha_transformer = struct
   
     
   let rec transform_expr ctx e =
-  let id_gen _ = fresh_name "t" in
+  let id_gen = fresh_name in
    match e with
   | Expr_const _ | Expr_nil as e -> return e
   | Expr_var id -> 
@@ -125,7 +125,7 @@ module Anf_transformer = struct
   | Expr_ite _ -> false
   | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
   let rec transform_expr expr k : expr t =
-    let fresh_name = fresh_name "anf_t" in
+    let fresh_name = fresh_name "t" in
     let temp_binding name value scope =
        Expr_let(NonRecursive, (Pat_var name, value), scope) in
     match expr with
@@ -136,20 +136,19 @@ module Anf_transformer = struct
       let* name = fresh_name in
       let e' = Expr_app(Expr_app(Expr_var op, x'), y') in
       let* scope = Expr_var name |> k in
-      temp_binding name e' scope |> return )) 
+      match scope with
+      | Expr_var n when n = name -> e' |> return
+      | _ -> temp_binding name e' scope |> return )) 
     | Expr_app(f, a) ->
       transform_expr f (fun f' ->
       transform_expr a (fun a' ->
       Expr_app(f', a') |> k))
     | Expr_ite(c, t, e) ->
       transform_expr c (fun c' ->
-      transform_expr t (fun t' ->
-      transform_expr e (fun e' ->
-      let*  name = fresh_name in
-      let value = Expr_ite(c', t', e') in
-      let* scope = (Expr_var name) |> k in
-      temp_binding name value scope |> return
-      )))
+        let* t' = transform_expr t k in
+        let* e' = transform_expr e k in
+        Expr_ite(c', t', e') |> return
+      )
     | Expr_cons(x, xs) ->
       transform_expr x (fun x' ->
       transform_expr xs (fun xs' ->
@@ -164,30 +163,30 @@ module Anf_transformer = struct
       transform_expr snd (fun snd' ->
       let* rest' = List.fold_right (fun e acc ->
         let* acc = acc in
-        let* e' = transform_expr e (fun e' -> return e') in
+        let* e' = transform_expr e return in
         return (e'::acc))
       rest
       (return []) in
       Expr_tuple(fst', snd', rest') |> k
       ))
     | Expr_fun(p, e) ->
-      transform_expr e (fun e' ->
-      Expr_fun(p, e') |> k)
+      let* e' = transform_expr e return in
+      Expr_fun(p, e') |> k
     | Expr_let(rec_flag, (p, e), scope) ->
       transform_expr e (fun e' ->
-      transform_expr scope (fun scope' ->
+      let* scope' = transform_expr scope k in
       Expr_let(rec_flag, (p, e'), scope') |> return
-      ))
+      )
     | Expr_match(e, cases) ->
       transform_expr e (fun e' ->
       let* cases = List.fold_right (fun (p, e) acc ->
         let* acc = acc in
-        let* e' = transform_expr e (fun e' -> return e') in
+        let* e' = transform_expr e return in (* maybe k here*)
         return ((p, e')::acc))
       cases
       (return [])
       in
-      Expr_match(e', cases) |> return
+      Expr_match(e', cases) |> k
       )
       
 
