@@ -1,9 +1,11 @@
+use std::clone;
+
 use log::debug;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Closure {
-    pub(crate) fn_ptr: usize,
+    pub(crate) fn_ptr: *const fn(),
     pub(crate) arity: usize,
     pub(crate) args: Vec<isize>,
 }
@@ -13,13 +15,15 @@ pub struct Closure {
 // }
 
 #[no_mangle]
-pub extern "C" fn create_closure(fn_ptr: usize, arity: usize) -> *mut Closure {
+pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Closure {
     let closure = Box::new(Closure {
         fn_ptr,
         arity,
         args: Vec::with_capacity(arity),
     });
-    Box::into_raw(closure)
+    debug!("Created {:?} at {:?}", closure, Box::as_ptr(&closure));
+    let res = Box::into_raw(closure);
+    res
 }
 
 #[no_mangle]
@@ -27,9 +31,8 @@ pub extern "C" fn apply_closure(closure_ptr: *mut Closure, arg: isize) -> isize 
     // TODO: less cloning
     let mut closure = Box::new(unsafe { &*closure_ptr }.clone());
     closure.args.push(arg);
-    debug!("Args: {:?}", closure.args);
+    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
     if closure.args.len() == closure.arity {
-        debug!("Enough args");
         let res = match closure.arity {
             1 => {
                 let func: fn(isize) -> isize = unsafe { std::mem::transmute(closure.fn_ptr) };
@@ -62,7 +65,7 @@ pub extern "C" fn apply_closure(closure_ptr: *mut Closure, arg: isize) -> isize 
                 unimplemented!("Closure with size {x}")
             }
         };
-        debug!("Result: {}", res);
+        debug!("Result: {} / {:#x}", res, res);
         res
     } else {
         debug!("Not enough args");
