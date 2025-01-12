@@ -7,7 +7,7 @@ open Utils
 let tuple_field lst idx =
   te_app
     dummy_ty
-    (te_app dummy_ty (te_var dummy_ty "`tuple_field") lst)
+    (te_app dummy_ty (te_var dummy_ty "`get_tuple_field") lst)
     (te_const dummy_ty (CInt idx))
 ;;
 

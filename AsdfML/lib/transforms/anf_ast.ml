@@ -26,6 +26,21 @@ and aexpr =
 type fn = Fn of id * id list * aexpr [@@deriving show { with_path = false }]
 type program = fn list [@@deriving show { with_path = false }]
 
+
+let count_bindings (fn : fn) =
+  let rec helper_cexpr = function
+    | CIfElse (_, aexpr1, aexpr2) -> helper_aexpr aexpr1 + helper_aexpr aexpr2
+    | _ -> 0
+  and helper_aexpr = function
+    | ALet (_, cexpr, aexpr) -> 1 + helper_cexpr cexpr + helper_aexpr aexpr
+    | ACExpr cexpr -> helper_cexpr cexpr
+  and helper = function
+    | Fn (_, _, aexpr) -> helper_aexpr aexpr
+  in
+  helper fn
+;;
+
+
 open Base
 open Format
 open Utils

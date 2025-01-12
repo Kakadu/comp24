@@ -47,7 +47,13 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
     anf_expr env expr (fun imm_expr ->
       let* body = anf_expr new_env body cont in
       return (ALet (name, CImmExpr imm_expr, body)))
-  | CFTuple _ | CFList _ -> failwith "Not implemented"
+  | CFTuple xs ->
+    let rec helper acc = function
+      | [] -> cont (ImmTuple (List.rev acc))
+      | x :: xs -> anf_expr env x (fun x -> helper (x :: acc) xs)
+    in
+    helper [] xs
+  | CFList xs -> failwith "todo: CFList"
 ;;
 
 let anf_def env (def : cf_definition) =
@@ -55,7 +61,7 @@ let anf_def env (def : cf_definition) =
   | CFLet (id, args, expr) ->
     let env = List.fold args ~init:env ~f:(fun acc x -> Map.set acc ~key:x ~data:x) in
     let env = Map.set env ~key:id ~data:id in
-    let* aexpr = anf_expr env expr (fun x -> return @@ ACExpr (CImmExpr x)) in
+    let* aexpr = anf_expr env expr (fun x -> return (ACExpr (CImmExpr x))) in
     return (Fn (id, args, aexpr), env)
 ;;
 
@@ -78,11 +84,13 @@ let remove_useless_bindings =
       | x -> x
     and useless_a = function
       | ALet (id1, CImmExpr (ImmId id2), a)
-        when String.equal (String.common_prefix2 id1 id2) "a" ->
+      (* TODO: re? prefix auto-generated vars with `? *)
+        when String.equal (String.prefix id1 1) "a"
+             && String.equal (String.prefix id2 1) "a" ->
         Hashtbl.set remaps ~key:id1 ~data:id2;
         useless_a a
       | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
-        ACExpr (useless_c c) |> useless_a
+        ACExpr (useless_c c) 
       | ALet (id, c, a) -> ALet (id, useless_c c, useless_a a)
       | ACExpr c -> ACExpr (useless_c c)
     in
