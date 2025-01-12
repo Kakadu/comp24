@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 type List = VecDeque<isize>;
 
 #[no_mangle]
-pub extern "C" fn create_list() -> *mut List {
+pub extern "C" fn ml_create_list() -> *mut List {
     let list = Box::new(List::new());
     Box::into_raw(list)
 }

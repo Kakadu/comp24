@@ -52,9 +52,15 @@ let rec gen_imm fn_args env dest = function
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> failwith "todo: ImmUnit"
   | ImmNil -> failwith "todo: ImmNil"
-  | ImmTuple xs -> failwith "todo: ImmTuple"
+  | ImmTuple xs ->
+    let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length xs) ] in
+    let tuple = emit_store tuple ~comm:"tuple" in
+    List.iteri xs ~f:(fun i x ->
+      gen_imm fn_args env a2 x;
+      let res = emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ] in
+      emit_load_2 (AsmReg tuple) (AsmReg res));
+    emit_load dest (AsmReg tuple)
   | ImmList xs ->
-    let list = emit_fn_call "create_list" [] in
     failwith "todo: ImmList"
 
 and gen_cexpr fn_args env dest = function
@@ -94,7 +100,8 @@ and gen_aexpr fn_args env dest = function
 and gen_fn fn_args = function
   | Fn (id, args, aexpr) as fn ->
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
-    let stack_size = 8 * (3 + List.length args + Anf.count_bindings fn) in
+    (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
+    let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in
     (* dbg "FN %d: %a\n" n_bindings Anf_ast.pp_fn fn; *)
     let args_loc = emit_fn_decl id args stack_size in
     if String.equal id "main" then emit call "runtime_init";

@@ -83,7 +83,7 @@ let pp_instr fmt =
   (* *)
   | Beq (dst, src, where) -> fprintf fmt "    beq %a,%a,%s" pp_reg dst pp_reg src where
   | Blt (dst, src, where) -> fprintf fmt "    blt %a,%a,%s" pp_reg dst pp_reg src where
-  | J (where) -> fprintf fmt "    j %s" where
+  | J where -> fprintf fmt "    j %s" where
   (* *)
   | Label src -> fprintf fmt "%s:" src
   | Call src -> fprintf fmt "    call %s" src
@@ -126,7 +126,7 @@ let mv k dst src = k (Mv (dst, src))
 (*  *)
 let beq k dst src1 where = k (Beq (dst, src1, where))
 let blt k dst src1 where = k (Blt (dst, src1, where))
-let j k where = k (J (where))
+let j k where = k (J where)
 
 (*  *)
 let label k src = k (Label src)
@@ -137,4 +137,3 @@ let ret k = k Ret
 (*  *)
 let comment k src = k (Comment src)
 let str k src = k (Str src)
-
