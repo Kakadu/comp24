@@ -59,9 +59,9 @@ let rec gen_imm fn_args env dest = function
 
 and gen_cexpr fn_args env dest = function
   (* TODO:
-     CApp with multiple arguments
-     direct calls when possible (anf?)
-     IfElse with true/false
+     CFApp/CApp with multiple arguments
+     direct calls when possible
+     direct math
   *)
   | CApp (fn, arg) ->
     gen_imm fn_args env a0 fn;
@@ -104,7 +104,6 @@ and gen_fn fn_args = function
            ~init:(Map.empty (module String))
            ~f:(fun env (arg, reg) -> Map.set env ~key:arg ~data:reg)
     in
-    (* add args to env (for stack ones emit_fn_decl should return list of offsets?) *)
     gen_aexpr fn_args env a0 aexpr;
     emit_fn_ret stack_size
 ;;
@@ -143,7 +142,7 @@ let peephole (code : (instr * string) Queue.t) =
 
 let compile ?(out_file = "/tmp/out.s") (ast : Anf_ast.program) =
   let open Format in
-  (* dbg "ANF: %a\n" pp_program ast; *)
+  dbg "ANF: %a\n" pp_program ast;
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     let fn_args = init_env ast in
