@@ -69,18 +69,44 @@ let default_env =
   env
 ;;
 
+(** Removes `let ax = ... in ax` and `let ax = ay in ...` *)
 let remove_useless_bindings =
-  let rec helper_c = function
-    | CIfElse (c, aexpr1, aexpr2) -> CIfElse (c, helper_a aexpr1, helper_a aexpr2)
-    | x -> x
-  and helper_a = function
-    | ALet (id1, cexpr, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
-      ACExpr (helper_c cexpr)
-    | ALet(id, cexpr, aexpr) -> ALet(id, helper_c cexpr, helper_a aexpr)
-    | ACExpr (cexpr) -> ACExpr (helper_c cexpr)
+  let remaps = Hashtbl.create (module String) in
+  let useless =
+    let rec useless_c = function
+      | CIfElse (c, a1, a2) -> CIfElse (c, useless_a a1, useless_a a2)
+      | x -> x
+    and useless_a = function
+      | ALet (id1, CImmExpr (ImmId id2), a)
+        when String.equal (String.common_prefix2 id1 id2) "a" ->
+        Hashtbl.set remaps ~key:id1 ~data:id2;
+        useless_a a
+      | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
+        ACExpr (useless_c c) |> useless_a
+      | ALet (id, c, a) -> ALet (id, useless_c c, useless_a a)
+      | ACExpr c -> ACExpr (useless_c c)
+    in
+    function
+    | Fn (id, args, a) -> Fn (id, args, useless_a a)
   in
-  function
-  | Fn (id, args, aexpr) -> Fn (id, args, helper_a aexpr)
+  let remap =
+    let rec remap_i = function
+      | ImmId id -> ImmId (Hashtbl.find remaps id |> Option.value ~default:id)
+      | ImmTuple xs -> ImmTuple (List.map ~f:remap_i xs)
+      | ImmList xs -> ImmList (List.map ~f:remap_i xs)
+      | x -> x
+    and remap_c = function
+      | CIfElse (c, a1, a2) -> CIfElse (remap_i c, remap_a a1, remap_a a2)
+      | CApp (i1, i2) -> CApp (remap_i i1, remap_i i2)
+      | CImmExpr i -> CImmExpr (remap_i i)
+    and remap_a = function
+      | ALet (id, c, a) -> ALet (id, remap_c c, remap_a a)
+      | ACExpr c -> ACExpr (remap_c c)
+    in
+    function
+    | Fn (id, args, a) -> Fn (id, args, remap_a a)
+  in
+  Fn.compose remap useless
 ;;
 
 let anf (ast : Cf_ast.program) : Anf_ast.program =
