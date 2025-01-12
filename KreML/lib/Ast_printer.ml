@@ -86,17 +86,17 @@ let rec pp_expr ppf = function
       (fun () -> fprintf ppf ", ")
       true
   | Expr_ite (c, t, e) ->
-    fprintf ppf "@[<2>(if %a then %a @, else %a) @]" pp_expr c pp_expr t pp_expr e
+    fprintf ppf "@[<2>(if %a then @,%a @, else  @,%a)@]" pp_expr c pp_expr t pp_expr e
   | Expr_app ((Expr_var _ as f), ((Expr_nil | Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>%a @ %a@]" pp_expr f pp_expr arg
   | Expr_app (f, ((Expr_nil | Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>(%a) %a@]" pp_expr f pp_expr arg
-  | Expr_app ((Expr_var _ as f), arg) -> fprintf ppf "@[%a (%a) @]" pp_expr f pp_expr arg
+  | Expr_app ((Expr_var _ as f), arg) -> fprintf ppf "@[%a (%a)@]" pp_expr f pp_expr arg
   | Expr_app (f, arg) -> fprintf ppf "@[(%a) (%a) @]" pp_expr f pp_expr arg
   | Expr_let (NonRecursive, (p, e), scope) ->
-    fprintf ppf "@[<2>(let %a = %a in @, %a) @]" pp_pat p pp_expr e pp_expr scope
+    fprintf ppf "@[(let %a = %a in @, %a)@]" pp_pat p pp_expr e pp_expr scope
   | Expr_let (Recursive, (p, e), scope) ->
-    fprintf ppf "@[<2>(let rec %a = %a in @, %a) @]" pp_pat p pp_expr e pp_expr scope
+    fprintf ppf "@[(let rec %a = %a in @, %a)@]" pp_pat p pp_expr e pp_expr scope
   | Expr_constrained (e, t) -> fprintf ppf "@[((%a) : %a)@]" pp_expr e pp_typ t
   | Expr_match (e, cases) ->
     fprintf ppf "@[<2>(%a@ %a %a@, @]" kwd "match" pp_expr e kwd "with";
