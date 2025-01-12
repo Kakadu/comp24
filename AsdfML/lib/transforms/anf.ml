@@ -69,6 +69,20 @@ let default_env =
   env
 ;;
 
+let remove_useless_bindings =
+  let rec helper_c = function
+    | CIfElse (c, aexpr1, aexpr2) -> CIfElse (c, helper_a aexpr1, helper_a aexpr2)
+    | x -> x
+  and helper_a = function
+    | ALet (id1, cexpr, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
+      ACExpr (helper_c cexpr)
+    | ALet(id, cexpr, aexpr) -> ALet(id, helper_c cexpr, helper_a aexpr)
+    | ACExpr (cexpr) -> ACExpr (helper_c cexpr)
+  in
+  function
+  | Fn (id, args, aexpr) -> Fn (id, args, helper_a aexpr)
+;;
+
 let anf (ast : Cf_ast.program) : Anf_ast.program =
   let helper ast =
     List.fold
@@ -80,5 +94,5 @@ let anf (ast : Cf_ast.program) : Anf_ast.program =
         return (x :: fns, env))
     >>| fun (defs, _) -> List.rev defs
   in
-  run (helper ast)
+  run (helper ast) |> List.map ~f:remove_useless_bindings
 ;;
