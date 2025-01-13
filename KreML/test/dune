@@ -24,6 +24,14 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(executable
+ (public_name transformers)
+ (name transformers)
+ (modules transformers)
+ (libraries kreml_lib)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (deps
   %{bin:parser}

@@ -73,6 +73,7 @@ module TypeEnv : sig
   val generalize : typ -> t -> Scheme.t
   val generalize_pattern : pattern -> typ -> t -> t
   val pp : Stdlib.Format.formatter -> t -> unit
+  val alpha_equals : t -> t -> bool
 end
 
 val infer_expr : TypeEnv.t -> expr -> (Subst.t * typ) R.t
