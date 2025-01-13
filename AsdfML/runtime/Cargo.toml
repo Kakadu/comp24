@@ -15,4 +15,3 @@ crate-type = [
 
 [profile.release]
 strip = true
-panic = "abort"

@@ -20,6 +20,7 @@ let emit_fn_decl name (args : Ast.id list) stack_size =
     .globl %s
     .type %s, @function|} name name);
     emit label name;
+    if not (List.is_empty args) then emit comment ("args: " ^ (args |> String.concat ~sep:", "));
     emit addi sp sp (-stack_size);
     emit sd ra (Offset (sp, stack_size));
     emit sd fp (Offset (sp, stack_size - 8));
