@@ -92,3 +92,4 @@ let geq x y = eapp (Expr_var ">=") [ x; y ]
 let leq x y = eapp (Expr_var "<=") [ x; y ]
 
 let binary_ops = ["*"; "/"; "::"; "+"; "-"; "=="; "="; ">="; ">"; "<="; "<"; "||"; "&&"]
+let stdlib_funs = ["print_int"]

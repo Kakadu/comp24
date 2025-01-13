@@ -91,7 +91,7 @@ let rec pp_expr ppf = function
     fprintf ppf "@[<2>%a @ %a@]" pp_expr f pp_expr arg
   | Expr_app (f, ((Expr_nil | Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>(%a) %a@]" pp_expr f pp_expr arg
-  | Expr_app ((Expr_var _ as f), arg) -> fprintf ppf "@[%a (%a)@]" pp_expr f pp_expr arg
+  | Expr_app ((Expr_var _ | Expr_app _ as f), arg) -> fprintf ppf "@[%a (%a)@]" pp_expr f pp_expr arg
   | Expr_app (f, arg) -> fprintf ppf "@[(%a) (%a) @]" pp_expr f pp_expr arg
   | Expr_let (NonRecursive, (p, e), scope) ->
     fprintf ppf "@[(let %a = %a in @, %a)@]" pp_pat p pp_expr e pp_expr scope

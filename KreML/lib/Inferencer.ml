@@ -62,6 +62,15 @@ module Varset = struct
 end
 
 module Type = struct
+  let rec alpha_equals t1 t2 =
+    match t1, t2 with
+    | Typ_bool, Typ_bool | Typ_int, Typ_int | Typ_unit, Typ_unit -> true
+    | Typ_var _, Typ_var _ -> true
+    | Typ_fun(p1, e1), Typ_fun(p2, e2) -> alpha_equals p1 p2 && alpha_equals e1 e2
+    | Typ_list(e1), Typ_list(e2) -> alpha_equals e1 e2
+    | Typ_tuple(x1, y1, rest1), Typ_tuple(x2, y2, rest2) ->
+      List.for_all2_exn (x1::y1::rest1) (x2::y2::rest2) ~f:alpha_equals
+    | _, _ -> false
   let rec occurs id = function
     | Typ_bool | Typ_int -> false
     | Typ_var v -> id = v
@@ -191,6 +200,10 @@ let fresh_var () =
 module Scheme = struct
   type t = scheme
 
+  let alpha_equals (Scheme(bs1, t1)) (Scheme(bs2, t2)) =
+    let set_len s = Varset.elements s |> List.length in
+    set_len bs1 = set_len bs2 && Type.alpha_equals t1 t2
+
   let free_vars (Scheme (bs, t)) = Varset.diff (Type.free_vars t) bs
 
   let apply_subst subst (Scheme (bs, t)) =
@@ -296,6 +309,16 @@ module TypeEnv = struct
       let* t = Scheme.instantiate scheme in
       R.return (Subst.empty, t)
   ;;
+
+  let alpha_equals e1 e2 =
+    let l1 = Base.Map.length e1 in
+    let l2 = Base.Map.length e2 in
+    if l1 <> l2 then false
+    else
+      Base.Map.fold e1 ~init:true ~f:(fun ~key ~data:s1 acc ->
+        match Base.Map.find e2 key with
+        | Some s2 when Scheme.alpha_equals s1 s2 -> acc && true
+        | _ -> false)
 end
 
 open R.Syntax
