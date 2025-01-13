@@ -21,6 +21,7 @@ let list_field lst idx =
 (* TODO: arrow type for CC? *)
 let list_hd lst = te_app dummy_ty (te_var dummy_ty "`list_hd") lst
 let list_tl lst = te_app dummy_ty (te_var dummy_ty "`list_tl") lst
+let list_is_empty lst = te_app dummy_ty (te_var dummy_ty "`list_is_empty") lst
 let check_eq l r = TEApp (dummy_ty, TEApp (dummy_ty, TEVar (dummy_ty, "( = )"), l), r)
 
 let remove_match =
@@ -58,7 +59,8 @@ let remove_match =
         | _ -> action
       in
       let case_matched match_exp = function
-        | PConst c -> check_eq match_exp (TEConst (dummy_ty, c))
+        | PConst (CInt _ as c) | PConst (CBool _ as c) -> check_eq match_exp (TEConst (dummy_ty, c))
+        | PConst (CNil) -> list_is_empty match_exp
         | PTuple xs -> failwith "TODO case_matched tuple"
         | PList xs -> failwith "TODO case_matched list"
         | PCons (hd, tl) -> TEVar (dummy_ty, "(TODO: check cons pattern)") 
