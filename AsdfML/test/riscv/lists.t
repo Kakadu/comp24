@@ -46,18 +46,18 @@
   $ /tmp/lists
   [1, 2, 3]
 
-$ dune exec riscv -- -o /tmp/lists.s <<- EOF
-> let rec map f list = match list with
-> | [] -> []
-> | hd::tl -> (f hd) :: (map f tl)
-> let main = 
->   let sq = map (fun x -> x * x) in
->   let x = [1;2;3] in
->   let res = sq x in
->   print_list res
-> EOF
-$ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-$ /tmp/lists
+  $ dune exec riscv -- -o /tmp/lists.s <<- EOF
+  > let rec map f list = match list with
+  > | [] -> []
+  > | hd::tl -> (f hd) :: (map f tl)
+  > let main = 
+  >   let sq = map (fun x -> x * x) in
+  >   let x = [1;2;3] in
+  >   let res = sq x in
+  >   print_list res
+  > EOF
+  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ /tmp/lists
 
 $ dune exec riscv -- -o /tmp/lists.s <<- EOF
 > let rec map = fun f -> fun list -> match list with
