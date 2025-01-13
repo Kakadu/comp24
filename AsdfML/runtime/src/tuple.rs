@@ -1,4 +1,3 @@
-
 use log::debug;
 
 type Tuple = Vec<isize>;
@@ -14,7 +13,7 @@ pub extern "C" fn ml_create_tuple(size: usize) -> *mut Tuple {
 pub extern "C" fn ml_set_tuple_field(tuple_ptr: *mut Tuple, idx: usize, value: isize) -> *mut Tuple {
     let mut tuple = unsafe { Box::from_raw(tuple_ptr) };
     tuple[idx] = value;
-    debug!("Set [{}] = {} of {:?} at {:?}", idx, value, tuple, tuple_ptr);
+    debug!("Set [{}] = {} in {:?} at {:?}", idx, value, tuple, tuple_ptr);
     Box::into_raw(tuple)
 }
 
@@ -23,7 +22,7 @@ pub extern "C" fn ml_get_tuple_field(tuple_ptr: *mut Tuple, idx: usize) -> isize
     let tuple = unsafe { Box::from_raw(tuple_ptr) };
     debug!("Getting {} of {:?} at {:?}", idx, tuple, tuple_ptr);
     let res = tuple[idx];
-    Box::leak(tuple);
+    let _ = Box::into_raw(tuple);
     res
 }
 
@@ -35,6 +34,6 @@ pub extern "C" fn ml_print_tuple(tuple_ptr: *mut Tuple) -> isize {
         "({})",
         tuple.iter().map(isize::to_string).collect::<Vec<_>>().join(", ")
     );
-    Box::leak(tuple);
+    let _ = Box::into_raw(tuple);
     0
 }
