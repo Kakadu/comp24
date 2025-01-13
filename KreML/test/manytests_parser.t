@@ -1,6 +1,6 @@
   $ dune exec parser < manytests/do_not_type/001.ml
   let recfac = 
-  (fun n -> (if ((<=)  n) 1 then 1  else  ((*)  n) (fac (((-)  n) 1)) ))
+  (fun n -> (if ((<=)  n) 1 then 1  else  (*)  n (fac (((-)  n) 1))))
    
    [(Ast.Str_value (Ast.NonRecursive,
          [((Ast.Pat_var "recfac"),
@@ -102,7 +102,7 @@
 
   $ dune exec parser < manytests/typed/001fac.ml
   let rec fac  = 
-  (fun n -> (if ((<=)  n) 1 then 1  else  ((*)  n) (fac (((-)  n) 1)) ))
+  (fun n -> (if ((<=)  n) 1 then 1  else  (*)  n (fac (((-)  n) 1))))
   let main =  (let () = print_int (fac  4) in  0)
    
    [(Ast.Str_value (Ast.Recursive,
@@ -144,9 +144,9 @@
   (fun n ->
     (fun k ->
       (if ((=)  n) 1 then k  1  else  
-        (fac_cps (((-)  n) 1)) ((fun p -> k (((*)  p) n))) )))
+        fac_cps (((-)  n) 1) ((fun p -> k (((*)  p) n))))))
   let main = 
-  (let () = print_int ((fac_cps  4) ((fun print_int -> print_int)) ) in  0)
+  (let () = print_int (fac_cps  4 ((fun print_int -> print_int))) in  0)
    
    [(Ast.Str_value (Ast.Recursive,
          [((Ast.Pat_var "fac_cps"),
@@ -206,7 +206,7 @@
            (let ab = ((+)  a) b in  ((fib_acc  b) ab) n1))))))
   let rec fib  = 
   (fun n ->
-    (if ((<)  n) 2 then n  else  ((+) (fib (((-)  n) 1))) (fib (((-)  n) 2)) ))
+    (if ((<)  n) 2 then n  else  (+) (fib (((-)  n) 1)) (fib (((-)  n) 2))))
   let main = 
   (let () = print_int (((fib_acc  0) 1) 4) in 
    (let () = print_int (fib  4) in  0))
@@ -494,7 +494,7 @@
   let rec fix  =  (fun f -> (fun x -> (f (fix  f)) x))
   let fac = 
   (fun self ->
-    (fun n -> (if ((<=)  n) 1 then 1  else  ((*)  n) (self (((-)  n) 1)) )))
+    (fun n -> (if ((<=)  n) 1 then 1  else  (*)  n (self (((-)  n) 1)))))
   let main =  (let () = print_int ((fix  fac) 6) in  0)
    
    [(Ast.Str_value (Ast.Recursive,
@@ -554,8 +554,7 @@
   let foo = 
   (fun b ->
     (if b then (fun foo -> ((+)  foo) 2)  else  (fun foo -> ((*)  foo) 10)))
-  let foo = 
-  (fun x -> (foo  true) ((foo  false) ((foo  true) ((foo  false) x) ) ) )
+  let foo =  (fun x -> foo  true (foo  false (foo  true ((foo  false) x))))
   let main =  (let () = print_int (foo  11) in  0)
    
    [(Ast.Str_value (Ast.NonRecursive,
@@ -620,7 +619,7 @@
       (fun c ->
         (let () = print_int  a in 
          (let () = print_int  b in 
-          (let () = print_int  c in  ((+)  a) (((*)  b) c) ))))))
+          (let () = print_int  c in  (+)  a (((*)  b) c)))))))
   let main = 
   (let foo = foo  1 in 
    (let foo = foo  2 in 
@@ -744,8 +743,8 @@
                      (let () = print_int  __ in 
                       ((+) (((/) (((*)  a) b)) _c)) d))))) ))) )) ) 
   let main = 
-  print_int (((((((((_start (print_int  1)) (print_int  2) ) 3) (print_int  4) ) 100) 1000) (
-               print_int  -1) ) 10000) -555555)
+  print_int ((((((_start (print_int  1) (print_int  2)) 3 (print_int  4)) 100) 1000 (
+               print_int  -1)) 10000) -555555)
    
    [(Ast.Str_value (Ast.NonRecursive,
          [((Ast.Pat_var "_start"),
@@ -840,13 +839,12 @@
        ]
 
   $ dune exec parser < manytests/typed/008ascription.ml
-  let addi = 
-  (fun f -> (fun g -> (fun x -> (((f  x) (((g  x) : bool)) ) : int))))
+  let addi =  (fun f -> (fun g -> (fun x -> ((f  x (((g  x) : bool))) : int))))
   let main = 
-  (let () = print_int (((addi ((fun x ->
-                                 (fun b ->
-                                   (if b then ((+)  x) 1  else  ((*)  x) 2))))) (
-                        (fun _start -> ((=) (((/)  _start) 2)) 0)) ) 4) in 
+  (let () = print_int ((addi ((fun x ->
+                                (fun b ->
+                                  (if b then ((+)  x) 1  else  ((*)  x) 2)))) (
+                        (fun _start -> ((=) (((/)  _start) 2)) 0))) 4) in 
    0)
    
    [(Ast.Str_value (Ast.NonRecursive,
@@ -1146,7 +1144,7 @@
 
   $ dune exec parser < manytests/typed/016lists.ml
   let rec length  = 
-  (fun xs -> (match xs with | [] -> 0 | (h::tl)  -> ((+)  1) (length  tl)  ))
+  (fun xs -> (match xs with | [] -> 0 | (h::tl)  -> (+)  1 (length  tl) ))
   let length_tail = 
   (let rec helper = (fun acc ->
                       (fun xs ->
@@ -1178,8 +1176,8 @@
       (match xs with | [] -> ys | (x::xs)  -> (x)::((append  xs) ys)  )))
   let concat = 
   (let rec helper = (fun xs ->
-                      (match xs with | [] -> [] | (h::tl)  -> (append  h) (
-                                                              helper  tl) 
+                      (match xs with | [] -> [] | (h::tl)  -> append  h (
+                                                              helper  tl)
                                                  )) in 
    helper)
   let rec iter  = 
@@ -1189,15 +1187,14 @@
   let rec cartesian  = 
   (fun xs ->
     (fun ys ->
-      (match xs with | [] -> [] | (h::tl)  -> (append ((map ((fun a -> (h, a)))) ys)) (
-                                              (cartesian  tl) ys) 
+      (match xs with | [] -> [] | (h::tl)  -> append ((map ((fun a -> (h, a)))) ys) (
+                                              (cartesian  tl) ys)
                                  )))
   let main = 
-  (let () = (iter  print_int) ((1)::((2)::((3)::([]) ) ) )  in 
-   (let () = print_int (length ((cartesian ((1)::((2)::([]) ) )) ((1)::(
-                                                                    (2)::(
+  (let () = iter  print_int ((1)::((2)::((3)::([]) ) ) ) in 
+   (let () = print_int (length (cartesian ((1)::((2)::([]) ) ) ((1)::((2)::(
                                                                       (3)::(
-                                                                      (4)::([]) ) ) ) ) )) in 
+                                                                      (4)::([]) ) ) ) ))) in 
     0))
    
    [(Ast.Str_value (Ast.Recursive,

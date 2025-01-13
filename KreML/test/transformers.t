@@ -1,0 +1,12 @@
+  $ dune exec transformers < manytests/typed/001fac.ml
+  $ dune exec transformers < manytests/typed/002fac.ml
+  $ dune exec transformers < manytests/typed/003fib.ml
+  $ dune exec transformers < manytests/typed/004manyargs.ml
+  $ dune exec transformers < manytests/typed/005fix.ml
+  $ dune exec transformers < manytests/typed/006partial.ml
+  $ dune exec transformers < manytests/typed/006partial2.ml
+  $ dune exec transformers < manytests/typed/006partial3.ml
+  $ dune exec transformers < manytests/typed/008ascription.ml
+  $ dune exec transformers < manytests/typed/009let_poly.ml
+  $ dune exec transformers < manytests/typed/015tuples.ml
+  $ dune exec transformers < manytests/typed/016lists.ml
