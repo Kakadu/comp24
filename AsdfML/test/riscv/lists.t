@@ -46,18 +46,41 @@
   $ /tmp/lists
   [1, 2, 3]
 
-  $ dune exec riscv -- -o /tmp/lists.s <<- EOF
+  $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
   > let rec map f list = match list with
   > | [] -> []
   > | hd::tl -> (f hd) :: (map f tl)
   > let main = 
-  >   let sq = map (fun x -> x * x) in
+  >   let sq = (fun x -> x * x) in
   >   let x = [1;2;3] in
-  >   let res = sq x in
+  >   let res = map sq x in
   >   print_list res
   > EOF
+  ANF:
+  let map f list =
+         let a1 = `list_is_empty list in
+         if a1 
+         then [] 
+         else
+           let a3 = `list_hd list in
+           let a5 = `list_tl list in
+           let a10 = f a3 in
+           let a7 = ( :: ) a10 in
+           let a9 = map f in
+           let a8 = a9 a5 in
+           a7 a8
+  let `sq_4 x = let a12 = ( * ) x in
+    a12 x
+  let main =
+    let a13 = `sq_4 in
+    let a14 = [1; 2; 3] in
+    let a18 = map a13 in
+    let a16 = a18 a14 in
+    print_list a16
+  
   $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
+  [1, 4, 9]
 
 $ dune exec riscv -- -o /tmp/lists.s <<- EOF
 > let rec map = fun f -> fun list -> match list with
