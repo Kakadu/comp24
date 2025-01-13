@@ -92,9 +92,9 @@ let runtime : std list =
   ; { name = "`set_tuple_field"; typ = arg3; extern = "ml_set_tuple_field"; arity = 0 }
   ; { name = "`get_tuple_field"; typ = arg2; extern = "ml_get_tuple_field"; arity = 0 }
   ; { name = "`list_field"; typ = arg2; extern = "ml_list_field"; arity = 0 }
-  ; { name = "`list_hd"; typ = arg2; extern = "ml_list_hd"; arity = 0 }
-  ; { name = "`list_tl"; typ = arg2; extern = "ml_list_tl"; arity = 0 }
-  ; { name = "`list_is_empty"; typ = arg2; extern = "ml_list_is_empty"; arity = 0 }
+  ; { name = "`list_hd"; typ = arg1; extern = "ml_list_hd"; arity = 0 }
+  ; { name = "`list_tl"; typ = arg1; extern = "ml_list_tl"; arity = 0 }
+  ; { name = "`list_is_empty"; typ = arg1; extern = "ml_list_is_empty"; arity = 0 }
   ; { name = "`create_closure"; typ = arg2; extern = "create_closure"; arity = 0 }
   ; { name = "(TODO: check cons pattern)"; typ = arg2; extern = "TODO:remove"; arity = 0 }
   ]
