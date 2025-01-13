@@ -47,13 +47,17 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
     anf_expr env expr (fun imm_expr ->
       let* body = anf_expr new_env body cont in
       return (ALet (name, CImmExpr imm_expr, body)))
-  | CFTuple xs ->
+  | (CFTuple xs | CFList xs) as exp ->
+    let[@warning "-8"] constr x =
+      match exp with
+      | CFTuple _ -> ImmTuple x
+      | CFList _ -> ImmList x
+    in
     let rec helper acc = function
-      | [] -> cont (ImmTuple (List.rev acc))
+      | [] -> cont (constr (List.rev acc))
       | x :: xs -> anf_expr env x (fun x -> helper (x :: acc) xs)
     in
     helper [] xs
-  | CFList xs -> failwith "todo: CFList"
 ;;
 
 let anf_def env (def : cf_definition) =
@@ -90,7 +94,7 @@ let remove_useless_bindings =
         Hashtbl.set remaps ~key:id1 ~data:id2;
         useless_a a
       | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
-        ACExpr (useless_c c) 
+        ACExpr (useless_c c)
       | ALet (id, c, a) -> ALet (id, useless_c c, useless_a a)
       | ACExpr c -> ACExpr (useless_c c)
     in

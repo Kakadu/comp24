@@ -72,12 +72,13 @@ let stdlib : std list =
   ; { name = "not"; typ = bool_typ ^-> bool_typ; extern = "ml_not"; arity = 0 }
   ; { name = "( :: )"
     ; typ = dummy_ty ^-> TList dummy_ty ^-> TList dummy_ty
-    ; extern = "ml_cons"
+    ; extern = "ml_list_cons"
     ; arity = 0
     }
   ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int"; arity = 0 }
   ; { name = "print_bool"; typ = bool_typ ^-> unit_typ; extern = "ml_print_bool"; arity = 0 }
   ; { name = "print_tuple"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_tuple"; arity = 0 }
+  ; { name = "print_list"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_list"; arity = 0 }
   ]
   |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
