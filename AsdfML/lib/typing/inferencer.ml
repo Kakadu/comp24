@@ -519,14 +519,21 @@ let strip_annots (prog : Tast.tdefinition list) =
       | PCons (l, r) -> PCons (strip_pat l, strip_pat r)
       | pat -> pat
   in
-  let strip_expr = function
-    | TEFun (ty, pats, exp) -> TEFun (ty, List.map pats ~f:strip_pat, exp)
+  let rec strip_expr = function
+    | TEFun (ty, pats, exp) -> TEFun (ty, List.map pats ~f:strip_pat, strip_expr exp)
     | TEMatch (ty, expr, pes) ->
-      TEMatch (ty, expr, List.map pes ~f:(fun (pat, exp) -> strip_pat pat, exp))
+      TEMatch (ty, expr, List.map pes ~f:(fun (pat, exp) -> strip_pat pat, strip_expr exp))
+    (* | expr -> expr *)
+    | TEApp (ty, l, r) -> TEApp (ty, strip_expr l, strip_expr r)
+    | TEIfElse (ty, i, t, e) -> TEIfElse (ty, strip_expr i, strip_expr t, strip_expr e)
+    | TELetIn (ty, def, body) -> TELetIn (ty, strip_def def, strip_expr body)
+    | TETuple (ty, xs) -> TETuple (ty, List.map xs ~f:strip_expr)
+    | TEList (ty, xs) -> TEList (ty, List.map xs ~f:strip_expr)
     | expr -> expr
+  and strip_def = function
+    | TDLet (ty, flag, pat, exp) -> TDLet (ty, flag, strip_pat pat, strip_expr exp)
   in
-  List.map prog ~f:(function TDLet (ty, flag, pat, exp) ->
-    TDLet (ty, flag, strip_pat pat, strip_expr exp))
+  List.map prog ~f:strip_def
 ;;
 
 let infer_program (prog : Ast.definition list) =
