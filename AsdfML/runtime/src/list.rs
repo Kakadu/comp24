@@ -47,6 +47,14 @@ pub extern "C" fn ml_list_field(list_ptr: *mut List, idx: usize) -> isize {
 }
 
 #[no_mangle]
+pub extern "C" fn ml_list_is_empty(list_ptr: *mut List) -> isize {
+    let list = unsafe { Box::from_raw(list_ptr) };
+    let res = (list.len() == 0) as isize;
+    let _ = Box::into_raw(list);
+    res
+}
+
+#[no_mangle]
 pub extern "C" fn ml_print_list(list_ptr: *mut List) {
     let list = unsafe { Box::from_raw(list_ptr) };
     println!("{:?}", list);
