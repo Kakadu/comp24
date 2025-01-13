@@ -80,8 +80,9 @@ let default_env =
 ;;
 
 (** Removes `let ax = ... in ax` and `let ax = ay in ...` *)
-let remove_useless_bindings =
+let remove_useless_bindings fn =
   let remaps = Hashtbl.create (module String) in
+  Hashtbl.clear remaps;
   let useless =
     let rec useless_c = function
       | CIfElse (c, a1, a2) -> CIfElse (c, useless_a a1, useless_a a2)
@@ -118,7 +119,7 @@ let remove_useless_bindings =
     function
     | Fn (id, args, a) -> Fn (id, args, remap_a a)
   in
-  Fn.compose remap useless
+  remap (useless fn)
 ;;
 
 let anf (ast : Cf_ast.program) : Anf_ast.program =
