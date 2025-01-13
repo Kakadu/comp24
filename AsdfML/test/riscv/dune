@@ -1,0 +1,12 @@
+(executable
+ (name riscv)
+ (modules riscv)
+ (public_name riscv)
+ (instrumentation
+  (backend bisect_ppx))
+ (libraries AsdfML.Lib test))
+
+(cram
+ (deps %{bin:riscv}
+ ../../runtime/libruntime.a
+ ))

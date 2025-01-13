@@ -28,6 +28,14 @@ let counter_next () =
   n
 ;;
 
+(* TODO:
+   - cps factorial: fails if id cont is passed directly to helper
+     (attempts to call apply_closure on helper's closure without loading it in a0)
+   - CFApp/CApp with multiple arguments
+   - direct calls when possible
+   - direct math
+*)
+
 let rec gen_imm fn_args env dest = function
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
@@ -45,13 +53,15 @@ let rec gen_imm fn_args env dest = function
        let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
        emit comment (Format.sprintf "Creating closure for %s" id);
        let x = emit_fn_call "create_closure" [ AsmFn id; AsmInt n_args ] in
-       emit_load dest (AsmReg x)
+       emit_load dest (AsmReg x) ~comm:id
      | None ->
        (match Map.find env id with
-        | Some x -> emit_load dest (AsmReg x)
+        | Some x -> emit_load dest (AsmReg x) ~comm:id
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> failwith "todo: ImmUnit"
-  | ImmNil -> failwith "todo: ImmNil"
+  | ImmNil ->
+    let list = emit_fn_call "ml_create_list" [] in
+    emit_load dest (AsmReg list)
   | ImmTuple xs ->
     let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length xs) ] in
     let tuple = emit_store tuple ~comm:"tuple" in
@@ -61,14 +71,17 @@ let rec gen_imm fn_args env dest = function
       emit_load_2 (AsmReg tuple) (AsmReg res));
     emit_load dest (AsmReg tuple)
   | ImmList xs ->
-    failwith "todo: ImmList"
+    let list = emit_fn_call "ml_create_list" [] in
+    let list = emit_store list ~comm:"list" in
+    xs
+    |> List.rev
+    |> List.iteri ~f:(fun i x ->
+      gen_imm fn_args env a1 x;
+      let res = emit_fn_call "ml_list_cons" [ AsmReg list; AsmReg a1 ] in
+      emit_load_2 (AsmReg list) (AsmReg res));
+    emit_load dest (AsmReg list)
 
 and gen_cexpr fn_args env dest = function
-  (* TODO:
-     CFApp/CApp with multiple arguments
-     direct calls when possible
-     direct math
-  *)
   | CApp (fn, arg) ->
     gen_imm fn_args env a0 fn;
     gen_imm fn_args env a1 arg;
@@ -102,7 +115,6 @@ and gen_fn fn_args = function
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
     (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
     let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in
-    (* dbg "FN %d: %a\n" n_bindings Anf_ast.pp_fn fn; *)
     let args_loc = emit_fn_decl id args stack_size in
     if String.equal id "main" then emit call "runtime_init";
     let env =
@@ -147,9 +159,9 @@ let peephole (code : (instr * string) Queue.t) =
   code |> Queue.to_list |> helper |> Queue.of_list
 ;;
 
-let compile ?(out_file = "/tmp/out.s") (ast : Anf_ast.program) =
+let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.program) =
   let open Format in
-  dbg "ANF: %a\n" pp_program ast;
+  if print_anf then Format.printf "ANF:\n%a\n" Anf_ast.pp_program ast;
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     let fn_args = init_env ast in
