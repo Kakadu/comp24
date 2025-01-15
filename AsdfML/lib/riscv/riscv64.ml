@@ -34,6 +34,7 @@ let counter_next () =
    - CFApp/CApp with multiple arguments
    - direct calls when possible
    - direct math
+   - gen_imm may rewrite a0 a1 a2
 *)
 
 let rec gen_imm fn_args env dest = function
@@ -43,11 +44,7 @@ let rec gen_imm fn_args env dest = function
     (* dbg "FN_ARGS: %s\n" (pp_fn_args fn_args);
        dbg "ENV: %s\n" (pp_env env);
        dbg "lookup %s = %b\n" id (Map.find fn_args id |> Option.is_some); *)
-    let id =
-      match Std.lookup_extern id with
-      | Some (fn, _) -> fn
-      | None -> id
-    in
+    let id = Std.lookup_extern id |> Option.value ~default:id in
     (match Map.find fn_args id with
      | Some n_args ->
        let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
@@ -82,10 +79,15 @@ let rec gen_imm fn_args env dest = function
     emit_load dest (AsmReg list)
 
 and gen_cexpr fn_args env dest = function
-  | CApp (fn, arg) ->
+  | CApp (fn, args) ->
     gen_imm fn_args env a0 fn;
-    gen_imm fn_args env a1 arg;
-    let closure = emit_fn_call "apply_closure" [ AsmReg a0; AsmReg a1 ] in
+    let n_args = List.length args in
+    let a = List.take (List.tl_exn arg_regs) n_args in
+    List.zip_exn args a |> List.iter ~f:(fun (arg, reg) -> gen_imm fn_args env reg arg);
+    let app_clos = Format.sprintf "apply_closure_%d" n_args in
+    let closure =
+      emit_fn_call app_clos (AsmReg a0 :: List.map a ~f:(fun x -> AsmReg x))
+    in
     emit_load dest (AsmReg closure)
   | CIfElse (ImmBool true, then_, _) -> gen_aexpr fn_args env dest then_
   | CIfElse (ImmBool false, _, else_) -> gen_aexpr fn_args env dest else_
