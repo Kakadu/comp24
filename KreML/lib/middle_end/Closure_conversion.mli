@@ -3,7 +3,7 @@ open Ast
 module Closure_env : sig
   type t
 
-  val lookup : ident -> expr
+  val lookup : t -> ident -> expr
 end
 
 type lambda =
