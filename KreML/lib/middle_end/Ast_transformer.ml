@@ -192,16 +192,9 @@ module Anf_transformer = struct
     | Expr_tuple (fst, snd, rest) ->
       transform_expr fst (fun fst' ->
         transform_expr snd (fun snd' ->
-          let* rest' =
-            List.fold_right
-              (fun e acc ->
-                let* acc = acc in
-                let* e' = transform_expr e return in
-                return (e' :: acc))
-              rest
-              (return [])
-          in
-          Expr_tuple (fst', snd', rest') |> k))
+          transform_list rest
+           (fun rest' -> Expr_tuple(fst', snd', rest'))
+           k))
     | Expr_fun (p, e) ->
       let* e' = transform_expr e return in
       Expr_fun (p, e') |> k
@@ -222,6 +215,13 @@ module Anf_transformer = struct
             (return [])
         in
         Expr_match (e', cases) |> k)
+  and transform_list l unifier k =
+    let rec helper acc l unifier =
+    match l with
+    | [] -> List.rev acc |> unifier |> k
+    | x::xs ->
+      transform_expr x (fun x' -> helper (x'::acc) xs unifier)
+      in helper [] l unifier
   ;;
 
   let transform_structure s =
@@ -239,7 +239,6 @@ module Anf_transformer = struct
   ;;
 end
 
-module CC = struct end
 
 let transform_structure s =
   let alpha_s = Alpha_transformer.transform_structure s in
