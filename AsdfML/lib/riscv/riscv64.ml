@@ -30,11 +30,10 @@ let counter_next () =
 
 (* TODO:
    - cps factorial: fails if id cont is passed directly to helper
-     (attempts to call apply_closure on helper's closure without loading it in a0)
-   - CFApp/CApp with multiple arguments
+     (attempts to call apply_closure on helper's closure without loading cont in a0)
    - direct calls when possible
-   - direct math
    - gen_imm may rewrite a0 a1 a2
+   - direct math should check if ops were redefined
 *)
 
 let rec gen_imm fn_args env dest = function
