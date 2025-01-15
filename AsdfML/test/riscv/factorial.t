@@ -4,18 +4,14 @@
   > EOF
   ANF:
   let fact x =
-         let a7 = ( < ) x in
-         let a1 = a7 2 in
+         let a1 = ( < ) x 2 in
          if a1 
          then 1 
-         else
-           let a3 = ( * ) x in
-           let a6 = ( - ) x in
-           let a5 = a6 1 in
-           let a4 = fact a5 in
-           a3 a4
-  let main = let a9 = fact 5 in
-    print_int a9
+         else let a4 = ( - ) x 1 in
+           let a3 = fact a4 in
+           ( * ) x a3
+  let main = let a6 = fact 5 in
+    print_int a6
   
   $ cat /tmp/factorial.s
   
@@ -23,57 +19,42 @@
       .type fact, @function
   fact:
       # args: x
-      addi sp,sp,-80
-      sd ra,80(sp)
-      sd s0,72(sp)
-      addi s0,sp,64  # Prologue ends
+      addi sp,sp,-56
+      sd ra,56(sp)
+      sd s0,48(sp)
+      addi s0,sp,40  # Prologue ends
       sd a0,0(s0)  # x
       # Creating closure for ml_lt
       la a0,ml_lt
       li a1,2
       call create_closure
       ld a1,0(s0)  # x
-      call apply_closure
-      sd a0,-8(s0)  # a7
-      li a1,2
-      call apply_closure
-      sd a0,-16(s0)  # a1
-      ld t0,-16(s0)  # a1
+      li a2,2
+      call apply_closure_2
+      sd a0,-8(s0)  # a1
+      ld t0,-8(s0)  # a1
       beq t0,zero,.else_0
       li a0,1
       j .end_0
   .else_0:
-      # Creating closure for ml_mul
-      la a0,ml_mul
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      call apply_closure
-      sd a0,-24(s0)  # a3
-      # Creating closure for ml_sub
-      la a0,ml_sub
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      call apply_closure
-      sd a0,-32(s0)  # a6
-      li a1,1
-      call apply_closure
-      sd a0,-40(s0)  # a5
+      ld t0,0(s0)  # x
+      li t1,1
+      sub a0,t0,t1
+      sd a0,-16(s0)  # a4
       # Creating closure for fact
       la a0,fact
       li a1,1
       call create_closure
-      ld a1,-40(s0)  # a5
-      call apply_closure
-      sd a0,-48(s0)  # a4
-      ld a0,-24(s0)  # a3
-      ld a1,-48(s0)  # a4
-      call apply_closure
+      ld a1,-16(s0)  # a4
+      call apply_closure_1
+      sd a0,-24(s0)  # a3
+      ld t0,0(s0)  # x
+      ld t1,-24(s0)  # a3
+      mul a0,t0,t1
   .end_0:
-      ld s0,72(sp)  # Epilogue starts
-      ld ra,80(sp)
-      addi sp,sp,80
+      ld s0,48(sp)  # Epilogue starts
+      ld ra,56(sp)
+      addi sp,sp,56
       ret
   
       .globl main
@@ -89,14 +70,14 @@
       li a1,1
       call create_closure
       li a1,5
-      call apply_closure
-      sd a0,0(s0)  # a9
+      call apply_closure_1
+      sd a0,0(s0)  # a6
       # Creating closure for ml_print_int
       la a0,ml_print_int
       li a1,1
       call create_closure
-      ld a1,0(s0)  # a9
-      call apply_closure
+      ld a1,0(s0)  # a6
+      call apply_closure_1
       ld s0,24(sp)  # Epilogue starts
       ld ra,32(sp)
       addi sp,sp,32
@@ -119,29 +100,21 @@
   > let main = print_int (fact 5)
   > EOF
   ANF:
-  let `ll_2 cont n res = let a2 = ( * ) n in
-         let a1 = a2 res in
+  let `ll_2 cont n res = let a1 = ( * ) n res in
          cont a1
   let `helper_1 n cont =
-    let a12 = ( <= ) n in
-    let a4 = a12 1 in
-    if a4 
+    let a3 = ( <= ) n 1 in
+    if a3 
     then cont 1 
-    else
-      let a11 = ( - ) n in
-      let a10 = a11 1 in
-      let a7 = `helper_1 a10 in
-      let a9 = `ll_2 cont in
-      let a8 = a9 n in
-      a7 a8
+    else let a6 = ( - ) n 1 in
+      let a7 = `ll_2 cont n in
+      `helper_1 a6 a7
   let `id_3 x = x
-  let fact n =
-    let a13 = `helper_1 in
-    let a14 = `id_3 in
-    let a16 = a13 n in
-    a16 a14
-  let main = let a18 = fact 5 in
-    print_int a18
+  let fact n = let a8 = `helper_1 in
+    let a9 = `id_3 in
+    a8 n a9
+  let main = let a12 = fact 5 in
+    print_int a12
   
   $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
