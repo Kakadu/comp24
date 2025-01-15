@@ -18,7 +18,6 @@ let rec map f xs =
   | a::b::[] -> [f a; f b]
   | a::b::c::[] -> [f a; f b; f c]
   | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
-
 let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
 
 let concat =
