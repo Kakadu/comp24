@@ -64,6 +64,8 @@ and case = pattern * expr [@@deriving show]
 type structure_item = Str_value of rec_flag * binding list [@@deriving show]
 type structure = structure_item list [@@deriving show]
 
+let evar id = Expr_var(id)
+
 let eapp func args =
   Base.List.fold_left args ~init:func ~f:(fun acc arg -> Expr_app (acc, arg))
 ;;

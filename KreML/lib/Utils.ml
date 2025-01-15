@@ -37,6 +37,10 @@ end
 
 module Counter = State (struct type t = int end)
 
+let fresh_num : int Counter.t =
+  let open Counter in
+  get >>= fun curr ->
+  put (curr + 1) >>= fun u -> return u
 
 let fresh_name base : string Counter.t =
   let open Counter in
