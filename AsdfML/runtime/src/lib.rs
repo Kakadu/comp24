@@ -1,15 +1,16 @@
 #![feature(box_as_ptr)]
+#![allow(clippy::missing_safety_doc)]
 
-use env_logger;
 use log::LevelFilter;
 mod closure;
-mod list;
+mod ml_list;
 mod tuple;
 use std::io::Write;
+mod list;
 mod ops;
 
 pub use closure::*;
-pub use list::*;
+pub use ml_list::*;
 pub use ops::*;
 pub use tuple::*;
 
@@ -23,4 +24,20 @@ pub extern "C" fn runtime_init() {
         .parse_default_env()
         .try_init()
         .unwrap();
+}
+
+unsafe fn with_raw<T, F, R>(ptr: *mut T, func: F) -> R
+where F: Fn(&T) -> R {
+    let x = Box::from_raw(ptr);
+    let res = func(&x);
+    let _ = Box::into_raw(x);
+    res
+}
+
+unsafe fn with_raw_mut<T, F, R>(ptr: *mut T, func: F) -> R
+where F: Fn(&mut T) -> R {
+    let mut x = Box::from_raw(ptr);
+    let res = func(&mut x);
+    let _ = Box::into_raw(x);
+    res
 }
