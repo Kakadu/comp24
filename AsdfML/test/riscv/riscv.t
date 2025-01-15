@@ -87,13 +87,9 @@ $ /tmp/out
       sd a0,0(s0)  # a0
       li a0,2
       sd a0,-8(s0)  # a1
-      # Creating closure for ml_add
-      la a0,ml_add
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # a0
-      ld a2,-8(s0)  # a1
-      call apply_closure_2
+      ld t0,0(s0)  # a0
+      ld t1,-8(s0)  # a1
+      add a0,t0,t1
       sd a0,-16(s0)  # a3
       # Creating closure for ml_print_int
       la a0,ml_print_int
@@ -132,13 +128,9 @@ $ /tmp/out
       addi s0,sp,24  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
-      # Creating closure for ml_add
-      la a0,ml_add
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      ld a2,-8(s0)  # y
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      ld t1,-8(s0)  # y
+      add a0,t0,t1
       ld s0,32(sp)  # Epilogue starts
       ld ra,40(sp)
       addi sp,sp,40
@@ -206,13 +198,9 @@ $ /tmp/out
       addi s0,sp,24  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
-      # Creating closure for ml_add
-      la a0,ml_add
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      ld a2,-8(s0)  # y
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      ld t1,-8(s0)  # y
+      add a0,t0,t1
       ld s0,32(sp)  # Epilogue starts
       ld ra,40(sp)
       addi sp,sp,40
@@ -228,13 +216,9 @@ $ /tmp/out
       addi s0,sp,24  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
-      # Creating closure for ml_mul
-      la a0,ml_mul
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      ld a2,-8(s0)  # y
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      ld t1,-8(s0)  # y
+      mul a0,t0,t1
       ld s0,32(sp)  # Epilogue starts
       ld ra,40(sp)
       addi sp,sp,40
@@ -374,13 +358,9 @@ $ /tmp/out
       li a0,0
       j .end_1
   .else_1:
-      # Creating closure for ml_sub
-      la a0,ml_sub
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      li a2,2
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      li t1,2
+      sub a0,t0,t1
       sd a0,-24(s0)  # a5
       # Creating closure for is_even
       la a0,is_even
@@ -465,3 +445,66 @@ $ cat /tmp/out.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   7
+
+  $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
+  > let main = 
+  >   let res = (1 + 2) * 3 + 4 * (32 / (3 + 5)) in
+  >   print_int res
+  > EOF
+  ANF:
+  let main =
+         let a7 = ( + ) 1 2 in
+         let a3 = ( * ) a7 3 in
+         let a6 = ( + ) 3 5 in
+         let a5 = ( / ) 32 a6 in
+         let a4 = ( * ) 4 a5 in
+         let a1 = ( + ) a3 a4 in
+         print_int a1
+  
+  $ cat /tmp/out.s
+  
+      .globl main
+      .type main, @function
+  main:
+      addi sp,sp,-72
+      sd ra,72(sp)
+      sd s0,64(sp)
+      addi s0,sp,56  # Prologue ends
+      call runtime_init
+      li t0,1
+      li t1,2
+      add a0,t0,t1
+      sd a0,0(s0)  # a7
+      ld t0,0(s0)  # a7
+      li t1,3
+      mul a0,t0,t1
+      sd a0,-8(s0)  # a3
+      li t0,3
+      li t1,5
+      add a0,t0,t1
+      sd a0,-16(s0)  # a6
+      li t0,32
+      ld t1,-16(s0)  # a6
+      div a0,t0,t1
+      sd a0,-24(s0)  # a5
+      li t0,4
+      ld t1,-24(s0)  # a5
+      mul a0,t0,t1
+      sd a0,-32(s0)  # a4
+      ld t0,-8(s0)  # a3
+      ld t1,-32(s0)  # a4
+      add a0,t0,t1
+      sd a0,-40(s0)  # a1
+      # Creating closure for ml_print_int
+      la a0,ml_print_int
+      li a1,1
+      call create_closure
+      ld a1,-40(s0)  # a1
+      call apply_closure_1
+      ld s0,64(sp)  # Epilogue starts
+      ld ra,72(sp)
+      addi sp,sp,72
+      ret
+  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ /tmp/out
+  25
