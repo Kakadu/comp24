@@ -84,6 +84,7 @@ and case = pattern * expr [@@deriving show]
 type structure_item = Str_value of rec_flag * binding list [@@deriving show]
 type structure = structure_item list [@@deriving show]
 
+val evar : ident -> expr
 val eapp : expr -> expr list -> expr
 val econs : expr -> expr -> expr
 val enil : expr
