@@ -216,12 +216,12 @@ module Anf_transformer = struct
         in
         Expr_match (e', cases) |> k)
   and transform_list l unifier k =
-    let rec helper acc l unifier =
+    let rec helper acc l =
     match l with
     | [] -> List.rev acc |> unifier |> k
     | x::xs ->
-      transform_expr x (fun x' -> helper (x'::acc) xs unifier)
-      in helper [] l unifier
+      transform_expr x (fun x' -> helper (x'::acc) xs)
+      in helper [] l
   ;;
 
   let transform_structure s =
