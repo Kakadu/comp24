@@ -79,6 +79,11 @@ let rec gen_imm fn_args env dest = function
     emit_load dest (AsmReg list)
 
 and gen_cexpr fn_args env dest = function
+  | CApp (ImmId fn, args)
+  when is_direct_math_op fn ->
+    gen_imm fn_args env t0 (List.nth_exn args 0); 
+    gen_imm fn_args env t1 (List.nth_exn args 1); 
+    emit_direct_math dest fn [ t0; t1 ]
   | CApp (fn, args) ->
     gen_imm fn_args env a0 fn;
     let n_args = List.length args in
