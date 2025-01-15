@@ -35,10 +35,8 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let a = let a3 = ( + ) 1 in
-      let a2 = a3 2 in
-      let a1 = ( - ) a2 in
-      a1 42
+    let a = let a1 = ( + ) 1 2 in
+      ( - ) a1 42
     |}]
 ;;
 
@@ -53,8 +51,7 @@ let%expect_test _ =
     {|
     let a = let a0 = 1 in
       let a1 = 2 in
-      let a3 = ( + ) a0 in
-      a3 a1
+      ( + ) a0 a1
     |}]
 ;;
 
@@ -69,18 +66,14 @@ let%expect_test _ =
     FV in fact: {}
 
     let fact x =
-      let a7 = ( < ) x in
-      let a1 = a7 2 in
+      let a1 = ( < ) x 2 in
       if a1
       then 1
-      else
-        let a3 = ( * ) x in
-        let a6 = ( - ) x in
-        let a5 = a6 1 in
-        let a4 = fact a5 in
-        a3 a4
-    let main = let a9 = fact 5 in
-      print_int a9
+      else let a4 = ( - ) x 1 in
+        let a3 = fact a4 in
+        ( * ) x a3
+    let main = let a6 = fact 5 in
+      print_int a6
     |}]
 ;;
 
@@ -112,25 +105,18 @@ let%expect_test _ =
     (fun x -> x)
     FV in helper: {}
 
-    let `ll_2 cont n res = let a2 = ( * ) n in
-      let a1 = a2 res in
+    let `ll_2 cont n res = let a1 = ( * ) n res in
       cont a1
     let `helper_1 n cont =
-      let a12 = ( <= ) n in
-      let a4 = a12 1 in
-      if a4
+      let a3 = ( <= ) n 1 in
+      if a3
       then cont 1
-      else
-        let a11 = ( - ) n in
-        let a10 = a11 1 in
-        let a7 = `helper_1 a10 in
-        let a9 = `ll_2 cont in
-        let a8 = a9 n in
-        a7 a8
+      else let a6 = ( - ) n 1 in
+        let a7 = `ll_2 cont n in
+        `helper_1 a6 a7
     let `ll_3 x = x
-    let fact n = let a13 = `helper_1 in
-      let a15 = a13 n in
-      a15 `ll_3
+    let fact n = let a8 = `helper_1 in
+      a8 n `ll_3
     |}]
 ;;
 
@@ -154,11 +140,9 @@ let%expect_test _ =
       then
         let a2 = `list_hd list in
         let a4 = `list_tl list in
-        let a9 = f a2 in
-        let a6 = ( :: ) a9 in
-        let a8 = map f in
-        let a7 = a8 a4 in
-        a6 a7
+        let a6 = f a2 in
+        let a7 = map f a4 in
+        ( :: ) a6 a7
       else []
     |}]
 ;;
@@ -180,60 +164,44 @@ let%expect_test _ =
     |};
   [%expect
     {|
-     FVs [] in fun
-     (fun `arg_8 `arg_9 -> let `tuple = `arg_9
-      in let z2 = (`get_tuple_field `tuple 2)
-      in let y2 = (`get_tuple_field `tuple 1)
-      in let x2 = (`get_tuple_field `tuple 0)
-      in let `tuple = `arg_8
-      in let z1 = (`get_tuple_field `tuple 2)
-      in let y1 = (`get_tuple_field `tuple 1)
-      in let x1 = (`get_tuple_field `tuple 0)
-      in let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))
-      in let y = (( - ) (( * ) z1 x2) (( * ) x1 z2))
-      in let z = (( - ) (( * ) x1 y2) (( * ) y1 x2))
-      in (x, y, z))
- 
-     let cross `arg_8 `arg_9 =
-       let a0 = `arg_9 in
-       let a40 = `get_tuple_field a0 in
-       let a2 = a40 2 in
-       let a39 = `get_tuple_field a0 in
-       let a4 = a39 1 in
-       let a38 = `get_tuple_field a0 in
-       let a6 = a38 0 in
-       let a7 = `arg_8 in
-       let a37 = `get_tuple_field a7 in
-       let a9 = a37 2 in
-       let a36 = `get_tuple_field a7 in
-       let a11 = a36 1 in
-       let a35 = `get_tuple_field a7 in
-       let a13 = a35 0 in
-       let a34 = ( * ) a11 in
-       let a33 = a34 a2 in
-       let a30 = ( - ) a33 in
-       let a32 = ( * ) a9 in
-       let a31 = a32 a4 in
-       let a15 = a30 a31 in
-       let a29 = ( * ) a9 in
-       let a28 = a29 a6 in
-       let a25 = ( - ) a28 in
-       let a27 = ( * ) a13 in
-       let a26 = a27 a2 in
-       let a17 = a25 a26 in
-       let a24 = ( * ) a13 in
-       let a23 = a24 a4 in
-       let a20 = ( - ) a23 in
-       let a22 = ( * ) a11 in
-       let a21 = a22 a6 in
-       let a19 = a20 a21 in
-       (a15, a17, a19)
-     let main =
-       let a41 = (1, 2, 3) in
-       let a42 = (4, 5, 6) in
-       let a46 = cross a41 in
-       let a44 = a46 a42 in
-       print_tuple a44
+    FVs [] in fun
+    (fun `arg_8 `arg_9 -> let `tuple = `arg_9
+     in let z2 = (`get_tuple_field `tuple 2)
+     in let y2 = (`get_tuple_field `tuple 1)
+     in let x2 = (`get_tuple_field `tuple 0)
+     in let `tuple = `arg_8
+     in let z1 = (`get_tuple_field `tuple 2)
+     in let y1 = (`get_tuple_field `tuple 1)
+     in let x1 = (`get_tuple_field `tuple 0)
+     in let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))
+     in let y = (( - ) (( * ) z1 x2) (( * ) x1 z2))
+     in let z = (( - ) (( * ) x1 y2) (( * ) y1 x2))
+     in (x, y, z))
+
+    let cross `arg_8 `arg_9 =
+      let a0 = `arg_9 in
+      let a2 = `get_tuple_field a0 2 in
+      let a4 = `get_tuple_field a0 1 in
+      let a6 = `get_tuple_field a0 0 in
+      let a7 = `arg_8 in
+      let a9 = `get_tuple_field a7 2 in
+      let a11 = `get_tuple_field a7 1 in
+      let a13 = `get_tuple_field a7 0 in
+      let a24 = ( * ) a11 a2 in
+      let a25 = ( * ) a9 a4 in
+      let a15 = ( - ) a24 a25 in
+      let a22 = ( * ) a9 a6 in
+      let a23 = ( * ) a13 a2 in
+      let a17 = ( - ) a22 a23 in
+      let a20 = ( * ) a13 a4 in
+      let a21 = ( * ) a11 a6 in
+      let a19 = ( - ) a20 a21 in
+      (a15, a17, a19)
+    let main =
+      let a26 = (1, 2, 3) in
+      let a27 = (4, 5, 6) in
+      let a29 = cross a26 a27 in
+      print_tuple a29
     |}]
 ;;
 
@@ -257,10 +225,8 @@ let%expect_test _ =
       else
         let a3 = `list_hd list in
         let a5 = `list_tl list in
-        let a10 = f a3 in
-        let a7 = ( :: ) a10 in
-        let a9 = map f in
-        let a8 = a9 a5 in
-        a7 a8
+        let a7 = f a3 in
+        let a8 = map f a5 in
+        ( :: ) a7 a8
     |}]
 ;;

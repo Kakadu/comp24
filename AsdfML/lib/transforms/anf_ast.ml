@@ -13,7 +13,7 @@ type imm_expr =
 [@@deriving show { with_path = false }]
 
 type cexpr =
-  | CApp of imm_expr * imm_expr
+  | CApp of imm_expr * imm_expr list
   | CIfElse of imm_expr * aexpr * aexpr
   | CImmExpr of imm_expr
 [@@deriving show { with_path = false }]
@@ -56,7 +56,9 @@ let rec pp_imm_expr fmt = function
 ;;
 
 let rec pp_cexpr fmt = function
-  | CApp (e1, e2) -> fprintf fmt "%a %a" pp_imm_expr e1 pp_imm_expr e2
+  | CApp (e1, e2) -> 
+    fprintf fmt "%a" pp_imm_expr e1;
+    pp_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
   | CIfElse (c, t, e) ->
     fprintf fmt "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"pp_imm_expr c pp_aexpr t pp_aexpr e
   | CImmExpr e -> pp_imm_expr fmt e

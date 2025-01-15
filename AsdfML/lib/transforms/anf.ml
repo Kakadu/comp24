@@ -28,12 +28,30 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
           | Some v -> v
           | None -> Format.sprintf "(Variable %s not found)" x))
     (* TODO ^^^ *)
+  | CFApp (CFApp (_, _), _) as app ->
+    let* name = new_var () in
+    let* body = cont (ImmId name) in
+    let[@warning "-8"] rec collect_args acc = function
+      | CFApp ((CFApp _ as inner), a) -> collect_args (a :: acc) inner
+      | CFApp (f, a) -> f, a :: acc
+    in
+    let func, args = collect_args [] app in
+    anf_expr env func (fun imm_func ->
+      let rec anf_args args cont =
+        match args with
+        | [] -> cont []
+        | head :: tail ->
+          anf_expr env head (fun imm_arg ->
+            anf_args tail (fun anf_args -> cont (imm_arg :: anf_args)))
+      in
+      anf_args args (fun imm_args ->
+        return (ALet (name, CApp (imm_func, imm_args), body))))
   | CFApp (func, arg) ->
     let* name = new_var () in
     let* body = cont (ImmId name) in
     anf_expr env func (fun imm_func ->
       anf_expr env arg (fun imm_arg ->
-        return (ALet (name, CApp (imm_func, imm_arg), body))))
+        return (ALet (name, CApp (imm_func, [ imm_arg ]), body))))
   | CFIfElse (i, t, e) ->
     let* name = new_var () in
     let* body = cont (ImmId name) in
@@ -110,7 +128,7 @@ let remove_useless_bindings fn =
       | x -> x
     and remap_c = function
       | CIfElse (c, a1, a2) -> CIfElse (remap_i c, remap_a a1, remap_a a2)
-      | CApp (i1, i2) -> CApp (remap_i i1, remap_i i2)
+      | CApp (i1, i2) -> CApp (remap_i i1, List.map i2 ~f:remap_i)
       | CImmExpr i -> CImmExpr (remap_i i)
     and remap_a = function
       | ALet (id, c, a) -> ALet (id, remap_c c, remap_a a)
