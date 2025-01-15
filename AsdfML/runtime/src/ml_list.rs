@@ -1,40 +1,54 @@
+use std::rc::Rc;
+
 use log::debug;
 
-use crate::{list::List, with_raw};
+use crate::{cons_list::ConsList, WithRaw};
 
-pub type MlList = List<isize>;
+pub type MlList = ConsList<isize>;
 
 #[no_mangle]
-pub extern "C" fn ml_create_list() -> *mut MlList {
-    let list = Box::new(MlList::new());
-    debug!("Created list at {:?}", Box::as_ptr(&list));
-    Box::into_raw(list)
+pub extern "C" fn ml_create_list() -> *const MlList {
+    let list = ConsList::new();
+    debug!("Created list at {:?}", Rc::as_ptr(&list));
+    Rc::into_raw(list)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ml_list_cons(list_ptr: *mut MlList, value: isize) -> *mut MlList {
-    let new_list = with_raw(list_ptr, |list| {
-        debug!("Cons {} to list {:?} at {:?}", value, list, list_ptr);
-        Box::new(list.prepend(value))
+pub unsafe extern "C" fn ml_list_cons(value: isize, list_ptr: *const MlList) -> *const MlList {
+    let list = Rc::from_raw(list_ptr);
+    debug!("Cons {} to list {} at {:?}", value, list, list_ptr);
+    let new_list = ConsList::cons(value, list);
+    debug!("New head at {:?}", Rc::as_ptr(&new_list));
+    Rc::into_raw(new_list)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ml_list_hd(list_ptr: *const MlList) -> isize {
+    Rc::with_raw_ref(list_ptr, |list| {
+        debug!("Head of list {} at {:?}", list, list_ptr);
+        *list.head().expect("ml_list_hd: empty list")
+    })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ml_list_tl(list_ptr: *const MlList) -> *const MlList {
+    let tail = Rc::with_raw_ref(list_ptr, |list| {
+        let tail = list.tail().expect("ml_list_tl: empty list");
+        debug!(
+            "Tail of list {} at {:?} is {} at {:?}",
+            list,
+            list_ptr,
+            tail,
+            Rc::as_ptr(&tail)
+        );
+        tail
     });
-    debug!("New list at {:?}", Box::as_ptr(&new_list));
-    Box::into_raw(new_list)
+    Rc::into_raw(tail)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ml_list_hd(list_ptr: *mut MlList) -> isize {
-    with_raw(list_ptr, |list| *list.head().expect("ml_list_hd: empty list"))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ml_list_tl(list_ptr: *mut MlList) -> *mut MlList {
-    let tail = with_raw(list_ptr, |list| Box::new(list.tail()));
-    Box::into_raw(tail)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn ml_list_field(list_ptr: *mut MlList, idx: usize) -> isize {
-    with_raw(list_ptr, |list| {
+pub unsafe extern "C" fn ml_list_field(list_ptr: *const MlList, idx: usize) -> isize {
+    Rc::with_raw_ref(list_ptr, |list| {
         list.iter()
             .enumerate()
             .find(|(i, _)| *i == idx)
@@ -44,13 +58,13 @@ pub unsafe extern "C" fn ml_list_field(list_ptr: *mut MlList, idx: usize) -> isi
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ml_list_is_empty(list_ptr: *mut MlList) -> isize {
-    with_raw(list_ptr, |list| (list.len() == 0) as isize)
+pub unsafe extern "C" fn ml_list_is_empty(list_ptr: *const MlList) -> isize {
+    Rc::with_raw_ref(list_ptr, |list| (list.iter().next().is_none()) as isize)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn ml_print_list(list_ptr: *mut MlList) {
-    with_raw(list_ptr, |list| {
+pub unsafe extern "C" fn ml_print_list(list_ptr: *const MlList) {
+    Rc::with_raw_ref(list_ptr, |list| {
         println!("{}", list);
     });
 }
