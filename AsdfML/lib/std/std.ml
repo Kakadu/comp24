@@ -102,5 +102,5 @@ let runtime : std list =
 ;;
 
 let lookup_extern name =
-  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> (x.extern, x.arity))
+  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> x.extern)
 ;;
