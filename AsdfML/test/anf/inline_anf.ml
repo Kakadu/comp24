@@ -115,8 +115,7 @@ let%expect_test _ =
         let a7 = `ll_2 cont n in
         `helper_1 a6 a7
     let `ll_3 x = x
-    let fact n = let a8 = `helper_1 in
-      a8 n `ll_3
+    let fact n = `helper_1 n `ll_3
     |}]
 ;;
 
@@ -179,14 +178,12 @@ let%expect_test _ =
      in (x, y, z))
 
     let cross `arg_8 `arg_9 =
-      let a0 = `arg_9 in
-      let a2 = `get_tuple_field a0 2 in
-      let a4 = `get_tuple_field a0 1 in
-      let a6 = `get_tuple_field a0 0 in
-      let a7 = `arg_8 in
-      let a9 = `get_tuple_field a7 2 in
-      let a11 = `get_tuple_field a7 1 in
-      let a13 = `get_tuple_field a7 0 in
+      let a2 = `get_tuple_field `arg_9 2 in
+      let a4 = `get_tuple_field `arg_9 1 in
+      let a6 = `get_tuple_field `arg_9 0 in
+      let a9 = `get_tuple_field `arg_8 2 in
+      let a11 = `get_tuple_field `arg_8 1 in
+      let a13 = `get_tuple_field `arg_8 0 in
       let a24 = ( * ) a11 a2 in
       let a25 = ( * ) a9 a4 in
       let a15 = ( - ) a24 a25 in

@@ -106,10 +106,7 @@ let remove_useless_bindings fn =
       | CIfElse (c, a1, a2) -> CIfElse (c, useless_a a1, useless_a a2)
       | x -> x
     and useless_a = function
-      | ALet (id1, CImmExpr (ImmId id2), a)
-      (* TODO: re? prefix auto-generated vars with `? *)
-        when String.equal (String.prefix id1 1) "a"
-             && String.equal (String.prefix id2 1) "a" ->
+      | ALet (id1, CImmExpr (ImmId id2), a) ->
         Hashtbl.set remaps ~key:id1 ~data:id2;
         useless_a a
       | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
