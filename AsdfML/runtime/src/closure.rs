@@ -8,10 +8,11 @@ pub struct Closure {
     pub(crate) args: Vec<isize>,
 }
 
-// TODO: 
-// - impl 
+// TODO:
+// - impl
 // - types (i/u size) + in lib
 // - shitcode with apply_closure
+// - pass args as tuple?
 // pub impl Closure {
 // }
 
@@ -92,7 +93,7 @@ pub unsafe extern "C" fn apply_closure_2(closure_ptr: *mut Closure, arg1: isize,
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize, arg2: isize, arg3:isize) -> isize {
+pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize, arg2: isize, arg3: isize) -> isize {
     let mut closure = Box::new((*closure_ptr).clone());
     closure.args.push(arg1);
     closure.args.push(arg2);
@@ -106,7 +107,13 @@ pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize,
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn apply_closure_4(closure_ptr: *mut Closure, arg1: isize, arg2: isize, arg3:isize, arg4:isize) -> isize {
+pub unsafe extern "C" fn apply_closure_4(
+    closure_ptr: *mut Closure,
+    arg1: isize,
+    arg2: isize,
+    arg3: isize,
+    arg4: isize,
+) -> isize {
     let mut closure = Box::new((*closure_ptr).clone());
     closure.args.push(arg1);
     closure.args.push(arg2);
@@ -121,7 +128,14 @@ pub unsafe extern "C" fn apply_closure_4(closure_ptr: *mut Closure, arg1: isize,
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn apply_closure_5(closure_ptr: *mut Closure, arg1: isize, arg2: isize, arg3:isize, arg4:isize, arg5:isize) -> isize {
+pub unsafe extern "C" fn apply_closure_5(
+    closure_ptr: *mut Closure,
+    arg1: isize,
+    arg2: isize,
+    arg3: isize,
+    arg4: isize,
+    arg5: isize,
+) -> isize {
     let mut closure = Box::new((*closure_ptr).clone());
     closure.args.push(arg1);
     closure.args.push(arg2);

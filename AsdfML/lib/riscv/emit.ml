@@ -3,7 +3,20 @@ open Machine
 
 let stack_pos = ref 0
 let code : (instr * string) Queue.t = Queue.create ()
-let emit ?(comm = "") instr = instr (fun i -> Queue.enqueue code (i, comm))
+let fn_code : (instr * string) Queue.t = Queue.create ()
+let cur_code = ref code
+let emit ?(comm = "") instr = instr (fun i -> Queue.enqueue !cur_code (i, comm))
+let set_code () = cur_code := code
+let set_fn_code () = cur_code := fn_code
+
+let flush_fn () =
+  Queue.drain
+    fn_code
+    ~f:(fun (i, comm) -> Queue.enqueue code (i, comm))
+    ~while_:(fun _ -> true)
+;;
+
+let empty_fn () = Queue.clear fn_code
 
 let emit_store ?(comm = "") reg =
   let stack_loc = Offset (fp, !stack_pos) in
@@ -20,17 +33,22 @@ let emit_fn_decl name (args : Ast.id list) stack_size =
     .globl %s
     .type %s, @function|} name name);
     emit label name;
-    if not (List.is_empty args) then emit comment ("args: " ^ (args |> String.concat ~sep:", "));
+    if not (List.is_empty args)
+    then emit comment ("args: " ^ (args |> String.concat ~sep:", "));
     emit addi sp sp (-stack_size);
     emit sd ra (Offset (sp, stack_size));
     emit sd fp (Offset (sp, stack_size - 8));
     emit addi fp sp (stack_size - 16) ~comm:"Prologue ends";
-    stack_pos := 0;
-    List.take arg_regs (List.length args)
-    |> List.zip_exn args
-    |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
-      let loc = emit_store reg ~comm:arg in
-      (arg, loc) :: acc))
+    stack_pos := 0)
+;;
+
+let dump_reg_args_to_stack args =
+  assert (List.length args <= 8);
+  List.take arg_regs (List.length args)
+  |> List.zip_exn args
+  |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
+    let loc = emit_store reg ~comm:arg in
+    (arg, loc) :: acc)
 ;;
 
 let emit_fn_ret stack_size =
@@ -94,9 +112,11 @@ let emit_fn_call name (args : asm_value list) =
 
 let direct_math_ops = [ "( + )"; "( - )"; "( * )"; "( / )"; "( && )"; "( || )" ]
 let is_direct_math_op = List.mem direct_math_ops ~equal:String.equal
-let emit_direct_math dest op args = 
+
+let emit_direct_math ?(comm = "") dest op args =
   (* TODO: addi case *)
-  let op = match op with
+  let op =
+    match op with
     | "( + )" -> add
     | "( - )" -> sub
     | "( * )" -> mul
@@ -105,4 +125,6 @@ let emit_direct_math dest op args =
     | "( || )" -> or_
     | _ -> failwith "emit_direct_math: invalid op"
   in
-  emit op dest (List.nth_exn args 0) (List.nth_exn args 1)
+  emit op dest (List.nth_exn args 0) (List.nth_exn args 1) ~comm
+;;
+

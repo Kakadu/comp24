@@ -14,14 +14,14 @@
       .type ll_2, @function
   ll_2:
       # args: x
-      addi sp,sp,-32
-      sd ra,32(sp)
-      sd s0,24(sp)
-      addi s0,sp,16  # Prologue ends
+      addi sp,sp,-24
+      sd ra,24(sp)
+      sd s0,16(sp)
+      addi s0,sp,8  # Prologue ends
       sd a0,0(s0)  # x
-      ld s0,24(sp)  # Epilogue starts
-      ld ra,32(sp)
-      addi sp,sp,32
+      ld s0,16(sp)  # Epilogue starts
+      ld ra,24(sp)
+      addi sp,sp,24
       ret
   
       .globl main
@@ -67,7 +67,7 @@
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (42, 1, 2122752)
+  (42, 1, 2118656)
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let cross (x1, y1, z1) (x2, y2, z2) =
@@ -84,14 +84,12 @@
   > EOF
   ANF:
   let cross `arg_8 `arg_9 =
-         let a0 = `arg_9 in
-         let a2 = `get_tuple_field a0 2 in
-         let a4 = `get_tuple_field a0 1 in
-         let a6 = `get_tuple_field a0 0 in
-         let a7 = `arg_8 in
-         let a9 = `get_tuple_field a7 2 in
-         let a11 = `get_tuple_field a7 1 in
-         let a13 = `get_tuple_field a7 0 in
+         let a2 = `get_tuple_field `arg_9 2 in
+         let a4 = `get_tuple_field `arg_9 1 in
+         let a6 = `get_tuple_field `arg_9 0 in
+         let a9 = `get_tuple_field `arg_8 2 in
+         let a11 = `get_tuple_field `arg_8 1 in
+         let a13 = `get_tuple_field `arg_8 0 in
          let a24 = ( * ) a11 a2 in
          let a25 = ( * ) a9 a4 in
          let a15 = ( - ) a24 a25 in
