@@ -32,3 +32,20 @@
    ""six"": int,
    ]
 
+  $ ./typeinference_demo.exe < manytests/do_not_type/001.ml
+  Infer error: Unbound value: fac
+
+  $ ./typeinference_demo.exe < manytests/do_not_type/002if.ml
+  Infer error: Can not unify `TInt` and `TBool`
+
+  $ ./typeinference_demo.exe < manytests/do_not_type/003occurs.ml
+  Infer error: The type variable _p2 occurs inside ('_p2 -> '_p6)
+
+  $ ./typeinference_demo.exe < manytests/do_not_type/004let_poly.ml
+  Infer error: Can not unify `TInt` and `TBool`
+
+  $ ./typeinference_demo.exe < manytests/do_not_type/015tuples.ml
+  Infer error:  Only variables are allowed as left-hand side of `let rec'
+
+  $ ./typeinference_demo.exe < manytests/do_not_type/099.ml
+  Infer error:  Only variables are allowed as left-hand side of `let rec'
