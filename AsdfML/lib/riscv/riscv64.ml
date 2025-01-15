@@ -73,23 +73,52 @@ let rec gen_imm fn_args env dest = function
     |> List.rev
     |> List.iteri ~f:(fun i x ->
       gen_imm fn_args env a1 x;
-      let res = emit_fn_call "ml_list_cons" [ AsmReg list; AsmReg a1 ] in
+      let res = emit_fn_call "ml_list_cons" [ AsmReg a1; AsmReg list ] in
       emit_load_2 (AsmReg list) (AsmReg res));
     emit_load dest (AsmReg list)
 
 and gen_cexpr fn_args env dest = function
   | CApp (ImmId fn, args) when is_direct_math_op fn ->
-    gen_imm fn_args env t0 (List.nth_exn args 0);
-    gen_imm fn_args env t1 (List.nth_exn args 1);
-    emit_direct_math dest fn [ t0; t1 ]
+    assert (List.length args = 2);
+    let fst = List.nth_exn args 0 in
+    let snd = List.nth_exn args 1 in
+    gen_imm fn_args env t0 fst;
+    gen_imm fn_args env t1 snd;
+    emit_direct_math
+      dest
+      fn
+      [ t0; t1 ]
+      ~comm:(Format.asprintf "%a %s %a" pp_imm_expr fst fn pp_imm_expr snd)
   | CApp (fn, args) ->
+    let is_rewrites_regs = function
+      | ImmNil | ImmTuple _ | ImmList _ -> true
+      | ImmId id ->
+        (match Map.find fn_args id with
+         | Some _ -> true
+         | None -> false)
+      (* | ImmUnit -> ??? *)
+      | _ -> false
+    in
+    (*  *)
+    let rw_arg_locs =
+      List.filter args ~f:is_rewrites_regs
+      |> List.fold ~init:Map.Poly.empty ~f:(fun acc arg ->
+        gen_imm fn_args env a0 arg;
+        let loc = emit_store a0 in
+        Map.set acc ~key:arg ~data:loc)
+    in
     gen_imm fn_args env a0 fn;
+    (*  *)
     let n_args = List.length args in
-    let a = List.take (List.tl_exn arg_regs) n_args in
-    List.zip_exn args a |> List.iter ~f:(fun (arg, reg) -> gen_imm fn_args env reg arg);
-    let app_clos = Format.sprintf "apply_closure_%d" n_args in
+    let regs = List.take (List.tl_exn arg_regs) n_args in
+    List.zip_exn args regs
+    |> List.iter ~f:(fun (arg, reg) ->
+      if is_rewrites_regs arg
+      then emit_load reg (AsmReg (Map.find_exn rw_arg_locs arg))
+      else gen_imm fn_args env reg arg);
+    let app_clos_fn = Format.sprintf "apply_closure_%d" n_args in
     let closure =
-      emit_fn_call app_clos (AsmReg a0 :: List.map a ~f:(fun x -> AsmReg x))
+      emit_fn_call app_clos_fn (AsmReg a0 :: List.map regs ~f:(fun x -> AsmReg x))
     in
     emit_load dest (AsmReg closure)
   | CIfElse (ImmBool true, then_, _) -> gen_aexpr fn_args env dest then_
@@ -119,9 +148,10 @@ and gen_fn fn_args = function
   | Fn (id, args, aexpr) as fn ->
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
     (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
-    let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in
-    let args_loc = emit_fn_decl id args stack_size in
-    if String.equal id "main" then emit call "runtime_init";
+    (* let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in *)
+    (*  *)
+    set_fn_code ();
+    let args_loc = dump_reg_args_to_stack args in
     let env =
       args_loc
       |> List.fold
@@ -129,8 +159,28 @@ and gen_fn fn_args = function
            ~f:(fun env (arg, reg) -> Map.set env ~key:arg ~data:reg)
     in
     gen_aexpr fn_args env a0 aexpr;
+    let stack_size =
+      let sp = max (- !stack_pos - 8) 0 in
+      sp + (8 * 3)
+    in
+    set_code ();
+    emit_fn_decl id args stack_size;
+    if String.equal id "main" then emit call "runtime_init";
+    flush_fn ();
     emit_fn_ret stack_size
 ;;
+
+(*  *)
+(* let args_loc = emit_fn_decl id args stack_size in
+   if String.equal id "main" then emit call "runtime_init";
+   let env =
+   args_loc
+   |> List.fold
+   ~init:(Map.empty (module String))
+   ~f:(fun env (arg, reg) -> Map.set env ~key:arg ~data:reg)
+   in
+   gen_aexpr fn_args env a0 aexpr;
+   emit_fn_ret stack_size *)
 
 let gen_program fn_args (prog : Anf_ast.program) = List.iter prog ~f:(gen_fn fn_args)
 
@@ -153,13 +203,13 @@ let init_env ast =
 
 let peephole (code : (instr * string) Queue.t) =
   let rec helper = function
-    | [] -> []
-    | (i, c) :: [] -> [ i, c ]
     | (i1, c1) :: (i2, c2) :: tl ->
       (match i1, i2 with
        | Sd (src1, dst1), Ld (dst2, src2) when equal_reg src1 dst2 && equal_reg dst1 src2
          -> (i1, c1) :: helper tl
        | _ -> (i1, c1) :: helper ((i2, c2) :: tl))
+    | (i, c) :: [] -> [ i, c ]
+    | [] -> []
   in
   code |> Queue.to_list |> helper |> Queue.of_list
 ;;

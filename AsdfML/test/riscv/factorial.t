@@ -19,10 +19,10 @@
       .type fact, @function
   fact:
       # args: x
-      addi sp,sp,-56
-      sd ra,56(sp)
-      sd s0,48(sp)
-      addi s0,sp,40  # Prologue ends
+      addi sp,sp,-48
+      sd ra,48(sp)
+      sd s0,40(sp)
+      addi s0,sp,32  # Prologue ends
       sd a0,0(s0)  # x
       # Creating closure for ml_lt
       la a0,ml_lt
@@ -39,7 +39,7 @@
   .else_0:
       ld t0,0(s0)  # x
       li t1,1
-      sub a0,t0,t1
+      sub a0,t0,t1  # x ( - ) 1
       sd a0,-16(s0)  # a4
       # Creating closure for fact
       la a0,fact
@@ -50,20 +50,20 @@
       sd a0,-24(s0)  # a3
       ld t0,0(s0)  # x
       ld t1,-24(s0)  # a3
-      mul a0,t0,t1
+      mul a0,t0,t1  # x ( * ) a3
   .end_0:
-      ld s0,48(sp)  # Epilogue starts
-      ld ra,56(sp)
-      addi sp,sp,56
+      ld s0,40(sp)  # Epilogue starts
+      ld ra,48(sp)
+      addi sp,sp,48
       ret
   
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-32
-      sd ra,32(sp)
-      sd s0,24(sp)
-      addi s0,sp,16  # Prologue ends
+      addi sp,sp,-24
+      sd ra,24(sp)
+      sd s0,16(sp)
+      addi s0,sp,8  # Prologue ends
       call runtime_init
       # Creating closure for fact
       la a0,fact
@@ -78,9 +78,9 @@
       call create_closure
       ld a1,0(s0)  # a6
       call apply_closure_1
-      ld s0,24(sp)  # Epilogue starts
-      ld ra,32(sp)
-      addi sp,sp,32
+      ld s0,16(sp)  # Epilogue starts
+      ld ra,24(sp)
+      addi sp,sp,24
       ret
 
   $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
@@ -110,9 +110,7 @@
       let a7 = `ll_2 cont n in
       `helper_1 a6 a7
   let `id_3 x = x
-  let fact n = let a8 = `helper_1 in
-    let a9 = `id_3 in
-    a8 n a9
+  let fact n = `helper_1 n `id_3
   let main = let a12 = fact 5 in
     print_int a12
   

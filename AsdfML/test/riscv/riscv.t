@@ -78,10 +78,10 @@ $ /tmp/out
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-48
-      sd ra,48(sp)
-      sd s0,40(sp)
-      addi s0,sp,32  # Prologue ends
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
       call runtime_init
       li a0,1
       sd a0,0(s0)  # a0
@@ -89,7 +89,7 @@ $ /tmp/out
       sd a0,-8(s0)  # a1
       ld t0,0(s0)  # a0
       ld t1,-8(s0)  # a1
-      add a0,t0,t1
+      add a0,t0,t1  # a0 ( + ) a1
       sd a0,-16(s0)  # a3
       # Creating closure for ml_print_int
       la a0,ml_print_int
@@ -97,9 +97,9 @@ $ /tmp/out
       call create_closure
       ld a1,-16(s0)  # a3
       call apply_closure_1
-      ld s0,40(sp)  # Epilogue starts
-      ld ra,48(sp)
-      addi sp,sp,48
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
@@ -112,8 +112,7 @@ $ /tmp/out
   > EOF
   ANF:
   let `sum_1 x y = ( + ) x y
-  let main = let a1 = `sum_1 in
-    let a3 = a1 1 2 in
+  let main = let a3 = `sum_1 1 2 in
     print_int a3
   
   $ cat /tmp/out.s
@@ -122,46 +121,45 @@ $ /tmp/out
       .type sum_1, @function
   sum_1:
       # args: x, y
-      addi sp,sp,-40
-      sd ra,40(sp)
-      sd s0,32(sp)
-      addi s0,sp,24  # Prologue ends
+      addi sp,sp,-32
+      sd ra,32(sp)
+      sd s0,24(sp)
+      addi s0,sp,16  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
       ld t0,0(s0)  # x
       ld t1,-8(s0)  # y
-      add a0,t0,t1
-      ld s0,32(sp)  # Epilogue starts
-      ld ra,40(sp)
-      addi sp,sp,40
+      add a0,t0,t1  # x ( + ) y
+      ld s0,24(sp)  # Epilogue starts
+      ld ra,32(sp)
+      addi sp,sp,32
       ret
   
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-40
-      sd ra,40(sp)
-      sd s0,32(sp)
-      addi s0,sp,24  # Prologue ends
+      addi sp,sp,-24
+      sd ra,24(sp)
+      sd s0,16(sp)
+      addi s0,sp,8  # Prologue ends
       call runtime_init
       # Creating closure for sum_1
       la a0,sum_1
       li a1,2
       call create_closure
-      sd a0,0(s0)  # a1
       li a1,1
       li a2,2
       call apply_closure_2
-      sd a0,-8(s0)  # a3
+      sd a0,0(s0)  # a3
       # Creating closure for ml_print_int
       la a0,ml_print_int
       li a1,1
       call create_closure
-      ld a1,-8(s0)  # a3
+      ld a1,0(s0)  # a3
       call apply_closure_1
-      ld s0,32(sp)  # Epilogue starts
-      ld ra,40(sp)
-      addi sp,sp,40
+      ld s0,16(sp)  # Epilogue starts
+      ld ra,24(sp)
+      addi sp,sp,24
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
@@ -179,11 +177,7 @@ $ /tmp/out
   let `mul_2 x y = ( * ) x y
   let `muladd_3 add mul x y z = let a3 = mul x y in
     add a3 z
-  let main =
-    let a4 = `add_1 in
-    let a5 = `mul_2 in
-    let a6 = `muladd_3 in
-    let a8 = a6 a4 a5 2 3 4 in
+  let main = let a8 = `muladd_3 `add_1 `mul_2 2 3 4 in
     print_int a8
   
   $ cat /tmp/out.s
@@ -192,46 +186,46 @@ $ /tmp/out
       .type add_1, @function
   add_1:
       # args: x, y
-      addi sp,sp,-40
-      sd ra,40(sp)
-      sd s0,32(sp)
-      addi s0,sp,24  # Prologue ends
+      addi sp,sp,-32
+      sd ra,32(sp)
+      sd s0,24(sp)
+      addi s0,sp,16  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
       ld t0,0(s0)  # x
       ld t1,-8(s0)  # y
-      add a0,t0,t1
-      ld s0,32(sp)  # Epilogue starts
-      ld ra,40(sp)
-      addi sp,sp,40
+      add a0,t0,t1  # x ( + ) y
+      ld s0,24(sp)  # Epilogue starts
+      ld ra,32(sp)
+      addi sp,sp,32
       ret
   
       .globl mul_2
       .type mul_2, @function
   mul_2:
       # args: x, y
-      addi sp,sp,-40
-      sd ra,40(sp)
-      sd s0,32(sp)
-      addi s0,sp,24  # Prologue ends
+      addi sp,sp,-32
+      sd ra,32(sp)
+      sd s0,24(sp)
+      addi s0,sp,16  # Prologue ends
       sd a0,0(s0)  # x
       sd a1,-8(s0)  # y
       ld t0,0(s0)  # x
       ld t1,-8(s0)  # y
-      mul a0,t0,t1
-      ld s0,32(sp)  # Epilogue starts
-      ld ra,40(sp)
-      addi sp,sp,40
+      mul a0,t0,t1  # x ( * ) y
+      ld s0,24(sp)  # Epilogue starts
+      ld ra,32(sp)
+      addi sp,sp,32
       ret
   
       .globl muladd_3
       .type muladd_3, @function
   muladd_3:
       # args: add, mul, x, y, z
-      addi sp,sp,-72
-      sd ra,72(sp)
-      sd s0,64(sp)
-      addi s0,sp,56  # Prologue ends
+      addi sp,sp,-64
+      sd ra,64(sp)
+      sd s0,56(sp)
+      addi s0,sp,48  # Prologue ends
       sd a0,0(s0)  # add
       sd a1,-8(s0)  # mul
       sd a2,-16(s0)  # x
@@ -246,50 +240,49 @@ $ /tmp/out
       ld a1,-40(s0)  # a3
       ld a2,-32(s0)  # z
       call apply_closure_2
-      ld s0,64(sp)  # Epilogue starts
-      ld ra,72(sp)
-      addi sp,sp,72
+      ld s0,56(sp)  # Epilogue starts
+      ld ra,64(sp)
+      addi sp,sp,64
       ret
   
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-56
-      sd ra,56(sp)
-      sd s0,48(sp)
-      addi s0,sp,40  # Prologue ends
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
       call runtime_init
       # Creating closure for add_1
       la a0,add_1
       li a1,2
       call create_closure
-      sd a0,0(s0)  # a4
+      sd a0,0(s0)
       # Creating closure for mul_2
       la a0,mul_2
       li a1,2
       call create_closure
-      sd a0,-8(s0)  # a5
+      sd a0,-8(s0)
       # Creating closure for muladd_3
       la a0,muladd_3
       li a1,5
       call create_closure
-      sd a0,-16(s0)  # a6
-      ld a1,0(s0)  # a4
-      ld a2,-8(s0)  # a5
+      ld a1,0(s0)
+      ld a2,-8(s0)
       li a3,2
       li a4,3
       li a5,4
       call apply_closure_5
-      sd a0,-24(s0)  # a8
+      sd a0,-16(s0)  # a8
       # Creating closure for ml_print_int
       la a0,ml_print_int
       li a1,1
       call create_closure
-      ld a1,-24(s0)  # a8
+      ld a1,-16(s0)  # a8
       call apply_closure_1
-      ld s0,48(sp)  # Epilogue starts
-      ld ra,56(sp)
-      addi sp,sp,56
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
@@ -327,10 +320,10 @@ $ /tmp/out
       .type is_even, @function
   is_even:
       # args: x
-      addi sp,sp,-56
-      sd ra,56(sp)
-      sd s0,48(sp)
-      addi s0,sp,40  # Prologue ends
+      addi sp,sp,-48
+      sd ra,48(sp)
+      sd s0,40(sp)
+      addi s0,sp,32  # Prologue ends
       sd a0,0(s0)  # x
       # Creating closure for ml_eq
       la a0,ml_eq
@@ -360,7 +353,7 @@ $ /tmp/out
   .else_1:
       ld t0,0(s0)  # x
       li t1,2
-      sub a0,t0,t1
+      sub a0,t0,t1  # x ( - ) 2
       sd a0,-24(s0)  # a5
       # Creating closure for is_even
       la a0,is_even
@@ -370,18 +363,18 @@ $ /tmp/out
       call apply_closure_1
   .end_1:
   .end_0:
-      ld s0,48(sp)  # Epilogue starts
-      ld ra,56(sp)
-      addi sp,sp,56
+      ld s0,40(sp)  # Epilogue starts
+      ld ra,48(sp)
+      addi sp,sp,48
       ret
   
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-48
-      sd ra,48(sp)
-      sd s0,40(sp)
-      addi s0,sp,32  # Prologue ends
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
       call runtime_init
       # Creating closure for is_even
       la a0,is_even
@@ -410,15 +403,14 @@ $ /tmp/out
       call create_closure
       ld a1,-16(s0)  # a9
       call apply_closure_1
-      ld s0,40(sp)  # Epilogue starts
-      ld ra,48(sp)
-      addi sp,sp,48
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   true
   false
-
 
   $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
   > let apply f x = f x
@@ -434,10 +426,7 @@ $ /tmp/out
     f a2
   let `f_3 x = ( + ) x 1
   let `g_4 x = ( * ) x 2
-  let main =
-    let a5 = `f_3 in
-    let a6 = `g_4 in
-    let a9 = compose a5 a6 in
+  let main = let a9 = compose `f_3 `g_4 in
     let a8 = apply a9 3 in
     print_int a8
   
@@ -466,34 +455,34 @@ $ cat /tmp/out.s
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-72
-      sd ra,72(sp)
-      sd s0,64(sp)
-      addi s0,sp,56  # Prologue ends
+      addi sp,sp,-64
+      sd ra,64(sp)
+      sd s0,56(sp)
+      addi s0,sp,48  # Prologue ends
       call runtime_init
       li t0,1
       li t1,2
-      add a0,t0,t1
+      add a0,t0,t1  # 1 ( + ) 2
       sd a0,0(s0)  # a7
       ld t0,0(s0)  # a7
       li t1,3
-      mul a0,t0,t1
+      mul a0,t0,t1  # a7 ( * ) 3
       sd a0,-8(s0)  # a3
       li t0,3
       li t1,5
-      add a0,t0,t1
+      add a0,t0,t1  # 3 ( + ) 5
       sd a0,-16(s0)  # a6
       li t0,32
       ld t1,-16(s0)  # a6
-      div a0,t0,t1
+      div a0,t0,t1  # 32 ( / ) a6
       sd a0,-24(s0)  # a5
       li t0,4
       ld t1,-24(s0)  # a5
-      mul a0,t0,t1
+      mul a0,t0,t1  # 4 ( * ) a5
       sd a0,-32(s0)  # a4
       ld t0,-8(s0)  # a3
       ld t1,-32(s0)  # a4
-      add a0,t0,t1
+      add a0,t0,t1  # a3 ( + ) a4
       sd a0,-40(s0)  # a1
       # Creating closure for ml_print_int
       la a0,ml_print_int
@@ -501,10 +490,26 @@ $ cat /tmp/out.s
       call create_closure
       ld a1,-40(s0)  # a1
       call apply_closure_1
-      ld s0,64(sp)  # Epilogue starts
-      ld ra,72(sp)
-      addi sp,sp,72
+      ld s0,56(sp)  # Epilogue starts
+      ld ra,64(sp)
+      addi sp,sp,64
       ret
+  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ /tmp/out
+  25
+
+  $ dune exec riscv -- -o /tmp/out.s <<- EOF
+  > let add_cps x y = fun k -> k (x + y)
+  > let square_cps x = fun k -> k (x * x)
+  > let pythagoras_cps x y = fun k ->
+  >   square_cps x (fun x_squared ->
+  >     square_cps y (fun y_squared ->
+  >       add_cps x_squared y_squared k))
+  > 
+  > let main =
+  >   pythagoras_cps 3 4 (fun res -> print_int res)
+  > EOF
+$ cat /tmp/out.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   25
