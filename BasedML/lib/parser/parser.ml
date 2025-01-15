@@ -87,14 +87,19 @@ let p_ident_string p_valid_fst_char =
   | _ -> fail "Identifier parsing failed: first character must start with [a-z]"
 ;;
 
-let p_infix_ident =
+let p_infix_ident constr =
   let* some_str =
     between_parens (skip_whitespace *> take_while1 is_inf_op_symb <* skip_whitespace)
   in
   if some_str |> is_op_symb
-  then return (PIdentifier ("( " ^ some_str ^ " )"))
+  then return (constr ("( " ^ some_str ^ " )"))
   else fail "Parsed string wasn't an supported operator"
 ;;
+
+let p_infix_ident_pat = p_infix_ident (fun x -> PIdentifier x)
+
+
+let p_infix_ident_expr = p_infix_ident (fun x -> EIdentifier x)
 
 (* Type parsers *)
 
@@ -291,7 +296,7 @@ let p_pattern =
     let atomic_pat =
       p_ident_pattern
       <|> p_const_pattern
-      <|> p_infix_ident
+      <|> p_infix_ident_pat
       <|> between_parens p_pattern
       <|> p_list_pattern p_pattern
       <|> p_pattern_with_type p_pattern
@@ -409,6 +414,7 @@ let p_exp =
     let atomic_exp =
       p_const_expr
       <|> p_ident
+      <|> p_infix_ident_expr
       <|> p_let_in p_exp
       <|> p_match p_pattern p_exp
       <|> p_function p_exp
@@ -418,9 +424,9 @@ let p_exp =
       <|> p_tuple_expr p_exp
       <|> p_if_then_else p_exp
     in
-    let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
-    let app_term = chainl1 cons_term app_delim <|> cons_term in
-    let high_pr_op_term = chainl1 app_term (mul_delim <|> div_delim) in
+    let app_term = chainl1 atomic_exp app_delim <|> atomic_exp in
+    let cons_term = chainr1 app_term cons_delim_expr <|> app_term in
+    let high_pr_op_term = chainl1 cons_term (mul_delim <|> div_delim) in
     let low_pr_op_term = chainl1 high_pr_op_term (add_delim <|> sub_delim) in
     let eq_term = chainl1 low_pr_op_term (double_eq_expr <|> eq_delim <|> not_eq_delim) in
     let gr_ls_term = chainl1 eq_term (gr_or_eq_delim <|> ls_or_eq_delim) in
