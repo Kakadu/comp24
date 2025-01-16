@@ -29,8 +29,6 @@ let counter_next () =
 ;;
 
 (* TODO:
-   - cps factorial: fails if id cont is passed directly to helper
-     (attempts to call apply_closure on helper's closure without loading cont in a0)
    - direct calls when possible
    - gen_imm may rewrite a0 a1 a2
    - direct math should check if ops were redefined
@@ -170,18 +168,6 @@ and gen_fn fn_args = function
     flush_fn ();
     emit_fn_ret stack_size
 ;;
-
-(*  *)
-(* let args_loc = emit_fn_decl id args stack_size in
-   if String.equal id "main" then emit call "runtime_init";
-   let env =
-   args_loc
-   |> List.fold
-   ~init:(Map.empty (module String))
-   ~f:(fun env (arg, reg) -> Map.set env ~key:arg ~data:reg)
-   in
-   gen_aexpr fn_args env a0 aexpr;
-   emit_fn_ret stack_size *)
 
 let gen_program fn_args (prog : Anf_ast.program) = List.iter prog ~f:(gen_fn fn_args)
 

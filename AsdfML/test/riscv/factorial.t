@@ -95,8 +95,7 @@
   >     else 
   >       helper (n - 1) (fun res -> cont (n * res)) 
   >   in 
-  >   let id = fun x -> x in
-  >   helper n id
+  >   helper n (fun x -> x)
   > let main = print_int (fact 5)
   > EOF
   ANF:
@@ -109,10 +108,10 @@
     else let a6 = ( - ) n 1 in
       let a7 = `ll_2 cont n in
       `helper_1 a6 a7
-  let `id_3 x = x
-  let fact n = `helper_1 n `id_3
-  let main = let a12 = fact 5 in
-    print_int a12
+  let `ll_3 x = x
+  let fact n = `helper_1 n `ll_3
+  let main = let a11 = fact 5 in
+    print_int a11
   
   $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
