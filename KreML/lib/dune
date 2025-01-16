@@ -4,6 +4,7 @@
   Ast
   Ast_printer
   Closure_conversion
+  Lambda
   Ast_transformer
   Parser
   Inferencer
