@@ -63,15 +63,16 @@ let rec gen_imm fn_args env dest = function
     let tuple = emit_store tuple ~comm:"tuple" in
     List.iteri xs ~f:(fun i x ->
       gen_imm fn_args env a2 x;
-      let res = emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ] in
-      emit_load_2 (AsmReg tuple) (AsmReg res));
+      let _ = emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ] in
+      ()
+      );
     emit_load dest (AsmReg tuple)
   | ImmList xs ->
     let list = emit_fn_call "ml_create_list" [] in
     let list = emit_store list ~comm:"list" in
     xs
     |> List.rev
-    |> List.iteri ~f:(fun i x ->
+    |> List.iter ~f:(fun x ->
       gen_imm fn_args env a1 x;
       let res = emit_fn_call "ml_list_cons" [ AsmReg a1; AsmReg list ] in
       emit_load_2 (AsmReg list) (AsmReg res));
