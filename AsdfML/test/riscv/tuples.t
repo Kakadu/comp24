@@ -39,12 +39,10 @@
       ld a0,0(s0)
       li a1,0
       call ml_set_tuple_field
-      sd a0,0(s0)
       li a2,1
       ld a0,0(s0)
       li a1,1
       call ml_set_tuple_field
-      sd a0,0(s0)
       # Creating closure for ll_2
       la a0,ll_2
       li a1,1
@@ -53,7 +51,7 @@
       ld a0,0(s0)
       li a1,2
       call ml_set_tuple_field
-      sd a0,0(s0)
+      ld a0,0(s0)
       sd a0,-8(s0)  # a0
       # Creating closure for ml_print_tuple
       la a0,ml_print_tuple
