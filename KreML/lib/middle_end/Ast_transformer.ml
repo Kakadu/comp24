@@ -10,7 +10,7 @@ module Alpha_transformer = struct
     List.fold_left
       (fun map f -> Base.Map.set map ~key:f ~data:f)
       empty
-      (Ast.binary_ops @ Ast.stdlib_funs)
+      (Ast.binary_ops @ Runtime.stdlib_funs)
   ;;
 
   open Utils.Counter
