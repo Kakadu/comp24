@@ -3,26 +3,21 @@ open Utils
 open Lambda
 
 module CC_state = struct
-  type vars = (ident, int, Base.String.comparator_witness) Base.Map.t
-
-  let empty_vars = Base.Map.empty (module Base.String)
 
   type local_env = (ident, lambda, Base.String.comparator_witness) Base.Map.t
 
-  let empty_local_env = empty_vars
+  let empty_local_env = Base.Map.empty (module Base.String)
 
   type ctx =
     { global_env : lprogram
     ; local_env : local_env
-    ; iv : vars
     ; indexer : int
     ; names_indexer : int
     }
 
   let empty_ctx =
     { global_env = []
-    ; local_env : local_env = empty_vars
-    ; iv = empty_local_env
+    ; local_env = empty_local_env
     ; indexer = 0
     ; names_indexer = 0
     }
@@ -52,50 +47,35 @@ module CC_state = struct
   let fresh_name =
     let open Monad in
     get
-    >>= fun { global_env; local_env; iv; indexer; names_indexer } ->
+    >>= fun { global_env; local_env; indexer; names_indexer } ->
     let name = Format.sprintf "fresh_fun_%i" names_indexer in
-    put { global_env; local_env; iv; indexer; names_indexer = names_indexer + 1 }
+    put { global_env; local_env; indexer; names_indexer = names_indexer + 1 }
     >>= fun _ -> return name
   ;;
 
-  let lookup_iv_exn e name =
-    match Base.Map.find e name with
-    | Some v -> v
-    | None -> internalfail @@ Format.sprintf "Unbound variable %s" name
-  ;;
-
-    let lookup_iv e name = Base.Map.find e name
-  ;;
-
-  let rec index pat =
+  let lookup_var_opt name =
     let open Monad in
-    let* pat = pat in
-    let index p = index (return p) in
-    (* let* {iv; _} = get in
-    let open Stdlib.Format in
-    fprintf std_formatter "indexing with init %a\n" ppvars iv; *)
-    match pat with
-    | Pat_wildcard | Pat_nil | Pat_const _ -> return ()
-    | Pat_var x ->
-      let* ({ iv; indexer; _ } as state) = get in
-      (* let open Stdlib.Format in
-      fprintf std_formatter "indexed var %s with %i\n" x indexer; *)
-      let iv = Base.Map.set iv ~key:x ~data:indexer in
-      (* ppvars Format.std_formatter iv; *)
-      let* _ = put { state with iv; indexer = indexer + 1 } in
-      return ()
-    | Pat_cons (x, y) ->
-      let* _ = index x in
-      index y
-    | Pat_constrained (x, _) -> index x
-    | Pat_tuple (fst, snd, rest) ->
-      List.fold_left
-        (fun acc p ->
-          let* _ = acc in
-          index p)
-        (return ())
-        (fst :: snd :: rest)
+    let* name = name in
+    let* { global_env; local_env; _ } = get in
+    match Base.Map.find local_env name with
+    | Some v -> return (Some v)
+    | None ->
+      (match List.find_opt (fun (id, _) -> id = name) global_env with
+       | Some (_, Fun closure) -> Some (Lclosure closure) |> return
+       | Some (_, Var l) -> return (Some l)
+       | None -> None |> return)
   ;;
+
+  let lookup_var_exn name =
+    let open Monad in
+    let* opt = lookup_var_opt name in
+    match opt with
+    | Some v -> return v
+    | None ->
+      let* name = name in
+      internalfail @@ Format.sprintf "Unbound variable %s" name
+  ;;
+
 
   (* let%expect_test "asd" =
     let p = Pat_cons(Pat_var "x", Pat_cons(Pat_var "y", Pat_var "ys")) in
@@ -148,24 +128,20 @@ let extend_inner_fun_env call =
            inner_fun) ->
         (* extend inner *)
         let* extended_body = extend inner_body in
-        let* { iv; local_env; _ } : CC_state.ctx = get in
-        (* find var either in closure or local environment *)
-        let find_var id =
-          match Base.Map.find local_env id with
-          | Some v -> v
-          | None ->
-            let id = CC_state.lookup_iv_exn iv id in
-            List.find (fun (closure_arg_id, _) -> closure_arg_id = id) env |> snd
-        in
         let intersection = Freevars.inter freevars inner_free_vars in
-        let extended_env =
+        let* extended_env =
           Freevars.fold
             (fun id acc ->
-              let idx = Base.Map.find_exn iv id in
-              let value = find_var id in
-              (idx, value) :: acc)
+              let* acc = acc in
+              (* free var is either in closure env or in ctx.local_env*)
+              let* value =
+                match List.find_opt (fun (id', _) -> id = id') env with
+                | Some (_, v) -> return v
+                | None -> CC_state.lookup_var_exn (return id)
+              in
+              (id, value) :: acc |> return)
             intersection
-            innner_env
+            (return innner_env)
         in
         Lclosure { inner_fun with env = extended_env; body = extended_body } |> return
       | (Lvar _ | Lconst _) as atom -> return atom
@@ -174,7 +150,10 @@ let extend_inner_fun_env call =
         let* t = extend t in
         let* e = extend e in
         Lite (c, t, e) |> return
-      | Lapp _ as a -> return a (* for now it is used only for runtime calls *)
+      | Lapp (f, a) ->
+        let* f = extend f in
+        let* a = extend a in
+        Lapp (f, a) |> return
       | Llet (rf, id, e, scope) ->
         let* e = extend e in
         let* scope = extend scope in
@@ -185,7 +164,55 @@ let extend_inner_fun_env call =
   | _ -> return lambda
 ;;
 
-let rec lexpr e =
+(* fun (a, b) -> ...  ~>  fun a -> fun b  -> ...*)
+
+(* Updates environment on function based on pattern of incoming argument 
+Example: (fun (a, b) -> ... ) (5, x) ~> env = {a -> 5; b -> x}*)
+let rec apply_arg closure e =
+  let* ({ arg_patterns; applied_count; _ } as c) = closure in
+  let p, ps =
+    match arg_patterns with
+    | p :: ps -> p, ps
+    | [] -> internalfail "Applying arg to non-function"
+  in
+  (* pop arg *)
+  let c = { c with arg_patterns = ps; applied_count = applied_count + 1 } in
+  let rec helper closure p e =
+    let* ({ env; _ } as closure) = closure in
+    match p, e with
+    | Pat_nil, _ | Pat_wildcard, _ | Pat_const _, _ -> internalfail "TODO"
+    | Pat_constrained (p, _), _ -> helper (return closure) p e
+    | Pat_var id, e ->
+      let* e' = lexpr (return e) in
+      return { closure with env = (id, e') :: env }
+    | Pat_cons (px, pxs), Expr_cons (ex, exs) ->
+      let closure = helper (return closure) px ex in
+      helper closure pxs exs
+    | Pat_cons (px, pxs), Expr_var _ ->
+      let head = eapp (evar Runtime.list_head) [ e ] in
+      let closure = helper (return closure) px head in
+      let tail = eapp (evar Runtime.list_tail) [ e ] in
+      helper closure pxs tail
+    | Pat_tuple (pfst, psnd, prest), Expr_tuple (efst, esnd, erest) ->
+      List.fold_left2
+        helper
+        (return closure)
+        (pfst :: psnd :: prest)
+        (efst :: esnd :: erest)
+    | Pat_tuple (pfst, psnd, prest), Expr_var _ ->
+      let ps = pfst :: psnd :: prest in
+      let es =
+        Base.List.range 0 (List.length ps) ~stop:`exclusive
+        |> List.map (fun i ->
+          eapp (evar Runtime.access_tuple) [ e; Expr_const (Const_int i) ])
+      in
+      List.fold_left2 helper (return closure) ps es
+    | _ -> unreachable ()
+    (* program is type checked*)
+  in
+  helper (return c) p e
+
+and lexpr e =
   let* e = e in
   (* let* { iv; _ } = get in
   Stdlib.Format.fprintf
@@ -196,30 +223,20 @@ let rec lexpr e =
     pp_expr
     e; *)
   let lexpr e = lexpr (return e) in
-  let is_global_var v =
-    let* { global_env; _ } = get in
-    match List.find_opt (fun (id, _) -> id = v) global_env with
-    | Some _ -> return true
-    | None -> return false
-  in
   match e with
   | Expr_const c -> Lconst c |> return
   | Expr_fun (p, e) as f ->
-    let* body, total_args = extract_fun_body (return f) in
+    let* body, patterns = extract_fun_body (return f) in
+    let patterns = List.rev patterns in
     let open Freevars in
     let free_vars = diff (collect_expr e) (collect_pat p) in
-    lclosure body total_args free_vars |> return
+    lclosure body patterns free_vars |> return
   | Expr_var x ->
-    let* is_global = is_global_var x in
-    if is_global
-    then Lvar x |> return
-    else
-      let* { iv; _ } = get in
-      (* CC_state.ppvars Format.std_formatter iv; *)
-      (match CC_state.lookup_iv iv x with
-      | Some idx -> lapp (lvar Runtime.access_closure) (iconst idx) |> return
-      | None when Runtime.is_stdlib_fun x -> lvar x |> return
-      | None  -> internalfail (Format.sprintf "Unexpected identifier %s" x)) 
+    let* lookup = CC_state.lookup_var_opt (return x) in
+    (match lookup with
+     | Some _ -> lvar x |> return (* either local or global *)
+     | None -> lapp (lvar Runtime.access_closure) (lvar x) |> return)
+    (* closure var *)
   | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op ->
     let* x = lexpr x in
     let* y = lexpr y in
@@ -260,18 +277,23 @@ let rec lexpr e =
             l)
   | Expr_app (f, a) ->
     let* lf = lexpr f in
-    let* la = lexpr a in
-    let* { global_env; _ } = get in
     (match lf with
      | Lvar id ->
-       (match List.find_opt (fun (x, _) -> x = id) global_env with
-        | Some (_, Fun f) -> apply_arg f la |> return |> extend_inner_fun_env
-        | Some (_, Var lam) ->
-          print_endline ( Format.asprintf "unexpected lambda %a" pp_lam lam);
+       let* lookup = CC_state.lookup_var_opt (return id) in
+       (match lookup with
+        | Some (Lclosure f) ->
+          let* f' = apply_arg (return f) a in
+          Lclosure f' |> return |> extend_inner_fun_env
+        | Some lam ->
+          print_endline (Format.asprintf "unexpected lambda %a" pp_lam lam);
           unreachable () (* program is type checked, can not apply arg to non function *)
         | None -> internalfail @@ Format.sprintf "Unknown identifier %s" id)
-     | Lclosure f -> apply_arg f la |> return |> extend_inner_fun_env
-     | Lapp _ as app -> lapp app la |> return
+     | Lclosure f ->
+       let* f' = apply_arg (return f) a in
+       Lclosure f' |> return |> extend_inner_fun_env
+     | Lapp _ as app ->
+       let* la = lexpr a in
+       lapp app la |> return
      | f -> internalfail @@ Format.asprintf "Expected function, got %a" pp_lambda f)
   | Expr_constrained (e, _) -> lexpr e
   | Expr_cons (x, xs) ->
@@ -300,24 +322,26 @@ let rec lexpr e =
             pp_lambda
             l)
   | Expr_let (NonRecursive, (p, e), scope) ->
-    let* () = CC_state.index (return p) in
     split_let p e ~is_top_level:false (fun _ -> lexpr scope)
   | Expr_match _ | Expr_tuple _ -> internalfail "todo"
   | _ -> internalfail (Format.asprintf "unexpected expr %a" pp_expr e)
 (* TODO *)
 
 and extract_fun_body expr =
-  let rec helper acc_count e =
+  let rec helper ps e =
     let* e = e in
     match e with
-    | Expr_fun (p, e) ->
-      let* () = CC_state.index (return p) in
-      helper (acc_count + 1) (return e)
+    | Expr_fun (p, e) -> helper (p :: ps) (return e)
     | e ->
+      (* we need to clear local environment when resolving body and restore it after *)
+      let* {local_env; _} as state = get in
+      let* _ = put {state with local_env = CC_state.empty_local_env } in
       let* e' = lexpr (return e) in
-      (e', acc_count) |> return
+      (* restore *)
+      let* _ = put { state with local_env} in
+      (e', ps) |> return
   in
-  helper 0 expr
+  helper [] expr
 
 (* deconstructs [pattern] with [expr] on atomic [Llet] without any patterns
  and chains it in scope *)
@@ -365,7 +389,7 @@ and split_let pat expr ~is_top_level k =
     let ps = pfst :: psnd :: prest in
     let len = List.length ps in
     let es =
-      Base.List.range ~start:`exclusive 0 len
+      Base.List.range ~stop:`exclusive 0 len
       |> List.map (fun i ->
         eapp (evar Runtime.access_tuple) [ var; Expr_const (Const_int i) ])
     in

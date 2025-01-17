@@ -17,6 +17,7 @@ type lambda =
 and closure =
   { body : lambda
   ; env : closure_env
+  ; arg_patterns: pattern list
   ; total_args : int
   ; applied_count : int
   ; freevars : StringSet.t
@@ -32,12 +33,12 @@ and global_value =
 
 type lprogram = (ident * global_value) list [@@deriving show]
 
-val apply_arg : closure -> ident -> lambda -> lambda
+val apply_arg : closure -> ident -> lambda -> closure
 val iconst : int -> lambda
 val lvar : ident -> lambda
 val lapp : lambda -> lambda -> lambda
 val llet : ident -> lambda -> lambda -> lambda
-val lclosure : lambda -> int ->  StringSet.t -> lambda
+val lclosure : lambda -> pattern list ->  StringSet.t -> lambda
 
 val pp_lam : Stdlib.Format.formatter -> lambda -> unit
 
