@@ -106,4 +106,4 @@ val geq : expr -> expr -> expr
 val leq : expr -> expr -> expr
 
 val binary_ops : ident list
-val stdlib_funs : ident list
+val is_binary : ident -> bool
