@@ -16,7 +16,7 @@ type lambda =
   | Lvar of ident
   | Lclosure of closure
   | Lite of lambda * lambda * lambda
-  | LApp of lambda * lambda
+  | Lapp of lambda * lambda
   | Llet of rec_flag * ident * lambda * lambda
   | Lswitch (* TODO *)
 [@@deriving show]
@@ -30,7 +30,7 @@ and closure =
   }
 [@@deriving show]
 
-and closure_env = (int * lambda) list [@@deriving show]
+and closure_env = (ident * lambda) list [@@deriving show]
 
 and global_value =
   | Fun of closure
@@ -38,8 +38,8 @@ and global_value =
 [@@deriving show]
 
 type lprogram = (ident * global_value) list [@@deriving show]
-let apply_arg ({ applied_count; env; _ } as c) arg =
-  Lclosure { c with applied_count = applied_count + 1; env = (applied_count, arg) :: env }
+let apply_arg ({ applied_count; env; _ } as c) id arg =
+  Lclosure { c with applied_count = applied_count + 1; env = (id, arg) :: env }
 ;;
 
 let iconst i = Lconst (Const_int i)
@@ -49,27 +49,27 @@ let lclosure body total_args freevars =
 ;;
 
 let lvar v = Lvar v
-let lapp f a = LApp (f, a)
+let lapp f a = Lapp (f, a)
 let llet id expr scope = Llet (NonRecursive, id, expr, scope)
 (* let lletrec id expr scope = Llet (Recursive, id, expr, scope) *)
 
 open Stdlib.Format
-let rec pp_lambda ppf = function
+let rec pp_lam ppf = function
 | Lvar id -> fprintf ppf "%s" id
 | Lconst (Const_int i) -> fprintf ppf "%i" i
 | Lconst (Const_bool b) -> fprintf ppf "%b" b
 | Lconst (Const_unit) -> fprintf ppf "unit"
-| Lite(c, t, e) -> fprintf ppf "@[if %a then %a @, else %a @]@." pp_lambda c pp_lambda t pp_lambda e
+| Lite(c, t, e) -> fprintf ppf "@[if %a then %a @, else %a @]@." pp_lam c pp_lam t pp_lam e
 | Llet(_, id, e, scope) ->
-  fprintf ppf "@[let %s = %a in @, %a @]@." id pp_lambda e pp_lambda scope
-| LApp(f, a) -> fprintf ppf "@[(%a %a)@]" pp_lambda f pp_lambda a
+  fprintf ppf "@[let %s = %a in @, %a @]@." id pp_lam e pp_lam scope
+| Lapp(f, a) -> fprintf ppf "@[(%a %a)@]" pp_lam f pp_lam a
 | Lclosure {body; env; total_args; applied_count; freevars} ->
   fprintf ppf "@[<2>{body: %a @, env: %a @, total args: %i @, applied_count: %i @, free_vars: %a } @]@."
-  pp_lambda body pp_clos_env env total_args applied_count StringSet.pp freevars
+  pp_lam body pp_clos_env env total_args applied_count StringSet.pp freevars
 | Lswitch -> Utils.internalfail "TODO"
 and pp_clos_env ppf ce =
   fprintf ppf "[ ";
-  List.iter (fun (id, v) -> fprintf ppf "@[ (%i,%a) @]" id pp_lambda v ) ce;
+  List.iter (fun (id, v) -> fprintf ppf "@[ (%s,%a) @]" id pp_lam v ) ce;
   fprintf ppf "]"
 
 let pp ppf lprogram =
@@ -77,7 +77,7 @@ let pp ppf lprogram =
     match gv with
     | Fun closure ->
       let lam = Lclosure closure in
-      fprintf ppf "@[let %s = %a @]@." id pp_lambda lam
-    | Var l -> fprintf ppf "@[let %s = %a]@." id pp_lambda l
+      fprintf ppf "@[let %s = %a @]@." id pp_lam lam
+    | Var lam -> fprintf ppf "@[let %s = %a@]@." id pp_lam lam
      in
   List.iter item_printer lprogram
