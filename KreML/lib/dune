@@ -5,6 +5,7 @@
   Ast_printer
   Alpha_transformer
   Anf_transformer
+  Anf_printer
   Match_elimination
   ; Closure_conversion
   ; Lambda

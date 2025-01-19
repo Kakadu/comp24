@@ -18,16 +18,3 @@
  (instrumentation
   (backend bisect_ppx)))
 
-
-let (a, b) =
-  if true then 5,6 
-  else 7, 8
-
-let ab =
-  if true then 5,6
-  else 7, 8
-
-let f x =
-  let a = 5 + 6 in 
-  228
-

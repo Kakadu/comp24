@@ -5,18 +5,17 @@ type immediate = Avar of ident | Aconst of const
 type cexpr =
   | CImm of immediate
   | CTuple of immediate list
-  | CNil
   | CCons of immediate * immediate
-  | CFun of ident * cexpr
-  | CApp of immediate * immediate
+  | CFun of ident * aexpr
+  | CApp of immediate * immediate list
   | CIte of immediate * aexpr * aexpr
-  | CConstrained of cexpr * typ
-  | CSwitch (* TODO rewrite pattern matching *)
-
 
 
 and aexpr =
     | ALet of rec_flag * ident * cexpr * aexpr
     | AExpr of cexpr
 
-type astructure = (ident * aexpr) list
+type astructure_item = AStr_value of rec_flag * (ident * aexpr) list
+type astructure = astructure_item list
+
+val transform : structure -> astructure

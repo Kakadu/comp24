@@ -5,12 +5,10 @@ type immediate = Avar of ident | Aconst of const
 type cexpr =
   | CImm of immediate
   | CTuple of immediate list
-  | CNil
   | CCons of immediate * immediate
   | CFun of ident * aexpr
   | CApp of immediate * immediate list
   | CIte of immediate * aexpr * aexpr
-  | CConstrained of cexpr * typ
 
 
 and aexpr =
@@ -167,7 +165,7 @@ open Utils.Counter
   ;;
 
 
-let transform_structure s =
+let transform s =
   let anf_s = transform_structure s in
   run anf_s 0 |> snd
 ;;
