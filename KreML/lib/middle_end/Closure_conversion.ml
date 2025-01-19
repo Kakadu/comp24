@@ -3,31 +3,24 @@ open Utils
 open Lambda
 
 module CC_state = struct
-
-  type local_env = (ident, lambda, Base.String.comparator_witness) Base.Map.t
-
-  let empty_local_env = Base.Map.empty (module Base.String)
+  let empty_local_env = StringSet.empty
 
   type ctx =
     { global_env : lprogram
-    ; local_env : local_env
+    ; local_env : StringSet.t
     ; indexer : int
     ; names_indexer : int
     }
 
   let empty_ctx =
-    { global_env = []
-    ; local_env = empty_local_env
-    ; indexer = 0
-    ; names_indexer = 0
-    }
+    { global_env = []; local_env = empty_local_env; indexer = 0; names_indexer = 0 }
   ;;
 
   module Monad = State (struct
       type t = ctx
     end)
 
-  (* let ppvars fmt v =
+  (* let pp fmt v =
     let v = Base.Map.to_alist v in
     let open Stdlib.Format in
     fprintf
@@ -39,11 +32,6 @@ module CC_state = struct
       v
   ;; *)
 
-  (* let fresh_idx =
-    let open Monad in
-    get >>= fun ({ indexer; _ } as state) -> put { state with indexer = indexer + 1 }
-  ;; *)
-
   let fresh_name =
     let open Monad in
     get
@@ -53,16 +41,25 @@ module CC_state = struct
     >>= fun _ -> return name
   ;;
 
+  let lookup_global_opt name =
+    let open Monad in
+    let* name = name in
+    let* { global_env; _ } = get in
+    return
+      (match List.find_opt (fun (name', _) -> name = name') global_env with
+       | Some (_, v) -> Some v
+       | None -> None)
+  ;;
+
   let lookup_var_opt name =
     let open Monad in
     let* name = name in
     let* { global_env; local_env; _ } = get in
-    match Base.Map.find local_env name with
-    | Some v -> return (Some v)
+    match StringSet.find_opt name local_env with
+    | Some v -> return (Some (lvar v))
     | None ->
       (match List.find_opt (fun (id, _) -> id = name) global_env with
        | Some (_, Fun closure) -> Some (Lclosure closure) |> return
-       | Some (_, Var l) -> return (Some l)
        | None -> None |> return)
   ;;
 
@@ -75,18 +72,10 @@ module CC_state = struct
       let* name = name in
       internalfail @@ Format.sprintf "Unbound variable %s" name
   ;;
-
-
-  (* let%expect_test "asd" =
-    let p = Pat_cons(Pat_var "x", Pat_cons(Pat_var "y", Pat_var "ys")) in
-    let p = Monad.return p in
-    let monad = index p in
-    let _ = Monad.run  monad empty_ctx in
-    () *)
 end
 
 module Freevars = struct
-  include Stdlib.Set.Make (String)
+  include StringSet
 
   let rec collect_pat = function
     | Pat_wildcard | Pat_nil | Pat_const _ -> empty
@@ -120,14 +109,11 @@ open CC_state.Monad
 let extend_inner_fun_env call =
   let* lambda = call in
   match lambda with
-  | Lclosure { body; env; total_args; applied_count; freevars; _ }
+  | Lclosure ({ name; body; env; total_args; applied_count; freevars; _ } as outer_fun)
     when applied_count = total_args ->
     let rec extend = function
-      | Lclosure
-          ({ body = inner_body; env = innner_env; freevars = inner_free_vars; _ } as
-           inner_fun) ->
+      | Lclosure ({ env = innner_env; freevars = inner_free_vars; _ } as inner_fun) ->
         (* extend inner *)
-        let* extended_body = extend inner_body in
         let intersection = Freevars.inter freevars inner_free_vars in
         let* extended_env =
           Freevars.fold
@@ -143,24 +129,39 @@ let extend_inner_fun_env call =
             intersection
             (return innner_env)
         in
-        Lclosure { inner_fun with env = extended_env; body = extended_body } |> return
+        Lclosure { inner_fun with env = extended_env } |> return
+      | Lcall (name, args, inner_env) ->
+        let* f = CC_state.lookup_var_exn (return name) in
+        (match f with
+         | Lclosure { freevars = inner_free_vars; _ } ->
+           let intersection = Freevars.inter freevars inner_free_vars in
+           let inner_env' =
+             Freevars.fold
+               (fun id acc ->
+                 let value = lookup_closure_env_exn env id in
+                 match acc with
+                 | None -> Some [ id, value ]
+                 | Some inner_env -> Some ((id, value) :: inner_env))
+               intersection
+               inner_env
+           in
+           Lcall (name, args, inner_env') |> return
+         | _ -> internalfail @@ Format.sprintf "unbound function name %s" name)
       | (Lvar _ | Lconst _) as atom -> return atom
       | Lite (c, t, e) ->
         let* c = extend c in
         let* t = extend t in
         let* e = extend e in
         Lite (c, t, e) |> return
-      | Lapp (f, a) ->
-        let* f = extend f in
-        let* a = extend a in
-        Lapp (f, a) |> return
       | Llet (rf, id, e, scope) ->
         let* e = extend e in
         let* scope = extend scope in
         Llet (rf, id, e, scope) |> return
+      | Lbinop _ as l -> return l
       | Lswitch -> internalfail "TODO"
     in
-    extend body
+    let* body = extend body in
+    Lclosure { outer_fun with body } |> return
   | _ -> return lambda
 ;;
 
@@ -173,44 +174,25 @@ let rec apply_arg closure e =
   let p, ps =
     match arg_patterns with
     | p :: ps -> p, ps
-    | [] -> internalfail "Applying arg to non-function"
+    | [] ->
+      internalfail
+      @@ Format.asprintf
+           "Applying %a arg to non-function %a"
+           pp_expr
+           e
+           pp_lam
+           (Lclosure c)
   in
   (* pop arg *)
   let c = { c with arg_patterns = ps; applied_count = applied_count + 1 } in
-  let rec helper closure p e =
-    let* ({ env; _ } as closure) = closure in
-    match p, e with
-    | Pat_nil, _ | Pat_wildcard, _ | Pat_const _, _ -> internalfail "TODO"
-    | Pat_constrained (p, _), _ -> helper (return closure) p e
-    | Pat_var id, e ->
-      let* e' = lexpr (return e) in
-      return { closure with env = (id, e') :: env }
-    | Pat_cons (px, pxs), Expr_cons (ex, exs) ->
-      let closure = helper (return closure) px ex in
-      helper closure pxs exs
-    | Pat_cons (px, pxs), Expr_var _ ->
-      let head = eapp (evar Runtime.list_head) [ e ] in
-      let closure = helper (return closure) px head in
-      let tail = eapp (evar Runtime.list_tail) [ e ] in
-      helper closure pxs tail
-    | Pat_tuple (pfst, psnd, prest), Expr_tuple (efst, esnd, erest) ->
-      List.fold_left2
-        helper
-        (return closure)
-        (pfst :: psnd :: prest)
-        (efst :: esnd :: erest)
-    | Pat_tuple (pfst, psnd, prest), Expr_var _ ->
-      let ps = pfst :: psnd :: prest in
-      let es =
-        Base.List.range 0 (List.length ps) ~stop:`exclusive
-        |> List.map (fun i ->
-          eapp (evar Runtime.access_tuple) [ e; Expr_const (Const_int i) ])
-      in
-      List.fold_left2 helper (return closure) ps es
-    | _ -> unreachable ()
-    (* program is type checked*)
-  in
-  helper (return c) p e
+  let zipped = Utils.zip_idents_with_exprs p e in
+  List.fold_left
+    (fun acc_cl (id, e) ->
+      let* ({ env; _ } as cl) = acc_cl in
+      let* e = lexpr (return e) in
+      return { cl with env = (id, e) :: env })
+    (return c)
+    zipped
 
 and lexpr e =
   let* e = e in
@@ -225,56 +207,26 @@ and lexpr e =
   let lexpr e = lexpr (return e) in
   match e with
   | Expr_const c -> Lconst c |> return
-  | Expr_fun (p, e) as f ->
-    let* body, patterns = extract_fun_body (return f) in
-    let patterns = List.rev patterns in
-    let open Freevars in
-    let free_vars = diff (collect_expr e) (collect_pat p) in
-    lclosure body patterns free_vars |> return
+  | Expr_fun _ as f ->
+    (* it is guaranteed by split_let that function is anonymous if it is 
+      resolved in lexpr, so we generate fresh name and lift it to top level *)
+    let* body, patterns, freevars = resolve_fun (return f) in
+    let* fresh_name = CC_state.fresh_name in
+    let closure = lclosure fresh_name body patterns freevars in
+    let* ({ global_env; _ } as state) = get in
+    let* _ = put { state with global_env = (fresh_name, Fun closure) :: global_env } in
+    lvar fresh_name |> return
   | Expr_var x ->
     let* lookup = CC_state.lookup_var_opt (return x) in
     (match lookup with
      | Some _ -> lvar x |> return (* either local or global *)
-     | None -> lapp (lvar Runtime.access_closure) (lvar x) |> return)
+     | None -> lcall Runtime.access_closure [ lvar x ] |> return)
     (* closure var *)
   | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op ->
     let* x = lexpr x in
     let* y = lexpr y in
-    lapp (lapp (lvar "+") x) y |> return
-  | Expr_app ((Expr_fun _ as anonymous_fun), a) ->
-    (* lift anonymous function to top level *)
-    let* anonymous_fun' = lexpr anonymous_fun in
-    let* fresh_name = CC_state.fresh_name in
-    let* ({ global_env; _ } as state) = get in
-    (match anonymous_fun' with
-     | Lclosure closure ->
-       let new_decl = Fun closure in
-       let* _ = put { state with global_env = (fresh_name, new_decl) :: global_env } in
-       let pointer = evar fresh_name in
-       lexpr @@ eapp pointer [ a ]
-     | l ->
-       internalfail
-       @@ Format.asprintf
-            "Unexpected term %a after resolving anonymous function"
-            pp_lambda
-            l)
-  | Expr_app (f, (Expr_fun _ as anonymous_fun)) ->
-    (* lift anonymous function to top level *)
-    let* anonymous_fun' = lexpr anonymous_fun in
-    let* fresh_name = CC_state.fresh_name in
-    let* ({ global_env; _ } as state) = get in
-    (match anonymous_fun' with
-     | Lclosure closure ->
-       let new_decl = Fun closure in
-       let* _ = put { state with global_env = (fresh_name, new_decl) :: global_env } in
-       let pointer = Expr_var fresh_name in
-       lexpr @@ eapp f [ pointer ]
-     | l ->
-       internalfail
-       @@ Format.asprintf
-            "Unexpected term %a after resolving anonymous function"
-            pp_lambda
-            l)
+    let binop = resolve_binop op in
+    Lbinop (binop, x, y) |> return
   | Expr_app (f, a) ->
     let* lf = lexpr f in
     (match lf with
@@ -291,20 +243,28 @@ and lexpr e =
      | Lclosure f ->
        let* f' = apply_arg (return f) a in
        Lclosure f' |> return |> extend_inner_fun_env
-     | Lapp _ as app ->
-       let* la = lexpr a in
-       lapp app la |> return
      | f -> internalfail @@ Format.asprintf "Expected function, got %a" pp_lambda f)
   | Expr_constrained (e, _) -> lexpr e
   | Expr_cons (x, xs) ->
     let* x' = lexpr x in
     let* xs' = lexpr xs in
-    lapp (lapp (lvar Runtime.list_cons) x') xs' |> return
+    lcall Runtime.list_cons [ x'; xs' ] |> return
   | Expr_ite (c, t, e) ->
     let* c' = lexpr c in
     let* t' = lexpr t in
     let* e' = lexpr e in
     Lite (c', t', e') |> return
+  | Expr_let (rec_flag, binding, (Expr_fun _ as f)) ->
+    (* lift anonymous fun with closure *)
+    let* f' = lexpr f in
+    let* ({ global_env; _ } as state) = get in
+    (match f' with
+     | Lclosure closure ->
+       let new_decl = Fun closure in
+       let* fresh_name = CC_state.fresh_name in
+       let* _ = put { state with global_env = (fresh_name, new_decl) :: global_env } in
+       elet ~rec_flag binding (evar fresh_name) |> lexpr
+     | _ -> unreachable ())
   | Expr_let (_, (Pat_var id, (Expr_fun _ as f)), scope) ->
     (* lift anonmous fun to top level *)
     (* TODO: maybe need second pass on Llet for dumb constructions like let a, f = 5, (fun x -> x) in... *)
@@ -325,20 +285,36 @@ and lexpr e =
     split_let p e ~is_top_level:false (fun _ -> lexpr scope)
   | Expr_match _ | Expr_tuple _ -> internalfail "todo"
   | _ -> internalfail (Format.asprintf "unexpected expr %a" pp_expr e)
-(* TODO *)
+
+and resolve_fun expr =
+  let* expr = expr in
+  match expr with
+  | Expr_fun (p, e) as f ->
+    let* body, patterns = extract_fun_body (return f) in
+    let patterns = List.rev patterns in
+    let open Freevars in
+    let free_vars = diff (collect_expr e) (collect_pat p) in
+    let* { global_env; _ } = get in
+    let free_vars = diff free_vars (List.map fst global_env |> StringSet.of_list) in
+    return (body, patterns, free_vars)
+  | _ ->
+    internalfail @@ Format.asprintf "resolve fun: %a is not a function" Ast.pp_expr expr
 
 and extract_fun_body expr =
   let rec helper ps e =
     let* e = e in
     match e with
-    | Expr_fun (p, e) -> helper (p :: ps) (return e)
-    | e ->
+    | Expr_fun (p, e) ->
       (* we need to clear local environment when resolving body and restore it after *)
-      let* {local_env; _} as state = get in
-      let* _ = put {state with local_env = CC_state.empty_local_env } in
-      let* e' = lexpr (return e) in
+      let* ({ local_env; _ } as state) = get in
+      let locals = Freevars.collect_pat p in
+      let* _ = put { state with local_env = locals } in
+      let* res = helper (p :: ps) (return e) in
       (* restore *)
-      let* _ = put { state with local_env} in
+      let* _ = put { state with local_env } in
+      return res
+    | e ->
+      let* e' = lexpr (return e) in
       (e', ps) |> return
   in
   helper [] expr
@@ -346,72 +322,59 @@ and extract_fun_body expr =
 (* deconstructs [pattern] with [expr] on atomic [Llet] without any patterns
  and chains it in scope *)
 and split_let pat expr ~is_top_level k =
-  let split_let p e = split_let p e ~is_top_level in
-  match pat, expr with
-  | Pat_const _, _ | Pat_nil, _ | Pat_wildcard, _ ->
-    internalfail "todo: check it in runtime"
-  | Pat_constrained (p, _), _ -> split_let p expr k
-  | _, Expr_constrained (e, _) -> split_let pat e k
-  | Pat_var id, expr ->
-    let* expr = lexpr (return expr) in
-    (* let open Stdlib.Format in
-    pp_lambda std_formatter expr; *)
-    let* scope = k (lvar id) in
-    let* _ =
-      if is_top_level
-      then
-        let* ({ global_env; _ } as state) = get in
-        let global_value =
-          match expr with
-          | Lclosure closure -> Fun closure
-          | lam -> Var lam
-        in
-        let global_env = (id, global_value) :: global_env in
-        put { state with global_env }
-      else
-        let* ({ local_env; _ } as state) = get in
-        let local_env = Base.Map.set local_env ~key:id ~data:expr in
-        put { state with local_env }
-    in
-    llet id expr scope |> return
-  | Pat_cons (px, pxs), Expr_cons (ex, exs) ->
-    split_let px ex (fun _ -> split_let pxs exs k)
-  | Pat_cons (px, pxs), (Expr_var _ as var) ->
-    let head = eapp (evar Runtime.list_head) [ var ] in
-    split_let px head (fun _ ->
-      let tail = eapp (evar Runtime.list_tail) [ var ] in
-      split_let pxs tail k)
-  | Pat_tuple (pfst, psnd, prest), Expr_tuple (efst, esnd, erest) ->
-    let ps = pfst :: psnd :: prest in
-    let es = efst :: esnd :: erest in
-    split_list ps es ~is_top_level k
-  | Pat_tuple (pfst, psnd, prest), (Expr_var _ as var) ->
-    let ps = pfst :: psnd :: prest in
-    let len = List.length ps in
-    let es =
-      Base.List.range ~stop:`exclusive 0 len
-      |> List.map (fun i ->
-        eapp (evar Runtime.access_tuple) [ var; Expr_const (Const_int i) ])
-    in
-    split_list ps es ~is_top_level k
-  | _, _ -> unreachable () (* program is type checked *)
-
-and split_list ps es ~is_top_level k =
-  let rec helper acc ps es =
-    match ps, es with
-    | [], [] -> acc |> List.hd |> k
-    | p :: ps, e :: es ->
-      split_let p e ~is_top_level (fun last -> helper (last :: acc) ps es)
-    | _ -> unreachable ()
+  let zipped = zip_idents_with_exprs pat expr in
+  let* zipped =
+    List.fold_right
+      (fun (id, e) acc ->
+        let* acc = acc in
+        let* e = lexpr (return e) in
+        (id, e) :: acc |> return)
+      zipped
+      (return [])
   in
-  helper [] ps es
-;;
+  let* _ =
+    List.fold_left
+      (fun acc (id, e) ->
+        let* () = acc in
+        if is_top_level
+        then
+          let* ({ global_env; _ } as state) = get in
+          let global_value =
+            match e with
+            | Lclosure closure -> Fun closure
+            | _ -> unreachable ()
+          in
+          let global_env = (id, global_value) :: global_env in
+          let* _ = put { state with global_env } in
+          return ()
+        else
+          let* ({ local_env; _ } as state) = get in
+          let local_env = StringSet.add id local_env in
+          let* _ = put { state with local_env } in
+          return ())
+      (return ())
+      zipped
+  in
+  let* scope = k () in
+  if not is_top_level
+  then (* create locals declarations *)
+    List.fold_right
+      (fun (id, l) acc ->
+        let* acc = acc in
+        let* lookup = CC_state.lookup_global_opt (return id) in
+        return
+          (match lookup with
+           | Some _ -> llet id l acc
+           | None -> acc))
+      zipped
+      (return scope)
+  else return scope
 
 let cc structure =
   let init = CC_state.empty_ctx in
   let item_to_lambda acc_state (Str_value (_, bindings)) =
     let split_binding acc_state (p, e) =
-      let l = split_let p e ~is_top_level:true return in
+      let l = split_let p e ~is_top_level:true (fun _ -> lvar "" |> return) in
       let state, _ = run l acc_state in
       { state with indexer = 0; names_indexer = 0 }
     in
@@ -424,3 +387,54 @@ let cc structure =
   print_endline s; *)
   global_env
 ;;
+
+
+
+let f x y =
+  let a = x + y in
+  fun t -> t + a
+
+(* rewrites to *)
+
+let extra env t = t + env
+
+let f x y =
+  let a = x + y in
+  extra a
+
+(* *)
+  
+let partial1 = f 5
+
+(* Lclosure {name = f, env = {x -> 5}}*)
+
+let partial2 = partial1 10
+(* Lcall(f, 10, {x -> 5})*)
+(**)
+
+let f = fun x ->
+  let a = x + 1 in
+  fun y ->
+    let b = a + 1 in
+    fun z ->
+      let c = b + 2 in
+      x + y + z + a + b + c
+
+(*let f3 env z =
+  let c = (env.b) + 2
+  (env.x + env.y + z + env.a + env.b + c) *)
+
+(*let f2 env y =
+  let b = env.a + 1 in
+  maybe update env from my env and locals?
+  Closure(name: f3, y::b::env)
+*)
+
+(*let f1 x =
+  let a = x + 1 in
+  Closure(name: f2, a::x::env )*)
+
+
+(* let p1 = f 1 = Closure(name: f1, x -> 1)*)
+(* let p2 = p1 5 = Closure(name: f1, x -> 1, y -> 5)*)
+(* let p3 = p2 10 = Closure (name: f1, x -> 1, y -> 5, z -> 10)*)
