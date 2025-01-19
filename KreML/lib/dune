@@ -3,9 +3,11 @@
  (modules
   Ast
   Ast_printer
-  Closure_conversion
-  Lambda
-  Ast_transformer
+  Alpha_transformer
+  Anf_transformer
+  Match_elimination
+  ; Closure_conversion
+  ; Lambda
   Parser
   Inferencer
   Runtime

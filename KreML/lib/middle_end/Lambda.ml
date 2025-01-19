@@ -25,6 +25,31 @@ type binop =
   | Or
 [@@deriving show]
 
+let f a = 
+  let a = a + 1 in
+  let b = a in
+  if a >  b then
+    fun x -> x + a + b
+  else fun y -> y + b 
+
+let f b =
+  if b then
+    fun (a, b) -> (a + 1, b + 1)
+  else fun ab -> ab 
+
+(*
+f1 x = 
+  x + 1
+f 2 x =
+  x + 2
+let f b = if b then
+  f_1 
+else f_2*)
+
+let x = 1, 2 in
+
+(fun (a, b) -> a + b) x
+
 let resolve_binop = function
   | "*" -> Mul
   | "/" -> Div
@@ -53,7 +78,6 @@ type lambda =
 
 and closure =
   { name : ident
-  ; body : lambda
   ; env : closure_env
   ; arg_patterns : pattern list
   ; total_args : int
@@ -63,9 +87,8 @@ and closure =
 [@@deriving show]
 
 and closure_env = (ident * lambda) list [@@deriving show]
-and global_value = Fun of closure [@@deriving show]
 
-type lprogram = (ident * global_value) list [@@deriving show]
+type lprogram = (ident * lambda) list [@@deriving show]
 
 let lookup_closure_env_exn c id = List.find (fun (id', _) -> id = id') c |> snd
 
@@ -75,9 +98,8 @@ let apply_arg ({ applied_count; env; _ } as c) id arg =
 
 let iconst i = Lconst (Const_int i)
 
-let lclosure name body arg_patterns freevars =
+let lclosure name arg_patterns freevars =
   { name
-  ; body
   ; arg_patterns
   ; total_args = List.length arg_patterns
   ; applied_count = 0
@@ -123,18 +145,16 @@ let rec pp_lam ppf = function
   | Lcall (f, args, None) ->
     let pp_args fmt list = pp_list fmt list ~print_bounds:false in
     fprintf ppf "@[ %s(%a) @]" f pp_args args
-  | Lclosure { name; body; env; arg_patterns; total_args; applied_count; freevars } ->
+  | Lclosure { name; env; arg_patterns; total_args; applied_count; freevars } ->
     fprintf
       ppf
-      "@[ { name: %s @, body: %a @,\
+      "@[ { name: %s @,
       \ env: %a  @,\
       \ arg_patterns: %a @,\
       \ total args: %i @,\
       \ applied_count: %i @,\
       \ free_vars: %a } @]@."
       name
-      pp_lam
-      body
       pp_clos_env
       env
       pp_pat_list
@@ -162,11 +182,8 @@ and pp_pat_list ppf list =
 ;;
 
 let pp ppf lprogram =
-  let item_printer (id, gv) =
-    match gv with
-    | Fun closure ->
-      let lam = Lclosure closure in
-      fprintf ppf "@[let %s = %a @]@." id pp_lam lam
+  let item_printer (id, f) =
+      fprintf ppf "@[let %s = %a @]@." id pp_lam f
   in
   List.iter item_printer lprogram
 ;;

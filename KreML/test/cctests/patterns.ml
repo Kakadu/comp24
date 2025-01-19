@@ -11,3 +11,8 @@ let f2 = f (1, 1, 1)
 let l = [5; 6]
 let res = f2 l
 let () = print_int res
+
+
+let f x =
+  let a = x + 5 in
+  fun z w -> a + z + w

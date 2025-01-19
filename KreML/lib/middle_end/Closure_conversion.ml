@@ -8,12 +8,14 @@ module CC_state = struct
   type ctx =
     { global_env : lprogram
     ; local_env : StringSet.t
-    ; indexer : int
     ; names_indexer : int
     }
 
   let empty_ctx =
-    { global_env = []; local_env = empty_local_env; indexer = 0; names_indexer = 0 }
+    { global_env = []
+    ; local_env = empty_local_env
+    ; names_indexer = 0
+    }
   ;;
 
   module Monad = State (struct
@@ -35,10 +37,9 @@ module CC_state = struct
   let fresh_name =
     let open Monad in
     get
-    >>= fun { global_env; local_env; indexer; names_indexer } ->
+    >>= fun ({ names_indexer; _ } as state) ->
     let name = Format.sprintf "fresh_fun_%i" names_indexer in
-    put { global_env; local_env; indexer; names_indexer = names_indexer + 1 }
-    >>= fun _ -> return name
+    put { state with names_indexer = names_indexer + 1 } >>= fun _ -> return name
   ;;
 
   let lookup_global_opt name =
@@ -59,7 +60,7 @@ module CC_state = struct
     | Some v -> return (Some (lvar v))
     | None ->
       (match List.find_opt (fun (id, _) -> id = name) global_env with
-       | Some (_, Fun closure) -> Some (Lclosure closure) |> return
+       | Some (_, l) -> Some l |> return
        | None -> None |> return)
   ;;
 
@@ -109,7 +110,7 @@ open CC_state.Monad
 let extend_inner_fun_env call =
   let* lambda = call in
   match lambda with
-  | Lclosure ({ name; body; env; total_args; applied_count; freevars; _ } as outer_fun)
+  | Lclosure ({ name; env; total_args; applied_count; freevars; _ } as outer_fun)
     when applied_count = total_args ->
     let rec extend = function
       | Lclosure ({ env = innner_env; freevars = inner_free_vars; _ } as inner_fun) ->
@@ -214,7 +215,7 @@ and lexpr e =
     let* fresh_name = CC_state.fresh_name in
     let closure = lclosure fresh_name body patterns freevars in
     let* ({ global_env; _ } as state) = get in
-    let* _ = put { state with global_env = (fresh_name, Fun closure) :: global_env } in
+    let* _ = put { state with global_env = (fresh_name, body) :: global_env } in
     lvar fresh_name |> return
   | Expr_var x ->
     let* lookup = CC_state.lookup_var_opt (return x) in
@@ -260,7 +261,7 @@ and lexpr e =
     let* ({ global_env; _ } as state) = get in
     (match f' with
      | Lclosure closure ->
-       let new_decl = Fun closure in
+       let new_decl = closure in
        let* fresh_name = CC_state.fresh_name in
        let* _ = put { state with global_env = (fresh_name, new_decl) :: global_env } in
        elet ~rec_flag binding (evar fresh_name) |> lexpr
@@ -287,10 +288,17 @@ and lexpr e =
   | _ -> internalfail (Format.asprintf "unexpected expr %a" pp_expr e)
 
 and resolve_fun expr =
+  let rec collect_params l =
+    let* l = l in
+    match l with
+    | Lbinop _ | Lcall _ | Lconst _ -> return []
+    | Lclosure {arg_patterns; _} -> return arg_patterns
+    | Llet(_, _, _, scope) -> collect_params (return scope) in
+    | Lite(c, t, e)
   let* expr = expr in
   match expr with
   | Expr_fun (p, e) as f ->
-    let* body, patterns = extract_fun_body (return f) in
+    let* body = extract_fun_body (return f) in
     let patterns = List.rev patterns in
     let open Freevars in
     let free_vars = diff (collect_expr e) (collect_pat p) in
@@ -301,23 +309,18 @@ and resolve_fun expr =
     internalfail @@ Format.asprintf "resolve fun: %a is not a function" Ast.pp_expr expr
 
 and extract_fun_body expr =
-  let rec helper ps e =
-    let* e = e in
-    match e with
+  let* expr = expr in
+    match expr with
     | Expr_fun (p, e) ->
       (* we need to clear local environment when resolving body and restore it after *)
       let* ({ local_env; _ } as state) = get in
       let locals = Freevars.collect_pat p in
       let* _ = put { state with local_env = locals } in
-      let* res = helper (p :: ps) (return e) in
+      let* res = extract_fun_body (return e) in
       (* restore *)
       let* _ = put { state with local_env } in
       return res
-    | e ->
-      let* e' = lexpr (return e) in
-      (e', ps) |> return
-  in
-  helper [] expr
+    | e -> lexpr (return e) in
 
 (* deconstructs [pattern] with [expr] on atomic [Llet] without any patterns
  and chains it in scope *)
@@ -369,14 +372,23 @@ and split_let pat expr ~is_top_level k =
       zipped
       (return scope)
   else return scope
+;;
 
 let cc structure =
   let init = CC_state.empty_ctx in
   let item_to_lambda acc_state (Str_value (_, bindings)) =
-    let split_binding acc_state (p, e) =
+    let split_binding (({ arg_counts; _ } : CC_state.ctx ) as acc_state) (p, e) =
+      let arg_counts', _ = count_args_with_state e in
+      let state =
+        { acc_state with
+          arg_counts =
+            Base.Map.merge_skewed arg_counts arg_counts' ~combine:(fun ~key:_ _ _ ->
+              internalfail "maps are expected to be disjoint")
+        }
+      in
       let l = split_let p e ~is_top_level:true (fun _ -> lvar "" |> return) in
-      let state, _ = run l acc_state in
-      { state with indexer = 0; names_indexer = 0 }
+      let state, _ = run l state in
+      { state with names_indexer = 0 }
     in
     List.fold_left split_binding acc_state bindings
   in
@@ -388,11 +400,10 @@ let cc structure =
   global_env
 ;;
 
-
-
 let f x y =
   let a = x + y in
   fun t -> t + a
+;;
 
 (* rewrites to *)
 
@@ -401,9 +412,10 @@ let extra env t = t + env
 let f x y =
   let a = x + y in
   extra a
+;;
 
 (* *)
-  
+
 let partial1 = f 5
 
 (* Lclosure {name = f, env = {x -> 5}}*)
@@ -412,13 +424,15 @@ let partial2 = partial1 10
 (* Lcall(f, 10, {x -> 5})*)
 (**)
 
-let f = fun x ->
+let f =
+  fun x ->
   let a = x + 1 in
   fun y ->
     let b = a + 1 in
     fun z ->
       let c = b + 2 in
       x + y + z + a + b + c
+;;
 
 (*let f3 env z =
   let c = (env.b) + 2
@@ -433,7 +447,6 @@ let f = fun x ->
 (*let f1 x =
   let a = x + 1 in
   Closure(name: f2, a::x::env )*)
-
 
 (* let p1 = f 1 = Closure(name: f1, x -> 1)*)
 (* let p2 = p1 5 = Closure(name: f1, x -> 1, y -> 5)*)

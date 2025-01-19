@@ -106,6 +106,7 @@ let const =
   <|> keyword "true" *> (Const_bool true |> return)
   <|> keyword "false" *> (Const_bool false |> return)
   <|> parens ws *> (Const_unit |> return)
+  <|> braces ws *> (Const_nil |> return)
 ;;
 
 let tuple sep p =
