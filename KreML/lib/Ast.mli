@@ -25,6 +25,7 @@ type const =
   | Const_int of int (** [Const_int] represents integer constants like 42, 1337 *)
   | Const_bool of bool (** [Const_bool] represents boolean constants {true, false} *)
   | Const_unit (** Unit *)
+  | Const_nil (** Nil *)
 [@@deriving show]
 
 type pattern =
@@ -59,7 +60,6 @@ type expr =
   | Expr_cons of expr * expr
   (** Lists like [1; 2] are represented with [Some(1, Some(2, None))],
       constructions like [1::xs] are represented with [Some (1, xs)] *)
-  | Expr_nil
   | Expr_tuple of expr * expr * expr list
   | Expr_let of rec_flag * binding * expr
   (** {[

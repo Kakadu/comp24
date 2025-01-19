@@ -21,6 +21,7 @@ type const =
   | Const_int of int
   | Const_bool of bool
   | Const_unit
+  | Const_nil
 [@@deriving show]
 
 type pattern =
@@ -48,7 +49,6 @@ type expr =
   | Expr_const of const
   | Expr_var of ident
   | Expr_cons of expr * expr
-  | Expr_nil
   | Expr_tuple of expr * expr * expr list
   | Expr_let of rec_flag * binding * expr
   | Expr_ite of expr * expr * expr
@@ -71,7 +71,7 @@ let eapp func args =
 ;;
 
 let econs x y = Expr_cons (x, y)
-let enil = Expr_nil
+let enil = Expr_const Const_nil
 let etuple fst snd rest = Expr_tuple (fst, snd, rest)
 let eite c e t = Expr_ite (c, e, t)
 let efun p body = Expr_fun (p, body)
