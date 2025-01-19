@@ -50,6 +50,7 @@ let rec pp_pat ppf = function
   | Pat_const (Const_bool b) -> fprintf ppf "%b" b
   | Pat_const (Const_int i) -> fprintf ppf "%i" i
   | Pat_const Const_unit -> fprintf ppf "()"
+  | Pat_const Const_nil -> fprintf ppf "[]"
   | Pat_tuple (fst, snd, rest) ->
     pp_tuple
       ppf
@@ -67,12 +68,12 @@ let is_infix = function
 ;;
 
 let rec pp_expr ppf = function
-  | Expr_nil -> fprintf ppf "[]"
   | Expr_var id when is_infix id -> fprintf ppf "(%s)" id
   | Expr_var id -> fprintf ppf "%s" id
   | Expr_const (Const_bool b) -> fprintf ppf "%b" b
   | Expr_const (Const_int i) -> fprintf ppf "%i" i
   | Expr_const Const_unit -> fprintf ppf "()"
+  | Expr_const Const_nil -> fprintf ppf "[]"
   | Expr_cons (x, xs) -> fprintf ppf "@[<2>(%a)::(%a) @]" pp_expr x pp_expr xs
   | Expr_fun ((Pat_var _ as f), arg) ->
     fprintf ppf "@[<2>(%a@ %a@ %a@ %a)@]" kwd "fun" pp_pat f kwd "->" pp_expr arg
@@ -87,9 +88,9 @@ let rec pp_expr ppf = function
       true
   | Expr_ite (c, t, e) ->
     fprintf ppf "@[<2>(if %a then @,%a @, else  @,%a)@]" pp_expr c pp_expr t pp_expr e
-  | Expr_app ((Expr_var _ as f), ((Expr_nil | Expr_var _ | Expr_const _) as arg)) ->
+  | Expr_app ((Expr_var _ as f), ((Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>%a @ %a@]" pp_expr f pp_expr arg
-  | Expr_app (f, ((Expr_nil | Expr_var _ | Expr_const _) as arg)) ->
+  | Expr_app (f, ((Expr_var _ | Expr_const _) as arg)) ->
     fprintf ppf "@[<2>(%a) %a@]" pp_expr f pp_expr arg
   | Expr_app ((Expr_var _ | Expr_app _ as f), arg) -> fprintf ppf "@[%a (%a)@]" pp_expr f pp_expr arg
   | Expr_app (f, arg) -> fprintf ppf "@[(%a) (%a) @]" pp_expr f pp_expr arg

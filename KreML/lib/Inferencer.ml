@@ -332,6 +332,9 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t =
   | Pat_const (Const_bool _) -> R.return (env, Typ_bool)
   | Pat_const (Const_int _) -> R.return (env, Typ_int)
   | Pat_const Const_unit -> R.return (env, Typ_unit)
+  | Pat_const Const_nil ->
+    let* fr = fresh_var () in
+    R.return(env, Typ_list fr)
   | Pat_wildcard ->
     let* fr = fresh_var () in
     R.return (env, fr)
@@ -379,6 +382,9 @@ let infer_expr env expr : (Subst.t * typ) R.t =
     | Expr_const (Const_bool _) -> R.return (Subst.empty, Typ_bool)
     | Expr_const (Const_int _) -> R.return (Subst.empty, Typ_int)
     | Expr_const Const_unit -> R.return (Subst.empty, Typ_unit)
+    | Expr_const Const_nil ->
+      let* fr = fresh_var () in
+      R.return (Subst.empty, Typ_list fr)
     | Expr_var "*" | Expr_var "/" | Expr_var "+" | Expr_var "-" ->
       (Subst.empty, Typ_fun (Typ_int, Typ_fun (Typ_int, Typ_int))) |> R.return
     | Expr_var ">=" | Expr_var ">" | Expr_var "<=" | Expr_var "<" | Expr_var "=" ->
@@ -392,9 +398,6 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       let* uni = Subst.unify_pair xs_t (Typ_list x_t) in
       let* final_subst = Subst.compose_all [ uni; xs_s; x_s ] in
       R.return (final_subst, Subst.apply xs_t final_subst)
-    | Expr_nil ->
-      let* fr = fresh_var () in
-      R.return (Subst.empty, Typ_list fr)
     | Expr_tuple (fst, snd, rest) ->
       let* fst_s, fst_t = helper env fst in
       let* snd_s, snd_t = helper env snd in

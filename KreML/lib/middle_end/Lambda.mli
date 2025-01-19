@@ -45,9 +45,8 @@ and closure =
 [@@deriving show]
 
 and closure_env = (ident * lambda) list [@@deriving show]
-and global_value = Fun of closure [@@deriving show]
 
-type lprogram = (ident * global_value) list [@@deriving show]
+type lprogram = (ident * lambda) list [@@deriving show]
 
 val lookup_closure_env_exn : closure_env -> ident -> lambda
 val apply_arg : closure -> ident -> lambda -> closure

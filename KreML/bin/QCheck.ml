@@ -30,6 +30,7 @@ let const =
     [ 4, map (fun i -> Const_int i) nat
     ; 1, map (fun b -> Const_bool b) bool
     ; 1, return Const_unit
+    ; 1, return Const_nil
     ]
 ;;
 
@@ -91,7 +92,6 @@ let expr =
       frequency
         [ 2, map (fun c -> Expr_const c) const
         ; 2, map (fun id -> Expr_var id) ident
-        ; 1, return Expr_nil
         ]
     | _ ->
       frequency
@@ -186,7 +186,7 @@ QCheck_runner.run_tests ~rand [ check_pattern ]
 let arbitrary_expr =
   let open QCheck.Iter in
   let rec shrink = function
-    | Expr_nil | Expr_const _ | Expr_var _ -> empty
+    | Expr_const _ | Expr_var _ -> empty
     | Expr_cons (x, xs) ->
       of_list [ x; xs ]
       <+> (shrink x >|= fun x' -> Expr_cons (x', xs))

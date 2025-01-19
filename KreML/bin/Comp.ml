@@ -2,6 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+(* alpha conv -> match elim -> anf -> clos conv *)
 open Kreml_lib.Inferencer
 
 let () =
