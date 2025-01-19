@@ -20,6 +20,7 @@
   ocaml
   dune
   bisect_ppx
+  qcheck
   (llvm
    (= "16.0.6+nnp"))))
 
