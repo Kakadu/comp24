@@ -68,14 +68,14 @@ let zip_idents_with_exprs p e =
     | _, Expr_constrained (e, _) -> helper acc p e
     | Pat_var id, e -> (id, e) :: acc
     | Pat_cons (px, pxs), Expr_cons (ex, exs) -> helper (helper acc px ex) pxs exs
-    | Pat_cons (px, pxs), Expr_var _ ->
+    | Pat_cons (px, pxs), e ->
       let head = eapp (evar Runtime.list_head) [ e ] in
       let acc = helper acc px head in
       let tail = eapp (evar Runtime.list_tail) [ e ] in
       helper acc pxs tail
     | Pat_tuple (pfst, psnd, prest), Expr_tuple (efst, esnd, erest) ->
       List.fold_left2 helper acc (pfst :: psnd :: prest) (efst :: esnd :: erest)
-    | Pat_tuple (pfst, psnd, prest), Expr_var _ ->
+    | Pat_tuple (pfst, psnd, prest), e ->
       let ps = pfst :: psnd :: prest in
       let es =
         Base.List.range 0 (List.length ps) ~stop:`exclusive
@@ -83,7 +83,7 @@ let zip_idents_with_exprs p e =
           eapp (evar Runtime.access_tuple) [ e; Expr_const (Const_int i) ])
       in
       List.fold_left2 helper acc ps es
-    | _ -> unreachable ()
+    | p, e -> internalfail @@ Format.asprintf "unexpected p, e %a, %a" Ast.pp_pattern p Ast.pp_expr e
   in
   (* call is expected to be in type checked contxext *)
   helper [] p e |> List.rev

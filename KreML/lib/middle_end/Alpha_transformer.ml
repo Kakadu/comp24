@@ -15,7 +15,7 @@ let default =
 open Utils.Counter
 
 let rec transform_pattern id_gen ctx = function
-  | (Pat_const _ | Pat_nil | Pat_wildcard) as p -> return (p, ctx)
+  | (Pat_const _ | Pat_wildcard) as p -> return (p, ctx)
   | Pat_var prev_id ->
     let* n = id_gen prev_id in
     (Pat_var n, Base.Map.set ctx ~key:prev_id ~data:n) |> return
@@ -105,7 +105,7 @@ let rec transform_expr ctx e =
     Expr_let (Recursive, (p', e'), scope') |> return
 ;;
 
-let transform_structure s =
+let transform s =
   let id_gen i = return i in
   let default_ctx = default in
   let transform_struct_item ctx (Str_value (rf, bindings)) =

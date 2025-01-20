@@ -250,12 +250,14 @@ let%expect_test "simple expressions" =
                 (Ast.Expr_app ((Ast.Expr_var "+"),
                    (Ast.Expr_const (Ast.Const_int 7)))),
                 (Ast.Expr_const (Ast.Const_int 8)))),
-             Ast.Expr_nil))
+             (Ast.Expr_const Ast.Const_nil)))
           ))
        ))
     (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 1)),
        (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 2)),
-          (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 3)), Ast.Expr_nil))))
+          (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 3)),
+             (Ast.Expr_const Ast.Const_nil)))
+          ))
        ))
     (Ast.Expr_ite ((Ast.Expr_const (Ast.Const_bool true)), (Ast.Expr_var "a"),
        (Ast.Expr_var "b")))
@@ -276,7 +278,7 @@ let%expect_test "simple expressions" =
                 (Ast.Expr_app ((Ast.Expr_var "+"), (Ast.Expr_var "x"))),
                 (Ast.Expr_var "y")))
              )),
-          Ast.Expr_nil))
+          (Ast.Expr_const Ast.Const_nil)))
        ))
     (Ast.Expr_let (Ast.NonRecursive,
        ((Ast.Pat_var "f"),
@@ -410,7 +412,7 @@ let%expect_test "complex expr" =
        5 [6; 7]"
     ; "let f a = 5 + a in f 6"
     ; "let fix f = (fun x -> f (fun f -> x x f))  (fun x -> f (fun f -> x x f)) in\n\
-      \      fix 3"
+      \      fix 3";
     ]
   in
   List.iter
@@ -427,7 +429,9 @@ let%expect_test "complex expr" =
                     (Ast.Expr_app ((Ast.Expr_var ">"), (Ast.Expr_var "a"))),
                     (Ast.Expr_const (Ast.Const_int 0)))),
                  (Ast.Expr_cons ((Ast.Expr_var "a"),
-                    (Ast.Expr_cons ((Ast.Expr_var "a"), Ast.Expr_nil)))),
+                    (Ast.Expr_cons ((Ast.Expr_var "a"),
+                       (Ast.Expr_const Ast.Const_nil)))
+                    )),
                  (Ast.Expr_match ((Ast.Expr_var "b"),
                     [((Ast.Pat_cons ((Ast.Pat_var "x"),
                          (Ast.Pat_cons ((Ast.Pat_var "y"), Ast.Pat_wildcard)))),
@@ -440,7 +444,9 @@ let%expect_test "complex expr" =
        (Ast.Expr_app (
           (Ast.Expr_app ((Ast.Expr_var "f"), (Ast.Expr_const (Ast.Const_int 5)))),
           (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 6)),
-             (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 7)), Ast.Expr_nil))))
+             (Ast.Expr_cons ((Ast.Expr_const (Ast.Const_int 7)),
+                (Ast.Expr_const Ast.Const_nil)))
+             ))
           ))
        ))
     (Ast.Expr_let (Ast.NonRecursive,
@@ -512,7 +518,7 @@ let%expect_test "fold" =
                                  (Ast.Expr_var "folder"))),
                               (Ast.Expr_var "acc")))
                            )));
-                        (Ast.Pat_nil, (Ast.Expr_var "init"))]
+                        ((Ast.Pat_const Ast.Const_nil), (Ast.Expr_var "init"))]
                       ))
                    ))
                 ))
