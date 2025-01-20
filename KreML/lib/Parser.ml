@@ -101,12 +101,13 @@ let rec chainr1 e op =
 (** Patterns **)
 
 let const =
-  number
+  (number
   >>| (fun n -> Const_int n)
   <|> keyword "true" *> (Const_bool true |> return)
   <|> keyword "false" *> (Const_bool false |> return)
   <|> parens ws *> (Const_unit |> return)
-  <|> braces ws *> (Const_nil |> return)
+  <|> braces ws *> (Const_nil |> return))
+  <* ws
 ;;
 
 let tuple sep p =

@@ -24,11 +24,17 @@ let cite c t e = CIte(c, t, e)
 
 let temp_binding ?(rf = NonRecursive) name value scope = ALet (rf, name, value, scope)
 
+let collect_fun_args_reversed f =
+  let rec helper acc = function
+  | Expr_fun(p, e) -> helper (p::acc) e
+  | e -> acc, e in
+  helper [] f
+
 let collect_app_args app = 
   let rec helper acc = function
-  | Expr_app(f, a) -> a::(helper acc f)
-  | _ -> acc
-in helper [] app |> List.rev
+  | Expr_app(f, a) -> (helper (a::acc) f)
+  | f -> f, acc
+in helper [] app
 
 open Utils.Counter
 
@@ -56,8 +62,8 @@ open Utils.Counter
           (match scope with
           | AExpr(CImm(Avar n)) when n = name -> AExpr e' |> return
           | _ -> temp_binding name e' scope |> return)))
-    | Expr_app (f, _) ->
-      let args = collect_app_args expr in
+    | Expr_app (_, _) ->
+      let f, args = collect_app_args expr in
       transform_expr f (fun f' ->
          transform_list args (fun args' ->
           let* name = fresh_name in
@@ -90,7 +96,7 @@ open Utils.Counter
         )
     | Expr_fun _ ->
       (* it is guaranteed by let processing that function resolved here is anonymous *)
-      let* fun_name = fresh_name in
+      let* fun_name = Utils.fresh_name "fresh_fun" in
       let* scope = ivar fun_name |> k in
       let* f = resolve_fun expr in
       temp_binding fun_name f scope |> return 
@@ -117,28 +123,33 @@ open Utils.Counter
       transform_expr x (fun x' -> helper (x'::acc) xs)
       in helper [] l
   and resolve_fun f =
-     match f with
-    | Expr_fun(p, e) ->
+    let args, body = collect_fun_args_reversed f in
+    let* body = transform_expr body (fun imm -> AExpr(CImm imm) |> return) in
+    let abstraction acc p =
+      let* acc = acc in
       (match p with
       | Pat_var id -> 
-        let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return) in
-        CFun(id, body) |> return
+        (* let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return) in *)
+        AExpr (CFun(id, acc)) |> return
       | p ->
-        (* Performs transformations fun (a, b) --> body ~~~-> fun ab -> let a = ab.first in
-         let b = ab.second in body*)
+        (* Performs codegen fun (a, b) --> body ~~~->
+        fun ab -> let a = ab.first in
+         let b = ab.second in body *)
         let* var_name = Utils.fresh_name "t" in
         let zipped =  Utils.zip_idents_with_exprs p (evar var_name) in
-        let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return ) in
+        (* let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return ) in *)
         let* body = transform_list (List.map snd zipped) (fun imms ->
           List.fold_right2 (fun imm (name, _) acc_body ->
           let* acc_body in
           temp_binding name (CImm imm) acc_body |> return) 
           imms
           zipped
-          (return body))
-          in CFun(var_name, body) |> return)
-      | _ -> Utils.internalfail "not a function"
-
+          (return acc))
+          in AExpr(CFun(var_name, body)) |> return) in
+        let* f = List.fold_left abstraction (return body) args in
+        match f with
+        | AExpr(CFun _ as f) -> return f
+        | _ -> Utils.unreachable()
 
   let transform_structure s =
     let transform_item  acc_items (Str_value (rf, bindings)) =
@@ -159,8 +170,10 @@ open Utils.Counter
         acc_bindings @ decls |> return
       in
       let* bindings = List.fold_left transform_binding (return []) bindings in
-      let str_value = AStr_value(rf, bindings) in
-      acc_items @ [str_value] |> return in
+      let str_values = match rf with
+      | NonRecursive -> List.map (fun (id, e) -> AStr_value(NonRecursive, [id, e])) bindings
+      | Recursive -> [ AStr_value(rf, bindings)] in
+      acc_items @ str_values |> return in
     List.fold_left transform_item (return []) s
   ;;
 

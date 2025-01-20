@@ -286,7 +286,7 @@ module TypeEnv = struct
     | Pat_cons (px, pxs), Typ_list element_typ ->
       let env = generalize_pattern px element_typ env in
       generalize_pattern pxs typ env
-    | Pat_nil, _ | Pat_wildcard, _ -> env
+    | Pat_wildcard, _ -> env
     | Pat_tuple (pfst, psnd, prest), Typ_tuple (tfst, tsnd, trest) ->
       let pats = pfst :: psnd :: prest in
       let types = tfst :: tsnd :: trest in
@@ -361,9 +361,6 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t =
     let* uni = Subst.unify_pair xs_t (Typ_list x_t) in
     let env = TypeEnv.apply uni env in
     R.return (env, xs_t)
-  | Pat_nil ->
-    let* fr = fresh_var () in
-    R.return (env, Typ_list fr)
 ;;
 
 let extend_env_with_pattern env p =
