@@ -71,7 +71,6 @@ let pattern =
     | 0 ->
       frequency
         [ 5, map (fun id -> Pat_var id) ident
-        ; 1, return Pat_nil
         ; 1, return Pat_wildcard
         ; 2, map (fun c -> Pat_const c) const
         ]
@@ -140,18 +139,22 @@ let check_ast_component ~parser ~to_code ~ast_printer expected =
   let code = to_code expected in
   match Angstrom.parse_string ~consume:Angstrom.Consume.All parser code with
   | Ok actual when expected = actual -> true
-  | Ok _ ->
+  | Ok actual ->
     print_endline "parsing succeeded";
+    (* let open Stdlib.Format in *)
+    print_endline (ast_printer expected);
+    print_endline (ast_printer actual);
     false
   | Error _ ->
-    print_endline (ast_printer expected);
+    print_endline code;
+    (* print_endline (ast_printer expected); *)
     false
 ;;
 
 let arbitrary_pattern =
   let open QCheck.Iter in
   let rec shrink = function
-    | Pat_wildcard | Pat_nil | Pat_const _ | Pat_var _ -> empty
+    | Pat_wildcard  | Pat_const _ | Pat_var _ -> empty
     | Pat_cons (x, xs) ->
       of_list [ x; xs ]
       <+> (shrink x >|= fun x' -> Pat_cons (x', xs))

@@ -44,7 +44,6 @@ let rec pp_typ ppf = function
 ;;
 
 let rec pp_pat ppf = function
-  | Pat_nil -> fprintf ppf "[]"
   | Pat_wildcard -> fprintf ppf "_"
   | Pat_var id -> fprintf ppf "%s" id
   | Pat_const (Const_bool b) -> fprintf ppf "%b" b

@@ -1,4 +1,4 @@
 open Ast
 
 
-val transform_structure : structure -> structure
+val transform : structure -> structure

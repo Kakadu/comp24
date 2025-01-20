@@ -28,7 +28,6 @@ type pattern =
   | Pat_const of const
   | Pat_var of ident
   | Pat_cons of pattern * pattern
-  | Pat_nil
   | Pat_tuple of pattern * pattern * pattern list
   | Pat_wildcard
   | Pat_constrained of pattern * typ
@@ -37,7 +36,7 @@ type pattern =
 let pconst c = Pat_const c
 let pvar v = Pat_var v
 let pcons x xs = Pat_cons (x, xs)
-let pnil = Pat_nil
+let pnil = Pat_const Const_nil
 let ptuple a b rest = Pat_tuple (a, b, rest)
 
 type rec_flag =
