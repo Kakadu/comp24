@@ -113,7 +113,7 @@ let emit_fn_call name (args : asm_value list) =
 let direct_math_ops = [ "( + )"; "( - )"; "( * )"; "( / )"; "( && )"; "( || )" ]
 let is_direct_math_op = List.mem direct_math_ops ~equal:String.equal
 
-let emit_direct_math ?(comm = "") dest op args =
+let emit_direct_math ?(comm = "") dest op a0 a1 =
   (* TODO: addi case *)
   let op =
     match op with
@@ -125,6 +125,6 @@ let emit_direct_math ?(comm = "") dest op args =
     | "( || )" -> or_
     | _ -> failwith "emit_direct_math: invalid op"
   in
-  emit op dest (List.nth_exn args 0) (List.nth_exn args 1) ~comm
+  emit op dest a0 a1 ~comm
 ;;
 

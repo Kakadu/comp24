@@ -62,8 +62,7 @@ let rec gen_imm fn_args env dest = function
     List.iteri xs ~f:(fun i x ->
       gen_imm fn_args env a2 x;
       let _ = emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ] in
-      ()
-      );
+      ());
     emit_load dest (AsmReg tuple)
   | ImmList xs ->
     let list = emit_fn_call "ml_create_list" [] in
@@ -86,7 +85,8 @@ and gen_cexpr fn_args env dest = function
     emit_direct_math
       dest
       fn
-      [ t0; t1 ]
+      t0
+      t1
       ~comm:(Format.asprintf "%a %s %a" pp_imm_expr fst fn pp_imm_expr snd)
   | CApp (fn, args) ->
     let is_rewrites_regs = function
