@@ -32,13 +32,13 @@
  (instrumentation
   (backend bisect_ppx)))
 
-; (executable
-;  (public_name closure_conv)
-;  (name closure_conv)
-;  (modules Closure_conv)
-;  (libraries kreml_lib)
-;  (instrumentation
-;   (backend bisect_ppx)))
+(executable
+ (public_name closure_conv)
+ (name closure_conv)
+ (modules Closure_conv)
+ (libraries kreml_lib)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (cram
  (deps
