@@ -69,9 +69,9 @@ let zip_idents_with_exprs p e =
     | Pat_var id, e -> (id, e) :: acc
     | Pat_cons (px, pxs), Expr_cons (ex, exs) -> helper (helper acc px ex) pxs exs
     | Pat_cons (px, pxs), e ->
-      let head = eapp (evar Runtime.list_head) [ e ] in
+      let head = eapp (evar "getfield") [ Expr_const (Const_int 0); e ] in
       let acc = helper acc px head in
-      let tail = eapp (evar Runtime.list_tail) [ e ] in
+      let tail = eapp (evar "getfield") [ Expr_const (Const_int 1); e ] in
       helper acc pxs tail
     | Pat_tuple (pfst, psnd, prest), Expr_tuple (efst, esnd, erest) ->
       List.fold_left2 helper acc (pfst :: psnd :: prest) (efst :: esnd :: erest)
@@ -80,7 +80,7 @@ let zip_idents_with_exprs p e =
       let es =
         Base.List.range 0 (List.length ps) ~stop:`exclusive
         |> List.map (fun i ->
-          eapp (evar Runtime.access_tuple) [ e; Expr_const (Const_int i) ])
+          eapp (evar "getfield") [ Expr_const (Const_int i); e ])
       in
       List.fold_left2 helper acc ps es
     | p, e -> internalfail @@ Format.asprintf "unexpected p, e %a, %a" Ast.pp_pattern p Ast.pp_expr e

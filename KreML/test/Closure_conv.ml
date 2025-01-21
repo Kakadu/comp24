@@ -1,43 +1,18 @@
+open Kreml_lib
 open Kreml_lib.Inferencer
-open Kreml_lib.Ast_transformer
 
 let () =
   let open Stdlib.Format in
-  let open Kreml_lib.Ast_printer in
   let input = In_channel.input_all stdin in
-  match Kreml_lib.Parser.run input with
+  match Parser.run input with
   | Ok structure ->
-    (match Kreml_lib.Inferencer.run structure with
-     | Ok env ->
-       let anf_structure = transform_structure structure in
-       (match Kreml_lib.Inferencer.run anf_structure with
-        | Ok anf_env when TypeEnv.alpha_equals env anf_env ->
-          let lprogram = Kreml_lib.Closure_conversion.cc anf_structure in
-          fprintf std_formatter "%a" Kreml_lib.Lambda.pp lprogram
-        | Ok anf_env ->
-          fprintf
-            std_formatter
-            "expected: %a\n anf:%a\n"
-            pp_structure
-            structure
-            pp_structure
-            anf_structure;
-          fprintf
-            std_formatter
-            "Type environment changed after applying anf:\n expected: %a\n actual:%a"
-            TypeEnv.pp
-            env
-            TypeEnv.pp
-            anf_env
-        | Error e ->
-          fprintf
-            std_formatter
-            "An error %a occured while inferencing program in ANF.\n %a"
-            pp_error
-            e
-            pp_structure
-            anf_structure)
+    (match Inferencer.run structure with
+     | Ok _ ->
+       let alpha = Alpha_transformer.transform structure in
+        let arities, anf = Anf.transform alpha in
+        let flstructure = Closure_conversion.cc arities anf in
+        Flambda.pp std_formatter flstructure
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input
-;;
+;; 
