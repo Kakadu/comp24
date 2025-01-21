@@ -76,18 +76,27 @@ let rec gen_imm fn_args env dest = function
     emit_load dest (AsmReg list)
 
 and gen_cexpr fn_args env dest = function
-  | CApp (ImmId fn, args) when is_direct_math_op fn ->
+  | CApp (ImmId fn, args) when is_direct_binop fn ->
     assert (List.length args = 2);
     let fst = List.nth_exn args 0 in
     let snd = List.nth_exn args 1 in
     gen_imm fn_args env t0 fst;
     gen_imm fn_args env t1 snd;
-    emit_direct_math
+    emit_direct_binop
       dest
       fn
       t0
       t1
       ~comm:(Format.asprintf "%a %s %a" pp_imm_expr fst fn pp_imm_expr snd)
+  | CApp (ImmId fn, args) when is_direct_unop fn ->
+    assert (List.length args = 1);
+    let fst = List.nth_exn args 0 in
+    gen_imm fn_args env t0 fst;
+    emit_direct_unop
+      dest
+      fn
+      t0
+      ~comm:(Format.asprintf "%s %a" fn pp_imm_expr fst)
   | CApp (fn, args) ->
     let is_rewrites_regs = function
       | ImmNil | ImmTuple _ | ImmList _ -> true

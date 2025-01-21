@@ -110,10 +110,19 @@ let emit_fn_call name (args : asm_value list) =
     a0 (* emit_store a0 *))
 ;;
 
-let direct_math_ops = [ "( + )"; "( - )"; "( * )"; "( / )"; "( && )"; "( || )" ]
-let is_direct_math_op = List.mem direct_math_ops ~equal:String.equal
+let direct_unops = [ "not"; "[ - ]" ]
+let direct_binops = [ "( + )"; "( - )"; "( * )"; "( / )"; "( && )"; "( || )" ]
+let is_direct_unop = List.mem direct_unops ~equal:String.equal
+let is_direct_binop = List.mem direct_binops ~equal:String.equal
 
-let emit_direct_math ?(comm = "") dest op a0 a1 =
+let emit_direct_unop ?(comm = "") dest op a =
+  match op with
+  | "not" -> emit xori dest a (-1) ~comm
+  | "[ - ]" -> emit sub dest zero a ~comm
+  | _ -> failwith "emit_direct_unop: invalid op"
+;;
+
+let emit_direct_binop ?(comm = "") dest op a0 a1 =
   (* TODO: addi case *)
   let op =
     match op with
@@ -127,4 +136,3 @@ let emit_direct_math ?(comm = "") dest op a0 a1 =
   in
   emit op dest a0 a1 ~comm
 ;;
-
