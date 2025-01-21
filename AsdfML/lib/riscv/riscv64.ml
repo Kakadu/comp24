@@ -71,8 +71,8 @@ let rec gen_imm fn_args env dest = function
     xs
     |> List.rev
     |> List.iter ~f:(fun x ->
-      gen_imm fn_args env a1 x;
-      let res = emit_fn_call "ml_list_cons" [ AsmReg a1; AsmReg list ] in
+      gen_imm fn_args env a0 x;
+      let res = emit_fn_call "ml_list_cons" [ AsmReg a0; AsmReg list ] in
       emit_load_2 (AsmReg list) (AsmReg res));
     emit_load dest (AsmReg list)
 

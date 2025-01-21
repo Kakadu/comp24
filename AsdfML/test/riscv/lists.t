@@ -19,18 +19,15 @@
       call runtime_init
       call ml_create_list
       sd a0,0(s0)  # list
-      li a1,3
-      mv a0,a1
+      li a0,3
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
-      li a1,2
-      mv a0,a1
+      li a0,2
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
-      li a1,1
-      mv a0,a1
+      li a0,1
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
@@ -167,18 +164,15 @@
       call runtime_init
       call ml_create_list
       sd a0,0(s0)  # list
-      li a1,4
-      mv a0,a1
+      li a0,4
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
-      li a1,3
-      mv a0,a1
+      li a0,3
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
-      li a1,2
-      mv a0,a1
+      li a0,2
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
