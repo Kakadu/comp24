@@ -59,6 +59,10 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       let* t = anf_expr env t (fun x -> return @@ ACExpr (CImmExpr x)) in
       let* e = anf_expr env e (fun x -> return @@ ACExpr (CImmExpr x)) in
       return (ALet (name, CIfElse (i, t, e), body)))
+  | CFLetIn ("_", expr, body) ->
+    anf_expr env expr (fun imm_expr ->
+      let* body = anf_expr env body cont in
+      return (ALet ("_", CImmExpr imm_expr, body)))
   | CFLetIn (id, expr, body) ->
     let* name = new_var () in
     let new_env = Map.set env ~key:id ~data:name in
