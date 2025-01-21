@@ -1,5 +1,5 @@
-open Ast
-open Lambda
+open Anf
+open Flambda
 
 
-val cc : structure -> lprogram
+val cc : arities -> astructure -> flstructure

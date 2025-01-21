@@ -4,11 +4,11 @@
   Ast
   Ast_printer
   Alpha_transformer
-  Anf_transformer
+  Anf
   Anf_printer
   Match_elimination
-  ; Closure_conversion
-  ; Lambda
+  Closure_conversion
+  Flambda
   Parser
   Inferencer
   Runtime

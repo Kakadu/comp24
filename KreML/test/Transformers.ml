@@ -9,7 +9,7 @@ let () =
     (match Inferencer.run structure with
      | Ok _ ->
        let alpha = Alpha_transformer.transform structure in
-       let anf = Anf_transformer.transform alpha in
+        let anf = Anf.transform alpha |> snd in
        Anf_printer.pp std_formatter anf
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)

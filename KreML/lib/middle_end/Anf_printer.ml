@@ -1,20 +1,39 @@
-open Anf_transformer
+open Anf
+open Ast
 open Stdlib.Format
 
+
+let binop_to_string = function
+  | Mul -> "*"
+  | Div -> "/"
+  | Plus -> "+"
+  | Minus -> "-"
+  | Eq -> "="
+  | Gt -> ">"
+  | Geq -> ">="
+  | Lt -> "<"
+  | Leq -> "<="
+  | And -> "&&"
+  | Or -> "||"
+
+
+let pp_const ppf = function
+  |  Const_int i -> fprintf ppf "@[%i@]" i
+  |  Const_bool b -> fprintf ppf "@[%b@]" b
+  |  Const_nil -> fprintf ppf "@[[]@]"
+  |  Const_unit -> fprintf ppf "@[()@]"
 let pp_imm ppf = function
   | Avar id -> fprintf ppf "@[%s@]" id
-  | Aconst (Const_int i) -> fprintf ppf "@[%i@]" i
-  | Aconst (Const_bool b) -> fprintf ppf "@[%b@]" b
-  | Aconst Const_nil -> fprintf ppf "@[[]@]"
-  | Aconst Const_unit -> fprintf ppf "@[()@]"
+  | Aconst c -> pp_const ppf c
 ;;
-
+ 
 let rec pp_cexpr ppf = function
   | CImm imm -> pp_imm ppf imm
   | CCons (x, xs) -> fprintf ppf "@[ %a :: %a @]" pp_imm x pp_imm xs
-  | CApp(Avar op, [x; y]) when Ast.is_binary op ->
-    fprintf ppf "@[%a %s %a @]" pp_imm x op pp_imm y
-  | CApp (f, args) -> fprintf ppf "@[%a(%a)@]" pp_imm f pp_list args
+  | CGetfield(idx, i) -> fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
+  | CBinop(op, x, y) ->
+    fprintf ppf "@[%a %s %a @]" pp_imm x (binop_to_string op) pp_imm y
+  | CApp (f, a) -> fprintf ppf "@[%a %a@]" pp_imm f pp_imm a
   | CFun (f, a) -> fprintf ppf "@[<2>fun %s -> @,%a@,@]" f pp_aexpr a
   | CIte (c, t, e) ->
     fprintf ppf "@[<2>if %a @, then %a @, else @, %a @, @]" pp_imm c pp_aexpr t pp_aexpr e
