@@ -159,26 +159,6 @@ let%expect_test _ =
     |}]
 ;;
 
-(* let%expect_test _ =
-  test_cc
-    {|
-    let rec map f list = match list with
-      | hd::tl -> f hd :: map f tl
-      | _ -> []
-    |};
-  [%expect
-    {|
-    FVs [] in fun
-    (fun f list -> match list with
-    | hd :: tl -> (( :: ) (f hd) (map f tl))
-
-    | _ -> [])
-    FV in map: {}
-    let rec map = (fun f list -> match list with
-    | hd :: tl -> (( :: ) (f hd) (map f tl))
-    | _ -> [])
-    |}]
-;; *)
 
 let%expect_test _ =
   test_cc

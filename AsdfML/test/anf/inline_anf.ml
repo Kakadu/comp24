@@ -61,10 +61,6 @@ let%expect_test _ =
     let main = print_int (fact 5)
   |};
   [%expect {|
-    FVs [] in fun
-    (fun x -> if (( < ) x 2) then 1 else (( * ) x (fact (( - ) x 1))))
-    FV in fact: {}
-
     let fact x =
       let a1 = ( < ) x 2 in
       if a1
@@ -91,20 +87,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun n -> let rec helper = (fun n cont -> if (( <= ) n 1) then (cont 1) else (helper (( - ) n 1) (fun res -> (cont (( * ) n res)))))
-     in (helper n (fun x -> x)))
-    FVs [] in fun
-    (fun n cont -> if (( <= ) n 1) then (cont 1) else (helper (( - ) n 1) (fun res -> (cont (( * ) n res)))))
-    FVs [cont; n] in fun
-    (fun res -> (cont (( * ) n res)))
-    Creating (apply:true) closure with FVs [cont; n]
-    and body (cont (( * ) n res))
-    FV in helper: {}
-    FVs [] in fun
-    (fun x -> x)
-    FV in helper: {}
-
     let `ll_2 cont n res = let a1 = ( * ) n res in
       cont a1
     let `helper_1 n cont =
@@ -116,34 +98,6 @@ let%expect_test _ =
         `helper_1 a6 a7
     let `ll_3 x = x
     let fact n = `helper_1 n `ll_3
-    |}]
-;;
-
-let%expect_test _ =
-  test
-    {|
-    let rec map f list = match list with
-      | hd::tl -> f hd :: map f tl
-      | _ -> []
-    |};
-  [%expect
-    {|
-    FVs [] in fun
-    (fun f list -> if (( && ) true true) then let hd = (`list_hd list)
-     in let tl = (`list_tl list)
-     in (( :: ) (f hd) (map f tl)) else [])
-    FV in map: {}
-
-    let map f list =
-      let a1 = ( && ) true true in
-      if a1
-      then
-        let a3 = `list_hd list in
-        let a5 = `list_tl list in
-        let a7 = f a3 in
-        let a8 = map f a5 in
-        ( :: ) a7 a8
-      else []
     |}]
 ;;
 
@@ -164,20 +118,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun `arg_8 `arg_9 -> let `tuple = `arg_9
-     in let z2 = (`get_tuple_field `tuple 2)
-     in let y2 = (`get_tuple_field `tuple 1)
-     in let x2 = (`get_tuple_field `tuple 0)
-     in let `tuple = `arg_8
-     in let z1 = (`get_tuple_field `tuple 2)
-     in let y1 = (`get_tuple_field `tuple 1)
-     in let x1 = (`get_tuple_field `tuple 0)
-     in let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))
-     in let y = (( - ) (( * ) z1 x2) (( * ) x1 z2))
-     in let z = (( - ) (( * ) x1 y2) (( * ) y1 x2))
-     in (x, y, z))
-
     let cross `arg_8 `arg_9 =
       let a2 = `get_tuple_field `arg_9 2 in
       let a4 = `get_tuple_field `arg_9 1 in
@@ -206,25 +146,44 @@ let%expect_test _ =
 let%expect_test _ =
   test {|
     let rec map f list = match list with
-    | [] -> []
-    | hd::tl -> (f hd) :: (map f tl) 
+      | hd :: tl -> (f hd) :: (map f tl) 
+      | [] -> []
+
+    let rec map_ f list = match list with
+      | hd :: tl -> f hd :: map f tl
+      | _ -> []
   |};
   [%expect {|
-    FVs [] in fun
-    (fun f list -> if (`list_is_empty list) then [] else let hd = (`list_hd list)
-     in let tl = (`list_tl list)
-     in (( :: ) (f hd) (map f tl)))
-    FV in map: {}
-
     let map f list =
-      let a1 = `list_is_empty list in
+      let a11 = `list_is_empty list in
+      let a9 = not a11 in
+      let a10 = ( && ) true true in
+      let a1 = ( && ) a9 a10 in
       if a1
-      then []
-      else
+      then
         let a3 = `list_hd list in
         let a5 = `list_tl list in
         let a7 = f a3 in
         let a8 = map f a5 in
         ( :: ) a7 a8
+      else []
+    let map_ f list =
+      let a23 = `list_is_empty list in
+      let a21 = not a23 in
+      let a22 = ( && ) true true in
+      let a13 = ( && ) a21 a22 in
+      if a13
+      then
+        let a15 = `list_hd list in
+        let a17 = `list_tl list in
+        let a19 = f a15 in
+        let a20 = map f a17 in
+        ( :: ) a19 a20
+      else []
     |}]
 ;;
+
+(* let%expect_test _ =
+  test {| |};
+  [%expect {| |}]
+;; *)

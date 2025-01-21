@@ -1,9 +1,8 @@
 open Ast
 
 (* Simplified AST after pattern and match elimination and closure conversion *)
-type is_fun = bool
-[@@deriving show { with_path = false }]
 
+type is_fun = bool [@@deriving show { with_path = false }]
 
 type sexpr =
   | SConst of constant
@@ -46,7 +45,8 @@ let rec pp_sexpr fmt = function
        in
        fprintf fmt "%a %a)" pp_rest e1 pp_sexpr e2
      | _ -> fprintf fmt "(%a %a)" pp_sexpr e1 pp_sexpr e2)
-  | SIfElse (c, t, e) -> fprintf fmt "if %a then %a else %a" pp_sexpr c pp_sexpr t pp_sexpr e
+  | SIfElse (c, t, e) ->
+    fprintf fmt "if %a then %a else %a" pp_sexpr c pp_sexpr t pp_sexpr e
   | SFun (p, e) ->
     fprintf fmt "(fun ";
     pp_print_list

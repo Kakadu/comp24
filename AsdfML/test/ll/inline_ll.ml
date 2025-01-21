@@ -333,13 +333,13 @@ let%expect_test _ =
   [%expect
     {|
     FVs [] in fun
-    (fun f list -> if (TODO: check cons pattern) then let hd = (`list_hd list)
+    (fun f list -> if (( && ) true true) then let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl)) else [])
     FV in map: {}
 
     let map f list =
-      if (TODO: check cons pattern)
+      if (( && ) true true)
       then
         let hd = (`list_hd list) in
         let tl = (`list_tl list) in
