@@ -23,14 +23,6 @@ let%expect_test _ =
   [%expect {| let const = (fun `arg_0 -> 42) |}]
 ;;
 
-(* let%expect_test _ =
-  test {|
-    let (a, b, c) = (1, 2, 3)
-  |};
-  [%expect {|
-    |}]
-;; *)
-
 let%expect_test _ =
   test {|
     let tuple_sum (a, b) = a + b
@@ -61,15 +53,6 @@ let%expect_test _ =
     |}]
 ;;
 
-(* let%expect_test _ =
-  test {|
-    let list_sum [a;b] = a + b 
-  |};
-  [%expect
-    {|
-    |}]
-;; *)
-
 let%expect_test _ =
   test {|
     let _ = 
@@ -94,21 +77,51 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec map = (fun f list -> if TODO: check cons pattern then let hd = (`list_hd list)
+    let rec map = (fun f list -> if (( && ) true true) then let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl)) else [])
     |}]
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let rec map = fun f -> fun (list: int list) -> match list with
     | [] -> []
     | hd::tl -> (f hd) :: (map f tl) 
   |};
-  [%expect {|
+  [%expect
+    {|
     let rec map = (fun f -> (fun list -> if (`list_is_empty list) then [] else let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl))))
     |}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let list_mul list = 
+      let rec helper acc list = match list with
+        | [] -> acc
+        | 0 :: _ -> 0
+        | hd :: tl -> helper (hd * acc) tl
+      in
+      helper 1 list
+  |};
+  [%expect
+    {|
+    let list_mul = (fun list -> let rec helper = (fun acc list -> if (`list_is_empty list) then acc else if (( && ) (( = ) (`list_hd list) 0) true) then 0 else let hd = (`list_hd list)
+     in let tl = (`list_tl list)
+     in (helper (( * ) hd acc) tl))
+     in (helper 1 list))
+    |}]
+;;
+
+(* let%expect_test _ =
+  test {|
+    let (a, b, c) = (1, 2, 3)
+  |};
+  [%expect {|
+    |}]
+;; *)
