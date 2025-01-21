@@ -130,12 +130,8 @@
       ld a1,-8(s0)  # list
       call apply_closure_1
       sd a0,-16(s0)  # a11
-      # Creating closure for ml_not
-      la a0,ml_not
-      li a1,1
-      call create_closure
-      ld a1,-16(s0)  # a11
-      call apply_closure_1
+      ld t0,-16(s0)  # a11
+      xori a0,t0,-1  # not a11
       sd a0,-24(s0)  # a9
       li t0,1
       li t1,1
