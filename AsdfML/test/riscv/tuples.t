@@ -1,3 +1,11 @@
+$ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
+> let main = 
+>   
+> EOF
+$ cat /tmp/tuples.s
+$ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+$ /tmp/tuples
+
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let main = 
   >   let tuple = (42, true, fun x -> x) in
@@ -108,3 +116,65 @@ $ cat /tmp/tuples.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   (-3, 6, -3)
+
+  $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
+  > let main = 
+  >   let (a, b, c) = (1, 2, true) in
+  >   let todo = print_int a in
+  >   let todo = print_int b in
+  >   let todo = print_bool c in
+  >   0
+  > EOF
+  ANF:
+  let main =
+         let a0 = (1, 2, true) in
+         let a2 = `get_tuple_field a0 2 in
+         let a4 = `get_tuple_field a0 1 in
+         let a6 = `get_tuple_field a0 0 in
+         let a8 = print_int a6 in
+         let a10 = print_int a4 in
+         let a12 = print_bool a2 in
+         0
+  
+$ cat /tmp/tuples.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ /tmp/tuples
+  1
+  2
+  true
+
+  $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
+  > let div x = match x with
+  >   | (a, 0) -> 0
+  >   | (a, b) -> a / b
+  > 
+  > let main = 
+  >   let todo = print_int (div (10, 2)) in
+  >   let todo = print_int (div (10, 0)) in
+  >   0
+  > EOF
+  ANF:
+  let div x =
+         let a11 = ( && ) true true in
+         let a13 = `get_tuple_field x 1 in
+         let a12 = ( = ) a13 0 in
+         let a1 = ( && ) a11 a12 in
+         if a1 
+         then let a4 = `get_tuple_field x 0 in
+           0 
+         else
+           let a7 = `get_tuple_field x 1 in
+           let a9 = `get_tuple_field x 0 in
+           ( / ) a9 a7
+  let main =
+    let a19 = div (10, 2) in
+    let a15 = print_int a19 in
+    let a18 = div (10, 0) in
+    let a17 = print_int a18 in
+    0
+  
+$ cat /tmp/tuples.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ /tmp/tuples
+  5
+  0
