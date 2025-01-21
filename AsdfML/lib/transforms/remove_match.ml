@@ -24,6 +24,7 @@ let list_tl lst = te_app dummy_ty (te_var dummy_ty "`list_tl") lst
 let list_is_empty lst = te_app dummy_ty (te_var dummy_ty "`list_is_empty") lst
 let check_eq l r = TEApp (dummy_ty, TEApp (dummy_ty, TEVar (dummy_ty, "( = )"), l), r)
 let and_ l r = TEApp (dummy_ty, TEApp (dummy_ty, TEVar (dummy_ty, "( && )"), l), r)
+let not_ e = TEApp (dummy_ty, TEVar (dummy_ty, "not"), e)
 
 let remove_match =
   let rec helper_expr = function
@@ -69,13 +70,17 @@ let remove_match =
             xs
             ~init:(TEConst (dummy_ty, CBool true))
             ~f:(fun idx acc x -> and_ acc (case_matched (tuple_field match_exp idx) x))
-        | PList xs -> 
+        | PList xs ->
           List.foldi
             xs
             ~init:(TEConst (dummy_ty, CBool true))
             ~f:(fun idx acc x -> and_ acc (case_matched (list_field match_exp idx) x))
         | PCons (hd, tl) ->
-          and_ (case_matched (list_hd match_exp) hd) (case_matched (list_tl match_exp) tl)
+          and_
+            (not_ (list_is_empty match_exp))
+            (and_
+               (case_matched (list_hd match_exp) hd)
+               (case_matched (list_tl match_exp) tl))
         | _ -> TEConst (dummy_ty, CBool true)
       in
       let rec gen_match cont cases =
@@ -97,8 +102,7 @@ let remove_match =
       in
       gen_match Fn.id cases
   and helper_def = function
-    | TDLet (t, r, p, e) ->
-      td_let_flag r t p (helper_expr e)
+    | TDLet (t, r, p, e) -> td_let_flag r t p (helper_expr e)
   in
   List.map ~f:helper_def
 ;;
