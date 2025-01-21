@@ -94,7 +94,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec map = (fun f list -> if (TODO: check cons pattern) then let hd = (`list_hd list)
+    let rec map = (fun f list -> if TODO: check cons pattern then let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl)) else [])
     |}]

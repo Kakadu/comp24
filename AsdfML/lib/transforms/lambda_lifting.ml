@@ -69,10 +69,8 @@ let rec ll_expr env lift ?(name = None) = function
 
 and ll_def env lift = function
   (* TODO:
-     let f x = ll_f x
      simplify?
      ~name
-     lifts in `let test = fun ... -> ...`
   *)
   | SLet (_, is_rec, id, exp) ->
     (* TODO: new_id ?? *)

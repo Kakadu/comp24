@@ -68,8 +68,10 @@ let remove_patterns =
       te_match t (helper_expr e) (List.map c ~f:(fun (p, e) -> p, helper_expr e))
   and helper_def = function
     | TDLet (t, r, p, e) ->
-      (* TODO: for tuple/list patterns, bind to temp var and bind inner vars from it *)
-      (* TODO: from here, a pattern in definition should be a single id (?) *)
+      (* TODO:
+         for tuple/list patterns, bind to temp var and bind inner vars from it
+         from here, a pattern in definition should be a single id (?)
+      *)
       assert (is_simple p);
       td_let_flag r t p (helper_expr e)
   in
