@@ -121,7 +121,7 @@ case:
 application :
 | l = application r = app_expr { EApp(l, r) }
 | a = app_expr { a }
-| op = op_binary { EVar(op) }  // todo: cons
+| op = op_binary { EVar(op) }
 
 app_expr: 
 | LPAREN e = expr RPAREN { e }
@@ -129,7 +129,6 @@ app_expr:
 | t = tuple { t }
 | l = list_ { l }
 | v = identifier { EVar(v) }
-// | op = op_binary { EVar(op) }  // todo: cons
 
 expr_binary: 
 | left = expr op = op_binary right = expr { EApp(EApp(EVar(op), left), right) }
