@@ -75,31 +75,41 @@
 
   $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
   > let rec map f list = match list with
-  > | [] -> []
-  > | hd::tl -> (f hd) :: (map f tl)
+  >   | hd::tl -> (f hd) :: (map f tl) 
+  >   | [] -> []
   > 
   > let sq x = x * x 
   > 
   > let main = 
-  >   let x = [2;3;4] in
-  >   let res = map sq x in
-  >   print_list res
+  >   let full = [2;3;4] in
+  >   let empty = [] in
+  >   let _ = print_list (map sq full) in
+  >   let _ = print_list (map sq empty) in
+  >   0
   > EOF
   ANF:
   let map f list =
-         let a1 = `list_is_empty list in
+         let a11 = `list_is_empty list in
+         let a9 = not a11 in
+         let a10 = ( && ) true true in
+         let a1 = ( && ) a9 a10 in
          if a1 
-         then [] 
-         else
+         then
            let a3 = `list_hd list in
            let a5 = `list_tl list in
            let a7 = f a3 in
            let a8 = map f a5 in
-           ( :: ) a7 a8
+           ( :: ) a7 a8 
+         else []
   let sq x = ( * ) x x
-  let main = let a10 = [2; 3; 4] in
-    let a12 = map sq a10 in
-    print_list a12
+  let main =
+    let a13 = [2; 3; 4] in
+    let a14 = [] in
+    let a18 = map sq a13 in
+    let a15 = print_list a18 in
+    let a17 = map sq a14 in
+    let a16 = print_list a17 in
+    0
   
   $ cat /tmp/lists.s
   
@@ -107,10 +117,10 @@
       .type map, @function
   map:
       # args: f, list
-      addi sp,sp,-72
-      sd ra,72(sp)
-      sd s0,64(sp)
-      addi s0,sp,56  # Prologue ends
+      addi sp,sp,-96
+      sd ra,96(sp)
+      sd s0,88(sp)
+      addi s0,sp,80  # Prologue ends
       sd a0,0(s0)  # f
       sd a1,-8(s0)  # list
       # Creating closure for ml_list_is_empty
@@ -119,49 +129,64 @@
       call create_closure
       ld a1,-8(s0)  # list
       call apply_closure_1
-      sd a0,-16(s0)  # a1
-      ld t0,-16(s0)  # a1
+      sd a0,-16(s0)  # a11
+      # Creating closure for ml_not
+      la a0,ml_not
+      li a1,1
+      call create_closure
+      ld a1,-16(s0)  # a11
+      call apply_closure_1
+      sd a0,-24(s0)  # a9
+      li t0,1
+      li t1,1
+      and a0,t0,t1  # true ( && ) true
+      sd a0,-32(s0)  # a10
+      ld t0,-24(s0)  # a9
+      ld t1,-32(s0)  # a10
+      and a0,t0,t1  # a9 ( && ) a10
+      sd a0,-40(s0)  # a1
+      ld t0,-40(s0)  # a1
       beq t0,zero,.else_0
-      call ml_create_list
-      j .end_0
-  .else_0:
       # Creating closure for ml_list_hd
       la a0,ml_list_hd
       li a1,1
       call create_closure
       ld a1,-8(s0)  # list
       call apply_closure_1
-      sd a0,-24(s0)  # a3
+      sd a0,-48(s0)  # a3
       # Creating closure for ml_list_tl
       la a0,ml_list_tl
       li a1,1
       call create_closure
       ld a1,-8(s0)  # list
       call apply_closure_1
-      sd a0,-32(s0)  # a5
+      sd a0,-56(s0)  # a5
       ld a0,0(s0)  # f
-      ld a1,-24(s0)  # a3
+      ld a1,-48(s0)  # a3
       call apply_closure_1
-      sd a0,-40(s0)  # a7
+      sd a0,-64(s0)  # a7
       # Creating closure for map
       la a0,map
       li a1,2
       call create_closure
       ld a1,0(s0)  # f
-      ld a2,-32(s0)  # a5
+      ld a2,-56(s0)  # a5
       call apply_closure_2
-      sd a0,-48(s0)  # a8
+      sd a0,-72(s0)  # a8
       # Creating closure for ml_list_cons
       la a0,ml_list_cons
       li a1,2
       call create_closure
-      ld a1,-40(s0)  # a7
-      ld a2,-48(s0)  # a8
+      ld a1,-64(s0)  # a7
+      ld a2,-72(s0)  # a8
       call apply_closure_2
+      j .end_0
+  .else_0:
+      call ml_create_list
   .end_0:
-      ld s0,64(sp)  # Epilogue starts
-      ld ra,72(sp)
-      addi sp,sp,72
+      ld s0,88(sp)  # Epilogue starts
+      ld ra,96(sp)
+      addi sp,sp,96
       ret
   
       .globl sq
@@ -184,10 +209,10 @@
       .globl main
       .type main, @function
   main:
-      addi sp,sp,-48
-      sd ra,48(sp)
-      sd s0,40(sp)
-      addi s0,sp,32  # Prologue ends
+      addi sp,sp,-88
+      sd ra,88(sp)
+      sd s0,80(sp)
+      addi s0,sp,72  # Prologue ends
       call runtime_init
       call ml_create_list
       sd a0,0(s0)  # list
@@ -203,30 +228,55 @@
       ld a1,0(s0)
       call ml_list_cons
       sd a0,0(s0)
-      sd a0,-8(s0)  # a10
+      sd a0,-8(s0)  # a13
+      call ml_create_list
+      sd a0,-16(s0)  # a14
       # Creating closure for sq
       la a0,sq
       li a1,1
       call create_closure
-      sd a0,-16(s0)
+      sd a0,-24(s0)
       # Creating closure for map
       la a0,map
       li a1,2
       call create_closure
-      ld a1,-16(s0)
-      ld a2,-8(s0)  # a10
+      ld a1,-24(s0)
+      ld a2,-8(s0)  # a13
       call apply_closure_2
-      sd a0,-24(s0)  # a12
+      sd a0,-32(s0)  # a18
       # Creating closure for ml_print_list
       la a0,ml_print_list
       li a1,1
       call create_closure
-      ld a1,-24(s0)  # a12
+      ld a1,-32(s0)  # a18
       call apply_closure_1
-      ld s0,40(sp)  # Epilogue starts
-      ld ra,48(sp)
-      addi sp,sp,48
+      sd a0,-40(s0)  # a15
+      # Creating closure for sq
+      la a0,sq
+      li a1,1
+      call create_closure
+      sd a0,-48(s0)
+      # Creating closure for map
+      la a0,map
+      li a1,2
+      call create_closure
+      ld a1,-48(s0)
+      ld a2,-16(s0)  # a14
+      call apply_closure_2
+      sd a0,-56(s0)  # a17
+      # Creating closure for ml_print_list
+      la a0,ml_print_list
+      li a1,1
+      call create_closure
+      ld a1,-56(s0)  # a17
+      call apply_closure_1
+      sd a0,-64(s0)  # a16
+      li a0,0
+      ld s0,80(sp)  # Epilogue starts
+      ld ra,88(sp)
+      addi sp,sp,88
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   [4, 9, 16]
+  []

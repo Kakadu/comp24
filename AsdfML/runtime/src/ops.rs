@@ -53,4 +53,5 @@ pub extern "C" fn ml_print_bool(b: isize) {
 
 #[no_mangle]
 pub extern "C" fn ml_neg(x: isize) -> isize { -x }
+#[no_mangle]
 pub extern "C" fn ml_not(x: isize) -> isize { !x }
