@@ -35,6 +35,7 @@ type instr =
   | Mul of reg * reg * reg
   | Div of reg * reg * reg
   | Addi of reg * reg * int
+  | Xori of reg * reg * int
   (* *)
   | And of reg * reg * reg
   | Or of reg * reg * reg
@@ -69,6 +70,7 @@ let pp_instr fmt =
   | Div (dst, src1, src2) ->
     fprintf fmt "    div %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
   | Addi (dst, src, n) -> fprintf fmt "    addi %a,%a,%d" pp_reg dst pp_reg src n
+  | Xori (dst, src, n) -> fprintf fmt "    xori %a,%a,%d" pp_reg dst pp_reg src n
   (* *)
   | And (dst, src1, src2) ->
     fprintf fmt "    and %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
@@ -111,6 +113,7 @@ let sub k dst src1 src2 = k (Sub (dst, src1, src2))
 let mul k dst src1 src2 = k (Mul (dst, src1, src2))
 let div k dst src1 src2 = k (Div (dst, src1, src2))
 let addi k dst src n = k (Addi (dst, src, n))
+let xori k dst src n = k (Xori (dst, src, n))
 
 (*  *)
 let and_ k dst src1 src2 = k (And (dst, src1, src2))
