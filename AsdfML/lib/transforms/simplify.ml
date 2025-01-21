@@ -9,7 +9,6 @@ open Utils
 open Vars
 
 (** Remove trivial applications and merge nested lambdas *)
-(* TODO: application *)
 let simplify =
   let rec expr = function
     | (TEConst _ as e) | (TEVar _ as e) -> e

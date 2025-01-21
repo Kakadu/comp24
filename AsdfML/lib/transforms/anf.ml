@@ -26,8 +26,7 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       (ImmId
          (match Map.find env x with
           | Some v -> v
-          | None -> Format.sprintf "(Variable %s not found)" x))
-    (* TODO ^^^ *)
+          | None -> failwith (Format.sprintf "anf: variable `%s` not found" x)))
   | CFApp (CFApp (_, _), _) as app ->
     let* name = new_var () in
     let* body = cont (ImmId name) in

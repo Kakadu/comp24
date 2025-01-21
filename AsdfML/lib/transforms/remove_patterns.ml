@@ -51,11 +51,6 @@ let remove_patterns =
       let p, e = eliminate_arg_patterns e p in
       te_fun t p e
     | TELetIn (t, def, body) ->
-      (* TODO: for complex patterns, transform
-         let pattern = expr in body
-         into
-         match expr with pattern -> body
-      *)
       let body = helper_expr body in
       (match def with
        | TDLet (_, _, pat, exp) ->
@@ -68,9 +63,7 @@ let remove_patterns =
       te_match t (helper_expr e) (List.map c ~f:(fun (p, e) -> p, helper_expr e))
   and helper_def = function
     | TDLet (t, r, p, e) when is_simple p -> td_let_flag r t p (helper_expr e)
-    | TDLet (t, r, p, e) ->
-      (* TODO: for tuple/list patterns, bind to temp var and bind inner vars from it *)
-      failwith "complex patterns in let bindings are not supported"
+    | TDLet _ -> failwith "complex patterns in top level let bindings are not supported"
   in
   (* From here, a pattern in definition should be a single id/wildcard *)
   List.map ~f:helper_def
