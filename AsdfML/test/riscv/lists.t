@@ -50,21 +50,21 @@
   $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
   > let main = 
   >   let a :: b :: c = [1;2;3;4] in
-  >   let todo = print_int a in
-  >   let todo = print_int b in
-  >   let todo = print_list c in
+  >   let _ = print_int a in
+  >   let _ = print_int b in
+  >   let _ = print_list c in
   >   0
   > EOF
   ANF:
   let main =
          let a1 = `list_hd [1; 2; 3; 4] in
-         let a13 = `list_tl [1; 2; 3; 4] in
-         let a3 = `list_hd a13 in
-         let a12 = `list_tl [1; 2; 3; 4] in
-         let a5 = `list_tl a12 in
-         let a7 = print_int a1 in
-         let a9 = print_int a3 in
-         let a11 = print_list a5 in
+         let a10 = `list_tl [1; 2; 3; 4] in
+         let a3 = `list_hd a10 in
+         let a9 = `list_tl [1; 2; 3; 4] in
+         let a5 = `list_tl a9 in
+         let a6 = print_int a1 in
+         let a7 = print_int a3 in
+         let a8 = print_list a5 in
          0
   
   $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
