@@ -266,11 +266,20 @@ module TypeEnv = struct
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
     | PAnn (x, _), _ -> extend_pat env x scheme
+    | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
+      let* env = extend_pat env hd (vars, ty) in
+      extend_pat env tl (vars, list_ty)
+    | PList xs, (vars, (TList ty)) ->
+      List.fold xs ~init:(return env) ~f:(fun acc x ->
+        let* acc = acc in
+        extend_pat acc x (vars, ty))
     | PConst _, _ | PList _, _ | PCons (_, _), _ | PTuple _, _ ->
       fail
         (`Syntax_error
-          "only identifiers, tuples, wildcards and type annotations are supported in let \
-           bindings")
+          (Format.asprintf
+             "Unsupported pattern `%a` in let binding"
+             Pp_ast.pp_pattern
+             pat))
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
@@ -436,7 +445,8 @@ let infer =
           let* s, t, texp = infer_expr env x in
           let* s' = Subst.compose acc_sub s in
           return (s', t :: acc_t, texp :: acc_ty))
-      >>| fun (s, t, tes) -> s, TTuple (List.map t ~f:(Subst.apply s)), TETuple (TTuple t, tes)
+      >>| fun (s, t, tes) ->
+      s, TTuple (List.map t ~f:(Subst.apply s)), TETuple (TTuple t, tes)
     | EList xs ->
       (match xs with
        | [] ->
@@ -503,7 +513,6 @@ let infer =
       let env = TypeEnv.extend env x scheme in
       return (env, sub', final_ty, TDLet (final_ty, Rec, pat, texp))
     | DLet (_, pat, _) ->
-      (* TODO: check in parser *)
       fail
         (`Syntax_error
           (Format.asprintf "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
@@ -513,17 +522,16 @@ let infer =
 
 let strip_annots (prog : Tast.tdefinition list) =
   let rec strip_pat = function
-      | PAnn (pat, _) -> pat
-      | PTuple (hd1, hd2, tl) -> PTuple (strip_pat hd1, strip_pat hd2, List.map tl ~f:strip_pat)
-      | PList pats -> PList (List.map pats ~f:strip_pat)
-      | PCons (l, r) -> PCons (strip_pat l, strip_pat r)
-      | pat -> pat
+    | PAnn (pat, _) -> pat
+    | PTuple (hd1, hd2, tl) -> PTuple (strip_pat hd1, strip_pat hd2, List.map tl ~f:strip_pat)
+    | PList pats -> PList (List.map pats ~f:strip_pat)
+    | PCons (l, r) -> PCons (strip_pat l, strip_pat r)
+    | pat -> pat
   in
   let rec strip_expr = function
     | TEFun (ty, pats, exp) -> TEFun (ty, List.map pats ~f:strip_pat, strip_expr exp)
     | TEMatch (ty, expr, pes) ->
       TEMatch (ty, expr, List.map pes ~f:(fun (pat, exp) -> strip_pat pat, strip_expr exp))
-    (* | expr -> expr *)
     | TEApp (ty, l, r) -> TEApp (ty, strip_expr l, strip_expr r)
     | TEIfElse (ty, i, t, e) -> TEIfElse (ty, strip_expr i, strip_expr t, strip_expr e)
     | TELetIn (ty, def, body) -> TELetIn (ty, strip_def def, strip_expr body)
