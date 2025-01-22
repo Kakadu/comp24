@@ -9,11 +9,11 @@ module StringSet = struct
   include Stdlib.Set.Make (String)
 
   (* let pp fmt s =
-    let open Stdlib.Format in
-    fprintf fmt "[ ";
+     let open Stdlib.Format in
+     fprintf fmt "[ ";
     iter (fprintf fmt "%s; ") s;
     fprintf fmt "]"
-  ;; *)
+     ;; *)
 end
 
 type flambda =

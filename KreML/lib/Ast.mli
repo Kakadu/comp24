@@ -64,7 +64,8 @@ type expr =
   (** {[
         let rec? x1 = expr1 in expr2
       ]} *)
-  | Expr_ite of expr * expr * expr (** {[
+  | Expr_ite of expr * expr * expr
+  (** {[
         if cond then expr1 else expr2
       ]}*)
   | Expr_fun of pattern * expr
