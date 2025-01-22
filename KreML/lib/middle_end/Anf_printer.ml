@@ -39,11 +39,11 @@ let rec pp_cexpr ppf = function
   | CGetfield (idx, i) -> fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
   | CBinop (op, x, y) ->
     fprintf ppf "@[%a %s %a @]" pp_imm x (binop_to_string op) pp_imm y
-  | CApp (f, a) -> fprintf ppf "@[%a %a@]" pp_imm f pp_imm a
+  | CApp (f, args) -> fprintf ppf "@[%a %a@]" pp_imm f (pp_list "") args
   | CFun (f, a) -> fprintf ppf "@[<2>fun %s -> @,%a@,@]" f pp_aexpr a
   | CIte (c, t, e) ->
     fprintf ppf "@[<2>if %a @, then %a @, else @, %a @, @]" pp_imm c pp_aexpr t pp_aexpr e
-  | CTuple elems -> pp_list ppf elems
+  | CTuple elems -> pp_list "," ppf elems
 
 and pp_aexpr ppf = function
   | ALet (Recursive, id, e, scope) ->
@@ -52,12 +52,12 @@ and pp_aexpr ppf = function
     fprintf ppf "@[let %s = @, %a in @, %a@]" id pp_cexpr e pp_aexpr scope
   | AExpr cexpr -> pp_cexpr ppf cexpr
 
-and pp_list ppf list =
+and pp_list sep ppf list =
   let rec helper = function
     | [] -> Utils.unreachable ()
     | [ e ] -> pp_imm ppf e
     | e :: es ->
-      fprintf ppf "@[%a, @]" pp_imm e;
+      fprintf ppf "@[%a%s @]" pp_imm e sep;
       helper es
   in
   helper list

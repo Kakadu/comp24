@@ -29,7 +29,7 @@ type cexpr =
   | CGetfield of int * immediate (* tuple or list access *)
   | CCons of immediate * immediate
   | CFun of ident * aexpr
-  | CApp of immediate * immediate
+  | CApp of immediate * immediate list
   | CIte of immediate * aexpr * aexpr
 
 and aexpr =

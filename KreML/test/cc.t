@@ -6,9 +6,9 @@
   > 0
   add(x_0 y_1 ) {let t_0 = x_0 + y_1 in  t_0 } 
   
-  main(unit) {let t_2 = { name: add, env_size: 1, arrange [ ]}  5 in 
+  main(unit) {let t_2 = { name: add, env_size: 1, arrange [ ]}  ([ 5  ]) in 
                let add5_2 = t_2 in 
-                let t_1 = add5_2 10 in  let res_3 = t_1 in  0    } 
+                let t_1 = add5_2 ([ 10  ]) in  let res_3 = t_1 in  0    } 
   
 
   $ dune exec closure_conv <<- EOF
@@ -17,8 +17,7 @@
   > let main = f 3 5 6
   f(x_0 y_1 z_2 ) {let t_0 = x_0 + y_1 in  let t_1 = t_0 + z_2 in  t_1  } 
   
-  main(unit) {let t_2 = { name: f, env_size: 2, arrange [ ]}  3 in 
-               let t_3 = t_2 5 in  t_3 6  } 
+  main(unit) {{ name: f, env_size: 2, arrange [ ]}  ([ 3 5 6  ])} 
   
 
   $ dune exec closure_conv <<- EOF
@@ -40,7 +39,7 @@
   fac(x_0) {let t_0 = x_0 < 1 in 
              if t_0  then 1  else 
               let t_1 = x_0 - 1 in 
-               let t_2 = { name: fac, env_size: 0, arrange [ ]}  t_1 in 
+               let t_2 = { name: fac, env_size: 0, arrange [ ]}  ([ t_1  ]) in 
                 let t_3 = x_0 * t_2 in  t_3     } 
   
 
@@ -87,14 +86,14 @@
   >  let rec helper acc n =
   >    if n < 1 then 1 else helper (acc * n) (n - 1) in
   >  helper 1 n
-  helper_1(acc_2 n_3 ) {let t_2 = n_3 < 1 in 
-                         if t_2  then 1  else 
-                          let t_3 = acc_2 * n_3 in 
-                           let t_4 = { name: helper_1, env_size: 1, arrange [ ]}  t_3 in 
-                            let t_5 = n_3 - 1 in  t_4 t_5     } 
+  helper_1(acc_2 n_3 ) {let t_1 = n_3 < 1 in 
+                         if t_1  then 1  else 
+                          let t_2 = acc_2 * n_3 in 
+                           let t_3 = n_3 - 1 in 
+                            { name: helper_1, env_size: 1, arrange [ ]}  ([ 
+                            t_2 t_3  ])    } 
   
-  fac(n_0) {let t_0 = { name: helper_1, env_size: 1, arrange [ ]}  1 in 
-             t_0 n_0 } 
+  fac(n_0) {{ name: helper_1, env_size: 1, arrange [ ]}  ([ 1 n_0  ])} 
   
 
   $ dune exec closure_conv <<- EOF
@@ -105,12 +104,12 @@
   is_even(n_1) {let t_0 = n_1 = 0 in 
                  if t_0  then true  else 
                   let t_1 = n_1 - 1 in 
-                   { name: is_odd, env_size: 0, arrange [ ]}  t_1   } 
+                   { name: is_odd, env_size: 0, arrange [ ]}  ([ t_1  ])   } 
   
   is_odd(n_0) {let t_3 = n_0 = 1 in 
                 if t_3  then true  else 
                  let t_4 = n_0 - 1 in 
-                  { name: is_even, env_size: 0, arrange [ ]}  t_4   } 
+                  { name: is_even, env_size: 0, arrange [ ]}  ([ t_4  ])   } 
   
 
   $ dune exec closure_conv <<- EOF
@@ -122,9 +121,10 @@
   helper_2(a_1 y_3 ) {let t_1 = y_3 < 0 in 
                        if t_1  then 1  else 
                         let t_2 = a_1 + y_3 in 
-                         { name: helper_2, env_size: 1, arrange [0: a_1;  ]}  t_2   } 
+                         { name: helper_2, env_size: 1, arrange [0: a_1;  ]}  ([ 
+                         t_2  ])   } 
   
   f(x_0) {let a_1 = 5 in 
-           { name: helper_2, env_size: 1, arrange [0: a_1;  ]}  10 } 
+           { name: helper_2, env_size: 1, arrange [0: a_1;  ]}  ([ 10  ]) } 
   
 
