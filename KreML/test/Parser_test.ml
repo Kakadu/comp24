@@ -28,19 +28,19 @@ let%expect_test "patterns test" =
     ; "1::y::_::xs"
     ; "x::xs, y::ys"
     ; "(x)::(xs)"
+    ; "(a, b)::xs"
     ; "a,b::xs"
     ; "(a,b)::xs"
-    ; "a : int"
-    ; "a, b : int * bool"
-    ; "(a, b : int * int)"
-    ; "f : int -> int"
-    ; "f : int -> int -> bool"
-    ; "a : (int -> int) -> int"
+    ; "(a : int)"
+    ; "(a, b : int * bool)"
+    ; "((a, b) : int * int)"
+    ; "(f : int -> int)"
+    ; "(f : int -> int -> bool)"
+    ; "(a : (int -> int) -> int)"
     ]
   in
   List.iter
-    (fun i ->
-      print_endline (show_res ~input:i ~parser:typed_pattern ~to_string:show_pattern))
+    (fun i -> print_endline (show_res ~input:i ~parser:pattern ~to_string:show_pattern))
     cases;
   [%expect
     {|
@@ -84,6 +84,8 @@ let%expect_test "patterns test" =
     (Ast.Pat_tuple ((Ast.Pat_cons ((Ast.Pat_var "x"), (Ast.Pat_var "xs"))),
        (Ast.Pat_cons ((Ast.Pat_var "y"), (Ast.Pat_var "ys"))), []))
     (Ast.Pat_cons ((Ast.Pat_var "x"), (Ast.Pat_var "xs")))
+    (Ast.Pat_cons ((Ast.Pat_tuple ((Ast.Pat_var "a"), (Ast.Pat_var "b"), [])),
+       (Ast.Pat_var "xs")))
     (Ast.Pat_tuple ((Ast.Pat_var "a"),
        (Ast.Pat_cons ((Ast.Pat_var "b"), (Ast.Pat_var "xs"))), []))
     (Ast.Pat_cons ((Ast.Pat_tuple ((Ast.Pat_var "a"), (Ast.Pat_var "b"), [])),
@@ -412,7 +414,7 @@ let%expect_test "complex expr" =
        5 [6; 7]"
     ; "let f a = 5 + a in f 6"
     ; "let fix f = (fun x -> f (fun f -> x x f))  (fun x -> f (fun f -> x x f)) in\n\
-      \      fix 3";
+      \      fix 3"
     ]
   in
   List.iter

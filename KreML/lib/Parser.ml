@@ -101,12 +101,12 @@ let rec chainr1 e op =
 (** Patterns **)
 
 let const =
-  (number
+  number
   >>| (fun n -> Const_int n)
   <|> keyword "true" *> (Const_bool true |> return)
   <|> keyword "false" *> (Const_bool false |> return)
   <|> parens ws *> (Const_unit |> return)
-  <|> braces ws *> (Const_nil |> return))
+  <|> braces ws *> (Const_nil |> return)
   <* ws
 ;;
 
@@ -139,11 +139,15 @@ let typ =
     arrow typ)
 ;;
 
-let typed_pattern =
+let pattern =
   fix (fun self ->
     let atom =
       braces ws
       >>| (fun _ -> pnil)
+      <|> parens
+            (self
+             >>= fun p -> stoken ":" *> typ >>= fun t -> Pat_constrained (p, t) |> return
+            )
       <|> parens self
       <|> (const >>| pconst)
       <|> (ident >>| pvar)
@@ -155,36 +159,8 @@ let typed_pattern =
       >>| (fun (fst, snd, rest) -> ptuple fst snd rest)
       <|> pattern
     in
-    let pattern =
-      pattern
-      >>= (fun p -> stoken ":" *> typ >>= fun t -> Pat_constrained (p, t) |> return)
-      <|> pattern
-    in
     pattern <* ws)
 ;;
-
-(* we need this because typing of fun params is allowed only in parens,
-   otherwise type constraint belongs to expression
-   for example, fun (x: int) y : int -> ...
-   let x : int = ... *)
-let untyped_pattern =
-  fix (fun self ->
-    let atom =
-      braces ws
-      >>| (fun _ -> pnil)
-      <|> parens self
-      <|> (const >>| pconst)
-      <|> (ident >>| pvar)
-      <|> keyword "_" *> return Pat_wildcard
-    in
-    let pattern = chainr1 atom (stoken "::" *> return pcons) in
-    tuple (stoken ",") pattern
-    >>| (fun (fst, snd, rest) -> ptuple fst snd rest)
-    <|> pattern
-    <* ws)
-;;
-
-let arg = parens typed_pattern <|> untyped_pattern
 
 (** Arithmetic  **)
 
@@ -220,11 +196,11 @@ let elist p =
 let ematch expr =
   let* matching_expr = keyword "match" *> ws *> expr <* ws <* keyword "with" in
   let fst_case =
-    (stoken "|" <|> ws) *> arg
+    (stoken "|" <|> ws) *> pattern
     >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e)
   in
   let case =
-    stoken "|" *> ws *> arg
+    stoken "|" *> ws *> pattern
     >>= fun p -> stoken "->" *> ws *> expr >>= fun e -> return (p, e)
   in
   let* fst_case = fst_case in
@@ -248,8 +224,8 @@ let letdef kw erhs =
     in
     is_rec, name, List.fold_right efun params rhs)
   <$> kw *> option NonRecursive (keyword "rec" *> return Recursive)
-  <*> arg
-  <*> many arg
+  <*> pattern
+  <*> many pattern
   <*> option None (stoken ":" *> typ >>| fun t -> Some t)
   <*> stoken "=" *> ws *> erhs
 ;;
@@ -260,7 +236,7 @@ let anonymous_fun expr =
       match typ_constr with
       | Some t -> List.fold_right efun args (Expr_constrained (body, t))
       | None -> List.fold_right efun args body)
-    (keyword "fun" *> many1 (ws *> arg))
+    (keyword "fun" *> many1 (ws *> pattern))
     (option None (stoken ":" *> typ >>| fun t -> Some t))
     (stoken "->" *> ws *> expr)
 ;;

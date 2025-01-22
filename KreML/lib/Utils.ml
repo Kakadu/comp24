@@ -79,11 +79,12 @@ let zip_idents_with_exprs p e =
       let ps = pfst :: psnd :: prest in
       let es =
         Base.List.range 0 (List.length ps) ~stop:`exclusive
-        |> List.map (fun i ->
-          eapp (evar "getfield") [ Expr_const (Const_int i); e ])
+        |> List.map (fun i -> eapp (evar "getfield") [ Expr_const (Const_int i); e ])
       in
       List.fold_left2 helper acc ps es
-    | p, e -> internalfail @@ Format.asprintf "unexpected p, e %a, %a" Ast.pp_pattern p Ast.pp_expr e
+    | p, e ->
+      internalfail
+      @@ Format.asprintf "unexpected p, e %a, %a" Ast.pp_pattern p Ast.pp_expr e
   in
   (* call is expected to be in type checked contxext *)
   helper [] p e |> List.rev
@@ -106,13 +107,13 @@ let count_args_with_state e =
     | Expr_constrained (e, _) -> count_args e
     | Expr_fun (p, e) ->
       let* acc = count_args e in
-      return (p::acc)
+      return (p :: acc)
     | Expr_app (f, _) ->
       let* args = count_args f in
       return (List.rev args |> List.tl |> List.rev)
-    | Expr_cons(_) -> return []
+    | Expr_cons _ -> return []
     | Expr_ite (_, t, e) ->
-      let* _ =  count_args t in
+      let* _ = count_args t in
       count_args e
     | Expr_match (_, cases) -> List.hd cases |> snd |> count_args
     | Expr_let (_, (p, e), scope) ->

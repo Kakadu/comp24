@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Kreml_lib.Inferencer
 open Kreml_lib
 
@@ -9,7 +13,8 @@ let () =
     (match Inferencer.run structure with
      | Ok _ ->
        let alpha = Alpha_transformer.transform structure in
-        let anf = Anf.transform alpha |> snd in
+       let mf_structure = Match_elimination.eliminate alpha in
+       let anf = Anf.transform mf_structure |> snd in
        Anf_printer.pp std_formatter anf
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)

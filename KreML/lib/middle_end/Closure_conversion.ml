@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Anf
 open Utils
 open Flambda
@@ -121,10 +125,8 @@ let rec resolve_fun name f =
   let* { freevars; _ } = get in
   let inherited_vars =
     match Base.Map.find freevars name with
-    | Some fv ->
-      fv
-    | None ->
-      []
+    | Some fv -> fv
+    | None -> []
   in
   let* ({ freevars; _ } as state) = get in
   let* _ =
@@ -187,10 +189,9 @@ and aexpr ae =
   match ae with
   | AExpr c -> cexpr (return c)
   | ALet (_, id, (CFun _ as f), scope) ->
-    let fv = Freevars.(
-       collect_cexpr f |> remove id |> to_seq |> List.of_seq) in
-    let* {freevars; _} as state = get in
-    let* _ = put {state with freevars = Base.Map.set freevars ~key:id ~data:fv} in
+    let fv = Freevars.(collect_cexpr f |> remove id |> to_seq |> List.of_seq) in
+    let* ({ freevars; _ } as state) = get in
+    let* _ = put { state with freevars = Base.Map.set freevars ~key:id ~data:fv } in
     let* () = resolve_fun id (return f) in
     aexpr (return scope)
   | ALet (_, id, e, scope) ->

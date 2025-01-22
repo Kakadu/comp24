@@ -29,6 +29,8 @@ format_license() {
     echo "Added header to $file"
 }
 
+rm tests/manytests
+
 # Recursively process all .ml files in the given directory
 process_directory() {
     local dir="$1"
@@ -41,4 +43,5 @@ process_directory() {
 TARGET_DIR=${1:-.}
 process_directory "$TARGET_DIR"
 
+ln -s ../manytests test/manytests
 echo "License formatting complete."
