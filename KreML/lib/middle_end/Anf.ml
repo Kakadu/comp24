@@ -196,8 +196,7 @@ let rec transform_expr expr k : aexpr t =
   | Expr_match _ -> Utils.internalfail "match must be eliminated here"
 
 and transform_list l k =
-  let rec helper acc l =
-    match l with
+  let rec helper acc = function
     | [] -> List.rev acc |> k
     | x :: xs -> transform_expr x (fun x' -> helper (x' :: acc) xs)
   in
