@@ -1,7 +1,10 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Anf
 open Ast
 open Stdlib.Format
-
 
 let binop_to_string = function
   | Mul -> "*"
@@ -9,29 +12,32 @@ let binop_to_string = function
   | Plus -> "+"
   | Minus -> "-"
   | Eq -> "="
+  | Neq -> "<>"
   | Gt -> ">"
   | Geq -> ">="
   | Lt -> "<"
   | Leq -> "<="
   | And -> "&&"
   | Or -> "||"
-
+;;
 
 let pp_const ppf = function
-  |  Const_int i -> fprintf ppf "@[%i@]" i
-  |  Const_bool b -> fprintf ppf "@[%b@]" b
-  |  Const_nil -> fprintf ppf "@[[]@]"
-  |  Const_unit -> fprintf ppf "@[()@]"
+  | Const_int i -> fprintf ppf "@[%i@]" i
+  | Const_bool b -> fprintf ppf "@[%b@]" b
+  | Const_nil -> fprintf ppf "@[[]@]"
+  | Const_unit -> fprintf ppf "@[()@]"
+;;
+
 let pp_imm ppf = function
   | Avar id -> fprintf ppf "@[%s@]" id
   | Aconst c -> pp_const ppf c
 ;;
- 
+
 let rec pp_cexpr ppf = function
   | CImm imm -> pp_imm ppf imm
   | CCons (x, xs) -> fprintf ppf "@[ %a :: %a @]" pp_imm x pp_imm xs
-  | CGetfield(idx, i) -> fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
-  | CBinop(op, x, y) ->
+  | CGetfield (idx, i) -> fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
+  | CBinop (op, x, y) ->
     fprintf ppf "@[%a %s %a @]" pp_imm x (binop_to_string op) pp_imm y
   | CApp (f, a) -> fprintf ppf "@[%a %a@]" pp_imm f pp_imm a
   | CFun (f, a) -> fprintf ppf "@[<2>fun %s -> @,%a@,@]" f pp_aexpr a
@@ -66,7 +72,9 @@ let pp ppf astructure =
     | Recursive, (id, e) :: bs ->
       pp_decl ppf "let rec" (id, e);
       List.iter (fun (id, e) -> pp_decl ppf "and" (id, e)) bs
-    | _ -> Utils.internalfail @@ Format.sprintf "unexpected declaration %i" (List.length bindings)
+    | _ ->
+      Utils.internalfail
+      @@ Format.sprintf "unexpected declaration %i" (List.length bindings)
   in
   List.iter pp_item astructure
 ;;

@@ -6,7 +6,7 @@ open Ast
 open Angstrom
 
 val is_keyword : string -> bool
-val typed_pattern : pattern t
+val pattern : pattern t
 val ident_as_expr : expr t
 val expr : expr t
 val program : structure t

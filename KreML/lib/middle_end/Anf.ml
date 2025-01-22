@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 
 type binop =
@@ -6,6 +10,7 @@ type binop =
   | Plus
   | Minus
   | Eq
+  | Neq
   | Gt
   | Geq
   | Lt
@@ -19,6 +24,7 @@ let resolve_binop = function
   | "+" -> Plus
   | "-" -> Minus
   | "=" | "==" -> Eq
+  | "<>" -> Neq
   | ">" -> Gt
   | ">=" -> Geq
   | "<" -> Lt
@@ -126,11 +132,11 @@ let rec transform_expr expr k : aexpr t =
         let value = CBinop (binop, x', y') in
         let* scope = ivar fresh |> k in
         temp_binding fresh value scope |> return))
-  | Expr_app (Expr_app(Expr_var "getfield", Expr_const (Const_int i)), e) ->
+  | Expr_app (Expr_app (Expr_var "getfield", Expr_const (Const_int i)), e) ->
     transform_expr e (fun e' ->
       let* fresh = fresh_temp in
       let* scope = ivar fresh |> k in
-      let value = CGetfield(i, e') in
+      let value = CGetfield (i, e') in
       temp_binding fresh value scope |> return)
   | Expr_app (f, a) ->
     transform_expr f (fun f' ->

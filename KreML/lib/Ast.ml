@@ -63,7 +63,7 @@ and case = pattern * expr [@@deriving show]
 type structure_item = Str_value of rec_flag * binding list [@@deriving show]
 type structure = structure_item list [@@deriving show]
 
-let evar id = Expr_var(id)
+let evar id = Expr_var id
 
 let eapp func args =
   Base.List.fold_left args ~init:func ~f:(fun acc arg -> Expr_app (acc, arg))
@@ -80,18 +80,31 @@ let elet ?(rec_flag = NonRecursive) (pattern, binding) where =
 ;;
 
 let ematch expr bindings = Expr_match (expr, bindings)
-let eland x y = eapp (Expr_var "&&") [ x; y ]
+let getfield idx obj = eapp (Expr_var "getfield") [ Expr_const (Const_int idx); obj ]
+
+let eland x y =
+  match x, y with
+  | Expr_const (Const_bool true), _ -> y
+  | _, Expr_const (Const_bool true) -> x
+  | Expr_const (Const_bool false), _ -> x
+  | _, Expr_const (Const_bool false) -> y
+  | _ -> eapp (Expr_var "&&") [ x; y ]
+;;
+
 let elor x y = eapp (Expr_var "||") [ x; y ]
 let add x y = eapp (Expr_var "+") [ x; y ]
 let mul x y = eapp (Expr_var "*") [ x; y ]
 let div x y = eapp (Expr_var "/") [ x; y ]
 let sub x y = eapp (Expr_var "-") [ x; y ]
 let eqq x y = eapp (Expr_var "=") [ x; y ]
+let neq x y = eapp (Expr_var "<>") [ x; y ]
 let ge x y = eapp (Expr_var ">") [ x; y ]
 let le x y = eapp (Expr_var "<") [ x; y ]
 let geq x y = eapp (Expr_var ">=") [ x; y ]
 let leq x y = eapp (Expr_var "<=") [ x; y ]
 
-let binary_ops = ["*"; "/"; "::"; "+"; "-"; "=="; "="; ">="; ">"; "<="; "<"; "||"; "&&"]
-let is_binary id = List.exists ((=) id) binary_ops
+let binary_ops =
+  [ "*"; "/"; "::"; "+"; "-"; "=="; "="; "<>"; ">="; ">"; "<="; "<"; "||"; "&&" ]
+;;
 
+let is_binary id = List.exists (( = ) id) binary_ops

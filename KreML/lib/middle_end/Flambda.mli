@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Anf
 
@@ -17,10 +21,9 @@ type flambda =
   | Fl_ite of flambda * flambda * flambda
   | Fl_let of ident * flambda * flambda
 
-
 and closure =
   { name : ident
-  ; env_size: int
+  ; env_size : int
   ; arrange : (int * flambda) list (* idx, value*)
   }
 

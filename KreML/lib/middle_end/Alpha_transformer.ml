@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, KreML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Utils
 
@@ -42,7 +46,7 @@ let rec transform_pattern id_gen ctx = function
 let rec transform_expr ctx e =
   let id_gen = fresh_name in
   match e with
-  | (Expr_const _) as e -> return e
+  | Expr_const _ as e -> return e
   | Expr_var id ->
     let unique = Base.Map.find_exn ctx id in
     (* program is type checked *)
@@ -130,13 +134,15 @@ let transform s =
     in
     (Str_value (rf, bindings'), ctx) |> return
   in
-  let res = List.fold_left
-    (fun acc item ->
-      let* acc_str, ctx = acc in
-      let* item, ctx = transform_struct_item (return ctx) item in
-      return (acc_str @ [ item ], ctx))
-    (return ([], default_ctx))
-    s in
-    let open Utils.Counter
-    in run res 0 |> snd |> fst
+  let res =
+    List.fold_left
+      (fun acc item ->
+        let* acc_str, ctx = acc in
+        let* item, ctx = transform_struct_item (return ctx) item in
+        return (acc_str @ [ item ], ctx))
+      (return ([], default_ctx))
+      s
+  in
+  let open Utils.Counter in
+  run res 0 |> snd |> fst
 ;;
