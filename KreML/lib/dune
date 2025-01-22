@@ -12,6 +12,7 @@
   Parser
   Inferencer
   Runtime
+  Llvm_codegen
   Utils)
  (inline_tests)
  (libraries base ppx_show.runtime angstrom qcheck llvm)
