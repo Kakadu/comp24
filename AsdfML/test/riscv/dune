@@ -7,6 +7,4 @@
  (libraries AsdfML.Lib test))
 
 (cram
- (deps %{bin:riscv}
- ../../runtime/libruntime.a
- ))
+ (deps %{bin:riscv} ../../runtime/libruntime.a))
