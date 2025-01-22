@@ -908,9 +908,9 @@ let letdef kw erhs =
 let anonymous_fun expr =
   <span data-count="22">l</span>ift3
     (fun args typ_constr body -&gt;
-      <span data-count="1876">m</span>atch typ_constr with
-      | <span data-count="0">S</span>ome t -&gt; List.fold_right efun args (Expr_constrained (body, t))
-      | <span data-count="1876">N</span>one -&gt; List.fold_right efun args body)
+       <span data-count="1876">m</span>atch typ_constr with
+       | <span data-count="0">S</span>ome t -&gt; List.fold_right efun args (Expr_constrained (body, t))
+       | <span data-count="1876">N</span>one -&gt; List.fold_right efun args body)
     (keywor<span data-count="22">d</span> "fun" *<span data-count="22">&gt;</span> many<span data-count="22">1</span> (ws *<span data-count="22">&gt;</span> pattern))
     (optio<span data-count="22">n</span> None (stoke<span data-count="22">n</span> ":" *<span data-count="22">&gt;</span> typ &gt;&gt;<span data-count="22">|</span> fun t -&gt; <span data-count="0">S</span>ome t))
     (stoke<span data-count="22">n</span> "-&gt;" *<span data-count="22">&gt;</span> ws *<span data-count="22">&gt;</span> expr)

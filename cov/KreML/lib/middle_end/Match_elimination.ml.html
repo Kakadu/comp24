@@ -275,8 +275,8 @@ let rec eliminate_expr = function
     in
     List.fold_right2
       (fun mc (_, e) acc -&gt;
-        <span data-count="0">l</span>et ite = Expr_ite (mc, e, acc) in
-        ite)
+         <span data-count="0">l</span>et ite = Expr_ite (mc, e, acc) in
+         ite)
       conds
       cases
       base

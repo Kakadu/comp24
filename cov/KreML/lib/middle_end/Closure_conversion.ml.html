@@ -820,9 +820,9 @@ and cexpr e =
     let* elems =
       List.fold_righ<span data-count="0">t</span>
         (fun e acc -&gt;
-          <span data-count="0">l</span>et* acc = acc in
-          <span data-count="0">l</span>et* e' = im<span data-count="0">m</span> (retur<span data-count="0">n</span> e) in
-          <span data-count="0">e</span>' :: acc |&gt; return)
+           <span data-count="0">l</span>et* acc = acc in
+           <span data-count="0">l</span>et* e' = im<span data-count="0">m</span> (retur<span data-count="0">n</span> e) in
+           <span data-count="0">e</span>' :: acc |&gt; return)
         elems
         (retur<span data-count="0">n</span> [])
     in
@@ -857,11 +857,11 @@ let cc arities astracture =
       | <span data-count="0">A</span>Str_value (Recursive, bindings) -&gt;
         List.fold_left
           (fun acc (id, ae) -&gt;
-            <span data-count="0">l</span>et function_fv = Freevars.collect_aexpr ae in
-            <span data-count="0">l</span>et without_top_lvl_names =
-              Freevars.diff function_fv binding_names |&gt; <span data-count="0">F</span>reevars.to_seq |&gt; <span data-count="0">L</span>ist.of_seq
-            in
-            <span data-count="0">B</span>ase.Map.set acc ~key:id ~data:without_top_lvl_names)
+             <span data-count="0">l</span>et function_fv = Freevars.collect_aexpr ae in
+             <span data-count="0">l</span>et without_top_lvl_names =
+               Freevars.diff function_fv binding_names |&gt; <span data-count="0">F</span>reevars.to_seq |&gt; <span data-count="0">L</span>ist.of_seq
+             in
+             <span data-count="0">B</span>ase.Map.set acc ~key:id ~data:without_top_lvl_names)
           freevars
           bindings
     in
