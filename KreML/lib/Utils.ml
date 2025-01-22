@@ -89,11 +89,3 @@ let zip_idents_with_exprs p e =
   (* call is expected to be in type checked contxext *)
   helper [] p e |> List.rev
 ;;
-
-module FunArgsState = State (struct
-    type t = (string, pattern list, Base.String.comparator_witness) Base.Map.t
-
-    (* let lookup_exn : t -> string -> int = fun state id -> Base.Map.find_exn state id
-    let empty : t = Base.Map.empty (module Base.String) *)
-  end)
-
