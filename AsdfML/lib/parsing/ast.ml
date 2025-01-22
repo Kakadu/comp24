@@ -2,55 +2,94 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-type id = string [@@deriving eq, show { with_path = false }]
+open QCheck
+
+let div = 25
+
+let gen_id =
+  let open QCheck.Gen in
+  let is_keyword x =
+    List.mem x [ "let"; "rec"; "in"; "fun"; "if"; "then"; "else"; "match"; "with" ]
+  in
+  let id = string_size ~gen:(char_range 'a' 'z') (int_range 1 5) in
+  id >>= fun id_ -> if is_keyword id_ then id else return id_
+;;
+
+type id = (string[@gen gen_id]) [@@deriving eq, show { with_path = false }, qcheck]
 
 type rec_flag =
   | Rec (** recursive *)
   | NonRec (** non-recursive *)
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, qcheck]
 
 type constant =
-  | CInt of int (** 42 *)
+  | CInt of (int[@gen Gen.int_range 0 1000]) (** 42 *)
   | CBool of bool (** true | false *)
   | CUnit (** () *)
   | CNil (** [] *)
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, qcheck]
 
 type type_ann =
   | TAInt (** int *)
   | TABool (** bool *)
   | TAUnit (** () *)
-  | TATuple of type_ann list (** int * bool *)
-  | TAFun of type_ann * type_ann (** int -> bool *)
+  | TATuple of
+      (type_ann list[@gen Gen.(list_size (2 -- 4) (gen_type_ann_sized (n / div)))])
+  (** (int * bool) *)
+  | TAFun of
+      (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
+      * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** int -> bool *)
   | TAList of type_ann (** %type% list *)
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, qcheck]
 
 type pattern =
   | PConst of constant
   | PWild (** _ *)
   | PIdent of id (** x *)
-  | PTuple of pattern list (** (a, b) *)
-  | PList of pattern list (** [1, 2, 3] *)
-  | PCons of pattern * pattern (** hd :: tl *)
+  | PTuple of (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))])
+  (** (a, b) *)
+  | PList of (pattern list[@gen Gen.(list_size (1 -- 4) (gen_pattern_sized (n / div)))])
+  (** [1, 2, 3] *)
+  | PCons of
+      (pattern[@gen Gen.(gen_pattern_sized (n / div))])
+      * (pattern[@gen Gen.(gen_pattern_sized (n / div))]) (** hd :: tl *)
   | PAnn of pattern * type_ann (** (x: int) *)
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, qcheck]
 
 type expr =
   | EConst of constant (** 42, true, ()*)
   | EVar of id (** x *)
   | EApp of expr * expr (** f x *)
   | EIfElse of expr * expr * expr (** if x then y else z *)
-  | EFun of pattern list * expr (** fun x -> y *)
+  | EFun of
+      (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))]) * expr
+  (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
-  | ETuple of expr list (** (x, fun x -> x, 42) *)
-  | EList of expr list (** [1; 2; 3] *)
-  | EMatch of expr * (pattern * expr) list (** match x with ... *)
-[@@deriving show { with_path = false }]
+  | ETuple of (expr list[@gen Gen.(list_size (2 -- 4) (gen_expr_sized (n / div)))])
+  (** (x, fun x -> x, 42) *)
+  | EList of (expr list[@gen Gen.(list_size (2 -- 4) (gen_expr_sized (n / div)))])
+  (** [1; 2; 3] *)
+  | EMatch of
+      ((expr * (pattern * expr) list)
+      [@gen
+        Gen.(
+          pair
+            (gen_expr_sized (n / div))
+            (list_size
+               (2 -- 4)
+               (pair (gen_pattern_sized (n / div)) (gen_expr_sized (n / div)))))])
+  (** match x with ... *)
+[@@deriving show { with_path = false }, qcheck]
 
-and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
-[@@deriving show { with_path = false }]
+and definition =
+  | DLet of
+      rec_flag
+      * (pattern[@gen gen_pattern_sized (n / div)])
+      * (expr[@gen gen_expr_sized (n / div)]) (** let (rec)? x = y *)
+[@@deriving show { with_path = false }, qcheck]
 
-type program = definition list [@@deriving show { with_path = false }]
+type program = (definition list[@gen Gen.(list_size (1 -- 3) gen_definition)])
+[@@deriving show { with_path = false }, qcheck]
 
 let p_const c = PConst c
 let p_wild = PWild
