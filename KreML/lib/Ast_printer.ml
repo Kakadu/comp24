@@ -36,9 +36,9 @@ let rec pp_typ ppf = function
       ppf
       (fst :: snd :: rest)
       (fun e ->
-        match e with
-        | Typ_tuple _ | Typ_fun _ -> fprintf ppf "(%a)" pp_typ e
-        | e -> fprintf ppf "%a" pp_typ e)
+         match e with
+         | Typ_tuple _ | Typ_fun _ -> fprintf ppf "(%a)" pp_typ e
+         | e -> fprintf ppf "%a" pp_typ e)
       (fun () -> fprintf ppf " * ")
       false
 ;;

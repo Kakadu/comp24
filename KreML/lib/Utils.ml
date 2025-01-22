@@ -41,7 +41,7 @@ module State (S : sig
   let ( let* ) = ( >>= )
   let get s = s, s
   let put s v = s, v
-  let run m st = m st
+  let run m = m
 end
 
 module Counter = State (struct
@@ -50,7 +50,7 @@ module Counter = State (struct
 
 let fresh_num : int Counter.t =
   let open Counter in
-  get >>= fun curr -> put (curr + 1) >>= fun u -> return u
+  get >>= fun curr -> put (curr + 1) >>= return
 ;;
 
 let fresh_name base : string Counter.t =
