@@ -14,7 +14,8 @@ let simplify =
     | (TEConst _ as e) | (TEVar _ as e) -> e
     | TEApp (t, l, r) -> te_app t (expr l) (expr r)
     | TEIfElse (ty, i, t, e) -> te_if_else ty (expr i) (expr t) (expr e)
-    | TEFun (tf, (PIdent x :: _ as args), ((TEApp (ta, inner, TEVar (_,y))) as apply)) when String.equal x y ->
+    | TEFun (tf, (PIdent x :: _ as args), (TEApp (ta, inner, TEVar (_, y)) as apply))
+      when String.equal x y ->
       let inner' = expr inner in
       (match inner' with
        | TEFun _ -> inner'

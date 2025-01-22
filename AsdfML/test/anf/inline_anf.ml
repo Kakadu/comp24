@@ -33,8 +33,7 @@ let%expect_test _ =
   test {|
     let a = 1 + 2 - 42
   |};
-  [%expect
-    {|
+  [%expect {|
     let a = let a1 = ( + ) 1 2 in
       ( - ) a1 42
     |}]
@@ -47,8 +46,7 @@ let%expect_test _ =
       let two = 2 in
       one + two
   |};
-  [%expect
-    {|
+  [%expect {|
     let a = let a0 = 1 in
       let a1 = 2 in
       ( + ) a0 a1
@@ -56,11 +54,13 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1)
     let main = print_int (fact 5)
   |};
-  [%expect {|
+  [%expect
+    {|
     let fact x =
       let a1 = ( < ) x 2 in
       if a1
@@ -144,7 +144,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let rec map f list = match list with
       | hd :: tl -> (f hd) :: (map f tl) 
       | [] -> []
@@ -153,7 +154,8 @@ let%expect_test _ =
       | hd :: tl -> f hd :: map f tl
       | _ -> []
   |};
-  [%expect {|
+  [%expect
+    {|
     let map f list =
       let a11 = `list_is_empty list in
       let a9 = not a11 in

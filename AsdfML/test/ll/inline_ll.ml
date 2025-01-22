@@ -27,8 +27,7 @@ let test_ll code =
 
 let%expect_test _ =
   test_ll "let test = fun x -> x";
-  [%expect
-    {|
+  [%expect {|
     FVs [] in fun
     (fun x -> x)
 

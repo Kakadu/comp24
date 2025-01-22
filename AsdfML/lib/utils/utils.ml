@@ -20,7 +20,5 @@ let pp_list ?(op = "(") ?(cl = ")") ?(sep = ", ") fmt pp_inner list =
 let set_to_string xs =
   xs |> Set.to_list |> String.concat ~sep:", " |> Format.asprintf "{%s}"
 ;;
-let list_to_string xs =
-  xs |> String.concat ~sep:"; " |> Format.asprintf "[%s]"
-;;
 
+let list_to_string xs = xs |> String.concat ~sep:"; " |> Format.asprintf "[%s]"

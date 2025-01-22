@@ -55,4 +55,6 @@ let rec an_ty_to_ty = function
 let rec count_arrow_args = function
   | TArrow (_, r) -> 1 + count_arrow_args r
   | _ -> 0
+;;
+
 let dummy_ty = TVar (-1)

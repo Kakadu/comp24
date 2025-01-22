@@ -127,11 +127,12 @@ let kostyli ast =
     | x -> x
   in
   let rec remap_def = function
-    | CFLet (id, args, exp) -> 
-      let id = 
-      (match List.Assoc.find useless_defs ~equal:String.equal id with
-       | None -> id
-       | Some new_id -> new_id) in
+    | CFLet (id, args, exp) ->
+      let id =
+        match List.Assoc.find useless_defs ~equal:String.equal id with
+        | None -> id
+        | Some new_id -> new_id
+      in
       CFLet (id, args, remap exp)
   in
   (* ast |> add_missing_args |> List.map ~f:remap_def *)

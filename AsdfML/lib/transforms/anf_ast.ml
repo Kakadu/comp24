@@ -26,7 +26,6 @@ and aexpr =
 type fn = Fn of id * id list * aexpr [@@deriving show { with_path = false }]
 type program = fn list [@@deriving show { with_path = false }]
 
-
 let count_bindings (fn : fn) =
   let rec helper_cexpr = function
     | CIfElse (_, aexpr1, aexpr2) -> helper_aexpr aexpr1 + helper_aexpr aexpr2
@@ -39,7 +38,6 @@ let count_bindings (fn : fn) =
   in
   helper fn
 ;;
-
 
 open Base
 open Format
@@ -56,11 +54,19 @@ let rec pp_imm_expr fmt = function
 ;;
 
 let rec pp_cexpr fmt = function
-  | CApp (e1, e2) -> 
+  | CApp (e1, e2) ->
     fprintf fmt "%a" pp_imm_expr e1;
     pp_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
   | CIfElse (c, t, e) ->
-    fprintf fmt "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"pp_imm_expr c pp_aexpr t pp_aexpr e
+    fprintf
+      fmt
+      "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"
+      pp_imm_expr
+      c
+      pp_aexpr
+      t
+      pp_aexpr
+      e
   | CImmExpr e -> pp_imm_expr fmt e
 
 and pp_aexpr fmt = function
@@ -76,7 +82,7 @@ let pp_fn fmt = function
      | _ ->
        fprintf
          fmt
-          "@[<hov 2>let %s %s =@ %a@]@." 
+         "@[<hov 2>let %s %s =@ %a@]@."
          id
          (String.concat args ~sep:" ")
          pp_aexpr

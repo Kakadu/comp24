@@ -76,9 +76,21 @@ let stdlib : std list =
     ; arity = 0
     }
   ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int"; arity = 0 }
-  ; { name = "print_bool"; typ = bool_typ ^-> unit_typ; extern = "ml_print_bool"; arity = 0 }
-  ; { name = "print_tuple"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_tuple"; arity = 0 }
-  ; { name = "print_list"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_list"; arity = 0 }
+  ; { name = "print_bool"
+    ; typ = bool_typ ^-> unit_typ
+    ; extern = "ml_print_bool"
+    ; arity = 0
+    }
+  ; { name = "print_tuple"
+    ; typ = dummy_ty ^-> unit_typ
+    ; extern = "ml_print_tuple"
+    ; arity = 0
+    }
+  ; { name = "print_list"
+    ; typ = dummy_ty ^-> unit_typ
+    ; extern = "ml_print_list"
+    ; arity = 0
+    }
   ]
   |> Base.List.map ~f:(fun x -> { x with arity = Types.count_arrow_args x.typ })
 ;;
@@ -87,8 +99,7 @@ let runtime : std list =
   let arg1 = dummy_ty ^-> dummy_ty in
   let arg2 = dummy_ty ^-> dummy_ty ^-> dummy_ty in
   let arg3 = dummy_ty ^-> dummy_ty ^-> dummy_ty ^-> dummy_ty in
-  [ 
-    { name = "`create_tuple"; typ = arg1; extern = "ml_create_tuple"; arity = 0 }
+  [ { name = "`create_tuple"; typ = arg1; extern = "ml_create_tuple"; arity = 0 }
   ; { name = "`set_tuple_field"; typ = arg3; extern = "ml_set_tuple_field"; arity = 0 }
   ; { name = "`get_tuple_field"; typ = arg2; extern = "ml_get_tuple_field"; arity = 0 }
   ; { name = "`list_field"; typ = arg2; extern = "ml_list_field"; arity = 0 }
@@ -101,5 +112,7 @@ let runtime : std list =
 ;;
 
 let lookup_extern name =
-  stdlib @ runtime |> Base.List.find ~f:(fun x -> x.name = name) |> Option.map (fun x -> x.extern)
+  stdlib @ runtime
+  |> Base.List.find ~f:(fun x -> x.name = name)
+  |> Option.map (fun x -> x.extern)
 ;;

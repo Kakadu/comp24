@@ -30,6 +30,7 @@ end
 
 module IntStateM = struct
   include StateM
+
   type 'a t = (int, 'a) StateM.t
 
   let fresh last = last, last + 1

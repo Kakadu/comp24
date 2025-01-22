@@ -73,7 +73,7 @@ and cc_def globals env ?(apply = true) = function
   | TDLet (_, flag, PIdent id, exp) ->
     let exp' = cc_expr globals env exp in
     s_let false flag id exp', env, globals
-  | TDLet (_, _, PWild, exp) -> 
+  | TDLet (_, _, PWild, exp) ->
     let exp' = cc_expr globals env exp in
     s_let false NonRec "_" exp', env, globals
   | _ -> failwith "cc_def: not implemented"

@@ -269,7 +269,7 @@ module TypeEnv = struct
     | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
       let* env = extend_pat env hd (vars, ty) in
       extend_pat env tl (vars, list_ty)
-    | PList xs, (vars, (TList ty)) ->
+    | PList xs, (vars, TList ty) ->
       List.fold xs ~init:(return env) ~f:(fun acc x ->
         let* acc = acc in
         extend_pat acc x (vars, ty))
