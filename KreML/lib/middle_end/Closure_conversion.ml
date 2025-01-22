@@ -174,9 +174,9 @@ and cexpr e =
     let* elems =
       List.fold_right
         (fun e acc ->
-          let* acc = acc in
-          let* e' = imm (return e) in
-          e' :: acc |> return)
+           let* acc = acc in
+           let* e' = imm (return e) in
+           e' :: acc |> return)
         elems
         (return [])
     in
@@ -221,11 +221,11 @@ let cc arities astracture =
       | AStr_value (Recursive, bindings) ->
         List.fold_left
           (fun acc (id, ae) ->
-            let function_fv = Freevars.collect_aexpr ae in
-            let without_top_lvl_names =
-              Freevars.diff function_fv binding_names |> Freevars.to_seq |> List.of_seq
-            in
-            Base.Map.set acc ~key:id ~data:without_top_lvl_names)
+             let function_fv = Freevars.collect_aexpr ae in
+             let without_top_lvl_names =
+               Freevars.diff function_fv binding_names |> Freevars.to_seq |> List.of_seq
+             in
+             Base.Map.set acc ~key:id ~data:without_top_lvl_names)
           freevars
           bindings
     in
