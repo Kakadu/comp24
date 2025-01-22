@@ -1584,8 +1584,8 @@ let%expect_test "operations" =
   in
   List.iter
     (fun i -&gt;
-       <span data-count="10">s</span>how_res ~input:i ~parser:(expr_with_op<span data-count="10">s</span> ident_as_expr) ~to_string:show_expr
-       |&gt; print_endline)
+      <span data-count="10">s</span>how_res ~input:i ~parser:(expr_with_op<span data-count="10">s</span> ident_as_expr) ~to_string:show_expr
+      |&gt; print_endline)
     inputs;
   <span data-count="1">[</span>%expect
     {|
@@ -2096,7 +2096,7 @@ let%expect_test "typed" =
   in
   List.iter
     (fun i -&gt;
-       <span data-count="2">s</span>how_res ~input:i ~parser:program ~to_string:show_structure |&gt; print_endline)
+      <span data-count="2">s</span>how_res ~input:i ~parser:program ~to_string:show_structure |&gt; print_endline)
     cases;
   <span data-count="1">[</span>%expect
     {|

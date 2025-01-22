@@ -849,17 +849,17 @@ let put_arity id arity =
 ;;
 
 (* let  rec expr_in_anf = function
-  | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
-Expr_nil -&gt; true
-  | Expr_constrained(e, _) -&gt; expr_in_anf e
-  | Expr_app(x, y) | Expr_cons(x, y) -&gt; expr_in_anf x &amp;&amp; expr_in_anf y
-  | Expr_tuple(fst, snd, rest) -&gt; List.for_all expr_in_anf (fst :: snd :: rest)
-  | Expr_fun(_, e) -&gt; expr_in_anf e
-  | Expr_match(e, cases) -&gt;
-    expr_in_anf e &amp;&amp; List.for_all (fun (_, e) -&gt; expr_in_anf e) cases
-  | Expr_ite((Expr_var _ | Expr_const _), t, e ) -&gt; expr_in_anf t &amp;&amp; expr_in_anf e
-  | Expr_ite _ -&gt; false
-  | Expr_let(_, (_, e), scope) -&gt; expr_in_anf e &amp;&amp; expr_in_anf scope *)
+   | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
+   Expr_nil -&gt; true
+   | Expr_constrained(e, _) -&gt; expr_in_anf e
+   | Expr_app(x, y) | Expr_cons(x, y) -&gt; expr_in_anf x &amp;&amp; expr_in_anf y
+   | Expr_tuple(fst, snd, rest) -&gt; List.for_all expr_in_anf (fst :: snd :: rest)
+   | Expr_fun(_, e) -&gt; expr_in_anf e
+   | Expr_match(e, cases) -&gt;
+   expr_in_anf e &amp;&amp; List.for_all (fun (_, e) -&gt; expr_in_anf e) cases
+   | Expr_ite((Expr_var _ | Expr_const _), t, e ) -&gt; expr_in_anf t &amp;&amp; expr_in_anf e
+   | Expr_ite _ -&gt; false
+   | Expr_let(_, (_, e), scope) -&gt; expr_in_anf e &amp;&amp; expr_in_anf scope *)
 let rec transform_expr expr k : aexpr t =
   <span data-count="0">m</span>atch expr with
   | <span data-count="0">E</span>xpr_const c -&gt; Aconst c |&gt; k
@@ -953,7 +953,7 @@ and resolve_fun f =
       return (acc_body, id :: acc_args)
     | <span data-count="0">p</span> -&gt;
       (* Performs codegen fun (a, b) --&gt; body ~~~-&gt;
-        fun ab -&gt; let a = ab.first in
+         fun ab -&gt; let a = ab.first in
          let b = ab.second in body *)
       let* var_name = fresh_param in
       <span data-count="0">l</span>et zipped = Utils.zip_idents_with_exprs p (eva<span data-count="0">r</span> var_name) in
@@ -962,8 +962,8 @@ and resolve_fun f =
         transform_lis<span data-count="0">t</span> (List.ma<span data-count="0">p</span> snd zipped) (fun imms -&gt;
           <span data-count="0">L</span>ist.fold_right2
             (fun imm (name, _) acc_body -&gt;
-               <span data-count="0">l</span>et* acc_body = acc_body in
-               <span data-count="0">t</span>emp_binding name (CImm imm) acc_body |&gt; <span data-count="0">r</span>eturn)
+              <span data-count="0">l</span>et* acc_body = acc_body in
+              <span data-count="0">t</span>emp_binding name (CImm imm) acc_body |&gt; <span data-count="0">r</span>eturn)
             imms
             zipped
             (retur<span data-count="0">n</span> acc_body))
@@ -987,16 +987,16 @@ let transform_structure s =
       <span data-count="0">l</span>et* decls =
         List.fold_lef<span data-count="0">t</span>
           (fun acc (id, e) -&gt;
-             <span data-count="0">l</span>et* acc = acc in
-             <span data-count="0">m</span>atch e with
-             | <span data-count="0">E</span>xpr_fun _ as f -&gt;
-               let* f, arity = resolve_fu<span data-count="0">n</span> f in
-               <span data-count="0">l</span>et* _ = put_arit<span data-count="0">y</span> id arity in
-               <span data-count="0">l</span>et binding = id, AExpr f in
-               binding :: acc |&gt; return
-             | <span data-count="0">_</span> -&gt;
-               let* e = transform_exp<span data-count="0">r</span> e (fun imm -&gt; <span data-count="0">A</span>Expr (CImm imm) |&gt; return) in
-               <span data-count="0">(</span>id, e) :: acc |&gt; return)
+            <span data-count="0">l</span>et* acc = acc in
+            <span data-count="0">m</span>atch e with
+            | <span data-count="0">E</span>xpr_fun _ as f -&gt;
+              let* f, arity = resolve_fu<span data-count="0">n</span> f in
+              <span data-count="0">l</span>et* _ = put_arit<span data-count="0">y</span> id arity in
+              <span data-count="0">l</span>et binding = id, AExpr f in
+              binding :: acc |&gt; return
+            | <span data-count="0">_</span> -&gt;
+              let* e = transform_exp<span data-count="0">r</span> e (fun imm -&gt; <span data-count="0">A</span>Expr (CImm imm) |&gt; return) in
+              <span data-count="0">(</span>id, e) :: acc |&gt; return)
           (retur<span data-count="0">n</span> [])
           zipped
       in

@@ -320,9 +320,9 @@ let rec pp_typ ppf = function
       ppf
       (fst :: snd :: rest)
       (fun e -&gt;
-         <span data-count="2">m</span>atch e with
-         | <span data-count="0">T</span>yp_tuple _ | <span data-count="0">T</span>yp_fun _ -&gt; fprintf ppf "(%a)" pp_typ e
-         | <span data-count="2">e</span> -&gt; fprintf ppf "%a" pp_typ e)
+        <span data-count="2">m</span>atch e with
+        | <span data-count="0">T</span>yp_tuple _ | <span data-count="0">T</span>yp_fun _ -&gt; fprintf ppf "(%a)" pp_typ e
+        | <span data-count="2">e</span> -&gt; fprintf ppf "%a" pp_typ e)
       (fun () -&gt; <span data-count="1">f</span>printf ppf " * ")
       false
 ;;

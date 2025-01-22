@@ -451,9 +451,9 @@ let rec transform_pattern id_gen ctx = function
     <span data-count="0">l</span>et* rest', ctx =
       List.fold_righ<span data-count="0">t</span>
         (fun elem acc -&gt;
-           <span data-count="0">l</span>et* elems, ctx = acc in
-           <span data-count="0">l</span>et* elem', ctx = transform_patter<span data-count="0">n</span> id_gen ctx elem in
-           <span data-count="0">r</span>eturn (elem' :: elems, ctx))
+          <span data-count="0">l</span>et* elems, ctx = acc in
+          <span data-count="0">l</span>et* elem', ctx = transform_patter<span data-count="0">n</span> id_gen ctx elem in
+          <span data-count="0">r</span>eturn (elem' :: elems, ctx))
         rest
         (retur<span data-count="0">n</span> ([], ctx))
     in
@@ -487,9 +487,9 @@ let rec transform_expr ctx e =
     <span data-count="0">l</span>et* rest' =
       List.fold_righ<span data-count="0">t</span>
         (fun elem acc -&gt;
-           <span data-count="0">l</span>et* acc = acc in
-           <span data-count="0">l</span>et* elem' = transform_exp<span data-count="0">r</span> ctx elem in
-           <span data-count="0">e</span>lem' :: acc |&gt; return)
+          <span data-count="0">l</span>et* acc = acc in
+          <span data-count="0">l</span>et* elem' = transform_exp<span data-count="0">r</span> ctx elem in
+          <span data-count="0">e</span>lem' :: acc |&gt; return)
         rest
         (retur<span data-count="0">n</span> [])
     in
@@ -507,10 +507,10 @@ let rec transform_expr ctx e =
     <span data-count="0">l</span>et* cases' =
       List.fold_righ<span data-count="0">t</span>
         (fun (p, e) acc -&gt;
-           <span data-count="0">l</span>et* cases = acc in
-           <span data-count="0">l</span>et* p, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
-           <span data-count="0">l</span>et* e = transform_exp<span data-count="0">r</span> ctx e in
-           <span data-count="0">(</span>p, e) :: cases |&gt; return)
+          <span data-count="0">l</span>et* cases = acc in
+          <span data-count="0">l</span>et* p, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
+          <span data-count="0">l</span>et* e = transform_exp<span data-count="0">r</span> ctx e in
+          <span data-count="0">(</span>p, e) :: cases |&gt; return)
         cases
         (retur<span data-count="0">n</span> [])
     in
@@ -534,19 +534,19 @@ let transform s =
     <span data-count="0">l</span>et* ctx =
       List.fold_lef<span data-count="0">t</span>
         (fun ctx (p, _) -&gt;
-           <span data-count="0">l</span>et* ctx = ctx in
-           <span data-count="0">l</span>et* _, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
-           <span data-count="0">r</span>eturn ctx)
+          <span data-count="0">l</span>et* ctx = ctx in
+          <span data-count="0">l</span>et* _, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
+          <span data-count="0">r</span>eturn ctx)
         ctx
         bindings
     in
     <span data-count="0">l</span>et* bindings', ctx =
       List.fold_righ<span data-count="0">t</span>
         (fun (p, e) acc -&gt;
-           <span data-count="0">l</span>et* acc, ctx = acc in
-           <span data-count="0">l</span>et* _, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
-           <span data-count="0">l</span>et* e' = transform_exp<span data-count="0">r</span> ctx e in
-           <span data-count="0">(</span>(p, e') :: acc, ctx) |&gt; return)
+          <span data-count="0">l</span>et* acc, ctx = acc in
+          <span data-count="0">l</span>et* _, ctx = transform_patter<span data-count="0">n</span> id_gen ctx p in
+          <span data-count="0">l</span>et* e' = transform_exp<span data-count="0">r</span> ctx e in
+          <span data-count="0">(</span>(p, e') :: acc, ctx) |&gt; return)
         bindings
         (retur<span data-count="0">n</span> ([], ctx))
     in
@@ -555,9 +555,9 @@ let transform s =
   let res =
     List.fold_left
       (fun acc item -&gt;
-         <span data-count="0">l</span>et* acc_str, ctx = acc in
-         <span data-count="0">l</span>et* item, ctx = transform_struct_ite<span data-count="0">m</span> (retur<span data-count="0">n</span> ctx) item in
-         <span data-count="0">r</span>eturn (acc_str @ [ item ], ctx))
+        <span data-count="0">l</span>et* acc_str, ctx = acc in
+        <span data-count="0">l</span>et* item, ctx = transform_struct_ite<span data-count="0">m</span> (retur<span data-count="0">n</span> ctx) item in
+        <span data-count="0">r</span>eturn (acc_str @ [ item ], ctx))
       (retur<span data-count="0">n</span> ([], default_ctx))
       s
   in
