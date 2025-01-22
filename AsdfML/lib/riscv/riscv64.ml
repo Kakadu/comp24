@@ -92,11 +92,7 @@ and gen_cexpr fn_args env dest = function
     assert (List.length args = 1);
     let fst = List.nth_exn args 0 in
     gen_imm fn_args env t0 fst;
-    emit_direct_unop
-      dest
-      fn
-      t0
-      ~comm:(Format.asprintf "%s %a" fn pp_imm_expr fst)
+    emit_direct_unop dest fn t0 ~comm:(Format.asprintf "%s %a" fn pp_imm_expr fst)
   | CApp (fn, args) ->
     let is_rewrites_regs = function
       | ImmNil | ImmTuple _ | ImmList _ -> true
