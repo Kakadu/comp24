@@ -59,8 +59,8 @@ let rec eliminate_expr = function
     in
     List.fold_right2
       (fun mc (_, e) acc ->
-         let ite = Expr_ite (mc, e, acc) in
-         ite)
+        let ite = Expr_ite (mc, e, acc) in
+        ite)
       conds
       cases
       base

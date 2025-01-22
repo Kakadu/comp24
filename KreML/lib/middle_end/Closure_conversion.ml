@@ -24,16 +24,16 @@ module CC_state = struct
     end)
 
   (* let pp fmt v =
-    let v = Base.Map.to_alist v in
-    let open Stdlib.Format in
-    fprintf
-      fmt
-      "[ %a ]"
-      (pp_print_list
-         ~pp_sep:(fun ppf () -> fprintf ppf ", ")
-         (fun ppf (k, v) -> fprintf ppf "%s -> %i\n" k v))
-      v
-  ;; *)
+     let v = Base.Map.to_alist v in
+     let open Stdlib.Format in
+     fprintf
+     fmt
+     "[ %a ]"
+     (pp_print_list
+     ~pp_sep:(fun ppf () -> fprintf ppf ", ")
+     (fun ppf (k, v) -> fprintf ppf "%s -> %i\n" k v))
+     v
+     ;; *)
 
   let lookup_global_opt name =
     let open Monad in
@@ -173,9 +173,9 @@ and cexpr e =
     let* elems =
       List.fold_right
         (fun e acc ->
-           let* acc = acc in
-           let* e' = imm (return e) in
-           e' :: acc |> return)
+          let* acc = acc in
+          let* e' = imm (return e) in
+          e' :: acc |> return)
         elems
         (return [])
     in
@@ -210,11 +210,11 @@ let cc arities astracture =
       | AStr_value (Recursive, bindings) ->
         List.fold_left
           (fun acc (id, ae) ->
-             let function_fv = Freevars.collect_aexpr ae in
-             let without_top_lvl_names =
-               Freevars.diff function_fv binding_names |> Freevars.to_seq |> List.of_seq
-             in
-             Base.Map.set acc ~key:id ~data:without_top_lvl_names)
+            let function_fv = Freevars.collect_aexpr ae in
+            let without_top_lvl_names =
+              Freevars.diff function_fv binding_names |> Freevars.to_seq |> List.of_seq
+            in
+            Base.Map.set acc ~key:id ~data:without_top_lvl_names)
           freevars
           bindings
     in

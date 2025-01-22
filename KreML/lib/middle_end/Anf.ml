@@ -110,17 +110,17 @@ let put_arity id arity =
 ;;
 
 (* let  rec expr_in_anf = function
-  | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
-Expr_nil -> true
-  | Expr_constrained(e, _) -> expr_in_anf e
-  | Expr_app(x, y) | Expr_cons(x, y) -> expr_in_anf x && expr_in_anf y
-  | Expr_tuple(fst, snd, rest) -> List.for_all expr_in_anf (fst :: snd :: rest)
-  | Expr_fun(_, e) -> expr_in_anf e
-  | Expr_match(e, cases) ->
-    expr_in_anf e && List.for_all (fun (_, e) -> expr_in_anf e) cases
-  | Expr_ite((Expr_var _ | Expr_const _), t, e ) -> expr_in_anf t && expr_in_anf e
-  | Expr_ite _ -> false
-  | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
+   | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
+   Expr_nil -> true
+   | Expr_constrained(e, _) -> expr_in_anf e
+   | Expr_app(x, y) | Expr_cons(x, y) -> expr_in_anf x && expr_in_anf y
+   | Expr_tuple(fst, snd, rest) -> List.for_all expr_in_anf (fst :: snd :: rest)
+   | Expr_fun(_, e) -> expr_in_anf e
+   | Expr_match(e, cases) ->
+   expr_in_anf e && List.for_all (fun (_, e) -> expr_in_anf e) cases
+   | Expr_ite((Expr_var _ | Expr_const _), t, e ) -> expr_in_anf t && expr_in_anf e
+   | Expr_ite _ -> false
+   | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
 let rec transform_expr expr k : aexpr t =
   match expr with
   | Expr_const c -> Aconst c |> k
@@ -214,7 +214,7 @@ and resolve_fun f =
       return (acc_body, id :: acc_args)
     | p ->
       (* Performs codegen fun (a, b) --> body ~~~->
-        fun ab -> let a = ab.first in
+         fun ab -> let a = ab.first in
          let b = ab.second in body *)
       let* var_name = fresh_param in
       let zipped = Utils.zip_idents_with_exprs p (evar var_name) in
@@ -223,8 +223,8 @@ and resolve_fun f =
         transform_list (List.map snd zipped) (fun imms ->
           List.fold_right2
             (fun imm (name, _) acc_body ->
-               let* acc_body = acc_body in
-               temp_binding name (CImm imm) acc_body |> return)
+              let* acc_body = acc_body in
+              temp_binding name (CImm imm) acc_body |> return)
             imms
             zipped
             (return acc_body))
@@ -248,16 +248,16 @@ let transform_structure s =
       let* decls =
         List.fold_left
           (fun acc (id, e) ->
-             let* acc = acc in
-             match e with
-             | Expr_fun _ as f ->
-               let* f, arity = resolve_fun f in
-               let* _ = put_arity id arity in
-               let binding = id, AExpr f in
-               binding :: acc |> return
-             | _ ->
-               let* e = transform_expr e (fun imm -> AExpr (CImm imm) |> return) in
-               (id, e) :: acc |> return)
+            let* acc = acc in
+            match e with
+            | Expr_fun _ as f ->
+              let* f, arity = resolve_fun f in
+              let* _ = put_arity id arity in
+              let binding = id, AExpr f in
+              binding :: acc |> return
+            | _ ->
+              let* e = transform_expr e (fun imm -> AExpr (CImm imm) |> return) in
+              (id, e) :: acc |> return)
           (return [])
           zipped
       in
