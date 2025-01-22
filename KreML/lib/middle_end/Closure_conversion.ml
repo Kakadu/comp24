@@ -53,7 +53,7 @@ module Freevars = struct
   let rec collect_cexpr = function
     | CImm imm -> collect_imm imm
     | CBinop (_, x, y) -> union (collect_imm x) (collect_imm y)
-    | CGetfield(_, i) -> collect_imm i
+    | CGetfield (_, i) -> collect_imm i
     | CApp (f, arg) -> union (collect_imm f) (collect_imm arg)
     | CIte (c, t, e) ->
       let acc = union (collect_aexpr t) (collect_imm c) in
@@ -72,14 +72,6 @@ end
 
 open CC_state
 open CC_state.Monad
-
-let fun_env_size = function
-  | Fun_with_env { arity; env_args; _ } ->
-    let call_args_count = arity - 1 in
-    (* all args except last one are placed into environment *)
-    List.length env_args + call_args_count
-  | Fun_without_env _ -> 0
-;;
 
 let fun_call_args_reversed f =
   let rec helper acc = function
@@ -106,10 +98,10 @@ let imm i =
           let start_index = arity - 1 in
           let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
           Fl_closure { name = id; env_size; arrange } |> return)
-     | Some (Fun_with_env { arity; env_args; _ } as f) ->
-       let env_size = fun_env_size f in
+     | Some (Fun_with_env { arity; captured_args; _ }) ->
+       let env_size = List.length captured_args in
        (* inherited args come after call args *)
-       let _, inherited_env = Base.List.split_n env_args (arity - 1) in
+       let _, inherited_env = Base.List.split_n captured_args (arity - 1) in
        let start_index = arity - 1 in
        let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
        Fl_closure { name = id; env_size; arrange } |> return
@@ -126,7 +118,14 @@ let rec resolve_fun name f =
     | x :: xs -> x, List.rev xs
     | _ -> Utils.unreachable ()
   in
-  let inherited_vars = Freevars.collect_aexpr body |> Freevars.to_seq |> List.of_seq in
+  let* { freevars; _ } = get in
+  let inherited_vars =
+    match Base.Map.find freevars name with
+    | Some fv ->
+      fv
+    | None ->
+      []
+  in
   let* ({ freevars; _ } as state) = get in
   let* _ =
     put { state with freevars = Base.Map.set freevars ~key:name ~data:inherited_vars }
@@ -135,10 +134,10 @@ let rec resolve_fun name f =
   let* body = aexpr (return body) in
   let decl =
     match free_vars with
-    | [] -> Fun_without_env (name, body)
+    | [] -> Fun_without_env (arg, body)
     | _ ->
       let arity = List.length call_args_rev in
-      Fun_with_env { arg; arity; body; env_args = free_vars }
+      Fun_with_env { arg; arity; body; captured_args = free_vars }
   in
   let* ({ global_env; _ } as state) = get in
   let* _ = put { state with global_env = (name, decl) :: global_env } in
@@ -152,9 +151,9 @@ and cexpr e =
     let* x' = imm (return x) in
     let* xs' = imm (return xs) in
     Fl_cons (x', xs') |> return
-  | CGetfield(idx, im ) ->
+  | CGetfield (idx, im) ->
     let* im' = imm (return im) in
-    Fl_getfield(idx, im') |> return
+    Fl_getfield (idx, im') |> return
   | CBinop (op, x, y) ->
     let* x' = imm (return x) in
     let* y' = imm (return y) in
@@ -188,6 +187,10 @@ and aexpr ae =
   match ae with
   | AExpr c -> cexpr (return c)
   | ALet (_, id, (CFun _ as f), scope) ->
+    let fv = Freevars.(
+       collect_cexpr f |> remove id |> to_seq |> List.of_seq) in
+    let* {freevars; _} as state = get in
+    let* _ = put {state with freevars = Base.Map.set freevars ~key:id ~data:fv} in
     let* () = resolve_fun id (return f) in
     aexpr (return scope)
   | ALet (_, id, e, scope) ->
@@ -195,7 +198,6 @@ and aexpr ae =
     let* scope = aexpr (return scope) in
     Fl_let (id, e, scope) |> return
 ;;
-
 
 let cc arities astracture =
   let add_item acc (AStr_value (_, bindings) as item) =
@@ -217,25 +219,23 @@ let cc arities astracture =
     in
     let* _ = put { state with freevars = update_fv item } in
     let add_binding acc (id, e) =
+      let* () = acc in
       match e with
       | AExpr (CFun _ as f) ->
         let* () = resolve_fun id (return f) in
-        acc
-      | AExpr c ->
-        let* acc = acc in
-        let* body = cexpr (return c) in
-        let f = Fun_without_env ("unit", body) in
-        acc @ [ id, f ] |> return
-      | ALet _ ->
-        let* acc = acc in
+        return ()
+      | e ->
         let* body = aexpr (return e) in
         let f = Fun_without_env ("unit", body) in
-        acc @ [ id, f ] |> return
+        let* ({ global_env; _ } as state) = get in
+        let* _ = put { state with global_env = (id, f) :: global_env } in
+        return ()
     in
-    let* new_itmes = List.fold_left add_binding (return []) bindings in
-    let* acc = acc in
-    acc @ new_itmes |> return
+    let* () = acc in
+    let* () = List.fold_left add_binding (return ()) bindings in
+    return ()
   in
-  let state = List.fold_left add_item (return []) astracture in
-  run state (empty_ctx arities) |> snd
+  let state = List.fold_left add_item (return ()) astracture in
+  let { global_env; _ }, _ = run state (empty_ctx arities) in
+  List.rev global_env
 ;;

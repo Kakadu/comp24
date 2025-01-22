@@ -30,7 +30,7 @@ type fl_fun =
 
 and fun_with_env =
   { arg : ident
-  ; env_args : ident list
+  ; captured_args : ident list
   ; arity : int
   ; body : flambda
   }
