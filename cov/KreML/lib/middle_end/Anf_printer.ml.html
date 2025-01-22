@@ -271,11 +271,11 @@ let rec pp_cexpr ppf = function
   | <span data-count="0">C</span>Getfield (idx, i) -&gt; fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
   | <span data-count="0">C</span>Binop (op, x, y) -&gt;
     fprintf ppf "@[%a %s %a @]" pp_imm x (binop_to_strin<span data-count="0">g</span> op) pp_imm y
-  | <span data-count="0">C</span>App (f, a) -&gt; fprintf ppf "@[%a %a@]" pp_imm f pp_imm a
+  | <span data-count="0">C</span>App (f, args) -&gt; fprintf ppf "@[%a %a@]" pp_imm f (pp_lis<span data-count="0">t</span> "") args
   | <span data-count="0">C</span>Fun (f, a) -&gt; fprintf ppf "@[&lt;2&gt;fun %s -&gt; @,%a@,@]" f pp_aexpr a
   | <span data-count="0">C</span>Ite (c, t, e) -&gt;
     fprintf ppf "@[&lt;2&gt;if %a @, then %a @, else @, %a @, @]" pp_imm c pp_aexpr t pp_aexpr e
-  | <span data-count="0">C</span>Tuple elems -&gt; pp_list ppf elems
+  | <span data-count="0">C</span>Tuple elems -&gt; pp_list "," ppf elems
 
 and pp_aexpr ppf = function
   | <span data-count="0">A</span>Let (Recursive, id, e, scope) -&gt;
@@ -284,12 +284,12 @@ and pp_aexpr ppf = function
     fprintf ppf "@[let %s = @, %a in @, %a@]" id pp_cexpr e pp_aexpr scope
   | <span data-count="0">A</span>Expr cexpr -&gt; pp_cexpr ppf cexpr
 
-and pp_list ppf list =
+and pp_list sep ppf list =
   <span data-count="0">l</span>et rec helper = function
     | <span data-count="0">[</span>] -&gt; Utils.unreachable ()
     | <span data-count="0">[</span> e ] -&gt; pp_imm ppf e
     | <span data-count="0">e</span> :: es -&gt;
-      fprintf ppf "@[%a, @]" pp_imm e;
+      fprintf ppf "@[%a%s @]" pp_imm e sep;
       <span data-count="0">h</span>elper es
   in
   helper list
