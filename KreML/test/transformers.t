@@ -164,6 +164,85 @@
             let t_1 =   3 :: t_0  in  let t_2 =   2 :: t_1  in  t_2 
   let x = 1 
 
+  $ dune exec transformers <<- EOF
+  > let f x =
+  >   match x with | 0 -> 0 | 1 -> -1 | n -> n
+  let f = fun x_0 -> 
+            let t_0 =  x_0 = 0  in 
+             if t_0  then 0  else 
+                let t_1 =  x_0 = 1  in 
+                 if t_1  then -1  else 
+                    if true  then n_1  else 
+                       Runtime error: expression x_0  does not match to any of provided patterns. 
+                       () 
+                        
+                     
+                
+             
+
+  $ dune exec transformers <<- EOF
+  > let rec map f list =
+  >   match list with
+  >   | [] -> []
+  >   | x::xs -> x::(map f xs)
+  let rec map = fun f_0 -> 
+                  fun list_1 -> 
+                    let t_0 =  list_1 = []  in 
+                     if t_0  then []  else 
+                        let t_1 =  list_1 <> []  in 
+                         if t_1 
+                            then let t_2 =  map f_0 in 
+                                  let t_3 =  t_2 xs_3 in 
+                                   let t_4 =   x_2 :: t_3  in  t_4 
+                            else 
+                            Runtime error: expression list_1  does not match to any of provided patterns. 
+                            () 
+                             
+                        
+                     
+
+  $ dune exec transformers <<- EOF
+  > let disj x y =
+  >   match x, y with
+  >   | true, _ -> true
+  >   | _, true -> true
+  >   | false, false -> false   
+  let disj = fun x_0 -> 
+               fun y_1 -> 
+                 let t_0 =  x_0 = true  in 
+                  if t_0  then true  else 
+                     let t_1 =  y_1 = true  in 
+                      if t_1  then true  else 
+                         let t_2 =  x_0 = false  in 
+                          let t_3 =  y_1 = false  in 
+                           let t_4 =  t_2 && t_3  in 
+                            if t_4  then false  else 
+                               Runtime error: expression (x_0, y_1)  does not match to any of provided patterns. 
+                               () 
+                                
+                          
+                     
+                  
+
+  $ dune exec transformers <<- EOF
+  > let rec sumps list =
+  >   match list with
+  >   | [] ->  []
+  >   | (a, b)::xs -> (a + b)::(sumps xs)
+  let rec sumps = fun list_0 -> 
+                    let t_0 =  list_0 = []  in 
+                     if t_0  then []  else 
+                        let t_1 =  list_0 <> []  in 
+                         if t_1 
+                            then let t_2 =  a_1 + b_2  in 
+                                  let t_3 =  sumps xs_3 in 
+                                   let t_4 =   t_2 :: t_3  in  t_4 
+                            else 
+                            Runtime error: expression list_0  does not match to any of provided patterns. 
+                            () 
+                             
+                        
+                     
 
 
 $ dune exec transformers < manytests/typed/001fac.ml

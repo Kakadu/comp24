@@ -89,9 +89,7 @@ let expr =
     match n with
     | 0 ->
       frequency
-        [ 2, map (fun c -> Expr_const c) const
-        ; 2, map (fun id -> Expr_var id) ident
-        ]
+        [ 2, map (fun c -> Expr_const c) const; 2, map (fun id -> Expr_var id) ident ]
     | _ ->
       frequency
         [ 1, map2 (fun x xs -> Expr_cons (x, xs)) s s
@@ -154,7 +152,7 @@ let check_ast_component ~parser ~to_code ~ast_printer expected =
 let arbitrary_pattern =
   let open QCheck.Iter in
   let rec shrink = function
-    | Pat_wildcard  | Pat_const _ | Pat_var _ -> empty
+    | Pat_wildcard | Pat_const _ | Pat_var _ -> empty
     | Pat_cons (x, xs) ->
       of_list [ x; xs ]
       <+> (shrink x >|= fun x' -> Pat_cons (x', xs))
@@ -173,7 +171,7 @@ let arbitrary_pattern =
 let check_pattern =
   let property =
     check_ast_component
-      ~parser:Kreml_lib.Parser.typed_pattern
+      ~parser:Kreml_lib.Parser.pattern
       ~to_code:Kreml_lib.Ast_printer.pattern_to_code
       ~ast_printer:show_pattern
   in

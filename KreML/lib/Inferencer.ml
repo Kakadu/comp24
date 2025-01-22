@@ -66,11 +66,13 @@ module Type = struct
     match t1, t2 with
     | Typ_bool, Typ_bool | Typ_int, Typ_int | Typ_unit, Typ_unit -> true
     | Typ_var _, Typ_var _ -> true
-    | Typ_fun(p1, e1), Typ_fun(p2, e2) -> alpha_equals p1 p2 && alpha_equals e1 e2
-    | Typ_list(e1), Typ_list(e2) -> alpha_equals e1 e2
-    | Typ_tuple(x1, y1, rest1), Typ_tuple(x2, y2, rest2) ->
-      List.for_all2_exn (x1::y1::rest1) (x2::y2::rest2) ~f:alpha_equals
+    | Typ_fun (p1, e1), Typ_fun (p2, e2) -> alpha_equals p1 p2 && alpha_equals e1 e2
+    | Typ_list e1, Typ_list e2 -> alpha_equals e1 e2
+    | Typ_tuple (x1, y1, rest1), Typ_tuple (x2, y2, rest2) ->
+      List.for_all2_exn (x1 :: y1 :: rest1) (x2 :: y2 :: rest2) ~f:alpha_equals
     | _, _ -> false
+  ;;
+
   let rec occurs id = function
     | Typ_bool | Typ_int -> false
     | Typ_var v -> id = v
@@ -200,9 +202,10 @@ let fresh_var () =
 module Scheme = struct
   type t = scheme
 
-  let alpha_equals (Scheme(bs1, t1)) (Scheme(bs2, t2)) =
+  let alpha_equals (Scheme (bs1, t1)) (Scheme (bs2, t2)) =
     let set_len s = Varset.elements s |> List.length in
     set_len bs1 = set_len bs2 && Type.alpha_equals t1 t2
+  ;;
 
   let free_vars (Scheme (bs, t)) = Varset.diff (Type.free_vars t) bs
 
@@ -313,12 +316,14 @@ module TypeEnv = struct
   let alpha_equals e1 e2 =
     let l1 = Base.Map.length e1 in
     let l2 = Base.Map.length e2 in
-    if l1 <> l2 then false
+    if l1 <> l2
+    then false
     else
       Base.Map.fold e1 ~init:true ~f:(fun ~key ~data:s1 acc ->
         match Base.Map.find e2 key with
         | Some s2 when Scheme.alpha_equals s1 s2 -> acc && true
         | _ -> false)
+  ;;
 end
 
 open R.Syntax
@@ -334,7 +339,7 @@ let rec infer_pattern env p : (TypeEnv.t * typ) R.t =
   | Pat_const Const_unit -> R.return (env, Typ_unit)
   | Pat_const Const_nil ->
     let* fr = fresh_var () in
-    R.return(env, Typ_list fr)
+    R.return (env, Typ_list fr)
   | Pat_wildcard ->
     let* fr = fresh_var () in
     R.return (env, fr)
@@ -384,7 +389,13 @@ let infer_expr env expr : (Subst.t * typ) R.t =
       R.return (Subst.empty, Typ_list fr)
     | Expr_var "*" | Expr_var "/" | Expr_var "+" | Expr_var "-" ->
       (Subst.empty, Typ_fun (Typ_int, Typ_fun (Typ_int, Typ_int))) |> R.return
-    | Expr_var ">=" | Expr_var ">" | Expr_var "<=" | Expr_var "<" | Expr_var "=" ->
+    | Expr_var ">="
+    | Expr_var ">"
+    | Expr_var "<="
+    | Expr_var "<"
+    | Expr_var "="
+    | Expr_var "=="
+    | Expr_var "<>" ->
       (Subst.empty, Typ_fun (Typ_int, Typ_fun (Typ_int, Typ_bool))) |> R.return
     | Expr_var "&&" | Expr_var "||" ->
       (Subst.empty, Typ_fun (Typ_bool, Typ_fun (Typ_bool, Typ_bool))) |> R.return

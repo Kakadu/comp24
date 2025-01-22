@@ -64,8 +64,7 @@ type expr =
   (** {[
         let rec? x1 = expr1 in expr2
       ]} *)
-  | Expr_ite of expr * expr * expr
-  (** {[
+  | Expr_ite of expr * expr * expr (** {[
         if cond then expr1 else expr2
       ]}*)
   | Expr_fun of pattern * expr
@@ -92,6 +91,7 @@ val eite : expr -> expr -> expr -> expr
 val efun : pattern -> expr -> expr
 val elet : ?rec_flag:rec_flag -> pattern * expr -> expr -> expr
 val ematch : expr -> binding list -> expr
+val getfield : int -> expr -> expr
 val eland : expr -> expr -> expr
 val elor : expr -> expr -> expr
 val add : expr -> expr -> expr
@@ -99,10 +99,10 @@ val mul : expr -> expr -> expr
 val div : expr -> expr -> expr
 val sub : expr -> expr -> expr
 val eqq : expr -> expr -> expr
+val neq : expr -> expr -> expr
 val ge : expr -> expr -> expr
 val le : expr -> expr -> expr
 val geq : expr -> expr -> expr
 val leq : expr -> expr -> expr
-
 val binary_ops : ident list
 val is_binary : ident -> bool
