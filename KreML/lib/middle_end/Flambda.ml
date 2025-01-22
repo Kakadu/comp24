@@ -23,7 +23,7 @@ type flambda =
   | Fl_getfield of int * flambda
   | Fl_cons of flambda * flambda
   | Fl_tuple of flambda list
-  | Fl_app of flambda * flambda
+  | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
   | Fl_let of ident * flambda * flambda
@@ -66,9 +66,11 @@ let rec pp_flambda ppf = function
   | Fl_getfield (idx, fl) -> fprintf ppf "@[%s %i %a@]" "getfield" idx pp_flambda fl
   | Fl_cons (x, xs) -> fprintf ppf "@[%a :: %a@]" pp_flambda x pp_flambda xs
   | Fl_tuple elems ->
-    let pp_tuple ppf l = pp_list ppf l (fun e -> pp_flambda ppf e) in
+    let pp_tuple ppf l = pp_list ppf l (fun e -> fprintf ppf "@[%a @]" pp_flambda e) in
     pp_tuple ppf elems
-  | Fl_app (f, a) -> fprintf ppf "@[%a %a@]" pp_flambda f pp_flambda a
+  | Fl_app (f, args) ->
+    let pp_args ppf l = pp_list ppf l (fun e -> fprintf ppf "@[%a @]" pp_flambda e) in
+    fprintf ppf "@[%a (%a)@]" pp_flambda f pp_args args
   | Fl_closure { name; env_size; arrange } ->
     let pp_arange ppf list =
       List.iter (fun (idx, value) -> fprintf ppf "@[%i: %a; @]" idx pp_flambda value) list

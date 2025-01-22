@@ -16,7 +16,7 @@ type flambda =
   | Fl_getfield of int * flambda
   | Fl_cons of flambda * flambda
   | Fl_tuple of flambda list
-  | Fl_app of flambda * flambda
+  | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
   | Fl_let of ident * flambda * flambda

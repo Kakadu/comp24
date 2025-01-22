@@ -46,14 +46,13 @@
                   let rec helper_1 = 
                    fun acc_2 -> 
                      fun x_3 -> 
-                       let t_2 =  x_3 < 1  in 
-                        if t_2  then acc_2  else 
-                           let t_3 =  x_3 * acc_2  in 
-                            let t_4 =  helper_1 t_3 in 
-                             let t_5 =  x_3 - 1  in  t_4 t_5 
+                       let t_1 =  x_3 < 1  in 
+                        if t_1  then acc_2  else 
+                           let t_2 =  x_3 * acc_2  in 
+                            let t_3 =  x_3 - 1  in  helper_1 t_2 t_3 
                            
                         in 
-                   let t_0 =  helper_1 1 in  t_0 x_0 
+                   helper_1 1 x_0 
 
   $ dune exec transformers <<- EOF
   > let rec is_even n =
@@ -118,9 +117,8 @@
   >   apply b (fun x -> x / 2)
   let apply = fun x_0 -> fun f_1 -> f_1 x_0 
   let a = let b_2 =  5 in 
-           let t_1 =  apply b_2 in 
-            let fresh_fun_0 =  fun x_3 -> let t_3 =  x_3 / 2  in  t_3 in 
-             t_1 fresh_fun_0 
+           let fresh_fun_0 =  fun x_3 -> let t_2 =  x_3 / 2  in  t_2 in 
+            apply b_2 fresh_fun_0 
 
   $ dune exec transformers <<- EOF
   > let f (a, b) = a +1, b + 1
@@ -191,9 +189,8 @@
                      if t_0  then []  else 
                         let t_1 =  list_1 <> []  in 
                          if t_1 
-                            then let t_2 =  map f_0 in 
-                                  let t_3 =  t_2 xs_3 in 
-                                   let t_4 =   x_2 :: t_3  in  t_4 
+                            then let t_2 =  map f_0 xs_3 in 
+                                  let t_3 =   x_2 :: t_2  in  t_3 
                             else 
                             Runtime error: expression list_1  does not match to any of provided patterns. 
                             () 

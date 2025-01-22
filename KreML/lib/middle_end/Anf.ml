@@ -45,7 +45,7 @@ type cexpr =
   | CGetfield of int * immediate (* tuple or list access *)
   | CCons of immediate * immediate
   | CFun of ident * aexpr
-  | CApp of immediate * immediate
+  | CApp of immediate * immediate list
   | CIte of immediate * aexpr * aexpr
 
 and aexpr =
@@ -58,7 +58,7 @@ type arities = (string, int, Base.String.comparator_witness) Base.Map.t
 
 let ivar id = Avar id
 let cite c t e = CIte (c, t, e)
-let capp f a = CApp (f, a)
+let capp f args = CApp (f, args)
 let temp_binding ?(rf = NonRecursive) name value scope = ALet (rf, name, value, scope)
 
 let collect_fun_args_reversed f =
@@ -109,6 +109,14 @@ let put_arity id arity =
   put { state with arities = Base.Map.set arities ~key:id ~data:arity }
 ;;
 
+let collect_app_args app =
+  let rec helper acc = function
+    | Expr_app (f, a) -> helper (a :: acc) f
+    | f -> acc, f
+  in
+  helper [] app
+;;
+
 (* let  rec expr_in_anf = function
    | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
    Expr_nil -> true
@@ -138,11 +146,12 @@ let rec transform_expr expr k : aexpr t =
       let* scope = ivar fresh |> k in
       let value = CGetfield (i, e') in
       temp_binding fresh value scope |> return)
-  | Expr_app (f, a) ->
+  | Expr_app _ ->
+    let args, f = collect_app_args expr in
     transform_expr f (fun f' ->
-      transform_expr a (fun a' ->
+      transform_list args (fun args' ->
         let* name = fresh_temp in
-        let call = capp f' a' in
+        let call = capp f' args' in
         let* scope = ivar name |> k in
         match scope with
         | AExpr (CImm (Avar n)) when n = name -> AExpr call |> return

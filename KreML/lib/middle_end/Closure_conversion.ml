@@ -58,7 +58,8 @@ module Freevars = struct
     | CImm imm -> collect_imm imm
     | CBinop (_, x, y) -> union (collect_imm x) (collect_imm y)
     | CGetfield (_, i) -> collect_imm i
-    | CApp (f, arg) -> union (collect_imm f) (collect_imm arg)
+    | CApp (f, args) ->
+      List.fold_left (fun acc e -> union acc (collect_imm e)) empty (f :: args)
     | CIte (c, t, e) ->
       let acc = union (collect_aexpr t) (collect_imm c) in
       union acc (collect_aexpr e)
@@ -165,10 +166,10 @@ and cexpr e =
     let* t' = aexpr (return t) in
     let* e' = aexpr (return e) in
     Fl_ite (c', t', e') |> return
-  | CApp (f, a) ->
+  | CApp (f, args) ->
     let* f' = imm (return f) in
-    let* a' = imm (return a) in
-    Fl_app (f', a') |> return
+    let* args' = transform_list (return args) in
+    Fl_app (f', args') |> return
   | CTuple elems ->
     let* elems =
       List.fold_right
@@ -183,6 +184,16 @@ and cexpr e =
   | CFun _ ->
     (* added to global scope in aexpr *)
     Utils.unreachable ()
+
+and transform_list imms =
+  let* imms = imms in
+  List.fold_right
+    (fun i acc ->
+      let* acc = acc in
+      let* fl' = imm (return i) in
+      fl' :: acc |> return)
+    imms
+    (return [])
 
 and aexpr ae =
   let* ae = ae in
