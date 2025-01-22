@@ -34,16 +34,16 @@ and closure =
   ; arrange : (int * flambda) list (* idx, value*)
   }
 
-type fl_fun =
-  | Fun_with_env of fun_with_env
-  | Fun_without_env of ident * flambda (** [Fun_without_env(arg, body)] *)
-
-and fun_with_env =
+type fun_with_env =
   { arg : ident
   ; captured_args : ident list
   ; arity : int
   ; body : flambda
   }
+
+type fl_fun =
+  | Fun_with_env of fun_with_env
+  | Fun_without_env of ident * flambda (** [Fun_without_env(arg, body)] *)
 
 type flstructure = (ident * fl_fun) list
 
