@@ -121,8 +121,8 @@ let%expect_test "operations" =
   in
   List.iter
     (fun i ->
-      show_res ~input:i ~parser:(expr_with_ops ident_as_expr) ~to_string:show_expr
-      |> print_endline)
+       show_res ~input:i ~parser:(expr_with_ops ident_as_expr) ~to_string:show_expr
+       |> print_endline)
     inputs;
   [%expect
     {|
@@ -633,7 +633,7 @@ let%expect_test "typed" =
   in
   List.iter
     (fun i ->
-      show_res ~input:i ~parser:program ~to_string:show_structure |> print_endline)
+       show_res ~input:i ~parser:program ~to_string:show_structure |> print_endline)
     cases;
   [%expect
     {|
