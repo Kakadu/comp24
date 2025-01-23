@@ -168,14 +168,7 @@
   let f = fun x_0 -> 
             let t_0 =  x_0 = 0  in 
              if t_0  then 0  else 
-                let t_1 =  x_0 = 1  in 
-                 if t_1  then -1  else 
-                    if true  then n_1  else 
-                       Runtime error: expression x_0  does not match to any of provided patterns. 
-                       () 
-                        
-                     
-                
+                let t_1 =  x_0 = 1  in  if t_1  then -1  else  true    
              
 
   $ dune exec transformers <<- EOF
