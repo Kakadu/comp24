@@ -147,7 +147,7 @@ let rec transform_expr expr k : aexpr t =
         let* fresh = fresh_temp in
         let value = CBinop (binop, x', y') in
         let* scope = ivar fresh |> k in
-        temp_binding fresh value scope |> return))
+        simplify_temp_binding fresh value scope |> return))
   | Expr_app (Expr_app (Expr_var "getfield", Expr_const (Const_int i)), e) ->
     transform_expr e (fun e' ->
       let* fresh = fresh_temp in
