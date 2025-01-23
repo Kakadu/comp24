@@ -19,7 +19,10 @@ let default =
 open Utils.Counter
 
 let rec transform_pattern id_gen ctx = function
-  | (Pat_const _ | Pat_wildcard) as p -> return (p, ctx)
+  | Pat_const Const_unit | Pat_wildcard  ->
+    let* fresh =  id_gen "unused" in
+    (Pat_var fresh, ctx) |> return
+  | (Pat_const _) as p -> return (p, ctx)
   | Pat_var prev_id ->
     let* n = id_gen prev_id in
     (Pat_var n, Base.Map.set ctx ~key:prev_id ~data:n) |> return
