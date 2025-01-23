@@ -13,27 +13,23 @@
   >   f a, f b
   let map = fun f_0 -> 
               fun p_1 -> 
-                let t_4 =   getfield 0 p_1  in 
-                 let a_2 =  t_4 in 
-                  let t_3 =   getfield 1 p_1  in 
-                   let b_3 =  t_3 in 
-                    let t_0 =  f_0 a_2 in  let t_1 =  f_0 b_3 in  t_0, t_1
+                let a_2 =   getfield 0 p_1  in 
+                 let b_3 =   getfield 1 p_1  in 
+                  let t_0 =  f_0 a_2 in  let t_1 =  f_0 b_3 in  t_0, t_1
                  
 
   $ dune exec transformers <<- EOF
   > let main = let a = 5 in (a + 6) - (a / 8)
   > EOF
   let main = let a_0 =  5 in 
-              let t_0 =  a_0 + 6  in 
-               let t_1 =  a_0 / 8  in  let t_2 =  t_0 - t_1  in  t_2 
+              let t_0 =  a_0 + 6  in  let t_1 =  a_0 / 8  in  t_0 - t_1  
   $ dune exec transformers <<- EOF
   > let rec fac x = if x < 1 then 1 else x * fac (x - 1)
   > EOF
   let rec fac = fun x_0 -> 
                   let t_0 =  x_0 < 1  in 
                    if t_0  then 1  else 
-                      let t_1 =  x_0 - 1  in 
-                       let t_2 =  fac t_1 in  let t_3 =  x_0 * t_2  in  t_3 
+                      let t_1 =  x_0 - 1  in  let t_2 =  fac t_1 in  x_0 * t_2  
                       
                    
   $ dune exec transformers <<- EOF
@@ -76,9 +72,8 @@
                   if t_3  then true  else  let t_4 =  n_0 - 1  in  is_even t_4 
                      
                   
-  let main = let t_8 =  is_even 600 in 
-              let res_2 =  t_8 in 
-               if res_2  then print_int 1  else  print_int 0   
+  let main = let res_2 =  is_even 600 in 
+              if res_2  then print_int 1  else  print_int 0   
 
   $ dune exec transformers <<- EOF
   > let f x =
@@ -92,22 +87,17 @@
   let f = fun x_0 -> 
             let t_0 =  x_0 < 0  in 
              if t_0 
-                then let t_3 =  535 + x_0  in 
-                      let a_1 =  t_3 in 
-                       let t_2 =  a_1 * x_0  in 
-                        let b_2 =  t_2 in  let t_1 =  a_1 / b_2  in  t_1 
-                else 
-                let a_3 =  20 in 
-                 let t_4 =  5 * 30  in  let t_5 =  a_3 + t_4  in  t_5 
-                
+                then let a_1 =  535 + x_0  in 
+                      let b_2 =  a_1 * x_0  in  a_1 / b_2  
+                else  let a_3 =  20 in  let t_4 =  5 * 30  in  a_3 + t_4   
              
   $ dune exec transformers <<- EOF
   > let f x =
   >  (fun x -> x + 1) x, (fun x -> x + 2) x
   let f = fun x_0 -> 
-            let fresh_fun_0 =  fun x_1 -> let t_4 =  x_1 + 1  in  t_4 in 
+            let fresh_fun_0 =  fun x_1 -> x_1 + 1  in 
              let t_0 =  fresh_fun_0 x_0 in 
-              let fresh_fun_1 =  fun x_2 -> let t_3 =  x_2 + 2  in  t_3 in 
+              let fresh_fun_1 =  fun x_2 -> x_2 + 2  in 
                let t_1 =  fresh_fun_1 x_0 in  t_0, t_1
              
   $ dune exec transformers <<- EOF
@@ -117,8 +107,7 @@
   >   apply b (fun x -> x / 2)
   let apply = fun x_0 -> fun f_1 -> f_1 x_0 
   let a = let b_2 =  5 in 
-           let fresh_fun_0 =  fun x_3 -> let t_2 =  x_3 / 2  in  t_2 in 
-            apply b_2 fresh_fun_0 
+           let fresh_fun_0 =  fun x_3 -> x_3 / 2  in  apply b_2 fresh_fun_0 
 
   $ dune exec transformers <<- EOF
   > let f (a, b) = a +1, b + 1
@@ -153,13 +142,11 @@
                                let zws_6 =  t_8 in 
                                 let t_0 =  a_0 + b_1  in 
                                  let t_1 =  t_0 + x_2  in 
-                                  let t_2 =  t_1 + z_4  in 
-                                   let t_3 =  t_2 + w_5  in  t_3
+                                  let t_2 =  t_1 + z_4  in  t_2 + w_5 
                  
   $ dune exec transformers  <<- EOF
   > let (x::xs) = [1;2;3;4]
-  let xs = let t_0 =   4 :: []  in 
-            let t_1 =   3 :: t_0  in  let t_2 =   2 :: t_1  in  t_2 
+  let xs = let t_0 =   4 :: []  in  let t_1 =   3 :: t_0  in   2 :: t_1  
   let x = 1 
 
   $ dune exec transformers <<- EOF
@@ -181,9 +168,7 @@
                     let t_0 =  list_1 = []  in 
                      if t_0  then []  else 
                         let t_1 =  list_1 <> []  in 
-                         if t_1 
-                            then let t_2 =  map f_0 xs_3 in 
-                                  let t_3 =   x_2 :: t_2  in  t_3 
+                         if t_1  then let t_2 =  map f_0 xs_3 in   x_2 :: t_2  
                             else 
                             Runtime error: expression list_1  does not match to any of provided patterns. 
                             () 
@@ -225,8 +210,7 @@
                         let t_1 =  list_0 <> []  in 
                          if t_1 
                             then let t_2 =  a_1 + b_2  in 
-                                  let t_3 =  sumps xs_3 in 
-                                   let t_4 =   t_2 :: t_3  in  t_4 
+                                  let t_3 =  sumps xs_3 in   t_2 :: t_3  
                             else 
                             Runtime error: expression list_0  does not match to any of provided patterns. 
                             () 
