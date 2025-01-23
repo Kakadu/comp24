@@ -7,6 +7,7 @@ open Ast
 
 let alloc_tuple = "alloc_tuple"
 let alloc_closure = "alloc_closure"
+let call_closure = "call_closure"
 let list_cons = "list_cons"
 let list_head = "list_head"
 let list_tail = "list_tail"
