@@ -38,12 +38,11 @@ let lookup_fun_exn name =
 
 let alloc_tuple_typ = Llvm.function_type int_type [| int_type |]
 
-let alloc_tuple size =
+let alloc_tuple name size =
   let* size = size in
-  let* fresh = fresh_name "new_tuple" in
   let size_const = iconst size in
   let f = lookup_fun_exn Runtime.alloc_tuple in
-  build_call alloc_tuple_typ f [| size_const |] fresh builder |> return
+  build_call alloc_tuple_typ f [| size_const |] name builder |> return
 ;;
 
 (* let alloc_closure_typ = Llvm.function_type int_type [| int_type; int_type |] *)
@@ -62,21 +61,23 @@ let alloc_closure f env =
 
 let call_closure c args =
   let* c = c in
-  let* fresh = fresh_name "call" in
+  let* fresh = fresh_name "call_closure" in
   let count = List.length args in
-  let* args_tuple = alloc_tuple (return count) in
+  let* tupled_args = fresh_name "tupled_args" in
+  let* args_tuple = alloc_tuple tupled_args (return count) in
   let* _ =
     List.fold_left
       (fun idx arg ->
         let* idx = idx in
-        let* fresh = fresh_name "store" in
+        let* fresh = fresh_name "elemptr" in
         let elemptr = build_gep int_type args_tuple [| iconst idx |] fresh builder in
         let _ = build_store arg elemptr builder in
         return (idx + 1))
       (return 0)
       args
   in
-  build_call call_closure_typ c [| c; args_tuple; iconst count |] fresh builder |> return
+  let callee = lookup_fun_exn "call_closure" in 
+  build_call call_closure_typ callee [| c; args_tuple; iconst count |] fresh builder |> return
 ;;
 
 let print_int_typ = function_type (void_type context) [| int_type |]
@@ -88,6 +89,7 @@ let add_runtime_functions () =
   let _ = declare_function Runtime.print_int print_int_typ mdl in
   ()
 ;;
+
 
 let codegen_const = function
   | Const_int i -> iconst i
@@ -117,7 +119,8 @@ let rec codegen_flambda = function
        Utils.internalfail @@ Format.sprintf "variable was not found in context %s" v)
   | Fl_tuple elems ->
     let* elems = codegen_list (return elems) in
-    let* tuple = alloc_tuple (List.length elems |> return) in
+    let* name = fresh_name "tuple" in
+    let* tuple = alloc_tuple name (List.length elems |> return) in
     let* _ =
       List.fold_left
         (fun idx value ->
@@ -138,7 +141,7 @@ let rec codegen_flambda = function
   | Fl_cons _ -> Utils.internalfail "todo"
   | Fl_getfield (idx, obj) ->
     let* obj = codegen_flambda obj in
-    let* fresh = fresh_name "getfield" in
+    let* fresh = fresh_name "fieldptr" in
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
@@ -152,16 +155,11 @@ let rec codegen_flambda = function
     let* f' = codegen_flambda f in
     let* args = codegen_list (return args) in
     (match f, args with
-     | Fl_closure { name; env_size; _ }, [ a ] when env_size = 0 ->
-       (* direct call of fun without env*)
-       (* let open Stdlib.Format in
-          fprintf std_formatter "in direct call!\n"; *)
+     | Fl_closure { name; env_size; _ }, [arg] when env_size = 0 ->
        let callee = lookup_fun_exn name in
-       let* fresh = fresh_name "temp_call" in
-       build_call fun_without_env_typ callee [| a |] fresh builder |> return
+       let* fresh = fresh_name "direct_call" in
+          build_call fun_without_env_typ callee [| arg |] fresh builder |> return
      | _ ->
-       (* let open Stdlib.Format in
-          fprintf std_formatter "in indirect call!\n"; *)
        call_closure (return f') args)
   | Fl_ite (c, t, e) ->
     let* c = codegen_flambda c in
@@ -210,7 +208,8 @@ let rec codegen_flambda = function
     codegen_flambda scope
   | Fl_closure { name; arrange; env_size } ->
     let callee = lookup_fun_exn name in
-    let* env = alloc_tuple (return env_size) in
+    let* name = fresh_name "tupled_env" in
+    let* env = alloc_tuple name (return env_size) in
     let* arrange_env =
       List.fold_right
         (fun (idx, value) acc ->
