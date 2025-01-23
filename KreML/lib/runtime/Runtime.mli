@@ -9,6 +9,7 @@ open Ast
 
 val alloc_closure : ident
 val alloc_tuple : ident
+val call_closure : ident
 val list_cons : ident
 val list_head : ident
 val list_tail : ident
