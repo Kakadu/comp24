@@ -40,7 +40,8 @@ let rec eliminate_expr = function
     let snd' = eliminate_expr snd in
     let rest' = List.map eliminate_expr rest in
     Expr_tuple (fst', snd', rest')
-  | Expr_ite (c, t, e) -> Expr_ite (eliminate_expr c, eliminate_expr t, eliminate_expr e)
+  | Expr_ite (c, t, e) ->
+    eite_simplified (eliminate_expr c) (eliminate_expr t) (eliminate_expr e)
   | Expr_app (f, a) -> Expr_app (eliminate_expr f, eliminate_expr a)
   | Expr_constrained (e, t) -> Expr_constrained (eliminate_expr e, t)
   | Expr_let (rf, (p, e), scope) ->
@@ -57,13 +58,7 @@ let rec eliminate_expr = function
       in
       Runtime.runtime_error error_msg
     in
-    List.fold_right2
-      (fun mc (_, e) acc ->
-        let ite = Expr_ite (mc, e, acc) in
-        ite)
-      conds
-      cases
-      base
+    List.fold_right2 (fun mc (_, e) acc -> eite_simplified mc e acc) conds cases base
 ;;
 
 let eliminate structure =

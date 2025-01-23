@@ -89,6 +89,7 @@ val econs : expr -> expr -> expr
 val enil : expr
 val etuple : expr -> expr -> expr list -> expr
 val eite : expr -> expr -> expr -> expr
+val eite_simplified : expr -> expr -> expr -> expr
 val efun : pattern -> expr -> expr
 val elet : ?rec_flag:rec_flag -> pattern * expr -> expr -> expr
 val ematch : expr -> binding list -> expr
