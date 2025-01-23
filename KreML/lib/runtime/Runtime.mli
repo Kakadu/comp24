@@ -16,5 +16,8 @@ val list_tail : ident
 val runtime_error : ident -> expr
 val runtime_funs : ident list
 val is_runtime_fun : ident -> bool
+
+
+val print_int : ident
 val stdlib_funs : ident list
 val is_stdlib_fun : ident -> bool

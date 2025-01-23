@@ -129,6 +129,14 @@ let collect_app_args app =
    | Expr_ite((Expr_var _ | Expr_const _), t, e ) -> expr_in_anf t && expr_in_anf e
    | Expr_ite _ -> false
    | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
+
+let simplify_temp_binding name value scope =
+ match scope with
+  | AExpr (CImm (Avar name')) when name' = name -> AExpr value
+  | ALet(_ , original_name, CImm (Avar name'), scope') when name' = name ->
+    temp_binding original_name value scope'
+  | _ -> temp_binding name value scope
+
 let rec transform_expr expr k : aexpr t =
   match expr with
   | Expr_const c -> Aconst c |> k
@@ -145,7 +153,7 @@ let rec transform_expr expr k : aexpr t =
       let* fresh = fresh_temp in
       let* scope = ivar fresh |> k in
       let value = CGetfield (i, e') in
-      temp_binding fresh value scope |> return)
+      simplify_temp_binding fresh value scope |> return)
   | Expr_app _ ->
     let args, f = collect_app_args expr in
     transform_expr f (fun f' ->
@@ -153,9 +161,8 @@ let rec transform_expr expr k : aexpr t =
         let* name = fresh_temp in
         let call = capp f' args' in
         let* scope = ivar name |> k in
-        match scope with
-        | AExpr (CImm (Avar n)) when n = name -> AExpr call |> return
-        | _ -> temp_binding name call scope |> return))
+        simplify_temp_binding name call scope |> return
+       ))
   | Expr_ite (c, t, e) ->
     transform_expr c (fun c' ->
       let* t' = transform_expr t k in
@@ -167,16 +174,14 @@ let rec transform_expr expr k : aexpr t =
         let* name = fresh_temp in
         let value = CCons (x', xs') in
         let* scope = ivar name |> k in
-        temp_binding name value scope |> return))
+        simplify_temp_binding name value scope |> return))
   | Expr_constrained (e, _) -> transform_expr e k
   | Expr_tuple (fst, snd, rest) ->
     transform_list (fst :: snd :: rest) (fun list ->
       let tuple = CTuple list in
       let* name = fresh_temp in
       let* scope = ivar name |> k in
-      match scope with
-      | AExpr (CImm (Avar n)) when n = name -> AExpr tuple |> return
-      | _ -> temp_binding name tuple scope |> return)
+      simplify_temp_binding name tuple scope |> return)
   | Expr_fun _ ->
     (* it is guaranteed by let processing that function resolved here is anonymous *)
     let* fun_name = fresh_fun in

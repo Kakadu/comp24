@@ -43,7 +43,7 @@ type fun_with_env =
 
 type fl_fun =
   | Fun_with_env of fun_with_env
-  | Fun_without_env of ident * flambda (** [Fun_without_env(arg, body)] *)
+  | Fun_without_env of ident option * flambda (** [Fun_without_env(arg, body)] *)
 
 type flstructure = (ident * fl_fun) list
 
@@ -102,7 +102,8 @@ and pp_list ppf list elem_printer =
 ;;
 
 let pp_fl_fun ppf = function
-  | Fun_without_env (arg, body) -> fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
+  | Fun_without_env (Some arg, body) -> fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
+  | Fun_without_env (None, body) -> fprintf ppf "@[() {%a} @]@." pp_flambda body
   | Fun_with_env { arg; captured_args; body; _ } ->
     let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list in
     fprintf ppf "@[(%a) {%a} @]@." print_args (captured_args @ [ arg ]) pp_flambda body

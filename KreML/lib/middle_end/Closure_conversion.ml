@@ -121,7 +121,7 @@ let rec resolve_fun name f =
   let arg, call_args_env =
     match call_args_rev with
     | x :: xs -> x, List.rev xs
-    | _ -> Utils.unreachable ()
+    | [] -> Utils.unreachable ()
   in
   let* { freevars; _ } = get in
   let inherited_vars =
@@ -137,7 +137,7 @@ let rec resolve_fun name f =
   let* body = aexpr (return body) in
   let decl =
     match free_vars with
-    | [] -> Fun_without_env (arg, body)
+    | [] -> Fun_without_env (Some arg, body)
     | _ ->
       let arity = List.length call_args_rev in
       Fun_with_env { arg; arity; body; captured_args = free_vars }
@@ -238,7 +238,7 @@ let cc arities astracture =
         return ()
       | e ->
         let* body = aexpr (return e) in
-        let f = Fun_without_env ("unit", body) in
+        let f = Fun_without_env (None, body) in
         let* ({ global_env; _ } as state) = get in
         let* _ = put { state with global_env = (id, f) :: global_env } in
         return ()

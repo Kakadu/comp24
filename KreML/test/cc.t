@@ -126,5 +126,3 @@
   
   f(x_0) {let a_1 = 5 in 
            { name: helper_2, env_size: 1, arrange [0: a_1;  ]}  ([ 10  ]) } 
-  
-
