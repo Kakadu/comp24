@@ -202,3 +202,42 @@ let rec codegen_flambda = function
     in
     alloc_closure (return callee) env
 ;;
+
+let codegen_fun name f =
+  let* f in
+  match f with
+  | Fun_with_env {arg = arg_name; captured_args; arity; body} ->
+    let f = declare_function name closure_typ mdl in
+    let env = param f 0 in
+    let arg = param f 1 in
+    let entry_bb = append_block context "entry" f in
+    position_at_end entry_bb builder;
+    (* unpack environment *)
+    let* _ = List.fold_left (fun idx name ->
+      let* idx in
+      let* fresh = fresh_name "envptr" in
+      let elemptr = build_gep int_type env [| iconst idx|] fresh builder in
+      let* fresh = fresh_name "envvalue" in
+      let value = build_load int_type elemptr fresh builder in
+      let local = build_alloca int_type name builder in
+      let _ = build_store  value local builder in
+      Hashtbl.add named_values name local;
+      return (idx + 1) ) (return 0) captured_args in
+      (* name arg *)
+     let named_arg = build_alloca int_type arg_name builder in
+     let _ = build_store arg named_arg builder in
+     Hashtbl.add named_values arg_name named_arg;
+     let* body = codegen_flambda body in
+     let _ = build_ret body builder in
+     return ()
+  | Fun_without_env(param_name, body) ->
+    let f = declare_function name fun_without_env_typ mdl in
+    let entry = append_block context "entry" f in
+    position_at_end entry builder;
+    let param = param f 0 in
+    let local = build_alloca int_type name builder in
+    let _ = build_store param local builder in
+    Hashtbl.add named_values param_name local;
+    let* body = codegen_flambda body in
+    let _ = build_ret body builder in
+    return ()
