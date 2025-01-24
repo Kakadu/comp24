@@ -13,6 +13,7 @@ pub struct Closure {
 // - types (i/u size) + in lib
 // - shitcode with apply_closure
 // - pass args as tuple?
+
 // pub impl Closure {
 // }
 
@@ -60,7 +61,6 @@ fn apply_closure(closure: &Closure) -> isize {
         }
     };
     debug!("Result: {} / {:#x}", res, res);
-    // let _ = Box::into_raw(closure); // TODO:
     res
 }
 
@@ -69,12 +69,14 @@ pub unsafe extern "C" fn apply_closure_1(closure_ptr: *mut Closure, arg: isize) 
     // TODO: less cloning
     let mut closure = Box::new((*closure_ptr).clone());
     closure.args.push(arg);
-    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
+    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     if closure.args.len() == closure.arity {
         apply_closure(&closure)
-    } else {
+    } else if closure.args.len() < closure.arity {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
+    } else {
+        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
     }
 }
 
@@ -83,12 +85,14 @@ pub unsafe extern "C" fn apply_closure_2(closure_ptr: *mut Closure, arg1: isize,
     let mut closure = Box::new((*closure_ptr).clone());
     closure.args.push(arg1);
     closure.args.push(arg2);
-    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
+    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     if closure.args.len() == closure.arity {
         apply_closure(&closure)
-    } else {
+    } else if closure.args.len() < closure.arity {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
+    } else {
+        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
     }
 }
 
@@ -98,12 +102,14 @@ pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize,
     closure.args.push(arg1);
     closure.args.push(arg2);
     closure.args.push(arg3);
-    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
+    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     if closure.args.len() == closure.arity {
         apply_closure(&closure)
-    } else {
+    } else if closure.args.len() < closure.arity {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
+    } else {
+        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
     }
 }
 #[no_mangle]
@@ -119,12 +125,14 @@ pub unsafe extern "C" fn apply_closure_4(
     closure.args.push(arg2);
     closure.args.push(arg3);
     closure.args.push(arg4);
-    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
+    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     if closure.args.len() == closure.arity {
         apply_closure(&closure)
-    } else {
+    } else if closure.args.len() < closure.arity {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
+    } else {
+        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
     }
 }
 #[no_mangle]
@@ -142,11 +150,13 @@ pub unsafe extern "C" fn apply_closure_5(
     closure.args.push(arg3);
     closure.args.push(arg4);
     closure.args.push(arg5);
-    debug!("Args: {:?} / {:x?}", closure.args, closure.args);
+    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     if closure.args.len() == closure.arity {
         apply_closure(&closure)
-    } else {
+    } else if closure.args.len() < closure.arity {
         debug!("Not enough args");
         Box::into_raw(closure) as isize
+    } else {
+        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
     }
 }

@@ -42,16 +42,25 @@ make_bool_bin_op!(ml_and, &&);
 make_bool_bin_op!(ml_or, ||);
 
 #[no_mangle]
-pub extern "C" fn ml_print_int(i: isize) {
-    println!("{}", i);
-}
+pub extern "C" fn ml_println_int(i: isize) { println!("{}", i) }
 
 #[no_mangle]
-pub extern "C" fn ml_print_bool(b: isize) {
-    println!("{}", b != 0);
-}
+pub extern "C" fn ml_print_int(i: isize) { print!("{} ", i) }
+
+#[no_mangle]
+pub extern "C" fn ml_println_bool(b: isize) { println!("{}", b != 0) }
+
+#[no_mangle]
+pub extern "C" fn ml_print_newline() { println!("") }
+
+#[no_mangle]
+pub extern "C" fn ml_print_char(i: isize) { print!("{}", i as u8 as char) }
+
+#[no_mangle]
+pub extern "C" fn ml_panic() { panic!("Panic from AsdfML") }
 
 #[no_mangle]
 pub extern "C" fn ml_neg(x: isize) -> isize { -x }
+
 #[no_mangle]
 pub extern "C" fn ml_not(x: isize) -> isize { !x }
