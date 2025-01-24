@@ -42,7 +42,7 @@ let rec ll_expr env lift ?(name = None) = function
     in
     let* exp, lift = ll_expr env lift exp in
     return (cf_var id, cf_def id args exp :: lift)
-  | SLetIn ((SLet (is_fun, is_rec, id, body) as def), exp) ->
+  | SLetIn ((SLet _ as def), exp) ->
     (* TODO: useless function defs *)
     let* def, lift, _ = ll_def env lift def in
     let id, body =
@@ -71,11 +71,19 @@ and ll_def env lift = function
   (* TODO:
      simplify?
      ~name
+     probably should decouple ELets and DLets
   *)
-  | SLet (_, is_rec, id, exp) ->
+  | SLet (false, _, id, exp) | SLet (true, NonRec, id, exp) ->
+    let* new_id = fresh_id id in
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
+    return (cf_def id [] exp, lift, env)
+  | SLet (true, Rec, id, exp) ->
     (* TODO: new_id ?? *)
     let* new_id = fresh_id id in
+    (* dbg "def: %a" Sast.pp_sdef def; *)
+    (* dbg "env bef: %s\n" (env |> Map.to_alist |> [%sexp_of: (string * string) list] |> Sexp.to_string); *)
     let env = Map.set env ~key:id ~data:new_id in
+    (* dbg "env aft: %s\n" (env |> Map.to_alist |> [%sexp_of: (string * string) list] |> Sexp.to_string); *)
     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
     return (cf_def id [] exp, lift, env)
 ;;
@@ -91,19 +99,19 @@ let ll_program prog =
 
 (* TODO: *)
 let kostyli ast =
-  let env =
-    ast
-    |> List.fold
-         ~init:(Map.empty (module String))
-         ~f:(fun env (CFLet (id, args, _)) -> Map.set env ~key:id ~data:args)
-  in
-  let add_missing_args =
-    List.map ~f:(function
-      | CFLet (id, [], CFVar ll_id) ->
-        let args = Map.find_exn env ll_id in
-        CFLet (id, args, CFVar ll_id)
-      | x -> x)
-  in
+  (* let env =
+     ast
+     |> List.fold
+     ~init:(Map.empty (module String))
+     ~f:(fun env (CFLet (id, args, _)) -> Map.set env ~key:id ~data:args)
+     in
+     let add_missing_args =
+     List.map ~f:(function
+     | CFLet (id, [], CFVar ll_id) ->
+     let args = Map.find_exn env ll_id in
+     CFLet (id, args, CFVar ll_id)
+     | x -> x)
+     in *)
   let useless_defs =
     List.filter_map ast ~f:(function
       | CFLet (id, [], CFVar ll_id) -> Some (ll_id, id)
@@ -126,7 +134,7 @@ let kostyli ast =
     | CFList xs -> CFList (List.map xs ~f:remap)
     | x -> x
   in
-  let rec remap_def = function
+  let remap_def = function
     | CFLet (id, args, exp) ->
       let id =
         match List.Assoc.find useless_defs ~equal:String.equal id with
