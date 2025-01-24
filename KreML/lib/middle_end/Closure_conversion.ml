@@ -102,16 +102,21 @@ let imm i =
           let env_size = arity - 1 + List.length inherited_env in
           let start_index = arity - 1 in
           let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
-          Fl_closure { name = id; env_size; arrange } |> return)
+          Fl_closure { name = id; env_size; arrange; arity } |> return)
      | Some (Fun_with_env { arity; captured_args; _ }) ->
        let env_size = List.length captured_args in
        (* inherited args come after call args *)
        let _, inherited_env = Base.List.split_n captured_args (arity - 1) in
        let start_index = arity - 1 in
        let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
-       Fl_closure { name = id; env_size; arrange } |> return
-     | Some (Fun_without_env _) ->
-       Fl_closure { name = id; env_size = 0; arrange = [] } |> return)
+       Fl_closure { name = id; env_size; arrange; arity } |> return
+     | Some (Fun_without_env (arg, _)) ->
+       let arity =
+         match arg with
+         | None -> 0
+         | Some _ -> 1
+       in
+       Fl_closure { name = id; env_size = 0; arrange = []; arity } |> return)
   | Aconst c -> Fl_const c |> return
 ;;
 

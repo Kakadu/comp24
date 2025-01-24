@@ -49,9 +49,7 @@ let rec eliminate_expr = function
   | Expr_fun (p, e) -> Expr_fun (p, eliminate_expr e)
   | Expr_match (e, cases) ->
     let conds = List.map (fun (p, _) -> match_condition p e) cases in
-    let base =
-      Runtime.partial_match_error e
-    in
+    let base = Runtime.partial_match_error e in
     List.fold_right2 (fun mc (_, e) acc -> eite_simplified mc e acc) conds cases base
 ;;
 

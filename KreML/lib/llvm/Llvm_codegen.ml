@@ -49,7 +49,8 @@ let alloc_tuple name size =
 (* let alloc_closure_typ = Llvm.function_type int_type [| int_type; int_type |] *)
 
 let fun_with_env_typ = Llvm.function_type int_type [| ptr_type; int_type |]
-let fun_without_env_typ = Llvm.function_type int_type [| int_type |]
+
+(* let fun_without_env_typ = Llvm.function_type int_type [| ptr_type; int_type |] *)
 let call_closure_typ = Llvm.function_type int_type [| ptr_type; ptr_type; int_type |]
 
 (* closure, args, args_count*)
@@ -171,12 +172,14 @@ let rec codegen_flambda = function
   | Fl_app (f, args) ->
     let* f' = codegen_flambda f in
     let* args = codegen_list (return args) in
-    (match f, args with
+    call_closure (return f') args
+    (* (match f, args with
      | Fl_closure { name; env_size; _ }, [ arg ] when env_size = 0 ->
        let callee = lookup_fun_exn name in
        let* fresh = fresh_name "direct_call" in
-       build_call fun_without_env_typ callee [| arg |] fresh builder |> return
-     | _ -> call_closure (return f') args)
+       let empty_env = all
+       build_call fun_with_env_typ callee [| ; arg |] fresh builder |> return
+     | _ -> call_closure (return f') args) *)
   | Fl_ite (c, t, e) ->
     let* c = codegen_flambda c in
     let* freshreg = fresh_name "ifcmp" in
@@ -224,7 +227,7 @@ let rec codegen_flambda = function
     set_value_name name v;
     Hashtbl.add named_values name v;
     codegen_flambda scope
-  | Fl_closure { name; arrange; env_size } ->
+  | Fl_closure { name; arrange; env_size; arity } ->
     let callee = lookup_fun_exn name in
     let* name = fresh_name "tupled_env" in
     let* env = alloc_tuple name (return env_size) in
@@ -249,7 +252,7 @@ let rec codegen_flambda = function
         (return ())
         arrange_env
     in
-    alloc_closure (return callee) env (env_size + 1)
+    alloc_closure (return callee) env arity
 
 and codegen_list list =
   let* list = list in
@@ -295,18 +298,18 @@ let codegen_fun name f =
       position_at_end body_bb builder;
       return body
     | Fun_without_env (None, body) ->
-      let f =
-        declare_function name (function_type int_type [| |]) mdl
-      in
+      let f = declare_function name (function_type int_type [||]) mdl in
       let entry = append_block context "entry" f in
       position_at_end entry builder;
       let* body = codegen_flambda body in
       return body
     | Fun_without_env (Some param_name, body) ->
-      let f = declare_function name (function_type int_type [| int_type |]) mdl in
+      let f =
+        declare_function name (function_type int_type [| ptr_type; int_type |]) mdl
+      in
       let entry = append_block context "entry" f in
       position_at_end entry builder;
-      let param = param f 0 in
+      let param = param f 1 in
       set_value_name param_name param;
       Hashtbl.add named_values param_name param;
       let* body = codegen_flambda body in
