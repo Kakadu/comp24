@@ -34,6 +34,10 @@ let counter_next () =
    - direct math should check if ops were redefined
 *)
 
+type const =
+  | NoInit of id * imm_expr
+  | Init of id * id * aexpr
+
 let rec gen_imm fn_args env dest = function
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
@@ -43,6 +47,9 @@ let rec gen_imm fn_args env dest = function
        dbg "lookup %s = %b\n" id (Map.find fn_args id |> Option.is_some); *)
     let id = Std.lookup_extern id |> Option.value ~default:id in
     (match Map.find fn_args id with
+     | Some 0 ->
+       emit la t1 id;
+       emit_load_2 (AsmReg dest) (AsmReg (Offset (t1, 0)))
      | Some n_args ->
        let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
        emit comment (Format.sprintf "Creating closure for %s" id);
@@ -52,7 +59,7 @@ let rec gen_imm fn_args env dest = function
        (match Map.find env id with
         | Some x -> emit_load dest (AsmReg x) ~comm:id
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
-  | ImmUnit -> failwith "todo: ImmUnit"
+  | ImmUnit -> emit li dest 0
   | ImmNil ->
     let list = emit_fn_call "ml_create_list" [] in
     emit_load dest (AsmReg list)
@@ -100,7 +107,6 @@ and gen_cexpr fn_args env dest = function
         (match Map.find fn_args id with
          | Some _ -> true
          | None -> false)
-      (* | ImmUnit -> ??? *)
       | _ -> false
     in
     (*  *)
@@ -146,10 +152,18 @@ and gen_aexpr fn_args env dest = function
     let loc = emit_store a0 ~comm:id in
     let env = Map.set env ~key:id ~data:loc in
     gen_aexpr fn_args env dest aexpr
-  | ACExpr cexpr -> gen_cexpr fn_args env a0 cexpr
+  | ACExpr cexpr -> gen_cexpr fn_args env dest cexpr
 
-and gen_fn fn_args = function
-  | Fn (id, args, aexpr) as fn ->
+and gen_fn ?(data_sec = None) fn_args init_fns = function
+  | Fn (id, [], ACExpr (CImmExpr _)) when String.( <> ) "main" id -> ()
+  | Fn (id, [], _)
+    when (not (String.equal "main" id))
+         &&
+         match Map.find fn_args id with
+         | None -> true
+         | Some 0 -> true
+         | _ -> false -> ()
+  | Fn (id, args, aexpr) ->
     let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
     (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
     (* let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in *)
@@ -169,12 +183,51 @@ and gen_fn fn_args = function
     in
     set_code ();
     emit_fn_decl id args stack_size;
-    if String.equal id "main" then emit call "runtime_init";
+    if String.equal id "main"
+    then (
+      emit call "runtime_init";
+      List.iter init_fns ~f:(emit call));
     flush_fn ();
+    (match data_sec with
+     | Some id ->
+       emit la t1 id;
+       emit_load_2 (AsmReg (Offset (t1, 0))) (AsmReg a0)
+     | None -> ());
     emit_fn_ret stack_size
 ;;
 
-let gen_program fn_args (prog : Anf_ast.program) = List.iter prog ~f:(gen_fn fn_args)
+let gen_const_inits fn_args consts =
+  let any_noinit = ref false in
+  let const_init_fns =
+    List.fold consts ~init:[] ~f:(fun acc ->
+        function
+        | Init (id, init_id, exp) ->
+          let fn = Fn (init_id, [ "_" ], exp) in
+          dbg "Init %s ANF: %a\n" id pp_fn fn;
+          gen_fn fn_args [] fn ~data_sec:(Some id);
+          init_id :: acc
+        | NoInit _ ->
+          any_noinit := true;
+          acc)
+    |> List.rev
+  in
+  if !any_noinit
+  then (
+    emit_fn_decl "init_noinit_consts" [] 24;
+    List.iter consts ~f:(function
+      | NoInit (id, imm) ->
+        gen_imm fn_args (Map.empty (module String)) t0 imm;
+        emit la t1 id;
+        emit_load_2 (AsmReg (Offset (t1, 0))) (AsmReg t0)
+      | _ -> ());
+    emit_fn_ret 24);
+  if !any_noinit then "init_noinit_consts" :: const_init_fns else const_init_fns
+;;
+
+let gen_program fn_args consts (prog : Anf_ast.program) =
+  let init_fns = gen_const_inits fn_args consts in
+  List.iter prog ~f:(gen_fn fn_args init_fns)
+;;
 
 let init_env ast =
   let open Std in
@@ -206,13 +259,45 @@ let peephole (code : (instr * string) Queue.t) =
   code |> Queue.to_list |> helper |> Queue.of_list
 ;;
 
+let collect_consts fn_args ast =
+  let helper consts = function
+    | Fn (id, [], ACExpr (CImmExpr imm)) when String.( <> ) "main" id ->
+      Format.printf "Noinit: %s\n" id;
+      NoInit (id, imm) :: consts
+    | Fn (id, [], exp)
+      when String.( <> ) "main" id
+           &&
+           match Map.find fn_args id with
+           | None -> true
+           | Some 0 -> true
+           | _ -> false ->
+      (* TODO: check guard *)
+      Format.printf "Init: %s\n" id;
+      Init (id, "init_" ^ id, exp) :: consts
+    | _ -> consts
+  in
+  List.fold ast ~init:[] ~f:helper |> List.rev
+;;
+
+let emit_data_section consts =
+  consts
+  |> List.filter_map ~f:(function NoInit (id, _) | Init (id, _, _) ->
+    Some (Format.sprintf "%s: .dword 0" id))
+  |> String.concat_lines
+  |> Format.sprintf ".section .data\n%s"
+  |> emit str
+;;
+
 let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.program) =
   let open Format in
   if print_anf then Format.printf "ANF:\n%a\n" Anf_ast.pp_program ast;
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     let fn_args = init_env ast in
-    gen_program fn_args ast;
+    let consts = collect_consts fn_args ast in
+    emit_data_section consts;
+    emit str ".section .text";
+    gen_program fn_args consts ast;
     let code = peephole code in
     Queue.iter
       ~f:(fun (i, comm) ->
