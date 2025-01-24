@@ -46,6 +46,7 @@ let dump_reg_args_to_stack args =
   assert (List.length args <= 8);
   List.take arg_regs (List.length args)
   |> List.zip_exn args
+  |> List.filter ~f:(fun (arg, _) -> String.( <> ) "_" arg)
   |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
     let loc = emit_store reg ~comm:arg in
     (arg, loc) :: acc)
