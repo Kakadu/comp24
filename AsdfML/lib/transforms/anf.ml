@@ -104,6 +104,11 @@ let default_env =
 let remove_useless_bindings fn =
   let remaps = Hashtbl.create (module String) in
   Hashtbl.clear remaps;
+  let rec find_rec id =
+    match Hashtbl.find remaps id with
+    | Some value -> find_rec value
+    | None -> id
+  in
   let useless =
     let rec useless_c = function
       | CIfElse (c, a1, a2) -> CIfElse (c, useless_a a1, useless_a a2)
@@ -122,7 +127,7 @@ let remove_useless_bindings fn =
   in
   let remap =
     let rec remap_i = function
-      | ImmId id -> ImmId (Hashtbl.find remaps id |> Option.value ~default:id)
+      | ImmId id -> ImmId (find_rec id)
       | ImmTuple xs -> ImmTuple (List.map ~f:remap_i xs)
       | ImmList xs -> ImmList (List.map ~f:remap_i xs)
       | x -> x
