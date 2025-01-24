@@ -15,7 +15,7 @@
   Llvm_codegen
   Utils)
  (inline_tests)
- (libraries base ppx_show.runtime angstrom qcheck llvm)
+ (libraries base ppx_show.runtime angstrom qcheck llvm llvm.analysis)
  (preprocess
   (pps ppx_inline_test ppx_deriving.show ppx_expect))
  (instrumentation

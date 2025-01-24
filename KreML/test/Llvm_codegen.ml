@@ -14,9 +14,12 @@ let () =
        let alpha = Alpha_transformer.transform structure in
        let arities, anf = Anf.transform alpha in
        let flstructure = Closure_conversion.cc arities anf in
-       Llvm_codegen.codegen_program flstructure
+       Llvm_codegen.dump flstructure
      | Error error ->
-       fprintf std_formatter "An error occured while type checking: %a" Inferencer.pp_error error)
+       fprintf
+         std_formatter
+         "An error occured while type checking: %a"
+         Inferencer.pp_error
+         error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input
 ;;
-
