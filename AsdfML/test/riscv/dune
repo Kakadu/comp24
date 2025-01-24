@@ -8,3 +8,12 @@
 
 (cram
  (deps %{bin:riscv} ../../runtime/libruntime.a))
+
+(executable
+ (name rt)
+ (modules rt)
+ (public_name rt)
+ (libraries AsdfML.Lib test))
+
+(cram
+ (deps %{bin:riscv} rt.ml ../../runtime/libruntime.a))
