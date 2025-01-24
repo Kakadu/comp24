@@ -12,6 +12,9 @@ $ /tmp/out
   let main = 42
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl main
       .type main, @function
@@ -31,12 +34,15 @@ $ /tmp/out
   [42]
 
   $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
-  > let main = print_int 42
+  > let main = println_int 42
   > EOF
   ANF:
-  let main = print_int 42
+  let main = println_int 42
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl main
       .type main, @function
@@ -46,8 +52,8 @@ $ /tmp/out
       sd s0,16(sp)
       addi s0,sp,8  # Prologue ends
       call runtime_init
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       li a1,42
@@ -65,15 +71,19 @@ $ /tmp/out
   >   let a = 1 in
   >   let b = 2 in
   >   let c = a + b in
-  >   print_int c
+  >   println_int c
   > EOF
   ANF:
-  let main = let a0 = 1 in
+  let main =
+         let a0 = 1 in
          let a1 = 2 in
          let a3 = ( + ) a0 a1 in
-         print_int a3
+         println_int a3
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl main
       .type main, @function
@@ -91,8 +101,8 @@ $ /tmp/out
       ld t1,-8(s0)  # a1
       add a0,t0,t1  # a0 ( + ) a1
       sd a0,-16(s0)  # a3
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       ld a1,-16(s0)  # a3
@@ -108,14 +118,17 @@ $ /tmp/out
   $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
   > let main = 
   >   let sum x y = x + y in
-  >   print_int (sum 1 2)
+  >   println_int (sum 1 2)
   > EOF
   ANF:
   let `sum_1 x y = ( + ) x y
   let main = let a3 = `sum_1 1 2 in
-    print_int a3
+    println_int a3
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl sum_1
       .type sum_1, @function
@@ -151,8 +164,8 @@ $ /tmp/out
       li a2,2
       call apply_closure_2
       sd a0,0(s0)  # a3
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       ld a1,0(s0)  # a3
@@ -170,7 +183,7 @@ $ /tmp/out
   >   let add x y = x + y in
   >   let mul x y = x * y in
   >   let muladd x y z = add (mul x y) z in
-  >   print_int (muladd 2 3 4)
+  >   println_int (muladd 2 3 4)
   > EOF
   ANF:
   let `add_1 x y = ( + ) x y
@@ -178,9 +191,12 @@ $ /tmp/out
   let `muladd_3 add mul x y z = let a3 = mul x y in
     add a3 z
   let main = let a8 = `muladd_3 `add_1 `mul_2 2 3 4 in
-    print_int a8
+    println_int a8
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl add_1
       .type add_1, @function
@@ -274,8 +290,8 @@ $ /tmp/out
       li a5,4
       call apply_closure_5
       sd a0,-16(s0)  # a8
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       ld a1,-16(s0)  # a8
@@ -294,8 +310,8 @@ $ /tmp/out
   >   | 1 -> false
   >   | _ -> is_even (x - 2)
   > let main = 
-  >   let x = print_bool (is_even 42) in
-  >   print_bool (is_even 43)
+  >   let x = println_bool (is_even 42) in
+  >   println_bool (is_even 43)
   > EOF
   ANF:
   let is_even x =
@@ -310,11 +326,14 @@ $ /tmp/out
              is_even a5
   let main =
     let a10 = is_even 42 in
-    let a7 = print_bool a10 in
+    let a7 = println_bool a10 in
     let a9 = is_even 43 in
-    print_bool a9
+    println_bool a9
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl is_even
       .type is_even, @function
@@ -383,8 +402,8 @@ $ /tmp/out
       li a1,42
       call apply_closure_1
       sd a0,0(s0)  # a10
-      # Creating closure for ml_print_bool
-      la a0,ml_print_bool
+      # Creating closure for ml_println_bool
+      la a0,ml_println_bool
       li a1,1
       call create_closure
       ld a1,0(s0)  # a10
@@ -397,8 +416,8 @@ $ /tmp/out
       li a1,43
       call apply_closure_1
       sd a0,-16(s0)  # a9
-      # Creating closure for ml_print_bool
-      la a0,ml_print_bool
+      # Creating closure for ml_println_bool
+      la a0,ml_println_bool
       li a1,1
       call create_closure
       ld a1,-16(s0)  # a9
@@ -418,7 +437,7 @@ $ /tmp/out
   > let main = 
   >   let f = fun x -> x + 1 in
   >   let g = fun x -> x * 2 in
-  >   print_int (apply (compose f g) 3)
+  >   println_int (apply (compose f g) 3)
   > EOF
   ANF:
   let apply f x = f x
@@ -428,7 +447,7 @@ $ /tmp/out
   let `g_4 x = ( * ) x 2
   let main = let a9 = compose `f_3 `g_4 in
     let a8 = apply a9 3 in
-    print_int a8
+    println_int a8
   
 $ cat /tmp/out.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
@@ -438,7 +457,7 @@ $ cat /tmp/out.s
   $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
   > let main = 
   >   let res = (1 + 2) * 3 + 4 * (32 / (3 + 5)) in
-  >   print_int res
+  >   println_int res
   > EOF
   ANF:
   let main =
@@ -448,9 +467,12 @@ $ cat /tmp/out.s
          let a5 = ( / ) 32 a6 in
          let a4 = ( * ) 4 a5 in
          let a1 = ( + ) a3 a4 in
-         print_int a1
+         println_int a1
   
   $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
   
       .globl main
       .type main, @function
@@ -484,8 +506,8 @@ $ cat /tmp/out.s
       ld t1,-32(s0)  # a4
       add a0,t0,t1  # a3 ( + ) a4
       sd a0,-40(s0)  # a1
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       ld a1,-40(s0)  # a1
@@ -507,9 +529,22 @@ $ cat /tmp/out.s
   >       add_cps x_squared y_squared k))
   > 
   > let main =
-  >   pythagoras_cps 3 4 (fun res -> print_int res)
+  >   pythagoras_cps 3 4 (fun res -> println_int res)
   > EOF
 $ cat /tmp/out.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   25
+
+  $ dune exec riscv -- -o /tmp/out.s <<- EOF
+  > let fn x y = x + y
+  > let const = 42
+  > let const_tuple = (const, 1 + const, fn 2 const)
+  > let main = 
+  >   let _ = print_tuple const_tuple in
+  >   ()
+  > EOF
+$ cat /tmp/out.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ /tmp/out
+  (42, 43, 44)

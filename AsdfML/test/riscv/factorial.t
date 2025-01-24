@@ -1,6 +1,6 @@
   $ dune exec riscv -- -anf -o /tmp/factorial.s <<- EOF
   > let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1)
-  > let main = print_int (fact 5)
+  > let main = println_int (fact 5)
   > EOF
   ANF:
   let fact x =
@@ -11,9 +11,12 @@
            let a3 = fact a4 in
            ( * ) x a3
   let main = let a6 = fact 5 in
-    print_int a6
+    println_int a6
   
   $ cat /tmp/factorial.s
+  .section .data
+  
+  .section .text
   
       .globl fact
       .type fact, @function
@@ -72,8 +75,8 @@
       li a1,5
       call apply_closure_1
       sd a0,0(s0)  # a6
-      # Creating closure for ml_print_int
-      la a0,ml_print_int
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
       li a1,1
       call create_closure
       ld a1,0(s0)  # a6
@@ -96,7 +99,7 @@
   >       helper (n - 1) (fun res -> cont (n * res)) 
   >   in 
   >   helper n (fun x -> x)
-  > let main = print_int (fact 5)
+  > let main = println_int (fact 5)
   > EOF
   ANF:
   let `ll_2 cont n res = let a1 = ( * ) n res in
@@ -111,7 +114,7 @@
   let `ll_3 x = x
   let fact n = `helper_1 n `ll_3
   let main = let a11 = fact 5 in
-    print_int a11
+    println_int a11
   
   $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
