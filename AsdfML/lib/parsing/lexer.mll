@@ -17,8 +17,13 @@ let id = (alpha | '_') (alpha | digit | '_')*
 let int = digit*  
 let bool = ("not" whitespace+)? ("true" | "false")
 
+rule comment = parse
+| "*)" { () }
+| "(*" { comment lexbuf; comment lexbuf }
+| _ { comment lexbuf }
 
-rule token = parse
+and token = parse
+  | "(*" { comment lexbuf; token lexbuf } 
   | "()" { UNIT }
   | "[]" { NIL }
   | "_" { WILDCARD }
