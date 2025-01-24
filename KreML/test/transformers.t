@@ -169,10 +169,7 @@
                      if t_0  then []  else 
                         let t_1 =  list_1 <> []  in 
                          if t_1  then let t_2 =  map f_0 xs_3 in   x_2 :: t_2  
-                            else 
-                            Runtime error: expression list_1  does not match to any of provided patterns. 
-                            () 
-                             
+                            else  partial_match list_1   
                         
                      
 
@@ -192,9 +189,7 @@
                           let t_3 =  y_1 = false  in 
                            let t_4 =  t_2 && t_3  in 
                             if t_4  then false  else 
-                               Runtime error: expression (x_0, y_1)  does not match to any of provided patterns. 
-                               () 
-                                
+                               let t_5 =  x_0, y_1 in  partial_match t_5   
                           
                      
                   
@@ -211,10 +206,7 @@
                          if t_1 
                             then let t_2 =  a_1 + b_2  in 
                                   let t_3 =  sumps xs_3 in   t_2 :: t_3  
-                            else 
-                            Runtime error: expression list_0  does not match to any of provided patterns. 
-                            () 
-                             
+                            else  partial_match list_0   
                         
                      
 
