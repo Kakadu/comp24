@@ -18,14 +18,13 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:42.42%"></span>
-      <span class="unvisited" style="top:45.45%"></span>
-      <span class="unvisited" style="bottom:36.36%"></span>
-      <span class="unvisited" style="bottom:33.33%"></span>
-      <span class="unvisited" style="bottom:30.30%"></span>
-      <span class="unvisited" style="bottom:9.09%"></span>
-      <span class="unvisited" style="bottom:6.06%"></span>
-      <span class="unvisited" style="bottom:3.03%"></span>
+      <span class="unvisited" style="top:47.06%"></span>
+      <span class="unvisited" style="bottom:35.29%"></span>
+      <span class="unvisited" style="bottom:32.35%"></span>
+      <span class="unvisited" style="bottom:29.41%"></span>
+      <span class="unvisited" style="bottom:8.82%"></span>
+      <span class="unvisited" style="bottom:5.88%"></span>
+      <span class="unvisited" style="bottom:2.94%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -43,26 +42,27 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="unvisited"> </span>
-<a id="L15"></a><span class="unvisited"> </span>
-<a id="L16"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="unvisited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span class="unvisited"> </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span class="unvisited"> </span>
+<a id="L30"></a><span > </span>
 <a id="L31"></a><span class="unvisited"> </span>
 <a id="L32"></a><span class="unvisited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -100,6 +100,7 @@
 <a href="#L31">31</a>
 <a href="#L32">32</a>
 <a href="#L33">33</a>
+<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
 
@@ -107,18 +108,19 @@
 
 open Ast
 
-let access_closure = "access_closure"
-let access_tuple = "access_tuple"
+let alloc_tuple = "alloc_tuple"
+let alloc_closure = "alloc_closure"
+let call_closure = "call_closure"
 let list_cons = "list_cons"
 let list_head = "list_head"
 let list_tail = "list_tail"
 
-let runtime_error s =
-  <span data-count="0">l</span>et msg = Format.asprintf "Runtime error: %s" s in
-  <span data-count="0">E</span>xpr_app (Expr_var msg, Expr_const Const_unit)
+let partial_match_error e =
+  (* let msg = Format.asprintf "Runtime error: %s" s in *)
+  <span data-count="0">E</span>xpr_app (Expr_var "partial_match", e)
 ;;
 
-let runtime_funs = [ access_closure; access_tuple; list_cons; list_head; list_tail ]
+let runtime_funs = [ alloc_closure; alloc_tuple; list_cons; list_head; list_tail ]
 
 let is_runtime_fun f =
   <span data-count="0">m</span>atch List.find_opt (( = ) f) runtime_funs with
