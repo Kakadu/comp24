@@ -131,11 +131,12 @@ let collect_app_args app =
    | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
 
 let simplify_temp_binding name value scope =
- match scope with
+  match scope with
   | AExpr (CImm (Avar name')) when name' = name -> AExpr value
-  | ALet(_ , original_name, CImm (Avar name'), scope') when name' = name ->
+  | ALet (_, original_name, CImm (Avar name'), scope') when name' = name ->
     temp_binding original_name value scope'
   | _ -> temp_binding name value scope
+;;
 
 let rec transform_expr expr k : aexpr t =
   match expr with
@@ -161,8 +162,7 @@ let rec transform_expr expr k : aexpr t =
         let* name = fresh_temp in
         let call = capp f' args' in
         let* scope = ivar name |> k in
-        simplify_temp_binding name call scope |> return
-       ))
+        simplify_temp_binding name call scope |> return))
   | Expr_ite (c, t, e) ->
     transform_expr c (fun c' ->
       let* t' = transform_expr t k in
@@ -237,8 +237,8 @@ and resolve_fun f =
         transform_list (List.map snd zipped) (fun imms ->
           List.fold_right2
             (fun imm (name, _) acc_body ->
-               let* acc_body = acc_body in
-               temp_binding name (CImm imm) acc_body |> return)
+              let* acc_body = acc_body in
+              temp_binding name (CImm imm) acc_body |> return)
             imms
             zipped
             (return acc_body))
@@ -262,16 +262,16 @@ let transform_structure s =
       let* decls =
         List.fold_left
           (fun acc (id, e) ->
-             let* acc = acc in
-             match e with
-             | Expr_fun _ as f ->
-               let* f, arity = resolve_fun f in
-               let* _ = put_arity id arity in
-               let binding = id, AExpr f in
-               binding :: acc |> return
-             | _ ->
-               let* e = transform_expr e (fun imm -> AExpr (CImm imm) |> return) in
-               (id, e) :: acc |> return)
+            let* acc = acc in
+            match e with
+            | Expr_fun _ as f ->
+              let* f, arity = resolve_fun f in
+              let* _ = put_arity id arity in
+              let binding = id, AExpr f in
+              binding :: acc |> return
+            | _ ->
+              let* e = transform_expr e (fun imm -> AExpr (CImm imm) |> return) in
+              (id, e) :: acc |> return)
           (return [])
           zipped
       in

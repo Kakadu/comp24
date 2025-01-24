@@ -50,13 +50,7 @@ let rec eliminate_expr = function
   | Expr_match (e, cases) ->
     let conds = List.map (fun (p, _) -> match_condition p e) cases in
     let base =
-      let error_msg =
-        Format.asprintf
-          "expression %a  does not match to any of provided patterns."
-          Ast_printer.pp_expr
-          e
-      in
-      Runtime.runtime_error error_msg
+      Runtime.partial_match_error e
     in
     List.fold_right2 (fun mc (_, e) acc -> eite_simplified mc e acc) conds cases base
 ;;

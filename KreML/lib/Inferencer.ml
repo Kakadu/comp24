@@ -218,10 +218,10 @@ module Scheme = struct
     let open R.Syntax in
     Varset.fold
       (fun b acc ->
-         let* acc = acc in
-         let* fr = fresh_var () in
-         let subst = Subst.singleton b fr in
-         Subst.apply acc subst |> R.return)
+        let* acc = acc in
+        let* fr = fresh_var () in
+        let subst = Subst.singleton b fr in
+        Subst.apply acc subst |> R.return)
       bs
       (R.return t)
   ;;

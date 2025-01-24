@@ -23,6 +23,7 @@ let builder = Llvm.builder context
 let named_values : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 16
 let int_type = Llvm.i64_type context
 let iconst = Llvm.const_int int_type
+let ptr_type = pointer_type context
 
 (* let cast2ptr value =
    let* value = value in
@@ -36,7 +37,7 @@ let lookup_fun_exn name =
   | Some f -> f
 ;;
 
-let alloc_tuple_typ = Llvm.function_type int_type [| int_type |]
+let alloc_tuple_typ = Llvm.function_type ptr_type [| int_type |]
 
 let alloc_tuple name size =
   let* size = size in
@@ -47,20 +48,30 @@ let alloc_tuple name size =
 
 (* let alloc_closure_typ = Llvm.function_type int_type [| int_type; int_type |] *)
 
-let closure_typ = Llvm.function_type int_type [| int_type; int_type |]
+let fun_with_env_typ = Llvm.function_type int_type [| ptr_type; int_type |]
 let fun_without_env_typ = Llvm.function_type int_type [| int_type |]
-let call_closure_typ = Llvm.function_type int_type [| int_type; int_type; int_type |]
-(* closure, args, args_count*)
+let call_closure_typ = Llvm.function_type int_type [| ptr_type; ptr_type; int_type |]
 
-let alloc_closure f env =
+(* closure, args, args_count*)
+let alloc_closure_typ = Llvm.function_type ptr_type [| ptr_type; ptr_type; int_type |]
+(* fptr, env, arity *)
+
+let alloc_closure f env arity =
   let* f = f in
   let* fresh = fresh_name "closure_temp" in
-  let alloc = lookup_fun_exn Runtime.alloc_closure in
-  build_call alloc_tuple_typ alloc [| f; env |] fresh builder |> return
+  let callee = lookup_fun_exn Runtime.alloc_closure in
+  build_call alloc_closure_typ callee [| f; env; iconst arity |] fresh builder |> return
 ;;
 
 let call_closure c args =
   let* c = c in
+  let* c =
+    if type_of c <> ptr_type
+    then
+      let* fresh_name = fresh_name "cast" in
+      build_inttoptr c ptr_type fresh_name builder |> return
+    else return c
+  in
   let* fresh = fresh_name "call_closure" in
   let count = List.length args in
   let* tupled_args = fresh_name "tupled_args" in
@@ -76,8 +87,9 @@ let call_closure c args =
       (return 0)
       args
   in
-  let callee = lookup_fun_exn "call_closure" in 
-  build_call call_closure_typ callee [| c; args_tuple; iconst count |] fresh builder |> return
+  let callee = lookup_fun_exn "call_closure" in
+  build_call call_closure_typ callee [| c; args_tuple; iconst count |] fresh builder
+  |> return
 ;;
 
 let print_int_typ = function_type (void_type context) [| int_type |]
@@ -89,7 +101,6 @@ let add_runtime_functions () =
   let _ = declare_function Runtime.print_int print_int_typ mdl in
   ()
 ;;
-
 
 let codegen_const = function
   | Const_int i -> iconst i
@@ -127,7 +138,7 @@ let rec codegen_flambda = function
           let* idx = idx in
           let* fresh = fresh_name "temp_tuple" in
           let elemptr = build_gep int_type tuple [| iconst idx |] fresh builder in
-          let _ = build_store elemptr value builder in
+          let _ = build_store value elemptr builder in
           return (idx + 1))
         (return 0)
         elems
@@ -141,6 +152,13 @@ let rec codegen_flambda = function
   | Fl_cons _ -> Utils.internalfail "todo"
   | Fl_getfield (idx, obj) ->
     let* obj = codegen_flambda obj in
+    let* obj =
+      if type_of obj <> ptr_type
+      then
+        let* fresh = fresh_name "cast" in
+        build_inttoptr obj ptr_type fresh builder |> return
+      else return obj
+    in
     let* fresh = fresh_name "fieldptr" in
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
@@ -149,22 +167,20 @@ let rec codegen_flambda = function
     let callee = lookup_fun_exn stdlib_fun in
     let* args = codegen_list (return args) in
     let fnty = function_type (void_type context) [| int_type |] in
-    dump_type fnty;
     build_call fnty callee (Array.of_list args) "" builder |> return
   | Fl_app (f, args) ->
     let* f' = codegen_flambda f in
     let* args = codegen_list (return args) in
     (match f, args with
-     | Fl_closure { name; env_size; _ }, [arg] when env_size = 0 ->
+     | Fl_closure { name; env_size; _ }, [ arg ] when env_size = 0 ->
        let callee = lookup_fun_exn name in
        let* fresh = fresh_name "direct_call" in
-          build_call fun_without_env_typ callee [| arg |] fresh builder |> return
-     | _ ->
-       call_closure (return f') args)
+       build_call fun_without_env_typ callee [| arg |] fresh builder |> return
+     | _ -> call_closure (return f') args)
   | Fl_ite (c, t, e) ->
     let* c = codegen_flambda c in
     let* freshreg = fresh_name "ifcmp" in
-    let is_zero = build_icmp Icmp.Eq (iconst 0) c freshreg builder in
+    let is_zero = build_icmp Icmp.Eq (const_int (i1_type context) 0) c freshreg builder in
     let start_bb = insertion_block builder in
     let f = block_parent start_bb in
     let* fresh_then = fresh_name "then" in
@@ -188,10 +204,12 @@ let rec codegen_flambda = function
     let _ = build_br merge_bb builder in
     position_at_end start_bb builder;
     let _ = build_cond_br is_zero else_bb then_bb builder in
+    position_at_end else_bb builder;
+    let _ = build_br merge_bb builder in
     position_at_end merge_bb builder;
     return phi
   | Fl_let (id, (Fl_app (Fl_var print, _) as call_print), scope)
-    when print = Runtime.print_int -> 
+    when print = Runtime.print_int ->
     let* call = codegen_flambda call_print in
     Hashtbl.add named_values id call;
     codegen_flambda scope
@@ -203,8 +221,8 @@ let rec codegen_flambda = function
     codegen_flambda scope
   | Fl_let (name, v, scope) ->
     let* v = codegen_flambda v in
-    let reg = build_load int_type v name builder in
-    Hashtbl.add named_values name reg;
+    set_value_name name v;
+    Hashtbl.add named_values name v;
     codegen_flambda scope
   | Fl_closure { name; arrange; env_size } ->
     let callee = lookup_fun_exn name in
@@ -224,14 +242,14 @@ let rec codegen_flambda = function
       List.fold_left
         (fun acc (idx, value) ->
           let* () = acc in
-          let* fresh = fresh_name "temp_arrange" in
+          let* fresh = fresh_name "envptr" in
           let elemptr = build_gep int_type env [| idx |] fresh builder in
-          let _ = build_store elemptr value builder in
+          let _ = build_store value elemptr builder in
           return ())
         (return ())
         arrange_env
     in
-    alloc_closure (return callee) env
+    alloc_closure (return callee) env (env_size + 1)
 
 and codegen_list list =
   let* list = list in
@@ -246,51 +264,65 @@ and codegen_list list =
 
 let codegen_fun name f =
   let* f = f in
-  match f with
-  | Fun_with_env { arg = arg_name; captured_args; body; _ } ->
-    let f = declare_function name closure_typ mdl in
-    let env = param f 0 in
-    let arg = param f 1 in
-    let entry_bb = append_block context "entry" f in
-    position_at_end entry_bb builder;
-    (* unpack environment *)
-    let* _ =
-      List.fold_left
-        (fun idx name ->
-          let* idx = idx in
-          let* fresh = fresh_name "envptr" in
-          let elemptr = build_gep int_type env [| iconst idx |] fresh builder in
-          let local = build_load int_type elemptr name builder in
-          Hashtbl.add named_values name local;
-          return (idx + 1))
-        (return 0)
-        captured_args
-    in
-    (* name arg *)
-    let named_arg = build_load int_type arg arg_name builder in
-    Hashtbl.add named_values arg_name named_arg;
-    let* body = codegen_flambda body in
-    let body_bb = insertion_block builder in
-    position_at_end body_bb builder;
-    let _ = build_ret body builder in
+  let* body =
+    match f with
+    | Fun_with_env { arg = arg_name; captured_args; body; _ } ->
+      let f = declare_function name fun_with_env_typ mdl in
+      let env = param f 0 in
+      set_value_name "env" env;
+      let arg = param f 1 in
+      set_value_name arg_name arg;
+      let entry_bb = append_block context "entry" f in
+      position_at_end entry_bb builder;
+      (* unpack environment *)
+      let* _ =
+        List.fold_left
+          (fun idx name ->
+            let* idx = idx in
+            let* fresh = fresh_name "envelemptr" in
+            let elemptr = build_gep int_type env [| iconst idx |] fresh builder in
+            let local = build_load int_type elemptr name builder in
+            Hashtbl.add named_values name local;
+            return (idx + 1))
+          (return 0)
+          captured_args
+      in
+      (* name arg *)
+      set_value_name arg_name arg;
+      Hashtbl.add named_values arg_name arg;
+      let* body = codegen_flambda body in
+      let body_bb = insertion_block builder in
+      position_at_end body_bb builder;
+      return body
+    | Fun_without_env (None, body) ->
+      let f =
+        declare_function name (function_type int_type [| |]) mdl
+      in
+      let entry = append_block context "entry" f in
+      position_at_end entry builder;
+      let* body = codegen_flambda body in
+      return body
+    | Fun_without_env (Some param_name, body) ->
+      let f = declare_function name (function_type int_type [| int_type |]) mdl in
+      let entry = append_block context "entry" f in
+      position_at_end entry builder;
+      let param = param f 0 in
+      set_value_name param_name param;
+      Hashtbl.add named_values param_name param;
+      let* body = codegen_flambda body in
+      let body_bb = insertion_block builder in
+      position_at_end body_bb builder;
+      return body
+  in
+  if type_of body <> int_type
+  then
+    let* fresh = fresh_name "cast" in
+    let cast = build_ptrtoint body int_type fresh builder in
+    let _ = build_ret cast builder in
     return ()
-  | Fun_without_env (None, body) ->
-    let f = declare_function name (function_type int_type [| void_type context|]) mdl in
-    let entry = append_block context "entry" f in
-    position_at_end entry builder;
-    let* body = codegen_flambda body in
+  else (
     let _ = build_ret body builder in
-    return ()
-  | Fun_without_env (Some param_name, body) ->
-    let f = declare_function name (function_type int_type [| int_type |]) mdl in
-    let entry = append_block context "entry" f in
-    position_at_end entry builder;
-    let param = param f 0 in
-    let local = build_load int_type param param_name builder in
-    Hashtbl.add named_values param_name local;
-    let* body = codegen_flambda body in
-    let _ = build_ret body builder in
-    return ()
+    return ())
 ;;
 
 let codegen_program program =
@@ -305,5 +337,20 @@ let codegen_program program =
       program
   in
   let _, _ = run state 0 in
+  match Llvm_analysis.verify_module mdl with
+  | None -> ()
+  | Some s ->
+    let open Stdlib.Format in
+    fprintf std_formatter "%s" s;
+    ()
+;;
+
+let dump program =
+  codegen_program program;
   dump_module mdl
+;;
+
+let get_module program =
+  codegen_program program;
+  mdl
 ;;

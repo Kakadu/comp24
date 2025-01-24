@@ -233,9 +233,9 @@ let letdef kw erhs =
 let anonymous_fun expr =
   lift3
     (fun args typ_constr body ->
-       match typ_constr with
-       | Some t -> List.fold_right efun args (Expr_constrained (body, t))
-       | None -> List.fold_right efun args body)
+      match typ_constr with
+      | Some t -> List.fold_right efun args (Expr_constrained (body, t))
+      | None -> List.fold_right efun args body)
     (keyword "fun" *> many1 (ws *> pattern))
     (option None (stoken ":" *> typ >>| fun t -> Some t))
     (stoken "->" *> ws *> expr)

@@ -19,10 +19,10 @@ let default =
 open Utils.Counter
 
 let rec transform_pattern id_gen ctx = function
-  | Pat_const Const_unit | Pat_wildcard  ->
-    let* fresh =  id_gen "unused" in
+  | Pat_const Const_unit | Pat_wildcard ->
+    let* fresh = id_gen "unused" in
     (Pat_var fresh, ctx) |> return
-  | (Pat_const _) as p -> return (p, ctx)
+  | Pat_const _ as p -> return (p, ctx)
   | Pat_var prev_id ->
     let* n = id_gen prev_id in
     (Pat_var n, Base.Map.set ctx ~key:prev_id ~data:n) |> return
@@ -36,9 +36,9 @@ let rec transform_pattern id_gen ctx = function
     let* rest', ctx =
       List.fold_right
         (fun elem acc ->
-           let* elems, ctx = acc in
-           let* elem', ctx = transform_pattern id_gen ctx elem in
-           return (elem' :: elems, ctx))
+          let* elems, ctx = acc in
+          let* elem', ctx = transform_pattern id_gen ctx elem in
+          return (elem' :: elems, ctx))
         rest
         (return ([], ctx))
     in
@@ -72,9 +72,9 @@ let rec transform_expr ctx e =
     let* rest' =
       List.fold_right
         (fun elem acc ->
-           let* acc = acc in
-           let* elem' = transform_expr ctx elem in
-           elem' :: acc |> return)
+          let* acc = acc in
+          let* elem' = transform_expr ctx elem in
+          elem' :: acc |> return)
         rest
         (return [])
     in
@@ -92,10 +92,10 @@ let rec transform_expr ctx e =
     let* cases' =
       List.fold_right
         (fun (p, e) acc ->
-           let* cases = acc in
-           let* p, ctx = transform_pattern id_gen ctx p in
-           let* e = transform_expr ctx e in
-           (p, e) :: cases |> return)
+          let* cases = acc in
+          let* p, ctx = transform_pattern id_gen ctx p in
+          let* e = transform_expr ctx e in
+          (p, e) :: cases |> return)
         cases
         (return [])
     in
@@ -119,19 +119,19 @@ let transform s =
     let* ctx =
       List.fold_left
         (fun ctx (p, _) ->
-           let* ctx = ctx in
-           let* _, ctx = transform_pattern id_gen ctx p in
-           return ctx)
+          let* ctx = ctx in
+          let* _, ctx = transform_pattern id_gen ctx p in
+          return ctx)
         ctx
         bindings
     in
     let* bindings', ctx =
       List.fold_right
         (fun (p, e) acc ->
-           let* acc, ctx = acc in
-           let* _, ctx = transform_pattern id_gen ctx p in
-           let* e' = transform_expr ctx e in
-           ((p, e') :: acc, ctx) |> return)
+          let* acc, ctx = acc in
+          let* _, ctx = transform_pattern id_gen ctx p in
+          let* e' = transform_expr ctx e in
+          ((p, e') :: acc, ctx) |> return)
         bindings
         (return ([], ctx))
     in
@@ -140,9 +140,9 @@ let transform s =
   let res =
     List.fold_left
       (fun acc item ->
-         let* acc_str, ctx = acc in
-         let* item, ctx = transform_struct_item (return ctx) item in
-         return (acc_str @ [ item ], ctx))
+        let* acc_str, ctx = acc in
+        let* item, ctx = transform_struct_item (return ctx) item in
+        return (acc_str @ [ item ], ctx))
       (return ([], default_ctx))
       s
   in

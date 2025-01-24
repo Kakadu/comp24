@@ -63,7 +63,8 @@ let fresh_name base : string Counter.t =
 let zip_idents_with_exprs p e =
   let rec helper acc p e =
     match p, e with
-    | Pat_const _, _ -> internalfail "it should be forbidden, this function is not used in match with"
+    | Pat_const _, _ ->
+      internalfail "it should be forbidden, this function is not used in match with"
     | Pat_constrained (p, _), _ -> helper acc p e
     | _, Expr_constrained (e, _) -> helper acc p e
     | Pat_var id, e -> (id, e) :: acc

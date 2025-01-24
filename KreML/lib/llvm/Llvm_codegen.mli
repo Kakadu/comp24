@@ -1,3 +1,4 @@
 open Flambda
 
-val codegen_program : flstructure -> unit
+val dump : flstructure -> unit
+val get_module : flstructure -> Llvm.llmodule
