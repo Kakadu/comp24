@@ -262,7 +262,6 @@ let peephole (code : (instr * string) Queue.t) =
 let collect_consts fn_args ast =
   let helper consts = function
     | Fn (id, [], ACExpr (CImmExpr imm)) when String.( <> ) "main" id ->
-      Format.printf "Noinit: %s\n" id;
       NoInit (id, imm) :: consts
     | Fn (id, [], exp)
       when String.( <> ) "main" id
@@ -272,7 +271,6 @@ let collect_consts fn_args ast =
            | Some 0 -> true
            | _ -> false ->
       (* TODO: check guard *)
-      Format.printf "Init: %s\n" id;
       Init (id, "init_" ^ id, exp) :: consts
     | _ -> consts
   in
