@@ -176,7 +176,6 @@ end = struct
   ;;
 
   let rec unify l r =
-    (* dbg "Unifing %a and %a\n" pp_typ l pp_typ r; *)
     match l, r with
     | TGround l, TGround r when equal_ground l r -> return empty
     | TVar a, TVar b when Int.equal a b -> return empty
@@ -265,6 +264,11 @@ module TypeEnv = struct
       |> (function
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
+    | PTuple xs, (vars, (TVar v as ty)) ->
+      List.fold xs ~init:(return env) ~f:(fun acc x ->
+        let* acc = acc in
+        let* fresh  = fresh >>| fun n -> TVar n in
+        extend_pat acc x (vars, fresh))
     | PAnn (x, _), _ -> extend_pat env x scheme
     | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
       let* env = extend_pat env hd (vars, ty) in
@@ -277,9 +281,10 @@ module TypeEnv = struct
       fail
         (`Syntax_error
           (Format.asprintf
-             "Unsupported pattern `%a` in let binding"
+             "Unsupported pattern `%a`, scheme `%a` in let binding"
              Pp_ast.pp_pattern
-             pat))
+             pat
+             pp_scheme scheme))
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
