@@ -26,22 +26,29 @@ let test_ll code =
 ;;
 
 let%expect_test _ =
-  test_ll "let test = fun x -> x";
+  test_ll
+    {|
+    let _ = 
+      let one = 1 in
+      let t = true in
+      let tup = (one, t) in
+      let test = fun x -> x in
+      ()
+  |};
   [%expect {|
-    FVs [] in fun
-    (fun x -> x)
-
-    let test x = x
+    let `test_4 x = x
+    let _ =
+      let one = 1 in
+      let t = true in
+      let tup = (one, t) in
+      let test = `test_4 in
+      ()
     |}]
 ;;
 
 let%expect_test _ =
   test_ll "let a = (42, fun x->x)";
-  [%expect
-    {|
-    FVs [] in fun
-    (fun x -> x)
-
+  [%expect {|
     let `ll_1 x = x
     let a = (42, `ll_1)
     |}]
@@ -73,20 +80,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun x -> let one = (fun x -> 1)
-     in let two = 2
-     in let add_three = (fun x -> (( + ) (( + ) x two) (one ())))
-     in (add_three x))
-    FVs [] in fun
-    (fun x -> 1)
-    FVs [one; two] in fun
-    (fun x -> (( + ) (( + ) x two) (one ())))
-    FV in one: {}
-    Creating (apply:false) closure with FVs [one; two]
-    and body (( + ) (( + ) x two) (one ()))
-    FV in add_three: {one, two}
-
     let `one_1 x = 1
     let `add_three_3 one two x = (( + ) (( + ) x two) (one ()))
     let test x =
@@ -111,21 +104,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun x -> let one = let z = 0
-     in (fun x -> 1)
-     in let two = 2
-     in let add_three = (fun x -> (( + ) (( + ) x two) (one ())))
-     in (add_three x))
-    FVs [] in fun
-    (fun x -> 1)
-    FVs [one; two] in fun
-    (fun x -> (( + ) (( + ) x two) (one ())))
-    FV in one: {}
-    Creating (apply:false) closure with FVs [one; two]
-    and body (( + ) (( + ) x two) (one ()))
-    FV in add_three: {one, two}
-
     let `one_1 x = 1
     let `add_three_4 one two x = (( + ) (( + ) x two) (one ()))
     let test x =
@@ -145,15 +123,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun k -> let add_k = (fun x y -> (( * ) (( + ) x y) k))
-     in (add_k 1 2))
-    FVs [k] in fun
-    (fun x y -> (( * ) (( + ) x y) k))
-    Creating (apply:false) closure with FVs [k]
-    and body (( * ) (( + ) x y) k)
-    FV in add_k: {k}
-
     let `add_k_1 k x y = (( * ) (( + ) x y) k)
     let main k = let add_k = `add_k_1 in
       (add_k k 1 2)
@@ -170,16 +139,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun k -> let add_k = (fun x y -> (( * ) (( + ) x y) k))
-     in let waste_of_space = 0
-     in (( + ) 42 (add_k 42 -42)))
-    FVs [k] in fun
-    (fun x y -> (( * ) (( + ) x y) k))
-    Creating (apply:false) closure with FVs [k]
-    and body (( * ) (( + ) x y) k)
-    FV in add_k: {k}
-
     let `add_k_1 k x y = (( * ) (( + ) x y) k)
     let main k =
       let add_k = `add_k_1 in
@@ -202,20 +161,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun n -> let rec helper = (fun n cont -> if (( <= ) n 1) then (cont 1) else (helper (( - ) n 1) (fun res -> (cont (( * ) n res)))))
-     in (helper n (fun x -> x)))
-    FVs [] in fun
-    (fun n cont -> if (( <= ) n 1) then (cont 1) else (helper (( - ) n 1) (fun res -> (cont (( * ) n res)))))
-    FVs [cont; n] in fun
-    (fun res -> (cont (( * ) n res)))
-    Creating (apply:true) closure with FVs [cont; n]
-    and body (cont (( * ) n res))
-    FV in helper: {}
-    FVs [] in fun
-    (fun x -> x)
-    FV in helper: {}
-
     let `ll_2 cont n res = (cont (( * ) n res))
     let `helper_1 n cont =
       if (( <= ) n 1)
@@ -241,14 +186,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun n -> let rec helper = (fun acc n -> if (( <= ) n 1) then 1 else (helper (( * ) acc n) (( - ) n 1)))
-     in (helper 1 n))
-    FVs [] in fun
-    (fun acc n -> if (( <= ) n 1) then 1 else (helper (( * ) acc n) (( - ) n 1)))
-    FV in helper: {}
-    FV in helper: {}
-
     let `helper_1 acc n =
       if (( <= ) n 1)
       then 1
@@ -267,17 +204,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun seed1 seed2 -> let gen = (fun n -> (( + ) (( * ) n seed2) (( * ) seed1 42)))
-     in [(gen 1); (gen 2); (gen 3)])
-    FVs [seed1; seed2] in fun
-    (fun n -> (( + ) (( * ) n seed2) (( * ) seed1 42)))
-    Creating (apply:false) closure with FVs [seed1; seed2]
-    and body (( + ) (( * ) n seed2) (( * ) seed1 42))
-    FV in gen: {seed1, seed2}
-    FV in gen: {seed1, seed2}
-    FV in gen: {seed1, seed2}
-
     let `gen_1 seed1 seed2 n = (( + ) (( * ) n seed2) (( * ) seed1 42))
     let gen seed1 seed2 =
       let gen = `gen_1 in
@@ -295,23 +221,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun x -> let const = (fun f s -> f)
-     in let rev_const = (fun f s -> (const s))
-     in (rev_const (fun s -> x)))
-    FVs [] in fun
-    (fun f s -> f)
-    FVs [const] in fun
-    (fun f s -> (const s))
-    FV in const: {}
-    Creating (apply:false) closure with FVs [const]
-    and body (const s)
-    FVs [x] in fun
-    (fun s -> x)
-    Creating (apply:true) closure with FVs [x]
-    and body x
-    FV in rev_const: {const}
-
     let `const_1 f s = f
     let `rev_const_2 const f s = (const s)
     let `ll_3 x s = x
@@ -331,14 +240,8 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun f list -> if (( && ) true true) then let hd = (`list_hd list)
-     in let tl = (`list_tl list)
-     in (( :: ) (f hd) (map f tl)) else [])
-    FV in map: {}
-
     let map f list =
-      if (( && ) true true)
+      if (( && ) (not (`list_is_empty list)) (( && ) true true))
       then
         let hd = (`list_hd list) in
         let tl = (`list_tl list) in
@@ -359,21 +262,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [] in fun
-    (fun x y k -> (k (( + ) x y)))
-    FVs [] in fun
-    (fun x k -> (k (( * ) x x)))
-    FVs [] in fun
-    (fun x y k -> (square_cps x (fun x_squared -> (square_cps y (fun y_squared -> (add_cps x_squared y_squared k))))))
-    FVs [k; y] in fun
-    (fun x_squared -> (square_cps y (fun y_squared -> (add_cps x_squared y_squared k))))
-    FVs [k; x_squared] in fun
-    (fun y_squared -> (add_cps x_squared y_squared k))
-    Creating (apply:true) closure with FVs [k; x_squared]
-    and body (add_cps x_squared y_squared k)
-    Creating (apply:true) closure with FVs [k; y]
-    and body (square_cps y ((fun k x_squared y_squared -> (add_cps x_squared y_squared k)) k x_squared))
-
     let add_cps x y k = (k (( + ) x y))
     let square_cps x k = (k (( * ) x x))
     let `ll_4 k x_squared y_squared = (add_cps x_squared y_squared k)
@@ -396,13 +284,6 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    FVs [one] in fun
-    (fun x -> (( + ) x one))
-    Creating (apply:false) closure with FVs [one]
-    and body (( + ) x one)
-    FV in func: {one}
-    FV in plus_one: {}
-
     let `func_3 one x = (( + ) x one)
     let main =
       let plus_one = let one = 1 in
@@ -410,5 +291,54 @@ let%expect_test _ =
         (func one) in
       let x = (plus_one 41) in
       (print_int x)
+    |}]
+;;
+
+let%expect_test _ =
+  test_ll
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect {|
+    let `helper_1 x acc n =
+      if (( = ) n 0)
+      then acc
+      else let n = n in
+        (`helper_1 x (( * ) acc x) (( - ) n 1))
+    let pow x n = let helper = `helper_1 in
+      (helper x 1 n)
+    |}]
+;;
+
+let%expect_test _ =
+  test_ll
+    {|
+    let pow n = match n with
+      | 0 -> 0
+      | n -> n * n
+  |};
+  [%expect {|
+    let pow n = if (( = ) n 0)
+      then 0
+      else let n = n in
+        (( * ) n n)
+    |}]
+;;
+
+let%expect_test _ =
+  test_ll {|
+    let div x y =
+      let x = x * 8 in
+      x / y
+  |};
+  [%expect {|
+    let div x y = let x = (( * ) x 8) in
+      (( / ) x y)
     |}]
 ;;

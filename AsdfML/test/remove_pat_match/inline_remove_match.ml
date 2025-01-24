@@ -20,7 +20,7 @@ let%expect_test _ =
   test {|
     let const _ = 42 
   |};
-  [%expect {| let const = (fun `arg_0 -> 42) |}]
+  [%expect {| let const = (fun _ -> 42) |}]
 ;;
 
 let%expect_test _ =
@@ -77,7 +77,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec map = (fun f list -> if (( && ) true true) then let hd = (`list_hd list)
+    let rec map = (fun f list -> if (( && ) (not (`list_is_empty list)) (( && ) true true)) then let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl)) else [])
     |}]
@@ -111,7 +111,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let list_mul = (fun list -> let rec helper = (fun acc list -> if (`list_is_empty list) then acc else if (( && ) (( = ) (`list_hd list) 0) true) then 0 else let hd = (`list_hd list)
+    let list_mul = (fun list -> let rec helper = (fun acc list -> if (`list_is_empty list) then acc else if (( && ) (not (`list_is_empty list)) (( && ) (( = ) (`list_hd list) 0) true)) then 0 else let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (helper (( * ) hd acc) tl))
      in (helper 1 list))
@@ -125,3 +125,22 @@ let%expect_test _ =
   [%expect {|
     |}]
 ;; *)
+
+let%expect_test _ =
+  test
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect
+    {|
+    let pow = (fun x n -> let rec helper = (fun acc n -> if (( = ) n 0) then acc else let n = n
+     in (helper (( * ) acc x) (( - ) n 1)))
+     in (helper 1 n))
+    |}]
+;;

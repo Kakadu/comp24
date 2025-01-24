@@ -60,7 +60,7 @@ let rec pp_cexpr fmt = function
   | CIfElse (c, t, e) ->
     fprintf
       fmt
-      "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"
+      "if %a @\n@[<2>then@ %a@] @\n@[<2>else@ %a@]"
       pp_imm_expr
       c
       pp_aexpr
@@ -71,18 +71,18 @@ let rec pp_cexpr fmt = function
 
 and pp_aexpr fmt = function
   | ALet (id, cexpr, aexpr) ->
-    fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
+    fprintf fmt "@[<2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
   | ACExpr cexpr -> pp_cexpr fmt cexpr
 ;;
 
 let pp_fn fmt = function
   | Fn (id, args, aexpr) ->
     (match args with
-     | [] -> fprintf fmt "@[<hov 2>let %s =@ %a@]@." id pp_aexpr aexpr
+     | [] -> fprintf fmt "@[<2>let %s =@ %a@]@." id pp_aexpr aexpr
      | _ ->
        fprintf
          fmt
-         "@[<hov 2>let %s %s =@ %a@]@."
+         "@[<2>let %s %s =@ %a@]@."
          id
          (String.concat args ~sep:" ")
          pp_aexpr

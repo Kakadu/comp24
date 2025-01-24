@@ -19,10 +19,7 @@ let%expect_test _ =
   test {|
     let const _ = 42 
   |};
-  [%expect {|
-    let const = (fun `arg_0 -> match `arg_0 with
-    | _ -> 42)
-    |}]
+  [%expect {| let const = (fun _ -> 42) |}]
 ;;
 
 (* let%expect_test _ =
@@ -79,5 +76,31 @@ let%expect_test _ =
   [%expect {|
     let _ = match (1, 2) with
     | (x, y) -> (( + ) x y)
+    |}]
+;;
+
+let%expect_test _ =
+  test {|
+    let _ = 
+      let v = (1, 2) in 
+      let (x, y) = v in
+      x + y
+  |};
+  [%expect {|
+    let _ = let v = (1, 2)
+     in match v with
+    | (x, y) -> (( + ) x y)
+    |}] ;;
+
+let%expect_test _ =
+  test {|
+    let normalize vec = 
+      let helper = (fun (x, y, z) -> x) in 
+      helper vec
+  |};
+  [%expect {|
+    let normalize = (fun vec -> let helper = (fun `arg_1 -> match `arg_1 with
+    | (x, y, z) -> x)
+     in (helper vec))
     |}]
 ;;

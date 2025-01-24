@@ -29,25 +29,25 @@ let rec cc_expr globals env ?(apply = true) = function
     (match Map.find env id with
      | None -> s_var id
      | Some fvs ->
-       dbg "FV in %s: %s\n" id (set_to_string fvs);
+       (* dbg "FV in %s: %s\n" id (set_to_string fvs); *)
        fvs |> Set.to_list |> List.map ~f:s_var |> List.fold ~init:(s_var id) ~f:s_app)
   | TEApp (_, l, r) -> s_app (cc_expr globals env l) (cc_expr globals env r)
   | TEIfElse (_, c, t, e) ->
     s_if_else (cc_expr globals env c) (cc_expr globals env t) (cc_expr globals env e)
   | TEFun (_, pat, body) as func ->
     let fvs = Set.diff (free_vars_texpr func) globals |> Set.to_list in
-    dbg "FVs %s in fun\n%a\n" (list_to_string fvs) Tast.pp_texpr func;
+    (* dbg "FVs %s in fun\n%a\n" (list_to_string fvs) Tast.pp_texpr func; *)
     (* dbg "GLOBALS: %s\n" (set_to_string globals); *)
     let body' = cc_expr globals env body in
     (match fvs with
      | [] -> s_fun (pat_list_to_id_list pat) body'
      | _ ->
-       dbg
+       (* dbg
          "Creating (apply:%b) closure with FVs %s\nand body %a\n"
          apply
          (list_to_string fvs)
          Sast.pp_sexpr
-         body';
+         body'; *)
        let pat = fvs |> List.map ~f:p_ident |> (Fn.flip List.append) pat in
        let closure_fun = s_fun (pat_list_to_id_list pat) body' in
        if apply
@@ -76,7 +76,7 @@ and cc_def globals env ?(apply = true) = function
   | TDLet (_, _, PWild, exp) ->
     let exp' = cc_expr globals env exp in
     s_let false NonRec "_" exp', env, globals
-  | _ -> failwith "cc_def: not implemented"
+  | d -> failwith (Format.asprintf "cc_def: not implemented for `%a`" pp_tdefinition d)
 ;;
 
 let default_globals =
