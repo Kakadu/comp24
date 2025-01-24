@@ -17,6 +17,9 @@ $ /tmp/tuples
     print_tuple a0
   
   $ cat /tmp/tuples.s
+  .section .data
+  
+  .section .text
   
       .globl ll_2
       .type ll_2, @function
@@ -120,9 +123,9 @@ $ cat /tmp/tuples.s
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let main = 
   >   let (a, b, c) = (1, 2, true) in
-  >   let _ = print_int a in
-  >   let _ = print_int b in
-  >   let _ = print_bool c in
+  >   let _ = println_int a in
+  >   let _ = println_int b in
+  >   let _ = println_bool c in
   >   0
   > EOF
   ANF:
@@ -131,9 +134,9 @@ $ cat /tmp/tuples.s
          let a2 = `get_tuple_field a0 2 in
          let a4 = `get_tuple_field a0 1 in
          let a6 = `get_tuple_field a0 0 in
-         let a7 = print_int a6 in
-         let a8 = print_int a4 in
-         let a9 = print_bool a2 in
+         let a7 = println_int a6 in
+         let a8 = println_int a4 in
+         let a9 = println_bool a2 in
          0
   
 $ cat /tmp/tuples.s
@@ -149,8 +152,8 @@ $ cat /tmp/tuples.s
   >   | (a, b) -> a / b
   > 
   > let main = 
-  >   let _ = print_int (div (10, 2)) in
-  >   let _ = print_int (div (10, 0)) in
+  >   let _ = println_int (div (10, 2)) in
+  >   let _ = println_int (div (10, 0)) in
   >   0
   > EOF
   ANF:
@@ -168,9 +171,9 @@ $ cat /tmp/tuples.s
            ( / ) a9 a7
   let main =
     let a17 = div (10, 2) in
-    let a14 = print_int a17 in
+    let a14 = println_int a17 in
     let a16 = div (10, 0) in
-    let a15 = print_int a16 in
+    let a15 = println_int a16 in
     0
   
 $ cat /tmp/tuples.s
