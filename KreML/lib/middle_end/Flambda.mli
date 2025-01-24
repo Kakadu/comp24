@@ -25,6 +25,7 @@ and closure =
   { name : ident
   ; env_size : int
   ; arrange : (int * flambda) list (* idx, value*)
+  ; arity : int
   }
 
 type fun_with_env =

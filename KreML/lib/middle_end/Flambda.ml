@@ -32,6 +32,7 @@ and closure =
   { name : ident
   ; env_size : int
   ; arrange : (int * flambda) list (* idx, value*)
+  ; arity : int
   }
 
 type fun_with_env =
@@ -71,14 +72,15 @@ let rec pp_flambda ppf = function
   | Fl_app (f, args) ->
     let pp_args ppf l = pp_list ppf l (fun e -> fprintf ppf "@[%a @]" pp_flambda e) in
     fprintf ppf "@[%a (%a)@]" pp_flambda f pp_args args
-  | Fl_closure { name; env_size; arrange } ->
+  | Fl_closure { name; env_size; arrange; arity } ->
     let pp_arange ppf list =
       List.iter (fun (idx, value) -> fprintf ppf "@[%i: %a; @]" idx pp_flambda value) list
     in
     fprintf
       ppf
-      "@[{ name: %s, env_size: %i, arrange [%a ]} @]"
+      "@[{ name: %s, arity: %i env_size: %i, arrange [%a ]} @]"
       name
+      arity
       env_size
       pp_arange
       arrange
