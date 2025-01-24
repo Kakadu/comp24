@@ -64,7 +64,7 @@ and pp_expr fmt =
     fprintf fmt "match %a with\n" pp_expr e;
     pp_print_list
       ~pp_sep:Format.pp_print_newline
-      (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p pp_expr e)
+      (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p parenthesize e)
       fmt
       pe_list
   | EList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
