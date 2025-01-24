@@ -2,6 +2,7 @@ open Base
 open Ast
 open Tast
 open Types
+open Utils
 open Vars
 
 let is_simple = function
@@ -23,6 +24,7 @@ let eliminate_arg_patterns body pattern_list =
     | head :: tail ->
       (match head with
        | PIdent id -> helper (Set.add used_names id) current_expr (id :: args_list) tail
+       | PWild -> helper used_names current_expr ("_" :: args_list) tail
        | _ ->
          let arg_name = generate_unique_arg_name used_names in
          helper
@@ -41,14 +43,18 @@ let eliminate_arg_patterns body pattern_list =
 ;;
 
 let remove_patterns =
+  (* let multi_assign = failwith "TODO" in *)
   let rec helper_expr = function
     | TEConst _ as c -> c
     | TEVar _ as v -> v
     | TEApp (t, l, r) -> te_app t (helper_expr l) (helper_expr r)
     | TEIfElse (ty, i, t, e) ->
       te_if_else ty (helper_expr i) (helper_expr t) (helper_expr e)
-    | TEFun (t, p, e) ->
+    | TEFun (t, p, e)  ->
+      let e = helper_expr e in
       let p, e = eliminate_arg_patterns e p in
+      (* dbg "fun: %a\n" pp_texpr f;
+         dbg "pat: %s\n" (p |> List.map ~f:(Format.asprintf "%a" pp_pattern) |> String.concat); *)
       te_fun t p e
     | TELetIn (t, def, body) ->
       let body = helper_expr body in
