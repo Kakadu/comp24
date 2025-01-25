@@ -94,3 +94,150 @@ let unbound_identifiers exp =
   in
   helper exp
 ;;
+
+let rec close_function local_ctx global_ctx convert = function
+  | EFunction (pat, body) ->
+    EFunction (pat, close_function local_ctx global_ctx convert body)
+  | expr -> convert local_ctx global_ctx expr
+;;
+
+let rec get_global_names = function
+  | PIdentifier id -> Set.add ((module String) |> Set.empty) id
+  | PWildCard | PConstant _ -> (module String) |> Set.empty
+  | PConstraint (pat, _) -> get_global_names pat
+  | PCons (pat1, pat2) ->
+    List.fold_left
+      [ pat1; pat2 ]
+      ~f:(fun acc h -> Set.union acc (get_global_names h))
+      ~init:((module String) |> Set.empty)
+  | PTuple pats ->
+    List.fold_left
+      pats
+      ~f:(fun acc h -> Set.union acc (get_global_names h))
+      ~init:((module String) |> Set.empty)
+;;
+
+let convert global_ctx declaration =
+  let rec helper local_ctx global_ctx = function
+    | EConstant const -> EConstant const
+    | EIdentifier id ->
+      (match Map.find local_ctx id with
+       | Some free ->
+         let ids = List.map (Set.to_list free) ~f:(fun x -> EIdentifier x) in
+         List.fold_left ids ~f:(fun f arg -> EApplication (f, arg)) ~init:(EIdentifier id)
+       | None -> EIdentifier id)
+    | EFunction (pat, body) ->
+      let unbound_names = unbound_identifiers (EFunction (pat, body)) in
+      let unbound_names_without_global = Set.diff unbound_names global_ctx in
+      let unbound_ids_patterns =
+        List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PIdentifier x)
+      in
+      let unbound_ids_exps =
+        List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> EIdentifier x)
+      in
+      let closed_fun =
+        close_function local_ctx global_ctx helper (EFunction (pat, body))
+      in
+      let new_fun =
+        List.fold_right
+          ~f:(fun pat exp -> EFunction (pat, exp))
+          unbound_ids_patterns
+          ~init:closed_fun
+      in
+      List.fold_left
+        unbound_ids_exps
+        ~f:(fun f arg -> EApplication (f, arg))
+        ~init:new_fun
+    | EApplication (left, right) ->
+      EApplication (helper local_ctx global_ctx left, helper local_ctx global_ctx right)
+    | EIfThenElse (guard, then_branch, else_branch) ->
+      EIfThenElse
+        ( helper local_ctx global_ctx guard
+        , helper local_ctx global_ctx then_branch
+        , helper local_ctx global_ctx else_branch )
+    | ELetIn (rec_flag, pat, outer, inner) ->
+      (match pat, outer with
+       (* Inner fun *)
+       | PIdentifier id, EFunction (_, _) ->
+         let updated_global_env = Set.add global_ctx id in
+         let unbound_names = unbound_identifiers (ELetIn (rec_flag, pat, outer, inner)) in
+         let unbound_names_without_global = Set.diff unbound_names updated_global_env in
+         let closed_fun = close_function local_ctx updated_global_env helper outer in
+         let unbound_ids_without_global =
+           List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PIdentifier x)
+         in
+         let closed_outer =
+           List.fold_right
+             unbound_ids_without_global
+             ~f:(fun pat exp -> EFunction (pat, exp))
+             ~init:closed_fun
+         in
+         let updated_local_env =
+           Map.set local_ctx ~key:id ~data:unbound_names_without_global
+         in
+         let closed_inner = helper updated_local_env (Set.add global_ctx id) inner in
+         let updated_outer =
+           helper updated_local_env (Set.add global_ctx id) closed_outer
+         in
+         ELetIn (rec_flag, PIdentifier id, updated_outer, closed_inner)
+       | _ ->
+         ELetIn
+           ( rec_flag
+           , pat
+           , helper local_ctx global_ctx outer
+           , helper local_ctx global_ctx inner ))
+    | ETuple exps ->
+      let new_exps = List.map exps ~f:(helper local_ctx global_ctx) in
+      ETuple new_exps
+    | EMatch (pat, branches) ->
+      let new_branches =
+        List.map branches ~f:(fun (pat, exp) -> pat, helper local_ctx global_ctx exp)
+      in
+      EMatch (pat, new_branches)
+    | EConstraint (exp, type_name) ->
+      EConstraint (helper local_ctx global_ctx exp, type_name)
+  in
+  let close_declaration global_ctx = function
+    | DSingleLet (flag, DLet (pat, exp)) ->
+      DSingleLet
+        ( flag
+        , DLet (pat, close_function ((module String) |> Map.empty) global_ctx helper exp)
+        )
+    | DMutualRecDecl (flag, decls) ->
+      let rec handle_mutual_rec global_ctx decls =
+        match decls with
+        | [] -> [], global_ctx
+        | DLet (pat, exp) :: tl ->
+          let closed_exp =
+            close_function (Map.empty (module String)) global_ctx helper exp
+          in
+          let new_decl, new_env = handle_mutual_rec global_ctx tl in
+          DLet (pat, closed_exp) :: new_decl, new_env
+      in
+      let new_decls, _ = handle_mutual_rec global_ctx decls in
+      DMutualRecDecl (flag, new_decls)
+  in
+  close_declaration global_ctx declaration
+;;
+
+let convert_ast ast =
+  let close ast =
+    List.fold
+      ast
+      ~f:(fun (acc, ctx) decl ->
+        match decl with
+        | DSingleLet (flag, DLet (pat, body)) ->
+          ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
+          , Set.union ctx (get_global_names pat) )
+        | DMutualRecDecl (flag, decls) ->
+          convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
+      ~init:([], (module String) |> Set.empty)
+  in
+  match ast |> close with
+  | converted_ast, _ -> converted_ast |> List.rev
+;;
+
+let test_closure_convert ast =
+  let converted = convert_ast ast in
+  Stdlib.Format.printf "%s" (Ast.show_declarations converted)
+;;
