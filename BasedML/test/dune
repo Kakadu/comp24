@@ -10,6 +10,12 @@
  (public_name typeinference_demo)
  (libraries typeinference stdio))
 
+(executable
+ (name closure_conversion_demo)
+ (modules closure_conversion_demo)
+ (public_name closure_conversion_demo)
+ (libraries typeinference middleend stdio ast))
+
 (cram
  (applies_to typeinference_tests)
  (deps
@@ -34,3 +40,7 @@
   manytests/typed/010sukharev.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
+
+(cram
+ (applies_to closure_conversion_tests)
+ (deps ./closure_conversion_demo.exe))
