@@ -16,6 +16,12 @@
  (public_name closure_conversion_demo)
  (libraries typeinference middleend stdio ast))
 
+(executable
+ (name lifting_demo)
+ (modules lifting_demo)
+ (public_name lifting_demo)
+ (libraries typeinference middleend stdio ast))
+
 (cram
  (applies_to typeinference_tests)
  (deps
@@ -44,3 +50,7 @@
 (cram
  (applies_to closure_conversion_tests)
  (deps ./closure_conversion_demo.exe))
+
+(cram
+ (applies_to lifting_tests)
+ (deps ./lifting_demo.exe))
