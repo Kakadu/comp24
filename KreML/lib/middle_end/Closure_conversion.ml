@@ -16,7 +16,9 @@ module CC_state = struct
     }
 
   let empty_ctx arities =
-    { global_env = []; freevars = Base.Map.empty (module Base.String); arities }
+    let freevars = Base.Map.empty (module Base.String) in
+    (* let freevars = Base.Map.set freevars ~key:"print_int" ~data:([] : string list) in *)
+    { global_env = []; freevars; arities }
   ;;
 
   module Monad = State (struct
@@ -205,7 +207,18 @@ and aexpr ae =
   match ae with
   | AExpr c -> cexpr (return c)
   | ALet (_, id, (CFun _ as f), scope) ->
-    let fv = Freevars.(collect_cexpr f |> remove id |> to_seq |> List.of_seq) in
+    let* fv =
+      Freevars.(
+        let fv = collect_cexpr f |> remove id in
+        let* { global_env; _ } = get in
+        let without_global = diff fv (List.map fst global_env |> Freevars.of_list) in
+        let without_stdlib =
+          diff
+            without_global
+            (Freevars.of_list @@ Runtime.stdlib_funs @ Runtime.runtime_funs)
+        in
+        without_stdlib |> to_seq |> List.of_seq |> return)
+    in
     let* ({ freevars; _ } as state) = get in
     let* _ = put { state with freevars = Base.Map.set freevars ~key:id ~data:fv } in
     let* () = resolve_fun id (return f) in
@@ -213,6 +226,7 @@ and aexpr ae =
   | ALet (_, id, e, scope) ->
     let* e = cexpr (return e) in
     let* scope = aexpr (return scope) in
+    let id = if String.starts_with ~prefix:"unused_" id then None else Some id in
     Fl_let (id, e, scope) |> return
 ;;
 
@@ -227,10 +241,16 @@ let cc arities astracture =
         List.fold_left
           (fun acc (id, ae) ->
             let function_fv = Freevars.collect_aexpr ae in
-            let without_top_lvl_names =
-              Freevars.diff function_fv binding_names |> Freevars.to_seq |> List.of_seq
+            let without_top_lvl_names = Freevars.diff function_fv binding_names in
+            let without_stdlib =
+              Freevars.diff
+                without_top_lvl_names
+                (Freevars.of_list @@ Runtime.stdlib_funs @ Runtime.runtime_funs)
             in
-            Base.Map.set acc ~key:id ~data:without_top_lvl_names)
+            Base.Map.set
+              acc
+              ~key:id
+              ~data:(without_stdlib |> Freevars.to_seq |> List.of_seq))
           freevars
           bindings
     in

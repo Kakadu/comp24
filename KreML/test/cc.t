@@ -148,5 +148,15 @@
   
   main() {let res_4 = { name: f, arity: 1 env_size: 0, arrange [ ]}  ([ 
                       10 11  ]) in 
-           let unused_5 = print_int ([ res_4  ]) in  0  } 
+           print_int ([ res_4  ]);  0  } 
+  
+
+  $ dune exec closure_conv <<- EOF
+  > let map_point f p =
+  >   let a, b = p in
+  >   f a, f b
+  map_point(f_0 p_1 ) {let a_2 = getfield 0 p_1 in 
+                        let b_3 = getfield 1 p_1 in 
+                         let t_0 = f_0 ([ a_2  ]) in 
+                          let t_1 = f_0 ([ b_3  ]) in  [ t_0 t_1  ]    } 
   
