@@ -4,7 +4,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -12,7 +12,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -25,21 +25,17 @@
     br i1 %ifcmp_0, label %else_2, label %then_1
   
   then_1:                                           ; preds = %entry
-    br label %merge_8
+    br label %merge_3
   
   else_2:                                           ; preds = %entry
     %t_1 = sub i64 %n_0, 1
-    %closure_temp_4 = call ptr @alloc_closure(ptr @fac, ptr @nil, i64 1, i64 0)
-    %tupled_args_6 = call ptr @alloc_tuple(i64 1)
-    %elemptr_7 = getelementptr i64, ptr %tupled_args_6, i64 0
-    store i64 %t_1, ptr %elemptr_7, align 4
-    %t_2 = call i64 @call_closure(ptr %closure_temp_4, ptr %tupled_args_6, i64 1)
+    %t_2 = call i64 @fac(i64 %t_1)
     %t_21 = mul i64 %n_0, %t_2
-    br label %merge_8
+    br label %merge_3
   
-  merge_8:                                          ; preds = %else_2, %then_1
-    %phi_9 = phi i64 [ 1, %then_1 ], [ %t_21, %else_2 ]
-    ret i64 %phi_9
+  merge_3:                                          ; preds = %else_2, %then_1
+    %phi_4 = phi i64 [ 1, %then_1 ], [ %t_21, %else_2 ]
+    ret i64 %phi_4
   }
 
   $ dune exec llvm_codegen <<- EOF
@@ -50,7 +46,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -58,7 +54,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -105,7 +101,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -113,7 +109,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -152,7 +148,7 @@
     %elemptr_12 = getelementptr i64, ptr %tupled_args_10, i64 1
     store i64 11, ptr %elemptr_12, align 4
     %res_4 = call i64 @call_closure(ptr %closure_temp_8, ptr %tupled_args_10, i64 2)
-    call void @print_int(i64 %res_4)
+    %0 = call i64 @print_int(i64 %res_4)
     ret i64 0
   }
 
@@ -164,7 +160,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -172,7 +168,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -218,7 +214,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -226,7 +222,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -316,7 +312,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -324,7 +320,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -337,21 +333,17 @@
     br i1 %ifcmp_0, label %else_2, label %then_1
   
   then_1:                                           ; preds = %entry
-    br label %merge_8
+    br label %merge_3
   
   else_2:                                           ; preds = %entry
     %t_1 = sub i64 %x_0, 1
-    %closure_temp_4 = call ptr @alloc_closure(ptr @f, ptr @nil, i64 1, i64 0)
-    %tupled_args_6 = call ptr @alloc_tuple(i64 1)
-    %elemptr_7 = getelementptr i64, ptr %tupled_args_6, i64 0
-    store i64 %t_1, ptr %elemptr_7, align 4
-    %t_2 = call i64 @call_closure(ptr %closure_temp_4, ptr %tupled_args_6, i64 1)
+    %t_2 = call i64 @f(i64 %t_1)
     %t_21 = mul i64 %t_2, %x_0
-    br label %merge_8
+    br label %merge_3
   
-  merge_8:                                          ; preds = %else_2, %then_1
-    %phi_9 = phi i64 [ 1, %then_1 ], [ %t_21, %else_2 ]
-    ret i64 %phi_9
+  merge_3:                                          ; preds = %else_2, %then_1
+    %phi_4 = phi i64 [ 1, %then_1 ], [ %t_21, %else_2 ]
+    ret i64 %phi_4
   }
   
   define i64 @id_2(i64 %x_1) {
@@ -361,12 +353,8 @@
   
   define i64 @main() {
   entry:
-    %closure_temp_11 = call ptr @alloc_closure(ptr @f, ptr @nil, i64 1, i64 0)
-    %tupled_args_13 = call ptr @alloc_tuple(i64 1)
-    %elemptr_14 = getelementptr i64, ptr %tupled_args_13, i64 0
-    store i64 6, ptr %elemptr_14, align 4
-    %t_4 = call i64 @call_closure(ptr %closure_temp_11, ptr %tupled_args_13, i64 1)
-    call void @print_int(i64 %t_4)
+    %t_4 = call i64 @f(i64 6)
+    %0 = call i64 @print_int(i64 %t_4)
     ret i64 0
   }
 
@@ -382,7 +370,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -390,7 +378,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -435,7 +423,7 @@
     %elemptr_13 = getelementptr i64, ptr %tupled_args_11, i64 1
     store i64 4, ptr %elemptr_13, align 4
     %t_3 = call i64 @call_closure(ptr %closure_temp_9, ptr %tupled_args_11, i64 2)
-    call void @print_int(i64 %t_3)
+    %0 = call i64 @print_int(i64 %t_3)
     ret i64 0
   }
 
@@ -458,7 +446,7 @@
   source_filename = "main"
   
   @nil = global ptr null
-  @unit = global ptr null
+  @unit = global i64 0
   
   declare ptr @alloc_tuple(i64 %0)
   
@@ -466,7 +454,7 @@
   
   declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
   
-  declare void @print_int(i64 %0)
+  declare i64 @print_int(i64 %0)
   
   declare ptr @list_cons(i64 %0, ptr %1)
   
@@ -604,14 +592,119 @@
     %elemptr_68 = getelementptr i64, ptr %tupled_args_66, i64 1
     store ptr %list_12, ptr %elemptr_68, align 8
     %squared_13 = call i64 @call_closure(ptr %closure_temp_64, ptr %tupled_args_66, i64 2)
-    %closure_temp_69 = call ptr @alloc_closure(ptr @print_int, ptr @nil, i64 1, i64 0)
-    %tupled_env_70 = call ptr @alloc_tuple(i64 1)
-    %closure_temp_71 = call ptr @alloc_closure(ptr @iter, ptr %tupled_env_70, i64 2, i64 1)
-    %tupled_args_73 = call ptr @alloc_tuple(i64 2)
-    %elemptr_74 = getelementptr i64, ptr %tupled_args_73, i64 0
-    store ptr %closure_temp_69, ptr %elemptr_74, align 8
-    %elemptr_75 = getelementptr i64, ptr %tupled_args_73, i64 1
-    store i64 %squared_13, ptr %elemptr_75, align 4
-    %call_closure_72 = call i64 @call_closure(ptr %closure_temp_71, ptr %tupled_args_73, i64 2)
+    %closure_temp_70 = call ptr @alloc_closure(ptr @print_int, ptr @nil, i64 1, i64 0)
+    %tupled_env_71 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_72 = call ptr @alloc_closure(ptr @iter, ptr %tupled_env_71, i64 2, i64 1)
+    %tupled_args_74 = call ptr @alloc_tuple(i64 2)
+    %elemptr_75 = getelementptr i64, ptr %tupled_args_74, i64 0
+    store ptr %closure_temp_70, ptr %elemptr_75, align 8
+    %elemptr_76 = getelementptr i64, ptr %tupled_args_74, i64 1
+    store i64 %squared_13, ptr %elemptr_76, align 4
+    %call_closure_73 = call i64 @call_closure(ptr %closure_temp_72, ptr %tupled_args_74, i64 2)
     ret i64 0
   }
+
+  $ dune exec llvm_codegen <<- EOF
+  > let sum_pair (a, b) = a + b
+  > let main = 
+  >   let () = print_int (sum_pair (1, 2)) in
+  >   0
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global i64 0
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare i64 @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @sum_pair(i64 %fresh_param_0) {
+  entry:
+    %cast_0 = inttoptr i64 %fresh_param_0 to ptr
+    %fieldptr_1 = getelementptr i64, ptr %cast_0, i64 0
+    %a_0 = load i64, ptr %fieldptr_1, align 4
+    %cast_3 = inttoptr i64 %fresh_param_0 to ptr
+    %fieldptr_4 = getelementptr i64, ptr %cast_3, i64 1
+    %b_1 = load i64, ptr %fieldptr_4, align 4
+    %b_11 = add i64 %a_0, %b_1
+    ret i64 %b_11
+  }
+  
+  define i64 @main() {
+  entry:
+    %t_3 = call ptr @alloc_tuple(i64 2)
+    %elemptr_6 = getelementptr i64, ptr %t_3, i64 0
+    store i64 1, ptr %elemptr_6, align 4
+    %elemptr_7 = getelementptr i64, ptr %t_3, i64 1
+    store i64 2, ptr %elemptr_7, align 4
+    %cast_8 = ptrtoint ptr %t_3 to i64
+    %t_4 = call i64 @sum_pair(i64 %cast_8)
+    %0 = call i64 @print_int(i64 %t_4)
+    ret i64 0
+  }
+  $ dune exec llvm_codegen <<- EOF
+  > let add x y = x + y
+  > let main =
+  >   let add5 = add 5 in
+  >   let () = print_int (add5 1) in
+  >   0
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global i64 0
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare i64 @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @add(ptr %env, i64 %y_1) {
+  entry:
+    %envelemptr_0 = getelementptr i64, ptr %env, i64 0
+    %x_0 = load i64, ptr %envelemptr_0, align 4
+    %0 = add i64 %x_0, %y_1
+    ret i64 %0
+  }
+  
+  define i64 @main() {
+  entry:
+    %tupled_env_1 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_2 = call ptr @alloc_closure(ptr @add, ptr %tupled_env_1, i64 2, i64 1)
+    %tupled_args_4 = call ptr @alloc_tuple(i64 1)
+    %elemptr_5 = getelementptr i64, ptr %tupled_args_4, i64 0
+    store i64 5, ptr %elemptr_5, align 4
+    %add5_2 = call i64 @call_closure(ptr %closure_temp_2, ptr %tupled_args_4, i64 1)
+    %cast_6 = inttoptr i64 %add5_2 to ptr
+    %tupled_args_8 = call ptr @alloc_tuple(i64 1)
+    %elemptr_9 = getelementptr i64, ptr %tupled_args_8, i64 0
+    store i64 1, ptr %elemptr_9, align 4
+    %t_1 = call i64 @call_closure(ptr %cast_6, ptr %tupled_args_8, i64 1)
+    %0 = call i64 @print_int(i64 %t_1)
+    ret i64 0
+  }
+
+$ dune exec llvm_codegen <<- EOF
+> let rec fix f x = f (fix f) x
+> let fac self n = if n<=1 then 1 else n * self (n-1)
+> let main =
+> let () = print_int (fix fac 6) in
+> 0
+
+

@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+
 typedef struct
 {
     int64_t (*fptr)(void *);
@@ -14,10 +15,10 @@ typedef struct
 } closure;
 
 
-void print_int(int64_t n)
+int64_t print_int(int64_t n)
 {
     printf("%" PRId64 "\n", n);
-    return;
+    return 0; // unit
 }
 
 void partial_match(int64_t o) {
@@ -50,6 +51,9 @@ int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
     }
     
     int64_t *curr_arg = args;
+    if (*curr_arg < 10) {
+        print_int(*curr_arg);
+    }
     closure *curr_c = c;
     for (size_t i = 0; i < args_count; i++)
     {
@@ -58,11 +62,11 @@ int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
         {
             int64_t call_res;
             if (curr_c->envsize == 0) {
-                // print_int(*curr_arg);
                 // printf("inside fun without env, arg is %" PRId64 "\n", *curr_arg);
                 int64_t (*callee)(int64_t) = (int64_t (*)(int64_t))curr_c->fptr;
                 call_res = callee(*curr_arg);
             } else {
+                // print_int(322);
                 int64_t (*callee)(int64_t*, int64_t) = (int64_t (*)(int64_t*, int64_t)) curr_c->fptr;
                 call_res = callee(curr_c->env, *curr_arg);
             }

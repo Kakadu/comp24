@@ -12,6 +12,7 @@
   Parser
   Inferencer
   Runtime
+  Kstdlib
   Llvm_codegen
   Utils)
  (inline_tests)

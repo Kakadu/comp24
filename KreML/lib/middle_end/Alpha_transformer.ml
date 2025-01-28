@@ -13,7 +13,7 @@ let default =
   List.fold_left
     (fun map f -> Base.Map.set map ~key:f ~data:f)
     empty
-    (Ast.binary_ops @ Runtime.stdlib_funs @ Runtime.runtime_funs)
+    (Ast.binary_ops @ Kstdlib.stdlib_funs @ Runtime.runtime_funs)
 ;;
 
 open Utils.Counter
@@ -53,7 +53,7 @@ let rec transform_expr ctx e =
   | Expr_var id ->
     let unique =
       match Base.Map.find ctx id with
-      | None -> internalfail @@ Format.sprintf "was not foun %s" id
+      | None -> internalfail @@ Format.sprintf "was not found %s" id
       | Some i -> i
     in
     (* program is type checked *)

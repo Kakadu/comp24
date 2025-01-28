@@ -17,6 +17,8 @@ module CC_state = struct
 
   let empty_ctx arities =
     let freevars = Base.Map.empty (module Base.String) in
+    let freevars = List.fold_left (fun acc f -> Base.Map.set acc ~key:f ~data:[]) freevars Kstdlib.stdlib_funs in 
+    let arities = List.fold_left (fun acc (f, arity) -> Base.Map.set acc ~key:f ~data:arity) arities Kstdlib.stdlib_funs_with_arity in
     (* let freevars = Base.Map.set freevars ~key:"print_int" ~data:([] : string list) in *)
     { global_env = []; freevars; arities }
   ;;
@@ -97,7 +99,7 @@ let imm i =
      | None ->
        let* { arities; freevars; _ } = get in
        (match Base.Map.find freevars id with
-        | None -> Fl_var id |> return (* just a local var *)
+        | None -> Fl_var id |> return (* local or env var, handle it in codegen *)
         | Some inherited_env ->
           (* self recursive function, lets build its closure *)
           let arity = Base.Map.find_exn arities id in
@@ -215,7 +217,7 @@ and aexpr ae =
         let without_stdlib =
           diff
             without_global
-            (Freevars.of_list @@ Runtime.stdlib_funs @ Runtime.runtime_funs)
+            (Freevars.of_list @@ Kstdlib.stdlib_funs @ Runtime.runtime_funs)
         in
         without_stdlib |> to_seq |> List.of_seq |> return)
     in
@@ -245,7 +247,7 @@ let cc arities astracture =
             let without_stdlib =
               Freevars.diff
                 without_top_lvl_names
-                (Freevars.of_list @@ Runtime.stdlib_funs @ Runtime.runtime_funs)
+                (Freevars.of_list @@ Kstdlib.stdlib_funs @ Runtime.runtime_funs)
             in
             Base.Map.set
               acc

@@ -31,7 +31,7 @@ end
 module Varset : sig
   type t
 
-  val pp : Stdlib.Format.formatter -> t -> unit
+  val pp : Format.formatter -> t -> unit
 end
 
 module Type : sig
