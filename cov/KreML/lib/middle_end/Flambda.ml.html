@@ -18,29 +18,30 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:43.97%"></span>
-      <span class="unvisited" style="top:48.28%"></span>
-      <span class="unvisited" style="top:49.14%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:44.83%"></span>
-      <span class="unvisited" style="bottom:42.24%"></span>
-      <span class="unvisited" style="bottom:41.38%"></span>
-      <span class="unvisited" style="bottom:40.52%"></span>
-      <span class="unvisited" style="bottom:39.66%"></span>
-      <span class="unvisited" style="bottom:37.93%"></span>
-      <span class="unvisited" style="bottom:37.07%"></span>
-      <span class="unvisited" style="bottom:35.34%"></span>
-      <span class="unvisited" style="bottom:33.62%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
-      <span class="unvisited" style="bottom:16.38%"></span>
-      <span class="unvisited" style="bottom:12.93%"></span>
-      <span class="unvisited" style="bottom:12.07%"></span>
-      <span class="unvisited" style="bottom:11.21%"></span>
-      <span class="unvisited" style="bottom:7.76%"></span>
-      <span class="unvisited" style="bottom:6.90%"></span>
-      <span class="unvisited" style="bottom:6.03%"></span>
-      <span class="unvisited" style="bottom:5.17%"></span>
-      <span class="unvisited" style="bottom:0.86%"></span>
+      <span class="unvisited" style="top:43.59%"></span>
+      <span class="unvisited" style="top:47.86%"></span>
+      <span class="unvisited" style="top:48.72%"></span>
+      <span class="unvisited" style="top:49.57%"></span>
+      <span class="unvisited" style="bottom:45.30%"></span>
+      <span class="unvisited" style="bottom:42.74%"></span>
+      <span class="unvisited" style="bottom:41.88%"></span>
+      <span class="unvisited" style="bottom:41.03%"></span>
+      <span class="unvisited" style="bottom:40.17%"></span>
+      <span class="unvisited" style="bottom:38.46%"></span>
+      <span class="unvisited" style="bottom:37.61%"></span>
+      <span class="unvisited" style="bottom:35.90%"></span>
+      <span class="unvisited" style="bottom:34.19%"></span>
+      <span class="unvisited" style="bottom:25.64%"></span>
+      <span class="unvisited" style="bottom:17.09%"></span>
+      <span class="unvisited" style="bottom:15.38%"></span>
+      <span class="unvisited" style="bottom:12.82%"></span>
+      <span class="unvisited" style="bottom:11.97%"></span>
+      <span class="unvisited" style="bottom:11.11%"></span>
+      <span class="unvisited" style="bottom:7.69%"></span>
+      <span class="unvisited" style="bottom:6.84%"></span>
+      <span class="unvisited" style="bottom:5.98%"></span>
+      <span class="unvisited" style="bottom:5.13%"></span>
+      <span class="unvisited" style="bottom:0.85%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -143,24 +144,25 @@
 <a id="L96"></a><span > </span>
 <a id="L97"></a><span class="unvisited"> </span>
 <a id="L98"></a><span > </span>
-<a id="L99"></a><span > </span>
+<a id="L99"></a><span class="unvisited"> </span>
 <a id="L100"></a><span > </span>
-<a id="L101"></a><span class="unvisited"> </span>
+<a id="L101"></a><span > </span>
 <a id="L102"></a><span class="unvisited"> </span>
 <a id="L103"></a><span class="unvisited"> </span>
-<a id="L104"></a><span > </span>
+<a id="L104"></a><span class="unvisited"> </span>
 <a id="L105"></a><span > </span>
 <a id="L106"></a><span > </span>
-<a id="L107"></a><span class="unvisited"> </span>
+<a id="L107"></a><span > </span>
 <a id="L108"></a><span class="unvisited"> </span>
 <a id="L109"></a><span class="unvisited"> </span>
 <a id="L110"></a><span class="unvisited"> </span>
-<a id="L111"></a><span > </span>
+<a id="L111"></a><span class="unvisited"> </span>
 <a id="L112"></a><span > </span>
 <a id="L113"></a><span > </span>
 <a id="L114"></a><span > </span>
-<a id="L115"></a><span class="unvisited"> </span>
-<a id="L116"></a><span > </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span class="unvisited"> </span>
+<a id="L117"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -281,6 +283,7 @@
 <a href="#L114">114</a>
 <a href="#L115">115</a>
 <a href="#L116">116</a>
+<a href="#L117">117</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
 
@@ -310,7 +313,7 @@ type flambda =
   | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
-  | Fl_let of ident * flambda * flambda
+  | Fl_let of ident option * flambda * flambda
 
 and closure =
   { name : ident
@@ -378,8 +381,9 @@ let rec pp_flambda ppf = function
       t
       pp_flambda
       e
-  | <span data-count="0">F</span>l_let (id, e, scope) -&gt;
+  | <span data-count="0">F</span>l_let (Some id, e, scope) -&gt;
     fprintf ppf "@[let %s = %a in @, %a @]" id pp_flambda e pp_flambda scope
+  | <span data-count="0">F</span>l_let (None, e, scope) -&gt; fprintf ppf "@[%a; @, %a @]" pp_flambda e pp_flambda scope
 
 and pp_list ppf list elem_printer =
   <span data-count="0">f</span>printf ppf "[ ";
