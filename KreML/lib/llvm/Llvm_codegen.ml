@@ -209,18 +209,18 @@ let rec codegen_flambda = function
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
   | Fl_app (Fl_var "partial_match", [ arg ]) ->
-    (* special case to insert unreacheable*)
+    (* special case to insert unreacheable *)
     let* arg = codegen_flambda arg in
     let callee = lookup_fun_exn Runtime.partial_match in
     let callee_typ = function_type (void_type context) [| int_type |] in
     let _ = build_call callee_typ callee [| arg |] "" builder in
     build_unreachable builder |> return
-  | Fl_app (Fl_var v, [ arg ]) when Hashtbl.mem functions_types v ->
+  | Fl_app (Fl_var v, (([ _ ] | []) as args)) when Hashtbl.mem functions_types v ->
     (* special case to build direct call of global function *)
-    let* arg = codegen_flambda arg in
+    let* args = codegen_list (return args) in
     let callee = lookup_fun_exn v in
     let callee_typ = Hashtbl.find functions_types v in
-    build_call callee_typ callee [| arg |] !curr_decl_name builder |> return
+    build_call callee_typ callee (Array.of_list args) !curr_decl_name builder |> return
   | Fl_app (f, args) ->
     let* args = codegen_list (return args) in
     let* f' = codegen_flambda f in
@@ -270,7 +270,11 @@ let rec codegen_flambda = function
     set_value_name name v;
     Hashtbl.add named_values name v;
     codegen_flambda scope
-    (* | Fl_closure {name; arrange; env_size; arity} when env_size = 0 -> *)
+  | Fl_closure { name; arrange = []; env_size = 0; arity = 0 } ->
+    let callee = lookup_fun_exn name in
+    let callee_typ = Hashtbl.find functions_types name in
+    let* fresh = fresh_name "call" in
+    build_call callee_typ callee [||] fresh builder |> return
   | Fl_closure { name; arrange; env_size; arity } ->
     let callee = lookup_fun_exn name in
     let* name = fresh_name "tupled_env" in
