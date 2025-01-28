@@ -45,12 +45,15 @@
  (name llvm_codegen)
  (modules Llvm_codegen)
  (libraries kreml_lib)
+ (link_deps
+  (file ../runtime/runtime.so))
  (instrumentation
   (backend bisect_ppx)))
 
 (cram
  (deps
   %{bin:parser}
+  ../runtime/runtime.so
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

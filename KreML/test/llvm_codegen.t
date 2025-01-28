@@ -371,6 +371,75 @@
   }
 
   $ dune exec llvm_codegen <<- EOF
+  > let a = 1
+  > let f x =
+  >   let b = 2 in
+  >   fun y -> y + a + x + b
+  > let main =
+  >   let () = print_int (f 3 4) in
+  >   0
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global ptr null
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare void @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @a() {
+  entry:
+    ret i64 1
+  }
+  
+  define i64 @fresh_fun_0(ptr %env, i64 %y_2) {
+  entry:
+    %envelemptr_0 = getelementptr i64, ptr %env, i64 0
+    %b_1 = load i64, ptr %envelemptr_0, align 4
+    %envelemptr_1 = getelementptr i64, ptr %env, i64 1
+    %x_0 = load i64, ptr %envelemptr_1, align 4
+    %call_2 = call i64 @a()
+    %t_0 = add i64 %y_2, %call_2
+    %t_1 = add i64 %t_0, %x_0
+    %t_11 = add i64 %t_1, %b_1
+    ret i64 %t_11
+  }
+  
+  define i64 @f(i64 %x_0) {
+  entry:
+    %tupled_env_3 = call ptr @alloc_tuple(i64 2)
+    %envptr_4 = getelementptr i64, ptr %tupled_env_3, i64 0
+    store i64 2, ptr %envptr_4, align 4
+    %envptr_5 = getelementptr i64, ptr %tupled_env_3, i64 1
+    store i64 %x_0, ptr %envptr_5, align 4
+    %closure_temp_6 = call ptr @alloc_closure(ptr @fresh_fun_0, ptr %tupled_env_3, i64 1, i64 2)
+    %cast_7 = ptrtoint ptr %closure_temp_6 to i64
+    ret i64 %cast_7
+  }
+  
+  define i64 @main() {
+  entry:
+    %closure_temp_9 = call ptr @alloc_closure(ptr @f, ptr @nil, i64 1, i64 0)
+    %tupled_args_11 = call ptr @alloc_tuple(i64 2)
+    %elemptr_12 = getelementptr i64, ptr %tupled_args_11, i64 0
+    store i64 3, ptr %elemptr_12, align 4
+    %elemptr_13 = getelementptr i64, ptr %tupled_args_11, i64 1
+    store i64 4, ptr %elemptr_13, align 4
+    %t_3 = call i64 @call_closure(ptr %closure_temp_9, ptr %tupled_args_11, i64 2)
+    call void @print_int(i64 %t_3)
+    ret i64 0
+  }
+
+  $ dune exec llvm_codegen <<- EOF
   > let rec map f list =
   > match list with
   > | [] -> []
