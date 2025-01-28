@@ -12,8 +12,10 @@ let () =
   | Ok structure ->
     (match Kreml_lib.Inferencer.run structure with
      | Ok _ ->
-       let alpha_structure = Alpha_transformer.transform structure in
+       let mf_structure = Match_elimination.eliminate structure in
+       let alpha_structure = Alpha_transformer.transform mf_structure in
        let arities, anf_structure = Anf.transform alpha_structure in
+       (* Anf. std_formatter anf_structure; *)
        let flstructure = Closure_conversion.cc arities anf_structure in
        let mdl = Llvm_codegen.get_module flstructure in
        Llvm.print_module "out.ll" mdl

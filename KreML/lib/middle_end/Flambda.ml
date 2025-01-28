@@ -26,7 +26,7 @@ type flambda =
   | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
-  | Fl_let of ident * flambda * flambda
+  | Fl_let of ident option * flambda * flambda
 
 and closure =
   { name : ident
@@ -94,8 +94,9 @@ let rec pp_flambda ppf = function
       t
       pp_flambda
       e
-  | Fl_let (id, e, scope) ->
+  | Fl_let (Some id, e, scope) ->
     fprintf ppf "@[let %s = %a in @, %a @]" id pp_flambda e pp_flambda scope
+  | Fl_let (None, e, scope) -> fprintf ppf "@[%a; @, %a @]" pp_flambda e pp_flambda scope
 
 and pp_list ppf list elem_printer =
   fprintf ppf "[ ";

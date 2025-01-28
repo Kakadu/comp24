@@ -5,31 +5,15 @@ open Anf
 open Utils
 open Utils.Counter
 
-(* let fresh_name base =
-  get >>= fun ({ counter ; _} as state) ->
-  let res = Format.sprintf "%s_%i" base counter in
-  put {state with counter = counter + 1} >>= fun _ -> return res
-
-let lookup_arity name =
-  let* name in
-  let* {arities; _} = get in
-  match Base.Map.find arities name with
-  | Some a -> return a
-  | None -> Utils.internalfail @@ Format.sprintf "arity of function %s is unknown" name *)
-
 let context = global_context ()
 let mdl = create_module context "main"
 let builder = Llvm.builder context
 let named_values : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 16
+let functions_types : (string, Llvm.lltype) Hashtbl.t = Hashtbl.create 16
+let curr_decl_name = ref ""
 let int_type = Llvm.i64_type context
 let iconst = Llvm.const_int int_type
 let ptr_type = pointer_type context
-
-(* let cast2ptr value =
-   let* value = value in
-   let* fresh = fresh_name "temp" in
-   build_pointercast value int_type fresh builder |> return
-   ;; *)
 
 let lookup_fun_exn name =
   match Llvm.lookup_function name mdl with
@@ -37,31 +21,47 @@ let lookup_fun_exn name =
   | Some f -> f
 ;;
 
+let lookup_global_exn name =
+  match Llvm.lookup_global name mdl with
+  | Some v -> v
+  | None -> Utils.internalfail @@ Format.sprintf "Unknown global %s" name
+;;
+
 let alloc_tuple_typ = Llvm.function_type ptr_type [| int_type |]
 
 let alloc_tuple name size =
   let* size = size in
-  let size_const = iconst size in
-  let f = lookup_fun_exn Runtime.alloc_tuple in
-  build_call alloc_tuple_typ f [| size_const |] name builder |> return
+  if size = 0
+  then lookup_global_exn "nil" |> return
+  else (
+    let size_const = iconst size in
+    let f = lookup_fun_exn Runtime.alloc_tuple in
+    build_call alloc_tuple_typ f [| size_const |] name builder |> return)
 ;;
 
-(* let alloc_closure_typ = Llvm.function_type int_type [| int_type; int_type |] *)
-
 let fun_with_env_typ = Llvm.function_type int_type [| ptr_type; int_type |]
-
-(* let fun_without_env_typ = Llvm.function_type int_type [| ptr_type; int_type |] *)
 let call_closure_typ = Llvm.function_type int_type [| ptr_type; ptr_type; int_type |]
 
 (* closure, args, args_count*)
-let alloc_closure_typ = Llvm.function_type ptr_type [| ptr_type; ptr_type; int_type |]
-(* fptr, env, arity *)
+let alloc_closure_typ =
+  Llvm.function_type ptr_type [| ptr_type; ptr_type; int_type; int_type |]
+;;
 
-let alloc_closure f env arity =
+(* fptr, env, arity, envsize *)
+
+let list_cons_typ = Llvm.function_type ptr_type [| int_type; ptr_type |]
+
+let alloc_closure f env arity env_size =
   let* f = f in
   let* fresh = fresh_name "closure_temp" in
   let callee = lookup_fun_exn Runtime.alloc_closure in
-  build_call alloc_closure_typ callee [| f; env; iconst arity |] fresh builder |> return
+  build_call
+    alloc_closure_typ
+    callee
+    [| f; env; iconst arity; iconst env_size |]
+    fresh
+    builder
+  |> return
 ;;
 
 let call_closure c args =
@@ -95,18 +95,38 @@ let call_closure c args =
 
 let print_int_typ = function_type (void_type context) [| int_type |]
 
-let add_runtime_functions () =
+let add_builtin_functions () =
   let _ = declare_function Runtime.alloc_tuple alloc_tuple_typ mdl in
-  let _ = declare_function Runtime.alloc_closure alloc_tuple_typ mdl in
+  let _ = declare_function Runtime.alloc_closure alloc_closure_typ mdl in
   let _ = declare_function Runtime.call_closure call_closure_typ mdl in
   let _ = declare_function Runtime.print_int print_int_typ mdl in
+  Hashtbl.add functions_types Runtime.print_int print_int_typ;
+  let _ = declare_function Runtime.list_cons list_cons_typ mdl in
+  let pmtype = function_type (void_type context) [| int_type |] in
+  let _ = declare_function Runtime.partial_match pmtype mdl in
+  ()
+;;
+
+let block_terminates_with_unreachable block =
+  match Llvm.block_terminator block with
+  | Some terminator ->
+    (match Llvm.instr_opcode terminator with
+     | Llvm.Opcode.Unreachable -> true
+     | _ -> false)
+  | None -> false
+;;
+
+let set_globals () =
+  let _ = define_global "nil" (const_null ptr_type) mdl in
+  let _ = define_global "unit" (const_null ptr_type) mdl in
   ()
 ;;
 
 let codegen_const = function
   | Const_int i -> iconst i
   | Const_bool c -> if c then iconst 1 else iconst 0
-  | _ -> Utils.internalfail "todo"
+  | Const_nil -> lookup_global_exn "nil"
+  | Const_unit -> lookup_global_exn "unit"
 ;;
 
 let codegen_binop name x y = function
@@ -126,18 +146,19 @@ let rec codegen_flambda = function
   | Fl_const c -> codegen_const c |> return
   | Fl_var v ->
     (match Hashtbl.find_opt named_values v with
-     | Some v -> v |> return
+     | Some v -> return v
      | None ->
-       Utils.internalfail @@ Format.sprintf "variable was not found in context %s" v)
+       let callee = lookup_fun_exn v in
+       let env = lookup_global_exn "nil" in
+       alloc_closure (return callee) env 1 0)
   | Fl_tuple elems ->
     let* elems = codegen_list (return elems) in
-    let* name = fresh_name "tuple" in
-    let* tuple = alloc_tuple name (List.length elems |> return) in
+    let* tuple = alloc_tuple !curr_decl_name (List.length elems |> return) in
     let* _ =
       List.fold_left
         (fun idx value ->
           let* idx = idx in
-          let* fresh = fresh_name "temp_tuple" in
+          let* fresh = fresh_name "elemptr" in
           let elemptr = build_gep int_type tuple [| iconst idx |] fresh builder in
           let _ = build_store value elemptr builder in
           return (idx + 1))
@@ -148,9 +169,32 @@ let rec codegen_flambda = function
   | Fl_binop (op, x, y) ->
     let* x = codegen_flambda x in
     let* y = codegen_flambda y in
-    let* fresh = fresh_name "temp" in
-    return @@ codegen_binop fresh x y op
-  | Fl_cons _ -> Utils.internalfail "todo"
+    let* x, y =
+      match type_of x, type_of y with
+      | xtype, ytype when xtype = ytype -> return (x, y)
+      | xtype, _ when xtype = ptr_type ->
+        let* cast = fresh_name "cast" in
+        let y = build_inttoptr y ptr_type cast builder in
+        return (x, y)
+      | _, ytype when ytype = ptr_type ->
+        let* cast = fresh_name "cast" in
+        let x = build_inttoptr x ptr_type cast builder in
+        return (x, y)
+      | _ -> unreachable ()
+    in
+    return @@ codegen_binop !curr_decl_name x y op
+  | Fl_cons (x, xs) ->
+    let* x' = codegen_flambda x in
+    let* xs' = codegen_flambda xs in
+    let* xs' =
+      if type_of xs' <> ptr_type
+      then
+        let* cast = fresh_name "cast" in
+        build_inttoptr xs' ptr_type cast builder |> return
+      else return xs'
+    in
+    let cons = lookup_fun_exn Runtime.list_cons in
+    build_call list_cons_typ cons [| x'; xs' |] !curr_decl_name builder |> return
   | Fl_getfield (idx, obj) ->
     let* obj = codegen_flambda obj in
     let* obj =
@@ -164,22 +208,23 @@ let rec codegen_flambda = function
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
-  | Fl_app (Fl_var stdlib_fun, args) when Runtime.is_stdlib_fun stdlib_fun ->
-    let callee = lookup_fun_exn stdlib_fun in
-    let* args = codegen_list (return args) in
-    let fnty = function_type (void_type context) [| int_type |] in
-    build_call fnty callee (Array.of_list args) "" builder |> return
+  | Fl_app (Fl_var "partial_match", [ arg ]) ->
+    (* special case to insert unreacheable*)
+    let* arg = codegen_flambda arg in
+    let callee = lookup_fun_exn Runtime.partial_match in
+    let callee_typ = function_type (void_type context) [| int_type |] in
+    let _ = build_call callee_typ callee [| arg |] "" builder in
+    build_unreachable builder |> return
+  | Fl_app (Fl_var v, [ arg ]) when Hashtbl.mem functions_types v ->
+    (* special case to build direct call of global function *)
+    let* arg = codegen_flambda arg in
+    let callee = lookup_fun_exn v in
+    let callee_typ = Hashtbl.find functions_types v in
+    build_call callee_typ callee [| arg |] !curr_decl_name builder |> return
   | Fl_app (f, args) ->
-    let* f' = codegen_flambda f in
     let* args = codegen_list (return args) in
+    let* f' = codegen_flambda f in
     call_closure (return f') args
-    (* (match f, args with
-     | Fl_closure { name; env_size; _ }, [ arg ] when env_size = 0 ->
-       let callee = lookup_fun_exn name in
-       let* fresh = fresh_name "direct_call" in
-       let empty_env = all
-       build_call fun_with_env_typ callee [| ; arg |] fresh builder |> return
-     | _ -> call_closure (return f') args) *)
   | Fl_ite (c, t, e) ->
     let* c = codegen_flambda c in
     let* freshreg = fresh_name "ifcmp" in
@@ -200,33 +245,32 @@ let rec codegen_flambda = function
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;
     let* fresh_phi = fresh_name "phi" in
-    let phi =
-      build_phi [ t, then_bb_after_gen; e, else_bb_after_gen ] fresh_phi builder
+    let incoming =
+      [ t, then_bb_after_gen; e, else_bb_after_gen ]
+      |> List.filter (fun (_, b) -> block_terminates_with_unreachable b |> not)
     in
-    position_at_end then_bb_after_gen builder;
-    let _ = build_br merge_bb builder in
+    let phi = build_phi incoming fresh_phi builder in
     position_at_end start_bb builder;
     let _ = build_cond_br is_zero else_bb then_bb builder in
-    position_at_end else_bb builder;
-    let _ = build_br merge_bb builder in
+    position_at_end then_bb_after_gen builder;
+    if block_terminates_with_unreachable then_bb_after_gen |> not
+    then ignore @@ build_br merge_bb builder;
+    position_at_end else_bb_after_gen builder;
+    if block_terminates_with_unreachable else_bb_after_gen |> not
+    then ignore @@ build_br merge_bb builder;
     position_at_end merge_bb builder;
     return phi
-  | Fl_let (id, (Fl_app (Fl_var print, _) as call_print), scope)
-    when print = Runtime.print_int ->
-    let* call = codegen_flambda call_print in
-    Hashtbl.add named_values id call;
+  | Fl_let (None, v, scope) ->
+    curr_decl_name := "";
+    let* _ = codegen_flambda v in
     codegen_flambda scope
-  | Fl_let (name, Fl_binop (op, x, y), scope) ->
-    let* x = codegen_flambda x in
-    let* y = codegen_flambda y in
-    let op = codegen_binop name x y op in
-    Hashtbl.add named_values name op;
-    codegen_flambda scope
-  | Fl_let (name, v, scope) ->
+  | Fl_let (Some name, v, scope) ->
+    curr_decl_name := name;
     let* v = codegen_flambda v in
     set_value_name name v;
     Hashtbl.add named_values name v;
     codegen_flambda scope
+    (* | Fl_closure {name; arrange; env_size; arity} when env_size = 0 -> *)
   | Fl_closure { name; arrange; env_size; arity } ->
     let callee = lookup_fun_exn name in
     let* name = fresh_name "tupled_env" in
@@ -252,7 +296,7 @@ let rec codegen_flambda = function
         (return ())
         arrange_env
     in
-    alloc_closure (return callee) env arity
+    alloc_closure (return callee) env arity env_size
 
 and codegen_list list =
   let* list = list in
@@ -271,6 +315,7 @@ let codegen_fun name f =
     match f with
     | Fun_with_env { arg = arg_name; captured_args; body; _ } ->
       let f = declare_function name fun_with_env_typ mdl in
+      Hashtbl.add functions_types name fun_with_env_typ;
       let env = param f 0 in
       set_value_name "env" env;
       let arg = param f 1 in
@@ -298,18 +343,20 @@ let codegen_fun name f =
       position_at_end body_bb builder;
       return body
     | Fun_without_env (None, body) ->
-      let f = declare_function name (function_type int_type [||]) mdl in
+      let fnty = function_type int_type [||] in
+      let f = declare_function name fnty mdl in
+      Hashtbl.add functions_types name fnty;
       let entry = append_block context "entry" f in
       position_at_end entry builder;
       let* body = codegen_flambda body in
       return body
     | Fun_without_env (Some param_name, body) ->
-      let f =
-        declare_function name (function_type int_type [| ptr_type; int_type |]) mdl
-      in
+      let fnty = function_type int_type [| int_type |] in
+      let f = declare_function name fnty mdl in
+      Hashtbl.add functions_types name fnty;
       let entry = append_block context "entry" f in
       position_at_end entry builder;
-      let param = param f 1 in
+      let param = param f 0 in
       set_value_name param_name param;
       Hashtbl.add named_values param_name param;
       let* body = codegen_flambda body in
@@ -317,19 +364,39 @@ let codegen_fun name f =
       position_at_end body_bb builder;
       return body
   in
-  if type_of body <> int_type
-  then
-    let* fresh = fresh_name "cast" in
-    let cast = build_ptrtoint body int_type fresh builder in
-    let _ = build_ret cast builder in
-    return ()
-  else (
-    let _ = build_ret body builder in
-    return ())
+  let f = lookup_fun_exn name in
+  let* () =
+    if type_of body <> int_type
+    then
+      let* fresh = fresh_name "cast" in
+      let cast = build_ptrtoint body int_type fresh builder in
+      let _ = build_ret cast builder in
+      return ()
+    else (
+      let _ = build_ret body builder in
+      return ())
+  in
+  (* some merge blocks may have not termination instruction
+     since ret is inserted only in the last block *)
+  let _ =
+    fold_right_blocks
+      (fun b next ->
+        let terminator = block_terminator b in
+        match terminator with
+        | None when block_terminates_with_unreachable b |> not ->
+          position_at_end b builder;
+          let _ = build_br next builder in
+          b
+        | Some _ | None -> b)
+      f
+      (entry_block f)
+  in
+  return ()
 ;;
 
 let codegen_program program =
-  add_runtime_functions ();
+  add_builtin_functions ();
+  set_globals ();
   let state =
     List.fold_left
       (fun acc (id, f) ->

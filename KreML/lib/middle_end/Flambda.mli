@@ -19,7 +19,7 @@ type flambda =
   | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
-  | Fl_let of ident * flambda * flambda
+  | Fl_let of ident option * flambda * flambda
 
 and closure =
   { name : ident

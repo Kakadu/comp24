@@ -11,7 +11,8 @@ let () =
   | Ok structure ->
     (match Inferencer.run structure with
      | Ok _ ->
-       let alpha = Alpha_transformer.transform structure in
+       let match_free_program = Match_elimination.eliminate structure in
+       let alpha = Alpha_transformer.transform match_free_program in
        let arities, anf = Anf.transform alpha in
        let flstructure = Closure_conversion.cc arities anf in
        Llvm_codegen.dump flstructure

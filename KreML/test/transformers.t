@@ -168,7 +168,10 @@
                     let t_0 =  list_1 = []  in 
                      if t_0  then []  else 
                         let t_1 =  list_1 <> []  in 
-                         if t_1  then let t_2 =  map f_0 xs_3 in   x_2 :: t_2  
+                         if t_1 
+                            then let x_2 =   getfield 0 list_1  in 
+                                  let xs_3 =   getfield 1 list_1  in 
+                                   let t_2 =  map f_0 xs_3 in   x_2 :: t_2  
                             else  partial_match list_1   
                         
                      
@@ -182,9 +185,9 @@
   let disj = fun x_0 -> 
                fun y_1 -> 
                  let t_0 =  x_0 = true  in 
-                  if t_0  then true  else 
+                  if t_0  then let unused_3 =  y_1 in  true  else 
                      let t_1 =  y_1 = true  in 
-                      if t_1  then true  else 
+                      if t_1  then let unused_2 =  x_0 in  true  else 
                          let t_2 =  x_0 = false  in 
                           let t_3 =  y_1 = false  in 
                            let t_4 =  t_2 && t_3  in 
@@ -204,8 +207,13 @@
                      if t_0  then []  else 
                         let t_1 =  list_0 <> []  in 
                          if t_1 
-                            then let t_2 =  a_1 + b_2  in 
-                                  let t_3 =  sumps xs_3 in   t_2 :: t_3  
+                            then let t_8 =   getfield 0 list_0  in 
+                                  let a_1 =   getfield 0 t_8  in 
+                                   let t_6 =   getfield 0 list_0  in 
+                                    let b_2 =   getfield 1 t_6  in 
+                                     let xs_3 =   getfield 1 list_0  in 
+                                      let t_2 =  a_1 + b_2  in 
+                                       let t_3 =  sumps xs_3 in   t_2 :: t_3  
                             else  partial_match list_0   
                         
                      
