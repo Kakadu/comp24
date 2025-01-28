@@ -8,6 +8,23 @@
   >   0
   10
 
+  $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so 
+  > let add x y = x + y
+  > let main =
+  >   let add5 = add 5 in
+  >   let () = print_int (add5 1) in
+  >   0
+  6
+
+  $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so 
+  > let add x y = x + y
+  > let add5 = add 5
+  > let main =
+  >   let () = print_int (add5 1) in
+  >   0
+  6
+
+
   $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so
   > let sum_pair (a, b) = a + b
   > let main = 
@@ -60,3 +77,28 @@
 
   $ dune exec llvm_codegen 2>&1 < manytests/typed/001fac.ml | lli-17 -load ../runtime/runtime.so
   24
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/002fac.ml | lli-17 -load ../runtime/runtime.so
+  24
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/003fib.ml | lli-17 -load ../runtime/runtime.so
+  3
+  3
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/004manyargs.ml | lli-17 -load ../runtime/runtime.so
+  1111111111
+  1
+  10
+  100
+
+$ dune exec llvm_codegen 2>&1 < manytests/typed/005fix.ml | lli-17 -load ../runtime/runtime.so
+
+
+$ dune exec llvm_codegen 2>&1 < manytests/typed/015tuples.ml | lli-17 -load ../runtime/runtime.so
+lli-17: lli: <stdin>:1:1: error: expected top-level entity
+
+
+
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/016lists.ml | lli-17 -load ../runtime/runtime.so
+  lli-17: lli: <stdin>:455:47: error: '%phi_279' defined with type 'ptr' but expected 'i64'
+    %phi_281 = phi i64 [ %ys_22, %then_259 ], [ %phi_279, %merge_278 ]
+                                                ^
+  
+  [1]

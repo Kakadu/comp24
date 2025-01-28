@@ -148,7 +148,8 @@
   
   main() {let res_4 = { name: f, arity: 1 env_size: 0, arrange [ ]}  ([ 
                       10 11  ]) in 
-           print_int ([ res_4  ]);  0  } 
+           { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ res_4  ]); 
+            0  } 
   
 
   $ dune exec closure_conv <<- EOF
@@ -159,4 +160,33 @@
                         let b_3 = getfield 1 p_1 in 
                          let t_0 = f_0 ([ a_2  ]) in 
                           let t_1 = f_0 ([ b_3  ]) in  [ t_0 t_1  ]    } 
+  
+  $ dune exec closure_conv <<- EOF
+  > let add x y = x + y
+  > let add5 = add 5
+  > let main =
+  >   let () = print_int (add5 1) in
+  >   0
+  add(x_0 y_1 ) {x_0 + y_1} 
+  
+  add5() {{ name: add, arity: 2 env_size: 1, arrange [ ]}  ([ 5  ])} 
+  
+  main() {let t_2 = { name: add5, arity: 0 env_size: 0, arrange [ ]}  ([ 1  ]) in 
+           { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ t_2  ]); 
+            0  } 
+  
+
+  $ dune exec closure_conv <<- EOF
+  > let add x y = x + y
+  > let main =
+  >   let add5 = add 5 in
+  >   let () = print_int (add5 1) in
+  >   0
+  add(x_0 y_1 ) {x_0 + y_1} 
+  
+  main() {let add5_2 = { name: add, arity: 2 env_size: 1, arrange [ ]}  ([ 
+                       5  ]) in 
+           let t_1 = add5_2 ([ 1  ]) in 
+            { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ t_1  ]); 
+             0   } 
   

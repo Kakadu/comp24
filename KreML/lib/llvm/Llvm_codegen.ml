@@ -93,14 +93,14 @@ let call_closure c args =
   |> return
 ;;
 
-let print_int_typ = function_type (void_type context) [| int_type |]
+let print_int_typ = function_type int_type [| int_type |]
 
 let add_builtin_functions () =
   let _ = declare_function Runtime.alloc_tuple alloc_tuple_typ mdl in
   let _ = declare_function Runtime.alloc_closure alloc_closure_typ mdl in
   let _ = declare_function Runtime.call_closure call_closure_typ mdl in
-  let _ = declare_function Runtime.print_int print_int_typ mdl in
-  Hashtbl.add functions_types Runtime.print_int print_int_typ;
+  let _ = declare_function Kstdlib.print_int print_int_typ mdl in
+  Hashtbl.add functions_types Kstdlib.print_int print_int_typ;
   let _ = declare_function Runtime.list_cons list_cons_typ mdl in
   let pmtype = function_type (void_type context) [| int_type |] in
   let _ = declare_function Runtime.partial_match pmtype mdl in
@@ -118,7 +118,7 @@ let block_terminates_with_unreachable block =
 
 let set_globals () =
   let _ = define_global "nil" (const_null ptr_type) mdl in
-  let _ = define_global "unit" (const_null ptr_type) mdl in
+  let _ = define_global "unit" (iconst 0) mdl in
   ()
 ;;
 
@@ -147,10 +147,7 @@ let rec codegen_flambda = function
   | Fl_var v ->
     (match Hashtbl.find_opt named_values v with
      | Some v -> return v
-     | None ->
-       let callee = lookup_fun_exn v in
-       let env = lookup_global_exn "nil" in
-       alloc_closure (return callee) env 1 0)
+     | None -> internalfail @@ Format.sprintf "Unbound variable %s" v)
   | Fl_tuple elems ->
     let* elems = codegen_list (return elems) in
     let* tuple = alloc_tuple !curr_decl_name (List.length elems |> return) in
@@ -215,12 +212,22 @@ let rec codegen_flambda = function
     let callee_typ = function_type (void_type context) [| int_type |] in
     let _ = build_call callee_typ callee [| arg |] "" builder in
     build_unreachable builder |> return
-  | Fl_app (Fl_var v, (([ _ ] | []) as args)) when Hashtbl.mem functions_types v ->
-    (* special case to build direct call of global function *)
+  | Fl_app (Fl_closure { name; env_size; arity; _ }, (([ _ ] | []) as args))
+    when env_size = 0 && arity <> 0 ->
+    (* if arity 0 it is calculated const, we should evail it and apply arg to its result *)
     let* args = codegen_list (return args) in
-    let callee = lookup_fun_exn v in
-    let callee_typ = Hashtbl.find functions_types v in
-    build_call callee_typ callee (Array.of_list args) !curr_decl_name builder |> return
+    let callee = lookup_fun_exn name in
+    let callee_typ = Hashtbl.find functions_types name in
+    let* args =
+      match args with
+      | [ a ] when type_of a = ptr_type ->
+        let* fresh = fresh_name "cast" in
+        let a = build_ptrtoint a int_type fresh builder in
+        return [| a |]
+      | [ a ] -> return [| a |]
+      | _ -> return [||]
+    in
+    build_call callee_typ callee args !curr_decl_name builder |> return
   | Fl_app (f, args) ->
     let* args = codegen_list (return args) in
     let* f' = codegen_flambda f in
@@ -313,18 +320,16 @@ and codegen_list list =
     (return [])
 ;;
 
-let codegen_fun name f =
+let codegen_fun_body f decl =
   let* f = f in
   let* body =
     match f with
     | Fun_with_env { arg = arg_name; captured_args; body; _ } ->
-      let f = declare_function name fun_with_env_typ mdl in
-      Hashtbl.add functions_types name fun_with_env_typ;
-      let env = param f 0 in
+      let env = param decl 0 in
       set_value_name "env" env;
-      let arg = param f 1 in
+      let arg = param decl 1 in
       set_value_name arg_name arg;
-      let entry_bb = append_block context "entry" f in
+      let entry_bb = append_block context "entry" decl in
       position_at_end entry_bb builder;
       (* unpack environment *)
       let* _ =
@@ -347,20 +352,14 @@ let codegen_fun name f =
       position_at_end body_bb builder;
       return body
     | Fun_without_env (None, body) ->
-      let fnty = function_type int_type [||] in
-      let f = declare_function name fnty mdl in
-      Hashtbl.add functions_types name fnty;
-      let entry = append_block context "entry" f in
+      let entry = append_block context "entry" decl in
       position_at_end entry builder;
       let* body = codegen_flambda body in
       return body
     | Fun_without_env (Some param_name, body) ->
-      let fnty = function_type int_type [| int_type |] in
-      let f = declare_function name fnty mdl in
-      Hashtbl.add functions_types name fnty;
-      let entry = append_block context "entry" f in
+      let entry = append_block context "entry" decl in
       position_at_end entry builder;
-      let param = param f 0 in
+      let param = param decl 0 in
       set_value_name param_name param;
       Hashtbl.add named_values param_name param;
       let* body = codegen_flambda body in
@@ -368,7 +367,6 @@ let codegen_fun name f =
       position_at_end body_bb builder;
       return body
   in
-  let f = lookup_fun_exn name in
   let* () =
     if type_of body <> int_type
     then
@@ -392,8 +390,8 @@ let codegen_fun name f =
           let _ = build_br next builder in
           b
         | Some _ | None -> b)
-      f
-      (entry_block f)
+      decl
+      (entry_block decl)
   in
   return ()
 ;;
@@ -401,14 +399,28 @@ let codegen_fun name f =
 let codegen_program program =
   add_builtin_functions ();
   set_globals ();
+  let declarations = List.map (fun (name, f) ->
+    match f with
+    | Fun_with_env _ ->
+      let f = declare_function name fun_with_env_typ mdl in
+      Hashtbl.add functions_types name fun_with_env_typ;
+       f
+    | Fun_without_env (None, _) ->
+      let fnty = function_type int_type [||] in
+      let f = declare_function name fnty mdl in
+      Hashtbl.add functions_types name fnty;  f
+    | Fun_without_env (Some _, _) ->
+      let fnty = function_type int_type [| int_type |] in
+      let f = declare_function name fnty mdl in
+      Hashtbl.add functions_types name fnty;f ) program in
   let state =
-    List.fold_left
-      (fun acc (id, f) ->
+    List.fold_left2
+      (fun acc (_, f) decl ->
         let* () = acc in
-        let* () = codegen_fun id (return f) in
+        let* () = codegen_fun_body (return f) decl in
         return ())
       (return ())
-      program
+      program declarations
   in
   let _, _ = run state 0 in
   match Llvm_analysis.verify_module mdl with
