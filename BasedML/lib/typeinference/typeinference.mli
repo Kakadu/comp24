@@ -9,3 +9,4 @@ val show_res_map : res_map -> string
 val infer_prog : Ast.declarations -> (res_map, string) result
 val test_infer_exp : string -> unit
 val test_infer_prog_with_state : StatementInfer.state -> string -> unit
+val test_infer_prog : string -> unit

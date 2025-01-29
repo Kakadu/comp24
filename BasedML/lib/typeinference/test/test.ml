@@ -340,3 +340,30 @@ let%expect_test "Test binops overriding" =
   [%expect {|
      Infer error: Can not unify `TInt` and `TBool` |}]
 ;;
+
+let%expect_test "Test avoiding already used type names" =
+  test_infer_prog
+    {|
+    let id1 = fun a -> a
+    let id2 = fun a -> a
+    let id3 = fun a -> a
+    let (x: '_p10) = 1
+    |};
+  [%expect {|
+    [""( * )"": (int -> (int -> int)),
+     ""( + )"": (int -> (int -> int)),
+     ""( - )"": (int -> (int -> int)),
+     ""( / )"": (int -> (int -> int)),
+     ""( :: )"": ('_p8 -> (('_p8 list) -> ('_p8 list))),
+     ""( < )"": ('_p9 -> ('_p9 -> bool)),
+     ""( <= )"": ('_pa -> ('_pa -> bool)),
+     ""( <> )"": ('_pb -> ('_pb -> bool)),
+     ""( = )"": ('_pc -> ('_pc -> bool)),
+     ""( > )"": ('_pd -> ('_pd -> bool)),
+     ""( >= )"": ('_pe -> ('_pe -> bool)),
+     ""id1"": ('_pf -> '_pf),
+     ""id2"": ('_p11 -> '_p11),
+     ""id3"": ('_p12 -> '_p12),
+     ""x"": int,
+     ] |}]
+;;

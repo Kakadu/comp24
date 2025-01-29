@@ -254,3 +254,14 @@ let test_infer_prog_with_state s_state string_exp =
      | Result.Error s -> Format.printf "Infer error: %s" s)
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
+
+let test_infer_prog string_exp =
+  let res = Parser.parse_program string_exp in
+  match res with
+  | Result.Ok prog ->
+    let res = infer_prog prog in
+    (match res with
+     | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
+     | Result.Error s -> Format.printf "Infer error: %s" s)
+  | Result.Error e -> Format.printf "Parser error: %s" e
+;;
