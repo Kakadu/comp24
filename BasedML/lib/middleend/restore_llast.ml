@@ -55,7 +55,7 @@ let rec frestore_llexpr ppf exp =
   match exp with
   | LLConstant c -> frestore_constant ppf c
   | LLIdentifier s -> fprintf "%s" s
-  | LLApp (exp1, exp2) ->
+  | LLApplication (exp1, exp2) ->
     fprintf "(";
     rec_call exp1;
     fprintf " ";

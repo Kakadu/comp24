@@ -95,7 +95,7 @@ let prog_lift prog =
     | EApplication (left_exp, right_exp) ->
       let lifted_left, acc, state = lift_expr ctx acc global_ctx state left_exp in
       let lifted_right, acc, state = lift_expr ctx acc global_ctx state right_exp in
-      LLApp (lifted_left, lifted_right), acc, state
+      LLApplication (lifted_left, lifted_right), acc, state
     | EConstraint (expr, typ) ->
       let lifted, ll_list, state = lift_expr ctx acc global_ctx state expr in
       LLConstraint (lifted, typ), ll_list, state

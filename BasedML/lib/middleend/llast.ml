@@ -9,7 +9,7 @@ type llexpr =
   | LLConstant of constant
   | LLIdentifier of string
   | LLIfThenElse of llexpr * llexpr * llexpr
-  | LLApp of llexpr * llexpr
+  | LLApplication of llexpr * llexpr
   | LLLetIn of rec_flag * pattern * llexpr * llexpr
   | LLConstraint of llexpr * type_name
   | LLTuple of llexpr list
