@@ -62,14 +62,14 @@
   > if res then
   >   print_int 1
   > else print_int 0
-  let rec is_even = fun n_1 -> 
-                      let t_0 =  n_1 = 0  in 
+  let rec is_even = fun n_0 -> 
+                      let t_0 =  n_0 = 0  in 
                        if t_0  then true  else 
-                          let t_1 =  n_1 - 1  in  is_odd t_1  
+                          let t_1 =  n_0 - 1  in  is_odd t_1  
                        
-  and is_odd = fun n_0 -> 
-                 let t_3 =  n_0 = 1  in 
-                  if t_3  then true  else  let t_4 =  n_0 - 1  in  is_even t_4 
+  and is_odd = fun n_1 -> 
+                 let t_3 =  n_1 = 1  in 
+                  if t_3  then true  else  let t_4 =  n_1 - 1  in  is_even t_4 
                      
                   
   let main = let res_2 =  is_even 600 in 
@@ -217,6 +217,25 @@
                             else  partial_match list_0   
                         
                      
+  $ dune exec transformers <<- EOF
+  > let foo b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)
+  > let foo x = foo true (foo false (foo true (foo false x)))
+  > let main =
+  > let () = print_int (foo 11) in
+  > 0   
+  let foo = fun b_0 -> 
+              if b_0 
+                 then let fresh_fun_0 =  fun foo_1 -> foo_1 + 2  in 
+                       fresh_fun_0 
+                 else 
+                 let fresh_fun_1 =  fun foo_2 -> foo_2 * 10  in  fresh_fun_1  
+               
+  let foo_4 = fun x_3 -> 
+                let t_2 =  foo false x_3 in 
+                 let t_3 =  foo true t_2 in 
+                  let t_4 =  foo false t_3 in  foo true t_4
+                 
+  let main = let t_6 =  foo_4 11 in  let unused_5 =  print_int t_6 in  0 
 
 
 $ dune exec transformers < manytests/typed/001fac.ml

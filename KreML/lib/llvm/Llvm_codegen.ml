@@ -124,12 +124,25 @@ let set_globals () =
 
 let codegen_const = function
   | Const_int i -> iconst i
-  | Const_bool c -> if c then iconst 1 else iconst 0
+  | Const_bool c ->
+    let i1_typ = i1_type context in
+     if c then const_int i1_typ 1 else const_int i1_typ 0 
   | Const_nil -> lookup_global_exn "nil"
   | Const_unit -> lookup_global_exn "unit"
 ;;
 
-let codegen_binop name x y = function
+let codegen_binop name x y = 
+  let xtyp = type_of x in
+  let ytyp = type_of y in
+  let x, y = if xtyp <> ytyp then 
+    let xsize = integer_bitwidth xtyp in
+    let ysize = integer_bitwidth ytyp in
+    if xsize < ysize then
+      x, build_trunc y xtyp "" builder
+    else
+      build_trunc x ytyp "" builder, y
+  else x, y in
+  function
   | Eq -> build_icmp Icmp.Eq x y name builder
   | Neq -> build_icmp Icmp.Ne x y name builder
   | Gt -> build_icmp Icmp.Sgt x y name builder
@@ -234,8 +247,8 @@ let rec codegen_flambda = function
     call_closure (return f') args
   | Fl_ite (c, t, e) ->
     let* c = codegen_flambda c in
-    let* freshreg = fresh_name "ifcmp" in
-    let is_zero = build_icmp Icmp.Eq (const_int (i1_type context) 0) c freshreg builder in
+    let* fresh_reg = fresh_name "ifcmp" in
+    let is_zero = codegen_binop fresh_reg c (const_int (i1_type context) 0) Eq in
     let start_bb = insertion_block builder in
     let f = block_parent start_bb in
     let* fresh_then = fresh_name "then" in
