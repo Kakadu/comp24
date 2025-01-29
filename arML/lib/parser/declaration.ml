@@ -12,7 +12,6 @@ let parse_declaration p =
     choice 
       [ p.parse_binary_operation p
       ; p.parse_type_defition p
-      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p

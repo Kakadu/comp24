@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, raf-nr and ksenmel *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Angstrom
 open Common
@@ -18,11 +22,11 @@ type type_dispatch =
 
 let parse_type =
   skip_wspace *>
-  let parse_int = string "int" *> return TDInt in
-  let parse_bool = string "bool" *> return TDBool in
-  let parse_unit = string "unit" *> return TDUnit in
-  let parse_char = string "char" *> return TDChar in
-  let parse_string = string "string" *> return TDString in
+  let parse_int = string "int" *> return GTDInt in
+  let parse_bool = string "bool" *> return GTDBool in
+  let parse_unit = string "unit" *> return GTDUnit in
+  let parse_char = string "char" *> return GTDChar in
+  let parse_string = string "string" *> return GTDString in
   choice [
     parse_int ; parse_bool ; parse_unit ; parse_char ; parse_string
   ]

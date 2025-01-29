@@ -15,7 +15,6 @@ let parsers =
   ; parse_fun
   ; parse_application
   ; parse_binary_operation
-  ; parse_unary_operation
   ; parse_if_then_else
   ; parse_let_in
   ; parse_match_with
@@ -28,7 +27,6 @@ let parsers =
 let parse_expression = skip_wspace *> choice 
   [ parsers.parse_type_defition parsers
   ; parsers.parse_binary_operation parsers
-  ; parsers.parse_unary_operation parsers
   ; parsers.parse_application parsers
   ; parsers.parse_tuple parsers
   ; parsers.parse_constant_expr

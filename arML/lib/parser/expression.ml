@@ -2,8 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+open Angstrom
 open Ast
 open Common
+open Pattern
+open Type
 
 (* Constant expression parsers *)
 
@@ -39,7 +42,6 @@ let parse_fun p =
   let parse_expr = choice 
     [ p.parse_type_defition p
     ; p.parse_binary_operation p
-    ; p.parse_unary_operation p
     ; p.parse_application p
     ; p.parse_tuple p
     ; p.parse_constant_expr
@@ -76,7 +78,6 @@ let parse_function p =
     [ p.parse_type_defition p
     ; self
     ; p.parse_binary_operation p
-    ; p.parse_unary_operation p
     ; p.parse_application p
     ; p.parse_tuple p
     ; p.parse_fun p
@@ -117,7 +118,6 @@ let parse_tuple p =
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
       ; p.parse_application p
-      ; p.parse_unary_operation p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -152,7 +152,6 @@ let parse_if_then_else p =
     choice
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
-      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p
@@ -198,7 +197,6 @@ let parse_let_in p =
     choice 
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
-      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p
@@ -255,7 +253,6 @@ let parse_match_with p =
     choice
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
-      ; p.parse_unary_operation p
       ; self
       ; p.parse_application p
       ; p.parse_tuple p
@@ -299,7 +296,6 @@ let parse_application p =
     choice
       [ p.parse_type_defition p
       ; parens @@ p.parse_binary_operation p
-      ; parens @@ p.parse_unary_operation p
       ; parens @@ p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -332,7 +328,6 @@ let parse_binary_operation p =
       [ p.parse_type_defition p
       ; p.parse_application p
       ; parens self
-      ; p.parse_unary_operation p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -399,7 +394,6 @@ let parse_type_defition p =
     let parse_expr =
       choice 
         [ p.parse_binary_operation p
-        ; p.parse_unary_operation p
         ; p.parse_tuple p
         ; p.parse_if_then_else p
         ; p.parse_application p
