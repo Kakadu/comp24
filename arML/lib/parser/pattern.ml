@@ -35,3 +35,20 @@ let parse_identifier_pattern =
   return @@ PVar identifier
 
 (* ---------------- *)
+
+(* Nil pattern parsers *)
+
+let parse_nill_pattern = 
+  let* _ = brackets (string "") in
+  return PNill
+
+(* ---------------- *)
+
+(* Wildcard pattern parsers *)
+
+let parse_any_pattern = 
+  let* _ = skip_wspace *> char '_' in
+  return PAny
+;;
+
+(* ---------------- *)
