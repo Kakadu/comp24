@@ -287,3 +287,35 @@ let parse_match_with p =
 ;;
 
 (* ---------------- *)
+
+(* Application parser *)
+
+let parse_application p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; parens @@ p.parse_binary_operation p
+      ; parens @@ p.parse_unary_operation p
+      ; parens @@ p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_let_in p
+      ; p.parse_if_then_else p
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; parens @@ p.parse_tuple p
+      ; p.parse_empty_list_expr
+      ; p.parse_match_with p
+      ; parens @@ self
+      ]
+  in
+  parens self <|>
+  let* func = parse_expr in
+  let* args = many1 (skip_wspace *> parse_expr) in
+  return @@ EApplication (func, args)
+;;
+
+(* ---------------- *)
