@@ -20,3 +20,11 @@ let parse_identifier_expr =
   return @@ EIdentifier identifier
 
 (* ---------------- *)
+
+(* Empty list parsers *)
+
+let parse_empty_list_expr =
+  let* _ = skip_wspace *> brackets skip_wspace in
+  return EEmptyList
+
+(* ---------------- *)
