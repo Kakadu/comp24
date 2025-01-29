@@ -107,3 +107,41 @@ let parse_tuple_pattern pp =
 ;;
 
 (* ---------------- *)
+
+(* List pattern parser *)
+
+let parse_list_pattern pp =
+  fix
+  @@ fun self ->
+  let parse_pattern = choice
+    [ pp.parse_pattern_type_defition pp
+    ; parens @@ pp.parse_or_pattern pp
+    ; pp.parse_constant_pattern
+    ; pp.parse_identifier_pattern
+    ; pp.parse_nill_pattern
+    ; pp.parse_any_pattern
+    ; pp.parse_tuple_pattern pp
+    ; parens @@ self
+    ]
+  in
+
+  let parse_list_cons =
+    let parse_operator =
+      skip_wspace *> string "::" <* skip_wspace
+      >>| fun _ head tail -> PListConstructor (head, tail)
+    in
+    chainr1 parse_pattern parse_operator
+  in
+
+  let parse_list_syntax =
+    brackets (sep_by (skip_wspace *> char ';' <* skip_wspace) parse_pattern) >>= function
+    | [] -> return PNill
+    | head :: tail ->
+      List.fold_right (fun pat acc -> PListConstructor (pat, acc)) tail (PListConstructor (head, PNill))
+      |> return
+  in
+
+  choice [parse_list_cons; parse_list_syntax]
+;;
+
+(* ---------------- *)
