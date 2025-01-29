@@ -22,6 +22,12 @@
  (public_name lifting_demo)
  (libraries typeinference middleend stdio ast))
 
+(executable
+ (name anf_demo)
+ (modules anf_demo)
+ (public_name anf_demo)
+ (libraries typeinference middleend stdio ast))
+
 (cram
  (applies_to typeinference_tests)
  (deps
@@ -54,3 +60,7 @@
 (cram
  (applies_to lifting_tests)
  (deps ./lifting_demo.exe))
+
+(cram
+ (applies_to anf_tests)
+ (deps ./anf_demo.exe))

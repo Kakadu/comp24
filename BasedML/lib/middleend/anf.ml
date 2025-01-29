@@ -5,9 +5,6 @@
 open Anf_ast
 open Llast
 open Ast
-open Restore_anf_ast
-open Parser
-open Lambda_lifting
 
 module COUNTERMONAD = struct
   type state = int
