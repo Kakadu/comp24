@@ -171,3 +171,29 @@ let parse_pattern_type_defition pp =
 ;;
 
 (* ---------------- *)
+
+(* Main pattern parser *)
+
+let parsers =
+  { parse_constant_pattern
+  ; parse_identifier_pattern
+  ; parse_nill_pattern
+  ; parse_any_pattern
+  ; parse_or_pattern
+  ; parse_tuple_pattern
+  ; parse_list_pattern
+  ; parse_pattern_type_defition
+  }
+
+let parse_pattern = choice 
+  [ parsers.parse_or_pattern parsers
+  ; parsers.parse_list_pattern parsers
+  ; parsers.parse_tuple_pattern parsers
+  ; parsers.parse_constant_pattern
+  ; parsers.parse_identifier_pattern
+  ; parsers.parse_nill_pattern
+  ; parsers.parse_any_pattern
+  ; parsers.parse_pattern_type_defition parsers
+  ]
+
+(* ---------------- *)
