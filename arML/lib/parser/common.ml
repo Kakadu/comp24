@@ -75,3 +75,20 @@ let trait = skip_wspace *> string "|"
 let tying = skip_wspace *> string "="
 
 (* ---------------- *)
+
+(* Constant parsers *)
+
+let parse_constant =
+  fix
+  @@ fun self ->
+  skip_wspace 
+  *> 
+  let parse_cint = take_while1 is_digit_char >>| int_of_string >>| fun x -> CInt x in
+  let parse_cstring = char '"' *> take_while (( != ) '"') <* char '"' >>| fun x -> CString x in
+  let parse_cchar = char '\'' *> any_char <* char '\'' >>| fun x -> CChar x in
+  let parse_cbool = string "true" <|> string "false" >>| bool_of_string >>| fun x -> CBool x in
+  let parse_cunit = string "()" >>| fun _ -> CUnit in
+  parens self <|> choice [ parse_cint; parse_cstring; parse_cchar; parse_cbool; parse_cunit ]
+;;
+
+(* ---------------- *)
