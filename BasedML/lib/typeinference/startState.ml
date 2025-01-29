@@ -9,28 +9,27 @@ type start_bin_op = string * Ast.type_name * Ast.type_name * Ast.type_name
 
 let add_bin_op : start_bin_op -> (state, unit) t =
   fun (name, arg1, arg2, ret) ->
-  let tvs = List.fold_left get_tv_from_tp SetPolyType.empty [ arg1; arg2; ret ] in
+  let tvs = List.fold_left get_tv_from_tp SetString.empty [ arg1; arg2; ret ] in
   let tp = Ast.TFunction (arg1, Ast.TFunction (arg2, ret)) in
-  if SetPolyType.is_empty tvs
+  if SetString.is_empty tvs
   then write_flat_var_type name tp
   else write_var_type name (TFSchem (tvs, tp))
 ;;
 
 let bin_op_list : start_bin_op list =
-  Ast.(
-    let tv1 = TPoly (PTSystem "'s") in
+  Ast.
     [ "( - )", TInt, TInt, TInt
     ; "( + )", TInt, TInt, TInt
     ; "( / )", TInt, TInt, TInt
     ; "( * )", TInt, TInt, TInt
-    ; "( < )", tv1, tv1, TBool
-    ; "( <= )", tv1, tv1, TBool
-    ; "( >= )", tv1, tv1, TBool
-    ; "( <> )", tv1, tv1, TBool
-    ; "( > )", tv1, tv1, TBool
-    ; "( = )", tv1, tv1, TBool
-    ; "( :: )", tv1, TList tv1, TList tv1
-    ])
+    ; "( < )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( <= )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( >= )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( <> )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( > )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( = )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( :: )", TPoly "'_s", TList (TPoly "'_s"), TList (TPoly "'_s")
+    ]
 ;;
 
 let empty_state : state = MapString.empty, [], 0

@@ -5,14 +5,14 @@
 open StatementInfer
 open Help
 
-let generalise : SetPolyType.t -> Ast.pattern -> Ast.type_name -> (state, unit) t =
+let generalise : SetString.t -> Ast.pattern -> Ast.type_name -> (state, unit) t =
   fun bound_vars pat tp ->
   let* tp = restore_type tp in
   let* subs = read_subs in
-  let used_vars = get_tv_from_tp SetPolyType.empty tp in
-  let unbound_vars = SetPolyType.diff used_vars bound_vars in
+  let used_vars = get_tv_from_tp SetString.empty tp in
+  let unbound_vars = SetString.diff used_vars bound_vars in
   let free_vars =
-    SetPolyType.filter (fun name -> not (List.mem_assoc name subs)) unbound_vars
+    SetString.filter (fun name -> not (List.mem_assoc name subs)) unbound_vars
   in
   write_scheme_for_pattern free_vars pat tp
 ;;

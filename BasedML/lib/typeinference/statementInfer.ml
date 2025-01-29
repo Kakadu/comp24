@@ -23,13 +23,12 @@ let write_env : env_map -> (state, unit) t =
 
 let fresh_tv : (state, Ast.type_name) t =
   let* env, substs, tv = read in
-  return (Ast.TPoly (Ast.PTSystem (Format.sprintf "p%x" tv)))
-  <* write (env, substs, tv + 1)
+  return (Ast.TPoly (Format.sprintf "p%x" tv)) <* write (env, substs, tv + 1)
 ;;
 
-let specialise : SetPolyType.t * Ast.type_name -> (state, Ast.type_name) t =
+let specialise : SetString.t * Ast.type_name -> (state, Ast.type_name) t =
   fun (free_vars, stp) ->
-  let names = SetPolyType.elements free_vars in
+  let names = SetString.elements free_vars in
   let* v2v_lst =
     map_list
       (fun s ->
@@ -37,10 +36,10 @@ let specialise : SetPolyType.t * Ast.type_name -> (state, Ast.type_name) t =
         return (s, new_v))
       names
   in
-  let v2v = MapPolyType.of_seq (List.to_seq v2v_lst) in
+  let v2v = MapString.of_seq (List.to_seq v2v_lst) in
   let rec traverse = function
     | Ast.TPoly x as old_t ->
-      (match MapPolyType.find_opt x v2v with
+      (match MapString.find_opt x v2v with
        | Some x -> x
        | None -> old_t)
     | Ast.TFunction (t1, t2) -> Ast.TFunction (traverse t1, traverse t2)
@@ -96,15 +95,15 @@ let write_subst : Ast.type_name -> Ast.type_name -> (state, unit) t =
 ;;
 
 let rec write_scheme_for_pattern
-  : SetPolyType.t -> Ast.pattern -> Ast.type_name -> (state, unit) t
+  : SetString.t -> Ast.pattern -> Ast.type_name -> (state, unit) t
   =
   fun free_vars pattern tp ->
   let rec_call = write_scheme_for_pattern free_vars in
   match pattern, tp with
   | PWildCard, _ | PConstant _, _ -> return ()
   | PIdentifier x, tp ->
-    let used_tvs = get_tv_from_tp SetPolyType.empty tp in
-    let new_free_vars = SetPolyType.inter used_tvs free_vars in
+    let used_tvs = get_tv_from_tp SetString.empty tp in
+    let new_free_vars = SetString.inter used_tvs free_vars in
     write_var_type x (TFSchem (new_free_vars, tp))
   | PCons (p1, p2), TList t -> rec_call p1 t *> rec_call p2 tp
   | PTuple p_lst, TTuple t_lst ->
@@ -119,7 +118,7 @@ let restore_type : Ast.type_name -> (state, Ast.type_name) t =
   return (apply_substs subs tp)
 ;;
 
-let get_tv_from_env : env_map -> SetPolyType.t =
+let get_tv_from_env : env_map -> SetString.t =
   fun env ->
   MapString.fold
     (fun _var_name tp acc ->
@@ -127,5 +126,5 @@ let get_tv_from_env : env_map -> SetPolyType.t =
       | TFFlat tp -> get_tv_from_tp acc tp
       | TFSchem _ -> acc)
     env
-    SetPolyType.empty
+    SetString.empty
 ;;
