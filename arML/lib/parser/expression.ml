@@ -64,3 +64,47 @@ let parse_tuple p =
 ;;
 
 (* ---------------- *)
+
+(* If then else parser *)
+
+let parse_if_then_else p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
+      ; p.parse_application p
+      ; p.parse_tuple p
+      ; p.parse_fun p
+      ; p.parse_let_in p
+      ; self
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; p.parse_function p
+      ; p.parse_match_with p
+      ; p.parse_empty_list_expr
+      ]
+  in
+
+  parens self
+  <|> 
+  let* cond = string "if" *> parse_expr in
+
+  let* then_branch = skip_wspace *> string "then" *> parse_expr in
+
+  let opt p = option None (p >>| Option.some) in
+
+  let* else_branch = opt (skip_wspace *> string "else") 
+      >>= function
+      | Some _ -> skip_wspace *> parse_expr >>| Option.some
+      | None -> return None
+  in
+
+  return @@ EIfThenElse (cond, then_branch, else_branch)
+;;
+
+(* ---------------- *)
