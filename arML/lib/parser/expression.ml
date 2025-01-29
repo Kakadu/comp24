@@ -29,6 +29,82 @@ let parse_empty_list_expr =
 
 (* ---------------- *)
 
+(* Function parsers *)
+
+let parse_fun p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr = choice 
+    [ p.parse_type_defition p
+    ; p.parse_binary_operation p
+    ; p.parse_unary_operation p
+    ; p.parse_application p
+    ; p.parse_tuple p
+    ; p.parse_constant_expr
+    ; p.parse_identifier_expr
+    ; p.parse_let_in p
+    ; p.parse_if_then_else p
+    ; p.parse_match_with p
+    ; p.parse_function p
+    ; self
+    ; p.parse_empty_list_expr
+    ]
+  in
+
+  parens self
+  <|>
+  let* args = string "fun" *> skip_wspace1 *> sep_by1 skip_wspace parse_pattern in
+
+  let* args_tuple = match args with
+  | hd :: tl -> return (hd, tl)
+  | [] -> fail "Syntax error: function must have at least one argument."
+  in
+
+  let* expr = skip_wspace *> string "->" *> skip_wspace *> parse_expr in
+
+  return @@ EFun (args_tuple, expr)
+;;
+
+let parse_function p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr = choice
+    [ p.parse_type_defition p
+    ; self
+    ; p.parse_binary_operation p
+    ; p.parse_unary_operation p
+    ; p.parse_application p
+    ; p.parse_tuple p
+    ; p.parse_fun p
+    ; p.parse_match_with p
+    ; p.parse_if_then_else p
+    ; p.parse_let_in p
+    ; p.parse_identifier_expr
+    ; p.parse_constant_expr
+    ; p.parse_empty_list_expr
+    ]
+  in
+  let* _ = string "function" *> skip_wspace1 in
+
+  let parse_case =
+    let* pattern = parse_pattern <* skip_wspace in
+    let* case_expr = string "->" *> skip_wspace *> parse_expr in
+    return (pattern, case_expr)
+  in
+
+  let* first_case = (char '|' *> skip_wspace *> parse_case) <|> parse_case in
+
+  let* other_cases = many (skip_wspace *> char '|' *> skip_wspace *> parse_case) in
+
+  return @@ EFunction (first_case, other_cases)
+;;
+
+(* ---------------- *)
+
 (* Tuple parsers *)
 
 let parse_tuple p =
