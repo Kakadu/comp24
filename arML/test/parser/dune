@@ -1,6 +1,7 @@
 (library
  (name parser_tests)
- (libraries arML_lib)
+ (libraries arML_lib parser)
+ (modules BinaryOperation)
  (inline_tests)
  (preprocess
   (pps ppx_expect ppx_deriving.show))
