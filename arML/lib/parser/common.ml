@@ -92,3 +92,37 @@ let parse_constant =
 ;;
 
 (* ---------------- *)
+
+(* Identifiers *)
+
+let parse_name =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let is_acceptable x = is_lower_char x || is_upper_char x || is_digit_char x || is_acceptable_service_char x in
+  parens self <|> take_while1 is_acceptable
+;;
+
+let parse_uncapitalized_name =
+  let* name = parse_name in
+  if (is_lower_char name.[0])
+  then return name
+  else fail "Syntax error: the some name started with a capital letter when a small letter was expected"
+;;
+
+let parse_capitalized_name =
+  let* name = parse_name in
+  if (is_upper_char name.[0])
+  then return name
+  else fail "Syntax error: the some name started with a small letter when a capital letter was expected"
+;;
+
+let parse_identifier =
+  let* name = parse_uncapitalized_name in
+  if is_keyword name
+  then fail "Syntax error: keywords cannot be used as identifiers"
+  else return @@ Id name
+;;
+
+(* ---------------- *)
