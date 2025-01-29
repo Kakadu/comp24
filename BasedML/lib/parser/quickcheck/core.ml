@@ -17,18 +17,6 @@ module Generator = struct
       ()
   ;;
 
-  let gen_typename =
-    fix
-      (fun self () ->
-         let* first_char = char_range 'a' 'z' in
-         let* suf =
-           string_size ~gen:(oneof [ char_range 'a' 'z'; return '_' ]) (int_range 1 10)
-         in
-         let nm = String.make 1 first_char ^ suf in
-         if Parser.is_keyword nm then self () else return nm)
-      ()
-  ;;
-
   let rec gen_type = function
     | 0 ->
       frequency
@@ -36,7 +24,7 @@ module Generator = struct
         ; 1, return Ast.TInt
         ; 1, return Ast.TBool
         ; ( 1
-          , let* nm = gen_typename in
+          , let* nm = gen_name in
             return (Ast.TPoly nm) )
         ]
     | n ->
