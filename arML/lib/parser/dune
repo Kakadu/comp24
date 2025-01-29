@@ -2,6 +2,6 @@
  (name parser)
  (public_name arML.parser)
  (libraries angstrom ast)
- (modules common expression parser pattern declaration type)
+ (modules common expression runner pattern declaration type error pprint)
  (preprocess
   (pps ppx_deriving.show)))

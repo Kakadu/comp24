@@ -7,6 +7,8 @@ open Common
 open Expression
 open Declaration
 open Angstrom
+open Pprint
+open Error
 
 let parsers = 
   { parse_type_defition
@@ -52,4 +54,12 @@ let declaration_parser =
 
 let parse input =
   parse_string ~consume:All (many1 (expression_parser <|> declaration_parser)) input
+;;
+
+let parse_with_print code =
+  (* The 'parse' function converts the result to a string.
+     Used in tests. *)
+  match parse code with
+  | Ok ast -> print_parser_result ast
+  | Error _ -> print_parser_error Syntax_error
 ;;
