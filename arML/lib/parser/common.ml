@@ -4,6 +4,26 @@
 
 open Angstrom
 
+(* Expression parsers description *)
+
+type dispatch =
+  { parse_tuple : dispatch -> expression Angstrom.t
+  ; parse_fun : dispatch -> expression Angstrom.t
+  ; parse_function : dispatch -> expression Angstrom.t
+  ; parse_application : dispatch -> expression Angstrom.t
+  ; parse_binary_operation : dispatch -> expression Angstrom.t
+  ; parse_unary_operation : dispatch -> expression Angstrom.t
+  ; parse_match_with : dispatch -> expression Angstrom.t
+  ; parse_let_in : dispatch -> expression Angstrom.t
+  ; parse_if_then_else : dispatch -> expression Angstrom.t
+  ; parse_type_defition : dispatch -> expression Angstrom.t
+  ; parse_constant_expr: expression Angstrom.t
+  ; parse_identifier_expr: expression Angstrom.t
+  ; parse_empty_list_expr: expression Angstrom.t
+  }
+
+(* ---------------- *)
+
 (* Helper functions *)
 
 let is_whitespace = function
