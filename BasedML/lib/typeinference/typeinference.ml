@@ -244,7 +244,7 @@ let test_infer_exp string_exp =
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
 
-let test_infer_prog s_state string_exp =
+let test_infer_prog_with_state s_state string_exp =
   let res = Parser.parse_program string_exp in
   match res with
   | Result.Ok prog ->

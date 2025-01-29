@@ -110,7 +110,7 @@ let%expect_test "Test simplest generalise" =
 (* Declarations *)
 
 let%expect_test "Test simple declarations" =
-  test_infer_prog empty_state {|let x = 1
+  test_infer_prog_with_state empty_state {|let x = 1
     let y = 2|};
   [%expect {|
     [""x"": int,
@@ -119,14 +119,14 @@ let%expect_test "Test simple declarations" =
 ;;
 
 let%expect_test "Test function decl" =
-  test_infer_prog empty_state {|let a = fun s -> ()|};
+  test_infer_prog_with_state empty_state {|let a = fun s -> ()|};
   [%expect {|
     [""a"": ('_p2 -> unit),
      ] |}]
 ;;
 
 let%expect_test "Test declaration with constraint" =
-  test_infer_prog empty_state {|let (a: ('a -> unit)) = fun s -> s|};
+  test_infer_prog_with_state empty_state {|let (a: ('a -> unit)) = fun s -> s|};
   [%expect {|
     [""a"": (unit -> unit),
      ]
@@ -134,14 +134,16 @@ let%expect_test "Test declaration with constraint" =
 ;;
 
 let%expect_test "Test id declaration" =
-  test_infer_prog empty_state {|let id = fun x-> x|};
+  test_infer_prog_with_state empty_state {|let id = fun x-> x|};
   [%expect {|
     [""id"": ('_p2 -> '_p2),
      ] |}]
 ;;
 
 let%expect_test "Test declaration with generalise" =
-  test_infer_prog empty_state {|let id = fun x-> x
+  test_infer_prog_with_state
+    empty_state
+    {|let id = fun x-> x
     let (x, y) = (id true, id 2)|};
   [%expect {|
     [""id"": ('_p9 -> '_p9),
@@ -151,14 +153,14 @@ let%expect_test "Test declaration with generalise" =
 ;;
 
 let%expect_test "Test occurs check declaration" =
-  test_infer_prog empty_state {|let rec f = fun x -> f|};
+  test_infer_prog_with_state empty_state {|let rec f = fun x -> f|};
   [%expect
     {|
     Infer error: The type variable _p0 occurs inside (TFunction ((TPoly "_p1"), (TPoly "_p0"))) |}]
 ;;
 
 let%expect_test "Test generalise in one scope" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|let rec id = fun x -> x and dup = fun x y -> (id x, id y)|};
   [%expect
@@ -169,7 +171,7 @@ let%expect_test "Test generalise in one scope" =
 ;;
 
 let%expect_test "Test generalise scope 1" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)))
   let (a, b) = ((x (1, 2)), (x (true, false)))|};
@@ -183,7 +185,7 @@ let%expect_test "Test generalise scope 1" =
 ;;
 
 let%expect_test "Test generalise scope 2" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|let ((x, y) :('a * 'a)) = ((fun x-> x), (fun (x, y) -> (x, x)))
   let (a, b) = ((x 1), (y (true, false)))|};
@@ -193,7 +195,7 @@ let%expect_test "Test generalise scope 2" =
 ;;
 
 let%expect_test "Test pseudo EvenOrOdd" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|
 let rec even = fun n -> match n with
@@ -210,7 +212,7 @@ and odd = fun n -> match n with
 ;;
 
 let%expect_test "Test pseudo EvenOrOdd (with minus decl)" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|
 let (-) = fun (a:int) (b:int)->  a
@@ -231,7 +233,7 @@ and odd = fun n -> match n with
 ;;
 
 let%expect_test "Test pseudo Fibo (with `+` and `-` decl)" =
-  test_infer_prog
+  test_infer_prog_with_state
     empty_state
     {|
     let (-) = fun (a:int) (b:int)->  a
@@ -253,7 +255,7 @@ let%expect_test "Test pseudo Fibo (with `+` and `-` decl)" =
 ;;
 
 let%expect_test "Test pseudo Fibo" =
-  test_infer_prog
+  test_infer_prog_with_state
     start_state
     {|
   let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
@@ -280,7 +282,7 @@ let%expect_test "Test pseudo Fibo" =
 ;;
 
 let%expect_test "Test partial application" =
-  test_infer_prog
+  test_infer_prog_with_state
     start_state
     {|
   let rec map = fun f lst-> match lst with
@@ -309,7 +311,7 @@ let%expect_test "Test partial application" =
 ;;
 
 let%expect_test "Test default binops" =
-  test_infer_prog start_state {|
+  test_infer_prog_with_state start_state {|
   let (a, b) = ((true < false), (3 < 4))|};
   [%expect
     {|
@@ -330,7 +332,7 @@ let%expect_test "Test default binops" =
 ;;
 
 let%expect_test "Test binops overriding" =
-  test_infer_prog
+  test_infer_prog_with_state
     start_state
     {|
   let ( < ) = fun a b ->  (b = 2)
