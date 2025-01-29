@@ -83,3 +83,27 @@ let parse_or_pattern pp =
 ;;
 
 (* ---------------- *)
+
+(* Tuple pattern parsers *)
+
+let parse_tuple_pattern pp =
+  fix
+  @@ fun self ->
+  let parse_pattern = choice 
+    [ pp.parse_pattern_type_defition pp
+    ; pp.parse_or_pattern pp
+    ; pp.parse_list_pattern pp
+    ; pp.parse_constant_pattern
+    ; pp.parse_identifier_pattern
+    ; pp.parse_nill_pattern
+    ; pp.parse_any_pattern
+    ; self
+    ]
+  in
+  let* patterns = parens (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern) in
+  match patterns with
+  | pat_1 :: pat_2 :: pats -> return (PTuple (pat_1, pat_2, pats))
+  | _ -> fail "Syntax error: tuple must have at least two patterns"
+;;
+
+(* ---------------- *)
