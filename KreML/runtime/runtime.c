@@ -32,6 +32,7 @@ int64_t *alloc_tuple(int64_t count)
     return tuple;
 }
 
+
 int64_t *alloc_closure(int64_t (*fptr)(void*), int64_t *env, int64_t arity, int64_t envsize)
 {
     closure *c = malloc(sizeof(closure));
@@ -43,6 +44,25 @@ int64_t *alloc_closure(int64_t (*fptr)(void*), int64_t *env, int64_t arity, int6
     return (int64_t *)c;
 }
 
+closure *copy_closure(closure* c) {
+    closure *c_copy = malloc(sizeof(closure));
+    c_copy->fptr = c->fptr;
+    c_copy->arity = c->arity;
+    c_copy->applied_count = c->applied_count;
+    int64_t envsize = c->envsize;
+    c_copy->envsize = envsize;
+    int64_t* env_copy = alloc_tuple(envsize);
+    c_copy->env = env_copy;
+
+    int64_t* env = c->env;
+    for (int64_t i = 0; i < c->envsize; i++)
+    {
+        int64_t* copy_elem = (env_copy + i);
+        *copy_elem = *(env + i);   
+    }
+    return c_copy;
+}
+
 int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
 {
     if (args_count == 0) {
@@ -51,10 +71,8 @@ int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
     }
     
     int64_t *curr_arg = args;
-    if (*curr_arg < 10) {
-        print_int(*curr_arg);
-    }
-    closure *curr_c = c;
+    closure *curr_c = copy_closure(c);
+    // printf("applied_count: %d, arity: %d, args_count: %d, closure_addr: %d\n", (int)(curr_c->applied_count), (int)curr_c->arity, (int)args_count), (int)(curr_c);
     for (size_t i = 0; i < args_count; i++)
     {
         int64_t ac = curr_c->applied_count;
@@ -62,11 +80,9 @@ int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
         {
             int64_t call_res;
             if (curr_c->envsize == 0) {
-                // printf("inside fun without env, arg is %" PRId64 "\n", *curr_arg);
                 int64_t (*callee)(int64_t) = (int64_t (*)(int64_t))curr_c->fptr;
                 call_res = callee(*curr_arg);
             } else {
-                // print_int(322);
                 int64_t (*callee)(int64_t*, int64_t) = (int64_t (*)(int64_t*, int64_t)) curr_c->fptr;
                 call_res = callee(curr_c->env, *curr_arg);
             }

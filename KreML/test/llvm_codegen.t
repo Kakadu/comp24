@@ -21,7 +21,7 @@
   define i64 @fac(i64 %n_0) {
   entry:
     %t_0 = icmp slt i64 %n_0, 1
-    %ifcmp_0 = icmp eq i1 false, %t_0
+    %ifcmp_0 = icmp eq i1 %t_0, false
     br i1 %ifcmp_0, label %else_2, label %then_1
   
   then_1:                                           ; preds = %entry
@@ -248,7 +248,7 @@
     %envelemptr_6 = getelementptr i64, ptr %env, i64 0
     %n_0 = load i64, ptr %envelemptr_6, align 4
     %t_0 = icmp slt i64 %n_0, 1
-    %ifcmp_7 = icmp eq i1 false, %t_0
+    %ifcmp_7 = icmp eq i1 %t_0, false
     br i1 %ifcmp_7, label %else_13, label %then_8
   
   then_8:                                           ; preds = %entry
@@ -329,7 +329,7 @@
   define i64 @f(i64 %x_0) {
   entry:
     %t_0 = icmp slt i64 %x_0, 1
-    %ifcmp_0 = icmp eq i1 false, %t_0
+    %ifcmp_0 = icmp eq i1 %t_0, false
     br i1 %ifcmp_0, label %else_2, label %then_1
   
   then_1:                                           ; preds = %entry
@@ -466,7 +466,7 @@
     %f_0 = load i64, ptr %envelemptr_0, align 4
     %cast_1 = inttoptr i64 %list_1 to ptr
     %t_0 = icmp eq ptr %cast_1, @nil
-    %ifcmp_2 = icmp eq i1 false, %t_0
+    %ifcmp_2 = icmp eq i1 %t_0, false
     br i1 %ifcmp_2, label %else_4, label %then_3
   
   then_3:                                           ; preds = %entry
@@ -475,7 +475,7 @@
   else_4:                                           ; preds = %entry
     %cast_5 = inttoptr i64 %list_1 to ptr
     %t_1 = icmp ne ptr %cast_5, @nil
-    %ifcmp_6 = icmp eq i1 false, %t_1
+    %ifcmp_6 = icmp eq i1 %t_1, false
     br i1 %ifcmp_6, label %else_25, label %then_7
   
   then_7:                                           ; preds = %else_4
@@ -522,7 +522,7 @@
     %action_4 = load i64, ptr %envelemptr_31, align 4
     %cast_32 = inttoptr i64 %list_5 to ptr
     %t_8 = icmp eq ptr %cast_32, @nil
-    %ifcmp_33 = icmp eq i1 false, %t_8
+    %ifcmp_33 = icmp eq i1 %t_8, false
     br i1 %ifcmp_33, label %else_35, label %then_34
   
   then_34:                                          ; preds = %entry
@@ -531,7 +531,7 @@
   else_35:                                          ; preds = %entry
     %cast_36 = inttoptr i64 %list_5 to ptr
     %t_9 = icmp ne ptr %cast_36, @nil
-    %ifcmp_37 = icmp eq i1 false, %t_9
+    %ifcmp_37 = icmp eq i1 %t_9, false
     br i1 %ifcmp_37, label %else_55, label %then_38
   
   then_38:                                          ; preds = %else_35
@@ -700,11 +700,160 @@
     ret i64 0
   }
 
-$ dune exec llvm_codegen <<- EOF
-> let rec fix f x = f (fix f) x
-> let fac self n = if n<=1 then 1 else n * self (n-1)
-> let main =
-> let () = print_int (fix fac 6) in
-> 0
+  $ dune exec llvm_codegen <<- EOF
+  > let rec fix f x = f (fix f) x
+  > let fac self n = if n<=1 then 1 else n * self (n-1)
+  > let main =
+  > let () = print_int (fix fac 6) in
+  > 0
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global i64 0
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare i64 @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @fix(ptr %env, i64 %x_1) {
+  entry:
+    %envelemptr_0 = getelementptr i64, ptr %env, i64 0
+    %f_0 = load i64, ptr %envelemptr_0, align 4
+    %tupled_env_1 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_2 = call ptr @alloc_closure(ptr @fix, ptr %tupled_env_1, i64 2, i64 1)
+    %tupled_args_4 = call ptr @alloc_tuple(i64 1)
+    %elemptr_5 = getelementptr i64, ptr %tupled_args_4, i64 0
+    store i64 %f_0, ptr %elemptr_5, align 4
+    %t_0 = call i64 @call_closure(ptr %closure_temp_2, ptr %tupled_args_4, i64 1)
+    %cast_6 = inttoptr i64 %f_0 to ptr
+    %tupled_args_8 = call ptr @alloc_tuple(i64 2)
+    %elemptr_9 = getelementptr i64, ptr %tupled_args_8, i64 0
+    store i64 %t_0, ptr %elemptr_9, align 4
+    %elemptr_10 = getelementptr i64, ptr %tupled_args_8, i64 1
+    store i64 %x_1, ptr %elemptr_10, align 4
+    %call_closure_7 = call i64 @call_closure(ptr %cast_6, ptr %tupled_args_8, i64 2)
+    ret i64 %call_closure_7
+  }
+  
+  define i64 @fac(ptr %env, i64 %n_3) {
+  entry:
+    %envelemptr_11 = getelementptr i64, ptr %env, i64 0
+    %self_2 = load i64, ptr %envelemptr_11, align 4
+    %t_2 = icmp sle i64 %n_3, 1
+    %ifcmp_12 = icmp eq i1 %t_2, false
+    br i1 %ifcmp_12, label %else_14, label %then_13
+  
+  then_13:                                          ; preds = %entry
+    br label %merge_19
+  
+  else_14:                                          ; preds = %entry
+    %t_3 = sub i64 %n_3, 1
+    %cast_15 = inttoptr i64 %self_2 to ptr
+    %tupled_args_17 = call ptr @alloc_tuple(i64 1)
+    %elemptr_18 = getelementptr i64, ptr %tupled_args_17, i64 0
+    store i64 %t_3, ptr %elemptr_18, align 4
+    %t_4 = call i64 @call_closure(ptr %cast_15, ptr %tupled_args_17, i64 1)
+    %t_41 = mul i64 %n_3, %t_4
+    br label %merge_19
+  
+  merge_19:                                         ; preds = %else_14, %then_13
+    %phi_20 = phi i64 [ 1, %then_13 ], [ %t_41, %else_14 ]
+    ret i64 %phi_20
+  }
+  
+  define i64 @main() {
+  entry:
+    %tupled_env_21 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_22 = call ptr @alloc_closure(ptr @fac, ptr %tupled_env_21, i64 2, i64 1)
+    %tupled_env_23 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_24 = call ptr @alloc_closure(ptr @fix, ptr %tupled_env_23, i64 2, i64 1)
+    %tupled_args_26 = call ptr @alloc_tuple(i64 2)
+    %elemptr_27 = getelementptr i64, ptr %tupled_args_26, i64 0
+    store ptr %closure_temp_22, ptr %elemptr_27, align 8
+    %elemptr_28 = getelementptr i64, ptr %tupled_args_26, i64 1
+    store i64 6, ptr %elemptr_28, align 4
+    %t_6 = call i64 @call_closure(ptr %closure_temp_24, ptr %tupled_args_26, i64 2)
+    %0 = call i64 @print_int(i64 %t_6)
+    ret i64 0
+  }
 
+  $ dune exec llvm_codegen <<- EOF
+  > let adder x y z = x + y + z
+  > let main =
+  >   let adder1 = adder 1 in
+  >   let adder12 = adder1 2 in
+  >   let adder13 = adder1 3 in
+  >   let () = print_int (adder12 3) in
+  >   let () = print_int (adder13 3) in
+  >   0
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global i64 0
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare i64 @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @adder(ptr %env, i64 %z_2) {
+  entry:
+    %envelemptr_0 = getelementptr i64, ptr %env, i64 0
+    %x_0 = load i64, ptr %envelemptr_0, align 4
+    %envelemptr_1 = getelementptr i64, ptr %env, i64 1
+    %y_1 = load i64, ptr %envelemptr_1, align 4
+    %t_0 = add i64 %x_0, %y_1
+    %t_01 = add i64 %t_0, %z_2
+    ret i64 %t_01
+  }
+  
+  define i64 @main() {
+  entry:
+    %tupled_env_2 = call ptr @alloc_tuple(i64 2)
+    %closure_temp_3 = call ptr @alloc_closure(ptr @adder, ptr %tupled_env_2, i64 3, i64 2)
+    %tupled_args_5 = call ptr @alloc_tuple(i64 1)
+    %elemptr_6 = getelementptr i64, ptr %tupled_args_5, i64 0
+    store i64 1, ptr %elemptr_6, align 4
+    %adder1_3 = call i64 @call_closure(ptr %closure_temp_3, ptr %tupled_args_5, i64 1)
+    %cast_7 = inttoptr i64 %adder1_3 to ptr
+    %tupled_args_9 = call ptr @alloc_tuple(i64 1)
+    %elemptr_10 = getelementptr i64, ptr %tupled_args_9, i64 0
+    store i64 2, ptr %elemptr_10, align 4
+    %adder12_4 = call i64 @call_closure(ptr %cast_7, ptr %tupled_args_9, i64 1)
+    %cast_11 = inttoptr i64 %adder1_3 to ptr
+    %tupled_args_13 = call ptr @alloc_tuple(i64 1)
+    %elemptr_14 = getelementptr i64, ptr %tupled_args_13, i64 0
+    store i64 3, ptr %elemptr_14, align 4
+    %adder13_5 = call i64 @call_closure(ptr %cast_11, ptr %tupled_args_13, i64 1)
+    %cast_15 = inttoptr i64 %adder12_4 to ptr
+    %tupled_args_17 = call ptr @alloc_tuple(i64 1)
+    %elemptr_18 = getelementptr i64, ptr %tupled_args_17, i64 0
+    store i64 3, ptr %elemptr_18, align 4
+    %t_4 = call i64 @call_closure(ptr %cast_15, ptr %tupled_args_17, i64 1)
+    %0 = call i64 @print_int(i64 %t_4)
+    %cast_19 = inttoptr i64 %adder13_5 to ptr
+    %tupled_args_21 = call ptr @alloc_tuple(i64 1)
+    %elemptr_22 = getelementptr i64, ptr %tupled_args_21, i64 0
+    store i64 3, ptr %elemptr_22, align 4
+    %t_2 = call i64 @call_closure(ptr %cast_19, ptr %tupled_args_21, i64 1)
+    %1 = call i64 @print_int(i64 %t_2)
+    ret i64 0
+  }
 

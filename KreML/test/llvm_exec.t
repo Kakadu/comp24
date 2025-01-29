@@ -75,6 +75,19 @@
   16
   25
 
+closures mutability check
+  $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so
+  > let adder x y z = x + y + z
+  > let main =
+  >   let adder1 = adder 1 in
+  >   let adder12 = adder1 2 in
+  >   let adder13 = adder1 3 in
+  >   let () = print_int (adder12 3) in
+  >   let () = print_int (adder13 3) in
+  >   0
+  6
+  7
+
   $ dune exec llvm_codegen 2>&1 < manytests/typed/001fac.ml | lli-17 -load ../runtime/runtime.so
   24
   $ dune exec llvm_codegen 2>&1 < manytests/typed/002fac.ml | lli-17 -load ../runtime/runtime.so
@@ -88,17 +101,31 @@
   10
   100
 
-$ dune exec llvm_codegen 2>&1 < manytests/typed/005fix.ml | lli-17 -load ../runtime/runtime.so
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/005fix.ml | lli-17 -load ../runtime/runtime.so
+  720
+
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/006partial.ml | lli-17 -load ../runtime/runtime.so
+  1122
+
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/006partial2.ml | lli-17 -load ../runtime/runtime.so
+  1
+  2
+  3
+  7
+
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/006partial3.ml | lli-17 -load ../runtime/runtime.so
+  4
+  8
+  9
 
 
-$ dune exec llvm_codegen 2>&1 < manytests/typed/015tuples.ml | lli-17 -load ../runtime/runtime.so
-lli-17: lli: <stdin>:1:1: error: expected top-level entity
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/015tuples.ml | lli-17 -load ../runtime/runtime.so
+  1
+  1
+  1
+  1
 
 
 
-  $ dune exec llvm_codegen 2>&1 < manytests/typed/016lists.ml | lli-17 -load ../runtime/runtime.so
-  lli-17: lli: <stdin>:455:47: error: '%phi_279' defined with type 'ptr' but expected 'i64'
-    %phi_281 = phi i64 [ %ys_22, %then_259 ], [ %phi_279, %merge_278 ]
-                                                ^
-  
-  [1]
+$ dune exec llvm_codegen 2>&1 < manytests/typed/016lists.ml | lli-17 -load ../runtime/runtime.so
+lli-17: lli: <stdin>:455:47: error: '%phi_279' defined with type 'ptr' but expected 'i64'

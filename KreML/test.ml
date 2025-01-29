@@ -1,7 +1,6 @@
-let rec fix f x =
-   f (fix f) x
-let fac self n = if n<=1 then 1 else
-   n * self (n-1)
+let rec fac_cps x k = if x <= 1 then k 1 else fac_cps (x - 1) (fun res -> k (res * x))
+
 let main =
-let () = print_int (fix fac 6) in
-0
+  let id x = x in
+  let () = print_int (fac_cps 10 id) in
+  0

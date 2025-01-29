@@ -117,27 +117,36 @@ let rec transform_expr ctx e =
 ;;
 
 let transform s =
-  let id_gen = return in
+  let renew_if_need ctx name =
+    if Base.Map.mem ctx name then fresh_name name else return name
+  in
+  let lookup ctx name = Base.Map.find_exn ctx name |> return in
   let default_ctx = default in
   let transform_struct_item ctx (Str_value (rf, bindings)) =
-    let* ctx =
-      List.fold_left
-        (fun ctx (p, _) ->
-          let* ctx = ctx in
-          let* _, ctx = transform_pattern id_gen ctx p in
-          return ctx)
-        ctx
-        bindings
+    let* refined_ctx =
+      match rf with
+      | Recursive ->
+        List.fold_left
+          (fun ctx (p, _) ->
+            let* ctx = ctx in
+            let* _, ctx = transform_pattern (renew_if_need ctx) ctx p in
+            return ctx)
+          ctx
+          bindings
+      | NonRecursive -> ctx
     in
+    let id_gen ctx = match rf with
+    | Recursive -> lookup ctx (* all bindings are in [refined_context] *)
+    | NonRecursive -> renew_if_need ctx in
     let* bindings', ctx =
-      List.fold_right
-        (fun (p, e) acc ->
+      List.fold_left
+        (fun acc (p, e) ->
           let* acc, ctx = acc in
-          let* _, ctx = transform_pattern id_gen ctx p in
           let* e' = transform_expr ctx e in
-          ((p, e') :: acc, ctx) |> return)
+          let* p', ctx = transform_pattern (id_gen ctx) ctx p in
+          (acc @ [ p', e' ], ctx) |> return)
+        (return ([], refined_ctx))
         bindings
-        (return ([], ctx))
     in
     (Str_value (rf, bindings'), ctx) |> return
   in
