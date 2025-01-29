@@ -12,3 +12,11 @@ let parse_constant_expr =
   return @@ EConstant constant
 
 (* ---------------- *)
+
+(* Identifiers expression parsers *)
+
+let parse_identifier_expr =
+  let* identifier = parse_identifier in
+  return @@ EIdentifier identifier
+
+(* ---------------- *)
