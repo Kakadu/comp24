@@ -1,5 +1,5 @@
 (library
- (name tests)
+ (name parser_tests)
  (libraries arML_lib)
  (inline_tests)
  (preprocess
