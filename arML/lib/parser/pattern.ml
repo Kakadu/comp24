@@ -52,3 +52,34 @@ let parse_any_pattern =
 ;;
 
 (* ---------------- *)
+
+(* Alternative (Or) pattern parser *)
+
+let parse_or_pattern pp =
+  fix
+  @@ fun self ->
+  let parse_left_pattern = choice
+    [ pp.parse_list_pattern pp
+    ; pp.parse_tuple_pattern pp
+    ; pp.parse_constant_pattern
+    ; pp.parse_identifier_pattern
+    ; pp.parse_nill_pattern
+    ; pp.parse_any_pattern
+    ; pp.parse_pattern_type_defition pp
+    ; parens self
+    ]
+  in
+
+  let parse_right_pattern = choice 
+    [ self
+    ; parse_left_pattern
+    ]
+  in
+
+  let* left_pattern = parse_left_pattern in
+  let* _ = skip_wspace *> char '|' <* skip_wspace in
+  let* right_pattern = parse_right_pattern in
+  return @@ POr (left_pattern, right_pattern)
+;;
+
+(* ---------------- *)
