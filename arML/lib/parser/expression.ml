@@ -319,3 +319,72 @@ let parse_application p =
 ;;
 
 (* ---------------- *)
+
+(* Binary operation parser *)
+
+let parse_binary_operation p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_application p
+      ; parens self
+      ; p.parse_unary_operation p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_let_in p
+      ; p.parse_match_with p
+      ; p.parse_if_then_else p
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; parens @@ p.parse_tuple p
+      ]
+  in
+
+  let addition = skip_wspace *> char '+' *> (return @@ EIdentifier (Id "( + )")) in
+  let subtraction = skip_wspace *> char '-' *> (return @@ EIdentifier (Id "( - )")) in
+  let multiplication = skip_wspace *> char '*' *> (return  @@ EIdentifier (Id "( * )")) in
+  let division = skip_wspace *> char '/' *> (return @@ EIdentifier (Id "( / )")) in
+  let eqality = skip_wspace *> char '=' *> (return @@ EIdentifier (Id "( = )")) in
+  let neqality = skip_wspace *> (string "<>" <|> string "!=") *> (return @@ EIdentifier (Id "( <> )")) in
+  let logand = skip_wspace *> string "&&" *> (return @@ EIdentifier (Id "( && )")) in
+  let logor = skip_wspace *> string "||" *> (return @@ EIdentifier (Id "( || )")) in
+  let larger = skip_wspace *> char '>'*> (return @@ EIdentifier (Id "( > )")) in
+  let largerEq = skip_wspace *> string ">=" *> (return @@ EIdentifier (Id "( >= )")) in
+  let less = skip_wspace *> char '<' *> (return @@ EIdentifier (Id "( < )")) in
+  let lessEq = skip_wspace *> string "<=" *> (return @@ EIdentifier (Id "( <= )")) in
+
+  let binary_operations =
+    [ multiplication
+    ; division
+    ; addition
+    ; subtraction
+    ; larger
+    ; largerEq
+    ; less
+    ; lessEq
+    ; eqality
+    ; neqality
+    ; logand
+    ; logor
+    ]
+  in
+
+  let application_constructor op left right = EApplication (op, [left ; right]) in
+
+  let chainl1 e op =
+    let rec go acc = lift2 (fun f x -> application_constructor f acc x) op e >>= go <|> return acc in
+    let* init = e in
+    go init
+  in
+
+  List.fold_left
+    (fun acc x -> chainl1 acc x)
+    (chainl1 parse_expr multiplication)
+    binary_operations
+;;
+
+(* ---------------- *)
