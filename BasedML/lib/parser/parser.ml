@@ -97,8 +97,6 @@ let p_infix_ident constr =
 ;;
 
 let p_infix_ident_pat = p_infix_ident (fun x -> PIdentifier x)
-
-
 let p_infix_ident_expr = p_infix_ident (fun x -> EIdentifier x)
 
 (* Type parsers *)
