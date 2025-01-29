@@ -184,3 +184,58 @@ let parse_if_then_else p =
 ;;
 
 (* ---------------- *)
+
+(* Let ... in ... parser *)
+
+let parse_let_in p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  parens self
+  <|>
+  let parse_expr =
+    choice 
+      [ p.parse_type_defition p
+      ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
+      ; p.parse_application p
+      ; p.parse_tuple p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_if_then_else p
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; self
+      ; p.parse_match_with p
+      ; p.parse_empty_list_expr
+      ]
+  in
+
+  let* decl =
+    skip_wspace *> string "let" *> skip_wspace1 *>
+    option "" (string "rec" <* skip_wspace1)
+  in
+
+  let* args = many1 parse_pattern in
+
+  let tying = skip_wspace *> string "=" in
+  let main_pattern = List.hd args in
+  let* binding_expr = tying *> skip_wspace *> parse_expr in
+
+  let* binding_expr =
+    match args with
+    | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
+    | _ -> return binding_expr
+  in
+
+  let* in_expr = skip_wspace *> string "in" *> skip_wspace *> parse_expr in
+
+  let let_binding pattern expr1 expr2 =
+    match decl with
+    | "rec" -> ERecLetIn ((pattern, expr1), expr2)
+    | _ -> ELetIn ((pattern, expr1), expr2)
+  in
+
+  return (let_binding main_pattern binding_expr in_expr)
+;;
