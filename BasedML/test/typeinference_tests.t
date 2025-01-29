@@ -48,4 +48,4 @@
   Infer error:  Only variables are allowed as left-hand side of `let rec'
 
   $ ./typeinference_demo.exe < manytests/do_not_type/099.ml
-  Infer error:  Only variables are allowed as left-hand side of `let rec'
+  Parser error: : end_of_input
