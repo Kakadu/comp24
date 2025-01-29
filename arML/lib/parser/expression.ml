@@ -388,3 +388,34 @@ let parse_binary_operation p =
 ;;
 
 (* ---------------- *)
+
+(* Type defition parsers *)
+
+let parse_type_defition p =
+  fix
+  @@ fun self ->
+    skip_wspace
+    *>
+    let parse_expr =
+      choice 
+        [ p.parse_binary_operation p
+        ; p.parse_unary_operation p
+        ; p.parse_tuple p
+        ; p.parse_if_then_else p
+        ; p.parse_application p
+        ; p.parse_let_in p
+        ; p.parse_match_with p
+        ; p.parse_fun p
+        ; p.parse_function p
+        ; p.parse_identifier_expr
+        ; p.parse_constant_expr
+        ; p.parse_empty_list_expr
+        ; parens @@ self
+        ]
+    in
+    parens @@
+    let* expr = parse_expr in
+    let* typ = skip_wspace *> char ':' *> parse_type in
+    return @@ ETyped (expr, typ)
+
+(* ---------------- *)
