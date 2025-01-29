@@ -28,6 +28,7 @@ module SetString : sig
   val union : t -> t -> t
   val inter : t -> t -> t
   val diff : t -> t -> t
+  val find_opt : elt -> t -> elt option
   val filter : (elt -> bool) -> t -> t
   val elements : t -> elt list
   val pp : Format.formatter -> t -> unit

@@ -22,7 +22,8 @@ val pp_env_map : Format.formatter -> env_map -> unit
 val show_env_map : env_map -> string
 
 type tv_num = int
-type state = env_map * Substitution.substitution_list * tv_num
+type used_types_set = Help.SetString.t
+type state = env_map * Substitution.substitution_list * tv_num * used_types_set
 
 val fresh_tv : (state, Ast.type_name) Substitution.t
 val read_env : (state, env_map) Substitution.t
