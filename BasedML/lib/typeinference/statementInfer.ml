@@ -22,6 +22,17 @@ let write_env : env_map -> (state, unit) t =
   write (env, substs, tv, uts)
 ;;
 
+let read_uts : (state, used_types_set) t =
+  let* _, _, _, uts = read in
+  return uts
+;;
+
+let write_uts : used_types_set -> (state, unit) t =
+  fun uts ->
+  let* env, substs, tv, _ = read in
+  write (env, substs, tv, uts)
+;;
+
 let fresh_tv : (state, Ast.type_name) t =
   let* env, substs, tv, uts = read in
   let rec gen_new_type_name tv =

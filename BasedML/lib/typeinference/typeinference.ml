@@ -223,7 +223,7 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
 ;;
 
 let infer_prog decls =
-  let _, res = run (infer_declarations decls) start_state in
+  let _, res = run (init_used_type_names decls *> infer_declarations decls) start_state in
   res
 ;;
 
@@ -231,8 +231,8 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (_, substs, _), res =
-      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0)
+    let (_, substs, _, _), res =
+      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0, SetString.empty)
     in
     (match res with
      | Result.Ok tp ->
