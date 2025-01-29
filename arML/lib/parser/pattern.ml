@@ -145,3 +145,29 @@ let parse_list_pattern pp =
 ;;
 
 (* ---------------- *)
+
+(* Pattern's type definition parser *)
+
+let parse_pattern_type_defition pp =
+  fix
+  @@ fun self ->
+    skip_wspace
+    *>
+    let parse_pattern = choice 
+    [ pp.parse_or_pattern pp
+    ; pp.parse_list_pattern pp
+    ; pp.parse_constant_pattern
+    ; pp.parse_identifier_pattern
+    ; pp.parse_nill_pattern
+    ; pp.parse_any_pattern
+    ; pp.parse_tuple_pattern pp
+    ; parens @@ self
+    ]
+  in
+    parens @@
+    let* pat = parse_pattern in
+    let* typ = skip_wspace *> char ':' *> parse_type in
+    return @@ PTyped (pat, typ)
+;;
+
+(* ---------------- *)
