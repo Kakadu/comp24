@@ -239,3 +239,51 @@ let parse_let_in p =
 
   return (let_binding main_pattern binding_expr in_expr)
 ;;
+
+(* ---------------- *)
+
+(* Match with parser *)
+
+let parse_match_with p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  parens self
+  <|>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
+      ; self
+      ; p.parse_application p
+      ; p.parse_tuple p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_let_in p
+      ; p.parse_if_then_else p
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; p.parse_empty_list_expr
+      ]
+  in
+
+  let* expr = string "match" *> skip_wspace *> parse_expr <* skip_wspace <* string "with" <* skip_wspace in
+  
+  let parse_case =
+    let* pattern = skip_wspace *> parse_pattern <* skip_wspace in
+    let* case_expr = string "->" *> skip_wspace *> parse_expr <* skip_wspace in
+    return (pattern, case_expr)
+  in
+
+  let* first_case = (char '|' *> skip_wspace *> parse_case) <|> parse_case in
+
+  let* other_cases =
+    many (char '|' *> skip_wspace *> parse_case)
+  in
+
+  return (EMatchWith (expr, first_case, other_cases))
+;;
+
+(* ---------------- *)
