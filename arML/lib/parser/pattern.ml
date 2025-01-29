@@ -2,7 +2,10 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+open Ast
 open Angstrom
+open Common
+open Type
 
 (* Pattern parsers description *)
 
@@ -16,5 +19,19 @@ type pattern_dispatch =
   ; parse_any_pattern: pattern Angstrom.t
   ; parse_pattern_type_defition: pattern_dispatch -> pattern Angstrom.t
   }
+
+(* ---------------- *)
+
+let parse_constant_pattern =
+  let* constant = parse_constant in
+  return @@ PConst constant
+
+(* ---------------- *)
+
+(* Identifiers pattern parsers *)
+
+let parse_identifier_pattern =
+  let* identifier = parse_identifier in
+  return @@ PVar identifier
 
 (* ---------------- *)
