@@ -19,15 +19,15 @@
    ""( + )"": (int -> (int -> int)),
    ""( - )"": (int -> (int -> int)),
    ""( / )"": (int -> (int -> int)),
-   ""( :: )"": ('p2f -> (('p2f list) -> ('p2f list))),
-   ""( < )"": ('p30 -> ('p30 -> bool)),
-   ""( <= )"": ('p31 -> ('p31 -> bool)),
-   ""( <> )"": ('p32 -> ('p32 -> bool)),
-   ""( = )"": ('p33 -> ('p33 -> bool)),
-   ""( > )"": ('p34 -> ('p34 -> bool)),
-   ""( >= )"": ('p35 -> ('p35 -> bool)),
+   ""( :: )"": ('_p2f -> (('_p2f list) -> ('_p2f list))),
+   ""( < )"": ('_p30 -> ('_p30 -> bool)),
+   ""( <= )"": ('_p31 -> ('_p31 -> bool)),
+   ""( <> )"": ('_p32 -> ('_p32 -> bool)),
+   ""( = )"": ('_p33 -> ('_p33 -> bool)),
+   ""( > )"": ('_p34 -> ('_p34 -> bool)),
+   ""( >= )"": ('_p35 -> ('_p35 -> bool)),
    ""__"": int,
-   ""___"": ('p36 list),
+   ""___"": ('_p36 list),
    ""fibo"": (int -> int),
    ""six"": int,
    ]
@@ -39,7 +39,7 @@
   Infer error: Can not unify `TInt` and `TBool`
 
   $ ./typeinference_demo.exe < manytests/do_not_type/003occurs.ml
-  Infer error: The type variable _p2 occurs inside ('_p2 -> '_p6)
+  Infer error: The type variable _p2 occurs inside (TFunction ((TPoly "_p2"), (TPoly "_p6")))
 
   $ ./typeinference_demo.exe < manytests/do_not_type/004let_poly.ml
   Infer error: Can not unify `TInt` and `TBool`
