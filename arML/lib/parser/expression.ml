@@ -28,3 +28,39 @@ let parse_empty_list_expr =
   return EEmptyList
 
 (* ---------------- *)
+
+(* Tuple parsers *)
+
+let parse_tuple p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_binary_operation p
+      ; p.parse_application p
+      ; p.parse_unary_operation p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_let_in p
+      ; p.parse_match_with p
+      ; p.parse_if_then_else p
+      ; parse_constant_expr
+      ; parse_identifier_expr
+      ; parens @@ self
+      ; p.parse_empty_list_expr
+      ]
+  in
+
+  let main_parser = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_expr) in
+
+  let* elements = parens main_parser <|> main_parser in
+
+  match elements with
+  | pat_1 :: pat_2 :: pats -> return (ETuple (pat_1, pat_2, pats))
+  | _ -> fail "Syntax error: tuple must have at least two elements"
+;;
+
+(* ---------------- *)
