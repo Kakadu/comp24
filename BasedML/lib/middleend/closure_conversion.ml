@@ -269,7 +269,7 @@ let convert_ast ast =
     List.fold_left
       ast
       ~init:([], (module String) |> Set.empty)
-      ~f:(fun (acc, ctx) -> 
+      ~f:(fun (acc, ctx) ->
         function
         | DSingleLet (flag, DLet (pat, body)) ->
           ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
