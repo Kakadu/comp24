@@ -59,11 +59,11 @@
   > fiboCPS n (fun x -> x)
   > EOF
   let  ll_2 acc x y  = (acc ((( + ) x) y))
-  let  ll_1 acc fiboCPS n x  = ((fiboCPS ((( - ) n) 2)) ((ll_2 acc) x))
+  let  ll_1 fiboCPS acc n x  = ((fiboCPS ((( - ) n) 2)) ((ll_2 acc) x))
   let rec ll_0 n acc  = (match n with 
   | 0 -> (acc 0)
   | 1 -> (acc 1)
-  | _ -> ((ll_0 ((( - ) n) 1)) (((ll_1 acc) ll_0) n)))
+  | _ -> ((ll_0 ((( - ) n) 1)) (((ll_1 ll_0) acc) n)))
   let  ll_3 x  = x
   let  fibo n  = ((ll_0 n) ll_3)
 
