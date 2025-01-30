@@ -22,6 +22,7 @@ let infer_expr =
   | Ast.ELetIn ((pattern, expr1), expr2) -> infer_let_in env pattern expr1 expr2
   | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
   | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
+  | Ast.EFunction (case, cases) -> infer_function env (case :: cases)
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -170,6 +171,11 @@ let infer_expr =
     let* sub1, ty1 = helper env expr in
     let env2 = TypeEnv.apply env sub1 in
     infer_cases env2 (sub1, ty1) cases
+  
+  and infer_function env cases =
+    let* fv = fresh_var in
+    let* sub, expr_ty = infer_cases env (Substitution.empty, fv) cases in
+    return (sub, Substitution.apply sub (fv @-> expr_ty))
 
   in
 
