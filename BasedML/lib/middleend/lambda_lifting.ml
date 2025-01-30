@@ -7,8 +7,6 @@ open Llast
 open Base
 
 module COUNTERMONAD = struct
-  type state = int
-
   let return value state = state, value
 
   let ( >>= ) =
@@ -18,10 +16,9 @@ module COUNTERMONAD = struct
   ;;
 
   let ( let* ) = ( >>= )
-  let bind = ( >>= )
   let get state = state, state
   let put state _ = state, ()
-  let run f start_state = f start_state
+  let run f = f
 end
 
 open COUNTERMONAD
@@ -53,9 +50,7 @@ let rec collect_bindings_from_pat = function
 let rec new_name env =
   let* new_num = get_new_num in
   let name_candidate = String.concat [ "ll_"; Int.to_string new_num ] in
-  match Set.mem env name_candidate with
-  | true -> new_name env
-  | false -> return name_candidate
+  if Set.mem env name_candidate then new_name env else return name_candidate
 ;;
 
 let rec collect_function_arguments collected = function
@@ -100,8 +95,7 @@ let prog_lift prog =
       let lifted, ll_list, state = lift_expr ctx acc global_ctx state expr in
       LLConstraint (lifted, typ), ll_list, state
     | ETuple exp_list ->
-      let rec lift_exprs env acc global_ctx state exprs =
-        match exprs with
+      let rec lift_exprs env acc global_ctx state = function
         | [] -> [], acc, state
         | e :: rest ->
           let l, acc, state = lift_expr env acc global_ctx state e in
@@ -111,8 +105,7 @@ let prog_lift prog =
       let lifted_exprs, acc, state = lift_exprs ctx acc global_ctx state exp_list in
       LLTuple lifted_exprs, acc, state
     | EMatch (pat, branches) ->
-      let rec lift_branches env acc global_ctx state branches =
-        match branches with
+      let rec lift_branches env acc global_ctx state = function
         | [] -> [], acc, state
         | (p, e) :: rest ->
           let lifted_expr, acc, state = lift_expr env acc global_ctx state e in
@@ -204,6 +197,6 @@ let prog_lift prog =
 ;;
 
 let lift_ast prog =
-  match prog_lift prog with
-  | lifted, _ -> lifted
+  let lifted, _ = prog_lift prog in
+  lifted
 ;;

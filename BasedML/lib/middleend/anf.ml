@@ -7,8 +7,6 @@ open Llast
 open Ast
 
 module COUNTERMONAD = struct
-  type state = int
-
   let return value state = state, value
 
   let ( >>= ) =
@@ -18,10 +16,9 @@ module COUNTERMONAD = struct
   ;;
 
   let ( let* ) = ( >>= )
-  let bind = ( >>= )
   let get state = state, state
   let put state _ = state, ()
-  let run f start_state = f start_state
+  let run f = f
 end
 
 open COUNTERMONAD
@@ -51,9 +48,9 @@ let rec new_name prefix global =
   let name_candidate =
     Base.String.concat [ prefix_to_string prefix; Base.Int.to_string new_num ]
   in
-  match Base.Set.mem global name_candidate with
-  | true -> new_name prefix global
-  | false -> return name_candidate
+  if Base.Set.mem global name_candidate
+  then new_name prefix global
+  else return name_candidate
 ;;
 
 let rec anf ctx llexpr expr_with_hole =
@@ -152,25 +149,25 @@ let anf_decl env =
 ;;
 
 let transform decls =
-  let rec init_ctx decls acc =
-    match decls with
-    | [] -> acc
-    | LLDSingleLet (_, LLLet (pat, _, _)) :: tl ->
-      init_ctx tl (Lambda_lifting.collect_bindings_from_pat pat)
-    | LLDMutualRecDecl (_, decls) :: tl_decls ->
-      let new_acc =
-        List.fold_left
-          (fun acc (LLLet (pat, _, _)) ->
-             Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
-          (Base.Set.empty (module Base.String))
-          decls
-      in
-      init_ctx tl_decls new_acc
+  let collect_bindings decls =
+    List.fold_left
+      (fun acc decl ->
+         match decl with
+         | LLDSingleLet (_, LLLet (pat, _, _)) ->
+           Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
+         | LLDMutualRecDecl (_, decls) ->
+           List.fold_left
+             (fun acc (LLLet (pat, _, _)) ->
+                Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
+             acc
+             decls)
+      (Base.Set.empty (module Base.String))
+      decls
   in
-  let ctx = init_ctx decls ((module Base.String) |> Base.Set.empty) in
+  let ctx = collect_bindings decls in
   List.map
     (fun decl ->
-       match run (anf_decl ctx decl) 0 with
-       | _, transformed -> transformed)
+       let _, transformed = run (anf_decl ctx decl) 0 in
+       transformed)
     decls
 ;;

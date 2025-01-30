@@ -10,8 +10,7 @@ let unbound_identifiers exp =
   let rec helper =
     (* Takes set of unbound identifiers and binds*)
     let rec bind_pattern pat base_set =
-      let rec bind_pattern_list acc lis =
-        match lis with
+      let rec bind_pattern_list acc = function
         | h :: tl ->
           (match h with
            | PWildCard -> bind_pattern_list acc tl
@@ -57,12 +56,11 @@ let unbound_identifiers exp =
         | PCons (left_pat, right_pat) ->
           Set.union (set_of_pat left_pat) (set_of_pat right_pat)
         | PTuple pats ->
-          let rec tuple_helper acc ls =
-            match ls with
-            | [] -> acc
-            | h :: tl -> tuple_helper (Set.union acc (set_of_pat h)) tl
-          in
-          tuple_helper ((module String) |> Set.empty) pats
+          let initial_set = Set.empty (module String) in
+          List.fold_left
+            ~init:initial_set
+            ~f:(fun acc h -> Set.union acc (set_of_pat h))
+            pats
         | PConstraint (pat, _) -> set_of_pat pat
       in
       let rec collect_binds acc = function
@@ -246,8 +244,7 @@ let convert global_ctx declaration =
                 helper
                 exp ) )
     | DMutualRecDecl (flag, decls) ->
-      let rec handle_mutual_rec global_ctx decls =
-        match decls with
+      let rec handle_mutual_rec global_ctx = function
         | [] -> [], Set.diff global_ctx infix_ops_set
         | DLet (pat, exp) :: tl ->
           let closed_exp =
@@ -271,17 +268,16 @@ let convert_ast ast =
   let close ast =
     List.fold
       ast
-      ~f:(fun (acc, ctx) decl ->
-        match decl with
-        | DSingleLet (flag, DLet (pat, body)) ->
-          ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
-          , Set.union ctx (get_global_names pat) )
-        | DMutualRecDecl (flag, decls) ->
-          convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
+      ~f:(fun (acc, ctx) -> function
+         | DSingleLet (flag, DLet (pat, body)) ->
+           ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
+           , Set.union ctx (get_global_names pat) )
+         | DMutualRecDecl (flag, decls) ->
+           convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
       ~init:([], (module String) |> Set.empty)
   in
-  match ast |> close with
-  | converted_ast, _ -> converted_ast |> List.rev
+  let converted_ast, _ = ast |> close in
+  converted_ast |> List.rev
 ;;
 
 let test_closure_convert ast =
