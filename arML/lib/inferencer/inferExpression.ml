@@ -21,6 +21,7 @@ let infer_expr =
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
   | Ast.ELetIn ((pattern, expr1), expr2) -> infer_let_in env pattern expr1 expr2
   | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
+  | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -148,6 +149,27 @@ let infer_expr =
       let* sub5 = Substitution.compose sub3 sub4 in
       return (sub5, ty4)
     | _ -> fail InvalidRecursionLeftHand
+  
+  and infer_cases env (init_sub, init_expr) cases =
+    let* fv = fresh_var in
+    let f acc case =
+      let acc_sub, acc_ty = acc in
+      let pat, expr = case in
+      let* pat_ty, pat_env = infer_pattern env pat in
+      let* sub2 = Substitution.unify init_expr pat_ty in
+      let env3 = TypeEnv.apply pat_env sub2 in
+      let* expr_sub, expr_ty = helper env3 expr in
+      let* sub3 = Substitution.unify expr_ty acc_ty in
+      let* sub = Substitution.compose_all [ acc_sub; expr_sub; sub2; sub3 ] in
+      let ty = Substitution.apply sub acc_ty in
+      return (sub, ty)
+    in
+    RList.fold_left cases ~init:(return (init_sub, fv)) ~f
+  
+  and infer_match_with env expr cases =
+    let* sub1, ty1 = helper env expr in
+    let env2 = TypeEnv.apply env sub1 in
+    infer_cases env2 (sub1, ty1) cases
 
   in
 
