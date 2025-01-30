@@ -9,8 +9,7 @@ open Ast
 module COUNTERMONAD = struct
   let return value state = state, value
 
-  let ( >>= ) =
-    fun m f state ->
+  let ( >>= ) m f state =
     let value, st = m state in
     f st value
   ;;
@@ -152,21 +151,21 @@ let transform decls =
   let collect_bindings decls =
     List.fold_left
       (fun acc -> function
-         | LLDSingleLet (_, LLLet (pat, _, _)) ->
-           Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
-         | LLDMutualRecDecl (_, decls) ->
-           List.fold_left
-             (fun acc (LLLet (pat, _, _)) ->
-                Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
-             acc
-             decls)
+        | LLDSingleLet (_, LLLet (pat, _, _)) ->
+          Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
+        | LLDMutualRecDecl (_, decls) ->
+          List.fold_left
+            (fun acc (LLLet (pat, _, _)) ->
+              Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
+            acc
+            decls)
       (Base.Set.empty (module Base.String))
       decls
   in
   let ctx = collect_bindings decls in
   List.map
     (fun decl ->
-       let _, transformed = run (anf_decl ctx decl) 0 in
-       transformed)
+      let _, transformed = run (anf_decl ctx decl) 0 in
+      transformed)
     decls
 ;;

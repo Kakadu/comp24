@@ -269,11 +269,11 @@ let convert_ast ast =
     List.fold
       ast
       ~f:(fun (acc, ctx) -> function
-         | DSingleLet (flag, DLet (pat, body)) ->
-           ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
-           , Set.union ctx (get_global_names pat) )
-         | DMutualRecDecl (flag, decls) ->
-           convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
+        | DSingleLet (flag, DLet (pat, body)) ->
+          ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
+          , Set.union ctx (get_global_names pat) )
+        | DMutualRecDecl (flag, decls) ->
+          convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
       ~init:([], (module String) |> Set.empty)
   in
   let converted_ast, _ = ast |> close in

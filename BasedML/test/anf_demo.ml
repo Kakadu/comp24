@@ -14,7 +14,7 @@ let () =
     in
     List.iter
       (fun binding ->
-         Stdlib.Format.printf "%a\n" Middleend.Restore_anf_ast.restore_anf_decl binding)
+        Stdlib.Format.printf "%a\n" Middleend.Restore_anf_ast.restore_anf_decl binding)
       final
   | Error message -> Format.printf "Error: %s\n" message
 ;;

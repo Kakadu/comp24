@@ -9,8 +9,7 @@ open Base
 module COUNTERMONAD = struct
   let return value state = state, value
 
-  let ( >>= ) =
-    fun m f state ->
+  let ( >>= ) m f state =
     let value, st = m state in
     f st value
   ;;
@@ -165,23 +164,22 @@ let prog_lift prog =
       in
       LLDSingleLet (rec_flag, LLLet (pat, pats, lifted)) :: acc, state
     | DMutualRecDecl (rec_flag, dlets) ->
-      let rec dlets_helper lifted_acc llets_acc cur_state =
-        (function
-          | DLet (pat, e) :: tl ->
-            let p, expr =
-              match collect_function_arguments [] e with
-              | Args_body (args, expr) -> args, expr
-            in
-            let lifted, acc, new_state =
-              let new_ctx = (module String) |> Map.empty in
-              lift_expr new_ctx [] global_ctx cur_state expr
-            in
-            dlets_helper
-              (LLLet (pat, p, lifted) :: lifted_acc)
-              (acc @ llets_acc)
-              new_state
-              tl
-          | [] -> List.rev lifted_acc, llets_acc, cur_state)
+      let rec dlets_helper lifted_acc llets_acc cur_state = function
+        | DLet (pat, e) :: tl ->
+          let p, expr =
+            match collect_function_arguments [] e with
+            | Args_body (args, expr) -> args, expr
+          in
+          let lifted, acc, new_state =
+            let new_ctx = (module String) |> Map.empty in
+            lift_expr new_ctx [] global_ctx cur_state expr
+          in
+          dlets_helper
+            (LLLet (pat, p, lifted) :: lifted_acc)
+            (acc @ llets_acc)
+            new_state
+            tl
+        | [] -> List.rev lifted_acc, llets_acc, cur_state
       in
       let lifted_acc, llets_acc, cur_state = dlets_helper [] [] 0 dlets in
       LLDMutualRecDecl (rec_flag, lifted_acc) :: llets_acc, cur_state

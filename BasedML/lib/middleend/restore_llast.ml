@@ -31,8 +31,8 @@ let rec frestore_pattern ppf pat =
     fprintf "(";
     List.iteri
       (fun i pat ->
-         if i != 0 then fprintf ", " else ();
-         rec_call pat)
+        if i != 0 then fprintf ", " else ();
+        rec_call pat)
       lst;
     fprintf ")"
   | PConstant c -> frestore_constant ppf c
@@ -83,8 +83,8 @@ let rec frestore_llexpr ppf exp =
     fprintf "(";
     List.iteri
       (fun i exp ->
-         if i != 0 then fprintf ", " else ();
-         rec_call exp)
+        if i != 0 then fprintf ", " else ();
+        rec_call exp)
       lst;
     fprintf ")"
   | LLMatch (pat_head, pat_exp_lst) ->
@@ -93,10 +93,10 @@ let rec frestore_llexpr ppf exp =
     fprintf " with ";
     List.iter
       (fun (pat, exp) ->
-         fprintf "\n| ";
-         frestore_pattern ppf pat;
-         fprintf " -> ";
-         rec_call exp)
+        fprintf "\n| ";
+        frestore_pattern ppf pat;
+        fprintf " -> ";
+        rec_call exp)
       pat_exp_lst;
     fprintf ")"
   | LLConstraint (exp, tp) ->
@@ -126,23 +126,23 @@ let pp_lllet_declaration fmt = function
     Format.fprintf fmt " ";
     List.iteri
       (fun i binding ->
-         if i != 0 then Format.fprintf fmt " and ";
-         match binding with
-         | LLLet (pat, patterns, exp) ->
-           Format.fprintf fmt " ";
-           frestore_pattern fmt pat;
-           (fun fmt ->
-              List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
-             fmt
-             patterns;
-           Format.fprintf fmt " = %a " frestore_llexpr exp)
+        if i != 0 then Format.fprintf fmt " and ";
+        match binding with
+        | LLLet (pat, patterns, exp) ->
+          Format.fprintf fmt " ";
+          frestore_pattern fmt pat;
+          (fun fmt ->
+            List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
+            fmt
+            patterns;
+          Format.fprintf fmt " = %a " frestore_llexpr exp)
       bindings
 ;;
 
 let pp_llprogram fmt program =
   List.iter
     (fun decl ->
-       pp_lllet_declaration fmt decl;
-       Format.fprintf fmt "\n")
+      pp_lllet_declaration fmt decl;
+      Format.fprintf fmt "\n")
     program
 ;;

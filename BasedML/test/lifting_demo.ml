@@ -11,7 +11,7 @@ let () =
     in
     List.iter
       (fun binding ->
-         Stdlib.Format.printf "%a\n" Middleend.Restore_llast.pp_lllet_declaration binding)
+        Stdlib.Format.printf "%a\n" Middleend.Restore_llast.pp_lllet_declaration binding)
       lifted
   | Error message -> Format.printf "Error: %s\n" message
 ;;
