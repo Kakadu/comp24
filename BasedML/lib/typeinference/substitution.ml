@@ -5,9 +5,7 @@
 include Common.StateMonad
 open Ast
 
-type substitution_list = (Ast.poly_type * type_name) list
-[@@deriving show { with_path = false }]
-
+type substitution_list = (string * type_name) list [@@deriving show { with_path = false }]
 type subs_state = substitution_list
 
 let rec apply_subst (stv, stp) tp =
@@ -54,12 +52,7 @@ let rec unify : type_name -> type_name -> (subs_state, type_name) t =
        return ret_tp
      | Found ->
        fail
-         (Format.asprintf
-            "The type variable %a occurs inside %a"
-            pp_poly_type
-            tv
-            pp_type_name
-            tp))
+         (Format.sprintf "The type variable %s occurs inside %s" tv (show_type_name tp)))
   | TTuple t_lst1, TTuple t_lst2 ->
     let* new_t_lst =
       map_list (fun (tp1, tp2) -> unify tp1 tp2) (List.combine t_lst1 t_lst2)
@@ -77,7 +70,7 @@ let rec unify : type_name -> type_name -> (subs_state, type_name) t =
          (show_type_name tp1)
          (show_type_name tp2))
 
-and insert_subst : Ast.poly_type * type_name -> (subs_state, type_name) t =
+and insert_subst : string * type_name -> (subs_state, type_name) t =
   fun (stv, stp) ->
   let* sub_lst = read in
   match List.assoc_opt stv sub_lst with

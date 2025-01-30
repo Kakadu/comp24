@@ -16,11 +16,11 @@ val ( >>| ) : ('a, 'b) t -> ('b -> 'c) -> ('a, 'c) t
 val ( <* ) : ('a, 'b) t -> ('a, 'c) t -> ('a, 'b) t
 val map_list : ('a -> ('st, 'b) t) -> 'a list -> ('st, 'b list) t
 
-type substitution_list = (Ast.poly_type * Ast.type_name) list
+type substitution_list = (string * Ast.type_name) list
 
 val pp_substitution_list : Format.formatter -> substitution_list -> unit
 val show_substitution_list : substitution_list -> string
-val apply_subst : Ast.poly_type * Ast.type_name -> Ast.type_name -> Ast.type_name
-val apply_substs : (Ast.poly_type * Ast.type_name) list -> Ast.type_name -> Ast.type_name
+val apply_subst : string * Ast.type_name -> Ast.type_name -> Ast.type_name
+val apply_substs : (string * Ast.type_name) list -> Ast.type_name -> Ast.type_name
 val unify : Ast.type_name -> Ast.type_name -> (substitution_list, Ast.type_name) t
-val insert_subst : Ast.poly_type * Ast.type_name -> (substitution_list, Ast.type_name) t
+val insert_subst : string * Ast.type_name -> (substitution_list, Ast.type_name) t

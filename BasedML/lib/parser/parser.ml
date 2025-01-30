@@ -97,8 +97,6 @@ let p_infix_ident constr =
 ;;
 
 let p_infix_ident_pat = p_infix_ident (fun x -> PIdentifier x)
-
-
 let p_infix_ident_expr = p_infix_ident (fun x -> EIdentifier x)
 
 (* Type parsers *)
@@ -109,7 +107,7 @@ let p_basic_type : type_name t =
   <|> Angstrom.string "unit" *> return TUnit
   <|> char '\''
       *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
-         return (TPoly (PTDefault typeNameChar))
+         return (TPoly typeNameChar)
 ;;
 
 let p_tuple_type p_type =

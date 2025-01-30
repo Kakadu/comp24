@@ -223,7 +223,7 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
 ;;
 
 let infer_prog decls =
-  let _, res = run (infer_declarations decls) start_state in
+  let _, res = run (init_used_type_names decls *> infer_declarations decls) start_state in
   res
 ;;
 
@@ -231,8 +231,8 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (_, substs, _), res =
-      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0)
+    let (_, substs, _, _), res =
+      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0, SetString.empty)
     in
     (match res with
      | Result.Ok tp ->
@@ -244,11 +244,22 @@ let test_infer_exp string_exp =
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
 
-let test_infer_prog s_state string_exp =
+let test_infer_prog_with_state s_state string_exp =
   let res = Parser.parse_program string_exp in
   match res with
   | Result.Ok prog ->
     let _, res = run (infer_declarations prog) s_state in
+    (match res with
+     | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
+     | Result.Error s -> Format.printf "Infer error: %s" s)
+  | Result.Error e -> Format.printf "Parser error: %s" e
+;;
+
+let test_infer_prog string_exp =
+  let res = Parser.parse_program string_exp in
+  match res with
+  | Result.Ok prog ->
+    let res = infer_prog prog in
     (match res with
      | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
      | Result.Error s -> Format.printf "Infer error: %s" s)

@@ -1,5 +1,5 @@
-let rec x :: [] = 1 :: []
+let rec Some x = Some 1
 
-let a :: [] = (<)
+let Some a = (<)
 
 let () = (fun x -> x)
