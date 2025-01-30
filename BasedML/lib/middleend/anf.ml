@@ -128,31 +128,30 @@ let rec map1 f = function
 ;;
 
 let anf_decl env =
-  let rec init_ctx pat_list acc =
-    match pat_list with
-    | pat :: tl ->
-      init_ctx tl (Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
-    | [] -> acc
+  let collect_bindings acc pat =
+    Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
   in
-  let proccess_lllet = function
+  let process_lllet = function
     | LLLet (pat, args, e) ->
-      let* aexp = anf (init_ctx args env) e (fun ie -> return (ACExpr (CImmExpr ie))) in
+      let* aexp =
+        anf (List.fold_left collect_bindings env args) e (fun ie ->
+          return (ACExpr (CImmExpr ie)))
+      in
       return (ALet (pat, args, aexp))
   in
   function
   | LLDSingleLet (rec_flag, LLLet (pat, args, e)) ->
-    let* anf_let = proccess_lllet (LLLet (pat, args, e)) in
+    let* anf_let = process_lllet (LLLet (pat, args, e)) in
     return (ADSingleLet (rec_flag, anf_let))
   | LLDMutualRecDecl (rec_flag, decls) ->
-    let* anf_decls = map1 proccess_lllet decls in
+    let* anf_decls = map1 process_lllet decls in
     return (ADMutualRecDecl (rec_flag, anf_decls))
 ;;
 
 let transform decls =
   let collect_bindings decls =
     List.fold_left
-      (fun acc decl ->
-         match decl with
+      (fun acc -> function
          | LLDSingleLet (_, LLLet (pat, _, _)) ->
            Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
          | LLDMutualRecDecl (_, decls) ->
