@@ -19,12 +19,12 @@ let infer_expr =
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
   | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
+  | Ast.EEmptyList -> fresh_var >>= fun fv -> return (Substitution.empty, TList fv)
   | Ast.ELetIn ((pattern, expr1), expr2) -> infer_let_in env pattern expr1 expr2
   | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
   | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
   | Ast.EFunction (case, cases) -> infer_function env (case :: cases)
   | Ast.ETyped (expr, typ) -> infer_typed_expression env expr typ
-  | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
     let* sub1, ty1 = helper env cond in
