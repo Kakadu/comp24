@@ -268,7 +268,8 @@ let convert_ast ast =
   let close ast =
     List.fold
       ast
-      ~f:(fun (acc, ctx) -> function
+      ~f:(fun (acc, ctx) -> 
+        function
         | DSingleLet (flag, DLet (pat, body)) ->
           ( convert ctx (DSingleLet (flag, DLet (pat, body))) :: acc
           , Set.union ctx (get_global_names pat) )
