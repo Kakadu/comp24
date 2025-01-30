@@ -6,6 +6,7 @@ open StateResultMonad
 open StateResultMonad.Syntax
 open CommonFunctions
 open UniquePatternVarsChecker
+open TypeUtils
 
 let infer_pattern =
   let rec helper env = function
@@ -36,6 +37,11 @@ let infer_pattern =
       in
       let ty = TypeTree.TTuple (List.rev ty) in
       return (ty, env)
+    | Ast.PTyped (pattern, pattern_ty) ->
+      let* ty, env = helper env pattern in
+      let pattern_ty = get_type_by_annotation pattern_ty in
+      let* sub = Substitution.unify ty pattern_ty in
+      return (Substitution.apply sub ty, TypeEnv.apply env sub)
     | _ ->
       (* !!! *)
       let* fv = fresh_var in
