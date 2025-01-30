@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-(* open TypeTree *)
+open TypeTree
 open StateResultMonad
 open StateResultMonad.Syntax
 open TypeErrors
@@ -18,6 +18,7 @@ let infer_expr =
   | Ast.EIfThenElse (cond, branch1, branch2) -> infer_if_then_else env cond branch1 branch2
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
   | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
+  | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -77,6 +78,22 @@ let infer_expr =
     in
   
     result
+  
+  and infer_tuple env expr_list =
+    let rec infer_tuple acc = function
+    | [] -> return acc
+    | hd :: tl ->
+      let* sub1, ty1 = helper env hd in
+      let acc_sub, acc_ty = acc in
+      let* sub2 = Substitution.compose sub1 acc_sub in
+      let new_acc = sub2, ty1 :: acc_ty in
+      infer_tuple new_acc tl
+    in
+    let acc = Substitution.empty, [] in
+    let* sub, ty = infer_tuple acc expr_list in
+    let ty_list = List.rev_map (Substitution.apply sub) ty in
+    let ty = TTuple ty_list in
+    return (sub, ty)
 
   in
 
