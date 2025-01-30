@@ -19,6 +19,8 @@ let infer_expr =
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
   | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
+  | Ast.ELetIn ((pattern, expr1), expr2) -> infer_let_in env pattern expr1 expr2
+  | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -94,6 +96,58 @@ let infer_expr =
     let ty_list = List.rev_map (Substitution.apply sub) ty in
     let ty = TTuple ty_list in
     return (sub, ty)
+  
+  and infer_let_in env pattern expr1 expr2 =
+    let* _ = UniquePatternVarsChecker.check_unique_vars pattern in
+    (* Check several bounds *)
+    let* sub1, ty1 = helper env expr1 in
+
+    let env_after_expr1 = TypeEnv.apply env sub1 in
+
+    let rec extend_env_with_pattern env pat ty =
+      (match pat, ty with
+      | Ast.PVar (Id v), ty ->
+        let generalized_ty = Generalize.generalize env ty in
+        return (TypeEnv.extend env v generalized_ty)
+      | Ast.PTuple (p1, p2, ps), TypeTree.TTuple ts ->
+        (match ts with
+        | t1 :: t2 :: rest when List.length rest = List.length ps ->
+          let* env = extend_env_with_pattern env p1 t1 in
+          let* env = extend_env_with_pattern env p2 t2 in
+          List.fold_left2 (fun acc pat ty ->
+            let* env = acc in
+            extend_env_with_pattern env pat ty
+          ) (return env) ps rest
+        | _ -> fail Occurs_check) (* !!! *)
+      | Ast.PAny, _ -> return env
+      | Ast.PNill, TypeTree.TList _ -> return env
+      | _ -> fail Occurs_check) (* !!! *)
+    in
+
+    let* extended_env = extend_env_with_pattern env_after_expr1 pattern ty1 in
+
+    let* sub2, ty2 = helper extended_env expr2 in
+
+    let* sub_final = Substitution.compose sub1 sub2 in
+    let final_ty = Substitution.apply sub_final ty2 in
+    return (sub_final, final_ty)  
+  
+  and infer_rec_let_in env pattern expr1 expr2 =
+    match pattern with
+    | Ast.PVar (Id name) ->
+      let* fv = fresh_var in
+      let env2 = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
+      let* sub1, ty1 = helper env2 expr1 in
+      let* sub2 = Substitution.unify ty1 fv in
+      let* sub3 = Substitution.compose sub1 sub2 in
+      let ty3 = Substitution.apply sub3 fv in
+      let env2 = TypeEnv.apply env sub3 in
+      let schema = Generalize.generalize env ty3 in
+      let env3 = TypeEnv.extend env2 name schema in
+      let* sub4, ty4 = helper env3 expr2 in
+      let* sub5 = Substitution.compose sub3 sub4 in
+      return (sub5, ty4)
+    | _ -> fail InvalidRecursionLeftHand
 
   in
 
