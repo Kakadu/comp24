@@ -100,7 +100,7 @@ let rec anf ctx llexpr expr_with_hole =
       let* fresh_name = new_name Tuple ctx in
       let imm_id = ImmIdentifier fresh_name in
       let* aexp = expr_with_hole imm_id in
-      return (ALetIn (PIdentifier fresh_name, CTuple list, aexp)))
+      return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmTuple list), aexp)))
   | LLApplication (left_exp, right_exp) ->
     anf ctx left_exp (fun imm_left ->
       anf ctx right_exp (fun imm_right ->

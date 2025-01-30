@@ -10,11 +10,11 @@ type immexpr =
   | ImmBool of bool
   | ImmUnit
   | ImmNil
+  | ImmTuple of immexpr list
 
 type cexpr =
   | CApplication of immexpr * immexpr
   | CIfThenElse of immexpr * aexpr * aexpr
-  | CTuple of immexpr list
   | CMatch of pattern * (pattern * aexpr) list
   | CImmExpr of immexpr
   | CConstraint of immexpr * type_name

@@ -37,17 +37,6 @@ let frestore_constant ppf c =
   | CUnit -> fprintf "()"
 ;;
 
-let frestore_imm ppf c =
-  let fprintf x = Format.fprintf ppf x in
-  match c with
-  | ImmInt i -> fprintf "%d" i
-  | ImmBool false -> fprintf "false"
-  | ImmBool true -> fprintf "true"
-  | ImmNil -> fprintf "[]"
-  | ImmIdentifier id -> fprintf "%s" id
-  | ImmUnit -> fprintf "()"
-;;
-
 let pp_list ppf pp sep lst =
   let rec aux = function
     | [] -> ()
@@ -58,6 +47,18 @@ let pp_list ppf pp sep lst =
       aux xs
   in
   aux lst
+;;
+
+let rec frestore_imm ppf c =
+  let fprintf x = Format.fprintf ppf x in
+  match c with
+  | ImmInt i -> fprintf "%d" i
+  | ImmBool false -> fprintf "false"
+  | ImmBool true -> fprintf "true"
+  | ImmNil -> fprintf "[]"
+  | ImmIdentifier id -> fprintf "%s" id
+  | ImmUnit -> fprintf "()"
+  | ImmTuple tup -> fprintf "(%a)" (fun ppf -> pp_list ppf frestore_imm ", ") tup
 ;;
 
 let rec frestore_pattern ppf pat =
@@ -91,7 +92,6 @@ let rec frestore_pattern ppf pat =
 
 let rec restore_cexpr ppf = function
   | CImmExpr imm -> fprintf ppf "%a" frestore_imm imm
-  | CTuple tup -> fprintf ppf "(%a)" (fun ppf -> pp_list ppf frestore_imm ", ") tup
   | CIfThenElse (cond, then_branch, else_branch) ->
     fprintf
       ppf
