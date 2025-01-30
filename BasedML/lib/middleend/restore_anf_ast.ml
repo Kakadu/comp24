@@ -13,7 +13,7 @@ let rec pp_type_name ppf tp =
   | TUnit -> fprintf "unit"
   | TInt -> fprintf "int"
   | TBool -> fprintf "bool"
-  | TPoly name -> fprintf "'%a" pp_poly_type name
+  | TPoly name -> fprintf "'%s" name
   | TTuple lst ->
     fprintf "(";
     List.iteri

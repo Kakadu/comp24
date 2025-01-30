@@ -117,6 +117,12 @@ let rec get_global_names = function
       ~init:((module String) |> Set.empty)
 ;;
 
+let infix_ops_set =
+  Set.of_list
+    (module String)
+    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )" ]
+;;
+
 let convert global_ctx declaration =
   let rec helper lts local_ctx global_ctx = function
     | EConstant const -> EConstant const
@@ -127,6 +133,7 @@ let convert global_ctx declaration =
          List.fold_left ids ~f:(fun f arg -> EApplication (f, arg)) ~init:(EIdentifier id)
        | None -> EIdentifier id)
     | EFunction (pat, body) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       let unbound_names = unbound_identifiers (EFunction (pat, body)) in
       let unbound_names_without_global = Set.diff unbound_names global_ctx in
       let unbound_ids_patterns =
@@ -149,15 +156,18 @@ let convert global_ctx declaration =
         ~f:(fun f arg -> EApplication (f, arg))
         ~init:new_fun
     | EApplication (left, right) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       EApplication
         ( helper lts local_ctx (Set.diff global_ctx lts) left
         , helper lts local_ctx (Set.diff global_ctx lts) right )
     | EIfThenElse (guard, then_branch, else_branch) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       EIfThenElse
         ( helper lts local_ctx global_ctx guard
         , helper lts local_ctx global_ctx then_branch
         , helper lts local_ctx global_ctx else_branch )
     | ELetIn (rec_flag, pat, outer, inner) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       (match pat, outer with
        (* Inner fun *)
        | PIdentifier id, EFunction (_, _) ->
@@ -196,17 +206,22 @@ let convert global_ctx declaration =
            , helper lts local_ctx global_ctx outer
            , helper lts local_ctx global_ctx inner ))
     | ETuple exps ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       let new_exps = List.map exps ~f:(helper lts local_ctx global_ctx) in
       ETuple new_exps
     | EMatch (pat, branches) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       let new_branches =
         List.map branches ~f:(fun (pat, exp) -> pat, helper lts local_ctx global_ctx exp)
       in
       EMatch (pat, new_branches)
     | EConstraint (exp, type_name) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
       EConstraint (helper lts local_ctx global_ctx exp, type_name)
   in
-  let close_declaration global_ctx = function
+  let close_declaration global_ctx =
+    let global_ctx = Set.diff global_ctx infix_ops_set in
+    function
     | DSingleLet (flag, DLet (pat, exp)) ->
       DSingleLet
         ( flag
