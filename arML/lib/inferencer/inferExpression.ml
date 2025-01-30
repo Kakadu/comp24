@@ -23,6 +23,7 @@ let infer_expr =
   | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
   | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
   | Ast.EFunction (case, cases) -> infer_function env (case :: cases)
+  | Ast.ETyped (expr, typ) -> infer_typed_expression env expr typ
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -176,7 +177,13 @@ let infer_expr =
     let* fv = fresh_var in
     let* sub, expr_ty = infer_cases env (Substitution.empty, fv) cases in
     return (sub, Substitution.apply sub (fv @-> expr_ty))
-
+  
+  and infer_typed_expression env expr expr_typ =
+    let* sub, ty = helper env expr in
+    let expr_ty = get_type_by_annotation expr_typ in
+    let* sub2 = Substitution.unify ty expr_ty in
+    let* final_sub = Substitution.compose sub sub2 in
+    return (final_sub, Substitution.apply final_sub ty)
   in
 
   helper
