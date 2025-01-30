@@ -1,0 +1,8 @@
+(include_subdirs unqualified)
+
+(library
+ (name inferencer)
+ (public_name arML.inferencer)
+ (libraries base ast parser)
+ (preprocess
+  (pps ppx_deriving.show)))
