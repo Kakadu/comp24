@@ -64,7 +64,24 @@ let parse_fun p =
   | [] -> fail "Syntax error: function must have at least one argument."
   in
 
+  let* typ_opt = 
+    
+    let typ_parser = 
+      skip_wspace *> char ':' *> skip_wspace *>
+      let* typ = parse_type in
+      return @@ Some typ
+    in
+    
+    option None typ_parser
+  in
+
   let* expr = skip_wspace *> string "->" *> skip_wspace *> parse_expr in
+
+  let* expr =
+    match typ_opt with
+    | Some typ -> return @@ ETyped (expr, typ)
+    | _ -> return expr
+  in
 
   return @@ EFun (args_tuple, expr)
 ;;
@@ -217,6 +234,17 @@ let parse_let_in p =
 
   let* args = many1 parse_pattern in
 
+  let* typ_opt = 
+    
+    let typ_parser = 
+      skip_wspace *> char ':' *> skip_wspace *>
+      let* typ = parse_type in
+      return @@ Some typ
+    in
+    
+    option None typ_parser
+  in
+
   let tying = skip_wspace *> string "=" in
   let main_pattern = List.hd args in
   let* binding_expr = tying *> skip_wspace *> parse_expr in
@@ -224,6 +252,12 @@ let parse_let_in p =
   let* binding_expr =
     match args with
     | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
+    | _ -> return binding_expr
+  in
+
+  let* binding_expr =
+    match typ_opt with
+    | Some typ -> return @@ ETyped (binding_expr, typ)
     | _ -> return binding_expr
   in
 

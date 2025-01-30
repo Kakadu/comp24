@@ -6,6 +6,7 @@ open Angstrom
 open Ast
 open Common
 open Pattern
+open Type
 
 let parse_declaration p =
   let parse_expr =
@@ -34,10 +35,28 @@ let parse_declaration p =
 
   let main_pattern = List.hd args in
 
+  let* typ_opt =
+
+    let typ_parser = 
+      skip_wspace *> char ':' *> skip_wspace *>
+      let* typ = parse_type in
+      return @@ Some typ
+    in
+    
+    option None typ_parser
+  in
+
   let* expr = tying *> skip_wspace *> parse_expr in
+
   let* expr = 
     match args with
     | _ :: md :: tl -> EFun ((md, tl), expr) |> return
+    | _ -> return expr
+  in
+
+  let* expr =
+    match typ_opt with
+    | Some typ -> return @@ ETyped (expr, typ)
     | _ -> return expr
   in
 
