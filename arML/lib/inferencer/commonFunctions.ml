@@ -9,11 +9,11 @@ open StateResultMonad.Syntax
 let fresh_var = fresh >>| fun name -> TVar name
 
 let infer_const = function
-  | Ast.CInt _ -> TPrim GTInt
-  | Ast.CBool _ -> TPrim GTBool
-  | Ast.CChar _ -> TPrim GTChar
-  | Ast.CString _ -> TPrim GTString
-  | Ast.CUnit -> TPrim GTUnit
+  | Ast.CInt _ -> TGround GTInt
+  | Ast.CBool _ -> TGround GTBool
+  | Ast.CChar _ -> TGround GTChar
+  | Ast.CString _ -> TGround GTString
+  | Ast.CUnit -> TGround GTUnit
 ;;
 
 let infer_id env id =

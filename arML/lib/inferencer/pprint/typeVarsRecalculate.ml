@@ -18,7 +18,7 @@ let recalculate_vars typ =
       | TArr (l, r) ->
         let new_last_v, new_acc = helper (last_v, acc) l in
         helper (new_last_v, new_acc) r
-      | TPrim _ -> last_v, acc
+      | TGround _ -> last_v, acc
     in
     let _, res = helper (0, Base.Map.empty (module Base.Int)) typ in
     res

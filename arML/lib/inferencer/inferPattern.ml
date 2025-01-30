@@ -5,10 +5,11 @@
 open StateResultMonad
 open StateResultMonad.Syntax
 open CommonFunctions
-open TypeUtils
+(* open TypeUtils *)
 
 let infer_pattern =
-  let rec helper env = function
+  (* let rec helper env = function *)
+  let helper env = function
     | Ast.PConst c -> return (infer_const c, env)
     | Ast.PVar (Id v) ->
       let* fv = fresh_var in

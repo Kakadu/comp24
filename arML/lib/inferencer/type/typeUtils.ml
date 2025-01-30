@@ -11,7 +11,6 @@ let type_vars =
     | TList typ -> helper acc typ
     | TTuple typ_list -> List.fold_left helper acc typ_list
     | TGround _ -> acc
-    | _ -> acc
   in
   helper TypeVarSet.empty
 ;;
@@ -31,5 +30,5 @@ let rec get_type_by_annotation = function
   | Ast.TDArrow (l, r) -> (get_type_by_annotation l) @-> (get_type_by_annotation r)
   | Ast.TDTuple (fst, snd, other) -> TTuple (get_type_by_annotation fst :: get_type_by_annotation snd :: List.map (fun x -> get_type_by_annotation x) other)
   | Ast.TDList ty -> TList (get_type_by_annotation ty)
-  | Ast.TDPolymorphic -> (get_type_by_annotation (Ast.TDGround (Ast.TDInt))) (* !!! *)
+  | Ast.TDPolymorphic _ -> (get_type_by_annotation (Ast.TDGround (Ast.GTDInt))) (* !!! *)
 ;;
