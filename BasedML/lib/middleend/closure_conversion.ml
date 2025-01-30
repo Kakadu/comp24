@@ -266,8 +266,9 @@ let convert global_ctx declaration =
 
 let convert_ast ast =
   let close ast =
-    List.fold
+    List.fold_left
       ast
+      ~init:([], (module String) |> Set.empty)
       ~f:(fun (acc, ctx) -> 
         function
         | DSingleLet (flag, DLet (pat, body)) ->
@@ -275,7 +276,6 @@ let convert_ast ast =
           , Set.union ctx (get_global_names pat) )
         | DMutualRecDecl (flag, decls) ->
           convert ctx (DMutualRecDecl (flag, decls)) :: acc, ctx)
-      ~init:([], (module String) |> Set.empty)
   in
   let converted_ast, _ = ast |> close in
   converted_ast |> List.rev
