@@ -6,8 +6,8 @@
 open StateResultMonad
 open StateResultMonad.Syntax
 open TypeErrors
-(* open InferPattern *)
-(* open TypeUtils *)
+open InferPattern
+open TypeUtils
 open CommonFunctions
 
 let infer_expr =
@@ -16,6 +16,7 @@ let infer_expr =
   | Ast.EConstant c -> return @@ (Substitution.empty, infer_const c)
   | Ast.EIdentifier (Id name) -> infer_id env name
   | Ast.EIfThenElse (cond, branch1, branch2) -> infer_if_then_else env cond branch1 branch2
+  | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -32,6 +33,27 @@ let infer_expr =
     let* sub = Substitution.compose_all [ sub1; sub2; sub3; sub4; sub5 ] in
     let ty = Substitution.apply sub ty3 in
     return (sub, ty)
+
+  and infer_fun env patterns expr =
+    let* patterns_ty, pattern_env =
+      RList.fold_left patterns
+        ~init:(return ([], env))
+        ~f:(fun (acc_ty, acc_env) pattern ->
+          let* pattern_ty, pattern_env = infer_pattern acc_env pattern in
+          return (pattern_ty :: acc_ty, pattern_env))
+    in
+
+    let* expr_sub, expr_ty = helper pattern_env expr in
+
+    let patterns_ty =
+      List.fold_right
+        (fun ty acc -> ty @-> acc)
+        (List.rev patterns_ty)
+        expr_ty
+    in
+
+    let result_ty = Substitution.apply expr_sub patterns_ty in
+    return (expr_sub, result_ty)
 
   in
 
