@@ -17,6 +17,7 @@ let infer_expr =
   | Ast.EIdentifier (Id name) -> infer_id env name
   | Ast.EIfThenElse (cond, branch1, branch2) -> infer_if_then_else env cond branch1 branch2
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
+  | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
   | _ -> fail Occurs_check (* !!! *)
 
   and infer_if_then_else env cond branch1 branch2 =
@@ -54,6 +55,28 @@ let infer_expr =
 
     let result_ty = Substitution.apply expr_sub patterns_ty in
     return (expr_sub, result_ty)
+  
+  and infer_application env func_expr args_exprs =
+    let* sub1, func_ty = helper env func_expr in
+
+    let result =
+      List.fold_left
+        (fun acc args_exprs ->
+            let* acc_sub, acc_func_ty = acc in
+            let env' = TypeEnv.apply env acc_sub in
+            let* sub_arg, arg_ty = helper env' args_exprs in
+            let* result_ty = fresh_var in
+            let ty1 = Substitution.apply sub_arg acc_func_ty in
+            let ty2 = arg_ty @-> result_ty in
+            let* sub_unify = Substitution.unify ty1 ty2 in
+            let* sub_combined = Substitution.compose_all [ acc_sub; sub_arg; sub_unify ] in
+            let updated_func_ty = Substitution.apply sub_combined result_ty in
+            return (sub_combined, updated_func_ty))
+        (return (sub1, func_ty))
+        args_exprs
+    in
+  
+    result
 
   in
 
