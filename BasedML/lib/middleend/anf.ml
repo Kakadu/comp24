@@ -98,13 +98,13 @@ let rec anf ctx llexpr expr_with_hole =
       let* aexp = expr_with_hole imm_id in
       return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmTuple list), aexp)))
   | LLApplication (left, right) ->
-    let rec sep_llapp = function
+    let rec sep_llapp exp cont =
+      match exp with
       | LLApplication (left, right) ->
-        let rest, llexp = sep_llapp left in
-        right :: rest, llexp
-      | llexp -> [], llexp
+        sep_llapp left (fun rest_llexp -> cont (right :: rest_llexp))
+      | llexp -> cont [], llexp
     in
-    let rest, llexp = sep_llapp (LLApplication (left, right)) in
+    let rest, llexp = sep_llapp (LLApplication (left, right)) Fun.id in
     anf ctx llexp (fun imm_exp ->
       anf_list ctx (List.rev rest) (fun imm_rest ->
         let* fresh_name = new_name Application ctx in
