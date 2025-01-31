@@ -18,8 +18,8 @@ let rec pp_type_name ppf tp =
     fprintf "(";
     List.iteri
       (fun i tp ->
-         if i <> 0 then fprintf " * " else ();
-         rec_call tp)
+        if i <> 0 then fprintf " * " else ();
+        rec_call tp)
       lst;
     fprintf ")"
   | TFunction (tp_arg, tp_ret) ->
@@ -77,8 +77,8 @@ let rec frestore_pattern ppf pat =
     fprintf "(";
     List.iteri
       (fun i pat ->
-         if i != 0 then fprintf ", " else ();
-         rec_call pat)
+        if i != 0 then fprintf ", " else ();
+        rec_call pat)
       lst;
     fprintf ")"
   | PConstant c -> frestore_constant ppf c
@@ -109,11 +109,10 @@ let rec restore_cexpr ppf = function
       frestore_pattern
       pat_head
       (fun ppf ->
-         pp_list
-           ppf
-           (fun ppf (pat, ae) ->
-              fprintf ppf "| %a -> %a" frestore_pattern pat pp_aexpr ae)
-           "\n")
+        pp_list
+          ppf
+          (fun ppf (pat, ae) -> fprintf ppf "| %a -> %a" frestore_pattern pat pp_aexpr ae)
+          "\n")
       pat_exp_lst
   | CApplication (left, rigth) ->
     fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
@@ -157,16 +156,16 @@ let restore_anf_decl fmt = function
     Format.fprintf fmt " ";
     List.iteri
       (fun i binding ->
-         if i != 0 then Format.fprintf fmt " and ";
-         match binding with
-         | ALet (pat, patterns, exp) ->
-           Format.fprintf fmt " ";
-           frestore_pattern fmt pat;
-           (fun fmt ->
-              List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
-             fmt
-             patterns;
-           Format.fprintf fmt " = %a " pp_aexpr exp)
+        if i != 0 then Format.fprintf fmt " and ";
+        match binding with
+        | ALet (pat, patterns, exp) ->
+          Format.fprintf fmt " ";
+          frestore_pattern fmt pat;
+          (fun fmt ->
+            List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
+            fmt
+            patterns;
+          Format.fprintf fmt " = %a " pp_aexpr exp)
       bindings
 ;;
 
