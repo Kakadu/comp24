@@ -285,7 +285,7 @@
 <a href="#L116">116</a>
 <a href="#L117">117</a>
 </pre>
-<pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
+<pre><code class="ocaml">(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -324,7 +324,7 @@ and closure =
 
 type fun_with_env =
   { arg : ident
-  ; captured_args : ident list
+  ; env_vars : ident list
   ; arity : int
   ; body : flambda
   }
@@ -394,9 +394,9 @@ and pp_list ppf list elem_printer =
 let pp_fl_fun ppf = function
   | <span data-count="0">F</span>un_without_env (Some arg, body) -&gt; fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
   | <span data-count="0">F</span>un_without_env (None, body) -&gt; fprintf ppf "@[() {%a} @]@." pp_flambda body
-  | <span data-count="0">F</span>un_with_env { arg; captured_args; body; _ } -&gt;
+  | <span data-count="0">F</span>un_with_env { arg; env_vars; body; _ } -&gt;
     let print_args ppf list = <span data-count="0">L</span>ist.iter (fun s -&gt; <span data-count="0">f</span>printf ppf "%s " s) list in
-    fprintf ppf "@[(%a) {%a} @]@." print_args (captured_args @ [ arg ]) pp_flambda body
+    fprintf ppf "@[(%a) {%a} @]@." print_args (env_vars @ [ arg ]) pp_flambda body
 ;;
 
 let pp ppf flstructure =

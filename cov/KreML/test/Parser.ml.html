@@ -68,11 +68,11 @@
 <a href="#L19">19</a>
 <a href="#L20">20</a>
 </pre>
-<pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
+<pre><code class="ocaml">(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Kreml_lib.Parser
+open Cursedml_lib.Parser
 
 let () =
   let input = In_channel.input_all Stdlib.stdin in
@@ -82,9 +82,9 @@ let () =
     fprint<span data-count="18">f</span>
       std_formatter
       "%a \n %a"
-      Kreml_lib.Ast_printer.pp_structure
+      Cursedml_lib.Ast_printer.pp_structure
       s
-      Kreml_lib.Ast.pp_structure
+      Cursedml_lib.Ast.pp_structure
       s
   | <span data-count="0">E</span>rror msg -&gt; fprint<span data-count="0">f</span> std_formatter "%s" msg
 ;;
