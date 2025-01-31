@@ -13,7 +13,8 @@ let () =
     (match Inferencer.run structure with
      | Ok _ ->
        let alpha = Alpha_transformer.transform structure in
-       let arities, anf = Anf.transform alpha in
+       let mf_structure = Match_elimination.eliminate alpha in
+       let arities, anf = Anf.transform mf_structure in
        let flstructure = Closure_conversion.cc arities anf in
        Flambda.pp std_formatter flstructure
      | Error error ->

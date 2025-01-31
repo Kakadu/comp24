@@ -857,3 +857,90 @@
     ret i64 0
   }
 
+  $ dune exec llvm_codegen < manytests/typed/008ascription.ml
+  ; ModuleID = 'main'
+  source_filename = "main"
+  
+  @nil = global ptr null
+  @unit = global i64 0
+  
+  declare ptr @alloc_tuple(i64 %0)
+  
+  declare ptr @alloc_closure(ptr %0, ptr %1, i64 %2, i64 %3)
+  
+  declare i64 @call_closure(ptr %0, ptr %1, i64 %2)
+  
+  declare i64 @print_int(i64 %0)
+  
+  declare ptr @list_cons(i64 %0, ptr %1)
+  
+  declare void @partial_match(i64 %0)
+  
+  define i64 @addi(ptr %env, i64 %x_2) {
+  entry:
+    %envelemptr_0 = getelementptr i64, ptr %env, i64 0
+    %f_0 = load i64, ptr %envelemptr_0, align 4
+    %envelemptr_1 = getelementptr i64, ptr %env, i64 1
+    %g_1 = load i64, ptr %envelemptr_1, align 4
+    %cast_2 = inttoptr i64 %g_1 to ptr
+    %tupled_args_4 = call ptr @alloc_tuple(i64 1)
+    %elemptr_5 = getelementptr i64, ptr %tupled_args_4, i64 0
+    store i64 %x_2, ptr %elemptr_5, align 4
+    %t_0 = call i64 @call_closure(ptr %cast_2, ptr %tupled_args_4, i64 1)
+    %cast_6 = inttoptr i64 %f_0 to ptr
+    %tupled_args_8 = call ptr @alloc_tuple(i64 2)
+    %elemptr_9 = getelementptr i64, ptr %tupled_args_8, i64 0
+    store i64 %x_2, ptr %elemptr_9, align 4
+    %elemptr_10 = getelementptr i64, ptr %tupled_args_8, i64 1
+    store i64 %t_0, ptr %elemptr_10, align 4
+    %call_closure_7 = call i64 @call_closure(ptr %cast_6, ptr %tupled_args_8, i64 2)
+    ret i64 %call_closure_7
+  }
+  
+  define i64 @fresh_fun_0(ptr %env, i64 %b_4) {
+  entry:
+    %envelemptr_11 = getelementptr i64, ptr %env, i64 0
+    %x_3 = load i64, ptr %envelemptr_11, align 4
+    %0 = trunc i64 %b_4 to i1
+    %ifcmp_12 = icmp eq i1 %0, false
+    br i1 %ifcmp_12, label %else_14, label %then_13
+  
+  then_13:                                          ; preds = %entry
+    %t_0 = add i64 %x_3, 1
+    br label %merge_15
+  
+  else_14:                                          ; preds = %entry
+    %t_01 = mul i64 %x_3, 2
+    br label %merge_15
+  
+  merge_15:                                         ; preds = %else_14, %then_13
+    %phi_16 = phi i64 [ %t_0, %then_13 ], [ %t_01, %else_14 ]
+    ret i64 %phi_16
+  }
+  
+  define i64 @fresh_fun_1(i64 %_start_5) {
+  entry:
+    %t_4 = sdiv i64 %_start_5, 2
+    %t_41 = icmp eq i64 %t_4, 0
+    %0 = sext i1 %t_41 to i64
+    ret i64 %0
+  }
+  
+  define i64 @main() {
+  entry:
+    %closure_temp_18 = call ptr @alloc_closure(ptr @fresh_fun_1, ptr @nil, i64 1, i64 0)
+    %tupled_env_19 = call ptr @alloc_tuple(i64 1)
+    %closure_temp_20 = call ptr @alloc_closure(ptr @fresh_fun_0, ptr %tupled_env_19, i64 2, i64 1)
+    %tupled_env_21 = call ptr @alloc_tuple(i64 2)
+    %closure_temp_22 = call ptr @alloc_closure(ptr @addi, ptr %tupled_env_21, i64 3, i64 2)
+    %tupled_args_24 = call ptr @alloc_tuple(i64 3)
+    %elemptr_25 = getelementptr i64, ptr %tupled_args_24, i64 0
+    store ptr %closure_temp_20, ptr %elemptr_25, align 8
+    %elemptr_26 = getelementptr i64, ptr %tupled_args_24, i64 1
+    store ptr %closure_temp_18, ptr %elemptr_26, align 8
+    %elemptr_27 = getelementptr i64, ptr %tupled_args_24, i64 2
+    store i64 4, ptr %elemptr_27, align 4
+    %t_2 = call i64 @call_closure(ptr %closure_temp_22, ptr %tupled_args_24, i64 3)
+    %0 = call i64 @print_int(i64 %t_2)
+    ret i64 0
+  }

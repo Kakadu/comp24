@@ -4,6 +4,7 @@ open Ast
 open Anf
 open Utils
 open Utils.Counter
+open Llvm_utils
 
 let context = global_context ()
 let mdl = create_module context "main"
@@ -107,15 +108,6 @@ let add_builtin_functions () =
   ()
 ;;
 
-let block_terminates_with_unreachable block =
-  match Llvm.block_terminator block with
-  | Some terminator ->
-    (match Llvm.instr_opcode terminator with
-     | Llvm.Opcode.Unreachable -> true
-     | _ -> false)
-  | None -> false
-;;
-
 let set_globals () =
   let _ = define_global "nil" (const_null ptr_type) mdl in
   let _ = define_global "unit" (iconst 0) mdl in
@@ -126,22 +118,24 @@ let codegen_const = function
   | Const_int i -> iconst i
   | Const_bool c ->
     let i1_typ = i1_type context in
-     if c then const_int i1_typ 1 else const_int i1_typ 0 
+    if c then const_int i1_typ 1 else const_int i1_typ 0
   | Const_nil -> lookup_global_exn "nil"
   | Const_unit -> lookup_global_exn "unit"
 ;;
 
-let codegen_binop name x y = 
+let codegen_binop name x y =
   let xtyp = type_of x in
   let ytyp = type_of y in
-  let x, y = if xtyp <> ytyp then 
-    let xsize = integer_bitwidth xtyp in
-    let ysize = integer_bitwidth ytyp in
-    if xsize < ysize then
-      x, build_trunc y xtyp "" builder
-    else
-      build_trunc x ytyp "" builder, y
-  else x, y in
+  let x, y =
+    if xtyp <> ytyp
+    then (
+      let xsize = integer_bitwidth xtyp in
+      let ysize = integer_bitwidth ytyp in
+      if xsize < ysize
+      then x, build_trunc y xtyp "" builder
+      else build_trunc x ytyp "" builder, y)
+    else x, y
+  in
   function
   | Eq -> build_icmp Icmp.Eq x y name builder
   | Neq -> build_icmp Icmp.Ne x y name builder
@@ -262,6 +256,20 @@ let rec codegen_flambda = function
     let* e = codegen_flambda e in
     let else_bb_after_gen = insertion_block builder in
     let* fresh_merge = fresh_name "merge" in
+    let t, e =
+      (* types may differ if either t or e is a function call, which
+         return value is int, and the other one is a pointer. we cast int to pointer *)
+      let ttype, etype = type_of t, type_of e in
+      match ttype, etype with
+      | _ when ttype = etype || etype = void_type context -> t, e
+      | ttype, _ when ttype = ptr_type ->
+        position_at_end else_bb_after_gen builder;
+        t, build_inttoptr e ptr_type "" builder
+      | _, etype when etype = ptr_type ->
+        position_at_end then_bb_after_gen builder;
+        build_inttoptr t ptr_type "" builder, e
+      | _ -> unreachable ()
+    in
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;
     let* fresh_phi = fresh_name "phi" in
@@ -337,7 +345,7 @@ let codegen_fun_body f decl =
   let* f = f in
   let* body =
     match f with
-    | Fun_with_env { arg = arg_name; captured_args; body; _ } ->
+    | Fun_with_env { arg = arg_name; env_vars; body; _ } ->
       let env = param decl 0 in
       set_value_name "env" env;
       let arg = param decl 1 in
@@ -355,7 +363,7 @@ let codegen_fun_body f decl =
             Hashtbl.add named_values name local;
             return (idx + 1))
           (return 0)
-          captured_args
+          env_vars
       in
       (* name arg *)
       set_value_name arg_name arg;
@@ -381,15 +389,19 @@ let codegen_fun_body f decl =
       return body
   in
   let* () =
-    if type_of body <> int_type
+     if type_of body = ptr_type
     then
       let* fresh = fresh_name "cast" in
       let cast = build_ptrtoint body int_type fresh builder in
       let _ = build_ret cast builder in
       return ()
+    else if type_of body = i1_type context
+    then
+      let _ = build_ret (build_sext body int_type "" builder) builder in
+    return ()
     else (
       let _ = build_ret body builder in
-      return ())
+       return ())
   in
   (* some merge blocks may have not termination instruction
      since ret is inserted only in the last block *)
@@ -412,20 +424,26 @@ let codegen_fun_body f decl =
 let codegen_program program =
   add_builtin_functions ();
   set_globals ();
-  let declarations = List.map (fun (name, f) ->
-    match f with
-    | Fun_with_env _ ->
-      let f = declare_function name fun_with_env_typ mdl in
-      Hashtbl.add functions_types name fun_with_env_typ;
-       f
-    | Fun_without_env (None, _) ->
-      let fnty = function_type int_type [||] in
-      let f = declare_function name fnty mdl in
-      Hashtbl.add functions_types name fnty;  f
-    | Fun_without_env (Some _, _) ->
-      let fnty = function_type int_type [| int_type |] in
-      let f = declare_function name fnty mdl in
-      Hashtbl.add functions_types name fnty;f ) program in
+  let declarations =
+    List.map
+      (fun (name, f) ->
+        match f with
+        | Fun_with_env _ ->
+          let f = declare_function name fun_with_env_typ mdl in
+          Hashtbl.add functions_types name fun_with_env_typ;
+          f
+        | Fun_without_env (None, _) ->
+          let fnty = function_type int_type [||] in
+          let f = declare_function name fnty mdl in
+          Hashtbl.add functions_types name fnty;
+          f
+        | Fun_without_env (Some _, _) ->
+          let fnty = function_type int_type [| int_type |] in
+          let f = declare_function name fnty mdl in
+          Hashtbl.add functions_types name fnty;
+          f)
+      program
+  in
   let state =
     List.fold_left2
       (fun acc (_, f) decl ->
@@ -433,7 +451,8 @@ let codegen_program program =
         let* () = codegen_fun_body (return f) decl in
         return ())
       (return ())
-      program declarations
+      program
+      declarations
   in
   let _, _ = run state 0 in
   match Llvm_analysis.verify_module mdl with

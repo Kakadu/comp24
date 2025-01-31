@@ -37,7 +37,7 @@ and closure =
 
 type fun_with_env =
   { arg : ident
-  ; captured_args : ident list
+  ; env_vars : ident list
   ; arity : int
   ; body : flambda
   }
@@ -107,9 +107,9 @@ and pp_list ppf list elem_printer =
 let pp_fl_fun ppf = function
   | Fun_without_env (Some arg, body) -> fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
   | Fun_without_env (None, body) -> fprintf ppf "@[() {%a} @]@." pp_flambda body
-  | Fun_with_env { arg; captured_args; body; _ } ->
+  | Fun_with_env { arg; env_vars; body; _ } ->
     let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list in
-    fprintf ppf "@[(%a) {%a} @]@." print_args (captured_args @ [ arg ]) pp_flambda body
+    fprintf ppf "@[(%a) {%a} @]@." print_args (env_vars @ [ arg ]) pp_flambda body
 ;;
 
 let pp ppf flstructure =

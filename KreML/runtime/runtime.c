@@ -104,7 +104,7 @@ typedef struct list_node
     struct list_node *next;
 } list_node;
 
-list_node* list_cons(int64_t v, list_node* tail) {
+list_node *list_cons(int64_t v, list_node* tail) {
     list_node* new_node = malloc(sizeof(list_node));
     new_node-> value = v;
     new_node->next = tail;
