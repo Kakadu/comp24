@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -209,8 +209,7 @@ and resolve_fun f =
   let abstraction acc p =
     let* acc_body, acc_args = acc in
     match p with
-    | Pat_var id ->
-      return (acc_body, id :: acc_args)
+    | Pat_var id -> return (acc_body, id :: acc_args)
     | p ->
       (* Performs codegen fun (a, b) --> body ~~~->
          fun ab -> let a = ab.first in

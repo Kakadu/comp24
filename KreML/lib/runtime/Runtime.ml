@@ -15,9 +15,7 @@ let partial_match_error e =
   Expr_app (Expr_var partial_match, e)
 ;;
 
-let runtime_funs =
-  [ alloc_closure; alloc_tuple; list_cons; partial_match ]
-;;
+let runtime_funs = [ alloc_closure; alloc_tuple; list_cons; partial_match ]
 
 let is_runtime_fun f =
   match List.find_opt (( = ) f) runtime_funs with

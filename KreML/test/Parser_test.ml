@@ -1,9 +1,9 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Kreml_lib.Parser
-open Kreml_lib.Ast
+open Cursedml_lib.Parser
+open Cursedml_lib.Ast
 
 let%expect_test "patterns test" =
   let cases =

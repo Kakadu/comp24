@@ -1,5 +1,5 @@
 (library
- (name kreml_lib)
+ (name cursedml_lib)
  (modules
   Ast
   Ast_printer
@@ -12,7 +12,7 @@
   Parser
   Inferencer
   Runtime
-  Kstdlib
+  Cstdlib
   Llvm_codegen
   Llvm_utils
   Utils)

@@ -1,7 +1,7 @@
 (library
- (name kreml_lib_test)
+ (name cursedml_lib_test)
  (modules Parser_test Inferencer_test)
- (libraries base ppx_show.runtime kreml_lib)
+ (libraries base ppx_show.runtime cursedml_lib)
  (preprocess
   (pps ppx_deriving.show ppx_expect))
  (inline_tests)
@@ -12,7 +12,7 @@
  (public_name parser)
  (name parser)
  (modules Parser)
- (libraries kreml_lib)
+ (libraries cursedml_lib)
  (instrumentation
   (backend bisect_ppx)))
 
@@ -20,7 +20,7 @@
  (public_name inferencer)
  (name inferencer)
  (modules Inferencer)
- (libraries kreml_lib)
+ (libraries cursedml_lib)
  (instrumentation
   (backend bisect_ppx)))
 
@@ -28,7 +28,7 @@
  (public_name transformers)
  (name transformers)
  (modules transformers)
- (libraries kreml_lib)
+ (libraries cursedml_lib)
  (instrumentation
   (backend bisect_ppx)))
 
@@ -36,7 +36,7 @@
  (public_name closure_conv)
  (name closure_conv)
  (modules Closure_conv)
- (libraries kreml_lib)
+ (libraries cursedml_lib)
  (instrumentation
   (backend bisect_ppx)))
 
@@ -44,7 +44,7 @@
  (public_name llvm_codegen)
  (name llvm_codegen)
  (modules Llvm_codegen)
- (libraries kreml_lib)
+ (libraries cursedml_lib)
  (link_deps
   (file ../runtime/runtime.so))
  (instrumentation
