@@ -1,14 +1,14 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Kreml_lib.Inferencer
+open Cursedml_lib.Inferencer
 
 let parse_program input =
   let open Stdlib.Format in
-  match Kreml_lib.Parser.run input with
+  match Cursedml_lib.Parser.run input with
   | Ok structure ->
-    (match Kreml_lib.Inferencer.run structure with
+    (match Cursedml_lib.Inferencer.run structure with
      | Result.Ok env -> TypeEnv.pp std_formatter env
      | Error e -> pp_error std_formatter e)
   | Error msg -> pp_print_string std_formatter msg

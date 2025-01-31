@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -13,7 +13,7 @@ let default =
   List.fold_left
     (fun map f -> Base.Map.set map ~key:f ~data:f)
     empty
-    (Ast.binary_ops @ Kstdlib.stdlib_funs @ Runtime.runtime_funs)
+    (Ast.binary_ops @ Cstdlib.stdlib_funs @ Runtime.runtime_funs)
 ;;
 
 open Utils.Counter
@@ -135,9 +135,11 @@ let transform s =
           bindings
       | NonRecursive -> ctx
     in
-    let id_gen ctx = match rf with
-    | Recursive -> lookup ctx (* all bindings are in [refined_context] *)
-    | NonRecursive -> renew_if_need ctx in
+    let id_gen ctx =
+      match rf with
+      | Recursive -> lookup ctx (* all bindings are in [refined_context] *)
+      | NonRecursive -> renew_if_need ctx
+    in
     let* bindings', ctx =
       List.fold_left
         (fun acc (p, e) ->

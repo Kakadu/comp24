@@ -1,16 +1,16 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (* alpha conv -> match elim -> anf -> clos conv *)
-open Kreml_lib
+open Cursedml_lib
 
 let () =
   let open Stdlib.Format in
   let input = In_channel.input_all stdin in
   match Parser.run input with
   | Ok structure ->
-    (match Kreml_lib.Inferencer.run structure with
+    (match Cursedml_lib.Inferencer.run structure with
      | Ok _ ->
        let mf_structure = Match_elimination.eliminate structure in
        let alpha_structure = Alpha_transformer.transform mf_structure in

@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Llvm
 open Flambda
 open Ast
@@ -100,8 +104,8 @@ let add_builtin_functions () =
   let _ = declare_function Runtime.alloc_tuple alloc_tuple_typ mdl in
   let _ = declare_function Runtime.alloc_closure alloc_closure_typ mdl in
   let _ = declare_function Runtime.call_closure call_closure_typ mdl in
-  let _ = declare_function Kstdlib.print_int print_int_typ mdl in
-  Hashtbl.add functions_types Kstdlib.print_int print_int_typ;
+  let _ = declare_function Cstdlib.print_int print_int_typ mdl in
+  Hashtbl.add functions_types Cstdlib.print_int print_int_typ;
   let _ = declare_function Runtime.list_cons list_cons_typ mdl in
   let pmtype = function_type (void_type context) [| int_type |] in
   let _ = declare_function Runtime.partial_match pmtype mdl in
@@ -389,19 +393,19 @@ let codegen_fun_body f decl =
       return body
   in
   let* () =
-     if type_of body = ptr_type
+    if type_of body = ptr_type
     then
       let* fresh = fresh_name "cast" in
       let cast = build_ptrtoint body int_type fresh builder in
       let _ = build_ret cast builder in
       return ()
     else if type_of body = i1_type context
-    then
+    then (
       let _ = build_ret (build_sext body int_type "" builder) builder in
-    return ()
+      return ())
     else (
       let _ = build_ret body builder in
-       return ())
+      return ())
   in
   (* some merge blocks may have not termination instruction
      since ret is inserted only in the last block *)

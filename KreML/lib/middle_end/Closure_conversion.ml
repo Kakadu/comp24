@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -35,7 +35,6 @@ module Freevars = struct
   ;;
 end
 
-
 module CC_state = struct
   type freevars = (string, string list, Base.String.comparator_witness) Base.Map.t
 
@@ -47,8 +46,18 @@ module CC_state = struct
 
   let empty_ctx arities =
     let freevars = Base.Map.empty (module Base.String) in
-    let freevars = List.fold_left (fun acc f -> Base.Map.set acc ~key:f ~data:[]) freevars Kstdlib.stdlib_funs in 
-    let arities = List.fold_left (fun acc (f, arity) -> Base.Map.set acc ~key:f ~data:arity) arities Kstdlib.stdlib_funs_with_arity in
+    let freevars =
+      List.fold_left
+        (fun acc f -> Base.Map.set acc ~key:f ~data:[])
+        freevars
+        Cstdlib.stdlib_funs
+    in
+    let arities =
+      List.fold_left
+        (fun acc (f, arity) -> Base.Map.set acc ~key:f ~data:arity)
+        arities
+        Cstdlib.stdlib_funs_with_arity
+    in
     (* let freevars = Base.Map.set freevars ~key:"print_int" ~data:([] : string list) in *)
     { global_env = []; freevars; arities }
   ;;
@@ -81,13 +90,23 @@ module CC_state = struct
 
   let set_fv fun_name fv =
     let open Monad in
-    let* {global_env; freevars; _} as state = get in
+    let* ({ global_env; freevars; _ } as state) = get in
     let globals = List.map fst global_env |> Freevars.of_list in
     let without_self = Freevars.remove fun_name fv in
     let without_globals = Freevars.diff without_self globals in
-    let without_stdlib = Freevars.diff without_globals (Freevars.of_list (Kstdlib.stdlib_funs @ Runtime.runtime_funs)) |> Freevars.to_seq |> List.of_seq in
-    let* _ = put { state with freevars = Base.Map.set freevars ~key:fun_name ~data:without_stdlib} in
+    let without_stdlib =
+      Freevars.diff
+        without_globals
+        (Freevars.of_list (Cstdlib.stdlib_funs @ Runtime.runtime_funs))
+      |> Freevars.to_seq
+      |> List.of_seq
+    in
+    let* _ =
+      put
+        { state with freevars = Base.Map.set freevars ~key:fun_name ~data:without_stdlib }
+    in
     return ()
+  ;;
 end
 
 open CC_state
@@ -239,7 +258,9 @@ let cc arities astracture =
             let* () = acc in
             let function_fv = Freevars.collect_aexpr ae in
             let without_rec_decls = Freevars.diff function_fv binding_names in
-            set_fv id without_rec_decls) (return ()) bindings
+            set_fv id without_rec_decls)
+          (return ())
+          bindings
     in
     let* () = acc in
     let* () = update_fv item in

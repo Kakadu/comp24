@@ -1,9 +1,9 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Kreml_lib.Ast
-open Kreml_lib.Parser
+open Cursedml_lib.Ast
+open Cursedml_lib.Parser
 open QCheck.Gen
 
 let match_cases_limit = 4
@@ -171,8 +171,8 @@ let arbitrary_pattern =
 let check_pattern =
   let property =
     check_ast_component
-      ~parser:Kreml_lib.Parser.pattern
-      ~to_code:Kreml_lib.Ast_printer.pattern_to_code
+      ~parser:Cursedml_lib.Parser.pattern
+      ~to_code:Cursedml_lib.Ast_printer.pattern_to_code
       ~ast_printer:show_pattern
   in
   QCheck.Test.make
@@ -203,15 +203,15 @@ let arbitrary_expr =
       <+> (shrink arg >|= fun arg' -> Expr_app (f, arg'))
     | Expr_constrained (e, _) -> return e
   in
-  let print = Kreml_lib.Ast_printer.expr_to_code in
+  let print = Cursedml_lib.Ast_printer.expr_to_code in
   QCheck.make ~shrink ~print expr
 ;;
 
 let check_expr =
   let property =
     check_ast_component
-      ~parser:Kreml_lib.Parser.expr
-      ~to_code:Kreml_lib.Ast_printer.expr_to_code
+      ~parser:Cursedml_lib.Parser.expr
+      ~to_code:Cursedml_lib.Ast_printer.expr_to_code
       ~ast_printer:show_expr
   in
   QCheck.Test.make
@@ -224,15 +224,15 @@ let check_expr =
 QCheck_runner.run_tests ~rand [ check_expr ]
 
 let arbitary_structure =
-  let print = Kreml_lib.Ast_printer.structure_to_code in
+  let print = Cursedml_lib.Ast_printer.structure_to_code in
   QCheck.make ~print structure
 ;;
 
 let check_structure =
   let property =
     check_ast_component
-      ~parser:Kreml_lib.Parser.program
-      ~to_code:Kreml_lib.Ast_printer.structure_to_code
+      ~parser:Cursedml_lib.Parser.program
+      ~to_code:Cursedml_lib.Ast_printer.structure_to_code
       ~ast_printer:show_structure
   in
   QCheck.Test.make
