@@ -121,10 +121,14 @@ let infer_expr =
             let* env = acc in
             extend_env_with_pattern env pat ty
           ) (return env) ps rest
-        | _ -> fail Occurs_check) (* !!! *)
+        | _ -> 
+          let* typ, _ = infer_pattern env pat in
+          fail @@ Unification_failed (typ, ty))
       | Ast.PAny, _ -> return env
       | Ast.PNill, TypeTree.TList _ -> return env
-      | _ -> fail Occurs_check) (* !!! *)
+      | pat, ty -> 
+        let* typ, _ = infer_pattern env pat in
+        fail @@ Unification_failed (typ, ty))
     in
 
     let* extended_env = extend_env_with_pattern env_after_expr1 pattern ty1 in

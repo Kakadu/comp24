@@ -8,6 +8,7 @@ open CommonFunctions
 open InferExpression
 open TypeErrors
 open TypeTree
+open InferPattern
 
 let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
@@ -31,10 +32,14 @@ let infer_declaration env name_list = function
             let* env, name_list = acc in
             extend_env_with_pattern env name_list pat ty
           ) (return (env, name_list)) ps rest
-        | _ -> fail Occurs_check) (* !!! *)
+        | _ -> 
+          let* typ, _ = infer_pattern env pat in
+          fail @@ Unification_failed (typ, ty))
       | Ast.PAny, _ -> return (env, name_list)
       | Ast.PNill, TypeTree.TList _ -> return (env, name_list)
-      | _ -> fail Occurs_check) (* !!! *)
+      | pat, ty -> 
+        let* typ, _ = infer_pattern env pat in
+        fail @@ Unification_failed (typ, ty))
     in
     let* extended_env, extend_name_list = extend_env_with_pattern env name_list pattern ty in
 
