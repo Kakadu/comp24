@@ -33,7 +33,6 @@ type pattern =
   | PNill (* Empty: '[]' *)
   | PConst of constant (** Any constant: '1', 'true', etc *)
   | PVar of identifier (** A variable pattern: 'x', 'y', etc *)
-  | POr of pattern * pattern (** 'P1 | P2' *)
   | PTuple of pattern * pattern * pattern list (** Tuple of patterns: '(P1, P2, P3)' *)
   | PListConstructor of pattern * pattern (** List construction pattern: 'P1::P2' *)
   | PTyped of pattern * type_defenition (** Assigning a type to a pattern: (P : int) *)

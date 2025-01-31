@@ -12,7 +12,6 @@ open Type
 type pattern_dispatch = 
   { parse_tuple_pattern: pattern_dispatch -> pattern Angstrom.t
   ; parse_list_pattern : pattern_dispatch -> pattern Angstrom.t
-  ; parse_or_pattern : pattern_dispatch -> pattern Angstrom.t
   ; parse_constant_pattern: pattern Angstrom.t
   ; parse_identifier_pattern: pattern Angstrom.t
   ; parse_nill_pattern: pattern Angstrom.t
@@ -53,37 +52,6 @@ let parse_any_pattern =
 
 (* ---------------- *)
 
-(* Alternative (Or) pattern parser *)
-
-let parse_or_pattern pp =
-  fix
-  @@ fun self ->
-  let parse_left_pattern = choice
-    [ pp.parse_list_pattern pp
-    ; pp.parse_tuple_pattern pp
-    ; pp.parse_constant_pattern
-    ; pp.parse_identifier_pattern
-    ; pp.parse_nill_pattern
-    ; pp.parse_any_pattern
-    ; pp.parse_pattern_type_defition pp
-    ; parens self
-    ]
-  in
-
-  let parse_right_pattern = choice 
-    [ self
-    ; parse_left_pattern
-    ]
-  in
-
-  let* left_pattern = parse_left_pattern in
-  let* _ = skip_wspace *> char '|' <* skip_wspace in
-  let* right_pattern = parse_right_pattern in
-  return @@ POr (left_pattern, right_pattern)
-;;
-
-(* ---------------- *)
-
 (* Tuple pattern parsers *)
 
 let parse_tuple_pattern pp =
@@ -91,7 +59,6 @@ let parse_tuple_pattern pp =
   @@ fun self ->
   let parse_pattern = choice 
     [ pp.parse_pattern_type_defition pp
-    ; pp.parse_or_pattern pp
     ; pp.parse_list_pattern pp
     ; pp.parse_constant_pattern
     ; pp.parse_identifier_pattern
@@ -115,7 +82,6 @@ let parse_list_pattern pp =
   @@ fun self ->
   let parse_pattern = choice
     [ pp.parse_pattern_type_defition pp
-    ; parens @@ pp.parse_or_pattern pp
     ; pp.parse_constant_pattern
     ; pp.parse_identifier_pattern
     ; pp.parse_nill_pattern
@@ -154,8 +120,7 @@ let parse_pattern_type_defition pp =
     skip_wspace
     *>
     let parse_pattern = choice 
-    [ pp.parse_or_pattern pp
-    ; pp.parse_list_pattern pp
+    [ pp.parse_list_pattern pp
     ; pp.parse_constant_pattern
     ; pp.parse_identifier_pattern
     ; pp.parse_nill_pattern
@@ -179,15 +144,13 @@ let parsers =
   ; parse_identifier_pattern
   ; parse_nill_pattern
   ; parse_any_pattern
-  ; parse_or_pattern
   ; parse_tuple_pattern
   ; parse_list_pattern
   ; parse_pattern_type_defition
   }
 
 let parse_pattern = choice 
-  [ parsers.parse_or_pattern parsers
-  ; parsers.parse_list_pattern parsers
+  [ parsers.parse_list_pattern parsers
   ; parsers.parse_tuple_pattern parsers
   ; parsers.parse_constant_pattern
   ; parsers.parse_identifier_pattern
