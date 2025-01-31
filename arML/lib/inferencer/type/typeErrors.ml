@@ -6,8 +6,8 @@ open TypeTree
 
 type error =
   | Occurs_check
-  | Unbound_variable of string (* !!! *)
+  | Unbound_variable of string
   | Unification_failed of typ * typ
   | InvalidRecursionLeftHand
-  | Several_bounds of string (* !!! *)
+  | Several_bounds of string
 (* [@@deriving show { with_path = false }] *)
