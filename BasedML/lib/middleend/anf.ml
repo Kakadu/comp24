@@ -114,8 +114,7 @@ let rec anf ctx llexpr expr_with_hole =
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
-        let rec build_app lst =
-          match lst with
+        let rec build_app = function
           | [ h; tl ] -> return (CApplication (CImmExpr h, CImmExpr tl))
           | h :: tl ->
             let* rest = build_app tl in
