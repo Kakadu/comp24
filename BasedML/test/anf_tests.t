@@ -234,8 +234,8 @@
   let  main  = let anf_app_0 = print_int 1 in
    let anf_app_1 = print_int 2 in
    let anf_app_2 = print_int 4 in
-   let anf_app_3 = print_int 1 in
-   let anf_app_4 = _start anf_app_0 anf_app_1 3 anf_app_2 100 1000 anf_app_3 10000 555555 in
+   let anf_app_3 = print_int -1 in
+   let anf_app_4 = _start anf_app_0 anf_app_1 3 anf_app_2 100 1000 anf_app_3 10000 -555555 in
    let anf_app_5 = print_int anf_app_4 in
    anf_app_5
 
