@@ -44,7 +44,7 @@
  (public_name llvm_codegen)
  (name llvm_codegen)
  (modules Llvm_codegen)
- (libraries cursedml_lib)
+ (libraries cursedml_lib llvm)
  (link_deps
   (file ../runtime/runtime.so))
  (instrumentation
