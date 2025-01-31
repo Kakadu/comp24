@@ -30,7 +30,7 @@ and closure =
 
 type fun_with_env =
   { arg : ident
-  ; captured_args : ident list
+  ; env_vars : ident list
   ; arity : int
   ; body : flambda
   }

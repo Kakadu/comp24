@@ -101,15 +101,15 @@
   >   if n = 0 then true else is_odd (n - 1)
   > and is_odd n =
   >   if n = 1 then true else is_even (n - 1)
-  is_even(n_1) {let t_0 = n_1 = 0 in 
+  is_even(n_0) {let t_0 = n_0 = 0 in 
                  if t_0  then true  else 
-                  let t_1 = n_1 - 1 in 
+                  let t_1 = n_0 - 1 in 
                    { name: is_odd, arity: 1 env_size: 0, arrange [ ]}  ([ 
                    t_1  ])   } 
   
-  is_odd(n_0) {let t_3 = n_0 = 1 in 
+  is_odd(n_1) {let t_3 = n_1 = 1 in 
                 if t_3  then true  else 
-                 let t_4 = n_0 - 1 in 
+                 let t_4 = n_1 - 1 in 
                   { name: is_even, arity: 1 env_size: 0, arrange [ ]}  ([ 
                   t_4  ])   } 
   
@@ -190,3 +190,4 @@
             { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ t_1  ]); 
              0   } 
   
+$ dune exec closure_conv < manytests/typed/016lists.ml

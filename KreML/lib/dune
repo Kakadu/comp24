@@ -14,6 +14,7 @@
   Runtime
   Kstdlib
   Llvm_codegen
+  Llvm_utils
   Utils)
  (inline_tests)
  (libraries base ppx_show.runtime angstrom qcheck llvm llvm.analysis)

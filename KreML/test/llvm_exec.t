@@ -118,6 +118,19 @@ closures mutability check
   8
   9
 
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/007order.ml | lli-17 -load ../runtime/runtime.so
+  1
+  2
+  4
+  -1
+  103
+  -555555
+  10000
+
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/008ascription.ml | lli-17 -load ../runtime/runtime.so
+  8
+
+
 
   $ dune exec llvm_codegen 2>&1 < manytests/typed/015tuples.ml | lli-17 -load ../runtime/runtime.so
   1
@@ -127,5 +140,8 @@ closures mutability check
 
 
 
-$ dune exec llvm_codegen 2>&1 < manytests/typed/016lists.ml | lli-17 -load ../runtime/runtime.so
-lli-17: lli: <stdin>:455:47: error: '%phi_279' defined with type 'ptr' but expected 'i64'
+  $ dune exec llvm_codegen 2>&1 < manytests/typed/016lists.ml | lli-17 -load ../runtime/runtime.so
+  1
+  2
+  3
+  8
