@@ -114,7 +114,9 @@ let rec restore_cexpr ppf = function
           (fun ppf (pat, ae) -> fprintf ppf "| %a -> %a" frestore_pattern pat pp_aexpr ae)
           "\n")
       pat_exp_lst
-  | CApplication (left, rigth) -> fprintf ppf "%a %a" frestore_imm left frestore_imm rigth
+  | CApplication (left, right_lst) ->
+    fprintf ppf "%a" frestore_imm left;
+    List.iter (fun imm -> fprintf ppf " %a" frestore_imm imm) right_lst
   | CConstraint (imm, typ) -> fprintf ppf "(%a : %a)" frestore_imm imm pp_type_name typ
 
 and pp_aexpr ppf = function

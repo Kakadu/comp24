@@ -13,7 +13,7 @@ type immexpr =
   | ImmTuple of immexpr list
 
 type cexpr =
-  | CApplication of immexpr * immexpr
+  | CApplication of immexpr * immexpr list
   | CIfThenElse of immexpr * aexpr * aexpr
   | CMatch of pattern * (pattern * aexpr) list
   | CImmExpr of immexpr

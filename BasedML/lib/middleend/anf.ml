@@ -53,6 +53,13 @@ let rec new_name prefix global =
 ;;
 
 let rec anf ctx llexpr expr_with_hole =
+  let anf_list env llexprs cont =
+    let rec helper acc = function
+      | [] -> cont (List.rev acc)
+      | h :: tl -> anf env h (fun imm -> helper (imm :: acc) tl)
+    in
+    helper [] llexprs
+  in
   match llexpr with
   | LLConstant const ->
     let imm_const =
@@ -85,25 +92,25 @@ let rec anf ctx llexpr expr_with_hole =
         (ALetIn
            (PIdentifier fresh_name, CIfThenElse (imm_guard, then_aexpr, else_aexpr), aexp)))
   | LLTuple elems ->
-    let anf_list env llexprs cont =
-      let rec helper acc = function
-        | [] -> cont (List.rev acc)
-        | h :: tl -> anf env h (fun imm -> helper (imm :: acc) tl)
-      in
-      helper [] llexprs
-    in
     anf_list ctx elems (fun list ->
       let* fresh_name = new_name Tuple ctx in
       let imm_id = ImmIdentifier fresh_name in
       let* aexp = expr_with_hole imm_id in
       return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmTuple list), aexp)))
-  | LLApplication (left_exp, right_exp) ->
-    anf ctx left_exp (fun imm_left ->
-      anf ctx right_exp (fun imm_right ->
+  | LLApplication (left, right) ->
+    let rec sep_llapp = function
+      | LLApplication (left, right) ->
+        let rest, llexp = sep_llapp left in
+        right :: rest, llexp
+      | llexp -> [], llexp
+    in
+    let rest, llexp = sep_llapp (LLApplication (left, right)) in
+    anf ctx llexp (fun imm_exp ->
+      anf_list ctx (List.rev rest) (fun imm_rest ->
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
-        return (ALetIn (PIdentifier fresh_name, CApplication (imm_left, imm_right), aexp))))
+        return (ALetIn (PIdentifier fresh_name, CApplication (imm_exp, imm_rest), aexp))))
   | LLMatch (pat, cases) ->
     let rec convert_cases cases acc =
       match cases with

@@ -44,17 +44,12 @@
   | n -> ((facCPS ((( - ) n) 1)) (((fun k -> (fun n -> (fun t -> (k ((( * ) n) t))))) k) n)))))
 
   $ dune exec ./closure_conversion_demo.exe << EOF
-  > let fibo = fun n -> let rec fiboCPS = fun n acc -> match n with
-  >   | 0 -> acc 0
-  >   | 1 -> acc 1
-  >   | _ -> fiboCPS (n - 1) (fun x -> fiboCPS (n - 2) (fun y -> acc (x + y)))
-  > in
-  > fiboCPS n (fun x -> x)
+  > let _start () () ()  () =
+  > let () = print_int 5 in 5
+  > let main = print_int (_start (print_int 1) (print_int 2)  (print_int 3)   (print_int 4))
   > EOF
-  let  fibo = (fun n -> (let rec fiboCPS = (fun n -> (fun acc -> (match n with
-  | 0 -> (acc 0)
-  | 1 -> (acc 1)
-  | _ -> ((fiboCPS ((( - ) n) 1)) ((((fun fiboCPS -> (fun acc -> (fun n -> (fun x -> ((fiboCPS ((( - ) n) 2)) (((fun acc -> (fun x -> (fun y -> (acc ((( + ) x) y))))) acc) x)))))) fiboCPS) acc) n))))) in ((fiboCPS n) (fun x -> x))))
+  let  _start = (fun () -> (fun () -> (fun () -> (fun () -> (let  () = (print_int 5) in 5)))))
+  let  main = (print_int ((((_start (print_int 1)) (print_int 2)) (print_int 3)) (print_int 4)))
 
 
 

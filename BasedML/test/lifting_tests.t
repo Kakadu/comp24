@@ -88,7 +88,11 @@
   let  fodd p n  = (let  (e, o) = p in (if (((( == ) n) 0)) then 0 else ((e ((( - ) n) 1)))))
   let  tie  = (fixpoly (feven, fodd))
 
-
-
+  $ dune exec ./lifting_demo.exe << EOF
+  > let test a1 a2 a3 = a1 + a2 + a3
+  > let () = test (5 + 5) (6 * 6) (7 * 7)
+  > EOF
+  let  test a1 a2 a3  = ((( + ) ((( + ) a1) a2)) a3)
+  let  ()  = (((test ((( + ) 5) 5)) ((( * ) 6) 6)) ((( * ) 7) 7))
 
 
