@@ -7,17 +7,22 @@ open Llast
 open Ast
 
 module COUNTERMONAD = struct
-  let return value state = state, value
+  let return x : _ = fun st -> st, Result.ok x
 
-  let ( >>= ) m f state =
-    let value, st = m state in
-    f st value
+  let ( >>= ) =
+    fun l r : _ ->
+    fun st ->
+    let st, x = l st in
+    match x with
+    | Result.Ok x -> r x st
+    | Result.Error s -> st, Result.error s
   ;;
 
   let ( let* ) = ( >>= )
-  let get state = state, state
-  let put state _ = state, ()
+  let get = fun st -> st, Result.ok st
+  let put = fun s _oldstate -> s, Result.ok ()
   let run f = f
+  let fail err st = st, Result.error err
 end
 
 open COUNTERMONAD
@@ -110,7 +115,16 @@ let rec anf ctx llexpr expr_with_hole =
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
-        return (ALetIn (PIdentifier fresh_name, CApplication (imm_exp, imm_rest), aexp))))
+        let rec build_app lst =
+          match lst with
+          | [ h; tl ] -> return (CApplication (CImmExpr h, CImmExpr tl))
+          | h :: tl ->
+            let* rest = build_app tl in
+            return (CApplication (CImmExpr h, rest))
+          | [] -> fail "Error while building application"
+        in
+        let* built_app = build_app (imm_exp :: imm_rest) in
+        return (ALetIn (PIdentifier fresh_name, built_app, aexp))))
   | LLMatch (pat, cases) ->
     let rec convert_cases cases acc =
       match cases with
@@ -158,21 +172,21 @@ let transform decls =
   let collect_bindings decls =
     List.fold_left
       (fun acc -> function
-        | LLDSingleLet (_, LLLet (pat, _, _)) ->
-          Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
-        | LLDMutualRecDecl (_, decls) ->
-          List.fold_left
-            (fun acc (LLLet (pat, _, _)) ->
-              Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
-            acc
-            decls)
+         | LLDSingleLet (_, LLLet (pat, _, _)) ->
+           Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
+         | LLDMutualRecDecl (_, decls) ->
+           List.fold_left
+             (fun acc (LLLet (pat, _, _)) ->
+                Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
+             acc
+             decls)
       (Base.Set.empty (module Base.String))
       decls
   in
   let ctx = collect_bindings decls in
   List.map
     (fun decl ->
-      let _, transformed = run (anf_decl ctx decl) 0 in
-      transformed)
+       let _, transformed = run (anf_decl ctx decl) 0 in
+       transformed)
     decls
 ;;

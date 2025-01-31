@@ -4,6 +4,15 @@
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
+  let rec print_anf = function
+    | h :: tl ->
+      (match h with
+       | Ok decl ->
+         Stdlib.Format.printf "%a\n" Middleend.Restore_anf_ast.restore_anf_decl decl;
+         print_anf tl
+       | Error message -> Format.printf "Error: %s\n" message)
+    | [] -> ()
+  in
   match Parser.parse_program s with
   | Ok ast ->
     let final =
@@ -12,9 +21,6 @@ let () =
       |> Middleend.Lambda_lifting.lift_ast
       |> Middleend.Anf.transform
     in
-    List.iter
-      (fun binding ->
-        Stdlib.Format.printf "%a\n" Middleend.Restore_anf_ast.restore_anf_decl binding)
-      final
+    print_anf final
   | Error message -> Format.printf "Error: %s\n" message
 ;;

@@ -13,8 +13,7 @@ type immexpr =
   | ImmTuple of immexpr list
 
 type cexpr =
-  | CApplication of
-      immexpr * immexpr list (* Length of the list of the second element >= 1 *)
+  | CApplication of cexpr * cexpr
   | CIfThenElse of immexpr * aexpr * aexpr
   | CMatch of pattern * (pattern * aexpr) list
   | CImmExpr of immexpr
