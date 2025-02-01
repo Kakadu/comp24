@@ -6,16 +6,66 @@ open Llvm
 open Flambda
 open Ast
 open Anf
-open Utils
-open Utils.Counter
 open Llvm_utils
+
+type codegen_state =
+  { counter : int
+  ; curr_decl_name : string
+  ; named_values : (Ast.ident, llvalue, Base.String.comparator_witness) Base.Map.t
+  ; fun_types : (Ast.ident, lltype, Base.String.comparator_witness) Base.Map.t
+  }
+
+module CodegenMonad = Utils.State (struct
+    type t = codegen_state
+  end)
+
+open CodegenMonad
+
+let fresh_name base =
+  let* ({ counter; _ } as state) = get in
+  let res = Format.sprintf "%s_%i" base counter in
+  let* _ = put { state with counter = counter + 1 } in
+  return res
+;;
+
+let put_curr_decl_name name =
+  let* state = get in
+  put { state with curr_decl_name = name }
+;;
+
+let get_curr_decl_name =
+  let* { curr_decl_name; _ } = get in
+  return curr_decl_name
+;;
+
+let put_named_value name value =
+  let open CodegenMonad in
+  let* ({ named_values; _ } as state) = get in
+  put { state with named_values = Base.Map.set named_values ~key:name ~data:value }
+;;
+
+let put_fun_type name typ =
+  let open CodegenMonad in
+  let* ({ fun_types; _ } as state) = get in
+  put { state with fun_types = Base.Map.set fun_types ~key:name ~data:typ }
+;;
+
+let lookup_named_value name =
+  let open CodegenMonad in
+  let* { named_values; _ } = get in
+  Base.Map.find_exn named_values name |> return
+;;
+
+let lookup_fun_type name =
+  let open CodegenMonad in
+  let* name = name in
+  let* { fun_types; _ } = get in
+  Base.Map.find_exn fun_types name |> return
+;;
 
 let context = global_context ()
 let mdl = create_module context "main"
 let builder = Llvm.builder context
-let named_values : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 16
-let functions_types : (string, Llvm.lltype) Hashtbl.t = Hashtbl.create 16
-let curr_decl_name = ref ""
 let int_type = Llvm.i64_type context
 let iconst = Llvm.const_int int_type
 let ptr_type = pointer_type context
@@ -33,6 +83,8 @@ let lookup_global_exn name =
 ;;
 
 let alloc_tuple_typ = Llvm.function_type ptr_type [| int_type |]
+
+open CodegenMonad
 
 let alloc_tuple name size =
   let* size = size in
@@ -105,11 +157,11 @@ let add_builtin_functions () =
   let _ = declare_function Runtime.alloc_closure alloc_closure_typ mdl in
   let _ = declare_function Runtime.call_closure call_closure_typ mdl in
   let _ = declare_function Cstdlib.print_int print_int_typ mdl in
-  Hashtbl.add functions_types Cstdlib.print_int print_int_typ;
+  let* _ = put_fun_type Cstdlib.print_int print_int_typ in
   let _ = declare_function Runtime.list_cons list_cons_typ mdl in
   let pmtype = function_type (void_type context) [| int_type |] in
   let _ = declare_function Runtime.partial_match pmtype mdl in
-  ()
+  return ()
 ;;
 
 let set_globals () =
@@ -155,13 +207,11 @@ let codegen_binop name x y =
 
 let rec codegen_flambda = function
   | Fl_const c -> codegen_const c |> return
-  | Fl_var v ->
-    (match Hashtbl.find_opt named_values v with
-     | Some v -> return v
-     | None -> internalfail @@ Format.sprintf "Unbound variable %s" v)
+  | Fl_var v -> lookup_named_value v
   | Fl_tuple elems ->
     let* elems = codegen_list (return elems) in
-    let* tuple = alloc_tuple !curr_decl_name (List.length elems |> return) in
+    let* name = get_curr_decl_name in
+    let* tuple = alloc_tuple name (List.length elems |> return) in
     let* _ =
       List.fold_left
         (fun idx value ->
@@ -188,9 +238,10 @@ let rec codegen_flambda = function
         let* cast = fresh_name "cast" in
         let x = build_inttoptr x ptr_type cast builder in
         return (x, y)
-      | _ -> unreachable ()
+      | _ -> Utils.unreachable ()
     in
-    return @@ codegen_binop !curr_decl_name x y op
+    let* name = get_curr_decl_name in
+    return @@ codegen_binop name x y op
   | Fl_cons (x, xs) ->
     let* x' = codegen_flambda x in
     let* xs' = codegen_flambda xs in
@@ -202,7 +253,8 @@ let rec codegen_flambda = function
       else return xs'
     in
     let cons = lookup_fun_exn Runtime.list_cons in
-    build_call list_cons_typ cons [| x'; xs' |] !curr_decl_name builder |> return
+    let* name = get_curr_decl_name in
+    build_call list_cons_typ cons [| x'; xs' |] name builder |> return
   | Fl_getfield (idx, obj) ->
     let* obj = codegen_flambda obj in
     let* obj =
@@ -228,7 +280,7 @@ let rec codegen_flambda = function
     (* if arity 0 it is calculated const, we should evail it and apply arg to its result *)
     let* args = codegen_list (return args) in
     let callee = lookup_fun_exn name in
-    let callee_typ = Hashtbl.find functions_types name in
+    let* callee_typ = lookup_fun_type (return name) in
     let* args =
       match args with
       | [ a ] when type_of a = ptr_type ->
@@ -238,7 +290,8 @@ let rec codegen_flambda = function
       | [ a ] -> return [| a |]
       | _ -> return [||]
     in
-    build_call callee_typ callee args !curr_decl_name builder |> return
+    let* name = get_curr_decl_name in
+    build_call callee_typ callee args name builder |> return
   | Fl_app (f, args) ->
     let* args = codegen_list (return args) in
     let* f' = codegen_flambda f in
@@ -272,7 +325,7 @@ let rec codegen_flambda = function
       | _, etype when etype = ptr_type ->
         position_at_end then_bb_after_gen builder;
         build_inttoptr t ptr_type "" builder, e
-      | _ -> unreachable ()
+      | _ -> Utils.unreachable ()
     in
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;
@@ -286,25 +339,29 @@ let rec codegen_flambda = function
     let _ = build_cond_br is_zero else_bb then_bb builder in
     position_at_end then_bb_after_gen builder;
     if block_terminates_with_unreachable then_bb_after_gen |> not
-    then ignore @@ build_br merge_bb builder;
+    then (
+      let _ = build_br merge_bb builder in
+      ());
     position_at_end else_bb_after_gen builder;
     if block_terminates_with_unreachable else_bb_after_gen |> not
-    then ignore @@ build_br merge_bb builder;
+    then (
+      let _ = build_br merge_bb builder in
+      ());
     position_at_end merge_bb builder;
     return phi
   | Fl_let (None, v, scope) ->
-    curr_decl_name := "";
+    let* _ = put_curr_decl_name "" in
     let* _ = codegen_flambda v in
     codegen_flambda scope
   | Fl_let (Some name, v, scope) ->
-    curr_decl_name := name;
+    let* _ = put_curr_decl_name name in
     let* v = codegen_flambda v in
     set_value_name name v;
-    Hashtbl.add named_values name v;
+    let* _ = put_named_value name v in
     codegen_flambda scope
   | Fl_closure { name; arrange = []; env_size = 0; arity = 0 } ->
     let callee = lookup_fun_exn name in
-    let callee_typ = Hashtbl.find functions_types name in
+    let* callee_typ = lookup_fun_type (return name) in
     let* fresh = fresh_name "call" in
     build_call callee_typ callee [||] fresh builder |> return
   | Fl_closure { name; arrange; env_size; arity } ->
@@ -364,14 +421,14 @@ let codegen_fun_body f decl =
             let* fresh = fresh_name "envelemptr" in
             let elemptr = build_gep int_type env [| iconst idx |] fresh builder in
             let local = build_load int_type elemptr name builder in
-            Hashtbl.add named_values name local;
+            let* _ = put_named_value name local in
             return (idx + 1))
           (return 0)
           env_vars
       in
       (* name arg *)
       set_value_name arg_name arg;
-      Hashtbl.add named_values arg_name arg;
+      let* _ = put_named_value arg_name arg in
       let* body = codegen_flambda body in
       let body_bb = insertion_block builder in
       position_at_end body_bb builder;
@@ -386,7 +443,7 @@ let codegen_fun_body f decl =
       position_at_end entry builder;
       let param = param decl 0 in
       set_value_name param_name param;
-      Hashtbl.add named_values param_name param;
+      let* _ = put_named_value param_name param in
       let* body = codegen_flambda body in
       let body_bb = insertion_block builder in
       position_at_end body_bb builder;
@@ -426,29 +483,32 @@ let codegen_fun_body f decl =
 ;;
 
 let codegen_program program =
-  add_builtin_functions ();
+  let* _ = add_builtin_functions () in
   set_globals ();
-  let declarations =
-    List.map
-      (fun (name, f) ->
-        match f with
-        | Fun_with_env _ ->
-          let f = declare_function name fun_with_env_typ mdl in
-          Hashtbl.add functions_types name fun_with_env_typ;
-          f
-        | Fun_without_env (None, _) ->
-          let fnty = function_type int_type [||] in
-          let f = declare_function name fnty mdl in
-          Hashtbl.add functions_types name fnty;
-          f
-        | Fun_without_env (Some _, _) ->
-          let fnty = function_type int_type [| int_type |] in
-          let f = declare_function name fnty mdl in
-          Hashtbl.add functions_types name fnty;
-          f)
+  let* declarations =
+    List.fold_left
+      (fun acc (name, f) ->
+        let* acc = acc in
+        let f, ty =
+          match f with
+          | Fun_with_env _ ->
+            let f = declare_function name fun_with_env_typ mdl in
+            f, fun_with_env_typ
+          | Fun_without_env (None, _) ->
+            let fnty = function_type int_type [||] in
+            let f = declare_function name fnty mdl in
+            f, fnty
+          | Fun_without_env (Some _, _) ->
+            let fnty = function_type int_type [| int_type |] in
+            let f = declare_function name fnty mdl in
+            f, fnty
+        in
+        let* _ = put_fun_type name ty in
+        return @@ acc @ [ f ])
+      (return [])
       program
   in
-  let state =
+  let* _ =
     List.fold_left2
       (fun acc (_, f) decl ->
         let* () = acc in
@@ -458,13 +518,25 @@ let codegen_program program =
       program
       declarations
   in
-  let _, _ = run state 0 in
   match Llvm_analysis.verify_module mdl with
-  | None -> ()
+  | None -> return ()
   | Some s ->
     let open Stdlib.Format in
     fprintf std_formatter "%s" s;
-    ()
+    return ()
+;;
+
+let codegen_program p =
+  let _, _ =
+    run
+      (codegen_program p)
+      { counter = 0
+      ; curr_decl_name = ""
+      ; named_values = Base.Map.empty (module Base.String)
+      ; fun_types = Base.Map.empty (module Base.String)
+      }
+  in
+  ()
 ;;
 
 let dump program =
