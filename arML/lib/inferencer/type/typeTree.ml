@@ -4,17 +4,19 @@
 
 type type_var = int
 
+let pp_type_var = Format.pp_print_int
+
 module TypeVar = struct
   type t = type_var
   let compare = Int.compare
 end
 
 type ground_type =
-  | GTInt
-  | GTBool
-  | GTUnit
-  | GTChar
-  | GTString
+  | GTInt (* int *)
+  | GTBool (* bool *)
+  | GTUnit (* unit *)
+  | GTChar (* char *)
+  | GTString (* string *)
 [@@deriving show { with_path = false }]
 
 type typ =
@@ -23,7 +25,7 @@ type typ =
   | TArr of typ * typ (* 'a -> 'b *)
   | TTuple of typ list (* 'a * int * char *)
   | TList of typ (* 'a list *)
-(* [@@deriving show { with_path = false }] *)
+[@@deriving show { with_path = false }]
 
 module TypeVarSet = Stdlib.Set.Make (TypeVar) (* Set, that storing type variables. *)
 

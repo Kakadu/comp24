@@ -4,6 +4,7 @@
 
 open TypeTree
 
+(* Return all type variables in type *)
 let type_vars =
   let rec helper acc = function
     | TVar n -> TypeVarSet.add n acc
@@ -15,20 +16,8 @@ let type_vars =
   helper TypeVarSet.empty
 ;;
 
+(* Syntactic sugar *)
+
 let (@->) left right = TArr (left, right)
 
-let get_ground_type_by_annotation = function
-  | Ast.GTDInt -> GTInt
-  | Ast.GTDBool -> GTBool
-  | Ast.GTDChar -> GTChar
-  | Ast.GTDString -> GTString
-  | Ast.GTDUnit -> GTUnit
-;;
-
-let rec get_type_by_annotation = function
-  | Ast.TDGround td -> TGround (get_ground_type_by_annotation td)
-  | Ast.TDArrow (l, r) -> (get_type_by_annotation l) @-> (get_type_by_annotation r)
-  | Ast.TDTuple (fst, snd, other) -> TTuple (get_type_by_annotation fst :: get_type_by_annotation snd :: List.map (fun x -> get_type_by_annotation x) other)
-  | Ast.TDList ty -> TList (get_type_by_annotation ty)
-  | Ast.TDPolymorphic _ -> (get_type_by_annotation (Ast.TDGround (Ast.GTDInt))) (* !!! *)
-;;
+(* ---------------- *)

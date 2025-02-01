@@ -41,8 +41,8 @@ let infer_declaration env name_list = function
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty))
     in
+    
     let* extended_env, extend_name_list = extend_env_with_pattern env name_list pattern ty in
-
     return (extended_env, extend_name_list)
   | Ast.DRecursive (pattern, expr) ->
     match pattern with

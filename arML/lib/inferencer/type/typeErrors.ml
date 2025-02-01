@@ -5,9 +5,9 @@
 open TypeTree
 
 type error =
-  | Occurs_check
-  | Unbound_variable of string
-  | Unification_failed of typ * typ
-  | InvalidRecursionLeftHand
-  | Several_bounds of string
-(* [@@deriving show { with_path = false }] *)
+  | Occurs_check (* Trying to unify two types when one of the types contains the other type as a subtype or variable. *)
+  | Unbound_variable of string (* An undeclared variable is used. *)
+  | Unification_failed of typ * typ (* Castable types are not compatible. *)
+  | InvalidRecursionLeftHand (* The left-hand side of a recursive let binding is not a simple variable.  e.g., let (x, y) = ... in ... *)
+  | Several_bounds of string (* A type variable is assigned more than one constraint. *)
+;;

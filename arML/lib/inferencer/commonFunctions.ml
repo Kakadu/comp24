@@ -5,6 +5,7 @@
 open TypeTree
 open StateResultMonad
 open StateResultMonad.Syntax
+open TypeUtils
 
 let fresh_var = fresh >>| fun name -> TVar name
 
@@ -24,3 +25,39 @@ let infer_id env id =
     return (Substitution.empty, fv)
   | _ -> TypeEnv.lookup_env env id
 ;;
+
+(* Type definition to real type mapping *)
+
+let get_ground_type_by_annotation = function
+  | Ast.GTDInt -> GTInt
+  | Ast.GTDBool -> GTBool
+  | Ast.GTDChar -> GTChar
+  | Ast.GTDString -> GTString
+  | Ast.GTDUnit -> GTUnit
+;;
+
+let rec get_type_by_annotation = function
+  | Ast.TDGround td -> return @@ TGround (get_ground_type_by_annotation td)
+  | Ast.TDArrow (l, r) ->
+    let* l_ty = get_type_by_annotation l in
+    let* r_ty = get_type_by_annotation r in
+    return (l_ty @-> r_ty)
+  | Ast.TDTuple (fst, snd, other) ->
+    let* fst_ty = get_type_by_annotation fst in
+    let* snd_ty = get_type_by_annotation snd in
+    let rec process_others acc = function
+      | [] -> return acc
+      | x :: xs ->
+        let* x_ty = get_type_by_annotation x in
+        process_others (x_ty :: acc) xs
+    in
+    let* other_tys = process_others [] other in
+    return (TTuple (fst_ty :: snd_ty :: List.rev other_tys))
+  | Ast.TDList ty ->
+    let* ty' = get_type_by_annotation ty in
+    return (TList ty')
+  | Ast.TDPolymorphic _ ->
+    let* fv = fresh_var in
+    return fv
+
+(* ---------------- *)
