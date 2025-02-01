@@ -1,0 +1,29 @@
+(include_subdirs unqualified)
+
+(library
+ (name inferencer)
+ (public_name arML.inferencer)
+ (libraries base ast parser)
+ (modules
+  StateResultMonad
+  TypeTree
+  TypeErrors
+  TypeUtils
+  TypeEnv
+  CommonFunctions
+  Schema
+  Generalize
+  Instantiate
+  PpType
+  PpTypeErrors
+  TypeVarsRecalculate
+  OccursChecker
+  UniquePatternVarsChecker
+  Substitution
+  InferPattern
+  InferDeclaration
+  InferProgram
+  InferExpression
+  Runner)
+ (preprocess
+  (pps ppx_deriving.show)))
