@@ -49,22 +49,18 @@ let infer_expr =
           let* pattern_ty, pattern_env = infer_pattern acc_env pattern in
           return (pattern_ty :: acc_ty, pattern_env))
     in
-
     let* expr_sub, expr_ty = helper pattern_env expr in
-
     let patterns_ty =
       List.fold_right
         (fun ty acc -> ty @-> acc)
         (List.rev patterns_ty)
         expr_ty
     in
-
     let result_ty = Substitution.apply expr_sub patterns_ty in
     return (expr_sub, result_ty)
   
   and infer_application env func_expr args_exprs =
     let* sub1, func_ty = helper env func_expr in
-
     let result =
       List.fold_left
         (fun acc args_exprs ->
@@ -81,7 +77,6 @@ let infer_expr =
         (return (sub1, func_ty))
         args_exprs
     in
-  
     result
   
   and infer_tuple env expr_list =
@@ -104,7 +99,6 @@ let infer_expr =
     let* _ = UniquePatternVarsChecker.check_unique_vars pattern in
     (* Check several bounds *)
     let* sub1, ty1 = helper env expr1 in
-
     let env_after_expr1 = TypeEnv.apply env sub1 in
 
     let rec extend_env_with_pattern env pat ty =
@@ -132,9 +126,7 @@ let infer_expr =
     in
 
     let* extended_env = extend_env_with_pattern env_after_expr1 pattern ty1 in
-
     let* sub2, ty2 = helper extended_env expr2 in
-
     let* sub_final = Substitution.compose sub1 sub2 in
     let final_ty = Substitution.apply sub_final ty2 in
     return (sub_final, final_ty)  
