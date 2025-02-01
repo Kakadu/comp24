@@ -5,7 +5,23 @@
 open StateResultMonad
 open InferExpression
 open InferProgram
+open TypeUtils
 
-let run_expr_inferencer expr = Result.map snd (run (infer_expr TypeEnv.empty expr))
+let binary_ops = [
+  ("( + )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
+  ("( - )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
+  ("( * )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
+  ("( / )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
+  ("( = )", TGround GTInt @-> TGround GTInt @-> TGround GTBool);
+]
 
-let run_program_inferencer program = run (infer_program TypeEnv.empty program)
+let start_env =
+  List.fold_left
+    (fun env (op, ty) -> TypeEnv.extend env op (Generalize.generalize TypeEnv.empty ty))
+    TypeEnv.empty
+    binary_ops
+;;
+
+let run_expr_inferencer expr = Result.map snd (run (infer_expr start_env expr))
+
+let run_program_inferencer program = run (infer_program start_env program)
