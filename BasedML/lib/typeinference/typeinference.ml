@@ -8,6 +8,15 @@ open StartState
 open Help
 open Generalise
 
+let infer_const : Ast.constant -> (state, Ast.type_name) t = function
+  | Ast.CBool _ -> return Ast.TBool
+  | Ast.CInt _ -> return Ast.TInt
+  | Ast.CNil ->
+    let* tv = fresh_tv in
+    return (Ast.TList tv)
+  | Ast.CUnit -> return Ast.TUnit
+;;
+
 type pattern_mode =
   | PMAdd
   | PMCheck
@@ -21,7 +30,7 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
     | Some _ ->
       fail (Format.sprintf "Variable %s is bound several times in this matching" name)
   and infer_add_pconstant c tp =
-    let const_tp = const2type c in
+    let* const_tp = infer_const c in
     write_subst tp const_tp *> return const_tp
   and infer_add_ptupple p_lst tp rec_fun =
     let* t_lst = map_list rec_fun p_lst in
@@ -31,10 +40,6 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
     let* head_tp = rec_fun p_head in
     let* tail_tp = rec_fun p_tail in
     write_subst tp tail_tp *> write_subst (Ast.TList head_tp) tail_tp *> return tail_tp
-  and infer_add_pnil tp =
-    let* tv = fresh_tv in
-    let list_tp = Ast.TList tv in
-    write_subst tp list_tp *> return list_tp
   in
   let rec help pat =
     let* tp = fresh_tv in
@@ -43,7 +48,6 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
     | Ast.PConstant c -> infer_add_pconstant c tp
     | Ast.PTuple p_lst -> infer_add_ptupple p_lst tp help
     | Ast.PCons (p_head, p_tail) -> infer_add_pcons (p_head, p_tail) tp help
-    | Ast.PNil -> infer_add_pnil tp
     | Ast.PWildCard -> return tp
     | Ast.PConstraint (pat, ctp) ->
       let* new_tp = help pat in
@@ -83,11 +87,8 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
 let rec infer_expr : Ast.expr -> (state, Ast.type_name) t =
   fun expr ->
   let help = function
-    | Ast.EConstant c -> return (const2type c)
+    | Ast.EConstant c -> infer_const c
     | Ast.EIdentifier name -> infer_ident name
-    | Ast.ENil ->
-      let* tv = fresh_tv in
-      return (Ast.TList tv)
     | Ast.EFunction (arg, body) -> infer_func arg body
     | Ast.EApplication (fun_exp, arg_exp) -> infer_app fun_exp arg_exp
     | Ast.EIfThenElse (e1, e2, e3) -> infer_ifthenelse e1 e2 e3
@@ -222,7 +223,7 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
 ;;
 
 let infer_prog decls =
-  let _, res = run (infer_declarations decls) start_state in
+  let _, res = run (init_used_type_names decls *> infer_declarations decls) start_state in
   res
 ;;
 
@@ -230,8 +231,8 @@ let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
   match res with
   | Result.Ok exp ->
-    let (_, substs, _), res =
-      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0)
+    let (_, substs, _, _), res =
+      run (infer_expr exp >>= restore_type) (MapString.empty, [], 0, SetString.empty)
     in
     (match res with
      | Result.Ok tp ->
@@ -243,11 +244,22 @@ let test_infer_exp string_exp =
   | Result.Error e -> Format.printf "Parser error: %s" e
 ;;
 
-let test_infer_prog s_state string_exp =
+let test_infer_prog_with_state s_state string_exp =
   let res = Parser.parse_program string_exp in
   match res with
   | Result.Ok prog ->
     let _, res = run (infer_declarations prog) s_state in
+    (match res with
+     | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
+     | Result.Error s -> Format.printf "Infer error: %s" s)
+  | Result.Error e -> Format.printf "Parser error: %s" e
+;;
+
+let test_infer_prog string_exp =
+  let res = Parser.parse_program string_exp in
+  match res with
+  | Result.Ok prog ->
+    let res = infer_prog prog in
     (match res with
      | Result.Ok map -> Format.printf "%s@\n" (show_res_map map)
      | Result.Error s -> Format.printf "Infer error: %s" s)

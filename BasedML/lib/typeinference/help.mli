@@ -28,6 +28,7 @@ module SetString : sig
   val union : t -> t -> t
   val inter : t -> t -> t
   val diff : t -> t -> t
+  val find_opt : elt -> t -> elt option
   val filter : (elt -> bool) -> t -> t
   val elements : t -> elt list
   val pp : Format.formatter -> t -> unit
@@ -39,5 +40,4 @@ type type_form =
 
 val pp_type_form : Format.formatter -> type_form -> unit
 val show_type_form : type_form -> string
-val const2type : Ast.constant -> Ast.type_name
 val get_tv_from_tp : SetString.t -> Ast.type_name -> SetString.t

@@ -27,13 +27,8 @@ type type_form =
   | TFSchem of SetString.t * Ast.type_name
 [@@deriving show { with_path = false }]
 
-let const2type : Ast.constant -> Ast.type_name = function
-  | Ast.CBool _ -> Ast.TBool
-  | Ast.CInt _ -> Ast.TInt
-;;
-
 let rec get_tv_from_tp acc = function
-  | Ast.TBool | Ast.TInt -> acc
+  | Ast.TBool | Ast.TInt | Ast.TUnit -> acc
   | Ast.TPoly x -> SetString.add x acc
   | Ast.TFunction (t1, t2) ->
     SetString.union (get_tv_from_tp acc t1) (get_tv_from_tp SetString.empty t2)
