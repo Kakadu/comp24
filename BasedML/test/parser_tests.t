@@ -417,3 +417,26 @@
          ))
       ))
     ]
+
+  $ dune exec parser_demo << EOF
+  > let test a1 a2 a3 = a1 + a2 + a3
+  > EOF
+  [(DSingleLet (NotRec,
+      (DLet ((PIdentifier "test"),
+         (EFunction ((PIdentifier "a1"),
+            (EFunction ((PIdentifier "a2"),
+               (EFunction ((PIdentifier "a3"),
+                  (EApplication (
+                     (EApplication ((EIdentifier "( + )"),
+                        (EApplication (
+                           (EApplication ((EIdentifier "( + )"),
+                              (EIdentifier "a1"))),
+                           (EIdentifier "a2")))
+                        )),
+                     (EIdentifier "a3")))
+                  ))
+               ))
+            ))
+         ))
+      ))
+    ]
