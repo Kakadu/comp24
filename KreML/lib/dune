@@ -1,0 +1,23 @@
+(library
+ (name kreml_lib)
+ (modules
+  Ast
+  Ast_printer
+  Alpha_transformer
+  Anf
+  Anf_printer
+  Match_elimination
+  Closure_conversion
+  Flambda
+  Parser
+  Inferencer
+  Runtime
+  Utils)
+ (inline_tests)
+ (libraries base ppx_show.runtime angstrom qcheck)
+ (preprocess
+  (pps ppx_inline_test ppx_deriving.show ppx_expect))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(include_subdirs unqualified)

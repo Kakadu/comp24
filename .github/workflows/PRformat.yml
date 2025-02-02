@@ -1,0 +1,100 @@
+name: Build PR (only formatting)
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+
+env:
+  OPAMROOT: /home/user/.opam
+  OPAMCONFIRMLEVEL: unsafe-yes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: kakadu18/ocaml:fp2024
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: sudo apt update
+
+      - name: List installed OPAM packages
+        run: opam list
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      ############# Detecting and compiling fp2024
+      # Smart link about setting environment variables
+      # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      - name: Detect latest changes
+        run: |
+          opam exec -- ocaml .github/detect_latest_pr.ml -v "pull/${{ steps.branch-name.outputs.ref_branch }}" -repo ${{ github.event.repository.name }} >> $GITHUB_ENV
+          echo "${{ env.latest }}"
+
+      - name: Naive linting
+        run: |
+          cd ${{ env.latest }}
+          python ../.github/lint_filesystem.py ${{ env.latest }}
+
+#      - name: Checking ocamlformat
+#        id: check-ocamlformat
+#        continue-on-error: true
+#        run: |
+#          echo "PROPERLY_FORMATTED=y" >> $GITHUB_ENV
+#          cd ${{ env.latest }} && opam exec -- dune build @fmt --profile=release || echo "PROPERLY_FORMATTED=n" >> $GITHUB_ENV
+
+      # We need to install dependencies because repo could have weird version of ocamlformat
+      - name: Installing dependencies for ${{ env.latest }}...
+        run: |
+          opam update
+          cd ./${{ env.latest }}
+          opam install . --depext-only --with-test --with-doc
+          opam install . --deps-only --with-test --with-doc
+
+      - name: Checking ocamlformat
+        run: |
+          cd ${{ env.latest }}
+          opam exec -- dune build @fmt --profile=release
+
+      # TODO: onfail post a comment how to fix it
+
+      # - name: Find a comment with OCamlformat report
+      #   uses: peter-evans/find-comment@v2
+      #   id: fc
+      #   with:
+      #     issue-number: ${{ github.event.number }}
+      #     body-includes: OCamlformat report for
+      #     comment-author: github-actions[bot]
+
+      # - name: Remove comment if build is OK and a comment was found
+      #   if: steps.fc.outputs.comment-id != 0
+      #   run: |
+      #     curl -L https://api.github.com/repos/Kakadu/fp2024/pulls/comments/${{ steps.fc.outputs.comment-id }} \
+      #       -X DELETE -H "Accept: application/vnd.github+json" \
+      #       -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+      #       -H "X-GitHub-Api-Version: 2022-11-28"
+
+      # TODO: move to workflow with proper authorization
+      #- name: Create comment
+      #  if: ${{ env.PROPERLY_FORMATTED == 'n' }}
+      #  uses: peter-evans/create-or-update-comment@v1
+      #  with:
+      #    edit-mode: replace
+      #    issue-number: ${{ github.event.number }}
+      #    body: |
+      #      ### OCamlformat report for ${{ env.latest }}
+
+      #      Format check failed. It could have two reasons:
+      #      * You didn't configure VsCode extensions properly
+      #      * The versions of ocamlformat differ on your machine and on CI
