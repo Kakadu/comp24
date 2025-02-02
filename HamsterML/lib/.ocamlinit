@@ -1,0 +1,10 @@
+#use "topfind";;
+#require "HamsterML";;
+open HamsterML__Ast;;
+open HamsterML__Lexer;;
+open HamsterML__Parser;;
+let parse (s : string) : expr =
+  let lexbuf = Lexing.from_string s in
+  let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in
+  ast
+;;
