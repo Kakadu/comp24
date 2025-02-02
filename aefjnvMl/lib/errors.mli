@@ -2,9 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+open Typedtree
+
 type parse_error = Syntax_error of string
 
-(* type infer_error =
+type infer_error =
   | Occurs_check of int * ty
   (** This error can lead to non-terminate of the type inference
       Example: [fun x -> x x]*)
@@ -16,13 +18,6 @@ type parse_error = Syntax_error of string
   | No_variable_rec
   (** Only variables are allowed as left-side of 'let rec'
       Example: [let rec (a, b) = 5] *)
-  | Multiple_definition of object_field * string
-  (** An instance variable / method must have a single definition
-      Example: [object val n = 0 val n = 5 end]*)
-  | Undefined_method of ty * string
-  (** Occurs when sending a message to undefined method in object *)
-  | Not_object of ty (** Occurs when trying to send a message to a non-object *)
-  | Cannot_match_self * A self-reference can only be a `self' variable *)
 
 (* type interpreter_error =
   | Division_by_zero (** Example: [5 / 0] *)
@@ -34,17 +29,20 @@ type parse_error = Syntax_error of string
   | Ill_typed (* Unreachable with using infer *)
   | Unbound_var of string Unreachable with using infer *)
 
-type error = Parser of parse_error
-(* | Infer of infer_error
-  | Interpreter of interpreter_error *)
+type error =
+  | Parser of parse_error
+  | Infer of infer_error
+  (* | Interpreter of interpreter_error *)
 
 (*================Constructors================*)
 
-(* val occurs_check : binder * ty -> error
+val occurs_check : binder * ty -> error
 val unbound_variable : string -> error
 val unification_failed : ty * ty -> error
 val several_bounds : string -> error
 val no_variable_rec : error
+
+(* 
 val multiple_variable : string -> error
 val multiple_method : string -> error
 val undefined_method : ty -> string -> error
