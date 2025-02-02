@@ -99,7 +99,7 @@ module Mapper (M : MONADERROR) = struct
     List [ Atom "let"; pattern_to_sexpr p; expr_to_sexpr e ]
   ;;
 
-  let let_declaration_to_sexpr = function
+  let sexpr_of_declaration = function
     | DSingleLet (flag, let_expr) ->
       List [ Atom "single_let"; rec_flag_to_sexpr flag; single_let_to_sexpr let_expr ]
     | DMutualRecDecl (flag, lets) ->
@@ -110,7 +110,7 @@ module Mapper (M : MONADERROR) = struct
         ]
   ;;
 
-  let declarations_to_sexpr decls = List.map let_declaration_to_sexpr decls
+  let sexpr_of_declarations decls = List.map sexpr_of_declaration decls
 
   let rec type_of_sexpr = function
     | Atom "unit" -> return TUnit
@@ -239,7 +239,7 @@ end
 
 open Mapper (Result)
 
-(* let rec show_sexp sexp : string =
+let rec show_sexp sexp : string =
   match sexp with
   | Atom s -> Printf.sprintf "Atom %S" s
   | List l ->
@@ -250,14 +250,14 @@ open Mapper (Result)
 let sexpr_of_ast_test_parse prog =
   match Parser.parse_program prog with
   | Ok ast ->
-    let sexprs = declarations_to_sexpr ast in
+    let sexprs = sexpr_of_declarations ast in
     List.iter (fun sexpr -> Printf.printf "%s\n" (show_sexp sexpr)) sexprs
   | Error err -> Printf.printf "%s\n" err
 ;;
 
 let%expect_test "Test list type" =
-  sexpr_of_ast_test_parse "let x = 5 + 0 + 0";
+  sexpr_of_ast_test_parse "let x = (a + 0) * 1 - 0 / 1";
   [%expect
     {|
-    List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "constant"; List [ Atom "int"; Atom "5" ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ] ] |}]
-;; *)
+    List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x"; List [ Atom "application"; List [ Atom "application"; Atom "( - )"; List [ Atom "application"; List [ Atom "application"; Atom "( * )"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; Atom "a" ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "1" ] ] ] ]; List [ Atom "application"; List [ Atom "application"; Atom "( / )"; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "1" ] ] ] ] ] ] |}]
+;;
