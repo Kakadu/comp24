@@ -239,3 +239,26 @@ module Mapper (M : MONADERROR) = struct
     | _ -> error "Invalid S-expression for declarations"
   ;;
 end
+
+open Mapper (Result)
+
+let rec show_sexp sexp : string =
+  match sexp with
+  | Atom s -> Printf.sprintf "Atom %S" s
+  | List l ->
+    let inner = String.concat "; " (List.map show_sexp l) in
+    Printf.sprintf "List [ %s ]" inner
+;;
+
+let sexpr_of_ast_test prog =
+  match Parser.parse_program prog with
+  | Ok ast -> Printf.printf "%s" (show_sexp (declarations_to_sexpr ast))
+  | Error err -> Printf.printf "%s" err
+;;
+
+let%expect_test "Test list type" =
+  sexpr_of_ast_test "let x = 5 + 0";
+  [%expect
+    {|
+    List [ List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "constant"; List [ Atom "int"; Atom "5" ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ] ] ] |}]
+;;
