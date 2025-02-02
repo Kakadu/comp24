@@ -32,8 +32,15 @@
   > let a = (5 + 5) / 5
   > EOF
   let  a = ((( + ) 1) 1)
-
-
  
+  $ dune exec ./egraphs_demo.exe << EOF
+  > let a = (5 / 5) * 5
+  > EOF
+  let  a = 5
+
+  $ dune exec ./egraphs_demo.exe << EOF
+  > let a = (5 * 5) / 5
+  > EOF
+  let  a = 5
 
 
