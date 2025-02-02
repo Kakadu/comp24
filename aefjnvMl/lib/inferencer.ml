@@ -110,6 +110,7 @@ end
 
 let tint = TPrim "int"
 let tbool = TPrim "bool"
+let tunit = TPrim "unit"
 let tarrow l r = TArrow (l, r)
 let tvar x = TVar x
 let tlist x = TList x
@@ -323,11 +324,13 @@ let const_infer fst = function
   | Const_nil ->
     let* tv = fresh_var in
     return (fst, tlist tv)
+  | Const_unit -> return (fst, tunit)
 ;;
 
 let rec convert_ty_annot env = function
   | Ptyp_int -> return tint
   | Ptyp_bool -> return tbool
+  | Ptyp_unit -> return tunit
   | Ptyp_var s ->
     let* var = poly_var s in
     return var
@@ -533,11 +536,11 @@ let init_env =
       "!=", comp_op
     ] 
   in
+  let print_int_ty = ("print_int", TArrow (TPrim "int", TPrim "int")) in
+  let funs = print_int_ty :: bin_ops in
   let bind_ty env id typ = TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name: None) in
-  Base.List.fold_left bin_ops ~init:TypeEnv.empty ~f:(fun env (id, typ) -> bind_ty env id typ)
+  Base.List.fold_left funs ~init:TypeEnv.empty ~f:(fun env (id, typ) -> bind_ty env id typ)
 ;;
-
-  
 
 let check_program program =
   let helper env =
