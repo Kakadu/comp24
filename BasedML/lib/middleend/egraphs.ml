@@ -28,6 +28,7 @@ let cost_function score (sym, children) =
     | "( / )" -> 5.
     | "( + )" -> 5.
     | "( - )" -> 5.
+    | "0" -> 1.
     | "?a" -> 1.
     | _ -> 0.
   in
@@ -92,14 +93,14 @@ let transform_sexp sexp =
        ; Atom "?a"
        ])
     (Atom "?a");
-  (* a - a = 0 *)
+  (* 0 + a = a *)
   add_rule
     (List
        [ Atom "application"
        ; List [ Atom "application"; Atom "( - )"; Atom "?a" ]
        ; Atom "?a"
        ])
-    (List [ Atom "int"; Atom "0" ]);
+    (List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]);
   let sexp_result = EGraph.extract cost_function graph graph_expr in
   sexp_result
 ;;
@@ -109,7 +110,7 @@ let simplify =
     let sexp = sexpr_of_declaration decl in
     match let_declaration_of_sexpr (transform_sexp sexp) with
     | Ok decl -> return decl
-    | Error _ -> error "temp error")
+    | Error _ -> error "Error while applying rewrites")
 ;;
 
 let test_egraph_optimization prog =
