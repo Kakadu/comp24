@@ -189,8 +189,7 @@ module Mapper (M : MONADERROR) = struct
       let* pat' = pattern_of_sexpr pat in
       let* cases' =
         map1
-          (fun case ->
-            match case with
+          (function
             | List [ p; e ] ->
               let* p' = pattern_of_sexpr p in
               let* e' = expr_of_sexpr e in
@@ -239,8 +238,7 @@ end
 
 open Mapper (Result)
 
-let rec show_sexp sexp : string =
-  match sexp with
+let rec show_sexp = function
   | Atom s -> Printf.sprintf "Atom %S" s
   | List l ->
     let inner = String.concat "; " (List.map show_sexp l) in
