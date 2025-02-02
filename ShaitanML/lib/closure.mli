@@ -1,6 +1,6 @@
-val unbound_identifiers : Ast.expr -> (string, Base.String.comparator_witness) Base.Set.t
+val find_unbound_vars : Ast.expr -> (string, Base.String.comparator_witness) Base.Set.t
 
-val close_function
+val close_function_scope
   :  'a
   -> 'b
   -> 'c
@@ -8,11 +8,13 @@ val close_function
   -> Ast.expr
   -> Ast.expr
 
-val get_global_names : Ast.pattern -> (string, Base.String.comparator_witness) Base.Set.t
+val find_global_vars : Ast.pattern -> (string, Base.String.comparator_witness) Base.Set.t
+val ops_set : (string, Base.String.comparator_witness) Base.Set.t
 
-val convert_binding
+val transform_ast
   :  (string, Base.String.comparator_witness) Base.Set.t
   -> Ast.str_item
   -> Ast.str_item
 
-val convert_ast : Ast.str_item list -> Ast.str_item list
+val convert_all_ast : Ast.str_item list -> Ast.str_item list
+val run_tests : Ast.str_item list -> unit
