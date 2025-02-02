@@ -190,12 +190,12 @@ module Mapper (M : MONADERROR) = struct
       let* cases' =
         map1
           (fun case ->
-             match case with
-             | List [ p; e ] ->
-               let* p' = pattern_of_sexpr p in
-               let* e' = expr_of_sexpr e in
-               return (p', e')
-             | _ -> error "Invalid case in match")
+            match case with
+            | List [ p; e ] ->
+              let* p' = pattern_of_sexpr p in
+              let* e' = expr_of_sexpr e in
+              return (p', e')
+            | _ -> error "Invalid case in match")
           cases
       in
       return (EMatch (pat', cases'))
