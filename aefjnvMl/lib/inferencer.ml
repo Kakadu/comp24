@@ -322,6 +322,14 @@ let const_infer fst = function
     return (fst, tlist tv)
 ;;
 
+let rec convert_ty_annot = function
+  | Ptyp_int -> tint
+  | Ptyp_bool -> tbool
+  | Ptyp_var id -> tint
+  | Ptyp_list t -> tlist (convert_ty_annot t)
+  | Ptyp_tuple ts-> ttuple (List.map convert_ty_annot ts)
+  | Ptyp_arrow (t, t') -> tarrow (convert_ty_annot t) (convert_ty_annot t')
+
 let pattern_infer =
   let rec helper env = function
     | Pat_const c -> const_infer env c
@@ -351,6 +359,11 @@ let pattern_infer =
       in
       let* _, env, ty = check_several_bounds (pattern_vars pat) env (ttuple ty) in
       return (env, ty)
+    | Pat_constraint(p, t) -> 
+      let* env', t' = helper env p in
+      let* sub = Subst.unify t' (convert_ty_annot t) in 
+      let env = TypeEnv.apply sub env' in
+      return (env, Subst.apply sub t')
   in
   helper
 ;;
