@@ -1,13 +1,20 @@
-(executable
- (public_name demo)
- (name main)
- (modules LL main)
+(library
+ (name LL)
+ (public_name demo.LL)
+ (modules LL)
+ (wrapped false)
  (libraries
   llvm
   llvm.analysis
   llvm.executionengine
   ;
-  )
+  ))
+
+(executable
+ (public_name demo)
+ (name main)
+ (modules main)
+ (libraries LL)
  (instrumentation
   (backend bisect_ppx)))
 

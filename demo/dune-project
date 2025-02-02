@@ -21,6 +21,8 @@
   dune
   bisect_ppx
   (llvm
-   (= "16.0.6+nnp"))))
+   (= "16.0.6+nnp"))
+  (qcheck :with-tests)
+  (ppx_deriving_qcheck :with-tests)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
