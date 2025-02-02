@@ -56,10 +56,10 @@ type expr =
   | Application of expr * expr
   | Value of value
   | Let of funType * id * value list * expr (* let id a = a *)
+  | LetAndIn of expr list * expr option (* let a = 1 and b = 2 in a + b *)
   | Fun of value list * expr (* (fun a -> a + 1) *)
   | If of expr * expr * expr option (* if a = b then c (else d) *)
   | Match of expr * (value * expr) list
-  | LetIn of expr list * expr (* let a = 1 and b = 2 in a + b *)
 [@@deriving show]
 
 and funType =

@@ -95,8 +95,8 @@ expr:
     | v = value                                                         { Value v }
     | uop = uop; e = expr                                               { UnOp (uop, e) }
     | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | LET; l = let_in_def                                               { l }
     | LET; l = let_def                                                  { l }
+    | LET; l = let_and_in_def                                           { l }
     | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
     | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
@@ -122,9 +122,10 @@ value:
     | p = pattern                                       { p }
 
 pattern:
-    | tpl = tuple_dt                                {Tuple tpl} (* (1, 2, 3, ...) *)
-    | lst = list_dt                                 {List lst}  (* [1; 2; 3; ...] *)
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
+    | tpl = tuple_dt                                        {Tuple tpl} (* (1, 2, 3, ...) *)
+    | lst = list_dt                                         {List lst}  (* [1; 2; 3; ...] *)
+    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } (* hd :: tl *)
+    | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } (* 1 :: [2; 3] *)
 
 %inline paramType:
     | INT                   { PInt }
@@ -161,19 +162,21 @@ typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (type
 %inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { arg_list }
 %inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { arg_list }
 
-%inline match_case: 
-    | BAR; v = value; ARROW; e = expr { (v, e) }
-
-let_bind: (* a = 10 and b = 20 and ... *)
-    | l = let_def                           { [l] }
-    | h = let_def; LET_AND; tl = let_bind   { h :: tl }
+%inline match_case: BAR; v = value; ARROW; e = expr { (v, e) }
 
 %inline rec_flag:
     | REC { Recursive }
     | { Nonrecursive }
 
+(* [rec] f x = x *)
 %inline let_def: rec_opt = rec_flag; fun_name = IDENTIFIER; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
-let_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetIn ([e1], e2) } (* without and *)
-    | exs = let_bind; IN; e = expr  { LetIn (exs, e) } (* with and *)
+(* a = 10 and b = 20 and ... *)
+and_bind:
+    | l = let_def                             { [l] }
+    | h = let_def; LET_AND; tl = and_bind   { h :: tl }
+
+(* a = 10 and b = 20 and ... in a + b + ... *)
+let_and_in_def: 
+    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) } (* without and *)
+    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) } (* with and *)

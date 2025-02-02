@@ -111,6 +111,15 @@ let%test _ =
         ] )
 ;;
 
+let%test _ =
+  parse "match rofl with \n  | [] -> 0\n  | hd::tl -> 10"
+  = Match
+      ( Value (VarId "rofl")
+      , [ List [], Value (Const (Int 0))
+        ; ListConcat (VarId "hd", VarId "tl"), Value (Const (Int 10))
+        ] )
+;;
+
 (* let *)
 let%test _ = parse "let a = 1" = Let (Nonrecursive, "a", [], Value (Const (Int 1)))
 
@@ -121,23 +130,24 @@ let%test _ =
 
 let%test _ =
   parse "let f a b = 10 and g c d = 20 and e = 30 in nike_pro"
-  = LetIn
+  = LetAndIn
       ( [ Let (Nonrecursive, "f", [ VarId "a"; VarId "b" ], Value (Const (Int 10)))
         ; Let (Nonrecursive, "g", [ VarId "c"; VarId "d" ], Value (Const (Int 20)))
         ; Let (Nonrecursive, "e", [], Value (Const (Int 30)))
         ]
-      , Value (VarId "nike_pro") )
+      , Some (Value (VarId "nike_pro")) )
 ;;
 
 let%test _ =
   parse "let a = 10 and b = 20 in let c = 30 in nike_pro"
-  = LetIn
+  = LetAndIn
       ( [ Let (Nonrecursive, "a", [], Value (Const (Int 10)))
         ; Let (Nonrecursive, "b", [], Value (Const (Int 20)))
         ]
-      , LetIn
-          ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
-          , Value (VarId "nike_pro") ) )
+      , Some
+          (LetAndIn
+             ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
+             , Some (Value (VarId "nike_pro")) )) )
 ;;
 
 (* application *)
@@ -145,4 +155,18 @@ let%test _ =
 let%test _ =
   parse "(*123*) f x y (*123*)"
   = Application (Value (VarId "f"), Application (Value (VarId "x"), Value (VarId "y")))
+;;
+
+(* nested recursive let and *)
+
+let%test _ =
+  parse "let rec a = 10 and b = 20 in let c = 30 in sigma"
+  = LetAndIn
+      ( [ Let (Recursive, "a", [], Value (Const (Int 10)))
+        ; Let (Nonrecursive, "b", [], Value (Const (Int 20)))
+        ]
+      , Some
+          (LetAndIn
+             ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
+             , Some (Value (VarId "sigma")) )) )
 ;;
