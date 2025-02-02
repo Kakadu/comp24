@@ -820,21 +820,21 @@ open AnfCtx
 
 let fresh_temp =
   get
-  &gt;&gt;<span data-count="4">=</span> fun ({ temps; _ } as state) -&gt;
+  &gt;&gt;<span data-count="1">=</span> fun ({ temps; _ } as state) -&gt;
   <span data-count="0">l</span>et res = Format.sprintf "t_%i" temps in
   <span data-count="0">p</span>u<span data-count="0">t</span> { state with temps = temps + 1 } &gt;&gt;= fun _ -&gt; <span data-count="0">r</span>eturn res
 ;;
 
 let fresh_fun =
   get
-  &gt;&gt;<span data-count="4">=</span> fun ({ funs; _ } as state) -&gt;
+  &gt;&gt;<span data-count="1">=</span> fun ({ funs; _ } as state) -&gt;
   <span data-count="0">l</span>et res = Format.sprintf "fresh_fun_%i" funs in
   <span data-count="0">p</span>u<span data-count="0">t</span> { state with funs = funs + 1 } &gt;&gt;= fun _ -&gt; <span data-count="0">r</span>eturn res
 ;;
 
 let fresh_param =
   get
-  &gt;&gt;<span data-count="4">=</span> fun ({ params; _ } as state) -&gt;
+  &gt;&gt;<span data-count="1">=</span> fun ({ params; _ } as state) -&gt;
   <span data-count="0">l</span>et res = Format.sprintf "fresh_param_%i" params in
   <span data-count="0">p</span>u<span data-count="0">t</span> { state with params = params + 1 } &gt;&gt;= fun _ -&gt; <span data-count="0">r</span>eturn res
 ;;

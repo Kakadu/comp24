@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>Ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="70.15% coverage in lib/Ast.ml">
+    <meta name="description" content="56.72% coverage in lib/Ast.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,15 +15,18 @@
           <span class="dirname">lib/</span>Ast.ml
         </a>
       </h1>
-      <h2>70.15%</h2>
+      <h2>56.72%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:4.24%"></span>
       <span class="unvisited" style="top:5.08%"></span>
+      <span class="unvisited" style="top:6.78%"></span>
+      <span class="unvisited" style="top:11.02%"></span>
       <span class="unvisited" style="top:15.25%"></span>
       <span class="unvisited" style="top:35.59%"></span>
       <span class="some-visited" style="bottom:49.15%"></span>
       <span class="some-visited" style="bottom:48.31%"></span>
+      <span class="some-visited" style="bottom:45.76%"></span>
       <span class="unvisited" style="bottom:44.07%"></span>
       <span class="unvisited" style="bottom:33.90%"></span>
       <span class="unvisited" style="bottom:33.05%"></span>
@@ -31,11 +34,16 @@
       <span class="unvisited" style="bottom:31.36%"></span>
       <span class="unvisited" style="bottom:27.12%"></span>
       <span class="unvisited" style="bottom:22.88%"></span>
+      <span class="unvisited" style="bottom:20.34%"></span>
       <span class="unvisited" style="bottom:19.49%"></span>
       <span class="unvisited" style="bottom:18.64%"></span>
       <span class="unvisited" style="bottom:17.80%"></span>
       <span class="unvisited" style="bottom:16.95%"></span>
+      <span class="unvisited" style="bottom:16.10%"></span>
+      <span class="unvisited" style="bottom:13.56%"></span>
       <span class="unvisited" style="bottom:8.47%"></span>
+      <span class="unvisited" style="bottom:7.63%"></span>
+      <span class="unvisited" style="bottom:5.93%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -48,12 +56,12 @@
 <a id="L5"></a><span class="some-visited"> </span>
 <a id="L6"></a><span class="unvisited"> </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L8"></a><span class="unvisited"> </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
@@ -104,7 +112,7 @@
 <a id="L61"></a><span class="some-visited"> </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span class="visited"> </span>
-<a id="L64"></a><span class="visited"> </span>
+<a id="L64"></a><span class="some-visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span class="unvisited"> </span>
 <a id="L67"></a><span > </span>
@@ -134,24 +142,24 @@
 <a id="L91"></a><span class="unvisited"> </span>
 <a id="L92"></a><span > </span>
 <a id="L93"></a><span > </span>
-<a id="L94"></a><span class="visited"> </span>
+<a id="L94"></a><span class="unvisited"> </span>
 <a id="L95"></a><span class="unvisited"> </span>
 <a id="L96"></a><span class="unvisited"> </span>
 <a id="L97"></a><span class="unvisited"> </span>
 <a id="L98"></a><span class="unvisited"> </span>
-<a id="L99"></a><span class="visited"> </span>
+<a id="L99"></a><span class="unvisited"> </span>
 <a id="L100"></a><span > </span>
 <a id="L101"></a><span > </span>
-<a id="L102"></a><span class="visited"> </span>
+<a id="L102"></a><span class="unvisited"> </span>
 <a id="L103"></a><span class="visited"> </span>
 <a id="L104"></a><span class="visited"> </span>
 <a id="L105"></a><span class="visited"> </span>
 <a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span class="visited"> </span>
 <a id="L108"></a><span class="unvisited"> </span>
-<a id="L109"></a><span class="visited"> </span>
+<a id="L109"></a><span class="unvisited"> </span>
 <a id="L110"></a><span class="visited"> </span>
-<a id="L111"></a><span class="visited"> </span>
+<a id="L111"></a><span class="unvisited"> </span>
 <a id="L112"></a><span class="visited"> </span>
 <a id="L113"></a><span > </span>
 <a id="L114"></a><span > </span>
@@ -286,77 +294,77 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-<span data-count="0">t</span>ype ident = <span data-count="772">s</span>tring [@@deriving show]
+<span data-count="0">t</span>ype ident = <span data-count="483">s</span>tring [@@deriving show]
 <span data-count="0">t</span>ype type_id = <span data-count="0">i</span>nt [@@deriving show]
 
-<span data-count="15">t</span>ype typ =
+<span data-count="0">t</span>ype typ =
   | Typ_int
   | Typ_bool
   | Typ_var of type_id
   | Typ_list of typ
-  | Typ_tuple of typ * typ * <span data-count="15">t</span>yp lis<span data-count="8">t</span>
+  | Typ_tuple of typ * typ * <span data-count="0">t</span>yp lis<span data-count="0">t</span>
   | Typ_fun of typ * typ
   | Typ_unit
 [@@deriving show]
 
 let tfun l r = <span data-count="0">T</span>yp_fun (l, r)
 
-<span data-count="368">t</span>ype const =
-  | Const_int of in<span data-count="164">t</span>
-  | Const_bool of boo<span data-count="20">l</span>
+<span data-count="228">t</span>ype const =
+  | Const_int of in<span data-count="106">t</span>
+  | Const_bool of boo<span data-count="8">l</span>
   | Const_unit
   | Const_nil
 [@@deriving show]
 
-<span data-count="816">t</span>ype pattern =
+<span data-count="453">t</span>ype pattern =
   | Pat_const of const
   | Pat_var of ident
   | Pat_cons of pattern * pattern
-  | Pat_tuple of pattern * pattern * <span data-count="93">p</span>attern lis<span data-count="56">t</span>
+  | Pat_tuple of pattern * pattern * <span data-count="15">p</span>attern lis<span data-count="10">t</span>
   | Pat_wildcard
   | Pat_constrained of pattern * typ
 [@@deriving show]
 
-let pconst c = <span data-count="125">P</span>at_const c
-let pvar v = <span data-count="5074">P</span>at_var v
-let pcons x xs = <span data-count="67">P</span>at_cons (x, xs)
+let pconst c = <span data-count="62">P</span>at_const c
+let pvar v = <span data-count="3376">P</span>at_var v
+let pcons x xs = <span data-count="32">P</span>at_cons (x, xs)
 let pnil = Pat_const Const_nil
-let ptuple a b rest = <span data-count="104">P</span>at_tuple (a, b, rest)
+let ptuple a b rest = <span data-count="20">P</span>at_tuple (a, b, rest)
 
 <span data-count="0">t</span>ype rec_flag =
   | Recursive
   | NonRecursive
 [@@deriving show]
 
-<span data-count="2018">t</span>ype expr =
+<span data-count="1306">t</span>ype expr =
   | Expr_const of const
   | Expr_var of ident
   | Expr_cons of expr * expr
-  | Expr_tuple of expr * expr * <span data-count="27">e</span>xpr lis<span data-count="18">t</span>
+  | Expr_tuple of expr * expr * <span data-count="18">e</span>xpr lis<span data-count="12">t</span>
   | Expr_let of rec_flag * binding * expr
   | Expr_ite of expr * expr * expr
   | Expr_fun of pattern * expr
-  | Expr_match of expr * <span data-count="154">c</span>ase lis<span data-count="45">t</span>
+  | Expr_match of expr * <span data-count="82">c</span>ase lis<span data-count="24">t</span>
   | Expr_app of expr * expr
   | Expr_constrained of expr * typ
 [@@deriving show]
 
-<span data-count="0">a</span>nd binding = <span data-count="218">p</span>attern * expr [@@deriving show]
-<span data-count="0">a</span>nd case = <span data-count="64">p</span>attern * expr [@@deriving show]
+<span data-count="0">a</span>nd binding = <span data-count="178">p</span>attern * expr [@@deriving show]
+<span data-count="0">a</span>nd case = <span data-count="34">p</span>attern * expr [@@deriving show]
 
-<span data-count="52">t</span>ype structure_item = Str_value of rec_flag * <span data-count="320">b</span>inding lis<span data-count="106">t</span> [@@deriving show]
-<span data-count="5">t</span>ype structure = <span data-count="231">s</span>tructure_item lis<span data-count="52">t</span> [@@deriving show]
+<span data-count="47">t</span>ype structure_item = Str_value of rec_flag * <span data-count="286">b</span>inding lis<span data-count="95">t</span> [@@deriving show]
+<span data-count="0">t</span>ype structure = <span data-count="206">s</span>tructure_item lis<span data-count="47">t</span> [@@deriving show]
 
 let evar id = <span data-count="0">E</span>xpr_var id
 
 let eapp func args =
-  <span data-count="19956">B</span>ase.List.fold_left args ~init:func ~f:(fun acc arg -&gt; <span data-count="22308">E</span>xpr_app (acc, arg))
+  <span data-count="15004">B</span>ase.List.fold_left args ~init:func ~f:(fun acc arg -&gt; <span data-count="16732">E</span>xpr_app (acc, arg))
 ;;
 
-let econs x y = <span data-count="500">E</span>xpr_cons (x, y)
+let econs x y = <span data-count="440">E</span>xpr_cons (x, y)
 let enil = Expr_const Const_nil
-let etuple fst snd rest = <span data-count="686">E</span>xpr_tuple (fst, snd, rest)
-let eite c e t = <span data-count="84">E</span>xpr_ite (c, e, t)
+let etuple fst snd rest = <span data-count="672">E</span>xpr_tuple (fst, snd, rest)
+let eite c e t = <span data-count="77">E</span>xpr_ite (c, e, t)
 
 let eite_simplified c e t =
   <span data-count="0">m</span>atch c with
@@ -365,35 +373,35 @@ let eite_simplified c e t =
   | <span data-count="0">_</span> -&gt; Expr_ite (c, e, t)
 ;;
 
-let efun p body = <span data-count="2318">E</span>xpr_fun (p, body)
+let efun p body = <span data-count="1589">E</span>xpr_fun (p, body)
 
 let elet ?(rec_flag = <span data-count="0">N</span>onRecursive) (pattern, binding) where =
-  <span data-count="61">E</span>xpr_let (rec_flag, (pattern, binding), where)
+  <span data-count="44">E</span>xpr_let (rec_flag, (pattern, binding), where)
 ;;
 
-let ematch expr bindings = <span data-count="13">E</span>xpr_match (expr, bindings)
+let ematch expr bindings = <span data-count="7">E</span>xpr_match (expr, bindings)
 let getfield idx obj = <span data-count="0">e</span>app (Expr_var "getfield") [ Expr_const (Const_int idx); obj ]
 
 let eland x y =
-  <span data-count="1">m</span>atch x, y with
+  <span data-count="0">m</span>atch x, y with
   | <span data-count="0">E</span>xpr_const (Const_bool true), _ -&gt; y
   | <span data-count="0">_</span>, Expr_const (Const_bool true) -&gt; x
   | <span data-count="0">E</span>xpr_const (Const_bool false), _ -&gt; x
   | <span data-count="0">_</span>, Expr_const (Const_bool false) -&gt; y
-  | <span data-count="1">_</span> -&gt; eapp (Expr_var "&amp;&amp;") [ x; y ]
+  | <span data-count="0">_</span> -&gt; eapp (Expr_var "&amp;&amp;") [ x; y ]
 ;;
 
-let elor x y = <span data-count="1">e</span>app (Expr_var "||") [ x; y ]
-let add x y = <span data-count="927">e</span>app (Expr_var "+") [ x; y ]
-let mul x y = <span data-count="609">e</span>app (Expr_var "*") [ x; y ]
-let div x y = <span data-count="265">e</span>app (Expr_var "/") [ x; y ]
-let sub x y = <span data-count="219">e</span>app (Expr_var "-") [ x; y ]
-let eqq x y = <span data-count="302">e</span>app (Expr_var "=") [ x; y ]
+let elor x y = <span data-count="0">e</span>app (Expr_var "||") [ x; y ]
+let add x y = <span data-count="408">e</span>app (Expr_var "+") [ x; y ]
+let mul x y = <span data-count="596">e</span>app (Expr_var "*") [ x; y ]
+let div x y = <span data-count="260">e</span>app (Expr_var "/") [ x; y ]
+let sub x y = <span data-count="164">e</span>app (Expr_var "-") [ x; y ]
+let eqq x y = <span data-count="284">e</span>app (Expr_var "=") [ x; y ]
 let neq x y = <span data-count="0">e</span>app (Expr_var "&lt;&gt;") [ x; y ]
-let ge x y = <span data-count="8">e</span>app (Expr_var "&gt;") [ x; y ]
+let ge x y = <span data-count="0">e</span>app (Expr_var "&gt;") [ x; y ]
 let le x y = <span data-count="4">e</span>app (Expr_var "&lt;") [ x; y ]
-let geq x y = <span data-count="2">e</span>app (Expr_var "&gt;=") [ x; y ]
-let leq x y = <span data-count="14">e</span>app (Expr_var "&lt;=") [ x; y ]
+let geq x y = <span data-count="0">e</span>app (Expr_var "&gt;=") [ x; y ]
+let leq x y = <span data-count="12">e</span>app (Expr_var "&lt;=") [ x; y ]
 
 let binary_ops =
   [ "*"; "/"; "::"; "+"; "-"; "=="; "="; "&lt;&gt;"; "&gt;="; "&gt;"; "&lt;="; "&lt;"; "||"; "&amp;&amp;" ]

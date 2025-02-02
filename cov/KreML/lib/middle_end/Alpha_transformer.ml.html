@@ -472,11 +472,11 @@ open Utils
 
 type context = (string, string, Base.String.comparator_witness) Base.Map.t
 
-let empty : context = Base.Map.empt<span data-count="4">y</span> (module Base.String)
+let empty : context = Base.Map.empt<span data-count="1">y</span> (module Base.String)
 
 let default =
-  List.fold_lef<span data-count="4">t</span>
-    (fun map f -&gt; <span data-count="80">B</span>ase.Map.set map ~key:f ~data:f)
+  List.fold_lef<span data-count="1">t</span>
+    (fun map f -&gt; <span data-count="20">B</span>ase.Map.set map ~key:f ~data:f)
     empty
     (Ast.binary_ops @ Cstdlib.stdlib_funs @ Runtime.runtime_funs)
 ;;

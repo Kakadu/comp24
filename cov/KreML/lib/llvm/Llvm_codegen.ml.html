@@ -1538,12 +1538,12 @@ let lookup_fun_type name =
   <span data-count="0">B</span>ase.Map.find_exn fun_types name |&gt; <span data-count="0">r</span>eturn
 ;;
 
-let context = global_contex<span data-count="4">t</span> ()
-let mdl = create_modul<span data-count="4">e</span> context "main"
-let builder = Llvm.builde<span data-count="4">r</span> context
-let int_type = Llvm.i64_typ<span data-count="4">e</span> context
-let iconst = Llvm.const_in<span data-count="4">t</span> int_type
-let ptr_type = pointer_typ<span data-count="4">e</span> context
+let context = global_contex<span data-count="1">t</span> ()
+let mdl = create_modul<span data-count="1">e</span> context "main"
+let builder = Llvm.builde<span data-count="1">r</span> context
+let int_type = Llvm.i64_typ<span data-count="1">e</span> context
+let iconst = Llvm.const_in<span data-count="1">t</span> int_type
+let ptr_type = pointer_typ<span data-count="1">e</span> context
 
 let lookup_fun_exn name =
   <span data-count="0">m</span>atch Llvm.lookup_function name mdl with
@@ -1557,7 +1557,7 @@ let lookup_global_exn name =
   | <span data-count="0">N</span>one -&gt; Utils.internalfail @@ Format.sprint<span data-count="0">f</span> "Unknown global %s" name
 ;;
 
-let alloc_tuple_typ = Llvm.function_typ<span data-count="4">e</span> ptr_type [| int_type |]
+let alloc_tuple_typ = Llvm.function_typ<span data-count="1">e</span> ptr_type [| int_type |]
 
 open CodegenMonad
 
@@ -1571,17 +1571,17 @@ let alloc_tuple name size =
     <span data-count="0">b</span>uild_call alloc_tuple_typ f [| size_const |] name builder |&gt; <span data-count="0">r</span>eturn)
 ;;
 
-let fun_with_env_typ = Llvm.function_typ<span data-count="4">e</span> int_type [| ptr_type; int_type |]
-let call_closure_typ = Llvm.function_typ<span data-count="4">e</span> int_type [| ptr_type; ptr_type; int_type |]
+let fun_with_env_typ = Llvm.function_typ<span data-count="1">e</span> int_type [| ptr_type; int_type |]
+let call_closure_typ = Llvm.function_typ<span data-count="1">e</span> int_type [| ptr_type; ptr_type; int_type |]
 
 (* closure, args, args_count*)
 let alloc_closure_typ =
-  Llvm.function_typ<span data-count="4">e</span> ptr_type [| ptr_type; ptr_type; int_type; int_type |]
+  Llvm.function_typ<span data-count="1">e</span> ptr_type [| ptr_type; ptr_type; int_type; int_type |]
 ;;
 
 (* fptr, env, arity, envsize *)
 
-let list_cons_typ = Llvm.function_typ<span data-count="4">e</span> ptr_type [| int_type; ptr_type |]
+let list_cons_typ = Llvm.function_typ<span data-count="1">e</span> ptr_type [| int_type; ptr_type |]
 
 let alloc_closure f env arity env_size =
   <span data-count="0">l</span>et* f = f in
@@ -1625,7 +1625,7 @@ let call_closure c args =
   |&gt; <span data-count="0">r</span>eturn
 ;;
 
-let print_int_typ = function_typ<span data-count="4">e</span> int_type [| int_type |]
+let print_int_typ = function_typ<span data-count="1">e</span> int_type [| int_type |]
 
 let add_builtin_functions () =
   <span data-count="0">l</span>et _ = declare_function Runtime.alloc_tuple alloc_tuple_typ mdl in
