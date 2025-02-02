@@ -1,5 +1,5 @@
 depexts: [
-  [ "llvm-17-dev" "clang-18" "gcc-13" "pkg-config" 
+  [ "llvm-17-dev" "gcc-13" "pkg-config" 
     "qemu-user-static"
   ] {os-distribution = "ubuntu"}
 ]
