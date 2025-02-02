@@ -127,13 +127,13 @@ type ty =
   | TTuple of ty list (** Tuple type *)
   | TList of ty (** List type *)
 
-let arrow l r = <span data-count="3993">T</span>Arrow (l, r)
+let arrow l r = <span data-count="4159">T</span>Arrow (l, r)
 let int_typ = TPrim "int"
 let bool_typ = TPrim "bool"
 let string_typ = TPrim "string"
 let unit_typ = TPrim "unit"
 let tuple_typ t = <span data-count="13">T</span>Tuple t
-let list_typ t = <span data-count="532">T</span>List t
+let list_typ t = <span data-count="572">T</span>List t
 
 let rec pp_typ ppf =
   <span data-count="1307">l</span>et open Format in
