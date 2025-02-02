@@ -26,7 +26,7 @@ let cost_function score (sym, children) =
     match Symbol.to_string sym with
     | "( * )" -> 5.
     | "( / )" -> 5.
-    | "( + )" -> 1115.
+    | "( + )" -> 3.
     | "( - )" -> 5.
     | "0" -> 1.
     | "1" -> 2.
@@ -70,7 +70,7 @@ let transform_sexp sexp =
            ; Atom "?c"
            ]
        ]);
-  (* a1 / (a2 * a3) = a1 * (a2 / a3) *)
+  (* (a1 * a2) / a3 = a1 * (a2 / a3)*)
   add_rule
     (List
        [ Atom "application"
@@ -190,6 +190,18 @@ let transform_sexp sexp =
        ; Atom "?a"
        ])
     (Atom "?a");
+  (* a * 2 = a + a *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( * )"; Atom "?a" ]
+       ; List [ Atom "constant"; List [ Atom "int"; Atom "2" ] ]
+       ])
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+       ; Atom "?a"
+       ]);
   let sexp_result = EGraph.extract cost_function graph graph_expr in
   sexp_result
 ;;
