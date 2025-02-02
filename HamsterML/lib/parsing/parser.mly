@@ -12,7 +12,7 @@
 %token <string> TYPE_STRING
 %token TYPE_UNIT
 
-// Param Types
+// Explicit Types
 %token INT
 %token FLOAT
 %token BOOL
@@ -95,7 +95,6 @@ expr:
     | v = value                                                         { Value v }
     | uop = uop; e = expr                                               { UnOp (uop, e) }
     | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | LET; REC; l = let_rec_def                                         { l }
     | LET; l = let_in_def                                               { l }
     | LET; l = let_def                                                  { l }
     | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
@@ -159,19 +158,21 @@ const_or_var: (* Const or variable *)
 
 typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
 
-%inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { val_list }
-%inline list_dt: LEFT_SQ_BRACKET; val_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { val_list }
+%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { arg_list }
+%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { arg_list }
 
 %inline match_case: 
     | BAR; v = value; ARROW; e = expr { (v, e) }
 
-(* <id> <value1> <value2> ... = <expr> *)
-%inline let_rec_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr    { Let (Recursive, id, vls, e) }
-%inline let_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr        { Let (Nonrecursive, id, vls, e) }
-
 let_bind: (* a = 10 and b = 20 and ... *)
     | l = let_def                           { [l] }
     | h = let_def; LET_AND; tl = let_bind   { h :: tl }
+
+%inline rec_flag:
+    | REC { Recursive }
+    | { Nonrecursive }
+
+%inline let_def: rec_opt = rec_flag; fun_name = IDENTIFIER; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
 let_in_def: 
     | e1 = let_def; IN; e2 = expr   { LetIn ([e1], e2) } (* without and *)
