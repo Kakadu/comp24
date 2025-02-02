@@ -256,8 +256,8 @@ let sexpr_of_ast_test_parse prog =
 ;;
 
 let%expect_test "Test list type" =
-  sexpr_of_ast_test_parse "let x1 = a + a";
+  sexpr_of_ast_test_parse "let x1 = (a * b) + (a * c)  ";
   [%expect
     {|
-    List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x1"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; Atom "a" ]; Atom "a" ] ] ] |}]
+    List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x1"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "application"; List [ Atom "application"; Atom "( * )"; Atom "a" ]; Atom "b" ] ]; List [ Atom "application"; List [ Atom "application"; Atom "( * )"; Atom "a" ]; Atom "c" ] ] ] ] |}]
 ;;

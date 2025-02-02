@@ -118,6 +118,66 @@ let transform_sexp sexp =
        ; List [ Atom "application"; Atom "( * )"; Atom "?b" ]
        ; Atom "?a"
        ]);
+  (* (a1 + a2) * a3 = (a1 * a3) + (a2 * a3) *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( * )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+               ; Atom "?b"
+               ]
+           ]
+       ; Atom "?c"
+       ])
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( + )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( * )"; Atom "?a" ]
+               ; Atom "?c"
+               ]
+           ]
+       ; List
+           [ Atom "application"
+           ; List [ Atom "application"; Atom "( * )"; Atom "?b" ]
+           ; Atom "?c"
+           ]
+       ]);
+  (* a1 * (a2 + a3) = (a1 * a2) + (a1 * a3) *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( * )"; Atom "?a" ]
+       ; List
+           [ Atom "application"
+           ; List [ Atom "application"; Atom "( + )"; Atom "?b" ]
+           ; Atom "?c"
+           ]
+       ])
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( + )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( * )"; Atom "?a" ]
+               ; Atom "?b"
+               ]
+           ]
+       ; List
+           [ Atom "application"
+           ; List [ Atom "application"; Atom "( * )"; Atom "?a" ]
+           ; Atom "?c"
+           ]
+       ]);
   (* a / 1 = a *)
   add_rule
     (List
