@@ -226,10 +226,7 @@ module Scheme = struct
       (R.return t)
   ;;
 
-  let pp fmt (Scheme (bs, t)) =
-    Varset.pp fmt bs;
-    pp_typ fmt t
-  ;;
+  let pp fmt (Scheme (_, t)) = pp_typ fmt t
 end
 
 type var_name = string
@@ -245,7 +242,7 @@ module TypeEnv = struct
       "[ %a ]"
       (pp_print_list
          ~pp_sep:(fun ppf () -> fprintf ppf ", ")
-         (fun ppf (k, v) -> fprintf ppf "%s -> %a\n" k Scheme.pp v))
+         (fun ppf (k, v) -> fprintf ppf "%s : %a\n" k Scheme.pp v))
       env
   ;;
 
