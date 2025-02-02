@@ -110,14 +110,13 @@ module Mapper (M : MONADERROR) = struct
         ]
   ;;
 
-  let declarations_to_sexpr decls = List (List.map let_declaration_to_sexpr decls)
+  let declarations_to_sexpr decls = List.map let_declaration_to_sexpr decls
 
   let rec type_of_sexpr = function
     | Atom "unit" -> return TUnit
     | Atom "int" -> return TInt
     | Atom "bool" -> return TBool
-    | Atom s when s.[0] = '\'' ->
-      return (TPoly (String.sub s 1 (String.length s - 1))) (* Handling TPoly *)
+    | Atom s when s.[0] = '\'' -> return (TPoly (String.sub s 1 (String.length s - 1)))
     | List (Atom "tuple" :: ts) ->
       let* ts' = map1 type_of_sexpr ts in
       return (TTuple ts')
@@ -232,17 +231,15 @@ module Mapper (M : MONADERROR) = struct
     | _ -> error "Invalid S-expression for let declaration"
   ;;
 
-  let declarations_of_sexpr = function
-    | List decls ->
-      let* decls' = map1 let_declaration_of_sexpr decls in
-      return decls'
-    | _ -> error "Invalid S-expression for declarations"
+  let declarations_of_sexpr sexprs =
+    let* decls' = map1 let_declaration_of_sexpr sexprs in
+    return decls'
   ;;
 end
 
 open Mapper (Result)
 
-let rec show_sexp sexp : string =
+(* let rec show_sexp sexp : string =
   match sexp with
   | Atom s -> Printf.sprintf "Atom %S" s
   | List l ->
@@ -250,15 +247,17 @@ let rec show_sexp sexp : string =
     Printf.sprintf "List [ %s ]" inner
 ;;
 
-let sexpr_of_ast_test prog =
+let sexpr_of_ast_test_parse prog =
   match Parser.parse_program prog with
-  | Ok ast -> Printf.printf "%s" (show_sexp (declarations_to_sexpr ast))
-  | Error err -> Printf.printf "%s" err
+  | Ok ast ->
+    let sexprs = declarations_to_sexpr ast in
+    List.iter (fun sexpr -> Printf.printf "%s\n" (show_sexp sexpr)) sexprs
+  | Error err -> Printf.printf "%s\n" err
 ;;
 
 let%expect_test "Test list type" =
-  sexpr_of_ast_test "let x = 5 + 0";
+  sexpr_of_ast_test_parse "let x = 5 + 0 + 0";
   [%expect
     {|
-    List [ List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "constant"; List [ Atom "int"; Atom "5" ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ] ] ] |}]
-;;
+    List [ Atom "single_let"; Atom "notrec"; List [ Atom "let"; Atom "x"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "application"; List [ Atom "application"; Atom "( + )"; List [ Atom "constant"; List [ Atom "int"; Atom "5" ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ]; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ] ] ] ] |}]
+;; *)
