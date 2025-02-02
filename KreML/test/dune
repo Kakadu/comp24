@@ -1,13 +1,3 @@
-(library
- (name cursedml_lib_test)
- (modules Parser_test Inferencer_test)
- (libraries base ppx_show.runtime cursedml_lib)
- (preprocess
-  (pps ppx_deriving.show ppx_expect))
- (inline_tests)
- (instrumentation
-  (backend bisect_ppx)))
-
 (executable
  (public_name parser)
  (name parser)
