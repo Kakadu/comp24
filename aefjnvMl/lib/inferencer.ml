@@ -31,6 +31,7 @@ module R : sig
   end
 
   val fresh : int t
+  val ident : int t
   val run : 'a t -> ('a, error) Result.t
 end = struct
   type 'a t = int -> int * ('a, error) Result.t
@@ -78,6 +79,7 @@ end = struct
   end
 
   let fresh : int t = fun last -> last + 1, Result.Ok last
+  let ident : int t = fun last -> last, Result.Ok last
   let run m = snd (m 0)
 end
 
@@ -117,6 +119,7 @@ open R
 open R.Syntax
 
 let fresh_var = fresh >>| fun n -> tvar n
+let poly_var s = ident >>| fun n -> tvar (n + (Hashtbl.hash s))
 
 module Subst : sig
   open Base
@@ -322,13 +325,29 @@ let const_infer fst = function
     return (fst, tlist tv)
 ;;
 
-let rec convert_ty_annot = function
-  | Ptyp_int -> tint
-  | Ptyp_bool -> tbool
-  | Ptyp_var id -> tint
-  | Ptyp_list t -> tlist (convert_ty_annot t)
-  | Ptyp_tuple ts-> ttuple (List.map convert_ty_annot ts)
-  | Ptyp_arrow (t, t') -> tarrow (convert_ty_annot t) (convert_ty_annot t')
+let rec convert_ty_annot env = function
+  | Ptyp_int -> return tint
+  | Ptyp_bool -> return tbool
+  | Ptyp_var s ->
+    let* var = poly_var s in
+    return var
+  | Ptyp_list t ->
+    let* el_ty = convert_ty_annot env t in
+    return @@ tlist el_ty
+  | Ptyp_tuple ts->
+    let* ty =
+        RList.fold_left
+          ts
+          ~init:(return [])
+          ~f:(fun ts t ->
+            let* p1 = convert_ty_annot env t in
+            return @@ p1 :: ts)
+      in
+      return @@ ttuple ty
+  | Ptyp_arrow(t, t') ->
+    let* t1 = convert_ty_annot env t in
+    let* t2 = convert_ty_annot env t' in 
+    return @@ tarrow t1 t2
 
 let pattern_infer =
   let rec helper env = function
@@ -361,9 +380,11 @@ let pattern_infer =
       return (env, ty)
     | Pat_constraint(p, t) -> 
       let* env', t' = helper env p in
-      let* sub = Subst.unify t' (convert_ty_annot t) in 
+      let* t_sp = convert_ty_annot env' t in
+      let* sub = Subst.unify t' t_sp in 
       let env = TypeEnv.apply sub env' in
       return (env, Subst.apply sub t')
+
   in
   helper
 ;;
