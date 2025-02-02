@@ -21,6 +21,9 @@ let%test _ = lex "add" = [ IDENTIFIER "add" ]
 let%test _ = lex "()" = [ TYPE_UNIT ]
 let%test _ = lex "( )" = [ TYPE_UNIT ]
 let%test _ = lex "(* comment!!! *)" = []
+let%test _ = lex "(  - )" = [ OP_IDENTIFIER '-' ]
+let%test _ = lex "( + )" = [ OP_IDENTIFIER '+' ]
+let%test _ = lex "(*)" = [ OP_IDENTIFIER '*' ]
 
 let%test _ =
   lex

@@ -71,7 +71,10 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
-    | infix_op  { OP_IDENTIFIER (String.get (Lexing.lexeme lexbuf) 1) }
+    | infix_op  { (let str = Lexing.lexeme lexbuf in
+                    let str2 = (String.sub str 1 (String.length str - 2)) in
+                        let char = String.get (String.trim str2) 0 in
+                        OP_IDENTIFIER char) }
     | comment   { read lexbuf }
     | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }

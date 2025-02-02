@@ -191,3 +191,14 @@ let%test _ =
         ]
       , None )
 ;;
+
+(* Operation override *)
+
+let%test _ =
+  parse "let ( + ) x y = x - y"
+  = Let
+      ( Nonrecursive
+      , "+"
+      , [ VarId "x"; VarId "y" ]
+      , BinOp (SUB, Value (VarId "x"), Value (VarId "y")) )
+;;

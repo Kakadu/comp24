@@ -154,7 +154,7 @@ pattern:
 
 %inline func_id: 
     | id = IDENTIFIER     {id}
-    | op = OP_IDENTIFIER  { print_char op; String.make 1 op }
+    | op = OP_IDENTIFIER  { String.make 1 op }
 
 const_or_var: (* Const or variable *)
     | const = dataType      {Const const} 
