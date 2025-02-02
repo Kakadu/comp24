@@ -168,15 +168,19 @@ typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (type
     | REC { Recursive }
     | { Nonrecursive }
 
-(* [rec] f x = x *)
-%inline let_def: rec_opt = rec_flag; fun_name = IDENTIFIER; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
+%inline let_def:
+    (* () = print_endline "123" *)
+    | TYPE_UNIT; EQUAL; e = expr                                                       { LetUnit (e) }                     
+    (* [rec] f x = x *)
+    | rec_opt = rec_flag; fun_name = IDENTIFIER; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
 (* a = 10 and b = 20 and ... *)
 and_bind:
     | l = let_def                             { [l] }
-    | h = let_def; LET_AND; tl = and_bind   { h :: tl }
+    | h = let_def; LET_AND; tl = and_bind     { h :: tl }
 
 (* a = 10 and b = 20 and ... in a + b + ... *)
 let_and_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) } (* without and *)
-    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) } (* with and *)
+    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
+    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
+    | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)

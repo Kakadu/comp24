@@ -150,6 +150,15 @@ let%test _ =
              , Some (Value (VarId "nike_pro")) )) )
 ;;
 
+let%test _ =
+  parse "let a = 10 and b = 20"
+  = LetAndIn
+      ( [ Let (Nonrecursive, "a", [], Value (Const (Int 10)))
+        ; Let (Nonrecursive, "b", [], Value (Const (Int 20)))
+        ]
+      , None )
+;;
+
 (* application *)
 
 let%test _ =
@@ -169,4 +178,16 @@ let%test _ =
           (LetAndIn
              ( [ Let (Nonrecursive, "c", [], Value (Const (Int 30))) ]
              , Some (Value (VarId "sigma")) )) )
+;;
+
+(* Unit *)
+let%test _ = parse "let () = ()" = LetUnit (Value (Const Unit))
+
+let%test _ =
+  parse "let () = () and () = print_int 1"
+  = LetAndIn
+      ( [ LetUnit (Value (Const Unit))
+        ; LetUnit (Application (Value (VarId "print_int"), Value (Const (Int 1))))
+        ]
+      , None )
 ;;
