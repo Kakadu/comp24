@@ -20,6 +20,7 @@
 %token STRING
 %token <string> POLYMORPHIC_NAME // (x: `a) (y: `b)
 
+%token <char>   OP_IDENTIFIER // let (+) = ...
 %token <string> IDENTIFIER
 
 // Statements 
@@ -111,12 +112,10 @@ dataType:
     | s = TYPE_STRING   {String s}
     | TYPE_UNIT         { Unit }
 
-%inline identifier:
-    | name = IDENTIFIER { name }
 
 value:
     | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS    { v }
-    | WILDCARD                                          {Wildcard}
+    | WILDCARD                                          { Wildcard }
     | t_v = typed_var                                   { t_v }
     | v = const_or_var                                  { v }
     | p = pattern                                       { p }
@@ -153,11 +152,15 @@ pattern:
 %inline uop:
     | NOT { NOT }   
 
+%inline func_id: 
+    | id = IDENTIFIER     {id}
+    | op = OP_IDENTIFIER  { print_char op; String.make 1 op }
+
 const_or_var: (* Const or variable *)
     | const = dataType      {Const const} 
-    | varId = identifier    { VarId varId }
+    | varId = IDENTIFIER    { VarId varId }
 
-typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
+typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
 
 %inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { arg_list }
 %inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { arg_list }
@@ -170,9 +173,9 @@ typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (type
 
 %inline let_def:
     (* () = print_endline "123" *)
-    | TYPE_UNIT; EQUAL; e = expr                                                       { LetUnit (e) }                     
+    | TYPE_UNIT; EQUAL; e = expr                                                    { LetUnit (e) }                     
     (* [rec] f x = x *)
-    | rec_opt = rec_flag; fun_name = IDENTIFIER; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
+    | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
 (* a = 10 and b = 20 and ... *)
 and_bind:

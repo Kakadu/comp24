@@ -25,6 +25,8 @@ let comment = "(*" comment_sym* "*)"
 
 let unit = '(' ' '* ')'
 
+let infix_op = '(' ' '* ['+' '-' '*' '/' ] ' '* ')'
+
 rule read =
     parse
     | white     { read lexbuf }
@@ -69,6 +71,7 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | infix_op  { OP_IDENTIFIER (String.get (Lexing.lexeme lexbuf) 1) }
     | comment   { read lexbuf }
     | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
