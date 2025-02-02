@@ -29,6 +29,7 @@ let cost_function score (sym, children) =
     | "( + )" -> 5.
     | "( - )" -> 5.
     | "0" -> 1.
+    | "1" -> 1.
     | "?a" -> 1.
     | _ -> 0.
   in
@@ -37,6 +38,38 @@ let cost_function score (sym, children) =
 
 let transform_sexp sexp =
   let graph_expr = EGraph.add_sexp graph sexp in
+  (* (a1 + a2) / a3 = (a1 / a3) + (a2 / a3) *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( / )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+               ; Atom "?b"
+               ]
+           ]
+       ; Atom "?c"
+       ])
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( + )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( / )"; Atom "?a" ]
+               ; Atom "?c"
+               ]
+           ]
+       ; List
+           [ Atom "application"
+           ; List [ Atom "application"; Atom "( / )"; Atom "?b" ]
+           ; Atom "?c"
+           ]
+       ]);
   (* a / 1 = a *)
   add_rule
     (List
@@ -93,7 +126,7 @@ let transform_sexp sexp =
        ; Atom "?a"
        ])
     (Atom "?a");
-  (* 0 + a = a *)
+  (* a - a = 0 *)
   add_rule
     (List
        [ Atom "application"
@@ -101,6 +134,14 @@ let transform_sexp sexp =
        ; Atom "?a"
        ])
     (List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]);
+  (* a / a = 1 *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( / )"; Atom "?a" ]
+       ; Atom "?a"
+       ])
+    (List [ Atom "constant"; List [ Atom "int"; Atom "1" ] ]);
   let sexp_result = EGraph.extract cost_function graph graph_expr in
   sexp_result
 ;;
