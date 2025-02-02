@@ -55,7 +55,9 @@ type pattern =
 
 and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = false }]
 
-type expr =
+type branch = pattern_typed * expr [@@deriving eq, show { with_path = false }]
+
+and expr =
   | EConst of const (** Const. Examples: 100; true *)
   | EId of ident (** Identifier. Examples: a, b, c *)
   | EFun of pattern_typed * expr (** Function. Examples: fun x -> x + 1 *)
@@ -65,13 +67,17 @@ type expr =
   | EList of expr * expr (** Lists. Examples: [1; 2; 3] *)
   | ETuple of expr * expr * expr list (** Tuple. Examples: (1, 2, 3) *)
   | EClsr of decl * expr (** Closure. Examples: let inc x = x + 1 in inc 5*)
-  | EMatch of expr * (pattern_typed * expr) * (pattern_typed * expr) list
-    (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
+  | EMatch of expr * branch * branch list
+  (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
 and decl =
   | DLet of rec_flag * ident_definable * expr * typ option (** Let declarations *)
-  | DLetMut of rec_flag * (ident_definable * expr * typ option) * (ident_definable * expr * typ option) * (ident_definable * expr * typ option) list
+  | DLetMut of
+      rec_flag
+      * (ident_definable * expr * typ option)
+      * (ident_definable * expr * typ option)
+      * (ident_definable * expr * typ option) list
 [@@deriving eq, show { with_path = false }]
 
 type prog = decl list [@@deriving eq, show { with_path = false }]
