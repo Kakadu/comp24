@@ -13,6 +13,7 @@
 _build/
 
 runtime/runtime.o
+out
 
 
 # ocamlbuild targets
