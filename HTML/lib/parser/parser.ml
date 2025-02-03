@@ -42,10 +42,10 @@ let is_letter c = is_lower c || is_upper c
 let is_ident_char c = is_digit c || is_letter c
 
 let keywords =
-  [ "let"
-  ; "if"
+  [ "if"
   ; "then"
   ; "else"
+  ; "let"
   ; "rec"
   ; "true"
   ; "false"
@@ -368,14 +368,18 @@ let parse_bin_op_app parse_expr =
     in
     let parse_bin_op_parens =
       let* op = parse_parens parse_op in
-      let parse_typed = parse_typed parse_bin_op_app in
+      let parse_expr =
+        parse_typed
+          (choice
+             [ parse_const_expr; parse_identifier_expr; parse_parens parse_bin_op_app ])
+      in
       lift2
         (fun e1 e2 ->
           eapp
             (e_typed (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) e1))
             e2)
-        parse_typed
-        parse_typed
+        parse_expr
+        parse_expr
     in
     parse_bin_op @@ choice [ parse_bin_op_parens; parse_app parse_expr ])
 ;;
