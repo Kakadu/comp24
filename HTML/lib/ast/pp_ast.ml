@@ -2,6 +2,22 @@ open Ast
 open Pp_utils
 open Format
 
+(* module PpPrintMonad = struct
+   open Base.Result
+
+   type 'a t = state -> 'a * state
+
+   let return (value : 'a) : 'a t = fun st -> value, st
+
+   let ( >>= ) (m : 'a t) (f : 'a -> 'b t) : 'b t =
+   fun st ->
+   let value, next_st = m st in
+   f value next_st
+   ;;
+   end
+
+   open PpPrintMonad *)
+
 let pp_const fmt = function
   | CInt a -> fprintf fmt "%d" a
   | CBool a -> fprintf fmt "%b" a
@@ -122,7 +138,7 @@ let rec pp_expr fmt = function
       bin_op
       pp_expr_typed
       op2
-  | EApp (e1, e2) -> fprintf fmt "%a %a" pp_expr_typed e1 pp_expr_typed e2
+  | EApp (e1, e2) -> fprintf fmt "(%a %a)" pp_expr_typed e1 pp_expr_typed e2
   | EIf (e_if, e_th, e_el) ->
     fprintf
       fmt
