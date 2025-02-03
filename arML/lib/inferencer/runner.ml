@@ -12,7 +12,16 @@ let binary_ops = [
   ("( - )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
   ("( * )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
   ("( / )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
-  ("( = )", TGround GTInt @-> TGround GTInt @-> TGround GTBool);
+  ("( % )", TGround GTInt @-> TGround GTInt @-> TGround GTInt);
+  ("( && )", TGround GTBool @-> TGround GTBool @-> TGround GTBool);
+  ("( || )", TGround GTBool @-> TGround GTBool @-> TGround GTBool);
+  ("( = )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( > )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( < )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( >= )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( <= )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( != )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
+  ("( <> )", TVar (-1) @-> TVar (-1) @-> TGround GTBool);
 ]
 
 let start_env =
