@@ -28,12 +28,17 @@ let bin_op_list : start_bin_op list =
     ; "( <> )", TPoly "'_s", TPoly "'_s", TBool
     ; "( > )", TPoly "'_s", TPoly "'_s", TBool
     ; "( = )", TPoly "'_s", TPoly "'_s", TBool
+    ; "( == )", TPoly "'_s", TPoly "'_s", TBool
     ; "( :: )", TPoly "'_s", TList (TPoly "'_s"), TList (TPoly "'_s")
     ]
 ;;
 
+let add_print_int : (state, unit) t =
+  write_flat_var_type "print_int" (Ast.TFunction (Ast.TInt, Ast.TUnit))
+;;
+
 let add_all_bin_ops = map_list add_bin_op bin_op_list
-let init_start_state = add_all_bin_ops
+let init_start_state = add_all_bin_ops *> add_print_int
 let empty_state : state = MapString.empty, [], 0, SetString.empty
 let (start_state : state), res = run init_start_state empty_state
 
