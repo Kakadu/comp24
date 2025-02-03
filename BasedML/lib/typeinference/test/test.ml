@@ -376,3 +376,26 @@ let%expect_test "Test avoiding already used type names" =
      ""x"": int,
      ] |}]
 ;;
+
+let%expect_test "Late binding var" =
+  test_infer_prog {|
+  let f cont =  let late = cont 1 in
+  late|};
+  [%expect
+    {|
+    [""( * )"": (int -> (int -> int)),
+     ""( + )"": (int -> (int -> int)),
+     ""( - )"": (int -> (int -> int)),
+     ""( / )"": (int -> (int -> int)),
+     ""( :: )"": ('_p4 -> (('_p4 list) -> ('_p4 list))),
+     ""( < )"": ('_p5 -> ('_p5 -> bool)),
+     ""( <= )"": ('_p6 -> ('_p6 -> bool)),
+     ""( <> )"": ('_p7 -> ('_p7 -> bool)),
+     ""( = )"": ('_p8 -> ('_p8 -> bool)),
+     ""( == )"": ('_p9 -> ('_p9 -> bool)),
+     ""( > )"": ('_pa -> ('_pa -> bool)),
+     ""( >= )"": ('_pb -> ('_pb -> bool)),
+     ""f"": ((int -> '_pc) -> '_pc),
+     ""print_int"": (int -> unit),
+     ] |}]
+;;
