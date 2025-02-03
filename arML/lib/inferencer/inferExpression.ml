@@ -19,6 +19,7 @@ let infer_expr =
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
   | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
+  | Ast.EListConstructor (head, tail) -> infer_list_constructor env head tail
   | Ast.EEmptyList -> fresh_var >>= fun fv -> return (Substitution.empty, TList fv)
   | Ast.ELetIn ((pattern, expr1), expr2) -> infer_let_in env pattern expr1 expr2
   | Ast.ERecLetIn ((pattern, expr1), expr2) -> infer_rec_let_in env pattern expr1 expr2
@@ -95,6 +96,17 @@ let infer_expr =
     let ty = TTuple ty_list in
     return (sub, ty)
   
+  and infer_list_constructor env l r =
+    let* sub1, ty1 = helper env l in
+    let env' = TypeEnv.apply env sub1 in
+    let* sub2, ty2 = helper env' r in
+    let* fv = fresh_var in
+    let* sub3 = Substitution.unify (TList ty1) fv in
+    let* sub4 = Substitution.unify ty2 fv in
+    let* sub = Substitution.compose_all [ sub1; sub2; sub3; sub4 ] in
+    let ty = Substitution.apply sub fv in
+    return (sub, ty)
+
   and infer_let_in env pattern expr1 expr2 =
     let* _ = UniquePatternVarsChecker.check_unique_vars pattern in
     (* Check several bounds *)

@@ -47,6 +47,7 @@ let rec unify l r =
     let* sub1 = unify left1 left2 in
     let* sub2 = unify (apply sub1 right1) (apply sub1 right2) in
     compose sub1 sub2
+  | TList typ1, TList typ2 -> unify typ1 typ2
   | TTuple t_list1, TTuple t_list2 ->
     (match
         Base.List.fold2 t_list1 t_list2 ~init:(return empty) ~f:(fun acc it1 it2 ->
