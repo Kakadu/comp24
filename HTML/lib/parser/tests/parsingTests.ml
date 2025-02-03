@@ -16,7 +16,7 @@ module ParsingTests = struct
 
   let%expect_test _ =
     parse_test {| let a : int = 2 ++ 2 ** 2 |};
-    [%expect {| let a : int = (2 ++ (2 ** 2)) |}]
+    [%expect {| let (a : int) = (2 ++ (2 ** 2)) |}]
   ;;
 
   let%expect_test _ =
@@ -27,7 +27,7 @@ module ParsingTests = struct
   let%expect_test _ =
     parse_test {| let a : int = let f x = x in 13 |};
     [%expect {| 
-      let a : int = let f = (fun x -> x)
+      let (a : int) = let f = (fun x -> x)
       in 13
       |}]
   ;;
@@ -154,7 +154,7 @@ module ParsingTests = struct
       |};
     [%expect
       {|
-      let blst : int = let rec f = (fun x -> if (x > 0) then g (x - 1) else 1)
+      let (blst : int) = let rec f = (fun x -> if (x > 0) then g (x - 1) else 1)
       and g = (fun x -> if (x > 0) then (f (x - 1) + g (x - 2)) else 1)
       in f 10 |}]
   ;;

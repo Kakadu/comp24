@@ -55,29 +55,39 @@ type pattern =
 
 and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = false }]
 
-type branch = pattern_typed * expr [@@deriving eq, show { with_path = false }]
+type pattern_or_op =
+  | POpPat of pattern
+  | POpOp of ident_op
+[@@deriving eq, show { with_path = false }]
+
+and pattern_or_op_typed = pattern_or_op * typ option
+[@@deriving eq, show { with_path = false }]
+
+type branch = pattern_typed * expr_typed [@@deriving eq, show { with_path = false }]
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
   | EId of ident (** Identifier. Examples: a, b, c *)
-  | EFun of pattern_typed * expr (** Function. Examples: fun x -> x + 1 *)
-  | EApp of expr * expr (** Application. Examples: f (x - 1) *)
-  | EIf of expr * expr * expr
+  | EFun of pattern_typed * expr_typed (** Function. Examples: fun x -> x + 1 *)
+  | EApp of expr_typed * expr_typed (** Application. Examples: f (x - 1) *)
+  | EIf of expr_typed * expr_typed * expr_typed
   (** If-then-else. Examples: if x >= y then x - y else y - x *)
-  | EList of expr * expr (** Lists. Examples: [1; 2; 3] *)
-  | ETuple of expr * expr * expr list (** Tuple. Examples: (1, 2, 3) *)
-  | EClsr of decl * expr (** Closure. Examples: let inc x = x + 1 in inc 5*)
-  | EMatch of expr * branch * branch list
+  | EList of expr_typed * expr_typed (** Lists. Examples: [1; 2; 3] *)
+  | ETuple of expr_typed * expr_typed * expr_typed list (** Tuple. Examples: (1, 2, 3) *)
+  | EClsr of decl * expr_typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
+  | EMatch of expr_typed * branch * branch list
   (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
+and expr_typed = expr * typ option [@@deriving eq, show { with_path = false }]
+
+and let_body = pattern_or_op_typed * expr_typed
+[@@deriving eq, show { with_path = false }]
+
 and decl =
-  | DLet of rec_flag * ident_definable * expr * typ option (** Let declarations *)
-  | DLetMut of
-      rec_flag
-      * (ident_definable * expr * typ option)
-      * (ident_definable * expr * typ option)
-      * (ident_definable * expr * typ option) list
+  | DLet of rec_flag * let_body (** Let declaration *)
+  | DLetMut of rec_flag * let_body * let_body * let_body list
+  (** Mutual let declaration *)
 [@@deriving eq, show { with_path = false }]
 
 type prog = decl list [@@deriving eq, show { with_path = false }]
@@ -97,6 +107,9 @@ let pid (id : ident_letters) = PId id
 let ptuple p1 p2 p_list = PTuple (p1, p2, p_list)
 let plist hd tl = PList (hd, tl)
 let p_typed ?(typ = None) (p : pattern) : pattern_typed = p, typ
+let pop_pat p = POpPat p
+let pop_op p = POpOp p
+let pop_typed ?(typ = None) (pop : pattern_or_op) : pattern_or_op_typed = pop, typ
 let pconst c = PConst c
 let econst c = EConst c
 let eid i = EId i
@@ -107,6 +120,7 @@ let elist hd tl = EList (hd, tl)
 let etuple e1 e2 l = ETuple (e1, e2, l)
 let eclsr d e = EClsr (d, e)
 let ematch e pair cl = EMatch (e, pair, cl)
-let dlet rf i e_let typ = DLet (rf, i, e_let, typ)
+let e_typed ?(typ = None) e : expr_typed = e, typ
+let dlet rf let_body = DLet (rf, let_body)
 let dletmut rec_flag fst snd tl = DLetMut (rec_flag, fst, snd, tl)
 let prog (d_l : decl list) : prog = d_l
