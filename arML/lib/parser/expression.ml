@@ -317,44 +317,46 @@ let parse_let_in p =
     option "" (string "rec" <* skip_wspace1)
   in
 
-  let* args = many1 parse_pattern in
-
-  let* typ_opt = 
-    
-    let typ_parser = 
-      skip_wspace *> char ':' *> skip_wspace *>
-      let* typ = parse_type in
-      return @@ Some typ
+  let parse_binding () =
+    let* args = many1 parse_pattern in
+    let* typ_opt = 
+      let typ_parser = 
+        skip_wspace *> char ':' *> skip_wspace *>
+        let* typ = parse_type in
+        return @@ Some typ
+      in
+      option None typ_parser
     in
-    
-    option None typ_parser
+    let tying = skip_wspace *> string "=" in
+    let main_pattern = List.hd args in
+    let* binding_expr = tying *> skip_wspace *> parse_expr in
+    let* binding_expr =
+      match args with
+      | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
+      | _ -> return binding_expr
+    in
+    let* binding_expr =
+      match typ_opt with
+      | Some typ -> return @@ ETyped (binding_expr, typ)
+      | _ -> return binding_expr
+    in
+    return (main_pattern, binding_expr)
   in
 
-  let tying = skip_wspace *> string "=" in
-  let main_pattern = List.hd args in
-  let* binding_expr = tying *> skip_wspace *> parse_expr in
-
-  let* binding_expr =
-    match args with
-    | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
-    | _ -> return binding_expr
-  in
-
-  let* binding_expr =
-    match typ_opt with
-    | Some typ -> return @@ ETyped (binding_expr, typ)
-    | _ -> return binding_expr
+  let* main_binding = parse_binding () in
+  let* and_bindings = 
+    many (skip_wspace *> string "and" *> skip_wspace1 *> parse_binding ())
   in
 
   let* in_expr = skip_wspace *> string "in" *> skip_wspace *> parse_expr in
 
-  let let_binding pattern expr1 expr2 =
+  let let_binding main_binding and_bindings expr =
     match decl with
-    | "rec" -> ERecLetIn ((pattern, expr1), expr2)
-    | _ -> ELetIn ((pattern, expr1), expr2)
+    | "rec" -> ERecLetIn (main_binding, and_bindings, expr)
+    | _ -> ELetIn (main_binding, and_bindings, expr)
   in
 
-  return (let_binding main_pattern binding_expr in_expr)
+  return (let_binding main_binding and_bindings in_expr)
 ;;
 
 (* ---------------- *)
