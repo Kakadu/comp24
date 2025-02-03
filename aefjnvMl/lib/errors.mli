@@ -32,7 +32,7 @@ type infer_error =
 type error =
   | Parser of parse_error
   | Infer of infer_error
-  (* | Interpreter of interpreter_error *)
+(* | Interpreter of interpreter_error *)
 
 (*================Constructors================*)
 
@@ -42,8 +42,8 @@ val unification_failed : ty * ty -> error
 val several_bounds : string -> error
 val no_variable_rec : error
 
-(* 
-val multiple_variable : string -> error
+(*
+   val multiple_variable : string -> error
 val multiple_method : string -> error
 val undefined_method : ty -> string -> error
 val not_object : ty -> error

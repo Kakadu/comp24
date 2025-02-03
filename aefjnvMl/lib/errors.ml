@@ -24,7 +24,7 @@ type infer_error =
 type error =
   | Parser of parse_error
   | Infer of infer_error
-  (*| Interpreter of interpreter_error *)
+(*| Interpreter of interpreter_error *)
 
 let occurs_check (b, t) = Infer (Occurs_check (b, t))
 let unbound_variable v = Infer (Unbound_variable v)
@@ -32,8 +32,8 @@ let unification_failed (t1, t2) = Infer (Unification_failed (t1, t2))
 let several_bounds v = Infer (Several_bounds v)
 let no_variable_rec = Infer No_variable_rec
 
-(* 
-let multiple_variable name = Infer (Multiple_definition (Variable, name))
+(*
+   let multiple_variable name = Infer (Multiple_definition (Variable, name))
 let multiple_method name = Infer (Multiple_definition (Method, name))
 let not_object t = Infer (Not_object t)
 let cannot_match_self = Infer Cannot_match_self

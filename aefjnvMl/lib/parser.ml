@@ -431,3 +431,9 @@ let parse_prefix_with p s =
 ;;
 
 (* TODO: mutual recursion *)
+
+module PP = struct
+  let pp_error ppf = function
+    | Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "%s" msg
+  ;;
+end

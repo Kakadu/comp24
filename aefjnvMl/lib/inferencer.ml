@@ -1,4 +1,4 @@
-(** Copyright 2023, Artem-Rzhankoff *)
+(** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -120,7 +120,7 @@ open R
 open R.Syntax
 
 let fresh_var = fresh >>| fun n -> tvar n
-let poly_var s = ident >>| fun n -> tvar (n + (Hashtbl.hash s))
+let poly_var s = ident >>| fun n -> tvar (n + Hashtbl.hash s)
 
 module Subst : sig
   open Base
@@ -272,10 +272,10 @@ let unify = Subst.unify
 let instantiate (S (bs, t)) =
   VarSet.fold
     (fun name ty ->
-      let* ty = ty in
-      let* tv = fresh_var in
-      let* s = Subst.singleton name tv in
-      return (Subst.apply s ty))
+       let* ty = ty in
+       let* tv = fresh_var in
+       let* s = Subst.singleton name tv in
+       return (Subst.apply s ty))
     bs
     (return t)
 ;;
@@ -337,20 +337,18 @@ let rec convert_ty_annot env = function
   | Ptyp_list t ->
     let* el_ty = convert_ty_annot env t in
     return @@ tlist el_ty
-  | Ptyp_tuple ts->
+  | Ptyp_tuple ts ->
     let* ty =
-        RList.fold_left
-          ts
-          ~init:(return [])
-          ~f:(fun ts t ->
-            let* p1 = convert_ty_annot env t in
-            return @@ p1 :: ts)
-      in
-      return @@ ttuple ty
-  | Ptyp_arrow(t, t') ->
+      RList.fold_left ts ~init:(return []) ~f:(fun ts t ->
+        let* p1 = convert_ty_annot env t in
+        return @@ (p1 :: ts))
+    in
+    return @@ ttuple ty
+  | Ptyp_arrow (t, t') ->
     let* t1 = convert_ty_annot env t in
-    let* t2 = convert_ty_annot env t' in 
+    let* t2 = convert_ty_annot env t' in
     return @@ tarrow t1 t2
+;;
 
 let pattern_infer =
   let rec helper env = function
@@ -381,13 +379,12 @@ let pattern_infer =
       in
       let* _, env, ty = check_several_bounds (pattern_vars pat) env (ttuple ty) in
       return (env, ty)
-    | Pat_constraint(p, t) -> 
+    | Pat_constraint (p, t) ->
       let* env', t' = helper env p in
       let* t_sp = convert_ty_annot env' t in
-      let* sub = Subst.unify t' t_sp in 
+      let* sub = Subst.unify t' t_sp in
       let env = TypeEnv.apply sub env' in
       return (env, Subst.apply sub t')
-
   in
   helper
 ;;
@@ -516,40 +513,41 @@ let value_type env = function
      | _ -> fail no_variable_rec)
 ;;
 
-let init_env = 
+let init_env =
   let int_ty_op = TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int")) in
   let bool_ty_op = TArrow (TPrim "bool", TArrow (TPrim "bool", TPrim "bool")) in
   let comp_op = TArrow (TVar 1, TArrow (TVar 1, TPrim "bool")) in
-  let bin_ops = 
-    [
-      "*", int_ty_op;
-      "/", int_ty_op;
-      "+", int_ty_op;
-      "-", int_ty_op;
-      "&&", bool_ty_op;
-      "||", bool_ty_op;
-      ">", comp_op;
-      "<", comp_op;
-      ">=", comp_op;
-      "<=", comp_op;
-      "=", comp_op;
-      "!=", comp_op
-    ] 
+  let bin_ops =
+    [ "*", int_ty_op
+    ; "/", int_ty_op
+    ; "+", int_ty_op
+    ; "-", int_ty_op
+    ; "&&", bool_ty_op
+    ; "||", bool_ty_op
+    ; ">", comp_op
+    ; "<", comp_op
+    ; ">=", comp_op
+    ; "<=", comp_op
+    ; "=", comp_op
+    ; "!=", comp_op
+    ]
   in
-  let print_int_ty = ("print_int", TArrow (TPrim "int", TPrim "int")) in
+  let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "int") in
   let funs = print_int_ty :: bin_ops in
-  let bind_ty env id typ = TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name: None) in
-  Base.List.fold_left funs ~init:TypeEnv.empty ~f:(fun env (id, typ) -> bind_ty env id typ)
+  let bind_ty env id typ =
+    TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
+  in
+  Base.List.fold_left funs ~init:TypeEnv.empty ~f:(fun env (id, typ) ->
+    bind_ty env id typ)
 ;;
 
 let check_program program =
   let helper env =
-    RList.fold_left program ~init:(return env) ~f:(fun env ->
-        function
-        | Str_eval e ->
-          let* _, _ = infer env e in
-          return env
-        | Str_value d -> value_type env d)
+    RList.fold_left program ~init:(return env) ~f:(fun env -> function
+      | Str_eval e ->
+        let* _, _ = infer env e in
+        return env
+      | Str_value d -> value_type env d)
   in
   run (helper init_env)
 ;;
