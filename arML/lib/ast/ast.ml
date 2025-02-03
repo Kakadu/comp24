@@ -48,6 +48,7 @@ and expression =
   | EApplication of expression * expression list (** Application: f x *)
   | EIfThenElse of expression * expression * expression option (* if condition then true_branch else false branch (else option)*)
   | ETuple of expression * expression * expression list (** Tuple: '(E1, E2, ..., En)' *)
+  | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
   | EEmptyList (** Empty list: '[]' *)
   | EMatchWith of expression * case * case list (** Pattern matching: match x with | y -> y *)
   | ELetIn of case * expression (** Let in: 'let f x = x in f 5 *)
