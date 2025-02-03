@@ -30,7 +30,7 @@ let parse_constant_pattern =
 (* Identifiers pattern parsers *)
 
 let parse_identifier_pattern =
-  let* identifier = parse_identifier in
+  let* identifier = parse_identifier <|> parse_operator in
   return @@ PVar identifier
 
 (* ---------------- *)

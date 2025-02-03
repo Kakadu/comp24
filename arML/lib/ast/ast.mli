@@ -48,16 +48,17 @@ and expression =
   | EApplication of expression * expression list (** Application: f x *)
   | EIfThenElse of expression * expression * expression option (* if condition then true_branch else false branch (else option)*)
   | ETuple of expression * expression * expression list (** Tuple: '(E1, E2, ..., En)' *)
+  | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
   | EEmptyList (** Empty list: '[]' *)
   | EMatchWith of expression * case * case list (** Pattern matching: match x with | y -> y *)
-  | ELetIn of case * expression (** Let in: 'let f x = x in f 5 *)
-  | ERecLetIn of case * expression (** Recursive let in: 'let rec f x = if x = 1 then 1 else x + f (x-1)'*)
+  | ELetIn of case * case list * expression (** Let in: 'let f x = x in f 5 *)
+  | ERecLetIn of case * case list * expression (** Recursive let in: 'let rec f x = if x = 1 then 1 else x + f (x-1)'*)
   | ETyped of expression * type_defenition (** Assigning a type to an expression: (expr : int) *)
 [@@deriving show { with_path = false }]
 
 type declaration = 
-  | DOrdinary of case (** Top-level let-binding: 'let f x = x' *)
-  | DRecursive of case (** Top-level recursive let-binding: 'let rec f x = ...' *)
+  | DOrdinary of case * case list (** Top-level let-binding: 'let f x = x' *)
+  | DRecursive of case * case list (** Top-level recursive let-binding: 'let rec f x = ...' *)
 [@@deriving show { with_path = false }]
 
 type structure_item =

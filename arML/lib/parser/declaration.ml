@@ -11,8 +11,10 @@ open Type
 let parse_declaration p =
   let parse_expr =
     choice 
-      [ p.parse_binary_operation p
+      [ p.parse_list_constructor p
+      ; p.parse_binary_operation p
       ; p.parse_type_defition p
+      ; p.parse_list p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p
@@ -31,40 +33,42 @@ let parse_declaration p =
     option "" (string "rec" <* skip_wspace1)
   in
 
-  let* args = many1 parse_pattern in
-
-  let main_pattern = List.hd args in
-
-  let* typ_opt =
-
-    let typ_parser = 
-      skip_wspace *> char ':' *> skip_wspace *>
-      let* typ = parse_type in
-      return @@ Some typ
+  let parse_binding () =
+    let* args = many1 parse_pattern in
+    let main_pattern = List.hd args in
+    let* typ_opt =
+      let typ_parser = 
+        skip_wspace *> char ':' *> skip_wspace *>
+        let* typ = parse_type in
+        return @@ Some typ
+      in
+      option None typ_parser
     in
-    
-    option None typ_parser
+    let tying = skip_wspace *> string "=" in
+    let* expr = tying *> skip_wspace *> parse_expr in
+    let* expr = 
+      match args with
+      | _ :: md :: tl -> EFun ((md, tl), expr) |> return
+      | _ -> return expr
+    in
+    let* expr =
+      match typ_opt with
+      | Some typ -> return @@ ETyped (expr, typ)
+      | _ -> return expr
+    in
+    return (main_pattern, expr)
   in
 
-  let* expr = tying *> skip_wspace *> parse_expr in
-
-  let* expr = 
-    match args with
-    | _ :: md :: tl -> EFun ((md, tl), expr) |> return
-    | _ -> return expr
+  let* main_binding = parse_binding () in
+  let* and_bindings = 
+    many (skip_wspace *> string "and" *> skip_wspace1 *> parse_binding ())
   in
 
-  let* expr =
-    match typ_opt with
-    | Some typ -> return @@ ETyped (expr, typ)
-    | _ -> return expr
-  in
-
-  let declaration_type pattern body = 
+  let declaration_type main_binding and_bindings = 
     match decl with
-    | "rec" -> DRecursive (pattern, body)
-    | _ -> DOrdinary (pattern, body)
+    | "rec" -> DRecursive (main_binding, and_bindings)
+    | _ -> DOrdinary (main_binding, and_bindings)
   in
 
-  return (declaration_type main_pattern expr)
+  return (declaration_type main_binding and_bindings)
 ;;

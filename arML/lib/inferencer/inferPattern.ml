@@ -4,8 +4,8 @@
 
 open StateResultMonad
 open StateResultMonad.Syntax
-open CommonFunctions
 open UniquePatternVarsChecker
+open InferBasic
 
 let infer_pattern =
   let rec helper env = function
@@ -23,7 +23,7 @@ let infer_pattern =
       let ty = TypeTree.TList fv in
       return (ty, env)
     | Ast.PTuple (first_pattern, second_pattern, patterns) as tuple_p ->
-      let* _ = check_unique_vars tuple_p in
+      let* _ = check_unique_vars [ tuple_p ] in
       (* Check several bounds *)
       let* ty, env =
         (* Here is the list of types in reverse order. *)
@@ -37,7 +37,7 @@ let infer_pattern =
       let ty = TypeTree.TTuple (List.rev ty) in
       return (ty, env)
     | Ast.PListConstructor (left, right) as list_cons ->
-      let* _ = check_unique_vars list_cons in
+      let* _ = check_unique_vars [ list_cons ] in
       (* Check several bounds *)
       let* ty1, env1 = helper env left in
       let* ty2, env2 = helper env1 right in

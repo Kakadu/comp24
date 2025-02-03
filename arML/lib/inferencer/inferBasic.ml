@@ -2,11 +2,12 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open TypeTree
 open StateResultMonad
 open StateResultMonad.Syntax
+open TypeTree
 open TypeUtils
 
+(* Get a new type variable *)
 let fresh_var = fresh >>| fun name -> TVar name
 
 let infer_const = function

@@ -9,6 +9,8 @@ open Ast
 
 type dispatch =
   { parse_tuple : dispatch -> expression Angstrom.t
+  ; parse_list : dispatch -> expression Angstrom.t
+  ; parse_list_constructor : dispatch -> expression Angstrom.t
   ; parse_fun : dispatch -> expression Angstrom.t
   ; parse_function : dispatch -> expression Angstrom.t
   ; parse_application : dispatch -> expression Angstrom.t
@@ -51,6 +53,11 @@ let is_acceptable_service_char = function
   | _ -> false
 ;; 
 
+let is_operator_char = function
+  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '&' | '|' | '^' | '%' -> true
+  | _ -> false
+;;
+
 let is_keyword = function
   | "let"
   | "if"
@@ -87,7 +94,7 @@ let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|>
 let skip_wspace = skip_while is_whitespace
 let skip_wspace1 = take_while1 is_whitespace
 
-let parens p = skip_wspace *> char '(' *> p <* skip_wspace <* char ')'
+let parens p = skip_wspace *> char '(' *> skip_wspace *> p <* skip_wspace <* char ')'
 let brackets p = skip_wspace *> char '[' *> p <* skip_wspace <* char ']'
 
 let arrow = skip_wspace *> string "->"
@@ -143,6 +150,11 @@ let parse_identifier =
   if is_keyword name
   then fail "Syntax error: keywords cannot be used as identifiers"
   else return @@ Id name
+;;
+
+let parse_operator =
+  let* operator = parens (take_while1 is_operator_char) in
+  return @@ Id ("( " ^ operator ^ " )")
 ;;
 
 (* ---------------- *)

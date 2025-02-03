@@ -19,7 +19,7 @@ let parse_constant_expr =
 (* Identifiers expression parsers *)
 
 let parse_identifier_expr =
-  let* identifier = parse_identifier in
+  let* identifier = parse_identifier <|> parse_operator in
   return @@ EIdentifier identifier
 
 (* ---------------- *)
@@ -41,9 +41,11 @@ let parse_fun p =
   *>
   let parse_expr = choice 
     [ p.parse_type_defition p
+    ; p.parse_list_constructor p
     ; p.parse_binary_operation p
     ; p.parse_application p
     ; p.parse_tuple p
+    ; p.parse_list p
     ; p.parse_constant_expr
     ; p.parse_identifier_expr
     ; p.parse_let_in p
@@ -94,9 +96,11 @@ let parse_function p =
   let parse_expr = choice
     [ p.parse_type_defition p
     ; self
+    ; p.parse_list_constructor p
     ; p.parse_binary_operation p
     ; p.parse_application p
     ; p.parse_tuple p
+    ; p.parse_list p
     ; p.parse_fun p
     ; p.parse_match_with p
     ; p.parse_if_then_else p
@@ -133,8 +137,10 @@ let parse_tuple p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; p.parse_list_constructor p
       ; p.parse_binary_operation p
       ; p.parse_application p
+      ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -158,6 +164,81 @@ let parse_tuple p =
 
 (* ---------------- *)
 
+(* List parsers *)
+
+let parse_list p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr = 
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_list_constructor p
+      ; self
+      ; p.parse_binary_operation p
+      ; p.parse_application p
+      ; p.parse_tuple p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_match_with p
+      ; p.parse_if_then_else p
+      ; p.parse_let_in p
+      ; p.parse_identifier_expr
+      ; p.parse_constant_expr
+      ; p.parse_empty_list_expr
+      ]
+  in
+  let* elements = brackets (sep_by (skip_wspace *> char ';' <* skip_wspace) parse_expr) in
+  let rec construct_list = function
+  | [] -> return EEmptyList
+  | hd :: tl ->
+    let* tail = construct_list tl in
+    return @@ EListConstructor (hd, tail)
+  in
+  construct_list elements
+;;
+
+let parse_list_constructor p =
+  fix
+  @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_binary_operation p
+      ; p.parse_application p
+      ; parens @@ p.parse_tuple p
+      ; p.parse_fun p
+      ; p.parse_function p
+      ; p.parse_match_with p
+      ; p.parse_if_then_else p
+      ; p.parse_let_in p
+      ; p.parse_identifier_expr
+      ; p.parse_constant_expr
+      ; p.parse_empty_list_expr
+      ; parens self
+      ]
+  in
+
+  let parse_cons_chain =
+    let* elements = sep_by1 (skip_wspace *> string "::" *> skip_wspace) parse_expr in
+    let rec build_list = function
+      | [] -> fail "Empty list constructor chain"
+      | [last] -> return last
+      | head :: tail ->
+        let* rest = build_list tail in
+        return @@ EListConstructor (head, rest)
+    in
+    build_list elements
+  in
+
+  parse_cons_chain
+;;
+
+(* ---------------- *)
+
 (* If then else parser *)
 
 let parse_if_then_else p =
@@ -168,9 +249,11 @@ let parse_if_then_else p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; p.parse_list_constructor p
       ; p.parse_binary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
+      ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_let_in p
       ; self
@@ -213,9 +296,11 @@ let parse_let_in p =
   let parse_expr =
     choice 
       [ p.parse_type_defition p
+      ; p.parse_list_constructor p
       ; p.parse_binary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
+      ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_if_then_else p
@@ -232,44 +317,46 @@ let parse_let_in p =
     option "" (string "rec" <* skip_wspace1)
   in
 
-  let* args = many1 parse_pattern in
-
-  let* typ_opt = 
-    
-    let typ_parser = 
-      skip_wspace *> char ':' *> skip_wspace *>
-      let* typ = parse_type in
-      return @@ Some typ
+  let parse_binding () =
+    let* args = many1 parse_pattern in
+    let* typ_opt = 
+      let typ_parser = 
+        skip_wspace *> char ':' *> skip_wspace *>
+        let* typ = parse_type in
+        return @@ Some typ
+      in
+      option None typ_parser
     in
-    
-    option None typ_parser
+    let tying = skip_wspace *> string "=" in
+    let main_pattern = List.hd args in
+    let* binding_expr = tying *> skip_wspace *> parse_expr in
+    let* binding_expr =
+      match args with
+      | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
+      | _ -> return binding_expr
+    in
+    let* binding_expr =
+      match typ_opt with
+      | Some typ -> return @@ ETyped (binding_expr, typ)
+      | _ -> return binding_expr
+    in
+    return (main_pattern, binding_expr)
   in
 
-  let tying = skip_wspace *> string "=" in
-  let main_pattern = List.hd args in
-  let* binding_expr = tying *> skip_wspace *> parse_expr in
-
-  let* binding_expr =
-    match args with
-    | _ :: md :: tl -> EFun ((md, tl), binding_expr) |> return
-    | _ -> return binding_expr
-  in
-
-  let* binding_expr =
-    match typ_opt with
-    | Some typ -> return @@ ETyped (binding_expr, typ)
-    | _ -> return binding_expr
+  let* main_binding = parse_binding () in
+  let* and_bindings = 
+    many (skip_wspace *> string "and" *> skip_wspace1 *> parse_binding ())
   in
 
   let* in_expr = skip_wspace *> string "in" *> skip_wspace *> parse_expr in
 
-  let let_binding pattern expr1 expr2 =
+  let let_binding main_binding and_bindings expr =
     match decl with
-    | "rec" -> ERecLetIn ((pattern, expr1), expr2)
-    | _ -> ELetIn ((pattern, expr1), expr2)
+    | "rec" -> ERecLetIn (main_binding, and_bindings, expr)
+    | _ -> ELetIn (main_binding, and_bindings, expr)
   in
 
-  return (let_binding main_pattern binding_expr in_expr)
+  return (let_binding main_binding and_bindings in_expr)
 ;;
 
 (* ---------------- *)
@@ -286,10 +373,12 @@ let parse_match_with p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; p.parse_list_constructor p
       ; p.parse_binary_operation p
       ; self
       ; p.parse_application p
       ; p.parse_tuple p
+      ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -329,8 +418,10 @@ let parse_application p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; parens @@ p.parse_list_constructor p
       ; parens @@ p.parse_binary_operation p
       ; parens @@ p.parse_fun p
+      ; p.parse_list p
       ; p.parse_function p
       ; p.parse_let_in p
       ; p.parse_if_then_else p
@@ -362,6 +453,7 @@ let parse_binary_operation p =
       [ p.parse_type_defition p
       ; p.parse_application p
       ; parens self
+      ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -429,8 +521,10 @@ let parse_type_defition p =
     *>
     let parse_expr =
       choice 
-        [ p.parse_binary_operation p
+        [ parens @@ p.parse_list_constructor p
+        ; p.parse_binary_operation p
         ; p.parse_tuple p
+        ; p.parse_list p
         ; p.parse_if_then_else p
         ; p.parse_application p
         ; p.parse_let_in p
