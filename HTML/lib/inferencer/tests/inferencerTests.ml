@@ -2,6 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+(** TODO: add description to tests *)
+
 module InferenceTests = struct
   let infer_test s =
     match Parser.parse_program s with
@@ -32,7 +34,8 @@ module InferenceTests = struct
       let ( - ) a = a = 100
       let a = (+) ((-) 7) 5;;
     |};
-    [%expect {|  Typecheck error: This expression has type bool but an expression was expected of type int |}]
+    [%expect
+      {|  Typecheck error: This expression has type bool but an expression was expected of type int |}]
   ;;
 
   let%expect_test _ =
