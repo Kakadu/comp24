@@ -1,7 +1,7 @@
 (library
  (name shaitanml_lib)
  (public_name ShaitanML.Lib)
- (modules Ast Parser Infer Typedtree Closure)
+ (modules Ast l_lifting_ast l_lifting Parser Infer Typedtree Closure)
  (inline_tests)
  (libraries base angstrom)
  (preprocess

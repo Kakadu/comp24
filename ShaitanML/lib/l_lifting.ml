@@ -17,23 +17,6 @@ open COUNTERMONAD
 
 type bindings = Args_body of pattern list * expr
 
-(* LL-specific types *)
-type ll_expr =
-  | LLConstant of const
-  | LLIdentifier of id
-  | LLIfThenElse of ll_expr * ll_expr * ll_expr
-  | LLApplication of ll_expr * ll_expr
-  | LLConstraint of ll_expr * type_annot
-  | LLTuple of ll_expr list
-  | LLMatch of ll_expr * (pattern * ll_expr) list
-  | LLLetIn of rec_flag * pattern * ll_expr * ll_expr
-
-type ll_declaration =
-  | LLDSingleLet of rec_flag * ll_let
-  | LLDMutualRecDecl of rec_flag * ll_let list
-
-and ll_let = LLLet of pattern * pattern list * ll_expr
-
 let get_new_num =
   let* i = get in
   let* () = put (i + 1) in
@@ -58,7 +41,7 @@ let rec new_name env =
 
 let rec collect_function_arguments expr =
   match expr with
-  | EFun (pat, body) -> 
+  | EFun (pat, body) ->
       let Args_body (args, rest) = collect_function_arguments body in
       Args_body (pat :: args, rest)
   | e -> Args_body ([], e)
@@ -113,7 +96,7 @@ let prog_lift prog =
     | EFun (pat, body) ->
         let Args_body (args, final_body) = collect_function_arguments (EFun (pat, body)) in
         let state, fresh_name = run (new_name global_ctx) state in
-        let lifted_body, acc, state = 
+        let lifted_body, acc, state =
           let new_ctx = Map.empty (module String) in
           lift_expr new_ctx acc global_ctx state final_body
         in
@@ -136,8 +119,8 @@ let prog_lift prog =
         let lifted_bindings, acc, state = lift_bindings acc state bindings in
         let lifted_body, acc, state = lift_expr ctx acc global_ctx state body in
         match rec_flag with
-        | Rec -> 
-            LLLetIn (rec_flag, PTuple (List.map bindings ~f:fst), 
+        | Rec ->
+            LLLetIn (rec_flag, PTuple (List.map bindings ~f:fst),
                     LLTuple (List.map lifted_bindings ~f:(fun (LLLet (_, _, e)) -> e)),
                     lifted_body),
             acc, state
@@ -155,7 +138,7 @@ let prog_lift prog =
     | SValue (rec_flag, bindings) ->
         let process_binding (pat, expr) =
           let Args_body (args, body) = collect_function_arguments expr in
-          let lifted, acc, state = 
+          let lifted, acc, state =
             lift_expr (Map.empty (module String)) [] global_ctx state body in
           LLLet (pat, args, lifted), acc, state
         in
@@ -169,8 +152,8 @@ let prog_lift prog =
         let lifted_bindings, acc, state = process_all [] state bindings in
         match rec_flag with
         | Rec -> [LLDMutualRecDecl (rec_flag, lifted_bindings)], state
-        | Nonrec -> 
-            List.map lifted_bindings 
+        | Nonrec ->
+            List.map lifted_bindings
               ~f:(fun decl -> LLDSingleLet (Nonrec, decl)),
             state
   in
