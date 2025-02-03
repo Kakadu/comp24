@@ -19,7 +19,7 @@ let parse_constant_expr =
 (* Identifiers expression parsers *)
 
 let parse_identifier_expr =
-  let* identifier = parse_identifier in
+  let* identifier = parse_identifier <|> parse_operator in
   return @@ EIdentifier identifier
 
 (* ---------------- *)
