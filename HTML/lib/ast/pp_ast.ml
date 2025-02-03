@@ -84,6 +84,17 @@ and pp_pattern_typed fmt = function
   | pattern, None -> fprintf fmt "%a" pp_pattern pattern
 ;;
 
+let pp_pattern_or_op fmt = function
+  | POpPat pat -> fprintf fmt "%a" pp_pattern pat
+  | POpOp op -> fprintf fmt "( %s )" op
+;;
+
+let pp_pattern_or_op_typed fmt = function
+  | pattern_or_op, Some typ ->
+    fprintf fmt "(%a : %a)" pp_pattern_or_op pattern_or_op pp_typ typ
+  | pattern_or_op, None -> fprintf fmt "%a" pp_pattern_or_op pattern_or_op
+;;
+
 let pp_rec_flag fmt = function
   | Recursive -> fprintf fmt " rec"
   | Not_recursive -> fprintf fmt ""
@@ -93,44 +104,67 @@ let rec pp_expr fmt = function
   | EConst c -> pp_const fmt c
   | EId s -> pp_ident fmt s
   | EFun (pattern_typed, expr) ->
-    fprintf fmt "(fun %a -> %a)" pp_pattern_typed pattern_typed pp_expr expr
-  | EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2) ->
+    fprintf fmt "(fun %a -> %a)" pp_pattern_typed pattern_typed pp_expr_typed expr
+  | EApp ((EApp ((EId (IdentOfDefinable (IdentOp bin_op)), None), op1), None), op2) ->
     (* bin op pattern *)
-    fprintf fmt "(%a %s %a)" pp_expr op1 bin_op pp_expr op2
-  | EApp (e1, EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2)) ->
-    fprintf fmt "%a (%a %s %a)" pp_expr e1 pp_expr op1 bin_op pp_expr op2
-  | EApp (e1, e2) -> fprintf fmt "%a %a" pp_expr e1 pp_expr e2
+    fprintf fmt "(%a %s %a)" pp_expr_typed op1 bin_op pp_expr_typed op2
+  | EApp
+      ( e1
+      , ( EApp ((EApp ((EId (IdentOfDefinable (IdentOp bin_op)), None), op1), None), op2)
+        , None ) ) ->
+    fprintf
+      fmt
+      "%a (%a %s %a)"
+      pp_expr_typed
+      e1
+      pp_expr_typed
+      op1
+      bin_op
+      pp_expr_typed
+      op2
+  | EApp (e1, e2) -> fprintf fmt "%a %a" pp_expr_typed e1 pp_expr_typed e2
   | EIf (e_if, e_th, e_el) ->
-    fprintf fmt "if %a then %a else %a" pp_expr e_if pp_expr e_th pp_expr e_el
-  | EList (hd, tl) -> fprintf fmt "%a :: %a" pp_expr hd pp_expr tl
+    fprintf
+      fmt
+      "if %a then %a else %a"
+      pp_expr_typed
+      e_if
+      pp_expr_typed
+      e_th
+      pp_expr_typed
+      e_el
+  | EList (hd, tl) -> fprintf fmt "%a :: %a" pp_expr_typed hd pp_expr_typed tl
   | ETuple (e1, e2, es) ->
     fprintf
       fmt
       "(%a)"
       (pp_tuple
-         (function
+         (fun (expr, _) ->
+           match expr with
            | ETuple _ | EList (_, _) -> true
            | _ -> false)
-         pp_expr
+         pp_expr_typed
          ", ")
       (e1 :: e2 :: es)
-  | EClsr (decl, expr) -> fprintf fmt "%a\nin %a" pp_decl decl pp_expr expr
+  | EClsr (decl, expr) -> fprintf fmt "%a\nin %a" pp_decl decl pp_expr_typed expr
   | EMatch (expr, case1, cases) ->
     let pp_case fmt (pat_typed, expr) =
-      fprintf fmt "| %a -> %a" pp_pattern_typed pat_typed pp_expr expr
+      fprintf fmt "| %a -> %a" pp_pattern_typed pat_typed pp_expr_typed expr
     in
     let pp_cases = pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "\n") pp_case in
-    fprintf fmt "match %a with\n%a" pp_expr expr pp_cases (case1 :: cases)
+    fprintf fmt "match %a with\n%a" pp_expr_typed expr pp_cases (case1 :: cases)
+
+and pp_expr_typed fmt = function
+  | expr, Some typ -> fprintf fmt "(%a : %a)" pp_expr expr pp_typ typ
+  | expr, None -> fprintf fmt "%a" pp_expr expr
 
 and pp_decl fmt =
-  let pp_let_body fmt (id, expr, typ) =
-    match typ with
-    | Some typ -> fprintf fmt "%a : %a = %a" pp_ident_definable id pp_typ typ pp_expr expr
-    | None -> fprintf fmt "%a = %a" pp_ident_definable id pp_expr expr
+  let pp_let_body fmt (pat_or_op_typed, expr_typed) =
+    fprintf fmt "%a = %a" pp_pattern_or_op_typed pat_or_op_typed pp_expr_typed expr_typed
   in
   function
-  | DLet (rec_flag, id, expr, typ) ->
-    fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body (id, expr, typ)
+  | DLet (rec_flag, (pat_or_op_typed, expr_typed)) ->
+    fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body (pat_or_op_typed, expr_typed)
   | DLetMut (rec_flag, decl1, decl2, decls) ->
     let pp_decls =
       pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "\nand ") pp_let_body
