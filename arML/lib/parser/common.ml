@@ -10,6 +10,7 @@ open Ast
 type dispatch =
   { parse_tuple : dispatch -> expression Angstrom.t
   ; parse_list : dispatch -> expression Angstrom.t
+  ; parse_list_constructor : dispatch -> expression Angstrom.t
   ; parse_fun : dispatch -> expression Angstrom.t
   ; parse_function : dispatch -> expression Angstrom.t
   ; parse_application : dispatch -> expression Angstrom.t

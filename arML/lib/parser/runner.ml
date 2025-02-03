@@ -23,12 +23,14 @@ let parsers =
   ; parse_function
   ; parse_tuple
   ; parse_list
+  ; parse_list_constructor
   ; parse_empty_list_expr
   }
 ;;
 
 let parse_expression = skip_wspace *> choice 
   [ parsers.parse_type_defition parsers
+  ; parsers.parse_list_constructor parsers
   ; parsers.parse_binary_operation parsers
   ; parsers.parse_list parsers
   ; parsers.parse_application parsers
