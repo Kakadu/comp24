@@ -10,7 +10,7 @@
   TypeErrors
   TypeUtils
   TypeEnv
-  CommonFunctions
+  InferBasic
   Schema
   Generalize
   Instantiate

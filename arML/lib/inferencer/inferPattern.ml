@@ -4,8 +4,8 @@
 
 open StateResultMonad
 open StateResultMonad.Syntax
-open CommonFunctions
 open UniquePatternVarsChecker
+open InferBasic
 
 let infer_pattern =
   let rec helper env = function

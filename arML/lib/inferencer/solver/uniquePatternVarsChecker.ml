@@ -25,7 +25,7 @@ let check_unique_vars patterns =
     | Ast.PListConstructor (hd, tl) :: rest ->
       let* var_set = helper var_set [hd] in
       helper var_set (tl :: rest)
-    | _ :: rest -> helper var_set rest
+    | Ast.PTyped (pat, _) :: rest -> helper var_set (pat :: rest)
   in
   helper VarSet.empty patterns
 ;;

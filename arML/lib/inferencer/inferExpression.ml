@@ -2,13 +2,13 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open TypeTree
 open StateResultMonad
 open StateResultMonad.Syntax
+open TypeTree
 open TypeErrors
-open InferPattern
 open TypeUtils
-open CommonFunctions
+open InferBasic
+open InferPattern
 
 let infer_expr =
 
@@ -21,8 +21,8 @@ let infer_expr =
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
   | Ast.EListConstructor (head, tail) -> infer_list_constructor env head tail
   | Ast.EEmptyList -> fresh_var >>= fun fv -> return (Substitution.empty, TList fv)
-  | Ast.ELetIn (case1, cases, expr2) -> infer_let_in env (case1 :: cases) expr2
-  | Ast.ERecLetIn (case1, cases, expr2) -> infer_rec_let_in env (case1 :: cases) expr2
+  | Ast.ELetIn (case, cases, expr) -> infer_let_in env (case :: cases) expr
+  | Ast.ERecLetIn (case, cases, expr) -> infer_rec_let_in env (case :: cases) expr
   | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
   | Ast.EFunction (case, cases) -> infer_function env (case :: cases)
   | Ast.ETyped (expr, typ) -> infer_typed_expression env expr typ
@@ -107,7 +107,7 @@ let infer_expr =
     let ty = Substitution.apply sub fv in
     return (sub, ty)
 
-  and infer_let_in env cases expr2 =
+  and infer_let_in env cases expr =
     let rec extend_env_with_pattern env pat ty =
       match pat, ty with
       | Ast.PVar (Id v), ty ->
@@ -132,6 +132,7 @@ let infer_expr =
         fail @@ Unification_failed (typ, ty)
     in
 
+    (* Check several bounds *)
     let all_patterns = List.map fst cases in
     let* _ = UniquePatternVarsChecker.check_unique_vars all_patterns in
   
@@ -145,12 +146,12 @@ let infer_expr =
       ) (return (env, Substitution.empty)) cases
     in
   
-    let* sub2, ty2 = helper final_env expr2 in
+    let* sub2, ty2 = helper final_env expr in
     let* sub_final = Substitution.compose final_sub sub2 in
     let final_ty = Substitution.apply sub_final ty2 in
     return (sub_final, final_ty)
   
-  and infer_rec_let_in env cases expr2 =
+  and infer_rec_let_in env cases expr =
 
     let extend_env_with_pattern env pat ty =
       match pat with
@@ -160,6 +161,10 @@ let infer_expr =
       | _ ->
         fail InvalidRecursionLeftHand
     in
+
+        (* Check several bounds *)
+        let all_patterns = List.map fst cases in
+        let* _ = UniquePatternVarsChecker.check_unique_vars all_patterns in
   
     let add_temporary_vars env cases =
       List.fold_left (fun acc (pat, _) ->
@@ -185,7 +190,7 @@ let infer_expr =
   
     let* env_with_vars = add_temporary_vars env cases in
     let* final_env, final_sub = process_cases env_with_vars cases in
-    let* sub2, ty2 = helper final_env expr2 in
+    let* sub2, ty2 = helper final_env expr in
     let* sub_final = Substitution.compose final_sub sub2 in
     return (sub_final, ty2)
   
