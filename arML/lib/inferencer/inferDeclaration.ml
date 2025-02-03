@@ -13,9 +13,8 @@ open InferPattern
 let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
 let infer_declaration env name_list = function
-  | Ast.DOrdinary (pattern, expr) -> 
-    let* _ = UniquePatternVarsChecker.check_unique_vars pattern in
-    let* _, ty = infer_expr env expr in
+  | Ast.DOrdinary (case, cases) ->
+    let cases = case :: cases in
 
     let rec extend_env_with_pattern env name_list pat ty =
       (match pat, ty with
@@ -35,26 +34,61 @@ let infer_declaration env name_list = function
         | _ -> 
           let* typ, _ = infer_pattern env pat in
           fail @@ Unification_failed (typ, ty))
-      | Ast.PAny, _ -> return (env, name_list)
-      | Ast.PNill, TypeTree.TList _ -> return (env, name_list)
+      | Ast.PAny, _
+      | Ast.PNill, TypeTree.TList _ 
+      | Ast.PConst(CUnit), TypeTree.TGround(GTUnit) -> return (env, name_list)
       | pat, ty -> 
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty))
     in
-    
-    let* extended_env, extend_name_list = extend_env_with_pattern env name_list pattern ty in
-    return (extended_env, extend_name_list)
-  | Ast.DRecursive (pattern, expr) ->
-    match pattern with
-    | Ast.PVar (Id name) -> 
-      let* fv = fresh_var in
-      let env2 = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
-      let* sub1, ty1 = infer_expr env2 expr in
-      let* sub2 = Substitution.unify ty1 fv in
-      let* sub3 = Substitution.compose sub1 sub2 in
-      let ty3 = Substitution.apply sub3 fv in
-      let new_acc = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, ty3)) in
-      let new_names_list = update_name_list name name_list in
-      return (new_acc, new_names_list)
-    | _ -> fail InvalidRecursionLeftHand
+
+    let patterns = List.map fst cases in
+    let* _ = UniquePatternVarsChecker.check_unique_vars patterns in
+
+    List.fold_left (fun acc (pat, expr) ->
+      let* extended_env, name_list = acc in
+      let* _, ty_expr = infer_expr env expr in
+      let* extended_env, extend_name_list = extend_env_with_pattern extended_env name_list pat ty_expr in
+      return (extended_env, extend_name_list)
+    ) (return (env, name_list)) cases
+  
+  | Ast.DRecursive (case, cases) ->
+    let cases = case :: cases in
+
+    let patterns = List.map fst cases in
+    let* _ = UniquePatternVarsChecker.check_unique_vars patterns in
+
+    let extend_env_with_pattern env name_list pat ty =
+      match pat with
+      | Ast.PVar (Id v) ->
+        let generalized_ty = Generalize.generalize env ty in
+        let new_names_list = update_name_list v name_list in
+        return ((TypeEnv.extend env v generalized_ty), new_names_list)
+      | _ ->
+        fail InvalidRecursionLeftHand
+    in
+
+    let add_temporary_vars env cases =
+      List.fold_left (fun acc (pat, _) ->
+        let* env = acc in
+        match pat with
+        | Ast.PVar (Id name) ->
+          let* fv = fresh_var in
+          return (TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)))
+        | _ -> fail InvalidRecursionLeftHand
+      ) (return env) cases
+    in
+
+    let process_cases env cases =
+      List.fold_left (fun acc (pat, expr) ->
+        let* env, name_list = acc in
+        let* sub, ty_expr = infer_expr env expr in
+        let env' = TypeEnv.apply env sub in
+        let* extended_env, extend_name_list = extend_env_with_pattern env' name_list pat ty_expr in
+        return (extended_env, extend_name_list)
+      ) (return (env, name_list)) cases
+    in
+
+    let* env_with_vars = add_temporary_vars env cases in
+    process_cases env_with_vars cases
 ;;
