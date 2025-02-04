@@ -11,6 +11,7 @@ type infer_error =
   | Unbound_variable of string
   | Unification_failed of ty * ty
   | Several_bounds of string
+  | Not_specify_rec
   | No_variable_rec
 
 (* type interpreter_error =
@@ -30,6 +31,7 @@ let occurs_check (b, t) = Infer (Occurs_check (b, t))
 let unbound_variable v = Infer (Unbound_variable v)
 let unification_failed (t1, t2) = Infer (Unification_failed (t1, t2))
 let several_bounds v = Infer (Several_bounds v)
+let not_specify_rec = Infer Not_specify_rec
 let no_variable_rec = Infer No_variable_rec
 
 (*

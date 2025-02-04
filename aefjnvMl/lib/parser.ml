@@ -1,11 +1,10 @@
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Angstrom
 open Base
 open Ast
-(* open Errors *)
-
-let id s = s
 
 (*===================== const =====================*)
 
@@ -52,7 +51,6 @@ let pcons a b = Pat_cons (a, b)
 let pany = Pat_any
 let ptuple ps = Pat_tuple ps
 let pconstraint p ct = Pat_constraint (p, ct)
-let pnil = pconst cnil
 
 (*===================== expression =====================*)
 
@@ -112,9 +110,6 @@ let is_keyword = function
 ;;
 
 let is_alpha c = is_upper c || is_lower c
-let is_ident_char = function
-  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
-  | _ -> false
 
 let is_ident_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
@@ -124,7 +119,6 @@ let is_ident_char = function
 (*===================== Control characters =====================*)
 
 let skip_whitespace = take_while is_whitespace
-let skip_whitespace1 = take_while1 is_whitespace
 let ptoken p = skip_whitespace *> p
 let token p = skip_whitespace *> string p
 let lp = token "("
@@ -147,16 +141,13 @@ let rec chainr1 e op =
 (*===================== Constants =====================*)
 
 let c_int =
-  ptoken @@
-  (string "-" *> take_while1 is_digit >>| fun digits -> "-" ^ digits)
-  <|> take_while1 is_digit
+  ptoken @@ take_while1 is_digit
   >>= fun whole ->
   let num = Stdlib.int_of_string_opt whole in
   match num with
   | Some n -> return @@ cint n
   | None -> fail "Integer literal exceeds the range of representable integers of type int"
 ;;
-
 
 let c_bool =
   ptoken @@ take_while1 is_alpha
@@ -186,7 +177,6 @@ let unchecked_ident =
   | Some x when Char.equal x '_' || is_lower x -> take_while is_ident_char
   | _ -> fail "not a valid identifier"
 ;;
-
 
 let ident = unchecked_ident >>= check_ident
 
@@ -241,7 +231,6 @@ let p_const = const >>| fun p -> pconst p
 let p_var = ident >>| pvar
 let p_cons = token "::" *> return pcons
 let p_any = token "_" *> skip_whitespace *> return pany
-let fold_plist = List.fold_right ~f:(fun p1 p2 -> pcons p1 p2) ~init:pnil
 let tuple ident f = lift2 (fun h tl -> f @@ (h :: tl)) ident (many1 (token "," *> ident))
 let p_tuple pat = parens (tuple pat ptuple) <|> tuple pat ptuple
 let p_type_annotation = token ":" *> p_core_type
@@ -297,6 +286,10 @@ let e_fun p_expr =
   >>| fun (h, tl) -> List.fold_left ~init:(efun h expr) ~f:(fun acc x -> efun x acc) tl
 ;;
 
+let rec constr_nested_expr t = function
+  | Exp_function(p, e) -> efun p (constr_nested_expr t e)
+  | expr -> etype expr t
+
 let e_value_binding pexpr =
   let pars_main_p =
     choice [ ptoken pattern; parens infix_op >>| pvar; parens un_op >>| pvar ]
@@ -310,10 +303,10 @@ let e_value_binding pexpr =
          error: let (a: int) b c ... = ..."
     | pat, _ -> return pat
   in
-  let collect_main_p tp_opt main_p =
+  let collect_main_p tp_opt exp =
     match tp_opt with
-    | Some tp -> pconstraint main_p tp
-    | None -> main_p
+    | Some tp -> constr_nested_expr tp exp
+    | None -> exp
   in
   let collect_expr args expr =
     let f = fun acc x -> efun x acc in
@@ -323,8 +316,8 @@ let e_value_binding pexpr =
   in
   let construct_value_binding (main_p, args, tp_opt, expr) =
     validate_main_p main_p args
-    >>| collect_main_p tp_opt
-    >>| fun main_valid_p -> evalue_binding main_valid_p (collect_expr args expr)
+    >>= fun main_valid_p -> return (collect_expr args expr) >>| collect_main_p tp_opt >>| 
+      fun expr -> evalue_binding main_valid_p expr
   in
   lift4
     (fun main_p args tp_opt expr -> main_p, args, tp_opt, expr)
@@ -429,14 +422,6 @@ let parse_prefix s =
   | Ok v -> Ok v
   | Error _ -> Error (parse_syntax_err "Syntax error")
 ;;
-
-let parse_prefix_with p s =
-  match parse_string ~consume:Prefix p s with
-  | Ok v -> Ok v
-  | Error _ -> Error (parse_syntax_err "Syntax error")
-;;
-
-(* TODO: mutual recursion *)
 
 module PP = struct
   let pp_error ppf = function

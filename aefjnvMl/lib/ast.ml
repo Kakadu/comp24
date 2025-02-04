@@ -17,13 +17,18 @@ type const =
 [@@deriving show { with_path = false }]
 
 type core_type =
-  | Ptyp_int
-  | Ptyp_bool
-  | Ptyp_unit
-  | Ptyp_var of ident
-  | Ptyp_list of core_type
-  | Ptyp_tuple of core_type list (** Invariant : [n >= 2] *)
+  | Ptyp_int (** Integer type [int] *)
+  | Ptyp_bool (** Boolean type [bool] *)
+  | Ptyp_unit (** Unit type [unit] *)
+  | Ptyp_var of ident (** A type variable such as ['a] *)
+  | Ptyp_list of core_type (** List type such as [int list] *)
+  | Ptyp_tuple of core_type list
+  (** [Ptyp_tuple([T1 ; ... ; Tn])]
+          represents a product type [T1 * ... * Tn].
+          Invariant: [n >= 2].
+        *)
   | Ptyp_arrow of core_type * core_type
+  (** [Ptyp_arrow(lbl, T1, T2)] represents: [T1 -> T2]*)
 [@@deriving show { with_path = false }]
 
 type pattern =

@@ -8,14 +8,12 @@ open Errors
 
 module R : sig
   include Base.Monad.Infix
-
-  val bind : 'a t -> f:('a -> 'b t) -> 'b t
+  
   val return : 'a -> 'a t
   val fail : error -> 'a t
 
   module Syntax : sig
     val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-    val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
   end
 
   module RList : sig
@@ -57,7 +55,6 @@ end = struct
 
   module Syntax = struct
     let ( let* ) x f = bind x ~f
-    let ( let+ ) x f = x >>| f
   end
 
   module RMap = struct
@@ -86,8 +83,6 @@ end
 type fresh = int
 
 module Type = struct
-  type t = ty
-
   let rec occurs_in v = function
     | TVar b -> b = v
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
@@ -129,7 +124,6 @@ module Subst : sig
 
   val empty : t
   val singleton : fresh -> ty -> t R.t
-  val find : fresh -> t -> ty option
   val apply : t -> ty -> ty
   val unify : ty -> ty -> t R.t
   val compose : t -> t -> t R.t
@@ -213,12 +207,6 @@ end = struct
 end
 
 module Scheme = struct
-  type t = scheme
-
-  let occurs_in v = function
-    | S (xs, t) -> (not (VarSet.mem v xs)) && Type.occurs_in v t
-  ;;
-
   let free_vars = function
     | S (bs, t) -> VarSet.diff (Type.vars t) bs
   ;;
@@ -231,8 +219,6 @@ end
 
 module TypeEnv = struct
   open Base
-
-  type t = (string, scheme, String.comparator_witness) Map.t
 
   let empty = Map.empty (module String)
   let extend env (v, scheme) = Map.update env v ~f:(fun _ -> scheme)
@@ -251,11 +237,6 @@ module TypeEnv = struct
        | Ok env -> env
        | _ -> acc)
     | _ -> acc
-  ;;
-
-  let union env1 env2 =
-    Map.fold env2 ~init:env1 ~f:(fun ~key ~data acc ->
-      Map.update acc key ~f:(fun _ -> data))
   ;;
 
   let free_vars =
@@ -389,19 +370,15 @@ let pattern_infer =
   helper
 ;;
 
-(* Introduce new type variable for each method in object *)
-type first_pass_acc =
-  { meths : string list (* for further construction of the object type *)
-  ; meth_env : (string, ty, Base.String.comparator_witness) Base.Map.t
-  }
+let saturate_env env bindings = 
+  let* env = 
+    RList.fold_left bindings ~init:(return env) ~f:(fun acc ({vb_pat; _}) -> 
+      let* env, _ = pattern_infer acc vb_pat in
+      return env)
+    in
+  return env
 
-type second_pass_acc =
-  { vals : TypeEnv.t
-  ; self_ty : ty
-  ; subst : Subst.t
-  }
-
-let infer =
+let rec infer =
   let rec helper env = function
     | Exp_constant c -> const_infer Subst.empty c
     | Exp_ident v -> lookup_env v env
@@ -428,31 +405,11 @@ let infer =
       let* sub2 = unify tv te in
       let* final_subs = Subst.compose_all [ si; st; se; sub; sub1; sub2 ] in
       return (final_subs, Subst.apply final_subs tt)
-    | Exp_let ({ d_rec = Nonrecursive; d_pat; d_expr }, e) ->
-      let* s1, t1 = helper env d_expr in
-      let scheme = generalize (TypeEnv.apply s1 env) t1 Nonrecursive ~pattern_name:None in
-      let* env1, t2 = pattern_infer env d_pat in
-      let env2 = TypeEnv.extend_by_pattern scheme env1 d_pat in
-      let* sub = unify t2 t1 in
-      let* sub1 = Subst.compose sub s1 in
-      let env3 = TypeEnv.apply sub1 env2 in
+    | Exp_let (decl, e) ->
+      let* sub1, env3 = infer_decl env decl in
       let* s2, t2 = helper env3 e in
       let* final_subs = Subst.compose_all [ sub1; s2 ] in
       return (final_subs, t2)
-    | Exp_let ({ d_rec = Recursive; d_pat; d_expr }, e) ->
-      (match d_pat with
-       | Pat_var v ->
-         let* tv = fresh_var in
-         let env1 = TypeEnv.extend env (v, S (VarSet.empty, tv)) in
-         let* s1, t1 = helper env1 d_expr in
-         let* s2 = unify (Subst.apply s1 tv) t1 in
-         let* s = Subst.compose s2 s1 in
-         let env = TypeEnv.apply s env1 in
-         let t2 = generalize env (Subst.apply s tv) Recursive ~pattern_name:(Some v) in
-         let* s2, t2 = helper TypeEnv.(extend env (v, t2)) e in
-         let* final_subs = Subst.compose s s2 in
-         return (final_subs, t2)
-       | _ -> fail no_variable_rec)
     | Exp_match (match_exp, cases) ->
       let* s, tcond = helper env match_exp in
       let env = TypeEnv.apply s env in
@@ -480,10 +437,10 @@ let infer =
       return (s, ttuple (List.rev_map (Subst.apply s) t))
     | Exp_list (e, e') ->
       let* s1, t1 = helper env e in
-      let* s2, t2 = helper env e' in
+      let* s2, t2 = helper (TypeEnv.apply s1 env) e' in
       let* subst = unify (tlist t1) t2 in
-      let trez = Subst.apply subst t2 in
       let* final_subs = Subst.compose_all [ s1; s2; subst ] in
+      let trez = Subst.apply final_subs t2 in
       return (final_subs, trez)
     | Exp_type(e, t) ->
       let* s1, t1 = helper env e in
@@ -494,30 +451,34 @@ let infer =
       return (final_subs, trez)
   in
   helper
-;;
-
-let value_type env = function
-  | { d_rec = Nonrecursive; d_pat; d_expr } ->
-    let* s1, t1 = infer env d_expr in
+and infer_decl env = function
+  | Decl (Nonrecursive, [{vb_pat; vb_expr }])->
+    let* s1, t1 = infer env vb_expr in
     let scheme = generalize (TypeEnv.apply s1 env) t1 Nonrecursive ~pattern_name:None in
-    let* env1, t2 = pattern_infer env d_pat in
-    let env2 = TypeEnv.extend_by_pattern scheme env1 d_pat in
+    let* env1, t2 = pattern_infer env vb_pat in
+    let env2 = TypeEnv.extend_by_pattern scheme env1 vb_pat in
     let* sub = unify t1 t2 in
     let* sub1 = Subst.compose s1 sub in
     let env3 = TypeEnv.apply sub1 env2 in
-    return env3
-  | { d_rec = Recursive; d_pat; d_expr } ->
-    (match d_pat with
-     | Pat_var v ->
-       let* tv = fresh_var in
-       let env = TypeEnv.extend env (v, S (VarSet.empty, tv)) in
-       let* s1, t1 = infer env d_expr in
-       let* s2 = unify (Subst.apply s1 tv) t1 in
-       let* s = Subst.compose s2 s1 in
-       let env = TypeEnv.apply s env in
-       let t2 = generalize env (Subst.apply s tv) Recursive ~pattern_name:(Some v) in
-       return (TypeEnv.extend env (v, t2))
-     | _ -> fail no_variable_rec)
+    return (sub1, env3)
+  | Decl (Nonrecursive, _) -> fail not_specify_rec 
+  | Decl (Recursive, bindings) ->
+    let* env = saturate_env env bindings in
+    RList.fold_left
+      bindings
+      ~init: (return (Subst.empty, env))
+      ~f: (fun (acc_subs, acc_env) {vb_pat; vb_expr} -> (match vb_pat with
+        | Pat_var v ->
+          let* tv = fresh_var in
+          let env = TypeEnv.extend acc_env (v, S (VarSet.empty, tv)) in
+          let* s1, t1 = infer env vb_expr in
+          let* s2 = unify (Subst.apply s1 tv) t1 in
+          let* s = Subst.compose s2 s1 in
+          let env = TypeEnv.apply s env in
+          let t2 = generalize env (Subst.apply s tv) Recursive ~pattern_name:(Some v) in
+          let* final_subs = Subst.compose_all [acc_subs;  s] in
+          return (final_subs, TypeEnv.extend env (v, t2))
+        | _ -> fail no_variable_rec))
 ;;
 
 let init_env =
@@ -536,11 +497,18 @@ let init_env =
     ; ">=", comp_op
     ; "<=", comp_op
     ; "=", comp_op
+    ; "==", comp_op
     ; "!=", comp_op
     ]
   in
+  let un_ops = 
+    [
+      "~-", TArrow(TPrim "int", TPrim "int");
+      "~!", TArrow(TPrim "int", TPrim "int")
+    ]
+  in
   let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "unit") in
-  let funs = print_int_ty :: bin_ops in
+  let funs = print_int_ty :: un_ops @ bin_ops in
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
   in
@@ -554,7 +522,9 @@ let check_program program =
       | Str_eval e ->
         let* _, _ = infer env e in
         return env
-      | Str_value d -> value_type env d)
+      | Str_value d -> 
+        let* _, env = infer_decl env d in 
+        return env)
   in
   run (helper init_env)
 ;;
@@ -670,6 +640,8 @@ module PP = struct
         pp_type
         r
     | Several_bounds s -> Format.fprintf ppf "Variable %s is bound several times" s
+    | Not_specify_rec ->
+      Format.fprintf ppf "This definition is recursive but is missing the 'rec' keyword"
     | No_variable_rec ->
       Format.fprintf ppf "Only variables are allowed as left-side of 'let rec'"
   ;;

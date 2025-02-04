@@ -9,7 +9,7 @@
  (libraries aefjnvMl_lib stdio))
 
 (cram
- (applies_to inferencer_tests parser_tests)
+ (applies_to inferencer_manytests parser_manytests)
  (deps
   ./inferencer_runner.exe
   ./parser_runner.exe
@@ -32,3 +32,8 @@
   manytests/typed/010sukharev.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
+
+(cram
+ (applies_to inferencer_tests)
+ (deps
+  ./inferencer_runner.exe))
