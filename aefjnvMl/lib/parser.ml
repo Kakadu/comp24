@@ -291,7 +291,7 @@ let e_value_binding pexpr =
     | None -> exp
   in
   let collect_expr args expr =
-    let f = fun acc x -> efun x acc in
+    let f acc x = efun x acc in
     match List.rev args with
     | h :: tl -> List.fold_left ~init:(efun h expr) ~f tl
     | _ -> expr

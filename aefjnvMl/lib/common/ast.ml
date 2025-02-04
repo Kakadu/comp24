@@ -24,9 +24,8 @@ type core_type =
   | Ptyp_list of core_type (** List type such as [int list] *)
   | Ptyp_tuple of core_type list
   (** [Ptyp_tuple([T1 ; ... ; Tn])]
-          represents a product type [T1 * ... * Tn].
-          Invariant: [n >= 2].
-        *)
+      represents a product type [T1 * ... * Tn].
+      Invariant: [n >= 2]. *)
   | Ptyp_arrow of core_type * core_type
   (** [Ptyp_arrow(lbl, T1, T2)] represents: [T1 -> T2]*)
 [@@deriving show { with_path = false }]
@@ -36,8 +35,7 @@ type pattern =
   | Pat_var of ident (** A variable pattern such as [x] *)
   | Pat_cons of pattern * pattern (** The pattern such as [P1::P2] *)
   | Pat_any (** The pattern [_] *)
-  | Pat_tuple of pattern list
-  (** Patterns [(P1, ..., P2)]
+  | Pat_tuple of pattern list (** Patterns [(P1, ..., P2)]
                                   Invariant : [n >= 2]*)
   | Pat_constraint of pattern * core_type
 [@@deriving show { with_path = false }]
@@ -46,8 +44,7 @@ type expression =
   | Exp_type of expression * core_type
   | Exp_constant of const (** Expressions constant such as [1], [true] *)
   | Exp_ident of ident (** Identifiers such as [x] *)
-  | Exp_tuple of expression list
-  (** Expressions [(E1, ..., En)]
+  | Exp_tuple of expression list (** Expressions [(E1, ..., En)]
                                      Invariant: [n >= 2] *)
   | Exp_function of pattern * expression (** [fun P1 -> E] *)
   | Exp_let of decl * expression
@@ -57,8 +54,7 @@ type expression =
   | Exp_match of expression * (pattern * expression) list
   (** [match E0 with P1 -> E1 | .. | Pn -> En] *)
   | Exp_ifthenelse of expression * expression * expression (** [if E1 then E2 else E3] *)
-  | Exp_apply of expression * expression
-  (** [E0 E1]
+  | Exp_apply of expression * expression (** [E0 E1]
                                              Invariant: n > 1 *)
   | Exp_list of expression * expression
   (** The expression such as [E1::E2]
@@ -67,8 +63,8 @@ type expression =
 
 (** Represents:
     - [let P = E] when [d_rec] is {{!rec_flag.Nonrecursive} [Nonrecursive]}
-    - [let rec P = E] when [d_rec] is {{!rec_flag.Recursive} [Recursive]} 
-                                                          Invariant: [n >= 1] *)
+    - [let rec P = E] when [d_rec] is {{!rec_flag.Recursive} [Recursive]}
+      Invariant: [n >= 1] *)
 and decl = Decl of rec_flag * value_binding list
 
 and value_binding =

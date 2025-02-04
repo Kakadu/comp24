@@ -254,10 +254,10 @@ let unify = Subst.unify
 let instantiate (S (bs, t)) =
   VarSet.fold
     (fun name ty ->
-       let* ty = ty in
-       let* tv = fresh_var in
-       let* s = Subst.singleton name tv in
-       return (Subst.apply s ty))
+      let* ty = ty in
+      let* tv = fresh_var in
+      let* s = Subst.singleton name tv in
+      return (Subst.apply s ty))
     bs
     (return t)
 ;;
@@ -518,13 +518,14 @@ let init_env =
 
 let check_program program =
   let helper env =
-    RList.fold_left program ~init:(return env) ~f:(fun env -> function
-      | Str_eval e ->
-        let* _, _ = infer env e in
-        return env
-      | Str_value d ->
-        let* _, env = infer_decl env d in
-        return env)
+    RList.fold_left program ~init:(return env) ~f:(fun env ->
+        function
+        | Str_eval e ->
+          let* _, _ = infer env e in
+          return env
+        | Str_value d ->
+          let* _, env = infer_decl env d in
+          return env)
   in
   run (helper init_env)
 ;;
