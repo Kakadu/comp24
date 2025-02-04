@@ -609,7 +609,9 @@ module PP = struct
 
   let pp_program ppf env =
     Base.Map.iteri env ~f:(fun ~key:v ~data:(S (_, ty)) ->
-      Format.fprintf ppf "var %s: %a\n" v pp_type ty)
+      match TypeEnv.find init_env v with 
+      | Some (S (_, init_ty)) when (ty = init_ty) ->  ()
+      | _ -> Format.fprintf ppf "var %s: %a\n" v pp_type ty)
   ;;
 
   let map_binder t1 t2 binder =
