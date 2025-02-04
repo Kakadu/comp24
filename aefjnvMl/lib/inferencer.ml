@@ -98,7 +98,7 @@ module Type = struct
       | TArrow (l, r) -> helper (helper acc l) r
       | TPrim _ -> acc
       | TList t -> helper acc t
-      | TTuple ts -> List.fold_left (fun acc t -> helper acc t) acc ts
+      | TTuple ts -> List.fold_left helper acc ts
     in
     helper VarSet.empty
   ;;
@@ -115,7 +115,7 @@ let ttuple ts = TTuple ts
 open R
 open R.Syntax
 
-let fresh_var = fresh >>| fun n -> tvar n
+let fresh_var = fresh >>| tvar
 let poly_var s = ident >>| fun n -> tvar (n + Hashtbl.hash s)
 
 module Subst : sig
@@ -147,7 +147,7 @@ end = struct
   ;;
 
   let find k xs = Map.find xs k
-  let remove xs k = Map.remove xs k
+  let remove = Map.remove
 
   let apply s =
     let rec helper = function
@@ -157,7 +157,7 @@ end = struct
          | Some x -> x)
       | TArrow (l, r) -> TArrow (helper l, helper r)
       | TList t -> tlist (helper t)
-      | TTuple ts -> ttuple @@ List.map ts ~f:(fun t -> helper t)
+      | TTuple ts -> ttuple @@ List.map ts ~f:helper
       | other -> other
     in
     helper
@@ -246,7 +246,7 @@ module TypeEnv = struct
   ;;
 
   let apply s env = Map.map env ~f:(Scheme.apply s)
-  let find xs name = Map.find xs name
+  let find = Map.find
 end
 
 let unify = Subst.unify
@@ -617,7 +617,8 @@ module PP = struct
 
   let map_binder t1 t2 binder =
     let rec helper acc = function
-      | TVar n1, TVar n2 -> if n1 = binder then convert_to_string n2 else acc
+      | TVar n1, TVar n2 when n1 = binder -> convert_to_string n2
+      | TVar _, TVar _ -> acc
       | TArrow (l1, r1), TArrow (l2, r2) ->
         let acc = helper acc (l1, l2) in
         helper acc (r1, r2)

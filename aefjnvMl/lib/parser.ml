@@ -112,7 +112,7 @@ let dsmcln = token ";;"
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
 
 let rec chainr1 e op =
@@ -208,7 +208,7 @@ let p_core_type =
 
 (*===================== Patterns =====================*)
 
-let p_const = const >>| fun p -> pconst p
+let p_const = const >>| pconst
 let p_var = ident >>| pvar
 let p_cons = token "::" *> return pcons
 let p_any = token "_" *> skip_whitespace *> return pany
@@ -221,15 +221,13 @@ let pattern =
     let term = choice [ parens pattern; p_const; p_var; p_any ] in
     let term = p_tuple term <|> term in
     let cons = chainr1 term p_cons in
-    let with_tp =
-      parens @@ lift2 (fun p tp -> pconstraint p tp) pattern p_type_annotation
-    in
+    let with_tp = parens @@ lift2 pconstraint pattern p_type_annotation in
     cons <|> term <|> with_tp)
 ;;
 
 (*===================== Expressions =====================*)
 
-let e_const = const >>| fun c -> econst c
+let e_const = const >>| econst
 let e_val = choice [ ident; parens infix_op; parens un_op ] >>| eval
 let e_cons = token "::" *> return econs
 
@@ -356,7 +354,7 @@ let e_let pexpr = lift2 elet (e_decl pexpr) (token "in" *> pexpr)
 
 (*===================== Binary/Unary operators =====================*)
 
-let bin_op chain1 e ops = chain1 e (ops >>| fun o l r -> ebinop o l r)
+let bin_op chain1 e ops = chain1 e (ops >>| ebinop)
 let lbo = bin_op chainl1
 let rbo = bin_op chainr1
 let op l = choice (List.map ~f:(fun o -> token o >>| eval) l)
