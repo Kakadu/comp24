@@ -3,7 +3,7 @@
 open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
-open HamsterML__Typechecker;;
+open HamsterML__Typing;;
 let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
   let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in

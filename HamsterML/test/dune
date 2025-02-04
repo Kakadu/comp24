@@ -1,5 +1,5 @@
 (library
- (modules ParserTest LexerTest)
+ (modules ParserTest LexerTest TypingTest)
  (name HamsterTest)
  (inline_tests)
  (preprocess
