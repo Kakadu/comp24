@@ -23,12 +23,11 @@ type parse_error = Syntax_error of string
   | Ill_typed
   | Unbound_var of string *)
 
-type error =
-  | Parser of parse_error
-  (* | Infer of infer_error
+type error = Parser of parse_error
+(* | Infer of infer_error
   | Interpreter of interpreter_error *)
-(* 
-let occurs_check (b, t) = Infer (Occurs_check (b, t))
+(*
+   let occurs_check (b, t) = Infer (Occurs_check (b, t))
 let unbound_variable v = Infer (Unbound_variable v)
 let unification_failed (t1, t2) = Infer (Unification_failed (t1, t2))
 let several_bounds v = Infer (Several_bounds v)

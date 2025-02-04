@@ -34,9 +34,8 @@ type parse_error = Syntax_error of string
   | Ill_typed (* Unreachable with using infer *)
   | Unbound_var of string Unreachable with using infer *)
 
-type error =
-  | Parser of parse_error
-  (* | Infer of infer_error
+type error = Parser of parse_error
+(* | Infer of infer_error
   | Interpreter of interpreter_error *)
 
 (*================Constructors================*)
