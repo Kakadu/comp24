@@ -1,0 +1,10 @@
+(library
+ (name common)
+ (public_name AefjnvMl.Common)
+ (modules errors ast typedtree)
+ (libraries base angstrom ppx_deriving)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
+ (inline_tests)
+ (instrumentation
+  (backend bisect_ppx)))

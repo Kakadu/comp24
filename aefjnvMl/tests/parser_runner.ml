@@ -8,6 +8,6 @@ open Parser
 let () =
   let input = Stdio.In_channel.input_all Stdlib.stdin in
   match parse input with
-  | Ok v -> Format.printf "%s\n" Ast.(show_program v)
+  | Ok v -> Format.printf "%s\n" Common.Ast.(show_program v)
   | Error _ -> Format.printf "Syntax error\n"
 ;;

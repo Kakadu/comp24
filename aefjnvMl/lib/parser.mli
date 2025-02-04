@@ -2,8 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Ast
-open Errors
+open Common.Ast
+open Common.Errors
 
 val parse : string -> (structure_item list, error) result
 val parse_prefix : string -> (structure_item list, error) result

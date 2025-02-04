@@ -4,7 +4,7 @@
 
 open Angstrom
 open Base
-open Ast
+open Common.Ast
 
 (*===================== const =====================*)
 
@@ -339,7 +339,7 @@ let e_decl pexpr =
     in
     let is_and_flag = function
       | "and" -> return true
-      | _ -> fail "Nonrec"
+      | _ -> fail "No mutual recursion"
     in
     let pars_d_rec = unchecked_ident >>= is_rec_flag <|> return Nonrecursive in
     let pars_let = token "let" in
@@ -412,7 +412,7 @@ let del = (dsmcln <|> skip_whitespace) *> skip_whitespace
 let decl = ptoken (e_decl expr)
 let str_item = expr >>| streval <|> (decl >>| strval)
 let program = del *> many1 (str_item <* del)
-let parse_syntax_err msg = Errors.Parser (Syntax_error msg)
+let parse_syntax_err msg = Common.Errors.Parser (Syntax_error msg)
 
 let parse s =
   match parse_string ~consume:All program s with
@@ -428,6 +428,6 @@ let parse_prefix s =
 
 module PP = struct
   let pp_error ppf = function
-    | Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "%s" msg
+    | Common.Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "%s" msg
   ;;
 end

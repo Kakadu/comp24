@@ -2,9 +2,9 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Ast
-open Typedtree
-open Errors
+open Common.Ast
+open Common.Typedtree
+open Common.Errors
 
 module R : sig
   include Base.Monad.Infix
