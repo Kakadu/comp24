@@ -1,6 +1,6 @@
 (lang dune 3.8)
 
-(name AefjnvMl)
+(name aefjnvMl)
 
 (generate_opam_files true)
 
@@ -14,7 +14,7 @@
 (license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
 
 (package
- (name AefjnvMl)
+ (name aefjnvMl)
  (synopsis "A short LLVM demo")
  (depends
   dune

@@ -1,6 +1,6 @@
 (library
  (name common)
- (public_name AefjnvMl.Common)
+ (public_name aefjnvMl.Common)
  (modules errors ast typedtree base_lib)
  (libraries base angstrom ppx_deriving)
  (preprocess
