@@ -34,7 +34,6 @@ type bop =
   | AND (** && *)
   | OR (** || *)
   | CONCAT (** ^ *)
-  | ASSIGN (** =  { let a = 1 } *)
 [@@deriving show]
 
 type uop = NOT (** not true *) [@@deriving show]
