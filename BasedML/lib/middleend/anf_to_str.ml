@@ -6,7 +6,6 @@ open Ast
 open Anf_ast
 
 let rec type_name_to_string tp =
-  let rec_call tp = type_name_to_string tp in
   match tp with
   | TUnit -> "unit"
   | TInt -> "int"
@@ -15,15 +14,16 @@ let rec type_name_to_string tp =
   | TTuple lst ->
     "("
     ^ (lst
-       |> List.mapi (fun i tp -> if i <> 0 then " * " ^ rec_call tp else rec_call tp)
+       |> List.mapi (fun i tp ->
+         if i <> 0 then " * " ^ type_name_to_string tp else type_name_to_string tp)
        |> String.concat "")
     ^ ")"
-  | TFunction (tp_arg, tp_ret) -> "(" ^ rec_call tp_arg ^ " -> " ^ rec_call tp_ret ^ ")"
-  | TList tp -> "(" ^ rec_call tp ^ " list)"
+  | TFunction (tp_arg, tp_ret) ->
+    "(" ^ type_name_to_string tp_arg ^ " -> " ^ type_name_to_string tp_ret ^ ")"
+  | TList tp -> "(" ^ type_name_to_string tp ^ " list)"
 ;;
 
-let constant_to_string c =
-  match c with
+let constant_to_string = function
   | CInt i -> string_of_int i
   | CBool false -> "false"
   | CBool true -> "true"
@@ -40,8 +40,7 @@ let list_to_string pp sep lst =
   aux lst
 ;;
 
-let rec imm_to_string c =
-  match c with
+let rec imm_to_string = function
   | ImmInt i -> string_of_int i
   | ImmBool false -> "false"
   | ImmBool true -> "true"
