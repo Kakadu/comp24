@@ -166,7 +166,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
        | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
   in
   let* _ = write_subst p_tp exp_tp in
-  let external_tvs = get_tv_from_env prev_env in
+  let* external_tvs = get_tv_from_env prev_env in
   generalise external_tvs pat p_tp
 ;;
 
@@ -194,7 +194,7 @@ let infer_let_decl : Ast.let_declaration -> (state, unit) t = function
         (fun (p_tp, exp_tp) -> write_subst p_tp exp_tp)
         (List.combine p_tp_lst exp_tp_lst)
     in
-    let external_tvs = get_tv_from_env prev_env in
+    let* external_tvs = get_tv_from_env prev_env in
     let* _ =
       map_list
         (fun (Ast.DLet (pat, _), tp) -> generalise external_tvs pat tp)
@@ -212,10 +212,10 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
      let lst = MapString.bindings env in
      let* restored_lst =
        map_list
-         (fun (name, _) ->
+         (fun (name, _tp) ->
            let* var_tp = read_var_type name in
            match var_tp with
-           | Some x -> restore_type x >>= fun tp -> return (name, tp)
+           | Some tp -> return (name, tp)
            | None -> fail "unreachable error: can not find name from env in env")
          lst
      in
