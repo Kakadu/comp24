@@ -105,13 +105,12 @@ expr:
     | le = expr; re = expr                                              { Application (le,re) }
 
 dataType:
-    | i = TYPE_INT      {Int i}
-    | f = TYPE_FLOAT    {Float f}
-    | b = TYPE_BOOL     {Bool b}
-    | c = TYPE_CHAR     {Char c}
-    | s = TYPE_STRING   {String s}
-    | TYPE_UNIT         { Unit }
-
+    | f = float             { f }
+    | i = int               { i }
+    | b = TYPE_BOOL         {Bool b}
+    | c = TYPE_CHAR         {Char c}
+    | s = TYPE_STRING       {String s}
+    | TYPE_UNIT             { Unit }
 
 value:
     | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS    { v }
@@ -125,6 +124,16 @@ pattern:
     | lst = list_dt                                         {List lst}  (* [1; 2; 3; ...] *)
     | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } (* hd :: tl *)
     | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } (* 1 :: [2; 3] *)
+
+int:
+    | i = TYPE_INT              {Int i}
+    | MINUS; i = TYPE_INT       {Int (-i)}
+    | PLUS; i = TYPE_INT        {Int (i)}
+
+float:
+    | f = TYPE_FLOAT            {Float f}
+    | MINUS; f = TYPE_FLOAT     {Float (-.f)}
+    | PLUS; f = TYPE_FLOAT      {Float (f)}
 
 %inline paramType:
     | INT                   { PInt }
@@ -150,7 +159,7 @@ pattern:
     | OR                    { OR }            
 
 %inline uop:
-    | NOT { NOT }   
+    | NOT { NOT }
 
 %inline func_id: 
     | id = IDENTIFIER     {id}
