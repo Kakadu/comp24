@@ -35,5 +35,4 @@
 
 (cram
  (applies_to inferencer_tests)
- (deps
-  ./inferencer_runner.exe))
+ (deps ./inferencer_runner.exe))

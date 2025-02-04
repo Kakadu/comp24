@@ -8,7 +8,7 @@ open Errors
 
 module R : sig
   include Base.Monad.Infix
-  
+
   val return : 'a -> 'a t
   val fail : error -> 'a t
 
@@ -370,13 +370,14 @@ let pattern_infer =
   helper
 ;;
 
-let saturate_env env bindings = 
-  let* env = 
-    RList.fold_left bindings ~init:(return env) ~f:(fun acc ({vb_pat; _}) -> 
+let saturate_env env bindings =
+  let* env =
+    RList.fold_left bindings ~init:(return env) ~f:(fun acc { vb_pat; _ } ->
       let* env, _ = pattern_infer acc vb_pat in
       return env)
-    in
+  in
   return env
+;;
 
 let rec infer =
   let rec helper env = function
@@ -442,17 +443,18 @@ let rec infer =
       let* final_subs = Subst.compose_all [ s1; s2; subst ] in
       let trez = Subst.apply final_subs t2 in
       return (final_subs, trez)
-    | Exp_type(e, t) ->
+    | Exp_type (e, t) ->
       let* s1, t1 = helper env e in
       let* t2 = convert_ty_annot env t in
       let* sub = Subst.unify t1 t2 in
       let trez = Subst.apply sub t1 in
-      let* final_subs = Subst.compose_all [s1; sub] in
+      let* final_subs = Subst.compose_all [ s1; sub ] in
       return (final_subs, trez)
   in
   helper
+
 and infer_decl env = function
-  | Decl (Nonrecursive, [{vb_pat; vb_expr }])->
+  | Decl (Nonrecursive, [ { vb_pat; vb_expr } ]) ->
     let* s1, t1 = infer env vb_expr in
     let scheme = generalize (TypeEnv.apply s1 env) t1 Nonrecursive ~pattern_name:None in
     let* env1, t2 = pattern_infer env vb_pat in
@@ -461,13 +463,14 @@ and infer_decl env = function
     let* sub1 = Subst.compose s1 sub in
     let env3 = TypeEnv.apply sub1 env2 in
     return (sub1, env3)
-  | Decl (Nonrecursive, _) -> fail not_specify_rec 
+  | Decl (Nonrecursive, _) -> fail not_specify_rec
   | Decl (Recursive, bindings) ->
     let* env = saturate_env env bindings in
     RList.fold_left
       bindings
-      ~init: (return (Subst.empty, env))
-      ~f: (fun (acc_subs, acc_env) {vb_pat; vb_expr} -> (match vb_pat with
+      ~init:(return (Subst.empty, env))
+      ~f:(fun (acc_subs, acc_env) { vb_pat; vb_expr } ->
+        match vb_pat with
         | Pat_var v ->
           let* tv = fresh_var in
           let env = TypeEnv.extend acc_env (v, S (VarSet.empty, tv)) in
@@ -476,9 +479,9 @@ and infer_decl env = function
           let* s = Subst.compose s2 s1 in
           let env = TypeEnv.apply s env in
           let t2 = generalize env (Subst.apply s tv) Recursive ~pattern_name:(Some v) in
-          let* final_subs = Subst.compose_all [acc_subs;  s] in
+          let* final_subs = Subst.compose_all [ acc_subs; s ] in
           return (final_subs, TypeEnv.extend env (v, t2))
-        | _ -> fail no_variable_rec))
+        | _ -> fail no_variable_rec)
 ;;
 
 let init_env =
@@ -501,14 +504,11 @@ let init_env =
     ; "!=", comp_op
     ]
   in
-  let un_ops = 
-    [
-      "~-", TArrow(TPrim "int", TPrim "int");
-      "~!", TArrow(TPrim "int", TPrim "int")
-    ]
+  let un_ops =
+    [ "~-", TArrow (TPrim "int", TPrim "int"); "~!", TArrow (TPrim "int", TPrim "int") ]
   in
   let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "unit") in
-  let funs = print_int_ty :: un_ops @ bin_ops in
+  let funs = (print_int_ty :: un_ops) @ bin_ops in
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
   in
@@ -522,8 +522,8 @@ let check_program program =
       | Str_eval e ->
         let* _, _ = infer env e in
         return env
-      | Str_value d -> 
-        let* _, env = infer_decl env d in 
+      | Str_value d ->
+        let* _, env = infer_decl env d in
         return env)
   in
   run (helper init_env)

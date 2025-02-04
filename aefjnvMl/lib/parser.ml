@@ -287,8 +287,9 @@ let e_fun p_expr =
 ;;
 
 let rec constr_nested_expr t = function
-  | Exp_function(p, e) -> efun p (constr_nested_expr t e)
+  | Exp_function (p, e) -> efun p (constr_nested_expr t e)
   | expr -> etype expr t
+;;
 
 let e_value_binding pexpr =
   let pars_main_p =
@@ -316,8 +317,10 @@ let e_value_binding pexpr =
   in
   let construct_value_binding (main_p, args, tp_opt, expr) =
     validate_main_p main_p args
-    >>= fun main_valid_p -> return (collect_expr args expr) >>| collect_main_p tp_opt >>| 
-      fun expr -> evalue_binding main_valid_p expr
+    >>= fun main_valid_p ->
+    return (collect_expr args expr)
+    >>| collect_main_p tp_opt
+    >>| fun expr -> evalue_binding main_valid_p expr
   in
   lift4
     (fun main_p args tp_opt expr -> main_p, args, tp_opt, expr)
