@@ -485,6 +485,13 @@ let infer =
       let trez = Subst.apply subst t2 in
       let* final_subs = Subst.compose_all [ s1; s2; subst ] in
       return (final_subs, trez)
+    | Exp_type(e, t) ->
+      let* s1, t1 = helper env e in
+      let* t2 = convert_ty_annot env t in
+      let* sub = Subst.unify t1 t2 in
+      let trez = Subst.apply sub t1 in
+      let* final_subs = Subst.compose_all [s1; sub] in
+      return (final_subs, trez)
   in
   helper
 ;;
@@ -532,7 +539,7 @@ let init_env =
     ; "!=", comp_op
     ]
   in
-  let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "int") in
+  let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "unit") in
   let funs = print_int_ty :: bin_ops in
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)

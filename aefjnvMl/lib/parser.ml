@@ -112,7 +112,9 @@ let is_keyword = function
 ;;
 
 let is_alpha c = is_upper c || is_lower c
-let is_ident c = is_alpha c || Char.equal '_' c
+let is_ident_char = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
+  | _ -> false
 
 let is_ident_char = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
@@ -145,13 +147,16 @@ let rec chainr1 e op =
 (*===================== Constants =====================*)
 
 let c_int =
-  ptoken @@ take_while1 is_digit
+  ptoken @@
+  (string "-" *> take_while1 is_digit >>| fun digits -> "-" ^ digits)
+  <|> take_while1 is_digit
   >>= fun whole ->
   let num = Stdlib.int_of_string_opt whole in
   match num with
   | Some n -> return @@ cint n
   | None -> fail "Integer literal exceeds the range of representable integers of type int"
 ;;
+
 
 let c_bool =
   ptoken @@ take_while1 is_alpha
@@ -181,6 +186,7 @@ let unchecked_ident =
   | Some x when Char.equal x '_' || is_lower x -> take_while is_ident_char
   | _ -> fail "not a valid identifier"
 ;;
+
 
 let ident = unchecked_ident >>= check_ident
 
