@@ -8,3 +8,5 @@
  (inline_tests)
  (instrumentation
   (backend bisect_ppx)))
+
+; TODO: remove bin ops from parser (update arch)

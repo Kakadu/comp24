@@ -9,23 +9,19 @@ type rec_flag =
   | Recursive
 [@@deriving eq, show { with_path = false }]
 
-type unary_op =
-  (* TODO: remove *)
-  | Minus (** [-]*)
-  | Not (** [not]*)
-[@@deriving show { with_path = false }]
-
 type const =
   | Const_int of int (** Integers constants such as [52] *)
   | Const_bool of bool (** Boolean constant: [true], [false]*)
   | Const_nil (** Represents empty list [[]] *)
+  | Const_unit
 [@@deriving show { with_path = false }]
 
 type core_type =
   | Ptyp_int
   | Ptyp_bool
+  | Ptyp_unit
   | Ptyp_var of ident
-  (* TODO: add list type *)
+  | Ptyp_list of core_type
   | Ptyp_tuple of core_type list (** Invariant : [n >= 2] *)
   | Ptyp_arrow of core_type * core_type
 [@@deriving show { with_path = false }]
@@ -42,6 +38,7 @@ type pattern =
 [@@deriving show { with_path = false }]
 
 type expression =
+  | Exp_type of expression * core_type
   | Exp_constant of const (** Expressions constant such as [1], [true] *)
   | Exp_ident of ident (** Identifiers such as [x] *)
   | Exp_tuple of expression list
@@ -65,11 +62,13 @@ type expression =
 
 (** Represents:
     - [let P = E] when [d_rec] is {{!rec_flag.Nonrecursive} [Nonrecursive]}
-    - [let rec P = E] when [d_rec] is {{!rec_flag.Recursive} [Recursive]} *)
-and decl =
-  { d_rec : rec_flag
-  ; d_pat : pattern
-  ; d_expr : expression
+    - [let rec P = E] when [d_rec] is {{!rec_flag.Recursive} [Recursive]} 
+                                                          Invariant: [n >= 1] *)
+and decl = Decl of rec_flag * value_binding list
+
+and value_binding =
+  { vb_pat : pattern
+  ; vb_expr : expression
   }
 
 type structure_item =
