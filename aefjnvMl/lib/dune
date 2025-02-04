@@ -1,7 +1,7 @@
 (library
  (name aefjnvMl_lib)
  (public_name AefjnvMl.Lib)
- (modules ast)
+ (modules typedtree errors ast parser)
  (libraries base angstrom)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
