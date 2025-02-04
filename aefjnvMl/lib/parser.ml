@@ -5,27 +5,7 @@
 open Angstrom
 open Base
 open Common.Ast
-
-(*===================== const =====================*)
-
-(* | "*" | "/" | "+" | "-" | "<=" | "<" | ">" | ">=" | "=" | "!=" | "&&" | "||" *)
-
-let op_mul = "*"
-let op_div = "/"
-let op_plus = "+"
-let op_minus = "-"
-let op_less_eq = "<="
-let op_more_eq = ">="
-let op_less = "<"
-let op_more = ">"
-let op_eq = "="
-let op_2eq = "=="
-let op_not_eq = "!="
-let op_and = "&&"
-let op_or = "||"
-let un_op_minus = "-"
-let un_op_not = "!"
-let un_op_prefix = "~"
+open Common.Base_lib
 
 (*===================== const =====================*)
 
@@ -33,6 +13,7 @@ let cint n = Const_int n
 let cbool b = Const_bool b
 let cnil = Const_nil
 let cunit = Const_unit
+
 (*===================== core_type =====================*)
 
 let ptint = Ptyp_int

@@ -5,6 +5,7 @@
 open Common.Ast
 open Common.Typedtree
 open Common.Errors
+open Common.Base_lib
 
 module R : sig
   include Base.Monad.Infix
@@ -485,29 +486,28 @@ and infer_decl env = function
 ;;
 
 let init_env =
-  let int_ty_op = TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int")) in
-  let bool_ty_op = TArrow (TPrim "bool", TArrow (TPrim "bool", TPrim "bool")) in
-  let comp_op = TArrow (TVar 1, TArrow (TVar 1, TPrim "bool")) in
   let bin_ops =
-    [ "*", int_ty_op
-    ; "/", int_ty_op
-    ; "+", int_ty_op
-    ; "-", int_ty_op
-    ; "&&", bool_ty_op
-    ; "||", bool_ty_op
-    ; ">", comp_op
-    ; "<", comp_op
-    ; ">=", comp_op
-    ; "<=", comp_op
-    ; "=", comp_op
-    ; "==", comp_op
-    ; "!=", comp_op
+    [ op_mul, int_ty_op
+    ; op_div, int_ty_op
+    ; op_plus, int_ty_op
+    ; op_minus, int_ty_op
+    ; op_and, bool_ty_op
+    ; op_or, bool_ty_op
+    ; op_more, comp_ty_op 1
+    ; op_less, comp_ty_op 1
+    ; op_more_eq, comp_ty_op 1
+    ; op_less_eq, comp_ty_op 1
+    ; op_eq, comp_ty_op 1
+    ; op_2eq, comp_ty_op 1
+    ; op_not_eq, comp_ty_op 1
     ]
   in
   let un_ops =
-    [ "~-", TArrow (TPrim "int", TPrim "int"); "~!", TArrow (TPrim "int", TPrim "int") ]
+    [ un_op_prefix ^ un_op_minus, sig_un_op_minus
+    ; un_op_prefix ^ un_op_not, sig_un_op_not
+    ]
   in
-  let print_int_ty = "print_int", TArrow (TPrim "int", TPrim "unit") in
+  let print_int_ty = func_print_int, sig_func_print_int in
   let funs = (print_int_ty :: un_ops) @ bin_ops in
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
@@ -609,8 +609,8 @@ module PP = struct
 
   let pp_program ppf env =
     Base.Map.iteri env ~f:(fun ~key:v ~data:(S (_, ty)) ->
-      match TypeEnv.find init_env v with 
-      | Some (S (_, init_ty)) when (ty = init_ty) ->  ()
+      match TypeEnv.find init_env v with
+      | Some (S (_, init_ty)) when ty = init_ty -> ()
       | _ -> Format.fprintf ppf "var %s: %a\n" v pp_type ty)
   ;;
 
