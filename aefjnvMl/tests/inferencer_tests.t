@@ -189,5 +189,4 @@
   $ cat << EOF | dune exec inferencer_runner -
   > let ( + ) a b = a && b
   > EOF
-  var result: int
-  var sum_list: int list -> int
+  var +: bool -> bool -> bool
