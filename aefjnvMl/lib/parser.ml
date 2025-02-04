@@ -20,22 +20,26 @@ let op_more_eq = ">="
 let op_less = "<"
 let op_more = ">"
 let op_eq = "="
+let op_2eq = "=="
 let op_not_eq = "!="
 let op_and = "&&"
 let op_or = "||"
 let un_op_minus = "-"
-let un_op_not = "not"
+let un_op_not = "!"
+let un_op_prefix = "~"
 
 (*===================== const =====================*)
 
 let cint n = Const_int n
 let cbool b = Const_bool b
 let cnil = Const_nil
-
+let cunit = Const_unit
 (*===================== core_type =====================*)
 
 let ptint = Ptyp_int
 let ptbool = Ptyp_bool
+let ptunit = Ptyp_unit
+let ptlist tp = Ptyp_list tp
 let ptvar idnt = Ptyp_var idnt
 let pttuple pt_list = Ptyp_tuple pt_list
 let ptarrow before_pt after_pt = Ptyp_arrow (before_pt, after_pt)
@@ -52,6 +56,7 @@ let pnil = pconst cnil
 
 (*===================== expression =====================*)
 
+let etype e tp = Exp_type (e, tp)
 let econst c = Exp_constant c
 let eval c = Exp_ident c
 let eapp f a = Exp_apply (f, a)
@@ -63,7 +68,8 @@ let eite b t e = Exp_ifthenelse (b, t, e)
 let elet d e = Exp_let (d, e)
 let etuple es = Exp_tuple es
 let econs a b = Exp_list (a, b)
-let edecl d_rec d_pat d_expr = { d_rec; d_pat; d_expr }
+let evalue_binding vb_pat vb_expr = { vb_pat; vb_expr }
+let edecl rec_flag bind_list = Decl (rec_flag, bind_list)
 let streval e = Str_eval e
 let strval d = Str_value d
 
@@ -99,12 +105,19 @@ let is_keyword = function
   | "val"
   | "not"
   | "method"
+  | "unit"
+  | "and"
   | "in" -> true
   | _ -> false
 ;;
 
 let is_alpha c = is_upper c || is_lower c
 let is_ident c = is_alpha c || Char.equal '_' c
+
+let is_ident_char = function
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '\'' -> true
+  | _ -> false
+;;
 
 (*===================== Control characters =====================*)
 
@@ -149,7 +162,8 @@ let c_bool =
 ;;
 
 let c_nil = token "[]" *> return cnil
-let const = choice [ c_int; c_bool; c_nil ]
+let c_unit = token "()" *> return cunit
+let const = choice [ c_int; c_bool; c_nil; c_unit ]
 
 (*===================== Identifiers =====================*)
 
@@ -158,16 +172,17 @@ let check_ident i =
   then fail "keyword"
   else if String.equal "_" i
   then fail "wildcard not expected"
-  else return (id i)
+  else return i
 ;;
 
-let ident =
+let unchecked_ident =
   ptoken peek_char
-  >>= (function
-   | Some x when Char.equal x '_' || is_lower x -> return x
-   | _ -> fail "not an identifier")
-  >>= fun _ -> take_while is_ident >>= fun s -> check_ident s
+  >>= function
+  | Some x when Char.equal x '_' || is_lower x -> take_while is_ident_char
+  | _ -> fail "not a valid identifier"
 ;;
+
+let ident = unchecked_ident >>= check_ident
 
 let infix_op =
   choice
@@ -180,96 +195,81 @@ let infix_op =
     ; token op_more
     ; token op_more_eq
     ; token op_eq
+    ; token op_2eq
     ; token op_not_eq
     ; token op_and
     ; token op_or
     ]
 ;;
 
+let un_op =
+  choice [ token (un_op_prefix ^ un_op_minus); token (un_op_prefix ^ un_op_not) ]
+;;
+
 (*===================== Core types =====================*)
-
-let p_tint = token "int" *> return ptint
-let p_tbool = token "bool" *> return ptbool
-let p_tvar = ident >>| ptvar
-
-let p_ttuple p_core_tp =
-  lift2 (fun h tl -> pttuple (h :: tl)) p_core_tp (many1 (token "*" *> p_core_tp))
-;;
-
-let p_tarrow p_core_tp =
-  lift3 (fun lside _ rside -> ptarrow lside rside) p_core_tp (token "->") p_core_tp
-;;
 
 let p_core_type =
   fix (fun core_type ->
-    let p_type =
-      choice
-        [ parens core_type
-        ; p_tvar
-        ; p_tint
-        ; p_tbool
-        ; p_ttuple core_type
-        ; p_tarrow core_type
-        ]
-        (* TODO: problem with left recursion *)
-        (* [ parens core_type
-           ; p_tarrow core_type
-           ; p_ttuple core_type
-           ; p_tint
-           ; p_tbool
-           ; p_tvar
-           ] 
-        *)
+    let p_tint = token "int" *> return ptint in
+    let p_tbool = token "bool" *> return ptbool in
+    let p_tunit = token "unit" *> return ptunit in
+    let p_tvar = ident >>| ptvar in
+    let p_primitive_types =
+      choice [ p_tint; p_tbool; p_tvar; parens core_type; p_tunit ]
     in
-    p_type)
+    let p_tlist = p_primitive_types >>= fun tp -> token "list" *> return (ptlist tp) in
+    let p_ttuple =
+      let p_base_types = choice [ p_primitive_types; p_tlist ] in
+      lift2
+        (fun h tl -> pttuple (h :: tl))
+        p_base_types
+        (many1 (token "*" *> p_base_types))
+    in
+    let p_composite_types = choice [ p_ttuple; p_tlist; p_primitive_types ] in
+    chainr1 p_composite_types (token "->" *> return ptarrow))
 ;;
 
 (*===================== Patterns =====================*)
 
 let p_const = const >>| fun p -> pconst p
-let p_var = (ident <|> parens infix_op) >>| pvar
+let p_var = ident >>| pvar
 let p_cons = token "::" *> return pcons
 let p_any = token "_" *> skip_whitespace *> return pany
 let fold_plist = List.fold_right ~f:(fun p1 p2 -> pcons p1 p2) ~init:pnil
-
-let p_list =
-  let item = p_const <|> p_var in
-  sbrcts @@ sep_by (token ";") item >>| fold_plist
-;;
-
 let tuple ident f = lift2 (fun h tl -> f @@ (h :: tl)) ident (many1 (token "," *> ident))
-let p_tuple pat = parens (tuple pat ptuple)
+let p_tuple pat = parens (tuple pat ptuple) <|> tuple pat ptuple
+let p_type_annotation = token ":" *> p_core_type
 
 let pattern =
   fix (fun pattern ->
-    let term = choice [ parens pattern; p_const; p_any; p_var; p_tuple pattern ] in
-    let cons = parens @@ chainr1 term p_cons in
+    let term = choice [ parens pattern; p_const; p_var; p_any ] in
+    let term = p_tuple term <|> term in
+    let cons = chainr1 term p_cons in
     let with_tp =
-      parens @@ lift3 (fun p _ tp -> pconstraint p tp) pattern (token ":") p_core_type
+      parens @@ lift2 (fun p tp -> pconstraint p tp) pattern p_type_annotation
     in
-    with_tp <|> cons <|> term)
+    cons <|> term <|> with_tp)
 ;;
 
 (*===================== Expressions =====================*)
 
 let e_const = const >>| fun c -> econst c
-let e_val = (ident <|> parens infix_op) >>| eval
+let e_val = choice [ ident; parens infix_op; parens un_op ] >>| eval
 let e_cons = token "::" *> return econs
 
-let e_list expr =
+let e_list_basic expr =
   let rec create_cons = function
     | [] -> econst cnil
     | h :: tl -> econs h (create_cons tl)
   in
-  let basic_list = sbrcts @@ sep_by (token ";") expr >>| create_cons in
-  let cons_list = chainr1 (expr <|> basic_list) e_cons in
-  basic_list <|> cons_list
+  sbrcts @@ sep_by (token ";") expr >>| create_cons
 ;;
 
+let e_list_cons expr = chainr1 (expr <|> e_list_basic expr) e_cons
 let e_tuple expr = tuple expr etuple
 let e_app expr = chainl1 expr (return eapp)
 let e_ite b t e = lift3 eite (token "if" *> b) (token "then" *> t) (token "else" *> e)
-let pars_fun_type_opt = token ":" *> p_core_type >>| (fun tp -> Some tp) <|> return None
+let p_type_annotation_opt = p_type_annotation >>| (fun tp -> Some tp) <|> return None
 
 let e_fun p_expr =
   let pars_args = many1 pattern in
@@ -278,7 +278,7 @@ let e_fun p_expr =
     *> lift4
          (fun args tp_opt _ expr -> args, tp_opt, expr)
          pars_args
-         pars_fun_type_opt
+         p_type_annotation_opt
          (token "->")
          p_expr
   in
@@ -291,41 +291,70 @@ let e_fun p_expr =
   >>| fun (h, tl) -> List.fold_left ~init:(efun h expr) ~f:(fun acc x -> efun x acc) tl
 ;;
 
-let lift5 f a b c d e =
-  lift4 (fun ra rb rc rd -> f ra rb rc rd) a b c d >>= fun f_new -> e >>| f_new
+let e_value_binding pexpr =
+  let pars_main_p =
+    choice [ ptoken pattern; parens infix_op >>| pvar; parens un_op >>| pvar ]
+  in
+  let pars_args = skip_whitespace *> many pattern in
+  let validate_main_p main_p args =
+    match main_p, args with
+    | Pat_constraint _, _ :: _ ->
+      fail
+        "Explicitly specifying the binding type is only available before '='. Syntax \
+         error: let (a: int) b c ... = ..."
+    | pat, _ -> return pat
+  in
+  let collect_main_p tp_opt main_p =
+    match tp_opt with
+    | Some tp -> pconstraint main_p tp
+    | None -> main_p
+  in
+  let collect_expr args expr =
+    let f = fun acc x -> efun x acc in
+    match List.rev args with
+    | h :: tl -> List.fold_left ~init:(efun h expr) ~f tl
+    | _ -> expr
+  in
+  let construct_value_binding (main_p, args, tp_opt, expr) =
+    validate_main_p main_p args
+    >>| collect_main_p tp_opt
+    >>| fun main_valid_p -> evalue_binding main_valid_p (collect_expr args expr)
+  in
+  lift4
+    (fun main_p args tp_opt expr -> main_p, args, tp_opt, expr)
+    pars_main_p
+    pars_args
+    p_type_annotation_opt
+    (token "=" *> pexpr)
+  >>= construct_value_binding
 ;;
 
-(* TODO: refactor it *)
 let e_decl pexpr =
-  let pars_args = skip_whitespace *> many pattern in
-  let pars_d_rec = token "rec" *> return Recursive <|> return Nonrecursive in
   let pars_decl =
-    token "let" *> pars_d_rec
+    let is_rec_flag = function
+      | "rec" -> return Recursive
+      | _ -> fail "Nonrec"
+    in
+    let is_and_flag = function
+      | "and" -> return true
+      | _ -> fail "Nonrec"
+    in
+    let pars_d_rec = unchecked_ident >>= is_rec_flag <|> return Nonrecursive in
+    let pars_let = token "let" in
+    let pars_secondary_vb = (unchecked_ident >>= is_and_flag) *> e_value_binding pexpr in
+    pars_let *> pars_d_rec
     >>= fun rflag ->
-    lift5
-      (fun main_p args tp_opt _ expr -> rflag, main_p, args, tp_opt, expr)
-      (ptoken pattern)
-      pars_args
-      pars_fun_type_opt
-      (token "=")
-      pexpr
+    e_value_binding pexpr
+    >>= fun first_vb ->
+    many pars_secondary_vb >>| fun secondary_vbs -> rflag, first_vb :: secondary_vbs
   in
-  let construct_decl (rflag, main_p, args, tp_opt, expr) =
-    return
-    @@ edecl
-         rflag
-         main_p
-         (match args, tp_opt with
-          | h :: tl, None ->
-            List.fold_left ~init:(efun h expr) ~f:(fun acc x -> efun x acc) tl
-          | h :: tl, Some tp ->
-            List.fold_left
-              ~init:(efun (pconstraint h tp) expr)
-              ~f:(fun acc x -> efun x acc)
-              tl
-          | _ -> expr)
+  let validate_decl (rflag, vb_list) =
+    match rflag, vb_list with
+    | Nonrecursive, _ :: _ :: _ -> fail "Using 'and' available only with 'rec' flag"
+    | x -> return x
   in
-  pars_decl >>= construct_decl
+  let construct_decl (rflag, vb_list) = return @@ edecl rflag vb_list in
+  pars_decl >>= validate_decl >>= construct_decl
 ;;
 
 let e_ptrn_matching pexpr = lift2 (fun k v -> k, v) (pattern <* token "->") pexpr
@@ -350,18 +379,26 @@ let rbo = bin_op chainr1
 let op l = choice (List.map ~f:(fun o -> token o >>| eval) l)
 let mul_div = op [ op_mul; op_div ]
 let add_sub = op [ op_plus; op_minus ]
-let cmp = op [ op_less_eq; op_less; op_more_eq; op_more; op_eq; op_not_eq ]
+let cmp = op [ op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq; op_not_eq ]
 let andop = op [ op_and ]
 let orop = op [ op_or ]
-let neg = op [ un_op_not; un_op_minus ]
+
+let unop l =
+  choice
+    (List.map ~f:(fun o -> token o >>| fun un_name -> eval (un_op_prefix ^ un_name)) l)
+;;
+
+let neg = unop [ un_op_not; un_op_minus ]
 
 let expr =
   fix (fun pexpr ->
-    let sube = choice [ parens pexpr; e_const; e_val ] in
-    let term = e_app sube in
+    let etp = parens @@ lift2 etype pexpr p_type_annotation in
+    let term = choice [ etp; parens pexpr; e_const; e_val ] in
+    let term = e_list_basic term <|> term in
+    let term = e_app term in
     let term = lbo (term <|> lift2 eunop neg term) mul_div in
+    let term = e_list_cons term <|> term in
     let term = lbo term add_sub in
-    let term = e_list term <|> term in
     let term = lbo term cmp in
     let term = rbo term andop in
     let term = rbo term orop in
@@ -371,9 +408,8 @@ let expr =
 
 let del = (dsmcln <|> skip_whitespace) *> skip_whitespace
 let decl = ptoken (e_decl expr)
-let str_item = expr >>| streval <* dsmcln <|> (decl >>| strval)
+let str_item = expr >>| streval <|> (decl >>| strval)
 let program = del *> many1 (str_item <* del)
-
 let parse_syntax_err msg = Errors.Parser (Syntax_error msg)
 
 let parse s =
@@ -393,3 +429,5 @@ let parse_prefix_with p s =
   | Ok v -> Ok v
   | Error _ -> Error (parse_syntax_err "Syntax error")
 ;;
+
+(* TODO: mutual recursion *)
