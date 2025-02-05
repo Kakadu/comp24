@@ -345,7 +345,7 @@ module Infer = struct
            let* ur = Subst.unify tr TString in
            let* res = Subst.compose_all [ sl; sr; ul; ur ] in
            return (res, TString))
-      | Value v ->
+      | Pattern v ->
         (match v with
          | Const dt -> infer_data_type dt
          | _ -> failwith "error in 'value' inference")

@@ -17,7 +17,7 @@ type paramType =
   | PBool
   | PChar
   | PString
-  | Poly of string (* (a: `a) (b: `b) *)
+  (* | Poly of string (a: `a) (b: `b) *)
 [@@deriving show]
 
 type bop =
@@ -47,7 +47,7 @@ type pattern =
   | Tuple of pattern list (* (1, 2, 3) *)
   | List of pattern list (* [1; 2; 3] *)
   | ListConcat of pattern * pattern (* a :: [b;c]*)
-  | UnitPattern
+  (* | UnitPattern *)
 [@@deriving show]
 
 type expr =

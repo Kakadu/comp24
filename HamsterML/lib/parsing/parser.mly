@@ -145,7 +145,7 @@ float:
     | BOOL                  { PBool }
     | CHAR                  { PChar }
     | STRING                { PString }
-    | n = POLYMORPHIC_NAME  { Poly n }
+    // | n = POLYMORPHIC_NAME  { Poly n }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -166,12 +166,13 @@ float:
     | NOT { NOT }
 
 %inline func_id: 
-    | id = IDENTIFIER     { VarId ( id ) }
+    // | id = IDENTIFIER     { VarId ( id ) }
     | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
-    (* let _ = .. *)
-    | WILDCARD            { Wildcard }
-    (* let f x = let (k, j) = x in j in f (1, 2) *)
-    | p = pattern         { p }
+    // (* let _ = .. *)
+    // | WILDCARD            { Wildcard }
+    // (* let f x = let (k, j) = x in j in f (1, 2) *)
+    // | p = pattern         { p }
+    | v = value            { v }
 
 const_or_var: (* Const or variable *)
     | const = dataType      {Const const} 
@@ -190,7 +191,7 @@ typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (type
 
 %inline let_def:
     (* () = print_endline "123" *)
-    | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, UnitPattern, [], e)}
+    | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
     (* [rec] f x = x *)
     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
