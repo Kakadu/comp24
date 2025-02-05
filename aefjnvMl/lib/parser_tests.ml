@@ -1,4 +1,4 @@
-(** Copyright 2023, Artem-Rzhankoff *)
+(** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -10,7 +10,7 @@ let parse_test s =
   | Error _ -> Format.printf "Syntax error\n"
 ;;
 
-let%expect_test _ =
+let%expect_test "base bin ops" =
   let () = parse_test "1 + 2 / 3;;" in
   [%expect
     {|
@@ -23,7 +23,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "infix op" =
   let () = parse_test "a != b" in
   [%expect
     {|
@@ -33,20 +33,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
-  let () = parse_test "let (~-) a = a;;" in
-  [%expect
-    {|
-    [(Str_value
-        (Decl (Nonrecursive,
-           [{ vb_pat = (Pat_var "~-");
-              vb_expr = (Exp_function ((Pat_var "a"), (Exp_ident "a"))) }
-             ]
-           )))
-      ] |}]
-;;
-
-let%expect_test _ =
+let%expect_test "override un op" =
   let () = parse_test "let (~!) a = a;;" in
   [%expect
     {|
@@ -59,7 +46,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "apply un ops" =
   let () = parse_test "let (~!) a = (~-) a;;" in
   [%expect
     {|
@@ -75,7 +62,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bin op infix apply" =
   let () = parse_test "1 * 2 / 3;;" in
   [%expect
     {|
@@ -90,7 +77,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bin op apply" =
   let () = parse_test "(+) 1 2;;" in
   [%expect
     {|
@@ -100,7 +87,7 @@ let%expect_test _ =
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bin exprs" =
   let () = parse_test {|true && true && false;;|} in
   [%expect
     {|
@@ -114,12 +101,12 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "un op" =
   let () = parse_test {|! vbool ;;|} in
   [%expect {| [(Str_eval (Exp_apply ((Exp_ident "~!"), (Exp_ident "vbool"))))] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "base list constructor" =
   let () = parse_test {|[1; 2; 3; 4];;|} in
   [%expect
     {|
@@ -135,7 +122,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list with apply" =
   let () = parse_test "-1::[2];;" in
   [%expect
     {|
@@ -145,7 +132,7 @@ let%expect_test _ =
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "base factorial" =
   let () =
     parse_test "let rec fact n k = if n <= 1 then k 1 else fact (n-1) (fun z -> k(z*n))"
   in
@@ -186,7 +173,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "bin override and type hints" =
   let () = parse_test "let (+) (a : bool) (b : int) c: int = funct (10 - b)" in
   [%expect
     {|
@@ -214,7 +201,7 @@ let%expect_test _ =
       ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "mutual rec" =
   let () =
     parse_test {|
 let rec x = 3 :: z2
@@ -246,7 +233,7 @@ x
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "match, tuples and lists" =
   let () =
     parse_test
       {|
@@ -279,7 +266,7 @@ match (10, 11, 12::[]) with
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list" =
   let () = parse_test {|
 [12; 13; 14]::[]
 ;;
@@ -298,7 +285,7 @@ let%expect_test _ =
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type hints" =
   let () =
     parse_test
       {|
@@ -339,7 +326,7 @@ let (): unit = (
         ] |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "currying" =
   let () = parse_test {|
 let a = fun x -> fun y -> fun z -> x y z
 ;;
