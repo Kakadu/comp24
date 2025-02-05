@@ -86,19 +86,23 @@
 %left ASTERISK, SLASH
 
 // --- Parsing ---
-%start <Ast.expr> prog
+%type <expr list> prog
+%start prog
 %%
 
-prog : p = expr EOF { p }
+prog : p = program EOF { p }
+program : p = list(declaration) { p }
+declaration :
+    | LET; l = let_def                                                  { l }
+    | LET; l = let_and_in_def                                           { l } 
 
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
     | v = value                                                         { Value v }
     | uop = uop; e = expr                                               { UnOp (uop, e) }
     | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | LET; l = let_def                                                  { l }
-    | LET; l = let_and_in_def                                           { l }
     | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
+    | d = declaration                                                   { d }
     | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
     | IF; e1 = expr; THEN; e2 = expr                                    { If (e1, e2, None) }
@@ -107,9 +111,9 @@ expr:
 dataType:
     | f = float             { f }
     | i = int               { i }
-    | b = TYPE_BOOL         {Bool b}
-    | c = TYPE_CHAR         {Char c}
-    | s = TYPE_STRING       {String s}
+    | b = TYPE_BOOL         { Bool b }
+    | c = TYPE_CHAR         { Char c }
+    | s = TYPE_STRING       { String s }
     | TYPE_UNIT             { Unit }
 
 value:
@@ -162,8 +166,12 @@ float:
     | NOT { NOT }
 
 %inline func_id: 
-    | id = IDENTIFIER     {id}
-    | op = OP_IDENTIFIER  { String.make 1 op }
+    | id = IDENTIFIER     { VarId ( id ) }
+    | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
+    (* let _ = .. *)
+    | WILDCARD            { Wildcard }
+    (* let f x = let (k, j) = x in j in f (1, 2) *)
+    | p = pattern         { p }
 
 const_or_var: (* Const or variable *)
     | const = dataType      {Const const} 
@@ -185,6 +193,7 @@ typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (type
     | TYPE_UNIT; EQUAL; e = expr                                                    { LetUnit (e) }                     
     (* [rec] f x = x *)
     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
+
 
 (* a = 10 and b = 20 and ... *)
 and_bind:

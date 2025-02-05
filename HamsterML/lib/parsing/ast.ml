@@ -54,7 +54,8 @@ type expr =
   | UnOp of uop * expr
   | Application of expr * expr
   | Value of value
-  | Let of funType * id * value list * expr (* let id a = a *)
+  (* let id a = a | the first `value` is the pattern that can be used instead of function's name *)
+  | Let of funType * value * value list * expr
   | LetUnit of expr (* let () = print_endline "123" *)
   | LetAndIn of expr list * expr option (* let a = 1 and b = 2 in a + b *)
   | Fun of value list * expr (* (fun a -> a + 1) *)
