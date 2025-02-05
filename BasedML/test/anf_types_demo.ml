@@ -3,8 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 let () =
-  let is_stdlib key =
-    match key with
+  let is_stdlib = function
     | "print_int"
     | "( + )"
     | "( :: )"
