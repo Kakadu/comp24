@@ -15,6 +15,11 @@ module ParsingTests = struct
   ;;
 
   let%expect_test _ =
+    parse_test {| let a : int = 3: int  |};
+    [%expect {| let (a : int) = (3 : int) |}]
+  ;;
+
+  let%expect_test _ =
     parse_test {| let a : int = 2 ++ 2 ** 2 |};
     [%expect {| let (a : int) = (2 ++ (2 ** 2)) |}]
   ;;
@@ -189,6 +194,13 @@ module ParsingTests = struct
       let a = let f = (fun x -> x)
       in (f (f (f ((((5 + (f 5)) + 5) + 5) + (f 5)) + 5) + 5) + 5) |}]
   ;;
+
+  let%expect_test _ =
+    parse_test "let a = (f x : int)";
+    [%expect {|
+      let a = ((f x) : int)
+      |}]
+  ;;
 end
 
 module ManyTests = struct
@@ -333,15 +345,16 @@ module ManyTests = struct
     |}]
   ;;
 
-  (*
-     let%expect_test _ =
-     parse_test (read_from_file_typed "008ascription");
+  (* let%expect_test _ =
+     pe_test (read_from_file_typed "008ascription");
      [%expect
       {|
-      syntax error????
+      let addi = (fun f -> (fun g -> (fun x -> ((f x) ((g x : bool)) : int)))));;
+      let main = let () = (print_int (((addi (fun x -> (fun b -> if b then (x + 1) else (x * 2)))) (fun _start -> ((_start / 2) = 0))) 4))
+      in 0
     |}]
-     ;;
-  *)
+     ;; *)
+
   let%expect_test _ =
     parse_test (read_from_file_typed "009let_poly");
     [%expect {|
@@ -350,17 +363,32 @@ module ManyTests = struct
     |}]
   ;;
 
-  (*
-     let%expect_test _ =
-     parse_test (read_from_file_typed "015tuples");
-     [%expect
-      {| hanging???
+  let%expect_test _ =
+    parse_test (read_from_file_typed "015tuples");
+    [%expect
+      {|
+      let rec fix = (fun f -> (fun x -> ((f (fix f)) x)));;
+      let map = (fun f -> (fun p -> let (a, b) = p
+      in ((f a), (f b))));;
+      let fixpoly = (fun l -> ((fix (fun self -> (fun l -> ((map (fun li -> (fun x -> ((li (self l)) x)))) l)))) l));;
+      let feven = (fun p -> (fun n -> let (e, o) = p
+      in if (n == 0) then 1 else o (n - 1)));;
+      let fodd = (fun p -> (fun n -> let (e, o) = p
+      in if (n == 0) then 0 else e (n - 1)));;
+      let tie = (fixpoly (feven, fodd));;
+      let rec meven = (fun n -> if (n = 0) then 1 else modd (n - 1))
+      and modd = (fun n -> if (n = 0) then 1 else meven (n - 1));;
+      let main = let () = (print_int (modd 1))
+      in let () = (print_int (meven 2))
+      in let (even, odd) = tie
+      in let () = (print_int (odd 3))
+      in let () = (print_int (even 4))
+      in 0
     |}]
-     ;;
-  *)
+  ;;
   (*
      let%expect_test _ =
-     parse_test (read_from_file_typed "016lists");
+     pe_test (read_from_file_typed "016lists");
      [%expect {|hanging???
     |}]
      ;;
