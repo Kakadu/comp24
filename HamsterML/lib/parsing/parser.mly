@@ -98,7 +98,7 @@ declaration :
 
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
-    | v = value                                                         { Value v }
+    | v = value                                                         { Pattern v }
     | uop = uop; e = expr                                               { UnOp (uop, e) }
     | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
     | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
@@ -124,8 +124,8 @@ value:
     | p = pattern                                       { p }
 
 pattern:
-    | tpl = tuple_dt                                        {Tuple tpl} (* (1, 2, 3, ...) *)
-    | lst = list_dt                                         {List lst}  (* [1; 2; 3; ...] *)
+    | tpl = tuple_dt                                        { Tuple tpl } (* (1, 2, 3, ...) *)
+    | lst = list_dt                                         { List lst }  (* [1; 2; 3; ...] *)
     | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } (* hd :: tl *)
     | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } (* 1 :: [2; 3] *)
 
@@ -190,7 +190,7 @@ typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (type
 
 %inline let_def:
     (* () = print_endline "123" *)
-    | TYPE_UNIT; EQUAL; e = expr                                                    { LetUnit (e) }                     
+    | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, UnitPattern, [], e)}
     (* [rec] f x = x *)
     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
