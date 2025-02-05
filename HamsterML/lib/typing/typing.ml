@@ -327,9 +327,11 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
-  let rec infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
+  let rec infer_args (env : TypeEnv.t) (vs : Ast.pattern list)
+    : (TypeEnv.t * inf_type) R.t
+    =
     (* infer value type in fun/let args *)
-    let infer_arg (env : TypeEnv.t) (v : Ast.value) : (TypeEnv.t * inf_type) R.t =
+    let infer_arg (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
       match v with
       | Const Unit -> R.return (env, TUnit)
       | Wildcard ->
@@ -348,7 +350,6 @@ module Infer = struct
           | PBool -> TBool
           | PChar -> TChar
           | PString -> TString
-          | Poly _ -> failwith "REMOVE POLY!!!!!!!!"
         in
         let env = TypeEnv.extend name (Scheme.create v_t) env in
         R.return (env, v_t)
