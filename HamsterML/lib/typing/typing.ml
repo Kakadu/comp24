@@ -14,7 +14,7 @@ type inf_type =
   | TList of inf_type (* 'a list *)
   | TTuple of inf_type list (* ('a, 'b, ...) *)
   | TArrow of inf_type * inf_type (* 'a -> 'a *)
-  | TVar of var_id
+  | TPVar of var_id
 [@@deriving show]
 
 type error =
@@ -86,14 +86,14 @@ module Type = struct
     | TList x -> occurs_in id x
     | TTuple tl -> List.fold tl ~init:false ~f:(fun acc t -> acc || occurs_in id t)
     | TArrow (x, y) -> occurs_in id x || occurs_in id y
-    | TVar v_id -> id = v_id
+    | TPVar v_id -> id = v_id
   ;;
 
   let free_vars t =
     (* Collect free variables in the passed type *)
     let rec helper acc = function
       | TBool | TInt | TFloat | TChar | TString | TUnit -> acc
-      | TVar v -> VarSet.add v acc
+      | TPVar v -> VarSet.add v acc
       | TArrow (x, y) -> helper (helper acc x) y
       | TList x -> helper acc x
       | TTuple tl -> List.fold tl ~init:acc ~f:helper
@@ -127,7 +127,7 @@ module Subst = struct
     (* Apply a substitutions to type, return new type *)
     let rec helper x =
       match x with
-      | TVar v ->
+      | TPVar v ->
         let find_type = find v s in
         (match find_type with
          | Some ft -> ft
@@ -149,8 +149,8 @@ module Subst = struct
     | TChar, TChar
     | TString, TString
     | TUnit, TUnit -> return empty
-    | TVar x, TVar y when x = y -> return empty
-    | TVar x, (_ as y) | (_ as y), TVar x -> singleton_checked x y
+    | TPVar x, TPVar y when x = y -> return empty
+    | TPVar x, (_ as y) | (_ as y), TPVar x -> singleton_checked x y
     | TArrow (x, xs), TArrow (y, ys) ->
       let* s1 = unify x y in
       let* s2 = unify (apply xs s1) (apply ys s1) in
@@ -215,7 +215,7 @@ end
 
 let fresh_var =
   let open R in
-  fresh >>= fun n -> return (TVar n)
+  fresh >>= fun n -> return (TPVar n)
 ;;
 
 (* ∀α. α -> α *)
@@ -225,7 +225,7 @@ type scheme = Scheme of VarSet.t * inf_type
 module Scheme = struct
   type t = scheme
 
-  let create (vs : VarSet.t) (t : inf_type) : t = Scheme (vs, t)
+  let create (t : inf_type) : t = Scheme (VarSet.empty, t)
 
   (* find free variables that are not in varset  *)
   let free_vars = function
@@ -327,27 +327,39 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
-  (* выводит тип для value, которые находятся в аргументах у Fun и Let *)
-  let infer_value (env : TypeEnv.t) (v : Ast.value) : (TypeEnv.t * inf_type) R.t =
-    match v with
-    | Const Unit -> R.return (env, TUnit)
-    | Wildcard ->
-      let* fr = fresh_var in
-      R.return (env, fr)
-      (* add new poly var *)
-    | VarId name ->
-      let* fr = fresh_var in
-      let new_env = TypeEnv.extend name (Scheme.create VarSet.empty fr) env in
-      R.return (new_env, fr)
-    | _ -> R.fail Illegal_pattern
-  ;;
-
   let rec infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
+    (* infer value type in fun/let args *)
+    let infer_arg (env : TypeEnv.t) (v : Ast.value) : (TypeEnv.t * inf_type) R.t =
+      match v with
+      | Const Unit -> R.return (env, TUnit)
+      | Wildcard ->
+        let* fr = fresh_var in
+        R.return (env, fr)
+        (* add new poly var *)
+      | VarId name ->
+        let* fr = fresh_var in
+        let new_env = TypeEnv.extend name (Scheme.create fr) env in
+        R.return (new_env, fr)
+      | TypedVarID (name, pt) ->
+        let v_t =
+          match pt with
+          | PInt -> TInt
+          | PFloat -> TFloat
+          | PBool -> TBool
+          | PChar -> TChar
+          | PString -> TString
+          | Poly _ -> failwith "REMOVE POLY!!!!!!!!"
+        in
+        let env = TypeEnv.extend name (Scheme.create v_t) env in
+        R.return (env, v_t)
+      | _ -> R.fail Illegal_pattern
+    in
+    (* infer fun/let args *)
     match vs with
     | [] -> R.return (env, TUnit)
-    | [ v ] -> infer_value env v
+    | [ v ] -> infer_arg env v
     | v :: vs ->
-      let* env, v_t = infer_value env v in
+      let* env, v_t = infer_arg env v in
       let* env, vs_t = infer_args env vs in
       R.return (env, TArrow (v_t, vs_t))
   ;;
