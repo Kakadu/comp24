@@ -367,3 +367,40 @@ let%test _ =
         , BinOp (SUB, Pattern (VarId "x"), Pattern (VarId "y")) )
     ]
 ;;
+
+(* Patterns in functions' names *)
+
+let%test _ =
+  parse "let f x = let (k, j) = x in j in f (1, 2)"
+  = [ LetAndIn
+        ( [ Let
+              ( Nonrecursive
+              , VarId "f"
+              , [ VarId "x" ]
+              , LetAndIn
+                  ( [ Let
+                        ( Nonrecursive
+                        , Tuple [ VarId "k"; VarId "j" ]
+                        , []
+                        , Pattern (VarId "x") )
+                    ]
+                  , Some (Pattern (VarId "j")) ) )
+          ]
+        , Some
+            (Application
+               (Pattern (VarId "f"), Pattern (Tuple [ Const (Int 1); Const (Int 2) ]))) )
+    ]
+;;
+
+let%test _ =
+  parse "let (a,b) = (1,2) in b"
+  = [ LetAndIn
+        ( [ Let
+              ( Nonrecursive
+              , Tuple [ VarId "a"; VarId "b" ]
+              , []
+              , Pattern (Tuple [ Const (Int 1); Const (Int 2) ]) )
+          ]
+        , Some (Pattern (VarId "b")) )
+    ]
+;;
