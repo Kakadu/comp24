@@ -5,23 +5,20 @@
 open Angstrom
 open AstLib.Ast
 
-let ( let+ ) = ( >>| )
-let ( let* ) = ( >>= )
-
 let is_space = function
   | ' ' | '\t' | '\r' | '\n' -> true
   | _ -> false
 ;;
 
-let parse_space = take_while is_space
-let parse_space1 = take_while1 is_space
-let parse_token p = parse_space *> p
-let parse_token1 p = parse_space1 *> p
-let parse_stoken s = parse_token @@ string s
-let parse_stoken1 s = parse_token1 @@ string s
-let parse_next_stoken p = parse_stoken1 p <* parse_space1
-let parse_parens p = parse_stoken "(" *> p <* parse_stoken ")"
-let parse_parens_or_non p = parse_parens p <|> p
+let pe_space = take_while is_space
+let pe_space1 = take_while1 is_space
+let pe_token p = pe_space *> p
+let pe_token1 p = pe_space1 *> p
+let pe_stoken s = pe_token @@ string s
+let pe_stoken1 s = pe_token1 @@ string s
+let pe_next_stoken p = pe_stoken1 p <* pe_space1
+let pe_parens p = pe_stoken "(" *> p <* pe_stoken ")"
+let pe_parens_or_non p = pe_parens p <|> p
 
 let is_digit = function
   | '0' .. '9' -> true
@@ -63,32 +60,30 @@ let keywords =
 ;;
 
 let is_keyword s = List.mem s keywords
-let ( =?*> ) string parser = parse_stoken string *> parser
-let ( =?>>| ) string value = parse_stoken string *> return value
+let ( =?*> ) string per = pe_stoken string *> per
+let ( =?>>| ) string value = pe_stoken string *> return value
 
 (****************************************************** Consts ******************************************************)
 
-let parse_int =
-  parse_token (lift (fun hd -> CInt (int_of_string hd)) (take_while1 is_digit))
-;;
+let pe_int = pe_token (lift (fun hd -> CInt (int_of_string hd)) (take_while1 is_digit))
 
-let parse_bool =
+let pe_bool =
   choice [ "true" =?>>| true; "false" =?>>| false ]
   >>= fun res_bool -> return @@ CBool res_bool
 ;;
 
-let parse_unit = "(" =?*> (")" =?>>| CUnit)
-let parse_const = choice [ parse_bool; parse_int; parse_unit ]
-let parse_const_expr = parse_const >>| econst
+let pe_unit = "(" =?*> (")" =?>>| CUnit)
+let pe_const = choice [ pe_bool; pe_int; pe_unit ]
+let pe_const_expr = pe_const >>| econst
 
 (****************************************************** Operators ******************************************************)
 
 open Common.Ops
 
-let parse_op first suffix base_ops =
+let pe_op first suffix base_ops =
   let rec helper = function
     | hd :: tl -> hd =?*> return hd <|> helper tl
-    | [] -> fail "Can't parse operator"
+    | [] -> fail "Can't pe operator"
   in
   choice
     [ (let* first_string = helper first in
@@ -101,11 +96,11 @@ let parse_op first suffix base_ops =
     ]
 ;;
 
-let parse_unary_op = parse_op first_unop_strings suffix_unop_strings base_unops
-let parse_binary_op = parse_op first_binop_strings suffix_binop_strings base_binops
+let pe_unary_op = pe_op first_unop_strings suffix_unop_strings base_unops
+let pe_binary_op = pe_op first_binop_strings suffix_binop_strings base_binops
 
-let parse_any_op =
-  parse_op
+let pe_any_op =
+  pe_op
     (first_unop_strings @ first_binop_strings)
     (suffix_unop_strings @ suffix_binop_strings)
     base_binops
@@ -116,13 +111,7 @@ let convert_op_to_ident = function
   | op -> op |> ident_op |> ident_of_definable
 ;;
 
-let parse_op =
-  let parse_bin_or_un_op = parse_binary_op <|> parse_unary_op in
-  let parse_base_op = parse_bin_or_un_op >>| convert_op_to_ident in
-  parse_base_op
-;;
-
-let parse_op = parse_binary_op <|> parse_unary_op
+let pe_op = pe_binary_op <|> pe_unary_op
 
 type priority_group =
   { group : string list
@@ -138,23 +127,39 @@ let third_priority_group = { group = [ "+"; "-" ]; left_associative = true }
 let fourth_priority_group = { group = [ "%"; "*"; "/" ]; left_associative = true }
 let fifth_priority_group = { group = [ "#" ]; left_associative = true }
 
-(****************************************************** Tuple ******************************************************)
-
-let parse_tuple ?(sep = ",") parser wrap =
-  let* list_res = sep_by1 (parse_stoken sep) parser in
-  match list_res with
-  | [ _ ] | [] -> fail "Tuple arity must be greater than 1"
-  | e1 :: e2 :: tl -> return (wrap e1 e2 tl)
+let pe_assert_token_is_not_ahead token =
+  pe_space
+  *>
+  let* next = pe_space *> choice [ peek_string (String.length token); return "" ] in
+  return (next = token)
 ;;
 
-let parse_get_rid_of_typ parse = parse >>| fst
+(****************************************************** Tuple ******************************************************)
+
+let pe_tuple ?(delim = ",") per wrap =
+  let* list_res = sep_by1 (pe_stoken delim) per in
+  match list_res with
+  | [ _ ] | [] -> fail "Tuple arity must be greater than 1"
+  | v1 :: v2 :: tl -> return (wrap v1 v2 tl)
+;;
+
+let pe_value_or_tuple ?(delim = ",") pe_tuple parser =
+  (* speed up hack moment *)
+  choice
+    [ (let* v = parser in
+       let* is_delim_ahead = pe_assert_token_is_not_ahead delim in
+       if is_delim_ahead then fail "Rollback" else return v)
+    ; pe_tuple parser
+    ]
+;;
+
 (****************************************************** List ******************************************************)
 
-let parse_list_semicolon parser wrap init =
+let pe_list_semicolon pe wrap init =
   let* expr_list =
     choice
-      [ "[" =?*> parse_stoken "]" *> return []
-      ; "[" =?*> sep_by (parse_stoken ";") parser <* parse_stoken "]"
+      [ "[" =?*> pe_stoken "]" *> return []
+      ; "[" =?*> sep_by (pe_stoken ";") pe <* pe_stoken "]"
       ]
   in
   return (List.fold_right wrap expr_list init)
@@ -162,168 +167,160 @@ let parse_list_semicolon parser wrap init =
 
 (****************************************************** Chains ******************************************************)
 
-let chainl1 parse_e op =
-  let rec go acc = lift2 (fun f x -> f acc x) op parse_e >>= go <|> return acc in
-  parse_e >>= fun init -> go init
+let chainl1 pe op =
+  let rec go acc = lift2 (fun f x -> f acc x) op pe >>= go <|> return acc in
+  pe >>= fun init -> go init
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 (****************************************************** Patterns, types ******************************************************)
-let parse_letters =
+let pe_letters =
   lift2
     (fun hd tl -> String.make 1 hd ^ tl)
     (satisfy (fun ch -> ch = '_' || is_lower ch))
     (take_while (fun ch -> ch = '_' || is_ident_char ch))
 ;;
 
-let parse_identifier_letters =
-  parse_token parse_letters
+let pe_identifier_letters =
+  pe_token pe_letters
   >>= fun ident ->
   if is_keyword ident then fail @@ ident ^ "? invalid syntax" else return ident
 ;;
 
-let parse_identifier_definable =
-  choice
-    [ parse_identifier_letters >>| ident_letters; parse_parens parse_any_op >>| ident_op ]
+let pe_identifier_definable =
+  choice [ pe_identifier_letters >>| ident_letters; pe_parens pe_any_op >>| ident_op ]
 ;;
 
-let parse_identifier_expr = parse_identifier_definable >>| ident_of_definable >>| eid
-let parse_base_expr = choice [ parse_const_expr; parse_identifier_expr ]
+let pe_identifier_expr = pe_identifier_definable >>| ident_of_definable >>| eid
+let pe_base_expr = choice [ pe_const_expr; pe_identifier_expr ]
+let pe_ground_type = choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]
+let pe_generic_type = "'" =?*> pe_letters >>| tvar
+let pe_base_types = choice [ pe_generic_type; pe_ground_type ]
+let pe_tuple_type pe_type = pe_tuple ~delim:"*" pe_type ttuple
+let pe_value_or_tuple_type = pe_value_or_tuple ~delim:"*" pe_tuple_type
+let pe_arrow_type pe_type = lift2 tarrow pe_type ("->" =?*> pe_type)
 
-let parse_ground_type =
-  choice [ "int" =?>>| tint; "bool" =?>>| tbool; "unit" =?>>| tunit ]
-;;
-
-let parse_generic_type = "'" =?*> parse_letters >>| tvar
-let parse_base_types = choice [ parse_generic_type; parse_ground_type ]
-let parse_tuple_type parse_type = parse_tuple ~sep:"*" parse_type ttuple
-let parse_arrow_type parse_type = lift2 tarrow parse_type ("->" =?*> parse_type)
-
-let parse_list_type parse_type =
-  let* typ = parse_type in
+let pe_list_type pe_type =
+  let* typ = pe_type in
   "list" =?*> return @@ tlist typ
 ;;
 
-let parse_type =
-  fix (fun parse_type ->
+let pe_type =
+  fix (fun pe_type ->
     choice
-      [ parse_parens @@ parse_arrow_type parse_type
-      ; parse_parens @@ parse_tuple_type parse_type
-      ; parse_parens @@ parse_list_type parse_type
-      ; parse_parens_or_non parse_base_types
+      [ pe_parens @@ pe_arrow_type pe_type
+      ; pe_parens @@ pe_value_or_tuple_type pe_type
+      ; pe_parens @@ pe_list_type pe_type
+      ; pe_parens_or_non pe_base_types
       ])
 ;;
 
-let parse_get_explicit_typ =
+let pe_get_explicit_typ =
   let delim = ":" in
-  (let* parsed_typ = delim =?*> parse_type in
-   return (Some parsed_typ))
-  <|> return None
-;;
-
-let parse_typed parse =
-  let delim = ":" in
-  let parse_typed is_in_parens =
-    lift2
-      (fun expr typ -> expr, typ)
-      parse
-      (parse_space
-       *>
-       let* is_there_delim_ahead =
-         if is_in_parens
-         then
-           choice
-             [ (let* next = peek_string 1 in
-                return (next = delim))
-             ; return false
-             ]
-         else return false
-       in
-       match is_there_delim_ahead && is_in_parens with
-       | true ->
-         let* typ = delim =?*> parse_type in
-         return (Some typ)
-       | false -> return None)
+  let* is_there_delim_ahead =
+    choice [ pe_assert_token_is_not_ahead delim; return false ]
   in
-  parse_typed false <|> parse_parens (parse_typed true)
+  match is_there_delim_ahead with
+  | true ->
+    choice
+      [ (let* typ = delim =?*> pe_type in
+         return (Some typ))
+      ; return None
+      ]
+  | false -> return None
 ;;
 
-let parse_list_pat_semicolon parse_pat =
-  parse_get_rid_of_typ
-  @@ parse_list_semicolon
-       (parse_typed parse_pat)
-       (fun hd tl -> p_typed @@ plist hd tl)
-       (p_typed (pconst CNil))
+let pe_typed pe =
+  let pe_typed = lift2 (fun res typ -> res, typ) pe pe_get_explicit_typ in
+  pe_typed <|> pe_parens pe_typed
 ;;
 
-let parse_list_pat_colons parse_pat =
-  let* pat, _ =
-    chainr1 (parse_typed parse_pat) ("::" =?*> return (fun hd tl -> p_typed (plist hd tl)))
-  in
+let rollback_not_list per =
+  let* pat, _ = per in
   match pat with
   | PList (_, _) -> return pat
   | _ -> fail "Rollback"
 ;;
 
-let parse_base_pats = choice [ parse_identifier_letters >>| pid; parse_const >>| pconst ]
-
-let parse_lrf_pats parse_pat =
-  (* lrf === left-recursion free *)
-  choice [ parse_base_pats; parse_list_pat_semicolon parse_pat ]
+let pe_list_pat_semicolon pe_pat =
+  rollback_not_list
+  @@ pe_list_semicolon
+       (pe_typed pe_pat)
+       (fun hd tl -> p_typed @@ plist hd tl)
+       (p_typed (pconst CNil))
 ;;
 
-let parse_tuple_pat parse_pat = parse_tuple (parse_typed parse_pat) ptuple
+let delim_list_pat_colons = "::"
 
-let parse_pattern =
-  fix (fun parse_pattern_fix ->
+let pe_list_pat_colons pe_pat =
+  rollback_not_list
+  @@ chainr1
+       (pe_typed pe_pat)
+       (delim_list_pat_colons =?*> return (fun hd tl -> p_typed (plist hd tl)))
+;;
+
+let pe_base_pat = choice [ pe_identifier_letters >>| pid; pe_const >>| pconst ]
+
+let pe_lrf_pats pe_pat =
+  (* lrf === left-recursion free *)
+  choice [ pe_list_pat_semicolon pe_pat; pe_base_pat; pe_pat ]
+;;
+
+let pe_tuple_pat pe_pat = pe_tuple (pe_typed pe_pat) ptuple
+let pe_value_or_tuple_pat = pe_value_or_tuple pe_tuple_pat
+
+let pe_pattern =
+  fix (fun pe_pattern_fix ->
     let term =
       choice
-        [ parse_lrf_pats parse_base_pats
-        ; parse_parens (parse_list_pat_colons parse_pattern_fix)
-        ; parse_parens (parse_lrf_pats parse_pattern_fix)
-        ; parse_parens (parse_tuple_pat parse_pattern_fix)
+        [ pe_lrf_pats pe_base_pat
+        ; pe_parens (pe_list_pat_colons pe_pattern_fix)
+        ; pe_parens (pe_lrf_pats pe_pattern_fix)
+        ; pe_parens (pe_tuple_pat pe_pattern_fix)
         ]
     in
-    choice [ parse_list_pat_colons term; parse_tuple_pat term; term ])
+    choice [ pe_list_pat_colons term; pe_tuple_pat term; term ])
 ;;
 
-let parse_pattern_typed = parse_typed parse_pattern
-let addi f g x : int = f x (g x : bool)
+let pe_pattern_typed = pe_typed pe_pattern
+
 (****************************************************** Tuple ******************************************************)
 
-let parse_tuple_expr parse_expr = parse_tuple (parse_typed parse_expr) etuple
+let pe_tuple_expr pe_expr = pe_tuple (pe_typed pe_expr) etuple
+let pe_value_or_tuple_expr = pe_value_or_tuple pe_tuple_expr
 
 (****************************************************** Branching ******************************************************)
 
-let parse_branching parse_expr =
-  let parse_typed = parse_typed parse_expr in
+let pe_branching pe_expr =
+  let pe_typed = pe_typed pe_expr in
   lift3
     eif
-    ("if" =?*> parse_token1 parse_typed)
-    ("then" =?*> parse_token1 parse_typed)
-    ("else" =?*> parse_token1 parse_typed)
+    ("if" =?*> pe_token1 pe_typed)
+    ("then" =?*> pe_token1 pe_typed)
+    ("else" =?*> pe_token1 pe_typed)
 ;;
 
 (****************************************************** Application, unary, binary ops ******************************************************)
 
 let binop_binder group =
-  let* bin_op_string = parse_binary_op in
-  let rec helper = function
+  let* bin_op_string = pe_binary_op in
+  let rec helper bin_op_string = function
     | group_string :: tl ->
       if String.starts_with ~prefix:group_string bin_op_string
       then return ()
-      else helper tl
+      else helper bin_op_string tl
     | [] -> fail "There is no matching operator"
   in
   let ebinop_helper x y =
-    e_typed
-    @@ eapp
-         (e_typed
-            (eapp (e_typed (eid (bin_op_string |> ident_op |> ident_of_definable))) x))
-         y
+    eapp
+      (e_typed
+         (eapp
+            (e_typed (eid (bin_op_string |> ident_op |> ident_of_definable)))
+            (e_typed x)))
+      (e_typed y)
   in
-  helper group *> return ebinop_helper
+  helper bin_op_string group *> return ebinop_helper
 ;;
 
 let get_chain e priority_group =
@@ -336,147 +333,127 @@ let get_chain e priority_group =
   chain e binop_binder
 ;;
 
-let rec parse_un_op_app (parse_expr : expr t) =
-  let* unop = parse_token parse_unary_op >>| convert_op_to_ident in
-  let* expr_typed =
-    choice
-      [ parse_expr; parse_parens parse_expr; parse_space1 *> parse_un_op_app parse_expr ]
-  in
-  return (eapp (e_typed (eid unop)) (e_typed expr_typed))
+let rec pe_un_op_app pe_expr =
+  let* unop = pe_token pe_unary_op >>| convert_op_to_ident in
+  let* expr_typed = choice [ pe_expr; pe_space1 *> pe_un_op_app pe_expr ] in
+  return @@ eapp (e_typed (eid unop)) (e_typed expr_typed)
 ;;
 
-let parse_bin_op_app parse_expr =
-  fix (fun parse_bin_op_app ->
-    let parse_bin_op parse_expr =
-      let term = get_chain (parse_typed parse_expr) fifth_priority_group in
+let pe_bin_op_app pe_expr =
+  let delim_list_expr_colons = "::" in
+  fix (fun pe_bin_op_app ->
+    let pe_bin_op pe_expr =
+      let term = get_chain pe_expr fifth_priority_group in
       let term = get_chain term fourth_priority_group in
       let term = get_chain term third_priority_group in
       let term = get_chain term second_priority_group in
-      parse_get_rid_of_typ
-      @@ get_chain
-           (choice [ term; parse_parens (parse_typed parse_bin_op_app) ])
-           first_priority_group
+      get_chain term first_priority_group
     in
-    let parse_app parse_expr =
-      let term =
-        parse_get_rid_of_typ
-        @@ chainl1 (parse_typed parse_expr) (return @@ fun x y -> e_typed (eapp x y))
+    let pe_app pe_expr =
+      let term = chainl1 pe_expr (return (fun x y -> eapp (e_typed x) (e_typed y))) in
+      let term = choice [ pe_un_op_app term; term ] in
+      let cons =
+        delim_list_expr_colons =?*> return (fun x y -> elist (e_typed x) (e_typed y))
       in
-      let term = choice [ parse_un_op_app term; term ] in
-      let cons = "::" =?*> return (fun x y -> e_typed (elist x y)) in
-      parse_get_rid_of_typ @@ chainr1 (parse_typed term) cons
+      chainr1 term cons
     in
-    let parse_bin_op_parens =
-      let* op = parse_parens parse_op in
-      let parse_expr =
-        parse_typed
-          (choice
-             [ parse_const_expr; parse_identifier_expr; parse_parens parse_bin_op_app ])
-      in
+    let pe_bin_op_parens =
+      let* op = pe_parens pe_op in
+      let pe_expr = pe_bin_op_app in
       lift2
         (fun e1 e2 ->
           eapp
-            (e_typed (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) e1))
-            e2)
-        parse_expr
-        parse_expr
+            (e_typed
+               (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) (e_typed e1)))
+            (e_typed e2))
+        pe_expr
+        pe_expr
     in
-    parse_bin_op @@ choice [ parse_bin_op_parens; parse_app parse_expr ])
+    pe_bin_op @@ choice [ pe_bin_op_parens; pe_app pe_expr ])
 ;;
 
 (****************************************************** Functions ******************************************************)
 
-let parse_list_expr parse_expr =
-  parse_get_rid_of_typ
-  @@ parse_list_semicolon
-       (parse_typed parse_expr)
-       (fun x y -> e_typed @@ elist x y)
-       (e_typed @@ econst CNil)
+let pe_list_expr pe_expr =
+  pe_list_semicolon (pe_typed pe_expr) (fun x y -> elist x (e_typed y)) (econst CNil)
 ;;
 
 (****************************************************** Functions ******************************************************)
-let parse_params = sep_by parse_space parse_pattern_typed
+let pe_params = sep_by pe_space pe_pattern_typed
 
-let parse_fun_decl parse_expr =
-  let fun_decl_delim = "=" in
+let pe_fun_let_decl (pe_expr : expr t) =
+  let delim_fun_decl = "=" in
   lift3
-    (fun params decl_typ expr_typed ->
-      let right_side, _ =
-        (* TODO: handle case with empty params *)
-        List.fold_right (fun x y -> e_typed @@ efun x y) params expr_typed
-      in
+    (fun params decl_typ expr ->
+      let right_side = List.fold_right (fun x y -> efun x (e_typed y)) params expr in
       decl_typ, right_side)
-    parse_params
-    (parse_get_explicit_typ <* parse_stoken fun_decl_delim)
-    (parse_typed parse_expr)
+    pe_params
+    (pe_get_explicit_typ <* pe_stoken delim_fun_decl)
+    pe_expr
 ;;
 
-let parse_fun_anon_expr parse_expr =
-  let fun_prefix = "fun" in
-  let fun_delim = "->" in
-  fun_prefix
-  =?*> parse_space1
+let pe_fun_anon_expr pe_expr =
+  let prefix_fun = "fun" in
+  let delim_fun = "->" in
+  prefix_fun
+  =?*> pe_space1
        *> lift2
             (fun params expr_typed ->
               let right_side, _ =
+                (*TODO: WTF??*)
                 List.fold_right (fun x y -> e_typed @@ efun x y) params expr_typed
               in
               right_side)
-            (parse_params <* parse_stoken fun_delim)
-            (parse_typed parse_expr)
+            (pe_params <* pe_stoken delim_fun)
+            (pe_typed pe_expr)
 ;;
 
 (****************************************************** Pattern matching ******************************************************)
 
-let parse_match parse_expr =
-  let parse_typed = parse_typed parse_expr in
+let pe_match pe_expr =
+  let pe_typed = pe_typed pe_expr in
   "match"
   =?*>
-  let parse_case =
-    lift2 (fun case value -> case, value) parse_pattern_typed ("->" =?*> parse_typed)
+  let pe_case =
+    lift2 (fun case value -> case, value) pe_pattern_typed ("->" =?*> pe_typed)
   in
   let* expr =
-    parse_token1 parse_typed
-    <* (parse_stoken "with" <* choice [ parse_stoken1 "|"; parse_space ])
+    pe_token1 pe_typed <* (pe_stoken "with" <* choice [ pe_stoken1 "|"; pe_space ])
   in
-  let* cases = sep_by1 (parse_stoken "|") parse_case in
+  let* cases = sep_by1 (pe_stoken "|") pe_case in
   match cases with
   | [] -> fail "Pattern matching with 0 patterns?!"
   | hd :: tl -> return @@ ematch expr hd tl
 ;;
 
 (****************************************************** Decl, expression parsing ******************************************************)
-let parse_rec_flag = parse_next_stoken "rec" *> return Recursive <|> return Not_recursive
+let pe_rec_flag = pe_next_stoken "rec" *> return Recursive <|> return Not_recursive
 
-let parse_let_body parse_expr =
-  lift2
-    (fun pat (pat_typ, expr) -> pat, pat_typ, expr)
-    (parse_token
+let pe_let_body pe_expr =
+  lift3
+    (fun pat (pat_typ, expr) expr_typ -> (pat, pat_typ), (expr, expr_typ))
+    (pe_token
        (choice
-          [ parse_parens_or_non parse_pattern >>| pop_pat
-          ; parse_parens (parse_binary_op <|> parse_unary_op) >>| pop_op
+          [ pe_parens_or_non pe_pattern >>| pop_pat
+          ; pe_parens (pe_binary_op <|> pe_unary_op) >>| pop_op
           ]))
-    (parse_fun_decl parse_expr)
+    (pe_fun_let_decl pe_expr)
+    pe_get_explicit_typ
 ;;
 
-let parse_closure parse_decl parse_expr =
-  lift2 eclsr parse_decl ("in" =?*> parse_typed parse_expr)
-;;
+let pe_closure pe_decl pe_expr = lift2 eclsr pe_decl ("in" =?*> pe_typed pe_expr)
 
-let parse_let_decl parse_expr =
-  let parse_let_body_typed =
+let pe_let_decl pe_expr =
+  let pe_let_body_typed =
     lift
-      (fun ((pat, pat_typ, expr), expr_typ) -> (pat, pat_typ), (expr, expr_typ))
-      (parse_typed (parse_let_body parse_expr))
+      (fun ((pat, pat_typ), (expr, expr_typ)) -> (pat, pat_typ), (expr, expr_typ))
+      (pe_let_body pe_expr)
   in
   let* let_decl =
     "let"
-    =?*> lift2
-           (fun rec_flag let_body -> rec_flag, let_body)
-           parse_rec_flag
-           parse_let_body_typed
+    =?*> lift2 (fun rec_flag let_body -> rec_flag, let_body) pe_rec_flag pe_let_body_typed
   in
-  let* let_decls_mut = many ("and" =?*> parse_let_body_typed) in
+  let* let_decls_mut = many ("and" =?*> pe_let_body_typed) in
   match let_decl, let_decls_mut with
   | (rec_flag, (pat_or_op_typed, expr_typed)), [] ->
     return @@ dlet rec_flag (pat_or_op_typed, expr_typed)
@@ -490,37 +467,32 @@ let parse_let_decl parse_expr =
          tl_decls)
 ;;
 
-let parse_expr =
-  fix (fun parse_expr_fix ->
-    let parse_expr_inner =
+let pe_expr =
+  fix (fun pe_expr_fix ->
+    let pe_expr_inner =
       choice
-        [ parse_base_expr
-        ; parse_parens parse_expr_fix
-        ; parse_fun_anon_expr parse_expr_fix
-        ; parse_closure (parse_let_decl parse_expr_fix) parse_expr_fix
-        ; parse_branching parse_expr_fix
-        ; parse_match parse_expr_fix
-        ; parse_list_expr parse_expr_fix
+        [ pe_base_expr
+        ; pe_parens pe_expr_fix
+        ; pe_fun_anon_expr pe_expr_fix
+        ; pe_closure (pe_let_decl pe_expr_fix) pe_expr_fix
+        ; pe_branching pe_expr_fix
+        ; pe_match pe_expr_fix
+        ; pe_list_expr pe_expr_fix
         ]
     in
-    let parse_expr_inner = parse_bin_op_app parse_expr_inner in
-    let parse_expr_inner =
-      choice [ parse_tuple_expr parse_expr_inner; parse_expr_inner ]
-    in
-    choice ~failure_msg:"Can't parse expr" [ parse_expr_inner ])
+    let pe_expr_inner = choice [ pe_bin_op_app pe_expr_inner; pe_expr_inner ] in
+    let pe_expr_inner = pe_value_or_tuple_expr pe_expr_inner in
+    choice ~failure_msg:"Can't parse expr" [ pe_expr_inner ])
 ;;
 
-let parse_decls =
+let pe_decls =
   lift
     prog
-    (many
-       (parse_let_decl parse_expr
-        <* choice [ parse_stoken ";;"; peek_string 0 ]
-        <* parse_space))
+    (many (pe_let_decl pe_expr) <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space)
 ;;
 
 let parse_program s =
-  match Angstrom.parse_string ~consume:Consume.All parse_decls s with
+  match Angstrom.parse_string ~consume:Consume.All pe_decls s with
   | Ok v -> Ok v
   | Error msg ->
     (match msg with
