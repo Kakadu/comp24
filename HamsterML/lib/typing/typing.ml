@@ -20,6 +20,8 @@ type inf_type =
 type error =
   | Variable_not_found
   | Unification_failed of inf_type * inf_type
+  | Illegal_pattern
+  | Unsupported_type
 [@@deriving show]
 
 module VarSet = struct
@@ -122,7 +124,7 @@ module Subst = struct
   let remove k s = Map.remove s k
 
   let apply t s =
-    (* Apply a substitution to type, return new type *)
+    (* Apply a substitutions to type, return new type *)
     let rec helper x =
       match x with
       | TVar v ->
@@ -211,9 +213,9 @@ module Subst = struct
   ;;
 end
 
-let fresh_var () =
+let fresh_var =
   let open R in
-  fresh >>= fun n -> TVar n |> return
+  fresh >>= fun n -> return (TVar n)
 ;;
 
 (* ∀α. α -> α *)
@@ -222,6 +224,8 @@ type scheme = Scheme of VarSet.t * inf_type
 
 module Scheme = struct
   type t = scheme
+
+  let create (vs : VarSet.t) (t : inf_type) : t = Scheme (vs, t)
 
   (* find free variables that are not in varset  *)
   let free_vars = function
@@ -243,7 +247,7 @@ module Scheme = struct
       VarSet.fold
         (fun b acc ->
            let* acc = acc in
-           let* fr = fresh_var () in
+           let* fr = fresh_var in
            let subst = Subst.singleton b fr in
            Subst.apply acc subst |> R.return)
         bs
@@ -323,6 +327,35 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
+  (* выводит тип для value, которые находятся в аргументах у Fun и Let *)
+  let infer_value (env : TypeEnv.t) (v : Ast.value) : (TypeEnv.t * inf_type) R.t =
+    match v with
+    | Const Unit -> R.return (env, TUnit)
+    | Wildcard ->
+      let* fr = fresh_var in
+      R.return (env, fr)
+      (* add new poly var *)
+    | VarId name ->
+      let* fr = fresh_var in
+      let new_env = TypeEnv.extend name (Scheme.create VarSet.empty fr) env in
+      R.return (new_env, fr)
+    | _ -> R.fail Illegal_pattern
+  ;;
+
+  let infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
+    let rec helper (acc : inf_type) (env : TypeEnv.t) = function
+      | [] -> R.return (env, acc)
+      | v :: vs ->
+        let* env, t = infer_value env v in
+        helper (TArrow (t, acc)) env vs
+    in
+    match vs with
+    | [] -> R.return (env, TUnit)
+    | v :: vs ->
+      let* env, t = infer_value env v in
+      helper t env vs
+  ;;
+
   (* Subst.t -> инфа о известных подстановках *)
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
@@ -348,8 +381,29 @@ module Infer = struct
       | Value v ->
         (match v with
          | Const dt -> infer_data_type dt
+         | VarId name -> TypeEnv.lookup name env
          | _ -> failwith "error in 'value' inference")
-      | _ -> failwith "error while inferencing"
+      | If (i, th, el) ->
+        let* i_s, i_t = helper env i in
+        let* i_u = Subst.unify i_t TBool in
+        let* th_s, th_t = helper (TypeEnv.apply i_s env) th in
+        (match el with
+         | Some el ->
+           let* el_s, el_t = helper (TypeEnv.apply th_s env) el in
+           let* th_e_u = Subst.unify th_t el_t in
+           let* fin_s = Subst.compose_all [ i_u; el_s; th_e_u ] in
+           R.return (fin_s, Subst.apply el_t fin_s)
+         | None ->
+           let* th_u = Subst.unify th_t TUnit in
+           let* fin_s = Subst.compose_all [ i_u; th_u ] in
+           R.return (fin_s, TUnit))
+      | Fun (args, scope) ->
+        let* env, args_t = infer_args env args in
+        let* subs, scope_t = helper env scope in
+        let args_t = Subst.apply args_t subs in
+        let fin_t = TArrow (args_t, scope_t) in
+        R.return (subs, fin_t)
+      | _ -> R.fail Unsupported_type
     in
     helper env expr
   ;;
