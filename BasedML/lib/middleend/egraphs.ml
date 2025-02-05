@@ -202,26 +202,6 @@ let transform_sexp sexp =
        ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
        ])
     (Atom "?a");
-  (* 0 + a = a *)
-  add_rule
-    (List
-       [ Atom "application"
-       ; List
-           [ Atom "application"
-           ; Atom "( + )"
-           ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
-           ]
-       ; Atom "?a"
-       ])
-    (Atom "?a");
-  (* a - a = 0 *)
-  add_rule
-    (List
-       [ Atom "application"
-       ; List [ Atom "application"; Atom "( - )"; Atom "?a" ]
-       ; Atom "?a"
-       ])
-    (List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]);
   (* a / a = 1 *)
   add_rule
     (List
@@ -262,6 +242,26 @@ let transform_sexp sexp =
        ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
        ; Atom "?a"
        ]);
+  (* a - a = 0 *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( - )"; Atom "?a" ]
+       ; Atom "?a"
+       ])
+    (List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]);
+  (* 0 + a = a *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( + )"
+           ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
+           ]
+       ; Atom "?a"
+       ])
+    (Atom "?a");
   let sexp_result = EGraph.extract cost_function graph graph_expr in
   sexp_result
 ;;

@@ -48,4 +48,7 @@
   > EOF
   let  a = 5
 
-
+  $ dune exec ./egraphs_demo.exe << EOF
+  > let overly_complicated_foruma a1 a2 a3 = ((a2 * a1) / a1) - a2 + a3
+  > EOF
+  let  a = 5
