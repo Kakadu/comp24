@@ -384,12 +384,12 @@ let pe_params = sep_by pe_space pe_pattern_typed
 let pe_fun_let_decl (pe_expr : expr t) =
   let delim_fun_decl = "=" in
   lift3
-    (fun params decl_typ expr ->
+    (fun params decl_typ (expr, typ) ->
       let right_side = List.fold_right (fun x y -> efun x (e_typed y)) params expr in
-      decl_typ, right_side)
+      decl_typ, (right_side, typ))
     pe_params
     (pe_get_explicit_typ <* pe_stoken delim_fun_decl)
-    pe_expr
+    (pe_typed pe_expr)
 ;;
 
 let pe_fun_anon_expr pe_expr =
@@ -430,15 +430,14 @@ let pe_match pe_expr =
 let pe_rec_flag = pe_next_stoken "rec" *> return Recursive <|> return Not_recursive
 
 let pe_let_body pe_expr =
-  lift3
-    (fun pat (pat_typ, expr) expr_typ -> (pat, pat_typ), (expr, expr_typ))
+  lift2
+    (fun pat (pat_typ, (expr, expr_typ)) -> (pat, pat_typ), (expr, expr_typ))
     (pe_token
        (choice
           [ pe_parens_or_non pe_pattern >>| pop_pat
           ; pe_parens (pe_binary_op <|> pe_unary_op) >>| pop_op
           ]))
     (pe_fun_let_decl pe_expr)
-    pe_get_explicit_typ
 ;;
 
 let pe_closure pe_decl pe_expr = lift2 eclsr pe_decl ("in" =?*> pe_typed pe_expr)
