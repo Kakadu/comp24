@@ -1448,13 +1448,13 @@ module Type = struct
 
   let vars =
     let rec helper acc = function
-      | <span data-count="5324">T</span>Var b -&gt; VarSet.add b acc
-      | <span data-count="15963">T</span>Arrow (l, r) -&gt; helper (helpe<span data-count="15963">r</span> acc l) r
-      | <span data-count="20127">T</span>Prim _ -&gt; acc
+      | <span data-count="5380">T</span>Var b -&gt; VarSet.add b acc
+      | <span data-count="16190">T</span>Arrow (l, r) -&gt; helper (helpe<span data-count="16190">r</span> acc l) r
+      | <span data-count="20434">T</span>Prim _ -&gt; acc
       | <span data-count="143">T</span>List t -&gt; helper acc t
       | <span data-count="152">T</span>Tuple ts -&gt; List.fold_left helper acc ts
     in
-    helpe<span data-count="51">r</span> VarSet.empty
+    helpe<span data-count="52">r</span> VarSet.empty
   ;;
 end
 
@@ -1469,7 +1469,7 @@ let ttuple ts = <span data-count="1713">T</span>Tuple ts
 open R
 open R.Syntax
 
-let fresh_var = fresh &gt;&gt;<span data-count="51">|</span> tvar
+let fresh_var = fresh &gt;&gt;<span data-count="52">|</span> tvar
 let poly_var s = <span data-count="0">i</span>dent &gt;&gt;| fun n -&gt; <span data-count="0">t</span>var (n + Hashtbl.has<span data-count="0">h</span> s)
 
 module Subst : sig
@@ -1489,7 +1489,7 @@ end = struct
 
   type t = (fresh, ty, Int.comparator_witness) Map.t
 
-  let empty = Map.empt<span data-count="51">y</span> (module Int)
+  let empty = Map.empt<span data-count="52">y</span> (module Int)
 
   let mapping k v =
     <span data-count="15298">i</span>f Type.occurs_in k v then <span data-count="3">f</span>ail @@ occurs_chec<span data-count="3">k</span> (k, v) else <span data-count="15295">r</span>eturn (k, v)
@@ -1563,7 +1563,7 @@ end
 
 module Scheme = struct
   let free_vars = function
-    | <span data-count="8385">S</span> (bs, t) -&gt; VarSet.diff (Type.var<span data-count="8385">s</span> t) bs
+    | <span data-count="8505">S</span> (bs, t) -&gt; VarSet.diff (Type.var<span data-count="8505">s</span> t) bs
   ;;
 
   let apply sub (S (names, ty)) =
@@ -1575,8 +1575,8 @@ end
 module TypeEnv = struct
   open Base
 
-  let empty = Map.empt<span data-count="51">y</span> (module String)
-  let extend env (v, scheme) = <span data-count="1205">M</span>ap.update env v ~f:(fun _ -&gt; <span data-count="1205">s</span>cheme)
+  let empty = Map.empt<span data-count="52">y</span> (module String)
+  let extend env (v, scheme) = <span data-count="1221">M</span>ap.update env v ~f:(fun _ -&gt; <span data-count="1221">s</span>cheme)
 
   let rec extend_by_pattern (S (bs, ty) as scheme) acc pat =
     <span data-count="118">m</span>atch pat, ty with
@@ -1596,7 +1596,7 @@ module TypeEnv = struct
 
   let free_vars =
     Map.fold ~init:VarSet.empty ~f:(fun ~key:_ ~data:s acc -&gt;
-      <span data-count="8385">V</span>arSet.union acc (Scheme.free_var<span data-count="8385">s</span> s))
+      <span data-count="8505">V</span>arSet.union acc (Scheme.free_var<span data-count="8505">s</span> s))
   ;;
 
   let apply s env = <span data-count="656">M</span>ap.map env ~f:(Scheme.appl<span data-count="656">y</span> s)
@@ -1617,13 +1617,13 @@ let instantiate (S (bs, t)) =
 ;;
 
 let generalize env ty is_rec ~pattern_name =
-  <span data-count="941">l</span>et env =
+  <span data-count="957">l</span>et env =
     match is_rec, pattern_name with
     | <span data-count="18">R</span>ecursive, Some ident -&gt; Base.Map.remov<span data-count="18">e</span> env ident
-    | <span data-count="923">_</span> -&gt; env
+    | <span data-count="939">_</span> -&gt; env
   in
-  let free = VarSet.diff (Type.var<span data-count="941">s</span> ty) (TypeEnv.free_var<span data-count="941">s</span> env) in
-  <span data-count="941">S</span> (free, ty)
+  let free = VarSet.diff (Type.var<span data-count="957">s</span> ty) (TypeEnv.free_var<span data-count="957">s</span> env) in
+  <span data-count="957">S</span> (free, ty)
 ;;
 
 let lookup_env e xs =
@@ -1641,7 +1641,7 @@ let pattern_vars =
     | <span data-count="14">P</span>at_tuple es -&gt; List.fold_left helper acc es
     | <span data-count="10">_</span> -&gt; acc
   in
-  helpe<span data-count="51">r</span> []
+  helpe<span data-count="52">r</span> []
 ;;
 
 let check_several_bounds names env ty =
@@ -1847,13 +1847,13 @@ let init_env =
     ; op_minus, int_ty_op
     ; op_and, bool_ty_op
     ; op_or, bool_ty_op
-    ; op_more, comp_ty_o<span data-count="51">p</span> 1
-    ; op_less, comp_ty_o<span data-count="51">p</span> 1
-    ; op_more_eq, comp_ty_o<span data-count="51">p</span> 1
-    ; op_less_eq, comp_ty_o<span data-count="51">p</span> 1
-    ; op_eq, comp_ty_o<span data-count="51">p</span> 1
-    ; op_2eq, comp_ty_o<span data-count="51">p</span> 1
-    ; op_not_eq, comp_ty_o<span data-count="51">p</span> 1
+    ; op_more, comp_ty_o<span data-count="52">p</span> 1
+    ; op_less, comp_ty_o<span data-count="52">p</span> 1
+    ; op_more_eq, comp_ty_o<span data-count="52">p</span> 1
+    ; op_less_eq, comp_ty_o<span data-count="52">p</span> 1
+    ; op_eq, comp_ty_o<span data-count="52">p</span> 1
+    ; op_2eq, comp_ty_o<span data-count="52">p</span> 1
+    ; op_not_eq, comp_ty_o<span data-count="52">p</span> 1
     ]
   in
   let un_ops =
@@ -1864,10 +1864,10 @@ let init_env =
   let print_int_ty = func_print_int, sig_func_print_int in
   let funs = (print_int_ty :: un_ops) @ bin_ops in
   let bind_ty env id typ =
-    <span data-count="816">T</span>ypeEnv.extend env (id, generaliz<span data-count="816">e</span> env typ Nonrecursive ~pattern_name:None)
+    <span data-count="832">T</span>ypeEnv.extend env (id, generaliz<span data-count="832">e</span> env typ Nonrecursive ~pattern_name:None)
   in
-  Base.List.fold_lef<span data-count="51">t</span> funs ~init:TypeEnv.empty ~f:(fun env (id, typ) -&gt;
-    <span data-count="816">b</span>ind_ty env id typ)
+  Base.List.fold_lef<span data-count="52">t</span> funs ~init:TypeEnv.empty ~f:(fun env (id, typ) -&gt;
+    <span data-count="832">b</span>ind_ty env id typ)
 ;;
 
 let check_program program =
