@@ -76,7 +76,7 @@ module InferenceTests = struct
     infer_test {|let f (x :: (x, y)) = 3|};
     [%expect
       {|
-    Typecheck error: This expression has type 'a list but an expression was expected of type 'b * 'c |}]
+    Typecheck error: This expression has type 'b list but an expression was expected of type 'c * 'd |}]
   ;;
 
   let%expect_test _ =
@@ -110,7 +110,6 @@ module InferenceTests = struct
     infer_test {|let f (h: ('c -> 'b)) (x: 'b) = h x;;|};
     [%expect {| val f : ('a -> 'a) -> 'a -> 'a |}]
   ;;
-
   let%expect_test _ =
     infer_test
       {| let rec map f lst = 
@@ -120,7 +119,7 @@ module InferenceTests = struct
     [%expect {| val map : ('a -> 'b) -> 'a list -> 'b list |}]
   ;;
 
-  let%expect_test _ =
+   let%expect_test _ =
     infer_test {| let a =([3;3], [4;4]) :: [([5;5],[6;6]);([7;7],[8;8])] |};
     [%expect {| val a : (int list * int list) list |}]
   ;;
@@ -156,7 +155,6 @@ module InferenceTests = struct
       val x : (int * int * int) list
       val y : (int * int * int) list list |}]
   ;;
-
   let%expect_test _ =
     infer_test {|let x = [1, 2, 3]
     and y = [x]|};
@@ -298,4 +296,5 @@ val f : bool -> int -> bool
     infer_test "let a = +4 + (-3)";
     [%expect {| val a : int |}]
   ;;
-end
+
+end 

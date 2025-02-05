@@ -51,7 +51,7 @@ module Type = struct
   let rec occurs_in v = function
     | TVar b -> b = v
     | TArr (l, r) -> occurs_in v l || occurs_in v r
-    | TTuple typ_list -> Base.List.exists typ_list ~f:(occurs_in v)
+    | TTuple (t1, t2, typ_list) -> Base.List.exists (t1 :: t2 :: typ_list) ~f:(occurs_in v)
     | TList typ -> occurs_in v typ
     | TGround _ -> false
   ;;
@@ -61,7 +61,8 @@ module Type = struct
     let rec helper acc = function
       | TVar n -> Base.Set.add acc n
       | TArr (left, right) -> helper (helper acc left) right
-      | TTuple typ_list ->
+      | TTuple (t1, t2, typ_list) ->
+        let typ_list = t1 :: t2 :: typ_list in
         Base.List.fold_right
           typ_list
           ~f:(fun typ acc -> Base.Set.union (helper empty typ) acc)
@@ -100,7 +101,11 @@ module Subst = struct
          | None -> tvar n
          | Some x -> x)
       | TArr (left, right) -> tarrow (helper left) (helper right)
-      | TTuple typ_list -> ttuple @@ Base.List.map typ_list ~f:helper
+      | TTuple (t1, t2, typ_list) ->
+        let t1 = helper t1 in
+        let t2 = helper t2 in
+        let typ_list = Base.List.map typ_list ~f:helper in 
+        ttuple t1 t2 typ_list
       | TList typ -> tlist @@ helper typ
       | ground -> ground
     in
@@ -116,17 +121,19 @@ module Subst = struct
       let* subst1 = unify f1 f2 in
       let* subst2 = unify (apply subst1 s1) (apply subst1 s2) in
       compose subst1 subst2
-    | TTuple typ_list_l, TTuple typ_list_r ->
-      (match Base.List.zip typ_list_l typ_list_r with
-       | Base.List.Or_unequal_lengths.Unequal_lengths -> fail (UnificationFailed (l, r))
-       | Base.List.Or_unequal_lengths.Ok zipped_list ->
-         Base.List.fold_right
-           zipped_list
-           ~f:(fun (typ_l, typ_r) subst ->
-             let* subst_pair = unify typ_l typ_r in
-             let* subst = subst in
-             compose subst_pair subst)
-           ~init:(return empty))
+      | TTuple (t1_l, t2_l, typ_list_l), TTuple (t1_r, t2_r, typ_list_r) ->
+        let typ_list_l = t1_l :: t2_l :: typ_list_l in
+        let typ_list_r = t1_r :: t2_r :: typ_list_r in 
+        (match Base.List.zip typ_list_l typ_list_r with
+         | Base.List.Or_unequal_lengths.Unequal_lengths -> fail (UnificationFailed (l, r))
+         | Base.List.Or_unequal_lengths.Ok zipped_list ->
+           Base.List.fold_right
+             zipped_list
+             ~f:(fun (typ_l, typ_r) subst ->
+               let* subst_pair = unify typ_l typ_r in
+               let* subst = subst in
+               compose subst_pair subst)
+             ~init:(return empty))
     | TList typ1, TList typ2 -> unify typ1 typ2
     | _ -> fail (UnificationFailed (l, r))
 
@@ -171,7 +178,7 @@ module Scheme = struct
 end
 
 module TypeEnv = struct
-  type t = (ident, scheme, Base.String.comparator_witness) Base.Map.t
+  type t = (string, scheme, Base.String.comparator_witness) Base.Map.t
 
   let extend env id scheme = Base.Map.update env id ~f:(fun _ -> scheme)
   let empty = Base.Map.empty (module Base.String)
@@ -181,6 +188,29 @@ module TypeEnv = struct
       ~init:(Base.Set.empty (module Base.String))
       ~f:(fun ~key:_ ~data acc -> Base.Set.union acc (Scheme.free_vars data))
   ;;
+
+  let rec extend_by_pattern ((bs, ty) as scheme) acc (pat, _) =
+    match pat, ty with
+    | PId v, _ -> extend acc v scheme
+    | PList (h, tl), TList t ->
+      let env = extend_by_pattern (bs, t) acc h in
+      extend_by_pattern (bs, ty) env tl
+    | PTuple (e1, e2, es), TTuple (t1, t2, ts) ->
+      let es = e1 :: e2 :: es in
+      let ts = t1 :: t2 :: ts in
+      let new_env =
+        Base.List.fold2 es ts ~init:acc ~f:(fun acc e t -> extend_by_pattern (bs, t) acc e)
+      in
+      (match new_env with
+       | Ok env -> env
+       | _ -> acc)
+    | _ -> acc
+  ;;
+
+  let extend_by_pattern_or_op ((_, ty) as scheme) acc (pat, typ) =
+    match pat, ty with
+    | POpPat p, _ -> extend_by_pattern scheme acc (p, typ)
+    | POpOp op, _ -> extend acc op scheme
 
   let apply s env = Base.Map.map env ~f:(Scheme.apply s)
 end
@@ -232,14 +262,16 @@ let rec convert_type =
       | Ast.GUnit -> tunit
     in
     return ground
-  | Ast.TTuple tuple ->
+  | Ast.TTuple (t1, t2, tlist) ->
+    let* t1 = convert_type t1 in
+    let* t2 = convert_type t2 in
     let rec helper acc = function
       | hd :: tl ->
         let* hd = convert_type hd in
         helper (hd :: acc) tl
-      | [] -> return @@ ttuple (List.rev acc)
+      | [] -> return @@ ttuple t1 t2 (List.rev acc)
     in
-    helper [] tuple
+    helper [] tlist
   | Ast.TArr (t1, t2) ->
     let* t1 = convert_type t1 in
     let* t2 = convert_type t2 in
@@ -286,21 +318,36 @@ let infer_ptrn ?(env = TypeEnv.empty) (pat : pattern_typed) =
       let* subst = Subst.compose subst1 subst2 in
       let env = TypeEnv.apply subst env in
       return (env, tlist (Subst.apply subst typ_hd))
-    | PTuple tuple, ty ->
-      let rec tuple_pat env acc = function
-        | hd :: tl ->
-          let* env, typ_hd = helper env hd in
-          tuple_pat env (typ_hd :: acc) tl
-        | [] ->
-          let tuple_types = ttuple (List.rev acc) in
-          let* subst = unify_annotated_type tuple_types ty in
-          let new_ty = Subst.apply subst tuple_types in
-          let env = TypeEnv.apply subst env in
-          return (env, new_ty)
-      in
-      tuple_pat env [] tuple
+      | PTuple (t1, t2, tlist), ty ->
+        let* env, t1 = helper env t1 in
+        let* env, t2 = helper env t2 in 
+        let rec tuple_pat env acc = function
+          | hd :: tl ->
+            let* env, typ_hd = helper env hd in
+            tuple_pat env (typ_hd :: acc) tl
+          | [] ->
+            let tuple_types = ttuple t1 t2 (List.rev acc) in
+            let* subst = unify_annotated_type tuple_types ty in
+            let new_ty = Subst.apply subst tuple_types in
+            let env = TypeEnv.apply subst env in
+            return (env, new_ty)
+        in
+        tuple_pat env [] tlist
   in
   helper env pat
+;;
+
+let infer_op env (op, ty) =
+  let* tv = fresh_var in
+  let* sub = unify_annotated_type tv ty in
+  let typi = Subst.apply sub tv in
+  let env = TypeEnv.extend env op (Scheme.empty, typi) in
+  return (env, typi)
+;;
+
+let infer_ptrn_or_op env = function 
+  | POpPat pat, ty -> infer_ptrn ~env (pat, ty)
+  | POpOp pat, ty -> infer_op env (pat, ty)
 ;;
 
 let rec get_return_type = function
@@ -320,13 +367,15 @@ let rec infer env = function
       | CUnit -> return tunit
     in
     return (Subst.empty, typ)
-  | EId ident ->
+  | EId (IdentOfBaseOp Plus) -> lookup_env "base +" env
+  | EId (IdentOfBaseOp Minus) -> lookup_env "base -" env
+  | EId (IdentOfDefinable IdentLetters ident | IdentOfDefinable IdentOp ident) ->
     (match ident with
      | "_" -> fail WildcardNotExpected
      | _ -> lookup_env ident env)
   | EApp (e1, e2) ->
-    let* subst_1, typ_1 = infer env e1 in
-    let* subst_2, typ_2 = infer (TypeEnv.apply subst_1 env) e2 in
+    let* subst_1, typ_1 = infer_expr_typed env e1 in
+    let* subst_2, typ_2 = infer_expr_typed (TypeEnv.apply subst_1 env) e2 in
     let* type_variable = fresh_var in
     let* subst_3 = unify (tarrow typ_2 type_variable) (Subst.apply subst_2 typ_1) in
     let type_result = Subst.apply subst_3 type_variable in
@@ -334,12 +383,12 @@ let rec infer env = function
     return (subst_result, type_result)
   | EFun (pat, expr) ->
     let* env_pat, typ_pat = infer_ptrn pat ~env in
-    let* subst_expr, typ_expr = infer env_pat expr in
+    let* subst_expr, typ_expr = infer_expr_typed env_pat expr in
     return (subst_expr, tarrow (Subst.apply subst_expr typ_pat) typ_expr)
   | EIf (cond, thn, els) ->
-    let* subst_cond, typ_cond = infer env cond in
-    let* subst_thn, typ_thn = infer env thn in
-    let* subst_els, typ_els = infer env els in
+    let* subst_cond, typ_cond = infer_expr_typed env cond in
+    let* subst_thn, typ_thn = infer_expr_typed env thn in
+    let* subst_els, typ_els = infer_expr_typed env els in
     let* subst_1 = unify (Subst.apply subst_els typ_cond) tbool in
     let* subst_2 = unify typ_thn typ_els in
     let* subst_result =
@@ -348,70 +397,84 @@ let rec infer env = function
     let type_result = Subst.apply subst_result typ_thn in
     return (subst_result, type_result)
   | EList (hd, tl) ->
-    let* subst_hd, typ_hd = infer env hd in
+    let* subst_hd, typ_hd = infer_expr_typed env hd in
     let typ_lhd = tlist typ_hd in
-    let* subst_tl, typ_tl = infer env tl in
+    let* subst_tl, typ_tl = infer_expr_typed env tl in
     let* s3 = unify typ_lhd typ_tl in
     let* subst_result = Subst.compose_all [ subst_hd; subst_tl; s3 ] in
     return (subst_result, Subst.apply subst_result typ_lhd)
-  | ETuple x ->
-    let* subst_result, typ_list =
-      List.fold_left
-        (fun acc expr ->
-          let* subst, typ = infer env expr in
-          let* subst_acc, typ_acc = acc in
-          let* subst = Subst.compose subst subst_acc in
-          return (subst, typ :: typ_acc))
-        (return (Subst.empty, []))
-        x
-    in
-    return (subst_result, ttuple @@ List.rev typ_list)
+    | ETuple (e1, e2, l) ->
+      let* subst_e1, typ_e1 = infer_expr_typed env e1 in
+      let* subst_e2, typ_e2 = infer_expr_typed env e2 in
+      let* subst_result, typ_list =
+        List.fold_left
+          (fun acc expr ->
+            let* subst, typ = infer_expr_typed env expr in
+            let* subst_acc, typ_acc = acc in
+            let* subst = Subst.compose subst subst_acc in
+            return (subst, typ :: typ_acc))
+          (return (Subst.empty, []))
+          l
+      in
+      let* subst_result = Subst.compose_all [ subst_e1; subst_e2; subst_result ] in
+      return (subst_result, ttuple typ_e1 typ_e2 (List.rev typ_list))
   | EClsr (decl, expr) ->
     let* subst_decl, env = infer_decl env decl in
-    let* subst, typ_expr = infer env expr in
+    let* subst, typ_expr = infer_expr_typed env expr in
     let* subst_result = Subst.compose_all [ subst; subst_decl ] in
     return (subst_result, typ_expr)
-  | EMatch (e, patmatch) ->
+  | EMatch (e, branch, branch_list) ->
     let rec check_cases typ_res typ_e subst_e = function
       | (pat, expr_res) :: tl ->
         let* env_new, typ_pat = infer_ptrn pat ~env in
         let* subst_pat = unify typ_pat typ_e in
-        let* subst_res_2, typ_res_2 = infer (TypeEnv.apply subst_pat env_new) expr_res in
+        let* subst_res_2, typ_res_2 = infer_expr_typed (TypeEnv.apply subst_pat env_new) expr_res in
         let* subst_u = unify typ_res_2 (Subst.apply subst_res_2 typ_res) in
         let* subst_e = Subst.compose_all [ subst_e; subst_u; subst_res_2; subst_pat ] in
         let typ_res_2 = Subst.apply subst_e typ_res_2 in
         check_cases typ_res_2 typ_e subst_e tl
       | [] -> return (subst_e, typ_res)
     in
-    let* subst_e, typ_e = infer env e in
+    let* subst_e, typ_e = infer_expr_typed env e in
     let* type_variable = fresh_var in
-    check_cases type_variable typ_e subst_e patmatch
+    check_cases type_variable typ_e subst_e (branch :: branch_list)
+
+
+  and infer_expr_typed env (expr, annotated_type) =
+      let* s1, typ = infer env expr in
+      let* subst = unify_annotated_type typ annotated_type in
+      let* subst = Subst.compose subst s1 in
+      return (subst,  Subst.apply subst typ)
 
 and infer_common_decl env expr annotated_type =
-  let* s1, typ = infer env expr in
+  let* s1, typ = infer_expr_typed env expr in
+  (* todo expr int -> int*)
   let* subst = unify_annotated_type (get_return_type typ) annotated_type in
   let* subst = Subst.compose subst s1 in
   return (typ, subst, env)
 
 and infer_decl env = function
-  | DLet (Not_recursive, id, expr, annotated_type) ->
-    let* typ, subst, env = infer_common_decl env expr annotated_type in
+(* todo expr type *)
+  | DLet (Not_recursive, ((_, ty_pat) as pat_typed, expr_typed)) ->
+    let* env, _ = infer_ptrn_or_op env pat_typed in
+    let* typ, subst, env = infer_common_decl env expr_typed ty_pat in
     let scheme = generalize env typ in
-    return (subst, TypeEnv.extend env id scheme)
-  | DLet (Recursive, id, expr, annotated_type) ->
+    return (subst, TypeEnv.extend_by_pattern_or_op scheme env pat_typed)
+  | DLet (Recursive, ((_, ty_pat) as pat_typed, expr_typed)) ->
     let* type_variable = fresh_var in
-    let env = TypeEnv.extend env id (Scheme.empty, type_variable) in
-    let* _, subst, env = infer_common_decl env expr annotated_type in
+    let env = TypeEnv.extend_by_pattern_or_op (Scheme.empty, type_variable) env pat_typed in
+    let* _, subst, env = infer_common_decl env expr_typed ty_pat in
     let typ = Subst.apply subst type_variable in
     let scheme = generalize env typ in
-    return (subst, TypeEnv.extend env id scheme)
-  | DLetMut (Not_recursive, let_list) ->
+    return (subst, TypeEnv.extend_by_pattern_or_op scheme env pat_typed)
+  | DLetMut (Not_recursive, let_1, let_2, let_list) ->
+    let let_list  = let_1 :: let_2 :: let_list in
     let rec helper start_env acc_env substs = function
       | hd :: tl ->
-        let ident, expr, annotated_type = hd in
-        let* sub_infer, typ = infer start_env expr in
-        let* sub_annotated = unify_annotated_type (get_return_type typ) annotated_type in
-        let acc_env = TypeEnv.extend acc_env ident (generalize env typ) in
+        let ((_, ty_pat) as pat_typed, ((_, _) as expr_typed)) = hd in
+        let* sub_infer, typ = infer_expr_typed start_env expr_typed in
+        let* sub_annotated = unify_annotated_type (get_return_type typ) ty_pat in
+        let acc_env = TypeEnv.extend_by_pattern_or_op (generalize env typ) acc_env pat_typed in
         let* sub_final = Subst.compose_all [ sub_infer; substs; sub_annotated ] in
         helper start_env acc_env sub_final tl
       | [] -> return (substs, acc_env)
@@ -420,25 +483,31 @@ and infer_decl env = function
        for some i'm lost in types :( *)
     let* substs, env = helper env env Subst.empty let_list in
     return (substs, env)
-  | DLetMut (Recursive, let_list) ->
-    let helper smth (ident, expr, annotated_type) =
+  | DLetMut (Recursive, let_1, let_2, let_list) ->
+    let let_list = let_1 :: let_2 :: let_list in
+    let helper smth ((pat, ty_pat), ((_, _) as expr_typed)) =
       let* sub_init, env = smth in
-      let* typ, sub_infer, env = infer_common_decl env expr annotated_type in
-      let* sub =
-        match Base.Map.find env ident with
+      let* typ, sub_infer, env = infer_common_decl env expr_typed ty_pat in
+        (* todo meaningful error *)
+        match pat with 
+        | POpPat PId x | POpOp x -> 
+          let* sub =
+             (match Base.Map.find env x with
         | Some (_, init_type) -> unify typ init_type
-        | _ -> return Subst.empty
-      in
-      let env = TypeEnv.extend env ident (Scheme.empty, typ) in
-      let* sub_final = Subst.compose_all [ sub_init; sub_infer; sub ] in
-      return (sub_final, TypeEnv.apply sub_final env)
+        | _ -> return Subst.empty)
+          in   
+          let env = TypeEnv.extend env x (Scheme.empty, typ) in
+          let* sub_final = Subst.compose_all [ sub_init; sub_infer; sub ] in
+          return (sub_final, TypeEnv.apply sub_final env)
+          (* todo test this *)
+        | _ -> fail UnexpectedRecursionLhs
     in
     let* env =
       List.fold_left
-        (fun env (id, _, _) ->
+        (fun env (pat_typed, _) ->
           let* env = env in
           let* fresh_var = fresh_var in
-          return @@ TypeEnv.extend env id (Scheme.empty, fresh_var))
+          return @@ TypeEnv.extend_by_pattern_or_op (Scheme.empty, fresh_var) env pat_typed)
         (return env)
         let_list
     in
@@ -484,7 +553,7 @@ let run_inference prog =
        return env))
 ;;
 
-let is_printable id typ =
+let is_printable (id: string) typ =
   let is_in_init =
     match Base.Map.find init_env id with
     | None -> false

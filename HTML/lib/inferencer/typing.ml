@@ -1,9 +1,6 @@
 (** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-
-open AstLib.Ast
-
 type type_variable_number = string
 
 type ground =
@@ -15,7 +12,7 @@ type ground =
 type typ =
   | TVar of type_variable_number
   | TArr of typ * typ
-  | TTuple of typ list
+  | TTuple of typ * typ * typ list
   | TList of typ
   | TGround of ground
 
@@ -23,7 +20,7 @@ let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit
 let tarrow left_type right_type = TArr (left_type, right_type)
-let ttuple type_list = TTuple type_list
+let ttuple t1 t2 type_list = TTuple (t1, t2, type_list)
 let tlist typ = TList typ
 let tvar n = TVar n
 
@@ -42,7 +39,8 @@ let rec pp_type fmt typ =
   | TVar var ->
     let ascii_code_of_a = 97 in
     fprintf fmt "%s" ("'" ^ Char.escaped (Char.chr (int_of_string var + ascii_code_of_a)))
-  | TTuple value_list ->
+    | TTuple (typ1, typ2, value_list) ->
+      let value_list = typ1 :: typ2 :: value_list in
     let pp_tuple value_list =
       let pp_el fmt typ =
         let s =
@@ -88,7 +86,9 @@ let edit_numbers_in_typ typ =
       in
       TVar (string_of_int n), total, map
     | TGround _ -> typ, total, map
-    | TTuple xs ->
+    | TTuple (t1, t2, xs) ->
+      let t1, total, map = helper t1 total map in
+      let t2, total, map = helper t2 total map in 
       let res, total, map =
         List.fold_left
           (fun (acc, total, map) typ ->
@@ -97,7 +97,7 @@ let edit_numbers_in_typ typ =
           ([], total, map)
           xs
       in
-      TTuple (List.rev res), total, map
+      TTuple (t1, t2, (List.rev res)), total, map
     | TList ltyp ->
       let res, total, map = helper ltyp total map in
       TList res, total, map
@@ -119,12 +119,13 @@ let print_typ fmt ?(carriage = false) typ =
 
 type error =
   | OccursCheck
-  | UnboundValue of ident
+  | UnboundValue of string
   | MismatchValues of typ * typ (** For pattern matching errors *)
   | UnificationFailed of typ * typ
   | ParserAvoidedError
   (** Use the parser to get the AST: the parser does some transformations of expressions *)
   | WildcardNotExpected
+  | UnexpectedRecursionLhs
 
 let pp_error fmt err =
   let open Format in
@@ -153,6 +154,7 @@ let pp_error fmt err =
       fmt
       "Use parser to get the AST: the parser does some transformations of expressions"
   | WildcardNotExpected -> fprintf fmt {| wildcard " _ " not expected |}
+  | UnexpectedRecursionLhs -> fprintf fmt "Error: Only variables are allowed as left-hand side of `let rec'"
 ;;
 
 let print_type_error error =

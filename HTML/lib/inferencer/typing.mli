@@ -16,7 +16,7 @@ val show_ground : ground -> string
 type typ =
   | TVar of string
   | TArr of typ * typ
-  | TTuple of typ list
+  | TTuple of typ * typ * typ list
   | TList of typ
   | TGround of ground
 
@@ -24,7 +24,7 @@ val tint : typ
 val tbool : typ
 val tunit : typ
 val tarrow : typ -> typ -> typ
-val ttuple : typ list -> typ
+val ttuple : typ -> typ -> typ list -> typ
 val tlist : typ -> typ
 val tvar : string -> typ
 val edit_numbers_in_typ : typ -> typ
@@ -38,6 +38,7 @@ type error =
   | UnificationFailed of typ * typ
   | ParserAvoidedError
   | WildcardNotExpected
+  | UnexpectedRecursionLhs
 
 val pp_error : Format.formatter -> error -> unit
 val print_type_error : error -> unit
