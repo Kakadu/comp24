@@ -342,18 +342,14 @@ module Infer = struct
     | _ -> R.fail Illegal_pattern
   ;;
 
-  let infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
-    let rec helper (acc : inf_type) (env : TypeEnv.t) = function
-      | [] -> R.return (env, acc)
-      | v :: vs ->
-        let* env, t = infer_value env v in
-        helper (TArrow (t, acc)) env vs
-    in
+  let rec infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
     match vs with
     | [] -> R.return (env, TUnit)
+    | [ v ] -> infer_value env v
     | v :: vs ->
-      let* env, t = infer_value env v in
-      helper t env vs
+      let* env, v_t = infer_value env v in
+      let* env, vs_t = infer_args env vs in
+      R.return (env, TArrow (v_t, vs_t))
   ;;
 
   (* Subst.t -> инфа о известных подстановках *)
@@ -401,8 +397,13 @@ module Infer = struct
         let* env, args_t = infer_args env args in
         let* subs, scope_t = helper env scope in
         let args_t = Subst.apply args_t subs in
-        let fin_t = TArrow (args_t, scope_t) in
-        R.return (subs, fin_t)
+        let rec fin_t end_t =
+          (* 'a -> 'b + int <=> 'a -> 'b -> int *)
+          (function
+            | TArrow (t1, t2) -> TArrow (t1, fin_t end_t t2)
+            | x -> TArrow (x, end_t))
+        in
+        R.return (subs, fin_t scope_t args_t)
       | _ -> R.fail Unsupported_type
     in
     helper env expr

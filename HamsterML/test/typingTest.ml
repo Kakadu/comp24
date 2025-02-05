@@ -22,3 +22,17 @@ let%test _ =
 ;;
 
 let%test _ = typecheck (BinOp (EQ, Value (Const (Int 1)), Value (Const (Int 20)))) = TBool
+
+(* fun *)
+
+let%test _ =
+  typecheck
+    (Fun
+       ( [ VarId "x"; Const Unit; VarId "y"; Const Unit; VarId "z"; Const Unit ]
+       , BinOp (ADD, BinOp (ADD, Value (VarId "x"), Value (VarId "y")), Value (VarId "z"))
+       ))
+  = TArrow
+      ( TInt
+      , TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TInt)))))
+      )
+;;
