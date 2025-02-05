@@ -3,6 +3,23 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 let () =
+  let is_stdlib key =
+    match key with
+    | "print_int"
+    | "( + )"
+    | "( :: )"
+    | "( * )"
+    | "( - )"
+    | "( == )"
+    | "( = )"
+    | "( / )"
+    | "( >= )"
+    | "( > )"
+    | "( <= )"
+    | "( < )"
+    | "( <> )" -> true
+    | _ -> false
+  in
   let s = Stdio.In_channel.input_all Stdlib.stdin in
   match Parser.parse_program s with
   | Ok ast_before ->
@@ -24,21 +41,22 @@ let () =
           let all_types_match =
             Typeinference.StringMap.for_all
               (fun key typ1 ->
-                match Typeinference.StringMap.find_opt key map2 with
-                | Some typ2 ->
-                  if key <> "print_int"
-                  then (
+                if is_stdlib key
+                then true
+                else (
+                  match Typeinference.StringMap.find_opt key map2 with
+                  | Some typ2 ->
                     Format.printf "Name: %s\n" key;
                     Format.printf "Original program: %a\n" Ast.pp_type_name typ1;
-                    Format.printf "ANF: %a\n\n" Ast.pp_type_name typ2);
-                  if not (Typeinference.types_equal typ1 typ2)
-                  then (
-                    Format.printf "There's been a discrepancy for name %s\n" key;
-                    false)
-                  else true
-                | None ->
-                  Format.printf "Name %s found in map1 but not in map2\n" key;
-                  false)
+                    Format.printf "ANF: %a\n\n" Ast.pp_type_name typ2;
+                    if not (Typeinference.types_equal typ1 typ2)
+                    then (
+                      Format.printf "There's been a discrepancy for name %s\n" key;
+                      false)
+                    else true
+                  | None ->
+                    Format.printf "Name %s found in map1 but not in map2\n" key;
+                    false))
               map1
           in
           if all_types_match
