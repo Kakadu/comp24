@@ -194,14 +194,6 @@ let transform_sexp sexp =
        ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
        ])
     (Atom "?a");
-  (* a + 0 = a *)
-  add_rule
-    (List
-       [ Atom "application"
-       ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
-       ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
-       ])
-    (Atom "?a");
   (* a / a = 1 *)
   add_rule
     (List
@@ -242,6 +234,30 @@ let transform_sexp sexp =
        ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
        ; Atom "?a"
        ]);
+  (* (a1 + a2) - a3 = a1 + (a2 - a3) *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List
+           [ Atom "application"
+           ; Atom "( - )"
+           ; List
+               [ Atom "application"
+               ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+               ; Atom "?b"
+               ]
+           ]
+       ; Atom "?b"
+       ])
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+       ; List
+           [ Atom "application"
+           ; List [ Atom "application"; Atom "( - )"; Atom "?b" ]
+           ; Atom "?b"
+           ]
+       ]);
   (* a - a = 0 *)
   add_rule
     (List
@@ -262,6 +278,22 @@ let transform_sexp sexp =
        ; Atom "?a"
        ])
     (Atom "?a");
+  (* a + 0 = a *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+       ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
+       ])
+    (Atom "?a");
+  (* a + 0 = a *)
+  add_rule
+    (List
+       [ Atom "application"
+       ; List [ Atom "application"; Atom "( + )"; Atom "?a" ]
+       ; List [ Atom "constant"; List [ Atom "int"; Atom "0" ] ]
+       ])
+    (Atom "?a");
   let sexp_result = EGraph.extract cost_function graph graph_expr in
   sexp_result
 ;;
@@ -271,7 +303,7 @@ let simplify =
     let sexp = sexpr_of_declaration decl in
     match let_declaration_of_sexpr (transform_sexp sexp) with
     | Ok decl -> return decl
-    | Error _ -> error "Error while applying rewrites")
+    | Error _ -> error "Error while applying rewrite rules")
 ;;
 
 let test_egraph_optimization prog =
