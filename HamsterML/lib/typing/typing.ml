@@ -14,12 +14,14 @@ type inf_type =
   | TList of inf_type (* 'a list *)
   | TTuple of inf_type list (* ('a, 'b, ...) *)
   | TArrow of inf_type * inf_type (* 'a -> 'a *)
-  | TVar of var_id
+  | TPVar of var_id
 [@@deriving show]
 
 type error =
   | Variable_not_found
   | Unification_failed of inf_type * inf_type
+  | Illegal_pattern
+  | Unsupported_type
 [@@deriving show]
 
 module VarSet = struct
@@ -84,14 +86,14 @@ module Type = struct
     | TList x -> occurs_in id x
     | TTuple tl -> List.fold tl ~init:false ~f:(fun acc t -> acc || occurs_in id t)
     | TArrow (x, y) -> occurs_in id x || occurs_in id y
-    | TVar v_id -> id = v_id
+    | TPVar v_id -> id = v_id
   ;;
 
   let free_vars t =
     (* Collect free variables in the passed type *)
     let rec helper acc = function
       | TBool | TInt | TFloat | TChar | TString | TUnit -> acc
-      | TVar v -> VarSet.add v acc
+      | TPVar v -> VarSet.add v acc
       | TArrow (x, y) -> helper (helper acc x) y
       | TList x -> helper acc x
       | TTuple tl -> List.fold tl ~init:acc ~f:helper
@@ -122,10 +124,10 @@ module Subst = struct
   let remove k s = Map.remove s k
 
   let apply t s =
-    (* Apply a substitution to type, return new type *)
+    (* Apply a substitutions to type, return new type *)
     let rec helper x =
       match x with
-      | TVar v ->
+      | TPVar v ->
         let find_type = find v s in
         (match find_type with
          | Some ft -> ft
@@ -147,8 +149,8 @@ module Subst = struct
     | TChar, TChar
     | TString, TString
     | TUnit, TUnit -> return empty
-    | TVar x, TVar y when x = y -> return empty
-    | TVar x, (_ as y) | (_ as y), TVar x -> singleton_checked x y
+    | TPVar x, TPVar y when x = y -> return empty
+    | TPVar x, (_ as y) | (_ as y), TPVar x -> singleton_checked x y
     | TArrow (x, xs), TArrow (y, ys) ->
       let* s1 = unify x y in
       let* s2 = unify (apply xs s1) (apply ys s1) in
@@ -211,9 +213,9 @@ module Subst = struct
   ;;
 end
 
-let fresh_var () =
+let fresh_var =
   let open R in
-  fresh >>= fun n -> TVar n |> return
+  fresh >>= fun n -> return (TPVar n)
 ;;
 
 (* ∀α. α -> α *)
@@ -222,6 +224,8 @@ type scheme = Scheme of VarSet.t * inf_type
 
 module Scheme = struct
   type t = scheme
+
+  let create (t : inf_type) : t = Scheme (VarSet.empty, t)
 
   (* find free variables that are not in varset  *)
   let free_vars = function
@@ -243,7 +247,7 @@ module Scheme = struct
       VarSet.fold
         (fun b acc ->
            let* acc = acc in
-           let* fr = fresh_var () in
+           let* fr = fresh_var in
            let subst = Subst.singleton b fr in
            Subst.apply acc subst |> R.return)
         bs
@@ -323,6 +327,43 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
+  let rec infer_args (env : TypeEnv.t) (vs : Ast.value list) : (TypeEnv.t * inf_type) R.t =
+    (* infer value type in fun/let args *)
+    let infer_arg (env : TypeEnv.t) (v : Ast.value) : (TypeEnv.t * inf_type) R.t =
+      match v with
+      | Const Unit -> R.return (env, TUnit)
+      | Wildcard ->
+        let* fr = fresh_var in
+        R.return (env, fr)
+        (* add new poly var *)
+      | VarId name ->
+        let* fr = fresh_var in
+        let new_env = TypeEnv.extend name (Scheme.create fr) env in
+        R.return (new_env, fr)
+      | TypedVarID (name, pt) ->
+        let v_t =
+          match pt with
+          | PInt -> TInt
+          | PFloat -> TFloat
+          | PBool -> TBool
+          | PChar -> TChar
+          | PString -> TString
+          | Poly _ -> failwith "REMOVE POLY!!!!!!!!"
+        in
+        let env = TypeEnv.extend name (Scheme.create v_t) env in
+        R.return (env, v_t)
+      | _ -> R.fail Illegal_pattern
+    in
+    (* infer fun/let args *)
+    match vs with
+    | [] -> R.return (env, TUnit)
+    | [ v ] -> infer_arg env v
+    | v :: vs ->
+      let* env, v_t = infer_arg env v in
+      let* env, vs_t = infer_args env vs in
+      R.return (env, TArrow (v_t, vs_t))
+  ;;
+
   (* Subst.t -> инфа о известных подстановках *)
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
@@ -348,8 +389,34 @@ module Infer = struct
       | Pattern v ->
         (match v with
          | Const dt -> infer_data_type dt
+         | VarId name -> TypeEnv.lookup name env
          | _ -> failwith "error in 'value' inference")
-      | _ -> failwith "error while inferencing"
+      | If (i, th, el) ->
+        let* i_s, i_t = helper env i in
+        let* i_u = Subst.unify i_t TBool in
+        let* th_s, th_t = helper (TypeEnv.apply i_s env) th in
+        (match el with
+         | Some el ->
+           let* el_s, el_t = helper (TypeEnv.apply th_s env) el in
+           let* th_e_u = Subst.unify th_t el_t in
+           let* fin_s = Subst.compose_all [ i_u; el_s; th_e_u ] in
+           R.return (fin_s, Subst.apply el_t fin_s)
+         | None ->
+           let* th_u = Subst.unify th_t TUnit in
+           let* fin_s = Subst.compose_all [ i_u; th_u ] in
+           R.return (fin_s, TUnit))
+      | Fun (args, scope) ->
+        let* env, args_t = infer_args env args in
+        let* subs, scope_t = helper env scope in
+        let args_t = Subst.apply args_t subs in
+        let rec fin_t end_t =
+          (* 'a -> 'b + int <=> 'a -> 'b -> int *)
+          (function
+            | TArrow (t1, t2) -> TArrow (t1, fin_t end_t t2)
+            | x -> TArrow (x, end_t))
+        in
+        R.return (subs, fin_t scope_t args_t)
+      | _ -> R.fail Unsupported_type
     in
     helper env expr
   ;;
