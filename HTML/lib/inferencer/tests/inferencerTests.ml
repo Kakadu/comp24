@@ -84,7 +84,6 @@ module InferenceTests = struct
     [%expect {| val f : 'a -> 'a |}]
   ;;
 
-  (* возможно семантика двух тестов тут говно, но надеюсь понятен смысл *)
   let%expect_test "test_polymorphic_types" =
     infer_test
       {|let f (g: ('a -> 'b)) (x: 'b) = 100
@@ -296,5 +295,24 @@ val f : bool -> int -> bool
     infer_test "let a = +4 + (-3)";
     [%expect {| val a : int |}]
   ;;
+
+  let%expect_test _ =
+    infer_test "let rec (x, y, z) = (1, 2, 3) and (g, h) = (5, 6)";
+    [%expect {| Typecheck error: Only variables are allowed as left-hand side of `let rec' |}]
+  ;;
+  
+  let%expect_test _ =
+    infer_test "let (x, y, z) = (1, 2, 3) and (g, h) = (5, 6)";
+    [%expect {|
+      val g : int
+      val h : int
+      val x : int
+      val y : int
+      val z : int |}]
+
+
+  let%expect_test _ =
+    infer_test "let x = ((fun y -> y + 1): (int -> int))";
+    [%expect {| val x : int -> int |}]
 
 end 

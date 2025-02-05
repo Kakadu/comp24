@@ -154,7 +154,7 @@ let pp_error fmt err =
       fmt
       "Use parser to get the AST: the parser does some transformations of expressions"
   | WildcardNotExpected -> fprintf fmt {| wildcard " _ " not expected |}
-  | UnexpectedRecursionLhs -> fprintf fmt "Error: Only variables are allowed as left-hand side of `let rec'"
+  | UnexpectedRecursionLhs -> fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
 ;;
 
 let print_type_error error =
