@@ -26,9 +26,11 @@ let () =
               (fun key typ1 ->
                 match Typeinference.StringMap.find_opt key map2 with
                 | Some typ2 ->
-                  Format.printf "Name: %s\n" key;
-                  Format.printf "Original program: %a\n" Ast.pp_type_name typ1;
-                  Format.printf "ANF: %a\n\n" Ast.pp_type_name typ2;
+                  if key <> "print_int"
+                  then (
+                    Format.printf "Name: %s\n" key;
+                    Format.printf "Original program: %a\n" Ast.pp_type_name typ1;
+                    Format.printf "ANF: %a\n\n" Ast.pp_type_name typ2);
                   if not (Typeinference.types_equal typ1 typ2)
                   then (
                     Format.printf "There's been a discrepancy for name %s\n" key;
@@ -41,7 +43,7 @@ let () =
           in
           if all_types_match
           then Format.printf "All types are correct\n"
-          else Format.printf "Bad\n"
+          else Format.printf "There's been a type mismatch\n"
         | _ -> Format.printf "Error while typechecking\n")
      | _ -> Format.printf "Error while parsing ANF program\n")
   | _ -> Format.printf "Error while parsing original program\n"

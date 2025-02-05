@@ -56,10 +56,6 @@
   Original program: (int -> ((int -> '_p18) -> '_p18))
   ANF: (int -> ((int -> '_p26) -> '_p26))
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/001fac.ml
@@ -118,10 +114,6 @@
   Name: main
   Original program: int
   ANF: int
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   All types are correct
 
@@ -182,10 +174,6 @@
   Original program: int
   ANF: int
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/002fac.ml
@@ -244,10 +232,6 @@
   Name: main
   Original program: int
   ANF: int
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   All types are correct
 
@@ -314,10 +298,6 @@
   Original program: (int -> ((int -> '_p22) -> '_p22))
   ANF: (int -> ((int -> '_p3f) -> '_p3f))
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/003fib.ml
@@ -381,10 +361,6 @@
   Original program: int
   ANF: int
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe << EOF
@@ -437,10 +413,6 @@
   Name: ( > )
   Original program: ('_p10 -> ('_p10 -> bool))
   ANF: ('_p15 -> ('_p15 -> bool))
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   Name: test
   Original program: (int * int * int)
@@ -496,10 +468,6 @@
   Name: ( > )
   Original program: ('_p49 -> ('_p49 -> bool))
   ANF: ('_p5a -> ('_p5a -> bool))
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   Name: main
   Original program: int
@@ -580,10 +548,6 @@
   Original program: int
   ANF: int
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/006partial.ml
@@ -642,10 +606,6 @@
   Name: main
   Original program: int
   ANF: int
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   All types are correct
 
@@ -706,10 +666,6 @@
   Original program: int
   ANF: int
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/006partial3.ml
@@ -769,10 +725,6 @@
   Original program: int
   ANF: int
   
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
-  
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/009let_poly.ml
@@ -823,10 +775,6 @@
   Name: ( > )
   Original program: ('_pd -> ('_pd -> bool))
   ANF: ('_p10 -> ('_p10 -> bool))
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   Name: temp
   Original program: (int * bool)
@@ -914,9 +862,5 @@
   Name: map
   Original program: (('_pe9 -> '_pea) -> (('_pe9 list) -> ('_pea list)))
   ANF: (('_p126 -> '_p127) -> (('_p126 list) -> ('_p127 list)))
-  
-  Name: print_int
-  Original program: (int -> unit)
-  ANF: (int -> unit)
   
   All types are correct
