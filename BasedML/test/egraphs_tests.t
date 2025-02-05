@@ -49,6 +49,6 @@
   let  a = 5
 
   $ dune exec ./egraphs_demo.exe << EOF
-  > let overly_complicated_foruma a1 a2 a3 = ((a2 * a1) / a1) - a2 + a3
+  > let overly_complicated_formula a1 a2 a3 = ((a2 * a1) / a1) - a2 + a3
   > EOF
-  let  a = 5
+  let  overly_complicated_formula = (fun a1 -> (fun a2 -> (fun a3 -> a3)))
