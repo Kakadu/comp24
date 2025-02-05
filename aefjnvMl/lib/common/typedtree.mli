@@ -7,18 +7,10 @@ module VarSet : sig
   type t = Set.Make(Int).t
 
   val empty : t
-  val is_empty : t -> bool
-  val mem : elt -> t -> bool
   val add : elt -> t -> t
-  val remove : elt -> t -> t
   val union : t -> t -> t
   val diff : t -> t -> t
-  val compare : t -> t -> int
-  val equal : t -> t -> bool
-  val subset : t -> t -> bool
-  val iter : (elt -> unit) -> t -> unit
   val fold : (elt -> 'a -> 'a) -> t -> 'a -> 'a
-  val exists : (elt -> bool) -> t -> bool
   val pp : Format.formatter -> t -> unit
 end
 
