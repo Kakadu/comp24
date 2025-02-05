@@ -448,13 +448,11 @@ let rec infer env = function
 
 and infer_common_decl env expr annotated_type =
   let* s1, typ = infer_expr_typed env expr in
-  (* todo expr int -> int*)
   let* subst = unify_annotated_type (get_return_type typ) annotated_type in
   let* subst = Subst.compose subst s1 in
   return (typ, subst, env)
 
 and infer_decl env = function
-(* todo expr type *)
   | DLet (Not_recursive, ((_, ty_pat) as pat_typed, expr_typed)) ->
     let* env, _ = infer_ptrn_or_op env pat_typed in
     let* typ, subst, env = infer_common_decl env expr_typed ty_pat in
@@ -488,7 +486,6 @@ and infer_decl env = function
     let helper smth ((pat, ty_pat), ((_, _) as expr_typed)) =
       let* sub_init, env = smth in
       let* typ, sub_infer, env = infer_common_decl env expr_typed ty_pat in
-        (* todo meaningful error *)
         match pat with 
         | POpPat PId x | POpOp x -> 
           let* sub =
@@ -499,7 +496,6 @@ and infer_decl env = function
           let env = TypeEnv.extend env x (Scheme.empty, typ) in
           let* sub_final = Subst.compose_all [ sub_init; sub_infer; sub ] in
           return (sub_final, TypeEnv.apply sub_final env)
-          (* todo test this *)
         | _ -> fail UnexpectedRecursionLhs
     in
     let* env =
