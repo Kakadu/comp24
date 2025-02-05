@@ -215,13 +215,15 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let () = parse_test {|
+  let () =
+    parse_test {|
 let rec x = 3 :: z2
  and z1 = 4:: x :: z2
  and z2 = 4:: x in
 x
 ;;
-  |} in
+  |}
+  in
   [%expect
     {|
       [(Str_eval
@@ -245,13 +247,16 @@ x
 ;;
 
 let%expect_test _ =
-  let () = parse_test {|
+  let () =
+    parse_test
+      {|
 match (10, 11, 12::[]) with
 | a, b, c::_ -> 10
 | (a, b, s::_::_) -> 11
 | _ -> 0
 ;;
-  |} in
+  |}
+  in
   [%expect
     {|
       [(Str_eval
@@ -294,7 +299,9 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  let () = parse_test {|
+  let () =
+    parse_test
+      {|
 let (): unit = (
    ptint_int (
          (10 : int) + (true : bool)
@@ -302,7 +309,8 @@ let (): unit = (
 ) in
 10
 ;;
-  |} in
+  |}
+  in
   [%expect
     {|
       [(Str_eval
