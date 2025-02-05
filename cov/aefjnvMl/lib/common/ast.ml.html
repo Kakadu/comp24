@@ -205,7 +205,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-<span data-count="0">t</span>ype ident = <span data-count="426">s</span>tring [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype ident = <span data-count="423">s</span>tring [@@deriving show { with_path = false }]
 
 <span data-count="0">t</span>ype rec_flag =
   <span data-count="0">|</span> Nonrecursive
@@ -233,7 +233,7 @@
   (** [Ptyp_arrow(lbl, T1, T2)] represents: [T1 -&gt; T2]*)
 [@@deriving show { with_path = false }]
 
-<span data-count="403">t</span>ype pattern =
+<span data-count="399">t</span>ype pattern =
   | Pat_const of const (** Patterns such as [1], [true] *)
   | Pat_var of ident (** A variable pattern such as [x] *)
   | Pat_cons of pattern * pattern (** The pattern such as [P1::P2] *)
@@ -243,7 +243,7 @@
   | Pat_constraint of pattern * core_type
 [@@deriving show { with_path = false }]
 
-<span data-count="1234">t</span>ype expression =
+<span data-count="1231">t</span>ype expression =
   | Exp_type of expression * core_type
   | Exp_constant of const (** Expressions constant such as [1], [true] *)
   | Exp_ident of ident (** Identifiers such as [x] *)
@@ -268,14 +268,14 @@
     - [let P = E] when [d_rec] is {{!rec_flag.Nonrecursive} [Nonrecursive]}
     - [let rec P = E] when [d_rec] is {{!rec_flag.Recursive} [Recursive]}
       Invariant: [n &gt;= 1] *)
-<span data-count="73">a</span>nd decl = Decl of rec_flag * <span data-count="446">v</span>alue_binding lis<span data-count="148">t</span>
+<span data-count="72">a</span>nd decl = Decl of rec_flag * <span data-count="440">v</span>alue_binding lis<span data-count="146">t</span>
 
-<span data-count="525">a</span>nd value_binding =
+<span data-count="518">a</span>nd value_binding =
   { vb_pat : pattern
   ; vb_expr : expression
-  <span data-count="150">}</span>
+  <span data-count="148">}</span>
 
-<span data-count="102">t</span>ype structure_item =
+<span data-count="100">t</span>ype structure_item =
   | Str_eval of expression (** [E] *)
   | Str_value of decl
   (** [Str_value({is_rec; P; E})] represents:
@@ -284,7 +284,7 @@
 [@@deriving show { with_path = false }]
 
 (** Represents whole program with all statements *)
-<span data-count="29">t</span>ype program = <span data-count="233">s</span>tructure_item lis<span data-count="51">t</span> [@@deriving show { with_path = false }]
+<span data-count="28">t</span>ype program = <span data-count="228">s</span>tructure_item lis<span data-count="50">t</span> [@@deriving show { with_path = false }]
 </code></pre>
       </div>
     </div>
