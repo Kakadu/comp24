@@ -196,7 +196,7 @@ module ParsingTests = struct
   ;;
 
   let%expect_test _ =
-    parse_test "let a = (f x : int)";
+    parse_test "let a = f x : int";
     [%expect {|
       let a = ((f x) : int)
       |}]
@@ -345,15 +345,15 @@ module ManyTests = struct
     |}]
   ;;
 
-  (* let%expect_test _ =
-     pe_test (read_from_file_typed "008ascription");
-     [%expect
+  let%expect_test _ =
+    parse_test (read_from_file_typed "008ascription");
+    [%expect
       {|
       let addi = (fun f -> (fun g -> (fun x -> ((f x) ((g x : bool)) : int)))));;
       let main = let () = (print_int (((addi (fun x -> (fun b -> if b then (x + 1) else (x * 2)))) (fun _start -> ((_start / 2) = 0))) 4))
       in 0
     |}]
-     ;; *)
+  ;;
 
   let%expect_test _ =
     parse_test (read_from_file_typed "009let_poly");
