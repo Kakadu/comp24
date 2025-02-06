@@ -90,9 +90,9 @@
 %start prog
 %%
 
-prog : p = program EOF { p }
-program : p = list(declaration) { p }
-declaration :
+prog: p = list(declaration) EOF { p }
+
+declaration:
     | LET; l = let_def                                                  { l }
     | LET; l = let_and_in_def                                           { l } 
 
