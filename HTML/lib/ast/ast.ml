@@ -56,14 +56,14 @@ type pattern =
 and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = false }]
 
 type pattern_or_op =
-  | POpPat of pattern
-  | POpOp of ident_op
+  | POpPat of pattern (** pattern *)
+  | POpOp of ident_op (** custom operator *)
 [@@deriving eq, show { with_path = false }]
 
 and pattern_or_op_typed = pattern_or_op * typ option
 [@@deriving eq, show { with_path = false }]
 
-type branch = pattern_typed * expr_typed [@@deriving eq, show { with_path = false }]
+type branch = pattern_typed * expr_typed (** branch in match expr *) [@@deriving eq, show { with_path = false }] 
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
@@ -79,9 +79,9 @@ and expr =
   (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
-and expr_typed = expr * typ option [@@deriving eq, show { with_path = false }]
+and expr_typed = expr * typ option (** typed expression *) [@@deriving eq, show { with_path = false }]
 
-and let_body = pattern_or_op_typed * expr_typed
+and let_body = pattern_or_op_typed * expr_typed (** let body: pattern and associated expression *)
 [@@deriving eq, show { with_path = false }]
 
 and decl =
@@ -90,7 +90,7 @@ and decl =
   (** Mutual let declaration *)
 [@@deriving eq, show { with_path = false }]
 
-type prog = decl list [@@deriving eq, show { with_path = false }]
+type prog = decl list (** the whole program *)[@@deriving eq, show { with_path = false }]
 
 let ident_letters (s : ident_letters) = IdentLetters s
 let ident_op (s : ident_op) = IdentOp s
