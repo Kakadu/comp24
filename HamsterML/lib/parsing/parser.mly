@@ -124,10 +124,10 @@ value:
     | p = pattern                                       { p }
 
 pattern:
-    | tpl = tuple_dt                                        { Tuple tpl } (* (1, 2, 3, ...) *)
-    | lst = list_dt                                         { List lst }  (* [1; 2; 3; ...] *)
-    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } (* hd :: tl *)
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } (* 1 :: [2; 3] *)
+    | tpl = tuple_dt                                        { Tuple tpl } // (1, 2, 3, ...) 
+    | lst = list_dt                                         { List lst }  // [1; 2; 3; ...] 
+    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } // hd :: tl 
+    | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } // 1 :: [2; 3] 
 
 int:
     | i = TYPE_INT              {Int i}
@@ -145,7 +145,6 @@ float:
     | BOOL                  { PBool }
     | CHAR                  { PChar }
     | STRING                { PString }
-    // | n = POLYMORPHIC_NAME  { Poly n }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -166,15 +165,12 @@ float:
     | NOT { NOT }
 
 %inline func_id: 
-    // | id = IDENTIFIER     { VarId ( id ) }
+    // let (+) x y = x - y  (operators as names)
     | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
-    // (* let _ = .. *)
-    // | WILDCARD            { Wildcard }
-    // (* let f x = let (k, j) = x in j in f (1, 2) *)
-    // | p = pattern         { p }
+    // let f x = let (k, j) = x in j in f (1, 2) (regular names and patterns like (k,j))
     | v = value            { v }
 
-const_or_var: (* Const or variable *)
+const_or_var: // Const or variable 
     | const = dataType      {Const const} 
     | varId = IDENTIFIER    { VarId varId }
 
@@ -190,19 +186,19 @@ typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (type
     | { Nonrecursive }
 
 %inline let_def:
-    (* () = print_endline "123" *)
+    // () = print_endline "123" 
     | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
-    (* [rec] f x = x *)
+    // [rec] f x = x 
     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
 
-(* a = 10 and b = 20 and ... *)
+// a = 10 and b = 20 and ... 
 and_bind:
     | l = let_def                             { [l] }
     | h = let_def; LET_AND; tl = and_bind     { h :: tl }
 
-(* a = 10 and b = 20 and ... in a + b + ... *)
+// a = 10 and b = 20 and ... in a + b + ... 
 let_and_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
-    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
-    | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)
+    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    // without and 
+    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      // with and 
+    | exs = and_bind;               { LetAndIn (exs, None) }        // and .. and .. without IN 
