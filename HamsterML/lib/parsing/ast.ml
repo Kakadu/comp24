@@ -16,8 +16,7 @@ type paramType =
   | PFloat
   | PBool
   | PChar
-  | PString
-  (* | Poly of string (a: `a) (b: `b) *)
+  | PString (* | Poly of string (a: `a) (b: `b) *)
 [@@deriving show]
 
 type bop =
@@ -26,6 +25,7 @@ type bop =
   | MUL (** * *)
   | DIV (** / *)
   | EQ (** = *)
+  | ID_EQ
   | NEQ (** != *)
   | GT (** > *)
   | GTE (** >= *)
@@ -44,13 +44,12 @@ type pattern =
   | VarId of id
   | TypedVarID of id * paramType (* (a: int) *)
   | Wildcard (* _ *)
-  | Tuple of pattern list (* (1, 2, 3) *)
-  | List of pattern list (* [1; 2; 3] *)
-  | ListConcat of pattern * pattern (* a :: [b;c]*)
-  (* | UnitPattern *)
+  | Tuple of expr list (* (1, 2, 3) *)
+  | List of expr list (* [1; 2; 3] *)
+  | ListConcat of expr * pattern (* a :: [b;c]*)
 [@@deriving show]
 
-type expr =
+and expr =
   | BinOp of bop * expr * expr
   | UnOp of uop * expr
   | Application of expr * expr

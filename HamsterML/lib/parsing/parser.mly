@@ -18,7 +18,6 @@
 %token BOOL
 %token CHAR
 %token STRING
-%token <string> POLYMORPHIC_NAME // (x: `a) (y: `b)
 
 %token <char>   OP_IDENTIFIER // let (+) = ...
 %token <string> IDENTIFIER
@@ -56,6 +55,7 @@
 %token SLASH                // "/"
 %token CARET                // "^"
 %token EQUAL                // "="
+%token IDENTICAL_EQ         // "=="
 %token NOT_EQUAL            // "!=" || "<>" TODO: check semantics
 %token GREATER_THAN         // ">"
 %token GREATER_THAN_EQUAL   // ">="
@@ -80,6 +80,7 @@
 %left LESS_THAN
 %left NOT_EQUAL
 %left EQUAL
+%left IDENTICAL_EQ
 
 %left CARET
 %left PLUS, MINUS
@@ -126,8 +127,8 @@ patternValue:
 pattern:
     | tpl = tuple_dt                                        { Tuple tpl } // (1, 2, 3, ...) 
     | lst = list_dt                                         { List lst }  // [1; 2; 3; ...] 
-    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } // hd :: tl 
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } // 1 :: [2; 3] 
+    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (Pattern lv, rv) } // hd :: tl 
+    | l = const_or_var ; DOUBLE_COLON; r = pattern          { ListConcat (Pattern l, r) }
 
 int:
     | i = TYPE_INT              {Int i}
@@ -152,7 +153,8 @@ float:
     | ASTERISK              { MUL }                  
     | SLASH                 { DIV }                  
     | CARET                 { CONCAT }               
-    | EQUAL                 { EQ }                
+    | EQUAL                 { EQ }       
+    | IDENTICAL_EQ          { ID_EQ }         
     | NOT_EQUAL             { NEQ }           
     | GREATER_THAN          { GT }       
     | GREATER_THAN_EQUAL    { GTE }  
@@ -176,9 +178,9 @@ const_or_var: // Const or variable
 
 typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
 
-%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, patternValue); RIGHT_PARENTHESIS      { arg_list }
+%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, expr); RIGHT_PARENTHESIS      { arg_list }
 
-%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, patternValue); RIGHT_SQ_BRACKET              { arg_list }
+%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, expr); RIGHT_SQ_BRACKET              { arg_list }
 
 match_cases: first_match_case = match_case_first; rest_cases = list(match_case)     { first_match_case :: rest_cases }
 

@@ -66,6 +66,7 @@ rule read =
     | '/'       { SLASH }
     | '^'       { CARET }
     | '='       { EQUAL }
+    | "=="      { IDENTICAL_EQ }
     | "!="      { NOT_EQUAL}  
     | '>'       { GREATER_THAN }
     | ">="      { GREATER_THAN_EQUAL }
@@ -84,8 +85,6 @@ rule read =
                     TYPE_STRING (String.sub str 1 (String.length str - 2))}
     | "true"    { TYPE_BOOL (true) }
     | "false"   { TYPE_BOOL (false) }
-    | poly      { (let str = Lexing.lexeme lexbuf in
-                    POLYMORPHIC_NAME (String.sub str 1 ((String.length str) - 1))) }
     | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
     | eof       { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

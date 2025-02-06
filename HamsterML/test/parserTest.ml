@@ -88,10 +88,6 @@ let%test _ =
   = [ Let (Nonrecursive, TypedVarID ("roblox", PBool), [], Pattern (Const (Bool false))) ]
 ;;
 
-(*
-   let%test _ = parse "( roblox : `a )" = [ Pattern (TypedVarID ("roblox", Poly "a")) ]
-let%test _ = parse "( roblox : `a )" = [ Pattern (TypedVarID ("roblox", Poly "a")) ] *)
-
 (* Patterns *)
 let%test _ =
   parse "let l = [1; 2; 3; 4]"
@@ -99,7 +95,13 @@ let%test _ =
         ( Nonrecursive
         , VarId "l"
         , []
-        , Pattern (List [ Const (Int 1); Const (Int 2); Const (Int 3); Const (Int 4) ]) )
+        , Pattern
+            (List
+               [ Pattern (Const (Int 1))
+               ; Pattern (Const (Int 2))
+               ; Pattern (Const (Int 3))
+               ; Pattern (Const (Int 4))
+               ]) )
     ]
 ;;
 
@@ -113,7 +115,12 @@ let%test _ =
         , []
         , Pattern
             (ListConcat
-               (Const (Int 1), List [ Const (Int 2); Const (Int 3); Const (Int 4) ])) )
+               ( Pattern (Const (Int 1))
+               , List
+                   [ Pattern (Const (Int 2))
+                   ; Pattern (Const (Int 3))
+                   ; Pattern (Const (Int 4))
+                   ] )) )
     ]
 ;;
 
@@ -125,8 +132,11 @@ let%test _ =
         , []
         , Pattern
             (Tuple
-               [ Const (Char 'a'); Const (Char 'b'); Const (Char 'c'); Const (Char 'd') ])
-        )
+               [ Pattern (Const (Char 'a'))
+               ; Pattern (Const (Char 'b'))
+               ; Pattern (Const (Char 'c'))
+               ; Pattern (Const (Char 'd'))
+               ]) )
     ]
 ;;
 
@@ -257,7 +267,7 @@ let%test _ =
         , Match
             ( Pattern (VarId "rofl")
             , [ List [], Pattern (Const (Int 0))
-              ; ListConcat (VarId "hd", VarId "tl"), Pattern (Const (Int 10))
+              ; ListConcat (Pattern (VarId "hd"), VarId "tl"), Pattern (Const (Int 10))
               ] ) )
     ]
 ;;
@@ -276,7 +286,10 @@ let%test _ =
     ]
 ;;
 
-let %test _ = parse "let f x = match x with | 1 -> 10 | 2 -> 20" = parse "let f x = match x with 1 -> 10 | 2 -> 20"
+let%test _ =
+  parse "let f x = match x with | 1 -> 10 | 2 -> 20"
+  = parse "let f x = match x with 1 -> 10 | 2 -> 20"
+;;
 
 (* let declarations *)
 let%test _ =
@@ -396,7 +409,7 @@ let%test _ =
               , LetAndIn
                   ( [ Let
                         ( Nonrecursive
-                        , Tuple [ VarId "k"; VarId "j" ]
+                        , Tuple [ Pattern (VarId "k"); Pattern (VarId "j") ]
                         , []
                         , Pattern (VarId "x") )
                     ]
@@ -404,7 +417,9 @@ let%test _ =
           ]
         , Some
             (Application
-               (Pattern (VarId "f"), Pattern (Tuple [ Const (Int 1); Const (Int 2) ]))) )
+               ( Pattern (VarId "f")
+               , Pattern (Tuple [ Pattern (Const (Int 1)); Pattern (Const (Int 2)) ]) ))
+        )
     ]
 ;;
 
@@ -413,9 +428,9 @@ let%test _ =
   = [ LetAndIn
         ( [ Let
               ( Nonrecursive
-              , Tuple [ VarId "a"; VarId "b" ]
+              , Tuple [ Pattern (VarId "a"); Pattern (VarId "b") ]
               , []
-              , Pattern (Tuple [ Const (Int 1); Const (Int 2) ]) )
+              , Pattern (Tuple [ Pattern (Const (Int 1)); Pattern (Const (Int 2)) ]) )
           ]
         , Some (Pattern (VarId "b")) )
     ]
