@@ -313,12 +313,11 @@ let binop_binder group =
     | [] -> fail "There is no matching operator"
   in
   let ebinop_helper x y =
-    eapp
-      (e_typed
-         (eapp
-            (e_typed (eid (bin_op_string |> ident_op |> ident_of_definable)))
-            (e_typed x)))
-      (e_typed y)
+    e_typed
+    @@ eapp
+         (e_typed
+            (eapp (e_typed (eid (bin_op_string |> ident_op |> ident_of_definable))) x))
+         y
   in
   helper bin_op_string group *> return ebinop_helper
 ;;
@@ -333,43 +332,56 @@ let get_chain e priority_group =
   chain e binop_binder
 ;;
 
-let rec pe_un_op_app pe_expr =
-  let* unop = pe_token pe_unary_op >>| convert_op_to_ident in
-  let* expr_typed = choice [ pe_expr; pe_space1 *> pe_un_op_app pe_expr ] in
-  return @@ eapp (e_typed (eid unop)) (e_typed expr_typed)
+let pe_typed_if_in_parens pe = pe_parens (pe_typed pe) <|> (pe >>| e_typed)
+
+let rollback_not_app per =
+  let* e, typ = per in
+  match typ with
+  | None -> return e
+  | _ -> fail "Rollback"
 ;;
 
 let pe_bin_op_app pe_expr =
   let delim_list_expr_colons = "::" in
   fix (fun pe_bin_op_app ->
     let pe_bin_op pe_expr =
-      let term = get_chain pe_expr fifth_priority_group in
+      let term = get_chain (pe_typed_if_in_parens pe_expr) fifth_priority_group in
       let term = get_chain term fourth_priority_group in
       let term = get_chain term third_priority_group in
       let term = get_chain term second_priority_group in
       get_chain term first_priority_group
     in
+    let rec pe_un_op_app pe_expr =
+      let* unop = pe_token pe_unary_op >>| convert_op_to_ident in
+      let* expr_typed = choice [ pe_space1 *> pe_un_op_app pe_expr; pe_expr ] in
+      return @@ e_typed @@ eapp (e_typed (eid unop)) expr_typed
+    in
     let pe_app pe_expr =
-      let term = chainl1 pe_expr (return (fun x y -> eapp (e_typed x) (e_typed y))) in
-      let term = choice [ pe_un_op_app term; term ] in
-      let cons =
-        delim_list_expr_colons =?*> return (fun x y -> elist (e_typed x) (e_typed y))
+      let term =
+        rollback_not_app
+        @@ chainl1 (pe_expr >>| e_typed) (return (fun x y -> e_typed @@ eapp x y))
       in
+      let term =
+        chainl1 (pe_typed_if_in_parens term) (return (fun x y -> e_typed @@ eapp x y))
+      in
+      let term = choice [ pe_un_op_app term; term ] in
+      let cons = delim_list_expr_colons =?*> return (fun x y -> e_typed @@ elist x y) in
       chainr1 term cons
     in
     let pe_bin_op_parens =
       let* op = pe_parens pe_op in
-      let pe_expr = pe_bin_op_app in
+      let pe_expr = pe_typed_if_in_parens pe_bin_op_app in
       lift2
         (fun e1 e2 ->
-          eapp
-            (e_typed
-               (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) (e_typed e1)))
-            (e_typed e2))
+          e_typed
+          @@ eapp
+               (e_typed (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) e1))
+               e2)
         pe_expr
         pe_expr
     in
-    pe_bin_op @@ choice [ pe_bin_op_parens; pe_app pe_expr ])
+    rollback_not_app
+    @@ pe_bin_op (rollback_not_app @@ choice [ pe_bin_op_parens; pe_app pe_expr ]))
 ;;
 
 (****************************************************** Functions ******************************************************)
@@ -487,11 +499,11 @@ let pe_expr =
 let pe_decls =
   lift
     prog
-    (many ((pe_let_decl pe_expr) <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space))
+    (many (pe_let_decl pe_expr <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space))
 ;;
 
 let parse_program s =
-  match Angstrom.parse_string ~consume:Consume.Prefix pe_decls s with
+  match Angstrom.parse_string ~consume:Consume.All pe_decls s with
   | Ok v -> Ok v
   | Error msg ->
     (match msg with
