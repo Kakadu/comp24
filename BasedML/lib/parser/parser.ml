@@ -477,8 +477,10 @@ let parse p s = parse_string ~consume:All p s
 (* takes in code in OCaml and returns its AST*)
 let parse_program =
   parse
-    (sep_by (take_while1 is_whitespace) (p_mutually_rec_decl <|> p_let_decl p_exp)
-     <* option "" (take_while1 is_whitespace))
+    (sep_by
+       (Angstrom.string ";;" <|> take_while1 is_whitespace)
+       (p_mutually_rec_decl <|> p_let_decl p_exp)
+     <* option "" (Angstrom.string ";;" <|> take_while1 is_whitespace))
 ;;
 
 (* parser testing function *)

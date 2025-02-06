@@ -141,7 +141,7 @@ let restore_anf_decl fmt = function
   | ADSingleLet (rec_flag, ALet (pat, patterns, body)) ->
     Format.fprintf
       fmt
-      "let %a %a %a = %a"
+      "let %a %a %a = %a;;"
       frestore_rec_flag
       rec_flag
       frestore_pattern
