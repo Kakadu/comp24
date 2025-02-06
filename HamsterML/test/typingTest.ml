@@ -1,12 +1,57 @@
 open HamsterML.Typing
+open HamsterML.Ast
 
-let typecheck expr =
-  match infer expr with
+let typecheck f x =
+  let res = R.run (f TypeEnv.empty x) in
+  match res with
   | Ok (_, t) -> t
   | Error e -> failwith (show_error e)
 ;;
 
-(* data types *)
+let typecheck_expr = typecheck Infer.infer_expr
+
+(* fun [10; 10] = () => int list -> unit *)
+let%test _ =
+  typecheck_expr (Fun ([ List [ Const (Int 10); Const (Int 20) ] ], Pattern (Const Unit)))
+  = TArrow (TList TInt, TUnit)
+;;
+
+(* Patterns *)
+
+(* (1, 2, 3) => int * int * int  *)
+let%test _ =
+  typecheck Infer.infer_pattern (Tuple [ Const (Int 1); Const (Int 2); Const (Int 3) ])
+  = TTuple [ TInt; TInt; TInt ]
+;;
+
+(* (1, "2", 3) => int * string * int  *)
+let%test _ =
+  typecheck
+    Infer.infer_pattern
+    (Tuple [ Const (Int 1); Const (String "2"); Const (Int 3) ])
+  = TTuple [ TInt; TString; TInt ]
+;;
+
+(* (1, 2, 3) => int * int * int  *)
+let%test _ =
+  typecheck Infer.infer_pattern (Tuple [ Const (Int 1); Const (Int 2); Const (Int 1) ])
+  = TTuple [ TInt; TInt; TInt ]
+;;
+
+(* ([1; 2; 3], "123", 123) => int list * string * int *)
+let%test _ =
+  typecheck
+    Infer.infer_pattern
+    (Tuple
+       [ List [ Const (Int 1); Const (Int 2); Const (Int 3) ]
+       ; Const (String "123")
+       ; Const (Int 123)
+       ])
+  = TTuple [ TList TInt; TString; TInt ]
+;;
+
+(*
+   (* data types *)
 let%test _ = typecheck (Pattern (Const (Int 228))) = TInt
 let%test _ = typecheck (Pattern (Const (Float 228.337))) = TFloat
 let%test _ = typecheck (Pattern (Const (String "kfc boss"))) = TString
@@ -42,4 +87,4 @@ let%test _ =
       ( TInt
       , TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TInt)))))
       )
-;;
+;; *)

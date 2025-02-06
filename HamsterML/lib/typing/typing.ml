@@ -20,8 +20,10 @@ type inf_type =
 type error =
   | Variable_not_found
   | Unification_failed of inf_type * inf_type
-  | Illegal_pattern
+  | Illegal_pattern of Ast.pattern
   | Unsupported_type
+  | Empty_program
+  | Inexhaustive_pattern of Ast.pattern
 [@@deriving show]
 
 module VarSet = struct
@@ -327,17 +329,15 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
-  let rec infer_args (env : TypeEnv.t) (vs : Ast.pattern list)
-    : (TypeEnv.t * inf_type) R.t
-    =
-    (* infer value type in fun/let args *)
-    let infer_arg (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
-      match v with
-      | Const Unit -> R.return (env, TUnit)
+  let infer_pattern (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
+    let rec helper (env : TypeEnv.t) = function
+      | Const dt ->
+        let* subs, t = infer_data_type dt in
+        R.return (TypeEnv.apply subs env, t)
       | Wildcard ->
         let* fr = fresh_var in
         R.return (env, fr)
-        (* add new poly var *)
+        (* let f _ _ : 'a -> 'b *)
       | VarId name ->
         let* fr = fresh_var in
         let new_env = TypeEnv.extend name (Scheme.create fr) env in
@@ -353,15 +353,58 @@ module Infer = struct
         in
         let env = TypeEnv.extend name (Scheme.create v_t) env in
         R.return (env, v_t)
-      | _ -> R.fail Illegal_pattern
+      | List ps ->
+        (match ps with
+         | [] ->
+           let* fr = fresh_var in
+           R.return (env, TList fr)
+         | p :: tl ->
+           let* env, p_t = helper env p in
+           let* env, tl_t =
+             List.fold_left
+               tl
+               ~init:(R.return (env, p_t))
+               ~f:(fun prev cur ->
+                 let* env, prev_t = prev in
+                 let* env, cur_t = helper env cur in
+                 let* u = Subst.unify cur_t prev_t in
+                 R.return (TypeEnv.apply u env, cur_t))
+           in
+           R.return (env, TList tl_t))
+      | ListConcat (hd, tl) ->
+        (* 'a :: 'a list *)
+        let* env, hd_t = helper env hd in
+        let* env, tl_t = helper env tl in
+        let* u = Subst.unify (TList hd_t) tl_t in
+        R.return (TypeEnv.apply u env, tl_t)
+      | Tuple ps ->
+        (match ps with
+         | [] -> R.return (env, TUnit)
+         | p :: tl ->
+           let* env, p_t = helper env p in
+           let* env, tl_t =
+             List.fold_left
+               tl
+               ~init:(R.return (env, [ p_t ]))
+               ~f:(fun acc p ->
+                 let* env, acc_t = acc in
+                 let* env, p_t = helper env p in
+                 R.return (env, [ p_t ] @ acc_t))
+           in
+           R.return (env, TTuple (List.rev tl_t)))
     in
-    (* infer fun/let args *)
+    helper env v
+  ;;
+
+  let rec infer_pattern_list (env : TypeEnv.t) (vs : Ast.pattern list)
+    : (TypeEnv.t * inf_type) R.t
+    =
     match vs with
     | [] -> R.return (env, TUnit)
-    | [ v ] -> infer_arg env v
+    | [ v ] -> infer_pattern env v
     | v :: vs ->
-      let* env, v_t = infer_arg env v in
-      let* env, vs_t = infer_args env vs in
+      let* env, v_t = infer_pattern env v in
+      let* env, vs_t = infer_pattern_list env vs in
       R.return (env, TArrow (v_t, vs_t))
   ;;
 
@@ -406,7 +449,7 @@ module Infer = struct
            let* fin_s = Subst.compose_all [ i_u; th_u ] in
            R.return (fin_s, TUnit))
       | Fun (args, scope) ->
-        let* env, args_t = infer_args env args in
+        let* env, args_t = infer_pattern_list env args in
         let* subs, scope_t = helper env scope in
         let args_t = Subst.apply args_t subs in
         let rec fin_t end_t =
@@ -416,13 +459,30 @@ module Infer = struct
             | x -> TArrow (x, end_t))
         in
         R.return (subs, fin_t scope_t args_t)
-      | Application (f, arg) -> 
+      (* | Application (f, arg) -> 
         let* f_s, f_t = helper env f in
-        let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type 
+        let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type  *)
       | _ -> R.fail Unsupported_type
     in
     helper env expr
   ;;
+
+  let infer_prog (env : TypeEnv.t) (prog : Ast.prog) : (Subst.t * inf_type) list R.t =
+    let rec helper (acc : (Subst.t * inf_type) list) (env : TypeEnv.t) = function
+      | expr :: tl ->
+        let* subs, typ = infer_expr env expr in
+        let env = TypeEnv.apply subs env in
+        helper ([ subs, typ ] @ acc) env tl
+      | [] -> R.return acc
+    in
+    match prog with
+    | [] -> R.fail Empty_program
+    | hd :: tl ->
+      let* subs, typ = infer_expr env hd in
+      let env = TypeEnv.apply subs env in
+      let* h_list = helper [ subs, typ ] env tl in
+      R.return (List.rev h_list)
+  ;;
 end
 
-let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr)
+let infer prog = R.run (Infer.infer_prog TypeEnv.empty prog)

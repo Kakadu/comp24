@@ -67,3 +67,6 @@ and funType =
   | Recursive
   | Nonrecursive
 [@@deriving show]
+
+type prog = expr list
+[@@deriving show]
