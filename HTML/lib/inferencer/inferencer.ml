@@ -527,6 +527,7 @@ let init_env =
   ; ">=", bin_op (tvar "_a") (tvar "_a") tbool
   ; ">", bin_op (tvar "_a") (tvar "_a") tbool
   ; "=", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "==", bin_op (tvar "_a") (tvar "_a") tbool
   ; "!=", bin_op (tvar "_a") (tvar "_a") tbool
   ; "&&", bin_op tbool tbool tbool
   ; "||", bin_op tbool tbool tbool
