@@ -50,6 +50,15 @@ let%test _ =
   = TTuple [ TList TInt; TString; TInt ]
 ;;
 
+(* 1 :: [2; 3] => int list  *)
+
+let%test _ =
+  typecheck
+    Infer.infer_pattern
+    (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3) ]))
+  = TList TInt
+;;
+
 (*
    (* data types *)
 let%test _ = typecheck (Pattern (Const (Int 228))) = TInt
