@@ -262,7 +262,23 @@ let%test _ =
     ]
 ;;
 
-(* let *)
+let%test _ =
+  parse "let f x = match x with | 1 -> 10 | 2 -> 20"
+  = [ Let
+        ( Nonrecursive
+        , VarId "f"
+        , [ VarId "x" ]
+        , Match
+            ( Pattern (VarId "x")
+            , [ Const (Int 1), Pattern (Const (Int 10))
+              ; Const (Int 2), Pattern (Const (Int 20))
+              ] ) )
+    ]
+;;
+
+let %test _ = parse "let f x = match x with | 1 -> 10 | 2 -> 20" = parse "let f x = match x with 1 -> 10 | 2 -> 20"
+
+(* let declarations *)
 let%test _ =
   parse "let a = 1" = [ Let (Nonrecursive, VarId "a", [], Pattern (Const (Int 1))) ]
 ;;

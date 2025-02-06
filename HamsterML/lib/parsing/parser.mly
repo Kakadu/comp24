@@ -101,7 +101,7 @@ expr:
     | v = patternValue                                                      { Pattern v }
     | uop = uop; e = expr                                                   { UnOp (uop, e) }
     | le = expr; bop = bop; re = expr                                       { BinOp (bop, le, re) }
-    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case)     { Match (expr, match_cases) }
+    | MATCH; expr = expr; WITH; match_cases = match_cases                   { Match (expr, match_cases) }
     | d = declaration                                                       { d }
     | FUN; vls = nonempty_list(patternValue); ARROW; e = expr               { Fun (vls, e) }
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                       { If (e1, e2, Some e3) }
@@ -180,7 +180,15 @@ typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (type
 
 %inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, patternValue); RIGHT_SQ_BRACKET              { arg_list }
 
-%inline match_case: BAR; v = patternValue; ARROW; e = expr      { (v, e) }
+match_cases: first_match_case = match_case_first; rest_cases = list(match_case)     { first_match_case :: rest_cases }
+
+match_case_first: bar_opt; v = patternValue; ARROW; e = expr     { (v, e) } 
+
+bar_opt: 
+    | BAR   { () }
+    |       { () }
+
+match_case: BAR; v = patternValue; ARROW; e = expr      { (v, e) }
 
 %inline rec_flag:
     | REC   { Recursive }
