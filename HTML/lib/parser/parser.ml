@@ -60,7 +60,7 @@ let keywords =
 ;;
 
 let is_keyword s = List.mem s keywords
-let ( =?*> ) string per = pe_stoken string *> per
+let ( =?*> ) string pe = pe_stoken string *> pe
 let ( =?>>| ) string value = pe_stoken string *> return value
 
 (****************************************************** Consts ******************************************************)
@@ -136,8 +136,8 @@ let pe_assert_token_is_not_ahead token =
 
 (****************************************************** Tuple ******************************************************)
 
-let pe_tuple ?(delim = ",") per wrap =
-  let* list_res = sep_by1 (pe_stoken delim) per in
+let pe_tuple ?(delim = ",") pe wrap =
+  let* list_res = sep_by1 (pe_stoken delim) pe in
   match list_res with
   | v1 :: v2 :: tl -> return (wrap v1 v2 tl)
   | _ -> fail "Tuple arity must be greater than 1"
@@ -236,8 +236,8 @@ let pe_typed pe =
   pe_typed <|> pe_parens pe_typed
 ;;
 
-let rollback_not_list per =
-  let* pat, _ = per in
+let rollback_not_list pe =
+  let* pat, _ = pe in
   match pat with
   | PList (_, _) | PConst CNil -> return pat
   | _ -> fail "Rollback"
@@ -335,8 +335,8 @@ let get_chain e priority_group =
 
 let pe_typed_if_in_parens pe = pe_parens (pe_typed pe) <|> (pe >>| e_typed)
 
-let rollback_not_app per =
-  let* e, typ = per in
+let rollback_not_app pe =
+  let* e, typ = pe in
   match typ with
   | None -> return e
   | _ -> fail "Rollback"
