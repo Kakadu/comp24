@@ -345,7 +345,7 @@ let pe_bin_op_app pe_expr =
   let delim_list_expr_colons = "::" in
   fix (fun pe_bin_op_app ->
     let pe_bin_op pe_expr =
-      let term = get_chain (pe_typed_if_in_parens pe_expr) fifth_priority_group in
+      let term = get_chain pe_expr fifth_priority_group in
       let term = get_chain term fourth_priority_group in
       let term = get_chain term third_priority_group in
       let term = get_chain term second_priority_group in
@@ -357,10 +357,7 @@ let pe_bin_op_app pe_expr =
       return @@ e_typed @@ eapp (e_typed (eid unop)) expr_typed
     in
     let pe_app pe_expr =
-      let term =
-        rollback_not_app
-        @@ chainl1 (pe_expr >>| e_typed) (return (fun x y -> e_typed @@ eapp x y))
-      in
+      let term = chainl1 pe_expr (return (fun x y -> eapp (e_typed x) (e_typed y))) in
       let term =
         chainl1 (pe_typed_if_in_parens term) (return (fun x y -> e_typed @@ eapp x y))
       in
@@ -380,13 +377,12 @@ let pe_bin_op_app pe_expr =
         pe_expr
         pe_expr
     in
-    rollback_not_app
-    @@ pe_bin_op (rollback_not_app @@ choice [ pe_bin_op_parens; pe_app pe_expr ]))
+    rollback_not_app @@ pe_bin_op (choice [ pe_bin_op_parens; pe_app pe_expr ]))
 ;;
 
-(****************************************************** Functions ******************************************************)
+(****************************************************** List ******************************************************)
 
-let pe_list_expr pe_expr =
+let pe_list_expr_semicolon pe_expr =
   pe_list_semicolon (pe_typed pe_expr) (fun x y -> elist x (e_typed y)) (econst CNil)
 ;;
 
@@ -412,7 +408,6 @@ let pe_fun_anon_expr pe_expr =
        *> lift2
             (fun params expr_typed ->
               let right_side, _ =
-                (*TODO: WTF??*)
                 List.fold_right (fun x y -> e_typed @@ efun x y) params expr_typed
               in
               right_side)
@@ -488,7 +483,7 @@ let pe_expr =
         ; pe_closure (pe_let_decl pe_expr_fix) pe_expr_fix
         ; pe_branching pe_expr_fix
         ; pe_match pe_expr_fix
-        ; pe_list_expr pe_expr_fix
+        ; pe_list_expr_semicolon pe_expr_fix
         ]
     in
     let pe_expr_inner = choice [ pe_bin_op_app pe_expr_inner; pe_expr_inner ] in
@@ -499,7 +494,7 @@ let pe_expr =
 let pe_decls =
   lift
     prog
-    (many (pe_let_decl pe_expr <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space))
+    (many (pe_let_decl pe_expr <* choice [ pe_stoken ";;"; peek_string 0 ]) <* pe_space)
 ;;
 
 let parse_program s =
