@@ -139,8 +139,8 @@ let pe_assert_token_is_not_ahead token =
 let pe_tuple ?(delim = ",") per wrap =
   let* list_res = sep_by1 (pe_stoken delim) per in
   match list_res with
-  | [ _ ] | [] -> fail "Tuple arity must be greater than 1"
   | v1 :: v2 :: tl -> return (wrap v1 v2 tl)
+  | _ -> fail "Tuple arity must be greater than 1"
 ;;
 
 let pe_value_or_tuple ?(delim = ",") pe_tuple parser =
@@ -303,8 +303,16 @@ let pe_branching pe_expr =
 
 (****************************************************** Application, unary, binary ops ******************************************************)
 
+let get_typed_ebinop_applier op =
+  let cast_str_ident_op op = eid (op |> ident_op |> ident_of_definable) in
+  let typed_ebinop_applier x y =
+    e_typed @@ eapp (e_typed (eapp (e_typed (cast_str_ident_op op)) x)) y
+  in
+  typed_ebinop_applier
+;;
+
 let binop_binder group =
-  let* bin_op_string = pe_binary_op in
+  let* op = pe_binary_op in
   let rec helper bin_op_string = function
     | group_string :: tl ->
       if String.starts_with ~prefix:group_string bin_op_string
@@ -312,14 +320,7 @@ let binop_binder group =
       else helper bin_op_string tl
     | [] -> fail "There is no matching operator"
   in
-  let ebinop_helper x y =
-    e_typed
-    @@ eapp
-         (e_typed
-            (eapp (e_typed (eid (bin_op_string |> ident_op |> ident_of_definable))) x))
-         y
-  in
-  helper bin_op_string group *> return ebinop_helper
+  helper op group *> return (get_typed_ebinop_applier op)
 ;;
 
 let get_chain e priority_group =
@@ -368,14 +369,7 @@ let pe_bin_op_app pe_expr =
     let pe_bin_op_parens =
       let* op = pe_parens pe_op in
       let pe_expr = pe_typed_if_in_parens pe_bin_op_app in
-      lift2
-        (fun e1 e2 ->
-          e_typed
-          @@ eapp
-               (e_typed (eapp (e_typed (eid (op |> ident_op |> ident_of_definable))) e1))
-               e2)
-        pe_expr
-        pe_expr
+      lift2 (get_typed_ebinop_applier op) pe_expr pe_expr
     in
     rollback_not_app @@ pe_bin_op (choice [ pe_bin_op_parens; pe_app pe_expr ]))
 ;;
