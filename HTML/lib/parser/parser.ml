@@ -239,7 +239,7 @@ let pe_typed pe =
 let rollback_not_list per =
   let* pat, _ = per in
   match pat with
-  | PList (_, _) -> return pat
+  | PList (_, _) | PConst CNil -> return pat
   | _ -> fail "Rollback"
 ;;
 
