@@ -2,22 +2,6 @@ open Ast
 open Pp_utils
 open Format
 
-(* module PpPrintMonad = struct
-   open Base.Result
-
-   type 'a t = state -> 'a * state
-
-   let return (value : 'a) : 'a t = fun st -> value, st
-
-   let ( >>= ) (m : 'a t) (f : 'a -> 'b t) : 'b t =
-   fun st ->
-   let value, next_st = m st in
-   f value next_st
-   ;;
-   end
-
-   open PpPrintMonad *)
-
 let pp_const fmt = function
   | CInt a -> fprintf fmt "%d" a
   | CBool a -> fprintf fmt "%b" a
