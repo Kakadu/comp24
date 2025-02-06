@@ -39,8 +39,8 @@ let rec pp_type fmt typ =
   | TVar var ->
     let ascii_code_of_a = 97 in
     fprintf fmt "%s" ("'" ^ Char.escaped (Char.chr (int_of_string var + ascii_code_of_a)))
-    | TTuple (typ1, typ2, value_list) ->
-      let value_list = typ1 :: typ2 :: value_list in
+  | TTuple (typ1, typ2, value_list) ->
+    let value_list = typ1 :: typ2 :: value_list in
     let pp_tuple value_list =
       let pp_el fmt typ =
         let s =
@@ -88,7 +88,7 @@ let edit_numbers_in_typ typ =
     | TGround _ -> typ, total, map
     | TTuple (t1, t2, xs) ->
       let t1, total, map = helper t1 total map in
-      let t2, total, map = helper t2 total map in 
+      let t2, total, map = helper t2 total map in
       let res, total, map =
         List.fold_left
           (fun (acc, total, map) typ ->
@@ -97,7 +97,7 @@ let edit_numbers_in_typ typ =
           ([], total, map)
           xs
       in
-      TTuple (t1, t2, (List.rev res)), total, map
+      TTuple (t1, t2, List.rev res), total, map
     | TList ltyp ->
       let res, total, map = helper ltyp total map in
       TList res, total, map
@@ -154,7 +154,8 @@ let pp_error fmt err =
       fmt
       "Use parser to get the AST: the parser does some transformations of expressions"
   | WildcardNotExpected -> fprintf fmt {| wildcard " _ " not expected |}
-  | UnexpectedRecursionLhs -> fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
+  | UnexpectedRecursionLhs ->
+    fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
 ;;
 
 let print_type_error error =
