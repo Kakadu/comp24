@@ -487,11 +487,11 @@ let pe_expr =
 let pe_decls =
   lift
     prog
-    (many (pe_let_decl pe_expr) <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space)
+    (many ((pe_let_decl pe_expr) <* choice [ pe_stoken ";;"; peek_string 0 ] <* pe_space))
 ;;
 
 let parse_program s =
-  match Angstrom.parse_string ~consume:Consume.All pe_decls s with
+  match Angstrom.parse_string ~consume:Consume.Prefix pe_decls s with
   | Ok v -> Ok v
   | Error msg ->
     (match msg with
