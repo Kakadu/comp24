@@ -364,7 +364,6 @@ module Infer = struct
       R.return (env, TArrow (v_t, vs_t))
   ;;
 
-  (* Subst.t -> инфа о известных подстановках *)
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
       match expr with
@@ -416,6 +415,9 @@ module Infer = struct
             | x -> TArrow (x, end_t))
         in
         R.return (subs, fin_t scope_t args_t)
+      | Application (f, arg) -> 
+        let* f_s, f_t = helper env f in
+        let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type 
       | _ -> R.fail Unsupported_type
     in
     helper env expr
