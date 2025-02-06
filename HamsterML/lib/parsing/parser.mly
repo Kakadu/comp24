@@ -93,20 +93,20 @@
 prog: p = list(declaration) EOF { p }
 
 declaration:
-    | LET; l = let_def                                                  { l }
-    | LET; l = let_and_in_def                                           { l } 
+    | LET; l = let_def          { l }
+    | LET; l = let_and_in_def   { l } 
 
 expr:
-    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
-    | v = value                                                         { Pattern v }
-    | uop = uop; e = expr                                               { UnOp (uop, e) }
-    | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
-    | d = declaration                                                   { d }
-    | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
-    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
-    | IF; e1 = expr; THEN; e2 = expr                                    { If (e1, e2, None) }
-    | le = expr; re = expr                                              { Application (le,re) }
+    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                         { e }
+    | v = patternValue                                                      { Pattern v }
+    | uop = uop; e = expr                                                   { UnOp (uop, e) }
+    | le = expr; bop = bop; re = expr                                       { BinOp (bop, le, re) }
+    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case)     { Match (expr, match_cases) }
+    | d = declaration                                                       { d }
+    | FUN; vls = nonempty_list(patternValue); ARROW; e = expr               { Fun (vls, e) }
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                       { If (e1, e2, Some e3) }
+    | IF; e1 = expr; THEN; e2 = expr                                        { If (e1, e2, None) }
+    | le = expr; re = expr                                                  { Application (le,re) }
 
 dataType:
     | f = float             { f }
@@ -116,12 +116,12 @@ dataType:
     | s = TYPE_STRING       { String s }
     | TYPE_UNIT             { Unit }
 
-value:
-    | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS    { v }
-    | WILDCARD                                          { Wildcard }
-    | t_v = typed_var                                   { t_v }
-    | v = const_or_var                                  { v }
-    | p = pattern                                       { p }
+patternValue:
+    | LEFT_PARENTHESIS; v = patternValue; RIGHT_PARENTHESIS     { v }
+    | WILDCARD                                                  { Wildcard }
+    | t_v = typed_var                                           { t_v }
+    | v = const_or_var                                          { v }
+    | p = pattern                                               { p }
 
 pattern:
     | tpl = tuple_dt                                        { Tuple tpl } // (1, 2, 3, ...) 
@@ -140,11 +140,11 @@ float:
     | PLUS; f = TYPE_FLOAT      {Float (f)}
 
 %inline paramType:
-    | INT                   { PInt }
-    | FLOAT                 { PFloat }
-    | BOOL                  { PBool }
-    | CHAR                  { PChar }
-    | STRING                { PString }
+    | INT       { PInt }
+    | FLOAT     { PFloat }
+    | BOOL      { PBool }
+    | CHAR      { PChar }
+    | STRING    { PString }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -166,39 +166,39 @@ float:
 
 %inline func_id: 
     // let (+) x y = x - y  (operators as names)
-    | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
+    | op = OP_IDENTIFIER    { VarId ( String.make 1 op ) }
     // let f x = let (k, j) = x in j in f (1, 2) (regular names and patterns like (k,j))
-    | v = value            { v }
+    | v = patternValue      { v }
 
 const_or_var: // Const or variable 
-    | const = dataType      {Const const} 
+    | const = dataType      { Const const } 
     | varId = IDENTIFIER    { VarId varId }
 
 typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
 
-%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { arg_list }
-%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { arg_list }
+%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, patternValue); RIGHT_PARENTHESIS      { arg_list }
 
-%inline match_case: BAR; v = value; ARROW; e = expr { (v, e) }
+%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, patternValue); RIGHT_SQ_BRACKET              { arg_list }
+
+%inline match_case: BAR; v = patternValue; ARROW; e = expr      { (v, e) }
 
 %inline rec_flag:
-    | REC { Recursive }
-    | { Nonrecursive }
+    | REC   { Recursive }
+    |       { Nonrecursive }
 
 %inline let_def:
     // () = print_endline "123" 
-    | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
+    | TYPE_UNIT; EQUAL; e = expr                                                            { Let(Nonrecursive, Const(Unit), [], e)}
     // [rec] f x = x 
-    | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
-
+    | rec_opt = rec_flag; fun_name = func_id; args = list(patternValue); EQUAL; e = expr    { Let(rec_opt, fun_name, args, e) }
 
 // a = 10 and b = 20 and ... 
 and_bind:
-    | l = let_def                             { [l] }
-    | h = let_def; LET_AND; tl = and_bind     { h :: tl }
+    | l = let_def                               { [l] }
+    | h = let_def; LET_AND; tl = and_bind       { h :: tl }
 
 // a = 10 and b = 20 and ... in a + b + ... 
 let_and_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    // without and 
-    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      // with and 
-    | exs = and_bind;               { LetAndIn (exs, None) }        // and .. and .. without IN 
+    | e1 = let_def; IN; e2 = expr       { LetAndIn ([e1], Some e2) }    // without and 
+    | exs = and_bind; IN; e = expr      { LetAndIn (exs, Some e) }      // with and 
+    | exs = and_bind;                   { LetAndIn (exs, None) }        // and .. and .. without IN 
