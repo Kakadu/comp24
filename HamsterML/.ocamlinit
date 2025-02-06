@@ -4,13 +4,13 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
-let parse (s : string) : expr =
+let parse (s : string) : expr list =
   let lexbuf = Lexing.from_string s in
   let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in
   ast
 ;;
 
-let typecheck (s : string) = 
+(* let typecheck (s : string) = 
   match infer (parse s) with
     | Ok (_, t) -> t
-    | Error e -> failwith (show_error e);;
+    | Error e -> failwith (show_error e);; *)

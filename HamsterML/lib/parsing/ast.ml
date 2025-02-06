@@ -17,7 +17,7 @@ type paramType =
   | PBool
   | PChar
   | PString
-  | Poly of string (* (a: `a) (b: `b) *)
+  (* | Poly of string (a: `a) (b: `b) *)
 [@@deriving show]
 
 type bop =
@@ -38,28 +38,29 @@ type bop =
 
 type uop = NOT (** not true *) [@@deriving show]
 
-(* Value is a value (dataType -> dataStructure) *)
-type value =
+(* Pattern is a value (dataType -> dataStructure) *)
+type pattern =
   | Const of dataType
   | VarId of id
   | TypedVarID of id * paramType (* (a: int) *)
   | Wildcard (* _ *)
-  | Tuple of value list (* (1, 2, 3) *)
-  | List of value list (* [1; 2; 3] *)
-  | ListConcat of value * value (* a :: [b;c]*)
+  | Tuple of pattern list (* (1, 2, 3) *)
+  | List of pattern list (* [1; 2; 3] *)
+  | ListConcat of pattern * pattern (* a :: [b;c]*)
+  (* | UnitPattern *)
 [@@deriving show]
 
 type expr =
   | BinOp of bop * expr * expr
   | UnOp of uop * expr
   | Application of expr * expr
-  | Value of value
-  | Let of funType * id * value list * expr (* let id a = a *)
-  | LetUnit of expr (* let () = print_endline "123" *)
+  | Pattern of pattern
+  (* let id a = a | the first `pattern` is the pattern that can be used instead of function's name *)
+  | Let of funType * pattern * pattern list * expr
   | LetAndIn of expr list * expr option (* let a = 1 and b = 2 in a + b *)
-  | Fun of value list * expr (* (fun a -> a + 1) *)
+  | Fun of pattern list * expr (* (fun a -> a + 1) *)
   | If of expr * expr * expr option (* if a = b then c (else d) *)
-  | Match of expr * (value * expr) list
+  | Match of expr * (pattern * expr) list
 [@@deriving show]
 
 and funType =
