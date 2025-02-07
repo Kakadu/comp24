@@ -28,8 +28,8 @@ repos:
         language: system
         files: ^XaxaML/
 
-    # -   id: zanuda
-    #     name: zanuda
-    #     entry: bash -c 'cd XaxaML && zanuda -no-top_file_license -dir .'
-    #     language: system
-    #     files: ^XaxaML/
+    -   id: zanuda
+        name: zanuda
+        entry: bash -c 'cd XaxaML && zanuda -no-top_file_license -dir .'
+        language: system
+        files: ^XaxaML/
