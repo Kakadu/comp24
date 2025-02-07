@@ -14,7 +14,7 @@ type error =
 
 let pp_error ppf : error -> unit = function
   | Occurs_check -> Format.fprintf ppf {|Occurs check failed|}
-  | No_variable s -> Format.fprintf ppf {|Undefined variable "%s"|} s
+  | No_variable s -> Format.fprintf ppf {|Undefined variable %S|} s
   | Unification_failed (l, r) ->
     Format.fprintf ppf {|Unification failed on %a and %a|} pp_typ l pp_typ r
   | Multiple_bound s ->
@@ -64,7 +64,7 @@ end = struct
     | var, Result.Ok x -> f x var
   ;;
 
-  let bind x f = x >>= f
+  let bind = ( >>= )
 
   let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
     fun var ->
@@ -74,7 +74,7 @@ end = struct
   ;;
 
   module Syntax = struct
-    let ( let* ) x f = bind x f
+    let ( let* ) = bind
   end
 
   module RMap = struct
@@ -119,8 +119,7 @@ module Type = struct
     let rec helper acc = function
       | T_var b -> TypeVarSet.add b acc
       | T_arr (l, r) -> helper (helper acc l) r
-      | T_tuple (h, list) ->
-        List.fold_left (fun acc item -> helper acc item) (helper acc h) list
+      | T_tuple (h, list) -> List.fold_left helper (helper acc h) list
       | T_list t -> helper acc t
       | _ -> acc
     in
@@ -154,8 +153,8 @@ end = struct
     else return (Map.singleton (module Int) k v)
   ;;
 
-  let find mp ty = Map.find mp ty
-  let remove mp ty = Map.remove mp ty
+  let find = Map.find
+  let remove = Map.remove
 
   let apply sub =
     let rec helper = function
@@ -164,7 +163,7 @@ end = struct
          | None -> ty
          | Some x -> x)
       | T_arr (l, r) -> T_arr (helper l, helper r)
-      | T_tuple (h, list) -> T_tuple (helper h, List.map list ~f:(fun item -> helper item))
+      | T_tuple (h, list) -> T_tuple (helper h, List.map list ~f:helper)
       | T_list t -> T_list (helper t)
       | other -> other
     in
@@ -182,7 +181,7 @@ end = struct
       compose sub1 sub2
     | T_tuple (h1, list1), T_tuple (h2, list2) ->
       let* unified =
-        match List.map2 list1 list2 ~f:(fun t1 t2 -> unify t1 t2) with
+        match List.map2 list1 list2 ~f:unify with
         | Unequal_lengths ->
           fail (Unification_failed (T_tuple (h1, list1), T_tuple (h2, list2)))
         | Ok res -> return res
@@ -261,7 +260,7 @@ end = struct
   let std =
     let init_env = empty in
     let empty_bind = TypeVarSet.empty in
-    let single_bind n = TypeVarSet.singleton n in
+    let single_bind = TypeVarSet.singleton in
     let init_env =
       add_to_std init_env "print_int" (Scheme (empty_bind, int_typ @-> unit_typ))
     in
@@ -327,7 +326,7 @@ end = struct
     init_env
   ;;
 
-  let remove mp k = Map.remove mp k
+  let remove = Map.remove
 
   let find mp k =
     match Map.find mp k with

@@ -10,7 +10,7 @@ let parse_expr_and_print_ast str =
   | Result.Error str -> Format.printf "Parsing error%s\n" str
 ;;
 
-let%expect_test _ =
+let%expect_test "simple algebra" =
   parse_expr_and_print_ast {|1 + 2 * 3|};
   [%expect
     {|
@@ -20,7 +20,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "simple function" =
   parse_expr_and_print_ast {|fun a b c -> a + b + c|};
   [%expect
     {|
@@ -32,7 +32,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "if then else" =
   parse_expr_and_print_ast {|if true then if true then a else b else 1|};
   [%expect
     {|
@@ -41,14 +41,14 @@ let%expect_test _ =
        (E_const (C_int 1)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "apply" =
   parse_expr_and_print_ast {|f 1 2|};
   [%expect
     {|
     (E_app ((E_app ((E_ident "f"), (E_const (C_int 1)))), (E_const (C_int 2)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   parse_expr_and_print_ast {|1 + f 2|};
   [%expect
     {|
@@ -56,7 +56,7 @@ let%expect_test _ =
        (E_app ((E_ident "f"), (E_const (C_int 2)))))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "tuple" =
   parse_expr_and_print_ast {|(1, x, 1+2, (1, false))|};
   [%expect
     {|
@@ -68,7 +68,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "list" =
   parse_expr_and_print_ast {|3::[1; 2]|};
   [%expect
     {|
@@ -78,7 +78,7 @@ let%expect_test _ =
          )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "match with 1" =
   parse_expr_and_print_ast {|match x with
       | h::tl -> 1
       | _ -> 0 |};
@@ -90,7 +90,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "match with 2" =
   parse_expr_and_print_ast {|match x with (a, b) -> true | _ -> false |};
   [%expect
     {|
@@ -100,7 +100,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "empty list" =
   parse_expr_and_print_ast {|let f = [] in f|};
   [%expect
     {|
@@ -108,7 +108,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern in argument 1" =
   parse_expr_and_print_ast {|let k (1, 2) = 3 in k|};
   [%expect
     {|
@@ -120,7 +120,7 @@ let%expect_test _ =
        (E_ident "k"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "pattern in argument 2" =
   parse_expr_and_print_ast {|let f (h :: tl) = 1 in f|};
   [%expect
     {|
@@ -132,7 +132,7 @@ let%expect_test _ =
      (E_ident "f"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type 1" =
   parse_expr_and_print_ast {|(123 : ('a -> 'b) -> ('cd -> 'a0) )|};
   [%expect
     {|
@@ -142,7 +142,7 @@ let%expect_test _ =
        )) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type 2" =
   parse_expr_and_print_ast {|(fun (x : int) -> x + 1 : int -> int) |};
   [%expect
     {|
@@ -152,7 +152,7 @@ let%expect_test _ =
        (RT_arr ((RT_prim "int"), (RT_prim "int"))))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type 3" =
   parse_expr_and_print_ast {| let a : int = 1 in a |};
   [%expect
     {|
@@ -160,7 +160,7 @@ let%expect_test _ =
        (E_ident "a"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type 4" =
   parse_expr_and_print_ast {| let inc (x : int) : int = x + 1 in inc |};
   [%expect
     {|
@@ -174,7 +174,7 @@ let%expect_test _ =
        (E_ident "inc"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "rec and" =
   parse_expr_and_print_ast {|let rec f a = 1 and t b = 1 in 1|};
   [%expect
     {|
@@ -185,7 +185,7 @@ let%expect_test _ =
        (E_const (C_int 1)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "rec and typed" =
   parse_expr_and_print_ast {|let rec f a : int = 1 and t b : int = 1 in 1|};
   [%expect
     {|
@@ -199,7 +199,7 @@ let%expect_test _ =
        (E_const (C_int 1)))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "type 5" =
   parse_expr_and_print_ast {|(fun x -> x : 'a -> 'a)|};
   [%expect
     {|
@@ -207,7 +207,7 @@ let%expect_test _ =
        (RT_arr ((RT_var "a"), (RT_var "a"))))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "apply" =
   parse_expr_and_print_ast {|let f x g = g x in f|};
   [%expect
     {|
@@ -219,7 +219,7 @@ let%expect_test _ =
        (E_ident "f"))) |}]
 ;;
 
-let%expect_test _ =
+let%expect_test "operator as func" =
   parse_expr_and_print_ast {|let s = (+) 1 2 in (-)|};
   [%expect
     {|
