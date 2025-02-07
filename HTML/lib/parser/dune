@@ -1,4 +1,6 @@
 (library
  (name Parser)
  (modules Parser)
- (libraries angstrom AstLib Common))
+ (libraries angstrom AstLib Common)
+ (instrumentation
+  (backend bisect_ppx)))

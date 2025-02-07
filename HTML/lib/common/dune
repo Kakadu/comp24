@@ -1,4 +1,6 @@
 (library
  (name Common)
  (modules Ops)
- (libraries base))
+ (libraries base)
+ (instrumentation
+  (backend bisect_ppx)))

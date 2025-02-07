@@ -3,4 +3,6 @@
  (modules Ast Pp_ast Pp_utils)
  (libraries base Common)
  (preprocess
-  (pps ppx_deriving.show ppx_deriving.eq)))
+  (pps ppx_deriving.show ppx_deriving.eq))
+ (instrumentation
+  (backend bisect_ppx)))
