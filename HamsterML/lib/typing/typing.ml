@@ -455,6 +455,13 @@ module Infer = struct
     helper env p
   ;;
 
+  (* 'a -> 'b + int <=> 'a -> 'b -> int *)
+  let rec build_arrow arr end_t =
+    match arr with
+    | TArrow (t1, t2) -> TArrow (t1, build_arrow end_t t2)
+    | x -> TArrow (x, end_t)
+  ;;
+
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
       match expr with
@@ -496,13 +503,7 @@ module Infer = struct
         let* env, args_t = infer_pattern_list env args in
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
-        let rec build_arr end_t =
-          (* 'a -> 'b + int <=> 'a -> 'b -> int *)
-          (function
-            | TArrow (t1, t2) -> TArrow (t1, build_arr end_t t2)
-            | x -> TArrow (x, end_t))
-        in
-        R.return (expr_s, build_arr expr_t args_t)
+        R.return (expr_s, build_arrow args_t expr_t)
       | Let (Nonrecursive, np, args, expr) ->
         let* env, args_t = infer_pattern_list env args in
         (* 'a -> 'b -> ... *)
@@ -512,14 +513,7 @@ module Infer = struct
         let* _, np_t = infer_pattern env np in
         let* u = Subst.unify expr_t np_t in
         let* n_e_s = Subst.compose u expr_s in
-        (* let (a,b) = (1, 2) *)
-        let rec build_arr end_t =
-          (* 'a -> 'b + int <=> 'a -> 'b -> int *)
-          (function
-            | TArrow (t1, t2) -> TArrow (t1, build_arr end_t t2)
-            | x -> TArrow (x, end_t))
-        in
-        R.return (n_e_s, build_arr expr_t args_t)
+        R.return (n_e_s, build_arrow args_t expr_t)
       (* | Application (f, arg) -> 
         let* f_s, f_t = helper env f in
         let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type  *)
