@@ -368,10 +368,10 @@ let fresh_var = fresh >>| fun n -> T_var n
 let instantiate (Scheme (bind_set, ty)) =
   TypeVarSet.fold
     (fun cur_var acc_typ ->
-       let* acc_typ = acc_typ in
-       let* f1 = fresh_var in
-       let* s = Subst.singleton cur_var f1 in
-       return (Subst.apply s acc_typ))
+      let* acc_typ = acc_typ in
+      let* f1 = fresh_var in
+      let* s = Subst.singleton cur_var f1 in
+      return (Subst.apply s acc_typ))
     bind_set
     (return ty)
 ;;
@@ -486,9 +486,9 @@ let rec generalize_vars_in_pattern typ env = function
        let* env1 = generalize_vars_in_pattern typ_l env l in
        List.fold_left2
          (fun last_env cur_typ cur_pat ->
-            let* last_env = last_env in
-            let* cur_env = generalize_vars_in_pattern cur_typ last_env cur_pat in
-            return cur_env)
+           let* last_env = last_env in
+           let* cur_env = generalize_vars_in_pattern cur_typ last_env cur_pat in
+           return cur_env)
          (return env1)
          typ_list
          r
@@ -637,17 +637,17 @@ and infer_rec env decl_list =
   let filtered =
     List.map
       (fun (pat, rt, e) ->
-         match pat with
-         | Ast.P_val name -> return (name, rt, e)
-         | _ -> fail Recursive_binding)
+        match pat with
+        | Ast.P_val name -> return (name, rt, e)
+        | _ -> fail Recursive_binding)
       decl_list
   in
   let names =
     List.filter_map
       (fun (pat, _, _) ->
-         match pat with
-         | Ast.P_val name -> Some name
-         | _ -> None)
+        match pat with
+        | Ast.P_val name -> Some name
+        | _ -> None)
       decl_list
   in
   (* Add names to environment *)
@@ -662,8 +662,8 @@ and infer_rec env decl_list =
   let typed_decl =
     List.map2
       (fun decl typ ->
-         let* _, _, e = decl in
-         return (e, typ))
+        let* _, _, e = decl in
+        return (e, typ))
       filtered
       types
   in
@@ -684,8 +684,8 @@ and infer_rec env decl_list =
   let typed_names =
     List.map2
       (fun decl typ ->
-         let* name, _, _ = decl in
-         return (name, typ))
+        let* name, _, _ = decl in
+        return (name, typ))
       filtered
       types
   in
@@ -702,8 +702,8 @@ and infer_rec env decl_list =
   let fixed_inferred =
     List.map2
       (fun decl typ ->
-         let* _, fixed, _ = decl in
-         return (fixed, typ))
+        let* _, fixed, _ = decl in
+        return (fixed, typ))
       filtered
       types
   in
