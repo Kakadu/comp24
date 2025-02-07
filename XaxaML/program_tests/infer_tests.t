@@ -113,7 +113,8 @@ OTHER TESTS
   > let inc : int -> int = fun x -> (+) x 1
   > let f1 a (b: int) (c: 'a): 'b = if c then inc a else b
   > let f2 (x, y) = if x = y then (+) else (-)
-  val f : int -> int -> bool -> int
+  val f1 : int -> int -> bool -> int
+  val f2 : 'a * 'a -> int -> int -> int
   val fac : int -> int
   val id : int -> int
   val inc : int -> int
@@ -140,7 +141,6 @@ OTHER TESTS
   > and second a = first a a
   val first : 'a -> 'a -> 'b
   val second : 'a -> 'b
-  
   $ ./run_infer.exe << EOF
   > let return_bool a b : bool = a + b
   Type inference error: Unification failed on int and bool
