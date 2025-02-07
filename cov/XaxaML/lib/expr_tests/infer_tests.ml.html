@@ -354,59 +354,59 @@ let infer_expr_and_print_typ str =
   | <span data-count="9">E</span>rror err -&gt; Format.printf "%a" Inferencer.pp_error err
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let inc x = x + 1 in inc|} in
   <span data-count="1">[</span>%expect {| int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let sum a b = a + b in sum|} in
   <span data-count="1">[</span>%expect {| int -&gt; int -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f x g = g x in f|} in
   <span data-count="1">[</span>%expect {| 'a -&gt; ('a -&gt; 'b) -&gt; 'b |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {| fun f -&gt; fun x -&gt; f x |} in
   <span data-count="1">[</span>%expect {| ('a -&gt; 'b) -&gt; 'a -&gt; 'b |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ =
     infer_expr_and_print_typ {|let id x = x in if (id 2 &lt; 3) then id else (fun t -&gt; t)|}
   in
   <span data-count="1">[</span>%expect {| 'a -&gt; 'a |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|fun _ a -&gt; a|} in
   <span data-count="1">[</span>%expect {| 'a -&gt; 'b -&gt; 'b |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f ((1,2)::y) = 0 in f |} in
   <span data-count="1">[</span>%expect {| (int * int) list -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let a = [] in a |} in
   <span data-count="1">[</span>%expect {| 'a list |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {| let x = 1 in match x with a -&gt; 3 |} in
   <span data-count="1">[</span>%expect {| int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {| let rec fix f x = f (fix f) x in fix |} in
   <span data-count="1">[</span>%expect {| (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ =
     infer_expr_and_print_typ
       {| let f a b = 
@@ -416,32 +416,32 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {| ('a -&gt; int) -&gt; 'a -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f () = 1 in f |} in
   <span data-count="1">[</span>%expect {| unit -&gt; int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f = () in f |} in
   <span data-count="1">[</span>%expect {| unit |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let () = print_int 123 in print_bool true |} in
   <span data-count="1">[</span>%expect {| unit |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let (a :: b) = 1 :: [1] in (a, b)|} in
   <span data-count="1">[</span>%expect {| int * int list |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let rec f a b c = if a then b else c in f|} in
   <span data-count="1">[</span>%expect {| bool -&gt; 'a -&gt; 'a -&gt; 'a |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ =
     infer_expr_and_print_typ
       {|let rec fac (n: int): int = if n &lt;= 1 then 1 else n * fac (n - 1) in fac |}
@@ -451,47 +451,47 @@ let%expect_test _ =
 
 (* Errors *)
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let (3, a) = (true, 1) in 1 |} in
   <span data-count="1">[</span>%expect {| Unification failed on bool and int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {| fun (a,a) -&gt; a + a |} in
   <span data-count="1">[</span>%expect {| Variable a is bound several times in matching |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {| let rec f x = f in f |} in
   <span data-count="1">[</span>%expect {| Occurs check failed |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f (a,b) = a + b in f (1,2,3)|} in
   <span data-count="1">[</span>%expect {| Unification failed on int * int and int * int * int |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f (a::1) = 0 in f |} in
   <span data-count="1">[</span>%expect {| Unification failed on int and 'a list |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f x = a in f|} in
   <span data-count="1">[</span>%expect {| Undefined variable "a" |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let f x = f 1 in f |} in
   <span data-count="1">[</span>%expect {| Undefined variable "f" |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|fun f x -&gt; x x|} in
   <span data-count="1">[</span>%expect {| Occurs check failed |}<span data-count="7">]</span>
 ;;
 
-let%expect_test _ =
+let%expect_test "" =
   <span data-count="1">l</span>et _ = infer_expr_and_print_typ {|let 1 = true in 1|} in
   <span data-count="1">[</span>%expect {| Unification failed on bool and int |}<span data-count="7">]</span>
 ;;

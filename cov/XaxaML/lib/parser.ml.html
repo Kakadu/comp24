@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>parser.ml &mdash; Coverage report</title>
-    <meta name="description" content="96.74% coverage in lib/parser.ml">
+    <meta name="description" content="96.73% coverage in lib/parser.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/</span>parser.ml
         </a>
       </h1>
-      <h2>96.74%</h2>
+      <h2>96.73%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:2.49%"></span>
@@ -161,7 +161,7 @@
 <a id="L125"></a><span > </span>
 <a id="L126"></a><span > </span>
 <a id="L127"></a><span class="visited"> </span>
-<a id="L128"></a><span class="visited"> </span>
+<a id="L128"></a><span > </span>
 <a id="L129"></a><span > </span>
 <a id="L130"></a><span > </span>
 <a id="L131"></a><span class="visited"> </span>
@@ -890,7 +890,7 @@ let list_cons_op =
 
 let chainl1 e op =
   <span data-count="148">l</span>et rec go acc = <span data-count="6972">l</span>ift<span data-count="6972">2</span> (fun f x -&gt; <span data-count="992">f</span> acc x) op e &gt;&gt;<span data-count="6972">=</span> go &lt;|&gt; retur<span data-count="6972">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="5980">g</span>o init
+  e &gt;&gt;= go
 ;;
 
 let rec chainr1 e op = <span data-count="367">e</span> &gt;&gt;= fun a -&gt; <span data-count="4805">o</span>p &gt;&gt;<span data-count="4805">=</span> (fun f -&gt; <span data-count="71">c</span>hainr<span data-count="71">1</span> e op &gt;&gt;| <span data-count="71">f</span> a) &lt;|&gt; retur<span data-count="4805">n</span> a
@@ -916,8 +916,8 @@ let if_then_else expr =
 let parse_tuple expr =
   <span data-count="37">e</span>xpr
   &gt;&gt;<span data-count="37">=</span> (fun first_expr -&gt;
-  <span data-count="672">m</span>any<span data-count="672">1</span> (take_whitespaces *<span data-count="672">&gt;</span> cha<span data-count="672">r</span> ',' *<span data-count="672">&gt;</span> expr)
-  &gt;&gt;| fun expr_list -&gt; <span data-count="36">E</span>_tuple (first_expr, expr_list))
+        <span data-count="672">m</span>any<span data-count="672">1</span> (take_whitespaces *<span data-count="672">&gt;</span> cha<span data-count="672">r</span> ',' *<span data-count="672">&gt;</span> expr)
+        &gt;&gt;| fun expr_list -&gt; <span data-count="36">E</span>_tuple (first_expr, expr_list))
   &lt;|&gt; expr
 ;;
 
@@ -1036,9 +1036,9 @@ let create_fun_type args = function
       (fs<span data-count="8">t</span>
          (List.fold_righ<span data-count="8">t</span>
             (fun arg_pat (cur_typ, num) -&gt;
-               <span data-count="11">m</span>atch arg_pat with
-               | <span data-count="6">P</span>_typed (_, ty) -&gt; RT_arr (ty, cur_typ), num
-               | <span data-count="5">_</span> -&gt; RT_arr (RT_var (Int.to_strin<span data-count="5">g</span> num), cur_typ), num + 1)
+              <span data-count="11">m</span>atch arg_pat with
+              | <span data-count="6">P</span>_typed (_, ty) -&gt; RT_arr (ty, cur_typ), num
+              | <span data-count="5">_</span> -&gt; RT_arr (RT_var (Int.to_strin<span data-count="5">g</span> num), cur_typ), num + 1)
             args
             (ret_typ, 0)))
   | <span data-count="64">N</span>one -&gt; None
