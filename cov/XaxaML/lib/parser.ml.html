@@ -1036,9 +1036,9 @@ let create_fun_type args = function
       (fs<span data-count="8">t</span>
          (List.fold_righ<span data-count="8">t</span>
             (fun arg_pat (cur_typ, num) -&gt;
-              <span data-count="11">m</span>atch arg_pat with
-              | <span data-count="6">P</span>_typed (_, ty) -&gt; RT_arr (ty, cur_typ), num
-              | <span data-count="5">_</span> -&gt; RT_arr (RT_var (Int.to_strin<span data-count="5">g</span> num), cur_typ), num + 1)
+               <span data-count="11">m</span>atch arg_pat with
+               | <span data-count="6">P</span>_typed (_, ty) -&gt; RT_arr (ty, cur_typ), num
+               | <span data-count="5">_</span> -&gt; RT_arr (RT_var (Int.to_strin<span data-count="5">g</span> num), cur_typ), num + 1)
             args
             (ret_typ, 0)))
   | <span data-count="64">N</span>one -&gt; None

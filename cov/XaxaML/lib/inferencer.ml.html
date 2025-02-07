@@ -1954,10 +1954,10 @@ let fresh_var = fresh &gt;&gt;<span data-count="32">|</span> fun n -&gt; <span d
 let instantiate (Scheme (bind_set, ty)) =
   <span data-count="421">T</span>ypeVarSet.fold
     (fun cur_var acc_typ -&gt;
-      <span data-count="46">l</span>et* acc_typ = acc_typ in
-      <span data-count="46">l</span>et* f1 = fresh_var in
-      <span data-count="46">l</span>et* s = Subst.singleto<span data-count="46">n</span> cur_var f1 in
-      <span data-count="46">r</span>eturn (Subst.appl<span data-count="46">y</span> s acc_typ))
+       <span data-count="46">l</span>et* acc_typ = acc_typ in
+       <span data-count="46">l</span>et* f1 = fresh_var in
+       <span data-count="46">l</span>et* s = Subst.singleto<span data-count="46">n</span> cur_var f1 in
+       <span data-count="46">r</span>eturn (Subst.appl<span data-count="46">y</span> s acc_typ))
     bind_set
     (retur<span data-count="421">n</span> ty)
 ;;
@@ -2072,9 +2072,9 @@ let rec generalize_vars_in_pattern typ env = function
        let* env1 = generalize_vars_in_patter<span data-count="6">n</span> typ_l env l in
        <span data-count="6">L</span>ist.fold_left2
          (fun last_env cur_typ cur_pat -&gt;
-           <span data-count="6">l</span>et* last_env = last_env in
-           <span data-count="6">l</span>et* cur_env = generalize_vars_in_patter<span data-count="6">n</span> cur_typ last_env cur_pat in
-           <span data-count="6">r</span>eturn cur_env)
+            <span data-count="6">l</span>et* last_env = last_env in
+            <span data-count="6">l</span>et* cur_env = generalize_vars_in_patter<span data-count="6">n</span> cur_typ last_env cur_pat in
+            <span data-count="6">r</span>eturn cur_env)
          (retur<span data-count="6">n</span> env1)
          typ_list
          r
@@ -2223,17 +2223,17 @@ and infer_rec env decl_list =
   <span data-count="23">l</span>et filtered =
     List.map
       (fun (pat, rt, e) -&gt;
-        <span data-count="27">m</span>atch pat with
-        | <span data-count="26">A</span>st.P_val name -&gt; return (name, rt, e)
-        | <span data-count="1">_</span> -&gt; fail Recursive_binding)
+         <span data-count="27">m</span>atch pat with
+         | <span data-count="26">A</span>st.P_val name -&gt; return (name, rt, e)
+         | <span data-count="1">_</span> -&gt; fail Recursive_binding)
       decl_list
   in
   <span data-count="23">l</span>et names =
     List.filter_map
       (fun (pat, _, _) -&gt;
-        <span data-count="27">m</span>atch pat with
-        | <span data-count="26">A</span>st.P_val name -&gt; Some name
-        | <span data-count="1">_</span> -&gt; None)
+         <span data-count="27">m</span>atch pat with
+         | <span data-count="26">A</span>st.P_val name -&gt; Some name
+         | <span data-count="1">_</span> -&gt; None)
       decl_list
   in
   (* Add names to environment *)
@@ -2248,8 +2248,8 @@ and infer_rec env decl_list =
   <span data-count="22">l</span>et typed_decl =
     List.map2
       (fun decl typ -&gt;
-        <span data-count="26">l</span>et* _, _, e = decl in
-        <span data-count="26">r</span>eturn (e, typ))
+         <span data-count="26">l</span>et* _, _, e = decl in
+         <span data-count="26">r</span>eturn (e, typ))
       filtered
       types
   in
@@ -2270,8 +2270,8 @@ and infer_rec env decl_list =
   <span data-count="21">l</span>et typed_names =
     List.map2
       (fun decl typ -&gt;
-        <span data-count="25">l</span>et* name, _, _ = decl in
-        <span data-count="25">r</span>eturn (name, typ))
+         <span data-count="25">l</span>et* name, _, _ = decl in
+         <span data-count="25">r</span>eturn (name, typ))
       filtered
       types
   in
@@ -2288,8 +2288,8 @@ and infer_rec env decl_list =
   <span data-count="21">l</span>et fixed_inferred =
     List.map2
       (fun decl typ -&gt;
-        <span data-count="25">l</span>et* _, fixed, _ = decl in
-        <span data-count="25">r</span>eturn (fixed, typ))
+         <span data-count="25">l</span>et* _, fixed, _ = decl in
+         <span data-count="25">r</span>eturn (fixed, typ))
       filtered
       types
   in
