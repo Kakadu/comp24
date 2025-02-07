@@ -399,10 +399,11 @@ let parse_expression =
   in
   let app_left pack =
     evar
-    <|> (brackets_or_not @@ parse_eifelse parse_if (expression pack)
-         <|> parse_efun pack
-         <|> brackets @@ parse_eapp pack pack
-         <|> parse_eletin pack)
+    <|> 
+          (brackets_or_not @@ parse_eifelse parse_if (expression pack)
+           <|> parse_efun pack
+           <|> parse_eapp pack pack
+           <|> parse_eletin pack)
   in
   let app_right pack =
     brackets_or_not
