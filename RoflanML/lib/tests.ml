@@ -54,7 +54,7 @@ module ParserTests = struct
            (EBranch ((EApp ((EApp ((EVar ">="), (EVar "h1"))), (EVar "h2"))),
               (EVar "h1"), (EVar "h2"))));
            ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
-           (PWild, (EConst (CInt 0)))]
+           ((PVar "_"), (EConst (CInt 0)))]
          ))
       |}]
   ;;
@@ -738,6 +738,85 @@ module ANFTests = struct
       let ANF_0 = LL_0 1 in
       let ANF_1 = LL_1 2 in
       let ANF_2 = [ ANF_0; ANF_1 ] in ANF_2
+      |}]
+  ;;
+end
+
+module UnparseTests = struct
+  open Unparse
+
+  let%expect_test "print constant" =
+    let ast = [ EConst (CInt 42) ] in
+    let printed = unparse_program ast in
+    Format.printf "%s\n" printed;
+    [%expect {| 42 |}]
+  ;;
+
+  let%expect_test "print variable" =
+    let ast = [ EVar "x" ] in
+    let printed = unparse_program ast in
+    Format.printf "%s\n" printed;
+    [%expect {| x |}]
+  ;;
+
+  let%expect_test "print let-expression" =
+    (* let x = 1 in x *)
+    let ast = [ ELet (NonRec, "x", EConst (CInt 1), Some (EVar "x")) ] in
+    let printed = unparse_program ast in
+    Format.printf "%s\n" printed;
+    [%expect {| let x = 1 in x |}]
+  ;;
+
+  let%expect_test "print function with if-then-else" =
+    let arg = "x", Some TInt in
+    let body = EBranch (EVar "x", EConst (CInt 1), EConst (CInt 0)) in
+    let ast = [ EFun (arg, body) ] in
+    let printed = unparse_program ast in
+    Format.printf "%s\n" printed;
+    [%expect {| fun (x : int) -> if x then 1 else 0 |}]
+  ;;
+end
+
+module QCheckTests = struct
+  open Unparse
+
+  let arbitrary_decl =
+    QCheck.make
+      (QCheck.Gen.sized (fun n ->
+         QCheck.Gen.map
+           (fun e -> [ ELet (NonRec, "x", e, None) ])
+           (Check.Generator.gen_expr (min n 500))))
+      ~print:unparse_program
+      ~shrink:Check.Shrinker.shrink_program
+  ;;
+
+  let parser_qtests =
+    [ QCheck.Test.make ~count:100 arbitrary_decl (fun ast ->
+        let src = unparse_program ast in
+        match Parser.parse src with
+        | Result.Ok ast' when ast' = ast -> true
+        | Result.Ok ast' ->
+          Format.printf
+            "\n\n[!]: Different AST!\nSource: %S\nParsed: %s\nOriginal: %s\n"
+            src
+            (Ast.show_program ast')
+            (Ast.show_program ast);
+          false
+        | Result.Error err ->
+          Format.printf "\n\n[!]: Parser error: %s\nOn source:\n%S\n" err src;
+          false)
+    ]
+  ;;
+
+  let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no shrinker)" =
+    QCheck_runner.set_seed 42;
+    let _ = QCheck_runner.run_tests ~colors:false parser_qtests in
+    ();
+    [%expect
+      {|
+      random seed: 42
+      ================================================================================
+      success (ran 1 tests)
       |}]
   ;;
 end
