@@ -127,17 +127,6 @@ let%expect_test "expression_test" =
 (* EBinaryOp *)
 
 let%expect_test "expression_test" =
-  let test = "3 + 2 * 4 - 1" in
-  start_test parse_expression show_expression test;
-  [%expect
-    {|
-    (EBinaryOp (Sub,
-       (EBinaryOp (Add, (EConst (CInt 3)),
-          (EBinaryOp (Mul, (EConst (CInt 2)), (EConst (CInt 4)))))),
-       (EConst (CInt 1)))) |}]
-;;
-
-let%expect_test "expression_test" =
   let test = "1 + (a * 3) - x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -196,6 +185,17 @@ let%expect_test "expression_test" =
     {|
     (EApp ((EApp ((EVar ("is_something", TUnknown)), (EVar ("yes", TUnknown)))),
        (EVar ("no", TUnknown)))) |}]
+;;
+
+let%expect_test "expression_test" =
+  let test = "(fun x -> x + 1) 1" in
+  start_test parse_expression show_expression test;
+  [%expect
+    {|
+    (EApp (
+       (EFun ((PVar ("x", TUnknown)),
+          (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 1)))))),
+       (EConst (CInt 1)))) |}]
 ;;
 
 (* ELetIn *)

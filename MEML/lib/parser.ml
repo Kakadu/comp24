@@ -317,7 +317,7 @@ let parse_expression =
   in
   let app_left pack =
     evar
-    <|> brackets
+    <|> 
           (brackets_or_not @@ parse_eifelse parse_if (expression pack)
            <|> parse_efun pack
            <|> parse_eapp pack pack
@@ -357,7 +357,7 @@ let parse_expression =
           <|> econst)
   in
   let eletin = parse_eletin @@ expression pack <|> brackets @@ parse_eletin pack in
-  choice [ eletin; efun; ebinop; eifelse; eapp; lists; tuples; evar; econst ]
+  choice [ eletin; eapp; efun; ebinop; eifelse; lists; tuples; evar; econst ]
 ;;
 
 (** Binding type *)
