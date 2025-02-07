@@ -15,7 +15,7 @@ module ParsingTests = struct
   ;;
 
   let%expect_test "Typed constant declaration" =
-    parse_test {| let a : int = 3 : int |};
+    parse_test {| let a : int = (3 : int) |};
     [%expect {| let (a : int) = (3 : int) |}]
   ;;
 
@@ -207,8 +207,7 @@ module ParsingTests = struct
     parse_test {|
       let map [] = []
     |};
-    [%expect
-      {|
+    [%expect {|
       let map = (fun [] -> [])
       |}]
   ;;
