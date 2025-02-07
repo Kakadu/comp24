@@ -151,8 +151,8 @@ let if_then_else expr =
 let parse_tuple expr =
   expr
   >>= (fun first_expr ->
-  many1 (take_whitespaces *> char ',' *> expr)
-  >>| fun expr_list -> E_tuple (first_expr, expr_list))
+        many1 (take_whitespaces *> char ',' *> expr)
+        >>| fun expr_list -> E_tuple (first_expr, expr_list))
   <|> expr
 ;;
 
@@ -271,9 +271,9 @@ let create_fun_type args = function
       (fst
          (List.fold_right
             (fun arg_pat (cur_typ, num) ->
-               match arg_pat with
-               | P_typed (_, ty) -> RT_arr (ty, cur_typ), num
-               | _ -> RT_arr (RT_var (Int.to_string num), cur_typ), num + 1)
+              match arg_pat with
+              | P_typed (_, ty) -> RT_arr (ty, cur_typ), num
+              | _ -> RT_arr (RT_var (Int.to_string num), cur_typ), num + 1)
             args
             (ret_typ, 0)))
   | None -> None

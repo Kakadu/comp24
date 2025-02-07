@@ -79,8 +79,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expr_and_print_ast
-    {|match x with
+  parse_expr_and_print_ast {|match x with
       | h::tl -> 1
       | _ -> 0 |};
   [%expect
