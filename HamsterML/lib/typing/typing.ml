@@ -24,6 +24,7 @@ type error =
   | Unsupported_type
   | Empty_program
   | Inexhaustive_pattern of Ast.pattern
+  | Too_Small_Tuple
 [@@deriving show]
 
 module VarSet = struct
@@ -332,8 +333,8 @@ module Infer = struct
   let infer_pattern (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) = function
       | Const dt ->
-        let* subs, t = infer_data_type dt in
-        R.return (TypeEnv.apply subs env, t)
+        let* _, t = infer_data_type dt in
+        R.return (env, t)
       | Wildcard ->
         let* fr = fresh_var in
         R.return (env, fr)
@@ -379,7 +380,7 @@ module Infer = struct
         R.return (TypeEnv.apply u env, tl_t)
       | Tuple ps ->
         (match ps with
-         | [] -> R.return (env, TUnit)
+         | [] | [ _ ] -> R.fail Too_Small_Tuple
          | p :: tl ->
            let* env, p_t = helper env p in
            let* env, tl_t =
@@ -408,6 +409,52 @@ module Infer = struct
       R.return (env, TArrow (v_t, vs_t))
   ;;
 
+  (* For 'Pattern' constructor inside 'expr' type *)
+  let infer_expr_pattern (env : TypeEnv.t) (p : Ast.pattern) : (Subst.t * inf_type) R.t =
+    let rec helper (env : TypeEnv.t) (p : Ast.pattern) : (Subst.t * inf_type) R.t =
+      match p with
+      | Const dt -> infer_data_type dt
+      | VarId name -> TypeEnv.lookup name env
+      | Tuple ps ->
+        (match ps with
+         | [] | [ _ ] -> R.fail Too_Small_Tuple
+         | p :: tl ->
+           let* p_s, p_t = helper env p in
+           let* tl_s, tl_t =
+             List.fold_left
+               tl
+               ~init:(R.return (p_s, [ p_t ]))
+               ~f:(fun acc p ->
+                 let* acc_s, acc_t = acc in
+                 let* s, p_t = helper (TypeEnv.apply acc_s env) p in
+                 R.return (s, [ p_t ] @ acc_t))
+           in
+           R.return (tl_s, TTuple (List.rev tl_t)))
+      | List ps ->
+        (match ps with
+         | [] ->
+           (* 'a list *)
+           let* fr = fresh_var in
+           R.return (Subst.empty, TList fr)
+         | p :: tl ->
+           let* p_s, p_t = helper env p in
+           let* tl_s, tl_t =
+             List.fold_left
+               tl
+               ~init:(R.return (p_s, p_t))
+               ~f:(fun prev cur ->
+                 let* prev_s, prev_t = prev in
+                 let* cur_s, cur_t = helper (TypeEnv.apply prev_s env) cur in
+                 let* u = Subst.unify cur_t prev_t in
+                 let* res_s = Subst.compose u cur_s in
+                 R.return (res_s, cur_t))
+           in
+           R.return (tl_s, TList tl_t))
+      | _ -> R.fail (Illegal_pattern p)
+    in
+    helper env p
+  ;;
+
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
       match expr with
@@ -429,11 +476,7 @@ module Infer = struct
            let* ur = Subst.unify tr TString in
            let* res = Subst.compose_all [ sl; sr; ul; ur ] in
            return (res, TString))
-      | Pattern v ->
-        (match v with
-         | Const dt -> infer_data_type dt
-         | VarId name -> TypeEnv.lookup name env
-         | _ -> failwith "error in 'value' inference")
+      | Pattern v -> infer_expr_pattern env v
       | If (i, th, el) ->
         let* i_s, i_t = helper env i in
         let* i_u = Subst.unify i_t TBool in
@@ -448,9 +491,9 @@ module Infer = struct
            let* th_u = Subst.unify th_t TUnit in
            let* fin_s = Subst.compose_all [ i_u; th_u ] in
            R.return (fin_s, TUnit))
-      | Fun (args, scope) ->
+      | Fun (args, expr) ->
         let* env, args_t = infer_pattern_list env args in
-        let* subs, scope_t = helper env scope in
+        let* subs, expr_t = helper env expr in
         let args_t = Subst.apply args_t subs in
         let rec fin_t end_t =
           (* 'a -> 'b + int <=> 'a -> 'b -> int *)
@@ -458,7 +501,14 @@ module Infer = struct
             | TArrow (t1, t2) -> TArrow (t1, fin_t end_t t2)
             | x -> TArrow (x, end_t))
         in
-        R.return (subs, fin_t scope_t args_t)
+        R.return (subs, fin_t expr_t args_t)
+      | Let (Nonrecursive, np, _, expr) ->
+        let* expr_s, expr_t = helper env expr in
+        let env = TypeEnv.apply expr_s env in
+        let* _, np_t = infer_pattern env np in
+        let* u = Subst.unify expr_t np_t in
+        let* subs = Subst.compose u expr_s in
+        R.return (subs, np_t)
       (* | Application (f, arg) -> 
         let* f_s, f_t = helper env f in
         let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type  *)

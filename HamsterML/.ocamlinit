@@ -10,11 +10,11 @@ let parse (s : string) : expr list =
   ast
 ;;
 
-let typecheck expr =
-  let res = R.run (Infer.infer_expr TypeEnv.empty expr) in
+let typecheck (s : string) =
+  let std = Format.std_formatter in
+  let x = List.hd (parse s) in
+  let res = R.run (Infer.infer_expr TypeEnv.empty x) in
   match res with
-  | Ok (s, t) ->
-    Subst.pp Format.std_formatter s;
-    Format.fprintf Format.std_formatter "\n|> type: %s" (show_inf_type t)
+  | Ok (s, t) -> Subst.pp std s; Format.fprintf std "\nType:%s" (show_inf_type t)
   | Error e -> failwith (show_error e)
 ;;
