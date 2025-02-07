@@ -480,28 +480,29 @@ module Infer = struct
       | If (i, th, el) ->
         let* i_s, i_t = helper env i in
         let* i_u = Subst.unify i_t TBool in
-        let* th_s, th_t = helper (TypeEnv.apply i_s env) th in
+        let* if_s = Subst.compose i_u i_s in
+        let* th_s, th_t = helper (TypeEnv.apply if_s env) th in
         (match el with
          | Some el ->
            let* el_s, el_t = helper (TypeEnv.apply th_s env) el in
            let* th_e_u = Subst.unify th_t el_t in
-           let* fin_s = Subst.compose_all [ i_u; el_s; th_e_u ] in
+           let* fin_s = Subst.compose_all [ if_s; el_s; th_e_u ] in
            R.return (fin_s, Subst.apply el_t fin_s)
          | None ->
            let* th_u = Subst.unify th_t TUnit in
-           let* fin_s = Subst.compose_all [ i_u; th_u ] in
+           let* fin_s = Subst.compose_all [ if_s; th_u ] in
            R.return (fin_s, TUnit))
       | Fun (args, expr) ->
         let* env, args_t = infer_pattern_list env args in
-        let* subs, expr_t = helper env expr in
-        let args_t = Subst.apply args_t subs in
-        let rec fin_t end_t =
+        let* expr_s, expr_t = helper env expr in
+        let args_t = Subst.apply args_t expr_s in
+        let rec build_arr end_t =
           (* 'a -> 'b + int <=> 'a -> 'b -> int *)
           (function
-            | TArrow (t1, t2) -> TArrow (t1, fin_t end_t t2)
+            | TArrow (t1, t2) -> TArrow (t1, build_arr end_t t2)
             | x -> TArrow (x, end_t))
         in
-        R.return (subs, fin_t expr_t args_t)
+        R.return (expr_s, build_arr expr_t args_t)
       | Let (Nonrecursive, np, _, expr) ->
         let* expr_s, expr_t = helper env expr in
         let env = TypeEnv.apply expr_s env in
