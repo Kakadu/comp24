@@ -146,7 +146,7 @@ let plist pexpr =
   psqparens @@ sep_by (pstoken ";") pexpr >>| fun x -> EList x
 ;;
 
-let ppconst = choice [ pint; pbool ] >>| fun x -> PConst x
+let ppconst = choice [ pint; pbool; punit ] >>| fun x -> PConst x
 let ppvar = pid >>| fun x -> PVar x
 
 let ppattern =
@@ -156,9 +156,9 @@ let ppattern =
     choice
       [ pparens ppattern
       ; ppconst
+      ; ppvar
       ; (pstoken "_" >>| fun _ -> PWild)
       ; (pstoken "[]" >>| fun _ -> PEmpty)
-      ; ppvar
       ]
   in
   let ppt =
