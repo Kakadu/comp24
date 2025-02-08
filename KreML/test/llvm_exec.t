@@ -44,7 +44,7 @@
   >   0
   15
 
- 
+
   $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so 
   > let rec fac_cps x k =
   >   if x <= 1 then k 1 else fac_cps (x-1) (fun res -> k (res * x))
@@ -53,7 +53,7 @@
   >   let () = print_int (fac_cps 10 id) in
   >   0
   3628800
- 
+
   $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so
   > let rec map f list =
   > match list with
@@ -74,8 +74,6 @@
   9
   16
   25
-
-closures mutability check
   $ dune exec llvm_codegen 2>&1 <<- EOF | lli-17 -load ../runtime/runtime.so
   > let adder x y z = x + y + z
   > let main =

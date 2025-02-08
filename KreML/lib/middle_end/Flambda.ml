@@ -35,16 +35,15 @@ and closure =
   ; arity : int
   }
 
-type fun_with_env =
-  { arg : ident
-  ; env_vars : ident list
+type fun_decl =
+  { param_names : ident list
   ; arity : int
   ; body : flambda
   }
 
 type fl_fun =
-  | Fun_with_env of fun_with_env
-  | Fun_without_env of ident option * flambda (** [Fun_without_env(arg, body)] *)
+  | Fun_with_env of fun_decl
+  | Fun_without_env of fun_decl (** [Fun_without_env(params, body)] *)
 
 type flstructure = (ident * fl_fun) list
 
@@ -104,12 +103,11 @@ and pp_list ppf list elem_printer =
   fprintf ppf " ]"
 ;;
 
+let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list
+
 let pp_fl_fun ppf = function
-  | Fun_without_env (Some arg, body) -> fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
-  | Fun_without_env (None, body) -> fprintf ppf "@[() {%a} @]@." pp_flambda body
-  | Fun_with_env { arg; env_vars; body; _ } ->
-    let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list in
-    fprintf ppf "@[(%a) {%a} @]@." print_args (env_vars @ [ arg ]) pp_flambda body
+  | Fun_without_env { param_names; body; _ } | Fun_with_env { param_names; body; _ } ->
+    fprintf ppf "@[(%a) {%a} @]@." print_args param_names pp_flambda body
 ;;
 
 let pp ppf flstructure =
