@@ -57,7 +57,8 @@ let declaration_parser =
 ;;
 
 let parse input =
-  parse_string ~consume:All (many1 (expression_parser <|> declaration_parser)) input
+  let sep = option () (skip_wspace *> string ";;" *> return ()) in
+  parse_string ~consume:All (many1 ((expression_parser <|> declaration_parser) <* sep <* skip_wspace)) input
 ;;
 
 let parse_with_print code =
