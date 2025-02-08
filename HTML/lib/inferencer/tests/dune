@@ -1,7 +1,7 @@
 (library
  (name inferncer_tests)
  (modules inferencerTests)
- (libraries Parser Inferencer)
+ (libraries Parser Inferencer unix)
  (preprocess
   (pps ppx_expect))
  (inline_tests))
