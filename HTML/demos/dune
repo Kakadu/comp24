@@ -1,0 +1,23 @@
+(executable
+ (name parser_demo)
+ (public_name parser_demo)
+ (modules parser_demo)
+ (libraries Parser stdio))
+
+(cram
+ (applies_to parser_demo)
+ (deps
+  ./parser_demo.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
