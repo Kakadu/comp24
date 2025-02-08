@@ -3,7 +3,7 @@
 (library
  (name XaxaML)
  (public_name XaxaML.Lib)
- (modules Ast Parser Typedtree Inferencer)
+ (modules Ast Parser Typedtree Std_names Inferencer Closure_conversion)
  (libraries base stdlib angstrom)
  (inline_tests)
  (preprocess
@@ -24,4 +24,4 @@
 (env
  (dev
   (flags
-   (:standard -w -32))))
+   (:standard -w -26-27-32))))
