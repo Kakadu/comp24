@@ -1,7 +1,14 @@
 (library
  (name inferencer_tests)
  (libraries arML_lib)
- (modules BinaryOperation)
+ (modules
+  Function
+  ListAndTuple
+  PatternMatching
+  TypedExpression
+  BinaryOperation
+  Declaration
+  Complex)
  (inline_tests)
  (preprocess
   (pps ppx_expect ppx_deriving.show))
