@@ -130,26 +130,21 @@ let imm i =
        let* { arities; freevars; _ } = get in
        (match Base.Map.find freevars id with
         | None -> Fl_var id |> return (* local or env var, handle it in codegen *)
-        | Some inherited_env ->
+        | Some fv ->
           (* self recursive function, lets build its closure *)
           let arity = Base.Map.find_exn arities id in
-          let env_size = arity - 1 + List.length inherited_env in
-          let start_index = arity - 1 in
-          let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
+          let env_size = List.length fv in
+          let start_index = arity in
+          let arrange = List.mapi (fun i id -> i + start_index, flvar id) fv in
           Fl_closure { name = id; env_size; arrange; arity } |> return)
-     | Some (Fun_with_env { arity; env_vars; _ }) ->
-       let env_size = List.length env_vars in
+     | Some (Fun_with_env { arity; param_names; _ }) ->
+       let env_size = List.length param_names - arity in
        (* inherited args come after call args *)
-       let _, inherited_env = Base.List.split_n env_vars (arity - 1) in
-       let start_index = arity - 1 in
-       let arrange = List.mapi (fun i id -> i + start_index, flvar id) inherited_env in
+       let _, fv = Base.List.split_n param_names arity in
+       let start_index = arity in
+       let arrange = List.mapi (fun i id -> i + start_index, flvar id) fv in
        Fl_closure { name = id; env_size; arrange; arity } |> return
-     | Some (Fun_without_env (arg, _)) ->
-       let arity =
-         match arg with
-         | None -> 0
-         | Some _ -> 1
-       in
+     | Some (Fun_without_env { arity; _ }) ->
        Fl_closure { name = id; env_size = 0; arrange = []; arity } |> return)
   | Aconst c -> Fl_const c |> return
 ;;
@@ -157,25 +152,20 @@ let imm i =
 let rec resolve_fun name f =
   let* f = f in
   let call_args_rev, body = fun_call_args_reversed (AExpr f) in
-  let arg, call_args_env =
-    match call_args_rev with
-    | x :: xs -> x, List.rev xs
-    | [] -> Utils.unreachable ()
-  in
+  let call_args = List.rev call_args_rev in
   let* { freevars; _ } = get in
   let freevars =
     match Base.Map.find freevars name with
     | Some fv -> fv
     | None -> []
   in
-  let env_vars = call_args_env @ freevars in
+  let param_names = call_args @ freevars in
+  let arity = List.length call_args in
   let* body = aexpr (return body) in
   let decl =
-    match env_vars with
-    | [] -> Fun_without_env (Some arg, body)
-    | _ ->
-      let arity = List.length call_args_rev in
-      Fun_with_env { arg; arity; body; env_vars }
+    match freevars with
+    | [] -> Fun_without_env { param_names; arity; body }
+    | _ -> Fun_with_env { param_names; arity; body }
   in
   let* ({ global_env; _ } as state) = get in
   let* _ = put { state with global_env = (name, decl) :: global_env } in
@@ -272,7 +262,7 @@ let cc arities astracture =
         return ()
       | e ->
         let* body = aexpr (return e) in
-        let f = Fun_without_env (None, body) in
+        let f = Fun_without_env { arity = 0; param_names = []; body } in
         let* ({ global_env; _ } as state) = get in
         let* _ = put { state with global_env = (id, f) :: global_env } in
         return ()

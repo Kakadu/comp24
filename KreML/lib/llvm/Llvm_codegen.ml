@@ -69,6 +69,7 @@ let builder = Llvm.builder context
 let int_type = Llvm.i64_type context
 let iconst = Llvm.const_int int_type
 let ptr_type = pointer_type context
+let max_args_count = 8
 
 let lookup_fun_exn name =
   match Llvm.lookup_function name mdl with
@@ -96,7 +97,6 @@ let alloc_tuple name size =
     build_call alloc_tuple_typ f [| size_const |] name builder |> return)
 ;;
 
-let fun_with_env_typ = Llvm.function_type int_type [| ptr_type; int_type |]
 let call_closure_typ = Llvm.function_type int_type [| ptr_type; ptr_type; int_type |]
 
 (* closure, args, args_count*)
@@ -108,14 +108,14 @@ let alloc_closure_typ =
 
 let list_cons_typ = Llvm.function_type ptr_type [| int_type; ptr_type |]
 
-let alloc_closure f env arity env_size =
+let alloc_closure f env arity fv_count =
   let* f = f in
   let* fresh = fresh_name "closure_temp" in
   let callee = lookup_fun_exn Runtime.alloc_closure in
   build_call
     alloc_closure_typ
     callee
-    [| f; env; iconst arity; iconst env_size |]
+    [| f; env; iconst arity; iconst fv_count |]
     fresh
     builder
   |> return
@@ -275,23 +275,20 @@ let rec codegen_flambda = function
     let callee_typ = function_type (void_type context) [| int_type |] in
     let _ = build_call callee_typ callee [| arg |] "" builder in
     build_unreachable builder |> return
-  | Fl_app (Fl_closure { name; env_size; arity; _ }, (([ _ ] | []) as args))
-    when env_size = 0 && arity <> 0 ->
+  | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
+    when env_size = 0 && arity = List.length args && arity <= max_args_count ->
     (* if arity 0 it is calculated const, we should evail it and apply arg to its result *)
     let* args = codegen_list (return args) in
     let callee = lookup_fun_exn name in
     let* callee_typ = lookup_fun_type (return name) in
-    let* args =
-      match args with
-      | [ a ] when type_of a = ptr_type ->
-        let* fresh = fresh_name "cast" in
-        let a = build_ptrtoint a int_type fresh builder in
-        return [| a |]
-      | [ a ] -> return [| a |]
-      | _ -> return [||]
+    let args =
+      List.map
+        (fun arg ->
+          if type_of arg = ptr_type then build_ptrtoint arg int_type "" builder else arg)
+        args
     in
     let* name = get_curr_decl_name in
-    build_call callee_typ callee args name builder |> return
+    build_call callee_typ callee (Array.of_list args) name builder |> return
   | Fl_app (f, args) ->
     let* args = codegen_list (return args) in
     let* f' = codegen_flambda f in
@@ -364,32 +361,33 @@ let rec codegen_flambda = function
     let* callee_typ = lookup_fun_type (return name) in
     let* fresh = fresh_name "call" in
     build_call callee_typ callee [||] fresh builder |> return
-  | Fl_closure { name; arrange; env_size; arity } ->
+  | Fl_closure { name; arrange; env_size = fv_count; arity } ->
     let callee = lookup_fun_exn name in
     let* name = fresh_name "tupled_env" in
-    let* env = alloc_tuple name (return env_size) in
-    let* arrange_env =
-      List.fold_right
-        (fun (idx, value) acc ->
-          let* acc = acc in
-          let idx = iconst idx in
-          let* value' = codegen_flambda value in
-          (idx, value') :: acc |> return)
-        arrange
-        (return [])
-    in
+    let* env = alloc_tuple name (return (fv_count + arity)) in
+    (* let* arrange_env =
+       List.fold_right
+       (fun (idx, value) acc ->
+       let* acc = acc in
+       let idx = iconst idx in
+       let* value' = codegen_flambda value in
+       (idx, value') :: acc |> return)
+       arrange
+       (return [])
+       in *)
     let* () =
       List.fold_left
         (fun acc (idx, value) ->
           let* () = acc in
+          let* value = codegen_flambda value in
           let* fresh = fresh_name "envptr" in
-          let elemptr = build_gep int_type env [| idx |] fresh builder in
+          let elemptr = build_gep int_type env [| iconst idx |] fresh builder in
           let _ = build_store value elemptr builder in
           return ())
         (return ())
-        arrange_env
+        arrange
     in
-    alloc_closure (return callee) env arity env_size
+    alloc_closure (return callee) env arity fv_count
 
 and codegen_list list =
   let* list = list in
@@ -406,11 +404,40 @@ let codegen_fun_body f decl =
   let* f = f in
   let* body =
     match f with
-    | Fun_with_env { arg = arg_name; env_vars; body; _ } ->
+    | Fun_without_env { param_names; arity; body } when arity <= max_args_count ->
+      let llparams = params decl |> Array.to_list in
+      let* () =
+        List.fold_left2
+          (fun acc p llp ->
+            let* () = acc in
+            set_value_name p llp;
+            let* _ = put_named_value p llp in
+            return ())
+          (return ())
+          param_names
+          llparams
+      in
+      let entry = append_block context "entry" decl in
+      position_at_end entry builder;
+      let* body = codegen_flambda body in
+      return body
+    | Fun_without_env { param_names; body; _ } | Fun_with_env { param_names; body; _ } ->
       let env = param decl 0 in
       set_value_name "env" env;
-      let arg = param decl 1 in
-      set_value_name arg_name arg;
+      let llparams = Base.List.drop (params decl |> Array.to_list) 1 in
+      let params, env_params = Base.List.split_n param_names (List.length llparams) in
+      (* name args and put them in named values*)
+      let* () =
+        List.fold_left2
+          (fun acc p llp ->
+            let* () = acc in
+            set_value_name p llp;
+            let* _ = put_named_value p llp in
+            return ())
+          (return ())
+          params
+          llparams
+      in
       let entry_bb = append_block context "entry" decl in
       position_at_end entry_bb builder;
       (* unpack environment *)
@@ -424,26 +451,8 @@ let codegen_fun_body f decl =
             let* _ = put_named_value name local in
             return (idx + 1))
           (return 0)
-          env_vars
+          env_params
       in
-      (* name arg *)
-      set_value_name arg_name arg;
-      let* _ = put_named_value arg_name arg in
-      let* body = codegen_flambda body in
-      let body_bb = insertion_block builder in
-      position_at_end body_bb builder;
-      return body
-    | Fun_without_env (None, body) ->
-      let entry = append_block context "entry" decl in
-      position_at_end entry builder;
-      let* body = codegen_flambda body in
-      return body
-    | Fun_without_env (Some param_name, body) ->
-      let entry = append_block context "entry" decl in
-      position_at_end entry builder;
-      let param = param decl 0 in
-      set_value_name param_name param;
-      let* _ = put_named_value param_name param in
       let* body = codegen_flambda body in
       let body_bb = insertion_block builder in
       position_at_end body_bb builder;
@@ -490,18 +499,19 @@ let codegen_program program =
       (fun acc (name, f) ->
         let* acc = acc in
         let f, ty =
-          match f with
-          | Fun_with_env _ ->
-            let f = declare_function name fun_with_env_typ mdl in
-            f, fun_with_env_typ
-          | Fun_without_env (None, _) ->
-            let fnty = function_type int_type [||] in
-            let f = declare_function name fnty mdl in
-            f, fnty
-          | Fun_without_env (Some _, _) ->
-            let fnty = function_type int_type [| int_type |] in
-            let f = declare_function name fnty mdl in
-            f, fnty
+          let params =
+            match f with
+            | Fun_without_env { arity; _ } when arity <= max_args_count ->
+              List.init arity (fun _ -> int_type)
+            | Fun_without_env { arity; _ } | Fun_with_env { arity; _ } ->
+              let all_params = [ ptr_type ] @ List.init arity (fun _ -> int_type) in
+              if List.length all_params > max_args_count
+              then Utils.list_take max_args_count all_params
+              else all_params
+          in
+          let fnty = function_type int_type (Array.of_list params) in
+          let f = declare_function name fnty mdl in
+          f, fnty
         in
         let* _ = put_fun_type name ty in
         return @@ acc @ [ f ])

@@ -28,16 +28,15 @@ and closure =
   ; arity : int
   }
 
-type fun_with_env =
-  { arg : ident
-  ; env_vars : ident list
+type fun_decl =
+  { param_names : ident list (* 1. args 2. freevars*)
   ; arity : int
   ; body : flambda
   }
 
 type fl_fun =
-  | Fun_with_env of fun_with_env
-  | Fun_without_env of ident option * flambda (** [Fun_without_env(arg, body)] *)
+  | Fun_with_env of fun_decl
+  | Fun_without_env of fun_decl
 
 type flstructure = (ident * fl_fun) list
 

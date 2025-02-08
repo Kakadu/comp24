@@ -90,3 +90,17 @@ let zip_idents_with_exprs p e =
   (* call is expected to be in type checked contxext *)
   helper [] p e |> List.rev
 ;;
+
+(* List utils *)
+
+let list_take count list =
+  let rec helper count acc list =
+    if count = 0
+    then acc
+    else (
+      match list with
+      | [] -> internalfail @@ Format.sprintf "List must have at least %i elements" count
+      | x :: xs -> helper (count - 1) (x :: acc) xs)
+  in
+  helper count [] list |> List.rev
+;;
