@@ -151,48 +151,62 @@ let infer_expr =
     let final_ty = Substitution.apply sub_final ty2 in
     return (sub_final, final_ty)
   
-  and infer_rec_let_in env cases expr =
+    and infer_rec_let_in env cases expr =
 
-    let extend_env_with_pattern env pat ty =
-      match pat with
-      | Ast.PVar (Id v) ->
-        let generalized_ty = Generalize.generalize env ty in
-        return (TypeEnv.extend env v generalized_ty)
-      | _ ->
-        fail InvalidRecursionLeftHand
-    in
-
-        (* Check several bounds *)
-        let all_patterns = List.map fst cases in
-        let* _ = UniquePatternVarsChecker.check_unique_vars all_patterns in
-  
-    let add_temporary_vars env cases =
-      List.fold_left (fun acc (pat, _) ->
-        let* env = acc in
+      let extend_env_with_pattern env pat ty =
         match pat with
-        | Ast.PVar (Id name) ->
-          let* fv = fresh_var in
-          return (TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)))
-        | _ -> fail InvalidRecursionLeftHand
-      ) (return env) cases
-    in
+        | Ast.PVar (Id v) ->
+          let generalized_ty = Generalize.generalize env ty in
+          return (TypeEnv.extend env v generalized_ty)
+        | _ ->
+          fail InvalidRecursionLeftHand
+      in
   
-    let process_cases env cases =
-      List.fold_left (fun acc (pat, expr) ->
-        let* env, sub = acc in
-        let* sub_expr, ty_expr = helper env expr in
-        let env' = TypeEnv.apply env sub_expr in
-        let* env'' = extend_env_with_pattern env' pat ty_expr in
-        let* sub_final = Substitution.compose sub sub_expr in
-        return (env'', sub_final)
-      ) (return (env, Substitution.empty)) cases
-    in
-  
-    let* env_with_vars = add_temporary_vars env cases in
-    let* final_env, final_sub = process_cases env_with_vars cases in
-    let* sub2, ty2 = helper final_env expr in
-    let* sub_final = Substitution.compose final_sub sub2 in
-    return (sub_final, ty2)
+      let all_patterns = List.map fst cases in
+      let* _ = UniquePatternVarsChecker.check_unique_vars all_patterns in
+    
+      let add_temporary_vars env cases =
+        List.fold_left (fun acc (pat, _) ->
+          let* env, vars = acc in
+          match pat with
+          | Ast.PVar (Id name) ->
+            let* fv = fresh_var in
+            let env' = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
+            return (env', (name, fv) :: vars)
+          | _ -> fail InvalidRecursionLeftHand
+        ) (return (env, [])) cases
+          in
+    
+      let process_cases env cases temp_vars =
+        List.fold_left (fun acc (pat, expr) ->
+          
+          let* extract_var_name =
+            (match pat with
+            | Ast.PVar (Id name) -> return name
+            | _ -> fail InvalidRecursionLeftHand) in
+          let* env, sub = acc in
+          let* sub_expr, ty_expr = helper env expr in
+          let env' = TypeEnv.apply env sub_expr in
+          let* env'' = extend_env_with_pattern env' pat ty_expr in
+          let* sub_final = Substitution.compose sub sub_expr in
+
+          let* sub_final = 
+            match List.assoc_opt extract_var_name temp_vars with
+            | Some temp_ty -> 
+              let* sub = Substitution.unify temp_ty ty_expr in
+              Substitution.compose sub_final sub
+            | None -> return sub_final
+          in
+          
+          return (env'', sub_final)
+        ) (return (env, Substitution.empty)) cases
+      in
+    
+      let* env_with_vars, temp_vars = add_temporary_vars env cases in
+      let* final_env, final_sub = process_cases env_with_vars cases temp_vars in
+      let* sub2, ty2 = helper final_env expr in
+      let* sub_final = Substitution.compose final_sub sub2 in
+      return (sub_final, ty2)
   
   and infer_cases env (init_sub, init_expr) cases =
     let* fv = fresh_var in

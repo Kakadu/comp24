@@ -168,11 +168,11 @@ let%expect_test _ =
     {| - : 'a |}]
 ;;
 
-(* let%expect_test _ =
+let%expect_test _ =
   inference {| let rec f x = f in f |};
   [%expect
-    {| - : 'a -> 'b |}]
-;; *)
+    {| Type error: occurs check failed. |}]
+;;
 
 (* ---------------- *)
 
@@ -203,10 +203,22 @@ let%expect_test _ =
     {| - : int |}]
 ;;
 
-(* let%expect_test _ =
+let%expect_test _ =
   inference {| let rec f x = g and g x = f in (f, g) |};
   [%expect
-    {| - : ('a -> 'b) * ('c -> 'd -> 'b) |}]
+    {| Type error: occurs check failed. |}]
+;;
+
+(* let%expect_test _ =
+  inference {| let rec f x = g x and g x = f x in (f, g) |};
+  [%expect
+    {| Type error: occurs check failed. |}]
+;;
+
+let%expect_test _ =
+  inference {| let rec f x = g x and g x = f 3 in (f, g) |};
+  [%expect
+    {| - : (int -> 'a) * ('b -> 'a) |}]
 ;; *)
 
 (* ---------------- *)
