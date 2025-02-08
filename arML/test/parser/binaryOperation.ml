@@ -2,10 +2,10 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Parser.Runner
+open ArML_lib.Runner
 
 let%expect_test _ =
-  parse_with_print {| 1 + 1 |};
+  parse_program_with_print {| 1 + 1 |};
   [%expect
     {|
     [(SExpression
@@ -15,7 +15,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| 1 + 2 * 3 |};
+  parse_program_with_print {| 1 + 2 * 3 |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( + )")),
@@ -28,7 +28,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| 1 + 2 / 3 |};
+  parse_program_with_print {| 1 + 2 / 3 |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( + )")),
@@ -41,7 +41,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| (1 + 2) * (3 + 4) / (1 + (2 * 3)) |};
+  parse_program_with_print {| (1 + 2) * (3 + 4) / (1 + (2 * 3)) |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( / )")),
@@ -64,7 +64,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| 1 < 2 && 2 > 1 |};
+  parse_program_with_print {| 1 < 2 && 2 > 1 |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( && )")),
@@ -78,7 +78,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| 1 <= 2 || 3 >= 2 |};
+  parse_program_with_print {| 1 <= 2 || 3 >= 2 |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
@@ -92,12 +92,12 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| 1 <> 2 && 3 != 4 || 1 =|};
+  parse_program_with_print {| 1 <> 2 && 3 != 4 || 1 =|};
   [%expect{| Syntax error. |}]
 ;;
 
 let%expect_test _ =
-  parse_with_print {| (1 * 2 + 3 / 3) >= (3 / 3 / 3) || (1 != 9 / 3) |};
+  parse_program_with_print {| (1 * 2 + 3 / 3) >= (3 / 3 / 3) || (1 != 9 / 3) |};
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),

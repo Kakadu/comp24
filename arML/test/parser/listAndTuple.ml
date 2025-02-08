@@ -2,18 +2,18 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Parser.Runner
+open ArML_lib.Runner
 
 (* List *)
 
 let%expect_test _ =
-  parse_with_print {| [] |};
+  parse_program_with_print {| [] |};
   [%expect {|
     [(SExpression EEmptyList)] |}]
 ;;
 
 let%expect_test _ =
-  parse_with_print {| [1; 2; 3] |};
+  parse_program_with_print {| [1; 2; 3] |};
   [%expect
     {|
     [(SExpression
@@ -25,7 +25,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| [1; 2; a] |};
+  parse_program_with_print {| [1; 2; a] |};
   [%expect {|
     [(SExpression
         (EListConstructor ((EConstant (CInt 1)),
@@ -38,7 +38,7 @@ let%expect_test _ =
 (* Tuple *)
 
 let%expect_test _ =
-  parse_with_print {| () |};
+  parse_program_with_print {| () |};
   (* An empty tuple is not parsed *)
   [%expect {|
     [(SExpression (EConstant CUnit))] |}]
@@ -46,7 +46,7 @@ let%expect_test _ =
 
 
 let%expect_test _ =
-  parse_with_print {| (1, 2, 3) |};
+  parse_program_with_print {| (1, 2, 3) |};
   [%expect
     {|
     [(SExpression
@@ -56,7 +56,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {| (1, 2, a) |};
+  parse_program_with_print {| (1, 2, a) |};
   [%expect
     {|
     [(SExpression
