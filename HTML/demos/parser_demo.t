@@ -112,3 +112,18 @@
   let main = let () = ((iter print_int) 1 :: 2 :: 3 :: [])
   in let () = (print_int (length ((cartesian 1 :: 2 :: []) 1 :: 2 :: 3 :: 4 :: [])))
   in 0
+  $ ./parser_demo.exe < manytests/do_not_type/001.ml
+  let recfac = (fun n -> if (n <= 1) then 1 else (n * fac (n - 1)))
+
+  $ ./parser_demo.exe < manytests/do_not_type/002if.ml
+  let main = if true then 1 else false
+
+  $ ./parser_demo.exe < manytests/do_not_type/003occurs.ml
+  let fix = (fun f -> ((fun x -> (f (fun f -> ((x x) f)))) (fun x -> (f (fun f -> ((x x) f))))))
+
+  $ ./parser_demo.exe < manytests/do_not_type/004let_poly.ml
+  let temp = ((fun f -> ((f 1), (f true))) (fun x -> x))
+
+  $ ./parser_demo.exe < manytests/do_not_type/015tuples.ml
+  let rec (a, b) = (a, b)
+
