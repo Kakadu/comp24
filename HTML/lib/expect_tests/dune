@@ -1,6 +1,6 @@
 (library
  (name parser_tests)
- (modules parsingTests)
+ (modules parsing_tests)
  (libraries Parser unix)
  (preprocess
   (pps ppx_expect))
