@@ -1,0 +1,9 @@
+(library
+ (name inferencer_tests)
+ (libraries arML_lib)
+ (modules BinaryOperation)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
