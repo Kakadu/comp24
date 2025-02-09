@@ -36,7 +36,6 @@ type error =
   | UnboundValue of string
   | MismatchValues of typ * typ
   | UnificationFailed of typ * typ
-  | ParserAvoidedError
   | WildcardNotExpected
   | UnexpectedRecursionLhs
 
