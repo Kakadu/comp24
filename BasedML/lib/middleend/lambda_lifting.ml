@@ -120,7 +120,13 @@ let prog_lift prog =
            match collect_function_arguments [] outer with
            | Args_body (arg, expr) -> arg, expr
          in
-         let state, fresh_name = run (new_name global_ctx) state in
+         let used_names =
+           List.fold_left
+             args
+             ~init:(Set.empty (module String))
+             ~f:(fun acc x -> Set.union acc (collect_bindings_from_pat x))
+         in
+         let state, fresh_name = run (new_name (Set.union global_ctx used_names)) state in
          let updated_ctx = Map.set ctx ~key:id ~data:fresh_name in
          let lifted_outer, acc, state =
            match rec_flag with
@@ -143,7 +149,13 @@ let prog_lift prog =
         match collect_function_arguments [] (EFunction (pat, body)) with
         | Args_body (arg, expr) -> arg, expr
       in
-      let state, fresh_name = run (new_name global_ctx) state in
+      let used_names =
+        List.fold_left
+          arguments
+          ~init:(Set.empty (module String))
+          ~f:(fun acc x -> Set.union acc (collect_bindings_from_pat x))
+      in
+      let state, fresh_name = run (new_name (Set.union global_ctx used_names)) state in
       let lifted, acc, state =
         let new_ctx = (module String) |> Map.empty in
         lift_expr new_ctx acc global_ctx state new_body
