@@ -123,8 +123,6 @@ type error =
   | UnboundValue of string
   | MismatchValues of typ * typ (** For pattern matching errors *)
   | UnificationFailed of typ * typ
-  | ParserAvoidedError
-  (** Use the parser to get the AST: the parser does some transformations of expressions *)
   | WildcardNotExpected
   | UnexpectedRecursionLhs
 
@@ -150,10 +148,6 @@ let pp_error fmt err =
       t1
       pp_type
       t2
-  | ParserAvoidedError ->
-    fprintf
-      fmt
-      "Use parser to get the AST: the parser does some transformations of expressions"
   | WildcardNotExpected -> fprintf fmt {| wildcard " _ " not expected |}
   | UnexpectedRecursionLhs ->
     fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
