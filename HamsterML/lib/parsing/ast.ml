@@ -1,7 +1,6 @@
 type id = string [@@deriving show]
 
-(* default types *)
-type dataType =
+type value =
   | Int of int
   | Float of float
   | Bool of bool
@@ -11,13 +10,12 @@ type dataType =
 [@@deriving show]
 
 (* let f (a: Int) (b: Int) = ...*)
-type paramType =
+type dataType =
   | PInt
   | PFloat
   | PBool
   | PChar
   | PString
-  (* | Poly of string (a: `a) (b: `b) *)
 [@@deriving show]
 
 type bop =
@@ -38,32 +36,40 @@ type bop =
 
 type uop = NOT (** not true *) [@@deriving show]
 
+type op =
+  | Binary of bop
+  | Unary of uop
+[@@deriving show]
+
 (* Pattern is a value (dataType -> dataStructure) *)
 type pattern =
-  | Const of dataType
-  | VarId of id
-  | TypedVarID of id * paramType (* (a: int) *)
+  | Const of value
+  | Var of id
+  | TypedVar of id * dataType (* (a: int) *)
   | Wildcard (* _ *)
   | Tuple of pattern list (* (1, 2, 3) *)
   | List of pattern list (* [1; 2; 3] *)
-  | ListConcat of pattern * pattern (* a :: [b;c]*)
-  (* | UnitPattern *)
+  | ListConcat of pattern * pattern
+  | Operation of op
 [@@deriving show]
 
 type expr =
-  | BinOp of bop * expr * expr
-  | UnOp of uop * expr
-  | Application of expr * expr
   | Pattern of pattern
-  (* let id a = a | the first `pattern` is the pattern that can be used instead of function's name *)
-  | Let of funType * pattern * pattern list * expr
-  | LetAndIn of expr list * expr option (* let a = 1 and b = 2 in a + b *)
-  | Fun of pattern list * expr (* (fun a -> a + 1) *)
+  | Application of expr * expr
+  | Constraint of expr * dataType
+  | Let of funType * bind list * expr option (* let f = ... and g = ... [in ...] *)
+  | Fun of args * expr (* (fun a -> a + 1) *)
   | If of expr * expr * expr option (* if a = b then c (else d) *)
-  | Match of expr * (pattern * expr) list
+  | Match of expr * case list
 [@@deriving show]
+
+and args = pattern list
+and bind = pattern * args * expr
+and case = pattern * expr
 
 and funType =
   | Recursive
   | Nonrecursive
 [@@deriving show]
+
+type prog = expr list [@@deriving show]
