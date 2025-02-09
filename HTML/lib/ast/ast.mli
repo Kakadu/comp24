@@ -16,13 +16,15 @@ val equal_base_op : base_op -> base_op -> bool
 val pp_base_op : Format.formatter -> base_op -> unit
 val show_base_op : base_op -> string
 
-type ident_letters = string (** Letters of idents with only letters *)
+(** Letters of idents with only letters *)
+type ident_letters = string
 
 val equal_ident_letters : ident_letters -> ident_letters -> bool
 val pp_ident_letters : Format.formatter -> ident_letters -> unit
 val show_ident_letters : ident_letters -> string
 
-type ident_op = string (** Letters of idents-operators *)
+(** Letters of idents-operators *)
+type ident_op = string
 
 val equal_ident_op : ident_op -> ident_op -> bool
 val pp_ident_op : Format.formatter -> ident_op -> unit
@@ -78,7 +80,8 @@ type pattern =
   | PList of pattern_typed * pattern_typed (** x :: xs *)
   | PConst of const (** 3 *)
 
-and pattern_typed = pattern * typ option (** typed pattern *)
+(** typed pattern *)
+and pattern_typed = pattern * typ option
 
 val equal_pattern : pattern -> pattern -> bool
 val equal_pattern_typed : pattern_typed -> pattern_typed -> bool
@@ -91,7 +94,8 @@ type pattern_or_op =
   | POpPat of pattern (** pattern *)
   | POpOp of ident_op (** custom operator *)
 
-and pattern_or_op_typed = pattern_or_op * typ option (** typed pattern or op *)
+(** typed pattern or op *)
+and pattern_or_op_typed = pattern_or_op * typ option
 
 val equal_pattern_or_op : pattern_or_op -> pattern_or_op -> bool
 val equal_pattern_or_op_typed : pattern_or_op_typed -> pattern_or_op_typed -> bool
@@ -100,8 +104,8 @@ val show_pattern_or_op : pattern_or_op -> string
 val pp_pattern_or_op_typed : Format.formatter -> pattern_or_op_typed -> unit
 val show_pattern_or_op_typed : pattern_or_op_typed -> string
 
-type branch = pattern_typed * expr_typed
 (** branch in match expr *)
+type branch = pattern_typed * expr_typed
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
@@ -114,16 +118,18 @@ and expr =
   | ETuple of expr_typed * expr_typed * expr_typed list (** Tuple. Examples: (1, 2, 3) *)
   | EClsr of decl * expr_typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
   | EMatch of expr_typed * branch * branch list
-(** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
+  (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 
-and expr_typed = expr * typ option (** typed expression *)
+(** typed expression *)
+and expr_typed = expr * typ option
 
-and let_body =
-  pattern_or_op_typed * expr_typed (** let body: pattern and associated expression *)
+(** let body: pattern and associated expression *)
+and let_body = pattern_or_op_typed * expr_typed
 
 and decl =
   | DLet of rec_flag * let_body (** Let declaration *)
-  | DLetMut of rec_flag * let_body * let_body * let_body list (** Mutual let declaration *)
+  | DLetMut of rec_flag * let_body * let_body * let_body list
+  (** Mutual let declaration *)
 
 val equal_branch : branch -> branch -> bool
 val equal_expr : expr -> expr -> bool
@@ -141,7 +147,8 @@ val show_let_body : let_body -> string
 val pp_decl : Format.formatter -> decl -> unit
 val show_decl : decl -> string
 
-type prog = decl list (** the whole program *)
+(** the whole program *)
+type prog = decl list
 
 val equal_prog : prog -> prog -> bool
 val pp_prog : Format.formatter -> prog -> unit
