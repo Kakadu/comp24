@@ -63,7 +63,8 @@ type pattern_or_op =
 and pattern_or_op_typed = pattern_or_op * typ option
 [@@deriving eq, show { with_path = false }]
 
-type branch = pattern_typed * expr_typed (** branch in match expr *) [@@deriving eq, show { with_path = false }] 
+type branch = pattern_typed * expr_typed
+(** branch in match expr *) [@@deriving eq, show { with_path = false }]
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
@@ -76,21 +77,22 @@ and expr =
   | ETuple of expr_typed * expr_typed * expr_typed list (** Tuple. Examples: (1, 2, 3) *)
   | EClsr of decl * expr_typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
   | EMatch of expr_typed * branch * branch list
-  (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
+    (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
-and expr_typed = expr * typ option (** typed expression *) [@@deriving eq, show { with_path = false }]
+and expr_typed = expr * typ option
+(** typed expression *) [@@deriving eq, show { with_path = false }]
 
-and let_body = pattern_or_op_typed * expr_typed (** let body: pattern and associated expression *)
+and let_body =
+  pattern_or_op_typed * expr_typed (** let body: pattern and associated expression *)
 [@@deriving eq, show { with_path = false }]
 
 and decl =
   | DLet of rec_flag * let_body (** Let declaration *)
-  | DLetMut of rec_flag * let_body * let_body * let_body list
-  (** Mutual let declaration *)
+  | DLetMut of rec_flag * let_body * let_body * let_body list (** Mutual let declaration *)
 [@@deriving eq, show { with_path = false }]
 
-type prog = decl list (** the whole program *)[@@deriving eq, show { with_path = false }]
+type prog = decl list (** the whole program *) [@@deriving eq, show { with_path = false }]
 
 let ident_letters (s : ident_letters) = IdentLetters s
 let ident_op (s : ident_op) = IdentOp s
