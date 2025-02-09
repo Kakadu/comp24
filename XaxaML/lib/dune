@@ -13,7 +13,7 @@
 
 (library
  (name tests)
- (modules Parser_tests Infer_tests)
+ (modules Parser_tests Infer_tests Cc_tests)
  (libraries XaxaML)
  (inline_tests)
  (preprocess
