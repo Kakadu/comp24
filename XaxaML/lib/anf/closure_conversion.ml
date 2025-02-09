@@ -1,3 +1,7 @@
+(** Copyright 2025, aartdem, toadharvard *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Ast
 open Base
 
@@ -11,6 +15,7 @@ module StrSet : sig
   val add : t -> string -> t
   val find : t -> string -> bool
   val to_list : t -> string list
+  val of_list : string list -> t
   val fold : t -> init:'a -> f:('a -> string -> 'a) -> 'a
   val diff : t -> t -> t
 end = struct
@@ -29,12 +34,14 @@ end = struct
 
   let add = Set.add
   let to_list = Set.to_list
+  let of_list = Set.of_list (module String)
   let fold = Set.fold
   let diff = Set.diff
 end
 
-let update_bindings last new1 = 
+let update_bindings last new1 =
   Map.merge_skewed last new1 ~combine:(fun ~key:_ _ v2 -> v2)
+;;
 
 let rec get_idents = function
   | P_typed (pat, _) -> get_idents pat
@@ -97,12 +104,12 @@ let rec cc_expr global_env bindings = function
     let else1 = cc_expr global_env bindings else1 in
     E_ite (if1, then1, else1)
   | E_fun (first_arg, other_args, body) as orig ->
-    let args = first_arg :: other_args in 
+    let args = first_arg :: other_args in
     let idents = get_idents_from_list args in
     let bindings = StrSet.fold idents ~init:bindings ~f:(fun acc a -> Map.remove acc a) in
     let free = get_free global_env orig |> StrSet.to_list in
     let free_patterns = List.map free ~f:(fun x -> P_val x) in
-    let new_args = List.concat [ free_patterns; args ] in
+    let new_args = free_patterns @ args in
     let new_body = cc_expr global_env bindings body in
     E_fun (List.hd_exn new_args, List.tl_exn new_args, new_body)
   | E_app (e1, e2) ->
@@ -114,61 +121,84 @@ let rec cc_expr global_env bindings = function
     let new_e2 = cc_expr global_env bindings e2 in
     E_let (Non_rec (pat, None, new_e1), new_e2)
   | E_let (Rec decl_list, e2) ->
-      let new_decl_list, new_bindings = cc_decl_rec global_env bindings decl_list in
-      E_const C_unit
+    let new_decl_list, bindings = cc_decl_rec global_env bindings decl_list in
+    let new_e2 = cc_expr global_env bindings e2 in
+    E_let (Rec new_decl_list, new_e2)
   | _ -> E_const C_unit
 
 and cc_non_rec_fun global_env bindings args body =
-  let idents = get_idents_from_list args in
-  let bindings = StrSet.fold idents ~init:bindings ~f:(fun acc a -> Map.remove acc a) in
-
-  let free = (StrSet.diff (get_free global_env body) idents) 
-  |> StrSet.to_list in 
+  let args_idents = get_idents_from_list args in
+  let free = StrSet.diff (get_free global_env body) args_idents |> StrSet.to_list in
   let free_patterns = List.map free ~f:(fun x -> P_val x) in
-  let new_args = List.concat [ free_patterns; args ] in
-
+  let new_args = free_patterns @ args in
+  let bindings =
+    StrSet.fold args_idents ~init:bindings ~f:(fun acc a -> Map.remove acc a)
+  in
   let new_body = cc_expr global_env bindings body in
-
   E_fun (List.hd_exn new_args, List.tl_exn new_args, new_body), free
 
 and cc_decl_non_rec global_env bindings = function
   | P_val ident, expr ->
     (match expr with
      | E_fun (first_arg, other_args, body) ->
-       let new_expr, free = cc_non_rec_fun global_env bindings (first_arg :: other_args) body in
-       new_expr, Map.singleton (module String)  ident new_expr
+       let new_expr, free =
+         cc_non_rec_fun global_env bindings (first_arg :: other_args) body
+       in
+       new_expr, Map.singleton (module String) ident free
      | _ -> cc_expr global_env bindings expr, Map.empty (module String))
   | P_tuple (p_hd, p_tl), E_tuple (e_hd, e_tl) ->
     let new_expr_hd, new_mp_hd = cc_decl_non_rec global_env bindings (p_hd, e_hd) in
     let new_expr_tl, new_mp_tl =
       List.unzip
-        (List.map2_exn p_tl e_tl ~f:(fun p e -> cc_decl_non_rec global_env bindings (p, e)))
+        (List.map2_exn p_tl e_tl ~f:(fun p e ->
+           cc_decl_non_rec global_env bindings (p, e)))
     in
-    let mp =
-      List.fold new_mp_tl ~init:(new_mp_hd) ~f:update_bindings
-    in
-    E_tuple (new_expr_hd, new_expr_tl), mp
+    let bindings = List.fold new_mp_tl ~init:new_mp_hd ~f:update_bindings in
+    E_tuple (new_expr_hd, new_expr_tl), bindings
   | P_cons_list (p1, p2), E_cons_list (e1, e2) ->
     let new_e1, mp1 = cc_decl_non_rec global_env bindings (p1, e1) in
     let new_e2, mp2 = cc_decl_non_rec global_env bindings (p2, e2) in
-    ( E_cons_list (new_e1, new_e2) (* TODO: not accumulat bindings here*)
-    , update_bindings mp1 mp2 )
-  | _, expr -> cc_expr global_env bindings expr, bindings
-and cc_decl_rec global_env bindings decl_list = 
-  let patterns = List.map decl_list ~f:(fun (pat, _, _) -> pat) in 
-  let rec_names = get_idents_from_list patterns in 
-  let global_env = StrSet.union rec_names global_env in
-  let bindings = StrSet.fold rec_names ~init:bindings ~f:(fun acc a -> 
-    Map.update acc a ~f:(fun _ -> a)) in 
-  let f1 (cur_pat, _, cur_expr) (acc_decl, acc_map) = 
-    let (new_decl, new_bind) = match (cur_pat, cur_expr) with 
-    | P_val ident, (E_fun (first_arg, other_args, body) as orig) -> 
-      let new_decl, new_bindings = cc_non_rec_fun ident true global_env bindings
-       (first_arg :: other_args) body in 
-      (new_decl::acc_decl, update_bindings) 
-    | _ -> cc_expr global_env bindings cur_expr, Map.empty (module String)
-  in 
-  List.fold_right decl_list ~init:([], Map.empty (module String)) ~f:f1 
+    E_cons_list (new_e1, new_e2), update_bindings mp1 mp2
+  | _, expr -> cc_expr global_env bindings expr, Map.empty (module String)
+
+and cc_decl_rec global_env bindings decl_list =
+  let names_bodies =
+    List.map decl_list ~f:(fun (pat, _, expr) ->
+      match pat with
+      | P_val name -> name, expr
+      | _ -> "", expr)
+  in
+  let names = StrSet.of_list (fst (List.unzip names_bodies)) in
+  let global_env = StrSet.union names global_env in
+  let f1 (free_list, bindings) (name, expr) =
+    match expr with
+    | E_fun (first, other, body) ->
+      let args_idents = get_idents_from_list (first :: other) in
+      let free = StrSet.diff (get_free global_env body) args_idents |> StrSet.to_list in
+      let bindings = Map.update bindings name ~f:(fun _ -> free) in
+      free :: free_list, bindings
+    | _ -> [] :: free_list, bindings
+  in
+  let free_list, bindings = List.fold names_bodies ~init:([], bindings) ~f:f1 in
+  let free_list = List.rev free_list in
+  let to_fold = List.zip_exn names_bodies free_list in
+  let f1 decl_acc ((name, expr), free) =
+    match expr with
+    | E_fun (first, other, body) ->
+      let free_patterns = List.map free ~f:(fun x -> P_val x) in
+      let new_args = free_patterns @ (first :: other) in
+      let bindings = List.fold free ~init:bindings ~f:(fun acc a -> Map.remove acc a) in
+      let new_body = cc_expr global_env bindings body in
+      let new_fun = E_fun (List.hd_exn new_args, List.tl_exn new_args, new_body) in
+      (name, None, new_fun) :: decl_acc
+    | _ ->
+      let new_expr = cc_expr global_env bindings expr in
+      (name, None, new_expr) :: decl_acc
+  in
+  let new_decls = List.fold to_fold ~init:[] ~f:f1 in
+  let new_decls = List.rev new_decls in
+  decl_list, bindings
+;;
 
 let toplevel _env_names = function
   | Expr _ | Let_decl _ -> StrSet.empty, Expr (Ast.E_const (C_bool true))
@@ -185,3 +215,5 @@ let run_closure_conversion_program program =
   in
   helper std_names program
 ;;
+
+let run_closure_conversion_expr expr = cc_expr std_names (Map.empty (module String)) expr
