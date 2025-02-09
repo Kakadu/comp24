@@ -90,7 +90,10 @@ let pe_op first suffix base_ops =
        let* suffix_string_list = many (helper suffix) in
        let res_string = String.concat "" (first_string :: suffix_string_list) in
        if List.mem res_string prohibited_ops
-       then fail ("Can't use " ^ res_string ^ " as custom operator")
+       then
+         fail
+           (let strings = [ "Can't use "; res_string; " as custom operator" ] in
+            String.concat "" strings)
        else return res_string)
     ; helper base_ops
     ]
