@@ -1,8 +1,8 @@
 (** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-let prohibited_ops = [ "|"; "->" ]
 
+let prohibited_ops = [ "|"; "->" ]
 let first_unop_strings = [ "?"; "~"; "!" ]
 
 let suffix_unop_strings =
