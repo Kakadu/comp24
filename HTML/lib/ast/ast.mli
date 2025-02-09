@@ -99,7 +99,7 @@ type pattern_or_op =
   | POpOp of ident_op (** custom operator *)
 
 (** typed pattern or op *)
-and pattern_or_op_typed = pattern_or_op * typ option
+type pattern_or_op_typed = pattern_or_op * typ option
 
 val equal_pattern_or_op : pattern_or_op -> pattern_or_op -> bool
 val equal_pattern_or_op_typed : pattern_or_op_typed -> pattern_or_op_typed -> bool

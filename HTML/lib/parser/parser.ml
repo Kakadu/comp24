@@ -172,7 +172,7 @@ let pe_list_semicolon pe wrap init =
 
 let chainl1 pe op =
   let rec go acc = lift2 (fun f x -> f acc x) op pe >>= go <|> return acc in
-  pe >>= fun init -> go init
+  pe >>= go
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
@@ -224,14 +224,14 @@ let pe_get_explicit_typ =
   let* is_there_delim_ahead =
     choice [ pe_assert_token_is_not_ahead delim; return false ]
   in
-  match is_there_delim_ahead with
-  | true ->
+  if is_there_delim_ahead
+  then
     choice
       [ (let* typ = delim =?*> pe_type in
          return (Some typ))
       ; return None
       ]
-  | false -> return None
+  else return None
 ;;
 
 let pe_typed pe =
@@ -317,10 +317,9 @@ let get_typed_ebinop_applier op =
 let binop_binder group =
   let* op = pe_binary_op in
   let rec helper bin_op_string = function
-    | group_string :: tl ->
-      if String.starts_with ~prefix:group_string bin_op_string
-      then return ()
-      else helper bin_op_string tl
+    | group_string :: _ when String.starts_with ~prefix:group_string bin_op_string ->
+      return ()
+    | _ :: tl -> helper bin_op_string tl
     | [] -> fail "There is no matching operator"
   in
   helper op group *> return (get_typed_ebinop_applier op)
@@ -328,11 +327,7 @@ let binop_binder group =
 
 let get_chain e priority_group =
   let binop_binder = binop_binder priority_group.group in
-  let chain =
-    match priority_group.left_associative with
-    | true -> chainl1
-    | false -> chainr1
-  in
+  let chain = if priority_group.left_associative then chainl1 else chainr1 in
   chain e binop_binder
 ;;
 

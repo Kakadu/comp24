@@ -5,11 +5,7 @@
 open Format
 
 let pp_el parens_pred pp_e fmt e =
-  let s =
-    match parens_pred e with
-    | true -> format_of_string "(%a)"
-    | false -> format_of_string "%a"
-  in
+  let s = if parens_pred e then format_of_string "(%a)" else format_of_string "%a" in
   fprintf fmt s pp_e e
 ;;
 
