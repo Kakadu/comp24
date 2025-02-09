@@ -63,6 +63,7 @@ rule read =
     | '/'       { SLASH }
     | '^'       { CARET }
     | '='       { EQUAL }
+    | "=="      { IDENTICAL_EQ }
     | "!="      { NOT_EQUAL}  
     | '>'       { GREATER_THAN }
     | ">="      { GREATER_THAN_EQUAL }

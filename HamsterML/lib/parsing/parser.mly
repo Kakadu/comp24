@@ -54,6 +54,7 @@
 %token SLASH                // "/"
 %token CARET                // "^"
 %token EQUAL                // "="
+%token IDENTICAL_EQ         // "=="
 %token NOT_EQUAL            // "!=" || "<>" TODO: check semantics
 %token GREATER_THAN         // ">"
 %token GREATER_THAN_EQUAL   // ">="
@@ -78,6 +79,7 @@
 %left LESS_THAN
 %left NOT_EQUAL
 %left EQUAL
+%left IDENTICAL_EQ
 
 %left CARET
 %left PLUS, MINUS
@@ -103,7 +105,8 @@
     | ASTERISK              { MUL }                  
     | SLASH                 { DIV }                  
     | CARET                 { CONCAT }               
-    | EQUAL                 { EQ }                
+    | EQUAL                 { EQ }       
+    | IDENTICAL_EQ          { ID_EQ }         
     | NOT_EQUAL             { NEQ }           
     | GREATER_THAN          { GT }       
     | GREATER_THAN_EQUAL    { GTE }  
@@ -190,8 +193,8 @@ if_expr:
 %inline match_case: BAR; v = pattern; ARROW; e = expr { (v, e) }
 
 %inline rec_flag:
-    | REC { Recursive }
-    | { Nonrecursive }
+    | REC   { Recursive }
+    |       { Nonrecursive }
 
 // %inline let_def:
 //     (* () = print_endline "123" *)

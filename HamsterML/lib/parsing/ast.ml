@@ -19,19 +19,20 @@ type dataType =
 [@@deriving show]
 
 type bop =
-  | ADD (** + *)
-  | SUB (** - *)
-  | MUL (** * *)
-  | DIV (** / *)
-  | EQ (** = *)
-  | NEQ (** != *)
-  | GT (** > *)
-  | GTE (** >= *)
-  | LT (** < *)
-  | LTE (** <= *)
-  | AND (** && *)
-  | OR (** || *)
-  | CONCAT (** ^ *)
+  | ADD (* + *)
+  | SUB (* - *)
+  | MUL (* * *)
+  | DIV (* / *)
+  | EQ (* = *)
+  | ID_EQ (* == *)
+  | NEQ (* != *)
+  | GT (* > *)
+  | GTE (* >= *)
+  | LT (* < *)
+  | LTE (* <= *)
+  | AND (* && *)
+  | OR (* || *)
+  | CONCAT (* ^ *)
 [@@deriving show]
 
 type uop = NOT (** not true *) [@@deriving show]
