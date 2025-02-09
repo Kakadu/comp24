@@ -34,6 +34,12 @@
  (public_name egraphs_demo)
  (libraries middleend stdio ast))
 
+(executable
+ (name anf_types_demo)
+ (modules anf_types_demo)
+ (public_name anf_types_demo)
+ (libraries middleend stdio ast typeinference))
+
 (cram
  (applies_to typeinference_tests)
  (deps
@@ -89,3 +95,22 @@
 (cram
  (applies_to egraphs_tests)
  (deps ./egraphs_demo.exe))
+
+(cram
+ (applies_to anf_types_tests)
+ (deps
+  ./anf_types_demo.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/010sukharev.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
