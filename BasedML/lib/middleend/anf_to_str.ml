@@ -10,17 +10,20 @@ let rec type_name_to_string tp =
   | TUnit -> "unit"
   | TInt -> "int"
   | TBool -> "bool"
-  | TPoly name -> "'" ^ name
+  | TPoly name -> Printf.sprintf "'%s" name
   | TTuple lst ->
-    "("
-    ^ (lst
-       |> List.mapi (fun i tp ->
-         if i <> 0 then " * " ^ type_name_to_string tp else type_name_to_string tp)
-       |> String.concat "")
-    ^ ")"
+    let type_str =
+      lst
+      |> List.mapi (fun i tp ->
+        if i <> 0
+        then Printf.sprintf " * %s" (type_name_to_string tp)
+        else type_name_to_string tp)
+      |> String.concat ""
+    in
+    Printf.sprintf "(%s)" type_str
   | TFunction (tp_arg, tp_ret) ->
-    "(" ^ type_name_to_string tp_arg ^ " -> " ^ type_name_to_string tp_ret ^ ")"
-  | TList tp -> "(" ^ type_name_to_string tp ^ " list)"
+    Printf.sprintf "(%s -> %s)" (type_name_to_string tp_arg) (type_name_to_string tp_ret)
+  | TList tp -> Printf.sprintf "(%s list)" (type_name_to_string tp)
 ;;
 
 let constant_to_string = function
@@ -35,7 +38,7 @@ let list_to_string pp sep lst =
   let rec aux = function
     | [] -> ""
     | [ x ] -> pp x
-    | x :: xs -> pp x ^ sep ^ aux xs
+    | x :: xs -> Printf.sprintf "%s%s%s" (pp x) sep (aux xs)
   in
   aux lst
 ;;
@@ -47,55 +50,57 @@ let rec imm_to_string = function
   | ImmNil -> "[]"
   | ImmIdentifier id -> id
   | ImmUnit -> "()"
-  | ImmTuple tup -> "(" ^ list_to_string imm_to_string ", " tup ^ ")"
+  | ImmTuple tup -> Printf.sprintf "(%s)" (list_to_string imm_to_string ", " tup)
 ;;
 
 let rec pattern_to_string pat =
   let rec_call = pattern_to_string in
   match pat with
   | PWildCard -> "_"
-  | PCons (h_pat, t_pat) -> "(" ^ rec_call h_pat ^ " :: " ^ rec_call t_pat ^ ")"
+  | PCons (h_pat, t_pat) -> Printf.sprintf "(%s :: %s)" (rec_call h_pat) (rec_call t_pat)
   | PIdentifier x -> x
   | PTuple lst ->
-    "("
-    ^ (lst
-       |> List.mapi (fun i pat -> if i <> 0 then ", " ^ rec_call pat else rec_call pat)
-       |> String.concat "")
-    ^ ")"
+    let tuple_str =
+      lst
+      |> List.mapi (fun i pat ->
+        if i <> 0 then Printf.sprintf ", %s" (rec_call pat) else rec_call pat)
+      |> String.concat ""
+    in
+    Printf.sprintf "(%s)" tuple_str
   | PConstant c -> constant_to_string c
-  | PConstraint (pat, tp) -> "(" ^ rec_call pat ^ " : " ^ type_name_to_string tp ^ ")"
+  | PConstraint (pat, tp) ->
+    Printf.sprintf "(%s : %s)" (rec_call pat) (type_name_to_string tp)
 ;;
 
 let rec cexpr_to_string = function
   | CImmExpr imm -> imm_to_string imm
   | CIfThenElse (cond, then_branch, else_branch) ->
-    "if "
-    ^ imm_to_string cond
-    ^ " then "
-    ^ aexpr_to_string then_branch
-    ^ " else "
-    ^ aexpr_to_string else_branch
+    Printf.sprintf
+      "if %s then %s else %s"
+      (imm_to_string cond)
+      (aexpr_to_string then_branch)
+      (aexpr_to_string else_branch)
   | CMatch (pat_head, pat_exp_lst) ->
-    "match "
-    ^ pattern_to_string pat_head
-    ^ " with\n"
-    ^ (pat_exp_lst
-       |> List.map (fun (pat, ae) ->
-         "| " ^ pattern_to_string pat ^ " -> " ^ aexpr_to_string ae)
-       |> String.concat "\n")
-  | CApplication (left, right) -> cexpr_to_string left ^ " " ^ cexpr_to_string right
+    let match_cases =
+      pat_exp_lst
+      |> List.map (fun (pat, ae) ->
+        Printf.sprintf "| %s -> %s" (pattern_to_string pat) (aexpr_to_string ae))
+      |> String.concat "\n"
+    in
+    Printf.sprintf "match %s with\n%s" (pattern_to_string pat_head) match_cases
+  | CApplication (left, right) ->
+    Printf.sprintf "%s %s" (cexpr_to_string left) (cexpr_to_string right)
   | CConstraint (imm, typ) ->
-    "(" ^ imm_to_string imm ^ " : " ^ type_name_to_string typ ^ ")"
+    Printf.sprintf "(%s : %s)" (imm_to_string imm) (type_name_to_string typ)
 
 and aexpr_to_string = function
   | ACExpr cexp -> cexpr_to_string cexp
   | ALetIn (pat, outer, inner) ->
-    "let "
-    ^ pattern_to_string pat
-    ^ " = "
-    ^ cexpr_to_string outer
-    ^ " in\n"
-    ^ aexpr_to_string inner
+    Printf.sprintf
+      "let %s = %s in\n%s"
+      (pattern_to_string pat)
+      (cexpr_to_string outer)
+      (aexpr_to_string inner)
 ;;
 
 let rec_flag_to_string = function
@@ -105,34 +110,29 @@ let rec_flag_to_string = function
 
 let anf_decl_to_string = function
   | ADSingleLet (rec_flag, ALet (pat, patterns, body)) ->
-    "let "
-    ^ rec_flag_to_string rec_flag
-    ^ " "
-    ^ pattern_to_string pat
-    ^ " "
-    ^ (patterns |> List.map pattern_to_string |> String.concat " ")
-    ^ " = "
-    ^ aexpr_to_string body
-    ^ ";;"
+    Printf.sprintf
+      "let %s %s %s = %s;;"
+      (rec_flag_to_string rec_flag)
+      (pattern_to_string pat)
+      (patterns |> List.map pattern_to_string |> String.concat " ")
+      (aexpr_to_string body)
   | ADMutualRecDecl (rec_flag, bindings) ->
-    "let "
-    ^ rec_flag_to_string rec_flag
-    ^ " "
-    ^ (bindings
-       |> List.mapi (fun i binding ->
-         if i <> 0
-         then " and "
-         else
-           ""
-           ^
-           match binding with
-           | ALet (pat, patterns, exp) ->
-             pattern_to_string pat
-             ^ " "
-             ^ (patterns |> List.map pattern_to_string |> String.concat " ")
-             ^ " = "
-             ^ aexpr_to_string exp)
-       |> String.concat "")
+    let bindings_str =
+      bindings
+      |> List.mapi (fun i binding ->
+        let binding_str =
+          match binding with
+          | ALet (pat, patterns, exp) ->
+            Printf.sprintf
+              "%s %s = %s"
+              (pattern_to_string pat)
+              (patterns |> List.map pattern_to_string |> String.concat " ")
+              (aexpr_to_string exp)
+        in
+        if i <> 0 then Printf.sprintf " and %s" binding_str else binding_str)
+      |> String.concat ""
+    in
+    Printf.sprintf "let %s %s" (rec_flag_to_string rec_flag) bindings_str
 ;;
 
 let program_to_string declarations =
