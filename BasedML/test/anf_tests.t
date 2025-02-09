@@ -1,16 +1,16 @@
   $ dune exec ./anf_demo.exe << EOF
-  > let nested1 = let nested2 = 5 in 
-  > let nested3 = 6 in
-  > let nested4 x = x + (fun i -> nested2 + nested3) 8 in nested4 55
+  > let anf_app_0 = let anf_app_1 = 5 in 
+  > let anf_app_2 = 6 in
+  > let anf_app_3 x = x + (fun i -> anf_app_1 + anf_app_2) 8 in nested4 55
   > EOF
-  let  ll_1 nested2 nested3 i  = let anf_app_0 = ( + ) nested2 nested3 in
-   anf_app_0;;
-  let  ll_0 nested2 nested3 x  = let anf_app_0 = ll_1 nested2 nested3 8 in
-   let anf_app_1 = ( + ) x anf_app_0 in
-   anf_app_1;;
-  let  nested1  = let nested2 = 5 in
-   let nested3 = 6 in
-   let anf_app_0 = ll_0 nested2 nested3 55 in
+  let  ll_1 anf_app_1 anf_app_2 i  = let anf_app_3 = ( + ) anf_app_1 anf_app_2 in
+   anf_app_3;;
+  let  ll_0 anf_app_1 anf_app_2 nested4 x  = let anf_app_3 = ll_1 anf_app_1 anf_app_2 8 in
+   let anf_app_4 = ( + ) x anf_app_3 in
+   anf_app_4;;
+  let  anf_app_0  = let anf_app_1 = 5 in
+   let anf_app_2 = 6 in
+   let anf_app_0 = nested4 55 in
    anf_app_0;;
 
   $ dune exec ./anf_demo.exe << EOF
@@ -241,7 +241,8 @@
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/008ascription.ml
   let  addi f g x  = let anf_app_0 = g x in
-   (anf_app_0 : bool);;
+   let anf_app_1 = f x (anf_app_0 : bool) in
+   (anf_app_1 : int);;
   let  ll_0 x b  = let anf_ifthenelse_2 = if b then let anf_app_0 = ( + ) x 1 in
    anf_app_0 else let anf_app_1 = ( * ) x 2 in
    anf_app_1 in
