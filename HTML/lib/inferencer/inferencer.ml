@@ -156,7 +156,7 @@ module Subst = struct
 
   and compose s1 s2 = RList.fold_left s2 ~init:(return s1) ~f:extend
 
-  let compose_all substs =
+  let compose_all (substs : t list) =
     Base.List.fold_left substs ~init:(return empty) ~f:(fun acc subst ->
       let* acc = acc in
       compose acc subst)
@@ -228,7 +228,7 @@ let fresh_var =
   return @@ tvar fresh
 ;;
 
-let instantiate =
+let instantiate : scheme -> typ R.t =
   let fold_right set init f =
     Base.Set.fold_right set ~init ~f:(fun x acc ->
       let* acc = acc in
@@ -241,7 +241,8 @@ let instantiate =
       return @@ Subst.apply subst typ)
 ;;
 
-let generalize env typ =
+let generalize : TypeEnv.t -> Type.t -> Scheme.t =
+  fun env typ ->
   let free = Base.Set.diff (Type.free_vars typ) (TypeEnv.free_vars env) in
   free, typ
 ;;
