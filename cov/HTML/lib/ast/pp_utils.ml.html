@@ -30,23 +30,19 @@
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -72,10 +68,6 @@
 <a href="#L19">19</a>
 <a href="#L20">20</a>
 <a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
 
@@ -84,12 +76,8 @@
 open Format
 
 let pp_el parens_pred pp_e fmt e =
-  <span data-count="46">l</span>et s =
-    match parens_pred e with
-    | <span data-count="6">t</span>rue -&gt; format_of_strin<span data-count="6">g</span> "(%a)"
-    | <span data-count="40">f</span>alse -&gt; format_of_strin<span data-count="40">g</span> "%a"
-  in
-  fprintf fmt s pp_e e
+  <span data-count="46">l</span>et s = if parens_pred e then <span data-count="6">"</span>(%a)" else <span data-count="40">"</span>%a" in
+  fprintf fmt (Scanf.format_from_strin<span data-count="46">g</span> s "%a") pp_e e
 ;;
 
 let pp_list parens_pred pp_e fmt delimiter =
