@@ -513,7 +513,9 @@ module Infer = struct
         let* _, np_t = infer_pattern env np in
         let* u = Subst.unify expr_t np_t in
         let* n_e_s = Subst.compose u expr_s in
-        R.return (n_e_s, build_arrow args_t expr_t)
+        (match args with
+         | [] -> R.return (n_e_s, np_t)
+         | _ -> R.return (n_e_s, build_arrow args_t expr_t))
       (* | Application (f, arg) -> 
         let* f_s, f_t = helper env f in
         let* arg_s, arg_t = helper (TypeEnv.apply f_s env) arg in ;; R.fail Unsupported_type  *)
