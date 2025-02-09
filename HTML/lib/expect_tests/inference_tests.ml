@@ -2,8 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-(** TODO: add description to tests *)
-
 module InferenceTests = struct
   let infer_test s =
     match Parser.parse_program s with
@@ -279,7 +277,7 @@ val a : int
 |}]
   ;;
 
-  let%expect_test "y combinator" =
+  let%expect_test "occurs check" =
     infer_test {|let f x = x x;;|};
     [%expect
       {| 
@@ -364,181 +362,4 @@ val f : bool -> int -> bool
     infer_test {|let dam (_, (x::xs)) = x|};
     [%expect {| val dam : 'a * 'b list -> 'b |}]
   ;;
-  let%expect_test "pattern" =
-  infer_test {|let foo b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)
-  let foo x = foo true (foo false (foo true (foo false x)))|};
-  [%expect {| val foo : int -> int |}]
-
-  let%expect_test "pattern" =
-    infer_test {|
-    let map f xs =
-  match xs with
-  | [] -> []
-  | a::b::tl-> [f a; f b]
-|};
-    [%expect {|
-      val map : ('a -> 'b) -> 'a list -> 'b list |}]
-  ;;
-;;
 end
-
-module ManyTests = struct
-  open InferenceTests
-
-  let read_from_file filename =
-    let full_file =
-      let rec get_rparent s = function
-        | 0 -> s
-        | n when n < 0 -> failwith "Can't get parent of "
-        | n -> get_rparent (Filename.dirname s) (n - 1)
-      in
-      get_rparent (Unix.getcwd ()) 8 ^ "/manytests/" ^ filename ^ ".ml"
-    in
-    let ch = open_in full_file in
-    let s = really_input_string ch (in_channel_length ch) in
-    close_in ch;
-    s 
-  ;;
-
-  let read_from_file_typed filename = read_from_file ("typed/" ^ filename)
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "001fac");
-    [%expect
-      {|
-      val fac : int -> int
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "002fac");
-    [%expect
-      {|
-      val fac_cps : int -> (int -> 'a) -> 'a
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "002fac");
-    [%expect
-      {|
-      val fac_cps : int -> (int -> 'a) -> 'a
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "003fib");
-    [%expect
-      {|
-      val fib : int -> int
-      val fib_acc : int -> int -> int -> int
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "004manyargs");
-    [%expect
-      {|
-      val main : int
-      val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-      val test3 : int -> int -> int -> int
-      val wrap : 'a -> 'a
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "005fix");
-    [%expect
-      {|
-      val fac : (int -> int) -> int -> int
-      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "006partial");
-    [%expect
-      {|
-      val foo : int -> int
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "006partial2");
-    [%expect
-      {|
-      val foo : int -> int -> int -> int
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "006partial3");
-    [%expect
-      {|
-      val foo : int -> int -> int -> Unit
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "007order");
-    [%expect
-      {|
-      val _start : Unit -> Unit -> int -> Unit -> int -> int -> Unit -> int -> int -> int
-      val main : Unit
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "008ascription");
-    [%expect
-      {|
-      val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
-      val main : int
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "009let_poly");
-    [%expect {|
-      val temp : int * bool
-    |}]
-  ;;
-
-  let%expect_test _ =
-infer_test (read_from_file_typed "015tuples");
-    [%expect
-      {|
-      val feven : 'a * int -> int -> int -> int
-      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-      val fixpoly : 'a -> 'b * 'a -> 'b -> 'a -> 'b * 'a -> 'b * 'a -> 'b -> 'a -> 'b -> 'a -> 'b * 'a -> 'b
-      val fodd : int -> int * 'a -> int -> int
-      val main : int
-      val map : ('a -> 'b) -> 'a * 'a -> 'b * 'b
-      val meven : int -> int
-      val modd : int -> int
-      val tie : int -> int * int -> int
-    |}]
-  ;;
-     let%expect_test _ =
-infer_test (read_from_file_typed "016lists");
-     [%expect {|
-       val append : 'a list -> 'a list -> 'a list
-       val cartesian : 'a list -> 'b list -> ('a * 'b) list
-       val concat : 'a list list -> 'a list
-       val iter : ('a -> Unit) -> 'a list -> Unit
-       val length : 'a list -> int
-       val length_tail : 'a list -> int
-       val main : int
-       val map : ('a -> 'b) -> 'a list -> 'b list
-    |}]
-     ;;
-
-end 

@@ -470,9 +470,7 @@ and infer_decl env = function
     let* tv = fresh_var in
     let env = TypeEnv.extend env x (Scheme.empty, tv) in
     let* s1 = unify_annotated_type tv ty_pat in
-    let* typ_expr, subst =
-      infer_common_decl (TypeEnv.apply s1 env) expr_typed ty_pat
-    in
+    let* typ_expr, subst = infer_common_decl (TypeEnv.apply s1 env) expr_typed ty_pat in
     let* s2 = unify typ_expr (Subst.apply subst tv) in
     let* sub = Subst.compose s2 subst in
     let env = TypeEnv.apply s2 env in
@@ -482,19 +480,19 @@ and infer_decl env = function
   | DLetMut (Not_recursive, let_1, let_2, let_list) ->
     let let_list = let_1 :: let_2 :: let_list in
     let rec helper ~start_env ~acc_env ~substs = function
-    | hd :: tl ->
-      let ((_, ty_pat) as pat_typed), ((_, _) as expr_typed) = hd in
-      let* sub_infer, typ = infer_expr_typed start_env expr_typed in
-      let* sub_annotated = unify_annotated_type (get_return_type typ) ty_pat in
-      let acc_env =
-        TypeEnv.extend_by_pattern_or_op (generalize start_env typ) acc_env pat_typed
-      in
-      let* sub_final = Subst.compose_all [sub_infer; substs; sub_annotated] in
-      helper ~start_env ~acc_env ~substs:sub_final tl
-    | [] -> return (substs, acc_env)
-  in
-  let* substs, env = helper ~start_env:env ~acc_env:env ~substs:Subst.empty let_list in
-  return (substs, env)
+      | hd :: tl ->
+        let ((_, ty_pat) as pat_typed), ((_, _) as expr_typed) = hd in
+        let* sub_infer, typ = infer_expr_typed start_env expr_typed in
+        let* sub_annotated = unify_annotated_type (get_return_type typ) ty_pat in
+        let acc_env =
+          TypeEnv.extend_by_pattern_or_op (generalize start_env typ) acc_env pat_typed
+        in
+        let* sub_final = Subst.compose_all [ sub_infer; substs; sub_annotated ] in
+        helper ~start_env ~acc_env ~substs:sub_final tl
+      | [] -> return (substs, acc_env)
+    in
+    let* substs, env = helper ~start_env:env ~acc_env:env ~substs:Subst.empty let_list in
+    return (substs, env)
   | DLetMut (Recursive, let_1, let_2, let_list) ->
     let let_list = let_1 :: let_2 :: let_list in
     let helper smth ((pat, ty_pat), ((_, _) as expr_typed)) =
