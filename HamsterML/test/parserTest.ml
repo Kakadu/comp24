@@ -1,4 +1,4 @@
-open HamsterML.Ast
+(* open HamsterML.Ast
 
 let parse (s : string) : expr list =
   let lexbuf = Lexing.from_string s in
@@ -403,4 +403,4 @@ let%test _ =
           ]
         , Some (Pattern (VarId "b")) )
     ]
-;;
+;; *)

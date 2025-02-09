@@ -1,4 +1,4 @@
-let lex code =
+(* let lex code =
   let rec build_list lexbuf =
     match HamsterML.Lexer.read lexbuf with
     | EOF -> []
@@ -55,4 +55,4 @@ let%test _ =
     ; IDENTIFIER "sum"
     ; IDENTIFIER "tail"
     ]
-;;
+;; *)

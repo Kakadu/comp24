@@ -4,6 +4,16 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
+
+let lexer (s: string) =
+  let rec build_list lexbuf =
+    match HamsterML.Lexer.read lexbuf with
+    | EOF -> []
+    | token -> token :: build_list lexbuf
+  in
+  build_list (Lexing.from_string s)
+;;
+
 let parse (s : string) : expr list =
   let lexbuf = Lexing.from_string s in
   let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in

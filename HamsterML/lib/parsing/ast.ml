@@ -45,7 +45,6 @@ type op =
 type pattern =
   | Const of value
   | Var of id
-  | TypedVar of id * dataType (* (a: int) *)
   | Wildcard (* _ *)
   | Tuple of pattern list (* (1, 2, 3) *)
   | List of pattern list (* [1; 2; 3] *)

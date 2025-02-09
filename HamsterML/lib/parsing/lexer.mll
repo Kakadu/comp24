@@ -17,15 +17,12 @@ let sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '
 let comment_sym = ['a'-'z' 'A'-'Z' '_' '0'-'9' '!' '@' '#' '$' '%' '^' '&' '?' '/' '[' ']' '{' '}' ',' '.' ' ']
 let char = ''' sym '''
 let string  = '\"' sym* '\"'
-let poly = '`' ['a'-'z' 'A'-'Z']+
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
 let comment = "(*" comment_sym* "*)"
 
 let unit = '(' ' '* ')'
-
-let infix_op = '(' ' '* ['+' '-' '*' '/' ] ' '* ')'
 
 rule read =
     parse
@@ -71,10 +68,6 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
-    | infix_op  { (let str = Lexing.lexeme lexbuf in
-                    let str2 = (String.sub str 1 (String.length str - 2)) in
-                        let char = String.get (String.trim str2) 0 in
-                        OP_IDENTIFIER char) }
     | comment   { read lexbuf }
     | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
@@ -84,8 +77,6 @@ rule read =
                     TYPE_STRING (String.sub str 1 (String.length str - 2))}
     | "true"    { TYPE_BOOL (true) }
     | "false"   { TYPE_BOOL (false) }
-    | poly      { (let str = Lexing.lexeme lexbuf in
-                    POLYMORPHIC_NAME (String.sub str 1 ((String.length str) - 1))) }
     | id        { IDENTIFIER (Lexing.lexeme lexbuf)}
     | eof       { EOF }
     | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

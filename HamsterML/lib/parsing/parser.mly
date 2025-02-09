@@ -18,9 +18,7 @@
 %token BOOL
 %token CHAR
 %token STRING
-%token <string> POLYMORPHIC_NAME // (x: `a) (y: `b)
 
-%token <char>   OP_IDENTIFIER // let (+) = ...
 %token <string> IDENTIFIER
 
 // Statements 
@@ -90,54 +88,7 @@
 %start prog
 %%
 
-prog : p = program EOF { p }
-program : p = list(declaration) { p }
-declaration :
-    | LET; l = let_def                                                  { l }
-    | LET; l = let_and_in_def                                           { l } 
-
-expr:
-    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
-    | v = value                                                         { Pattern v }
-    | uop = uop; e = expr                                               { UnOp (uop, e) }
-    | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
-    | d = declaration                                                   { d }
-    | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
-    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
-    | IF; e1 = expr; THEN; e2 = expr                                    { If (e1, e2, None) }
-    | le = expr; re = expr                                              { Application (le,re) }
-
-dataType:
-    | f = float             { f }
-    | i = int               { i }
-    | b = TYPE_BOOL         { Bool b }
-    | c = TYPE_CHAR         { Char c }
-    | s = TYPE_STRING       { String s }
-    | TYPE_UNIT             { Unit }
-
-value:
-    | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS    { v }
-    | WILDCARD                                          { Wildcard }
-    | t_v = typed_var                                   { t_v }
-    | v = const_or_var                                  { v }
-    | p = pattern                                       { p }
-
-pattern:
-    | tpl = tuple_dt                                        { Tuple tpl } (* (1, 2, 3, ...) *)
-    | lst = list_dt                                         { List lst }  (* [1; 2; 3; ...] *)
-    | lv = const_or_var; DOUBLE_COLON; rv = const_or_var    { ListConcat (lv, rv) } (* hd :: tl *)
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt          { ListConcat (v, List l) } (* 1 :: [2; 3] *)
-
-int:
-    | i = TYPE_INT              {Int i}
-    | MINUS; i = TYPE_INT       {Int (-i)}
-    | PLUS; i = TYPE_INT        {Int (i)}
-
-float:
-    | f = TYPE_FLOAT            {Float f}
-    | MINUS; f = TYPE_FLOAT     {Float (-.f)}
-    | PLUS; f = TYPE_FLOAT      {Float (f)}
+// --- Subs ---
 
 %inline paramType:
     | INT                   { PInt }
@@ -145,7 +96,6 @@ float:
     | BOOL                  { PBool }
     | CHAR                  { PChar }
     | STRING                { PString }
-    // | n = POLYMORPHIC_NAME  { Poly n }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -165,44 +115,98 @@ float:
 %inline uop:
     | NOT { NOT }
 
-%inline func_id: 
-    // | id = IDENTIFIER     { VarId ( id ) }
-    | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
-    // (* let _ = .. *)
-    // | WILDCARD            { Wildcard }
-    // (* let f x = let (k, j) = x in j in f (1, 2) *)
-    // | p = pattern         { p }
-    | v = value            { v }
+dataType:
+    | f = float             { f }
+    | i = int               { i }
+    | b = TYPE_BOOL         { Bool b }
+    | c = TYPE_CHAR         { Char c }
+    | s = TYPE_STRING       { String s }
+    | TYPE_UNIT             { Unit }
 
-const_or_var: (* Const or variable *)
-    | const = dataType      {Const const} 
-    | varId = IDENTIFIER    { VarId varId }
+int:
+    | i = TYPE_INT              {Int i}
+    | MINUS; i = TYPE_INT       {Int (-i)}
+    | PLUS; i = TYPE_INT        {Int (i)}
 
-typed_var: typedVarId = IDENTIFIER; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
+float:
+    | f = TYPE_FLOAT            {Float f}
+    | MINUS; f = TYPE_FLOAT     {Float (-.f)}
+    | PLUS; f = TYPE_FLOAT      {Float (f)}
 
-%inline tuple_dt: LEFT_PARENTHESIS; arg_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { arg_list }
-%inline list_dt: LEFT_SQ_BRACKET; arg_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { arg_list }
+// --- Parser rules ---
 
-%inline match_case: BAR; v = value; ARROW; e = expr { (v, e) }
+prog : e = expr EOF { [e] }
+
+// declaration:
+//     | LET; l = let_def                                                  { l }
+//     | LET; l = let_and_in_def                                           { l } 
+
+expr:
+    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
+    | e = operation_expr                                                { e }
+    | e = if_expr                                                       { e }
+    | p = pattern                                                       { Pattern p }
+    | le = expr; re = expr                                              { Application (le, re) }
+    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
+    // | d = declaration                                                   { d }
+    // | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
+
+
+pattern:
+    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
+    | const = dataType                                      { Const const } 
+    | var = IDENTIFIER                                      { Var var }
+    | WILDCARD                                              { Wildcard }
+    | tpl = tuple_pattern                                   { Tuple tpl } (* (1, 2, 3, ...) *)
+    | lst = list_pattern                                    { List lst }  (* [1; 2; 3; ...] *)
+    | lv = pattern; DOUBLE_COLON; rv = pattern              { ListConcat (lv, rv) } (* hd :: tl *)
+    | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS         { Operation (Binary op) } (* for prefix operations like "(+) 1 2" *)
+
+(* default operations like "1 + 2" *)
+operation_expr: 
+    | e1 = expr; op = bop; e2 = expr { Application ( Application (Pattern (Operation (Binary op)), e1), e2 ) }
+    | op = uop; e = expr             { Application (Pattern (Operation (Unary op)), e) } 
+
+if_expr:
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
+    | IF; e1 = expr; THEN; e2 = expr                                    { If (e1, e2, None) }
+
+// %inline func_id: 
+//     // | id = IDENTIFIER     { VarId ( id ) }
+//     | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
+//     // (* let _ = .. *)
+//     // | WILDCARD            { Wildcard }
+//     // (* let f x = let (k, j) = x in j in f (1, 2) *)
+//     // | p = pattern         { p }
+//     | v = value            { v }
+
+// const_or_var: (* Const or variable *)
+//     | const = dataType      { Const const} 
+//     | var = IDENTIFIER    { Var var }
+
+%inline tuple_pattern: LEFT_PARENTHESIS; args = separated_nonempty_list(COMMA, pattern); RIGHT_PARENTHESIS { args }
+%inline list_pattern: LEFT_SQ_BRACKET; args = separated_list(SEMICOLON, pattern); RIGHT_SQ_BRACKET         { args }
+
+%inline match_case: BAR; v = pattern; ARROW; e = expr { (v, e) }
 
 %inline rec_flag:
     | REC { Recursive }
     | { Nonrecursive }
 
-%inline let_def:
-    (* () = print_endline "123" *)
-    | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
-    (* [rec] f x = x *)
-    | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
+// %inline let_def:
+//     (* () = print_endline "123" *)
+//     | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
+//     (* [rec] f x = x *)
+//     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
 
 
-(* a = 10 and b = 20 and ... *)
-and_bind:
-    | l = let_def                             { [l] }
-    | h = let_def; LET_AND; tl = and_bind     { h :: tl }
+// (* a = 10 and b = 20 and ... *)
+// and_bind:
+//     | l = let_def                             { [l] }
+//     | h = let_def; LET_AND; tl = and_bind     { h :: tl }
 
-(* a = 10 and b = 20 and ... in a + b + ... *)
-let_and_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
-    | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
-    | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)
+// (* a = 10 and b = 20 and ... in a + b + ... *)
+// let_and_in_def: 
+//     | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
+//     | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
+//     | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)

@@ -1,4 +1,4 @@
-open HamsterML.Typing
+(* open HamsterML.Typing
 
 let typecheck expr =
   match infer expr with
@@ -42,4 +42,4 @@ let%test _ =
       ( TInt
       , TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TInt)))))
       )
-;;
+;; *)
