@@ -5,8 +5,8 @@
 open Format
 
 let pp_el parens_pred pp_e fmt e =
-  let s = if parens_pred e then format_of_string "(%a)" else format_of_string "%a" in
-  fprintf fmt s pp_e e
+  let s = if parens_pred e then "(%a)" else "%a" in
+  fprintf fmt (Scanf.format_from_string s "%a") pp_e e
 ;;
 
 let pp_list parens_pred pp_e fmt delimiter =
