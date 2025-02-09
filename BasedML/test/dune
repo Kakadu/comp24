@@ -2,7 +2,7 @@
  (name parser_demo)
  (modules parser_demo)
  (public_name parser_demo)
- (libraries parser stdio))
+ (libraries parser stdio middleend))
 
 (executable
  (name typeinference_demo)
@@ -103,3 +103,7 @@
   manytests/typed/010sukharev.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
+
+(cram
+ (applies_to egraphs_tests)
+ (deps ./egraphs_demo.exe))

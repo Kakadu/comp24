@@ -11,6 +11,7 @@ depends: [
   "dune" {>= "3.8"}
   "bisect_ppx"
   "qcheck"
+  "ego"
   "llvm" {= "16.0.6+nnp"}
   "odoc" {with-doc}
 ]
