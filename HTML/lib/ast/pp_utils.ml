@@ -17,5 +17,5 @@ let pp_list parens_pred pp_e fmt delimiter =
 ;;
 
 let pp_tuple parens_pred pp_e delim fmt value_list =
-  pp_list parens_pred pp_e fmt delim  value_list
+  pp_list parens_pred pp_e fmt delim value_list
 ;;
