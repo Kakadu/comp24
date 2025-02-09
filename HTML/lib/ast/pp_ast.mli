@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 val pp_const : Format.formatter -> Ast.const -> unit
 
 val pp_ground_typ
