@@ -458,7 +458,7 @@ module Infer = struct
   (* 'a -> 'b + int <=> 'a -> 'b -> int *)
   let rec build_arrow arr end_t =
     match arr with
-    | TArrow (t1, t2) -> TArrow (t1, build_arrow end_t t2)
+    | TArrow (t1, t2) -> TArrow (t1, build_arrow t2 end_t)
     | x -> TArrow (x, end_t)
   ;;
 
