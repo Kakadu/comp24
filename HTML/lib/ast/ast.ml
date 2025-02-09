@@ -14,8 +14,11 @@ type base_op =
   | Minus (** - *)
 [@@deriving eq, show { with_path = false }]
 
-type ident_letters = string [@@deriving eq, show { with_path = false }]
-type ident_op = string [@@deriving eq, show { with_path = false }]
+type ident_letters = string
+(** Letters of idents with only letters *) [@@deriving eq, show { with_path = false }]
+
+type ident_op = string
+(** Letters of idents-operators *) [@@deriving eq, show { with_path = false }]
 
 type ident_definable =
   | IdentLetters of ident_letters (** a, b, c, ...*)
@@ -53,14 +56,15 @@ type pattern =
   | PConst of const (** 3 *)
 [@@deriving eq, show { with_path = false }]
 
-and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = false }]
+and pattern_typed = pattern * typ option
+(** typed pattern *) [@@deriving eq, show { with_path = false }]
 
 type pattern_or_op =
   | POpPat of pattern (** pattern *)
   | POpOp of ident_op (** custom operator *)
 [@@deriving eq, show { with_path = false }]
 
-and pattern_or_op_typed = pattern_or_op * typ option
+and pattern_or_op_typed = pattern_or_op * typ option (** typed pattern or op *)
 [@@deriving eq, show { with_path = false }]
 
 type branch = pattern_typed * expr_typed
