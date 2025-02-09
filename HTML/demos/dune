@@ -4,10 +4,17 @@
  (modules parser_demo)
  (libraries Parser stdio))
 
+(executable
+ (name inferencer_demo)
+ (public_name inferencer_demo)
+ (modules inferencer_demo)
+ (libraries Parser Inferencer stdio))
+
 (cram
- (applies_to parser_demo)
+ (applies_to parser_demo inferencer_demo)
  (deps
   ./parser_demo.exe
+  ./inferencer_demo.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
