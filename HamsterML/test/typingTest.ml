@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 (* open HamsterML.Typing
-=======
-open HamsterML.Typing
-open HamsterML.Ast
->>>>>>> ef3f44c62a349915a86d9e6637f54ca887192eb9
 
 let typecheck f x =
   let res = R.run (f TypeEnv.empty x) in
@@ -80,7 +75,6 @@ let%test _ =
 
 let%test _ =
   typecheck
-<<<<<<< HEAD
     (Fun
        ( [ VarId "x"; Const Unit; VarId "y"; Const Unit; VarId "z"; Const Unit ]
        , BinOp
@@ -92,39 +86,3 @@ let%test _ =
       , TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TInt)))))
       )
 ;; *)
-=======
-    Infer.infer_pattern
-    (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3) ]))
-  = TList TInt
-;;
-
-(* -- Let *)
-
-let%test _ =
-  typecheck_expr
-    (Let
-       ( Nonrecursive
-       , VarId "f"
-       , [ VarId "x"; VarId "y" ]
-       , BinOp (ADD, Pattern (VarId "x"), Pattern (VarId "y")) ))
-  = TArrow (TPVar 0, TArrow (TInt, TPVar 1))
-;;
-
-(* let f x y = if x = y && x = 10 then 0 else 1 *)
-
-let%test _ =
-  typecheck_expr
-    (Let
-       ( Nonrecursive
-       , VarId "f"
-       , [ VarId "x"; VarId "y" ]
-       , If
-           ( BinOp
-               ( HamsterML.Ast.AND
-               , BinOp (EQ, Pattern (VarId "x"), Pattern (VarId "y"))
-               , BinOp (EQ, Pattern (VarId "x"), Pattern (Const (Int 10))) )
-           , Pattern (Const (Int 0))
-           , Some (Pattern (Const (Int 1))) ) ))
-  = TArrow (TPVar 0, TArrow (TInt, TPVar 1))
-;;
->>>>>>> ef3f44c62a349915a86d9e6637f54ca887192eb9

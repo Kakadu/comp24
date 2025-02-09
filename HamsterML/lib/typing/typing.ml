@@ -540,8 +540,4 @@ module Infer = struct
   ;;
 end
 
-<<<<<<< HEAD
 let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr) *)
-=======
-let infer prog = R.run (Infer.infer_prog TypeEnv.empty prog)
->>>>>>> ef3f44c62a349915a86d9e6637f54ca887192eb9
