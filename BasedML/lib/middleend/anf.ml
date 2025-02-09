@@ -30,13 +30,11 @@ type prefix =
   | IfThenElse
   | Tuple
   | Application
-  | Constraint
 
 let prefix_to_string = function
   | IfThenElse -> "anf_ifthenelse_"
   | Tuple -> "anf_tuple_"
   | Application -> "anf_app_"
-  | Constraint -> "anf_constraint_"
 ;;
 
 let get_new_num =
@@ -76,11 +74,7 @@ let rec anf ctx llexpr expr_with_hole =
     expr_with_hole imm_const
   | LLIdentifier id -> expr_with_hole (ImmIdentifier id)
   | LLConstraint (llexp, typ) ->
-    anf ctx llexp (fun imm ->
-      let* fresh_name = new_name Constraint ctx in
-      let imm_id = ImmIdentifier fresh_name in
-      let* _ = expr_with_hole imm_id in
-      return (ACExpr (CConstraint (imm, typ))))
+    anf ctx llexp (fun imm -> expr_with_hole (ImmConstraint (imm, typ)))
   | LLIfThenElse (guard, then_branch, else_branch) ->
     anf ctx guard (fun imm_guard ->
       let* then_aexpr =
