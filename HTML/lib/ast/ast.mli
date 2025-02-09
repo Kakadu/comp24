@@ -13,8 +13,8 @@ val pp_const : Format.formatter -> const -> unit
 val show_const : const -> string
 
 type base_op =
-  | Plus (** + *)
-  | Minus (** - *)
+  | Plus (** plus: + *)
+  | Minus (** minus: - *)
 
 val equal_base_op : base_op -> base_op -> bool
 val pp_base_op : Format.formatter -> base_op -> unit
