@@ -65,7 +65,7 @@ type pattern_or_op =
 [@@deriving eq, show { with_path = false }]
 
 (** typed pattern or op *)
-and pattern_or_op_typed = pattern_or_op * typ option
+type pattern_or_op_typed = pattern_or_op * typ option
 [@@deriving eq, show { with_path = false }]
 
 (** branch in match expr *)
