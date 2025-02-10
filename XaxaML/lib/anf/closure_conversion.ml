@@ -103,6 +103,7 @@ let rec cc_expr global_env bindings = function
     let then1 = cc_expr global_env bindings then1 in
     let else1 = cc_expr global_env bindings else1 in
     E_ite (if1, then1, else1)
+    (* only for anonymous functions *)
   | E_fun (first_arg, other_args, body) as orig ->
     let args = first_arg :: other_args in
     let idents = get_idents_from_list args in
@@ -111,6 +112,7 @@ let rec cc_expr global_env bindings = function
     let free_patterns = List.map free ~f:(fun x -> P_val x) in
     let new_args = free_patterns @ args in
     let new_body = cc_expr global_env bindings body in
+    let new_body = List.fold free ~init:new_body ~f:(fun acc name -> E_app (acc, E_ident name) ) in 
     E_fun (List.hd_exn new_args, List.tl_exn new_args, new_body)
   | E_app (e1, e2) ->
     let e1 = cc_expr global_env bindings e1 in

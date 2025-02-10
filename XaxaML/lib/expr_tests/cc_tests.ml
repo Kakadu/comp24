@@ -39,8 +39,14 @@ let%expect_test "anonymous fun, add c d" =
            (E_tuple ((E_const (C_int 1)), [(E_const (C_int 2))])))),
        (E_fun ((P_val "c"), [(P_val "d"); (P_val "a")],
           (E_app (
-             (E_app ((E_ident "+"),
-                (E_app ((E_app ((E_ident "+"), (E_ident "a"))), (E_ident "c"))))),
+             (E_app (
+                (E_app (
+                   (E_app ((E_ident "+"),
+                      (E_app ((E_app ((E_ident "+"), (E_ident "a"))),
+                         (E_ident "c")))
+                      )),
+                   (E_ident "d"))),
+                (E_ident "c"))),
              (E_ident "d")))
           ))
        )) |}]
