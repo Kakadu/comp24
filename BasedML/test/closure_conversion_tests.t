@@ -6,17 +6,17 @@
   $ dune exec ./closure_conversion_demo.exe << EOF
   > let test1 x = let test2 y = x + y in test2
   > EOF
-  let  test1 = (fun x -> (let  test2 = (fun x -> (fun y -> ((( + ) x) y))) in (test2 x)))
+  let  test1 = (fun x -> (let  test2_arg_1 = x in (let  test2 = (fun x -> (fun y -> ((( + ) x) y))) in (test2 x))))
 
   $ dune exec ./closure_conversion_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
-  let  test1 = (fun (x, y) -> (let  test2 = (fun x -> (fun y -> (fun i -> (x, y, i)))) in ((test2 x) y)))
+  let  test1 = (fun (x, y) -> (let  test2_arg_2 = y in (let  test2_arg_1 = x in (let  test2 = (fun x -> (fun y -> (fun i -> (x, y, i)))) in ((test2 x) y)))))
 
   $ dune exec ./closure_conversion_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
-  let  test1 = (fun (x, y) -> (let  test2 = (fun x -> (fun y -> (fun i -> (x, y, i)))) in ((test2 x) y)))
+  let  test1 = (fun (x, y) -> (let  test2_arg_2 = y in (let  test2_arg_1 = x in (let  test2 = (fun x -> (fun y -> (fun i -> (x, y, i)))) in ((test2 x) y)))))
 
   $ dune exec ./closure_conversion_demo.exe << EOF
   > let rec facCPS n k = match n with
@@ -32,7 +32,7 @@
   > let nested3 = 6 in
   > let nested4 x = x + (fun i -> nested2 + nested3) 8 in nested4 55
   > EOF
-  let  nested1 = (let  nested2 = 5 in (let  nested3 = 6 in (let  nested4 = (fun nested2 -> (fun nested3 -> (fun x -> ((( + ) x) ((((fun nested2 -> (fun nested3 -> (fun i -> ((( + ) nested2) nested3)))) nested2) nested3) 8))))) in (((nested4 nested2) nested3) 55))))
+  let  nested1 = (let  nested2 = 5 in (let  nested3 = 6 in (let  nested4_arg_2 = nested3 in (let  nested4_arg_1 = nested2 in (let  nested4 = (fun nested2 -> (fun nested3 -> (fun x -> ((( + ) x) ((((fun nested2 -> (fun nested3 -> (fun i -> ((( + ) nested2) nested3)))) nested2) nested3) 8))))) in (((nested4 nested2) nested3) 55))))))
 
   $ dune exec ./closure_conversion_demo.exe << EOF
   > let rec facCPS n k = match n with
@@ -53,3 +53,4 @@
 
 
 
+z

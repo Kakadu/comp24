@@ -1,19 +1,4 @@
   $ dune exec ./anf_demo.exe << EOF
-  > let anf_app_0 = let anf_app_1 = 5 in 
-  > let anf_app_2 = 6 in
-  > let anf_app_3 x = x + (fun i -> anf_app_1 + anf_app_2) 8 in nested4 55
-  > EOF
-  let  ll_1 anf_app_1 anf_app_2 i  = let anf_app_3 = ( + ) anf_app_1 anf_app_2 in
-   anf_app_3;;
-  let  ll_0 anf_app_1 anf_app_2 nested4 x  = let anf_app_3 = ll_1 anf_app_1 anf_app_2 8 in
-   let anf_app_4 = ( + ) x anf_app_3 in
-   anf_app_4;;
-  let  anf_app_0  = let anf_app_1 = 5 in
-   let anf_app_2 = 6 in
-   let anf_app_0 = nested4 55 in
-   anf_app_0;;
-
-  $ dune exec ./anf_demo.exe << EOF
   > let rec fact_cps n cont =
   > if (n = 0) then
   >  cont 1
@@ -207,16 +192,14 @@
    0;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/006partial3.ml
-  let  ll_1 print_int c  = let anf_app_0 = print_int c in
+  let  ll_1 c  = let anf_app_0 = print_int c in
    anf_app_0;;
-  let  ll_0 print_int b  = let anf_app_0 = print_int b in
+  let  ll_0 b  = let anf_app_0 = print_int b in
    let () = anf_app_0 in
-   let anf_app_1 = ll_1 print_int in
-   anf_app_1;;
+   ll_1;;
   let  foo a  = let anf_app_0 = print_int a in
    let () = anf_app_0 in
-   let anf_app_1 = ll_0 print_int in
-   anf_app_1;;
+   ll_0;;
   let  main  = let anf_app_0 = foo 4 8 9 in
    let () = anf_app_0 in
    0;;
@@ -368,7 +351,8 @@
   | (h :: tl) -> let anf_app_0 = ll_1 tl in
    let anf_app_1 = append h anf_app_0 in
    anf_app_1;;
-  let  concat  = ll_1;;
+  let  concat  = let helper_arg_1 = append in
+   ll_1;;
   let rec iter f xs  = match xs with
   | [] -> ()
   | (h :: tl) -> let anf_app_0 = f h in

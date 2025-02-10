@@ -7,19 +7,19 @@
   > let test1 x = let test2 y = x + y in test2
   > EOF
   let  ll_0 x y  = ((( + ) x) y)
-  let  test1 x  = (ll_0 x)
+  let  test1 x  = (let  test2_arg_1 = x in (ll_0 x))
 
   $ dune exec ./lifting_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
   let  ll_0 x y i  = (x, y, i)
-  let  test1 (x, y)  = ((ll_0 x) y)
+  let  test1 (x, y)  = (let  test2_arg_2 = y in (let  test2_arg_1 = x in ((ll_0 x) y)))
 
   $ dune exec ./lifting_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
   let  ll_0 x y i  = (x, y, i)
-  let  test1 (x, y)  = ((ll_0 x) y)
+  let  test1 (x, y)  = (let  test2_arg_2 = y in (let  test2_arg_1 = x in ((ll_0 x) y)))
 
   $ dune exec ./lifting_demo.exe << EOF
   > let rec facCPS n k = match n with
@@ -38,7 +38,7 @@
   > EOF
   let  ll_1 nested2 nested3 i  = ((( + ) nested2) nested3)
   let  ll_0 nested2 nested3 x  = ((( + ) x) (((ll_1 nested2) nested3) 8))
-  let  nested1  = (let  nested2 = 5 in (let  nested3 = 6 in (((ll_0 nested2) nested3) 55)))
+  let  nested1  = (let  nested2 = 5 in (let  nested3 = 6 in (let  nested4_arg_2 = nested3 in (let  nested4_arg_1 = nested2 in (((ll_0 nested2) nested3) 55)))))
 
   $ dune exec ./lifting_demo.exe << EOF
   > let rec facCPS n k = match n with
@@ -94,5 +94,13 @@
   > EOF
   let  test a1 a2 a3  = ((( + ) ((( + ) a1) a2)) a3)
   let  ()  = (((test ((( + ) 5) 5)) ((( * ) 6) 6)) ((( * ) 7) 7))
+
+  $ dune exec ./lifting_demo.exe << EOF
+  > let some_name2 = 5
+  > let test a1 = let some_name1 = some_name2 in let nested_fun a  s =  a + s in nested_fun a1 5
+  > EOF
+  let  some_name2  = 5
+  let  ll_0 a1 a s  = ((( + ) a) s)
+  let  test a1  = (let  some_name1 = some_name2 in (let  nested_fun_arg_1 = a1 in (((ll_0 a1) a1) 5)))
 
 
