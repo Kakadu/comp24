@@ -823,16 +823,16 @@ let opname_ =
 
 (* let ppvar = varname &gt;&gt;| pvar *)
 let ppvar =
-   let pvar =
-   let* name = varname in
-   <span data-count="984">r</span>eturn (PVar (name))
-   in
-   let opname =
-   let* op = opname_ in
-   <span data-count="0">r</span>eturn (PVar (op))
-   in
-   choic<span data-count="30">e</span> [pvar; opname ]
-   ;;
+  let pvar =
+    let* name = varname in
+    <span data-count="984">r</span>eturn (PVar name)
+  in
+  let opname =
+    let* op = opname_ in
+    <span data-count="0">r</span>eturn (PVar op)
+  in
+  choic<span data-count="30">e</span> [ pvar; opname ]
+;;
 
 let pptuple p = <span data-count="30">l</span>ift<span data-count="30">2</span> List.cons p (many<span data-count="30">1</span> (comma *<span data-count="30">&gt;</span> p)) &gt;&gt;| ptuple
 let pplist p = <span data-count="30">b</span>racket<span data-count="30">s</span> @@ sep_by<span data-count="30">1</span> semi p &gt;&gt;| List.fold_right ~f:pcons ~init:(pcons<span data-count="30">t</span> CNil)
