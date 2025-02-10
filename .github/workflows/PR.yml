@@ -114,7 +114,7 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        if: ${{ not(env.IsD) }}
+        if: ${{ !env.IsD }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
@@ -128,7 +128,7 @@ jobs:
 
       - run: cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }}
       - name: Preparing lints tarball
-        #if: ${{ not(env.IsD) }}
+        #if: ${{ !(env.IsD) }}
         run: |
           echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
           echo ${{ github.event.pull_request.user.login }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/piarast.txt
@@ -184,7 +184,7 @@ jobs:
       ###################### Coverage #####################################
 
       - name: Calculating coverage (1/2)
-        #if: ${{ not(env.IsD) }}
+        #if: ${{ !(env.IsD) }}
         run: |
           mkdir -p ${{ env.BISECT_DIR }}
           cd ${{ env.latest }} && opam exec -- dune runtest --instrument-with bisect_ppx --force
@@ -198,7 +198,7 @@ jobs:
       #    BISECT_FILE: /tmp/bisect_ppx_data/data
 
       - name: Calculating coverage (2/2)
-        #if: ${{ not(env.IsD) }}
+        #if: ${{ !(env.IsD) }}
         id: calc-coverage
         run: |
             cd ${{ env.latest }}
