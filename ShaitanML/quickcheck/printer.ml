@@ -27,8 +27,7 @@ let rec fpattern ppf pat =
   let fprintf x = Format.fprintf ppf x in
   match pat with
   | PAny -> fprintf "_"
-  | PCons (h_pat, t_pat) ->
-    fprintf "(%a :: %a)" fpattern h_pat fpattern t_pat
+  | PCons (h_pat, t_pat) -> fprintf "(%a :: %a)" fpattern h_pat fpattern t_pat
   | PVar x -> fprintf "%s" x
   | PTuple lst -> fprintf "(%a)" (flist fpattern) lst
   | PConst c -> fconst ppf c
@@ -49,27 +48,15 @@ let rec fexpr ppf exp =
   | EApply (exp1, exp2) -> fprintf "((%a) %a)" fexpr exp1 fexpr exp2
   | ECons (eh, et) -> fprintf "(%a :: %a)" fexpr eh fexpr et
   | EIf (exp_cond, exp_then, exp_else) ->
-    fprintf
-      "(if %a then %a else %a)"
-      fexpr
-      exp_cond
-      fexpr
-      exp_then
-      fexpr
-      exp_else
+    fprintf "(if %a then %a else %a)" fexpr exp_cond fexpr exp_then fexpr exp_else
   | ELet (rec_f, binding_list, exp_body) ->
-    fprintf
-      "(let %a "
-      frec_flag
-      rec_f;
-      List.iteri
+    fprintf "(let %a " frec_flag rec_f;
+    List.iteri
       (fun i binding ->
          if i <> 0 then fprintf " and " else ();
          fbinding ppf binding)
       binding_list;
-      fprintf " in %a)"
-      fexpr
-      exp_body
+    fprintf " in %a)" fexpr exp_body
   | ETuple lst -> fprintf "(%a)" (flist fexpr) lst
   | EMatch (exp, pat_exp_lst) ->
     fprintf "(match %a with" fexpr exp;
