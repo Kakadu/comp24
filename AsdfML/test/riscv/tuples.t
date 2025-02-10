@@ -76,7 +76,7 @@ $ /tmp/tuples
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (42, 1, 2122752)
+  (42, 1, 2094080)
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let cross (x1, y1, z1) (x2, y2, z2) =
