@@ -4,3 +4,4 @@
 
 val parse : string -> (Ast.structure, string) result
 val test_parse : string -> unit
+val is_keyword : string -> bool
