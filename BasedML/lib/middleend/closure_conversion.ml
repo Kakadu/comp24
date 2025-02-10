@@ -121,7 +121,7 @@ let infix_ops_set =
     [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )" ]
 ;;
 
-let convert global_ctx declaration =
+let convert global_context declaration =
   let rec helper lts local_ctx global_ctx = function
     | EConstant const -> EConstant const
     | EIdentifier id ->
@@ -174,16 +174,16 @@ let convert global_ctx declaration =
        (* Inner fun *)
        | PIdentifier id, EFunction (_, _) ->
          let updated_lts = Set.add lts id in
-         let updated_global_env =
+         let updated_global_ctx =
            match rec_flag with
            | Rec -> Set.add (Set.diff global_ctx infix_ops_set) id
            | NotRec -> Set.add (Set.diff global_ctx infix_ops_set) id
          in
          let unbound_names = unbound_identifiers (ELetIn (rec_flag, pat, outer, inner)) in
          let unbound_names_without_global =
-           Set.diff (Set.diff unbound_names updated_global_env) infix_ops_set
+           Set.diff (Set.diff unbound_names updated_global_ctx) infix_ops_set
          in
-         let closed_fun = close_function lts local_ctx updated_global_env helper outer in
+         let closed_fun = close_function lts local_ctx updated_global_ctx helper outer in
          let unbound_ids_without_global =
            List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PIdentifier x)
          in
@@ -193,20 +193,20 @@ let convert global_ctx declaration =
              ~f:(fun pat exp -> EFunction (pat, exp))
              ~init:closed_fun
          in
-         let updated_local_env =
+         let updated_local_ctx =
            Map.set local_ctx ~key:id ~data:unbound_names_without_global
          in
          let closed_inner =
            helper
              updated_lts
-             updated_local_env
+             updated_local_ctx
              (Set.diff (Set.add global_ctx id) infix_ops_set)
              inner
          in
          let updated_outer =
            helper
              updated_lts
-             updated_local_env
+             updated_local_ctx
              (Set.diff (Set.add global_ctx id) infix_ops_set)
              closed_outer
          in
@@ -231,7 +231,7 @@ let convert global_ctx declaration =
     | EConstraint (exp, type_name) ->
       EConstraint (helper lts local_ctx (Set.diff global_ctx infix_ops_set) exp, type_name)
   in
-  let close_declaration global_ctx = function
+  let close_declaration global_ctx_close_decl = function
     | DSingleLet (flag, DLet (pat, exp)) ->
       DSingleLet
         ( flag
@@ -240,7 +240,7 @@ let convert global_ctx declaration =
             , close_function
                 ((module String) |> Set.empty)
                 ((module String) |> Map.empty)
-                (Set.diff global_ctx infix_ops_set)
+                (Set.diff global_ctx_close_decl infix_ops_set)
                 helper
                 exp ) )
     | DMutualRecDecl (flag, decls) ->
@@ -255,13 +255,13 @@ let convert global_ctx declaration =
               helper
               exp
           in
-          let new_decl, new_env = handle_mutual_rec global_ctx tl in
-          DLet (pat, closed_exp) :: new_decl, new_env
+          let new_decl, new_ctx = handle_mutual_rec global_ctx tl in
+          DLet (pat, closed_exp) :: new_decl, new_ctx
       in
-      let new_decls, _ = handle_mutual_rec global_ctx decls in
+      let new_decls, _ = handle_mutual_rec global_ctx_close_decl decls in
       DMutualRecDecl (flag, new_decls)
   in
-  close_declaration global_ctx declaration
+  close_declaration global_context declaration
 ;;
 
 let convert_ast ast =
