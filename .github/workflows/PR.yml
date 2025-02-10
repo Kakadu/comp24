@@ -47,7 +47,7 @@ jobs:
 
       - name: Is it a D task? ${{  github.event.pull_request.title  }}
         run: |
-          echo "IsD=${{ startsWith(github.event.pull_request.title, '[D]') }}"
+          echo "IsD=${{ startsWith(github.event.pull_request.title, '[D]') }}" >> $GITHUB_ENV
 
       - name: isD = ${{ env.IsD }}
         run: echo "${{ env.IsD }}"
@@ -114,15 +114,25 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
+        if: ${{ not(env.IsD) }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
 
+      - name: SKIPPING linter in ${{ env.latest }}...
+        if: ${{ env.IsD }}
+        run: |
+          cd ${{ env.latest }}
+          echo '' > ${{ env.ZANUDA_REPORT_FILE_PATH }}
+          echo '' > ${{ env.RDJSON_FILE_PATH }}
+
       - run: cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }}
       - name: Preparing lints tarball
+        #if: ${{ not(env.IsD) }}
         run: |
           echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
           echo ${{ github.event.pull_request.user.login }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/piarast.txt
+          echo ${{ github.event.pull_request.title }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PRtitle.txt
           echo ${{ github.event.number }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PR_number.txt
           echo ${{ github.event.pull_request.head.sha }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
       # we use commit previous from head because HEAD is merge commit by some reason
@@ -174,6 +184,7 @@ jobs:
       ###################### Coverage #####################################
 
       - name: Calculating coverage (1/2)
+        #if: ${{ not(env.IsD) }}
         run: |
           mkdir -p ${{ env.BISECT_DIR }}
           cd ${{ env.latest }} && opam exec -- dune runtest --instrument-with bisect_ppx --force
@@ -187,6 +198,7 @@ jobs:
       #    BISECT_FILE: /tmp/bisect_ppx_data/data
 
       - name: Calculating coverage (2/2)
+        #if: ${{ not(env.IsD) }}
         id: calc-coverage
         run: |
             cd ${{ env.latest }}
