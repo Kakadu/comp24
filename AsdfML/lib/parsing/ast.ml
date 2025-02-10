@@ -107,9 +107,6 @@ let e_let_in def e = ELetIn (def, e)
 let e_tuple exprs = ETuple exprs
 let e_list exprs = EList exprs
 let e_match e branches = EMatch (e, branches)
-<<<<<<< HEAD
-||||||| parent of 413c173 (CC from scratch)
-=======
 let d_let p e = DLet (NonRec, p, e)
 let d_let_rec p e = DLet (Rec, p, e)
 
@@ -117,4 +114,3 @@ let d_let_flag = function
   | Rec -> d_let_rec
   | NonRec -> d_let
 ;;
->>>>>>> 413c173 (CC from scratch)
