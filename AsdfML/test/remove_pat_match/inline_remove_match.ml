@@ -29,7 +29,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let tuple_sum = (fun `arg_3 -> let `tuple = `arg_3
+    let tuple_sum = (fun `arg_0 -> let `tuple = `arg_0
      in let b = (`get_tuple_field `tuple 1)
      in let a = (`get_tuple_field `tuple 0)
      in (( + ) a b))
@@ -45,7 +45,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let _ = let tuple_sum = (fun `arg_3 -> let `tuple = `arg_3
+    let _ = let tuple_sum = (fun `arg_0 -> let `tuple = `arg_0
      in let b = (`get_tuple_field `tuple 1)
      in let a = (`get_tuple_field `tuple 0)
      in (( + ) a b))

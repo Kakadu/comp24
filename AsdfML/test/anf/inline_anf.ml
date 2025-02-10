@@ -118,13 +118,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let cross `arg_8 `arg_9 =
-      let a2 = `get_tuple_field `arg_9 2 in
-      let a4 = `get_tuple_field `arg_9 1 in
-      let a6 = `get_tuple_field `arg_9 0 in
-      let a9 = `get_tuple_field `arg_8 2 in
-      let a11 = `get_tuple_field `arg_8 1 in
-      let a13 = `get_tuple_field `arg_8 0 in
+    let cross `arg_0 `arg_1 =
+      let a2 = `get_tuple_field `arg_1 2 in
+      let a4 = `get_tuple_field `arg_1 1 in
+      let a6 = `get_tuple_field `arg_1 0 in
+      let a9 = `get_tuple_field `arg_0 2 in
+      let a11 = `get_tuple_field `arg_0 1 in
+      let a13 = `get_tuple_field `arg_0 0 in
       let a24 = ( * ) a11 a2 in
       let a25 = ( * ) a9 a4 in
       let a15 = ( - ) a24 a25 in

@@ -74,6 +74,7 @@ let remove_patterns =
   and helper_def = function
     | TDLet (t, r, p, e) when is_simple p -> [ td_let_flag r t p (helper_expr e) ]
     | TDLet (t, r, PTuple xs, e) ->
+      (* TODO: temp var name *)
       let temp_var = p_ident "temp_tuple" in
       let temp_def = td_let_flag r t temp_var (helper_expr e) in
       let assigns =
