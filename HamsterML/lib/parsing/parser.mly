@@ -1,5 +1,17 @@
 %{
     open Ast    
+
+    
+    let fold_app f =
+    let rec helper acc args =
+        match args with
+        | [] -> acc
+        | hd :: tl ->
+        let acc = Application (acc, hd) in
+        helper acc tl
+    in
+    helper f
+    ;;
 %}
 
 // --- Tokens ---
@@ -68,8 +80,6 @@
 // End Of File
 %token EOF
 
-
-
 // --- Priorities ---
 %left OR
 %left AND
@@ -119,25 +129,17 @@
     | OR                    { OR }            
 
 %inline uop:
-    | NOT { NOT }
+    | NOT   { NOT }
+    | MINUS { UMINUS }
+    | PLUS  { UPLUS }
 
 value:
-    | f = float             { f }
-    | i = int               { i }
+    | f = TYPE_FLOAT        { Float f }
+    | i = TYPE_INT          { Int i }
     | b = TYPE_BOOL         { Bool b }
     | c = TYPE_CHAR         { Char c }
     | s = TYPE_STRING       { String s }
     | TYPE_UNIT             { Unit }
-
-int:
-    | i = TYPE_INT              {Int i}
-    | MINUS; i = TYPE_INT       {Int (-i)}
-    | PLUS; i = TYPE_INT        {Int (i)}
-
-float:
-    | f = TYPE_FLOAT            {Float f}
-    | MINUS; f = TYPE_FLOAT     {Float (-.f)}
-    | PLUS; f = TYPE_FLOAT      {Float (f)}
 
 // --- Parser rules ---
 
@@ -158,8 +160,8 @@ prog_expr : e = expr EOF { [e] }
 _expr:
     | LEFT_PARENTHESIS; e = _expr; RIGHT_PARENTHESIS                    { e }   
     | v = value                                                         { EConst v }
-    | var = IDENTIFIER                                                  { EVar var }
     | op = operation                                                    { op }
+    | var = IDENTIFIER                                                  { EVar var }
     | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS                     { EOperation (Binary op) }
     | lst = _list(expr)                                                 { EList lst }
     | FUN; vls = nonempty_list(pattern); ARROW; e = expr                { Fun (vls, e) }
@@ -170,7 +172,7 @@ expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }   
     | sub_expr = _expr                                                  { sub_expr }
     | tpl = _tuple(_expr)                                               { ETuple tpl }
-    | le = expr; re = expr                                             { pp_expr Format.std_formatter le ;pp_expr Format.std_formatter re; Application (le, re) }
+    | a = application                                                   { a }
 
 _pattern:
     | LEFT_PARENTHESIS; p = _pattern; RIGHT_PARENTHESIS     { p }
@@ -187,9 +189,18 @@ pattern:
     | tpl = _tuple(_pattern)                                   { Tuple tpl }
 
 (* default operations like "1 + 2" *)
-operation: 
+%inline operation: 
     | e1 = expr; op = bop; e2 = expr { Application ( Application (EOperation (Binary op), e1), e2 ) }
     | op = uop; e = expr             { Application (EOperation (Unary op), e) } 
+
+(* add arguments to list and then build application
+    using fold_app function *)
+application:
+    | f = _expr; args = application_args { fold_app f args }
+
+application_args:
+    | arg = _expr; tl = application_args { arg :: tl }
+    | arg = _expr { [arg] }
 
 if_expr:
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }

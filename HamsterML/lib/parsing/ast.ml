@@ -35,7 +35,11 @@ type bop =
   | CONCAT (* ^ *)
 [@@deriving show]
 
-type uop = NOT (** not true *) [@@deriving show]
+type uop = 
+  | NOT (** not true *) 
+  | UMINUS (* -10 *)
+  | UPLUS (* +10 *)
+  [@@deriving show]
 
 type op =
   | Binary of bop
@@ -70,6 +74,7 @@ type expr =
 [@@deriving show]
 
 and args = pattern list
+
 (* name + args + scope *)
 and bind = pattern * args * expr
 and case = pattern * expr
