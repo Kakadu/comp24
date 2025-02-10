@@ -68,6 +68,8 @@
 // End Of File
 %token EOF
 
+
+
 // --- Priorities ---
 %left OR
 %left AND
@@ -144,13 +146,19 @@ prog : e = expr EOF { [e] }
 //     | LET; l = let_def                                                  { l }
 //     | LET; l = let_and_in_def                                           { l } 
 
+typ_opt:
+    | COLON; t = paramType { Some t }
+    | { None }
+
 expr:
+    | t = tuple_pattern { Pattern t }
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
     | e = operation_expr                                                { e }
     | e = if_expr                                                       { e }
     | p = pattern                                                       { Pattern p }
-    | le = expr; re = expr                                              { Application (le, re) }
-    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
+    | le = expr; re = expr; t = typ_opt                                         { Application (le, re, t) }
+    | MATCH; expr = expr; WITH; match_cases = match_cases { Match (expr, match_cases) }
+    | tb = tuple_pattern { Pattern tb }
     // | d = declaration                                                   { d }
     // | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
 
@@ -158,17 +166,16 @@ expr:
 pattern:
     | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
     | const = dataType                                      { Const const } 
-    | var = IDENTIFIER                                      { Var var }
+    | var = IDENTIFIER                               { Var var }
     | WILDCARD                                              { Wildcard }
-    | tpl = tuple_pattern                                   { Tuple tpl } (* (1, 2, 3, ...) *)
     | lst = list_pattern                                    { List lst }  (* [1; 2; 3; ...] *)
     | lv = pattern; DOUBLE_COLON; rv = pattern              { ListConcat (lv, rv) } (* hd :: tl *)
     | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS         { Operation (Binary op) } (* for prefix operations like "(+) 1 2" *)
 
 (* default operations like "1 + 2" *)
 operation_expr: 
-    | e1 = expr; op = bop; e2 = expr { Application ( Application (Pattern (Operation (Binary op)), e1), e2 ) }
-    | op = uop; e = expr             { Application (Pattern (Operation (Unary op)), e) } 
+    | e1 = expr; op = bop; e2 = expr { Application ( Application (Pattern (Operation (Binary op)), e1, None), e2, None ) }
+    | op = uop; e = expr             { Application (Pattern (Operation (Unary op)), e, None) } 
 
 if_expr:
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
@@ -187,13 +194,32 @@ if_expr:
 //     | const = dataType      { Const const} 
 //     | var = IDENTIFIER    { Var var }
 
-%inline tuple_pattern: LEFT_PARENTHESIS; args = separated_nonempty_list(COMMA, pattern); RIGHT_PARENTHESIS { args }
-%inline list_pattern: LEFT_SQ_BRACKET; args = separated_list(SEMICOLON, pattern); RIGHT_SQ_BRACKET         { args }
+// %inline tuple_pattern: LEFT_PARENTHESIS; args = separated_nonempty_list(COMMA, pattern); RIGHT_PARENTHESIS { args }
+%inline list_pattern: LEFT_SQ_BRACKET; args = separated_list(SEMICOLON, expr); RIGHT_SQ_BRACKET         { args }
+
+%inline tuple_pattern:
+    | t = tuple_body { t }
+    | LEFT_PARENTHESIS; t = tuple_body; RIGHT_PARENTHESIS { t }
+
+tuple_body: p1 = expr; COMMA; p2 = expr; tl = tuple_tail { Tuple (p1,p2,tl) }
+
+tuple_tail: 
+    | COMMA; p = expr; tl = tuple_tail { p::tl }
+    | { [] }
+
+%inline match_cases:
+    | hd =  first_match_case; tl = list(match_case) { hd :: tl }
+
+%inline first_match_case: bar_opt; v = pattern; ARROW; e = expr { (v, e) }
+
+%inline bar_opt:
+    | BAR { () }
+    |     { () }
 
 %inline match_case: BAR; v = pattern; ARROW; e = expr { (v, e) }
 
 %inline rec_flag:
-    | REC   { Recursive }
+    | REC   { Recursive } 
     |       { Nonrecursive }
 
 // %inline let_def:
