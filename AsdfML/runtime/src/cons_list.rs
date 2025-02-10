@@ -15,18 +15,16 @@ impl<T> ConsList<T> {
     pub fn is_empty(&self) -> bool { matches!(self, ConsList::Nil) }
 
     pub fn head(&self) -> Option<&T> {
-        if let ConsList::Cons(ref value, _) = *self {
-            Some(value)
-        } else {
-            None
+        match self {
+            ConsList::Nil => None,
+            ConsList::Cons(value, _) => Some(value),
         }
     }
 
     pub fn tail(&self) -> Option<Rc<ConsList<T>>> {
-        if let ConsList::Cons(_, ref tail) = *self {
-            Some(Rc::clone(tail))
-        } else {
-            None
+        match self {
+            ConsList::Nil => None,
+            ConsList::Cons(_, tail) => Some(Rc::clone(tail)),
         }
     }
 

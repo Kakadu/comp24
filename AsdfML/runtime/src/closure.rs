@@ -9,13 +9,11 @@ pub struct Closure {
 }
 
 // TODO:
-// - impl
 // - types (i/u size) + in lib
 // - shitcode with apply_closure
 // - pass args as tuple?
-
-// pub impl Closure {
-// }
+// - with_cap & clone?
+// - type fn_N = ...
 
 #[no_mangle]
 pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Closure {
@@ -76,7 +74,11 @@ pub unsafe extern "C" fn apply_closure_1(closure_ptr: *mut Closure, arg: isize) 
         debug!("Not enough args");
         Box::into_raw(closure) as isize
     } else {
-        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
+        panic!(
+            "Applied {} args to closure with arity {}",
+            closure.args.len(),
+            closure.arity
+        )
     }
 }
 
@@ -92,7 +94,11 @@ pub unsafe extern "C" fn apply_closure_2(closure_ptr: *mut Closure, arg1: isize,
         debug!("Not enough args");
         Box::into_raw(closure) as isize
     } else {
-        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
+        panic!(
+            "Applied {} args to closure with arity {}",
+            closure.args.len(),
+            closure.arity
+        )
     }
 }
 
@@ -109,7 +115,11 @@ pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize,
         debug!("Not enough args");
         Box::into_raw(closure) as isize
     } else {
-        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
+        panic!(
+            "Applied {} args to closure with arity {}",
+            closure.args.len(),
+            closure.arity
+        )
     }
 }
 #[no_mangle]
@@ -132,7 +142,11 @@ pub unsafe extern "C" fn apply_closure_4(
         debug!("Not enough args");
         Box::into_raw(closure) as isize
     } else {
-        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
+        panic!(
+            "Applied {} args to closure with arity {}",
+            closure.args.len(),
+            closure.arity
+        )
     }
 }
 #[no_mangle]
@@ -157,6 +171,10 @@ pub unsafe extern "C" fn apply_closure_5(
         debug!("Not enough args");
         Box::into_raw(closure) as isize
     } else {
-        panic!("Applied {} args to closure with arity {}", closure.args.len(), closure.arity)
+        panic!(
+            "Applied {} args to closure with arity {}",
+            closure.args.len(),
+            closure.arity
+        )
     }
 }
