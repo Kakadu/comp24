@@ -11,7 +11,7 @@ module InferenceTests = struct
     | Error err -> Format.printf "%s\n" err
   ;;
 
-  let%expect_test _ =
+  let%expect_test "sanity check" =
     infer_test {| let a = 3 |};
     [%expect {| val a : int |}]
   ;;
@@ -61,7 +61,7 @@ module InferenceTests = struct
     [%expect {| val a : int -> int |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "operator application and redefinition" =
     infer_test {| 
   let a = ( + ) 5;; 
   let ( + ) = (fun x y -> x || y);;|};
@@ -82,7 +82,7 @@ module InferenceTests = struct
     [%expect {| val f : 'a -> 'a |}]
   ;;
 
-  let%expect_test "polymorphic types" =
+  let%expect_test "polymorphic annotated arguments' type" =
     infer_test
       {|let f (g: ('a -> 'b)) (x: 'b) = 100
   let res = f (fun x -> true) false;;|};
@@ -91,7 +91,7 @@ module InferenceTests = struct
       val res : int |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "polymorphic annotated types unification error" =
     infer_test {|let f (g: ('a -> 'b)) (x: 'b) = 100
     let res = f (fun x -> true) 5;;|};
     [%expect
@@ -103,7 +103,7 @@ module InferenceTests = struct
     [%expect {| val f : (('a -> 'a) -> 'a -> 'a) -> ('a -> 'a) -> 'a -> 'a |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "polymorphic annotated arguments' type" =
     infer_test {|let f (h: ('c -> 'b)) (x: 'b) = h x;;|};
     [%expect {| val f : ('a -> 'a) -> 'a -> 'a |}]
   ;;
@@ -117,12 +117,12 @@ module InferenceTests = struct
     [%expect {| val map : ('a -> 'b) -> 'a list -> 'b list |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "list of tuple of two int lists" =
     infer_test {| let a =([3;3], [4;4]) :: [([5;5],[6;6]);([7;7],[8;8])] |};
     [%expect {| val a : (int list * int list) list |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "multiple let separated by ;;, pattern matching" =
     infer_test
       {| let f x = x;; let a = match [3;4;5] with | (hd::tl) -> (2, f true) | hd -> (f 2, false) |};
     [%expect {|
@@ -161,7 +161,7 @@ module InferenceTests = struct
     Typecheck error: Unbound value x |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "let ... and ... variable definition correct" =
     infer_test {|let f (a: int): int = a
 and g (b: bool): bool = b;;|};
     [%expect {|
@@ -169,7 +169,7 @@ and g (b: bool): bool = b;;|};
   val g : bool -> bool |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "mutual recursive functions polymorphic" =
     infer_test {|let rec id = fun x -> x and dup x y = (id x, id y);;|};
     [%expect
       {| 
@@ -234,7 +234,7 @@ val -$ : int -> int -> int
 |}]
   ;;
 
-  let%expect_test _ =
+  let%expect_test "polymorphic arguments' type" =
     infer_test
       {|let final_value (x: 'a) (y: 'b) =
   let double_x: int = x * 2 in

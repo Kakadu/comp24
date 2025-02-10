@@ -52,10 +52,7 @@ let rec pp_type fmt typ =
         fprintf fmt s pp_type typ
       in
       let pp_list fmt delimiter =
-        pp_print_list
-          ~pp_sep:(fun fmt _ -> fprintf fmt delimiter)
-          (fun fmt value -> pp_el fmt value)
-          fmt
+        pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt delimiter) pp_el fmt
       in
       pp_list fmt " * " value_list
     in
@@ -76,7 +73,7 @@ let rec pp_type fmt typ =
 let edit_numbers_in_typ typ =
   let empty = Base.Map.empty (module Base.String) in
   let add map old_n new_n = Base.Map.update map old_n ~f:(fun _ -> new_n) in
-  let lookup map key = Base.Map.find map key in
+  let lookup = Base.Map.find in
   let rec helper typ total map =
     match typ with
     | TVar x ->

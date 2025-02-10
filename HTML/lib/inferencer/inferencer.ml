@@ -23,7 +23,7 @@ module R = struct
   let return value last = last, return value
 
   module Syntax = struct
-    let ( let* ) x f = x >>= f
+    let ( let* ) = ( >>= )
   end
 
   module RList = struct
@@ -93,7 +93,7 @@ module Subst = struct
   ;;
 
   let find key subst = Base.Map.find subst key
-  let remove subst key = Base.Map.remove subst key
+  let remove = Base.Map.remove
 
   let apply s =
     let rec helper = function
@@ -173,7 +173,7 @@ module Scheme = struct
   let free_vars (set, typ) = Base.Set.diff (Type.free_vars typ) set
 
   let apply subst (set, typ) =
-    let s2 = Base.Set.fold set ~init:subst ~f:(fun acc k -> Subst.remove acc k) in
+    let s2 = Base.Set.fold set ~init:subst ~f:Subst.remove in
     set, Subst.apply s2 typ
   ;;
 end
@@ -526,7 +526,7 @@ and infer_decl env = function
 ;;
 
 let init_env =
-  let un_op a res = tarrow a res in
+  let un_op = tarrow in
   let bin_op a b res = tarrow a @@ tarrow b res in
   [ "print_int", tarrow tint tunit
   ; "print_newline", tarrow tunit tunit
