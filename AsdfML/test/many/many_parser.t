@@ -96,8 +96,8 @@ $ dune exec many_parser < manytests/typed/015tuples.ml
    in helper
   let rec iter = (fun f xs -> match xs with
   | [] -> ()
-  | h :: tl -> let () = (f h)
-   in (iter f tl))
+  | h :: tl -> (let () = (f h)
+   in (iter f tl)))
   let rec cartesian = (fun xs ys -> match xs with
   | [] -> []
   | h :: tl -> (append (map (fun a -> (h, a)) ys) (cartesian tl ys)))
