@@ -397,3 +397,14 @@
    let anf_app_2 = ( + ) 7 7 in
    let anf_app_3 = test anf_app_0 anf_app_1 anf_app_2 in
    anf_app_3;;
+  $ dune exec ./anf_demo.exe << EOF
+  > let test = let a = 2 in let c b = ( + ) a b in let a = 3 in c 2
+  > EOF
+  let  ll_0 a b  = let anf_app_0 = ( + ) a b in
+   anf_app_0;;
+  let  test  = let a = 2 in
+   let c_arg_1 = a in
+   let a = 3 in
+   let anf_app_0 = ll_0 c_arg_1 2 in
+   anf_app_0;;
+
