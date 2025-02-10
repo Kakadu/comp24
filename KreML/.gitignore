@@ -7,9 +7,14 @@
 *.cmx
 *.cmxs
 *.cmxa
+*.ll
 
 # ocamlbuild working directory
 _build/
+
+runtime/runtime.o
+out
+
 
 # ocamlbuild targets
 *.byte

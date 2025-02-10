@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -63,7 +63,8 @@ let fresh_name base : string Counter.t =
 let zip_idents_with_exprs p e =
   let rec helper acc p e =
     match p, e with
-    | Pat_const _, _ -> internalfail "runtime check"
+    | Pat_const _, _ ->
+      internalfail "it should be forbidden, this function is not used in match with"
     | Pat_constrained (p, _), _ -> helper acc p e
     | _, Expr_constrained (e, _) -> helper acc p e
     | Pat_var id, e -> (id, e) :: acc
@@ -88,4 +89,18 @@ let zip_idents_with_exprs p e =
   in
   (* call is expected to be in type checked contxext *)
   helper [] p e |> List.rev
+;;
+
+(* List utils *)
+
+let list_take count list =
+  let rec helper count acc list =
+    if count = 0
+    then acc
+    else (
+      match list with
+      | [] -> internalfail @@ Format.sprintf "List must have at least %i elements" count
+      | x :: xs -> helper (count - 1) (x :: acc) xs)
+  in
+  helper count [] list |> List.rev
 ;;
