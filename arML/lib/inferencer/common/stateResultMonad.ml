@@ -35,8 +35,8 @@ module RMap = struct
   let fold_left mp ~init ~f =
     let open Syntax in
     Base.Map.fold mp ~init ~f:(fun ~key ~data acc ->
-      let* acc = acc in
-      f key data acc)
+        let* acc = acc in
+        f key data acc)
   ;;
 end
 
@@ -45,8 +45,8 @@ module RList = struct
   let fold_left lt ~init ~f =
     let open Syntax in
     Base.List.fold_left lt ~init ~f:(fun acc item ->
-      let* acc = acc in
-      f acc item)
+        let* acc = acc in
+        f acc item)
   ;;
 end
 

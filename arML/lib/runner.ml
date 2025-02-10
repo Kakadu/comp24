@@ -8,8 +8,8 @@ let parse_program program = Parser.Runner.parse program
 
 let parse_program_with_print program =
   match Parser.Runner.parse program with
-  | Ok ast -> Parser.Pprint.print_parser_result ast
-  | Error _ -> Parser.Pprint.print_parser_error Parser.Error.Syntax_error
+  | Ok ast -> Parser.PpParsingResult.print_parser_result ast
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
 (* -------------- *)
@@ -33,7 +33,7 @@ let inference program =
   match ast with
   | Ok [SExpression expr] -> inference_expr expr
   | Ok ast -> inference_program ast
-  | Error _ -> Parser.Pprint.print_parser_error Parser.Error.Syntax_error
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
 (* -------------- *)

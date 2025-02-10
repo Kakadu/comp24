@@ -14,13 +14,15 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 1 |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration (DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))), [])))] |}]
 ;;
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -31,7 +33,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x y = x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -44,12 +47,12 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-  {| 
+  parse_program_with_print {| 
    let f x y = x + y
    let main = f 1 2
    |};
-  [%expect{|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -64,12 +67,13 @@ let%expect_test _ =
              (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
                 [(EConstant (CInt 2))]))),
             [])))
-      ] |} ]
+      ] |}]
 ;;
 
 let%expect_test _ =
   parse_program_with_print {| let f = let x = 1 in 2 + x * 3|};
-  [%expect{|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -81,7 +85,7 @@ let%expect_test _ =
                   ))
                ))),
            [])))
-      ] |} ]
+      ] |}]
 ;;
 
 (* ---------------- *)
@@ -96,7 +100,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let () = some_function some_argument |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PConst CUnit),
@@ -108,7 +113,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x, y = 0, 0 |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -119,7 +125,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let (x :: y) = x :: y |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
@@ -136,7 +143,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let ((x :: y, k :: l), (q :: j), o, _) = x :: y |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PTuple (
@@ -151,12 +159,12 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-  {| 
+  parse_program_with_print {| 
    let f x y = x + y
    let (x, y) = (f 0 0, f 1 1)
    |};
-  [%expect{|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -175,16 +183,17 @@ let%expect_test _ =
                    [(EConstant (CInt 1))])),
                 []))),
             [])))
-      ] |} ]
+      ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-  {| 
+  parse_program_with_print
+    {| 
    let f x y = x + y
    let (x :: y) = (f 0 0 :: f 1 1)
    |};
-  [%expect{|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -203,7 +212,7 @@ let%expect_test _ =
                    [(EConstant (CInt 1))]))
                 ))),
             [])))
-      ] |} ]
+      ] |}]
 ;;
 
 (* ---------------- *)
@@ -212,7 +221,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 1 and y = 2 |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))),
            [((PVar (Id "y")), (EConstant (CInt 2)))])))
@@ -221,7 +231,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x and y = 2 |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -232,7 +243,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x and g y = y |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -245,7 +257,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x and g y = y and a b c = b + c |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -263,17 +276,18 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-  {| 
+  parse_program_with_print
+    {| 
    let f x = x 
    and g y = y 
    and a b c = b + c 
-   
+
    let q y = y
-   
+
    let k i = f q i
    |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -309,7 +323,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let (x, y) = (1, 2) and (e :: l) = (1 :: 2) |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -322,7 +337,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x and (x, y) = (1, 2) |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -334,8 +350,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x and () = some_function some_args and ((x :: y), (z :: w)) = (1 :: 1, 1 :: 1) |};
-  [%expect {|
+  parse_program_with_print
+    {| let f x = x and () = some_function some_args and ((x :: y), (z :: w)) = (1 :: 1, 1 :: 1) |};
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -376,8 +394,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-   {| 
+  parse_program_with_print {| 
    let rec f x = f (x - 1) 
    let rec g y = f (g y)
    |};
@@ -482,8 +499,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print 
-   {| 
+  parse_program_with_print
+    {| 
       let rec f x = fun y -> f x y 
       and g x = f x x
       let rec q y x = q (y - 1) (x + 1)

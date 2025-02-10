@@ -33,9 +33,9 @@ let pp_type ppf typ =
         (Format.pp_print_list
            ~pp_sep:(fun ppf () -> Format.fprintf ppf " * ")
            (fun ppf ty ->
-             match ty with
-             | TTuple _ | TArr _ -> Format.fprintf ppf "(%a)" helper ty
-             | _ -> helper ppf ty))
+              match ty with
+              | TTuple _ | TArr _ -> Format.fprintf ppf "(%a)" helper ty
+              | _ -> helper ppf ty))
         tl
   in
   helper ppf (TypeVarsRecalculate.recalculate_vars typ)
@@ -49,6 +49,6 @@ let expr_with_name name typ = String.concat " " [ "val"; name; ":"; type_to_stri
 let print_expr_type typ = Format.printf "%s\n" (expr_without_name typ)
 let print_program_type env names_list =
   Base.List.iter names_list ~f:(fun name ->
-    let (Schema.Schema (_, ty)) = Base.Map.find_exn env name in
-    Format.printf "%s\n" (expr_with_name name ty))
+      let (Schema.Schema (_, ty)) = Base.Map.find_exn env name in
+      Format.printf "%s\n" (expr_with_name name ty))
 ;;

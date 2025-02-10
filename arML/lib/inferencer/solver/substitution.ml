@@ -27,8 +27,8 @@ let apply sub =
   let rec helper = function
     | TVar n ->
       (match find sub n with
-      | None -> TVar n
-      | Some v -> v)
+       | None -> TVar n
+       | Some v -> v)
     | TArr (left, right) -> TArr ((helper left), (helper right))
     | TList typ -> TList (helper typ)
     | TTuple t_list -> TTuple (Base.List.map t_list ~f:helper)
@@ -50,13 +50,13 @@ let rec unify l r =
   | TList typ1, TList typ2 -> unify typ1 typ2
   | TTuple t_list1, TTuple t_list2 ->
     (match
-        Base.List.fold2 t_list1 t_list2 ~init:(return empty) ~f:(fun acc it1 it2 ->
-          let* sub1 = acc in
-          let* sub2 = unify (apply sub1 it1) (apply sub1 it2) in
-          compose sub1 sub2)
-      with
-      | Ok r -> r
-      | _ -> fail (Unification_failed (l, r)))
+       Base.List.fold2 t_list1 t_list2 ~init:(return empty) ~f:(fun acc it1 it2 ->
+           let* sub1 = acc in
+           let* sub2 = unify (apply sub1 it1) (apply sub1 it2) in
+           compose sub1 sub2)
+     with
+     | Ok r -> r
+     | _ -> fail (Unification_failed (l, r)))
   | _ -> fail (Unification_failed (l, r))
 
 (* Expanding the substitution with a new key-value. *)

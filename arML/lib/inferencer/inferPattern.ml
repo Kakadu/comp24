@@ -31,8 +31,8 @@ let infer_pattern =
           (first_pattern :: second_pattern :: patterns)
           ~init:(return ([], env))
           ~f:(fun (acc, env) (pattern) ->
-            let* ty1, env1 = helper env pattern in
-            return (ty1 :: acc, env1))
+              let* ty1, env1 = helper env pattern in
+              return (ty1 :: acc, env1))
       in
       let ty = TypeTree.TTuple (List.rev ty) in
       return (ty, env)

@@ -26,7 +26,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| [x; y; z] |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EListConstructor ((EIdentifier (Id "x")),
            (EListConstructor ((EIdentifier (Id "y")),
@@ -37,7 +38,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| x :: y :: z :: [] |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EListConstructor ((EIdentifier (Id "x")),
            (EListConstructor ((EIdentifier (Id "y")),
@@ -48,7 +50,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| (0, 0) :: (1, 2) :: [(3, 4); (5, 6)] |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EListConstructor (
            (ETuple ((EConstant (CInt 0)), (EConstant (CInt 0)), [])),
@@ -67,7 +70,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| (fun x y -> x) :: (fun x _ -> x) :: [] |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EListConstructor (
            (EFun (((PVar (Id "x")), [(PVar (Id "y"))]), (EIdentifier (Id "x")))),
@@ -91,13 +95,15 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| (1, 2) |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])))] |}]
 ;;
 
 let%expect_test _ =
   parse_program_with_print {| 1, 2 |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])))] |}]
 ;;
 

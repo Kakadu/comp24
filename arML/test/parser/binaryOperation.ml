@@ -16,7 +16,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| 1 + 2 * 3 |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
            [(EApplication ((EIdentifier (Id "( * )")), (EConstant (CInt 2)),
@@ -28,7 +29,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| 1 + 2 / 3 |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
            [(EApplication ((EIdentifier (Id "( / )")), (EConstant (CInt 2)),
@@ -40,7 +42,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| (1 + 2) * (3 + 4) / (1 + (2 * 3)) |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( / )")),
            (EApplication ((EIdentifier (Id "( * )")),
@@ -62,7 +65,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| 1 < 2 && 2 > 1 |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( && )")),
            (EApplication ((EIdentifier (Id "( < )")), (EConstant (CInt 1)),
@@ -76,7 +80,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| 1 <= 2 || 3 >= 2 |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
            (EApplication ((EIdentifier (Id "( <= )")), (EConstant (CInt 1)),
@@ -90,7 +95,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| 1 <> 2 && 3 <> 4 || 1 = 1|};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
            (EApplication ((EIdentifier (Id "( && )")),
@@ -109,7 +115,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| (1 * 2 + 3 / 3) >= (3 / 3 / 3) || (1 <> 9 / 3) |};
-  [%expect{|
+  [%expect
+    {|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
            (EApplication ((EIdentifier (Id "( >= )")),

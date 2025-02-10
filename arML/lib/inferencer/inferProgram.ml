@@ -13,12 +13,12 @@ let infer_program env program =
     | hd :: tl ->
       let* acc_env, acc_name_list = acc in
       (match hd with
-      | Ast.SDeclaration decl -> 
-        let* new_acc_env, new_acc_name_list = infer_declaration acc_env acc_name_list decl in
-        helper (return (new_acc_env, new_acc_name_list)) tl
-      | Ast.SExpression expr ->
-        let* _ = infer_expr env expr in
-        acc)
+       | Ast.SDeclaration decl -> 
+         let* new_acc_env, new_acc_name_list = infer_declaration acc_env acc_name_list decl in
+         helper (return (new_acc_env, new_acc_name_list)) tl
+       | Ast.SExpression expr ->
+         let* _ = infer_expr env expr in
+         acc)
   in
   let* env, names = helper (return (env, [])) program in
   return (env, List.rev names)

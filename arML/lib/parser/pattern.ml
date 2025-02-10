@@ -58,14 +58,14 @@ let parse_tuple_pattern pp =
   fix
   @@ fun self ->
   let parse_pattern = choice 
-    [ pp.parse_pattern_type_defition pp
-    ; pp.parse_list_pattern pp
-    ; pp.parse_constant_pattern
-    ; pp.parse_identifier_pattern
-    ; pp.parse_nill_pattern
-    ; pp.parse_any_pattern
-    ; parens self
-    ]
+      [ pp.parse_pattern_type_defition pp
+      ; pp.parse_list_pattern pp
+      ; pp.parse_constant_pattern
+      ; pp.parse_identifier_pattern
+      ; pp.parse_nill_pattern
+      ; pp.parse_any_pattern
+      ; parens self
+      ]
   in
   let* patterns = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern) in
   match patterns with
@@ -81,14 +81,14 @@ let parse_list_pattern pp =
   fix
   @@ fun self ->
   let parse_pattern = choice
-    [ pp.parse_constant_pattern
-    ; pp.parse_identifier_pattern
-    ; pp.parse_nill_pattern
-    ; pp.parse_any_pattern
-    ; parens @@ pp.parse_pattern_type_defition pp
-    ; parens @@ pp.parse_tuple_pattern pp
-    ; parens @@ self
-    ]
+      [ pp.parse_constant_pattern
+      ; pp.parse_identifier_pattern
+      ; pp.parse_nill_pattern
+      ; pp.parse_any_pattern
+      ; parens @@ pp.parse_pattern_type_defition pp
+      ; parens @@ pp.parse_tuple_pattern pp
+      ; parens @@ self
+      ]
   in
 
   let parse_list_cons =
@@ -117,22 +117,22 @@ let parse_list_pattern pp =
 let parse_pattern_type_defition pp =
   fix
   @@ fun self ->
-    skip_wspace
-    *>
-    let parse_pattern = choice 
-    [ pp.parse_constant_pattern
-    ; pp.parse_identifier_pattern
-    ; pp.parse_nill_pattern
-    ; pp.parse_any_pattern
-    ; parens @@ pp.parse_list_pattern pp
-    ; parens @@ pp.parse_tuple_pattern pp
-    ; parens @@ self
-    ]
+  skip_wspace
+  *>
+  let parse_pattern = choice 
+      [ pp.parse_constant_pattern
+      ; pp.parse_identifier_pattern
+      ; pp.parse_nill_pattern
+      ; pp.parse_any_pattern
+      ; parens @@ pp.parse_list_pattern pp
+      ; parens @@ pp.parse_tuple_pattern pp
+      ; parens @@ self
+      ]
   in
-    parens @@
-    let* pat = parse_pattern in
-    let* typ = skip_wspace *> char ':' *> parse_type in
-    return @@ PTyped (pat, typ)
+  parens @@
+  let* pat = parse_pattern in
+  let* typ = skip_wspace *> char ':' *> parse_type in
+  return @@ PTyped (pat, typ)
 ;;
 
 (* ---------------- *)

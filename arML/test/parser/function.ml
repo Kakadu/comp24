@@ -8,14 +8,12 @@ open ArML_lib.Runner
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> x |};
-  [%expect
-    {| [(SExpression (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x")))))] |}]
+  [%expect {| [(SExpression (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x")))))] |}]
 ;;
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> y |};
-  [%expect
-    {| [(SExpression (EFun (((PVar (Id "x")), []), (EIdentifier (Id "y")))))] |}]
+  [%expect {| [(SExpression (EFun (((PVar (Id "x")), []), (EIdentifier (Id "y")))))] |}]
 ;;
 
 let%expect_test _ =
@@ -34,7 +32,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> fun y -> fun z -> x + y + z |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PVar (Id "x")), []),
            (EFun (((PVar (Id "y")), []),
@@ -51,7 +50,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> fun y -> x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PVar (Id "x")), []),
            (EFun (((PVar (Id "y")), []),
@@ -64,7 +64,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> let y = x * 2 in y + x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PVar (Id "x")), []),
            (ELetIn (
@@ -81,7 +82,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> if x > 0 then x else x - 1 |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PVar (Id "x")), []),
            (EIfThenElse (
@@ -97,7 +99,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x -> let y = x + 1 in let z = y * 2 in z |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PVar (Id "x")), []),
            (ELetIn (
@@ -121,7 +124,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun (x, y) -> x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])), []),
            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
@@ -132,7 +136,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun (x :: y) -> x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))), []),
            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
@@ -143,7 +148,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun (a, b) c d e (x :: y) -> a + b + c + d + e + x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (
            ((PTuple ((PVar (Id "a")), (PVar (Id "b")), [])),
@@ -167,7 +173,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun ((x, y) :: xs) -> x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (
            ((PListConstructor ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -181,7 +188,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun ((a, (b, c)), d) -> a + b + c + d |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (
            ((PTuple (
@@ -201,7 +209,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun ((x, y), z :: zs) -> x + y + z |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (
            ((PTuple ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -217,7 +226,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun (x, _) -> x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (((PTuple ((PVar (Id "x")), PAny, [])), []), (EIdentifier (Id "x"))
            )))
@@ -226,7 +236,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| fun x (y, z) _ (_, _) -> x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFun (
            ((PVar (Id "x")),
@@ -252,7 +263,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 5 in x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 5))), [],
            (EIdentifier (Id "x")))))
@@ -261,7 +273,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let y = true in y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "y")), (EConstant (CBool true))), [],
            (EIdentifier (Id "y")))))
@@ -270,7 +283,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x in (f 1, f true) |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PVar (Id "f")),
@@ -287,7 +301,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x y = (x, y) in (f 1 true, f 2 false) |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PVar (Id "f")),
@@ -306,7 +321,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 3 in let y = 4 in x * y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 3))), [],
            (ELetIn (((PVar (Id "y")), (EConstant (CInt 4))), [],
@@ -319,7 +335,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 2 in let y = x + 3 in let z = y * 2 in z |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 2))), [],
            (ELetIn (
@@ -339,7 +356,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 5 in if x > 3 then x else 0 |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 5))), [],
            (EIfThenElse (
@@ -352,7 +370,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f = fun x -> x + 1 in f 10 |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PVar (Id "f")),
@@ -367,7 +386,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 5 in let y = let z = x + 2 in z * 2 in y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 5))), [],
            (ELetIn (
@@ -387,7 +407,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 10 in let y = x + x in y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 10))), [],
            (ELetIn (
@@ -401,7 +422,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 3 in let y = x + 2 in let z = y * x in z - y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 3))), [],
            (ELetIn (
@@ -428,7 +450,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x, y = (1, 2) in x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -442,7 +465,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x :: xs = [1; 2; 3] in x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PListConstructor ((PVar (Id "x")), (PVar (Id "xs")))),
@@ -456,7 +480,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let ((a, b), c) = ((1, 2), 3) in a + b + c |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PTuple ((PTuple ((PVar (Id "a")), (PVar (Id "b")), [])),
@@ -474,7 +499,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let (x, _) = (1, 2) in x |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PTuple ((PVar (Id "x")), PAny, [])),
@@ -485,7 +511,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let ((x, y), z :: zs) = ((1, 2), [3; 4]) in x + y + z |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PTuple ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -505,7 +532,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f (x, y) (w :: u) k = x + y + w + u + k |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "f")),
@@ -532,7 +560,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 1 and y = 2 in x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 1))),
            [((PVar (Id "y")), (EConstant (CInt 2)))],
@@ -544,7 +573,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x = 3 and y = 4 in if x > y then x else y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (((PVar (Id "x")), (EConstant (CInt 3))),
            [((PVar (Id "y")), (EConstant (CInt 4)))],
@@ -558,7 +588,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let f x = x and y = 4 in f y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PVar (Id "f")),
@@ -574,7 +605,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let (x, y) = (1, 2) and (a, b) = (3, 4) in x + a |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -589,7 +621,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x :: xs = [1; 2; 3] and y = 4 in x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PListConstructor ((PVar (Id "x")), (PVar (Id "xs")))),
@@ -605,8 +638,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let (x, y) :: xs = [(1, 2); (3, 4)] and z = 5 in x + y + z |};
-  [%expect {|
+  parse_program_with_print
+    {| let (x, y) :: xs = [(1, 2); (3, 4)] and z = 5 in x + y + z |};
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PListConstructor ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -628,7 +663,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let x :: _ = [1; 2; 3] and y = 4 in x + y |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ELetIn (
            ((PListConstructor ((PVar (Id "x")), PAny)),
@@ -649,7 +685,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program_with_print {| let rec f x = if x = 0 then 1 else x * f (x - 1) |};
-  [%expect {|
+  [%expect
+    {|
     [(SDeclaration
         (DRecursive (
            ((PVar (Id "f")),
@@ -674,8 +711,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let rec sum lst = match lst with [] -> 0 | x :: xs -> x + sum xs in sum [1; 2; 3; 4] |};
-  [%expect {|
+  parse_program_with_print
+    {| let rec sum lst = match lst with [] -> 0 | x :: xs -> x + sum xs in sum [1; 2; 3; 4] |};
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "sum")),
@@ -706,8 +745,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let rec length lst = match lst with [] -> 0 | _ :: xs -> 1 + length xs in length [1; 2; 3] |};
-  [%expect {|
+  parse_program_with_print
+    {| let rec length lst = match lst with [] -> 0 | _ :: xs -> 1 + length xs in length [1; 2; 3] |};
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "length")),
@@ -736,12 +777,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let rec merge lst1 lst2 = match (lst1, lst2) with 
+  parse_program_with_print
+    {| let rec merge lst1 lst2 = match (lst1, lst2) with 
     | ([], lst) -> lst 
     | (lst, []) -> lst 
     | (x :: xs, y :: ys) -> if x < y then x :: merge xs (y :: ys) else y :: merge (x :: xs) ys 
   in merge [1; 3; 5] [2; 4; 6] |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "merge")),
@@ -799,13 +842,15 @@ let%expect_test _ =
 (* Let in expression with mutual recursion *)
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     let rec f x = g x
     and g x = f x
     in
     (f, g)
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "f")),
@@ -824,12 +869,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     let rec is_even n = if n = 0 then true else is_odd (n - 1) 
     and is_odd n = if n = 0 then false else is_even (n - 1) 
     in is_even 4
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "is_even")),
@@ -864,12 +911,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     let rec sequence_a n = if n = 0 then 1 else 2 * sequence_b (n - 1) 
     and sequence_b n = if n = 0 then 1 else 3 + sequence_a (n - 1) 
     in sequence_a 4
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "sequence_a")),
@@ -914,13 +963,15 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     let rec length = function 
     | [] -> 0
     | _ :: xs -> 1 + length xs
     in length [1; 2; 3]
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (ERecLetIn (
            ((PVar (Id "length")),
@@ -952,7 +1003,8 @@ let%expect_test _ =
   parse_program_with_print {| 
     function (x, y) -> x + y
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFunction (
            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
@@ -963,12 +1015,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     function 
     | [] -> "empty"
     | x :: xs -> "not empty"
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFunction ((PNill, (EConstant (CString "empty"))),
            [((PListConstructor ((PVar (Id "x")), (PVar (Id "xs")))),
@@ -978,13 +1032,15 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     function 
     | 0, y -> y
     | x, 0 -> x
     | x, y -> x + y
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFunction (
            ((PTuple ((PConst (CInt 0)), (PVar (Id "y")), [])),
@@ -1000,13 +1056,15 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program_with_print
+    {| 
     function 
     | [] -> "empty"
     | [x] -> "one element"
     | x :: y :: xs -> "at least two elements"
   |};
-  [%expect {|
+  [%expect
+    {|
     [(SExpression
         (EFunction ((PNill, (EConstant (CString "empty"))),
            [((PListConstructor ((PVar (Id "x")), PNill)),
