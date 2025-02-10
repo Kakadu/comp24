@@ -166,16 +166,16 @@ let opname_ =
 
 (* let ppvar = varname >>| pvar *)
 let ppvar =
-   let pvar =
-   let* name = varname in
-   return (PVar (name))
-   in
-   let opname =
-   let* op = opname_ in
-   return (PVar (op))
-   in
-   choice [pvar; opname ]
-   ;;
+  let pvar =
+    let* name = varname in
+    return (PVar name)
+  in
+  let opname =
+    let* op = opname_ in
+    return (PVar op)
+  in
+  choice [ pvar; opname ]
+;;
 
 let pptuple p = lift2 List.cons p (many1 (comma *> p)) >>| ptuple
 let pplist p = brackets @@ sep_by1 semi p >>| List.fold_right ~f:pcons ~init:(pconst CNil)
