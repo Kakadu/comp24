@@ -271,10 +271,10 @@ let instantiate : scheme -> ty R.t =
   fun (S (xs, ty)) ->
   VarSet.fold
     (fun name typ ->
-      let* typ = typ in
-      let* f1 = fresh_var in
-      let* s = Subst.singleton name f1 in
-      return (Subst.apply s typ))
+       let* typ = typ in
+       let* f1 = fresh_var in
+       let* s = Subst.singleton name f1 in
+       return (Subst.apply s typ))
     xs
     (return ty)
 ;;
@@ -473,8 +473,8 @@ let infer_exp =
 let infer_str_item env = function
   | SValue (Rec, bindings) ->
     (* Create fresh type variables for all bindings *)
-    let* fresh_vars = 
-      List.fold_left 
+    let* fresh_vars =
+      List.fold_left
         ~f:(fun acc (pat, _) ->
           let* acc_vars = acc in
           let* fresh = fresh_var in
@@ -482,15 +482,15 @@ let infer_str_item env = function
           | PVar x -> return ((x, fresh) :: acc_vars)
           | _ -> fail (`Unreachable_state __FUNCTION__))
         ~init:(return [])
-        bindings in
-    
+        bindings
+    in
     (* Extend environment with fresh type variables *)
     let initial_env =
       List.fold_left
         ~f:(fun acc (x, fresh) -> TypeEnv.extend acc (x, S (VarSet.empty, fresh)))
         ~init:env
-        fresh_vars in
-    
+        fresh_vars
+    in
     (* Rest of the function remains the same *)
     let* subst_types =
       List.fold_left
@@ -501,8 +501,8 @@ let infer_str_item env = function
           | PVar x -> return ((x, s, t) :: acc_subst_types)
           | _ -> fail (`Unreachable_state __FUNCTION__))
         ~init:(return [])
-        bindings in
-    
+        bindings
+    in
     let* final_subst =
       List.fold_left
         ~f:(fun acc (x, s, t) ->
@@ -513,8 +513,8 @@ let infer_str_item env = function
           let* s3 = Subst.compose s2 s1 in
           return s3)
         ~init:(return Subst.empty)
-        subst_types in
-    
+        subst_types
+    in
     let env = TypeEnv.apply final_subst env in
     let final_env =
       List.fold_left
@@ -523,10 +523,9 @@ let infer_str_item env = function
           let scheme = generalize_rec acc final_type x in
           TypeEnv.extend acc (x, scheme))
         ~init:env
-        subst_types in
-    
+        subst_types
+    in
     return final_env
-
   | SValue (Nonrec, [ (pattern_, e) ]) ->
     (* Original non-recursive case remains unchanged *)
     let* s, type1 = infer_exp env e in
@@ -538,13 +537,11 @@ let infer_str_item env = function
     let* sub1 = Subst.compose s sub in
     let env3 = TypeEnv.apply sub1 env2 in
     return env3
-
   | SEval e ->
     let* _, _ = infer_exp env e in
     return env
-    
   | _ -> fail (`Unreachable_state __FUNCTION__)
-  ;;
+;;
 
 let start_env =
   let bin_op_list =
