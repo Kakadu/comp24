@@ -29,23 +29,11 @@ let sq x = mul x x
 let div x y = (x * frac) / y
 let eps = div one (to_fp (pow 2 (frac_bits - 2)))
 
-(* TODO: remove h when top level patterns are fixed *)
-let dot a b = 
-  let h (x1, y1, z1) (x2, y2, z2) = 
-    mul x1 x2 + mul y1 y2 + mul z1 z2
-  in h a b
-let add_vec a b = 
-  let h (x1, y1, z1) (x2, y2, z2) = (x1 + x2, y1 + y2, z1 + z2)
-  in h a b
-let sub_vec a b = 
-  let h (x1, y1, z1) (x2, y2, z2) = (x1 - x2, y1 - y2, z1 - z2) 
-  in h a b
-let map_vec f v = 
-  let h f (x, y, z) = (f x, f y, f z) 
-  in h f v
-let mul_vec v c = 
-  let h (x, y, z) scalar = map_vec (mul scalar) (x, y, z) 
-  in h v c
+let dot (x1, y1, z1) (x2, y2, z2) = mul x1 x2 + mul y1 y2 + mul z1 z2
+let add_vec (x1, y1, z1) (x2, y2, z2) = (x1 + x2, y1 + y2, z1 + z2)
+let sub_vec (x1, y1, z1) (x2, y2, z2) = (x1 - x2, y1 - y2, z1 - z2) 
+let map_vec f (x, y, z) = (f x, f y, f z) 
+let mul_vec (x, y, z) scalar = map_vec (mul scalar) (x, y, z) 
 
 let sqrt_ x =
   let rec binary_search low high =
