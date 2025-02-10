@@ -1,43 +1,29 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (* alpha conv -> match elim -> anf -> clos conv *)
-open Kreml_lib.Inferencer
+open Cursedml_lib
 
 let () =
   let open Stdlib.Format in
   let input = In_channel.input_all stdin in
-  match Kreml_lib.Parser.run input with
+  match Parser.run input with
   | Ok structure ->
-    (match Kreml_lib.Inferencer.run structure with
-     | Ok env ->
-       TypeEnv.pp std_formatter env;
-       fprintf std_formatter "applying alpha conversion\n";
-       let anf_structure = Kreml_lib.Ast_transformer.transform_structure structure in
-       Kreml_lib.Ast_printer.pp_structure std_formatter anf_structure;
-       let env_equals env1 env2 =
-         let s1 = asprintf "%a" TypeEnv.pp env1 in
-         let s2 = asprintf "%a" TypeEnv.pp env2 in
-         String.equal s1 s2
-       in
-       (match Kreml_lib.Inferencer.run anf_structure with
-        | Ok anf_env when env_equals env anf_env -> ()
-        | Ok anf_env ->
-          fprintf
-            std_formatter
-            "Type environment changed after applying anf:\n expected: %a\n actual:%a"
-            TypeEnv.pp
-            env
-            TypeEnv.pp
-            anf_env
-        | Error e ->
-          fprintf
-            std_formatter
-            "An error %a occured while inferencing program in ANF."
-            pp_error
-            e)
+    (match Cursedml_lib.Inferencer.run structure with
+     | Ok _ ->
+       let mf_structure = Match_elimination.eliminate structure in
+       let alpha_structure = Alpha_transformer.transform mf_structure in
+       let arities, anf_structure = Anf.transform alpha_structure in
+       (* Anf. std_formatter anf_structure; *)
+       let flstructure = Closure_conversion.cc arities anf_structure in
+       let mdl = Llvm_codegen.get_module flstructure in
+       Llvm.print_module "out.ll" mdl
      | Error error ->
-       fprintf std_formatter "An error occured while type checking: %a" pp_error error)
+       fprintf
+         std_formatter
+         "An error occured while type checking: %a"
+         Inferencer.pp_error
+         error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input
 ;;
