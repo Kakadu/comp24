@@ -2,7 +2,10 @@
 .SUFFIXES: .fmt .pdf
 ENGINE ?= xelatex
 
-all: #010intro.pdf 020closures.pdf 030cfg.pdf
+TALK = demo
+OTHER_TEX=../preamble.tex
+
+all:
 
 define ADDMISC
 $1.pdf: ../misc/$2.pdf
@@ -11,8 +14,6 @@ $1.pdf: ../misc/$2.pdf
 endef
 
 $(eval $(call ADDMISC,demo,cfg1))
-
-OTHER_TEX=../preamble.tex
 
 define WRAP
 INPUT_$(1)=$(wildcard $(1)*.tex)
@@ -30,10 +31,7 @@ $$(INPUT_$(1):%.tex=%.pdf): $$(INPUT_$(1))  $$(INPUT_$(1):%.tex=%.fmt)
 endif
 endef
 
-LECTURES  = 
-LECTURES += demo
-
-$(foreach i,$(LECTURES),$(eval $(call WRAP,$(i)) ) )
+$(foreach i,$(TALK),$(eval $(call WRAP,$(i)) ) )
 
 celan: clean
 clean:
