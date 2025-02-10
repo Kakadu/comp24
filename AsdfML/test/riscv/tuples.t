@@ -92,13 +92,13 @@ $ /tmp/tuples
   >   print_tuple c
   > EOF
   ANF:
-  let cross `arg_8 `arg_9 =
-         let a2 = `get_tuple_field `arg_9 2 in
-         let a4 = `get_tuple_field `arg_9 1 in
-         let a6 = `get_tuple_field `arg_9 0 in
-         let a9 = `get_tuple_field `arg_8 2 in
-         let a11 = `get_tuple_field `arg_8 1 in
-         let a13 = `get_tuple_field `arg_8 0 in
+  let cross `arg_0 `arg_1 =
+         let a2 = `get_tuple_field `arg_1 2 in
+         let a4 = `get_tuple_field `arg_1 1 in
+         let a6 = `get_tuple_field `arg_1 0 in
+         let a9 = `get_tuple_field `arg_0 2 in
+         let a11 = `get_tuple_field `arg_0 1 in
+         let a13 = `get_tuple_field `arg_0 0 in
          let a24 = ( * ) a11 a2 in
          let a25 = ( * ) a9 a4 in
          let a15 = ( - ) a24 a25 in
@@ -181,3 +181,29 @@ $ cat /tmp/tuples.s
   $ /tmp/tuples
   5
   0
+
+  $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
+  > let (a, b, c) = (1, 2, 3)
+  > let main = 
+  >   let _ = println_int a in
+  >   let _ = println_int b in
+  >   let _ = println_int c in
+  >   0
+  > EOF
+  ANF:
+  let temp_tuple = (1, 2, 3)
+  let a = `get_tuple_field temp_tuple 0
+  let b = `get_tuple_field temp_tuple 1
+  let c = `get_tuple_field temp_tuple 2
+  let main =
+    let a3 = println_int a in
+    let a4 = println_int b in
+    let a5 = println_int c in
+    0
+  
+$ cat /tmp/tuples.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ /tmp/tuples
+  1
+  2
+  3

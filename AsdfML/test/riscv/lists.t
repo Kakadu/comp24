@@ -282,3 +282,29 @@
   $ /tmp/lists
   [4, 9, 16]
   []
+
+  $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
+  > let [a; b; c] = [1; 2; 3]
+  > let main = 
+  >   let _ = println_int a in
+  >   let _ = println_int b in
+  >   let _ = println_int c in
+  >   0
+  > EOF
+  ANF:
+  let temp_list = [1; 2; 3]
+  let a = `list_field temp_list 0
+  let b = `list_field temp_list 1
+  let c = `list_field temp_list 2
+  let main =
+    let a3 = println_int a in
+    let a4 = println_int b in
+    let a5 = println_int c in
+    0
+  
+$ cat /tmp/lists.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ /tmp/lists
+  1
+  2
+  3
