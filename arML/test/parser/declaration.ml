@@ -22,8 +22,8 @@ let%expect_test _ =
     [(SDeclaration
         (DOrdinary (
            ((PVar (Id "x")),
-            (EApplication ((EIdentifier (Id "( + )")),
-               [(EIdentifier (Id "x")); (EConstant (CInt 1))]))),
+            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+               [(EConstant (CInt 1))]))),
            [])))
       ] |}]
 ;;
@@ -35,8 +35,8 @@ let%expect_test _ =
         (DOrdinary (
            ((PVar (Id "f")),
             (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")),
-                  [(EIdentifier (Id "x")); (EIdentifier (Id "y"))]))
+               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+                  [(EIdentifier (Id "y"))]))
                ))),
            [])))
       ] |}]
@@ -51,10 +51,9 @@ let%expect_test _ =
            ((PVar (Id "f")),
             (EFun (((PVar (Id "x")), []),
                (EApplication ((EIdentifier (Id "f")),
-                  [(EApplication ((EIdentifier (Id "( - )")),
-                      [(EIdentifier (Id "x")); (EConstant (CInt 1))]))
-                    ]
-                  ))
+                  (EApplication ((EIdentifier (Id "( - )")),
+                     (EIdentifier (Id "x")), [(EConstant (CInt 1))])),
+                  []))
                ))),
            [])))
       ] |}]
@@ -67,15 +66,15 @@ let%expect_test _ =
         (DOrdinary (
            ((PVar (Id "f")),
             (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")),
-                  [(EIdentifier (Id "x")); (EIdentifier (Id "y"))]))
+               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+                  [(EIdentifier (Id "y"))]))
                ))),
            [])));
       (SDeclaration
          (DOrdinary (
             ((PVar (Id "main")),
-             (EApplication ((EIdentifier (Id "f")),
-                [(EConstant (CInt 1)); (EConstant (CInt 2))]))),
+             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
+                [(EConstant (CInt 2))]))),
             [])))
       ] |} ]
 ;;
@@ -87,10 +86,9 @@ let%expect_test _ =
         (DOrdinary (
            ((PVar (Id "f")),
             (ELetIn (((PVar (Id "x")), (EConstant (CInt 1))), [],
-               (EApplication ((EIdentifier (Id "( + )")),
-                  [(EConstant (CInt 2));
-                    (EApplication ((EIdentifier (Id "( * )")),
-                       [(EIdentifier (Id "x")); (EConstant (CInt 3))]))
+               (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 2)),
+                  [(EApplication ((EIdentifier (Id "( * )")),
+                      (EIdentifier (Id "x")), [(EConstant (CInt 3))]))
                     ]
                   ))
                ))),
@@ -102,10 +100,9 @@ let%expect_test _ =
   parse_program_with_print {| 1 + let x = 1 in x |};
   [%expect{|
     [(SExpression
-        (EApplication ((EIdentifier (Id "( + )")),
-           [(EConstant (CInt 1));
-             (ELetIn (((PVar (Id "x")), (EConstant (CInt 1))), [],
-                (EIdentifier (Id "x"))))
+        (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+           [(ELetIn (((PVar (Id "x")), (EConstant (CInt 1))), [],
+               (EIdentifier (Id "x"))))
              ]
            )))
       ] |} ]
@@ -120,8 +117,8 @@ let%expect_test _ =
   parse_program_with_print {| letrec = 1 |};
   [%expect{|
     [(SExpression
-        (EApplication ((EIdentifier (Id "( = )")),
-           [(EIdentifier (Id "letrec")); (EConstant (CInt 1))])))
+        (EApplication ((EIdentifier (Id "( = )")), (EIdentifier (Id "letrec")),
+           [(EConstant (CInt 1))])))
       ] |}]
 
 

@@ -436,7 +436,7 @@ let parse_application p =
   parens self <|>
   let* func = parse_expr in
   let* args = many1 (skip_wspace *> parse_expr) in
-  return @@ EApplication (func, args)
+  return @@ EApplication (func, List.hd args, List.tl args)
 ;;
 
 (* ---------------- *)
@@ -498,7 +498,7 @@ let parse_binary_operation p =
     ]
   in
 
-  let application_constructor op left right = EApplication (op, [left ; right]) in
+  let application_constructor op left right = EApplication (op, left, [right]) in
 
   let chainl1 e op =
     let rec go acc = lift2 (fun f x -> application_constructor f acc x) op e >>= go <|> return acc in

@@ -9,8 +9,8 @@ let%expect_test _ =
   [%expect
     {|
     [(SExpression
-        (EApplication ((EIdentifier (Id "( + )")),
-           [(EConstant (CInt 1)); (EConstant (CInt 1))])))
+        (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+           [(EConstant (CInt 1))])))
       ] |}]
 ;;
 
@@ -18,10 +18,9 @@ let%expect_test _ =
   parse_program_with_print {| 1 + 2 * 3 |};
   [%expect{|
     [(SExpression
-        (EApplication ((EIdentifier (Id "( + )")),
-           [(EConstant (CInt 1));
-             (EApplication ((EIdentifier (Id "( * )")),
-                [(EConstant (CInt 2)); (EConstant (CInt 3))]))
+        (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+           [(EApplication ((EIdentifier (Id "( * )")), (EConstant (CInt 2)),
+               [(EConstant (CInt 3))]))
              ]
            )))
       ] |}]
@@ -31,10 +30,9 @@ let%expect_test _ =
   parse_program_with_print {| 1 + 2 / 3 |};
   [%expect{|
     [(SExpression
-        (EApplication ((EIdentifier (Id "( + )")),
-           [(EConstant (CInt 1));
-             (EApplication ((EIdentifier (Id "( / )")),
-                [(EConstant (CInt 2)); (EConstant (CInt 3))]))
+        (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+           [(EApplication ((EIdentifier (Id "( / )")), (EConstant (CInt 2)),
+               [(EConstant (CInt 3))]))
              ]
            )))
       ] |}]
@@ -45,19 +43,18 @@ let%expect_test _ =
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( / )")),
-           [(EApplication ((EIdentifier (Id "( * )")),
-               [(EApplication ((EIdentifier (Id "( + )")),
-                   [(EConstant (CInt 1)); (EConstant (CInt 2))]));
-                 (EApplication ((EIdentifier (Id "( + )")),
-                    [(EConstant (CInt 3)); (EConstant (CInt 4))]))
+           (EApplication ((EIdentifier (Id "( * )")),
+              (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+                 [(EConstant (CInt 2))])),
+              [(EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 3)),
+                  [(EConstant (CInt 4))]))
+                ]
+              )),
+           [(EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+               [(EApplication ((EIdentifier (Id "( * )")), (EConstant (CInt 2)),
+                   [(EConstant (CInt 3))]))
                  ]
-               ));
-             (EApplication ((EIdentifier (Id "( + )")),
-                [(EConstant (CInt 1));
-                  (EApplication ((EIdentifier (Id "( * )")),
-                     [(EConstant (CInt 2)); (EConstant (CInt 3))]))
-                  ]
-                ))
+               ))
              ]
            )))
       ] |}]
@@ -68,10 +65,10 @@ let%expect_test _ =
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( && )")),
-           [(EApplication ((EIdentifier (Id "( < )")),
-               [(EConstant (CInt 1)); (EConstant (CInt 2))]));
-             (EApplication ((EIdentifier (Id "( > )")),
-                [(EConstant (CInt 2)); (EConstant (CInt 1))]))
+           (EApplication ((EIdentifier (Id "( < )")), (EConstant (CInt 1)),
+              [(EConstant (CInt 2))])),
+           [(EApplication ((EIdentifier (Id "( > )")), (EConstant (CInt 2)),
+               [(EConstant (CInt 1))]))
              ]
            )))
       ] |}]
@@ -82,10 +79,10 @@ let%expect_test _ =
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
-           [(EApplication ((EIdentifier (Id "( <= )")),
-               [(EConstant (CInt 1)); (EConstant (CInt 2))]));
-             (EApplication ((EIdentifier (Id "( >= )")),
-                [(EConstant (CInt 3)); (EConstant (CInt 2))]))
+           (EApplication ((EIdentifier (Id "( <= )")), (EConstant (CInt 1)),
+              [(EConstant (CInt 2))])),
+           [(EApplication ((EIdentifier (Id "( >= )")), (EConstant (CInt 3)),
+               [(EConstant (CInt 2))]))
              ]
            )))
       ] |}]
@@ -101,27 +98,25 @@ let%expect_test _ =
   [%expect{|
     [(SExpression
         (EApplication ((EIdentifier (Id "( || )")),
-           [(EApplication ((EIdentifier (Id "( >= )")),
-               [(EApplication ((EIdentifier (Id "( + )")),
-                   [(EApplication ((EIdentifier (Id "( * )")),
-                       [(EConstant (CInt 1)); (EConstant (CInt 2))]));
-                     (EApplication ((EIdentifier (Id "( / )")),
-                        [(EConstant (CInt 3)); (EConstant (CInt 3))]))
-                     ]
-                   ));
-                 (EApplication ((EIdentifier (Id "( / )")),
-                    [(EApplication ((EIdentifier (Id "( / )")),
-                        [(EConstant (CInt 3)); (EConstant (CInt 3))]));
-                      (EConstant (CInt 3))]
-                    ))
-                 ]
-               ));
-             (EApplication ((EIdentifier (Id "( != )")),
-                [(EConstant (CInt 1));
+           (EApplication ((EIdentifier (Id "( >= )")),
+              (EApplication ((EIdentifier (Id "( + )")),
+                 (EApplication ((EIdentifier (Id "( * )")), (EConstant (CInt 1)),
+                    [(EConstant (CInt 2))])),
+                 [(EApplication ((EIdentifier (Id "( / )")),
+                     (EConstant (CInt 3)), [(EConstant (CInt 3))]))
+                   ]
+                 )),
+              [(EApplication ((EIdentifier (Id "( / )")),
                   (EApplication ((EIdentifier (Id "( / )")),
-                     [(EConstant (CInt 9)); (EConstant (CInt 3))]))
-                  ]
-                ))
+                     (EConstant (CInt 3)), [(EConstant (CInt 3))])),
+                  [(EConstant (CInt 3))]))
+                ]
+              )),
+           [(EApplication ((EIdentifier (Id "( != )")), (EConstant (CInt 1)),
+               [(EApplication ((EIdentifier (Id "( / )")), (EConstant (CInt 9)),
+                   [(EConstant (CInt 3))]))
+                 ]
+               ))
              ]
            )))
       ] |}]

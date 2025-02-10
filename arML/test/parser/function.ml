@@ -18,10 +18,9 @@ let%expect_test _ =
     [(SExpression
         (EFun (((PVar (Id "x")), [(PVar (Id "y")); (PVar (Id "z"))]),
            (EApplication ((EIdentifier (Id "( + )")),
-              [(EApplication ((EIdentifier (Id "( + )")),
-                  [(EIdentifier (Id "x")); (EIdentifier (Id "y"))]));
-                (EIdentifier (Id "z"))]
-              ))
+              (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+                 [(EIdentifier (Id "y"))])),
+              [(EIdentifier (Id "z"))]))
            )))
       ] |}]
 ;;
@@ -31,7 +30,7 @@ let%expect_test _ =
   [%expect{|
     [(SExpression
         (EFun (((PTyped ((PVar (Id "x")), (TDGround GTDInt))), []),
-           (EApplication ((EIdentifier (Id "( + )")),
-              [(EIdentifier (Id "x")); (EConstant (CInt 1))]))
+           (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+              [(EConstant (CInt 1))]))
            )))
       ] |} ]

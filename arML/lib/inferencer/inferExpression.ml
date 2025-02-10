@@ -17,7 +17,7 @@ let infer_expr =
   | Ast.EIdentifier (Id name) -> infer_id env name
   | Ast.EIfThenElse (cond, branch1, branch2) -> infer_if_then_else env cond branch1 branch2
   | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
-  | Ast.EApplication (func_expr, args_exprs) -> infer_application env func_expr args_exprs
+  | Ast.EApplication (func_expr, arg, args_exprs) -> infer_application env func_expr (arg :: args_exprs)
   | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
   | Ast.EListConstructor (head, tail) -> infer_list_constructor env head tail
   | Ast.EEmptyList -> fresh_var >>= fun fv -> return (Substitution.empty, TList fv)
