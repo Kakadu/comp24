@@ -4,7 +4,7 @@
 
 open ArML_lib.Runner
 
-(* Fun *)
+(* Fun expression ([PVar] pattern) *)
 
 let%expect_test _ =
   inference {| fun x -> x |};
@@ -66,6 +66,65 @@ let%expect_test _ =
   [%expect {| Type error: unbound variable 'y' |}]
 ;;
 
+let%expect_test _ =
+  inference {| fun x -> if x > 0 then x else -x |};
+  [%expect {| Syntax error. |}]
+;;
+
+(* ---------------- *)
+
+(* Fun expression (compex patterns) *)
+
+let%expect_test _ =
+  inference {| fun _ -> () |};
+  [%expect {| - : 'a -> unit |}]
+;;
+
+let%expect_test _ =
+  inference {| fun () -> () |};
+  [%expect {| - : unit -> unit |}]
+;;
+
+let%expect_test _ =
+  inference {| fun (x :: y) -> x :: y |};
+  [%expect {| - : 'a list -> 'a list |}]
+;;
+
+let%expect_test _ =
+  inference {| fun (x, y) -> x + y |};
+  [%expect {| - : int * int -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| fun ((x, y), (z, w)) -> x + y + z + w |};
+  [%expect {| - : (int * int) * (int * int) -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| fun ((x, y), (z, w)) -> x (y z) w |};
+  [%expect {| - : (('a -> 'b -> 'c) * ('d -> 'a)) * ('d * 'b) -> 'c |}]
+;;
+
+let%expect_test _ =
+  inference {| fun ((x, y), (z, w)) -> (x, y, z, w) |};
+  [%expect {| - : ('a * 'b) * ('c * 'd) -> 'a * 'b * 'c * 'd |}]
+;;
+
+let%expect_test _ =
+  inference {| fun ((x, y), z) -> x + y + z |};
+  [%expect {| - : (int * int) * int -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| fun (x, (y, z, x)) -> x + y + z |};
+  [%expect {| Type error: variable 'x' is bound several times |}]
+;;
+
+let%expect_test _ =
+  inference {| fun (x :: y :: (a :: (b, y) :: [])) -> x + y + z |};
+  [%expect {| Type error: variable 'y' is bound several times |}]
+;;
+
 (* ---------------- *)
 
 (* Let in *)
@@ -99,6 +158,22 @@ let%expect_test _ =
   inference {| let f x = y > 5 in f 4 |};
   [%expect {| Type error: unbound variable 'y' |}]
 ;;
+
+let%expect_test _ =
+  inference {| let f x = x + 1 in f "a" |};
+  [%expect {| Type error: unification failed - type int does not match expected type string |}]
+;;
+
+let%expect_test _ =
+  inference {| let (x, y) = ((fun x -> x + 1), 0) in x y |};
+  [%expect {| - : int |}]
+;;
+
+let%expect_test _ =
+  inference {| let (x, y) = ((fun x -> x + 1), true) in x y |};
+  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+;;
+
 
 (* ---------------- *)
 
@@ -148,6 +223,11 @@ let%expect_test _ =
   [%expect {| Type error: occurs check failed. |}]
 ;;
 
+let%expect_test _ =
+  inference {| let rec (x, y) = (1, 2) |};
+  [%expect {| Only variables are allowed as left-hand side of `let rec' |}]
+;;
+
 (* ---------------- *)
 
 (* Mutual recursive let in *)
@@ -177,6 +257,11 @@ let%expect_test _ =
 let%expect_test _ =
   inference {| let rec f x = g and g x = f in (f, g) |};
   [%expect {| Type error: occurs check failed. |}]
+;;
+
+let%expect_test _ =
+  inference {| let rec f x = f x and (y :: z) = (1 :: []) in f (y :: z) |};
+  [%expect {| Only variables are allowed as left-hand side of `let rec' |}]
 ;;
 
 (* let%expect_test _ =
