@@ -34,12 +34,6 @@
  (public_name egraphs_demo)
  (libraries middleend stdio ast))
 
-(executable
- (name anf_types_demo)
- (modules anf_types_demo)
- (public_name anf_types_demo)
- (libraries middleend stdio ast typeinference))
-
 (cram
  (applies_to typeinference_tests)
  (deps
@@ -95,6 +89,12 @@
 (cram
  (applies_to egraphs_tests)
  (deps ./egraphs_demo.exe))
+
+(executable
+ (name anf_types_demo)
+ (modules anf_types_demo)
+ (public_name anf_types_demo)
+ (libraries middleend stdio ast typeinference))
 
 (cram
  (applies_to anf_types_tests)
