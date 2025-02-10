@@ -2,11 +2,11 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open StateResultMonad
-open StateResultMonad.Syntax
+open Common.StateResultMonad
+open Common.StateResultMonad.Syntax
 open TypeTree
 
-let instantiate : Schema.schema -> TypeTree.typ StateResultMonad.t =
+let instantiate : Schema.schema -> (TypeTree.typ, TypeErrors.error) t =
   fun (Schema (bind_var, ty)) ->
   TypeVarSet.fold
     (fun var_name acc ->

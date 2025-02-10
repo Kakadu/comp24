@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open StateResultMonad
+open Common.StateResultMonad
 open TypeUtils
 open InferExpression
 open InferProgram
