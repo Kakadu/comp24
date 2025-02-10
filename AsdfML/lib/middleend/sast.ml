@@ -1,3 +1,8 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+
 open Ast
 
 (* Simplified AST after pattern and match elimination and closure conversion *)
