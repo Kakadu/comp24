@@ -23,7 +23,7 @@ module Generator = struct
          let* first_char = char_range 'a' 'z' in
          let* suf =
            string_size
-             ~gen:(frequency [ 20, char_range 'a' 'z'; 1,  return '_' ])
+             ~gen:(frequency [ 20, char_range 'a' 'z'; 1, return '_' ])
              (int_range 1 10)
          in
          let nm = String.make 1 first_char ^ suf in
@@ -100,7 +100,7 @@ module Generator = struct
     let* pat = gen_pat (n / 2) in
     let* exp = gen_exp (n / 2) in
     return (pat, exp)
-
+  ;;
 
   let rec gen_exp = function
     | 0 ->
