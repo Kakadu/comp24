@@ -4,6 +4,9 @@
 
 open TypeTree
 
+(** Recalculates type variables in a type expression.
+    This function renames type variables sequentially (starting from 0)
+    to standardize type representations. *)
 let recalculate_vars typ =
   let insert (old_v, new_v) acc =
     match Base.Map.find acc old_v with

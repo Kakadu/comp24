@@ -7,10 +7,10 @@ open Common.StateResultMonad.Syntax
 open TypeTree
 open TypeErrors
 
+(** Checks that all variables in the given list of patterns are unique.
+    Used to detect several bound errors in tuple patterns,
+    list constructor patterns, and effects with arguments. *)
 let check_unique_vars patterns =
-  (* Checks that all variables in the given list of patterns are unique.
-     Used to detect several bound errors in tuple patterns,
-     list constructor patterns, and effects with arguments. *)
   let rec helper var_set = function
     | [] -> return var_set
     | Ast.PVar (Id v) :: rest ->

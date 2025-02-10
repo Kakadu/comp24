@@ -236,7 +236,7 @@ let infer_expr =
 
   and infer_typed_expression env expr expr_typ =
     let* sub, ty = helper env expr in
-    let* expr_ty = get_type_by_annotation expr_typ in
+    let* expr_ty = get_type_by_defenition expr_typ in
     let* sub2 = Substitution.unify ty expr_ty in
     let* final_sub = Substitution.compose sub sub2 in
     return (final_sub, Substitution.apply final_sub ty)

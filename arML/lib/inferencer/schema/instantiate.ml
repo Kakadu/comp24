@@ -6,7 +6,7 @@ open Common.StateResultMonad
 open Common.StateResultMonad.Syntax
 open TypeTree
 
-let instantiate : Schema.schema -> (TypeTree.typ, TypeErrors.error) t =
+let instantiate : Schema.schema -> (TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t =
   fun (Schema (bind_var, ty)) ->
   TypeVarSet.fold
     (fun var_name acc ->

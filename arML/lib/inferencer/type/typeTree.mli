@@ -2,15 +2,16 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+(** Type variable representation *)
 type type_var = int
 
-let pp_type_var = Format.pp_print_int
-
-module TypeVar = struct
+(** Module for handling type variables *)
+module TypeVar : sig
   type t = type_var
-  let compare = Int.compare
+  val compare : t -> t -> int
 end
 
+(** Primitive (ground) types *)
 type ground_type =
   | GTInt    (** Integer type (int) *)
   | GTBool   (** Boolean type (bool) *)
@@ -19,6 +20,7 @@ type ground_type =
   | GTString (** String type (string) *)
 [@@deriving show { with_path = false }]
 
+(** Full type representation *)
 type typ =
   | TGround of ground_type  (** Basic types: int, bool, unit, etc. *)
   | TVar of type_var        (** Polymorphic type variable: 'a, 'b, etc. *)
@@ -27,6 +29,12 @@ type typ =
   | TList of typ            (** List type: 'a list *)
 [@@deriving show { with_path = false }]
 
-module TypeVarSet = Stdlib.Set.Make (TypeVar) (* Set, that storing type variables. *)
+(** Set, that storing type variables. *)
+module TypeVarSet : sig
+  include module type of Set.Make (TypeVar)
+end
 
-module VarSet = Stdlib.Set.Make (String) (* Set, that storing variables (let-binds and effect declarations). *)
+(** Set, that storing variables (let-binds and effect declarations). *)
+module VarSet : sig
+  include module type of Set.Make (String)
+end
