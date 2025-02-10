@@ -27,12 +27,12 @@ let parsers =
 ;;
 
 let parse_expression = skip_wspace *> choice 
-  [ parsers.parse_type_defition parsers
+  [ parsers.parse_tuple parsers
+  ; parsers.parse_type_defition parsers
   ; parsers.parse_list_constructor parsers
   ; parsers.parse_binary_operation parsers
   ; parsers.parse_list parsers
   ; parsers.parse_application parsers
-  ; parsers.parse_tuple parsers
   ; parsers.parse_constant_expr
   ; parsers.parse_identifier_expr
   ; parsers.parse_fun parsers

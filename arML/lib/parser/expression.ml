@@ -59,7 +59,7 @@ let parse_fun p =
 
   parens self
   <|>
-  let* args = string "fun" *> skip_wspace1 *> sep_by1 skip_wspace parse_pattern in
+  let* args = string "fun" *> skip_wspace1 *> sep_by1 skip_wspace (parse_pattern true) in
 
   let* args_tuple = match args with
   | hd :: tl -> return (hd, tl)
@@ -113,7 +113,7 @@ let parse_function p =
   let* _ = string "function" *> skip_wspace1 in
 
   let parse_case =
-    let* pattern = parse_pattern <* skip_wspace in
+    let* pattern = (parse_pattern false) <* skip_wspace in
     let* case_expr = string "->" *> skip_wspace *> parse_expr in
     return (pattern, case_expr)
   in
@@ -155,7 +155,7 @@ let parse_tuple p =
 
   let main_parser = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_expr) in
 
-  let* elements = parens main_parser <|> main_parser in
+  let* elements = main_parser <|> parens main_parser in
 
   match elements with
   | pat_1 :: pat_2 :: pats -> return (ETuple (pat_1, pat_2, pats))
@@ -297,9 +297,9 @@ let parse_let_in p =
     choice 
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
+      ; p.parse_tuple p
       ; p.parse_binary_operation p
       ; p.parse_application p
-      ; p.parse_tuple p
       ; p.parse_list p
       ; p.parse_fun p
       ; p.parse_function p
@@ -318,7 +318,7 @@ let parse_let_in p =
   in
 
   let parse_binding () =
-    let* args = many1 parse_pattern in
+    let* args = many1 (parse_pattern false) in
     let* typ_opt = 
       let typ_parser = 
         skip_wspace *> char ':' *> skip_wspace *>
@@ -392,7 +392,7 @@ let parse_match_with p =
   let* expr = string "match" *> skip_wspace *> parse_expr <* skip_wspace <* string "with" <* skip_wspace in
   
   let parse_case =
-    let* pattern = skip_wspace *> parse_pattern <* skip_wspace in
+    let* pattern = skip_wspace *> (parse_pattern false) <* skip_wspace in
     let* case_expr = string "->" *> skip_wspace *> parse_expr <* skip_wspace in
     return (pattern, case_expr)
   in
@@ -418,9 +418,9 @@ let parse_application p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; parens @@ p.parse_fun p
       ; parens @@ p.parse_list_constructor p
       ; parens @@ p.parse_binary_operation p
-      ; parens @@ p.parse_fun p
       ; p.parse_list p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -523,9 +523,9 @@ let parse_type_defition p =
     *>
     let parse_expr =
       choice 
-        [ parens @@ p.parse_list_constructor p
+        [ p.parse_tuple p
+        ; parens @@ p.parse_list_constructor p
         ; p.parse_binary_operation p
-        ; p.parse_tuple p
         ; p.parse_list p
         ; p.parse_if_then_else p
         ; p.parse_application p

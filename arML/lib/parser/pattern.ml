@@ -64,10 +64,10 @@ let parse_tuple_pattern pp =
     ; pp.parse_identifier_pattern
     ; pp.parse_nill_pattern
     ; pp.parse_any_pattern
-    ; self
+    ; parens self
     ]
   in
-  let* patterns = parens (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern) in
+  let* patterns = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern) in
   match patterns with
   | pat_1 :: pat_2 :: pats -> return (PTuple (pat_1, pat_2, pats))
   | _ -> fail "Syntax error: tuple must have at least two patterns"
@@ -81,12 +81,12 @@ let parse_list_pattern pp =
   fix
   @@ fun self ->
   let parse_pattern = choice
-    [ pp.parse_pattern_type_defition pp
-    ; pp.parse_constant_pattern
+    [ pp.parse_constant_pattern
     ; pp.parse_identifier_pattern
     ; pp.parse_nill_pattern
     ; pp.parse_any_pattern
-    ; pp.parse_tuple_pattern pp
+    ; parens @@ pp.parse_pattern_type_defition pp
+    ; parens @@ pp.parse_tuple_pattern pp
     ; parens @@ self
     ]
   in
@@ -120,12 +120,12 @@ let parse_pattern_type_defition pp =
     skip_wspace
     *>
     let parse_pattern = choice 
-    [ pp.parse_list_pattern pp
-    ; pp.parse_constant_pattern
+    [ pp.parse_constant_pattern
     ; pp.parse_identifier_pattern
     ; pp.parse_nill_pattern
     ; pp.parse_any_pattern
-    ; pp.parse_tuple_pattern pp
+    ; parens @@ pp.parse_list_pattern pp
+    ; parens @@ pp.parse_tuple_pattern pp
     ; parens @@ self
     ]
   in
@@ -149,14 +149,16 @@ let parsers =
   ; parse_pattern_type_defition
   }
 
-let parse_pattern = choice 
-  [ parsers.parse_list_pattern parsers
-  ; parsers.parse_tuple_pattern parsers
-  ; parsers.parse_constant_pattern
-  ; parsers.parse_identifier_pattern
-  ; parsers.parse_nill_pattern
-  ; parsers.parse_any_pattern
-  ; parsers.parse_pattern_type_defition parsers
-  ]
+let parse_pattern fun_flag =
+  let between = if fun_flag then parens else (fun x -> x) in
+  choice 
+    [ between @@ parsers.parse_tuple_pattern parsers
+    ; between @@ parsers.parse_list_pattern parsers
+    ; parsers.parse_constant_pattern
+    ; parsers.parse_identifier_pattern
+    ; parsers.parse_nill_pattern
+    ; parsers.parse_any_pattern
+    ; parsers.parse_pattern_type_defition parsers
+    ]
 
 (* ---------------- *)
