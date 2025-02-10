@@ -14,7 +14,7 @@
 (license LGPL-2.1-or-later WITH OCaml-LGPL-linking-exception)
 
 (package
- (name demo)
+ (name demo2)
  (synopsis "A short LLVM demo")
  (depends
   ocaml
