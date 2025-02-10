@@ -150,6 +150,8 @@ let parsers =
   }
 
 let parse_pattern fun_flag =
+  (* If first argument is true then can parse without brackets around the pattern. 
+     Otherwise, parentheses are required *)
   let between = if fun_flag then parens else (fun x -> x) in
   choice 
     [ between @@ parsers.parse_tuple_pattern parsers

@@ -2,6 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+open Ast
+
 (* Parser runner *)
 
 let parse_program program = Parser.Runner.parse program
