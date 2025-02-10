@@ -92,7 +92,7 @@ let closure_conversion ?(globals = default_globals) (program : tdefinition list)
         function
         | TDLet (_, _, pat, _) as def ->
           let def', _, _ = cc_def globals env def in
-          let globals' = Set.union globals (bound_vars_pat pat) in
+          let globals' = Set.union globals (vars_pat pat) in
           globals', def')
   in
   helper program |> snd
