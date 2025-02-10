@@ -47,21 +47,22 @@ type pattern =
   | Const of value
   | Var of id
   | Wildcard (* _ *)
-  | Tuple of pattern * pattern * pattern list (* (1, 2, ...) *)
+  | Tuple of pattern list (* (1, 2, ...) *)
   | List of pattern list (* [1; 2; 3] *)
   | ListConcat of pattern * pattern
-  | Operation of op
+  | Constraint of pattern * dataType (* a : Int *)
+  | Operation of op (* let (+) x y = ... *)
 [@@deriving show]
 
 type expr =
   | EConst of value
   | EVar of id
   | EOperation of op (* 1 + 1 or (+) 1 1 *)
-  | ETuple of expr * expr * expr list
+  | ETuple of expr list
   | EList of expr list
   | EListConcat of expr * expr
+  | EConstraint of expr * dataType (* f x : Int *)
   | Application of expr * expr
-  | Constraint of expr * dataType
   | Let of funType * bind list * expr option (* let f = ... and g = ... [in ...] *)
   | Fun of args * expr (* (fun a -> a + 1) *)
   | If of expr * expr * expr option (* if a = b then c (else d) *)

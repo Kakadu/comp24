@@ -1,11 +1,23 @@
-(* open HamsterML.Ast
+
+open HamsterML.Ast
 
 let parse (s : string) : expr list =
   let lexbuf = Lexing.from_string s in
-  let ast = HamsterML.Parser.prog HamsterML.Lexer.read lexbuf in
+  let ast = HamsterML.Parser.prog_expr HamsterML.Lexer.read lexbuf in
   ast
 ;;
 
+let%test _ = parse "[1; 2; 3]" = [EList [EConst (Int 1); EConst (Int 2); EConst (Int 3)]] 
+let%test _ = parse "[]" = [EList []] 
+
+let%test _ = parse "(1,2)" = [ETuple [EConst (Int 1); EConst (Int 2)]]
+let%test _ = parse "(1,2,3)" = [ETuple [EConst (Int 1); EConst (Int 2); EConst (Int 3)]]
+let%test _ = parse "1,2" = parse "(1,2)"
+let%test _ = parse "1,2,3,4,5" = parse "(1,2,3,4,5)"
+let%test _ = parse "([1], [2])" = [ETuple [EList [EConst (Int 1)]; EList [EConst (Int 2)]]]
+let%test _ = parse "[(1,2)]" = [EList [ETuple [EConst (Int 1); EConst (Int 2)]]]
+
+(*
 (* Data Type tests *)
 let%test _ = parse "let a = +228" = parse "let a = 228"
 
