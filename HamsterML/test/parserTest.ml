@@ -1,4 +1,3 @@
-
 open HamsterML.Ast
 
 let parse (s : string) : expr list =
@@ -7,18 +6,76 @@ let parse (s : string) : expr list =
   ast
 ;;
 
-let%test _ = parse "[1; 2; 3]" = [EList [EConst (Int 1); EConst (Int 2); EConst (Int 3)]] 
-let%test _ = parse "[]" = [EList []] 
+let%test _ =
+  parse "[1; 2; 3]" = [ EList [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+;;
 
-let%test _ = parse "(1,2)" = [ETuple [EConst (Int 1); EConst (Int 2)]]
-let%test _ = parse "(1,2,3)" = [ETuple [EConst (Int 1); EConst (Int 2); EConst (Int 3)]]
+let%test _ = parse "[]" = [ EList [] ]
+let%test _ = parse "(1,2)" = [ ETuple [ EConst (Int 1); EConst (Int 2) ] ]
+
+let%test _ =
+  parse "(1,2,3)" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+;;
+
 let%test _ = parse "1,2" = parse "(1,2)"
 let%test _ = parse "1,2,3,4,5" = parse "(1,2,3,4,5)"
-let%test _ = parse "([1], [2])" = [ETuple [EList [EConst (Int 1)]; EList [EConst (Int 2)]]]
-let%test _ = parse "[(1,2)]" = [EList [ETuple [EConst (Int 1); EConst (Int 2)]]]
+
+let%test _ =
+  parse "([1], [2])" = [ ETuple [ EList [ EConst (Int 1) ]; EList [ EConst (Int 2) ] ] ]
+;;
+
+let%test _ = parse "[(1,2)]" = [ EList [ ETuple [ EConst (Int 1); EConst (Int 2) ] ] ]
+let%test _ = parse "[1,2,3]" = [EList [ETuple [EConst (Int 1); EConst (Int 2); EConst (Int 3)]]]
+let%test _ = parse "-1" = [ Application (EOperation (Unary UMINUS), EConst (Int 1)) ]
+
+let%test _ =
+  parse "1+1"
+  = [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
+    ]
+;;
+
+let%test _ = parse "1+1" = parse "1 + 1"
+
+let%test _ =
+  parse "1+1"
+  = [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
+    ]
+;;
+
+let%test _ = parse "1-1" = parse "1 - 1"
+
+let%test _ =
+  parse "1,2,3,(4,5)"
+  = [ ETuple
+        [ EConst (Int 1)
+        ; EConst (Int 2)
+        ; EConst (Int 3)
+        ; ETuple [ EConst (Int 4); EConst (Int 5) ]
+        ]
+    ]
+;;
+
+let%test _ =
+  parse "(1,2,3,(1,2))"
+  = [ ETuple
+        [ EConst (Int 1)
+        ; EConst (Int 2)
+        ; EConst (Int 3)
+        ; ETuple [ EConst (Int 1); EConst (Int 2) ]
+        ]
+    ]
+;;
+
+let%test _ = parse "1,2,3" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+
+let%test _ =
+  parse "(1,2,3)" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+;;
+
+let%test _ = parse "(1,2,3)" = parse "1,2,3"
 
 (*
-(* Data Type tests *)
+   (* Data Type tests *)
 let%test _ = parse "let a = +228" = parse "let a = 228"
 
 let%test _ =
