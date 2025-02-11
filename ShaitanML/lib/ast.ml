@@ -44,7 +44,7 @@ type expr =
   | EVar of id (** x *)
   | EIf of expr * expr * expr (** if e1 then e2 else e3 *)
   | EMatch of expr * case list (** match e with p1 -> e1 |...| pn -> en *)
-  | ELet of rec_flag * binding list * expr (** let x = e1 in e2 *)
+  | ELet of rec_flag * binding * expr (** let x = e1 in e2 *)
   | EFun of pattern * expr (** fun p -> e *)
   | ETuple of expr list (** a, b, c *)
   | ECons of expr * expr (** x :: xs | [x1; x2]*)
