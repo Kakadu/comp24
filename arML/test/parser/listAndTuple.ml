@@ -90,13 +90,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression {| 1, 2 |};
-  [%expect
-    {|
-    (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])) |}]
-;;
-
-let%expect_test _ =
   parse_expression {| (1, 2, 3) |};
   [%expect
     {|
@@ -120,15 +113,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression {| fun x -> x, fun y -> y |};
-  [%expect
-    {|
-    (ETuple ((EFun (((PVar (Id "x")), []), (EIdentifier (Id "x")))),
-       (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))), [])) |}]
-;;
-
-let%expect_test _ =
-  parse_expression {| 1, fun x -> x, (), [1 ; 3; 5] |};
+  parse_expression {| (1, fun x -> x, (), [1 ; 3; 5]) |};
   [%expect
     {|
     (ETuple ((EConstant (CInt 1)),
@@ -143,7 +128,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression {| (1, 2), 1 |};
+  parse_expression {| ((1, 2), 1) |};
   [%expect
     {|
     (ETuple ((ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])),
@@ -151,7 +136,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression {| (fun x -> x) 0, (fun y -> y) 0 |};
+  parse_expression {| ((fun x -> x) 0, (fun y -> y) 0) |};
   [%expect
     {|
     (ETuple (
@@ -163,7 +148,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression {| let f x = x in f 0, let f y = y in 0 |};
+  parse_expression {| (let f x = x in f 0, let f y = y in 0) |};
   [%expect
     {|
     (ETuple (

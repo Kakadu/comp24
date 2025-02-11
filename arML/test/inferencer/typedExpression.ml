@@ -233,28 +233,28 @@ let%expect_test _ =
 (* Declarations *)
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let identity (x : 'a) : 'a = x
   |};
   [%expect {| val identity : 'a -> 'a |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let f x : int = x
   |};
   [%expect {| val f : int -> int |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let apply (f : 'a -> 'b) (x : 'a) : 'b = f x
   |};
   [%expect {| val apply : ('a -> 'b) -> 'a -> 'b |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let f x : int =
       match x with
       | 0 -> 0
@@ -264,7 +264,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let rec factorial (n : int) : int =
       if n = 0 then 1
       else n * (factorial (n - 1) : int)
@@ -273,7 +273,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let rec even (x : int) : bool =
       match x with
       | 0 -> true
@@ -289,7 +289,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_program {|
     let rec even (x : int) : 'a =
       match x with
       | 0 -> true

@@ -130,6 +130,9 @@ let infer_expr =
         extend_env_with_pattern env r (TypeTree.TList t)
       | Ast.PNill, TypeTree.TList _ -> return env
       | Ast.PAny, _ -> return env
+      | Ast.PConst _ as pat, ct -> 
+        let* t, _ = infer_pattern env pat in
+        if t = ct then return env else fail @@ Unification_failed (t, ct)
       | pat, ty -> 
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty)

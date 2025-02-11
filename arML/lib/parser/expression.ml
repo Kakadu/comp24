@@ -148,15 +148,13 @@ let parse_tuple p =
       ; p.parse_if_then_else p
       ; parse_constant_expr
       ; parse_identifier_expr
-      ; parens @@ self
+      ; self
       ; p.parse_empty_list_expr
       ]
   in
-
+  parens @@
   let main_parser = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_expr) in
-
   let* elements = main_parser <|> parens main_parser in
-
   match elements with
   | pat_1 :: pat_2 :: pats -> return (ETuple (pat_1, pat_2, pats))
   | _ -> fail "Syntax error: tuple must have at least two elements"
@@ -209,7 +207,7 @@ let parse_list_constructor p =
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
       ; p.parse_application p
-      ; parens @@ p.parse_tuple p
+      ; p.parse_tuple p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_match_with p
@@ -415,27 +413,39 @@ let parse_application p =
   @@ fun self ->
   skip_wspace
   *>
-  let parse_expr =
+  let parse_func =
+    choice
+      [ p.parse_type_defition p
+      ; parens @@ p.parse_fun p
+      ; p.parse_constant_expr
+      ; p.parse_identifier_expr
+      ; parens @@ p.parse_function p
+      ; parens @@ p.parse_let_in p
+      ; parens @@ p.parse_if_then_else p
+      ; parens @@ p.parse_match_with p
+      ; parens @@ self
+      ]
+  in
+  let parse_args =
     choice
       [ p.parse_type_defition p
       ; parens @@ p.parse_fun p
       ; parens @@ p.parse_list_constructor p
       ; parens @@ p.parse_binary_operation p
+      ; p.parse_tuple p
       ; p.parse_list p
       ; p.parse_function p
       ; p.parse_let_in p
       ; p.parse_if_then_else p
       ; p.parse_constant_expr
       ; p.parse_identifier_expr
-      ; parens @@ p.parse_tuple p
       ; p.parse_empty_list_expr
-      ; p.parse_match_with p
       ; parens @@ self
       ]
   in
   parens self <|>
-  let* func = parse_expr in
-  let* args = many1 (skip_wspace *> parse_expr) in
+  let* func = parse_func in
+  let* args = many1 (skip_wspace *> parse_args) in
   return @@ EApplication (func, List.hd args, List.tl args)
 ;;
 
@@ -451,17 +461,17 @@ let parse_binary_operation p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; p.parse_constant_expr
       ; p.parse_application p
+      ; p.parse_identifier_expr
       ; parens self
       ; p.parse_list p
-      ; p.parse_fun p
-      ; p.parse_function p
-      ; p.parse_let_in p
-      ; p.parse_match_with p
-      ; p.parse_if_then_else p
-      ; p.parse_constant_expr
-      ; p.parse_identifier_expr
-      ; parens @@ p.parse_tuple p
+      ; p.parse_tuple p
+      ; parens @@ p.parse_fun p
+      ; parens @@ p.parse_function p
+      ; parens @@ p.parse_let_in p
+      ; parens @@ p.parse_match_with p
+      ; parens @@ p.parse_if_then_else p
       ]
   in
 
@@ -571,12 +581,12 @@ let parsers =
 let parse_expression = 
   skip_wspace *> 
   choice 
-    [ parsers.parse_tuple parsers
+    [ parsers.parse_list_constructor parsers
+    ; parsers.parse_application parsers
+    ; parsers.parse_tuple parsers
     ; parsers.parse_type_defition parsers
-    ; parsers.parse_list_constructor parsers
     ; parsers.parse_binary_operation parsers
     ; parsers.parse_list parsers
-    ; parsers.parse_application parsers
     ; parsers.parse_constant_expr
     ; parsers.parse_identifier_expr
     ; parsers.parse_fun parsers

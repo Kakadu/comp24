@@ -4,10 +4,17 @@
  (modules start_parser_demos)
  (libraries arML.lib stdio))
 
+(executable
+ (name start_type_inference_demos)
+ (public_name arML.start_type_inference_demos)
+ (modules start_type_inference_demos)
+ (libraries arML.lib stdio))
+
 (cram
- (applies_to parser_demos)
+ (applies_to start_parser_demos type_inference_demos)
  (deps
   ./start_parser_demos.exe
+  ./start_type_inference_demos.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

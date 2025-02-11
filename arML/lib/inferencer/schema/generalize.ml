@@ -6,6 +6,6 @@ open TypeTree
 
 let generalize : TypeEnv.t -> typ -> Schema.schema =
   fun env ty ->
-  let free = TypeVarSet.diff (TypeUtils.type_vars ty) (TypeEnv.free_vars env) in
-  Schema (free, ty)
+  let bound = TypeVarSet.diff (TypeUtils.type_vars ty) (TypeEnv.free_vars env) in
+  Schema (bound, ty)
 ;;

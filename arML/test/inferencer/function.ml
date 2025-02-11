@@ -272,7 +272,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| let rec (x, y) = (1, 2) |};
+  inference_expression {| let rec (x, y) = (1, 2) in (x, y) |};
   [%expect {| Only variables are allowed as left-hand side of `let rec' |}]
 ;;
 

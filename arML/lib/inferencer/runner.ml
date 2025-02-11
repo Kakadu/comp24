@@ -17,12 +17,15 @@ let start_env =
     ; ("( && )", TGround GTBool @-> TGround GTBool @-> TGround GTBool)
     ; ("( || )", TGround GTBool @-> TGround GTBool @-> TGround GTBool)
     ; ("( = )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
+    ; ("( == )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( > )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( < )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( >= )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( <= )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( != )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( <> )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
+    ; ("print_int", TGround GTInt @-> TGround GTUnit)
+    ; ("print_bool", TGround GTBool @-> TGround GTUnit)
     ]
   in
   List.fold_left

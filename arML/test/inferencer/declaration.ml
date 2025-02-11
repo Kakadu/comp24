@@ -50,7 +50,7 @@ let%expect_test _ =
 (* Basic let declaration (complex patterns) *)
 
 let%expect_test _ =
-  inference_program {| let x, y = 1, 2;; let z :: w = [true; false] |};
+  inference_program {| let (x, y) = (1, 2);; let z :: w = [true; false] |};
   [%expect {|
     val x : int
     val y : int
@@ -59,7 +59,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let x, y = 1, 2;; let z :: w :: _ = true :: false :: [] |};
+  inference_program {| let (x, y) = (1, 2);; let z :: w :: _ = true :: false :: [] |};
   [%expect {|
     val x : int
     val y : int
@@ -68,7 +68,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let x, y = 1, 2;; let x :: y = [1; 2] |};
+  inference_program {| let (x, y) = (1, 2);; let x :: y = [1; 2] |};
   [%expect {|
     val x : int
     val y : int list |}]

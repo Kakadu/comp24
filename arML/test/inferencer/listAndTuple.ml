@@ -36,7 +36,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| (fun x -> x), (fun y x -> x y), (let f x = x + 1 in f 0) |};
+  inference_expression {| ((fun x -> x), (fun y x -> x y), (let f x = x + 1 in f 0)) |};
   [%expect {| - : ('a -> 'a) * ('b -> ('b -> 'c) -> 'c) * int |}]
 ;;
 

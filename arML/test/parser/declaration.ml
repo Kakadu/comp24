@@ -105,7 +105,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program {| let x, y = 0, 0 |};
+  parse_program {| let (x, y) = (0, 0) |};
   [%expect
     {|
     [(DOrdinary (
