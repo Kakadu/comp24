@@ -244,7 +244,7 @@ let pelet pe =
   lift3
     elet
     (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
-    (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") pe)))
+    ((both pattern (lift2 efunf (many pattern <* token "=") pe)))
     (token "in" *> pe)
 ;;
 

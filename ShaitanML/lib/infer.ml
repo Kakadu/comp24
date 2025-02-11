@@ -398,7 +398,7 @@ let infer_exp =
           cl
       in
       return (sub, t)
-    | ELet (Nonrec, [ (pattern_, e1) ], e2) ->
+    | ELet (Nonrec, (pattern_, e1) , e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
@@ -410,7 +410,7 @@ let infer_exp =
       let* s2, t2 = helper env3 e2 in
       let* s = Subst.compose sub1 s2 in
       return (s, t2)
-    | ELet (Rec, [ (pat, e1) ], e2) ->
+    | ELet (Rec, (pat, e1), e2) ->
       let rec extract_nested = function
         | PConstraint (p, _) -> extract_nested p
         | _ as namaa -> namaa
