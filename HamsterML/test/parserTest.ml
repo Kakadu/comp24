@@ -1,79 +1,173 @@
 open HamsterML.Ast
 
-let parse (s : string) : expr list =
+let parse (s : string) : expr =
   let lexbuf = Lexing.from_string s in
   let ast = HamsterML.Parser.prog_expr HamsterML.Lexer.read lexbuf in
   ast
 ;;
 
-let%test _ =
-  parse "[1; 2; 3]" = [ EList [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+let parse_pattern (s : string) : pattern =
+  let lexbuf = Lexing.from_string s in
+  let ast = HamsterML.Parser.prog_pattern HamsterML.Lexer.read lexbuf in
+  ast
 ;;
 
-let%test _ = parse "[]" = [ EList [] ]
-let%test _ = parse "(1,2)" = [ ETuple [ EConst (Int 1); EConst (Int 2) ] ]
+(* --- EXPRESSIONS --- *)
 
-let%test _ =
-  parse "(1,2,3)" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
-;;
+(* Lists and Tuples *)
 
+let%test _ = parse "[1; 2; 3]" = EList [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ]
+let%test _ = parse "[]" = EList []
+let%test _ = parse "(1,2)" = ETuple [ EConst (Int 1); EConst (Int 2) ]
+let%test _ = parse "(1,2,3)" = ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ]
 let%test _ = parse "1,2" = parse "(1,2)"
 let%test _ = parse "1,2,3,4,5" = parse "(1,2,3,4,5)"
 
 let%test _ =
-  parse "([1], [2])" = [ ETuple [ EList [ EConst (Int 1) ]; EList [ EConst (Int 2) ] ] ]
+  parse "([1], [2])" = ETuple [ EList [ EConst (Int 1) ]; EList [ EConst (Int 2) ] ]
 ;;
 
-let%test _ = parse "[(1,2)]" = [ EList [ ETuple [ EConst (Int 1); EConst (Int 2) ] ] ]
-let%test _ = parse "[1,2,3]" = [EList [ETuple [EConst (Int 1); EConst (Int 2); EConst (Int 3)]]]
-let%test _ = parse "-1" = [ Application (EOperation (Unary UMINUS), EConst (Int 1)) ]
+let%test _ = parse "[(1,2)]" = EList [ ETuple [ EConst (Int 1); EConst (Int 2) ] ]
+
+let%test _ =
+  parse "[1,2,3]" = EList [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+;;
+
+let%test _ =
+  parse "(1+2, 3+4)"
+  = ETuple
+      [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 2))
+      ; Application (Application (EOperation (Binary ADD), EConst (Int 3)), EConst (Int 4))
+      ]
+;;
+
+let%test _ =
+  parse "((+),(+))" = ETuple [ EOperation (Binary ADD); EOperation (Binary ADD) ]
+;;
+
+let%test _ =
+  parse "[1+2; 3+4]"
+  = EList
+      [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 2))
+      ; Application (Application (EOperation (Binary ADD), EConst (Int 3)), EConst (Int 4))
+      ]
+;;
+
+let%test _ =
+  parse "[(+);(+)]" = EList [ EOperation (Binary ADD); EOperation (Binary ADD) ]
+;;
+
+let%test _ =
+  parse "1,2,3,(4,5)"
+  = ETuple
+      [ EConst (Int 1)
+      ; EConst (Int 2)
+      ; EConst (Int 3)
+      ; ETuple [ EConst (Int 4); EConst (Int 5) ]
+      ]
+;;
+
+let%test _ =
+  parse "(1,2,3,(1,2))"
+  = ETuple
+      [ EConst (Int 1)
+      ; EConst (Int 2)
+      ; EConst (Int 3)
+      ; ETuple [ EConst (Int 1); EConst (Int 2) ]
+      ]
+;;
+
+let%test _ = parse "1,2,3" = ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ]
+let%test _ = parse "(1,2,3)" = ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ]
+let%test _ = parse "(1,2,3)" = parse "1,2,3"
+
+(* Operations *)
+
+let%test _ = parse "-1" = Application (EOperation (Unary UMINUS), EConst (Int 1))
 
 let%test _ =
   parse "1+1"
-  = [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
-    ]
+  = Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
 ;;
 
 let%test _ = parse "1+1" = parse "1 + 1"
 
 let%test _ =
   parse "1+1"
-  = [ Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
-    ]
+  = Application (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1))
 ;;
 
 let%test _ = parse "1-1" = parse "1 - 1"
+let%test _ = parse "((1+2)+3)" = parse "1 + 2 + 3"
+let%test _ = parse "(1+2)*3" != parse "1 + 2 * 3"
+
+(* Application *)
+
+let%test _ = parse "f x" = Application (EVar "f", EVar "x")
+let%test _ = parse "f x y" = Application (Application (EVar "f", EVar "x"), EVar "y")
 
 let%test _ =
-  parse "1,2,3,(4,5)"
-  = [ ETuple
-        [ EConst (Int 1)
-        ; EConst (Int 2)
-        ; EConst (Int 3)
-        ; ETuple [ EConst (Int 4); EConst (Int 5) ]
-        ]
-    ]
+  parse "f x y z"
+  = Application (Application (Application (EVar "f", EVar "x"), EVar "y"), EVar "z")
+;;
+
+let%test _ = parse "f (g x)" = Application (EVar "f", Application (EVar "g", EVar "x"))
+
+let%test _ =
+  parse "f x, g y"
+  = ETuple [ Application (EVar "f", EVar "x"); Application (EVar "g", EVar "y") ]
 ;;
 
 let%test _ =
-  parse "(1,2,3,(1,2))"
-  = [ ETuple
-        [ EConst (Int 1)
-        ; EConst (Int 2)
-        ; EConst (Int 3)
-        ; ETuple [ EConst (Int 1); EConst (Int 2) ]
-        ]
-    ]
+  parse "(f x, g y)"
+  = ETuple [ Application (EVar "f", EVar "x"); Application (EVar "g", EVar "y") ]
 ;;
 
-let%test _ = parse "1,2,3" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+let%test _ = parse "f x, g y" = parse "(f x, g y)"
 
 let%test _ =
-  parse "(1,2,3)" = [ ETuple [ EConst (Int 1); EConst (Int 2); EConst (Int 3) ] ]
+  parse "[f x y]" = EList [ Application (Application (EVar "f", EVar "x"), EVar "y") ]
 ;;
 
-let%test _ = parse "(1,2,3)" = parse "1,2,3"
+(* --- PATTERNS --- *)
 
+(* simple patterns *)
+
+let%test _ = parse_pattern "10" = Const (Int 10)
+let%test _ = parse_pattern "nike_pro" = Var "nike_pro"
+let%test _ = parse_pattern "_" = Wildcard
+let%test _ = parse_pattern "(_)" = parse_pattern "_"
+let%test _ = parse_pattern "(nike_pro)" = parse_pattern "nike_pro"
+let%test _ = parse_pattern "(10)" = parse_pattern "10"
+
+(* Tuples *)
+
+let%test _ = parse_pattern "(1,2)" = Tuple [ Const (Int 1); Const (Int 2) ]
+
+let%test _ =
+  parse_pattern "(1,2,3)" = Tuple [ Const (Int 1); Const (Int 2); Const (Int 3) ]
+;;
+
+let%test _ = parse_pattern "1,2" = parse_pattern "(1,2)"
+let%test _ = parse_pattern "1,2,3,4,5" = parse_pattern "(1,2,3,4,5)"
+
+let%test _ =
+  parse_pattern "1,2,3,(4,5)"
+  = Tuple
+      [ Const (Int 1)
+      ; Const (Int 2)
+      ; Const (Int 3)
+      ; Tuple [ Const (Int 4); Const (Int 5) ]
+      ]
+;;
+
+(* let%test _ =
+  parse_pattern "((+),(+))" = Tuple [ Operation (Binary ADD); Operation (Binary ADD) ]
+;; *)
+
+let%test _ =
+  parse_pattern "([1], [2])" = Tuple [ List [ Const (Int 1) ]; List [ Const (Int 2) ] ]
+;;
 (*
    (* Data Type tests *)
 let%test _ = parse "let a = +228" = parse "let a = 228"
