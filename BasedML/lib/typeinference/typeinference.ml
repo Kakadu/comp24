@@ -18,12 +18,8 @@ let infer_const : Ast.constant -> (state, Ast.type_name) t = function
   | Ast.CUnit -> return Ast.TUnit
 ;;
 
-type pattern_mode =
-  | PMAdd
-  | PMCheck
-
-let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
-  fun pm cpat ->
+let infer_pattern : Ast.pattern -> (state, Ast.type_name) t =
+  fun cpat ->
   let infer_add_pident name tp =
     let* var_tp = read_var_type name in
     match var_tp with
@@ -58,31 +54,15 @@ let infer_pattern : pattern_mode -> Ast.pattern -> (state, Ast.type_name) t =
   write_env MapString.empty
   *> let* tp = help cpat in
      let* loc_env = read_env in
-     match pm with
-     | PMAdd ->
-       let new_env =
-         MapString.merge
-           (fun _ old_el -> function
-             | Some x -> Some x
-             | None -> old_el)
-           glob_env
-           loc_env
-       in
-       write_env new_env *> return tp
-     | PMCheck ->
-       let* _ = write_env glob_env in
-       let loc_vars = MapString.bindings loc_env in
-       map_list
-         (fun (name, tp) ->
-           match tp with
-           | TFFlat tp ->
-             let* opt_tp = read_var_type name in
-             (match opt_tp with
-              | Some x -> write_subst x tp
-              | None -> fail (Format.sprintf "Unbound value %s" name))
-           | TFSchem _ -> fail "Unreacheble error: getschem type in pattern")
-         loc_vars
-       *> return tp
+     let new_env =
+       MapString.merge
+         (fun _ old_el -> function
+           | Some x -> Some x
+           | None -> old_el)
+         glob_env
+         loc_env
+     in
+     write_env new_env *> return tp
 ;;
 
 let rec infer_expr : Ast.expr -> (state, Ast.type_name) t =
@@ -116,7 +96,7 @@ and infer_ident : string -> (state, Ast.type_name) t =
 
 and infer_func : Ast.pattern -> Ast.expr -> (state, Ast.type_name) t =
   fun pat exp ->
-  let* arg_tp = infer_pattern PMAdd pat in
+  let* arg_tp = infer_pattern pat in
   let* exp_tp = infer_expr exp in
   let fcn_tp = Ast.TFunction (arg_tp, exp_tp) in
   return fcn_tp
@@ -142,7 +122,7 @@ and infer_match : Ast.expr -> (Ast.pattern * Ast.expr) list -> (state, Ast.type_
   let* scr_tp = infer_expr hexpr in
   let* cur_env = read_env in
   let help (pat, exp) =
-    let* pat_tp = infer_pattern PMAdd pat in
+    let* pat_tp = infer_pattern pat in
     let* exp_tp = infer_expr exp in
     write_subst pat_tp scr_tp *> write_subst exp_tp tp *> write_env cur_env
   in
@@ -155,12 +135,12 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
     match rec_f with
     | NotRec ->
       let* exp_tp = infer_expr exp in
-      let* p_tp = infer_pattern PMAdd pat in
+      let* p_tp = infer_pattern pat in
       return (p_tp, exp_tp)
     | Rec ->
       (match pat with
        | Ast.PIdentifier _ ->
-         let* p_tp = infer_pattern PMAdd pat in
+         let* p_tp = infer_pattern pat in
          let* exp_tp = infer_expr exp in
          return (p_tp, exp_tp)
        | _ -> fail " Only variables are allowed as left-hand side of `let rec'")
@@ -171,7 +151,7 @@ and infer_let_common : Ast.rec_flag -> Ast.pattern -> Ast.expr -> (state, unit) 
 ;;
 
 let infer_mr_let_only_pat : Ast.pattern -> (state, Ast.type_name) t = function
-  | Ast.PIdentifier _ as pat -> infer_pattern PMAdd pat
+  | Ast.PIdentifier _ as pat -> infer_pattern pat
   | _ -> fail " Only variables are allowed as left-hand side of `let rec'"
 ;;
 
