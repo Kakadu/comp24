@@ -91,22 +91,22 @@ open Lib.Pp_typing
 open Base
 
 let test_parser code =
-  <span data-count="49">m</span>atch Lib.Parser.parse_program code ~print_ast:true with
-  | <span data-count="49">O</span>k _ -&gt; ()
+  <span data-count="53">m</span>atch Lib.Parser.parse_program code ~print_ast:true with
+  | <span data-count="53">O</span>k _ -&gt; ()
   | <span data-count="0">E</span>rror e -&gt; print_endline e
 ;;
 
 let test_inferencer code =
-  <span data-count="59">l</span>et open Format in
+  <span data-count="60">l</span>et open Format in
   let pa = false in
-  let ast = Result.ok_or_failwith (Lib.Parser.parse_progra<span data-count="59">m</span> ~print_ast:pa code) in
-  <span data-count="59">m</span>atch inference_program ast with
-  | <span data-count="51">O</span>k t -&gt;
+  let ast = Result.ok_or_failwith (Lib.Parser.parse_progra<span data-count="60">m</span> ~print_ast:pa code) in
+  <span data-count="60">m</span>atch inference_program ast with
+  | <span data-count="52">O</span>k t -&gt;
     printf
       "%s"
       (t
-       |&gt; List.map ~f:(fun (s, t) -&gt; <span data-count="97">a</span>sprintf "%s: %a" s pp_typ t)
-       |&gt; <span data-count="51">S</span>tring.conca<span data-count="51">t</span> ~sep:"\n")
+       |&gt; List.map ~f:(fun (s, t) -&gt; <span data-count="99">a</span>sprintf "%s: %a" s pp_typ t)
+       |&gt; <span data-count="52">S</span>tring.conca<span data-count="52">t</span> ~sep:"\n")
   | <span data-count="8">E</span>rror e -&gt; eprintf "%a" pp_error e
 ;;
 </code></pre>
