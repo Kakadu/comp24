@@ -4,7 +4,7 @@
 
 open QCheck
 
-let div = 15
+let div = 8
 
 let gen_id =
   let open QCheck.Gen in
@@ -23,7 +23,7 @@ type rec_flag =
 [@@deriving show { with_path = false }, qcheck]
 
 type constant =
-  | CInt of (int[@gen Gen.int_range 0 1000]) (** 42 *)
+  | CInt of int (** 42 *)
   | CBool of bool (** true | false *)
   | CUnit (** () *)
   | CNil (** [] *)
@@ -39,7 +39,7 @@ type type_ann =
   | TAFun of
       (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** int -> bool *)
-  | TAList of type_ann (** %type% list *)
+  | TAList of (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** %type% list *)
 [@@deriving show { with_path = false }, qcheck]
 
 type pattern =
@@ -51,16 +51,24 @@ type pattern =
   | PList of (pattern list[@gen Gen.(list_size (1 -- 4) (gen_pattern_sized (n / div)))])
   (** [1, 2, 3] *)
   | PCons of
+      (pattern[@gen Gen.(gen_pattern_sized 0)])
+      * (pattern[@gen Gen.(gen_pattern_sized (n / div))]) 
+      (** hd :: tl *)
+  | PAnn of
       (pattern[@gen Gen.(gen_pattern_sized (n / div))])
-      * (pattern[@gen Gen.(gen_pattern_sized (n / div))]) (** hd :: tl *)
-  | PAnn of pattern * type_ann (** (x: int) *)
+      * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** (x: int) *)
 [@@deriving show { with_path = false }, qcheck]
 
 type expr =
   | EConst of constant (** 42, true, ()*)
   | EVar of id (** x *)
-  | EApp of expr * expr (** f x *)
-  | EIfElse of expr * expr * expr (** if x then y else z *)
+  | EApp of
+      (expr[@gen Gen.(gen_expr_sized (n / div))])
+      * (expr[@gen Gen.(gen_expr_sized (n / div))]) (** f x *)
+  | EIfElse of
+      (expr[@gen Gen.(gen_expr_sized (n / div))])
+      * (expr[@gen Gen.(gen_expr_sized (n / div))])
+      * (expr[@gen Gen.(gen_expr_sized (n / div))]) (** if x then y else z *)
   | EFun of
       (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))]) * expr
   (** fun x -> y *)

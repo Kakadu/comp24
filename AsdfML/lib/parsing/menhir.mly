@@ -192,6 +192,7 @@ expr_unary:
 
 constant: 
 | i = INT { CInt i }
+| MINUS i = INT { CInt (-i) }
 | b = BOOL { CBool b }
 | UNIT { CUnit }
 | NIL { CNil }
