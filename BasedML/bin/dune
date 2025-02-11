@@ -1,4 +1,15 @@
 (executable
- (public_name BasedML)
+ (public_name demo)
  (name main)
- (libraries BasedML))
+ (modules LL main)
+ (libraries
+  llvm
+  llvm.analysis
+  llvm.executionengine
+  ;
+  )
+ (instrumentation
+  (backend bisect_ppx)))
+
+(cram
+ (deps ./main.exe runtime.c))
