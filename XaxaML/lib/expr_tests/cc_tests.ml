@@ -13,30 +13,33 @@ let cc_expr_and_print_ast str =
 
 let%expect_test "do nothing 1" =
   cc_expr_and_print_ast {|1 + 2 * 3|};
-  [%expect
-    {|((+ 1) ((* 2) 3)) |}]
+  [%expect {|((+ 1) ((* 2) 3)) |}]
 ;;
 
 let%expect_test "do nothing 2" =
   cc_expr_and_print_ast {|fun a b -> a + b|};
-  [%expect
-    {|(fun a b -> ((+ a) b) |}]
+  [%expect {|(fun a b -> ((+ a) b)) |}]
 ;;
 
 let%expect_test "do nothing 2" =
   cc_expr_and_print_ast {|let x = 1 in let f x = x in f 1|};
-  [%expect
-    {|let x = 1 in let f = (fun x -> x in (f 1) |}]
+  [%expect {|
+    let x = 1 in
+    let f = (fun x -> x) in
+    (f 1) |}]
 ;;
 
 let%expect_test "anonymous fun, add c d" =
   cc_expr_and_print_ast {|let (c, d) = (1, 2) in fun a -> a + c + d|};
-  [%expect
-    {|let (c, d) = (1, 2) in (fun c d a -> ((((+ ((+ a) c)) d) c) d) |}]
+  [%expect {|
+    let (c, d) = (1, 2) in
+    (((fun c d a -> ((+ ((+ a) c)) d)) c) d) |}]
 ;;
 
 let%expect_test "add one arg with applying" =
   cc_expr_and_print_ast {|let x = 1 in let f y = x + y in f 1|};
-  [%expect
-    {|let x = 1 in let f = (fun x y -> ((+ x) y) in ((f x) 1) |}]
+  [%expect {|
+    let x = 1 in
+    let f = (fun x y -> ((+ x) y)) in
+    ((f x) 1) |}]
 ;;
