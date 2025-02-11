@@ -9,8 +9,9 @@
   Typedtree
   Std_names
   Inferencer
-  Closure_conversion
-  Pprint_as_src)
+  Common
+  Remove_patterns
+  Closure_conversion)
  (libraries base stdlib angstrom)
  (inline_tests)
  (preprocess
@@ -20,7 +21,7 @@
 
 (library
  (name tests)
- (modules Parser_tests Infer_tests Cc_tests)
+ (modules Parser_tests Infer_tests)
  (libraries XaxaML)
  (inline_tests)
  (preprocess
