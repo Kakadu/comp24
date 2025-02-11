@@ -4,6 +4,7 @@
 
 open Ast
 open Base
+open Stdlib_funs
 
 (* Find unbound variables within an expression *)
 let unbound_identifiers exp =
@@ -112,5 +113,5 @@ let rec collect_names_from_patterns = function
 let stdlib_names =
   Set.of_list
     (module String)
-    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )"; "print_int" ]
+    (List.map stdlib_funs ~f:(fun (name, _llvm_name, _) -> name))
 ;;

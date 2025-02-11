@@ -1,7 +1,7 @@
 (library
  (name middleend)
  (public_name BasedML.Middleend)
- (libraries base angstrom ast restore_src parser ego common)
+ (libraries base angstrom ast restore_src parser ego common stdlib_funs)
  (inline_tests)
  (preprocess
   (pps ppx_inline_test ppx_expect ppx_deriving.show ppx_deriving.eq)))

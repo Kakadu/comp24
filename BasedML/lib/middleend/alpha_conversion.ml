@@ -4,6 +4,7 @@
 
 open Ast
 open Common.StateMonad
+open Stdlib_funs
 
 type context =
   { name_mapping : (string, string * int, Base.String.comparator_witness) Base.Map.t
@@ -67,8 +68,8 @@ let rec alpha_convert_pattern ctx = function
 
 let rec alpha_convert_expr ctx = function
   | EConstant const -> (EConstant const, ctx) |> return
-  | EIdentifier ident when Base.Set.mem Utils.stdlib_names ident ->
-    (EIdentifier ident, ctx) |> return
+  (* | EIdentifier ident when Base.Set.mem Utils.stdlib_names ident ->
+     (EIdentifier ident, ctx) |> return *)
   | EIdentifier ident ->
     let ctx_with_id =
       { ctx with reserved_names = Base.Set.add ctx.reserved_names ident }
@@ -155,18 +156,29 @@ let rec alpha_convert_decl_list ctx acc = function
   | [] -> List.rev acc |> return
 ;;
 
+let add_to_context_std_fun (ctx : context) ((name, llvm_name, _) : std_fun) =
+  let reserved_names = Base.Set.add ctx.reserved_names llvm_name in
+  let name_map = Base.Map.add_exn ctx.name_mapping ~key:name ~data:(llvm_name, -1) in
+  { name_mapping = name_map; reserved_names }
+;;
+
+let add_to_context_all_std_funs ctx =
+  List.fold_left add_to_context_std_fun ctx stdlib_funs
+;;
+
+let init_context =
+  let empty_context =
+    { name_mapping = (module Base.String) |> Base.Map.empty
+    ; reserved_names = (module Base.String) |> Base.Set.empty
+    }
+  in
+  add_to_context_all_std_funs empty_context
+;;
+
 let test_alpha_for_expr str =
   match Parser.parse Parser.p_exp str with
   | Ok expr ->
-    (match
-       run
-         (alpha_convert_expr
-            { name_mapping = (module Base.String) |> Base.Map.empty
-            ; reserved_names = (module Base.String) |> Base.Set.empty
-            }
-            expr)
-         0
-     with
+    (match run (alpha_convert_expr init_context expr) 0 with
      | _, Ok (expr, _) -> Format.printf "%a" Restore_src.RestoreSrc.frestore_expr expr
      | _, Error err -> Format.printf "%s" err)
   | Error err -> Format.printf "%s" err
@@ -175,16 +187,7 @@ let test_alpha_for_expr str =
 let test_alpha_for_decls str =
   match Parser.parse_program str with
   | Ok decls ->
-    (match
-       run
-         (alpha_convert_decl_list
-            { name_mapping = (module Base.String) |> Base.Map.empty
-            ; reserved_names = (module Base.String) |> Base.Set.empty
-            }
-            []
-            decls)
-         0
-     with
+    (match run (alpha_convert_decl_list init_context [] decls) 0 with
      | _, Ok lst -> Format.printf "%s" (Restore_src.RestoreSrc.restore_declarations lst)
      | _, Error err -> Format.printf "%s" err)
   | Error err -> Format.printf "%s" err
@@ -206,14 +209,14 @@ let%expect_test "" =
   test_alpha_for_expr "let f a b c = a + b + c + f in a";
   [%expect
     {|
-    (let  f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((( + ) ((( + ) ((( + ) a_0) b_0)) c_0)) unbound_f_0)))) in unbound_a_0) |}]
+    (let  f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((plus_mlint_-1 ((plus_mlint_-1 ((plus_mlint_-1 a_0) b_0)) c_0)) unbound_f_0)))) in unbound_a_0) |}]
 ;;
 
 let%expect_test "" =
   test_alpha_for_expr "let rec f a b c = a + b + c + f in a";
   [%expect
     {|
-    (let rec f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((( + ) ((( + ) ((( + ) a_0) b_0)) c_0)) f_0)))) in unbound_a_0) |}]
+    (let rec f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((plus_mlint_-1 ((plus_mlint_-1 ((plus_mlint_-1 a_0) b_0)) c_0)) f_0)))) in unbound_a_0) |}]
 ;;
 
 let%expect_test "" =
@@ -224,7 +227,7 @@ let f = 6 + 6
 |};
   [%expect
     {|
-    let  f_0 = ((( + ) 5) 5)
-    let  g_0 = ((( + ) f_0) 10)
-    let  f_1 = ((( + ) 6) 6) |}]
+    let  f_0 = ((plus_mlint_-1 5) 5)
+    let  g_0 = ((plus_mlint_-1 f_0) 10)
+    let  f_1 = ((plus_mlint_-1 6) 6) |}]
 ;;
