@@ -1,0 +1,26 @@
+(library
+ (name cursedml_lib)
+ (modules
+  Ast
+  Ast_printer
+  Alpha_transformer
+  Anf
+  Anf_printer
+  Match_elimination
+  Closure_conversion
+  Flambda
+  Parser
+  Inferencer
+  Runtime
+  Cstdlib
+  Llvm_codegen
+  Llvm_utils
+  Utils)
+ (inline_tests)
+ (libraries base ppx_show.runtime angstrom qcheck llvm llvm.analysis)
+ (preprocess
+  (pps ppx_inline_test ppx_deriving.show ppx_expect))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(include_subdirs unqualified)

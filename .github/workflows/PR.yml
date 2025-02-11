@@ -22,13 +22,37 @@ jobs:
       - name: Print
         run: env | sort
 
+##### DEBUG HACK
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v45
+        with:
+          files_ignore: docs/static.js
+
+      - name: Run step if any file(s) in the docs folder change
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
+        run: |
+          echo "One or more files in the docs folder has changed."
+          echo "List all the files that have changed: $ALL_CHANGED_FILES"
+##### END OF DEBUG HACK
+
+      - run: sudo apt update
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0                # fix me later
 
+      - name: Is it a D task? ${{  github.event.pull_request.title  }}
+        run: |
+          echo "IsD=${{ startsWith(github.event.pull_request.title, '[D]') }}" >> $GITHUB_ENV
+
+      - name: isD = ${{ env.IsD }}
+        run: echo "${{ env.IsD }}"
+
       - name: Pin linter to the latest version
-        #if: false  # HACK!
         run: |
           opam pin add https://github.com/Kakadu/zanuda.git --no-action
           opam reinstall zanuda odig --yes
@@ -45,8 +69,6 @@ jobs:
         run: |
           echo "${{ steps.branch-name.outputs.ref_branch }}"
 
-      #- run: git remote -vvv
-      #- run: git branch -vvv
 
       ############# Detecting and compiling
       # Smart link about setting environment variables
@@ -58,9 +80,7 @@ jobs:
         #if: ${{ github.event.pull_request.user.login == 'fp2022-helper' }}
 
       - name: Installing dependencies for ${{ env.latest }}
-        if: false  # HACK!
         run: |
-          sudo apt-get update
           opam update
           opam install ./${{ env.latest }} --depext-only --with-test --with-doc
           opam install ./${{ env.latest }} --deps-only --with-test --with-doc
@@ -94,15 +114,25 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
+        if: ${{ !env.IsD }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
 
+      - name: SKIPPING linter in ${{ env.latest }}...
+        if: ${{ env.IsD }}
+        run: |
+          cd ${{ env.latest }}
+          echo '' > ${{ env.ZANUDA_REPORT_FILE_PATH }}
+          echo '' > ${{ env.RDJSON_FILE_PATH }}
+
       - run: cat ${{ env.latest }}/${{ env.RDJSON_FILE_PATH }}
       - name: Preparing lints tarball
+        #if: ${{ !(env.IsD) }}
         run: |
           echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
           echo ${{ github.event.pull_request.user.login }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/piarast.txt
+          echo '${{ github.event.pull_request.title }}' > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PRtitle.txt
           echo ${{ github.event.number }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PR_number.txt
           echo ${{ github.event.pull_request.head.sha }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
       # we use commit previous from head because HEAD is merge commit by some reason
@@ -154,6 +184,7 @@ jobs:
       ###################### Coverage #####################################
 
       - name: Calculating coverage (1/2)
+        #if: ${{ !(env.IsD) }}
         run: |
           mkdir -p ${{ env.BISECT_DIR }}
           cd ${{ env.latest }} && opam exec -- dune runtest --instrument-with bisect_ppx --force
@@ -167,6 +198,7 @@ jobs:
       #    BISECT_FILE: /tmp/bisect_ppx_data/data
 
       - name: Calculating coverage (2/2)
+        #if: ${{ !(env.IsD) }}
         id: calc-coverage
         run: |
             cd ${{ env.latest }}

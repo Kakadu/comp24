@@ -1,0 +1,35 @@
+(lang dune 3.16)
+
+(cram enable)
+
+(name KreML)
+
+(generate_opam_files true)
+
+(source
+ (github oveeernight/comp24))
+
+(authors "Roman Pozharskiy")
+
+(maintainers "Roman Pozharskiy")
+
+(license LGPL-3.0-or-later)
+
+(package
+ (name KreML)
+ (synopsis "A CursedML compiler")
+ (version 0.1)
+ (depends
+  base
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_show
+  qcheck
+  (odoc :with-doc)
+  (ocamlformat :build)
+  (llvm
+   (= "16.0.6+nnp"))))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
