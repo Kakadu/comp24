@@ -12,7 +12,8 @@ let%expect_test _ =
   test "let _ = -12";
   test "let _ = (12)";
   test "let _ = (-12)";
-  [%expect {|
+  [%expect
+    {|
     let _ = 12
     let _ = -12
     let _ = 12
@@ -38,7 +39,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = let x = 42 in x";
-  [%expect {|
+  [%expect
+    {|
     let _ = let x = 42
      in x |}]
 ;;
@@ -79,7 +81,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let plus_one = fun x -> let one = 1 in x + one";
-  [%expect {|
+  [%expect
+    {|
       let plus_one = (fun x -> let one = 1
        in (( + ) x one)) |}]
 ;;
@@ -91,7 +94,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let one = 1 let two = 2";
-  [%expect {|
+  [%expect
+    {|
     let one = 1
     let two = 2 |}]
 ;;
@@ -108,19 +112,22 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let _ = (1, true, ())";
-  [%expect {|  
+  [%expect
+    {|  
     let _ = (1, true, ())|}]
 ;;
 
 let%expect_test _ =
   test "let (x: int list) = [1;2;3]";
-  [%expect {|  
+  [%expect
+    {|  
     let (x: int list) = [1; 2; 3]|}]
 ;;
 
 let%expect_test _ =
   test "let (x: int list list) = [[1]; [2]; [3]]";
-  [%expect {|  
+  [%expect
+    {|  
     let (x: int list list) = [[1]; [2]; [3]]|}]
 ;;
 
@@ -164,7 +171,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let (x, y) = (1, 2) |};
-  [%expect {|
+  [%expect
+    {|
     let (x, y) = (1, 2) |}]
 ;;
 
@@ -182,7 +190,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {| let (x, y) = (not true, not false) |};
-  [%expect {|
+  [%expect
+    {|
     let (x, y) = (false, true)
      |}]
 ;;
@@ -295,7 +304,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let x = (if cond then (fun x -> x + 1) else (fun x -> x - 1)) 42
   |};
   [%expect
@@ -303,10 +313,16 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let ((): ()) = ()
     (*comment
     here*)
   |};
   [%expect {| let ((): ()) = () |}]
+;;
+
+let%expect_test _ =
+  test {| let -123 = () |};
+  [%expect {| let -123 = () |}]
 ;;
