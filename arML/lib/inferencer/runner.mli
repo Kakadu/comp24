@@ -10,7 +10,7 @@ val run_expr_inferencer :
 (** Runs the type inference process on a program represented as a list of structure items.  
     Returns either a mapping of inferred types for named entities along with a list of declarations names, or a type error. *)
 val run_program_inferencer :
-  Ast.structure_item list ->
+  Ast.declaration list ->
   ( (string, Schema.schema, Base.String.comparator_witness) Base.Map.t
     * string list,
     TypeErrors.error

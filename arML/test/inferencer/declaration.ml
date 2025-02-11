@@ -7,14 +7,14 @@ open ArML_lib.Runner
 (* Basic let declaration ([PVar] pattern) *)
 
 let%expect_test _ =
-  inference {| let f = 5;; let g = 6 |};
+  inference_program {| let f = 5;; let g = 6 |};
   [%expect {|
     val f : int
     val g : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| let f x = x;; let g x = x;; let h = f g 0 |};
+  inference_program {| let f x = x;; let g x = x;; let h = f g 0 |};
   [%expect {|
     val f : 'a -> 'a
     val g : 'a -> 'a
@@ -22,7 +22,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let f x y = x + y;; let g x = x;; let h = f (g 0) 0 |};
+  inference_program {| let f x y = x + y;; let g x = x;; let h = f (g 0) 0 |};
   [%expect {|
     val f : int -> int -> int
     val g : 'a -> 'a
@@ -30,7 +30,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let f (x, y) = x + y;; let g x = x;; let h = f ((g 0), 0) |};
+  inference_program {| let f (x, y) = x + y;; let g x = x;; let h = f ((g 0), 0) |};
   [%expect {|
     val f : int * int -> int
     val g : 'a -> 'a
@@ -38,7 +38,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let f (x :: y :: []) = x + y;; let g x = x;; let h = f [(g 0); 0] |};
+  inference_program {| let f (x :: y :: []) = x + y;; let g x = x;; let h = f [(g 0); 0] |};
   [%expect {|
     val f : int list -> int
     val g : 'a -> 'a
@@ -50,7 +50,7 @@ let%expect_test _ =
 (* Basic let declaration (complex patterns) *)
 
 let%expect_test _ =
-  inference {| let x, y = 1, 2;; let z :: w = [true; false] |};
+  inference_program {| let x, y = 1, 2;; let z :: w = [true; false] |};
   [%expect {|
     val x : int
     val y : int
@@ -59,7 +59,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let x, y = 1, 2;; let z :: w :: _ = true :: false :: [] |};
+  inference_program {| let x, y = 1, 2;; let z :: w :: _ = true :: false :: [] |};
   [%expect {|
     val x : int
     val y : int
@@ -68,24 +68,24 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let x, y = 1, 2;; let x :: y = [1; 2] |};
+  inference_program {| let x, y = 1, 2;; let x :: y = [1; 2] |};
   [%expect {|
     val x : int
     val y : int list |}]
 ;;
 
 let%expect_test _ =
-  inference {| let _ = () |};
+  inference_program {| let _ = () |};
   [%expect {| |}]
 ;;
 
 let%expect_test _ =
-  inference {| let () = () |};
+  inference_program {| let () = () |};
   [%expect {| |}]
 ;;
 
 let%expect_test _ =
-  inference {| let (((x, 2) :: []), (z, true)) = ([((), 2)], (0, true)) |};
+  inference_program {| let (((x, 2) :: []), (z, true)) = ([((), 2)], (0, true)) |};
   [%expect {|
     val x : unit
     val z : int |}]
@@ -96,7 +96,7 @@ let%expect_test _ =
 (* Basic let declaration with "and" ([PVar] pattern) *)
 
 let%expect_test _ =
-  inference {| let f x = x and g y = y |};
+  inference_program {| let f x = x and g y = y |};
   [%expect {|
     val f : 'a -> 'a
     val g : 'a -> 'a |}]
@@ -104,7 +104,7 @@ let%expect_test _ =
 
 
 let%expect_test _ =
-  inference {| let f x = x and g y = y + 1;; let res = (f true, f g 0) |};
+  inference_program {| let f x = x and g y = y + 1;; let res = (f true, f g 0) |};
   [%expect {|
     val f : 'a -> 'a
     val g : int -> int
@@ -112,7 +112,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let start = 0 and end = 5 and f x y = [x; y];; let res = f start end |};
+  inference_program {| let start = 0 and end = 5 and f x y = [x; y];; let res = f start end |};
   [%expect {|
     val start : int
     val end : int
@@ -125,7 +125,7 @@ let%expect_test _ =
 (* Basic let declaration with "and" (complex patterns) *)
 
 let%expect_test _ =
-  inference {| let f x = x and (x, y) = (1, 2);; let res = (f x, f y) |};
+  inference_program {| let f x = x and (x, y) = (1, 2);; let res = (f x, f y) |};
   [%expect {|
     val f : 'a -> 'a
     val x : int
@@ -134,7 +134,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let f x = x and (x, y, lst) = (1, 2, [3; 4; 5]);; let res = (f x, f y, lst) |};
+  inference_program {| let f x = x and (x, y, lst) = (1, 2, [3; 4; 5]);; let res = (f x, f y, lst) |};
   [%expect {|
     val f : 'a -> 'a
     val x : int
@@ -144,7 +144,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let () = () and f x = x and (x :: y :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
+  inference_program {| let () = () and f x = x and (x :: y :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
   [%expect {|
     val f : 'a -> 'a
     val x : int * int
@@ -153,7 +153,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let () = () and f x = x and (x :: f :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
+  inference_program {| let () = () and f x = x and (x :: f :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
   [%expect {|
     Type error: variable 'f' is bound several times |}]
 ;;
@@ -163,29 +163,29 @@ let%expect_test _ =
 (* Recursive let declaration *)
 
 let%expect_test _ =
-  inference {| let rec f x = f x |};
+  inference_program {| let rec f x = f x |};
   [%expect {|
     val f : 'a -> 'b |}]
 ;;
 
 let%expect_test _ =
-  inference {| let rec f x = f (f x) |};
+  inference_program {| let rec f x = f (f x) |};
   [%expect {| val f : 'a -> 'a |}]
 ;;
 
 let%expect_test _ =
-  inference {| let rec f x = f |};
+  inference_program {| let rec f x = f |};
   [%expect {|
     Type error: occurs check failed. |}]
 ;;
 
 let%expect_test _ =
-  inference {| let rec f x = f (x :: []) |};
+  inference_program {| let rec f x = f (x :: []) |};
   [%expect {| Type error: occurs check failed. |}]
 ;;
 
 let%expect_test _ =
-  inference
+  inference_program
     {| 
       let rec f x = if x = 1 then x else x * f (x-1)
     |};
@@ -199,7 +199,7 @@ let%expect_test _ =
 (* Let declaration with mutual recursion *)
 
 let%expect_test _ =
-  inference {|
+  inference_program {|
     let rec f x = g x
     and g x = f x
   |};
@@ -210,7 +210,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {|
+  inference_program {|
     let rec f x = g (x + 1)
     and g x = f (x - 1)
   |};
@@ -221,7 +221,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {|
+  inference_program {|
     let rec f x = g x
     and g x = f (g x)
   |};
@@ -232,7 +232,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| 
+  inference_program {| 
     let rec is_even n = if n = 0 then true else is_odd (n - 1) 
     and is_odd n = if n = 0 then false else is_even (n - 1)
 

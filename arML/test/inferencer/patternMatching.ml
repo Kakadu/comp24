@@ -9,7 +9,7 @@ open ArML_lib.Runner
 (* See "function" expr with pattern matching tests in function.ml *)
 
 let%expect_test _ =
-  inference {| fun x -> match x with
+  inference_expression {| fun x -> match x with
     | 0 -> "zero"
     | 1 -> "one"
     | _ -> "many"
@@ -18,7 +18,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (0, y) -> y
     | (x, 0) -> x
     | (x, y) -> x + y
@@ -27,7 +27,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun xs -> match xs with
+  inference_expression {| fun xs -> match xs with
     | [] -> "empty"
     | [x] -> "one element"
     | _ :: _ -> "multiple"
@@ -36,7 +36,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (1, 1) -> "both one"
     | (0, 0) -> "both zero"
     | _ -> "other"
@@ -45,7 +45,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun xs -> match xs with
+  inference_expression {| fun xs -> match xs with
     | [] -> "empty list"
     | x :: xs -> "non-empty list"
   |};
@@ -53,14 +53,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (a, b) -> a + b
   |};
   [%expect {| - : int -> int -> int |}]
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (a, b) -> a + b
     | _ -> true
   |};
@@ -68,7 +68,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (a, b) -> a + b
     | (a, b, c) -> a + b + c
   |};
@@ -76,7 +76,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y ->  match (x, y) with
+  inference_expression {| fun x y ->  match (x, y) with
     | (a, b, (k :: z)) -> a + b + k
     | _ -> 0
   |};
@@ -84,7 +84,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y z ->  match (x, y, z) with
+  inference_expression {| fun x y z ->  match (x, y, z) with
     | (a, b, (k :: z)) -> a + b + k
     | _ -> 0
   |};
@@ -92,7 +92,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y z ->  match (x, y, z) with
+  inference_expression {| fun x y z ->  match (x, y, z) with
     | (a, b, (k :: z)) -> a + b + k + z
     | _ -> 0
   |};
@@ -100,7 +100,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x y -> match (x, y) with
+  inference_expression {| fun x y -> match (x, y) with
     | (a, b, (k :: a)) -> a + b + k
     | _ -> 0
   |};

@@ -6,5 +6,5 @@ open ArML_lib.Runner
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  parse_program_with_print s
+  parse_program s
 ;;

@@ -470,7 +470,8 @@ let parse_binary_operation p =
   let multiplication = skip_wspace *> char '*' *> (return  @@ EIdentifier (Id "( * )")) in
   let division = skip_wspace *> char '/' *> (return @@ EIdentifier (Id "( / )")) in
   let mod_div = skip_wspace *> char '%' *> (return @@ EIdentifier (Id "( % )")) in
-  let eqality = skip_wspace *> char '=' *> (return @@ EIdentifier (Id "( = )")) in
+  let eqality1 = skip_wspace *> char '=' *> (return @@ EIdentifier (Id "( = )")) in
+  let eqality2 = skip_wspace *> string "==" *> (return @@ EIdentifier (Id "( == )")) in
   let neqality1 = skip_wspace *> string "<>" *> (return @@ EIdentifier (Id "( <> )")) in
   let neqality2 = skip_wspace *> string "!=" *> (return @@ EIdentifier (Id "( != )")) in
   let logand = skip_wspace *> string "&&" *> (return @@ EIdentifier (Id "( && )")) in
@@ -490,7 +491,8 @@ let parse_binary_operation p =
     ; largerEq
     ; less
     ; lessEq
-    ; eqality
+    ; eqality2
+    ; eqality1
     ; neqality1
     ; neqality2
     ; logand

@@ -145,8 +145,15 @@ let parse_capitalized_name =
   else fail "Syntax error: the some name started with a small letter when a capital letter was expected"
 ;;
 
+let parse_name_started_with_underscore =
+  let* name = parse_name in
+  if (name.[0] = '_' && String.length name > 1)
+  then return name
+  else fail "Syntax error: expected '_' at the beggining of the identifier"
+;;
+
 let parse_identifier =
-  let* name = parse_uncapitalized_name in
+  let* name = parse_uncapitalized_name <|> parse_name_started_with_underscore in
   if is_keyword name
   then fail "Syntax error: keywords cannot be used as identifiers"
   else return @@ Id name

@@ -13,7 +13,7 @@
 open ArML_lib.Runner
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_expression
     {| 
     match 2 with
     | 0 -> "zero"
@@ -23,55 +23,49 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith ((EConstant (CInt 2)),
-           ((PConst (CInt 0)), (EConstant (CString "zero"))),
-           [((PConst (CInt 1)), (EConstant (CString "one")));
-             ((PConst (CInt 2)), (EConstant (CString "two")));
-             (PAny, (EConstant (CString "other")))]
-           )))
-      ] |}]
+    (EMatchWith ((EConstant (CInt 2)),
+       ((PConst (CInt 0)), (EConstant (CString "zero"))),
+       [((PConst (CInt 1)), (EConstant (CString "one")));
+         ((PConst (CInt 2)), (EConstant (CString "two")));
+         (PAny, (EConstant (CString "other")))]
+       )) |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_expression {| 
     match (3, 4) with (x, y) -> x + y
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith ((ETuple ((EConstant (CInt 3)), (EConstant (CInt 4)), [])),
-           ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-               [(EIdentifier (Id "y"))]))),
-           [])))
-      ] |}]
+    (EMatchWith ((ETuple ((EConstant (CInt 3)), (EConstant (CInt 4)), [])),
+       ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+        (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+           [(EIdentifier (Id "y"))]))),
+       [])) |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_expression
     {| 
     match ((1, 2), 3) with
     | ((x, y), z) -> x + y + z
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith (
-           (ETuple ((ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])),
-              (EConstant (CInt 3)), [])),
-           ((PTuple ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-               (PVar (Id "z")), [])),
-            (EApplication ((EIdentifier (Id "( + )")),
-               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-                  [(EIdentifier (Id "y"))])),
-               [(EIdentifier (Id "z"))]))),
-           [])))
-      ] |}]
+    (EMatchWith (
+       (ETuple ((ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])),
+          (EConstant (CInt 3)), [])),
+       ((PTuple ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+           (PVar (Id "z")), [])),
+        (EApplication ((EIdentifier (Id "( + )")),
+           (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+              [(EIdentifier (Id "y"))])),
+           [(EIdentifier (Id "z"))]))),
+       [])) |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_expression
     {| 
     match (1 :: 2 :: 3 :: []) with
     | [] -> []
@@ -79,21 +73,19 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith (
-           (EListConstructor ((EConstant (CInt 1)),
-              (EListConstructor ((EConstant (CInt 2)),
-                 (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
-              )),
-           (PNill, EEmptyList),
-           [((PListConstructor ((PVar (Id "x")), (PVar (Id "xs")))),
-             (EListConstructor ((EIdentifier (Id "x")), EEmptyList)))]
-           )))
-      ] |}]
+    (EMatchWith (
+       (EListConstructor ((EConstant (CInt 1)),
+          (EListConstructor ((EConstant (CInt 2)),
+             (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
+          )),
+       (PNill, EEmptyList),
+       [((PListConstructor ((PVar (Id "x")), (PVar (Id "xs")))),
+         (EListConstructor ((EIdentifier (Id "x")), EEmptyList)))]
+       )) |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_expression
     {| 
     match (3, [1; 2; 3]) with
     | (x, []) -> x
@@ -101,23 +93,21 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith (
-           (ETuple ((EConstant (CInt 3)),
-              (EListConstructor ((EConstant (CInt 1)),
-                 (EListConstructor ((EConstant (CInt 2)),
-                    (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
-                 )),
-              [])),
-           ((PTuple ((PVar (Id "x")), PNill, [])), (EIdentifier (Id "x"))),
-           [((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-             (EIdentifier (Id "y")))]
-           )))
-      ] |}]
+    (EMatchWith (
+       (ETuple ((EConstant (CInt 3)),
+          (EListConstructor ((EConstant (CInt 1)),
+             (EListConstructor ((EConstant (CInt 2)),
+                (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
+             )),
+          [])),
+       ((PTuple ((PVar (Id "x")), PNill, [])), (EIdentifier (Id "x"))),
+       [((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])), (EIdentifier (Id "y")))
+         ]
+       )) |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_expression
     {| 
     match (5, [1; 2; 3]) with
     | (x, []) -> "empty list"
@@ -126,26 +116,22 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    [(SExpression
-        (EMatchWith (
-           (ETuple ((EConstant (CInt 5)),
-              (EListConstructor ((EConstant (CInt 1)),
-                 (EListConstructor ((EConstant (CInt 2)),
-                    (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
-                 )),
-              [])),
-           ((PTuple ((PVar (Id "x")), PNill, [])),
-            (EConstant (CString "empty list"))),
-           [((PTuple ((PVar (Id "x")),
-                (PListConstructor ((PVar (Id "y")), PNill)), [])),
-             (EConstant (CString "one element in list")));
-             ((PTuple ((PVar (Id "x")),
-                 (PListConstructor ((PVar (Id "y")), (PVar (Id "ys")))),
-                 [])),
-              (EConstant (CString "head")))
-             ]
-           )))
-      ] |}]
+    (EMatchWith (
+       (ETuple ((EConstant (CInt 5)),
+          (EListConstructor ((EConstant (CInt 1)),
+             (EListConstructor ((EConstant (CInt 2)),
+                (EListConstructor ((EConstant (CInt 3)), EEmptyList))))
+             )),
+          [])),
+       ((PTuple ((PVar (Id "x")), PNill, [])), (EConstant (CString "empty list"))),
+       [((PTuple ((PVar (Id "x")), (PListConstructor ((PVar (Id "y")), PNill)),
+            [])),
+         (EConstant (CString "one element in list")));
+         ((PTuple ((PVar (Id "x")),
+             (PListConstructor ((PVar (Id "y")), (PVar (Id "ys")))), [])),
+          (EConstant (CString "head")))
+         ]
+       )) |}]
 ;;
 
 (* ---------------- *)

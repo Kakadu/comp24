@@ -7,84 +7,78 @@ open ArML_lib.Runner
 (* Basic let ([PVar] pattern) *)
 
 let%expect_test _ =
-  parse_program_with_print {| let x = [] |};
+  parse_program {| let x = [] |};
   [%expect {|
-    [(SDeclaration (DOrdinary (((PVar (Id "x")), EEmptyList), [])))] |}]
+    [(DOrdinary (((PVar (Id "x")), EEmptyList), []))] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let x = 1 |};
+  parse_program {| let x = 1 |};
   [%expect
     {|
-    [(SDeclaration (DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))), [])))] |}]
+    [(DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))), []))] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x |};
+  parse_program {| let f x = x |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [])))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x y = x + y |};
+  parse_program {| let f x y = x + y |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-                  [(EIdentifier (Id "y"))]))
-               ))),
-           [])))
+    [(DOrdinary (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
+            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+               [(EIdentifier (Id "y"))]))
+            ))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program {| 
    let f x y = x + y
    let main = f 1 2
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-                  [(EIdentifier (Id "y"))]))
-               ))),
-           [])));
-      (SDeclaration
-         (DOrdinary (
-            ((PVar (Id "main")),
-             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
-                [(EConstant (CInt 2))]))),
-            [])))
+    [(DOrdinary (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
+            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+               [(EIdentifier (Id "y"))]))
+            ))),
+        []));
+      (DOrdinary (
+         ((PVar (Id "main")),
+          (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
+             [(EConstant (CInt 2))]))),
+         []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f = let x = 1 in 2 + x * 3|};
+  parse_program {| let f = let x = 1 in 2 + x * 3|};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (ELetIn (((PVar (Id "x")), (EConstant (CInt 1))), [],
-               (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 2)),
-                  [(EApplication ((EIdentifier (Id "( * )")),
-                      (EIdentifier (Id "x")), [(EConstant (CInt 3))]))
-                    ]
-                  ))
-               ))),
-           [])))
+    [(DOrdinary (
+        ((PVar (Id "f")),
+         (ELetIn (((PVar (Id "x")), (EConstant (CInt 1))), [],
+            (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 2)),
+               [(EApplication ((EIdentifier (Id "( * )")),
+                   (EIdentifier (Id "x")), [(EConstant (CInt 3))]))
+                 ]
+               ))
+            ))),
+        []))
       ] |}]
 ;;
 
@@ -93,125 +87,116 @@ let%expect_test _ =
 (* Basic let (complex patterns) *)
 
 let%expect_test _ =
-  parse_program_with_print {| let _ = 1 |};
+  parse_program {| let _ = 1 |};
   [%expect {|
-    [(SDeclaration (DOrdinary ((PAny, (EConstant (CInt 1))), [])))] |}]
+    [(DOrdinary ((PAny, (EConstant (CInt 1))), []))] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let () = some_function some_argument |};
+  parse_program {| let () = some_function some_argument |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PConst CUnit),
-            (EApplication ((EIdentifier (Id "some_function")),
-               (EIdentifier (Id "some_argument")), []))),
-           [])))
+    [(DOrdinary (
+        ((PConst CUnit),
+         (EApplication ((EIdentifier (Id "some_function")),
+            (EIdentifier (Id "some_argument")), []))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let x, y = 0, 0 |};
+  parse_program {| let x, y = 0, 0 |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-            (ETuple ((EConstant (CInt 0)), (EConstant (CInt 0)), []))),
-           [])))
+    [(DOrdinary (
+        ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+         (ETuple ((EConstant (CInt 0)), (EConstant (CInt 0)), []))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let (x :: y) = x :: y |};
+  parse_program {| let (x :: y) = x :: y |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
-            (EListConstructor ((EIdentifier (Id "x")), (EIdentifier (Id "y"))))),
-           [])))
+    [(DOrdinary (
+        ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
+         (EListConstructor ((EIdentifier (Id "x")), (EIdentifier (Id "y"))))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let [] = [] |};
+  parse_program {| let [] = [] |};
   [%expect {|
-    [(SDeclaration (DOrdinary ((PNill, EEmptyList), [])))] |}]
+    [(DOrdinary ((PNill, EEmptyList), []))] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let ((x :: y, k :: l), (q :: j), o, _) = x :: y |};
+  parse_program {| let ((x :: y, k :: l), (q :: j), o, _) = x :: y |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PTuple (
-               (PTuple ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
-                  (PListConstructor ((PVar (Id "k")), (PVar (Id "l")))),
-                  [])),
-               (PListConstructor ((PVar (Id "q")), (PVar (Id "j")))),
-               [(PVar (Id "o")); PAny])),
-            (EListConstructor ((EIdentifier (Id "x")), (EIdentifier (Id "y"))))),
-           [])))
+    [(DOrdinary (
+        ((PTuple (
+            (PTuple ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
+               (PListConstructor ((PVar (Id "k")), (PVar (Id "l")))), [])),
+            (PListConstructor ((PVar (Id "q")), (PVar (Id "j")))),
+            [(PVar (Id "o")); PAny])),
+         (EListConstructor ((EIdentifier (Id "x")), (EIdentifier (Id "y"))))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program {| 
    let f x y = x + y
    let (x, y) = (f 0 0, f 1 1)
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-                  [(EIdentifier (Id "y"))]))
-               ))),
-           [])));
-      (SDeclaration
-         (DOrdinary (
-            ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-             (ETuple (
-                (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 0)),
-                   [(EConstant (CInt 0))])),
-                (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
-                   [(EConstant (CInt 1))])),
-                []))),
-            [])))
+    [(DOrdinary (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
+            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+               [(EIdentifier (Id "y"))]))
+            ))),
+        []));
+      (DOrdinary (
+         ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+          (ETuple (
+             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 0)),
+                [(EConstant (CInt 0))])),
+             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
+                [(EConstant (CInt 1))])),
+             []))),
+         []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_program
     {| 
    let f x y = x + y
    let (x :: y) = (f 0 0 :: f 1 1)
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
-               (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
-                  [(EIdentifier (Id "y"))]))
-               ))),
-           [])));
-      (SDeclaration
-         (DOrdinary (
-            ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
-             (EListConstructor (
-                (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 0)),
-                   [(EConstant (CInt 0))])),
-                (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
-                   [(EConstant (CInt 1))]))
-                ))),
-            [])))
+    [(DOrdinary (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), [(PVar (Id "y"))]),
+            (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "x")),
+               [(EIdentifier (Id "y"))]))
+            ))),
+        []));
+      (DOrdinary (
+         ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
+          (EListConstructor (
+             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 0)),
+                [(EConstant (CInt 0))])),
+             (EApplication ((EIdentifier (Id "f")), (EConstant (CInt 1)),
+                [(EConstant (CInt 1))]))
+             ))),
+         []))
       ] |}]
 ;;
 
@@ -220,63 +205,55 @@ let%expect_test _ =
 (* Basic let with "and" ([PVar] pattern)] *)
 
 let%expect_test _ =
-  parse_program_with_print {| let x = 1 and y = 2 |};
+  parse_program {| let x = 1 and y = 2 |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))),
-           [((PVar (Id "y")), (EConstant (CInt 2)))])))
+    [(DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))),
+        [((PVar (Id "y")), (EConstant (CInt 2)))]))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x and y = 2 |};
+  parse_program {| let f x = x and y = 2 |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PVar (Id "y")), (EConstant (CInt 2)))])))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PVar (Id "y")), (EConstant (CInt 2)))]))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x and g y = y |};
+  parse_program {| let f x = x and g y = y |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))))]
-           )))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PVar (Id "g")), (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))))
+          ]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x and g y = y and a b c = b + c |};
+  parse_program {| let f x = x and g y = y and a b c = b + c |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))));
-             ((PVar (Id "a")),
-              (EFun (((PVar (Id "b")), [(PVar (Id "c"))]),
-                 (EApplication ((EIdentifier (Id "( + )")),
-                    (EIdentifier (Id "b")), [(EIdentifier (Id "c"))]))
-                 )))
-             ]
-           )))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PVar (Id "g")), (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))));
+          ((PVar (Id "a")),
+           (EFun (((PVar (Id "b")), [(PVar (Id "c"))]),
+              (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "b")),
+                 [(EIdentifier (Id "c"))]))
+              )))
+          ]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_program
     {| 
    let f x = x 
    and g y = y 
@@ -288,32 +265,26 @@ let%expect_test _ =
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))));
-             ((PVar (Id "a")),
-              (EFun (((PVar (Id "b")), [(PVar (Id "c"))]),
-                 (EApplication ((EIdentifier (Id "( + )")),
-                    (EIdentifier (Id "b")), [(EIdentifier (Id "c"))]))
-                 )))
-             ]
-           )));
-      (SDeclaration
-         (DOrdinary (
-            ((PVar (Id "q")),
-             (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y"))))),
-            [])));
-      (SDeclaration
-         (DOrdinary (
-            ((PVar (Id "k")),
-             (EFun (((PVar (Id "i")), []),
-                (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "q")),
-                   [(EIdentifier (Id "i"))]))
-                ))),
-            [])))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PVar (Id "g")), (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y")))));
+          ((PVar (Id "a")),
+           (EFun (((PVar (Id "b")), [(PVar (Id "c"))]),
+              (EApplication ((EIdentifier (Id "( + )")), (EIdentifier (Id "b")),
+                 [(EIdentifier (Id "c"))]))
+              )))
+          ]
+        ));
+      (DOrdinary (
+         ((PVar (Id "q")), (EFun (((PVar (Id "y")), []), (EIdentifier (Id "y"))))),
+         []));
+      (DOrdinary (
+         ((PVar (Id "k")),
+          (EFun (((PVar (Id "i")), []),
+             (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "q")),
+                [(EIdentifier (Id "i"))]))
+             ))),
+         []))
       ] |}]
 ;;
 
@@ -322,53 +293,48 @@ let%expect_test _ =
 (* Basic let with "and" (complex patterns)] *)
 
 let%expect_test _ =
-  parse_program_with_print {| let (x, y) = (1, 2) and (e :: l) = (1 :: 2) |};
+  parse_program {| let (x, y) = (1, 2) and (e :: l) = (1 :: 2) |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-            (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), []))),
-           [((PListConstructor ((PVar (Id "e")), (PVar (Id "l")))),
-             (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 2)))))]
-           )))
+    [(DOrdinary (
+        ((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+         (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), []))),
+        [((PListConstructor ((PVar (Id "e")), (PVar (Id "l")))),
+          (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 2)))))]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let f x = x and (x, y) = (1, 2) |};
+  parse_program {| let f x = x and (x, y) = (1, 2) |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
-             (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])))]
-           )))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PTuple ((PVar (Id "x")), (PVar (Id "y")), [])),
+          (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])))]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_program
     {| let f x = x and () = some_function some_args and ((x :: y), (z :: w)) = (1 :: 1, 1 :: 1) |};
   [%expect
     {|
-    [(SDeclaration
-        (DOrdinary (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
-           [((PConst CUnit),
-             (EApplication ((EIdentifier (Id "some_function")),
-                (EIdentifier (Id "some_args")), [])));
-             ((PTuple ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
-                 (PListConstructor ((PVar (Id "z")), (PVar (Id "w")))), [])),
-              (ETuple (
-                 (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 1)))),
-                 (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 1)))),
-                 [])))
-             ]
-           )))
+    [(DOrdinary (
+        ((PVar (Id "f")), (EFun (((PVar (Id "x")), []), (EIdentifier (Id "x"))))),
+        [((PConst CUnit),
+          (EApplication ((EIdentifier (Id "some_function")),
+             (EIdentifier (Id "some_args")), [])));
+          ((PTuple ((PListConstructor ((PVar (Id "x")), (PVar (Id "y")))),
+              (PListConstructor ((PVar (Id "z")), (PVar (Id "w")))), [])),
+           (ETuple (
+              (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 1)))),
+              (EListConstructor ((EConstant (CInt 1)), (EConstant (CInt 1)))),
+              [])))
+          ]
+        ))
       ] |}]
 ;;
 
@@ -377,76 +343,71 @@ let%expect_test _ =
 (* Recursive let *)
 
 let%expect_test _ =
-  parse_program_with_print {| let rec f x = f (x - 1) |};
+  parse_program {| let rec f x = f (x - 1) |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EApplication ((EIdentifier (Id "f")),
-                  (EApplication ((EIdentifier (Id "( - )")),
-                     (EIdentifier (Id "x")), [(EConstant (CInt 1))])),
-                  []))
-               ))),
-           [])))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EApplication ((EIdentifier (Id "f")),
+               (EApplication ((EIdentifier (Id "( - )")), (EIdentifier (Id "x")),
+                  [(EConstant (CInt 1))])),
+               []))
+            ))),
+        []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| 
+  parse_program {| 
    let rec f x = f (x - 1) 
    let rec g y = f (g y)
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EApplication ((EIdentifier (Id "f")),
-                  (EApplication ((EIdentifier (Id "( - )")),
-                     (EIdentifier (Id "x")), [(EConstant (CInt 1))])),
-                  []))
-               ))),
-           [])));
-      (SDeclaration
-         (DRecursive (
-            ((PVar (Id "g")),
-             (EFun (((PVar (Id "y")), []),
-                (EApplication ((EIdentifier (Id "f")),
-                   (EApplication ((EIdentifier (Id "g")), (EIdentifier (Id "y")),
-                      [])),
-                   []))
-                ))),
-            [])))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EApplication ((EIdentifier (Id "f")),
+               (EApplication ((EIdentifier (Id "( - )")), (EIdentifier (Id "x")),
+                  [(EConstant (CInt 1))])),
+               []))
+            ))),
+        []));
+      (DRecursive (
+         ((PVar (Id "g")),
+          (EFun (((PVar (Id "y")), []),
+             (EApplication ((EIdentifier (Id "f")),
+                (EApplication ((EIdentifier (Id "g")), (EIdentifier (Id "y")),
+                   [])),
+                []))
+             ))),
+         []))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let rec f x = if x = 1 then x else x * f (x - 1) |};
+  parse_program {| let rec f x = if x = 1 then x else x * f (x - 1) |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EIfThenElse (
-                  (EApplication ((EIdentifier (Id "( = )")),
-                     (EIdentifier (Id "x")), [(EConstant (CInt 1))])),
-                  (EIdentifier (Id "x")),
-                  (Some (EApplication ((EIdentifier (Id "( * )")),
-                           (EIdentifier (Id "x")),
-                           [(EApplication ((EIdentifier (Id "f")),
-                               (EApplication ((EIdentifier (Id "( - )")),
-                                  (EIdentifier (Id "x")), [(EConstant (CInt 1))]
-                                  )),
-                               []))
-                             ]
-                           )))
-                  ))
-               ))),
-           [])))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EIfThenElse (
+               (EApplication ((EIdentifier (Id "( = )")), (EIdentifier (Id "x")),
+                  [(EConstant (CInt 1))])),
+               (EIdentifier (Id "x")),
+               (Some (EApplication ((EIdentifier (Id "( * )")),
+                        (EIdentifier (Id "x")),
+                        [(EApplication ((EIdentifier (Id "f")),
+                            (EApplication ((EIdentifier (Id "( - )")),
+                               (EIdentifier (Id "x")), [(EConstant (CInt 1))])),
+                            []))
+                          ]
+                        )))
+               ))
+            ))),
+        []))
       ] |}]
 ;;
 
@@ -455,51 +416,46 @@ let%expect_test _ =
 (* Let with mutual recursion *)
 
 let%expect_test _ =
-  parse_program_with_print {| let rec f x = g x and g x = f x |};
+  parse_program {| let rec f x = g x and g x = f x |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EApplication ((EIdentifier (Id "g")), (EIdentifier (Id "x")),
-                  []))
-               ))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "x")), []),
-                (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
-                   []))
-                )))
-             ]
-           )))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EApplication ((EIdentifier (Id "g")), (EIdentifier (Id "x")), []))))),
+        [((PVar (Id "g")),
+          (EFun (((PVar (Id "x")), []),
+             (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")), []))
+             )))
+          ]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print {| let rec f x = fun y -> f x y and g x = f x x |};
+  parse_program {| let rec f x = fun y -> f x y and g x = f x x |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EFun (((PVar (Id "y")), []),
-                  (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
-                     [(EIdentifier (Id "y"))]))
-                  ))
-               ))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "x")), []),
-                (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
-                   [(EIdentifier (Id "x"))]))
-                )))
-             ]
-           )))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EFun (((PVar (Id "y")), []),
+               (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
+                  [(EIdentifier (Id "y"))]))
+               ))
+            ))),
+        [((PVar (Id "g")),
+          (EFun (((PVar (Id "x")), []),
+             (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
+                [(EIdentifier (Id "x"))]))
+             )))
+          ]
+        ))
       ] |}]
 ;;
 
 let%expect_test _ =
-  parse_program_with_print
+  parse_program
     {| 
       let rec f x = fun y -> f x y 
       and g x = f x x
@@ -507,35 +463,33 @@ let%expect_test _ =
    |};
   [%expect
     {|
-    [(SDeclaration
-        (DRecursive (
-           ((PVar (Id "f")),
-            (EFun (((PVar (Id "x")), []),
-               (EFun (((PVar (Id "y")), []),
-                  (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
-                     [(EIdentifier (Id "y"))]))
-                  ))
-               ))),
-           [((PVar (Id "g")),
-             (EFun (((PVar (Id "x")), []),
-                (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
-                   [(EIdentifier (Id "x"))]))
-                )))
-             ]
-           )));
-      (SDeclaration
-         (DRecursive (
-            ((PVar (Id "q")),
-             (EFun (((PVar (Id "y")), [(PVar (Id "x"))]),
-                (EApplication ((EIdentifier (Id "q")),
-                   (EApplication ((EIdentifier (Id "( - )")),
-                      (EIdentifier (Id "y")), [(EConstant (CInt 1))])),
-                   [(EApplication ((EIdentifier (Id "( + )")),
-                       (EIdentifier (Id "x")), [(EConstant (CInt 1))]))
-                     ]
-                   ))
-                ))),
-            [])))
+    [(DRecursive (
+        ((PVar (Id "f")),
+         (EFun (((PVar (Id "x")), []),
+            (EFun (((PVar (Id "y")), []),
+               (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
+                  [(EIdentifier (Id "y"))]))
+               ))
+            ))),
+        [((PVar (Id "g")),
+          (EFun (((PVar (Id "x")), []),
+             (EApplication ((EIdentifier (Id "f")), (EIdentifier (Id "x")),
+                [(EIdentifier (Id "x"))]))
+             )))
+          ]
+        ));
+      (DRecursive (
+         ((PVar (Id "q")),
+          (EFun (((PVar (Id "y")), [(PVar (Id "x"))]),
+             (EApplication ((EIdentifier (Id "q")),
+                (EApplication ((EIdentifier (Id "( - )")),
+                   (EIdentifier (Id "y")), [(EConstant (CInt 1))])),
+                [(EApplication ((EIdentifier (Id "( + )")),
+                    (EIdentifier (Id "x")), [(EConstant (CInt 1))]))
+                  ]
+                ))
+             ))),
+         []))
       ] |}]
 ;;
 

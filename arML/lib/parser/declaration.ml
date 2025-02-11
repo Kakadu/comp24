@@ -7,6 +7,7 @@ open Ast
 open Common
 open Pattern
 open Type
+open Expression
 
 let parse_declaration p =
   let parse_expr =
@@ -72,3 +73,5 @@ let parse_declaration p =
 
   return (declaration_type main_binding and_bindings)
 ;;
+
+let parse_declaration = parse_declaration parsers

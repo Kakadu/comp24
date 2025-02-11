@@ -5,115 +5,115 @@
 open ArML_lib.Runner
 
 let%expect_test _ =
-  inference {| 1 + 1 |};
+  inference_expression {| 1 + 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 * 1 |};
+  inference_expression {| 1 * 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 / 1 |};
+  inference_expression {| 1 / 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 % 1 |};
+  inference_expression {| 1 % 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 + 1 + 1 + 1 + 1 |};
+  inference_expression {| 1 + 1 + 1 + 1 + 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| (1 / 2 + 3 * 8 / 9 % 3) * 3 - 1 |};
+  inference_expression {| (1 / 2 + 3 * 8 / 9 % 3) * 3 - 1 |};
   [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
-  inference {| true || false |};
+  inference_expression {| true || false |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| true && false |};
+  inference_expression {| true && false |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| (true && false) || (false && true) |};
+  inference_expression {| (true && false) || (false && true) |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| (true || false) && (false || true) |};
+  inference_expression {| (true || false) && (false || true) |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 <= 2 |};
+  inference_expression {| 1 <= 2 |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 >= 2 |};
+  inference_expression {| 1 >= 2 |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 = 1 && (1 != 2 || 1 <> 2) |};
+  inference_expression {| 1 = 1 && (1 != 2 || 1 <> 2) |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| (1 >= 1 || 1 <= 1) = true |};
+  inference_expression {| (1 >= 1 || 1 <= 1) = true |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| "aaa" = "aaa" |};
+  inference_expression {| "aaa" = "aaa" |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| "aaa" < "bbb" |};
+  inference_expression {| "aaa" < "bbb" |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| () = () |};
+  inference_expression {| () = () |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| true <> false && true != false |};
+  inference_expression {| true <> false && true != false |};
   [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
-  inference {| 1 + 3 >= 4 && 1 - 3 <= 9 |};
+  inference_expression {| 1 + 3 >= 4 && 1 - 3 <= 9 |};
   [%expect {|
     - : bool |}]
 ;;

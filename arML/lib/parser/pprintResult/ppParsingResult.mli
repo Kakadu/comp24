@@ -3,4 +3,5 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (** Prints the parsed abstract syntax tree (AST) using the formatter. *)
-val print_parser_result : Ast.program -> unit
+val print_expression_parsing_result : Ast.expression -> unit
+val print_program_parsing_result : Ast.program -> unit

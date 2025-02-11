@@ -2,23 +2,15 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Ast
 open Common
 open Expression
 open Declaration
 open Angstrom
 
-let expression_parser =
-  let* expr = parse_expression in
-  return @@ SExpression expr
-;;
+let parse_expression input =
+  parse_string ~consume:All (many1 parse_expression) input
 
-let declaration_parser =
-  let* decl = parse_declaration parsers in
-  return @@ SDeclaration decl
-;;
-
-let parse input =
+let parse_program input =
   let sep = option () (skip_wspace *> string ";;" *> return ()) in
-  parse_string ~consume:All (many1 ((expression_parser <|> declaration_parser) <* sep <* skip_wspace)) input
+  parse_string ~consume:All (many1 (parse_declaration <* sep <* skip_wspace)) input
 ;;
