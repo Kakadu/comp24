@@ -7,8 +7,7 @@
   PatternMatching
   TypedExpression
   BinaryOperation
-  Declaration
-  Complex)
+  Declaration)
  (inline_tests)
  (preprocess
   (pps ppx_expect ppx_deriving.show))

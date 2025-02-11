@@ -125,8 +125,11 @@ let infer_expr =
          | _ -> 
            let* typ, _ = infer_pattern env pat in
            fail @@ Unification_failed (typ, ty))
-      | Ast.PAny, _ -> return env
+      | Ast.PListConstructor (l, r), TypeTree.TList t ->
+        let* env = extend_env_with_pattern env l t in
+        extend_env_with_pattern env r (TypeTree.TList t)
       | Ast.PNill, TypeTree.TList _ -> return env
+      | Ast.PAny, _ -> return env
       | pat, ty -> 
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty)
@@ -138,6 +141,11 @@ let infer_expr =
 
     let* final_env, final_sub = 
       List.fold_left (fun acc (pat, expr) ->
+          let expr = 
+            (match expr with
+             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | _ -> expr)
+          in
           let* env, sub = acc in
           let* sub_expr, ty_expr = helper env expr in
           let* env = extend_env_with_pattern env pat ty_expr in
@@ -152,14 +160,12 @@ let infer_expr =
     return (sub_final, final_ty)
 
   and infer_rec_let_in env cases expr =
-
     let extend_env_with_pattern env pat ty =
       match pat with
       | Ast.PVar (Id v) ->
         let generalized_ty = Generalize.generalize env ty in
         return (TypeEnv.extend env v generalized_ty)
-      | _ ->
-        fail InvalidRecursionLeftHand
+      | _ -> fail InvalidRecursionLeftHand
     in
 
     let all_patterns = List.map fst cases in
@@ -172,41 +178,45 @@ let infer_expr =
           | Ast.PVar (Id name) ->
             let* fv = fresh_var in
             let env' = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
-            return (env', (name, fv) :: vars)
+            return (env', (name, fv) :: vars) (* <-- Исправлено *)
           | _ -> fail InvalidRecursionLeftHand
         ) (return (env, [])) cases
     in
 
     let process_cases env cases temp_vars =
       List.fold_left (fun acc (pat, expr) ->
-
+          let expr = 
+            (match expr with
+             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | _ -> expr)
+          in
           let* extract_var_name =
             (match pat with
              | Ast.PVar (Id name) -> return name
-             | _ -> fail InvalidRecursionLeftHand) in
+             | _ -> fail InvalidRecursionLeftHand)
+          in
           let* env, sub = acc in
           let* sub_expr, ty_expr = helper env expr in
           let env' = TypeEnv.apply env sub_expr in
           let* env'' = extend_env_with_pattern env' pat ty_expr in
-          let* sub_final = Substitution.compose sub sub_expr in
 
-          let* sub_final = 
+          let* sub_update =
             match List.assoc_opt extract_var_name temp_vars with
-            | Some temp_ty -> 
-              let* sub = Substitution.unify temp_ty ty_expr in
-              Substitution.compose sub_final sub
-            | None -> return sub_final
+            | Some temp_ty -> Substitution.unify temp_ty ty_expr
+            | None -> return Substitution.empty
           in
 
+          let* sub_final = Substitution.compose sub sub_update in
           return (env'', sub_final)
         ) (return (env, Substitution.empty)) cases
     in
 
     let* env_with_vars, temp_vars = add_temporary_vars env cases in
     let* final_env, final_sub = process_cases env_with_vars cases temp_vars in
-    let* sub2, ty2 = helper final_env expr in
-    let* sub_final = Substitution.compose final_sub sub2 in
-    return (sub_final, ty2)
+
+    let* sub_expr, ty_expr = helper final_env expr in
+    let* sub_final = Substitution.compose final_sub sub_expr in
+    return (sub_final, ty_expr)
 
   and infer_cases env (init_sub, init_expr) cases =
     let* fv = fresh_var in

@@ -29,9 +29,14 @@ let infer_declaration env name_list = function
              let* env, name_list = acc in
              extend_env_with_pattern env name_list pat ty
            ) (return (env, name_list)) ps rest
+       | Ast.PListConstructor (l, r), TypeTree.TList t ->
+         let* env, name_list = extend_env_with_pattern env name_list l t in
+         extend_env_with_pattern env name_list r (TypeTree.TList t)
        | Ast.PAny, _
-       | Ast.PNill, TypeTree.TList _ 
-       | Ast.PConst(CUnit), TypeTree.TGround(GTUnit) -> return (env, name_list)
+       | Ast.PNill, TypeTree.TList _ -> return (env, name_list)
+       | Ast.PConst _ as pat, ct -> 
+         let* t, _ = infer_pattern env pat in
+         if t = ct then return (env, name_list) else fail @@ Unification_failed (t, ct)
        | pat, ty -> 
          let* typ, _ = infer_pattern env pat in
          fail @@ Unification_failed (typ, ty))
@@ -42,6 +47,11 @@ let infer_declaration env name_list = function
     let* _ = UniquePatternVarsChecker.check_unique_vars patterns in
 
     List.fold_left (fun acc (pat, expr) ->
+        let expr = 
+          (match expr with
+           | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+           | _ -> expr)
+        in
         let* extended_env, name_list = acc in
         (* We specifically count in a “pure” env. 
            This is not a mistake. There is no mutual recursion, 
@@ -70,25 +80,43 @@ let infer_declaration env name_list = function
 
     let add_temporary_vars env cases =
       List.fold_left (fun acc (pat, _) ->
-          let* env = acc in
+          let* env, vars = acc in
           match pat with
           | Ast.PVar (Id name) ->
             let* fv = fresh_var in
-            return (TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)))
+            let env' = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
+            return (env', (name, fv) :: vars)
           | _ -> fail InvalidRecursionLeftHand
-        ) (return env) cases
+        ) (return (env, [])) cases
     in
 
-    let process_cases env cases =
+    let process_cases env cases temp_vars =
       List.fold_left (fun acc (pat, expr) ->
+          let expr = 
+            (match expr with
+             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | _ -> expr)
+          in
+          let* extract_var_name =
+            (match pat with
+             | Ast.PVar (Id name) -> return name
+             | _ -> fail InvalidRecursionLeftHand)
+          in
           let* env, name_list = acc in
           let* sub, ty_expr = infer_expr env expr in
           let env' = TypeEnv.apply env sub in
           let* extended_env, extend_name_list = extend_env_with_pattern env' name_list pat ty_expr in
-          return (extended_env, extend_name_list)
+          let* sub_update =
+            match List.assoc_opt extract_var_name temp_vars with
+            | Some temp_ty -> Substitution.unify temp_ty ty_expr
+            | None -> return Substitution.empty
+          in
+          let* sub_final = Substitution.compose sub sub_update in
+          let extended_env' = TypeEnv.apply extended_env sub_final in
+          return (extended_env', extend_name_list)
         ) (return (env, name_list)) cases
     in
 
-    let* env_with_vars = add_temporary_vars env cases in
-    process_cases env_with_vars cases
+    let* env_with_vars, temp_vars = add_temporary_vars env cases in
+    process_cases env_with_vars cases temp_vars
 ;;

@@ -67,8 +67,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| fun x -> if x > 0 then x else -x |};
-  [%expect {| Syntax error. |}]
+  inference {| fun x -> if x > 0 then x > 0 else x < 0 |};
+  [%expect {| - : int -> bool |}]
 ;;
 
 (* ---------------- *)
@@ -127,7 +127,7 @@ let%expect_test _ =
 
 (* ---------------- *)
 
-(* Let in *)
+(* Let in ([PVar] pattern) *)
 
 let%expect_test _ =
   inference {| let f x = x in f |};
@@ -164,16 +164,39 @@ let%expect_test _ =
   [%expect {| Type error: unification failed - type int does not match expected type string |}]
 ;;
 
+(* ---------------- *)
+
+(* Let in (complex patterns) *)
+
 let%expect_test _ =
-  inference {| let (x, y) = ((fun x -> x + 1), 0) in x y |};
+  inference {| let x, y = (0, 0) in (x, y) |};
+  [%expect {| - : int * int |}]
+;;
+
+let%expect_test _ =
+  inference {| let x :: y = [1 ; 2] in (x :: y) |};
+  [%expect {| - : int list |}]
+;;
+
+let%expect_test _ =
+  inference {| let x, y = ((fun x -> x + 1), 0) in x y |};
   [%expect {| - : int |}]
+;;
+
+let%expect_test _ =
+  inference {| let _ = () in 0 |};
+  [%expect {| - : int |}]
+;;
+
+let%expect_test _ =
+  inference {| let (x, y) = 1 in (x :: y) |};
+  [%expect {| Type error: unification failed - type 'a * 'b does not match expected type int |}]
 ;;
 
 let%expect_test _ =
   inference {| let (x, y) = ((fun x -> x + 1), true) in x y |};
   [%expect {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
-
 
 (* ---------------- *)
 
@@ -194,6 +217,21 @@ let%expect_test _ =
   [%expect {| - : bool |}]
 ;;
 
+let%expect_test _ =
+  inference {| let (x, y) = (true, false) and g x y = true && false in g x y |};
+  [%expect {| - : bool |}]
+;;
+
+let%expect_test _ =
+  inference {| let (x, y) = (true, false) and g x y = true && false and (k :: z) = [1; 2] in (g x y, k, z) |};
+  [%expect {| - : bool * int * int list |}]
+;;
+
+let%expect_test _ =
+  inference {| let (x, y) = (true, false) and g x y = true && false and (x :: y) = [1; 2] in g x y |};
+  [%expect {| Type error: variable 'x' is bound several times |}]
+;;
+
 (* ---------------- *)
 
 (* Recursive let in *)
@@ -204,6 +242,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  inference {| let rec f x = f (f x) in f |};
+  [%expect {| - : 'a -> 'a |}]
+;;
+
+let%expect_test _ =
   inference {| let rec f x = if x = 0 then 1 else x * f (x - 1) in f 5 |};
   [%expect {| - : int |}]
 ;;
@@ -211,6 +254,11 @@ let%expect_test _ =
 let%expect_test _ =
   inference {| let rec f x = if x then false else f true in f |};
   [%expect {| - : bool -> bool |}]
+;;
+
+let%expect_test _ =
+  inference {| let rec f x = if x then 0 else (f true) && true in f |};
+  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 let%expect_test _ =
@@ -255,6 +303,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
+  inference {| let rec f x = x + 1 and g x = x - 1 in (f 3, g 3) |};
+  [%expect {| - : int * int |}]
+;;
+
+let%expect_test _ =
   inference {| let rec f x = g and g x = f in (f, g) |};
   [%expect {| Type error: occurs check failed. |}]
 ;;
@@ -264,16 +317,62 @@ let%expect_test _ =
   [%expect {| Only variables are allowed as left-hand side of `let rec' |}]
 ;;
 
-(* let%expect_test _ =
-   inference {| let rec f x = g x and g x = f x in (f, g) |};
-   [%expect
-    {| Type error: occurs check failed. |}]
-   ;;
+(* ---------------- *)
 
-   let%expect_test _ =
-   inference {| let rec f x = g x and g x = f 3 in (f, g) |};
-   [%expect
-    {| - : (int -> 'a) * ('b -> 'a) |}]
-   ;; *)
+(* Function expression *)
+
+let%expect_test _ =
+  inference {| function x -> x * 2 |};
+  [%expect {| - : int -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| function (x, y) -> x + y |};
+  [%expect {| - : int * int -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| function
+    | 0 -> "zero"
+    | 1 -> "one"
+    | _ -> "many"
+  |};
+  [%expect {| - : int -> string |}]
+;;
+
+let%expect_test _ =
+  inference {| function
+    | [] -> "empty"
+    | [x] -> "one element"
+    | _ :: _ -> "multiple"
+  |};
+  [%expect {| - : 'a list -> string |}]
+;;
+
+let%expect_test _ =
+  inference {| function
+    | (0, y) -> y
+    | (x, 0) -> x
+    | (x, y) -> x + y
+  |};
+  [%expect {| - : int * int -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| function
+    | [] -> 0
+    | [x] -> x
+    | x1 :: x2 :: xs -> x1 + x2
+  |};
+  [%expect {| - : int list -> int |}]
+;;
+
+let%expect_test _ =
+  inference {| function
+    | (x, (0, z)) -> x + z
+    | (x, (y, x)) -> x + y
+  |};
+  [%expect {| Type error: variable 'x' is bound several times |}]
+;;
 
 (* ---------------- *)
