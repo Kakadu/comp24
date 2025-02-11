@@ -31,5 +31,5 @@ build: [
 ]
 dev-repo: "git+https://github.com/Salvatore112/comp24.git"
 depexts: [
-  [ "llvm-16-dev" "clang-16" ] {os-distribution = "ubuntu"}
+  [ "llvm-16-dev" "clang-16" "libffi-dev" ] {os-distribution = "ubuntu"}
 ]
