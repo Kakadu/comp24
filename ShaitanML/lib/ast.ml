@@ -49,6 +49,7 @@ type expr =
   | ETuple of expr list (** a, b, c *)
   | ECons of expr * expr (** x :: xs | [x1; x2]*)
   | EApply of expr * expr (** f e *)
+  | EConstraint of expr * type_annot (** e : int list *)
 [@@deriving show { with_path = false }]
 
 (** Used in {match} expr *)
@@ -61,6 +62,9 @@ type str_item =
   | SEval of expr (** Some expression *)
   | SValue of rec_flag * binding list (** let [rec] p1 = e1 and p2 = e2 and ... *)
 [@@deriving show { with_path = false }]
+
+let constr_apply f args = List.fold_left (fun f arg -> EApply (f, arg)) f args
+let constr_fun pl e = List.fold_right (fun p e -> EFun (p, e)) pl e
 
 (** Sequence of structure items *)
 type structure = str_item list [@@deriving show { with_path = false }]
