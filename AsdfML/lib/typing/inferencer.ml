@@ -266,8 +266,8 @@ module TypeEnv = struct
     | PConst _, _ | PList _, _ | PCons (_, _), _ | PTuple _, _ ->
       fail
         (`Syntax_error
-           "only identifiers, tuples, wildcards and type annotations are supported in \
-            let bindings")
+          "only identifiers, tuples, wildcards and type annotations are supported in let \
+           bindings")
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
@@ -354,161 +354,161 @@ let infer =
   in
   let rec infer_pattern : TypeEnv.t -> Ast.pattern -> (TypeEnv.t * ty) R.t =
     fun env -> function
-      | PConst c ->
-        let* c = infer_const c in
-        return (env, c)
-      | PWild -> fresh_var >>| fun v -> env, v
-      | PIdent x ->
-        let* fv = fresh_var in
-        let env' = TypeEnv.extend env x (VarSet.empty, fv) in
-        return (env', fv)
-      | PTuple xs ->
-        List.fold_right
-          xs
-          ~init:(return (env, []))
-          ~f:(fun x acc ->
-            let* env, fvs = acc in
-            let* env', fv = infer_pattern env x in
-            return (env', fv :: fvs))
-        >>| fun (env, fvs) -> env, TTuple fvs
-      | PList xs ->
-        let* fv = fresh_var in
-        List.fold
-          xs
-          ~init:(return (env, fv))
-          ~f:(fun acc x ->
-            let* env, fv = acc in
-            let* env', ty = infer_pattern env x in
-            let* sub = unify fv ty in
-            let env'' = TypeEnv.apply env' sub in
-            let ty = Subst.apply sub fv in
-            return (env'', ty))
-      | PCons (hd, tl) ->
-        let* env', ty' = infer_pattern env hd in
-        let* env'', ty'' = infer_pattern env' tl in
-        let* sub = Subst.unify (TList ty') ty'' in
-        let final_env = TypeEnv.apply env'' sub in
-        let final_ty = Subst.apply sub ty'' in
-        return (final_env, final_ty)
-      | PAnn (pat, ann_ty) ->
-        let* pat_env, ty = infer_pattern env pat in
-        let* sub = unify ty (an_ty_to_ty ann_ty) in
-        let final_env = TypeEnv.apply pat_env sub in
-        let final_ty = Subst.apply sub ty in
-        return (final_env, final_ty)
+    | PConst c ->
+      let* c = infer_const c in
+      return (env, c)
+    | PWild -> fresh_var >>| fun v -> env, v
+    | PIdent x ->
+      let* fv = fresh_var in
+      let env' = TypeEnv.extend env x (VarSet.empty, fv) in
+      return (env', fv)
+    | PTuple xs ->
+      List.fold_right
+        xs
+        ~init:(return (env, []))
+        ~f:(fun x acc ->
+          let* env, fvs = acc in
+          let* env', fv = infer_pattern env x in
+          return (env', fv :: fvs))
+      >>| fun (env, fvs) -> env, TTuple fvs
+    | PList xs ->
+      let* fv = fresh_var in
+      List.fold
+        xs
+        ~init:(return (env, fv))
+        ~f:(fun acc x ->
+          let* env, fv = acc in
+          let* env', ty = infer_pattern env x in
+          let* sub = unify fv ty in
+          let env'' = TypeEnv.apply env' sub in
+          let ty = Subst.apply sub fv in
+          return (env'', ty))
+    | PCons (hd, tl) ->
+      let* env', ty' = infer_pattern env hd in
+      let* env'', ty'' = infer_pattern env' tl in
+      let* sub = Subst.unify (TList ty') ty'' in
+      let final_env = TypeEnv.apply env'' sub in
+      let final_ty = Subst.apply sub ty'' in
+      return (final_env, final_ty)
+    | PAnn (pat, ann_ty) ->
+      let* pat_env, ty = infer_pattern env pat in
+      let* sub = unify ty (an_ty_to_ty ann_ty) in
+      let final_env = TypeEnv.apply pat_env sub in
+      let final_ty = Subst.apply sub ty in
+      return (final_env, final_ty)
   in
   let rec (infer_expr : TypeEnv.t -> Ast.expr -> (Subst.t * ty) R.t) =
     fun env -> function
-      | EConst c ->
-        let* c = infer_const c in
-        return (Subst.empty, c)
-      | EVar x -> lookup_env x env
-      | EApp (left, right) ->
-        let* left_sub, left_ty = infer_expr env left in
-        let* right_sub, right_ty = infer_expr (TypeEnv.apply env left_sub) right in
-        let* fv = fresh_var in
-        let* sub = unify (Subst.apply right_sub left_ty) (right_ty ^-> fv) in
-        let final_ty = Subst.apply sub fv in
-        let* sub = Subst.compose_all [ sub; right_sub; left_sub ] in
-        return (sub, final_ty)
-      | EIfElse (cond, th, el) ->
-        let* s1, t1 = infer_expr env cond in
-        let* s2, t2 = infer_expr env th in
-        let* s3, t3 = infer_expr env el in
-        let* s4 = unify t1 bool_typ in
-        let* s5 = unify t2 t3 in
-        let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
-        return (final_subst, Subst.apply s5 t2)
-      | EFun (pat, exp) ->
-        let* env', pat_ty =
-          List.fold
-            pat
-            ~init:(return (env, []))
-            ~f:(fun acc pat ->
-              let* acc_env, acc_ty = acc in
-              let* env, ty = infer_pattern acc_env pat in
-              return (env, ty :: acc_ty))
-        in
-        let* s, exp_ty = infer_expr env' exp in
-        let final_ty = exp_ty :: pat_ty |> List.reduce_exn ~f:(fun l r -> r ^-> l) in
-        let ty = Subst.apply s final_ty in
-        return (s, ty)
-      | ELetIn (def, expr) ->
-        let* let_env, let_sub, _ = infer_def env def in
-        let* exp_sub, exp_ty = infer_expr let_env expr in
-        let* sub = Subst.compose let_sub exp_sub in
-        return (sub, exp_ty)
-      | ETuple xs ->
-        List.fold_right
-          xs
-          ~init:(return (Subst.empty, []))
-          ~f:(fun x acc ->
-            let* acc_sub, acc_t = acc in
-            let* s, t = infer_expr env x in
-            let* s' = Subst.compose acc_sub s in
-            return (s', t :: acc_t))
-        >>| fun (s, t) -> s, TTuple (List.map t ~f:(Subst.apply s))
-      | EList xs ->
-        (match xs with
-         | [] ->
-           let* fv = fresh_var in
-           return (Subst.empty, TList fv)
-         | hd :: tl ->
-           List.fold tl ~init:(infer_expr env hd) ~f:(fun acc x ->
-             let* acc_sub, acc_t = acc in
-             let* s, t = infer_expr env x in
-             let* s' = unify acc_t t in
-             let* sub = Subst.compose_all [ s'; s; acc_sub ] in
-             return (sub, acc_t)))
-        >>| fun (s, t) -> s, TList t
-      | EMatch (e, pe) ->
-        let* match_sub, match_ty = infer_expr env e in
-        let* fv = fresh_var in
-        let* sub, ty =
-          List.fold
-            pe
-            ~init:(return (match_sub, fv))
-            ~f:(fun acc (p, e) ->
-              let* acc_sub, acc_ty = acc in
-              let* pat_env, pat_ty = infer_pattern env p in
-              let* pat_sub = unify match_ty pat_ty in
-              let pat_env' = TypeEnv.apply pat_env pat_sub in
-              let* exp_sub, exp_ty = infer_expr pat_env' e in
-              let* sub = unify exp_ty acc_ty in
-              let* final_subst = Subst.compose_all [ acc_sub; pat_sub; exp_sub; sub ] in
-              let final_ty = Subst.apply final_subst acc_ty in
-              return (final_subst, final_ty))
-        in
-        return (sub, ty)
+    | EConst c ->
+      let* c = infer_const c in
+      return (Subst.empty, c)
+    | EVar x -> lookup_env x env
+    | EApp (left, right) ->
+      let* left_sub, left_ty = infer_expr env left in
+      let* right_sub, right_ty = infer_expr (TypeEnv.apply env left_sub) right in
+      let* fv = fresh_var in
+      let* sub = unify (Subst.apply right_sub left_ty) (right_ty ^-> fv) in
+      let final_ty = Subst.apply sub fv in
+      let* sub = Subst.compose_all [ sub; right_sub; left_sub ] in
+      return (sub, final_ty)
+    | EIfElse (cond, th, el) ->
+      let* s1, t1 = infer_expr env cond in
+      let* s2, t2 = infer_expr env th in
+      let* s3, t3 = infer_expr env el in
+      let* s4 = unify t1 bool_typ in
+      let* s5 = unify t2 t3 in
+      let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
+      return (final_subst, Subst.apply s5 t2)
+    | EFun (pat, exp) ->
+      let* env', pat_ty =
+        List.fold
+          pat
+          ~init:(return (env, []))
+          ~f:(fun acc pat ->
+            let* acc_env, acc_ty = acc in
+            let* env, ty = infer_pattern acc_env pat in
+            return (env, ty :: acc_ty))
+      in
+      let* s, exp_ty = infer_expr env' exp in
+      let final_ty = exp_ty :: pat_ty |> List.reduce_exn ~f:(fun l r -> r ^-> l) in
+      let ty = Subst.apply s final_ty in
+      return (s, ty)
+    | ELetIn (def, expr) ->
+      let* let_env, let_sub, _ = infer_def env def in
+      let* exp_sub, exp_ty = infer_expr let_env expr in
+      let* sub = Subst.compose let_sub exp_sub in
+      return (sub, exp_ty)
+    | ETuple xs ->
+      List.fold_right
+        xs
+        ~init:(return (Subst.empty, []))
+        ~f:(fun x acc ->
+          let* acc_sub, acc_t = acc in
+          let* s, t = infer_expr env x in
+          let* s' = Subst.compose acc_sub s in
+          return (s', t :: acc_t))
+      >>| fun (s, t) -> s, TTuple (List.map t ~f:(Subst.apply s))
+    | EList xs ->
+      (match xs with
+       | [] ->
+         let* fv = fresh_var in
+         return (Subst.empty, TList fv)
+       | hd :: tl ->
+         List.fold tl ~init:(infer_expr env hd) ~f:(fun acc x ->
+           let* acc_sub, acc_t = acc in
+           let* s, t = infer_expr env x in
+           let* s' = unify acc_t t in
+           let* sub = Subst.compose_all [ s'; s; acc_sub ] in
+           return (sub, acc_t)))
+      >>| fun (s, t) -> s, TList t
+    | EMatch (e, pe) ->
+      let* match_sub, match_ty = infer_expr env e in
+      let* fv = fresh_var in
+      let* sub, ty =
+        List.fold
+          pe
+          ~init:(return (match_sub, fv))
+          ~f:(fun acc (p, e) ->
+            let* acc_sub, acc_ty = acc in
+            let* pat_env, pat_ty = infer_pattern env p in
+            let* pat_sub = unify match_ty pat_ty in
+            let pat_env' = TypeEnv.apply pat_env pat_sub in
+            let* exp_sub, exp_ty = infer_expr pat_env' e in
+            let* sub = unify exp_ty acc_ty in
+            let* final_subst = Subst.compose_all [ acc_sub; pat_sub; exp_sub; sub ] in
+            let final_ty = Subst.apply final_subst acc_ty in
+            return (final_subst, final_ty))
+      in
+      return (sub, ty)
   and (infer_def : TypeEnv.t -> Ast.definition -> (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -> function
-      | DLet (NonRec, pat, expr) ->
-        let* exp_sub, exp_ty = infer_expr env expr in
-        let env' = TypeEnv.apply env exp_sub in
-        let scheme = generalize env' exp_ty in
-        let* pat_env, pat_ty = infer_pattern env pat in
-        let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
-        let* sub = Subst.unify pat_ty exp_ty in
-        let* final_sub = Subst.compose sub exp_sub in
-        let final_env = TypeEnv.apply pat_env' final_sub in
-        let final_ty = Subst.apply final_sub exp_ty in
-        return (final_env, final_sub, final_ty)
-      | DLet (Rec, (PIdent x as pat), expr) | DLet (Rec, (PAnn (PIdent x, _) as pat), expr)
-        ->
-        let* pat_env, pat_ty = infer_pattern env pat in
-        let* exp_sub, exp_ty = infer_expr pat_env expr in
-        let pat_ty = Subst.apply exp_sub pat_ty in
-        let* sub = Subst.unify pat_ty exp_ty in
-        let* sub' = Subst.compose exp_sub sub in
-        let env = TypeEnv.apply pat_env sub' in
-        let final_ty = Subst.apply sub' exp_ty in
-        let scheme = generalize (TypeEnv.remove env x) final_ty in
-        let env = TypeEnv.extend env x scheme in
-        return (env, sub', final_ty)
-      | DLet (_, pat, _) ->
-        fail
-          (`Syntax_error
-             (Format.asprintf "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
+    | DLet (NonRec, pat, expr) ->
+      let* exp_sub, exp_ty = infer_expr env expr in
+      let env' = TypeEnv.apply env exp_sub in
+      let scheme = generalize env' exp_ty in
+      let* pat_env, pat_ty = infer_pattern env pat in
+      let* pat_env' = TypeEnv.extend_pat pat_env pat scheme in
+      let* sub = Subst.unify pat_ty exp_ty in
+      let* final_sub = Subst.compose sub exp_sub in
+      let final_env = TypeEnv.apply pat_env' final_sub in
+      let final_ty = Subst.apply final_sub exp_ty in
+      return (final_env, final_sub, final_ty)
+    | DLet (Rec, (PIdent x as pat), expr) | DLet (Rec, (PAnn (PIdent x, _) as pat), expr)
+      ->
+      let* pat_env, pat_ty = infer_pattern env pat in
+      let* exp_sub, exp_ty = infer_expr pat_env expr in
+      let pat_ty = Subst.apply exp_sub pat_ty in
+      let* sub = Subst.unify pat_ty exp_ty in
+      let* sub' = Subst.compose exp_sub sub in
+      let env = TypeEnv.apply pat_env sub' in
+      let final_ty = Subst.apply sub' exp_ty in
+      let scheme = generalize (TypeEnv.remove env x) final_ty in
+      let env = TypeEnv.extend env x scheme in
+      return (env, sub', final_ty)
+    | DLet (_, pat, _) ->
+      fail
+        (`Syntax_error
+          (Format.asprintf "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
   in
   infer_def
 ;;
@@ -532,8 +532,8 @@ let rec ids_from_pattern pat =
   | _ ->
     fail
       (`TODO
-         "unreachable? should fail before this either in TypeEnv.extend_pat (NonRec) or \
-          infer_def (Rec)")
+        "unreachable? should fail before this either in TypeEnv.extend_pat (NonRec) or \
+         infer_def (Rec)")
 ;;
 
 let infer_program (prog : Ast.definition list) =
