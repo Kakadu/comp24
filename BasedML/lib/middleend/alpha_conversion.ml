@@ -27,7 +27,7 @@ let get_id id ctx =
   | Some (old_name, counter) -> Printf.sprintf "%s_%d" old_name counter |> return
 ;;
 
-let alpha_convert_expr ctx = function
+let rec alpha_convert_expr ctx = function
   | EConstant const -> (EConstant const, ctx) |> return
   | EIdentifier ident ->
     let ctx_with_id =
@@ -35,12 +35,26 @@ let alpha_convert_expr ctx = function
     in
     let old_name, counter = generate_unique_name ident ctx_with_id 0 in
     ( EIdentifier (Printf.sprintf "%s_%d" old_name counter)
-    , { ctx_with_id with
-        name_mapping =
+    , { name_mapping =
           Base.Map.update ctx_with_id.name_mapping ident ~f:(fun existing_value ->
             match existing_value with
             | None | Some _ -> old_name, counter)
+      ; reserved_names =
+          Base.Set.add ctx.reserved_names (Printf.sprintf "%s_%d" old_name counter)
       } )
+    |> return
+  | EIfThenElse (guard_branch, then_branch, else_branch) ->
+    let* renamed_guard_branch, ctx_after_guard_branch =
+      alpha_convert_expr ctx guard_branch
+    in
+    let* renamed_then_branch, ctx_after_then_branch =
+      alpha_convert_expr ctx_after_guard_branch then_branch
+    in
+    let* renamed_else_branch, ctx_after_else_branch =
+      alpha_convert_expr ctx_after_then_branch else_branch
+    in
+    ( EIfThenElse (renamed_guard_branch, renamed_then_branch, renamed_else_branch)
+    , ctx_after_else_branch )
     |> return
   | _ -> fail "unimplemented yet"
 ;;
@@ -66,4 +80,10 @@ let%expect_test "" =
   test_alpha_for_expr "test";
   [%expect {|
     test_0 |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_expr "if test then test else test";
+  [%expect {|
+    (if test_0 then test_1 else test_2) |}]
 ;;
