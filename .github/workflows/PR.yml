@@ -132,7 +132,7 @@ jobs:
         run: |
           echo ${{ env.latest }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/projectname.txt
           echo ${{ github.event.pull_request.user.login }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/piarast.txt
-          echo ${{ github.event.pull_request.title }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PRtitle.txt
+          echo '${{ github.event.pull_request.title }}' > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PRtitle.txt
           echo ${{ github.event.number }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/PR_number.txt
           echo ${{ github.event.pull_request.head.sha }} > ${{ env.latest }}/${{ env.RDJSON_DIR_PATH }}/CI_COMMIT.txt
       # we use commit previous from head because HEAD is merge commit by some reason
