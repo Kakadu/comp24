@@ -106,7 +106,7 @@ let rec restore_cexpr ppf = function
     fprintf
       ppf
       "match %a with\n%a"
-      frestore_pattern
+      frestore_imm
       pat_head
       (fun ppf ->
         pp_list

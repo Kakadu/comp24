@@ -84,7 +84,7 @@ module Mapper (M : MONADERROR) = struct
     | EMatch (p, cases) ->
       List
         [ Atom "match"
-        ; pattern_to_sexpr p
+        ; expr_to_sexpr p
         ; List
             (List.map (fun (p, e) -> List [ pattern_to_sexpr p; expr_to_sexpr e ]) cases)
         ]
@@ -186,7 +186,7 @@ module Mapper (M : MONADERROR) = struct
       let* es' = map1 expr_of_sexpr es in
       return (ETuple es')
     | List [ Atom "match"; pat; List cases ] ->
-      let* pat' = pattern_of_sexpr pat in
+      let* pat' = expr_of_sexpr pat in
       let* cases' =
         map1
           (function

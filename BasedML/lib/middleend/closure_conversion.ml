@@ -80,14 +80,14 @@ let unbound_identifiers exp =
         exps
         ~init:((module String) |> Set.empty)
         ~f:(fun acc h -> Set.union acc (helper h))
-    | EMatch (pat, branches) ->
+    | EMatch (expr, branches) ->
       let unbound_in_braches =
         List.fold
           branches
           ~init:((module String) |> Set.empty)
           ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
       in
-      bind_pattern pat unbound_in_braches
+      Set.union unbound_in_braches (helper expr)
     | EConstraint (expr, _) -> helper expr
   in
   helper exp

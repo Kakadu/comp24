@@ -31,12 +31,14 @@ type prefix =
   | Tuple
   | Application
   | Constraint
+  | Matching
 
 let prefix_to_string = function
   | IfThenElse -> "anf_ifthenelse_"
   | Tuple -> "anf_tuple_"
   | Application -> "anf_app_"
   | Constraint -> "anf_constraint_"
+  | Matching -> "anf_matching_"
 ;;
 
 let get_new_num =
@@ -123,7 +125,7 @@ let rec anf ctx llexpr expr_with_hole =
         in
         let* built_app = build_app (imm_exp :: imm_rest) in
         return (ALetIn (PIdentifier fresh_name, built_app, aexp))))
-  | LLMatch (pat, cases) ->
+  | LLMatch (exp, cases) ->
     let rec convert_cases cases acc =
       match cases with
       | (pat, exp) :: tl ->
@@ -132,7 +134,11 @@ let rec anf ctx llexpr expr_with_hole =
       | [] -> return (List.rev acc)
     in
     let* cases = convert_cases cases [] in
-    return (ACExpr (CMatch (pat, cases)))
+    anf ctx exp (fun imm_exp ->
+      let* fresh_name = new_name Matching ctx in
+      let imm_id = ImmIdentifier fresh_name in
+      let* aexp = expr_with_hole imm_id in
+      return (ALetIn (PIdentifier fresh_name, CMatch (imm_exp, cases), aexp)))
   | LLLetIn (_, pat, outer, inner) ->
     let new_env = Lambda_lifting.collect_bindings_from_pat pat in
     anf new_env outer (fun imm_outer ->

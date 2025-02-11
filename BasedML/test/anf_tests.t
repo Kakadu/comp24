@@ -318,19 +318,21 @@
    0;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/016lists.ml
-  let rec length xs  = match xs with
+  let rec length xs  = let anf_matching_2 = match xs with
   | [] -> 0
   | (h :: tl) -> let anf_app_0 = length tl in
    let anf_app_1 = ( + ) 1 anf_app_0 in
-   anf_app_1;;
-  let rec ll_0 acc xs  = match xs with
+   anf_app_1 in
+   anf_matching_2;;
+  let rec ll_0 acc xs  = let anf_matching_2 = match xs with
   | [] -> acc
   | (h :: tl) -> let anf_app_0 = ( + ) acc 1 in
    let anf_app_1 = ll_0 anf_app_0 tl in
-   anf_app_1;;
+   anf_app_1 in
+   anf_matching_2;;
   let  length_tail  = let anf_app_0 = ll_0 0 in
    anf_app_0;;
-  let rec map f xs  = match xs with
+  let rec map f xs  = let anf_matching_21 = match xs with
   | [] -> []
   | (a :: []) -> let anf_app_0 = f a in
    let anf_app_1 = ( :: ) anf_app_0 [] in
@@ -356,33 +358,38 @@
    let anf_app_18 = ( :: ) anf_app_14 anf_app_17 in
    let anf_app_19 = ( :: ) anf_app_13 anf_app_18 in
    let anf_app_20 = ( :: ) anf_app_12 anf_app_19 in
-   anf_app_20;;
-  let rec append xs ys  = match xs with
+   anf_app_20 in
+   anf_matching_21;;
+  let rec append xs ys  = let anf_matching_2 = match xs with
   | [] -> ys
   | (x :: xs) -> let anf_app_0 = append xs ys in
    let anf_app_1 = ( :: ) x anf_app_0 in
-   anf_app_1;;
-  let rec ll_1 xs  = match xs with
+   anf_app_1 in
+   anf_matching_2;;
+  let rec ll_1 xs  = let anf_matching_2 = match xs with
   | [] -> []
   | (h :: tl) -> let anf_app_0 = ll_1 tl in
    let anf_app_1 = append h anf_app_0 in
-   anf_app_1;;
+   anf_app_1 in
+   anf_matching_2;;
   let  concat  = ll_1;;
-  let rec iter f xs  = match xs with
+  let rec iter f xs  = let anf_matching_2 = match xs with
   | [] -> ()
   | (h :: tl) -> let anf_app_0 = f h in
    let () = anf_app_0 in
    let anf_app_1 = iter f tl in
-   anf_app_1;;
+   anf_app_1 in
+   anf_matching_2;;
   let  ll_2 h a  = let anf_tuple_0 = (h, a) in
    anf_tuple_0;;
-  let rec cartesian xs ys  = match xs with
+  let rec cartesian xs ys  = let anf_matching_4 = match xs with
   | [] -> []
   | (h :: tl) -> let anf_app_0 = ll_2 h in
    let anf_app_1 = map anf_app_0 ys in
    let anf_app_2 = cartesian tl ys in
    let anf_app_3 = append anf_app_1 anf_app_2 in
-   anf_app_3;;
+   anf_app_3 in
+   anf_matching_4;;
   let  main  = let anf_app_0 = ( :: ) 3 [] in
    let anf_app_1 = ( :: ) 2 anf_app_0 in
    let anf_app_2 = ( :: ) 1 anf_app_1 in
