@@ -52,8 +52,7 @@ type pattern =
   (** [1, 2, 3] *)
   | PCons of
       (pattern[@gen Gen.(gen_pattern_sized 0)])
-      * (pattern[@gen Gen.(gen_pattern_sized (n / div))]) 
-      (** hd :: tl *)
+      * (pattern[@gen Gen.(gen_pattern_sized (n / div))]) (** hd :: tl *)
   | PAnn of
       (pattern[@gen Gen.(gen_pattern_sized (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** (x: int) *)

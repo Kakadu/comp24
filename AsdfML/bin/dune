@@ -9,6 +9,4 @@
  (modules quickcheck)
  (libraries qcheck AsdfML.Lib)
  (instrumentation
-  (backend bisect_ppx))
- )
- 
+  (backend bisect_ppx)))

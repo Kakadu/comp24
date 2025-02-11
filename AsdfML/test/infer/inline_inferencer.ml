@@ -118,11 +118,13 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let plus_one = fun x -> x + 1
     let is_neg = fun x -> x < 0
   |};
-  [%expect {|
+  [%expect
+    {|
     plus_one: int -> int
     is_neg: int -> bool 
   |}]
@@ -161,7 +163,8 @@ let%expect_test _ =
 
     let x = fact 5
   |};
-  [%expect {|
+  [%expect
+    {|
     helper: int -> (int -> 'o) -> 'o
     fact: int -> int
     x: int
@@ -183,7 +186,8 @@ let%expect_test _ =
       
       let x = fact_2 5
     |};
-  [%expect {|
+  [%expect
+    {|
     fact_2: int -> int
     x: int
   |}]
@@ -269,7 +273,8 @@ let%expect_test _ =
   let w = not z
   let v = not (not z)
   |};
-  [%expect {|
+  [%expect
+    {|
     x: int
     y: int
     z: bool
@@ -311,7 +316,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
     let (x, y, z) = (not true, 42) 
   |};
   [%expect
@@ -366,7 +372,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let (x: int list list) = [[[]]]";
-  [%expect {|  
+  [%expect
+    {|  
     Unification failed on int and 'a list|}]
 ;;
 
@@ -377,7 +384,8 @@ let%expect_test _ =
     | [] -> []
     | hd::tl -> (f hd) :: (map f tl) 
     |};
-  [%expect {|  
+  [%expect
+    {|  
     map: (int -> 'f) -> int list -> 'f list|}]
 ;;
 
@@ -408,14 +416,16 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let _ = ( 1,2 )
     |};
   [%expect {| _: (int * int) |}]
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
     let tup = (not true, 42, fun x -> x)
     let (x, y, z) = tup 
   |};
