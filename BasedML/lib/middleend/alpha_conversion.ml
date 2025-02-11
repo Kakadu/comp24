@@ -139,6 +139,22 @@ let rec alpha_convert_expr ctx = function
   | _ -> fail "unimplemented yet: expression"
 ;;
 
+let rec alpha_convert_decl_list ctx acc = function
+  | h :: tl ->
+    (match h with
+     | DSingleLet (rec_flag, DLet (pat, expr)) ->
+       (* TODO: What about let test = fun x -> ... ? *)
+       (* TODO: proccess differently for rec or not rec *)
+       let* new_pat, ctx_after_pat = alpha_convert_pattern ctx pat in
+       let* new_expr, _ = alpha_convert_expr ctx_after_pat expr in
+       alpha_convert_decl_list
+         ctx_after_pat
+         (DSingleLet (rec_flag, DLet (new_pat, new_expr)) :: acc)
+         tl
+     | _ -> fail "unimplemented")
+  | [] -> List.rev acc |> return
+;;
+
 let test_alpha_for_expr str =
   match Parser.parse Parser.p_exp str with
   | Ok expr ->
@@ -152,6 +168,24 @@ let test_alpha_for_expr str =
          0
      with
      | _, Ok (expr, _) -> Format.printf "%a" Restore_src.RestoreSrc.frestore_expr expr
+     | _, Error err -> Format.printf "%s" err)
+  | Error err -> Format.printf "%s" err
+;;
+
+let test_alpha_for_decls str =
+  match Parser.parse_program str with
+  | Ok decls ->
+    (match
+       run
+         (alpha_convert_decl_list
+            { name_mapping = (module Base.String) |> Base.Map.empty
+            ; reserved_names = (module Base.String) |> Base.Set.empty
+            }
+            []
+            decls)
+         0
+     with
+     | _, Ok lst -> Format.printf "%s" (Restore_src.RestoreSrc.restore_declarations lst)
      | _, Error err -> Format.printf "%s" err)
   | Error err -> Format.printf "%s" err
 ;;
@@ -180,4 +214,17 @@ let%expect_test "" =
   [%expect
     {|
     (let rec f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((( + ) ((( + ) ((( + ) a_0) b_0)) c_0)) f_0)))) in unbound_a_0) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let f = 5 + 5
+let g = f + 10
+let f = 6 + 6  
+|};
+  [%expect
+    {|
+    let  f_0 = ((( + ) 5) 5)
+    let  g_0 = ((( + ) f_0) 10)
+    let  f_1 = ((( + ) 6) 6) |}]
 ;;
