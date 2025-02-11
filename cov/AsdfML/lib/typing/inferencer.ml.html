@@ -1431,8 +1431,8 @@ module TypeEnv = struct
     | <span data-count="0">P</span>Const _, _ | <span data-count="0">P</span>List _, _ | <span data-count="0">P</span>Cons (_, _), _ | <span data-count="0">P</span>Tuple _, _ -&gt;
       fail
         (`Syntax_error
-          "only identifiers, tuples, wildcards and type annotations are supported in let \
-           bindings")
+           "only identifiers, tuples, wildcards and type annotations are supported in \
+            let bindings")
   ;;
 
   let apply env sub = <span data-count="645">m</span>ap env ~f:(Scheme.appl<span data-count="645">y</span> sub)
@@ -1519,161 +1519,161 @@ let infer =
   in
   let rec infer_pattern : TypeEnv.t -&gt; Ast.pattern -&gt; (TypeEnv.t * ty) R.t =
     fun env -&gt; function
-    | <span data-count="37">P</span>Const c -&gt;
-      let* c = infer_cons<span data-count="37">t</span> c in
-      <span data-count="37">r</span>eturn (env, c)
-    | <span data-count="2">P</span>Wild -&gt; fresh_var &gt;&gt;| fun v -&gt; <span data-count="2">e</span>nv, v
-    | <span data-count="284">P</span>Ident x -&gt;
-      let* fv = fresh_var in
-      <span data-count="284">l</span>et env' = TypeEnv.extend env x (VarSet.empty, fv) in
-      <span data-count="284">r</span>eturn (env', fv)
-    | <span data-count="3">P</span>Tuple xs -&gt;
-      List.fold_righ<span data-count="3">t</span>
-        xs
-        ~init:(retur<span data-count="3">n</span> (env, []))
-        ~f:(fun x acc -&gt;
-          <span data-count="9">l</span>et* env, fvs = acc in
-          <span data-count="9">l</span>et* env', fv = infer_patter<span data-count="9">n</span> env x in
-          <span data-count="9">r</span>eturn (env', fv :: fvs))
-      &gt;&gt;| fun (env, fvs) -&gt; <span data-count="3">e</span>nv, TTuple fvs
-    | <span data-count="0">P</span>List xs -&gt;
-      let* fv = fresh_var in
-      <span data-count="0">L</span>ist.fold
-        xs
-        ~init:(retur<span data-count="0">n</span> (env, fv))
-        ~f:(fun acc x -&gt;
-          <span data-count="0">l</span>et* env, fv = acc in
-          <span data-count="0">l</span>et* env', ty = infer_patter<span data-count="0">n</span> env x in
-          <span data-count="0">l</span>et* sub = unif<span data-count="0">y</span> fv ty in
-          <span data-count="0">l</span>et env'' = TypeEnv.apply env' sub in
-          <span data-count="0">l</span>et ty = Subst.apply sub fv in
-          <span data-count="0">r</span>eturn (env'', ty))
-    | <span data-count="20">P</span>Cons (hd, tl) -&gt;
-      let* env', ty' = infer_patter<span data-count="20">n</span> env hd in
-      <span data-count="20">l</span>et* env'', ty'' = infer_patter<span data-count="20">n</span> env' tl in
-      <span data-count="20">l</span>et* sub = Subst.unif<span data-count="20">y</span> (TList ty') ty'' in
-      <span data-count="20">l</span>et final_env = TypeEnv.apply env'' sub in
-      <span data-count="20">l</span>et final_ty = Subst.apply sub ty'' in
-      <span data-count="20">r</span>eturn (final_env, final_ty)
-    | <span data-count="17">P</span>Ann (pat, ann_ty) -&gt;
-      let* pat_env, ty = infer_patter<span data-count="17">n</span> env pat in
-      <span data-count="17">l</span>et* sub = unif<span data-count="17">y</span> ty (an_ty_to_t<span data-count="17">y</span> ann_ty) in
-      <span data-count="17">l</span>et final_env = TypeEnv.apply pat_env sub in
-      <span data-count="17">l</span>et final_ty = Subst.apply sub ty in
-      <span data-count="17">r</span>eturn (final_env, final_ty)
+      | <span data-count="37">P</span>Const c -&gt;
+        let* c = infer_cons<span data-count="37">t</span> c in
+        <span data-count="37">r</span>eturn (env, c)
+      | <span data-count="2">P</span>Wild -&gt; fresh_var &gt;&gt;| fun v -&gt; <span data-count="2">e</span>nv, v
+      | <span data-count="284">P</span>Ident x -&gt;
+        let* fv = fresh_var in
+        <span data-count="284">l</span>et env' = TypeEnv.extend env x (VarSet.empty, fv) in
+        <span data-count="284">r</span>eturn (env', fv)
+      | <span data-count="3">P</span>Tuple xs -&gt;
+        List.fold_righ<span data-count="3">t</span>
+          xs
+          ~init:(retur<span data-count="3">n</span> (env, []))
+          ~f:(fun x acc -&gt;
+            <span data-count="9">l</span>et* env, fvs = acc in
+            <span data-count="9">l</span>et* env', fv = infer_patter<span data-count="9">n</span> env x in
+            <span data-count="9">r</span>eturn (env', fv :: fvs))
+        &gt;&gt;| fun (env, fvs) -&gt; <span data-count="3">e</span>nv, TTuple fvs
+      | <span data-count="0">P</span>List xs -&gt;
+        let* fv = fresh_var in
+        <span data-count="0">L</span>ist.fold
+          xs
+          ~init:(retur<span data-count="0">n</span> (env, fv))
+          ~f:(fun acc x -&gt;
+            <span data-count="0">l</span>et* env, fv = acc in
+            <span data-count="0">l</span>et* env', ty = infer_patter<span data-count="0">n</span> env x in
+            <span data-count="0">l</span>et* sub = unif<span data-count="0">y</span> fv ty in
+            <span data-count="0">l</span>et env'' = TypeEnv.apply env' sub in
+            <span data-count="0">l</span>et ty = Subst.apply sub fv in
+            <span data-count="0">r</span>eturn (env'', ty))
+      | <span data-count="20">P</span>Cons (hd, tl) -&gt;
+        let* env', ty' = infer_patter<span data-count="20">n</span> env hd in
+        <span data-count="20">l</span>et* env'', ty'' = infer_patter<span data-count="20">n</span> env' tl in
+        <span data-count="20">l</span>et* sub = Subst.unif<span data-count="20">y</span> (TList ty') ty'' in
+        <span data-count="20">l</span>et final_env = TypeEnv.apply env'' sub in
+        <span data-count="20">l</span>et final_ty = Subst.apply sub ty'' in
+        <span data-count="20">r</span>eturn (final_env, final_ty)
+      | <span data-count="17">P</span>Ann (pat, ann_ty) -&gt;
+        let* pat_env, ty = infer_patter<span data-count="17">n</span> env pat in
+        <span data-count="17">l</span>et* sub = unif<span data-count="17">y</span> ty (an_ty_to_t<span data-count="17">y</span> ann_ty) in
+        <span data-count="17">l</span>et final_env = TypeEnv.apply pat_env sub in
+        <span data-count="17">l</span>et final_ty = Subst.apply sub ty in
+        <span data-count="17">r</span>eturn (final_env, final_ty)
   in
   let rec (infer_expr : TypeEnv.t -&gt; Ast.expr -&gt; (Subst.t * ty) R.t) =
     fun env -&gt; function
-    | <span data-count="170">E</span>Const c -&gt;
-      let* c = infer_cons<span data-count="170">t</span> c in
-      <span data-count="170">r</span>eturn (Subst.empty, c)
-    | <span data-count="391">E</span>Var x -&gt; lookup_env x env
-    | <span data-count="334">E</span>App (left, right) -&gt;
-      let* left_sub, left_ty = infer_exp<span data-count="334">r</span> env left in
-      <span data-count="333">l</span>et* right_sub, right_ty = infer_exp<span data-count="333">r</span> (TypeEnv.appl<span data-count="333">y</span> env left_sub) right in
-      <span data-count="333">l</span>et* fv = fresh_var in
-      <span data-count="333">l</span>et* sub = unif<span data-count="333">y</span> (Subst.appl<span data-count="333">y</span> right_sub left_ty) (right_ty ^-<span data-count="333">&gt;</span> fv) in
-      <span data-count="332">l</span>et final_ty = Subst.apply sub fv in
-      <span data-count="332">l</span>et* sub = Subst.compose_al<span data-count="332">l</span> [ sub; right_sub; left_sub ] in
-      <span data-count="332">r</span>eturn (sub, final_ty)
-    | <span data-count="16">E</span>IfElse (cond, th, el) -&gt;
-      let* s1, t1 = infer_exp<span data-count="16">r</span> env cond in
-      <span data-count="16">l</span>et* s2, t2 = infer_exp<span data-count="16">r</span> env th in
-      <span data-count="16">l</span>et* s3, t3 = infer_exp<span data-count="16">r</span> env el in
-      <span data-count="16">l</span>et* s4 = unif<span data-count="16">y</span> t1 bool_typ in
-      <span data-count="16">l</span>et* s5 = unif<span data-count="16">y</span> t2 t3 in
-      <span data-count="15">l</span>et* final_subst = Subst.compose_al<span data-count="15">l</span> [ s5; s4; s3; s2; s1 ] in
-      <span data-count="15">r</span>eturn (final_subst, Subst.appl<span data-count="15">y</span> s5 t2)
-    | <span data-count="99">E</span>Fun (pat, exp) -&gt;
-      let* env', pat_ty =
-        List.fol<span data-count="99">d</span>
-          pat
-          ~init:(retur<span data-count="99">n</span> (env, []))
-          ~f:(fun acc pat -&gt;
-            <span data-count="132">l</span>et* acc_env, acc_ty = acc in
-            <span data-count="132">l</span>et* env, ty = infer_patter<span data-count="132">n</span> acc_env pat in
-            <span data-count="132">r</span>eturn (env, ty :: acc_ty))
-      in
-      <span data-count="99">l</span>et* s, exp_ty = infer_exp<span data-count="99">r</span> env' exp in
-      <span data-count="98">l</span>et final_ty = exp_ty :: pat_ty |&gt; List.reduce_exn ~f:(fun l r -&gt; <span data-count="131">r</span> ^-&gt; l) in
-      <span data-count="98">l</span>et ty = Subst.apply s final_ty in
-      <span data-count="98">r</span>eturn (s, ty)
-    | <span data-count="33">E</span>LetIn (def, expr) -&gt;
-      let* let_env, let_sub, _ = infer_de<span data-count="33">f</span> env def in
-      <span data-count="33">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="33">r</span> let_env expr in
-      <span data-count="33">l</span>et* sub = Subst.compos<span data-count="33">e</span> let_sub exp_sub in
-      <span data-count="33">r</span>eturn (sub, exp_ty)
-    | <span data-count="7">E</span>Tuple xs -&gt;
-      List.fold_righ<span data-count="7">t</span>
-        xs
-        ~init:(retur<span data-count="7">n</span> (Subst.empty, []))
-        ~f:(fun x acc -&gt;
-          <span data-count="18">l</span>et* acc_sub, acc_t = acc in
-          <span data-count="18">l</span>et* s, t = infer_exp<span data-count="18">r</span> env x in
-          <span data-count="18">l</span>et* s' = Subst.compos<span data-count="18">e</span> acc_sub s in
-          <span data-count="18">r</span>eturn (s', t :: acc_t))
-      &gt;&gt;| fun (s, t) -&gt; <span data-count="7">s</span>, TTuple (List.ma<span data-count="7">p</span> t ~f:(Subst.appl<span data-count="7">y</span> s))
-    | <span data-count="17">E</span>List xs -&gt;
-      (match xs with
-       | <span data-count="0">[</span>] -&gt;
-         let* fv = fresh_var in
-         <span data-count="0">r</span>eturn (Subst.empty, TList fv)
-       | <span data-count="17">h</span>d :: tl -&gt;
-         List.fol<span data-count="17">d</span> tl ~init:(infer_exp<span data-count="17">r</span> env hd) ~f:(fun acc x -&gt;
-           <span data-count="18">l</span>et* acc_sub, acc_t = acc in
-           <span data-count="17">l</span>et* s, t = infer_exp<span data-count="17">r</span> env x in
-           <span data-count="17">l</span>et* s' = unif<span data-count="17">y</span> acc_t t in
-           <span data-count="16">l</span>et* sub = Subst.compose_al<span data-count="16">l</span> [ s'; s; acc_sub ] in
-           <span data-count="16">r</span>eturn (sub, acc_t)))
-      &gt;&gt;| fun (s, t) -&gt; <span data-count="16">s</span>, TList t
-    | <span data-count="12">E</span>Match (e, pe) -&gt;
-      let* match_sub, match_ty = infer_exp<span data-count="12">r</span> env e in
-      <span data-count="12">l</span>et* fv = fresh_var in
-      <span data-count="12">l</span>et* sub, ty =
-        List.fol<span data-count="12">d</span>
-          pe
-          ~init:(retur<span data-count="12">n</span> (match_sub, fv))
-          ~f:(fun acc (p, e) -&gt;
-            <span data-count="28">l</span>et* acc_sub, acc_ty = acc in
-            <span data-count="28">l</span>et* pat_env, pat_ty = infer_patter<span data-count="28">n</span> env p in
-            <span data-count="28">l</span>et* pat_sub = unif<span data-count="28">y</span> match_ty pat_ty in
-            <span data-count="28">l</span>et pat_env' = TypeEnv.apply pat_env pat_sub in
-            <span data-count="28">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="28">r</span> pat_env' e in
-            <span data-count="28">l</span>et* sub = unif<span data-count="28">y</span> exp_ty acc_ty in
-            <span data-count="28">l</span>et* final_subst = Subst.compose_al<span data-count="28">l</span> [ acc_sub; pat_sub; exp_sub; sub ] in
-            <span data-count="28">l</span>et final_ty = Subst.apply final_subst acc_ty in
-            <span data-count="28">r</span>eturn (final_subst, final_ty))
-      in
-      <span data-count="12">r</span>eturn (sub, ty)
+      | <span data-count="170">E</span>Const c -&gt;
+        let* c = infer_cons<span data-count="170">t</span> c in
+        <span data-count="170">r</span>eturn (Subst.empty, c)
+      | <span data-count="391">E</span>Var x -&gt; lookup_env x env
+      | <span data-count="334">E</span>App (left, right) -&gt;
+        let* left_sub, left_ty = infer_exp<span data-count="334">r</span> env left in
+        <span data-count="333">l</span>et* right_sub, right_ty = infer_exp<span data-count="333">r</span> (TypeEnv.appl<span data-count="333">y</span> env left_sub) right in
+        <span data-count="333">l</span>et* fv = fresh_var in
+        <span data-count="333">l</span>et* sub = unif<span data-count="333">y</span> (Subst.appl<span data-count="333">y</span> right_sub left_ty) (right_ty ^-<span data-count="333">&gt;</span> fv) in
+        <span data-count="332">l</span>et final_ty = Subst.apply sub fv in
+        <span data-count="332">l</span>et* sub = Subst.compose_al<span data-count="332">l</span> [ sub; right_sub; left_sub ] in
+        <span data-count="332">r</span>eturn (sub, final_ty)
+      | <span data-count="16">E</span>IfElse (cond, th, el) -&gt;
+        let* s1, t1 = infer_exp<span data-count="16">r</span> env cond in
+        <span data-count="16">l</span>et* s2, t2 = infer_exp<span data-count="16">r</span> env th in
+        <span data-count="16">l</span>et* s3, t3 = infer_exp<span data-count="16">r</span> env el in
+        <span data-count="16">l</span>et* s4 = unif<span data-count="16">y</span> t1 bool_typ in
+        <span data-count="16">l</span>et* s5 = unif<span data-count="16">y</span> t2 t3 in
+        <span data-count="15">l</span>et* final_subst = Subst.compose_al<span data-count="15">l</span> [ s5; s4; s3; s2; s1 ] in
+        <span data-count="15">r</span>eturn (final_subst, Subst.appl<span data-count="15">y</span> s5 t2)
+      | <span data-count="99">E</span>Fun (pat, exp) -&gt;
+        let* env', pat_ty =
+          List.fol<span data-count="99">d</span>
+            pat
+            ~init:(retur<span data-count="99">n</span> (env, []))
+            ~f:(fun acc pat -&gt;
+              <span data-count="132">l</span>et* acc_env, acc_ty = acc in
+              <span data-count="132">l</span>et* env, ty = infer_patter<span data-count="132">n</span> acc_env pat in
+              <span data-count="132">r</span>eturn (env, ty :: acc_ty))
+        in
+        <span data-count="99">l</span>et* s, exp_ty = infer_exp<span data-count="99">r</span> env' exp in
+        <span data-count="98">l</span>et final_ty = exp_ty :: pat_ty |&gt; List.reduce_exn ~f:(fun l r -&gt; <span data-count="131">r</span> ^-&gt; l) in
+        <span data-count="98">l</span>et ty = Subst.apply s final_ty in
+        <span data-count="98">r</span>eturn (s, ty)
+      | <span data-count="33">E</span>LetIn (def, expr) -&gt;
+        let* let_env, let_sub, _ = infer_de<span data-count="33">f</span> env def in
+        <span data-count="33">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="33">r</span> let_env expr in
+        <span data-count="33">l</span>et* sub = Subst.compos<span data-count="33">e</span> let_sub exp_sub in
+        <span data-count="33">r</span>eturn (sub, exp_ty)
+      | <span data-count="7">E</span>Tuple xs -&gt;
+        List.fold_righ<span data-count="7">t</span>
+          xs
+          ~init:(retur<span data-count="7">n</span> (Subst.empty, []))
+          ~f:(fun x acc -&gt;
+            <span data-count="18">l</span>et* acc_sub, acc_t = acc in
+            <span data-count="18">l</span>et* s, t = infer_exp<span data-count="18">r</span> env x in
+            <span data-count="18">l</span>et* s' = Subst.compos<span data-count="18">e</span> acc_sub s in
+            <span data-count="18">r</span>eturn (s', t :: acc_t))
+        &gt;&gt;| fun (s, t) -&gt; <span data-count="7">s</span>, TTuple (List.ma<span data-count="7">p</span> t ~f:(Subst.appl<span data-count="7">y</span> s))
+      | <span data-count="17">E</span>List xs -&gt;
+        (match xs with
+         | <span data-count="0">[</span>] -&gt;
+           let* fv = fresh_var in
+           <span data-count="0">r</span>eturn (Subst.empty, TList fv)
+         | <span data-count="17">h</span>d :: tl -&gt;
+           List.fol<span data-count="17">d</span> tl ~init:(infer_exp<span data-count="17">r</span> env hd) ~f:(fun acc x -&gt;
+             <span data-count="18">l</span>et* acc_sub, acc_t = acc in
+             <span data-count="17">l</span>et* s, t = infer_exp<span data-count="17">r</span> env x in
+             <span data-count="17">l</span>et* s' = unif<span data-count="17">y</span> acc_t t in
+             <span data-count="16">l</span>et* sub = Subst.compose_al<span data-count="16">l</span> [ s'; s; acc_sub ] in
+             <span data-count="16">r</span>eturn (sub, acc_t)))
+        &gt;&gt;| fun (s, t) -&gt; <span data-count="16">s</span>, TList t
+      | <span data-count="12">E</span>Match (e, pe) -&gt;
+        let* match_sub, match_ty = infer_exp<span data-count="12">r</span> env e in
+        <span data-count="12">l</span>et* fv = fresh_var in
+        <span data-count="12">l</span>et* sub, ty =
+          List.fol<span data-count="12">d</span>
+            pe
+            ~init:(retur<span data-count="12">n</span> (match_sub, fv))
+            ~f:(fun acc (p, e) -&gt;
+              <span data-count="28">l</span>et* acc_sub, acc_ty = acc in
+              <span data-count="28">l</span>et* pat_env, pat_ty = infer_patter<span data-count="28">n</span> env p in
+              <span data-count="28">l</span>et* pat_sub = unif<span data-count="28">y</span> match_ty pat_ty in
+              <span data-count="28">l</span>et pat_env' = TypeEnv.apply pat_env pat_sub in
+              <span data-count="28">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="28">r</span> pat_env' e in
+              <span data-count="28">l</span>et* sub = unif<span data-count="28">y</span> exp_ty acc_ty in
+              <span data-count="28">l</span>et* final_subst = Subst.compose_al<span data-count="28">l</span> [ acc_sub; pat_sub; exp_sub; sub ] in
+              <span data-count="28">l</span>et final_ty = Subst.apply final_subst acc_ty in
+              <span data-count="28">r</span>eturn (final_subst, final_ty))
+        in
+        <span data-count="12">r</span>eturn (sub, ty)
   and (infer_def : TypeEnv.t -&gt; Ast.definition -&gt; (TypeEnv.t * Subst.t * ty) R.t) =
     fun env -&gt; function
-    | <span data-count="118">D</span>Let (NonRec, pat, expr) -&gt;
-      let* exp_sub, exp_ty = infer_exp<span data-count="118">r</span> env expr in
-      <span data-count="115">l</span>et env' = TypeEnv.apply env exp_sub in
-      <span data-count="115">l</span>et scheme = generalize env' exp_ty in
-      <span data-count="115">l</span>et* pat_env, pat_ty = infer_patter<span data-count="115">n</span> env pat in
-      <span data-count="115">l</span>et* pat_env' = TypeEnv.extend_pa<span data-count="115">t</span> pat_env pat scheme in
-      <span data-count="114">l</span>et* sub = Subst.unif<span data-count="114">y</span> pat_ty exp_ty in
-      <span data-count="111">l</span>et* final_sub = Subst.compos<span data-count="111">e</span> sub exp_sub in
-      <span data-count="111">l</span>et final_env = TypeEnv.apply pat_env' final_sub in
-      <span data-count="111">l</span>et final_ty = Subst.apply final_sub exp_ty in
-      <span data-count="111">r</span>eturn (final_env, final_sub, final_ty)
-    | <span data-count="22">D</span>Let (Rec, (PIdent x as pat), expr) | <span data-count="0">D</span>Let (Rec, (PAnn (PIdent x, _) as pat), expr)
-      -&gt;
-      let* pat_env, pat_ty = infer_patter<span data-count="22">n</span> env pat in
-      <span data-count="22">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="22">r</span> pat_env expr in
-      <span data-count="21">l</span>et pat_ty = Subst.apply exp_sub pat_ty in
-      <span data-count="21">l</span>et* sub = Subst.unif<span data-count="21">y</span> pat_ty exp_ty in
-      <span data-count="21">l</span>et* sub' = Subst.compos<span data-count="21">e</span> exp_sub sub in
-      <span data-count="21">l</span>et env = TypeEnv.apply pat_env sub' in
-      <span data-count="21">l</span>et final_ty = Subst.apply sub' exp_ty in
-      <span data-count="21">l</span>et scheme = generalize (TypeEnv.remov<span data-count="21">e</span> env x) final_ty in
-      <span data-count="21">l</span>et env = TypeEnv.extend env x scheme in
-      <span data-count="21">r</span>eturn (env, sub', final_ty)
-    | <span data-count="0">D</span>Let (_, pat, _) -&gt;
-      fail
-        (`Syntax_error
-          (Format.asprint<span data-count="0">f</span> "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
+      | <span data-count="118">D</span>Let (NonRec, pat, expr) -&gt;
+        let* exp_sub, exp_ty = infer_exp<span data-count="118">r</span> env expr in
+        <span data-count="115">l</span>et env' = TypeEnv.apply env exp_sub in
+        <span data-count="115">l</span>et scheme = generalize env' exp_ty in
+        <span data-count="115">l</span>et* pat_env, pat_ty = infer_patter<span data-count="115">n</span> env pat in
+        <span data-count="115">l</span>et* pat_env' = TypeEnv.extend_pa<span data-count="115">t</span> pat_env pat scheme in
+        <span data-count="114">l</span>et* sub = Subst.unif<span data-count="114">y</span> pat_ty exp_ty in
+        <span data-count="111">l</span>et* final_sub = Subst.compos<span data-count="111">e</span> sub exp_sub in
+        <span data-count="111">l</span>et final_env = TypeEnv.apply pat_env' final_sub in
+        <span data-count="111">l</span>et final_ty = Subst.apply final_sub exp_ty in
+        <span data-count="111">r</span>eturn (final_env, final_sub, final_ty)
+      | <span data-count="22">D</span>Let (Rec, (PIdent x as pat), expr) | <span data-count="0">D</span>Let (Rec, (PAnn (PIdent x, _) as pat), expr)
+        -&gt;
+        let* pat_env, pat_ty = infer_patter<span data-count="22">n</span> env pat in
+        <span data-count="22">l</span>et* exp_sub, exp_ty = infer_exp<span data-count="22">r</span> pat_env expr in
+        <span data-count="21">l</span>et pat_ty = Subst.apply exp_sub pat_ty in
+        <span data-count="21">l</span>et* sub = Subst.unif<span data-count="21">y</span> pat_ty exp_ty in
+        <span data-count="21">l</span>et* sub' = Subst.compos<span data-count="21">e</span> exp_sub sub in
+        <span data-count="21">l</span>et env = TypeEnv.apply pat_env sub' in
+        <span data-count="21">l</span>et final_ty = Subst.apply sub' exp_ty in
+        <span data-count="21">l</span>et scheme = generalize (TypeEnv.remov<span data-count="21">e</span> env x) final_ty in
+        <span data-count="21">l</span>et env = TypeEnv.extend env x scheme in
+        <span data-count="21">r</span>eturn (env, sub', final_ty)
+      | <span data-count="0">D</span>Let (_, pat, _) -&gt;
+        fail
+          (`Syntax_error
+             (Format.asprint<span data-count="0">f</span> "Can't use %a in let rec expression" Pp_ast.pp_pattern pat))
   in
   infer_def
 ;;
@@ -1697,8 +1697,8 @@ let rec ids_from_pattern pat =
   | <span data-count="0">_</span> -&gt;
     fail
       (`TODO
-        "unreachable? should fail before this either in TypeEnv.extend_pat (NonRec) or \
-         infer_def (Rec)")
+         "unreachable? should fail before this either in TypeEnv.extend_pat (NonRec) or \
+          infer_def (Rec)")
 ;;
 
 let infer_program (prog : Ast.definition list) =
