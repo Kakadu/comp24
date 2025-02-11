@@ -1,0 +1,11 @@
+(executable
+ (name demoParse)
+ (modules demoParse)
+ (public_name demoParse)
+ (libraries ObaML stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
+(cram
+ (applies_to demoParse)
+ (deps ./demoParse.exe))

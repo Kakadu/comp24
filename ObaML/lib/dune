@@ -1,0 +1,24 @@
+(include_subdirs unqualified)
+
+(env
+ (dev
+  (flags
+   (:standard -w -26-32))))
+
+(library
+ (name ObaML)
+ (public_name ObaML)
+ (modules Ast Parser)
+ (libraries angstrom)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_deriving.eq))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(library
+ (name tests)
+ (modules ParserTests)
+ (libraries ObaML)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
