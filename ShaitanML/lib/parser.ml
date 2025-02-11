@@ -277,8 +277,13 @@ let pand = parse_op "&&"
 let por = parse_op "||"
 
 let expr =
+    let expr_with_type eexpr =
+    let* exp = ws *> lp *> eexpr in
+    let* constr = ws *> token ":" *> ws *> annot <* ws <* rp in
+    return (EConstraint (exp, constr))
+  in
   fix (fun expr ->
-    let term = choice [ pevar; peconst; pelist expr; parens expr ] in
+    let term = choice [ pevar; peconst; pelist expr; parens expr; expr_with_type expr; ] in
     let apply = chainl1 term (return eapply) in
     let fact = chainl1 apply (pmul <|> pdiv) in
     let sum = chainl1 fact (padd <|> psub) in
