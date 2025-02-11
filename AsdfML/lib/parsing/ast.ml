@@ -4,7 +4,7 @@
 
 open QCheck
 
-let div = 10
+let div = 15
 
 let gen_id =
   let open QCheck.Gen in

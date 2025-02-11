@@ -6,10 +6,14 @@ open Ast
 module Shrinker = struct
   open QCheck.Iter
 
-  let shrink_pat = function
-    | PCons (hd, tl) -> of_list [ hd; tl ]
-    | PTuple xs -> of_list xs
-    | PList xs -> of_list xs
+  let rec shrink_pat = function
+    | PCons (hd, tl) ->
+      of_list [ hd; tl ]
+      <+> (shrink_pat hd >|= fun hd -> p_cons hd tl)
+      <+> (shrink_pat tl >|= fun tl -> p_cons hd tl)
+    | PTuple xs | PList xs ->
+      let* xs = Shrink.list ~shrink:shrink_pat xs in
+      of_list xs
     | _ -> empty
   ;;
 
@@ -23,14 +27,15 @@ module Shrinker = struct
     | EIfElse (c, t, e) -> of_list [ c; t; e ]
     | EFun (p, e) ->
       let* p = shrink_pats p in
-      of_list [ e; EFun (p, e) ]
+      let* e_ = shrink_expr e in
+      of_list [ EFun (p, e_); e ]
     | ELetIn (d, e) ->
       let* d = shrink_def d in
-      of_list [ e; ELetIn (d, e) ]
+      let* e_ = shrink_expr e in
+      of_list [ ELetIn (d, e_); e ]
     | EList es | ETuple es ->
-      let* es = Shrink.list ~shrink:shrink_expr es in
       of_list es
-    | EMatch (e, pes) -> of_list (List.map (fun (_p, e) -> e) pes) <+> of_list [ e ]
+    | EMatch (e, cases) -> of_list (List.map (fun (_, e) -> e) cases) <+> of_list [ e ]
     | _ -> empty
 
   and shrink_def = function
