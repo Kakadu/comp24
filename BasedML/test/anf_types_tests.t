@@ -160,27 +160,27 @@
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/016lists.ml
   Name: iter
-  Original program: (('_pe6 -> unit) -> (('_pe6 list) -> unit))
+  Original program: (('_pdf -> unit) -> (('_pdf list) -> unit))
   ANF: (('_p11f -> unit) -> (('_p11f list) -> unit))
   
   Name: cartesian
-  Original program: (('_pe3 list) -> (('_pe4 list) -> (('_pe3 * '_pe4) list)))
+  Original program: (('_pdc list) -> (('_pdd list) -> (('_pdc * '_pdd) list)))
   ANF: (('_p11c list) -> (('_p11d list) -> (('_p11c * '_p11d) list)))
   
   Name: append
-  Original program: (('_pe2 list) -> (('_pe2 list) -> ('_pe2 list)))
+  Original program: (('_pdb list) -> (('_pdb list) -> ('_pdb list)))
   ANF: (('_p11b list) -> (('_p11b list) -> ('_p11b list)))
   
   Name: concat
-  Original program: ((('_pe5 list) list) -> ('_pe5 list))
+  Original program: ((('_pde list) list) -> ('_pde list))
   ANF: ((('_p11e list) list) -> ('_p11e list))
   
   Name: length_tail
-  Original program: (('_pe8 list) -> int)
+  Original program: (('_pe1 list) -> int)
   ANF: (('_p121 list) -> int)
   
   Name: length
-  Original program: (('_pe7 list) -> int)
+  Original program: (('_pe0 list) -> int)
   ANF: (('_p120 list) -> int)
   
   Name: main
@@ -188,7 +188,7 @@
   ANF: int
   
   Name: map
-  Original program: (('_pe9 -> '_pea) -> (('_pe9 list) -> ('_pea list)))
+  Original program: (('_pe2 -> '_pe3) -> (('_pe2 list) -> ('_pe3 list)))
   ANF: (('_p126 -> '_p127) -> (('_p126 list) -> ('_p127 list)))
   
   All types are correct
