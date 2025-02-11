@@ -95,8 +95,8 @@ let rec collect_uts_expr (expr : Ast.expr) (acc : SetString.t) : SetString.t =
     let acc = collect_uts_expr e1 acc in
     collect_uts_expr e2 acc
   | ETuple lst -> List.fold_left (fun acc_child e -> collect_uts_expr e acc_child) acc lst
-  | EMatch (pat, branches) ->
-    let acc = collect_uts_pattern pat acc in
+  | EMatch (exp, branches) ->
+    let acc = collect_uts_expr exp acc in
     List.fold_left (fun acc_child (_, e) -> collect_uts_expr e acc_child) acc branches
   | EConstraint (e, tp) ->
     let acc = collect_uts_type_name tp acc in

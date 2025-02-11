@@ -99,7 +99,7 @@ let rec infer_expr : Ast.expr -> (state, Ast.type_name) t =
     | Ast.ETuple exp_lst ->
       let* t_lst = map_list infer_expr exp_lst in
       return (Ast.TTuple t_lst)
-    | Ast.EMatch (scrutin, pat_exp_lst) -> infer_match scrutin pat_exp_lst
+    | Ast.EMatch (exp, pat_exp_lst) -> infer_match exp pat_exp_lst
     | Ast.EConstraint (exp, tp) ->
       let* exp_tp = infer_expr exp in
       write_subst exp_tp tp *> return exp_tp
@@ -136,11 +136,10 @@ and infer_ifthenelse : Ast.expr -> Ast.expr -> Ast.expr -> (state, Ast.type_name
   let* t3 = infer_expr e3 in
   write_subst t1 Ast.TBool *> write_subst tp t2 *> write_subst tp t3 *> return tp
 
-and infer_match : Ast.pattern -> (Ast.pattern * Ast.expr) list -> (state, Ast.type_name) t
-  =
-  fun scrutin pat_exp_lst ->
+and infer_match : Ast.expr -> (Ast.pattern * Ast.expr) list -> (state, Ast.type_name) t =
+  fun hexpr pat_exp_lst ->
   let* tp = fresh_tv in
-  let* scr_tp = infer_pattern PMCheck scrutin in
+  let* scr_tp = infer_expr hexpr in
   let* cur_env = read_env in
   let help (pat, exp) =
     let* pat_tp = infer_pattern PMAdd pat in
