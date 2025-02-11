@@ -465,6 +465,11 @@ let infer_exp =
       let* sub = Subst.compose_all [ s1; s2; s3 ] in
       let t = Subst.apply sub fresh in
       return (sub, t)
+      | EConstraint (exp, an) ->
+      let* sub1, t1 = helper env exp in
+      let* sub2 = Subst.unify t1 (annot_to_ty an) in
+      let* sub = Subst.compose sub1 sub2 in
+      return (sub, Subst.apply sub t1)
     | _ -> fail (`Unreachable_state __FUNCTION__)
   in
   helper
