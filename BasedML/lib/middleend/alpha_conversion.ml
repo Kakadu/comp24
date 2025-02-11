@@ -27,14 +27,26 @@ let get_id id ctx =
   | Some (old_name, counter) -> Printf.sprintf "%s_%d" old_name counter |> return
 ;;
 
-let rec alpha_convert_expr ctx = function
-  | EConstant const -> (EConstant const, ctx) |> return
-  | EIdentifier ident ->
+let rec collect_function_arguments collected = function
+  | EFunction (pat, next) -> collect_function_arguments (pat :: collected) next
+  | expr -> List.rev collected, expr
+;;
+
+let rec construct_function (patterns : pattern list) (body : expr) : expr =
+  match patterns with
+  | [] -> body
+  | p :: ps -> EFunction (p, construct_function ps body)
+;;
+
+let rec alpha_convert_pattern ctx = function
+  | PConstant const -> (PConstant const, ctx) |> return
+  | PWildCard -> (PWildCard, ctx) |> return
+  | PIdentifier ident ->
     let ctx_with_id =
       { ctx with reserved_names = Base.Set.add ctx.reserved_names ident }
     in
     let old_name, counter = generate_unique_name ident ctx_with_id 0 in
-    ( EIdentifier (Printf.sprintf "%s_%d" old_name counter)
+    ( PIdentifier (Printf.sprintf "%s_%d" old_name counter)
     , { name_mapping =
           Base.Map.update ctx_with_id.name_mapping ident ~f:(fun existing_value ->
             match existing_value with
@@ -43,6 +55,70 @@ let rec alpha_convert_expr ctx = function
           Base.Set.add ctx.reserved_names (Printf.sprintf "%s_%d" old_name counter)
       } )
     |> return
+  | PCons (left, right) ->
+    let* renamed_left, ctx_after_left = alpha_convert_pattern ctx left in
+    let* renamed_right, ctx_after_right = alpha_convert_pattern ctx_after_left right in
+    (PCons (renamed_left, renamed_right), ctx_after_right) |> return
+  | PConstraint (pat, typ) ->
+    let* renamed_pat, ctx_after_pat = alpha_convert_pattern ctx pat in
+    (PConstraint (renamed_pat, typ), ctx_after_pat) |> return
+  | _ -> fail "pattern: unimplemented yet"
+;;
+
+let rec alpha_convert_expr ctx = function
+  | EConstant const -> (EConstant const, ctx) |> return
+  | EIdentifier ident when Base.Set.mem Utils.stdlib_names ident ->
+    (EIdentifier ident, ctx) |> return
+  | EIdentifier ident ->
+    let ctx_with_id =
+      { ctx with reserved_names = Base.Set.add ctx.reserved_names ident }
+    in
+    (match Base.Map.find ctx.name_mapping ident with
+     | None ->
+       let old_name, counter = generate_unique_name ident ctx_with_id 0 in
+       ( EIdentifier (Printf.sprintf "unbound_%s_%d" old_name counter)
+       , { name_mapping =
+             Base.Map.update ctx_with_id.name_mapping ident ~f:(fun existing_value ->
+               match existing_value with
+               | None | Some _ -> old_name, counter)
+         ; reserved_names =
+             Base.Set.add
+               ctx.reserved_names
+               (Printf.sprintf "unbound_%s_%d" old_name counter)
+         } )
+       |> return
+     | Some (old_name, counter) ->
+       (EIdentifier (Printf.sprintf "%s_%d" old_name counter), ctx) |> return)
+  | ELetIn (flag, PIdentifier main_id, EFunction (fun_pat, fun_body), inner) ->
+    let rec args_rename_helper acc helper_context = function
+      | [] -> (List.rev acc, helper_context) |> return
+      | h :: tl ->
+        let* renamed_h, ctx_after_h = alpha_convert_pattern helper_context h in
+        args_rename_helper (renamed_h :: acc) ctx_after_h tl
+    in
+    let args, main_body = collect_function_arguments [] (EFunction (fun_pat, fun_body)) in
+    let* new_main_id, ctx_after_main_pat =
+      alpha_convert_pattern ctx (PIdentifier main_id)
+    in
+    (match flag with
+     | Rec ->
+       let* renamed_args, ctx_after_args =
+         args_rename_helper [] ctx_after_main_pat args
+       in
+       let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
+       let* renamed_inner, _ = alpha_convert_expr ctx_after_main_pat inner in
+       ( ELetIn
+           (flag, new_main_id, construct_function renamed_args renamed_body, renamed_inner)
+       , ctx )
+       |> return
+     | NotRec ->
+       let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
+       let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
+       let* renamed_inner, _ = alpha_convert_expr ctx_after_main_pat inner in
+       ( ELetIn
+           (flag, new_main_id, construct_function renamed_args renamed_body, renamed_inner)
+       , ctx )
+       |> return)
   | EIfThenElse (guard_branch, then_branch, else_branch) ->
     let* renamed_guard_branch, ctx_after_guard_branch =
       alpha_convert_expr ctx guard_branch
@@ -56,7 +132,11 @@ let rec alpha_convert_expr ctx = function
     ( EIfThenElse (renamed_guard_branch, renamed_then_branch, renamed_else_branch)
     , ctx_after_else_branch )
     |> return
-  | _ -> fail "unimplemented yet"
+  | EApplication (left, right) ->
+    let* renamed_left, ctx_after_left = alpha_convert_expr ctx left in
+    let* renamed_right, ctx_after_right = alpha_convert_expr ctx_after_left right in
+    (EApplication (renamed_left, renamed_right), ctx_after_right) |> return
+  | _ -> fail "unimplemented yet: expression"
 ;;
 
 let test_alpha_for_expr str =
@@ -79,11 +159,25 @@ let test_alpha_for_expr str =
 let%expect_test "" =
   test_alpha_for_expr "test";
   [%expect {|
-    test_0 |}]
+    unbound_test_0 |}]
 ;;
 
 let%expect_test "" =
   test_alpha_for_expr "if test then test else test";
   [%expect {|
-    (if test_0 then test_1 else test_2) |}]
+    (if unbound_test_0 then test_0 else test_0) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_expr "let f a b c = a + b + c + f in a";
+  [%expect
+    {|
+    (let  f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((( + ) ((( + ) ((( + ) a_0) b_0)) c_0)) unbound_f_0)))) in unbound_a_0) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_expr "let rec f a b c = a + b + c + f in a";
+  [%expect
+    {|
+    (let rec f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((( + ) ((( + ) ((( + ) a_0) b_0)) c_0)) f_0)))) in unbound_a_0) |}]
 ;;
