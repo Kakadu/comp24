@@ -326,3 +326,8 @@ let%expect_test _ =
   test {| let -123 = () |};
   [%expect {| let -123 = () |}]
 ;;
+
+let%expect_test _ =
+  test {| let oqifj = ([] (-1708307406375306875)) |};
+  [%expect {| |}]
+;;

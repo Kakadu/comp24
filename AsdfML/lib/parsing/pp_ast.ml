@@ -10,7 +10,8 @@ open Utils
 let pp_id = Ast.pp_id
 
 let rec pp_constant fmt = function
-  | CInt i -> fprintf fmt "%d" i
+  | CInt i when i >= 0 -> fprintf fmt "%d" i
+  | CInt i -> fprintf fmt "(%d)" i
   | CBool b -> fprintf fmt "%b" b
   | CUnit -> fprintf fmt "()"
   | CNil -> fprintf fmt "[]"
