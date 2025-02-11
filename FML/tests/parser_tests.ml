@@ -17,6 +17,20 @@ let%expect_test _ =
     {| [(SingleDecl (DDeclaration (NoRec, (PIdentifier "n"), (EConst (CInt 5)))))] |}]
 ;;
 
+
+let%expect_test _ =
+  parse_with_print {| let n = 5
+
+  let f x = x|};
+  [%expect
+    {|
+      [(SingleDecl (DDeclaration (NoRec, (PIdentifier "n"), (EConst (CInt 5)))));
+        (SingleDecl
+           (DDeclaration (NoRec, (PIdentifier "f"),
+              (EFun ((PIdentifier "x"), (EIdentifier "x"))))))
+        ] |}]
+;;
+
 let%expect_test _ =
   parse_with_print {| let flag = true|};
   [%expect
@@ -230,3 +244,49 @@ let%expect_test _ =
           ]
     |}]
 ;;
+
+let%expect_test _ = 
+parse_with_print {|let () = print_int (fac_cps 4 (fun print_int -> print_int))|};
+  [%expect
+  {|
+      Error: : end_of_input
+  |}]
+
+  let%expect_test _ = 
+parse_with_print {|let rec fac_cps n k =
+   if n=1 then k 1 else
+   fac_cps (n-1) (fun p -> k (p*n))|};
+  [%expect
+  {|
+      [(SingleDecl
+          (DDeclaration (Rec, (PIdentifier "fac_cps"),
+             (EFun ((PIdentifier "n"),
+                (EFun ((PIdentifier "k"),
+                   (EIf (
+                      (EApplication (
+                         (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
+                         (EConst (CInt 1)))),
+                      (EApplication ((EIdentifier "k"), (EConst (CInt 1)))),
+                      (EApplication (
+                         (EApplication ((EIdentifier "fac_cps"),
+                            (EApplication (
+                               (EApplication ((EIdentifier "( - )"),
+                                  (EIdentifier "n"))),
+                               (EConst (CInt 1))))
+                            )),
+                         (EFun ((PIdentifier "p"),
+                            (EApplication ((EIdentifier "k"),
+                               (EApplication (
+                                  (EApplication ((EIdentifier "( * )"),
+                                     (EIdentifier "p"))),
+                                  (EIdentifier "n")))
+                               ))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             )))
+        ]
+  |}]
+  

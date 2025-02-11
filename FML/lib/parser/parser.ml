@@ -152,6 +152,7 @@ let parse_pattern_wout_type =
     choice
       [ parens self
       ; parse_pany
+      ; parse_punit
       ; parse_pconst
       ; parse_pnill
       ; parse_pidentifier
@@ -338,11 +339,20 @@ let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declara
 
 (* ------------------ *)
 
+(* let parse input =
+  parse_string
+    ~consume:All
+    (sep_by (token ";;" *> skip_wspace <|> token "\n" *> skip_wspace) parse_program
+     <* option "" (token ";;" <|> token "\n")
+     <* skip_wspace)
+    input
+;; *)
+
+let del = token ";;" *> skip_wspace <|> skip_wspace
+
 let parse input =
   parse_string
     ~consume:All
-    (sep_by (token ";;" <|> token "\n") parse_program
-     <* option "" (token ";;" <|> token "\n")
-     <* skip_wspace)
+    (many1 (parse_program <* del))
     input
 ;;
