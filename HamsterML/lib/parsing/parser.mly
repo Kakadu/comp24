@@ -214,8 +214,6 @@ concat_expr:
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
 
-expr_constraint: expr; COLON; paramType     { EConstraint ($1, $3) }
-
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS     { e }
     | value                                             { EConst $1 }
@@ -267,6 +265,7 @@ pattern:
     | _tuple(tuple_pattern)                                 { Tuple $1 }
     | _list(list_pattern)                                   { List $1 }
     | concat(concat_pattern)                                { let a,b = $1 in ListConcat (a,b) }
+    | pattern_contraint                                     { $1 }
 
 
 concat (rule):
@@ -326,13 +325,8 @@ tuple_simple (rule):
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
 
-// (* a = 10 and b = 20 and ... *)
-// and_bind:
-//     | l = let_def                             { [l] }
-//     | h = let_def; LET_AND; tl = and_bind     { h :: tl }
+expr_constraint: 
+    | expr; COLON; paramType     { EConstraint ($1, $3) }
 
-// (* a = 10 and b = 20 and ... in a + b + ... *)
-// let_and_in_def: 
-//     | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
-//     | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
-//     | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)
+pattern_contraint:
+    | pattern; COLON; paramType     { Constraint ($1, $3) }
