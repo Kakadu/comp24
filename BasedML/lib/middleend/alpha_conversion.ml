@@ -67,14 +67,23 @@ let rec alpha_convert_pattern ctx = function
     let* renamed_pat, ctx_after_pat = alpha_convert_pattern ctx pat in
     (PConstraint (renamed_pat, typ), ctx_after_pat) |> return
   | PTuple pats ->
-    let rec tuple_helper ctx acc = function
-      | [] -> (List.rev acc, ctx) |> return
+    let rec tuple_helper ctx acc reserved = function
+      | [] -> (List.rev acc, ctx, reserved) |> return
       | h :: tl ->
         let* renamed_pat, new_ctx = alpha_convert_pattern ctx h in
-        tuple_helper new_ctx (renamed_pat :: acc) tl
+        tuple_helper
+          { new_ctx with reserved_names = ctx.reserved_names }
+          (renamed_pat :: acc)
+          (Base.Set.union reserved new_ctx.reserved_names)
+          tl
     in
-    let* renamed_pats, ctx_after_pats = tuple_helper ctx [] pats in
-    (PTuple renamed_pats, ctx_after_pats) |> return
+    let* renamed_pats, ctx_after_pats, reserved =
+      tuple_helper ctx [] ctx.reserved_names pats
+    in
+    ( PTuple renamed_pats
+    , { ctx_after_pats with reserved_names = Base.Set.union ctx.reserved_names reserved }
+    )
+    |> return
 ;;
 
 let rec args_rename_helper acc helper_context = function
@@ -286,6 +295,15 @@ let f (a, s, p) = let f (a, s, p) = a * s * p in a + s + p
   [%expect
     {|
     let  f_0 = (fun (a_0, s_0, p_0) -> (let  f_1 = (fun (a_1, s_1, p_1) -> ((mult_mlint ((mult_mlint a_1) s_1)) p_1)) in ((plus_mlint ((plus_mlint a_0) s_0)) p_0))) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let f (a, a) = 5
+|};
+  [%expect
+    {|
+    let  f_0 = (fun (a_0, a_0) -> 5) |}]
 ;;
 
 let%expect_test "" =
