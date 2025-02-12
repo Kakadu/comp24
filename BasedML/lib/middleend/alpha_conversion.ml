@@ -201,6 +201,24 @@ let rec alpha_convert_expr ctx = function
     ( EConstraint (new_expr, typ)
     , { ctx with reserved_names = ctx_after_expr.reserved_names } )
     |> return
+  | ETuple exprs ->
+    let rec tuple_helper ctx acc reserved = function
+      | [] -> (List.rev acc, ctx, reserved) |> return
+      | h :: tl ->
+        let* renamed_pat, new_ctx = alpha_convert_expr ctx h in
+        tuple_helper
+          { new_ctx with reserved_names = ctx.reserved_names }
+          (renamed_pat :: acc)
+          (Base.Set.union reserved new_ctx.reserved_names)
+          tl
+    in
+    let* renamed_pats, ctx_after_pats, reserved =
+      tuple_helper ctx [] ctx.reserved_names exprs
+    in
+    ( ETuple renamed_pats
+    , { ctx_after_pats with reserved_names = Base.Set.union ctx.reserved_names reserved }
+    )
+    |> return
   | _ -> fail "unimplemented yet: expression"
 ;;
 
@@ -289,6 +307,18 @@ let test_alpha_for_decls str =
 let%expect_test "" =
   test_alpha_for_decls {|
 let f a = let f a s = a + s in f a 5
+|};
+  [%expect
+    {|
+    let  f_0 = (fun a_0 -> (let  f_1 = (fun a_1 -> (fun s_0 -> ((plus_mlint a_1) s_0))) in ((f_1 a_0) 5))) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let m = 5
+let n = 6
+let m = 55
+let f (a, s, p) = (m, n, p) 
 |};
   [%expect
     {|
