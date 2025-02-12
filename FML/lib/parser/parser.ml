@@ -111,6 +111,7 @@ let parse_operators =
         ; token ">" *> return "( > )"
         ; token "<=" *> return "( <= )"
         ; token "<" *> return "( < )"
+        ; token "==" *> return "( == )"
         ; token "=" *> return "( = )"
         ; token "<>" *> return "( <> )"
         ; token "!=" *> return "( != )"
@@ -170,7 +171,8 @@ let parse_pattern_with_type =
     (skip_wspace *> char ':' *> parse_type <* char ')')
 ;;
 
-let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
+let parse_pattern =
+  parse_pattern_with_type <|> parse_pattern_wout_type
 
 (* ------------------------- *)
 
@@ -187,6 +189,7 @@ let sub = bin_op "-" (EIdentifier "( - )")
 let mul = bin_op "*" (EIdentifier "( * )")
 let div = bin_op "/" (EIdentifier "( / )")
 let eq = bin_op "=" (EIdentifier "( = )")
+let eqq = bin_op "==" (EIdentifier "( == )")
 let neq = bin_op "!=" (EIdentifier "( != )") <|> bin_op "<>" (EIdentifier "( <> )")
 let gt = bin_op ">" (EIdentifier "( > )")
 let gte = bin_op ">=" (EIdentifier "( >= )")
@@ -229,16 +232,6 @@ let parse_eif arg =
        (token "else" *> arg)
 ;;
 
-(* let parse_ematch pexpr =
-  let pcase pexpr =
-    lift2 (fun p e -> p, e) (token "|" *> parse_pattern) (token "->" *> pexpr)
-  in
-  lift2
-    (fun expr cases -> EMatch (expr, cases))
-    (token "match" *> pexpr <* token "with")
-    (many1 (pcase pexpr))
-;; *)
-
 let parse_ematch pexpr =
   let pcase pexpr =
     lift2 (fun p e -> p, e) (option "" (token "|") *> parse_pattern) (token "->" *> pexpr)
@@ -273,10 +266,7 @@ let parse_let pexpr =
     | _ -> return expr
   in
   let* in_expression = keyword "in" *> pexpr in
-  match decl with
-  | PIdentifier _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
-  | _ when List.length args <> 0 -> fail "Syntax error"
-  | _ -> return @@ ELetIn (rec_flag, decl, expression, in_expression)
+  return @@ ELetIn (rec_flag, decl, expression, in_expression)
 ;;
 
 let parse_expr =
@@ -291,6 +281,8 @@ let parse_expr =
       ; parse_elist expr
       ; parse_identifier
       ; parse_econst
+      ; parse_eif expr
+      ; parse_let expr
       ]
   in
   let apply =
@@ -304,8 +296,8 @@ let parse_expr =
   let expr = chainl1 apply (mul <|> div) in
   let expr = chainl1 expr (add <|> sub) in
   let expr = chainr1 expr parse_cons in
-  let expr = chainl1 expr (choice [ lte; lt; gte; gt; eq; neq; or_; and_ ]) in
-  choice [ parse_let expr; expr; parse_eif expr; parse_efun expr ]
+  let expr = chainl1 expr (choice [ lte; lt; gte; gt; eqq; eq; neq; or_; and_ ]) in
+  expr
 ;;
 
 (* ------------------------- *)
