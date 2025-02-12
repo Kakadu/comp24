@@ -342,3 +342,27 @@ let%expect_test _ =
       (( / ) x y)
     |}]
 ;;
+
+let%expect_test _ =
+  test_ll {|
+    let f x = x
+    let g = f
+    let h = g
+    let main = 
+      let x = 42 in
+      let fx = f x in
+      let gx = g x in
+      let hx = h x in
+      ()
+  |};
+  [%expect {|
+    let f x = x
+    let g = f
+    let h = g
+    let main = let x = 42 in
+      let fx = (f x) in
+      let gx = (g x) in
+      let hx = (h x) in
+      ()
+    |}]
+;;
