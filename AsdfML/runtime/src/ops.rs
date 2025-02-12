@@ -51,7 +51,7 @@ pub extern "C" fn ml_print_int(i: isize) { print!("{} ", i) }
 pub extern "C" fn ml_println_bool(b: isize) { println!("{}", b != 0) }
 
 #[no_mangle]
-pub extern "C" fn ml_print_newline() { println!("") }
+pub extern "C" fn ml_print_newline() { println!() }
 
 #[no_mangle]
 pub extern "C" fn ml_print_char(i: isize) { print!("{}", i as u8 as char) }
