@@ -33,7 +33,7 @@ let rec get_expr_free_vars = function
   | EIdentifier id -> IdentifierSet.singleton id
   | EFun ((p, ps), body) -> get_fun_free_vars (p :: ps) body
   | EFunction (case, cases) -> get_function_free_vars (case :: cases)
-  | EApplication (func, args) -> get_application_free_vars func args
+  | EApplication (func, arg1, args) -> get_application_free_vars func (arg1 :: args)
   | EIfThenElse (cond, b1, b2) -> get_if_then_else_free_vars cond b1 b2
   | EEmptyList -> IdentifierSet.empty
   | EListConstructor (e1, e2) -> IdentifierSet.union (get_expr_free_vars e1) (get_expr_free_vars e2)

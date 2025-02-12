@@ -16,10 +16,11 @@ let rec substitute_identifiers replacement_map expr =
     let patterns_identifiers = List.fold_left (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p)) IdentifierSet.empty (p :: ps) in
     let body' = substitute_identifiers (remove_keys_from_map patterns_identifiers replacement_map) body in
     EFun ((p, ps), body')
-  | EApplication (f, args) ->
+  | EApplication (f, arg1, args) ->
     let f' = substitute_identifiers replacement_map f in
+    let arg1' = substitute_identifiers replacement_map arg1 in
     let args' = List.map (substitute_identifiers replacement_map) args in
-    EApplication (f', args')
+    EApplication (f', arg1', args')
   | EListConstructor (l, r) ->
     let l = substitute_identifiers replacement_map l in
     let r = substitute_identifiers replacement_map r in
