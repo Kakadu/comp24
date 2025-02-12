@@ -143,7 +143,7 @@ let%expect_test _ =
     let main k =
       let add_k = `add_k_1 in
       let waste_of_space = 0 in
-      (( + ) 42 (add_k k 42 -42))
+      (( + ) 42 (add_k k 42 (-42)))
     |}]
 ;;
 

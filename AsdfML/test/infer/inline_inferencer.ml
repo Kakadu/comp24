@@ -162,7 +162,7 @@ let%expect_test _ =
     let x = fact 5
   |};
   [%expect {|
-    helper: int -> (int -> 'o) -> 'o
+    helper: int -> (int -> 'n) -> 'n
     fact: int -> int
     x: int
     |}]
