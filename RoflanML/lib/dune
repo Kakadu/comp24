@@ -1,7 +1,7 @@
 (library
  (name Roflanml_lib)
  (public_name RoflanML.Lib)
- (modules Ast Parser Typing Typechecker)
+ (modules Ast Parser Typing Typechecker Roflanml_stdlib Closure_conversion)
  (libraries base angstrom)
  (inline_tests)
  (preprocess
@@ -24,3 +24,5 @@
 ;  (public_name RoflanML.Main) ; публичное имя исполняемого файла
 ;  (modules Main) ; указание на модуль Main (соответствует файлу main.ml)
 ;  (libraries RoflanML.Lib base angstrom)) ; библиотеки, которые использует исполняемый файл
+
+(include_subdirs unqualified)

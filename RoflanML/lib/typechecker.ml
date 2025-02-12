@@ -222,6 +222,7 @@ end
 
 open R
 open R.Syntax
+open Roflanml_stdlib
 
 let unify = Subst.unify
 let fresh_var = fresh >>= fun x -> return (TVar x)
@@ -251,41 +252,36 @@ let lookup_env : TypeEnv.t -> id -> (Subst.t * ty, error) R.t =
   | None -> fail (UndeclaredVariable id)
 ;;
 
+let type_to_schema ty =
+  let rec helper = function
+    | TBase base -> TBase base, VarSet.empty
+    | TVar x -> TVar x, VarSet.singleton (module Base.Int) x
+    | TArrow (l, r) ->
+      let lty, lvarset = helper l in
+      let rty, rvarset = helper r in
+      TArrow (lty, rty), VarSet.union lvarset rvarset
+    | TTuple (ty1, ty2, tys) ->
+      let ty1, varset1 = helper ty1 in
+      let ty2, varset2 = helper ty2 in
+      let tys, varset =
+        Base.List.fold_right tys ~init:([], VarSet.empty) ~f:(fun ty (tys, varset) ->
+          let ty, varset1 = helper ty in
+          ty :: tys, VarSet.union varset varset1)
+      in
+      ( TTuple (ty1, ty2, tys)
+      , VarSet.union_list (module Base.Int) [ varset1; varset2; varset ] )
+    | TList ty ->
+      let ty, varset = helper ty in
+      TList ty, varset
+  in
+  let ty, varset = helper ty in
+  Scheme.S (varset, ty)
+;;
+
 let create_base_env ?(env = TypeEnv.empty) =
-  let int2int_binops = [ "+"; "-"; "*"; "/" ] in
-  let poly2bool_binops = [ "="; "<>"; ">"; ">="; "<"; "<=" ] in
-  let* env =
-    Base.List.fold
-      ~init:(return env)
-      ~f:(fun env op ->
-        let* env = env in
-        return
-          (TypeEnv.extend
-             env
-             (op, S (VarSet.empty, TArrow (TBase BInt, TArrow (TBase BInt, TBase BInt))))))
-      int2int_binops
-  in
-  let* env =
-    Base.List.fold
-      ~init:(return env)
-      ~f:(fun env op ->
-        let* env = env in
-        let* tv = fresh_var in
-        let* tv_id =
-          match tv with
-          | TVar id -> return id
-          | _ -> fail NotReachable
-        in
-        return
-          (TypeEnv.extend
-             env
-             ( op
-             , S
-                 ( VarSet.singleton (module Base.Int) tv_id
-                 , TArrow (tv, TArrow (tv, TBase BBool)) ) )))
-      poly2bool_binops
-  in
-  return env
+  Base.Map.fold RoflanML_Stdlib.empty ~init:(return env) ~f:(fun ~key ~data env ->
+    let* env = env in
+    return (TypeEnv.extend env (key, type_to_schema data)))
 ;;
 
 let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) R.t =
