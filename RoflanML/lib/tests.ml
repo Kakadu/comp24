@@ -373,6 +373,16 @@ module TypecheckerTests = struct
     [%expect {| 'a -> 'a -> bool -> bool |}]
   ;;
 
+  let%expect_test "stdlib print_int" =
+    pp_parse_and_infer "let print = print_int";
+    [%expect {| int -> unit |}]
+  ;;
+
+  let%expect_test "stdlib print_bool" =
+    pp_parse_and_infer "let print = print_bool";
+    [%expect {| bool -> unit |}]
+  ;;
+
   (* Errors *)
 
   let%expect_test "unbound value error in expression" =
@@ -421,5 +431,17 @@ module TypecheckerTests = struct
   let%expect_test "argument type mismatch in function application" =
     pp_parse_and_infer "let apply (g: int -> int) (x: bool) = g x";
     [%expect {| Failed to unify types int and bool |}]
+  ;;
+end
+
+module CCTests = struct
+  open Closure_conversion
+
+  let env = Base.Set.of_list (module Base.String) [ "+"; "-"; "*"; "/" ]
+
+  let pp_parse_and_cc input =
+    match Parser.parse_expr input with
+    | Result.Ok e -> Stdlib.Format.printf "%a" pp_expr (close_expr e env)
+    | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 end
