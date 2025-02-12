@@ -194,13 +194,12 @@ r_app_expr:
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
 
 op_expr: 
-    | value             { EConst $1 }
-    | id                { EVar $1 }
-    | application { $1 }
-    | operation         { $1 }
-    | _fun              { $1 }
-    | _if               { $1 }
-    | _match            { $1 }   
+    | value                                             { EConst $1 }
+    | id                                                { EVar $1 }
+    | application                                       { $1 }
+    | operation                                         { $1 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS       { $2 }   
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS          { $2 }
 
 concat_expr:
     | value                                                         { EConst $1 }
