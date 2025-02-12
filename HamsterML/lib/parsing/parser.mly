@@ -134,11 +134,10 @@ prog : list (declare) EOF { $1 }
 prog_expr : expr EOF { $1 }
 prog_pattern : pattern EOF { $1 }
 
-(* special expr for resolving tuple conflicts *)
-
 declare:
     | _let  { $1 }
 
+(* possible elements in list *)
 list_expr:
     | value                     { EConst $1 }
     | id                        { EVar $1 }
@@ -152,6 +151,7 @@ list_expr:
     | application               { $1 }
     | concat(concat_expr)       { let a,b = $1 in EListConcat (a,b) }
 
+(* possible elements in tuple *)
 tuple_expr:
     | value                                                         { EConst $1 }
     | id                                                            { EVar $1 }
@@ -164,6 +164,7 @@ tuple_expr:
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
 
+(* possible left parts of application *)
 l_app_expr: 
     | id                                                                    { EVar $1 } 
     | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                             { $2 }
@@ -172,6 +173,7 @@ l_app_expr:
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                           { $2 }
     | application                                                           { $1 }
 
+(* possible rights parts of application *)
 r_app_expr:
     | value                                                         { EConst $1 }
     | id                                                            { EVar $1 }
@@ -186,6 +188,7 @@ r_app_expr:
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
     | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
+(* all possible operands in arithmetic *)
 op_expr: 
     | value                                             { EConst $1 }
     | id                                                { EVar $1 }
@@ -194,6 +197,7 @@ op_expr:
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS       { $2 }   
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS          { $2 }
 
+(* possible elements in constructions like '1 :: [2; 3]' *)
 concat_expr:
     | value                                                         { EConst $1 }
     | id                                                            { EVar $1 }
@@ -207,6 +211,8 @@ concat_expr:
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
 
+(* all possible elements to which we can apply type constraints *)
+(* there is no 'fun' or 'let' because we don't support explicit arrow types *)
 constraint_expr:
     | value                                             { EConst $1 }
     | id                                                { EVar $1 }
@@ -216,6 +222,7 @@ constraint_expr:
     | _match                                            { $1 }   
     | application                                       { $1 }
 
+(* union of all rules that can be called an expression *)
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS     { e }
     | value                                             { EConst $1 }
@@ -232,14 +239,9 @@ expr:
     | _let                                              { $1 }
     | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
 
-tuple_pattern:
-    | value                                                         { Const $1 } 
-    | id                                                            { Var $1 }
-    | WILDCARD                                                      { Wildcard }
-    | prefix_bop                                                    { Operation $1 }
-    | _list(list_pattern)                                           { List $1 }
-    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+(* -- same for patterns, but a little simpler -- *)
 
+(* possible elements in list *)
 list_pattern:
     | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
     | value                                                 { Const $1 } 
@@ -249,6 +251,16 @@ list_pattern:
     | _list(list_pattern)                                   { List $1 }
     | _tuple(tuple_pattern)                                 { Tuple $1 }
 
+(* possible elements in tuple *)
+tuple_pattern:
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
+    | _list(list_pattern)                                           { List $1 }
+    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+
+(* possible elements in constructions like '1 :: [2; 3]' *)
 concat_pattern:
     | value                                                         { Const $1 }
     | id                                                            { Var $1 }
@@ -258,44 +270,48 @@ concat_pattern:
     | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
     | WILDCARD                                                      { Wildcard }
 
+(* all possible elements to which we can apply type constraints *)
+(* we can't apply type constraints to functions 'fun x y z : int -> ...' *)
 constraint_pattern:
-    | value                                                 { Const $1 } 
-    | id                                                    { Var $1 }
-    | WILDCARD                                              { Wildcard }
-    | prefix_bop                                            { Operation $1 }
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
 
+(* union of all rules that can be called a pattern *)
 pattern:
-    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
-    | value                                                 { Const $1 } 
-    | id                                                    { Var $1 }
-    | WILDCARD                                              { Wildcard }
-    | prefix_bop                                            { Operation $1 }
-    | _tuple(tuple_pattern)                                 { Tuple $1 }
-    | _list(list_pattern)                                   { List $1 }
-    | concat(concat_pattern)                                { let a,b = $1 in ListConcat (a,b) }
-    | _constraint (constraint_pattern)                      { let a,b = $1 in Constraint (a,b)  }
+    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS              { p }
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
+    | _tuple(tuple_pattern)                                         { Tuple $1 }
+    | _list(list_pattern)                                           { List $1 }
+    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
+(* --- other rules --- *)
 
 concat (rule):
-    | rule; DOUBLE_COLON; rule                                  { $1, $3 }
-    | LEFT_PARENTHESIS; concat (rule); RIGHT_PARENTHESIS        { $2 }
+    | rule; DOUBLE_COLON; rule                                      { $1, $3 }
+    | LEFT_PARENTHESIS; concat (rule); RIGHT_PARENTHESIS            { $2 }
 
 (* default operations like "1 + 2" *)
 operation:
-    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS           { $2 }
-    | e1 = op_expr; op = bop; e2 = op_expr                     { Application ( Application (EOperation (Binary op), e1), e2 ) }
-    | op = uop; e = op_expr                                    { Application (EOperation (Unary op), e) } 
+    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
+    | e1 = op_expr; op = bop; e2 = op_expr                          { Application ( Application (EOperation (Binary op), e1), e2 ) }
+    | op = uop; e = op_expr                                         { Application (EOperation (Unary op), e) } 
 
 application:
-    | LEFT_PARENTHESIS; a = application; RIGHT_PARENTHESIS      { a }
-    | f = l_app_expr; a = r_app_expr                            { Application (f, a) }
+    | LEFT_PARENTHESIS; a = application; RIGHT_PARENTHESIS          { a }
+    | f = l_app_expr; a = r_app_expr                                { Application (f, a) }
 
 _match:
     | MATCH; e = expr; WITH; cases = separated_nonempty_list(BAR, match_case)           { Match (e, cases) }
     | MATCH; e = expr; WITH; BAR; cases = separated_nonempty_list(BAR, match_case)      { Match (e, cases) }
     | LEFT_PARENTHESIS; m = _match; RIGHT_PARENTHESIS                                   { m }
 
-%inline match_case: p = pattern; ARROW; e = expr    { (p, e) }
+%inline match_case: p = pattern; ARROW; e = expr            { (p, e) }
 
 %inline _if:
     | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr       { If (e1, e2, Some e3) }
@@ -303,7 +319,7 @@ _match:
 
 (* let (+) x y = ... *)
 %inline prefix_bop:
-    | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS     { Binary op }
+    | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS         { Binary op }
     
 %inline _fun:
     | FUN; vls = nonempty_list(pattern); ARROW; e = expr    { Fun (vls, e) }
