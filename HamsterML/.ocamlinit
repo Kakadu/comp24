@@ -20,6 +20,12 @@ let parse (s : string) : expr =
   ast
 ;;
 
+let parse_pattern (s : string) : pattern =
+  let lexbuf = Lexing.from_string s in
+  let ast = HamsterML__Parser.prog_pattern HamsterML__Lexer.read lexbuf in
+  ast
+;;
+
 (* let typecheck (s : string) =
   let std = Format.std_formatter in
   let x = List.hd (parse s) in
