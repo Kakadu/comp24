@@ -519,4 +519,65 @@ module CCTests = struct
          ))
       |}]
   ;;
+
+  let%expect_test "fun closure" =
+    pp_parse_and_cc "let x = 1 in let y = 2 in fun z -> x + y + z";
+    [%expect
+      {|
+      (ELet (NonRec, "x", (EConst (CInt 1)),
+         (Some (ELet (NonRec, "y", (EConst (CInt 2)),
+                  (Some (EApp (
+                           (EApp (
+                              (EFun (("x", None),
+                                 (EFun (("y", None),
+                                    (EFun (("z", None),
+                                       (EApp (
+                                          (EApp ((EVar "+"),
+                                             (EApp (
+                                                (EApp ((EVar "+"), (EVar "x"))),
+                                                (EVar "y")))
+                                             )),
+                                          (EVar "z")))
+                                       ))
+                                    ))
+                                 )),
+                              (EVar "x"))),
+                           (EVar "y"))))
+                  )))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "fun chain closure" =
+    pp_parse_and_cc "let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
+    [%expect
+      {|
+      (ELet (NonRec, "x", (EConst (CInt 1)),
+         (Some (EApp (
+                  (EApp (
+                     (EFun (("x", None),
+                        (EFun (("f", None),
+                           (EFun (("y", None),
+                              (EApp (
+                                 (EApp ((EVar "+"),
+                                    (EApp (
+                                       (EApp ((EVar "+"),
+                                          (EApp ((EVar "f"), (EVar "x"))))),
+                                       (EVar "x")))
+                                    )),
+                                 (EConst (CInt 1))))
+                              ))
+                           ))
+                        )),
+                     (EVar "x"))),
+                  (EApp (
+                     (EFun (("x", None),
+                        (EFun (("z", None),
+                           (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "z")))))
+                        )),
+                     (EVar "x")))
+                  )))
+         ))
+      |}]
+  ;;
 end
