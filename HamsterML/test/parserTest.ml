@@ -189,37 +189,105 @@ let%test _ =
   = Match (EVar "x", [ Const (Int 1), EConst (Int 10); Wildcard, EConst (Int 20) ])
 ;;
 
+let%test _ =
+  parse "match xs with\n  | [] -> 0\n  | h::tl -> 1 + length tl"
+  = Match
+      ( EVar "xs"
+      , [ List [], EConst (Int 0)
+        ; ( ListConcat (Var "h", Var "tl")
+          , Application
+              ( Application (EOperation (Binary ADD), EConst (Int 1))
+              , Application (EVar "length", EVar "tl") ) )
+        ] )
+;;
+
+let%test _ =
+  parse "match xs with\n  | [] -> acc\n  | h::tl -> helper (acc + 1) tl"
+  = Match
+      ( EVar "xs"
+      , [ List [], EVar "acc"
+        ; ( ListConcat (Var "h", Var "tl")
+          , Application
+              ( Application
+                  ( EVar "helper"
+                  , Application
+                      (Application (EOperation (Binary ADD), EVar "acc"), EConst (Int 1))
+                  )
+              , EVar "tl" ) )
+        ] )
+;;
+
+let%test _ =
+  parse
+    "match xs with\n\
+    \  | [] -> []\n\
+    \  | a::[] -> [f a]\n\
+    \  | a::b::[] -> [f a; f b]\n\
+    \  | a::b::c::[] -> [f a; f b; f c]\n\
+    \  | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl"
+  = Match
+      ( EVar "xs"
+      , [ List [], EList []
+        ; ListConcat (Var "a", List []), EList [ Application (EVar "f", EVar "a") ]
+        ; ( ListConcat (Var "a", ListConcat (Var "b", List []))
+          , EList [ Application (EVar "f", EVar "a"); Application (EVar "f", EVar "b") ] )
+        ; ( ListConcat (Var "a", ListConcat (Var "b", ListConcat (Var "c", List [])))
+          , EList
+              [ Application (EVar "f", EVar "a")
+              ; Application (EVar "f", EVar "b")
+              ; Application (EVar "f", EVar "c")
+              ] )
+        ; ( ListConcat
+              ( Var "a"
+              , ListConcat (Var "b", ListConcat (Var "c", ListConcat (Var "d", Var "tl")))
+              )
+          , EListConcat
+              ( Application (EVar "f", EVar "a")
+              , EListConcat
+                  ( Application (EVar "f", EVar "b")
+                  , EListConcat
+                      ( Application (EVar "f", EVar "c")
+                      , EListConcat
+                          ( Application (EVar "f", EVar "d")
+                          , Application (Application (EVar "map", EVar "f"), EVar "tl") )
+                      ) ) ) )
+        ] )
+;;
+
+let%test _ =
+  parse "match xs with\n    | [] -> []\n    | h::tl -> append h (helper tl)"
+  = Match
+      ( EVar "xs"
+      , [ List [], EList []
+        ; ( ListConcat (Var "h", Var "tl")
+          , Application
+              ( Application (EVar "append", EVar "h")
+              , Application (EVar "helper", EVar "tl") ) )
+        ] )
+;;
+
 (* let%test _ = parse 
-"match xs with
-  | [] -> 0
-  | h::tl -> 1 + length tl" = 
+" match xs with [] -> () | h::tl -> let () = f h" = *)
 
-let%test _ = parse 
-"match xs with
-  | [] -> acc
-  | h::tl -> helper (acc + 1) tl" = 
-
-
-let%test _ = parse 
-"match xs with
-  | [] -> []
-  | a::[] -> [f a]
-  | a::b::[] -> [f a; f b]
-  | a::b::c::[] -> [f a; f b; f c]
-  | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl" =
-
-let%test _ = parse 
-"match xs with
-    | [] -> []
-    | h::tl -> append h (helper tl)"
-
-let%test _ = parse 
-" match xs with [] -> () | h::tl -> let () = f h" =
-
-let%test _ = parse 
-"match xs with
-  | [] -> []
-  | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)" =   *)
+let%test _ =
+  parse
+    "match xs with\n\
+    \  | [] -> []\n\
+    \  | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)"
+  = Match
+      ( EVar "xs"
+      , [ List [], EList []
+        ; ( ListConcat (Var "h", Var "tl")
+          , Application
+              ( Application
+                  ( EVar "append"
+                  , Application
+                      ( Application
+                          (EVar "map", Fun ([ Var "a" ], ETuple [ EVar "h"; EVar "a" ]))
+                      , EVar "ys" ) )
+              , Application (Application (EVar "cartesian", EVar "tl"), EVar "ys") ) )
+        ] )
+;;
 
 (* --- PATTERNS --- *)
 
