@@ -24,6 +24,9 @@ let start_env =
     ; ("( <= )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( != )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
     ; ("( <> )", TVar (-1) @-> TVar (-1) @-> TGround GTBool)
+    ; ("U-", TGround GTInt @-> TGround GTInt)
+    ; ("U+", TGround GTInt @-> TGround GTInt)
+    ; ("UNot", TGround GTBool @-> TGround GTBool)
     ; ("print_int", TGround GTInt @-> TGround GTUnit)
     ; ("print_bool", TGround GTBool @-> TGround GTUnit)
     ]

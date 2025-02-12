@@ -4,6 +4,8 @@
 
 open ArML_lib.Runner
 
+(* Binary operartions *)
+
 let%expect_test _ =
   inference_expression {| 1 + 1 |};
   [%expect {|
@@ -117,3 +119,44 @@ let%expect_test _ =
   [%expect {|
     - : bool |}]
 ;;
+
+(* ---------------- *)
+
+(* Unary operartions *)
+
+let%expect_test _ =
+  inference_expression {| -1 |};
+  [%expect
+    {|
+    - : int |}]
+;;
+
+let%expect_test _ =
+  inference_expression {| +1 |};
+  [%expect
+    {|
+    - : int |}]
+;;
+
+let%expect_test _ =
+  inference_expression {| not true |};
+  [%expect
+    {|
+    - : bool |}]
+;;
+
+let%expect_test _ =
+  inference_expression {| fun f -> f (-1) |};
+  [%expect
+    {|
+    - : (int -> 'a) -> 'a |}]
+;;
+
+let%expect_test _ =
+  inference_expression {| not (1 + (-2) * (+3) >= 3) |};
+  [%expect
+    {|
+    - : bool |}]
+;;
+
+(* ---------------- *)

@@ -4,6 +4,8 @@
 
 open ArML_lib.Runner
 
+(* Binary operations *)
+
 let%expect_test _ =
   parse_expression {| 1 + 1 |};
   [%expect
@@ -126,3 +128,72 @@ let%expect_test _ =
          ]
        )) |}]
 ;;
+
+(* ---------------- *)
+
+(* Unary operartions *)
+
+let%expect_test _ =
+  parse_expression {| -1 |};
+  [%expect
+    {|
+    (EApplication ((EIdentifier (Id "U-")), (EConstant (CInt 1)), [])) |}]
+;;
+
+let%expect_test _ =
+  parse_expression {| +1 |};
+  [%expect
+    {|
+    (EApplication ((EIdentifier (Id "U+")), (EConstant (CInt 1)), [])) |}]
+;;
+
+let%expect_test _ =
+  parse_expression {| not true |};
+  [%expect
+    {|
+    (EApplication ((EIdentifier (Id "UNot")), (EConstant (CBool true)), [])) |}]
+;;
+
+let%expect_test _ =
+  parse_expression {| f (-1) |};
+  [%expect
+    {|
+    (EApplication ((EIdentifier (Id "f")),
+       (EApplication ((EIdentifier (Id "U-")), (EConstant (CInt 1)), [])),
+       [])) |}]
+;;
+
+let%expect_test _ =
+  parse_expression {| fun f x -> - (f (-x)) |};
+  [%expect
+    {|
+    (EFun (((PVar (Id "f")), [(PVar (Id "x"))]),
+       (EApplication ((EIdentifier (Id "U-")),
+          (EApplication ((EIdentifier (Id "f")),
+             (EApplication ((EIdentifier (Id "U-")), (EIdentifier (Id "x")), [])),
+             [])),
+          []))
+       )) |}]
+;;
+
+let%expect_test _ =
+  parse_expression {| not (1 + (-2) * (+3) >= 3) |};
+  [%expect
+    {|
+    (EApplication ((EIdentifier (Id "UNot")),
+       (EApplication ((EIdentifier (Id "( >= )")),
+          (EApplication ((EIdentifier (Id "( + )")), (EConstant (CInt 1)),
+             [(EApplication ((EIdentifier (Id "( * )")),
+                 (EApplication ((EIdentifier (Id "U-")), (EConstant (CInt 2)),
+                    [])),
+                 [(EApplication ((EIdentifier (Id "U+")), (EConstant (CInt 3)),
+                     []))
+                   ]
+                 ))
+               ]
+             )),
+          [(EConstant (CInt 3))])),
+       [])) |}]
+;;
+
+(* ---------------- *)

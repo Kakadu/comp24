@@ -15,6 +15,7 @@ let parse_declaration p =
       [ p.parse_tuple p
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_type_defition p
       ; p.parse_list p
       ; p.parse_application p

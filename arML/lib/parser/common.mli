@@ -14,6 +14,7 @@ type dispatch =
   ; parse_function : dispatch -> expression Angstrom.t
   ; parse_application : dispatch -> expression Angstrom.t
   ; parse_binary_operation : dispatch -> expression Angstrom.t
+  ; parse_unary_operation : dispatch -> expression Angstrom.t
   ; parse_match_with : dispatch -> expression Angstrom.t
   ; parse_let_in : dispatch -> expression Angstrom.t
   ; parse_if_then_else : dispatch -> expression Angstrom.t

@@ -43,6 +43,7 @@ let parse_fun p =
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_list p
@@ -98,6 +99,7 @@ let parse_function p =
       ; self
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_list p
@@ -139,6 +141,7 @@ let parse_tuple p =
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_list p
       ; p.parse_fun p
@@ -175,6 +178,7 @@ let parse_list p =
       ; p.parse_list_constructor p
       ; self
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p
@@ -206,6 +210,7 @@ let parse_list_constructor p =
     choice
       [ p.parse_type_defition p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
       ; p.parse_fun p
@@ -248,6 +253,7 @@ let parse_if_then_else p =
     choice
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
+      ; p.parse_unary_operation p
       ; p.parse_binary_operation p
       ; p.parse_application p
       ; p.parse_tuple p
@@ -296,6 +302,7 @@ let parse_let_in p =
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
       ; p.parse_tuple p
+      ; p.parse_unary_operation p
       ; p.parse_binary_operation p
       ; p.parse_application p
       ; p.parse_list p
@@ -373,6 +380,7 @@ let parse_match_with p =
       [ p.parse_type_defition p
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; self
       ; p.parse_application p
       ; p.parse_tuple p
@@ -423,6 +431,7 @@ let parse_application p =
       ; parens @@ p.parse_let_in p
       ; parens @@ p.parse_if_then_else p
       ; parens @@ p.parse_match_with p
+      ; parens @@ p.parse_unary_operation p
       ; parens @@ self
       ]
   in
@@ -432,6 +441,7 @@ let parse_application p =
       ; parens @@ p.parse_fun p
       ; parens @@ p.parse_list_constructor p
       ; parens @@ p.parse_binary_operation p
+      ; parens @@ p.parse_unary_operation p
       ; p.parse_tuple p
       ; p.parse_list p
       ; p.parse_function p
@@ -461,6 +471,7 @@ let parse_binary_operation p =
   let parse_expr =
     choice
       [ p.parse_type_defition p
+      ; p.parse_unary_operation p
       ; p.parse_constant_expr
       ; p.parse_application p
       ; p.parse_identifier_expr
@@ -526,6 +537,46 @@ let parse_binary_operation p =
 
 (* ---------------- *)
 
+(* Unary operation parser *)
+
+let parse_unary_operation p =
+  fix @@ fun self ->
+  skip_wspace
+  *>
+  let parse_expr =
+    choice
+      [ p.parse_type_defition p
+      ; p.parse_constant_expr
+      ; p.parse_application p
+      ; p.parse_identifier_expr
+      ; parens self
+      ; parens @@ p.parse_binary_operation p
+      ; parens @@ p.parse_let_in p
+      ; parens @@ p.parse_if_then_else p
+      ]
+  in
+
+  let unary_plus = skip_wspace *> char '+' *> (return @@ EIdentifier (Id "U+")) in
+  let unary_minus = skip_wspace *> char '-' *> (return @@ EIdentifier (Id "U-")) in
+  let unary_not = skip_wspace *> string "not" *> (return @@ EIdentifier (Id "UNot")) in
+
+  let unary_operations =
+    choice [ unary_plus; unary_minus; unary_not ]
+  in
+
+  let application_constructor op expr = EApplication (op, expr, []) in
+
+  let unary_chain =
+    let* op = unary_operations in
+    let* expr = parse_expr in
+    return @@ application_constructor op expr
+  in
+
+  unary_chain <|> (parens unary_chain)
+;;
+
+(* ---------------- *)
+
 (* Type defition parsers *)
 
 let parse_type_defition p =
@@ -538,6 +589,7 @@ let parse_type_defition p =
       [ p.parse_tuple p
       ; parens @@ p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; parens @@ p.parse_unary_operation p
       ; p.parse_list p
       ; p.parse_if_then_else p
       ; p.parse_application p
@@ -567,6 +619,7 @@ let parsers =
   ; parse_fun
   ; parse_application
   ; parse_binary_operation
+  ; parse_unary_operation
   ; parse_if_then_else
   ; parse_let_in
   ; parse_match_with
@@ -582,6 +635,7 @@ let parse_expression =
   skip_wspace *> 
   choice 
     [ parsers.parse_list_constructor parsers
+    ; parsers.parse_unary_operation parsers
     ; parsers.parse_application parsers
     ; parsers.parse_tuple parsers
     ; parsers.parse_type_defition parsers

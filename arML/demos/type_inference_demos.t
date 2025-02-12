@@ -51,7 +51,8 @@ MANYTESTS
   val main : int
 
   $ ./start_type_inference_demos.exe < manytests/typed/007order.ml
-  Syntax error.
+  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main : unit
 
   $ ./start_type_inference_demos.exe < manytests/typed/008ascription.ml
   val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int

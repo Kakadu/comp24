@@ -6,7 +6,7 @@
   ListAndTuple
   PatternMatching
   TypedExpression
-  BinaryOperation
+  Operators
   Declaration)
  (inline_tests)
  (preprocess
