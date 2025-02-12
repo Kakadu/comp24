@@ -193,18 +193,14 @@ r_app_expr:
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
 
-%inline simple_op_expr:
+op_expr: 
     | value             { EConst $1 }
     | id                { EVar $1 }
+    | application { $1 }
+    | operation         { $1 }
     | _fun              { $1 }
     | _if               { $1 }
     | _match            { $1 }   
-    | application       { $1 } 
-
-op_expr:
-    | 
-    | simple_op_expr    { $1 }
-    | operation         { $1 }
 
 concat_expr:
     | value                                                         { EConst $1 }
@@ -277,8 +273,8 @@ concat (rule):
 (* default operations like "1 + 2" *)
 operation:
     | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS    { $2 }
-    | e1 = op_expr; op = bop; e2 = op_expr              { Application ( Application (EOperation (Binary op), e1), e2 ) }
-    | op = uop; e = op_expr                             { Application (EOperation (Unary op), e) } 
+    | e1 = op_expr; op = bop; e2 = op_expr                     { Application ( Application (EOperation (Binary op), e1), e2 ) }
+    | op = uop; e = op_expr                                    { Application (EOperation (Unary op), e) } 
 
 application:
     | LEFT_PARENTHESIS; a = application; RIGHT_PARENTHESIS      { a }

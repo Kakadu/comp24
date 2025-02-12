@@ -130,6 +130,27 @@ let%test _ =
 ;;
 
 let%test _ =
+  parse "1 + a"
+  = Application (Application (EOperation (Binary ADD), EConst (Int 1)), EVar "a")
+;;
+
+let%test _ =
+  parse "a + a" = Application (Application (EOperation (Binary ADD), EVar "a"), EVar "a")
+;;
+
+let%test _ =
+  parse "a + 1"
+  = Application (Application (EOperation (Binary ADD), EVar "a"), EConst (Int 1))
+;;
+
+let%test _ =
+  parse "1 + f x"
+  = Application
+      ( Application (EOperation (Binary ADD), EConst (Int 1))
+      , Application (EVar "f", EVar "x") )
+;;
+
+let%test _ =
   parse "f (1+1) x"
   = Application
       ( Application
