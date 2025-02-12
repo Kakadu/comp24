@@ -9,19 +9,20 @@ open TypeErrors
 open InferBasic
 open InferPattern
 open InferExpression
+open Ast.AbstractSyntaxTree
 
 let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
 let infer_declaration env name_list = function
-  | Ast.DOrdinary (case, cases) ->
+  | DOrdinary (case, cases) ->
     let cases = case :: cases in
 
     let rec extend_env_with_pattern env name_list = function
-      | Ast.PVar (Id v), ty ->
+      | PVar (Id v), ty ->
         let generalized_ty = Generalize.generalize env ty in
         let new_names_list = update_name_list v name_list in
         return ((TypeEnv.extend env v generalized_ty), new_names_list)
-      | Ast.PTuple (p1, p2, ps) as pat, (TypeTree.TVar _ as ty) ->
+      | PTuple (p1, p2, ps) as pat, (TypeTree.TVar _ as ty) ->
         let* tvs =
           List.fold_left 
             (fun acc _ -> 
@@ -34,7 +35,7 @@ let infer_declaration env name_list = function
         let new_ty = TTuple tvs in
         let* sub = Substitution.unify ty new_ty in
         extend_env_with_pattern (TypeEnv.apply env sub) name_list (pat, new_ty)
-      | Ast.PTuple (p1, p2, ps), TypeTree.TTuple (t1 :: t2 :: rest) when List.length rest = List.length ps ->
+      | PTuple (p1, p2, ps), TypeTree.TTuple (t1 :: t2 :: rest) when List.length rest = List.length ps ->
         let* env, name_list = extend_env_with_pattern env name_list (p1, t1) in
         let* env, name_list = extend_env_with_pattern env name_list (p2, t2) in
         List.fold_left2 
@@ -44,17 +45,17 @@ let infer_declaration env name_list = function
           (return (env, name_list)) 
           ps
           rest
-      | Ast.PListConstructor _ as pat, (TypeTree.TVar _ as ty) ->
+      | PListConstructor _ as pat, (TypeTree.TVar _ as ty) ->
         let* fv = fresh_var in
         let new_ty = TList fv in
         let* sub = Substitution.unify ty new_ty in
         extend_env_with_pattern (TypeEnv.apply env sub) name_list (pat, new_ty)
-      | Ast.PListConstructor (l, r), TypeTree.TList t ->
+      | PListConstructor (l, r), TypeTree.TList t ->
         let* env, name_list = extend_env_with_pattern env name_list (l, t) in
         extend_env_with_pattern env name_list (r, (TypeTree.TList t))
-      | Ast.PAny, _
-      | Ast.PNill, TypeTree.TList _ -> return (env, name_list)
-      | Ast.PConst _ as pat, pty ->
+      | PAny, _
+      | PNill, TypeTree.TList _ -> return (env, name_list)
+      | PConst _ as pat, pty ->
         let* pt, _ = infer_pattern env pat in
         let* _ = Substitution.unify pt pty in
         return (env, name_list)
@@ -70,7 +71,7 @@ let infer_declaration env name_list = function
     List.fold_left (fun acc (pat, expr) ->
         let expr = 
           (match expr with
-           | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+           | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
            | _ -> expr)
         in
         let* extended_env, name_list = acc in
@@ -82,7 +83,7 @@ let infer_declaration env name_list = function
         return (extended_env, extend_name_list)
       ) (return (env, name_list)) cases
 
-  | Ast.DRecursive (case, cases) ->
+  | DRecursive (case, cases) ->
     let cases = case :: cases in
 
     (* Check several bounds *)
@@ -90,7 +91,7 @@ let infer_declaration env name_list = function
     let* _ = UniquePatternVarsChecker.check_unique_vars patterns in
 
     let extend_env_with_pattern env name_list = function
-      | Ast.PVar (Id v), ty ->
+      | PVar (Id v), ty ->
         let generalized_ty = Generalize.generalize env ty in
         let new_names_list = update_name_list v name_list in
         return ((TypeEnv.extend env v generalized_ty), new_names_list)
@@ -101,7 +102,7 @@ let infer_declaration env name_list = function
       List.fold_left (fun acc (pat, _) ->
           let* env, vars = acc in
           match pat with
-          | Ast.PVar (Id name) ->
+          | PVar (Id name) ->
             let* fv = fresh_var in
             let env' = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
             return (env', (name, fv) :: vars)
@@ -113,12 +114,12 @@ let infer_declaration env name_list = function
       List.fold_left (fun acc (pat, expr) ->
           let expr = 
             (match expr with
-             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
              | _ -> expr)
           in
           let* extracted_var_name =
             (match pat with
-             | Ast.PVar (Id name) -> return name
+             | PVar (Id name) -> return name
              | _ -> fail InvalidRecursionLeftHand)
           in
           let* env, name_list = acc in

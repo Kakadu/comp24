@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Angstrom
-open Ast
+open Ast.AbstractSyntaxTree
 open Common
 open Pattern
 open Type

@@ -1,6 +1,6 @@
 (library
  (name ast)
  (public_name arML.ast)
- (modules Ast)
+ (modules AbstractSyntaxTree Pprint)
  (preprocess
   (pps ppx_deriving.show)))

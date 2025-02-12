@@ -4,6 +4,7 @@
 
 open Common.StateResultMonad
 open Common.StateResultMonad.Syntax
+open Ast.AbstractSyntaxTree
 open TypeTree
 open TypeUtils
 
@@ -11,11 +12,11 @@ open TypeUtils
 let fresh_var = fresh >>| fun name -> TVar name
 
 let infer_const = function
-  | Ast.CInt _ -> TGround GTInt
-  | Ast.CBool _ -> TGround GTBool
-  | Ast.CChar _ -> TGround GTChar
-  | Ast.CString _ -> TGround GTString
-  | Ast.CUnit -> TGround GTUnit
+  | CInt _ -> TGround GTInt
+  | CBool _ -> TGround GTBool
+  | CChar _ -> TGround GTChar
+  | CString _ -> TGround GTString
+  | CUnit -> TGround GTUnit
 ;;
 
 let infer_id env id =
@@ -30,20 +31,20 @@ let infer_id env id =
 (* Type definition to real type mapping *)
 
 let get_ground_type_by_defenition = function
-  | Ast.GTDInt -> GTInt
-  | Ast.GTDBool -> GTBool
-  | Ast.GTDChar -> GTChar
-  | Ast.GTDString -> GTString
-  | Ast.GTDUnit -> GTUnit
+  | GTDInt -> GTInt
+  | GTDBool -> GTBool
+  | GTDChar -> GTChar
+  | GTDString -> GTString
+  | GTDUnit -> GTUnit
 ;;
 
 let rec get_type_by_defenition = function
-  | Ast.TDGround td -> return @@ TGround (get_ground_type_by_defenition td)
-  | Ast.TDArrow (l, r) ->
+  | TDGround td -> return @@ TGround (get_ground_type_by_defenition td)
+  | TDArrow (l, r) ->
     let* l_ty = get_type_by_defenition l in
     let* r_ty = get_type_by_defenition r in
     return (l_ty @-> r_ty)
-  | Ast.TDTuple (fst, snd, other) ->
+  | TDTuple (fst, snd, other) ->
     let* fst_ty = get_type_by_defenition fst in
     let* snd_ty = get_type_by_defenition snd in
     let rec process_others acc = function
@@ -54,10 +55,10 @@ let rec get_type_by_defenition = function
     in
     let* other_tys = process_others [] other in
     return (TTuple (fst_ty :: snd_ty :: List.rev other_tys))
-  | Ast.TDList ty ->
+  | TDList ty ->
     let* ty' = get_type_by_defenition ty in
     return (TList ty')
-  | Ast.TDPolymorphic _ ->
+  | TDPolymorphic _ ->
     let* fv = fresh_var in
     return fv
 
