@@ -156,6 +156,21 @@ let rec alpha_convert_expr ctx = function
            (flag, new_main_id, construct_function renamed_args renamed_body, renamed_inner)
        , { ctx with reserved_names = ctx_after_inner.reserved_names } )
        |> return)
+  | ELetIn (rec_flag, main_pat, outer, inner) ->
+    let* renamed_main_pat, ctx_after_main_pat = alpha_convert_pattern ctx main_pat in
+    let* renamed_outer, ctx_after_outer =
+      alpha_convert_expr
+        { ctx with reserved_names = ctx_after_main_pat.reserved_names }
+        outer
+    in
+    let* renamed_inner, ctx_after_inner =
+      alpha_convert_expr
+        { ctx_after_main_pat with reserved_names = ctx_after_outer.reserved_names }
+        inner
+    in
+    ( ELetIn (rec_flag, renamed_main_pat, renamed_outer, renamed_inner)
+    , { ctx with reserved_names = ctx_after_inner.reserved_names } )
+    |> return
   | EIfThenElse (guard_branch, then_branch, else_branch) ->
     let* renamed_guard_branch, ctx_after_guard_branch =
       alpha_convert_expr ctx guard_branch
@@ -301,8 +316,7 @@ let%expect_test "" =
   test_alpha_for_decls {|
 let f (a, a) = 5
 |};
-  [%expect
-    {|
+  [%expect {|
     let  f_0 = (fun (a_0, a_0) -> 5) |}]
 ;;
 
@@ -341,4 +355,14 @@ let f = 6 + 6
     let  plus_mlint_0 = 2
     let  g_0 = ((plus_mlint_0 f_0) 10)
     let  f_1 = ((plus_mlint 6) 6) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls
+    {|
+let test = let a = 2 in let c b = ( + ) a b in let a = 3 in c 2
+|};
+  [%expect
+    {|
+    let  test_0 = (let  a_0 = 2 in (let  c_0 = (fun b_0 -> ((plus_mlint a_0) b_0)) in (let  a_1 = 3 in (c_0 2)))) |}]
 ;;
