@@ -266,8 +266,16 @@ let%test _ =
         ] )
 ;;
 
-(* let%test _ = parse 
-" match xs with [] -> () | h::tl -> let () = f h" = *)
+let%test _ =
+  parse " match xs with [] -> () | h::tl -> let () = f h"
+  = Match
+      ( EVar "xs"
+      , [ List [], EConst Unit
+        ; ( ListConcat (Var "h", Var "tl")
+          , Let (Nonrecursive, [ Const Unit, [], Application (EVar "f", EVar "h") ], None)
+          )
+        ] )
+;;
 
 let%test _ =
   parse

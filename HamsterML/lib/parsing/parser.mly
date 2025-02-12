@@ -215,6 +215,7 @@ expr:
     | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
     | application                                       { $1 }
     | _let                                              { $1 }
+    | expr_constraint                                   { $1 }
 
 tuple_pattern:
     | value                                                         { Const $1 } 
@@ -251,6 +252,7 @@ pattern:
     | _tuple(tuple_pattern)                                 { Tuple $1 }
     | _list(list_pattern)                                   { List $1 }
     | concat(concat_pattern)                                { let a,b = $1 in ListConcat (a,b) }
+    | pattern_contraint                                     { $1 }
 
 
 concat (rule):
@@ -309,3 +311,9 @@ tuple_simple (rule):
 
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
+
+expr_constraint: 
+    | expr; COLON; paramType     { EConstraint ($1, $3) }
+
+pattern_contraint:
+    | pattern; COLON; paramType     { Constraint ($1, $3) }
