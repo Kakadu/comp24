@@ -55,12 +55,41 @@ jobs:
 #          cd ${{ env.latest }} && opam exec -- dune build @fmt --profile=release || echo "PROPERLY_FORMATTED=n" >> $GITHUB_ENV
 
       # We need to install dependencies because repo could have weird version of ocamlformat
+      - name: Look for `rust-toolchain.toml`
+        run: |
+          cd ${{ env.latest }}
+          RUST_TOOLCHAIN=$(find . -name "rust-toolchain.toml" | head -n 1)
+          if [ -n "$RUST_TOOLCHAIN" ]; then
+            echo "RUST_TOOLCHAIN=$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+            echo "RUST_ROOT=$(dirname "$RUST_TOOLCHAIN")" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup Rust
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        uses: mkroening/rust-toolchain-toml@main
+        with:
+          toolchain-file: "${{ env.RUST_TOOLCHAIN }}"
+
       - name: Installing dependencies for ${{ env.latest }}...
         run: |
           opam update
           cd ./${{ env.latest }}
           opam install . --depext-only --with-test --with-doc
           opam install . --deps-only --with-test --with-doc
+
+      - name: Run `cargo fmt`
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+          cd ${{ env.latest }}
+          cd ${{ env.RUST_ROOT }}
+          cargo fmt --check
+
+      - name: Run `clippy`
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+          cd ${{ env.latest }}
+          cd ${{ env.RUST_ROOT }}
+          cargo clippy -- -D warnings
 
       - name: Checking ocamlformat
         run: |

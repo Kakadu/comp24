@@ -79,6 +79,21 @@ jobs:
           echo "${{ env.latest }}"
         #if: ${{ github.event.pull_request.user.login == 'fp2022-helper' }}
 
+      - name: Look for `rust-toolchain.toml`
+        run: |
+          cd ${{ env.latest }}
+          RUST_TOOLCHAIN=$(find . -name "rust-toolchain.toml" | head -n 1)
+          if [ -n "$RUST_TOOLCHAIN" ]; then
+            echo "RUST_TOOLCHAIN=$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+            echo "RUST_ROOT=$(dirname "$RUST_TOOLCHAIN")" >> "$GITHUB_ENV"
+          fi
+
+      - name: Setup Rust
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        uses: mkroening/rust-toolchain-toml@main
+        with:
+          toolchain-file: "${{ env.RUST_TOOLCHAIN }}"
+
       - name: Installing dependencies for ${{ env.latest }}
         run: |
           opam update
@@ -87,6 +102,20 @@ jobs:
 
       - name: List installed OPAM packages
         run: opam list
+
+      - name: Run `cargo fmt`
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+          cd ${{ env.latest }}
+          cd ${{ env.RUST_ROOT }}
+          cargo fmt --check
+
+      - name: Run `clippy`
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+          cd ${{ env.latest }}
+          cd ${{ env.RUST_ROOT }}
+          cargo clippy -- -D warnings
 
       - name: Naive linting
         run: |
