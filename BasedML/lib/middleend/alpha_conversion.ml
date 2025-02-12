@@ -178,10 +178,24 @@ let rec alpha_convert_decl_list ctx acc = function
              :: acc)
             tl
         | NotRec ->
-          let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
-          let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
+          let* renamed_args, ctx_after_args =
+            args_rename_helper
+              []
+              { ctx with reserved_names = ctx_after_main_pat.reserved_names }
+              args
+          in
+          let* renamed_body, ctx_after_body =
+            alpha_convert_expr
+              { ctx with reserved_names = ctx_after_args.reserved_names }
+              main_body
+          in
           alpha_convert_decl_list
-            ctx_after_main_pat
+            { ctx_after_main_pat with
+              reserved_names =
+                Base.Set.union
+                  ctx_after_main_pat.reserved_names
+                  ctx_after_body.reserved_names
+            }
             (DSingleLet
                ( rec_flag
                , DLet (new_main_pat, construct_function renamed_args renamed_body) )
@@ -228,15 +242,15 @@ let test_alpha_for_decls str =
 
 let%expect_test "" =
   test_alpha_for_decls {|
-let f = 5 + 5
+let f a = a + 5
 let g = f + 10
-let f = 6 + 6  
+let f a = a + 6  
 |};
   [%expect
     {|
-    let  f_0 = ((plus_mlint 5) 5)
+    let  f_0 = (fun a_0 -> ((plus_mlint unbound_a_1) 5))
     let  g_0 = ((plus_mlint f_0) 10)
-    let  f_1 = ((plus_mlint 6) 6) |}]
+    let  f_1 = (fun a_1 -> ((plus_mlint unbound_a_2) 6)) |}]
 ;;
 
 let%expect_test "" =
