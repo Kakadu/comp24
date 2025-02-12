@@ -16,7 +16,7 @@ let rec closure_expression env fv_map = function
     return fun_closure
   | ELetIn (case, cases, expr) -> closure_let_in env fv_map (case, cases) expr
   | ERecLetIn (case, cases, expr) -> closure_rec_let_in env fv_map (case, cases) expr IdentifierMap.empty
-  | EApplication (func, args) -> closure_application env fv_map (func, args)
+  | EApplication (func, arg1, args) -> closure_application env fv_map (func, arg1, args)
   | EIfThenElse (cond, b1, b2) -> closure_if_then_else env fv_map (cond, b1, b2)
   | ETuple (e1, e2, es) -> closure_tuple env fv_map (e1, e2, es)
   | EListConstructor (l, r) -> closure_list_constructor env fv_map (l, r)
@@ -33,7 +33,7 @@ and closure_identifier env fv_map = function
        let args = IdentifierSet.fold (fun var acc -> (EIdentifier var) :: acc) free_vars [] in
        (match args with
         | [] -> return expr
-        | _ -> return @@ EApplication(expr, args)))
+        | hd :: tl -> return @@ EApplication(expr, hd, tl)))
   | expr -> closure_expression env fv_map expr
 
 and closure_fun application_flag env fv_map = function
@@ -87,15 +87,16 @@ and closure_fun application_flag env fv_map = function
        (match old_free_vars, application_flag with
         | [], _ 
         | _, false -> return @@ (EFun ((head, tail), updated_body), replacement_map)
-        | _, true -> return @@ (EApplication (EFun ((head, tail), updated_body), old_free_vars), replacement_map)))
+        | hd :: tl, true -> return @@ (EApplication (EFun ((head, tail), updated_body), hd, tl), replacement_map)))
 
   | expr -> 
     let* closure_expr = closure_expression env fv_map expr in
     return @@ (closure_expr, IdentifierMap.empty)
 
 
-and closure_application env fv_map (func, args) =
+and closure_application env fv_map (func, arg1, args) =
   let* func_closure = closure_expression env fv_map func in
+  let* arg1_closure = closure_expression env fv_map arg1 in
   let* args_closure =
     List.fold_left 
       (fun acc arg ->
@@ -107,7 +108,7 @@ and closure_application env fv_map (func, args) =
       args
   in
   let args_closure = List.rev args_closure in
-  return @@ EApplication (func_closure, args_closure)
+  return @@ EApplication (func_closure, arg1_closure, args_closure)
 
 and closure_if_then_else env fv_map (cond, b1, b2) =
   let* closure_cond = closure_expression env fv_map cond in
