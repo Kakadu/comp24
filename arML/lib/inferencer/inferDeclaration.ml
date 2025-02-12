@@ -90,14 +90,6 @@ let infer_declaration env name_list = function
     let patterns = List.map fst cases in
     let* _ = UniquePatternVarsChecker.check_unique_vars patterns in
 
-    let extend_env_with_pattern env name_list = function
-      | PVar (Id v), ty ->
-        let generalized_ty = Generalize.generalize env ty in
-        let new_names_list = update_name_list v name_list in
-        return ((TypeEnv.extend env v generalized_ty), new_names_list)
-      | _ -> fail InvalidRecursionLeftHand
-    in
-
     let add_temporary_vars env cases =
       List.fold_left (fun acc (pat, _) ->
           let* env, vars = acc in
@@ -111,30 +103,30 @@ let infer_declaration env name_list = function
     in
 
     let process_cases env cases temp_vars =
-      List.fold_left (fun acc (pat, expr) ->
-          let expr = 
-            (match expr with
-             | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
-             | _ -> expr)
-          in
-          let* extracted_var_name =
-            (match pat with
-             | PVar (Id name) -> return name
-             | _ -> fail InvalidRecursionLeftHand)
-          in
-          let* env, name_list = acc in
-          let* sub, ty_expr = infer_expr env expr in
-          let env' = TypeEnv.apply env sub in
-          let* extended_env, extend_name_list = extend_env_with_pattern env' name_list (pat, ty_expr) in
-          let* sub_update =
-            match List.assoc_opt extracted_var_name temp_vars with
-            | Some temp_ty -> Substitution.unify temp_ty ty_expr
-            | None -> return Substitution.empty
-          in
-          let* sub_final = Substitution.compose sub sub_update in
-          let extended_env' = TypeEnv.apply extended_env sub_final in
-          return (extended_env', extend_name_list)
-        ) (return (env, name_list)) cases
+      List.fold_left (fun acc -> function
+          | PVar (Id name), expr ->
+            let expr = 
+              (match expr with
+               | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
+               | _ -> expr)
+            in
+            let* acc_env, acc_name_list = acc in
+            let* sub', ty_expr = infer_expr env expr in
+            let* tv =
+              match List.assoc_opt name temp_vars with
+              | Some temp_ty -> return temp_ty
+              | None -> fail (Unbound_variable name)
+            in
+            let* sub'' = Substitution.unify tv ty_expr in
+            let* final_sub = Substitution.compose sub' sub'' in
+            let final_typ = Substitution.apply final_sub tv in
+            let new_acc_env = TypeEnv.extend acc_env name (Schema (TypeVarSet.empty, final_typ)) in
+            let new_acc_names_list = update_name_list name acc_name_list in
+            return (new_acc_env, new_acc_names_list)
+          | _ -> fail InvalidRecursionLeftHand
+        ) 
+        (return (env, name_list)) 
+        cases
     in
     let* env_with_vars, temp_vars = add_temporary_vars env cases in
     process_cases env_with_vars cases temp_vars
