@@ -37,6 +37,7 @@ and closure_identifier env fv_map = function
   | expr -> closure_expression env fv_map expr
 
 and closure_fun application_flag env fv_map = function
+  (* If [application_flag] is true, it adds application with new arguments around the new function *)
   | EFun ((p, ps), body) as expr ->
     let patters = p :: ps in
     let free_vars = get_expr_free_vars expr in

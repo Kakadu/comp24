@@ -2,9 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Base
-
-type 'a t = int -> int * 'a
+type 'a t = int -> 'a * int
 
 let return x = fun s -> (x, s)
 
