@@ -229,9 +229,19 @@ let parse_eif arg =
        (token "else" *> arg)
 ;;
 
-let parse_ematch pexpr =
+(* let parse_ematch pexpr =
   let pcase pexpr =
     lift2 (fun p e -> p, e) (token "|" *> parse_pattern) (token "->" *> pexpr)
+  in
+  lift2
+    (fun expr cases -> EMatch (expr, cases))
+    (token "match" *> pexpr <* token "with")
+    (many1 (pcase pexpr))
+;; *)
+
+let parse_ematch pexpr =
+  let pcase pexpr =
+    lift2 (fun p e -> p, e) (option "" (token "|") *> parse_pattern) (token "->" *> pexpr)
   in
   lift2
     (fun expr cases -> EMatch (expr, cases))
@@ -327,7 +337,7 @@ let parse_mutable_rec_declaration =
   >>= fun lst -> return @@ MutableRecDecl (first_decl :: lst)
 ;;
 
-let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration]
+let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration ]
 
 (* ------------------ *)
 

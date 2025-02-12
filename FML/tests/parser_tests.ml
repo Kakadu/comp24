@@ -17,9 +17,9 @@ let%expect_test _ =
     {| [(SingleDecl (DDeclaration (NoRec, (PIdentifier "n"), (EConst (CInt 5)))))] |}]
 ;;
 
-
 let%expect_test _ =
-  parse_with_print {| let n = 5
+  parse_with_print
+    {| let n = 5
 
   let f x = x|};
   [%expect
@@ -80,7 +80,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {|
+  parse_with_print
+    {|
         let a = 4::[5; 6]|};
   [%expect
     {|
@@ -112,7 +113,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {|
+  parse_with_print
+    {|
         let add_one (x: int) = 1 + x|};
   [%expect
     {|
@@ -129,7 +131,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {|
+  parse_with_print
+    {|
         let (+) a = 1 + a |};
   [%expect
     {|
@@ -146,7 +149,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print {|
+  parse_with_print
+    {|
         let f a b = b + a |};
   [%expect
     {|
@@ -203,9 +207,12 @@ and second x = first (x + 1);;
       ] |}]
 ;;
 
-let%expect_test _ = parse_with_print {|
+let%expect_test _ =
+  parse_with_print
+    {|
         let h::x::tl = 5::6::4::[]|};
-  [%expect {|
+  [%expect
+    {|
     [(SingleDecl
         (DDeclaration (NoRec,
            (PCons ((PIdentifier "h"),
@@ -217,7 +224,8 @@ let%expect_test _ = parse_with_print {|
 ;;
 
 let%expect_test _ =
-  parse_with_print {|
+  parse_with_print
+    {|
         let rec factorial n = if n < 1 then 1 else n * factorial (n - 1) |};
   [%expect
     {|
@@ -245,10 +253,10 @@ let%expect_test _ =
     |}]
 ;;
 
-let%expect_test _ = 
-parse_with_print {|let () = print_int ( fac_cps 4 ( fun print_int -> print_int ) )|};
+let%expect_test _ =
+  parse_with_print {|let () = print_int ( fac_cps 4 ( fun print_int -> print_int ) )|};
   [%expect
-  {|
+    {|
       [(SingleDecl
           (DDeclaration (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
@@ -259,13 +267,15 @@ parse_with_print {|let () = print_int ( fac_cps 4 ( fun print_int -> print_int )
              )))
         ]
   |}]
+;;
 
-  let%expect_test _ = 
-parse_with_print {|let rec fac_cps n k =
+let%expect_test _ =
+  parse_with_print
+    {|let rec fac_cps n k =
    if n=1 then k 1 else
    fac_cps (n-1) (fun p -> k (p*n))|};
   [%expect
-  {|
+    {|
       [(SingleDecl
           (DDeclaration (Rec, (PIdentifier "fac_cps"),
              (EFun ((PIdentifier "n"),
@@ -297,4 +307,4 @@ parse_with_print {|let rec fac_cps n k =
              )))
         ]
   |}]
-
+;;
