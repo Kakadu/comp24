@@ -131,21 +131,16 @@ value:
 
 // --- Parser rules ---
 
-prog : expr EOF { [$1] }
+prog : list (declare) EOF { $1 }
 
 (* for testing purposes *)
 prog_expr : expr EOF { $1 }
 prog_pattern : pattern EOF { $1 }
 
-// declaration:
-//     | LET; l = let_def                                                  { l }
-//     | LET; l = let_and_in_def                                           { l } 
-
-// typ_opt:
-//     | COLON; t = paramType { Some t }
-//     | { None }
-
 (* special expr for resolving tuple conflicts *)
+
+declare:
+    | _let  { $1 }
 
 list_expr:
     | value                     { EConst $1 }
