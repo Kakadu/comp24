@@ -4,7 +4,7 @@
 
 open TypeTree
 
-(* Checks whether the passed type variable is contained in the passed type. *)
+(*** Checks whether the passed type variable is contained in the passed type. *)
 let rec occurs_check v = function
   | TVar b -> b = v
   | TArr (left, right) -> occurs_check v left || occurs_check v right

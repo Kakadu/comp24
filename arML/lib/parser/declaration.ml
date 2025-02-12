@@ -7,16 +7,18 @@ open Ast
 open Common
 open Pattern
 open Type
+open Expression
 
 let parse_declaration p =
   let parse_expr =
     choice 
-      [ p.parse_list_constructor p
+      [ p.parse_tuple p
+      ; p.parse_list_constructor p
       ; p.parse_binary_operation p
+      ; p.parse_unary_operation p
       ; p.parse_type_defition p
       ; p.parse_list p
       ; p.parse_application p
-      ; p.parse_tuple p
       ; p.parse_fun p
       ; p.parse_function p
       ; p.parse_let_in p
@@ -34,7 +36,7 @@ let parse_declaration p =
   in
 
   let parse_binding () =
-    let* args = many1 parse_pattern in
+    let* args = many1 (parse_pattern false) in
     let main_pattern = List.hd args in
     let* typ_opt =
       let typ_parser = 
@@ -72,3 +74,5 @@ let parse_declaration p =
 
   return (declaration_type main_binding and_bindings)
 ;;
+
+let parse_declaration = parse_declaration parsers

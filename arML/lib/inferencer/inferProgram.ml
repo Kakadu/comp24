@@ -2,9 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open StateResultMonad
-open StateResultMonad.Syntax
-open InferExpression
+open Common.StateResultMonad
+open Common.StateResultMonad.Syntax
 open InferDeclaration
 
 let infer_program env program =
@@ -12,13 +11,8 @@ let infer_program env program =
     | [] -> acc
     | hd :: tl ->
       let* acc_env, acc_name_list = acc in
-      (match hd with
-      | Ast.SDeclaration decl -> 
-        let* new_acc_env, new_acc_name_list = infer_declaration acc_env acc_name_list decl in
-        helper (return (new_acc_env, new_acc_name_list)) tl
-      | Ast.SExpression expr ->
-        let* _ = infer_expr env expr in
-        acc)
+      let* new_acc_env, new_acc_name_list = infer_declaration acc_env acc_name_list hd in
+      helper (return (new_acc_env, new_acc_name_list)) tl
   in
   let* env, names = helper (return (env, [])) program in
   return (env, List.rev names)

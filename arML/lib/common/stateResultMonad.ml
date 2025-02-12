@@ -3,18 +3,17 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Base
-open TypeErrors
 
-type 'a t = int -> int * ('a, error) Result.t (* State and Result monad composition *)
+type ('a, 'e) t = int -> int * ('a, 'e) Result.t (* State and Result monad composition *)
 
-let ( >>= ) : 'a 'b. 'a t -> ('a -> 'b t) -> 'b t =
+let ( >>= ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t =
   fun m f s ->
   match m s with
   | s, Result.Error e -> s, Error e
   | s, Result.Ok v -> f v s
 ;;
 
-let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
+let ( >>| ) : ('a, 'e) t -> ('a -> 'b) -> ('b, 'e) t =
   fun m f s ->
   match m s with
   | s, Result.Error e -> s, Error e
@@ -35,8 +34,8 @@ module RMap = struct
   let fold_left mp ~init ~f =
     let open Syntax in
     Base.Map.fold mp ~init ~f:(fun ~key ~data acc ->
-      let* acc = acc in
-      f key data acc)
+        let* acc = acc in
+        f key data acc)
   ;;
 end
 
@@ -45,8 +44,8 @@ module RList = struct
   let fold_left lt ~init ~f =
     let open Syntax in
     Base.List.fold_left lt ~init ~f:(fun acc item ->
-      let* acc = acc in
-      f acc item)
+        let* acc = acc in
+        f acc item)
   ;;
 end
 

@@ -150,11 +150,11 @@ let parsers =
   }
 
 let parse_type = choice
-  [ parsers.parse_list_type parsers
-  ; parsers.parse_arrow_type parsers
-  ; parsers.parse_tuple_type parsers
-  ; parsers.parse_ground_type
-  ; parsers.parse_polymorphic_type
-  ]
+    [ parsers.parse_list_type parsers
+    ; parsers.parse_arrow_type parsers
+    ; parsers.parse_tuple_type parsers
+    ; parsers.parse_ground_type
+    ; parsers.parse_polymorphic_type
+    ]
 
 (* ---------------- *)

@@ -45,7 +45,7 @@ and expression =
   | EIdentifier of identifier (** A variable name: 'x', 'y', etc *)
   | EFun of (pattern * pattern list) * expression (** Anonymous function: 'fun x -> x' *)
   | EFunction of case * case list (** Anonymous function with one argument and pattern matching: 'function | hd :: tl -> (hd, tl) | _ -> (0, 0)'*)
-  | EApplication of expression * expression list (** Application: f x *)
+  | EApplication of expression * expression * expression list (** Application: f x *)
   | EIfThenElse of expression * expression * expression option (* if condition then true_branch else false branch (else option)*)
   | ETuple of expression * expression * expression list (** Tuple: '(E1, E2, ..., En)' *)
   | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
@@ -61,10 +61,5 @@ type declaration =
   | DRecursive of case * case list (** Top-level recursive let-binding: 'let rec f x = ...' *)
 [@@deriving show { with_path = false }]
 
-type structure_item =
-  | SExpression of expression (** Any expression: '5+3', 'let f x = x in f 0' *)
-  | SDeclaration of declaration (** Top-level non-recursive or recursive let-binding *)
+type program = declaration list (** The entire parsed code of the program *)
 [@@deriving show { with_path = false }]
-
-type program = structure_item list [@@deriving show { with_path = false }]
-(** The entire parsed code of the program *)
