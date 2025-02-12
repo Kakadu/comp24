@@ -45,8 +45,8 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
         match args with
         | [] -> cont []
         | head :: tail ->
-          anf_expr env head (fun imm_arg ->
-            anf_args tail (fun anf_args -> cont (imm_arg :: anf_args)))
+          anf_expr env head (fun imm_hd ->
+            anf_args tail (fun anf_tl -> cont (imm_hd :: anf_tl)))
       in
       anf_args args (fun imm_args ->
         return (ALet (name, CApp (imm_func, imm_args), body))))
@@ -108,7 +108,6 @@ let default_env =
 (** Removes `let ax = ... in ax` and `let ax = ay in ...` *)
 let remove_useless_bindings fn =
   let remaps = Hashtbl.create (module String) in
-  Hashtbl.clear remaps;
   let rec find_rec id =
     match Hashtbl.find remaps id with
     | Some value -> find_rec value

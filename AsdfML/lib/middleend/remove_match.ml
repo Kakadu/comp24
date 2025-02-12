@@ -23,7 +23,6 @@ let list_field lst idx =
     (te_const dummy_ty (CInt idx))
 ;;
 
-(* TODO: arrow type for CC? *)
 let list_hd lst = te_app dummy_ty (te_var dummy_ty "`list_hd") lst
 let list_tl lst = te_app dummy_ty (te_var dummy_ty "`list_tl") lst
 let list_is_empty lst = te_app dummy_ty (te_var dummy_ty "`list_is_empty") lst

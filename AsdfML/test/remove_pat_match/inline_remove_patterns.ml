@@ -119,24 +119,25 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_tuple = (1, 2, 3)
-    let a = (`get_tuple_field temp_tuple 0)
-    let b = (`get_tuple_field temp_tuple 1)
-    let c = (`get_tuple_field temp_tuple 2)
+    let `temp_tuple = (1, 2, 3)
+    let a = (`get_tuple_field `temp_tuple 0)
+    let b = (`get_tuple_field `temp_tuple 1)
+    let c = (`get_tuple_field `temp_tuple 2)
     |}]
 ;;
 
 let%expect_test _ =
   test
     {|
-    let [a; b; c ] = [1; 2; 3; 4]
+    let [a; b; c] = [1; 2; 3; 4]
   |};
   [%expect
     {|
-    let temp_list = [1; 2; 3; 4]
-    let a = (`list_field temp_list 0)
-    let b = (`list_field temp_list 1)
-    let c = (`list_field temp_list 2)
+    let `temp_list = match [1; 2; 3; 4] with
+    | [a; b; c] -> [1; 2; 3; 4]
+    let a = (`list_field `temp_list 0)
+    let b = (`list_field `temp_list 1)
+    let c = (`list_field `temp_list 2)
     |}]
 ;;
 
@@ -147,8 +148,8 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_list = [1; 2; 3; 4]
-    let a = (`list_hd temp_list)
-    let b = (`list_tl temp_list)
+    let `temp_list = [1; 2; 3; 4]
+    let a = (`list_hd `temp_list)
+    let b = (`list_tl `temp_list)
     |}]
 ;;

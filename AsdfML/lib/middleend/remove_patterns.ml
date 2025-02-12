@@ -79,31 +79,30 @@ let remove_patterns =
   and helper_def = function
     | TDLet (t, r, p, e) when is_simple p -> [ td_let_flag r t p (helper_expr e) ]
     | TDLet (t, r, PTuple xs, e) ->
-      (* TODO: temp var name *)
-      let temp_var = p_ident "temp_tuple" in
+      let temp_var = p_ident "`temp_tuple" in
       let temp_def = td_let_flag r t temp_var (helper_expr e) in
       let assigns =
         List.mapi xs ~f:(fun i x ->
-          td_let dummy_ty x (Remove_match.tuple_field (te_var dummy_ty "temp_tuple") i))
+          td_let dummy_ty x (Remove_match.tuple_field (te_var dummy_ty "`temp_tuple") i))
       in
       temp_def :: assigns
-    | TDLet (t, r, PList xs, e) ->
-      (* TODO: len(pat) < len(list) case? match? *)
-      let temp_var = p_ident "temp_list" in
-      let temp_def = td_let_flag r t temp_var (helper_expr e) in
+    | TDLet (t, r, (PList xs as pat), e) ->
+      let temp_var = p_ident "`temp_list" in
+      let e' = helper_expr e in
+      let temp_def = td_let_flag r t temp_var (te_match t e' [(pat, e')]) in
       let assigns =
         List.mapi xs ~f:(fun i x ->
-          td_let dummy_ty x (Remove_match.list_field (te_var dummy_ty "temp_list") i))
+          td_let dummy_ty x (Remove_match.list_field (te_var dummy_ty "`temp_list") i))
       in
       temp_def :: assigns
     | TDLet (t, r, PCons (hd, tl), e) ->
-      let temp_var = p_ident "temp_list" in
+      let temp_var = p_ident "`temp_list" in
       let temp_def = td_let_flag r t temp_var (helper_expr e) in
       let hd_assign =
-        td_let dummy_ty hd (Remove_match.list_hd (te_var dummy_ty "temp_list"))
+        td_let dummy_ty hd (Remove_match.list_hd (te_var dummy_ty "`temp_list"))
       in
       let tl_assign =
-        td_let dummy_ty tl (Remove_match.list_tl (te_var dummy_ty "temp_list"))
+        td_let dummy_ty tl (Remove_match.list_tl (te_var dummy_ty "`temp_list"))
       in
       [ temp_def; hd_assign; tl_assign ]
     | _ ->
