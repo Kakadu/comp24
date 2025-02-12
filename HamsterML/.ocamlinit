@@ -14,7 +14,13 @@ let lexer (s: string) =
   build_list (Lexing.from_string s)
 ;;
 
-let parse (s : string) : expr =
+let parse (s : string) : expr list =
+  let lexbuf = Lexing.from_string s in
+  let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in
+  ast
+;;
+
+let parse_expr (s : string) : expr =
   let lexbuf = Lexing.from_string s in
   let ast = HamsterML__Parser.prog_expr HamsterML__Lexer.read lexbuf in
   ast
