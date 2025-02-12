@@ -6,17 +6,13 @@
 
 // Data Types
 %token <int> TYPE_INT
-%token <float> TYPE_FLOAT
 %token <bool> TYPE_BOOL
-%token <char> TYPE_CHAR
 %token <string> TYPE_STRING
 %token TYPE_UNIT
 
 // Explicit Types
 %token INT
-%token FLOAT
 %token BOOL
-%token CHAR
 %token STRING
 
 %token <string> IDENTIFIER
@@ -55,7 +51,7 @@
 %token CARET                // "^"
 %token EQUAL                // "="
 %token IDENTICAL_EQ         // "=="
-%token NOT_EQUAL            // "!=" || "<>" TODO: check semantics
+%token NOT_EQUAL            // "!=" || "<>"
 %token GREATER_THAN         // ">"
 %token GREATER_THAN_EQUAL   // ">="
 %token LESS_THAN            // "<"
@@ -95,9 +91,7 @@
 
 %inline paramType:
     | INT                   { PInt }
-    | FLOAT                 { PFloat }
     | BOOL                  { PBool }
-    | CHAR                  { PChar }
     | STRING                { PString }
 
 %inline bop:
@@ -122,10 +116,8 @@
     | PLUS  {UPLUS}
 
 value:
-    | TYPE_FLOAT        { Float $1 }
     | TYPE_INT          { Int $1 }
     | TYPE_BOOL         { Bool $1 }
-    | TYPE_CHAR         { Char $1 }
     | TYPE_STRING       { String $1 }
     | TYPE_UNIT         { Unit }
 
@@ -309,22 +301,11 @@ tuple_simple (rule):
 
 %inline rec_flag:
     | REC   { Recursive } 
-    | { Nonrecursive }
+    |       { Nonrecursive }
 
 %inline _let:
-    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind); IN; expr   { Let($2, $3, Some $5) }
-    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind)  { Let($2, $3, None) }
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind); IN; expr  { Let($2, $3, Some $5) }
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind)            { Let($2, $3, None) }
 
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
-
-// (* a = 10 and b = 20 and ... *)
-// and_bind:
-//     | l = let_def                             { [l] }
-//     | h = let_def; LET_AND; tl = and_bind     { h :: tl }
-
-// (* a = 10 and b = 20 and ... in a + b + ... *)
-// let_and_in_def: 
-//     | e1 = let_def; IN; e2 = expr   { LetAndIn ([e1], Some e2) }    (* without and *)
-//     | exs = and_bind; IN; e = expr  { LetAndIn (exs, Some e) }      (* with and *)
-//     | exs = and_bind;               { LetAndIn (exs, None) }        (* and .. and .. without IN *)

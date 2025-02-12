@@ -2,9 +2,7 @@ type id = string [@@deriving show]
 
 type value =
   | Int of int
-  | Float of float
   | Bool of bool
-  | Char of char
   | String of string
   | Unit
 [@@deriving show]
@@ -12,9 +10,7 @@ type value =
 (* let f (a: Int) (b: Int) = ...*)
 type dataType =
   | PInt
-  | PFloat
   | PBool
-  | PChar
   | PString
 [@@deriving show]
 
