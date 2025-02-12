@@ -219,11 +219,18 @@ let rec alpha_convert_expr ctx = function
     , { ctx_after_pats with reserved_names = Base.Set.union ctx.reserved_names reserved }
     )
     |> return
+  | EFunction (fun_pat, fun_body) ->
+    let args, main_body = collect_function_arguments [] (EFunction (fun_pat, fun_body)) in
+    let* new_args, ctx_after_args = args_rename_helper [] ctx args in
+    let* new_body, ctx_after_body = alpha_convert_expr ctx_after_args main_body in
+    ( construct_function new_args new_body
+    , { ctx with reserved_names = ctx_after_body.reserved_names } )
+    |> return
   | _ -> fail "unimplemented yet: expression"
 ;;
 
 let rec alpha_convert_decl_list ctx acc = function
-  | h :: tl ->
+  | h :: tail ->
     (match h with
      | DSingleLet (rec_flag, DLet (main_pat, EFunction (fun_pat, fun_body))) ->
        let args, main_body =
@@ -242,7 +249,7 @@ let rec alpha_convert_decl_list ctx acc = function
                ( rec_flag
                , DLet (new_main_pat, construct_function renamed_args renamed_body) )
              :: acc)
-            tl
+            tail
         | NotRec ->
           let* renamed_args, ctx_after_args =
             args_rename_helper
@@ -264,15 +271,90 @@ let rec alpha_convert_decl_list ctx acc = function
                ( rec_flag
                , DLet (new_main_pat, construct_function renamed_args renamed_body) )
              :: acc)
-            tl)
+            tail)
      | DSingleLet (rec_flag, DLet (main_pat, expr)) ->
        let* new_main_pat, ctx_after_main_pat = alpha_convert_pattern ctx main_pat in
        let* new_expr, _ = alpha_convert_expr ctx expr in
        alpha_convert_decl_list
          ctx_after_main_pat
          (DSingleLet (rec_flag, DLet (new_main_pat, new_expr)) :: acc)
-         tl
-     | _ -> fail "unimplemented: declaration")
+         tail
+     | DMutualRecDecl (Rec, decls) ->
+       let rec mut_let_helper ctx acc = function
+         | DLet (PIdentifier let_name, EFunction (fun_pat, fun_body)) :: tl ->
+           let args, body =
+             collect_function_arguments [] (EFunction (fun_pat, fun_body))
+           in
+           let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
+           let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args body in
+           let* renamed_let_name, ctx_after_let_name =
+             alpha_convert_pattern
+               { ctx with reserved_names = ctx_after_body.reserved_names }
+               (PIdentifier let_name)
+           in
+           mut_let_helper
+             { ctx with reserved_names = ctx_after_let_name.reserved_names }
+             (DLet (renamed_let_name, construct_function renamed_args renamed_body) :: acc)
+             tl
+         | DLet (let_pat, let_body) :: tl ->
+           let* renamed_let_pat, ctx_after_pat = alpha_convert_pattern ctx let_pat in
+           let* renamed_body, ctx_after_body =
+             alpha_convert_expr
+               { ctx with reserved_names = ctx_after_pat.reserved_names }
+               let_body
+           in
+           mut_let_helper
+             { ctx with reserved_names = ctx_after_body.reserved_names }
+             (DLet (renamed_let_pat, renamed_body) :: acc)
+             tl
+         | [] -> (List.rev acc, ctx) |> return
+       in
+       (match decls with
+        | DLet (PIdentifier let_name, EFunction (fun_pat, fun_body)) :: tl ->
+          let args, body =
+            collect_function_arguments [] (EFunction (fun_pat, fun_body))
+          in
+          let* renamed_let_name, ctx_after_let_name =
+            alpha_convert_pattern ctx (PIdentifier let_name)
+          in
+          let* renamed_args, ctx_after_args =
+            args_rename_helper [] ctx_after_let_name args
+          in
+          let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args body in
+          let* rest_decls, ctx_after_decls =
+            mut_let_helper
+              { ctx_after_let_name with reserved_names = ctx_after_body.reserved_names }
+              []
+              tl
+          in
+          alpha_convert_decl_list
+            ctx_after_decls
+            (DMutualRecDecl
+               ( Rec
+               , DLet (renamed_let_name, construct_function renamed_args renamed_body)
+                 :: rest_decls )
+             :: acc)
+            tail
+        | DLet (let_pat, let_body) :: tl ->
+          let* renamed_body, ctx_after_body = alpha_convert_expr ctx let_body in
+          let* renamed_let_pat, ctx_after_let_name =
+            alpha_convert_pattern
+              { ctx with reserved_names = ctx_after_body.reserved_names }
+              let_pat
+          in
+          let* rest_decls, ctx_after_decls =
+            mut_let_helper
+              { ctx_after_let_name with reserved_names = ctx_after_body.reserved_names }
+              []
+              tl
+          in
+          alpha_convert_decl_list
+            ctx_after_decls
+            (DMutualRecDecl (Rec, DLet (renamed_let_pat, renamed_body) :: rest_decls)
+             :: acc)
+            tail
+        | [] -> fail "Error: Unexpected let declaraion")
+     | _ -> fail "Error: Unexpected let declaraion")
   | [] -> List.rev acc |> return
 ;;
 
@@ -322,7 +404,10 @@ let f (a, s, p) = (m, n, p)
 |};
   [%expect
     {|
-    let  f_0 = (fun a_0 -> (let  f_1 = (fun a_1 -> (fun s_0 -> ((plus_mlint a_1) s_0))) in ((f_1 a_0) 5))) |}]
+    let  m_0 = 5
+    let  n_0 = 6
+    let  m_1 = 55
+    let  f_0 = (fun (a_0, s_0, p_0) -> (m_1, n_0, p_0)) |}]
 ;;
 
 let%expect_test "" =
@@ -395,4 +480,23 @@ let test = let a = 2 in let c b = ( + ) a b in let a = 3 in c 2
   [%expect
     {|
     let  test_0 = (let  a_0 = 2 in (let  c_0 = (fun b_0 -> ((plus_mlint a_0) b_0)) in (let  a_1 = 3 in (c_0 2)))) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let f = (fun x -> x) ((fun x -> x) 5)
+|};
+  [%expect {|
+    let  f_0 = ((fun x_0 -> x_0) ((fun x_1 -> x_1) 5)) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls
+    {|
+let rec even n = if n = 0 then true else (n - 1)
+and odd n = if n = 0 then false else even (n - 1)
+|};
+  [%expect
+    {|
+    let rec even_0 = (fun n_0 -> (if ((eq_ml n_0) 0) then true else ((minus_mlint n_0) 1))) and odd_0 = (fun n_1 -> (if ((eq_ml n_1) 0) then false else (even_0 ((minus_mlint n_1) 1)))) |}]
 ;;
