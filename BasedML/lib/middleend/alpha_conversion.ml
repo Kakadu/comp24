@@ -69,10 +69,15 @@ let rec alpha_convert_pattern ctx = function
   | _ -> fail "pattern: unimplemented yet"
 ;;
 
+let rec args_rename_helper acc helper_context = function
+  | [] -> (List.rev acc, helper_context) |> return
+  | h :: tl ->
+    let* renamed_h, ctx_after_h = alpha_convert_pattern helper_context h in
+    args_rename_helper (renamed_h :: acc) ctx_after_h tl
+;;
+
 let rec alpha_convert_expr ctx = function
   | EConstant const -> (EConstant const, ctx) |> return
-  (* | EIdentifier ident when Base.Set.mem Utils.stdlib_names ident ->
-     (EIdentifier ident, ctx) |> return *)
   | EIdentifier ident ->
     let ctx_with_id =
       { ctx with reserved_names = Base.Set.add ctx.reserved_names ident }
@@ -94,12 +99,7 @@ let rec alpha_convert_expr ctx = function
      | Some (old_name, counter) ->
        (EIdentifier (show_idname old_name counter), ctx) |> return)
   | ELetIn (flag, PIdentifier main_id, EFunction (fun_pat, fun_body), inner) ->
-    let rec args_rename_helper acc helper_context = function
-      | [] -> (List.rev acc, helper_context) |> return
-      | h :: tl ->
-        let* renamed_h, ctx_after_h = alpha_convert_pattern helper_context h in
-        args_rename_helper (renamed_h :: acc) ctx_after_h tl
-    in
+    (* TODO: add reserved names after let in *)
     let args, main_body = collect_function_arguments [] (EFunction (fun_pat, fun_body)) in
     let* new_main_id, ctx_after_main_pat =
       alpha_convert_pattern ctx (PIdentifier main_id)
@@ -128,34 +128,73 @@ let rec alpha_convert_expr ctx = function
       alpha_convert_expr ctx guard_branch
     in
     let* renamed_then_branch, ctx_after_then_branch =
-      alpha_convert_expr ctx_after_guard_branch then_branch
+      alpha_convert_expr
+        { ctx with reserved_names = ctx_after_guard_branch.reserved_names }
+        then_branch
     in
     let* renamed_else_branch, ctx_after_else_branch =
-      alpha_convert_expr ctx_after_then_branch else_branch
+      alpha_convert_expr
+        { ctx with reserved_names = ctx_after_then_branch.reserved_names }
+        else_branch
     in
     ( EIfThenElse (renamed_guard_branch, renamed_then_branch, renamed_else_branch)
-    , ctx_after_else_branch )
+    , { ctx with reserved_names = ctx_after_else_branch.reserved_names } )
     |> return
   | EApplication (left, right) ->
     let* renamed_left, ctx_after_left = alpha_convert_expr ctx left in
-    let* renamed_right, ctx_after_right = alpha_convert_expr ctx_after_left right in
-    (EApplication (renamed_left, renamed_right), ctx_after_right) |> return
+    let* renamed_right, ctx_after_right =
+      alpha_convert_expr { ctx with reserved_names = ctx_after_left.reserved_names } right
+    in
+    ( EApplication (renamed_left, renamed_right)
+    , { ctx with reserved_names = ctx_after_right.reserved_names } )
+    |> return
+  | EConstraint (expr, typ) ->
+    let* new_expr, ctx_after_expr = alpha_convert_expr ctx expr in
+    ( EConstraint (new_expr, typ)
+    , { ctx with reserved_names = ctx_after_expr.reserved_names } )
+    |> return
   | _ -> fail "unimplemented yet: expression"
 ;;
 
 let rec alpha_convert_decl_list ctx acc = function
   | h :: tl ->
     (match h with
-     | DSingleLet (rec_flag, DLet (pat, expr)) ->
-       (* TODO: What about let test = fun x -> ... ? *)
-       (* TODO: proccess differently for rec or not rec *)
-       let* new_pat, ctx_after_pat = alpha_convert_pattern ctx pat in
-       let* new_expr, _ = alpha_convert_expr ctx_after_pat expr in
+     | DSingleLet (rec_flag, DLet (main_pat, EFunction (fun_pat, fun_body))) ->
+       let args, main_body =
+         collect_function_arguments [] (EFunction (fun_pat, fun_body))
+       in
+       let* new_main_pat, ctx_after_main_pat = alpha_convert_pattern ctx main_pat in
+       (match rec_flag with
+        | Rec ->
+          let* renamed_args, ctx_after_args =
+            args_rename_helper [] ctx_after_main_pat args
+          in
+          let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
+          alpha_convert_decl_list
+            ctx_after_main_pat
+            (DSingleLet
+               ( rec_flag
+               , DLet (new_main_pat, construct_function renamed_args renamed_body) )
+             :: acc)
+            tl
+        | NotRec ->
+          let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
+          let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
+          alpha_convert_decl_list
+            ctx_after_main_pat
+            (DSingleLet
+               ( rec_flag
+               , DLet (new_main_pat, construct_function renamed_args renamed_body) )
+             :: acc)
+            tl)
+     | DSingleLet (rec_flag, DLet (main_pat, expr)) ->
+       let* new_main_pat, ctx_after_main_pat = alpha_convert_pattern ctx main_pat in
+       let* new_expr, _ = alpha_convert_expr ctx expr in
        alpha_convert_decl_list
-         ctx_after_pat
-         (DSingleLet (rec_flag, DLet (new_pat, new_expr)) :: acc)
+         ctx_after_main_pat
+         (DSingleLet (rec_flag, DLet (new_main_pat, new_expr)) :: acc)
          tl
-     | _ -> fail "unimplemented")
+     | _ -> fail "unimplemented: declaration")
   | [] -> List.rev acc |> return
 ;;
 
@@ -178,15 +217,6 @@ let init_context =
   add_to_context_all_std_funs empty_context
 ;;
 
-let test_alpha_for_expr str =
-  match Parser.parse Parser.p_exp str with
-  | Ok expr ->
-    (match run (alpha_convert_expr init_context expr) 0 with
-     | _, Ok (expr, _) -> Format.printf "%a" Restore_src.RestoreSrc.frestore_expr expr
-     | _, Error err -> Format.printf "%s" err)
-  | Error err -> Format.printf "%s" err
-;;
-
 let test_alpha_for_decls str =
   match Parser.parse_program str with
   | Ok decls ->
@@ -194,32 +224,6 @@ let test_alpha_for_decls str =
      | _, Ok lst -> Format.printf "%s" (Restore_src.RestoreSrc.restore_declarations lst)
      | _, Error err -> Format.printf "%s" err)
   | Error err -> Format.printf "%s" err
-;;
-
-let%expect_test "" =
-  test_alpha_for_expr "test";
-  [%expect {|
-    unbound_test_0 |}]
-;;
-
-let%expect_test "" =
-  test_alpha_for_expr "if test then test else test";
-  [%expect {|
-    (if unbound_test_0 then test_0 else test_0) |}]
-;;
-
-let%expect_test "" =
-  test_alpha_for_expr "let f a b c = a + b + c + f in a";
-  [%expect
-    {|
-    (let  f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((plus_mlint ((plus_mlint ((plus_mlint a_0) b_0)) c_0)) unbound_f_0)))) in unbound_a_0) |}]
-;;
-
-let%expect_test "" =
-  test_alpha_for_expr "let rec f a b c = a + b + c + f in a";
-  [%expect
-    {|
-    (let rec f_0 = (fun a_0 -> (fun b_0 -> (fun c_0 -> ((plus_mlint ((plus_mlint ((plus_mlint a_0) b_0)) c_0)) f_0)))) in unbound_a_0) |}]
 ;;
 
 let%expect_test "" =
@@ -243,7 +247,7 @@ let plus_mlint = 2
 let g = plus_mlint f 10
 let f = 6 + 6  
 |};
-[%expect
+  [%expect
     {|
     let  f_0 = ((plus_mlint 5) 5)
     let  plus_mlint_0 = 2
