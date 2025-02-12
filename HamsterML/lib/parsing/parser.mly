@@ -165,12 +165,12 @@ tuple_expr:
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
 
 l_app_expr: 
-    | id                                                    { EVar $1 } 
-    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS             { $2 }
-    | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS       { EOperation $2 }
-    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS              { $2 }
-    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS           { $2 }
-    | application                                           { $1 }
+    | id                                                                    { EVar $1 } 
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                             { $2 }
+    | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS                       { EOperation $2 }
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                              { $2 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                           { $2 }
+    | application                                                           { $1 }
 
 r_app_expr:
     | value                                                         { EConst $1 }
@@ -184,6 +184,7 @@ r_app_expr:
     | LEFT_PARENTHESIS; _list(list_expr); RIGHT_PARENTHESIS         { EList $2 }
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
+    | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
 op_expr: 
     | value                                             { EConst $1 }
@@ -206,6 +207,15 @@ concat_expr:
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
 
+constraint_expr:
+    | value                                             { EConst $1 }
+    | id                                                { EVar $1 }
+    | operation                                         { $1 }
+    | prefix_bop                                        { EOperation $1 }
+    | _if                                               { $1 }
+    | _match                                            { $1 }   
+    | application                                       { $1 }
+
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS     { e }
     | value                                             { EConst $1 }
@@ -220,7 +230,7 @@ expr:
     | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
     | application                                       { $1 }
     | _let                                              { $1 }
-    | expr_constraint                                   { $1 }
+    | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
 
 tuple_pattern:
     | value                                                         { Const $1 } 
@@ -248,6 +258,12 @@ concat_pattern:
     | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
     | WILDCARD                                                      { Wildcard }
 
+constraint_pattern:
+    | value                                                 { Const $1 } 
+    | id                                                    { Var $1 }
+    | WILDCARD                                              { Wildcard }
+    | prefix_bop                                            { Operation $1 }
+
 pattern:
     | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
     | value                                                 { Const $1 } 
@@ -257,7 +273,7 @@ pattern:
     | _tuple(tuple_pattern)                                 { Tuple $1 }
     | _list(list_pattern)                                   { List $1 }
     | concat(concat_pattern)                                { let a,b = $1 in ListConcat (a,b) }
-    | pattern_contraint                                     { $1 }
+    | _constraint (constraint_pattern)                      { let a,b = $1 in Constraint (a,b)  }
 
 
 concat (rule):
@@ -317,8 +333,5 @@ tuple_simple (rule):
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
 
-%inline expr_constraint: 
-    | expr; COLON; paramType        { EConstraint ($1, $3) }
-
-pattern_contraint:
-    | pattern; COLON; paramType     { Constraint ($1, $3) }
+%inline _constraint (rule): 
+    | LEFT_PARENTHESIS; rule; COLON; paramType; RIGHT_PARENTHESIS { ($2, $4) }
