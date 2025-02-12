@@ -69,6 +69,9 @@
 %left AND
 %left NOT
 
+%left ARROW
+%left COLON
+
 %left GREATER_THAN_EQUAL
 %left LESS_THAN_EQUAL
 %left GREATER_THAN
@@ -312,8 +315,8 @@ tuple_simple (rule):
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
 
-expr_constraint: 
-    | expr; COLON; paramType     { EConstraint ($1, $3) }
+%inline expr_constraint: 
+    | expr; COLON; paramType        { EConstraint ($1, $3) }
 
 pattern_contraint:
     | pattern; COLON; paramType     { Constraint ($1, $3) }
