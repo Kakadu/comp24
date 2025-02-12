@@ -66,7 +66,15 @@ let rec alpha_convert_pattern ctx = function
   | PConstraint (pat, typ) ->
     let* renamed_pat, ctx_after_pat = alpha_convert_pattern ctx pat in
     (PConstraint (renamed_pat, typ), ctx_after_pat) |> return
-  | _ -> fail "pattern: unimplemented yet"
+  | PTuple pats ->
+    let rec tuple_helper ctx acc = function
+      | [] -> (List.rev acc, ctx) |> return
+      | h :: tl ->
+        let* renamed_pat, new_ctx = alpha_convert_pattern ctx h in
+        tuple_helper new_ctx (renamed_pat :: acc) tl
+    in
+    let* renamed_pats, ctx_after_pats = tuple_helper ctx [] pats in
+    (PTuple renamed_pats, ctx_after_pats) |> return
 ;;
 
 let rec args_rename_helper acc helper_context = function
@@ -101,27 +109,43 @@ let rec alpha_convert_expr ctx = function
   | ELetIn (flag, PIdentifier main_id, EFunction (fun_pat, fun_body), inner) ->
     (* TODO: add reserved names after let in *)
     let args, main_body = collect_function_arguments [] (EFunction (fun_pat, fun_body)) in
-    let* new_main_id, ctx_after_main_pat =
-      alpha_convert_pattern ctx (PIdentifier main_id)
-    in
     (match flag with
      | Rec ->
+       let* new_main_id, ctx_after_main_pat =
+         alpha_convert_pattern ctx (PIdentifier main_id)
+       in
        let* renamed_args, ctx_after_args =
          args_rename_helper [] ctx_after_main_pat args
        in
-       let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
-       let* renamed_inner, _ = alpha_convert_expr ctx_after_main_pat inner in
+       let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args main_body in
+       let* renamed_inner, ctx_after_inner =
+         alpha_convert_expr
+           { ctx_after_main_pat with
+             reserved_names =
+               Base.Set.union
+                 ctx_after_main_pat.reserved_names
+                 ctx_after_body.reserved_names
+           }
+           inner
+       in
        ( ELetIn
            (flag, new_main_id, construct_function renamed_args renamed_body, renamed_inner)
-       , ctx )
+       , { ctx with reserved_names = ctx_after_inner.reserved_names } )
        |> return
      | NotRec ->
        let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
-       let* renamed_body, _ = alpha_convert_expr ctx_after_args main_body in
-       let* renamed_inner, _ = alpha_convert_expr ctx_after_main_pat inner in
+       let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args main_body in
+       let* new_main_id, ctx_after_main_pat =
+         alpha_convert_pattern
+           { ctx with reserved_names = ctx_after_body.reserved_names }
+           (PIdentifier main_id)
+       in
+       let* renamed_inner, ctx_after_inner =
+         alpha_convert_expr ctx_after_main_pat inner
+       in
        ( ELetIn
            (flag, new_main_id, construct_function renamed_args renamed_body, renamed_inner)
-       , ctx )
+       , { ctx with reserved_names = ctx_after_inner.reserved_names } )
        |> return)
   | EIfThenElse (guard_branch, then_branch, else_branch) ->
     let* renamed_guard_branch, ctx_after_guard_branch =
@@ -185,9 +209,7 @@ let rec alpha_convert_decl_list ctx acc = function
               args
           in
           let* renamed_body, ctx_after_body =
-            alpha_convert_expr
-              { ctx with reserved_names = ctx_after_args.reserved_names }
-              main_body
+            alpha_convert_expr ctx_after_args main_body
           in
           alpha_convert_decl_list
             { ctx_after_main_pat with
@@ -242,15 +264,49 @@ let test_alpha_for_decls str =
 
 let%expect_test "" =
   test_alpha_for_decls {|
+let f a = let f a s = a + s in f a 5
+|};
+  [%expect
+    {|
+    let  f_0 = (fun a_0 -> (let  f_1 = (fun a_1 -> (fun s_0 -> ((plus_mlint a_1) s_0))) in ((f_1 a_0) 5))) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let f a = (f 5)
+|};
+  [%expect {|
+    let  f_0 = (fun a_0 -> (unbound_f_1 5)) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let f (a, s, p) = let f (a, s, p) = a * s * p in a + s + p
+|};
+  [%expect
+    {|
+    let  f_0 = (fun (a_0, s_0, p_0) -> (let  f_1 = (fun (a_1, s_1, p_1) -> ((mult_mlint ((mult_mlint a_1) s_1)) p_1)) in ((plus_mlint ((plus_mlint a_0) s_0)) p_0))) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
+let rec f a = (f 5)
+|};
+  [%expect {|
+    let rec f_0 = (fun a_0 -> (f_0 5)) |}]
+;;
+
+let%expect_test "" =
+  test_alpha_for_decls {|
 let f a = a + 5
 let g = f + 10
 let f a = a + 6  
 |};
   [%expect
     {|
-    let  f_0 = (fun a_0 -> ((plus_mlint unbound_a_1) 5))
+    let  f_0 = (fun a_0 -> ((plus_mlint a_0) 5))
     let  g_0 = ((plus_mlint f_0) 10)
-    let  f_1 = (fun a_1 -> ((plus_mlint unbound_a_2) 6)) |}]
+    let  f_1 = (fun a_1 -> ((plus_mlint a_1) 6)) |}]
 ;;
 
 let%expect_test "" =
