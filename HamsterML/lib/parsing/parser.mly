@@ -31,7 +31,7 @@
 
 // Separators
 %token ARROW        // "->"
-%token COMMA        // "."
+%token COMMA        // ","
 %token SEMICOLON    // ";"
 %token COLON        // ":"
 %token DOUBLE_COLON // "::"
@@ -65,12 +65,14 @@
 %token EOF
 
 // --- Priorities ---
+%left ARROW COLON
+%right COMMA DOUBLE_COLON
+
+%nonassoc BAR
+
 %left OR
 %left AND
 %left NOT
-
-%left ARROW
-%left COLON
 
 %left GREATER_THAN_EQUAL
 %left LESS_THAN_EQUAL
