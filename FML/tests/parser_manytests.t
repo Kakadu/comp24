@@ -29,7 +29,48 @@
     ]
 
   $ ./parser_runner.exe < manytests/typed/002fac.ml
-  Error: : end_of_input
+  [(SingleDecl
+      (DDeclaration (Rec, (PIdentifier "fac_cps"),
+         (EFun ((PIdentifier "n"),
+            (EFun ((PIdentifier "k"),
+               (EIf (
+                  (EApplication (
+                     (EApplication ((EIdentifier "( = )"), (EIdentifier "n"))),
+                     (EConst (CInt 1)))),
+                  (EApplication ((EIdentifier "k"), (EConst (CInt 1)))),
+                  (EApplication (
+                     (EApplication ((EIdentifier "fac_cps"),
+                        (EApplication (
+                           (EApplication ((EIdentifier "( - )"),
+                              (EIdentifier "n"))),
+                           (EConst (CInt 1))))
+                        )),
+                     (EFun ((PIdentifier "p"),
+                        (EApplication ((EIdentifier "k"),
+                           (EApplication (
+                              (EApplication ((EIdentifier "( * )"),
+                                 (EIdentifier "p"))),
+                              (EIdentifier "n")))
+                           ))
+                        ))
+                     ))
+                  ))
+               ))
+            ))
+         )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "main"),
+          (ELetIn (NoRec, PUnit,
+             (EApplication ((EIdentifier "print_int"),
+                (EApplication (
+                   (EApplication ((EIdentifier "fac_cps"), (EConst (CInt 4)))),
+                   (EFun ((PIdentifier "print_int"), (EIdentifier "print_int")
+                      ))
+                   ))
+                )),
+             (EConst (CInt 0))))
+          )))
+    ]
 
   $ ./parser_runner.exe < manytests/typed/003fib.ml
   Error: : no more choices
@@ -135,7 +176,35 @@
   $ ./parser_runner.exe < manytests/typed/006partial2.ml
   Error: : no more choices
   $ ./parser_runner.exe < manytests/typed/006partial3.ml
-  Error: : end_of_input
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "foo"),
+         (EFun ((PIdentifier "a"),
+            (ELetIn (NoRec, PUnit,
+               (EApplication ((EIdentifier "print_int"), (EIdentifier "a"))),
+               (EFun ((PIdentifier "b"),
+                  (ELetIn (NoRec, PUnit,
+                     (EApplication ((EIdentifier "print_int"),
+                        (EIdentifier "b"))),
+                     (EFun ((PIdentifier "c"),
+                        (EApplication ((EIdentifier "print_int"),
+                           (EIdentifier "c")))
+                        ))
+                     ))
+                  ))
+               ))
+            ))
+         )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "main"),
+          (ELetIn (NoRec, PUnit,
+             (EApplication (
+                (EApplication (
+                   (EApplication ((EIdentifier "foo"), (EConst (CInt 4)))),
+                   (EConst (CInt 8)))),
+                (EConst (CInt 9)))),
+             (EConst (CInt 0))))
+          )))
+    ]
 
   $ ./parser_runner.exe < manytests/typed/007order.ml
   Error: : no more choices

@@ -246,10 +246,18 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ = 
-parse_with_print {|let () = print_int (fac_cps 4 (fun print_int -> print_int))|};
+parse_with_print {|let () = print_int ( fac_cps 4 ( fun print_int -> print_int ) )|};
   [%expect
   {|
-      Error: : end_of_input
+      [(SingleDecl
+          (DDeclaration (NoRec, PUnit,
+             (EApplication ((EIdentifier "print_int"),
+                (EApplication (
+                   (EApplication ((EIdentifier "fac_cps"), (EConst (CInt 4)))),
+                   (EFun ((PIdentifier "print_int"), (EIdentifier "print_int")))))
+                ))
+             )))
+        ]
   |}]
 
   let%expect_test _ = 
@@ -289,4 +297,4 @@ parse_with_print {|let rec fac_cps n k =
              )))
         ]
   |}]
-  
+

@@ -29,6 +29,7 @@ let is_keyword = function
   | "else"
   | "false"
   | "fun"
+  | "and"
   | "if"
   | "in"
   | "let"
@@ -251,16 +252,6 @@ let parse_cons = token "::" *> return (fun e1 e2 -> ECons (e1, e2))
 let parse_enill = token "[]" >>| fun _ -> ENill
 let parse_elist arg = parse_enill <|> parse_elist arg
 
-(* let parse_let pexpr =
-   token "let"
-   *> lift4
-   (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
-   (token "rec" *> return Rec <|> return NoRec)
-   (parse_punit <|> parse_pidentifier)
-   (token "=" *> pexpr <|> parse_bundle pexpr)
-   (token "in" *> pexpr)
-   ;; *)
-
 let parse_let pexpr =
   let* rec_flag = keyword "let" *> (keyword "rec" *> return Rec <|> return NoRec) in
   let* decl = parse_pattern in
@@ -293,11 +284,12 @@ let parse_expr =
       ]
   in
   let apply =
-    lift2
-      (fun f args ->
-        Base.List.fold_left ~f:(fun f arg -> EApplication (f, arg)) ~init:f args)
-      expr
-      (many (char ' ' *> skip_while is_whitespace *> expr))
+    let rec build_application f args =
+      match args with
+      | [] -> f
+      | h :: t -> build_application (EApplication (f, h)) t
+    in
+    lift2 build_application expr (many (skip_wspace *> expr))
   in
   let expr = chainl1 apply (mul <|> div) in
   let expr = chainl1 expr (add <|> sub) in
@@ -335,24 +327,9 @@ let parse_mutable_rec_declaration =
   >>= fun lst -> return @@ MutableRecDecl (first_decl :: lst)
 ;;
 
-let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration ]
+let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration]
 
 (* ------------------ *)
 
-(* let parse input =
-  parse_string
-    ~consume:All
-    (sep_by (token ";;" *> skip_wspace <|> token "\n" *> skip_wspace) parse_program
-     <* option "" (token ";;" <|> token "\n")
-     <* skip_wspace)
-    input
-;; *)
-
 let del = token ";;" *> skip_wspace <|> skip_wspace
-
-let parse input =
-  parse_string
-    ~consume:All
-    (many1 (parse_program <* del))
-    input
-;;
+let parse input = parse_string ~consume:All (many1 (parse_program <* del)) input
