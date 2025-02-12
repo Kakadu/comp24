@@ -214,6 +214,36 @@ let%test _ =
 ;; *)
 
 let%test _ =
+  parse_expr "f (x : int)" = Application (EVar "f", EConstraint (EVar "x", PInt))
+;;
+
+let%test _ =
+  parse_expr "(f x) : string" = EConstraint (Application (EVar "f", EVar "x"), PString)
+;;
+
+let%test _ = parse_expr "f x : int" != EConstraint (Application (EVar "f", EVar "x"), PInt)
+
+let%test _ =
+  parse_expr "let f (x:int) y = x + y"
+  = Let
+      ( Nonrecursive
+      , [ ( Var "f"
+          , [ Constraint (Var "x", PInt); Var "y" ]
+          , Application (Application (EOperation (Binary ADD), EVar "x"), EVar "y") )
+        ]
+      , None )
+;;
+
+let%test _ =
+  parse_expr "fun f g x -> (f (x: string) (g x: bool) : int)"
+  = Fun
+      ( [ Var "x"; Var "y"; Var "z" ]
+      , Application
+          ( Application (EVar "f", EConstraint (EVar "x", PString))
+          , EConstraint (Application (EVar "g", EVar "x"), PBool) ) )
+;;
+
+let%test _ =
   parse_expr
     "let main =\n\
     \  let () = print_int (addi (fun x: int b -> if b then x+1 else x*2) (fun _start: \
