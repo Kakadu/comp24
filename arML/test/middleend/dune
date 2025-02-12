@@ -1,0 +1,9 @@
+(library
+ (name middleend_tests)
+ (libraries arML_lib)
+ (modules ClosureConversion)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
