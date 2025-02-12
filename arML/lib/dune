@@ -1,5 +1,5 @@
 (library
  (name arML_lib)
  (public_name arML.lib)
- (libraries arML.common arML.ast arML.parser arML.inferencer)
+ (libraries arML.common arML.ast arML.parser arML.inferencer arML.middleend)
  (modules Runner))

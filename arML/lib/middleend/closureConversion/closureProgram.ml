@@ -9,49 +9,7 @@ open Common.IdentifierStructs
 open IdentifierSearcher
 open ClosureExpression
 
-let start_identifiers = 
-  let binary_operations =
-    [ "( + )" 
-    ; "( - )" 
-    ; "( * )" 
-    ; "( / )" 
-    ; "( % )" 
-    ; "( > )" 
-    ; "( < )" 
-    ; "( >= )" 
-    ; "( <= )" 
-    ; "( = )" 
-    ; "( != )" 
-    ; "( <> )" 
-    ; "( && )" 
-    ; "( || )"
-    ]
-  in
-
-  let unary_operations =
-    [ "U-"
-    ; "U+"
-    ; "UNot"
-    ]
-  in
-
-  let stdlib_functions =
-    [ "print_int"
-    ; "print_bool"
-    ]
-  in
-
-  binary_operations @ unary_operations @ stdlib_functions
-;;
-
-let start_env = 
-  List.fold_left 
-    (fun acc var -> IdentifierSet.add (Id var) acc) 
-    IdentifierSet.empty 
-    start_identifiers
-;;
-
-let closure_program program =
+let closure_program start_env program =
 
   let new_declaration decl cases =
     match decl with
@@ -100,11 +58,4 @@ let closure_program program =
         helper new_acc updated_env tl
   in
   helper [] start_env program
-;;
-
-let run_closure_program program = 
-  let first_state = 0 in
-  let m = closure_program program in
-  let result = run m first_state in
-  fst result
 ;;

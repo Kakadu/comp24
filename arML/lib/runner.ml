@@ -47,3 +47,23 @@ let inference_program program =
 ;;
 
 (* -------------- *)
+
+(* Closure conversion *)
+
+let closure_conversion_expr_ast expr = Ast.Pprint.print_expression (Middleend.Runner.run_closure_expression expr)
+
+let closure_conversion_program_ast program = Ast.Pprint.print_program (Middleend.Runner.run_closure_program program)
+
+let closure_conversion_expression expr =
+  match Parser.Runner.parse_expression expr with
+  | Ok [ast] -> closure_conversion_expr_ast ast
+  | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+let closure_conversion_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast -> closure_conversion_program_ast ast
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
