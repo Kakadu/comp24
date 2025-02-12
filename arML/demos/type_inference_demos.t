@@ -61,7 +61,22 @@ MANYTESTS
   val temp : int * bool
 
   $ ./start_type_inference_demos.exe < manytests/typed/015tuples.ml
-  Type error: unification failed - type 'a * 'b does not match expected type 'a
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val map : ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val fixpoly : (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) * (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) -> ('a -> 'b) * ('a -> 'b)
+  val feven : 'a * (int -> int) -> int -> int
+  val fodd : (int -> int) * 'a -> int -> int
+  val tie : (int -> int) * (int -> int)
+  val meven : int -> int
+  val modd : int -> int
+  val main : int
 
   $ ./start_type_inference_demos.exe < manytests/typed/016lists.ml
-  Type error: unification failed - type unit does not match expected type 'a
+  val length : 'a list -> int
+  val length_tail : 'a list -> int
+  val map : ('a -> 'b * 'a) -> 'a list -> 'b * 'a list
+  val append : 'a * 'b list -> 'a * 'b list -> 'a * 'b list
+  val concat : 'a list list -> 'a list
+  val iter : ('a -> unit) -> 'a list -> unit
+  val cartesian : 'a list -> 'b list -> 'a * 'b list
+  val main : int

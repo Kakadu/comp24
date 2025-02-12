@@ -84,6 +84,7 @@ let infer_declaration env name_list = function
           match pat with
           | Ast.PVar (Id name) ->
             let* fv = fresh_var in
+            (* let* env', _ = extend_env_with_pattern env name_list pat fv in *)
             let env' = TypeEnv.extend env name (Schema.Schema (TypeVarSet.empty, fv)) in
             return (env', (name, fv) :: vars)
           | _ -> fail InvalidRecursionLeftHand

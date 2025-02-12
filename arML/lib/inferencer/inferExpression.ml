@@ -108,31 +108,37 @@ let infer_expr =
     return (sub, ty)
 
   and infer_let_in env cases expr =
-    let rec extend_env_with_pattern env pat ty =
+    let rec extend_env_with_pattern env acc pat ty =
       match pat, ty with
       | Ast.PVar (Id v), ty ->
         let generalized_ty = Generalize.generalize env ty in
-        return (TypeEnv.extend env v generalized_ty)
+        return @@ ((TypeEnv.extend env v generalized_ty), acc)
+      | Ast.PTuple (p1, p2, ps), (TypeTree.TVar _ as tv) ->
+        let* tvs = List.fold_left (fun acc _ -> let* acc = acc in let* fv = fresh_var in return @@ fv :: acc) (return []) (p1 :: p2 :: ps) in
+        let new_ty = TTuple tvs in 
+        let* sub = Substitution.unify tv new_ty in
+        extend_env_with_pattern (TypeEnv.apply env sub) (sub :: acc) pat new_ty
       | Ast.PTuple (p1, p2, ps), TypeTree.TTuple ts ->
         (match ts with
          | t1 :: t2 :: rest when List.length rest = List.length ps ->
-           let* env = extend_env_with_pattern env p1 t1 in
-           let* env = extend_env_with_pattern env p2 t2 in
-           List.fold_left2 (fun acc pat ty ->
-               let* env = acc in
-               extend_env_with_pattern env pat ty
-             ) (return env) ps rest
+           let* env, acc = extend_env_with_pattern env acc p1 t1 in
+           let* env, acc = extend_env_with_pattern env acc p2 t2 in
+           List.fold_left2 (fun acc1 pat ty ->
+               let* env, acc = acc1 in
+               extend_env_with_pattern env acc pat ty
+             ) (return @@ (env, acc)) ps rest
          | _ -> 
            let* typ, _ = infer_pattern env pat in
            fail @@ Unification_failed (typ, ty))
       | Ast.PListConstructor (l, r), TypeTree.TList t ->
-        let* env = extend_env_with_pattern env l t in
-        extend_env_with_pattern env r (TypeTree.TList t)
-      | Ast.PNill, TypeTree.TList _ -> return env
-      | Ast.PAny, _ -> return env
-      | Ast.PConst _ as pat, ct -> 
-        let* t, _ = infer_pattern env pat in
-        if t = ct then return env else fail @@ Unification_failed (t, ct)
+        let* env, acc = extend_env_with_pattern env acc l t in
+        extend_env_with_pattern env acc r (TypeTree.TList t)
+      | Ast.PNill, TypeTree.TList _ -> return (env, acc)
+      | Ast.PAny, _ -> return (env, acc)
+      | Ast.PConst _ as pat, pty ->
+        let* pt, _ = infer_pattern env pat in
+        let* sub = Substitution.unify pt pty in
+        return (env, sub :: acc)
       | pat, ty -> 
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty)
@@ -151,8 +157,10 @@ let infer_expr =
           in
           let* env, sub = acc in
           let* sub_expr, ty_expr = helper env expr in
-          let* env = extend_env_with_pattern env pat ty_expr in
+          let* env, sub2 = extend_env_with_pattern env [] pat ty_expr in
+          let* sub2 = Substitution.compose_all sub2 in
           let* sub_final = Substitution.compose sub sub_expr in
+          let* sub_final = Substitution.compose sub_final sub2 in
           return (env, sub_final)
         ) (return (env, Substitution.empty)) cases
     in
