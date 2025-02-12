@@ -21,11 +21,14 @@ let transform_let_in env = function
     let patterns_to_update = IdentifierSet.empty in
     let patterns_to_update =
       List.fold_left
-        (fun acc (_, expr) ->
-           let e_free_vars = get_expr_free_vars expr in
+        (fun acc (_, case_expr) ->
+           let ce_free_vars = get_expr_free_vars case_expr in
+           let inner_expr_free_vars = get_expr_free_vars expr in
+           let predicate1 v = IdentifierSet.mem v main_patterns_identifiers in
+           let predicate2 v = IdentifierSet.mem v inner_expr_free_vars in
            IdentifierSet.fold
-             (fun v acc -> if IdentifierSet.mem v main_patterns_identifiers then IdentifierSet.add v acc else acc)
-             e_free_vars
+             (fun v acc -> if (predicate1 v) && (predicate2 v) then IdentifierSet.add v acc else acc)
+             ce_free_vars
              acc)
         patterns_to_update
         (case :: cases)
