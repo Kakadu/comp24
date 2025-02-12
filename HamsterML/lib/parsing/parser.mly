@@ -214,6 +214,8 @@ concat_expr:
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
 
+expr_constraint: expr; COLON; paramType     { EConstraint ($1, $3) }
+
 expr:
     | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS     { e }
     | value                                             { EConst $1 }
@@ -228,6 +230,7 @@ expr:
     | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
     | application                                       { $1 }
     | _let                                              { $1 }
+    | expr_constraint                                   { $1 }
 
 tuple_pattern:
     | value                                                         { Const $1 } 
