@@ -444,4 +444,79 @@ module CCTests = struct
     | Result.Ok e -> Stdlib.Format.printf "%a" pp_expr (close_expr e env)
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
+
+  let%expect_test "no closure" =
+    pp_parse_and_cc "let f x = x in f 10";
+    [%expect
+      {|
+      (ELet (NonRec, "f", (EFun (("x", None), (EVar "x"))),
+         (Some (EApp ((EVar "f"), (EConst (CInt 10)))))))
+      |}]
+  ;;
+
+  let%expect_test "let closure" =
+    pp_parse_and_cc "let f x = x + 1 in let g x = f x in g 10";
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun (("x", None),
+            (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
+         (Some (ELet (NonRec, "g",
+                  (EFun (("f", None),
+                     (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
+                  (Some (EApp ((EApp ((EVar "g"), (EVar "f"))), (EConst (CInt 10))
+                           )))
+                  )))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "let chain closure" =
+    pp_parse_and_cc
+      "let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun (("x", None),
+            (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
+         (Some (ELet (NonRec, "g",
+                  (EFun (("f", None),
+                     (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
+                  (Some (ELet (NonRec, "k",
+                           (EFun (("f", None),
+                              (EFun (("g", None),
+                                 (EFun (("x", None),
+                                    (EApp ((EApp ((EVar "g"), (EVar "f"))),
+                                       (EVar "x")))
+                                    ))
+                                 ))
+                              )),
+                           (Some (ELet (NonRec, "q",
+                                    (EFun (("f", None),
+                                       (EFun (("g", None),
+                                          (EFun (("k", None),
+                                             (EFun (("x", None),
+                                                (EApp (
+                                                   (EApp (
+                                                      (EApp ((EVar "k"), (EVar "f")
+                                                         )),
+                                                      (EVar "g"))),
+                                                   (EVar "x")))
+                                                ))
+                                             ))
+                                          ))
+                                       )),
+                                    (Some (EApp (
+                                             (EApp (
+                                                (EApp (
+                                                   (EApp ((EVar "q"), (EVar "f"))),
+                                                   (EVar "g"))),
+                                                (EVar "k"))),
+                                             (EConst (CInt 1)))))
+                                    )))
+                           )))
+                  )))
+         ))
+      |}]
+  ;;
 end
