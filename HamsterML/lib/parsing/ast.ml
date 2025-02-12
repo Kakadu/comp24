@@ -75,7 +75,7 @@ type expr =
 
 and args = pattern list
 
-(* name + args + scope *)
+(* name args = expr *)
 and bind = pattern * args * expr
 and case = pattern * expr
 

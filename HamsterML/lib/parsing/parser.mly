@@ -227,6 +227,7 @@ expr:
     | _tuple(tuple_expr)                                { ETuple $1 }
     | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
     | application                                       { $1 }
+    | _let                                              { $1 }
 
 tuple_pattern:
     | value                                                         { Const $1 } 
@@ -271,7 +272,7 @@ concat (rule):
 
 (* default operations like "1 + 2" *)
 operation:
-    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS    { $2 }
+    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS           { $2 }
     | e1 = op_expr; op = bop; e2 = op_expr                     { Application ( Application (EOperation (Binary op), e1), e2 ) }
     | op = uop; e = op_expr                                    { Application (EOperation (Unary op), e) } 
 
@@ -300,15 +301,6 @@ _match:
 %inline id:
     | IDENTIFIER    { $1 }
 
-// %inline func_id: 
-//     // | id = IDENTIFIER     { VarId ( id ) }
-//     | op = OP_IDENTIFIER  { VarId ( String.make 1 op ) }
-//     // (* let _ = .. *)
-//     // | WILDCARD            { Wildcard }
-//     // (* let f x = let (k, j) = x in j in f (1, 2) *)
-//     // | p = pattern         { p }
-//     | v = value            { v }
-
 %inline _list(rule):
   LEFT_SQ_BRACKET; elements = separated_list(SEMICOLON, rule); RIGHT_SQ_BRACKET     { elements }
 
@@ -322,14 +314,14 @@ tuple_simple (rule):
 
 %inline rec_flag:
     | REC   { Recursive } 
-    |       { Nonrecursive }
+    | { Nonrecursive }
 
-// %inline let_def:
-//     (* () = print_endline "123" *)
-//     | TYPE_UNIT; EQUAL; e = expr    { Let(Nonrecursive, Const(Unit), [], e)}
-//     (* [rec] f x = x *)
-//     | rec_opt = rec_flag; fun_name = func_id; args = list(value); EQUAL; e = expr   { Let(rec_opt, fun_name, args, e) }
+%inline _let:
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind); IN; expr   { Let($2, $3, Some $5) }
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind)  { Let($2, $3, None) }
 
+%inline _bind:
+    | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
 
 // (* a = 10 and b = 20 and ... *)
 // and_bind:
