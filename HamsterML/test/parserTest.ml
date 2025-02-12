@@ -129,6 +129,77 @@ let%test _ =
   parse "[f x y]" = EList [ Application (Application (EVar "f", EVar "x"), EVar "y") ]
 ;;
 
+let%test _ =
+  parse "f (1+1) x"
+  = Application
+      ( Application
+          ( EVar "f"
+          , Application
+              (Application (EOperation (Binary ADD), EConst (Int 1)), EConst (Int 1)) )
+      , EVar "x" )
+;;
+
+(* Concat *)
+
+let%test _ = parse "1::[]" = EListConcat (EConst (Int 1), EList [])
+
+let%test _ =
+  parse "1::2::[]" = EListConcat (EConst (Int 1), EListConcat (EConst (Int 2), EList []))
+;;
+
+let%test _ =
+  parse "1::2::[3;4]"
+  = EListConcat
+      ( EConst (Int 1)
+      , EListConcat (EConst (Int 2), EList [ EConst (Int 3); EConst (Int 4) ]) )
+;;
+
+(* Pattern matching *)
+
+let%test _ =
+  parse "match x with 10 -> true"
+  = Match (EVar "x", [ Const (Int 10), EConst (Bool true) ])
+;;
+
+let%test _ = parse "match x with | 10 -> true" = parse "match x with 10 -> true"
+
+let%test _ =
+  parse "match x with | 1 -> 10 | _ -> 20"
+  = Match (EVar "x", [ Const (Int 1), EConst (Int 10); Wildcard, EConst (Int 20) ])
+;;
+
+(* let%test _ = parse 
+"match xs with
+  | [] -> 0
+  | h::tl -> 1 + length tl" = 
+
+let%test _ = parse 
+"match xs with
+  | [] -> acc
+  | h::tl -> helper (acc + 1) tl" = 
+
+
+let%test _ = parse 
+"match xs with
+  | [] -> []
+  | a::[] -> [f a]
+  | a::b::[] -> [f a; f b]
+  | a::b::c::[] -> [f a; f b; f c]
+  | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl" =
+
+let%test _ = parse 
+"match xs with
+    | [] -> []
+    | h::tl -> append h (helper tl)"
+
+let%test _ = parse 
+" match xs with [] -> () | h::tl -> let () = f h" =
+
+let%test _ = parse 
+"match xs with
+  | [] -> []
+  | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)" =   *)
+
 (* --- PATTERNS --- *)
 
 (* simple patterns *)
@@ -161,12 +232,27 @@ let%test _ =
       ]
 ;;
 
-(* let%test _ =
+let%test _ =
   parse_pattern "((+),(+))" = Tuple [ Operation (Binary ADD); Operation (Binary ADD) ]
-;; *)
+;;
 
 let%test _ =
   parse_pattern "([1], [2])" = Tuple [ List [ Const (Int 1) ]; List [ Const (Int 2) ] ]
+;;
+
+(* Concat *)
+
+let%test _ = parse_pattern "1::[]" = ListConcat (Const (Int 1), List [])
+
+let%test _ =
+  parse_pattern "1::2::[]"
+  = ListConcat (Const (Int 1), ListConcat (Const (Int 2), List []))
+;;
+
+let%test _ =
+  parse_pattern "1::2::[3;4]"
+  = ListConcat
+      (Const (Int 1), ListConcat (Const (Int 2), List [ Const (Int 3); Const (Int 4) ]))
 ;;
 (*
    (* Data Type tests *)
