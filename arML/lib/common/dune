@@ -1,5 +1,5 @@
 (library
  (name common)
  (public_name arML.common)
- (libraries base)
- (modules stateResultMonad))
+ (libraries base arML.ast)
+ (modules identifierStructs stateMonad stateResultMonad))

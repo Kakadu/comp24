@@ -75,8 +75,8 @@ MANYTESTS
   $ ./start_type_inference_demos.exe < manytests/typed/016lists.ml
   val length : 'a list -> int
   val length_tail : 'a list -> int
-  val map : ('a -> 'b * 'a) -> 'a list -> 'b * 'a list
-  val append : 'a * 'b list -> 'a * 'b list -> 'a * 'b list
+  val map : ('a -> 'b) -> 'a list -> 'b list
+  val append : 'a list -> 'a list -> 'a list
   val concat : 'a list list -> 'a list
   val iter : ('a -> unit) -> 'a list -> unit
   val cartesian : 'a list -> 'b list -> 'a * 'b list

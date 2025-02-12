@@ -12,5 +12,5 @@ val update_name_list : string -> string list -> string list
 val infer_declaration : 
   TypeEnv.t -> 
   string list -> 
-  Ast.declaration -> 
+  Ast.AbstractSyntaxTree.declaration -> 
   (TypeEnv.t * string list, TypeErrors.error) Common.StateResultMonad.t

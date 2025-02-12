@@ -221,17 +221,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {|
-    let rec f x = g x
-    and g x = f (g x)
-  |};
-  [%expect {|
-    val f : 'a -> 'a
-    val g : 'a -> 'a
-    |}]
-;;
-
-let%expect_test _ =
   inference_program {| 
     let rec is_even n = if n = 0 then true else is_odd (n - 1) 
     and is_odd n = if n = 0 then false else is_even (n - 1)

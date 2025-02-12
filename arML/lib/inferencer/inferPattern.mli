@@ -7,5 +7,5 @@
     or a type error if inference fails. *)
 val infer_pattern : 
   TypeEnv.t ->
-  Ast.pattern ->
+  Ast.AbstractSyntaxTree.pattern ->
   (TypeTree.typ * TypeEnv.t, TypeErrors.error) Common.StateResultMonad.t

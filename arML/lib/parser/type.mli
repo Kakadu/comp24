@@ -1,5 +1,5 @@
 
-open Ast
+open Ast.AbstractSyntaxTree
 
 (* Type definition dispatch *)
 type type_dispatch = {

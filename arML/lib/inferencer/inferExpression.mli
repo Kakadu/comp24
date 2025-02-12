@@ -7,5 +7,5 @@
     or a type error if inference fails. *)
 val infer_expr : 
   TypeEnv.t -> 
-  Ast.expression -> 
+  Ast.AbstractSyntaxTree.expression -> 
   (Substitution.t * TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t

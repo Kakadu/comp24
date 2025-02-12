@@ -7,5 +7,5 @@
     or a type error if inference fails. *)
 val infer_program : 
   TypeEnv.t ->
-  Ast.declaration list ->
+  Ast.AbstractSyntaxTree.declaration list ->
   (TypeEnv.t * string list, TypeErrors.error) Common.StateResultMonad.t

@@ -9,23 +9,24 @@ open TypeErrors
 open TypeUtils
 open InferBasic
 open InferPattern
+open Ast.AbstractSyntaxTree
 
 let infer_expr =
 
   let rec helper env = function
-    | Ast.EConstant c -> return @@ (Substitution.empty, InferBasic.infer_const c)
-    | Ast.EIdentifier (Id name) -> InferBasic.infer_id env name
-    | Ast.EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
-    | Ast.EApplication (func_expr, arg, args_exprs) -> infer_application env func_expr (arg :: args_exprs)
-    | Ast.EIfThenElse (c, b1, b2) -> infer_if_then_else env c b1 b2
-    | Ast.ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
-    | Ast.EListConstructor (head, tail) -> infer_list_constructor env head tail
-    | Ast.EEmptyList -> let* fv = fresh_var in return (Substitution.empty, TList fv)
-    | Ast.ELetIn (case, cases, expr) -> infer_let_in env (case :: cases) expr
-    | Ast.ERecLetIn (case, cases, expr) -> infer_rec_let_in env (case :: cases) expr
-    | Ast.EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
-    | Ast.EFunction (case, cases) -> infer_function env (case :: cases)
-    | Ast.ETyped (expr, typ) -> infer_typed_expression env expr typ
+    | EConstant c -> return @@ (Substitution.empty, InferBasic.infer_const c)
+    | EIdentifier (Id name) -> InferBasic.infer_id env name
+    | EFun ((first_pattern, param_patterns), expr) -> infer_fun env (first_pattern :: param_patterns) expr
+    | EApplication (func_expr, arg, args_exprs) -> infer_application env func_expr (arg :: args_exprs)
+    | EIfThenElse (c, b1, b2) -> infer_if_then_else env c b1 b2
+    | ETuple (first_pattern, second_pattern, pattern_list) -> infer_tuple env (first_pattern :: second_pattern :: pattern_list)
+    | EListConstructor (head, tail) -> infer_list_constructor env head tail
+    | EEmptyList -> let* fv = fresh_var in return (Substitution.empty, TList fv)
+    | ELetIn (case, cases, expr) -> infer_let_in env (case :: cases) expr
+    | ERecLetIn (case, cases, expr) -> infer_rec_let_in env (case :: cases) expr
+    | EMatchWith (expr, case, cases) -> infer_match_with env expr (case :: cases)
+    | EFunction (case, cases) -> infer_function env (case :: cases)
+    | ETyped (expr, typ) -> infer_typed_expression env expr typ
 
   and infer_fun env ps e =
     let* ps_ty, ps_env =
@@ -107,10 +108,10 @@ let infer_expr =
   and infer_let_in env cases expr =
 
     let rec extend_env_with_pattern env subs = function
-      | Ast.PVar (Id v), ty ->
+      | PVar (Id v), ty ->
         let generalized_ty = Generalize.generalize env ty in
         return @@ ((TypeEnv.extend env v generalized_ty), subs)
-      | Ast.PTuple (p1, p2, ps) as pat, (TypeTree.TVar _ as ty) ->
+      | PTuple (p1, p2, ps) as pat, (TypeTree.TVar _ as ty) ->
         let* tvs = 
           List.fold_left 
             (fun acc _ -> 
@@ -123,7 +124,7 @@ let infer_expr =
         let new_ty = TTuple tvs in
         let* sub = Substitution.unify ty new_ty in
         extend_env_with_pattern (TypeEnv.apply env sub) (sub :: subs) (pat, new_ty)
-      | Ast.PTuple (p1, p2, ps), 
+      | PTuple (p1, p2, ps), 
         TypeTree.TTuple (t1 :: t2 :: rest) 
         when List.length rest = List.length ps ->
         let* env, subs = extend_env_with_pattern env subs (p1, t1) in
@@ -135,20 +136,20 @@ let infer_expr =
           (return @@ (env, subs))
           ps
           rest
-      | Ast.PListConstructor _ as pat, (TypeTree.TVar _ as ty) ->
+      | PListConstructor _ as pat, (TypeTree.TVar _ as ty) ->
         let* fv = fresh_var in
         let new_ty = TList fv in
         let* sub = Substitution.unify ty new_ty in
         extend_env_with_pattern (TypeEnv.apply env sub) (sub :: subs) (pat, new_ty)
-      | Ast.PListConstructor (l, r), TypeTree.TList t ->
+      | PListConstructor (l, r), TypeTree.TList t ->
         let* env, subs = extend_env_with_pattern env subs (l, t) in
         extend_env_with_pattern env subs (r, (TypeTree.TList t))
-      | Ast.PConst _ as pat, pty ->
+      | PConst _ as pat, pty ->
         let* pt, _ = infer_pattern env pat in
         let* sub = Substitution.unify pt pty in
         return (env, sub :: subs)
-      | Ast.PNill, TypeTree.TList _
-      | Ast.PAny, _ -> return (env, subs)
+      | PNill, TypeTree.TList _
+      | PAny, _ -> return (env, subs)
       | pat, ty -> 
         let* typ, _ = infer_pattern env pat in
         fail @@ Unification_failed (typ, ty)
@@ -162,7 +163,7 @@ let infer_expr =
       List.fold_left (fun acc (pat, expr) ->
           let expr = 
             (match expr with
-             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
              | _ -> expr)
           in
           let* env, sub = acc in
@@ -183,7 +184,7 @@ let infer_expr =
   and infer_rec_let_in env cases expr =
 
     let extend_env_with_pattern env = function
-      | Ast.PVar (Id v), ty ->
+      | PVar (Id v), ty ->
         let generalized_ty = Generalize.generalize env ty in
         return (TypeEnv.extend env v generalized_ty)
       | _ -> fail InvalidRecursionLeftHand
@@ -196,7 +197,7 @@ let infer_expr =
       List.fold_left (fun acc (pat, _) ->
           let* env', vars = acc in
           match pat with
-          | Ast.PVar (Id name) ->
+          | PVar (Id name) ->
             let* fv = fresh_var in
             let env'' = TypeEnv.extend env' name (Schema.Schema (TypeVarSet.empty, fv)) in
             return (env'', (name, fv) :: vars)
@@ -208,12 +209,12 @@ let infer_expr =
       List.fold_left (fun acc (pat, expr) ->
           let expr = 
             (match expr with
-             | Ast.ETyped(EFun (ps, body), typ) -> Ast.EFun (ps, Ast.ETyped(body, typ))
+             | ETyped(EFun (ps, body), typ) -> EFun (ps, ETyped(body, typ))
              | _ -> expr)
           in
           let* extracted_var_name =
             (match pat with
-             | Ast.PVar (Id name) -> return name
+             | PVar (Id name) -> return name
              | _ -> fail InvalidRecursionLeftHand)
           in
           let* env, sub = acc in

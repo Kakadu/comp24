@@ -1,0 +1,14 @@
+(include_subdirs unqualified)
+
+(library
+ (name middleend)
+ (public_name arML.middleend)
+ (libraries base ast common)
+ (modules
+  FunctionTransformer
+  IdentifierSearcher
+  IdentifierSubstitutor
+  NameCreator
+  ClosureExpression
+  ClosureProgram
+  Runner))
