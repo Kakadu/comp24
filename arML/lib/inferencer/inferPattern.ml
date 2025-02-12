@@ -26,28 +26,27 @@ let infer_pattern =
       let* _ = check_unique_vars [ tuple_p ] in
       (* Check several bounds *)
       let* ty, env =
-        (* Here is the list of types in reverse order. *)
         RList.fold_left
           (first_pattern :: second_pattern :: patterns)
           ~init:(return ([], env))
           ~f:(fun (acc, env) (pattern) ->
-              let* ty1, env1 = helper env pattern in
-              return (ty1 :: acc, env1))
+              let* ty', env' = helper env pattern in
+              return (ty' :: acc, env'))
       in
       let ty = TypeTree.TTuple (List.rev ty) in
       return (ty, env)
     | Ast.PListConstructor (left, right) as list_cons ->
       let* _ = check_unique_vars [ list_cons ] in
       (* Check several bounds *)
-      let* ty1, env1 = helper env left in
-      let* ty2, env2 = helper env1 right in
+      let* ty1, env' = helper env left in
+      let* ty2, env'' = helper env' right in
       let* fv = fresh_var in
-      let* sub1 = Substitution.unify (TList ty1) fv in
-      let* sub2 = Substitution.unify ty2 fv in
-      let* sub3 = Substitution.compose sub1 sub2 in
-      let env = TypeEnv.apply env2 sub3 in
-      let ty3 = Substitution.apply sub3 fv in
-      return (ty3, env)
+      let* sub = Substitution.unify (TList ty1) fv in
+      let* sub' = Substitution.unify ty2 fv in
+      let* sub'' = Substitution.compose sub sub' in
+      let env''' = TypeEnv.apply env'' sub'' in
+      let ty3 = Substitution.apply sub'' fv in
+      return (ty3, env''')
     | Ast.PTyped (pattern, pattern_ty) ->
       let* ty, env = helper env pattern in
       let* expected_ty = get_type_by_defenition pattern_ty in
