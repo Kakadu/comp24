@@ -1,7 +1,7 @@
 (library
  (name Roflanml_lib)
  (public_name RoflanML.Lib)
- (modules Ast Parser Typing Typechecker Roflanml_stdlib Closure_conversion)
+ (modules Ast Parser Typing Typechecker Roflanml_stdlib Common Closure_conversion)
  (libraries base angstrom)
  (inline_tests)
  (preprocess

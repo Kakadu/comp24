@@ -6,7 +6,7 @@ open Base
 open Typing
 
 module RoflanML_Stdlib = struct
-  let empty =
+  let default =
     let stdlib = Map.empty (module String) in
     let stdlib =
       List.fold [ "+"; "-"; "*"; "/" ] ~init:stdlib ~f:(fun stdlib op ->

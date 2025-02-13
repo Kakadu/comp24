@@ -4,6 +4,8 @@
 
 open Ast
 open Base
+open Common.Middleend_Common
+open Roflanml_stdlib
 
 let find_free_vars =
   let rec find_free_vars_pattern pat =
@@ -91,17 +93,6 @@ let closure_app e args =
   List.fold_left args ~init:e ~f:(fun acc arg -> EApp (acc, EVar arg))
 ;;
 
-let uncurry e =
-  let rec helper args = function
-    | EFun (x, e) -> helper (x :: args) e
-    | e -> args, e
-  in
-  let args, e = helper [] e in
-  List.rev args, e
-;;
-
-let curry args e = Base.List.fold_right args ~init:e ~f:(fun arg acc -> EFun (arg, acc))
-
 let closure_fun f args =
   Base.List.fold_right args ~init:f ~f:(fun arg acc -> EFun ((arg, None), acc))
 ;;
@@ -157,4 +148,21 @@ let close_expr e env =
     | EApp (e1, e2) -> EApp (helper e1 free_vars env, helper e2 free_vars env)
   in
   helper e (Map.empty (module String)) env
+;;
+
+let close_program prog =
+  let prog, _ =
+    List.fold_left
+      prog
+      ~init:([], RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String))
+      ~f:(fun (closed, env) e ->
+        match e with
+        | ELet (_, id, _, None) ->
+          let e = close_expr e env in
+          e :: closed, Set.add env id
+        | e ->
+          let e = close_expr e env in
+          e :: closed, env)
+  in
+  List.rev prog
 ;;

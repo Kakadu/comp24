@@ -279,7 +279,7 @@ let type_to_schema ty =
 ;;
 
 let create_base_env ?(env = TypeEnv.empty) =
-  Base.Map.fold RoflanML_Stdlib.empty ~init:(return env) ~f:(fun ~key ~data env ->
+  Base.Map.fold RoflanML_Stdlib.default ~init:(return env) ~f:(fun ~key ~data env ->
     let* env = env in
     return (TypeEnv.extend env (key, type_to_schema data)))
 ;;
