@@ -265,43 +265,43 @@ module TypeEnv = struct
     let init_env =
       extend
         "( == )"
-        (Scheme (VarSet.singleton (-5), type_var (-5) @-> type_var (-5) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( <> )"
-        (Scheme (VarSet.singleton (-5), type_var (-5) @-> type_var (-5) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( != )"
-        (Scheme (VarSet.singleton (-5), type_var (-5) @-> type_var (-5) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( < )"
-        (Scheme (VarSet.singleton (-3), type_var (-3) @-> type_var (-3) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( <= )"
-        (Scheme (VarSet.singleton (-2), type_var (-2) @-> type_var (-2) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( > )"
-        (Scheme (VarSet.singleton (-3), type_var (-3) @-> type_var (-3) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =
       extend
         "( >= )"
-        (Scheme (VarSet.singleton (-2), type_var (-2) @-> type_var (-2) @-> tprim_bool))
+        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
         init_env
     in
     let init_env =

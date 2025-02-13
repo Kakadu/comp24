@@ -444,3 +444,17 @@ let%expect_test "" =
     "a": (int -> int -> int) -> int -> int -> int
      |}]
 ;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a b = b;; |};
+  [%expect {|
+    "a": '0 . '0 -> '0
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a b : int = b;; |};
+  [%expect {|
+    "a": int -> int
+     |}]
+;;

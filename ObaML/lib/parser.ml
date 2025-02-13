@@ -72,6 +72,12 @@ let spaces = take_while is_space
 let spaces1 = take_while1 is_space
 let pchunk p = spaces *> p
 let check_chunk s = pchunk @@ string s
+
+let check_token s =
+  let* token = spaces *> take_while (fun c -> is_char c || is_digit c || is_wildcard c) in
+  if s = token then return s else fail "invalid token name"
+;;
+
 let pparens p = check_chunk "(" *> p <* check_chunk ")"
 
 (****************************Identifier*parser**************************)
@@ -125,8 +131,8 @@ let parse_number_constant =
 ;;
 
 let parse_bool_constant =
-  check_chunk "true" *> (return @@ CBool true)
-  <|> check_chunk "false" *> (return @@ CBool false)
+  check_token "true" *> (return @@ CBool true)
+  <|> check_token "false" *> (return @@ CBool false)
 ;;
 
 let parse_empty_list_constant = check_chunk "[]" *> return CEmptyList
@@ -153,7 +159,7 @@ let parse_tuple_type pt =
 ;;
 
 let parse_list_type pt =
-  pt <* check_chunk "list" >>= fun lst_type -> return (TList lst_type)
+  pt <* check_token "list" >>= fun lst_type -> return (TList lst_type)
 ;;
 
 let parse_arrow_type pt =
@@ -164,10 +170,10 @@ let parse_type =
   fix
   @@ fun parse_type ->
   let pt = pparens parse_type <|> parse_type_var in
-  let pt = check_chunk "int" *> return TInt <|> pt in
-  let pt = check_chunk "string" *> return TString <|> pt in
-  let pt = check_chunk "bool" *> return TBool <|> pt in
-  let pt = check_chunk "unit" *> return TUnit <|> pt in
+  let pt = check_token "int" *> return TInt <|> pt in
+  let pt = check_token "string" *> return TString <|> pt in
+  let pt = check_token "bool" *> return TBool <|> pt in
+  let pt = check_token "unit" *> return TUnit <|> pt in
   let pt = parse_list_type pt <|> pt in
   let pt = parse_tuple_type pt <|> pt in
   let pt = parse_arrow_type pt <|> pt in
@@ -286,28 +292,33 @@ let parse_if pfexp =
   @@ fun parse_if ->
   lift3
     eif
-    (check_chunk "if" *> (pfexp <|> parse_if))
-    (check_chunk "then" *> (pfexp <|> parse_if))
-    (check_chunk "else" *> (pfexp <|> parse_if))
+    (check_token "if" *> (pfexp <|> parse_if))
+    (check_token "then" *> (pfexp <|> parse_if))
+    (check_token "else" *> (pfexp <|> parse_if))
 ;;
 
 let ematch a b = EMatch (a, b)
 
 let parse_match pfe =
-  lift2
-    ematch
-    (check_chunk "match" *> pfe <* check_chunk "with")
-    (many1
-     @@ lift2
-          (fun pat expr -> pat, expr)
-          (check_chunk "|" *> parse_pattern <* check_chunk "->")
-          pfe)
+  let caseWithout =
+    lift2 (fun pat expr -> pat, expr) (parse_pattern <* check_chunk "->") pfe
+  in
+  let caseWith =
+    lift2
+      (fun pat expr -> pat, expr)
+      (check_chunk "|" *> parse_pattern <* check_chunk "->")
+      pfe
+  in
+  let allCases =
+    lift2 (fun first other -> first :: other) (caseWith <|> caseWithout) (many @@ caseWith)
+  in
+  lift2 ematch (check_token "match" *> pfe <* check_token "with") allCases
 ;;
 
 let efun a b = EFun (a, b)
 
 let parse_fun pfe =
-  check_chunk "fun" *> lift2 efun (many1 @@ parse_pattern) (check_chunk "->" *> pfe)
+  check_token "fun" *> lift2 efun (many1 @@ parse_pattern) (check_chunk "->" *> pfe)
 ;;
 
 let elet a b c = ELet (a, b, c)
@@ -353,12 +364,12 @@ let parse_value_binding pfexp =
 ;;
 
 let parse_let pfexp =
-  check_chunk "let"
+  check_token "let"
   *> lift3
        elet
-       (check_chunk "rec" *> return Recursive <|> return Nonrecursive)
+       (check_token "rec" *> return Recursive <|> return Nonrecursive)
        (parse_value_binding pfexp)
-       (check_chunk "in" *> pfexp)
+       (check_token "in" *> pfexp)
 ;;
 
 let etype a b = EType (a, b)
@@ -377,7 +388,7 @@ let parse_expr =
   let pfe = pfeand pfe <|> pfe in
   let pfe = pfeor pfe <|> pfe in
   let pfe = parse_tuple pfe <|> pfe in
-  let pfe = parse_if pfe <|> pfe in
+  let pfe = parse_if pfexpr <|> pfe in
   let pfe = parse_let pfexpr <|> parse_match pfexpr <|> parse_fun pfexpr <|> pfe in
   pfe
 ;;
@@ -385,11 +396,11 @@ let parse_expr =
 (*********************Structure*Item*Parser*******************)
 
 let parse_let_declaration =
-  check_chunk "let"
+  check_token "let"
   *> lift2
        (fun rec_flag binding_lst -> SILet (rec_flag, binding_lst))
-       (check_chunk "rec" *> return Recursive <|> return Nonrecursive)
-       (sep_by1 (check_chunk "and") (parse_value_binding parse_expr))
+       (check_token "rec" *> return Recursive <|> return Nonrecursive)
+       (sep_by1 (check_token "and") (parse_value_binding parse_expr))
 ;;
 
 let parse_semicolon = many @@ check_chunk ";;"
