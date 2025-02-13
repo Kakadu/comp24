@@ -1,7 +1,27 @@
 (** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Base
+
+module State_Monad = struct
+  type ('a, 'err) t = int -> int * ('a, 'err) Result.t
+
+  let return : 'a -> ('a, 'err) t = fun x st -> st, Result.Ok x
+  let fail : 'err -> ('a, 'err) t = fun err st -> st, Result.Error err
+
+  let ( >>= ) : ('a, 'err) t -> ('a -> ('b, 'err) t) -> ('b, 'err) t =
+    fun m f st ->
+    let st, r = m st in
+    match r with
+    | Result.Ok a -> f a st
+    | Result.Error err -> fail err st
+  ;;
+
+  let ( let* ) = ( >>= )
+  let fresh st = st + 1, Result.Ok st
+  let run m = snd (m 0)
+end
 
 module Middleend_Common = struct
   open Ast

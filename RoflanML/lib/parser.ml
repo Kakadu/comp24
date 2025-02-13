@@ -125,11 +125,23 @@ let plet pexpr =
   in
   pstoken "let"
   *> lift4
-       (fun r id e1 e2 -> ELet (r, id, e1, e2))
+       (fun r id e1 e2 -> ELetIn (r, id, e1, e2))
        (pstoken "rec" *> return Rec <|> return NonRec)
        (poperator <|> pstoken "()" <|> pid)
        (pstoken "=" *> pexpr <|> pbody pexpr)
-       (pstoken "in" *> pexpr >>| (fun x -> Some x) <|> return None)
+       (pstoken "in" *> pexpr)
+;;
+
+let plet_decl pexpr =
+  let rec pbody pexpr =
+    ptyped_var >>= fun id -> pbody pexpr <|> pstoken "=" *> pexpr >>| fun e -> EFun (id, e)
+  in
+  pstoken "let"
+  *> lift3
+       (fun r id e -> DLet (r, id, e))
+       (pstoken "rec" *> return Rec <|> return NonRec)
+       (poperator <|> pstoken "()" <|> pid)
+       (pstoken "=" *> pexpr <|> pbody pexpr)
 ;;
 
 let pbranch pexpr =
@@ -247,4 +259,5 @@ let pexpr =
 ;;
 
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
-let parse = parse_string ~consume:Consume.All (many1 (plet pexpr) <* pspaces)
+let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
+let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)
