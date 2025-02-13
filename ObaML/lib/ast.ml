@@ -12,15 +12,15 @@ type constant =
   | CUnit (** [()] *)
 [@@deriving eq, show { with_path = false }]
 
-type ty =
+type typ =
   | TInt (** [int] *)
   | TString (** [string] *)
   | TBool (** [bool] *)
   | TUnit (** [()] *)
   | TVar of identifier (** ['a] *)
-  | TTuple of ty list (** [int * string], invariant: [list length >= 2] *)
-  | TArrow of ty * ty (** [int -> string] *)
-  | TList of ty (** [int list] *)
+  | TTuple of typ list (** [int * string], invariant: [list length >= 2] *)
+  | TArrow of typ * typ (** [int -> string] *)
+  | TList of typ (** [int list] *)
 [@@deriving eq, show { with_path = false }]
 
 type pattern =
@@ -29,7 +29,7 @@ type pattern =
   | PVar of identifier (** [variable] *)
   | PTuple of pattern list (** [first, second, third], invariant: [list length >= 2] *)
   | PCons of pattern * pattern (** [1 :: []] *)
-  | PType of pattern * ty (** [a : int] *)
+  | PType of pattern * typ (** [a : int] *)
 [@@deriving eq, show { with_path = false }]
 
 type rec_flag =
@@ -38,23 +38,22 @@ type rec_flag =
 [@@deriving eq, show { with_path = false }]
 
 (** [let a = e;;] | [let fst, snd = pair in fst + snd] *)
-type value_binding = Binding of pattern * expr
-[@@deriving eq, show { with_path = false }]
+type value_binding = pattern * expr [@@deriving eq, show { with_path = false }]
 
 (** [Tree(left, right) -> left, right] *)
-and case = Case of pattern * expr [@@deriving eq, show { with_path = false }]
+and case = pattern * expr [@@deriving eq, show { with_path = false }]
 
 and expr =
   | EConst of constant (** [52] | ["hola"] *)
   | EVar of identifier (** [x] *)
   | ETuple of expr list (** [fst, snd, trd], invariant: [list length >= 2] *)
   | EFun of pattern list * expr (** [fun n -> n + 1] *)
-  | ECons of pattern * pattern (** [1 :: []] *)
   | ELet of rec_flag * value_binding * expr (** [let abc = "a" in abc] *)
   | EApp of expr * expr (** [f x] *)
   | EMatch of expr * case list (** [match x with | 1 -> true | _ -> false] *)
   | EIf of expr * expr * expr (** [if true then false else true] *)
-  | EType of expr * ty (** [(g x: bool)] *)
+  | ECons of expr * expr (** [[1; 2; 3]], [1 :: []]*)
+  | EType of expr * typ (** [(g x: bool)] *)
 [@@deriving eq, show { with_path = false }]
 
 type structure_item =

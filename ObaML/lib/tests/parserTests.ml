@@ -3,30 +3,10 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open ObaML
-open Format
-
-let ptest str expected =
-  match Parser.structure_from_string str with
-  | Ok actual ->
-    let is_eq = List.equal Ast.equal_structure_item expected actual in
-    if is_eq
-    then ()
-    else
-      printf
-        "Expected: %a\nActual: %a\n"
-        Ast.pp_structure
-        expected
-        Ast.pp_structure
-        actual;
-    is_eq
-  | Error err ->
-    printf "%s\n" err;
-    false
-;;
 
 let print_result val_pp = function
   | Ok v -> Stdlib.Format.printf "%a" val_pp v
-  | Error _ -> Stdlib.Printf.printf "Error"
+  | Error _ -> Stdlib.Printf.printf "Syntax error"
 ;;
 
 (***************************Identifier*Parser*Tests***************************)
@@ -60,7 +40,7 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_and_print {| + |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "" =
@@ -70,22 +50,22 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_and_print {| +* |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "" =
   parse_and_print {| ( +1* ) |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "" =
   parse_and_print {| var(var) |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "" =
   parse_and_print {| 1var |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "" =
@@ -96,6 +76,11 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_print {| (( + )) |};
   [%expect {| (Id "( + )") |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| (( ~- )) |};
+  [%expect {| (Id "( ~- )") |}]
 ;;
 
 (***************************Constant*Parser*Tests***************************)
@@ -109,27 +94,12 @@ let%expect_test "Constant int test" =
 
 let%expect_test "" =
   parse_and_print {| (52) |};
-  [%expect {| Error |}]
+  [%expect {| Syntax error |}]
 ;;
 
 let%expect_test "Constant int leading zero test" =
   parse_and_print {| 052 |};
   [%expect {| (CInt 52) |}]
-;;
-
-let%expect_test "Constant int leading plus test" =
-  parse_and_print {| +52 |};
-  [%expect {| Error |}]
-;;
-
-let%expect_test "Constant int leading minus test" =
-  parse_and_print {| -52 |};
-  [%expect {| Error |}]
-;;
-
-let%expect_test "Constant int leading sign zero test" =
-  parse_and_print {| +052 |};
-  [%expect {| Error |}]
 ;;
 
 let%expect_test "Constant string empty test" =
@@ -169,7 +139,7 @@ let%expect_test "Empty list constant" =
 
 (***************************Types*Parser*Tests***************************)
 
-let parse_and_print s = Parser.type_from_string s |> print_result Ast.pp_ty
+let parse_and_print s = Parser.type_from_string s |> print_result Ast.pp_typ
 
 let%expect_test "" =
   parse_and_print {| 'a * unit |};
@@ -207,7 +177,7 @@ let parse_and_print s = Parser.pattern_from_string s |> print_result Ast.pp_patt
 
 let%expect_test "" =
   parse_and_print {| _ |};
-  [%expect {| PAny |}]
+  [%expect {| (PVar (Id "_")) |}]
 ;;
 
 let%expect_test "" =
@@ -283,6 +253,36 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
+  parse_and_print {| 1 + -2 |};
+  [%expect
+    {|
+      (EApp ((EApp ((EVar (Id "( + )")), (EConst (CInt 1)))),
+         (EApp ((EVar (Id "( ~- )")), (EConst (CInt 2)))))) |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| 1 :: [] |};
+  [%expect {|
+      (ECons ((EConst (CInt 1)), (EConst CEmptyList)))
+       |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| [1; 2] |};
+  [%expect
+    {|
+      (ECons ((EConst (CInt 1)), (ECons ((EConst (CInt 2)), (EConst CEmptyList))))) |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| [1 :: []] |};
+  [%expect
+    {|
+      (ECons ((ECons ((EConst (CInt 1)), (EConst CEmptyList))), (EConst CEmptyList)
+         )) |}]
+;;
+
+let%expect_test "" =
   parse_and_print {| f (1 + 2) |};
   [%expect
     {|
@@ -320,10 +320,10 @@ let%expect_test "" =
     {|
     (EFun ([(PVar (Id "x"))],
        (EMatch ((EVar (Id "x")),
-          [(Case ((PCons ((PConst CEmptyList), (PConst CEmptyList))),
-              (EApp ((EVar (Id "f")), (EVar (Id "n"))))));
-            (Case ((PVar (Id "a")), (EConst (CBool true))));
-            (Case (PAny, (EConst (CInt 0))))]
+          [((PCons ((PConst CEmptyList), (PConst CEmptyList))),
+            (EApp ((EVar (Id "f")), (EVar (Id "n")))));
+            ((PVar (Id "a")), (EConst (CBool true)));
+            ((PVar (Id "_")), (EConst (CInt 0)))]
           ))
        )) |}]
 ;;
@@ -349,26 +349,20 @@ let%expect_test "" =
     {|
     (EFun ([(PVar (Id "lst"))],
        (ELet (Recursive,
-          (Binding ((PVar (Id "helper")),
-             (EFun ([(PVar (Id "acc"))],
-                (EFun ([(PVar (Id "lst"))],
-                   (EMatch ((EVar (Id "lst")),
-                      [(Case ((PConst CEmptyList), (EVar (Id "acc"))));
-                        (Case ((PCons ((PVar (Id "h")), (PVar (Id "tl")))),
-                           (EApp (
-                              (EApp ((EVar (Id "helper")),
-                                 (EApp (
-                                    (EApp ((EVar (Id "( :: )")), (EVar (Id "h"))
-                                       )),
-                                    (EVar (Id "acc"))))
-                                 )),
-                              (EVar (Id "tl"))))
-                           ))
-                        ]
-                      ))
-                   ))
-                ))
-             )),
+          ((PVar (Id "helper")),
+           (EFun ([(PVar (Id "acc"))],
+              (EFun ([(PVar (Id "lst"))],
+                 (EMatch ((EVar (Id "lst")),
+                    [((PConst CEmptyList), (EVar (Id "acc")));
+                      ((PCons ((PVar (Id "h")), (PVar (Id "tl")))),
+                       (EApp (
+                          (EApp ((EVar (Id "helper")),
+                             (ECons ((EVar (Id "h")), (EVar (Id "acc")))))),
+                          (EVar (Id "tl")))))
+                      ]
+                    ))
+                 ))
+              ))),
           (EApp ((EApp ((EVar (Id "helper")), (EConst CEmptyList))),
              (EVar (Id "lst"))))
           ))
@@ -402,7 +396,7 @@ let%expect_test "" =
   [%expect
     {|
     (EFun ([(PCons ((PVar (Id "a")), (PVar (Id "b"))))],
-       (EApp ((EApp ((EVar (Id "( :: )")), (EVar (Id "a")))), (EVar (Id "b")))))) |}]
+       (ECons ((EVar (Id "a")), (EVar (Id "b")))))) |}]
 ;;
 
 let%expect_test "" =
@@ -432,15 +426,14 @@ let%expect_test "" =
   [%expect
     {|
     (EMatch ((EVar (Id "lst")),
-       [(Case ((PConst CEmptyList), (EConst (CString "Empty list"))));
-         (Case ((PCons ((PVar (Id "x")), (PVar (Id "xs")))),
-            (EMatch ((EVar (Id "x")),
-               [(Case ((PConst CEmptyList), (EConst (CString "a"))));
-                 (Case ((PCons ((PVar (Id "y")), (PVar (Id "ys")))),
-                    (EConst (CString "b"))))
-                 ]
-               ))
-            ))
+       [((PConst CEmptyList), (EConst (CString "Empty list")));
+         ((PCons ((PVar (Id "x")), (PVar (Id "xs")))),
+          (EMatch ((EVar (Id "x")),
+             [((PConst CEmptyList), (EConst (CString "a")));
+               ((PCons ((PVar (Id "y")), (PVar (Id "ys")))),
+                (EConst (CString "b")))
+               ]
+             )))
          ]
        )) |}]
 ;;
@@ -457,26 +450,21 @@ let%expect_test "" =
   [%expect
     {|
     (ELet (Nonrecursive,
-       (Binding ((PVar (Id "sum")),
-          (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "x")))), (EVar (Id "y"))))
-          )),
+       ((PVar (Id "sum")),
+        (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "x")))), (EVar (Id "y"))))),
        (ELet (Nonrecursive,
-          (Binding ((PVar (Id "diff")),
-             (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "x")))),
-                (EVar (Id "y"))))
-             )),
+          ((PVar (Id "diff")),
+           (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "x")))), (EVar (Id "y"))
+              ))),
           (ELet (Nonrecursive,
-             (Binding ((PVar (Id "product")),
-                (ELet (Nonrecursive,
-                   (Binding ((PVar (Id "intermediate")),
-                      (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "sum")))),
-                         (EVar (Id "diff"))))
-                      )),
-                   (EApp (
-                      (EApp ((EVar (Id "( + )")), (EVar (Id "intermediate")))),
-                      (EConst (CInt 10))))
-                   ))
-                )),
+             ((PVar (Id "product")),
+              (ELet (Nonrecursive,
+                 ((PVar (Id "intermediate")),
+                  (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "sum")))),
+                     (EVar (Id "diff"))))),
+                 (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "intermediate")))),
+                    (EConst (CInt 10))))
+                 ))),
              (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "product")))),
                 (EConst (CInt 2))))
              ))
@@ -529,10 +517,9 @@ let%expect_test "" =
   [%expect
     {|
       (ELet (Nonrecursive,
-         (Binding ((PVar (Id "a")),
-            (EType ((EFun ([(PVar (Id "x"))], (EType ((EVar (Id "x")), TInt)))),
-               (TArrow (TInt, TInt))))
-            )),
+         ((PVar (Id "a")),
+          (EType ((EFun ([(PVar (Id "x"))], (EType ((EVar (Id "x")), TInt)))),
+             (TArrow (TInt, TInt))))),
          (EVar (Id "a")))) |}]
 ;;
 
@@ -547,10 +534,9 @@ let%expect_test "" =
   [%expect
     {|
     (SILet (Nonrecursive,
-       [(Binding ((PVar (Id "aBC")),
-           (EFun ([(PVar (Id "n"))],
-              (EIf ((EVar (Id "n")), (EConst (CInt 5)), (EConst (CInt 0))))))
-           ))
+       [((PVar (Id "aBC")),
+         (EFun ([(PVar (Id "n"))],
+            (EIf ((EVar (Id "n")), (EConst (CInt 5)), (EConst (CInt 0)))))))
          ]
        )) |}]
 ;;
@@ -560,8 +546,8 @@ let%expect_test "" =
   [%expect
     {|
     (SILet (Recursive,
-       [(Binding ((PVar (Id "a")), (EConst (CInt 5))));
-         (Binding ((PVar (Id "b")), (EConst (CInt 4))))]
+       [((PVar (Id "a")), (EConst (CInt 5)));
+         ((PVar (Id "b")), (EConst (CInt 4)))]
        )) |}]
 ;;
 
@@ -570,18 +556,26 @@ let%expect_test "" =
   [%expect
     {|
     (SILet (Recursive,
-       [(Binding ((PVar (Id "fix")),
-           (EFun ([(PVar (Id "f"))],
-              (EFun ([(PVar (Id "x"))],
-                 (EApp (
-                    (EApp ((EVar (Id "f")),
-                       (EApp ((EVar (Id "fix")), (EVar (Id "x")))))),
-                    (EVar (Id "x"))))
-                 ))
-              ))
-           ))
+       [((PVar (Id "fix")),
+         (EFun ([(PVar (Id "f"))],
+            (EFun ([(PVar (Id "x"))],
+               (EApp (
+                  (EApp ((EVar (Id "f")),
+                     (EApp ((EVar (Id "fix")), (EVar (Id "x")))))),
+                  (EVar (Id "x"))))
+               ))
+            )))
          ]
        )) |}]
+;;
+
+let%expect_test _ =
+  let _ = parse_and_print {| 2 + "a" |} in
+  [%expect
+    {|
+    (SIExpr
+       (EApp ((EApp ((EVar (Id "( + )")), (EConst (CInt 2)))),
+          (EConst (CString "a"))))) |}]
 ;;
 
 (***************************Structure*Parser*Tests***************************)
@@ -590,9 +584,84 @@ let parse_and_print s = Parser.structure_from_string s |> print_result Ast.pp_st
 
 let%expect_test "" =
   parse_and_print {| let rec fix = 4;;     |};
+  [%expect {|
+    [(SILet (Recursive, [((PVar (Id "fix")), (EConst (CInt 4)))]))] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| let a = 5  |};
+  [%expect {|
+    [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 5)))]))] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| let (a, b, _) = 1, 2, 3;;  |};
   [%expect
     {|
-    [(SILet (Recursive, [(Binding ((PVar (Id "fix")), (EConst (CInt 4))))]))] |}]
+    [(SILet (Nonrecursive,
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); (PVar (Id "_"))]),
+          (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
+        ))
+      ] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print
+    {| let rec is_even n =
+    if n = 0 then true
+    else is_odd (n - 1)
+  
+  and is_odd n =
+    if n = 0 then false
+    else is_even (n - 1);;  |};
+  [%expect
+    {|
+    [(SILet (Recursive,
+        [((PVar (Id "is_even")),
+          (EFun ([(PVar (Id "n"))],
+             (EIf (
+                (EApp ((EApp ((EVar (Id "( = )")), (EVar (Id "n")))),
+                   (EConst (CInt 0)))),
+                (EConst (CBool true)),
+                (EApp ((EVar (Id "is_odd")),
+                   (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "n")))),
+                      (EConst (CInt 1))))
+                   ))
+                ))
+             )));
+          ((PVar (Id "is_odd")),
+           (EFun ([(PVar (Id "n"))],
+              (EIf (
+                 (EApp ((EApp ((EVar (Id "( = )")), (EVar (Id "n")))),
+                    (EConst (CInt 0)))),
+                 (EConst (CBool false)),
+                 (EApp ((EVar (Id "is_even")),
+                    (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "n")))),
+                       (EConst (CInt 1))))
+                    ))
+                 ))
+              )))
+          ]
+        ))
+      ] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| let (a, b, _) = 1, 2, 3 and c = "s"  |};
+  [%expect
+    {|
+    [(SILet (Nonrecursive,
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); (PVar (Id "_"))]),
+          (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]));
+          ((PVar (Id "c")), (EConst (CString "s")))]
+        ))
+      ] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {| let () = 5  |};
+  [%expect {|
+    [(SILet (Nonrecursive, [((PConst CUnit), (EConst (CInt 5)))]))] |}]
 ;;
 
 let%expect_test "" =
@@ -600,12 +669,11 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding ((PVar (Id "( + )")),
-            (EFun ([(PVar (Id "a")); (PVar (Id "b"))],
-               (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "a")))),
-                  (EVar (Id "b"))))
-               ))
-            ))
+        [((PVar (Id "( + )")),
+          (EFun ([(PVar (Id "a")); (PVar (Id "b"))],
+             (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "a")))),
+                (EVar (Id "b"))))
+             )))
           ]
         ))
       ] |}]
@@ -616,9 +684,8 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Recursive,
-        [(Binding ((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
-            (ETuple [(EVar (Id "a")); (EVar (Id "b"))])))
-          ]
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
+          (ETuple [(EVar (Id "a")); (EVar (Id "b"))]))]
         ))
       ]
      |}]
@@ -629,10 +696,8 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Recursive,
-        [(Binding ((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
-            (ETuple
-               [(EVar (Id "a")); (ETuple [(EVar (Id "b")); (EVar (Id "c"))])])
-            ))
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
+          (ETuple [(EVar (Id "a")); (ETuple [(EVar (Id "b")); (EVar (Id "c"))])]))
           ]
         ))
       ]
@@ -644,9 +709,8 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Recursive,
-        [(Binding ((PVar (Id "a")),
-            (EFun ([(PVar (Id "b")); (PVar (Id "c"))], (EConst (CInt 5))))))
-          ]
+        [((PVar (Id "a")),
+          (EFun ([(PVar (Id "b")); (PVar (Id "c"))], (EConst (CInt 5)))))]
         ))
       ]
      |}]
@@ -657,17 +721,15 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding ((PVar (Id "a")),
-            (EFun ([(PVar (Id "x"))],
-               (EIf (
-                  (ELet (Nonrecursive,
-                     (Binding ((PVar (Id "b")), (EConst (CInt 4)))),
-                     (EApp ((EApp ((EVar (Id "( > )")), (EVar (Id "b")))),
-                        (EVar (Id "x"))))
-                     )),
-                  (EConst (CBool true)), (EConst (CBool false))))
-               ))
-            ))
+        [((PVar (Id "a")),
+          (EFun ([(PVar (Id "x"))],
+             (EIf (
+                (ELet (Nonrecursive, ((PVar (Id "b")), (EConst (CInt 4))),
+                   (EApp ((EApp ((EVar (Id "( > )")), (EVar (Id "b")))),
+                      (EVar (Id "x"))))
+                   )),
+                (EConst (CBool true)), (EConst (CBool false))))
+             )))
           ]
         ))
       ]
@@ -679,18 +741,15 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding ((PVar (Id "a")),
-            (EApp (
-               (EApp ((EVar (Id "( + )")),
-                  (ELet (Nonrecursive,
-                     (Binding ((PVar (Id "b")), (EConst (CInt 5)))),
-                     (EVar (Id "b"))))
-                  )),
-               (ELet (Nonrecursive,
-                  (Binding ((PVar (Id "c")), (EConst (CInt 6)))), (EVar (Id "c"))
-                  ))
-               ))
-            ))
+        [((PVar (Id "a")),
+          (EApp (
+             (EApp ((EVar (Id "( + )")),
+                (ELet (Nonrecursive, ((PVar (Id "b")), (EConst (CInt 5))),
+                   (EVar (Id "b"))))
+                )),
+             (ELet (Nonrecursive, ((PVar (Id "c")), (EConst (CInt 6))),
+                (EVar (Id "c"))))
+             )))
           ]
         ))
       ]
@@ -716,40 +775,38 @@ let%expect_test "" =
     [(SIExpr
         (EApp ((EApp ((EVar (Id "( + )")), (EConst (CInt 2)))), (EConst (CInt 3))
            )));
-      (SILet (Nonrecursive, [(Binding ((PVar (Id "a")), (EConst (CInt 5))))]));
+      (SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 5)))]));
       (SILet (Recursive,
-         [(Binding ((PVar (Id "a")), (EConst (CInt 5))));
-           (Binding ((PVar (Id "b")), (EConst (CInt 6))))]
+         [((PVar (Id "a")), (EConst (CInt 5)));
+           ((PVar (Id "b")), (EConst (CInt 6)))]
          ));
       (SILet (Recursive,
-         [(Binding ((PVar (Id "fix")),
-             (EFun ([(PVar (Id "f")); (PVar (Id "x"))],
-                (EApp (
-                   (EApp ((EVar (Id "f")),
-                      (EApp ((EVar (Id "fix")), (EVar (Id "f")))))),
-                   (EVar (Id "x"))))
-                ))
-             ))
+         [((PVar (Id "fix")),
+           (EFun ([(PVar (Id "f")); (PVar (Id "x"))],
+              (EApp (
+                 (EApp ((EVar (Id "f")),
+                    (EApp ((EVar (Id "fix")), (EVar (Id "f")))))),
+                 (EVar (Id "x"))))
+              )))
            ]
          ));
       (SILet (Nonrecursive,
-         [(Binding ((PVar (Id "fac")),
-             (EApp ((EVar (Id "fix")),
-                (EFun ([(PVar (Id "self")); (PVar (Id "n"))],
-                   (EIf (
-                      (EApp ((EApp ((EVar (Id "( <= )")), (EVar (Id "n")))),
-                         (EConst (CInt 1)))),
-                      (EConst (CInt 1)),
-                      (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "n")))),
-                         (EApp ((EVar (Id "self")),
-                            (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "n")))),
-                               (EConst (CInt 1))))
-                            ))
-                         ))
-                      ))
-                   ))
-                ))
-             ))
+         [((PVar (Id "fac")),
+           (EApp ((EVar (Id "fix")),
+              (EFun ([(PVar (Id "self")); (PVar (Id "n"))],
+                 (EIf (
+                    (EApp ((EApp ((EVar (Id "( <= )")), (EVar (Id "n")))),
+                       (EConst (CInt 1)))),
+                    (EConst (CInt 1)),
+                    (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "n")))),
+                       (EApp ((EVar (Id "self")),
+                          (EApp ((EApp ((EVar (Id "( - )")), (EVar (Id "n")))),
+                             (EConst (CInt 1))))
+                          ))
+                       ))
+                    ))
+                 ))
+              )))
            ]
          ))
       ]
@@ -761,16 +818,14 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding (
-            (PType ((PVar (Id "a")),
-               (TArrow ((TTuple [TBool; TString]),
-                  (TArrow ((TArrow (TInt, TInt)), TInt))))
-               )),
-            (EFun (
-               [(PType ((PVar (Id "b")), (TTuple [TBool; TString])));
-                 (PType ((PVar (Id "c")), (TArrow (TInt, TInt))))],
-               (EConst (CInt 5))))
-            ))
+        [((PType ((PVar (Id "a")),
+             (TArrow ((TTuple [TBool; TString]),
+                (TArrow ((TArrow (TInt, TInt)), TInt))))
+             )),
+          (EFun (
+             [(PType ((PVar (Id "b")), (TTuple [TBool; TString])));
+               (PType ((PVar (Id "c")), (TArrow (TInt, TInt))))],
+             (EConst (CInt 5)))))
           ]
         ))
       ]
@@ -782,12 +837,9 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding (
-            (PType ((PVar (Id "a")),
-               (TArrow ((TVar (Id "Var0")), (TArrow ((TVar (Id "Var1")), TInt))))
-               )),
-            (EFun ([(PVar (Id "b")); (PVar (Id "c"))], (EConst (CInt 5))))))
-          ]
+        [((PType ((PVar (Id "a")),
+             (TArrow ((TVar (Id "Var0")), (TArrow ((TVar (Id "Var1")), TInt)))))),
+          (EFun ([(PVar (Id "b")); (PVar (Id "c"))], (EConst (CInt 5)))))]
         ))
       ]
      |}]
@@ -798,18 +850,122 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [(Binding (
-            (PType ((PVar (Id "a")),
-               (TArrow ((TVar (Id "Var0")), (TArrow (TInt, TInt)))))),
-            (EFun ([(PVar (Id "b"))],
-               (EFun ([(PVar (Id "x"))],
-                  (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "x")))),
-                     (EVar (Id "b"))))
-                  ))
-               ))
-            ))
+        [((PType ((PVar (Id "a")),
+             (TArrow ((TVar (Id "Var0")), (TArrow (TInt, TInt)))))),
+          (EFun ([(PVar (Id "b"))],
+             (EFun ([(PVar (Id "x"))],
+                (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "x")))),
+                   (EVar (Id "b"))))
+                ))
+             )))
           ]
         ))
       ]
      |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {|let map p = let (a,b) = p in a + b |};
+  [%expect
+    {|       
+  [(SILet (Nonrecursive,
+      [((PVar (Id "map")),
+        (EFun ([(PVar (Id "p"))],
+           (ELet (Nonrecursive,
+              ((PTuple [(PVar (Id "a")); (PVar (Id "b"))]), (EVar (Id "p"))),
+              (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "a")))),
+                 (EVar (Id "b"))))
+              ))
+           )))
+        ]
+      ))
+    ] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print {|fun x () x -> x |};
+  [%expect
+    {|       
+  [(SIExpr
+      (EFun ([(PVar (Id "x")); (PConst CUnit); (PVar (Id "x"))],
+         (EVar (Id "x")))))
+    ] |}]
+;;
+
+let%expect_test "" =
+  parse_and_print
+    {|let _start () () a () b _c () d __ =
+  let () = print_int (a+b) in
+  let () = print_int __ in
+  a*b / _c + d
+
+
+let main =
+  print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555)) |};
+  [%expect
+    {|       
+  [(SILet (Nonrecursive,
+      [((PVar (Id "_start")),
+        (EFun (
+           [(PConst CUnit); (PConst CUnit); (PVar (Id "a")); (PConst CUnit);
+             (PVar (Id "b")); (PVar (Id "_c")); (PConst CUnit);
+             (PVar (Id "d")); (PVar (Id "__"))],
+           (ELet (Nonrecursive,
+              ((PConst CUnit),
+               (EApp ((EVar (Id "print_int")),
+                  (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "a")))),
+                     (EVar (Id "b"))))
+                  ))),
+              (ELet (Nonrecursive,
+                 ((PConst CUnit),
+                  (EApp ((EVar (Id "print_int")), (EVar (Id "__"))))),
+                 (EApp (
+                    (EApp ((EVar (Id "( + )")),
+                       (EApp (
+                          (EApp ((EVar (Id "( / )")),
+                             (EApp (
+                                (EApp ((EVar (Id "( * )")), (EVar (Id "a")))),
+                                (EVar (Id "b"))))
+                             )),
+                          (EVar (Id "_c"))))
+                       )),
+                    (EVar (Id "d"))))
+                 ))
+              ))
+           )))
+        ]
+      ));
+    (SILet (Nonrecursive,
+       [((PVar (Id "main")),
+         (EApp ((EVar (Id "print_int")),
+            (EApp (
+               (EApp (
+                  (EApp (
+                     (EApp (
+                        (EApp (
+                           (EApp (
+                              (EApp (
+                                 (EApp (
+                                    (EApp ((EVar (Id "_start")),
+                                       (EApp ((EVar (Id "print_int")),
+                                          (EConst (CInt 1))))
+                                       )),
+                                    (EApp ((EVar (Id "print_int")),
+                                       (EConst (CInt 2))))
+                                    )),
+                                 (EConst (CInt 3)))),
+                              (EApp ((EVar (Id "print_int")), (EConst (CInt 4))
+                                 ))
+                              )),
+                           (EConst (CInt 100)))),
+                        (EConst (CInt 1000)))),
+                     (EApp ((EVar (Id "print_int")),
+                        (EApp ((EVar (Id "( ~- )")), (EConst (CInt 1))))))
+                     )),
+                  (EConst (CInt 10000)))),
+               (EApp ((EVar (Id "( ~- )")), (EConst (CInt 555555))))))
+            )))
+         ]
+       ))
+    ] |}]
 ;;

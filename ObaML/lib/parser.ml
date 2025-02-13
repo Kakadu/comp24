@@ -67,6 +67,7 @@ let is_operator_char = function
 ;;
 
 let operator_name oper_chars = "( " ^ oper_chars ^ " )"
+let unary_operator_name oper_chars = operator_name ("~" ^ oper_chars)
 let spaces = take_while is_space
 let spaces1 = take_while1 is_space
 let pchunk p = spaces *> p
@@ -77,7 +78,7 @@ let pparens p = check_chunk "(" *> p <* check_chunk ")"
 
 let parse_var_without_parens pv =
   pchunk
-    (take_while (fun ch -> is_uchar ch || is_digit ch || is_wildcard ch)
+    (take_while (fun ch -> is_uchar ch || is_digit ch)
      >>= function
      | "" ->
        take_while1 (fun ch -> is_wildcard ch || is_char ch || is_digit ch)
@@ -182,7 +183,7 @@ let parse_any = check_chunk "_" *> return PAny
 let parse_tuple pp =
   fix
   @@ fun parse_tuple ->
-  pparens @@ sep_by (check_chunk ",") (pp <|> parse_tuple)
+  pparens @@ sep_by1 (check_chunk ",") (pp <|> parse_tuple)
   >>= function
   | [] -> pp
   | [ h ] -> return h
@@ -190,9 +191,7 @@ let parse_tuple pp =
 ;;
 
 let ptype a b = PType (a, b)
-
-let parse_typed_pattern pp =
-  pparens @@ lift2 ptype pp (check_chunk ":" *> parse_type)
+let parse_typed_pattern pp = pparens @@ lift2 ptype pp (check_chunk ":" *> parse_type)
 
 let parse_pattern =
   fix
@@ -213,28 +212,41 @@ let bin_operation op =
   *> return (fun exp1 exp2 -> EApp (EApp (EVar (Id (operator_name op)), exp1), exp2))
 ;;
 
+let cons_operation = check_chunk "::" *> return (fun exp1 exp2 -> ECons (exp1, exp2))
+
+let unary_operation op pfe =
+  check_chunk op *> pfe
+  >>= fun exp1 -> return (EApp (EVar (Id (unary_operator_name op)), exp1))
+;;
+
 let pfemul pfe = chainl1 pfe (bin_operation "*")
 let pfediv pfe = chainl1 pfe (bin_operation "/")
 let pfeadd pfe = chainl1 pfe (bin_operation "+")
 let pfesub pfe = chainl1 pfe (bin_operation "-")
 let pfeeq pfe = chainl1 pfe (bin_operation "=")
+let pfereq pfe = chainl1 pfe (bin_operation "==")
 let pfeneq pfe = chainl1 pfe (bin_operation "<>")
+let pferneq pfe = chainl1 pfe (bin_operation "!=")
 let pfeles pfe = chainl1 pfe (bin_operation "<")
 let pfeleq pfe = chainl1 pfe (bin_operation "<=")
 let pfegre pfe = chainl1 pfe (bin_operation ">")
 let pfegeq pfe = chainl1 pfe (bin_operation ">=")
 let pfeand pfe = chainr1 pfe (bin_operation "&&")
 let pfeor pfe = chainr1 pfe (bin_operation "||")
-let pfecons pfe = chainr1 pfe (bin_operation "::")
+let pfeunplus pfe = unary_operation "+" pfe
+let pfeunminus pfe = unary_operation "-" pfe
+let pfecons pfe = chainr1 pfe cons_operation
 
-let parse_arith pfe =
+let parse_binops pfe =
   let pfe = pfemul pfe <|> pfe in
   let pfe = pfediv pfe <|> pfe in
   let pfe = pfeadd pfe <|> pfe in
   let pfe = pfesub pfe <|> pfe in
   let pfe = pfecons pfe <|> pfe in
   let pfe = pfeneq pfe <|> pfe in
+  let pfe = pferneq pfe <|> pfe in
   let pfe = pfeeq pfe <|> pfe in
+  let pfe = pfereq pfe <|> pfe in
   let pfe = pfeles pfe <|> pfe in
   let pfe = pfeleq pfe <|> pfe in
   let pfe = pfegre pfe <|> pfe in
@@ -243,6 +255,21 @@ let parse_arith pfe =
 ;;
 
 let parse_application pfe = chainl1 pfe (return (fun exp1 exp2 -> EApp (exp1, exp2)))
+
+let parse_list_constr pfe =
+  fix
+  @@ fun parse_list_constr ->
+  check_chunk "["
+  *> (sep_by (check_chunk ";") (pfe <|> parse_list_constr)
+      >>=
+      let rec helper = function
+        | [] -> return (EConst CEmptyList)
+        | [ h ] -> return (ECons (h, EConst CEmptyList))
+        | h :: tl -> helper tl >>= fun x -> return (ECons (h, x))
+      in
+      helper)
+  <* check_chunk "]"
+;;
 
 let parse_tuple pfe =
   sep_by (check_chunk ",") pfe
@@ -272,7 +299,7 @@ let parse_match pfe =
     (check_chunk "match" *> pfe <* check_chunk "with")
     (many1
      @@ lift2
-          (fun pat expr -> Case (pat, expr))
+          (fun pat expr -> pat, expr)
           (check_chunk "|" *> parse_pattern <* check_chunk "->")
           pfe)
 ;;
@@ -284,41 +311,46 @@ let parse_fun pfe =
 ;;
 
 let elet a b c = ELet (a, b, c)
-let binding a b = Binding (a, b)
 
-let add_pattern_type_to typ var_name = function  
-  | PType(_, pt) -> TArrow(pt, typ)
-  | _ -> TArrow(TVar (Id ("Var" ^ (Int.to_string var_name))), typ)
-
-let get_full_type binding_params typ = 
-  let rec helper acc num = function 
-    | [] -> return acc 
-    | [ h ] -> return (add_pattern_type_to acc num h)
-    | h :: tl -> helper (add_pattern_type_to acc num h) (num - 1) tl 
-in helper typ (List.length binding_params - 1) (List.rev binding_params)
-
-let get_binding_expr binding_params binding_expr = 
-  match binding_params with 
-  | [] -> binding_expr
-  | _ -> EFun (binding_params, binding_expr)
-
-let parse_value_binding_with_type pfexp = 
-  let* pat = parse_pattern in 
-  let* binding_params = many @@ parse_pattern in 
-  let* typ = check_chunk ":" *> parse_type in
-  let* full_type = get_full_type binding_params typ in 
-  let* binding_expr = (check_chunk "=" *> pfexp) in 
-  return (binding (ptype pat full_type) (get_binding_expr binding_params binding_expr))
-
-let parse_value_binding_without_type pfexp =
-  let* pat = parse_pattern in 
-  let* binding_params = many @@ parse_pattern in 
-  let* binding_expr = (check_chunk "=" *> pfexp) in 
-  return ( binding pat (get_binding_expr binding_params binding_expr))
+let add_pattern_type_to typ var_name = function
+  | PType (_, pt) -> TArrow (pt, typ)
+  | _ -> TArrow (TVar (Id ("Var" ^ Int.to_string var_name)), typ)
 ;;
 
-let parse_value_binding pfexp = 
+let get_full_type binding_params typ =
+  let rec helper acc num = function
+    | [] -> return acc
+    | [ h ] -> return (add_pattern_type_to acc num h)
+    | h :: tl -> helper (add_pattern_type_to acc num h) (num - 1) tl
+  in
+  helper typ (List.length binding_params - 1) (List.rev binding_params)
+;;
+
+let get_binding_expr binding_params binding_expr =
+  match binding_params with
+  | [] -> binding_expr
+  | _ -> EFun (binding_params, binding_expr)
+;;
+
+let parse_value_binding_with_type pfexp =
+  let* pat = parse_pattern in
+  let* binding_params = many @@ parse_pattern in
+  let* typ = check_chunk ":" *> parse_type in
+  let* full_type = get_full_type binding_params typ in
+  let* binding_expr = check_chunk "=" *> pfexp in
+  return (ptype pat full_type, get_binding_expr binding_params binding_expr)
+;;
+
+let parse_value_binding_without_type pfexp =
+  let* pat = parse_pattern in
+  let* binding_params = many @@ parse_pattern in
+  let* binding_expr = check_chunk "=" *> pfexp in
+  return (pat, get_binding_expr binding_params binding_expr)
+;;
+
+let parse_value_binding pfexp =
   parse_value_binding_without_type pfexp <|> parse_value_binding_with_type pfexp
+;;
 
 let parse_let pfexp =
   check_chunk "let"
@@ -336,11 +368,12 @@ let parse_typed_expr pfexp = pparens @@ lift2 etype pfexp (check_chunk ":" *> pa
 let parse_expr =
   fix
   @@ fun pfexpr ->
-  let pfe = pparens pfexpr <|> parse_typed_expr pfexpr in
+  let pfe = pparens pfexpr <|> parse_list_constr pfexpr <|> parse_typed_expr pfexpr in
   let pfe = parse_id >>= (fun ident -> return (EVar ident)) <|> pfe in
   let pfe = parse_constant >>= (fun const -> return (EConst const)) <|> pfe in
   let pfe = parse_application pfe <|> pfe in
-  let pfe = parse_arith pfe <|> pfe in
+  let pfe = pfeunminus pfe <|> pfeunplus pfe <|> pfe in
+  let pfe = parse_binops pfe <|> pfe in
   let pfe = pfeand pfe <|> pfe in
   let pfe = pfeor pfe <|> pfe in
   let pfe = parse_tuple pfe <|> pfe in

@@ -8,8 +8,8 @@
 (library
  (name ObaML)
  (public_name ObaML)
- (modules Ast Parser)
- (libraries angstrom)
+ (modules Ast Parser Inferencer InferencerTypes)
+ (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving.eq))
  (instrumentation
@@ -17,7 +17,7 @@
 
 (library
  (name tests)
- (modules ParserTests)
+ (modules ParserTests InferTests)
  (libraries ObaML)
  (inline_tests)
  (preprocess
