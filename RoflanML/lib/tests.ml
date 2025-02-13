@@ -9,25 +9,31 @@ open Ast
 module ParserTests = struct
   open Parser
 
-  let pp printer parser input =
-    match parser input with
-    | Result.Ok res -> Stdlib.Format.printf "%a" printer res
+  let parse_and_pp_expr input =
+    match parse_expr input with
+    | Result.Ok res -> Stdlib.Format.printf "%a" pp_expr res
+    | _ -> Stdlib.print_endline "Failed to parse"
+  ;;
+
+  let parse_and_pp_decl input =
+    match parse_decl input with
+    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl res
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
   let%expect_test "simple function definition" =
-    pp pp_expr parse_expr "let f x = x";
-    [%expect {| (ELet (NonRec, "f", (EFun (("x", None), (EVar "x"))), None)) |}]
+    parse_and_pp_decl "let f x = x";
+    [%expect {| (DLet (NonRec, "f", (EFun (("x", None), (EVar "x"))))) |}]
   ;;
 
   let%expect_test "if-then-else branch" =
-    pp pp_expr parse_expr "if f x then x else 0";
+    parse_and_pp_expr "if f x then x else 0";
     [%expect
       {| (EBranch ((EApp ((EVar "f"), (EVar "x"))), (EVar "x"), (EConst (CInt 0)))) |}]
   ;;
 
   let%expect_test "list with arithmetic operations" =
-    pp pp_expr parse_expr "[1 + 2; 1 * 2; 1 - 2; 1 / 2]";
+    parse_and_pp_expr "[1 + 2; 1 * 2; 1 - 2; 1 / 2]";
     [%expect
       {|
       (EList
@@ -39,9 +45,7 @@ module ParserTests = struct
   ;;
 
   let%expect_test "match expression with pattern matching" =
-    pp
-      pp_expr
-      parse_expr
+    parse_and_pp_expr
       {|match x with | h1 :: h2 :: tl -> if h1 >= h2 then h1 else h2 | h1 :: [] -> h1 | _ -> 0|};
     [%expect
       {|
@@ -56,7 +60,7 @@ module ParserTests = struct
   ;;
 
   let%expect_test "tuple of lists" =
-    pp pp_expr parse_expr "[1; 2], [3; 4]";
+    parse_and_pp_expr "[1; 2], [3; 4]";
     [%expect
       {|
     (ETuple ((EList [(EConst (CInt 1)); (EConst (CInt 2))]),
@@ -65,7 +69,7 @@ module ParserTests = struct
   ;;
 
   let%expect_test "nested tuples in a list" =
-    pp pp_expr parse_expr "[1, 2, 3; 4, 5, 6]";
+    parse_and_pp_expr "[1, 2, 3; 4, 5, 6]";
     [%expect
       {|
     (EList
@@ -75,157 +79,155 @@ module ParserTests = struct
   ;;
 
   let%expect_test "unit let binding" =
-    pp pp_expr parse_expr "let () = () in ()";
-    [%expect {| (ELet (NonRec, "()", (EConst CUnit), (Some (EConst CUnit)))) |}]
+    parse_and_pp_expr "let () = () in ()";
+    [%expect {| (ELetIn (NonRec, "()", (EConst CUnit), (EConst CUnit))) |}]
   ;;
 
   let%expect_test "function with type annotation" =
-    pp pp_expr parse_expr "let f (x : bool) (y: int)= x * y";
+    parse_and_pp_decl "let f (x : bool) (y: int)= x * y";
     [%expect
       {|
-      (ELet (NonRec, "f",
+      (DLet (NonRec, "f",
          (EFun (("x", (Some TBool)),
             (EFun (("y", (Some TInt)),
                (EApp ((EApp ((EVar "*"), (EVar "x"))), (EVar "y")))))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "operator function definition" =
-    pp pp_expr parse_expr "let (+) = fun (x: int) (y: int) -> x * y";
+    parse_and_pp_decl "let (+) = fun (x: int) (y: int) -> x * y";
     [%expect
       {|
-      (ELet (NonRec, "+",
+      (DLet (NonRec, "+",
          (EFun (("x", (Some TInt)),
             (EFun (("y", (Some TInt)),
                (EApp ((EApp ((EVar "*"), (EVar "x"))), (EVar "y")))))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "nested let and operations in function" =
-    pp pp_expr parse_expr "let ( + ) (x: int) y = let ( - ) x (y: int) = x + y in x - y";
+    parse_and_pp_decl "let ( + ) (x: int) y = let ( - ) x (y: int) = x + y in x - y";
     [%expect
       {|
-      (ELet (NonRec, "+",
+      (DLet (NonRec, "+",
          (EFun (("x", (Some TInt)),
             (EFun (("y", None),
-               (ELet (NonRec, "-",
+               (ELetIn (NonRec, "-",
                   (EFun (("x", None),
                      (EFun (("y", (Some TInt)),
                         (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "y")))))
                      )),
-                  (Some (EApp ((EApp ((EVar "-"), (EVar "x"))), (EVar "y"))))))
+                  (EApp ((EApp ((EVar "-"), (EVar "x"))), (EVar "y")))))
                ))
-            )),
-         None)) 
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "recursive function with nested application" =
-    pp pp_expr parse_expr "let fix f = f (fix f) x in fix g";
+    parse_and_pp_expr "let fix f = f (fix f) x in fix g";
     [%expect
       {|
-      (ELet (NonRec, "fix",
+      (ELetIn (NonRec, "fix",
          (EFun (("f", None),
             (EApp ((EApp ((EVar "f"), (EApp ((EVar "fix"), (EVar "f"))))),
                (EVar "x")))
             )),
-         (Some (EApp ((EVar "fix"), (EVar "g"))))))
+         (EApp ((EVar "fix"), (EVar "g")))))
       |}]
   ;;
 
   let%expect_test "higher order function with tuple and list" =
-    pp pp_expr parse_expr "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y";
+    parse_and_pp_decl "let f = fun (g: int -> int -> int) (x: int) (y: int) -> g x y";
     [%expect
       {|
-      (ELet (NonRec, "f",
+      (DLet (NonRec, "f",
          (EFun (("g", (Some (TFun (TInt, (TFun (TInt, TInt)))))),
             (EFun (("x", (Some TInt)),
                (EFun (("y", (Some TInt)),
                   (EApp ((EApp ((EVar "g"), (EVar "x"))), (EVar "y")))))
                ))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "tuple argument type in function" =
-    pp pp_expr parse_expr "let f (x: int * bool) = x";
+    parse_and_pp_decl "let f (x: int * bool) = x";
     [%expect
       {|
-      (ELet (NonRec, "f",
-         (EFun (("x", (Some (TTuple (TInt, TBool, [])))), (EVar "x"))), None))
+      (DLet (NonRec, "f",
+         (EFun (("x", (Some (TTuple (TInt, TBool, [])))), (EVar "x")))))
       |}]
   ;;
 
   let%expect_test "function with tuple argument to unit type" =
-    pp pp_expr parse_expr "let f (x: (int * bool) -> unit) = x";
+    parse_and_pp_decl "let f (x: (int * bool) -> unit) = x";
     [%expect
       {|
-      (ELet (NonRec, "f",
+      (DLet (NonRec, "f",
          (EFun (("x", (Some (TFun ((TTuple (TInt, TBool, [])), TUnit)))),
-            (EVar "x"))),
-         None))
+            (EVar "x")))
+         ))
       |}]
   ;;
 
   let%expect_test "function with list type argument" =
-    pp pp_expr parse_expr "let f (x: int list) = x";
-    [%expect
-      {| (ELet (NonRec, "f", (EFun (("x", (Some (TList TInt))), (EVar "x"))), None)) |}]
+    parse_and_pp_decl "let f (x: int list) = x";
+    [%expect {| (DLet (NonRec, "f", (EFun (("x", (Some (TList TInt))), (EVar "x"))))) |}]
   ;;
 
   let%expect_test "function with complex tuple and list types" =
-    pp pp_expr parse_expr "let f (x: int * bool list * bool) = x";
+    parse_and_pp_decl "let f (x: int * bool list * bool) = x";
     [%expect
       {|
-      (ELet (NonRec, "f",
-         (EFun (("x", (Some (TTuple (TInt, (TList TBool), [TBool])))), (EVar "x"))),
-         None))
+      (DLet (NonRec, "f",
+         (EFun (("x", (Some (TTuple (TInt, (TList TBool), [TBool])))), (EVar "x")))
+         ))
       |}]
   ;;
 
   let%expect_test "application of operator within function body" =
-    pp pp_expr parse_expr "let f x y = ( > ) x y";
+    parse_and_pp_decl "let f x y = ( > ) x y";
     [%expect
       {|
-      (ELet (NonRec, "f",
+      (DLet (NonRec, "f",
          (EFun (("x", None),
             (EFun (("y", None),
                (EApp ((EApp ((EVar ">"), (EVar "x"))), (EVar "y")))))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "nested let with function and operator application" =
-    pp pp_expr parse_expr "let x = let f g x y = g x y in f ( + ) 7 8";
+    parse_and_pp_decl "let x = let f g x y = g x y in f ( + ) 7 8";
     [%expect
       {|
-      (ELet (NonRec, "x",
-         (ELet (NonRec, "f",
+      (DLet (NonRec, "x",
+         (ELetIn (NonRec, "f",
             (EFun (("g", None),
                (EFun (("x", None),
                   (EFun (("y", None),
                      (EApp ((EApp ((EVar "g"), (EVar "x"))), (EVar "y")))))
                   ))
                )),
-            (Some (EApp (
-                     (EApp ((EApp ((EVar "f"), (EVar "+"))), (EConst (CInt 7)))),
-                     (EConst (CInt 8)))))
-            )),
-         None))
+            (EApp ((EApp ((EApp ((EVar "f"), (EVar "+"))), (EConst (CInt 7)))),
+               (EConst (CInt 8))))
+            ))
+         ))
       |}]
   ;;
 
   let%expect_test "chained equality in custom operator function" =
-    pp pp_expr parse_expr "let ( ^-^ ) x y z = x = y = z";
+    parse_and_pp_decl "let ( ^-^ ) x y z = x = y = z";
     [%expect
       {|
-      (ELet (NonRec, "^-^",
+      (DLet (NonRec, "^-^",
          (EFun (("x", None),
             (EFun (("y", None),
                (EFun (("z", None),
@@ -235,8 +237,8 @@ module ParserTests = struct
                      (EVar "z")))
                   ))
                ))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 end
@@ -245,15 +247,15 @@ module TypecheckerTests = struct
   open Typechecker
   open Typing
 
-  let pp_infer e =
-    match run_infer e with
+  let pp_infer decl =
+    match run_infer decl with
     | Ok ty -> Stdlib.Format.printf "%a" pp_ty ty
     | Error err -> Stdlib.Format.printf "%a" pp_error err
   ;;
 
   let pp_parse_and_infer input =
-    match Parser.parse_expr input with
-    | Result.Ok e -> pp_infer e
+    match Parser.parse_decl input with
+    | Result.Ok decl -> pp_infer decl
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -268,7 +270,7 @@ module TypecheckerTests = struct
   ;;
 
   let%expect_test "inference for function returning a list" =
-    pp_parse_and_infer "let f x y = [x; y] in f 42";
+    pp_parse_and_infer "let q = let f x y = [x; y] in f 42";
     [%expect {| int -> int list |}]
   ;;
 
@@ -279,7 +281,8 @@ module TypecheckerTests = struct
   ;;
 
   let%expect_test "type of recursive factorial function application" =
-    pp_parse_and_infer "let rec fact x = if x = 1 then x else x * fact (x - 1) in fact 42";
+    pp_parse_and_infer
+      "let x = let rec fact x = if x = 1 then x else x * fact (x - 1) in fact 42";
     [%expect {| int |}]
   ;;
 
@@ -319,17 +322,17 @@ module TypecheckerTests = struct
   ;;
 
   let%expect_test "list of comparison functions" =
-    pp_parse_and_infer "[(fun x y -> x = y); (fun x y -> x <> y)]";
+    pp_parse_and_infer "let l = [(fun x y -> x = y); (fun x y -> x <> y)]";
     [%expect {| ('a -> 'a -> bool) list |}]
   ;;
 
   let%expect_test "inference for nested functions in tuple" =
-    pp_parse_and_infer "fun x -> x, fun x y -> x, y";
+    pp_parse_and_infer "let fs = fun x -> x, fun x y -> x, y";
     [%expect {| 'a -> 'a * ('b -> 'c -> 'b * 'c) |}]
   ;;
 
   let%expect_test "inference for nested functions in tuple" =
-    pp_parse_and_infer "(fun x -> x), (fun x y -> x, y)";
+    pp_parse_and_infer "let fs = (fun x -> x), (fun x y -> x, y)";
     [%expect {| ('a -> 'a) * ('b -> 'c -> 'b * 'c) |}]
   ;;
 
@@ -365,7 +368,7 @@ module TypecheckerTests = struct
   ;;
 
   let%expect_test "inference for custom operator with multiple arguments" =
-    pp_parse_and_infer "let ( + ) x y z = x * y * z in 1 + 2";
+    pp_parse_and_infer "let q = let ( + ) x y z = x * y * z in 1 + 2";
     [%expect {| int -> int |}]
   ;;
 
@@ -397,7 +400,7 @@ module TypecheckerTests = struct
   ;;
 
   let%expect_test "type mismatch error in list of mixed types" =
-    pp_parse_and_infer "[1; 1, 2]";
+    pp_parse_and_infer "let l = [1; 1, 2]";
     [%expect {| Failed to unify types int and int * int |}]
   ;;
 
@@ -442,143 +445,142 @@ module CCTests = struct
   let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
 
   let pp_parse_and_cc input =
-    match Parser.parse_expr input with
-    | Result.Ok e -> Stdlib.Format.printf "%a" pp_expr (close_expr e env)
+    match Parser.parse_decl input with
+    | Result.Ok e -> Stdlib.Format.printf "%a" pp_decl (close e env)
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
   let%expect_test "no closure" =
-    pp_parse_and_cc "let f x = x in f 10";
+    pp_parse_and_cc "let q = let f x = x in f 10";
     [%expect
       {|
-      (ELet (NonRec, "f", (EFun (("x", None), (EVar "x"))),
-         (Some (EApp ((EVar "f"), (EConst (CInt 10)))))))
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "f", (EFun (("x", None), (EVar "x"))),
+            (EApp ((EVar "f"), (EConst (CInt 10))))))
+         ))
       |}]
   ;;
 
   let%expect_test "let closure" =
-    pp_parse_and_cc "let f x = x + 1 in let g x = f x in g 10";
+    pp_parse_and_cc "let q = let f x = x + 1 in let g x = f x in g 10";
     [%expect
       {|
-      (ELet (NonRec, "f",
-         (EFun (("x", None),
-            (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-         (Some (ELet (NonRec, "g",
-                  (EFun (("f", None),
-                     (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-                  (Some (EApp ((EApp ((EVar "g"), (EVar "f"))), (EConst (CInt 10))
-                           )))
-                  )))
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "f",
+            (EFun (("x", None),
+               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
+            (ELetIn (NonRec, "g",
+               (EFun (("f", None),
+                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
+               (EApp ((EApp ((EVar "g"), (EVar "f"))), (EConst (CInt 10))))))
+            ))
          ))
       |}]
   ;;
 
   let%expect_test "let chain closure" =
     pp_parse_and_cc
-      "let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
+      "let q = let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
     [%expect
       {|
-      (ELet (NonRec, "f",
-         (EFun (("x", None),
-            (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-         (Some (ELet (NonRec, "g",
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "f",
+            (EFun (("x", None),
+               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
+            (ELetIn (NonRec, "g",
+               (EFun (("f", None),
+                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
+               (ELetIn (NonRec, "k",
                   (EFun (("f", None),
-                     (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-                  (Some (ELet (NonRec, "k",
-                           (EFun (("f", None),
-                              (EFun (("g", None),
-                                 (EFun (("x", None),
-                                    (EApp ((EApp ((EVar "g"), (EVar "f"))),
-                                       (EVar "x")))
-                                    ))
+                     (EFun (("g", None),
+                        (EFun (("x", None),
+                           (EApp ((EApp ((EVar "g"), (EVar "f"))), (EVar "x")))))
+                        ))
+                     )),
+                  (ELetIn (NonRec, "q",
+                     (EFun (("f", None),
+                        (EFun (("g", None),
+                           (EFun (("k", None),
+                              (EFun (("x", None),
+                                 (EApp (
+                                    (EApp ((EApp ((EVar "k"), (EVar "f"))),
+                                       (EVar "g"))),
+                                    (EVar "x")))
                                  ))
-                              )),
-                           (Some (ELet (NonRec, "q",
-                                    (EFun (("f", None),
-                                       (EFun (("g", None),
-                                          (EFun (("k", None),
-                                             (EFun (("x", None),
-                                                (EApp (
-                                                   (EApp (
-                                                      (EApp ((EVar "k"), (EVar "f")
-                                                         )),
-                                                      (EVar "g"))),
-                                                   (EVar "x")))
-                                                ))
-                                             ))
-                                          ))
-                                       )),
-                                    (Some (EApp (
-                                             (EApp (
-                                                (EApp (
-                                                   (EApp ((EVar "q"), (EVar "f"))),
-                                                   (EVar "g"))),
-                                                (EVar "k"))),
-                                             (EConst (CInt 1)))))
-                                    )))
-                           )))
-                  )))
+                              ))
+                           ))
+                        )),
+                     (EApp (
+                        (EApp (
+                           (EApp ((EApp ((EVar "q"), (EVar "f"))), (EVar "g"))),
+                           (EVar "k"))),
+                        (EConst (CInt 1))))
+                     ))
+                  ))
+               ))
+            ))
          ))
       |}]
   ;;
 
   let%expect_test "fun closure" =
-    pp_parse_and_cc "let x = 1 in let y = 2 in fun z -> x + y + z";
-    [%expect
-      {|
-      (ELet (NonRec, "x", (EConst (CInt 1)),
-         (Some (ELet (NonRec, "y", (EConst (CInt 2)),
-                  (Some (EApp (
-                           (EApp (
-                              (EFun (("x", None),
-                                 (EFun (("y", None),
-                                    (EFun (("z", None),
-                                       (EApp (
-                                          (EApp ((EVar "+"),
-                                             (EApp (
-                                                (EApp ((EVar "+"), (EVar "x"))),
-                                                (EVar "y")))
-                                             )),
-                                          (EVar "z")))
-                                       ))
-                                    ))
-                                 )),
-                              (EVar "x"))),
-                           (EVar "y"))))
-                  )))
+    pp_parse_and_cc "let q = let x = 1 in let y = 2 in fun z -> x + y + z";
+    [%expect {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "x", (EConst (CInt 1)),
+            (ELetIn (NonRec, "y", (EConst (CInt 2)),
+               (EApp (
+                  (EApp (
+                     (EFun (("x", None),
+                        (EFun (("y", None),
+                           (EFun (("z", None),
+                              (EApp (
+                                 (EApp ((EVar "+"),
+                                    (EApp ((EApp ((EVar "+"), (EVar "x"))),
+                                       (EVar "y")))
+                                    )),
+                                 (EVar "z")))
+                              ))
+                           ))
+                        )),
+                     (EVar "x"))),
+                  (EVar "y")))
+               ))
+            ))
          ))
       |}]
   ;;
 
   let%expect_test "fun chain closure" =
-    pp_parse_and_cc "let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
-    [%expect
-      {|
-      (ELet (NonRec, "x", (EConst (CInt 1)),
-         (Some (EApp (
-                  (EApp (
-                     (EFun (("x", None),
-                        (EFun (("f", None),
-                           (EFun (("y", None),
-                              (EApp (
-                                 (EApp ((EVar "+"),
-                                    (EApp (
-                                       (EApp ((EVar "+"),
-                                          (EApp ((EVar "f"), (EVar "x"))))),
-                                       (EVar "x")))
-                                    )),
-                                 (EConst (CInt 1))))
-                              ))
+    pp_parse_and_cc "let q = let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
+    [%expect {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "x", (EConst (CInt 1)),
+            (EApp (
+               (EApp (
+                  (EFun (("x", None),
+                     (EFun (("f", None),
+                        (EFun (("y", None),
+                           (EApp (
+                              (EApp ((EVar "+"),
+                                 (EApp (
+                                    (EApp ((EVar "+"),
+                                       (EApp ((EVar "f"), (EVar "x"))))),
+                                    (EVar "x")))
+                                 )),
+                              (EConst (CInt 1))))
                            ))
-                        )),
-                     (EVar "x"))),
-                  (EApp (
-                     (EFun (("x", None),
-                        (EFun (("z", None),
-                           (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "z")))))
-                        )),
-                     (EVar "x")))
-                  )))
+                        ))
+                     )),
+                  (EVar "x"))),
+               (EApp (
+                  (EFun (("x", None),
+                     (EFun (("z", None),
+                        (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "z")))))
+                     )),
+                  (EVar "x")))
+               ))
+            ))
          ))
       |}]
   ;;
@@ -587,8 +589,8 @@ module CCTests = struct
     pp_parse_and_cc "let f x = print_int x";
     [%expect
       {|
-      (ELet (NonRec, "f",
-         (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x"))))), None))
+      (DLet (NonRec, "f",
+         (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x")))))))
       |}]
   ;;
 end

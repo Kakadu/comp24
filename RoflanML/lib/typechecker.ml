@@ -4,30 +4,11 @@
 
 open Ast
 open Typing
+open Roflanml_stdlib
+open Common
+open Common.State_Monad
 
 type fresh = int
-
-module R = struct
-  type ('a, 'err) t = int -> int * ('a, 'err) Result.t
-
-  let return : 'a -> ('a, 'err) t = fun x st -> st, Result.Ok x
-  let fail : 'err -> ('a, 'err) t = fun err st -> st, Result.Error err
-
-  let ( >>= ) : ('a, 'err) t -> ('a -> ('b, 'err) t) -> ('b, 'err) t =
-    fun m f st ->
-    let st, r = m st in
-    match r with
-    | Result.Ok a -> f a st
-    | Result.Error err -> fail err st
-  ;;
-
-  module Syntax = struct
-    let ( let* ) = ( >>= )
-  end
-
-  let fresh st = st + 1, Result.Ok st
-  let run m = snd (m 0)
-end
 
 module VarSet = struct
   include Base.Set
@@ -86,9 +67,6 @@ module Type = struct
 end
 
 module Subst = struct
-  open R
-  open R.Syntax
-
   type t = (int, ty, Base.Int.comparator_witness) Base.Map.t
 
   let empty : t = Base.Map.empty (module Base.Int)
@@ -138,7 +116,7 @@ module Subst = struct
     | TList ty1, TList ty2 -> unify ty1 ty2
     | _ -> fail (UnificationFailed (l, r))
 
-  and extend (subst : t) (k, v) : (t, error) R.t =
+  and extend (subst : t) (k, v) : (t, error) State_Monad.t =
     match Base.Map.find subst k with
     | Some v2 ->
       let* subst2 = unify v v2 in
@@ -220,10 +198,6 @@ module TypeEnv = struct
   ;;
 end
 
-open R
-open R.Syntax
-open Roflanml_stdlib
-
 let unify = Subst.unify
 let fresh_var = fresh >>= fun x -> return (TVar x)
 
@@ -243,7 +217,7 @@ let generalize : TypeEnv.t -> ty -> Scheme.t =
   Scheme.S (free, ty)
 ;;
 
-let lookup_env : TypeEnv.t -> id -> (Subst.t * ty, error) R.t =
+let lookup_env : TypeEnv.t -> id -> (Subst.t * ty, error) State_Monad.t =
   fun env id ->
   match Base.Map.find env id with
   | Some sch ->
@@ -284,7 +258,7 @@ let create_base_env ?(env = TypeEnv.empty) =
     return (TypeEnv.extend env (key, type_to_schema data)))
 ;;
 
-let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) R.t =
+let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) State_Monad.t =
   let rec helper env = function
     | PWild ->
       let* tv = fresh_var in
@@ -418,15 +392,7 @@ let infer env ty =
       let* subst5 = unify ty2 ty3 in
       let* final_subst = Subst.compose_all [ subst1; subst2; subst3; subst4; subst5 ] in
       return (final_subst, Subst.apply subst5 ty3)
-    | ELet (NonRec, _, e1, None) -> helper env e1
-    | ELet (Rec, x, e1, None) ->
-      let* tv = fresh_var in
-      let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
-      let* subst1, ty1 = helper env e1 in
-      let* subst2 = unify (Subst.apply subst1 tv) ty1 in
-      let* final_subst = Subst.compose subst1 subst2 in
-      return (final_subst, Subst.apply final_subst tv)
-    | ELet (NonRec, x, e1, Some e2) ->
+    | ELetIn (NonRec, x, e1, e2) ->
       let* subst1, ty1 = helper env e1 in
       let env2 = TypeEnv.apply env subst1 in
       let ty2 = generalize env2 ty1 in
@@ -434,7 +400,7 @@ let infer env ty =
       let* subst2, ty3 = helper env3 e2 in
       let* final_subst = Subst.compose subst1 subst2 in
       return (final_subst, ty3)
-    | ELet (Rec, x, e1, Some e2) ->
+    | ELetIn (Rec, x, e1, e2) ->
       let* tv = fresh_var in
       let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
       let* subst1, ty1 = helper env e1 in
@@ -464,25 +430,34 @@ let infer env ty =
       let* final_subst = Subst.compose c_subst e_subst in
       return (final_subst, Subst.apply final_subst e_ty)
   in
+  let infer_decl env = function
+    | DLet (NonRec, _, e) -> helper env e
+    | DLet (Rec, x, e) ->
+      let* tv = fresh_var in
+      let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
+      let* subst1, ty1 = helper env e in
+      let* subst2 = unify (Subst.apply subst1 tv) ty1 in
+      let* final_subst = Subst.compose subst1 subst2 in
+      return (final_subst, Subst.apply final_subst tv)
+  in
   let* env = create_base_env ~env in
-  helper env ty
+  infer_decl env ty
 ;;
 
 let run_infer ?(env = TypeEnv.empty) e = Result.map snd (run (infer env e))
 
-let check_program env program =
-  let check_expr env e =
-    let* _, ty = infer env e in
-    match e with
-    | ELet (_, x, _, None) ->
-      let env = TypeEnv.extend env (x, Scheme.S (VarSet.empty, ty)) in
+let check_program env prog =
+  let check_decl env decl =
+    let* _, ty = infer env decl in
+    match decl with
+    | DLet (_, id, _) ->
+      let env = TypeEnv.extend env (id, Scheme.S (VarSet.empty, ty)) in
       return (env, ty)
-    | _ -> return (env, ty)
   in
-  Base.List.fold_left program ~init:(return env) ~f:(fun env e ->
+  Base.List.fold_left prog ~init:(return env) ~f:(fun env e ->
     let* env = env in
-    let* env, _ = check_expr env e in
+    let* env, _ = check_decl env e in
     return env)
 ;;
 
-let typecheck ?(env = TypeEnv.empty) program = run (check_program env program)
+let typecheck ?(env = TypeEnv.empty) prog = run (check_program env prog)
