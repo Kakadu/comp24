@@ -166,13 +166,19 @@ let ppattern =
   @@ fun ppattern ->
   let ppt =
     choice
-      [ pparens ppattern
+      [ pparens
+          (sep_by1 (pstoken ",") ppattern
+           >>= function
+           | [ p ] -> return p (* одиночный паттерн в скобках *)
+           | p1 :: p2 :: ps -> return (PTuple (p1, p2, ps)) (* кортеж из 2+ элементов *)
+           | [] -> fail "Unexpected empty list in tuple pattern")
       ; ppconst
       ; (pstoken "_" >>| fun _ -> PWild)
       ; (pstoken "[]" >>| fun _ -> PEmpty)
       ; ppvar
       ]
   in
+  (* Остальная часть парсера остается без изменений *)
   let ppt =
     lift2
       (fun p1 -> function

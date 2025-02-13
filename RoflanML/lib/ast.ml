@@ -18,6 +18,7 @@ type pattern =
   | PVar of id (** | varname -> ... *)
   | PCons of pattern * pattern * pattern list (** | p1 :: p2 -> ... *)
   | POr of pattern * pattern * pattern list (** | p1 | p2 | p3 -> ... *)
+  | PTuple of pattern * pattern * pattern list (** (p1, p2, ...) -> ... *)
 [@@deriving show { with_path = false }]
 
 type is_rec =
