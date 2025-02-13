@@ -18,6 +18,7 @@ type pattern =
   | PVar of id (** | varname -> ... *)
   | PCons of pattern * pattern * pattern list (** | p1 :: p2 -> ... *)
   | POr of pattern * pattern * pattern list (** | p1 | p2 | p3 -> ... *)
+  | PTuple of pattern * pattern * pattern list (** (p1, p2, ...) -> ... *)
 [@@deriving show { with_path = false }]
 
 type is_rec =
@@ -45,6 +46,7 @@ type expr =
   | EBranch of expr * expr * expr (** if [cond] then [a] else [b] *)
   | EMatch of expr * (pattern * expr) list (** match [x] with | [p1] -> [e1] | ... *)
   | ELet of is_rec * id * expr * expr option (** let rec f: t1 -> t2 *)
+  | ELetMutual of (id * expr) list (* Взаимная рекурсия let rec f = ... and g = ... *)
   | EFun of typed_arg * expr (** Anonymous function with typed arguments *)
   | EApp of expr * expr (** Application f x y z *)
 [@@deriving show { with_path = false }]

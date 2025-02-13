@@ -1,4 +1,4 @@
-(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
+(* Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -234,6 +234,27 @@ module ParserTests = struct
                         (EApp ((EApp ((EVar "="), (EVar "x"))), (EVar "y"))))),
                      (EVar "z")))
                   ))
+               ))
+            )),
+         None))
+      |}]
+  ;;
+
+  let%expect_test "tuple pattern" =
+    pp
+      pp_expr
+      parse_expr
+      "let ( =| ) x = match x with\n    |(a, b, ilyaChert) -> 1\n    | (x, true) -> 2";
+    [%expect
+      {|
+      (ELet (NonRec, "=|",
+         (EFun (("x", None),
+            (EMatch ((EVar "x"),
+               [((PTuple ((PVar "a"), (PVar "b"), [(PVar "ilyaChert")])),
+                 (EConst (CInt 1)));
+                 ((PTuple ((PVar "x"), (PConst (CBool true)), [])),
+                  (EConst (CInt 2)))
+                 ]
                ))
             )),
          None))
