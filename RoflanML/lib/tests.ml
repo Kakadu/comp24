@@ -2,6 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
+open Base
 open Roflanml_lib
 open Ast
 
@@ -436,8 +437,9 @@ end
 
 module CCTests = struct
   open Closure_conversion
+  open Roflanml_stdlib
 
-  let env = Base.Set.of_list (module Base.String) [ "+"; "-"; "*"; "/" ]
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
 
   let pp_parse_and_cc input =
     match Parser.parse_expr input with
@@ -578,6 +580,15 @@ module CCTests = struct
                      (EVar "x")))
                   )))
          ))
+      |}]
+  ;;
+
+  let%expect_test "no closure with stdlib" =
+    pp_parse_and_cc "let f x = print_int x";
+    [%expect
+      {|
+      (ELet (NonRec, "f",
+         (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x"))))), None))
       |}]
   ;;
 end
