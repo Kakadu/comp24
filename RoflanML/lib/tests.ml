@@ -243,9 +243,7 @@ module ParserTests = struct
   ;;
 
   let%expect_test "tuple pattern" =
-    pp
-      pp_expr
-      parse_expr
+    parse_and_pp_decl
       "let ( =| ) x = match x with\n    |(a, b, ilyaChert) -> 1\n    | (x, true) -> 2";
     [%expect
       {|
@@ -546,7 +544,8 @@ module CCTests = struct
 
   let%expect_test "fun closure" =
     pp_parse_and_cc "let q = let x = 1 in let y = 2 in fun z -> x + y + z";
-    [%expect {|
+    [%expect
+      {|
       (DLet (NonRec, "q",
          (ELetIn (NonRec, "x", (EConst (CInt 1)),
             (ELetIn (NonRec, "y", (EConst (CInt 2)),
@@ -574,7 +573,8 @@ module CCTests = struct
 
   let%expect_test "fun chain closure" =
     pp_parse_and_cc "let q = let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
-    [%expect {|
+    [%expect
+      {|
       (DLet (NonRec, "q",
          (ELetIn (NonRec, "x", (EConst (CInt 1)),
             (EApp (
