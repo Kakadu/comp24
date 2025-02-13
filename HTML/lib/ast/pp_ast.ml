@@ -162,9 +162,38 @@ and pp_expr_typed fmt = function
   | expr, Some typ -> fprintf fmt "(%a : %a)" pp_expr expr pp_typ typ
   | expr, None -> fprintf fmt "%a" pp_expr expr
 
+and pp_let_expr fmt ((expr, expr_typ) as expr_typed) =
+  let rec extract_fun_pats acc = function
+    | EFun (pat_typed, (expr, _)) -> extract_fun_pats (pat_typed :: acc) expr
+    | _ -> acc
+  in
+  let pats_typed = List.rev (extract_fun_pats [] expr) in
+  let rec extract_fun_body = function
+    | EFun (_, expr_typed), _ -> extract_fun_body expr_typed
+    | expr_typed -> expr_typed
+  in
+  let expr_fun_body = extract_fun_body expr_typed in
+  let is_pat_with_parens = function
+    | PConst _ | PId _ | PTuple _ -> false
+    | _ -> true
+  in
+  let pp_pattern_typed fmt ((pat, _) as pat_typed) =
+    let to_print = format_of_string @@ if is_pat_with_parens pat then "(%a)" else "%a" in
+    fprintf fmt to_print pp_pattern_typed pat_typed
+  in
+  let pp_pats_typed =
+    pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt " ") pp_pattern_typed
+  in
+  let to_print =
+    format_of_string (if List.length pats_typed > 0 then "%a = %a" else "%a= %a")
+  in
+  match expr_typ with
+  | Some _ -> fprintf fmt to_print pp_pats_typed pats_typed pp_expr_typed expr_typed
+  | None -> fprintf fmt to_print pp_pats_typed pats_typed pp_expr_typed expr_fun_body
+
 and pp_decl fmt =
   let pp_let_body fmt (pat_or_op_typed, expr_typed) =
-    fprintf fmt "%a = %a" pp_pattern_or_op_typed pat_or_op_typed pp_expr_typed expr_typed
+    fprintf fmt "%a %a" pp_pattern_or_op_typed pat_or_op_typed pp_let_expr expr_typed
   in
   function
   | DLet (rec_flag, (pat_or_op_typed, expr_typed)) ->
