@@ -10,6 +10,6 @@ let () =
   | Ok structure ->
     (match Inferencer.run_stucture_infer structure with
      | Ok env -> Format.printf "%a" Inferencer.TypeEnv.pp_env env
-     | Error err -> Format.printf "%a" InferencerTypes.pp_inf_err err)
-  | Error err -> Format.printf "Parsing error: %s\n" err
+     | Error err -> Format.printf "Infer: %a" InferencerTypes.pp_inf_err err)
+  | Error err -> Format.printf "Parser: %s\n" err
 ;;

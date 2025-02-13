@@ -24,29 +24,36 @@ let ( @-> ) = tarr
 let tlist ty = ITList ty
 let ttuple ty_lst = ITTuple ty_lst
 
-let rec pp_ty_tuple fmt = function
+let rec pretty_pp_ty_tuples fmt acc =
+  let typ, mp = acc in
+  match typ with
   | [] -> ()
   | [ h ] ->
     (match h with
-     | ITArr (_, _) -> fprintf fmt "(%a)" pp_ty h
-     | _ -> fprintf fmt "%a" pp_ty h)
+     | ITArr (_, _) -> fprintf fmt "(%a)" pretty_pp_ty (h, mp)
+     | _ -> fprintf fmt "%a" pretty_pp_ty (h, mp))
   | h :: tl ->
     (match h with
-     | ITArr (_, _) -> fprintf fmt "(%a) * %a" pp_ty h pp_ty_tuple tl
-     | _ -> fprintf fmt "%a * %a" pp_ty h pp_ty_tuple tl)
+     | ITArr (_, _) -> fprintf fmt "(%a) * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp)
+     | _ -> fprintf fmt "%a * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp))
 
-and pp_ty fmt = function
-  | ITVar num -> fprintf fmt "'%d" num
+and pretty_pp_ty fmt acc =
+  let typ, mp = acc in
+  match typ with
+  | ITVar num ->
+    (match VarMap.find_opt num mp with
+     | Some x -> fprintf fmt "'%s" x
+     | None -> fprintf fmt "'%d" num)
   | ITPrim str -> fprintf fmt "%s" str
   | ITArr (ty1, ty2) ->
     (match ty1, ty2 with
-     | ITArr (_, _), _ -> fprintf fmt "(%a) -> %a" pp_ty ty1 pp_ty ty2
-     | _ -> fprintf fmt "%a -> %a" pp_ty ty1 pp_ty ty2)
-  | ITTuple ty_lst -> fprintf fmt "%a" pp_ty_tuple ty_lst
+     | ITArr (_, _), _ -> fprintf fmt "(%a) -> %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp)
+     | _ -> fprintf fmt "%a -> %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp))
+  | ITTuple ty_lst -> fprintf fmt "%a" pretty_pp_ty_tuples (ty_lst, mp)
   | ITList ty1 ->
     (match ty1 with
-     | ITVar _ | ITPrim _ -> fprintf fmt "%a list" pp_ty ty1
-     | _ -> fprintf fmt "(%a) list" pp_ty ty1)
+     | ITVar _ | ITPrim _ -> fprintf fmt "%a list" pretty_pp_ty (ty1, mp)
+     | _ -> fprintf fmt "(%a) list" pretty_pp_ty (ty1, mp))
 ;;
 
 type scheme = Scheme of VarSet.t * ty
@@ -54,20 +61,26 @@ type scheme = Scheme of VarSet.t * ty
 type error =
   [ `Occurs_check
   | `Unification_failed of ty * ty
-  | `Wrong_exp
-  | `Wrong_type
+  | `Unexpected_type
   | `Unbound_variable of string
-  | `Pattern_matching_failed
-  | `Pattern_multi_bound of string
+  | `Several_bound of string
+  | `WrongRecursiveValueBinding
   ]
 
 let pp_inf_err fmt = function
-  | `Occurs_check -> fprintf fmt "Occurs_check"
+  | `Occurs_check -> fprintf fmt "Occurs check error"
   | `Unification_failed (typ1, typ2) ->
-    fprintf fmt "Unification_failed: %a # %a" pp_ty typ1 pp_ty typ2
-  | `Wrong_exp -> fprintf fmt "Wrong_exp"
-  | `Wrong_type -> fprintf fmt "Wrong_type"
-  | `Unbound_variable str -> fprintf fmt "Unbound_variable: %S" str
-  | `Pattern_matching_failed -> fprintf fmt "Pattern_matching_failed"
-  | `Pattern_multi_bound str -> fprintf fmt "Pattern_matching_failed: %S" str
+    fprintf
+      fmt
+      "Unification failed: %a and %a"
+      pretty_pp_ty
+      (typ1, VarMap.empty)
+      pretty_pp_ty
+      (typ2, VarMap.empty)
+  | `Unexpected_type -> fprintf fmt "Unexpected type"
+  | `Several_bound str ->
+    fprintf fmt "Variable %S is bound several times in this matching" str
+  | `Unbound_variable str -> fprintf fmt "Unbound value %S" str
+  | `WrongRecursiveValueBinding ->
+    fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
 ;;

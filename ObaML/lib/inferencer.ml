@@ -193,7 +193,9 @@ end = struct
   let compose_all ss = RList.fold_left ss ~init:(return empty) ~f:compose
 
   let pp_subst fmt subst =
-    VarMap.iter (fun key value -> fprintf fmt "||| '%d : %a ||| " key pp_ty value) subst
+    VarMap.iter
+      (fun key value -> fprintf fmt "||| '%d : %a ||| " key pretty_pp_ty (value, VarMap.empty))
+      subst
   ;;
 end
 
@@ -219,11 +221,35 @@ module Scheme = struct
     Scheme (names, Subst.apply s2 ty)
   ;;
 
+  let get_convert_map st =
+    let char_to_string c = String.make 1 c in
+    let a_char_code = Char.code 'a' in
+    let z_char_code = Char.code 'z' in
+    let get_additional_char_code char_code =
+      string_of_int ((char_code - a_char_code) / (z_char_code - a_char_code))
+    in
+    let get_poly_type_by_char_code char_code =
+      let str = char_to_string (char_of_int char_code) in
+      if char_code <= z_char_code then str else str ^ get_additional_char_code char_code
+    in
+    let convert_map, _ =
+      VarSet.fold
+        (fun key acc ->
+          let convert_map, char_code = acc in
+          let convert_map =
+            VarMap.add key (get_poly_type_by_char_code char_code) convert_map
+          in
+          convert_map, char_code + 1)
+        st
+        (VarMap.empty, Char.code 'a')
+    in
+    convert_map
+  ;;
+
   let pp_scheme fmt = function
-    | Scheme (st, typ) ->
-      if VarSet.is_empty st
-      then fprintf fmt "%a" pp_ty typ
-      else fprintf fmt "%a. %a" VarSet.pp_varset st pp_ty typ
+    | Scheme (st, typ) as sc ->
+      let convert_map = get_convert_map st in
+      fprintf fmt "%a" pretty_pp_ty (typ, convert_map)
   ;;
 end
 
@@ -340,7 +366,7 @@ module TypeEnv = struct
 
   let pp_env fmt environment =
     StringMap.iter
-      (fun key data -> fprintf fmt "%S: %a\n" key Scheme.pp_scheme data)
+      (fun key data -> fprintf fmt "val %s : %a\n" key Scheme.pp_scheme data)
       (StringMap.filter (fun tag _ -> StringMap.find_opt tag init_env = None) environment)
   ;;
 end
@@ -414,38 +440,50 @@ let convert_ast_type ast_typ =
   helper StringMap.empty ast_typ >>= fun (_, typ) -> return typ
 ;;
 
-let rec infer_pattern pattern env =
-  match pattern with
-  | Ast.PAny ->
-    let* fresh_var = fresh_var in
-    return (env, fresh_var)
-  | Ast.PConst const -> infer_const const env
-  | Ast.PVar (Id var_name) ->
-    let* fresh_var = fresh_var in
-    return (TypeEnv.extend var_name (Scheme (VarSet.empty, fresh_var)) env, fresh_var)
-  | Ast.PTuple pattern_lst ->
-    let* env, typ_lst =
-      List.fold_left
-        (fun acc pattern ->
-          let* env, typ_lst = acc in
-          let* env, typ = infer_pattern pattern env in
-          return (env, typ :: typ_lst))
-        (return (env, []))
-        pattern_lst
-    in
-    return (env, ttuple (List.rev typ_lst))
-  | Ast.PCons (pattern1, pattern2) ->
-    let* env, typ1 = infer_pattern pattern1 env in
-    let* env, typ2 = infer_pattern pattern2 env in
-    let* subst = Subst.unify (tlist typ1) typ2 in
-    let env = TypeEnv.apply subst env in
-    return (env, Subst.apply subst typ2)
-  | Ast.PType (pat, ast_typ) ->
-    let* env, typ = infer_pattern pat env in
-    let* conv_typ = convert_ast_type ast_typ in
-    let* subst = Subst.unify typ conv_typ in
-    let env = TypeEnv.apply subst env in
-    return (env, Subst.apply subst typ)
+let infer_pattern pattern env =
+  let rec helper env names = function
+    | Ast.PAny ->
+      let* fresh_var = fresh_var in
+      return (env, fresh_var, names)
+    | Ast.PConst const ->
+      let* env, typ = infer_const const env in
+      return (env, typ, names)
+    | Ast.PVar (Id var_name) ->
+      (match StringMap.find_opt var_name names with
+       | Some _ -> fail (`Several_bound var_name)
+       | None ->
+         let* fresh_var = fresh_var in
+         let names = StringMap.add var_name fresh_var names in
+         return
+           ( TypeEnv.extend var_name (Scheme (VarSet.empty, fresh_var)) env
+           , fresh_var
+           , names ))
+    | Ast.PTuple pattern_lst ->
+      let* env, typ_lst, names =
+        List.fold_left
+          (fun acc pattern ->
+            let* env, typ_lst, names = acc in
+            let* env, typ, names = helper env names pattern in
+            return (env, typ :: typ_lst, names))
+          (return (env, [], names))
+          pattern_lst
+      in
+      return (env, ttuple (List.rev typ_lst), names)
+    | Ast.PCons (pattern1, pattern2) ->
+      let* env, typ1, names = helper env names pattern1 in
+      let* env, typ2, names = helper env names pattern2 in
+      let* subst = Subst.unify (tlist typ1) typ2 in
+      let env = TypeEnv.apply subst env in
+      return (env, Subst.apply subst typ2, names)
+    | Ast.PType (pat, ast_typ) ->
+      let* env, typ, names = helper env names pat in
+      let* conv_typ = convert_ast_type ast_typ in
+      let* subst = Subst.unify typ conv_typ in
+      let env = TypeEnv.apply subst env in
+      return (env, Subst.apply subst typ, names)
+  in
+  let* env, ty, _ = helper env StringMap.empty pattern in
+  return (env, ty)
 ;;
 
 let rec extend_pat pat t env =
@@ -467,14 +505,14 @@ let rec extend_pat pat t env =
          (return env)
          lst
          itlst
-     | _ -> fail `Wrong_type)
+     | _ -> fail `Unexpected_type)
   | PCons (p1, p2) ->
     (match t with
      | ITList el_t ->
        let* env = extend_pat p1 el_t env in
        let* env = extend_pat p2 t env in
        return env
-     | _ -> fail `Wrong_type)
+     | _ -> fail `Unexpected_type)
   | PType (p, _) ->
     let* env = extend_pat p t env in
     return env
@@ -607,8 +645,11 @@ and infer_rec_let value_binding_lst env =
       (fun acc value_binding ->
         let* env, ty_lst = acc in
         let pat, _ = value_binding in
-        let* env, ty = infer_pattern pat env in
-        return (env, ty :: ty_lst))
+        match pat with
+        | Ast.PVar _ ->
+          let* env, ty = infer_pattern pat env in
+          return (env, ty :: ty_lst)
+        | _ -> fail `WrongRecursiveValueBinding)
       (return (env, []))
       value_binding_lst
   and helper2 ty_lst env =
