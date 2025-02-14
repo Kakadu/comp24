@@ -58,7 +58,7 @@
   $ ./infer_tests.exe < manytests/typed/016lists.ml
   val append : 'a list -> 'a list -> 'a list
   val cartesian : 'a list -> 'b list -> ('a * 'b) list
-  val concat : ('a list) list -> 'a list
+  val concat : 'a list list -> 'a list
   val iter : ('a -> unit) -> 'a list -> unit
   val length : 'a list -> int
   val length_tail : 'a list -> int

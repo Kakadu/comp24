@@ -177,7 +177,7 @@ let parse_and_print s = Parser.pattern_from_string s |> print_result Ast.pp_patt
 
 let%expect_test "" =
   parse_and_print {| _ |};
-  [%expect {| (PVar (Id "_")) |}]
+  [%expect {| PAny |}]
 ;;
 
 let%expect_test "" =
@@ -322,8 +322,7 @@ let%expect_test "" =
        (EMatch ((EVar (Id "x")),
           [((PCons ((PConst CEmptyList), (PConst CEmptyList))),
             (EApp ((EVar (Id "f")), (EVar (Id "n")))));
-            ((PVar (Id "a")), (EConst (CBool true)));
-            ((PVar (Id "_")), (EConst (CInt 0)))]
+            ((PVar (Id "a")), (EConst (CBool true))); (PAny, (EConst (CInt 0)))]
           ))
        )) |}]
 ;;
@@ -599,7 +598,7 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); (PVar (Id "_"))]),
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); PAny]),
           (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
         ))
       ] |}]
@@ -651,7 +650,7 @@ let%expect_test "" =
   [%expect
     {|
     [(SILet (Nonrecursive,
-        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); (PVar (Id "_"))]),
+        [((PTuple [(PVar (Id "a")); (PVar (Id "b")); PAny]),
           (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]));
           ((PVar (Id "c")), (EConst (CString "s")))]
         ))
@@ -890,4 +889,16 @@ let%expect_test "" =
       (EFun ([(PVar (Id "x")); (PConst CUnit); (PVar (Id "x"))],
          (EVar (Id "x")))))
     ] |}]
+;;
+
+let%expect_test _ =
+  let _ = parse_and_print {| let (a, b, _) = 1, 2, 3 and c = "s" |} in
+  [%expect
+    {|
+      [(SILet (Nonrecursive,
+          [((PTuple [(PVar (Id "a")); (PVar (Id "b")); PAny]),
+            (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]));
+            ((PVar (Id "c")), (EConst (CString "s")))]
+          ))
+        ] |}]
 ;;

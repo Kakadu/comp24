@@ -52,7 +52,7 @@ and pretty_pp_ty fmt acc =
   | ITTuple ty_lst -> fprintf fmt "%a" pretty_pp_ty_tuples (ty_lst, mp)
   | ITList ty1 ->
     (match ty1 with
-     | ITVar _ | ITPrim _ -> fprintf fmt "%a list" pretty_pp_ty (ty1, mp)
+     | ITVar _ | ITPrim _ | ITList _ -> fprintf fmt "%a list" pretty_pp_ty (ty1, mp)
      | _ -> fprintf fmt "(%a) list" pretty_pp_ty (ty1, mp))
 ;;
 

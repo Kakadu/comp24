@@ -184,7 +184,7 @@ let parse_type =
 
 let fcons = check_chunk "::" *> return (fun ptr1 ptr2 -> PCons (ptr1, ptr2))
 let parse_cons pp = chainr1 pp fcons
-let parse_any = check_chunk "_" *> return PAny
+let parse_any = check_token "_" *> return PAny
 
 let parse_tuple pp =
   fix
@@ -203,9 +203,9 @@ let parse_pattern =
   fix
   @@ fun parse_pattern ->
   let pp = pparens parse_pattern <|> parse_typed_pattern parse_pattern in
-  let pp = parse_any <|> pp in
   let pp = parse_constant >>= (fun const -> return (PConst const)) <|> pp in
   let pp = parse_id >>= (fun ident -> return (PVar ident)) <|> pp in
+  let pp = parse_any <|> pp in
   let pp = parse_tuple pp <|> pp in
   let pp = parse_cons pp <|> pp in
   pp
