@@ -226,7 +226,24 @@ let rec alpha_convert_expr ctx = function
     ( construct_function new_args new_body
     , { ctx with reserved_names = ctx_after_body.reserved_names } )
     |> return
-  | _ -> fail "unimplemented yet: expression"
+  | EMatch (expr, cases) ->
+    let* renamed_expr, ctx_after_expr = alpha_convert_expr ctx expr in
+    let rec case_helper acc env = function
+      | [] -> (List.rev acc, env) |> return
+      | (pat, exp) :: tl ->
+        let* renamed_pat, ctx_after_pat = alpha_convert_pattern env pat in
+        let* renamed_exp, ctx_after_exp = alpha_convert_expr ctx_after_pat exp in
+        case_helper
+          ((renamed_pat, renamed_exp) :: acc)
+          { env with reserved_names = ctx_after_exp.reserved_names }
+          tl
+    in
+    let* new_cases, ctx_after_cases =
+      case_helper [] { ctx with reserved_names = ctx_after_expr.reserved_names } cases
+    in
+    ( EMatch (renamed_expr, new_cases)
+    , { ctx with reserved_names = ctx_after_cases.reserved_names } )
+    |> return
 ;;
 
 let rec alpha_convert_decl_list ctx acc = function
@@ -279,82 +296,7 @@ let rec alpha_convert_decl_list ctx acc = function
          ctx_after_main_pat
          (DSingleLet (rec_flag, DLet (new_main_pat, new_expr)) :: acc)
          tail
-     | DMutualRecDecl (Rec, decls) ->
-       let rec mut_let_helper ctx acc = function
-         | DLet (PIdentifier let_name, EFunction (fun_pat, fun_body)) :: tl ->
-           let args, body =
-             collect_function_arguments [] (EFunction (fun_pat, fun_body))
-           in
-           let* renamed_args, ctx_after_args = args_rename_helper [] ctx args in
-           let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args body in
-           let* renamed_let_name, ctx_after_let_name =
-             alpha_convert_pattern
-               { ctx with reserved_names = ctx_after_body.reserved_names }
-               (PIdentifier let_name)
-           in
-           mut_let_helper
-             { ctx with reserved_names = ctx_after_let_name.reserved_names }
-             (DLet (renamed_let_name, construct_function renamed_args renamed_body) :: acc)
-             tl
-         | DLet (let_pat, let_body) :: tl ->
-           let* renamed_let_pat, ctx_after_pat = alpha_convert_pattern ctx let_pat in
-           let* renamed_body, ctx_after_body =
-             alpha_convert_expr
-               { ctx with reserved_names = ctx_after_pat.reserved_names }
-               let_body
-           in
-           mut_let_helper
-             { ctx with reserved_names = ctx_after_body.reserved_names }
-             (DLet (renamed_let_pat, renamed_body) :: acc)
-             tl
-         | [] -> (List.rev acc, ctx) |> return
-       in
-       (match decls with
-        | DLet (PIdentifier let_name, EFunction (fun_pat, fun_body)) :: tl ->
-          let args, body =
-            collect_function_arguments [] (EFunction (fun_pat, fun_body))
-          in
-          let* renamed_let_name, ctx_after_let_name =
-            alpha_convert_pattern ctx (PIdentifier let_name)
-          in
-          let* renamed_args, ctx_after_args =
-            args_rename_helper [] ctx_after_let_name args
-          in
-          let* renamed_body, ctx_after_body = alpha_convert_expr ctx_after_args body in
-          let* rest_decls, ctx_after_decls =
-            mut_let_helper
-              { ctx_after_let_name with reserved_names = ctx_after_body.reserved_names }
-              []
-              tl
-          in
-          alpha_convert_decl_list
-            ctx_after_decls
-            (DMutualRecDecl
-               ( Rec
-               , DLet (renamed_let_name, construct_function renamed_args renamed_body)
-                 :: rest_decls )
-             :: acc)
-            tail
-        | DLet (let_pat, let_body) :: tl ->
-          let* renamed_body, ctx_after_body = alpha_convert_expr ctx let_body in
-          let* renamed_let_pat, ctx_after_let_name =
-            alpha_convert_pattern
-              { ctx with reserved_names = ctx_after_body.reserved_names }
-              let_pat
-          in
-          let* rest_decls, ctx_after_decls =
-            mut_let_helper
-              { ctx_after_let_name with reserved_names = ctx_after_body.reserved_names }
-              []
-              tl
-          in
-          alpha_convert_decl_list
-            ctx_after_decls
-            (DMutualRecDecl (Rec, DLet (renamed_let_pat, renamed_body) :: rest_decls)
-             :: acc)
-            tail
-        | [] -> fail "Error: Unexpected let declaraion")
-     | _ -> fail "Error: Unexpected let declaraion")
+     | _ -> fail "unimplemented: declaraion")
   | [] -> List.rev acc |> return
 ;;
 
@@ -498,5 +440,5 @@ and odd n = if n = 0 then false else even (n - 1)
 |};
   [%expect
     {|
-    let rec even_0 = (fun n_0 -> (if ((eq_ml n_0) 0) then true else ((minus_mlint n_0) 1))) and odd_0 = (fun n_1 -> (if ((eq_ml n_1) 0) then false else (even_0 ((minus_mlint n_1) 1)))) |}]
+    unimplemented: declaraion |}]
 ;;

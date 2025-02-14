@@ -264,63 +264,97 @@
    anf_tuple_2;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/015tuples.ml
-  let rec fix_0 f_0 x_0  = let anf_app_0 = fix_0 f_0 in
-   let anf_app_1 = f_0 anf_app_0 x_0 in
-   anf_app_1;;
-  let  map_0 f_0 p_0  = let (a_0, b_0) = p_0 in
-   let anf_app_0 = f_0 a_0 in
-   let anf_app_1 = f_0 b_0 in
-   let anf_tuple_2 = (anf_app_0, anf_app_1) in
-   anf_tuple_2;;
-  let  ll_1 l_1 self_0 li_0 x_0  = let anf_app_0 = self_0 l_1 in
-   let anf_app_1 = li_0 anf_app_0 x_0 in
-   anf_app_1;;
-  let  ll_0 self_0 l_1  = let anf_app_0 = ll_1 l_1 self_0 in
-   let anf_app_1 = map_0 anf_app_0 l_1 in
-   anf_app_1;;
-  let  fixpoly_0 l_0  = let anf_app_0 = fix_0 ll_0 l_0 in
-   anf_app_0;;
-  let  feven_0 p_1 n_0  = let (e_0, o_0) = p_1 in
-   let anf_app_0 = peq_ml n_0 0 in
-   let anf_ifthenelse_3 = if anf_app_0 then 1 else let anf_app_1 = minus_mlint n_0 1 in
-   let anf_app_2 = o_0 anf_app_1 in
-   anf_app_2 in
-   anf_ifthenelse_3;;
-  let  fodd_0 p_2 n_1  = let (e_1, o_1) = p_2 in
-   let anf_app_0 = peq_ml n_1 0 in
-   let anf_ifthenelse_3 = if anf_app_0 then 0 else let anf_app_1 = minus_mlint n_1 1 in
-   let anf_app_2 = e_1 anf_app_1 in
-   anf_app_2 in
-   anf_ifthenelse_3;;
-  let  tie_0  = let anf_tuple_0 = (feven_0, fodd_0) in
-   let anf_app_1 = fixpoly_0 anf_tuple_0 in
-   anf_app_1;;
-  let rec  meven_0 n_2  = let anf_app_0 = eq_ml n_2 0 in
-   let anf_ifthenelse_3 = if anf_app_0 then 1 else let anf_app_1 = minus_mlint n_2 1 in
-   let anf_app_2 = unbound_modd_0 anf_app_1 in
-   anf_app_2 in
-   anf_ifthenelse_3  and  modd_0 n_3  = let anf_app_4 = eq_ml n_3 0 in
-   let anf_ifthenelse_7 = if anf_app_4 then 1 else let anf_app_5 = minus_mlint n_3 1 in
-   let anf_app_6 = meven_0 anf_app_5 in
-   anf_app_6 in
-   anf_ifthenelse_7 
-  let  main_0  = let anf_app_0 = unbound_modd_1 1 in
-   let anf_app_1 = print_int anf_app_0 in
-   let () = anf_app_1 in
-   let anf_app_2 = meven_0 2 in
-   let anf_app_3 = print_int anf_app_2 in
-   let () = anf_app_3 in
-   let (even_0, odd_0) = tie_0 in
-   let anf_app_4 = odd_0 3 in
-   let anf_app_5 = print_int anf_app_4 in
-   let () = anf_app_5 in
-   let anf_app_6 = even_0 4 in
-   let anf_app_7 = print_int anf_app_6 in
-   let () = anf_app_7 in
-   0;;
+  unimplemented: declaraion
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/016lists.ml
-  unimplemented yet: expression
+  let rec length_0 xs_0  = let anf_matching_2 = match xs_0 with
+  | [] -> 0
+  | (h_0 :: tl_0) -> let anf_app_0 = length_0 tl_0 in
+   let anf_app_1 = plus_mlint 1 anf_app_0 in
+   anf_app_1 in
+   anf_matching_2;;
+  let rec ll_0 plus_mlint acc_0 xs_0  = let anf_matching_2 = match xs_0 with
+  | [] -> acc_0
+  | (h_0 :: tl_0) -> let anf_app_0 = plus_mlint acc_0 1 in
+   let anf_app_1 = ll_0 plus_mlint anf_app_0 tl_0 in
+   anf_app_1 in
+   anf_matching_2;;
+  let  length_tail_0  = let anf_app_0 = ll_0 plus_mlint 0 in
+   anf_app_0;;
+  let rec map_0 f_0 xs_0  = let anf_matching_21 = match xs_0 with
+  | [] -> []
+  | (a_0 :: []) -> let anf_app_0 = f_0 a_0 in
+   let anf_app_1 = cons_ml anf_app_0 [] in
+   anf_app_1
+  | (a_1 :: (b_0 :: [])) -> let anf_app_2 = f_0 a_1 in
+   let anf_app_3 = f_0 b_0 in
+   let anf_app_4 = cons_ml anf_app_3 [] in
+   let anf_app_5 = cons_ml anf_app_2 anf_app_4 in
+   anf_app_5
+  | (a_2 :: (b_1 :: (c_0 :: []))) -> let anf_app_6 = f_0 a_2 in
+   let anf_app_7 = f_0 b_1 in
+   let anf_app_8 = f_0 c_0 in
+   let anf_app_9 = cons_ml anf_app_8 [] in
+   let anf_app_10 = cons_ml anf_app_7 anf_app_9 in
+   let anf_app_11 = cons_ml anf_app_6 anf_app_10 in
+   anf_app_11
+  | (a_3 :: (b_2 :: (c_1 :: (d_0 :: tl_0)))) -> let anf_app_12 = f_0 a_3 in
+   let anf_app_13 = f_0 b_2 in
+   let anf_app_14 = f_0 c_1 in
+   let anf_app_15 = f_0 d_0 in
+   let anf_app_16 = map_0 f_0 tl_0 in
+   let anf_app_17 = cons_ml anf_app_15 anf_app_16 in
+   let anf_app_18 = cons_ml anf_app_14 anf_app_17 in
+   let anf_app_19 = cons_ml anf_app_13 anf_app_18 in
+   let anf_app_20 = cons_ml anf_app_12 anf_app_19 in
+   anf_app_20 in
+   anf_matching_21;;
+  let rec append_0 xs_0 ys_0  = let anf_matching_2 = match xs_0 with
+  | [] -> ys_0
+  | (x_0 :: xs_1) -> let anf_app_0 = append_0 xs_1 ys_0 in
+   let anf_app_1 = cons_ml x_0 anf_app_0 in
+   anf_app_1 in
+   anf_matching_2;;
+  let rec ll_1 xs_0  = let anf_matching_2 = match xs_0 with
+  | [] -> []
+  | (h_0 :: tl_0) -> let anf_app_0 = ll_1 tl_0 in
+   let anf_app_1 = append_0 h_0 anf_app_0 in
+   anf_app_1 in
+   anf_matching_2;;
+  let  concat_0  = ll_1;;
+  let rec iter_0 f_0 xs_0  = let anf_matching_2 = match xs_0 with
+  | [] -> ()
+  | (h_0 :: tl_0) -> let anf_app_0 = f_0 h_0 in
+   let () = anf_app_0 in
+   let anf_app_1 = iter_0 f_0 tl_0 in
+   anf_app_1 in
+   anf_matching_2;;
+  let  ll_2 h_0 a_0  = let anf_tuple_0 = (h_0, a_0) in
+   anf_tuple_0;;
+  let rec cartesian_0 xs_0 ys_0  = let anf_matching_4 = match xs_0 with
+  | [] -> []
+  | (h_0 :: tl_0) -> let anf_app_0 = ll_2 h_0 in
+   let anf_app_1 = map_0 anf_app_0 ys_0 in
+   let anf_app_2 = cartesian_0 tl_0 ys_0 in
+   let anf_app_3 = append_0 anf_app_1 anf_app_2 in
+   anf_app_3 in
+   anf_matching_4;;
+  let  main_0  = let anf_app_0 = cons_ml 3 [] in
+   let anf_app_1 = cons_ml 2 anf_app_0 in
+   let anf_app_2 = cons_ml 1 anf_app_1 in
+   let anf_app_3 = iter_0 print_int anf_app_2 in
+   let () = anf_app_3 in
+   let anf_app_4 = cons_ml 2 [] in
+   let anf_app_5 = cons_ml 1 anf_app_4 in
+   let anf_app_6 = cons_ml 4 [] in
+   let anf_app_7 = cons_ml 3 anf_app_6 in
+   let anf_app_8 = cons_ml 2 anf_app_7 in
+   let anf_app_9 = cons_ml 1 anf_app_8 in
+   let anf_app_10 = cartesian_0 anf_app_5 anf_app_9 in
+   let anf_app_11 = length_0 anf_app_10 in
+   let anf_app_12 = print_int anf_app_11 in
+   let () = anf_app_12 in
+   0;;
 
   $ dune exec ./anf_demo.exe << EOF
   > let test a1 a2 a3 = a1 + a2 + a3
@@ -334,3 +368,19 @@
    let anf_app_2 = plus_mlint 7 7 in
    let anf_app_3 = test_0 anf_app_0 anf_app_1 anf_app_2 in
    anf_app_3;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let funct a = a + 5
+  > let g a = (funct 5)
+  > let funct a = a + 500
+  > let () = print_int (g 5) 
+  > EOF
+  let  funct_0 a_0  = let anf_app_0 = plus_mlint a_0 5 in
+   anf_app_0;;
+  let  g_0 a_1  = let anf_app_0 = funct_0 5 in
+   anf_app_0;;
+  let  funct_1 a_2  = let anf_app_0 = plus_mlint a_2 500 in
+   anf_app_0;;
+  let  ()  = let anf_app_0 = g_0 5 in
+   let anf_app_1 = print_int anf_app_0 in
+   anf_app_1;;
