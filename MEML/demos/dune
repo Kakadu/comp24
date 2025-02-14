@@ -1,0 +1,9 @@
+(executable
+ (name clouse_demo)
+ (modules clouse_demo)
+ (public_name clouse_demo)
+ (libraries MEML_lib stdio))
+
+(cram
+ (applies_to clouse_demo)
+ (deps ./clouse_demo.exe))
