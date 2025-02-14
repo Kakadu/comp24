@@ -258,6 +258,20 @@ let%test _ =
       , EConst (Int 1) )
 ;;
 
+let%test _ =
+  parse_expr "[(x:int); y; z]"
+  = EList [ EConstraint (EVar "x", PInt); EVar "y"; EVar "z" ]
+;;
+
+let%test _ =
+  parse_expr "((x:int), y, z)"
+  = ETuple [ EConstraint (EVar "x", PInt); EVar "y"; EVar "z" ]
+;;
+
+let%test _ =
+  parse_expr "(x: int) :: [x]" = EListConcat (EConstraint (EVar "x", PInt), EList [ EVar "x" ])
+;;
+
 (* Pattern matching *)
 
 let%test _ =
@@ -433,4 +447,19 @@ let%test _ =
   parse_pattern "1::2::[3;4]"
   = ListConcat
       (Const (Int 1), ListConcat (Const (Int 2), List [ Const (Int 3); Const (Int 4) ]))
+;;
+
+(* Constraints *)
+
+let%test _ =
+  parse_pattern "[(x:int); y; z]" = List [ Constraint (Var "x", PInt); Var "y"; Var "z" ]
+;;
+
+let%test _ =
+  parse_pattern "((x:int), y, z)" = Tuple [ Constraint (Var "x", PInt); Var "y"; Var "z" ]
+;;
+
+let%test _ =
+  parse_pattern "(x: int) :: [x]"
+  = ListConcat (Constraint (Var "x", PInt), List [ Var "x" ])
 ;;

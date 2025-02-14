@@ -139,17 +139,18 @@ declare:
 
 (* possible elements in list *)
 list_expr:
-    | value                     { EConst $1 }
-    | id                        { EVar $1 }
-    | operation                 { $1 }
-    | prefix_bop                { EOperation $1 }
-    | _fun                      { $1 }
-    | _if                       { $1 }
-    | _match                    { $1 }
-    | _list(list_expr)          { EList $1 }
-    | _tuple(tuple_expr)        { ETuple $1 }
-    | application               { $1 }
-    | concat(concat_expr)       { let a,b = $1 in EListConcat (a,b) }
+    | value                         { EConst $1 }
+    | id                            { EVar $1 }
+    | operation                     { $1 }
+    | prefix_bop                    { EOperation $1 }
+    | _fun                          { $1 }
+    | _if                           { $1 }
+    | _match                        { $1 }
+    | _list(list_expr)              { EList $1 }
+    | _tuple(tuple_expr)            { ETuple $1 }
+    | application                   { $1 }
+    | concat(concat_expr)           { let a,b = $1 in EListConcat (a,b) }
+    | _constraint (constraint_expr) { let a,b = $1 in EConstraint (a,b)  }
 
 (* possible elements in tuple *)
 tuple_expr:
@@ -163,6 +164,7 @@ tuple_expr:
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
 (* possible left parts of application *)
 l_app_expr: 
@@ -210,6 +212,7 @@ concat_expr:
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
     | application                                                   { $1 }
     | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
+    | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
 
 (* all possible elements to which we can apply type constraints *)
 (* there is no 'fun' or 'let' because we don't support explicit arrow types *)
@@ -250,6 +253,7 @@ list_pattern:
     | prefix_bop                                            { Operation $1 }
     | _list(list_pattern)                                   { List $1 }
     | _tuple(tuple_pattern)                                 { Tuple $1 }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
 (* possible elements in tuple *)
 tuple_pattern:
@@ -259,6 +263,7 @@ tuple_pattern:
     | prefix_bop                                                    { Operation $1 }
     | _list(list_pattern)                                           { List $1 }
     | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
 (* possible elements in constructions like '1 :: [2; 3]' *)
 concat_pattern:
@@ -269,6 +274,7 @@ concat_pattern:
     | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
     | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
     | WILDCARD                                                      { Wildcard }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
 (* all possible elements to which we can apply type constraints *)
 (* we can't apply type constraints to functions 'fun x y z : int -> ...' *)
