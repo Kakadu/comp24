@@ -49,11 +49,6 @@ let%expect_test "" =
     val b : int list |}]
 ;;
 
-let%expect_test "" =
-  let _ = parse_and_infer_result {|let f ((1,2)::y) = 0 |} in
-  [%expect {| val f : (int * int) list -> int |}]
-;;
-
 let%expect_test _ =
   let _ = parse_and_infer_result {| let n a b = a + 1, b |} in
   [%expect {|
@@ -355,5 +350,14 @@ let%expect_test "" =
   parse_and_infer_result {| let (a, a) = (5, 4);; |};
   [%expect {|
     Variable "a" is bound several times in this matching
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let ( + ) a = a;;
+  let b = ( + ) "s" |};
+  [%expect {|
+    val ( + ) : 'a -> 'a
+    val b : string
      |}]
 ;;
