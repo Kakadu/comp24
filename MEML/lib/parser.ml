@@ -410,9 +410,6 @@ let parse_let parse =
 
 let expr_main = (fun expr -> Expression expr) <$> parse_expression
 let parse_bindings = parse_let parse_expression <|> expr_main
-
-let parse_statements =
-  sep_by (parse_white_space_str ";;" <|> parse_white_space) parse_bindings
-;;
-
-let parse program = parse_string parse_statements program
+let parse_statements = many1 (token parse_bindings <* token (many (stoken ";;")))
+let parse_str p s = parse_string ~consume:All p s
+let parser str = parse_str parse_statements (String.strip str)

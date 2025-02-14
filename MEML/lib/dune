@@ -1,7 +1,7 @@
 (library
  (name MEML_lib)
  (public_name MEML.Lib)
- (modules Ast Parser Inferencer Ty Closure)
+ (modules Ast Parser Inferencer Ty Closure Printer)
  (libraries base angstrom)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
