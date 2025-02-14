@@ -177,13 +177,13 @@ l_app_expr:
 r_app_expr:
     | value                                                         { EConst $1 }
     | id                                                            { EVar $1 }
+    | _list(list_expr)                                              { EList $1 }
     | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
     | LEFT_PARENTHESIS; concat(concat_expr); RIGHT_PARENTHESIS      { let a,b = $2 in EListConcat (a,b) }
     | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS               { EOperation $2 }
     | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                     { $2 }
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }
-    | LEFT_PARENTHESIS; _list(list_expr); RIGHT_PARENTHESIS         { EList $2 }
     | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
     | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
@@ -321,14 +321,15 @@ _match:
 %inline prefix_bop:
     | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS         { Binary op }
     
-%inline _fun:
+_fun:
     | FUN; vls = nonempty_list(pattern); ARROW; e = expr    { Fun (vls, e) }
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS             { $2 }
 
 %inline id:
     | IDENTIFIER    { $1 }
 
-%inline _list(rule):
-  LEFT_SQ_BRACKET; elements = separated_list(SEMICOLON, rule); RIGHT_SQ_BRACKET     { elements }
+_list(rule):
+    | LEFT_SQ_BRACKET; elements = separated_list(SEMICOLON, rule); RIGHT_SQ_BRACKET     { elements }
 
 _tuple (rule):
     | lst = tuple_simple (rule)                                     { lst }
