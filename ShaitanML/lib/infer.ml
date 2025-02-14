@@ -6,26 +6,30 @@ open Ast
 open Typedtree
 open Base
 
+type fresh = int
+
 type error =
-  [ `Occurs_check (** Type variable occurs inside type it must be unified with *)
+  [ `Occurs_check of fresh * ty
+    (** Type variable occurs inside type it must be unified with *)
   | `Unbound_variable of id (** Unbound variable *)
   | `Unification_failed of ty * ty (** Failed to unify two types *)
   | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
   | `Let_rec_lhs
   ]
 
+type id = string
+
 let pp_error ppf : error -> _ =
   let open Stdlib.Format in
   function
-  | `Occurs_check -> fprintf ppf "Occurs check failed"
+  | `Occurs_check (tv, ty) ->
+    fprintf ppf "Occurs check failed: %d occurs inside %a" tv pp_typ ty
   | `Unbound_variable s -> fprintf ppf "Unbound variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
   | `Unreachable_state place -> fprintf ppf "Unreachable state: '%s'" place
   | `Let_rec_lhs -> fprintf ppf "Left-hand side of let rec should be a variable"
 ;;
-
-type id = string
 
 module VarSet = struct
   include Stdlib.Set.Make (Int)
@@ -95,8 +99,6 @@ end = struct
   end
 end
 
-type fresh = int
-
 module Type = struct
   type t = ty
 
@@ -138,7 +140,10 @@ end = struct
   type t = (fresh, ty, Int.comparator_witness) Map.t
 
   let empty = Map.empty (module Int)
-  let mapping k v = if Type.occurs_in k v then fail `Occurs_check else return (k, v)
+
+  let mapping k v =
+    if Type.occurs_in k v then fail (`Occurs_check (k, v)) else return (k, v)
+  ;;
 
   let singleton k v =
     let* k, v = mapping k v in
@@ -396,7 +401,27 @@ let infer_exp =
           cl
       in
       return (sub, t)
-    | ELet (Nonrec, (pat, e1), e2) ->
+    | ELet (Rec, (pat, e1), e2) ->
+      let rec extract_nested = function
+        | PConstraint (p, _) -> extract_nested p
+        | _ as namaa -> namaa
+      in
+      (match extract_nested pat with
+       | PVar x ->
+         let* fresh = fresh_var in
+         let env1 = TypeEnv.extend env (x, S (VarSet.empty, fresh)) in
+         let* s1, t1 = helper env1 e1 in
+         let* s2 = Subst.unify (Subst.apply s1 fresh) t1 in
+         let* s3 = Subst.compose s1 s2 in
+         let env2 = TypeEnv.apply s3 env in
+         let t1 = Subst.apply s3 t1 in
+         let s = generalize_rec env2 t1 x in
+         let env3 = TypeEnv.extend env2 (x, s) in
+         let* s4, t2 = helper env3 e2 in
+         let* s5 = Subst.compose s3 s4 in
+         return (s5, t2)
+       | _ -> fail `Let_rec_lhs)
+      | ELet (Nonrec, (pat, e1), e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
@@ -408,30 +433,6 @@ let infer_exp =
       let* s2, t2 = helper env3 e2 in
       let* s = Subst.compose sub1 s2 in
       return (s, t2)
-    | ELet (Rec, (pat, e1), e2) ->
-      let rec extract_nested = function
-        | PConstraint (p, _) -> extract_nested p
-        | _ as namaa -> namaa
-      in
-      (match extract_nested pat with
-       | PVar x ->
-         let* fresh = fresh_var in
-         let* e, t = infer_pat env pat in
-         let* ss = Subst.unify fresh t in
-         let env = TypeEnv.apply ss e in
-         let fresh = Subst.apply ss fresh in
-         let env1 = TypeEnv.extend env (x, S (VarSet.empty, fresh)) in
-         let* s, t = helper env1 e1 in
-         let* s1 = Subst.unify (Subst.apply s fresh) t in
-         let* s2 = Subst.compose s s1 in
-         let env = TypeEnv.apply s2 env in
-         let t = Subst.apply s2 t in
-         let s = generalize_rec env t x in
-         let env = TypeEnv.extend env (x, s) in
-         let* sub, t = helper env e2 in
-         let* sub = Subst.compose s2 sub in
-         return (sub, t)
-       | _ -> fail `Let_rec_lhs)
     | EFun (p, e) ->
       let* env, t = infer_pat env p in
       let* sub, t1 = helper env e in
