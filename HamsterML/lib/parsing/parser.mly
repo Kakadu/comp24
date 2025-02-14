@@ -65,10 +65,10 @@
 %token EOF
 
 // --- Priorities ---
-%left ARROW COLON
+%left ARROW
 %right COMMA DOUBLE_COLON
 
-%nonassoc BAR
+%nonassoc BAR RIGHT_PARENTHESIS
 
 %left OR
 %left AND
