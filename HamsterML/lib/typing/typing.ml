@@ -1,4 +1,4 @@
-(* open Base
+open Base
 module Format = Stdlib.Format
 
 type var_id = int [@@deriving show]
@@ -6,9 +6,7 @@ type var_id = int [@@deriving show]
 (* Inferred types *)
 type inf_type =
   | TInt
-  | TFloat
   | TBool
-  | TChar
   | TString
   | TUnit
   | TList of inf_type (* 'a list *)
@@ -25,6 +23,7 @@ type error =
   | Empty_program
   | Inexhaustive_pattern of Ast.pattern
   | Too_Small_Tuple
+  | UnidentifiedOperator of string
 [@@deriving show]
 
 module VarSet = struct
@@ -85,7 +84,7 @@ module Type = struct
 
   let rec occurs_in (id : var_id) = function
     (* Does the variable occur in the passed type *)
-    | TBool | TInt | TFloat | TChar | TString | TUnit -> false
+    | TBool | TInt | TString | TUnit -> false
     | TList x -> occurs_in id x
     | TTuple tl -> List.fold tl ~init:false ~f:(fun acc t -> acc || occurs_in id t)
     | TArrow (x, y) -> occurs_in id x || occurs_in id y
@@ -95,7 +94,7 @@ module Type = struct
   let free_vars t =
     (* Collect free variables in the passed type *)
     let rec helper acc = function
-      | TBool | TInt | TFloat | TChar | TString | TUnit -> acc
+      | TBool | TInt | TString | TUnit -> acc
       | TPVar v -> VarSet.add v acc
       | TArrow (x, y) -> helper (helper acc x) y
       | TList x -> helper acc x
@@ -146,12 +145,7 @@ module Subst = struct
   let rec unify t1 t2 =
     (* Returns the substitutions needed to unify types *)
     match t1, t2 with
-    | TBool, TBool
-    | TInt, TInt
-    | TFloat, TFloat
-    | TChar, TChar
-    | TString, TString
-    | TUnit, TUnit -> return empty
+    | TBool, TBool | TInt, TInt | TString, TString | TUnit, TUnit -> return empty
     | TPVar x, TPVar y when x = y -> return empty
     | TPVar x, (_ as y) | (_ as y), TPVar x -> singleton_checked x y
     | TArrow (x, xs), TArrow (y, ys) ->
@@ -266,6 +260,47 @@ end
 
 type var_name = string
 
+module BinOperator = struct
+  let arithm : Ast.bop list = [ ADD; SUB; MUL; DIV ]
+  let logic : Ast.bop list = [ EQ; ID_EQ; NEQ; NEQ; GT; GTE; LT; LTE; AND; OR ]
+  let string : Ast.bop list = [ CONCAT ]
+
+  let to_string : Ast.bop -> string = function
+    | ADD -> "+"
+    | SUB -> "-"
+    | MUL -> "*"
+    | DIV -> "/"
+    | EQ -> "="
+    | ID_EQ -> "=="
+    | NEQ -> "!="
+    | GT -> ">"
+    | GTE -> ">="
+    | LT -> "<"
+    | LTE -> "<="
+    | AND -> "&&"
+    | OR -> "||"
+    | CONCAT -> "^"
+  ;;
+
+  let of_string : string -> Ast.bop = function
+    | "+" -> ADD
+    | "-" -> SUB
+    | "*" -> MUL
+    | "/" -> DIV
+    | "=" -> EQ
+    | "==" -> ID_EQ
+    | "!=" -> NEQ
+    | ">" -> GT
+    | ">=" -> GTE
+    | "<" -> LT
+    | "<=" -> LTE
+    | "&&" -> AND
+    | "||" -> OR
+    | "^" -> CONCAT
+    | s -> failwith (show_error (UnidentifiedOperator s))
+  ;;
+end
+
 module TypeEnv = struct
   (** Environment: name + its schema *)
 
@@ -273,7 +308,27 @@ module TypeEnv = struct
 
   let empty : t = Map.empty (module String)
 
-  (* TODO add default env *)
+  let default : t =
+    (* build list (operator name, scheme) using operator list *)
+    let build_op_schemes lst scheme =
+      List.map lst ~f:(fun op -> BinOperator.to_string op, Scheme (VarSet.empty, scheme))
+    in
+    let op_schemes =
+      [ BinOperator.logic, TArrow (TBool, TArrow (TBool, TBool))
+      ; BinOperator.arithm, TArrow (TInt, TArrow (TInt, TInt))
+      ; BinOperator.string, TArrow (TString, TArrow (TString, TString))
+      ]
+      |> fun lst -> List.concat_map lst ~f:(fun (ops, typ) -> build_op_schemes ops typ)
+    in
+    (* default environment data *)
+    let data =
+      [ "print_string", Scheme (VarSet.empty, TArrow (TString, TUnit))
+      ; "print_int", Scheme (VarSet.empty, TArrow (TInt, TUnit))
+      ]
+      @ op_schemes
+    in
+    List.fold data ~init:empty ~f:(fun acc (k, v) -> Map.set acc ~key:k ~data:v)
+  ;;
 
   (* find names in env *)
   let find_exn (name : var_name) (env : t) = Map.find_exn env name
@@ -321,39 +376,32 @@ module Infer = struct
   open R
   open R.Syntax
 
-  let infer_data_type : Ast.dataType -> (Subst.t * inf_type) R.t = function
+  let infer_value : Ast.value -> (Subst.t * inf_type) R.t = function
     | Int _ -> return (Subst.empty, TInt)
-    | Float _ -> return (Subst.empty, TFloat)
     | Bool _ -> return (Subst.empty, TBool)
-    | Char _ -> return (Subst.empty, TChar)
     | String _ -> return (Subst.empty, TString)
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
+  let infer_data_type : Ast.dataType -> (Subst.t * inf_type) R.t = function
+    | PInt -> return (Subst.empty, TInt)
+    | PBool -> return (Subst.empty, TBool)
+    | PString -> return (Subst.empty, TString)
+  ;;
+
   let infer_pattern (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
     let rec helper (env : TypeEnv.t) = function
-      | Const dt ->
-        let* _, t = infer_data_type dt in
+      | Const v ->
+        let* _, t = infer_value v in
         R.return (env, t)
       | Wildcard ->
         let* fr = fresh_var in
         R.return (env, fr)
         (* let f _ _ : 'a -> 'b *)
-      | VarId name ->
+      | Var name ->
         let* fr = fresh_var in
         let new_env = TypeEnv.extend name (Scheme.create fr) env in
         R.return (new_env, fr)
-      | TypedVarID (name, pt) ->
-        let v_t =
-          match pt with
-          | PInt -> TInt
-          | PFloat -> TFloat
-          | PBool -> TBool
-          | PChar -> TChar
-          | PString -> TString
-        in
-        let env = TypeEnv.extend name (Scheme.create v_t) env in
-        R.return (env, v_t)
       | List ps ->
         (match ps with
          | [] ->
@@ -393,6 +441,14 @@ module Infer = struct
                  R.return (env, [ p_t ] @ acc_t))
            in
            R.return (env, TTuple (List.rev tl_t)))
+      | Constraint (p, dt) ->
+        let* env, p_t = helper env p in
+        let* dt_s, dt_t = infer_data_type dt in
+        let* s = Subst.unify p_t dt_t in
+        let* subs = Subst.compose dt_s s in
+        R.return (TypeEnv.apply subs env, p_t)
+      | Operation (Binary op) -> R.fail Unsupported_type
+      | Operation (Unary op) -> R.fail Unsupported_type
     in
     helper env v
   ;;
@@ -539,4 +595,4 @@ module Infer = struct
   ;;
 end
 
-let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr) *)
+let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr)

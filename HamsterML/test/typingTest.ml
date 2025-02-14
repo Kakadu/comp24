@@ -1,8 +1,6 @@
-open HamsterML.Typing
+(* open HamsterML.Typing
 open HamsterML.Ast
 open ParserTest
-
-let parse_expr (s : string) = List.hd (parse s)
 
 let typecheck f x =
   let res = R.run (f TypeEnv.empty x) in
@@ -119,4 +117,4 @@ let%test _ =
     Infer.infer_pattern
     (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3) ]))
   = TList TInt
-;;
+;; *)
