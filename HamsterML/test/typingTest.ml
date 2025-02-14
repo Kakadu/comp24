@@ -1,8 +1,4 @@
-open HamsterML.Typing
-open HamsterML.Ast
-open ParserTest
-
-let parse_expr (s : string) = List.hd (parse s)
+(* open HamsterML.Typing
 
 let typecheck f x =
   let res = R.run (f TypeEnv.empty x) in
@@ -116,7 +112,14 @@ let%test _ =
 
 let%test _ =
   typecheck
-    Infer.infer_pattern
-    (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3) ]))
-  = TList TInt
-;;
+    (Fun
+       ( [ VarId "x"; Const Unit; VarId "y"; Const Unit; VarId "z"; Const Unit ]
+       , BinOp
+           ( ADD
+           , BinOp (ADD, Pattern (VarId "x"), Pattern (VarId "y"))
+           , Pattern (VarId "z") ) ))
+  = TArrow
+      ( TInt
+      , TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TArrow (TInt, TArrow (TUnit, TInt)))))
+      )
+;; *)

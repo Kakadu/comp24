@@ -1,4 +1,4 @@
-open Base
+(* open Base
 module Format = Stdlib.Format
 
 type var_id = int [@@deriving show]
@@ -539,4 +539,4 @@ module Infer = struct
   ;;
 end
 
-let infer prog = R.run (Infer.infer_prog TypeEnv.empty prog)
+let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr) *)
