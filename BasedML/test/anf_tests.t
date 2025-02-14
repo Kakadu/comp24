@@ -264,7 +264,60 @@
    anf_tuple_2;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/015tuples.ml
-  unimplemented: declaraion
+  let rec fix_0 f_0 x_0  = let anf_app_0 = fix_0 f_0 in
+   let anf_app_1 = f_0 anf_app_0 x_0 in
+   anf_app_1;;
+  let  map_0 f_0 p_0  = let (a_0, b_0) = p_0 in
+   let anf_app_0 = f_0 a_0 in
+   let anf_app_1 = f_0 b_0 in
+   let anf_tuple_2 = (anf_app_0, anf_app_1) in
+   anf_tuple_2;;
+  let  ll_1 l_1 self_0 li_0 x_0  = let anf_app_0 = self_0 l_1 in
+   let anf_app_1 = li_0 anf_app_0 x_0 in
+   anf_app_1;;
+  let  ll_0 self_0 l_1  = let anf_app_0 = ll_1 l_1 self_0 in
+   let anf_app_1 = map_0 anf_app_0 l_1 in
+   anf_app_1;;
+  let  fixpoly_0 l_0  = let anf_app_0 = fix_0 ll_0 l_0 in
+   anf_app_0;;
+  let  feven_0 p_1 n_0  = let (e_0, o_0) = p_1 in
+   let anf_app_0 = peq_ml n_0 0 in
+   let anf_ifthenelse_3 = if anf_app_0 then 1 else let anf_app_1 = minus_mlint n_0 1 in
+   let anf_app_2 = o_0 anf_app_1 in
+   anf_app_2 in
+   anf_ifthenelse_3;;
+  let  fodd_0 p_2 n_1  = let (e_1, o_1) = p_2 in
+   let anf_app_0 = peq_ml n_1 0 in
+   let anf_ifthenelse_3 = if anf_app_0 then 0 else let anf_app_1 = minus_mlint n_1 1 in
+   let anf_app_2 = e_1 anf_app_1 in
+   anf_app_2 in
+   anf_ifthenelse_3;;
+  let  tie_0  = let anf_tuple_0 = (feven_0, fodd_0) in
+   let anf_app_1 = fixpoly_0 anf_tuple_0 in
+   anf_app_1;;
+  let rec  meven_0 n_2  = let anf_app_0 = eq_ml n_2 0 in
+   let anf_ifthenelse_3 = if anf_app_0 then 1 else let anf_app_1 = minus_mlint n_2 1 in
+   let anf_app_2 = modd_0 anf_app_1 in
+   anf_app_2 in
+   anf_ifthenelse_3  and  modd_0 n_3  = let anf_app_4 = eq_ml n_3 0 in
+   let anf_ifthenelse_7 = if anf_app_4 then 1 else let anf_app_5 = minus_mlint n_3 1 in
+   let anf_app_6 = meven_0 anf_app_5 in
+   anf_app_6 in
+   anf_ifthenelse_7 
+  let  main_0  = let anf_app_0 = modd_0 1 in
+   let anf_app_1 = print_int anf_app_0 in
+   let () = anf_app_1 in
+   let anf_app_2 = meven_0 2 in
+   let anf_app_3 = print_int anf_app_2 in
+   let () = anf_app_3 in
+   let (even_0, odd_0) = tie_0 in
+   let anf_app_4 = odd_0 3 in
+   let anf_app_5 = print_int anf_app_4 in
+   let () = anf_app_5 in
+   let anf_app_6 = even_0 4 in
+   let anf_app_7 = print_int anf_app_6 in
+   let () = anf_app_7 in
+   0;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/016lists.ml
   let rec length_0 xs_0  = let anf_matching_2 = match xs_0 with
@@ -384,3 +437,25 @@
   let  ()  = let anf_app_0 = g_0 5 in
    let anf_app_1 = print_int anf_app_0 in
    anf_app_1;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let rec even n =
+  > match n with
+  >   | 0 -> true
+  >   | x -> odd (x - 1)
+  > and odd n =
+  > match n with
+  >   | 0 -> false
+  >   | x -> even (x - 1)
+  > EOF
+  let rec  even_0 n_0  = let anf_matching_2 = match n_0 with
+  | 0 -> true
+  | x_0 -> let anf_app_0 = minus_mlint x_0 1 in
+   let anf_app_1 = odd_0 anf_app_0 in
+   anf_app_1 in
+   anf_matching_2  and  odd_0 n_1  = let anf_matching_5 = match n_1 with
+  | 0 -> false
+  | x_1 -> let anf_app_3 = minus_mlint x_1 1 in
+   let anf_app_4 = even_0 anf_app_3 in
+   anf_app_4 in
+   anf_matching_5 
