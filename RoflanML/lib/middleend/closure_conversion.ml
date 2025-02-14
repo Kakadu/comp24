@@ -12,7 +12,7 @@ let find_free_vars =
     match pat with
     | PWild | PEmpty | PConst _ -> Set.empty (module String)
     | PVar x -> Set.singleton (module String) x
-    | PCons (p1, p2, ps) ->
+    | PCons (p1, p2, ps) | PTuple (p1, p2, ps) ->
       Set.union_list
         (module String)
         [ find_free_vars_pattern p1

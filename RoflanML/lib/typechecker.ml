@@ -258,7 +258,7 @@ let create_base_env ?(env = TypeEnv.empty) =
     return (TypeEnv.extend env (key, type_to_schema data)))
 ;;
 
-let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) State_Monad.t =
+let infer_pattern : pattern -> (TypeEnv.t * ty, error) State_Monad.t =
   let rec helper env = function
     | PWild ->
       let* tv = fresh_var in
@@ -278,6 +278,19 @@ let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) State_Monad.
          let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
          return (env, tv)
        | Some (Scheme.S (_, ty)) -> return (env, ty))
+    | PTuple (p1, p2, ps) ->
+      let* env, ty1 = helper env p1 in
+      let* env, ty2 = helper env p2 in
+      let* env, tys =
+        Base.List.fold_right
+          ps
+          ~init:(return (env, []))
+          ~f:(fun p acc ->
+            let* env, ty = helper env p in
+            let* _, tys = acc in
+            return (env, ty :: tys))
+      in
+      return (env, TTuple (ty1, ty2, tys))
     | PCons (p1, p2, ps) ->
       let p1, ps, plast =
         match List.rev ps with
@@ -321,7 +334,7 @@ let infer_pattern : TypeEnv.t -> pattern -> (TypeEnv.t * ty, error) State_Monad.
       in
       return (env, ty)
   in
-  helper
+  helper TypeEnv.empty
 ;;
 
 let infer env ty =
@@ -420,7 +433,11 @@ let infer env ty =
           ~init:(return (c_subst, tv))
           ~f:(fun acc (pat, e) ->
             let* subst, ty = acc in
-            let* pat_env, pat_ty = infer_pattern env pat in
+            let* pat_env, pat_ty = infer_pattern pat in
+            let pat_env =
+              TypeEnv.fold pat_env ~init:env ~f:(fun ~key ~data acc ->
+                TypeEnv.extend acc (key, data))
+            in
             let* subst2 = unify c_ty pat_ty in
             let* subst3, e_ty = helper pat_env e in
             let* subst4 = unify ty e_ty in

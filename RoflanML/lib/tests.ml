@@ -247,7 +247,7 @@ module ParserTests = struct
       "let ( =| ) x = match x with\n    |(a, b, ilyaChert) -> 1\n    | (x, true) -> 2";
     [%expect
       {|
-      (ELet (NonRec, "=|",
+      (DLet (NonRec, "=|",
          (EFun (("x", None),
             (EMatch ((EVar "x"),
                [((PTuple ((PVar "a"), (PVar "b"), [(PVar "ilyaChert")])),
@@ -256,8 +256,8 @@ module ParserTests = struct
                   (EConst (CInt 2)))
                  ]
                ))
-            )),
-         None))
+            ))
+         ))
       |}]
   ;;
 end
@@ -404,6 +404,11 @@ module TypecheckerTests = struct
   let%expect_test "stdlib print_bool" =
     pp_parse_and_infer "let print = print_bool";
     [%expect {| bool -> unit |}]
+  ;;
+
+  let%expect_test "tuple pattern poly type inference" =
+    pp_parse_and_infer "let f x = match x with | (x, y) -> y, x";
+    [%expect {| 'a * 'b -> 'b * 'a |}]
   ;;
 
   (* Errors *)
