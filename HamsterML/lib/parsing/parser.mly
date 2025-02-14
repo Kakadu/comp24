@@ -168,9 +168,9 @@ tuple_expr:
 
 (* possible left parts of application *)
 l_app_expr: 
-    | id                                                                    { EVar $1 } 
+    | id                                                                    { EVar $1 }
+    | prefix_bop                                                            { EOperation $1 }
     | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                             { $2 }
-    | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS                       { EOperation $2 }
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                              { $2 }
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                           { $2 }
     | application                                                           { $1 }

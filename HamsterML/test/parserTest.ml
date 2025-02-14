@@ -97,6 +97,14 @@ let%test _ = parse_expr "(1,2,3)" = parse_expr "1,2,3"
 
 (* Operations *)
 
+let%test _ = parse_expr "(+)" = EOperation (Binary ADD)
+let%test _ = parse_expr "(+)" = EOperation (Binary ADD)
+
+let%test _ =
+  parse_expr "(+) 4 5"
+  = Application (Application (EOperation (Binary ADD), EConst (Int 4)), EConst (Int 5))
+;;
+
 let%test _ = parse_expr "-1" = Application (EOperation (Unary UMINUS), EConst (Int 1))
 
 let%test _ =
@@ -269,7 +277,8 @@ let%test _ =
 ;;
 
 let%test _ =
-  parse_expr "(x: int) :: [x]" = EListConcat (EConstraint (EVar "x", PInt), EList [ EVar "x" ])
+  parse_expr "(x: int) :: [x]"
+  = EListConcat (EConstraint (EVar "x", PInt), EList [ EVar "x" ])
 ;;
 
 (* Pattern matching *)
