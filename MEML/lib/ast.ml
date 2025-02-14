@@ -55,7 +55,7 @@ type expression =
   | ELetIn of rec_flag * name * expression * expression
   | EFun of pattern * expression (** fun z -> z + z *)
   | EList of expression * expression (** [1;2;3]*)
-  | ETuple of expression list (** (1,2,3)*)
+  | ETuple of expression list (** (1,2,3) *)
 [@@deriving eq, show { with_path = false }]
 
 (** Binding type *)
