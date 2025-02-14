@@ -1,8 +1,8 @@
-(** Copyright 2025, tepa46 *)
+(** Copyright 2025, tepa46, Arsene-Baitenov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open InferencerTypes
+open Typedtree
 open Ast
 open Format
 
@@ -109,7 +109,6 @@ module Subst : sig
 
   val compose_all : t list -> t R.t
   val remove : fresh -> t -> t
-  val pp_subst : Format.formatter -> t -> unit
 end = struct
   open R
   open R.Syntax
@@ -191,18 +190,6 @@ end = struct
   and compose s1 s2 = fold s2 (return s1) extend
 
   let compose_all ss = RList.fold_left ss ~init:(return empty) ~f:compose
-
-  let pp_subst fmt subst =
-    VarMap.iter
-      (fun key value -> fprintf fmt "||| '%d : %a ||| " key pretty_pp_ty (value, VarMap.empty))
-      subst
-  ;;
-end
-
-module VarSet = struct
-  include VarSet
-
-  let pp_varset fmt st = VarSet.iter (fun key -> fprintf fmt "'%d " key) st
 end
 
 module Scheme = struct
@@ -246,7 +233,7 @@ module Scheme = struct
     convert_map
   ;;
 
-  let pp_scheme fmt = function
+  let pretty_pp_scheme fmt = function
     | Scheme (st, typ) as sc ->
       let convert_map = get_convert_map st in
       fprintf fmt "%a" pretty_pp_ty (typ, convert_map)
@@ -364,9 +351,9 @@ module TypeEnv = struct
   let apply s env = StringMap.map (Scheme.apply s) env
   let find name xs = StringMap.find_opt name xs
 
-  let pp_env fmt environment =
+  let pretty_pp_env fmt environment =
     StringMap.iter
-      (fun key data -> fprintf fmt "val %s : %a\n" key Scheme.pp_scheme data)
+      (fun key data -> fprintf fmt "val %s : %a\n" key Scheme.pretty_pp_scheme data)
       (StringMap.filter (fun tag sch -> StringMap.find_opt tag init_env <> Some sch) environment)
   ;;
 end
@@ -486,7 +473,7 @@ let infer_pattern pattern env =
   return (env, ty)
 ;;
 
-let rec extend_pat pat t env =
+let rec extend_env_with_pat pat t env =
   match pat with
   | PAny -> return env
   | PConst _ -> return env
@@ -500,7 +487,7 @@ let rec extend_pat pat t env =
        List.fold_left2
          (fun acc p t1 ->
            let* env = acc in
-           let* env = extend_pat p t1 env in
+           let* env = extend_env_with_pat p t1 env in
            return env)
          (return env)
          lst
@@ -509,12 +496,12 @@ let rec extend_pat pat t env =
   | PCons (p1, p2) ->
     (match t with
      | ITList el_t ->
-       let* env = extend_pat p1 el_t env in
-       let* env = extend_pat p2 t env in
+       let* env = extend_env_with_pat p1 el_t env in
+       let* env = extend_env_with_pat p2 t env in
        return env
      | _ -> fail `Unexpected_type)
   | PType (p, _) ->
-    let* env = extend_pat p t env in
+    let* env = extend_env_with_pat p t env in
     return env
 ;;
 
@@ -633,7 +620,7 @@ and infer_nonrec_let value_binding_lst env =
       let* subst2 = Subst.unify ty t in
       let* subst3 = Subst.compose subst1 subst2 in
       let env = TypeEnv.apply subst3 env in
-      let* env = extend_pat pat (Subst.apply subst3 t) env in
+      let* env = extend_env_with_pat pat (Subst.apply subst3 t) env in
       let* new_subst = Subst.compose_all [ subst; subst1; subst2; subst3 ] in
       return (new_subst, env))
     (return (Subst.empty, env))
@@ -669,7 +656,7 @@ and infer_rec_let value_binding_lst env =
       (fun acc value_binding ty ->
         let* env = acc in
         let pat, _ = value_binding in
-        let* env = extend_pat pat (Subst.apply subst ty) env in
+        let* env = extend_env_with_pat pat (Subst.apply subst ty) env in
         let env = TypeEnv.apply subst env in
         return env)
       (return env)
@@ -700,10 +687,6 @@ let infer_structure (structure : Ast.structure) =
         return env)
     (return TypeEnv.init_env)
     structure
-;;
-
-let run_expr_infer (expr : Ast.expr) =
-  Result.map (fun (_, ty) -> ty) (run (infer_exp expr TypeEnv.init_env))
 ;;
 
 let run_stucture_infer (structure : Ast.structure) = run (infer_structure structure)

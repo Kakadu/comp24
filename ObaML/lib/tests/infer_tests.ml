@@ -1,10 +1,9 @@
-(** Copyright 2025, tepa46 *)
+(** Copyright 2025, tepa46, Arsene-Baitenov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open ObaML
 open Format
-module VarMap = Stdlib.Map.Make (Int)
 
 
 (***************************Structure*Infer*Tests***************************)
@@ -13,8 +12,8 @@ let parse_and_infer_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
     (match Inferencer.run_stucture_infer parse_result with
-     | Ok env -> printf "%a" Inferencer.TypeEnv.pp_env env
-     | Error err -> printf "%a" InferencerTypes.pp_inf_err err)
+     | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env env
+     | Error err -> printf "%a" Typedtree.pp_error err)
   | Error _ -> printf "Syntax error"
 ;;
 

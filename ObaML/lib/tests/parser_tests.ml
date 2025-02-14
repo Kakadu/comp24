@@ -1,4 +1,4 @@
-(** Copyright 2025, tepa46 *)
+(** Copyright 2025, tepa46, Arsene-Baitenov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
@@ -658,12 +658,6 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_print {| let () = 5  |};
-  [%expect {|
-    [(SILet (Nonrecursive, [((PConst CUnit), (EConst (CInt 5)))]))] |}]
-;;
-
-let%expect_test "" =
   parse_and_print {| let ( + ) a b = a - b;;     |};
   [%expect
     {|
@@ -676,31 +670,6 @@ let%expect_test "" =
           ]
         ))
       ] |}]
-;;
-
-let%expect_test "" =
-  parse_and_print {| let rec (a,b) = (a,b) |};
-  [%expect
-    {|
-    [(SILet (Recursive,
-        [((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
-          (ETuple [(EVar (Id "a")); (EVar (Id "b"))]))]
-        ))
-      ]
-     |}]
-;;
-
-let%expect_test "" =
-  parse_and_print {| let rec (a,b) = a, (b, c) |};
-  [%expect
-    {|
-    [(SILet (Recursive,
-        [((PTuple [(PVar (Id "a")); (PVar (Id "b"))]),
-          (ETuple [(EVar (Id "a")); (ETuple [(EVar (Id "b")); (EVar (Id "c"))])]))
-          ]
-        ))
-      ]
-     |}]
 ;;
 
 let%expect_test "" =

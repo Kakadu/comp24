@@ -1,4 +1,4 @@
-(** Copyright 2025, tepa46 *)
+(** Copyright 2025, tepa46, Arsene-Baitenov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
@@ -67,7 +67,7 @@ type error =
   | `WrongRecursiveValueBinding
   ]
 
-let pp_inf_err fmt = function
+let pp_error fmt = function
   | `Occurs_check -> fprintf fmt "Occurs check error"
   | `Unification_failed (typ1, typ2) ->
     fprintf
@@ -78,9 +78,9 @@ let pp_inf_err fmt = function
       pretty_pp_ty
       (typ2, VarMap.empty)
   | `Unexpected_type -> fprintf fmt "Unexpected type"
+  | `Unbound_variable str -> fprintf fmt "Unbound value %S" str
   | `Several_bound str ->
     fprintf fmt "Variable %S is bound several times in this matching" str
-  | `Unbound_variable str -> fprintf fmt "Unbound value %S" str
   | `WrongRecursiveValueBinding ->
     fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
 ;;
