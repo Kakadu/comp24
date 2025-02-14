@@ -34,7 +34,8 @@ let rec pretty_pp_ty_tuples fmt acc =
      | _ -> fprintf fmt "%a" pretty_pp_ty (h, mp))
   | h :: tl ->
     (match h with
-     | ITArr (_, _) -> fprintf fmt "(%a) * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp)
+     | ITArr (_, _) ->
+       fprintf fmt "(%a) * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp)
      | _ -> fprintf fmt "%a * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp))
 
 and pretty_pp_ty fmt acc =
@@ -47,7 +48,8 @@ and pretty_pp_ty fmt acc =
   | ITPrim str -> fprintf fmt "%s" str
   | ITArr (ty1, ty2) ->
     (match ty1, ty2 with
-     | ITArr (_, _), _ -> fprintf fmt "(%a) -> %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp)
+     | ITArr (_, _), _ ->
+       fprintf fmt "(%a) -> %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp)
      | _ -> fprintf fmt "%a -> %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp))
   | ITTuple ty_lst -> fprintf fmt "%a" pretty_pp_ty_tuples (ty_lst, mp)
   | ITList ty1 ->

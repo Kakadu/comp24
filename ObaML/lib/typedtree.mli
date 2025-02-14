@@ -2,10 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module VarSet : Stdlib.Set.S with type elt = int 
-
+module VarSet : Stdlib.Set.S with type elt = int
 module VarMap : Map.S with type key = int
-
 module StringMap : Map.S with type key = string
 
 type ty =
@@ -15,7 +13,7 @@ type ty =
   | ITTuple of ty list
   | ITList of ty
 
-val type_var : int -> ty 
+val type_var : int -> ty
 val tprim_int : ty
 val tprim_bool : ty
 val tprim_string : ty
@@ -24,7 +22,6 @@ val tarr : ty -> ty -> ty
 val ( @-> ) : ty -> ty -> ty
 val tlist : ty -> ty
 val ttuple : ty list -> ty
-
 val pretty_pp_ty : Format.formatter -> ty * string VarMap.t -> unit
 
 type scheme = Scheme of VarSet.t * ty

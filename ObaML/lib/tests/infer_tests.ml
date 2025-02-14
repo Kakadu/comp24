@@ -5,7 +5,6 @@
 open ObaML
 open Format
 
-
 (***************************Structure*Infer*Tests***************************)
 
 let parse_and_infer_result str =
@@ -56,8 +55,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   let _ = parse_and_infer_result {| let (a, b, _) = 1, 2, 3 and c = "s" |} in
-  [%expect
-    {|
+  [%expect {|
       val a : int
       val b : int
       val c : string |}]

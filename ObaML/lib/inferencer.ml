@@ -354,7 +354,9 @@ module TypeEnv = struct
   let pretty_pp_env fmt environment =
     StringMap.iter
       (fun key data -> fprintf fmt "val %s : %a\n" key Scheme.pretty_pp_scheme data)
-      (StringMap.filter (fun tag sch -> StringMap.find_opt tag init_env <> Some sch) environment)
+      (StringMap.filter
+         (fun tag sch -> StringMap.find_opt tag init_env <> Some sch)
+         environment)
   ;;
 end
 
