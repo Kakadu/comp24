@@ -127,7 +127,7 @@ let parse_operators =
 (* ------------------------ *)
 
 (* Pattern parsers*)
-let parse_pany = token "_" >>| pany
+let parse_pany = token "_" *> skip_wspace1 >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
 
 let parse_pidentifier =
@@ -171,8 +171,7 @@ let parse_pattern_with_type =
     (skip_wspace *> char ':' *> parse_type <* char ')')
 ;;
 
-let parse_pattern =
-  parse_pattern_with_type <|> parse_pattern_wout_type
+let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
 
 (* ------------------------- *)
 
@@ -205,6 +204,11 @@ let parse_identifier = parse_identifier eidentifier
 
 let parse_etuple p_expr =
   parens @@ lift2 (fun h tl -> etuple (h :: tl)) p_expr (many1 (token "," *> p_expr))
+;;
+
+let parse_eunop p_expr =
+  let* op = token "not" *> return Not <|> token "-" *> return Minus in
+  p_expr >>| fun expr -> EUnOp (op, expr)
 ;;
 
 let parse_efun p_expr =

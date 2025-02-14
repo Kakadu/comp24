@@ -264,10 +264,10 @@ let instantiate : scheme -> typ R.t =
   fun (Scheme (bind_var, ty)) ->
   TVarSet.fold
     (fun var_name acc ->
-      let* acc = acc in
-      let* fv = fresh_var in
-      let* sub = Subst.singleton var_name fv in
-      return (Subst.apply sub acc))
+       let* acc = acc in
+       let* fv = fresh_var in
+       let* sub = Subst.singleton var_name fv in
+       return (Subst.apply sub acc))
     bind_var
     (return ty)
 ;;
@@ -507,6 +507,7 @@ let infer_expr =
          let* sub = Subst.compose s2 sub in
          return (sub, t)
        | _ -> fail `Not_impl)
+    | _ -> fail `Not_impl
   in
   helper
 ;;
