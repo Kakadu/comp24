@@ -31,14 +31,12 @@ let%expect_test "sanity check" =
   if (n = 0) then
     cont 1
    else
-    fact_cps (n - 1) (fun acc -> cont (n * acc))
+     fact_cps (n - 1) (fun acc ->  cont  (n * acc))
 |};
   [%expect
     {|
-    let fun-2 fact_cps n = (fun-1 (fact_cps, n));;
-    let fun-1 (fact_cps, n) cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) (fun-0 (cont, n)));;
     let fun-0 (cont, n) acc = cont (n * acc);;
-    let rec fact_cps = (fun-2 fact_cps) |}]
+    let rec fact_cps n cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) (fun-0 (cont, n))) |}]
 ;;
 
 (*
