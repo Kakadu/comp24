@@ -75,18 +75,13 @@ let parse_infix_with_prefixes prefixes = choice (List.map parse_infix_op prefixe
 let parse_bop (op : string t) =
   let+ parsed = ws *> op in
   let ident = Exp_ident parsed in
-  fun a b -> Exp_apply (ident, Exp_tuple [ a; b ])
+  fun e1 e2 -> Exp_apply (Exp_apply (ident, e1), e2)
 ;;
 
 let prefix_op parser prev = unary_chain parser prev <|> prev
 let infix_left_op parser prev = chainl1 prev (parse_bop parser)
 let infix_right_op parser prev = chainr1 prev (parse_bop parser)
-
-let application prev =
-  let+ name = parse_ident
-  and+ args = many1 prev in
-  Exp_apply (name, Exp_tuple args)
-;;
+let application prev = chainl1 prev (return (fun e1 e2 -> Exp_apply (e1, e2)))
 
 let constructor prev =
   let+ ident = parse_capitalized_ident
