@@ -90,6 +90,8 @@ let parse_int =
   lift2 (fun sign digit -> CInt (Int.of_string @@ sign ^ digit)) ps pd
 ;;
 
+let parse_nil = parse_white_space *> ((fun _ -> CNil) <$> string "[]")
+
 (* Var parsers *)
 let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool")
 let parse_arrow = parse_empty @@ stoken "->"
@@ -123,12 +125,11 @@ let parse_var =
 (** Pattern parsers *)
 
 let parse_pvar =
-  (fun a -> PVar (a, TUnknown))
-  <$> parse_var
-  <|> brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  <|> ((fun a -> PVar (a, TUnknown)) <$> parse_var)
 ;;
 
-let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool ]
+let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_nil ]
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
 
 let parse_tuple parser =
@@ -174,15 +175,14 @@ let parse_econst = (fun v -> EConst v) <$> choice [ parse_int; parse_bool ]
 (* EVar *)
 
 let parse_evar =
-  (fun a -> EVar (a, TUnknown))
-  <$> parse_var
-  <|> brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type
+  lift2 (fun a b -> EVar (a, b)) parse_var parse_type
+  <|> ((fun a -> EVar (a, TUnknown)) <$> parse_var)
 ;;
 
 (* EBinaryOp *)
 
 let parse_op char_op op = stoken char_op *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
-let pmulti = parse_op "*" Mul <|> parse_op "/" Div <|> parse_op "%" Mod
+let pmulti = parse_op "*" Mul <|> parse_op "/" Div
 let padd = parse_op "+" Add <|> parse_op "-" Sub
 
 let pcomp =
@@ -227,7 +227,7 @@ let parse_efun expr =
 let parse_eapp e1 e2 =
   lift2
     (fun f args -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg)) args)
-    (parse_evar <|> brackets e1)
+    (parse_evar <|> e1)
     (many1 (parse_evar <|> e2))
 ;;
 
@@ -255,6 +255,7 @@ let parse_rename =
            ; string ">" *> return "Gre"
            ; string "<=" *> return "Leq"
            ; string "<" *> return "Less"
+           ; string "" *> return "()"
            ])
   <* parse_white_space
 ;;
@@ -294,6 +295,18 @@ let parse_tuple_expr parser =
        (sep_by1 (stoken ",") parser)
 ;;
 
+(* EMatch *)
+
+let parse_ematch matching parse_expr =
+  let ematch c pl = EMatch (c, pl) in
+  let wand = stoken "|" *> parse_pattern in
+  let arrow = stoken "->" *> parse_expr in
+  let expr = lift2 (fun value arrow_value -> value, arrow_value) wand arrow in
+  let exprs = many1 expr in
+  let pematch = stoken "match" *> matching <* stoken "with" in
+  parse_white_space *> lift2 ematch pematch exprs
+;;
+
 (* Expression parsers *)
 
 let ebinop_p expr =
@@ -323,8 +336,8 @@ let ebinop_p expr =
 let parse_expression =
   fix
   @@ fun pack ->
-  let econst = brackets_or_not parse_econst in
-  let evar = brackets_or_not parse_evar in
+  let econst = parse_econst in
+  let evar = parse_evar in
   let tuples =
     parse_tuple_expr
       (econst
@@ -349,14 +362,18 @@ let parse_expression =
     <|> parse_eletin pack
     <|> brackets @@ choice [ tuples; parse_ebinop pack ]
     <|> lists
+    <|> evar
+    <|> econst
+  in
+  let ematch =
+    brackets_or_not @@ parse_ematch (econst <|> tuples <|> evar) (expression pack)
   in
   let app_left pack =
     evar
-    <|> 
-          (brackets_or_not @@ parse_eifelse parse_if (expression pack)
-           <|> parse_efun pack
-           <|> parse_eapp pack pack
-           <|> parse_eletin pack)
+    <|> (brackets_or_not @@ parse_eifelse parse_if (expression pack)
+         <|> parse_efun pack
+         <|> brackets @@ parse_eapp pack pack
+         <|> parse_eletin pack)
   in
   let app_right pack =
     brackets
@@ -365,21 +382,21 @@ let parse_expression =
        <|> parse_eapp pack pack
        <|> parse_efun pack
        <|> parse_eletin pack)
+    <|> tuples
     <|> evar
     <|> econst
   in
-  let eapp =
-    parse_eapp (app_left pack) (app_right pack) <|> brackets @@ parse_ebinop pack
-  in
+  let eapp = parse_eapp (app_left pack) (app_right pack) in
   let eifelse = parse_eifelse parse_if (expression pack) in
   let efun =
-    brackets_or_not
-    @@ parse_efun
-         (parse_ebinop pack
-          <|> parse_eapp (app_left pack) (app_right pack)
-          <|> brackets_or_not @@ parse_eifelse parse_if (expression pack)
-          <|> parse_efun pack
-          <|> parse_eletin pack)
+    brackets_or_not @@ parse_efun @@ parse_ebinop pack
+    <|> tuples
+    <|> parse_tuple_expr (eapp <|> evar <|> econst)
+    <|> parse_eapp (app_left pack) (app_right pack)
+    <|> brackets_or_not @@ parse_eifelse parse_if (expression pack)
+    <|> parse_efun pack
+    <|> parse_eletin pack
+    <|> ematch
   in
   let ebinop =
     brackets_or_not
@@ -391,8 +408,12 @@ let parse_expression =
           <|> evar
           <|> econst)
   in
-  let eletin = parse_eletin @@ expression pack <|> brackets @@ parse_eletin pack in
-  choice [ eletin; eapp; efun; ebinop; eifelse; lists; tuples; evar; econst ]
+  let eletin =
+    parse_eletin @@ expression pack
+    <|> brackets @@ parse_eletin pack
+    <|> parse_eletin ematch
+  in
+  choice [ eletin; eapp; efun; ebinop; eifelse; lists; tuples; evar; econst; ematch ]
 ;;
 
 (** Binding type *)
