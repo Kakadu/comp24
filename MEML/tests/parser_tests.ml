@@ -446,3 +446,75 @@ let%expect_test "bindings_test" =
        ))
  |}]
 ;;
+
+let%expect_test "bindings_test" =
+  let test = "let h f1 f2 f3 f4 f5 f6 f7 = f1 (f2 (f3 (f4 (f5 (f6 f7)))))" in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "h",
+       (EFun ((PVar ("f1", TUnknown)),
+          (EFun ((PVar ("f2", TUnknown)),
+             (EFun ((PVar ("f3", TUnknown)),
+                (EFun ((PVar ("f4", TUnknown)),
+                   (EFun ((PVar ("f5", TUnknown)),
+                      (EFun ((PVar ("f6", TUnknown)),
+                         (EFun ((PVar ("f7", TUnknown)),
+                            (EApp ((EVar ("f1", TUnknown)),
+                               (EApp ((EVar ("f2", TUnknown)),
+                                  (EApp ((EVar ("f3", TUnknown)),
+                                     (EApp ((EVar ("f4", TUnknown)),
+                                        (EApp ((EVar ("f5", TUnknown)),
+                                           (EApp ((EVar ("f6", TUnknown)),
+                                              (EVar ("f7", TUnknown))))
+                                           ))
+                                        ))
+                                     ))
+                                  ))
+                               ))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test "bindings_test" =
+  let test = "let h f1 f2 f3 f4 f5 f6 f7 = ((((((f1 f2) f3) f4) f5) f6) f7)" in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "h",
+       (EFun ((PVar ("f1", TUnknown)),
+          (EFun ((PVar ("f2", TUnknown)),
+             (EFun ((PVar ("f3", TUnknown)),
+                (EFun ((PVar ("f4", TUnknown)),
+                   (EFun ((PVar ("f5", TUnknown)),
+                      (EFun ((PVar ("f6", TUnknown)),
+                         (EFun ((PVar ("f7", TUnknown)),
+                            (EApp (
+                               (EApp (
+                                  (EApp (
+                                     (EApp (
+                                        (EApp (
+                                           (EApp ((EVar ("f1", TUnknown)),
+                                              (EVar ("f2", TUnknown)))),
+                                           (EVar ("f3", TUnknown)))),
+                                        (EVar ("f4", TUnknown)))),
+                                     (EVar ("f5", TUnknown)))),
+                                  (EVar ("f6", TUnknown)))),
+                               (EVar ("f7", TUnknown))))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
+          ))
+       ))
+ |}]
+;;
