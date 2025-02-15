@@ -1,6 +1,6 @@
 (library
- (name test_parser)
- (libraries angstrom parser)
+ (name test_types)
+ (libraries typing parser)
  (preprocess
   (pps ppx_expect ppx_deriving.show))
  (instrumentation
