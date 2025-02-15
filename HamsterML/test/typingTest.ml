@@ -1,24 +1,36 @@
-(* open HamsterML.Typing
-open HamsterML.Ast
+open HamsterML.Typing
 open ParserTest
 
-let typecheck f x =
-  let res = R.run (f TypeEnv.empty x) in
-  match res with
+let infer_pattern (s : string) : inf_type =
+  let inf_res = R.run (Infer.infer_pattern TypeEnv.default (parse_pattern s)) in
+  match inf_res with
   | Ok (_, t) -> t
   | Error e -> failwith (show_error e)
 ;;
 
-let typecheck_expr x =
-  let res = R.run (Infer.infer_expr TypeEnv.empty x) in
-  match res with
+let infer_expr (s : string) : (inf_type) =
+  let inf_res = R.run (Infer.infer_expr TypeEnv.default (parse_expr s)) in
+  match inf_res with
   | Ok (s, t) -> Subst.apply t s
   | Error e -> failwith (show_error e)
 ;;
 
-(* -- Let *)
+(* --- Patterns --- *)
 
-let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
+let%test _ = infer_pattern "(1,2,3)" = TTuple [ TInt; TInt; TInt ]
+let%test _ = infer_pattern "(1, true, 2)" = TTuple [ TInt; TBool; TInt ]
+let%test _ = infer_pattern "()" = TUnit
+let%test _ = infer_pattern "([1; 2; 3], true, 10)" = TTuple [ TList TInt; TBool; TInt ]
+
+(* 1 :: [2; 3] => int list  *)
+
+let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
+
+(* --- Expressions ---  *)
+
+let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
+
+(* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
 
 let%test _ =
@@ -74,47 +86,4 @@ let%test _ =
 let%test _ =
   typecheck_expr (Fun ([ List [ Const (Int 10); Const (Int 20) ] ], Pattern (Const Unit)))
   = TArrow (TList TInt, TUnit)
-;;
-
-(* --- Patterns *)
-
-(* (1, 2, 3) => int * int * int  *)
-let%test _ =
-  typecheck Infer.infer_pattern (Tuple [ Const (Int 1); Const (Int 2); Const (Int 3) ])
-  = TTuple [ TInt; TInt; TInt ]
-;;
-
-(* (1, "2", 3) => int * string * int  *)
-let%test _ =
-  typecheck
-    Infer.infer_pattern
-    (Tuple [ Const (Int 1); Const (String "2"); Const (Int 3) ])
-  = TTuple [ TInt; TString; TInt ]
-;;
-
-(* (1, 2, 3) => int * int * int  *)
-let%test _ =
-  typecheck Infer.infer_pattern (Tuple [ Const (Int 1); Const (Int 2); Const (Int 1) ])
-  = TTuple [ TInt; TInt; TInt ]
-;;
-
-(* ([1; 2; 3], "123", 123) => int list * string * int *)
-let%test _ =
-  typecheck
-    Infer.infer_pattern
-    (Tuple
-       [ List [ Const (Int 1); Const (Int 2); Const (Int 3) ]
-       ; Const (String "123")
-       ; Const (Int 123)
-       ])
-  = TTuple [ TList TInt; TString; TInt ]
-;;
-
-(* 1 :: [2; 3] => int list  *)
-
-let%test _ =
-  typecheck
-    Infer.infer_pattern
-    (ListConcat (Const (Int 1), List [ Const (Int 2); Const (Int 3) ]))
-  = TList TInt
 ;; *)

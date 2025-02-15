@@ -22,7 +22,6 @@ type error =
   | Unsupported_type
   | Empty_program
   | Inexhaustive_pattern of Ast.pattern
-  | Too_Small_Tuple
   | UnidentifiedOperator of string
 [@@deriving show]
 
@@ -261,9 +260,9 @@ end
 type var_name = string
 
 module BinOperator = struct
-  let arithm : Ast.bop list = [ ADD; SUB; MUL; DIV ]
-  let logic : Ast.bop list = [ EQ; ID_EQ; NEQ; NEQ; GT; GTE; LT; LTE; AND; OR ]
-  let string : Ast.bop list = [ CONCAT ]
+  let list : Ast.bop list =
+    [ ADD; SUB; MUL; DIV; EQ; ID_EQ; NEQ; GT; GTE; LT; LTE; AND; OR; CONCAT ]
+  ;;
 
   let to_string : Ast.bop -> string = function
     | ADD -> "+"
@@ -281,6 +280,15 @@ module BinOperator = struct
     | OR -> "||"
     | CONCAT -> "^"
   ;;
+
+  let to_inf_type : Ast.bop -> inf_type = function
+    | ADD | SUB | MUL | DIV -> TArrow (TInt, TArrow (TInt, TInt))
+    | EQ | ID_EQ | NEQ | GT | GTE | LT | LTE | AND | OR ->
+      TArrow (TBool, TArrow (TBool, TBool))
+    | CONCAT -> TArrow (TString, TArrow (TString, TString))
+  ;;
+
+  let to_scheme (bop : Ast.bop) : scheme = Scheme (VarSet.empty, to_inf_type bop)
 
   let of_string : string -> Ast.bop = function
     | "+" -> ADD
@@ -309,23 +317,16 @@ module TypeEnv = struct
   let empty : t = Map.empty (module String)
 
   let default : t =
-    (* build list (operator name, scheme) using operator list *)
-    let build_op_schemes lst scheme =
-      List.map lst ~f:(fun op -> BinOperator.to_string op, Scheme (VarSet.empty, scheme))
-    in
-    let op_schemes =
-      [ BinOperator.logic, TArrow (TBool, TArrow (TBool, TBool))
-      ; BinOperator.arithm, TArrow (TInt, TArrow (TInt, TInt))
-      ; BinOperator.string, TArrow (TString, TArrow (TString, TString))
-      ]
-      |> fun lst -> List.concat_map lst ~f:(fun (ops, typ) -> build_op_schemes ops typ)
+    let bop_schemes =
+      List.map BinOperator.list ~f:(fun bop ->
+        BinOperator.to_string bop, BinOperator.to_scheme bop)
     in
     (* default environment data *)
     let data =
       [ "print_string", Scheme (VarSet.empty, TArrow (TString, TUnit))
       ; "print_int", Scheme (VarSet.empty, TArrow (TInt, TUnit))
       ]
-      @ op_schemes
+      @ bop_schemes
     in
     List.fold data ~init:empty ~f:(fun acc (k, v) -> Map.set acc ~key:k ~data:v)
   ;;
@@ -368,6 +369,16 @@ module TypeEnv = struct
     | Some scheme ->
       let* t = Scheme.instantiate scheme in
       R.return (Subst.empty, t)
+  ;;
+
+  let pp fmt (env : t) =
+    let pp_binding fmt (var_name, scheme) =
+      Format.fprintf fmt "@[<h>%s : %a@]" var_name Scheme.pp scheme
+    in
+    Format.fprintf fmt "@[<v>";
+    Map.iteri env ~f:(fun ~key ~data ->
+      Format.fprintf fmt "%a@;" pp_binding (key, data);
+      Format.fprintf fmt "@]")
   ;;
 end
 
@@ -428,7 +439,7 @@ module Infer = struct
         R.return (TypeEnv.apply u env, tl_t)
       | Tuple ps ->
         (match ps with
-         | [] | [ _ ] -> R.fail Too_Small_Tuple
+         | [] | [ _ ] -> R.fail Unsupported_type
          | p :: tl ->
            let* env, p_t = helper env p in
            let* env, tl_t =
@@ -443,12 +454,16 @@ module Infer = struct
            R.return (env, TTuple (List.rev tl_t)))
       | Constraint (p, dt) ->
         let* env, p_t = helper env p in
-        let* dt_s, dt_t = infer_data_type dt in
+        let* _, dt_t = infer_data_type dt in
         let* s = Subst.unify p_t dt_t in
-        let* subs = Subst.compose dt_s s in
-        R.return (TypeEnv.apply subs env, p_t)
-      | Operation (Binary op) -> R.fail Unsupported_type
-      | Operation (Unary op) -> R.fail Unsupported_type
+        R.return (TypeEnv.apply s env, dt_t)
+      | Operation (Binary bop) -> R.return (env, BinOperator.to_inf_type bop)
+      | Operation (Unary uop) ->
+        R.return
+          ( env
+          , match uop with
+            | UMINUS | UPLUS -> TArrow (TInt, TInt)
+            | NOT -> TArrow (TBool, TBool) )
     in
     helper env v
   ;;
@@ -465,29 +480,20 @@ module Infer = struct
       R.return (env, TArrow (v_t, vs_t))
   ;;
 
-  (* For 'Pattern' constructor inside 'expr' type *)
-  let infer_expr_pattern (env : TypeEnv.t) (p : Ast.pattern) : (Subst.t * inf_type) R.t =
-    let rec helper (env : TypeEnv.t) (p : Ast.pattern) : (Subst.t * inf_type) R.t =
-      match p with
-      | Const dt -> infer_data_type dt
-      | VarId name -> TypeEnv.lookup name env
-      | Tuple ps ->
-        (match ps with
-         | [] | [ _ ] -> R.fail Too_Small_Tuple
-         | p :: tl ->
-           let* p_s, p_t = helper env p in
-           let* tl_s, tl_t =
-             List.fold_left
-               tl
-               ~init:(R.return (p_s, [ p_t ]))
-               ~f:(fun acc p ->
-                 let* acc_s, acc_t = acc in
-                 let* s, p_t = helper (TypeEnv.apply acc_s env) p in
-                 R.return (s, [ p_t ] @ acc_t))
-           in
-           R.return (tl_s, TTuple (List.rev tl_t)))
-      | List ps ->
-        (match ps with
+  (* 'a -> 'b + int <=> 'a -> 'b -> int *)
+  let rec build_arrow arr end_t =
+    match arr with
+    | TArrow (t1, t2) -> TArrow (t1, build_arrow t2 end_t)
+    | x -> TArrow (x, end_t)
+  ;;
+
+  let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
+    let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
+      match expr with
+      | EConst v -> infer_value v
+      | EVar id -> TypeEnv.lookup id env
+      | EList lst ->
+        (match lst with
          | [] ->
            (* 'a list *)
            let* fr = fresh_var in
@@ -506,40 +512,33 @@ module Infer = struct
                  R.return (res_s, cur_t))
            in
            R.return (tl_s, TList tl_t))
-      | _ -> R.fail (Illegal_pattern p)
-    in
-    helper env p
-  ;;
-
-  (* 'a -> 'b + int <=> 'a -> 'b -> int *)
-  let rec build_arrow arr end_t =
-    match arr with
-    | TArrow (t1, t2) -> TArrow (t1, build_arrow t2 end_t)
-    | x -> TArrow (x, end_t)
-  ;;
-
-  let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
-    let rec helper (env : TypeEnv.t) (expr : Ast.expr) =
-      match expr with
-      | BinOp (op, l, r) ->
-        let* sl, tl = helper env l in
-        let* sr, tr = helper env r in
-        (match op with
-         | ADD | SUB | MUL | DIV ->
-           let* ul = Subst.unify tl TInt in
-           let* ur = Subst.unify tr TInt in
-           let* res = Subst.compose_all [ sl; sr; ul; ur ] in
-           return (res, TInt)
-         | EQ | NEQ | GT | GTE | LT | LTE | AND | OR ->
-           let* u = Subst.unify tl tr in
-           let* res = Subst.compose_all [ sl; sr; u ] in
-           return (res, TBool)
-         | CONCAT ->
-           let* ul = Subst.unify tl TString in
-           let* ur = Subst.unify tr TString in
-           let* res = Subst.compose_all [ sl; sr; ul; ur ] in
-           return (res, TString))
-      | Pattern v -> infer_expr_pattern env v
+      | ETuple tls ->
+        (match tls with
+         | [] | [ _ ] -> R.fail Unsupported_type
+         | p :: tl ->
+           let* p_s, p_t = helper env p in
+           let* tl_s, tl_t =
+             List.fold_left
+               tl
+               ~init:(R.return (p_s, [ p_t ]))
+               ~f:(fun acc p ->
+                 let* acc_s, acc_t = acc in
+                 let* s, p_t = helper (TypeEnv.apply acc_s env) p in
+                 R.return (s, [ p_t ] @ acc_t))
+           in
+           R.return (tl_s, TTuple (List.rev tl_t)))
+      | EListConcat (l, r) ->
+        let* l_s, l_t = helper env l in
+        let* r_s, r_t = helper (TypeEnv.apply l_s env) r in
+        let* u = Subst.unify (TList l_t) r_t in
+        let* subs = Subst.compose_all [ l_s; r_s; u ] in
+        R.return (subs, r_t)
+      | EConstraint (e, dt) ->
+        let* e_s, e_t = helper env e in
+        let* dt_s, dt_t = infer_data_type dt in
+        let* u = Subst.unify e_t dt_t in
+        let* subs = Subst.compose_all [ e_s; dt_s; u ] in
+        R.return (subs, dt_t)
       | If (i, th, el) ->
         let* i_s, i_t = helper env i in
         let* i_u = Subst.unify i_t TBool in
@@ -560,24 +559,12 @@ module Infer = struct
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
         R.return (expr_s, build_arrow args_t expr_t)
-      | Let (Nonrecursive, np, args, expr) ->
-        let* env, args_t = infer_pattern_list env args in
-        (* 'a -> 'b -> ... *)
-        let* expr_s, expr_t = helper env expr in
-        (* let = ... *)
-        let env = TypeEnv.apply expr_s env in
-        let* _, np_t = infer_pattern env np in
-        let* u = Subst.unify expr_t np_t in
-        let* n_e_s = Subst.compose u expr_s in
-        (match args with
-         | [] -> R.return (n_e_s, np_t)
-         | _ -> R.return (n_e_s, build_arrow args_t expr_t))
       | _ -> R.fail Unsupported_type
     in
     helper env expr
   ;;
 
-  let infer_prog (env : TypeEnv.t) (prog : Ast.prog) : (Subst.t * inf_type) list R.t =
+  (* let infer_prog (env : TypeEnv.t) (prog : Ast.prog) : (Subst.t * inf_type) list R.t =
     let rec helper (acc : (Subst.t * inf_type) list) (env : TypeEnv.t) = function
       | expr :: tl ->
         let* subs, typ = infer_expr env expr in
@@ -593,6 +580,5 @@ module Infer = struct
       let* h_list = helper [ subs, typ ] env tl in
       R.return (List.rev h_list)
   ;;
+  *)
 end
-
-let infer expr = R.run (Infer.infer_expr TypeEnv.empty expr)
