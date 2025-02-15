@@ -4,7 +4,7 @@
 
 open Base
 
-module State_Monad = struct
+module Counter_Monad = struct
   type ('a, 'err) t = int -> int * ('a, 'err) Result.t
 
   let return : 'a -> ('a, 'err) t = fun x st -> st, Result.Ok x
@@ -22,6 +22,13 @@ module State_Monad = struct
   let fresh st = st + 1, Result.Ok st
   let run m = snd (m 0)
 end
+
+let gen_name prefix =
+  let open Counter_Monad in
+  let fresh_id = fresh >>= fun x -> return (Int.to_string x) in
+  let* id = fresh_id in
+  return (prefix ^ "_" ^ id)
+;;
 
 module Middleend_Common = struct
   open Ast

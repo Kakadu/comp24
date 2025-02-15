@@ -5,10 +5,9 @@
 open Base
 open Roflanml_lib
 open Ast
+open Parser
 
 module ParserTests = struct
-  open Parser
-
   let parse_and_pp_expr input =
     match parse_expr input with
     | Result.Ok res -> Stdlib.Format.printf "%a" pp_expr res
@@ -618,5 +617,97 @@ module CCTests = struct
       (DLet (NonRec, "f",
          (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x")))))))
       |}]
+  ;;
+
+  let%expect_test "closure with rec" =
+    pp_parse_and_cc "let q = let f x = x + 1 in let rec g x = f x + g x in g";
+    [%expect
+      {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "f",
+            (EFun (("x", None),
+               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
+            (ELetIn (Rec, "g",
+               (EFun (("f", None),
+                  (EFun (("x", None),
+                     (EApp ((EApp ((EVar "+"), (EApp ((EVar "f"), (EVar "x"))))),
+                        (EApp ((EApp ((EVar "g"), (EVar "f"))), (EVar "x")))))
+                     ))
+                  )),
+               (EApp ((EVar "g"), (EVar "f")))))
+            ))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cps fact" =
+    pp_parse_and_cc
+      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
+       k (x * n)) in fact 10 (fun x -> x)";
+    [%expect
+      {|
+      (DLet (NonRec, "q",
+         (ELetIn (Rec, "fact",
+            (EFun (("x", None),
+               (EFun (("k", None),
+                  (EMatch ((EVar "x"),
+                     [((PConst (CInt 1)), (EApp ((EVar "k"), (EConst (CInt 1)))));
+                       ((PVar "x"),
+                        (EApp (
+                           (EApp ((EVar "fact"),
+                              (EApp ((EApp ((EVar "-"), (EVar "x"))),
+                                 (EConst (CInt 1))))
+                              )),
+                           (EApp (
+                              (EApp (
+                                 (EFun (("k", None),
+                                    (EFun (("x", None),
+                                       (EFun (("n", None),
+                                          (EApp ((EVar "k"),
+                                             (EApp (
+                                                (EApp ((EVar "*"), (EVar "x"))),
+                                                (EVar "n")))
+                                             ))
+                                          ))
+                                       ))
+                                    )),
+                                 (EVar "k"))),
+                              (EVar "x")))
+                           )))
+                       ]
+                     ))
+                  ))
+               )),
+            (EApp ((EApp ((EVar "fact"), (EConst (CInt 10)))),
+               (EFun (("x", None), (EVar "x")))))
+            ))
+         ))
+      |}]
+  ;;
+end
+
+module LLTests = struct
+  open Closure_conversion
+  open Lambda_lifting
+  open Roflanml_stdlib
+  open Ll_ast
+
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
+
+  let pp_parse_and_ll input =
+    match Parser.parse input with
+    | Result.Ok prog ->
+      (match lift_program (close_program prog env) with
+       | Result.Ok prog ->
+         List.iter prog ~f:(fun decl -> Stdlib.Format.printf "%a\n" pp_lldecl decl)
+       | Result.Error _ -> Stdlib.print_endline "Failed to LL")
+    | _ -> Stdlib.print_endline "Failed to parse"
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_ll
+      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
+       k (x * n)) in fact 10 (fun x -> x)";
+    [%expect {| Failed to parse |}]
   ;;
 end
