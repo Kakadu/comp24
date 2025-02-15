@@ -565,16 +565,10 @@ module PP = struct
   ;;
 
   let convert_to_string binder =
-    let rec helper binder acc =
-      if binder < 26
-      then (
-        let s = Char.chr (97 + binder) in
-        Base.Char.to_string s ^ acc)
-      else (
-        let tl = Char.chr (97 + (binder mod 26)) in
-        helper (binder / 26) (Format.sprintf "%c%s" tl acc))
-    in
-    helper binder ""
+    let base = 97 in
+    let letter = Char.chr (base + (binder mod 26)) in
+    let number = binder / 26 in
+    String.make 1 letter ^ if number = 0 then "" else string_of_int number
   ;;
 
   let pp_type ppf ty =
@@ -612,7 +606,7 @@ module PP = struct
     Base.Map.iteri env ~f:(fun ~key:v ~data:(S (_, ty)) ->
       match TypeEnv.find init_env v with
       | Some (S (_, init_ty)) when ty = init_ty -> ()
-      | _ -> Format.fprintf ppf "var %s: %a\n" v pp_type ty)
+      | _ -> Format.fprintf ppf "val %s: %a\n" v pp_type ty)
   ;;
 
   let map_binder t1 t2 binder =
