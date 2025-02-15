@@ -61,9 +61,10 @@ let rec bound_vars_pattern ((pat, _) : pattern_typed) : string list =
 let pattern_to_string ((pat, ty) : pattern_or_op_typed) : string list =
   match pat with
   | POpPat p -> bound_vars_pattern (p, ty)
-  | POpOp s -> [s]
+  | POpOp s -> [ s ]
+;;
 
-let rec free_vars_expr (global_env: StringSet.t) ((e, _) : expr_typed) : StringSet.t =
+let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr_typed) : StringSet.t =
   match e with
   | EConst _ -> StringSet.empty
   | EId id ->
@@ -71,24 +72,24 @@ let rec free_vars_expr (global_env: StringSet.t) ((e, _) : expr_typed) : StringS
     (match id with
      | (IdentOfDefinable (IdentLetters s) | IdentOfDefinable (IdentOp s))
        when (not @@ List.mem s Common.Ops.base_binops)
-            && (not @@ String.starts_with ~prefix:"fun-" s) && (not @@ StringSet.contains global_env s) ->
+            && (not @@ String.starts_with ~prefix:"fun-" s)
+            && (not @@ StringSet.contains global_env s) ->
        StringSet.singleton (ident_to_string id)
      | _ -> StringSet.empty)
   | EFun (pat, body) ->
     let bound =
-      List.fold_left
-        (fun s x -> StringSet.add s x)
-        global_env
-        (bound_vars_pattern pat)
+      List.fold_left (fun s x -> StringSet.add s x) global_env (bound_vars_pattern pat)
     in
     free_vars_expr bound body
-  | EApp (e1, e2) -> StringSet.union (free_vars_expr global_env e1) (free_vars_expr global_env e2)
+  | EApp (e1, e2) ->
+    StringSet.union (free_vars_expr global_env e1) (free_vars_expr global_env e2)
   | EIf (e1, e2, e3) ->
     let fv_e1 = free_vars_expr global_env e1 in
     let fv_e2 = free_vars_expr global_env e2 in
     let fv_e3 = free_vars_expr global_env e3 in
     StringSet.union_all [ fv_e1; fv_e2; fv_e3 ]
-  | EList (e1, e2) -> StringSet.union (free_vars_expr global_env e1) (free_vars_expr global_env e2)
+  | EList (e1, e2) ->
+    StringSet.union (free_vars_expr global_env e1) (free_vars_expr global_env e2)
   | ETuple (e1, e2, es) ->
     List.fold_left
       (fun acc et -> StringSet.union acc (free_vars_expr global_env et))
@@ -103,10 +104,7 @@ let rec free_vars_expr (global_env: StringSet.t) ((e, _) : expr_typed) : StringS
     let fv_e = free_vars_expr global_env e in
     let free_vars_branch ((pat, expr) : branch) : StringSet.t =
       let bound =
-        List.fold_left
-          (fun s x -> StringSet.add s x)
-          global_env
-          (bound_vars_pattern pat)
+        List.fold_left (fun s x -> StringSet.add s x) global_env (bound_vars_pattern pat)
       in
       StringSet.diff (free_vars_expr global_env expr) bound
     in
@@ -160,85 +158,43 @@ let pattern_of_free_vars (fv : string list) : pattern_typed =
     PTuple (p1, p2, rest_pats), None
 ;;
 
-let rec efun_conversion local_env = function 
-  | EFun (pat, e), _ -> efun_conversion (List.fold_left StringSet.add local_env (bound_vars_pattern pat) ) e
+let rec efun_conversion local_env = function
+  | EFun (pat, e), _ ->
+    efun_conversion (List.fold_left StringSet.add local_env (bound_vars_pattern pat)) e
   | expr -> local_env, expr
-
 ;;
 
 let rec change_body body = function
-  | EFun(pat, e), ty -> EFun (pat, change_body body e), ty
+  | EFun (pat, e), ty -> EFun (pat, change_body body e), ty
   | _ -> body
 ;;
 
-let rec closure_convert_expr (global_env: StringSet.t) ((e, t) : expr_typed) : expr_typed cc =
+let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
+  : expr_typed cc
+  =
   match e with
   | EConst _ | EId _ -> return (e, t)
-  (* | EFun (pat, (EFun (_, _) as efun, ty)) -local_env>
-     let* efun = closure_convert_expr (efun, ty) in
-     return (EFun(pat, efun), t) *)
   | EFun (pat, _) as efun ->
     let local_env, body = efun_conversion StringSet.empty (efun, t) in
     let new_env = StringSet.union global_env local_env in
-
     let* body' = closure_convert_expr global_env body in
     let fv = free_vars_expr new_env body' in
-
-    (* let bound =
-      List.fold_left
-        (fun s x -> StringSet.add s x)
-        StringSet.empty
-        (bound_vars_pattern pat)
-    in
-    let fv_set = StringSet.diff fv_set bound in
-    let fv = StringSet.elements fv_set in
-    if fv = [] *)
     let fv = StringSet.elements fv in
-    (* let rec print_list = function 
-[] -> ()
-| e::l -> print_string e ; print_string " " ; print_list l
+    let* f_name = fresh_name "fun-" in
+    let main_efun = EFun (pat, body'), t in
+    let new_fun =
+      List.fold_left (fun acc x -> EFun ((PId x, None), acc), None) main_efun fv
     in
-    print_list fv; *)
-      (* let* env_name = fresh_name "env-" in *)
-      (* let env_val =
-        (match fv with
-        | [] -> EConst CUnit, None
-        | [ x ] -> EId (IdentOfDefinable (IdentLetters x)), None
-        | x :: xs ->
-          let first = EId (IdentOfDefinable (IdentLetters x)), None in
-          let rest =
-            List.map (fun x -> EId (IdentOfDefinable (IdentLetters x)), None) xs
-          in
-          ETuple (first, List.hd rest, List.tl rest), None)
-      in *)
-      (* let env_pattern = pattern_of_free_vars fv in *)
-      let* f_name = fresh_name "fun-" in
-      (* clusterfuck for nice syntax (without () ) 
-        or maybe just apply multiply functions TODO 
-      *)
-      let main_efun = EFun (pat, body'), t in
-      let new_fun =
-        List.fold_left
-          (fun acc x -> (EFun ((PId x, None), acc), None))
-          main_efun
-          fv
-      in
-
-      (* let new_fun = if fv = [] then (EFun (pat, body'), t) else (EFun (env_pattern, (EFun (pat, body'), t)), None) in *)
-      let _decl = DLet (Not_recursive, ((POpPat (PId f_name), None), new_fun)) in
-      let* () = tell _decl in
-
-
-      let new_fun_id = (EId (IdentOfDefinable (IdentLetters f_name)), None) in
-      let applied_fun =
-        List.fold_right
-          (fun x acc -> (EApp (acc, (EId (IdentOfDefinable (IdentLetters x)), None)), None))
-          fv
-          new_fun_id      
-  in
-  return @@ applied_fun
-      (* return @@ if fv = [] then  (EId (IdentOfDefinable (IdentLetters f_name)), t)
-      else (EApp ((EId (IdentOfDefinable (IdentLetters f_name)), None), env_val), t) *)
+    let decl = DLet (Not_recursive, ((POpPat (PId f_name), None), new_fun)) in
+    let* () = tell decl in
+    let new_fun_id = EId (IdentOfDefinable (IdentLetters f_name)), None in
+    let applied_fun =
+      List.fold_right
+        (fun x acc -> EApp (acc, (EId (IdentOfDefinable (IdentLetters x)), None)), None)
+        fv
+        new_fun_id
+    in
+    return @@ applied_fun
   | EApp (e1, e2) ->
     let* ce1 = closure_convert_expr global_env e1 in
     let* ce2 = closure_convert_expr global_env e2 in
@@ -268,19 +224,6 @@ let rec closure_convert_expr (global_env: StringSet.t) ((e, t) : expr_typed) : e
     let* cdecl = closure_convert_let_in decl in
     let* ce = closure_convert_expr global_env e in
     return (EClsr (cdecl, ce), t)
-    (* (match decl with
-       | DLet (_, (_, (EApp (_, _) as eapp, ty))) -> return (eapp, ty)
-
-       | _ -> return (EClsr (cdecl, ce), t)) *)
-
-    (* let* cdecl = closure_convert_decl decl in
-       (match cdecl with
-       | DLet (rf, ((s, _), (EApp(_, _), ty) as eapp)) ->
-       let* ce = closure_convert_expr e in
-       let subst = substitute_expr e [(ident_to_string s, eapp)] in
-       return (EClsr (cdecl, ce), t)
-       | _ -> let* ce = closure_convert_expr e in
-       return (EClsr (cdecl, ce), t)) *)
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let* ce = closure_convert_expr global_env e in
@@ -295,42 +238,41 @@ let rec closure_convert_expr (global_env: StringSet.t) ((e, t) : expr_typed) : e
     let* cbrs = conv_branches global_env brs in
     return (EMatch (ce, cbr, cbrs), t)
 
-
 (* ugly edge case *)
-and closure_convert_let_in (d: decl) : decl cc =
+and closure_convert_let_in (d : decl) : decl cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
-    let env = StringSet.from_list @@ if (rf = Recursive) then (pattern_to_string pat_or_op) else [] in
+    let env =
+      StringSet.from_list @@ if rf = Recursive then pattern_to_string pat_or_op else []
+    in
     let* cexpr = closure_convert_expr env expr in
     return (DLet (rf, (pat_or_op, cexpr)))
   | _ -> failwith "todo"
 
-
 and closure_convert_decl (d : decl) : decl cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
+    (* todo global env *)
     let _, body = efun_conversion StringSet.empty expr in
-    let global_env = StringSet.from_list @@ if (rf = Recursive) then (pattern_to_string pat_or_op) else [] in
-    let* body' = closure_convert_expr global_env body in
-    (* let new_env = StringSet.union global_env local_env in *)
-    (* let fv = free_vars_expr new_env body' in
-    let fv = StringSet.elements fv in *)
-    return @@ DLet (rf, (pat_or_op, change_body body' expr ))
-
-  | _ -> failwith "todo"
-  (* | DLetMut (rf, lb, lb2, lbs) ->
-    let* clb = closure_convert_expr (snd lb) in
-    let* clb2 = closure_convert_expr (snd lb2) in
-    let rec conv lbs =
-      match lbs with
-      | [] -> return []
-      | (pat_or_op, expr) :: xs ->
-        let* cexpr = closure_convert_expr expr in
-        let* cexprs = conv xs in
-        return ((pat_or_op, cexpr) :: cexprs)
+    let global_env =
+      StringSet.from_list @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
-    let* cexprs = conv lbs in
-    return (DLetMut (rf, (fst lb, clb), (fst lb2, clb2), cexprs)) *)
+    let* body' = closure_convert_expr global_env body in
+    return @@ DLet (rf, (pat_or_op, change_body body' expr))
+  | _ -> failwith "todo"
+(* | DLetMut (rf, lb, lb2, lbs) ->
+   let* clb = closure_convert_expr (snd lb) in
+   let* clb2 = closure_convert_expr (snd lb2) in
+   let rec conv lbs =
+   match lbs with
+   | [] -> return []
+   | (pat_or_op, expr) :: xs ->
+   let* cexpr = closure_convert_expr expr in
+   let* cexprs = conv xs in
+   return ((pat_or_op, cexpr) :: cexprs)
+   in
+   let* cexprs = conv lbs in
+   return (DLetMut (rf, (fst lb, clb), (fst lb2, clb2), cexprs)) *)
 
 and closure_convert_branch env (br : branch) : branch cc =
   let pat, expr = br in
