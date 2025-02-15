@@ -131,6 +131,14 @@ let%test _ =
   = TArrow (TInt, TArrow (TBool, TInt))
 ;;
 
+(* match *)
+
+let%test _ = infer_expr "fun x -> match x with 10 -> 10 | _ -> 0" = TArrow (TInt, TInt)
+
+let%test _ =
+  infer_expr "fun xs -> match xs with [] -> 10 | h::tl -> h" = TArrow (TList TInt, TInt)
+;;
+
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
 

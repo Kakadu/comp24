@@ -16,7 +16,7 @@ type inf_type =
 [@@deriving show]
 
 type error =
-  | Variable_not_found
+  | Variable_not_found of string
   | Unification_failed of inf_type * inf_type
   | Illegal_pattern of Ast.pattern
   | Is_not_function of inf_type
@@ -50,6 +50,46 @@ module R = struct
   let return x last = last, Result.return x
   let bind x f = x >>= f
 
+  module R = struct
+    type 'a t = var_id -> var_id * ('a, error) Result.t
+
+    let ( >>= ) : 'a 'b. 'a t -> ('a -> 'b t) -> 'b t =
+      fun m f st ->
+      let last, r = m st in
+      match r with
+      | Result.Error x -> last, Error x
+      | Ok a -> f a last
+    ;;
+
+    let fail e st = st, Result.fail e
+    let return x last = last, Result.return x
+    let bind x f = x >>= f
+
+    let fold lst ~init ~f =
+      List.fold lst ~init ~f:(fun acc e -> bind acc (fun acc -> f acc e))
+    ;;
+
+    let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
+      fun x f st ->
+      match x st with
+      | st, Ok x -> st, Ok (f x)
+      | st, Result.Error e -> st, Result.Error e
+    ;;
+
+    module Syntax = struct
+      let ( let* ) = bind
+      let ( >>= ) = bind
+    end
+
+    let fresh : int t = fun last -> last + 1, Result.Ok last
+    let get_fresh : int t = fun last -> last, Result.Ok last
+    let run m = snd (m 0)
+  end
+
+  let fold lst ~init ~f =
+    List.fold lst ~init ~f:(fun acc e -> bind acc (fun acc -> f acc e))
+  ;;
+
   let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
     fun x f st ->
     match x st with
@@ -60,15 +100,6 @@ module R = struct
   module Syntax = struct
     let ( let* ) = bind
     let ( >>= ) = bind
-  end
-
-  module RMap = struct
-    let fold_left map ~init ~f =
-      Map.fold map ~init ~f:(fun ~key ~data acc ->
-        let open Syntax in
-        let* acc = acc in
-        f acc (key, data))
-    ;;
   end
 
   let fresh : int t = fun last -> last + 1, Result.Ok last
@@ -116,8 +147,8 @@ module Subst = struct
 
   let singleton_checked id t =
     if Type.occurs_in id t
-    then Variable_not_found |> R.fail
-    else singleton id t |> R.return
+    then R.fail (Variable_not_found (Int.to_string id))
+    else R.return (singleton id t)
   ;;
 
   let find key s = Map.find s key
@@ -364,7 +395,7 @@ module TypeEnv = struct
   let lookup (name : var_name) (env : t) =
     let open R.Syntax in
     match find name env with
-    | None -> Variable_not_found |> R.fail
+    | None -> R.fail (Variable_not_found name)
     | Some scheme ->
       let* t = Scheme.instantiate scheme in
       R.return (Subst.empty, t)
@@ -420,11 +451,10 @@ module Infer = struct
          | p :: tl ->
            let* env, p_t = helper env p in
            let* env, tl_t =
-             List.fold_left
+             R.fold
                tl
                ~init:(R.return (env, p_t))
-               ~f:(fun prev cur ->
-                 let* env, prev_t = prev in
+               ~f:(fun (env, prev_t) cur ->
                  let* env, cur_t = helper env cur in
                  let* u = Subst.unify cur_t prev_t in
                  R.return (TypeEnv.apply u env, cur_t))
@@ -435,6 +465,7 @@ module Infer = struct
         let* env, hd_t = helper env hd in
         let* env, tl_t = helper env tl in
         let* u = Subst.unify (TList hd_t) tl_t in
+        let tl_t = Subst.apply tl_t u in
         R.return (TypeEnv.apply u env, tl_t)
       | Tuple ps ->
         (match ps with
@@ -442,11 +473,10 @@ module Infer = struct
          | p :: tl ->
            let* env, p_t = helper env p in
            let* env, tl_t =
-             List.fold_left
+             R.fold
                tl
                ~init:(R.return (env, [ p_t ]))
-               ~f:(fun acc p ->
-                 let* env, acc_t = acc in
+               ~f:(fun (env, acc_t) p ->
                  let* env, p_t = helper env p in
                  R.return (env, [ p_t ] @ acc_t))
            in
@@ -510,11 +540,10 @@ module Infer = struct
          | p :: tl ->
            let* p_s, p_t = helper env p in
            let* tl_s, tl_t =
-             List.fold_left
+             R.fold
                tl
                ~init:(R.return (p_s, p_t))
-               ~f:(fun prev cur ->
-                 let* prev_s, prev_t = prev in
+               ~f:(fun (prev_s, prev_t) cur ->
                  let* cur_s, cur_t = helper (TypeEnv.apply prev_s env) cur in
                  let* u = Subst.unify cur_t prev_t in
                  let* res_s = Subst.compose_all [ u; cur_s; prev_s ] in
@@ -527,11 +556,10 @@ module Infer = struct
          | p :: tl ->
            let* p_s, p_t = helper env p in
            let* tl_s, tl_t =
-             List.fold_left
+             R.fold
                tl
                ~init:(R.return (p_s, [ p_t ]))
-               ~f:(fun acc p ->
-                 let* acc_s, acc_lst = acc in
+               ~f:(fun (acc_s, acc_lst) p ->
                  let* s, p_t = helper (TypeEnv.apply acc_s env) p in
                  let* subs = Subst.compose acc_s s in
                  R.return (subs, [ p_t ] @ acc_lst))
@@ -581,6 +609,20 @@ module Infer = struct
         let* u = Subst.unify fun_type (Subst.apply l_app_t subs) in
         let* subs = Subst.compose subs u in
         R.return (subs, Subst.apply body_t subs)
+      | Match (expr, cases) ->
+        let* comp_s, comp_t = helper env expr in
+        let* res_abs_t = fresh_var in
+        R.fold
+          cases
+          ~init:(R.return (comp_s, res_abs_t))
+          ~f:(fun (res_s, res_t) (p, e) ->
+            let* env, p_t = infer_pattern (TypeEnv.apply res_s env) p in
+            let* u1 = Subst.unify p_t comp_t in
+            let* u1 = Subst.compose u1 res_s in
+            let* e_s, e_t = helper (TypeEnv.apply u1 env) e in
+            let* u2 = Subst.unify res_t e_t in
+            let* subs = Subst.compose_all [ u1; u2; e_s; res_s ] in
+            R.return (subs, Subst.apply res_t subs))
       | _ -> R.fail Unsupported_type
     in
     helper env expr
