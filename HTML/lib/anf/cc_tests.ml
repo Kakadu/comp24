@@ -35,8 +35,8 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let fun-0 (cont, n) acc = cont (n * acc);;
-    let rec fact_cps n cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) (fun-0 (cont, n))) |}]
+    let fun-0 n cont acc = cont (n * acc);;
+    let rec fact_cps n cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) ((fun-0 n) cont)) |}]
 ;;
 
 (*
@@ -53,10 +53,10 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let fun-1 (nested2, nested3) x = (x + ((fun-0 (nested2, nested3)) 8));;
-    let fun-0 (nested2, nested3) i = (nested2 + nested3);;
+    let fun-1 nested3 nested2 x = (x + (((fun-0 nested3) nested2) 8));;
+    let fun-0 nested3 nested2 i = (nested2 + nested3);;
     let nested1 = let nested2 = 5
     in let nested3 = 6
-    in let nested4 = (fun-1 (nested2, nested3))
+    in let nested4 = ((fun-1 nested3) nested2)
     in (nested4 55) |}]
 ;;
