@@ -9,11 +9,11 @@ let lex code =
 
 let%test _ = lex "\"rofl\"" = [ TYPE_STRING "rofl" ]
 let%test _ = lex "228" = [ TYPE_INT 228 ]
-let%test _ = lex "+228" = [ PLUS ; TYPE_INT 228 ]
+let%test _ = lex "+228" = [ PLUS; TYPE_INT 228 ]
 let%test _ = lex "-228" = [ MINUS; TYPE_INT 228 ]
 let%test _ = lex "+228" = [ PLUS; TYPE_INT 228 ]
 let%test _ = lex "-228" = [ MINUS; TYPE_INT 228 ]
-let%test _ = lex "1 -1 +2" = [TYPE_INT 1; MINUS; TYPE_INT 1; PLUS; TYPE_INT 2 ]
+let%test _ = lex "1 -1 +2" = [ TYPE_INT 1; MINUS; TYPE_INT 1; PLUS; TYPE_INT 2 ]
 let%test _ = lex "true" = [ TYPE_BOOL true ]
 let%test _ = lex "false" = [ TYPE_BOOL false ]
 let%test _ = lex "add" = [ IDENTIFIER "add" ]
