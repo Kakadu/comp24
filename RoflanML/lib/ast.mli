@@ -50,5 +50,9 @@ type expr =
   | EApp of expr * expr (** Application f x y z *)
 [@@deriving show { with_path = false }]
 
-type decl = DLet of is_rec * id * expr [@@deriving show { with_path = false }]
+type decl =
+  | DLet of is_rec * id * expr
+  | DMutualLet of is_rec * (id * expr) list
+[@@deriving show { with_path = false }]
+
 type program = decl list [@@deriving show { with_path = false }]
