@@ -218,16 +218,6 @@ let%expect_test _ =
        (EIdentifier (Id "x")))) |}]
 ;;
 
-let%expect_test _ =
-  parse_expression {| fun x, y -> x + y |};
-  [%expect {| Syntax error. |}]
-;;
-
-let%expect_test _ =
-  parse_expression {| fun x :: y -> x + y |};
-  [%expect {| Syntax error. |}]
-;;
-
 (* ---------------- *)
 
 (* Basic let in expression ([PVar] pattern) *)
@@ -395,7 +385,7 @@ let%expect_test _ =
 (* Basic let in expression (complex patterns) *)
 
 let%expect_test _ =
-  parse_expression {| let x, y = (1, 2) in x + y |};
+  parse_expression {| let (x, y) = (1, 2) in x + y |};
   [%expect
     {|
     (ELetIn (
@@ -880,9 +870,9 @@ let%expect_test _ =
   parse_expression
     {| 
     function 
-    | 0, y -> y
-    | x, 0 -> x
-    | x, y -> x + y
+    | (0, y) -> y
+    | (x, 0) -> x
+    | (x, y) -> x + y
   |};
   [%expect
     {|

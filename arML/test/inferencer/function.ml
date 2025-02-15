@@ -170,17 +170,17 @@ let%expect_test _ =
 (* Let in (complex patterns) *)
 
 let%expect_test _ =
-  inference_expression {| let x, y = (0, 0) in (x, y) |};
+  inference_expression {| let (x, y) = (0, 0) in (x, y) |};
   [%expect {| - : int * int |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {| let x :: y = [1 ; 2] in (x :: y) |};
+  inference_expression {| let (x :: y) = [1 ; 2] in (x :: y) |};
   [%expect {| - : int list |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {| let x, y = ((fun x -> x + 1), 0) in x y |};
+  inference_expression {| let (x, y) = ((fun x -> x + 1), 0) in x y |};
   [%expect {| - : int |}]
 ;;
 
