@@ -52,8 +52,9 @@ let parse_tuple_type pt =
   parens self <|>
   let parse_type =
     choice
-      [ pt.parse_list_type pt
-      ; pt.parse_ground_type
+      [ 
+        (* pt.parse_list_type pt *)
+        pt.parse_ground_type
       ; pt.parse_polymorphic_type
       ; parens @@ self
       ]

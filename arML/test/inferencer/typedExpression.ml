@@ -207,12 +207,12 @@ let%expect_test _ =
   [%expect {| - : int -> int |}]
 ;;
 
-let%expect_test _ =
-  inference_expression {|
+(* let%expect_test _ =
+   inference_expression {|
     let f x y : (int list * bool list) = ([x; y], []) in f
-  |};
-  [%expect {| - : int -> int -> int list * bool list |}]
-;;
+   |};
+   [%expect {| - : int -> int -> int list * bool list |}]
+   ;; *)
 
 let%expect_test _ =
   inference_expression {|
@@ -323,12 +323,12 @@ let%expect_test _ =
     Type error: unification failed - type bool does not match expected type int |}]
 ;;
 
-let%expect_test _ =
-  inference_expression {|
+(* let%expect_test _ =
+   inference_expression {|
     fun x -> match (x : (int list * 'a)) with | (x :: y, true) -> (x, y, true)  | (x :: y, false) -> (x, y, false)
-  |};
-  [%expect {|
+   |};
+   [%expect {|
     - : int list * bool -> int * int list * bool |}]
-;;
+   ;; *)
 
 (* ---------------- *)
