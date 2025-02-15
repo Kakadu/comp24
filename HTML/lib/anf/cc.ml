@@ -71,8 +71,8 @@ let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr_typed) : String
     (* todo global env *)
     (match id with
      | (IdentOfDefinable (IdentLetters s) | IdentOfDefinable (IdentOp s))
-       when (not @@ List.mem s Common.Ops.base_binops)
-            && (not @@ String.starts_with ~prefix:"fun-" s)
+       when 
+           (not @@ String.starts_with ~prefix:"fun-" s)
             && (not @@ StringSet.contains global_env s) ->
        StringSet.singleton (ident_to_string id)
      | _ -> StringSet.empty)
@@ -221,7 +221,7 @@ let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
     let* ces = convert_list es in
     return (ETuple (ce1, ce2, ces), t)
   | EClsr (decl, e) ->
-    let* cdecl = closure_convert_let_in decl in
+    let* cdecl = closure_convert_let_in global_env decl in
     let* ce = closure_convert_expr global_env e in
     return (EClsr (cdecl, ce), t)
   | EMatch (e, br, brs) ->
@@ -239,13 +239,15 @@ let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
     return (EMatch (ce, cbr, cbrs), t)
 
 (* ugly edge case *)
-and closure_convert_let_in (d : decl) : decl cc =
+and closure_convert_let_in  global_env (d : decl) : decl cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
-    let env =
-      StringSet.from_list @@ if rf = Recursive then pattern_to_string pat_or_op else []
+    let global_env =
+      StringSet.union global_env
+      @@ StringSet.from_list
+      @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
-    let* cexpr = closure_convert_expr env expr in
+    let* cexpr = closure_convert_expr global_env expr in
     return (DLet (rf, (pat_or_op, cexpr)))
   | _ -> failwith "todo"
 

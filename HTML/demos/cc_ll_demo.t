@@ -121,8 +121,8 @@ PASS
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   Fatal error: exception Failure("todo")
   Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 289, characters 28-61
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 290, characters 17-37
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 295, characters 28-61
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 296, characters 17-37
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
@@ -134,13 +134,13 @@ PASS
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 298, characters 24-67
+  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 304, characters 24-67
   Called from Dune__exe__Cc_ll_demo.cc_ll_test in file "demos/cc_ll_demo.ml", line 4, characters 15-44
   [2]
 
   $ ./cc_ll_demo.exe < manytests/typed/016lists.ml
   let fun-2 h a = (h, a);;
-  let fun-1 append xs = match xs with
+  let fun-1 xs = match xs with
   | [] -> []
   | h :: tl -> ((append h) (helper tl));;
   let fun-0 acc = match xs with
@@ -160,7 +160,7 @@ PASS
   let rec append xs ys = match xs with
   | [] -> ys
   | x :: xs -> x :: ((append xs) ys);;
-  let concat = let rec helper = (fun-1 append)
+  let concat = let rec helper = fun-1
   in helper;;
   let rec iter f xs = match xs with
   | [] -> ()
