@@ -441,7 +441,7 @@ let infer =
       let* sub = Subst.compose let_sub exp_sub in
       return (sub, exp_ty)
     | ETuple (hd1, hd2, tl) ->
-    let xs = hd1 :: hd2 :: tl in
+      let xs = hd1 :: hd2 :: tl in
       List.fold_right
         xs
         ~init:(return (Subst.empty, []))

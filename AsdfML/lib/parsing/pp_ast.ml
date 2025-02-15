@@ -26,7 +26,7 @@ and pp_type_ann fmt = function
       | e -> fprintf fmt "%a)" pp_type_ann e
     in
     fprintf fmt "(%a -> %a" pp_type_ann e1 pp_rest e2
-  | TATuple (hd1, hd2, tl) -> 
+  | TATuple (hd1, hd2, tl) ->
     let xs = hd1 :: hd2 :: tl in
     pp_list ~sep:" * " fmt pp_type_ann xs
   | TAList x -> fprintf fmt "%a list" pp_type_ann x
@@ -64,7 +64,7 @@ and pp_expr fmt =
     pp_pattern_list fmt p;
     fprintf fmt " -> %a)" pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
-  | ETuple (hd1, hd2, tl) -> 
+  | ETuple (hd1, hd2, tl) ->
     let xs = hd1 :: hd2 :: tl in
     pp_list ~sep:", " fmt pp_expr xs
   | EMatch (e, pe_list) ->
