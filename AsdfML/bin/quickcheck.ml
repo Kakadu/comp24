@@ -11,7 +11,10 @@ module Shrinker = struct
       of_list [ hd; tl ]
       <+> (shrink_pat hd >|= fun hd -> p_cons hd tl)
       <+> (shrink_pat tl >|= fun tl -> p_cons hd tl)
-    | PTuple xs | PList xs -> Shrink.list ~shrink:shrink_pat xs >>= of_list
+    | PTuple (hd1, hd2, tl) ->
+      let xs = hd1 :: hd2 :: tl in
+      Shrink.list ~shrink:shrink_pat xs >>= of_list
+    | PList xs -> Shrink.list ~shrink:shrink_pat xs >>= of_list
     | PAnn (p, _) -> return p
     | _ -> empty
   ;;
@@ -32,7 +35,10 @@ module Shrinker = struct
       let* d = shrink_def d in
       let* e_ = shrink_expr e in
       of_list [ ELetIn (d, e_); e ]
-    | EList es | ETuple es -> Shrink.list ~shrink:shrink_expr es >>= of_list
+    | EList es -> Shrink.list ~shrink:shrink_expr es >>= of_list
+    | ETuple (hd1, hd2, tl) ->
+      let es = hd1 :: hd2 :: tl in
+      Shrink.list ~shrink:shrink_expr es >>= of_list
     | EMatch (e, cases) -> of_list (List.map (fun (_, e) -> e) cases) <+> of_list [ e ]
     | _ -> empty
 
