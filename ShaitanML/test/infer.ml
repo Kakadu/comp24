@@ -309,7 +309,7 @@ let%expect_test "cps function" =
     val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val map_cps : ('7 -> '9) -> '7 list -> '9 list
+    val map_cps : ('6 -> '8) -> '6 list -> '8 list
     val print_int : int -> unit
     |}]
 ;;
