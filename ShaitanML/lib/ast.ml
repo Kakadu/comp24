@@ -100,7 +100,7 @@ let rec fmt_pattern ppf pat =
 ;;
 
 let fmt_rec_flag ppf = function
-  | Rec -> Format.fprintf ppf "rec"
+  | Rec -> Format.fprintf ppf " rec"
   | Nonrec -> ()
 ;;
 
@@ -122,7 +122,7 @@ let rec fmt_expr ppf exp =
       exp_else
   | ELet (rec_f, (pat, exp_val), exp_body) ->
     fprintf
-      "(let %a %a = %a in %a)"
+      "(let%a %a = %a in %a)"
       fmt_rec_flag
       rec_f
       fmt_pattern
@@ -135,7 +135,7 @@ let rec fmt_expr ppf exp =
   | EMatch (pat_head, case_list) ->
     fprintf "(match %a with" fmt_expr pat_head;
     List.iter
-      (fun (pat, exp) -> fprintf "\n| %a -> %a" pp_pattern pat fmt_expr exp)
+      (fun (pat, exp) -> fprintf "\n| %a -> %a" fmt_pattern pat fmt_expr exp)
       case_list;
     fprintf ")"
   | EConstraint (exp, tp) -> fprintf "(%a : %a)" fmt_expr exp pp_type_annot tp
@@ -150,9 +150,9 @@ let fmt_str_item ppf decl =
   let fprintf x = Format.fprintf ppf x in
   match decl with
   | SValue (flag, [ binding ]) ->
-    fprintf "let %a %a\n" fmt_rec_flag flag fmt_binding binding
+    fprintf "let%a %a\n" fmt_rec_flag flag fmt_binding binding
   | SValue (flag, binding_list) ->
-    fprintf "let %a " fmt_rec_flag flag;
+    fprintf "let%a " fmt_rec_flag flag;
     List.iteri
       (fun i binding ->
          if i <> 0 then fprintf " and " else ();

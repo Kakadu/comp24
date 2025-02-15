@@ -218,14 +218,6 @@ let pevar =
   choice [ pvar; opname ]
 ;;
 
-(* let peif pe =
-  fix (fun peif ->
-    lift3
-      eif
-      (token "if" *> (peif <|> pe))
-      (token "then" *> (peif <|> pe))
-      (token "else" *> (peif <|> pe)))
-;; *)
 let peif pe =
   let* ifexpr = token "if" *> pe in
   let* thenexpr = token "then" *> pe in
@@ -289,7 +281,7 @@ let expr =
   in
   fix (fun expr ->
     let term =
-      choice [ pevar; peconst; pelist expr; parens expr; expr_with_type expr; peif expr ]
+      choice [ peconst; pevar; pelist expr; parens expr; expr_with_type expr; peif expr ]
     in
     let apply = chainl1 term (return eapply) in
     let fact = chainl1 apply (pmul <|> pdiv) in
@@ -300,7 +292,6 @@ let expr =
     let band = chainr1 cmp2 pand in
     let bor = chainr1 band por in
     let tuple = petuple bor <|> bor in
-    (* let ife = peif tuple <|> tuple in *)
     choice [ pelet expr; pematch expr; pefun expr; tuple ])
 ;;
 
