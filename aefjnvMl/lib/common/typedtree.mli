@@ -11,7 +11,6 @@ module VarSet : sig
   val union : t -> t -> t
   val diff : t -> t -> t
   val fold : (elt -> 'a -> 'a) -> t -> 'a -> 'a
-  val pp : Format.formatter -> t -> unit
 end
 
 type binder = int

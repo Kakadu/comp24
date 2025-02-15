@@ -17,7 +17,7 @@ let op_less = "<"
 let op_more = ">"
 let op_eq = "="
 let op_2eq = "=="
-let op_not_eq = "!="
+let op_not_eq = "<>"
 let bool_ty_op = TArrow (TPrim "bool", TArrow (TPrim "bool", TPrim "bool"))
 let op_and = "&&"
 let op_or = "||"

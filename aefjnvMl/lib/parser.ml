@@ -360,7 +360,7 @@ let rbo = bin_op chainr1
 let op l = choice (List.map ~f:(fun o -> token o >>| eval) l)
 let mul_div = op [ op_mul; op_div ]
 let add_sub = op [ op_plus; op_minus ]
-let cmp = op [ op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq; op_not_eq ]
+let cmp = op [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq ]
 let andop = op [ op_and ]
 let orop = op [ op_or ]
 

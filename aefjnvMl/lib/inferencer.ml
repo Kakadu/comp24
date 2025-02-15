@@ -572,7 +572,7 @@ module PP = struct
         Base.Char.to_string s ^ acc)
       else (
         let tl = Char.chr (97 + (binder mod 26)) in
-        helper ((binder / 26) - 1) (Format.sprintf "%c%s" tl acc))
+        helper (binder / 26) (Format.sprintf "%c%s" tl acc))
     in
     helper binder ""
   ;;

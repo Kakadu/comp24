@@ -24,11 +24,11 @@ let%expect_test "base bin ops" =
 ;;
 
 let%expect_test "infix op" =
-  let () = parse_test "a != b" in
+  let () = parse_test "a <> b" in
   [%expect
     {|
     [(Str_eval
-        (Exp_apply ((Exp_apply ((Exp_ident "!="), (Exp_ident "a"))),
+        (Exp_apply ((Exp_apply ((Exp_ident "<>"), (Exp_ident "a"))),
            (Exp_ident "b"))))
       ] |}]
 ;;
