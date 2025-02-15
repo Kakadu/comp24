@@ -380,7 +380,8 @@ let rec alpha_convert_decl_list ctx acc = function
 
 let add_to_context_std_fun (ctx : context) ((name, llvm_name, _) : std_fun) =
   let reserved_names = Base.Set.add ctx.reserved_names llvm_name in
-  let name_map = Base.Map.add_exn ctx.name_mapping ~key:name ~data:(llvm_name, -1) in
+  let reserved_names = Base.Set.add reserved_names name in
+  let name_map = Base.Map.add_exn ctx.name_mapping ~key:name ~data:(name, -1) in
   { name_mapping = name_map; reserved_names }
 ;;
 
@@ -412,7 +413,7 @@ let f a = let f a s = a + s in f a 5
 |};
   [%expect
     {|
-    let  f_0 = (fun a_0 -> (let  f_1 = (fun a_1 -> (fun s_0 -> ((plus_mlint a_1) s_0))) in ((f_1 a_0) 5))) |}]
+    let  f_0 = (fun a_0 -> (let  f_1 = (fun a_1 -> (fun s_0 -> ((( + ) a_1) s_0))) in ((f_1 a_0) 5))) |}]
 ;;
 
 let%expect_test "" =
@@ -444,7 +445,7 @@ let f (a, s, p) = let f (a, s, p) = a * s * p in a + s + p
 |};
   [%expect
     {|
-    let  f_0 = (fun (a_0, s_0, p_0) -> (let  f_1 = (fun (a_1, s_1, p_1) -> ((mult_mlint ((mult_mlint a_1) s_1)) p_1)) in ((plus_mlint ((plus_mlint a_0) s_0)) p_0))) |}]
+    let  f_0 = (fun (a_0, s_0, p_0) -> (let  f_1 = (fun (a_1, s_1, p_1) -> ((( * ) ((( * ) a_1) s_1)) p_1)) in ((( + ) ((( + ) a_0) s_0)) p_0))) |}]
 ;;
 
 let%expect_test "" =
@@ -471,9 +472,9 @@ let f a = a + 6
 |};
   [%expect
     {|
-    let  f_0 = (fun a_0 -> ((plus_mlint a_0) 5))
-    let  g_0 = ((plus_mlint f_0) 10)
-    let  f_1 = (fun a_1 -> ((plus_mlint a_1) 6)) |}]
+    let  f_0 = (fun a_0 -> ((( + ) a_0) 5))
+    let  g_0 = ((( + ) f_0) 10)
+    let  f_1 = (fun a_1 -> ((( + ) a_1) 6)) |}]
 ;;
 
 let%expect_test "" =
@@ -486,10 +487,10 @@ let f = 6 + 6
 |};
   [%expect
     {|
-    let  f_0 = ((plus_mlint 5) 5)
+    let  f_0 = ((( + ) 5) 5)
     let  plus_mlint_0 = 2
     let  g_0 = ((plus_mlint_0 f_0) 10)
-    let  f_1 = ((plus_mlint 6) 6) |}]
+    let  f_1 = ((( + ) 6) 6) |}]
 ;;
 
 let%expect_test "" =
@@ -499,7 +500,7 @@ let test = let a = 2 in let c b = ( + ) a b in let a = 3 in c 2
 |};
   [%expect
     {|
-    let  test_0 = (let  a_0 = 2 in (let  c_0 = (fun b_0 -> ((plus_mlint a_0) b_0)) in (let  a_1 = 3 in (c_0 2)))) |}]
+    let  test_0 = (let  a_0 = 2 in (let  c_0 = (fun b_0 -> ((( + ) a_0) b_0)) in (let  a_1 = 3 in (c_0 2)))) |}]
 ;;
 
 let%expect_test "" =
@@ -518,5 +519,5 @@ and odd n = if n = 0 then false else even (n - 1)
 |};
   [%expect
     {|
-    let rec even_0 = (fun n_0 -> (if ((eq_ml n_0) 0) then true else ((minus_mlint n_0) 1))) and odd_0 = (fun n_1 -> (if ((eq_ml n_1) 0) then false else (even_0 ((minus_mlint n_1) 1)))) |}]
+    let rec even_0 = (fun n_0 -> (if ((( = ) n_0) 0) then true else ((( - ) n_0) 1))) and odd_0 = (fun n_1 -> (if ((( = ) n_1) 0) then false else (even_0 ((( - ) n_1) 1)))) |}]
 ;;
