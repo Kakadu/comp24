@@ -11,13 +11,13 @@ type immexpr =
   | ImmUnit
   | ImmNil
   | ImmTuple of immexpr list
+  | ImmConstraint of immexpr * type_name
 
 type cexpr =
   | CApplication of cexpr * cexpr
   | CIfThenElse of immexpr * aexpr * aexpr
   | CMatch of immexpr * (pattern * aexpr) list
   | CImmExpr of immexpr
-  | CConstraint of immexpr * type_name
 
 and aexpr =
   | ALetIn of pattern * cexpr * aexpr

@@ -59,6 +59,7 @@ let rec frestore_imm ppf c =
   | ImmIdentifier id -> fprintf "%s" id
   | ImmUnit -> fprintf "()"
   | ImmTuple tup -> fprintf "(%a)" (fun ppf -> pp_list ppf frestore_imm ", ") tup
+  | ImmConstraint (imm, typ) -> fprintf "(%a : %a)" frestore_imm imm pp_type_name typ
 ;;
 
 let rec frestore_pattern ppf pat =
@@ -116,7 +117,6 @@ let rec restore_cexpr ppf = function
       pat_exp_lst
   | CApplication (left, rigth) ->
     fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
-  | CConstraint (imm, typ) -> fprintf ppf "(%a : %a)" frestore_imm imm pp_type_name typ
 
 and pp_aexpr ppf = function
   | ACExpr cexp -> fprintf ppf "%a" restore_cexpr cexp

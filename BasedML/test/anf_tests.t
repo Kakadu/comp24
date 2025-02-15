@@ -241,7 +241,10 @@
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/008ascription.ml
   let  addi_0 f_0 g_0 x_0  = let anf_app_0 = g_0 x_0 in
-   (anf_app_0 : bool);;
+   let anf_constraint_1 = (anf_app_0 : bool) in
+   let anf_app_2 = f_0 x_0 anf_constraint_1 in
+   let anf_constraint_3 = (anf_app_2 : int) in
+   anf_constraint_3;;
   let  ll_0 mult_mlint plus_mlint x_1 b_0  = let anf_ifthenelse_2 = if b_0 then let anf_app_0 = plus_mlint x_1 1 in
    anf_app_0 else let anf_app_1 = mult_mlint x_1 2 in
    anf_app_1 in

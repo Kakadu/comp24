@@ -51,6 +51,8 @@ let rec imm_to_string = function
   | ImmIdentifier id -> id
   | ImmUnit -> "()"
   | ImmTuple tup -> Printf.sprintf "(%s)" (list_to_string imm_to_string ", " tup)
+  | ImmConstraint (imm, typ) ->
+    Printf.sprintf "(%s : %s)" (imm_to_string imm) (type_name_to_string typ)
 ;;
 
 let rec pattern_to_string pat =
@@ -90,8 +92,6 @@ let rec cexpr_to_string = function
     Printf.sprintf "match %s with\n%s" (imm_to_string exp_head) match_cases
   | CApplication (left, right) ->
     Printf.sprintf "%s %s" (cexpr_to_string left) (cexpr_to_string right)
-  | CConstraint (imm, typ) ->
-    Printf.sprintf "(%s : %s)" (imm_to_string imm) (type_name_to_string typ)
 
 and aexpr_to_string = function
   | ACExpr cexp -> cexpr_to_string cexp

@@ -81,8 +81,8 @@ let rec anf ctx llexpr expr_with_hole =
     anf ctx llexp (fun imm ->
       let* fresh_name = new_name Constraint ctx in
       let imm_id = ImmIdentifier fresh_name in
-      let* _ = expr_with_hole imm_id in
-      return (ACExpr (CConstraint (imm, typ))))
+      let* aexp = expr_with_hole imm_id in
+      return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmConstraint (imm, typ)), aexp)))
   | LLIfThenElse (guard, then_branch, else_branch) ->
     anf ctx guard (fun imm_guard ->
       let* then_aexpr =
