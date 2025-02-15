@@ -523,9 +523,10 @@ module Infer = struct
                tl
                ~init:(R.return (p_s, [ p_t ]))
                ~f:(fun acc p ->
-                 let* acc_s, acc_t = acc in
+                 let* acc_s, acc_lst = acc in
                  let* s, p_t = helper (TypeEnv.apply acc_s env) p in
-                 R.return (s, [ p_t ] @ acc_t))
+                 let* subs = Subst.compose acc_s s in 
+                 R.return (subs, [ p_t ] @ acc_lst))
            in
            R.return (tl_s, TTuple (List.rev tl_t)))
       | EListConcat (l, r) ->

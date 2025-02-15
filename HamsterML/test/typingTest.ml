@@ -8,7 +8,7 @@ let infer_pattern (s : string) : inf_type =
   | Error e -> failwith (show_error e)
 ;;
 
-let infer_expr (s : string) : (inf_type) =
+let infer_expr (s : string) : inf_type =
   let inf_res = R.run (Infer.infer_expr TypeEnv.default (parse_expr s)) in
   match inf_res with
   | Ok (s, t) -> Subst.apply t s
@@ -31,11 +31,35 @@ let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
 let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
 let%test _ = infer_expr "fun x -> (x: int)" = TArrow (TInt, TInt)
 let%test _ = infer_expr "fun x -> [(x: int)]" = TArrow (TInt, TList TInt)
-let%test _ = infer_expr "fun x y z -> [x; y; (z: int)]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
-let%test _ = infer_expr "fun x y z -> [(x: int); y; z]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
-let%test _ = infer_expr "fun x y z -> [x; y; (z: int)]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
-let%test _ = infer_expr "fun x (y: int) z -> [x; y; z]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
 
+let%test _ =
+  infer_expr "fun x y z -> [x; y; (z: int)]"
+  = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+;;
+
+let%test _ =
+  infer_expr "fun x y z -> [(x: int); y; z]"
+  = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+;;
+
+let%test _ =
+  infer_expr "fun x y z -> [x; y; (z: int)]"
+  = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+;;
+
+let%test _ =
+  infer_expr "fun x (y: int) z -> [x; y; z]"
+  = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+;;
+
+let%test _ = infer_expr "fun x -> ((x : int), x, x, x, x)" = 
+  TArrow (TInt, TTuple [TInt; TInt; TInt; TInt; TInt])
+
+  let%test _ = infer_expr "fun (x: string) -> (x, x, x, x, x)" = 
+  TArrow (TString, TTuple [TString; TString; TString; TString; TString])
+
+  let%test _ = infer_expr "fun x -> (x, x, x, x, (x: bool))" = 
+  TArrow (TBool, TTuple [TBool; TBool; TBool; TBool; TBool])
 
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
