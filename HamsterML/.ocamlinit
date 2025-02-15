@@ -35,13 +35,13 @@ let parse_pattern (s : string) : pattern =
 let infer_pattern (s : string) : (inf_type) =
   let inf_res = R.run (Infer.infer_pattern TypeEnv.default (parse_pattern s)) in
   match inf_res with
-  | Ok (_, t) -> t
+  | Ok (env, t) -> TypeEnv.pp Format.std_formatter env; t
   | Error e -> failwith (show_error e)
 ;;
 
 let infer_expr (s : string) : (inf_type) =
   let inf_res = R.run (Infer.infer_expr TypeEnv.default (parse_expr s)) in
   match inf_res with
-  | Ok (s, t) -> Subst.apply t s
+  | Ok (s, t) -> Subst.pp Format.std_formatter s; Subst.apply t s
   | Error e -> failwith (show_error e)
 ;;
