@@ -19,6 +19,7 @@ type error =
   | Variable_not_found
   | Unification_failed of inf_type * inf_type
   | Illegal_pattern of Ast.pattern
+  | Is_not_function of inf_type
   | Unsupported_type
   | Empty_program
 [@@deriving show]
@@ -490,6 +491,13 @@ module Infer = struct
       match expr with
       | EConst v -> infer_value v
       | EVar id -> TypeEnv.lookup id env
+      | EOperation (Binary bop) ->
+        let id = BinOperator.to_string bop in
+        TypeEnv.lookup id env
+      | EOperation (Unary uop) ->
+        (match uop with
+         | UPLUS | UMINUS -> R.return (Subst.empty, TArrow (TInt, TInt))
+         | NOT -> R.return (Subst.empty, TArrow (TBool, TBool)))
       | EList lst ->
         (match lst with
          | [] ->
@@ -509,7 +517,7 @@ module Infer = struct
                  let* prev_s, prev_t = prev in
                  let* cur_s, cur_t = helper (TypeEnv.apply prev_s env) cur in
                  let* u = Subst.unify cur_t prev_t in
-                 let* res_s = Subst.compose_all [u; cur_s; prev_s] in
+                 let* res_s = Subst.compose_all [ u; cur_s; prev_s ] in
                  R.return (res_s, cur_t))
            in
            R.return (tl_s, TList tl_t))
@@ -525,7 +533,7 @@ module Infer = struct
                ~f:(fun acc p ->
                  let* acc_s, acc_lst = acc in
                  let* s, p_t = helper (TypeEnv.apply acc_s env) p in
-                 let* subs = Subst.compose acc_s s in 
+                 let* subs = Subst.compose acc_s s in
                  R.return (subs, [ p_t ] @ acc_lst))
            in
            R.return (tl_s, TTuple (List.rev tl_t)))
@@ -563,6 +571,16 @@ module Infer = struct
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
         R.return (expr_s, build_arrow args_t expr_t)
+      | Application (l_app, r_app) ->
+        let* l_app_s, l_app_t = helper env l_app in
+        let* r_app_s, r_app_t = helper (TypeEnv.apply l_app_s env) r_app in
+        let* subs = Subst.compose l_app_s r_app_s in
+        let* body_t = fresh_var in
+        (* f (x: int) <=> int -> 'a *)
+        let fun_type = TArrow (r_app_t, body_t) in
+        let* u = Subst.unify fun_type (Subst.apply l_app_t subs) in
+        let* subs = Subst.compose subs u in
+        R.return (subs, Subst.apply body_t subs)
       | _ -> R.fail Unsupported_type
     in
     helper env expr

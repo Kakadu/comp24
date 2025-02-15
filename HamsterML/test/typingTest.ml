@@ -30,6 +30,12 @@ let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
 
 let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
 let%test _ = infer_expr "fun x -> (x: int)" = TArrow (TInt, TInt)
+let%test _ = infer_expr "fun [(a: int); b] -> b" = TArrow (TList (TPVar 1), TInt)
+
+let%test _ =
+  infer_expr "fun (a, b) -> (1, 2)"
+  = TArrow (TTuple [ TPVar 0; TPVar 1 ], TTuple [ TInt; TInt ])
+;;
 
 (* lists *)
 
@@ -79,8 +85,7 @@ let%test _ =
 ;;
 
 let%test _ =
-  infer_expr "fun x y -> (x: int) :: y"
-  = TArrow (TInt, TArrow (TList TInt, TList TInt))
+  infer_expr "fun x y -> (x: int) :: y" = TArrow (TInt, TArrow (TList TInt, TList TInt))
 ;;
 
 let%test _ =
@@ -110,6 +115,20 @@ let%test _ =
 let%test _ =
   infer_expr "fun x y -> if x then (y: string) else y"
   = TArrow (TBool, TArrow (TString, TString))
+;;
+
+(* application *)
+
+let%test _ = infer_expr "(fun x y -> x) 1" = TArrow (TPVar 1, TInt)
+let%test _ = infer_expr "(fun x y -> x) 1 2" = TInt
+let%test _ = infer_expr "(fun f x y -> f x y) (+) 1 2" = TInt
+let%test _ = infer_expr "(fun f x y -> f x y) (+) 1" = TArrow (TInt, TInt)
+let%test _ = infer_expr "(fun f x y -> f x y) (+)" = TArrow (TInt, TArrow (TInt, TInt))
+let%test _ = infer_expr "(fun f x y -> f x y) (fun a b -> a + b) 1 2" = TInt
+
+let%test _ =
+  infer_expr "(fun v x -> (fun (y: bool) -> (x: int))) 1"
+  = TArrow (TInt, TArrow (TBool, TInt))
 ;;
 
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
