@@ -21,8 +21,6 @@ type error =
   | Illegal_pattern of Ast.pattern
   | Unsupported_type
   | Empty_program
-  | Inexhaustive_pattern of Ast.pattern
-  | UnidentifiedOperator of string
 [@@deriving show]
 
 module VarSet = struct
@@ -305,7 +303,7 @@ module BinOperator = struct
     | "&&" -> AND
     | "||" -> OR
     | "^" -> CONCAT
-    | s -> failwith (show_error (UnidentifiedOperator s))
+    | s -> failwith ("Can't find operator " ^ s)
   ;;
 end
 
@@ -468,15 +466,15 @@ module Infer = struct
     helper env v
   ;;
 
-  let rec infer_pattern_list (env : TypeEnv.t) (vs : Ast.pattern list)
+  let rec infer_args (env : TypeEnv.t) (ps : Ast.pattern list)
     : (TypeEnv.t * inf_type) R.t
     =
-    match vs with
-    | [] -> R.return (env, TUnit)
-    | [ v ] -> infer_pattern env v
-    | v :: vs ->
-      let* env, v_t = infer_pattern env v in
-      let* env, vs_t = infer_pattern_list env vs in
+    match ps with
+    | [] -> R.fail Unsupported_type
+    | [ p ] -> infer_pattern env p
+    | p :: ps ->
+      let* env, v_t = infer_pattern env p in
+      let* env, vs_t = infer_args env ps in
       R.return (env, TArrow (v_t, vs_t))
   ;;
 
@@ -498,6 +496,9 @@ module Infer = struct
            (* 'a list *)
            let* fr = fresh_var in
            R.return (Subst.empty, TList fr)
+         | [ p ] ->
+           let* p_s, p_t = helper env p in
+           R.return (p_s, TList p_t)
          | p :: tl ->
            let* p_s, p_t = helper env p in
            let* tl_s, tl_t =
@@ -508,7 +509,7 @@ module Infer = struct
                  let* prev_s, prev_t = prev in
                  let* cur_s, cur_t = helper (TypeEnv.apply prev_s env) cur in
                  let* u = Subst.unify cur_t prev_t in
-                 let* res_s = Subst.compose u cur_s in
+                 let* res_s = Subst.compose_all [u; cur_s; prev_s] in
                  R.return (res_s, cur_t))
            in
            R.return (tl_s, TList tl_t))
@@ -555,7 +556,7 @@ module Infer = struct
            let* fin_s = Subst.compose_all [ if_s; th_u ] in
            R.return (fin_s, TUnit))
       | Fun (args, expr) ->
-        let* env, args_t = infer_pattern_list env args in
+        let* env, args_t = infer_args env args in
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
         R.return (expr_s, build_arrow args_t expr_t)

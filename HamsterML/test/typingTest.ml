@@ -29,6 +29,13 @@ let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
 (* --- Expressions ---  *)
 
 let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
+let%test _ = infer_expr "fun x -> (x: int)" = TArrow (TInt, TInt)
+let%test _ = infer_expr "fun x -> [(x: int)]" = TArrow (TInt, TList TInt)
+let%test _ = infer_expr "fun x y z -> [x; y; (z: int)]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+let%test _ = infer_expr "fun x y z -> [(x: int); y; z]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+let%test _ = infer_expr "fun x y z -> [x; y; (z: int)]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+let%test _ = infer_expr "fun x (y: int) z -> [x; y; z]" = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
+
 
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
