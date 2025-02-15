@@ -7,11 +7,14 @@ open Help
 open Stdlib_funs
 
 let add_stdfun : std_fun -> (state, unit) t =
-  fun (name, _, tp) ->
-  let tvs = get_tv_from_tp SetString.empty tp in
-  if SetString.is_empty tvs
-  then write_flat_var_type name tp
-  else write_var_type name (TFSchem (tvs, tp))
+  fun (name, _, fun_tp, tp) ->
+  match fun_tp with
+  | UserFun ->
+    let tvs = get_tv_from_tp SetString.empty tp in
+    if SetString.is_empty tvs
+    then write_flat_var_type name tp
+    else write_var_type name (TFSchem (tvs, tp))
+  | SystemFun -> return ()
 ;;
 
 let add_all_std_funs = map_list add_stdfun stdlib_funs
