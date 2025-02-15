@@ -61,5 +61,6 @@ let rec get_type_by_defenition = function
   | TDPolymorphic _ ->
     let* fv = fresh_var in
     return fv
+;;
 
 (* ---------------- *)

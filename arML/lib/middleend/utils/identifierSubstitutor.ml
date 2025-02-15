@@ -13,8 +13,17 @@ let rec substitute_identifiers replacement_map expr =
      | Some new_id -> EIdentifier new_id
      | None -> expr)
   | EFun ((p, ps), body) ->
-    let patterns_identifiers = List.fold_left (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p)) IdentifierSet.empty (p :: ps) in
-    let body' = substitute_identifiers (remove_keys_from_map patterns_identifiers replacement_map) body in
+    let patterns_identifiers =
+      List.fold_left
+        (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p))
+        IdentifierSet.empty
+        (p :: ps)
+    in
+    let body' =
+      substitute_identifiers
+        (remove_keys_from_map patterns_identifiers replacement_map)
+        body
+    in
     EFun ((p, ps), body')
   | EApplication (f, arg1, args) ->
     let f' = substitute_identifiers replacement_map f in
@@ -28,9 +37,10 @@ let rec substitute_identifiers replacement_map expr =
   | EIfThenElse (cond, b1, b2) ->
     let cond = substitute_identifiers replacement_map cond in
     let b1 = substitute_identifiers replacement_map b1 in
-    let b2 = (match b2 with
-        | Some b2 -> Some (substitute_identifiers replacement_map b2)
-        | None -> None)
+    let b2 =
+      match b2 with
+      | Some b2 -> Some (substitute_identifiers replacement_map b2)
+      | None -> None
     in
     EIfThenElse (cond, b1, b2)
   | ETuple (e1, e2, es) ->
@@ -39,24 +49,48 @@ let rec substitute_identifiers replacement_map expr =
     let es = List.map (fun e -> substitute_identifiers replacement_map e) es in
     ETuple (e1, e2, es)
   | EFunction (case, cases) ->
-    let cases' = List.map (fun (p, e) -> (p, substitute_identifiers (remove_keys_from_map (get_pattern_identifiers p) replacement_map) e)) (case :: cases) in
+    let cases' =
+      List.map
+        (fun (p, e) ->
+          ( p
+          , substitute_identifiers
+              (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
+              e ))
+        (case :: cases)
+    in
     EFunction (List.hd cases', List.tl cases')
   | EMatchWith (expr, case, cases) ->
     let expr = substitute_identifiers replacement_map expr in
-    let cases' = List.map (fun (p, e) -> (p, substitute_identifiers (remove_keys_from_map (get_pattern_identifiers p) replacement_map) e)) (case :: cases) in
+    let cases' =
+      List.map
+        (fun (p, e) ->
+          ( p
+          , substitute_identifiers
+              (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
+              e ))
+        (case :: cases)
+    in
     EMatchWith (expr, List.hd cases', List.tl cases')
   | ETyped (e, t) ->
     let e' = substitute_identifiers replacement_map e in
     ETyped (e', t)
   | ELetIn (case, cases, body) ->
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
-    let cases' = List.map (fun (p, e) -> (p, substitute_identifiers replacement_map e)) (case :: cases) in
-    let body' = substitute_identifiers (remove_keys_from_map patterns_identifiers replacement_map) body in
+    let cases' =
+      List.map (fun (p, e) -> p, substitute_identifiers replacement_map e) (case :: cases)
+    in
+    let body' =
+      substitute_identifiers
+        (remove_keys_from_map patterns_identifiers replacement_map)
+        body
+    in
     ELetIn (List.hd cases', List.tl cases', body')
   | ERecLetIn (case, cases, body) ->
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
     let replacement_map = remove_keys_from_map patterns_identifiers replacement_map in
-    let cases' = List.map (fun (p, e) -> (p, substitute_identifiers replacement_map e)) (case :: cases) in
+    let cases' =
+      List.map (fun (p, e) -> p, substitute_identifiers replacement_map e) (case :: cases)
+    in
     let body' = substitute_identifiers replacement_map body in
     ERecLetIn (List.hd cases', List.tl cases', body')
   | _ -> expr

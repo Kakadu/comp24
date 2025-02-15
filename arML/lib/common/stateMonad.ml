@@ -4,26 +4,23 @@
 
 type 'a t = int -> 'a * int
 
-let return x = fun s -> (x, s)
+let return x s = x, s
 
-let bind m f = fun s ->
-  let (a, s') = m s in
+let bind m f s =
+  let a, s' = m s in
   f a s'
 ;;
 
-let map m f = fun s ->
-  let (a, s') = m s in
+let map m f s =
+  let a, s' = m s in
   f a, s'
 ;;
 
-let (>>=) m f = bind m f
-let (>>|) m f = map m f
-
-let get = fun s -> (s, s)
-
-let put new_s = fun _ -> ((), new_s)
-
-let fresh = fun s -> (s, s + 1)
+let ( >>= ) m f = bind m f
+let ( >>| ) m f = map m f
+let get s = s, s
+let put new_s _ = (), new_s
+let fresh s = s, s + 1
 
 module Syntax = struct
   let ( let* ) x f = bind x f

@@ -8,7 +8,7 @@ open TypeTree
 open TypeErrors
 
 (* A substitution is an map, where the first element of each list element is what needs to be replaced,
-    the second is what it should be replaced with. *)
+   the second is what it should be replaced with. *)
 type t = (int, typ, Base.Int.comparator_witness) Base.Map.t
 
 let empty = Base.Map.empty (module Base.Int)
@@ -29,7 +29,7 @@ let apply sub =
       (match find sub n with
        | None -> TVar n
        | Some v -> v)
-    | TArr (left, right) -> TArr ((helper left), (helper right))
+    | TArr (left, right) -> TArr (helper left, helper right)
     | TList typ -> TList (helper typ)
     | TTuple t_list -> TTuple (Base.List.map t_list ~f:helper)
     | other -> other
@@ -51,9 +51,9 @@ let rec unify l r =
   | TTuple t_list1, TTuple t_list2 ->
     (match
        Base.List.fold2 t_list1 t_list2 ~init:(return empty) ~f:(fun acc it1 it2 ->
-           let* sub1 = acc in
-           let* sub2 = unify (apply sub1 it1) (apply sub1 it2) in
-           compose sub1 sub2)
+         let* sub1 = acc in
+         let* sub2 = unify (apply sub1 it1) (apply sub1 it2) in
+         compose sub1 sub2)
      with
      | Ok r -> r
      | _ -> fail (Unification_failed (l, r)))

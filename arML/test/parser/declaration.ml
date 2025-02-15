@@ -14,8 +14,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_program {| let x = 1 |};
-  [%expect
-    {|
+  [%expect {|
     [(DOrdinary (((PVar (Id "x")), (EConstant (CInt 1))), []))] |}]
 ;;
 
@@ -174,8 +173,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_program
-    {| 
+  parse_program {| 
    let f x y = x + y
    let (x :: y) = (f 0 0 :: f 1 1)
    |};

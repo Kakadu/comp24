@@ -30,9 +30,9 @@ let infer_pattern =
         RList.fold_left
           (first_pattern :: second_pattern :: patterns)
           ~init:(return ([], env))
-          ~f:(fun (acc, env) (pattern) ->
-              let* ty', env' = helper env pattern in
-              return (ty' :: acc, env'))
+          ~f:(fun (acc, env) pattern ->
+            let* ty', env' = helper env pattern in
+            return (ty' :: acc, env'))
       in
       let ty = TypeTree.TTuple (List.rev ty) in
       return (ty, env)

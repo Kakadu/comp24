@@ -9,14 +9,14 @@ open Type
 
 (* Pattern parsers description *)
 
-type pattern_dispatch = 
-  { parse_tuple_pattern: pattern_dispatch -> pattern Angstrom.t
+type pattern_dispatch =
+  { parse_tuple_pattern : pattern_dispatch -> pattern Angstrom.t
   ; parse_list_pattern : pattern_dispatch -> pattern Angstrom.t
-  ; parse_constant_pattern: pattern Angstrom.t
-  ; parse_identifier_pattern: pattern Angstrom.t
-  ; parse_nill_pattern: pattern Angstrom.t
-  ; parse_any_pattern: pattern Angstrom.t
-  ; parse_pattern_type_defition: pattern_dispatch -> pattern Angstrom.t
+  ; parse_constant_pattern : pattern Angstrom.t
+  ; parse_identifier_pattern : pattern Angstrom.t
+  ; parse_nill_pattern : pattern Angstrom.t
+  ; parse_any_pattern : pattern Angstrom.t
+  ; parse_pattern_type_defition : pattern_dispatch -> pattern Angstrom.t
   }
 
 (* ---------------- *)
@@ -24,6 +24,7 @@ type pattern_dispatch =
 let parse_constant_pattern =
   let* constant = parse_constant in
   return @@ PConst constant
+;;
 
 (* ---------------- *)
 
@@ -32,20 +33,22 @@ let parse_constant_pattern =
 let parse_identifier_pattern =
   let* identifier = parse_identifier <|> parse_operator in
   return @@ PVar identifier
+;;
 
 (* ---------------- *)
 
 (* Nil pattern parsers *)
 
-let parse_nill_pattern = 
+let parse_nill_pattern =
   let* _ = brackets (string "") in
   return PNill
+;;
 
 (* ---------------- *)
 
 (* Wildcard pattern parsers *)
 
-let parse_any_pattern = 
+let parse_any_pattern =
   let* _ = skip_wspace *> char '_' in
   return PAny
 ;;
@@ -57,7 +60,8 @@ let parse_any_pattern =
 let parse_tuple_pattern pp =
   fix
   @@ fun self ->
-  let parse_pattern = choice 
+  let parse_pattern =
+    choice
       [ pp.parse_pattern_type_defition pp
       ; pp.parse_list_pattern pp
       ; pp.parse_constant_pattern
@@ -67,7 +71,7 @@ let parse_tuple_pattern pp =
       ; parens self
       ]
   in
-  let* patterns = (sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern) in
+  let* patterns = sep_by (skip_wspace *> char ',' <* skip_wspace) parse_pattern in
   match patterns with
   | pat_1 :: pat_2 :: pats -> return (PTuple (pat_1, pat_2, pats))
   | _ -> fail "Syntax error: tuple must have at least two patterns"
@@ -80,7 +84,8 @@ let parse_tuple_pattern pp =
 let parse_list_pattern pp =
   fix
   @@ fun self ->
-  let parse_pattern = choice
+  let parse_pattern =
+    choice
       [ pp.parse_constant_pattern
       ; pp.parse_identifier_pattern
       ; pp.parse_nill_pattern
@@ -90,24 +95,26 @@ let parse_list_pattern pp =
       ; parens @@ self
       ]
   in
-
   let parse_list_cons =
     let parse_operator =
-      skip_wspace *> string "::" <* skip_wspace
+      skip_wspace *> string "::"
+      <* skip_wspace
       >>| fun _ head tail -> PListConstructor (head, tail)
     in
     chainr1 parse_pattern parse_operator
   in
-
   let parse_list_syntax =
-    brackets (sep_by (skip_wspace *> char ';' <* skip_wspace) parse_pattern) >>= function
+    brackets (sep_by (skip_wspace *> char ';' <* skip_wspace) parse_pattern)
+    >>= function
     | [] -> return PNill
     | head :: tail ->
-      List.fold_right (fun pat acc -> PListConstructor (pat, acc)) tail (PListConstructor (head, PNill))
+      List.fold_right
+        (fun pat acc -> PListConstructor (pat, acc))
+        tail
+        (PListConstructor (head, PNill))
       |> return
   in
-
-  choice [parse_list_cons; parse_list_syntax]
+  choice [ parse_list_cons; parse_list_syntax ]
 ;;
 
 (* ---------------- *)
@@ -119,7 +126,8 @@ let parse_pattern_type_defition pp =
   @@ fun self ->
   skip_wspace
   *>
-  let parse_pattern = choice 
+  let parse_pattern =
+    choice
       [ pp.parse_constant_pattern
       ; pp.parse_identifier_pattern
       ; pp.parse_nill_pattern
@@ -129,7 +137,8 @@ let parse_pattern_type_defition pp =
       ; parens @@ self
       ]
   in
-  parens @@
+  parens
+  @@
   let* pat = parse_pattern in
   let* typ = skip_wspace *> char ':' *> parse_type in
   return @@ PTyped (pat, typ)
@@ -148,12 +157,13 @@ let parsers =
   ; parse_list_pattern
   ; parse_pattern_type_defition
   }
+;;
 
 let parse_pattern fun_flag =
-  (* If first argument is true then can parse without brackets around the pattern. 
+  (* If first argument is true then can parse without brackets around the pattern.
      Otherwise, parentheses are required *)
-  let between = if fun_flag then parens else (fun x -> x) in
-  choice 
+  let between = if fun_flag then parens else fun x -> x in
+  choice
     [ between @@ parsers.parse_tuple_pattern parsers
     ; between @@ parsers.parse_list_pattern parsers
     ; parsers.parse_constant_pattern
@@ -162,5 +172,6 @@ let parse_pattern fun_flag =
     ; parsers.parse_any_pattern
     ; parsers.parse_pattern_type_defition parsers
     ]
+;;
 
 (* ---------------- *)

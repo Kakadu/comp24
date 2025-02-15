@@ -30,7 +30,7 @@ let recalculate_vars typ =
     | TVar n -> TVar (Base.Map.find_exn new_vars n)
     | TList t -> TList (helper t)
     | TTuple tl -> TTuple (List.map helper tl)
-    | TArr (l, r) -> TArr ((helper l), (helper r))
+    | TArr (l, r) -> TArr (helper l, helper r)
     | other -> other
   in
   helper typ

@@ -38,7 +38,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let f (x :: y :: []) = x + y;; let g x = x;; let h = f [(g 0); 0] |};
+  inference_program
+    {| let f (x :: y :: []) = x + y;; let g x = x;; let h = f [(g 0); 0] |};
   [%expect {|
     val f : int list -> int
     val g : 'a -> 'a
@@ -102,7 +103,6 @@ let%expect_test _ =
     val g : 'a -> 'a |}]
 ;;
 
-
 let%expect_test _ =
   inference_program {| let f x = x and g y = y + 1;; let res = (f true, f g 0) |};
   [%expect {|
@@ -112,8 +112,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let start = 0 and end = 5 and f x y = [x; y];; let res = f start end |};
-  [%expect {|
+  inference_program
+    {| let start = 0 and end = 5 and f x y = [x; y];; let res = f start end |};
+  [%expect
+    {|
     val start : int
     val end : int
     val f : 'a -> 'a -> 'a list
@@ -126,7 +128,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_program {| let f x = x and (x, y) = (1, 2);; let res = (f x, f y) |};
-  [%expect {|
+  [%expect
+    {|
     val f : 'a -> 'a
     val x : int
     val y : int
@@ -134,8 +137,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let f x = x and (x, y, lst) = (1, 2, [3; 4; 5]);; let res = (f x, f y, lst) |};
-  [%expect {|
+  inference_program
+    {| let f x = x and (x, y, lst) = (1, 2, [3; 4; 5]);; let res = (f x, f y, lst) |};
+  [%expect
+    {|
     val f : 'a -> 'a
     val x : int
     val y : int
@@ -144,8 +149,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let () = () and f x = x and (x :: y :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
-  [%expect {|
+  inference_program
+    {| let () = () and f x = x and (x :: y :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
+  [%expect
+    {|
     val f : 'a -> 'a
     val x : int * int
     val y : int * int
@@ -153,7 +160,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| let () = () and f x = x and (x :: f :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
+  inference_program
+    {| let () = () and f x = x and (x :: f :: []) = ((0, 1) :: (2, 3) :: []);; let res = (f x, f y) |};
   [%expect {|
     Type error: variable 'f' is bound several times |}]
 ;;
@@ -185,12 +193,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program
-    {| 
+  inference_program {| 
       let rec f x = if x = 1 then x else x * f (x-1)
     |};
-  [%expect
-    {|
+  [%expect {|
     val f : int -> int |}]
 ;;
 
@@ -221,14 +227,16 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {| 
+  inference_program
+    {| 
     let rec is_even n = if n = 0 then true else is_odd (n - 1) 
     and is_odd n = if n = 0 then false else is_even (n - 1)
 
     let res1 = is_even 2
     let res2 = is_odd 2
   |};
-  [%expect {|
+  [%expect
+    {|
     val is_even : int -> bool
     val is_odd : int -> bool
     val res1 : bool

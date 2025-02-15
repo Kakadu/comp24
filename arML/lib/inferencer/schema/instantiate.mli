@@ -3,4 +3,6 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 (** Instantiate a schema into a concrete type *)
-val instantiate : Schema.schema -> (TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t
+val instantiate
+  :  Schema.schema
+  -> (TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t

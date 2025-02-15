@@ -6,7 +6,7 @@
 
 let parse_expression expr =
   match Parser.Runner.parse_expression expr with
-  | Ok [expr] -> Parser.PpParsingResult.print_expression_parsing_result expr
+  | Ok [ expr ] -> Parser.PpParsingResult.print_expression_parsing_result expr
   | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
@@ -35,7 +35,7 @@ let inference_program_ast ast =
 let inference_expression expr =
   let ast = Parser.Runner.parse_expression expr in
   match ast with
-  | Ok [expr] -> inference_expr_ast expr
+  | Ok [ expr ] -> inference_expr_ast expr
   | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
@@ -50,13 +50,17 @@ let inference_program program =
 
 (* Closure conversion *)
 
-let closure_conversion_expr_ast expr = Ast.Pprint.print_expression (Middleend.Runner.run_closure_expression expr)
+let closure_conversion_expr_ast expr =
+  Ast.Pprint.print_expression (Middleend.Runner.run_closure_expression expr)
+;;
 
-let closure_conversion_program_ast program = Ast.Pprint.print_program (Middleend.Runner.run_closure_program program)
+let closure_conversion_program_ast program =
+  Ast.Pprint.print_program (Middleend.Runner.run_closure_program program)
+;;
 
 let closure_conversion_expression expr =
   match Parser.Runner.parse_expression expr with
-  | Ok [ast] -> closure_conversion_expr_ast ast
+  | Ok [ ast ] -> closure_conversion_expr_ast ast
   | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 

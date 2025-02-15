@@ -126,36 +126,31 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_expression {| -1 |};
-  [%expect
-    {|
+  [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
   inference_expression {| +1 |};
-  [%expect
-    {|
+  [%expect {|
     - : int |}]
 ;;
 
 let%expect_test _ =
   inference_expression {| not true |};
-  [%expect
-    {|
+  [%expect {|
     - : bool |}]
 ;;
 
 let%expect_test _ =
   inference_expression {| fun f -> f (-1) |};
-  [%expect
-    {|
+  [%expect {|
     - : (int -> 'a) -> 'a |}]
 ;;
 
 let%expect_test _ =
   inference_expression {| not (1 + (-2) * (+3) >= 3) |};
-  [%expect
-    {|
+  [%expect {|
     - : bool |}]
 ;;
 

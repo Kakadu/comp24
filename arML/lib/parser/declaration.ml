@@ -11,7 +11,7 @@ open Expression
 
 let parse_declaration p =
   let parse_expr =
-    choice 
+    choice
       [ p.parse_tuple p
       ; p.parse_list_constructor p
       ; p.parse_binary_operation p
@@ -29,18 +29,18 @@ let parse_declaration p =
       ; p.parse_identifier_expr
       ]
   in
-
-  let* decl = 
-    skip_wspace *> string "let" *> skip_wspace1 *>
-    option "" (string "rec" <* skip_wspace1)
+  let* decl =
+    skip_wspace *> string "let" *> skip_wspace1 *> option "" (string "rec" <* skip_wspace1)
   in
-
   let parse_binding () =
     let* args = many1 (parse_pattern false) in
     let main_pattern = List.hd args in
     let* typ_opt =
-      let typ_parser = 
-        skip_wspace *> char ':' *> skip_wspace *>
+      let typ_parser =
+        skip_wspace
+        *> char ':'
+        *> skip_wspace
+        *>
         let* typ = parse_type in
         return @@ Some typ
       in
@@ -48,7 +48,7 @@ let parse_declaration p =
     in
     let tying = skip_wspace *> string "=" in
     let* expr = tying *> skip_wspace *> parse_expr in
-    let* expr = 
+    let* expr =
       match args with
       | _ :: md :: tl -> EFun ((md, tl), expr) |> return
       | _ -> return expr
@@ -60,18 +60,15 @@ let parse_declaration p =
     in
     return (main_pattern, expr)
   in
-
   let* main_binding = parse_binding () in
-  let* and_bindings = 
+  let* and_bindings =
     many (skip_wspace *> string "and" *> skip_wspace1 *> parse_binding ())
   in
-
-  let declaration_type main_binding and_bindings = 
+  let declaration_type main_binding and_bindings =
     match decl with
     | "rec" -> DRecursive (main_binding, and_bindings)
     | _ -> DOrdinary (main_binding, and_bindings)
   in
-
   return (declaration_type main_binding and_bindings)
 ;;
 

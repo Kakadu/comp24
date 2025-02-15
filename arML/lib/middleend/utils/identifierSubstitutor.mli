@@ -6,4 +6,7 @@ open Ast
 open Common.IdentifierStructs
 
 (** Replaces identifiers in an expression according to the given map. *)
-val substitute_identifiers : (AbstractSyntaxTree.identifier) IdentifierMap.t -> AbstractSyntaxTree.expression -> AbstractSyntaxTree.expression
+val substitute_identifiers
+  :  AbstractSyntaxTree.identifier IdentifierMap.t
+  -> AbstractSyntaxTree.expression
+  -> AbstractSyntaxTree.expression

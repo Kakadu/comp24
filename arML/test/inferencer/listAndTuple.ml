@@ -18,7 +18,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_expression {| [1; "a"] |};
-  [%expect {| Type error: unification failed - type string does not match expected type int |}]
+  [%expect
+    {| Type error: unification failed - type string does not match expected type int |}]
 ;;
 
 (* ---------------- *)

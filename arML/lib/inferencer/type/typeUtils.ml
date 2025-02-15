@@ -18,6 +18,6 @@ let type_vars =
 
 (* Syntactic sugar *)
 
-let (@->) left right = TArr (left, right)
+let ( @-> ) left right = TArr (left, right)
 
 (* ---------------- *)

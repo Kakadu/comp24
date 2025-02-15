@@ -84,8 +84,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_expression {| (1, 2) |};
-  [%expect
-    {|
+  [%expect {|
     (ETuple ((EConstant (CInt 1)), (EConstant (CInt 2)), [])) |}]
 ;;
 

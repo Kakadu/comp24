@@ -16,9 +16,9 @@ let rec get_pattern_identifiers = function
   | PTyped (p, _) -> get_pattern_identifiers p
 ;;
 
-let get_pattern_identifiers_from_list lst = 
-  List.fold_left 
-    (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p)) 
+let get_pattern_identifiers_from_list lst =
+  List.fold_left
+    (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p))
     IdentifierSet.empty
     lst
 ;;
@@ -36,7 +36,8 @@ let rec get_expr_free_vars = function
   | EApplication (func, arg1, args) -> get_application_free_vars func (arg1 :: args)
   | EIfThenElse (cond, b1, b2) -> get_if_then_else_free_vars cond b1 b2
   | EEmptyList -> IdentifierSet.empty
-  | EListConstructor (e1, e2) -> IdentifierSet.union (get_expr_free_vars e1) (get_expr_free_vars e2)
+  | EListConstructor (e1, e2) ->
+    IdentifierSet.union (get_expr_free_vars e1) (get_expr_free_vars e2)
   | ETuple (e1, e2, es) -> get_tuple_free_vars (e1 :: e2 :: es)
   | EMatchWith (e, case, cases) -> get_match_with_free_vars e (case :: cases)
   | ELetIn (case, cases, e) -> get_let_in_free_vars (case :: cases) e
@@ -59,18 +60,17 @@ and get_function_free_vars cases =
 and get_application_free_vars func args =
   let func_free_vars = get_expr_free_vars func in
   let args_free_vars = List.map get_expr_free_vars args in
-  let args_free_vars = 
-    List.fold_left
-      IdentifierSet.union 
-      IdentifierSet.empty
-      args_free_vars
+  let args_free_vars =
+    List.fold_left IdentifierSet.union IdentifierSet.empty args_free_vars
   in
   IdentifierSet.union func_free_vars args_free_vars
 
 and get_if_then_else_free_vars cond b1 b2 =
   let cond_vars = get_expr_free_vars cond in
   let b1_vars = get_expr_free_vars b1 in
-  let b2_vars = Option.map get_expr_free_vars b2 |> Option.value ~default:IdentifierSet.empty in
+  let b2_vars =
+    Option.map get_expr_free_vars b2 |> Option.value ~default:IdentifierSet.empty
+  in
   IdentifierSet.union cond_vars (IdentifierSet.union b1_vars b2_vars)
 
 and get_tuple_free_vars es =
@@ -87,7 +87,9 @@ and get_let_in_free_vars cases e =
   let bound_vars = List.map get_case_bound_vars cases in
   let bound_vars = List.fold_left IdentifierSet.union IdentifierSet.empty bound_vars in
   let cases_free_vars = List.map get_case_free_vars cases in
-  let cases_free_vars = List.fold_left IdentifierSet.union IdentifierSet.empty cases_free_vars in
+  let cases_free_vars =
+    List.fold_left IdentifierSet.union IdentifierSet.empty cases_free_vars
+  in
   let body_free_vars = IdentifierSet.diff (get_expr_free_vars e) bound_vars in
   IdentifierSet.union cases_free_vars body_free_vars
 
@@ -98,12 +100,11 @@ and get_rec_let_in_free_vars cases e =
       IdentifierSet.empty
       cases
   in
-
   let cases_free_vars =
     List.fold_left
       (fun acc (_, expr) ->
-         let free_vars = IdentifierSet.diff (get_expr_free_vars expr) bound_vars in
-         IdentifierSet.union acc free_vars)
+        let free_vars = IdentifierSet.diff (get_expr_free_vars expr) bound_vars in
+        IdentifierSet.union acc free_vars)
       IdentifierSet.empty
       cases
   in

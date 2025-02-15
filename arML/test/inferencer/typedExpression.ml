@@ -52,14 +52,16 @@ let%expect_test _ =
   inference_expression {|
     (1 : char)
   |};
-  [%expect {| Type error: unification failed - type int does not match expected type char |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type char |}]
 ;;
 
 let%expect_test _ =
   inference_expression {|
     (true : string)
   |};
-  [%expect {| Type error: unification failed - type bool does not match expected type string |}]
+  [%expect
+    {| Type error: unification failed - type bool does not match expected type string |}]
 ;;
 
 (* ---------------- *)
@@ -116,7 +118,8 @@ let%expect_test _ =
   inference_expression {|
     ([true; false] : int list)
   |};
-  [%expect {| Type error: unification failed - type bool does not match expected type int |}]
+  [%expect
+    {| Type error: unification failed - type bool does not match expected type int |}]
 ;;
 
 let%expect_test _ =
@@ -137,7 +140,8 @@ let%expect_test _ =
   inference_expression {|
     ((1 :: (2 : int list)) : 'a list)
   |};
-  [%expect {| Type error: unification failed - type int does not match expected type int list |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type int list |}]
 ;;
 
 let%expect_test _ =
@@ -162,7 +166,8 @@ let%expect_test _ =
   inference_expression {|
     fun (x : int) : bool -> x
   |};
-  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 let%expect_test _ =
@@ -190,7 +195,8 @@ let%expect_test _ =
   inference_expression {|
     let f = 1 in (f : bool)
   |};
-  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 let%expect_test _ =
@@ -215,17 +221,20 @@ let%expect_test _ =
    ;; *)
 
 let%expect_test _ =
-  inference_expression {|
+  inference_expression
+    {|
     let f x = x and (x, y) : ('a * 'a) = (true, false) in (f x, f y)
   |};
   [%expect {| - : bool * bool |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_expression
+    {|
     let f x : int = x and (x, y) : ('a * 'a) = (true, false) in (f x, f y)
   |};
-  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 (* ---------------- *)
@@ -254,7 +263,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {|
+  inference_program
+    {|
     let f x : int =
       match x with
       | 0 -> 0
@@ -264,7 +274,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {|
+  inference_program
+    {|
     let rec factorial (n : int) : int =
       if n = 0 then 1
       else n * (factorial (n - 1) : int)
@@ -273,7 +284,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {|
+  inference_program
+    {|
     let rec even (x : int) : bool =
       match x with
       | 0 -> true
@@ -289,7 +301,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_program {|
+  inference_program
+    {|
     let rec even (x : int) : 'a =
       match x with
       | 0 -> true
@@ -299,7 +312,8 @@ let%expect_test _ =
       | 0 -> false
       | _ -> even (x - 1)
   |};
-  [%expect {|
+  [%expect
+    {|
     Type error: unification failed - type bool does not match expected type int |}]
 ;;
 
@@ -308,7 +322,8 @@ let%expect_test _ =
 (* Pattern matching *)
 
 let%expect_test _ =
-  inference_expression {|
+  inference_expression
+    {|
     fun x -> match (x : 'a * 'b) with | (0, 1) -> true | _ -> false
   |};
   [%expect {|
@@ -316,10 +331,12 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {|
+  inference_expression
+    {|
     fun x -> match (x : 'a * 'b) with | (0, 1) -> true | (true, false) -> false
   |};
-  [%expect {|
+  [%expect
+    {|
     Type error: unification failed - type bool does not match expected type int |}]
 ;;
 

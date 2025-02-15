@@ -468,8 +468,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_expression {| let f (x, y) (w :: u) k = x + y + w + u + k |};
-  [%expect
-    {|
+  [%expect {|
     Syntax error. |}]
 ;;
 
@@ -546,8 +545,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression
-    {| let (x, y) :: xs = [(1, 2); (3, 4)] and z = 5 in x + y + z |};
+  parse_expression {| let (x, y) :: xs = [(1, 2); (3, 4)] and z = 5 in x + y + z |};
   [%expect
     {|
     (ELetIn (
@@ -589,8 +587,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_expression {| let rec f x = if x = 0 then 1 else x * f (x - 1) |};
-  [%expect
-    {|
+  [%expect {|
     Syntax error. |}]
 ;;
 
@@ -713,8 +710,7 @@ let%expect_test _ =
 (* Let in expression with mutual recursion *)
 
 let%expect_test _ =
-  parse_expression
-    {| 
+  parse_expression {| 
     let rec f x = g x
     and g x = f x
     in
@@ -867,8 +863,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression
-    {| 
+  parse_expression {| 
     function 
     | [] -> "empty"
     | x :: xs -> "not empty"

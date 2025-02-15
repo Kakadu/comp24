@@ -161,7 +161,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_expression {| let f x = x + 1 in f "a" |};
-  [%expect {| Type error: unification failed - type int does not match expected type string |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type string |}]
 ;;
 
 (* ---------------- *)
@@ -190,12 +191,14 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_expression {| let (x, y) = 1 in (x :: y) |};
-  [%expect {| Type error: unification failed - type 'a * 'b does not match expected type int |}]
+  [%expect
+    {| Type error: unification failed - type 'a * 'b does not match expected type int |}]
 ;;
 
 let%expect_test _ =
   inference_expression {| let (x, y) = ((fun x -> x + 1), true) in x y |};
-  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 (* ---------------- *)
@@ -223,12 +226,14 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| let (x, y) = (true, false) and g x y = true && false and (k :: z) = [1; 2] in (g x y, k, z) |};
+  inference_expression
+    {| let (x, y) = (true, false) and g x y = true && false and (k :: z) = [1; 2] in (g x y, k, z) |};
   [%expect {| - : bool * int * int list |}]
 ;;
 
 let%expect_test _ =
-  inference_expression {| let (x, y) = (true, false) and g x y = true && false and (x :: y) = [1; 2] in g x y |};
+  inference_expression
+    {| let (x, y) = (true, false) and g x y = true && false and (x :: y) = [1; 2] in g x y |};
   [%expect {| Type error: variable 'x' is bound several times |}]
 ;;
 
@@ -258,7 +263,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference_expression {| let rec f x = if x then 0 else (f true) && true in f |};
-  [%expect {| Type error: unification failed - type int does not match expected type bool |}]
+  [%expect
+    {| Type error: unification failed - type int does not match expected type bool |}]
 ;;
 
 let%expect_test _ =
@@ -332,7 +338,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| function
+  inference_expression
+    {| function
     | 0 -> "zero"
     | 1 -> "one"
     | _ -> "many"
@@ -341,7 +348,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| function
+  inference_expression
+    {| function
     | [] -> "empty"
     | [x] -> "one element"
     | _ :: _ -> "multiple"
@@ -350,7 +358,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| function
+  inference_expression
+    {| function
     | (0, y) -> y
     | (x, 0) -> x
     | (x, y) -> x + y
@@ -359,7 +368,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| function
+  inference_expression
+    {| function
     | [] -> 0
     | [x] -> x
     | x1 :: x2 :: xs -> x1 + x2
@@ -368,7 +378,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference_expression {| function
+  inference_expression
+    {| function
     | (x, (0, z)) -> x + z
     | (x, (y, x)) -> x + y
   |};

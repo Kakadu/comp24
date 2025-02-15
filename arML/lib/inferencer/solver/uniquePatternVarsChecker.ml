@@ -21,10 +21,9 @@ let check_unique_vars patterns =
     | PAny :: rest -> helper var_set rest
     | PNill :: rest -> helper var_set rest
     | PConst _ :: rest -> helper var_set rest
-    | PTuple (fst, snd, other) :: rest ->
-      helper var_set (fst :: snd :: other @ rest)
+    | PTuple (fst, snd, other) :: rest -> helper var_set ((fst :: snd :: other) @ rest)
     | PListConstructor (hd, tl) :: rest ->
-      let* var_set = helper var_set [hd] in
+      let* var_set = helper var_set [ hd ] in
       helper var_set (tl :: rest)
     | PTyped (pat, _) :: rest -> helper var_set (pat :: rest)
   in

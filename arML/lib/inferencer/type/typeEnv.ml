@@ -19,9 +19,7 @@ let free_vars env =
 ;;
 
 let apply env sub = Base.Map.map env ~f:(Schema.apply sub)
-
 let extend env key schema = Base.Map.update ~f:(fun _ -> schema) env key
-
 let find env key = Base.Map.find env key
 
 (* Search for an identifier in the environment. If not found - error. *)

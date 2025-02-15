@@ -10,4 +10,7 @@ open IdentifierStructs
 val transform_fun : AbstractSyntaxTree.expression -> AbstractSyntaxTree.expression
 
 (** [transform_let_in env expr] processes a `let ... in ...` expression, updating pattern identifiers to avoid conflicts. *)
-val transform_let_in : IdentifierSet.t -> AbstractSyntaxTree.expression -> AbstractSyntaxTree.expression StateMonad.t
+val transform_let_in
+  :  IdentifierSet.t
+  -> AbstractSyntaxTree.expression
+  -> AbstractSyntaxTree.expression StateMonad.t

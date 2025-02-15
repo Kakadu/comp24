@@ -18,7 +18,11 @@ module Syntax : sig
 end
 
 module RMap : sig
-  val fold_left : ('a, 'b, 'c) Base.Map.t -> init:('d, 'e) t -> f:('a -> 'b -> 'd -> ('d, 'e) t) -> ('d, 'e) t
+  val fold_left
+    :  ('a, 'b, 'c) Base.Map.t
+    -> init:('d, 'e) t
+    -> f:('a -> 'b -> 'd -> ('d, 'e) t)
+    -> ('d, 'e) t
 end
 
 module RList : sig

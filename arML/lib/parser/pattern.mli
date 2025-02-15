@@ -5,7 +5,7 @@
 open Ast.AbstractSyntaxTree
 
 (* Description of pattern parsers *)
-type pattern_dispatch = 
+type pattern_dispatch =
   { parse_tuple_pattern : pattern_dispatch -> pattern Angstrom.t
   ; parse_list_pattern : pattern_dispatch -> pattern Angstrom.t
   ; parse_constant_pattern : pattern Angstrom.t
@@ -17,5 +17,5 @@ type pattern_dispatch =
 
 (* Main pattern parser *)
 val parse_pattern : bool -> pattern Angstrom.t
-(* If first argument is true then can parse without brackets around the pattern. 
+(* If first argument is true then can parse without brackets around the pattern.
    Otherwise, parentheses are required *)

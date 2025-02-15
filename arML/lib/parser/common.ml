@@ -20,9 +20,9 @@ type dispatch =
   ; parse_let_in : dispatch -> expression Angstrom.t
   ; parse_if_then_else : dispatch -> expression Angstrom.t
   ; parse_type_defition : dispatch -> expression Angstrom.t
-  ; parse_constant_expr: expression Angstrom.t
-  ; parse_identifier_expr: expression Angstrom.t
-  ; parse_empty_list_expr: expression Angstrom.t
+  ; parse_constant_expr : expression Angstrom.t
+  ; parse_identifier_expr : expression Angstrom.t
+  ; parse_empty_list_expr : expression Angstrom.t
   }
 
 (* ---------------- *)
@@ -52,7 +52,7 @@ let is_digit_char = function
 let is_acceptable_service_char = function
   | '_' | '\'' -> true
   | _ -> false
-;; 
+;;
 
 let is_operator_char = function
   | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '&' | '|' | '^' | '%' -> true
@@ -86,7 +86,6 @@ let chainl1 e op =
 ;;
 
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
-;;
 
 (* ---------------- *)
 
@@ -94,10 +93,8 @@ let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|>
 
 let skip_wspace = skip_while is_whitespace
 let skip_wspace1 = take_while1 is_whitespace
-
 let parens p = skip_wspace *> char '(' *> skip_wspace *> p <* skip_wspace <* char ')'
 let brackets p = skip_wspace *> char '[' *> p <* skip_wspace <* char ']'
-
 let arrow = skip_wspace *> string "->"
 let trait = skip_wspace *> string "|"
 let tying = skip_wspace *> string "="
@@ -109,14 +106,19 @@ let tying = skip_wspace *> string "="
 let parse_constant =
   fix
   @@ fun self ->
-  skip_wspace 
-  *> 
+  skip_wspace
+  *>
   let parse_cint = take_while1 is_digit_char >>| int_of_string >>| fun x -> CInt x in
-  let parse_cstring = char '"' *> take_while (( != ) '"') <* char '"' >>| fun x -> CString x in
+  let parse_cstring =
+    char '"' *> take_while (( != ) '"') <* char '"' >>| fun x -> CString x
+  in
   let parse_cchar = char '\'' *> any_char <* char '\'' >>| fun x -> CChar x in
-  let parse_cbool = string "true" <|> string "false" >>| bool_of_string >>| fun x -> CBool x in
+  let parse_cbool =
+    string "true" <|> string "false" >>| bool_of_string >>| fun x -> CBool x
+  in
   let parse_cunit = string "()" >>| fun _ -> CUnit in
-  parens self <|> choice [ parse_cint; parse_cstring; parse_cchar; parse_cbool; parse_cunit ]
+  parens self
+  <|> choice [ parse_cint; parse_cstring; parse_cchar; parse_cbool; parse_cunit ]
 ;;
 
 (* ---------------- *)
@@ -128,27 +130,35 @@ let parse_name =
   @@ fun self ->
   skip_wspace
   *>
-  let is_acceptable x = is_lower_char x || is_upper_char x || is_digit_char x || is_acceptable_service_char x in
+  let is_acceptable x =
+    is_lower_char x || is_upper_char x || is_digit_char x || is_acceptable_service_char x
+  in
   parens self <|> take_while1 is_acceptable
 ;;
 
 let parse_uncapitalized_name =
   let* name = parse_name in
-  if (is_lower_char name.[0])
+  if is_lower_char name.[0]
   then return name
-  else fail "Syntax error: the some name started with a capital letter when a small letter was expected"
+  else
+    fail
+      "Syntax error: the some name started with a capital letter when a small letter was \
+       expected"
 ;;
 
 let parse_capitalized_name =
   let* name = parse_name in
-  if (is_upper_char name.[0])
+  if is_upper_char name.[0]
   then return name
-  else fail "Syntax error: the some name started with a small letter when a capital letter was expected"
+  else
+    fail
+      "Syntax error: the some name started with a small letter when a capital letter was \
+       expected"
 ;;
 
 let parse_name_started_with_underscore =
   let* name = parse_name in
-  if (name.[0] = '_' && String.length name > 1)
+  if name.[0] = '_' && String.length name > 1
   then return name
   else fail "Syntax error: expected '_' at the beggining of the identifier"
 ;;

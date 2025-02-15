@@ -135,15 +135,13 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_expression {| -1 |};
-  [%expect
-    {|
+  [%expect {|
     (EApplication ((EIdentifier (Id "U-")), (EConstant (CInt 1)), [])) |}]
 ;;
 
 let%expect_test _ =
   parse_expression {| +1 |};
-  [%expect
-    {|
+  [%expect {|
     (EApplication ((EIdentifier (Id "U+")), (EConstant (CInt 1)), [])) |}]
 ;;
 

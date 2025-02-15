@@ -12,8 +12,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   parse_expression {| ("s" : string) |};
-  [%expect
-    {|
+  [%expect {|
     (ETyped ((EConstant (CString "s")), (TDGround GTDString))) |}]
 ;;
 

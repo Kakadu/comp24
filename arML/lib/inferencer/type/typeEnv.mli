@@ -20,6 +20,9 @@ val extend : t -> string -> Schema.schema -> t
 (** Looks up the schema for a given identifier in the environment. *)
 val find : t -> string -> Schema.schema option
 
-(** Looks up an identifier in the environment and returns its type. 
+(** Looks up an identifier in the environment and returns its type.
     If the identifier is not found, an error is returned. *)
-val lookup_env : t -> string -> (Substitution.t * TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t
+val lookup_env
+  :  t
+  -> string
+  -> (Substitution.t * TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t

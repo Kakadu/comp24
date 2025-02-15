@@ -7,57 +7,45 @@ open Common.IdentifierStructs
 open ClosureExpression
 open ClosureProgram
 
-let start_identifiers = 
+let start_identifiers =
   let binary_operations =
-    [ "( + )" 
-    ; "( - )" 
-    ; "( * )" 
-    ; "( / )" 
-    ; "( % )" 
-    ; "( > )" 
-    ; "( < )" 
-    ; "( >= )" 
-    ; "( <= )" 
-    ; "( = )" 
-    ; "( == )" 
-    ; "( != )" 
-    ; "( <> )" 
-    ; "( && )" 
+    [ "( + )"
+    ; "( - )"
+    ; "( * )"
+    ; "( / )"
+    ; "( % )"
+    ; "( > )"
+    ; "( < )"
+    ; "( >= )"
+    ; "( <= )"
+    ; "( = )"
+    ; "( == )"
+    ; "( != )"
+    ; "( <> )"
+    ; "( && )"
     ; "( || )"
     ]
   in
-
-  let unary_operations =
-    [ "U-"
-    ; "U+"
-    ; "UNot"
-    ]
-  in
-
-  let stdlib_functions =
-    [ "print_int"
-    ; "print_bool"
-    ]
-  in
-
+  let unary_operations = [ "U-"; "U+"; "UNot" ] in
+  let stdlib_functions = [ "print_int"; "print_bool" ] in
   binary_operations @ unary_operations @ stdlib_functions
 ;;
 
-let start_env = 
-  List.fold_left 
-    (fun acc var -> IdentifierSet.add (Id var) acc) 
-    IdentifierSet.empty 
+let start_env =
+  List.fold_left
+    (fun acc var -> IdentifierSet.add (Id var) acc)
+    IdentifierSet.empty
     start_identifiers
 ;;
 
-let run_closure_expression expression = 
+let run_closure_expression expression =
   let first_state = 0 in
   let m = closure_expression start_env IdentifierMap.empty expression in
   let result = run m first_state in
   fst result
 ;;
 
-let run_closure_program program = 
+let run_closure_program program =
   let first_state = 0 in
   let m = closure_program start_env program in
   let result = run m first_state in

@@ -19,9 +19,9 @@ type dispatch =
   ; parse_let_in : dispatch -> expression Angstrom.t
   ; parse_if_then_else : dispatch -> expression Angstrom.t
   ; parse_type_defition : dispatch -> expression Angstrom.t
-  ; parse_constant_expr: expression Angstrom.t
-  ; parse_identifier_expr: expression Angstrom.t
-  ; parse_empty_list_expr: expression Angstrom.t
+  ; parse_constant_expr : expression Angstrom.t
+  ; parse_identifier_expr : expression Angstrom.t
+  ; parse_empty_list_expr : expression Angstrom.t
   }
 
 (* ---------------- *)
@@ -44,10 +44,8 @@ val chainr1 : 'a Angstrom.t -> ('a -> 'a -> 'a) Angstrom.t -> 'a Angstrom.t
 
 val skip_wspace : unit Angstrom.t
 val skip_wspace1 : string Angstrom.t
-
 val parens : 'a Angstrom.t -> 'a Angstrom.t
 val brackets : 'a Angstrom.t -> 'a Angstrom.t
-
 val arrow : string Angstrom.t
 val trait : string Angstrom.t
 val tying : string Angstrom.t

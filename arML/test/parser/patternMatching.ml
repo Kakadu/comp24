@@ -45,8 +45,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_expression
-    {| 
+  parse_expression {| 
     match ((1, 2), 3) with
     | ((x, y), z) -> x + y + z
   |};

@@ -15,8 +15,10 @@ let pp_error ppf = function
       PpType.pp_type
       r
   | Unbound_variable name -> Format.fprintf ppf "Type error: unbound variable '%s'" name
-  | InvalidRecursionLeftHand -> Format.fprintf ppf "Only variables are allowed as left-hand side of `let rec'"
-  | Several_bounds name -> Format.fprintf ppf "Type error: variable '%s' is bound several times" name
+  | InvalidRecursionLeftHand ->
+    Format.fprintf ppf "Only variables are allowed as left-hand side of `let rec'"
+  | Several_bounds name ->
+    Format.fprintf ppf "Type error: variable '%s' is bound several times" name
 ;;
 
 let print_inferencer_error e =

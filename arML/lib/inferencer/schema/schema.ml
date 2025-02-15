@@ -12,6 +12,8 @@ let free_vars = function
 
 let apply sub = function
   | Schema (bind_vars, ty) ->
-    let sub2 = TypeVarSet.fold (fun sub key -> Substitution.remove key sub) bind_vars sub in
+    let sub2 =
+      TypeVarSet.fold (fun sub key -> Substitution.remove key sub) bind_vars sub
+    in
     Schema (bind_vars, Substitution.apply sub2 ty)
 ;;
