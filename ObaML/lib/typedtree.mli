@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module VarSet : Stdlib.Set.S with type elt = int
+module VarSet : Set.S with type elt = int
 module VarMap : Map.S with type key = int
 module StringMap : Map.S with type key = string
 
