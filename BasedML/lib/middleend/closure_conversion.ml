@@ -115,7 +115,7 @@ let rec get_global_names = function
       ~init:((module String) |> Set.empty)
 ;;
 
-let infix_ops_set =
+let stdlib_names =
   Set.of_list
     (module String)
     [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )"; "print_int" ]
