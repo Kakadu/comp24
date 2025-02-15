@@ -57,6 +57,7 @@ let unrelated e =
       Set.union outer inner
     | ETuple exps ->
       List.fold exps ~init:set_empty ~f:(fun acc h -> Set.union acc (helper h))
+    | _ -> failwith "pspspsp"
   in
   helper e
 ;;
@@ -125,6 +126,7 @@ let closure_expr gctx bindings =
       let hd = helper lts lctx gctx hd in
       let tl = helper lts lctx gctx tl in
       EList (hd, tl)
+    | _ -> failwith ""
   in
   let closure_bindings gctx = function
     | Let (flag, p, e) -> Let (flag, p, closure_function set_empty map_empty gctx helper e)

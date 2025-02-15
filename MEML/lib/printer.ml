@@ -34,7 +34,6 @@ let binop_printer formatter = function
   | Sub -> Format.fprintf formatter "-"
   | Mul -> Format.fprintf formatter "*"
   | Div -> Format.fprintf formatter "/"
-  | Mod -> Format.fprintf formatter "mod"
   | And -> Format.fprintf formatter "&"
   | Or -> Format.fprintf formatter "||"
   | Eq -> Format.fprintf formatter "="
