@@ -25,4 +25,9 @@ let parse_string =
   >>| fun s -> Const_string s
 ;;
 
-let parse_const = ws *> choice [ parse_int; parse_char; parse_string ]
+let parse_bool =
+  let+ res = string "true" *> return true <|> string "false" *> return false in
+  Const_bool res
+;;
+
+let parse_const = ws *> choice [ parse_int; parse_char; parse_string; parse_bool ]
