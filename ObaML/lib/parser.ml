@@ -69,7 +69,6 @@ let is_operator_char = function
 let operator_name oper_chars = "( " ^ oper_chars ^ " )"
 let unary_operator_name oper_chars = operator_name ("~" ^ oper_chars)
 let spaces = take_while is_space
-let spaces1 = take_while1 is_space
 let pchunk p = spaces *> p
 let check_chunk s = pchunk @@ string s
 

@@ -40,7 +40,7 @@ type rec_flag =
 (** [let a = e;;] | [let fst, snd = pair in fst + snd] *)
 type value_binding = pattern * expr [@@deriving eq, show { with_path = false }]
 
-(** [Tree(left, right) -> left, right] *)
+(** [h :: tl -> h :: tl] *)
 and case = pattern * expr [@@deriving eq, show { with_path = false }]
 
 and expr =

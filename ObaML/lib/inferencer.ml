@@ -9,7 +9,6 @@ open Format
 module R : sig
   type 'a t
 
-  val bind : 'a t -> f:('a -> 'b t) -> 'b t
   val return : 'a -> 'a t
   val fail : error -> 'a t
 
@@ -100,7 +99,6 @@ module Subst : sig
 
   val empty : t
   val singleton : fresh -> ty -> t R.t
-  val find : fresh -> t -> ty option
   val apply : t -> ty -> ty
   val unify : ty -> ty -> t R.t
 
@@ -195,10 +193,6 @@ end
 module Scheme = struct
   type t = scheme
 
-  let occurs_in v = function
-    | Scheme (xs, t) -> (not (VarSet.mem v xs)) && Type.occurs_in v t
-  ;;
-
   let free_vars = function
     | Scheme (bs, t) -> VarSet.diff (Type.free_vars t) bs
   ;;
@@ -234,7 +228,7 @@ module Scheme = struct
   ;;
 
   let pretty_pp_scheme fmt = function
-    | Scheme (st, typ) as sc ->
+    | Scheme (st, typ) ->
       let convert_map = get_convert_map st in
       fprintf fmt "%a" pretty_pp_ty (typ, convert_map)
   ;;
@@ -647,7 +641,6 @@ and infer_rec_let value_binding_lst env =
         let* subst = acc in
         let _, expr = value_binding in
         let* subst1, ty = infer_exp expr env in
-        let env = TypeEnv.apply subst env in
         let* subst2 = Subst.unify ty t in
         Subst.compose_all [ subst; subst1; subst2 ])
       (return Subst.empty)

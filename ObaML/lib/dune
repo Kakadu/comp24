@@ -1,10 +1,5 @@
 (include_subdirs unqualified)
 
-(env
- (dev
-  (flags
-   (:standard -w -26-32))))
-
 (library
  (name ObaML)
  (public_name ObaML)
