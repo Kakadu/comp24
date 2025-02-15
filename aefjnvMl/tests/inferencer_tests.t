@@ -1,50 +1,50 @@
   $ cat << EOF | ./inferencer_runner.exe -
   > let a = 5 * 9 / 7
   > EOF
-  var a: int
+  val a: int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a = [1; 2; 3451; 12]
   > EOF
-  var a: int list
+  val a: int list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a = (true, 55 - 892, [(1, 2); (3, 5)])
   > EOF
-  var a: bool * int * (int * int) list
+  val a: bool * int * (int * int) list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a = [(true, 55 - 892, [(1, 2); (3, 5)])]
   > EOF
-  var a: bool * int * (int * int) list list
+  val a: bool * int * (int * int) list list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let rec fact x = if x = 0 then 1 else x * fact (x - 1)
   > EOF
-  var fact: int -> int
+  val fact: int -> int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a x = x :: [1; 2; 3]
   > EOF
-  var a: int -> int list
+  val a: int -> int list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let (5::a) = [3; 4; 6]
   > EOF
-  var a: int list
+  val a: int list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let (a::b) = [3; 4; 6]
   > EOF
-  var a: int
-  var b: int list
+  val a: int
+  val b: int list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let tuple = (22, 23)
   > let (_, b) = tuple
   > EOF
-  var b: int
-  var tuple: int * int
+  val b: int
+  val tuple: int * int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let pat_matching x = 
@@ -52,7 +52,7 @@
   >   | (52, 52) -> true
   >   | _ -> false
   > EOF
-  var pat_matching: int * int -> bool
+  val pat_matching: int * int -> bool
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let check_equal x y = 
@@ -61,17 +61,17 @@
   >   let rev x = -x in 
   >   if rev x = rev y then sub x y else sum x y
   > EOF
-  var check_equal: int -> int -> int
+  val check_equal: int -> int -> int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a = (fun x y -> (x, y)) 1 2
   > EOF
-  var a: int * int
+  val a: int * int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let list = (0, [(-1, [(-2, [], [])], [])], [])
   > EOF
-  var list: int * (int * (int * 'a list * 'b list) list * 'c list) list * 'd list
+  val list: int * (int * (int * 'a list * 'b list) list * 'c list) list * 'd list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let reverse = 
@@ -84,28 +84,28 @@
   >   let reverse_intt = helper [] ([true; false]) in
   >   (reverse_int, reverse_intt)
   > EOF
-  var reverse: int list * bool list
+  val reverse: int list * bool list
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let f x = x
   > EOF
-  var f: 'a -> 'a
+  val f: 'a -> 'a
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let (a, b) = (fun a x -> a x), (fun a x -> a x)
   > EOF
-  var a: ('a -> 'b) -> 'a -> 'b
-  var b: ('a -> 'b) -> 'a -> 'b
+  val a: ('a -> 'b) -> 'a -> 'b
+  val b: ('a -> 'b) -> 'a -> 'b
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let f g a b = g a b
   > EOF
-  var f: ('a -> 'b -> 'c) -> 'a -> 'b -> 'c
+  val f: ('a -> 'b -> 'c) -> 'a -> 'b -> 'c
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a x = let id x = x in let (a, b) = (id x, id x) in (a, b)
   > EOF
-  var a: 'a -> 'a * 'a
+  val a: 'a -> 'a * 'a
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let a x = x x
@@ -150,14 +150,14 @@
   $ cat << EOF | ./inferencer_runner.exe -
   > let a x = fun y -> y x
   > EOF
-  var a: 'a -> ('a -> 'b) -> 'b
+  val a: 'a -> ('a -> 'b) -> 'b
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let id (x : int) : int = x
   > let double = id 42
   > EOF
-  var double: int
-  var id: int -> int
+  val double: int
+  val id: int -> int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let apply_pair (f : int -> int) (x : int * int) : int * int =
@@ -165,16 +165,16 @@
   >   (f a, f b)
   > let result = apply_pair (fun x -> x * 2) (3, 4)
   > EOF
-  var apply_pair: (int -> int) -> int * int -> int * int
-  var result: int * int
+  val apply_pair: (int -> int) -> int * int -> int * int
+  val result: int * int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let map_triple (f : int -> bool) ((x, y, z) : int * int * int) : bool * bool * bool = 
   >   (f x, f y, f z)
   > let result = map_triple (fun x -> x > 0) (1, -2, 3)
   > EOF
-  var map_triple: (int -> bool) -> int * int * int -> bool * bool * bool
-  var result: bool * bool * bool
+  val map_triple: (int -> bool) -> int * int * int -> bool * bool * bool
+  val result: bool * bool * bool
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let rec sum_list (lst : int list) : int =
@@ -183,10 +183,20 @@
   >   | h :: t -> h + sum_list t
   > let result = sum_list [1;2;3;4]
   > EOF
-  var result: int
-  var sum_list: int list -> int
+  val result: int
+  val sum_list: int list -> int
 
   $ cat << EOF | ./inferencer_runner.exe -
   > let ( + ) a b = a && b
   > EOF
-  var +: bool -> bool -> bool
+  val +: bool -> bool -> bool
+
+  $ cat << EOF | ./inferencer_runner.exe -
+  > let pack a b c d e f g h i j k l m n o p q r s t u v w x y z
+  >  aa ab ac ad ae af ag ah ai aj ak al am an ao ap aq ar as1 at au av aw ax ay az
+  >  ba bb =
+  > (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
+  > aa, ab, ac, ad, ae, af, ag, ah, ai, aj, ak, al, am, an, ao, ap, aq, ar, as1, at, au, av, aw, ax, ay, az,
+  > ba, bb)
+  > EOF
+  val pack: 'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'g -> 'h -> 'i -> 'j -> 'k -> 'l -> 'm -> 'n -> 'o -> 'p -> 'q -> 'r -> 's -> 't -> 'u -> 'v -> 'w -> 'x -> 'y -> 'z -> 'a1 -> 'b1 -> 'c1 -> 'd1 -> 'e1 -> 'f1 -> 'g1 -> 'h1 -> 'i1 -> 'j1 -> 'k1 -> 'l1 -> 'm1 -> 'n1 -> 'o1 -> 'p1 -> 'q1 -> 'r1 -> 's1 -> 't1 -> 'u1 -> 'v1 -> 'w1 -> 'x1 -> 'y1 -> 'z1 -> 'a2 -> 'b2 -> 'a * 'b * 'c * 'd * 'e * 'f * 'g * 'h * 'i * 'j * 'k * 'l * 'm * 'n * 'o * 'p * 'q * 'r * 's * 't * 'u * 'v * 'w * 'x * 'y * 'z * 'a1 * 'b1 * 'c1 * 'd1 * 'e1 * 'f1 * 'g1 * 'h1 * 'i1 * 'j1 * 'k1 * 'l1 * 'm1 * 'n1 * 'o1 * 'p1 * 'q1 * 'r1 * 's1 * 't1 * 'u1 * 'v1 * 'w1 * 'x1 * 'y1 * 'z1 * 'a2 * 'b2
