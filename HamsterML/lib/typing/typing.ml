@@ -542,18 +542,20 @@ module Infer = struct
         let* subs = Subst.compose_all [ e_s; dt_s; u ] in
         R.return (subs, dt_t)
       | If (i, th, el) ->
-        let* i_s, i_t = helper env i in
-        let* i_u = Subst.unify i_t TBool in
-        let* if_s = Subst.compose i_u i_s in
-        let* th_s, th_t = helper (TypeEnv.apply if_s env) th in
+        let* if_s, if_t = helper env i in
+        let* if_u = Subst.unify if_t TBool in
+        let* if_s = Subst.compose if_u if_s in
+        let* then_s, then_t = helper (TypeEnv.apply if_s env) th in
+        let* then_s = Subst.compose then_s if_s in
         (match el with
          | Some el ->
-           let* el_s, el_t = helper (TypeEnv.apply th_s env) el in
-           let* th_e_u = Subst.unify th_t el_t in
-           let* fin_s = Subst.compose_all [ if_s; el_s; th_e_u ] in
-           R.return (fin_s, Subst.apply el_t fin_s)
+           let* else_s, else_t = helper (TypeEnv.apply then_s env) el in
+           let* else_s = Subst.compose else_s then_s in
+           let* then_else_u = Subst.unify then_t else_t in
+           let* fin_s = Subst.compose_all [ if_s; else_s; then_else_u ] in
+           R.return (fin_s, Subst.apply else_t fin_s)
          | None ->
-           let* th_u = Subst.unify th_t TUnit in
+           let* th_u = Subst.unify then_t TUnit in
            let* fin_s = Subst.compose_all [ if_s; th_u ] in
            R.return (fin_s, TUnit))
       | Fun (args, expr) ->

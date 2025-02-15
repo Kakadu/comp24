@@ -30,6 +30,9 @@ let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
 
 let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
 let%test _ = infer_expr "fun x -> (x: int)" = TArrow (TInt, TInt)
+
+(* lists *)
+
 let%test _ = infer_expr "fun x -> [(x: int)]" = TArrow (TInt, TList TInt)
 
 let%test _ =
@@ -52,14 +55,62 @@ let%test _ =
   = TArrow (TInt, TArrow (TInt, TArrow (TInt, TList TInt)))
 ;;
 
-let%test _ = infer_expr "fun x -> ((x : int), x, x, x, x)" = 
-  TArrow (TInt, TTuple [TInt; TInt; TInt; TInt; TInt])
+(* tuples *)
 
-  let%test _ = infer_expr "fun (x: string) -> (x, x, x, x, x)" = 
-  TArrow (TString, TTuple [TString; TString; TString; TString; TString])
+let%test _ =
+  infer_expr "fun x -> ((x : int), x, x, x, x)"
+  = TArrow (TInt, TTuple [ TInt; TInt; TInt; TInt; TInt ])
+;;
 
-  let%test _ = infer_expr "fun x -> (x, x, x, x, (x: bool))" = 
-  TArrow (TBool, TTuple [TBool; TBool; TBool; TBool; TBool])
+let%test _ =
+  infer_expr "fun (x: string) -> (x, x, x, x, x)"
+  = TArrow (TString, TTuple [ TString; TString; TString; TString; TString ])
+;;
+
+let%test _ =
+  infer_expr "fun x -> (x, x, x, x, (x: bool))"
+  = TArrow (TBool, TTuple [ TBool; TBool; TBool; TBool; TBool ])
+;;
+
+(* concat *)
+let%test _ =
+  infer_expr "fun x y -> x :: y"
+  = TArrow (TPVar 0, TArrow (TList (TPVar 0), TList (TPVar 0)))
+;;
+
+let%test _ =
+  infer_expr "fun x y -> (x: int) :: y"
+  = TArrow (TInt, TArrow (TList TInt, TList TInt))
+;;
+
+let%test _ =
+  infer_expr "fun x y -> (x: bool) :: [(y: bool)]"
+  = TArrow (TBool, TArrow (TBool, TList TBool))
+;;
+
+let%test _ =
+  infer_expr "fun (x: string) y -> x :: [y]"
+  = TArrow (TString, TArrow (TString, TList TString))
+;;
+
+(* if *)
+let%test _ = infer_expr "fun x -> if x then 10 else 11" = TArrow (TBool, TInt)
+let%test _ = infer_expr "fun x -> if x then 10 else 11" = TArrow (TBool, TInt)
+
+let%test _ =
+  infer_expr "fun x y z -> if x then (y: string) else z"
+  = TArrow (TBool, TArrow (TString, TArrow (TString, TString)))
+;;
+
+let%test _ =
+  infer_expr "fun x y z -> if x then y else (z: string)"
+  = TArrow (TBool, TArrow (TString, TArrow (TString, TString)))
+;;
+
+let%test _ =
+  infer_expr "fun x y -> if x then (y: string) else y"
+  = TArrow (TBool, TArrow (TString, TString))
+;;
 
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
