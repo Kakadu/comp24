@@ -182,7 +182,7 @@ r_app_expr:
     | _list(list_expr)                                              { EList $1 }
     | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
     | LEFT_PARENTHESIS; concat(concat_expr); RIGHT_PARENTHESIS      { let a,b = $2 in EListConcat (a,b) }
-    | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS               { EOperation $2 }
+    | prefix_bop;                                                   { EOperation $1 }
     | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                     { $2 }
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }
