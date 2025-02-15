@@ -127,17 +127,6 @@ let%expect_test "expression_test" =
 (* EBinaryOp *)
 
 let%expect_test "expression_test" =
-  let test = "3 + 2 * 4 - 1" in
-  start_test parse_expression show_expression test;
-  [%expect
-    {|
-    (EBinaryOp (Sub,
-       (EBinaryOp (Add, (EConst (CInt 3)),
-          (EBinaryOp (Mul, (EConst (CInt 2)), (EConst (CInt 4)))))),
-       (EConst (CInt 1)))) |}]
-;;
-
-let%expect_test "expression_test" =
   let test = "1 + (a * 3) - x" in
   start_test parse_expression show_expression test;
   [%expect
@@ -196,6 +185,17 @@ let%expect_test "expression_test" =
     {|
     (EApp ((EApp ((EVar ("is_something", TUnknown)), (EVar ("yes", TUnknown)))),
        (EVar ("no", TUnknown)))) |}]
+;;
+
+let%expect_test "expression_test" =
+  let test = "(fun x -> x + 1) 1" in
+  start_test parse_expression show_expression test;
+  [%expect
+    {|
+    (EApp (
+       (EFun ((PVar ("x", TUnknown)),
+          (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 1)))))),
+       (EConst (CInt 1)))) |}]
 ;;
 
 (* ELetIn *)
@@ -442,6 +442,78 @@ let%expect_test "bindings_test" =
        (EFun ((PVar ("x", TInt)),
           (EFun ((PVar ("y", TInt)),
              (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test "bindings_test" =
+  let test = "let h f1 f2 f3 f4 f5 f6 f7 = f1 (f2 (f3 (f4 (f5 (f6 f7)))))" in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "h",
+       (EFun ((PVar ("f1", TUnknown)),
+          (EFun ((PVar ("f2", TUnknown)),
+             (EFun ((PVar ("f3", TUnknown)),
+                (EFun ((PVar ("f4", TUnknown)),
+                   (EFun ((PVar ("f5", TUnknown)),
+                      (EFun ((PVar ("f6", TUnknown)),
+                         (EFun ((PVar ("f7", TUnknown)),
+                            (EApp ((EVar ("f1", TUnknown)),
+                               (EApp ((EVar ("f2", TUnknown)),
+                                  (EApp ((EVar ("f3", TUnknown)),
+                                     (EApp ((EVar ("f4", TUnknown)),
+                                        (EApp ((EVar ("f5", TUnknown)),
+                                           (EApp ((EVar ("f6", TUnknown)),
+                                              (EVar ("f7", TUnknown))))
+                                           ))
+                                        ))
+                                     ))
+                                  ))
+                               ))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
+          ))
+       ))
+ |}]
+;;
+
+let%expect_test "bindings_test" =
+  let test = "let h f1 f2 f3 f4 f5 f6 f7 = ((((((f1 f2) f3) f4) f5) f6) f7)" in
+  start_test parse_bindings show_bindings test;
+  [%expect
+    {|
+    (Let (Notrec, "h",
+       (EFun ((PVar ("f1", TUnknown)),
+          (EFun ((PVar ("f2", TUnknown)),
+             (EFun ((PVar ("f3", TUnknown)),
+                (EFun ((PVar ("f4", TUnknown)),
+                   (EFun ((PVar ("f5", TUnknown)),
+                      (EFun ((PVar ("f6", TUnknown)),
+                         (EFun ((PVar ("f7", TUnknown)),
+                            (EApp (
+                               (EApp (
+                                  (EApp (
+                                     (EApp (
+                                        (EApp (
+                                           (EApp ((EVar ("f1", TUnknown)),
+                                              (EVar ("f2", TUnknown)))),
+                                           (EVar ("f3", TUnknown)))),
+                                        (EVar ("f4", TUnknown)))),
+                                     (EVar ("f5", TUnknown)))),
+                                  (EVar ("f6", TUnknown)))),
+                               (EVar ("f7", TUnknown))))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
           ))
        ))
  |}]

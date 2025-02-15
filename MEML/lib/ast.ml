@@ -15,7 +15,6 @@ type binary_op =
   | Sub (** 2 - 1 *)
   | Mul (** * *)
   | Div (** / *)
-  | Mod (** % *)
   | And (** && *)
   | Or (** || *)
   | Eq (** = *)
@@ -38,7 +37,7 @@ type pattern =
   | PConst of const (** constant pattern *)
   | PVar of name * type_of_var (** variable pattern*)
   | PTuple of pattern list (** (a, b) *)
-  | PCon of pattern * pattern (** hd::tl *)
+  | PCon of pattern * pattern (** hd :: tl *)
 [@@deriving eq, show { with_path = false }]
 
 type rec_flag =
@@ -55,7 +54,8 @@ type expression =
   | ELetIn of rec_flag * name * expression * expression
   | EFun of pattern * expression (** fun z -> z + z *)
   | EList of expression * expression (** [1;2;3]*)
-  | ETuple of expression list (** (1,2,3)*)
+  | ETuple of expression list (** (1,2,3) *)
+  | EMatch of expression * (pattern * expression) list
 [@@deriving eq, show { with_path = false }]
 
 (** Binding type *)

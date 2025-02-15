@@ -72,6 +72,17 @@ let%expect_test "let plusfive x = let five a = a + 5 in five x" =
   [%expect {| plusfive : int -> int |}]
 ;;
 
+let%expect_test "let f (x: int) = x + 4" =
+  print_prog_result
+    [ Let
+        ( Notrec
+        , "f"
+        , EFun (PVar ("x", TInt), EBinaryOp (Add, EVar ("x", TUnknown), EConst (CInt 4)))
+        )
+    ];
+  [%expect {| f : int -> int |}]
+;;
+
 let%expect_test "let f x y = x + y" =
   print_prog_result
     [ Let

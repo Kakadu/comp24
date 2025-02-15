@@ -270,9 +270,9 @@ let infer =
       let* sl, tl = helper env l in
       let* sr, tr = helper env r in
       (match bin_op with
-       | Add | Sub | Mul | Div | Mod ->
-         let* s1 = unify tl TInt in
-         let* s2 = unify tr TInt in
+       | Add | Sub | Mul | Div ->
+         let* s1 = unify tl int_typ in
+         let* s2 = unify tr int_typ in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
          return (sres, TInt)
        | Less | Leq | Gre | Greq | Eq | Neq ->
@@ -363,6 +363,7 @@ let infer =
       let* s2, t2 = helper TypeEnv.(extend (apply s env) (id, t2)) e2 in
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
+    | _ -> failwith "match"
   in
   helper
 ;;
