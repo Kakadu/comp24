@@ -148,6 +148,10 @@ end = struct
   ;;
 
   let find = Map.find
+<<<<<<< HEAD
+=======
+
+>>>>>>> ae67fa7 (fix parser and infer for the sake of manytests)
   let remove = Map.remove
 
   let apply s =
@@ -229,6 +233,10 @@ module TypeEnv = struct
   type t = (id, scheme, String.comparator_witness) Map.t
 
   let extend env (v, scheme) = Map.update env v ~f:(fun _ -> scheme)
+<<<<<<< HEAD
+=======
+
+>>>>>>> ae67fa7 (fix parser and infer for the sake of manytests)
   let remove = Map.remove
   let empty = Map.empty (module String)
 
