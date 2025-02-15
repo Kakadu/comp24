@@ -12,9 +12,9 @@
   let fix f = ((fun-1 f) (fun-3 f))
 
   $ ./cc_ll_demo.exe < manytests/do_not_type/004let_poly.ml
-  let fun-1 () x = x;;
-  let fun-0 () f = ((f 1), (f true));;
-  let temp = ((fun-0 ()) (fun-1 ()))
+  let fun-1 x = x;;
+  let fun-0 f = ((f 1), (f true));;
+  let temp = (fun-0 fun-1)
 
   $ ./cc_ll_demo.exe < manytests/do_not_type/015tuples.ml
   let rec (a, b) = (a, b)
@@ -27,10 +27,10 @@ PASS
 
 NO LAMBDA LIFT????? fun print_int -> print_int
   $ ./cc_ll_demo.exe < manytests/typed/002fac.ml
-  let fun-1 () print_int = print_int;;
-  let fun-0 (k, n) p = k (p * n);;
-  let rec fac_cps n k = if (n = 1) then (k 1) else (fac_cps (n - 1) (fun-0 (k, n)));;
-  let main = let () = (print_int ((fac_cps 4) (fun-1 ())))
+  let fun-1 print_int = print_int;;
+  let fun-0 n k p = k (p * n);;
+  let rec fac_cps n k = if (n = 1) then (k 1) else (fac_cps (n - 1) ((fun-0 n) k));;
+  let main = let () = (print_int ((fac_cps 4) fun-1))
   in 0
 
 PASS
@@ -65,9 +65,9 @@ PASS
 
 LAMBDA LIFT???
   $ ./cc_ll_demo.exe < manytests/typed/006partial.ml
-  let fun-1 () foo = (foo * 10);;
-  let fun-0 () foo = (foo + 2);;
-  let foo b = if b then (fun-0 ()) else (fun-1 ());;
+  let fun-1 foo = (foo * 10);;
+  let fun-0 foo = (foo + 2);;
+  let foo b = if b then fun-0 else fun-1;;
   let foo x = ((foo true) ((foo false) ((foo true) ((foo false) x))));;
   let main = let () = (print_int (foo 11))
   in 0
@@ -107,22 +107,22 @@ let  main  = (let  () = (((foo 4) 8) 9) in 0)
 
 NO LAMBDA LIFT AS WELL
   $ ./cc_ll_demo.exe < manytests/typed/008ascription.ml
-  let fun-1 () _start = ((_start / 2) = 0);;
-  let fun-0 () x = if b then (x + 1) else (x * 2);;
+  let fun-1 _start = ((_start / 2) = 0);;
+  let fun-0 x = if b then (x + 1) else (x * 2);;
   let addi f g x = (((f x) ((g x) : bool)) : int);;
-  let main = let () = (print_int (((addi (fun-0 ())) (fun-1 ())) 4))
+  let main = let () = (print_int (((addi fun-0) fun-1) 4))
   in 0
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/009let_poly.ml
-  let fun-0 () x = x;;
-  let temp = let f = (fun-0 ())
+  let fun-0 x = x;;
+  let temp = let f = fun-0
   in ((f 1), (f true))
 
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   Fatal error: exception Failure("todo")
   Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 336, characters 14-36
-  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 337, characters 15-43
+  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 345, characters 14-36
+  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 346, characters 15-43
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
@@ -134,7 +134,7 @@ PASS
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 342, characters 24-56
+  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 351, characters 24-56
   Called from Dune__exe__Cc_ll_demo.cc_ll_test in file "demos/cc_ll_demo.ml", line 4, characters 15-44
   [2]
 
@@ -143,13 +143,13 @@ PASS
   let fun-1 append xs = match xs with
   | [] -> []
   | h :: tl -> ((append h) (helper tl));;
-  let fun-0 () acc = match xs with
+  let fun-0 acc = match xs with
   | [] -> acc
   | h :: tl -> (helper (acc + 1) tl);;
   let rec length xs = match xs with
   | [] -> 0
   | h :: tl -> (1 + (length tl));;
-  let length_tail = let rec helper = (fun-0 ())
+  let length_tail = let rec helper = fun-0
   in (helper 0);;
   let rec map f xs = match xs with
   | [] -> []
