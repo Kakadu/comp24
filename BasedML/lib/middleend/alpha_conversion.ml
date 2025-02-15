@@ -26,12 +26,6 @@ let rec generate_unique_name old_name ctx counter =
   else new_name
 ;;
 
-let get_id id ctx =
-  match Base.Map.find ctx.name_mapping id with
-  | None -> fail "No name was found in map"
-  | Some (old_name, counter) -> show_idname old_name counter |> return
-;;
-
 let rec collect_function_arguments collected = function
   | EFunction (pat, next) -> collect_function_arguments (pat :: collected) next
   | expr -> List.rev collected, expr
