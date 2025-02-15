@@ -11,7 +11,9 @@ module Generator = struct
     fix
       (fun self () ->
         let* nm =
-          string_size ~gen:(oneof [ char_range 'a' 'z'; return '_' ]) (int_range 1 10)
+          string_size
+            ~gen:(oneof [ char_range 'a' 'z'; char_range '_' '_' ])
+            (int_range 1 10)
         in
         if Parser.is_keyword nm then self () else return nm)
       ()

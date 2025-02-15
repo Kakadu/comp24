@@ -207,16 +207,14 @@
    0;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/006partial3.ml
-  let  ll_1 print_int c  = let anf_app_0 = print_int c in
+  let  ll_1 c  = let anf_app_0 = print_int c in
    anf_app_0;;
-  let  ll_0 print_int b  = let anf_app_0 = print_int b in
+  let  ll_0 b  = let anf_app_0 = print_int b in
    let () = anf_app_0 in
-   let anf_app_1 = ll_1 print_int in
-   anf_app_1;;
+   ll_1;;
   let  foo a  = let anf_app_0 = print_int a in
    let () = anf_app_0 in
-   let anf_app_1 = ll_0 print_int in
-   anf_app_1;;
+   ll_0;;
   let  main  = let anf_app_0 = foo 4 8 9 in
    let () = anf_app_0 in
    0;;

@@ -118,7 +118,7 @@ let rec get_global_names = function
 let infix_ops_set =
   Set.of_list
     (module String)
-    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )" ]
+    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )"; "print_int" ]
 ;;
 
 let convert global_ctx declaration =
