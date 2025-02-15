@@ -1240,7 +1240,7 @@ let rbo = bin_o<span data-count="63">p</span> chainr1
 let op l = <span data-count="315">c</span>hoice (List.ma<span data-count="315">p</span> ~f:(fun o -&gt; <span data-count="819">t</span>oke<span data-count="819">n</span> o &gt;&gt;| eval) l)
 let mul_div = o<span data-count="63">p</span> [ op_mul; op_div ]
 let add_sub = o<span data-count="63">p</span> [ op_plus; op_minus ]
-let cmp = o<span data-count="63">p</span> [ op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq; op_not_eq ]
+let cmp = o<span data-count="63">p</span> [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq ]
 let andop = o<span data-count="63">p</span> [ op_and ]
 let orop = o<span data-count="63">p</span> [ op_or ]
 

@@ -760,11 +760,11 @@ let%expect_test "base bin ops" =
 ;;
 
 let%expect_test "infix op" =
-  <span data-count="1">l</span>et () = parse_test "a != b" in
+  <span data-count="1">l</span>et () = parse_test "a &lt;&gt; b" in
   <span data-count="1">[</span>%expect
     {|
     [(Str_eval
-        (Exp_apply ((Exp_apply ((Exp_ident "!="), (Exp_ident "a"))),
+        (Exp_apply ((Exp_apply ((Exp_ident "&lt;&gt;"), (Exp_ident "a"))),
            (Exp_ident "b"))))
       ] |}<span data-count="5">]</span>
 ;;
