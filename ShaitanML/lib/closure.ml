@@ -5,39 +5,39 @@
 open Ast
 open Base
 
-let unbound_identifiers exp =
+let find_unbound_ids exp =
   let rec helper =
-    let rec bind_pattern pat base_set =
-      let rec bind_pattern_list acc = function
+    let rec bind_pat pat base_set =
+      let rec bind_pat_list acc = function
         | h :: tl ->
           (match h with
-           | PAny -> bind_pattern_list acc tl
+           | PAny -> bind_pat_list acc tl
            | PCons (pat1, pat2) ->
-             let new_acc = bind_pattern_list acc (pat1 :: [ pat2 ]) in
-             bind_pattern_list new_acc tl
-           | PVar id -> bind_pattern_list (Set.remove acc id) tl
+             let new_acc = bind_pat_list acc (pat1 :: [ pat2 ]) in
+             bind_pat_list new_acc tl
+           | PVar id -> bind_pat_list (Set.remove acc id) tl
            | PTuple patterns ->
-             let new_acc = bind_pattern_list acc patterns in
-             bind_pattern_list new_acc tl
-           | PConst _ -> bind_pattern_list acc tl
+             let new_acc = bind_pat_list acc patterns in
+             bind_pat_list new_acc tl
+           | PConst _ -> bind_pat_list acc tl
            | PConstraint (pat, _) ->
-             let new_acc = bind_pattern pat base_set in
-             bind_pattern_list new_acc tl)
+             let new_acc = bind_pat pat base_set in
+             bind_pat_list new_acc tl)
         | [] -> acc
       in
       match pat with
       | PAny | PConst _ -> base_set
-      | PCons (pat1, pat2) -> bind_pattern_list base_set (pat1 :: [ pat2 ])
+      | PCons (pat1, pat2) -> bind_pat_list base_set (pat1 :: [ pat2 ])
       | PVar x -> Set.remove base_set x
-      | PTuple pats -> bind_pattern_list base_set pats
-      | PConstraint (pat, _) -> bind_pattern_list base_set [ pat ]
+      | PTuple pats -> bind_pat_list base_set pats
+      | PConstraint (pat, _) -> bind_pat_list base_set [ pat ]
     in
     function
     | EConst _ -> (module String) |> Set.empty
     | EVar id -> Set.add ((module String) |> Set.empty) id
     | EFun (pat, exp) ->
       let unbound_in_fun = helper exp in
-      bind_pattern pat unbound_in_fun
+      bind_pat pat unbound_in_fun
     | EApply (left_exp, right_exp) ->
       let unbound_in_left = helper left_exp in
       let unbound_in_right = helper right_exp in
@@ -68,8 +68,8 @@ let unbound_identifiers exp =
       let unbound_in_outer = helper outer_exp in
       let unbound_in_inner = helper inner_exp in
       let binds = collect_binds ((module String) |> Set.empty) outer_exp in
-      let unbound_in_outer_without_pat = bind_pattern pat unbound_in_outer in
-      let unbound_in_inner_without_pat = bind_pattern pat unbound_in_inner in
+      let unbound_in_outer_without_pat = bind_pat pat unbound_in_outer in
+      let unbound_in_inner_without_pat = bind_pat pat unbound_in_inner in
       let unbound_in_inner_final = Set.diff unbound_in_inner_without_pat binds in
       let unbound_in_outer_final = Set.diff unbound_in_outer_without_pat binds in
       Set.union unbound_in_outer_final unbound_in_inner_final
@@ -83,12 +83,11 @@ let unbound_identifiers exp =
         List.fold
           branches
           ~init:((module String) |> Set.empty)
-          ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
+          ~f:(fun acc (pat, exp) -> Set.union acc (bind_pat pat (helper exp)))
       in
       Set.union unbound_in_braches (helper expr)
     | ECons (head, tail) -> Set.union (helper head) (helper tail)
     | EConstraint (exp, _) -> helper exp
-    | _ -> failwith "Not implemented"
   in
   helper exp
 ;;
@@ -115,7 +114,7 @@ let rec get_global_names = function
 ;;
 
 let infix_ops_set =
-  Set.of_list (module String) [ "(+)"; "(*)"; "(-)"; "(=)"; "(/)" ]
+  Set.of_list (module String) [ "+"; "*"; "-"; "="; "=="; "/" ]
 ;;
 
 let convert global_ctx declaration =
@@ -128,7 +127,7 @@ let convert global_ctx declaration =
          List.fold_left ids ~f:(fun f arg -> EApply (f, arg)) ~init:(EVar id)
        | None -> EVar id)
     | EFun (pat, body) ->
-      let unbound_names = unbound_identifiers (EFun (pat, body)) in
+      let unbound_names = find_unbound_ids (EFun (pat, body)) in
       let unbound_names_without_global =
         Set.diff (Set.diff unbound_names global_ctx) infix_ops_set
       in
@@ -166,7 +165,7 @@ let convert global_ctx declaration =
     | ELet (rec_flag, (pat, outer), inner) ->
       let handle_inner_fun id outer updated_lts updated_global_env =
         let unbound_names =
-          unbound_identifiers (ELet (rec_flag, (pat, outer), inner))
+          find_unbound_ids (ELet (rec_flag, (pat, outer), inner))
         in
         let unbound_names_without_global =
           Set.diff (Set.diff unbound_names updated_global_env) infix_ops_set
@@ -230,7 +229,6 @@ let convert global_ctx declaration =
         ( helper lts local_ctx (Set.diff global_ctx infix_ops_set) head
         , helper lts local_ctx (Set.diff global_ctx infix_ops_set) tail )
     | EConstraint (exp, _) -> helper lts local_ctx global_ctx exp
-    | _ -> failwith "Not implemented"
   in
   let close_declaration global_ctx = function
     | SValue (flag, [ (pat, exp) ]) ->
