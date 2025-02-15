@@ -246,7 +246,6 @@ expr:
 
 (* possible elements in list *)
 list_pattern:
-    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
     | value                                                 { Const $1 } 
     | id                                                    { Var $1 }
     | WILDCARD                                              { Wildcard }
