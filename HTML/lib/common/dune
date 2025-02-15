@@ -1,6 +1,6 @@
 (library
  (name Common)
- (modules Ops)
+ (modules Ops Stdlib)
  (libraries base)
  (instrumentation
   (backend bisect_ppx)))
