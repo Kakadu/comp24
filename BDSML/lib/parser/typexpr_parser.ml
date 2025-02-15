@@ -17,7 +17,7 @@ let parse_single =
 let parse_typeconstr prev =
   let rec go acc =
     (let+ main_type = ws1 *> parse_ident_name in
-     Type_params (acc, main_type))
+     Type_parametric (acc, main_type))
     >>= go
     <|> return acc
   in
