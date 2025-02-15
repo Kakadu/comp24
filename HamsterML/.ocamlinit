@@ -4,6 +4,9 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
+open HamsterML__Closure_conversion;;
+
+open Base
 
 let lexer (s: string) =
   let rec build_list lexbuf =
@@ -31,6 +34,9 @@ let parse_pattern (s : string) : pattern =
   let ast = HamsterML__Parser.prog_pattern HamsterML__Lexer.read lexbuf in
   ast
 ;;
+
+let unbound_identifiers exp = 
+  Set.to_list (HamsterML__Closure_conversion.unbound_variables (parse_expr exp))
 
 (* let typecheck (s : string) =
   let std = Format.std_formatter in
