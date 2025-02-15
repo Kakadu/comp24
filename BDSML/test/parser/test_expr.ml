@@ -18,6 +18,15 @@ let%expect_test "test just sum" =
     |}]
 ;;
 
+let%expect_test "test bool" =
+  test_expr "true, false";
+  [%expect
+    {|
+    (Exp_tuple
+       [(Exp_constant (Const_bool true)); (Exp_constant (Const_bool false))])
+    |}]
+;;
+
 let%expect_test "test sum priority" =
   test_expr "4 + 5 + 6";
   [%expect

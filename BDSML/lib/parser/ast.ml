@@ -6,6 +6,7 @@ type constant =
   | Const_int of int (** Integer literal, e.g. [69] *)
   | Const_char of char (** Character literal, e.g. ['m'] *)
   | Const_string of string (** String literal, e.g. ["something"] *)
+  | Const_bool of bool (** Bool literal, [true] or [false] *)
 [@@deriving show { with_path = false }]
 
 type typexpr =
@@ -36,8 +37,8 @@ type pattern =
 [@@deriving show { with_path = false }]
 
 type let_binding =
-  | Pat_binding of pattern * expression
-  | Val_binding of string * pattern list * expression
+  | Pat_binding of pattern * expression (** e.g. [let (a, b) = (1, 2)] *)
+  | Val_binding of string * pattern list * expression (** e.g. [let f a b = a + b] *)
 [@@deriving show { with_path = false }]
 
 and case =
