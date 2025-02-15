@@ -25,7 +25,7 @@ PASS
   let main = let () = (print_int (fac 4))
   in 0
 
-NO LAMBDA LIFT????? fun print_int -> print_int
+PASS
   $ ./cc_ll_demo.exe < manytests/typed/002fac.ml
   let fun-1 print_int = print_int;;
   let fun-0 n k p = k (p * n);;
@@ -63,7 +63,7 @@ PASS
   let main = let () = (print_int ((fix fac) 6))
   in 0
 
-LAMBDA LIFT???
+PASS
   $ ./cc_ll_demo.exe < manytests/typed/006partial.ml
   let fun-1 foo = (foo * 10);;
   let fun-0 foo = (foo + 2);;
@@ -84,11 +84,7 @@ PASS
   in let () = (print_int foo)
   in 0
 
-DON'T LIKE THIS OUTPUT, SHOULD BE 
-let  ll_1 print_int c  = (print_int c)
-let  ll_0 print_int b  = (let  () = (print_int b) in (ll_1 print_int))
-let  foo a  = (let  () = (print_int a) in (ll_0 print_int))
-let  main  = (let  () = (((foo 4) 8) 9) in 0)
+PASS
   $ ./cc_ll_demo.exe < manytests/typed/006partial3.ml
   let fun-1 b = let () = (print_int b)
   in fun-0;;
@@ -99,13 +95,14 @@ let  main  = (let  () = (((foo 4) 8) 9) in 0)
   in 0
 
 
+PASS
   $ ./cc_ll_demo.exe < manytests/typed/007order.ml
   let _start () () a () b _c () d __ = let () = print_int (a + b)
   in let () = (print_int __)
   in (((a * b) / _c) + d);;
   let main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (- 1))) 10000) (- 555555)))
 
-NO LAMBDA LIFT AS WELL
+PASS
   $ ./cc_ll_demo.exe < manytests/typed/008ascription.ml
   let fun-1 _start = ((_start / 2) = 0);;
   let fun-0 x = if b then (x + 1) else (x * 2);;
