@@ -90,11 +90,11 @@ let  ll_0 print_int b  = (let  () = (print_int b) in (ll_1 print_int))
 let  foo a  = (let  () = (print_int a) in (ll_0 print_int))
 let  main  = (let  () = (((foo 4) 8) 9) in 0)
   $ ./cc_ll_demo.exe < manytests/typed/006partial3.ml
-  let fun-1 print_int b = let () = (print_int b)
-  in (fun-0 print_int);;
-  let fun-0 print_int c = (print_int c);;
+  let fun-1 b = let () = (print_int b)
+  in fun-0;;
+  let fun-0 c = (print_int c);;
   let foo a = let () = (print_int a)
-  in (fun-1 print_int);;
+  in fun-1;;
   let main = let () = (((foo 4) 8) 9)
   in 0
 
@@ -121,8 +121,8 @@ PASS
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   Fatal error: exception Failure("todo")
   Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 345, characters 14-36
-  Called from Anf__Cc.closure_convert_decl_list in file "lib/anf/cc.ml", line 346, characters 15-43
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 289, characters 28-61
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 290, characters 17-37
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
@@ -134,7 +134,7 @@ PASS
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 351, characters 24-56
+  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 298, characters 24-67
   Called from Dune__exe__Cc_ll_demo.cc_ll_test in file "demos/cc_ll_demo.ml", line 4, characters 15-44
   [2]
 

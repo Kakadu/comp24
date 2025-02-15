@@ -249,16 +249,19 @@ and closure_convert_let_in (d : decl) : decl cc =
     return (DLet (rf, (pat_or_op, cexpr)))
   | _ -> failwith "todo"
 
-and closure_convert_decl (d : decl) : decl cc =
+and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     (* todo global env *)
-    let _, body = efun_conversion StringSet.empty expr in
+    let _, body = efun_conversion global_env expr in
+    (* horrible todo*)
     let global_env =
-      StringSet.from_list @@ if rf = Recursive then pattern_to_string pat_or_op else []
+      StringSet.union global_env
+      @@ StringSet.from_list
+      @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
     let* body' = closure_convert_expr global_env body in
-    return @@ DLet (rf, (pat_or_op, change_body body' expr))
+    return (global_env, DLet (rf, (pat_or_op, change_body body' expr)))
   | _ -> failwith "todo"
 (* | DLetMut (rf, lb, lb2, lbs) ->
    let* clb = closure_convert_expr (snd lb) in
@@ -280,16 +283,22 @@ and closure_convert_branch env (br : branch) : branch cc =
   return (pat, cexpr)
 ;;
 
-let rec closure_convert_decl_list (decls : decl list) : decl list cc =
-  match decls with
-  | [] -> return []
-  | d :: ds ->
-    let* cd = closure_convert_decl d in
-    let* cds = closure_convert_decl_list ds in
-    return (cd :: cds)
+let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
+  : decl list cc
+  =
+  let rec helper global_env decls =
+    match decls with
+    | [] -> return []
+    | d :: ds ->
+      let* global_env, cd = closure_convert_decl global_env d in
+      let* cds = helper global_env ds in
+      return (cd :: cds)
+  in
+  helper global_env decls
 ;;
 
 let closure_convert (prog : decl list) : decl list =
-  let decls, _, extra = closure_convert_decl_list prog 0 in
+  let global_env = StringSet.from_list Common.Stdlib.stdlib in
+  let decls, _, extra = closure_convert_decl_list global_env prog 0 in
   List.rev extra @ decls
 ;;
