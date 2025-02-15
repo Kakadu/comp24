@@ -139,6 +139,17 @@ let%test _ =
   infer_expr "fun xs -> match xs with [] -> 10 | h::tl -> h" = TArrow (TList TInt, TInt)
 ;;
 
+let%test _ =
+  infer_expr
+    "fun f xs -> match xs with \n\
+    \      | [] -> [] \n\
+    \      | (a: int)::[] -> [(f a: bool)] \n\
+    \      | a::b::[] -> [f a; f b] \n\
+    \      | a::b::c::[] -> [f a; f b; f c] \n\
+    \      | a::b::c::d::tl -> f a :: f b :: f c :: f d :: []"
+  = TArrow (TArrow (TInt, TBool), TArrow (TList TInt, TList TBool))
+;;
+
 (* let%test _ = typecheck_expr (parse_expr "let x = true") = TBool
 let%test _ = typecheck_expr (parse_expr "let (a, b) = (1, 2)") = TTuple [ TInt; TInt ]
 
