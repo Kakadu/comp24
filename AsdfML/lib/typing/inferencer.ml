@@ -255,7 +255,8 @@ module TypeEnv = struct
     | PConst CUnit, _ -> return env
     | PWild, _ -> return env
     | PIdent x, _ -> extend env x scheme |> return
-    | PTuple xs, (vars, (TTuple ys as ty)) ->
+    | PTuple (hd1, hd2, tl), (vars, (TTuple ys as ty)) ->
+      let xs = hd1 :: hd2 :: tl in
       List.fold2 xs ys ~init:(return env) ~f:(fun acc x y ->
         let* acc = acc in
         extend_pat acc x (vars, y))
@@ -362,7 +363,8 @@ let infer =
       let* fv = fresh_var in
       let env' = TypeEnv.extend env x (VarSet.empty, fv) in
       return (env', fv)
-    | PTuple xs ->
+    | PTuple (hd1, hd2, tl) ->
+      let xs = hd1 :: hd2 :: tl in
       List.fold_right
         xs
         ~init:(return (env, []))
@@ -438,7 +440,8 @@ let infer =
       let* exp_sub, exp_ty = infer_expr let_env expr in
       let* sub = Subst.compose let_sub exp_sub in
       return (sub, exp_ty)
-    | ETuple xs ->
+    | ETuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
       List.fold_right
         xs
         ~init:(return (Subst.empty, []))
@@ -518,7 +521,8 @@ let rec ids_from_pattern pat =
   match pat with
   | Ast.PWild -> "_" |> return
   | PIdent x -> x |> return
-  | PTuple xs ->
+  | PTuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
     xs
     |> List.fold ~init:(return []) ~f:(fun acc x ->
       let* acc = acc in

@@ -33,7 +33,7 @@ type type_ann =
   | TAInt
   | TABool
   | TAUnit
-  | TATuple of type_ann list
+  | TATuple of type_ann * type_ann * type_ann list
   | TAFun of type_ann * type_ann
   | TAList of type_ann
 
@@ -48,7 +48,7 @@ type pattern =
   | PConst of constant
   | PWild
   | PIdent of id
-  | PTuple of pattern list
+  | PTuple of pattern * pattern * pattern list
   | PList of pattern list
   | PCons of pattern * pattern
   | PAnn of pattern * type_ann
@@ -67,7 +67,7 @@ type expr =
   | EIfElse of expr * expr * expr
   | EFun of pattern list * expr
   | ELetIn of definition * expr
-  | ETuple of expr list
+  | ETuple of expr * expr * expr list
   | EList of expr list
   | EMatch of (expr * (pattern * expr) list)
 
@@ -95,7 +95,7 @@ val arb_program : definition list QCheck.arbitrary
 val p_const : constant -> pattern
 val p_wild : pattern
 val p_ident : id -> pattern
-val p_tuple : pattern list -> pattern
+val p_tuple : pattern -> pattern -> pattern list -> pattern
 val p_list : pattern list -> pattern
 val p_cons : pattern -> pattern -> pattern
 val p_ann : pattern -> type_ann -> pattern
@@ -105,7 +105,7 @@ val e_app : expr -> expr -> expr
 val e_if_else : expr -> expr -> expr -> expr
 val e_fun : pattern list -> expr -> expr
 val e_let_in : definition -> expr -> expr
-val e_tuple : expr list -> expr
+val e_tuple : expr -> expr -> expr list -> expr
 val e_list : expr list -> expr
 val e_match : expr -> (pattern * expr) list -> expr
 val d_let : pattern -> expr -> definition

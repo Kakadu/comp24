@@ -34,7 +34,9 @@ type type_ann =
   | TABool (** bool *)
   | TAUnit (** () *)
   | TATuple of
-      (type_ann list[@gen Gen.(list_size (2 -- 4) (gen_type_ann_sized (n / div)))])
+      type_ann
+      * type_ann
+      * (type_ann list[@gen Gen.(list_size (0 -- 4) (gen_type_ann_sized (n / div)))])
   (** (int * bool) *)
   | TAFun of
       (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
@@ -46,7 +48,10 @@ type pattern =
   | PConst of constant
   | PWild (** _ *)
   | PIdent of id (** x *)
-  | PTuple of (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))])
+  | PTuple of
+      pattern
+      * pattern
+      * (pattern list[@gen Gen.(list_size (0 -- 4) (gen_pattern_sized (n / div)))])
   (** (a, b) *)
   | PList of (pattern list[@gen Gen.(list_size (1 -- 4) (gen_pattern_sized (n / div)))])
   (** [1, 2, 3] *)
@@ -72,7 +77,8 @@ type expr =
       (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))]) * expr
   (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
-  | ETuple of (expr list[@gen Gen.(list_size (2 -- 4) (gen_expr_sized (n / div)))])
+  | ETuple of
+      expr * expr * (expr list[@gen Gen.(list_size (0 -- 4) (gen_expr_sized (n / div)))])
   (** (x, fun x -> x, 42) *)
   | EList of (expr list[@gen Gen.(list_size (2 -- 4) (gen_expr_sized (n / div)))])
   (** [1; 2; 3] *)
@@ -101,7 +107,7 @@ type program = (definition list[@gen Gen.(list_size (1 -- 3) gen_definition)])
 let p_const c = PConst c
 let p_wild = PWild
 let p_ident x = PIdent x
-let p_tuple ps = PTuple ps
+let p_tuple hd1 hd2 tl = PTuple (hd1, hd2, tl)
 let p_list ps = PList ps
 let p_cons hd tl = PCons (hd, tl)
 let p_ann p t = PAnn (p, t)
@@ -111,7 +117,7 @@ let e_app f x = EApp (f, x)
 let e_if_else cond e_true e_false = EIfElse (cond, e_true, e_false)
 let e_fun p e = EFun (p, e)
 let e_let_in def e = ELetIn (def, e)
-let e_tuple exprs = ETuple exprs
+let e_tuple hd1 hd2 tl = ETuple (hd1, hd2, tl)
 let e_list exprs = EList exprs
 let e_match e branches = EMatch (e, branches)
 let d_let p e = DLet (NonRec, p, e)

@@ -117,13 +117,21 @@ app_expr:
 | v = identifier { EVar(v) }
 
 tuple:
-| LPAREN es = take_2_or_more_sep(expr, COMMA) RPAREN { ETuple(es) }
+| LPAREN es = take_2_or_more_sep(expr, COMMA) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> ETuple(hd1, hd2, tl) 
+    | _ -> failwith "tuple with less than 2 elements"
+}
 
 list_:
 | LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
 
 type_ann:
-| LPAREN es = take_2_or_more_sep(type_ann, MUL) RPAREN { TATuple(es) }
+| LPAREN es = take_2_or_more_sep(type_ann, MUL) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> TATuple(hd1, hd2, tl) 
+    | _ -> failwith "tuple type annotation with less than 2 elements"
+}
 | ann = type_ann id = identifier { 
     if String.equal id "list" 
     then TAList ann
@@ -149,7 +157,11 @@ pattern:
 | id = identifier { PIdent(id) }
 | LPAREN op = op_binary RPAREN { PIdent(op) }
 | LPAREN pat = pattern COLON ty = type_ann RPAREN { PAnn(pat, ty) }
-| LPAREN es = take_2_or_more_sep(pattern, COMMA) RPAREN { PTuple(es) }
+| LPAREN es = take_2_or_more_sep(pattern, COMMA) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> PTuple(hd1,hd2,tl) 
+    | _ -> failwith "tuple pattern with less than 2 elements"
+}
 | LBRACK es = separated_nonempty_list(SEMI, pattern) RBRACK { PList(es) }
 | l = pattern CONS r = pattern { PCons(l, r) }
 | LPAREN p = pattern RPAREN { p }

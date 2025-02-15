@@ -26,14 +26,18 @@ and pp_type_ann fmt = function
       | e -> fprintf fmt "%a)" pp_type_ann e
     in
     fprintf fmt "(%a -> %a" pp_type_ann e1 pp_rest e2
-  | TATuple xs -> pp_list ~sep:" * " fmt pp_type_ann xs
+  | TATuple (hd1, hd2, tl) -> 
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:" * " fmt pp_type_ann xs
   | TAList x -> fprintf fmt "%a list" pp_type_ann x
 
 and pp_pattern fmt = function
   | PConst c -> fprintf fmt "%a" pp_constant c
   | PWild -> fprintf fmt "_"
   | PIdent id -> fprintf fmt "%s" id
-  | PTuple xs -> pp_list ~sep:", " fmt pp_pattern xs
+  | PTuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:", " fmt pp_pattern xs
   | PList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_pattern xs
   | PCons (l, r) -> fprintf fmt "%a :: %a" pp_pattern l pp_pattern r
   | PAnn (pat, ty) -> fprintf fmt "(%a: %a)" pp_pattern pat pp_type_ann ty
@@ -60,7 +64,9 @@ and pp_expr fmt =
     pp_pattern_list fmt p;
     fprintf fmt " -> %a)" pp_expr e
   | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
-  | ETuple xs -> pp_list ~sep:", " fmt pp_expr xs
+  | ETuple (hd1, hd2, tl) -> 
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:", " fmt pp_expr xs
   | EMatch (e, pe_list) ->
     fprintf fmt "match %a with\n" pp_expr e;
     pp_print_list
