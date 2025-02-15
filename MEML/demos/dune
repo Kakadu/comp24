@@ -4,6 +4,12 @@
  (public_name parser_demo)
  (libraries MEML_lib stdio))
 
+
+
+(cram
+ (deps ./demos.exe)
+ )
+
 (cram
  (applies_to
   parser_demo
