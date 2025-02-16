@@ -60,3 +60,24 @@ let%expect_test "sanity check" =
     in let nested4 = ((fun-1 nested3) nested2)
     in (nested4 55) |}]
 ;;
+
+let%expect_test "sanity check" =
+  CcTests.cc_test
+    {|let length_tail =
+  let rec helper acc xs =
+  match xs with
+  | [] -> acc
+  | h::tl -> helper (acc + 1) tl
+  in
+  helper 0
+
+|};
+  [%expect
+    {|
+    let rec fun-0 acc xs = match xs with
+    | [] -> acc
+    | h :: tl -> (fun-0 (acc + 1) tl);;
+    let length_tail = let helper = fun-0
+    in (helper 0) |}]
+;;
+

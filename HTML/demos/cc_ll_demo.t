@@ -105,7 +105,7 @@ PASS
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/008ascription.ml
   let fun-1 _start = ((_start / 2) = 0);;
-  let fun-0 x = if b then (x + 1) else (x * 2);;
+  let fun-0 x b = if b then (x + 1) else (x * 2);;
   let addi f g x = (((f x) ((g x) : bool)) : int);;
   let main = let () = (print_int (((addi fun-0) fun-1) 4))
   in 0
@@ -118,8 +118,8 @@ PASS
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   Fatal error: exception Failure("todo")
   Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 295, characters 28-61
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 296, characters 17-37
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 360, characters 28-61
+  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 361, characters 17-37
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
@@ -131,22 +131,22 @@ PASS
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
   Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 304, characters 24-67
+  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 369, characters 24-67
   Called from Dune__exe__Cc_ll_demo.cc_ll_test in file "demos/cc_ll_demo.ml", line 4, characters 15-44
   [2]
 
   $ ./cc_ll_demo.exe < manytests/typed/016lists.ml
   let fun-2 h a = (h, a);;
-  let fun-1 xs = match xs with
+  let rec fun-1 xs = match xs with
   | [] -> []
-  | h :: tl -> ((append h) (helper tl));;
-  let fun-0 acc = match xs with
+  | h :: tl -> ((append h) (fun-1 tl));;
+  let rec fun-0 acc xs = match xs with
   | [] -> acc
-  | h :: tl -> (helper (acc + 1) tl);;
+  | h :: tl -> (fun-0 (acc + 1) tl);;
   let rec length xs = match xs with
   | [] -> 0
   | h :: tl -> (1 + (length tl));;
-  let length_tail = let rec helper = fun-0
+  let length_tail = let helper = fun-0
   in (helper 0);;
   let rec map f xs = match xs with
   | [] -> []
@@ -157,7 +157,7 @@ PASS
   let rec append xs ys = match xs with
   | [] -> ys
   | x :: xs -> x :: ((append xs) ys);;
-  let concat = let rec helper = fun-1
+  let concat = let helper = fun-1
   in helper;;
   let rec iter f xs = match xs with
   | [] -> ()
