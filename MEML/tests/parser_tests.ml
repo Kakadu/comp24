@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -205,7 +205,7 @@ let%expect_test "expression_test" =
   start_test parse_expression show_expression test;
   [%expect
     {|
-    (ELetIn (Notrec, "sum",
+    (ELetIn (Notrec, ["sum"],
        (EFun ((PVar ("a", TUnknown)),
           (EFun ((PVar ("b", TUnknown)),
              (EBinaryOp (Add, (EVar ("a", TUnknown)), (EVar ("b", TUnknown))))))
@@ -248,9 +248,9 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "plusfive",
+    (Let (Notrec, ["plusfive"],
        (EFun ((PVar ("x", TUnknown)),
-          (ELetIn (Notrec, "five",
+          (ELetIn (Notrec, ["five"],
              (EFun ((PVar ("a", TUnknown)),
                 (EBinaryOp (Add, (EVar ("a", TUnknown)), (EConst (CInt 5)))))),
              (EApp ((EVar ("five", TUnknown)), (EVar ("x", TUnknown))))))
@@ -270,7 +270,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "Add",
+    (Let (Notrec, ["Add"],
        (EFun ((PVar ("x", TUnknown)),
           (EFun ((PVar ("y", TUnknown)),
              (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
@@ -283,7 +283,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "f",
+    (Let (Notrec, ["f"],
        (EFun ((PVar ("x", TInt)),
           (EFun ((PVar ("y", TInt)),
              (EBinaryOp (Add, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
@@ -324,7 +324,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "f",
+    (Let (Notrec, ["f"],
        (EFun ((PVar ("x", TInt)),
           (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 4))))))
        ))
@@ -354,7 +354,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Rec, "fib",
+    (Let (Rec, ["fib"],
        (EFun ((PVar ("n", TUnknown)),
           (EIfElse (
              (EBinaryOp (Less, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
@@ -384,9 +384,9 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Rec, "cps_fact",
+    (Let (Rec, ["cps_fact"],
        (EFun ((PVar ("x", TUnknown)),
-          (ELetIn (Notrec, "helper",
+          (ELetIn (Notrec, ["helper"],
              (EFun ((PVar ("x", TUnknown)),
                 (EFun ((PVar ("acc", TUnknown)),
                    (EIfElse (
@@ -420,7 +420,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "f",
+    (Let (Notrec, ["f"],
        (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
           (EFun ((PVar ("x", TInt)),
              (EFun ((PVar ("y", TInt)),
@@ -438,7 +438,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "Add",
+    (Let (Notrec, ["Add"],
        (EFun ((PVar ("x", TInt)),
           (EFun ((PVar ("y", TInt)),
              (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
@@ -452,7 +452,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "h",
+    (Let (Notrec, ["h"],
        (EFun ((PVar ("f1", TUnknown)),
           (EFun ((PVar ("f2", TUnknown)),
              (EFun ((PVar ("f3", TUnknown)),
@@ -488,7 +488,7 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, "h",
+    (Let (Notrec, ["h"],
        (EFun ((PVar ("f1", TUnknown)),
           (EFun ((PVar ("f2", TUnknown)),
              (EFun ((PVar ("f3", TUnknown)),
