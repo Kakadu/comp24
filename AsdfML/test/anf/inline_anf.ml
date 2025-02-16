@@ -124,20 +124,20 @@ let%expect_test _ =
   [%expect
     {|
     let cross `arg_0 `arg_1 =
-      let a2 = `get_tuple_field `arg_1 2 in
+      let a2 = `get_tuple_field `arg_1 0 in
       let a4 = `get_tuple_field `arg_1 1 in
-      let a6 = `get_tuple_field `arg_1 0 in
-      let a9 = `get_tuple_field `arg_0 2 in
+      let a6 = `get_tuple_field `arg_1 2 in
+      let a9 = `get_tuple_field `arg_0 0 in
       let a11 = `get_tuple_field `arg_0 1 in
-      let a13 = `get_tuple_field `arg_0 0 in
-      let a24 = ( * ) a11 a2 in
-      let a25 = ( * ) a9 a4 in
+      let a13 = `get_tuple_field `arg_0 2 in
+      let a24 = ( * ) a11 a6 in
+      let a25 = ( * ) a13 a4 in
       let a15 = ( - ) a24 a25 in
-      let a22 = ( * ) a9 a6 in
-      let a23 = ( * ) a13 a2 in
+      let a22 = ( * ) a13 a2 in
+      let a23 = ( * ) a9 a6 in
       let a17 = ( - ) a22 a23 in
-      let a20 = ( * ) a13 a4 in
-      let a21 = ( * ) a11 a6 in
+      let a20 = ( * ) a9 a4 in
+      let a21 = ( * ) a11 a2 in
       let a19 = ( - ) a20 a21 in
       (a15, a17, a19)
     let main =
@@ -162,10 +162,8 @@ let%expect_test _ =
   [%expect
     {|
     let map f list =
-      let a11 = `list_is_empty list in
-      let a9 = not a11 in
-      let a10 = ( && ) true true in
-      let a1 = ( && ) a9 a10 in
+      let a9 = `list_is_empty list in
+      let a1 = not a9 in
       if a1
       then
         let a3 = `list_hd list in
@@ -175,17 +173,15 @@ let%expect_test _ =
         ( :: ) a7 a8
       else []
     let map_ f list =
-      let a23 = `list_is_empty list in
-      let a21 = not a23 in
-      let a22 = ( && ) true true in
-      let a13 = ( && ) a21 a22 in
-      if a13
+      let a19 = `list_is_empty list in
+      let a11 = not a19 in
+      if a11
       then
-        let a15 = `list_hd list in
-        let a17 = `list_tl list in
-        let a19 = f a15 in
-        let a20 = map f a17 in
-        ( :: ) a19 a20
+        let a13 = `list_hd list in
+        let a15 = `list_tl list in
+        let a17 = f a13 in
+        let a18 = map f a15 in
+        ( :: ) a17 a18
       else []
     |}]
 ;;

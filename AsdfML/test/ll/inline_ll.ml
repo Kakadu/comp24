@@ -241,7 +241,7 @@ let%expect_test _ =
   [%expect
     {|
     let map f list =
-      if (( && ) (not (`list_is_empty list)) (( && ) true true))
+      if (not (`list_is_empty list))
       then
         let hd = (`list_hd list) in
         let tl = (`list_tl list) in

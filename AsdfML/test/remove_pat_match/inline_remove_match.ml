@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Lib
 
@@ -34,10 +33,47 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let tuple_sum = (fun `arg_0 -> let `tuple = `arg_0
-     in let b = (`get_tuple_field `tuple 1)
-     in let a = (`get_tuple_field `tuple 0)
+    let tuple_sum = (fun `arg_0 -> let `tuple_0 = `arg_0
+     in let a = (`get_tuple_field `tuple_0 0)
+     in let b = (`get_tuple_field `tuple_0 1)
      in (( + ) a b))
+    |}]
+;;
+
+let%expect_test _ =
+  test {|
+    let f x = match x with 
+    | (a, (b, c)) -> a + b + c
+    | _ -> 0
+  |};
+  [%expect
+    {|
+    let f = (fun x -> if (( && ) (( = ) (`tuple_len x) 2) (( = ) (`tuple_len (`get_tuple_field x 1)) 2)) then let `tuple_0 = x
+     in let a = (`get_tuple_field `tuple_0 0)
+     in let `tuple_1 = (`get_tuple_field `tuple_0 1)
+     in let b = (`get_tuple_field `tuple_1 0)
+     in let c = (`get_tuple_field `tuple_1 1)
+     in (( + ) (( + ) a b) c) else 0)
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let f x = match x with
+    | [[a; b]; [c; d]] -> a + b + c + d
+    | _ -> 0
+  |};
+  [%expect
+    {|
+    let f = (fun x -> if (( && ) (( && ) (( = ) (`list_len x) 2) (( = ) (`list_len (`list_field x 0)) 2)) (( = ) (`list_len (`list_field x 1)) 2)) then let `list_0 = x
+     in let `list_2 = (`list_field `list_0 0)
+     in let a = (`list_field `list_2 0)
+     in let b = (`list_field `list_2 1)
+     in let `list_1 = (`list_field `list_0 1)
+     in let c = (`list_field `list_1 0)
+     in let d = (`list_field `list_1 1)
+     in (( + ) (( + ) (( + ) a b) c) d) else 0)
     |}]
 ;;
 
@@ -50,9 +86,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let _ = let tuple_sum = (fun `arg_0 -> let `tuple = `arg_0
-     in let b = (`get_tuple_field `tuple 1)
-     in let a = (`get_tuple_field `tuple 0)
+    let _ = let tuple_sum = (fun `arg_0 -> let `tuple_0 = `arg_0
+     in let a = (`get_tuple_field `tuple_0 0)
+     in let b = (`get_tuple_field `tuple_0 1)
      in (( + ) a b))
      in (tuple_sum (1, 2))
     |}]
@@ -66,9 +102,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let _ = let `tuple = (1, 2)
-     in let y = (`get_tuple_field `tuple 1)
-     in let x = (`get_tuple_field `tuple 0)
+    let _ = let `tuple_0 = (1, 2)
+     in let x = (`get_tuple_field `tuple_0 0)
+     in let y = (`get_tuple_field `tuple_0 1)
      in (( + ) x y)
     |}]
 ;;
@@ -82,7 +118,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec map = (fun f list -> if (( && ) (not (`list_is_empty list)) (( && ) true true)) then let hd = (`list_hd list)
+    let rec map = (fun f list -> if (not (`list_is_empty list)) then let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (( :: ) (f hd) (map f tl)) else [])
     |}]
@@ -116,20 +152,12 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let list_mul = (fun list -> let rec helper = (fun acc list -> if (`list_is_empty list) then acc else if (( && ) (not (`list_is_empty list)) (( && ) (( = ) (`list_hd list) 0) true)) then 0 else let hd = (`list_hd list)
+    let list_mul = (fun list -> let rec helper = (fun acc list -> if (`list_is_empty list) then acc else if (( && ) (not (`list_is_empty list)) (( = ) (`list_hd list) 0)) then 0 else let hd = (`list_hd list)
      in let tl = (`list_tl list)
      in (helper (( * ) hd acc) tl))
      in (helper 1 list))
     |}]
 ;;
-
-(* let%expect_test _ =
-  test {|
-    let (a, b, c) = (1, 2, 3)
-  |};
-  [%expect {|
-    |}]
-;; *)
 
 let%expect_test _ =
   test
@@ -147,5 +175,31 @@ let%expect_test _ =
     let pow = (fun x n -> let rec helper = (fun acc n -> if (( = ) n 0) then acc else let n = n
      in (helper (( * ) acc x) (( - ) n 1)))
      in (helper 1 n))
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let cross (x1, y1, z1) (x2, y2, z2) =
+      let x = (y1 * z2) - (z1 * y2) in
+      let y = (z1 * x2) - (x1 * z2) in
+      let z = (x1 * y2) - (y1 * x2) in
+      (x, y, z)
+  |};
+  [%expect
+    {|
+    let cross = (fun `arg_0 `arg_1 -> let `tuple_1 = `arg_1
+     in let x2 = (`get_tuple_field `tuple_1 0)
+     in let y2 = (`get_tuple_field `tuple_1 1)
+     in let z2 = (`get_tuple_field `tuple_1 2)
+     in let `tuple_0 = `arg_0
+     in let x1 = (`get_tuple_field `tuple_0 0)
+     in let y1 = (`get_tuple_field `tuple_0 1)
+     in let z1 = (`get_tuple_field `tuple_0 2)
+     in let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))
+     in let y = (( - ) (( * ) z1 x2) (( * ) x1 z2))
+     in let z = (( - ) (( * ) x1 y2) (( * ) y1 x2))
+     in (x, y, z))
     |}]
 ;;
