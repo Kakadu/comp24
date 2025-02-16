@@ -1,0 +1,33 @@
+(lang dune 3.7)
+
+(generate_opam_files true)
+
+(cram enable)
+
+(license LGPL-3.0-or-later)
+
+(authors "Nikita Lukonenko and Nikita Nemakin")
+
+(maintainers "Nikita Lukonenko Nikita Nemakin")
+
+(bug_reports "github.com/nemakin/ShaitanML/issues")
+
+(homepage "github.com/nemakin/ShaitanML")
+
+(package
+ (name ShaitanML)
+ (synopsis "Compiler for subset of OCaml")
+ (description
+  "A longer description, for example, which are the most interesing features being supported, etc.")
+ (version 0.1)
+ (depends
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  qcheck
+  (odoc :with-doc)
+  (ocamlformat :build)
+  base))
