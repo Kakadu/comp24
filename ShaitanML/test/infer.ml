@@ -1,4 +1,4 @@
-(** Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -20,9 +20,12 @@ let%expect_test "function with narrowing type annotation" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : int -> int |}]
+    val f : int -> int
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "annotation for rec" =
@@ -40,9 +43,12 @@ let%expect_test "annotation for rec" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val x : int |}]
+    val print_int : int -> unit
+    val x : int
+    |}]
 ;;
 
 let%expect_test "list pattern in let" =
@@ -60,10 +66,13 @@ let%expect_test "list pattern in let" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
     val a : int
-    val b : int list|}]
+    val b : int list
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "nested annotation" =
@@ -81,9 +90,12 @@ let%expect_test "nested annotation" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : int |}]
+    val f : int
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "nested annotation unmatch" =
@@ -111,9 +123,12 @@ let%expect_test "simple annotation" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val x : int |}]
+    val print_int : int -> unit
+    val x : int
+    |}]
 ;;
 
 let%expect_test "fixed point combinator" =
@@ -131,9 +146,12 @@ let%expect_test "fixed point combinator" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3 |}]
+    val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "list folding" =
@@ -155,9 +173,12 @@ let%expect_test "list folding" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val fold_left : ('4 -> '5 -> '4) -> '4 -> '5 list -> '4 |}]
+    val fold_left : ('4 -> '5 -> '4) -> '4 -> '5 list -> '4
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "complex tuple" =
@@ -175,9 +196,12 @@ let%expect_test "complex tuple" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : int -> int -> int * int list |}]
+    val f : int -> int -> int * int list
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "tuple of functions" =
@@ -195,9 +219,12 @@ let%expect_test "tuple of functions" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val fs : ('0 -> '0) * (int -> int -> int) |}]
+    val fs : ('0 -> '0) * (int -> int -> int)
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "unbound variable check" =
@@ -226,9 +253,12 @@ let%expect_test "inner let expr" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : int -> int |}]
+    val f : int -> int
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "multiple args as functions" =
@@ -246,9 +276,12 @@ let%expect_test "multiple args as functions" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5 |}]
+    val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5
+    val print_int : int -> unit
+    |}]
 ;;
 
 let%expect_test "cps function" =
@@ -273,7 +306,10 @@ let%expect_test "cps function" =
     val <= : '1 -> '1 -> bool
     val <> : '1 -> '1 -> bool
     val = : '1 -> '1 -> bool
+    val == : '1 -> '1 -> bool
     val > : '1 -> '1 -> bool
     val >= : '1 -> '1 -> bool
-    val map_cps : ('7 -> '9) -> '7 list -> '9 list |}]
+    val map_cps : ('7 -> '9) -> '7 list -> '9 list
+    val print_int : int -> unit
+    |}]
 ;;
