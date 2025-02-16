@@ -7,25 +7,25 @@ open Base
 open Common.Middleend_Common
 
 let find_free_vars =
-  let rec find_free_vars_pattern pat =
+  let rec find_vars_pattern pat =
     match pat with
     | PWild | PEmpty | PConst _ -> Set.empty (module String)
     | PVar x -> Set.singleton (module String) x
     | PCons (p1, p2, ps) | PTuple (p1, p2, ps) ->
       Set.union_list
         (module String)
-        [ find_free_vars_pattern p1
-        ; find_free_vars_pattern p2
+        [ find_vars_pattern p1
+        ; find_vars_pattern p2
         ; List.fold
             ps
             ~init:(Set.empty (module String))
-            ~f:(fun acc p -> Set.union acc (find_free_vars_pattern p))
+            ~f:(fun acc p -> Set.union acc (find_vars_pattern p))
         ]
       (* According to OCaml rules, all patterns in POr must have same variables set *)
-    | POr (p1, _, _) -> find_free_vars_pattern p1
+    | POr (p1, _, _) -> find_vars_pattern p1
   in
   let rec find_free_vars_case env free_vars (pat, e) =
-    let env = Set.union env (find_free_vars_pattern pat) in
+    let env = Set.union env (find_vars_pattern pat) in
     helper env free_vars e
   and helper env free_vars = function
     | EConst _ -> Set.empty (module String)
