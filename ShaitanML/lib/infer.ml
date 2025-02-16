@@ -1,10 +1,6 @@
-(** Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-
-(* Based on
-   https://gitlab.com/Kakadu/fp2020course-materials/-/blob/master/code/miniml/inferencer.ml?ref_type=heads
-   with new features added and bugs fixed *)
 
 open Ast
 open Typedtree
@@ -15,6 +11,7 @@ type error =
   | `Unbound_variable of id (** Unbound variable *)
   | `Unification_failed of ty * ty (** Failed to unify two types *)
   | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
+  | `Let_rec_lhs
   ]
 
 let pp_error ppf : error -> _ =
@@ -25,6 +22,7 @@ let pp_error ppf : error -> _ =
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
   | `Unreachable_state place -> fprintf ppf "Unreachable state: '%s'" place
+  | `Let_rec_lhs -> fprintf ppf "Left-hand side of let rec should be a variable"
 ;;
 
 type id = string
@@ -398,12 +396,12 @@ let infer_exp =
           cl
       in
       return (sub, t)
-    | ELet (Nonrec, (pattern_, e1) , e2) ->
+    | ELet (Nonrec, (pat, e1), e2) ->
       let* s1, t1 = helper env e1 in
       let env = TypeEnv.apply s1 env in
       let s = generalize env t1 in
-      let* env1, t2 = infer_pat env pattern_ in
-      let env2 = TypeEnv.ext_by_pat s env1 pattern_ in
+      let* env1, t2 = infer_pat env pat in
+      let env2 = TypeEnv.ext_by_pat s env1 pat in
       let* sub = Subst.unify t2 t1 in
       let* sub1 = Subst.compose sub s1 in
       let env3 = TypeEnv.apply sub1 env2 in
@@ -433,7 +431,7 @@ let infer_exp =
          let* sub, t = helper env e2 in
          let* sub = Subst.compose s2 sub in
          return (sub, t)
-       | _ -> fail (`Unreachable_state __FUNCTION__))
+       | _ -> fail `Let_rec_lhs)
     | EFun (p, e) ->
       let* env, t = infer_pat env p in
       let* sub, t1 = helper env e in
@@ -465,12 +463,11 @@ let infer_exp =
       let* sub = Subst.compose_all [ s1; s2; s3 ] in
       let t = Subst.apply sub fresh in
       return (sub, t)
-      | EConstraint (exp, an) ->
+    | EConstraint (exp, an) ->
       let* sub1, t1 = helper env exp in
       let* sub2 = Subst.unify t1 (annot_to_ty an) in
       let* sub = Subst.compose sub1 sub2 in
       return (sub, Subst.apply sub t1)
-    | _ -> fail (`Unreachable_state __FUNCTION__)
   in
   helper
 ;;
@@ -485,7 +482,7 @@ let infer_str_item env = function
           let* fresh = fresh_var in
           match pat with
           | PVar x -> return ((x, fresh) :: acc_vars)
-          | _ -> fail (`Unreachable_state __FUNCTION__))
+          | _ -> fail `Let_rec_lhs)
         ~init:(return [])
         bindings
     in
@@ -560,6 +557,8 @@ let start_env =
     ; ">=", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
     ; "<>", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
     ; "=", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "==", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "print_int", TArrow (TPrim "int", TPrim "unit")
     ]
   in
   let env = TypeEnv.empty in
