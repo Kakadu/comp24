@@ -1508,10 +1508,10 @@ let instantiate : scheme -&gt; ty R.t =
   fun (S (xs, ty)) -&gt;
   <span data-count="328">V</span>arSet.fold
     (fun name typ -&gt;
-       <span data-count="33">l</span>et* typ = typ in
-       <span data-count="33">l</span>et* f1 = fresh_var in
-       <span data-count="33">l</span>et* s = Subst.singleto<span data-count="33">n</span> name f1 in
-       <span data-count="33">r</span>eturn (Subst.appl<span data-count="33">y</span> s typ))
+      <span data-count="33">l</span>et* typ = typ in
+      <span data-count="33">l</span>et* f1 = fresh_var in
+      <span data-count="33">l</span>et* s = Subst.singleto<span data-count="33">n</span> name f1 in
+      <span data-count="33">r</span>eturn (Subst.appl<span data-count="33">y</span> s typ))
     xs
     (retur<span data-count="328">n</span> ty)
 ;;

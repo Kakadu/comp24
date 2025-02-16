@@ -496,8 +496,8 @@ let fmt_const ppf c =
 let fmt_list pp_elem ppf lst =
   <span data-count="0">L</span>ist.iteri
     (fun i pat -&gt;
-       <span data-count="0">i</span>f i &lt;&gt; 0 then <span data-count="0">F</span>ormat.fprint<span data-count="0">f</span> ppf ", " else <span data-count="0">(</span>);
-       pp_elem ppf pat)
+      <span data-count="0">i</span>f i &lt;&gt; 0 then <span data-count="0">F</span>ormat.fprint<span data-count="0">f</span> ppf ", " else <span data-count="0">(</span>);
+      pp_elem ppf pat)
     lst
 ;;
 
@@ -568,8 +568,8 @@ let fmt_str_item ppf decl =
     fprintf "let%a " fmt_rec_flag flag;
     <span data-count="0">L</span>ist.iteri
       (fun i binding -&gt;
-         <span data-count="0">i</span>f i &lt;&gt; 0 then <span data-count="0">f</span>print<span data-count="0">f</span> " and " else <span data-count="0">(</span>);
-         fmt_binding ppf binding)
+        <span data-count="0">i</span>f i &lt;&gt; 0 then <span data-count="0">f</span>print<span data-count="0">f</span> " and " else <span data-count="0">(</span>);
+        fmt_binding ppf binding)
       binding_list;
     <span data-count="0">f</span>printf "\n"
   | <span data-count="0">S</span>Eval exp -&gt; fprintf "%a\n" fmt_expr exp

@@ -151,9 +151,9 @@ let rec pp_typ ppf =
       (pp_print_lis<span data-count="13">t</span>
          ~pp_sep:(fun _ _ -&gt; <span data-count="13">f</span>printf ppf " * ")
          (fun ppf ty -&gt;
-            <span data-count="26">m</span>atch ty with
-            | <span data-count="14">T</span>Arrow _ | <span data-count="0">T</span>Tuple _ -&gt; fprintf ppf "(%a)" pp_typ ty
-            | <span data-count="12">_</span> -&gt; fprintf ppf "%a" pp_typ ty))
+           <span data-count="26">m</span>atch ty with
+           | <span data-count="14">T</span>Arrow _ | <span data-count="0">T</span>Tuple _ -&gt; fprintf ppf "(%a)" pp_typ ty
+           | <span data-count="12">_</span> -&gt; fprintf ppf "%a" pp_typ ty))
       tl
   | <span data-count="10">T</span>List t -&gt; fprintf ppf "%a list" pp_typ t
 ;;
