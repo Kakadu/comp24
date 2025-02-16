@@ -626,8 +626,8 @@ module Infer = struct
                  R.return (subs, scope_t))
             (* let f x y = x + y *)
             | args ->
-              let* env, args_t = infer_args env args in
-              let* expr_s, expr_t = helper env expr in
+              let* arg_env, args_t = infer_args env args in
+              let* expr_s, expr_t = helper arg_env expr in
               let args_t = Subst.apply args_t expr_s in
               (match scope with
                | None -> R.return (expr_s, build_arrow args_t expr_t)
