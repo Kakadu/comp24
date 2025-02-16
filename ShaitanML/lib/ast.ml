@@ -1,4 +1,4 @@
-(** Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -68,3 +68,99 @@ let constr_fun pl e = List.fold_right (fun p e -> EFun (p, e)) pl e
 
 (** Sequence of structure items *)
 type structure = str_item list [@@deriving show { with_path = false }]
+
+let fmt_const ppf c =
+  let fprintf x = Format.fprintf ppf x in
+  match c with
+  | CInt i -> fprintf "%d" i
+  | CBool false -> fprintf "false"
+  | CBool true -> fprintf "true"
+  | CNil -> fprintf "[]"
+  | CUnit -> fprintf "()"
+  | CString s -> fprintf "\"%s\"" s
+;;
+
+let fmt_list pp_elem ppf lst =
+  List.iteri
+    (fun i pat ->
+       if i <> 0 then Format.fprintf ppf ", " else ();
+       pp_elem ppf pat)
+    lst
+;;
+
+let rec fmt_pattern ppf pat =
+  let fprintf x = Format.fprintf ppf x in
+  match pat with
+  | PAny -> fprintf "_"
+  | PCons (h_pat, t_pat) -> fprintf "(%a :: %a)" fmt_pattern h_pat fmt_pattern t_pat
+  | PVar x -> fprintf "%s" x
+  | PTuple lst -> fprintf "(%a)" (fmt_list fmt_pattern) lst
+  | PConst c -> fmt_const ppf c
+  | PConstraint (pat, tp) -> fprintf "(%a : %a)" fmt_pattern pat pp_type_annot tp
+;;
+
+let fmt_rec_flag ppf = function
+  | Rec -> Format.fprintf ppf "rec"
+  | Nonrec -> ()
+;;
+
+let rec fmt_expr ppf exp =
+  let fprintf x = Format.fprintf ppf x in
+  match exp with
+  | EConst c -> fmt_const ppf c
+  | EVar s -> fprintf "%s" s
+  | EFun (pat, exp) -> fprintf "(fun %a -> %a)" fmt_pattern pat fmt_expr exp
+  | EApply (exp1, exp2) -> fprintf "(%a %a)" fmt_expr exp1 fmt_expr exp2
+  | EIf (exp_cond, exp_then, exp_else) ->
+    fprintf
+      "(if %a then %a else %a)"
+      fmt_expr
+      exp_cond
+      fmt_expr
+      exp_then
+      fmt_expr
+      exp_else
+  | ELet (rec_f, (pat, exp_val), exp_body) ->
+    fprintf
+      "(let %a %a = %a in %a)"
+      fmt_rec_flag
+      rec_f
+      fmt_pattern
+      pat
+      fmt_expr
+      exp_val
+      fmt_expr
+      exp_body
+  | ETuple lst -> fprintf "(%a)" (fmt_list fmt_expr) lst
+  | EMatch (pat_head, case_list) ->
+    fprintf "(match %a with" fmt_expr pat_head;
+    List.iter
+      (fun (pat, exp) -> fprintf "\n| %a -> %a" pp_pattern pat fmt_expr exp)
+      case_list;
+    fprintf ")"
+  | EConstraint (exp, tp) -> fprintf "(%a : %a)" fmt_expr exp pp_type_annot tp
+  | ECons (exp1, exp2) -> fprintf "(%a :: %a)" fmt_expr exp1 fmt_expr exp2
+;;
+
+let fmt_binding ppf ((pat, exp) : binding) =
+  Format.fprintf ppf "%a = %a" fmt_pattern pat fmt_expr exp
+;;
+
+let fmt_str_item ppf decl =
+  let fprintf x = Format.fprintf ppf x in
+  match decl with
+  | SValue (flag, [ binding ]) ->
+    fprintf "let %a %a\n" fmt_rec_flag flag fmt_binding binding
+  | SValue (flag, binding_list) ->
+    fprintf "let %a " fmt_rec_flag flag;
+    List.iteri
+      (fun i binding ->
+         if i <> 0 then fprintf " and " else ();
+         fmt_binding ppf binding)
+      binding_list;
+    fprintf "\n"
+  | SEval exp -> fprintf "%a\n" fmt_expr exp
+;;
+
+let fmt_structure ppf decls = List.iter (fmt_str_item ppf) decls
+let print_structure structure = Format.asprintf "%a" fmt_structure structure
