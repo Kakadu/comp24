@@ -1,4 +1,3 @@
-
 module COUNTERMONAD : sig
   val return : 'a -> 'b -> 'b * 'a
   val ( >>= ) : ('a -> 'b * 'c) -> ('c -> 'b -> 'd) -> 'a -> 'd
@@ -17,7 +16,7 @@ val collect_bindings_from_pat
   -> (string, Base.String.comparator_witness) Base.Set.t
 
 val new_name : (string, 'a) Base.Set.t -> int -> int * string
-val collect_function_arguments : Ast.expr -> bindings
+val collect_function_arguments : Ast.pattern list -> Ast.expr -> bindings
 
 val init_env
   :  (string, Base.String.comparator_witness) Base.Set.t

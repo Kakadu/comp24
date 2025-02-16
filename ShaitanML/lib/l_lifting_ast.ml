@@ -1,100 +1,36 @@
 open Ast
 
 type ll_expr =
-  | LLConstant of const
-  | LLIdentifier of id
-  | LLIfThenElse of ll_expr * ll_expr * ll_expr
+  | LLConst of const
+  | LLVar of id
+  | LLIf of ll_expr * ll_expr * ll_expr
   | LLApplication of ll_expr * ll_expr
   | LLConstraint of ll_expr * type_annot
   | LLTuple of ll_expr list
   | LLMatch of ll_expr * (pattern * ll_expr) list
   | LLLetIn of rec_flag * pattern * ll_expr * ll_expr
 
+
 type ll_declaration =
-  | LLDSingleLet of rec_flag * ll_let
-  | LLDMutualRecDecl of rec_flag * ll_let list
+  | LLSingleLet of rec_flag * ll_binding
+  | LLMutLetRec of rec_flag * ll_binding list
 
-and ll_let = LLLet of pattern * pattern list * ll_expr
+and ll_binding = LLLet of pattern * pattern list * ll_expr
 
-let rec pp_type_name ppf tp =
-  let rec_call tp = pp_type_name ppf tp in
-  let fprintf x = Format.fprintf ppf x in
-  match tp with
-  | AUnit -> fprintf "unit"
-  | AInt -> fprintf "int"
-  | ABool -> fprintf "bool"
-  | AString -> fprintf "string"
-  | AVar name -> fprintf "'%s" name
-  | ATuple lst ->
-    fprintf "(";
-    List.iteri
-      (fun i tp ->
-         if i <> 0 then fprintf " * " else ();
-         rec_call tp)
-      lst;
-    fprintf ")"
-  | AFun (tp_arg, tp_ret) -> fprintf "(%a -> %a)" pp_type_name tp_arg pp_type_name tp_ret
-  | AList tp -> fprintf "(%a list)" pp_type_name tp
-;;
-
-let pp_const ppf c =
-  let fprintf x = Format.fprintf ppf x in
-  match c with
-  | CInt i -> fprintf "%d" i
-  | CBool false -> fprintf "false"
-  | CBool true -> fprintf "true"
-  | CNil -> fprintf "[]"
-  | CUnit -> fprintf "()"
-  | CString s -> fprintf "%s" s
-;;
-
-let rec pp_pattern ppf pat =
-  let rec_call = pp_pattern ppf in
-  let fprintf x = Format.fprintf ppf x in
-  match pat with
-  | PAny -> fprintf "_"
-  | PCons (h_pat, t_pat) ->
-    fprintf "(";
-    rec_call h_pat;
-    fprintf " :: ";
-    rec_call t_pat;
-    fprintf ")"
-  | PVar x -> fprintf "%s" x
-  | PTuple lst ->
-    fprintf "(";
-    List.iteri
-      (fun i pat ->
-         if i != 0 then fprintf ", " else ();
-         rec_call pat)
-      lst;
-    fprintf ")"
-  | PConst c -> pp_const ppf c
-  | PConstraint (pat, tp) ->
-    fprintf "(";
-    rec_call pat;
-    fprintf " : ";
-    pp_type_name ppf tp;
-    fprintf ")"
-;;
-
-let frestore_rec_flag ppf = function
-  | Rec -> Format.fprintf ppf "rec"
-  | Nonrec -> ()
-;;
 
 let rec pp_llexpr ppf exp =
   let rec_call = pp_llexpr ppf in
   let fprintf x = Format.fprintf ppf x in
   match exp with
-  | LLConstant c -> pp_const ppf c
-  | LLIdentifier s -> fprintf "%s" s
+  | LLConst c -> Ast.pp_const ppf c
+  | LLVar s -> fprintf "%s" s
   | LLApplication (exp1, exp2) ->
     fprintf "(";
     rec_call exp1;
     fprintf " ";
     rec_call exp2;
     fprintf ")"
-  | LLIfThenElse (exp_cond, exp_then, exp_else) ->
+  | LLIf (exp_cond, exp_then, exp_else) ->
     fprintf "(if (";
     rec_call exp_cond;
     fprintf ") then ";
@@ -104,7 +40,7 @@ let rec pp_llexpr ppf exp =
     fprintf "))"
   | LLLetIn (rec_f, pat, exp_val, exp_body) ->
     fprintf "(let ";
-    frestore_rec_flag ppf rec_f;
+    pp_rec_flag ppf rec_f;
     fprintf " ";
     pp_pattern ppf pat;
     fprintf " = ";
@@ -136,16 +72,16 @@ let rec pp_llexpr ppf exp =
     fprintf "(";
     rec_call exp;
     fprintf " : ";
-    pp_type_name ppf tp;
+   pp_type_annot ppf tp;
     fprintf ")"
 ;;
 
 let pp_ll_declaration fmt = function
-  | LLDSingleLet (rec_flag, LLLet (pat, patterns, l)) ->
+  | LLSingleLet (rec_flag, LLLet (pat, patterns, l)) ->
     Format.fprintf
       fmt
       "let %a %a %a = %a"
-      frestore_rec_flag
+      pp_rec_flag
       rec_flag
       pp_pattern
       pat
@@ -153,9 +89,9 @@ let pp_ll_declaration fmt = function
       patterns
       pp_llexpr
       l
-  | LLDMutualRecDecl (rec_flag, bindings) ->
+  | LLMutLetRec (rec_flag, bindings) ->
     Format.fprintf fmt "let ";
-    frestore_rec_flag fmt rec_flag;
+  pp_rec_flag fmt rec_flag;
     Format.fprintf fmt " ";
     List.iteri
       (fun i binding ->
