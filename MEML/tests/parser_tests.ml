@@ -176,7 +176,7 @@ let%expect_test "expression_test" =
   start_test parse_expression show_expression test;
   [%expect
     {|
-    (ELetIn (Notrec, "sum",
+    (ELetIn (Notrec, ["sum"],
        (EFun ((PVar ("a", TUnknown)),
           (EFun ((PVar ("b", TUnknown)),
              (EBinaryOp (Add, (EVar ("a", TUnknown)), (EVar ("b", TUnknown))))))
