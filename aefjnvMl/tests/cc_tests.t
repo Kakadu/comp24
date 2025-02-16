@@ -7,24 +7,24 @@
   > let test1 x = let test2 y = x + y in test2
   > EOF
   let test1 x =
-   let test2 ac0_x y =
-   (( + ) ac0_x) y in
+   let test2 cc0_x y =
+   (( + ) cc0_x) y in
   test2 x;;
 
   $ dune exec ./cc_runner.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
   let test1 (x, y) =
-   let test2 ac0_y ac1_x i =
-   (ac1_x, ac0_y, i) in
+   let test2 cc0_y cc1_x i =
+   (cc1_x, cc0_y, i) in
   (test2 y) x;;
 
   $ dune exec ./cc_runner.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
   let test1 (x, y) =
-   let test2 ac0_y ac1_x i =
-   (ac1_x, ac0_y, i) in
+   let test2 cc0_y cc1_x i =
+   (cc1_x, cc0_y, i) in
   (test2 y) x;;
 
   $ dune exec ./cc_runner.exe << EOF
@@ -35,7 +35,7 @@
   let rec facCPS n k =
    match n with
     | 0 -> k 1
-    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun ac0_k t ac1_cc_ac0_n -> ac0_k ((( * ) ac1_cc_ac0_n) t)) k) cc_ac0_n);;
+    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k t cc1_cc_ac0_n -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
 
   $ dune exec ./cc_runner.exe << EOF
   > let nested1 = let nested2 = 5 in 
@@ -44,8 +44,8 @@
   > EOF
   let nested1 = let nested2 = 5 in
   let nested3 = 6 in
-  let nested4 ac0_nested3 ac1_nested2 x =
-   (( + ) x) ((((fun ac2_nested3 ac3_nested2 i -> (( + ) ac3_nested2) ac2_nested3) ac0_nested3) ac1_nested2) 8) in
+  let nested4 cc0_nested3 cc1_nested2 x =
+   (( + ) x) ((((fun cc2_nested3 cc3_nested2 i -> (( + ) cc3_nested2) cc2_nested3) cc0_nested3) cc1_nested2) 8) in
   ((nested4 nested3) nested2) 55;;
 
   $ dune exec ./cc_runner.exe << EOF
@@ -56,7 +56,7 @@
   let rec facCPS n k =
    match n with
     | 0 -> k 1
-    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun ac0_k t ac1_cc_ac0_n -> ac0_k ((( * ) ac1_cc_ac0_n) t)) k) cc_ac0_n);;
+    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k t cc1_cc_ac0_n -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
 
   $ dune exec ./cc_runner.exe << EOF
   > let _start () () ()  () =

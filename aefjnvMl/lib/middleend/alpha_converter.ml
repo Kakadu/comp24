@@ -25,8 +25,8 @@ module StringAlphfaconverterMonad = struct
 
   type 'a t = (name_space, 'a, string) Common.Se_monad.Base_SE_Monad.t
 
-  let current_prefix = Common.Naming.alpha_prefix
-  let num_prefix id = current_prefix ^ Int.to_string id
+ 
+  let num_prefix current_prefix id = current_prefix ^ Int.to_string id
   let create_fresh_id id = id + 1
 
   let binding_scope : 'a t -> 'a t =
@@ -40,12 +40,12 @@ module StringAlphfaconverterMonad = struct
 
   let fresh_bind pre_formatter name =
     let apply_prefix pref name_ = pref ^ "_" ^ name_ in
-    let get_uniq_name new_name old_fresh_id b_set =
+    let get_uniq_name cur_pref new_name old_fresh_id b_set =
       let rec helper name_ id_ =
         match Banned_Set.find_opt name_ b_set with
         | None -> id_, name_
         | Some _ ->
-          let supported_name = apply_prefix (num_prefix id_) new_name in
+          let supported_name = apply_prefix (num_prefix cur_pref id_) new_name in
           let fresh_id = create_fresh_id id_ in
           helper supported_name fresh_id
       in
@@ -70,7 +70,7 @@ module StringAlphfaconverterMonad = struct
           | true -> apply_prefix a_pref prepared_name
           | false -> prepared_name
         in
-        get_uniq_name start_name fresh_id b_set
+        get_uniq_name a_pref start_name fresh_id b_set
       in
       let bindings' = Bind_Map.add name name'' bindings in
       let b_set' = add_binding_in_ban_set name name'' b_set in
