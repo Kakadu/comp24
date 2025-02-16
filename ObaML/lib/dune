@@ -3,7 +3,13 @@
 (library
  (name ObaML)
  (public_name ObaML)
- (modules Ast Parser Inferencer Typedtree)
+ (modules
+  Ast
+  Ast_pretty_printer
+  Parser
+  Inferencer
+  Typedtree
+  Closure_conversion)
  (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving.eq))
@@ -12,7 +18,7 @@
 
 (library
  (name tests)
- (modules Parser_tests Infer_tests)
+ (modules Parser_tests Infer_tests Closure_conversion_tests)
  (libraries ObaML)
  (inline_tests)
  (preprocess

@@ -358,3 +358,10 @@ let%expect_test "" =
     val b : string
      |}]
 ;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let rec a = (fun a x -> a x) a;; |};
+  [%expect {|
+    val a : 'a -> 'b
+     |}]
+;;
