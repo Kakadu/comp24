@@ -5,6 +5,7 @@
 open Base
 open Roflanml_lib
 open Ast
+open Ast_to_str
 open Parser
 
 module ParserTests = struct
@@ -469,7 +470,7 @@ module CCTests = struct
 
   let pp_parse_and_cc input =
     match Parser.parse_decl input with
-    | Result.Ok e -> Stdlib.Format.printf "%a" pp_decl (close e env)
+    | Result.Ok e -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -477,10 +478,8 @@ module CCTests = struct
     pp_parse_and_cc "let q = let f x = x in f 10";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f", (EFun (("x", None), (EVar "x"))),
-            (EApp ((EVar "f"), (EConst (CInt 10))))))
-         ))
+      let q =
+      let f x = x in f 10
       |}]
   ;;
 
@@ -488,16 +487,9 @@ module CCTests = struct
     pp_parse_and_cc "let q = let f x = x + 1 in let g x = f x in g 10";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f",
-            (EFun (("x", None),
-               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-            (ELetIn (NonRec, "g",
-               (EFun (("f", None),
-                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-               (EApp ((EApp ((EVar "g"), (EVar "f"))), (EConst (CInt 10))))))
-            ))
-         ))
+      let q =
+      let f x = ( + ) x 1 in
+      let g f x = f x in g f 10
       |}]
   ;;
 
@@ -506,43 +498,11 @@ module CCTests = struct
       "let q = let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f",
-            (EFun (("x", None),
-               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-            (ELetIn (NonRec, "g",
-               (EFun (("f", None),
-                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-               (ELetIn (NonRec, "k",
-                  (EFun (("f", None),
-                     (EFun (("g", None),
-                        (EFun (("x", None),
-                           (EApp ((EApp ((EVar "g"), (EVar "f"))), (EVar "x")))))
-                        ))
-                     )),
-                  (ELetIn (NonRec, "q",
-                     (EFun (("f", None),
-                        (EFun (("g", None),
-                           (EFun (("k", None),
-                              (EFun (("x", None),
-                                 (EApp (
-                                    (EApp ((EApp ((EVar "k"), (EVar "f"))),
-                                       (EVar "g"))),
-                                    (EVar "x")))
-                                 ))
-                              ))
-                           ))
-                        )),
-                     (EApp (
-                        (EApp (
-                           (EApp ((EApp ((EVar "q"), (EVar "f"))), (EVar "g"))),
-                           (EVar "k"))),
-                        (EConst (CInt 1))))
-                     ))
-                  ))
-               ))
-            ))
-         ))
+      let q =
+      let f x = ( + ) x 1 in
+      let g f x = f x in
+      let k f g x = g f x in
+      let q f g k x = k f g x in q f g k 1
       |}]
   ;;
 
@@ -550,28 +510,9 @@ module CCTests = struct
     pp_parse_and_cc "let q = let x = 1 in let y = 2 in fun z -> x + y + z";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "x", (EConst (CInt 1)),
-            (ELetIn (NonRec, "y", (EConst (CInt 2)),
-               (EApp (
-                  (EApp (
-                     (EFun (("x", None),
-                        (EFun (("y", None),
-                           (EFun (("z", None),
-                              (EApp (
-                                 (EApp ((EVar "+"),
-                                    (EApp ((EApp ((EVar "+"), (EVar "x"))),
-                                       (EVar "y")))
-                                    )),
-                                 (EVar "z")))
-                              ))
-                           ))
-                        )),
-                     (EVar "x"))),
-                  (EVar "y")))
-               ))
-            ))
-         ))
+      let q =
+      let x = 1 in
+      let y = 2 in (fun x y z -> ( + ) (( + ) x y) z) x y
       |}]
   ;;
 
@@ -579,64 +520,23 @@ module CCTests = struct
     pp_parse_and_cc "let q = let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "x", (EConst (CInt 1)),
-            (EApp (
-               (EApp (
-                  (EFun (("x", None),
-                     (EFun (("f", None),
-                        (EFun (("y", None),
-                           (EApp (
-                              (EApp ((EVar "+"),
-                                 (EApp (
-                                    (EApp ((EVar "+"),
-                                       (EApp ((EVar "f"), (EVar "x"))))),
-                                    (EVar "x")))
-                                 )),
-                              (EConst (CInt 1))))
-                           ))
-                        ))
-                     )),
-                  (EVar "x"))),
-               (EApp (
-                  (EFun (("x", None),
-                     (EFun (("z", None),
-                        (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "z")))))
-                     )),
-                  (EVar "x")))
-               ))
-            ))
-         ))
+      let q =
+      let x = 1 in (fun x f y -> ( + ) (( + ) (f x) x) 1) x ((fun x z -> ( + ) x z) x)
       |}]
   ;;
 
   let%expect_test "no closure with stdlib" =
     pp_parse_and_cc "let f x = print_int x";
-    [%expect
-      {|
-      (DLet (NonRec, "f",
-         (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x")))))))
-      |}]
+    [%expect {| let f x = print_int x |}]
   ;;
 
   let%expect_test "closure with rec" =
     pp_parse_and_cc "let q = let f x = x + 1 in let rec g x = f x + g x in g";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f",
-            (EFun (("x", None),
-               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-            (ELetIn (Rec, "g",
-               (EFun (("f", None),
-                  (EFun (("x", None),
-                     (EApp ((EApp ((EVar "+"), (EApp ((EVar "f"), (EVar "x"))))),
-                        (EApp ((EApp ((EVar "g"), (EVar "f"))), (EVar "x")))))
-                     ))
-                  )),
-               (EApp ((EVar "g"), (EVar "f")))))
-            ))
-         ))
+      let q =
+      let f x = ( + ) x 1 in
+      let rec g f x = ( + ) (f x) (g f x) in g f
       |}]
   ;;
 
@@ -646,42 +546,10 @@ module CCTests = struct
        k (x * n)) in fact 10 (fun x -> x)";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (Rec, "fact",
-            (EFun (("x", None),
-               (EFun (("k", None),
-                  (EMatch ((EVar "x"),
-                     [((PConst (CInt 1)), (EApp ((EVar "k"), (EConst (CInt 1)))));
-                       ((PVar "x"),
-                        (EApp (
-                           (EApp ((EVar "fact"),
-                              (EApp ((EApp ((EVar "-"), (EVar "x"))),
-                                 (EConst (CInt 1))))
-                              )),
-                           (EApp (
-                              (EApp (
-                                 (EFun (("k", None),
-                                    (EFun (("x", None),
-                                       (EFun (("n", None),
-                                          (EApp ((EVar "k"),
-                                             (EApp (
-                                                (EApp ((EVar "*"), (EVar "x"))),
-                                                (EVar "n")))
-                                             ))
-                                          ))
-                                       ))
-                                    )),
-                                 (EVar "k"))),
-                              (EVar "x")))
-                           )))
-                       ]
-                     ))
-                  ))
-               )),
-            (EApp ((EApp ((EVar "fact"), (EConst (CInt 10)))),
-               (EFun (("x", None), (EVar "x")))))
-            ))
-         ))
+      let q =
+      let rec fact x k = match x with
+      | 1 -> k 1
+      | x -> fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x) in fact 10 (fun x -> x)
       |}]
   ;;
 end
@@ -708,6 +576,42 @@ module LLTests = struct
     pp_parse_and_ll
       "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
        k (x * n)) in fact 10 (fun x -> x)";
-    [%expect {| Failed to parse |}]
+    [%expect
+      {|
+      (LLDLet (NonRec, "LL_1", [("k", None); ("x", None); ("n", None)],
+         (LLApp ((LLVar "k"),
+            (LLApp ((LLApp ((LLVar "*"), (LLVar "x"))), (LLVar "n")))))
+         ))
+      (LLDLet (Rec, "LL_0", [("x", None); ("k", None)],
+               (LLMatch ((LLVar "x"),
+                  [((PConst (CInt 1)), (LLApp ((LLVar "k"), (LLConst (CInt 1)))));
+                    ((PVar "x"),
+                     (LLApp (
+                        (LLApp ((LLVar "LL_0"),
+                           (LLApp ((LLApp ((LLVar "-"), (LLVar "x"))),
+                              (LLConst (CInt 1))))
+                           )),
+                        (LLApp ((LLApp ((LLVar "LL_1"), (LLVar "k"))), (LLVar "x")
+                           ))
+                        )))
+                    ]
+                  ))
+               ))
+      (LLDLet (NonRec, "LL_2", [("x", None)], (LLVar "x")))
+      (LLDLet (
+                                                                          NonRec,
+                                                                          "q",
+                                                                          [],
+                                                                          (LLApp (
+                                                                          (LLApp (
+                                                                          (LLVar
+                                                                          "LL_0"),
+                                                                          (LLConst
+                                                                          (CInt 10))
+                                                                          )),
+                                                                          (LLVar
+                                                                          "LL_2")))
+                                                                          ))
+      |}]
   ;;
 end
