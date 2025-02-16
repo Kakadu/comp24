@@ -5,7 +5,7 @@
   Infer error: Unification failed on int and bool
 
   $ infer < manytests/do_not_type/003occurs.ml
-  Infer error: Occurs check failed
+  Infer error: Occurs check failed: 2 occurs inside '2 -> '6
 
   $ infer < manytests/do_not_type/004let_poly.ml
   Infer error: Unification failed on bool and int
@@ -219,7 +219,7 @@
   val tie : (int -> int) * (int -> int)
 
   $ infer < manytests/typed/016lists.ml
-  Infer error: Occurs check failed
+  Infer error: Occurs check failed: 41 occurs inside '41
 
   $ dune exec infer << EOF
   > let f ((x : int) : int) ((y : int) : int) = x + y;;
@@ -282,7 +282,7 @@
   val == : '1 -> '1 -> bool
   val > : '1 -> '1 -> bool
   val >= : '1 -> '1 -> bool
-  val map_cps : ('7 -> '9) -> '7 list -> '9 list
+  val map_cps : ('6 -> '8) -> '6 list -> '8 list
   val print_int : int -> unit
 
   $ dune exec infer << EOF
