@@ -1,4 +1,4 @@
-(* Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -62,9 +62,8 @@ let cbool b = CBool b
 let cstring s = CString s
 
 let pcint =
-  let* sign = choice [ token "-"; token "+"; token "" ] in
-  let* num = take_while1 Char.is_digit in
-  return @@ Int.of_string (sign ^ num) >>| cint
+  let* num = ws *> take_while1 Char.is_digit in
+  return @@ Int.of_string num >>| cint
 ;;
 
 let pcbool =
@@ -164,7 +163,6 @@ let opname_ =
   return op
 ;;
 
-(* let ppvar = varname >>| pvar *)
 let ppvar =
   let pvar =
     let* name = varname in
@@ -220,13 +218,19 @@ let pevar =
   choice [ pvar; opname ]
 ;;
 
-let peif pe =
+(* let peif pe =
   fix (fun peif ->
     lift3
       eif
       (token "if" *> (peif <|> pe))
       (token "then" *> (peif <|> pe))
       (token "else" *> (peif <|> pe)))
+;; *)
+let peif pe =
+  let* ifexpr = token "if" *> pe in
+  let* thenexpr = token "then" *> pe in
+  let* elseexpr = token "else" *> pe in
+  return (eif ifexpr thenexpr elseexpr)
 ;;
 
 let pematch pe =
@@ -244,14 +248,15 @@ let pelet pe =
   lift3
     elet
     (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
-    ((both pattern (lift2 efunf (many pattern <* token "=") pe)))
+    (both pattern (lift2 efunf (many pattern <* token "=") pe))
     (token "in" *> pe)
 ;;
 
 let op_starts_with s =
   let* start = token s in
   let* rest =
-    take_while (function
+    take_while (fun c ->
+      match c with
       | '*' | '/' | '+' | '-' | '=' | '<' | '>' | '&' | '|' -> true
       | _ -> false)
   in
@@ -277,13 +282,15 @@ let pand = parse_op "&&"
 let por = parse_op "||"
 
 let expr =
-    let expr_with_type eexpr =
+  let expr_with_type eexpr =
     let* exp = ws *> lp *> eexpr in
     let* constr = ws *> token ":" *> ws *> annot <* ws <* rp in
     return (EConstraint (exp, constr))
   in
   fix (fun expr ->
-    let term = choice [ pevar; peconst; pelist expr; parens expr; expr_with_type expr; ] in
+    let term =
+      choice [ pevar; peconst; pelist expr; parens expr; expr_with_type expr; peif expr ]
+    in
     let apply = chainl1 term (return eapply) in
     let fact = chainl1 apply (pmul <|> pdiv) in
     let sum = chainl1 fact (padd <|> psub) in
@@ -293,8 +300,8 @@ let expr =
     let band = chainr1 cmp2 pand in
     let bor = chainr1 band por in
     let tuple = petuple bor <|> bor in
-    let ife = peif tuple <|> tuple in
-    choice [ pelet expr; pematch expr; pefun expr; ife ])
+    (* let ife = peif tuple <|> tuple in *)
+    choice [ pelet expr; pematch expr; pefun expr; tuple ])
 ;;
 
 (*----------------------------- Structure ------------------------------------*)
@@ -311,7 +318,7 @@ let str_item =
   choice [ pseval; psvalue ]
 ;;
 
-let structure : structure t = sep_by dsemi str_item
+let structure : structure t = sep_by (choice [ dsemi; ws ]) str_item
 let parse s = parse_string ~consume:Prefix structure s
 
 let test_parse input =
