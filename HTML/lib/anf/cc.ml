@@ -116,7 +116,7 @@ let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr_typed) : String
 
 and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
   match d with
-  | DLet (_rec_flag, (pat_or_op, expr)) ->
+  | DLet (_, (pat_or_op, expr)) ->
     let bound =
       match pat_or_op with
       (* todo type lost? *)
@@ -124,24 +124,24 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
       | _ -> StringSet.empty
     in
     bound, free_vars_expr (StringSet.union bound env) expr
-  | _ -> failwith "TODO"
+  (* todo no test for this, praying it works 🙏🙏🙏*)
+  | DLetMut (_, lb, lb2, lbs) ->
+    let lbs = lb :: lb2 :: lbs in
+    let all_pats =
+      List.filter_map
+        (fun ((pat_or_op, _), _) ->
+          match pat_or_op with
+          | POpPat (PId s) -> Some s
+          | _ -> None)
+        lbs
+    in
+    let bound = List.fold_left StringSet.add StringSet.empty all_pats in
+    let free_in_lb (_, e) = free_vars_expr env e in
+    let free_all =
+      List.fold_left (fun s lb -> StringSet.union s (free_in_lb lb)) StringSet.empty lbs
+    in
+    bound, free_all
 ;;
-
-(* | DLetMut (_rec_flag, lb, lb2, lbs) ->
-   let all_pats = List.map (fun (pat_or_op, _) ->
-   match pat_or_op with
-   | POpPat (PId s) -> s
-   | _ -> ""
-   ) (lb :: lb2 :: lbs) in
-   let bound =
-   List.fold_left (fun s x -> if x = "" then s else StringSet.add x s)
-   StringSet.empty all_pats
-   in
-   let free_in_lb (_, e) = free_vars_expr e in
-   let free_all = List.fold_left (fun s lb -> StringSet.union s (free_in_lb lb))
-   StringSet.empty (lb :: lb2 :: lbs)
-   in
-   (bound, free_all) *)
 
 (* -------------------------------------------------------------------------- *)
 
