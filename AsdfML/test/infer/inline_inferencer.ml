@@ -425,3 +425,19 @@ let%expect_test _ =
     (x, y, z): (bool * int * 'c -> 'c)
     |}]
 ;;
+
+let%expect_test _ =
+  test {| 
+    let sum tuples =
+      let rec helper acc tuples =
+        match tuples with
+        | [] -> acc
+        | (a, b, c) :: tl ->
+          let (x, y, z) = acc in
+          helper (a + x, b + y, c + z) tl
+      in
+      helper (0, 0, 0) tuples
+  |};
+  [%expect
+    {| sum: (int * int * int) list -> (int * int * int) |}]
+;;

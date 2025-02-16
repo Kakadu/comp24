@@ -271,6 +271,12 @@ module TypeEnv = struct
       |> (function
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
+    | PTuple (x1, x2, xs), (vars, (TVar v as ty)) ->
+      let xs = x1 :: x2 :: xs in
+      List.fold xs ~init:(return env) ~f:(fun acc x ->
+        let* acc = acc in
+        let* fresh  = fresh >>| fun n -> TVar n in
+        extend_pat acc x (vars, fresh))
     | PAnn (x, _), _ -> extend_pat env x scheme
     | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
       let* env = extend_pat env hd (vars, ty) in

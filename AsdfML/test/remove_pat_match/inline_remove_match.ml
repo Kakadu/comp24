@@ -234,3 +234,36 @@ let%expect_test _ =
        (x, y, z))
     |}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let sum tuples =
+      let rec helper acc tuples =
+        match tuples with
+        | [] -> acc
+        | (a, b, c) :: tl ->
+          let (x, y, z) = acc in
+          helper (a + x, b + y, c + z) tl
+      in
+      helper (0, 0, 0) tuples
+  |};
+  [%expect {|
+    let sum = (fun tuples ->
+       let rec helper = (fun acc tuples ->
+         if (`list_is_empty tuples)
+         then acc
+         else
+           let `tuple_1 = (`list_hd tuples) in
+           let a = (`get_tuple_field `tuple_1 0) in
+           let b = (`get_tuple_field `tuple_1 1) in
+           let c = (`get_tuple_field `tuple_1 2) in
+           let tl = (`list_tl tuples) in
+           let `tuple_0 = acc in
+           let x = (`get_tuple_field `tuple_0 0) in
+           let y = (`get_tuple_field `tuple_0 1) in
+           let z = (`get_tuple_field `tuple_0 2) in
+           (helper ((( + ) a x), (( + ) b y), (( + ) c z)) tl)) in
+       (helper (0, 0, 0) tuples))
+    |}]
+;;
