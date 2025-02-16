@@ -5,7 +5,8 @@
 type fresh = int
 
 type error =
-  [ `Occurs_check of fresh * Typedtree.ty (** Type variable occurs inside type it must be unified with *)
+  [ `Occurs_check of fresh * Typedtree.ty
+    (** Type variable occurs inside type it must be unified with *)
   | `Unbound_variable of Ast.id (** Unbound variable *)
   | `Unification_failed of Typedtree.ty * Typedtree.ty (** Failed to unify two types *)
   | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)

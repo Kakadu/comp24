@@ -269,10 +269,10 @@ let instantiate : scheme -> ty R.t =
   fun (S (xs, ty)) ->
   VarSet.fold
     (fun name typ ->
-       let* typ = typ in
-       let* f1 = fresh_var in
-       let* s = Subst.singleton name f1 in
-       return (Subst.apply s typ))
+      let* typ = typ in
+      let* f1 = fresh_var in
+      let* s = Subst.singleton name f1 in
+      return (Subst.apply s typ))
     xs
     (return ty)
 ;;

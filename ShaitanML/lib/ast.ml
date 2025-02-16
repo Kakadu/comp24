@@ -83,8 +83,8 @@ let fmt_const ppf c =
 let fmt_list pp_elem ppf lst =
   List.iteri
     (fun i pat ->
-       if i <> 0 then Format.fprintf ppf ", " else ();
-       pp_elem ppf pat)
+      if i <> 0 then Format.fprintf ppf ", " else ();
+      pp_elem ppf pat)
     lst
 ;;
 
@@ -155,8 +155,8 @@ let fmt_str_item ppf decl =
     fprintf "let%a " fmt_rec_flag flag;
     List.iteri
       (fun i binding ->
-         if i <> 0 then fprintf " and " else ();
-         fmt_binding ppf binding)
+        if i <> 0 then fprintf " and " else ();
+        fmt_binding ppf binding)
       binding_list;
     fprintf "\n"
   | SEval exp -> fprintf "%a\n" fmt_expr exp

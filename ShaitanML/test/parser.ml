@@ -6,8 +6,7 @@ open Shaitanml_lib
 open Parser
 
 let%expect_test "nested annotations for multiple args" =
-  test_parse
-    {|
+  test_parse {|
       let f ((x : int) : int) ((y : int) : int) = x + y;;
       |};
   [%expect
@@ -59,8 +58,7 @@ let%expect_test "list folding" =
 ;;
 
 let%expect_test "binary operators precedence check" =
-  test_parse
-    {|
+  test_parse {|
       let a b c = a && b || b && c
       |};
   [%expect
@@ -116,8 +114,7 @@ let%expect_test "mutual let bindings" =
 ;;
 
 let%expect_test "mutual let bindings" =
-  test_parse
-    {|
+  test_parse {|
       let rec f x = x + 1 and g x = x + 1
 ;;
       |};
@@ -136,8 +133,7 @@ let%expect_test "mutual let bindings" =
 ;;
 
 let%expect_test "simple annotation" =
-  test_parse
-    {|
+  test_parse {|
       let (x : int) = 3;;
       |};
   [%expect
@@ -146,8 +142,7 @@ let%expect_test "simple annotation" =
 ;;
 
 let%expect_test "complex annotation" =
-  test_parse
-    {|
+  test_parse {|
       let (x : (int -> int) list) = f;;
       |};
   [%expect
@@ -158,8 +153,7 @@ let%expect_test "complex annotation" =
 ;;
 
 let%expect_test "complex annotation" =
-  test_parse
-    {|
+  test_parse {|
       let (x : int -> int -> (int -> int)) = f;;
       |};
   [%expect
@@ -214,8 +208,7 @@ let%expect_test "factorial with fix" =
 ;;
 
 let%expect_test "if then else" =
-  test_parse
-    {|
+  test_parse {|
       let n = fun y -> if y > 0 then 1 else 2
     |};
   [%expect
@@ -233,8 +226,7 @@ let%expect_test "if then else" =
 ;;
 
 let%expect_test "factorial" =
-  test_parse
-    {|
+  test_parse {|
     let rec fac n = if n < 2 then 1 else n * fac(n - 1);;
     |};
   [%expect
