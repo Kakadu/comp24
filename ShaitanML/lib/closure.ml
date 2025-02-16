@@ -1,157 +1,288 @@
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Base
 
-let find_unbound_vars expr =
-  let rec explore_expr exp bound =
-    match exp with
-    | EConst _ -> Set.empty (module String)
-    | EVar var_name -> if Set.mem bound var_name then Set.empty (module String) else Set.singleton (module String) var_name
-    | EFun (pattern, body) ->
-        explore_expr body (bind_pattern_vars pattern bound)
-    | EApply (func, arg) ->
-        Set.union (explore_expr func bound) (explore_expr arg bound)
-    | EIf (cond, then_exp, else_exp) ->
-        Set.union_list (module String) [
-          explore_expr cond bound;
-          explore_expr then_exp bound;
-          explore_expr else_exp bound
-        ]
-    | ELet (_is_rec, bindings, body) ->
-        let patterns_set =
-          List.fold bindings ~init:(Set.empty (module String))
-            ~f:(fun acc (pattern, _) -> Set.union acc (get_pattern_vars pattern))
-        in
-        let bindings_unbound =
-          List.fold bindings ~init:(Set.empty (module String))
-            ~f:(fun acc (_, bind_expr) -> Set.union acc (explore_expr bind_expr bound))
-        in
-        let body_unbound = explore_expr body (Set.union bound patterns_set) in
-        let bound_vars = List.fold bindings ~init:(Set.empty (module String)) ~f:(fun acc (_, expr) ->
-          Set.union acc (nested_func_binds expr))
-        in
-        Set.diff (Set.union bindings_unbound body_unbound) bound_vars
-    | ETuple elements ->
-        List.fold elements ~init:(Set.empty (module String)) ~f:(fun acc e -> Set.union acc (explore_expr e bound))
-    | EMatch (matched_expr, branches) ->
-        let unbound_in_match = explore_expr matched_expr bound in
-        let unbound_in_cases =
-          List.fold branches ~init:(Set.empty (module String)) ~f:(fun acc (pattern, case_body) ->
-            Set.union acc (explore_expr case_body (bind_pattern_vars pattern bound)))
-        in
-        Set.union unbound_in_match unbound_in_cases
-    | ECons (head, tail) ->
-        Set.union (explore_expr head bound) (explore_expr tail bound)
-  and bind_pattern_vars pattern bound_set =
-    match pattern with
-    | PAny | PConst _ -> bound_set
-    | PVar id -> Set.add bound_set id
-    | PCons (left, right) -> bind_pattern_vars right (bind_pattern_vars left bound_set)
-    | PTuple pats -> List.fold pats ~init:bound_set ~f:(fun acc pat -> bind_pattern_vars pat acc)
-    | PConstraint (nested_pat, _) -> bind_pattern_vars nested_pat bound_set
-  and get_pattern_vars pat =
-    match pat with
-    | PVar id -> Set.singleton (module String) id
-    | PTuple pats -> List.fold pats ~init:(Set.empty (module String)) ~f:(fun acc pat -> Set.union acc (get_pattern_vars pat))
-    | PCons (p1, p2) -> Set.union (get_pattern_vars p1) (get_pattern_vars p2)
-    | PConstraint (pat, _) -> get_pattern_vars pat
-    | PAny | PConst _ -> Set.empty (module String)
-  and nested_func_binds func_expr =
-    match func_expr with
-    | EFun (pat, body) -> Set.union (get_pattern_vars pat) (nested_func_binds body)
-    | _ -> Set.empty (module String)
-  in
-  explore_expr expr (Set.empty (module String))
-
-let rec close_function_scope local_defs local_ctx global_ctx converter expr =
-  match expr with
-  | EFun (pattern, body) ->
-      let closed_body = close_function_scope local_defs local_ctx global_ctx converter body in
-      EFun (pattern, closed_body)
-  | _ -> converter local_defs local_ctx global_ctx expr
-
-let find_global_vars pattern =
-  let rec collect_globals pat =
-    match pat with
-    | PVar id -> Set.singleton (module String) id
-    | PTuple pats -> List.fold pats ~init:(Set.empty (module String)) ~f:(fun acc p -> Set.union acc (collect_globals p))
-    | PCons (p1, p2) -> Set.union (collect_globals p1) (collect_globals p2)
-    | PConstraint (nested_pat, _) -> collect_globals nested_pat
-    | PAny | PConst _ -> Set.empty (module String)
-  in
-  collect_globals pattern
-
-let ops_set =
-  Set.of_list (module String) ["(+)"; "(::)"; "(*)"; "(-)"; "(==)"; "(=)"; "(/)"]
-
-let rec transform_ast global_ctx structure_item =
-  let rec process_expression locals ctx global_ctx expr =
-    match expr with
-    | EConst _ as const -> const
-    | EVar id ->
-        (match Map.find ctx id with
-        | None -> EVar id
-        | Some free_vars ->
-            List.fold_left (Set.to_list free_vars) ~init:(EVar id) ~f:(fun acc var -> EApply (acc, EVar var)))
-    | EFun (pat, body) ->
-        let unbound_vars = find_unbound_vars (EFun (pat, body)) in
-        let free_vars = Set.diff unbound_vars global_ctx |> Set.diff ops_set in
-        let variables = Set.to_list free_vars |> List.map ~f:(fun v -> PVar v) in
-        let wrapped_vars =
-          List.fold_right variables ~init:(close_function_scope locals ctx global_ctx process_expression body)
-            ~f:(fun pat wrapped -> EFun (pat, wrapped))
-        in
-        List.fold_left (Set.to_list free_vars) ~init:wrapped_vars ~f:(fun acc var -> EApply (acc, EVar var))
-    | EApply (f, arg) ->
-        let new_global_ctx = Set.diff global_ctx ops_set in
-        EApply (process_expression locals ctx new_global_ctx f, process_expression locals ctx new_global_ctx arg)
-    | EIf (cond, then_branch, else_branch) ->
-        let new_global_ctx = Set.diff global_ctx ops_set in
-        EIf (
-          process_expression locals ctx new_global_ctx cond,
-          process_expression locals ctx new_global_ctx then_branch,
-          process_expression locals ctx new_global_ctx else_branch
-        )
-    | ELet (is_rec, bindings, body) ->
-        let updated_ctx, updated_defs, bindings_converted =
-          List.fold bindings ~init:(ctx, locals, []) ~f:(fun (ctx_acc, defs_acc, bind_acc) (pat, exp) ->
-            let free_vars = find_unbound_vars exp |> Set.diff global_ctx |> Set.diff ops_set in
-            let closed_exp = close_function_scope defs_acc ctx_acc global_ctx process_expression exp in
-            let ctx_updated = Map.set ctx_acc ~key:(match pat with PVar id -> id | _ -> "") ~data:free_vars in
-            (ctx_updated, Set.add defs_acc "", (pat, closed_exp) :: bind_acc))
-        in
-        let new_global_ctx = Set.diff global_ctx ops_set in
-        let closed_body = process_expression updated_defs updated_ctx new_global_ctx body in
-        ELet (is_rec, List.rev bindings_converted, closed_body)
-    | _ -> expr
-  in
-  match structure_item with
-  | SEval expr ->
-      SEval (process_expression (Set.empty (module String)) (Map.empty (module String)) global_ctx expr)
-  | SValue (rec_flag, bindings) ->
-      let bindings_converted =
-        List.map bindings ~f:(fun (pat, exp) ->
-          let new_exp =
-            close_function_scope (Set.empty (module String)) (Map.empty (module String)) global_ctx process_expression exp
-          in
-          (pat, new_exp))
+let unbound_identifiers exp =
+  let rec helper =
+    let rec bind_pattern pat base_set =
+      let rec bind_pattern_list acc = function
+        | h :: tl ->
+          (match h with
+           | PAny -> bind_pattern_list acc tl
+           | PCons (pat1, pat2) ->
+             let new_acc = bind_pattern_list acc (pat1 :: [ pat2 ]) in
+             bind_pattern_list new_acc tl
+           | PVar id -> bind_pattern_list (Set.remove acc id) tl
+           | PTuple patterns ->
+             let new_acc = bind_pattern_list acc patterns in
+             bind_pattern_list new_acc tl
+           | PConst _ -> bind_pattern_list acc tl
+           | PConstraint (pat, _) ->
+             let new_acc = bind_pattern pat base_set in
+             bind_pattern_list new_acc tl)
+        | [] -> acc
       in
-      SValue (rec_flag, bindings_converted)
-
-let convert_all_ast input_ast =
-  let rec process_items ast_items global_ctx acc =
-    match ast_items with
-    | [] -> List.rev acc
-    | item :: rest ->
-        let updated_ctx = 
-          match item with
-          | SValue (_, binds) ->
-              List.fold binds ~init:global_ctx ~f:(fun acc_globals (pat, _) -> Set.union acc_globals (find_global_vars pat))
-          | SEval _ -> global_ctx
-        in
-        process_items rest updated_ctx ((transform_ast global_ctx item) :: acc)
+      match pat with
+      | PAny | PConst _ -> base_set
+      | PCons (pat1, pat2) -> bind_pattern_list base_set (pat1 :: [ pat2 ])
+      | PVar x -> Set.remove base_set x
+      | PTuple pats -> bind_pattern_list base_set pats
+      | PConstraint (pat, _) -> bind_pattern_list base_set [ pat ]
+    in
+    function
+    | EConst _ -> (module String) |> Set.empty
+    | EVar id -> Set.add ((module String) |> Set.empty) id
+    | EFun (pat, exp) ->
+      let unbound_in_fun = helper exp in
+      bind_pattern pat unbound_in_fun
+    | EApply (left_exp, right_exp) ->
+      let unbound_in_left = helper left_exp in
+      let unbound_in_right = helper right_exp in
+      Set.union unbound_in_left unbound_in_right
+    | EIf (guard_expr, if_expr, else_expr) ->
+      let unbound_in_guard = helper guard_expr in
+      let unbound_in_if = helper if_expr in
+      let unbound_in_else = helper else_expr in
+      Set.union (Set.union unbound_in_guard unbound_in_if) unbound_in_else
+    | ELet (_, (pat, outer_exp), inner_exp) ->
+      let rec set_of_pat = function
+        | PAny | PConst _ -> (module String) |> Set.empty
+        | PVar id -> Set.add ((module String) |> Set.empty) id
+        | PCons (left_pat, right_pat) ->
+          Set.union (set_of_pat left_pat) (set_of_pat right_pat)
+        | PTuple pats ->
+          let initial_set = Set.empty (module String) in
+          List.fold_left
+            ~init:initial_set
+            ~f:(fun acc h -> Set.union acc (set_of_pat h))
+            pats
+        | PConstraint (pat, _) -> set_of_pat pat
+      in
+      let rec collect_binds acc = function
+        | EFun (pat, next) -> collect_binds (Set.union acc (set_of_pat pat)) next
+        | _ -> acc
+      in
+      let unbound_in_outer = helper outer_exp in
+      let unbound_in_inner = helper inner_exp in
+      let binds = collect_binds ((module String) |> Set.empty) outer_exp in
+      let unbound_in_outer_without_pat = bind_pattern pat unbound_in_outer in
+      let unbound_in_inner_without_pat = bind_pattern pat unbound_in_inner in
+      let unbound_in_inner_final = Set.diff unbound_in_inner_without_pat binds in
+      let unbound_in_outer_final = Set.diff unbound_in_outer_without_pat binds in
+      Set.union unbound_in_outer_final unbound_in_inner_final
+    | ETuple exps ->
+      List.fold
+        exps
+        ~init:((module String) |> Set.empty)
+        ~f:(fun acc h -> Set.union acc (helper h))
+    | EMatch (expr, branches) ->
+      let unbound_in_braches =
+        List.fold
+          branches
+          ~init:((module String) |> Set.empty)
+          ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
+      in
+      Set.union unbound_in_braches (helper expr)
+    | ECons (head, tail) -> Set.union (helper head) (helper tail)
+    | EConstraint (exp, _) -> helper exp
+    | _ -> failwith "Not implemented"
   in
-  process_items input_ast (Set.empty (module String)) []
+  helper exp
+;;
 
-let run_tests ast =
-  let transformed = convert_all_ast ast in
-  Stdlib.Format.printf "%s" (show_structure transformed)
+let rec close_function lts local_ctx global_ctx convert = function
+  | EFun (pat, body) -> EFun (pat, close_function lts local_ctx global_ctx convert body)
+  | expr -> convert lts local_ctx global_ctx expr
+;;
+
+let rec get_global_names = function
+  | PVar id -> Set.add ((module String) |> Set.empty) id
+  | PAny | PConst _ -> (module String) |> Set.empty
+  | PConstraint (pat, _) -> get_global_names pat
+  | PCons (pat1, pat2) ->
+    List.fold_left
+      [ pat1; pat2 ]
+      ~f:(fun acc h -> Set.union acc (get_global_names h))
+      ~init:((module String) |> Set.empty)
+  | PTuple pats ->
+    List.fold_left
+      pats
+      ~f:(fun acc h -> Set.union acc (get_global_names h))
+      ~init:((module String) |> Set.empty)
+;;
+
+let infix_ops_set =
+  Set.of_list (module String) [ "(+)"; "(*)"; "(-)"; "(=)"; "(/)" ]
+;;
+
+let convert global_ctx declaration =
+  let rec helper lts local_ctx global_ctx = function
+    | EConst const -> EConst const
+    | EVar id ->
+      (match Map.find local_ctx id with
+       | Some free ->
+         let ids = List.map (Set.to_list free) ~f:(fun x -> EVar x) in
+         List.fold_left ids ~f:(fun f arg -> EApply (f, arg)) ~init:(EVar id)
+       | None -> EVar id)
+    | EFun (pat, body) ->
+      let unbound_names = unbound_identifiers (EFun (pat, body)) in
+      let unbound_names_without_global =
+        Set.diff (Set.diff unbound_names global_ctx) infix_ops_set
+      in
+      let unbound_ids_patterns =
+        List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PVar x)
+      in
+      let unbound_ids_exps =
+        List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> EVar x)
+      in
+      let closed_fun =
+        close_function
+          lts
+          local_ctx
+          (Set.diff global_ctx infix_ops_set)
+          helper
+          (EFun (pat, body))
+      in
+      let new_fun =
+        List.fold_right
+          ~f:(fun pat exp -> EFun (pat, exp))
+          unbound_ids_patterns
+          ~init:closed_fun
+      in
+      List.fold_left unbound_ids_exps ~f:(fun f arg -> EApply (f, arg)) ~init:new_fun
+    | EApply (left, right) ->
+      EApply
+        ( helper lts local_ctx (Set.diff (Set.diff global_ctx lts) infix_ops_set) left
+        , helper lts local_ctx (Set.diff (Set.diff global_ctx lts) infix_ops_set) right )
+    | EIf (guard, then_branch, else_branch) ->
+      let global_ctx = Set.diff global_ctx infix_ops_set in
+      EIf
+        ( helper lts local_ctx (Set.diff global_ctx infix_ops_set) guard
+        , helper lts local_ctx (Set.diff global_ctx infix_ops_set) then_branch
+        , helper lts local_ctx (Set.diff global_ctx infix_ops_set) else_branch )
+    | ELet (rec_flag, (pat, outer), inner) ->
+      let handle_inner_fun id outer updated_lts updated_global_env =
+        let unbound_names =
+          unbound_identifiers (ELet (rec_flag, (pat, outer), inner))
+        in
+        let unbound_names_without_global =
+          Set.diff (Set.diff unbound_names updated_global_env) infix_ops_set
+        in
+        let closed_fun = close_function lts local_ctx updated_global_env helper outer in
+        let unbound_ids_without_global =
+          List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PVar x)
+        in
+        let closed_outer =
+          List.fold_right
+            unbound_ids_without_global
+            ~f:(fun pat exp -> EFun (pat, exp))
+            ~init:closed_fun
+        in
+        let updated_local_env =
+          Map.set local_ctx ~key:id ~data:unbound_names_without_global
+        in
+        let closed_inner =
+          helper
+            updated_lts
+            updated_local_env
+            (Set.diff (Set.add global_ctx id) infix_ops_set)
+            inner
+        in
+        let updated_outer =
+          helper
+            updated_lts
+            updated_local_env
+            (Set.diff (Set.add global_ctx id) infix_ops_set)
+            closed_outer
+        in
+        ELet (rec_flag, (PVar id, updated_outer ), closed_inner)
+      in
+      (match pat, outer with
+       | PVar id, EFun (_, _) ->
+         let updated_lts = Set.add lts id in
+         let updated_global_env =
+           match rec_flag with
+           | Rec -> Set.add (Set.diff global_ctx infix_ops_set) id
+           | Nonrec -> Set.add (Set.diff global_ctx infix_ops_set) id
+         in
+         handle_inner_fun id outer updated_lts updated_global_env
+       | _ ->
+         ELet
+           ( rec_flag
+           , (pat, helper lts local_ctx (Set.diff global_ctx infix_ops_set) outer )
+           , helper lts local_ctx (Set.diff global_ctx infix_ops_set) inner ))
+    | ETuple exps ->
+      let new_exps =
+        List.map exps ~f:(helper lts local_ctx (Set.diff global_ctx infix_ops_set))
+      in
+      ETuple new_exps
+    | EMatch (pat, branches) ->
+      let new_branches =
+        List.map branches ~f:(fun (pat, exp) ->
+          pat, helper lts local_ctx (Set.diff global_ctx infix_ops_set) exp)
+      in
+      EMatch (pat, new_branches)
+    | ECons (head, tail) ->
+      ECons
+        ( helper lts local_ctx (Set.diff global_ctx infix_ops_set) head
+        , helper lts local_ctx (Set.diff global_ctx infix_ops_set) tail )
+    | EConstraint (exp, _) -> helper lts local_ctx global_ctx exp
+    | _ -> failwith "Not implemented"
+  in
+  let close_declaration global_ctx = function
+    | SValue (flag, [ (pat, exp) ]) ->
+      SValue
+        ( flag
+        , [ ( pat
+            , close_function
+                ((module String) |> Set.empty)
+                ((module String) |> Map.empty)
+                (Set.diff global_ctx infix_ops_set)
+                helper
+                exp )
+          ] )
+    | SValue (flag, decls) ->
+      let rec handle_mutual_rec global_ctx = function
+        | [] -> [], Set.diff global_ctx infix_ops_set
+        | (pat, exp) :: tl ->
+          let closed_exp =
+            close_function
+              ((module String) |> Set.empty)
+              (Map.empty (module String))
+              (Set.diff global_ctx infix_ops_set)
+              helper
+              exp
+          in
+          let new_decl, new_env = handle_mutual_rec global_ctx tl in
+          (pat, closed_exp) :: new_decl, new_env
+      in
+      let new_decls, _ = handle_mutual_rec global_ctx decls in
+      SValue (flag, new_decls)
+    | _ -> failwith "Not implemented"
+  in
+  close_declaration global_ctx declaration
+;;
+
+let convert_ast ast =
+  let close ast =
+    List.fold_left
+      ast
+      ~init:([], (module String) |> Set.empty)
+      ~f:(fun (acc, ctx) -> function
+        | SValue (flag, [ (pat, body) ]) ->
+          ( convert ctx (SValue (flag, [ pat, body ])) :: acc
+          , Set.union ctx (get_global_names pat) )
+        | SValue (flag, decls) -> convert ctx (SValue (flag, decls)) :: acc, ctx
+        | _ -> failwith "Not implemented")
+  in
+  let converted_ast, _ = ast |> close in
+  converted_ast |> List.rev
+;;
+
+let test_closure_convert ast =
+  let converted = convert_ast ast in
+  Stdlib.Format.printf "%s" (Ast.show_structure converted)
+;;
