@@ -3,7 +3,6 @@ open Ast
 module Generator = struct
   open QCheck.Gen
 
-  (* Генератор для идентификаторов (без ключевых слов) *)
   let gen_name =
     fix
       (fun self () ->
@@ -38,7 +37,6 @@ module Generator = struct
       ()
   ;;
 
-  (* Генератор констант *)
   let gen_const =
     frequency
       [ (1, small_int >|= fun i -> CInt i)
@@ -47,7 +45,6 @@ module Generator = struct
       ]
   ;;
 
-  (* Генератор выражений (упрощённо) *)
   let rec gen_expr n =
     if n <= 0
     then
@@ -80,7 +77,6 @@ module Generator = struct
           , let* rec_flag = oneof [ return Rec; return NonRec ] in
             let* id = gen_name in
             let* e_val = gen_expr (n / 2) in
-            (* Для простоты опциональное тело генерируем как 0-ое значение *)
             return (ELetIn (rec_flag, id, e_val, EConst (CInt 0))) )
         ; ( 1
           , let* arg = gen_typed_arg (n / 2) in
@@ -132,7 +128,7 @@ module Generator = struct
           , gen_name
             >|= fun id ->
             if String.length id > 0 && id.[0] = '_' then PVar "_" else PVar id )
-        ; 1, return (PVar "_") (* вместо PWild *)
+        ; 1, return (PVar "_")
         ; 1, return PEmpty
         ]
     else
@@ -142,7 +138,7 @@ module Generator = struct
           , gen_name
             >|= fun id ->
             if String.length id > 0 && id.[0] = '_' then PVar "_" else PVar id )
-        ; 1, return (PVar "_") (* вместо PWild *)
+        ; 1, return (PVar "_")
         ; 1, return PEmpty
         ; ( 1
           , let* p1 = gen_pattern (n / 2) in
@@ -157,7 +153,6 @@ module Generator = struct
         ]
   ;;
 
-  (* Генератор для деклараций *)
   let gen_decl =
     frequency
       [ ( 1
@@ -185,7 +180,7 @@ module Shrinker = struct
   open QCheck.Iter
 
   let shrink_decl = function
-    | DLet (_, _, e) -> of_list [ DLet (NonRec, "_", e) ] (* Пример упрощения *)
+    | DLet (_, _, e) -> of_list [ DLet (NonRec, "_", e) ]
     | DMutualLet (_, binds) ->
       of_list (List.map (fun (id, e) -> DLet (NonRec, id, e)) binds)
   ;;
