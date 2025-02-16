@@ -2,10 +2,7 @@
  (name parser_demo)
  (modules parser_demo)
  (public_name parser_demo)
- (libraries parser stdio))
-
-(cram
- (deps %{bin:parser_demo}))
+ (libraries parser stdio middleend))
 
 (executable
  (name typeinference_demo)
@@ -13,5 +10,107 @@
  (public_name typeinference_demo)
  (libraries typeinference stdio))
 
+(executable
+ (name closure_conversion_demo)
+ (modules closure_conversion_demo)
+ (public_name closure_conversion_demo)
+ (libraries typeinference middleend stdio ast))
+
+(executable
+ (name lifting_demo)
+ (modules lifting_demo)
+ (public_name lifting_demo)
+ (libraries typeinference middleend stdio ast))
+
+(executable
+ (name anf_demo)
+ (modules anf_demo)
+ (public_name anf_demo)
+ (libraries typeinference middleend stdio ast))
+
+(executable
+ (name egraphs_demo)
+ (modules egraphs_demo)
+ (public_name egraphs_demo)
+ (libraries middleend stdio ast))
+
 (cram
- (deps %{bin:typeinference_demo}))
+ (applies_to typeinference_tests)
+ (deps
+  ./typeinference_demo.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/do_not_type/099.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/010sukharev.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to closure_conversion_tests)
+ (deps ./closure_conversion_demo.exe))
+
+(cram
+ (applies_to lifting_tests)
+ (deps ./lifting_demo.exe))
+
+(cram
+ (applies_to anf_tests)
+ (deps
+  ./anf_demo.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/010sukharev.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to egraphs_tests)
+ (deps ./egraphs_demo.exe))
+
+(executable
+ (name anf_types_demo)
+ (modules anf_types_demo)
+ (public_name anf_types_demo)
+ (libraries middleend stdio ast typeinference))
+
+(cram
+ (applies_to anf_types_tests)
+ (deps
+  ./anf_types_demo.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/010sukharev.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))

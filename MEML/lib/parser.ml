@@ -119,6 +119,7 @@ let parse_pvar =
 ;;
 
 let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_nil ]
+
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
 
 let parse_tuple parser =
