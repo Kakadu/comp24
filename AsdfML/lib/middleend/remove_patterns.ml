@@ -11,6 +11,8 @@ open Vars
 open State.IntStateM
 open State.IntStateM.Syntax
 
+(* Replaces complex patterns with explicit pattern-matching *)
+
 (* TODO: constant pattens? *)
 
 let is_simple = function
@@ -18,11 +20,11 @@ let is_simple = function
   | _ -> false
 ;;
 
-let eliminate_arg_patterns body pattern_list =
+let remove_argument_patterns body pattern_list =
   let generate_arg_name used_names =
     let rec find_unique () =
-      let* cnt = fresh in
-      let current_name = "`arg_" ^ string_of_int cnt in
+      let* cnt = fresh_postfix in
+      let current_name = "`arg" ^ cnt in
       match Set.find used_names ~f:(String.equal current_name) with
       | None -> return current_name
       | _ -> find_unique ()
@@ -60,7 +62,7 @@ let remove_patterns =
       te_if_else ty (helper_expr i) (helper_expr t) (helper_expr e)
     | TEFun (t, p, e) ->
       let e = helper_expr e in
-      let p, e = eliminate_arg_patterns e p in
+      let p, e = remove_argument_patterns e p in
       (* dbg "fun: %a\n" pp_texpr f;
          dbg "pat: %s\n" (p |> List.map ~f:(Format.asprintf "%a" pp_pattern) |> String.concat); *)
       te_fun t p e
@@ -110,6 +112,5 @@ let remove_patterns =
       (* TODO: recursive assignment for complex patterns *)
       failwith "complex patterns in top level let bindings are not supported"
   in
-  (* From here, a pattern in definition should be a single id/wildcard *)
   fun x -> List.map x ~f:helper_def |> List.concat
 ;;

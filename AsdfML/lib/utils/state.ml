@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 
 module StateM = struct
@@ -39,5 +38,30 @@ module IntStateM = struct
   type 'a t = (int, 'a) StateM.t
 
   let fresh last = last, last + 1
+  let fresh_postfix last = "_" ^ string_of_int last, last + 1
   let run m = fst (m 0)
 end
+
+open StateM
+open StateM.Syntax
+
+let mfold xs ~init ~f =
+  List.fold xs ~init:(return init) ~f:(fun acc x -> acc >>= fun acc -> f acc x)
+;;
+
+let mfoldi xs ~init ~f =
+  List.foldi xs ~init:(return init) ~f:(fun idx acc x -> acc >>= fun acc -> f idx acc x)
+;;
+
+let mfold_right xs ~init ~f =
+  List.fold_right xs ~init:(return init) ~f:(fun x acc -> acc >>= fun acc -> f x acc)
+;;
+
+let mfoldi_right xs ~init ~f =
+  let len = List.length xs - 1 in
+  snd
+    (List.fold_right
+       xs
+       ~init:(len, return init)
+       ~f:(fun v (i, acc) -> i - 1, acc >>= fun acc -> f i acc v))
+;;

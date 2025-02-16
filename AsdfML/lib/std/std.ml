@@ -83,15 +83,14 @@ let stdlib : std list =
 ;;
 
 let runtime : std list =
-  let arg1 = dummy_ty ^-> dummy_ty in
-  let arg2 = dummy_ty ^-> dummy_ty ^-> dummy_ty in
-  let arg3 = dummy_ty ^-> dummy_ty ^-> dummy_ty ^-> dummy_ty in
   [ { name = "`create_tuple"; typ = arg1; extern = "ml_create_tuple"; }
+  ; { name = "`tuple_len"; typ = arg1; extern = "ml_tuple_len"; }
   ; { name = "`set_tuple_field"; typ = arg3; extern = "ml_set_tuple_field"; }
   ; { name = "`get_tuple_field"; typ = arg2; extern = "ml_get_tuple_field"; }
   ; { name = "`list_field"; typ = arg2; extern = "ml_list_field"; }
   ; { name = "`list_hd"; typ = arg1; extern = "ml_list_hd"; }
   ; { name = "`list_tl"; typ = arg1; extern = "ml_list_tl"; }
+  ; { name = "`list_len"; typ = arg1; extern = "ml_list_len"; }
   ; { name = "`list_is_empty"; typ = arg1; extern = "ml_list_is_empty"; }
   ; { name = "`create_closure"; typ = arg2; extern = "create_closure"; }
   ]

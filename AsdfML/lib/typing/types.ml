@@ -57,3 +57,6 @@ let rec count_arrow_args = function
 ;;
 
 let dummy_ty = TVar (-1)
+let arg1 = dummy_ty ^-> dummy_ty
+let arg2 = dummy_ty ^-> dummy_ty ^-> dummy_ty
+let arg3 = dummy_ty ^-> dummy_ty ^-> dummy_ty ^-> dummy_ty

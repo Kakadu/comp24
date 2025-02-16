@@ -11,9 +11,8 @@ open State.IntStateM
 open State.IntStateM.Syntax
 
 let fresh_id name =
-  let* fresh = fresh in
-  let fresh = string_of_int fresh in
-  return (if String.equal name "" then "`ll_" ^ fresh else "`" ^ name ^ "_" ^ fresh)
+  fresh_postfix
+  >>| fun fresh -> (if String.equal name "" then "`ll" else "`" ^ name) ^ fresh
 ;;
 
 let rec ll_expr env lift ?(name = None) = function
@@ -71,7 +70,7 @@ let rec ll_expr env lift ?(name = None) = function
         return (x :: acc, lift))
     >>| fun (xs, lift) ->
     (match List.rev xs with
-     | x1 :: x2 :: xs -> (cf_tuple x1 x2 xs, lift)
+     | x1 :: x2 :: xs -> cf_tuple x1 x2 xs, lift
      | _ -> failwith "Lost tuple element")
 
 and ll_def env lift = function
