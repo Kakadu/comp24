@@ -1,3 +1,8 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+
 val div : int
 val gen_id : string QCheck.Gen.t
 

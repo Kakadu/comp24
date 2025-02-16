@@ -1,3 +1,8 @@
+(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+
 open QCheck
 open QCheck.Gen
 open Lib
