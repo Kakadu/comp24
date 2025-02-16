@@ -96,7 +96,6 @@
   > ;;
   > EOF
   val map_cps: ('a -> 'b) -> 'a list -> 'b list
-
   $ dune exec infer << EOF
   > let f a b c d e = a b c d e;;
   > EOF
