@@ -248,7 +248,8 @@ let%expect_test _ =
       in
       helper (0, 0, 0) tuples
   |};
-  [%expect {|
+  [%expect
+    {|
     let sum = (fun tuples ->
        let rec helper = (fun acc tuples ->
          if (`list_is_empty tuples)

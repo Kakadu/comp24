@@ -427,7 +427,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
     let sum tuples =
       let rec helper acc tuples =
         match tuples with
@@ -438,6 +439,5 @@ let%expect_test _ =
       in
       helper (0, 0, 0) tuples
   |};
-  [%expect
-    {| sum: (int * int * int) list -> (int * int * int) |}]
+  [%expect {| sum: (int * int * int) list -> (int * int * int) |}]
 ;;

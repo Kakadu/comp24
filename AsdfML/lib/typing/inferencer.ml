@@ -275,7 +275,7 @@ module TypeEnv = struct
       let xs = x1 :: x2 :: xs in
       List.fold xs ~init:(return env) ~f:(fun acc x ->
         let* acc = acc in
-        let* fresh  = fresh >>| fun n -> TVar n in
+        let* fresh = fresh >>| fun n -> TVar n in
         extend_pat acc x (vars, fresh))
     | PAnn (x, _), _ -> extend_pat env x scheme
     | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
