@@ -32,10 +32,13 @@ let%expect_test _ =
   [%expect
     {|
     let tuple_sum = (fun `arg_0 ->
-       let `tuple_0 = `arg_0 in
-       let a = (`get_tuple_field `tuple_0 0) in
-       let b = (`get_tuple_field `tuple_0 1) in
-       (( + ) a b))
+       if (( = ) (`tuple_len `arg_0) 2)
+       then
+         let `tuple_0 = `arg_0 in
+         let a = (`get_tuple_field `tuple_0 0) in
+         let b = (`get_tuple_field `tuple_0 1) in
+         (( + ) a b)
+       else (panic ()))
     |}]
 ;;
 
@@ -95,27 +98,14 @@ let%expect_test _ =
     {|
     let _ =
        let tuple_sum = (fun `arg_0 ->
-         let `tuple_0 = `arg_0 in
-         let a = (`get_tuple_field `tuple_0 0) in
-         let b = (`get_tuple_field `tuple_0 1) in
-         (( + ) a b)) in
+         if (( = ) (`tuple_len `arg_0) 2)
+         then
+           let `tuple_0 = `arg_0 in
+           let a = (`get_tuple_field `tuple_0 0) in
+           let b = (`get_tuple_field `tuple_0 1) in
+           (( + ) a b)
+         else (panic ())) in
        (tuple_sum (1, 2))
-    |}]
-;;
-
-let%expect_test _ =
-  test {|
-    let _ = 
-      let (x, y) = (1, 2) in 
-      x + y
-  |};
-  [%expect
-    {|
-    let _ =
-       let `tuple_0 = (1, 2) in
-       let x = (`get_tuple_field `tuple_0 0) in
-       let y = (`get_tuple_field `tuple_0 1) in
-       (( + ) x y)
     |}]
 ;;
 
@@ -151,9 +141,12 @@ let%expect_test _ =
        if (`list_is_empty list)
        then []
        else
-         let hd = (`list_hd list) in
-         let tl = (`list_tl list) in
-         (( :: ) (f hd) (map f tl))))
+         if (not (`list_is_empty list))
+         then
+           let hd = (`list_hd list) in
+           let tl = (`list_tl list) in
+           (( :: ) (f hd) (map f tl))
+         else (panic ())))
     |}]
 ;;
 
@@ -178,9 +171,12 @@ let%expect_test _ =
            if (( && ) (not (`list_is_empty list)) (( = ) (`list_hd list) 0))
            then 0
            else
-             let hd = (`list_hd list) in
-             let tl = (`list_tl list) in
-             (helper (( * ) hd acc) tl)) in
+             if (not (`list_is_empty list))
+             then
+               let hd = (`list_hd list) in
+               let tl = (`list_tl list) in
+               (helper (( * ) hd acc) tl)
+             else (panic ())) in
        (helper 1 list))
     |}]
 ;;
@@ -220,18 +216,24 @@ let%expect_test _ =
   [%expect
     {|
     let cross = (fun `arg_0 `arg_1 ->
-       let `tuple_1 = `arg_1 in
-       let x2 = (`get_tuple_field `tuple_1 0) in
-       let y2 = (`get_tuple_field `tuple_1 1) in
-       let z2 = (`get_tuple_field `tuple_1 2) in
-       let `tuple_0 = `arg_0 in
-       let x1 = (`get_tuple_field `tuple_0 0) in
-       let y1 = (`get_tuple_field `tuple_0 1) in
-       let z1 = (`get_tuple_field `tuple_0 2) in
-       let x = (( - ) (( * ) y1 z2) (( * ) z1 y2)) in
-       let y = (( - ) (( * ) z1 x2) (( * ) x1 z2)) in
-       let z = (( - ) (( * ) x1 y2) (( * ) y1 x2)) in
-       (x, y, z))
+       if (( = ) (`tuple_len `arg_1) 3)
+       then
+         let `tuple_1 = `arg_1 in
+         let x2 = (`get_tuple_field `tuple_1 0) in
+         let y2 = (`get_tuple_field `tuple_1 1) in
+         let z2 = (`get_tuple_field `tuple_1 2) in
+         if (( = ) (`tuple_len `arg_0) 3)
+         then
+           let `tuple_0 = `arg_0 in
+           let x1 = (`get_tuple_field `tuple_0 0) in
+           let y1 = (`get_tuple_field `tuple_0 1) in
+           let z1 = (`get_tuple_field `tuple_0 2) in
+           let x = (( - ) (( * ) y1 z2) (( * ) z1 y2)) in
+           let y = (( - ) (( * ) z1 x2) (( * ) x1 z2)) in
+           let z = (( - ) (( * ) x1 y2) (( * ) y1 x2)) in
+           (x, y, z)
+         else (panic ())
+       else (panic ()))
     |}]
 ;;
 
@@ -255,16 +257,58 @@ let%expect_test _ =
          if (`list_is_empty tuples)
          then acc
          else
-           let `tuple_1 = (`list_hd tuples) in
-           let a = (`get_tuple_field `tuple_1 0) in
-           let b = (`get_tuple_field `tuple_1 1) in
-           let c = (`get_tuple_field `tuple_1 2) in
-           let tl = (`list_tl tuples) in
-           let `tuple_0 = acc in
-           let x = (`get_tuple_field `tuple_0 0) in
-           let y = (`get_tuple_field `tuple_0 1) in
-           let z = (`get_tuple_field `tuple_0 2) in
-           (helper ((( + ) a x), (( + ) b y), (( + ) c z)) tl)) in
+           if (( && ) (not (`list_is_empty tuples)) (( = ) (`tuple_len (`list_hd tuples)) 3))
+           then
+             let `tuple_1 = (`list_hd tuples) in
+             let a = (`get_tuple_field `tuple_1 0) in
+             let b = (`get_tuple_field `tuple_1 1) in
+             let c = (`get_tuple_field `tuple_1 2) in
+             let tl = (`list_tl tuples) in
+             if (( = ) (`tuple_len acc) 3)
+             then
+               let `tuple_0 = acc in
+               let x = (`get_tuple_field `tuple_0 0) in
+               let y = (`get_tuple_field `tuple_0 1) in
+               let z = (`get_tuple_field `tuple_0 2) in
+               (helper ((( + ) a x), (( + ) b y), (( + ) c z)) tl)
+             else (panic ())
+           else (panic ())) in
        (helper (0, 0, 0) tuples))
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let len list = 
+      let rec helper acc list = match list with 
+        | [] -> 0
+        | [x; y] -> 2
+        | a :: b :: tl -> helper (acc + 2) tl
+      in
+      helper 0 list
+  |};
+  [%expect
+    {|
+    let len = (fun list ->
+       let rec helper = (fun acc list ->
+         if (`list_is_empty list)
+         then 0
+         else
+           if (( = ) (`list_len list) 2)
+           then
+             let `list_0 = list in
+             let x = (`list_field `list_0 0) in
+             let y = (`list_field `list_0 1) in
+             2
+           else
+             if (( && ) (not (`list_is_empty list)) (not (`list_is_empty (`list_tl list))))
+             then
+               let a = (`list_hd list) in
+               let b = (`list_hd (`list_tl list)) in
+               let tl = (`list_tl (`list_tl list)) in
+               (helper (( + ) acc 2) tl)
+             else (panic ())) in
+       (helper 0 list))
     |}]
 ;;

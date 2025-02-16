@@ -123,27 +123,37 @@ let%expect_test _ =
   [%expect
     {|
     let cross `arg_0 `arg_1 =
-      let a2 = `get_tuple_field `arg_1 0 in
-      let a4 = `get_tuple_field `arg_1 1 in
-      let a6 = `get_tuple_field `arg_1 2 in
-      let a9 = `get_tuple_field `arg_0 0 in
-      let a11 = `get_tuple_field `arg_0 1 in
-      let a13 = `get_tuple_field `arg_0 2 in
-      let a24 = ( * ) a11 a6 in
-      let a25 = ( * ) a13 a4 in
-      let a15 = ( - ) a24 a25 in
-      let a22 = ( * ) a13 a2 in
-      let a23 = ( * ) a9 a6 in
-      let a17 = ( - ) a22 a23 in
-      let a20 = ( * ) a9 a4 in
-      let a21 = ( * ) a11 a2 in
-      let a19 = ( - ) a20 a21 in
-      (a15, a17, a19)
+      let a33 = `tuple_len `arg_1 in
+      let a1 = ( = ) a33 3 in
+      if a1
+      then
+        let a4 = `get_tuple_field `arg_1 0 in
+        let a6 = `get_tuple_field `arg_1 1 in
+        let a8 = `get_tuple_field `arg_1 2 in
+        let a31 = `tuple_len `arg_0 in
+        let a10 = ( = ) a31 3 in
+        if a10
+        then
+          let a13 = `get_tuple_field `arg_0 0 in
+          let a15 = `get_tuple_field `arg_0 1 in
+          let a17 = `get_tuple_field `arg_0 2 in
+          let a28 = ( * ) a15 a8 in
+          let a29 = ( * ) a17 a6 in
+          let a19 = ( - ) a28 a29 in
+          let a26 = ( * ) a17 a4 in
+          let a27 = ( * ) a13 a8 in
+          let a21 = ( - ) a26 a27 in
+          let a24 = ( * ) a13 a6 in
+          let a25 = ( * ) a15 a4 in
+          let a23 = ( - ) a24 a25 in
+          (a19, a21, a23)
+        else panic ()
+      else panic ()
     let main =
-      let a26 = (1, 2, 3) in
-      let a27 = (4, 5, 6) in
-      let a29 = cross a26 a27 in
-      print_tuple a29
+      let a34 = (1, 2, 3) in
+      let a35 = (4, 5, 6) in
+      let a37 = cross a34 a35 in
+      print_tuple a37
     |}]
 ;;
 
@@ -161,8 +171,8 @@ let%expect_test _ =
   [%expect
     {|
     let map f list =
-      let a9 = `list_is_empty list in
-      let a1 = not a9 in
+      let a12 = `list_is_empty list in
+      let a1 = not a12 in
       if a1
       then
         let a3 = `list_hd list in
@@ -170,17 +180,20 @@ let%expect_test _ =
         let a7 = f a3 in
         let a8 = map f a5 in
         ( :: ) a7 a8
-      else []
+      else let a10 = `list_is_empty list in
+        if a10
+        then []
+        else panic ()
     let map_ f list =
-      let a19 = `list_is_empty list in
-      let a11 = not a19 in
-      if a11
+      let a22 = `list_is_empty list in
+      let a14 = not a22 in
+      if a14
       then
-        let a13 = `list_hd list in
-        let a15 = `list_tl list in
-        let a17 = f a13 in
-        let a18 = map f a15 in
-        ( :: ) a17 a18
+        let a16 = `list_hd list in
+        let a18 = `list_tl list in
+        let a20 = f a16 in
+        let a21 = map f a18 in
+        ( :: ) a20 a21
       else []
     |}]
 ;;

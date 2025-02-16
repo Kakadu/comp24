@@ -47,6 +47,7 @@ let runtime : std list =
   ; { name = "`list_len"; typ = arg1; extern = "ml_list_len" }
   ; { name = "`list_is_empty"; typ = arg1; extern = "ml_list_is_empty" }
   ; { name = "`create_closure"; typ = arg2; extern = "create_closure" }
+  ; { name = "panic"; typ = unit_typ ^-> unit_typ; extern = "ml_panic" }
   ]
 ;;
 

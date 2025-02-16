@@ -10,10 +10,9 @@ open Utils
 open State.IntStateM
 open State.IntStateM.Syntax
 
-(* TODO: catch-all branch? *)
-
 let true_ = TEConst (dummy_ty, CBool true)
 let check_eq l r = TEApp (bool_typ, TEApp (dummy_ty, TEVar (dummy_ty, "( = )"), l), r)
+let panic () = TEApp (unit_typ, TEVar (dummy_ty, "panic"), TEConst (unit_typ, CUnit))
 
 let and_ l r =
   match l, r with
@@ -136,14 +135,27 @@ let remove_match prog =
                (case_matched (list_tl match_exp) tl))
         | _ -> true_
       in
-      let rec gen_match cont cases =
+      let rec gen_match ?(has_catch_all = false) cont cases =
+        let is_catch_all = function
+          | PWild | PIdent _ -> true
+          | _ -> false
+        in
         let* match_exp = helper_expr match_exp in
         let[@warning "-8"] ((pat, action) :: tl_cases) = cases in
+        let has_catch_all = has_catch_all || is_catch_all pat in
         let* action = helper_expr action in
         match tl_cases with
-        | [] -> bind_pat_vars match_exp pat action |> cont
+        | [] ->
+          if has_catch_all
+          then bind_pat_vars match_exp pat action |> cont
+          else (
+            let catch_all = panic () in
+            let* then_branch = bind_pat_vars match_exp pat action in
+            cont
+              (return (te_if_else t (case_matched match_exp pat) then_branch catch_all)))
         | _ ->
           gen_match
+            ~has_catch_all
             (fun else_branch ->
               let* then_branch = bind_pat_vars match_exp pat action in
               let* else_branch = else_branch in
