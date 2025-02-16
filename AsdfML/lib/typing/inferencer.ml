@@ -101,7 +101,9 @@ module Type = struct
     | TVar b -> b = v
     | TArrow (l, r) -> occurs_in v l || occurs_in v r
     | TGround _ -> false
-    | TTuple xs -> List.exists xs ~f:(occurs_in v)
+    | TTuple (x1, x2, xs) ->
+      let xs = x1 :: x2 :: xs in
+      List.exists xs ~f:(occurs_in v)
     | TList t -> occurs_in v t
   ;;
 
@@ -110,7 +112,9 @@ module Type = struct
       | TVar b -> Set.add acc b
       | TArrow (l, r) -> helper (helper acc l) r
       | TGround _ -> acc
-      | TTuple xs -> List.fold xs ~init:VarSet.empty ~f:helper
+      | TTuple (x1, x2, xs) ->
+        let xs = x1 :: x2 :: xs in
+        List.fold xs ~init:VarSet.empty ~f:helper
       | TList t -> helper acc t
     in
     helper VarSet.empty
@@ -169,7 +173,7 @@ end = struct
          | Some x -> x)
       | TArrow (l, r) -> helper l ^-> helper r
       | TList x -> TList (helper x)
-      | TTuple xs -> TTuple (List.map xs ~f:helper)
+      | TTuple (x1, x2, xs) -> TTuple (helper x1, helper x2, List.map xs ~f:helper)
       | TGround _ as g -> g
     in
     helper
@@ -184,9 +188,11 @@ end = struct
       let* subs1 = unify l1 l2 in
       let* subs2 = unify (apply subs1 r1) (apply subs1 r2) in
       compose subs1 subs2
-    | TTuple t1, TTuple t2 ->
+    | TTuple (x1, x2, xs), TTuple (y1, y2, ys) ->
+      let xs = x1 :: x2 :: xs in
+      let ys = y1 :: y2 :: ys in
       (match
-         List.fold2 t1 t2 ~init:(return empty) ~f:(fun acc l r ->
+         List.fold2 xs ys ~init:(return empty) ~f:(fun acc l r ->
            let* acc = acc in
            let* sub = unify l r in
            compose acc sub)
@@ -256,19 +262,15 @@ module TypeEnv = struct
     | PConst CUnit, _ -> return env
     | PWild, _ -> return env
     | PIdent x, _ -> extend env x scheme |> return
-    | PTuple (hd1, hd2, tl), (vars, (TTuple ys as ty)) ->
-      let xs = hd1 :: hd2 :: tl in
+    | PTuple (x1, x2, xs), (vars, (TTuple (y1, y2, ys) as ty)) ->
+      let xs = x1 :: x2 :: xs in
+      let ys = y1 :: y2 :: ys in
       List.fold2 xs ys ~init:(return env) ~f:(fun acc x y ->
         let* acc = acc in
         extend_pat acc x (vars, y))
       |> (function
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
-    | PTuple xs, (vars, (TVar v as ty)) ->
-      List.fold xs ~init:(return env) ~f:(fun acc x ->
-        let* acc = acc in
-        let* fresh  = fresh >>| fun n -> TVar n in
-        extend_pat acc x (vars, fresh))
     | PAnn (x, _), _ -> extend_pat env x scheme
     | PCons (hd, tl), (vars, (TList ty as list_ty)) ->
       let* env = extend_pat env hd (vars, ty) in
@@ -284,7 +286,8 @@ module TypeEnv = struct
              "Unsupported pattern `%a`, scheme `%a` in let binding"
              Pp_ast.pp_pattern
              pat
-             pp_scheme scheme))
+             pp_scheme
+             scheme))
   ;;
 
   let apply env sub = map env ~f:(Scheme.apply sub)
@@ -371,7 +374,10 @@ let infer =
           let* env, fvs = acc in
           let* env', fv = infer_pattern env x in
           return (env', fv :: fvs))
-      >>| fun (env, fvs) -> env, TTuple fvs
+      >>= fun (env, fvs) ->
+      (match fvs with
+       | fv1 :: fv2 :: fvs -> return (env, TTuple (fv1, fv2, fvs))
+       | _ -> fail (`Syntax_error "Lost tuple element"))
     | PList xs ->
       let* fv = fresh_var in
       List.fold
@@ -439,7 +445,7 @@ let infer =
       let* let_env, let_sub, _, tdef = infer_def env def in
       let* exp_sub, exp_ty, texp = infer_expr let_env expr in
       let* sub = Subst.compose let_sub exp_sub in
-      return (sub, exp_ty)
+      return (sub, exp_ty, TELetIn (exp_ty, tdef, texp))
     | ETuple (hd1, hd2, tl) ->
       let xs = hd1 :: hd2 :: tl in
       List.fold_right
@@ -450,8 +456,18 @@ let infer =
           let* s, t, texp = infer_expr env x in
           let* s' = Subst.compose acc_sub s in
           return (s', t :: acc_t, texp :: acc_ty))
-      >>| fun (s, t, tes) ->
-      s, TTuple (List.map t ~f:(Subst.apply s)), TETuple (TTuple t, tes)
+      >>= fun (s, t, tes) ->
+      let* ty =
+        match List.map t ~f:(Subst.apply s) with
+        | t1 :: t2 :: ts -> return (TTuple (t1, t2, ts))
+        | _ -> fail (`Syntax_error "Lost tuple element")
+      in
+      let* texp =
+        match tes with
+        | t1 :: t2 :: ts -> return (TETuple (ty, t1, t2, ts))
+        | _ -> fail (`Syntax_error "Lost tuple element")
+      in
+      return (s, ty, texp)
     | EList xs ->
       (match xs with
        | [] ->
@@ -528,7 +544,8 @@ let infer =
 let strip_annots (prog : Tast.tdefinition list) =
   let rec strip_pat = function
     | PAnn (pat, _) -> pat
-    | PTuple (hd1, hd2, tl) -> PTuple (strip_pat hd1, strip_pat hd2, List.map tl ~f:strip_pat)
+    | PTuple (hd1, hd2, tl) ->
+      PTuple (strip_pat hd1, strip_pat hd2, List.map tl ~f:strip_pat)
     | PList pats -> PList (List.map pats ~f:strip_pat)
     | PCons (l, r) -> PCons (strip_pat l, strip_pat r)
     | pat -> pat
@@ -540,7 +557,8 @@ let strip_annots (prog : Tast.tdefinition list) =
     | TEApp (ty, l, r) -> TEApp (ty, strip_expr l, strip_expr r)
     | TEIfElse (ty, i, t, e) -> TEIfElse (ty, strip_expr i, strip_expr t, strip_expr e)
     | TELetIn (ty, def, body) -> TELetIn (ty, strip_def def, strip_expr body)
-    | TETuple (ty, xs) -> TETuple (ty, List.map xs ~f:strip_expr)
+    | TETuple (ty, x1, x2, xs) ->
+      TETuple (ty, strip_expr x1, strip_expr x2, List.map xs ~f:strip_expr)
     | TEList (ty, xs) -> TEList (ty, List.map xs ~f:strip_expr)
     | expr -> expr
   and strip_def = function

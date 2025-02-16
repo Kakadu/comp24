@@ -51,12 +51,7 @@ let rec ll_expr env lift ?(name = None) = function
     let env = Map.remove env id in
     let* exp, lift = ll_expr env lift exp ~name in
     return (cf_let_in id body exp, lift)
-  | (STuple xs | SList xs) as exp ->
-    let[@warning "-8"] constr =
-      match exp with
-      | STuple _ -> cf_tuple
-      | SList _ -> cf_list
-    in
+  | SList xs ->
     List.fold
       xs
       ~init:(return ([], lift))
@@ -64,7 +59,20 @@ let rec ll_expr env lift ?(name = None) = function
         let* acc, lift = acc in
         let* x, lift = ll_expr env lift x in
         return (x :: acc, lift))
-    >>| fun (xs, lift) -> constr (List.rev xs), lift
+    >>| fun (xs, lift) -> cf_list (List.rev xs), lift
+  | STuple (x1, x2, xs) ->
+    let xs = x1 :: x2 :: xs in
+    List.fold
+      xs
+      ~init:(return ([], lift))
+      ~f:(fun acc x ->
+        let* acc, lift = acc in
+        let* x, lift = ll_expr env lift x in
+        return (x :: acc, lift))
+    >>| fun (xs, lift) ->
+    (match List.rev xs with
+     | x1 :: x2 :: xs -> (cf_tuple x1 x2 xs, lift)
+     | _ -> failwith "Lost tuple element")
 
 and ll_def env lift = function
   (* TODO: probably should decouple ELets and DLets *)
@@ -112,7 +120,7 @@ let remove_toplevel_lifts ast =
     | CFApp (f, arg) -> CFApp (remap f, remap arg)
     | CFIfElse (i, t, e) -> CFIfElse (remap i, remap t, remap e)
     | CFLetIn (id, body, exp) -> CFLetIn (id, remap body, remap exp)
-    | CFTuple xs -> CFTuple (List.map xs ~f:remap)
+    | CFTuple (x1, x2, xs) -> CFTuple (remap x1, remap x2, List.map xs ~f:remap)
     | CFList xs -> CFList (List.map xs ~f:remap)
     | x -> x
   in

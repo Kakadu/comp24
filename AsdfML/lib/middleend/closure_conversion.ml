@@ -43,11 +43,11 @@ let rec cc_expr globals env ?(apply = true) = function
      | [] -> s_fun (pat_list_to_id_list pat) body'
      | _ ->
        (* dbg
-         "Creating (apply:%b) closure with FVs %s\nand body %a\n"
-         apply
-         (list_to_string fvs)
-         Sast.pp_sexpr
-         body'; *)
+          "Creating (apply:%b) closure with FVs %s\nand body %a\n"
+          apply
+          (list_to_string fvs)
+          Sast.pp_sexpr
+          body'; *)
        let pat = fvs |> List.map ~f:p_ident |> (Fn.flip List.append) pat in
        let closure_fun = s_fun (pat_list_to_id_list pat) body' in
        if apply
@@ -59,7 +59,11 @@ let rec cc_expr globals env ?(apply = true) = function
     let def', env', _ = cc_def globals env def ~apply:false in
     let exp' = cc_expr globals env' exp in
     s_let_in def' exp'
-  | TETuple (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_tuple
+  | TETuple (_, x1, x2, xs) ->
+    s_tuple
+      (cc_expr globals env x1)
+      (cc_expr globals env x2)
+      (List.map xs ~f:(cc_expr globals env))
   | TEList (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_list
   | TEMatch _ -> failwith "removed by now"
 

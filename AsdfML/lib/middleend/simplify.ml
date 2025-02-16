@@ -25,7 +25,7 @@ let simplify =
       te_fun (t1 ^-> t2) (List.append args1 args2) (expr body) |> expr
     | TEFun (t, p, e) -> te_fun t p (expr e)
     | TELetIn (t, d, e2) -> te_let_in t (def d) (expr e2)
-    | TETuple (t, xs) -> te_tuple t (List.map xs ~f:expr)
+    | TETuple (t, x1, x2, xs) -> te_tuple t (expr x1) (expr x2) (List.map xs ~f:expr)
     | TEList (t, xs) -> te_list t (List.map xs ~f:expr)
     | TEMatch (t, e, c) -> te_match t (expr e) (List.map c ~f:(fun (p, e) -> p, expr e))
   and def = function

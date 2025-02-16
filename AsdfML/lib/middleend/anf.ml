@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Anf_ast
 open Cf_ast
@@ -73,17 +72,22 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
     anf_expr env expr (fun imm_expr ->
       let* body = anf_expr new_env body cont in
       return (ALet (name, CImmExpr imm_expr, body)))
-  | (CFTuple xs | CFList xs) as exp ->
-    let[@warning "-8"] constr x =
-      match exp with
-      | CFTuple _ -> ImmTuple x
-      | CFList _ -> ImmList x
-    in
+  | CFList xs ->
     let rec helper acc = function
-      | [] -> cont (constr (List.rev acc))
+      | [] -> cont (ImmList (List.rev acc))
       | x :: xs -> anf_expr env x (fun x -> helper (x :: acc) xs)
     in
     helper [] xs
+  | CFTuple (x1, x2, xs) ->
+    let rec helper acc = function
+      | [] ->
+        cont
+          (match List.rev acc with
+           | x1 :: x2 :: xs -> ImmTuple (x1, x2, xs)
+           | _ -> failwith "Lost tuple element")
+      | x :: xs -> anf_expr env x (fun x -> helper (x :: acc) xs)
+    in
+    helper [] (x1 :: x2 :: xs)
 ;;
 
 let anf_def env (def : cf_definition) =
@@ -132,7 +136,7 @@ let remove_useless_bindings fn =
   let remap =
     let rec remap_i = function
       | ImmId id -> ImmId (find_rec id)
-      | ImmTuple xs -> ImmTuple (List.map ~f:remap_i xs)
+      | ImmTuple (x1, x2, xs) -> ImmTuple (remap_i x1, remap_i x2, List.map ~f:remap_i xs)
       | ImmList xs -> ImmList (List.map ~f:remap_i xs)
       | x -> x
     and remap_c = function

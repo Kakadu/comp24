@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Ast
 
 type id = string
@@ -13,7 +12,7 @@ type imm_expr =
   | ImmUnit
   | ImmNil
   | ImmId of id
-  | ImmTuple of imm_expr list
+  | ImmTuple of imm_expr * imm_expr * imm_expr list
   | ImmList of imm_expr list
 [@@deriving show { with_path = false }]
 
@@ -54,7 +53,9 @@ let rec pp_imm_expr fmt = function
   | ImmId id -> fprintf fmt "%s" id
   | ImmUnit -> fprintf fmt "()"
   | ImmNil -> fprintf fmt "[]"
-  | ImmTuple xs -> pp_list ~op:"(" ~cl:")" ~sep:", " fmt pp_imm_expr xs
+  | ImmTuple (x1, x2, xs) -> 
+    let xs = x1 :: x2 :: xs in
+    pp_list ~op:"(" ~cl:")" ~sep:", " fmt pp_imm_expr xs
   | ImmList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs
 ;;
 

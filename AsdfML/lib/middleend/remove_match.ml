@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Ast
 open Tast
@@ -39,14 +38,16 @@ let remove_match =
       te_if_else ty (helper_expr i) (helper_expr t) (helper_expr e)
     | TEFun (t, p, e) -> te_fun t p (helper_expr e)
     | TELetIn (t, d, e) -> te_let_in t (helper_def d) (helper_expr e)
-    | TETuple (t, xs) -> te_tuple t (List.map xs ~f:helper_expr)
+    | TETuple (t, x1, x2, xs) ->
+      te_tuple t (helper_expr x1) (helper_expr x2) (List.map xs ~f:helper_expr)
     | TEList (t, xs) -> te_list t (List.map xs ~f:helper_expr)
     | TEMatch (t, match_exp, cases) ->
       let rec bind_pat_vars match_exp pat action =
         match pat with
         | PIdent _ -> te_let_in dummy_ty (td_let dummy_ty pat match_exp) action
-        | PTuple xs ->
+        | PTuple (x1, x2, xs) ->
           (* TODO: simplify `&& true` *)
+          let xs = x1 :: x2 :: xs in
           te_let_in
             dummy_ty
             (td_let dummy_ty (p_ident "`tuple") match_exp)
@@ -69,7 +70,8 @@ let remove_match =
         | PConst (CInt _ as c) | PConst (CBool _ as c) ->
           check_eq match_exp (TEConst (dummy_ty, c))
         | PConst CNil -> list_is_empty match_exp
-        | PTuple xs ->
+        | PTuple (x1, x2, xs) ->
+          let xs = x1 :: x2 :: xs in
           List.foldi
             xs
             ~init:(TEConst (dummy_ty, CBool true))

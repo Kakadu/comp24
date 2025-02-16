@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Ast
 open Types
 open Pp_ast
@@ -15,7 +14,7 @@ type texpr =
   | TEIfElse of ty * texpr * texpr * texpr
   | TEFun of ty * pattern list * texpr
   | TELetIn of ty * tdefinition * texpr
-  | TETuple of ty * texpr list
+  | TETuple of ty * texpr * texpr * texpr list
   | TEList of ty * texpr list
   | TEMatch of ty * texpr * (pattern * texpr) list
 [@@deriving show { with_path = false }]
@@ -31,7 +30,7 @@ let te_app t f x = TEApp (t, f, x)
 let te_if_else t cond e_true e_false = TEIfElse (t, cond, e_true, e_false)
 let te_fun t p e = TEFun (t, p, e)
 let te_let_in t def e = TELetIn (t, def, e)
-let te_tuple t exprs = TETuple (t, exprs)
+let te_tuple t e1 e2 es = TETuple (t, e1, e2, es)
 let te_list t exprs = TEList (t, exprs)
 let te_match t e branches = TEMatch (t, e, branches)
 let td_let t p e = TDLet (t, NonRec, p, e)
@@ -51,7 +50,7 @@ let texpr_type = function
   | TEIfElse (t, _, _, _)
   | TEFun (t, _, _)
   | TELetIn (t, _, _)
-  | TETuple (t, _)
+  | TETuple (t, _, _, _)
   | TEList (t, _)
   | TEMatch (t, _, _) -> t
 ;;
@@ -64,7 +63,8 @@ let rec strip_types_expr = function
     EIfElse (strip_types_expr c, strip_types_expr t, strip_types_expr e)
   | TEFun (_, p, e) -> EFun (p, strip_types_expr e)
   | TELetIn (_, d, e) -> ELetIn (strip_types_def d, strip_types_expr e)
-  | TETuple (_, es) -> ETuple (List.map es ~f:strip_types_expr)
+  | TETuple (_, e1, e2, es) ->
+    ETuple (strip_types_expr e1, strip_types_expr e2, List.map es ~f:strip_types_expr)
   | TEList (_, es) -> EList (List.map es ~f:strip_types_expr)
   | TEMatch (_, e, pes) ->
     EMatch (strip_types_expr e, List.map ~f:(fun (p, e) -> p, strip_types_expr e) pes)

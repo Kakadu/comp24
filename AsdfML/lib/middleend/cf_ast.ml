@@ -10,7 +10,7 @@ type cf_expr =
   | CFApp of cf_expr * cf_expr
   | CFIfElse of cf_expr * cf_expr * cf_expr
   | CFLetIn of id * cf_expr * cf_expr
-  | CFTuple of cf_expr list
+  | CFTuple of cf_expr * cf_expr * cf_expr list
   | CFList of cf_expr list
 
 and cf_definition = CFLet of id * id list * cf_expr
@@ -22,7 +22,7 @@ let cf_var v = CFVar v
 let cf_app f arg = CFApp (f, arg)
 let cf_if_else cond if_expr else_expr = CFIfElse (cond, if_expr, else_expr)
 let cf_let_in id body exp = CFLetIn (id, body, exp)
-let cf_tuple exprs = CFTuple exprs
+let cf_tuple e1 e2 es = CFTuple (e1, e2, es)
 let cf_list exprs = CFList exprs
 let cf_def id args expr = CFLet (id, args, expr)
 
@@ -54,7 +54,9 @@ let rec pp_expr fmt = function
       e
   | CFLetIn (id, body, exp) ->
     fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_expr body pp_expr exp
-  | CFTuple xs -> pp_list ~sep:", " fmt pp_expr xs
+  | CFTuple (x, y, xs) ->
+    let xs = x :: y :: xs in
+    pp_list ~sep:", " fmt pp_expr xs
   | CFList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function

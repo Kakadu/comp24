@@ -15,7 +15,7 @@ type ty =
   | TGround of ground
   | TVar of var_id
   | TArrow of ty * ty
-  | TTuple of ty list
+  | TTuple of ty * ty * ty list
   | TList of ty
 
 type error =

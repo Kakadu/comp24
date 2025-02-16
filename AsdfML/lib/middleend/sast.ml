@@ -16,7 +16,7 @@ type sexpr =
   | SIfElse of sexpr * sexpr * sexpr
   | SFun of id list * sexpr
   | SLetIn of sdefinition * sexpr
-  | STuple of sexpr list
+  | STuple of sexpr * sexpr * sexpr list
   | SList of sexpr list
 [@@deriving show { with_path = false }]
 
@@ -31,7 +31,7 @@ let s_app f x = SApp (f, x)
 let s_if_else cond e_true e_false = SIfElse (cond, e_true, e_false)
 let s_fun p e = SFun (p, e)
 let s_let_in def e = SLetIn (def, e)
-let s_tuple exprs = STuple exprs
+let s_tuple e1 e2 es = STuple (e1, e2, es)
 let s_list exprs = SList exprs
 let s_let f r x e = SLet (f, r, x, e)
 
@@ -61,7 +61,7 @@ let rec pp_sexpr fmt = function
       p;
     fprintf fmt " -> %a)" pp_sexpr e
   | SLetIn (d, e) -> fprintf fmt "%a in %a" pp_sdef d pp_sexpr e
-  | STuple xs -> pp_list ~sep:", " fmt pp_sexpr xs
+  | STuple (x1, x2, xs) -> let xs = x1 :: x2 :: xs in pp_list ~sep:", " fmt pp_sexpr xs
   | SList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_sexpr xs
 
 and pp_sdef fmt = function

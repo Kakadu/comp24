@@ -11,7 +11,10 @@ let vars_pat, vars_pat_list =
   let rec helper = function
     | PConst _ | PWild -> empty
     | PIdent x -> singleton x
-    | PTuple xs | PList xs -> union_list (List.map xs ~f:helper)
+    | PTuple (hd1, hd2, tl) ->
+      let xs = hd1 :: hd2 :: tl in
+      union_list (List.map xs ~f:helper)
+    | PList xs -> union_list (List.map xs ~f:helper)
     | PCons (l, r) -> union (helper l) (helper r)
     | PAnn (x, _) -> helper x
   in
@@ -31,7 +34,10 @@ let rec free_vars_expr =
     let free_def = free_vars_def def in
     let free_expr = diff (free_vars_expr exp) (vars_pat pat) in
     union free_def free_expr
-  | ETuple xs | EList xs -> union_list (List.map xs ~f:free_vars_expr)
+  | ETuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    union_list (List.map xs ~f:free_vars_expr)
+  | EList xs -> union_list (List.map xs ~f:free_vars_expr)
   | EMatch (e, pe) ->
     let free_cases =
       List.fold pe ~init:empty ~f:(fun acc (p, e) ->
@@ -58,7 +64,10 @@ let rec vars_expr =
   | EIfElse (c, t, e) -> union_list [ vars_expr c; vars_expr t; vars_expr e ]
   | EFun (pat, exp) -> union (vars_pat_list pat) (vars_expr exp)
   | ELetIn ((DLet _ as def), exp) -> union (vars_def def) (vars_expr exp)
-  | ETuple xs | EList xs -> union_list (List.map xs ~f:vars_expr)
+  | ETuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    union_list (List.map xs ~f:vars_expr)
+  | EList xs -> union_list (List.map xs ~f:vars_expr)
   | EMatch (e, pe) ->
     let vars_cases =
       List.fold pe ~init:empty ~f:(fun acc (p, e) ->

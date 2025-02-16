@@ -39,7 +39,9 @@ let rec pp_ty fmt = function
     (match left with
      | TArrow (_, _) -> fprintf fmt "(%a) -> %a" pp_ty left pp_ty right
      | _ -> fprintf fmt "%a -> %a" pp_ty left pp_ty right)
-  | TTuple xs -> pp_list ~sep:" * " fmt pp_ty xs
+  | TTuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:" * " fmt pp_ty xs
   | TList t -> fprintf fmt "%a list" pp_ty t
 ;;
 
