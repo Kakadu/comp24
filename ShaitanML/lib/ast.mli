@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 type id = string
 
 val pp_id : Format.formatter -> id -> unit
@@ -59,23 +63,22 @@ type expr =
 and case = pattern * expr
 and binding = pattern * expr
 
+type str_item =
+  | SEval of expr
+  | SValue of rec_flag * binding list
+
+type structure = str_item list
+
 val pp_expr : Format.formatter -> expr -> unit
 val show_expr : expr -> string
 val pp_case : Format.formatter -> case -> unit
 val show_case : case -> string
 val pp_binding : Format.formatter -> binding -> unit
 val show_binding : binding -> string
-
-type str_item =
-  | SEval of expr
-  | SValue of rec_flag * binding list
-
 val pp_str_item : Format.formatter -> str_item -> unit
 val show_str_item : str_item -> string
 val constr_apply : expr -> expr list -> expr
 val constr_fun : pattern list -> expr -> expr
-
-type structure = str_item list
-
 val pp_structure : Format.formatter -> structure -> unit
 val show_structure : structure -> string
+val print_structure : structure -> string
