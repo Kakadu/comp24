@@ -15,12 +15,9 @@ let%expect_test _ =
   [%expect {|
     let _ = 12
 
-
     let _ = (-12)
 
-
     let _ = 12
-
 
     let _ = (-12)
     |}]
@@ -34,9 +31,7 @@ let%expect_test _ =
     {|
     let _ = (( + ) 1 2)
 
-
     let _ = (( + ) 1 (-2))
-
 
     let _ = (( * ) (( - ) (-1) (-3)) (( + ) (-2) (( / ) 4 2)))
     |}]
@@ -76,7 +71,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let max = fun x -> fun y -> if x < y then y else x";
-  [%expect {|
+  [%expect
+    {|
     let max = (fun x -> (fun y -> if (( < ) x y)
       then y
       else x))

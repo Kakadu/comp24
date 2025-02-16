@@ -31,7 +31,7 @@ let%expect_test _ =
   [%expect
     {|
     let tuple_sum = (fun `arg_0 -> match `arg_0 with
-    | (a, b) -> (( + ) a b))
+       | (a, b) -> (( + ) a b))
     |}]
 ;;
 
@@ -41,8 +41,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let tuple_sum = (fun `arg_0 -> match `arg_0 with
-    | (a, (b, c)) -> (( + ) (( + ) a b) c))
+    let tuple_sum = (fun `arg_0 ->
+       match `arg_0 with
+       | (a, (b, c)) -> (( + ) (( + ) a b) c))
     |}]
 ;;
 
@@ -52,8 +53,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let f = (fun `arg_0 -> match `arg_0 with
-    | (a, (b, c)) -> (( + ) (( + ) a b) c))
+    let f = (fun `arg_0 ->
+       match `arg_0 with
+       | (a, (b, c)) -> (( + ) (( + ) a b) c))
     |}]
 ;;
 
@@ -63,8 +65,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let f = (fun `arg_0 -> match `arg_0 with
-    | [[a; b]; [c; d]] -> (( + ) (( + ) (( + ) a b) c) d))
+    let f = (fun `arg_0 ->
+       match `arg_0 with
+       | [[a; b]; [c; d]] -> (( + ) (( + ) (( + ) a b) c) d))
     |}]
 ;;
 
@@ -77,9 +80,10 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let _ = let tuple_sum = (fun `arg_0 -> match `arg_0 with
-    | (a, b) -> (( + ) a b))
-     in (tuple_sum (1, 2))
+    let _ =
+       let tuple_sum = (fun `arg_0 -> match `arg_0 with
+         | (a, b) -> (( + ) a b)) in
+       (tuple_sum (1, 2))
     |}]
 ;;
 
@@ -90,7 +94,7 @@ let%expect_test _ =
   [%expect
     {|
     let list_sum = (fun `arg_0 -> match `arg_0 with
-    | [a; b] -> (( + ) a b))
+       | [a; b] -> (( + ) a b))
     |}]
 ;;
 
@@ -102,7 +106,7 @@ let%expect_test _ =
   |};
   [%expect {|
     let _ = match (1, 2) with
-    | (x, y) -> (( + ) x y)
+       | (x, y) -> (( + ) x y)
     |}]
 ;;
 
@@ -115,9 +119,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let _ = let v = (1, 2)
-     in match v with
-    | (x, y) -> (( + ) x y)
+    let _ = let v = (1, 2) in
+       match v with
+       | (x, y) -> (( + ) x y)
     |}]
 ;;
 
@@ -130,9 +134,10 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let fst = (fun vec -> let helper = (fun `arg_0 -> match `arg_0 with
-    | (x, y, z) -> x)
-     in (helper vec))
+    let fst = (fun vec ->
+       let helper = (fun `arg_0 -> match `arg_0 with
+         | (x, y, z) -> x) in
+       (helper vec))
     |}]
 ;;
 
@@ -156,7 +161,7 @@ let%expect_test _ =
   [%expect
     {|
     let `temp_list = match [1; 2; 3; 4] with
-    | [a; b; c] -> [1; 2; 3; 4]
+       | [a; b; c] -> [1; 2; 3; 4]
     let a = (`list_field `temp_list 0)
     let b = (`list_field `temp_list 1)
     let c = (`list_field `temp_list 2)
@@ -186,11 +191,13 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let cross = (fun `arg_0 `arg_1 -> match `arg_1 with
-    | (x2, y2, z2) -> (match `arg_0 with
-    | (x1, y1, z1) -> (let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))
-     in let y = (( - ) (( * ) z1 x2) (( * ) x1 z2))
-     in let z = (( - ) (( * ) x1 y2) (( * ) y1 x2))
-     in (x, y, z))))
+    let cross = (fun `arg_0 `arg_1 ->
+       match `arg_1 with
+       | (x2, y2, z2) -> (
+         match `arg_0 with
+         | (x1, y1, z1) -> (let x = (( - ) (( * ) y1 z2) (( * ) z1 y2)) in
+           let y = (( - ) (( * ) z1 x2) (( * ) x1 z2)) in
+           let z = (( - ) (( * ) x1 y2) (( * ) y1 x2)) in
+           (x, y, z))))
     |}]
 ;;

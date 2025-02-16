@@ -28,5 +28,4 @@ let foldi_right list ~init ~f =
   snd (List.fold_right list ~init:(len, init) ~f:(fun v (i, acc) -> i - 1, f i acc v))
 ;;
 
-let index_list list =
-  List.mapi list ~f:(fun i v -> (i, v))
+let index_list list = List.mapi list ~f:(fun i v -> i, v)

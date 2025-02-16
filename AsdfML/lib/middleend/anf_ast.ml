@@ -53,7 +53,7 @@ let rec pp_imm_expr fmt = function
   | ImmId id -> fprintf fmt "%s" id
   | ImmUnit -> fprintf fmt "()"
   | ImmNil -> fprintf fmt "[]"
-  | ImmTuple (x1, x2, xs) -> 
+  | ImmTuple (x1, x2, xs) ->
     let xs = x1 :: x2 :: xs in
     pp_list ~op:"(" ~cl:")" ~sep:", " fmt pp_imm_expr xs
   | ImmList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs

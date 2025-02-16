@@ -35,7 +35,8 @@ let%expect_test _ =
       let test = fun x -> x in
       ()
   |};
-  [%expect {|
+  [%expect
+    {|
     let `test_4 x = x
     let _ =
       let one = 1 in
@@ -305,7 +306,8 @@ let%expect_test _ =
       in
       helper 1 n
   |};
-  [%expect {|
+  [%expect
+    {|
     let `helper_1 x acc n =
       if (( = ) n 0)
       then acc
@@ -317,13 +319,13 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_ll
-    {|
+  test_ll {|
     let pow n = match n with
       | 0 -> 0
       | n -> n * n
   |};
-  [%expect {|
+  [%expect
+    {|
     let pow n = if (( = ) n 0)
       then 0
       else let n = n in
@@ -344,7 +346,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_ll {|
+  test_ll
+    {|
     let f x = x
     let g = f
     let h = g
@@ -355,7 +358,8 @@ let%expect_test _ =
       let hx = h x in
       ()
   |};
-  [%expect {|
+  [%expect
+    {|
     let f x = x
     let g = f
     let h = g

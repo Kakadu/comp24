@@ -40,7 +40,7 @@ type scheme = var_id_set * ty
 val an_ty_to_ty : Ast.type_ann -> ty
 val count_arrow_args : ty -> int
 val dummy_ty : ty
-val arg1 : ty 
-val arg2 : ty 
-val arg3 : ty 
+val arg1 : ty
+val arg2 : ty
+val arg3 : ty
 val equal_ty : ty -> ty -> bool

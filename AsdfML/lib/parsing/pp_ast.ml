@@ -91,5 +91,5 @@ and pp_definition fmt = function
 
 let pp_program fmt p =
   List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_definition d);
-  fprintf fmt "@\n@."
+  fprintf fmt "@."
 ;;
