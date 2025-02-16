@@ -1,0 +1,4 @@
+(library
+ (name qcheck)
+ (public_name BDSML.Parser.Qcheck)
+ (libraries parser))
