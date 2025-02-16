@@ -116,8 +116,13 @@ let parse_let_main_part prev =
         Pat_binding (pat, expr)
       in
       let val_bind =
+        let addition p =
+          let+ p = p in
+          "( " ^ p ^ " )"
+        in
         let+ ident =
-          parse_ident_name <|> remove_parents (parse_prefix_op <|> parse_infix_op "")
+          parse_ident_name
+          <|> addition (remove_parents (parse_prefix_op <|> parse_infix_op ""))
         and+ pats = sep_by ws1 Pattern_parser.parse_pattern
         and+ expr = parse_expr in
         Val_binding (ident, pats, expr)
