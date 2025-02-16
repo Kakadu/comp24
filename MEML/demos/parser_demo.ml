@@ -3,10 +3,11 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open MEML_lib.Parser
+open MEML_lib.Printer
 
 let parsing_and_inerpretation input =
   match parser input with
-  | Ok ast -> MEML_lib.Ast.pp_statements Format.std_formatter ast
+  | Ok ast -> Format.print_string @@ printer ast
   | Error e -> Format.printf "Parsing error %s" e
 ;;
 
