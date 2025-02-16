@@ -294,7 +294,7 @@ let unify_annotated_type typ t =
     unify typ t
 ;;
 
-let infer_ptrn ?(env = TypeEnv.empty) (pat : pattern_typed) =
+let infer_ptrn ?(env = TypeEnv.empty) (pat : pattern typed) =
   let rec helper env = function
     | PConst x, ty ->
       let* typ =

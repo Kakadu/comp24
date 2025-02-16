@@ -95,20 +95,26 @@ val pe_branching : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 
 val get_typed_ebinop_applier
   :  string
-  -> AstLib.Ast.expr_typed
-  -> AstLib.Ast.expr_typed
-  -> AstLib.Ast.expr_typed
+  -> AstLib.Ast.expr AstLib.Ast.typed
+  -> AstLib.Ast.expr AstLib.Ast.typed
+  -> AstLib.Ast.expr AstLib.Ast.typed
 
 val binop_binder
   :  string list
-  -> (AstLib.Ast.expr_typed -> AstLib.Ast.expr_typed -> AstLib.Ast.expr_typed) Angstrom.t
+  -> (AstLib.Ast.expr AstLib.Ast.typed
+      -> AstLib.Ast.expr AstLib.Ast.typed
+      -> AstLib.Ast.expr AstLib.Ast.typed)
+       Angstrom.t
 
 val get_chain
-  :  AstLib.Ast.expr_typed Angstrom.t
+  :  AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
   -> priority_group
-  -> AstLib.Ast.expr_typed Angstrom.t
+  -> AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
 
-val pe_typed_if_in_parens : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr_typed Angstrom.t
+val pe_typed_if_in_parens
+  :  AstLib.Ast.expr Angstrom.t
+  -> AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
+
 val rollback_not_app : ('a * 'b option) Angstrom.t -> 'a Angstrom.t
 val pe_bin_op_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_list_expr_semicolon : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
