@@ -14,9 +14,7 @@ let test code =
      | Error e -> printf "%a" Pp_typing.pp_error e
      | Ok ast ->
        let ast = Remove_patterns.remove_patterns ast in
-       printf
-         "\n%s"
-         (ast |> List.map ~f:(asprintf "%a" Tast.pp_tdefinition) |> String.concat))
+       printf "\n%a" Tast.pp_tprogram ast)
 ;;
 
 let%expect_test _ =
@@ -60,8 +58,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test
-    {|
+  test {|
     let f [[a; b]; [c; d]] = a + b + c + d
   |};
   [%expect
@@ -69,6 +66,8 @@ let%expect_test _ =
     let f = (fun `arg_0 -> match `arg_0 with
     | [[a; b]; [c; d]] -> (( + ) (( + ) (( + ) a b) c) d))
     |}]
+;;
+
 let%expect_test _ =
   test
     {|
@@ -185,7 +184,8 @@ let%expect_test _ =
       let z = (x1 * y2) - (y1 * x2) in
       (x, y, z)
   |};
-  [%expect {|
+  [%expect
+    {|
     let cross = (fun `arg_0 `arg_1 -> match `arg_1 with
     | (x2, y2, z2) -> (match `arg_0 with
     | (x1, y1, z1) -> (let x = (( - ) (( * ) y1 z2) (( * ) z1 y2))

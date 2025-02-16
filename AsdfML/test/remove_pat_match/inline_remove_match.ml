@@ -15,9 +15,7 @@ let test code =
      | Ok ast ->
        let ast = Remove_patterns.remove_patterns ast in
        let ast = Remove_match.remove_match ast in
-       printf
-         "\n%s"
-         (ast |> List.map ~f:(asprintf "%a" Tast.pp_tdefinition) |> String.concat))
+       printf "\n%a" Tast.pp_tprogram ast)
 ;;
 
 let%expect_test _ =

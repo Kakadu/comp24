@@ -20,7 +20,7 @@ let test_cc code =
          |> Remove_match.remove_match
          |> Closure_conversion.closure_conversion
        in
-       printf "\n%s" (ast |> List.map ~f:(asprintf "%a" Sast.pp_sdef) |> String.concat))
+       printf "%a" Sast.pp_program ast)
 ;;
 
 let%expect_test _ =
@@ -70,8 +70,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let fact = (fun n -> let rec helper = (fun n cont -> if (( <= ) n 1) then (cont 1) else (helper (( - ) n 1) ((fun cont n res -> (cont (( * ) n res))) cont n)))
-     in (helper n (fun x -> x)))
+    let fact = (fun n ->
+      let rec helper = (fun n cont ->
+        if (( <= ) n 1)
+        then (cont 1)
+        else (helper (( - ) n 1) ((fun cont n res ->
+          (cont (( * ) n res))) cont n))) in
+      (helper n (fun x -> x)))
     |}]
 ;;
 
@@ -84,8 +89,9 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let gen = (fun seed1 seed2 -> let gen = (fun seed1 seed2 n -> (( + ) (( * ) n seed2) (( * ) seed1 42)))
-     in [(gen seed1 seed2 1); (gen seed1 seed2 2); (gen seed1 seed2 3)])
+    let gen = (fun seed1 seed2 ->
+      let gen = (fun seed1 seed2 n -> (( + ) (( * ) n seed2) (( * ) seed1 42))) in
+      [(gen seed1 seed2 1); (gen seed1 seed2 2); (gen seed1 seed2 3)])
     |}]
 ;;
 
@@ -99,9 +105,10 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let main = (fun x -> let const = (fun f s -> f)
-     in let rev_const = (fun const f s -> (const s))
-     in (rev_const const ((fun x _ -> x) x)))
+    let main = (fun x ->
+      let const = (fun f s -> f) in
+      let rev_const = (fun const f s -> (const s)) in
+      (rev_const const ((fun x _ -> x) x)))
     |}]
 ;;
 
@@ -119,7 +126,9 @@ let%expect_test _ =
     {|
     let add_cps = (fun x y k -> (k (( + ) x y)))
     let square_cps = (fun x k -> (k (( * ) x x)))
-    let pythagoras_cps = (fun x y k -> (square_cps x ((fun k y x_squared -> (square_cps y ((fun k x_squared y_squared -> (add_cps x_squared y_squared k)) k x_squared))) k y)))
+    let pythagoras_cps = (fun x y k -> (square_cps x ((fun k y x_squared ->
+      (square_cps y ((fun k x_squared y_squared ->
+      (add_cps x_squared y_squared k)) k x_squared))) k y)))
     |}]
 ;;
 
@@ -134,8 +143,12 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let shitty_mul = (fun x -> let rec helper = (fun x acc cnt -> if (( = ) cnt 0) then acc else (helper x (( + ) acc x) (( - ) cnt 1)))
-     in (helper x 0))
+    let shitty_mul = (fun x ->
+      let rec helper = (fun x acc cnt ->
+        if (( = ) cnt 0)
+        then acc
+        else (helper x (( + ) acc x) (( - ) cnt 1))) in
+      (helper x 0))
     |}]
 ;;
 
@@ -162,9 +175,10 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let a = (fun c d -> let m = (( + ) c d)
-     in let k = (fun m l -> (( + ) l m))
-     in (k m (( + ) 5 m)))
+    let a = (fun c d ->
+      let m = (( + ) c d) in
+      let k = (fun m l -> (( + ) l m)) in
+      (k m (( + ) 5 m)))
     |}]
 ;;
 
@@ -182,10 +196,11 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let test = (fun x -> let one = let z = 0
-     in (fun x -> 1)
-     in let two = 2
-     in let add_three = (fun one two x -> (( + ) (( + ) x two) (one ())))
-     in (add_three one two x))
+    let test = (fun x ->
+      let one = let z = 0 in
+        (fun x -> 1) in
+      let two = 2 in
+      let add_three = (fun one two x -> (( + ) (( + ) x two) (one ()))) in
+      (add_three one two x))
     |}]
 ;;
