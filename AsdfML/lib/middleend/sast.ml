@@ -42,16 +42,21 @@ let rec pp_sexpr fmt = function
   | SConst c -> fprintf fmt "%a" Pp_ast.pp_constant c
   | SVar v -> fprintf fmt "%s" v
   | SApp (e1, e2) ->
-    (match e1 with
-     | SApp (_, _) ->
-       let rec pp_rest fmt = function
-         | SApp (e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_sexpr e2
-         | e -> fprintf fmt "(%a" pp_sexpr e
-       in
-       fprintf fmt "%a %a)" pp_rest e1 pp_sexpr e2
-     | _ -> fprintf fmt "(%a %a)" pp_sexpr e1 pp_sexpr e2)
+    let rec pp_rest fmt = function
+      | SApp (e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_sexpr e2
+      | e -> fprintf fmt "(%a" pp_sexpr e
+    in
+    fprintf fmt "%a %a)" pp_rest e1 pp_sexpr e2
   | SIfElse (c, t, e) ->
-    fprintf fmt "if %a then %a else %a" pp_sexpr c pp_sexpr t pp_sexpr e
+    fprintf
+      fmt
+      "@,if %a @\n@[<2>then@ %a@] @\n@[<2>else@ %a@]"
+      pp_sexpr
+      c
+      pp_sexpr
+      t
+      pp_sexpr
+      e
   | SFun (p, e) ->
     fprintf fmt "(fun ";
     pp_print_list
@@ -59,12 +64,19 @@ let rec pp_sexpr fmt = function
       (fun fmt x -> fprintf fmt "%s" x)
       fmt
       p;
-    fprintf fmt " -> %a)" pp_sexpr e
-  | SLetIn (d, e) -> fprintf fmt "%a in %a" pp_sdef d pp_sexpr e
-  | STuple (x1, x2, xs) -> let xs = x1 :: x2 :: xs in pp_list ~sep:", " fmt pp_sexpr xs
+    fprintf fmt " ->@ %a)" pp_sexpr e
+  | SLetIn (d, e) -> fprintf fmt "%a in@\n%a" pp_sdef d pp_sexpr e
+  | STuple (x1, x2, xs) ->
+    let xs = x1 :: x2 :: xs in
+    pp_list ~sep:", " fmt pp_sexpr xs
   | SList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_sexpr xs
 
 and pp_sdef fmt = function
-  | SLet (_, NonRec, name, e) -> fprintf fmt "let %s = %a\n" name pp_sexpr e
-  | SLet (_, Rec, name, e) -> fprintf fmt "let rec %s = %a\n" name pp_sexpr e
+  | SLet (_, NonRec, name, e) -> fprintf fmt "@[<2>let %s =@ %a@]" name pp_sexpr e
+  | SLet (_, Rec, name, e) -> fprintf fmt "@[<2>let rec %s =@ %a@]" name pp_sexpr e
+;;
+
+let pp_program fmt p =
+  Base.List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_sdef d);
+  fprintf fmt "@."
 ;;

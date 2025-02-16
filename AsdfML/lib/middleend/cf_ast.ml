@@ -34,18 +34,15 @@ let rec pp_expr fmt = function
   | CFConst c -> fprintf fmt "%a" Pp_ast.pp_constant c
   | CFVar v -> fprintf fmt "%s" v
   | CFApp (e1, e2) ->
-    (match e1 with
-     | CFApp (_, _) ->
-       let rec pp_rest fmt = function
-         | CFApp (e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_expr e2
-         | e -> fprintf fmt "(%a" pp_expr e
-       in
-       fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
-     | _ -> fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2)
+    let rec pp_rest fmt = function
+      | CFApp (e1, e2) -> fprintf fmt "%a %a" pp_rest e1 pp_expr e2
+      | e -> fprintf fmt "(%a" pp_expr e
+    in
+    fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
   | CFIfElse (c, t, e) ->
     fprintf
       fmt
-      "if %a @\n@[<hov 2>then@ %a@] @\n@[<hov 2>else@ %a@]"
+      "if %a @\n@[<2>then@ %a@] @\n@[<2>else@ %a@]"
       pp_expr
       c
       pp_expr
@@ -53,7 +50,7 @@ let rec pp_expr fmt = function
       pp_expr
       e
   | CFLetIn (id, body, exp) ->
-    fprintf fmt "@[<hov2>let %s =@ %a @]in@\n%a" id pp_expr body pp_expr exp
+    fprintf fmt "@[<2>@,let %s =@ %a @]in@\n%a" id pp_expr body pp_expr exp
   | CFTuple (x, y, xs) ->
     let xs = x :: y :: xs in
     pp_list ~sep:", " fmt pp_expr xs
@@ -62,13 +59,7 @@ let rec pp_expr fmt = function
 and pp_definition fmt = function
   | CFLet (id, args, e) ->
     (match args with
-     | [] -> fprintf fmt "@[<hov 2>let %s =@ %a@]\n" id pp_expr e
+     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]\n" id pp_expr e
      | _ ->
-       fprintf
-         fmt
-         "@[<hov 2>let %s %s =@ %a@]\n"
-         id
-         (String.concat args ~sep:" ")
-         pp_expr
-         e)
+       fprintf fmt "@[<2>@,let %s %s =@ %a@]\n" id (String.concat args ~sep:" ") pp_expr e)
 ;;

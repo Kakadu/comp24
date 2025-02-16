@@ -58,27 +58,38 @@ and pp_expr fmt =
       | e -> fprintf fmt "(%a" parenthesize e
     in
     fprintf fmt "%a %a)" pp_rest e1 parenthesize e2
-  | EIfElse (c, t, e) -> fprintf fmt "if %a then %a else %a" pp_expr c pp_expr t pp_expr e
+  | EIfElse (c, t, e) ->
+    fprintf
+      fmt
+      "@,if %a @\n@[<2>then@ %a@] @\n@[<2>else@ %a@]"
+      pp_expr
+      c
+      pp_expr
+      t
+      pp_expr
+      e
   | EFun (p, e) ->
     fprintf fmt "(fun ";
     pp_pattern_list fmt p;
-    fprintf fmt " -> %a)" pp_expr e
-  | ELetIn (d, e) -> fprintf fmt "%a in %a" pp_definition d pp_expr e
+    fprintf fmt " ->@ %a)" pp_expr e
+  | ELetIn (d, e) -> fprintf fmt "%a in@\n%a" pp_definition d pp_expr e
   | ETuple (hd1, hd2, tl) ->
     let xs = hd1 :: hd2 :: tl in
     pp_list ~sep:", " fmt pp_expr xs
   | EMatch (e, pe_list) ->
-    fprintf fmt "match %a with\n" pp_expr e;
+    fprintf fmt "@,match %a with" pp_expr e;
     pp_print_list
-      ~pp_sep:Format.pp_print_newline
-      (fun fmt (p, e) -> fprintf fmt "| %a -> %a" pp_pattern p parenthesize e)
+      (fun fmt (p, e) -> fprintf fmt "@\n@[<2>| %a -> %a@]" pp_pattern p parenthesize e)
       fmt
       pe_list
   | EList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | DLet (NonRec, pat, e) -> fprintf fmt "let %a = %a\n" pp_pattern pat pp_expr e
-  | DLet (Rec, pat, e) -> fprintf fmt "let rec %a = %a\n" pp_pattern pat pp_expr e
+  | DLet (NonRec, pat, e) -> fprintf fmt "@[<2>@,let %a =@ %a@]" pp_pattern pat pp_expr e
+  | DLet (Rec, pat, e) -> fprintf fmt "@[<2>@,let rec %a =@ %a@]" pp_pattern pat pp_expr e
 ;;
 
-let pp_program fmt p = pp_list ~op:"" ~cl:"" ~sep:"\n" fmt pp_definition p
+let pp_program fmt p =
+  List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_definition d);
+  fprintf fmt "@\n@."
+;;

@@ -77,18 +77,18 @@ let rec pp_cexpr fmt = function
 
 and pp_aexpr fmt = function
   | ALet (id, cexpr, aexpr) ->
-    fprintf fmt "@[<2>let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
+    fprintf fmt "@[<2>@,let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
   | ACExpr cexpr -> pp_cexpr fmt cexpr
 ;;
 
 let pp_fn fmt = function
   | Fn (id, args, aexpr) ->
     (match args with
-     | [] -> fprintf fmt "@[<2>let %s =@ %a@]@." id pp_aexpr aexpr
+     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]@." id pp_aexpr aexpr
      | _ ->
        fprintf
          fmt
-         "@[<2>let %s %s =@ %a@]@."
+         "@[<2>@,let %s %s =@ %a@]@."
          id
          (String.concat args ~sep:" ")
          pp_aexpr
