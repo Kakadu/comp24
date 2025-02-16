@@ -6,6 +6,7 @@
   Alpha_transformer
   Anf
   Anf_printer
+  Active_registers_intf
   Match_elimination
   Closure_conversion
   Flambda
@@ -15,6 +16,9 @@
   Cstdlib
   Llvm_codegen
   Llvm_utils
+  Riscv_active_registers
+  Riscv
+  ; Riscv_codegen
   Utils)
  (inline_tests)
  (libraries base ppx_show.runtime angstrom qcheck llvm llvm.analysis)
