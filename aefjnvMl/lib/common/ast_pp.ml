@@ -1,4 +1,3 @@
-
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
@@ -9,7 +8,7 @@ open Format
 let rec collect_fun_args expr args =
   match expr with
   | Exp_function (pat, body) -> collect_fun_args body (pat :: args)
-  | _ -> (List.rev args, expr)
+  | _ -> List.rev args, expr
 ;;
 
 let ident_pp fmt id = fprintf fmt "%s" id
@@ -60,7 +59,7 @@ let rec pattern_pp fmt pat =
 ;;
 
 let rec expression_pp fmt expr =
-  let rec helper in_app fmt expr = 
+  let rec helper in_app fmt expr =
     match expr with
     | Exp_type (e, t) -> fprintf fmt "(%a : %a)" expression_pp e core_type_pp t
     | Exp_constant c -> const_pp fmt c
@@ -71,11 +70,15 @@ let rec expression_pp fmt expr =
         "(%a)"
         (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt ", ") expression_pp)
         exprs
-    | Exp_function _ -> 
+    | Exp_function _ ->
       let args, body = collect_fun_args expr [] in
-      fprintf fmt "(fun %a -> %a)" 
-      (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ") pattern_pp)
-      args expression_pp body
+      fprintf
+        fmt
+        "(fun %a -> %a)"
+        (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ") pattern_pp)
+        args
+        expression_pp
+        body
     | Exp_let (decl, e) -> decl_expression_pp fmt decl e
     | Exp_match (e, cases) ->
       fprintf fmt "match %a with@\n" expression_pp e;
@@ -85,15 +88,22 @@ let rec expression_pp fmt expr =
         fmt
         cases
     | Exp_ifthenelse (e1, e2, e3) ->
-      fprintf fmt "if %a then %a else %a" expression_pp e1 expression_pp e2 expression_pp e3
+      fprintf
+        fmt
+        "if %a then %a else %a"
+        expression_pp
+        e1
+        expression_pp
+        e2
+        expression_pp
+        e3
     | Exp_apply (Exp_ident op, e) when Base_lib.is_binop op ->
       fprintf fmt "(( %s ) %a)" op expression_pp e
     | Exp_apply (e1, e2) ->
       let pp_app fmt e1 e2 =
-        if in_app then
-          fprintf fmt "(%a %a)" (helper true) e1 (helper true) e2
-        else
-          fprintf fmt "%a %a" (helper true) e1 (helper true) e2
+        if in_app
+        then fprintf fmt "(%a %a)" (helper true) e1 (helper true) e2
+        else fprintf fmt "%a %a" (helper true) e1 (helper true) e2
       in
       pp_app fmt e1 e2
     | Exp_list (e1, e2) -> fprintf fmt "(%a :: %a)" expression_pp e1 expression_pp e2

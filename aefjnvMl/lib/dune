@@ -1,11 +1,8 @@
 (library
  (name aefjnvMl_lib)
  (public_name aefjnvMl.Lib)
- (modules
-  parser
-  inferencer
-  alpha_converter)
- (libraries base angstrom ppx_deriving aefjnvMl.Common str)
+ (modules parser inferencer alpha_converter_tests top_utils parser_tests)
+ (libraries base angstrom ppx_deriving aefjnvMl.Common aefjnvMl.Middleend)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)

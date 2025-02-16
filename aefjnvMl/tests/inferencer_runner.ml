@@ -6,14 +6,11 @@ open AefjnvMl_lib
 open Parser
 open Inferencer
 open Base.Result
+open Top_utils.Ast_test_utils
 
 let () =
   let input = Stdio.In_channel.input_all Stdlib.stdin in
   match parse input >>= check_program with
   | Ok env -> Inferencer.PP.pp_program Format.std_formatter env
-  | Error err ->
-    (match err with
-     | Parser e -> Parser.PP.pp_error Format.std_formatter e
-     | Infer e -> Inferencer.PP.pp_error Format.std_formatter e
-     | Alpha_converter (Illegal_state_error s) -> Format.print_string s)
+  | Error err -> print_error err
 ;;

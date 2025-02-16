@@ -19,7 +19,7 @@ module StringAlphfaconverterMonad = struct
   type ban_set = Banned_Set.t
   type reserved_re_prefs = Str.regexp list
   type ban_rules = reserved_re_prefs * ban_set
-  type name_space = ban_rules * bind_space * fresh_id
+  type name_space = ban_rules * bind_space * fresh_id * ident
 
   include Common.Se_monad.Base_SE_Monad
 
@@ -31,10 +31,10 @@ module StringAlphfaconverterMonad = struct
 
   let binding_scope : 'a t -> 'a t =
     fun f ->
-    let* _, old_bindings, _ = read in
+    let* _, old_bindings, _, _ = read in
     let* f_res = f in
-    let* b_rules, _, f_id = read in
-    let* () = save (b_rules, old_bindings, f_id) in
+    let* b_rules, _, f_id, pref = read in
+    let* () = save (b_rules, old_bindings, f_id, pref) in
     return f_res
   ;;
 
@@ -56,7 +56,7 @@ module StringAlphfaconverterMonad = struct
       Banned_Set.add new_name b_set'
     in
     let* name', st' =
-      let* (b_prefs, b_set), bindings, fresh_id = read in
+      let* (b_prefs, b_set), bindings, fresh_id, a_pref = read in
       let should_rename_via_prefs =
         Base.List.fold_left b_prefs ~init:false ~f:(fun acc pref ->
           match acc with
@@ -67,14 +67,14 @@ module StringAlphfaconverterMonad = struct
         let start_name =
           let prepared_name = pre_formatter name in
           match should_rename_via_prefs with
-          | true -> apply_prefix current_prefix prepared_name
+          | true -> apply_prefix a_pref prepared_name
           | false -> prepared_name
         in
         get_uniq_name start_name fresh_id b_set
       in
       let bindings' = Bind_Map.add name name'' bindings in
       let b_set' = add_binding_in_ban_set name name'' b_set in
-      let st'' = (b_prefs, b_set'), bindings', id' in
+      let st'' = (b_prefs, b_set'), bindings', id', a_pref in
       return (name'', st'')
     in
     let* () = save st' in
@@ -82,7 +82,7 @@ module StringAlphfaconverterMonad = struct
   ;;
 
   let get_bind name =
-    let* _, binds, _ = read in
+    let* _, binds, _, _ = read in
     match Bind_Map.find_opt name binds with
     | Some name' -> return name'
     | None -> fail ("=doesn't find binded value -- " ^ name)
@@ -234,7 +234,7 @@ let aconvert_program prog =
     return @@ (sti' :: acc))
 ;;
 
-let rename_ast_with_uniq prog =
+let rename_ast_with_uniq step_pref prog =
   let open Common.Naming in
   let open Common.Base_lib in
   let name_space =
@@ -252,7 +252,7 @@ let rename_ast_with_uniq prog =
       List.fold_left helper Bind_Map.empty std_lib_names
     in
     let fresh_id = 0 in
-    ban_rules, bind_space, fresh_id
+    ban_rules, bind_space, fresh_id, step_pref
   in
   let prog_alpha_converter = aconvert_program prog in
   let open Common.Errors in

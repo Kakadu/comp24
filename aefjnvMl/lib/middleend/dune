@@ -1,8 +1,8 @@
 (library
  (name middleend)
  (public_name aefjnvMl.Middleend)
- (modules closure_conversion)
- (libraries base common)
+ (modules closure_conversion alpha_converter)
+ (libraries base common str)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)

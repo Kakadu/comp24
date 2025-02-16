@@ -7,5 +7,6 @@ type core_type_flag =
   | Off
 
 val rename_ast_with_uniq
-  :  Common.Ast.structure_item list
+  :  StringAlphfaconverterMonad.ident
+  -> Common.Ast.structure_item list
   -> (Common.Ast.structure_item list, Common.Errors.error) result
