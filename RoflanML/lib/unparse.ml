@@ -1,8 +1,8 @@
 (** Copyright 2025, Ilya Syresenkov, Akhmetov Tamerlan *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-open Ast
 
+open Ast
 open Format
 
 let unparse_const ppf c =
@@ -45,6 +45,17 @@ let rec unparse_pattern ppf pat =
     List.iter
       (fun p ->
         fprintf ppf " | ";
+        unparse_pattern ppf p)
+      ps;
+    fprintf ppf ")"
+  | PTuple (p1, p2, ps) ->
+    fprintf ppf "(";
+    unparse_pattern ppf p1;
+    fprintf ppf ", ";
+    unparse_pattern ppf p2;
+    List.iter
+      (fun p ->
+        fprintf ppf ", ";
         unparse_pattern ppf p)
       ps;
     fprintf ppf ")"
@@ -116,14 +127,14 @@ let rec unparse_expr ?(top_level = false) ppf exp =
         e_then
         (unparse_expr ~top_level:false)
         e_else
-  | ELet (rec_flag, id, e_val, Some e_body) ->
+  | ELetIn (r, id, e_val, e_body) ->
     if top_level
     then
       fprintf
         ppf
         "let %a%s = %a in %a"
         unparse_is_rec
-        rec_flag
+        r
         id
         (unparse_expr ~top_level:true)
         e_val
@@ -134,40 +145,17 @@ let rec unparse_expr ?(top_level = false) ppf exp =
         ppf
         "(let %a%s = %a in %a)"
         unparse_is_rec
-        rec_flag
+        r
         id
         (unparse_expr ~top_level:false)
         e_val
         (unparse_expr ~top_level:false)
         e_body
-  | ELet (rec_flag, id, e_val, None) ->
-    if top_level
-    then
-      fprintf
-        ppf
-        "let %a%s = %a"
-        unparse_is_rec
-        rec_flag
-        id
-        (unparse_expr ~top_level:true)
-        e_val
-    else
-      fprintf
-        ppf
-        "(let %a%s = %a)"
-        unparse_is_rec
-        rec_flag
-        id
-        (unparse_expr ~top_level:false)
-        e_val
   | ETuple (e1, e2, es) ->
-    fprintf
-      ppf
-      "(%a, %a"
-      (unparse_expr ~top_level:false)
-      e1
-      (unparse_expr ~top_level:false)
-      e2;
+    fprintf ppf "(";
+    unparse_expr ~top_level:false ppf e1;
+    fprintf ppf ", ";
+    unparse_expr ~top_level:false ppf e2;
     List.iter
       (fun e ->
         fprintf ppf ", ";
@@ -184,29 +172,18 @@ let rec unparse_expr ?(top_level = false) ppf exp =
     fprintf ppf ")"
 ;;
 
-let unparse_decl ppf exp =
-  match exp with
-  | ELet (rec_flag, id, e_val, Some e_body) ->
-    fprintf
-      ppf
-      "let %a%s = %a in %a"
-      unparse_is_rec
-      rec_flag
-      id
-      (unparse_expr ~top_level:true)
-      e_val
-      (unparse_expr ~top_level:true)
-      e_body
-  | ELet (rec_flag, id, e_val, None) ->
-    fprintf
-      ppf
-      "let %a%s = %a"
-      unparse_is_rec
-      rec_flag
-      id
-      (unparse_expr ~top_level:true)
-      e_val
-  | _ -> unparse_expr ~top_level:true ppf exp
+let unparse_decl ppf d =
+  match d with
+  | DLet (r, id, e) ->
+    fprintf ppf "let %a%s = %a" unparse_is_rec r id (unparse_expr ~top_level:true) e
+  | DMutualLet (r, binds) ->
+    (match binds with
+     | [] -> () (* этого случая не должно быть *)
+     | (id, e) :: rest ->
+       fprintf ppf "let %a%s = %a" unparse_is_rec r id (unparse_expr ~top_level:true) e;
+       List.iter
+         (fun (id, e) -> fprintf ppf " and %s = %a" id (unparse_expr ~top_level:true) e)
+         rest)
 ;;
 
 let unparse_program prog =
@@ -214,8 +191,8 @@ let unparse_program prog =
     "%a"
     (fun ppf prog ->
       List.iter
-        (fun e ->
-          unparse_decl ppf e;
+        (fun d ->
+          unparse_decl ppf d;
           fprintf ppf "\n")
         prog)
     prog
