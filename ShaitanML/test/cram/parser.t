@@ -1,4 +1,4 @@
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let f ((x : int) : int) ((y : int) : int) = x + y;;
   > EOF
   [(SValue (Nonrec,
@@ -10,7 +10,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let rec fold_left f acc l =
   >    match l with
   >    | [] -> acc
@@ -39,7 +39,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let a b c = a && b || b && c
   > EOF
   [(SValue (Nonrec,
@@ -55,7 +55,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   >      let f x y = x + y
   >      and
   >      g x y = x - y
@@ -84,7 +84,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let rec f x = x + 1 and g x = x + 1
   > ;;
   > EOF
@@ -98,17 +98,17 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let (x : int) = 3;;
   > EOF
   [(SValue (Nonrec, [((PConstraint ((PVar "x"), AInt)), (EConst (CInt 3)))]))]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let (x : (int -> int) list) = f;;
   > EOF
   [(SValue (Nonrec,
       [((PConstraint ((PVar "x"), (AList (AFun (AInt, AInt))))), (EVar "f"))]))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let (x : int -> int -> (int -> int)) = f;;
   > EOF
   [(SValue (Nonrec,
@@ -117,7 +117,7 @@
         (EVar "f"))]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let rec fix f x = f (fix f) x;;
   > let fac_ fac n = if n = 1 then 1 else n * fac (n - 1);;
   > EOF
@@ -152,7 +152,7 @@
          ]
        ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let n = fun y -> if y > 0 then 1 else 2
   > EOF
   [(SValue (Nonrec,
@@ -165,7 +165,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let rec fac n = if n < 2 then 1 else n * fac(n - 1);;
   > EOF
   [(SValue (Rec,
@@ -185,7 +185,7 @@
         ]
       ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let f = let g x = x + 1 in g;;
   > let rec len l =
   >   match l with
@@ -217,7 +217,7 @@
          ]
        ))
     ]
-  $ dune exec test << EOF
+  $ dune exec parser << EOF
   > let f = (fun x -> x + 1) 123 in f;;
   > let x, y, z = (1, 2, 3);;
   > EOF
@@ -234,4 +234,23 @@
        [((PTuple [(PVar "x"); (PVar "y"); (PVar "z")]),
          (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
        ))
+    ]
+  $ dune exec parser << EOF
+  > let addi = fun f g x -> (f x (g x: bool) : int)
+  > EOF
+  [(SValue (Nonrec,
+      [((PVar "addi"),
+        (EFun ((PVar "f"),
+           (EFun ((PVar "g"),
+              (EFun ((PVar "x"),
+                 (EConstraint (
+                    (EApply ((EApply ((EVar "f"), (EVar "x"))),
+                       (EConstraint ((EApply ((EVar "g"), (EVar "x"))), ABool))
+                       )),
+                    AInt))
+                 ))
+              ))
+           )))
+        ]
+      ))
     ]

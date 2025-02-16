@@ -1,6 +1,6 @@
 (library
  (name tests)
- (modules Parser_test Infer_test)
+ (modules Parser Infer)
  (libraries shaitanml_lib)
  (preprocess
   (pps ppx_expect ppx_deriving.show))
