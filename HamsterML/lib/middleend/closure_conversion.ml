@@ -3,6 +3,14 @@
 open Base
 open Ast
 
+(*
+   let f x y = x - y                        |> free_vars: {}
+   fun x -> x                               |> free_vars: {}
+   match x with | (a,b) -> 1 | _ -> 2       |> free_vars: {}
+   let f x = let (k,j) = x in j in f (1,2)  |> free_vars: {}
+*)
+
+(** get free variables from an expression *)
 let unbound_variables exp =
   let rec helper_expr exp =
     let rec helper_pattern pat =
@@ -78,3 +86,7 @@ let unbound_variables exp =
   in
   helper_expr exp
 ;;
+
+(* let close_function = failwith "not yet implemented"
+let convert = failwith "not yet implemented"
+let convert_ast = failwith "not yet implemented" *)
