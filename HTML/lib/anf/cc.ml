@@ -160,7 +160,7 @@ let pattern_of_free_vars (fv : string list) : pattern_typed =
 
 let rec efun_conversion local_env = function
   | EFun (pat, e), _ ->
-    efun_conversion (List.fold_left StringSet.add local_env (bound_vars_pattern pat)) e
+    efun_conversion ((bound_vars_pattern pat) @ local_env) e
   | expr -> local_env, expr
 ;;
 
@@ -169,23 +169,89 @@ let rec change_body body = function
   | _ -> body
 ;;
 
-let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
+let rec subst_eid ((e, t) : expr_typed) (subst : (string * expr_typed) list)
+  : expr_typed
+  =
+  match e with
+  | EConst _ -> e, t
+  | EId id ->
+    (match id with
+     | IdentOfDefinable _ ->
+       let name = ident_to_string id in
+       (try List.assoc name subst with
+        | Not_found -> e, t)
+     | IdentOfBaseOp _ -> e, t)
+  | EFun (pat, body) ->
+    let bound = bound_vars_pattern pat in
+    let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
+    EFun (pat, subst_eid body subst'), t
+  | EApp (e1, e2) -> EApp (subst_eid e1 subst, subst_eid e2 subst), t
+  | EIf (e1, e2, e3) ->
+    EIf (subst_eid e1 subst, subst_eid e2 subst, subst_eid e3 subst), t
+  | EList (e1, e2) -> EList (subst_eid e1 subst, subst_eid e2 subst), t
+  | ETuple (e1, e2, es) ->
+    ( ETuple
+        ( subst_eid e1 subst
+        , subst_eid e2 subst
+        , List.map (fun e -> subst_eid e subst) es )
+    , t )
+  | EClsr (decl, e) -> EClsr (substitute_decl decl subst, subst_eid e subst), t
+  | EMatch (e, br, brs) ->
+    let substitute_branch ((pat, expr) : branch) (subst : (string * expr_typed) list)
+      : branch
+      =
+      let bound = bound_vars_pattern pat in
+      let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
+      pat, subst_eid expr subst'
+    in
+    ( EMatch
+        ( subst_eid e subst
+        , substitute_branch br subst
+        , List.map (fun b -> substitute_branch b subst) brs )
+    , t )
+
+and substitute_decl (d : decl) (subst : (string * expr_typed) list) : decl =
+  match d with
+  | DLet (rf, (pat_or_op, expr)) ->
+    let bound =
+      (* todo type lost *)
+      match pat_or_op with
+      | POpPat (PId s), _ -> [ s ]
+      | _ -> []
+    in
+    let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
+    DLet (rf, (pat_or_op, subst_eid expr subst'))
+  | _ -> failwith "hui"
+;;
+
+let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed) (rec_name: string option)
   : expr_typed cc
   =
   match e with
   | EConst _ | EId _ -> return (e, t)
-  | EFun (pat, _) as efun ->
-    let local_env, body = efun_conversion StringSet.empty (efun, t) in
-    let new_env = StringSet.union global_env local_env in
-    let* body' = closure_convert_expr global_env body in
+  | EFun (_, _) as efun ->
+    let local_env, body = efun_conversion [] (efun, t) in
+    let new_env = StringSet.union global_env (StringSet.from_list local_env) in
+    (* bound vars in efun  todo rec_name*)
+
+
+     let* body' = closure_convert_expr global_env body None in
     let fv = free_vars_expr new_env body' in
     let fv = StringSet.elements fv in
     let* f_name = fresh_name "fun-" in
-    let main_efun = EFun (pat, body'), t in
+
+
+    let body'' = (match rec_name with
+    | Some rec_name -> subst_eid body [(rec_name, (EId (IdentOfDefinable (IdentLetters f_name)), None))]
+    | None -> body')
+  in
+    
+    (* let main_efun = EFun (pat, body'), t in *)
     let new_fun =
-      List.fold_left (fun acc x -> EFun ((PId x, None), acc), None) main_efun fv
+      List.fold_left (fun acc x -> EFun ((PId x, None), acc), None) body'' (local_env @ fv)
     in
-    let decl = DLet (Not_recursive, ((POpPat (PId f_name), None), new_fun)) in
+    let rf = if rec_name = None then Not_recursive else Recursive in
+    let decl = DLet (rf, ((POpPat (PId f_name), None), new_fun)) in
     let* () = tell decl in
     let new_fun_id = EId (IdentOfDefinable (IdentLetters f_name)), None in
     let applied_fun =
@@ -196,25 +262,25 @@ let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
     in
     return @@ applied_fun
   | EApp (e1, e2) ->
-    let* ce1 = closure_convert_expr global_env e1 in
-    let* ce2 = closure_convert_expr global_env e2 in
+    let* ce1 = closure_convert_expr global_env e1 rec_name in
+    let* ce2 = closure_convert_expr global_env e2 rec_name in
     return (EApp (ce1, ce2), t)
   | EIf (e1, e2, e3) ->
-    let* ce1 = closure_convert_expr global_env e1 in
-    let* ce2 = closure_convert_expr global_env e2 in
-    let* ce3 = closure_convert_expr global_env e3 in
+    let* ce1 = closure_convert_expr global_env e1 rec_name in
+    let* ce2 = closure_convert_expr global_env e2 rec_name in
+    let* ce3 = closure_convert_expr global_env e3 rec_name in
     return (EIf (ce1, ce2, ce3), t)
   | EList (e1, e2) ->
-    let* ce1 = closure_convert_expr global_env e1 in
-    let* ce2 = closure_convert_expr global_env e2 in
+    let* ce1 = closure_convert_expr global_env e1 rec_name in
+    let* ce2 = closure_convert_expr global_env e2 rec_name in
     return (EList (ce1, ce2), t)
   | ETuple (e1, e2, es) ->
-    let* ce1 = closure_convert_expr global_env e1 in
-    let* ce2 = closure_convert_expr global_env e2 in
+    let* ce1 = closure_convert_expr global_env e1 rec_name in
+    let* ce2 = closure_convert_expr global_env e2 rec_name in
     let rec convert_list = function
       | [] -> return []
       | x :: xs ->
-        let* cx = closure_convert_expr global_env x in
+        let* cx = closure_convert_expr global_env x rec_name in
         let* cxs = convert_list xs in
         return (cx :: cxs)
     in
@@ -222,11 +288,16 @@ let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
     return (ETuple (ce1, ce2, ces), t)
   | EClsr (decl, e) ->
     let* cdecl = closure_convert_let_in global_env decl in
-    let* ce = closure_convert_expr global_env e in
+    let* ce = closure_convert_expr global_env e rec_name in
     return (EClsr (cdecl, ce), t)
   | EMatch (e, br, brs) ->
     (* todo proper env *)
-    let* ce = closure_convert_expr global_env e in
+    let closure_convert_branch env (br : branch) : branch cc =
+      let pat, expr = br in
+      let* cexpr = closure_convert_expr env expr rec_name in
+      return (pat, cexpr) in
+      
+    let* ce = closure_convert_expr global_env e rec_name in
     let* cbr = closure_convert_branch global_env br in
     let rec conv_branches env = function
       | [] -> return []
@@ -239,6 +310,7 @@ let rec closure_convert_expr (global_env : StringSet.t) ((e, t) : expr_typed)
     return (EMatch (ce, cbr, cbrs), t)
 
 (* ugly edge case *)
+(* THINK ABOUT OTHER RECURSIVE CASES TODO *)
 and closure_convert_let_in  global_env (d : decl) : decl cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
@@ -247,22 +319,21 @@ and closure_convert_let_in  global_env (d : decl) : decl cc =
       @@ StringSet.from_list
       @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
-    let* cexpr = closure_convert_expr global_env expr in
-    return (DLet (rf, (pat_or_op, cexpr)))
+    let* cexpr = closure_convert_expr global_env expr (if rf = Recursive then Some (List.hd (pattern_to_string pat_or_op)) else None) in
+    return (DLet (Not_recursive, (pat_or_op, cexpr)))
   | _ -> failwith "todo"
 
 and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
-    (* todo global env *)
-    let _, body = efun_conversion global_env expr in
+    let _, body = efun_conversion (StringSet.elements global_env) expr in
     (* horrible todo*)
     let global_env =
       StringSet.union global_env
       @@ StringSet.from_list
       @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
-    let* body' = closure_convert_expr global_env body in
+    let* body' = closure_convert_expr global_env body None in
     return (global_env, DLet (rf, (pat_or_op, change_body body' expr)))
   | _ -> failwith "todo"
 (* | DLetMut (rf, lb, lb2, lbs) ->
@@ -278,12 +349,6 @@ and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * 
    in
    let* cexprs = conv lbs in
    return (DLetMut (rf, (fst lb, clb), (fst lb2, clb2), cexprs)) *)
-
-and closure_convert_branch env (br : branch) : branch cc =
-  let pat, expr = br in
-  let* cexpr = closure_convert_expr env expr in
-  return (pat, cexpr)
-;;
 
 let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
   : decl list cc
@@ -302,5 +367,5 @@ let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
 let closure_convert (prog : decl list) : decl list =
   let global_env = StringSet.from_list Common.Stdlib.stdlib in
   let decls, _, extra = closure_convert_decl_list global_env prog 0 in
-  List.rev extra @ decls
+  extra @ decls
 ;;
