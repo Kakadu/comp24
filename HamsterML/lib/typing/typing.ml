@@ -488,7 +488,11 @@ module Infer = struct
         let* _, dt_t = infer_data_type dt in
         let* s = Subst.unify p_t dt_t in
         R.return (TypeEnv.apply s env, dt_t)
-      | Operation (Binary bop) -> R.return (env, BinOperator.to_inf_type bop)
+      | Operation (Binary bop) ->
+        let name = BinOperator.to_string bop in
+        let* fr = fresh_var in
+        let new_env = TypeEnv.extend name (Scheme.create fr) env in
+        R.return (new_env, fr)
       | Operation (Unary uop) ->
         R.return
           ( env
@@ -618,7 +622,8 @@ module Infer = struct
                | Some scope ->
                  let env = TypeEnv.generalize_pattern name expr_t env in
                  let* scope_s, scope_t = helper env scope in
-                 R.return (scope_s, scope_t))
+                 let* subs = Subst.compose subs scope_s in
+                 R.return (subs, scope_t))
             (* let f x y = x + y *)
             | args ->
               let* env, args_t = infer_args env args in

@@ -190,3 +190,5 @@ let%test _ =
 
 let%test _ = infer_expr "fun x -> let f x = x in f (x: bool)" = TArrow (TBool, TBool)
 let%test _ = infer_expr "fun (x: bool) -> let f x = x in f x" = TArrow (TBool, TBool)
+let%test _ = infer_expr "let (+) = (&&)" = TArrow (TBool, TArrow (TBool, TBool))
+let%test _ = infer_expr "let (+) x y = (&&) x y" = TArrow (TBool, TArrow (TBool, TBool))
