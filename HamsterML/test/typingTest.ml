@@ -117,6 +117,8 @@ let%test _ =
   = TArrow (TBool, TArrow (TString, TString))
 ;;
 
+let%test _ = infer_expr "fun x -> if x = 10 then true else false" = TArrow (TInt, TBool)
+
 (* application *)
 
 let%test _ = infer_expr "(fun x y -> x) 1" = TArrow (TPVar 1, TInt)
@@ -165,3 +167,26 @@ let%test _ =
 
 let%test _ = infer_expr "let x () () = 10" = TArrow (TUnit, TArrow (TUnit, TInt))
 let%test _ = infer_expr "let x () = ()" = TArrow (TUnit, TUnit)
+let%test _ = infer_expr "let f x y = x + y in 1" = TInt
+let%test _ = infer_expr "let f x = x in f" = TArrow (TPVar 0, TPVar 0)
+let%test _ = infer_expr "let f x = x in f 1" = TInt
+let%test _ = infer_expr "let f x y = x + y in f 1 2" = TInt
+let%test _ = infer_expr "let f x = (x: int) in f" = TArrow (TInt, TInt)
+
+let%test _ =
+  infer_expr "fun x, y -> let a, b = (x: int), (y: bool)"
+  = TArrow (TTuple [ TInt; TBool ], TTuple [ TInt; TBool ])
+;;
+
+let%test _ =
+  infer_expr "fun (x: int), (y: bool) -> let a, b = x, y"
+  = TArrow (TTuple [ TInt; TBool ], TTuple [ TInt; TBool ])
+;;
+
+let%test _ =
+  infer_expr "fun (x: bool), y -> let a, b = x, (y: int) in a"
+  = TArrow (TTuple [ TBool; TInt ], TBool)
+;;
+
+let%test _ = infer_expr "fun x -> let f x = x in f (x: bool)" = TArrow (TBool, TBool)
+let%test _ = infer_expr "fun (x: bool) -> let f x = x in f x" = TArrow (TBool, TBool)

@@ -313,30 +313,12 @@ module BinOperator = struct
 
   let to_inf_type : Ast.bop -> inf_type = function
     | ADD | SUB | MUL | DIV -> TArrow (TInt, TArrow (TInt, TInt))
-    | EQ | ID_EQ | NEQ | GT | GTE | LT | LTE | AND | OR ->
-      TArrow (TBool, TArrow (TBool, TBool))
+    | EQ | ID_EQ | NEQ | GT | GTE | LT | LTE -> TArrow (TInt, TArrow (TInt, TBool))
+    | AND | OR -> TArrow (TBool, TArrow (TBool, TBool))
     | CONCAT -> TArrow (TString, TArrow (TString, TString))
   ;;
 
   let to_scheme (bop : Ast.bop) : scheme = Scheme (VarSet.empty, to_inf_type bop)
-
-  let of_string : string -> Ast.bop = function
-    | "+" -> ADD
-    | "-" -> SUB
-    | "*" -> MUL
-    | "/" -> DIV
-    | "=" -> EQ
-    | "==" -> ID_EQ
-    | "!=" -> NEQ
-    | ">" -> GT
-    | ">=" -> GTE
-    | "<" -> LT
-    | "<=" -> LTE
-    | "&&" -> AND
-    | "||" -> OR
-    | "^" -> CONCAT
-    | s -> failwith ("Can't find operator " ^ s)
-  ;;
 end
 
 module TypeEnv = struct
@@ -389,6 +371,26 @@ module TypeEnv = struct
   let generalize (t : inf_type) (env : t) =
     let quantified = VarSet.diff (Type.free_vars t) (free_vars env) in
     Scheme (quantified, t)
+  ;;
+
+  (* name = expr *)
+  let rec generalize_pattern (name_p : Ast.pattern) (expr_t : inf_type) (env : t) =
+    match name_p, expr_t with
+    | Const _, _ -> env
+    | Wildcard, _ -> env
+    | Var id, t -> extend id (generalize t env) env
+    | ListConcat (hd, tl), TList lst_t ->
+      let env = generalize_pattern hd lst_t env in
+      generalize_pattern tl expr_t env
+    | List lst, TList lst_t ->
+      List.fold lst ~init:env ~f:(fun acc p -> generalize_pattern p lst_t acc)
+    | Tuple tls, TTuple tls_t ->
+      List.fold2_exn tls tls_t ~init:env ~f:(fun acc p t -> generalize_pattern p t acc)
+    | Constraint (p, PInt), _ -> generalize_pattern p TInt env
+    | Constraint (p, PString), _ -> generalize_pattern p TString env
+    | Constraint (p, PBool), _ -> generalize_pattern p TBool env
+    | Operation (Binary op), t -> extend (BinOperator.to_string op) (generalize t env) env
+    | _ -> failwith "Incorrect generalize pattern"
   ;;
 
   (* Find scheme by name *)
@@ -599,6 +601,37 @@ module Infer = struct
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
         R.return (expr_s, build_arrow args_t expr_t)
+      | Let (Nonrecursive, binds, scope) ->
+        (match binds with
+         | [] -> R.fail Unsupported_type
+         | (name, args, expr) :: _ ->
+           (match args with
+            (* let a,b = 1,2 *)
+            | [] ->
+              let* expr_s, expr_t = helper env expr in
+              let* env, name_t = infer_pattern env name in
+              let* u = Subst.unify name_t expr_t in
+              let* subs = Subst.compose u expr_s in
+              let expr_t = Subst.apply expr_t subs in
+              (match scope with
+               | None -> R.return (subs, expr_t)
+               | Some scope ->
+                 let env = TypeEnv.generalize_pattern name expr_t env in
+                 let* scope_s, scope_t = helper env scope in
+                 R.return (scope_s, scope_t))
+            (* let f x y = x + y *)
+            | args ->
+              let* env, args_t = infer_args env args in
+              let* expr_s, expr_t = helper env expr in
+              let args_t = Subst.apply args_t expr_s in
+              (match scope with
+               | None -> R.return (expr_s, build_arrow args_t expr_t)
+               | Some scope ->
+                 let env =
+                   TypeEnv.generalize_pattern name (build_arrow args_t expr_t) env
+                 in
+                 let* scope_s, scope_t = helper env scope in
+                 R.return (scope_s, scope_t))))
       | Application (l_app, r_app) ->
         let* l_app_s, l_app_t = helper env l_app in
         let* r_app_s, r_app_t = helper (TypeEnv.apply l_app_s env) r_app in
