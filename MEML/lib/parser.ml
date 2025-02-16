@@ -50,6 +50,11 @@ let is_type = function
   | _ -> false
 ;;
 
+let is_type = function
+  | "int" | "bool" | "string" -> true
+  | _ -> false
+;;
+
 let is_whitespace = function
   | ' ' | '\n' | '\t' | '\r' -> true
   | _ -> false
@@ -309,6 +314,15 @@ let parse_rec =
 
 let parse_name = parse_rename <|> parse_var
 
+let parse_name_list =
+  brackets_or_not
+  @@ (lift2
+        (fun a b -> a :: b)
+        ((parse_rename <|> parse_var) <* stoken ",")
+        (sep_by1 (stoken ",") (parse_rename <|> parse_var)))
+  <|> (parse_rename <|> parse_var >>| fun x -> [x])
+;;
+
 let parse_eletin expr =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
@@ -369,6 +383,30 @@ let parse_ematch matching parse_expr =
 ;;
 
 (* Expression parsers *)
+
+let ebinop_p expr =
+  let helper p op =
+    parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
+  in
+  let add = helper (char '+') Add in
+  let sub = helper (char '-') Sub in
+  let mul = helper (char '*') Mul in
+  let div = helper (char '/') Div in
+  let and_p = helper (string "&&") And in
+  let or_p = helper (string "||") Or in
+  let eq = helper (char '=') Eq in
+  let neq = helper (string "<>") Neq in
+  let gre = helper (char '>') Gre in
+  let less = helper (char '<') Less in
+  let greq = helper (string ">=") Greq in
+  let leq = helper (string "<=") Leq in
+  let muldiv = chainl1 expr (mul <|> div) in
+  let addsub = chainl1 muldiv (add <|> sub) in
+  let compare = chainl1 addsub (neq <|> gre <|> greq <|> less <|> leq <|> eq) in
+  let and_op = chainl1 compare and_p in
+  let or_op = chainl1 and_op or_p in
+  or_op
+;;
 
 let parse_expression =
   fix

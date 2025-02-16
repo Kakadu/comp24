@@ -14,6 +14,14 @@ let log fmt =
   else Format.ifprintf Format.std_formatter fmt
 ;;
 
+let use_logging = false
+
+let log fmt =
+  if use_logging
+  then Format.kasprintf (fun s -> Format.printf "%s\n%!" s) fmt
+  else Format.ifprintf Format.std_formatter fmt
+;;
+
 module R : sig
   type 'a t
 
@@ -451,22 +459,38 @@ let infer =
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       R.return (final_subst, Subst.apply s5 t2)
-    | ELetIn (Notrec, id, e1, e2) ->
+    | ELetIn (Notrec, id_list, e1, e2) ->
       let* s1, t1 = helper env e1 in
       let env2 = TypeEnv.apply s1 env in
       let t2 = generalize env2 t1 in
-      let* s2, t3 = helper (TypeEnv.extend env2 (id, t2)) e2 in
+      let* s2, t3 =
+        helper
+          ((List.fold_left ~init:env2 ~f:(fun acc_env id ->
+              TypeEnv.extend acc_env (id, t2)))
+             id_list)
+          e2
+      in
       let* final_subst = Subst.compose s1 s2 in
       return (final_subst, t3)
-    | ELetIn (Rec, id, e1, e2) ->
+    | ELetIn (Rec, id_list, e1, e2) ->
       let* tv = fresh_var in
-      let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
+      let env =
+        (List.fold_left ~init:env ~f:(fun acc_env id ->
+           TypeEnv.extend acc_env (id, S (VarSet.empty, tv))))
+          id_list
+      in
       let* s1, t1 = helper env e1 in
       let* s2 = unify (Subst.apply s1 tv) t1 in
       let* s = Subst.compose s2 s1 in
       let env = TypeEnv.apply s env in
       let t2 = generalize env (Subst.apply s tv) in
-      let* s2, t2 = helper TypeEnv.(extend (apply s env) (id, t2)) e2 in
+      let* s2, t2 =
+        helper
+          ((List.fold_left ~init:env ~f:(fun acc_env id ->
+              TypeEnv.(extend (apply s acc_env) (id, t2))))
+             id_list)
+          e2
+      in
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
   in
