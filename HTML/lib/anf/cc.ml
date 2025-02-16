@@ -126,7 +126,7 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
       | _ -> StringSet.empty
     in
     bound, free_vars_expr (StringSet.union bound env) expr
-  | _ -> failwith "hui"
+  | _ -> failwith "TODO"
 ;;
 
 (* | DLetMut (_rec_flag, lb, lb2, lbs) ->
@@ -323,10 +323,8 @@ and closure_convert_let_in  global_env (d : decl) : decl cc =
     return (DLet (Not_recursive, (pat_or_op, cexpr)))
   | _ -> failwith "todo"
 
-and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
-  match d with
-  | DLet (rf, (pat_or_op, expr)) ->
-    let _, body = efun_conversion (StringSet.elements global_env) expr in
+and common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr)) :(StringSet.t * let_body) cc =
+  let _, body = efun_conversion (StringSet.elements global_env) expr in
     (* horrible todo*)
     let global_env =
       StringSet.union global_env
@@ -334,21 +332,29 @@ and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * 
       @@ if rf = Recursive then pattern_to_string pat_or_op else []
     in
     let* body' = closure_convert_expr global_env body None in
-    return (global_env, DLet (rf, (pat_or_op, change_body body' expr)))
-  | _ -> failwith "todo"
-(* | DLetMut (rf, lb, lb2, lbs) ->
-   let* clb = closure_convert_expr (snd lb) in
-   let* clb2 = closure_convert_expr (snd lb2) in
-   let rec conv lbs =
-   match lbs with
-   | [] -> return []
-   | (pat_or_op, expr) :: xs ->
-   let* cexpr = closure_convert_expr expr in
-   let* cexprs = conv xs in
-   return ((pat_or_op, cexpr) :: cexprs)
+    let global_env = 
+      StringSet.union global_env (StringSet.from_list (pattern_to_string pat_or_op)) in
+    return (global_env, (pat_or_op, change_body body' expr))
+
+and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
+  
+  match d with
+  | DLet (rf, (pat_or_op, expr)) ->
+    let* global_env, lb = common_convert_decl global_env (rf, (pat_or_op, expr)) in
+    return (global_env, DLet (rf, lb))
+| DLetMut (rf, lb, lb2, lbs) ->
+   let* global_env, clb = common_convert_decl global_env (Recursive, lb) in
+   let* global_env, clb2 = common_convert_decl global_env (Recursive, lb2) in
+   let rec conv lbs global_env =
+      match lbs with
+      | [] -> return []
+      | lb :: xs ->
+      let* global_env, clb = common_convert_decl global_env (Recursive, lb) in
+      let* clbs = conv xs global_env in
+      return (clb :: clbs)
    in
-   let* cexprs = conv lbs in
-   return (DLetMut (rf, (fst lb, clb), (fst lb2, clb2), cexprs)) *)
+   let* clbs = conv lbs global_env in
+   return (global_env, DLetMut (rf, clb, clb2, clbs))
 
 let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
   : decl list cc

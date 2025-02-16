@@ -5,15 +5,15 @@
   let main = if true then 1 else false
 
   $ ./cc_ll_demo.exe < manytests/do_not_type/003occurs.ml
-  let fun-3 f x = (f (fun-2 x));;
-  let fun-2 x f = ((x x) f);;
-  let fun-1 f x = (f (fun-0 x));;
   let fun-0 x f = ((x x) f);;
+  let fun-1 f x = (f (fun-0 x));;
+  let fun-2 x f = ((x x) f);;
+  let fun-3 f x = (f (fun-2 x));;
   let fix f = ((fun-1 f) (fun-3 f))
 
   $ ./cc_ll_demo.exe < manytests/do_not_type/004let_poly.ml
-  let fun-1 x = x;;
   let fun-0 f = ((f 1), (f true));;
+  let fun-1 x = x;;
   let temp = (fun-0 fun-1)
 
   $ ./cc_ll_demo.exe < manytests/do_not_type/015tuples.ml
@@ -27,8 +27,8 @@ PASS
 
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/002fac.ml
-  let fun-1 print_int = print_int;;
   let fun-0 n k p = k (p * n);;
+  let fun-1 print_int = print_int;;
   let rec fac_cps n k = if (n = 1) then (k 1) else (fac_cps (n - 1) ((fun-0 n) k));;
   let main = let () = (print_int ((fac_cps 4) fun-1))
   in 0
@@ -65,8 +65,8 @@ PASS
 
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/006partial.ml
-  let fun-1 foo = (foo * 10);;
   let fun-0 foo = (foo + 2);;
+  let fun-1 foo = (foo * 10);;
   let foo b = if b then fun-0 else fun-1;;
   let foo x = ((foo true) ((foo false) ((foo true) ((foo false) x))));;
   let main = let () = (print_int (foo 11))
@@ -86,9 +86,9 @@ PASS
 
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/006partial3.ml
+  let fun-0 c = (print_int c);;
   let fun-1 b = let () = (print_int b)
   in fun-0;;
-  let fun-0 c = (print_int c);;
   let foo a = let () = (print_int a)
   in fun-1;;
   let main = let () = (((foo 4) 8) 9)
@@ -104,8 +104,8 @@ PASS
 
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/008ascription.ml
-  let fun-1 _start = ((_start / 2) = 0);;
   let fun-0 x b = if b then (x + 1) else (x * 2);;
+  let fun-1 _start = ((_start / 2) = 0);;
   let addi f g x = (((f x) ((g x) : bool)) : int);;
   let main = let () = (print_int (((addi fun-0) fun-1) 4))
   in 0
@@ -116,33 +116,34 @@ PASS
   in ((f 1), (f true))
 
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
-  Fatal error: exception Failure("todo")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 360, characters 28-61
-  Called from Anf__Cc.closure_convert_decl_list.helper in file "lib/anf/cc.ml", line 361, characters 17-37
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 26, characters 20-23
-  Called from Anf__Cc.CounterWriterMonad.bind in file "lib/anf/cc.ml", line 27, characters 21-27
-  Called from Anf__Cc.closure_convert in file "lib/anf/cc.ml", line 369, characters 24-67
-  Called from Dune__exe__Cc_ll_demo.cc_ll_test in file "demos/cc_ll_demo.ml", line 4, characters 15-44
-  [2]
+  let fun-0 self l li x = ((li (self l)) x);;
+  let fun-1 self l = ((map ((fun-0 self) l)) l);;
+  let rec fix f x = ((f (fix f)) x);;
+  let map f p = let (a, b) = p
+  in ((f a), (f b));;
+  let fixpoly l = ((fix fun-1) l);;
+  let feven p n = let (e, o) = p
+  in if (n == 0) then 1 else o (n - 1);;
+  let fodd p n = let (e, o) = p
+  in if (n == 0) then 0 else e (n - 1);;
+  let tie = (fixpoly (feven, fodd));;
+  let rec meven n = if (n = 0) then 1 else modd (n - 1)
+  and modd n = if (n = 0) then 1 else meven (n - 1);;
+  let main = let () = (print_int (modd 1))
+  in let () = (print_int (meven 2))
+  in let (even, odd) = tie
+  in let () = (print_int (odd 3))
+  in let () = (print_int (even 4))
+  in 0
 
   $ ./cc_ll_demo.exe < manytests/typed/016lists.ml
-  let fun-2 h a = (h, a);;
-  let rec fun-1 xs = match xs with
-  | [] -> []
-  | h :: tl -> ((append h) (fun-1 tl));;
   let rec fun-0 acc xs = match xs with
   | [] -> acc
   | h :: tl -> (fun-0 (acc + 1) tl);;
+  let rec fun-1 xs = match xs with
+  | [] -> []
+  | h :: tl -> ((append h) (fun-1 tl));;
+  let fun-2 h a = (h, a);;
   let rec length xs = match xs with
   | [] -> 0
   | h :: tl -> (1 + (length tl));;
