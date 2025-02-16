@@ -3,10 +3,30 @@ open Monads
 open Helpers
 open Parser.Ast
 
-let last_expr_id = VarId.create 0
-let start_var_id = VarId.create 1
+let unnamed_expr = ""
+let start_type_var = VarId.create 1
 let fresh_var = fresh >>| fun n -> TVar n
 let init_env = TypeEnv.empty
+
+let instantiate (scheme : Scheme.t) : type_val t =
+  let vars, ty = scheme in
+  VarSet.fold
+    (fun var ty ->
+      let* ty = ty in
+      let* fv = fresh_var in
+      let+ sub = Subst.singleton var fv in
+      Subst.apply sub ty)
+    vars
+    (return ty)
+;;
+
+let lookup_env env var =
+  match TypeEnv.find var env with
+  | None -> fail (No_variable var)
+  | Some scheme ->
+    let* ans = instantiate scheme in
+    return (Subst.empty, ans)
+;;
 
 let rec infer_base_type c =
   let const_to_type = function
@@ -33,11 +53,30 @@ and infer_if env cond bthen belse =
   let+ united_sub = Subst.compose_all @@ else_branch_subs @ [ s3; s2; s1 ] in
   united_sub, res_type
 
+and infer_fun env vars exp =
+  let rec helper env = function
+    | var :: tl ->
+      let* fv = fresh_var in
+      let env =
+        match var with
+        | Pat_var name -> TypeEnv.extend env name (Scheme.create VarSet.empty fv)
+        | _ -> env
+      in
+      let+ env, vars = helper env tl in
+      env, fv :: vars
+    | _ -> return (env, [])
+  in
+  let* env, fvs = helper env vars in
+  let+ sub, ty = infer_expression env exp in
+  sub, List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, ty)) fvs ty
+
 and infer_expression env expr =
   let rec helper env = function
     | Exp_constant c -> infer_base_type c
     | Exp_if (cond, bthen, belse) -> infer_if env cond bthen belse
-    | _ -> raise (Unimplemented "infer_expr")
+    | Exp_ident var -> lookup_env env var
+    | Exp_fun (vars, exp) -> infer_fun env vars exp
+    | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
   in
   helper env expr
 ;;
@@ -50,7 +89,7 @@ let infer_structure_item prog =
       (match h with
        | Str_eval e ->
          let* _, t = infer_expression env e in
-         let types = types @ [ last_expr_id, t ] in
+         let types = types @ [ unnamed_expr, t ] in
          helper env tl types
        | Str_value _ -> raise (Unimplemented "str_value infer"))
   in
@@ -61,10 +100,11 @@ let error_to_string = function
   | Occurs_check -> "occurs check"
   | Unification_failed (val1, val2) ->
     "failed unification of types " ^ show_type_val val1 ^ " and " ^ show_type_val val2
+  | No_variable v -> "variable " ^ v ^ " is not found"
 ;;
 
 let infer_program prog =
-  match run (infer_structure_item prog) start_var_id with
+  match run (infer_structure_item prog) start_type_var with
   | Ok _ as x -> x
   | Error e -> Error ("Type infering error: " ^ error_to_string e)
 ;;

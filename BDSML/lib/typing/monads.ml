@@ -26,5 +26,20 @@ let ( and+ ) (o1 : 'a t) (o2 : 'b t) st =
     | (Error _ as a), _ -> a )
 ;;
 
+let rec map (f : 'a -> 'b t) = function
+  | h :: tl ->
+    let+ h = f h
+    and+ tl = map f tl in
+    h :: tl
+  | _ -> return []
+;;
+
+let rec fold_left (f : 'a -> 'b -> 'a t) (acc : 'a t) : 'b list -> 'a t  = function
+  | h :: tl ->
+    let* acc = acc in
+    fold_left f (f acc h) tl
+  | _ -> acc
+;;
+
 let fresh (last : VarId.t) = VarId.( + ) last 1, Ok last
 let run p start_value : ('a, error) Result.t = snd (p start_value)

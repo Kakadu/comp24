@@ -12,6 +12,7 @@ let rec occurs_in (v : VarId.t) = function
 module Scheme = struct
   type t = VarSet.t * type_val
 
+  let create set ty : t = set, ty
   let free_vars =
     let rec helper acc = function
       | TVar b -> VarSet.add b acc
@@ -27,6 +28,8 @@ module TypeEnv = struct
   module Map = Map.Make (String)
 
   type t = Scheme.t Map.t
+
+  let find : string -> t -> Scheme.t option = Map.find_opt
 
   let extend map name scheme = Map.add name scheme map
   let empty : t = Map.empty
