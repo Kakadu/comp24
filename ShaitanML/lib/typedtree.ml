@@ -35,9 +35,9 @@ let rec pp_typ ppf =
       (pp_print_list
          ~pp_sep:(fun _ _ -> fprintf ppf " * ")
          (fun ppf ty ->
-            match ty with
-            | TArrow _ | TTuple _ -> fprintf ppf "(%a)" pp_typ ty
-            | _ -> fprintf ppf "%a" pp_typ ty))
+           match ty with
+           | TArrow _ | TTuple _ -> fprintf ppf "(%a)" pp_typ ty
+           | _ -> fprintf ppf "%a" pp_typ ty))
       tl
   | TList t -> fprintf ppf "%a list" pp_typ t
 ;;

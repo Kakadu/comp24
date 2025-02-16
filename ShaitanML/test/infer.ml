@@ -6,8 +6,7 @@ open Shaitanml_lib
 open Infer
 
 let%expect_test "function with narrowing type annotation" =
-  test_infer
-    {|
+  test_infer {|
      let (f : int -> int) = fun x -> x;;
      |};
   [%expect
@@ -29,8 +28,7 @@ let%expect_test "function with narrowing type annotation" =
 ;;
 
 let%expect_test "annotation for rec" =
-  test_infer
-    {|
+  test_infer {|
      let x = let rec (f : int -> int) = fun x -> x in f 3;;
      |};
   [%expect
@@ -52,8 +50,7 @@ let%expect_test "annotation for rec" =
 ;;
 
 let%expect_test "list pattern in let" =
-  test_infer
-    {|
+  test_infer {|
     let a::b = [1; 2; 3];;
      |};
   [%expect
@@ -76,8 +73,7 @@ let%expect_test "list pattern in let" =
 ;;
 
 let%expect_test "nested annotation" =
-  test_infer
-    {|
+  test_infer {|
     let f = let ((x : int):int) = 5 in x;;
      |};
   [%expect
@@ -99,18 +95,15 @@ let%expect_test "nested annotation" =
 ;;
 
 let%expect_test "nested annotation unmatch" =
-  test_infer
-    {|
+  test_infer {|
     let f ((x : int):int) (((y : int):string):int) = x;;
      |};
-  [%expect
-    {|
+  [%expect {|
     Infer error: Unification failed on int and string |}]
 ;;
 
 let%expect_test "simple annotation" =
-  test_infer
-    {|
+  test_infer {|
     let (x:int) = 5;;
      |};
   [%expect
@@ -132,8 +125,7 @@ let%expect_test "simple annotation" =
 ;;
 
 let%expect_test "fixed point combinator" =
-  test_infer
-    {|
+  test_infer {|
       let rec fix f x = f (fix f) x ;;
      |};
   [%expect
@@ -182,8 +174,7 @@ let%expect_test "list folding" =
 ;;
 
 let%expect_test "complex tuple" =
-  test_infer
-    {|
+  test_infer {|
     let f x y = (x + y, [x; y])]
      |};
   [%expect
@@ -205,8 +196,7 @@ let%expect_test "complex tuple" =
 ;;
 
 let%expect_test "tuple of functions" =
-  test_infer
-    {|
+  test_infer {|
       let fs = ((fun x -> x), (fun x y -> x + y))
      |};
   [%expect
@@ -228,8 +218,7 @@ let%expect_test "tuple of functions" =
 ;;
 
 let%expect_test "unbound variable check" =
-  test_infer
-    {|
+  test_infer {|
       let f x = x + y;;
       let y = 3;;
      |};
@@ -237,8 +226,7 @@ let%expect_test "unbound variable check" =
 ;;
 
 let%expect_test "inner let expr" =
-  test_infer
-    {|
+  test_infer {|
       let f x =
          let y = 3 in
          x + y;;
@@ -262,8 +250,7 @@ let%expect_test "inner let expr" =
 ;;
 
 let%expect_test "multiple args as functions" =
-  test_infer
-    {|
+  test_infer {|
     let f a b c d e = a b c d e;;
      |};
   [%expect
