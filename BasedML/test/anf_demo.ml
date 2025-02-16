@@ -15,12 +15,20 @@ let () =
   in
   match Parser.parse_program s with
   | Ok ast ->
-    let final =
-      ast
-      |> Middleend.Closure_conversion.convert_ast
-      |> Middleend.Lambda_lifting.lift_ast
-      |> Middleend.Anf.transform
-    in
-    print_anf final
+    (match
+       Common.StateMonad.run
+         (Middleend.Alpha_conversion.alpha_convert_decl_list
+            Middleend.Alpha_conversion.init_context
+            []
+            ast)
+         0
+     with
+     | _, Ok lst ->
+       lst
+       |> Middleend.Closure_conversion.convert_ast
+       |> Middleend.Lambda_lifting.lift_ast
+       |> Middleend.Anf.transform
+       |> print_anf
+     | _, Error err -> Format.printf "%s" err)
   | Error message -> Format.printf "Error: %s\n" message
 ;;
