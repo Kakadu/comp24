@@ -66,6 +66,8 @@ let rec pp_typ fmt typ =
     fprintf fmt (arrow typ_left ^^ " -> %a") pp_typ typ_left pp_typ typ_right
 ;;
 
+let pp_typed fmt pp_v (v, typ) = fprintf fmt "(%a : %a)" pp_v v pp_typ typ
+
 let rec pp_pattern fmt = function
   | PId id -> fprintf fmt "%s" id
   | PConst c -> fprintf fmt "%a" pp_const c
@@ -75,28 +77,19 @@ let rec pp_pattern fmt = function
       "(%a)"
       (pp_tuple
          (function
-           | PList _, _ -> true
+           | PList _ -> true
            | _ -> false)
-         pp_pattern_typed
+         pp_pattern
          ", ")
       (p1 :: p2 :: tuple)
-  | PList (left, right) ->
-    fprintf fmt "%a :: %a" pp_pattern_typed left pp_pattern_typed right
-
-and pp_pattern_typed fmt = function
-  | pattern, Some typ -> fprintf fmt "(%a : %a)" pp_pattern pattern pp_typ typ
-  | pattern, None -> fprintf fmt "%a" pp_pattern pattern
+  | PList (left, right) -> fprintf fmt "%a :: %a" pp_pattern left pp_pattern right
+  | PConstraint (p, typ) -> pp_typed fmt pp_pattern (p, typ)
 ;;
 
-let pp_pattern_or_op fmt = function
+let rec pp_pattern_or_op fmt = function
   | POpPat pat -> fprintf fmt "%a" pp_pattern pat
   | POpOp op -> fprintf fmt "( %s )" op
-;;
-
-let pp_pattern_or_op_typed fmt = function
-  | pattern_or_op, Some typ ->
-    fprintf fmt "(%a : %a)" pp_pattern_or_op pattern_or_op pp_typ typ
-  | pattern_or_op, None -> fprintf fmt "%a" pp_pattern_or_op pattern_or_op
+  | POrOpConstraint (pat, typ) -> pp_typed fmt pp_pattern_or_op (pat, typ)
 ;;
 
 let pp_rec_flag fmt = function
@@ -107,97 +100,67 @@ let pp_rec_flag fmt = function
 let rec pp_expr fmt = function
   | EConst c -> pp_const fmt c
   | EId s -> pp_ident fmt s
-  | EFun (pattern_typed, expr) ->
-    fprintf fmt "(fun %a -> %a)" pp_pattern_typed pattern_typed pp_expr_typed expr
-  | EApp ((EApp ((EId (IdentOfDefinable (IdentOp bin_op)), None), op1), None), op2) ->
+  | EFun (pattern, expr) -> fprintf fmt "(fun %a -> %a)" pp_pattern pattern pp_expr expr
+  | EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2) ->
     (* bin op pattern *)
-    fprintf fmt "(%a %s %a)" pp_expr_typed op1 bin_op pp_expr_typed op2
-  | EApp
-      ( e1
-      , ( EApp ((EApp ((EId (IdentOfDefinable (IdentOp bin_op)), None), op1), None), op2)
-        , None ) ) ->
-    fprintf
-      fmt
-      "%a (%a %s %a)"
-      pp_expr_typed
-      e1
-      pp_expr_typed
-      op1
-      bin_op
-      pp_expr_typed
-      op2
-  | EApp (e1, e2) -> fprintf fmt "(%a %a)" pp_expr_typed e1 pp_expr_typed e2
+    fprintf fmt "(%a %s %a)" pp_expr op1 bin_op pp_expr op2
+  | EApp (e1, EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2)) ->
+    fprintf fmt "%a (%a %s %a)" pp_expr e1 pp_expr op1 bin_op pp_expr op2
+  | EApp (e1, e2) -> fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2
   | EIf (e_if, e_th, e_el) ->
-    fprintf
-      fmt
-      "if %a then %a else %a"
-      pp_expr_typed
-      e_if
-      pp_expr_typed
-      e_th
-      pp_expr_typed
-      e_el
-  | EList (hd, tl) -> fprintf fmt "%a :: %a" pp_expr_typed hd pp_expr_typed tl
+    fprintf fmt "if %a then %a else %a" pp_expr e_if pp_expr e_th pp_expr e_el
+  | EList (hd, tl) -> fprintf fmt "%a :: %a" pp_expr hd pp_expr tl
   | ETuple (e1, e2, es) ->
     fprintf
       fmt
       "(%a)"
       (pp_tuple
-         (fun (expr, _) ->
-           match expr with
+         (function
            | ETuple _ | EList (_, _) -> true
            | _ -> false)
-         pp_expr_typed
+         pp_expr
          ", ")
       (e1 :: e2 :: es)
-  | EClsr (decl, expr) -> fprintf fmt "%a\nin %a" pp_decl decl pp_expr_typed expr
+  | EClsr (decl, expr) -> fprintf fmt "%a\nin %a" pp_decl decl pp_expr expr
   | EMatch (expr, case1, cases) ->
     let pp_case fmt (pat_typed, expr) =
-      fprintf fmt "| %a -> %a" pp_pattern_typed pat_typed pp_expr_typed expr
+      fprintf fmt "| %a -> %a" pp_pattern pat_typed pp_expr expr
     in
     let pp_cases = pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "\n") pp_case in
-    fprintf fmt "match %a with\n%a" pp_expr_typed expr pp_cases (case1 :: cases)
+    fprintf fmt "match %a with\n%a" pp_expr expr pp_cases (case1 :: cases)
+  | EConstraint (e, typ) -> pp_typed fmt pp_expr (e, typ)
 
-and pp_expr_typed fmt = function
-  | expr, Some typ -> fprintf fmt "(%a : %a)" pp_expr expr pp_typ typ
-  | expr, None -> fprintf fmt "%a" pp_expr expr
-
-and pp_let_expr fmt ((expr, expr_typ) as expr_typed) =
+and pp_let_expr fmt expr =
   let rec extract_fun_pats acc = function
-    | EFun (pat_typed, (expr, _)) -> extract_fun_pats (pat_typed :: acc) expr
-    | _ -> acc
+    | EFun (pat_typed, expr) -> extract_fun_pats (pat_typed :: acc) expr
+    | e -> List.rev acc, e
   in
-  let pats_typed = List.rev (extract_fun_pats [] expr) in
-  let rec extract_fun_body = function
-    | EFun (_, expr_typed), _ -> extract_fun_body expr_typed
-    | expr_typed -> expr_typed
-  in
-  let expr_fun_body = extract_fun_body expr_typed in
+  let pats, expr_fun_body = extract_fun_pats [] expr in
   let is_pat_with_parens = function
-    | PConst _ | PId _ | PTuple _ -> false
+    | PConst _ | PId _ | PTuple _ | PConstraint _ -> false
     | _ -> true
   in
-  let pp_pattern_typed fmt ((pat, _) as pat_typed) =
+  let pp_pattern_typed fmt pat =
     let to_print = format_of_string @@ if is_pat_with_parens pat then "(%a)" else "%a" in
-    fprintf fmt to_print pp_pattern_typed pat_typed
+    fprintf fmt to_print pp_pattern pat
   in
   let pp_pats_typed =
     pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt " ") pp_pattern_typed
   in
   let to_print =
-    format_of_string (if List.length pats_typed > 0 then "%a = %a" else "%a= %a")
+    format_of_string (if List.length pats > 0 then "%a = %a" else "%a= %a")
   in
-  match expr_typ with
-  | Some _ -> fprintf fmt to_print pp_pats_typed pats_typed pp_expr_typed expr_typed
-  | None -> fprintf fmt to_print pp_pats_typed pats_typed pp_expr_typed expr_fun_body
+  match expr with
+  | EConstraint (_, _) -> fprintf fmt to_print pp_pats_typed pats pp_expr expr
+  | _ -> fprintf fmt to_print pp_pats_typed pats pp_expr expr_fun_body
 
 and pp_decl fmt =
-  let pp_let_body fmt (pat_or_op_typed, expr_typed) =
-    fprintf fmt "%a %a" pp_pattern_or_op_typed pat_or_op_typed pp_let_expr expr_typed
+  let pp_let_body fmt (pat_or_op, expr) =
+    fprintf fmt "%a %a" pp_pattern_or_op pat_or_op pp_let_expr expr
   in
   function
-  | DLet (rec_flag, (pat_or_op_typed, expr_typed)) ->
-    fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body (pat_or_op_typed, expr_typed)
+  | DLet (rec_flag, (pat_or_op, expr)) ->
+    fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body (pat_or_op, expr)
   | DLetMut (rec_flag, decl1, decl2, decls) ->
     let pp_decls =
       pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "\nand ") pp_let_body

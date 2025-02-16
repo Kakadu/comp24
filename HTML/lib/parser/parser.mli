@@ -1,7 +1,3 @@
-(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
-
-(** SPDX-License-Identifier: LGPL-3.0-or-later *)
-
 val is_space : char -> bool
 val pe_space : string Angstrom.t
 val pe_space1 : string Angstrom.t
@@ -74,12 +70,10 @@ val pe_arrow_type : AstLib.Ast.typ Angstrom.t -> AstLib.Ast.typ Angstrom.t
 val pe_list_type : AstLib.Ast.typ Angstrom.t -> AstLib.Ast.typ Angstrom.t
 val pe_type : AstLib.Ast.typ Angstrom.t
 val pe_get_explicit_typ : AstLib.Ast.typ option Angstrom.t
-val pe_typed : 'a Angstrom.t -> ('a * AstLib.Ast.typ option) Angstrom.t
-
-val rollback_not_list
-  :  (AstLib.Ast.pattern * 'a) Angstrom.t
-  -> AstLib.Ast.pattern Angstrom.t
-
+val pe_typed : ('a -> AstLib.Ast.typ option -> 'b) -> 'a Angstrom.t -> 'b Angstrom.t
+val cons_pat_typed : AstLib.Ast.pattern -> AstLib.Ast.typ option -> AstLib.Ast.pattern
+val pe_typed_pat : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
+val rollback_not_list : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
 val pe_list_pat_semicolon : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
 val delim_list_pat_colons : string
 val pe_list_pat_colons : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
@@ -88,41 +82,33 @@ val pe_lrf_pats : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
 val pe_tuple_pat : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
 val pe_value_or_tuple_pat : AstLib.Ast.pattern Angstrom.t -> AstLib.Ast.pattern Angstrom.t
 val pe_pattern : AstLib.Ast.pattern Angstrom.t
-val pe_pattern_typed : (AstLib.Ast.pattern * AstLib.Ast.typ option) Angstrom.t
+val pe_pattern_typed : AstLib.Ast.pattern Angstrom.t
+val cons_expr_typed : AstLib.Ast.expr -> AstLib.Ast.typ option -> AstLib.Ast.expr
+val pe_typed_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_tuple_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_value_or_tuple_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_branching : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 
 val get_typed_ebinop_applier
   :  string
-  -> AstLib.Ast.expr AstLib.Ast.typed
-  -> AstLib.Ast.expr AstLib.Ast.typed
-  -> AstLib.Ast.expr AstLib.Ast.typed
+  -> AstLib.Ast.expr
+  -> AstLib.Ast.expr
+  -> AstLib.Ast.expr
 
 val binop_binder
   :  string list
-  -> (AstLib.Ast.expr AstLib.Ast.typed
-      -> AstLib.Ast.expr AstLib.Ast.typed
-      -> AstLib.Ast.expr AstLib.Ast.typed)
-       Angstrom.t
+  -> (AstLib.Ast.expr -> AstLib.Ast.expr -> AstLib.Ast.expr) Angstrom.t
 
-val get_chain
-  :  AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
-  -> priority_group
-  -> AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
-
-val pe_typed_if_in_parens
-  :  AstLib.Ast.expr Angstrom.t
-  -> AstLib.Ast.expr AstLib.Ast.typed Angstrom.t
-
-val rollback_not_app : ('a * 'b option) Angstrom.t -> 'a Angstrom.t
+val get_chain : AstLib.Ast.expr Angstrom.t -> priority_group -> AstLib.Ast.expr Angstrom.t
+val pe_typed_if_in_parens : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
+val rollback_not_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_bin_op_app : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_list_expr_semicolon : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
-val pe_params : (AstLib.Ast.pattern * AstLib.Ast.typ option) list Angstrom.t
+val pe_params : AstLib.Ast.pattern list Angstrom.t
 
 val pe_fun_let_decl
   :  AstLib.Ast.expr Angstrom.t
-  -> (AstLib.Ast.typ option * (AstLib.Ast.expr * AstLib.Ast.typ option)) Angstrom.t
+  -> (AstLib.Ast.typ option * AstLib.Ast.expr) Angstrom.t
 
 val pe_fun_anon_expr : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
 val pe_match : AstLib.Ast.expr Angstrom.t -> AstLib.Ast.expr Angstrom.t
@@ -130,9 +116,7 @@ val pe_rec_flag : AstLib.Ast.rec_flag Angstrom.t
 
 val pe_let_body
   :  AstLib.Ast.expr Angstrom.t
-  -> ((AstLib.Ast.pattern_or_op * AstLib.Ast.typ option)
-     * (AstLib.Ast.expr * AstLib.Ast.typ option))
-       Angstrom.t
+  -> (AstLib.Ast.pattern_or_op * AstLib.Ast.expr) Angstrom.t
 
 val pe_closure
   :  AstLib.Ast.decl Angstrom.t
