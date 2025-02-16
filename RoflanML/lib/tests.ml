@@ -15,9 +15,17 @@ module ParserTests = struct
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
+  let pp_decl_list ppf decls =
+    Stdlib.Format.pp_print_list
+      ~pp_sep:(fun ppf () -> Stdlib.Format.fprintf ppf "\n")
+      pp_decl
+      ppf
+      decls
+  ;;
+
   let parse_and_pp_decl input =
     match parse_decl input with
-    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl res
+    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl_list res
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -257,6 +265,37 @@ module ParserTests = struct
                  ]
                ))
             ))
+         ))
+
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion" =
+    parse_and_pp_decl
+      "let rec even x = if x = 0 then true else odd (x - 1)\n\
+       and odd x = if x = 0 then false else even (x - 1)";
+    [%expect
+      {|
+      (DMutualLet (Rec,
+         [("even",
+           (EFun (("x", None),
+              (EBranch (
+                 (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                 (EConst (CBool true)),
+                 (EApp ((EVar "odd"),
+                    (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                 ))
+              )));
+           ("odd",
+            (EFun (("x", None),
+               (EBranch (
+                  (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                  (EConst (CBool false)),
+                  (EApp ((EVar "even"),
+                     (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                  ))
+               )))
+           ]
          ))
       |}]
   ;;
