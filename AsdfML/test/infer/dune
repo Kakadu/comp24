@@ -1,7 +1,7 @@
 (library
- (name test)
- (libraries AsdfML.Lib)
- (modules utils)
+ (name inline_infer)
+ (libraries AsdfML.Lib test)
+ (modules Inline_inferencer)
  (preprocess
   (pps ppx_inline_test ppx_expect))
  (instrumentation
