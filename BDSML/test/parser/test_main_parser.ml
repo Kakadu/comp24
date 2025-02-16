@@ -7,7 +7,8 @@ let test_parser str =
 ;;
 
 let%expect_test "some beautiful test" =
-  test_parser {|
+  test_parser
+    {|
 let (+) a b = a - b
 let m = 4
 and mm = 6
@@ -16,7 +17,7 @@ m + let b = 6 in m + b
   [%expect
     {|
     [(Str_value (Nonrecursive,
-        [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
+        [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
             (Exp_apply ((Exp_apply ((Exp_ident "-"), (Exp_ident "a"))),
                (Exp_ident "b")))
             ))
@@ -49,9 +50,10 @@ let m = 4
 and mm = 6;;
 m + let b = 6 in m + b ;;;;
 |};
-  [%expect {|
+  [%expect
+    {|
     [(Str_value (Nonrecursive,
-        [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
+        [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
             (Exp_apply ((Exp_apply ((Exp_ident "-"), (Exp_ident "a"))),
                (Exp_ident "b")))
             ))

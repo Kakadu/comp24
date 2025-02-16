@@ -83,8 +83,7 @@ let%expect_test "test right associativity" =
 
 let%expect_test "test unary prefix op" =
   test_expr "! 4";
-  [%expect
-    {| (Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4)))) |}]
+  [%expect {| (Exp_apply ((Exp_ident "!"), (Exp_constant (Const_int 4)))) |}]
 ;;
 
 let%expect_test "test several unary prefix op" =
@@ -547,13 +546,13 @@ let%expect_test "test redefine operator" =
   [%expect
     {|
     (Exp_let (Nonrecursive,
-       [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
+       [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
            (Exp_apply ((Exp_apply ((Exp_ident "-"), (Exp_ident "a"))),
               (Exp_ident "b")))
            ))
          ],
        (Exp_let (Nonrecursive,
-          [(Val_binding ("!", [(Pat_var "m")], (Exp_ident "m")))],
+          [(Val_binding ("( ! )", [(Pat_var "m")], (Exp_ident "m")))],
           (Exp_apply ((Exp_apply ((Exp_ident "+"), (Exp_ident "a"))),
              (Exp_apply ((Exp_ident "!"), (Exp_ident "b")))))
           ))
