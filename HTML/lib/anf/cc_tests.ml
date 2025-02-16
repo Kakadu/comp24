@@ -53,8 +53,8 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let fun-1 nested3 nested2 x = (x + (((fun-0 nested3) nested2) 8));;
     let fun-0 nested3 nested2 i = (nested2 + nested3);;
+    let fun-1 nested3 nested2 x = (x + (((fun-0 nested3) nested2) 8));;
     let nested1 = let nested2 = 5
     in let nested3 = 6
     in let nested4 = ((fun-1 nested3) nested2)
@@ -79,5 +79,17 @@ let%expect_test "sanity check" =
     | h :: tl -> (fun-0 (acc + 1) tl);;
     let length_tail = let helper = fun-0
     in (helper 0) |}]
+;;
+
+let%expect_test "sanity check" =
+  CcTests.cc_test
+    {|let rec meven n = if n = 0 then 1 else modd (n - 1)
+and modd n = if n = 0 then 1 else meven (n - 1)
+
+|};
+  [%expect
+    {|
+    let rec meven n = if (n = 0) then 1 else modd (n - 1)
+    and modd n = if (n = 0) then 1 else meven (n - 1) |}]
 ;;
 
