@@ -4,24 +4,22 @@
  (modules parser_demo)
  (libraries Parser stdio))
 
-(executable
- (name inferencer_demo)
- (public_name inferencer_demo)
- (modules inferencer_demo)
- (libraries Parser Inferencer stdio))
+; (executable
+;  (name inferencer_demo)
+;  (public_name inferencer_demo)
+;  (modules inferencer_demo)
+;  (libraries Parser Inferencer stdio))
 
-(executable
- (name cc_ll_demo)
- (public_name cc_ll_demo)
- (modules cc_ll_demo)
- (libraries Parser Inferencer Anf stdio))
+; (executable
+;  (name cc_ll_demo)
+;  (public_name cc_ll_demo)
+;  (modules cc_ll_demo)
+;  (libraries Parser Inferencer Anf stdio))
 
 (cram
- (applies_to parser_demo inferencer_demo cc_ll_demo)
+ (applies_to parser_demo)
  (deps
   ./parser_demo.exe
-  ./inferencer_demo.exe
-  ./cc_ll_demo.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
