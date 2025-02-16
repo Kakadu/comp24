@@ -12,13 +12,7 @@ let test str =
   |> function
   | Result.Ok res ->
     let rec helper acc = function
-      | (id, v) :: tl ->
-        acc
-        ^ Types.VarId.to_string id
-        ^ " "
-        ^ Types.show_type_val v
-        ^ "\n"
-        ^ helper acc tl
+      | (id, v) :: tl -> acc ^ id ^ " " ^ Types.show_type_val v ^ "\n" ^ helper acc tl
       | _ -> acc
     in
     Format.print_string @@ helper "" res

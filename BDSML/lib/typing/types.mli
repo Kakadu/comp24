@@ -26,5 +26,6 @@ val show_type_val : type_val -> string
 type error =
   | Unification_failed of type_val * type_val
   | Occurs_check
+  | No_variable of string
 
 exception Unimplemented of string

@@ -22,11 +22,10 @@ let singleton k v =
   VarMap.singleton k v
 ;;
 
-(** substitute type of var instead of var *)
-let apply map =
+let apply (sub : t) =
   let rec helper = function
     | TVar b as ty ->
-      (match VarMap.find_opt b map with
+      (match VarMap.find_opt b sub with
        | None -> ty
        | Some x -> x)
     | TArrow (l, r) -> TArrow (helper l, helper r)
