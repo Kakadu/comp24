@@ -8,6 +8,11 @@
  (public_name inferencer_runner)
  (libraries aefjnvMl_lib stdio))
 
+(executable
+ (name cc_runner)
+ (public_name cc_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
 (cram
  (applies_to inferencer_manytests parser_manytests)
  (deps
@@ -36,3 +41,7 @@
 (cram
  (applies_to inferencer_tests)
  (deps ./inferencer_runner.exe))
+
+(cram
+ (applies_to cc_tests)
+ (deps ./cc_runner.exe))

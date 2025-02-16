@@ -7,7 +7,6 @@
 (* int operators *)
 val int_ty_op : Typedtree.ty
 val op_mul : string
-val sig_op_mul : string
 val op_div : string
 val op_plus : string
 val op_minus : string
@@ -38,3 +37,8 @@ val un_op_prefix : string
 
 val sig_func_print_int : Typedtree.ty
 val func_print_int : string
+
+(* ALL *)
+val std_lib_names : string list
+val converte_infix : string -> string
+val is_binop : string -> bool

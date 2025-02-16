@@ -1,0 +1,10 @@
+(library
+ (name middleend)
+ (public_name aefjnvMl.Middleend)
+ (modules closure_conversion)
+ (libraries base common)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
+ (inline_tests)
+ (instrumentation
+  (backend bisect_ppx)))

@@ -20,9 +20,12 @@ type infer_error =
   (** Only variables are allowed as left-side of 'let rec'
       Example: [let rec (a, b) = 5] *)
 
+type illegal_state_error = Illegal_state_error of string
+
 type error =
   | Parser of parse_error
   | Infer of infer_error
+  | Alpha_converter of illegal_state_error
 
 (*================Constructors================*)
 
@@ -32,3 +35,4 @@ val unification_failed : ty * ty -> error
 val several_bounds : string -> error
 val not_specify_rec : error
 val no_variable_rec : error
+val illegal_state : string -> error
