@@ -16,6 +16,7 @@ module StringSet = struct
   let is_empty = Base.Set.is_empty
 end
 
+(* todo WriterT? *)
 module CounterWriterMonad = struct
   type 'a cc = int -> 'a * int * decl list
 
@@ -119,7 +120,6 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
   | DLet (_, (pat_or_op, expr)) ->
     let bound =
       match pat_or_op with
-      (* todo type lost? *)
       | POpPat (PId s), _ -> StringSet.singleton s
       | _ -> StringSet.empty
     in
@@ -142,8 +142,6 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
     in
     bound, free_all
 ;;
-
-(* -------------------------------------------------------------------------- *)
 
 let pattern_of_free_vars (fv : string list) : pattern_typed =
   match fv with
@@ -207,14 +205,13 @@ and substitute_decl (d : decl) (subst : (string * expr_typed) list) : decl =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     let bound =
-      (* todo type lost *)
       match pat_or_op with
       | POpPat (PId s), _ -> [ s ]
       | _ -> []
     in
     let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
     DLet (rf, (pat_or_op, subst_eid expr subst'))
-  | _ -> failwith "hui"
+  | _ -> failwith "todo pohui"
 ;;
 
 let rec closure_convert_expr
@@ -317,7 +314,7 @@ and closure_convert_let_in global_env (d : decl) : decl cc =
         (if rf = Recursive then Some (List.hd (pattern_to_string pat_or_op)) else None)
     in
     return (DLet (Not_recursive, (pat_or_op, cexpr)))
-  | _ -> failwith "todo"
+  | _ -> failwith "todo pohui"
 
 and common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
   : (StringSet.t * let_body) cc
