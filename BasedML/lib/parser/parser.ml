@@ -20,6 +20,7 @@ let is_keyword = function
   | "true"
   | "then"
   | "and"
+  | "with"
   | "_"
   | "in" -> true
   | _ -> false
@@ -381,8 +382,8 @@ let p_match p_pattern p_expr =
     let* expr = skip_whitespace *> Angstrom.string "->" *> skip_whitespace *> p_expr in
     return (pattern, expr)
   in
-  let* sub_pat =
-    skip_whitespace *> Angstrom.string "match" *> skip_whitespace *> p_pattern
+  let* sub_exp =
+    skip_whitespace *> Angstrom.string "match" *> skip_whitespace *> p_expr
     <* skip_whitespace
     <* Angstrom.string "with"
   in
@@ -394,7 +395,7 @@ let p_match p_pattern p_expr =
     return (pattern, expr)
   in
   let* cases = many1 (p_match_case p_pattern p_expr) in
-  return @@ EMatch (sub_pat, fst_case :: cases)
+  return @@ EMatch (sub_exp, fst_case :: cases)
 ;;
 
 (* expression parser *)

@@ -103,7 +103,7 @@ let prog_lift prog =
       in
       let lifted_exprs, acc, state = lift_exprs ctx acc global_ctx state exp_list in
       LLTuple lifted_exprs, acc, state
-    | EMatch (pat, branches) ->
+    | EMatch (exp, branches) ->
       let rec lift_branches env acc global_ctx state = function
         | [] -> [], acc, state
         | (p, e) :: rest ->
@@ -112,7 +112,8 @@ let prog_lift prog =
           (p, lifted_expr) :: lifted_branches, acc, state
       in
       let lifted_branches, acc, state = lift_branches ctx acc global_ctx state branches in
-      LLMatch (pat, lifted_branches), acc, state
+      let lifted_exp, acc, state = lift_expr ctx acc global_ctx state exp in
+      LLMatch (lifted_exp, lifted_branches), acc, state
     | ELetIn (rec_flag, pat, outer, inner) ->
       (match pat, outer with
        | PIdentifier id, EFunction (_, _) ->

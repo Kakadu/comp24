@@ -13,7 +13,7 @@ type llexpr =
   | LLLetIn of rec_flag * pattern * llexpr * llexpr
   | LLConstraint of llexpr * type_name
   | LLTuple of llexpr list
-  | LLMatch of pattern * (pattern * llexpr) list
+  | LLMatch of llexpr * (pattern * llexpr) list
 [@@deriving show { with_path = false }]
 
 type llbinding = LLLet of pattern * pattern list * llexpr

@@ -67,7 +67,7 @@ type expr =
   | EIfThenElse of expr * expr * expr
   | ELetIn of rec_flag * pattern * expr * expr
   | ETuple of expr list (**List.length >= 2 *)
-  | EMatch of pattern * (pattern * expr) list
+  | EMatch of expr * (pattern * expr) list
   | EConstraint of expr * type_name
 [@@deriving show { with_path = false }]
 
