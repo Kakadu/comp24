@@ -54,8 +54,6 @@ let rec cc_expr globals env ?(apply = true) = function
        then fvs |> List.map ~f:s_var |> List.fold ~init:closure_fun ~f:s_app
        else closure_fun)
   | TELetIn (_, def, exp) ->
-    (* let def', env', globals' = cc_def globals env def ~apply:false in
-       let exp' = cc_expr globals' env' exp in *)
     let def', env', _ = cc_def globals env def ~apply:false in
     let exp' = cc_expr globals env' exp in
     s_let_in def' exp'
@@ -65,7 +63,7 @@ let rec cc_expr globals env ?(apply = true) = function
       (cc_expr globals env x2)
       (List.map xs ~f:(cc_expr globals env))
   | TEList (_, xs) -> List.map xs ~f:(cc_expr globals env) |> s_list
-  | TEMatch _ -> failwith "removed by now"
+  | TEMatch _ -> failwith "cc_def: EMatch should be removed by now"
 
 and cc_def globals env ?(apply = true) = function
   | TDLet (TArrow _, flag, PIdent id, func) as def ->
@@ -80,7 +78,9 @@ and cc_def globals env ?(apply = true) = function
   | TDLet (_, _, PWild, exp) ->
     let exp' = cc_expr globals env exp in
     s_let false NonRec "_" exp', env, globals
-  | d -> failwith (Format.asprintf "cc_def: not implemented for `%a`" pp_tdefinition d)
+  | d ->
+    failwith
+      (Format.asprintf "cc_def: expected only PIdent and PWild, got %a" pp_tdefinition d)
 ;;
 
 let default_globals =

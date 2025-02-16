@@ -8,6 +8,8 @@ open Tast
 open Types
 open Utils
 
+(* TODO: 'no_match' branch *)
+
 let tuple_field lst idx =
   te_app
     dummy_ty
@@ -46,7 +48,7 @@ let remove_match =
         match pat with
         | PIdent _ -> te_let_in dummy_ty (td_let dummy_ty pat match_exp) action
         | PTuple (x1, x2, xs) ->
-          (* TODO: simplify `&& true` *)
+          (* TODO: simplify *)
           let xs = x1 :: x2 :: xs in
           te_let_in
             dummy_ty

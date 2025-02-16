@@ -71,14 +71,14 @@ let remove_patterns =
          if is_simple pat
          then te_let_in t (helper_def def |> List.hd_exn) body
          else te_match t (helper_expr exp) [ pat, body ])
-    | TETuple (t, x1, x2, xs) -> 
+    | TETuple (t, x1, x2, xs) ->
       te_tuple t (helper_expr x1) (helper_expr x2) (List.map xs ~f:helper_expr)
     | TEList (t, xs) -> te_list t (List.map xs ~f:helper_expr)
     | TEMatch (t, e, c) ->
       te_match t (helper_expr e) (List.map c ~f:(fun (p, e) -> p, helper_expr e))
   and helper_def = function
     | TDLet (t, r, p, e) when is_simple p -> [ td_let_flag r t p (helper_expr e) ]
-    | TDLet (t, r, PTuple (x1,x2,xs), e) ->
+    | TDLet (t, r, PTuple (x1, x2, xs), e) ->
       let xs = x1 :: x2 :: xs in
       let temp_var = p_ident "`temp_tuple" in
       let temp_def = td_let_flag r t temp_var (helper_expr e) in

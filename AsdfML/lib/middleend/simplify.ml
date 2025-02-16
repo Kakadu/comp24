@@ -18,7 +18,7 @@ let simplify =
       when String.equal x y ->
       let inner' = expr inner in
       (match inner' with
-       | TEFun _ -> inner'
+       | TEFun _ -> expr inner'
        | _ -> TEFun (tf, args, apply))
     | TEFun (t1, args1, TEFun (t2, args2, body)) ->
       let rec helper = function
