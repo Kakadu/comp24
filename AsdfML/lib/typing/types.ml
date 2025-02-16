@@ -6,7 +6,7 @@
 
 open Base
 
-type var_id = int [@@deriving show { with_path = false }]
+type var_id = int [@@deriving show { with_path = false }, eq]
 
 type ground =
   | TInt
@@ -20,7 +20,7 @@ type ty =
   | TArrow of ty * ty
   | TTuple of ty * ty * ty list
   | TList of ty
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, eq]
 
 type error =
   [ `Occurs_check
