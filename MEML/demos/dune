@@ -38,4 +38,11 @@
 (cram
  (deps ./clouse_demo.exe))
 
+(executable
+ (name lamdalift_demo)
+ (modules lamdalift_demo)
+ (public_name lamdalift_demo)
+ (libraries MEML_lib stdio))
 
+(cram
+ (deps ./lamdalift_demo.exe))
