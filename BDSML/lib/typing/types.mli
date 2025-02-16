@@ -1,5 +1,5 @@
 module VarId : sig
-  type t = int
+  type t
 
   val to_string : t -> string
   val create : int -> t
@@ -11,11 +11,12 @@ type base_type =
   | TInt
   | TChar
   | TString
+  | TBool
 
 type type_val =
   | TVar of VarId.t (** e.g. ['a] *)
   | TBase of base_type (** e.g. [int] *)
-  | TParams of type_val * type_val (** e.g. [int list] *)
+  | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
 
@@ -27,20 +28,3 @@ type error =
   | Occurs_check
 
 exception Unimplemented of string
-
-module VarSet : Set.S with type elt = VarId.t
-
-module Scheme : sig
-  type t
-
-  val occurs_in : int -> type_val -> bool
-  val free_vars : type_val -> VarSet.t
-end
-
-module TypeEnv : sig
-  type t
-
-  val extend : t -> string -> Scheme.t -> t
-  val empty : t
-  val init : (string * Scheme.t) list -> t
-end
