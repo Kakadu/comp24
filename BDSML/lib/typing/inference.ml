@@ -4,7 +4,7 @@ open Helpers
 open Parser.Ast
 
 let unnamed_expr = ""
-let start_type_var = VarId.create 1
+let start_type_var = VarId.create 0
 let fresh_var = fresh >>| fun n -> TVar n
 let init_env = TypeEnv.empty
 

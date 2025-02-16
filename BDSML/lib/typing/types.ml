@@ -16,7 +16,16 @@ type base_type =
   | TChar
   | TString
   | TBool
-[@@deriving show { with_path = false }]
+(* [@@deriving show { with_path = false }] *)
+
+let show_base_type = function
+  | TInt -> "int"
+  | TChar -> "char"
+  | TString -> "string"
+  | TBool -> "bool"
+;;
+
+let pp_base_type fmt ty = Format.fprintf fmt "%s" @@ show_base_type ty
 
 type type_val =
   | TVar of VarId.t (** e.g. ['a] *)
@@ -24,7 +33,18 @@ type type_val =
   | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
-[@@deriving show { with_path = false }]
+
+let enclose s = "(" ^ s ^ ")"
+
+let rec show_type_val = function
+  | TBase b -> show_base_type b
+  | TArrow (l, r) -> show_type_val l ^ " -> " ^ show_type_val r
+  | TTuple l -> enclose @@ String.concat ", " (List.map show_type_val l)
+  | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
+  | TParametric (t1, t2) -> show_type_val t1 ^ " " ^ show_type_val t2
+;;
+
+let pp_type_val fmt ty = Format.fprintf fmt "%s" @@ show_type_val ty
 
 type error =
   | Unification_failed of type_val * type_val
