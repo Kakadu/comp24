@@ -48,7 +48,7 @@ let ident_to_string (id : ident) : string =
   | IdentOfBaseOp _ -> failwith "base operator is not a variable"
 ;;
 
-let rec bound_vars_pattern ((pat, _) : pattern_typed) : string list =
+let rec bound_vars_pattern ((pat, _) : pattern typed) : string list =
   match pat with
   | PId s -> [ s ]
   | PTuple (p1, p2, ps) ->
@@ -59,13 +59,13 @@ let rec bound_vars_pattern ((pat, _) : pattern_typed) : string list =
   | PConst _ -> []
 ;;
 
-let pattern_to_string ((pat, ty) : pattern_or_op_typed) : string list =
+let pattern_to_string ((pat, ty) : pattern_or_op typed) : string list =
   match pat with
   | POpPat p -> bound_vars_pattern (p, ty)
   | POpOp s -> [ s ]
 ;;
 
-let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr_typed) : StringSet.t =
+let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr typed) : StringSet.t =
   match e with
   | EConst _ -> StringSet.empty
   | EId id ->
@@ -143,7 +143,7 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
     bound, free_all
 ;;
 
-let pattern_of_free_vars (fv : string list) : pattern_typed =
+let pattern_of_free_vars (fv : string list) : pattern typed =
   match fv with
   | [] -> PConst CUnit, None
   | [ x ] -> PId x, None
@@ -164,7 +164,7 @@ let rec replace_fun_body body = function
   | _ -> body
 ;;
 
-let rec subst_eid ((e, t) : expr_typed) (subst : (string * expr_typed) list) : expr_typed =
+let rec subst_eid ((e, t) : expr typed) (subst : (string * expr typed) list) : expr typed =
   match e with
   | EConst _ -> e, t
   | EId id ->
@@ -188,7 +188,7 @@ let rec subst_eid ((e, t) : expr_typed) (subst : (string * expr_typed) list) : e
     , t )
   | EClsr (decl, e) -> EClsr (substitute_decl decl subst, subst_eid e subst), t
   | EMatch (e, br, brs) ->
-    let substitute_branch ((pat, expr) : branch) (subst : (string * expr_typed) list)
+    let substitute_branch ((pat, expr) : branch) (subst : (string * expr typed) list)
       : branch
       =
       let bound = bound_vars_pattern pat in
@@ -201,7 +201,7 @@ let rec subst_eid ((e, t) : expr_typed) (subst : (string * expr_typed) list) : e
         , List.map (fun b -> substitute_branch b subst) brs )
     , t )
 
-and substitute_decl (d : decl) (subst : (string * expr_typed) list) : decl =
+and substitute_decl (d : decl) (subst : (string * expr typed) list) : decl =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     let bound =
@@ -216,9 +216,9 @@ and substitute_decl (d : decl) (subst : (string * expr_typed) list) : decl =
 
 let rec closure_convert_expr
   (global_env : StringSet.t)
-  ((e, t) : expr_typed)
+  ((e, t) : expr typed)
   (rec_name : string option)
-  : expr_typed cc
+  : expr typed cc
   =
   match e with
   | EConst _ | EId _ -> return (e, t)

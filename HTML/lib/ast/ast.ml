@@ -49,47 +49,39 @@ type typ =
   | TGround of ground (** ground *)
 [@@deriving eq, show { with_path = false }]
 
+type 'a typed = 'a * typ option [@@deriving eq, show { with_path = false }]
+
 type pattern =
   | PId of ident_letters (** x *)
-  | PTuple of pattern_typed * pattern_typed * pattern_typed list (** (x, y) *)
-  | PList of pattern_typed * pattern_typed (** x :: xs *)
+  | PTuple of pattern typed * pattern typed * pattern typed list (** (x, y) *)
+  | PList of pattern typed * pattern typed (** x :: xs *)
   | PConst of const (** 3 *)
 [@@deriving eq, show { with_path = false }]
-
-(** typed pattern *)
-and pattern_typed = pattern * typ option [@@deriving eq, show { with_path = false }]
 
 type pattern_or_op =
   | POpPat of pattern (** pattern *)
   | POpOp of ident_op (** custom operator *)
 [@@deriving eq, show { with_path = false }]
 
-(** typed pattern or op *)
-type pattern_or_op_typed = pattern_or_op * typ option
-[@@deriving eq, show { with_path = false }]
-
 (** branch in match expr *)
-type branch = pattern_typed * expr_typed [@@deriving eq, show { with_path = false }]
+type branch = pattern typed * expr typed [@@deriving eq, show { with_path = false }]
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
   | EId of ident (** Identifier. Examples: a, b, c *)
-  | EFun of pattern_typed * expr_typed (** Function. Examples: fun x -> x + 1 *)
-  | EApp of expr_typed * expr_typed (** Application. Examples: f (x - 1) *)
-  | EIf of expr_typed * expr_typed * expr_typed
+  | EFun of pattern typed * expr typed (** Function. Examples: fun x -> x + 1 *)
+  | EApp of expr typed * expr typed (** Application. Examples: f (x - 1) *)
+  | EIf of expr typed * expr typed * expr typed
   (** If-then-else. Examples: if x >= y then x - y else y - x *)
-  | EList of expr_typed * expr_typed (** Lists. Examples: [1; 2; 3] *)
-  | ETuple of expr_typed * expr_typed * expr_typed list (** Tuple. Examples: (1, 2, 3) *)
-  | EClsr of decl * expr_typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
-  | EMatch of expr_typed * branch * branch list
+  | EList of expr typed * expr typed (** Lists. Examples: [1; 2; 3] *)
+  | ETuple of expr typed * expr typed * expr typed list (** Tuple. Examples: (1, 2, 3) *)
+  | EClsr of decl * expr typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
+  | EMatch of expr typed * branch * branch list
   (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
 [@@deriving eq, show { with_path = false }]
 
-(** typed expression *)
-and expr_typed = expr * typ option [@@deriving eq, show { with_path = false }]
-
 (** let body: pattern and associated expression *)
-and let_body = pattern_or_op_typed * expr_typed
+and let_body = pattern_or_op typed * expr typed
 [@@deriving eq, show { with_path = false }]
 
 and decl =
@@ -115,10 +107,10 @@ let tvar n = TVar n
 let pid (id : ident_letters) = PId id
 let ptuple p1 p2 p_list = PTuple (p1, p2, p_list)
 let plist hd tl = PList (hd, tl)
-let p_typed ?(typ = None) (p : pattern) : pattern_typed = p, typ
+let p_typed ?(typ = None) (p : pattern) : pattern typed = p, typ
 let pop_pat p = POpPat p
 let pop_op p = POpOp p
-let pop_typed ?(typ = None) (pop : pattern_or_op) : pattern_or_op_typed = pop, typ
+let pop_typed ?(typ = None) (pop : pattern_or_op) : pattern_or_op typed = pop, typ
 let pconst c = PConst c
 let econst c = EConst c
 let eid i = EId i
@@ -129,7 +121,7 @@ let elist hd tl = EList (hd, tl)
 let etuple e1 e2 l = ETuple (e1, e2, l)
 let eclsr d e = EClsr (d, e)
 let ematch e pair cl = EMatch (e, pair, cl)
-let e_typed ?(typ = None) e : expr_typed = e, typ
+let e_typed ?(typ = None) e : expr typed = e, typ
 let dlet rf let_body = DLet (rf, let_body)
 let dletmut rec_flag fst snd tl = DLetMut (rec_flag, fst, snd, tl)
 let prog (d_l : decl list) : prog = d_l
