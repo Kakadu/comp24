@@ -1,4 +1,4 @@
-(** Copyright 2023-2024, Nikita Lukonenko and Nikita Nemakin *)
+(** Copyright 2024-2025, Nikita Lukonenko and Nikita Nemakin *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -7,6 +7,7 @@ type error =
   | `Unbound_variable of Ast.id (** Unbound variable *)
   | `Unification_failed of Typedtree.ty * Typedtree.ty (** Failed to unify two types *)
   | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
+  | `Let_rec_lhs
   ]
 
 val pp_error : Format.formatter -> error -> unit
