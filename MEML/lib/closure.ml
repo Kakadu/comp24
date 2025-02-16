@@ -50,14 +50,31 @@ let unrelated e =
         | EFun (p, next) -> binds (Set.union acc (pat_set p)) next
         | _ -> acc
       in
-      let inner = bind_name n @@ helper ine in
-      let outer = bind_name n @@ helper e in
+      let inner =
+        List.fold
+          ~init:set_empty
+          ~f:(fun acc name -> Base.Set.union acc (bind_name name @@ helper ine))
+          n
+      in
+      let outer =
+        List.fold
+          ~init:(Base.Set.empty (module String))
+          ~f:(fun acc name -> Base.Set.union acc (bind_name name @@ helper e))
+          n
+      in
       let inner = Set.diff inner @@ binds set_empty e in
       let outer = Set.diff outer @@ binds set_empty e in
       Set.union outer inner
     | ETuple exps ->
       List.fold exps ~init:set_empty ~f:(fun acc h -> Set.union acc (helper h))
-    | _ -> failwith "pspspsp"
+    | EMatch (pat, branches) ->
+      let unbound_in_braches =
+        List.fold
+          branches
+          ~init:set_empty
+          ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
+      in
+      Set.union (helper pat) unbound_in_braches
   in
   helper e
 ;;
@@ -101,11 +118,8 @@ let closure_expr gctx bindings =
     | ELetIn (r, n, e, ein) ->
       (match e with
        | EFun (_, _) ->
-         let lts = Set.add lts n in
-         let genv =
-           match r with
-           | Rec -> Set.add gctx n
-           | Notrec -> Set.add gctx n
+         let lts = List.fold_left ~init: lts ~f:(fun acc x -> Set.add acc x) n in
+         let genv = List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n
          in
          let unrelated = unrelated (ELetIn (r, n, e, ein)) in
          let unrelated = Set.diff unrelated genv in
@@ -114,9 +128,9 @@ let closure_expr gctx bindings =
            List.map (Set.to_list unrelated) ~f:(fun x -> PVar (x, TUnknown))
          in
          let e = List.fold_right unrelated_global ~f:(fun p e -> EFun (p, e)) ~init:e in
-         let local_env = Map.set lctx ~key:n ~data:unrelated in
-         let ein = helper lts local_env (Set.add gctx n) ein in
-         let e = helper lts local_env (Set.add gctx n) e in
+         let local_env = Map.set lctx ~key:(String.concat n) ~data:unrelated in
+         let ein = helper lts local_env (List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n) ein in
+         let e = helper lts local_env (List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n) e in
          ELetIn (r, n, e, ein)
        | _ -> ELetIn (r, n, helper lts lctx gctx e, helper lts lctx gctx ein))
     | ETuple exps ->
@@ -126,7 +140,11 @@ let closure_expr gctx bindings =
       let hd = helper lts lctx gctx hd in
       let tl = helper lts lctx gctx tl in
       EList (hd, tl)
-    | _ -> failwith ""
+    | EMatch (m, p) ->
+      let new_branches =
+        List.map p ~f:(fun (pat, exp) -> pat, helper lts lctx gctx exp)
+      in
+      EMatch (m, new_branches)
   in
   let closure_bindings gctx = function
     | Let (flag, p, e) -> Let (flag, p, closure_function set_empty map_empty gctx helper e)

@@ -17,6 +17,11 @@ let is_char = function
   | _ -> false
 ;;
 
+let is_bchar = function
+  | 'A' .. 'Z' -> true
+  | _ -> false
+;;
+
 let is_digit = function
   | '0' .. '9' -> true
   | _ -> false
@@ -38,6 +43,11 @@ let is_keyword = function
   | _ -> false
 ;;
 
+let is_type = function
+  | "int" | "bool" | "string" -> true
+  | _ -> false
+;;
+
 let is_whitespace = function
   | ' ' | '\n' | '\t' | '\r' -> true
   | _ -> false
@@ -54,6 +64,7 @@ let parse_white_space1 = take_while1 is_whitespace
 let parse_empty s = parse_white_space *> s <* parse_white_space
 let parse_white_space_str str = parse_white_space *> string_ci str <* parse_white_space
 let token s = parse_white_space *> s
+let token1 s = parse_white_space1 *> s
 let stoken s = parse_white_space *> string s
 let stoken1 s = parse_white_space1 *> string s
 let brackets p = stoken "(" *> p <* stoken ")"
@@ -119,7 +130,6 @@ let parse_pvar =
 ;;
 
 let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_nil ]
-
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
 
 let parse_tuple parser =
@@ -250,6 +260,15 @@ let parse_rename =
   <* parse_white_space
 ;;
 
+let parse_name_list =
+  brackets_or_not
+  @@ (lift2
+        (fun a b -> a :: b)
+        ((parse_rename <|> parse_var) <* stoken ",")
+        (sep_by1 (stoken ",") (parse_rename <|> parse_var)))
+  <|> (parse_rename <|> parse_var >>| fun x -> [x])
+;;
+
 let parse_eletin expr =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
@@ -257,7 +276,7 @@ let parse_eletin expr =
       let expr = constr_efun args expr1 in
       ELetIn (is_rec, name, expr, expr2))
     parse_rec
-    (parse_rename <|> parse_var)
+    parse_name_list
     (many parse_pattern)
     (stoken "=" *> expr)
     (stoken "in" *> expr)
@@ -299,6 +318,30 @@ let parse_ematch matching parse_expr =
 
 (* Expression parsers *)
 
+let ebinop_p expr =
+  let helper p op =
+    parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
+  in
+  let add = helper (char '+') Add in
+  let sub = helper (char '-') Sub in
+  let mul = helper (char '*') Mul in
+  let div = helper (char '/') Div in
+  let and_p = helper (string "&&") And in
+  let or_p = helper (string "||") Or in
+  let eq = helper (char '=') Eq in
+  let neq = helper (string "<>") Neq in
+  let gre = helper (char '>') Gre in
+  let less = helper (char '<') Less in
+  let greq = helper (string ">=") Greq in
+  let leq = helper (string "<=") Leq in
+  let muldiv = chainl1 expr (mul <|> div) in
+  let addsub = chainl1 muldiv (add <|> sub) in
+  let compare = chainl1 addsub (neq <|> gre <|> greq <|> less <|> leq <|> eq) in
+  let and_op = chainl1 compare and_p in
+  let or_op = chainl1 and_op or_p in
+  or_op
+;;
+
 let parse_expression =
   fix
   @@ fun pack ->
@@ -330,6 +373,7 @@ let parse_expression =
     <|> lists
     <|> evar
     <|> econst
+    <|> tuples
   in
   let ematch =
     brackets_or_not @@ parse_ematch (econst <|> tuples <|> evar) (expression pack)
@@ -390,7 +434,7 @@ let parse_let parse =
       let body = constr_efun args body in
       Let (flag, name, body))
     parse_rec
-    (parse_rename <|> parse_var)
+    parse_name_list
     (parse_white_space *> many (brackets_or_not parse_pattern))
     (stoken "=" *> parse)
 ;;

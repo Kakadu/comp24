@@ -1,10 +1,10 @@
-(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** SPDX-License-Identifier: LGPL-3.0 *)
 
 open Format
 
-type binder = int
+type binder = int [@@deriving eq, show { with_path = false }]
 
 module VarSet = struct
   include Stdlib.Set.Make (Int)
@@ -16,7 +16,7 @@ module VarSet = struct
   ;;
 end
 
-type binder_set = VarSet.t
+type binder_set = VarSet.t [@@deriving show { with_path = false }]
 
 type ty =
   | TBool
@@ -25,6 +25,7 @@ type ty =
   | TArrow of ty * ty
   | TList of ty
   | TTuple of ty list
+[@@deriving eq, show { with_path = false }]
 
 type error =
   [ `Occurs_check
@@ -33,7 +34,7 @@ type error =
   | `Unification_failed of ty * ty
   ]
 
-type scheme = S of binder_set * ty
+type scheme = S of binder_set * ty [@@deriving show { with_path = false }]
 
 let pp_list helper l sep =
   Format.pp_print_list ~pp_sep:(fun ppf _ -> Format.fprintf ppf sep) helper l

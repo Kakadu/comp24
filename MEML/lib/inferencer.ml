@@ -1,11 +1,19 @@
-(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2023-2024, Perevalov Efim, Dyachkov Vitaliy *)
 
-(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+(** SPDX-License-Identifier: LGPL-3.0 *)
 
 open Base
 open Ast
 open Ty
 module Format = Stdlib.Format (* silencing a warning *)
+
+let use_logging = false
+
+let log fmt =
+  if use_logging
+  then Format.kasprintf (fun s -> Format.printf "%s\n%!" s) fmt
+  else Format.ifprintf Format.std_formatter fmt
+;;
 
 module R : sig
   type 'a t
@@ -100,7 +108,26 @@ module Type = struct
   ;;
 end
 
-module Subst = struct
+module Subst : sig
+  type t
+
+  val pp : Stdlib.Format.formatter -> t -> unit
+  val empty : t
+  val singleton : fresh -> ty -> t R.t
+
+  (** Getting value from substitution. May raise [Not_found] *)
+  val find_exn : fresh -> t -> ty
+
+  val find : fresh -> t -> ty option
+  val apply : t -> ty -> ty
+  val unify : ty -> ty -> t R.t
+
+  (** Compositon of substitutions *)
+  val compose : t -> t -> t R.t
+
+  val compose_all : t list -> t R.t
+  val remove : t -> fresh -> t
+end = struct
   open R
   open R.Syntax
 
@@ -205,7 +232,11 @@ module VarSet = struct
 end
 
 module Scheme = struct
-  type t = scheme
+  type t = scheme [@@deriving show { with_path = false }]
+
+  let occurs_in v = function
+    | S (xs, t) -> (not (VarSet.mem v xs)) && Type.occurs_in v t
+  ;;
 
   let free_vars = function
     | S (bs, t) -> VarSet.diff (Type.free_vars t) bs
@@ -215,6 +246,8 @@ module Scheme = struct
     let s2 = VarSet.fold (fun k s -> Subst.remove s k) names sub in
     S (names, Subst.apply s2 ty)
   ;;
+
+  let pp = pp_scheme
 end
 
 module TypeEnv = struct
@@ -229,6 +262,14 @@ module TypeEnv = struct
   ;;
 
   let apply s env = Map.map env ~f:(Scheme.apply s)
+
+  let pp ppf xs =
+    Stdlib.Format.fprintf ppf "{| ";
+    Map.iter xs ~f:(fun (n, s) -> Stdlib.Format.fprintf ppf "%s -> %a; " n pp_scheme s);
+    Stdlib.Format.fprintf ppf "|}%!"
+  ;;
+
+  let find_exn name xs = Map.find_exn ~equal:String.equal xs name
 end
 
 open R
@@ -271,8 +312,8 @@ let infer =
       let* sr, tr = helper env r in
       (match bin_op with
        | Add | Sub | Mul | Div ->
-         let* s1 = unify tl int_typ in
-         let* s2 = unify tr int_typ in
+         let* s1 = unify tl TInt in
+         let* s2 = unify tr TInt in
          let* sres = Subst.compose_all [ s1; s2; sl; sr ] in
          return (sres, TInt)
        | Less | Leq | Gre | Greq | Eq | Neq ->
@@ -345,22 +386,38 @@ let infer =
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       R.return (final_subst, Subst.apply s5 t2)
-    | ELetIn (Notrec, id, e1, e2) ->
+    | ELetIn (Notrec, id_list, e1, e2) ->
       let* s1, t1 = helper env e1 in
       let env2 = TypeEnv.apply s1 env in
       let t2 = generalize env2 t1 in
-      let* s2, t3 = helper (TypeEnv.extend env2 (id, t2)) e2 in
+      let* s2, t3 =
+        helper
+          ((List.fold_left ~init:env2 ~f:(fun acc_env id ->
+              TypeEnv.extend acc_env (id, t2)))
+             id_list)
+          e2
+      in
       let* final_subst = Subst.compose s1 s2 in
       return (final_subst, t3)
-    | ELetIn (Rec, id, e1, e2) ->
+    | ELetIn (Rec, id_list, e1, e2) ->
       let* tv = fresh_var in
-      let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
+      let env =
+        (List.fold_left ~init:env ~f:(fun acc_env id ->
+           TypeEnv.extend acc_env (id, S (VarSet.empty, tv))))
+          id_list
+      in
       let* s1, t1 = helper env e1 in
       let* s2 = unify (Subst.apply s1 tv) t1 in
       let* s = Subst.compose s2 s1 in
       let env = TypeEnv.apply s env in
       let t2 = generalize env (Subst.apply s tv) in
-      let* s2, t2 = helper TypeEnv.(extend (apply s env) (id, t2)) e2 in
+      let* s2, t2 =
+        helper
+          ((List.fold_left ~init:env ~f:(fun acc_env id ->
+              TypeEnv.(extend (apply s acc_env) (id, t2))))
+             id_list)
+          e2
+      in
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
     | _ -> failwith "match"
@@ -376,23 +433,33 @@ let infer_prog prog =
     match prog with
     | h :: tl ->
       (match h with
-       | Let (Notrec, id, expr) ->
+       | Let (Notrec, id_list, expr) ->
          let* s, t = infer env expr in
          let env = TypeEnv.apply s env in
          let t = generalize env t in
-         let env = TypeEnv.extend env (id, t) in
-         let l1 = l @ [ id, sc_to_type t ] in
+         let env =
+           (List.fold_left ~init:env ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t)))
+             id_list
+         in
+         let l1 = l @ [ id_list, sc_to_type t ] in
          helper env tl l1
-       | Let (Rec, id, expr) ->
+       | Let (Rec, id_list, expr) ->
          let* tv = fresh_var in
-         let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
+         let env =
+           (List.fold_left ~init:env ~f:(fun acc_env id ->
+              TypeEnv.extend acc_env (id, S (VarSet.empty, tv))))
+             id_list
+         in
          let* s, t = infer env expr in
          let* s2 = unify (Subst.apply s tv) t in
          let* s = Subst.compose s2 s in
          let env = TypeEnv.apply s env in
          let t = generalize env (Subst.apply s tv) in
-         let env = TypeEnv.extend env (id, t) in
-         let l1 = l @ [ id, sc_to_type t ] in
+         let env =
+           (List.fold_left ~init:env ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t)))
+             id_list
+         in
+         let l1 = l @ [ id_list, sc_to_type t ] in
          helper env tl l1
        | _ -> fail `Occurs_check)
     | [] -> return l
@@ -405,7 +472,11 @@ let run_prog_inference prog = run (infer_prog prog)
 
 let print_prog_result prog =
   match run_prog_inference prog with
-  | Ok l -> List.iter l ~f:(fun (id, t) -> Stdlib.Format.printf "%s : %a\n" id pp_typ t)
+  | Ok l ->
+    List.iter l ~f:(fun (id_list, t) ->
+      let id_str = String.concat id_list in
+      (* Объединяем список идентификаторов в строку *)
+      Stdlib.Format.printf "%s : %a\n" id_str pp_typ t)
   | Error e -> print_typ_err e
 ;;
 

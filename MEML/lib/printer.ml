@@ -65,10 +65,10 @@ let rec expression_printer formatter e =
   | ELetIn (r, n, e, ine) ->
     Format.fprintf
       formatter
-      "\n  let %a %s = %a\n  in %a"
+      "\n  let %a %a = %a\n  in %a"
       rec_printer
       r
-      n
+      (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf " ") Format.pp_print_string) n
       expression_printer
       e
       expression_printer
@@ -77,32 +77,41 @@ let rec expression_printer formatter e =
   | EBinaryOp (op, l, r) ->
     Format.fprintf
       formatter
-      "%a %a %a"
+      "(%a %a %a)"
       expression_printer
       l
       binop_printer
       op
       expression_printer
       r
-  | _ -> failwith "asf"
+  | EList (head, tail) ->
+    (* Рекурсивно выводим список *)
+    let rec print_list formatter = function
+      | EConst CNil -> Format.fprintf formatter ""
+      | EList (h, t) ->
+        Format.fprintf formatter "%a; %a" expression_printer h print_list t
+      | _ -> Format.fprintf formatter "%a" expression_printer tail
+    in
+    Format.fprintf formatter "[%a]" print_list (EList (head, tail))
+  | EMatch (m, p) ->
+    Format.fprintf formatter "(match %a with" expression_printer m;
+    List.iter
+      (fun (pat, exp) -> Format.fprintf formatter "\n| %a -> %a" pattern_printer pat expression_printer exp)
+      p
 ;;
 
 let bindings_printer formatter bindings =
   List.iter
     (fun bind ->
       (match bind with
-       | Let (r, n, e) ->
-         Format.fprintf
-           formatter
-           "let %a %s = %a"
-           rec_printer
-           r
-           n
-           expression_printer
-           e
-       | Expression e -> expression_printer formatter e);
+      | Let (r, n, e) ->
+        (* Выводим список строк с разделителем " " *)
+        Format.fprintf formatter "let %a %a = %a"
+          rec_printer r
+          (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ") Format.pp_print_string) n
+          expression_printer e
+      | Expression e -> expression_printer formatter e);
       Format.fprintf formatter "\n")
     bindings
-;;
 
 let printer bindings = Format.asprintf "%a" bindings_printer bindings
