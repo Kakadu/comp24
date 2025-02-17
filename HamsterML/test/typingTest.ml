@@ -174,6 +174,11 @@ let%test _ = infer_expr "let f x y = x + y in f 1 2" = TInt
 let%test _ = infer_expr "let f x = (x: int) in f" = TArrow (TInt, TInt)
 
 let%test _ =
+  infer_expr "fun f (x: int) (y: string) -> (f x y : bool)"
+  = TArrow (TArrow (TInt, TArrow (TString, TBool)), TArrow (TInt, TArrow (TString, TBool)))
+;;
+
+let%test _ =
   infer_expr "fun x, y -> let a, b = (x: int), (y: bool)"
   = TArrow (TTuple [ TInt; TBool ], TTuple [ TInt; TBool ])
 ;;
@@ -191,6 +196,11 @@ let%test _ =
 let%test _ =
   infer_expr "fun (a: int),(b: bool) -> let a,b = a, b in a"
   = TArrow (TTuple [ TInt; TBool ], TInt)
+;;
+
+let%test _ =
+  infer_expr "let foo b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)"
+  = TArrow (TBool, TArrow (TInt, TInt))
 ;;
 
 let%test _ = infer_expr "fun y -> let f x = x in f (y: bool)" = TArrow (TBool, TBool)
@@ -213,11 +223,48 @@ let%test _ =
   = TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13))
 ;;
 
-let%test _ = infer_expr "let rec fib n = if n<2 then n else fib (n - 1) + fib (n - 2)" = TArrow(TInt, TInt)
+let%test _ =
+  infer_expr "let temp = let f = fun x -> x in (f 1, f true)" = TTuple [ TInt; TBool ]
+;;
+
+let%test _ =
+  infer_expr "let rec fib n = if n<2 then n else fib (n - 1) + fib (n - 2)"
+  = TArrow (TInt, TInt)
+;;
 
 let%test _ =
   infer_expr
     "let rec fib_acc a b n = if n=1 then b else let n1 = n-1 in let ab = a+b in fib_acc \
      b ab n1"
   = TArrow (TInt, TArrow (TInt, TArrow (TInt, TInt)))
+;;
+
+let%test _ =
+  infer_expr "let rec fix f x = f (fix f) x"
+  = TArrow
+      ( TArrow (TArrow (TPVar 2, TPVar 5), TArrow (TPVar 2, TPVar 5))
+      , TArrow (TPVar 2, TPVar 5) )
+;;
+
+let%test _ =
+  infer_expr
+    "let rec map f xs =\n\
+    \  match xs with\n\
+    \  | [] -> []\n\
+    \  | a::[] -> [f a]\n\
+    \  | a::b::[] -> [f a; f b]\n\
+    \  | a::b::c::[] -> [f a; f b; f c]\n\
+    \  | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl"
+  = TArrow (TArrow (TPVar 24, TPVar 8), TArrow (TList (TPVar 24), TList (TPVar 8)))
+;;
+
+let%test _ =
+  infer_expr "let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)"
+  = TArrow (TList (TPVar 5), TArrow (TList (TPVar 5), TList (TPVar 5)))
+;;
+
+let%test _ =
+  infer_expr
+    "let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl"
+  = TArrow (TArrow (TPVar 5, TUnit), TArrow (TList (TPVar 5), TUnit))
 ;;
