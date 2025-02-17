@@ -268,7 +268,7 @@ module TypecheckerTests = struct
 
   let pp_infer decl =
     match run_infer decl with
-    | Ok ty -> Stdlib.Format.printf "%a" pp_ty ty
+    | Ok tys -> List.iter tys ~f:(Stdlib.Format.printf "%a\n" pp_ty)
     | Error err -> Stdlib.Format.printf "%a" pp_error err
   ;;
 
@@ -409,6 +409,26 @@ module TypecheckerTests = struct
   let%expect_test "tuple pattern poly type inference" =
     pp_parse_and_infer "let f x = match x with | (x, y) -> y, x";
     [%expect {| 'a * 'b -> 'b * 'a |}]
+  ;;
+
+  let%expect_test "mutual recursion type inference 1" =
+    pp_parse_and_infer
+      "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
+       false else even (x - 1)";
+    [%expect
+      {|
+      int -> bool
+      int -> bool
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion type inference 2" =
+    pp_parse_and_infer "let rec f x = x && true and g x = x + 1";
+    [%expect
+      {|
+      bool -> bool
+      int -> int
+      |}]
   ;;
 
   (* Errors *)
@@ -567,7 +587,8 @@ module LLTests = struct
     | Result.Ok prog ->
       (match lift_program (close_program prog env) with
        | Result.Ok prog ->
-         List.iter prog ~f:(fun decl -> Stdlib.Format.printf "%a\n" pp_lldecl decl)
+         List.iter prog ~f:(fun decl ->
+           Stdlib.Format.printf "%s\n" (ast_to_str (ll_to_ast decl)))
        | Result.Error _ -> Stdlib.print_endline "Failed to LL")
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
@@ -578,40 +599,15 @@ module LLTests = struct
        k (x * n)) in fact 10 (fun x -> x)";
     [%expect
       {|
-      (LLDLet (NonRec, "LL_1", [("k", None); ("x", None); ("n", None)],
-         (LLApp ((LLVar "k"),
-            (LLApp ((LLApp ((LLVar "*"), (LLVar "x"))), (LLVar "n")))))
-         ))
-      (LLDLet (Rec, "LL_0", [("x", None); ("k", None)],
-               (LLMatch ((LLVar "x"),
-                  [((PConst (CInt 1)), (LLApp ((LLVar "k"), (LLConst (CInt 1)))));
-                    ((PVar "x"),
-                     (LLApp (
-                        (LLApp ((LLVar "LL_0"),
-                           (LLApp ((LLApp ((LLVar "-"), (LLVar "x"))),
-                              (LLConst (CInt 1))))
-                           )),
-                        (LLApp ((LLApp ((LLVar "LL_1"), (LLVar "k"))), (LLVar "x")
-                           ))
-                        )))
-                    ]
-                  ))
-               ))
-      (LLDLet (NonRec, "LL_2", [("x", None)], (LLVar "x")))
-      (LLDLet (
-                                                                          NonRec,
-                                                                          "q",
-                                                                          [],
-                                                                          (LLApp (
-                                                                          (LLApp (
-                                                                          (LLVar
-                                                                          "LL_0"),
-                                                                          (LLConst
-                                                                          (CInt 10))
-                                                                          )),
-                                                                          (LLVar
-                                                                          "LL_2")))
-                                                                          ))
+      let LL_1 k x n = k (( * ) x n)
+
+      let rec LL_0 x k = match x with
+      | 1 -> k 1
+      | x -> LL_0 (( - ) x 1) (LL_1 k x)
+
+      let LL_2 x = x
+
+      let q = LL_0 10 LL_2
       |}]
   ;;
 end
