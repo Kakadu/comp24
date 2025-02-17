@@ -28,7 +28,7 @@ let pp_error ppf : error -> _ =
   | `Unbound_variable s -> fprintf ppf "Unbound variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
-  | `NotVar  -> fprintf ppf "Unexpected pattern, expected variable'"
+  | `NotVar -> fprintf ppf "Unexpected pattern, expected variable'"
   | `NotStrItem -> fprintf ppf "Unexpected structure item, expected let or let rec"
   | `Let_rec_lhs -> fprintf ppf "Left-hand side of let rec should be a variable"
 ;;
@@ -503,7 +503,7 @@ let infer_str_item env = function
           let* s, t = infer_exp initial_env exp in
           match pat with
           | PVar x -> return ((x, s, t) :: acc_subst_types)
-          | _ -> fail (`NotVar))
+          | _ -> fail `NotVar)
         ~init:(return [])
         bindings
     in
@@ -544,22 +544,21 @@ let infer_str_item env = function
   | SEval e ->
     let* _, _ = infer_exp env e in
     return env
-  | _ -> fail (`NotStrItem)
+  | _ -> fail `NotStrItem
 ;;
 
 let start_env =
   let bin_op_list =
-    [ "+", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
-    ; "-", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
-    ; "/", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
-    ; "*", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
-    ; "<", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; ">", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; "<=", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; ">=", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; "<>", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; "=", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
-    ; "==", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    [ "( + )", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
+    ; "( - )", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
+    ; "( / )", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
+    ; "( * )", TArrow (TPrim "int", TArrow (TPrim "int", TPrim "int"))
+    ; "( < )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( > )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( <= )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( >= )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( <> )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( = )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
     ; "print_int", TArrow (TPrim "int", TPrim "unit")
     ]
   in

@@ -257,7 +257,7 @@ let op_starts_with s =
 
 let parse_op start =
   let* op = op_starts_with start in
-  return (fun e1 e2 -> EApply (EApply (EVar op, e1), e2))
+  return (fun e1 e2 -> EApply (EApply (EVar ("( " ^ op ^ " )"), e1), e2))
 ;;
 
 let pmul = parse_op "*"

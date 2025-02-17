@@ -15,7 +15,7 @@ let%expect_test "nested annotations for multiple args" =
         [((PVar "f"),
           (EFun ((PConstraint ((PConstraint ((PVar "x"), AInt)), AInt)),
              (EFun ((PConstraint ((PConstraint ((PVar "y"), AInt)), AInt)),
-                (EApply ((EApply ((EVar "+"), (EVar "x"))), (EVar "y")))))
+                (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EVar "y")))))
              )))
           ]
         ))
@@ -68,9 +68,12 @@ let%expect_test "binary operators precedence check" =
           (EFun ((PVar "b"),
              (EFun ((PVar "c"),
                 (EApply (
-                   (EApply ((EVar "||"),
-                      (EApply ((EApply ((EVar "&&"), (EVar "a"))), (EVar "b"))))),
-                   (EApply ((EApply ((EVar "&&"), (EVar "b"))), (EVar "c")))))
+                   (EApply ((EVar "( || )"),
+                      (EApply ((EApply ((EVar "( && )"), (EVar "a"))), (EVar "b")
+                         ))
+                      )),
+                   (EApply ((EApply ((EVar "( && )"), (EVar "b"))), (EVar "c")))
+                   ))
                 ))
              )))
           ]
@@ -96,17 +99,17 @@ let%expect_test "mutual let bindings" =
         [((PVar "f"),
           (EFun ((PVar "x"),
              (EFun ((PVar "y"),
-                (EApply ((EApply ((EVar "+"), (EVar "x"))), (EVar "y")))))
+                (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EVar "y")))))
              )));
           ((PVar "g"),
            (EFun ((PVar "x"),
               (EFun ((PVar "y"),
-                 (EApply ((EApply ((EVar "-"), (EVar "x"))), (EVar "y")))))
+                 (EApply ((EApply ((EVar "( - )"), (EVar "x"))), (EVar "y")))))
               )));
           ((PVar "h"),
            (EFun ((PVar "x"),
               (EFun ((PVar "y"),
-                 (EApply ((EApply ((EVar "*"), (EVar "x"))), (EVar "y")))))
+                 (EApply ((EApply ((EVar "( * )"), (EVar "x"))), (EVar "y")))))
               )))
           ]
         ))
@@ -123,10 +126,12 @@ let%expect_test "mutual let bindings" =
     [(SValue (Rec,
         [((PVar "f"),
           (EFun ((PVar "x"),
-             (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))));
+             (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EConst (CInt 1))))
+             )));
           ((PVar "g"),
            (EFun ((PVar "x"),
-              (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))))
+              (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EConst (CInt 1))))
+              )))
           ]
         ))
       ] |}]
@@ -190,12 +195,12 @@ let%expect_test "factorial with fix" =
            (EFun ((PVar "fac"),
               (EFun ((PVar "n"),
                  (EIf (
-                    (EApply ((EApply ((EVar "="), (EVar "n"))), (EConst (CInt 1))
-                       )),
+                    (EApply ((EApply ((EVar "( = )"), (EVar "n"))),
+                       (EConst (CInt 1)))),
                     (EConst (CInt 1)),
-                    (EApply ((EApply ((EVar "*"), (EVar "n"))),
+                    (EApply ((EApply ((EVar "( * )"), (EVar "n"))),
                        (EApply ((EVar "fac"),
-                          (EApply ((EApply ((EVar "-"), (EVar "n"))),
+                          (EApply ((EApply ((EVar "( - )"), (EVar "n"))),
                              (EConst (CInt 1))))
                           ))
                        ))
@@ -217,7 +222,8 @@ let%expect_test "if then else" =
           [((PVar "n"),
             (EFun ((PVar "y"),
                (EIf (
-                  (EApply ((EApply ((EVar ">"), (EVar "y"))), (EConst (CInt 0)))),
+                  (EApply ((EApply ((EVar "( > )"), (EVar "y"))), (EConst (CInt 0))
+                     )),
                   (EConst (CInt 1)), (EConst (CInt 2))))
                )))
             ]
@@ -235,11 +241,12 @@ let%expect_test "factorial" =
         [((PVar "fac"),
           (EFun ((PVar "n"),
              (EIf (
-                (EApply ((EApply ((EVar "<"), (EVar "n"))), (EConst (CInt 2)))),
+                (EApply ((EApply ((EVar "( < )"), (EVar "n"))), (EConst (CInt 2))
+                   )),
                 (EConst (CInt 1)),
-                (EApply ((EApply ((EVar "*"), (EVar "n"))),
+                (EApply ((EApply ((EVar "( * )"), (EVar "n"))),
                    (EApply ((EVar "fac"),
-                      (EApply ((EApply ((EVar "-"), (EVar "n"))),
+                      (EApply ((EApply ((EVar "( - )"), (EVar "n"))),
                          (EConst (CInt 1))))
                       ))
                    ))
@@ -267,7 +274,8 @@ let%expect_test "several let bindings" =
             (ELet (Nonrec,
                ((PVar "g"),
                 (EFun ((PVar "x"),
-                   (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1))))
+                   (EApply ((EApply ((EVar "( + )"), (EVar "x"))),
+                      (EConst (CInt 1))))
                    ))),
                (EVar "g"))))
             ]
@@ -278,7 +286,7 @@ let%expect_test "several let bindings" =
                 (EMatch ((EVar "l"),
                    [((PConst CNil), (EConst (CInt 0)));
                      ((PCons (PAny, (PVar "xs"))),
-                      (EApply ((EApply ((EVar "+"), (EConst (CInt 1)))),
+                      (EApply ((EApply ((EVar "( + )"), (EConst (CInt 1)))),
                          (EApply ((EVar "len"), (EVar "xs"))))))
                      ]
                    ))
@@ -303,7 +311,8 @@ let%expect_test "more complex let bindings" =
              ((PVar "f"),
               (EApply (
                  (EFun ((PVar "x"),
-                    (EApply ((EApply ((EVar "+"), (EVar "x"))), (EConst (CInt 1))))
+                    (EApply ((EApply ((EVar "( + )"), (EVar "x"))),
+                       (EConst (CInt 1))))
                     )),
                  (EConst (CInt 123))))),
              (EVar "f"))));
