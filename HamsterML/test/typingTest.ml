@@ -223,6 +223,15 @@ let%test _ =
   = TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13))
 ;;
 
+(* TArrow (TInt, TArrow (TInt, TPVar 13)) *)
+(* + (TPVar 13) => обернуть в ещё одну стрелку последний аргумент *)
+
+(* Есть: TArrow (TInt, TArrow (TInt, TArrow (TPVar 13, TPVar 13))) *)
+(* Должно: TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13)) *)
+
+(* int -> int -> 'a -> 'a*)
+(* int -> (int -> 'a) -> 'a*)
+
 let%test _ =
   infer_expr "let temp = let f = fun x -> x in (f 1, f true)" = TTuple [ TInt; TBool ]
 ;;

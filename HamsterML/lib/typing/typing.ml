@@ -171,6 +171,10 @@ module Subst = struct
     helper t
   ;;
 
+  let apply_list (arg_ts : inf_type list) (subs : t) =
+    List.map arg_ts ~f:(fun arg_t -> apply arg_t subs)
+  ;;
+
   let rec unify t1 t2 =
     (* Returns the substitutions needed to unify types *)
     match t1, t2 with
@@ -504,22 +508,22 @@ module Infer = struct
   ;;
 
   let rec infer_args (env : TypeEnv.t) (ps : Ast.pattern list)
-    : (TypeEnv.t * inf_type) R.t
+    : (TypeEnv.t * inf_type list) R.t
     =
     match ps with
     | [] -> R.fail Unsupported_type
-    | [ p ] -> infer_pattern env p
+    | [ p ] -> infer_pattern env p >>| fun (env, p) -> env, [ p ]
     | p :: ps ->
       let* env, v_t = infer_pattern env p in
       let* env, vs_t = infer_args env ps in
-      R.return (env, TArrow (v_t, vs_t))
+      R.return (env, [ v_t ] @ vs_t)
   ;;
 
   (* 'a -> 'b + int <=> 'a -> 'b -> int *)
-  let rec build_arrow arr end_t =
-    match arr with
-    | TArrow (t1, t2) -> TArrow (t1, build_arrow t2 end_t)
-    | x -> TArrow (x, end_t)
+  let rec build_arrow (typs : inf_type list) (end_t : inf_type) =
+    match typs with
+    | [] -> R.return end_t
+    | hd :: tl -> build_arrow tl end_t >>| fun tl -> TArrow (hd, tl)
   ;;
 
   let infer_expr (env : TypeEnv.t) (expr : Ast.expr) : (Subst.t * inf_type) R.t =
@@ -601,10 +605,11 @@ module Infer = struct
            let* fin_s = Subst.compose_all [ if_s; th_u ] in
            R.return (fin_s, TUnit))
       | Fun (args, expr) ->
-        let* env, args_t = infer_args env args in
+        let* env, arg_ts = infer_args env args in
         let* expr_s, expr_t = helper env expr in
-        let args_t = Subst.apply args_t expr_s in
-        R.return (expr_s, build_arrow args_t expr_t)
+        let arg_ts = Subst.apply_list arg_ts expr_s in
+        let* res_t = build_arrow arg_ts expr_t in
+        R.return (expr_s, res_t)
       | Let (Nonrecursive, (name, args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
           match args with
@@ -619,10 +624,10 @@ module Infer = struct
             R.return (env, subs, expr_t)
           (* let f x y = x + y *)
           | args ->
-            let* arg_env, args_t = infer_args env args in
+            let* arg_env, arg_ts = infer_args env args in
             let* expr_s, expr_t = helper arg_env expr in
-            let args_t = Subst.apply args_t expr_s in
-            let res_t = build_arrow args_t expr_t in
+            let arg_ts = Subst.apply_list arg_ts expr_s in
+            let* res_t = build_arrow arg_ts expr_t in
             let env = TypeEnv.generalize_pattern name res_t env in
             R.return (env, expr_s, res_t)
         in
@@ -660,10 +665,10 @@ module Infer = struct
           | args ->
             (* extend env with id *)
             let* env, _ = infer_pattern env name in
-            let* arg_env, args_t = infer_args env args in
+            let* arg_env, arg_ts = infer_args env args in
             let* expr_s, expr_t = helper arg_env expr in
-            let args_t = Subst.apply args_t expr_s in
-            let res_t = build_arrow args_t expr_t in
+            let arg_ts = Subst.apply_list arg_ts expr_s in
+            let* res_t = build_arrow arg_ts expr_t in
             let env = TypeEnv.generalize_pattern name res_t env in
             R.return (env, expr_s, res_t)
         in
@@ -712,21 +717,21 @@ module Infer = struct
     helper env expr
   ;;
 
-  (* let infer_prog (env : TypeEnv.t) (prog : Ast.prog) : (Subst.t * inf_type) list R.t =
-    let rec helper (acc : (Subst.t * inf_type) list) (env : TypeEnv.t) = function
-      | expr :: tl ->
-        let* subs, typ = infer_expr env expr in
-        let env = TypeEnv.apply subs env in
-        helper ([ subs, typ ] @ acc) env tl
-      | [] -> R.return acc
-    in
+  (* let infer_prog (env : TypeEnv.t) (prog : Ast.prog) : inf_type list R.t =
     match prog with
     | [] -> R.fail Empty_program
     | hd :: tl ->
-      let* subs, typ = infer_expr env hd in
-      let env = TypeEnv.apply subs env in
-      let* h_list = helper [ subs, typ ] env tl in
-      R.return (List.rev h_list)
-  ;;
-  *)
+      let* _, t_lst =
+        R.fold
+          tl
+          ~init:(infer_expr env hd >>= fun (s, t) -> R.return (s, [ t ]))
+          ~f:(fun (s, t) e ->
+            let env = TypeEnv.apply s env in
+            infer_expr env e
+            >>= fun (new_s, new_t) ->
+            let* new_s = Subst.compose new_s s in
+            R.return (new_s, [ new_t ] @ t))
+      in
+      R.return t_lst
+  ;; *)
 end
