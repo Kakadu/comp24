@@ -4,11 +4,17 @@
 
 type var_id = int
 
+val pp_var_id : Format.formatter -> var_id -> unit
+val show_var_id : var_id -> string
+val equal_var_id : var_id -> var_id -> bool
+
 type ground =
   | TInt
   | TBool
   | TUnit
 
+val pp_ground : Format.formatter -> ground -> unit
+val show_ground : ground -> string
 val equal_ground : ground -> ground -> bool
 
 type ty =
@@ -17,6 +23,10 @@ type ty =
   | TArrow of ty * ty
   | TTuple of ty * ty * ty list
   | TList of ty
+
+val pp_ty : Format.formatter -> ty -> unit
+val show_ty : ty -> string
+val equal_ty : ty -> ty -> bool
 
 type error =
   [ `Arg_num_mismatch of Ast.pattern * ty
@@ -43,4 +53,3 @@ val dummy_ty : ty
 val arg1 : ty
 val arg2 : ty
 val arg3 : ty
-val equal_ty : ty -> ty -> bool

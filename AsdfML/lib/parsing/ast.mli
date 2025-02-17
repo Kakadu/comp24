@@ -7,11 +7,11 @@ val gen_id : string QCheck.Gen.t
 
 type id = string
 
-val equal_id : id -> id -> bool
 val pp_id : Format.formatter -> id -> unit
 val show_id : id -> string
 val gen_id : string QCheck.Gen.t
 val arb_id : string QCheck.arbitrary
+val equal_id : id -> id -> bool
 
 type rec_flag =
   | Rec
@@ -21,6 +21,7 @@ val pp_rec_flag : Format.formatter -> rec_flag -> unit
 val show_rec_flag : rec_flag -> string
 val gen_rec_flag : rec_flag QCheck.Gen.t
 val arb_rec_flag : rec_flag QCheck.arbitrary
+val equal_rec_flag : rec_flag -> rec_flag -> bool
 
 type constant =
   | CInt of int
@@ -32,6 +33,7 @@ val pp_constant : Format.formatter -> constant -> unit
 val show_constant : constant -> string
 val gen_constant : constant QCheck.Gen.t
 val arb_constant : constant QCheck.arbitrary
+val equal_constant : constant -> constant -> bool
 
 type type_ann =
   | TAInt
@@ -47,6 +49,7 @@ val gen_type_ann_sized : int -> type_ann QCheck.Gen.t
 val gen_type_ann : type_ann QCheck.Gen.t
 val arb_type_ann_sized : int -> type_ann QCheck.arbitrary
 val arb_type_ann : type_ann QCheck.arbitrary
+val equal_type_ann : type_ann -> type_ann -> bool
 
 type pattern =
   | PConst of constant
@@ -59,6 +62,7 @@ type pattern =
 
 val pp_pattern : Format.formatter -> pattern -> unit
 val show_pattern : pattern -> string
+val equal_pattern : pattern -> pattern -> bool
 val gen_pattern_sized : int -> pattern QCheck.Gen.t
 val gen_pattern : pattern QCheck.Gen.t
 val arb_pattern_sized : int -> pattern QCheck.arbitrary
@@ -89,6 +93,8 @@ val arb_expr_sized : int -> expr QCheck.arbitrary
 val arb_definition_sized : int -> definition QCheck.arbitrary
 val arb_expr : expr QCheck.arbitrary
 val arb_definition : definition QCheck.arbitrary
+val equal_expr : expr -> expr -> bool
+val equal_definition : definition -> definition -> bool
 
 type program = definition list
 
@@ -96,6 +102,7 @@ val pp_program : Format.formatter -> program -> unit
 val show_program : program -> string
 val gen_program : definition list QCheck.Gen.t
 val arb_program : definition list QCheck.arbitrary
+val equal_program : program -> program -> bool
 val p_const : constant -> pattern
 val p_wild : pattern
 val p_ident : id -> pattern

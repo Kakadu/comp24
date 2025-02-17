@@ -15,19 +15,19 @@ let gen_id =
   id >>= fun id_ -> if is_keyword id_ then id else return id_
 ;;
 
-type id = (string[@gen gen_id]) [@@deriving eq, show { with_path = false }, qcheck]
+type id = (string[@gen gen_id]) [@@deriving eq, show { with_path = false }, qcheck, eq]
 
 type rec_flag =
   | Rec (** recursive *)
   | NonRec (** non-recursive *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 type constant =
   | CInt of int (** 42 *)
   | CBool of bool (** true | false *)
   | CUnit (** () *)
   | CNil (** [] *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 type type_ann =
   | TAInt (** int *)
@@ -42,7 +42,7 @@ type type_ann =
       (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** int -> bool *)
   | TAList of (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** %type% list *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 type pattern =
   | PConst of constant
@@ -61,7 +61,7 @@ type pattern =
   | PAnn of
       (pattern[@gen Gen.(gen_pattern_sized (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))]) (** (x: int) *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 type expr =
   | EConst of constant (** 42, true, ()*)
@@ -92,17 +92,17 @@ type expr =
                (2 -- 4)
                (pair (gen_pattern_sized (n / div)) (gen_expr_sized (n / div)))))])
   (** match x with ... *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 and definition =
   | DLet of
       rec_flag
       * (pattern[@gen gen_pattern_sized (n / div)])
       * (expr[@gen gen_expr_sized (n / div)]) (** let (rec)? x = y *)
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 type program = (definition list[@gen Gen.(list_size (1 -- 3) gen_definition)])
-[@@deriving show { with_path = false }, qcheck]
+[@@deriving show { with_path = false }, qcheck, eq]
 
 let p_const c = PConst c
 let p_wild = PWild

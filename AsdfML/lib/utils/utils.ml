@@ -22,10 +22,3 @@ let set_to_string xs =
 ;;
 
 let list_to_string xs = xs |> String.concat ~sep:"; " |> Format.asprintf "[%s]"
-
-let foldi_right list ~init ~f =
-  let len = List.length list - 1 in
-  snd (List.fold_right list ~init:(len, init) ~f:(fun v (i, acc) -> i - 1, f i acc v))
-;;
-
-let index_list list = List.mapi list ~f:(fun i v -> i, v)

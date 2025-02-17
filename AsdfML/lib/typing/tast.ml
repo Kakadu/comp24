@@ -17,12 +17,12 @@ type texpr =
   | TETuple of ty * texpr * texpr * texpr list
   | TEList of ty * texpr list
   | TEMatch of ty * texpr * (pattern * texpr) list
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, eq]
 
 and tdefinition = TDLet of ty * Ast.rec_flag * pattern * texpr
 [@@deriving show { with_path = false }]
 
-type tprogram = tdefinition list [@@deriving show { with_path = false }]
+type tprogram = tdefinition list [@@deriving show { with_path = false }, eq]
 
 let te_const t c = TEConst (t, c)
 let te_var t x = TEVar (t, x)
