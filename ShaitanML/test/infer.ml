@@ -11,17 +11,16 @@ let%expect_test "function with narrowing type annotation" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val f : int -> int
     val print_int : int -> unit
     |}]
@@ -33,17 +32,16 @@ let%expect_test "annotation for rec" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val print_int : int -> unit
     val x : int
     |}]
@@ -55,17 +53,16 @@ let%expect_test "list pattern in let" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val a : int
     val b : int list
     val print_int : int -> unit
@@ -78,17 +75,16 @@ let%expect_test "nested annotation" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val f : int
     val print_int : int -> unit
     |}]
@@ -108,17 +104,16 @@ let%expect_test "simple annotation" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val print_int : int -> unit
     val x : int
     |}]
@@ -130,18 +125,17 @@ let%expect_test "fixed point combinator" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
-    val fix : (('2 -> '3) -> '2 -> '3) -> '2 -> '3
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
+    val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
     val print_int : int -> unit
     |}]
 ;;
@@ -157,18 +151,17 @@ let%expect_test "list folding" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
-    val fold_left : ('4 -> '5 -> '4) -> '4 -> '5 list -> '4
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
+    val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
     val print_int : int -> unit
     |}]
 ;;
@@ -179,17 +172,16 @@ let%expect_test "complex tuple" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val f : int -> int -> int * int list
     val print_int : int -> unit
     |}]
@@ -201,18 +193,17 @@ let%expect_test "tuple of functions" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
-    val fs : ('0 -> '0) * (int -> int -> int)
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
+    val fs : ('a -> 'a) * (int -> int -> int)
     val print_int : int -> unit
     |}]
 ;;
@@ -233,17 +224,16 @@ let%expect_test "inner let expr" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
     val f : int -> int
     val print_int : int -> unit
     |}]
@@ -255,18 +245,17 @@ let%expect_test "multiple args as functions" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
-    val f : ('1 -> '2 -> '3 -> '4 -> '5) -> '1 -> '2 -> '3 -> '4 -> '5
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
+    val f : ('a -> 'b -> 'c -> 'd -> 'e) -> 'a -> 'b -> 'c -> 'd -> 'e
     val print_int : int -> unit
     |}]
 ;;
@@ -285,18 +274,17 @@ let%expect_test "cps function" =
      |};
   [%expect
     {|
-    val * : int -> int -> int
-    val + : int -> int -> int
-    val - : int -> int -> int
-    val / : int -> int -> int
-    val < : '1 -> '1 -> bool
-    val <= : '1 -> '1 -> bool
-    val <> : '1 -> '1 -> bool
-    val = : '1 -> '1 -> bool
-    val == : '1 -> '1 -> bool
-    val > : '1 -> '1 -> bool
-    val >= : '1 -> '1 -> bool
-    val map_cps : ('6 -> '8) -> '6 list -> '8 list
+    val ( * ) : int -> int -> int
+    val ( + ) : int -> int -> int
+    val ( - ) : int -> int -> int
+    val ( / ) : int -> int -> int
+    val ( < ) : 'a -> 'a -> bool
+    val ( <= ) : 'a -> 'a -> bool
+    val ( <> ) : 'a -> 'a -> bool
+    val ( = ) : 'a -> 'a -> bool
+    val ( > ) : 'a -> 'a -> bool
+    val ( >= ) : 'a -> 'a -> bool
+    val map_cps : ('a -> 'b) -> 'a list -> 'b list
     val print_int : int -> unit
     |}]
 ;;
