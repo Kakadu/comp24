@@ -621,38 +621,29 @@ module Infer = struct
                let expr_t = Subst.apply expr_t subs in
                let env = TypeEnv.generalize_pattern name expr_t env in
                R.return (env, subs, expr_t)
-             (* (match scope with
-                | None -> R.return (subs, expr_t)
-                (* IN <scope> *)
-                | Some scope ->
-                  let* scope_s, scope_t = helper env scope in
-                  let* subs = Subst.compose subs scope_s in
-                  R.return (subs, scope_t)) *)
              (* let f x y = x + y *)
              | args ->
                let* arg_env, args_t = infer_args env args in
                let* expr_s, expr_t = helper arg_env expr in
                let args_t = Subst.apply args_t expr_s in
-               let env =
-                 TypeEnv.generalize_pattern name (build_arrow args_t expr_t) env
-               in
-               R.return (env, expr_s, expr_t)
-             (* (match scope with
-                | None -> R.return (expr_s, build_arrow args_t expr_t)
-                (* IN <scope> *)
-                | Some scope ->
-                  let* scope_s, scope_t = helper env scope in
-                  R.return (scope_s, scope_t)) *)
+               let res_t = build_arrow args_t expr_t in
+               let env = TypeEnv.generalize_pattern name res_t env in
+               R.return (env, expr_s, res_t)
            in
-            let* env, fst_s, fst_e = infer_bind env (name, args, expr) in
-            
-
+           let* env, subs, typ =
+             R.fold
+               tl
+               ~init:(infer_bind env name args expr)
+               ~f:(fun (env, _, _) (name, args, expr) -> infer_bind env name args expr)
+           in
            (match scope with
-            | None -> R.return (expr_s, build_arrow args_t expr_t)
-            (* IN <scope> *)
+            (* let f x y = x + y *)
+            | None -> R.return (subs, typ)
+            (* let a = 10 and b = 20 in a + b *)
             | Some scope ->
               let* scope_s, scope_t = helper env scope in
-              R.return (scope_s, scope_t)))
+              let* subs = Subst.compose subs scope_s in
+              R.return (subs, scope_t)))
       | Application (l_app, r_app) ->
         let* l_app_s, l_app_t = helper env l_app in
         let* r_app_s, r_app_t = helper (TypeEnv.apply l_app_s env) r_app in
