@@ -6,11 +6,10 @@ open Ast
 open Typedtree
 open Base
 
-type fresh = int
+type fresh = int [@@deriving eq]
 
 type error =
-  [ `Occurs_check of fresh * ty
-    (** Type variable occurs inside type it must be unified with *)
+  [ `Occurs_check (** Type variable occurs inside type it must be unified with *)
   | `Unbound_variable of id (** Unbound variable *)
   | `Unification_failed of ty * ty (** Failed to unify two types *)
   | `NotVar
@@ -23,8 +22,7 @@ type id = string
 let pp_error ppf : error -> _ =
   let open Stdlib.Format in
   function
-  | `Occurs_check (tv, ty) ->
-    fprintf ppf "Occurs check failed: %d occurs inside %a" tv pp_typ ty
+  | `Occurs_check -> fprintf ppf "Occurs check failed"
   | `Unbound_variable s -> fprintf ppf "Unbound variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
@@ -142,10 +140,7 @@ end = struct
   type t = (fresh, ty, Int.comparator_witness) Map.t
 
   let empty = Map.empty (module Int)
-
-  let mapping k v =
-    if Type.occurs_in k v then fail (`Occurs_check (k, v)) else return (k, v)
-  ;;
+  let mapping k v = if Type.occurs_in k v then fail `Occurs_check else return (k, v)
 
   let singleton k v =
     let* k, v = mapping k v in
@@ -585,8 +580,10 @@ let test_infer s =
   | Ok parsed ->
     (match run_infer parsed with
      | Ok env ->
-       Base.Map.iteri env ~f:(fun ~key ~data:(S (_, ty)) ->
-         printf "val %s : %a\n" key pp_typ ty)
+       Base.Map.iteri env ~f:(fun ~key:v ~data:(S (_, ty)) ->
+         match TypeEnv.find v start_env with
+         | Some (S (_, init_ty)) when Stdlib.(ty = init_ty) -> ()
+         | _ -> Format.printf "val %s: %a\n" v pp_typ ty)
      | Error e -> printf "Infer error: %a\n" pp_error e)
   | Error e -> printf "Parsing error: %s\n" e
 ;;
