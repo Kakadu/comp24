@@ -13,7 +13,8 @@ type error =
     (** Type variable occurs inside type it must be unified with *)
   | `Unbound_variable of id (** Unbound variable *)
   | `Unification_failed of ty * ty (** Failed to unify two types *)
-  | `Unreachable_state of string (** Unreachable state (e.g. empty binding list in let) *)
+  | `NotVar
+  | `NotStrItem
   | `Let_rec_lhs
   ]
 
@@ -27,7 +28,8 @@ let pp_error ppf : error -> _ =
   | `Unbound_variable s -> fprintf ppf "Unbound variable '%s'" s
   | `Unification_failed (l, r) ->
     fprintf ppf "Unification failed on %a and %a" pp_typ l pp_typ r
-  | `Unreachable_state place -> fprintf ppf "Unreachable state: '%s'" place
+  | `NotVar  -> fprintf ppf "Unexpected pattern, expected variable'"
+  | `NotStrItem -> fprintf ppf "Unexpected structure item, expected let or let rec"
   | `Let_rec_lhs -> fprintf ppf "Left-hand side of let rec should be a variable"
 ;;
 
@@ -501,7 +503,7 @@ let infer_str_item env = function
           let* s, t = infer_exp initial_env exp in
           match pat with
           | PVar x -> return ((x, s, t) :: acc_subst_types)
-          | _ -> fail (`Unreachable_state __FUNCTION__))
+          | _ -> fail (`NotVar))
         ~init:(return [])
         bindings
     in
@@ -542,7 +544,7 @@ let infer_str_item env = function
   | SEval e ->
     let* _, _ = infer_exp env e in
     return env
-  | _ -> fail (`Unreachable_state __FUNCTION__)
+  | _ -> fail (`NotStrItem)
 ;;
 
 let start_env =
