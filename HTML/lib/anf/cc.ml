@@ -48,8 +48,9 @@ let ident_to_string (id : ident) : string =
   | IdentOfBaseOp _ -> failwith "base operator is not a variable"
 ;;
 
-let rec bound_vars_pattern ((pat, _) : pattern typed) : string list =
+let rec bound_vars_pattern (pat : pattern) : string list =
   match pat with
+  | PConstraint (p, _) -> bound_vars_pattern p
   | PId s -> [ s ]
   | PTuple (p1, p2, ps) ->
     bound_vars_pattern p1
@@ -59,14 +60,16 @@ let rec bound_vars_pattern ((pat, _) : pattern typed) : string list =
   | PConst _ -> []
 ;;
 
-let pattern_to_string ((pat, ty) : pattern_or_op typed) : string list =
+let rec pattern_to_string (pat : pattern_or_op) : string list =
   match pat with
-  | POpPat p -> bound_vars_pattern (p, ty)
+  | POpPat p -> bound_vars_pattern p
   | POpOp s -> [ s ]
+  | POrOpConstraint (p, _) -> pattern_to_string p
 ;;
 
-let rec free_vars_expr (global_env : StringSet.t) ((e, _) : expr typed) : StringSet.t =
+let rec free_vars_expr (global_env : StringSet.t) (e : expr) : StringSet.t =
   match e with
+  | EConstraint (e, _) -> free_vars_expr global_env e
   | EConst _ -> StringSet.empty
   | EId id ->
     (match id with
@@ -120,7 +123,7 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
   | DLet (_, (pat_or_op, expr)) ->
     let bound =
       match pat_or_op with
-      | POpPat (PId s), _ -> StringSet.singleton s
+      | POpPat (PId s) | POrOpConstraint (POpPat (PId s), _) -> StringSet.singleton s
       | _ -> StringSet.empty
     in
     bound, free_vars_expr (StringSet.union bound env) expr
@@ -129,9 +132,9 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
     let lbs = lb :: lb2 :: lbs in
     let all_pats =
       List.filter_map
-        (fun ((pat_or_op, _), _) ->
+        (fun (pat_or_op, _) ->
           match pat_or_op with
-          | POpPat (PId s) -> Some s
+          | POpPat (PId s) | POrOpConstraint (POpPat (PId s), _) -> Some s
           | _ -> None)
         lbs
     in
@@ -143,70 +146,66 @@ and free_vars_decl env (d : decl) : StringSet.t * StringSet.t =
     bound, free_all
 ;;
 
-let pattern_of_free_vars (fv : string list) : pattern typed =
+let pattern_of_free_vars (fv : string list) : pattern =
   match fv with
-  | [] -> PConst CUnit, None
-  | [ x ] -> PId x, None
+  | [] -> PConst CUnit
+  | [ x ] -> PId x
   | x :: y :: rest ->
-    let p1 = PId x, None in
-    let p2 = PId y, None in
-    let rest_pats = List.map (fun v -> PId v, None) rest in
-    PTuple (p1, p2, rest_pats), None
+    let p1 = PId x in
+    let p2 = PId y in
+    let rest_pats = List.map (fun v -> PId v) rest in
+    PTuple (p1, p2, rest_pats)
 ;;
 
 let rec get_efun_args_body local_env = function
-  | EFun (pat, e), _ -> get_efun_args_body (bound_vars_pattern pat @ local_env) e
+  | EFun (pat, e) -> get_efun_args_body (bound_vars_pattern pat @ local_env) e
   | expr -> local_env, expr
 ;;
 
 let rec replace_fun_body body = function
-  | EFun (pat, e), ty -> EFun (pat, replace_fun_body body e), ty
+  | EFun (pat, e) -> EFun (pat, replace_fun_body body e)
   | _ -> body
 ;;
 
-let rec subst_eid ((e, t) : expr typed) (subst : (string * expr typed) list) : expr typed =
+let rec subst_eid (e : expr) (subst : (string * expr) list) : expr =
   match e with
-  | EConst _ -> e, t
+  | EConstraint (e, t) -> EConstraint (subst_eid e subst, t)
+  | EConst _ -> e
   | EId id ->
     (match id with
      | IdentOfDefinable _ ->
        let name = ident_to_string id in
        (try List.assoc name subst with
-        | Not_found -> e, t)
-     | IdentOfBaseOp _ -> e, t)
+        | Not_found -> e)
+     | IdentOfBaseOp _ -> e)
   | EFun (pat, body) ->
     let bound = bound_vars_pattern pat in
     let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
-    EFun (pat, subst_eid body subst'), t
-  | EApp (e1, e2) -> EApp (subst_eid e1 subst, subst_eid e2 subst), t
-  | EIf (e1, e2, e3) ->
-    EIf (subst_eid e1 subst, subst_eid e2 subst, subst_eid e3 subst), t
-  | EList (e1, e2) -> EList (subst_eid e1 subst, subst_eid e2 subst), t
+    EFun (pat, subst_eid body subst')
+  | EApp (e1, e2) -> EApp (subst_eid e1 subst, subst_eid e2 subst)
+  | EIf (e1, e2, e3) -> EIf (subst_eid e1 subst, subst_eid e2 subst, subst_eid e3 subst)
+  | EList (e1, e2) -> EList (subst_eid e1 subst, subst_eid e2 subst)
   | ETuple (e1, e2, es) ->
-    ( ETuple
-        (subst_eid e1 subst, subst_eid e2 subst, List.map (fun e -> subst_eid e subst) es)
-    , t )
-  | EClsr (decl, e) -> EClsr (substitute_decl decl subst, subst_eid e subst), t
+    ETuple
+      (subst_eid e1 subst, subst_eid e2 subst, List.map (fun e -> subst_eid e subst) es)
+  | EClsr (decl, e) -> EClsr (substitute_decl decl subst, subst_eid e subst)
   | EMatch (e, br, brs) ->
-    let substitute_branch ((pat, expr) : branch) (subst : (string * expr typed) list)
-      : branch
-      =
+    let substitute_branch ((pat, expr) : branch) (subst : (string * expr) list) : branch =
       let bound = bound_vars_pattern pat in
       let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
       pat, subst_eid expr subst'
     in
-    ( EMatch
-        ( subst_eid e subst
-        , substitute_branch br subst
-        , List.map (fun b -> substitute_branch b subst) brs )
-    , t )
+    EMatch
+      ( subst_eid e subst
+      , substitute_branch br subst
+      , List.map (fun b -> substitute_branch b subst) brs )
 
-and substitute_decl (d : decl) (subst : (string * expr typed) list) : decl =
+and substitute_decl (d : decl) (subst : (string * expr) list) : decl =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     let bound =
       match pat_or_op with
-      | POpPat (PId s), _ -> [ s ]
+      | POpPat (PId s) | POrOpConstraint (POpPat (PId s), _) -> [ s ]
       | _ -> []
     in
     let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
@@ -216,35 +215,38 @@ and substitute_decl (d : decl) (subst : (string * expr typed) list) : decl =
 
 let rec closure_convert_expr
   (global_env : StringSet.t)
-  ((e, t) : expr typed)
+  (e : expr)
   (rec_name : string option)
-  : expr typed cc
+  : expr cc
   =
   match e with
-  | EConst _ | EId _ -> return (e, t)
+  | EConstraint (e, t) ->
+    let* ce = closure_convert_expr global_env e rec_name in
+    return @@ EConstraint (ce, t)
+  | EConst _ | EId _ -> return e
   | EFun (_, _) as efun ->
-    let local_env, body = get_efun_args_body [] (efun, t) in
+    let local_env, body = get_efun_args_body [] efun in
     let new_env = StringSet.union global_env (StringSet.from_list local_env) in
-    let* body' = closure_convert_expr global_env body None in
+    let* body' = closure_convert_expr global_env body rec_name in
     let fv = free_vars_expr new_env body' in
     let fv = StringSet.elements fv in
     let* f_name = fresh_name "fun-" in
     let body'' =
       match rec_name with
       | Some rec_name ->
-        subst_eid body [ rec_name, (EId (IdentOfDefinable (IdentLetters f_name)), None) ]
+        subst_eid body [ rec_name, EId (IdentOfDefinable (IdentLetters f_name)) ]
       | None -> body'
     in
     let new_fun =
-      List.fold_left (fun acc x -> EFun ((PId x, None), acc), None) body'' (local_env @ fv)
+      List.fold_left (fun acc x -> EFun (PId x, acc)) body'' (local_env @ fv)
     in
     let rf = if rec_name = None then Not_recursive else Recursive in
-    let decl = DLet (rf, ((POpPat (PId f_name), None), new_fun)) in
+    let decl = DLet (rf, (POpPat (PId f_name), new_fun)) in
     let* () = tell decl in
-    let new_fun_id = EId (IdentOfDefinable (IdentLetters f_name)), None in
+    let new_fun_id = EId (IdentOfDefinable (IdentLetters f_name)) in
     let applied_fun =
       List.fold_right
-        (fun x acc -> EApp (acc, (EId (IdentOfDefinable (IdentLetters x)), None)), None)
+        (fun x acc -> EApp (acc, EId (IdentOfDefinable (IdentLetters x))))
         fv
         new_fun_id
     in
@@ -252,16 +254,16 @@ let rec closure_convert_expr
   | EApp (e1, e2) ->
     let* ce1 = closure_convert_expr global_env e1 rec_name in
     let* ce2 = closure_convert_expr global_env e2 rec_name in
-    return (EApp (ce1, ce2), t)
+    return (EApp (ce1, ce2))
   | EIf (e1, e2, e3) ->
     let* ce1 = closure_convert_expr global_env e1 rec_name in
     let* ce2 = closure_convert_expr global_env e2 rec_name in
     let* ce3 = closure_convert_expr global_env e3 rec_name in
-    return (EIf (ce1, ce2, ce3), t)
+    return (EIf (ce1, ce2, ce3))
   | EList (e1, e2) ->
     let* ce1 = closure_convert_expr global_env e1 rec_name in
     let* ce2 = closure_convert_expr global_env e2 rec_name in
-    return (EList (ce1, ce2), t)
+    return (EList (ce1, ce2))
   | ETuple (e1, e2, es) ->
     let* ce1 = closure_convert_expr global_env e1 rec_name in
     let* ce2 = closure_convert_expr global_env e2 rec_name in
@@ -273,11 +275,11 @@ let rec closure_convert_expr
         return (cx :: cxs)
     in
     let* ces = convert_list es in
-    return (ETuple (ce1, ce2, ces), t)
+    return (ETuple (ce1, ce2, ces))
   | EClsr (decl, e) ->
     let* cdecl = closure_convert_let_in global_env decl in
     let* ce = closure_convert_expr global_env e rec_name in
-    return (EClsr (cdecl, ce), t)
+    return (EClsr (cdecl, ce))
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let closure_convert_branch env (br : branch) : branch cc =
@@ -295,7 +297,7 @@ let rec closure_convert_expr
         return (cx :: cxs)
     in
     let* cbrs = conv_branches global_env brs in
-    return (EMatch (ce, cbr, cbrs), t)
+    return (EMatch (ce, cbr, cbrs))
 
 (* ugly edge case *)
 (* THINK ABOUT OTHER RECURSIVE CASES TODO *)
