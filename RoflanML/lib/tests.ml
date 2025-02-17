@@ -511,6 +511,11 @@ module TypecheckerTests = struct
     pp_parse_and_infer "let apply (g: int -> int) (x: bool) = g x";
     [%expect {| Failed to unify types int and bool |}]
   ;;
+
+  let%expect_test "mutual recursion occurs check" =
+    pp_parse_and_infer "let rec f x = g and g x = f";
+    [%expect {| The type variable 'a occurs inside 'c -> 'b -> 'a |}]
+  ;;
 end
 
 module CCTests = struct
