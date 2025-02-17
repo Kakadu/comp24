@@ -146,7 +146,7 @@ let parse_bindings pexpr =
 
 (* --- Верхнеуровневые let‑объявления --- *)
 
-let plet_decl_single pexpr =
+let plet_decl pexpr =
   pstoken "let"
   *> lift2
        (fun r bindings ->
@@ -156,8 +156,6 @@ let plet_decl_single pexpr =
        (choice [ pstoken "rec" *> return Rec; return NonRec ])
        (parse_bindings pexpr)
 ;;
-
-let plet_decl pexpr = many1 (plet_decl_single pexpr)
 
 (* --- Локальный let с in (поддерживает только одно связывание) --- *)
 
@@ -259,6 +257,8 @@ let ples = pstoken "<" *> return "<"
 let pleq = pstoken "<=" *> return "<="
 let pgre = pstoken ">" *> return ">"
 let pgeq = pstoken ">=" *> return ">="
+let pand = pstoken "&&" *> return "&&"
+let por = pstoken "||" *> return "||"
 
 let pexpr_fun () =
   fix (fun pexpr ->
@@ -276,7 +276,7 @@ let pexpr_fun () =
       let pe1 = pe_app in
       let pe2 = op_bin pe1 (pmul <|> pdiv) in
       let pe3 = op_bin pe2 (padd <|> psub) in
-      op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre ])
+      op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
     let pe_tuple =
       lift2
@@ -293,7 +293,4 @@ let pexpr_fun () =
 let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-
-let parse =
-  parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces >>| List.concat)
-;;
+let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)

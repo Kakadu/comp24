@@ -138,6 +138,7 @@ let ast_to_str =
         | NonRec -> ""
       in
       sprintf "\nlet%s %s = %s" rec_flag id (expr_to_str e)
+    | DMutualLet _ -> failwith "Not Implemented"
   in
   decl_to_str
 ;;

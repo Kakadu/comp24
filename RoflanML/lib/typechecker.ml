@@ -337,8 +337,8 @@ let infer_pattern : pattern -> (TypeEnv.t * ty, error) Counter_Monad.t =
   helper TypeEnv.empty
 ;;
 
-let infer env ty =
-  let rec helper env = function
+let infer env decl =
+  let rec infer_expr env = function
     | EConst c ->
       (match c with
        | CInt _ -> return (Subst.empty, TBase BInt)
@@ -355,27 +355,27 @@ let infer env ty =
           unify tv arg_ty
       in
       let env2 = TypeEnv.extend env (id, S (VarSet.empty, Subst.apply subst tv)) in
-      let* s, ty = helper env2 e in
+      let* s, ty = infer_expr env2 e in
       let* s = Subst.compose s subst in
       let res_ty = TArrow (Subst.apply s tv, ty) in
       return (s, res_ty)
     | EApp (e1, e2) ->
-      let* subst1, ty1 = helper env e1 in
-      let* subst2, ty2 = helper (TypeEnv.apply env subst1) e2 in
+      let* subst1, ty1 = infer_expr env e1 in
+      let* subst2, ty2 = infer_expr (TypeEnv.apply env subst1) e2 in
       let* tv = fresh_var in
       let* subst3 = unify (Subst.apply subst2 ty1) (TArrow (ty2, tv)) in
       let res_ty = Subst.apply subst3 tv in
       let* final_subst = Subst.compose_all [ subst1; subst2; subst3 ] in
       return (final_subst, res_ty)
     | ETuple (e1, e2, es) ->
-      let* subst1, ty1 = helper env e1 in
-      let* subst2, ty2 = helper env e2 in
+      let* subst1, ty1 = infer_expr env e1 in
+      let* subst2, ty2 = infer_expr env e2 in
       let* substs, tys =
         Base.List.fold_right
           es
           ~init:(return ([], []))
           ~f:(fun e acc ->
-            let* subst, ty = helper env e in
+            let* subst, ty = infer_expr env e in
             let* substs, tys = acc in
             return (subst :: substs, ty :: tys))
       in
@@ -388,9 +388,9 @@ let infer env ty =
          return (Subst.empty, TList tv)
        | h :: tl ->
          let* final_subst, res_ty =
-           Base.List.fold_left tl ~init:(helper env h) ~f:(fun acc e ->
+           Base.List.fold_left tl ~init:(infer_expr env h) ~f:(fun acc e ->
              let* subst, ty = acc in
-             let* subst1, ty1 = helper env e in
+             let* subst1, ty1 = infer_expr env e in
              let* subst2 = unify ty ty1 in
              let* final_subst = Subst.compose_all [ subst; subst1; subst2 ] in
              let res_ty = Subst.apply final_subst ty in
@@ -398,34 +398,34 @@ let infer env ty =
          in
          return (final_subst, TList res_ty))
     | EBranch (c, t, f) ->
-      let* subst1, ty1 = helper env c in
-      let* subst2, ty2 = helper env t in
-      let* subst3, ty3 = helper env f in
+      let* subst1, ty1 = infer_expr env c in
+      let* subst2, ty2 = infer_expr env t in
+      let* subst3, ty3 = infer_expr env f in
       let* subst4 = unify ty1 (TBase BBool) in
       let* subst5 = unify ty2 ty3 in
       let* final_subst = Subst.compose_all [ subst1; subst2; subst3; subst4; subst5 ] in
       return (final_subst, Subst.apply subst5 ty3)
     | ELetIn (NonRec, x, e1, e2) ->
-      let* subst1, ty1 = helper env e1 in
+      let* subst1, ty1 = infer_expr env e1 in
       let env2 = TypeEnv.apply env subst1 in
       let ty2 = generalize env2 ty1 in
       let env3 = TypeEnv.extend env2 (x, ty2) in
-      let* subst2, ty3 = helper env3 e2 in
+      let* subst2, ty3 = infer_expr env3 e2 in
       let* final_subst = Subst.compose subst1 subst2 in
       return (final_subst, ty3)
     | ELetIn (Rec, x, e1, e2) ->
       let* tv = fresh_var in
       let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
-      let* subst1, ty1 = helper env e1 in
+      let* subst1, ty1 = infer_expr env e1 in
       let* subst2 = unify (Subst.apply subst1 tv) ty1 in
       let* subst = Subst.compose subst1 subst2 in
       let env = TypeEnv.apply env subst in
       let ty2 = generalize env (Subst.apply subst tv) in
-      let* subst2, ty2 = helper TypeEnv.(extend (apply env subst) (x, ty2)) e2 in
+      let* subst2, ty2 = infer_expr TypeEnv.(extend (apply env subst) (x, ty2)) e2 in
       let* final_subst = Subst.compose subst subst2 in
       return (final_subst, ty2)
     | EMatch (c, cases) ->
-      let* c_subst, c_ty = helper env c in
+      let* c_subst, c_ty = infer_expr env c in
       let* tv = fresh_var in
       let* e_subst, e_ty =
         Base.List.fold_left
@@ -439,7 +439,7 @@ let infer env ty =
                 TypeEnv.extend acc (key, data))
             in
             let* subst2 = unify c_ty pat_ty in
-            let* subst3, e_ty = helper pat_env e in
+            let* subst3, e_ty = infer_expr pat_env e in
             let* subst4 = unify ty e_ty in
             let* final_subst = Subst.compose_all [ subst; subst2; subst3; subst4 ] in
             return (final_subst, Subst.apply final_subst ty))
@@ -448,32 +448,63 @@ let infer env ty =
       return (final_subst, Subst.apply final_subst e_ty)
   in
   let infer_decl env = function
-    | DLet (NonRec, _, e) -> helper env e
+    | DLet (NonRec, _, e) ->
+      let* subst, ty = infer_expr env e in
+      return (subst, [ ty ])
     | DLet (Rec, x, e) ->
       let* tv = fresh_var in
       let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
-      let* subst1, ty1 = helper env e in
+      let* subst1, ty1 = infer_expr env e in
       let* subst2 = unify (Subst.apply subst1 tv) ty1 in
       let* final_subst = Subst.compose subst1 subst2 in
-      return (final_subst, Subst.apply final_subst tv)
+      return (final_subst, [ Subst.apply final_subst tv ])
+    | DMutualLet (_, decls) ->
+      let* env =
+        Base.List.fold decls ~init:(return env) ~f:(fun env (x, _) ->
+          let* env = env in
+          let* tv = fresh_var in
+          return (TypeEnv.extend env (x, S (VarSet.empty, tv))))
+      in
+      let* subst, _, tys =
+        Base.List.fold_right
+          decls
+          ~init:(return (Subst.empty, env, []))
+          ~f:(fun (id, e) acc ->
+            let* subst, env, tys = acc in
+            let* subst1, ty1 = infer_expr env e in
+            let (S (_, ty)) = Base.Map.find_exn env id in
+            let* subst2 = unify (Subst.apply subst1 ty) ty1 in
+            let* subst = Subst.compose_all [ subst; subst1; subst2 ] in
+            let env = TypeEnv.apply env subst in
+            let ty = Subst.apply subst ty in
+            return (subst, env, ty :: tys))
+      in
+      return (subst, tys)
   in
   let* env = create_base_env ~env in
-  infer_decl env ty
+  infer_decl env decl
 ;;
 
 let run_infer ?(env = TypeEnv.empty) e = Result.map snd (run (infer env e))
 
 let check_program env prog =
   let check_decl env decl =
-    let* _, ty = infer env decl in
-    match decl with
-    | DLet (_, id, _) ->
+    let* _, tys = infer env decl in
+    match decl, tys with
+    | DLet (_, id, _), [ ty ] ->
       let env = TypeEnv.extend env (id, Scheme.S (VarSet.empty, ty)) in
-      return (env, ty)
+      return env
+    | DMutualLet (_, decls), tys ->
+      let env =
+        Base.List.fold2_exn decls tys ~init:env ~f:(fun env (id, _) ty ->
+          TypeEnv.extend env (id, Scheme.S (VarSet.empty, ty)))
+      in
+      return env
+    | _ -> fail NotReachable
   in
   Base.List.fold_left prog ~init:(return env) ~f:(fun env e ->
     let* env = env in
-    let* env, _ = check_decl env e in
+    let* env = check_decl env e in
     return env)
 ;;
 

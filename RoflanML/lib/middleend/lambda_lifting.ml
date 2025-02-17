@@ -73,10 +73,10 @@ let lift decl =
       let renames = Map.update renames id ~f:(fun _ -> new_name) in
       let* e2, lifted = lift_expr e2 lifted renames in
       return (e2, lifted)
-    | ELetIn (is_rec, id, e1, e2) ->
+    | ELetIn (_, id, e1, e2) ->
       let* e1, lifted = lift_expr e1 lifted renames in
       let* e2, lifted = lift_expr e2 lifted renames in
-      return (LLLetIn (is_rec, id, e1, e2), lifted)
+      return (LLLetIn (id, e1, e2), lifted)
     | EFun _ as f ->
       let args, e = uncurry f in
       let* new_name = gen_name in
@@ -97,6 +97,7 @@ let lift decl =
     | DLet (is_rec, id, e) ->
       let* e, lifted = lift_expr e lifted renames in
       return (LLDLet (is_rec, id, [], e), lifted)
+    | DMutualLet _ -> failwith "Not Implemented"
   in
   lift_decl decl [] (Map.empty (module String))
 ;;

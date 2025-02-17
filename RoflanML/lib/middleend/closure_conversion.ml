@@ -158,6 +158,7 @@ let close e env =
       let f = closure_fun f free in
       DLet (is_rec, id, f)
     | DLet (is_rec, id, e) -> DLet (is_rec, id, close_expr e free_vars env)
+    | DMutualLet _ -> failwith "Not Implemented"
   in
   close_decl e (Map.empty (module String)) env
 ;;
@@ -168,7 +169,8 @@ let close_program prog env =
       match decl with
       | DLet (_, id, _) ->
         let e = close decl env in
-        e :: closed, Set.add env id)
+        e :: closed, Set.add env id
+      | DMutualLet _ -> failwith "Not Implemented")
   in
   List.rev prog
 ;;
