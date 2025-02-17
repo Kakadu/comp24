@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-type binder = int
+type binder = int [@@deriving eq, show]
 
 type ty =
   | TPrim of string (** int, string *)
@@ -10,6 +10,7 @@ type ty =
   | TArrow of ty * ty (** Function type *)
   | TTuple of ty list (** Tuple type *)
   | TList of ty (** List type *)
+[@@deriving eq, show]
 
 let arrow l r = TArrow (l, r)
 let int_typ = TPrim "int"
