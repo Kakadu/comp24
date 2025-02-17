@@ -511,7 +511,7 @@ module Infer = struct
     : (TypeEnv.t * inf_type list) R.t
     =
     match ps with
-    | [] -> R.fail Unsupported_type
+    | [] -> R.return (env, [])
     | [ p ] -> infer_pattern env p >>| fun (env, p) -> env, [ p ]
     | p :: ps ->
       let* env, v_t = infer_pattern env p in
@@ -612,26 +612,18 @@ module Infer = struct
         R.return (expr_s, res_t)
       | Let (Nonrecursive, (name, args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
-          match args with
-          (* let a,b = 1,2 *)
-          | [] ->
-            let* expr_s, expr_t = helper env expr in
-            let* env, name_t = infer_pattern env name in
-            let* u = Subst.unify name_t expr_t in
-            let* subs = Subst.compose u expr_s in
-            let expr_t = Subst.apply expr_t subs in
-            let env = TypeEnv.generalize_pattern name expr_t env in
-            R.return (env, subs, expr_t)
-          (* let f x y = x + y *)
-          | args ->
-            let* arg_env, arg_ts = infer_args env args in
-            let* expr_s, expr_t = helper arg_env expr in
-            let arg_ts = Subst.apply_list arg_ts expr_s in
-            let* res_t = build_arrow arg_ts expr_t in
-            let env = TypeEnv.generalize_pattern name res_t env in
-            R.return (env, expr_s, res_t)
+          let* arg_env, arg_ts = infer_args env args in
+          let* expr_s, expr_t = helper arg_env expr in
+          let* _, name_t = infer_pattern env name in
+          let* u = Subst.unify name_t expr_t in
+          let* subs = Subst.compose u expr_s in
+          let expr_t = Subst.apply expr_t subs in
+          let arg_ts = Subst.apply_list arg_ts subs in
+          let* res_t = build_arrow arg_ts expr_t in
+          let env = TypeEnv.generalize_pattern name res_t env in
+          R.return (env, subs, res_t)
         in
-        (* '<bind> and <bind>' infer *)
+        (* <bind> and <bind> and ... *)
         let* env, subs, typ =
           R.fold
             tl_bind
@@ -640,9 +632,7 @@ module Infer = struct
         in
         (* scope infer *)
         (match scope with
-         (* let f x y = x + y *)
          | None -> R.return (subs, typ)
-         (* let a = 10 and b = 20 in a + b *)
          | Some scope ->
            let* scope_s, scope_t = helper env scope in
            let* subs = Subst.compose subs scope_s in
@@ -664,8 +654,10 @@ module Infer = struct
           (* let rec fac n = if n <= 1 then 1 else fac (n-1) * n *)
           | args ->
             (* extend env with id *)
-            let* env, _ = infer_pattern env name in (* 0 *)
-            let* env, arg_ts = infer_args env args in (* 1 *)
+            let* env, _ = infer_pattern env name in
+            (* 0 *)
+            let* env, arg_ts = infer_args env args in
+            (* 1 *)
             let* expr_s, expr_t = helper env expr in
             let arg_ts = Subst.apply_list arg_ts expr_s in
             let* res_t = build_arrow arg_ts expr_t in

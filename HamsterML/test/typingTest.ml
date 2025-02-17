@@ -168,7 +168,7 @@ let%test _ =
 let%test _ = infer_expr "let x () () = 10" = TArrow (TUnit, TArrow (TUnit, TInt))
 let%test _ = infer_expr "let x () = ()" = TArrow (TUnit, TUnit)
 let%test _ = infer_expr "let f x y = x + y in 1" = TInt
-let%test _ = infer_expr "let f x = x in f" = TArrow (TPVar 1, TPVar 1)
+let%test _ = infer_expr "let f x = x in f" = TArrow (TPVar 2, TPVar 2)
 let%test _ = infer_expr "let f x = x in f 1" = TInt
 let%test _ = infer_expr "let f x y = x + y in f 1 2" = TInt
 let%test _ = infer_expr "let f x = (x: int) in f" = TArrow (TInt, TInt)
@@ -209,7 +209,21 @@ let%test _ = infer_expr "fun (x: bool) -> let f x = x in f x" = TArrow (TBool, T
 let%test _ = infer_expr "let (+) = (&&)" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let (+) x y = (&&) x y" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let f x = x in let g x y = x + y in g (f 1) (f 2)" = TInt
+
 let%test _ = infer_expr "let a = 10 and b = 20 and c = 30 in a + b + c" = TInt
+
+let%test _ =
+  infer_expr "let f x = x and g x y = x, y in g (f 1) (f true)" = TTuple [ TInt; TBool ]
+;;
+
+let%test _ =
+  infer_expr {|let f x y = (x, y) in let a = f 1 "hello" in let b = f true 3 in (a, b) |}
+  = TTuple [ TTuple [ TInt; TString ]; TTuple [ TBool; TInt ] ]
+;;
+
+let%test _ =
+  infer_expr "let temp = let f = fun x -> x in (f 1, f true)" = TTuple [ TInt; TBool ]
+;;
 
 (* Let rec *)
 let%test _ = infer_expr "let rec x = 10 :: x" = TList TInt
@@ -221,19 +235,6 @@ let%test _ =
 let%test _ =
   infer_expr "let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n))"
   = TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13))
-;;
-
-(* TArrow (TInt, TArrow (TInt, TPVar 13)) *)
-(* + (TPVar 13) => обернуть в ещё одну стрелку последний аргумент *)
-
-(* Есть: TArrow (TInt, TArrow (TInt, TArrow (TPVar 13, TPVar 13))) *)
-(* Должно: TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13)) *)
-
-(* int -> int -> 'a -> 'a*)
-(* int -> (int -> 'a) -> 'a*)
-
-let%test _ =
-  infer_expr "let temp = let f = fun x -> x in (f 1, f true)" = TTuple [ TInt; TBool ]
 ;;
 
 let%test _ =
