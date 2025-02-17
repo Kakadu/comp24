@@ -200,3 +200,10 @@ let%test _ = infer_expr "let (+) = (&&)" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let (+) x y = (&&) x y" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let f x = x in let g x y = x + y in g (f 1) (f 2)" = TInt
 let%test _ = infer_expr "let a = 10 and b = 20 and c = 30 in a + b + c" = TInt
+
+(* Let rec *)
+let%test _ = infer_expr "let rec x = 10 :: x" = TList TInt
+
+let%test _ =
+  infer_expr "let rec fac n = if n <= 1 then 1 else fac (n-1) * n" = TArrow (TInt, TInt)
+;;

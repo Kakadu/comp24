@@ -605,7 +605,7 @@ module Infer = struct
         let* expr_s, expr_t = helper env expr in
         let args_t = Subst.apply args_t expr_s in
         R.return (expr_s, build_arrow args_t expr_t)
-      | Let (Nonrecursive, fst_bind :: tl_bind, scope) ->
+      | Let (Nonrecursive, (name, args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
           match args with
           (* let a,b = 1,2 *)
@@ -626,13 +626,55 @@ module Infer = struct
             let env = TypeEnv.generalize_pattern name res_t env in
             R.return (env, expr_s, res_t)
         in
-        let name, args, expr = fst_bind in
+        (* '<bind> and <bind>' infer *)
         let* env, subs, typ =
           R.fold
             tl_bind
             ~init:(infer_bind env name args expr)
             ~f:(fun (env, _, _) (name, args, expr) -> infer_bind env name args expr)
         in
+        (* scope infer *)
+        (match scope with
+         (* let f x y = x + y *)
+         | None -> R.return (subs, typ)
+         (* let a = 10 and b = 20 in a + b *)
+         | Some scope ->
+           let* scope_s, scope_t = helper env scope in
+           let* subs = Subst.compose subs scope_s in
+           R.return (subs, scope_t))
+      | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
+        let infer_bind env name args expr =
+          match args with
+          (* let rec a = 10 :: a *)
+          | [] ->
+            (* extend env with id *)
+            let* env, name_t = infer_pattern env name in
+            let* expr_s, expr_t = helper env expr in
+            let* u = Subst.unify name_t expr_t in
+            let* subs = Subst.compose u expr_s in
+            let expr_t = Subst.apply expr_t subs in
+            let env = TypeEnv.generalize_pattern name expr_t env in
+            let env = TypeEnv.apply subs env in
+            R.return (env, subs, expr_t)
+          (* let rec fac n = if n <= 1 then 1 else fac (n-1) * n *)
+          | args ->
+            (* extend env with id *)
+            let* env, _ = infer_pattern env name in
+            let* arg_env, args_t = infer_args env args in
+            let* expr_s, expr_t = helper arg_env expr in
+            let args_t = Subst.apply args_t expr_s in
+            let res_t = build_arrow args_t expr_t in
+            let env = TypeEnv.generalize_pattern name res_t env in
+            R.return (env, expr_s, res_t)
+        in
+        (* '<bind> and <bind>' infer *)
+        let* env, subs, typ =
+          R.fold
+            tl_bind
+            ~init:(infer_bind env name args expr)
+            ~f:(fun (env, _, _) (name, args, expr) -> infer_bind env name args expr)
+        in
+        (* scope infer *)
         (match scope with
          (* let f x y = x + y *)
          | None -> R.return (subs, typ)
