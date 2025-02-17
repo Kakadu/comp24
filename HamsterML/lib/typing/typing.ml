@@ -639,30 +639,13 @@ module Infer = struct
            R.return (subs, scope_t))
       | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
-          match args with
-          (* let rec a = 10 :: a *)
-          | [] ->
-            (* extend env with id *)
-            let* env, name_t = infer_pattern env name in
-            let* expr_s, expr_t = helper env expr in
-            let* u = Subst.unify name_t expr_t in
-            let* subs = Subst.compose u expr_s in
-            let expr_t = Subst.apply expr_t subs in
-            let env = TypeEnv.generalize_pattern name expr_t env in
-            let env = TypeEnv.apply subs env in
-            R.return (env, subs, expr_t)
-          (* let rec fac n = if n <= 1 then 1 else fac (n-1) * n *)
-          | args ->
-            (* extend env with id *)
-            let* env, _ = infer_pattern env name in
-            (* 0 *)
-            let* env, arg_ts = infer_args env args in
-            (* 1 *)
-            let* expr_s, expr_t = helper env expr in
-            let arg_ts = Subst.apply_list arg_ts expr_s in
-            let* res_t = build_arrow arg_ts expr_t in
-            let env = TypeEnv.generalize_pattern name res_t env in
-            R.return (env, expr_s, res_t)
+          let* env, _ = infer_pattern env name in
+          let* arg_env, arg_ts = infer_args env args in
+          let* expr_s, expr_t = helper arg_env expr in
+          let arg_ts = Subst.apply_list arg_ts expr_s in
+          let* res_t = build_arrow arg_ts expr_t in
+          let env = TypeEnv.generalize_pattern name res_t env in
+          R.return (env, expr_s, res_t)
         in
         (* '<bind> and <bind>' infer *)
         let* env, subs, typ =
