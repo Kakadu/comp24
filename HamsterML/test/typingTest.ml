@@ -207,3 +207,17 @@ let%test _ = infer_expr "let rec x = 10 :: x" = TList TInt
 let%test _ =
   infer_expr "let rec fac n = if n <= 1 then 1 else fac (n-1) * n" = TArrow (TInt, TInt)
 ;;
+
+let%test _ =
+  infer_expr "let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n))"
+  = TArrow (TInt, TArrow (TArrow (TInt, TPVar 13), TPVar 13))
+;;
+
+let%test _ = infer_expr "let rec fib n = if n<2 then n else fib (n - 1) + fib (n - 2)" = TArrow(TInt, TInt)
+
+let%test _ =
+  infer_expr
+    "let rec fib_acc a b n = if n=1 then b else let n1 = n-1 in let ab = a+b in fib_acc \
+     b ab n1"
+  = TArrow (TInt, TArrow (TInt, TArrow (TInt, TInt)))
+;;
