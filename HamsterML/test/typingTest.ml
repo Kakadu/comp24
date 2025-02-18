@@ -15,6 +15,13 @@ let infer_expr (s : string) : inf_type =
   | Error e -> failwith (show_error e)
 ;;
 
+let infer_prog (s : string) =
+  let inf_res = R.run (Infer.infer_prog TypeEnv.default (parse_prog s)) in
+  match inf_res with
+  | Ok env -> TypeEnv.pp Format.std_formatter env
+  | Error e -> failwith (show_error e)
+;;
+
 (* --- Patterns --- *)
 
 let%test _ = infer_pattern "(1,2,3)" = TTuple [ TInt; TInt; TInt ]

@@ -12,6 +12,12 @@ let parse_pattern (s : string) : pattern =
   ast
 ;;
 
+let parse_prog (s : string) : prog =
+  let lexbuf = Lexing.from_string s in
+  let ast = HamsterML.Parser.prog HamsterML.Lexer.read lexbuf in
+  ast
+;;
+
 (* --- EXPRESSIONS --- *)
 
 (* Lists and Tuples *)
