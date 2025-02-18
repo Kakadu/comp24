@@ -66,23 +66,43 @@ let rec llexpression_printer formatter e =
 let llbindings_printer formatter bindings =
   List.iter
     (fun bind ->
-      (match bind with
-       | LLLet (r, n_list, p, e) ->
-         let n_str = String.concat " " n_list in (* Объединяем список строк в одну строку *)
-         Format.fprintf
-           formatter
-           "let %a %s %a = %a"
-           rec_printer
-           r
-           n_str (* Используем преобразованный идентификатор *)
-           (fun fmt ->
-             List.iter (fun pat -> Format.fprintf fmt "%a " pattern_printer pat))
-           p
-           llexpression_printer
-           e
-       | LLExpression e -> llexpression_printer formatter e);
-      Format.fprintf formatter "\n")
+      match bind with
+      | LLLet bindings_list -> 
+        (* Перебираем все let-объявления внутри LLLet *)
+        List.iteri
+          (fun i (r, n_list, p, e) ->
+            let n_str = String.concat " " n_list in
+            if i = 0 then (* Первое объявление начинается с "let" *)
+              Format.fprintf
+                formatter
+                "let %a %s %a = %a"
+                rec_printer
+                r
+                n_str
+                (fun fmt ->
+                  List.iter (fun pat -> Format.fprintf fmt "%a " pattern_printer pat))
+                p
+                llexpression_printer
+                e
+            else (* Все последующие объявления начинаются с "and" *)
+              Format.fprintf
+                formatter
+                "and %a %s %a = %a"
+                rec_printer
+                r
+                n_str
+                (fun fmt ->
+                  List.iter (fun pat -> Format.fprintf fmt "%a " pattern_printer pat))
+                p
+                llexpression_printer
+                e)
+          bindings_list;
+        Format.fprintf formatter "\n"
+      | LLExpression e -> 
+        llexpression_printer formatter e;
+        Format.fprintf formatter "\n")
     bindings
 ;;
+
 
 let llprinter bindings = Format.asprintf "%a" llbindings_printer bindings

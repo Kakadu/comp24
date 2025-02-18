@@ -433,39 +433,52 @@ let infer_prog prog =
     match prog with
     | h :: tl ->
       (match h with
-       | Let (Notrec, id_list, expr) ->
-         let* s, t = infer env expr in
-         let env = TypeEnv.apply s env in
-         let t = generalize env t in
-         let env =
-           (List.fold_left ~init:env ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t)))
-             id_list
-         in
-         let l1 = l @ [ id_list, sc_to_type t ] in
-         helper env tl l1
-       | Let (Rec, id_list, expr) ->
-         let* tv = fresh_var in
-         let env =
-           (List.fold_left ~init:env ~f:(fun acc_env id ->
-              TypeEnv.extend acc_env (id, S (VarSet.empty, tv))))
-             id_list
-         in
-         let* s, t = infer env expr in
-         let* s2 = unify (Subst.apply s tv) t in
-         let* s = Subst.compose s2 s in
-         let env = TypeEnv.apply s env in
-         let t = generalize env (Subst.apply s tv) in
-         let env =
-           (List.fold_left ~init:env ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t)))
-             id_list
-         in
-         let l1 = l @ [ id_list, sc_to_type t ] in
-         helper env tl l1
+       | Let lets -> (* lets — это список (r, id_list, expr) *)
+         List.fold_left
+           ~f:(fun acc (r, id_list, expr) ->
+             let* env, l = acc in
+             match r with
+             | Notrec ->
+               let* s, t = infer env expr in
+               let env = TypeEnv.apply s env in
+               let t = generalize env t in
+               let env =
+                 List.fold_left
+                   ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t))
+                   ~init:env
+                   id_list
+               in
+               let l1 = l @ [ id_list, sc_to_type t ] in
+               return (env, l1)
+             | Rec ->
+               let* tv = fresh_var in
+               let env =
+                 List.fold_left
+                   ~f:(fun acc_env id ->
+                     TypeEnv.extend acc_env (id, S (VarSet.empty, tv)))
+                   ~init:env
+                   id_list
+               in
+               let* s, t = infer env expr in
+               let* s2 = unify (Subst.apply s tv) t in
+               let* s = Subst.compose s2 s in
+               let env = TypeEnv.apply s env in
+               let t = generalize env (Subst.apply s tv) in
+               let env =
+                 List.fold_left
+                   ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t))
+                   ~init:env
+                   id_list
+               in
+               let l1 = l @ [ id_list, sc_to_type t ] in
+               return (env, l1))
+           ~init:(return (env, l)) (* Начальное значение аккумулятора *)
+           lets (* Список для обработки *)
+         >>= fun (env, l) -> helper env tl l
        | _ -> fail `Occurs_check)
     | [] -> return l
   in
   helper TypeEnv.empty prog []
-;;
 
 let w e = Result.map (run (infer TypeEnv.empty e)) ~f:snd
 let run_prog_inference prog = run (infer_prog prog)

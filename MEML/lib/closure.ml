@@ -69,10 +69,8 @@ let unrelated e =
       List.fold exps ~init:set_empty ~f:(fun acc h -> Set.union acc (helper h))
     | EMatch (pat, branches) ->
       let unbound_in_braches =
-        List.fold
-          branches
-          ~init:set_empty
-          ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
+        List.fold branches ~init:set_empty ~f:(fun acc (pat, exp) ->
+          Set.union acc (bind_pattern pat (helper exp)))
       in
       Set.union (helper pat) unbound_in_braches
   in
@@ -118,9 +116,8 @@ let closure_expr gctx bindings =
     | ELetIn (r, n, e, ein) ->
       (match e with
        | EFun (_, _) ->
-         let lts = List.fold_left ~init: lts ~f:(fun acc x -> Set.add acc x) n in
-         let genv = List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n
-         in
+         let lts = List.fold_left ~init:lts ~f:(fun acc x -> Set.add acc x) n in
+         let genv = List.fold_left ~init:gctx ~f:(fun acc x -> Set.add acc x) n in
          let unrelated = unrelated (ELetIn (r, n, e, ein)) in
          let unrelated = Set.diff unrelated genv in
          let e = closure_function lts lctx genv helper e in
@@ -129,8 +126,20 @@ let closure_expr gctx bindings =
          in
          let e = List.fold_right unrelated_global ~f:(fun p e -> EFun (p, e)) ~init:e in
          let local_env = Map.set lctx ~key:(String.concat n) ~data:unrelated in
-         let ein = helper lts local_env (List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n) ein in
-         let e = helper lts local_env (List.fold_left ~init: gctx ~f:(fun acc x -> Set.add acc x) n) e in
+         let ein =
+           helper
+             lts
+             local_env
+             (List.fold_left ~init:gctx ~f:(fun acc x -> Set.add acc x) n)
+             ein
+         in
+         let e =
+           helper
+             lts
+             local_env
+             (List.fold_left ~init:gctx ~f:(fun acc x -> Set.add acc x) n)
+             e
+         in
          ELetIn (r, n, e, ein)
        | _ -> ELetIn (r, n, helper lts lctx gctx e, helper lts lctx gctx ein))
     | ETuple exps ->
@@ -147,7 +156,11 @@ let closure_expr gctx bindings =
       EMatch (m, new_branches)
   in
   let closure_bindings gctx = function
-    | Let (flag, p, e) -> Let (flag, p, closure_function set_empty map_empty gctx helper e)
+    | Let lets ->
+      Let
+        ((List.fold ~init:[] ~f:(fun acc (flag, p, e) ->
+            (flag, p, closure_function set_empty map_empty gctx helper e) :: acc))
+           lets)
     | Expression e -> Expression (closure_function set_empty map_empty gctx helper e)
   in
   closure_bindings gctx bindings

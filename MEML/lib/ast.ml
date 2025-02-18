@@ -49,7 +49,7 @@ type expression =
   | EConst of const (** constant *)
   | EVar of name * type_of_var (** variable *)
   | EBinaryOp of binary_op * expression * expression (** binary operation *)
-  | EApp of expression * expression (** application *)
+  | EApp of expression * expression(** application *)
   | EIfElse of expression * expression * expression (** if z then v else n*)
   | ELetIn of rec_flag * name list * expression * expression
   | EFun of pattern * expression (** fun z -> z + z *)
@@ -60,7 +60,7 @@ type expression =
 
 (** Binding type *)
 type bindings =
-  | Let of rec_flag * name list * expression (** let id = expr *)
+  | Let of (rec_flag * name list * expression) list (** let id = expr *)
   | Expression of expression (** simple expressions *)
 [@@deriving show { with_path = false }]
 

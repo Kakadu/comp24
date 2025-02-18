@@ -36,8 +36,13 @@ let rec arguments pl = function
 ;;
 
 let rec init_env acc = function
-  | [] -> acc                        
-  | Let (_, id_list, _) :: tl -> init_env ((List.fold_left ~init: acc ~f:(fun acc id -> Set.union acc (Set.add set_empty id)))id_list ) tl
+  | [] -> acc
+  | Let lets :: tl ->
+    init_env
+      (List.fold ~init:acc ~f:(fun acc (_, id_list, _) ->
+         (List.fold_left ~init:acc ~f:(fun acc id -> Set.union acc (Set.add set_empty id)))
+           id_list)lets)
+      tl
   | Expression _ :: tl -> init_env acc tl
 ;;
 
@@ -84,7 +89,7 @@ let rec lift_expression ctx acc gctx state = function
          | Rec -> lift_expression update_ctx acc gctx state body
          | Notrec -> lift_expression ctx acc gctx state body
        in
-       lift_expression update_ctx (LLLet (r, [name], args, line) :: acc) gctx state ine
+       lift_expression update_ctx (LLLet [(r, [ name ], args, line)] :: acc) gctx state ine
      | _ ->
        let le, acc, state = lift_expression ctx acc gctx state e in
        let line, acc, state = lift_expression ctx acc gctx state ine in
@@ -99,7 +104,7 @@ let rec lift_expression ctx acc gctx state = function
       let ctx = map_empty in
       lift_expression ctx acc gctx state b
     in
-    LLVar name, LLLet (Notrec, [name], args, le) :: acc, state
+    LLVar name, LLLet [(Notrec, [ name ], args, le)] :: acc, state
   | EBinaryOp (op, e1, e2) ->
     let le1, acc, state = lift_expression ctx acc gctx state e1 in
     let le2, acc, state = lift_expression ctx acc gctx state e2 in
@@ -122,16 +127,23 @@ let rec lift_expression ctx acc gctx state = function
 ;;
 
 let lift_bindings gctx state = function
-  | Let (r, n, e) ->
-    let args, expr =
-      match arguments [] e with
-      | Args (args, expr) -> args, expr
+    | Let bindings ->
+    let transformed_bindings,acc, state =
+      List.fold_left
+        ~f:(fun (acc, _, state) (r, n, e) ->
+          let args, expr =
+            match arguments [] e with
+            | Args (args, expr) -> args, expr
+          in
+          let lift, acc_inner, state =  
+            let new_ctx = map_empty in
+            lift_expression new_ctx [] gctx state expr
+          in
+          ((r, n, args, lift) :: acc, acc_inner, state))
+        ~init:([],[], state)
+        bindings
     in
-    let lift, acc, state =
-      let new_ctx = map_empty in
-      lift_expression new_ctx [] gctx state expr
-    in
-    LLLet (r, n, args, lift) :: acc, state
+    (LLLet transformed_bindings :: acc), state 
   | Expression e ->
     let lift, acc, state =
       let new_ctx = map_empty in
