@@ -79,7 +79,7 @@ let%expect_test "let plusfive x = let five a = a + 5 in five x" =
                 , EFun
                     ( PVar ("a", TUnknown)
                     , EBinaryOp (Add, EVar ("a", TUnknown), EConst (CInt 5)) )
-                , EApp (EVar ("five", TUnknown), EVar ("x", TUnknown)) ) ) )]
+                , EApp (EVar ("five", TUnknown), EVar ("x", TUnknown), TUnknown) ) ) )]
     ];
   [%expect {| plusfive : int -> int |}]
 ;;

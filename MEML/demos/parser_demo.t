@@ -146,7 +146,13 @@
     in (((a * b) / _c) + d))))))))))))
   let  main = print_int _start print_int 1 print_int 2 3 print_int 4 100 1000 print_int -1 10000 -555555
   $ ./parser_demo.exe < manytests/typed/008ascription.ml
-  Parsing error : no more choices
+  let  addi = (fun f -> (fun g -> (fun x -> f x g x)))
+  let  main = 
+    let  () = print_int addi (fun x -> (fun b -> 
+    if b
+    then x 1
+    else (x * 2))) (fun _ -> (fun start -> ((_start / 2) = 0))) 4
+    in 0
   $ ./parser_demo.exe < manytests/typed/009let_poly.ml
   let  temp = 
     let  f = (fun x -> x)
