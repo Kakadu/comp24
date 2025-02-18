@@ -38,8 +38,7 @@ int64_t compare_ml(int64_t x, int64_t y) {
         DEBUG_RUN(if (is_inside_heap(x) != is_inside_heap(y))
                       EXCEPTION_FMT("Debug \"compare: some arg inside heap, other is not\""););
         if (!is_inside_heap(x)) {
-            // function case
-            EXCEPTION_FMT("Invalid_argument \"compare: functional value\"");
+            EXCEPTION_FMT("Debug \"compare: get boxed value outside heap\"");
         } else {
             return compare_boxed(x, y);
         }
