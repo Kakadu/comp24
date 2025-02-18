@@ -4,8 +4,12 @@ type 'a assignment =
   | Reg of 'a
   | StackLoc of int
 
-type 'a lsra_result = (string, 'a assignment, Base.String.comparator_witness) Base.Map.t
+type 'a fun_allocation = (string, 'a assignment, Base.String.comparator_witness) Base.Map.t
+type 'a program_allocation = (string * 'a fun_allocation) list
 
-module Allocator(Storage: Active_registers_intf.S) : sig
-  val scan : range list -> 'a lsra_result
+module Allocator(S : Registers_storage_intf.S) : sig
+  val scan_fun : 'a S.t -> range list -> 'a fun_allocation
+  val scan_program : 'a S.t -> Liveness_analysis.analysis_result -> 'a program_allocation
 end
+
+val pp : Format.formatter -> (Format.formatter -> 'a -> unit) -> 'a program_allocation -> unit

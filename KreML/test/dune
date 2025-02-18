@@ -31,6 +31,22 @@
   (backend bisect_ppx)))
 
 (executable
+ (public_name liveness_analysis)
+ (name liveness_analysis)
+ (modules Liveness_analysis)
+ (libraries cursedml_lib)
+ (instrumentation
+  (backend bisect_ppx)))
+
+(executable
+ (public_name rv_regalloc)
+ (name rv_regalloc)
+ (modules Rv_regalloc)
+ (libraries cursedml_lib)
+ (instrumentation
+  (backend bisect_ppx)))
+
+(executable
  (public_name llvm_codegen)
  (name llvm_codegen)
  (modules Llvm_codegen)

@@ -54,3 +54,33 @@ type instruction =
   | BType of reg * reg * int * op (** rs1, rs2, target, op *)
   | UType of reg * int * op (** dst, imm, op *)
   | JType of int * reg * op (** signed offset, link reg, op *)
+
+module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
+  type 'a t = 'a list
+
+  let remove reg regs = List.filter (( <> ) reg) regs
+  let add = List.cons
+  let find = List.find
+  let size = List.length
+
+  let pop regs =
+    match regs with
+    | x :: xs -> x, xs
+    | _ -> Utils.internalfail "Pop from empty registers storage"
+  ;;
+
+  let with_ranges = List.combine
+  let fold = List.fold_left
+  let empty = []
+  (* let available = List.init 7 (fun i -> Temp i) *)
+end
+
+let pp_reg fmt =
+  let open Format in
+   function
+  | Zero -> fprintf fmt "x0"
+  | Ra -> fprintf fmt "ra"
+  | Sp -> fprintf fmt "sp"
+  | Temp i -> fprintf fmt "t%i" i
+  | Saved i -> fprintf fmt "s%i" i
+  | Arg i -> fprintf fmt "a%i" i

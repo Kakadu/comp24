@@ -54,3 +54,11 @@ type instruction =
   | BType of reg * reg * int * op (** rs1, rs2, target, op *)
   | UType of reg * int * op (** dst, imm, op *)
   | JType of int * reg * op (** signed offset, link reg, op *)
+
+module RegistersStorage : sig
+  include Registers_storage_intf.S with type 'a t = 'a list
+  (* val available :  reg t *)
+end
+
+val pp_reg : Format.formatter -> reg -> unit
+

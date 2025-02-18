@@ -6,7 +6,7 @@
   Alpha_transformer
   Anf
   Anf_printer
-  Active_registers_intf
+  Registers_storage_intf
   Match_elimination
   Closure_conversion
   Flambda
@@ -18,7 +18,6 @@
   Llvm_utils
   Liveness_analysis
   Linear_scan_allocation
-  Riscv_active_registers
   Riscv
   ; Riscv_codegen
   Utils)
