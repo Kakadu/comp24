@@ -695,6 +695,33 @@ module Infer = struct
            let* scope_s, _ = infer_expr env scope in
            let env = TypeEnv.apply scope_s env in
            R.return env)
+      | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
+        let infer_bind env name args expr =
+          let* env, name_t = infer_pattern env name in
+          let* arg_env, arg_ts = infer_args env args in
+          let* expr_s, expr_t = infer_expr arg_env expr in
+          let name_t = Subst.apply name_t expr_s in
+          let arg_ts = Subst.apply_list arg_ts expr_s in
+          let* res_t = build_arrow arg_ts expr_t in
+          let* u = Subst.unify name_t res_t in
+          let res_t = Subst.apply res_t u in
+          let env = TypeEnv.generalize_pattern name res_t env in
+          R.return (env, expr_s, res_t)
+        in
+        (* '<bind> and <bind>' infer *)
+        let* env, subs, _ =
+          R.fold
+            tl_bind
+            ~init:(infer_bind env name args expr)
+            ~f:(fun (env, _, _) (name, args, expr) -> infer_bind env name args expr)
+        in
+        (* scope infer *)
+        (match scope with
+         | None -> R.return (TypeEnv.apply subs env)
+         | Some scope ->
+           let* scope_s, _ = infer_expr env scope in
+           let* subs = Subst.compose subs scope_s in
+           R.return (TypeEnv.apply subs env))
       | e -> R.fail (Incorrect_starting_point e)
     in
     match prog with
