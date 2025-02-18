@@ -369,6 +369,33 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_infer_result {| let (a, b) = (fun x -> (4, x)) 4;; |};
   [%expect {|
-    val a : 'a -> 'b
+    val a : int
+    val b : int
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result
+    {| let a = match 1 :: 2 :: [] with 
+  | 1 :: 2 :: 3 :: [] -> 1
+  | 1 :: 2 :: [] -> 2;; |};
+  [%expect {|
+    val a : int
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a :: b :: c = 1 :: []|};
+  [%expect {|
+    val a : int
+    val b : int
+    val c : int list
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a = [] :: [[]];;|};
+  [%expect {|
+    val a : 'a list list
      |}]
 ;;

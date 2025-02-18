@@ -4,19 +4,21 @@
 
 (** Simplified AST *)
 
-type sexpr =
+type svalue_binding = Ast.identifier * sexpr
+
+and sexpr =
   | SEConst of Ast.constant
   | SEVar of Ast.identifier
   | SETuple of sexpr list
   | SEFun of Ast.identifier list * sexpr
-  | SELet of Ast.rec_flag * Ast.identifier * sexpr * sexpr
+  | SELet of Ast.rec_flag * svalue_binding * sexpr
   | SEApp of sexpr * sexpr
   | SEIf of sexpr * sexpr * sexpr
   | SECons of sexpr * sexpr
 [@@deriving eq, show { with_path = false }]
 
 type sstructure_item =
-  | SSILet of Ast.rec_flag * (Ast.identifier * sexpr) list
+  | SSILet of Ast.rec_flag * svalue_binding list
   | SSIExpr of sexpr
 [@@deriving eq, show { with_path = false }]
 

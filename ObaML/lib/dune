@@ -5,7 +5,7 @@
  (public_name ObaML)
  (modules
   Ast
-  Ast_pretty_printer
+  Simple_ast_pretty_printer
   Parser
   Inferencer
   Typedtree
@@ -20,7 +20,11 @@
 
 (library
  (name tests)
- (modules Parser_tests Infer_tests Closure_conversion_tests)
+ (modules
+  Parser_tests
+  Infer_tests
+  Closure_conversion_tests
+  Ast_simplifier_tests)
  (libraries ObaML)
  (inline_tests)
  (preprocess

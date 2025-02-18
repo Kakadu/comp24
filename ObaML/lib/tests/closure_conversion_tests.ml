@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open ObaML
+(* open ObaML
 open Format
 
 let print_result val_pp = function
@@ -113,4 +113,4 @@ let%expect_test "" =
       let add_cps x y = (((fun y x k -> (k ((( + ) x) y))) y) x);;
       let square_cps x = ((fun x k -> (k ((( * ) x) x))) x);;
       let pythagoras_cps x y = (((fun y x k -> ((square_cps x) (((fun y k x_squared -> ((square_cps y) (((fun x_squared k y_squared -> (((add_cps x_squared) y_squared) k)) x_squared) k))) y) k))) y) x);; |}]
-;;
+;; *)

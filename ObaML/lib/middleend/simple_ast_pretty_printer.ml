@@ -4,8 +4,34 @@
 
 open Format
 
+let binop_vars =
+  [ "( * )"
+  ; "( / )"
+  ; "( + )"
+  ; "( - )"
+  ; "( = )"
+  ; "( == )"
+  ; "( <> )"
+  ; "( != )"
+  ; "( < )"
+  ; "( <= )"
+  ; "( > )"
+  ; "( >= )"
+  ; "( && )"
+  ; "( || )"
+  ]
+;;
+
 let print_id fmt = function
+  | Ast.Id ident when List.mem ident binop_vars = true ->
+    fprintf fmt "%s" (String.sub ident 1 (String.length ident - 2))
   | Ast.Id ident -> fprintf fmt "%s" ident
+;;
+
+let rec print_id_lst fmt = function
+  | [] -> ()
+  | [ h ] -> fprintf fmt "%a" print_id h
+  | h :: tl -> fprintf fmt "%a %a" print_id h print_id_lst tl
 ;;
 
 let print_const fmt = function
@@ -57,39 +83,36 @@ let rec print_etuple fmt = function
   | [ h ] -> fprintf fmt "%a" print_expr h
   | h :: tl -> fprintf fmt "%a, %a" print_expr h print_etuple tl
 
-and print_cases fmt = function
-  | [] -> ()
-  | [ (pat, expr) ] -> fprintf fmt "| %a -> %a" print_pattern pat print_expr expr
-  | (pat, expr) :: tl ->
-    fprintf fmt "| %a -> %a %a" print_pattern pat print_expr expr print_cases tl
-
 and print_expr fmt = function
-  | Ast.EConst const -> fprintf fmt "%a" print_const const
-  | Ast.EVar id -> fprintf fmt "%a" print_id id
-  | Ast.ETuple exp_lst -> fprintf fmt "(%a)" print_etuple exp_lst
-  | Ast.EFun (pat_lst, expr) ->
-    fprintf fmt "(fun %a -> %a)" print_pattern_lst pat_lst print_expr expr
-  | Ast.ELet (Ast.Nonrecursive, value_binding, expr) ->
+  | Simple_ast.SEConst const -> fprintf fmt "%a" print_const const
+  | Simple_ast.SEVar id -> fprintf fmt "%a" print_id id
+  | Simple_ast.SETuple exp_lst -> fprintf fmt "(%a)" print_etuple exp_lst
+  | Simple_ast.SEFun (pat_lst, expr) ->
+    fprintf fmt "(fun %a -> %a)" print_id_lst pat_lst print_expr expr
+  | Simple_ast.SELet (Ast.Nonrecursive, value_binding, expr) ->
     fprintf fmt "let %a in %a" print_value_binding value_binding print_expr expr
-  | Ast.ELet (Ast.Recursive, value_binding, expr) ->
+  | Simple_ast.SELet (Ast.Recursive, value_binding, expr) ->
     fprintf fmt "let rec %a in %a" print_value_binding value_binding print_expr expr
-  | Ast.EApp (expr1, expr2) -> fprintf fmt "(%a %a)" print_expr expr1 print_expr expr2
-  | Ast.EMatch (expr, case_lst) ->
-    fprintf fmt "match %a with %a" print_expr expr print_cases case_lst
-  | Ast.EIf (expr1, expr2, expr3) ->
+  | Simple_ast.SEApp
+      (Simple_ast.SEApp ((Simple_ast.SEVar (Id var_name) as expr1), expr2), expr3)
+    when List.mem var_name binop_vars = true ->
+    fprintf fmt "(%a %a %a)" print_expr expr2 print_expr expr1 print_expr expr3
+  | Simple_ast.SEApp (expr1, expr2) ->
+    fprintf fmt "(%a %a)" print_expr expr1 print_expr expr2
+  | Simple_ast.SEIf (expr1, expr2, expr3) ->
     fprintf fmt "if %a then %a else %a" print_expr expr1 print_expr expr2 print_expr expr3
-  | Ast.ECons (expr1, expr2) -> fprintf fmt "%a :: %a" print_expr expr1 print_expr expr2
-  | Ast.EType (expr, typ) -> fprintf fmt "(%a : %a)" print_expr expr print_type typ
+  | Simple_ast.SECons (expr1, expr2) ->
+    fprintf fmt "%a :: %a" print_expr expr1 print_expr expr2
 
 and print_value_binding fmt value_binding =
-  let pat, expr = value_binding in
+  let ident, expr = value_binding in
   match expr with
-  | Ast.EFun (pat_lst, fexpr) ->
-    fprintf fmt "%a = %a" print_pattern_lst (pat :: pat_lst) print_expr fexpr
-  | _ -> fprintf fmt "%a = %a" print_pattern pat print_expr expr
+  | Simple_ast.SEFun (ident_lst, fexpr) ->
+    fprintf fmt "%a = %a" print_id_lst (ident :: ident_lst) print_expr fexpr
+  | _ -> fprintf fmt "%a = %a" print_id ident print_expr expr
 ;;
 
-let rec print_value_binding_lst fmt (value_binding_lst : Ast.value_binding list) =
+let rec print_value_binding_lst fmt (value_binding_lst : Simple_ast.svalue_binding list) =
   match value_binding_lst with
   | [] -> ()
   | [ h ] -> fprintf fmt "%a" print_value_binding h
@@ -100,10 +123,10 @@ let print_structure fmt structure =
   List.iter
     (fun structure_item ->
       match structure_item with
-      | Ast.SILet (Ast.Nonrecursive, value_binding_lst) ->
+      | Simple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) ->
         fprintf fmt "let %a;;\n" print_value_binding_lst value_binding_lst
-      | Ast.SILet (Ast.Recursive, value_binding_lst) ->
+      | Simple_ast.SSILet (Ast.Recursive, value_binding_lst) ->
         fprintf fmt "let rec %a;;\n" print_value_binding_lst value_binding_lst
-      | Ast.SIExpr expr -> fprintf fmt "%a" print_expr expr)
+      | Simple_ast.SSIExpr expr -> fprintf fmt "%a" print_expr expr)
     structure
 ;;
