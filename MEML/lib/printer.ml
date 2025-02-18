@@ -44,14 +44,24 @@ let binop_printer formatter = function
   | Greq -> Format.fprintf formatter ">="
 ;;
 
+let rec pp_type formatter = function
+  | TInt -> Format.fprintf formatter "int"
+  | TBool -> Format.fprintf formatter "bool"
+  | TUnknown -> Format.fprintf formatter "unknown"
+  | TArrow (t1, t2) -> Format.fprintf formatter "(%a -> %a)" pp_type t1 pp_type t2
+;;
+
 let rec expression_printer formatter e =
   match e with
   | EConst c -> constant_printer formatter c
-  | EVar (n, _) -> Format.fprintf formatter "%s" n
+  | EVar (n, t) ->
+    Format.fprintf formatter "%s" n;
+    if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
   | EFun (p, e) ->
     Format.fprintf formatter "(fun %a -> %a)" pattern_printer p expression_printer e
-  | EApp (e1, e2, _) ->
-    Format.fprintf formatter "%a %a" expression_printer e1 expression_printer e2
+  | EApp (e1, e2, t) ->
+    Format.fprintf formatter "(%a %a)" expression_printer e1 expression_printer e2;
+    if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
   | EIfElse (i, t, e) ->
     Format.fprintf
       formatter
@@ -107,7 +117,7 @@ let rec expression_printer formatter e =
 let bindings_printer formatter bindings =
   List.iter
     (fun bind ->
-      (match bind with
+      match bind with
       | Let lets ->
         (* lets — это список (r, n, e) *)
         List.iteri
@@ -142,7 +152,7 @@ let bindings_printer formatter bindings =
           lets
       | Expression e ->
         expression_printer formatter e;
-        Format.fprintf formatter "\n"))
+        Format.fprintf formatter "\n")
     bindings
 ;;
 
