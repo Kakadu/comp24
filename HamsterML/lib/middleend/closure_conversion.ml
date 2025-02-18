@@ -3,15 +3,33 @@
 open Base
 open Ast
 
-(*
-   let f x y = x - y                        |> free_vars: {}
-   fun x -> x                               |> free_vars: {}
-   match x with | (a,b) -> 1 | _ -> 2       |> free_vars: {}
-   let f x = let (k,j) = x in j in f (1,2)  |> free_vars: {}
-*)
-
-(** get free variables from an expression *)
+(* get free variables from an expression *)
 let unbound_variables exp =
+  let rec exclude_bind_pattern pat base_set =
+    let rec exclude_bind_pattern_list acc = function
+      | hd :: tl ->
+        (match hd with
+         | Wildcard | Operation _ -> exclude_bind_pattern_list acc tl
+         | ListConcat (pat1, pat2) ->
+           let new_acc = exclude_bind_pattern_list acc (pat1 :: [ pat2 ]) in
+           exclude_bind_pattern_list new_acc tl
+         | Var id -> exclude_bind_pattern_list (Set.remove acc id) tl
+         | Tuple pat_list | List pat_list ->
+           let new_acc = exclude_bind_pattern_list acc pat_list in
+           exclude_bind_pattern_list new_acc tl
+         | Const _ -> exclude_bind_pattern_list acc tl
+         | Constraint (pat, _) ->
+           let new_acc = exclude_bind_pattern pat base_set in
+           exclude_bind_pattern_list new_acc tl)
+      | [] -> acc
+    in
+    match pat with
+    | Wildcard | Operation _ | Const _ -> base_set
+    | ListConcat (pat1, pat2) -> exclude_bind_pattern_list base_set (pat1 :: [ pat2 ])
+    | Var id -> Set.remove base_set id
+    | Tuple pat_list | List pat_list -> exclude_bind_pattern_list base_set pat_list
+    | Constraint (pat, _) -> exclude_bind_pattern_list base_set [ pat ]
+  in
   let rec helper_expr exp =
     let rec helper_pattern pat =
       match pat with
@@ -75,14 +93,8 @@ let unbound_variables exp =
       Set.union binds_set in_expr_set
     | EConstraint (expr, _) -> helper_expr expr
     | Fun (args, expr) ->
-      let args_set =
-        List.fold
-          args
-          ~init:(Set.empty (module String))
-          ~f:(fun acc pat -> Set.union acc (helper_pattern pat))
-      in
-      let expr_set = helper_expr expr in
-      Set.union args_set expr_set
+      let free_vars = helper_expr expr in
+      List.fold args ~init:free_vars ~f:(fun acc arg -> exclude_bind_pattern arg acc)
   in
   helper_expr exp
 ;;
