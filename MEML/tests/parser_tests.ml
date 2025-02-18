@@ -546,14 +546,3 @@ let%expect_test "bindings_test" =
          ])
  |}]
 ;;
-
-
-let%expect_test "bindings_test" =
-  let test = "a::b" in
-  start_test (parse_econ parse_evar) show_expression test;
-  [%expect
-    {|
-    (EList ((EVar ("a", TUnknown)),
-       (EList ((EVar ("b", TUnknown)), (EConst CNil)))))
- |}]
-;;

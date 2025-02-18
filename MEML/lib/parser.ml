@@ -224,11 +224,25 @@ let parse_efun expr =
 (* EApp *)
 
 let parse_eapp e1 e2 =
-  lift3
-    (fun f args ty -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg, ty)) args)
-    (parse_evar <|> e1)
-    (many1 (parse_evar <|> e2))
-    (parse_type)
+  (* Парсим функцию и аргументы *)
+  (parse_evar <|> e1) >>= fun f ->
+  many1 (parse_evar <|> e2) >>= fun args ->
+  (* Строим выражение без типов *)
+  let app_without_type = List.fold_left
+    ~f:(fun f_acc arg -> EApp (f_acc, arg, TUnknown)) (* Используем TUnknown как временный тип *)
+    ~init:f
+    args
+  in
+  (* Парсим тип для внешней аппликации *)
+  parse_type >>= fun ty ->
+  (* Заменяем TUnknown на вычисленный тип для внешней аппликации *)
+  let replace_outer_type expr new_ty =
+    match expr with
+    | EApp (e1, e2, TUnknown) -> EApp (e1, e2, new_ty) (* Заменяем тип только для внешней аппликации *)
+    | EApp (e1, e2, _) -> EApp (e1, e2, TUnknown) (* Внутренние аппликации остаются без изменений *)
+    | _ -> expr (* Базовый случай: не аппликация *)
+  in
+  return (replace_outer_type app_without_type ty)
 ;;
 
 (* ELetIn *)
