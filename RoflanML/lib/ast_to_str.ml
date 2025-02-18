@@ -8,7 +8,7 @@ open Common.Middleend_Common
 
 let is_operator op =
   let is_operator_char = function
-    | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' -> true
+    | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' | ':' -> true
     | _ -> false
   in
   String.fold op ~init:true ~f:(fun acc ch -> acc && is_operator_char ch)

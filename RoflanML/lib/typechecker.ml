@@ -227,35 +227,48 @@ let lookup_env : TypeEnv.t -> id -> (Subst.t * ty, error) Counter_Monad.t =
 ;;
 
 let type_to_schema ty =
-  let rec helper = function
-    | TBase base -> TBase base, VarSet.empty
-    | TVar x -> TVar x, VarSet.singleton (module Base.Int) x
+  let rec helper tv_mapping = function
+    | TBase base -> return (TBase base, VarSet.empty, tv_mapping)
+    | TVar x ->
+      (match Base.Map.find tv_mapping x with
+       | Some v -> return (TVar v, VarSet.empty, tv_mapping)
+       | None ->
+         let* fv = fresh in
+         let tv_mapping = Base.Map.update tv_mapping x ~f:(fun _ -> fv) in
+         return (TVar fv, VarSet.singleton (module Base.Int) fv, tv_mapping))
     | TArrow (l, r) ->
-      let lty, lvarset = helper l in
-      let rty, rvarset = helper r in
-      TArrow (lty, rty), VarSet.union lvarset rvarset
+      let* lty, lvarset, tv_mapping = helper tv_mapping l in
+      let* rty, rvarset, tv_mapping = helper tv_mapping r in
+      return (TArrow (lty, rty), VarSet.union lvarset rvarset, tv_mapping)
     | TTuple (ty1, ty2, tys) ->
-      let ty1, varset1 = helper ty1 in
-      let ty2, varset2 = helper ty2 in
-      let tys, varset =
-        Base.List.fold_right tys ~init:([], VarSet.empty) ~f:(fun ty (tys, varset) ->
-          let ty, varset1 = helper ty in
-          ty :: tys, VarSet.union varset varset1)
+      let* ty1, varset1, tv_mapping = helper tv_mapping ty1 in
+      let* ty2, varset2, tv_mapping = helper tv_mapping ty2 in
+      let* tys, varset, tv_mapping =
+        Base.List.fold_right
+          tys
+          ~init:(return ([], VarSet.empty, tv_mapping))
+          ~f:(fun ty acc ->
+            let* tys, varset, tv_mapping = acc in
+            let* ty, varset1, tv_mapping = helper tv_mapping ty in
+            return (ty :: tys, VarSet.union varset varset1, tv_mapping))
       in
-      ( TTuple (ty1, ty2, tys)
-      , VarSet.union_list (module Base.Int) [ varset1; varset2; varset ] )
+      return
+        ( TTuple (ty1, ty2, tys)
+        , VarSet.union_list (module Base.Int) [ varset1; varset2; varset ]
+        , tv_mapping )
     | TList ty ->
-      let ty, varset = helper ty in
-      TList ty, varset
+      let* ty, varset, tv_mapping = helper tv_mapping ty in
+      return (TList ty, varset, tv_mapping)
   in
-  let ty, varset = helper ty in
-  Scheme.S (varset, ty)
+  let* ty, varset, _ = helper (Base.Map.empty (module Base.Int)) ty in
+  return (Scheme.S (varset, ty))
 ;;
 
-let create_base_env ?(env = TypeEnv.empty) =
+let create_base_env env =
   Base.Map.fold RoflanML_Stdlib.default ~init:(return env) ~f:(fun ~key ~data env ->
     let* env = env in
-    return (TypeEnv.extend env (key, type_to_schema data)))
+    let* sch = type_to_schema data in
+    return (TypeEnv.extend env (key, sch)))
 ;;
 
 let infer_pattern : pattern -> (TypeEnv.t * ty, error) Counter_Monad.t =
@@ -481,11 +494,16 @@ let infer env decl =
       in
       return (subst, tys)
   in
-  let* env = create_base_env ~env in
   infer_decl env decl
 ;;
 
-let run_infer ?(env = TypeEnv.empty) e = Result.map snd (run (infer env e))
+let run_infer ?(env = TypeEnv.empty) e =
+  Result.map
+    snd
+    (run
+       (let* env = create_base_env env in
+        infer env e))
+;;
 
 let check_program env prog =
   let check_decl env decl =
@@ -508,4 +526,8 @@ let check_program env prog =
     return env)
 ;;
 
-let typecheck ?(env = TypeEnv.empty) prog = run (check_program env prog)
+let typecheck ?(env = TypeEnv.empty) prog =
+  run
+    (let* env = create_base_env env in
+     check_program env prog)
+;;

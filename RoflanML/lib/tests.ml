@@ -264,8 +264,8 @@ module ParserTests = struct
 
   let%expect_test "mutual recursion" =
     parse_and_pp_decl
-      "let rec even x = if x = 0 then true else odd (x - 1)\n\
-       and odd x = if x = 0 then false else even (x - 1)";
+      "let rec even x = if x = 0 then true else odd (x - 1)\n\n\
+      \       and odd x = if x = 0 then false else even (x - 1)";
     [%expect
       {|
       (DMutualLet (Rec,
@@ -288,6 +288,34 @@ module ParserTests = struct
                   ))
                )))
            ]
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons list parse" =
+    parse_and_pp_decl "let q = let x = [1; 2] in 1 :: x, 1 :: [1; 2]";
+    [%expect
+      {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "x", (EList [(EConst (CInt 1)); (EConst (CInt 2))]),
+            (ETuple ((EApp ((EApp ((EVar "::"), (EConst (CInt 1)))), (EVar "x"))),
+               (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+                  (EList [(EConst (CInt 1)); (EConst (CInt 2))]))),
+               []))
+            ))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons associativity" =
+    parse_and_pp_decl "let x = 1 :: 2 :: [3; 4]";
+    [%expect
+      {|
+      (DLet (NonRec, "x",
+         (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+            (EApp ((EApp ((EVar "::"), (EConst (CInt 2)))),
+               (EList [(EConst (CInt 3)); (EConst (CInt 4))])))
+            ))
          ))
       |}]
   ;;
@@ -460,6 +488,11 @@ module TypecheckerTests = struct
       bool -> bool
       int -> int
       |}]
+  ;;
+
+  let%expect_test "cons list type inference" =
+    pp_parse_and_infer "let q = 1 :: [3; 4]";
+    [%expect {| int list |}]
   ;;
 
   (* Errors *)

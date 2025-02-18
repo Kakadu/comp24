@@ -51,7 +51,7 @@ let is_keyword = function
 ;;
 
 let is_operator_char = function
-  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' -> true
+  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' | ':' -> true
   | _ -> false
 ;;
 
@@ -247,6 +247,7 @@ let pebinop chain1 e pbinop =
 ;;
 
 let plbinop = pebinop chainl1
+let prbinop = pebinop chainr1
 let padd = pstoken "+" *> return "+"
 let psub = pstoken "-" *> return "-"
 let pmul = pstoken "*" *> return "*"
@@ -259,6 +260,7 @@ let pgre = pstoken ">" *> return ">"
 let pgeq = pstoken ">=" *> return ">="
 let pand = pstoken "&&" *> return "&&"
 let por = pstoken "||" *> return "||"
+let pcons = pstoken "::" *> return "::"
 
 let pexpr_fun () =
   fix (fun pexpr ->
@@ -278,14 +280,15 @@ let pexpr_fun () =
       let pe3 = op_bin pe2 (padd <|> psub) in
       op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
+    let pe_cons = prbinop pe_bin pcons in
     let pe_tuple =
       lift2
         (fun e1 rest ->
           match rest with
           | [] -> e1
           | hd :: tl -> ETuple (e1, hd, tl))
-        pe_bin
-        (many (pstoken "," *> pe_bin))
+        pe_cons
+        (many (pstoken "," *> pe_cons))
     in
     choice [ plet_in pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe_tuple ])
 ;;
