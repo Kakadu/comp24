@@ -1,6 +1,6 @@
 open MEML_lib.Closure
 open MEML_lib.Parser
-open MEML_lib.Printer
+open MEML_lib.PprinterAST
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in

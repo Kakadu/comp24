@@ -1,13 +1,13 @@
 open Ast
 
-let constant_printer formatter = function
+let pp_constant formatter = function
   | CInt i -> Format.fprintf formatter "%d" i
   | CBool false -> Format.fprintf formatter "false"
   | CBool true -> Format.fprintf formatter "true"
   | CNil -> Format.fprintf formatter "[]"
 ;;
 
-let tuple_printer printer formatter l =
+let pp_tuple printer formatter l =
   List.iteri
     (fun i e ->
       if i <> 0 then Format.fprintf formatter ", " else ();
@@ -15,21 +15,21 @@ let tuple_printer printer formatter l =
     l
 ;;
 
-let rec pattern_printer formatter = function
+let rec pp_pattern formatter = function
   | PWild -> Format.fprintf formatter "_"
   | PCon (hd, tl) ->
-    Format.fprintf formatter "(%a :: %a)" pattern_printer hd pattern_printer tl
+    Format.fprintf formatter "(%a :: %a)" pp_pattern hd pp_pattern tl
   | PVar (n, _) -> Format.fprintf formatter "%s" n
-  | PTuple t -> Format.fprintf formatter "(%a)" (tuple_printer pattern_printer) t
-  | PConst c -> constant_printer formatter c
+  | PTuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_pattern) t
+  | PConst c -> pp_constant formatter c
 ;;
 
-let rec_printer formatter = function
+let pp_rec formatter = function
   | Rec -> Format.fprintf formatter "rec"
   | Notrec -> ()
 ;;
 
-let binop_printer formatter = function
+let pp_binop formatter = function
   | Add -> Format.fprintf formatter "+"
   | Sub -> Format.fprintf formatter "-"
   | Mul -> Format.fprintf formatter "*"
@@ -51,109 +51,106 @@ let rec pp_type formatter = function
   | TArrow (t1, t2) -> Format.fprintf formatter "(%a -> %a)" pp_type t1 pp_type t2
 ;;
 
-let rec expression_printer formatter e =
+let rec pp_expression formatter e =
   match e with
-  | EConst c -> constant_printer formatter c
+  | EConst c -> pp_constant formatter c
   | EVar (n, t) ->
     Format.fprintf formatter "%s" n;
     if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
   | EFun (p, e) ->
-    Format.fprintf formatter "(fun %a -> %a)" pattern_printer p expression_printer e
+    Format.fprintf formatter "(fun %a -> %a)" pp_pattern p pp_expression e
   | EApp (e1, e2, t) ->
-    Format.fprintf formatter "(%a %a)" expression_printer e1 expression_printer e2;
+    Format.fprintf formatter "(%a %a)" pp_expression e1 pp_expression e2;
     if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
   | EIfElse (i, t, e) ->
     Format.fprintf
       formatter
       "\n  if %a\n  then %a\n  else %a"
-      expression_printer
+      pp_expression
       i
-      expression_printer
+      pp_expression
       t
-      expression_printer
+      pp_expression
       e
   | ELetIn (r, n, e, ine) ->
     Format.fprintf
       formatter
       "\n  let %a %a = %a\n  in %a"
-      rec_printer
+      pp_rec
       r
       (Format.pp_print_list
          ~pp_sep:(fun ppf () -> Format.fprintf ppf " ")
          Format.pp_print_string)
       n
-      expression_printer
+      pp_expression
       e
-      expression_printer
+      pp_expression
       ine
-  | ETuple t -> Format.fprintf formatter "(%a)" (tuple_printer expression_printer) t
+  | ETuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_expression) t
   | EBinaryOp (op, l, r) ->
     Format.fprintf
       formatter
       "(%a %a %a)"
-      expression_printer
+      pp_expression
       l
-      binop_printer
+      pp_binop
       op
-      expression_printer
+      pp_expression
       r
   | EList (head, tail) ->
     (* Рекурсивно выводим список *)
     let rec print_list formatter = function
       | EConst CNil -> Format.fprintf formatter ""
       | EList (h, t) ->
-        Format.fprintf formatter "%a; %a" expression_printer h print_list t
-      | _ -> Format.fprintf formatter "%a" expression_printer tail
+        Format.fprintf formatter "%a; %a" pp_expression h print_list t
+      | _ -> Format.fprintf formatter "%a" pp_expression tail
     in
     Format.fprintf formatter "[%a]" print_list (EList (head, tail))
   | EMatch (m, p) ->
-    Format.fprintf formatter "(match %a with" expression_printer m;
+    Format.fprintf formatter "(match %a with" pp_expression m;
     List.iter
       (fun (pat, exp) ->
-        Format.fprintf formatter "\n| %a -> %a" pattern_printer pat expression_printer exp)
+        Format.fprintf formatter "\n| %a -> %a" pp_pattern pat pp_expression exp)
       p
 ;;
 
-let bindings_printer formatter bindings =
+let pp_bindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
       | Let lets ->
-        (* lets — это список (r, n, e) *)
         List.iteri
           (fun i (r, n, e) ->
             if i = 0
             then
-              (* Первый элемент: используем "let" *)
               Format.fprintf
                 formatter
                 "let %a %a = %a\n"
-                rec_printer
+                pp_rec
                 r
                 (Format.pp_print_list
                    ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
                    Format.pp_print_string)
                 n
-                expression_printer
+                pp_expression
                 e
             else
-              (* Остальные элементы: используем "and" *)
               Format.fprintf
                 formatter
                 "and %a %a = %a\n"
-                rec_printer
+                pp_rec
                 r
                 (Format.pp_print_list
                    ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
                    Format.pp_print_string)
                 n
-                expression_printer
+                pp_expression
                 e)
           lets
       | Expression e ->
-        expression_printer formatter e;
+        pp_expression formatter e;
         Format.fprintf formatter "\n")
     bindings
 ;;
 
-let printer bindings = Format.asprintf "%a" bindings_printer bindings
+let printer bindings = Format.asprintf "%a" pp_bindings bindings

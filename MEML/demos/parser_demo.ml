@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open MEML_lib.Parser
-open MEML_lib.Printer
+open MEML_lib.PprinterAST
 
 let parsing_and_inerpretation input =
   match parser input with

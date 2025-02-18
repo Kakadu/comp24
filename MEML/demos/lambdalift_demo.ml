@@ -1,6 +1,6 @@
 open MEML_lib.Closure
 open MEML_lib.Lambdalift
-open MEML_lib.Llprinter
+open MEML_lib.PprinterLLAST
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in

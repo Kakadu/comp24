@@ -1,69 +1,68 @@
 open Llast
 open Ast
-open Printer
+open PprinterAST
 
-let rec llexpression_printer formatter e =
+let rec pp_llexpression formatter e =
   match e with
-  | LLConst c -> constant_printer formatter c
+  | LLConst c -> pp_constant formatter c
   | LLVar n -> Format.fprintf formatter "%s" n
   | LLApp (e1, e2) ->
-    Format.fprintf formatter "(%a %a)" llexpression_printer e1 llexpression_printer e2
+    Format.fprintf formatter "(%a %a)" pp_llexpression e1 pp_llexpression e2
   | LLIfElse (i, t, e) ->
     Format.fprintf
       formatter
       "\n  if %a\n  then %a\n  else %a"
-      llexpression_printer
+      pp_llexpression
       i
-      llexpression_printer
+      pp_llexpression
       t
-      llexpression_printer
+      pp_llexpression
       e
   | LLLetIn (r, n, e, ine) ->
     Format.fprintf
       formatter
       "\n  let %a %s = %a\n  in %a"
-      rec_printer
+      pp_rec
       r
       (String.concat ", " n)
-      llexpression_printer
+      pp_llexpression
       e
-      llexpression_printer
+      pp_llexpression
       ine
-  | LLTuple t -> Format.fprintf formatter "(%a)" (tuple_printer llexpression_printer) t
+  | LLTuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_llexpression) t
   | LLEbinOp (op, l, r) ->
     Format.fprintf
       formatter
       "(%a %a %a)"
-      llexpression_printer
+      pp_llexpression
       l
-      binop_printer
+      pp_binop
       op
-      llexpression_printer
+      pp_llexpression
       r
   | LLList (head, tail) ->
-    (* Рекурсивно выводим список *)
     let rec print_list formatter = function
       | LLConst CNil -> Format.fprintf formatter ""
       | LLList (h, t) ->
-        Format.fprintf formatter "%a; %a" llexpression_printer h print_list t
-      | _ -> Format.fprintf formatter "%a" llexpression_printer tail
+        Format.fprintf formatter "%a; %a" pp_llexpression h print_list t
+      | _ -> Format.fprintf formatter "%a" pp_llexpression tail
     in
     Format.fprintf formatter "[%a]" print_list (LLList (head, tail))
   | LLMatch (m, p) ->
-    Format.fprintf formatter "(match %a with" llexpression_printer m;
+    Format.fprintf formatter "(match %a with" pp_llexpression m;
     List.iter
-      (fun (pat, exp) ->
+      (fun (p, lle) ->
         Format.fprintf
           formatter
           "\n| %a -> %a"
-          pattern_printer
-          pat
-          llexpression_printer
-          exp)
+          pp_pattern
+          p
+          pp_llexpression
+          lle)
       p
 ;;
 
-let llbindings_printer formatter bindings =
+let pp_llbindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
@@ -76,33 +75,33 @@ let llbindings_printer formatter bindings =
               Format.fprintf
                 formatter
                 "let %a %s %a = %a"
-                rec_printer
+                pp_rec
                 r
                 n_str
                 (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pattern_printer pat))
+                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
                 p
-                llexpression_printer
+                pp_llexpression
                 e
             else (* Все последующие объявления начинаются с "and" *)
               Format.fprintf
                 formatter
                 "and %a %s %a = %a"
-                rec_printer
+                pp_rec
                 r
                 n_str
                 (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pattern_printer pat))
+                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
                 p
-                llexpression_printer
+                pp_llexpression
                 e)
           bindings_list;
         Format.fprintf formatter "\n"
       | LLExpression e -> 
-        llexpression_printer formatter e;
+        pp_llexpression formatter e;
         Format.fprintf formatter "\n")
     bindings
 ;;
 
 
-let llprinter bindings = Format.asprintf "%a" llbindings_printer bindings
+let llprinter bindings = Format.asprintf "%a" pp_llbindings bindings
