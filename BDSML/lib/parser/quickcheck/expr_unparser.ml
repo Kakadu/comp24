@@ -6,8 +6,6 @@ open Parser.Ast
 open Format
 open Unparser_utils
 
-let is_unary_operator op = List.mem op [ "-"; "+."; "-."; "~-"; "~+." ]
-
 let rec unparse_expr ppf = function
   | Exp_ident s -> fprintf ppf "%s" s
   | Exp_constant c -> fprintf ppf "%a" Const_unparser.unparse_const c
