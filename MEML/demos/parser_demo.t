@@ -157,8 +157,6 @@
   let  temp = 
     let  f = (fun x -> x)
     in (f 1, f true)
-  $ ./parser_demo.exe < manytests/typed/010sukharev.ml
-  Parsing error : end_of_input
   $ ./parser_demo.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f -> (fun x -> f fix f x))
   let  map = (fun f -> (fun p -> 

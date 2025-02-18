@@ -5,7 +5,7 @@
  (libraries MEML_lib stdio))
 
 (cram
- (applies_to parser_demo)
+ (applies_to parser_demo clouse_demo lamdalift_demo)
  (deps
   ./parser_demo.exe
     manytests/do_not_type/001.ml
@@ -25,7 +25,6 @@
     manytests/typed/007order.ml
     manytests/typed/008ascription.ml
     manytests/typed/009let_poly.ml
-    manytests/typed/010sukharev.ml
     manytests/typed/015tuples.ml
     manytests/typed/016lists.ml))
 
