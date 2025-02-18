@@ -5,7 +5,7 @@
  (libraries MEML_lib stdio))
 
 (cram
- (applies_to parser_demo clouse_demo lambdalift_demo)
+ (applies_to parser_demo closure_demo lambdalift_demo)
  (deps
   ./parser_demo.exe
     manytests/do_not_type/001.ml
@@ -29,13 +29,13 @@
     manytests/typed/016lists.ml))
 
 (executable
- (name clouse_demo)
- (modules clouse_demo)
- (public_name clouse_demo)
+ (name closure_demo)
+ (modules closure_demo)
+ (public_name closure_demo)
  (libraries MEML_lib stdio))
 
 (cram
- (deps ./clouse_demo.exe))
+ (deps ./closure_demo.exe))
 
 (executable
  (name lambdalift_demo)

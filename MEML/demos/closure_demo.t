@@ -1,17 +1,17 @@
 
-  $ ./clouse_demo.exe << EOF
+  $ ./closure_demo.exe << EOF
   > let sum x = let num2 y = x + y in test2
   let  sum = (fun x -> 
     let  num2 = (fun test2 -> (fun x -> (fun y -> (x + y))))
     in test2)
 
-  $ ./clouse_demo.exe << EOF
+  $ ./closure_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   let  test1 = (fun (x, y) -> 
     let  test2 = (fun x -> (fun y -> (fun i -> (x, y, i))))
     in ((test2 x) y))
 
-  $ ./clouse_demo.exe << EOF
+  $ ./closure_demo.exe << EOF
   > let vosem = 
   >   let odin = 1 in 
   >   let dva = 2 in
@@ -25,7 +25,7 @@
     let  odin_plus_dva_plus = (fun dva -> (fun odin -> (fun x -> (x + ((((fun dva -> (fun odin -> (fun i -> (odin + dva)))) dva) odin) 0)))))
     in (((odin_plus_dva_plus dva) odin) 5)
 
-  $ ./clouse_demo.exe << EOF
+  $ ./closure_demo.exe << EOF
   > let b = 6;;
   > let i = 1;;
   > let sem = (fun num1 -> (fun num2 -> num1 + num2)) b i
@@ -33,7 +33,7 @@
   let  i = 1
   let  sem = (((fun num1 -> (fun num2 -> (num1 + num2))) b) i)
 
-  $ ./clouse_demo.exe << EOF
+  $ ./closure_demo.exe << EOF
   > let rec fac_cps num =
   >   let helper num acc =
   >     if num = 0
@@ -48,7 +48,7 @@
     else ((fac_cps (num - 1)) (((fun acc -> (fun num -> (fun t -> (acc (num * t))))) acc) num)))))
     in (((helper fac_cps) num) (fun x -> x)))
 
-  $ ./clouse_demo.exe < manytests/typed/001fac.ml
+  $ ./closure_demo.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> 
     if (n <= 1)
     then 1
@@ -56,7 +56,7 @@
   let  main = 
     let  () = (print_int (fac 4))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/002fac.ml
+  $ ./closure_demo.exe < manytests/typed/002fac.ml
   let rec fac_cps = (fun n -> (fun k -> 
     if (n = 1)
     then (k 1)
@@ -64,7 +64,7 @@
   let  main = 
     let  () = (print_int ((fac_cps 4) (fun print_int -> print_int)))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/003fib.ml
+  $ ./closure_demo.exe < manytests/typed/003fib.ml
   let rec fib_acc = (fun a -> (fun b -> (fun n -> 
     if (n = 1)
     then b
@@ -82,7 +82,7 @@
     in 
     let  () = (print_int (fib 4))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/004manyargs.ml
+  $ ./closure_demo.exe < manytests/typed/004manyargs.ml
   let  wrap = (fun f -> 
     if (1 = 1)
     then f
@@ -102,7 +102,7 @@
     in 
     let  temp2 = ((((wrap test3) 1) 10) 100)
     in 0
-  $ ./clouse_demo.exe < manytests/typed/005fix.ml
+  $ ./closure_demo.exe < manytests/typed/005fix.ml
   let rec fix = (fun f -> (fun x -> ((f (fix f)) x)))
   let  fac = (fun self -> (fun n -> 
     if (n <= 1)
@@ -111,7 +111,7 @@
   let  main = 
     let  () = (print_int ((fix fac) 6))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/006partial.ml
+  $ ./closure_demo.exe < manytests/typed/006partial.ml
   let  foo = (fun b -> 
     if b
     then (fun foo -> (foo 2))
@@ -120,7 +120,7 @@
   let  main = 
     let  () = (print_int (foo 11))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/006partial2.ml
+  $ ./closure_demo.exe < manytests/typed/006partial2.ml
   let  foo = (fun a -> (fun b -> (fun c -> 
     let  () = (print_int a)
     in 
@@ -137,7 +137,7 @@
     in 
     let  () = (print_int foo)
     in 0
-  $ ./clouse_demo.exe < manytests/typed/006partial3.ml
+  $ ./closure_demo.exe < manytests/typed/006partial3.ml
   let  foo = (fun a -> 
     let  () = (print_int a)
     in ((fun print_int -> (fun b -> 
@@ -146,14 +146,14 @@
   let  main = 
     let  () = (((foo 4) 8) 9)
     in 0
-  $ ./clouse_demo.exe < manytests/typed/007order.ml
+  $ ./closure_demo.exe < manytests/typed/007order.ml
   let  _start = (fun () -> (fun () -> (fun a -> (fun () -> (fun b -> (fun _ -> (fun c -> (fun () -> (fun d -> (fun _ -> (fun _ -> 
     let  () = (print_int (a + b))
     in 
     let  () = (print_int __)
     in (((a * b) / _c) + d))))))))))))
   let  main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int -1)) 10000) -555555))
-  $ ./clouse_demo.exe < manytests/typed/008ascription.ml
+  $ ./closure_demo.exe < manytests/typed/008ascription.ml
   let  addi = (fun f -> (fun g -> (fun x -> ((f x) (g x)))))
   let  main = 
     let  () = (print_int (((addi (fun x -> (fun b -> 
@@ -161,11 +161,11 @@
     then (x 1)
     else (x * 2)))) ((fun _start -> (fun _ -> (fun start -> ((_start / 2) = 0)))) _start)) 4))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/009let_poly.ml
+  $ ./closure_demo.exe < manytests/typed/009let_poly.ml
   let  temp = 
     let  f = (fun x -> x)
     in ((f 1), (f true))
-  $ ./clouse_demo.exe < manytests/typed/015tuples.ml
+  $ ./closure_demo.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f -> (fun x -> ((f (fix f)) x)))
   let  map = (fun f -> (fun p -> 
     let  a b = p
@@ -203,7 +203,7 @@
     in 
     let  () = (print_int (even 4))
     in 0
-  $ ./clouse_demo.exe < manytests/typed/016lists.ml
+  $ ./closure_demo.exe < manytests/typed/016lists.ml
   let rec length = (fun xs -> (match xs with
   | [] -> 0
   | (h :: tl) -> (1 + (length tl)))
