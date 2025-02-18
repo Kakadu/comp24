@@ -34,7 +34,6 @@ type error =
   | Variable_not_found of string
   | Unification_failed of inf_type * inf_type
   | Illegal_pattern of Ast.pattern
-  | Is_not_function of inf_type
   | Unsupported_type
   | Incorrect_starting_point of Ast.expr
   | Empty_program
@@ -58,50 +57,6 @@ module R = struct
     | Ok a -> f a last
   ;;
 
-  let fail e st = st, Result.fail e
-  let return x last = last, Result.return x
-  let bind x f = x >>= f
-
-  module R = struct
-    type 'a t = var_id -> var_id * ('a, error) Result.t
-
-    let ( >>= ) : 'a 'b. 'a t -> ('a -> 'b t) -> 'b t =
-      fun m f st ->
-      let last, r = m st in
-      match r with
-      | Result.Error x -> last, Error x
-      | Ok a -> f a last
-    ;;
-
-    let fail e st = st, Result.fail e
-    let return x last = last, Result.return x
-    let bind x f = x >>= f
-
-    let fold lst ~init ~f =
-      List.fold lst ~init ~f:(fun acc e -> bind acc (fun acc -> f acc e))
-    ;;
-
-    let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
-      fun x f st ->
-      match x st with
-      | st, Ok x -> st, Ok (f x)
-      | st, Result.Error e -> st, Result.Error e
-    ;;
-
-    module Syntax = struct
-      let ( let* ) = bind
-      let ( >>= ) = bind
-    end
-
-    let fresh : int t = fun last -> last + 1, Result.Ok last
-    let get_fresh : int t = fun last -> last, Result.Ok last
-    let run m = snd (m 0)
-  end
-
-  let fold lst ~init ~f =
-    List.fold lst ~init ~f:(fun acc e -> bind acc (fun acc -> f acc e))
-  ;;
-
   let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
     fun x f st ->
     match x st with
@@ -109,13 +64,19 @@ module R = struct
     | st, Result.Error e -> st, Result.Error e
   ;;
 
+  let fail e st = st, Result.fail e
+  let return x last = last, Result.return x
+  let bind x f = x >>= f
+
+  let fold lst ~init ~f =
+    List.fold lst ~init ~f:(fun acc e -> bind acc (fun acc -> f acc e))
+  ;;
+
   module Syntax = struct
     let ( let* ) = bind
-    let ( >>= ) = bind
   end
 
   let fresh : int t = fun last -> last + 1, Result.Ok last
-  let get_fresh : int t = fun last -> last, Result.Ok last
   let run m = snd (m 0)
 end
 
@@ -356,7 +317,6 @@ module TypeEnv = struct
   ;;
 
   (* find names in env *)
-  let find_exn (name : var_name) (env : t) = Map.find_exn env name
   let find (name : var_name) (env : t) = Map.find env name
 
   (* get free vars from all schemes *)

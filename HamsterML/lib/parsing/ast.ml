@@ -42,7 +42,6 @@ type op =
   | Unary of uop
 [@@deriving show]
 
-(* Pattern is a value (dataType -> dataStructure) *)
 type pattern =
   | Const of value
   | Var of id
