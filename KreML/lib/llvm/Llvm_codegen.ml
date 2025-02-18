@@ -506,7 +506,7 @@ let codegen_program program =
             | Fun_without_env { arity; _ } | Fun_with_env { arity; _ } ->
               let all_params = [ ptr_type ] @ List.init arity (fun _ -> int_type) in
               if List.length all_params > max_args_count
-              then Utils.list_take max_args_count all_params
+              then Utils.ListUtils.take max_args_count all_params
               else all_params
           in
           let fnty = function_type int_type (Array.of_list params) in

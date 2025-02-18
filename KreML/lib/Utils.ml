@@ -93,14 +93,20 @@ let zip_idents_with_exprs p e =
 
 (* List utils *)
 
-let list_take count list =
-  let rec helper count acc list =
-    if count = 0
-    then acc
-    else (
-      match list with
-      | [] -> internalfail @@ Format.sprintf "List must have at least %i elements" count
-      | x :: xs -> helper (count - 1) (x :: acc) xs)
-  in
-  helper count [] list |> List.rev
-;;
+module ListUtils = struct
+  let take count list =
+    let rec helper count acc list =
+      if count = 0
+      then acc
+      else (
+        match list with
+        | [] -> internalfail @@ Format.sprintf "List must have at least %i elements" count
+        | x :: xs -> helper (count - 1) (x :: acc) xs)
+    in
+    helper count [] list |> List.rev
+  let foldi folder init list =
+    List.fold_left (fun (i, acc) elem -> i + 1,folder i acc elem) (0, init) list |> snd
+  let foldri folder list init =
+    List.fold_right (fun elem (i, acc) -> i + 1, folder i elem acc) list (0, init) |> snd
+  ;;
+end

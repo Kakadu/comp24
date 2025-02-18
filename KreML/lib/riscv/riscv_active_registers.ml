@@ -2,8 +2,17 @@ open Riscv
 
 
 type 'a t = 'a list
-let remove regs reg = List.filter ((<>) reg) regs
-let add regs reg = reg::regs
+let remove reg regs = List.filter (( <> ) reg) regs
+let add reg regs = reg :: regs
 let size regs = List.length regs
-let from_temps count =
-  List.init count (fun i -> Temp i) 
+let pop regs =
+  match regs with
+  | x::xs -> x, xs
+  | _ -> Utils.internalfail "Pop from empty registers storage"
+let remove_at regs idx = List.filteri (fun i _ -> i <> idx) regs
+let element_at regs idx = List.filteri (fun i _ -> i = idx) regs |> List.hd
+let with_ranges regs ranges = List.combine regs ranges
+let fold = List.fold_left
+let empty = []
+let available = List.init 7 (fun i -> Temp i)
+

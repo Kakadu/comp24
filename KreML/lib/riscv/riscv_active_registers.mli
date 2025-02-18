@@ -1,4 +1,3 @@
+include Active_registers_intf.S with type 'a t = 'a list 
+val available : Riscv.reg t
 
-
-include Active_registers_intf.S
-val from_temps : int -> Riscv.reg t

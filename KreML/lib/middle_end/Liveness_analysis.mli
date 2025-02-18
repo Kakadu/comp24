@@ -1,3 +1,5 @@
-type var_range = {name: string; s: int; e: int}
+open Flambda
 
-type fun_summary = va
+type range = { var: string; s: int; e: int }
+
+val analyse_fun : fl_fun -> range list
