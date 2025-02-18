@@ -40,7 +40,7 @@ let rec init_env acc = function
   | Let lets :: tl ->
     init_env
       (List.fold ~init:acc ~f:(fun acc (_, id_list, _) ->
-         (List.fold_left ~init:acc ~f:(fun acc id -> Set.union acc (Set.add set_empty id)))
+         (List.fold_left ~init:acc ~f:(fun acc id -> Set.add acc id))
            id_list)lets)
       tl
   | Expression _ :: tl -> init_env acc tl
@@ -161,6 +161,3 @@ let lambada_lift prog =
   let lift, _ = lift_fold prog in
   lift
 ;;
-
-let rec meven n = if n = 0 then 1 else modd (n - 1)
-and modd n = if n = 0 then 1 else meven (n - 1)
