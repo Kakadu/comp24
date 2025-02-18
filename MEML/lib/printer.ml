@@ -50,7 +50,7 @@ let rec expression_printer formatter e =
   | EVar (n, _) -> Format.fprintf formatter "%s" n
   | EFun (p, e) ->
     Format.fprintf formatter "(fun %a -> %a)" pattern_printer p expression_printer e
-  | EApp (e1, e2) ->
+  | EApp (e1, e2, _) ->
     Format.fprintf formatter "%a %a" expression_printer e1 expression_printer e2
   | EIfElse (i, t, e) ->
     Format.fprintf

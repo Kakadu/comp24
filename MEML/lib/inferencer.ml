@@ -344,7 +344,7 @@ let infer =
       let* s, ty = helper env2 e1 in
       let trez = TArrow (Subst.apply s v, ty) in
       return (s, trez)
-    | EApp (e1, e2) ->
+    | EApp (e1, e2, _) ->
       let* s1, t1 = helper env e1 in
       let* s2, t2 = helper (TypeEnv.apply s1 env) e2 in
       let* tv = fresh_var in

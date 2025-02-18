@@ -224,10 +224,11 @@ let parse_efun expr =
 (* EApp *)
 
 let parse_eapp e1 e2 =
-  lift2
-    (fun f args -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg)) args)
+  lift3
+    (fun f args ty -> List.fold_left ~init:f ~f:(fun f arg -> EApp (f, arg, ty)) args)
     (parse_evar <|> e1)
     (many1 (parse_evar <|> e2))
+    (parse_type)
 ;;
 
 (* ELetIn *)

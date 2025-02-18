@@ -31,7 +31,7 @@ let unrelated e =
     | EConst _ -> set_empty
     | EVar (n, _) -> Set.add set_empty n
     | EFun (p, e) -> bind_pattern p @@ helper e
-    | EApp (e1, e2) | EBinaryOp (_, e1, e2) | EList (e1, e2) ->
+    | EApp (e1, e2, _) | EBinaryOp (_, e1, e2) | EList (e1, e2) ->
       Set.union (helper e1) (helper e2)
     | EIfElse (i, t, e) -> Set.union (Set.union (helper i) (helper t)) (helper e)
     | ELetIn (_, n, e, ine) ->
@@ -88,7 +88,7 @@ let closure_expr gctx bindings =
       (match Map.find lctx n with
        | Some free ->
          let ids = List.map (Set.to_list free) ~f:(fun x -> EVar (x, TUnknown)) in
-         List.fold_left ids ~f:(fun f arg -> EApp (f, arg)) ~init:(EVar (n, TUnknown))
+         List.fold_left ids ~f:(fun f arg -> EApp (f, arg, TUnknown)) ~init:(EVar (n, TUnknown))
        | None -> EVar (n, TUnknown))
     | EFun (p, e) ->
       let unrelated = unrelated (EFun (p, e)) in
@@ -103,14 +103,14 @@ let closure_expr gctx bindings =
       let new_fun =
         List.fold_right ~f:(fun p e -> EFun (p, e)) unrelated_patterns ~init:closured_fun
       in
-      List.fold_left unrelated_exps ~f:(fun f arg -> EApp (f, arg)) ~init:new_fun
+      List.fold_left unrelated_exps ~f:(fun f arg -> EApp (f, arg, TUnknown)) ~init:new_fun
     | EBinaryOp (op, e1, e2) ->
       EBinaryOp
         ( op
         , helper lts lctx (Set.diff gctx lts) e1
         , helper lts lctx (Set.diff gctx lts) e2 )
-    | EApp (e1, e2) ->
-      EApp (helper lts lctx (Set.diff gctx lts) e1, helper lts lctx (Set.diff gctx lts) e2)
+    | EApp (e1, e2, _) ->
+      EApp (helper lts lctx (Set.diff gctx lts) e1, helper lts lctx (Set.diff gctx lts) e2, TUnknown)
     | EIfElse (i, t, e) ->
       EIfElse (helper lts lctx gctx i, helper lts lctx gctx t, helper lts lctx gctx e)
     | ELetIn (r, n, e, ein) ->

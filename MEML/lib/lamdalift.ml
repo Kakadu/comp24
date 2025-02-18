@@ -61,7 +61,7 @@ let rec lift_expression ctx acc gctx state = function
     let lt, acc, state = lift_expression ctx acc gctx state t in
     let le, acc, state = lift_expression ctx acc gctx state e in
     LLIfElse (li, lt, le), acc, state
-  | EApp (e1, e2) ->
+  | EApp (e1, e2, _) ->
     let le1, acc, state = lift_expression ctx acc gctx state e1 in
     let le2, acc, state = lift_expression ctx acc gctx state e2 in
     LLApp (le1, le2), acc, state
