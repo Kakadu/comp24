@@ -288,3 +288,12 @@ let%test _ =
     "let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl"
   = TArrow (TArrow (TPVar 5, TUnit), TArrow (TList (TPVar 5), TUnit))
 ;;
+
+(* Let and *)
+
+let%test _ =
+  infer_expr
+    "let rec meven n = if n = 0 then 1 else modd (n - 1) and modd n = if n = 0 then 1 \
+     else meven (n - 1) in meven 10"
+  = TInt
+;;
