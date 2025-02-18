@@ -5,27 +5,28 @@
 module VarMap = Stdlib.Map.Make (String)
 module VarSet = Stdlib.Set.Make (String)
 
-let std_var_set = 
-  let init_var_set = VarSet.empty in 
-  let init_var_set = VarSet.add "( * )" init_var_set in 
-  let init_var_set = VarSet.add "( / )" init_var_set in 
-  let init_var_set = VarSet.add "( + )" init_var_set in 
-  let init_var_set = VarSet.add "( - )" init_var_set in 
-  let init_var_set = VarSet.add "( = )" init_var_set in 
-  let init_var_set = VarSet.add "( == )" init_var_set in 
-  let init_var_set = VarSet.add "( <> )" init_var_set in 
-  let init_var_set = VarSet.add "( != )" init_var_set in 
-  let init_var_set = VarSet.add "( < )" init_var_set in 
-  let init_var_set = VarSet.add "( <= )" init_var_set in 
-  let init_var_set = VarSet.add "( > )" init_var_set in 
-  let init_var_set = VarSet.add "( >= )" init_var_set in 
-  let init_var_set = VarSet.add "( && )" init_var_set in 
-  let init_var_set = VarSet.add "( || )" init_var_set in 
-  let init_var_set = VarSet.add "print_int" init_var_set in 
-  let init_var_set = VarSet.add "print_string" init_var_set in 
-  let init_var_set = VarSet.add "( ~+ )" init_var_set in 
+let std_var_set =
+  let init_var_set = VarSet.empty in
+  let init_var_set = VarSet.add "( * )" init_var_set in
+  let init_var_set = VarSet.add "( / )" init_var_set in
+  let init_var_set = VarSet.add "( + )" init_var_set in
+  let init_var_set = VarSet.add "( - )" init_var_set in
+  let init_var_set = VarSet.add "( = )" init_var_set in
+  let init_var_set = VarSet.add "( == )" init_var_set in
+  let init_var_set = VarSet.add "( <> )" init_var_set in
+  let init_var_set = VarSet.add "( != )" init_var_set in
+  let init_var_set = VarSet.add "( < )" init_var_set in
+  let init_var_set = VarSet.add "( <= )" init_var_set in
+  let init_var_set = VarSet.add "( > )" init_var_set in
+  let init_var_set = VarSet.add "( >= )" init_var_set in
+  let init_var_set = VarSet.add "( && )" init_var_set in
+  let init_var_set = VarSet.add "( || )" init_var_set in
+  let init_var_set = VarSet.add "print_int" init_var_set in
+  let init_var_set = VarSet.add "print_string" init_var_set in
+  let init_var_set = VarSet.add "( ~+ )" init_var_set in
   let init_var_set = VarSet.add "( ~- )" init_var_set in
-init_var_set
+  init_var_set
+;;
 
 let get_vars_from_pattern pattern =
   let rec helper acc = function
@@ -39,12 +40,24 @@ let get_vars_from_pattern pattern =
   helper VarSet.empty pattern
 ;;
 
-let get_vars_from_pattern_lst pattern_lst = 
+let get_vars_from_pattern_lst pattern_lst =
   let rec helper acc = function
-  | [] -> acc 
-  | [ h ] -> VarSet.fold (fun new_var acc -> VarSet.add new_var acc) (get_vars_from_pattern h) acc
-  | h :: tl -> helper (VarSet.fold (fun new_var acc -> VarSet.add new_var acc) (get_vars_from_pattern h) acc) tl
-  in helper VarSet.empty pattern_lst
+    | [] -> acc
+    | [ h ] ->
+      VarSet.fold
+        (fun new_var acc -> VarSet.add new_var acc)
+        (get_vars_from_pattern h)
+        acc
+    | h :: tl ->
+      helper
+        (VarSet.fold
+           (fun new_var acc -> VarSet.add new_var acc)
+           (get_vars_from_pattern h)
+           acc)
+        tl
+  in
+  helper VarSet.empty pattern_lst
+;;
 
 let get_vars_from_expr expr env =
   let rec helper acc env = function
@@ -55,8 +68,7 @@ let get_vars_from_expr expr env =
        | None -> VarSet.add var_name acc)
     | Ast.ETuple exp_lst -> List.fold_left (fun acc exp -> helper acc env exp) acc exp_lst
     | Ast.EFun (pat_lst, expr) ->
-      let vars_from_pattern = get_vars_from_pattern_lst pat_lst
-      in
+      let vars_from_pattern = get_vars_from_pattern_lst pat_lst in
       let new_env =
         VarSet.fold (fun var_name acc -> VarSet.add var_name acc) vars_from_pattern env
       in
@@ -65,7 +77,7 @@ let get_vars_from_expr expr env =
       let vars_from_pattern = get_vars_from_pattern pat in
       let new_acc = helper acc env expr1 in
       let new_env =
-        VarSet.fold (fun var_name acc -> VarSet.add var_name acc) vars_from_pattern env 
+        VarSet.fold (fun var_name acc -> VarSet.add var_name acc) vars_from_pattern env
       in
       helper new_acc new_env expr2
     | Ast.ELet (Ast.Recursive, (pat, expr1), expr2) ->
@@ -152,13 +164,13 @@ let rec convert_expr env global_env = function
             vars_to_add
         in
         let pat_to_add = List.rev rev_pat_to_add in
-        (match expr1 with 
-        | Ast.EFun (pat_lst, fexpr) ->
-          let all_pats = List.append pat_to_add pat_lst in 
-          pat, Ast.EFun (all_pats, convert_expr env global_env fexpr)
-        | _ -> 
-          let converted_expr1 = convert_expr env global_env expr1 in 
-         pat, Ast.EFun (pat_to_add, converted_expr1))
+        (match expr1 with
+         | Ast.EFun (pat_lst, fexpr) ->
+           let all_pats = List.append pat_to_add pat_lst in
+           pat, Ast.EFun (all_pats, convert_expr env global_env fexpr)
+         | _ ->
+           let converted_expr1 = convert_expr env global_env expr1 in
+           pat, Ast.EFun (pat_to_add, converted_expr1))
     in
     let vars_from_pattern = VarSet.elements (get_vars_from_pattern pat) in
     let updated_env =
@@ -187,10 +199,10 @@ let rec convert_expr env global_env = function
     let new_value_binding =
       match vars_to_add with
       | [] ->
-        (match expr1 with 
-        | Ast.EFun (pat_lst, fexpr) -> 
-          pat, Ast.EFun (pat_lst, convert_expr env global_env fexpr)
-        | _ -> pat, convert_expr env global_env expr1)
+        (match expr1 with
+         | Ast.EFun (pat_lst, fexpr) ->
+           pat, Ast.EFun (pat_lst, convert_expr env global_env fexpr)
+         | _ -> pat, convert_expr env global_env expr1)
       | _ ->
         let rev_pat_to_add =
           List.fold_left
@@ -201,13 +213,13 @@ let rec convert_expr env global_env = function
             vars_to_add
         in
         let pat_to_add = List.rev rev_pat_to_add in
-        (match expr1 with 
-        | Ast.EFun (pat_lst, fexpr) ->
-          let all_pats = List.append pat_to_add pat_lst in 
-          pat, Ast.EFun (all_pats, convert_expr env global_env fexpr)
-        | _ -> 
-          let converted_expr1 = convert_expr env global_env expr1 in 
-         pat, Ast.EFun (pat_to_add, converted_expr1))
+        (match expr1 with
+         | Ast.EFun (pat_lst, fexpr) ->
+           let all_pats = List.append pat_to_add pat_lst in
+           pat, Ast.EFun (all_pats, convert_expr env global_env fexpr)
+         | _ ->
+           let converted_expr1 = convert_expr env global_env expr1 in
+           pat, Ast.EFun (pat_to_add, converted_expr1))
     in
     let updated_env =
       List.fold_left
@@ -253,13 +265,14 @@ let rec convert_expr env global_env = function
     Ast.EType (new_expr, typ)
 ;;
 
-let get_pats_lst_from_value_binding_lst value_binding_lst = 
+let get_pats_lst_from_value_binding_lst value_binding_lst =
   List.fold_left
-  (fun acc value_binding ->
-    let pat, _ = value_binding in 
-    pat :: acc)
-  []
-  value_binding_lst
+    (fun acc value_binding ->
+      let pat, _ = value_binding in
+      pat :: acc)
+    []
+    value_binding_lst
+;;
 
 let convert_structure_item global_env = function
   | Ast.SILet (Ast.Nonrecursive, value_binding_lst) ->
@@ -305,7 +318,7 @@ let convert_structure global_env structure =
         let vars_from_pattern =
           match structure_item with
           | Ast.SILet (_, value_binding_lst) ->
-            let pat_lst = get_pats_lst_from_value_binding_lst value_binding_lst in 
+            let pat_lst = get_pats_lst_from_value_binding_lst value_binding_lst in
             VarSet.elements (get_vars_from_pattern_lst pat_lst)
           | Ast.SIExpr _ -> []
         in

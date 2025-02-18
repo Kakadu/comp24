@@ -9,6 +9,8 @@
   Parser
   Inferencer
   Typedtree
+  Simple_ast
+  Ast_simplifier
   Closure_conversion)
  (libraries base angstrom)
  (preprocess

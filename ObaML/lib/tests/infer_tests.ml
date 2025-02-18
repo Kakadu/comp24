@@ -365,3 +365,10 @@ let%expect_test "" =
     val a : 'a -> 'b
      |}]
 ;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let (a, b) = (fun x -> (4, x)) 4;; |};
+  [%expect {|
+    val a : 'a -> 'b
+     |}]
+;;

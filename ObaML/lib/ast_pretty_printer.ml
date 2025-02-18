@@ -83,8 +83,9 @@ and print_expr fmt = function
 
 and print_value_binding fmt value_binding =
   let pat, expr = value_binding in
-  match expr with 
-  | Ast.EFun (pat_lst, fexpr) -> fprintf fmt "%a = %a" print_pattern_lst (pat :: pat_lst) print_expr fexpr
+  match expr with
+  | Ast.EFun (pat_lst, fexpr) ->
+    fprintf fmt "%a = %a" print_pattern_lst (pat :: pat_lst) print_expr fexpr
   | _ -> fprintf fmt "%a = %a" print_pattern pat print_expr expr
 ;;
 
