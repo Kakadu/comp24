@@ -1,6 +1,6 @@
 (library
  (name test_qcheck)
- (libraries parser test_parser qcheck)
+ (libraries parser test_parser quickcheck)
   (preprocess
   (pps ppx_expect ppx_deriving.show))
  (inline_tests))

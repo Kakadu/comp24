@@ -6,26 +6,6 @@ open Parser.Ast
 open Format
 open Unparser_utils
 
-let is_infix_operator s =
-  let is_core_operator_char = function
-    | '$' | '&' | '*' | '+' | '-' | '/' | '=' | '>' | '@' | '^' | '|' -> true
-    | _ -> false
-  in
-  let is_operator_char = function
-    | '~' | '!' | '?' | ':' | '.' | '%' | '<' -> true
-    | c -> is_core_operator_char c
-  in
-  let len = String.length s in
-  if len = 0
-  then false
-  else (
-    match s.[0] with
-    | '#' -> len > 1 && String.for_all is_operator_char s
-    | c when is_core_operator_char c || c = '%' || c = '<' ->
-      String.for_all is_operator_char s
-    | _ -> false)
-;;
-
 let is_unary_operator op = List.mem op [ "-"; "+."; "-."; "~-"; "~+." ]
 
 let rec unparse_expr ppf = function
@@ -46,18 +26,6 @@ let rec unparse_expr ppf = function
   | Exp_fun (pl, e) ->
     fprintf ppf "fun %a -> %a" Pattern_unparser.unparse_pattern_list pl unparse_expr e
   | Exp_function cl -> fprintf ppf "function %a" unparse_case_list cl
-  | Exp_apply (Exp_ident op, arg) when is_unary_operator op ->
-    fprintf ppf "%a %a" unparse_expr (Exp_ident op) unparse_apply_helper arg
-  | Exp_apply (Exp_apply (Exp_ident op, left), right) when is_infix_operator op ->
-    fprintf
-      ppf
-      "( %a ) %a %a"
-      unparse_expr
-      (Exp_ident op)
-      unparse_apply_helper
-      left
-      unparse_apply_helper
-      right
   | Exp_apply (e1, e2) -> fprintf ppf "%a %a" unparse_expr e1 unparse_apply_helper e2
   | Exp_match (e, cl) ->
     fprintf ppf "match %a with %a" unparse_expr e unparse_case_list cl

@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open Test_parser.Test_utils
-open Qcheck
+open Quickcheck
 
 let test_parser str =
   pp_result Main_unparser.unparse_structure @@ Parser.Main_parser.parse str
