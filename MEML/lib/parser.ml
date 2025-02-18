@@ -103,7 +103,7 @@ let parse_int =
 let parse_nil = parse_white_space *> ((fun _ -> CNil) <$> string "[]")
 
 (* Var parsers *)
-let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool")
+let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool") 
 let parse_arrow = parse_empty @@ stoken "->"
 
 let parse_types =
@@ -316,11 +316,11 @@ let parse_name = parse_rename <|> parse_var
 
 let parse_name_list =
   brackets_or_not
-  @@ (lift2
-        (fun a b -> a :: b)
-        ((parse_rename <|> parse_var) <* stoken ",")
-        (sep_by1 (stoken ",") (parse_rename <|> parse_var)))
-  <|> (parse_rename <|> parse_var >>| fun x -> [x])
+  @@ lift2
+       (fun a b -> a :: b)
+       (parse_rename <|> parse_var <* stoken ",")
+       (sep_by1 (stoken ",") (parse_rename <|> parse_var))
+  <|> (parse_rename <|> parse_var >>| fun x -> [ x ])
 ;;
 
 let parse_eletin expr =

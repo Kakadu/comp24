@@ -68,7 +68,10 @@ let rec expression_printer formatter e =
       "\n  let %a %a = %a\n  in %a"
       rec_printer
       r
-      (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf " ") Format.pp_print_string) n
+      (Format.pp_print_list
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf " ")
+         Format.pp_print_string)
+      n
       expression_printer
       e
       expression_printer
@@ -96,7 +99,8 @@ let rec expression_printer formatter e =
   | EMatch (m, p) ->
     Format.fprintf formatter "(match %a with" expression_printer m;
     List.iter
-      (fun (pat, exp) -> Format.fprintf formatter "\n| %a -> %a" pattern_printer pat expression_printer exp)
+      (fun (pat, exp) ->
+        Format.fprintf formatter "\n| %a -> %a" pattern_printer pat expression_printer exp)
       p
 ;;
 
@@ -104,14 +108,42 @@ let bindings_printer formatter bindings =
   List.iter
     (fun bind ->
       (match bind with
-      | Let (r, n, e) ->
-        (* Выводим список строк с разделителем " " *)
-        Format.fprintf formatter "let %a %a = %a"
-          rec_printer r
-          (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ") Format.pp_print_string) n
-          expression_printer e
-      | Expression e -> expression_printer formatter e);
-      Format.fprintf formatter "\n")
+      | Let lets ->
+        (* lets — это список (r, n, e) *)
+        List.iteri
+          (fun i (r, n, e) ->
+            if i = 0
+            then
+              (* Первый элемент: используем "let" *)
+              Format.fprintf
+                formatter
+                "let %a %a = %a\n"
+                rec_printer
+                r
+                (Format.pp_print_list
+                   ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
+                   Format.pp_print_string)
+                n
+                expression_printer
+                e
+            else
+              (* Остальные элементы: используем "and" *)
+              Format.fprintf
+                formatter
+                "and %a %a = %a\n"
+                rec_printer
+                r
+                (Format.pp_print_list
+                   ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
+                   Format.pp_print_string)
+                n
+                expression_printer
+                e)
+          lets
+      | Expression e ->
+        expression_printer formatter e;
+        Format.fprintf formatter "\n"))
     bindings
+;;
 
 let printer bindings = Format.asprintf "%a" bindings_printer bindings
