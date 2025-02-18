@@ -1,15 +1,15 @@
 
-  $ ./lamdalift_demo.exe << EOF
+  $ ./lambdalift_demo.exe << EOF
   > let sum x = let num2 y = x + y in test2
   let  lambada0 test2 x y  = (x + y)
   let  sum x  = test2
 
-  $ ./lamdalift_demo.exe << EOF
+  $ ./lambdalift_demo.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   let  lambada0 x y i  = (x, y, i)
   let  test1 (x, y)  = ((lambada0 x) y)
 
-  $ ./lamdalift_demo.exe << EOF
+  $ ./lambdalift_demo.exe << EOF
   > let vosem = 
   >   let odin = 1 in 
   >   let dva = 2 in
@@ -23,7 +23,7 @@
     let  dva = 2
     in (((lambada0 dva) odin) 5)
 
-  $ ./lamdalift_demo.exe << EOF
+  $ ./lambdalift_demo.exe << EOF
   > let b = 6;;
   > let lambada0 = 1;;
   > let i = 1;;
@@ -38,7 +38,7 @@
   let  lambada2 num1 num2  = (num1 + num2)
   let  sem  = ((lambada2 b) i)
 
-  $ ./lamdalift_demo.exe << EOF
+  $ ./lambdalift_demo.exe << EOF
   > let rec fac_cps num =
   >   let helper num acc =
   >     if num = 0
@@ -54,7 +54,7 @@
   let  lambada2 x  = x
   let rec fac_cps num  = (((lambada0 fac_cps) num) lambada2)
 
-  $ ./lamdalift_demo.exe < manytests/typed/001fac.ml
+  $ ./lambdalift_demo.exe < manytests/typed/001fac.ml
   let rec fac n  = 
     if (n <= 1)
     then 1
@@ -62,7 +62,7 @@
   let  main  = 
     let  () = (print_int (fac 4))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/002fac.ml
+  $ ./lambdalift_demo.exe < manytests/typed/002fac.ml
   let  lambada0 k n p  = (k (p * n))
   let rec fac_cps n k  = 
     if (n = 1)
@@ -72,7 +72,7 @@
   let  main  = 
     let  () = (print_int ((fac_cps 4) lambada1))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/003fib.ml
+  $ ./lambdalift_demo.exe < manytests/typed/003fib.ml
   let rec fib_acc a b n  = 
     if (n = 1)
     then b
@@ -90,7 +90,7 @@
     in 
     let  () = (print_int (fib 4))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/004manyargs.ml
+  $ ./lambdalift_demo.exe < manytests/typed/004manyargs.ml
   let  wrap f  = 
     if (1 = 1)
     then f
@@ -110,7 +110,7 @@
     in 
     let  temp2 = ((((wrap test3) 1) 10) 100)
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/005fix.ml
+  $ ./lambdalift_demo.exe < manytests/typed/005fix.ml
   let rec fix f x  = ((f (fix f)) x)
   let  fac self n  = 
     if (n <= 1)
@@ -119,7 +119,7 @@
   let  main  = 
     let  () = (print_int ((fix fac) 6))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/006partial.ml
+  $ ./lambdalift_demo.exe < manytests/typed/006partial.ml
   let  lambada0 foo  = (foo 2)
   let  lambada1 foo  = (foo * 10)
   let  foo b  = 
@@ -130,7 +130,7 @@
   let  main  = 
     let  () = (print_int (foo 11))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/006partial2.ml
+  $ ./lambdalift_demo.exe < manytests/typed/006partial2.ml
   let  foo a b c  = 
     let  () = (print_int a)
     in 
@@ -147,7 +147,7 @@
     in 
     let  () = (print_int foo)
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/006partial3.ml
+  $ ./lambdalift_demo.exe < manytests/typed/006partial3.ml
   let  lambada1 print_int c  = (print_int c)
   let  lambada0 print_int b  = 
     let  () = (print_int b)
@@ -158,14 +158,14 @@
   let  main  = 
     let  () = (((foo 4) 8) 9)
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/007order.ml
+  $ ./lambdalift_demo.exe < manytests/typed/007order.ml
   let  _start () () a () b _ c () d _ _  = 
     let  () = (print_int (a + b))
     in 
     let  () = (print_int __)
     in (((a * b) / _c) + d)
   let  main  = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int -1)) 10000) -555555))
-  $ ./lamdalift_demo.exe < manytests/typed/008ascription.ml
+  $ ./lambdalift_demo.exe < manytests/typed/008ascription.ml
   let  addi f g x  = ((f x) (g x))
   let  lambada0 x b  = 
     if b
@@ -175,10 +175,10 @@
   let  main  = 
     let  () = (print_int (((addi lambada0) (lambada1 _start)) 4))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/009let_poly.ml
+  $ ./lambdalift_demo.exe < manytests/typed/009let_poly.ml
   let  lambada0 x  = x
   let  temp  = ((lambada0 1), (lambada0 true))
-  $ ./lamdalift_demo.exe < manytests/typed/015tuples.ml
+  $ ./lambdalift_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x  = ((f (fix f)) x)
   let  map f p  = 
     let  a, b = p
@@ -217,7 +217,7 @@
     in 
     let  () = (print_int (even 4))
     in 0
-  $ ./lamdalift_demo.exe < manytests/typed/016lists.ml
+  $ ./lambdalift_demo.exe < manytests/typed/016lists.ml
   let rec length xs  = (match xs with
   | [] -> 0
   | (h :: tl) -> (1 + (length tl))

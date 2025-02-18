@@ -1,5 +1,5 @@
 open MEML_lib.Closure
-open MEML_lib.Lamdalift
+open MEML_lib.Lambdalift
 open MEML_lib.Llprinter
 
 let () =
