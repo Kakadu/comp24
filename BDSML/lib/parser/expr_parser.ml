@@ -74,7 +74,7 @@ let parse_infix_with_prefixes prefixes = choice (List.map parse_infix_op prefixe
 
 let parse_bop (op : string t) =
   let+ parsed = ws *> op in
-  let ident = Exp_ident parsed in
+  let ident = Exp_ident ("( " ^ parsed ^ " )") in
   fun e1 e2 -> Exp_apply (Exp_apply (ident, e1), e2)
 ;;
 

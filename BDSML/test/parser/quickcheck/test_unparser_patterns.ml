@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open Test_parser.Test_utils
-open Qcheck
+open Quickcheck
 
 let test_pattern_unparser str =
   pp_result Pattern_unparser.unparse_pattern
@@ -62,7 +62,8 @@ let%expect_test "test list 4" =
 
 let%expect_test "test list 5" =
   test_pattern_unparser "[[[1]; [2]]; [[3]; [4]]]";
-  [%expect {| (::) ((::) ((::) (1, []), (::) ((::) (2, []), [])), (::) ((::) ((::) (3, []), (::) ((::) (4, []), [])), [])) |}]
+  [%expect
+    {| (::) ((::) ((::) (1, []), (::) ((::) (2, []), [])), (::) ((::) ((::) (3, []), (::) ((::) (4, []), [])), [])) |}]
 ;;
 
 let%expect_test "cons test" =
