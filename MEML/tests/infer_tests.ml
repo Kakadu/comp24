@@ -69,7 +69,7 @@ let%expect_test "ETuple_ty_test" =
 let%expect_test "let plusfive x = let five a = a + 5 in five x" =
   print_prog_result
     [ Let
-        ( Notrec
+        [( Notrec
         , ["plusfive"]
         , EFun
             ( PVar ("x", TUnknown)
@@ -79,7 +79,7 @@ let%expect_test "let plusfive x = let five a = a + 5 in five x" =
                 , EFun
                     ( PVar ("a", TUnknown)
                     , EBinaryOp (Add, EVar ("a", TUnknown), EConst (CInt 5)) )
-                , EApp (EVar ("five", TUnknown), EVar ("x", TUnknown)) ) ) )
+                , EApp (EVar ("five", TUnknown), EVar ("x", TUnknown)) ) ) )]
     ];
   [%expect {| plusfive : int -> int |}]
 ;;
@@ -87,10 +87,10 @@ let%expect_test "let plusfive x = let five a = a + 5 in five x" =
 let%expect_test "let f (x: int) = x + 4" =
   print_prog_result
     [ Let
-        ( Notrec
+        [( Notrec
         , ["f"]
         , EFun (PVar ("x", TInt), EBinaryOp (Add, EVar ("x", TUnknown), EConst (CInt 4)))
-        )
+        )]
     ];
   [%expect {| f : int -> int |}]
 ;;
@@ -98,13 +98,13 @@ let%expect_test "let f (x: int) = x + 4" =
 let%expect_test "let f x y = x + y" =
   print_prog_result
     [ Let
-        ( Notrec
+        [( Notrec
         , ["f"]
         , EFun
             ( PVar ("x", TUnknown)
             , EFun
                 ( PVar ("y", TUnknown)
-                , EBinaryOp (Add, EVar ("x", TUnknown), EVar ("y", TUnknown)) ) ) )
+                , EBinaryOp (Add, EVar ("x", TUnknown), EVar ("y", TUnknown)) ) ) )]
     ];
   [%expect {| f : int -> int -> int |}]
 ;;
@@ -112,7 +112,7 @@ let%expect_test "let f x y = x + y" =
 let%expect_test "let idk (fs: int) (sn: int) = fs + sn * fs" =
   print_prog_result
     [ Let
-        ( Notrec
+        [( Notrec
         , ["idk"]
         , EFun
             ( PVar ("fs", TInt)
@@ -122,7 +122,7 @@ let%expect_test "let idk (fs: int) (sn: int) = fs + sn * fs" =
                     ( Add
                     , EVar ("fs", TUnknown)
                     , EBinaryOp (Mul, EVar ("sn", TUnknown), EVar ("fs", TUnknown)) ) ) )
-        )
+        )]
     ];
   [%expect {| idk : int -> int -> int |}]
 ;;

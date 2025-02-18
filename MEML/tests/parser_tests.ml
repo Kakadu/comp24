@@ -248,14 +248,15 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["plusfive"],
-       (EFun ((PVar ("x", TUnknown)),
-          (ELetIn (Notrec, ["five"],
-             (EFun ((PVar ("a", TUnknown)),
-                (EBinaryOp (Add, (EVar ("a", TUnknown)), (EConst (CInt 5)))))),
-             (EApp ((EVar ("five", TUnknown)), (EVar ("x", TUnknown))))))
-          ))
-       )) |}]
+    (Let
+       [(Notrec, ["plusfive"],
+         (EFun ((PVar ("x", TUnknown)),
+            (ELetIn (Notrec, ["five"],
+               (EFun ((PVar ("a", TUnknown)),
+                  (EBinaryOp (Add, (EVar ("a", TUnknown)), (EConst (CInt 5)))))),
+               (EApp ((EVar ("five", TUnknown)), (EVar ("x", TUnknown))))))
+            )))
+         ]) |}]
 ;;
 
 let%expect_test "bindings_test" =
@@ -270,12 +271,14 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["Add"],
-       (EFun ((PVar ("x", TUnknown)),
-          (EFun ((PVar ("y", TUnknown)),
-             (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
-          ))
-       ))|}]
+    (Let
+       [(Notrec, ["Add"],
+         (EFun ((PVar ("x", TUnknown)),
+            (EFun ((PVar ("y", TUnknown)),
+               (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))
+               ))
+            )))
+         ])|}]
 ;;
 
 let%expect_test "bindings_test" =
@@ -283,12 +286,14 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["f"],
-       (EFun ((PVar ("x", TInt)),
-          (EFun ((PVar ("y", TInt)),
-             (EBinaryOp (Add, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
-          ))
-       ))
+    (Let
+       [(Notrec, ["f"],
+         (EFun ((PVar ("x", TInt)),
+            (EFun ((PVar ("y", TInt)),
+               (EBinaryOp (Add, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -324,10 +329,11 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["f"],
-       (EFun ((PVar ("x", TInt)),
-          (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 4))))))
-       ))
+    (Let
+       [(Notrec, ["f"],
+         (EFun ((PVar ("x", TInt)),
+            (EBinaryOp (Add, (EVar ("x", TUnknown)), (EConst (CInt 4)))))))
+         ])
  |}]
 ;;
 
@@ -354,20 +360,23 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Rec, ["fib"],
-       (EFun ((PVar ("n", TUnknown)),
-          (EIfElse (
-             (EBinaryOp (Less, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
-             (EConst (CInt 1)),
-             (EBinaryOp (Add,
-                (EApp ((EVar ("fib", TUnknown)),
-                   (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 1)))))),
-                (EApp ((EVar ("fib", TUnknown)),
-                   (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 2))))))
-                ))
-             ))
-          ))
-       ))
+    (Let
+       [(Rec, ["fib"],
+         (EFun ((PVar ("n", TUnknown)),
+            (EIfElse (
+               (EBinaryOp (Less, (EVar ("n", TUnknown)), (EConst (CInt 1)))),
+               (EConst (CInt 1)),
+               (EBinaryOp (Add,
+                  (EApp ((EVar ("fib", TUnknown)),
+                     (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 1))))
+                     )),
+                  (EApp ((EVar ("fib", TUnknown)),
+                     (EBinaryOp (Sub, (EVar ("n", TUnknown)), (EConst (CInt 2))))
+                     ))
+                  ))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -384,34 +393,37 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Rec, ["cps_fact"],
-       (EFun ((PVar ("x", TUnknown)),
-          (ELetIn (Notrec, ["helper"],
-             (EFun ((PVar ("x", TUnknown)),
-                (EFun ((PVar ("acc", TUnknown)),
-                   (EIfElse (
-                      (EBinaryOp (Eq, (EVar ("x", TUnknown)), (EConst (CInt 1)))),
-                      (EApp ((EVar ("acc", TUnknown)), (EVar ("x", TUnknown)))),
-                      (EApp (
-                         (EApp ((EVar ("helper", TUnknown)),
-                            (EBinaryOp (Sub, (EVar ("x", TUnknown)),
-                               (EConst (CInt 1))))
-                            )),
-                         (EFun ((PVar ("n", TUnknown)),
-                            (EBinaryOp (Mul, (EVar ("n", TUnknown)),
-                               (EApp ((EVar ("acc", TUnknown)),
-                                  (EVar ("x", TUnknown))))
-                               ))
-                            ))
-                         ))
-                      ))
-                   ))
-                )),
-             (EApp ((EApp ((EVar ("helper", TUnknown)), (EVar ("x", TUnknown)))),
-                (EFun ((PVar ("a", TUnknown)), (EVar ("a", TUnknown))))))
-             ))
-          ))
-       ))
+    (Let
+       [(Rec, ["cps_fact"],
+         (EFun ((PVar ("x", TUnknown)),
+            (ELetIn (Notrec, ["helper"],
+               (EFun ((PVar ("x", TUnknown)),
+                  (EFun ((PVar ("acc", TUnknown)),
+                     (EIfElse (
+                        (EBinaryOp (Eq, (EVar ("x", TUnknown)), (EConst (CInt 1))
+                           )),
+                        (EApp ((EVar ("acc", TUnknown)), (EVar ("x", TUnknown)))),
+                        (EApp (
+                           (EApp ((EVar ("helper", TUnknown)),
+                              (EBinaryOp (Sub, (EVar ("x", TUnknown)),
+                                 (EConst (CInt 1))))
+                              )),
+                           (EFun ((PVar ("n", TUnknown)),
+                              (EBinaryOp (Mul, (EVar ("n", TUnknown)),
+                                 (EApp ((EVar ("acc", TUnknown)),
+                                    (EVar ("x", TUnknown))))
+                                 ))
+                              ))
+                           ))
+                        ))
+                     ))
+                  )),
+               (EApp (
+                  (EApp ((EVar ("helper", TUnknown)), (EVar ("x", TUnknown)))),
+                  (EFun ((PVar ("a", TUnknown)), (EVar ("a", TUnknown))))))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -420,16 +432,17 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["f"],
-       (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
-          (EFun ((PVar ("x", TInt)),
-             (EFun ((PVar ("y", TInt)),
-                (EApp ((EApp ((EVar ("g", TUnknown)), (EVar ("x", TUnknown)))),
-                   (EVar ("y", TUnknown))))
-                ))
-             ))
-          ))
-       ))
+    (Let
+       [(Notrec, ["f"],
+         (EFun ((PVar ("g", (TArrow (TInt, (TArrow (TInt, TInt)))))),
+            (EFun ((PVar ("x", TInt)),
+               (EFun ((PVar ("y", TInt)),
+                  (EApp ((EApp ((EVar ("g", TUnknown)), (EVar ("x", TUnknown)))),
+                     (EVar ("y", TUnknown))))
+                  ))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -438,12 +451,14 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["Add"],
-       (EFun ((PVar ("x", TInt)),
-          (EFun ((PVar ("y", TInt)),
-             (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))))
-          ))
-       ))
+    (Let
+       [(Notrec, ["Add"],
+         (EFun ((PVar ("x", TInt)),
+            (EFun ((PVar ("y", TInt)),
+               (EBinaryOp (Sub, (EVar ("x", TUnknown)), (EVar ("y", TUnknown))))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -452,34 +467,35 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["h"],
-       (EFun ((PVar ("f1", TUnknown)),
-          (EFun ((PVar ("f2", TUnknown)),
-             (EFun ((PVar ("f3", TUnknown)),
-                (EFun ((PVar ("f4", TUnknown)),
-                   (EFun ((PVar ("f5", TUnknown)),
-                      (EFun ((PVar ("f6", TUnknown)),
-                         (EFun ((PVar ("f7", TUnknown)),
-                            (EApp ((EVar ("f1", TUnknown)),
-                               (EApp ((EVar ("f2", TUnknown)),
-                                  (EApp ((EVar ("f3", TUnknown)),
-                                     (EApp ((EVar ("f4", TUnknown)),
-                                        (EApp ((EVar ("f5", TUnknown)),
-                                           (EApp ((EVar ("f6", TUnknown)),
-                                              (EVar ("f7", TUnknown))))
-                                           ))
-                                        ))
-                                     ))
-                                  ))
-                               ))
-                            ))
-                         ))
-                      ))
-                   ))
-                ))
-             ))
-          ))
-       ))
+    (Let
+       [(Notrec, ["h"],
+         (EFun ((PVar ("f1", TUnknown)),
+            (EFun ((PVar ("f2", TUnknown)),
+               (EFun ((PVar ("f3", TUnknown)),
+                  (EFun ((PVar ("f4", TUnknown)),
+                     (EFun ((PVar ("f5", TUnknown)),
+                        (EFun ((PVar ("f6", TUnknown)),
+                           (EFun ((PVar ("f7", TUnknown)),
+                              (EApp ((EVar ("f1", TUnknown)),
+                                 (EApp ((EVar ("f2", TUnknown)),
+                                    (EApp ((EVar ("f3", TUnknown)),
+                                       (EApp ((EVar ("f4", TUnknown)),
+                                          (EApp ((EVar ("f5", TUnknown)),
+                                             (EApp ((EVar ("f6", TUnknown)),
+                                                (EVar ("f7", TUnknown))))
+                                             ))
+                                          ))
+                                       ))
+                                    ))
+                                 ))
+                              ))
+                           ))
+                        ))
+                     ))
+                  ))
+               ))
+            )))
+         ])
  |}]
 ;;
 
@@ -488,33 +504,45 @@ let%expect_test "bindings_test" =
   start_test parse_bindings show_bindings test;
   [%expect
     {|
-    (Let (Notrec, ["h"],
-       (EFun ((PVar ("f1", TUnknown)),
-          (EFun ((PVar ("f2", TUnknown)),
-             (EFun ((PVar ("f3", TUnknown)),
-                (EFun ((PVar ("f4", TUnknown)),
-                   (EFun ((PVar ("f5", TUnknown)),
-                      (EFun ((PVar ("f6", TUnknown)),
-                         (EFun ((PVar ("f7", TUnknown)),
-                            (EApp (
-                               (EApp (
-                                  (EApp (
-                                     (EApp (
-                                        (EApp (
-                                           (EApp ((EVar ("f1", TUnknown)),
-                                              (EVar ("f2", TUnknown)))),
-                                           (EVar ("f3", TUnknown)))),
-                                        (EVar ("f4", TUnknown)))),
-                                     (EVar ("f5", TUnknown)))),
-                                  (EVar ("f6", TUnknown)))),
-                               (EVar ("f7", TUnknown))))
-                            ))
-                         ))
-                      ))
-                   ))
-                ))
-             ))
-          ))
-       ))
+    (Let
+       [(Notrec, ["h"],
+         (EFun ((PVar ("f1", TUnknown)),
+            (EFun ((PVar ("f2", TUnknown)),
+               (EFun ((PVar ("f3", TUnknown)),
+                  (EFun ((PVar ("f4", TUnknown)),
+                     (EFun ((PVar ("f5", TUnknown)),
+                        (EFun ((PVar ("f6", TUnknown)),
+                           (EFun ((PVar ("f7", TUnknown)),
+                              (EApp (
+                                 (EApp (
+                                    (EApp (
+                                       (EApp (
+                                          (EApp (
+                                             (EApp ((EVar ("f1", TUnknown)),
+                                                (EVar ("f2", TUnknown)))),
+                                             (EVar ("f3", TUnknown)))),
+                                          (EVar ("f4", TUnknown)))),
+                                       (EVar ("f5", TUnknown)))),
+                                    (EVar ("f6", TUnknown)))),
+                                 (EVar ("f7", TUnknown))))
+                              ))
+                           ))
+                        ))
+                     ))
+                  ))
+               ))
+            )))
+         ])
+ |}]
+;;
+
+
+let%expect_test "bindings_test" =
+  let test = "a::b" in
+  start_test (parse_econ parse_evar) show_expression test;
+  [%expect
+    {|
+    (EList ((EVar ("a", TUnknown)),
+       (EList ((EVar ("b", TUnknown)), (EConst CNil)))))
  |}]
 ;;

@@ -18,11 +18,11 @@
 
   $ ./parser_demo.exe <<- EOF
   > let a = f 
-  > let b = 4
+  > and b = 4
   > 
   > let (c, b) = (2, 3)
   let  a = f
-  let  b = 4
+  and  b = 4
   let  c, b = (2, 3)
   $ ./parser_demo.exe < manytests/do_not_type/001.ml
   let  recfac = (fun n -> 
@@ -139,7 +139,12 @@
     let  () = foo 4 8 9
     in 0
   $ ./parser_demo.exe < manytests/typed/007order.ml
-  Parsing error : no more choices
+  let  _start = (fun () -> (fun () -> (fun a -> (fun () -> (fun b -> (fun _ -> (fun c -> (fun () -> (fun d -> (fun _ -> (fun _ -> 
+    let  () = print_int (a + b)
+    in 
+    let  () = print_int __
+    in (((a * b) / _c) + d))))))))))))
+  let  main = print_int _start print_int 1 print_int 2 3 print_int 4 100 1000 print_int -1 10000 -555555
   $ ./parser_demo.exe < manytests/typed/008ascription.ml
   Parsing error : no more choices
   $ ./parser_demo.exe < manytests/typed/009let_poly.ml
@@ -149,9 +154,76 @@
   $ ./parser_demo.exe < manytests/typed/010sukharev.ml
   Parsing error : end_of_input
   $ ./parser_demo.exe < manytests/typed/015tuples.ml
-  Parsing error : end_of_input
+  let rec fix = (fun f -> (fun x -> f fix f x))
+  let  map = (fun f -> (fun p -> 
+    let  a b = p
+    in (f a, f b)))
+  let  fixpoly = (fun l -> fix (fun self -> (fun l -> map (fun li -> (fun x -> li self l x)) l)) l)
+  let  feven = (fun p -> (fun n -> 
+    let  e o = p
+    in 
+    if (n = 0)
+    then 1
+    else o (n - 1)))
+  let  fodd = (fun p -> (fun n -> 
+    let  e o = p
+    in 
+    if (n = 0)
+    then 0
+    else e (n - 1)))
+  let  tie = fixpoly (feven, fodd)
+  let rec meven = (fun n -> 
+    if (n = 0)
+    then 1
+    else modd (n - 1))
+  and  modd = (fun n -> 
+    if (n = 0)
+    then 1
+    else meven (n - 1))
+  let  main = 
+    let  () = print_int modd 1
+    in 
+    let  () = print_int meven 2
+    in 
+    let  even odd = tie
+    in 
+    let  () = print_int odd 3
+    in 
+    let  () = print_int even 4
+    in 0
   $ ./parser_demo.exe < manytests/typed/016lists.ml
-  Parsing error : end_of_input
-
-  $ ./parser_demo.exe <<- EOF
-  > let _1 = fun x y (a, _) -> (x + y - a) = 1
+  let rec length = (fun xs -> (match xs with
+  | [] -> 0
+  | (h :: tl) -> (1 + length tl))
+  let  length_tail = 
+    let rec helper = (fun acc -> (fun xs -> (match xs with
+  | [] -> acc
+  | (h :: tl) -> helper (acc + 1) tl))
+    in helper 0
+  let rec map = (fun f -> (fun xs -> (match xs with
+  | [] -> []
+  | (a :: []) -> [f a; ]
+  | (a :: (b :: [])) -> [f a; f b; ]
+  | (a :: (b :: (c :: []))) -> [f a; f b; f c; ]
+  | (a :: (b :: (c :: (d :: tl)))) -> [f a; f b; f c; f d; map f tl; ]))
+  let rec append = (fun xs -> (fun ys -> (match xs with
+  | [] -> ys
+  | (x :: xs) -> [x; append xs ys; ]))
+  let  concat = 
+    let rec helper = (fun xs -> (match xs with
+  | [] -> []
+  | (h :: tl) -> append h helper tl)
+    in helper
+  let rec iter = (fun f -> (fun xs -> (match xs with
+  | [] -> ()
+  | (h :: tl) -> 
+    let  () = f h
+    in iter f tl))
+  let rec cartesian = (fun xs -> (fun ys -> (match xs with
+  | [] -> []
+  | (h :: tl) -> append map (fun a -> (h, a)) ys cartesian tl ys))
+  let  main = 
+    let  () = iter print_int [1; 2; 3; ]
+    in 
+    let  () = print_int length cartesian [1; 2; ] [1; 2; 3; 4; ]
+    in 0
