@@ -639,11 +639,14 @@ module Infer = struct
            R.return (subs, scope_t))
       | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
-          let* env, _ = infer_pattern env name in
+          let* env, name_t = infer_pattern env name in
           let* arg_env, arg_ts = infer_args env args in
           let* expr_s, expr_t = helper arg_env expr in
+          let name_t = Subst.apply name_t expr_s in
           let arg_ts = Subst.apply_list arg_ts expr_s in
           let* res_t = build_arrow arg_ts expr_t in
+          let* u = Subst.unify name_t res_t in
+          let res_t = Subst.apply res_t u in
           let env = TypeEnv.generalize_pattern name res_t env in
           R.return (env, expr_s, res_t)
         in

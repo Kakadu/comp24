@@ -209,7 +209,6 @@ let%test _ = infer_expr "fun (x: bool) -> let f x = x in f x" = TArrow (TBool, T
 let%test _ = infer_expr "let (+) = (&&)" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let (+) x y = (&&) x y" = TArrow (TBool, TArrow (TBool, TBool))
 let%test _ = infer_expr "let f x = x in let g x y = x + y in g (f 1) (f 2)" = TInt
-
 let%test _ = infer_expr "let a = 10 and b = 20 and c = 30 in a + b + c" = TInt
 
 let%test _ =
@@ -247,6 +246,10 @@ let%test _ =
     "let rec fib_acc a b n = if n=1 then b else let n1 = n-1 in let ab = a+b in fib_acc \
      b ab n1"
   = TArrow (TInt, TArrow (TInt, TArrow (TInt, TInt)))
+;;
+
+let%test _ =
+  infer_expr "let rec fix f = f (fix f : int)" = TArrow (TArrow (TInt, TInt), TInt)
 ;;
 
 let%test _ =
