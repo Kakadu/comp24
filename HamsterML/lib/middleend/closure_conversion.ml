@@ -59,15 +59,14 @@ let unbound_variables exp =
        | Some e -> Set.union if_then (helper_expr e)
        | None -> if_then)
     | Match (e, cases) ->
-      let base_set = helper_expr e in
-      let cases_set =
+      let unbound_in_cases =
         List.fold
           cases
           ~init:(Set.empty (module String))
           ~f:(fun acc (pat, expr) ->
-            Set.union acc (Set.union (helper_pattern pat) (helper_expr expr)))
+            Set.union acc (exclude_bind_pattern pat (helper_expr expr)))
       in
-      Set.union base_set cases_set
+      Set.union unbound_in_cases (helper_expr e)
     | Let (_, binds, in_expr) ->
       let binds_set =
         List.fold
