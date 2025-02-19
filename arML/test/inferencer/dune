@@ -1,0 +1,13 @@
+(library
+ (name inferencer_tests)
+ (libraries arML_lib)
+ (modules
+  Function
+  ListAndTuple
+  PatternMatching
+  TypedExpression
+  Operators
+  Declaration)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))

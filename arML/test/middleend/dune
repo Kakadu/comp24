@@ -1,0 +1,7 @@
+(library
+ (name middleend_tests)
+ (libraries arML_lib)
+ (modules ClosureConversion)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
