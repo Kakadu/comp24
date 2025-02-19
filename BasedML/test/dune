@@ -34,6 +34,16 @@
  (public_name egraphs_demo)
  (libraries middleend stdio ast))
 
+(executable
+ (name match_elimination_demo)
+ (modules match_elimination_demo)
+ (public_name match_elimination_demo)
+ (libraries middleend stdio ast))
+
+(cram
+ (applies_to match_elimination_tests)
+ (deps ./match_elimination_demo.exe))
+
 (cram
  (applies_to typeinference_tests)
  (deps

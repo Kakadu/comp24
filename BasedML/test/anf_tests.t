@@ -1,16 +1,21 @@
   $ dune exec ./anf_demo.exe << EOF
-  > let nested1 = let nested2 = 5 in 
-  > let nested3 = 6 in
-  > let nested4 x = x + (fun i -> nested2 + nested3) 8 in nested4 55
+  > let test = let nested_pat x = match x with | 5 -> a 5 | 6 -> 6 in nested_pat 7 
   > EOF
-  let  ll_1 nested2_0 nested3_0 i_0  = let anf_app_0 = ( + ) nested2_0 nested3_0 in
+  let  ll_0 unbound_a_0 x_0  = let anf_matching_1 = match x_0 with
+  | 5 -> let anf_app_0 = unbound_a_0 5 in
+   anf_app_0
+  | 6 -> 6 in
+   anf_matching_1;;
+  let  test_0  = let anf_app_0 = ll_0 unbound_a_0 7 in
    anf_app_0;;
-  let  ll_0 nested2_0 nested3_0 x_0  = let anf_app_0 = ll_1 nested2_0 nested3_0 8 in
-   let anf_app_1 = ( + ) x_0 anf_app_0 in
-   anf_app_1;;
-  let  nested1_0  = let nested2_0 = 5 in
-   let nested3_0 = 6 in
-   let anf_app_0 = ll_0 nested2_0 nested3_0 55 in
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let test = let nested_pat x = if x 5 then 5 else 6 in nested_pat 7 
+  > EOF
+  let  ll_0 x_0  = let anf_app_0 = x_0 5 in
+   let anf_ifthenelse_1 = if anf_app_0 then 5 else 6 in
+   anf_ifthenelse_1;;
+  let  test_0  = let anf_app_0 = ll_0 7 in
    anf_app_0;;
 
   $ dune exec ./anf_demo.exe << EOF
