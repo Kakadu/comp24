@@ -232,8 +232,7 @@ let%test _ =
 ;;
 
 let%test _ =
-  infer_expr "fun tpl -> let (x, y) = tpl in x - y"
-  = TArrow (TTuple [ TInt; TInt ], TInt)
+  infer_expr "fun tpl -> let (x, y) = tpl in x - y" = TArrow (TTuple [ TInt; TInt ], TInt)
 ;;
 
 let%test _ =

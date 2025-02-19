@@ -245,7 +245,8 @@ module Scheme = struct
 
   (* Replaces all generic variables (α) with new unique variables *)
   let instantiate = function
-    | Scheme (_, (TPVar _ as t)) -> R.return t
+    | Scheme (bs, (TPVar id as t)) when VarSet.equal bs (VarSet.singleton id) ->
+      R.return t
     | Scheme (bs, t) ->
       let open R.Syntax in
       VarSet.fold
