@@ -1,7 +1,0 @@
-(library
- (modules ParserTest LexerTest TypingTest)
- (name HamsterTest)
- (inline_tests)
- (preprocess
-  (pps ppx_inline_test))
- (libraries HamsterML))
