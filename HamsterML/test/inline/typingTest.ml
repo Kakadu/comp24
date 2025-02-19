@@ -29,11 +29,11 @@ let%test _ = infer_pattern "(1, true, 2)" = TTuple [ TInt; TBool; TInt ]
 let%test _ = infer_pattern "()" = TUnit
 let%test _ = infer_pattern "([1; 2; 3], true, 10)" = TTuple [ TList TInt; TBool; TInt ]
 
-(* 1 :: [2; 3] => int list  *)
+(* 1 :: [2; 3] => int list *)
 
 let%test _ = infer_pattern "1 :: [2; 3]" = TList TInt
 
-(* --- Expressions ---  *)
+(* --- Expressions --- *)
 
 let%test _ = infer_expr "fun (x: int) -> x" = TArrow (TInt, TInt)
 let%test _ = infer_expr "fun x -> (x: int)" = TArrow (TInt, TInt)

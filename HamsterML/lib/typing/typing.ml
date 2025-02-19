@@ -230,7 +230,7 @@ module Scheme = struct
 
   let create (t : inf_type) : t = Scheme (VarSet.empty, t)
 
-  (* find free variables that are not in varset  *)
+  (* find free variables that are not in varset *)
   let free_vars = function
     | Scheme (bs, t) -> VarSet.diff (Type.free_vars t) bs
   ;;
@@ -251,10 +251,10 @@ module Scheme = struct
       let open R.Syntax in
       VarSet.fold
         (fun b acc ->
-           let* acc = acc in
-           let* fr = fresh_var in
-           let subst = Subst.singleton b fr in
-           Subst.apply acc subst |> R.return)
+          let* acc = acc in
+          let* fr = fresh_var in
+          let subst = Subst.singleton b fr in
+          Subst.apply acc subst |> R.return)
         bs
         (R.return t)
   ;;
