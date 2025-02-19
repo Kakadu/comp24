@@ -1,0 +1,27 @@
+(include_subdirs unqualified)
+
+(library
+ (name XaxaML)
+ (public_name XaxaML.Lib)
+ (modules Ast Parser Typedtree Inferencer)
+ (libraries base stdlib angstrom)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(library
+ (name tests)
+ (modules Parser_tests Infer_tests)
+ (libraries XaxaML)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
+
+(env
+ (dev
+  (flags
+   (:standard -w -32))))

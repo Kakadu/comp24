@@ -27,6 +27,8 @@
   bisect_ppx
   ppx_deriving
   ppx_expect
+  qcheck
+  ppx_deriving_qcheck
   (ppx_inline_test :with-test)
   (odoc :with-doc)
   (ocamlformat :build)

@@ -67,7 +67,7 @@ $ dune exec many_parser < manytests/typed/003fib.ml
   let _start = (fun () () a () b _c () d __ -> let () = (print_int (( + ) a b))
    in let () = (print_int __)
    in (( + ) (( / ) (( * ) a b) _c) d))
-  let main = (print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int -1) 10000 -555555))
+  let main = (print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555)))
 
 $ dune exec many_parser < manytests/typed/008ascription.ml
 
@@ -96,8 +96,8 @@ $ dune exec many_parser < manytests/typed/015tuples.ml
    in helper
   let rec iter = (fun f xs -> match xs with
   | [] -> ()
-  | h :: tl -> let () = (f h)
-   in (iter f tl))
+  | h :: tl -> (let () = (f h)
+   in (iter f tl)))
   let rec cartesian = (fun xs ys -> match xs with
   | [] -> []
   | h :: tl -> (append (map (fun a -> (h, a)) ys) (cartesian tl ys)))

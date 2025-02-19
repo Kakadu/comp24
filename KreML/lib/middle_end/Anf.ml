@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -117,18 +117,14 @@ let collect_app_args app =
   helper [] app
 ;;
 
-(* let  rec expr_in_anf = function
-   | Expr_const _ | Expr_var _ |     let fresh_name = Utils.fresh_name "t" in
-   Expr_nil -> true
-   | Expr_constrained(e, _) -> expr_in_anf e
-   | Expr_app(x, y) | Expr_cons(x, y) -> expr_in_anf x && expr_in_anf y
-   | Expr_tuple(fst, snd, rest) -> List.for_all expr_in_anf (fst :: snd :: rest)
-   | Expr_fun(_, e) -> expr_in_anf e
-   | Expr_match(e, cases) ->
-   expr_in_anf e && List.for_all (fun (_, e) -> expr_in_anf e) cases
-   | Expr_ite((Expr_var _ | Expr_const _), t, e ) -> expr_in_anf t && expr_in_anf e
-   | Expr_ite _ -> false
-   | Expr_let(_, (_, e), scope) -> expr_in_anf e && expr_in_anf scope *)
+let simplify_temp_binding name value scope =
+  match scope with
+  | AExpr (CImm (Avar name')) when name' = name -> AExpr value
+  | ALet (_, original_name, CImm (Avar name'), scope') when name' = name ->
+    temp_binding original_name value scope'
+  | _ -> temp_binding name value scope
+;;
+
 let rec transform_expr expr k : aexpr t =
   match expr with
   | Expr_const c -> Aconst c |> k
@@ -139,13 +135,13 @@ let rec transform_expr expr k : aexpr t =
         let* fresh = fresh_temp in
         let value = CBinop (binop, x', y') in
         let* scope = ivar fresh |> k in
-        temp_binding fresh value scope |> return))
+        simplify_temp_binding fresh value scope |> return))
   | Expr_app (Expr_app (Expr_var "getfield", Expr_const (Const_int i)), e) ->
     transform_expr e (fun e' ->
       let* fresh = fresh_temp in
       let* scope = ivar fresh |> k in
       let value = CGetfield (i, e') in
-      temp_binding fresh value scope |> return)
+      simplify_temp_binding fresh value scope |> return)
   | Expr_app _ ->
     let args, f = collect_app_args expr in
     transform_expr f (fun f' ->
@@ -153,9 +149,7 @@ let rec transform_expr expr k : aexpr t =
         let* name = fresh_temp in
         let call = capp f' args' in
         let* scope = ivar name |> k in
-        match scope with
-        | AExpr (CImm (Avar n)) when n = name -> AExpr call |> return
-        | _ -> temp_binding name call scope |> return))
+        simplify_temp_binding name call scope |> return))
   | Expr_ite (c, t, e) ->
     transform_expr c (fun c' ->
       let* t' = transform_expr t k in
@@ -167,16 +161,14 @@ let rec transform_expr expr k : aexpr t =
         let* name = fresh_temp in
         let value = CCons (x', xs') in
         let* scope = ivar name |> k in
-        temp_binding name value scope |> return))
+        simplify_temp_binding name value scope |> return))
   | Expr_constrained (e, _) -> transform_expr e k
   | Expr_tuple (fst, snd, rest) ->
     transform_list (fst :: snd :: rest) (fun list ->
       let tuple = CTuple list in
       let* name = fresh_temp in
       let* scope = ivar name |> k in
-      match scope with
-      | AExpr (CImm (Avar n)) when n = name -> AExpr tuple |> return
-      | _ -> temp_binding name tuple scope |> return)
+      simplify_temp_binding name tuple scope |> return)
   | Expr_fun _ ->
     (* it is guaranteed by let processing that function resolved here is anonymous *)
     let* fun_name = fresh_fun in
@@ -217,17 +209,13 @@ and resolve_fun f =
   let abstraction acc p =
     let* acc_body, acc_args = acc in
     match p with
-    | Pat_var id ->
-      (* let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return) in *)
-      (* AExpr (CFun(id, acc)) |> return *)
-      return (acc_body, id :: acc_args)
+    | Pat_var id -> return (acc_body, id :: acc_args)
     | p ->
       (* Performs codegen fun (a, b) --> body ~~~->
          fun ab -> let a = ab.first in
          let b = ab.second in body *)
       let* var_name = fresh_param in
       let zipped = Utils.zip_idents_with_exprs p (evar var_name) in
-      (* let* body = transform_expr e (fun imm -> AExpr(CImm imm) |> return ) in *)
       let* body =
         transform_list (List.map snd zipped) (fun imms ->
           List.fold_right2
@@ -239,7 +227,6 @@ and resolve_fun f =
             (return acc_body))
       in
       return (body, var_name :: acc_args)
-    (* in AExpr(CFun(var_name, body)) |> return *)
   in
   let* body, args = List.fold_left abstraction (return (body, [])) args in
   let f = List.fold_right (fun id body -> AExpr (CFun (id, body))) args body in

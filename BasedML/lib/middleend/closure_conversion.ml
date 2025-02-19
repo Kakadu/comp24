@@ -80,14 +80,14 @@ let unbound_identifiers exp =
         exps
         ~init:((module String) |> Set.empty)
         ~f:(fun acc h -> Set.union acc (helper h))
-    | EMatch (pat, branches) ->
+    | EMatch (expr, branches) ->
       let unbound_in_braches =
         List.fold
           branches
           ~init:((module String) |> Set.empty)
           ~f:(fun acc (pat, exp) -> Set.union acc (bind_pattern pat (helper exp)))
       in
-      bind_pattern pat unbound_in_braches
+      Set.union unbound_in_braches (helper expr)
     | EConstraint (expr, _) -> helper expr
   in
   helper exp
@@ -115,10 +115,10 @@ let rec get_global_names = function
       ~init:((module String) |> Set.empty)
 ;;
 
-let infix_ops_set =
+let stdlib_names =
   Set.of_list
     (module String)
-    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )" ]
+    [ "( + )"; "( :: )"; "( * )"; "( - )"; "( == )"; "( = )"; "( / )"; "print_int" ]
 ;;
 
 let convert global_ctx declaration =
@@ -133,7 +133,7 @@ let convert global_ctx declaration =
     | EFunction (pat, body) ->
       let unbound_names = unbound_identifiers (EFunction (pat, body)) in
       let unbound_names_without_global =
-        Set.diff (Set.diff unbound_names global_ctx) infix_ops_set
+        Set.diff (Set.diff unbound_names global_ctx) stdlib_names
       in
       let unbound_ids_patterns =
         List.map (Set.to_list unbound_names_without_global) ~f:(fun x -> PIdentifier x)
@@ -145,7 +145,7 @@ let convert global_ctx declaration =
         close_function
           lts
           local_ctx
-          (Set.diff global_ctx infix_ops_set)
+          (Set.diff global_ctx stdlib_names)
           helper
           (EFunction (pat, body))
       in
@@ -161,14 +161,14 @@ let convert global_ctx declaration =
         ~init:new_fun
     | EApplication (left, right) ->
       EApplication
-        ( helper lts local_ctx (Set.diff (Set.diff global_ctx lts) infix_ops_set) left
-        , helper lts local_ctx (Set.diff (Set.diff global_ctx lts) infix_ops_set) right )
+        ( helper lts local_ctx (Set.diff (Set.diff global_ctx lts) stdlib_names) left
+        , helper lts local_ctx (Set.diff (Set.diff global_ctx lts) stdlib_names) right )
     | EIfThenElse (guard, then_branch, else_branch) ->
-      let global_ctx = Set.diff global_ctx infix_ops_set in
+      let global_ctx = Set.diff global_ctx stdlib_names in
       EIfThenElse
-        ( helper lts local_ctx (Set.diff global_ctx infix_ops_set) guard
-        , helper lts local_ctx (Set.diff global_ctx infix_ops_set) then_branch
-        , helper lts local_ctx (Set.diff global_ctx infix_ops_set) else_branch )
+        ( helper lts local_ctx (Set.diff global_ctx stdlib_names) guard
+        , helper lts local_ctx (Set.diff global_ctx stdlib_names) then_branch
+        , helper lts local_ctx (Set.diff global_ctx stdlib_names) else_branch )
     | ELetIn (rec_flag, pat, outer, inner) ->
       (match pat, outer with
        (* Inner fun *)
@@ -176,12 +176,12 @@ let convert global_ctx declaration =
          let updated_lts = Set.add lts id in
          let updated_global_env =
            match rec_flag with
-           | Rec -> Set.add (Set.diff global_ctx infix_ops_set) id
-           | NotRec -> Set.add (Set.diff global_ctx infix_ops_set) id
+           | Rec -> Set.add (Set.diff global_ctx stdlib_names) id
+           | NotRec -> Set.add (Set.diff global_ctx stdlib_names) id
          in
          let unbound_names = unbound_identifiers (ELetIn (rec_flag, pat, outer, inner)) in
          let unbound_names_without_global =
-           Set.diff (Set.diff unbound_names updated_global_env) infix_ops_set
+           Set.diff (Set.diff unbound_names updated_global_env) stdlib_names
          in
          let closed_fun = close_function lts local_ctx updated_global_env helper outer in
          let unbound_ids_without_global =
@@ -200,14 +200,14 @@ let convert global_ctx declaration =
            helper
              updated_lts
              updated_local_env
-             (Set.diff (Set.add global_ctx id) infix_ops_set)
+             (Set.diff (Set.add global_ctx id) stdlib_names)
              inner
          in
          let updated_outer =
            helper
              updated_lts
              updated_local_env
-             (Set.diff (Set.add global_ctx id) infix_ops_set)
+             (Set.diff (Set.add global_ctx id) stdlib_names)
              closed_outer
          in
          ELetIn (rec_flag, PIdentifier id, updated_outer, closed_inner)
@@ -215,21 +215,21 @@ let convert global_ctx declaration =
          ELetIn
            ( rec_flag
            , pat
-           , helper lts local_ctx (Set.diff global_ctx infix_ops_set) outer
-           , helper lts local_ctx (Set.diff global_ctx infix_ops_set) inner ))
+           , helper lts local_ctx (Set.diff global_ctx stdlib_names) outer
+           , helper lts local_ctx (Set.diff global_ctx stdlib_names) inner ))
     | ETuple exps ->
       let new_exps =
-        List.map exps ~f:(helper lts local_ctx (Set.diff global_ctx infix_ops_set))
+        List.map exps ~f:(helper lts local_ctx (Set.diff global_ctx stdlib_names))
       in
       ETuple new_exps
     | EMatch (pat, branches) ->
       let new_branches =
         List.map branches ~f:(fun (pat, exp) ->
-          pat, helper lts local_ctx (Set.diff global_ctx infix_ops_set) exp)
+          pat, helper lts local_ctx (Set.diff global_ctx stdlib_names) exp)
       in
       EMatch (pat, new_branches)
     | EConstraint (exp, type_name) ->
-      EConstraint (helper lts local_ctx (Set.diff global_ctx infix_ops_set) exp, type_name)
+      EConstraint (helper lts local_ctx (Set.diff global_ctx stdlib_names) exp, type_name)
   in
   let close_declaration global_ctx = function
     | DSingleLet (flag, DLet (pat, exp)) ->
@@ -240,18 +240,18 @@ let convert global_ctx declaration =
             , close_function
                 ((module String) |> Set.empty)
                 ((module String) |> Map.empty)
-                (Set.diff global_ctx infix_ops_set)
+                (Set.diff global_ctx stdlib_names)
                 helper
                 exp ) )
     | DMutualRecDecl (flag, decls) ->
       let rec handle_mutual_rec global_ctx = function
-        | [] -> [], Set.diff global_ctx infix_ops_set
+        | [] -> [], Set.diff global_ctx stdlib_names
         | DLet (pat, exp) :: tl ->
           let closed_exp =
             close_function
               ((module String) |> Set.empty)
               (Map.empty (module String))
-              (Set.diff global_ctx infix_ops_set)
+              (Set.diff global_ctx stdlib_names)
               helper
               exp
           in

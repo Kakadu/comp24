@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -26,24 +26,24 @@ type flambda =
   | Fl_app of flambda * flambda list
   | Fl_closure of closure
   | Fl_ite of flambda * flambda * flambda
-  | Fl_let of ident * flambda * flambda
+  | Fl_let of ident option * flambda * flambda
 
 and closure =
   { name : ident
   ; env_size : int
   ; arrange : (int * flambda) list (* idx, value*)
+  ; arity : int
   }
 
-type fun_with_env =
-  { arg : ident
-  ; captured_args : ident list
+type fun_decl =
+  { param_names : ident list
   ; arity : int
   ; body : flambda
   }
 
 type fl_fun =
-  | Fun_with_env of fun_with_env
-  | Fun_without_env of ident * flambda (** [Fun_without_env(arg, body)] *)
+  | Fun_with_env of fun_decl
+  | Fun_without_env of fun_decl (** [Fun_without_env(params, body)] *)
 
 type flstructure = (ident * fl_fun) list
 
@@ -71,14 +71,15 @@ let rec pp_flambda ppf = function
   | Fl_app (f, args) ->
     let pp_args ppf l = pp_list ppf l (fun e -> fprintf ppf "@[%a @]" pp_flambda e) in
     fprintf ppf "@[%a (%a)@]" pp_flambda f pp_args args
-  | Fl_closure { name; env_size; arrange } ->
+  | Fl_closure { name; env_size; arrange; arity } ->
     let pp_arange ppf list =
       List.iter (fun (idx, value) -> fprintf ppf "@[%i: %a; @]" idx pp_flambda value) list
     in
     fprintf
       ppf
-      "@[{ name: %s, env_size: %i, arrange [%a ]} @]"
+      "@[{ name: %s, arity: %i env_size: %i, arrange [%a ]} @]"
       name
+      arity
       env_size
       pp_arange
       arrange
@@ -92,8 +93,9 @@ let rec pp_flambda ppf = function
       t
       pp_flambda
       e
-  | Fl_let (id, e, scope) ->
+  | Fl_let (Some id, e, scope) ->
     fprintf ppf "@[let %s = %a in @, %a @]" id pp_flambda e pp_flambda scope
+  | Fl_let (None, e, scope) -> fprintf ppf "@[%a; @, %a @]" pp_flambda e pp_flambda scope
 
 and pp_list ppf list elem_printer =
   fprintf ppf "[ ";
@@ -101,11 +103,11 @@ and pp_list ppf list elem_printer =
   fprintf ppf " ]"
 ;;
 
+let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list
+
 let pp_fl_fun ppf = function
-  | Fun_without_env (arg, body) -> fprintf ppf "@[(%s) {%a} @]@." arg pp_flambda body
-  | Fun_with_env { arg; captured_args; body; _ } ->
-    let print_args ppf list = List.iter (fun s -> fprintf ppf "%s " s) list in
-    fprintf ppf "@[(%a) {%a} @]@." print_args (captured_args @ [ arg ]) pp_flambda body
+  | Fun_without_env { param_names; body; _ } | Fun_with_env { param_names; body; _ } ->
+    fprintf ppf "@[(%a) {%a} @]@." print_args param_names pp_flambda body
 ;;
 
 let pp ppf flstructure =

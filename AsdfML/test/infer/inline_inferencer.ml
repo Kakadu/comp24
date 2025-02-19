@@ -84,7 +84,7 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {|
-    let compose = 
+  let compose =
       let plus_one = fun x -> x + 1 in
       let is_neg = fun x -> x < 0 in
       fun x -> is_neg (plus_one x)
@@ -165,7 +165,7 @@ let%expect_test _ =
     helper: int -> (int -> 'o) -> 'o
     fact: int -> int
     x: int
-  |}]
+    |}]
 ;;
 
 let%expect_test _ =
@@ -247,9 +247,9 @@ let%expect_test _ =
 let%expect_test _ =
   test
     {|
-  let (+) = fun a -> fun b -> a || b 
+  let ( + ) = fun a -> fun b -> a || b 
   let a = true + false
-  let (*) = fun a -> fun b -> fun c -> a * b * c 
+  let ( * ) = fun a -> fun b -> fun c -> a * b * c 
   let b = (2 * 3) 4
   |};
   [%expect
@@ -306,11 +306,14 @@ let%expect_test _ =
     (x, y, z): (bool * int * int -> bool)
     a: bool
     b: int
-    c: int -> bool |}]
+    c: int -> bool
+    |}]
 ;;
 
 let%expect_test _ =
-  test {| let (x, y, z) = (not true, 42) |};
+  test {| 
+    let (x, y, z) = (not true, 42) 
+  |};
   [%expect
     {| Mismatched number of arguments in pattern (x, y, z) and expression (bool * int) |}]
 ;;
@@ -353,14 +356,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   test "let (x: int list) = []";
-  [%expect {|  
-    x: int list|}]
+  [%expect {| x: int list |}]
 ;;
 
 let%expect_test _ =
   test "let (x: int list list) = [[1]; []]";
-  [%expect {|  
-    x: int list list|}]
+  [%expect {| x: int list list |}]
 ;;
 
 let%expect_test _ =
@@ -411,4 +412,16 @@ let%expect_test _ =
     let _ = ( 1,2 )
     |};
   [%expect {| _: (int * int) |}]
+;;
+
+let%expect_test _ =
+  test {| 
+    let tup = (not true, 42, fun x -> x)
+    let (x, y, z) = tup 
+  |};
+  [%expect
+    {|
+    tup: (bool * int * 'a -> 'a)
+    (x, y, z): (bool * int * 'c -> 'c)
+    |}]
 ;;
