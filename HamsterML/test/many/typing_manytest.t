@@ -46,15 +46,15 @@
   val temp : (int * bool)
 
   $ dune exec TypingRunner < manytests/typed/015tuples.ml
-  val feven : ('36 * '37) -> int -> int
+  val feven : ('32 * int -> int) -> int -> int
   val fix : '2 -> '5 -> '2 -> '5 -> '2 -> '5
-  val fixpoly : ('20 * '21) -> ('25 -> '28 * '25 -> '28)
-  val fodd : ('47 * '48) -> int -> int
+  val fixpoly : (('21 -> '24 * '21 -> '24) -> '21 -> '24 * ('21 -> '24 * '21 -> '24) -> '21 -> '24) -> ('21 -> '24 * '21 -> '24)
+  val fodd : (int -> int * '43) -> int -> int
   val main : int
-  val map : '10 -> '11 -> ('8 * '9) -> ('11 * '11)
+  val map : '8 -> '10 -> ('8 * '8) -> ('10 * '10)
   val meven : int -> int
   val modd : int -> int
-  val tie : ('58 -> '59 * '58 -> '59)
+  val tie : (int -> int * int -> int)
 
   $ dune exec TypingRunner < manytests/typed/016lists.ml
   val append : '60 list -> '60 list -> '60 list

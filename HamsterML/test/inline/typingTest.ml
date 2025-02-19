@@ -231,6 +231,16 @@ let%test _ =
   infer_expr "let temp = let f = fun x -> x in (f 1, f true)" = TTuple [ TInt; TBool ]
 ;;
 
+let%test _ =
+  infer_expr "fun tpl -> let (x, y) = tpl in x - y"
+  = TArrow (TTuple [ TInt; TInt ], TInt)
+;;
+
+let%test _ =
+  infer_expr "let fodd p n = let (e, o) = p in if n == 0 then 0 else e (n - 1)"
+  = TArrow (TTuple [ TArrow (TInt, TInt); TPVar 3 ], TArrow (TInt, TInt))
+;;
+
 (* Let rec *)
 let%test _ = infer_expr "let rec x = 10 :: x" = TList TInt
 
