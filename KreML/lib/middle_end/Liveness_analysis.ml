@@ -32,12 +32,12 @@ and analyse_list list counter res_start res_end =
 ;;
 
 let analyse_fun = function
-  | Fun_with_env { param_names; body; _ } | Fun_without_env { param_names; body; _ } ->
+  | Fun_with_env { body; _ } | Fun_without_env { body; _ } ->
     let open Base in
-    let res_start = Map.empty (module String) in
-    let res_start =
+    let res_start = Map.empty (module String)
+    (* let res_start =
       List.fold param_names ~init:res_start ~f:(fun acc name ->
-        Map.set acc ~key:name ~data:0)
+        Map.set acc ~key:name ~data:0) *)
     in
     let res_end = Map.empty (module String) in
     let _, ss, es = analyse_expr body 1 res_start res_end in
@@ -45,7 +45,7 @@ let analyse_fun = function
       match Map.find es var with
       | Some e -> {s; e; var}::acc
       | None -> {s; e = s; var}::acc)
-    in List.sort ranges ~compare:(fun r1 r2 -> Base.Int.compare r1.e r2.e)
+    in List.sort ranges ~compare:(fun r1 r2 -> Base.Int.compare r1.s r2.s)
 ;;
 
 let analyse_program flstucture =
