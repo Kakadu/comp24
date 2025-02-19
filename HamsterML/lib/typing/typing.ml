@@ -318,6 +318,7 @@ module TypeEnv = struct
 
   (* find names in env *)
   let find (name : var_name) (env : t) = Map.find env name
+  let find_exn name env = Base.Map.find_exn env name
 
   (* get free vars from all schemes *)
   let free_vars (env : t) =
@@ -609,9 +610,9 @@ module Infer = struct
            let* scope_s, scope_t = helper env scope in
            let* subs = Subst.compose subs scope_s in
            R.return (subs, scope_t))
-      | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
+      | Let (Recursive, (((Var id as name), args, expr) :: tl_bind as binds), scope) ->
         let infer_bind env name args expr =
-          let* env, name_t = infer_pattern env name in
+          let (Scheme (_, name_t)) = TypeEnv.find_exn id env in
           let* arg_env, arg_ts = infer_args env args in
           let* expr_s, expr_t = helper arg_env expr in
           let name_t = Subst.apply name_t expr_s in
@@ -623,6 +624,11 @@ module Infer = struct
           R.return (env, expr_s, res_t)
         in
         (* '<bind> and <bind>' infer *)
+        (* add names to env *)
+        let* env =
+          R.fold binds ~init:(R.return env) ~f:(fun env (name, _, _) ->
+            infer_pattern env name >>| fun (env, _) -> env)
+        in
         let* env, subs, typ =
           R.fold
             tl_bind
@@ -695,9 +701,9 @@ module Infer = struct
            let* scope_s, _ = infer_expr env scope in
            let env = TypeEnv.apply scope_s env in
            R.return env)
-      | Let (Recursive, ((Var _ as name), args, expr) :: tl_bind, scope) ->
+      | Let (Recursive, (((Var id as name), args, expr) :: tl_bind as binds), scope) ->
         let infer_bind env name args expr =
-          let* env, name_t = infer_pattern env name in
+          let (Scheme (_, name_t)) = TypeEnv.find_exn id env in
           let* arg_env, arg_ts = infer_args env args in
           let* expr_s, expr_t = infer_expr arg_env expr in
           let name_t = Subst.apply name_t expr_s in
@@ -709,6 +715,10 @@ module Infer = struct
           R.return (env, expr_s, res_t)
         in
         (* '<bind> and <bind>' infer *)
+        let* env =
+          R.fold binds ~init:(R.return env) ~f:(fun env (name, _, _) ->
+            infer_pattern env name >>| fun (env, _) -> env)
+        in
         let* env, subs, _ =
           R.fold
             tl_bind
