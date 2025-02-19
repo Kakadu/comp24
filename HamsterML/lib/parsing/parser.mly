@@ -6,19 +6,14 @@
 
 // Data Types
 %token <int> TYPE_INT
-%token <float> TYPE_FLOAT
 %token <bool> TYPE_BOOL
-%token <char> TYPE_CHAR
 %token <string> TYPE_STRING
 %token TYPE_UNIT
 
-// Param Types
+// Explicit Types
 %token INT
-%token FLOAT
 %token BOOL
-%token CHAR
 %token STRING
-%token <string> POLYMORPHIC_NAME // (x: `a) (y: `b)
 
 %token <string> IDENTIFIER
 
@@ -36,7 +31,7 @@
 
 // Separators
 %token ARROW        // "->"
-%token COMMA        // "."
+%token COMMA        // ","
 %token SEMICOLON    // ";"
 %token COLON        // ":"
 %token DOUBLE_COLON // "::"
@@ -55,7 +50,8 @@
 %token SLASH                // "/"
 %token CARET                // "^"
 %token EQUAL                // "="
-%token NOT_EQUAL            // "!=" || "<>" TODO: check semantics
+%token IDENTICAL_EQ         // "=="
+%token NOT_EQUAL            // "!=" || "<>"
 %token GREATER_THAN         // ">"
 %token GREATER_THAN_EQUAL   // ">="
 %token LESS_THAN            // "<"
@@ -69,6 +65,11 @@
 %token EOF
 
 // --- Priorities ---
+%left ARROW
+%right COMMA DOUBLE_COLON
+
+%nonassoc BAR RIGHT_PARENTHESIS
+
 %left OR
 %left AND
 %left NOT
@@ -79,61 +80,24 @@
 %left LESS_THAN
 %left NOT_EQUAL
 %left EQUAL
+%left IDENTICAL_EQ
 
 %left CARET
 %left PLUS, MINUS
 %left ASTERISK, SLASH
 
 // --- Parsing ---
-%start <Ast.expr> prog
+%start <expr list> prog
+%start <expr> prog_expr
+%start <pattern> prog_pattern
 %%
 
-prog : p = expr EOF { p }
-
-expr:
-    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS                     { e }
-    | v = value                                                         { Value v }
-    | uop = uop; e = expr                                               { UnOp (uop, e) }
-    | le = expr; bop = bop; re = expr                                   { BinOp (bop, le, re) }
-    | LET; REC; l = let_rec_def                                         { l }
-    | LET; l = let_in_def                                               { l }
-    | LET; l = let_def                                                  { l }
-    | MATCH; expr = expr; WITH; match_cases = nonempty_list(match_case) { Match (expr, match_cases) }
-    | FUN; vls = nonempty_list(value); ARROW; e = expr                  { Fun (vls, e) }
-    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr                   { If (e1, e2, Some e3) }
-    | IF; e1 = expr; THEN; e2 = expr                                    { If (e1, e2, None) }
-    | le = expr; re = expr                                              { Application (le,re) }
-
-dataType:
-    | i = TYPE_INT      {Int i}
-    | f = TYPE_FLOAT    {Float f}
-    | b = TYPE_BOOL     {Bool b}
-    | c = TYPE_CHAR     {Char c}
-    | s = TYPE_STRING   {String s}
-    | TYPE_UNIT         { Unit }
-
-%inline identifier:
-    | name = IDENTIFIER { name }
-
-value:
-    | LEFT_PARENTHESIS; v = value; RIGHT_PARENTHESIS    { v }
-    | WILDCARD                                          {Wildcard}
-    | t_v = typed_var                                   { t_v }
-    | v = const_or_var                                  { v }
-    | p = pattern                                       { p }
-
-pattern:
-    | tpl = tuple_dt                                {Tuple tpl} (* (1, 2, 3, ...) *)
-    | lst = list_dt                                 {List lst}  (* [1; 2; 3; ...] *)
-    | v = const_or_var ; DOUBLE_COLON; l = list_dt  { ListConcat (v, List l) }
+// --- Subs ---
 
 %inline paramType:
     | INT                   { PInt }
-    | FLOAT                 { PFloat }
     | BOOL                  { PBool }
-    | CHAR                  { PChar }
     | STRING                { PString }
-    | n = POLYMORPHIC_NAME  { Poly n }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -141,7 +105,8 @@ pattern:
     | ASTERISK              { MUL }                  
     | SLASH                 { DIV }                  
     | CARET                 { CONCAT }               
-    | EQUAL                 { EQ }                
+    | EQUAL                 { EQ }       
+    | IDENTICAL_EQ          { ID_EQ }         
     | NOT_EQUAL             { NEQ }           
     | GREATER_THAN          { GT }       
     | GREATER_THAN_EQUAL    { GTE }  
@@ -151,28 +116,244 @@ pattern:
     | OR                    { OR }            
 
 %inline uop:
-    | NOT { NOT }   
+    | NOT   { NOT }
+    | MINUS {UMINUS}
+    | PLUS  {UPLUS}
 
-const_or_var: (* Const or variable *)
-    | const = dataType      {Const const} 
-    | varId = identifier    { VarId varId }
+value:
+    | TYPE_INT          { Int $1 }
+    | TYPE_BOOL         { Bool $1 }
+    | TYPE_STRING       { String $1 }
+    | TYPE_UNIT         { Unit }
 
-typed_var: typedVarId = identifier; COLON; varType = paramType {TypedVarID (typedVarId, varType) }
+// --- Parser rules ---
 
-%inline tuple_dt: LEFT_PARENTHESIS; val_list = separated_nonempty_list(COMMA, value); RIGHT_PARENTHESIS { val_list }
-%inline list_dt: LEFT_SQ_BRACKET; val_list = separated_list(SEMICOLON, value); RIGHT_SQ_BRACKET         { val_list }
+prog : list (declare) EOF { $1 }
 
-%inline match_case: 
-    | BAR; v = value; ARROW; e = expr { (v, e) }
+(* for testing purposes *)
+prog_expr : expr EOF { $1 }
+prog_pattern : pattern EOF { $1 }
 
-(* <id> <value1> <value2> ... = <expr> *)
-%inline let_rec_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr    { Let (Recursive, id, vls, e) }
-%inline let_def: id = IDENTIFIER; vls = list(value); EQUAL; e = expr        { Let (Nonrecursive, id, vls, e) }
+declare:
+    | _let  { $1 }
 
-let_bind: (* a = 10 and b = 20 and ... *)
-    | l = let_def                           { [l] }
-    | h = let_def; LET_AND; tl = let_bind   { h :: tl }
+(* possible elements in list *)
+list_expr:
+    | value                         { EConst $1 }
+    | id                            { EVar $1 }
+    | operation                     { $1 }
+    | prefix_bop                    { EOperation $1 }
+    | _fun                          { $1 }
+    | _if                           { $1 }
+    | _match                        { $1 }
+    | _list(list_expr)              { EList $1 }
+    | _tuple(tuple_expr)            { ETuple $1 }
+    | application                   { $1 }
+    | concat(concat_expr)           { let a,b = $1 in EListConcat (a,b) }
+    | _constraint (constraint_expr) { let a,b = $1 in EConstraint (a,b)  }
 
-let_in_def: 
-    | e1 = let_def; IN; e2 = expr   { LetIn ([e1], e2) } (* without and *)
-    | exs = let_bind; IN; e = expr  { LetIn (exs, e) } (* with and *)
+(* possible elements in tuple *)
+tuple_expr:
+    | value                                                         { EConst $1 }
+    | id                                                            { EVar $1 }
+    | operation                                                     { $1 }
+    | prefix_bop                                                    { EOperation $1 }
+    | _fun                                                          { $1 }
+    | _match                                                        { $1 }
+    | _list(list_expr)                                              { EList $1 }
+    | application                                                   { $1 }
+    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
+
+(* possible left parts of application *)
+l_app_expr: 
+    | id                                                                    { EVar $1 }
+    | prefix_bop                                                            { EOperation $1 }
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                             { $2 }
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                              { $2 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                           { $2 }
+    | application                                                           { $1 }
+
+(* possible rights parts of application *)
+r_app_expr:
+    | value                                                         { EConst $1 }
+    | id                                                            { EVar $1 }
+    | _list(list_expr)                                              { EList $1 }
+    | prefix_bop;                                                   { EOperation $1 }
+    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
+    | LEFT_PARENTHESIS; concat(concat_expr); RIGHT_PARENTHESIS      { let a,b = $2 in EListConcat (a,b) }
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                     { $2 }
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
+    | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
+
+(* all possible operands in arithmetic *)
+op_expr: 
+    | value                                             { EConst $1 }
+    | id                                                { EVar $1 }
+    | application                                       { $1 }
+    | operation                                         { $1 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS       { $2 }   
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS          { $2 }
+
+(* possible elements in constructions like '1 :: [2; 3]' *)
+concat_expr:
+    | value                                                         { EConst $1 }
+    | id                                                            { EVar $1 }
+    | operation                                                     { $1 }
+    | prefix_bop                                                    { EOperation $1 }
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                     { $2 }
+    | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
+    | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }   
+    | _list(list_expr)                                              { EList $1 }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | application                                                   { $1 }
+    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
+    | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
+
+(* all possible elements to which we can apply type constraints *)
+(* there is no 'fun' or 'let' because we don't support explicit arrow types *)
+constraint_expr:
+    | value                                             { EConst $1 }
+    | id                                                { EVar $1 }
+    | operation                                         { $1 }
+    | prefix_bop                                        { EOperation $1 }
+    | _if                                               { $1 }
+    | _match                                            { $1 }   
+    | application                                       { $1 }
+
+(* union of all rules that can be called an expression *)
+expr:
+    | LEFT_PARENTHESIS; e = expr; RIGHT_PARENTHESIS     { e }
+    | value                                             { EConst $1 }
+    | id                                                { EVar $1 }
+    | operation                                         { $1 }
+    | prefix_bop                                        { EOperation $1 }
+    | _fun                                              { $1 }
+    | _if                                               { $1 }
+    | _match                                            { $1 }   
+    | _list(list_expr)                                  { EList $1 }
+    | _tuple(tuple_expr)                                { ETuple $1 }
+    | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
+    | application                                       { $1 }
+    | _let                                              { $1 }
+    | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
+
+(* -- same for patterns, but a little simpler -- *)
+
+(* possible elements in list *)
+list_pattern:
+    | value                                                 { Const $1 } 
+    | id                                                    { Var $1 }
+    | WILDCARD                                              { Wildcard }
+    | prefix_bop                                            { Operation $1 }
+    | _list(list_pattern)                                   { List $1 }
+    | _tuple(tuple_pattern)                                 { Tuple $1 }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
+
+(* possible elements in tuple *)
+tuple_pattern:
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
+    | _list(list_pattern)                                           { List $1 }
+    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
+
+(* possible elements in constructions like '1 :: [2; 3]' *)
+concat_pattern:
+    | value                                                         { Const $1 }
+    | id                                                            { Var $1 }
+    | prefix_bop                                                    { Operation $1 }
+    | _list(list_pattern)                                           { List $1 }
+    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
+    | WILDCARD                                                      { Wildcard }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
+
+(* all possible elements to which we can apply type constraints *)
+(* we can't apply type constraints to functions 'fun x y z : int -> ...' *)
+constraint_pattern:
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
+
+(* union of all rules that can be called a pattern *)
+pattern:
+    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS              { p }
+    | value                                                         { Const $1 } 
+    | id                                                            { Var $1 }
+    | WILDCARD                                                      { Wildcard }
+    | prefix_bop                                                    { Operation $1 }
+    | _tuple(tuple_pattern)                                         { Tuple $1 }
+    | _list(list_pattern)                                           { List $1 }
+    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
+    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
+
+(* --- other rules --- *)
+
+concat (rule):
+    | rule; DOUBLE_COLON; rule                                      { $1, $3 }
+    | LEFT_PARENTHESIS; concat (rule); RIGHT_PARENTHESIS            { $2 }
+
+(* default operations like "1 + 2" *)
+operation:
+    | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
+    | e1 = op_expr; op = bop; e2 = op_expr                          { Application ( Application (EOperation (Binary op), e1), e2 ) }
+    | op = uop; e = op_expr                                         { Application (EOperation (Unary op), e) } 
+
+application:
+    | LEFT_PARENTHESIS; a = application; RIGHT_PARENTHESIS          { a }
+    | f = l_app_expr; a = r_app_expr                                { Application (f, a) }
+
+_match:
+    | MATCH; e = expr; WITH; cases = separated_nonempty_list(BAR, match_case)           { Match (e, cases) }
+    | MATCH; e = expr; WITH; BAR; cases = separated_nonempty_list(BAR, match_case)      { Match (e, cases) }
+    | LEFT_PARENTHESIS; m = _match; RIGHT_PARENTHESIS                                   { m }
+
+%inline match_case: p = pattern; ARROW; e = expr            { (p, e) }
+
+%inline _if:
+    | IF; e1 = expr; THEN; e2 = expr; ELSE; e3 = expr       { If (e1, e2, Some e3) }
+    | IF; e1 = expr; THEN; e2 = expr                        { If (e1, e2, None) }
+
+(* let (+) x y = ... *)
+%inline prefix_bop:
+    | LEFT_PARENTHESIS; op = bop; RIGHT_PARENTHESIS         { Binary op }
+    
+_fun:
+    | FUN; vls = nonempty_list(pattern); ARROW; e = expr    { Fun (vls, e) }
+    | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS             { $2 }
+
+%inline id:
+    | IDENTIFIER    { $1 }
+
+_list(rule):
+    | LEFT_SQ_BRACKET; elements = separated_list(SEMICOLON, rule); RIGHT_SQ_BRACKET     { elements }
+
+_tuple (rule):
+    | lst = tuple_simple (rule)                                     { lst }
+    | LEFT_PARENTHESIS; lst = _tuple (rule); RIGHT_PARENTHESIS      { lst }    
+
+tuple_simple (rule):
+    | e1 = rule; COMMA; e2 = rule                   { [e1;e2] }
+    | e = rule; COMMA; t = tuple_simple(rule)       { e :: t }
+
+%inline rec_flag:
+    | REC   { Recursive } 
+    |       { Nonrecursive }
+
+%inline _let:
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind); IN; expr  { Let($2, $3, Some $5) }
+    | LET; rec_flag; separated_nonempty_list(LET_AND, _bind)            { Let($2, $3, None) }
+
+%inline _bind:
+    | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
+
+%inline _constraint (rule): 
+    | LEFT_PARENTHESIS; rule; COLON; paramType; RIGHT_PARENTHESIS { ($2, $4) }
