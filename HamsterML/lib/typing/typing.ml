@@ -24,7 +24,7 @@ let rec pp_inf_type fmt = function
     Format.fprintf
       fmt
       "(%a)"
-      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ", ") pp_inf_type)
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " * ") pp_inf_type)
       types
   | TArrow (t1, t2) -> Format.fprintf fmt "%a -> %a" pp_inf_type t1 pp_inf_type t2
   | TPVar v -> Format.fprintf fmt "'%d" v
@@ -245,6 +245,7 @@ module Scheme = struct
 
   (* Replaces all generic variables (α) with new unique variables *)
   let instantiate = function
+    | Scheme (_, (TPVar _ as t)) -> R.return t
     | Scheme (bs, t) ->
       let open R.Syntax in
       VarSet.fold
@@ -585,13 +586,20 @@ module Infer = struct
         R.return (expr_s, res_t)
       | Let (Nonrecursive, (name, args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
+          (* arg_ts = [] *)
           let* arg_env, arg_ts = infer_args env args in
+          (* expr_t = '0 *)
           let* expr_s, expr_t = helper arg_env expr in
+          (* name_t =  '1 * '2 *)
           let* _, name_t = infer_pattern env name in
+          (* u: 0 => ('1 * '2) *)
           let* u = Subst.unify name_t expr_t in
+          (* subs: 0 => ('1 * '2) *)
           let* subs = Subst.compose u expr_s in
+          (* expr_t = '1 * '2 *)
           let expr_t = Subst.apply expr_t subs in
           let arg_ts = Subst.apply_list arg_ts subs in
+          (* res_t = '1 * '2 *)
           let* res_t = build_arrow arg_ts expr_t in
           let env = TypeEnv.generalize_pattern name res_t env in
           R.return (env, subs, res_t)
@@ -607,6 +615,9 @@ module Infer = struct
         (match scope with
          | None -> R.return (subs, typ)
          | Some scope ->
+           (* env: {x -> '1 y -> '2 tpl -> '0} *)
+           (* scope_s = { '3 => int, '4 => int } [!] ПОЧЕМУ НЕ '1 и '2 ??? *)
+           (* scope_t = int *)
            let* scope_s, scope_t = helper env scope in
            let* subs = Subst.compose subs scope_s in
            R.return (subs, scope_t))
