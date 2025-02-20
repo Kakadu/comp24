@@ -485,7 +485,6 @@ module Infer = struct
     =
     match ps with
     | [] -> R.return (env, [])
-    | [ p ] -> infer_pattern env p >>| fun (env, p) -> env, [ p ]
     | p :: ps ->
       let* env, v_t = infer_pattern env p in
       let* env, vs_t = infer_args env ps in

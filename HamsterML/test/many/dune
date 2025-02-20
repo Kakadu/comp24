@@ -32,4 +32,5 @@
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml
   manytests/do_not_type/004let_poly.ml
-  manytests/do_not_type/015tuples.ml))
+  manytests/do_not_type/015tuples.ml
+  manytests/do_not_type/099.ml))

@@ -81,3 +81,18 @@
         (Ast.ETuple ((Ast.EVar "a"), (Ast.EVar "b"), [])))],
       None))
     ]
+
+  $ dune exec ParserRunner < manytests/do_not_type/099.ml
+  [(Ast.Let (Ast.Recursive,
+      [((Ast.Var "Some"), [(Ast.Var "x")],
+        (Ast.Application ((Ast.EVar "Some"), (Ast.EConst (Ast.Int 1)))))],
+      None));
+    (Ast.Let (Ast.Nonrecursive,
+       [((Ast.Var "Some"), [(Ast.Var "a")],
+         (Ast.EOperation (Ast.Binary Ast.LT)))],
+       None));
+    (Ast.Let (Ast.Nonrecursive,
+       [((Ast.Const Ast.Unit), [], (Ast.Fun ([(Ast.Var "x")], (Ast.EVar "x"))))
+         ],
+       None))
+    ]
