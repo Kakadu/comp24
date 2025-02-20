@@ -660,35 +660,36 @@
   
   define i64 @fac(i64 %self_2, i64 %n_3) {
   entry:
-    %t_2 = icmp sle i64 %n_3, 1
-    %ifcmp_10 = icmp eq i1 %t_2, false
-    br i1 %ifcmp_10, label %else_12, label %then_11
+    %t_2 = icmp sgt i64 %n_3, 1
+    %t_3 = xor i1 %t_2, true
+    %ifcmp_11 = icmp eq i1 %t_3, false
+    br i1 %ifcmp_11, label %else_13, label %then_12
   
-  then_11:                                          ; preds = %entry
-    br label %merge_17
+  then_12:                                          ; preds = %entry
+    br label %merge_18
   
-  else_12:                                          ; preds = %entry
-    %t_3 = sub i64 %n_3, 1
-    %cast_13 = inttoptr i64 %self_2 to ptr
-    %tupled_args_15 = call ptr @alloc_tuple(i64 1)
-    %elemptr_16 = getelementptr i64, ptr %tupled_args_15, i64 0
-    store i64 %t_3, ptr %elemptr_16, align 4
-    %t_4 = call i64 @call_closure(ptr %cast_13, ptr %tupled_args_15, i64 1)
-    %t_41 = mul i64 %n_3, %t_4
-    br label %merge_17
+  else_13:                                          ; preds = %entry
+    %t_4 = sub i64 %n_3, 1
+    %cast_14 = inttoptr i64 %self_2 to ptr
+    %tupled_args_16 = call ptr @alloc_tuple(i64 1)
+    %elemptr_17 = getelementptr i64, ptr %tupled_args_16, i64 0
+    store i64 %t_4, ptr %elemptr_17, align 4
+    %t_5 = call i64 @call_closure(ptr %cast_14, ptr %tupled_args_16, i64 1)
+    %t_51 = mul i64 %n_3, %t_5
+    br label %merge_18
   
-  merge_17:                                         ; preds = %else_12, %then_11
-    %phi_18 = phi i64 [ 1, %then_11 ], [ %t_41, %else_12 ]
-    ret i64 %phi_18
+  merge_18:                                         ; preds = %else_13, %then_12
+    %phi_19 = phi i64 [ 1, %then_12 ], [ %t_51, %else_13 ]
+    ret i64 %phi_19
   }
   
   define i64 @main() {
   entry:
-    %tupled_env_19 = call ptr @alloc_tuple(i64 2)
-    %closure_temp_20 = call ptr @alloc_closure(ptr @fac, ptr %tupled_env_19, i64 2, i64 0)
-    %0 = ptrtoint ptr %closure_temp_20 to i64
-    %t_6 = call i64 @fix(i64 %0, i64 6)
-    %1 = call i64 @print_int(i64 %t_6)
+    %tupled_env_20 = call ptr @alloc_tuple(i64 2)
+    %closure_temp_21 = call ptr @alloc_closure(ptr @fac, ptr %tupled_env_20, i64 2, i64 0)
+    %0 = ptrtoint ptr %closure_temp_21 to i64
+    %t_7 = call i64 @fix(i64 %0, i64 6)
+    %1 = call i64 @print_int(i64 %t_7)
     ret i64 0
   }
 

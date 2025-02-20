@@ -19,7 +19,7 @@
   Liveness_analysis
   Linear_scan_allocation
   Riscv
-  Riscv_codegen
+  ; Riscv_codegen
   Utils)
  (inline_tests)
  (libraries base ppx_show.runtime angstrom qcheck llvm llvm.analysis)

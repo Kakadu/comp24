@@ -21,6 +21,7 @@ let rec analyse_expr expr counter res_start res_end =
   | Fl_tuple elems -> analyse_list elems counter res_start res_end
   | Fl_app (f, args) -> analyse_list (f :: args) counter res_start res_end
   | Fl_binop (_, x, y) | Fl_cons (x, y) -> analyse_list [ x; y ] counter res_start res_end
+  | Fl_unop (_, x) -> analyse_expr x counter res_start res_end
   | Fl_ite (c, t, e) -> analyse_list [ c; t; e ] counter res_start res_end
   | Fl_getfield (_, o) -> analyse_expr o counter res_start res_end
 

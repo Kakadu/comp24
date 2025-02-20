@@ -195,12 +195,10 @@ let codegen_binop name x y =
   function
   | Eq -> build_icmp Icmp.Eq x y name builder
   | Neq -> build_icmp Icmp.Ne x y name builder
-  | Gt -> build_icmp Icmp.Sgt x y name builder
-  | Geq -> build_icmp Icmp.Sge x y name builder
   | Lt -> build_icmp Icmp.Slt x y name builder
-  | Leq -> build_icmp Icmp.Sle x y name builder
-  | Plus | Or -> build_add x y name builder
-  | Minus -> build_sub x y name builder
+  | Gt -> build_icmp Icmp.Sgt x y name builder
+  | Add | Or -> build_add x y name builder
+  | Sub -> build_sub x y name builder
   | Mul | And -> build_mul x y name builder
   | Div -> build_sdiv x y name builder
 ;;
@@ -242,6 +240,10 @@ let rec codegen_flambda = function
     in
     let* name = get_curr_decl_name in
     return @@ codegen_binop name x y op
+  | Fl_unop(Not, x) ->
+    let* x = codegen_flambda x in
+    let* fresh = fresh_name "not" in
+    build_not x fresh builder |> return
   | Fl_cons (x, xs) ->
     let* x' = codegen_flambda x in
     let* xs' = codegen_flambda xs in

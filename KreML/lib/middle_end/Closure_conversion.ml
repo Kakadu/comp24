@@ -17,6 +17,7 @@ module Freevars = struct
   let rec collect_cexpr = function
     | CImm imm -> collect_imm imm
     | CBinop (_, x, y) -> union (collect_imm x) (collect_imm y)
+    | CUnop (_, x) -> collect_imm x
     | CGetfield (_, i) -> collect_imm i
     | CApp (f, args) ->
       List.fold_left (fun acc e -> union acc (collect_imm e)) empty (f :: args)
@@ -186,6 +187,9 @@ and cexpr e =
     let* x' = imm (return x) in
     let* y' = imm (return y) in
     Fl_binop (op, x', y') |> return
+  | CUnop(unop, x) ->
+    let* x' = imm (return x) in
+    Fl_unop(unop, x') |> return
   | CIte (c, t, e) ->
     let* c' = imm (return c) in
     let* t' = aexpr (return t) in

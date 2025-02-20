@@ -7,31 +7,42 @@ open Ast
 type binop =
   | Mul
   | Div
-  | Plus
-  | Minus
+  | Add
+  | Sub
   | Eq
   | Neq
-  | Gt
-  | Geq
   | Lt
-  | Leq
+  | Gt
   | And
   | Or
 
+type unop = Not
+(* a > b <=> !(a <= b) <=> !(!(a>b))*)
 let resolve_binop = function
   | "*" -> Mul
   | "/" -> Div
-  | "+" -> Plus
-  | "-" -> Minus
+  | "+" -> Add
+  | "-" -> Sub
   | "=" | "==" -> Eq
   | "<>" -> Neq
-  | ">" -> Gt
-  | ">=" -> Geq
   | "<" -> Lt
-  | "<=" -> Leq
+  | ">" -> Gt
   | "&&" -> And
   | "||" -> Or
   | s -> Utils.internalfail @@ Format.sprintf "unexpected binop %s" s
+;;
+
+let op_is_normalized = function
+  | "<=" | ">=" -> false
+  | _ -> true
+;;
+
+let normalize_binop op x y =
+  let negate x = eapp (evar "!") [ x ] in
+  match op with
+  | "<=" -> eapp (evar ">") [ x; y ] |> negate
+  | ">=" -> eapp (evar "<") [ x; y ] |> negate
+  | _ -> eapp (evar op) [ x; y ]
 ;;
 
 type immediate =
@@ -41,6 +52,7 @@ type immediate =
 type cexpr =
   | CImm of immediate
   | CBinop of binop * immediate * immediate
+  | CUnop of unop * immediate
   | CTuple of immediate list
   | CGetfield of int * immediate (* tuple or list access *)
   | CCons of immediate * immediate
@@ -128,6 +140,14 @@ let simplify_temp_binding name value scope =
 let rec transform_expr expr k : aexpr t =
   match expr with
   | Expr_const c -> Aconst c |> k
+  | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op && (op_is_normalized op |> not) ->
+    let normalized = normalize_binop op x y in
+    transform_expr normalized k
+  | Expr_app(Expr_var "!", x) ->
+    transform_expr x (fun x' ->
+      let* fresh = fresh_temp in
+      let* scope = ivar fresh |> k in
+      temp_binding fresh (CUnop(Not, x')) scope |> return)
   | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op ->
     let binop = resolve_binop op in
     transform_expr x (fun x' ->
