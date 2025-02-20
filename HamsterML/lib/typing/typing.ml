@@ -26,6 +26,7 @@ let rec pp_inf_type fmt = function
       "(%a)"
       (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " * ") pp_inf_type)
       types
+  | TArrow (TArrow (_, _) as t1, t2) -> Format.fprintf fmt "(%a) -> %a" pp_inf_type t1 pp_inf_type t2
   | TArrow (t1, t2) -> Format.fprintf fmt "%a -> %a" pp_inf_type t1 pp_inf_type t2
   | TPVar v -> Format.fprintf fmt "'%d" v
 ;;
