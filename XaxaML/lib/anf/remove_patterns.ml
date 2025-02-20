@@ -10,13 +10,6 @@ type rp_const =
   | Rp_c_empty_list
   | Rp_c_unit
 
-type rp_pattern =
-  | Rp_p_any
-  | Rp_p_val of string
-  | Rp_p_const of rp_const
-  | Rp_p_tuple of rp_pattern * rp_pattern list
-  | Rp_p_cons_list of rp_pattern * rp_pattern
-
 type rp_expr =
   | Rp_e_const of rp_const
   | Rp_e_ident of string
@@ -24,36 +17,20 @@ type rp_expr =
   | Rp_e_fun of string list * rp_expr
   | Rp_e_app of rp_expr * rp_expr
   | Rp_e_let of rp_decl * rp_expr
-  | Rp_e_match of rp_expr * (rp_pattern * rp_expr) list
   | Rp_e_cons_list of rp_expr * rp_expr
-  | Rp_e_tuple of rp_expr * rp_expr list
+  | Rp_e_tuple of rp_expr list
 
 and rp_decl =
   | Rp_non_rec of string * rp_expr
   | Rp_rec of (string * rp_expr) list
 
-type rp_toplevel =
-  | Rp_let_decl of rp_decl
-  | Rp_expr of rp_expr
-
-type rp_program = rp_toplevel list
+type rp_program = rp_decl list
 
 let const_to_str = function
   | Rp_c_bool b -> if b then "true" else "false"
   | Rp_c_int i -> Format.sprintf "%i" i
   | Rp_c_empty_list -> "[]"
   | Rp_c_unit -> "()"
-;;
-
-let rec pat_to_str = function
-  | Rp_p_const c -> const_to_str c
-  | Rp_p_any -> "_"
-  | Rp_p_val v -> v
-  | Rp_p_tuple (p_hd, p_tl) ->
-    Format.sprintf
-      "(%s)"
-      (pat_to_str p_hd ^ List.fold_left (fun acc p -> acc ^ ", " ^ pat_to_str p) "" p_tl)
-  | Rp_p_cons_list (p1, p2) -> Format.sprintf "(%s::%s)" (pat_to_str p1) (pat_to_str p2)
 ;;
 
 let rec expr_to_str = function
@@ -82,28 +59,20 @@ let rec expr_to_str = function
         ""
         tl
     ^ Format.sprintf " in\n%s" (expr_to_str e2)
-  | Rp_e_match (e, case_list) ->
-    Format.sprintf "match %s with " (expr_to_str e)
-    ^ List.fold_left
-        (fun acc (p, e) ->
-          acc ^ Format.sprintf "\n| %s -> %s " (pat_to_str p) (expr_to_str e))
-        ""
-        case_list
   | Rp_e_cons_list (e1, e2) -> Format.sprintf "(%s::%s)" (expr_to_str e1) (expr_to_str e2)
-  | Rp_e_tuple (e, e_list) ->
+  | Rp_e_tuple e_list ->
     Format.sprintf
       "(%s)"
-      (expr_to_str e
+      (expr_to_str (List.hd e_list)
        ^ List.fold_left
            (fun acc e -> acc ^ Format.sprintf ", %s" (expr_to_str e))
            ""
-           e_list)
+           (List.tl e_list))
 ;;
 
 let toplevel_to_str = function
-  | Rp_let_decl (Rp_non_rec (name, e)) ->
-    Format.sprintf "let %s = %s" name (expr_to_str e)
-  | Rp_let_decl (Rp_rec decl_list) ->
+  | Rp_non_rec (name, e) -> Format.sprintf "let %s = %s" name (expr_to_str e)
+  | Rp_rec decl_list ->
     let name1, e1 = List.hd decl_list in
     let tl = List.tl decl_list in
     Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
@@ -111,7 +80,6 @@ let toplevel_to_str = function
         (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
         ""
         tl
-  | Rp_expr e -> Format.sprintf "%s;;" (expr_to_str e)
 ;;
 
 let pp_rp_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
@@ -125,7 +93,6 @@ let pp_rp_program ppf p =
       else Format.fprintf ppf "%s\n\n" (toplevel_to_str a))
     p
 ;;
-
 
 open Base
 open Common
@@ -148,14 +115,91 @@ let convert_const = function
   | Ast.C_unit -> Rp_c_unit
 ;;
 
-let rec convert_pat = function
-  | Ast.P_any -> Rp_p_any
-  | Ast.P_cons_list (a, b) -> Rp_p_cons_list (convert_pat a, convert_pat b)
-  | Ast.P_const c -> Rp_p_const (convert_const c)
-  | Ast.P_tuple (a, b) -> Rp_p_tuple (convert_pat a, List.map b ~f:convert_pat)
-  | Ast.P_typed (p, _) -> convert_pat p
-  | Ast.P_val v -> Rp_p_val v
+type unpack =
+  | Tuple of int
+  | List_hd
+  | List_tl
+  | Value
+
+let unpack_expr e = function
+  | Tuple i -> Rp_e_app (Rp_e_app (Rp_e_ident "#unpack_tuple", e), Rp_e_const (Rp_c_int i))
+  | List_hd -> Rp_e_app (Rp_e_ident "#list_hd", e)
+  | List_tl -> Rp_e_app (Rp_e_ident "#list_tl", e)
+  | Value -> e
 ;;
+
+let unpack_pat_checks expr pat =
+  let rec get_min_lenght l = function
+    | Ast.P_cons_list (_, r) -> get_min_lenght (l + 1) r
+    | _ -> l
+  in
+  let rec helper add_list cur = function
+    | Ast.P_typed (p, _) -> helper add_list cur p
+    | P_const c ->
+      (match c with
+       | C_unit -> []
+       | _ -> [ Rp_e_app (Rp_e_app (Rp_e_ident "=", cur), Rp_e_const (convert_const c)) ])
+    | P_tuple (a, b) ->
+      let t =
+        List.mapi (a :: b) ~f:(fun i p -> helper true (unpack_expr cur (Tuple i)) p)
+      in
+      List.concat t
+    | P_cons_list (l, r) ->
+      let min_length = get_min_lenght 0 r in
+      let list_length = Rp_e_app (Rp_e_ident "#list_length", cur) in
+      let check =
+        Rp_e_app (Rp_e_app (Rp_e_ident ">", list_length), Rp_e_const (Rp_c_int min_length))
+      in
+      let l = helper true (unpack_expr cur List_hd) l in
+      let r = helper false (unpack_expr cur List_tl) r in
+      if add_list then (check :: l) @ r else l @ r
+    | _ -> []
+  in
+  helper true expr pat
+;;
+
+let unpack_pat_decls expr pat =
+  let rec helper name = function
+    | Ast.P_typed (p, _) -> helper name p
+    | P_cons_list (l, r) ->
+      (match helper name l with
+       | _ :: _ as lst -> List_hd :: lst
+       | _ -> List_tl :: helper name r)
+    | P_tuple (a, b) ->
+      let t = List.map (a :: b) ~f:(helper name) in
+      (match List.findi t ~f:(fun _ a -> not @@ List.is_empty a) with
+       | Some (i, lst) -> Tuple i :: lst
+       | None -> [])
+    | P_val v when String.equal v name -> [ Value ]
+    | _ -> []
+  in
+  let create_expr name =
+    List.fold_left (helper name pat) ~init:expr ~f:(fun acc unpack ->
+      unpack_expr acc unpack)
+  in
+  let names = get_idents pat in
+  List.map (StrSet.to_list names) ~f:(fun name -> Rp_non_rec (name, create_expr name))
+;;
+
+let create_if checks e1 e2 =
+  let cond =
+    List.fold (List.tl_exn checks) ~init:(List.hd_exn checks) ~f:(fun acc a ->
+      Rp_e_app (Rp_e_app (Rp_e_ident "&&", acc), a))
+  in
+  Rp_e_ite (cond, e1, e2)
+;;
+
+let create_case to_match pat case_expr not_match_expr =
+  let checks = unpack_pat_checks to_match pat in
+  let decls = unpack_pat_decls to_match pat in
+  let let_expr =
+    List.fold_right decls ~init:case_expr ~f:(fun decl_body acc ->
+      Rp_e_let (decl_body, acc))
+  in
+  if List.is_empty checks then let_expr else create_if checks let_expr not_match_expr
+;;
+
+let match_failure = Rp_e_ident "#match_failure"
 
 let rec rp_expr = function
   | Ast.E_typed (e, _) -> rp_expr e
@@ -177,7 +221,7 @@ let rec rp_expr = function
   | E_tuple (e, e_list) ->
     let e = rp_expr e in
     let e_list = List.map e_list ~f:(fun e -> rp_expr e) in
-    Rp_e_tuple (e, e_list)
+    Rp_e_tuple (e :: e_list)
   | E_fun (first, other, body) ->
     let last_args = first :: other in
     let new_args =
@@ -189,68 +233,87 @@ let rec rp_expr = function
     let args_to_match =
       List.filter_mapi last_args ~f:(fun i arg ->
         match arg with
-        | Ast.P_val _ -> None
+        | P_val _ -> None
         | _ -> Some ("#" ^ Int.to_string i))
     in
-    let new_e = rp_expr body in
-    if List.length args_to_match = 0
-    then Rp_e_fun (new_args, new_e)
-    else (
-      let to_match =
-        let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
-        Rp_e_tuple (List.hd_exn vals, List.tl_exn vals)
-      in
-      let pat =
-        let pat_list =
-          List.filter_map last_args ~f:(fun arg ->
-            match arg with
-            | P_val _ -> None
-            | p -> Some (convert_pat p))
-        in
-        Rp_p_tuple (List.hd_exn pat_list, List.tl_exn pat_list)
-      in
-      Rp_e_fun (new_args, Rp_e_match (to_match, [ pat, new_e ])))
+    let pat_list =
+      List.filter last_args ~f:(function
+        | P_val _ -> false
+        | _ -> true)
+    in
+    let new_body = rp_expr body in
+    (match List.length args_to_match with
+     | 0 -> Rp_e_fun (new_args, new_body)
+     | count ->
+       let pat =
+         if count = 1
+         then List.hd_exn pat_list
+         else P_tuple (List.hd_exn pat_list, List.tl_exn pat_list)
+       in
+       let to_match =
+         if count = 1
+         then Rp_e_ident (List.hd_exn args_to_match)
+         else (
+           let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
+           Rp_e_tuple vals)
+       in
+       let case_expr = create_case (Rp_e_ident "#t") pat new_body match_failure in
+       Rp_e_fun (new_args, Rp_e_let (Rp_non_rec ("#t", to_match), case_expr)))
   | E_match (e, case_list) ->
-    let e = rp_expr e in
-    let case_list = List.map case_list ~f:(fun (p, e) -> convert_pat p, rp_expr e) in
-    Rp_e_match (e, case_list)
-  | E_let ((Non_rec (_, _, _) as orig), e) ->
-    let decls = rp_decl orig in
-    let e = rp_expr e in
-    (* TODO: add #t as name here *)
-    List.fold_right decls ~init:e ~f:(fun decl_body acc -> Rp_e_let (decl_body, acc))
-  | E_let ((Rec _ as orig), e) ->
-    let decl = List.nth_exn (rp_decl orig) 0 in
+    Rp_e_let (Rp_non_rec ("#t", rp_expr e), rp_match (Rp_e_ident "#t") case_list)
+  | E_let (Non_rec (pat, _, e1), e2) ->
+    let e1 = rp_expr e1 in
+    let e2 = rp_expr e2 in
+    (match pat with
+     | P_val name -> Rp_e_let (Rp_non_rec (name, e1), e2)
+     | _ ->
+       let case_expr = create_case (Rp_e_ident "#t") pat e2 match_failure in
+       Rp_e_let (Rp_non_rec ("#t", e1), case_expr))
+  | E_let (Rec decl_list, e) ->
+    let decl = rp_rec_decl decl_list in
     let e = rp_expr e in
     Rp_e_let (decl, e)
 
-and rp_decl = function
-  | Non_rec (pat, _, e) ->
-    let new_e = rp_expr e in
-    (match pat with
-     | P_val name -> [ Rp_non_rec (name, new_e) ]
-     | pat ->
-       let fst = Rp_non_rec ("#t", new_e) in
-       let idents = get_idents pat in
-       let f1 name =
-         Rp_non_rec
-           (name, Rp_e_match (Rp_e_ident "#t", [ convert_pat pat, Rp_e_ident name ]))
-       in
-       fst :: List.map (StrSet.to_list idents) ~f:f1)
-  | Rec decl_list ->
-    let f1 (pat, _, e) =
-      let e = rp_expr e in
-      match pat with
-      | Ast.P_val v -> v, e
-      | _ -> "", e
-    in
-    let new_decls = List.map decl_list ~f:f1 in
-    [ Rp_rec new_decls ]
+and rp_match to_match = function
+  | (p, e) :: tl ->
+    let checks = unpack_pat_checks to_match p in
+    let decls = unpack_pat_decls to_match p in
+    let e = rp_expr e in
+    let let_in = List.fold_right decls ~init:e ~f:(fun d acc -> Rp_e_let (d, acc)) in
+    if List.is_empty checks
+    then let_in
+    else create_if checks let_in (rp_match to_match tl)
+  | _ -> Rp_e_ident "#match_failure"
+
+and rp_rec_decl decl_list =
+  let f1 (pat, _, e) =
+    let e = rp_expr e in
+    match pat with
+    | Ast.P_val v -> v, e
+    | _ -> "", e
+  in
+  let new_decls = List.map decl_list ~f:f1 in
+  Rp_rec new_decls
 ;;
 
 let rp_toplevel = function
-  | Ast.Expr e -> [ Rp_expr (rp_expr e) ]
-  | Let_decl d -> List.map (rp_decl d) ~f:(fun x -> Rp_let_decl x)
+  | Ast.Expr e -> [ Rp_non_rec ("#t", rp_expr e) ]
+  | Let_decl (Non_rec (pat, _, e)) ->
+    let e = rp_expr e in
+    (match pat with
+     | P_val name -> [ Rp_non_rec (name, e) ]
+     | pat ->
+       let to_unpack = Rp_e_ident "#t" in
+       let checks = unpack_pat_checks to_unpack pat in
+       let decls = unpack_pat_decls to_unpack pat in
+       if List.is_empty checks
+       then Rp_non_rec ("#t", e) :: decls
+       else (
+         let ite =
+           create_if checks (Rp_e_const Rp_c_unit) (Rp_e_ident "#match_failure")
+         in
+         Rp_non_rec ("#t", e) :: Rp_non_rec ("(#tt)", ite) :: decls))
+  | Let_decl (Rec decl_list) -> [ rp_rec_decl decl_list ]
 ;;
 
 let run_remove_patterns_program program =

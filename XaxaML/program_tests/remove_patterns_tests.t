@@ -43,30 +43,40 @@ DO NOTHING
 
 MODIFY
   $ ./run_remove_patterns.exe << EOF
-  > let (a, b) = (1,2)
-  > let (c :: d) = [1; 2; 3]
-  > let f (x, y) = x + y
-  let a = match (1, 2) with 
-  | (a, b) -> a 
+  > let abc = 
+  >   let (a, (b, c)) = (1, (2, 3)) in 
+  >   let (d::e) = [1; 2; 3] in
+  >   let f (x, y) = x + y in 
+  >   0
+  let abc = let #t = (1, (2, 3)) in
+  let a = ((#unpack_tuple #t) 0) in
+  let b = ((#unpack_tuple ((#unpack_tuple #t) 1)) 0) in
+  let c = ((#unpack_tuple ((#unpack_tuple #t) 1)) 1) in
+  let #t = (1::(2::(3::[]))) in
   
-  let b = match (1, 2) with 
-  | (a, b) -> b 
-  
-  let c = match (1::(2::(3::[]))) with 
-  | (c::d) -> c 
-  
-  let d = match (1::(2::(3::[]))) with 
-  | (c::d) -> d 
-  
-  let f = (fun #0 -> match (#0) with 
-  | ((x, y)) -> ((+ x) y) )
+  if ((> (#list_length #t)) 0)
+  then let d = (#list_hd #t) in
+  let e = (#list_tl #t) in
+  let f = (fun #0 -> let #t = #0 in
+  let x = ((#unpack_tuple #t) 0) in
+  let y = ((#unpack_tuple #t) 1) in
+  ((+ x) y)) in
+  0
+  else #match_failure
 
   $ ./run_remove_patterns.exe << EOF
   > let f x = 
   >  let g (a, b) (c :: d) e = x + 1
   >  in g 
-  let f = (fun x -> let g = (fun #0 #1 e -> match (#0, #1) with 
-  | ((a, b), (c::d)) -> ((+ x) 1) ) in
+  let f = (fun x -> let g = (fun #0 #1 e -> let #t = (#0, #1) in
+  
+  if ((> (#list_length ((#unpack_tuple #t) 1))) 0)
+  then let a = ((#unpack_tuple ((#unpack_tuple #t) 0)) 0) in
+  let b = ((#unpack_tuple ((#unpack_tuple #t) 0)) 1) in
+  let c = (#list_hd ((#unpack_tuple #t) 1)) in
+  let d = (#list_tl ((#unpack_tuple #t) 1)) in
+  ((+ x) 1)
+  else #match_failure) in
   g)
 
   $ ./run_remove_patterns.exe << EOF
@@ -74,7 +84,96 @@ MODIFY
   >   let f (x, y) = x + y in 
   >   let rec g a = h a and h a = g a in 
   >   1
-  let a = let f = (fun #0 -> match (#0) with 
-  | ((x, y)) -> ((+ x) y) ) in
+  let a = let f = (fun #0 -> let #t = #0 in
+  let x = ((#unpack_tuple #t) 0) in
+  let y = ((#unpack_tuple #t) 1) in
+  ((+ x) y)) in
   let rec g = (fun a -> (h a)) and h = (fun a -> (g a)) in
   1
+
+  $ ./run_remove_patterns.exe << EOF
+  > let x = 1
+  > let t = match x with 
+  >   | 2 -> 3
+  >   | 3 -> 4
+  >   | _ -> 1
+  >   | 5 -> 6
+  >   | 7 -> 8
+  >   | 10 -> 9
+  let x = 1
+  
+  let t = let #t = x in
+  
+  if ((= #t) 2)
+  then 3
+  else 
+  if ((= #t) 3)
+  then 4
+  else 1
+
+  $ ./run_remove_patterns.exe << EOF
+  > let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
+  let rec append = (fun xs ys -> let #t = xs in
+  
+  if ((= #t) [])
+  then ys
+  else 
+  if ((> (#list_length #t)) 0)
+  then let x = (#list_hd #t) in
+  let xs = (#list_tl #t) in
+  (x::((append xs) ys))
+  else #match_failure)
+
+  $ ./run_remove_patterns.exe << EOF
+  > let (1, 2) = (2, 3)
+  let #t = (2, 3)
+  
+  let (#tt) = 
+  if ((&& ((= ((#unpack_tuple #t) 0)) 1)) ((= ((#unpack_tuple #t) 1)) 2))
+  then ()
+  else #match_failure
+
+  $ ./run_remove_patterns.exe << EOF
+  > let rec map f xs =
+  > match xs with
+  > | [] -> []
+  > | a::[] -> [f a]
+  > | a::b::[] -> [f a; f b]
+  > | a::b::c::[] -> [f a; f b; f c]
+  > | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
+  let rec map = (fun f xs -> let #t = xs in
+  
+  if ((= #t) [])
+  then []
+  else 
+  if ((&& ((> (#list_length #t)) 0)) ((= (#list_tl #t)) []))
+  then let a = (#list_hd #t) in
+  ((f a)::[])
+  else 
+  if ((&& ((> (#list_length #t)) 1)) ((= (#list_tl (#list_tl #t))) []))
+  then let a = (#list_hd #t) in
+  let b = (#list_hd (#list_tl #t)) in
+  ((f a)::((f b)::[]))
+  else 
+  if ((&& ((> (#list_length #t)) 2)) ((= (#list_tl (#list_tl (#list_tl #t)))) []))
+  then let a = (#list_hd #t) in
+  let b = (#list_hd (#list_tl #t)) in
+  let c = (#list_hd (#list_tl (#list_tl #t))) in
+  ((f a)::((f b)::((f c)::[])))
+  else 
+  if ((> (#list_length #t)) 3)
+  then let a = (#list_hd #t) in
+  let b = (#list_hd (#list_tl #t)) in
+  let c = (#list_hd (#list_tl (#list_tl #t))) in
+  let d = (#list_hd (#list_tl (#list_tl (#list_tl #t)))) in
+  let tl = (#list_tl (#list_tl (#list_tl (#list_tl #t)))) in
+  ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
+  else #match_failure)
+
+
+  $ ./run_remove_patterns.exe << EOF
+  > let a = match 1 + 2 with 
+  > | x -> x
+  let a = let #t = ((+ 1) 2) in
+  let x = #t in
+  x
