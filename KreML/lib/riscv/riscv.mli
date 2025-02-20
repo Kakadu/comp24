@@ -6,9 +6,15 @@ type reg =
   | Saved of int (** s{i} *)
   | Arg of int (** a{i} *)
 
+val temp : int -> reg
+val saved : int -> reg
+val arg : int -> reg
+
 type op =
   (* R-type *)
   | ADD
+  | MUL
+  | DIV
   | SLT
   | SLTU
   | AND
@@ -47,13 +53,19 @@ type op =
   | JAL
   | JALR
 
+
 type instruction =
-  | Rtype of reg * reg * reg * op (** dst, rs1, rs2, op *)
-  | Itype of reg * int * reg * op (** dst, imm, rs1, op *)
-  | SType of reg * int * reg * op (** base, offset, value, op *)
-  | BType of reg * reg * int * op (** rs1, rs2, target, op *)
-  | UType of reg * int * op (** dst, imm, op *)
-  | JType of int * reg * op (** signed offset, link reg, op *)
+  | Rtype of reg * reg * reg * op (** rd, rs1, rs2, op *)
+  | Itype of reg * reg * int * op (** rd, rs1, imm, op *)
+  | Stype of reg * int * reg * op (** base, offset, value, op *)
+  | Btype of reg * reg * string * op (** rs1, rs2, target, op *)
+  | Utype of reg * int * op (** dst, imm, op *)
+  (* | Jtype of string * reg * op *)
+   (** signed offset, link reg, op *)
+  | Pseudo of string (* can not unify signature *)
+  | Label of string
+
+val sw : reg -> int -> reg -> instruction
 
 module RegistersStorage : sig
   include Registers_storage_intf.S with type 'a t = 'a list
@@ -61,4 +73,7 @@ module RegistersStorage : sig
 end
 
 val pp_reg : Format.formatter -> reg -> unit
+val pp_op : Format.formatter -> op -> unit
+val pp_insn : Format.formatter -> instruction -> unit
+
 

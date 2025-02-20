@@ -6,9 +6,15 @@ type reg =
   | Saved of int
   | Arg of int
 
+let temp idx = Temp idx
+let saved idx = Saved idx
+let arg idx = Arg idx
+
 type op =
   (* R-type *)
   | ADD
+  | MUL
+  | DIV
   | SLT
   | SLTU
   | AND
@@ -48,12 +54,18 @@ type op =
   | JALR
 
 type instruction =
-  | Rtype of reg * reg * reg * op (** dst, rs1, rs2, op *)
-  | Itype of reg * int * reg * op (** dst, imm, rs1, op *)
-  | SType of reg * int * reg * op (** base, offset, value, op *)
-  | BType of reg * reg * int * op (** rs1, rs2, target, op *)
-  | UType of reg * int * op (** dst, imm, op *)
-  | JType of int * reg * op (** signed offset, link reg, op *)
+  | Rtype of reg * reg * reg * op (** rd, rs1, rs2, op *)
+  | Itype of reg * reg * int * op (** rd, rs1, imm, op *)
+  | Stype of reg * int * reg * op (** base, offset, value, op *)
+  | Btype of reg * reg * string * op (** rs1, rs2, target, op *)
+  | Utype of reg * int * op (** dst, imm, op *)
+  (* | Jtype of string * reg * op *)
+   (** signed offset, link reg, op *)
+  | Pseudo of string (* can not unify signature *)
+  | Label of string
+
+let sw rd offset base = Stype(rd, offset, base, SW)
+
 
 module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
   type 'a t = 'a list
@@ -77,10 +89,69 @@ end
 
 let pp_reg fmt =
   let open Format in
-   function
+  function
   | Zero -> fprintf fmt "x0"
   | Ra -> fprintf fmt "ra"
   | Sp -> fprintf fmt "sp"
   | Temp i -> fprintf fmt "t%i" i
   | Saved i -> fprintf fmt "s%i" i
   | Arg i -> fprintf fmt "a%i" i
+;;
+
+let pp_op fmt =
+  let open Format in
+  let p = fprintf fmt in
+  function
+  | ADD -> p "add"
+  | MUL -> p "mul"
+  | DIV -> p "div"
+  | SLT -> p "slt"
+  | SLTU -> p "sltu"
+  | AND -> p "and"
+  | OR -> p "or"
+  | XOR -> p "xor"
+  | SLL -> p "sll"
+  | SRL -> p "srl"
+  | SUB -> p "sub"
+  | SRA -> p "sra"
+  | ADDI -> p "addi"
+  | SLTI -> p "slti"
+  | SLTIU -> p "sltiu"
+  | ANDI -> p "andi"
+  | ORI -> p "ori"
+  | XORI -> p "xori"
+  | LW -> p "lw"
+  | LH -> p "lh"
+  | LHU -> p "lhu"
+  | LB -> p "lb"
+  | SW -> p "sw"
+  | SH -> p "sh"
+  | SB -> p "sb"
+  | BEQ -> p "beq"
+  | BNE -> p "bne"
+  | BLT -> p "blt"
+  | BLTU -> p "bltu"
+  | BGE -> p "bge"
+  | BGEU -> p "bgeu"
+  | LUI -> p "lui"
+  | AUIPC -> p "auipc"
+  | JAL -> p "jal"
+  | JALR -> p "jalr"
+;;
+
+let pp_insn fmt =
+  let open Format in
+  function
+  | Rtype (rd, rs1, rs2, op) ->
+    fprintf fmt "@[%a %a, %a, %a%@]@." pp_op op pp_reg rd pp_reg rs1 pp_reg rs2
+  | Itype (rd, rs, imm, op) ->
+    fprintf fmt "@[%a %a, %a, %i@]@." pp_op op pp_reg rd pp_reg rs imm
+  | Stype (base, offset, value, op) ->
+    fprintf fmt "@[%a %a, %i(%a) @]@." pp_op op pp_reg value offset pp_reg base
+  | Btype(rs1, rs2, target, op) ->
+    fprintf fmt "@[%a  %a, %a, %s@]@." pp_op op pp_reg rs1 pp_reg rs2 target
+  | Utype(rd, imm, op) ->
+    fprintf fmt "@[%a %a, %i@]@." pp_op op pp_reg rd imm
+  | Pseudo p -> fprintf fmt "@[%s@]@." p
+  | Label l -> fprintf  fmt "@[%s:@]@." l
+;;

@@ -9,7 +9,7 @@ type 'a program_allocation = (string * 'a fun_allocation) list
 
 module Allocator(S : Registers_storage_intf.S) : sig
   val scan_fun : 'a S.t -> range list -> 'a fun_allocation
-  val scan_program : 'a S.t -> Liveness_analysis.analysis_result -> 'a program_allocation
+  val scan_program : 'a S.t -> Flambda.flstructure -> 'a program_allocation
 end
 
 val pp : Format.formatter -> (Format.formatter -> 'a -> unit) -> 'a program_allocation -> unit

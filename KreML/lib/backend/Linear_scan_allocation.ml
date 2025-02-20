@@ -65,8 +65,9 @@ module Allocator (Storage : Registers_storage_intf.S) = struct
     res
   ;;
 
-  let scan_program available liveness_analysis_result : 'a program_allocation =
-    List.map (fun (id, vars) -> id, scan_fun available vars) liveness_analysis_result
+  let scan_program available flstructure : 'a program_allocation =
+    let liveness = Liveness_analysis.analyse_program flstructure in
+    List.map (fun (id, vars) -> id, scan_fun available vars) liveness
   ;;
 end
 
