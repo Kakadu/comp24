@@ -419,7 +419,6 @@ module Infer = struct
       | Wildcard ->
         let* fr = fresh_var in
         R.return (env, fr)
-        (* let f _ _ : 'a -> 'b *)
       | Var name ->
         let* fr = fresh_var in
         let new_env = TypeEnv.extend name (Scheme.create fr) env in
@@ -587,20 +586,13 @@ module Infer = struct
         R.return (expr_s, res_t)
       | Let (Nonrecursive, (name, args, expr) :: tl_bind, scope) ->
         let infer_bind env name args expr =
-          (* arg_ts = [] *)
           let* arg_env, arg_ts = infer_args env args in
-          (* expr_t = '0 *)
           let* expr_s, expr_t = helper arg_env expr in
-          (* name_t =  '1 * '2 *)
           let* _, name_t = infer_pattern env name in
-          (* u: 0 => ('1 * '2) *)
           let* u = Subst.unify name_t expr_t in
-          (* subs: 0 => ('1 * '2) *)
           let* subs = Subst.compose u expr_s in
-          (* expr_t = '1 * '2 *)
           let expr_t = Subst.apply expr_t subs in
           let arg_ts = Subst.apply_list arg_ts subs in
-          (* res_t = '1 * '2 *)
           let* res_t = build_arrow arg_ts expr_t in
           let env = TypeEnv.generalize_pattern name res_t env in
           R.return (env, subs, res_t)
@@ -616,9 +608,6 @@ module Infer = struct
         (match scope with
          | None -> R.return (subs, typ)
          | Some scope ->
-           (* env: {x -> '1 y -> '2 tpl -> '0} *)
-           (* scope_s = { '3 => int, '4 => int } [!] ПОЧЕМУ НЕ '1 и '2 ??? *)
-           (* scope_t = int *)
            let* scope_s, scope_t = helper env scope in
            let* subs = Subst.compose subs scope_s in
            R.return (subs, scope_t))
@@ -659,7 +648,6 @@ module Infer = struct
         let* r_app_s, r_app_t = helper (TypeEnv.apply l_app_s env) r_app in
         let* subs = Subst.compose l_app_s r_app_s in
         let* body_t = fresh_var in
-        (* f (x: int) <=> int -> 'a *)
         let fun_type = TArrow (r_app_t, body_t) in
         let* u = Subst.unify fun_type (Subst.apply l_app_t subs) in
         let* subs = Subst.compose subs u in
