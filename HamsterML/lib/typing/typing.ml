@@ -518,9 +518,6 @@ module Infer = struct
            (* 'a list *)
            let* fr = fresh_var in
            R.return (Subst.empty, TList fr)
-         | [ p ] ->
-           let* p_s, p_t = helper env p in
-           R.return (p_s, TList p_t)
          | p :: tl ->
            let* p_s, p_t = helper env p in
            let* tl_s, tl_t =
