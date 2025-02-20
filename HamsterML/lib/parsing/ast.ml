@@ -57,7 +57,7 @@ type expr =
   | EConst of value
   | EVar of id
   | EOperation of op (* 1 + 1 or (+) 1 1 *)
-  | ETuple of expr * expr *expr list
+  | ETuple of expr * expr * expr list
   | EList of expr list
   | EListConcat of expr * expr (* 1::2::[] *)
   | EConstraint of expr * dataType (* f x : Int *)

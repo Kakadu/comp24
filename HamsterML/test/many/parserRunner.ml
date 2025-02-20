@@ -1,7 +1,8 @@
+open HamsterML.Ast
 open HamsterTest.ParserTest
 
 let () =
   let s = In_channel.input_all Stdlib.stdin in
-  match parse_prog s with
-  | _ -> ()
+  let prog = parse_prog s in
+  pp_prog Format.std_formatter prog
 ;;
