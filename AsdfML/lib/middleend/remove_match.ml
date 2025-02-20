@@ -66,9 +66,9 @@ let remove_match prog =
       let* t = helper_expr t in
       let* e = helper_expr e in
       return (te_if_else ty i t e)
-    | TEFun (t, p, e) ->
+    | TEFun (t, p, ps, e) ->
       let* e = helper_expr e in
-      return (te_fun t p e)
+      return (te_fun t p ps e)
     | TELetIn (t, d, e) ->
       let* d = helper_def d in
       let* e = helper_expr e in

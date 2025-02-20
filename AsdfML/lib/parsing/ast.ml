@@ -74,8 +74,9 @@ type expr =
       * (expr[@gen Gen.(gen_expr_sized (n / div))])
       * (expr[@gen Gen.(gen_expr_sized (n / div))]) (** if x then y else z *)
   | EFun of
-      (pattern list[@gen Gen.(list_size (2 -- 4) (gen_pattern_sized (n / div)))]) * expr
-  (** fun x -> y *)
+      (pattern[@gen Gen.(gen_pattern_sized (n / div))])
+      * (pattern list[@gen Gen.(list_size (0 -- 4) (gen_pattern_sized (n / div)))])
+      * expr (** fun x -> y *)
   | ELetIn of definition * expr (** let x = y in z *)
   | ETuple of
       expr * expr * (expr list[@gen Gen.(list_size (0 -- 4) (gen_expr_sized (n / div)))])
@@ -115,7 +116,7 @@ let e_const c = EConst c
 let e_var x = EVar x
 let e_app f x = EApp (f, x)
 let e_if_else cond e_true e_false = EIfElse (cond, e_true, e_false)
-let e_fun p e = EFun (p, e)
+let e_fun p ps e = EFun (p, ps, e)
 let e_let_in def e = ELetIn (def, e)
 let e_tuple hd1 hd2 tl = ETuple (hd1, hd2, tl)
 let e_list exprs = EList exprs

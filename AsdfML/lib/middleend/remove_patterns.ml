@@ -60,12 +60,12 @@ let remove_patterns =
     | TEApp (t, l, r) -> te_app t (helper_expr l) (helper_expr r)
     | TEIfElse (ty, i, t, e) ->
       te_if_else ty (helper_expr i) (helper_expr t) (helper_expr e)
-    | TEFun (t, p, e) ->
+    | TEFun (t, p, ps, e) ->
       let e = helper_expr e in
-      let p, e = remove_argument_patterns e p in
-      (* dbg "fun: %a\n" pp_texpr f;
-         dbg "pat: %s\n" (p |> List.map ~f:(Format.asprintf "%a" pp_pattern) |> String.concat); *)
-      te_fun t p e
+      let ps, e = remove_argument_patterns e (p :: ps) in
+      (* TODO: *)
+      let (p :: ps) = ps in
+      te_fun t p ps e
     | TELetIn (t, def, body) ->
       let body = helper_expr body in
       (match def with

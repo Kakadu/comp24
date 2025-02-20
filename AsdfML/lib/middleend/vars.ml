@@ -29,7 +29,7 @@ let rec free_vars_expr =
   | EApp (l, r) -> union (free_vars_expr l) (free_vars_expr r)
   | EIfElse (c, t, e) ->
     union_list [ free_vars_expr c; free_vars_expr t; free_vars_expr e ]
-  | EFun (pat, exp) -> diff (free_vars_expr exp) (vars_pat_list pat)
+  | EFun (p, ps, exp) -> diff (free_vars_expr exp) (vars_pat_list (p :: ps))
   | ELetIn ((DLet (_, pat, _) as def), exp) ->
     let free_def = free_vars_def def in
     let free_expr = diff (free_vars_expr exp) (vars_pat pat) in
@@ -62,7 +62,7 @@ let rec vars_expr =
   | EVar id -> singleton id
   | EApp (l, r) -> union (vars_expr l) (vars_expr r)
   | EIfElse (c, t, e) -> union_list [ vars_expr c; vars_expr t; vars_expr e ]
-  | EFun (pat, exp) -> union (vars_pat_list pat) (vars_expr exp)
+  | EFun (p, ps, exp) -> union (vars_pat_list (p :: ps)) (vars_expr exp)
   | ELetIn ((DLet _ as def), exp) -> union (vars_def def) (vars_expr exp)
   | ETuple (hd1, hd2, tl) ->
     let xs = hd1 :: hd2 :: tl in

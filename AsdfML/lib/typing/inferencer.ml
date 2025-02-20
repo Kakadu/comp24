@@ -433,7 +433,8 @@ let infer =
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       let final_ty = Subst.apply s5 t2 in
       return (final_subst, final_ty, TEIfElse (final_ty, tc, tt, te))
-    | EFun (pat, exp) ->
+    | EFun (p, ps, exp) ->
+      let pat = p :: ps in
       let* env', pat_ty =
         List.fold
           pat
@@ -446,7 +447,7 @@ let infer =
       let* s, exp_ty, texp = infer_expr env' exp in
       let final_ty = exp_ty :: pat_ty |> List.reduce_exn ~f:(fun l r -> r ^-> l) in
       let ty = Subst.apply s final_ty in
-      return (s, ty, TEFun (ty, pat, texp))
+      return (s, ty, TEFun (ty, p, ps, texp))
     | ELetIn (def, expr) ->
       let* let_env, let_sub, _, tdef = infer_def env def in
       let* exp_sub, exp_ty, texp = infer_expr let_env expr in
@@ -557,7 +558,8 @@ let strip_annots (prog : Tast.tdefinition list) =
     | pat -> pat
   in
   let rec strip_expr = function
-    | TEFun (ty, pats, exp) -> TEFun (ty, List.map pats ~f:strip_pat, strip_expr exp)
+    | TEFun (ty, p, ps, exp) ->
+      TEFun (ty, strip_pat p, List.map ps ~f:strip_pat, strip_expr exp)
     | TEMatch (ty, expr, pes) ->
       TEMatch (ty, expr, List.map pes ~f:(fun (pat, exp) -> strip_pat pat, strip_expr exp))
     | TEApp (ty, l, r) -> TEApp (ty, strip_expr l, strip_expr r)

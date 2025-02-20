@@ -12,7 +12,7 @@ type texpr =
   | TEVar of ty * Ast.id
   | TEApp of ty * texpr * texpr
   | TEIfElse of ty * texpr * texpr * texpr
-  | TEFun of ty * pattern list * texpr
+  | TEFun of ty * pattern * pattern list * texpr
   | TELetIn of ty * tdefinition * texpr
   | TETuple of ty * texpr * texpr * texpr list
   | TEList of ty * texpr list
@@ -28,7 +28,7 @@ let te_const t c = TEConst (t, c)
 let te_var t x = TEVar (t, x)
 let te_app t f x = TEApp (t, f, x)
 let te_if_else t cond e_true e_false = TEIfElse (t, cond, e_true, e_false)
-let te_fun t p e = TEFun (t, p, e)
+let te_fun t p ps e = TEFun (t, p, ps, e)
 let te_let_in t def e = TELetIn (t, def, e)
 let te_tuple t e1 e2 es = TETuple (t, e1, e2, es)
 let te_list t exprs = TEList (t, exprs)
@@ -48,7 +48,7 @@ let texpr_type = function
   | TEVar (t, _)
   | TEApp (t, _, _)
   | TEIfElse (t, _, _, _)
-  | TEFun (t, _, _)
+  | TEFun (t, _, _, _)
   | TELetIn (t, _, _)
   | TETuple (t, _, _, _)
   | TEList (t, _)
@@ -61,7 +61,7 @@ let rec strip_types_expr = function
   | TEApp (_, f, x) -> EApp (strip_types_expr f, strip_types_expr x)
   | TEIfElse (_, c, t, e) ->
     EIfElse (strip_types_expr c, strip_types_expr t, strip_types_expr e)
-  | TEFun (_, p, e) -> EFun (p, strip_types_expr e)
+  | TEFun (_, p, ps, e) -> EFun (p, ps, strip_types_expr e)
   | TELetIn (_, d, e) -> ELetIn (strip_types_def d, strip_types_expr e)
   | TETuple (_, e1, e2, es) ->
     ETuple (strip_types_expr e1, strip_types_expr e2, List.map es ~f:strip_types_expr)

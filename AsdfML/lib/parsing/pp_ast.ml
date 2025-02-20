@@ -68,7 +68,8 @@ and pp_expr fmt =
       t
       pp_expr
       e
-  | EFun (p, e) ->
+  | EFun (p, ps, e) ->
+    let p = p :: ps in
     fprintf fmt "(fun ";
     pp_pattern_list fmt p;
     fprintf fmt " ->@ %a)" pp_expr e

@@ -62,18 +62,18 @@ type pattern =
 
 val pp_pattern : Format.formatter -> pattern -> unit
 val show_pattern : pattern -> string
-val equal_pattern : pattern -> pattern -> bool
 val gen_pattern_sized : int -> pattern QCheck.Gen.t
 val gen_pattern : pattern QCheck.Gen.t
 val arb_pattern_sized : int -> pattern QCheck.arbitrary
 val arb_pattern : pattern QCheck.arbitrary
+val equal_pattern : pattern -> pattern -> bool
 
 type expr =
   | EConst of constant
   | EVar of id
   | EApp of expr * expr
   | EIfElse of expr * expr * expr
-  | EFun of pattern list * expr
+  | EFun of pattern * pattern list * expr
   | ELetIn of definition * expr
   | ETuple of expr * expr * expr list
   | EList of expr list
@@ -114,7 +114,7 @@ val e_const : constant -> expr
 val e_var : id -> expr
 val e_app : expr -> expr -> expr
 val e_if_else : expr -> expr -> expr -> expr
-val e_fun : pattern list -> expr -> expr
+val e_fun : pattern -> pattern list -> expr -> expr
 val e_let_in : definition -> expr -> expr
 val e_tuple : expr -> expr -> expr list -> expr
 val e_list : expr list -> expr

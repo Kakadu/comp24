@@ -34,7 +34,8 @@ let rec cc_expr globals env ?(apply = true) = function
   | TEApp (_, l, r) -> s_app (cc_expr globals env l) (cc_expr globals env r)
   | TEIfElse (_, c, t, e) ->
     s_if_else (cc_expr globals env c) (cc_expr globals env t) (cc_expr globals env e)
-  | TEFun (_, pat, body) as func ->
+  | TEFun (_, p, ps, body) as func ->
+    let pat = p :: ps in
     let fvs = Set.diff (free_vars_texpr func) globals |> Set.to_list in
     (* dbg "FVs %s in fun\n%a\n" (list_to_string fvs) Tast.pp_texpr func; *)
     (* dbg "GLOBALS: %s\n" (set_to_string globals); *)
