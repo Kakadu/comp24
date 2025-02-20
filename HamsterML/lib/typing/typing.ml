@@ -26,7 +26,8 @@ let rec pp_inf_type fmt = function
       "(%a)"
       (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " * ") pp_inf_type)
       types
-  | TArrow (TArrow (_, _) as t1, t2) -> Format.fprintf fmt "(%a) -> %a" pp_inf_type t1 pp_inf_type t2
+  | TArrow ((TArrow (_, _) as t1), t2) ->
+    Format.fprintf fmt "(%a) -> %a" pp_inf_type t1 pp_inf_type t2
   | TArrow (t1, t2) -> Format.fprintf fmt "%a -> %a" pp_inf_type t1 pp_inf_type t2
   | TPVar v -> Format.fprintf fmt "'%d" v
 ;;
@@ -34,10 +35,9 @@ let rec pp_inf_type fmt = function
 type error =
   | Variable_not_found of string
   | Unification_failed of inf_type * inf_type
-  | Illegal_pattern of Ast.pattern
   | Unsupported_type
-  | Incorrect_starting_point of Ast.expr
-  | Empty_program
+  | Incorrect_starting_point of Ast.expr (* Starting expression is not Let *)
+  | Empty_program (* Program contains no expressions *)
 [@@deriving show]
 
 module VarSet = struct
@@ -360,8 +360,9 @@ module TypeEnv = struct
       generalize_pattern tl expr_t env
     | List lst, TList lst_t ->
       List.fold lst ~init:env ~f:(fun acc p -> generalize_pattern p lst_t acc)
-    | Tuple tls, TTuple tls_t ->
-      List.fold2_exn tls tls_t ~init:env ~f:(fun acc p t -> generalize_pattern p t acc)
+    | Tuple (a, b, tl), TTuple tpl2 ->
+      let tpl1 = a :: b :: tl in
+      List.fold2_exn tpl1 tpl2 ~init:env ~f:(fun acc p t -> generalize_pattern p t acc)
     | Constraint (p, PInt), _ -> generalize_pattern p TInt env
     | Constraint (p, PString), _ -> generalize_pattern p TString env
     | Constraint (p, PBool), _ -> generalize_pattern p TBool env
@@ -448,20 +449,17 @@ module Infer = struct
         let* u = Subst.unify (TList hd_t) tl_t in
         let tl_t = Subst.apply tl_t u in
         R.return (TypeEnv.apply u env, tl_t)
-      | Tuple ps ->
-        (match ps with
-         | [] | [ _ ] -> R.fail Unsupported_type
-         | p :: tl ->
-           let* env, p_t = helper env p in
-           let* env, tl_t =
-             R.fold
-               tl
-               ~init:(R.return (env, [ p_t ]))
-               ~f:(fun (env, acc_t) p ->
-                 let* env, p_t = helper env p in
-                 R.return (env, [ p_t ] @ acc_t))
-           in
-           R.return (env, TTuple (List.rev tl_t)))
+      | Tuple (a, b, tl) ->
+        let tpl = a :: b :: tl in
+        let* env, tl_t =
+          R.fold
+            tpl
+            ~init:(R.return (env, []))
+            ~f:(fun (env, acc_t) p ->
+              let* env, p_t = helper env p in
+              R.return (env, [ p_t ] @ acc_t))
+        in
+        R.return (env, TTuple (List.rev tl_t))
       | Constraint (p, dt) ->
         let* env, p_t = helper env p in
         let* _, dt_t = infer_data_type dt in
@@ -532,21 +530,18 @@ module Infer = struct
                  R.return (res_s, cur_t))
            in
            R.return (tl_s, TList tl_t))
-      | ETuple tls ->
-        (match tls with
-         | [] | [ _ ] -> R.fail Unsupported_type
-         | p :: tl ->
-           let* p_s, p_t = helper env p in
-           let* tl_s, tl_t =
-             R.fold
-               tl
-               ~init:(R.return (p_s, [ p_t ]))
-               ~f:(fun (acc_s, acc_lst) p ->
-                 let* s, p_t = helper (TypeEnv.apply acc_s env) p in
-                 let* subs = Subst.compose acc_s s in
-                 R.return (subs, [ p_t ] @ acc_lst))
-           in
-           R.return (tl_s, TTuple (List.rev tl_t)))
+      | ETuple (a, b, tl) ->
+        let tpl = a :: b :: tl in
+        let* tl_s, tl_t =
+          R.fold
+            tpl
+            ~init:(R.return (Subst.empty, []))
+            ~f:(fun (acc_s, acc_lst) p ->
+              let* s, p_t = helper (TypeEnv.apply acc_s env) p in
+              let* subs = Subst.compose acc_s s in
+              R.return (subs, [ p_t ] @ acc_lst))
+        in
+        R.return (tl_s, TTuple (List.rev tl_t))
       | EListConcat (l, r) ->
         let* l_s, l_t = helper env l in
         let* r_s, r_t = helper (TypeEnv.apply l_s env) r in

@@ -46,9 +46,9 @@ type pattern =
   | Const of value
   | Var of id
   | Wildcard (* _ *)
-  | Tuple of pattern list (* (1, 2, ...) *)
+  | Tuple of pattern * pattern * pattern list (* (1, 2, ...) *)
   | List of pattern list (* [1; 2; 3] *)
-  | ListConcat of pattern * pattern
+  | ListConcat of pattern * pattern (* 1::2::[] *)
   | Constraint of pattern * dataType (* a : Int *)
   | Operation of op (* let (+) x y = ... *)
 [@@deriving show]
@@ -57,9 +57,9 @@ type expr =
   | EConst of value
   | EVar of id
   | EOperation of op (* 1 + 1 or (+) 1 1 *)
-  | ETuple of expr list
+  | ETuple of expr * expr *expr list
   | EList of expr list
-  | EListConcat of expr * expr
+  | EListConcat of expr * expr (* 1::2::[] *)
   | EConstraint of expr * dataType (* f x : Int *)
   | Application of expr * expr
   | Let of funType * bind list * expr option (* let f = ... and g = ... [in ...] *)
