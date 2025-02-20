@@ -9,6 +9,7 @@ type reg =
 val temp : int -> reg
 val saved : int -> reg
 val arg : int -> reg
+val is_saved : reg -> bool
 
 type op =
   (* R-type *)
@@ -65,7 +66,10 @@ type instruction =
   | Pseudo of string (* can not unify signature *)
   | Label of string
 
-val sw : reg -> int -> reg -> instruction
+val extend_stack_insn : int -> instruction
+val shrink_stack_insn : int -> instruction
+val sw : v:reg -> int -> src: reg -> instruction
+val lw : rd:reg -> int -> src:reg -> instruction
 
 module RegistersStorage : sig
   include Registers_storage_intf.S with type 'a t = 'a list

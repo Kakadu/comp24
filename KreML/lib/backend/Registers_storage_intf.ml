@@ -8,5 +8,6 @@ module type S = sig
   val with_ranges : 'a t -> range list -> ('a * range) t
   val fold : ('b -> 'a -> 'b) -> 'b -> 'a t -> 'b
   val find : ('a -> bool) -> 'a t -> 'a
+  val to_list : 'a t -> 'a list
   val empty: 'a t
 end

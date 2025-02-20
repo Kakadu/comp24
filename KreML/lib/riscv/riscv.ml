@@ -9,6 +9,10 @@ type reg =
 let temp idx = Temp idx
 let saved idx = Saved idx
 let arg idx = Arg idx
+let is_saved =
+  function
+  | Saved _ -> true
+  | _ -> false
 
 type op =
   (* R-type *)
@@ -64,7 +68,10 @@ type instruction =
   | Pseudo of string (* can not unify signature *)
   | Label of string
 
-let sw rd offset base = Stype(rd, offset, base, SW)
+let extend_stack_insn size = Itype(Sp, Sp, size, SUB)
+let shrink_stack_insn size = Itype(Sp, Sp, size, ADD)
+let sw ~v offset ~src = Stype(v, offset, src, SW)
+let lw ~rd offset  ~src = Itype(rd, src, offset, LW)
 
 
 module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
@@ -84,6 +91,7 @@ module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = st
   let with_ranges = List.combine
   let fold = List.fold_left
   let empty = []
+  let to_list = Fun.id
   (* let available = List.init 7 (fun i -> Temp i) *)
 end
 
