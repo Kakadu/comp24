@@ -1,0 +1,9 @@
+#use "topfind";;
+#require "HamsterML";;
+open HamsterML__Ast;;
+open HamsterML__Lexer;;
+open HamsterML__Parser;;
+open HamsterML__Typing;;
+open HamsterTest__LexerTest;;
+open HamsterTest__ParserTest;;
+open HamsterTest__TypingTest;;
