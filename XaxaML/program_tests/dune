@@ -17,6 +17,12 @@
  (libraries XaxaML.Lib stdio))
 
 (executable
+ (name run_alpha_conversion)
+ (modules Run_alpha_conversion)
+ (public_name run_alpha_conversion)
+ (libraries XaxaML.Lib stdio))
+
+(executable
  (name run_closure_conversion)
  (modules Run_closure_conversion)
  (public_name run_closure_conversion)
@@ -52,6 +58,10 @@
 (cram
  (applies_to remove_patterns_tests)
  (deps ./run_remove_patterns.exe))
+
+(cram
+ (applies_to alpha_conversion_tests)
+ (deps ./run_alpha_conversion.exe))
 
 (cram
  (applies_to closure_conversion_tests)

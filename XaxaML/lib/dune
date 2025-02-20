@@ -11,6 +11,7 @@
   Inferencer
   Common
   Remove_patterns
+  Alpha_conversion
   Closure_conversion)
  (libraries base stdlib angstrom)
  (inline_tests)

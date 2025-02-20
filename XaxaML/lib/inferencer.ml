@@ -102,7 +102,7 @@ end = struct
     ;;
   end
 
-  let run m = snd (m 4)
+  let run m = snd (m Std_names.type_var_count)
 end
 
 module Type = struct
