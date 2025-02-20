@@ -79,15 +79,13 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
     in
     helper [] xs
   | CFTuple (x1, x2, xs) ->
-    let rec helper acc = function
-      | [] ->
-        cont
-          (match List.rev acc with
-           | x1 :: x2 :: xs -> ImmTuple (x1, x2, xs)
-           | _ -> failwith "Lost tuple element")
-      | x :: xs -> anf_expr env x (fun x -> helper (x :: acc) xs)
-    in
-    helper [] (x1 :: x2 :: xs)
+    anf_expr env x1 (fun x1' ->
+      anf_expr env x2 (fun x2' ->
+        let rec helper acc = function
+          | [] -> cont (ImmTuple (x1', x2', List.rev acc))
+          | x :: rest -> anf_expr env x (fun x' -> helper (x' :: acc) rest)
+        in
+        helper [] xs))
 ;;
 
 let anf_def env (def : cf_definition) =

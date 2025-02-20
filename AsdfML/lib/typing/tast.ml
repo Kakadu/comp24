@@ -8,8 +8,8 @@ open Pp_ast
 open Pp_typing
 
 type texpr =
-  | TEConst of ty * Ast.constant
-  | TEVar of ty * Ast.id
+  | TEConst of ty * constant
+  | TEVar of ty * id
   | TEApp of ty * texpr * texpr
   | TEIfElse of ty * texpr * texpr * texpr
   | TEFun of ty * pattern * pattern list * texpr
@@ -19,7 +19,7 @@ type texpr =
   | TEMatch of ty * texpr * (pattern * texpr) list
 [@@deriving show { with_path = false }, eq]
 
-and tdefinition = TDLet of ty * Ast.rec_flag * pattern * texpr
+and tdefinition = TDLet of ty * rec_flag * pattern * texpr
 [@@deriving show { with_path = false }]
 
 type tprogram = tdefinition list [@@deriving show { with_path = false }, eq]
@@ -72,6 +72,7 @@ let rec strip_types_expr = function
 and strip_types_def = function
   | TDLet (_, flag, p, e) -> DLet (flag, p, strip_types_expr e)
 ;;
+let strip_types_program = List.map ~f:strip_types_def
 
 let pp_texpr fmt e = strip_types_expr e |> Pp_ast.pp_expr fmt
 and pp_tdefinition fmt d = strip_types_def d |> Pp_ast.pp_definition fmt

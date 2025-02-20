@@ -2,7 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Tast
+(* open Tast *)
+open Sast
 open Types
 open Base
 open Utils
@@ -11,29 +12,23 @@ open Vars
 (** Remove trivial applications and merge nested lambdas *)
 let simplify =
   let rec expr = function
-    | (TEConst _ as e) | (TEVar _ as e) -> e
-    | TEApp (t, l, r) -> te_app t (expr l) (expr r)
-    | TEIfElse (ty, i, t, e) -> te_if_else ty (expr i) (expr t) (expr e)
-    | TEFun (tf, (PIdent x as arg), args, (TEApp (_, inner, TEVar (_, y)) as apply))
-      when String.equal x y ->
+    | (SConst _ as e) | (SVar _ as e) -> e
+    | SApp (l, r) -> s_app (expr l) (expr r)
+    | SIfElse (i, t, e) -> s_if_else (expr i) (expr t) (expr e)
+    | SFun (arg1, args1, (SApp (inner, SVar arg2) as apply)) when String.equal arg1 arg2
+      ->
       let inner' = expr inner in
       (match inner' with
-       | TEFun _ -> expr inner'
-       | _ -> TEFun (tf, arg, args, apply))
-    | TEFun (t1, arg1, args1, TEFun (t2, arg2, args2, body)) ->
-      let rec helper = function
-        | TArrow (t1, t2) -> t1 :: helper t2
-        | _ -> []
-      in
-      let t = List.fold_right (helper t1) ~init:t2 ~f:(fun t1 t2 -> t1 ^-> t2) in
-      te_fun t arg1 (args1 @ [ arg2 ] @ args2) (expr body) |> expr
-    | TEFun (t, p, ps, e) -> te_fun t p ps (expr e)
-    | TELetIn (t, d, e2) -> te_let_in t (def d) (expr e2)
-    | TETuple (t, x1, x2, xs) -> te_tuple t (expr x1) (expr x2) (List.map xs ~f:expr)
-    | TEList (t, xs) -> te_list t (List.map xs ~f:expr)
-    | TEMatch (t, e, c) -> te_match t (expr e) (List.map c ~f:(fun (p, e) -> p, expr e))
+       | SFun _ -> expr inner'
+       | _ -> SFun (arg1, args1, apply))
+    | SFun (arg1, args1, SFun (arg2, args2, body)) ->
+      s_fun arg1 (args1 @ [ arg2 ] @ args2) (expr body) |> expr
+    | SFun (p, ps, e) -> s_fun p ps (expr e)
+    | SLetIn (d, e2) -> s_let_in (def d) (expr e2)
+    | STuple (x1, x2, xs) -> s_tuple (expr x1) (expr x2) (List.map xs ~f:expr)
+    | SList xs -> s_list (List.map xs ~f:expr)
   and def = function
-    | TDLet (t, r, p, e) -> td_let_flag r t p (expr e)
+    | SLet (r, p, e) -> s_let_flag r p (expr e)
   in
   List.map ~f:def
 ;;

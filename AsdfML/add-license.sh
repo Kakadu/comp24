@@ -15,6 +15,7 @@ format_license() {
     if head -n $(echo "$LICENSE_HEADER" | wc -l) "$file" | grep -q "Copyright"; then
         # If header already exists, do nothing
         echo "Header already exists in $file"
+        rm $temp_file
         return
     fi
 

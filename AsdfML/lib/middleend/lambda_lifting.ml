@@ -33,14 +33,14 @@ let rec ll_expr env lift ?(name = None) = function
     let* t, lift = ll_expr env lift t in
     let* e, lift = ll_expr env lift e in
     return (cf_if_else i t e, lift)
-  | SFun (args, exp) ->
+  | SFun (arg, args, exp) ->
     let* id =
       match name with
       | Some id -> return id
       | None -> fresh_id ""
     in
     let* exp, lift = ll_expr env lift exp in
-    return (cf_var id, cf_def id args exp :: lift)
+    return (cf_var id, cf_def id (arg :: args) exp :: lift)
   | SLetIn ((SLet _ as def), exp) ->
     let* def, lift, _ = ll_def env lift def in
     let id, body =
@@ -71,20 +71,17 @@ let rec ll_expr env lift ?(name = None) = function
     >>| fun (xs, lift) ->
     (match List.rev xs with
      | x1 :: x2 :: xs -> cf_tuple x1 x2 xs, lift
-     | _ -> failwith "Lost tuple element")
+     | _ -> failwith "Tuple with less than 2 elements")
 
 and ll_def env lift = function
   (* TODO: probably should decouple ELets and DLets *)
-  | SLet (false, _, id, exp) | SLet (true, NonRec, id, exp) ->
+  | SLet (NonRec, id, exp) ->
     let* new_id = fresh_id id in
     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
     return (cf_def id [] exp, lift, env)
-  | SLet (true, Rec, id, exp) ->
+  | SLet (Rec, id, exp) ->
     let* new_id = fresh_id id in
-    (* dbg "def: %a" Sast.pp_sdef def; *)
-    (* dbg "env bef: %s\n" (env |> Map.to_alist |> [%sexp_of: (string * string) list] |> Sexp.to_string); *)
     let env = Map.set env ~key:id ~data:new_id in
-    (* dbg "env aft: %s\n" (env |> Map.to_alist |> [%sexp_of: (string * string) list] |> Sexp.to_string); *)
     let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
     return (cf_def id [] exp, lift, env)
 ;;

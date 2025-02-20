@@ -15,6 +15,7 @@ let test_cc code =
      | Ok ast ->
        let ast =
          ast
+         |> Tast.strip_types_program
          |> Remove_patterns.remove_patterns
          |> Remove_match.remove_match
          |> Closure_conversion.closure_conversion
@@ -148,6 +149,20 @@ let%expect_test _ =
         then acc
         else (helper x (( + ) acc x) (( - ) cnt 1))) in
       (helper x 0))
+    |}]
+;;
+
+let%expect_test _ =
+  test_cc
+    {|
+    let add x y = x + y
+    let add1 = let one = 1 in (fun x -> one + x)
+    |};
+  [%expect
+    {|
+    let add = (fun x y -> (( + ) x y))
+    let add1 = let one = 1 in
+      ((fun one x -> (( + ) one x)) one)
     |}]
 ;;
 

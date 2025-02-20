@@ -1,7 +1,7 @@
 (library
  (name inline_cc)
  (libraries AsdfML.Lib test)
- (modules Inline_fv Inline_cc)
+ (modules Inline_cc)
  (preprocess
   (pps ppx_inline_test ppx_expect))
  (instrumentation

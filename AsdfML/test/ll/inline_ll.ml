@@ -15,6 +15,7 @@ let test_ll code =
        | Error e -> failwith (asprintf "%a" Pp_typing.pp_error e)
        | Ok ast ->
          ast
+         |> Tast.strip_types_program
          |> Remove_patterns.remove_patterns
          |> Remove_match.remove_match
          |> Closure_conversion.closure_conversion

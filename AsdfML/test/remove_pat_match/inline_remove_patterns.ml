@@ -13,8 +13,8 @@ let test code =
     (match Inferencer.inference_program ast with
      | Error e -> printf "%a" Pp_typing.pp_error e
      | Ok ast ->
-       let ast = Remove_patterns.remove_patterns ast in
-       printf "\n%a" Tast.pp_tprogram ast)
+       let ast = ast |> Tast.strip_types_program |> Remove_patterns.remove_patterns in
+       printf "\n%a" Pp_ast.pp_program ast)
 ;;
 
 let%expect_test _ =

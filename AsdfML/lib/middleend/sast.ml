@@ -4,22 +4,20 @@
 
 open Ast
 
-(* Simplified AST after pattern and match elimination and closure conversion *)
-
-type is_fun = bool [@@deriving show { with_path = false }]
+(* Simplified AST after pattern and match elimination *)
 
 type sexpr =
   | SConst of constant
   | SVar of id
   | SApp of sexpr * sexpr
   | SIfElse of sexpr * sexpr * sexpr
-  | SFun of id list * sexpr
+  | SFun of id * id list * sexpr
   | SLetIn of sdefinition * sexpr
   | STuple of sexpr * sexpr * sexpr list
   | SList of sexpr list
 [@@deriving show { with_path = false }]
 
-and sdefinition = SLet of is_fun * Ast.rec_flag * id * sexpr
+and sdefinition = SLet of Ast.rec_flag * id * sexpr
 [@@deriving show { with_path = false }]
 
 type sprogram = sdefinition list [@@deriving show { with_path = false }]
@@ -28,11 +26,13 @@ let s_const c = SConst c
 let s_var x = SVar x
 let s_app f x = SApp (f, x)
 let s_if_else cond e_true e_false = SIfElse (cond, e_true, e_false)
-let s_fun p e = SFun (p, e)
+let s_fun p ps e = SFun (p, ps, e)
 let s_let_in def e = SLetIn (def, e)
 let s_tuple e1 e2 es = STuple (e1, e2, es)
 let s_list exprs = SList exprs
-let s_let f r x e = SLet (f, r, x, e)
+let s_let x e = SLet (NonRec, x, e)
+let s_let_rec x e = SLet (Rec, x, e)
+let s_let_flag r x e = SLet (r, x, e)
 
 open Format
 open Utils
@@ -56,7 +56,8 @@ let rec pp_sexpr fmt = function
       t
       pp_sexpr
       e
-  | SFun (p, e) ->
+  | SFun (p, ps, e) ->
+    let p = p :: ps in
     fprintf fmt "(fun ";
     pp_print_list
       ~pp_sep:(fun fmt _ -> fprintf fmt " ")
@@ -71,8 +72,8 @@ let rec pp_sexpr fmt = function
   | SList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_sexpr xs
 
 and pp_sdef fmt = function
-  | SLet (_, NonRec, name, e) -> fprintf fmt "@[<2>let %s =@ %a@]" name pp_sexpr e
-  | SLet (_, Rec, name, e) -> fprintf fmt "@[<2>let rec %s =@ %a@]" name pp_sexpr e
+  | SLet (NonRec, name, e) -> fprintf fmt "@[<2>let %s =@ %a@]" name pp_sexpr e
+  | SLet (Rec, name, e) -> fprintf fmt "@[<2>let rec %s =@ %a@]" name pp_sexpr e
 ;;
 
 let pp_program fmt p =
