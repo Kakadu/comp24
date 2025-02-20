@@ -204,10 +204,10 @@
 <a href="#L81">81</a>
 <a href="#L82">82</a>
 </pre>
-<pre><code class="ocaml"><span data-count="0">t</span>ype id = <span data-count="31">s</span>tring [@@deriving show]
+<pre><code class="ocaml"><span data-count="0">t</span>ype id = <span data-count="38">s</span>tring [@@deriving show]
 
-<span data-count="16">t</span>ype value =
-  | Int of in<span data-count="5">t</span>
+<span data-count="18">t</span>ype value =
+  | Int of in<span data-count="6">t</span>
   | Bool of boo<span data-count="3">l</span>
   | String of strin<span data-count="0">g</span>
   | Unit
@@ -243,12 +243,12 @@
   | UPLUS (* +10 *)
 [@@deriving show]
 
-<span data-count="6">t</span>ype op =
+<span data-count="8">t</span>ype op =
   | Binary of bop
   | Unary of uop
 [@@deriving show]
 
-<span data-count="29">t</span>ype pattern =
+<span data-count="41">t</span>ype pattern =
   | Const of value
   | Var of id
   | Wildcard (* _ *)
@@ -259,7 +259,7 @@
   | Operation of op (* let (+) x y = ... *)
 [@@deriving show]
 
-<span data-count="88">t</span>ype expr =
+<span data-count="101">t</span>ype expr =
   | EConst of value
   | EVar of id
   | EOperation of op (* 1 + 1 or (+) 1 1 *)
@@ -268,16 +268,16 @@
   | EListConcat of expr * expr (* 1::2::[] *)
   | EConstraint of expr * dataType (* f x : Int *)
   | Application of expr * expr
-  | Let of funType * <span data-count="30">b</span>ind lis<span data-count="10">t</span> * <span data-count="10">e</span>xpr optio<span data-count="5">n</span> (* let f = ... and g = ... [in ...] *)
+  | Let of funType * <span data-count="48">b</span>ind lis<span data-count="16">t</span> * <span data-count="16">e</span>xpr optio<span data-count="8">n</span> (* let f = ... and g = ... [in ...] *)
   | Fun of args * expr (* (fun a -&gt; a + 1) *)
   | If of expr * expr * <span data-count="8">e</span>xpr optio<span data-count="2">n</span> (* if a = b then c (else d) *)
   | Match of expr * <span data-count="0">c</span>ase lis<span data-count="0">t</span>
 [@@deriving show]
 
-<span data-count="0">a</span>nd args = <span data-count="46">p</span>attern lis<span data-count="11">t</span>
+<span data-count="0">a</span>nd args = <span data-count="63">p</span>attern lis<span data-count="15">t</span>
 
 (* name args = expr *)
-<span data-count="0">a</span>nd bind = <span data-count="10">p</span>attern * args * expr
+<span data-count="0">a</span>nd bind = <span data-count="16">p</span>attern * args * expr
 <span data-count="0">a</span>nd case = <span data-count="0">p</span>attern * expr
 
 <span data-count="0">a</span>nd funType =
@@ -285,7 +285,7 @@
   | Nonrecursive
 [@@deriving show]
 
-<span data-count="0">t</span>ype prog = <span data-count="25">e</span>xpr lis<span data-count="5">t</span> [@@deriving show]
+<span data-count="0">t</span>ype prog = <span data-count="38">e</span>xpr lis<span data-count="8">t</span> [@@deriving show]
 </code></pre>
       </div>
     </div>
