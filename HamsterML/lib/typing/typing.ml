@@ -35,7 +35,7 @@ let rec pp_inf_type fmt = function
 type error =
   | Variable_not_found of string
   | Unification_failed of inf_type * inf_type
-  | Unsupported_type
+  | Incorrect_left_let_side (* let rec (a,b) = 1,2 *)
   | Incorrect_starting_point of Ast.expr (* Starting expression is not Let *)
   | Empty_program (* Program contains no expressions *)
 [@@deriving show]
@@ -659,7 +659,7 @@ module Infer = struct
             let* u2 = Subst.unify res_t e_t in
             let* subs = Subst.compose_all [ u1; u2; e_s; res_s ] in
             R.return (subs, Subst.apply res_t subs))
-      | _ -> R.fail Unsupported_type
+      | Let (_, _, _) -> R.fail Incorrect_left_let_side
     in
     helper env expr
   ;;

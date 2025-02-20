@@ -27,7 +27,7 @@ val pp_inf_type : Format.formatter -> inf_type -> unit
 type error =
   | Variable_not_found of string (* Unbound variable *)
   | Unification_failed of inf_type * inf_type (* Type mismatch *)
-  | Unsupported_type (* Unsupported type encountered *)
+  | Incorrect_left_let_side (* let rec (a,b) = 1,2 *)
   | Incorrect_starting_point of Ast.expr (* Invalid program start *)
   | Empty_program (* Program contains no expressions *)
 
