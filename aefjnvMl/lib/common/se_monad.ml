@@ -32,4 +32,14 @@ module Base_SE_Monad = struct
       let* acc = acc in
       f acc x)
   ;;
+
+  let revt lt =
+    let* l = lt in
+    return @@ List.rev l
+  ;;
+
+  let ignore_t f =
+    let* f_res = f in
+    return @@ ignore f_res
+  ;;
 end

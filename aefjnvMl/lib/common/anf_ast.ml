@@ -5,8 +5,8 @@
 type id =
   | Id_name of string
   | Id_anf of int * string (** [int] -- uniq id; [string] -- original name *)
-  | Id_any
   | Id_unit
+(* | Id_any --> rename to something after matach elim e.g. <NAME> *)
 
 type immexpr =
   | ImmInt of int

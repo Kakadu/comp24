@@ -95,11 +95,6 @@ open Common.Ast_construct
 
 let fresh_bind = fresh_bind Common.Base_lib.converte_infix
 
-let revt lt =
-  let* l = lt in
-  return @@ List.rev l
-;;
-
 type core_type_flag =
   | On
   | Off

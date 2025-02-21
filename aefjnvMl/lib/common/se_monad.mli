@@ -31,4 +31,7 @@ module Base_SE_Monad : sig
     -> f:('d -> 'a -> 'c -> 'c * ('d, 'e) result)
     -> 'b
     -> 'c * ('d, 'e) result
+
+  val revt : ('a -> 'b * ('c list, 'd) result) -> 'a -> 'b * ('c list, 'd) result
+  val ignore_t : ('a -> 'b * ('c, 'd) result) -> 'a -> 'b * (unit, 'd) result
 end
