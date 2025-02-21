@@ -577,6 +577,18 @@ module CCTests = struct
       | x -> fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x) in fact 10 (fun x -> x)
       |}]
   ;;
+
+  let%expect_test "mutual recursion" =
+    pp_parse_and_cc
+      "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
+       false else even (x - 1)";
+    [%expect
+      {|
+      let rec even = (fun odd x -> if ( = ) x 0 then true else odd (( - ) x 1))
+      and
+      odd = (fun even x -> if ( = ) x 0 then false else even (( - ) x 1))
+      |}]
+  ;;
 end
 
 module LLTests = struct
