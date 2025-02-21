@@ -127,7 +127,7 @@ let parse_let_main_part prev =
         and+ expr = parse_expr in
         Val_binding (ident, pats, expr)
       in
-      pat_bind <|> val_bind
+      val_bind <|> pat_bind
     in
     sep_by1 (check_string "and" <* ws1) pat_expr
   in
