@@ -22,6 +22,7 @@
     } while (0)
 
 typedef enum {
+    T_UNBOXED = -1,
     T_TUPLE = 0,
     T_CONS = 0,
     // T_FUNCTION = -1, // not used
@@ -45,13 +46,16 @@ typedef struct {
 } box_t;
 #pragma pack(pop)
 
-typedef struct {
-    int64_t val;
-    struct list_t* next;
-} list_t;
-
 #define CONVERT_INT_ML_TO_NATIVE(x) ((x) >> 1)
 #define CONVERT_INT_NATIVE_TO_ML(x) (((x) << 1) + 1)
 int8_t is_ml_ptr(int64_t arg);
-int8_t is_inside_heap(int64_t ptr);
-box_t* get_box_t(int64_t ptr);
+tag_t get_tag(int64_t obj);
+
+int64_t mlrt_create_cons(int64_t data, int64_t next);
+int64_t mlrt_create_tuple(int64_t tuple_size, ...);
+int64_t mlrt_create_empty_closure(int64_t fun, int64_t args_num);
+int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ...);
+
+int64_t mlrt_check_tag(int64_t target, int64_t tag);
+int64_t mlrt_get_box_field(int64_t box, int64_t field_num);
+void mltr_match_error();
