@@ -9,4 +9,5 @@ let unparse_const ppf = function
   | Const_int i -> fprintf ppf "%d" i
   | Const_char c -> fprintf ppf "\'%c\'" c
   | Const_string s -> fprintf ppf "\"%s\"" s
+  | Const_bool s -> fprintf ppf "%s" @@ if s then "true" else "false"
 ;;

@@ -8,7 +8,7 @@ open Unparser_utils
 
 let rec unparse_typexpr ppf = function
   | Type_single s -> fprintf ppf "%s" s
-  | Type_params (t, id) -> fprintf ppf "%a %s" unparse_typexpr t id
+  | Type_parametric (t, id) -> fprintf ppf "%a %s" unparse_typexpr t id
   | Type_tuple l -> fprintf ppf "%a" unparse_tuple l
   | Type_fun l -> fprintf ppf "(%a)" unparse_fun l
 
