@@ -28,7 +28,7 @@ pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Clos
         arity,
         args: Vec::with_capacity(arity),
     });
-    debug!("Created {:?} at {:?}", closure, Box::as_ptr(&closure));
+    debug!("Creating {:?} at {:?}", closure, Box::as_ptr(&closure));
     Box::into_raw(closure)
 }
 
