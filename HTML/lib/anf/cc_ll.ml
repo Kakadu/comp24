@@ -26,6 +26,8 @@ end
 open CounterWriterMonad
 open Utils
 
+let cc_ll_prefix = "cc_ll_"
+
 let ident_to_string (id : ident) : string =
   match id with
   | IdentOfDefinable (IdentLetters s) -> s
@@ -47,7 +49,7 @@ let rec free_vars_expr (global_env : StringSet.t) (e : expr) : StringSet.t =
   | EId id ->
     (match id with
      | (IdentOfDefinable (IdentLetters s) | IdentOfDefinable (IdentOp s))
-       when (not @@ String.starts_with ~prefix:"fun-" s)
+       when (not @@ String.starts_with ~prefix:cc_ll_prefix s)
             && (not @@ StringSet.contains global_env s) ->
        StringSet.singleton (ident_to_string id)
      | _ -> StringSet.empty)
@@ -203,7 +205,7 @@ let rec closure_convert_expr
     let* body' = closure_convert_expr global_env body rec_name in
     let fv = free_vars_expr new_env body' in
     let fv = StringSet.elements fv in
-    let* f_name = fresh_name "fun-" in
+    let* f_name = fresh_name cc_ll_prefix in
     let body'' =
       match rec_name with
       | Some rec_name ->
