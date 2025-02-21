@@ -149,7 +149,7 @@ end = struct
       fmt
       "[ %a ]"
       (pp_print_list
-         ~pp_sep:(fun fmt () -> fprintf fmt "\n")
+         ~pp_sep:(fun fmt () -> fprintf fmt ", ")
          (fun fmt (k, v) -> fprintf fmt "%s => %a" (type_id_to_name k) pp_ty v))
       (Map.to_alist subst)
   ;;
@@ -396,6 +396,7 @@ let infer =
           let env'' = TypeEnv.apply env' sub in
           let ty = Subst.apply sub fv in
           return (env'', ty))
+      >>| fun (env, ty) -> env, TList ty
     | PCons (hd, tl) ->
       let* env', ty' = infer_pattern env hd in
       let* env'', ty'' = infer_pattern env' tl in

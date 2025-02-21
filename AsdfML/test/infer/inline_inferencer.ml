@@ -441,3 +441,23 @@ let%expect_test _ =
   |};
   [%expect {| sum: (int * int * int) list -> (int * int * int) |}]
 ;;
+
+let%expect_test _ =
+  test
+    {| 
+    let f x =
+      match x with
+      | [ 1 ] -> 1
+      | [ a ] -> a
+      | hd :: tl -> hd
+      | _ -> 42
+  |};
+  [%expect {| f: int list -> int |}]
+;;
+
+let%expect_test _ =
+  test {| 
+    let f [[a; b]; [c; d]] = a + b + c + d
+  |};
+  [%expect {| f: int list list -> int |}]
+;;
