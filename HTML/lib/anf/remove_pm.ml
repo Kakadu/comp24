@@ -112,11 +112,7 @@ module RuntimeEnv = struct
   let get_head = { name = "GET_HEAD"; typ = tarrow (tlist generic) generic }
   let get_tl = { name = "GET_TALE"; typ = tarrow (tlist generic) (tlist generic) }
   let get_nth = { name = "GET_NTH"; typ = tarrow (ttuple tint generic []) (tvar "b") }
-
-  let not_exhaustive_pm =
-    { name = "RTE_ERROR_NOT_EXHAUSTIVE_PATTERN_MATCHING"; typ = tarrow tunit generic }
-  ;;
-
+  let not_exhaustive_pm = { name = "RTE_ERROR_MATCH_FAILURE"; typ = tarrow tunit generic }
   let init_env = [ get_head; get_tl; get_nth; not_exhaustive_pm ]
 end
 
