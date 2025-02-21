@@ -44,3 +44,18 @@ let%expect_test "test let fun" =
   test "let a b = b in a";
   [%expect {| 'b -> 'b |}]
 ;;
+
+let%expect_test "test let fun apply" =
+  test "let a b = b in a 4";
+  [%expect {| int |}]
+;;
+
+let%expect_test "test simple let" =
+  test "let a = 4 in a";
+  [%expect {| int |}]
+;;
+
+let%expect_test "test several lets" =
+  test "let f a = a and a = true and b = 4 in f f b";
+  [%expect {| int |}]
+;;
