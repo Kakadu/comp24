@@ -39,10 +39,6 @@ let counter_next () =
 *)
 let remove_grave = String.substr_replace_all ~pattern:"`" ~with_:""
 
-type const =
-  | NoInit of id * imm_expr
-  | Init of id * id * aexpr
-
 let rec gen_imm fn_args env dest = function
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
@@ -161,6 +157,7 @@ and gen_aexpr fn_args env dest = function
   | ACExpr cexpr -> gen_cexpr fn_args env dest cexpr
 
 and gen_fn ?(data_sec = None) fn_args init_fns = function
+  (* TODO: why is it here? *)
   | Fn (id, [], ACExpr (CImmExpr _)) when String.( <> ) "main" id -> ()
   | Fn (id, [], _)
     when (not (String.equal "main" id))
@@ -203,31 +200,12 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
 ;;
 
 let gen_const_inits fn_args consts =
-  let any_noinit = ref false in
-  let const_init_fns =
-    List.fold consts ~init:[] ~f:(fun acc ->
-        function
-        | Init (id, init_id, exp) ->
-          let fn = Fn (init_id, [ "_" ], exp) in
-          dbg "Init %s ANF: %a\n" id pp_fn fn;
-          gen_fn fn_args [] fn ~data_sec:(Some id);
-          init_id :: acc
-        | NoInit _ ->
-          any_noinit := true;
-          acc)
-    |> List.rev
-  in
-  if !any_noinit
-  then (
-    emit_fn_decl "init_noinit_consts" [] 24;
-    List.iter consts ~f:(function
-      | NoInit (id, imm) ->
-        gen_imm fn_args (Map.empty (module String)) t0 imm;
-        emit la t1 id;
-        emit_load_2 (AsmReg (Offset (t1, 0))) (AsmReg t0)
-      | _ -> ());
-    emit_fn_ret 24);
-  if !any_noinit then "init_noinit_consts" :: const_init_fns else const_init_fns
+  List.fold consts ~init:[] ~f:(fun acc (id, init_id, exp) ->
+    let fn = Fn (init_id, [ "_" ], exp) in
+    dbg "Init %s ANF: %a\n" id pp_fn fn;
+    gen_fn fn_args [] fn ~data_sec:(Some id);
+    init_id :: acc)
+  |> List.rev
 ;;
 
 let gen_program fn_args consts (prog : Anf_ast.program) =
@@ -266,19 +244,9 @@ let peephole (code : (instr * string) Queue.t) =
   code |> Queue.to_list |> helper |> Queue.of_list
 ;;
 
-let collect_consts fn_args ast =
+let collect_consts ast =
   let helper consts = function
-    | Fn (id, [], ACExpr (CImmExpr imm)) when String.( <> ) "main" id ->
-      NoInit (id, imm) :: consts
-    | Fn (id, [], exp)
-      when String.( <> ) "main" id
-           &&
-           match Map.find fn_args id with
-           | None -> true
-           | Some 0 -> true
-           | _ -> false ->
-      (* TODO: check guard *)
-      Init (id, "init_" ^ id, exp) :: consts
+    | Fn (id, [], exp) when String.( <> ) "main" id -> (id, "init_" ^ id, exp) :: consts
     | _ -> consts
   in
   List.fold ast ~init:[] ~f:helper |> List.rev
@@ -286,8 +254,7 @@ let collect_consts fn_args ast =
 
 let emit_data_section consts =
   consts
-  |> List.filter_map ~f:(function NoInit (id, _) | Init (id, _, _) ->
-    Some (Format.sprintf "%s: .dword 0" id))
+  |> List.filter_map ~f:(fun (id, _, _) -> Some (Format.sprintf "%s: .dword 0" id))
   |> String.concat_lines
   |> Format.sprintf ".section .data\n%s"
   |> emit str
@@ -299,7 +266,7 @@ let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.progr
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     let fn_args = init_env ast in
-    let consts = collect_consts fn_args ast in
+    let consts = collect_consts ast in
     emit_data_section consts;
     emit str ".section .text";
     gen_program fn_args consts ast;
