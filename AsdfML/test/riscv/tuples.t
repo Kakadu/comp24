@@ -76,7 +76,8 @@ $ /tmp/tuples
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (42, 1, 2094080)
+  (42, 1, 2089984)
+
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let cross (x1, y1, z1) (x2, y2, z2) =
@@ -86,39 +87,40 @@ $ /tmp/tuples
   >   (x, y, z)
   > 
   > let main = 
-  >   let a = (1, 2, 3) in
-  >   let b = (4, 5, 6) in
+  >   let a = (1, 3, 5) in
+  >   let b = (7, 11, 13) in
   >   let c = cross a b in
   >   print_tuple c
   > EOF
   ANF:
-  let cross `arg_0 `arg_1 =
-         let a2 = `get_tuple_field `arg_1 2 in
-         let a4 = `get_tuple_field `arg_1 1 in
-         let a6 = `get_tuple_field `arg_1 0 in
-         let a9 = `get_tuple_field `arg_0 2 in
-         let a11 = `get_tuple_field `arg_0 1 in
-         let a13 = `get_tuple_field `arg_0 0 in
-         let a24 = ( * ) a11 a2 in
-         let a25 = ( * ) a9 a4 in
+  let cross arg_0 arg_1 =
+         let a2 = `get_tuple_field arg_1 0 in
+         let a4 = `get_tuple_field arg_1 1 in
+         let a6 = `get_tuple_field arg_1 2 in
+         let a9 = `get_tuple_field arg_0 0 in
+         let a11 = `get_tuple_field arg_0 1 in
+         let a13 = `get_tuple_field arg_0 2 in
+         let a24 = ( * ) a11 a6 in
+         let a25 = ( * ) a13 a4 in
          let a15 = ( - ) a24 a25 in
-         let a22 = ( * ) a9 a6 in
-         let a23 = ( * ) a13 a2 in
+         let a22 = ( * ) a13 a2 in
+         let a23 = ( * ) a9 a6 in
          let a17 = ( - ) a22 a23 in
-         let a20 = ( * ) a13 a4 in
-         let a21 = ( * ) a11 a6 in
+         let a20 = ( * ) a9 a4 in
+         let a21 = ( * ) a11 a2 in
          let a19 = ( - ) a20 a21 in
          (a15, a17, a19)
   let main =
-    let a26 = (1, 2, 3) in
-    let a27 = (4, 5, 6) in
+    let a26 = (1, 3, 5) in
+    let a27 = (7, 11, 13) in
     let a29 = cross a26 a27 in
     print_tuple a29
   
 $ cat /tmp/tuples.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (-3, 6, -3)
+  (-16, 22, -10)
+
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let main = 
@@ -131,12 +133,12 @@ $ cat /tmp/tuples.s
   ANF:
   let main =
          let a0 = (1, 2, true) in
-         let a2 = `get_tuple_field a0 2 in
+         let a2 = `get_tuple_field a0 0 in
          let a4 = `get_tuple_field a0 1 in
-         let a6 = `get_tuple_field a0 0 in
-         let a7 = println_int a6 in
+         let a6 = `get_tuple_field a0 2 in
+         let a7 = println_int a2 in
          let a8 = println_int a4 in
-         let a9 = println_bool a2 in
+         let a9 = println_bool a6 in
          0
   
 $ cat /tmp/tuples.s
@@ -145,6 +147,7 @@ $ cat /tmp/tuples.s
   1
   2
   true
+
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let div x = match x with
@@ -158,22 +161,20 @@ $ cat /tmp/tuples.s
   > EOF
   ANF:
   let div x =
-         let a11 = ( && ) true true in
-         let a13 = `get_tuple_field x 1 in
-         let a12 = ( = ) a13 0 in
-         let a1 = ( && ) a11 a12 in
+         let a11 = `get_tuple_field x 1 in
+         let a1 = ( = ) a11 0 in
          if a1 
          then let a4 = `get_tuple_field x 0 in
            0 
          else
-           let a7 = `get_tuple_field x 1 in
-           let a9 = `get_tuple_field x 0 in
-           ( / ) a9 a7
+           let a7 = `get_tuple_field x 0 in
+           let a9 = `get_tuple_field x 1 in
+           ( / ) a7 a9
   let main =
-    let a17 = div (10, 2) in
-    let a14 = println_int a17 in
-    let a16 = div (10, 0) in
-    let a15 = println_int a16 in
+    let a15 = div (10, 2) in
+    let a12 = println_int a15 in
+    let a14 = div (10, 0) in
+    let a13 = println_int a14 in
     0
   
 $ cat /tmp/tuples.s
@@ -181,6 +182,7 @@ $ cat /tmp/tuples.s
   $ /tmp/tuples
   5
   0
+
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let (a, b, c) = (1, 2, 3)
@@ -191,14 +193,15 @@ $ cat /tmp/tuples.s
   >   0
   > EOF
   ANF:
-  let temp_tuple = (1, 2, 3)
-  let a = `get_tuple_field temp_tuple 0
-  let b = `get_tuple_field temp_tuple 1
-  let c = `get_tuple_field temp_tuple 2
+  let temp_match_0 = (1, 2, 3)
+  let tuple_0 = temp_match_0
+  let a = `get_tuple_field tuple_0 0
+  let b = `get_tuple_field tuple_0 1
+  let c = `get_tuple_field tuple_0 2
   let main =
-    let a3 = println_int a in
-    let a4 = println_int b in
-    let a5 = println_int c in
+    let a4 = println_int a in
+    let a5 = println_int b in
+    let a6 = println_int c in
     0
   
 $ cat /tmp/tuples.s
