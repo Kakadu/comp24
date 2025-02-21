@@ -142,7 +142,7 @@ let close e env =
       closure_app f free
     | EApp (e1, e2) -> EApp (close_expr e1 free_vars env, close_expr e2 free_vars env)
   in
-  let close_decl e free_vars env =
+  let rec close_decl e free_vars env =
     match e with
     | DLet (is_rec, id, (EFun (_, _) as e)) ->
       let env =
@@ -158,7 +158,15 @@ let close e env =
       let f = closure_fun f free in
       DLet (is_rec, id, f)
     | DLet (is_rec, id, e) -> DLet (is_rec, id, close_expr e free_vars env)
-    | DMutualLet _ -> failwith "Not Implemented"
+    | DMutualLet (_, decls) ->
+      let decls =
+        Base.List.fold_right decls ~init:[] ~f:(fun (id, e) acc ->
+          let decl = close_decl (DLet (Rec, id, e)) free_vars env in
+          match decl with
+          | DLet (_, id, e) -> (id, e) :: acc
+          | _ -> failwith "Not Reachable")
+      in
+      DMutualLet (Rec, decls)
   in
   close_decl e (Map.empty (module String)) env
 ;;
@@ -170,7 +178,10 @@ let close_program prog env =
       | DLet (_, id, _) ->
         let e = close decl env in
         e :: closed, Set.add env id
-      | DMutualLet _ -> failwith "Not Implemented")
+      | DMutualLet (_, decls) ->
+        let env = List.fold decls ~init:env ~f:(fun env (id, _) -> Set.add env id) in
+        let e = close decl env in
+        e :: closed, env)
   in
   List.rev prog
 ;;

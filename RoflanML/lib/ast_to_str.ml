@@ -138,7 +138,11 @@ let ast_to_str =
         | NonRec -> ""
       in
       sprintf "\nlet%s %s = %s" rec_flag id (expr_to_str e)
-    | DMutualLet _ -> failwith "Not Implemented"
+    | DMutualLet (_, decls) ->
+      List.fold_left decls ~init:"" ~f:(fun acc (id, e) ->
+        if String.is_empty acc
+        then sprintf "\nlet rec %s = %s" id (expr_to_str e)
+        else sprintf "%s\nand\n%s = %s" acc id (expr_to_str e))
   in
   decl_to_str
 ;;

@@ -15,12 +15,9 @@ type llexpr =
   | LLMatch of llexpr * (pattern * llexpr) list (** match [x] with | [p1] -> [e1] | ... *)
   | LLLetIn of id * llexpr * llexpr (** let x = 1, only non-function bindings *)
   | LLApp of llexpr * llexpr (** Application f x y z *)
-[@@deriving show { with_path = false }]
 
 type lldecl = LLDLet of is_rec * id * typed_arg list * llexpr
-[@@deriving show { with_path = false }]
-
-type llprogram = lldecl list [@@deriving show { with_path = false }]
+type llprogram = lldecl list
 
 let ll_to_ast =
   let rec expr_to_ast = function
