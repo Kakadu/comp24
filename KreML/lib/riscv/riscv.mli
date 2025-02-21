@@ -12,6 +12,18 @@ val arg : int -> reg
 val fp: reg
 val is_saved : reg -> bool
 
+type rvalue =
+  | Rv_imm of int
+  | Rv_reg of reg
+  | Rv_mem of reg * int (** base, offset *)
+  | Rv_function of Flambda.fun_decl
+  | Rv_nop
+
+type location =
+  | Loc_reg of reg
+  | Loc_mem of reg * int
+
+
 type op =
   (* R-type *)
   | ADD
@@ -69,7 +81,7 @@ type instruction =
 
 val extend_stack_insn : int -> instruction
 val shrink_stack_insn : int -> instruction
-val sw : v:reg -> int -> src: reg -> instruction
+val sw : v:reg -> int -> dst: reg -> instruction
 val lw : rd:reg -> int -> src:reg -> instruction
 
 module RegistersStorage : sig

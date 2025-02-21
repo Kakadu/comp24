@@ -15,6 +15,17 @@ let is_saved =
   | Saved _ -> true
   | _ -> false
 
+type rvalue =
+| Rv_imm of int
+| Rv_reg of reg
+| Rv_mem of reg * int (** base, offset *)
+| Rv_function of Flambda.fun_decl
+| Rv_nop
+
+type location =
+  | Loc_reg of reg
+  | Loc_mem of reg * int
+
 type op =
   (* R-type *)
   | ADD
@@ -71,7 +82,7 @@ type instruction =
 
 let extend_stack_insn size = Itype(Sp, Sp, size, SUB)
 let shrink_stack_insn size = Itype(Sp, Sp, size, ADD)
-let sw ~v offset ~src = Stype(v, offset, src, SW)
+let sw ~v offset ~dst = Stype(v, offset, dst, SW)
 let lw ~rd offset  ~src = Itype(rd, src, offset, LW)
 
 

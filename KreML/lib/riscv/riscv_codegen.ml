@@ -9,7 +9,16 @@ type generated_code = (string, fun_body) Hashtbl.t
 let word_size = 8
 let arg_regs_count = 8
 let curr_block = ref []
+let block_counter = ref 0
+let current_fun_arity = ref 0
+
+(* when we codegen ite we must preserve rd of binding*)
+let curr_rd = ref (temp 0)
 let curr_assignment = ref (Base.Map.empty (module Base.String))
+
+let find_reg forbidden =
+  List.find (fun r -> List.for_all (( <> ) r) forbidden) available_regs
+;;
 
 module Arith = struct
   let const_to_int = function
@@ -35,205 +44,208 @@ module Arith = struct
 
   (* handle case when src is on the stack*)
   let codegen_binop op x y rd =
-    let find_reg forbidden =
-      List.find (fun r -> List.for_all (( <> ) r) forbidden) available_regs
-    in
-    match x, y with
-    | Fl_var x, Fl_var y ->
-      let xloc = Base.Map.find_exn !curr_assignment x in
-      let yloc = Base.Map.find_exn !curr_assignment y in
-      let xreg, yreg, save, restore =
-        match xloc, yloc with
-        | Reg xr, Reg yr -> xr, yr, None, None
-        | StackLoc x_idx, Reg yr ->
-          let xreg = find_reg [ yr; rd ] in
-          let save = sw ~v:xreg 0 ~src:Sp in
-          let load = lw ~rd:xreg (x_idx * word_size) ~src:fp in
-          let restore = lw ~rd:xreg 0 ~src:Sp in
-          xreg, yr, Some [ save; load ], Some [ restore ]
-        | Reg xr, StackLoc y_idx ->
-          let yreg = find_reg [ xr; rd ] in
-          let save = sw ~v:yreg 0 ~src:Sp in
-          let load = lw ~rd:yreg (y_idx * word_size) ~src:fp in
-          let restore = lw ~rd:yreg 0 ~src:Sp in
-          xr, yreg, Some [ save; load ], Some [ restore ]
-        | StackLoc x_idx, StackLoc y_idx ->
-          let xreg = find_reg [ rd ] in
-          let yreg = find_reg [ rd; xreg ] in
-          let save0 = sw ~v:xreg 0 ~src:Sp in
-          let save1 = sw ~v:yreg word_size ~src:Sp in
-          let load0 = lw ~rd:xreg (word_size * x_idx) ~src:fp in
-          let load1 = lw ~rd:yreg (word_size * y_idx) ~src:fp in
-          let restore0 = lw ~rd:xreg 0 ~src:Sp in
-          let restore1 = lw ~rd:yreg word_size ~src:Sp in
-          xreg, yreg, Some [ save0; save1; load0; load1 ], Some [ restore0; restore1 ]
-      in
-      let insn =
-        match op with
-        | Anf.Add -> Rtype (rd, xreg, yreg, ADD)
-        | Anf.Sub -> Rtype (rd, xreg, yreg, SUB)
-        | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
-        | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
-        | Anf.Lt -> Rtype (rd, xreg, yreg, SLT)
-        | Anf.Gt -> Rtype (rd, yreg, xreg, SLT)
-        | Anf.Eq -> Rtype (rd, xreg, yreg, SUB)
-        | Anf.Neq -> Rtype (rd, xreg, yreg, SUB)
-        | Anf.And -> Rtype (rd, xreg, yreg, AND)
-        | Anf.Or -> Rtype (rd, xreg, yreg, OR)
-      in
-      merge_with_save_and_restore save [ insn ] restore
-    | Fl_const x, Fl_var y ->
-      let imm = const_to_int x in
-      let yloc = Base.Map.find_exn !curr_assignment y in
-      let yreg, save, restore =
-        match yloc with
-        | Reg r -> r, None, None
-        | StackLoc idx ->
-          let yreg = find_reg [ rd ] in
-          let save = sw ~v:yreg 0 ~src:Sp in
-          let load = lw ~rd:yreg (word_size * idx) ~src:fp in
-          let restore = lw ~rd:yreg 0 ~src:Sp in
-          yreg, Some [ save; load ], Some [ restore ]
-      in
-      if imm_is_12_bytes imm
-      then (
-        let insns =
-          match op with
-          | Anf.Add -> [ Itype (rd, yreg, imm, ADDI) ]
-          | Anf.Sub ->
-            let negate = Pseudo.neg yreg in
-            [ negate; Itype (rd, yreg, -imm, ADDI); negate ]
-          | Anf.Mul | Anf.Div ->
-            let xreg = find_reg [ yreg; rd ] in
-            let save = sw ~v:xreg 0 ~src:Sp in
-            let load = Pseudo.li xreg imm in
-            let insn =
-              match op with
-              | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
-              | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
-              | _ -> Utils.unreachable ()
-            in
+    let insns =
+      match x, y with
+      | Fl_var x, Fl_var y ->
+        let xloc = Base.Map.find_exn !curr_assignment x in
+        let yloc = Base.Map.find_exn !curr_assignment y in
+        let xreg, yreg, save, restore =
+          match xloc, yloc with
+          | Reg xr, Reg yr -> xr, yr, None, None
+          | StackLoc x_idx, Reg yr ->
+            let xreg = find_reg [ yr; rd ] in
+            let save = sw ~v:xreg 0 ~dst:Sp in
+            let load = lw ~rd:xreg (x_idx * word_size) ~src:fp in
             let restore = lw ~rd:xreg 0 ~src:Sp in
-            [ save; load; insn; restore ]
-          | Anf.Eq -> [ Itype (rd, yreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> [ Itype (rd, yreg, -imm, ADDI) ]
-          | Anf.Gt -> [ Itype (rd, yreg, imm, SLTI) ]
-          (* imm < reg  <=> 0 < reg - imm*)
-          | Anf.Lt -> [ Itype (rd, yreg, -imm, ADDI); Rtype (rd, Zero, rd, SLT) ]
-          | Anf.And -> [ Itype (rd, yreg, imm, ANDI) ]
-          | Anf.Or -> [ Itype (rd, yreg, imm, ORI) ]
-        in
-        merge_with_save_and_restore save insns restore)
-      else (
-        let xreg = find_reg [ yreg; rd ] in
-        let save_x = sw ~v:xreg 0 ~src:Sp in
-        let load_x = Pseudo.li xreg imm in
-        let restore_x = lw ~rd:xreg 0 ~src:Sp in
-        let build_instr insns =
-          build_complex_instr [ save_x; load_x ] insns [ restore_x ]
-        in
-        let insns =
-          match op with
-          | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
-          | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
-          | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
-          | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
-          | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
-          | Anf.Eq -> build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.And -> build_instr [ Rtype (rd, yreg, xreg, AND) ]
-          | Anf.Or -> build_instr [ Rtype (rd, yreg, xreg, OR) ]
-        in
-        merge_with_save_and_restore save insns restore)
-    | Fl_var x, Fl_const y ->
-      let imm = const_to_int y in
-      let xloc = Base.Map.find_exn !curr_assignment x in
-      let xreg, save, restore =
-        match xloc with
-        | Reg r -> r, None, None
-        | StackLoc idx ->
-          let xreg = find_reg [ rd ] in
-          let save = sw ~v:xreg 0 ~src:Sp in
-          let load = lw ~rd:xreg (word_size * idx) ~src:fp in
-          let restore = lw ~rd:xreg 0 ~src:Sp in
-          xreg, Some [ save; load ], Some [ restore ]
-      in
-      if imm_is_12_bytes imm
-      then (
-        let insns =
-          match op with
-          | Anf.Add -> [ Itype (rd, xreg, imm, ADDI) ]
-          | Anf.Sub -> [ Itype (rd, xreg, -imm, ADDI) ]
-          | Anf.Mul | Anf.Div ->
-            let yreg = find_reg [ rd; xreg ] in
-            let save = sw ~v:yreg 0 ~src:Sp in
-            let load = Pseudo.li yreg imm in
+            xreg, yr, Some [ save; load ], Some [ restore ]
+          | Reg xr, StackLoc y_idx ->
+            let yreg = find_reg [ xr; rd ] in
+            let save = sw ~v:yreg 0 ~dst:Sp in
+            let load = lw ~rd:yreg (y_idx * word_size) ~src:fp in
             let restore = lw ~rd:yreg 0 ~src:Sp in
-            let insn =
-              match op with
-              | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
-              | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
-              | _ -> Utils.unreachable ()
-            in
-            [ save; load; insn; restore ]
-          | Anf.Eq -> [ Itype (rd, xreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> [ Itype (rd, xreg, -imm, ADDI) ]
-          | Anf.Lt -> [ Itype (rd, xreg, imm, SLTI) ]
-          (* reg > imm <=> reg - imm > 0*)
-          | Anf.Gt -> [ Itype (rd, xreg, -imm, ADDI); Rtype (rd, Zero, rd, SLT) ]
-          | Anf.Or -> [ Itype (rd, xreg, imm, ORI) ]
-          | Anf.And -> [ Itype (rd, xreg, imm, ANDI) ]
+            xr, yreg, Some [ save; load ], Some [ restore ]
+          | StackLoc x_idx, StackLoc y_idx ->
+            let xreg = find_reg [ rd ] in
+            let yreg = find_reg [ rd; xreg ] in
+            let save0 = sw ~v:xreg 0 ~dst:Sp in
+            let save1 = sw ~v:yreg word_size ~dst:Sp in
+            let load0 = lw ~rd:xreg (word_size * x_idx) ~src:fp in
+            let load1 = lw ~rd:yreg (word_size * y_idx) ~src:fp in
+            let restore0 = lw ~rd:xreg 0 ~src:Sp in
+            let restore1 = lw ~rd:yreg word_size ~src:Sp in
+            xreg, yreg, Some [ save0; save1; load0; load1 ], Some [ restore0; restore1 ]
         in
-        merge_with_save_and_restore save insns restore)
-      else (
+        let insn =
+          match op with
+          | Anf.Add -> Rtype (rd, xreg, yreg, ADD)
+          | Anf.Sub -> Rtype (rd, xreg, yreg, SUB)
+          | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
+          | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
+          | Anf.Lt -> Rtype (rd, xreg, yreg, SLT)
+          | Anf.Gt -> Rtype (rd, yreg, xreg, SLT)
+          | Anf.Eq -> Rtype (rd, xreg, yreg, SUB)
+          | Anf.Neq -> Rtype (rd, xreg, yreg, SUB)
+          | Anf.And -> Rtype (rd, xreg, yreg, AND)
+          | Anf.Or -> Rtype (rd, xreg, yreg, OR)
+        in
+        merge_with_save_and_restore save [ insn ] restore
+      | Fl_const x, Fl_var y ->
+        let imm = const_to_int x in
+        let yloc = Base.Map.find_exn !curr_assignment y in
+        let yreg, save, restore =
+          match yloc with
+          | Reg r -> r, None, None
+          | StackLoc idx ->
+            let yreg = find_reg [ rd ] in
+            let save = sw ~v:yreg 0 ~dst:Sp in
+            let load = lw ~rd:yreg (word_size * idx) ~src:fp in
+            let restore = lw ~rd:yreg 0 ~src:Sp in
+            yreg, Some [ save; load ], Some [ restore ]
+        in
+        if imm_is_12_bytes imm
+        then (
+          let insns =
+            match op with
+            | Anf.Add -> [ Itype (rd, yreg, imm, ADDI) ]
+            | Anf.Sub ->
+              let negate = Pseudo.neg yreg in
+              [ negate; Itype (rd, yreg, -imm, ADDI); negate ]
+            | Anf.Mul | Anf.Div ->
+              let xreg = find_reg [ yreg; rd ] in
+              let save = sw ~v:xreg 0 ~dst:Sp in
+              let load = Pseudo.li xreg imm in
+              let insn =
+                match op with
+                | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
+                | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
+                | _ -> Utils.unreachable ()
+              in
+              let restore = lw ~rd:xreg 0 ~src:Sp in
+              [ save; load; insn; restore ]
+            | Anf.Eq -> [ Itype (rd, yreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
+            | Anf.Neq -> [ Itype (rd, yreg, -imm, ADDI) ]
+            | Anf.Gt -> [ Itype (rd, yreg, imm, SLTI) ]
+            (* imm < reg  <=> 0 < reg - imm*)
+            | Anf.Lt -> [ Itype (rd, yreg, -imm, ADDI); Rtype (rd, Zero, rd, SLT) ]
+            | Anf.And -> [ Itype (rd, yreg, imm, ANDI) ]
+            | Anf.Or -> [ Itype (rd, yreg, imm, ORI) ]
+          in
+          merge_with_save_and_restore save insns restore)
+        else (
+          let xreg = find_reg [ yreg; rd ] in
+          let save_x = sw ~v:xreg 0 ~dst:Sp in
+          let load_x = Pseudo.li xreg imm in
+          let restore_x = lw ~rd:xreg 0 ~src:Sp in
+          let build_instr insns =
+            build_complex_instr [ save_x; load_x ] insns [ restore_x ]
+          in
+          let insns =
+            match op with
+            | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
+            | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+            | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
+            | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
+            | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
+            | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
+            | Anf.Eq ->
+              build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~dst:rd ]
+            | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+            | Anf.And -> build_instr [ Rtype (rd, yreg, xreg, AND) ]
+            | Anf.Or -> build_instr [ Rtype (rd, yreg, xreg, OR) ]
+          in
+          merge_with_save_and_restore save insns restore)
+      | Fl_var x, Fl_const y ->
+        let imm = const_to_int y in
+        let xloc = Base.Map.find_exn !curr_assignment x in
+        let xreg, save, restore =
+          match xloc with
+          | Reg r -> r, None, None
+          | StackLoc idx ->
+            let xreg = find_reg [ rd ] in
+            let save = sw ~v:xreg 0 ~dst:Sp in
+            let load = lw ~rd:xreg (word_size * idx) ~src:fp in
+            let restore = lw ~rd:xreg 0 ~src:Sp in
+            xreg, Some [ save; load ], Some [ restore ]
+        in
+        if imm_is_12_bytes imm
+        then (
+          let insns =
+            match op with
+            | Anf.Add -> [ Itype (rd, xreg, imm, ADDI) ]
+            | Anf.Sub -> [ Itype (rd, xreg, -imm, ADDI) ]
+            | Anf.Mul | Anf.Div ->
+              let yreg = find_reg [ rd; xreg ] in
+              let save = sw ~v:yreg 0 ~dst:Sp in
+              let load = Pseudo.li yreg imm in
+              let restore = lw ~rd:yreg 0 ~src:Sp in
+              let insn =
+                match op with
+                | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
+                | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
+                | _ -> Utils.unreachable ()
+              in
+              [ save; load; insn; restore ]
+            | Anf.Eq -> [ Itype (rd, xreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
+            | Anf.Neq -> [ Itype (rd, xreg, -imm, ADDI) ]
+            | Anf.Lt -> [ Itype (rd, xreg, imm, SLTI) ]
+            (* reg > imm <=> reg - imm > 0*)
+            | Anf.Gt -> [ Itype (rd, xreg, -imm, ADDI); Rtype (rd, Zero, rd, SLT) ]
+            | Anf.Or -> [ Itype (rd, xreg, imm, ORI) ]
+            | Anf.And -> [ Itype (rd, xreg, imm, ANDI) ]
+          in
+          merge_with_save_and_restore save insns restore)
+        else (
+          let yreg = find_reg [ rd; xreg ] in
+          let save_y = sw ~v:yreg 0 ~dst:Sp in
+          let load_y = Pseudo.li yreg imm in
+          let restore_y = lw ~rd:yreg 0 ~src:Sp in
+          let build_instr insns =
+            build_complex_instr [ save_y; load_y ] insns [ restore_y ]
+          in
+          let insns =
+            match op with
+            | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
+            | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+            | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
+            | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
+            | Anf.Eq ->
+              build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
+            | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+            | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
+            | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
+            | Anf.And -> build_instr [ Rtype (rd, xreg, yreg, AND) ]
+            | Anf.Or -> build_instr [ Rtype (rd, xreg, yreg, OR) ]
+          in
+          merge_with_save_and_restore save insns restore)
+      | Fl_const x, Fl_const y ->
+        let x = const_to_int x
+        and y = const_to_int y in
+        let xreg = find_reg [ rd ] in
         let yreg = find_reg [ rd; xreg ] in
-        let save_y = sw ~v:yreg 0 ~src:Sp in
-        let load_y = Pseudo.li yreg imm in
-        let restore_y = lw ~rd:yreg 0 ~src:Sp in
-        let build_instr insns =
-          build_complex_instr [ save_y; load_y ] @ insns @ [ restore_y ]
-        in
+        let save_x = sw ~v:xreg 0 ~dst:Sp in
+        let save_y = sw ~v:yreg word_size ~dst:Sp in
+        let load_x = Pseudo.li xreg x in
+        let load_y = Pseudo.li yreg y in
+        let restore_x = lw ~rd:xreg 0 ~src:Sp in
+        let restore_y = lw ~rd:yreg word_size ~src:Sp in
         let insns =
           match op with
-          | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
-          | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
-          | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
-          | Anf.Eq -> build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
-          | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
-          | Anf.And -> build_instr [ Rtype (rd, xreg, yreg, AND) ]
-          | Anf.Or -> build_instr [ Rtype (rd, xreg, yreg, OR) ]
+          | Anf.Add -> [ Rtype (rd, xreg, yreg, ADD) ]
+          | Anf.Sub -> [ Rtype (rd, xreg, yreg, SUB) ]
+          | Anf.Mul -> [ Rtype (rd, xreg, yreg, MUL) ]
+          | Anf.Div -> [ Rtype (rd, xreg, yreg, MUL) ]
+          | Anf.Eq -> [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
+          | Anf.Neq -> [ Rtype (rd, xreg, yreg, SUB) ]
+          | Anf.Lt -> [ Rtype (rd, xreg, yreg, SLT) ]
+          | Anf.Gt -> [ Rtype (rd, yreg, xreg, SLT) ]
+          | Anf.And -> [ Rtype (rd, xreg, yreg, AND) ]
+          | Anf.Or -> [ Rtype (rd, xreg, yreg, OR) ]
         in
-        merge_with_save_and_restore save insns restore)
-    | Fl_const x, Fl_const y ->
-      let x = const_to_int x
-      and y = const_to_int y in
-      let xreg = find_reg [ rd ] in
-      let yreg = find_reg [ rd; xreg ] in
-      let save_x = sw ~v:xreg 0 ~src:Sp in
-      let save_y = sw ~v:yreg word_size ~src:Sp in
-      let load_x = Pseudo.li xreg x in
-      let load_y = Pseudo.li yreg y in
-      let restore_x = lw ~rd:xreg 0 ~src:Sp in
-      let restore_y = lw ~rd:yreg word_size ~src:Sp in
-      let insns =
-        match op with
-        | Anf.Add -> [ Rtype (rd, xreg, yreg, ADD) ]
-        | Anf.Sub -> [ Rtype (rd, xreg, yreg, SUB) ]
-        | Anf.Mul -> [ Rtype (rd, xreg, yreg, MUL) ]
-        | Anf.Div -> [ Rtype (rd, xreg, yreg, MUL) ]
-        | Anf.Eq -> [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
-        | Anf.Neq -> [ Rtype (rd, xreg, yreg, SUB) ]
-        | Anf.Lt -> [ Rtype (rd, xreg, yreg, SLT) ]
-        | Anf.Gt -> [ Rtype (rd, yreg, xreg, SLT) ]
-        | Anf.And -> [ Rtype (rd, xreg, yreg, AND) ]
-        | Anf.Or -> [ Rtype (rd, xreg, yreg, OR) ]
-      in
-      [ save_x; save_y; load_x; load_y ] @ insns @ [ restore_x; restore_y ]
-    | _ -> Utils.internalfail "unexpected opearnds"
+        [ save_x; save_y; load_x; load_y ] @ insns @ [ restore_x; restore_y ]
+      | _ -> Utils.internalfail "unexpected opearnds"
+    in
+    curr_block := insns @ !curr_block;
+    Rv_reg rd
   ;;
 end
 
@@ -266,12 +278,11 @@ module Function = struct
 
   let prologue_and_apilogue assignment =
     (* todo save frame pointer *)
-    let used_registers = used_registers assignment in
-    let saved_registers = List.filter is_saved used_registers in
+    let saved_registers = used_registers assignment |> List.filter is_saved in
     let stack_size = stack_size_aligned (List.length saved_registers) in
     let extend_stack_insn = extend_stack_insn stack_size in
     let prologue =
-      List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~src:Sp) saved_registers
+      List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) saved_registers
     in
     let prologue = extend_stack_insn :: prologue in
     let restore_stack_insn = shrink_stack_insn stack_size in
@@ -283,13 +294,16 @@ module Function = struct
   ;;
 
   module Call = struct
-    let save_and_restore_insns callee_arity =
-      let callee_args = List.init callee_arity arg in
-      let to_preserve = Ra :: callee_args in
+    let save_and_restore_insns caller_arity =
+      let callee_args = List.init caller_arity arg in
+      let callee_temps =
+        used_registers !curr_assignment |> List.filter (fun r -> is_saved r |> not)
+      in
+      let to_preserve = (Ra :: callee_args) @ callee_temps in
       let extra_stack_size = stack_size_aligned (List.length to_preserve) in
       let extend_stack_insn = extend_stack_insn extra_stack_size in
       let save_insns =
-        List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~src:Sp) to_preserve
+        List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) to_preserve
       in
       let save_insns = extend_stack_insn :: save_insns in
       let restore_stack_insn = shrink_stack_insn extra_stack_size in
@@ -301,5 +315,80 @@ module Function = struct
     ;;
   end
 end
+
+(* let a =
+   if flag then
+   let b = 6 in
+   a + 6
+   else 5*)
+
+let store_rvalue location rvalue =
+  match location, rvalue with
+  | Loc_reg rd, Rv_reg src ->
+    let insn = Pseudo.mv ~rd ~src in
+    curr_block := insn :: !curr_block
+  | Loc_reg rd, Rv_imm imm ->
+    let insn = Pseudo.li rd imm in
+    curr_block := insn :: !curr_block
+  | Loc_reg rd, Rv_mem (src, offset) ->
+    let insn = lw ~rd offset ~src in
+    curr_block := insn :: !curr_block
+  | Loc_mem (dst, offset), Rv_reg v ->
+    let insn = sw ~v offset ~dst in
+    curr_block := insn :: !curr_block
+  | Loc_mem (dst, offset), Rv_imm imm ->
+    let temp_reg = find_reg [ dst ] in
+    let save = sw ~v:temp_reg 0 ~dst:Sp in
+    let load = Pseudo.li temp_reg imm in
+    let store = sw ~v:temp_reg offset ~dst in
+    let restore = lw ~rd:temp_reg 0 ~src:Sp in
+    curr_block := restore :: store :: load :: save :: !curr_block
+  | Loc_mem (dst_reg, dst_offset), Rv_mem (src_reg, src_offset) ->
+    let temp_reg = find_reg [ dst_reg; src_reg ] in
+    let save = sw ~v:temp_reg 0 ~dst:Sp in
+    let load = lw ~rd:temp_reg src_offset ~src:src_reg in
+    let store = sw ~v:temp_reg dst_offset ~dst:dst_reg in
+    let restore = lw ~rd:temp_reg 0 ~src:Sp in
+    curr_block := restore :: store :: load :: save :: !curr_block
+  | _ -> ()
+;;
+
+let rec codegen_flambda location = function
+  | Fl_var id ->
+    (match Base.Map.find_exn !curr_assignment id with
+     | Reg reg -> Rv_reg reg
+     | StackLoc idx -> Rv_mem (fp, idx * word_size))
+  | Fl_let (Some name, v, scope) ->
+    let loc = Base.Map.find_exn !curr_assignment name in
+    let rd, save, restore =
+      match loc with
+      | Reg r -> r, [], []
+      | StackLoc idx ->
+        let reg = find_reg [] in
+        let save = sw ~v:reg 0 ~src:Sp in
+        let extend_stack = extend_stack_insn word_size in
+        let load = lw ~rd:reg (word_size * idx) ~src:fp in
+        let shrink_stack_insn = shrink_stack_insn word_size in
+        let restore = lw ~rd:reg 0 ~src:Sp in
+        reg, [ save; extend_stack; load ], [ shrink_stack_insn; restore ]
+    in
+    curr_block := save @ !curr_block;
+    curr_rd := rd;
+    let _ = codegen_flambda v in
+    curr_block := restore @ !curr_block;
+    let _ = codegen_flambda scope in
+    Rv_nop
+  | Fl_const c ->
+    let const = Arith.const_to_int c in
+    Rv_imm const
+  | Fl_app (Fl_closure { name; env_size; arity; arrange }, args)
+    when arity = List.length args && env_size = 0 ->
+    let args = List.map codegen_flambda args in
+    let save, restore = Function.Call.save_and_restore_insns !current_fun_arity in
+    curr_block := restore @ [ Pseudo.call name ] @ save @ !curr_block;
+    Rv_reg (arg 0)
+;;
+
+(* let a = f x in *)
 
 let codegen program = "1"
