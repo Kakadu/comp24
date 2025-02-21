@@ -30,9 +30,13 @@ let stdlib : std list =
     ; extern = "ml_list_cons"
     }
   ; { name = "print_int"; typ = int_typ ^-> unit_typ; extern = "ml_print_int" }
-  ; { name = "print_bool"; typ = bool_typ ^-> unit_typ; extern = "ml_print_bool" }
+  ; { name = "println_int"; typ = int_typ ^-> unit_typ; extern = "ml_println_int" }
+  ; { name = "println_bool"; typ = bool_typ ^-> unit_typ; extern = "ml_println_bool" }
   ; { name = "print_tuple"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_tuple" }
   ; { name = "print_list"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_list" }
+  ; { name = "panic"; typ = unit_typ ^-> unit_typ; extern = "ml_panic" }
+  ; { name = "print_newline"; typ = unit_typ ^-> unit_typ; extern = "ml_print_newline"}
+  ; { name = "print_char"; typ = int_typ ^-> unit_typ; extern = "ml_print_char"}
   ]
 ;;
 
@@ -47,7 +51,6 @@ let runtime : std list =
   ; { name = "`list_len"; typ = arg1; extern = "ml_list_len" }
   ; { name = "`list_is_empty"; typ = arg1; extern = "ml_list_is_empty" }
   ; { name = "`create_closure"; typ = arg2; extern = "create_closure" }
-  ; { name = "panic"; typ = unit_typ ^-> unit_typ; extern = "ml_panic" }
   ]
 ;;
 

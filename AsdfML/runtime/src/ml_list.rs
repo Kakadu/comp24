@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use log::debug;
+use log::{debug, info};
 
 use crate::{cons_list::ConsList, WithRaw};
 
@@ -59,7 +59,15 @@ pub unsafe extern "C" fn ml_list_field(list_ptr: *const MlList, idx: usize) -> i
 
 #[no_mangle]
 pub unsafe extern "C" fn ml_list_is_empty(list_ptr: *const MlList) -> isize {
-    Rc::with_raw_ref(list_ptr, |list| (list.is_empty()) as isize)
+    Rc::with_raw_ref(list_ptr, |list| {
+        debug!("Is list {} at {:?} empty? {}", list, list_ptr, list.is_empty());
+        list.is_empty() as isize
+    })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn ml_list_len(list_ptr: *const MlList) -> isize {
+    Rc::with_raw_ref(list_ptr, |list| list.len() as isize)
 }
 
 #[no_mangle]
