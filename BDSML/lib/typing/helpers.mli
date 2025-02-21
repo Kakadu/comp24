@@ -1,14 +1,10 @@
 open Types
 
-val occurs_in : VarId.t -> type_val -> bool
-
-module VarSet : Set.S with type elt = VarId.t
-
 module Scheme : sig
   type t = VarSet.t * type_val
 
   val create : VarSet.t -> type_val -> t
-  val free_vars : type_val -> VarSet.t
+  val free_vars : t -> VarSet.t
 end
 
 module TypeEnv : sig
@@ -18,4 +14,6 @@ module TypeEnv : sig
   val extend : t -> string -> Scheme.t -> t
   val empty : t
   val init : (string * Scheme.t) list -> t
+  val free_vars : t -> VarSet.t
+  val apply : Subst.t -> t -> t
 end

@@ -4,7 +4,7 @@ open Helpers
 open Parser.Ast
 
 let unnamed_expr = ""
-let start_type_var = VarId.create 0
+let start_type_var = TVarId.create 0
 let fresh_var = fresh >>| fun n -> TVar n
 let init_env = TypeEnv.empty
 
@@ -26,6 +26,11 @@ let lookup_env env var =
   | Some scheme ->
     let* ans = instantiate scheme in
     return (Subst.empty, ans)
+;;
+
+let generalize env ty =
+  let free = VarSet.diff (free_vars ty) (TypeEnv.free_vars env) in
+  Scheme.create free ty
 ;;
 
 let rec infer_base_type c =
@@ -70,12 +75,34 @@ and infer_fun env vars exp =
   let+ sub, ty = infer_expression env exp in
   sub, List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, ty)) fvs ty
 
+and infer_let env rec_flag bindings expression =
+  let* env, sub1 =
+    fold_left
+      (fun (env, sub) bind ->
+        match bind with
+        | Val_binding (var, args, exp) ->
+          let* s1, t1 = infer_fun env args exp in
+          let env = TypeEnv.apply s1 env in
+          let sheme = generalize env t1 in
+          let env = TypeEnv.extend env var sheme in
+          let+ sub = Subst.compose sub s1 in
+          env, sub
+        | _ -> raise @@ Unimplemented "infer_let")
+      (return (env, Subst.empty))
+      bindings
+  in
+  let* sub2, ty = infer_expression env expression in
+  let+ sub = Subst.compose sub1 sub2 in
+  sub, ty
+
 and infer_expression env expr =
   let rec helper env = function
     | Exp_constant c -> infer_base_type c
     | Exp_if (cond, bthen, belse) -> infer_if env cond bthen belse
     | Exp_ident var -> lookup_env env var
     | Exp_fun (vars, exp) -> infer_fun env vars exp
+    | Exp_let (rec_flag, bindings, expression) ->
+      infer_let env rec_flag bindings expression
     | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
   in
   helper env expr

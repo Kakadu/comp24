@@ -22,8 +22,7 @@ let%expect_test "test if inference" =
 
 let%expect_test "test wrong if inference" =
   test "if false then 4 else 'c'";
-  [%expect
-    {| ErrorType infering error: failed unification of types int and char |}]
+  [%expect {| ErrorType infering error: failed unification of types int and char |}]
 ;;
 
 let%expect_test "test if without else inference" =
@@ -39,4 +38,9 @@ let%expect_test "test fun inference" =
 let%expect_test "test fun with several arguments inference" =
   test "fun a b c -> b";
   [%expect {| 'a -> 'b -> 'c -> 'b |}]
+;;
+
+let%expect_test "test let fun" =
+  test "let a b = b in a";
+  [%expect {| 'b -> 'b |}]
 ;;

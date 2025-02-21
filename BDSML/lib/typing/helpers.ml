@@ -1,26 +1,14 @@
 open Types
-module VarSet = Set.Make (VarId)
-
-let rec occurs_in (v : VarId.t) = function
-  | TVar b -> b = v
-  | TTuple (f :: tl) -> occurs_in v f || (occurs_in v @@ TTuple tl)
-  | TArrow (l, r) -> occurs_in v l || occurs_in v r
-  | TBase _ -> false
-  | _ -> raise (Unimplemented "occurs_in")
-;;
 
 module Scheme = struct
   type t = VarSet.t * type_val
 
   let create set ty : t = set, ty
-  let free_vars =
-    let rec helper acc = function
-      | TVar b -> VarSet.add b acc
-      | TArrow (l, r) -> helper (helper acc l) r
-      | TBase _ -> acc
-      | _ -> raise (Unimplemented "free_vars")
-    in
-    helper VarSet.empty
+  let free_vars (set, ty) = VarSet.diff (free_vars ty) set
+
+  let apply sub (names, ty) =
+    let s2 = VarSet.fold (fun k s -> Subst.remove k s) names sub in
+    names, Subst.apply s2 ty
   ;;
 end
 
@@ -30,7 +18,6 @@ module TypeEnv = struct
   type t = Scheme.t Map.t
 
   let find : string -> t -> Scheme.t option = Map.find_opt
-
   let extend map name scheme = Map.add name scheme map
   let empty : t = Map.empty
 
@@ -41,4 +28,13 @@ module TypeEnv = struct
     in
     helper empty values
   ;;
+
+  let free_vars (map : t) : VarSet.t =
+    Map.fold
+      (fun _ scheme acc -> VarSet.union acc @@ Scheme.free_vars scheme)
+      map
+      VarSet.empty
+  ;;
+
+  let apply s env = Map.map (Scheme.apply s) env
 end

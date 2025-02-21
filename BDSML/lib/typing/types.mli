@@ -1,4 +1,4 @@
-module VarId : sig
+module TVarId : sig
   type t
 
   val to_string : t -> string
@@ -14,7 +14,7 @@ type base_type =
   | TBool
 
 type type_val =
-  | TVar of VarId.t (** e.g. ['a] *)
+  | TVar of TVarId.t (** e.g. ['a] *)
   | TBase of base_type (** e.g. [int] *)
   | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
@@ -29,3 +29,8 @@ type error =
   | No_variable of string
 
 exception Unimplemented of string
+
+module VarSet : Set.S with type elt = TVarId.t
+
+val occurs_in : TVarId.t -> type_val -> bool
+val free_vars : type_val -> VarSet.t
