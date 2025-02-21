@@ -176,36 +176,36 @@ $ cat /tmp/lists.s
   [4, 9, 16]
   []
 
-;  $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
-;  > let [a; b; c] = [1; 2; 3]
-;  > let main = 
-;  >   let _ = println_int a in
-;  >   let _ = println_int b in
-;  >   let _ = println_int c in
-;  >   0
-;  > EOF
-;  ANF:
-;  let temp_match_0 =
-;         let a0 = [1; 2; 3] in
-;         let a4 = `list_len a0 in
-;         let a2 = ( = ) a4 3 in
-;         if a2 
-;         then a0 
-;         else panic ()
-;  let list_0 = temp_match_0
-;  let a = `list_field list_0 0
-;  let b = `list_field list_0 1
-;  let c = `list_field list_0 2
-;  let main =
-;    let a8 = println_int a in
-;    let a9 = println_int b in
-;    let a10 = println_int c in
-;    0
-;  
-;$ cat /tmp/lists.s
-;  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-;  $ /tmp/lists
-;  1
-;  2
-;  3
+  $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
+  > let [a; b; c] = [1; 2; 3]
+  > let main = 
+  >   let _ = println_int a in
+  >   let _ = println_int b in
+  >   let _ = println_int c in
+  >   0
+  > EOF
+  ANF:
+  let temp_match_0 =
+         let a0 = [1; 2; 3] in
+         let a4 = `list_len a0 in
+         let a2 = ( = ) a4 3 in
+         if a2 
+         then a0 
+         else panic ()
+  let list_0 = temp_match_0
+  let a = `list_field list_0 0
+  let b = `list_field list_0 1
+  let c = `list_field list_0 2
+  let main =
+    let a8 = println_int a in
+    let a9 = println_int b in
+    let a10 = println_int c in
+    0
+  
+$ cat /tmp/lists.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ /tmp/lists
+  1
+  2
+  3
 
