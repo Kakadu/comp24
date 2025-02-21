@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open AstLib.Ast
 
 (* todo WriterT? *)
@@ -176,16 +180,23 @@ let rec subst_eid (e : expr) (subst : (string * expr) list) : expr =
       , List.map (fun b -> substitute_branch b subst) brs )
 
 and substitute_decl (d : decl) (subst : (string * expr) list) : decl =
+  let bound = function
+    | POpPat (PId s) | POrOpConstraint (POpPat (PId s), _) -> [ s ]
+    | _ -> []
+  in
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
-    let bound =
-      match pat_or_op with
-      | POpPat (PId s) | POrOpConstraint (POpPat (PId s), _) -> [ s ]
-      | _ -> []
-    in
-    let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
+    let subst' = List.filter (fun (x, _) -> not (List.mem x @@ bound pat_or_op)) subst in
     DLet (rf, (pat_or_op, subst_eid expr subst'))
-  | _ -> failwith "todo pohui"
+  | DLetMut (rf, (pat_or_op, expr), (pat_or_op2, expr2), lbs) ->
+    let patterns = pat_or_op :: pat_or_op2 :: List.map fst lbs in
+    let bound = List.concat_map bound patterns in
+    let subst' = List.filter (fun (x, _) -> not (List.mem x bound)) subst in
+    DLetMut
+      ( rf
+      , (pat_or_op, subst_eid expr subst')
+      , (pat_or_op2, subst_eid expr2 subst')
+      , List.map (fun (p, e) -> p, subst_eid e subst') lbs )
 ;;
 
 let rec closure_convert_expr
@@ -256,14 +267,14 @@ let rec closure_convert_expr
     let* ce = closure_convert_expr global_env e rec_name in
     (* dirty hack for eliminating let a = expr in a *)
     (match cdecl, ce with
-    | DLet (_, (POpPat (PId name), body)), ((EId _ )) ->
-      let new_body = subst_eid ce [ name , body ] in
-      return new_body
-    (* let a = b in ...*)
-     | DLet (_, (POpPat (PId name), (EId _ as body))), _ -> 
-        let new_body = subst_eid ce [ name , body ] in
-        return new_body
-     | _  -> return (EClsr (cdecl, ce)))
+     | DLet (_, (POpPat (PId name), body)), EId _ ->
+       let new_body = subst_eid ce [ name, body ] in
+       return new_body
+     (* let a = b in ...*)
+     | DLet (_, (POpPat (PId name), (EId _ as body))), _ ->
+       let new_body = subst_eid ce [ name, body ] in
+       return new_body
+     | _ -> return (EClsr (cdecl, ce)))
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let closure_convert_branch env (br : branch) : branch cc =
@@ -283,8 +294,6 @@ let rec closure_convert_expr
     let* cbrs = conv_branches global_env brs in
     return (EMatch (ce, cbr, cbrs))
 
-(* ugly edge case *)
-(* THINK ABOUT OTHER RECURSIVE CASES TODO *)
 and closure_convert_let_in global_env (d : decl) : decl cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
@@ -300,9 +309,33 @@ and closure_convert_let_in global_env (d : decl) : decl cc =
         (if rf = Recursive then Some (List.hd (pattern_to_string pat_or_op)) else None)
     in
     return (DLet (Not_recursive, (pat_or_op, cexpr)))
-  | _ -> failwith "todo pohui"
+    (* non rf flag probably not supported*)
+  | DLetMut (rf, lb1, lb2, lbs) ->
+    let process_lb (p, e) global_env =
+      let rec_name = Some (List.hd (pattern_to_string p)) in
+      let* cexpr = closure_convert_expr global_env e rec_name in
+      return (p, cexpr)
+    in
+    let global_env =
+      let patterns = lb1 :: lb2 :: lbs |> List.map fst in
+      let patterns_to_string = List.concat_map pattern_to_string patterns in
+      StringSet.union global_env (StringSet.from_list patterns_to_string)
+    in
+    let* lb1 = process_lb lb1 global_env in
+    let* lb2 = process_lb lb2 global_env in
+    let rec conv lbs global_env =
+      match lbs with
+      | [] -> return []
+      | (pat, e) :: xs ->
+        let* clb = process_lb (pat, e) global_env in
+        let* clbs = conv xs global_env in
+        return (clb :: clbs)
+    in
+    let* lbs = conv lbs global_env in
+    return (DLetMut (rf, lb1, lb2, lbs))
+;;
 
-and common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
+let common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
   : (StringSet.t * let_body) cc
   =
   let _, body = get_efun_args_body (StringSet.elements global_env) expr in
@@ -317,8 +350,9 @@ and common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
     StringSet.union global_env (StringSet.from_list (pattern_to_string pat_or_op))
   in
   return (global_env, (pat_or_op, replace_fun_body body' expr))
+;;
 
-and closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
+let closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     let* global_env, lb = common_convert_decl global_env (rf, (pat_or_op, expr)) in

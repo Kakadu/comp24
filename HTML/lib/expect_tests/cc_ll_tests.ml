@@ -16,12 +16,10 @@ end
 
 let%expect_test "sanity check" =
   CcLlTests.cc_ll_test {|let test1 x = let test2 y = x + y in test2|};
-  [%expect
-    {|
+  [%expect {|
     let cc_ll_0 x y = (x + y);;
     let test1 x = (cc_ll_0 x) |}]
 ;;
-
 
 let%expect_test "sanity check" =
   CcLlTests.cc_ll_test
