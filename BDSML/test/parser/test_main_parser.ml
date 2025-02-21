@@ -23,13 +23,13 @@ m + let b = 6 in m + b
           ]
         ));
       (Str_value (Nonrecursive,
-         [(Pat_binding ((Pat_var "m"), (Exp_constant (Const_int 4))));
-           (Pat_binding ((Pat_var "mm"),
+         [(Val_binding ("m", [], (Exp_constant (Const_int 4))));
+           (Val_binding ("mm", [],
               (Exp_apply (
                  (Exp_apply ((Exp_ident "( + )"),
                     (Exp_apply ((Exp_constant (Const_int 6)), (Exp_ident "m"))))),
                  (Exp_let (Nonrecursive,
-                    [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
+                    [(Val_binding ("b", [], (Exp_constant (Const_int 6))))],
                     (Exp_apply (
                        (Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
                        (Exp_ident "b")))
@@ -60,13 +60,13 @@ m + let b = 6 in m + b ;;;;
           ]
         ));
       (Str_value (Nonrecursive,
-         [(Pat_binding ((Pat_var "m"), (Exp_constant (Const_int 4))));
-           (Pat_binding ((Pat_var "mm"), (Exp_constant (Const_int 6))))]
+         [(Val_binding ("m", [], (Exp_constant (Const_int 4))));
+           (Val_binding ("mm", [], (Exp_constant (Const_int 6))))]
          ));
       (Str_eval
          (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
             (Exp_let (Nonrecursive,
-               [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
+               [(Val_binding ("b", [], (Exp_constant (Const_int 6))))],
                (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
                   (Exp_ident "b")))
                ))
@@ -82,7 +82,7 @@ let%expect_test "let is an expression test" =
 
       [(Str_eval
           (Exp_let (Nonrecursive,
-             [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 1))))],
+             [(Val_binding ("a", [], (Exp_constant (Const_int 1))))],
              (Exp_ident "a"))))
         ] |}]
 ;;
@@ -93,6 +93,6 @@ let%expect_test "let is not an expression test" =
     {|
 
       [(Str_value (Nonrecursive,
-          [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 1))))]))
+          [(Val_binding ("a", [], (Exp_constant (Const_int 1))))]))
         ] |}]
 ;;

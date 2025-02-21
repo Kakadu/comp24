@@ -275,8 +275,8 @@ let%expect_test "test let several" =
   [%expect
     {|
     (Exp_let (Recursive,
-       [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 4))));
-         (Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
+       [(Val_binding ("a", [], (Exp_constant (Const_int 4))));
+         (Val_binding ("b", [], (Exp_constant (Const_int 6))))],
        (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "a"))),
           (Exp_ident "b")))
        ))
@@ -288,9 +288,9 @@ let%expect_test "test let in let" =
   [%expect
     {|
     (Exp_let (Nonrecursive,
-       [(Pat_binding ((Pat_var "a"),
+       [(Val_binding ("a", [],
            (Exp_let (Nonrecursive,
-              [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 4))))],
+              [(Val_binding ("b", [], (Exp_constant (Const_int 4))))],
               (Exp_ident "b")))
            ))
          ],
@@ -304,7 +304,7 @@ let%expect_test "test num + let" =
     {|
     (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 4)))),
        (Exp_let (Nonrecursive,
-          [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 5))))],
+          [(Val_binding ("a", [], (Exp_constant (Const_int 5))))],
           (Exp_ident "a")))
        ))
     |}]
