@@ -22,7 +22,7 @@ let rec unparse_expr ppf = function
       unparse_expr
       e
   | Exp_fun (pl, e) ->
-    fprintf ppf "fun %a -> %a" Pattern_unparser.unparse_pattern_list pl unparse_expr e
+    fprintf ppf "fun%a -> %a" Pattern_unparser.unparse_pattern_list pl unparse_expr e
   | Exp_function cl -> fprintf ppf "function %a" unparse_case_list cl
   | Exp_apply (e1, e2) -> fprintf ppf "%a %a" unparse_expr e1 unparse_apply_helper e2
   | Exp_match (e, cl) ->
@@ -41,7 +41,7 @@ and unparse_let_binding_list ppf l =
     | Pat_binding (p, e) ->
       fprintf ppf "%a = %a" Pattern_unparser.unparse_pattern p unparse_expr e
     | Val_binding (s, pl, e) ->
-      fprintf ppf "%s %a = %a" s Pattern_unparser.unparse_pattern_list pl unparse_expr e
+      fprintf ppf "%s%a = %a" s Pattern_unparser.unparse_pattern_list pl unparse_expr e
   in
   list_unparser ppf l ~f:unparse_let_binding ~s:" and "
 

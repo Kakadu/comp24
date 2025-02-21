@@ -5,10 +5,10 @@
 open Format
 open Parser.Ast
 
-let list_unparser ppf l ~f ~s =
+let list_unparser ?(add_before = false) ppf l ~f ~s =
   List.iteri
     (fun i x ->
-      if i <> 0 then fprintf ppf s else ();
+      if add_before || i <> 0 then fprintf ppf s else ();
       fprintf ppf "%a" f x)
     l
 ;;
