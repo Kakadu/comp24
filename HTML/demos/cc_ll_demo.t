@@ -112,8 +112,7 @@ PASS
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/009let_poly.ml
   let fun-0 x = x;;
-  let temp = let f = fun-0
-  in ((f 1), (f true))
+  let temp = ((fun-0 1), (fun-0 true))
 
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   let fun-0 self l li x = ((li (self l)) x);;
@@ -147,8 +146,7 @@ PASS
   let rec length xs = match xs with
   | [] -> 0
   | h :: tl -> (1 + (length tl));;
-  let length_tail = let helper = fun-0
-  in (helper 0);;
+  let length_tail = (fun-0 0);;
   let rec map f xs = match xs with
   | [] -> []
   | a :: [] -> (f a) :: []
@@ -158,8 +156,7 @@ PASS
   let rec append xs ys = match xs with
   | [] -> ys
   | x :: xs -> x :: ((append xs) ys);;
-  let concat = let helper = fun-1
-  in helper;;
+  let concat = fun-1;;
   let rec iter f xs = match xs with
   | [] -> ()
   | h :: tl -> let () = (f h)

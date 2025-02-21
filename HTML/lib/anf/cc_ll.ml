@@ -1,21 +1,5 @@
 open AstLib.Ast
 
-module StringSet = struct
-  type t = (string, Base.String.comparator_witness) Base.Set.t
-
-  let empty = Base.Set.empty (module Base.String)
-  let add = Base.Set.add
-  let remove = Base.Set.remove
-  let diff = Base.Set.diff
-  let singleton = Base.Set.add empty
-  let contains set key = Base.Set.mem set key
-  let union = Base.Set.union
-  let union_all = Base.Set.union_list (module Base.String)
-  let elements = Base.Set.to_list
-  let from_list = Base.Set.of_list (module Base.String)
-  let is_empty = Base.Set.is_empty
-end
-
 (* todo WriterT? *)
 module CounterWriterMonad = struct
   type 'a cc = int -> 'a * int * decl list
@@ -40,24 +24,13 @@ module CounterWriterMonad = struct
 end
 
 open CounterWriterMonad
+open Utils
 
 let ident_to_string (id : ident) : string =
   match id with
   | IdentOfDefinable (IdentLetters s) -> s
   | IdentOfDefinable (IdentOp s) -> s
   | IdentOfBaseOp _ -> failwith "base operator is not a variable"
-;;
-
-let rec bound_vars_pattern (pat : pattern) : string list =
-  match pat with
-  | PConstraint (p, _) -> bound_vars_pattern p
-  | PId s -> [ s ]
-  | PTuple (p1, p2, ps) ->
-    bound_vars_pattern p1
-    @ bound_vars_pattern p2
-    @ List.concat (List.map bound_vars_pattern ps)
-  | PList (p1, p2) -> bound_vars_pattern p1 @ bound_vars_pattern p2
-  | PConst _ -> []
 ;;
 
 let rec pattern_to_string (pat : pattern_or_op) : string list =
@@ -279,7 +252,16 @@ let rec closure_convert_expr
   | EClsr (decl, e) ->
     let* cdecl = closure_convert_let_in global_env decl in
     let* ce = closure_convert_expr global_env e rec_name in
-    return (EClsr (cdecl, ce))
+    (* dirty hack for eliminating let a = expr in a *)
+    (match cdecl, ce with
+    | DLet (_, (POpPat (PId name), body)), ((EId _ )) ->
+      let new_body = subst_eid ce [ name , body ] in
+      return new_body
+    (* let a = b in ...*)
+     | DLet (_, (POpPat (PId name), (EId _ as body))), _ -> 
+        let new_body = subst_eid ce [ name , body ] in
+        return new_body
+     | _  -> return (EClsr (cdecl, ce)))
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let closure_convert_branch env (br : branch) : branch cc =
