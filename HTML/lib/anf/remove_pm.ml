@@ -103,11 +103,6 @@ module RuntimeEnv = struct
     }
 
   let apply f x =
-    let get_res_typ = function
-      | TArr (_, x) -> return x
-      | _ -> fail "Incorrect type of function"
-    in
-    let* res_typ = get_res_typ f.typ in
     return @@ e_typed (eapp (e_typed (eid (ident_of_definable (ident_letters f.name)))) x)
   ;;
 
@@ -219,7 +214,7 @@ let remove_pm =
           let pat = pid key in
           let pat =
             match data with
-            | NoPMEConstraint (_, typ) as ec -> p_typed ~typ:(Some typ) pat
+            | NoPMEConstraint (_, typ) -> p_typed ~typ:(Some typ) pat
             | _ -> pat
           in
           let decl = dlet Not_recursive (pop_pat pat, data) in
