@@ -18,8 +18,8 @@ let%expect_test "sanity check" =
   CcLlTests.cc_ll_test {|let test1 x = let test2 y = x + y in test2|};
   [%expect
     {|
-    let fun-0 x y = (x + y);;
-    let test1 x = (fun-0 x) |}]
+    let cc_ll_0 x y = (x + y);;
+    let test1 x = (cc_ll_0 x) |}]
 ;;
 
 
@@ -33,8 +33,8 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let fun-0 n cont acc = cont (n * acc);;
-    let rec fact_cps n cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) ((fun-0 n) cont)) |}]
+    let cc_ll_0 n cont acc = cont (n * acc);;
+    let rec fact_cps n cont = if (n = 0) then (cont 1) else (fact_cps (n - 1) ((cc_ll_0 n) cont)) |}]
 ;;
 
 let%expect_test "sanity check" =
@@ -45,11 +45,11 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let fun-0 nested3 nested2 i = (nested2 + nested3);;
-    let fun-1 nested3 nested2 x = (x + (((fun-0 nested3) nested2) 8));;
+    let cc_ll_0 nested3 nested2 i = (nested2 + nested3);;
+    let cc_ll_1 nested3 nested2 x = (x + (((cc_ll_0 nested3) nested2) 8));;
     let nested1 = let nested2 = 5
     in let nested3 = 6
-    in let nested4 = ((fun-1 nested3) nested2)
+    in let nested4 = ((cc_ll_1 nested3) nested2)
     in (nested4 55) |}]
 ;;
 
@@ -66,10 +66,10 @@ let%expect_test "sanity check" =
 |};
   [%expect
     {|
-    let rec fun-0 acc xs = match xs with
+    let rec cc_ll_0 acc xs = match xs with
     | [] -> acc
-    | h :: tl -> (fun-0 (acc + 1) tl);;
-    let length_tail = (fun-0 0) |}]
+    | h :: tl -> (cc_ll_0 (acc + 1) tl);;
+    let length_tail = (cc_ll_0 0) |}]
 ;;
 
 let%expect_test "sanity check" =
