@@ -95,6 +95,15 @@ and infer_let env rec_flag bindings expression =
   let+ sub = Subst.compose sub1 sub2 in
   sub, ty
 
+and infer_apply env left right =
+  let* s1, t1 = infer_expression env left in
+  let* s2, t2 = infer_expression (TypeEnv.apply s1 env) right in
+  let* fv = fresh_var in
+  let* s3 = Subst.unify (Subst.apply s2 t1) (TArrow (t2, fv)) in
+  let ty = Subst.apply s3 fv in
+  let+ sub = Subst.compose_all [ s3; s2; s1 ] in
+  sub, ty
+
 and infer_expression env expr =
   let rec helper env = function
     | Exp_constant c -> infer_base_type c
@@ -103,6 +112,7 @@ and infer_expression env expr =
     | Exp_fun (vars, exp) -> infer_fun env vars exp
     | Exp_let (rec_flag, bindings, expression) ->
       infer_let env rec_flag bindings expression
+    | Exp_apply (l, r) -> infer_apply env l r
     | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
   in
   helper env expr
