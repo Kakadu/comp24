@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Lib
 
@@ -17,6 +16,7 @@ let compile code =
      | Error e -> failwith (Format.asprintf "%a" Pp_typing.pp_error e)
      | Ok ast ->
        ast
+       |> Tast.strip_types_program
        |> Remove_patterns.remove_patterns
        |> Remove_match.remove_match
        |> Closure_conversion.closure_conversion
@@ -36,3 +36,4 @@ let () =
   | Error e -> print_endline e
   | Ok _ -> ()
 ;;
+

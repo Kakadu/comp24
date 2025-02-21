@@ -119,3 +119,66 @@
   $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
   120
+
+
+  $ dune exec riscv -- -anf -o /tmp/factorial.s <<- EOF
+  > let fact n =
+  >   let rec helper n cont =
+  >     if n <= 1 then 
+  >       cont 1
+  >     else 
+  >       helper (n - 1) (fun res -> cont (n * res)) 
+  >   in 
+  >   helper n (fun x -> x)
+  > let main = println_int (fact 5)
+  > EOF
+  ANF:
+  let `ll_2 cont n res = let a1 = ( * ) n res in
+         cont a1
+  let `helper_1 n cont =
+    let a3 = ( <= ) n 1 in
+    if a3 
+    then cont 1 
+    else let a6 = ( - ) n 1 in
+      let a7 = `ll_2 cont n in
+      `helper_1 a6 a7
+  let `ll_3 x = x
+  let fact n = `helper_1 n `ll_3
+  let main = let a11 = fact 5 in
+    println_int a11
+  
+  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ /tmp/factorial
+  120
+
+
+  $ dune exec riscv -- -o /tmp/factorial.s <<- EOF
+  > let fib n =
+  >   let rec helper acc n =
+  >     match (n, acc) with
+  >     | (0, x :: _) -> x
+  >     | (_, x :: y :: _) -> helper ((x + y) :: acc) (n - 1)
+  >     | _ -> -1
+  >   in
+  >   helper [ 1; 1 ] (n - 2)
+  > let main = 
+  >   let _ = println_int (fib 3) in
+  >   let _ = println_int (fib 4) in
+  >   let _ = println_int (fib 5) in
+  >   let _ = println_int (fib 6) in
+  >   let _ = println_int (fib 7) in
+  >   let _ = println_int (fib 8) in
+  >   let _ = println_int (fib 9) in
+  >   let _ = println_int (fib 10) in
+  >   ()
+  > EOF
+  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ /tmp/factorial
+  2
+  3
+  5
+  8
+  13
+  21
+  34
+  55
