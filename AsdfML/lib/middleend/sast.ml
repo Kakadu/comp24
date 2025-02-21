@@ -25,7 +25,14 @@ type sprogram = sdefinition list [@@deriving show { with_path = false }]
 let s_const c = SConst c
 let s_var x = SVar x
 let s_app f x = SApp (f, x)
-let s_if_else cond e_true e_false = SIfElse (cond, e_true, e_false)
+
+let s_if_else cond e_true e_false =
+  match cond with
+  | SConst (CBool true) -> e_true
+  | SConst (CBool false) -> e_false
+  | _ -> SIfElse (cond, e_true, e_false)
+;;
+
 let s_fun p ps e = SFun (p, ps, e)
 let s_let_in def e = SLetIn (def, e)
 let s_tuple e1 e2 es = STuple (e1, e2, es)
@@ -78,5 +85,4 @@ and pp_sdef fmt = function
 
 let pp_program fmt p =
   Base.List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_sdef d);
-  fprintf fmt "@."
 ;;

@@ -27,10 +27,6 @@ let tuple_field lst idx =
   s_app (s_app (s_var "`get_tuple_field") lst) (s_const (CInt idx))
 ;;
 
-let check_tuple_len tup len =
-  check_eq (s_app (s_var "`tuple_len") tup) (s_const (CInt len))
-;;
-
 let check_list_len lst len = check_eq (s_app (s_var "`list_len") lst) (s_const (CInt len))
 let list_field lst idx = s_app (s_app (s_var "`list_field") lst) (s_const (CInt idx))
 let list_hd lst = s_app (s_var "`list_hd") lst
@@ -111,8 +107,7 @@ let remove_match prog =
         | PConst CNil -> list_is_empty match_exp
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
-          let check_len = check_tuple_len match_exp (List.length xs) in
-          List.foldi xs ~init:check_len ~f:(fun idx acc x ->
+          List.foldi xs ~init:true_ ~f:(fun idx acc x ->
             let cond = case_matched (tuple_field match_exp idx) x in
             and_ acc cond)
         | PList xs ->
@@ -160,7 +155,7 @@ let remove_match prog =
       in
       gen_match Fn.id cases
   and helper_def ?(top = false) = function
-    | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"`temp_match" ->
+    | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"#temp_match" ->
       let* e' = helper_expr e in
       let match_, binds =
         match e' with
@@ -171,7 +166,15 @@ let remove_match prog =
           in
           let binds, e = extract_binds [] binds in
           s_let (pat_as_id p) (s_let_in bind_exp (s_if_else cond e panic)), binds
-        | _ -> failwith (Format.asprintf "expected if-else, got %a\n" Sast.pp_sexpr e')
+        | SLetIn ((SLet _ as bind_exp), (SLetIn _ as binds)) ->
+          (* TODO:  *)
+          let rec extract_binds acc = function
+            | SLetIn (d, e) -> extract_binds (d :: acc) e
+            | e -> List.rev acc, e
+          in
+          let binds, e = extract_binds [] binds in
+          s_let (pat_as_id p) (s_let_in bind_exp e), binds
+        | _ -> failwith (Format.asprintf "remove_match: unexpected expr %a\n" Sast.pp_sexpr e')
       in
       return (match_ :: binds)
     | DLet (r, p, e) ->
