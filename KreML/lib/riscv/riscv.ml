@@ -9,6 +9,7 @@ type reg =
 let temp idx = Temp idx
 let saved idx = Saved idx
 let arg idx = Arg idx
+let fp = Saved 0
 let is_saved =
   function
   | Saved _ -> true
@@ -92,8 +93,10 @@ module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = st
   let fold = List.fold_left
   let empty = []
   let to_list = Fun.id
-  (* let available = List.init 7 (fun i -> Temp i) *)
 end
+
+let available_regs = List.init 8 temp @ List.init 12 saved
+
 
 let pp_reg fmt =
   let open Format in
@@ -163,3 +166,23 @@ let pp_insn fmt =
   | Pseudo p -> fprintf fmt "@[%s@]@." p
   | Label l -> fprintf  fmt "@[%s:@]@." l
 ;;
+
+module Pseudo = struct
+  open Format
+  let mv ~rd ~src =
+    let insn = asprintf "mv %a, %a" pp_reg rd pp_reg src in
+    Pseudo insn
+  let li rd imm =
+    let insn = asprintf "li %a, %i" pp_reg rd imm in
+    Pseudo insn
+  let neg r =
+    let insn = asprintf "neg %a" pp_reg r in
+    Pseudo insn
+
+  let seqz ~rd ~src =
+    let insn = asprintf "seqz %a, %a" pp_reg rd pp_reg src in
+    Pseudo insn
+
+  let call label = Pseudo label
+  let ret = Pseudo "ret"
+end

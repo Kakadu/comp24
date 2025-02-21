@@ -9,6 +9,7 @@ type reg =
 val temp : int -> reg
 val saved : int -> reg
 val arg : int -> reg
+val fp: reg
 val is_saved : reg -> bool
 
 type op =
@@ -25,7 +26,7 @@ type op =
   | SRL
   | SUB
   | SRA
-  (* I-type *)
+  (* I-type *) (* reg < imm*) (* reg > imm ?*)
   | ADDI
   | SLTI
   | SLTIU
@@ -73,11 +74,22 @@ val lw : rd:reg -> int -> src:reg -> instruction
 
 module RegistersStorage : sig
   include Registers_storage_intf.S with type 'a t = 'a list
-  (* val available :  reg t *)
 end
+
+val available_regs : reg list
+
 
 val pp_reg : Format.formatter -> reg -> unit
 val pp_op : Format.formatter -> op -> unit
 val pp_insn : Format.formatter -> instruction -> unit
+
+module Pseudo : sig
+  val mv: rd:reg -> src:reg -> instruction
+  val li: reg -> int -> instruction
+  val neg: reg -> instruction
+  val seqz : rd:reg -> src:reg -> instruction
+  val call: string -> instruction
+  val ret: instruction
+end
 
 
