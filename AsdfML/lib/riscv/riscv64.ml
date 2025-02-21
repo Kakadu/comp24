@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Anf_ast
 open Machine
@@ -38,6 +37,7 @@ let counter_next () =
    - gen_imm may rewrite a0 a1 a2
    - direct math should check if ops were redefined
 *)
+let remove_grave = String.substr_replace_all ~pattern:"`" ~with_:""
 
 type const =
   | NoInit of id * imm_expr
@@ -56,7 +56,7 @@ let rec gen_imm fn_args env dest = function
        emit la t1 id;
        emit_load_2 (AsmReg dest) (AsmReg (Offset (t1, 0)))
      | Some n_args ->
-       let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
+       let id = remove_grave id in
        emit comment (Format.sprintf "Creating closure for %s" id);
        let x = emit_fn_call "create_closure" [ AsmFn id; AsmInt n_args ] in
        emit_load dest (AsmReg x) ~comm:id
@@ -68,7 +68,8 @@ let rec gen_imm fn_args env dest = function
   | ImmNil ->
     let list = emit_fn_call "ml_create_list" [] in
     emit_load dest (AsmReg list)
-  | ImmTuple xs ->
+  | ImmTuple (x1, x2, xs) ->
+    let xs = x1 :: x2 :: xs in
     let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length xs) ] in
     let tuple = emit_store tuple ~comm:"tuple" in
     List.iteri xs ~f:(fun i x ->
@@ -169,7 +170,7 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
          | Some 0 -> true
          | _ -> false -> ()
   | Fn (id, args, aexpr) ->
-    let id = String.substr_replace_all id ~pattern:"`" ~with_:"" in
+    let id = remove_grave id in
     (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
     (* let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in *)
     (*  *)
@@ -246,7 +247,8 @@ let init_env ast =
   in
   let env =
     stdlib @ runtime
-    |> List.fold ~init:env ~f:(fun env x -> Map.set env ~key:x.extern ~data:x.arity)
+    |> List.fold ~init:env ~f:(fun env x ->
+      Map.set env ~key:x.extern ~data:(Types.count_arrow_args x.typ))
   in
   env
 ;;
