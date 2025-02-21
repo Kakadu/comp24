@@ -13,8 +13,6 @@ open State.IntStateM.Syntax
 
 (* Replaces complex patterns with explicit pattern-matching *)
 
-(* TODO: constant pattens? *)
-
 let list_field lst idx = e_app (e_app (e_var "`list_field") lst) (e_const (CInt idx))
 let list_hd lst = e_app (e_var "`list_hd") lst
 let list_tl lst = e_app (e_var "`list_tl") lst
@@ -28,34 +26,38 @@ let is_simple = function
   | _ -> false
 ;;
 
-let remove_argument_patterns body pattern_list =
+let remove_argument_patterns body pattern pattern_list =
   let generate_arg_name used_names =
     let rec find_unique () =
-      let* cnt = fresh_postfix in
-      let current_name = "`arg" ^ cnt in
+      let* current_name = fresh_prefix "`arg" in
       match Set.find used_names ~f:(String.equal current_name) with
       | None -> return current_name
       | _ -> find_unique ()
     in
     run (find_unique ())
   in
-  let rec helper used_names current_expr args_list = function
-    | head :: tail ->
-      (match head with
-       | PIdent id -> helper (Set.add used_names id) current_expr (id :: args_list) tail
-       | PWild -> helper used_names current_expr ("_" :: args_list) tail
-       | _ ->
-         let arg_name = generate_arg_name used_names in
-         helper
-           (Set.add used_names arg_name)
-           (e_match (e_var arg_name) [ head, current_expr ])
-           (arg_name :: args_list)
-           tail)
-    | _ -> List.rev args_list, current_expr
+  let helper (used_names, current_expr) pattern =
+    match pattern with
+    | PIdent id -> Set.add used_names id, current_expr, pattern
+    | PWild -> used_names, current_expr, pattern
+    | _ ->
+      let arg_name = generate_arg_name used_names in
+      ( Set.add used_names arg_name
+      , e_match (e_var arg_name) [ pattern, current_expr ]
+      , p_ident arg_name )
   in
   let used_names = vars_expr body in
-  let ids, exp = helper used_names body [] pattern_list in
-  List.map ids ~f:p_ident, exp
+  let used_names, exp, pattern' = helper (used_names, body) pattern in
+  let _, exp, pattern_list' =
+    List.fold_right
+      ~f:(fun x acc ->
+        let used_names, exp, pattern_list = acc in
+        let used_names, current_expr, pattern' = helper (used_names, exp) x in
+        used_names, current_expr, pattern' :: pattern_list)
+      ~init:(used_names, exp, [])
+      pattern_list
+  in
+  pattern', pattern_list', exp
 ;;
 
 let remove_patterns =
@@ -66,13 +68,7 @@ let remove_patterns =
     | EIfElse (i, t, e) -> e_if_else (helper_expr i) (helper_expr t) (helper_expr e)
     | EFun (p, ps, e) ->
       let e = helper_expr e in
-      let ps, e = remove_argument_patterns e (p :: ps) in
-      (* TODO: *)
-      let p, ps =
-        match ps with
-        | hd :: tl -> hd, tl
-        | _ -> failwith "no args"
-      in
+      let p, ps, e = remove_argument_patterns e p ps in
       e_fun p ps e
     | ELetIn (def, body) ->
       let body = helper_expr body in

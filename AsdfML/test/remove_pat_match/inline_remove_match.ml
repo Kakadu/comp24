@@ -316,3 +316,52 @@ let%expect_test _ =
        (helper 0 list))
     |}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let f x = match x with
+    | 0 -> 0
+    | x -> x
+    | _ -> 42
+    | 2 -> 2
+    | 3 -> 3
+  |};
+  [%expect
+    {|
+    let f = (fun x -> if (( = ) x 0)
+       then 0
+       else let x = x in
+         x)
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let f x = match x with
+    | [1] -> 1
+    | [x] -> x
+    | hd :: tl -> hd
+    | _ -> 42
+    | [] -> 0
+  |};
+  [%expect
+    {|
+    let f = (fun x ->
+       if (( && ) (( = ) (`list_len x) 1) (( = ) (`list_field x 0) 1))
+       then let `list_1 = x in
+         1
+       else
+         if (( = ) (`list_len x) 1)
+         then let `list_0 = x in
+           let x = (`list_field `list_0 0) in
+           x
+         else
+           if (not (`list_is_empty x))
+           then let hd = (`list_hd x) in
+             let tl = (`list_tl x) in
+             hd
+           else 42)
+    |}]
+;;

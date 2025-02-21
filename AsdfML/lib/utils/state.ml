@@ -38,7 +38,7 @@ module IntStateM = struct
   type 'a t = (int, 'a) StateM.t
 
   let fresh last = last, last + 1
-  let fresh_postfix last = "_" ^ string_of_int last, last + 1
+  let fresh_prefix str last = str ^ "_" ^ string_of_int last, last + 1
   let run m = fst (m 0)
 end
 

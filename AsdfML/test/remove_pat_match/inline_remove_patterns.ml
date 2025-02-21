@@ -124,6 +124,18 @@ let%expect_test _ =
        | (x, y) -> (( + ) x y)
     |}]
 ;;
+let%expect_test _ =
+  test {|
+    let _ = 
+      let [x; y] = [1; 2] in
+      x + y
+  |};
+  [%expect
+    {|
+    let _ = match [1; 2] with
+       | [x; y] -> (( + ) x y)
+    |}]
+;;
 
 let%expect_test _ =
   test
@@ -201,3 +213,4 @@ let%expect_test _ =
            (x, y, z))))
     |}]
 ;;
+

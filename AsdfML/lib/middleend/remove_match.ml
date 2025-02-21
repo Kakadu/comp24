@@ -87,14 +87,14 @@ let remove_match prog =
         | PIdent id -> s_let_in (s_let id match_exp) action |> return
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
-          let* tuple_id = fresh_postfix >>| fun f -> "`tuple" ^ f in
+          let* tuple_id = fresh_prefix "`tuple"  in
           let* body =
             State.mfoldi_right xs ~init:action ~f:(fun idx acc x ->
               bind_pat_vars (tuple_field (s_var tuple_id) idx) x acc)
           in
           s_let_in (s_let tuple_id match_exp) body |> return
         | PList xs ->
-          let* list_id = fresh_postfix >>| fun f -> "`list" ^ f in
+          let* list_id = fresh_prefix "`list" in
           let* body =
             State.mfoldi_right xs ~init:action ~f:(fun idx action x ->
               bind_pat_vars (list_field (s_var list_id) idx) x action)
@@ -142,15 +142,19 @@ let remove_match prog =
           else (
             let catch_all = panic () in
             let* then_branch = bind_pat_vars match_exp pat action in
-            cont (return (s_if_else (case_matched match_exp pat) then_branch catch_all)))
+            let cond = case_matched match_exp pat in
+            cont (return (s_if_else (cond) then_branch catch_all)))
         | _ ->
           gen_match
             ~has_catch_all
             (fun else_branch ->
               let* then_branch = bind_pat_vars match_exp pat action in
               let* else_branch = else_branch in
-              cont
-                (return (s_if_else (case_matched match_exp pat) then_branch else_branch)))
+              let cond = case_matched match_exp pat in
+              match cond with
+              | SConst (CBool true) -> return then_branch |> cont
+              | SConst (CBool false) -> return else_branch |> cont
+              | _ -> cont (return (s_if_else cond then_branch else_branch)))
             tl_cases
       in
       gen_match Fn.id cases
