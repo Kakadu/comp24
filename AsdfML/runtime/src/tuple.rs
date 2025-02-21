@@ -23,7 +23,10 @@ pub unsafe extern "C" fn ml_set_tuple_field(tuple_ptr: *mut Tuple, idx: usize, v
 pub unsafe extern "C" fn ml_get_tuple_field(tuple_ptr: *const Tuple, idx: usize) -> isize {
     Box::with_raw_ref(tuple_ptr, |tuple| {
         debug!("Getting {} of {:?} at {:?}", idx, tuple, tuple_ptr);
-        tuple[idx]
+        tuple
+            .get(idx)
+            .expect(&format!("Index {} is out of bounds for tuple {:?}", idx, tuple))
+            .clone()
     })
 }
 
