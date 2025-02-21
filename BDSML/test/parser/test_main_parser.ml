@@ -48,7 +48,8 @@ let m = 4
 and mm = 6;;
 m + let b = 6 in m + b ;;;;
 |};
-  [%expect {|
+  [%expect
+    {|
 
       [(Str_value (Nonrecursive,
           [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
@@ -72,5 +73,27 @@ m + let b = 6 in m + b ;;;;
                       ))
                    ])
               )))
+        ] |}]
+;;
+
+let%expect_test "let is an expression test" =
+  test_parser "let a = 1 in a";
+  [%expect
+    {|
+
+      [(Str_eval
+          (Exp_let (Nonrecursive,
+             [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 1))))],
+             (Exp_ident "a"))))
+        ] |}]
+;;
+
+let%expect_test "let is not an expression test" =
+  test_parser "let a = 1";
+  [%expect
+    {|
+
+      [(Str_value (Nonrecursive,
+          [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 1))))]))
         ] |}]
 ;;
