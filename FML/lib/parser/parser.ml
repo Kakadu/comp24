@@ -206,11 +206,6 @@ let parse_etuple p_expr =
   parens @@ lift2 (fun h tl -> etuple (h :: tl)) p_expr (many1 (token "," *> p_expr))
 ;;
 
-let parse_eunop p_expr =
-  let* op = token "not" *> return Not <|> token "-" *> return Minus in
-  p_expr >>| fun expr -> EUnOp (op, expr)
-;;
-
 let parse_efun p_expr =
   let* args = token "fun" *> many1 parse_pattern in
   let* expr = token "->" *> p_expr in
@@ -219,13 +214,13 @@ let parse_efun p_expr =
   | _ -> fail "Syntax errror"
 ;;
 
-let rec parse_bundle pexpr =
+(* let rec parse_bundle pexpr =
   let expr_with_pattern =
     parse_pattern
     >>= fun pat -> parse_bundle pexpr <|> token "=" *> pexpr >>| fun e -> EFun (pat, e)
   in
   expr_with_pattern
-;;
+;; *)
 
 let parse_eif arg =
   skip_wspace

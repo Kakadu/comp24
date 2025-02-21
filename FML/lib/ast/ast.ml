@@ -14,11 +14,6 @@ type rec_flag =
   | NoRec
 [@@deriving show { with_path = false }]
 
-type un_op =
-  | Minus
-  | Not
-[@@deriving show { with_path = false }]
-
 type type_annotation =
   | AUnit
   | AInt
@@ -41,8 +36,8 @@ type pattern =
 
 type expression =
   | ENill
+  | EConstraint of expression * type_annotation
   | EConst of const
-  | EUnOp of un_op * expression
   | EIdentifier of id
   | EApplication of expression * expression (** E1 E2*)
   | EFun of pattern * expression (** fun P -> E*)

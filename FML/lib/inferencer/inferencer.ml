@@ -559,9 +559,15 @@ let start_env =
     ; "( = )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ]
   in
+  let un_op_list =
+    [ "( ~- )", TFunction (TInt, TInt); "not", TFunction (TBool, TBool) ]
+  in
   let env = TypeEnv.empty in
   let bind env id typ = TypeEnv.extend env id (generalize env typ) in
-  Base.List.fold_left bin_op_list ~init:env ~f:(fun env (id, typ) -> bind env id typ)
+  Base.List.fold_left
+    (List.append bin_op_list un_op_list)
+    ~init:env
+    ~f:(fun env (id, typ) -> bind env id typ)
 ;;
 
 let infer_program program =

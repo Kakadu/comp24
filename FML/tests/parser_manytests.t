@@ -497,7 +497,7 @@
     ]
 
   $ ./parser_runner.exe < manytests/typed/007order.ml
-  Error: : no more choices
+  Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/008ascription.ml
   Error: : no more choices
@@ -515,7 +515,7 @@
     ]
 
   $ ./parser_runner.exe < manytests/typed/010sukharev.ml
-  Error: : no more choices
+  Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/015tuples.ml
   [(SingleDecl
