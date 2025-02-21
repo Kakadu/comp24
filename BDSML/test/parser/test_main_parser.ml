@@ -16,28 +16,30 @@ m + let b = 6 in m + b
   [%expect
     {|
     [(Str_value (Nonrecursive,
-        [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
-            (Exp_apply ((Exp_ident "-"),
-               (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
+        [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
+            (Exp_apply ((Exp_apply ((Exp_ident "( - )"), (Exp_ident "a"))),
+               (Exp_ident "b")))
             ))
           ]
         ));
       (Str_value (Nonrecursive,
          [(Pat_binding ((Pat_var "m"), (Exp_constant (Const_int 4))));
-           (Pat_binding ((Pat_var "mm"), (Exp_constant (Const_int 6))))]
-         ));
-      (Str_eval
-         (Exp_apply ((Exp_ident "+"),
-            (Exp_tuple
-               [(Exp_ident "m");
+           (Pat_binding ((Pat_var "mm"),
+              (Exp_apply (
+                 (Exp_apply ((Exp_ident "( + )"),
+                    (Exp_apply ((Exp_constant (Const_int 6)), (Exp_ident "m"))))),
                  (Exp_let (Nonrecursive,
                     [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
-                    (Exp_apply ((Exp_ident "+"),
-                       (Exp_tuple [(Exp_ident "m"); (Exp_ident "b")])))
+                    (Exp_apply (
+                       (Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
+                       (Exp_ident "b")))
                     ))
-                 ])
-            )))
-      ] |}]
+                 ))
+              ))
+           ]
+         ))
+      ]
+    |}]
 ;;
 
 let%expect_test "some beautiful test with semicolon" =
@@ -50,30 +52,27 @@ m + let b = 6 in m + b ;;;;
 |};
   [%expect
     {|
-
-      [(Str_value (Nonrecursive,
-          [(Val_binding ("+", [(Pat_var "a"); (Pat_var "b")],
-              (Exp_apply ((Exp_ident "-"),
-                 (Exp_tuple [(Exp_ident "a"); (Exp_ident "b")])))
-              ))
-            ]
-          ));
-        (Str_value (Nonrecursive,
-           [(Pat_binding ((Pat_var "m"), (Exp_constant (Const_int 4))));
-             (Pat_binding ((Pat_var "mm"), (Exp_constant (Const_int 6))))]
-           ));
-        (Str_eval
-           (Exp_apply ((Exp_ident "+"),
-              (Exp_tuple
-                 [(Exp_ident "m");
-                   (Exp_let (Nonrecursive,
-                      [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
-                      (Exp_apply ((Exp_ident "+"),
-                         (Exp_tuple [(Exp_ident "m"); (Exp_ident "b")])))
-                      ))
-                   ])
-              )))
-        ] |}]
+    [(Str_value (Nonrecursive,
+        [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
+            (Exp_apply ((Exp_apply ((Exp_ident "( - )"), (Exp_ident "a"))),
+               (Exp_ident "b")))
+            ))
+          ]
+        ));
+      (Str_value (Nonrecursive,
+         [(Pat_binding ((Pat_var "m"), (Exp_constant (Const_int 4))));
+           (Pat_binding ((Pat_var "mm"), (Exp_constant (Const_int 6))))]
+         ));
+      (Str_eval
+         (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
+            (Exp_let (Nonrecursive,
+               [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
+               (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
+                  (Exp_ident "b")))
+               ))
+            )))
+      ]
+    |}]
 ;;
 
 let%expect_test "let is an expression test" =
