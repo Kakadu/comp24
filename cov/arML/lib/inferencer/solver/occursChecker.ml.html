@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>occursChecker.ml &mdash; Coverage report</title>
+    <meta name="description" content="88.89% coverage in lib/inferencer/solver/occursChecker.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/inferencer/solver/</span>occursChecker.ml
+        </a>
+      </h1>
+      <h2>88.89%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="bottom:13.33%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="some-visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open TypeTree
+
+(*** Checks whether the passed type variable is contained in the passed type. *)
+let rec occurs_check v = function
+  | <span data-count="1862">T</span>Var b -&gt; b = v
+  | <span data-count="3268">T</span>Arr (left, right) -&gt; occurs_chec<span data-count="3268">k</span> v lef<span data-count="1">t</span> || occurs_check v right
+  | <span data-count="646">T</span>List typ -&gt; occurs_check v typ
+  | <span data-count="211">T</span>Tuple typ_list -&gt;
+    List.fold_left (fun acc item -&gt; <span data-count="424">a</span>c<span data-count="0">c</span> || occurs_check v item) false typ_list
+  | <span data-count="7324">T</span>Ground _ -&gt; false
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>identifierSubstitutor.ml &mdash; Coverage report</title>
+    <meta name="description" content="73.13% coverage in lib/middleend/utils/identifierSubstitutor.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/utils/</span>identifierSubstitutor.ml
+        </a>
+      </h1>
+      <h2>73.13%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:44.33%"></span>
+      <span class="unvisited" style="bottom:47.42%"></span>
+      <span class="unvisited" style="bottom:43.30%"></span>
+      <span class="unvisited" style="bottom:42.27%"></span>
+      <span class="unvisited" style="bottom:41.24%"></span>
+      <span class="unvisited" style="bottom:37.11%"></span>
+      <span class="unvisited" style="bottom:9.28%"></span>
+      <span class="unvisited" style="bottom:7.22%"></span>
+      <span class="unvisited" style="bottom:6.19%"></span>
+      <span class="unvisited" style="bottom:5.15%"></span>
+      <span class="unvisited" style="bottom:3.09%"></span>
+      <span class="unvisited" style="bottom:2.06%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="unvisited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="unvisited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span class="unvisited"> </span>
+<a id="L91"></a><span class="unvisited"> </span>
+<a id="L92"></a><span class="unvisited"> </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span class="unvisited"> </span>
+<a id="L95"></a><span class="unvisited"> </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
+<a href="#L95">95</a>
+<a href="#L96">96</a>
+<a href="#L97">97</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Ast.AbstractSyntaxTree
+open Common.IdentifierStructs
+open IdentifierSearcher
+
+let rec substitute_identifiers replacement_map expr =
+  <span data-count="2235">m</span>atch expr with
+  | <span data-count="1193">E</span>Identifier id -&gt;
+    (match IdentifierMap.find_opt id replacement_map with
+     | <span data-count="146">S</span>ome new_id -&gt; EIdentifier new_id
+     | <span data-count="1047">N</span>one -&gt; expr)
+  | <span data-count="104">E</span>Fun ((p, ps), body) -&gt;
+    let patterns_identifiers =
+      List.fold_left
+        (fun acc p -&gt; <span data-count="220">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="220">s</span> p))
+        IdentifierSet.empty
+        (p :: ps)
+    in
+    <span data-count="104">l</span>et body' =
+      substitute_identifiers
+        (remove_keys_from_ma<span data-count="104">p</span> patterns_identifiers replacement_map)
+        body
+    in
+    <span data-count="104">E</span>Fun ((p, ps), body')
+  | <span data-count="609">E</span>Application (f, arg1, args) -&gt;
+    let f' = substitute_identifiers replacement_map f in
+    <span data-count="609">l</span>et arg1' = substitute_identifiers replacement_map arg1 in
+    <span data-count="609">l</span>et args' = List.map (substitute_identifier<span data-count="609">s</span> replacement_map) args in
+    <span data-count="609">E</span>Application (f', arg1', args')
+  | <span data-count="19">E</span>ListConstructor (l, r) -&gt;
+    let l = substitute_identifiers replacement_map l in
+    <span data-count="19">l</span>et r = substitute_identifiers replacement_map r in
+    <span data-count="19">E</span>ListConstructor (l, r)
+  | <span data-count="26">E</span>IfThenElse (cond, b1, b2) -&gt;
+    let cond = substitute_identifiers replacement_map cond in
+    <span data-count="26">l</span>et b1 = substitute_identifiers replacement_map b1 in
+    <span data-count="26">l</span>et b2 =
+      match b2 with
+      | <span data-count="26">S</span>ome b2 -&gt; Some (substitute_identifier<span data-count="26">s</span> replacement_map b2)
+      | <span data-count="0">N</span>one -&gt; None
+    in
+    EIfThenElse (cond, b1, b2)
+  | <span data-count="18">E</span>Tuple (e1, e2, es) -&gt;
+    let e1 = substitute_identifiers replacement_map e1 in
+    <span data-count="18">l</span>et e2 = substitute_identifiers replacement_map e2 in
+    <span data-count="18">l</span>et es = List.map (fun e -&gt; <span data-count="8">s</span>ubstitute_identifiers replacement_map e) es in
+    <span data-count="18">E</span>Tuple (e1, e2, es)
+  | <span data-count="0">E</span>Function (case, cases) -&gt;
+    let cases' =
+      List.map
+        (fun (p, e) -&gt;
+          <span data-count="0">(</span> p
+          , substitute_identifier<span data-count="0">s</span>
+              (remove_keys_from_ma<span data-count="0">p</span> (get_pattern_identifier<span data-count="0">s</span> p) replacement_map)
+              e ))
+        (case :: cases)
+    in
+    <span data-count="0">E</span>Function (List.h<span data-count="0">d</span> cases', List.t<span data-count="0">l</span> cases')
+  | <span data-count="21">E</span>MatchWith (expr, case, cases) -&gt;
+    let expr = substitute_identifiers replacement_map expr in
+    <span data-count="21">l</span>et cases' =
+      List.map
+        (fun (p, e) -&gt;
+          <span data-count="45">(</span> p
+          , substitute_identifier<span data-count="45">s</span>
+              (remove_keys_from_ma<span data-count="45">p</span> (get_pattern_identifier<span data-count="45">s</span> p) replacement_map)
+              e ))
+        (case :: cases)
+    in
+    <span data-count="21">E</span>MatchWith (expr, List.h<span data-count="21">d</span> cases', List.t<span data-count="21">l</span> cases')
+  | <span data-count="5">E</span>Typed (e, t) -&gt;
+    let e' = substitute_identifiers replacement_map e in
+    <span data-count="5">E</span>Typed (e', t)
+  | <span data-count="51">E</span>LetIn (case, cases, body) -&gt;
+    let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
+    <span data-count="51">l</span>et cases' =
+      List.map (fun (p, e) -&gt; <span data-count="51">p</span>, substitute_identifier<span data-count="51">s</span> replacement_map e) (case :: cases)
+    in
+    <span data-count="51">l</span>et body' =
+      substitute_identifiers
+        (remove_keys_from_ma<span data-count="51">p</span> patterns_identifiers replacement_map)
+        body
+    in
+    <span data-count="51">E</span>LetIn (List.h<span data-count="51">d</span> cases', List.t<span data-count="51">l</span> cases', body')
+  | <span data-count="0">E</span>RecLetIn (case, cases, body) -&gt;
+    let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
+    <span data-count="0">l</span>et replacement_map = remove_keys_from_map patterns_identifiers replacement_map in
+    <span data-count="0">l</span>et cases' =
+      List.map (fun (p, e) -&gt; <span data-count="0">p</span>, substitute_identifier<span data-count="0">s</span> replacement_map e) (case :: cases)
+    in
+    <span data-count="0">l</span>et body' = substitute_identifiers replacement_map body in
+    <span data-count="0">E</span>RecLetIn (List.h<span data-count="0">d</span> cases', List.t<span data-count="0">l</span> cases', body')
+  | <span data-count="189">_</span> -&gt; expr
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

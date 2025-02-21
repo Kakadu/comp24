@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>abstractSyntaxTree.ml &mdash; Coverage report</title>
+    <meta name="description" content="90.48% coverage in lib/ast/abstractSyntaxTree.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/ast/</span>abstractSyntaxTree.ml
+        </a>
+      </h1>
+      <h2>90.48%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:13.33%"></span>
+      <span class="unvisited" style="top:20.00%"></span>
+      <span class="some-visited" style="bottom:40.00%"></span>
+      <span class="some-visited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="unvisited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="some-visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="some-visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+<span data-count="2298">t</span>ype identifier = Id of strin<span data-count="1149">g</span> [@@deriving show { with_path = false }]
+
+<span data-count="738">t</span>ype constant =
+  | CInt of in<span data-count="341">t</span> (** -1, 0, 1, ... *)
+  | CBool of boo<span data-count="15">l</span> (** true, false *)
+  | CChar of cha<span data-count="0">r</span> (** 'a', 'b', 'c', ... *)
+  | CString of strin<span data-count="13">g</span> (** "Hello world!" *)
+  | CUnit (** () *)
+[@@deriving show { with_path = false }]
+
+<span data-count="0">t</span>ype ground_type_defenition =
+  | GTDInt (** Int type (x: int) *)
+  | GTDBool (** Bool type (x: bool) *)
+  | GTDUnit (** Unit type (x: unit) *)
+  | GTDChar (** Char type (x: char) *)
+  | GTDString (** String type (x: string) *)
+[@@deriving show { with_path = false }]
+
+<span data-count="33">t</span>ype type_defenition =
+  | TDPolymorphic of identifier (* Polymorphic type (x: 'a) *)
+  | TDGround of ground_type_defenition (* Int, Bool, Char, etc type *)
+  | TDArrow of type_defenition * type_defenition (* Function type (f: (int -&gt; int)) *)
+  | TDTuple of
+      type_defenition
+      * type_defenition
+      * <span data-count="9">t</span>ype_defenition lis<span data-count="6">t</span> (* Tuple type (x: (int, bool)) *)
+  | TDList of type_defenition (* List type (x: int list) *)
+[@@deriving show { with_path = false }]
+
+<span data-count="1075">t</span>ype pattern =
+  | PAny (* Wildcard: '_' *)
+  | PNill (* Empty: '[]' *)
+  | PConst of constant (** Any constant: '1', 'true', etc *)
+  | PVar of identifier (** A variable pattern: 'x', 'y', etc *)
+  | PTuple of pattern * pattern * <span data-count="151">p</span>attern lis<span data-count="97">t</span> (** Tuple of patterns: '(P1, P2, P3)' *)
+  | PListConstructor of pattern * pattern (** List construction pattern: 'P1::P2' *)
+  | PTyped of pattern * type_defenition (** Assigning a type to a pattern: (P : int) *)
+[@@deriving show { with_path = false }]
+
+(** Binding pattern with expression *)
+<span data-count="0">t</span>ype case = <span data-count="484">p</span>attern * expression
+
+<span data-count="2865">a</span>nd expression =
+  | EConstant of constant (** Any constant: '1', 'true', etc *)
+  | EIdentifier of identifier (** A variable name: 'x', 'y', etc *)
+  | EFun of (<span data-count="252">p</span>attern * <span data-count="586">p</span>attern lis<span data-count="277">t</span>) * expression (** Anonymous function: 'fun x -&gt; x' *)
+  | EFunction of case * <span data-count="35">c</span>ase lis<span data-count="12">t</span>
+  (** Anonymous function with one argument and pattern matching: 'function | hd :: tl -&gt; (hd, tl) | _ -&gt; (0, 0)'*)
+  | EApplication of expression * expression * <span data-count="1771">e</span>xpression lis<span data-count="708">t</span> (** Application: f x *)
+  | EIfThenElse of expression * expression * <span data-count="92">e</span>xpression optio<span data-count="23">n</span>
+    (* if condition then true_branch else false branch (else option)*)
+  | ETuple of expression * expression * <span data-count="151">e</span>xpression lis<span data-count="93">t</span> (** Tuple: '(E1, E2, ..., En)' *)
+  | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
+  | EEmptyList (** Empty list: '[]' *)
+  | EMatchWith of expression * case * <span data-count="118">c</span>ase lis<span data-count="39">t</span>
+  (** Pattern matching: match x with | y -&gt; y *)
+  | ELetIn of case * <span data-count="255">c</span>ase lis<span data-count="156">t</span> * expression (** Let in: 'let f x = x in f 5 *)
+  | ERecLetIn of case * <span data-count="36">c</span>ase lis<span data-count="18">t</span> * expression
+  (** Recursive let in: 'let rec f x = if x = 1 then 1 else x + f (x-1)'*)
+  | ETyped of expression * type_defenition
+  (** Assigning a type to an expression: (expr : int) *)
+[@@deriving show { with_path = false }]
+
+<span data-count="82">t</span>ype declaration =
+  | DOrdinary of case * <span data-count="219">c</span>ase lis<span data-count="125">t</span> (** Top-level let-binding: 'let f x = x' *)
+  | DRecursive of case * <span data-count="75">c</span>ase lis<span data-count="42">t</span>
+  (** Top-level recursive let-binding: 'let rec f x = ...' *)
+[@@deriving show { with_path = false }]
+
+(** The entire parsed code of the program *)
+<span data-count="0">t</span>ype program = <span data-count="374">d</span>eclaration lis<span data-count="82">t</span> [@@deriving show { with_path = false }]
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
