@@ -1,8 +1,3 @@
-(** Copyright 2024, Artem Khelmianov *)
-
-(** SPDX-License-Identifier: LGPL-2.1 *)
-
-
 (* Uncomment to run with OCaml *)
 (* open Format
 let print_int x = printf "%d " x
@@ -23,7 +18,7 @@ let shr x n = x / pow 2 n
 
 
 (* Fixed point arithmetic *)
-let frac_bits = 8
+let frac_bits = 10
 let frac = shl 1 frac_bits
 let to_fp x = shl x frac_bits
 let zero = to_fp 0
@@ -32,6 +27,7 @@ let two = to_fp 2
 let mul x y = (x*y) / (frac) 
 let sq x = mul x x
 let div x y = (x * frac) / y
+let half = div one two
 let eps = div one (to_fp (pow 2 (frac_bits - 2)))
 
 let dot (x1, y1, z1) (x2, y2, z2) = mul x1 x2 + mul y1 y2 + mul z1 z2
@@ -73,8 +69,8 @@ let hit_sphere sphere ray =
   let oc = sub_vec center origin in
   let a = dot dir dir in
   let b = dot dir oc in
-  let c = dot oc oc - sq radius in
-  let discr = sq b - mul a c in
+  let c = (dot oc oc) - (sq radius) in
+  let discr = (sq b) - (mul a c) in
   if discr < zero
   then (false, (zero, zero, zero))
   else (
@@ -106,15 +102,15 @@ let loop2 fn start1 stop1 start2 stop2 =
 
 (* 
   Min and max x,y values for the screen 
-  For 64, it takes around 30sec and 1.5gb of ram
+  For 64, it takes around 10sec and 0.5gb of ram
 *)
-let max = 32
+let max = 64
 let min = -max 
 
 let cam_to_screen_distance = 2 * max 
 let camera = (zero, zero, to_fp cam_to_screen_distance)
 let sphere_radius = max
-let cam_to_sphere_distance = min
+let cam_to_sphere_distance = 2 * min
 let sphere = ((zero, zero, to_fp cam_to_sphere_distance), to_fp sphere_radius)
 
 (*

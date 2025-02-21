@@ -31,43 +31,37 @@ pub extern "C" fn runtime_init() {
 }
 
 pub trait WithRaw: Deref {
-    type Ptr;
-
     fn into_raw(self) -> *const Self::Target;
     unsafe fn from_raw(ptr: *const Self::Target) -> Self;
 
     unsafe fn with_raw_ref<T, Fun, Out>(ptr: *const T, func: Fun) -> Out
     where
-        Fun: Fn(&T) -> Out,
-        Self::Ptr: WithRaw<Target = T>, {
-        let x = Self::Ptr::from_raw(ptr);
+        Fun: FnOnce(&T) -> Out,
+        Self: Sized + WithRaw<Target = T>, {
+        let x = Self::from_raw(ptr);
         let res = func(&x);
-        let _ = Self::Ptr::into_raw(x);
+        let _ = Self::into_raw(x);
         res
     }
 
     unsafe fn with_raw_mut<T, Fun, Out>(ptr: *mut T, func: Fun) -> Out
     where
-        Fun: Fn(&mut T) -> Out,
-        Self::Ptr: WithRaw<Target = T> + DerefMut, {
-        let mut x = Self::Ptr::from_raw(ptr);
+        Fun: FnOnce(&mut T) -> Out,
+        Self: Sized + WithRaw<Target = T> + DerefMut, {
+        let mut x = Self::from_raw(ptr as *const _);
         let res = func(&mut x);
-        let _ = Self::Ptr::into_raw(x);
+        let _ = Self::into_raw(x);
         res
     }
 }
 
 impl<T> WithRaw for Rc<T> {
-    type Ptr = Self;
-
     fn into_raw(self) -> *const Self::Target { Rc::into_raw(self) }
 
     unsafe fn from_raw(ptr: *const Self::Target) -> Self { Rc::from_raw(ptr) }
 }
 
 impl<T> WithRaw for Box<T> {
-    type Ptr = Self;
-
     fn into_raw(self) -> *const Self::Target { Box::into_raw(self) }
 
     unsafe fn from_raw(ptr: *const Self::Target) -> Self { Box::from_raw(ptr as *mut _) }
