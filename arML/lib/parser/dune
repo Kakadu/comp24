@@ -14,5 +14,7 @@
   error
   ppParsingResult
   ppParsingError)
+ (instrumentation
+  (backend bisect_ppx))
  (preprocess
   (pps ppx_deriving.show)))

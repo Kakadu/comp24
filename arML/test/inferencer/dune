@@ -9,5 +9,7 @@
   Operators
   Declaration)
  (inline_tests)
+ (instrumentation
+  (backend bisect_ppx))
  (preprocess
   (pps ppx_expect)))

@@ -2,19 +2,25 @@
  (name start_parser_demos)
  (public_name arML.start_parser_demos)
  (modules start_parser_demos)
- (libraries arML.lib stdio))
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (executable
  (name start_type_inference_demos)
  (public_name arML.start_type_inference_demos)
  (modules start_type_inference_demos)
- (libraries arML.lib stdio))
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (executable
  (name start_closure_conversion_demos)
  (public_name arML.start_closure_conversion_demos)
  (modules start_closure_conversion_demos)
- (libraries arML.lib stdio))
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (cram
  (applies_to parser_demos)

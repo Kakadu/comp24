@@ -11,4 +11,6 @@
   NameCreator
   ClosureExpression
   ClosureProgram
-  Runner))
+  Runner)
+ (instrumentation
+  (backend bisect_ppx)))

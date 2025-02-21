@@ -3,5 +3,7 @@
  (libraries arML_lib parser)
  (modules Declaration Function Operators ListAndTuple PatternMatching Typed)
  (inline_tests)
+ (instrumentation
+  (backend bisect_ppx))
  (preprocess
   (pps ppx_expect)))

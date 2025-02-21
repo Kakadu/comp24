@@ -3,5 +3,7 @@
  (libraries arML_lib)
  (modules ClosureConversion)
  (inline_tests)
+ (instrumentation
+  (backend bisect_ppx))
  (preprocess
   (pps ppx_expect)))
