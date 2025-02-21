@@ -123,7 +123,7 @@ let is_direct_binop = List.mem direct_binops ~equal:String.equal
 
 let emit_direct_unop ?(comm = "") dest op a =
   match op with
-  | "not" -> emit xori dest a (-1) ~comm
+  | "not" -> emit xori dest a (1) ~comm
   | "[ - ]" -> emit sub dest zero a ~comm
   | _ -> failwith "emit_direct_unop: invalid op"
 ;;

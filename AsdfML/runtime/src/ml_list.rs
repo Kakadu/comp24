@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use log::{debug, info};
+use log::debug;
 
 use crate::{cons_list::ConsList, WithRaw};
 
@@ -49,11 +49,7 @@ pub unsafe extern "C" fn ml_list_tl(list_ptr: *const MlList) -> *const MlList {
 #[no_mangle]
 pub unsafe extern "C" fn ml_list_field(list_ptr: *const MlList, idx: usize) -> isize {
     Rc::with_raw_ref(list_ptr, |list| {
-        list.iter()
-            .enumerate()
-            .find(|(i, _)| *i == idx)
-            .map(|(_, &value)| value)
-            .expect("ml_list_field: index out of bounds")
+        *list.iter().nth(idx).expect("ml_list_field: index out of bounds")
     })
 }
 
