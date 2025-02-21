@@ -124,14 +124,14 @@ let%expect_test _ =
        | (x, y) -> (( + ) x y)
     |}]
 ;;
+
 let%expect_test _ =
   test {|
     let _ = 
       let [x; y] = [1; 2] in
       x + y
   |};
-  [%expect
-    {|
+  [%expect {|
     let _ = match [1; 2] with
        | [x; y] -> (( + ) x y)
     |}]
@@ -159,10 +159,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `temp_tuple = (1, 2, 3)
-    let a = (`get_tuple_field `temp_tuple 0)
-    let b = (`get_tuple_field `temp_tuple 1)
-    let c = (`get_tuple_field `temp_tuple 2)
+    let `temp_match_0 = let `temp_match_0 = (1, 2, 3) in
+       match `temp_match_0 with
+       | (a, b, c) -> `temp_match_0
     |}]
 ;;
 
@@ -172,11 +171,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `temp_list = match [1; 2; 3; 4] with
-       | [a; b; c] -> [1; 2; 3; 4]
-    let a = (`list_field `temp_list 0)
-    let b = (`list_field `temp_list 1)
-    let c = (`list_field `temp_list 2)
+    let `temp_match_0 = let `temp_match_0 = [1; 2; 3; 4] in
+       match `temp_match_0 with
+       | [a; b; c] -> `temp_match_0
     |}]
 ;;
 
@@ -186,9 +183,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `temp_list = [1; 2; 3; 4]
-    let a = (`list_hd `temp_list)
-    let b = (`list_tl `temp_list)
+    let `temp_match_0 = let `temp_match_0 = [1; 2; 3; 4] in
+       match `temp_match_0 with
+       | a :: b -> `temp_match_0
     |}]
 ;;
 
@@ -214,3 +211,14 @@ let%expect_test _ =
     |}]
 ;;
 
+let%expect_test _ =
+  test {|
+    let (a, (b, c), [d;e], f::g) = (1, (2, 3), [4; 5], [6; 7]) 
+  |};
+  [%expect
+    {|
+    let `temp_match_0 = let `temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
+       match `temp_match_0 with
+       | (a, (b, c), [d; e], f :: g) -> `temp_match_0
+    |}]
+;;

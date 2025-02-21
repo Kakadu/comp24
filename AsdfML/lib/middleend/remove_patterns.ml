@@ -60,55 +60,115 @@ let remove_argument_patterns body pattern pattern_list =
   pattern', pattern_list', exp
 ;;
 
-let remove_patterns =
+let remove_patterns program =
   let rec helper_expr = function
-    | EConst _ as c -> c
-    | EVar _ as v -> v
-    | EApp (l, r) -> e_app (helper_expr l) (helper_expr r)
-    | EIfElse (i, t, e) -> e_if_else (helper_expr i) (helper_expr t) (helper_expr e)
+    | EConst _ as c -> return c
+    | EVar _ as v -> return v
+    | EApp (l, r) ->
+      let* l = helper_expr l in
+      let* r = helper_expr r in
+      return @@ e_app l r
+    | EIfElse (i, t, e) ->
+      let* i = helper_expr i in
+      let* t = helper_expr t in
+      let* e = helper_expr e in
+      return @@ e_if_else i t e
     | EFun (p, ps, e) ->
-      let e = helper_expr e in
+      let* e = helper_expr e in
       let p, ps, e = remove_argument_patterns e p ps in
-      e_fun p ps e
+      return @@ e_fun p ps e
     | ELetIn (def, body) ->
-      let body = helper_expr body in
+      let* body = helper_expr body in
       (match def with
        | DLet (_, pat, exp) ->
          if is_simple pat
-         then e_let_in (helper_def def |> List.hd_exn) body
-         else e_match (helper_expr exp) [ pat, body ])
+         then
+           let* def = helper_def def in
+           let def = List.hd_exn def in
+           return @@ e_let_in def body
+         else
+           let* exp = helper_expr exp in
+           return @@ e_match exp [ pat, body ])
     | ETuple (x1, x2, xs) ->
-      e_tuple (helper_expr x1) (helper_expr x2) (List.map xs ~f:helper_expr)
-    | EList xs -> e_list (List.map xs ~f:helper_expr)
-    | EMatch (e, c) ->
-      e_match (helper_expr e) (List.map c ~f:(fun (p, e) -> p, helper_expr e))
-  and helper_def = function
-    | DLet (r, p, e) when is_simple p -> [ d_let_flag r p (helper_expr e) ]
-    | DLet (r, PTuple (x1, x2, xs), e) ->
-      let xs = x1 :: x2 :: xs in
-      let temp_var = "`temp_tuple" in
-      let temp_def = d_let_flag r (p_ident temp_var) (helper_expr e) in
-      let assigns =
-        List.mapi xs ~f:(fun i x -> d_let x (tuple_field (e_var temp_var) i))
+      let* x1 = helper_expr x1 in
+      let* x2 = helper_expr x2 in
+      let* xs =
+        State.mfold_right xs ~init:[] ~f:(fun x acc ->
+          helper_expr x >>| fun x -> x :: acc)
       in
-      temp_def :: assigns
-    | DLet (r, (PList xs as pat), e) ->
-      let temp_var = "`temp_list" in
-      let e' = helper_expr e in
-      let temp_def = d_let_flag r (p_ident temp_var) (e_match e' [ pat, e' ]) in
-      let assigns =
-        List.mapi xs ~f:(fun i x -> d_let x (list_field (e_var temp_var) i))
+      return @@ e_tuple x1 x2 xs
+    | EList xs ->
+      let* xs =
+        State.mfold_right xs ~init:[] ~f:(fun x acc ->
+          helper_expr x >>| fun x -> x :: acc)
       in
-      temp_def :: assigns
-    | DLet (r, PCons (hd, tl), e) ->
-      let temp_var = "`temp_list" in
-      let temp_def = d_let_flag r (p_ident temp_var) (helper_expr e) in
-      let hd_assign = d_let hd (list_hd (e_var temp_var)) in
-      let tl_assign = d_let tl (list_tl (e_var temp_var)) in
-      [ temp_def; hd_assign; tl_assign ]
-    | _ ->
-      (* TODO: recursive assignment for complex patterns *)
-      failwith "complex patterns in top level let bindings are not supported"
+      return @@ e_list xs
+    | EMatch (exp, cases) ->
+      let* exp = helper_expr exp in
+      let* cases =
+        State.mfold_right cases ~init:[] ~f:(fun (pat, exp) acc ->
+          let* exp = helper_expr exp in
+          return ((pat, exp) :: acc))
+      in
+      return @@ e_match exp cases
+  and helper_def : definition -> (var_id, definition list) State.StateM.t =
+    let rec helper_complex exp = function
+      | PTuple (x1, x2, xn) ->
+        let xs = x1 :: x2 :: xn in
+        let* temp_var = fresh_prefix "`temp_tuple" in
+        let* exp = helper_expr exp in
+        let temp_def = d_let (p_ident temp_var) exp in
+        let* assigns =
+          State.mfoldi_right xs ~init:[] ~f:(fun i acc x ->
+            let* x = helper_complex (tuple_field (e_var temp_var) i) x in
+            return @@ x @ acc)
+        in
+        return (temp_def :: assigns)
+      | PList xs ->
+        let* temp_var = fresh_prefix "`temp_list" in
+        let* exp = helper_expr exp in
+        let temp_def = d_let (p_ident temp_var) exp in
+        let* assigns =
+          State.mfoldi_right xs ~init:[] ~f:(fun i acc x ->
+            let* x = helper_complex (list_field (e_var temp_var) i) x in
+            return @@ x @ acc)
+        in
+        return (temp_def :: assigns)
+      | PCons (hd, tl) ->
+        let* temp_var = fresh_prefix "`temp_list" in
+        let* exp = helper_expr exp in
+        let temp_def = d_let (p_ident temp_var) exp in
+        let hd_assign = d_let hd (list_hd (e_var temp_var)) in
+        let tl_assign = d_let tl (list_tl (e_var temp_var)) in
+        return [ temp_def; hd_assign; tl_assign ]
+      | (PWild | PIdent _) as p ->
+        let* e = helper_expr exp in
+        return [ d_let p e ]
+      | _ -> failwith "complex patterns in top level let bindings are not supported"
+    in
+    function
+    | DLet (r, p, e) when is_simple p ->
+      let* e = helper_expr e in
+      return [ d_let_flag r p e ]
+    | DLet (_, pat, e) ->
+      (* Convert `let complex_pattern = expr`
+         into `let temp_match = match expr with | complex_pattern -> ()`
+         and deal with it later in 'remove_match' *)
+      let* temp_match = fresh_prefix "`temp_match" in
+      let match_exp =
+        d_let
+          (p_ident temp_match)
+          (e_let_in
+             (d_let (p_ident temp_match) e)
+             (e_match (e_var temp_match) [ pat, e_var temp_match ]))
+      in
+      return @@ [ match_exp ]
   in
-  fun (x : definition list) -> List.map x ~f:helper_def |> List.concat
+  let helper_program program =
+    State.mfold program ~init:[] ~f:(fun acc def ->
+      let* defs = helper_def def in
+      return (defs @ acc))
+    >>| List.rev
+  in
+  run (helper_program program)
 ;;

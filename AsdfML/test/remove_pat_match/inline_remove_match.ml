@@ -365,3 +365,46 @@ let%expect_test _ =
            else 42)
     |}]
 ;;
+
+let%expect_test _ =
+  test {|
+    let list = [(1, 2); (3, 4); (5, 6)]
+    let (a, b) :: c :: tl = list
+  |};
+  [%expect
+    {|
+    let list = [(1, 2); (3, 4); (5, 6)]
+    let `temp_match_0 = let `temp_match_0 = list in
+      if (( && ) (not (`list_is_empty `temp_match_0)) (( && ) (( = ) (`tuple_len (`list_hd `temp_match_0)) 2) (not (`list_is_empty (`list_tl `temp_match_0)))))
+      then `temp_match_0
+      else (panic ())
+    let `tuple_0 = (`list_hd `temp_match_0)
+    let a = (`get_tuple_field `tuple_0 0)
+    let b = (`get_tuple_field `tuple_0 1)
+    let c = (`list_hd (`list_tl `temp_match_0))
+    let tl = (`list_tl (`list_tl `temp_match_0))
+    |}]
+;;
+
+let%expect_test _ =
+  test {|
+    let (a, (b, c), [d;e], f::g) = (1, (2, 3), [4; 5], [6; 7]) 
+  |};
+  [%expect
+    {|
+    let `temp_match_0 = let `temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
+       if (( && ) (( && ) (( && ) (( = ) (`tuple_len `temp_match_0) 4) (( = ) (`tuple_len (`get_tuple_field `temp_match_0 1)) 2)) (( = ) (`list_len (`get_tuple_field `temp_match_0 2)) 2)) (not (`list_is_empty (`get_tuple_field `temp_match_0 3))))
+       then `temp_match_0
+       else (panic ())
+    let `tuple_0 = `temp_match_0
+    let a = (`get_tuple_field `tuple_0 0)
+    let `tuple_2 = (`get_tuple_field `tuple_0 1)
+    let b = (`get_tuple_field `tuple_2 0)
+    let c = (`get_tuple_field `tuple_2 1)
+    let `list_1 = (`get_tuple_field `tuple_0 2)
+    let d = (`list_field `list_1 0)
+    let e = (`list_field `list_1 1)
+    let f = (`list_hd (`get_tuple_field `tuple_0 3))
+    let g = (`list_tl (`get_tuple_field `tuple_0 3))
+    |}]
+;;

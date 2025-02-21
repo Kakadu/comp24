@@ -63,6 +63,7 @@ let remove_match prog =
       return (s_fun p ps e)
     | ELetIn (d, e) ->
       let* d = helper_def d in
+      let d = List.hd_exn d in
       let* e = helper_expr e in
       return (s_let_in d e)
     | ETuple (x1, x2, xs) ->
@@ -87,7 +88,7 @@ let remove_match prog =
         | PIdent id -> s_let_in (s_let id match_exp) action |> return
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
-          let* tuple_id = fresh_prefix "`tuple"  in
+          let* tuple_id = fresh_prefix "`tuple" in
           let* body =
             State.mfoldi_right xs ~init:action ~f:(fun idx acc x ->
               bind_pat_vars (tuple_field (s_var tuple_id) idx) x acc)
@@ -143,7 +144,7 @@ let remove_match prog =
             let catch_all = panic () in
             let* then_branch = bind_pat_vars match_exp pat action in
             let cond = case_matched match_exp pat in
-            cont (return (s_if_else (cond) then_branch catch_all)))
+            cont (return (s_if_else cond then_branch catch_all)))
         | _ ->
           gen_match
             ~has_catch_all
@@ -158,11 +159,25 @@ let remove_match prog =
             tl_cases
       in
       gen_match Fn.id cases
-  and helper_def = function
+  and helper_def ?(top = false) = function
+    | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"`temp_match" ->
+      let* e' = helper_expr e in
+      let match_, binds =
+        match e' with
+        | SLetIn ((SLet _ as bind_exp), SIfElse (cond, binds, panic)) ->
+          let rec extract_binds acc = function
+            | SLetIn (d, e) -> extract_binds (d :: acc) e
+            | e -> List.rev acc, e
+          in
+          let binds, e = extract_binds [] binds in
+          s_let (pat_as_id p) (s_let_in bind_exp (s_if_else cond e panic)), binds
+        | _ -> failwith (Format.asprintf "expected if-else, got %a\n" Sast.pp_sexpr e')
+      in
+      return (match_ :: binds)
     | DLet (r, p, e) ->
       let* e = helper_expr e in
       let p = pat_as_id p in
-      s_let_flag r p e |> return
+      [ s_let_flag r p e ] |> return
   in
-  List.map prog ~f:(fun def -> run (helper_def def))
+  List.map prog ~f:(fun def -> run (helper_def ~top:true def)) |> List.concat
 ;;
