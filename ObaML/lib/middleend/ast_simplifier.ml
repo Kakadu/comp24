@@ -217,21 +217,27 @@ and simplify_expr expr =
       in
       Simple_ast.SEFun (List.rev rev_new_fun_args, new_expr)
     | Ast.ELet (Ast.Nonrecursive, value_binding, expr2) ->
-      let new_gen_decl_name = gen_pat_expr_name ^ string_of_int 0 in
-      let rev_new_value_bindings =
-        construct_new_nonrec_value_decl value_binding new_gen_decl_name
-      in
-      let new_expr2 =
-        List.fold_left
-          (fun exp value_binding ->
-            let ident, value_binding_exp = value_binding in
-            Simple_ast.SELet (Ast.Nonrecursive, (ident, value_binding_exp), exp))
-          (helper expr2)
-          rev_new_value_bindings
-      in
-      let _, expr1 = value_binding in
-      Simple_ast.SELet
-        (Ast.Nonrecursive, (Ast.Id new_gen_decl_name, simplify_expr expr1), new_expr2)
+      let pat, expr1 = value_binding in
+      (match pat with
+       | Ast.PVar var_name ->
+         Simple_ast.SELet
+           (Ast.Nonrecursive, (var_name, simplify_expr expr1), simplify_expr expr2)
+       | _ ->
+         let new_gen_decl_name = gen_pat_expr_name ^ string_of_int 0 in
+         let rev_new_value_bindings =
+           construct_new_nonrec_value_decl value_binding new_gen_decl_name
+         in
+         let new_expr2 =
+           List.fold_left
+             (fun exp value_binding ->
+               let ident, value_binding_exp = value_binding in
+               Simple_ast.SELet (Ast.Nonrecursive, (ident, value_binding_exp), exp))
+             (helper expr2)
+             rev_new_value_bindings
+         in
+         let _, expr1 = value_binding in
+         Simple_ast.SELet
+           (Ast.Nonrecursive, (Ast.Id new_gen_decl_name, simplify_expr expr1), new_expr2))
     | Ast.ELet (Ast.Recursive, value_binding, expr2) ->
       let ident, new_expr1 = construct_new_rec_value_binding value_binding in
       Simple_ast.SELet (Ast.Recursive, (ident, new_expr1), simplify_expr expr2)
@@ -320,7 +326,6 @@ and construct_new_rec_value_bindings value_binding_lst =
 let simplify_structure_item structure_item =
   let helper = function
     | Ast.SILet (Ast.Nonrecursive, value_binding_lst) ->
-      (* сгенерировать для каждой поеботы переменную и сохранить в список имена переменных *)
       let rev_gen_decl_lst, rev_gen_decl_names, _ =
         List.fold_left
           (fun acc value_binding ->
@@ -349,7 +354,6 @@ let simplify_structure_item structure_item =
           (List.rev value_binding_lst)
       in
       let gen_decl_names = List.rev rev_gen_decl_names in
-      (* обойти в цикле каждую поеботу, и для каждой поеботы сгенерировать новые поеботы по паттерну *)
       let rev_updated_value_bindings =
         List.fold_left2
           (fun acc value_binding gen_decl_name ->

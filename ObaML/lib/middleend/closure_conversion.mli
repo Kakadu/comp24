@@ -2,5 +2,5 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-val run_expr_closure_conversion : Ast.expr -> Ast.expr
-val run_closure_conversion : Ast.structure -> Ast.structure
+val run_expr_closure_conversion : Simple_ast.sexpr -> Simple_ast.sexpr
+val run_closure_conversion : Simple_ast.sstructure -> Simple_ast.sstructure

@@ -146,7 +146,7 @@ let%expect_test "" =
   parse_simplify_and_print_result {| let a = fun b -> match b with | h :: tl -> (h, tl) |};
   [%expect
     {|
-    let a b = let #gen_pat_expr#0 = b in if true then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in (h, tl) else (#gen_matching_failed# ());;
+    let a b = let #gen_pat_expr#0 = b in if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in (h, tl) else (#gen_matching_failed# ());;
      |}]
 ;;
 
@@ -162,6 +162,13 @@ let%expect_test "" =
   parse_simplify_and_print_result {| let a = fun b -> match b with | 1 :: 2 :: [] -> 1 |};
   [%expect
     {|
-    let a b = let #gen_pat_expr#0 = b in if (((1  =  (#gen_list_getter_head# #gen_pat_expr#0))  &&  (2  =  (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0))))  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) then 1 else (#gen_matching_failed# ());;
+    let a b = let #gen_pat_expr#0 = b in if (((((#gen_list_getter_length# #gen_pat_expr#0)  =  2)  &&  (1  =  (#gen_list_getter_head# #gen_pat_expr#0)))  &&  (2  =  (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0))))  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) then 1 else (#gen_matching_failed# ());;
      |}]
+;;
+
+let%expect_test "" =
+  parse_simplify_and_print_result {| let a = fun x -> let b = x in b;; |};
+  [%expect {|
+    let a x = let b = x in b;; 
+    |}]
 ;;

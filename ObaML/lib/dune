@@ -11,6 +11,7 @@
   Typedtree
   Simple_ast
   Ast_simplifier
+  Alpha_conversion
   Closure_conversion)
  (libraries base angstrom)
  (preprocess
@@ -24,7 +25,8 @@
   Parser_tests
   Infer_tests
   Closure_conversion_tests
-  Ast_simplifier_tests)
+  Ast_simplifier_tests
+  Alpha_conversion_tests)
  (libraries ObaML)
  (inline_tests)
  (preprocess
