@@ -21,7 +21,7 @@ let%expect_test _ =
     let test1 x = let EVALUATED_0 = x
     in if ([] ( != ) EVALUATED_0) then let a = (GET_HEAD EVALUATED_0)
     in let b = (GET_TALE EVALUATED_0)
-    in (a + b) else (RTE_ERROR_NOT_EXHAUSTIVE_PATTERN_MATCHING ()) |}]
+    in (a + b) else (RTE_ERROR_MATCH_FAILURE ()) |}]
 ;;
 
 let%expect_test _ =
@@ -40,7 +40,7 @@ let%expect_test _ =
     in if ([] ( != ) EVALUATED_0) then let a = (GET_HEAD EVALUATED_0)
     in let b = (GET_TALE EVALUATED_0)
     in let EVALUATED_1 = a
-    in if (5 ( = ) EVALUATED_1) then 1 else 0 else if ([] ( = ) EVALUATED_0) then 400 else (RTE_ERROR_NOT_EXHAUSTIVE_PATTERN_MATCHING ()) |}]
+    in if (5 ( = ) EVALUATED_1) then 1 else 0 else if ([] ( = ) EVALUATED_0) then 400 else (RTE_ERROR_MATCH_FAILURE ()) |}]
 ;;
 
 let%expect_test _ =
@@ -68,5 +68,5 @@ let%expect_test "typed pattern" =
     {|
     let a = let EVALUATED_0 = l
     in if (0 ( = ) (GET_NTH (1, EVALUATED_0))) then let (a : int) = ((GET_NTH (0, EVALUATED_0)) : int)
-    in 3 else (RTE_ERROR_NOT_EXHAUSTIVE_PATTERN_MATCHING ()) |}]
+    in 3 else (RTE_ERROR_MATCH_FAILURE ()) |}]
 ;;
