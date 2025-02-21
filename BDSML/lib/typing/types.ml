@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module VarId = struct
+module TVarId = struct
   type t = int [@@deriving show { with_path = false }]
 
   let to_string n = Int.to_string n
@@ -16,7 +16,7 @@ type base_type =
   | TChar
   | TString
   | TBool
-(* [@@deriving show { with_path = false }] *)
+[@@deriving show { with_path = false }]
 
 let show_base_type = function
   | TInt -> "int"
@@ -28,7 +28,7 @@ let show_base_type = function
 let pp_base_type fmt ty = Format.fprintf fmt "%s" @@ show_base_type ty
 
 type type_val =
-  | TVar of VarId.t (** e.g. ['a] *)
+  | TVar of TVarId.t (** e.g. ['a] *)
   | TBase of base_type (** e.g. [int] *)
   | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
@@ -52,3 +52,24 @@ type error =
   | No_variable of string
 
 exception Unimplemented of string
+
+module VarSet = Set.Make (TVarId)
+
+let rec occurs_in (v : TVarId.t) = function
+  | TVar b -> b = v
+  | TParametric (l, r) -> occurs_in v l || occurs_in v r
+  | TTuple (f :: tl) -> occurs_in v f || (occurs_in v @@ TTuple tl)
+  | TArrow (l, r) -> occurs_in v l || occurs_in v r
+  | _ -> false
+;;
+
+let free_vars =
+  let rec helper acc = function
+    | TVar b -> VarSet.add b acc
+    | TArrow (l, r) -> helper (helper acc l) r
+    | TTuple (h :: tl) -> helper (helper acc h) @@ TTuple tl
+    | TParametric (l, r) -> helper (helper acc l) r
+    | _ -> acc
+  in
+  helper VarSet.empty
+;;

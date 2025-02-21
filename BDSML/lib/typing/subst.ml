@@ -1,7 +1,6 @@
 open Monads
-open Helpers
 open Types
-module VarMap = Map.Make (VarId)
+module VarMap = Map.Make (TVarId)
 
 type t = type_val VarMap.t
 
@@ -15,9 +14,9 @@ let fold_left (map : t) init f =
 ;;
 
 let empty = VarMap.empty
-let mapping k v = if occurs_in k v then fail Occurs_check else return (k, v)
+let mapping (k : TVarId.t) v = if occurs_in k v then fail Occurs_check else return (k, v)
 
-let singleton k v =
+let singleton k v : t Monads.t =
   let+ k, v = mapping k v in
   VarMap.singleton k v
 ;;
@@ -44,10 +43,9 @@ let rec unify l r =
   | TArrow (l1, r1), TArrow (l2, r2) ->
     let* subs1 = unify l1 l2 in
     let* subs2 = unify (apply subs1 r1) (apply subs1 r2) in
-    compose_maps subs1 subs2
+    compose subs1 subs2
   | _ -> fail (Unification_failed (l, r))
 
-(** add type to map *)
 and extend s (k, v) =
   match VarMap.find_opt k s with
   | None ->
@@ -59,15 +57,17 @@ and extend s (k, v) =
       VarMap.add k v acc)
   | Some v2 ->
     let* s2 = unify v v2 in
-    compose_maps s s2
+    compose s s2
 
-and compose_maps s1 s2 = fold_left s2 (return s1) extend
+and compose s1 s2 = fold_left s2 (return s1) extend
 
 let compose_all ss =
   List.fold_left
     (fun acc ss ->
       let* acc = acc in
-      compose_maps acc ss)
+      compose acc ss)
     (return empty)
     ss
 ;;
+
+let remove var (sub : t) : t = VarMap.remove var sub

@@ -1,6 +1,6 @@
 open Types
 
-type 'a t = VarId.t -> VarId.t * ('a, error) Result.t
+type 'a t = TVarId.t -> TVarId.t * ('a, error) Result.t
 
 let fail e st = st, Error e
 let return x last = last, Ok x
@@ -34,12 +34,12 @@ let rec map (f : 'a -> 'b t) = function
   | _ -> return []
 ;;
 
-let rec fold_left (f : 'a -> 'b -> 'a t) (acc : 'a t) : 'b list -> 'a t  = function
+let rec fold_left (f : 'a -> 'b -> 'a t) (acc : 'a t) : 'b list -> 'a t = function
   | h :: tl ->
     let* acc = acc in
     fold_left f (f acc h) tl
   | _ -> acc
 ;;
 
-let fresh (last : VarId.t) = VarId.( + ) last 1, Ok last
+let fresh (last : TVarId.t) = TVarId.( + ) last 1, Ok last
 let run p start_value : ('a, error) Result.t = snd (p start_value)
