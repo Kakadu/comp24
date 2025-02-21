@@ -316,7 +316,8 @@ let bin_op_to_str bo =
     | And -> "&&"
     | Or -> "||"
   in
-  "base_bop_" ^ map bo
+  let res = [ "( "; map bo; " )" ] in
+  String.concat "" res
 ;;
 
 let rec transform_back = function
