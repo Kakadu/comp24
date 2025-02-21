@@ -23,4 +23,5 @@
   ppx_deriving
   (ppx_inline_test :with-test)
   (odoc :with-doc)
-  (ocamlformat :build)))
+  (ocamlformat :build)
+  qcheck))

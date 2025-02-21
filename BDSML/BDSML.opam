@@ -14,6 +14,7 @@ depends: [
   "ppx_inline_test" {with-test}
   "odoc" {with-doc}
   "ocamlformat" {build}
+  "qcheck"
 ]
 build: [
   ["dune" "subst"] {dev}
