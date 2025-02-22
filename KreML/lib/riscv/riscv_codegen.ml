@@ -385,9 +385,11 @@ let rec codegen_flambda location =
     let size = List.length elems in
     Function.Runtime.alloc_tuple size (fun addr ->
       let fill_insns =
-        List.mapi (fun i e ->
-          let loc = Loc_mem (addr, i * word_size) in
-          codegen_flambda loc e)
+        List.mapi
+          (fun i e ->
+            let loc = Loc_mem (addr, i * word_size) in
+            codegen_flambda loc e)
+          elems
         |> List.concat
       in
       let store = Memory.store_rvalue location (Rv_reg addr) in
@@ -486,7 +488,28 @@ let rec codegen_flambda location =
       in
       let store = Memory.store_rvalue location (Rv_reg addr) in
       arrange_insns @ store)
-    
+  | Fl_ite (c, t, e) ->
+    let some_reg = find_reg [] in
+    let save = sw ~v:some_reg 0 ~dst:Sp in
+    let extend_stack = extend_stack_insn word_size in
+    let shrink_stack = shrink_stack_insn word_size in
+    let restore = lw ~rd:some_reg 0 ~src:Sp in
+    let cond = codegen_flambda (Loc_reg some_reg) c in
+    let fresh_label l =
+      let s = Format.sprintf ".L_%s_%i" l !block_counter in
+      block_counter := !block_counter + 1;
+      s
+    in
+    let else_label = fresh_label "else" in
+    let join_label = fresh_label "join" in
+    let branch = Btype (some_reg, Zero, else_label, BEQ) in
+    curr_block := (branch :: cond) @ (extend_stack :: save :: !curr_block);
+    let then_final_insns = codegen_flambda location t in
+    let jump_join = Pseudo.jump join_label in
+    curr_block := (Label else_label :: jump_join :: then_final_insns) @ !curr_block;
+    let else_final_insns = codegen_flambda location e in
+    curr_block := (restore :: shrink_stack :: Label join_label :: else_final_insns) @ !curr_block;
+    []
 ;;
 
 (* let a = f x in *)

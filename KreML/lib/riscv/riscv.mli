@@ -102,6 +102,7 @@ module Pseudo : sig
   val neg: reg -> instruction
   val seqz : rd:reg -> src:reg -> instruction
   val call: string -> instruction
+  val jump: string -> instruction
   val ret: instruction
 end
 

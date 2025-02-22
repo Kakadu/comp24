@@ -197,5 +197,8 @@ module Pseudo = struct
     Pseudo insn
 
   let call label = Pseudo label
+  let jump label =
+    let insn = sprintf "j %s" label in
+    Pseudo (insn)
   let ret = Pseudo "ret"
 end
