@@ -1,24 +1,11 @@
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-(* 
-let print patterns =
-  let pp_pattern_list fmt patterns =
-    Format.fprintf fmt "@[<hov 1>%a@]"
-      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") Common.Ast.pp_pattern)
-      patterns
-  in
-  Format.printf "[%a]@." pp_pattern_list patterns
-in
-print plain_list; *)
 
 module CounterMonad = struct
   type fresh_id = int
 
   let name_prefix = Common.Naming.me_prefix
-  let fail_f = Me_ast.MExp_ident "rt_fail_pt_match" (*TODO: mb make apply + its type: [unit -> 'a]*)
-  let get_by_idx_f = Me_ast.MExp_ident "rt_get_by_idx"
-  let get_list_len_1_f = Me_ast.MExp_ident "rt_get_list_len_plus_one"
 
   include Common.Se_monad.Base_SE_Monad
 
@@ -41,12 +28,15 @@ type semantic_bind = ident * m_expr
 
 type alt_pat = ident * m_expr * semantic_bind list
 
-let fail_app arg = MExp_apply (fail_f, arg)
+let fail_f = Me_ast.MExp_ident Common.Base_lib.func_fail_pt_match
+let get_by_idx_f = Me_ast.MExp_ident Common.Base_lib.func_get_by_idx
+let get_list_len_1_f = Me_ast.MExp_ident Common.Base_lib.func_get_list_len_plus_one
+let fail_app = MExp_apply (fail_f, MExp_constant Const_unit)
 let me_name nm = MExp_ident nm
 let ite ~cond ~then_br ~else_br = MExp_ifthenelse (cond, then_br, else_br)
 
-let ite_with_fail ~fail_arg ~cond ~then_br =
-  let else_br = fail_app fail_arg in
+let ite_with_fail ~cond ~then_br =
+  let else_br = fail_app in
   ite ~cond ~then_br ~else_br
 ;;
 
@@ -132,44 +122,42 @@ let rec elim_pattern : pattern -> alt_pat t =
     let* indexed_alt_pts = elim_pt_list_rev pt'list in
     merge_alt_pts'list indexed_alt_pts
   in
-  fun pt ->
-    match pt with
-    | Pat_var bind_nm -> return @@ (bind_nm, me_bool true, [])
-    | Pat_any ->
-      let* bind_nm = get_uniq_name in
-      return @@ (bind_nm, me_bool true, [])
-    | Pat_const c ->
-      let* bind_name = get_uniq_name in
-      let me_cond = me_const_comperison c (MExp_ident bind_name) in
-      return @@ (bind_name, me_cond, [])
-    | Pat_constraint (pt, _) -> elim_pattern pt
-    (* TODO: *)
-    | Pat_tuple pt'list -> elim_pt_list pt'list
-    | Pat_cons (head_pt, tail_pt) ->
-      let plain_list = optimize_cons head_pt tail_pt in
-      let me_pt_elem_cnt = MExp_constant (Const_int (List.length plain_list)) in
-      let* bind_nm, cond, sbinds = elim_pt_list plain_list in
-      let* last_elem =
-        match List.rev plain_list with
-        | x :: _ -> return x
-        | _ -> fail "Pat_cons has at least two elements"
-      in
-      let len_cond_me =
-        let me_list_len = me_get_list_len_1 @@ me_name bind_nm in
-        match last_elem with
-        | Pat_const Const_nil -> me_eq me_pt_elem_cnt me_list_len
-        | _ -> me_more_eq me_list_len me_pt_elem_cnt
-      in
-      let lazy_if_cond = MExp_ifthenelse (len_cond_me, cond, me_bool false) in
-      return @@ (bind_nm, lazy_if_cond, sbinds)
+  function
+  | Pat_var bind_nm -> return @@ (bind_nm, me_bool true, [])
+  | Pat_any ->
+    let* bind_nm = get_uniq_name in
+    return @@ (bind_nm, me_bool true, [])
+  | Pat_const c ->
+    let* bind_name = get_uniq_name in
+    let me_cond = me_const_comperison c (MExp_ident bind_name) in
+    return @@ (bind_name, me_cond, [])
+  | Pat_constraint (pt, _) -> elim_pattern pt
+  (* TODO: *)
+  | Pat_tuple pt'list -> elim_pt_list pt'list
+  | Pat_cons (head_pt, tail_pt) ->
+    let plain_list = optimize_cons head_pt tail_pt in
+    let me_pt_elem_cnt = MExp_constant (Const_int (List.length plain_list)) in
+    let* bind_nm, cond, sbinds = elim_pt_list plain_list in
+    let* last_elem =
+      match List.rev plain_list with
+      | x :: _ -> return x
+      | _ -> fail "Pat_cons has at least two elements"
+    in
+    let len_cond_me =
+      let me_list_len = me_get_list_len_1 @@ me_name bind_nm in
+      match last_elem with
+      | Pat_const Const_nil -> me_eq me_pt_elem_cnt me_list_len
+      | _ -> me_more_eq me_list_len me_pt_elem_cnt
+    in
+    let lazy_if_cond = MExp_ifthenelse (len_cond_me, cond, me_bool false) in
+    return @@ (bind_nm, lazy_if_cond, sbinds)
 ;;
 
 let to_me_vbs to_me_expr { vb_pat; vb_expr } =
   let* nm, cond, sbinds = elim_pattern vb_pat in
   let* binded_me' =
-    let fail_arg = me_name nm in
     let* bind_body = to_me_expr vb_expr in
-    return @@ ite_with_fail ~fail_arg ~cond ~then_br:bind_body
+    return @@ ite_with_fail ~cond ~then_br:bind_body
   in
   let m_vb_pat = Me_name nm in
   let main_vb = { m_vb_pat; m_vb_expr = binded_me' } in
@@ -185,8 +173,7 @@ let elim_pats_in_vbl to_me_expr vb_l =
     return @@ List.concat [ vb'_l; acc ])
 ;;
 
-let rec to_me_expr e =
-  match e with
+let rec to_me_expr = function
   | Exp_constant c -> return @@ MExp_constant c
   | Exp_ident name -> return @@ MExp_ident name
   | Exp_type (e', _) -> to_me_expr e'
@@ -218,7 +205,7 @@ let rec to_me_expr e =
       let* then_f = sbinds_to_letin sbinds in
       return @@ then_f fun_body
     in
-    let fun_body' = ite_with_fail ~fail_arg:(me_name nm) ~cond ~then_br in
+    let fun_body' = ite_with_fail ~cond ~then_br in
     return @@ MExp_function (Me_name nm, fun_body')
   | Exp_let (Decl (r_flag, vb_l), e) ->
     let* vb_l' = elim_pats_in_vbl to_me_expr vb_l in
@@ -245,8 +232,7 @@ let rec to_me_expr e =
           in
           return new_acc_f)
     in
-    let fail_br = fail_app @@ me_name bind_name in
-    return @@ f_match' fail_br
+    return @@ f_match' fail_app
 ;;
 
 let to_me_struct_item = function
@@ -256,7 +242,7 @@ let to_me_struct_item = function
     let* m_vb_expr = to_me_expr e in
     return @@ MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ])
   | Str_value (Decl (rflag, vb_l)) ->
-    let* vb_l' = elim_pats_in_vbl to_me_expr vb_l in
+    let* vb_l' = revt @@ elim_pats_in_vbl to_me_expr vb_l in
     return @@ MDecl (rflag, vb_l')
 ;;
 
