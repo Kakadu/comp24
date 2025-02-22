@@ -42,3 +42,22 @@ val func_print_int : string
 val std_lib_names : string list
 val converte_infix : string -> string
 val is_binop : string -> bool
+
+(* INTERN LIB *)
+
+open Typedtree
+
+(**  *)
+val ty_get_by_idx : binder -> binder -> ty
+
+val func_get_by_idx : string
+
+(**  *)
+val ty_get_list_len_plus_one : binder -> ty
+
+val func_get_list_len_plus_one : string
+
+(**  *)
+val ty_fail_pt_match : binder -> ty
+
+val func_fail_pt_match : string

@@ -28,6 +28,22 @@ let un_op_prefix = "~"
 let sig_func_print_int = TArrow (TPrim "int", TPrim "unit")
 let func_print_int = "print_int"
 
+(* INTERNAL LIB *)
+
+let ty_get_by_idx binder1 binder2 =
+  TArrow (TVar binder1, TArrow (TPrim "int", TVar binder2))
+;;
+
+let func_get_by_idx = "get_by_idx"
+
+(*  *)
+let ty_get_list_len_plus_one binder = TArrow (TVar binder, TPrim "int")
+let func_get_list_len_plus_one = "get_list_len_plus_one"
+
+(*  *)
+let ty_fail_pt_match binder = TArrow (TPrim "unit", TVar binder)
+let func_fail_pt_match = "fail_pt_match"
+
 let converte_infix = function
   | name when name = op_mul -> "op_mul"
   | name when name = op_div -> "op_div"
