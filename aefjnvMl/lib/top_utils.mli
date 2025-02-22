@@ -13,4 +13,5 @@ module Ast_test_utils : sig
 
   val print_error : error -> unit
   val print_result : ('a -> unit) -> ('a, error) result -> unit
+  val ( let*! ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
 end

@@ -8,6 +8,12 @@ module Ast_test_utils = struct
 
   let ( let* ) = ( >>= )
 
+  let ( let*! ) x f =
+    let* x = x in
+    let* ast = f x in
+    return ast
+  ;;
+
   let ( let* ) x f =
     let* x = x in
     let* ast = f x in
