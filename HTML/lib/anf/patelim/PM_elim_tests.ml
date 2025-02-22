@@ -1,8 +1,9 @@
-module RemovePMTests = struct
+module PMElimTests = struct
   let test s =
     match Parser.parse_program s with
     | Ok actual ->
-      let prog = Remove_pm.remove_decls_pm actual in
+      let prog = PM_elim.pm_elim_decls actual in
+      let prog = Result.map (List.map IR_utils.transform_back_decl) prog in
       (match prog with
        | Ok prog -> Format.printf "%a\n" AstLib.Pp_ast.pp_prog prog
        | Error err -> Format.printf "%s\n" err)
@@ -11,7 +12,7 @@ module RemovePMTests = struct
 end
 
 let%expect_test _ =
-  RemovePMTests.test {|
+  PMElimTests.test {|
   let test1 x = 
     match (x) with 
     | a::b -> a + b 
@@ -25,7 +26,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  RemovePMTests.test
+  PMElimTests.test
     {|
   let test1 x (y:'a)= 
     match (x) with 
@@ -44,7 +45,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  RemovePMTests.test {|
+  PMElimTests.test {|
     let a l = 
         match l with 
         | hd, tl -> hd
@@ -58,7 +59,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test "typed pattern" =
-  RemovePMTests.test
+  PMElimTests.test
     {|
     let a = 
         match l with 
