@@ -125,10 +125,10 @@ let infix_op =
     ; token op_minus
     ; token op_less_eq
     ; token op_less
-    ; token op_more
     ; token op_more_eq
-    ; token op_eq
+    ; token op_more
     ; token op_2eq
+    ; token op_eq
     ; token op_not_eq
     ; token op_and
     ; token op_or
@@ -285,13 +285,8 @@ let e_decl pexpr =
     >>= fun first_vb ->
     many pars_secondary_vb >>| fun secondary_vbs -> rflag, first_vb :: secondary_vbs
   in
-  let validate_decl (rflag, vb_list) =
-    match rflag, vb_list with
-    | Nonrecursive, _ :: _ :: _ -> fail "Using 'and' available only with 'rec' flag"
-    | x -> return x
-  in
   let construct_decl (rflag, vb_list) = return @@ edecl rflag vb_list in
-  pars_decl >>= validate_decl >>= construct_decl
+  pars_decl >>= construct_decl
 ;;
 
 let e_ptrn_matching pexpr = lift2 (fun k v -> k, v) (pattern <* token "->") pexpr
@@ -352,17 +347,17 @@ let parse_syntax_err msg = Common.Errors.Parser (Syntax_error msg)
 let parse s =
   match parse_string ~consume:All program s with
   | Ok v -> Ok v
-  | Error _ -> Error (parse_syntax_err "Syntax error")
+  | Error msg -> Error (parse_syntax_err msg)
 ;;
 
 let parse_prefix s =
   match parse_string ~consume:Prefix program s with
   | Ok v -> Ok v
-  | Error _ -> Error (parse_syntax_err "Syntax error")
+  | Error msg -> Error (parse_syntax_err msg)
 ;;
 
 module PP = struct
   let pp_error ppf = function
-    | Common.Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "%s" msg
+    | Common.Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "Syntax error: %s" msg
   ;;
 end

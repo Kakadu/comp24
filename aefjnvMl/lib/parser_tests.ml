@@ -7,7 +7,7 @@ open Parser
 let parse_test s =
   match parse s with
   | Ok v -> Format.printf "%s\n" Common.Ast.(show_program v)
-  | Error _ -> Format.printf "Syntax error\n"
+  | Error msg -> Top_utils.Ast_test_utils.print_error msg
 ;;
 
 let%expect_test "base bin ops" =
@@ -348,6 +348,22 @@ let a = fun x -> fun y -> fun z -> x y z
                    ))
                 }
                ]
+             )))
+        ] |}]
+;;
+
+let%expect_test "currying" =
+  let () = parse_test {|
+let a = 1 
+and b = 2
+;;
+  |} in
+  [%expect
+    {|
+      [(Str_value
+          (Decl (Nonrecursive,
+             [{ vb_pat = (Pat_var "a"); vb_expr = (Exp_constant (Const_int 1)) };
+               { vb_pat = (Pat_var "b"); vb_expr = (Exp_constant (Const_int 2)) }]
              )))
         ] |}]
 ;;

@@ -1,12 +1,22 @@
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
+(* 
+let print patterns =
+  let pp_pattern_list fmt patterns =
+    Format.fprintf fmt "@[<hov 1>%a@]"
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ") Common.Ast.pp_pattern)
+      patterns
+  in
+  Format.printf "[%a]@." pp_pattern_list patterns
+in
+print plain_list; *)
 
 module CounterMonad = struct
   type fresh_id = int
 
   let name_prefix = Common.Naming.me_prefix
-  let fail_f = Me_ast.MExp_ident "rt_fail_pt_match" (*TODO: mb make apply*)
+  let fail_f = Me_ast.MExp_ident "rt_fail_pt_match" (*TODO: mb make apply + its type: [unit -> 'a]*)
   let get_by_idx_f = Me_ast.MExp_ident "rt_get_by_idx"
   let get_list_len_1_f = Me_ast.MExp_ident "rt_get_list_len_plus_one"
 
@@ -27,19 +37,17 @@ open Common.Ast
 open Me_ast
 
 (** bind * condition * then_branch *)
-type alt_pat = ident * m_expr * (m_expr -> m_expr)
+type semantic_bind = ident * m_expr
+
+type alt_pat = ident * m_expr * semantic_bind list
 
 let fail_app arg = MExp_apply (fail_f, arg)
 let me_name nm = MExp_ident nm
+let ite ~cond ~then_br ~else_br = MExp_ifthenelse (cond, then_br, else_br)
 
-let complete_with (_, cond, then_f) then_e else_br =
-  let then_br = then_f then_e in
-  MExp_ifthenelse (cond, then_br, else_br)
-;;
-
-let complete_with_fail (nm, cond, then_f) =
-  let else_br = fail_app @@ me_name nm in
-  complete_with (nm, cond, then_f) else_br
+let ite_with_fail ~fail_arg ~cond ~then_br =
+  let else_br = fail_app fail_arg in
+  ite ~cond ~then_br ~else_br
 ;;
 
 let me_nonrec_letin nm_s body cont =
@@ -73,6 +81,13 @@ let optimize_cons : pattern -> pattern -> pattern list =
   helper [ head_pt ] tail_pt
 ;;
 
+let sbinds_to_letin sbinds =
+  fold_left_t
+    sbinds
+    ~init:(return @@ fun cont -> cont)
+    ~f:(fun acc_f (nm, me) -> return @@ fun cont -> acc_f @@ me_nonrec_letin nm me cont)
+;;
+
 let rec elim_pattern : pattern -> alt_pat t =
   let elim_pt_list pt'list =
     let elim_pt_list_rev pt_list =
@@ -88,18 +103,13 @@ let rec elim_pattern : pattern -> alt_pat t =
     in
     let merge_alt_pts'list indexed_alt_pts =
       let* tup_bind_name = get_uniq_name in
-      let* bindings =
+      let* sbindings =
         let me_tup_bind_name = me_name tup_bind_name in
-        fold_left_t
-          indexed_alt_pts
-          ~init:(return (fun cont -> cont))
-          ~f:(fun acc_f (alt_pt, idx) ->
-            let under_bind_nm, _, _ = alt_pt in
-            let get_elem_from_bind = me_get_by_idx me_tup_bind_name idx in
-            let new_acc_f cont =
-              me_nonrec_letin under_bind_nm get_elem_from_bind @@ acc_f cont
-            in
-            return @@ new_acc_f)
+        fold_left_t indexed_alt_pts ~init:(return []) ~f:(fun acc_sbinds (alt_pt, idx) ->
+          let under_bind_nm, _, _ = alt_pt in
+          let get_elem_from_bind = me_get_by_idx me_tup_bind_name idx in
+          let new_acc_sbinds = (under_bind_nm, get_elem_from_bind) :: acc_sbinds in
+          return @@ new_acc_sbinds)
       in
       let* (alt_pt, _), alt_pts_tl =
         match indexed_alt_pts with
@@ -114,42 +124,34 @@ let rec elim_pattern : pattern -> alt_pat t =
             let merged_cond = me_and_func cur_cond acc_e in
             return merged_cond)
         in
-        return @@ bindings unbounded_common_cond
+        let* letin_bindings = sbinds_to_letin sbindings in
+        return @@ letin_bindings unbounded_common_cond
       in
-      let* common_body =
-        let* unbounded_common_body =
-          let _, _, then_f = alt_pt in
-          fold_left_t alt_pts_tl ~init:(return @@ then_f) ~f:(fun acc_f (alt_pt, _) ->
-            let _, _, cur_then_f = alt_pt in
-            let merged_then_f cont = cur_then_f @@ acc_f cont in
-            return @@ merged_then_f)
-        in
-        return @@ fun cont -> bindings @@ unbounded_common_body cont
-      in
-      return (tup_bind_name, common_cond, common_body)
+      return (tup_bind_name, common_cond, sbindings)
     in
     let* indexed_alt_pts = elim_pt_list_rev pt'list in
     merge_alt_pts'list indexed_alt_pts
   in
   fun pt ->
     match pt with
-    | Pat_var bind_nm -> return @@ (bind_nm, me_bool true, fun then_e -> then_e)
+    | Pat_var bind_nm -> return @@ (bind_nm, me_bool true, [])
     | Pat_any ->
       let* bind_nm = get_uniq_name in
-      return @@ (bind_nm, me_bool true, fun then_e -> then_e)
+      return @@ (bind_nm, me_bool true, [])
     | Pat_const c ->
       let* bind_name = get_uniq_name in
       let me_cond = me_const_comperison c (MExp_ident bind_name) in
-      return @@ (bind_name, me_cond, fun then_e -> then_e)
+      return @@ (bind_name, me_cond, [])
     | Pat_constraint (pt, _) -> elim_pattern pt
+    (* TODO: *)
     | Pat_tuple pt'list -> elim_pt_list pt'list
     | Pat_cons (head_pt, tail_pt) ->
       let plain_list = optimize_cons head_pt tail_pt in
       let me_pt_elem_cnt = MExp_constant (Const_int (List.length plain_list)) in
-      let* bind_nm, cond, then_br = elim_pt_list plain_list in
+      let* bind_nm, cond, sbinds = elim_pt_list plain_list in
       let* last_elem =
         match List.rev plain_list with
-        | x :: [] -> return x
+        | x :: _ -> return x
         | _ -> fail "Pat_cons has at least two elements"
       in
       let len_cond_me =
@@ -159,18 +161,21 @@ let rec elim_pattern : pattern -> alt_pat t =
         | _ -> me_more_eq me_list_len me_pt_elem_cnt
       in
       let lazy_if_cond = MExp_ifthenelse (len_cond_me, cond, me_bool false) in
-      return @@ (bind_nm, lazy_if_cond, then_br)
+      return @@ (bind_nm, lazy_if_cond, sbinds)
 ;;
 
 let to_me_vbs to_me_expr { vb_pat; vb_expr } =
-  match vb_pat with
-  | Pat_const _ | Pat_tuple _ | Pat_cons _ ->
-    fail "TODO: rewrite deconstructors as mne matches and use [to_me_expr]"
-  | pt ->
+  let* nm, cond, sbinds = elim_pattern vb_pat in
+  let* binded_me' =
+    let fail_arg = me_name nm in
     let* bind_body = to_me_expr vb_expr in
-    let* nm, cond, then_f = elim_pattern pt in
-    let bind_body' = complete_with_fail (nm, cond, then_f) bind_body in
-    return [ { m_vb_pat = Me_name nm; m_vb_expr = bind_body' } ]
+    return @@ ite_with_fail ~fail_arg ~cond ~then_br:bind_body
+  in
+  let m_vb_pat = Me_name nm in
+  let main_vb = { m_vb_pat; m_vb_expr = binded_me' } in
+  revt
+  @@ fold_left_t sbinds ~init:(return [ main_vb ]) ~f:(fun acc (sbind_nm, sbind_me) ->
+    return @@ ({ m_vb_pat = Me_name sbind_nm; m_vb_expr = sbind_me } :: acc))
 ;;
 
 let elim_pats_in_vbl to_me_expr vb_l =
@@ -208,8 +213,12 @@ let rec to_me_expr e =
     return @@ MExp_ifthenelse (e1', e2', e3')
   | Exp_function (pt, e') ->
     let* fun_body = to_me_expr e' in
-    let* nm, cond, then_f = elim_pattern pt in
-    let fun_body' = complete_with_fail (nm, cond, then_f) fun_body in
+    let* nm, cond, sbinds = elim_pattern pt in
+    let* then_br =
+      let* then_f = sbinds_to_letin sbinds in
+      return @@ then_f fun_body
+    in
+    let fun_body' = ite_with_fail ~fail_arg:(me_name nm) ~cond ~then_br in
     return @@ MExp_function (Me_name nm, fun_body')
   | Exp_let (Decl (r_flag, vb_l), e) ->
     let* vb_l' = elim_pats_in_vbl to_me_expr vb_l in
@@ -223,16 +232,21 @@ let rec to_me_expr e =
         branches
         ~init:(return (me_nonrec_letin bind_name e_for_match'))
         ~f:(fun acc_f (pt, br_e) ->
-          let* br_e' = to_me_expr br_e in
-          let* nm, cond, then_f = elim_pattern pt in
+          let* nm, cond, sbinds = elim_pattern pt in
+          let* then_br =
+            let* br_e' = to_me_expr br_e in
+            let* then_f = sbinds_to_letin sbinds in
+            return @@ then_f br_e'
+          in
           let new_acc_f cont =
             acc_f
             @@ me_nonrec_letin nm (MExp_ident bind_name)
-            @@ complete_with (nm, cond, then_f) br_e' cont
+            @@ ite ~cond ~then_br ~else_br:cont
           in
           return new_acc_f)
     in
-    return @@ f_match' fail_f
+    let fail_br = fail_app @@ me_name bind_name in
+    return @@ f_match' fail_br
 ;;
 
 let to_me_struct_item = function
