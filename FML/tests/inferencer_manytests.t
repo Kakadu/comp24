@@ -25,7 +25,7 @@
   Error: : end_of_input
 
   $ ./inferencer_runner.exe < manytests/typed/008ascription.ml
-  Error: : no more choices
+  TODO: Not implemented.
 
   $ ./inferencer_runner.exe < manytests/typed/009let_poly.ml
   val temp : int * bool
@@ -37,4 +37,4 @@
   TODO: Not implemented.
 
   $ ./inferencer_runner.exe < manytests/typed/016lists.ml
-  Error: : end_of_input
+  TODO: Not implemented.

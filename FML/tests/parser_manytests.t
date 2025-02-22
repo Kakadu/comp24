@@ -500,7 +500,62 @@
   Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/008ascription.ml
-  Error: : no more choices
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "addi"),
+         (EFun ((PIdentifier "f"),
+            (EFun ((PIdentifier "g"),
+               (EFun ((PIdentifier "x"),
+                  (EConstraint (
+                     (EApplication (
+                        (EApplication ((EIdentifier "f"), (EIdentifier "x"))),
+                        (EConstraint (
+                           (EApplication ((EIdentifier "g"), (EIdentifier "x")
+                              )),
+                           ABool))
+                        )),
+                     AInt))
+                  ))
+               ))
+            ))
+         )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "main"),
+          (ELetIn (NoRec, PUnit,
+             (EApplication ((EIdentifier "print_int"),
+                (EApplication (
+                   (EApplication (
+                      (EApplication ((EIdentifier "addi"),
+                         (EFun ((PIdentifier "x"),
+                            (EFun ((PIdentifier "b"),
+                               (EIf ((EIdentifier "b"),
+                                  (EApplication (
+                                     (EApplication ((EIdentifier "( + )"),
+                                        (EIdentifier "x"))),
+                                     (EConst (CInt 1)))),
+                                  (EApplication (
+                                     (EApplication ((EIdentifier "( * )"),
+                                        (EIdentifier "x"))),
+                                     (EConst (CInt 2))))
+                                  ))
+                               ))
+                            ))
+                         )),
+                      (EFun ((PIdentifier "_start"),
+                         (EApplication (
+                            (EApplication ((EIdentifier "( = )"),
+                               (EApplication (
+                                  (EApplication ((EIdentifier "( / )"),
+                                     (EIdentifier "_start"))),
+                                  (EConst (CInt 2))))
+                               )),
+                            (EConst (CInt 0))))
+                         ))
+                      )),
+                   (EConst (CInt 4))))
+                )),
+             (EConst (CInt 0))))
+          )))
+    ]
 
   $ ./parser_runner.exe < manytests/typed/009let_poly.ml
   [(SingleDecl

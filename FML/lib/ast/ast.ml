@@ -81,7 +81,7 @@ let econst c = EConst c
 let eidentifier v = EIdentifier v
 let etuple l = ETuple l
 let efun arg expr = EFun (arg, expr)
-
+let econstraint e t = EConstraint (e, t)
 (* ---------------------------- *)
 
 (* Constructor for declaration *)
