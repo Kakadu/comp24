@@ -294,8 +294,10 @@ let rec rp_expr = function
        Rp_e_fun (new_args, case_expr)
      | _ ->
        let pat = Ast.P_tuple (List.hd_exn pat_list, List.tl_exn pat_list) in
-       let to_match = let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
-       Rp_e_tuple vals in
+       let to_match =
+         let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
+         Rp_e_tuple vals
+       in
        let case_expr = create_case (Rp_e_ident "#t") pat new_body match_failure in
        Rp_e_fun (new_args, Rp_e_let (Rp_non_rec ("#t", to_match), case_expr)))
   | E_match (e, case_list) ->
