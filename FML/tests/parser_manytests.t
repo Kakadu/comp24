@@ -687,4 +687,221 @@
     ]
 
   $ ./parser_runner.exe < manytests/typed/016lists.ml
-  Error: : end_of_input
+  [(SingleDecl
+      (DDeclaration (Rec, (PIdentifier "length"),
+         (EFun ((PIdentifier "xs"),
+            (EMatch ((EIdentifier "xs"),
+               [(PNill, (EConst (CInt 0)));
+                 ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                  (EApplication (
+                     (EApplication ((EIdentifier "( + )"), (EConst (CInt 1)))),
+                     (EApplication ((EIdentifier "length"), (EIdentifier "tl")
+                        ))
+                     )))
+                 ]
+               ))
+            ))
+         )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "length_tail"),
+          (ELetIn (Rec, (PIdentifier "helper"),
+             (EFun ((PIdentifier "acc"),
+                (EFun ((PIdentifier "xs"),
+                   (EMatch ((EIdentifier "xs"),
+                      [(PNill, (EIdentifier "acc"));
+                        ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                         (EApplication (
+                            (EApplication ((EIdentifier "helper"),
+                               (EApplication (
+                                  (EApplication ((EIdentifier "( + )"),
+                                     (EIdentifier "acc"))),
+                                  (EConst (CInt 1))))
+                               )),
+                            (EIdentifier "tl"))))
+                        ]
+                      ))
+                   ))
+                )),
+             (EApplication ((EIdentifier "helper"), (EConst (CInt 0))))))
+          )));
+    (SingleDecl
+       (DDeclaration (Rec, (PIdentifier "map"),
+          (EFun ((PIdentifier "f"),
+             (EFun ((PIdentifier "xs"),
+                (EMatch ((EIdentifier "xs"),
+                   [(PNill, ENill);
+                     ((PCons ((PIdentifier "a"), PNill)),
+                      (ECons (
+                         (EApplication ((EIdentifier "f"), (EIdentifier "a"))),
+                         ENill)));
+                     ((PCons ((PIdentifier "a"),
+                         (PCons ((PIdentifier "b"), PNill)))),
+                      (ECons (
+                         (EApplication ((EIdentifier "f"), (EIdentifier "a"))),
+                         (ECons (
+                            (EApplication ((EIdentifier "f"), (EIdentifier "b")
+                               )),
+                            ENill))
+                         )));
+                     ((PCons ((PIdentifier "a"),
+                         (PCons ((PIdentifier "b"),
+                            (PCons ((PIdentifier "c"), PNill))))
+                         )),
+                      (ECons (
+                         (EApplication ((EIdentifier "f"), (EIdentifier "a"))),
+                         (ECons (
+                            (EApplication ((EIdentifier "f"), (EIdentifier "b")
+                               )),
+                            (ECons (
+                               (EApplication ((EIdentifier "f"),
+                                  (EIdentifier "c"))),
+                               ENill))
+                            ))
+                         )));
+                     ((PCons ((PIdentifier "a"),
+                         (PCons ((PIdentifier "b"),
+                            (PCons ((PIdentifier "c"),
+                               (PCons ((PIdentifier "d"), (PIdentifier "tl")))
+                               ))
+                            ))
+                         )),
+                      (ECons (
+                         (EApplication ((EIdentifier "f"), (EIdentifier "a"))),
+                         (ECons (
+                            (EApplication ((EIdentifier "f"), (EIdentifier "b")
+                               )),
+                            (ECons (
+                               (EApplication ((EIdentifier "f"),
+                                  (EIdentifier "c"))),
+                               (ECons (
+                                  (EApplication ((EIdentifier "f"),
+                                     (EIdentifier "d"))),
+                                  (EApplication (
+                                     (EApplication ((EIdentifier "map"),
+                                        (EIdentifier "f"))),
+                                     (EIdentifier "tl")))
+                                  ))
+                               ))
+                            ))
+                         )))
+                     ]
+                   ))
+                ))
+             ))
+          )));
+    (SingleDecl
+       (DDeclaration (Rec, (PIdentifier "append"),
+          (EFun ((PIdentifier "xs"),
+             (EFun ((PIdentifier "ys"),
+                (EMatch ((EIdentifier "xs"),
+                   [(PNill, (EIdentifier "ys"));
+                     ((PCons ((PIdentifier "x"), (PIdentifier "xs"))),
+                      (ECons ((EIdentifier "x"),
+                         (EApplication (
+                            (EApplication ((EIdentifier "append"),
+                               (EIdentifier "xs"))),
+                            (EIdentifier "ys")))
+                         )))
+                     ]
+                   ))
+                ))
+             ))
+          )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "concat"),
+          (ELetIn (Rec, (PIdentifier "helper"),
+             (EFun ((PIdentifier "xs"),
+                (EMatch ((EIdentifier "xs"),
+                   [(PNill, ENill);
+                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                      (EApplication (
+                         (EApplication ((EIdentifier "append"),
+                            (EIdentifier "h"))),
+                         (EApplication ((EIdentifier "helper"),
+                            (EIdentifier "tl")))
+                         )))
+                     ]
+                   ))
+                )),
+             (EIdentifier "helper")))
+          )));
+    (SingleDecl
+       (DDeclaration (Rec, (PIdentifier "iter"),
+          (EFun ((PIdentifier "f"),
+             (EFun ((PIdentifier "xs"),
+                (EMatch ((EIdentifier "xs"),
+                   [(PNill, EUnit);
+                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                      (ELetIn (NoRec, PUnit,
+                         (EApplication ((EIdentifier "f"), (EIdentifier "h"))),
+                         (EApplication (
+                            (EApplication ((EIdentifier "iter"),
+                               (EIdentifier "f"))),
+                            (EIdentifier "tl")))
+                         )))
+                     ]
+                   ))
+                ))
+             ))
+          )));
+    (SingleDecl
+       (DDeclaration (Rec, (PIdentifier "cartesian"),
+          (EFun ((PIdentifier "xs"),
+             (EFun ((PIdentifier "ys"),
+                (EMatch ((EIdentifier "xs"),
+                   [(PNill, ENill);
+                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                      (EApplication (
+                         (EApplication ((EIdentifier "append"),
+                            (EApplication (
+                               (EApplication ((EIdentifier "map"),
+                                  (EFun ((PIdentifier "a"),
+                                     (ETuple
+                                        [(EIdentifier "h"); (EIdentifier "a")])
+                                     ))
+                                  )),
+                               (EIdentifier "ys")))
+                            )),
+                         (EApplication (
+                            (EApplication ((EIdentifier "cartesian"),
+                               (EIdentifier "tl"))),
+                            (EIdentifier "ys")))
+                         )))
+                     ]
+                   ))
+                ))
+             ))
+          )));
+    (SingleDecl
+       (DDeclaration (NoRec, (PIdentifier "main"),
+          (ELetIn (NoRec, PUnit,
+             (EApplication (
+                (EApplication ((EIdentifier "iter"), (EIdentifier "print_int")
+                   )),
+                (ECons ((EConst (CInt 1)),
+                   (ECons ((EConst (CInt 2)),
+                      (ECons ((EConst (CInt 3)), ENill))))
+                   ))
+                )),
+             (ELetIn (NoRec, PUnit,
+                (EApplication ((EIdentifier "print_int"),
+                   (EApplication ((EIdentifier "length"),
+                      (EApplication (
+                         (EApplication ((EIdentifier "cartesian"),
+                            (ECons ((EConst (CInt 1)),
+                               (ECons ((EConst (CInt 2)), ENill))))
+                            )),
+                         (ECons ((EConst (CInt 1)),
+                            (ECons ((EConst (CInt 2)),
+                               (ECons ((EConst (CInt 3)),
+                                  (ECons ((EConst (CInt 4)), ENill))))
+                               ))
+                            ))
+                         ))
+                      ))
+                   )),
+                (EConst (CInt 0))))
+             ))
+          )))
+    ]
+ 

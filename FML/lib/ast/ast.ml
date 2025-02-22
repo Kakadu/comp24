@@ -35,6 +35,7 @@ type pattern =
 [@@deriving show { with_path = false }]
 
 type expression =
+  | EUnit
   | ENill
   | EConstraint of expression * type_annotation
   | EConst of const

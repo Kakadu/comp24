@@ -171,7 +171,7 @@ let parse_pattern_with_type =
     (skip_wspace *> char ':' *> parse_type <* char ')')
 ;;
 
-let parse_pattern = parse_pattern_with_type <|> parse_pattern_wout_type
+let parse_pattern =  parse_pattern_wout_type <|> parse_pattern_with_type
 
 (* ------------------------- *)
 
@@ -201,6 +201,8 @@ let or_ = bin_op "||" (EIdentifier "( || )")
 
 let parse_econst = parse_const econst
 let parse_identifier = parse_identifier eidentifier
+
+let parse_eunit = token "(" *> token ")" >>| fun _ -> EUnit
 
 let parse_etuple p_expr =
   parens @@ lift2 (fun h tl -> etuple (h :: tl)) p_expr (many1 (token "," *> p_expr))
@@ -233,7 +235,7 @@ let parse_eif arg =
 
 let parse_ematch pexpr =
   let pcase pexpr =
-    lift2 (fun p e -> p, e) (option "" (token "|") *> parse_pattern) (token "->" *> pexpr)
+    lift2 (fun p e -> p, e) (parse_pattern <|> token "|" *> parse_pattern) (token "->" *> pexpr)
   in
   lift2
     (fun expr cases -> EMatch (expr, cases))
@@ -281,6 +283,7 @@ let parse_expr =
       ; parse_identifier
       ; parse_econst
       ; parse_eif expr
+      ; parse_eunit 
       ; parse_let expr
       ]
   in
