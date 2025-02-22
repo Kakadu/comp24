@@ -26,6 +26,8 @@ type location =
   | Loc_reg of reg
   | Loc_mem of reg * int
 
+let idc_loc = Loc_reg Zero
+
 type op =
   (* R-type *)
   | ADD

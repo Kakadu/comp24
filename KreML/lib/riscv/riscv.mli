@@ -23,6 +23,7 @@ type location =
   | Loc_reg of reg
   | Loc_mem of reg * int
 
+val idc_loc : location
 
 type op =
   (* R-type *)
