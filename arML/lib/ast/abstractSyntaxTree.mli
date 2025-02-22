@@ -24,10 +24,8 @@ type type_defenition =
   | TDPolymorphic of identifier (** Polymorphic type (x: 'a) *)
   | TDGround of ground_type_defenition (** Int, Bool, Char, etc type *)
   | TDArrow of type_defenition * type_defenition (** Function type (f: (int -> int)) *)
-  | TDTuple of
-      type_defenition
-      * type_defenition
-      * type_defenition list (** Tuple type (x: (int, bool)) *)
+  | TDTuple of type_defenition * type_defenition * type_defenition list
+  (** Tuple type (x: (int, bool)) *)
   | TDList of type_defenition (** List type (x: int list) *)
 [@@deriving show { with_path = false }]
 
