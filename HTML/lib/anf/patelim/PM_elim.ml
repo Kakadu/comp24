@@ -130,8 +130,9 @@ let rec pm_elim_expr expr =
       let* e_res = helper e in
       let* fresh = fresh in
       let evaluated_name = RuntimeUtils.create_var_for_eval (string_of_int fresh) in
-      let evaluated_pat = pop_pat (pid evaluated_name) in
-      let evaluated_e = eid (ident_of_definable (ident_letters evaluated_name)) in
+      let evaluated_pat, evaluated_e =
+        RuntimeUtils.create_pop_and_expr_for_eval evaluated_name
+      in
       let* no_pm_els =
         map
           (fun (pat, e) ->
