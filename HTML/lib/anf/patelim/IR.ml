@@ -1,5 +1,6 @@
 open AstLib.Ast
 
+(* TODO: probably should be moved to common *)
 type bin_op =
   | Add (** + *)
   | Sub (** - *)
