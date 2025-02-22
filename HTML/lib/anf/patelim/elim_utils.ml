@@ -43,9 +43,7 @@ module RuntimeEnv = struct
     ; typ : typ
     }
 
-  let apply f x =
-    return @@ e_typed (eapp (e_typed (eid (ident_of_definable (ident_letters f.name)))) x)
-  ;;
+  let apply f x = return @@ eapp (eid (ident_of_definable (ident_letters f.name))) x
 
   (** add it to infer *)
   let generic = tvar "a"
@@ -71,4 +69,14 @@ module Env = struct
       | Some _ -> fail "Key intersection"
       | None -> return @@ extend acc key data)
   ;;
+end
+
+module RuntimeUtils = struct
+  open RuntimeEnv
+  open IR
+
+  let apply_get_head head = apply get_head head
+  let apply_get_tl tl = apply get_tl tl
+  let apply_get_nth n e = apply get_nth (etuple (econst (CInt n)) e [])
+  let apply_not_exhaustive_pm () = apply not_exhaustive_pm (econst CUnit)
 end

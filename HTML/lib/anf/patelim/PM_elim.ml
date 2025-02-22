@@ -14,8 +14,8 @@ let rec is_pattern_suitable = function
   | PConst x, e -> return @@ ebin_op Eq (econst x) e
   | PList (p1, p2), e ->
     let is_not_empty = ebin_op Neq (econst CNil) e in
-    let* head = RuntimeEnv.apply RuntimeEnv.get_head e in
-    let* tl = RuntimeEnv.apply RuntimeEnv.get_tl e in
+    let* head = RuntimeUtils.apply_get_head e in
+    let* tl = RuntimeUtils.apply_get_tl e in
     let* head_res = is_pattern_suitable (p1, head) in
     let* tl_res = is_pattern_suitable (p2, tl) in
     return @@ ebin_op And (ebin_op And is_not_empty head_res) tl_res
@@ -23,9 +23,8 @@ let rec is_pattern_suitable = function
     let all_pats = p1 :: p2 :: ps in
     let check_nth n pat_n =
       let* nth_el =
-        RuntimeEnv.apply
-          RuntimeEnv.get_nth
-          (e_typed ~typ:(get_typ_of_pat pat_n) (etuple (econst (CInt n)) e []))
+        let* nth_el = RuntimeUtils.apply_get_nth n e in
+        return @@ e_typed ~typ:(get_typ_of_pat pat_n) nth_el
       in
       is_pattern_suitable (pat_n, nth_el)
     in
@@ -47,8 +46,8 @@ let rec get_pattern_vars = function
   | PConst _, _ | PId "_", _ -> return empty
   | PId id, e -> return @@ extend empty id e
   | PList (p1, p2), e ->
-    let* head = RuntimeEnv.apply RuntimeEnv.get_head e in
-    let* tl = RuntimeEnv.apply RuntimeEnv.get_tl e in
+    let* head = RuntimeUtils.apply_get_head e in
+    let* tl = RuntimeUtils.apply_get_tl e in
     let* p1_map = get_pattern_vars (p1, head) in
     let* p2_map = get_pattern_vars (p2, tl) in
     Env.merge p1_map p2_map
@@ -58,9 +57,7 @@ let rec get_pattern_vars = function
       List.fold_left
         (fun acc x ->
           let* acc, i = acc in
-          let* nth_el =
-            RuntimeEnv.apply RuntimeEnv.get_nth (etuple (econst (CInt i)) e [])
-          in
+          let* nth_el = RuntimeUtils.apply_get_nth i e in
           let* pattern_vars = get_pattern_vars (x, nth_el) in
           let* acc' = merge acc pattern_vars in
           return (acc', i + 1))
@@ -92,7 +89,7 @@ let pm_elim =
       (match cond with
        | NoPMEConst (CBool true) -> return @@ res_expr
        | _ -> return @@ eif cond res_expr res_tl)
-    | [], _ -> RuntimeEnv.apply RuntimeEnv.not_exhaustive_pm (econst CUnit)
+    | [], _ -> RuntimeUtils.apply_not_exhaustive_pm ()
   in
   helper
 ;;
