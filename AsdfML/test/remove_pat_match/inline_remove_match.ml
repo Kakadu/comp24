@@ -35,14 +35,11 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let tuple_sum = (fun `arg_0 ->
-       if (( = ) (`tuple_len `arg_0) 2)
-       then
-         let `tuple_0 = `arg_0 in
-         let a = (`get_tuple_field `tuple_0 0) in
-         let b = (`get_tuple_field `tuple_0 1) in
-         (( + ) a b)
-       else (panic ()))
+    let tuple_sum = (fun #arg_0 ->
+       let #tuple_0 = #arg_0 in
+       let a = (`get_tuple_field #tuple_0 0) in
+       let b = (`get_tuple_field #tuple_0 1) in
+       (( + ) a b))
     |}]
 ;;
 
@@ -55,15 +52,12 @@ let%expect_test _ =
   [%expect
     {|
     let f = (fun x ->
-       if (( && ) (( = ) (`tuple_len x) 2) (( = ) (`tuple_len (`get_tuple_field x 1)) 2))
-       then
-         let `tuple_0 = x in
-         let a = (`get_tuple_field `tuple_0 0) in
-         let `tuple_1 = (`get_tuple_field `tuple_0 1) in
-         let b = (`get_tuple_field `tuple_1 0) in
-         let c = (`get_tuple_field `tuple_1 1) in
-         (( + ) (( + ) a b) c)
-       else 0)
+       let #tuple_0 = x in
+       let a = (`get_tuple_field #tuple_0 0) in
+       let #tuple_1 = (`get_tuple_field #tuple_0 1) in
+       let b = (`get_tuple_field #tuple_1 0) in
+       let c = (`get_tuple_field #tuple_1 1) in
+       (( + ) (( + ) a b) c))
     |}]
 ;;
 
@@ -79,13 +73,13 @@ let%expect_test _ =
     let f = (fun x ->
        if (( && ) (( && ) (( = ) (`list_len x) 2) (( = ) (`list_len (`list_field x 0)) 2)) (( = ) (`list_len (`list_field x 1)) 2))
        then
-         let `list_0 = x in
-         let `list_2 = (`list_field `list_0 0) in
-         let a = (`list_field `list_2 0) in
-         let b = (`list_field `list_2 1) in
-         let `list_1 = (`list_field `list_0 1) in
-         let c = (`list_field `list_1 0) in
-         let d = (`list_field `list_1 1) in
+         let #list_0 = x in
+         let #list_2 = (`list_field #list_0 0) in
+         let a = (`list_field #list_2 0) in
+         let b = (`list_field #list_2 1) in
+         let #list_1 = (`list_field #list_0 1) in
+         let c = (`list_field #list_1 0) in
+         let d = (`list_field #list_1 1) in
          (( + ) (( + ) (( + ) a b) c) d)
        else 0)
     |}]
@@ -101,14 +95,11 @@ let%expect_test _ =
   [%expect
     {|
     let _ =
-       let tuple_sum = (fun `arg_0 ->
-         if (( = ) (`tuple_len `arg_0) 2)
-         then
-           let `tuple_0 = `arg_0 in
-           let a = (`get_tuple_field `tuple_0 0) in
-           let b = (`get_tuple_field `tuple_0 1) in
-           (( + ) a b)
-         else (panic ())) in
+       let tuple_sum = (fun #arg_0 ->
+         let #tuple_0 = #arg_0 in
+         let a = (`get_tuple_field #tuple_0 0) in
+         let b = (`get_tuple_field #tuple_0 1) in
+         (( + ) a b)) in
        (tuple_sum (1, 2))
     |}]
 ;;
@@ -219,25 +210,19 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let cross = (fun `arg_0 `arg_1 ->
-       if (( = ) (`tuple_len `arg_1) 3)
-       then
-         let `tuple_1 = `arg_1 in
-         let x2 = (`get_tuple_field `tuple_1 0) in
-         let y2 = (`get_tuple_field `tuple_1 1) in
-         let z2 = (`get_tuple_field `tuple_1 2) in
-         if (( = ) (`tuple_len `arg_0) 3)
-         then
-           let `tuple_0 = `arg_0 in
-           let x1 = (`get_tuple_field `tuple_0 0) in
-           let y1 = (`get_tuple_field `tuple_0 1) in
-           let z1 = (`get_tuple_field `tuple_0 2) in
-           let x = (( - ) (( * ) y1 z2) (( * ) z1 y2)) in
-           let y = (( - ) (( * ) z1 x2) (( * ) x1 z2)) in
-           let z = (( - ) (( * ) x1 y2) (( * ) y1 x2)) in
-           (x, y, z)
-         else (panic ())
-       else (panic ()))
+    let cross = (fun #arg_0 #arg_1 ->
+       let #tuple_1 = #arg_1 in
+       let x2 = (`get_tuple_field #tuple_1 0) in
+       let y2 = (`get_tuple_field #tuple_1 1) in
+       let z2 = (`get_tuple_field #tuple_1 2) in
+       let #tuple_0 = #arg_0 in
+       let x1 = (`get_tuple_field #tuple_0 0) in
+       let y1 = (`get_tuple_field #tuple_0 1) in
+       let z1 = (`get_tuple_field #tuple_0 2) in
+       let x = (( - ) (( * ) y1 z2) (( * ) z1 y2)) in
+       let y = (( - ) (( * ) z1 x2) (( * ) x1 z2)) in
+       let z = (( - ) (( * ) x1 y2) (( * ) y1 x2)) in
+       (x, y, z))
     |}]
 ;;
 
@@ -261,21 +246,18 @@ let%expect_test _ =
          if (`list_is_empty tuples)
          then acc
          else
-           if (( && ) (not (`list_is_empty tuples)) (( = ) (`tuple_len (`list_hd tuples)) 3))
+           if (not (`list_is_empty tuples))
            then
-             let `tuple_1 = (`list_hd tuples) in
-             let a = (`get_tuple_field `tuple_1 0) in
-             let b = (`get_tuple_field `tuple_1 1) in
-             let c = (`get_tuple_field `tuple_1 2) in
+             let #tuple_1 = (`list_hd tuples) in
+             let a = (`get_tuple_field #tuple_1 0) in
+             let b = (`get_tuple_field #tuple_1 1) in
+             let c = (`get_tuple_field #tuple_1 2) in
              let tl = (`list_tl tuples) in
-             if (( = ) (`tuple_len acc) 3)
-             then
-               let `tuple_0 = acc in
-               let x = (`get_tuple_field `tuple_0 0) in
-               let y = (`get_tuple_field `tuple_0 1) in
-               let z = (`get_tuple_field `tuple_0 2) in
-               (helper ((( + ) a x), (( + ) b y), (( + ) c z)) tl)
-             else (panic ())
+             let #tuple_0 = acc in
+             let x = (`get_tuple_field #tuple_0 0) in
+             let y = (`get_tuple_field #tuple_0 1) in
+             let z = (`get_tuple_field #tuple_0 2) in
+             (helper ((( + ) a x), (( + ) b y), (( + ) c z)) tl)
            else (panic ())) in
        (helper (0, 0, 0) tuples))
     |}]
@@ -301,9 +283,9 @@ let%expect_test _ =
          else
            if (( = ) (`list_len list) 2)
            then
-             let `list_0 = list in
-             let x = (`list_field `list_0 0) in
-             let y = (`list_field `list_0 1) in
+             let #list_0 = list in
+             let x = (`list_field #list_0 0) in
+             let y = (`list_field #list_0 1) in
              2
            else
              if (( && ) (not (`list_is_empty list)) (not (`list_is_empty (`list_tl list))))
@@ -350,12 +332,12 @@ let%expect_test _ =
     {|
     let f = (fun x ->
        if (( && ) (( = ) (`list_len x) 1) (( = ) (`list_field x 0) 1))
-       then let `list_1 = x in
+       then let #list_1 = x in
          1
        else
          if (( = ) (`list_len x) 1)
-         then let `list_0 = x in
-           let x = (`list_field `list_0 0) in
+         then let #list_0 = x in
+           let x = (`list_field #list_0 0) in
            x
          else
            if (not (`list_is_empty x))
@@ -368,21 +350,35 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {|
+    let (a, b, c) = (1, 2, 3)
+  |};
+  [%expect {|
+    let #temp_match_0 = let #temp_match_0 = (1, 2, 3) in
+       #temp_match_0
+    let #tuple_0 = #temp_match_0
+    let a = (`get_tuple_field #tuple_0 0)
+    let b = (`get_tuple_field #tuple_0 1)
+    let c = (`get_tuple_field #tuple_0 2)
+    |}]
+;;
+
+let%expect_test _ =
+  test {|
     let list = [(1, 2); (3, 4); (5, 6)]
     let (a, b) :: c :: tl = list
   |};
   [%expect
     {|
     let list = [(1, 2); (3, 4); (5, 6)]
-    let `temp_match_0 = let `temp_match_0 = list in
-      if (( && ) (not (`list_is_empty `temp_match_0)) (( && ) (( = ) (`tuple_len (`list_hd `temp_match_0)) 2) (not (`list_is_empty (`list_tl `temp_match_0)))))
-      then `temp_match_0
+    let #temp_match_0 = let #temp_match_0 = list in
+      if (( && ) (not (`list_is_empty #temp_match_0)) (not (`list_is_empty (`list_tl #temp_match_0))))
+      then #temp_match_0
       else (panic ())
-    let `tuple_0 = (`list_hd `temp_match_0)
-    let a = (`get_tuple_field `tuple_0 0)
-    let b = (`get_tuple_field `tuple_0 1)
-    let c = (`list_hd (`list_tl `temp_match_0))
-    let tl = (`list_tl (`list_tl `temp_match_0))
+    let #tuple_0 = (`list_hd #temp_match_0)
+    let a = (`get_tuple_field #tuple_0 0)
+    let b = (`get_tuple_field #tuple_0 1)
+    let c = (`list_hd (`list_tl #temp_match_0))
+    let tl = (`list_tl (`list_tl #temp_match_0))
     |}]
 ;;
 
@@ -392,19 +388,19 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `temp_match_0 = let `temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
-       if (( && ) (( && ) (( && ) (( = ) (`tuple_len `temp_match_0) 4) (( = ) (`tuple_len (`get_tuple_field `temp_match_0 1)) 2)) (( = ) (`list_len (`get_tuple_field `temp_match_0 2)) 2)) (not (`list_is_empty (`get_tuple_field `temp_match_0 3))))
-       then `temp_match_0
+    let #temp_match_0 = let #temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
+       if (( && ) (( = ) (`list_len (`get_tuple_field #temp_match_0 2)) 2) (not (`list_is_empty (`get_tuple_field #temp_match_0 3))))
+       then #temp_match_0
        else (panic ())
-    let `tuple_0 = `temp_match_0
-    let a = (`get_tuple_field `tuple_0 0)
-    let `tuple_2 = (`get_tuple_field `tuple_0 1)
-    let b = (`get_tuple_field `tuple_2 0)
-    let c = (`get_tuple_field `tuple_2 1)
-    let `list_1 = (`get_tuple_field `tuple_0 2)
-    let d = (`list_field `list_1 0)
-    let e = (`list_field `list_1 1)
-    let f = (`list_hd (`get_tuple_field `tuple_0 3))
-    let g = (`list_tl (`get_tuple_field `tuple_0 3))
+    let #tuple_0 = #temp_match_0
+    let a = (`get_tuple_field #tuple_0 0)
+    let #tuple_2 = (`get_tuple_field #tuple_0 1)
+    let b = (`get_tuple_field #tuple_2 0)
+    let c = (`get_tuple_field #tuple_2 1)
+    let #list_1 = (`get_tuple_field #tuple_0 2)
+    let d = (`list_field #list_1 0)
+    let e = (`list_field #list_1 1)
+    let f = (`list_hd (`get_tuple_field #tuple_0 3))
+    let g = (`list_tl (`get_tuple_field #tuple_0 3))
     |}]
 ;;

@@ -84,14 +84,14 @@ let remove_match prog =
         | PIdent id -> s_let_in (s_let id match_exp) action |> return
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
-          let* tuple_id = fresh_prefix "`tuple" in
+          let* tuple_id = fresh_prefix "#tuple" in
           let* body =
             State.mfoldi_right xs ~init:action ~f:(fun idx acc x ->
               bind_pat_vars (tuple_field (s_var tuple_id) idx) x acc)
           in
           s_let_in (s_let tuple_id match_exp) body |> return
         | PList xs ->
-          let* list_id = fresh_prefix "`list" in
+          let* list_id = fresh_prefix "#list" in
           let* body =
             State.mfoldi_right xs ~init:action ~f:(fun idx action x ->
               bind_pat_vars (list_field (s_var list_id) idx) x action)
@@ -147,10 +147,7 @@ let remove_match prog =
               let* then_branch = bind_pat_vars match_exp pat action in
               let* else_branch = else_branch in
               let cond = case_matched match_exp pat in
-              match cond with
-              | SConst (CBool true) -> return then_branch |> cont
-              | SConst (CBool false) -> return else_branch |> cont
-              | _ -> cont (return (s_if_else cond then_branch else_branch)))
+              cont (return (s_if_else cond then_branch else_branch)))
             tl_cases
       in
       gen_match Fn.id cases
@@ -158,23 +155,19 @@ let remove_match prog =
     | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"#temp_match" ->
       let* e' = helper_expr e in
       let match_, binds =
+        let rec extract_binds acc = function
+          | SLetIn (d, e) -> extract_binds (d :: acc) e
+          | e -> List.rev acc, e
+        in
         match e' with
         | SLetIn ((SLet _ as bind_exp), SIfElse (cond, binds, panic)) ->
-          let rec extract_binds acc = function
-            | SLetIn (d, e) -> extract_binds (d :: acc) e
-            | e -> List.rev acc, e
-          in
           let binds, e = extract_binds [] binds in
           s_let (pat_as_id p) (s_let_in bind_exp (s_if_else cond e panic)), binds
         | SLetIn ((SLet _ as bind_exp), (SLetIn _ as binds)) ->
-          (* TODO:  *)
-          let rec extract_binds acc = function
-            | SLetIn (d, e) -> extract_binds (d :: acc) e
-            | e -> List.rev acc, e
-          in
           let binds, e = extract_binds [] binds in
           s_let (pat_as_id p) (s_let_in bind_exp e), binds
-        | _ -> failwith (Format.asprintf "remove_match: unexpected expr %a\n" Sast.pp_sexpr e')
+        | _ ->
+          failwith (Format.asprintf "remove_match: unexpected expr %a\n" Sast.pp_sexpr e')
       in
       return (match_ :: binds)
     | DLet (r, p, e) ->

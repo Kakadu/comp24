@@ -34,8 +34,8 @@ type type_ann =
   | TABool (** bool *)
   | TAUnit (** () *)
   | TATuple of
-      type_ann
-      * type_ann
+      (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
+      * (type_ann[@gen Gen.(gen_type_ann_sized (n / div))])
       * (type_ann list[@gen Gen.(list_size (0 -- 4) (gen_type_ann_sized (n / div)))])
   (** (int * bool) *)
   | TAFun of
@@ -49,8 +49,8 @@ type pattern =
   | PWild (** _ *)
   | PIdent of id (** x *)
   | PTuple of
-      pattern
-      * pattern
+      (pattern[@gen Gen.(gen_pattern_sized (n / div))])
+      * (pattern[@gen Gen.(gen_pattern_sized (n / div))])
       * (pattern list[@gen Gen.(list_size (0 -- 4) (gen_pattern_sized (n / div)))])
   (** (a, b) *)
   | PList of (pattern list[@gen Gen.(list_size (1 -- 4) (gen_pattern_sized (n / div)))])
@@ -76,12 +76,16 @@ type expr =
   | EFun of
       (pattern[@gen Gen.(gen_pattern_sized (n / div))])
       * (pattern list[@gen Gen.(list_size (0 -- 4) (gen_pattern_sized (n / div)))])
-      * expr (** fun x -> y *)
-  | ELetIn of definition * expr (** let x = y in z *)
+      * (expr[@gen Gen.(gen_expr_sized (n / div))]) (** fun x -> y *)
+  | ELetIn of
+      (definition[@gen Gen.(gen_definition_sized (n / div))])
+      * (expr[@gen Gen.(gen_expr_sized (n / div))]) (** let x = y in z *)
   | ETuple of
-      expr * expr * (expr list[@gen Gen.(list_size (0 -- 4) (gen_expr_sized (n / div)))])
+      (expr[@gen Gen.(gen_expr_sized (n / div))])
+      * (expr[@gen Gen.(gen_expr_sized (n / div))])
+      * (expr list[@gen Gen.(list_size (0 -- 4) (gen_expr_sized (n / div)))])
   (** (x, fun x -> x, 42) *)
-  | EList of (expr list[@gen Gen.(list_size (2 -- 4) (gen_expr_sized (n / div)))])
+  | EList of (expr list[@gen Gen.(list_size (1 -- 4) (gen_expr_sized (n / div)))])
   (** [1; 2; 3] *)
   | EMatch of
       ((expr * (pattern * expr) list)
@@ -90,7 +94,7 @@ type expr =
           pair
             (gen_expr_sized (n / div))
             (list_size
-               (2 -- 4)
+               (1 -- 4)
                (pair (gen_pattern_sized (n / div)) (gen_expr_sized (n / div)))))])
   (** match x with ... *)
 [@@deriving show { with_path = false }, qcheck, eq]

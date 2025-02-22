@@ -22,3 +22,4 @@ let set_to_string xs =
 ;;
 
 let list_to_string xs = xs |> String.concat ~sep:"; " |> Format.asprintf "[%s]"
+let remove_substr sub str = String.substr_replace_all str ~pattern:sub ~with_:""

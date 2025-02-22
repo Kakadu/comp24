@@ -63,7 +63,7 @@ and token = parse
     function
     | [ "not"; b ] -> not (bool_of_string b)
     | [ b ] -> bool_of_string b
-    | x -> raise (SyntaxError ("bool: " ^ Lexing.lexeme lexbuf))) 
+    | _ -> raise (SyntaxError ("bool: " ^ Lexing.lexeme lexbuf))) 
   }
   (* | "not" { NOT } *)
   | id { IDENT (Lexing.lexeme lexbuf) }

@@ -271,7 +271,7 @@ module TypeEnv = struct
       |> (function
        | List.Or_unequal_lengths.Ok env' -> env'
        | _ -> fail (`Arg_num_mismatch (pat, ty)))
-    | PTuple (x1, x2, xs), (vars, (TVar v as ty)) ->
+    | PTuple (x1, x2, xs), (vars, _) ->
       let xs = x1 :: x2 :: xs in
       List.fold xs ~init:(return env) ~f:(fun acc x ->
         let* acc = acc in
@@ -285,7 +285,7 @@ module TypeEnv = struct
       List.fold xs ~init:(return env) ~f:(fun acc x ->
         let* acc = acc in
         extend_pat acc x (vars, ty))
-    | PConst _, _ | PList _, _ | PCons (_, _), _ | PTuple _, _ ->
+    | (PConst _ | PList _ | PCons (_, _)), _ ->
       fail
         (`Syntax_error
           (Format.asprintf

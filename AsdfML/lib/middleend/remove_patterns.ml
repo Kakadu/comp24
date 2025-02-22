@@ -13,14 +13,6 @@ open State.IntStateM.Syntax
 
 (* Replaces complex patterns with explicit pattern-matching *)
 
-let list_field lst idx = e_app (e_app (e_var "`list_field") lst) (e_const (CInt idx))
-let list_hd lst = e_app (e_var "`list_hd") lst
-let list_tl lst = e_app (e_var "`list_tl") lst
-
-let tuple_field lst idx =
-  e_app (e_app (e_var "`get_tuple_field") lst) (e_const (CInt idx))
-;;
-
 let is_simple = function
   | PIdent _ | PWild -> true
   | _ -> false
@@ -29,7 +21,7 @@ let is_simple = function
 let remove_argument_patterns body pattern pattern_list =
   let generate_arg_name used_names =
     let rec find_unique () =
-      let* current_name = fresh_prefix "`arg" in
+      let* current_name = fresh_prefix "#arg" in
       match Set.find used_names ~f:(String.equal current_name) with
       | None -> return current_name
       | _ -> find_unique ()
@@ -112,40 +104,6 @@ let remove_patterns program =
       in
       return @@ e_match exp cases
   and helper_def : definition -> (var_id, definition list) State.StateM.t =
-    let rec helper_complex exp = function
-      | PTuple (x1, x2, xn) ->
-        let xs = x1 :: x2 :: xn in
-        let* temp_var = fresh_prefix "`temp_tuple" in
-        let* exp = helper_expr exp in
-        let temp_def = d_let (p_ident temp_var) exp in
-        let* assigns =
-          State.mfoldi_right xs ~init:[] ~f:(fun i acc x ->
-            let* x = helper_complex (tuple_field (e_var temp_var) i) x in
-            return @@ x @ acc)
-        in
-        return (temp_def :: assigns)
-      | PList xs ->
-        let* temp_var = fresh_prefix "`temp_list" in
-        let* exp = helper_expr exp in
-        let temp_def = d_let (p_ident temp_var) exp in
-        let* assigns =
-          State.mfoldi_right xs ~init:[] ~f:(fun i acc x ->
-            let* x = helper_complex (list_field (e_var temp_var) i) x in
-            return @@ x @ acc)
-        in
-        return (temp_def :: assigns)
-      | PCons (hd, tl) ->
-        let* temp_var = fresh_prefix "`temp_list" in
-        let* exp = helper_expr exp in
-        let temp_def = d_let (p_ident temp_var) exp in
-        let hd_assign = d_let hd (list_hd (e_var temp_var)) in
-        let tl_assign = d_let tl (list_tl (e_var temp_var)) in
-        return [ temp_def; hd_assign; tl_assign ]
-      | (PWild | PIdent _) as p ->
-        let* e = helper_expr exp in
-        return [ d_let p e ]
-      | _ -> failwith "complex patterns in top level let bindings are not supported"
-    in
     function
     | DLet (r, p, e) when is_simple p ->
       let* e = helper_expr e in
@@ -154,7 +112,7 @@ let remove_patterns program =
       (* Convert `let complex_pattern = expr`
          into `let temp_match = match expr with | complex_pattern -> ()`
          and deal with it later in 'remove_match' *)
-      let* temp_match = fresh_prefix "`temp_match" in
+      let* temp_match = fresh_prefix "#temp_match" in
       let match_exp =
         d_let
           (p_ident temp_match)

@@ -26,6 +26,7 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
      | Ast.CUnit -> cont ImmUnit
      | Ast.CNil -> cont ImmNil)
   | CFVar x ->
+    let x = remove_substr "#" x in
     cont
       (ImmId
          (match Map.find env x with
@@ -67,6 +68,7 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       let* body = anf_expr env body cont in
       return (ALet ("_", CImmExpr imm_expr, body)))
   | CFLetIn (id, expr, body) ->
+    let id = remove_substr "#" id in
     let* name = new_var () in
     let new_env = Map.set env ~key:id ~data:name in
     anf_expr env expr (fun imm_expr ->
@@ -91,6 +93,8 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
 let anf_def env (def : cf_definition) =
   match def with
   | CFLet (id, args, expr) ->
+    let id = remove_substr "#" id in
+    let args = List.map args ~f:(fun x -> remove_substr "#" x) in
     let env = List.fold args ~init:env ~f:(fun acc x -> Map.set acc ~key:x ~data:x) in
     let env = Map.set env ~key:id ~data:id in
     let* aexpr = anf_expr env expr (fun x -> return (ACExpr (CImmExpr x))) in

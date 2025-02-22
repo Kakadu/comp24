@@ -63,3 +63,7 @@ and pp_definition fmt = function
      | _ ->
        fprintf fmt "@[<2>@,let %s %s =@ %a@]\n" id (String.concat args ~sep:" ") pp_expr e)
 ;;
+
+let pp_program fmt p =
+  List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_definition d);
+;;
