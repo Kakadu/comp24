@@ -25,7 +25,6 @@ module StringAlphfaconverterMonad = struct
 
   type 'a t = (name_space, 'a, string) Common.Se_monad.Base_SE_Monad.t
 
- 
   let num_prefix current_prefix id = current_prefix ^ Int.to_string id
   let create_fresh_id id = id + 1
 
