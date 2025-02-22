@@ -1,5 +1,5 @@
 open AstLib.Ast
-open Utils
+open Elim_utils
 open R
 open Env
 open IR
