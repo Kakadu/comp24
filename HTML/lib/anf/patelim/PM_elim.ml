@@ -167,8 +167,9 @@ and pm_elim_decl decl =
 ;;
 
 let pm_elim_decls decls =
-  run
-    (map
-       (fun x -> pm_elim_decl x >>| IR_utils.transform_expr_in_decl IR_utils.optimize)
-       decls)
+  map
+    (fun x -> pm_elim_decl x >>| IR_utils.transform_expr_in_decl IR_utils.optimize)
+    decls
 ;;
+
+let pm_elim decls = run (pm_elim_decls decls)

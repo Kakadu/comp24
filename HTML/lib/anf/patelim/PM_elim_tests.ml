@@ -2,7 +2,7 @@ module PMElimTests = struct
   let test s =
     match Parser.parse_program s with
     | Ok actual ->
-      let prog = PM_elim.pm_elim_decls actual in
+      let prog = PM_elim.pm_elim actual in
       let prog = Result.map (List.map IR_utils.transform_back_decl) prog in
       (match prog with
        | Ok prog -> Format.printf "%a\n" AstLib.Pp_ast.pp_prog prog
