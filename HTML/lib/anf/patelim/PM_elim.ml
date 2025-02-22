@@ -129,7 +129,7 @@ let rec pm_elim_expr expr =
     | EMatch (e, br, brs) ->
       let* e_res = helper e in
       let* fresh = fresh in
-      let evaluated_name = "EVALUATED_" ^ string_of_int fresh in
+      let evaluated_name = RuntimeUtils.create_var_for_eval (string_of_int fresh) in
       let evaluated_pat = pop_pat (pid evaluated_name) in
       let evaluated_e = eid (ident_of_definable (ident_letters evaluated_name)) in
       let* no_pm_els =

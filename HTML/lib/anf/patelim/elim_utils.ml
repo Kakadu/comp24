@@ -79,4 +79,5 @@ module RuntimeUtils = struct
   let apply_get_tl tl = apply get_tl tl
   let apply_get_nth n e = apply get_nth (etuple (econst (CInt n)) e [])
   let apply_not_exhaustive_pm () = apply not_exhaustive_pm (econst CUnit)
+  let create_var_for_eval n = "EVALUATED_" ^ n
 end
