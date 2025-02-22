@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>types.ml &mdash; Coverage report</title>
-    <meta name="description" content="61.90% coverage in lib/typing/types.ml">
+    <meta name="description" content="55.26% coverage in lib/typing/types.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,15 +15,21 @@
           <span class="dirname">lib/typing/</span>types.ml
         </a>
       </h1>
-      <h2>61.90%</h2>
+      <h2>55.26%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:17.65%"></span>
-      <span class="unvisited" style="top:21.57%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="unvisited" style="top:41.18%"></span>
-      <span class="unvisited" style="bottom:25.49%"></span>
-      <span class="unvisited" style="bottom:7.84%"></span>
+      <span class="unvisited" style="top:14.52%"></span>
+      <span class="unvisited" style="top:17.74%"></span>
+      <span class="unvisited" style="top:27.42%"></span>
+      <span class="unvisited" style="top:29.03%"></span>
+      <span class="unvisited" style="top:30.65%"></span>
+      <span class="unvisited" style="top:32.26%"></span>
+      <span class="unvisited" style="top:33.87%"></span>
+      <span class="unvisited" style="top:35.48%"></span>
+      <span class="unvisited" style="bottom:38.71%"></span>
+      <span class="unvisited" style="bottom:24.19%"></span>
+      <span class="unvisited" style="bottom:11.29%"></span>
+      <span class="unvisited" style="bottom:9.68%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -45,11 +51,11 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="unvisited"> </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span > </span>
+<a id="L18"></a><span class="unvisited"> </span>
+<a id="L19"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="unvisited"> </span>
 <a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
@@ -78,7 +84,18 @@
 <a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -134,6 +151,17 @@
 <a href="#L49">49</a>
 <a href="#L50">50</a>
 <a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -143,21 +171,21 @@
 
 open Base
 
-<span data-count="0">t</span>ype var_id = <span data-count="0">i</span>nt [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype var_id = <span data-count="0">i</span>nt [@@deriving show { with_path = false }, eq]
 
 <span data-count="0">t</span>ype ground =
-  <span data-count="182">|</span> TInt
-  <span data-count="26">|</span> TBool
+  <span data-count="456">|</span> TInt
+  <span data-count="32">|</span> TBool
   <span data-count="23">|</span> TUnit
 [@@deriving show { with_path = false }, eq]
 
 <span data-count="0">t</span>ype ty =
-  | TGround of ground
-  | TVar of var_id
-  | TArrow of ty * ty
-  | TTuple of <span data-count="0">t</span>y lis<span data-count="0">t</span>
-  | TList of ty
-[@@deriving show { with_path = false }]
+  <span data-count="0">|</span> TGround of ground
+  <span data-count="0">|</span> TVar of var_id
+  <span data-count="0">|</span> TArrow of ty * t<span data-count="0">y</span>
+  <span data-count="0">|</span> TTuple of ty * ty * <span data-count="0">t</span>y lis<span data-count="0">t</span>
+  <span data-count="0">|</span> TList of ty
+[@@deriving show { with_path = false }, eq]
 
 type error =
   [ `Occurs_check
@@ -171,7 +199,7 @@ type error =
 let int_typ = TGround TInt
 let bool_typ = TGround TBool
 let unit_typ = TGround TUnit
-let arrow l r = <span data-count="34759">T</span>Arrow (l, r)
+let arrow l r = <span data-count="71889">T</span>Arrow (l, r)
 let var x = <span data-count="0">T</span>Var x
 let ( ^-&gt; ) = arrow
 
@@ -179,13 +207,24 @@ type var_id_set = (var_id, Int.comparator_witness) Set.t
 type scheme = var_id_set * ty
 
 let rec an_ty_to_ty = function
-  | <span data-count="21">A</span>st.TAInt -&gt; int_typ
+  | <span data-count="22">A</span>st.TAInt -&gt; int_typ
   | <span data-count="4">A</span>st.TABool -&gt; bool_typ
   | <span data-count="0">A</span>st.TAUnit -&gt; unit_typ
   | <span data-count="6">A</span>st.TAFun (l, r) -&gt; TArrow (an_ty_to_t<span data-count="6">y</span> l, an_ty_to_t<span data-count="6">y</span> r)
-  | <span data-count="1">A</span>st.TATuple xs -&gt; TTuple (List.ma<span data-count="1">p</span> xs an_ty_to_ty)
-  | <span data-count="6">A</span>st.TAList x -&gt; TList (an_ty_to_t<span data-count="6">y</span> x)
+  | <span data-count="1">A</span>st.TATuple (hd1, hd2, tl) -&gt;
+    TTuple (an_ty_to_t<span data-count="1">y</span> hd1, an_ty_to_t<span data-count="1">y</span> hd2, List.ma<span data-count="1">p</span> tl an_ty_to_ty)
+  | <span data-count="7">A</span>st.TAList x -&gt; TList (an_ty_to_t<span data-count="7">y</span> x)
 ;;
+
+let rec count_arrow_args = function
+  | <span data-count="0">T</span>Arrow (_, r) -&gt; 1 + count_arrow_arg<span data-count="0">s</span> r
+  | <span data-count="0">_</span> -&gt; 0
+;;
+
+let dummy_ty = TVar (-1)
+let arg1 = dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty
+let arg2 = dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty
+let arg3 = dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty
 </code></pre>
       </div>
     </div>

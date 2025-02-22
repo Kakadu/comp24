@@ -18,7 +18,7 @@
       <h2>90.91%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:44.44%"></span>
+      <span class="unvisited" style="top:48.39%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -32,24 +32,28 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="unvisited"> </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
-<a id="L16"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
 <a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -81,6 +85,10 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -89,24 +97,28 @@
 open Lib.Inferencer
 open Lib.Pp_typing
 open Base
+open Lib.Pp_ast
+open Lib.Tast
+open Lib
 
 let test_parser code =
-  <span data-count="53">m</span>atch Lib.Parser.parse_program code ~print_ast:true with
+  <span data-count="53">m</span>atch Parser.parse_program code ~print_ast:true with
   | <span data-count="53">O</span>k _ -&gt; ()
   | <span data-count="0">E</span>rror e -&gt; print_endline e
 ;;
 
 let test_inferencer code =
-  <span data-count="60">l</span>et open Format in
+  <span data-count="63">l</span>et open Format in
   let pa = false in
-  let ast = Result.ok_or_failwith (Lib.Parser.parse_progra<span data-count="60">m</span> ~print_ast:pa code) in
-  <span data-count="60">m</span>atch inference_program ast with
-  | <span data-count="52">O</span>k t -&gt;
+  let ast = Result.ok_or_failwith (Parser.parse_progra<span data-count="63">m</span> ~print_ast:pa code) in
+  <span data-count="63">m</span>atch inference_program ast with
+  | <span data-count="55">O</span>k t -&gt;
     printf
       "%s"
       (t
-       |&gt; List.map ~f:(fun (s, t) -&gt; <span data-count="99">a</span>sprintf "%s: %a" s pp_typ t)
-       |&gt; <span data-count="52">S</span>tring.conca<span data-count="52">t</span> ~sep:"\n")
+       |&gt; List.map ~f:(function <span data-count="102">T</span>DLet (ty, _, pat, _) -&gt;
+         asprintf "%a: %a" pp_pattern pat pp_ty ty)
+       |&gt; <span data-count="55">S</span>tring.conca<span data-count="55">t</span> ~sep:"\n")
   | <span data-count="8">E</span>rror e -&gt; eprintf "%a" pp_error e
 ;;
 </code></pre>

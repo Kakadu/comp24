@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>remove_match.ml &mdash; Coverage report</title>
+    <meta name="description" content="95.52% coverage in lib/middleend/remove_match.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/middleend/</span>remove_match.ml
+        </a>
+      </h1>
+      <h2>95.52%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:10.44%"></span>
+      <span class="some-visited" style="top:10.99%"></span>
+      <span class="unvisited" style="top:21.43%"></span>
+      <span class="some-visited" style="bottom:41.76%"></span>
+      <span class="unvisited" style="bottom:16.48%"></span>
+      <span class="unvisited" style="bottom:5.49%"></span>
+      <span class="unvisited" style="bottom:4.95%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="some-visited"> </span>
+<a id="L20"></a><span class="some-visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="some-visited"> </span>
+<a id="L107"></a><span class="visited"> </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span > </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span class="visited"> </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span > </span>
+<a id="L130"></a><span class="visited"> </span>
+<a id="L131"></a><span class="visited"> </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span class="visited"> </span>
+<a id="L134"></a><span class="visited"> </span>
+<a id="L135"></a><span class="visited"> </span>
+<a id="L136"></a><span > </span>
+<a id="L137"></a><span class="visited"> </span>
+<a id="L138"></a><span class="visited"> </span>
+<a id="L139"></a><span > </span>
+<a id="L140"></a><span class="visited"> </span>
+<a id="L141"></a><span class="visited"> </span>
+<a id="L142"></a><span class="visited"> </span>
+<a id="L143"></a><span class="visited"> </span>
+<a id="L144"></a><span > </span>
+<a id="L145"></a><span > </span>
+<a id="L146"></a><span > </span>
+<a id="L147"></a><span class="visited"> </span>
+<a id="L148"></a><span class="visited"> </span>
+<a id="L149"></a><span class="visited"> </span>
+<a id="L150"></a><span class="visited"> </span>
+<a id="L151"></a><span class="visited"> </span>
+<a id="L152"></a><span class="unvisited"> </span>
+<a id="L153"></a><span class="visited"> </span>
+<a id="L154"></a><span > </span>
+<a id="L155"></a><span > </span>
+<a id="L156"></a><span > </span>
+<a id="L157"></a><span class="visited"> </span>
+<a id="L158"></a><span class="visited"> </span>
+<a id="L159"></a><span class="visited"> </span>
+<a id="L160"></a><span class="visited"> </span>
+<a id="L161"></a><span > </span>
+<a id="L162"></a><span class="visited"> </span>
+<a id="L163"></a><span class="visited"> </span>
+<a id="L164"></a><span > </span>
+<a id="L165"></a><span > </span>
+<a id="L166"></a><span class="visited"> </span>
+<a id="L167"></a><span > </span>
+<a id="L168"></a><span class="visited"> </span>
+<a id="L169"></a><span class="visited"> </span>
+<a id="L170"></a><span > </span>
+<a id="L171"></a><span class="visited"> </span>
+<a id="L172"></a><span class="unvisited"> </span>
+<a id="L173"></a><span class="unvisited"> </span>
+<a id="L174"></a><span > </span>
+<a id="L175"></a><span > </span>
+<a id="L176"></a><span class="visited"> </span>
+<a id="L177"></a><span class="visited"> </span>
+<a id="L178"></a><span class="visited"> </span>
+<a id="L179"></a><span class="visited"> </span>
+<a id="L180"></a><span > </span>
+<a id="L181"></a><span class="visited"> </span>
+<a id="L182"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
+<a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
+<a href="#L148">148</a>
+<a href="#L149">149</a>
+<a href="#L150">150</a>
+<a href="#L151">151</a>
+<a href="#L152">152</a>
+<a href="#L153">153</a>
+<a href="#L154">154</a>
+<a href="#L155">155</a>
+<a href="#L156">156</a>
+<a href="#L157">157</a>
+<a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
+<a href="#L167">167</a>
+<a href="#L168">168</a>
+<a href="#L169">169</a>
+<a href="#L170">170</a>
+<a href="#L171">171</a>
+<a href="#L172">172</a>
+<a href="#L173">173</a>
+<a href="#L174">174</a>
+<a href="#L175">175</a>
+<a href="#L176">176</a>
+<a href="#L177">177</a>
+<a href="#L178">178</a>
+<a href="#L179">179</a>
+<a href="#L180">180</a>
+<a href="#L181">181</a>
+<a href="#L182">182</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+open Base
+open Ast
+open Sast
+open Types
+open Utils
+open State.IntStateM
+open State.IntStateM.Syntax
+
+let true_ = SConst (CBool true)
+let check_eq l r = <span data-count="15">S</span>App (SApp (SVar "( = )", l), r)
+let panic () = <span data-count="15">S</span>App (SVar "panic", SConst CUnit)
+
+let and_ l r =
+  <span data-count="87">m</span>atch l, r with
+  | <span data-count="55">S</span>Const (CBool true), _ | <span data-count="0">_</span>, SConst (CBool false) -&gt; r
+  | <span data-count="23">_</span>, SConst (CBool true) | <span data-count="0">S</span>Const (CBool false), _ -&gt; l
+  | <span data-count="9">_</span> -&gt; SApp (SApp (SVar "( &amp;&amp; )", l), r)
+;;
+
+let not_ e = <span data-count="17">S</span>App (SVar "not", e)
+
+let tuple_field lst idx =
+  <span data-count="82">s</span>_app (s_ap<span data-count="82">p</span> (s_va<span data-count="82">r</span> "`get_tuple_field") lst) (s_cons<span data-count="82">t</span> (CInt idx))
+;;
+
+let check_list_len lst len = <span data-count="7">c</span>heck_eq (s_ap<span data-count="7">p</span> (s_va<span data-count="7">r</span> "`list_len") lst) (s_cons<span data-count="7">t</span> (CInt len))
+let list_field lst idx = <span data-count="24">s</span>_app (s_ap<span data-count="24">p</span> (s_va<span data-count="24">r</span> "`list_field") lst) (s_cons<span data-count="24">t</span> (CInt idx))
+let list_hd lst = <span data-count="34">s</span>_app (s_va<span data-count="34">r</span> "`list_hd") lst
+let list_tl lst = <span data-count="34">s</span>_app (s_va<span data-count="34">r</span> "`list_tl") lst
+let list_is_empty lst = <span data-count="22">s</span>_app (s_va<span data-count="22">r</span> "`list_is_empty") lst
+
+let pat_as_id = function
+  | <span data-count="339">P</span>Ident x -&gt; x
+  | <span data-count="6">P</span>Wild -&gt; "_"
+  | <span data-count="0">p</span> -&gt; failwith (Format.asprint<span data-count="0">f</span> "remove_match: non-id pattern %a" Ast.pp_pattern p)
+;;
+
+let remove_match prog =
+  <span data-count="54">l</span>et rec helper_expr = function
+    | <span data-count="122">E</span>Const c -&gt; return (s_cons<span data-count="122">t</span> c)
+    | <span data-count="452">E</span>Var v -&gt; return (s_va<span data-count="452">r</span> v)
+    | <span data-count="317">E</span>App (l, r) -&gt;
+      let* l = helper_exp<span data-count="317">r</span> l in
+      <span data-count="317">l</span>et* r = helper_exp<span data-count="317">r</span> r in
+      <span data-count="317">r</span>eturn (s_ap<span data-count="317">p</span> l r)
+    | <span data-count="6">E</span>IfElse (i, t, e) -&gt;
+      let* i = helper_exp<span data-count="6">r</span> i in
+      <span data-count="6">l</span>et* t = helper_exp<span data-count="6">r</span> t in
+      <span data-count="6">l</span>et* e = helper_exp<span data-count="6">r</span> e in
+      <span data-count="6">r</span>eturn (s_if_els<span data-count="6">e</span> i t e)
+    | <span data-count="106">E</span>Fun (p, ps, e) -&gt;
+      let* e = helper_exp<span data-count="106">r</span> e in
+      <span data-count="106">l</span>et p = pat_as_id p in
+      <span data-count="106">l</span>et ps = List.map ps ~f:pat_as_id in
+      <span data-count="106">r</span>eturn (s_fu<span data-count="106">n</span> p ps e)
+    | <span data-count="64">E</span>LetIn (d, e) -&gt;
+      let* d = helper_de<span data-count="64">f</span> d in
+      <span data-count="64">l</span>et d = List.hd_exn d in
+      <span data-count="64">l</span>et* e = helper_exp<span data-count="64">r</span> e in
+      <span data-count="64">r</span>eturn (s_let_i<span data-count="64">n</span> d e)
+    | <span data-count="18">E</span>Tuple (x1, x2, xs) -&gt;
+      let* x1 = helper_exp<span data-count="18">r</span> x1 in
+      <span data-count="18">l</span>et* x2 = helper_exp<span data-count="18">r</span> x2 in
+      <span data-count="18">l</span>et* xs =
+        State.mfold_righ<span data-count="18">t</span> xs ~init:[] ~f:(fun e acc -&gt;
+          <span data-count="9">l</span>et* e = helper_exp<span data-count="9">r</span> e in
+          <span data-count="9">r</span>eturn (e :: acc))
+      in
+      <span data-count="18">r</span>eturn (s_tupl<span data-count="18">e</span> x1 x2 xs)
+    | <span data-count="6">E</span>List xs -&gt;
+      let* xs =
+        State.mfold_righ<span data-count="6">t</span> xs ~init:[] ~f:(fun e acc -&gt;
+          <span data-count="15">l</span>et* e = helper_exp<span data-count="15">r</span> e in
+          <span data-count="15">r</span>eturn (e :: acc))
+      in
+      <span data-count="6">r</span>eturn (s_lis<span data-count="6">t</span> xs)
+    | <span data-count="26">E</span>Match (match_exp, cases) -&gt;
+      let rec bind_pat_vars match_exp pat action =
+        <span data-count="138">m</span>atch pat with
+        | <span data-count="71">P</span>Ident id -&gt; s_let_in (s_le<span data-count="71">t</span> id match_exp) action |&gt; <span data-count="71">r</span>eturn
+        | <span data-count="16">P</span>Tuple (x1, x2, xs) -&gt;
+          let xs = x1 :: x2 :: xs in
+          let* tuple_id = fresh_prefi<span data-count="16">x</span> "#tuple" in
+          <span data-count="16">l</span>et* body =
+            State.mfoldi_righ<span data-count="16">t</span> xs ~init:action ~f:(fun idx acc x -&gt;
+              <span data-count="41">b</span>ind_pat_vars (tuple_fiel<span data-count="41">d</span> (s_va<span data-count="41">r</span> tuple_id) idx) x acc)
+          in
+          <span data-count="16">s</span>_let_in (s_le<span data-count="16">t</span> tuple_id match_exp) body |&gt; <span data-count="16">r</span>eturn
+        | <span data-count="7">P</span>List xs -&gt;
+          let* list_id = fresh_prefi<span data-count="7">x</span> "#list" in
+          <span data-count="7">l</span>et* body =
+            State.mfoldi_righ<span data-count="7">t</span> xs ~init:action ~f:(fun idx action x -&gt;
+              <span data-count="12">b</span>ind_pat_vars (list_fiel<span data-count="12">d</span> (s_va<span data-count="12">r</span> list_id) idx) x action)
+          in
+          <span data-count="7">s</span>_let_in (s_le<span data-count="7">t</span> list_id match_exp) body |&gt; <span data-count="7">r</span>eturn
+        | <span data-count="17">P</span>Cons (hd, tl) -&gt;
+          let* tl = bind_pat_var<span data-count="17">s</span> (list_t<span data-count="17">l</span> match_exp) tl action in
+          <span data-count="17">b</span>ind_pat_vars (list_h<span data-count="17">d</span> match_exp) hd tl
+        | <span data-count="27">_</span> -&gt; return action
+      in
+      let rec case_matched match_exp = function
+        | <span data-count="8">P</span>Const (CInt _ as c) | <span data-count="0">P</span>Const (CBool _ as c) -&gt; check_eq match_exp (SConst c)
+        | <span data-count="5">P</span>Const CNil -&gt; list_is_empty match_exp
+        | <span data-count="16">P</span>Tuple (x1, x2, xs) -&gt;
+          let xs = x1 :: x2 :: xs in
+          List.foldi xs ~init:true_ ~f:(fun idx acc x -&gt;
+            <span data-count="41">l</span>et cond = case_matched (tuple_fiel<span data-count="41">d</span> match_exp idx) x in
+            <span data-count="41">a</span>nd_ acc cond)
+        | <span data-count="7">P</span>List xs -&gt;
+          let check_len = check_list_len match_exp (List.lengt<span data-count="7">h</span> xs) in
+          <span data-count="7">L</span>ist.foldi xs ~init:check_len ~f:(fun idx acc x -&gt;
+            <span data-count="12">a</span>nd_ acc (case_matche<span data-count="12">d</span> (list_fiel<span data-count="12">d</span> match_exp idx) x))
+        | <span data-count="17">P</span>Cons (hd, tl) -&gt;
+          and_
+            (not<span data-count="17">_</span> (list_is_empt<span data-count="17">y</span> match_exp))
+            (and<span data-count="17">_</span>
+               (case_matche<span data-count="17">d</span> (list_h<span data-count="17">d</span> match_exp) hd)
+               (case_matche<span data-count="17">d</span> (list_t<span data-count="17">l</span> match_exp) tl))
+        | <span data-count="74">_</span> -&gt; true_
+      in
+      let rec gen_match ?(has_catch_all = <span data-count="26">f</span>alse) cont cases =
+        <span data-count="51">l</span>et is_catch_all = function
+          | <span data-count="7">P</span>Wild | <span data-count="4">P</span>Ident _ -&gt; true
+          | <span data-count="36">_</span> -&gt; false
+        in
+        let* match_exp = helper_exp<span data-count="51">r</span> match_exp in
+        <span data-count="51">l</span>et[@warning "-8"] ((pat, action) :: tl_cases) = cases in
+        let has_catch_all = has_catch_al<span data-count="4">l</span> || is_catch_al<span data-count="47">l</span> pa<span data-count="11">t</span> in
+        let* action = helper_exp<span data-count="51">r</span> action in
+        <span data-count="51">m</span>atch tl_cases with
+        | <span data-count="26">[</span>] -&gt;
+          if has_catch_all
+          then <span data-count="11">b</span>ind_pat_vars match_exp pat action |&gt; <span data-count="11">c</span>ont
+          else <span data-count="15">(</span>
+            let catch_all = panic () in
+            <span data-count="15">l</span>et* then_branch = bind_pat_var<span data-count="15">s</span> match_exp pat action in
+            <span data-count="15">l</span>et cond = case_matched match_exp pat in
+            <span data-count="15">c</span>ont (retur<span data-count="15">n</span> (s_if_els<span data-count="15">e</span> cond then_branch catch_all)))
+        | <span data-count="25">_</span> -&gt;
+          gen_match
+            ~has_catch_all
+            (fun else_branch -&gt;
+              <span data-count="25">l</span>et* then_branch = bind_pat_var<span data-count="25">s</span> match_exp pat action in
+              <span data-count="25">l</span>et* else_branch = else_branch in
+              <span data-count="25">l</span>et cond = case_matched match_exp pat in
+              <span data-count="25">m</span>atch cond with
+              | <span data-count="4">S</span>Const (CBool true) -&gt; return then_branch |&gt; <span data-count="4">c</span>ont
+              | <span data-count="0">S</span>Const (CBool false) -&gt; return else_branch |&gt; <span data-count="0">c</span>ont
+              | <span data-count="21">_</span> -&gt; cont (retur<span data-count="21">n</span> (s_if_els<span data-count="21">e</span> cond then_branch else_branch)))
+            tl_cases
+      in
+      gen_match Fn.id cases
+  and helper_def ?(top = <span data-count="64">f</span>alse) = function
+    | <span data-count="133">D</span>Let (_, p, e) when top &amp;&amp; <span data-count="69">S</span>tring.is_prefi<span data-count="69">x</span> (pat_as_i<span data-count="69">d</span> p) ~prefix:"#temp_match" -&gt;
+      <span data-count="3">l</span>et* e' = helper_exp<span data-count="3">r</span> e in
+      <span data-count="3">l</span>et match_, binds =
+        let rec extract_binds acc = function
+          | <span data-count="19">S</span>LetIn (d, e) -&gt; extract_binds (d :: acc) e
+          | <span data-count="3">e</span> -&gt; List.re<span data-count="3">v</span> acc, e
+        in
+        match e' with
+        | <span data-count="2">S</span>LetIn ((SLet _ as bind_exp), SIfElse (cond, binds, panic)) -&gt;
+          let binds, e = extract_binds [] binds in
+          <span data-count="2">s</span>_le<span data-count="2">t</span> (pat_as_i<span data-count="2">d</span> p) (s_let_i<span data-count="2">n</span> bind_exp (s_if_els<span data-count="2">e</span> cond e panic)), binds
+        | <span data-count="1">S</span>LetIn ((SLet _ as bind_exp), (SLetIn _ as binds)) -&gt;
+          let binds, e = extract_binds [] binds in
+          <span data-count="1">s</span>_le<span data-count="1">t</span> (pat_as_i<span data-count="1">d</span> p) (s_let_i<span data-count="1">n</span> bind_exp e), binds
+        | <span data-count="0">_</span> -&gt;
+          failwith (Format.asprint<span data-count="0">f</span> "remove_match: unexpected expr %a\n" Sast.pp_sexpr e')
+      in
+      return (match_ :: binds)
+    | <span data-count="130">D</span>Let (r, p, e) -&gt;
+      let* e = helper_exp<span data-count="130">r</span> e in
+      <span data-count="130">l</span>et p = pat_as_id p in
+      <span data-count="130">[</span> s_let_fla<span data-count="130">g</span> r p e ] |&gt; return
+  in
+  List.map prog ~f:(fun def -&gt; <span data-count="69">r</span>un (helper_de<span data-count="69">f</span> ~top:true def)) |&gt; <span data-count="54">L</span>ist.concat
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

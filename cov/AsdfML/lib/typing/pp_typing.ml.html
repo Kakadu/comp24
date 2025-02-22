@@ -18,17 +18,17 @@
       <h2>60.42%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:16.00%"></span>
-      <span class="unvisited" style="top:29.33%"></span>
-      <span class="unvisited" style="top:30.67%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="unvisited" style="top:34.67%"></span>
-      <span class="unvisited" style="bottom:21.33%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:10.67%"></span>
-      <span class="unvisited" style="bottom:9.33%"></span>
-      <span class="unvisited" style="bottom:8.00%"></span>
-      <span class="unvisited" style="bottom:1.33%"></span>
+      <span class="some-visited" style="top:15.58%"></span>
+      <span class="unvisited" style="top:28.57%"></span>
+      <span class="unvisited" style="top:29.87%"></span>
+      <span class="unvisited" style="top:32.47%"></span>
+      <span class="unvisited" style="top:33.77%"></span>
+      <span class="unvisited" style="bottom:20.78%"></span>
+      <span class="unvisited" style="bottom:19.48%"></span>
+      <span class="unvisited" style="bottom:10.39%"></span>
+      <span class="unvisited" style="bottom:9.09%"></span>
+      <span class="unvisited" style="bottom:7.79%"></span>
+      <span class="unvisited" style="bottom:1.30%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -75,39 +75,41 @@
 <a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span class="visited"> </span>
 <a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
 <a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span class="unvisited"> </span>
-<a id="L60"></a><span class="unvisited"> </span>
-<a id="L61"></a><span > </span>
-<a id="L62"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span class="unvisited"> </span>
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span class="unvisited"> </span>
-<a id="L68"></a><span class="unvisited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
 <a id="L69"></a><span class="unvisited"> </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span class="unvisited"> </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
-<a id="L74"></a><span class="unvisited"> </span>
+<a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -187,6 +189,8 @@
 <a href="#L73">73</a>
 <a href="#L74">74</a>
 <a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -216,35 +220,37 @@ let rec int_to_alphabet_str n =
     ^ String.mak<span data-count="0">e</span> 1 (Char.ch<span data-count="0">r</span> ((n mod 26) + Char.cod<span data-count="0">e</span> 'a'))
 ;;
 
-let rec pp_typ fmt = function
+let rec pp_ty fmt = function
   | <span data-count="82">T</span>Var var -&gt; fprintf fmt "%s" (type_id_to_nam<span data-count="82">e</span> var)
-  | <span data-count="186">T</span>Ground x -&gt;
+  | <span data-count="196">T</span>Ground x -&gt;
     fprintf
       fmt
       (match x with
-       | <span data-count="146">T</span>Int -&gt; "int"
+       | <span data-count="156">T</span>Int -&gt; "int"
        | <span data-count="31">T</span>Bool -&gt; "bool"
        | <span data-count="9">T</span>Unit -&gt; "()")
-  | <span data-count="145">T</span>Arrow (left, right) -&gt;
+  | <span data-count="148">T</span>Arrow (left, right) -&gt;
     (match left with
-     | <span data-count="22">T</span>Arrow (_, _) -&gt; fprintf fmt "(%a) -&gt; %a" pp_typ left pp_typ right
-     | <span data-count="123">_</span> -&gt; fprintf fmt "%a -&gt; %a" pp_typ left pp_typ right)
-  | <span data-count="8">T</span>Tuple xs -&gt; pp_list ~sep:" * " fmt pp_typ xs
-  | <span data-count="34">T</span>List t -&gt; fprintf fmt "%a list" pp_typ t
+     | <span data-count="22">T</span>Arrow (_, _) -&gt; fprintf fmt "(%a) -&gt; %a" pp_ty left pp_ty right
+     | <span data-count="126">_</span> -&gt; fprintf fmt "%a -&gt; %a" pp_ty left pp_ty right)
+  | <span data-count="10">T</span>Tuple (hd1, hd2, tl) -&gt;
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:" * " fmt pp_ty xs
+  | <span data-count="38">T</span>List t -&gt; fprintf fmt "%a list" pp_ty t
 ;;
 
 let pp_error fmt : error -&gt; _ = <span data-count="8">f</span>unction
   | <span data-count="1">`</span>Occurs_check -&gt; fprintf fmt "Occurs check failed"
   | <span data-count="1">`</span>No_variable s -&gt; fprintf fmt "Undefined variable '%s'" s
   | <span data-count="5">`</span>Unification_failed (l, r) -&gt;
-    fprintf fmt "Unification failed on %a and %a" pp_typ l pp_typ r
+    fprintf fmt "Unification failed on %a and %a" pp_ty l pp_ty r
   | <span data-count="1">`</span>Arg_num_mismatch (pat, ty) -&gt;
     fprintf
       fmt
       "Mismatched number of arguments in pattern %a and expression %a"
       Pp_ast.pp_pattern
       pat
-      pp_typ
+      pp_ty
       ty
   | <span data-count="0">`</span>Syntax_error s -&gt; fprintf fmt "Syntax error: %s" s
   | <span data-count="0">`</span>TODO s -&gt; fprintf fmt "TODO: %s" s
@@ -261,7 +267,7 @@ module VarSet = struct
 end
 
 let pp_scheme fmt = function
-  | <span data-count="0">x</span>s, ty -&gt; fprintf fmt "forall %a . %a" VarSet.pp xs pp_typ ty
+  | <span data-count="0">x</span>s, ty -&gt; fprintf fmt "forall %a . %a" VarSet.pp xs pp_ty ty
 ;;
 </code></pre>
       </div>

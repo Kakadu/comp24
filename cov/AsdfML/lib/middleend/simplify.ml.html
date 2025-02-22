@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>simplify.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/middleend/simplify.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/middleend/</span>simplify.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+(* open Tast *)
+open Sast
+open Types
+open Base
+open Utils
+open Vars
+
+(** Remove trivial applications and merge nested lambdas *)
+let simplify =
+  let rec expr = function
+    | <span data-count="98">(</span>SConst _ as e) | <span data-count="419">(</span>SVar _ as e) -&gt; e
+    | <span data-count="334">S</span>App (l, r) -&gt; s_app (exp<span data-count="334">r</span> l) (exp<span data-count="334">r</span> r)
+    | <span data-count="14">S</span>IfElse (i, t, e) -&gt; s_if_else (exp<span data-count="14">r</span> i) (exp<span data-count="14">r</span> t) (exp<span data-count="14">r</span> e)
+    | <span data-count="20">S</span>Fun (arg1, args1, (SApp (inner, SVar arg2) as apply)) when String.equa<span data-count="20">l</span> arg1 arg2
+      -&gt;
+      <span data-count="7">l</span>et inner' = expr inner in
+      <span data-count="7">(</span>match inner' with
+       | <span data-count="1">S</span>Fun _ -&gt; expr inner'
+       | <span data-count="6">_</span> -&gt; SFun (arg1, args1, apply))
+    | <span data-count="10">S</span>Fun (arg1, args1, SFun (arg2, args2, body)) -&gt;
+      s_fun arg1 (args1 @ [ arg2 ] @ args2) (exp<span data-count="10">r</span> body) |&gt; <span data-count="10">e</span>xpr
+    | <span data-count="76">S</span>Fun (p, ps, e) -&gt; s_fun p ps (exp<span data-count="76">r</span> e)
+    | <span data-count="74">S</span>LetIn (d, e2) -&gt; s_let_in (de<span data-count="74">f</span> d) (exp<span data-count="74">r</span> e2)
+    | <span data-count="11">S</span>Tuple (x1, x2, xs) -&gt; s_tuple (exp<span data-count="11">r</span> x1) (exp<span data-count="11">r</span> x2) (List.ma<span data-count="11">p</span> xs ~f:expr)
+    | <span data-count="3">S</span>List xs -&gt; s_list (List.ma<span data-count="3">p</span> xs ~f:expr)
+  and def = function
+    | <span data-count="125">S</span>Let (r, p, e) -&gt; s_let_flag r p (exp<span data-count="125">r</span> e)
+  in
+  List.map ~f:def
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

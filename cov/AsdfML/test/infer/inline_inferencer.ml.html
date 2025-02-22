@@ -449,6 +449,42 @@
 <a id="L425"></a><span > </span>
 <a id="L426"></a><span class="visited"> </span>
 <a id="L427"></a><span > </span>
+<a id="L428"></a><span > </span>
+<a id="L429"></a><span > </span>
+<a id="L430"></a><span class="visited"> </span>
+<a id="L431"></a><span > </span>
+<a id="L432"></a><span > </span>
+<a id="L433"></a><span > </span>
+<a id="L434"></a><span > </span>
+<a id="L435"></a><span > </span>
+<a id="L436"></a><span > </span>
+<a id="L437"></a><span > </span>
+<a id="L438"></a><span > </span>
+<a id="L439"></a><span > </span>
+<a id="L440"></a><span > </span>
+<a id="L441"></a><span > </span>
+<a id="L442"></a><span class="visited"> </span>
+<a id="L443"></a><span > </span>
+<a id="L444"></a><span > </span>
+<a id="L445"></a><span > </span>
+<a id="L446"></a><span class="visited"> </span>
+<a id="L447"></a><span > </span>
+<a id="L448"></a><span > </span>
+<a id="L449"></a><span > </span>
+<a id="L450"></a><span > </span>
+<a id="L451"></a><span > </span>
+<a id="L452"></a><span > </span>
+<a id="L453"></a><span > </span>
+<a id="L454"></a><span > </span>
+<a id="L455"></a><span class="visited"> </span>
+<a id="L456"></a><span > </span>
+<a id="L457"></a><span > </span>
+<a id="L458"></a><span > </span>
+<a id="L459"></a><span class="visited"> </span>
+<a id="L460"></a><span > </span>
+<a id="L461"></a><span > </span>
+<a id="L462"></a><span class="visited"> </span>
+<a id="L463"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -880,6 +916,42 @@
 <a href="#L425">425</a>
 <a href="#L426">426</a>
 <a href="#L427">427</a>
+<a href="#L428">428</a>
+<a href="#L429">429</a>
+<a href="#L430">430</a>
+<a href="#L431">431</a>
+<a href="#L432">432</a>
+<a href="#L433">433</a>
+<a href="#L434">434</a>
+<a href="#L435">435</a>
+<a href="#L436">436</a>
+<a href="#L437">437</a>
+<a href="#L438">438</a>
+<a href="#L439">439</a>
+<a href="#L440">440</a>
+<a href="#L441">441</a>
+<a href="#L442">442</a>
+<a href="#L443">443</a>
+<a href="#L444">444</a>
+<a href="#L445">445</a>
+<a href="#L446">446</a>
+<a href="#L447">447</a>
+<a href="#L448">448</a>
+<a href="#L449">449</a>
+<a href="#L450">450</a>
+<a href="#L451">451</a>
+<a href="#L452">452</a>
+<a href="#L453">453</a>
+<a href="#L454">454</a>
+<a href="#L455">455</a>
+<a href="#L456">456</a>
+<a href="#L457">457</a>
+<a href="#L458">458</a>
+<a href="#L459">459</a>
+<a href="#L460">460</a>
+<a href="#L461">461</a>
+<a href="#L462">462</a>
+<a href="#L463">463</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -1045,7 +1117,7 @@ let%expect_test _ =
     let x = fact 5
   |};
   <span data-count="1">[</span>%expect {|
-    helper: int -&gt; (int -&gt; 'o) -&gt; 'o
+    helper: int -&gt; (int -&gt; 'n) -&gt; 'n
     fact: int -&gt; int
     x: int
     |}<span data-count="5">]</span>
@@ -1307,6 +1379,42 @@ let%expect_test _ =
     tup: (bool * int * 'a -&gt; 'a)
     (x, y, z): (bool * int * 'c -&gt; 'c)
     |}<span data-count="5">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est
+    {| 
+    let sum tuples =
+      let rec helper acc tuples =
+        match tuples with
+        | [] -&gt; acc
+        | (a, b, c) :: tl -&gt;
+          let (x, y, z) = acc in
+          helper (a + x, b + y, c + z) tl
+      in
+      helper (0, 0, 0) tuples
+  |};
+  <span data-count="1">[</span>%expect {| sum: (int * int * int) list -&gt; (int * int * int) |}<span data-count="5">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est
+    {| 
+    let f x =
+      match x with
+      | [ 1 ] -&gt; 1
+      | [ a ] -&gt; a
+      | hd :: tl -&gt; hd
+      | _ -&gt; 42
+  |};
+  <span data-count="1">[</span>%expect {| f: int list -&gt; int |}<span data-count="5">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est {| 
+    let f [[a; b]; [c; d]] = a + b + c + d
+  |};
+  <span data-count="1">[</span>%expect {| f: int list list -&gt; int |}<span data-count="5">]</span>
 ;;
 </code></pre>
       </div>
