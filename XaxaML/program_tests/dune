@@ -69,6 +69,4 @@
   ./run_closure_conversion.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
-  manytests/typed/006partial.ml
-  manytests/typed/006partial2.ml
-  manytests/typed/006partial3.ml))
+  manytests/typed/016lists.ml))

@@ -12,8 +12,21 @@ let () =
   | Result.Ok parsed ->
     (match Inferencer.run_infer_program parsed with
      | Error err -> Format.printf "Type inference error: %a\n" Inferencer.pp_error err
-     | Ok _ ->
+     | Ok last_typed_env ->
+       Format.printf
+         "Types before modifications:\n%a"
+         Inferencer.TypeEnv.pp_env
+         last_typed_env;
        let ast = Remove_patterns.run_remove_patterns_program parsed in
+       let _, ast = Alpha_conversion.run_alpha_conversion_program ast in
        let ast = Closure_conversion.run_closure_conversion_program ast in
-       Format.printf "%a" Remove_patterns.pp_rp_program ast)
+       let restore_ast = Remove_patterns.ToAst.convert_program ast in
+       (match Inferencer.run_infer_program restore_ast with
+        | Error err -> Format.printf "Type inference error: %a\n" Inferencer.pp_error err
+        | Ok new_typed_env ->
+          Format.printf
+            "Types after modifications:\n%a"
+            Inferencer.TypeEnv.pp_env
+            new_typed_env);
+       Format.printf "Modified ast:\n%a" Remove_patterns.PP.pp_rp_program ast)
 ;;

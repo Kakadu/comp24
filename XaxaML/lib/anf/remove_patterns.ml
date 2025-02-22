@@ -33,66 +33,111 @@ let const_to_str = function
   | Rp_c_unit -> "()"
 ;;
 
-let rec expr_to_str = function
-  | Rp_e_const c -> const_to_str c
-  | Rp_e_ident id -> id
-  | Rp_e_ite (e1, e2, e3) ->
-    Format.sprintf
-      "\nif %s\nthen %s\nelse %s"
-      (expr_to_str e1)
-      (expr_to_str e2)
-      (expr_to_str e3)
-  | Rp_e_fun (args, e) ->
-    Format.sprintf
-      "(fun%s -> %s)"
-      (List.fold_left (fun acc name -> acc ^ " " ^ name) "" args)
-      (expr_to_str e)
-  | Rp_e_app (e1, e2) -> Format.sprintf "(%s %s)" (expr_to_str e1) (expr_to_str e2)
-  | Rp_e_let (Rp_non_rec (name, e1), e2) ->
-    Format.sprintf "let %s = %s in\n%s" name (expr_to_str e1) (expr_to_str e2)
-  | Rp_e_let (Rp_rec decl_list, e2) ->
-    let name1, e1 = List.hd decl_list in
-    let tl = List.tl decl_list in
-    Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
-    ^ List.fold_left
-        (fun acc (name, e) -> acc ^ Format.sprintf " and %s = %s" name (expr_to_str e))
-        ""
-        tl
-    ^ Format.sprintf " in\n%s" (expr_to_str e2)
-  | Rp_e_cons_list (e1, e2) -> Format.sprintf "(%s::%s)" (expr_to_str e1) (expr_to_str e2)
-  | Rp_e_tuple e_list ->
-    Format.sprintf
-      "(%s)"
-      (expr_to_str (List.hd e_list)
-       ^ List.fold_left
-           (fun acc e -> acc ^ Format.sprintf ", %s" (expr_to_str e))
-           ""
-           (List.tl e_list))
-;;
+module PP : sig
+  val pp_rp_program : Format.formatter -> rp_program -> unit
+  val pp_rp_expr : Format.formatter -> rp_expr -> unit
+end = struct
+  let rec expr_to_str = function
+    | Rp_e_const c -> const_to_str c
+    | Rp_e_ident id -> id
+    | Rp_e_ite (e1, e2, e3) ->
+      Format.sprintf
+        "if %s\nthen %s\nelse %s"
+        (expr_to_str e1)
+        (expr_to_str e2)
+        (expr_to_str e3)
+    | Rp_e_fun (args, e) ->
+      Format.sprintf
+        "(fun%s -> %s)"
+        (List.fold_left (fun acc name -> acc ^ " " ^ name) "" args)
+        (expr_to_str e)
+    | Rp_e_app (e1, e2) -> Format.sprintf "(%s %s)" (expr_to_str e1) (expr_to_str e2)
+    | Rp_e_let (Rp_non_rec (name, e1), e2) ->
+      Format.sprintf "let %s = %s in\n%s" name (expr_to_str e1) (expr_to_str e2)
+    | Rp_e_let (Rp_rec decl_list, e2) ->
+      let name1, e1 = List.hd decl_list in
+      let tl = List.tl decl_list in
+      Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
+      ^ List.fold_left
+          (fun acc (name, e) -> acc ^ Format.sprintf " and %s = %s" name (expr_to_str e))
+          ""
+          tl
+      ^ Format.sprintf " in\n%s" (expr_to_str e2)
+    | Rp_e_cons_list (e1, e2) ->
+      Format.sprintf "(%s::%s)" (expr_to_str e1) (expr_to_str e2)
+    | Rp_e_tuple e_list ->
+      Format.sprintf
+        "(%s)"
+        (expr_to_str (List.hd e_list)
+         ^ List.fold_left
+             (fun acc e -> acc ^ Format.sprintf ", %s" (expr_to_str e))
+             ""
+             (List.tl e_list))
+  ;;
 
-let toplevel_to_str = function
-  | Rp_non_rec (name, e) -> Format.sprintf "let %s = %s" name (expr_to_str e)
-  | Rp_rec decl_list ->
-    let name1, e1 = List.hd decl_list in
-    let tl = List.tl decl_list in
-    Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
-    ^ List.fold_left
-        (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
-        ""
-        tl
-;;
+  let toplevel_to_str = function
+    | Rp_non_rec (name, e) -> Format.sprintf "let %s = %s" name (expr_to_str e)
+    | Rp_rec decl_list ->
+      let name1, e1 = List.hd decl_list in
+      let tl = List.tl decl_list in
+      Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
+      ^ List.fold_left
+          (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
+          ""
+          tl
+  ;;
 
-let pp_rp_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
+  let pp_rp_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
 
-let pp_rp_program ppf p =
-  let len = List.length p in
-  List.iteri
-    (fun i a ->
-      if i = len - 1
-      then Format.fprintf ppf "%s" (toplevel_to_str a)
-      else Format.fprintf ppf "%s\n\n" (toplevel_to_str a))
-    p
-;;
+  let pp_rp_program ppf p =
+    let len = List.length p in
+    List.iteri
+      (fun i a ->
+        if i = len - 1
+        then Format.fprintf ppf "%s" (toplevel_to_str a)
+        else Format.fprintf ppf "%s\n\n" (toplevel_to_str a))
+      p
+  ;;
+end
+
+module ToAst : sig
+  val convert_program : rp_program -> Ast.program
+end = struct
+  open Ast
+  open Base
+
+  let const_to_ast = function
+    | Rp_c_bool b -> C_bool b
+    | Rp_c_int i -> C_int i
+    | Rp_c_unit -> C_unit
+    | Rp_c_empty_list -> C_empty_list
+  ;;
+
+  let to_pattern name = P_val name
+
+  let rec expr_to_ast = function
+    | Rp_e_const c -> E_const (const_to_ast c)
+    | Rp_e_app (l, r) -> E_app (expr_to_ast l, expr_to_ast r)
+    | Rp_e_cons_list (l, r) -> E_cons_list (expr_to_ast l, expr_to_ast r)
+    | Rp_e_fun (args, body) ->
+      let pats = List.map args ~f:to_pattern in
+      E_fun (List.hd_exn pats, List.tl_exn pats, expr_to_ast body)
+    | Rp_e_ident v -> E_ident v
+    | Rp_e_ite (e1, e2, e3) -> E_ite (expr_to_ast e1, expr_to_ast e2, expr_to_ast e3)
+    | Rp_e_let (decl, e) -> E_let (decl_to_ast decl, expr_to_ast e)
+    | Rp_e_tuple e_list ->
+      let e_list = List.map e_list ~f:expr_to_ast in
+      E_tuple (List.hd_exn e_list, List.tl_exn e_list)
+
+  and decl_body_to_ast (name, e) = to_pattern name, None, expr_to_ast e
+
+  and decl_to_ast = function
+    | Rp_non_rec (name, e) -> Non_rec (decl_body_to_ast (name, e))
+    | Rp_rec decls -> Rec (List.map decls ~f:decl_body_to_ast)
+  ;;
+
+  let convert_program p = List.map p ~f:(fun x -> Let_decl (decl_to_ast x))
+end
 
 open Base
 open Common
@@ -136,9 +181,7 @@ let unpack_pat_checks expr pat =
   let rec helper add_list cur = function
     | Ast.P_typed (p, _) -> helper add_list cur p
     | P_const c ->
-      (match c with
-       | C_unit -> []
-       | _ -> [ Rp_e_app (Rp_e_app (Rp_e_ident "=", cur), Rp_e_const (convert_const c)) ])
+      [ Rp_e_app (Rp_e_app (Rp_e_ident "=", cur), Rp_e_const (convert_const c)) ]
     | P_tuple (a, b) ->
       let t =
         List.mapi (a :: b) ~f:(fun i p -> helper true (unpack_expr cur (Tuple i)) p)
@@ -244,23 +287,21 @@ let rec rp_expr = function
     let new_body = rp_expr body in
     (match List.length args_to_match with
      | 0 -> Rp_e_fun (new_args, new_body)
-     | count ->
-       let pat =
-         if count = 1
-         then List.hd_exn pat_list
-         else P_tuple (List.hd_exn pat_list, List.tl_exn pat_list)
-       in
-       let to_match =
-         if count = 1
-         then Rp_e_ident (List.hd_exn args_to_match)
-         else (
-           let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
-           Rp_e_tuple vals)
-       in
+     | 1 ->
+       let pat = List.hd_exn pat_list in
+       let to_match = Rp_e_ident (List.hd_exn args_to_match) in
+       let case_expr = create_case to_match pat new_body match_failure in
+       Rp_e_fun (new_args, case_expr)
+     | _ ->
+       let pat = Ast.P_tuple (List.hd_exn pat_list, List.tl_exn pat_list) in
+       let to_match = let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
+       Rp_e_tuple vals in
        let case_expr = create_case (Rp_e_ident "#t") pat new_body match_failure in
        Rp_e_fun (new_args, Rp_e_let (Rp_non_rec ("#t", to_match), case_expr)))
   | E_match (e, case_list) ->
-    Rp_e_let (Rp_non_rec ("#t", rp_expr e), rp_match (Rp_e_ident "#t") case_list)
+    (match e with
+     | E_ident _ | E_const _ -> rp_match (rp_expr e) case_list
+     | _ -> Rp_e_let (Rp_non_rec ("#t", rp_expr e), rp_match (Rp_e_ident "#t") case_list))
   | E_let (Non_rec (pat, _, e1), e2) ->
     let e1 = rp_expr e1 in
     let e2 = rp_expr e2 in

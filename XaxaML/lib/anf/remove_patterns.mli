@@ -24,5 +24,12 @@ and rp_decl =
 
 type rp_program = rp_decl list
 
-val pp_rp_program : Format.formatter -> rp_program -> unit
+module PP : sig
+  val pp_rp_program : Format.formatter -> rp_program -> unit
+end
+
+module ToAst : sig
+  val convert_program : rp_program -> Ast.program
+end
+
 val run_remove_patterns_program : Ast.program -> rp_program

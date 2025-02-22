@@ -14,5 +14,5 @@ let () =
      | Error err -> Format.printf "Type inference error: %a\n" Inferencer.pp_error err
      | Ok _ ->
        let ast = Remove_patterns.run_remove_patterns_program parsed in
-       Format.printf "%a" Remove_patterns.pp_rp_program ast)
+       Format.printf "%a" Remove_patterns.PP.pp_rp_program ast)
 ;;

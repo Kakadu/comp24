@@ -164,7 +164,7 @@ end = struct
          | Some x -> x)
       | T_arr (l, r) -> T_arr (helper l, helper r)
       | T_tuple (h, list) -> T_tuple (helper h, List.map list ~f:helper)
-      | T_list t -> T_list (helper t)
+      | T_list t -> list_typ @@ helper t
       | other -> other
     in
     helper
@@ -323,6 +323,32 @@ end = struct
         "!="
         (Scheme (single_bind 3, type_var 3 @-> type_var 3 @-> bool_typ))
     in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_hd"
+        (Scheme (single_bind 4, list_typ (type_var 4) @-> type_var 4))
+    in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_tl"
+        (Scheme (single_bind 5, list_typ (type_var 5) @-> list_typ (type_var 5)))
+    in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_length"
+        (Scheme (single_bind 6, list_typ (type_var 6) @-> int_typ))
+    in
+    let init_env =
+      (* Unfortunately, we cannot create more specific type for this function,
+         because its actual type will depend on the number of elements in the tuple *)
+      add_to_std init_env "#unpack_tuple" (Scheme (single_bind 7, type_var 7))
+    in
+    let init_env =
+      add_to_std init_env "#match_failure" (Scheme (single_bind 8, type_var 8))
+    in
     init_env
   ;;
 
@@ -405,7 +431,7 @@ let convert_raw_typ raw_typ =
       return (names, T_arr (l_typ, r_typ))
     | Ast.RT_list t ->
       let* names, typ = helper names t in
-      return (names, T_list typ)
+      return (names, list_typ typ)
     | Ast.RT_tuple (h, tl) ->
       let rev_t = List.rev (h :: tl) in
       let last, other = List.hd rev_t, List.tl rev_t in
@@ -426,7 +452,7 @@ let infer_const = function
   | Ast.C_bool _ -> return bool_typ
   | Ast.C_empty_list ->
     let* fresh = fresh_var in
-    return (T_list fresh)
+    return (list_typ fresh)
   | Ast.C_unit -> return unit_typ
 ;;
 
@@ -456,9 +482,9 @@ let rec infer_pattern env = function
     let* sub1, typ1, env1 = infer_pattern env l1 in
     let* sub2, typ2, env2 = infer_pattern (TypeEnv.apply sub1 env1) r1 in
     let* fresh = fresh_var in
-    let* sub_uni = Subst.unify typ2 (T_list fresh) in
+    let* sub_uni = Subst.unify typ2 (list_typ fresh) in
     let typ2 = Subst.apply sub_uni typ2 in
-    let* sub3 = Subst.unify (T_list typ1) typ2 in
+    let* sub3 = Subst.unify (list_typ typ1) typ2 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3; sub_uni ] in
     return (final_sub, Subst.apply sub3 typ2, env2)
   | Ast.P_tuple (h, list) ->
@@ -597,7 +623,7 @@ let rec infer_expr env expr =
   | E_cons_list (e1, e2) ->
     let* sub1, typ1 = infer_expr env e1 in
     let* sub2, typ2 = infer_expr (TypeEnv.apply sub1 env) e2 in
-    let* sub3 = Subst.unify (T_list typ1) typ2 in
+    let* sub3 = Subst.unify (list_typ typ1) typ2 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3 ] in
     return (final_sub, Subst.apply sub3 typ2)
   | E_match (e, list) ->

@@ -7,8 +7,9 @@ let std_names =
   ; "print_bool"
   ; "#list_hd"
   ; "#list_tl"
-  ; "unpack_tuple"
-  ; "list_length"
+  ; "#list_length"
+  ; "#unpack_tuple"
+  ; "#match_failure"
   ; "~+"
   ; "~-"
   ; "+"
@@ -28,4 +29,4 @@ let std_names =
   ]
 ;;
 
-let type_var_count = 8
+let type_var_count = 9

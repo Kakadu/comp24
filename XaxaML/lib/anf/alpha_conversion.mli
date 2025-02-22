@@ -4,4 +4,4 @@
 
 val run_alpha_conversion_program
   :  Remove_patterns.rp_program
-  -> Remove_patterns.rp_program
+  -> int * Remove_patterns.rp_program

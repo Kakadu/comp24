@@ -23,8 +23,7 @@ DO NOTHING
   
   let sum = (fun a b -> ((+ a) b))
   
-  let rec fac = (fun n -> 
-  if ((<= n) 1)
+  let rec fac = (fun n -> if ((<= n) 1)
   then 1
   else ((* n) (fac ((- n) 1))))
   
@@ -32,12 +31,10 @@ DO NOTHING
   let temp = (a 1) in
   ((- temp) x))
   
-  let rec is_even = (fun n -> 
-  if ((= n) 0)
+  let rec is_even = (fun n -> if ((= n) 0)
   then true
   else (is_odd ((- n) 1)))
-  and is_odd = (fun n -> 
-  if ((= n) 0)
+  and is_odd = (fun n -> if ((= n) 0)
   then false
   else (is_even ((- n) 1)))
 
@@ -53,13 +50,11 @@ MODIFY
   let b = ((#unpack_tuple ((#unpack_tuple #t) 1)) 0) in
   let c = ((#unpack_tuple ((#unpack_tuple #t) 1)) 1) in
   let #t = (1::(2::(3::[]))) in
-  
   if ((> (#list_length #t)) 0)
   then let d = (#list_hd #t) in
   let e = (#list_tl #t) in
-  let f = (fun #0 -> let #t = #0 in
-  let x = ((#unpack_tuple #t) 0) in
-  let y = ((#unpack_tuple #t) 1) in
+  let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
+  let y = ((#unpack_tuple #0) 1) in
   ((+ x) y)) in
   0
   else #match_failure
@@ -69,7 +64,6 @@ MODIFY
   >  let g (a, b) (c :: d) e = x + 1
   >  in g 
   let f = (fun x -> let g = (fun #0 #1 e -> let #t = (#0, #1) in
-  
   if ((> (#list_length ((#unpack_tuple #t) 1))) 0)
   then let a = ((#unpack_tuple ((#unpack_tuple #t) 0)) 0) in
   let b = ((#unpack_tuple ((#unpack_tuple #t) 0)) 1) in
@@ -84,9 +78,8 @@ MODIFY
   >   let f (x, y) = x + y in 
   >   let rec g a = h a and h a = g a in 
   >   1
-  let a = let f = (fun #0 -> let #t = #0 in
-  let x = ((#unpack_tuple #t) 0) in
-  let y = ((#unpack_tuple #t) 1) in
+  let a = let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
+  let y = ((#unpack_tuple #0) 1) in
   ((+ x) y)) in
   let rec g = (fun a -> (h a)) and h = (fun a -> (g a)) in
   1
@@ -102,25 +95,19 @@ MODIFY
   >   | 10 -> 9
   let x = 1
   
-  let t = let #t = x in
-  
-  if ((= #t) 2)
+  let t = if ((= x) 2)
   then 3
-  else 
-  if ((= #t) 3)
+  else if ((= x) 3)
   then 4
   else 1
 
   $ ./run_remove_patterns.exe << EOF
   > let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
-  let rec append = (fun xs ys -> let #t = xs in
-  
-  if ((= #t) [])
+  let rec append = (fun xs ys -> if ((= xs) [])
   then ys
-  else 
-  if ((> (#list_length #t)) 0)
-  then let x = (#list_hd #t) in
-  let xs = (#list_tl #t) in
+  else if ((> (#list_length xs)) 0)
+  then let x = (#list_hd xs) in
+  let xs = (#list_tl xs) in
   (x::((append xs) ys))
   else #match_failure)
 
@@ -128,8 +115,7 @@ MODIFY
   > let (1, 2) = (2, 3)
   let #t = (2, 3)
   
-  let (#tt) = 
-  if ((&& ((= ((#unpack_tuple #t) 0)) 1)) ((= ((#unpack_tuple #t) 1)) 2))
+  let (#tt) = if ((&& ((= ((#unpack_tuple #t) 0)) 1)) ((= ((#unpack_tuple #t) 1)) 2))
   then ()
   else #match_failure
 
@@ -141,32 +127,26 @@ MODIFY
   > | a::b::[] -> [f a; f b]
   > | a::b::c::[] -> [f a; f b; f c]
   > | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
-  let rec map = (fun f xs -> let #t = xs in
-  
-  if ((= #t) [])
+  let rec map = (fun f xs -> if ((= xs) [])
   then []
-  else 
-  if ((&& ((> (#list_length #t)) 0)) ((= (#list_tl #t)) []))
-  then let a = (#list_hd #t) in
+  else if ((&& ((> (#list_length xs)) 0)) ((= (#list_tl xs)) []))
+  then let a = (#list_hd xs) in
   ((f a)::[])
-  else 
-  if ((&& ((> (#list_length #t)) 1)) ((= (#list_tl (#list_tl #t))) []))
-  then let a = (#list_hd #t) in
-  let b = (#list_hd (#list_tl #t)) in
+  else if ((&& ((> (#list_length xs)) 1)) ((= (#list_tl (#list_tl xs))) []))
+  then let a = (#list_hd xs) in
+  let b = (#list_hd (#list_tl xs)) in
   ((f a)::((f b)::[]))
-  else 
-  if ((&& ((> (#list_length #t)) 2)) ((= (#list_tl (#list_tl (#list_tl #t)))) []))
-  then let a = (#list_hd #t) in
-  let b = (#list_hd (#list_tl #t)) in
-  let c = (#list_hd (#list_tl (#list_tl #t))) in
+  else if ((&& ((> (#list_length xs)) 2)) ((= (#list_tl (#list_tl (#list_tl xs)))) []))
+  then let a = (#list_hd xs) in
+  let b = (#list_hd (#list_tl xs)) in
+  let c = (#list_hd (#list_tl (#list_tl xs))) in
   ((f a)::((f b)::((f c)::[])))
-  else 
-  if ((> (#list_length #t)) 3)
-  then let a = (#list_hd #t) in
-  let b = (#list_hd (#list_tl #t)) in
-  let c = (#list_hd (#list_tl (#list_tl #t))) in
-  let d = (#list_hd (#list_tl (#list_tl (#list_tl #t)))) in
-  let tl = (#list_tl (#list_tl (#list_tl (#list_tl #t)))) in
+  else if ((> (#list_length xs)) 3)
+  then let a = (#list_hd xs) in
+  let b = (#list_hd (#list_tl xs)) in
+  let c = (#list_hd (#list_tl (#list_tl xs))) in
+  let d = (#list_hd (#list_tl (#list_tl (#list_tl xs)))) in
+  let tl = (#list_tl (#list_tl (#list_tl (#list_tl xs)))) in
   ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
   else #match_failure)
 

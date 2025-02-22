@@ -15,7 +15,7 @@ module R : sig
   include Base.Monad.Infix with type 'a t := 'a t
 
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-  val run : 'a t -> 'a
+  val run : 'a t -> int -> int * 'a
 
   module RList : sig
     val map : 'a list -> f:('a -> 'b t) -> 'b list t
@@ -42,7 +42,7 @@ end = struct
     var, f x
   ;;
 
-  let run m = snd (m 0)
+  let run m start = m start
 
   module RList = struct
     let map (xs : 'a list) ~(f : 'a -> 'b t) : 'b list t =
@@ -64,115 +64,96 @@ end = struct
 end
 
 open R
+open Common
 
 let get_name i = "#" ^ Int.to_string i
-let empty_env = Map.empty (module String)
 
-let process_name env name =
-  match Map.find env name with
-  | Some _ ->
+let process_name env bindings name =
+  match StrSet.find env name with
+  | true ->
     let* fresh = fresh in
     let new_name = get_name fresh in
-    return (new_name, Map.update env name ~f:(fun _ -> new_name))
-  | None -> return (name, Map.update env name ~f:(fun _ -> name))
+    return
+      (StrSet.add env new_name, Map.update bindings name ~f:(fun _ -> new_name), new_name)
+  | false -> return (StrSet.add env name, bindings, name)
 ;;
 
-let rec ac_expr env = function
+let rec ac_expr env bindings = function
   | Rp_e_const _ as orig -> return orig
   | Rp_e_ident name as orig ->
-    (match Map.find env name with
+    (match Map.find bindings name with
      | Some new_name -> return @@ Rp_e_ident new_name
      | None -> return orig)
   | Rp_e_cons_list (l, r) ->
-    let* l = ac_expr env l in
-    let* r = ac_expr env r in
+    let* l = ac_expr env bindings l in
+    let* r = ac_expr env bindings r in
     return @@ Rp_e_cons_list (l, r)
   | Rp_e_app (e1, e2) ->
-    let* e1 = ac_expr env e1 in
-    let* e2 = ac_expr env e2 in
+    let* e1 = ac_expr env bindings e1 in
+    let* e2 = ac_expr env bindings e2 in
     return @@ Rp_e_app (e1, e2)
   | Rp_e_ite (e1, e2, e3) ->
-    let* e1 = ac_expr env e1 in
-    let* e2 = ac_expr env e2 in
-    let* e3 = ac_expr env e3 in
+    let* e1 = ac_expr env bindings e1 in
+    let* e2 = ac_expr env bindings e2 in
+    let* e3 = ac_expr env bindings e3 in
     return @@ Rp_e_ite (e1, e2, e3)
   | Rp_e_fun (args, body) ->
-    let* args, env =
+    let* args, env, bindings =
       RList.fold_left
         args
-        ~init:(return ([], env))
-        ~f:(fun (names, env) name ->
-          let* name, env = process_name env name in
-          return (name :: names, env))
+        ~init:(return ([], env, bindings))
+        ~f:(fun (names, env, bindings) name ->
+          let* env, bindings, name = process_name env bindings name in
+          return (name :: names, env, bindings))
     in
     let args = List.rev args in
-    let* body = ac_expr env body in
+    let* body = ac_expr env bindings body in
     return @@ Rp_e_fun (args, body)
   | Rp_e_tuple e_list ->
-    let* e_list = RList.map e_list ~f:(ac_expr env) in
+    let* e_list = RList.map e_list ~f:(ac_expr env bindings) in
     return @@ Rp_e_tuple e_list
   | Rp_e_let (decl, e) ->
-    let* new_env, new_decl = ac_decl env decl in
-    let* new_e = ac_expr new_env e in
+    let* new_env, new_bindings, new_decl = ac_decl env bindings decl in
+    let* new_e = ac_expr new_env new_bindings e in
     return @@ Rp_e_let (new_decl, new_e)
 
-and ac_decl env = function
+and ac_decl env bindings = function
   | Rp_non_rec (name, e) ->
-    let* new_name, new_env = process_name env name in
-    let* new_e = ac_expr env e in
-    return (new_env, Rp_non_rec (new_name, new_e))
+    let* new_env, new_bindings, new_name = process_name env bindings name in
+    let* new_e = ac_expr new_env bindings e in
+    return (new_env, new_bindings, Rp_non_rec (new_name, new_e))
   | Rp_rec decl_list ->
     let names, exprs = List.unzip decl_list in
     let f1 acc cur_name =
-      let* names, env = acc in
-      let* new_name, new_env = process_name env cur_name in
-      return (new_name :: names, new_env)
+      let* names, env, bindings = acc in
+      let* new_env, new_bindings, new_name = process_name env bindings cur_name in
+      return (new_name :: names, new_env, new_bindings)
     in
-    let* new_names, new_env = List.fold names ~init:(return ([], env)) ~f:f1 in
+    let* new_names, new_env, new_bindings =
+      List.fold names ~init:(return ([], env, bindings)) ~f:f1
+    in
     let new_names = List.rev new_names in
-    let new_exprs = List.map exprs ~f:(fun e -> ac_expr new_env e) in
+    let new_exprs = List.map exprs ~f:(fun e -> ac_expr new_env new_bindings e) in
     let f1 acc name expr =
       let* acc = acc in
       let* expr = expr in
       return ((name, expr) :: acc)
     in
     let* new_decls = List.fold2_exn new_names new_exprs ~init:(return []) ~f:f1 in
-    return (new_env, Rp_rec new_decls)
+    return (new_env, new_bindings, Rp_rec new_decls)
 ;;
 
-let ac_toplevel env = function
-  | Rp_non_rec (name, e) ->
-    let* new_name, new_env = process_name env name in
-    let* new_e = ac_expr env e in
-    return (new_env, Rp_non_rec (new_name, new_e))
-  | Rp_rec decl_list ->
-    let names, exprs = List.unzip decl_list in
-    let f1 acc cur_name =
-      let* names, env = acc in
-      let* new_name, new_env = process_name env cur_name in
-      return (new_name :: names, new_env)
-    in
-    let* new_names, new_env = List.fold names ~init:(return ([], env)) ~f:f1 in
-    let new_names = List.rev new_names in
-    let new_exprs = List.map exprs ~f:(fun e -> ac_expr new_env e) in
-    let f1 acc name expr =
-      let* acc = acc in
-      let* expr = expr in
-      return ((name, expr) :: acc)
-    in
-    let* new_decls = List.fold2_exn new_names new_exprs ~init:(return []) ~f:f1 in
-    return (new_env, Rp_rec new_decls)
-;;
-
-let ac_program program =
-  let rec helper last_env = function
+let ac_program program init_env =
+  let rec helper last_env last_bindings = function
     | [] -> return []
     | hd :: tl ->
-      let* cur_env, cur_ast = ac_toplevel last_env hd in
-      let* other_asts = helper cur_env tl in
+      let* cur_env, cur_bindings, cur_ast = ac_decl last_env last_bindings hd in
+      let* other_asts = helper cur_env cur_bindings tl in
       return (cur_ast :: other_asts)
   in
-  helper empty_env program
+  helper init_env (Map.empty (module String)) program
 ;;
 
-let run_alpha_conversion_program prog = run (ac_program prog)
+let run_alpha_conversion_program prog =
+  run (ac_program prog (StrSet.of_list Std_names.std_names)) 0
+;;
