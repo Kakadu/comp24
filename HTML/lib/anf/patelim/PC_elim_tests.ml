@@ -60,6 +60,16 @@ let%expect_test "PC elimination with PM" =
     in (f 6) else false |}]
 ;;
 
+let%expect_test "Const at the left side" =
+  PCElimTests.test {|
+   let 5 = x
+  |};
+  [%expect
+    {|
+    let _ = let EVALUATED_0 = x
+    in if (EVALUATED_0 ( = ) 5) then () else (RTE_ERROR_MATCH_FAILURE ()) |}]
+;;
+
 let%expect_test "Complex structures are not supported yet" =
   PCElimTests.test {|
    let (a, b) = (2, 3)
