@@ -103,8 +103,7 @@ let remove_patterns program =
           return ((pat, exp) :: acc))
       in
       return @@ e_match exp cases
-  and helper_def : definition -> (var_id, definition list) State.StateM.t =
-    function
+  and helper_def : definition -> (var_id, definition list) State.StateM.t = function
     | DLet (r, p, e) when is_simple p ->
       let* e = helper_expr e in
       return [ d_let_flag r p e ]

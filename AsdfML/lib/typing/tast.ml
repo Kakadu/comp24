@@ -72,6 +72,7 @@ let rec strip_types_expr = function
 and strip_types_def = function
   | TDLet (_, flag, p, e) -> DLet (flag, p, strip_types_expr e)
 ;;
+
 let strip_types_program = List.map ~f:strip_types_def
 
 let pp_texpr fmt e = strip_types_expr e |> Pp_ast.pp_expr fmt

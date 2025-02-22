@@ -83,6 +83,4 @@ and pp_sdef fmt = function
   | SLet (Rec, name, e) -> fprintf fmt "@[<2>let rec %s =@ %a@]" name pp_sexpr e
 ;;
 
-let pp_program fmt p =
-  Base.List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_sdef d);
-;;
+let pp_program fmt p = Base.List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_sdef d)

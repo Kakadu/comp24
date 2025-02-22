@@ -190,7 +190,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {| 
+  test
+    {| 
   let fib n =
     let rec helper acc n =
       match (n, acc) with
@@ -200,7 +201,8 @@ let%expect_test _ =
     in
     helper [ 1; 1 ] (n - 2)
   |};
-  [%expect {|
+  [%expect
+    {|
     let `helper_1 acc n =
       let a31 = `get_tuple_field (n, acc) 0 in
       let a27 = ( = ) a31 0 in

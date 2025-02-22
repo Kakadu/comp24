@@ -44,8 +44,7 @@ module Shrinker = struct
     | ETuple (hd1, hd2, tl) ->
       let es = hd1 :: hd2 :: tl in
       Shrink.list ~shrink:shrink_expr es >>= of_list
-    | EMatch (e, cases) -> 
-      Shrink.list (e :: List.map (fun (_, e) -> e) cases) >>= of_list 
+    | EMatch (e, cases) -> Shrink.list (e :: List.map (fun (_, e) -> e) cases) >>= of_list
     | _ -> empty
 
   and shrink_def = function

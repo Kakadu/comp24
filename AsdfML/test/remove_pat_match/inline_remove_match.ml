@@ -352,7 +352,8 @@ let%expect_test _ =
   test {|
     let (a, b, c) = (1, 2, 3)
   |};
-  [%expect {|
+  [%expect
+    {|
     let #temp_match_0 = let #temp_match_0 = (1, 2, 3) in
        #temp_match_0
     let #tuple_0 = #temp_match_0
