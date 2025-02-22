@@ -80,4 +80,12 @@ module RuntimeUtils = struct
   let apply_get_nth n e = apply get_nth (etuple (econst (CInt n)) e [])
   let apply_not_exhaustive_pm () = apply not_exhaustive_pm (econst CUnit)
   let create_var_for_eval n = "EVALUATED_" ^ n
+
+  let create_pop_and_expr_for_eval evaluated =
+    let create_pop_for_eval evaluated = pop_pat (pid evaluated) in
+    let create_expr_for_eval evaluated =
+      eid (ident_of_definable (ident_letters evaluated))
+    in
+    create_pop_for_eval evaluated, create_expr_for_eval evaluated
+  ;;
 end
