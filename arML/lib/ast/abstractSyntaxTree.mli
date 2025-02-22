@@ -21,19 +21,19 @@ type ground_type_defenition =
 [@@deriving show { with_path = false }]
 
 type type_defenition =
-  | TDPolymorphic of identifier (* Polymorphic type (x: 'a) *)
-  | TDGround of ground_type_defenition (* Int, Bool, Char, etc type *)
-  | TDArrow of type_defenition * type_defenition (* Function type (f: (int -> int)) *)
+  | TDPolymorphic of identifier (** Polymorphic type (x: 'a) *)
+  | TDGround of ground_type_defenition (** Int, Bool, Char, etc type *)
+  | TDArrow of type_defenition * type_defenition (** Function type (f: (int -> int)) *)
   | TDTuple of
       type_defenition
       * type_defenition
-      * type_defenition list (* Tuple type (x: (int, bool)) *)
-  | TDList of type_defenition (* List type (x: int list) *)
+      * type_defenition list (** Tuple type (x: (int, bool)) *)
+  | TDList of type_defenition (** List type (x: int list) *)
 [@@deriving show { with_path = false }]
 
 type pattern =
-  | PAny (* Wildcard: '_' *)
-  | PNill (* Empty: '[]' *)
+  | PAny (** Wildcard: '_' *)
+  | PNill (** Empty: '[]' *)
   | PConst of constant (** Any constant: '1', 'true', etc *)
   | PVar of identifier (** A variable pattern: 'x', 'y', etc *)
   | PTuple of pattern * pattern * pattern list (** Tuple of patterns: '(P1, P2, P3)' *)
@@ -52,7 +52,7 @@ and expression =
   (** Anonymous function with one argument and pattern matching: 'function | hd :: tl -> (hd, tl) | _ -> (0, 0)'*)
   | EApplication of expression * expression * expression list (** Application: f x *)
   | EIfThenElse of expression * expression * expression option
-    (* if condition then true_branch else false branch (else option)*)
+  (** if condition then true_branch else false branch (else option)*)
   | ETuple of expression * expression * expression list (** Tuple: '(E1, E2, ..., En)' *)
   | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
   | EEmptyList (** Empty list: '[]' *)

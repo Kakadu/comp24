@@ -10,4 +10,4 @@ type error =
   (** Castable types are not compatible. *)
   | InvalidRecursionLeftHand
   (** The left-hand side of a recursive let binding is not a simple variable.  e.g., let (x, y) = ... in ... *)
-  | Several_bounds of string (** A type variable is assigned more than one constraint. *)
+  | Several_bounds of string (** A type variable is assigned more than once. *)
