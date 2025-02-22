@@ -25,9 +25,4 @@ and value_binding =
   ; m_vb_expr : m_expr
   }
 
-type m_structure_item =
-  | MStr_eval of m_expr
-  | MStr_value of m_decl
-[@@deriving show { with_path = false }]
-
-type m_program = m_structure_item list [@@deriving show { with_path = false }]
+type m_program = m_decl list [@@deriving show { with_path = false }]
