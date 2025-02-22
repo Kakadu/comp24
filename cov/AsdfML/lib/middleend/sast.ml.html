@@ -236,8 +236,8 @@ let s_var x = <span data-count="1131">S</span>Var x
 let s_app f x = <span data-count="1309">S</span>App (f, x)
 
 let s_if_else cond e_true e_false =
-  <span data-count="72">m</span>atch cond with
-  | <span data-count="8">S</span>Const (CBool true) -&gt; e_true
+  <span data-count="76">m</span>atch cond with
+  | <span data-count="12">S</span>Const (CBool true) -&gt; e_true
   | <span data-count="0">S</span>Const (CBool false) -&gt; e_false
   | <span data-count="64">_</span> -&gt; SIfElse (cond, e_true, e_false)
 ;;
