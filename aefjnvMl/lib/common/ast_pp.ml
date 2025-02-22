@@ -90,7 +90,7 @@ let rec expression_pp fmt expr =
     | Exp_ifthenelse (e1, e2, e3) ->
       fprintf
         fmt
-        "if %a then %a else %a"
+        "(if %a \n then %a \n else %a)"
         expression_pp
         e1
         expression_pp
