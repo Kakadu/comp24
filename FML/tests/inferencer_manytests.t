@@ -14,12 +14,16 @@
   TODO: Not implemented.
 
   $ ./inferencer_runner.exe < manytests/typed/006partial.ml
-  Type error: unbound variable 'print_int'
+  val main : int
+  val foo : int -> int
+  val foo : int -> int
 
   $ ./inferencer_runner.exe < manytests/typed/006partial2.ml
-  Type error: unbound variable 'print_int'
+  val main : int
+  val foo : int -> int -> int -> int
   $ ./inferencer_runner.exe < manytests/typed/006partial3.ml
-  Type error: unbound variable 'print_int'
+  val main : int
+  val foo : int -> int -> int -> unit
 
   $ ./inferencer_runner.exe < manytests/typed/007order.ml
   Error: : end_of_input

@@ -960,3 +960,86 @@
           )))
     ]
  
+  $ ./parser_runner.exe < manytests/do_not_type/001.ml
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "recfac"),
+         (EFun ((PIdentifier "n"),
+            (EIf (
+               (EApplication (
+                  (EApplication ((EIdentifier "( <= )"), (EIdentifier "n"))),
+                  (EConst (CInt 1)))),
+               (EConst (CInt 1)),
+               (EApplication (
+                  (EApplication ((EIdentifier "( * )"), (EIdentifier "n"))),
+                  (EApplication ((EIdentifier "fac"),
+                     (EApplication (
+                        (EApplication ((EIdentifier "( - )"), (EIdentifier "n")
+                           )),
+                        (EConst (CInt 1))))
+                     ))
+                  ))
+               ))
+            ))
+         )))
+    ]
+  $ ./parser_runner.exe < manytests/do_not_type/002if.ml
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "main"),
+         (EIf ((EConst (CBool true)), (EConst (CInt 1)), (EConst (CBool false))
+            ))
+         )))
+    ]
+  $ ./parser_runner.exe < manytests/do_not_type/003occurs.ml
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "fix"),
+         (EFun ((PIdentifier "f"),
+            (EApplication (
+               (EFun ((PIdentifier "x"),
+                  (EApplication ((EIdentifier "f"),
+                     (EFun ((PIdentifier "f"),
+                        (EApplication (
+                           (EApplication ((EIdentifier "x"), (EIdentifier "x")
+                              )),
+                           (EIdentifier "f")))
+                        ))
+                     ))
+                  )),
+               (EFun ((PIdentifier "x"),
+                  (EApplication ((EIdentifier "f"),
+                     (EFun ((PIdentifier "f"),
+                        (EApplication (
+                           (EApplication ((EIdentifier "x"), (EIdentifier "x")
+                              )),
+                           (EIdentifier "f")))
+                        ))
+                     ))
+                  ))
+               ))
+            ))
+         )))
+    ]
+
+  $ ./parser_runner.exe < manytests/do_not_type/004let_poly.ml
+  [(SingleDecl
+      (DDeclaration (NoRec, (PIdentifier "temp"),
+         (EApplication (
+            (EFun ((PIdentifier "f"),
+               (ETuple
+                  [(EApplication ((EIdentifier "f"), (EConst (CInt 1))));
+                    (EApplication ((EIdentifier "f"), (EConst (CBool true))))])
+               )),
+            (EFun ((PIdentifier "x"), (EIdentifier "x")))))
+         )))
+    ]
+
+  $ ./parser_runner.exe < manytests/do_not_type/015tuples.ml
+  [(SingleDecl
+      (DDeclaration (Rec, (PTuple [(PIdentifier "a"); (PIdentifier "b")]),
+         (ETuple [(EIdentifier "a"); (EIdentifier "b")]))))
+    ]
+
+  $ ./parser_runner.exe < manytests/do_not_type/099.ml
+  manytests/do_not_type/099.ml: No such file or directory
+  [1]
+
+
