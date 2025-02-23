@@ -10,8 +10,8 @@ int64_t div_mlint(int64_t x, int64_t y) {
 int8_t compare_ml(int64_t x, int64_t y);
 
 int8_t compare_boxed(int64_t x, int64_t y) {
-    box_t* xbox = x;
-    box_t* ybox = y;
+    box_t* xbox = (box_t*)x;
+    box_t* ybox = (box_t*)y;
 
     DEBUG_RUN(if (xbox->header.tag != ybox->header.tag) EXCEPTION_FMT("Debug \"compare: args have different tag\""););
     if (xbox->header.tag == T_CLOSURE) {
