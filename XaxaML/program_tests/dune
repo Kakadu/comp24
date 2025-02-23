@@ -28,6 +28,12 @@
  (public_name run_closure_conversion)
  (libraries XaxaML.Lib stdio))
 
+(executable
+ (name run_lambda_lifting)
+ (modules Run_lambda_lifting)
+ (public_name run_lambda_lifting)
+ (libraries XaxaML.Lib stdio))
+
 (cram
  (applies_to parser_tests)
  (deps ./run_parser.exe))
@@ -67,5 +73,12 @@
  (applies_to closure_conversion_tests)
  (deps
   ./run_closure_conversion.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml))
+
+(cram
+ (applies_to lambda_lifting_tests)
+ (deps
+  ./run_lambda_lifting.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml))

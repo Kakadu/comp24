@@ -12,7 +12,8 @@
   Common
   Remove_patterns
   Alpha_conversion
-  Closure_conversion)
+  Closure_conversion
+  Lambda_lifting)
  (libraries base stdlib angstrom)
  (inline_tests)
  (preprocess

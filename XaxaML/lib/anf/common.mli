@@ -16,3 +16,20 @@ module StrSet : sig
   val fold : t -> init:'a -> f:('a -> string -> 'a) -> 'a
   val diff : t -> t -> t
 end
+
+module MonadCounter : sig
+  type 'a t
+
+  val return : 'a -> 'a t
+  val fresh : int t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+  val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
+  val ( >>| ) : 'a t -> ('a -> 'b) -> 'b t
+  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
+  val run : 'a t -> int -> int * 'a
+
+  module RList : sig
+    val map : 'a list -> f:('a -> 'b t) -> 'b list t
+    val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
+  end
+end
