@@ -1,14 +1,16 @@
 open Liveness_analysis
 
-type 'a assignment =
+type 'a location =
   | Reg of 'a
   | StackLoc of int
 
-type 'a fun_allocation = (string, 'a assignment, Base.String.comparator_witness) Base.Map.t
-type 'a program_allocation = (string * 'a fun_allocation) list
+type 'a regs_assignment =
+  (string, 'a location, Base.String.comparator_witness) Base.Map.t
+
+type 'a program_allocation = (string * 'a regs_assignment) list
 
 module Allocator(S : Registers_storage_intf.S) : sig
-  val scan_fun : 'a S.t -> range list -> 'a fun_allocation
+  val scan_fun : 'a S.t -> range list -> 'a regs_assignment
   val scan_program : 'a S.t -> Flambda.flstructure -> 'a program_allocation
 end
 

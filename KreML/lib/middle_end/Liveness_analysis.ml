@@ -36,9 +36,6 @@ let analyse_fun = function
   | Fun_with_env { body; _ } | Fun_without_env { body; _ } ->
     let open Base in
     let res_start = Map.empty (module String)
-    (* let res_start =
-      List.fold param_names ~init:res_start ~f:(fun acc name ->
-        Map.set acc ~key:name ~data:0) *)
     in
     let res_end = Map.empty (module String) in
     let _, ss, es = analyse_expr body 1 res_start res_end in

@@ -2,18 +2,12 @@ open Riscv
 open Flambda
 open Linear_scan_allocation
 
-type block = instruction list
-type fun_body = block list
-type generated_code = (string, fun_body) Hashtbl.t
-
 let word_size = 8
 let arg_regs_count = 8
 let curr_block = ref []
 let block_counter = ref 0
 let current_fun_arity = ref 0
 
-(* when we codegen ite we must preserve rd of binding*)
-let curr_rd = ref (temp 0)
 let curr_assignment = ref (Base.Map.empty (module Base.String))
 
 let find_reg forbidden =
@@ -50,26 +44,26 @@ module Arith = struct
       let yloc = Base.Map.find_exn !curr_assignment y in
       let xreg, yreg, save, restore =
         match xloc, yloc with
-        | Reg xr, Reg yr -> xr, yr, None, None
-        | StackLoc x_idx, Reg yr ->
+        | Loc_reg xr, Loc_reg yr -> xr, yr, None, None
+        | Loc_mem (xbase, xoffset), Loc_reg yr ->
           let xreg = find_reg [ yr; rd ] in
           let save = sw ~v:xreg 0 ~dst:Sp in
-          let load = lw ~rd:xreg (x_idx * word_size) ~src:fp in
+          let load = lw ~rd:xreg xoffset ~src:xbase in
           let restore = lw ~rd:xreg 0 ~src:Sp in
           xreg, yr, Some [ save; load ], Some [ restore ]
-        | Reg xr, StackLoc y_idx ->
+        | Loc_reg xr, Loc_mem (ybase, yoffset) ->
           let yreg = find_reg [ xr; rd ] in
           let save = sw ~v:yreg 0 ~dst:Sp in
-          let load = lw ~rd:yreg (y_idx * word_size) ~src:fp in
+          let load = lw ~rd:yreg yoffset ~src:ybase in
           let restore = lw ~rd:yreg 0 ~src:Sp in
           xr, yreg, Some [ save; load ], Some [ restore ]
-        | StackLoc x_idx, StackLoc y_idx ->
+        | Loc_mem (xbase, xoffset), Loc_mem (ybase, yoffset) ->
           let xreg = find_reg [ rd ] in
           let yreg = find_reg [ rd; xreg ] in
           let save0 = sw ~v:xreg 0 ~dst:Sp in
           let save1 = sw ~v:yreg word_size ~dst:Sp in
-          let load0 = lw ~rd:xreg (word_size * x_idx) ~src:fp in
-          let load1 = lw ~rd:yreg (word_size * y_idx) ~src:fp in
+          let load0 = lw ~rd:xreg xoffset ~src:xbase in
+          let load1 = lw ~rd:yreg yoffset ~src:ybase in
           let restore0 = lw ~rd:xreg 0 ~src:Sp in
           let restore1 = lw ~rd:yreg word_size ~src:Sp in
           xreg, yreg, Some [ save0; save1; load0; load1 ], Some [ restore0; restore1 ]
@@ -93,11 +87,11 @@ module Arith = struct
       let yloc = Base.Map.find_exn !curr_assignment y in
       let yreg, save, restore =
         match yloc with
-        | Reg r -> r, None, None
-        | StackLoc idx ->
+        | Loc_reg r -> r, None, None
+        | Loc_mem (base, offset) ->
           let yreg = find_reg [ rd ] in
           let save = sw ~v:yreg 0 ~dst:Sp in
-          let load = lw ~rd:yreg (word_size * idx) ~src:fp in
+          let load = lw ~rd:yreg offset ~src:base in
           let restore = lw ~rd:yreg 0 ~src:Sp in
           yreg, Some [ save; load ], Some [ restore ]
       in
@@ -157,11 +151,11 @@ module Arith = struct
       let xloc = Base.Map.find_exn !curr_assignment x in
       let xreg, save, restore =
         match xloc with
-        | Reg r -> r, None, None
-        | StackLoc idx ->
+        | Loc_reg r -> r, None, None
+        | Loc_mem (base, offset) ->
           let xreg = find_reg [ rd ] in
           let save = sw ~v:xreg 0 ~dst:Sp in
-          let load = lw ~rd:xreg (word_size * idx) ~src:fp in
+          let load = lw ~rd:xreg offset ~src:base in
           let restore = lw ~rd:xreg 0 ~src:Sp in
           xreg, Some [ save; load ], Some [ restore ]
       in
@@ -287,8 +281,8 @@ module Function = struct
   let used_registers assignment =
     assignment
     |> Base.Map.filter_map ~f:(function
-      | Reg r -> Some r
-      | StackLoc _ -> None)
+      | Loc_reg r -> Some r
+      | Loc_mem _ -> None)
     |> Base.Map.to_alist
     |> List.map snd
   ;;
@@ -314,12 +308,12 @@ module Function = struct
 
   let stack_locals_count regs_assignment =
     Base.Map.filter regs_assignment ~f:(function
-      | Reg _ -> false
-      | StackLoc _ -> true)
+      | Loc_reg _ -> false
+      | Loc_mem _ -> true)
     |> Base.Map.length
   ;;
 
-  let prologue_and_apilogue regs_assignment =
+  let prologue_and_epilogue regs_assignment =
     let saved_registers = fp :: saved_used_registers regs_assignment in
     let set_sp_to_fp = Pseudo.mv ~rd:fp ~src:Sp in
     let stack_locals_count = stack_locals_count regs_assignment in
@@ -363,10 +357,14 @@ module Function = struct
     let extend_stack_for_args stack_args_count =
       Memory.extend_stack_aligned (stack_args_count * word_size)
     ;;
+
+    let shrink_stack_for_args stack_args_count =
+      Memory.shrink_stack_aligned (stack_args_count * word_size)
   end
-(* la t0, closure
-   la t1, my_function
-   sw t1, t0(0)*)
+
+  (* la t0, closure
+     la t1, my_function
+     sw t1, t0(0)*)
   module Runtime = struct
     let alloc_tuple size action =
       let save, restore = Call.save_and_restore_insns !current_fun_arity in
@@ -377,16 +375,16 @@ module Function = struct
       save @ [ load_size; call ] @ extra_insns @ restore
     ;;
 
-    (** this function is supposed to use in [action] of [alloc_tuple], so 
-    callee-saved args are considered to be saved on call-site *)
+    (** this function is supposed to use in [action] of [alloc_tuple], so
+        callee-saved args are considered to be saved on call-site *)
     let alloc_closure f_label env_addr_reg arity fv_count =
       let store_env_addr = Pseudo.mv ~rd:(arg 1) ~src:env_addr_reg in
       let load_faddr = Pseudo.la (arg 0) f_label in
       let load_arity = Pseudo.li (arg 2) arity in
       let load_fvcount = Pseudo.li (arg 3) fv_count in
       let call = Pseudo.call Runtime.rv_alloc_closure in
-      [store_env_addr; load_faddr; load_arity; load_fvcount; call]
-
+      [ store_env_addr; load_faddr; load_arity; load_fvcount; call ]
+    ;;
 
     (** args must be placed in [before_call_insns] from call sight of this method *)
     let call callee_name before_call_insns result_action =
@@ -403,8 +401,9 @@ let rec codegen_flambda location =
   function
   | Fl_var id ->
     (match Base.Map.find_exn !curr_assignment id with
-     | Reg reg -> Rv_reg reg |> Memory.store_rvalue location
-     | StackLoc idx -> Rv_mem (fp, idx * word_size) |> Memory.store_rvalue location)
+     | Loc_reg reg -> Rv_reg reg
+     | Loc_mem (base, offset) -> Rv_mem (base, offset))
+    |> Memory.store_rvalue location
   | Fl_const c ->
     let const = Arith.const_to_int c in
     Rv_imm const |> Memory.store_rvalue location
@@ -478,12 +477,7 @@ let rec codegen_flambda location =
     let loc =
       match name with
       | Some name -> Base.Map.find_exn !curr_assignment name
-      | None -> Reg Zero
-    in
-    let loc =
-      match loc with
-      | Reg r -> Loc_reg r
-      | StackLoc idx -> Loc_mem (fp, idx * word_size)
+      | None -> Loc_reg Zero
     in
     let insns = codegen_flambda loc v in
     append_reversed insns;
@@ -498,25 +492,26 @@ let rec codegen_flambda location =
     let call = Pseudo.call name in
     (* save function result *)
     let save_result = Memory.store_rvalue location (Rv_reg (arg 0)) in
-    if stack_args_count = 0 then
-      save @ arrange @ (call :: save_result) @ restore
-    else
-      let extend_stack = Memory.extend_stack_aligned (stack_args_count * word_size) in
-      let shrink_stack = Memory.shrink_stack_aligned (stack_args_count * word_size) in
-      save @ (extend_stack::arrange) @ (call::shrink_stack::save_result) @ restore
+    if stack_args_count = 0
+    then save @ arrange @ (call :: save_result) @ restore
+    else (
+      let extend_stack = Function.Call.extend_stack_for_args stack_args_count in
+      let shrink_stack = Function.Call.shrink_stack_for_args stack_args_count in
+      save @ (extend_stack :: arrange) @ (call :: shrink_stack :: save_result) @ restore)
   | Fl_app (f, args) ->
     let arg_locations = Function.Call.arg_locations (1 + List.length args) in
     let stack_args_count = max 0 (List.length args - arg_regs_count) in
     let arrange = List.map2 codegen_flambda arg_locations (f :: args) |> List.concat in
-    if stack_args_count = 0 then
-    Function.Runtime.call Runtime.call_closure arrange (fun addr ->
-      Memory.store_rvalue location (Rv_reg addr))
-    else
-      let extend_stack = Memory.extend_stack_aligned (word_size * stack_args_count) in
-      let shrink_stack = Memory.shrink_stack_aligned (word_size * stack_args_count) in
-      Function.Runtime.call Runtime.call_closure (extend_stack::arrange) (fun addr ->
-        shrink_stack :: (Memory.store_rvalue location (Rv_reg addr)))
-  | Fl_closure { arity; env_size; arrange; name; } ->
+    if stack_args_count = 0
+    then
+      Function.Runtime.call Runtime.call_closure arrange (fun addr ->
+        Memory.store_rvalue location (Rv_reg addr))
+    else (
+      let extend_stack = Function.Call.extend_stack_for_args stack_args_count in
+      let shrink_stack = Function.Call.shrink_stack_for_args stack_args_count in
+      Function.Runtime.call Runtime.call_closure (extend_stack :: arrange) (fun addr ->
+        shrink_stack :: Memory.store_rvalue location (Rv_reg addr)))
+  | Fl_closure { arity; env_size; arrange; name } ->
     Function.Runtime.alloc_tuple (env_size + arity) (fun env_addr ->
       let arrange_env_insns =
         List.map
@@ -526,7 +521,9 @@ let rec codegen_flambda location =
           arrange
         |> List.concat
       in
-      let call_alloc_closure_insns = Function.Runtime.alloc_closure name env_addr arity env_size in
+      let call_alloc_closure_insns =
+        Function.Runtime.alloc_closure name env_addr arity env_size
+      in
       let store = Memory.store_rvalue location (Rv_reg (arg 0)) in
       arrange_env_insns @ call_alloc_closure_insns @ store)
   | Fl_ite (c, t, e) ->
@@ -554,17 +551,53 @@ let rec codegen_flambda location =
     []
 ;;
 
-let codegen_fun ({ param_names; arity; body } as fun_decl) regs_assignment =
+let convert_generic_assignment_to_rv generic =
+  Base.Map.map generic ~f:(function
+    | Reg r -> Loc_reg r
+    | StackLoc idx -> Loc_mem (fp, idx * word_size))
+;;
+
+let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
+  let rv_locals_assignment = convert_generic_assignment_to_rv regs_assignment in
   let explicit_params, env_params = Base.List.split_n param_names arity in
   let explicit_param_locations = Function.resolve_param_locations explicit_params arity in
   let env_param_locations =
     let a0 = arg 0 in
-     List.mapi (fun i name -> 
-    name, Loc_mem(a0, i * word_size) ) in
-  curr_assignment := regs_assignment;
-  List.iter (fun (exp_p, loc) -> )
-  let prologue, epilogue = Function.prologue_and_apilogue regs_assignment in
-  ()
+    List.mapi (fun i name -> name, Loc_mem (a0, i * word_size)) env_params
+  in
+  curr_assignment := rv_locals_assignment;
+  List.iter
+    (fun (arg, loc) ->
+      curr_assignment := Base.Map.set !curr_assignment ~key:arg ~data:loc)
+    explicit_param_locations;
+  List.iter
+    (fun (env_param, loc) ->
+      curr_assignment := Base.Map.set !curr_assignment ~key:env_param ~data:loc)
+    env_param_locations;
+  let prologue, epilogue = Function.prologue_and_epilogue !curr_assignment in
+  curr_block := prologue @ [ Label fun_name ] @ !curr_block;
+  let return_value_location = Loc_reg (arg 0) in
+  let final_insn = codegen_flambda return_value_location body in
+  curr_block := epilogue @ final_insn @ !curr_block
 ;;
 
-let codegen program = "1"
+module RvAllocator = Linear_scan_allocation.Allocator (RegistersStorage)
+
+let codegen_program flstructure =
+  let available_regs = Riscv.available_regs in
+  let regs_assignment = RvAllocator.scan_program available_regs flstructure in
+  List.iter2
+    (fun (fun_name, fun_decl) (fun_name', fun_regs_assignment) ->
+      if fun_name <> fun_name' then Utils.internalfail "order";
+      match fun_decl with
+      | Fun_with_env decl | Fun_without_env decl ->
+        codegen_fun (fun_name, decl) fun_regs_assignment)
+    flstructure
+    regs_assignment;
+  !curr_block
+;;
+
+let dump instructions =
+  let open Stdlib.Format in
+  List.iter (fun insn -> fprintf std_formatter "%a" pp_insn insn) instructions
+;;
