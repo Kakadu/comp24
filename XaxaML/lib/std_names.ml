@@ -29,4 +29,4 @@ let std_names =
   ]
 ;;
 
-let type_var_count = 9
+let type_var_count = 10

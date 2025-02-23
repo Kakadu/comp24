@@ -344,10 +344,14 @@ end = struct
     let init_env =
       (* Unfortunately, we cannot create more specific type for this function,
          because its actual type will depend on the number of elements in the tuple *)
-      add_to_std init_env "#unpack_tuple" (Scheme (single_bind 7, type_var 7))
+      let type_var_set = TypeVarSet.add 8 (single_bind 7) in
+      add_to_std
+        init_env
+        "#unpack_tuple"
+        (Scheme (type_var_set, type_var 7 @-> int_typ @-> type_var 8))
     in
     let init_env =
-      add_to_std init_env "#match_failure" (Scheme (single_bind 8, type_var 8))
+      add_to_std init_env "#match_failure" (Scheme (single_bind 9, type_var 9))
     in
     init_env
   ;;
