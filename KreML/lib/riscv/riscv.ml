@@ -108,7 +108,8 @@ module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = st
   let to_list = Fun.id
 end
 
-let available_regs = List.init 8 temp @ List.init 12 saved
+(* fp is not available *)
+let available_regs = List.init 8 temp @ List.init 11 (fun i -> saved (i + 1))
 
 
 let pp_reg fmt =
@@ -187,6 +188,9 @@ module Pseudo = struct
     Pseudo insn
   let li rd imm =
     let insn = asprintf "li %a, %i" pp_reg rd imm in
+    Pseudo insn
+  let la rd label =
+    let insn = asprintf "la  %a, %s" pp_reg rd label in
     Pseudo insn
   let neg r =
     let insn = asprintf "neg %a" pp_reg r in

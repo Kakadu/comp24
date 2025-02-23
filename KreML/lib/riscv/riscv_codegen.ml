@@ -244,6 +244,20 @@ module Arith = struct
 end
 
 module Memory = struct
+  (** evaluates cells count so that stack is kep 16-bytes aligned
+      according to RISC-V calling convention*)
+  let stack_size_aligned size = size + (16 - (size mod 16))
+
+  let extend_stack_aligned size =
+    let aligned_size = stack_size_aligned size in
+    extend_stack_insn aligned_size
+  ;;
+
+  let shrink_stack_aligned size =
+    let aligned_size = stack_size_aligned size in
+    shrink_stack_insn aligned_size
+  ;;
+
   let store_rvalue location rvalue =
     match location, rvalue with
     | Loc_reg rd, Rv_reg src when rd = src -> []
@@ -270,13 +284,6 @@ module Memory = struct
 end
 
 module Function = struct
-  (** evaluates cells count so that stack is aligned by 128-bit
-      according to RISC-V calling convention*)
-  let stack_size_aligned args_count =
-    let byte_size = args_count * word_size in
-    byte_size + (16 - (byte_size mod 16))
-  ;;
-
   let used_registers assignment =
     assignment
     |> Base.Map.filter_map ~f:(function
@@ -293,30 +300,40 @@ module Function = struct
     args @ used_registers assignment |> List.filter (fun r -> is_saved r |> not)
   ;;
 
-  let resolve_args param_names arity =
+  let resolve_param_locations param_names arity =
     if arity <= arg_regs_count
-    then List.mapi (fun i name -> name, Reg (arg i)) param_names
+    then List.mapi (fun i name -> name, Loc_reg (arg i)) param_names
     else (
       let reg_args, stack_args = Base.List.split_n param_names arg_regs_count in
-      let reg_args = List.mapi (fun i name -> name, Reg (arg i)) reg_args in
-      let stack_args = List.mapi (fun i name -> name, StackLoc i) stack_args in
+      let reg_args = List.mapi (fun i name -> name, Loc_reg (arg i)) reg_args in
+      let stack_args =
+        List.mapi (fun i name -> name, Loc_mem (fp, i * word_size)) stack_args
+      in
       reg_args @ stack_args)
   ;;
 
-  let prologue_and_apilogue assignment =
-    (* todo save frame pointer *)
-    let saved_registers = saved_used_registers assignment in
-    let stack_size = stack_size_aligned (List.length saved_registers) in
-    let extend_stack_insn = extend_stack_insn stack_size in
-    let prologue =
+  let stack_locals_count regs_assignment =
+    Base.Map.filter regs_assignment ~f:(function
+      | Reg _ -> false
+      | StackLoc _ -> true)
+    |> Base.Map.length
+  ;;
+
+  let prologue_and_apilogue regs_assignment =
+    let saved_registers = fp :: saved_used_registers regs_assignment in
+    let set_sp_to_fp = Pseudo.mv ~rd:fp ~src:Sp in
+    let stack_locals_count = stack_locals_count regs_assignment in
+    let save_regs =
       List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) saved_registers
     in
-    let prologue = extend_stack_insn :: prologue in
-    let restore_stack_insn = shrink_stack_insn stack_size in
-    let epilogue =
+    let stack_cells_count = stack_locals_count + List.length save_regs in
+    let extend_stack_insn = Memory.extend_stack_aligned (stack_cells_count * word_size) in
+    let prologue = (set_sp_to_fp :: save_regs) @ [ extend_stack_insn ] in
+    let restore_stack_insn = shrink_stack_insn (word_size * stack_cells_count) in
+    let restore_regs =
       List.mapi (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp) saved_registers
     in
-    let epilogue = epilogue @ [ restore_stack_insn ] in
+    let epilogue = restore_stack_insn :: restore_regs in
     prologue, epilogue
   ;;
 
@@ -325,13 +342,12 @@ module Function = struct
       let callee_args = List.init caller_arity arg in
       let callee_temps = temporary_used_registers !curr_assignment caller_arity in
       let to_preserve = (Ra :: callee_args) @ callee_temps in
-      let extra_stack_size = stack_size_aligned (List.length to_preserve) in
-      let extend_stack_insn = extend_stack_insn extra_stack_size in
+      let extend_stack_insn = Memory.extend_stack_aligned (List.length to_preserve) in
       let save_insns =
         List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) to_preserve
       in
       let save_insns = extend_stack_insn :: save_insns in
-      let restore_stack_insn = shrink_stack_insn extra_stack_size in
+      let restore_stack_insn = Memory.shrink_stack_aligned (List.length to_preserve) in
       let restore_insns =
         List.mapi (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp) to_preserve
       in
@@ -341,10 +357,16 @@ module Function = struct
 
     let arg_locations args_count =
       List.init args_count (fun i ->
-        if i < 8 then Loc_reg (arg i) else Loc_mem (Sp, word_size * (i - 7)))
+        if i < 8 then Loc_reg (arg i) else Loc_mem (fp, word_size * (i - 7)))
+    ;;
+
+    let extend_stack_for_args stack_args_count =
+      Memory.extend_stack_aligned (stack_args_count * word_size)
     ;;
   end
-
+(* la t0, closure
+   la t1, my_function
+   sw t1, t0(0)*)
   module Runtime = struct
     let alloc_tuple size action =
       let save, restore = Call.save_and_restore_insns !current_fun_arity in
@@ -355,7 +377,18 @@ module Function = struct
       save @ [ load_size; call ] @ extra_insns @ restore
     ;;
 
-    (** args must be placed in correct locations from call sight of this method *)
+    (** this function is supposed to use in [action] of [alloc_tuple], so 
+    callee-saved args are considered to be saved on call-site *)
+    let alloc_closure f_label env_addr_reg arity fv_count =
+      let store_env_addr = Pseudo.mv ~rd:(arg 1) ~src:env_addr_reg in
+      let load_faddr = Pseudo.la (arg 0) f_label in
+      let load_arity = Pseudo.li (arg 2) arity in
+      let load_fvcount = Pseudo.li (arg 3) fv_count in
+      let call = Pseudo.call Runtime.rv_alloc_closure in
+      [store_env_addr; load_faddr; load_arity; load_fvcount; call]
+
+
+    (** args must be placed in [before_call_insns] from call sight of this method *)
     let call callee_name before_call_insns result_action =
       let save, restore = Call.save_and_restore_insns !current_fun_arity in
       let call = Pseudo.call callee_name in
@@ -364,12 +397,6 @@ module Function = struct
     ;;
   end
 end
-
-(* let a =
-   if flag then
-   let b = 6 in
-   a + 6
-   else 5*)
 
 let rec codegen_flambda location =
   let append_reversed insns = curr_block := List.rev insns @ !curr_block in
@@ -403,11 +430,11 @@ let rec codegen_flambda location =
   | Fl_getfield (idx, obj) ->
     let some_reg = find_reg [] in
     let save = sw ~v:some_reg 0 ~dst:Sp in
-    let extend_stack = extend_stack_insn word_size in
+    let extend_stack = Memory.extend_stack_aligned word_size in
     let load_addr = codegen_flambda (Loc_reg some_reg) obj in
     let load_value = lw ~rd:some_reg (idx * word_size) ~src:some_reg in
     let store = Memory.store_rvalue location (Rv_reg some_reg) in
-    let shrink_stack = shrink_stack_insn word_size in
+    let shrink_stack = Memory.shrink_stack_aligned word_size in
     let restore = lw ~rd:some_reg 0 ~src:Sp in
     [ save; extend_stack ] @ load_addr @ (load_value :: store) @ [ shrink_stack; restore ]
   | Fl_binop (op, x, y) ->
@@ -417,8 +444,8 @@ let rec codegen_flambda location =
       | Loc_mem (_, _) ->
         let some_reg = find_reg [] in
         let save = sw ~v:some_reg 0 ~dst:Sp in
-        let extend_stack = extend_stack_insn word_size in
-        let shrink_stack = shrink_stack_insn word_size in
+        let extend_stack = Memory.extend_stack_aligned word_size in
+        let shrink_stack = Memory.shrink_stack_aligned word_size in
         let restore = lw ~rd:some_reg 0 ~src:Sp in
         some_reg, Some [ save; extend_stack ], Some [ shrink_stack; restore ]
     in
@@ -435,8 +462,8 @@ let rec codegen_flambda location =
       | Loc_mem (_, _) ->
         let some_reg = find_reg [] in
         let save = sw ~v:some_reg 0 ~dst:Sp in
-        let extend_stack = extend_stack_insn word_size in
-        let shrink_stack = shrink_stack_insn word_size in
+        let extend_stack = Memory.extend_stack_aligned word_size in
+        let shrink_stack = Memory.shrink_stack_aligned word_size in
         let restore = lw ~rd:some_reg 0 ~src:Sp in
         some_reg, Some [ save; extend_stack ], Some [ shrink_stack; restore ]
     in
@@ -467,32 +494,46 @@ let rec codegen_flambda location =
     let save, restore = Function.Call.save_and_restore_insns !current_fun_arity in
     let arg_locations = Function.Call.arg_locations arity in
     let arrange = List.map2 codegen_flambda arg_locations args |> List.concat in
-    (* save function result *)
+    let stack_args_count = max 0 (arity - arg_regs_count) in
     let call = Pseudo.call name in
+    (* save function result *)
     let save_result = Memory.store_rvalue location (Rv_reg (arg 0)) in
-    save @ arrange @ (call :: save_result) @ restore
+    if stack_args_count = 0 then
+      save @ arrange @ (call :: save_result) @ restore
+    else
+      let extend_stack = Memory.extend_stack_aligned (stack_args_count * word_size) in
+      let shrink_stack = Memory.shrink_stack_aligned (stack_args_count * word_size) in
+      save @ (extend_stack::arrange) @ (call::shrink_stack::save_result) @ restore
   | Fl_app (f, args) ->
     let arg_locations = Function.Call.arg_locations (1 + List.length args) in
+    let stack_args_count = max 0 (List.length args - arg_regs_count) in
     let arrange = List.map2 codegen_flambda arg_locations (f :: args) |> List.concat in
+    if stack_args_count = 0 then
     Function.Runtime.call Runtime.call_closure arrange (fun addr ->
       Memory.store_rvalue location (Rv_reg addr))
-  | Fl_closure { arity; env_size; arrange; _ } ->
-    Function.Runtime.alloc_tuple (env_size + arity) (fun addr ->
-      let arrange_insns =
+    else
+      let extend_stack = Memory.extend_stack_aligned (word_size * stack_args_count) in
+      let shrink_stack = Memory.shrink_stack_aligned (word_size * stack_args_count) in
+      Function.Runtime.call Runtime.call_closure (extend_stack::arrange) (fun addr ->
+        shrink_stack :: (Memory.store_rvalue location (Rv_reg addr)))
+  | Fl_closure { arity; env_size; arrange; name; } ->
+    Function.Runtime.alloc_tuple (env_size + arity) (fun env_addr ->
+      let arrange_env_insns =
         List.map
           (fun (idx, arg) ->
-            let loc = Loc_mem (addr, idx * word_size) in
+            let loc = Loc_mem (env_addr, idx * word_size) in
             codegen_flambda loc arg)
           arrange
         |> List.concat
       in
-      let store = Memory.store_rvalue location (Rv_reg addr) in
-      arrange_insns @ store)
+      let call_alloc_closure_insns = Function.Runtime.alloc_closure name env_addr arity env_size in
+      let store = Memory.store_rvalue location (Rv_reg (arg 0)) in
+      arrange_env_insns @ call_alloc_closure_insns @ store)
   | Fl_ite (c, t, e) ->
     let some_reg = find_reg [] in
     let save = sw ~v:some_reg 0 ~dst:Sp in
-    let extend_stack = extend_stack_insn word_size in
-    let shrink_stack = shrink_stack_insn word_size in
+    let extend_stack = Memory.extend_stack_aligned word_size in
+    let shrink_stack = Memory.shrink_stack_aligned word_size in
     let restore = lw ~rd:some_reg 0 ~src:Sp in
     let cond = codegen_flambda (Loc_reg some_reg) c in
     let fresh_label l =
@@ -508,10 +549,22 @@ let rec codegen_flambda location =
     let jump_join = Pseudo.jump join_label in
     curr_block := (Label else_label :: jump_join :: then_final_insns) @ !curr_block;
     let else_final_insns = codegen_flambda location e in
-    curr_block := (restore :: shrink_stack :: Label join_label :: else_final_insns) @ !curr_block;
+    curr_block
+    := (restore :: shrink_stack :: Label join_label :: else_final_insns) @ !curr_block;
     []
 ;;
 
-(* let a = f x in *)
+let codegen_fun ({ param_names; arity; body } as fun_decl) regs_assignment =
+  let explicit_params, env_params = Base.List.split_n param_names arity in
+  let explicit_param_locations = Function.resolve_param_locations explicit_params arity in
+  let env_param_locations =
+    let a0 = arg 0 in
+     List.mapi (fun i name -> 
+    name, Loc_mem(a0, i * word_size) ) in
+  curr_assignment := regs_assignment;
+  List.iter (fun (exp_p, loc) -> )
+  let prologue, epilogue = Function.prologue_and_apilogue regs_assignment in
+  ()
+;;
 
 let codegen program = "1"

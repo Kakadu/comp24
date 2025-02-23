@@ -6,6 +6,7 @@ open Ast
 
 let alloc_tuple = "alloc_tuple"
 let alloc_closure = "alloc_closure"
+let rv_alloc_closure = "rv_alloc_closure"
 let call_closure = "call_closure"
 let list_cons = "list_cons"
 let partial_match = "partial_match"

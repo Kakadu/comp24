@@ -99,6 +99,7 @@ val pp_insn : Format.formatter -> instruction -> unit
 module Pseudo : sig
   val mv: rd:reg -> src:reg -> instruction
   val li: reg -> int -> instruction
+  val la : reg -> string -> instruction
   val neg: reg -> instruction
   val seqz : rd:reg -> src:reg -> instruction
   val call: string -> instruction
