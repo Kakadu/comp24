@@ -599,8 +599,10 @@ let rec infer_expr env expr =
     return (final_sub, typ2)
   | E_ite (e1, e2, e3) ->
     let* sub1, typ1 = infer_expr env e1 in
-    let* sub2, typ2 = infer_expr (TypeEnv.apply sub1 env) e2 in
-    let* sub3, typ3 = infer_expr (TypeEnv.apply sub2 env) e3 in
+    let env = TypeEnv.apply sub1 env in
+    let* sub2, typ2 = infer_expr env e2 in
+    let env = TypeEnv.apply sub2 env in
+    let* sub3, typ3 = infer_expr env e3 in
     let* sub_cond = Subst.unify typ1 bool_typ in
     let* sub_branches = Subst.unify typ2 typ3 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3; sub_cond; sub_branches ] in
