@@ -47,6 +47,14 @@
   (backend bisect_ppx)))
 
 (executable
+ (public_name rv_codegen)
+ (name rv_codegen)
+ (modules Rv_codegen)
+ (libraries cursedml_lib)
+ (instrumentation
+  (backend bisect_ppx)))
+
+(executable
  (public_name llvm_codegen)
  (name llvm_codegen)
  (modules Llvm_codegen)

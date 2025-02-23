@@ -74,7 +74,7 @@ type op =
 type instruction =
   | Rtype of reg * reg * reg * op (** rd, rs1, rs2, op *)
   | Itype of reg * reg * int * op (** rd, rs1, imm, op *)
-  | Stype of reg * int * reg * op (** base, offset, value, op *)
+  | Stype of reg * int * reg * op (** value, offset, dst, op *)
   | Btype of reg * reg * string * op (** rs1, rs2, target, op *)
   | Utype of reg * int * op (** dst, imm, op *)
   (* | Jtype of string * reg * op *)
@@ -168,16 +168,18 @@ let pp_insn fmt =
   let open Format in
   function
   | Rtype (rd, rs1, rs2, op) ->
-    fprintf fmt "@[%a %a, %a, %a%@]@." pp_op op pp_reg rd pp_reg rs1 pp_reg rs2
+    fprintf fmt "@[\t%a %a, %a, %a@]@." pp_op op pp_reg rd pp_reg rs1 pp_reg rs2
+  | Itype(rd, rs, imm, LW) ->
+    fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op LW pp_reg rd imm pp_reg rs
   | Itype (rd, rs, imm, op) ->
-    fprintf fmt "@[%a %a, %a, %i@]@." pp_op op pp_reg rd pp_reg rs imm
-  | Stype (base, offset, value, op) ->
-    fprintf fmt "@[%a %a, %i(%a) @]@." pp_op op pp_reg value offset pp_reg base
+    fprintf fmt "@[\t%a %a, %a, %i@]@." pp_op op pp_reg rd pp_reg rs imm
+  | Stype (value, offset, dst, op) ->
+    fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op op pp_reg value offset pp_reg dst
   | Btype(rs1, rs2, target, op) ->
-    fprintf fmt "@[%a  %a, %a, %s@]@." pp_op op pp_reg rs1 pp_reg rs2 target
+    fprintf fmt "@[\t%a  %a, %a, %s@]@." pp_op op pp_reg rs1 pp_reg rs2 target
   | Utype(rd, imm, op) ->
-    fprintf fmt "@[%a %a, %i@]@." pp_op op pp_reg rd imm
-  | Pseudo p -> fprintf fmt "@[%s@]@." p
+    fprintf fmt "@[\t%a %a, %i@]@." pp_op op pp_reg rd imm
+  | Pseudo p -> fprintf fmt "@[\t%s@]@." p
   | Label l -> fprintf  fmt "@[%s:@]@." l
 ;;
 
@@ -200,7 +202,9 @@ module Pseudo = struct
     let insn = asprintf "seqz %a, %a" pp_reg rd pp_reg src in
     Pseudo insn
 
-  let call label = Pseudo label
+  let call label =
+    let insn = Format.sprintf "call %s" label in
+     Pseudo insn
   let jump label =
     let insn = sprintf "j %s" label in
     Pseudo (insn)
