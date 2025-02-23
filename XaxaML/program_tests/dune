@@ -68,5 +68,4 @@
  (deps
   ./run_closure_conversion.exe
   manytests/typed/001fac.ml
-  manytests/typed/002fac.ml
-  manytests/typed/016lists.ml))
+  manytests/typed/002fac.ml))

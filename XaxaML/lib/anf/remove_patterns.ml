@@ -181,7 +181,9 @@ let unpack_pat_checks expr pat =
   let rec helper add_list cur = function
     | Ast.P_typed (p, _) -> helper add_list cur p
     | P_const c ->
-      [ Rp_e_app (Rp_e_app (Rp_e_ident "=", cur), Rp_e_const (convert_const c)) ]
+      (match c with
+       | C_unit -> []
+       | _ -> [ Rp_e_app (Rp_e_app (Rp_e_ident "=", cur), Rp_e_const (convert_const c)) ])
     | P_tuple (a, b) ->
       let t =
         List.mapi (a :: b) ~f:(fun i p -> helper true (unpack_expr cur (Tuple i)) p)
