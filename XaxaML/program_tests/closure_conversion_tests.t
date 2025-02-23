@@ -27,6 +27,46 @@
   let main = let #t = (print_int ((fac_cps 4) (fun #0 -> #0))) in
   0
 
+  $ ./run_closure_conversion.exe << EOF 
+  > let f y = let add_2 x = x + 2 in add_2
+  Types before modifications:
+  val f : 'a -> int -> int
+  Types after modifications:
+  val f : 'a -> int -> int
+  Modified ast:
+  let f = (fun y -> let add_2 = (fun x -> ((+ x) 2)) in
+  add_2)
+
+  $ ./run_closure_conversion.exe << EOF 
+  > let f y = let add_y x = x + y in add_y
+  Types before modifications:
+  val f : int -> int -> int
+  Types after modifications:
+  val f : int -> int -> int
+  Modified ast:
+  let f = (fun y -> let add_y = (fun y x -> ((+ x) y)) in
+  (add_y y))
+
+  $ ./run_closure_conversion.exe << EOF 
+  > let t =
+  >   let x = 1 in
+  >   let y = 2 in
+  >   let f a =
+  >     let g b = a + b + x + y in
+  >     g (a * 2)
+  >   in
+  >   f 10
+  Types before modifications:
+  val t : int
+  Types after modifications:
+  val t : int
+  Modified ast:
+  let t = let x = 1 in
+  let y = 2 in
+  let f = (fun x y a -> let g = (fun a x y b -> ((+ ((+ ((+ a) b)) x)) y)) in
+  ((((g a) x) y) ((* a) 2))) in
+  (((f x) y) 10)
+
   $ ./run_closure_conversion.exe << EOF
   > let rec y x =
   >   let a z = y x + z in
@@ -54,4 +94,3 @@
   let f = (fun a b -> let #0 = (fun b x -> ((+ b) x)) in
   let #1 = (fun #0 x -> ((+ (#0 1)) x)) in
   ((+ ((#0 b) 1)) ((#1 (#0 b)) 2)))
-
