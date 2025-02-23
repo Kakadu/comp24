@@ -129,11 +129,7 @@ let parse_operators =
 (* Pattern parsers*)
 let parse_pany = token "_" *> skip_wspace1 >>| pany
 let parse_punit = token "(" *> token ")" >>| punit
-
-let parse_pidentifier =
-  parse_operators >>| (fun x -> PIdentifier x) <|> parse_identifier pident
-;;
-
+let parse_pidentifier = parse_operators >>| pident <|> parse_identifier pident
 let parse_pconst = parse_const pconst
 let parse_pnill = sqr_br skip_wspace >>| pnill
 
@@ -200,7 +196,7 @@ let or_ = bin_op "||" (EIdentifier "( || )")
 (* Expressions parsers *)
 
 let parse_econst = parse_const econst
-let parse_identifier = parse_identifier eidentifier
+let parse_identifier = parse_operators >>| eidentifier <|> parse_identifier eidentifier
 let parse_eunit = token "(" *> token ")" >>| fun _ -> EUnit
 
 let parse_etuple p_expr =

@@ -546,7 +546,7 @@ let infer_decl env = function
 ;;
 
 let start_env =
-  let bin_op_list =
+  let init_list =
     [ "( + )", TFunction (TInt, TFunction (TInt, TInt))
     ; "( - )", TFunction (TInt, TFunction (TInt, TInt))
     ; "( / )", TFunction (TInt, TFunction (TInt, TInt))
@@ -564,7 +564,7 @@ let start_env =
   in
   let env = TypeEnv.empty in
   let bind env id typ = TypeEnv.extend env id (generalize env typ) in
-  Base.List.fold_left bin_op_list ~init:env ~f:(fun env (id, typ) -> bind env id typ)
+  Base.List.fold_left init_list ~init:env ~f:(fun env (id, typ) -> bind env id typ)
 ;;
 
 let infer_program program =
