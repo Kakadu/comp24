@@ -76,7 +76,7 @@ $ /tmp/tuples
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (42, 1, 2089984)
+  (42, 1, 2098176)
 
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF

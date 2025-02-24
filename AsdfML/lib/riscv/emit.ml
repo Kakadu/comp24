@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-
 open Base
 open Machine
 
@@ -109,11 +108,10 @@ let emit_fn_call name (args : asm_value list) =
   if List.length args > 8
   then failwith "TODO: stack arguments"
   else (
-    (* Utils.dbg "emit_fn_call %s(%a)\n" name (Format.pp_print_list pp_asm_value) args; *)
     List.zip_exn (List.take arg_regs (List.length args)) args
     |> List.iter ~f:(fun (reg, arg) -> emit_load reg arg);
     emit call name;
-    a0 (* emit_store a0 *))
+    a0)
 ;;
 
 let direct_unops = [ "not"; "[ - ]" ]
@@ -123,7 +121,7 @@ let is_direct_binop = List.mem direct_binops ~equal:String.equal
 
 let emit_direct_unop ?(comm = "") dest op a =
   match op with
-  | "not" -> emit xori dest a (1) ~comm
+  | "not" -> emit xori dest a 1 ~comm
   | "[ - ]" -> emit sub dest zero a ~comm
   | _ -> failwith "emit_direct_unop: invalid op"
 ;;
