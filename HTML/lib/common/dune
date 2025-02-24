@@ -1,6 +1,8 @@
 (library
  (name Common)
- (modules Ops Stdlib)
+ (modules Ops Stdlib Base_bin_ops)
  (libraries base)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq))
  (instrumentation
   (backend bisect_ppx)))
