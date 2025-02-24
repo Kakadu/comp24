@@ -1,20 +1,5 @@
 open AstLib.Ast
-
-(* TODO: probably should be moved to common *)
-type bin_op =
-  | Add (** + *)
-  | Sub (** - *)
-  | Mul (** * *)
-  | Div (** / *)
-  | Leq (** <= *)
-  | Less (** < *)
-  | Geq (** >= *)
-  | Gre (** > *)
-  | Eq (** == *)
-  | Neq (** != *)
-  | And (** && *)
-  | Or (** || *)
-[@@deriving eq, show { with_path = false }]
+open Common.Base_bin_ops
 
 type expr_no_pm =
   | NoPMEConst of const (** Const. Examples: 100; true *)

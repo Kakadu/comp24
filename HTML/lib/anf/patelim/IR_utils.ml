@@ -1,24 +1,6 @@
 open AstLib.Ast
 open IR
-
-let bin_op_to_str bo =
-  let map = function
-    | Add -> "+"
-    | Sub -> "_"
-    | Mul -> "*"
-    | Div -> "/"
-    | Leq -> "<="
-    | Less -> "<"
-    | Geq -> ">="
-    | Gre -> ">"
-    | Eq -> "="
-    | Neq -> "!="
-    | And -> "&&"
-    | Or -> "||"
-  in
-  let res = [ "( "; map bo; " )" ] in
-  String.concat "" res
-;;
+open Common.Base_bin_ops
 
 let rec transform_back = function
   | NoPMEConst c -> EConst c
