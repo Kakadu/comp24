@@ -155,7 +155,9 @@
   let f = fun x_0 -> 
             let t_0 =  x_0 = 0  in 
              if t_0  then 0  else 
-                let t_1 =  x_0 = 1  in  if t_1  then -1  else  true    
+                let t_1 =  x_0 = 1  in 
+                 if t_1  then -1  else  let n_1 =  x_0 in  n_1   
+                
              
 
   $ dune exec transformers <<- EOF

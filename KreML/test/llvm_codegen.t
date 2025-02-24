@@ -826,4 +826,5 @@
     ret i64 %t_101
   }
 
+
 $ dune exec llvm_codegen < manytests/typed/004manyargs.ml

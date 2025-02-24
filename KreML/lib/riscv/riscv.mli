@@ -19,6 +19,8 @@ type rvalue =
   | Rv_function of Flambda.fun_decl
   | Rv_nop
 
+val a0value : rvalue
+
 type location =
   | Loc_reg of reg
   | Loc_mem of reg * int

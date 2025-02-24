@@ -324,7 +324,10 @@ let rec codegen_flambda = function
       | _, etype when etype = ptr_type ->
         position_at_end then_bb_after_gen builder;
         build_inttoptr t ptr_type "" builder, e
-      | _ -> Utils.unreachable ()
+      | _ ->
+        dump_type ttype;
+        dump_type etype;
+         Utils.unreachable ()
     in
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;

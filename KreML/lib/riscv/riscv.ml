@@ -22,6 +22,8 @@ type rvalue =
 | Rv_function of Flambda.fun_decl
 | Rv_nop
 
+let a0value = Rv_reg(arg 0)
+
 type location =
   | Loc_reg of reg
   | Loc_mem of reg * int

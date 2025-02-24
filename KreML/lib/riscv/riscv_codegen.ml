@@ -14,9 +14,9 @@ let find_reg forbidden =
 ;;
 
 (* let pp_loc fmt = function
-  | Loc_reg r -> pp_reg fmt r
-  | Loc_mem (b, o) -> Format.fprintf fmt "%i(%a)" o pp_reg b
-;; *)
+   | Loc_reg r -> pp_reg fmt r
+   | Loc_mem (b, o) -> Format.fprintf fmt "%i(%a)" o pp_reg b
+   ;; *)
 
 module Arith = struct
   let const_to_int = function
@@ -293,7 +293,9 @@ module Function = struct
     |> List.map snd
   ;;
 
-  let saved_used_registers assignment = used_registers assignment |> List.filter is_saved |> Utils.ListUtils.distinct
+  let saved_used_registers assignment =
+    used_registers assignment |> List.filter is_saved |> Utils.ListUtils.distinct
+  ;;
 
   let temporary_used_registers assignment arity =
     let args = List.init (min 8 arity) arg in
@@ -348,24 +350,29 @@ module Function = struct
   ;;
 
   module Call = struct
-    let save_and_restore_insns caller_arity insns_before_restore_a0 =
-      let all_callee_args = List.init caller_arity arg in
-      let a0, rest = List.hd all_callee_args, List.tl all_callee_args in
+    let save_and_restore_insns caller_arity ~save_retvalue =
+      let callee_args = List.init caller_arity arg in
       let callee_temps = temporary_used_registers !curr_assignment caller_arity in
-      let to_preserve = (Ra :: all_callee_args) @ callee_temps |> Utils.ListUtils.distinct in
-
-      let extend_stack_insn = Memory.extend_stack_aligned (word_size * List.length to_preserve) in
+      let to_preserve = callee_args @ (Ra :: callee_temps) |> Utils.ListUtils.distinct in
+      let extend_stack_insn =
+        Memory.extend_stack_aligned (word_size * List.length to_preserve)
+      in
       let save_insns =
         List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) to_preserve
       in
       let save_insns = extend_stack_insn :: save_insns in
       let restore_stack_insn = Memory.shrink_stack_aligned (List.length to_preserve) in
       let restore_insns =
-        List.mapi (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp) to_preserve
+        List.mapi
+          (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp)
+          to_preserve
       in
 
-      let restore_insns = restore_insns @ [ restore_stack_insn ] in
-      save_insns, restore_insns
+      let restore_a0, restore_rest = List.hd restore_insns, List.tl restore_insns in
+      let restore__and_save_insns =
+        restore_rest @ save_retvalue @ [ restore_a0; restore_stack_insn ]
+      in
+      save_insns, restore__and_save_insns
     ;;
 
     let arg_locations args_count =
@@ -386,13 +393,12 @@ module Function = struct
      la t1, my_function
      sw t1, t0(0)*)
   module Runtime = struct
-    let alloc_tuple size action =
-      let save, restore = Call.save_and_restore_insns !current_fun_arity in
+    let alloc_tuple size ~save_retvalue =
+      let save, restore = Call.save_and_restore_insns !current_fun_arity ~save_retvalue in
       let a0 = arg 0 in
       let load_size = Pseudo.li a0 size in
       let call = Pseudo.call Runtime.alloc_tuple in
-      let extra_insns = action a0 in
-      save @ [ load_size; call ] @ extra_insns @ restore
+      save @ [ load_size; call ] @ restore
     ;;
 
     (** this function is supposed to use in [action] of [alloc_tuple], so
@@ -407,11 +413,10 @@ module Function = struct
     ;;
 
     (** args must be placed in [before_call_insns] from call sight of this method *)
-    let call callee_name before_call_insns result_action =
-      let save, restore = Call.save_and_restore_insns !current_fun_arity in
+    let call callee_name before_call_insns ~save_retvalue =
+      let save, restore = Call.save_and_restore_insns !current_fun_arity ~save_retvalue in
       let call = Pseudo.call callee_name in
-      let extra_insns = result_action (arg 0) in
-      save @ before_call_insns @ (call :: extra_insns) @ restore
+      save @ before_call_insns @ (call :: restore)
     ;;
   end
 end
@@ -429,23 +434,23 @@ let rec codegen_flambda location =
     Rv_imm const |> Memory.store_rvalue location
   | Fl_tuple elems ->
     let size = List.length elems in
-    Function.Runtime.alloc_tuple size (fun addr ->
-      let fill_insns =
-        List.mapi
-          (fun i e ->
-            let loc = Loc_mem (addr, i * word_size) in
-            codegen_flambda loc e)
-          elems
-        |> List.concat
-      in
-      let store = Memory.store_rvalue location (Rv_reg addr) in
-      fill_insns @ store)
+    let a0 = arg 0 in
+    let fill_tuple_insns =
+      List.mapi
+        (fun i e ->
+          let loc = Loc_mem (a0, i * word_size) in
+          codegen_flambda loc e)
+        elems
+      |> List.concat
+    in
+    let save_tuple = Memory.store_rvalue location a0value in
+    Function.Runtime.alloc_tuple size ~save_retvalue:(fill_tuple_insns @ save_tuple)
   | Fl_cons (x, xs) ->
     let a0 = Loc_reg (arg 0) in
     let a1 = Loc_reg (arg 1) in
     let before_call_insns = codegen_flambda a0 x @ codegen_flambda a1 xs in
-    Function.Runtime.call Runtime.list_cons before_call_insns (fun addr ->
-      Memory.store_rvalue (Loc_reg addr) (Rv_reg addr))
+    let save_retvalue = Memory.store_rvalue location a0value in
+    Function.Runtime.call Runtime.list_cons before_call_insns ~save_retvalue
   | Fl_getfield (idx, obj) ->
     let some_reg = find_reg [] in
     let save = sw ~v:some_reg 0 ~dst:Sp in
@@ -505,49 +510,51 @@ let rec codegen_flambda location =
     []
   | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
     when arity = List.length args && env_size = 0 ->
-    let save, restore = Function.Call.save_and_restore_insns !current_fun_arity in
+    let save_retvalue = Memory.store_rvalue location a0value in
+    let save, restore =
+      Function.Call.save_and_restore_insns !current_fun_arity ~save_retvalue
+    in
     let arg_locations = Function.Call.arg_locations arity in
     let arrange = List.map2 codegen_flambda arg_locations args |> List.concat in
     let stack_args_count = max 0 (arity - arg_regs_count) in
     let call = Pseudo.call name in
-     (* since [location] can be equal to one of callee saved registers, [restore] can 
-    overwrite saving function ret value. It can be fixed with more smart register allocation working with live intervals,
-    but we figure it out with storing on stack and then moving to desired [location] after restore *)
-    let save_result = Memory.store_rvalue location (Rv_reg (arg 0)) in
+    (* since [location] can be equal to one of callee saved registers, [restore] can
+       overwrite saving function ret value. It can be fixed with more smart register allocation working with live intervals,
+       but we figure it out with storing on stack and then moving to desired [location] after restore *)
     if stack_args_count = 0
-    then save @ arrange @ (call :: save_result) @ restore
+    then save @ arrange @ (call :: restore)
     else (
       let extend_stack = Function.Call.extend_stack_for_args stack_args_count in
       let shrink_stack = Function.Call.shrink_stack_for_args stack_args_count in
-      save @ (extend_stack :: arrange) @ (call :: shrink_stack :: save_result) @ restore)
+      save @ (extend_stack :: arrange) @ (call :: shrink_stack :: restore))
   | Fl_app (f, args) ->
     let arg_locations = Function.Call.arg_locations (1 + List.length args) in
     let stack_args_count = max 0 (List.length args - arg_regs_count) in
     let arrange = List.map2 codegen_flambda arg_locations (f :: args) |> List.concat in
+    let save_retvalue = Memory.store_rvalue location a0value in
     if stack_args_count = 0
-    then
-      Function.Runtime.call Runtime.call_closure arrange (fun addr ->
-        Memory.store_rvalue location (Rv_reg addr))
+    then Function.Runtime.call Runtime.call_closure arrange ~save_retvalue
     else (
       let extend_stack = Function.Call.extend_stack_for_args stack_args_count in
       let shrink_stack = Function.Call.shrink_stack_for_args stack_args_count in
-      Function.Runtime.call Runtime.call_closure (extend_stack :: arrange) (fun addr ->
-        shrink_stack :: Memory.store_rvalue location (Rv_reg addr)))
+      Function.Runtime.call
+        Runtime.call_closure
+        (extend_stack :: arrange)
+        ~save_retvalue:(shrink_stack :: save_retvalue))
   | Fl_closure { arity; env_size; arrange; name } ->
-    Function.Runtime.alloc_tuple (env_size + arity) (fun env_addr ->
-      let arrange_env_insns =
-        List.map
-          (fun (idx, arg) ->
-            let loc = Loc_mem (env_addr, idx * word_size) in
-            codegen_flambda loc arg)
-          arrange
-        |> List.concat
-      in
-      let call_alloc_closure_insns =
-        Function.Runtime.alloc_closure name env_addr arity env_size
-      in
-      let store = Memory.store_rvalue location (Rv_reg (arg 0)) in
-      arrange_env_insns @ call_alloc_closure_insns @ store)
+    let a0 = arg 0 in
+    let arrange_env_insns =
+      List.map
+        (fun (idx, arg) ->
+          let loc = Loc_mem (a0, idx * word_size) in
+          codegen_flambda loc arg)
+        arrange
+      |> List.concat
+    in
+    let alloc_closure_insns = Function.Runtime.alloc_closure name a0 arity env_size in
+    let save_closure = Memory.store_rvalue location a0value in
+    let save_retvalue = arrange_env_insns @ alloc_closure_insns @ save_closure in
+    Function.Runtime.alloc_tuple (env_size + arity) ~save_retvalue
   | Fl_ite (c, t, e) ->
     let some_reg = find_reg [] in
     let save = sw ~v:some_reg 0 ~dst:Sp in
