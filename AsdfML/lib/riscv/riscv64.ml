@@ -111,6 +111,31 @@ and gen_cexpr fn_args env dest = function
          | None -> false)
       | _ -> false
     in
+    let split_args args =
+      let n_args = List.length args in
+      let free_arg_regs = List.tl_exn arg_regs in
+      match args with
+      | args when n_args <= List.length free_arg_regs ->
+        List.take free_arg_regs n_args |> List.zip_exn args, None
+      | args ->
+        List.split_n args (List.length free_arg_regs - 1)
+        |> fun (in_regs, on_heap) ->
+        List.zip_exn in_regs (List.drop_last_exn free_arg_regs), Some on_heap
+    in
+    let reg_args, heap_args = split_args args in
+    let heap_args =
+      Option.map heap_args ~f:(fun heap_args ->
+        (* TODO: copy-paste from ImmTuple *)
+        let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length heap_args) ] in
+        let tuple = emit_store tuple ~comm:"tuple" in
+        List.iteri heap_args ~f:(fun i arg ->
+          gen_imm fn_args env a2 arg;
+          let _ =
+            emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ]
+          in
+          ());
+        tuple)
+    in
     (*  *)
     let rw_arg_locs =
       List.filter args ~f:is_rewrites_regs
@@ -121,16 +146,23 @@ and gen_cexpr fn_args env dest = function
     in
     gen_imm fn_args env a0 fn;
     (*  *)
-    let n_args = List.length args in
-    let regs = List.take (List.tl_exn arg_regs) n_args in
-    List.zip_exn args regs
+    reg_args
     |> List.iter ~f:(fun (arg, reg) ->
       if is_rewrites_regs arg
       then emit_load reg (AsmReg (Map.find_exn rw_arg_locs arg))
       else gen_imm fn_args env reg arg);
-    let app_clos_fn = Format.sprintf "apply_closure_%d" n_args in
+    let _ = Option.map heap_args ~f:(fun tuple_loc -> emit_load a7 (AsmReg tuple_loc)) in
+    let app_closure_fn =
+      "apply_closure_"
+      ^
+      match heap_args with
+      | Some _ -> "9plus"
+      | None -> string_of_int (List.length reg_args)
+    in
     let closure =
-      emit_fn_call app_clos_fn (AsmReg a0 :: List.map regs ~f:(fun x -> AsmReg x))
+      emit_fn_call
+        app_closure_fn
+        (AsmReg a0 :: List.map reg_args ~f:(fun (_, reg) -> AsmReg reg))
     in
     emit_load dest (AsmReg closure)
   | CIfElse (ImmBool true, then_, _) -> gen_aexpr fn_args env dest then_

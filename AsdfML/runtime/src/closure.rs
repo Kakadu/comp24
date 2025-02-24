@@ -2,6 +2,8 @@ use std::cmp::Ordering;
 
 use log::debug;
 
+use crate::Tuple;
+
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Closure {
@@ -15,6 +17,9 @@ type Fn2 = fn(isize, isize) -> isize;
 type Fn3 = fn(isize, isize, isize) -> isize;
 type Fn4 = fn(isize, isize, isize, isize) -> isize;
 type Fn5 = fn(isize, isize, isize, isize, isize) -> isize;
+type Fn6 = fn(isize, isize, isize, isize, isize, isize) -> isize;
+type Fn7 = fn(isize, isize, isize, isize, isize, isize, isize) -> isize;
+type Fn8 = fn(isize, isize, isize, isize, isize, isize, isize, isize) -> isize;
 
 // TODO:
 // - types (i/u size) + in lib
@@ -32,7 +37,7 @@ pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Clos
     Box::into_raw(closure)
 }
 
-fn apply_closure(closure: &Closure) -> Option<isize> {
+fn apply_closure(closure: &mut Closure) -> Option<isize> {
     debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
     match closure.args.len().cmp(&closure.arity) {
         Ordering::Less => {
@@ -75,83 +80,101 @@ fn apply_closure(closure: &Closure) -> Option<isize> {
                 closure.args[4],
             )
         }
-        x => {
-            unimplemented!("Closure with size {x}")
+        6 => {
+            let func: Fn6 = unsafe { std::mem::transmute(closure.fn_ptr) };
+            func(
+                closure.args[0],
+                closure.args[1],
+                closure.args[2],
+                closure.args[3],
+                closure.args[4],
+                closure.args[5],
+            )
+        }
+        7 => {
+            let func: Fn7 = unsafe { std::mem::transmute(closure.fn_ptr) };
+            func(
+                closure.args[0],
+                closure.args[1],
+                closure.args[2],
+                closure.args[3],
+                closure.args[4],
+                closure.args[5],
+                closure.args[6],
+            )
+        }
+        8 => {
+            let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
+            func(
+                closure.args[0],
+                closure.args[1],
+                closure.args[2],
+                closure.args[3],
+                closure.args[4],
+                closure.args[5],
+                closure.args[6],
+                closure.args[7],
+            )
+        }
+        _ => {
+            let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
+            let rest = closure.args.split_off(7);
+            func(
+                closure.args[0],
+                closure.args[1],
+                closure.args[2],
+                closure.args[3],
+                closure.args[4],
+                closure.args[5],
+                closure.args[6],
+                (&rest as *const Tuple) as isize,
+            )
         }
     };
     debug!("Result: {} / {:#x}", res, res);
     Some(res)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn apply_closure_1(closure_ptr: *mut Closure, arg: isize) -> isize {
-    // TODO: less cloning
-    let mut closure = Box::new((*closure_ptr).clone());
-    closure.args.push(arg);
-    match apply_closure(&closure) {
-        Some(res) => res,
-        None => Box::into_raw(closure) as isize,
-    }
+macro_rules! apply_closure_n {
+    ($fn_name:ident, $($arg:ident),*) => {
+        #[no_mangle]
+        pub unsafe extern "C" fn $fn_name(closure_ptr: *mut Closure, $($arg: isize),*) -> isize {
+            let mut closure = Box::new((*closure_ptr).clone());
+            closure.args.extend_from_slice(&[$($arg),*]);
+            match apply_closure(&mut closure) {
+                Some(res) => res,
+                None => Box::into_raw(closure) as isize,
+            }
+        }
+    };
 }
+apply_closure_n!(apply_closure_1, a1);
+apply_closure_n!(apply_closure_2, a1, a2);
+apply_closure_n!(apply_closure_3, a1, a2, a3);
+apply_closure_n!(apply_closure_4, a1, a2, a3, a4);
+apply_closure_n!(apply_closure_5, a1, a2, a3, a4, a5);
+apply_closure_n!(apply_closure_6, a1, a2, a3, a4, a5, a6);
+apply_closure_n!(apply_closure_7, a1, a2, a3, a4, a5, a6, a7);
+apply_closure_n!(apply_closure_8, a1, a2, a3, a4, a5, a6, a7, a8);
 
 #[no_mangle]
-pub unsafe extern "C" fn apply_closure_2(closure_ptr: *mut Closure, arg1: isize, arg2: isize) -> isize {
-    let mut closure = Box::new((*closure_ptr).clone());
-    closure.args.push(arg1);
-    closure.args.push(arg2);
-    match apply_closure(&closure) {
-        Some(res) => res,
-        None => Box::into_raw(closure) as isize,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn apply_closure_3(closure_ptr: *mut Closure, arg1: isize, arg2: isize, arg3: isize) -> isize {
-    let mut closure = Box::new((*closure_ptr).clone());
-    closure.args.push(arg1);
-    closure.args.push(arg2);
-    closure.args.push(arg3);
-    match apply_closure(&closure) {
-        Some(res) => res,
-        None => Box::into_raw(closure) as isize,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn apply_closure_4(
+pub unsafe extern "C" fn apply_closure_9plus(
     closure_ptr: *mut Closure,
-    arg1: isize,
-    arg2: isize,
-    arg3: isize,
-    arg4: isize,
+    a1: isize,
+    a2: isize,
+    a3: isize,
+    a4: isize,
+    a5: isize,
+    a6: isize,
+    tuple_ptr: *mut Tuple,
 ) -> isize {
     let mut closure = Box::new((*closure_ptr).clone());
-    closure.args.push(arg1);
-    closure.args.push(arg2);
-    closure.args.push(arg3);
-    closure.args.push(arg4);
-    match apply_closure(&closure) {
-        Some(res) => res,
-        None => Box::into_raw(closure) as isize,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn apply_closure_5(
-    closure_ptr: *mut Closure,
-    arg1: isize,
-    arg2: isize,
-    arg3: isize,
-    arg4: isize,
-    arg5: isize,
-) -> isize {
-    let mut closure = Box::new((*closure_ptr).clone());
-    closure.args.push(arg1);
-    closure.args.push(arg2);
-    closure.args.push(arg3);
-    closure.args.push(arg4);
-    closure.args.push(arg5);
-    match apply_closure(&closure) {
+    debug!("tuple_ptr: {:?}", tuple_ptr);
+    let tuple = Box::from_raw(tuple_ptr);
+    debug!("Tuple: {:?}", tuple);
+    closure.args.extend_from_slice(&[a1, a2, a3, a4, a5, a6]);
+    closure.args.extend(tuple.iter());
+    match apply_closure(&mut closure) {
         Some(res) => res,
         None => Box::into_raw(closure) as isize,
     }
