@@ -2,7 +2,7 @@ use log::debug;
 
 use crate::WithRaw;
 
-type Tuple = Vec<isize>;
+pub(crate) type Tuple = Vec<isize>;
 
 #[no_mangle]
 pub extern "C" fn ml_create_tuple(size: usize) -> *mut Tuple {
