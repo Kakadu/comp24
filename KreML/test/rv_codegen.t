@@ -51,3 +51,7 @@
   	lw s0, 8(sp) 
   	add sp, sp, 16
   	ret
+
+  $ dune exec rv_codegen <<- EOF
+  > let adder a b c d e f g h j k l =
+  >   a + b + c + d + e + f + g + h + j  + k + l

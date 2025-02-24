@@ -112,6 +112,7 @@ end
 
 (* fp is not available *)
 let available_regs = List.init 8 temp @ List.init 11 (fun i -> saved (i + 1))
+let temporary_regs = List.init 8 temp
 
 
 let pp_reg fmt =

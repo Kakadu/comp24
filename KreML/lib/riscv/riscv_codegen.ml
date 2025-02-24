@@ -10,7 +10,29 @@ let current_fun_arity = ref 0
 let curr_assignment = ref (Base.Map.empty (module Base.String))
 
 let find_reg forbidden =
-  List.find (fun r -> List.for_all (( <> ) r) forbidden) available_regs
+  let used_temps =
+    Base.Map.filter_map !curr_assignment ~f:(function
+      | Loc_reg (Temp _ as r) -> Some r
+      | _ -> None)
+    |> Base.Map.to_alist
+    |> List.map snd
+  in
+  let unused_temp =
+    List.find_opt
+      (fun t -> List.mem t used_temps |> not && List.mem t forbidden |> not)
+      temporary_regs
+  in
+  match unused_temp with
+  | Some v -> v, [], []
+  | None ->
+    let some_reg =
+      List.find (fun r -> List.for_all (( <> ) r) forbidden) available_regs
+    in
+    let extend_stack_insn = extend_stack_insn (2 * word_size) in
+    let save_reg = sw ~v:some_reg 0 ~dst:Sp in
+    let restore_reg = lw ~rd:some_reg 0 ~src:Sp in
+    let shrink_stack_insn = shrink_stack_insn (2 * word_size) in
+    some_reg, [ extend_stack_insn; save_reg ], [ restore_reg; shrink_stack_insn ]
 ;;
 
 (* let pp_loc fmt = function
@@ -33,13 +55,6 @@ module Arith = struct
     save_insns @ insns @ restore_insns
   ;;
 
-  let merge_with_save_and_restore save insns restore =
-    match save, restore with
-    | Some s, Some r -> s @ insns @ r
-    | None, None -> insns
-    | _ -> Utils.unreachable ()
-  ;;
-
   (* handle case when src is on the stack*)
   let codegen_binop op x y rd =
     match x, y with
@@ -48,29 +63,21 @@ module Arith = struct
       let yloc = Base.Map.find_exn !curr_assignment y in
       let xreg, yreg, save, restore =
         match xloc, yloc with
-        | Loc_reg xr, Loc_reg yr -> xr, yr, None, None
+        | Loc_reg xr, Loc_reg yr -> xr, yr, [], []
         | Loc_mem (xbase, xoffset), Loc_reg yr ->
-          let xreg = find_reg [ yr; rd ] in
-          let save = sw ~v:xreg 0 ~dst:Sp in
+          let xreg, save, restore = find_reg [ yr; rd ] in
           let load = lw ~rd:xreg xoffset ~src:xbase in
-          let restore = lw ~rd:xreg 0 ~src:Sp in
-          xreg, yr, Some [ save; load ], Some [ restore ]
+          xreg, yr, save @ [ load ], restore
         | Loc_reg xr, Loc_mem (ybase, yoffset) ->
-          let yreg = find_reg [ xr; rd ] in
-          let save = sw ~v:yreg 0 ~dst:Sp in
+          let yreg, save, restore = find_reg [ xr; rd ] in
           let load = lw ~rd:yreg yoffset ~src:ybase in
-          let restore = lw ~rd:yreg 0 ~src:Sp in
-          xr, yreg, Some [ save; load ], Some [ restore ]
+          xr, yreg, save @ [ load ], restore
         | Loc_mem (xbase, xoffset), Loc_mem (ybase, yoffset) ->
-          let xreg = find_reg [ rd ] in
-          let yreg = find_reg [ rd; xreg ] in
-          let save0 = sw ~v:xreg 0 ~dst:Sp in
-          let save1 = sw ~v:yreg word_size ~dst:Sp in
+          let xreg, xsave, xrestore = find_reg [ rd ] in
+          let yreg, ysave, yrestore = find_reg [ rd; xreg ] in
           let load0 = lw ~rd:xreg xoffset ~src:xbase in
           let load1 = lw ~rd:yreg yoffset ~src:ybase in
-          let restore0 = lw ~rd:xreg 0 ~src:Sp in
-          let restore1 = lw ~rd:yreg word_size ~src:Sp in
-          xreg, yreg, Some [ save0; save1; load0; load1 ], Some [ restore0; restore1 ]
+          xreg, yreg, xsave @ ysave @ [ load0; load1 ], xrestore @ yrestore
       in
       let insn =
         match op with
@@ -85,19 +92,17 @@ module Arith = struct
         | Anf.And -> Rtype (rd, xreg, yreg, AND)
         | Anf.Or -> Rtype (rd, xreg, yreg, OR)
       in
-      merge_with_save_and_restore save [ insn ] restore
+      save @ insn:: restore
     | Fl_const x, Fl_var y ->
       let imm = const_to_int x in
       let yloc = Base.Map.find_exn !curr_assignment y in
       let yreg, save, restore =
         match yloc with
-        | Loc_reg r -> r, None, None
+        | Loc_reg r -> r, [], []
         | Loc_mem (base, offset) ->
-          let yreg = find_reg [ rd ] in
-          let save = sw ~v:yreg 0 ~dst:Sp in
+          let yreg, save, restore = find_reg [ rd ] in
           let load = lw ~rd:yreg offset ~src:base in
-          let restore = lw ~rd:yreg 0 ~src:Sp in
-          yreg, Some [ save; load ], Some [ restore ]
+          yreg, save @ [ load ], restore
       in
       if imm_is_12_bytes imm
       then (
@@ -108,8 +113,7 @@ module Arith = struct
             let negate = Pseudo.neg yreg in
             [ negate; Itype (rd, yreg, -imm, ADDI); negate ]
           | Anf.Mul | Anf.Div ->
-            let xreg = find_reg [ yreg; rd ] in
-            let save = sw ~v:xreg 0 ~dst:Sp in
+            let xreg, xsave, xrestore = find_reg [ yreg; rd ] in
             let load = Pseudo.li xreg imm in
             let insn =
               match op with
@@ -117,8 +121,7 @@ module Arith = struct
               | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
               | _ -> Utils.unreachable ()
             in
-            let restore = lw ~rd:xreg 0 ~src:Sp in
-            [ save; load; insn; restore ]
+            xsave @ [ load; insn ] @ xrestore
           | Anf.Eq -> [ Itype (rd, yreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
           | Anf.Neq -> [ Itype (rd, yreg, -imm, ADDI) ]
           | Anf.Gt -> [ Itype (rd, yreg, imm, SLTI) ]
@@ -127,15 +130,11 @@ module Arith = struct
           | Anf.And -> [ Itype (rd, yreg, imm, ANDI) ]
           | Anf.Or -> [ Itype (rd, yreg, imm, ORI) ]
         in
-        merge_with_save_and_restore save insns restore)
+        save @ insns @ restore)
       else (
-        let xreg = find_reg [ yreg; rd ] in
-        let save_x = sw ~v:xreg 0 ~dst:Sp in
+        let xreg, xsave, xrestore = find_reg [ yreg; rd ] in
         let load_x = Pseudo.li xreg imm in
-        let restore_x = lw ~rd:xreg 0 ~src:Sp in
-        let build_instr insns =
-          build_complex_instr [ save_x; load_x ] insns [ restore_x ]
-        in
+        let build_instr insns = build_complex_instr xsave (load_x :: insns) xrestore in
         let insns =
           match op with
           | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
@@ -149,19 +148,17 @@ module Arith = struct
           | Anf.And -> build_instr [ Rtype (rd, yreg, xreg, AND) ]
           | Anf.Or -> build_instr [ Rtype (rd, yreg, xreg, OR) ]
         in
-        merge_with_save_and_restore save insns restore)
+        save @ insns @ restore)
     | Fl_var x, Fl_const y ->
       let imm = const_to_int y in
       let xloc = Base.Map.find_exn !curr_assignment x in
       let xreg, save, restore =
         match xloc with
-        | Loc_reg r -> r, None, None
+        | Loc_reg r -> r, [], []
         | Loc_mem (base, offset) ->
-          let xreg = find_reg [ rd ] in
-          let save = sw ~v:xreg 0 ~dst:Sp in
+          let xreg, xsave, xrestore = find_reg [ rd ] in
           let load = lw ~rd:xreg offset ~src:base in
-          let restore = lw ~rd:xreg 0 ~src:Sp in
-          xreg, Some [ save; load ], Some [ restore ]
+          xreg, xsave @ [ load ], xrestore
       in
       if imm_is_12_bytes imm
       then (
@@ -170,17 +167,15 @@ module Arith = struct
           | Anf.Add -> [ Itype (rd, xreg, imm, ADDI) ]
           | Anf.Sub -> [ Itype (rd, xreg, -imm, ADDI) ]
           | Anf.Mul | Anf.Div ->
-            let yreg = find_reg [ rd; xreg ] in
-            let save = sw ~v:yreg 0 ~dst:Sp in
+            let yreg, ysave, yrestore = find_reg [ rd; xreg ] in
             let load = Pseudo.li yreg imm in
-            let restore = lw ~rd:yreg 0 ~src:Sp in
             let insn =
               match op with
               | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
               | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
               | _ -> Utils.unreachable ()
             in
-            [ save; load; insn; restore ]
+            ysave @ [ load; insn ] @ yrestore
           | Anf.Eq -> [ Itype (rd, xreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
           | Anf.Neq -> [ Itype (rd, xreg, -imm, ADDI) ]
           | Anf.Lt -> [ Itype (rd, xreg, imm, SLTI) ]
@@ -189,15 +184,11 @@ module Arith = struct
           | Anf.Or -> [ Itype (rd, xreg, imm, ORI) ]
           | Anf.And -> [ Itype (rd, xreg, imm, ANDI) ]
         in
-        merge_with_save_and_restore save insns restore)
+        save @ insns @ restore)
       else (
-        let yreg = find_reg [ rd; xreg ] in
-        let save_y = sw ~v:yreg 0 ~dst:Sp in
+        let yreg, ysave, yrestore = find_reg [ rd; xreg ] in
         let load_y = Pseudo.li yreg imm in
-        let restore_y = lw ~rd:yreg 0 ~src:Sp in
-        let build_instr insns =
-          build_complex_instr [ save_y; load_y ] insns [ restore_y ]
-        in
+        let build_instr insns = build_complex_instr ysave (load_y :: insns) yrestore in
         let insns =
           match op with
           | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
@@ -211,18 +202,14 @@ module Arith = struct
           | Anf.And -> build_instr [ Rtype (rd, xreg, yreg, AND) ]
           | Anf.Or -> build_instr [ Rtype (rd, xreg, yreg, OR) ]
         in
-        merge_with_save_and_restore save insns restore)
+        save @ insns @ restore)
     | Fl_const x, Fl_const y ->
       let x = const_to_int x
       and y = const_to_int y in
-      let xreg = find_reg [ rd ] in
-      let yreg = find_reg [ rd; xreg ] in
-      let save_x = sw ~v:xreg 0 ~dst:Sp in
-      let save_y = sw ~v:yreg word_size ~dst:Sp in
+      let xreg, xsave, xrestore = find_reg [ rd ] in
+      let yreg, ysave, yrestore = find_reg [ rd; xreg ] in
       let load_x = Pseudo.li xreg x in
       let load_y = Pseudo.li yreg y in
-      let restore_x = lw ~rd:xreg 0 ~src:Sp in
-      let restore_y = lw ~rd:yreg word_size ~src:Sp in
       let insns =
         match op with
         | Anf.Add -> [ Rtype (rd, xreg, yreg, ADD) ]
@@ -236,7 +223,7 @@ module Arith = struct
         | Anf.And -> [ Rtype (rd, xreg, yreg, AND) ]
         | Anf.Or -> [ Rtype (rd, xreg, yreg, OR) ]
       in
-      [ save_x; save_y; load_x; load_y ] @ insns @ [ restore_x; restore_y ]
+      xsave @ ysave @ (load_x :: load_y :: insns) @ xrestore @ yrestore
     | _ -> Utils.internalfail "unexpected opearnds"
   ;;
 end
@@ -266,19 +253,15 @@ module Memory = struct
     | Loc_reg rd, Rv_mem (src, offset) -> [ lw ~rd offset ~src ]
     | Loc_mem (dst, offset), Rv_reg v -> [ sw ~v offset ~dst ]
     | Loc_mem (dst, offset), Rv_imm imm ->
-      let temp_reg = find_reg [ dst ] in
-      let save = sw ~v:temp_reg 0 ~dst:Sp in
+      let temp_reg, save, restore = find_reg [ dst ] in
       let load = Pseudo.li temp_reg imm in
       let store = sw ~v:temp_reg offset ~dst in
-      let restore = lw ~rd:temp_reg 0 ~src:Sp in
-      [ save; load; store; restore ]
+      save @ (load :: store :: restore)
     | Loc_mem (dst_reg, dst_offset), Rv_mem (src_reg, src_offset) ->
-      let temp_reg = find_reg [ dst_reg; src_reg ] in
-      let save = sw ~v:temp_reg 0 ~dst:Sp in
+      let temp_reg, save, restore = find_reg [ dst_reg; src_reg ] in
       let load = lw ~rd:temp_reg src_offset ~src:src_reg in
       let store = sw ~v:temp_reg dst_offset ~dst:dst_reg in
-      let restore = lw ~rd:temp_reg 0 ~src:Sp in
-      [ save; load; store; restore ]
+      save @ (load :: store :: restore)
     | _ -> []
   ;;
 end
@@ -311,7 +294,7 @@ module Function = struct
       let reg_args, stack_args = Base.List.split_n param_names arg_regs_count in
       let reg_args = List.mapi (fun i name -> name, Loc_reg (arg i)) reg_args in
       let stack_args =
-        List.mapi (fun i name -> name, Loc_mem (fp, i * word_size)) stack_args
+        List.mapi (fun i name -> name, Loc_mem (fp, (i + 1) * word_size)) stack_args
       in
       reg_args @ stack_args)
   ;;
@@ -363,11 +346,8 @@ module Function = struct
       let save_insns = extend_stack_insn :: save_insns in
       let restore_stack_insn = Memory.shrink_stack_aligned (List.length to_preserve) in
       let restore_insns =
-        List.mapi
-          (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp)
-          to_preserve
+        List.mapi (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp) to_preserve
       in
-
       let restore_a0, restore_rest = List.hd restore_insns, List.tl restore_insns in
       let restore__and_save_insns =
         restore_rest @ save_retvalue @ [ restore_a0; restore_stack_insn ]
@@ -452,52 +432,38 @@ let rec codegen_flambda location =
     let save_retvalue = Memory.store_rvalue location a0value in
     Function.Runtime.call Runtime.list_cons before_call_insns ~save_retvalue
   | Fl_getfield (idx, obj) ->
-    let some_reg = find_reg [] in
-    let save = sw ~v:some_reg 0 ~dst:Sp in
+    let some_reg, save, restore = find_reg [] in
     let extend_stack = Memory.extend_stack_aligned word_size in
     let load_addr = codegen_flambda (Loc_reg some_reg) obj in
     let load_value = lw ~rd:some_reg (idx * word_size) ~src:some_reg in
     let store = Memory.store_rvalue location (Rv_reg some_reg) in
     let shrink_stack = Memory.shrink_stack_aligned word_size in
-    let restore = lw ~rd:some_reg 0 ~src:Sp in
-    [ save; extend_stack ] @ load_addr @ (load_value :: store) @ [ shrink_stack; restore ]
+    save @ (extend_stack :: load_addr) @ (load_value :: store) @ (shrink_stack :: restore)
   | Fl_binop (op, x, y) ->
     let rd, save, restore =
       match location with
-      | Loc_reg reg -> reg, None, None
+      | Loc_reg reg -> reg, [], []
       | Loc_mem (_, _) ->
-        let some_reg = find_reg [] in
-        let save = sw ~v:some_reg 0 ~dst:Sp in
-        let extend_stack = Memory.extend_stack_aligned word_size in
-        let shrink_stack = Memory.shrink_stack_aligned word_size in
-        let restore = lw ~rd:some_reg 0 ~src:Sp in
-        some_reg, Some [ save; extend_stack ], Some [ shrink_stack; restore ]
+        let some_reg, save, restore = find_reg [] in
+        some_reg, save, restore
     in
     let binop_insns = Arith.codegen_binop op x y rd in
     let store_to_loc = Memory.store_rvalue location (Rv_reg rd) in
-    (match save, restore with
-     | None, None -> binop_insns @ store_to_loc
-     | Some s, Some r -> s @ binop_insns @ store_to_loc @ r
-     | _ -> Utils.unreachable ())
+    save @ binop_insns @ store_to_loc @ restore
   | Fl_unop (Anf.Not, x) ->
     let rd, save, restore =
       match location with
-      | Loc_reg reg -> reg, None, None
+      | Loc_reg reg -> reg, [], []
       | Loc_mem (_, _) ->
-        let some_reg = find_reg [] in
-        let save = sw ~v:some_reg 0 ~dst:Sp in
+        let some_reg, save, restore = find_reg [] in
         let extend_stack = Memory.extend_stack_aligned word_size in
         let shrink_stack = Memory.shrink_stack_aligned word_size in
-        let restore = lw ~rd:some_reg 0 ~src:Sp in
-        some_reg, Some [ save; extend_stack ], Some [ shrink_stack; restore ]
+        some_reg, save @ [ extend_stack ], shrink_stack :: restore
     in
     let insns = codegen_flambda (Loc_reg rd) x in
     let neg = Pseudo.neg rd in
     let store_to_loc = Memory.store_rvalue location (Rv_reg rd) in
-    (match save, restore with
-     | None, None -> insns @ (neg :: store_to_loc)
-     | Some s, Some r -> s @ insns @ (neg :: store_to_loc) @ r
-     | _ -> Utils.unreachable ())
+    save @ insns @ (neg :: store_to_loc) @ restore
   | Fl_let (name, v, scope) ->
     let loc =
       match name with
@@ -506,8 +472,8 @@ let rec codegen_flambda location =
     in
     let insns = codegen_flambda loc v in
     append_reversed insns;
-    let _ = codegen_flambda location scope in
-    []
+    let insns = codegen_flambda location scope in
+    insns |> List.rev
   | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
     when arity = List.length args && env_size = 0 ->
     let save_retvalue = Memory.store_rvalue location a0value in
@@ -556,11 +522,7 @@ let rec codegen_flambda location =
     let save_retvalue = arrange_env_insns @ alloc_closure_insns @ save_closure in
     Function.Runtime.alloc_tuple (env_size + arity) ~save_retvalue
   | Fl_ite (c, t, e) ->
-    let some_reg = find_reg [] in
-    let save = sw ~v:some_reg 0 ~dst:Sp in
-    let extend_stack = Memory.extend_stack_aligned word_size in
-    let shrink_stack = Memory.shrink_stack_aligned word_size in
-    let restore = lw ~rd:some_reg 0 ~src:Sp in
+    let some_reg, save, restore = find_reg [] in
     let cond = codegen_flambda (Loc_reg some_reg) c in
     let fresh_label l =
       let s = Format.sprintf ".L_%s_%i" l !block_counter in
@@ -570,13 +532,12 @@ let rec codegen_flambda location =
     let else_label = fresh_label "else" in
     let join_label = fresh_label "join" in
     let branch = Btype (some_reg, Zero, else_label, BEQ) in
-    curr_block := (branch :: cond) @ (extend_stack :: save :: !curr_block);
+    curr_block := (branch :: cond) @ save @ !curr_block;
     let then_final_insns = codegen_flambda location t in
     let jump_join = Pseudo.jump join_label in
     curr_block := (Label else_label :: jump_join :: then_final_insns) @ !curr_block;
     let else_final_insns = codegen_flambda location e in
-    curr_block
-    := (restore :: shrink_stack :: Label join_label :: else_final_insns) @ !curr_block;
+    curr_block := (restore @ (Label join_label :: else_final_insns)) @ !curr_block;
     []
 ;;
 

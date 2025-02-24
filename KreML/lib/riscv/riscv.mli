@@ -92,6 +92,7 @@ module RegistersStorage : sig
 end
 
 val available_regs : reg list
+val temporary_regs : reg list
 
 
 val pp_reg : Format.formatter -> reg -> unit
