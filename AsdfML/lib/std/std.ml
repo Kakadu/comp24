@@ -35,8 +35,8 @@ let stdlib : std list =
   ; { name = "print_tuple"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_tuple" }
   ; { name = "print_list"; typ = dummy_ty ^-> unit_typ; extern = "ml_print_list" }
   ; { name = "panic"; typ = unit_typ ^-> unit_typ; extern = "ml_panic" }
-  ; { name = "print_newline"; typ = unit_typ ^-> unit_typ; extern = "ml_print_newline"}
-  ; { name = "print_char"; typ = int_typ ^-> unit_typ; extern = "ml_print_char"}
+  ; { name = "print_newline"; typ = unit_typ ^-> unit_typ; extern = "ml_print_newline" }
+  ; { name = "print_char"; typ = int_typ ^-> unit_typ; extern = "ml_print_char" }
   ]
 ;;
 

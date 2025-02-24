@@ -548,3 +548,16 @@ $ cat /tmp/out.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   (42, 43, 44)
+
+  $ dune exec riscv -- -o /tmp/out.s <<- EOF
+  > let fn r1 r2 r3 r4 r5 r6 r7 = 
+  >   r1 + r2 + r3 + r4 + r5 + r6 + r7
+  > let main = 
+  >   let res = fn 1 1 1 1 1 1 1 in
+  >   let _ = println_int res in
+  >   ()
+  > EOF
+  $ cat /tmp/out.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ /tmp/out
+  7
