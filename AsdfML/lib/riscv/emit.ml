@@ -30,9 +30,9 @@ let emit_store ?(comm = "") reg =
 ;;
 
 let emit_fn_decl name (args : Ast.id list) stack_size =
-  if List.length args > 8
+  (* if List.length args > 8
   then failwith "TODO: stack arguments"
-  else (
+  else *) (
     emit str (Format.sprintf {|
     .globl %s
     .type %s, @function|} name name);
@@ -44,16 +44,6 @@ let emit_fn_decl name (args : Ast.id list) stack_size =
     emit sd fp (Offset (sp, stack_size - 8));
     emit addi fp sp (stack_size - 16) ~comm:"Prologue ends";
     stack_pos := 0)
-;;
-
-let dump_reg_args_to_stack args =
-  assert (List.length args <= 8);
-  List.take arg_regs (List.length args)
-  |> List.zip_exn args
-  |> List.filter ~f:(fun (arg, _) -> String.( <> ) "_" arg)
-  |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
-    let loc = emit_store reg ~comm:arg in
-    (arg, loc) :: acc)
 ;;
 
 let emit_fn_ret stack_size =
@@ -106,12 +96,47 @@ let emit_load_2 ?(comm = "") = function
 
 let emit_fn_call name (args : asm_value list) =
   if List.length args > 8
-  then failwith "TODO: stack arguments"
+  then (
+    List.iter args ~f:(fun arg -> Format.printf "%a\n" pp_asm_value arg);
+    failwith "TODO: stack arguments")
   else (
     List.zip_exn (List.take arg_regs (List.length args)) args
     |> List.iter ~f:(fun (reg, arg) -> emit_load reg arg);
     emit call name;
     a0)
+;;
+
+let dump_reg_args_to_stack args =
+  let regs, stack = List.split_n args (List.length arg_regs) in
+  match stack with
+  | [] ->
+    List.take arg_regs (List.length regs)
+    |> List.zip_exn args
+    |> List.fold ~init:[] ~f:(fun acc (arg, reg) ->
+      let loc = emit_store reg ~comm:arg in
+      (arg, loc) :: acc)
+  | _ ->
+    let tuple = List.last_exn arg_regs in
+    let arg_regs = List.drop_last_exn arg_regs in
+    let dumped =
+      List.take args (List.length arg_regs)
+      |> List.zip_exn arg_regs
+      |> List.fold ~init:[] ~f:(fun acc (reg, arg) ->
+        let loc = emit_store reg ~comm:arg in
+        (arg, loc) :: acc)
+    in
+    let tuple_loc = emit_store tuple ~comm:"Tuple for stack arguments" in
+    let heap_loc =
+      List.split_n args (List.length arg_regs)
+      |> snd
+      |> List.foldi ~init:[] ~f:(fun idx acc arg ->
+        let loc =
+          emit_store (emit_fn_call "ml_get_tuple_field" [ AsmReg tuple_loc; AsmInt idx ])
+        in
+        (* TODO: don't unpack tuple args *)
+        (arg, loc) :: acc)
+    in
+    dumped @ heap_loc
 ;;
 
 let direct_unops = [ "not"; "[ - ]" ]
