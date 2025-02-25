@@ -40,24 +40,33 @@ let rec lift_llexpression new_lllet units id = function
           else acc, id)
         n_list
     in
-    let new_names, new_id, count_units, units =
+    let new_names, new_id, units =
       List.fold
-        ~init:([], id, 0, units)
-        ~f:(fun (acc, acc_id, counter, units) n ->
+        ~init:([], id, units)
+        ~f:(fun (acc, acc_id, units) n ->
           if Poly.( = ) n "()"
           then (
             let unit_name, new_id = get_name units acc_id in
             let units = Set.add units unit_name in
-            unit_name :: acc, new_id, counter + 1, units)
-          else n :: acc, acc_id, counter, units)
+            unit_name :: acc, new_id, units)
+          else n :: acc, acc_id, units)
         n_list
     in
-    let new_lllet = LLLet [ r, List.rev new_names, args, lle ] :: new_lllet in
+    let new_lllet =
+      if List.length new_names = List.length use_names || List.length new_names = 1
+      then LLLet [ r, List.rev new_names, args, lle ] :: new_lllet
+      else new_lllet
+    in
     let drop_letin, new_lllet, new_id = lift_llexpression new_lllet units new_id ine in
     let new_body =
-      if count_units = 0
+      if List.length use_names = 0
       then drop_letin
       else List.fold ~init:drop_letin ~f:(fun acc n -> LLVars (LLVar n, acc)) use_names
+    in
+    let new_body =
+      if List.length new_names = List.length use_names || List.length new_names = 1
+      then new_body
+      else LLLetIn (List.rev new_names, args, lle, new_body)
     in
     new_body, new_lllet, new_id
   | CTuple t ->
@@ -108,6 +117,14 @@ let lift_statments statments =
     statments
 ;;
 
+let rec pattern_to_string_list = function
+  | PWild -> []
+  | PConst _ -> []
+  | PVar (name, _) -> [ name ]
+  | PTuple patterns -> List.concat_map patterns ~f:pattern_to_string_list
+  | PCon (hd, tl) -> pattern_to_string_list hd @ pattern_to_string_list tl
+;;
+
 let rec find_free gvars new_app = function
   | LLVar v ->
     let a =
@@ -154,19 +171,23 @@ let rec find_free gvars new_app = function
       List.fold
         ~init:([], new_gvars)
         ~f:(fun (acc, acc_gvars) (p, e) ->
-          let new_e, new_gvars = find_free acc_gvars new_app e in
+          let sp = pattern_to_string_list p in
+          let new_acc_gvars =
+            List.fold ~init:acc_gvars ~f:(fun acc_gvars pn -> Set.add acc_gvars pn) sp
+          in
+          let new_e, new_gvars = find_free new_acc_gvars new_app e in
+          let new_gvars = List.fold ~init:new_gvars ~f:(fun acc_gvars pn -> Set.remove acc_gvars pn) sp in
           (p, new_e) :: acc, new_gvars)
         b
     in
     LLMatch (new_m, List.rev new_b), new_gvars
-;;
-
-let rec pattern_to_string_list = function
-  | PWild -> []
-  | PConst _ -> []
-  | PVar (name, _) -> [ name ]
-  | PTuple patterns -> List.concat_map patterns ~f:pattern_to_string_list
-  | PCon (hd, tl) -> pattern_to_string_list hd @ pattern_to_string_list tl
+  | LLLetIn (n_list, args, lle, llein) ->
+    let new_lle, new_gvars = find_free gvars new_app lle in
+    let new_llein, new_gvars = find_free new_gvars new_app llein in
+    let new_gvars =
+      List.fold ~init:new_gvars ~f:(fun new_gvars n -> Set.remove new_gvars n) n_list
+    in
+    LLLetIn (n_list, args, new_lle, new_llein), new_gvars
 ;;
 
 let add_free gvars add_app = function

@@ -41,6 +41,17 @@ let rec pp_llexpression formatter e =
         Format.fprintf formatter "\n| %a -> %a" pp_pattern p pp_llexpression lle)
       p;
     Format.fprintf formatter ")"
+    | LLLetIn (n, args, e, ine) ->
+    Format.fprintf
+      formatter
+      "\n  let %s %a = %a\n  in %a"
+      (String.concat ", " n)
+      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
+      args
+      pp_llexpression
+      e
+      pp_llexpression
+      ine
 ;;
 
 let pp_llbindings formatter bindings =

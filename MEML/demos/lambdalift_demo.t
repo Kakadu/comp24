@@ -145,66 +145,70 @@
   let  temp  = ((f 1), (f true))
   $ ./lambdalift_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x  = ((f (fix f)) x)
-  let  a, b p  = p    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  let  map f p  = ((f (a p)), (f (b p)))
+  let  map f p  = 
+    let a, b  = p
+    in ((f a), (f b))
   let  lambada1 self l li x  = ((li (self l)) x)
   let  lambada0 map self l  = ((map ((lambada1 self) l)) l)
   let  fixpoly l  = ((fix (lambada0 map)) l)
-  let  e, o p  = p     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   let  feven p n  = 
+    let e, o  = p
+    in 
     if (n = 0)
     then 1
-    else ((o p) (n - 1))
-  let  e, o p  = p
+    else (o (n - 1))
   let  fodd p n  = 
+    let e, o  = p
+    in 
     if (n = 0)
     then 0
-    else ((e p) (n - 1))
+    else (e (n - 1))
   let  tie  = (fixpoly (feven, fodd))
   let  modd meven n  = 
     if (n = 0)
     then 1
-    else (meven (n - 1))and rec meven n  =  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    else (meven (n - 1))and rec meven n  = 
     if (n = 0)
     then 1
     else ((modd meven) (n - 1))
   let  unit_0  = (print_int ((modd meven) 1))
   let  unit_1  = (print_int (meven 2))
-  let  even, odd  = tie
-  let  unit_2  = (print_int (odd 3))
-  let  unit_3  = (print_int (even 4))
-  let  main  = unit_0; unit_1; unit_2; unit_3; 0
+  let  unit_2 odd  = (print_int (odd 3))
+  let  unit_3 even  = (print_int (even 4))
+  let  main  = unit_0; unit_1; 
+    let even, odd  = tie
+    in (unit_2 odd); (unit_3 even); 0
   $ ./lambdalift_demo.exe < manytests/typed/016lists.ml
-  let rec length tl xs  = (match xs with !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  let rec length xs  = (match xs with
   | (h :: tl) -> (1 + (length tl))
   | [] -> 0)
-  let rec helper tl acc xs  = (match xs with
+  let rec helper acc xs  = (match xs with
   | (h :: tl) -> ((helper (acc + 1)) tl)
   | [] -> acc)
-  let  length_tail  = ((helper tl) 0)
-  let rec map a b c d tl f xs  = (match xs with
+  let  length_tail  = (helper 0)
+  let rec map f xs  = (match xs with
   | (a :: (b :: (c :: (d :: tl)))) -> [(f a); (f b); (f c); (f d); ((map f) tl); ]
   | (a :: (b :: (c :: []))) -> [(f a); (f b); (f c); ]
   | (a :: (b :: [])) -> [(f a); (f b); ]
   | (a :: []) -> [(f a); ]
   | [] -> [])
-  let rec append x xs ys  = (match xs with
+  let rec append xs ys  = (match xs with
   | (x :: xs) -> [x; ((append xs) ys); ]
   | [] -> ys)
-  let rec helper h tl xs  = (match xs with
-  | (h :: tl) -> (((append x) h) ((helper tl) tl))
+  let rec helper xs  = (match xs with
+  | (h :: tl) -> ((append h) (helper tl))
   | [] -> [])
-  let  concat  = ((helper h) tl)
+  let  concat  = helper
   let  unit_0 f h  = (f h)
-  let rec iter () tl f xs  = (match xs with
+  let rec iter () f xs  = (match xs with
   | (h :: tl) -> ((unit_0 f) h); ((iter f) tl)
   | [] -> ())
   let  lambada0 h a  = (h, a)
-  let rec cartesian h tl xs ys  = (match xs with
-  | (h :: tl) -> (((append x) (((((((map a) b) c) d) tl) (lambada0 h)) ys)) ((cartesian tl) ys))
+  let rec cartesian xs ys  = (match xs with
+  | (h :: tl) -> ((append ((map (lambada0 h)) ys)) ((cartesian tl) ys))
   | [] -> [])
-  let  unit_0  = ((((iter ()) tl) print_int) [1; 2; 3; ])
-  let  unit_1  = (print_int ((length tl) ((((cartesian h) tl) [1; 2; ]) [1; 2; 3; 4; ])))
+  let  unit_0  = (((iter ()) print_int) [1; 2; 3; ])
+  let  unit_1  = (print_int (length ((cartesian [1; 2; ]) [1; 2; 3; 4; ])))
   let  main  = ((unit_0 f) h); unit_1; 0
 
   $ ./lambdalift_demo.exe << EOF
