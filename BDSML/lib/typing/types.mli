@@ -27,6 +27,7 @@ type error =
   | Unification_failed of type_val * type_val
   | Occurs_check
   | No_variable of string
+  | Invalid_let
 
 exception Unimplemented of string
 
