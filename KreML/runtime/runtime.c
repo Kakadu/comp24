@@ -211,6 +211,7 @@ typedef struct list_node
     struct list_node *next;
 } list_node;
 
+
 list_node *list_cons(int64_t v, list_node *tail)
 {
     list_node *new_node = malloc(sizeof(list_node));
@@ -218,3 +219,19 @@ list_node *list_cons(int64_t v, list_node *tail)
     new_node->next = tail;
     return new_node;
 }
+
+// void* rv_call_closure(closure* c, int64_t args_count) {
+//     closure* curr_c = c;
+//     for (int64_t i = 0; i < args_count; i++) {
+//         if (curr_c->applied_count == curr_c->arity) {
+//             void* (*callee)(void* ) = curr_c->fptr;
+//             int64_t* env = curr_c->env;
+//         } else {
+//             if (i < 8) {
+//                 asm(
+//                     "lw "
+//                 )
+//             }
+//         }
+//     }
+// }

@@ -165,7 +165,7 @@ let add_builtin_functions () =
 ;;
 
 let set_globals () =
-  let _ = define_global "nil" (const_null ptr_type) mdl in
+  let _ = define_global "nil" (const_inttoptr (iconst 0) ptr_type) mdl in
   let _ = define_global "unit" (iconst 0) mdl in
   ()
 ;;

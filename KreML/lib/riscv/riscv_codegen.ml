@@ -92,7 +92,7 @@ module Arith = struct
         | Anf.And -> Rtype (rd, xreg, yreg, AND)
         | Anf.Or -> Rtype (rd, xreg, yreg, OR)
       in
-      save @ insn:: restore
+      save @ (insn :: restore)
     | Fl_const x, Fl_var y ->
       let imm = const_to_int x in
       let yloc = Base.Map.find_exn !curr_assignment y in
@@ -344,7 +344,7 @@ module Function = struct
         List.mapi (fun i reg -> sw ~v:reg ((i + 1) * word_size) ~dst:Sp) to_preserve
       in
       let save_insns = extend_stack_insn :: save_insns in
-      let restore_stack_insn = Memory.shrink_stack_aligned (List.length to_preserve) in
+      let restore_stack_insn = Memory.shrink_stack_aligned (word_size * List.length to_preserve) in
       let restore_insns =
         List.mapi (fun i reg -> lw ~rd:reg ((i + 1) * word_size) ~src:Sp) to_preserve
       in
@@ -374,11 +374,11 @@ module Function = struct
      sw t1, t0(0)*)
   module Runtime = struct
     let alloc_tuple size ~save_retvalue =
-      let save, restore = Call.save_and_restore_insns !current_fun_arity ~save_retvalue in
+      let save, restore = Call.save_and_restore_insns !current_fun_arity ~save_retvalue:[] in
       let a0 = arg 0 in
       let load_size = Pseudo.li a0 size in
       let call = Pseudo.call Runtime.alloc_tuple in
-      save @ [ load_size; call ] @ restore
+      save @ [ load_size; call ] @ save_retvalue @ restore
     ;;
 
     (** this function is supposed to use in [action] of [alloc_tuple], so
@@ -473,7 +473,7 @@ let rec codegen_flambda location =
     let insns = codegen_flambda loc v in
     append_reversed insns;
     let insns = codegen_flambda location scope in
-    insns |> List.rev
+    insns
   | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
     when arity = List.length args && env_size = 0 ->
     let save_retvalue = Memory.store_rvalue location a0value in
@@ -533,10 +533,10 @@ let rec codegen_flambda location =
     let join_label = fresh_label "join" in
     let branch = Btype (some_reg, Zero, else_label, BEQ) in
     curr_block := (branch :: cond) @ save @ !curr_block;
-    let then_final_insns = codegen_flambda location t in
+    let then_final_insns = codegen_flambda location t |> List.rev in
     let jump_join = Pseudo.jump join_label in
     curr_block := (Label else_label :: jump_join :: then_final_insns) @ !curr_block;
-    let else_final_insns = codegen_flambda location e in
+    let else_final_insns = codegen_flambda location e |> List.rev in
     curr_block := (restore @ (Label join_label :: else_final_insns)) @ !curr_block;
     []
 ;;
@@ -548,10 +548,16 @@ let convert_generic_assignment_to_rv generic =
 ;;
 
 let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
-  current_fun_arity := arity;
+  let has_env = List.length param_names != arity in
+  let arity, param_names =
+    if has_env then arity + 1, "env" :: param_names else arity, param_names
+  in
   let rv_locals_assignment = convert_generic_assignment_to_rv regs_assignment in
   let explicit_params, env_params = Base.List.split_n param_names arity in
-  let explicit_param_locations = Function.resolve_param_locations explicit_params arity in
+  current_fun_arity := arity;
+  let explicit_param_locations =
+    Function.resolve_param_locations explicit_params arity
+  in
   let env_param_locations =
     let a0 = arg 0 in
     List.mapi (fun i name -> name, Loc_mem (a0, i * word_size)) env_params
@@ -570,7 +576,7 @@ let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
   let fun_name_with_directive = Format.sprintf ".global %s" fun_name in
   curr_block := prologue @ [ Label fun_name_with_directive ] @ !curr_block;
   let return_value_location = Loc_reg (arg 0) in
-  let final_insn = codegen_flambda return_value_location body in
+  let final_insn = codegen_flambda return_value_location body |> List.rev in
   let ret = Pseudo.ret in
   curr_block := (ret :: epilogue) @ final_insn @ !curr_block
 ;;
