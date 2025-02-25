@@ -2,35 +2,49 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
+let word = 8
 let n_reg_args = 8
 
 type reg =
   | SP
   | Reg of string
-  | Offset of reg * int
   | Temp of int
-[@@deriving eq]
+[@@deriving eq, show { with_path = false }]
 
-type asm_value =
-  | AsmInt of int
-  | AsmFn of string
-  | AsmReg of reg
+type offset = reg * int [@@deriving eq, show { with_path = false }]
+
+type rvalue =
+  | RInt of int
+  | RFn of string
+  | RReg of reg
+  | ROffset of offset
+
+type loc =
+  | LReg of reg
+  | LMem of offset
+[@@deriving show { with_path = false }]
+
+let rec loc_to_rvalue = function
+  | LReg r -> RReg r
+  | LMem o -> ROffset o
+;;
 
 let rec pp_reg ppf =
   let open Format in
   function
   | SP -> fprintf ppf "sp"
   | Reg src -> fprintf ppf "%s" src
-  | Offset (r, n) -> fprintf ppf "%d(%a)" n pp_reg r
   | Temp n -> fprintf ppf "t%d" n
-;;
 
-let pp_asm_value ppf =
+and pp_offset ppf offset = Format.fprintf ppf "%d(%a)" (snd offset) pp_reg (fst offset)
+
+let pp_rvalue ppf =
   let open Format in
   function
-  | AsmInt n -> fprintf ppf "%d" n
-  | AsmFn n -> fprintf ppf "%s" n
-  | AsmReg r -> pp_reg ppf r
+  | RInt n -> fprintf ppf "%d" n
+  | RFn n -> fprintf ppf "%s" n
+  | RReg r -> pp_reg ppf r
+  | ROffset o -> fprintf ppf "%a" pp_offset o
 ;;
 
 type instr =
@@ -44,8 +58,8 @@ type instr =
   | And of reg * reg * reg
   | Or of reg * reg * reg
   (* *)
-  | Ld of reg * reg
-  | Sd of reg * reg
+  | Ld of reg * offset
+  | Sd of reg * offset
   | Li of reg * int
   | La of reg * string
   | Mv of reg * reg
@@ -81,8 +95,8 @@ let pp_instr fmt =
   | Or (dst, src1, src2) ->
     fprintf fmt "    or %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
   (* *)
-  | Ld (dst, src) -> fprintf fmt "    ld %a,%a" pp_reg dst pp_reg src
-  | Sd (dst, src) -> fprintf fmt "    sd %a,%a" pp_reg dst pp_reg src
+  | Ld (dst, src) -> fprintf fmt "    ld %a,%a" pp_reg dst pp_offset src
+  | Sd (dst, src) -> fprintf fmt "    sd %a,%a" pp_reg dst pp_offset src
   | Li (dst, n) -> fprintf fmt "    li %a,%d" pp_reg dst n
   | La (dst, s) -> fprintf fmt "    la %a,%s" pp_reg dst s (* TODO: (l)la *)
   | Mv (dst, src) -> fprintf fmt "    mv %a,%a" pp_reg dst pp_reg src

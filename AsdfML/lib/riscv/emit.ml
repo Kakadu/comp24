@@ -23,85 +23,69 @@ let flush_fn () =
 let empty_fn () = Queue.clear fn_code
 
 let emit_store ?(comm = "") reg =
-  let stack_loc = Offset (fp, !stack_pos) in
+  let stack_loc = fp, !stack_pos in
   emit sd reg stack_loc ~comm;
-  stack_pos := !stack_pos - 8;
-  stack_loc
+  stack_pos := !stack_pos - word;
+  LMem stack_loc
 ;;
 
 let emit_fn_decl name (args : Ast.id list) stack_size =
   (* if List.length args > 8
-  then failwith "TODO: stack arguments"
-  else *) (
-    emit str (Format.sprintf {|
+     then failwith "TODO: stack arguments"
+     else *)
+  emit str (Format.sprintf {|
     .globl %s
     .type %s, @function|} name name);
-    emit label name;
-    if not (List.is_empty args)
-    then emit comment ("args: " ^ (args |> String.concat ~sep:", "));
-    emit addi sp sp (-stack_size);
-    emit sd ra (Offset (sp, stack_size));
-    emit sd fp (Offset (sp, stack_size - 8));
-    emit addi fp sp (stack_size - 16) ~comm:"Prologue ends";
-    stack_pos := 0)
+  emit label name;
+  if not (List.is_empty args)
+  then emit comment ("args: " ^ (args |> String.concat ~sep:", "));
+  emit addi sp sp (-stack_size);
+  emit sd ra (sp, stack_size);
+  emit sd fp (sp, stack_size - word);
+  emit addi fp sp (stack_size - 16) ~comm:"Prologue ends";
+  stack_pos := 0
 ;;
 
 let emit_fn_ret stack_size =
-  emit ld fp (Offset (sp, stack_size - 8)) ~comm:"Epilogue starts";
-  emit ld ra (Offset (sp, stack_size));
+  emit ld fp (sp, stack_size - word) ~comm:"Epilogue starts";
+  emit ld ra (sp, stack_size);
   emit addi sp sp stack_size;
   emit ret
 ;;
 
-let emit_load ?(comm = "") dst = function
-  | AsmInt n -> emit li dst n ~comm
-  | AsmFn n -> emit la dst n ~comm
-  | AsmReg r ->
-    (match r with
-     | SP -> emit mv dst sp ~comm
-     | Reg _ | Temp _ -> if not (equal_reg r dst) then emit mv dst r ~comm
-     | Offset _ -> emit ld dst r ~comm)
+let emit_load ?(comm = "") (dst : loc) (src : rvalue) =
+  let load_src dst_reg = function
+    | RInt n -> emit li dst_reg n ~comm
+    | RFn id -> emit la dst_reg id ~comm
+    | RReg src_reg ->
+      (match src_reg with
+       | SP -> emit mv dst_reg sp ~comm
+       | Reg _ | Temp _ ->
+         if not (equal_reg src_reg dst_reg)
+         then
+           emit mv dst_reg src_reg ~comm
+           (* | Offset (src_reg, off) -> emit ld dst_reg (src_reg, off) ~comm *))
+    | ROffset (src, off) -> emit ld dst_reg (src, off) ~comm
+  in
+  let load_dst dst src =
+    match dst, src with
+    | LReg dst_reg, _ -> load_src dst_reg src
+    | LMem dst_off, RReg ((Reg _ | Temp _) as src) -> emit sd src dst_off ~comm
+    | LMem dst_off, _ ->
+      load_src t1 src;
+      emit ld t1 dst_off ~comm
+  in
+  load_dst dst src
 ;;
 
-(* TODO *)
-let emit_load_2 ?(comm = "") = function
-  | AsmInt _ | AsmFn _ -> failwith "emit_load: invalid dst"
-  | AsmReg dst ->
-    (match dst with
-     | SP -> failwith "emit_load: invalid dst"
-     | Reg _ | Temp _ ->
-       (function
-         | AsmInt n -> emit li dst n ~comm
-         | AsmFn n -> emit la dst n ~comm
-         | AsmReg src ->
-           (match src with
-            | SP -> emit mv dst sp ~comm
-            | Reg _ | Temp _ -> if not (equal_reg src dst) then emit mv dst src ~comm
-            | Offset _ -> emit ld dst src ~comm))
-     | Offset (r1, o1) ->
-       let load src = emit sd src dst ~comm in
-       (function
-         | AsmInt n ->
-           emit li t0 n ~comm;
-           load t0
-         | AsmFn n ->
-           emit la t0 n ~comm;
-           load t0
-         | AsmReg src ->
-           (match src with
-            | SP -> load sp
-            | Reg _ | Temp _ -> if not (equal_reg src dst) then load src
-            | Offset (r2, o2) -> if not (equal_reg r1 r2 && equal_int o1 o2) then load src)))
-;;
+let emit_load_reg ?(comm = "") reg src = emit_load (LReg reg) src ~comm
 
-let emit_fn_call name (args : asm_value list) =
+let emit_fn_call name (args : rvalue list) =
   if List.length args > n_reg_args
-  then (
-    List.iter args ~f:(fun arg -> Format.printf "%a\n" pp_asm_value arg);
-    failwith "TODO: stack arguments")
+  then failwith "TODO: stack arguments"
   else (
     List.zip_exn (List.take arg_regs (List.length args)) args
-    |> List.iter ~f:(fun (reg, arg) -> emit_load reg arg);
+    |> List.iter ~f:(fun (reg, arg) -> emit_load (LReg reg) arg);
     emit call name;
     a0)
 ;;
@@ -131,7 +115,8 @@ let dump_reg_args_to_stack args =
       |> snd
       |> List.foldi ~init:[] ~f:(fun idx acc arg ->
         let loc =
-          emit_store (emit_fn_call "ml_get_tuple_field" [ AsmReg tuple_loc; AsmInt idx ])
+          emit_store
+            (emit_fn_call "ml_get_tuple_field" [ loc_to_rvalue tuple_loc; RInt idx ])
         in
         (* TODO: don't unpack tuple args *)
         (arg, loc) :: acc)
