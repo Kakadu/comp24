@@ -25,7 +25,7 @@ let rec pp_reg ppf =
   | Temp n -> fprintf ppf "t%d" n
 ;;
 
-let rec pp_asm_value ppf =
+let pp_asm_value ppf =
   let open Format in
   function
   | AsmInt n -> fprintf ppf "%d" n
