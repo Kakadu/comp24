@@ -33,17 +33,15 @@
   	j .L_join_1
   .L_else_0:
   	addi t0, a0, -1
-  	sub sp, sp, 32
+  	sub sp, sp, 16
   	sw a0, 8(sp) 
   	sw ra, 16(sp) 
-  	sw t0, 24(sp) 
   	mv a0, t0
   	call fac
-  	lw ra, 16(sp) 
-  	lw t0, 24(sp) 
   	mv t0, a0
   	lw a0, 8(sp) 
-  	add sp, sp, 32
+  	lw ra, 16(sp) 
+  	add sp, sp, 16
   	mul a0, a0, t0
   .L_join_1:
   	lw s0, 8(sp) 
@@ -53,6 +51,34 @@
   $ dune exec rv_codegen <<- EOF
   > let rec fac acc x =
   >   if x < 2 then acc else fac (acc * x) (x - 1)
+  .global fac:
+  	sub sp, sp, 16
+  	sw s0, 8(sp) 
+  	addi s0, sp, 16
+  	slti t0, a1, 2
+  	mv t2, t0
+  	beq  t2, x0, .L_else_0
+  	j .L_join_1
+  .L_else_0:
+  	mul t0, a0, a1
+  	addi t1, a1, -1
+  	sub sp, sp, 32
+  	sw a1, 8(sp) 
+  	sw ra, 16(sp) 
+  	sw t0, 24(sp) 
+  	sw t1, 32(sp) 
+  	mv a0, t0
+  	mv a1, t1
+  	call fac
+  	lw a1, 8(sp) 
+  	lw ra, 16(sp) 
+  	lw t0, 24(sp) 
+  	lw t1, 32(sp) 
+  	add sp, sp, 32
+  .L_join_1:
+  	lw s0, 8(sp) 
+  	add sp, sp, 16
+  	ret
 
   $ dune exec rv_codegen <<- EOF
   > let adder a b c d e f g h j k l =
@@ -98,10 +124,9 @@
   	sw s0, 8(sp) 
   	addi s0, sp, 16
   	li t0, 5
-  	sub sp, sp, 32
-  	sw a0, 8(sp) 
-  	sw ra, 16(sp) 
-  	sw t0, 24(sp) 
+  	sub sp, sp, 16
+  	sw ra, 8(sp) 
+  	sw t0, 16(sp) 
   	li a0, 3
   	call alloc_tuple
   	sw a0, 8(a0) 
@@ -111,10 +136,9 @@
   	li a2, 1
   	li a3, 2
   	call rv_alloc_closure
-  	lw ra, 16(sp) 
-  	lw t0, 24(sp) 
-  	lw a0, 8(sp) 
-  	add sp, sp, 32
+  	lw ra, 8(sp) 
+  	lw t0, 16(sp) 
+  	add sp, sp, 16
   	lw s0, 8(sp) 
   	add sp, sp, 16
   	ret
