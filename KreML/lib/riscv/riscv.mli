@@ -81,6 +81,7 @@ type instruction =
    (** signed offset, link reg, op *)
   | Pseudo of string (* can not unify signature *)
   | Label of string
+  | Global of string
 
 val extend_stack_insn : int -> instruction
 val shrink_stack_insn : int -> instruction

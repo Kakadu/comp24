@@ -4,7 +4,7 @@ open Linear_scan_allocation
 
 let word_size = 8
 let arg_regs_count = 8
-let curr_block = ref []
+let curr_block = ref [ Global "main"]
 let block_counter = ref 0
 let current_fun_arity = ref 0
 let curr_assignment = ref (Base.Map.empty (module Base.String))
@@ -473,9 +473,9 @@ let rec codegen_flambda location =
         some_reg, save @ [ extend_stack ], shrink_stack :: restore
     in
     let insns = codegen_flambda (Loc_reg rd) x in
-    let neg = Pseudo.neg rd in
+    let invert = Itype(rd, rd, 1, XORI) in
     let store_to_loc = Memory.store_rvalue location (Rv_reg rd) in
-    save @ insns @ (neg :: store_to_loc) @ restore
+    save @ insns @ (invert :: store_to_loc) @ restore
   | Fl_let (name, v, scope) ->
     let loc =
       match name with
@@ -584,8 +584,7 @@ let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
     env_param_locations;
   let prologue, epilogue = Function.prologue_and_epilogue !curr_assignment in
   let prologue, epilogue = List.rev prologue, List.rev epilogue in
-  let fun_name_with_directive = Format.sprintf ".global %s" fun_name in
-  curr_block := prologue @ [ Label fun_name_with_directive ] @ !curr_block;
+  curr_block := prologue @ [ Label fun_name ] @ !curr_block;
   let return_value_location = Loc_reg (arg 0) in
   let final_insn = codegen_flambda return_value_location body |> List.rev in
   let ret = Pseudo.ret in

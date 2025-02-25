@@ -3,3 +3,16 @@
  (deps runtime.c)
  (action
   (run gcc -fPIC -shared %{deps} -o %{targets})))
+
+(rule
+ (targets rv64_runtime.o)
+ (deps runtime.c)
+ (action
+ (run riscv64-linux-gnu-gcc -o %{targets} -c %{deps}))
+)
+
+(rule
+ (targets rv64_runtime.a)
+ (deps rv64_runtime.o)
+ (action
+ (run ar rcs %{targets} %{deps})))

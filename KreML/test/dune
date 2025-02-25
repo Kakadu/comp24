@@ -68,6 +68,7 @@
  (deps
   %{bin:parser}
   ../runtime/runtime.so
+  ../runtime/rv64_runtime.a
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

@@ -83,9 +83,10 @@ type instruction =
    (** signed offset, link reg, op *)
   | Pseudo of string (* can not unify signature *)
   | Label of string
+  | Global of string
 
-let extend_stack_insn size = Itype(Sp, Sp, size, SUB)
-let shrink_stack_insn size = Itype(Sp, Sp, size, ADD)
+let extend_stack_insn size = Itype(Sp, Sp, -size, ADDI)
+let shrink_stack_insn size = Itype(Sp, Sp, size, ADDI)
 let sw ~v offset ~dst = Stype(v, offset, dst, SW)
 let lw ~rd offset  ~src = Itype(rd, src, offset, LW)
 
@@ -184,6 +185,7 @@ let pp_insn fmt =
     fprintf fmt "@[\t%a %a, %i@]@." pp_op op pp_reg rd imm
   | Pseudo p -> fprintf fmt "@[\t%s@]@." p
   | Label l -> fprintf  fmt "@[%s:@]@." l
+  | Global s -> fprintf fmt "@[.global %s@]@." s
 ;;
 
 module Pseudo = struct
