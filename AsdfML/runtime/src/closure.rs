@@ -4,7 +4,6 @@ use log::debug;
 
 use crate::Tuple;
 
-#[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Closure {
     pub(crate) fn_ptr: *const fn(),
@@ -116,10 +115,10 @@ fn apply_closure(closure: &mut Closure) -> Option<isize> {
                 closure.args[7],
             )
         }
-        _ => {
+        9.. => {
             let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            let rest = closure.args.split_off(7);
-            func(
+            let rest = Box::new(closure.args.split_off(7));
+            let res = func(
                 closure.args[0],
                 closure.args[1],
                 closure.args[2],
@@ -127,9 +126,12 @@ fn apply_closure(closure: &mut Closure) -> Option<isize> {
                 closure.args[4],
                 closure.args[5],
                 closure.args[6],
-                (&rest as *const Tuple) as isize,
-            )
+                (Box::as_ptr(&rest)) as isize,
+            );
+            let _ = Box::into_raw(rest);
+            res
         }
+        _ => panic!("Unsupported arity: {}", closure.arity),
     };
     debug!("Result: {} / {:#x}", res, res);
     Some(res)
