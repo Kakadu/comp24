@@ -18,33 +18,19 @@ let rec pp_llexpression formatter e =
       t
       pp_llexpression
       e
-  | LLLetIn (r, n, e, ine) ->
-    Format.fprintf
-      formatter
-      "\n  let %a %s = %a\n  in %a"
-      pp_rec
-      r
-      (String.concat ", " n)
-      pp_llexpression
-      e
-      pp_llexpression
-      ine
   | LLTuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_llexpression) t
   | LLEbinOp (op, l, r) ->
-    Format.fprintf
-      formatter
-      "(%a %a %a)"
-      pp_llexpression
-      l
-      pp_binop
-      op
-      pp_llexpression
-      r
+    Format.fprintf formatter "(%a %a %a)" pp_llexpression l pp_binop op pp_llexpression r
+  | LLVars (head, tail) ->
+    let rec print_list formatter = function
+      | LLList (h, t) -> Format.fprintf formatter "%a; %a" pp_llexpression h print_list t
+      | _ -> Format.fprintf formatter "%a" pp_llexpression tail
+    in
+    Format.fprintf formatter "%a" print_list (LLList (head, tail))
   | LLList (head, tail) ->
     let rec print_list formatter = function
       | LLConst CNil -> Format.fprintf formatter ""
-      | LLList (h, t) ->
-        Format.fprintf formatter "%a; %a" pp_llexpression h print_list t
+      | LLList (h, t) -> Format.fprintf formatter "%a; %a" pp_llexpression h print_list t
       | _ -> Format.fprintf formatter "%a" pp_llexpression tail
     in
     Format.fprintf formatter "[%a]" print_list (LLList (head, tail))
@@ -52,26 +38,23 @@ let rec pp_llexpression formatter e =
     Format.fprintf formatter "(match %a with" pp_llexpression m;
     List.iter
       (fun (p, lle) ->
-        Format.fprintf
-          formatter
-          "\n| %a -> %a"
-          pp_pattern
-          p
-          pp_llexpression
-          lle)
-      p
+        Format.fprintf formatter "\n| %a -> %a" pp_pattern p pp_llexpression lle)
+      p;
+    Format.fprintf formatter ")"
 ;;
 
 let pp_llbindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
-      | LLLet bindings_list -> 
+      | LLLet bindings_list ->
         (* Перебираем все let-объявления внутри LLLet *)
         List.iteri
           (fun i (r, n_list, p, e) ->
-            let n_str = String.concat " " n_list in
-            if i = 0 then (* Первое объявление начинается с "let" *)
+            let n_str = String.concat ", " n_list in
+            if i = 0
+            then
+              (* Первое объявление начинается с "let" *)
               Format.fprintf
                 formatter
                 "let %a %s %a = %a"
@@ -83,7 +66,8 @@ let pp_llbindings formatter bindings =
                 p
                 pp_llexpression
                 e
-            else (* Все последующие объявления начинаются с "and" *)
+            else
+              (* Все последующие объявления начинаются с "and" *)
               Format.fprintf
                 formatter
                 "and %a %s %a = %a"
@@ -97,11 +81,10 @@ let pp_llbindings formatter bindings =
                 e)
           bindings_list;
         Format.fprintf formatter "\n"
-      | LLExpression e -> 
+      | LLExpression e ->
         pp_llexpression formatter e;
         Format.fprintf formatter "\n")
     bindings
 ;;
 
-
-let llprinter bindings = Format.asprintf "%a" pp_llbindings bindings
+let pp_lambda_lifting bindings = Format.asprintf "%a" pp_llbindings bindings
