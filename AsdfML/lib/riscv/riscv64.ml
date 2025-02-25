@@ -11,7 +11,7 @@ open Utils
 let pp_env env =
   let open Format in
   Map.to_alist env
-  |> List.map ~f:(fun (k, v) -> asprintf "%s -> %a" k pp_reg v)
+  |> List.map ~f:(fun (k, v) -> asprintf "%s -> %a" k pp_rvalue v)
   |> String.concat ~sep:", "
   |> sprintf "{%s}"
 ;;
@@ -36,10 +36,22 @@ let counter_next () =
    - direct calls when possible
    - gen_imm may rewrite a0 a1 a2
    - direct math should check if ops were redefined
+   - save/restore sN regs
 *)
 let remove_grave = String.substr_replace_all ~pattern:"`" ~with_:""
 
-let rec gen_imm fn_args env dest = function
+let rec gen_tuple fn_args env xs =
+  let tuple = emit_fn_call "ml_create_tuple" [ RInt (List.length xs) ] in
+  let tuple = emit_store tuple ~comm:"tuple" in
+  List.iteri xs ~f:(fun i x ->
+    gen_imm fn_args env a2 x;
+    let _ = emit_fn_call "ml_set_tuple_field" [ loc_to_rvalue tuple; RInt i; RReg a2 ] in
+    ());
+  tuple
+
+and gen_imm fn_args (env : (id, loc, 'a) Map.t) dest
+  = (* dbg "ENV: %s\n" (pp_env env); *)
+  function
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
   | ImmId id ->
@@ -49,30 +61,25 @@ let rec gen_imm fn_args env dest = function
     let id = Std.lookup_extern id |> Option.value ~default:id in
     (match Map.find fn_args id with
      | Some 0 ->
-       emit la t1 id;
-       emit_load_2 (AsmReg dest) (AsmReg (Offset (t1, 0)))
+       emit_load_reg dest (RFn id);
+       emit_load_reg dest (ROffset (dest, 0))
      | Some n_args ->
        let id = remove_grave id in
        emit comment (Format.sprintf "Creating closure for %s" id);
-       let x = emit_fn_call "create_closure" [ AsmFn id; AsmInt n_args ] in
-       emit_load dest (AsmReg x) ~comm:id
+       let x = emit_fn_call "create_closure" [ RFn id; RInt n_args ] in
+       emit_load_reg dest (RReg x) ~comm:id
      | None ->
        (match Map.find env id with
-        | Some x -> emit_load dest (AsmReg x) ~comm:id
+        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id (* (Format.asprintf "%s - %a" id pp_loc x) *)
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> emit li dest 0
   | ImmNil ->
     let list = emit_fn_call "ml_create_list" [] in
-    emit_load dest (AsmReg list)
+    emit_load_reg dest (RReg list)
   | ImmTuple (x1, x2, xs) ->
     let xs = x1 :: x2 :: xs in
-    let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length xs) ] in
-    let tuple = emit_store tuple ~comm:"tuple" in
-    List.iteri xs ~f:(fun i x ->
-      gen_imm fn_args env a2 x;
-      let _ = emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ] in
-      ());
-    emit_load dest (AsmReg tuple)
+    let tuple = loc_to_rvalue (gen_tuple fn_args env xs) in
+    emit_load_reg dest tuple
   | ImmList xs ->
     let list = emit_fn_call "ml_create_list" [] in
     let list = emit_store list ~comm:"list" in
@@ -80,9 +87,9 @@ let rec gen_imm fn_args env dest = function
     |> List.rev
     |> List.iter ~f:(fun x ->
       gen_imm fn_args env a0 x;
-      let res = emit_fn_call "ml_list_cons" [ AsmReg a0; AsmReg list ] in
-      emit_load_2 (AsmReg list) (AsmReg res));
-    emit_load dest (AsmReg list)
+      let res = emit_fn_call "ml_list_cons" [ RReg a0; loc_to_rvalue list ] in
+      emit_load list (RReg res));
+    emit_load_reg dest (loc_to_rvalue list)
 
 and gen_cexpr fn_args env dest = function
   | CApp (ImmId fn, args) when is_direct_binop fn ->
@@ -123,19 +130,7 @@ and gen_cexpr fn_args env dest = function
         List.zip_exn in_regs (List.drop_last_exn free_arg_regs), Some on_heap
     in
     let reg_args, heap_args = split_args args in
-    let heap_args =
-      Option.map heap_args ~f:(fun heap_args ->
-        (* TODO: copy-paste from ImmTuple *)
-        let tuple = emit_fn_call "ml_create_tuple" [ AsmInt (List.length heap_args) ] in
-        let tuple = emit_store tuple ~comm:"tuple" in
-        List.iteri heap_args ~f:(fun i arg ->
-          gen_imm fn_args env a2 arg;
-          let _ =
-            emit_fn_call "ml_set_tuple_field" [ AsmReg tuple; AsmInt i; AsmReg a2 ]
-          in
-          ());
-        tuple)
-    in
+    let heap_args = Option.map heap_args ~f:(gen_tuple fn_args env) in
     (*  *)
     let rw_arg_locs =
       List.filter args ~f:is_rewrites_regs
@@ -149,9 +144,12 @@ and gen_cexpr fn_args env dest = function
     reg_args
     |> List.iter ~f:(fun (arg, reg) ->
       if is_rewrites_regs arg
-      then emit_load reg (AsmReg (Map.find_exn rw_arg_locs arg))
+      then emit_load_reg reg (loc_to_rvalue (Map.find_exn rw_arg_locs arg))
       else gen_imm fn_args env reg arg);
-    let _ = Option.map heap_args ~f:(fun tuple_loc -> emit_load a7 (AsmReg tuple_loc)) in
+    let _ =
+      Option.map heap_args ~f:(fun tuple_loc ->
+        emit_load_reg a7 (loc_to_rvalue tuple_loc))
+    in
     let app_closure_fn =
       "apply_closure_"
       ^
@@ -162,9 +160,9 @@ and gen_cexpr fn_args env dest = function
     let closure =
       emit_fn_call
         app_closure_fn
-        (AsmReg a0 :: List.map reg_args ~f:(fun (_, reg) -> AsmReg reg))
+        (RReg a0 :: List.map reg_args ~f:(fun (_, reg) -> RReg reg))
     in
-    emit_load dest (AsmReg closure)
+    emit_load_reg dest (RReg closure)
   | CIfElse (ImmBool true, then_, _) -> gen_aexpr fn_args env dest then_
   | CIfElse (ImmBool false, _, else_) -> gen_aexpr fn_args env dest else_
   | CIfElse (cond, then_, else_) ->
@@ -199,8 +197,9 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
   | Fn (id, args, aexpr) ->
     let id = remove_grave id in
     (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
-    (* let stack_size = 8 * (3 + List.length args + Anf_ast.count_bindings fn) in *)
+    (* let stack_size = word * (3 + List.length args + Anf_ast.count_bindings fn) in *)
     (*  *)
+    (* TODO: this *)
     set_fn_code ();
     let args_loc = dump_reg_args_to_stack args in
     let env =
@@ -211,8 +210,8 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
     in
     gen_aexpr fn_args env a0 aexpr;
     let stack_size =
-      let sp = max (- !stack_pos - 8) 0 in
-      sp + (8 * 3)
+      let sp = max (- !stack_pos - word) 0 in
+      sp + (word * 3)
     in
     set_code ();
     emit_fn_decl id args stack_size;
@@ -224,7 +223,7 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
     (match data_sec with
      | Some id ->
        emit la t1 id;
-       emit_load_2 (AsmReg (Offset (t1, 0))) (AsmReg a0)
+       emit_load (LMem (t1, 0)) (RReg a0)
      | None -> ());
     emit_fn_ret stack_size
 ;;
@@ -265,8 +264,8 @@ let peephole (code : (instr * string) Queue.t) =
   let rec helper = function
     | (i1, c1) :: (i2, c2) :: tl ->
       (match i1, i2 with
-       | Sd (src1, dst1), Ld (dst2, src2) when equal_reg src1 dst2 && equal_reg dst1 src2
-         -> (i1, c1) :: helper tl
+       | Sd (src1, dst1), Ld (dst2, src2)
+         when equal_reg src1 dst2 && equal_offset dst1 src2 -> (i1, c1) :: helper tl
        | _ -> (i1, c1) :: helper ((i2, c2) :: tl))
     | (i, c) :: [] -> [ i, c ]
     | [] -> []
