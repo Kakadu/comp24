@@ -95,7 +95,7 @@ let emit_load_2 ?(comm = "") = function
 ;;
 
 let emit_fn_call name (args : asm_value list) =
-  if List.length args > 8
+  if List.length args > n_reg_args
   then (
     List.iter args ~f:(fun arg -> Format.printf "%a\n" pp_asm_value arg);
     failwith "TODO: stack arguments")

@@ -189,8 +189,6 @@ and gen_aexpr fn_args env dest = function
   | ACExpr cexpr -> gen_cexpr fn_args env dest cexpr
 
 and gen_fn ?(data_sec = None) fn_args init_fns = function
-  (* TODO: why is it here? *)
-  | Fn (id, [], ACExpr (CImmExpr _)) when String.( <> ) "main" id -> ()
   | Fn (id, [], _)
     when (not (String.equal "main" id))
          &&
