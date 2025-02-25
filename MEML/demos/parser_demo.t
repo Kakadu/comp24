@@ -21,9 +21,11 @@
   > and b = 4
   > 
   > let (c, b) = (2, 3)
+  > x+3
   let  a = f
   and  b = 4
   let  c, b = (2, 3)
+  (x + 3)
   $ ./parser_demo.exe < manytests/do_not_type/001.ml
   let  recfac = (fun n -> 
     if (n <= 1)
@@ -106,7 +108,7 @@
   $ ./parser_demo.exe < manytests/typed/006partial.ml
   let  foo = (fun b -> 
     if b
-    then (fun foo -> (foo 2))
+    then (fun foo -> (foo + 2))
     else (fun foo -> (foo * 10)))
   let  foo = (fun x -> ((foo true) ((foo false) ((foo true) ((foo false) x)))))
   let  main = 
@@ -139,19 +141,19 @@
     let  () = (((foo 4) 8) 9)
     in 0
   $ ./parser_demo.exe < manytests/typed/007order.ml
-  let  _start = (fun () -> (fun () -> (fun a -> (fun () -> (fun b -> (fun _ -> (fun c -> (fun () -> (fun d -> (fun _ -> (fun _ -> 
+  let  _start = (fun () -> (fun () -> (fun a -> (fun () -> (fun b -> (fun _c -> (fun () -> (fun d -> (fun __ -> 
     let  () = (print_int (a + b))
     in 
     let  () = (print_int __)
-    in (((a * b) / _c) + d))))))))))))
+    in (((a * b) / _c) + d))))))))))
   let  main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int -1)) 10000) -555555))
   $ ./parser_demo.exe < manytests/typed/008ascription.ml
   let  addi = (fun f -> (fun g -> (fun x -> ((f x) (g x : bool)) : int)))
   let  main = 
     let  () = (print_int (((addi (fun x -> (fun b -> 
     if b
-    then (x 1)
-    else (x * 2)))) (fun _ -> (fun start -> ((_start / 2) = 0)))) 4))
+    then (x + 1)
+    else (x * 2)))) (fun _start -> ((_start / 2) = 0))) 4))
     in 0
   $ ./parser_demo.exe < manytests/typed/009let_poly.ml
   let  temp = 

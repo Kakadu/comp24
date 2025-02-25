@@ -85,8 +85,13 @@ let parse_bool =
       <|> ((fun _ -> CBool false) <$> string "false"))
 ;;
 
+let parse_uint =
+  let pd = parse_white_space *> take_while1 is_digit in
+  lift (fun digit -> CInt (Int.of_string @@ digit)) pd
+;;
+
 let parse_int =
-  let ps = token (option "" (stoken "-" <|> stoken "+")) in
+  let ps = token (option "" (stoken "-" )) in
   let pd = take_while1 is_digit in
   lift2 (fun sign digit -> CInt (Int.of_string @@ sign ^ digit)) ps pd
 ;;
@@ -126,10 +131,10 @@ let parse_var =
 (** Pattern parsers *)
 
 let parse_pvar =
-  brackets_or_not @@ lift2 (fun a b -> PVar (a, b)) parse_var parse_type
+  brackets_or_not @@ lift2 (fun a b -> ( if (String.( <> ) a "_") then PVar (a, b) else PWild)) parse_var parse_type
 ;;
 
-let parse_pconst = (fun v -> PConst v) <$> choice [ parse_int; parse_bool; parse_nil ]
+let parse_pconst = (fun v -> PConst v) <$> choice [parse_uint; parse_int; parse_bool; parse_nil ]
 let parse_wild = (fun _ -> PWild) <$> stoken "_"
 
 let parse_tuple parser =
@@ -157,7 +162,7 @@ let parse_con_2 parser constructor =
 let parse_pattern =
   fix
   @@ fun pack ->
-  let value = parse_wild <|> parse_pconst <|> parse_pvar in
+  let value = parse_pvar <|> parse_pconst in
   let tuple = brackets @@ parse_tuple (value <|> pack) in
   let con =
     parse_con (tuple <|> parse_con_2 pack constr_con <|> value)
@@ -170,7 +175,7 @@ let parse_pattern =
 
 (* EConst *)
 
-let parse_econst = (fun v -> EConst v) <$> choice [ parse_int; parse_bool ]
+let parse_econst = (fun v -> EConst v) <$> choice [ parse_uint; parse_int; parse_bool ]
 
 (* EVar *)
 
@@ -239,8 +244,8 @@ let parse_eapp e1 e2 =
   let replace_outer_type expr new_ty =
     match expr with
     | EApp (e1, e2, TUnknown) -> EApp (e1, e2, new_ty) (* Заменяем тип только для внешней аппликации *)
-    | EApp (e1, e2, _) -> EApp (e1, e2, TUnknown) (* Внутренние аппликации остаются без изменений *)
-    | _ -> expr (* Базовый случай: не аппликация *)
+    | EApp (e1, e2, _) -> EApp (e1, e2, TUnknown)
+    | _ -> expr
   in
   return (replace_outer_type app_without_type ty)
 ;;
@@ -339,29 +344,6 @@ let parse_ematch matching parse_expr =
 
 (* Expression parsers *)
 
-let ebinop_p expr =
-  let helper p op =
-    parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
-  in
-  let add = helper (char '+') Add in
-  let sub = helper (char '-') Sub in
-  let mul = helper (char '*') Mul in
-  let div = helper (char '/') Div in
-  let and_p = helper (string "&&") And in
-  let or_p = helper (string "||") Or in
-  let eq = helper (char '=') Eq in
-  let neq = helper (string "<>") Neq in
-  let gre = helper (char '>') Gre in
-  let less = helper (char '<') Less in
-  let greq = helper (string ">=") Greq in
-  let leq = helper (string "<=") Leq in
-  let muldiv = chainl1 expr (mul <|> div) in
-  let addsub = chainl1 muldiv (add <|> sub) in
-  let compare = chainl1 addsub (neq <|> gre <|> greq <|> less <|> leq <|> eq) in
-  let and_op = chainl1 compare and_p in
-  let or_op = chainl1 and_op or_p in
-  or_op
-;;
 
 let parse_expression =
   fix
