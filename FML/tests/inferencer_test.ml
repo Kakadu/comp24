@@ -29,7 +29,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference {| let (h::tl) = [1;2;3]|};
-  [%expect {|
+  [%expect
+    {|
     val h : int
     val tl : int list |}]
 ;;
@@ -40,11 +41,24 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference {| let id x = x;;
+  inference
+    {| let id x = x;;
 let fst (a, _) = a;;
 let snd (_, a) = a;; |};
-  [%expect {|
+  [%expect
+    {|
     val snd : 'a * 'b -> 'b
     val fst : 'a * 'b -> 'a
     val id : 'a -> 'a |}]
+;;
+
+let%expect_test _ =
+  inference
+    {| let x = 5 and y = 6;;
+let res = x + y;;|};
+  [%expect
+    {|
+    val res : int
+    val x : int
+    val y : int |}]
 ;;

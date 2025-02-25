@@ -308,7 +308,7 @@ let parse_expr =
 (* ------------------------- *)
 
 let parse_declaration =
-  let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
+  (* let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in *)
   let* decl = parse_pattern in
   let* args = many parse_pattern in
   let* expr = token "=" *> parse_expr in
@@ -318,20 +318,24 @@ let parse_declaration =
     | _ -> return expr
   in
   match decl with
-  | PIdentifier _ -> return @@ ddeclaration rec_flag decl expression
+  | PIdentifier _ -> return @@ ddeclaration decl expression
   | _ when List.length args <> 0 -> fail "Syntax error"
-  | _ -> return @@ ddeclaration rec_flag decl expression
+  | _ -> return @@ ddeclaration decl expression
 ;;
 
 let parse_single_declaration =
-  keyword "let" *> parse_declaration >>| fun x -> SingleDecl x
+  keyword "let"
+  *> let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
+     parse_declaration >>| fun x -> SingleDecl (rec_flag, x)
 ;;
 
 let parse_mutable_rec_declaration =
-  keyword "let" *> parse_declaration
-  >>= fun first_decl ->
-  many1 (keyword "and" *> parse_declaration)
-  >>= fun lst -> return @@ MutableRecDecl (first_decl :: lst)
+  keyword "let"
+  *> let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
+     parse_declaration
+     >>= fun first_decl ->
+     many1 (keyword "and" *> parse_declaration)
+     >>= fun lst -> return @@ MutableRecDecl (rec_flag, first_decl :: lst)
 ;;
 
 let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration ]

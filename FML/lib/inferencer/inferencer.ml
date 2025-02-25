@@ -524,25 +524,38 @@ let add_to_list =
   helper []
 ;;
 
-let infer_single_decl env (DDeclaration (rec_flag, pat, expr)) =
-  match rec_flag with
-  | NoRec ->
-    let* s, t1 = infer_expr env expr in
-    let env = TypeEnv.apply env s in
-    let scheme = generalize env t1 in
-    let* t2, env1 = infer_pattern env pat in
-    let env2 = TypeEnv.ext_by_pat env1 pat scheme in
-    let names_list = add_to_list pat in
-    let* s1 = Subst.unify t1 t2 in
-    let* sub = Subst.compose s s1 in
-    let env3 = TypeEnv.apply env2 sub in
-    return (env3, List.rev names_list)
-  | Rec -> fail `Not_impl
+let infer_single_decl env (DDeclaration (pat, expr)) =
+  let* s, t1 = infer_expr env expr in
+  let env = TypeEnv.apply env s in
+  let scheme = generalize env t1 in
+  let* t2, env1 = infer_pattern env pat in
+  let env2 = TypeEnv.ext_by_pat env1 pat scheme in
+  let names_list = add_to_list pat in
+  let* s1 = Subst.unify t1 t2 in
+  let* sub = Subst.compose s s1 in
+  let env3 = TypeEnv.apply env2 sub in
+  return (env3, List.rev names_list)
 ;;
 
 let infer_decl env = function
-  | SingleDecl declaration -> infer_single_decl env declaration
-  | MutableRecDecl _ -> fail `Not_impl
+  | SingleDecl (rec_flag, single_decl) ->
+    (match rec_flag with
+     | NoRec -> infer_single_decl env single_decl
+     | Rec -> fail `Not_impl)
+  | MutableRecDecl (rec_flag, decl_list) ->
+    (match rec_flag with
+     | NoRec ->
+       let* env, names_list =
+         Base.List.fold_left
+           ~f:(fun acc item ->
+             let* env, lst = acc in
+             let* env, names_list = infer_single_decl env item in
+             return (env, names_list @ lst))
+           ~init:(return (env, []))
+           decl_list
+       in
+       return (env, List.rev names_list)
+     | Rec -> fail `Not_impl)
 ;;
 
 let start_env =

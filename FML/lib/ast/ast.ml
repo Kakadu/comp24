@@ -50,12 +50,12 @@ type expression =
   (** match e with p1 -> e1 |...| pn -> en *)
 [@@deriving show { with_path = false }]
 
-type single_declaration = DDeclaration of rec_flag * pattern * expression
+type single_declaration = DDeclaration of pattern * expression
 [@@deriving show { with_path = false }]
 
 type declaration =
-  | SingleDecl of single_declaration
-  | MutableRecDecl of single_declaration list
+  | SingleDecl of rec_flag * single_declaration
+  | MutableRecDecl of rec_flag * single_declaration list
 [@@deriving show { with_path = false }]
 
 type program = declaration list [@@deriving show { with_path = false }]
@@ -85,4 +85,4 @@ let econstraint e t = EConstraint (e, t)
 (* ---------------------------- *)
 
 (* Constructor for declaration *)
-let ddeclaration rec_f pat expr = DDeclaration (rec_f, pat, expr)
+let ddeclaration pat expr = DDeclaration (pat, expr)

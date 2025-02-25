@@ -1,6 +1,6 @@
   $ ./parser_runner.exe < manytests/typed/001fac.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "fac"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "fac"),
          (EFun ((PIdentifier "n"),
             (EIf (
                (EApplication (
@@ -18,19 +18,21 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication ((EIdentifier "fac"), (EConst (CInt 4)))))),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/002fac.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "fac_cps"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "fac_cps"),
          (EFun ((PIdentifier "n"),
             (EFun ((PIdentifier "k"),
                (EIf (
@@ -57,9 +59,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication (
@@ -69,12 +72,13 @@
                    ))
                 )),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/003fib.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "fib_acc"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "fib_acc"),
          (EFun ((PIdentifier "a"),
             (EFun ((PIdentifier "b"),
                (EFun ((PIdentifier "n"),
@@ -110,9 +114,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (Rec, (PIdentifier "fib"),
+         ))
+      ));
+    (SingleDecl (Rec,
+       (DDeclaration ((PIdentifier "fib"),
           (EFun ((PIdentifier "n"),
              (EIf (
                 (EApplication (
@@ -137,9 +142,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication (
@@ -154,12 +160,13 @@
                    (EApplication ((EIdentifier "fib"), (EConst (CInt 4)))))),
                 (EConst (CInt 0))))
              ))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/004manyargs.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "wrap"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "wrap"),
          (EFun ((PIdentifier "f"),
             (EIf (
                (EApplication (
@@ -167,9 +174,10 @@
                   (EConst (CInt 1)))),
                (EIdentifier "f"), (EIdentifier "f")))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "test"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "test"),
           (EFun ((PConst (CInt 3)),
              (EFun ((PIdentifier "a"),
                 (EFun ((PIdentifier "b"),
@@ -190,9 +198,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "test"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "test"),
           (EFun ((PConst (CInt 10)),
              (EFun ((PIdentifier "a"),
                 (EFun ((PIdentifier "b"),
@@ -273,9 +282,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, (PIdentifier "rez"),
              (EApplication (
                 (EApplication (
@@ -320,12 +330,13 @@
                    (EConst (CInt 0))))
                 ))
              ))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/005fix.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "fix"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "fix"),
          (EFun ((PIdentifier "f"),
             (EFun ((PIdentifier "x"),
                (EApplication (
@@ -334,9 +345,10 @@
                   (EIdentifier "x")))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "fac"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "fac"),
           (EFun ((PIdentifier "self"),
              (EFun ((PIdentifier "n"),
                 (EIf (
@@ -357,9 +369,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication (
@@ -367,12 +380,13 @@
                    (EConst (CInt 6))))
                 )),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/006partial.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "foo"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "foo"),
          (EFun ((PIdentifier "b"),
             (EIf ((EIdentifier "b"),
                (EFun ((PIdentifier "foo"),
@@ -389,9 +403,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "foo"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "foo"),
           (EFun ((PIdentifier "x"),
              (EApplication (
                 (EApplication ((EIdentifier "foo"), (EConst (CBool true)))),
@@ -408,19 +423,21 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication ((EIdentifier "foo"), (EConst (CInt 11)))))),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/006partial2.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "foo"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "foo"),
          (EFun ((PIdentifier "a"),
             (EFun ((PIdentifier "b"),
                (EFun ((PIdentifier "c"),
@@ -447,9 +464,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, (PIdentifier "foo"),
              (EApplication ((EIdentifier "foo"), (EConst (CInt 1)))),
              (ELetIn (NoRec, (PIdentifier "foo"),
@@ -463,11 +481,12 @@
                    ))
                 ))
              ))
-          )))
+          ))
+       ))
     ]
   $ ./parser_runner.exe < manytests/typed/006partial3.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "foo"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "foo"),
          (EFun ((PIdentifier "a"),
             (ELetIn (NoRec, PUnit,
                (EApplication ((EIdentifier "print_int"), (EIdentifier "a"))),
@@ -483,9 +502,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication (
                 (EApplication (
@@ -493,15 +513,16 @@
                    (EConst (CInt 8)))),
                 (EConst (CInt 9)))),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/007order.ml
   Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/008ascription.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "addi"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "addi"),
          (EFun ((PIdentifier "f"),
             (EFun ((PIdentifier "g"),
                (EFun ((PIdentifier "x"),
@@ -517,9 +538,10 @@
                   ))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication (
@@ -554,27 +576,29 @@
                    (EConst (CInt 4))))
                 )),
              (EConst (CInt 0))))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/009let_poly.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "temp"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "temp"),
          (ELetIn (NoRec, (PIdentifier "f"),
             (EFun ((PIdentifier "x"), (EIdentifier "x"))),
             (ETuple
                [(EApplication ((EIdentifier "f"), (EConst (CInt 1))));
                  (EApplication ((EIdentifier "f"), (EConst (CBool true))))])
             ))
-         )))
+         ))
+      ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/010sukharev.ml
   Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/015tuples.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "fix"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "fix"),
          (EFun ((PIdentifier "f"),
             (EFun ((PIdentifier "x"),
                (EApplication (
@@ -583,9 +607,10 @@
                   (EIdentifier "x")))
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "map"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "map"),
           (EFun ((PIdentifier "f"),
              (EFun ((PIdentifier "p"),
                 (ELetIn (NoRec,
@@ -597,9 +622,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "fixpoly"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "fixpoly"),
           (EFun ((PIdentifier "l"),
              (EApplication (
                 (EApplication ((EIdentifier "fix"),
@@ -624,9 +650,10 @@
                    )),
                 (EIdentifier "l")))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "feven"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "feven"),
           (EFun ((PIdentifier "p"),
              (EFun ((PIdentifier "n"),
                 (ELetIn (NoRec,
@@ -648,9 +675,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "fodd"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "fodd"),
           (EFun ((PIdentifier "p"),
              (EFun ((PIdentifier "n"),
                 (ELetIn (NoRec,
@@ -672,14 +700,16 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "tie"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "tie"),
           (EApplication ((EIdentifier "fixpoly"),
              (ETuple [(EIdentifier "feven"); (EIdentifier "fodd")])))
-          )));
-    (MutableRecDecl
-       [(DDeclaration (Rec, (PIdentifier "meven"),
+          ))
+       ));
+    (MutableRecDecl (Rec,
+       [(DDeclaration ((PIdentifier "meven"),
            (EFun ((PIdentifier "n"),
               (EIf (
                  (EApplication (
@@ -695,7 +725,7 @@
                  ))
               ))
            ));
-         (DDeclaration (NoRec, (PIdentifier "modd"),
+         (DDeclaration ((PIdentifier "modd"),
             (EFun ((PIdentifier "n"),
                (EIf (
                   (EApplication (
@@ -711,9 +741,10 @@
                   ))
                ))
             ))
-         ]);
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+         ]
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication ((EIdentifier "print_int"),
                 (EApplication ((EIdentifier "modd"), (EConst (CInt 1)))))),
@@ -738,12 +769,13 @@
                    ))
                 ))
              ))
-          )))
+          ))
+       ))
     ]
 
   $ ./parser_runner.exe < manytests/typed/016lists.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PIdentifier "length"),
+  [(SingleDecl (Rec,
+      (DDeclaration ((PIdentifier "length"),
          (EFun ((PIdentifier "xs"),
             (EMatch ((EIdentifier "xs"),
                [(PNill, (EConst (CInt 0)));
@@ -756,9 +788,10 @@
                  ]
                ))
             ))
-         )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "length_tail"),
+         ))
+      ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "length_tail"),
           (ELetIn (Rec, (PIdentifier "helper"),
              (EFun ((PIdentifier "acc"),
                 (EFun ((PIdentifier "xs"),
@@ -778,9 +811,10 @@
                    ))
                 )),
              (EApplication ((EIdentifier "helper"), (EConst (CInt 0))))))
-          )));
-    (SingleDecl
-       (DDeclaration (Rec, (PIdentifier "map"),
+          ))
+       ));
+    (SingleDecl (Rec,
+       (DDeclaration ((PIdentifier "map"),
           (EFun ((PIdentifier "f"),
              (EFun ((PIdentifier "xs"),
                 (EMatch ((EIdentifier "xs"),
@@ -843,9 +877,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (Rec, (PIdentifier "append"),
+          ))
+       ));
+    (SingleDecl (Rec,
+       (DDeclaration ((PIdentifier "append"),
           (EFun ((PIdentifier "xs"),
              (EFun ((PIdentifier "ys"),
                 (EMatch ((EIdentifier "xs"),
@@ -861,9 +896,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "concat"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "concat"),
           (ELetIn (Rec, (PIdentifier "helper"),
              (EFun ((PIdentifier "xs"),
                 (EMatch ((EIdentifier "xs"),
@@ -879,9 +915,10 @@
                    ))
                 )),
              (EIdentifier "helper")))
-          )));
-    (SingleDecl
-       (DDeclaration (Rec, (PIdentifier "iter"),
+          ))
+       ));
+    (SingleDecl (Rec,
+       (DDeclaration ((PIdentifier "iter"),
           (EFun ((PIdentifier "f"),
              (EFun ((PIdentifier "xs"),
                 (EMatch ((EIdentifier "xs"),
@@ -898,9 +935,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (Rec, (PIdentifier "cartesian"),
+          ))
+       ));
+    (SingleDecl (Rec,
+       (DDeclaration ((PIdentifier "cartesian"),
           (EFun ((PIdentifier "xs"),
              (EFun ((PIdentifier "ys"),
                 (EMatch ((EIdentifier "xs"),
@@ -926,9 +964,10 @@
                    ))
                 ))
              ))
-          )));
-    (SingleDecl
-       (DDeclaration (NoRec, (PIdentifier "main"),
+          ))
+       ));
+    (SingleDecl (NoRec,
+       (DDeclaration ((PIdentifier "main"),
           (ELetIn (NoRec, PUnit,
              (EApplication (
                 (EApplication ((EIdentifier "iter"), (EIdentifier "print_int")
@@ -957,12 +996,13 @@
                    )),
                 (EConst (CInt 0))))
              ))
-          )))
+          ))
+       ))
     ]
  
   $ ./parser_runner.exe < manytests/do_not_type/001.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "recfac"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "recfac"),
          (EFun ((PIdentifier "n"),
             (EIf (
                (EApplication (
@@ -980,18 +1020,20 @@
                   ))
                ))
             ))
-         )))
+         ))
+      ))
     ]
   $ ./parser_runner.exe < manytests/do_not_type/002if.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "main"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "main"),
          (EIf ((EConst (CBool true)), (EConst (CInt 1)), (EConst (CBool false))
             ))
-         )))
+         ))
+      ))
     ]
   $ ./parser_runner.exe < manytests/do_not_type/003occurs.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "fix"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "fix"),
          (EFun ((PIdentifier "f"),
             (EApplication (
                (EFun ((PIdentifier "x"),
@@ -1016,12 +1058,13 @@
                   ))
                ))
             ))
-         )))
+         ))
+      ))
     ]
 
   $ ./parser_runner.exe < manytests/do_not_type/004let_poly.ml
-  [(SingleDecl
-      (DDeclaration (NoRec, (PIdentifier "temp"),
+  [(SingleDecl (NoRec,
+      (DDeclaration ((PIdentifier "temp"),
          (EApplication (
             (EFun ((PIdentifier "f"),
                (ETuple
@@ -1029,13 +1072,15 @@
                     (EApplication ((EIdentifier "f"), (EConst (CBool true))))])
                )),
             (EFun ((PIdentifier "x"), (EIdentifier "x")))))
-         )))
+         ))
+      ))
     ]
 
   $ ./parser_runner.exe < manytests/do_not_type/015tuples.ml
-  [(SingleDecl
-      (DDeclaration (Rec, (PTuple [(PIdentifier "a"); (PIdentifier "b")]),
-         (ETuple [(EIdentifier "a"); (EIdentifier "b")]))))
+  [(SingleDecl (Rec,
+      (DDeclaration ((PTuple [(PIdentifier "a"); (PIdentifier "b")]),
+         (ETuple [(EIdentifier "a"); (EIdentifier "b")])))
+      ))
     ]
 
   $ ./parser_runner.exe < manytests/do_not_type/099.ml
