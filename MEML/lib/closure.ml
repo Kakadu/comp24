@@ -1,30 +1,13 @@
 open Ast
 open Base
-open Llast
-
-module NAMECOUNTER = struct
-  let return value id = value, id
-
-  let ( let* ) m f id =
-    let value, mid = m id in
-    f mid value
-  ;;
-
-  let curent_id id = id, id
-  let update_id id _ = id + 1, ()
-  let run f = f
-end
-
-open NAMECOUNTER
+open Cast
 
 let set_empty = Set.empty (module String)
 let map_empty = Map.empty (module String)
 
-let rec get_name gvars =
-  let* id = curent_id in
-  let* () = update_id id in
+let rec get_name gvars id =
   let name = String.concat [ "lambada"; Int.to_string id ] in
-  if Set.mem gvars name then get_name gvars else return name
+  if Set.mem gvars name then get_name gvars (id + 1) else name, id
 ;;
 
 let rec arguments acc = function
@@ -34,61 +17,7 @@ let rec arguments acc = function
 
 let rec create_let acc = function
   | [] -> acc
-  | (n, args, lle) :: tl -> LLLetIn (Notrec, [ n ], args, lle, create_let acc tl)
-;;
-
-let rec closure_expression id gvars new_lets = function
-  | EVar (v, _) -> LLVar v, new_lets, id
-  | EConst c -> LLConst c, new_lets, id
-  | EBinaryOp (op, e1, e2) ->
-    let lle1, lets1, id = closure_expression id gvars new_lets e1 in
-    let lle2, lets2, id = closure_expression id gvars new_lets e2 in
-    LLEbinOp (op, lle1, lle2), new_lets @ lets1 @ lets2, id
-  | EApp (e1, e2, _) ->
-    let lle1, lets1, id = closure_expression id gvars new_lets e1 in
-    let lle2, lets2, id = closure_expression id gvars new_lets e2 in
-    LLApp (lle1, lle2), new_lets @ lets1 @ lets2, id
-  | EList (hd, tl) ->
-    let lle1, lets1, id = closure_expression id gvars new_lets hd in
-    let lle2, lets2, id = closure_expression id gvars new_lets tl in
-    LLList (lle1, lle2), new_lets @ lets1 @ lets2, id
-  | ETuple t ->
-    let llt, lets, id =
-      List.fold
-        ~init:([], [], id)
-        ~f:(fun (acc, let_acc, id) e ->
-          let c, l, id = closure_expression id gvars new_lets e in
-          c :: acc, l @ let_acc, id)
-        t
-    in
-    LLTuple (List.rev llt), new_lets @ lets, id
-  | EIfElse (i, t, e) ->
-    let lli, letsi, id = closure_expression id gvars new_lets i in
-    let llt, letst, id = closure_expression id gvars new_lets t in
-    let lle, letse, id = closure_expression id gvars new_lets e in
-    LLIfElse (lli, llt, lle), new_lets @ letsi @ letst @ letse, id
-  | ELetIn (r, n_list, e, ine) ->
-    let args, e_body = arguments [] e in
-    let lle, letse, id = closure_expression id gvars new_lets e_body in
-    let lline, letsine, id = closure_expression id gvars [] ine in
-    create_let (LLLetIn (r, n_list, args, lle, lline)) (new_lets @ letse), letsine, id
-  | EFun (p, e) ->
-    let args, next_e = arguments [] (EFun (p, e)) in
-    let name, new_id = run (get_name gvars) id in
-    let clo, lets, id = closure_expression new_id gvars new_lets next_e in
-    let llletin = name, args, clo in
-    LLVar name, new_lets @ lets @ [ llletin ], id
-  | EMatch (m, a) ->
-    let lla, letsa, id =
-      List.fold
-        ~init:([], new_lets, id)
-        ~f:(fun (acc, acc_lets, id) (p, e) ->
-          let lle, letse, id = closure_expression id gvars new_lets e in
-          (p, lle) :: acc, acc_lets @ letse, id)
-        a
-    in
-    let llm, letsm, id = closure_expression id gvars new_lets m in
-    LLMatch (llm, List.rev lla), letsa @ letsm, id
+  | (n, args, lle) :: tl -> CLetIn (Notrec, [ n ], args, lle, create_let acc tl)
 ;;
 
 let existence set_vars v = Set.mem set_vars v
@@ -102,6 +31,103 @@ let rec pattern_to_string_list = function
   | PCon (hd, tl) -> pattern_to_string_list hd @ pattern_to_string_list tl
 ;;
 
+let rec closure_expression id gvars lvars new_lets = function
+  | EVar (v, _) -> CVar v, new_lets, id, gvars, lvars, []
+  | EConst c -> CConst c, new_lets, id, gvars, lvars, []
+  | EBinaryOp (op, e1, e2) ->
+    let lle1, lets1, id, gvars, lvars, lambadi1 =
+      closure_expression id gvars lvars new_lets e1
+    in
+    let lle2, lets2, id, gvars, lvars, lambadi2 =
+      closure_expression id gvars lvars new_lets e2
+    in
+    ( CEbinOp (op, lle1, lle2)
+    , new_lets @ lets1 @ lets2
+    , id
+    , gvars
+    , lvars
+    , lambadi1 @ lambadi2 )
+  | EApp (e1, e2, _) ->
+    let lle1, lets1, id, gvars, lvars, lambadi1 =
+      closure_expression id gvars lvars new_lets e1
+    in
+    let lle2, lets2, id, gvars, lvars, lambadi2 =
+      closure_expression id gvars lvars new_lets e2
+    in
+    CApp (lle1, lle2), new_lets @ lets1 @ lets2, id, gvars, lvars, lambadi1 @ lambadi2
+  | EList (hd, tl) ->
+    let lle1, lets1, id, gvars, lvars, lambadi1 =
+      closure_expression id gvars lvars new_lets hd
+    in
+    let lle2, lets2, id, gvars, lvars, lambadi2 =
+      closure_expression id gvars lvars new_lets tl
+    in
+    CList (lle1, lle2), new_lets @ lets1 @ lets2, id, gvars, lvars, lambadi1 @ lambadi2
+  | ETuple t ->
+    let llt, lets, id, gvars, lvars, lambadi =
+      List.fold
+        ~init:([], [], id, gvars, lvars, [])
+        ~f:(fun (acc, let_acc, id, gvars, lvars, lamb) e ->
+          let c, l, id, gv, _, la = closure_expression id gvars lvars new_lets e in
+          c :: acc, l @ let_acc, id, Set.union gvars gv, lvars, lamb @ la)
+        t
+    in
+    CTuple (List.rev llt), new_lets @ lets, id, gvars, lvars, lambadi
+  | EIfElse (i, t, e) ->
+    let lli, letsi, id, gvars, lvars, lambadi1 =
+      closure_expression id gvars lvars new_lets i
+    in
+    let llt, letst, id, gvars, lvars, lambadi2 =
+      closure_expression id gvars lvars new_lets t
+    in
+    let lle, letse, id, gvars, lvars, lambadi3 =
+      closure_expression id gvars lvars new_lets e
+    in
+    ( CIfElse (lli, llt, lle)
+    , new_lets @ letsi @ letst @ letse
+    , id
+    , gvars
+    , lvars
+    , lambadi1 @ lambadi2 @ lambadi3 )
+  | ELetIn (r, n_list, e, ine) ->
+    let args, e_body = arguments [] e in
+    let str_args =
+      List.fold ~init:[] ~f:(fun acc arg -> acc @ pattern_to_string_list arg) args
+    in
+    let lle, letse, id, gvars, lvars, lambadi1 =
+      closure_expression id gvars str_args new_lets e_body
+    in
+    let lline, letsine, id, gvars, lvars, lambadi2 =
+      closure_expression id gvars lvars [] ine
+    in
+    ( create_let (CLetIn (r, n_list, args, lle, lline)) (new_lets @ letse)
+    , letsine
+    , id
+    , gvars
+    , lvars
+    , lambadi1 @ lambadi2 )
+  | EFun (p, e) ->
+    let args, next_e = arguments [] (EFun (p, e)) in
+    let name, new_id = get_name gvars id in
+    let gvars = Set.add gvars name in
+    let clo, lets, id, gvars, lvars, lambadi =
+      closure_expression new_id gvars lvars new_lets next_e
+    in
+    let llletin = name, args, clo in
+    CVar name, new_lets @ lets @ [ llletin ], id, gvars, lvars, name :: lambadi
+  | EMatch (m, a) ->
+    let lla, letsa, id, gvars, lvars, lambadi =
+      List.fold
+        ~init:([], new_lets, id, gvars, lvars, [])
+        ~f:(fun (acc, acc_lets, id, acc_g, lv, lambadi) (p, e) ->
+          let lle, letse, id, gv, _, la = closure_expression id acc_g lvars new_lets e in
+          (p, lle) :: acc, acc_lets @ letse, id, Set.union gv acc_g, lv, lambadi @ la)
+        a
+    in
+    let llm, letsm, id, gvars, lvars, ll = closure_expression id gvars lvars new_lets m in
+    CMatch (llm, List.rev lla), letsa @ letsm, id, gvars, lvars, lambadi @ ll
+;;
+
 let first_element_in_other lst1 lst2 =
   match lst1 with
   | [] -> false
@@ -109,12 +135,12 @@ let first_element_in_other lst1 lst2 =
 ;;
 
 let rec free_vars gvars lvars uvars lambadi = function
-  | LLConst c -> LLConst c, gvars, lvars, uvars, []
-  | LLVar v ->
+  | CConst c -> CConst c, gvars, lvars, uvars, []
+  | CVar v ->
     let new_app, new_vars =
       match Map.find uvars v with
-      | Some p -> List.fold ~init:(LLVar v) ~f:(fun acc a -> LLApp (acc, LLVar a)) p, p
-      | None -> LLVar v, [ v ]
+      | Some p -> List.fold ~init:(CVar v) ~f:(fun acc a -> CApp (acc, CVar a)) p, p
+      | None -> CVar v, [ v ]
     in
     let new_args =
       List.fold
@@ -123,20 +149,20 @@ let rec free_vars gvars lvars uvars lambadi = function
         new_vars
     in
     new_app, gvars, lvars, uvars, new_args
-  | LLApp (l, r) ->
+  | CApp (l, r) ->
     let l, gvars, lvars, uvars, new_argsl = free_vars gvars lvars uvars lambadi l in
     let r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
-    LLApp (l, r), gvars, lvars, uvars, new_argsl @ new_argsr
-  | LLEbinOp (op, l, r) ->
+    CApp (l, r), gvars, lvars, uvars, new_argsl @ new_argsr
+  | CEbinOp (op, l, r) ->
     let l, gvars, lvars, uvars, new_argsl = free_vars gvars lvars uvars lambadi l in
     let r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
-    LLEbinOp (op, l, r), gvars, lvars, uvars, new_argsl @ new_argsr
-  | LLIfElse (i, t, e) ->
+    CEbinOp (op, l, r), gvars, lvars, uvars, new_argsl @ new_argsr
+  | CIfElse (i, t, e) ->
     let i, gvars, lvars, uvars, new_argsi = free_vars gvars lvars uvars lambadi i in
     let t, gvars, lvars, uvars, new_argst = free_vars gvars lvars uvars lambadi t in
     let e, gvars, lvars, uvars, new_argse = free_vars gvars lvars uvars lambadi e in
-    LLIfElse (i, t, e), gvars, lvars, uvars, new_argsi @ new_argst @ new_argse
-  | LLLetIn (r, n_list, args, lle, lline) ->
+    CIfElse (i, t, e), gvars, lvars, uvars, new_argsi @ new_argst @ new_argse
+  | CLetIn (r, n_list, args, lle, lline) ->
     let string_args =
       List.rev (List.fold ~init:[] ~f:(fun acc p -> pattern_to_string_list p @ acc) args)
     in
@@ -144,7 +170,9 @@ let rec free_vars gvars lvars uvars lambadi = function
       List.fold string_args ~init:lvars ~f:(fun acc arg -> Set.add acc arg)
     in
     let new_gvars = List.fold ~init:gvars ~f:(fun acc n -> Set.add acc n) n_list in
-    let lle, _, _, uvars, new_argslle = free_vars gvars new_lvars uvars lambadi lle in
+    let lle, _, new_lvars, uvars, new_argslle =
+      free_vars gvars new_lvars uvars lambadi lle
+    in
     let new_uvars =
       if Poly.( <> ) new_argslle [] && first_element_in_other n_list lambadi
       then
@@ -157,37 +185,43 @@ let rec free_vars gvars lvars uvars lambadi = function
     let new_args =
       if first_element_in_other n_list lambadi
       then
-        List.fold ~init:[] ~f:(fun acc v -> PVar (v, TUnknown) :: acc) new_argslle @ args
+        List.fold
+          ~init:[]
+          ~f:(fun acc v -> PVar (v, TUnknown) :: acc)
+          (List.rev new_argslle)
+        @ args
       else args
     in
     let lline, _, _, new_uvars, _ =
       free_vars new_gvars new_lvars new_uvars lambadi lline
     in
-    LLLetIn (r, n_list, new_args, lle, lline), new_gvars, lvars, new_uvars, []
-  | LLList (hd, tl) -> LLList (hd, tl), gvars, lvars, uvars, []
-  | LLTuple t ->
+    CLetIn (r, n_list, new_args, lle, lline), new_gvars, lvars, new_uvars, []
+  | CList (hd, tl) -> CList (hd, tl), gvars, lvars, uvars, []
+  | CTuple t ->
     let new_t, new_uvars, new_args =
       List.fold
         ~init:([], uvars, [])
         ~f:(fun (acct, acc_uvars, acc_args) e ->
-          let new_t, _, _, new_uvars, new_arg = free_vars gvars lvars acc_uvars lambadi e in
+          let new_t, _, _, new_uvars, new_arg =
+            free_vars gvars lvars acc_uvars lambadi e
+          in
           new_t :: acct, new_uvars, acc_args @ new_arg)
         t
     in
-    LLTuple (List.rev new_t), gvars, lvars, new_uvars, new_args
-  | LLMatch (m, b) ->
+    CTuple (List.rev new_t), gvars, lvars, new_uvars, new_args
+  | CMatch (m, b) ->
     let new_m, gvars, lvars, uvars, new_args = free_vars gvars lvars uvars lambadi m in
     let new_b, new_gvars, new_lvars, new_uvars, new_args =
       List.fold
-           ~init:([], gvars, lvars, uvars, new_args)
-           ~f:(fun (acc, gacc, lacc, uacc, aacc) (p, e) ->
-             let check_e, new_gacc, new_lacc, new_uacc, new_aacc =
-               free_vars gacc lacc uacc lambadi e
-             in
-             (p, check_e) :: acc, new_gacc, new_lacc, new_uacc, aacc @ new_aacc)
-           b
+        ~init:([], gvars, lvars, uvars, new_args)
+        ~f:(fun (acc, gacc, lacc, uacc, aacc) (p, e) ->
+          let check_e, new_gacc, new_lacc, new_uacc, new_aacc =
+            free_vars gacc lacc uacc lambadi e
+          in
+          (p, check_e) :: acc, new_gacc, new_lacc, new_uacc, aacc @ new_aacc)
+        b
     in
-    LLMatch (new_m, List.rev new_b), new_gvars, new_lvars, new_uvars, new_args
+    CMatch (new_m, List.rev new_b), new_gvars, new_lvars, new_uvars, new_args
 ;;
 
 let closure_bindings id = function
@@ -197,28 +231,23 @@ let closure_bindings id = function
         ~init:([], id)
         ~f:(fun (lacc, id) (r, n_list, e) ->
           let args, e_body = arguments [] e in
-          let llet, letfun, id = closure_expression id set_empty [] e_body in
+          let llet, letfun, id, _, _, lambadi =
+            closure_expression id set_empty [] [] e_body
+          in
           let llet = create_let llet letfun in
           let gvars =
             if Poly.( = ) r Notrec
             then set_empty
             else List.fold ~init:set_empty ~f:(fun acc n -> Set.add acc n) n_list
           in
-          let str_args =
-            List.fold ~init:[] ~f:(fun acc p -> acc @ pattern_to_string_list p) args
+          let not_free_llet, _, _, _, _ =
+            free_vars gvars set_empty map_empty lambadi llet
           in
-          let lvars =
-            List.fold ~init:set_empty ~f:(fun acc arg -> Set.add acc arg) str_args
-          in
-          let lambadi =
-            List.rev @@ List.fold ~init:[] ~f:(fun acc (name, _, _) -> name :: acc) letfun
-          in
-          let not_free_llet, _, _, _, _ = free_vars gvars lvars map_empty lambadi llet in
           let lllet = r, n_list, args, not_free_llet in
           lllet :: lacc, id)
         bindings
     in
-    LLLet (List.rev llbindings)
+    CLet (List.rev llbindings)
   | _ -> failwith ""
 ;;
 
