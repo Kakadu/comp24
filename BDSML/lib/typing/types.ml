@@ -39,7 +39,7 @@ let enclose s = "(" ^ s ^ ")"
 let rec show_type_val = function
   | TBase b -> show_base_type b
   | TArrow (l, r) -> show_type_val l ^ " -> " ^ show_type_val r
-  | TTuple l -> enclose @@ String.concat ", " (List.map show_type_val l)
+  | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
   | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
   | TParametric (t1, t2) -> show_type_val t1 ^ " " ^ show_type_val t2
 ;;
@@ -50,6 +50,7 @@ type error =
   | Unification_failed of type_val * type_val
   | Occurs_check
   | No_variable of string
+  | Invalid_let
 
 exception Unimplemented of string
 

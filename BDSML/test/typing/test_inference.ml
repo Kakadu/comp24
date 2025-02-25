@@ -59,3 +59,8 @@ let%expect_test "test several lets" =
   test "let f a = a and a = true and b = 4 in f f b";
   [%expect {| int |}]
 ;;
+
+let%expect_test "test tuple" =
+  test "(4, 5, true, 'a')";
+  [%expect {| (int * int * bool * char) |}]
+;;

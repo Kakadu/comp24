@@ -76,24 +76,27 @@ and infer_fun env vars exp =
   sub, List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, ty)) fvs ty
 
 and infer_let env rec_flag bindings expression =
-  let* env, sub1 =
-    fold_left
-      (fun (env, sub) bind ->
-        match bind with
-        | Val_binding (var, args, exp) ->
-          let* s1, t1 = infer_fun env args exp in
-          let env = TypeEnv.apply s1 env in
-          let sheme = generalize env t1 in
-          let env = TypeEnv.extend env var sheme in
-          let+ sub = Subst.compose sub s1 in
-          env, sub
-        | _ -> raise @@ Unimplemented "infer_let")
-      (return (env, Subst.empty))
-      bindings
-  in
-  let* sub2, ty = infer_expression env expression in
-  let+ sub = Subst.compose sub1 sub2 in
-  sub, ty
+  match rec_flag with
+  | Nonrecursive ->
+    let* env, sub1 =
+      fold_left
+        (fun (env, sub) bind ->
+          match bind with
+          | Val_binding (var, args, exp) ->
+            let* s1, t1 = infer_fun env args exp in
+            let env = TypeEnv.apply s1 env in
+            let sheme = generalize env t1 in
+            let env = TypeEnv.extend env var sheme in
+            let+ sub = Subst.compose sub s1 in
+            env, sub
+          | _ -> raise @@ Unimplemented "infer_let")
+        (return (env, Subst.empty))
+        bindings
+    in
+    let* sub2, ty = infer_expression env expression in
+    let+ sub = Subst.compose sub1 sub2 in
+    sub, ty
+  | Recursive -> raise @@ Unimplemented "infer rec let"
 
 and infer_apply env left right =
   let* s1, t1 = infer_expression env left in
@@ -104,6 +107,18 @@ and infer_apply env left right =
   let+ sub = Subst.compose_all [ s3; s2; s1 ] in
   sub, ty
 
+and infer_tuple env l =
+  let+ sub, tys =
+    fold_left
+      (fun (sub, tys) exp ->
+        let* sub1, ty1 = infer_expression env exp in
+        let+ sub = Subst.compose sub1 sub in
+        sub, ty1 :: tys)
+      (return (Subst.empty, []))
+      l
+  in
+  sub, TTuple (List.rev tys)
+
 and infer_expression env expr =
   let rec helper env = function
     | Exp_constant c -> infer_base_type c
@@ -113,6 +128,7 @@ and infer_expression env expr =
     | Exp_let (rec_flag, bindings, expression) ->
       infer_let env rec_flag bindings expression
     | Exp_apply (l, r) -> infer_apply env l r
+    | Exp_tuple l -> infer_tuple env l
     | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
   in
   helper env expr
@@ -138,6 +154,7 @@ let error_to_string = function
   | Unification_failed (val1, val2) ->
     "failed unification of types " ^ show_type_val val1 ^ " and " ^ show_type_val val2
   | No_variable v -> "variable " ^ v ^ " is not found"
+  | Invalid_let -> "Only variables are allowed as left-hand side of `let rec'"
 ;;
 
 let infer_program prog =
