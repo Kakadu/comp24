@@ -7,22 +7,36 @@ open Base
 open Format
 
 let test code =
-  let ast =
-    match Parser.parse_program code with
-    | Error e -> failwith e
-    | Ok ast ->
-      (match Inferencer.inference_program ast with
-       | Error e -> failwith (asprintf "%a" Pp_typing.pp_error e)
-       | Ok ast ->
-         ast
-         |> Tast.strip_types_program
-         |> Remove_patterns.remove_patterns
-         |> Remove_match.remove_match
-         |> Closure_conversion.closure_conversion
-         |> Lambda_lifting.lambda_lifting
-         |> Anf.anf)
-  in
-  printf "%a" Anf_ast.pp_program ast
+  match Parser.parse_program code with
+  | Error e -> failwith e
+  | Ok ast ->
+    (match Inferencer.inference_program ast with
+     | Error e -> failwith (asprintf "%a" Pp_typing.pp_error e)
+     | Ok tast ->
+       tast
+       |> Tast.strip_types_program
+       |> Remove_patterns.remove_patterns
+       |> Remove_match.remove_match
+       |> Closure_conversion.closure_conversion
+       |> Lambda_lifting.lambda_lifting
+       |> Anf.anf
+       |> fun ast ->
+       (* printf "ANF:@\n"; *)
+       printf "%a@\n" Anf_ast.pp_program ast
+       (* let types tast =
+          tast
+          |> List.map ~f:(function Tast.TDLet (ty, _, pat, _) ->
+          asprintf "%a: %a" Pp_ast.pp_pattern pat Pp_typing.pp_ty ty)
+          |> String.concat ~sep:"\n"
+          in
+          let anf_ast = Anf_ast.anfast_to_ast ast in
+          printf "ANF to AST:\n%a\n" Pp_ast.pp_program anf_ast;
+          printf "Types before:\n%s\n" (types tast);
+          (match Inferencer.inference_program anf_ast with
+          | Ok anf_tast -> printf "Types after:\n%s\n" (types anf_tast)
+          | Error e ->
+          failwith
+          (asprintf "Failed to inference after ANF conversion: %a" Pp_typing.pp_error e)) *))
 ;;
 
 let%expect_test _ =
