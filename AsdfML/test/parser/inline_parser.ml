@@ -2,10 +2,9 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Lib.Parser
 open Test.Utils
 
-let test = test_parser
+let test code = parse code (Format.printf "%a" Lib.Pp_ast.pp_program);;
 
 let%expect_test _ =
   test "let _ = 12";

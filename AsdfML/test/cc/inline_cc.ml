@@ -2,25 +2,12 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Base
 open Lib
+open Test.Utils
 
 let test_cc code =
   let open Format in
-  match Parser.parse_program code with
-  | Error e -> print_endline e
-  | Ok ast ->
-    (match Inferencer.inference_program ast with
-     | Error e -> printf "%a" Pp_typing.pp_error e
-     | Ok ast ->
-       let ast =
-         ast
-         |> Tast.strip_types_program
-         |> Remove_patterns.remove_patterns
-         |> Remove_match.remove_match
-         |> Closure_conversion.closure_conversion
-       in
-       printf "%a" Sast.pp_program ast)
+  closure_conversion code (printf "%a" Sast.pp_program)
 ;;
 
 let%expect_test _ =

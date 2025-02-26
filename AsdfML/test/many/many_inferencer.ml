@@ -6,5 +6,5 @@ open Test.Utils
 
 let () =
   let s = In_channel.input_all Stdlib.stdin in
-  test_inferencer s
+  infer s (Format.printf "%a" Lib.Tast.pp_toplevel_types)
 ;;

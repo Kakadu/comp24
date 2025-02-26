@@ -2,28 +2,12 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Base
 open Lib
+open Test.Utils
 
 let test_ll code =
   let open Format in
-  let ll_ast =
-    match Parser.parse_program code with
-    | Error e -> failwith e
-    | Ok ast ->
-      (match Inferencer.inference_program ast with
-       | Error e -> failwith (asprintf "%a" Pp_typing.pp_error e)
-       | Ok ast ->
-         ast
-         |> Tast.strip_types_program
-         |> Remove_patterns.remove_patterns
-         |> Remove_match.remove_match
-         |> Closure_conversion.closure_conversion
-         |> Lambda_lifting.lambda_lifting)
-  in
-  printf
-    "\n%s"
-    (ll_ast |> List.map ~f:(asprintf "%a" Cf_ast.pp_definition) |> String.concat)
+  lambda_lift code (printf "%a" Cf_ast.pp_program)
 ;;
 
 let%expect_test _ =

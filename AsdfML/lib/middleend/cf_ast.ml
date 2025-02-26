@@ -59,9 +59,9 @@ let rec pp_expr fmt = function
 and pp_definition fmt = function
   | CFLet (id, args, e) ->
     (match args with
-     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]\n" id pp_expr e
+     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]" id pp_expr e
      | _ ->
-       fprintf fmt "@[<2>@,let %s %s =@ %a@]\n" id (String.concat args ~sep:" ") pp_expr e)
+       fprintf fmt "@[<2>@,let %s %s =@ %a@]" id (String.concat args ~sep:" ") pp_expr e)
 ;;
 
 let pp_program fmt p = List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_definition d)

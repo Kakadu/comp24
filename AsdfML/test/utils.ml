@@ -2,30 +2,30 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Lib.Inferencer
-open Lib.Pp_typing
 open Base
-open Lib.Pp_ast
-open Lib.Tast
 open Lib
 
-let test_parser code =
-  match Parser.parse_program code ~print_ast:true with
-  | Ok _ -> ()
-  | Error e -> print_endline e
+let parse code cont =
+  match Parser.parse_program code with
+  | Ok ast -> cont ast
+  | Error e -> Format.eprintf "%s" e
 ;;
 
-let test_inferencer code =
-  let open Format in
-  let pa = false in
-  let ast = Result.ok_or_failwith (Parser.parse_program ~print_ast:pa code) in
-  match inference_program ast with
-  | Ok t ->
-    printf
-      "%s"
-      (t
-       |> List.map ~f:(function TDLet (ty, _, pat, _) ->
-         asprintf "%a: %a" pp_pattern pat pp_ty ty)
-       |> String.concat ~sep:"\n")
-  | Error e -> eprintf "%a" pp_error e
+let infer code cont =
+  parse code (fun ast ->
+    match Inferencer.inference_program ast with
+    | Ok tast -> cont tast
+    | Error e -> Format.eprintf "%a" Pp_typing.pp_error e)
 ;;
+
+let ( $ ) = Fn.compose
+let infer_strip code cont = infer code (cont $ Tast.strip_types_program)
+let remove_patterns code cont = infer_strip code (cont $ Remove_patterns.remove_patterns)
+let remove_match code cont = remove_patterns code (cont $ Remove_match.remove_match)
+
+let closure_conversion code cont =
+  remove_match code (cont $ Closure_conversion.closure_conversion)
+;;
+
+let lambda_lift code cont = closure_conversion code (cont $ Lambda_lifting.lambda_lifting)
+let anf code cont = lambda_lift code (cont $ Anf.anf)

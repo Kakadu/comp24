@@ -4,7 +4,7 @@
 
 open Test.Utils
 
-let test = test_inferencer
+let test code = infer code (Format.printf "%a" Lib.Tast.pp_toplevel_types)
 
 let%expect_test _ =
   test {| let x = () |};

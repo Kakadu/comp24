@@ -6,5 +6,5 @@ open Test.Utils
 
 let () =
   let s = In_channel.input_all Stdlib.stdin in
-  test_parser s
+  parse s (Format.printf "%a" Lib.Pp_ast.pp_program)
 ;;

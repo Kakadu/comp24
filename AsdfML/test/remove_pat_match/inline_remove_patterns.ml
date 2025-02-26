@@ -2,19 +2,12 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Base
 open Lib
+open Test.Utils
 
 let test code =
   let open Format in
-  match Parser.parse_program code with
-  | Error e -> print_endline e
-  | Ok ast ->
-    (match Inferencer.inference_program ast with
-     | Error e -> printf "%a" Pp_typing.pp_error e
-     | Ok ast ->
-       let ast = ast |> Tast.strip_types_program |> Remove_patterns.remove_patterns in
-       printf "\n%a" Pp_ast.pp_program ast)
+  remove_patterns code (printf "\n%a" Pp_ast.pp_program )
 ;;
 
 let%expect_test _ =
@@ -227,7 +220,8 @@ let%expect_test _ =
   test {|
     let test arg_0 (a, b) arg_1 = a + b
   |};
-  [%expect {|
+  [%expect
+    {|
     let test = (fun arg_0 arg_2 arg_1 ->
        match arg_2 with
        | (a, b) -> (( + ) a b))
