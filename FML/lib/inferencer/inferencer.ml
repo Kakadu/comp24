@@ -507,6 +507,12 @@ let infer_expr =
          let* sub = Subst.compose s2 sub in
          return (sub, t)
        | _ -> fail `Not_impl)
+    | EConstraint (expr, expected_ty) ->
+      let* sub1, ty = helper env expr in
+      let* sub2 = Subst.unify ty (annotation_to_type expected_ty) in
+      let* final_sub = Subst.compose sub1 sub2 in
+      let final_ty = Subst.apply final_sub ty in
+      return (final_sub, final_ty)
     | _ -> fail `Not_impl
   in
   helper

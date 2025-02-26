@@ -29,7 +29,8 @@
   Error: : end_of_input
 
   $ ./inferencer_runner.exe < manytests/typed/008ascription.ml
-  TODO: Not implemented.
+  val main : int
+  val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
 
   $ ./inferencer_runner.exe < manytests/typed/009let_poly.ml
   val temp : int * bool

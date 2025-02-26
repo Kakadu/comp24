@@ -62,3 +62,10 @@ let res = x + y;;|};
     val x : int
     val y : int |}]
 ;;
+
+let%expect_test _ =
+  inference {| let f g x = (g x : int);; |};
+  [%expect
+    {|
+    val f : ('a -> int) -> 'a -> int |}]
+;;
