@@ -6,115 +6,12 @@ open Llast
 let set_empty = Set.empty (module String)
 let map_empty = Map.empty (module String)
 
-let rec get_name gvars id =
-  let name = String.concat [ "unit_"; Int.to_string id ] in
-  if Set.mem gvars name then get_name gvars (id + 1) else name, id
-;;
-
-let rec lift_llexpression new_lllet units id = function
-  | CVar v -> LLVar v, new_lllet, id
-  | CConst c -> LLConst c, new_lllet, id
-  | CIfElse (i, t, e) ->
-    let check_i, new_lllet, id = lift_llexpression new_lllet units id i in
-    let check_t, new_lllet, id = lift_llexpression new_lllet units id t in
-    let check_e, new_lllet, id = lift_llexpression new_lllet units id e in
-    LLIfElse (check_i, check_t, check_e), new_lllet, id
-  | CEbinOp (op, e1, e2) ->
-    let check_e1, new_lllet, id = lift_llexpression new_lllet units id e1 in
-    let check_e2, new_lllet, id = lift_llexpression new_lllet units id e2 in
-    LLEbinOp (op, check_e1, check_e2), new_lllet, id
-  | CApp (l, r) ->
-    let check_l, new_lllet, id = lift_llexpression new_lllet units id l in
-    let check_r, new_lllet, id = lift_llexpression new_lllet units id r in
-    LLApp (check_l, check_r), new_lllet, id
-  | CLetIn (r, n_list, args, e, ine) ->
-    let lle, new_lllet, id = lift_llexpression new_lllet units id e in
-    let use_names, _ =
-      List.fold
-        ~init:([], id)
-        ~f:(fun (acc, acc_id) n ->
-          if Poly.( = ) n "()"
-          then (
-            let new_name, new_id = get_name units acc_id in
-            new_name :: acc, new_id)
-          else acc, id)
-        n_list
-    in
-    let new_names, new_id, units =
-      List.fold
-        ~init:([], id, units)
-        ~f:(fun (acc, acc_id, units) n ->
-          if Poly.( = ) n "()"
-          then (
-            let unit_name, new_id = get_name units acc_id in
-            let units = Set.add units unit_name in
-            unit_name :: acc, new_id, units)
-          else n :: acc, acc_id, units)
-        n_list
-    in
-    let new_lllet =
-      if List.length new_names = List.length use_names || List.length new_names = 1
-      then LLLet [ r, List.rev new_names, args, lle ] :: new_lllet
-      else new_lllet
-    in
-    let drop_letin, new_lllet, new_id = lift_llexpression new_lllet units new_id ine in
-    let new_body =
-      if List.length use_names = 0
-      then drop_letin
-      else List.fold ~init:drop_letin ~f:(fun acc n -> LLVars (LLVar n, acc)) use_names
-    in
-    let new_body =
-      if List.length new_names = List.length use_names || List.length new_names = 1
-      then new_body
-      else LLLetIn (List.rev new_names, args, lle, new_body)
-    in
-    new_body, new_lllet, new_id
-  | CTuple t ->
-    let llt, new_lllet, id =
-      List.fold
-        ~init:([], new_lllet, id)
-        ~f:(fun (acc, acc_new_lllet, acc_id) c ->
-          let ll, new_let, id = lift_llexpression acc_new_lllet units acc_id c in
-          ll :: acc, new_let, id)
-        t
-    in
-    LLTuple (List.rev llt), new_lllet, id
-  | CMatch (m, b) ->
-    let llm, new_lllet, id = lift_llexpression new_lllet units id m in
-    let llb, new_lllet, id =
-      List.fold
-        ~init:([], new_lllet, id)
-        ~f:(fun (acc, acc_nllet, acc_id) (p, ce) ->
-          let lle, new_lllet, id = lift_llexpression acc_nllet units acc_id ce in
-          (p, lle) :: acc, new_lllet, id)
-        b
-    in
-    LLMatch (llm, llb), new_lllet, id
-  | CList (hd, tl) ->
-    let llhd, new_lllet, id = lift_llexpression new_lllet units id hd in
-    let lltl, new_lllet, id = lift_llexpression new_lllet units id tl in
-    LLList (llhd, lltl), new_lllet, id
-;;
-
-let lift_llbindings gvars = function
-  | CLet llbindings ->
-    let new_lets, old_lets =
-      List.fold
-        ~init:([], [])
-        ~f:(fun (acc_new, acc_old) (r, n_list, args, e) ->
-          let old_lets, new_lets, _ = lift_llexpression acc_new gvars 0 e in
-          acc_new @ new_lets, (r, n_list, args, old_lets) :: acc_old)
-        llbindings
-    in
-    List.rev @@ (LLLet old_lets :: new_lets)
-  | CExpression _ -> failwith "las;"
-;;
-
-let lift_statments statments =
-  List.fold
-    ~init:[]
-    ~f:(fun acc llbinding -> acc @ lift_llbindings set_empty llbinding)
-    statments
+let get_name gvars name =
+  let rec helper gvars id =
+    let name = String.concat [ name; Int.to_string id ] in
+    if Set.mem gvars name then helper gvars (id + 1) else name
+  in
+  if Set.mem gvars name then helper gvars 0 else name
 ;;
 
 let rec pattern_to_string_list = function
@@ -123,6 +20,181 @@ let rec pattern_to_string_list = function
   | PVar (name, _) -> [ name ]
   | PTuple patterns -> List.concat_map patterns ~f:pattern_to_string_list
   | PCon (hd, tl) -> pattern_to_string_list hd @ pattern_to_string_list tl
+;;
+
+let rec lift_llexpression new_lllet gvars fvars lvars = function
+  | CVar v ->
+    let new_vars =
+      match Map.find lvars v with
+      | Some p -> LLVar p
+      | None ->
+        (match Map.find gvars v with
+         | Some p -> LLVar p
+         | None -> LLVar v)
+    in
+    new_vars, new_lllet, fvars
+  | CConst c -> LLConst c, new_lllet, fvars
+  | CIfElse (i, t, e) ->
+    let check_i, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars i in
+    let check_t, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars t in
+    let check_e, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars e in
+    LLIfElse (check_i, check_t, check_e), new_lllet, fvars
+  | CEbinOp (op, e1, e2) ->
+    let check_e1, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars e1 in
+    let check_e2, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars e2 in
+    LLEbinOp (op, check_e1, check_e2), new_lllet, fvars
+  | CApp (l, r) ->
+    let check_l, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars l in
+    let check_r, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars r in
+    LLApp (check_l, check_r), new_lllet, fvars
+  | CLetIn (r, n_list, args, e, ine) ->
+    let use_names =
+      List.fold
+        ~init:[]
+        ~f:(fun acc n ->
+          if Poly.( = ) n "()"
+          then (
+            let new_name = get_name fvars "unit" in
+            new_name :: acc)
+          else acc)
+        n_list
+    in
+    let new_names, new_lvars, new_fvars =
+      List.fold
+        ~init:([], lvars, fvars)
+        ~f:(fun (acc, lvars, fvars) n ->
+          if Poly.( = ) n "()"
+          then (
+            let unit_name = get_name fvars "unit" in
+            let lvars = Map.set lvars ~key:n ~data:unit_name in
+            let fvars = Set.add fvars unit_name in
+            unit_name :: acc, lvars, fvars)
+          else (
+            let new_name = get_name fvars n in
+            let lvars = Map.set lvars ~key:n ~data:new_name in
+            let fvars = Set.add fvars new_name in
+            new_name :: acc, lvars, fvars))
+        n_list
+    in
+    let lle, new_lllet, new_fvars = if Poly.(=) r Rec then lift_llexpression new_lllet gvars new_fvars new_lvars e else lift_llexpression new_lllet gvars new_fvars lvars e  in
+    let new_lllet, fvars =
+      if List.length new_names = List.length use_names || List.length new_names = 1
+      then LLLet (r, List.rev new_names, args, lle) :: new_lllet, new_fvars
+      else new_lllet, fvars
+    in
+    let drop_letin, new_lllet, fvars =
+      lift_llexpression new_lllet gvars fvars new_lvars ine
+    in
+    let new_body =
+      if List.length use_names = 0
+      then drop_letin
+      else List.fold ~init:drop_letin ~f:(fun acc n -> LLVars (LLVar n, acc)) use_names
+    in
+    let new_body =
+      if List.length new_names = List.length use_names || List.length new_names = 1
+      then new_body
+      else LLLetIn (n_list, args, lle, new_body)
+    in
+    new_body, new_lllet, fvars
+  | CTuple t ->
+    let llt, new_lllet, fvars =
+      List.fold
+        ~init:([], new_lllet, fvars)
+        ~f:(fun (acc, acc_new_lllet, fvars) c ->
+          let ll, new_let, fvars = lift_llexpression acc_new_lllet gvars fvars lvars c in
+          ll :: acc, new_let, fvars)
+        t
+    in
+    LLTuple (List.rev llt), new_lllet, fvars
+  | CMatch (m, b) ->
+    let llm, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars m in
+    let llb, new_lllet, fvars =
+      List.fold
+        ~init:([], new_lllet, fvars)
+        ~f:(fun (acc, acc_nllet, fvars) (p, ce) ->
+          let lle, new_lllet, fvars = lift_llexpression acc_nllet gvars fvars lvars ce in
+          (p, lle) :: acc, new_lllet, fvars)
+        b
+    in
+    LLMatch (llm, llb), new_lllet, fvars
+  | CList (hd, tl) ->
+    let llhd, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars hd in
+    let lltl, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars tl in
+    LLList (llhd, lltl), new_lllet, fvars
+;;
+
+let lift_llbindings gvars fvars = function
+  | CLet llbindings ->
+    let new_lets, old_lets, gvars, fvars =
+      List.fold
+        ~init:([], [], gvars, fvars)
+        ~f:(fun (acc_new, acc_old, gvars, fvars) (r, n_list, args, e) ->
+          let gvars, new_names, fvars =
+            if Poly.( = ) r Rec
+            then
+              List.fold
+                ~init:(gvars, [], fvars)
+                ~f:(fun (gvars, acc, fvars) n ->
+                  let new_n = get_name fvars n in
+                  let fvars = Set.add fvars new_n in
+                  let gvars = Map.set gvars ~key:n ~data:new_n in
+                  gvars, new_n :: acc, fvars)
+                n_list
+            else gvars, n_list, fvars
+          in
+          let str_args =
+            List.fold ~init:[] ~f:(fun acc arg -> acc @ pattern_to_string_list arg) args
+          in
+          let lvars, new_fvars, new_args =
+            List.fold
+              ~init:(map_empty, fvars, [])
+              ~f:(fun (lvars, fvars, new_args) arg ->
+                if Poly.( <> ) arg "()"
+                then (
+                  let uniq_arg = get_name fvars arg in
+                  ( Map.set lvars ~key:arg ~data:uniq_arg
+                  , Set.add fvars uniq_arg
+                  , uniq_arg :: new_args ))
+                else lvars, fvars, arg :: new_args)
+              str_args
+          in
+          let old_lets, new_lets, update_fvars =
+            lift_llexpression acc_new gvars new_fvars lvars e
+          in
+          let fvars = Set.union fvars (Set.diff update_fvars new_fvars) in
+          let gvars, new_names, fvars =
+            if Poly.( <> ) r Rec
+            then
+              List.fold
+                ~init:(gvars, [], fvars)
+                ~f:(fun (gvars, acc, fvars) n ->
+                  let new_n = get_name fvars n in
+                  let gvars = Map.set gvars ~key:n ~data:new_n in
+                  let fvars = Set.add fvars new_n in
+                  gvars, new_n :: acc, fvars)
+                n_list
+            else gvars, new_names, fvars
+          in
+          let new_args =
+            if Poly.( = ) (List.rev new_args) str_args
+            then args
+            else
+              List.fold ~init:[] ~f:(fun acc arg -> PVar (arg, TUnknown) :: acc) new_args
+          in
+          acc_new @ new_lets, LLLet(r, new_names, new_args, old_lets) :: acc_old, gvars, fvars)
+        llbindings
+    in
+    (List.rev new_lets) @ old_lets, gvars, fvars
+  | CExpression _ -> failwith "las;"
+;;
+
+let lift_statments statments =
+  List.fold
+    ~init:([], map_empty, set_empty)
+    ~f:(fun (acc, gvars, fvars) llbinding ->
+      let llbindings, gvars, fvars = lift_llbindings gvars fvars llbinding in
+      acc @ llbindings, gvars, fvars)
+    statments
 ;;
 
 let rec find_free gvars new_app = function
@@ -176,11 +248,13 @@ let rec find_free gvars new_app = function
             List.fold ~init:acc_gvars ~f:(fun acc_gvars pn -> Set.add acc_gvars pn) sp
           in
           let new_e, new_gvars = find_free new_acc_gvars new_app e in
-          let new_gvars = List.fold ~init:new_gvars ~f:(fun acc_gvars pn -> Set.remove acc_gvars pn) sp in
+          let new_gvars =
+            List.fold ~init:new_gvars ~f:(fun acc_gvars pn -> Set.remove acc_gvars pn) sp
+          in
           (p, new_e) :: acc, new_gvars)
         b
     in
-    LLMatch (new_m, List.rev new_b), new_gvars
+    LLMatch (new_m, new_b), new_gvars
   | LLLetIn (n_list, args, lle, llein) ->
     let new_lle, new_gvars = find_free gvars new_app lle in
     let new_llein, new_gvars = find_free new_gvars new_app llein in
@@ -191,11 +265,8 @@ let rec find_free gvars new_app = function
 ;;
 
 let add_free gvars add_app = function
-  | LLLet llbindings ->
+  | LLLet (r, n_list, args, lle) ->
     let new_llbindings =
-      List.fold
-        ~init:([], gvars, add_app)
-        ~f:(fun (acc, gvars, acc_add_app) (r, n_list, args, lle) ->
           let args_str =
             List.fold
               ~init:[]
@@ -206,7 +277,7 @@ let add_free gvars add_app = function
           let new_gvars =
             List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) new_args_str
           in
-          let new_body, new_gvars_args = find_free new_gvars acc_add_app lle in
+          let new_body, new_gvars_args = find_free new_gvars add_app lle in
           let update_args = Set.diff new_gvars_args new_gvars in
           let new_args =
             List.fold
@@ -218,26 +289,26 @@ let add_free gvars add_app = function
             if not (Set.is_empty update_args)
             then
               List.fold
-                ~init:acc_add_app
+                ~init:add_app
                 ~f:(fun update_app name ->
                   Map.set update_app ~key:name ~data:(Set.to_list update_args))
                 n_list
-            else acc_add_app
+            else add_app
           in
           let new_gvars =
             List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) n_list
           in
-          (r, n_list, new_args, new_body) :: acc, new_gvars, new_app)
-        llbindings
+          (r, n_list, new_args, new_body), new_gvars, new_app
     in
     let a, b, c = new_llbindings in
-    LLLet (List.rev a), b, c
+    LLLet a, b, c
   | LLExpression _ -> failwith ""
 ;;
 
 let lambda_lift statments =
-  let a = lift_statments statments in
+  let a, _, _ = lift_statments statments in
   let gvars = Set.add set_empty "print_int" in
+  let gvars = Set.add gvars "()" in
   let b, _, _ =
     List.fold
       ~init:([], gvars, map_empty)

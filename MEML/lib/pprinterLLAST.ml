@@ -41,7 +41,7 @@ let rec pp_llexpression formatter e =
         Format.fprintf formatter "\n| %a -> %a" pp_pattern p pp_llexpression lle)
       p;
     Format.fprintf formatter ")"
-    | LLLetIn (n, args, e, ine) ->
+  | LLLetIn (n, args, e, ine) ->
     Format.fprintf
       formatter
       "\n  let %s %a = %a\n  in %a"
@@ -58,40 +58,21 @@ let pp_llbindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
-      | LLLet bindings_list ->
-        (* Перебираем все let-объявления внутри LLLet *)
-        List.iteri
-          (fun i (r, n_list, p, e) ->
-            let n_str = String.concat ", " n_list in
-            if i = 0
-            then
-              (* Первое объявление начинается с "let" *)
-              Format.fprintf
-                formatter
-                "let %a %s %a = %a"
-                pp_rec
-                r
-                n_str
-                (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
-                p
-                pp_llexpression
-                e
-            else
-              (* Все последующие объявления начинаются с "and" *)
-              Format.fprintf
-                formatter
-                "and %a %s %a = %a"
-                pp_rec
-                r
-                n_str
-                (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
-                p
-                pp_llexpression
-                e)
-          bindings_list;
-        Format.fprintf formatter "\n"
+      | LLLet (r, n_list, p, e) ->
+        let n_str = String.concat ", " n_list in
+        Format.fprintf
+          formatter
+          "let %a %s %a = %a"
+          pp_rec
+          r
+          n_str
+          (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
+          p
+          pp_llexpression
+          e;
+          Format.fprintf
+          formatter
+          "\n"
       | LLExpression e ->
         pp_llexpression formatter e;
         Format.fprintf formatter "\n")
