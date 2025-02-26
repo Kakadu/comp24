@@ -594,3 +594,215 @@ $ cat /tmp/out.s
 ;  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
 ;  $ /tmp/out
 ;  100
+
+
+  $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
+  > let add_cps x y = fun k -> k (x + y)
+  > let square_cps x = fun k -> k (x * x)
+  > let pythagoras_cps x y = fun k ->
+  >   square_cps x (fun x_squared ->
+  >     square_cps y (fun y_squared ->
+  >       add_cps x_squared y_squared k))
+  > let main = 
+  >   let _ = (pythagoras_cps 3 4 (fun res -> println_int res)) in ()
+  > EOF
+  ANF:
+  let add_cps x y k = let a1 = ( + ) x y in
+         k a1
+  let square_cps x k = let a3 = ( * ) x x in
+    k a3
+  let `ll_4 k x_squared y_squared = add_cps x_squared y_squared k
+  let `ll_3 k y x_squared = let a6 = `ll_4 k x_squared in
+    square_cps y a6
+  let pythagoras_cps x y k = let a8 = `ll_3 k y in
+    square_cps x a8
+  let `ll_7 res = println_int res
+  let main = let a10 = pythagoras_cps 3 4 `ll_7 in
+    ()
+  
+  $ cat /tmp/out.s
+  .section .data
+  
+  .section .text
+  
+      .globl add_cps
+      .type add_cps, @function
+  add_cps:
+      # args: x, y, k
+      addi sp,sp,-48
+      sd ra,48(sp)
+      sd s0,40(sp)
+      addi s0,sp,32  # Prologue ends
+      sd a0,0(s0)  # x
+      sd a1,-8(s0)  # y
+      sd a2,-16(s0)  # k
+      ld t0,0(s0)  # x
+      ld t1,-8(s0)  # y
+      add a0,t0,t1  # x ( + ) y
+      sd a0,-24(s0)  # a1
+      ld a0,-16(s0)  # k
+      ld a1,-24(s0)  # a1
+      call apply_closure_1
+      ld s0,40(sp)  # Epilogue starts
+      ld ra,48(sp)
+      addi sp,sp,48
+      ret
+  
+      .globl square_cps
+      .type square_cps, @function
+  square_cps:
+      # args: x, k
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
+      sd a0,0(s0)  # x
+      sd a1,-8(s0)  # k
+      ld t0,0(s0)  # x
+      ld t1,0(s0)  # x
+      mul a0,t0,t1  # x ( * ) x
+      sd a0,-16(s0)  # a3
+      ld a0,-8(s0)  # k
+      ld a1,-16(s0)  # a3
+      call apply_closure_1
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
+      ret
+  
+      .globl ll_4
+      .type ll_4, @function
+  ll_4:
+      # args: k, x_squared, y_squared
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
+      sd a0,0(s0)  # k
+      sd a1,-8(s0)  # x_squared
+      sd a2,-16(s0)  # y_squared
+      # Creating closure for add_cps
+      la a0,add_cps
+      li a1,3
+      call create_closure
+      ld a1,-8(s0)  # x_squared
+      ld a2,-16(s0)  # y_squared
+      ld a3,0(s0)  # k
+      call apply_closure_3
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
+      ret
+  
+      .globl ll_3
+      .type ll_3, @function
+  ll_3:
+      # args: k, y, x_squared
+      addi sp,sp,-48
+      sd ra,48(sp)
+      sd s0,40(sp)
+      addi s0,sp,32  # Prologue ends
+      sd a0,0(s0)  # k
+      sd a1,-8(s0)  # y
+      sd a2,-16(s0)  # x_squared
+      # Creating closure for ll_4
+      la a0,ll_4
+      li a1,3
+      call create_closure
+      ld a1,0(s0)  # k
+      ld a2,-16(s0)  # x_squared
+      call apply_closure_2
+      sd a0,-24(s0)  # a6
+      # Creating closure for square_cps
+      la a0,square_cps
+      li a1,2
+      call create_closure
+      ld a1,-8(s0)  # y
+      ld a2,-24(s0)  # a6
+      call apply_closure_2
+      ld s0,40(sp)  # Epilogue starts
+      ld ra,48(sp)
+      addi sp,sp,48
+      ret
+  
+      .globl pythagoras_cps
+      .type pythagoras_cps, @function
+  pythagoras_cps:
+      # args: x, y, k
+      addi sp,sp,-48
+      sd ra,48(sp)
+      sd s0,40(sp)
+      addi s0,sp,32  # Prologue ends
+      sd a0,0(s0)  # x
+      sd a1,-8(s0)  # y
+      sd a2,-16(s0)  # k
+      # Creating closure for ll_3
+      la a0,ll_3
+      li a1,3
+      call create_closure
+      ld a1,-16(s0)  # k
+      ld a2,-8(s0)  # y
+      call apply_closure_2
+      sd a0,-24(s0)  # a8
+      # Creating closure for square_cps
+      la a0,square_cps
+      li a1,2
+      call create_closure
+      ld a1,0(s0)  # x
+      ld a2,-24(s0)  # a8
+      call apply_closure_2
+      ld s0,40(sp)  # Epilogue starts
+      ld ra,48(sp)
+      addi sp,sp,48
+      ret
+  
+      .globl ll_7
+      .type ll_7, @function
+  ll_7:
+      # args: res
+      addi sp,sp,-24
+      sd ra,24(sp)
+      sd s0,16(sp)
+      addi s0,sp,8  # Prologue ends
+      sd a0,0(s0)  # res
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
+      li a1,1
+      call create_closure
+      ld a1,0(s0)  # res
+      call apply_closure_1
+      ld s0,16(sp)  # Epilogue starts
+      ld ra,24(sp)
+      addi sp,sp,24
+      ret
+  
+      .globl main
+      .type main, @function
+  main:
+      addi sp,sp,-32
+      sd ra,32(sp)
+      sd s0,24(sp)
+      addi s0,sp,16  # Prologue ends
+      call runtime_init
+      # Creating closure for ll_7
+      la a0,ll_7
+      li a1,1
+      call create_closure
+      sd a0,0(s0)
+      # Creating closure for pythagoras_cps
+      la a0,pythagoras_cps
+      li a1,3
+      call create_closure
+      li a1,3
+      li a2,4
+      ld a3,0(s0)
+      call apply_closure_3
+      sd a0,-8(s0)  # a10
+      li a0,0
+      ld s0,24(sp)  # Epilogue starts
+      ld ra,32(sp)
+      addi sp,sp,32
+      ret
+  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ /tmp/out
+  25
