@@ -266,3 +266,10 @@ let%expect_test _ =
       square_cps x a8
     |}]
 ;;
+
+let%expect_test _ =
+  test {|
+    let f a0 a1 a2 a3 a4 a5 = a0 + a1 + a2 + a3 + a4 + a5
+    |};
+  [%expect {| |}]
+;;

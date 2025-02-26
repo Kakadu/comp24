@@ -159,9 +159,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let #temp_match_0 = let #temp_match_0 = (1, 2, 3) in
-       match #temp_match_0 with
-       | (a, b, c) -> #temp_match_0
+    let temp_match_0 = let temp_match_0 = (1, 2, 3) in
+       match temp_match_0 with
+       | (a, b, c) -> temp_match_0
     |}]
 ;;
 
@@ -171,9 +171,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let #temp_match_0 = let #temp_match_0 = [1; 2; 3; 4] in
-       match #temp_match_0 with
-       | [a; b; c] -> #temp_match_0
+    let temp_match_0 = let temp_match_0 = [1; 2; 3; 4] in
+       match temp_match_0 with
+       | [a; b; c] -> temp_match_0
     |}]
 ;;
 
@@ -183,9 +183,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let #temp_match_0 = let #temp_match_0 = [1; 2; 3; 4] in
-       match #temp_match_0 with
-       | a :: b -> #temp_match_0
+    let temp_match_0 = let temp_match_0 = [1; 2; 3; 4] in
+       match temp_match_0 with
+       | a :: b -> temp_match_0
     |}]
 ;;
 
@@ -217,9 +217,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let #temp_match_0 = let #temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
-       match #temp_match_0 with
-       | (a, (b, c), [d; e], f :: g) -> #temp_match_0
+    let temp_match_0 = let temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
+       match temp_match_0 with
+       | (a, (b, c), [d; e], f :: g) -> temp_match_0
     |}]
 ;;
 

@@ -40,7 +40,7 @@ let remove_argument_patterns body pattern pattern_list =
   in
   let used_names = vars_expr body in
   let used_names, exp, pattern' = helper (used_names, body) pattern in
-  let u, exp, pattern_list' =
+  let _, exp, pattern_list' =
     List.fold_right
       ~f:(fun x acc ->
         let used_names, exp, pattern_list = acc in
@@ -111,7 +111,7 @@ let remove_patterns program =
       (* Convert `let complex_pattern = expr`
          into `let temp_match = match expr with | complex_pattern -> ()`
          and deal with it later in 'remove_match' *)
-      let* temp_match = fresh_prefix "#temp_match" in
+      let* temp_match = fresh_prefix "temp_match" in
       let match_exp =
         d_let
           (p_ident temp_match)
