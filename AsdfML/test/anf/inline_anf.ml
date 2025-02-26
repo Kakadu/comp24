@@ -92,17 +92,17 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `ll_2 cont n res = let a1 = ( * ) n res in
+    let ll_2 cont n res = let a1 = ( * ) n res in
       cont a1
-    let `helper_1 n cont =
+    let ll_helper_1 n cont =
       let a3 = ( <= ) n 1 in
       if a3
       then cont 1
       else let a6 = ( - ) n 1 in
-        let a7 = `ll_2 cont n in
-        `helper_1 a6 a7
-    let `ll_3 x = x
-    let fact n = `helper_1 n `ll_3
+        let a7 = ll_2 cont n in
+        ll_helper_1 a6 a7
+    let ll_3 x = x
+    let fact n = ll_helper_1 n ll_3
     |}]
 ;;
 
@@ -203,7 +203,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `helper_1 acc n =
+    let ll_helper_1 acc n =
       let a31 = `get_tuple_field (n, acc) 0 in
       let a27 = ( = ) a31 0 in
       let a30 = `get_tuple_field (n, acc) 1 in
@@ -236,9 +236,33 @@ let%expect_test _ =
           let a16 = ( + ) a10 a12 in
           let a14 = ( :: ) a16 acc in
           let a15 = ( - ) n 1 in
-          `helper_1 a14 a15
+          ll_helper_1 a14 a15
         else -1
     let fib n = let a34 = ( - ) n 2 in
-      `helper_1 [1; 1] a34
+      ll_helper_1 [1; 1] a34
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let add_cps x y = fun k -> k (x + y)
+    let square_cps x = fun k -> k (x * x)
+    let pythagoras_cps x y = fun k ->
+      square_cps x (fun x_squared ->
+        square_cps y (fun y_squared ->
+          add_cps x_squared y_squared k))
+    |};
+  [%expect
+    {|
+    let add_cps x y k = let a1 = ( + ) x y in
+      k a1
+    let square_cps x k = let a3 = ( * ) x x in
+      k a3
+    let ll_4 k x_squared y_squared = add_cps x_squared y_squared k
+    let ll_3 k y x_squared = let a6 = ll_4 k x_squared in
+      square_cps y a6
+    let pythagoras_cps x y k = let a8 = ll_3 k y in
+      square_cps x a8
     |}]
 ;;

@@ -38,12 +38,12 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `test_4 x = x
+    let ll_test_4 x = x
     let _ =
       let one = 1 in
       let t = true in
       let tup = (one, t) in
-      let test = `test_4 in
+      let test = ll_test_4 in
       ()
     |}]
 ;;
@@ -51,8 +51,8 @@ let%expect_test _ =
 let%expect_test _ =
   test_ll "let a = (42, fun x->x)";
   [%expect {|
-    let `ll_1 x = x
-    let a = (42, `ll_1)
+    let ll_1 x = x
+    let a = (42, ll_1)
     |}]
 ;;
 
@@ -82,12 +82,12 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `one_1 x = 1
-    let `add_three_3 one two x = (( + ) (( + ) x two) (one ()))
+    let ll_one_1 x = 1
+    let ll_add_three_3 one two x = (( + ) (( + ) x two) (one ()))
     let test x =
-      let one = `one_1 in
+      let one = ll_one_1 in
       let two = 2 in
-      let add_three = `add_three_3 in
+      let add_three = ll_add_three_3 in
       (add_three one two x)
     |}]
 ;;
@@ -106,13 +106,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `one_1 x = 1
-    let `add_three_4 one two x = (( + ) (( + ) x two) (one ()))
+    let ll_one_1 x = 1
+    let ll_add_three_4 one two x = (( + ) (( + ) x two) (one ()))
     let test x =
       let one = let z = 0 in
-        `one_1 in
+        ll_one_1 in
       let two = 2 in
-      let add_three = `add_three_4 in
+      let add_three = ll_add_three_4 in
       (add_three one two x)
     |}]
 ;;
@@ -125,8 +125,8 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `add_k_1 k x y = (( * ) (( + ) x y) k)
-    let main k = let add_k = `add_k_1 in
+    let ll_add_k_1 k x y = (( * ) (( + ) x y) k)
+    let main k = let add_k = ll_add_k_1 in
       (add_k k 1 2)
     |}]
 ;;
@@ -141,9 +141,9 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `add_k_1 k x y = (( * ) (( + ) x y) k)
+    let ll_add_k_1 k x y = (( * ) (( + ) x y) k)
     let main k =
-      let add_k = `add_k_1 in
+      let add_k = ll_add_k_1 in
       let waste_of_space = 0 in
       (( + ) 42 (add_k k 42 (-42)))
     |}]
@@ -163,14 +163,14 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `ll_2 cont n res = (cont (( * ) n res))
-    let `helper_1 n cont =
+    let ll_2 cont n res = (cont (( * ) n res))
+    let ll_helper_1 n cont =
       if (( <= ) n 1)
       then (cont 1)
-      else (`helper_1 (( - ) n 1) (`ll_2 cont n))
-    let `ll_3 x = x
-    let fact n = let helper = `helper_1 in
-      (helper n `ll_3)
+      else (ll_helper_1 (( - ) n 1) (ll_2 cont n))
+    let ll_3 x = x
+    let fact n = let helper = ll_helper_1 in
+      (helper n ll_3)
     |}]
 ;;
 
@@ -188,11 +188,11 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `helper_1 acc n =
+    let ll_helper_1 acc n =
       if (( <= ) n 1)
       then 1
-      else (`helper_1 (( * ) acc n) (( - ) n 1))
-    let fact n = let helper = `helper_1 in
+      else (ll_helper_1 (( * ) acc n) (( - ) n 1))
+    let fact n = let helper = ll_helper_1 in
       (helper 1 n)
     |}]
 ;;
@@ -206,9 +206,9 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `gen_1 seed1 seed2 n = (( + ) (( * ) n seed2) (( * ) seed1 42))
+    let ll_gen_1 seed1 seed2 n = (( + ) (( * ) n seed2) (( * ) seed1 42))
     let gen seed1 seed2 =
-      let gen = `gen_1 in
+      let gen = ll_gen_1 in
       [(gen seed1 seed2 1); (gen seed1 seed2 2); (gen seed1 seed2 3)]
     |}]
 ;;
@@ -223,13 +223,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `const_1 f s = f
-    let `rev_const_2 const f s = (const s)
-    let `ll_3 x s = x
+    let ll_const_1 f s = f
+    let ll_rev_const_2 const f s = (const s)
+    let ll_3 x s = x
     let main x =
-      let const = `const_1 in
-      let rev_const = `rev_const_2 in
-      (rev_const const (`ll_3 x))
+      let const = ll_const_1 in
+      let rev_const = ll_rev_const_2 in
+      (rev_const const (ll_3 x))
     |}]
 ;;
 
@@ -266,9 +266,9 @@ let%expect_test _ =
     {|
     let add_cps x y k = (k (( + ) x y))
     let square_cps x k = (k (( * ) x x))
-    let `ll_4 k x_squared y_squared = (add_cps x_squared y_squared k)
-    let `ll_3 k y x_squared = (square_cps y (`ll_4 k x_squared))
-    let pythagoras_cps x y k = (square_cps x (`ll_3 k y))
+    let ll_4 k x_squared y_squared = (add_cps x_squared y_squared k)
+    let ll_3 k y x_squared = (square_cps y (ll_4 k x_squared))
+    let pythagoras_cps x y k = (square_cps x (ll_3 k y))
     |}]
 ;;
 
@@ -286,10 +286,10 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let `func_3 one x = (( + ) x one)
+    let ll_func_3 one x = (( + ) x one)
     let main =
       let plus_one = let one = 1 in
-        let func = `func_3 in
+        let func = ll_func_3 in
         (func one) in
       let x = (plus_one 41) in
       (print_int x)
@@ -309,12 +309,12 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let `helper_1 x acc n =
+    let ll_helper_1 x acc n =
       if (( = ) n 0)
       then acc
       else let n = n in
-        (`helper_1 x (( * ) acc x) (( - ) n 1))
-    let pow x n = let helper = `helper_1 in
+        (ll_helper_1 x (( * ) acc x) (( - ) n 1))
+    let pow x n = let helper = ll_helper_1 in
       (helper x 1 n)
     |}]
 ;;

@@ -21,7 +21,7 @@ let is_simple = function
 let remove_argument_patterns body pattern pattern_list =
   let generate_arg_name used_names =
     let rec find_unique () =
-      let* current_name = fresh_prefix "#arg" in
+      let* current_name = fresh_prefix "arg" in
       match Set.find used_names ~f:(String.equal current_name) with
       | None -> return current_name
       | _ -> find_unique ()
@@ -40,7 +40,7 @@ let remove_argument_patterns body pattern pattern_list =
   in
   let used_names = vars_expr body in
   let used_names, exp, pattern' = helper (used_names, body) pattern in
-  let _, exp, pattern_list' =
+  let u, exp, pattern_list' =
     List.fold_right
       ~f:(fun x acc ->
         let used_names, exp, pattern_list = acc in

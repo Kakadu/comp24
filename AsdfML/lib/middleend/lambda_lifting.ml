@@ -10,15 +10,16 @@ open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
 
-let fresh_id name = fresh_prefix (if String.equal name "" then "`ll" else "`" ^ name)
+let fresh_id name = fresh_prefix (if String.equal name "" then "ll" else "ll_" ^ name)
 
 let rec ll_expr env lift ?(name = None) = function
   | SConst c -> return (cf_const c, lift)
   | SVar id ->
     let id =
-      match Map.find env id with
-      | None -> cf_var id
-      | Some new_id -> cf_var new_id
+      (match Map.find env id with
+       | None -> id
+       | Some new_id -> new_id)
+      |> cf_var
     in
     return (id, lift)
   | SApp (l, r) ->
@@ -93,7 +94,7 @@ let ll_program prog =
 ;;
 
 let remove_toplevel_lifts ast =
-  let is_ll_id id = String.equal (String.prefix id 1) "`" in
+  let is_ll_id id = String.equal (String.prefix id 3) "ll_" in
   let useless_defs =
     List.filter_map ast ~f:(function
       | CFLet (id, [], CFVar var) when is_ll_id var -> Some (var, id)
