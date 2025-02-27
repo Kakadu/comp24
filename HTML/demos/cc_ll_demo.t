@@ -28,8 +28,8 @@ PASS
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/002fac.ml
   let cc_ll_0 n k p = k (p * n);;
-  let cc_ll_1 print_int = print_int;;
   let rec fac_cps n k = if (n = 1) then (k 1) else (fac_cps (n - 1) ((cc_ll_0 n) k));;
+  let cc_ll_1 print_int = print_int;;
   let main = let () = (print_int ((fac_cps 4) cc_ll_1))
   in 0
 
@@ -104,9 +104,9 @@ PASS
 
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/008ascription.ml
+  let addi f g x = (((f x) ((g x) : bool)) : int);;
   let cc_ll_0 x b = if b then (x + 1) else (x * 2);;
   let cc_ll_1 _start = ((_start / 2) = 0);;
-  let addi f g x = (((f x) ((g x) : bool)) : int);;
   let main = let () = (print_int (((addi cc_ll_0) cc_ll_1) 4))
   in 0
 PASS
@@ -115,11 +115,11 @@ PASS
   let temp = ((cc_ll_0 1), (cc_ll_0 true))
 
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
-  let cc_ll_0 self l li x = ((li (self l)) x);;
-  let cc_ll_1 self l = ((map ((cc_ll_0 self) l)) l);;
   let rec fix f x = ((f (fix f)) x);;
   let map f p = let (a, b) = p
   in ((f a), (f b));;
+  let cc_ll_0 self l li x = ((li (self l)) x);;
+  let cc_ll_1 self l = ((map ((cc_ll_0 self) l)) l);;
   let fixpoly l = ((fix cc_ll_1) l);;
   let feven p n = let (e, o) = p
   in if (n == 0) then 1 else o (n - 1);;
@@ -136,16 +136,12 @@ PASS
   in 0
 
   $ ./cc_ll_demo.exe < manytests/typed/016lists.ml
-  let rec cc_ll_0 acc xs = match xs with
-  | [] -> acc
-  | h :: tl -> (cc_ll_0 (acc + 1) tl);;
-  let rec cc_ll_1 xs = match xs with
-  | [] -> []
-  | h :: tl -> ((append h) (cc_ll_1 tl));;
-  let cc_ll_2 h a = (h, a);;
   let rec length xs = match xs with
   | [] -> 0
   | h :: tl -> (1 + (length tl));;
+  let rec cc_ll_0 acc xs = match xs with
+  | [] -> acc
+  | h :: tl -> (cc_ll_0 (acc + 1) tl);;
   let length_tail = (cc_ll_0 0);;
   let rec map f xs = match xs with
   | [] -> []
@@ -156,11 +152,15 @@ PASS
   let rec append xs ys = match xs with
   | [] -> ys
   | x :: xs -> x :: ((append xs) ys);;
+  let rec cc_ll_1 xs = match xs with
+  | [] -> []
+  | h :: tl -> ((append h) (cc_ll_1 tl));;
   let concat = cc_ll_1;;
   let rec iter f xs = match xs with
   | [] -> ()
   | h :: tl -> let () = (f h)
   in ((iter f) tl);;
+  let cc_ll_2 h a = (h, a);;
   let rec cartesian xs ys = match xs with
   | [] -> []
   | h :: tl -> ((append ((map (cc_ll_2 h)) ys)) ((cartesian tl) ys));;
