@@ -33,6 +33,13 @@ let remaps_to_str r =
   Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
 ;;
 
+let reserved_prefixes = [ "__"; "anf"; "ll_" ]
+let renamed_prefix = "__var_"
+
+let is_internal id =
+  List.exists reserved_prefixes ~f:(fun p -> String.is_prefix id ~prefix:p)
+;;
+
 let alpha_id (remaps : remaps) id =
   let rec gen_new_id ctx id =
     match Map.find ctx.count id with
@@ -47,7 +54,7 @@ let alpha_id (remaps : remaps) id =
       then new_id, ctx
       else gen_new_id ctx id
   in
-  let id = if String.is_prefix id ~prefix:"__" then "__var" ^ id else id in
+  let id = if is_internal id then renamed_prefix ^ id else id in
   match Map.find remaps id with
   | Some new_id -> return (new_id, remaps)
   | None ->

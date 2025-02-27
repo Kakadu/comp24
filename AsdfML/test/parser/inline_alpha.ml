@@ -200,3 +200,18 @@ let%expect_test _ =
       | a_0 -> (( + ) a_0 a)
     |}]
 ;;
+
+let%expect_test _ =
+  test {|
+  let ll_0 = fun x -> x
+  let anf = 42
+  let x = anf
+  let y = ll_0 anf
+  |};
+  [%expect {|
+    let __var_ll_0 = (fun x -> x)
+    let __var_anf = 42
+    let x_0 = __var_anf
+    let y = (__var_ll_0 __var_anf)
+    |}]
+;;

@@ -237,12 +237,12 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let __var__temp_match_0 = 42
-    let x = __var__temp_match_0
+    let __var___temp_match_0 = 42
+    let x = __var___temp_match_0
     let __temp_match_0 = let __temp_match_0 = (1, 2, 3) in
       match __temp_match_0 with
       | (a, b, c) -> __temp_match_0
-    let y = __var__temp_match_0
+    let y = __var___temp_match_0
     |}]
 ;;
 

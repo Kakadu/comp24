@@ -12,7 +12,7 @@ open Std
 
 let new_var () =
   let* fresh = fresh in
-  return ("a" ^ string_of_int fresh)
+  return ("anf" ^ string_of_int fresh)
 ;;
 
 let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.t)
@@ -67,11 +67,10 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       let* body = anf_expr env body cont in
       return (ALet ("_", CImmExpr imm_expr, body)))
   | CFLetIn (id, expr, body) ->
-    let* name = new_var () in
-    let new_env = Map.set env ~key:id ~data:name in
+    let new_env = Map.set env ~key:id ~data:id in
     anf_expr env expr (fun imm_expr ->
       let* body = anf_expr new_env body cont in
-      return (ALet (name, CImmExpr imm_expr, body)))
+      return (ALet (id, CImmExpr imm_expr, body)))
   | CFList xs ->
     let rec helper acc = function
       | [] -> cont (ImmList (List.rev acc))
@@ -120,11 +119,16 @@ let remove_useless_bindings fn =
       | CIfElse (c, a1, a2) -> CIfElse (c, useless_a a1, useless_a a2)
       | x -> x
     and useless_a = function
-      | ALet (id1, CImmExpr (ImmId id2), a) ->
-        Hashtbl.set remaps ~key:id1 ~data:id2;
-        useless_a a
       | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
-        ACExpr (useless_c c)
+        useless_a @@ ACExpr (useless_c c)
+      | ALet (new_id, CImmExpr (ImmId old_id), a) ->
+        if (not (Alpha.is_internal new_id)) && not (String.is_prefix old_id ~prefix:"ll_")
+        then (
+          Hashtbl.set remaps ~key:old_id ~data:new_id;
+          useless_a a)
+        else (
+          Hashtbl.set remaps ~key:new_id ~data:old_id;
+          useless_a a)
       | ALet (id, c, a) -> ALet (id, useless_c c, useless_a a)
       | ACExpr c -> ACExpr (useless_c c)
     in
@@ -142,7 +146,7 @@ let remove_useless_bindings fn =
       | CApp (i1, i2) -> CApp (remap_i i1, List.map i2 ~f:remap_i)
       | CImmExpr i -> CImmExpr (remap_i i)
     and remap_a = function
-      | ALet (id, c, a) -> ALet (id, remap_c c, remap_a a)
+      | ALet (id, c, a) -> ALet (find_rec id, remap_c c, remap_a a)
       | ACExpr c -> ACExpr (remap_c c)
     in
     function

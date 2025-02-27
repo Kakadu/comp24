@@ -10,7 +10,7 @@ open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
 
-let fresh_id name = fresh_prefix (if String.equal name "" then "__ll" else "__ll_" ^ name)
+let fresh_id name = fresh_prefix (if String.equal name "" then "ll" else "ll_" ^ name)
 
 let rec ll_expr env lift ?(name = None) = function
   | SConst c -> return (cf_const c, lift)
