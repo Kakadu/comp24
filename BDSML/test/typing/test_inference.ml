@@ -64,3 +64,30 @@ let%expect_test "test tuple" =
   test "(4, 5, true, 'a')";
   [%expect {| (int * int * bool * char) |}]
 ;;
+
+let%expect_test "test difficult tuple" =
+  test "(let b = 4 in b, (3, 5), fun a -> a, 'a')";
+  [%expect {| (int * (int * int) * 'a -> ('a * char)) |}]
+;;
+
+let%expect_test "test let rec" =
+  test "let rec a = 4 in a";
+  [%expect {| int |}]
+;;
+
+let%expect_test "test let rec fun" =
+  test "let rec f a = if a then a else f a in f";
+  [%expect {| bool -> bool |}]
+;;
+
+let%expect_test "test let rec and" =
+  test {|let rec f a b = if b then g a b else m
+  and g a b = f a b and m = 4 in f|};
+  [%expect {| 'h -> bool -> int |}]
+;;
+
+let%expect_test "test invalid let rec with pat binding" =
+  test {|let rec a, b = 3, 4 in a|};
+  [%expect
+    {| ErrorType infering error: Only variables are allowed as left-hand side of `let rec' |}]
+;;

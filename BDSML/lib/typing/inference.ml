@@ -96,7 +96,36 @@ and infer_let env rec_flag bindings expression =
     let* sub2, ty = infer_expression env expression in
     let+ sub = Subst.compose sub1 sub2 in
     sub, ty
-  | Recursive -> raise @@ Unimplemented "infer rec let"
+  | Recursive ->
+    let* bind_data, env =
+      fold_left
+        (fun (data, env) bind ->
+          match bind with
+          | Val_binding (var, args, exp) ->
+            let+ fv = fresh_var in
+            let env = TypeEnv.extend env var (Scheme.create VarSet.empty fv) in
+            (fv, var, args, exp) :: data, env
+          | _ -> fail Invalid_let)
+        (return ([], env))
+        bindings
+    in
+    let* env, sub1 =
+      fold_left
+        (fun (env, sub) (fv, var, args, exp) ->
+          let* s1, t1 = infer_fun env args exp in
+          let* s2 = Subst.unify (Subst.apply s1 fv) t1 in
+          let* s = Subst.compose s2 s1 in
+          let env = TypeEnv.apply s env in
+          let sheme = generalize env (Subst.apply s t1) in
+          let env = TypeEnv.extend env var sheme in
+          let+ sub = Subst.compose sub s1 in
+          env, sub)
+        (return (env, Subst.empty))
+        bind_data
+    in
+    let* sub2, ty = infer_expression env expression in
+    let+ sub = Subst.compose sub1 sub2 in
+    sub, ty
 
 and infer_apply env left right =
   let* s1, t1 = infer_expression env left in
