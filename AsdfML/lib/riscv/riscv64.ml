@@ -60,9 +60,16 @@ and gen_imm fn_args (env : (id, loc, 'a) Map.t) dest
        dbg "lookup %s = %b\n" id (Map.find fn_args id |> Option.is_some); *)
     let id = Std.lookup_extern id |> Option.value ~default:id in
     (match Map.find fn_args id with
+     (* | Some 0 ->
+        emit_load_reg dest (RFn id);
+        emit_load_reg dest (ROffset (dest, 0)) *)
      | Some 0 ->
-       emit_load_reg dest (RFn id);
-       emit_load_reg dest (ROffset (dest, 0))
+       (* TODO: ?! *)
+       (match Map.find env id with
+        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
+        | None ->
+          emit_load_reg dest (RFn id);
+          emit_load_reg dest (ROffset (dest, 0)))
      | Some n_args ->
        let id = remove_grave id in
        emit comment (Format.sprintf "Creating closure for %s" id);
@@ -70,7 +77,7 @@ and gen_imm fn_args (env : (id, loc, 'a) Map.t) dest
        emit_load_reg dest (RReg x) ~comm:id
      | None ->
        (match Map.find env id with
-        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id (* (Format.asprintf "%s - %a" id pp_loc x) *)
+        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> emit li dest 0
   | ImmNil ->
@@ -187,6 +194,8 @@ and gen_aexpr fn_args env dest = function
   | ACExpr cexpr -> gen_cexpr fn_args env dest cexpr
 
 and gen_fn ?(data_sec = None) fn_args init_fns = function
+  (* TODO: ? *)
+  (* | Fn (id, [], ACExpr (CImmExpr _)) when String.( <> ) "main" id -> () *)
   | Fn (id, [], _)
     when (not (String.equal "main" id))
          &&
@@ -223,22 +232,22 @@ and gen_fn ?(data_sec = None) fn_args init_fns = function
     (match data_sec with
      | Some id ->
        emit la t1 id;
-       emit_load (LMem (t1, 0)) (RReg a0)
+       emit sd a0 (t1, 0) (* emit_load (LMem (t1, 0)) (RReg a0) *)
      | None -> ());
     emit_fn_ret stack_size
 ;;
 
-let gen_const_inits fn_args consts =
+let gen_const_inits ?(print_anf=false) fn_args consts =
   List.fold consts ~init:[] ~f:(fun acc (id, init_id, exp) ->
     let fn = Fn (init_id, [ "_" ], exp) in
-    dbg "Init %s ANF: %a\n" id pp_fn fn;
+    if print_anf then Format.printf "%s ANF:@\n%a@\n" init_id pp_fn fn;
     gen_fn fn_args [] fn ~data_sec:(Some id);
     init_id :: acc)
   |> List.rev
 ;;
 
-let gen_program fn_args consts (prog : Anf_ast.program) =
-  let init_fns = gen_const_inits fn_args consts in
+let gen_program ?(print_anf=false) fn_args consts (prog : Anf_ast.program) =
+  let init_fns = gen_const_inits ~print_anf fn_args consts in
   List.iter prog ~f:(gen_fn fn_args init_fns)
 ;;
 
@@ -298,7 +307,7 @@ let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.progr
     let consts = collect_consts ast in
     emit_data_section consts;
     emit str ".section .text";
-    gen_program fn_args consts ast;
+    gen_program ~print_anf fn_args consts ast;
     let code = peephole code in
     Queue.iter
       ~f:(fun (i, comm) ->
