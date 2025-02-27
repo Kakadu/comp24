@@ -62,22 +62,22 @@
   ANF:
   let main =
          let list = [1; 2; 3; 4] in
-         let anf15 = `list_is_empty list in
-         let anf11 = not anf15 in
-         let anf14 = `list_tl list in
-         let anf13 = `list_is_empty anf14 in
-         let anf12 = not anf13 in
-         let anf1 = ( && ) anf11 anf12 in
+         let anf12 = `list_is_empty list in
+         let anf8 = not anf12 in
+         let anf11 = `list_tl list in
+         let anf10 = `list_is_empty anf11 in
+         let anf9 = not anf10 in
+         let anf1 = ( && ) anf8 anf9 in
          if anf1 
          then
            let a = `list_hd list in
-           let anf9 = `list_tl list in
-           let b = `list_hd anf9 in
-           let anf8 = `list_tl list in
-           let c = `list_tl anf8 in
-           let _ = println_int a in
-           let _ = println_int b in
-           let _ = print_list c in
+           let anf6 = `list_tl list in
+           let b = `list_hd anf6 in
+           let anf5 = `list_tl list in
+           let c = `list_tl anf5 in
+           let anf2 = println_int a in
+           let anf3 = println_int b in
+           let anf4 = print_list c in
            0 
          else panic ()
   
@@ -103,27 +103,27 @@
   >   0
   > EOF
   ANF:
-  let ll_helper_1 acc list =
-         let anf1 = `list_is_empty list in
+  let ll_helper_1 acc list_0 =
+         let anf1 = `list_is_empty list_0 in
          if anf1 
          then acc 
          else
-           let anf8 = `list_is_empty list in
-           let anf3 = not anf8 in
+           let anf7 = `list_is_empty list_0 in
+           let anf3 = not anf7 in
            if anf3 
            then
-             let tl = `list_tl list in
-             let anf6 = ( + ) acc 1 in
-             ll_helper_1 anf6 tl 
+             let tl = `list_tl list_0 in
+             let anf5 = ( + ) acc 1 in
+             ll_helper_1 anf5 tl 
            else panic ()
   let length list = ll_helper_1 0 list
   let main =
     let full = [2; 3; 4] in
     let empty = [] in
-    let anf13 = length full in
-    let _ = println_int anf13 in
-    let anf12 = length empty in
-    let _ = println_int anf12 in
+    let anf12 = length full in
+    let anf9 = println_int anf12 in
+    let anf11 = length empty in
+    let anf10 = println_int anf11 in
     0
   
 $ cat /tmp/lists.s
@@ -148,27 +148,27 @@ $ cat /tmp/lists.s
   > EOF
   ANF:
   let map f list =
-         let anf10 = `list_is_empty list in
-         let anf1 = not anf10 in
+         let anf8 = `list_is_empty list in
+         let anf1 = not anf8 in
          if anf1 
          then
            let hd = `list_hd list in
            let tl = `list_tl list in
-           let anf5 = f hd in
-           let anf6 = map f tl in
-           ( :: ) anf5 anf6 
-         else let anf8 = `list_is_empty list in
-           if anf8 
+           let anf3 = f hd in
+           let anf4 = map f tl in
+           ( :: ) anf3 anf4 
+         else let anf6 = `list_is_empty list in
+           if anf6 
            then [] 
            else panic ()
   let sq x = ( * ) x x
   let main =
     let full = [2; 3; 4] in
     let empty = [] in
-    let anf15 = map sq full in
-    let _ = print_list anf15 in
-    let anf14 = map sq empty in
-    let _ = print_list anf14 in
+    let anf13 = map sq full in
+    let anf10 = print_list anf13 in
+    let anf12 = map sq empty in
+    let anf11 = print_list anf12 in
     0
   
 $ cat /tmp/lists.s
@@ -198,9 +198,9 @@ $ cat /tmp/lists.s
   let b = `list_field __list_0 1
   let c = `list_field __list_0 2
   let main =
-    let _ = println_int a in
-    let _ = println_int b in
-    let _ = println_int c in
+    let anf7 = println_int a in
+    let anf8 = println_int b in
+    let anf9 = println_int c in
     0
   
   init___temp_match_0 ANF:
@@ -411,7 +411,7 @@ $ cat /tmp/lists.s
       call create_closure
       ld a1,0(s0)
       call apply_closure_1
-      sd a0,-8(s0)  # _
+      sd a0,-8(s0)  # anf7
       la a0,b
       ld a0,0(a0)
       sd a0,-16(s0)
@@ -421,7 +421,7 @@ $ cat /tmp/lists.s
       call create_closure
       ld a1,-16(s0)
       call apply_closure_1
-      sd a0,-24(s0)  # _
+      sd a0,-24(s0)  # anf8
       la a0,c
       ld a0,0(a0)
       sd a0,-32(s0)
@@ -431,7 +431,7 @@ $ cat /tmp/lists.s
       call create_closure
       ld a1,-32(s0)
       call apply_closure_1
-      sd a0,-40(s0)  # _
+      sd a0,-40(s0)  # anf9
       li a0,0
       ld s0,56(sp)  # Epilogue starts
       ld ra,64(sp)

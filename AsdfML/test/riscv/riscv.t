@@ -186,8 +186,8 @@ $ /tmp/out
   > EOF
   ANF:
   let ll_add_1 x y = ( + ) x y
-  let ll_mul_2 x y = ( * ) x y
-  let ll_muladd_3 add mul x y z = let anf3 = mul x y in
+  let ll_mul_2 x_0 y_0 = ( * ) x_0 y_0
+  let ll_muladd_3 add mul x_1 y_1 z = let anf3 = mul x_1 y_1 in
     add anf3 z
   let main = let anf5 = ll_muladd_3 ll_add_1 ll_mul_2 2 3 4 in
     println_int anf5
@@ -218,16 +218,16 @@ $ /tmp/out
       .globl ll_mul_2
       .type ll_mul_2, @function
   ll_mul_2:
-      # args: x, y
+      # args: x_0, y_0
       addi sp,sp,-32
       sd ra,32(sp)
       sd s0,24(sp)
       addi s0,sp,16  # Prologue ends
-      sd a0,0(s0)  # x
-      sd a1,-8(s0)  # y
-      ld t0,0(s0)  # x
-      ld t1,-8(s0)  # y
-      mul a0,t0,t1  # x ( * ) y
+      sd a0,0(s0)  # x_0
+      sd a1,-8(s0)  # y_0
+      ld t0,0(s0)  # x_0
+      ld t1,-8(s0)  # y_0
+      mul a0,t0,t1  # x_0 ( * ) y_0
       ld s0,24(sp)  # Epilogue starts
       ld ra,32(sp)
       addi sp,sp,32
@@ -236,19 +236,19 @@ $ /tmp/out
       .globl ll_muladd_3
       .type ll_muladd_3, @function
   ll_muladd_3:
-      # args: add, mul, x, y, z
+      # args: add, mul, x_1, y_1, z
       addi sp,sp,-64
       sd ra,64(sp)
       sd s0,56(sp)
       addi s0,sp,48  # Prologue ends
       sd a0,0(s0)  # add
       sd a1,-8(s0)  # mul
-      sd a2,-16(s0)  # x
-      sd a3,-24(s0)  # y
+      sd a2,-16(s0)  # x_1
+      sd a3,-24(s0)  # y_1
       sd a4,-32(s0)  # z
       ld a0,-8(s0)  # mul
-      ld a1,-16(s0)  # x
-      ld a2,-24(s0)  # y
+      ld a1,-16(s0)  # x_1
+      ld a2,-24(s0)  # y_1
       call apply_closure_2
       sd a0,-40(s0)  # anf3
       ld a0,0(s0)  # add
@@ -324,10 +324,10 @@ $ /tmp/out
            else let anf5 = ( - ) x 2 in
              is_even anf5
   let main =
-    let anf9 = is_even 42 in
-    let x = println_bool anf9 in
-    let anf8 = is_even 43 in
-    println_bool anf8
+    let anf8 = is_even 42 in
+    let x_0 = println_bool anf8 in
+    let anf7 = is_even 43 in
+    println_bool anf7
   
   $ cat /tmp/out.s
   .section .data
@@ -400,26 +400,26 @@ $ /tmp/out
       call create_closure
       li a1,42
       call apply_closure_1
-      sd a0,0(s0)  # anf9
+      sd a0,0(s0)  # anf8
       # Creating closure for ml_println_bool
       la a0,ml_println_bool
       li a1,1
       call create_closure
-      ld a1,0(s0)  # anf9
+      ld a1,0(s0)  # anf8
       call apply_closure_1
-      sd a0,-8(s0)  # x
+      sd a0,-8(s0)  # x_0
       # Creating closure for is_even
       la a0,is_even
       li a1,1
       call create_closure
       li a1,43
       call apply_closure_1
-      sd a0,-16(s0)  # anf8
+      sd a0,-16(s0)  # anf7
       # Creating closure for ml_println_bool
       la a0,ml_println_bool
       li a1,1
       call create_closure
-      ld a1,-16(s0)  # anf8
+      ld a1,-16(s0)  # anf7
       call apply_closure_1
       ld s0,32(sp)  # Epilogue starts
       ld ra,40(sp)
@@ -440,12 +440,12 @@ $ /tmp/out
   > EOF
   ANF:
   let apply f x = f x
-  let compose f g x = let anf2 = g x in
-    f anf2
-  let ll_f_3 x = ( + ) x 1
-  let ll_g_4 x = ( * ) x 2
+  let compose f_0 g x_0 = let anf2 = g x_0 in
+    f_0 anf2
+  let ll_f_1_3 x_1 = ( + ) x_1 1
+  let ll_g_0_4 x_2 = ( * ) x_2 2
   let main =
-    let anf7 = compose ll_f_3 ll_g_4 in
+    let anf7 = compose ll_f_1_3 ll_g_0_4 in
     let anf6 = apply anf7 3 in
     println_int anf6
   
@@ -461,12 +461,12 @@ $ cat /tmp/out.s
   > EOF
   ANF:
   let main =
-         let anf6 = ( + ) 1 2 in
-         let anf2 = ( * ) anf6 3 in
-         let anf5 = ( + ) 3 5 in
-         let anf4 = ( / ) 32 anf5 in
-         let anf3 = ( * ) 4 anf4 in
-         let res = ( + ) anf2 anf3 in
+         let anf5 = ( + ) 1 2 in
+         let anf1 = ( * ) anf5 3 in
+         let anf4 = ( + ) 3 5 in
+         let anf3 = ( / ) 32 anf4 in
+         let anf2 = ( * ) 4 anf3 in
+         let res = ( + ) anf1 anf2 in
          println_int res
   
   $ cat /tmp/out.s
@@ -485,26 +485,26 @@ $ cat /tmp/out.s
       li t0,1
       li t1,2
       add a0,t0,t1  # 1 ( + ) 2
-      sd a0,0(s0)  # anf6
-      ld t0,0(s0)  # anf6
+      sd a0,0(s0)  # anf5
+      ld t0,0(s0)  # anf5
       li t1,3
-      mul a0,t0,t1  # anf6 ( * ) 3
-      sd a0,-8(s0)  # anf2
+      mul a0,t0,t1  # anf5 ( * ) 3
+      sd a0,-8(s0)  # anf1
       li t0,3
       li t1,5
       add a0,t0,t1  # 3 ( + ) 5
-      sd a0,-16(s0)  # anf5
+      sd a0,-16(s0)  # anf4
       li t0,32
-      ld t1,-16(s0)  # anf5
-      div a0,t0,t1  # 32 ( / ) anf5
-      sd a0,-24(s0)  # anf4
+      ld t1,-16(s0)  # anf4
+      div a0,t0,t1  # 32 ( / ) anf4
+      sd a0,-24(s0)  # anf3
       li t0,4
-      ld t1,-24(s0)  # anf4
-      mul a0,t0,t1  # 4 ( * ) anf4
-      sd a0,-32(s0)  # anf3
-      ld t0,-8(s0)  # anf2
-      ld t1,-32(s0)  # anf3
-      add a0,t0,t1  # anf2 ( + ) anf3
+      ld t1,-24(s0)  # anf3
+      mul a0,t0,t1  # 4 ( * ) anf3
+      sd a0,-32(s0)  # anf2
+      ld t0,-8(s0)  # anf1
+      ld t1,-32(s0)  # anf2
+      add a0,t0,t1  # anf1 ( + ) anf2
       sd a0,-40(s0)  # res
       # Creating closure for ml_println_int
       la a0,ml_println_int
@@ -609,15 +609,17 @@ $ cat /tmp/out.s
   ANF:
   let add_cps x y k = let anf1 = ( + ) x y in
          k anf1
-  let square_cps x k = let anf3 = ( * ) x x in
-    k anf3
-  let ll_4 k x_squared y_squared = add_cps x_squared y_squared k
-  let ll_3 k y x_squared = let anf6 = ll_4 k x_squared in
-    square_cps y anf6
-  let pythagoras_cps x y k = let anf8 = ll_3 k y in
-    square_cps x anf8
+  let square_cps x_0 k_0 = let anf3 = ( * ) x_0 x_0 in
+    k_0 anf3
+  let ll_4 k_1 x_squared y_squared = add_cps x_squared y_squared k_1
+  let ll_3 k_1 y_0 x_squared =
+    let anf6 = ll_4 k_1 x_squared in
+    square_cps y_0 anf6
+  let pythagoras_cps x_1 y_0 k_1 =
+    let anf8 = ll_3 k_1 y_0 in
+    square_cps x_1 anf8
   let ll_7 res = println_int res
-  let main = let _ = pythagoras_cps 3 4 ll_7 in
+  let main = let anf10 = pythagoras_cps 3 4 ll_7 in
     ()
   
 $ cat /tmp/out.s

@@ -100,15 +100,15 @@ $ /tmp/tuples
          let x1 = `get_tuple_field arg_0 0 in
          let y1 = `get_tuple_field arg_0 1 in
          let z1 = `get_tuple_field arg_0 2 in
-         let anf13 = ( * ) y1 z2 in
-         let anf14 = ( * ) z1 y2 in
-         let x = ( - ) anf13 anf14 in
-         let anf11 = ( * ) z1 x2 in
-         let anf12 = ( * ) x1 z2 in
-         let y = ( - ) anf11 anf12 in
-         let anf9 = ( * ) x1 y2 in
-         let anf10 = ( * ) y1 x2 in
-         let z = ( - ) anf9 anf10 in
+         let anf4 = ( * ) y1 z2 in
+         let anf5 = ( * ) z1 y2 in
+         let x = ( - ) anf4 anf5 in
+         let anf2 = ( * ) z1 x2 in
+         let anf3 = ( * ) x1 z2 in
+         let y = ( - ) anf2 anf3 in
+         let anf0 = ( * ) x1 y2 in
+         let anf1 = ( * ) y1 x2 in
+         let z = ( - ) anf0 anf1 in
          (x, y, z)
   let main =
     let a = (1, 3, 5) in
@@ -136,9 +136,9 @@ $ cat /tmp/tuples.s
          let a = `get_tuple_field __tuple_0 0 in
          let b = `get_tuple_field __tuple_0 1 in
          let c = `get_tuple_field __tuple_0 2 in
-         let _ = println_int a in
-         let _ = println_int b in
-         let _ = println_bool c in
+         let anf0 = println_int a in
+         let anf1 = println_int b in
+         let anf2 = println_bool c in
          0
   
 $ cat /tmp/tuples.s
@@ -161,20 +161,20 @@ $ cat /tmp/tuples.s
   > EOF
   ANF:
   let div x =
-         let anf6 = `get_tuple_field x 1 in
-         let anf1 = ( = ) anf6 0 in
+         let anf3 = `get_tuple_field x 1 in
+         let anf1 = ( = ) anf3 0 in
          if anf1 
          then let a = `get_tuple_field x 0 in
            0 
          else
-           let a = `get_tuple_field x 0 in
+           let a_0 = `get_tuple_field x 0 in
            let b = `get_tuple_field x 1 in
-           ( / ) a b
+           ( / ) a_0 b
   let main =
-    let anf10 = div (10, 2) in
-    let _ = println_int anf10 in
-    let anf9 = div (10, 0) in
-    let _ = println_int anf9 in
+    let anf7 = div (10, 2) in
+    let anf4 = println_int anf7 in
+    let anf6 = div (10, 0) in
+    let anf5 = println_int anf6 in
     0
   
 $ cat /tmp/tuples.s
@@ -199,9 +199,9 @@ $ cat /tmp/tuples.s
   let b = `get_tuple_field __tuple_0 1
   let c = `get_tuple_field __tuple_0 2
   let main =
-    let _ = println_int a in
-    let _ = println_int b in
-    let _ = println_int c in
+    let anf3 = println_int a in
+    let anf4 = println_int b in
+    let anf5 = println_int c in
     0
   
   init___temp_match_0 ANF:
