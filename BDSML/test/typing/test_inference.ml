@@ -131,3 +131,51 @@ let%expect_test "test wrong let exp and statements" =
   [%expect {|
     ErrorType infering error: variable a is not found |}]
 ;;
+
+let%expect_test "test constructor" =
+  test {|let a = []|};
+  [%expect {|
+    val a : 'a list |}]
+;;
+
+let%expect_test "test constructor some with" =
+  test {|Some true|};
+  [%expect {|
+      bool optional |}]
+;;
+
+let%expect_test "test constructor some" =
+  test {|let a b = if b then None else Some b in a|};
+  [%expect {|
+    bool -> bool optional |}]
+;;
+
+let%expect_test "test let with if inside on arg" =
+  test {|let f a = if a then a else a in f|};
+  [%expect {|
+    bool -> bool |}]
+;;
+
+let%expect_test "test fun with if inside on arg" =
+  test {|fun a -> if a then a else a|};
+  [%expect {|
+    bool -> bool |}]
+;;
+
+let%expect_test "test list" =
+  test {|[2]|};
+  [%expect {|
+    int list |}]
+;;
+
+let%expect_test "test list 2" =
+  test {|[2; 4]|};
+  [%expect {|
+    int list |}]
+;;
+
+let%expect_test "test list 3" =
+  test {|([2; 4]) :: []|};
+  [%expect {|
+    int list list |}]
+;;

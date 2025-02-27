@@ -8,6 +8,10 @@ let start_type_var = TVarId.create 0
 let fresh_var = fresh >>| fun n -> TVar n
 let init_env = TypeEnv.empty
 
+let poli_constructors_names =
+  [ "::", "list"; "[]", "list"; "Some", "optional"; "None", "optional" ]
+;;
+
 let instantiate (scheme : Scheme.t) : type_val t =
   let vars, ty = scheme in
   VarSet.fold
@@ -73,7 +77,9 @@ and infer_fun env vars exp =
   in
   let* env, fvs = helper env vars in
   let+ sub, ty = infer_expression env exp in
-  sub, List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, ty)) fvs ty
+  ( sub
+  , List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, Subst.apply sub ty)) fvs ty
+  )
 
 and infer_let env rec_flag bindings =
   match rec_flag with
@@ -138,6 +144,37 @@ and infer_tuple env l =
   in
   sub, TTuple (List.rev tys)
 
+(* and infer_typexpr env exp typexpr =
+   let* s1, t1 = infer_expression env exp in
+   let* t2 = let rec helper = function | Type_parametric ->
+   let* s2 = Subst.unify t1 *)
+(* function | Type_constructor_param (_, _) -> Subst.empty, TUnit
+   | Type_tuple (h::tl) -> *)
+
+and infer_construct env name =
+  let find_name name =
+    match List.find_opt (fun (s, _) -> name = s) poli_constructors_names with
+    | Some res -> return @@ snd res
+    | None -> fail @@ No_variable name
+  in
+  function
+  | Some e ->
+    let* s1, ty = infer_expression env e in
+    let* constr_name = find_name name in
+    if name = "::"
+    then (
+      match ty with
+      | TTuple [ l; r ] ->
+        let* sub = Subst.unify (TConstructor (Some l, "list")) r in
+        let+ sub = Subst.compose s1 sub in
+        sub, Subst.apply sub r
+      | _ -> fail Invalid_list_constructor_argument)
+    else return (s1, TConstructor (Some ty, constr_name))
+  | None ->
+    let+ fv = fresh_var
+    and+ constr_name = find_name name in
+    Subst.empty, TConstructor (Some fv, constr_name)
+
 and infer_expression env = function
   | Exp_constant c -> infer_base_type c
   | Exp_if (cond, bthen, belse) -> infer_if env cond bthen belse
@@ -150,6 +187,8 @@ and infer_expression env = function
     sub, ty
   | Exp_apply (l, r) -> infer_apply env l r
   | Exp_tuple l -> infer_tuple env l
+  | Exp_construct (name, exp) -> infer_construct env name exp
+  (* | Exp_type (exp, typexp) -> infer_typexpr env exp typexp *)
   | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
 ;;
 
@@ -177,6 +216,7 @@ let error_to_string = function
     "failed unification of types " ^ show_type_val val1 ^ " and " ^ show_type_val val2
   | No_variable v -> "variable " ^ v ^ " is not found"
   | Invalid_let -> "Only variables are allowed as left-hand side of `let rec'"
+  | Invalid_list_constructor_argument -> "Invalid list constructor argument"
 ;;
 
 let infer_program prog =

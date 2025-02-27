@@ -364,8 +364,7 @@ let%expect_test "test if" =
 
 let%expect_test "test if without else" =
   test_expr "if a then b";
-  [%expect
-    {|
+  [%expect {|
     (Exp_if ((Exp_ident "a"), (Exp_ident "b"), None))
      |}]
 ;;
@@ -429,6 +428,23 @@ let%expect_test "test cons list" =
                      ))
                   ]))
        ))
+     |}]
+;;
+
+let%expect_test "test cons list 2" =
+  test_expr "(1 :: []) :: []";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_construct ("::",
+                    (Some (Exp_tuple
+                             [(Exp_constant (Const_int 1));
+                               (Exp_construct ("[]", None))]))
+                    ));
+                  (Exp_construct ("[]", None))]))
+       ))
+
      |}]
 ;;
 

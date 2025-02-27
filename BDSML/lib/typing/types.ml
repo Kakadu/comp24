@@ -30,7 +30,7 @@ let pp_base_type fmt ty = Format.fprintf fmt "%s" @@ show_base_type ty
 type type_val =
   | TVar of TVarId.t (** e.g. ['a] *)
   | TBase of base_type (** e.g. [int] *)
-  | TParametric of type_val * type_val (** e.g. [int list] *)
+  | TConstructor of type_val option * string (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
   | TUnit
@@ -42,7 +42,8 @@ let rec show_type_val = function
   | TArrow (l, r) -> show_type_val l ^ " -> " ^ show_type_val r
   | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
   | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
-  | TParametric (t1, t2) -> show_type_val t1 ^ " " ^ show_type_val t2
+  | TConstructor (Some t1, name) -> show_type_val t1 ^ " " ^ name
+  | TConstructor (None, name) -> name
   | TUnit -> "unit"
 ;;
 
@@ -53,6 +54,7 @@ type error =
   | Occurs_check
   | No_variable of string
   | Invalid_let
+  | Invalid_list_constructor_argument
 
 exception Unimplemented of string
 
@@ -60,7 +62,7 @@ module VarSet = Set.Make (TVarId)
 
 let rec occurs_in (v : TVarId.t) = function
   | TVar b -> b = v
-  | TParametric (l, r) -> occurs_in v l || occurs_in v r
+  | TConstructor (Some l, _) -> occurs_in v l
   | TTuple (f :: tl) -> occurs_in v f || (occurs_in v @@ TTuple tl)
   | TArrow (l, r) -> occurs_in v l || occurs_in v r
   | _ -> false
@@ -71,7 +73,7 @@ let free_vars =
     | TVar b -> VarSet.add b acc
     | TArrow (l, r) -> helper (helper acc l) r
     | TTuple (h :: tl) -> helper (helper acc h) @@ TTuple tl
-    | TParametric (l, r) -> helper (helper acc l) r
+    | TConstructor (Some l, _) -> helper acc l
     | _ -> acc
   in
   helper VarSet.empty

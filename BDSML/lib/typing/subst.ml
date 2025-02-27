@@ -13,7 +13,7 @@ let fold_left (map : t) init f =
     init
 ;;
 
-let empty = VarMap.empty
+let empty : t = VarMap.empty
 let mapping (k : TVarId.t) v = if occurs_in k v then fail Occurs_check else return (k, v)
 
 let singleton k v : t Monads.t =
@@ -28,9 +28,9 @@ let apply (sub : t) =
        | None -> ty
        | Some x -> x)
     | TArrow (l, r) -> TArrow (helper l, helper r)
-    | TBase _ as x -> x
     | TTuple m -> TTuple (List.map helper m)
-    | _ -> raise (Unimplemented "apply")
+    | TConstructor (Some t, name) -> TConstructor (Some (helper t), name)
+    | _ as x -> x
   in
   helper
 ;;
@@ -44,6 +44,8 @@ let rec unify l r =
     let* subs1 = unify l1 l2 in
     let* subs2 = unify (apply subs1 r1) (apply subs1 r2) in
     compose subs1 subs2
+  | TConstructor (Some t1, _), TConstructor (Some t2, _) -> unify t1 t2
+  | TConstructor _, TConstructor _ -> return empty
   | _ -> fail (Unification_failed (l, r))
 
 and extend s (k, v) =
