@@ -207,5 +207,5 @@ let%expect_test "pat type" =
     (Pat_type (
        (Pat_construct ("::",
           (Some (Pat_tuple [(Pat_var "a"); (Pat_construct ("[]", None))])))),
-       (Type_parametric ((Type_single "int"), "list")))) |}]
+       (Type_constructor_param ((Type_single "int"), "list")))) |}]
 ;;

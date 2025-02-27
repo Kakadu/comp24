@@ -84,7 +84,7 @@ let infix_right_op parser prev = chainr1 prev (parse_bop parser)
 let application prev = chainl1 prev (return (fun e1 e2 -> Exp_apply (e1, e2)))
 
 let constructor prev =
-  let+ ident = parse_capitalized_ident
+  let+ ident = ws *> parse_capitalized_ident
   and+ arg = prev >>| Option.some <|> return None in
   Exp_construct (ident, arg)
 ;;

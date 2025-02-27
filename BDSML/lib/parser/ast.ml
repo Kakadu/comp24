@@ -10,7 +10,7 @@ type constant =
 [@@deriving show { with_path = false }]
 
 type typexpr =
-  | Type_parametric of typexpr * string (** e.g. [int list] *)
+  | Type_constructor_param of typexpr * string (** e.g. [int list] *)
   | Type_tuple of typexpr list (** e.g. [int * int] *)
   | Type_single of string (** e.g. [int] *)
   | Type_fun of typexpr list (** e.g. [int -> int] *)

@@ -16,7 +16,7 @@ type base_type =
 type type_val =
   | TVar of TVarId.t (** e.g. ['a] *)
   | TBase of base_type (** e.g. [int] *)
-  | TParametric of type_val * type_val (** e.g. [int list] *)
+  | TConstructor of type_val option * string (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
   | TUnit (** e.g. [unit]*)
@@ -29,6 +29,7 @@ type error =
   | Occurs_check
   | No_variable of string
   | Invalid_let
+  | Invalid_list_constructor_argument
 
 exception Unimplemented of string
 
