@@ -111,7 +111,7 @@ let remove_patterns program =
       (* Convert `let complex_pattern = expr`
          into `let temp_match = match expr with | complex_pattern -> ()`
          and deal with it later in 'remove_match' *)
-      let* temp_match = fresh_prefix "temp_match" in
+      let* temp_match = fresh_prefix "__temp_match" in
       let match_exp =
         d_let
           (p_ident temp_match)

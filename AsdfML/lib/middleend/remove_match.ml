@@ -84,14 +84,14 @@ let remove_match prog =
         | PIdent id -> s_let_in (s_let id match_exp) action |> return
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
-          let* tuple_id = fresh_prefix "tuple" in
+          let* tuple_id = fresh_prefix "__tuple" in
           let* body =
             mfoldi_right xs ~init:action ~f:(fun idx acc x ->
               bind_pat_vars (tuple_field (s_var tuple_id) idx) x acc)
           in
           s_let_in (s_let tuple_id match_exp) body |> return
         | PList xs ->
-          let* list_id = fresh_prefix "list" in
+          let* list_id = fresh_prefix "__list" in
           let* body =
             mfoldi_right xs ~init:action ~f:(fun idx action x ->
               bind_pat_vars (list_field (s_var list_id) idx) x action)
@@ -152,7 +152,7 @@ let remove_match prog =
       in
       gen_match Fn.id cases
   and helper_def ?(top = false) = function
-    | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"temp_match" ->
+    | DLet (_, p, e) when top && String.is_prefix (pat_as_id p) ~prefix:"__temp_match" ->
       let* e' = helper_expr e in
       let match_, binds =
         let rec extract_binds acc = function

@@ -34,7 +34,20 @@ let remaps_to_str r =
 ;;
 
 let alpha_id (remaps : remaps) id =
-  dbg "remaps: %s\n" (remaps_to_str remaps);
+  let rec gen_new_id ctx id =
+    match Map.find ctx.count id with
+    | None ->
+      let new_id = id in
+      let ctx = { ctx with count = Map.set ctx.count ~key:id ~data:0 } in
+      new_id, ctx
+    | Some cnt ->
+      let new_id = id ^ "_" ^ string_of_int cnt in
+      let ctx = { ctx with count = Map.set ctx.count ~key:id ~data:(cnt + 1) } in
+      if not (Map.mem remaps new_id || Map.mem ctx.count new_id)
+      then new_id, ctx
+      else gen_new_id ctx id
+  in
+  let id = if String.is_prefix id ~prefix:"__" then "__var" ^ id else id in
   match Map.find remaps id with
   | Some new_id -> return (new_id, remaps)
   | None ->
@@ -42,19 +55,6 @@ let alpha_id (remaps : remaps) id =
     if Set.mem ctx.reserved id
     then return (id, remaps)
     else (
-      let rec gen_new_id ctx id =
-        match Map.find ctx.count id with
-        | None ->
-          let new_id = id in
-          let ctx = { ctx with count = Map.set ctx.count ~key:id ~data:0 } in
-          new_id, ctx
-        | Some cnt ->
-          let new_id = id ^ "_" ^ string_of_int cnt in
-          let ctx = { ctx with count = Map.set ctx.count ~key:id ~data:(cnt + 1) } in
-          if not (Map.mem remaps new_id || Map.mem ctx.count new_id)
-          then new_id, ctx
-          else gen_new_id ctx id
-      in
       let new_id, ctx = gen_new_id ctx id in
       let* () = put ctx in
       let remaps = Map.set remaps ~key:id ~data:new_id in
@@ -82,14 +82,14 @@ let rec alpha_pattern remaps = function
     in
     return (PTuple (x1, x2, xs), remaps)
   | PList xs ->
-    let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
-        let* xs = acc in
-        let* x, _ = alpha_pattern remaps x in
-        return (x :: xs))
-      >>| List.rev
-    in
-    return (PList xs, remaps)
+    List.fold
+      xs
+      ~init:(return ([], remaps))
+      ~f:(fun acc x ->
+        let* xs, remaps = acc in
+        let* x, remaps = alpha_pattern remaps x in
+        return (x :: xs, remaps))
+    >>| fun (xs, remaps) -> PList (List.rev xs), remaps
   | PCons (hd, tl) ->
     let* hd, remaps = alpha_pattern remaps hd in
     let* tl, remaps = alpha_pattern remaps tl in
@@ -120,9 +120,9 @@ let rec alpha_expr remaps = function
         ps
         ~init:(return ([], remaps'))
         ~f:(fun acc p ->
-          let* ps, remaps = acc in
-          let* p, remaps = alpha_pattern remaps p in
-          return (p :: ps, remaps))
+          let* ps, remaps' = acc in
+          let* p, remaps' = alpha_pattern remaps' p in
+          return (p :: ps, remaps'))
       >>| fun (ps, remaps) -> List.rev ps, remaps
     in
     let remaps'' = remaps_merge remaps remaps' in
@@ -130,7 +130,6 @@ let rec alpha_expr remaps = function
     return (EFun (p, ps, e), remaps)
   | ELetIn (d, e) ->
     let* d, remaps' = alpha_def remaps d in
-    let remaps' = remaps_merge remaps remaps' in
     let* e, _ = alpha_expr remaps' e in
     return (ELetIn (d, e), remaps)
   | ETuple (x1, x2, xs) ->
@@ -166,6 +165,7 @@ let rec alpha_expr remaps = function
 and alpha_def remaps = function
   | DLet (r, p, e) ->
     let* p, remaps' = alpha_pattern remaps_empty p in
+    let remaps' = remaps_merge remaps remaps' in
     let* e, _ =
       match r with
       | Rec -> alpha_expr remaps' e
@@ -179,8 +179,7 @@ let alpha_program p =
     (mfold p ~init:(remaps_empty, []) ~f:(fun acc x ->
        let remaps, defs = acc in
        let* def, remaps' = alpha_def remaps x in
-       let remaps'' = remaps_merge remaps remaps' in
-       return (remaps'', def :: defs)))
+       return (remaps', def :: defs)))
     default_ctx
   |> fst
   |> snd

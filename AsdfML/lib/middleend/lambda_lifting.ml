@@ -10,7 +10,7 @@ open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
 
-let fresh_id name = fresh_prefix (if String.equal name "" then "ll" else "ll_" ^ name)
+let fresh_id name = fresh_prefix (if String.equal name "" then "__ll" else "__ll_" ^ name)
 
 let rec ll_expr env lift ?(name = None) = function
   | SConst c -> return (cf_const c, lift)
@@ -99,5 +99,42 @@ let ll_program prog =
     return ((def :: lift) @ acc))
   >>| List.rev
 ;;
+(* let remove_toplevel_lifts ast =
+  let is_ll_id id = String.is_prefix id ~prefix:"__ll_" in
+  let useless_defs =
+    List.filter_map ast ~f:(function
+      | CFLet (id, [], CFVar var) when is_ll_id var -> Some (var, id)
+      | _ -> None)
+    |> Map.of_alist_exn (module String)
+  in
+  let remove_useless =
+    List.filter ~f:(function
+      | CFLet (_, [], CFVar var) when is_ll_id var -> false
+      | _ -> true)
+  in
+  let rec remap = function
+    | CFVar id ->
+      (match Map.find useless_defs id with
+       | None -> CFVar id
+       | Some new_id -> CFVar new_id)
+    | CFApp (f, arg) -> CFApp (remap f, remap arg)
+    | CFIfElse (i, t, e) -> CFIfElse (remap i, remap t, remap e)
+    | CFLetIn (id, body, exp) -> CFLetIn (id, remap body, remap exp)
+    | CFTuple (x1, x2, xs) -> CFTuple (remap x1, remap x2, List.map xs ~f:remap)
+    | CFList xs -> CFList (List.map xs ~f:remap)
+    | x -> x
+  in
+  let remap_def = function
+    | CFLet (id, args, exp) ->
+      let id =
+        match Map.find useless_defs id with
+        | None -> id
+        | Some new_id -> new_id
+      in
+      CFLet (id, args, remap exp)
+  in
+  ast |> remove_useless |> List.map ~f:remap_def
+;; *)
 
 let lambda_lifting program = run (ll_program program) 
+(* |> remove_toplevel_lifts *)

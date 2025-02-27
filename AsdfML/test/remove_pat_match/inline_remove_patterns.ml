@@ -152,9 +152,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_match_0 = let temp_match_0 = (1, 2, 3) in
-       match temp_match_0 with
-       | (a, b, c) -> temp_match_0
+    let __temp_match_0 = let __temp_match_0 = (1, 2, 3) in
+       match __temp_match_0 with
+       | (a, b, c) -> __temp_match_0
     |}]
 ;;
 
@@ -164,9 +164,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_match_0 = let temp_match_0 = [1; 2; 3; 4] in
-       match temp_match_0 with
-       | [a; b; c] -> temp_match_0
+    let __temp_match_0 = let __temp_match_0 = [1; 2; 3; 4] in
+       match __temp_match_0 with
+       | [a; b; c] -> __temp_match_0
     |}]
 ;;
 
@@ -176,9 +176,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_match_0 = let temp_match_0 = [1; 2; 3; 4] in
-       match temp_match_0 with
-       | a :: b -> temp_match_0
+    let __temp_match_0 = let __temp_match_0 = [1; 2; 3; 4] in
+       match __temp_match_0 with
+       | a :: b -> __temp_match_0
     |}]
 ;;
 
@@ -210,9 +210,9 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let temp_match_0 = let temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
-       match temp_match_0 with
-       | (a, (b, c), [d; e], f :: g) -> temp_match_0
+    let __temp_match_0 = let __temp_match_0 = (1, (2, 3), [4; 5], [6; 7]) in
+       match __temp_match_0 with
+       | (a, (b, c), [d; e], f :: g) -> __temp_match_0
     |}]
 ;;
 
@@ -225,5 +225,43 @@ let%expect_test _ =
     let test = (fun arg_0 arg_2 arg_1 ->
        match arg_2 with
        | (a, b) -> (( + ) a b))
+    |}]
+;;
+
+let%expect_test _ =
+  test {|
+    let __temp_match_0 = 42
+    let x = __temp_match_0
+    let (a, b, c) = (1, 2, 3)
+    let y = __temp_match_0
+  |};
+  [%expect
+    {|
+    let __var__temp_match_0 = 42
+    let x = __var__temp_match_0
+    let __temp_match_0 = let __temp_match_0 = (1, 2, 3) in
+      match __temp_match_0 with
+      | (a, b, c) -> __temp_match_0
+    let y = __var__temp_match_0
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect {|
+    let pow = (fun x n ->
+       let rec helper = (fun acc n_0 -> match n_0 with
+         | 0 -> acc
+         | n_1 -> (helper (( * ) acc x) (( - ) n_1 1))) in
+       (helper 1 n))
     |}]
 ;;

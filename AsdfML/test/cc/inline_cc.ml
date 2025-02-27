@@ -25,8 +25,8 @@ let%expect_test _ =
   [%expect
     {|
     let test1 = (fun x y -> (y x))
-    let test2 = (fun x y -> (y x))
-    let test3 = (fun x y -> (y x))
+    let test2 = (fun x_0 y_0 -> (y_0 x_0))
+    let test3 = (fun x_2 y_1 -> (y_1 x_2))
     |}]
 ;;
 
@@ -39,7 +39,7 @@ let%expect_test _ =
   [%expect
     {|
     let mk_add_1 = (fun a b c -> (( + ) (( + ) a b) c))
-    let mk_add_2 = (fun a b c -> (( + ) (( + ) a b) c))
+    let mk_add_2 = (fun a_0 b_0 c_0 -> (( + ) (( + ) a_0 b_0) c_0))
     |}]
 ;;
 
@@ -58,11 +58,11 @@ let%expect_test _ =
   [%expect
     {|
     let fact = (fun n ->
-      let rec helper = (fun n cont ->
-        if (( <= ) n 1)
+      let rec helper = (fun n_0 cont ->
+        if (( <= ) n_0 1)
         then (cont 1)
-        else (helper (( - ) n 1) ((fun cont n res ->
-          (cont (( * ) n res))) cont n))) in
+        else (helper (( - ) n_0 1) ((fun cont n_0 res ->
+          (cont (( * ) n_0 res))) cont n_0))) in
       (helper n (fun x -> x)))
     |}]
 ;;
@@ -77,8 +77,8 @@ let%expect_test _ =
   [%expect
     {|
     let gen = (fun seed1 seed2 ->
-      let gen = (fun seed1 seed2 n -> (( + ) (( * ) n seed2) (( * ) seed1 42))) in
-      [(gen seed1 seed2 1); (gen seed1 seed2 2); (gen seed1 seed2 3)])
+      let gen_0 = (fun seed1 seed2 n -> (( + ) (( * ) n seed2) (( * ) seed1 42))) in
+      [(gen_0 seed1 seed2 1); (gen_0 seed1 seed2 2); (gen_0 seed1 seed2 3)])
     |}]
 ;;
 
@@ -94,7 +94,7 @@ let%expect_test _ =
     {|
     let main = (fun x ->
       let const = (fun f s -> f) in
-      let rev_const = (fun const f s -> (const s)) in
+      let rev_const = (fun const f_0 s_0 -> (const s_0)) in
       (rev_const const ((fun x _ -> x) x)))
     |}]
 ;;
@@ -112,10 +112,11 @@ let%expect_test _ =
   [%expect
     {|
     let add_cps = (fun x y k -> (k (( + ) x y)))
-    let square_cps = (fun x k -> (k (( * ) x x)))
-    let pythagoras_cps = (fun x y k -> (square_cps x ((fun k y x_squared ->
-      (square_cps y ((fun k x_squared y_squared ->
-      (add_cps x_squared y_squared k)) k x_squared))) k y)))
+    let square_cps = (fun x_0 k_0 -> (k_0 (( * ) x_0 x_0)))
+    let pythagoras_cps = (fun x_1 y_0 k_1 ->
+      (square_cps x_1 ((fun k_1 y_0 x_squared ->
+      (square_cps y_0 ((fun k_1 x_squared y_squared ->
+      (add_cps x_squared y_squared k_1)) k_1 x_squared))) k_1 y_0)))
     |}]
 ;;
 
@@ -149,7 +150,7 @@ let%expect_test _ =
     {|
     let add = (fun x y -> (( + ) x y))
     let add1 = let one = 1 in
-      ((fun one x -> (( + ) one x)) one)
+      ((fun one x_0 -> (( + ) one x_0)) one)
     |}]
 ;;
 
@@ -199,9 +200,9 @@ let%expect_test _ =
     {|
     let test = (fun x ->
       let one = let z = 0 in
-        (fun x -> 1) in
+        (fun x_0 -> 1) in
       let two = 2 in
-      let add_three = (fun one two x -> (( + ) (( + ) x two) (one ()))) in
+      let add_three = (fun one two x_1 -> (( + ) (( + ) x_1 two) (one ()))) in
       (add_three one two x))
     |}]
 ;;

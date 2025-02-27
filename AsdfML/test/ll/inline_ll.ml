@@ -22,12 +22,12 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ll_test_4 x = x
+    let __ll_test_4 x = x
     let _ =
       let one = 1 in
       let t = true in
       let tup = (one, t) in
-      let test = ll_test_4 in
+      let test = __ll_test_4 in
       ()
     |}]
 ;;
@@ -35,8 +35,8 @@ let%expect_test _ =
 let%expect_test _ =
   test_ll "let a = (42, fun x->x)";
   [%expect {|
-    let ll_1 x = x
-    let a = (42, ll_1)
+    let __ll_1 x = x
+    let a = (42, __ll_1)
     |}]
 ;;
 
@@ -66,12 +66,12 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_one_1 x = 1
-    let ll_add_three_3 one two x = (( + ) (( + ) x two) (one ()))
+    let __ll_one_1 x_0 = 1
+    let __ll_add_three_3 one two x_1 = (( + ) (( + ) x_1 two) (one ()))
     let test x =
-      let one = ll_one_1 in
+      let one = __ll_one_1 in
       let two = 2 in
-      let add_three = ll_add_three_3 in
+      let add_three = __ll_add_three_3 in
       (add_three one two x)
     |}]
 ;;
@@ -90,13 +90,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_one_1 x = 1
-    let ll_add_three_4 one two x = (( + ) (( + ) x two) (one ()))
+    let __ll_one_1 x_0 = 1
+    let __ll_add_three_4 one two x_1 = (( + ) (( + ) x_1 two) (one ()))
     let test x =
       let one = let z = 0 in
-        ll_one_1 in
+        __ll_one_1 in
       let two = 2 in
-      let add_three = ll_add_three_4 in
+      let add_three = __ll_add_three_4 in
       (add_three one two x)
     |}]
 ;;
@@ -109,8 +109,8 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_add_k_1 k x y = (( * ) (( + ) x y) k)
-    let main k = let add_k = ll_add_k_1 in
+    let __ll_add_k_1 k x y = (( * ) (( + ) x y) k)
+    let main k = let add_k = __ll_add_k_1 in
       (add_k k 1 2)
     |}]
 ;;
@@ -125,9 +125,9 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_add_k_1 k x y = (( * ) (( + ) x y) k)
+    let __ll_add_k_1 k x y = (( * ) (( + ) x y) k)
     let main k =
-      let add_k = ll_add_k_1 in
+      let add_k = __ll_add_k_1 in
       let waste_of_space = 0 in
       (( + ) 42 (add_k k 42 (-42)))
     |}]
@@ -147,14 +147,14 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_2 cont n res = (cont (( * ) n res))
-    let ll_helper_1 n cont =
-      if (( <= ) n 1)
+    let __ll_2 cont n_0 res = (cont (( * ) n_0 res))
+    let __ll_helper_1 n_0 cont =
+      if (( <= ) n_0 1)
       then (cont 1)
-      else (ll_helper_1 (( - ) n 1) (ll_2 cont n))
-    let ll_3 x = x
-    let fact n = let helper = ll_helper_1 in
-      (helper n ll_3)
+      else (__ll_helper_1 (( - ) n_0 1) (__ll_2 cont n_0))
+    let __ll_3 x = x
+    let fact n = let helper = __ll_helper_1 in
+      (helper n __ll_3)
     |}]
 ;;
 
@@ -172,11 +172,11 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_helper_1 acc n =
-      if (( <= ) n 1)
+    let __ll_helper_1 acc n_0 =
+      if (( <= ) n_0 1)
       then 1
-      else (ll_helper_1 (( * ) acc n) (( - ) n 1))
-    let fact n = let helper = ll_helper_1 in
+      else (__ll_helper_1 (( * ) acc n_0) (( - ) n_0 1))
+    let fact n = let helper = __ll_helper_1 in
       (helper 1 n)
     |}]
 ;;
@@ -190,10 +190,10 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_gen_1 seed1 seed2 n = (( + ) (( * ) n seed2) (( * ) seed1 42))
+    let __ll_gen_0_1 seed1 seed2 n = (( + ) (( * ) n seed2) (( * ) seed1 42))
     let gen seed1 seed2 =
-      let gen = ll_gen_1 in
-      [(gen seed1 seed2 1); (gen seed1 seed2 2); (gen seed1 seed2 3)]
+      let gen_0 = __ll_gen_0_1 in
+      [(gen_0 seed1 seed2 1); (gen_0 seed1 seed2 2); (gen_0 seed1 seed2 3)]
     |}]
 ;;
 
@@ -207,13 +207,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_const_1 f s = f
-    let ll_rev_const_2 const f s = (const s)
-    let ll_3 x s = x
+    let __ll_const_1 f s = f
+    let __ll_rev_const_2 const f_0 s_0 = (const s_0)
+    let __ll_3 x s_1 = x
     let main x =
-      let const = ll_const_1 in
-      let rev_const = ll_rev_const_2 in
-      (rev_const const (ll_3 x))
+      let const = __ll_const_1 in
+      let rev_const = __ll_rev_const_2 in
+      (rev_const const (__ll_3 x))
     |}]
 ;;
 
@@ -249,10 +249,10 @@ let%expect_test _ =
   [%expect
     {|
     let add_cps x y k = (k (( + ) x y))
-    let square_cps x k = (k (( * ) x x))
-    let ll_4 k x_squared y_squared = (add_cps x_squared y_squared k)
-    let ll_3 k y x_squared = (square_cps y (ll_4 k x_squared))
-    let pythagoras_cps x y k = (square_cps x (ll_3 k y))
+    let square_cps x_0 k_0 = (k_0 (( * ) x_0 x_0))
+    let __ll_4 k_1 x_squared y_squared = (add_cps x_squared y_squared k_1)
+    let __ll_3 k_1 y_0 x_squared = (square_cps y_0 (__ll_4 k_1 x_squared))
+    let pythagoras_cps x_1 y_0 k_1 = (square_cps x_1 (__ll_3 k_1 y_0))
     |}]
 ;;
 
@@ -270,13 +270,13 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_func_3 one x = (( + ) x one)
+    let __ll_func_3 one x = (( + ) x one)
     let main =
       let plus_one = let one = 1 in
-        let func = ll_func_3 in
+        let func = __ll_func_3 in
         (func one) in
-      let x = (plus_one 41) in
-      (print_int x)
+      let x_0 = (plus_one 41) in
+      (print_int x_0)
     |}]
 ;;
 
@@ -291,14 +291,13 @@ let%expect_test _ =
       in
       helper 1 n
   |};
-  [%expect
-    {|
-    let ll_helper_1 x acc n =
-      if (( = ) n 0)
+  [%expect {|
+    let __ll_helper_1 x acc n_0 =
+      if (( = ) n_0 0)
       then acc
-      else let n = n in
-        (ll_helper_1 x (( * ) acc x) (( - ) n 1))
-    let pow x n = let helper = ll_helper_1 in
+      else let n_1 = n_0 in
+        (__ll_helper_1 x (( * ) acc x) (( - ) n_1 1))
+    let pow x n = let helper = __ll_helper_1 in
       (helper x 1 n)
     |}]
 ;;
@@ -313,8 +312,8 @@ let%expect_test _ =
     {|
     let pow n = if (( = ) n 0)
       then 0
-      else let n = n in
-        (( * ) n n)
+      else let n_0 = n in
+        (( * ) n_0 n_0)
     |}]
 ;;
 
@@ -325,8 +324,8 @@ let%expect_test _ =
       x / y
   |};
   [%expect {|
-    let div x y = let x = (( * ) x 8) in
-      (( / ) x y)
+    let div x y = let x_0 = (( * ) x 8) in
+      (( / ) x_0 y)
     |}]
 ;;
 
@@ -348,10 +347,30 @@ let%expect_test _ =
     let f x = x
     let g = f
     let h = g
-    let main = let x = 42 in
-      let fx = (f x) in
-      let gx = (g x) in
-      let hx = (h x) in
+    let main =
+      let x_0 = 42 in
+      let fx = (f x_0) in
+      let gx = (g x_0) in
+      let hx = (h x_0) in
+      ()
+    |}]
+;;
+
+let%expect_test _ =
+  test_ll {|
+  let __ll_2 x = x
+  let main =
+    let one = 1 in
+    let f1 = (fun x -> x + one) in
+    let f2 = __ll_2 in
+    ()
+  |};
+  [%expect {|
+    let __var__ll_2 x = x
+    let __ll_f1_3 one x_0 = (( + ) x_0 one)
+    let main = let one = 1 in
+      let f1 = __ll_f1_3 in
+      let f2 = __var__ll_2 in
       ()
     |}]
 ;;
