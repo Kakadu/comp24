@@ -108,31 +108,31 @@ open Lib
 let ( $ ) = Fn.compose
 
 let parse code cont =
-  <span data-count="192">m</span>atch Parser.parse_program code with
-  | <span data-count="192">O</span>k ast -&gt; cont ast
+  <span data-count="195">m</span>atch Parser.parse_program code with
+  | <span data-count="195">O</span>k ast -&gt; cont ast
   | <span data-count="0">E</span>rror e -&gt; Format.eprintf "%s" e
 ;;
 
 let infer code cont =
-  <span data-count="139">p</span>arse code (fun ast -&gt;
-    <span data-count="139">m</span>atch Inferencer.inference_program ast with
-    | <span data-count="131">O</span>k tast -&gt; cont tast
+  <span data-count="142">p</span>arse code (fun ast -&gt;
+    <span data-count="142">m</span>atch Inferencer.inference_program ast with
+    | <span data-count="134">O</span>k tast -&gt; cont tast
     | <span data-count="8">E</span>rror e -&gt; Format.eprintf "%a" Pp_typing.pp_error e)
 ;;
 
 let infer_strip code cont =
-  <span data-count="76">i</span>nfer code (cont <span data-count="76">$</span> Alpha.alpha_program <span data-count="76">$</span> Tast.strip_types_program)
+  <span data-count="79">i</span>nfer code (cont <span data-count="79">$</span> Alpha.alpha_program <span data-count="79">$</span> Tast.strip_types_program)
 ;;
 
-let remove_patterns code cont = <span data-count="76">i</span>nfer_strip code (cont <span data-count="76">$</span> Remove_patterns.remove_patterns)
-let remove_match code cont = <span data-count="57">r</span>emove_patterns code (cont <span data-count="57">$</span> Remove_match.remove_match)
+let remove_patterns code cont = <span data-count="79">i</span>nfer_strip code (cont <span data-count="79">$</span> Remove_patterns.remove_patterns)
+let remove_match code cont = <span data-count="59">r</span>emove_patterns code (cont <span data-count="59">$</span> Remove_match.remove_match)
 
 let closure_conversion code cont =
-  <span data-count="40">r</span>emove_match code (cont <span data-count="40">$</span> Closure_conversion.closure_conversion)
+  <span data-count="41">r</span>emove_match code (cont <span data-count="41">$</span> Closure_conversion.closure_conversion)
 ;;
 
-let lambda_lift code cont = <span data-count="29">c</span>losure_conversion code (cont <span data-count="29">$</span> Lambda_lifting.lambda_lifting)
-let anf code cont = <span data-count="10">l</span>ambda_lift code (cont <span data-count="10">$</span> Anf.anf)
+let lambda_lift code cont = <span data-count="30">c</span>losure_conversion code (cont <span data-count="30">$</span> Lambda_lifting.lambda_lifting)
+let anf code cont = <span data-count="11">l</span>ambda_lift code (cont <span data-count="11">$</span> Anf.anf)
 </code></pre>
       </div>
     </div>

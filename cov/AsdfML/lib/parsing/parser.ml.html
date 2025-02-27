@@ -120,14 +120,14 @@ let error_position lexbuf =
   Format.asprintf "Line %d Pos %d" pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
 ;;
 
-let parse_program ?(print_ast = <span data-count="210">f</span>alse) (code : string)
+let parse_program ?(print_ast = <span data-count="213">f</span>alse) (code : string)
   : (Ast.definition list, string) result
   =
-  <span data-count="210">l</span>et lexbuf = Lexing.from_string code in
-  <span data-count="210">t</span>ry
+  <span data-count="213">l</span>et lexbuf = Lexing.from_string code in
+  <span data-count="213">t</span>ry
     let ast = Menhir.program Lexer.token lexbuf in
-    <span data-count="210">i</span>f print_ast then <span data-count="0">F</span>ormat.print<span data-count="0">f</span> "%a" Pp_ast.pp_program ast;
-    <span data-count="210">O</span>k ast
+    <span data-count="213">i</span>f print_ast then <span data-count="0">F</span>ormat.print<span data-count="0">f</span> "%a" Pp_ast.pp_program ast;
+    <span data-count="213">O</span>k ast
   with
   | <span data-count="0">S</span>yntaxError msg -&gt;
     let error_msg = Format.sprintf "%s: %s@." (error_positio<span data-count="0">n</span> lexbuf) msg in

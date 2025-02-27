@@ -291,6 +291,27 @@
 <a id="L267"></a><span > </span>
 <a id="L268"></a><span class="visited"> </span>
 <a id="L269"></a><span > </span>
+<a id="L270"></a><span > </span>
+<a id="L271"></a><span > </span>
+<a id="L272"></a><span class="visited"> </span>
+<a id="L273"></a><span > </span>
+<a id="L274"></a><span > </span>
+<a id="L275"></a><span > </span>
+<a id="L276"></a><span > </span>
+<a id="L277"></a><span > </span>
+<a id="L278"></a><span > </span>
+<a id="L279"></a><span > </span>
+<a id="L280"></a><span > </span>
+<a id="L281"></a><span > </span>
+<a id="L282"></a><span class="visited"> </span>
+<a id="L283"></a><span > </span>
+<a id="L284"></a><span > </span>
+<a id="L285"></a><span > </span>
+<a id="L286"></a><span > </span>
+<a id="L287"></a><span > </span>
+<a id="L288"></a><span > </span>
+<a id="L289"></a><span class="visited"> </span>
+<a id="L290"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -564,6 +585,27 @@
 <a href="#L267">267</a>
 <a href="#L268">268</a>
 <a href="#L269">269</a>
+<a href="#L270">270</a>
+<a href="#L271">271</a>
+<a href="#L272">272</a>
+<a href="#L273">273</a>
+<a href="#L274">274</a>
+<a href="#L275">275</a>
+<a href="#L276">276</a>
+<a href="#L277">277</a>
+<a href="#L278">278</a>
+<a href="#L279">279</a>
+<a href="#L280">280</a>
+<a href="#L281">281</a>
+<a href="#L282">282</a>
+<a href="#L283">283</a>
+<a href="#L284">284</a>
+<a href="#L285">285</a>
+<a href="#L286">286</a>
+<a href="#L287">287</a>
+<a href="#L288">288</a>
+<a href="#L289">289</a>
+<a href="#L290">290</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -573,8 +615,8 @@ open Lib
 open Test.Utils
 
 let test code =
-  <span data-count="19">l</span>et open Format in
-  remove_patterns code (print<span data-count="19">f</span> "\n%a" Pp_ast.pp_program)
+  <span data-count="20">l</span>et open Format in
+  remove_patterns code (print<span data-count="20">f</span> "\n%a" Pp_ast.pp_program)
 ;;
 
 let%expect_test _ =
@@ -811,6 +853,27 @@ let%expect_test _ =
       match __temp_match_0 with
       | (a, b, c) -&gt; __temp_match_0
     let y = __var___temp_match_0
+    |}<span data-count="7">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -&gt; acc
+        | n -&gt; helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  <span data-count="1">[</span>%expect
+    {|
+    let pow = (fun x n -&gt;
+       let rec helper = (fun acc n_0 -&gt; match n_0 with
+         | 0 -&gt; acc
+         | n_1 -&gt; (helper (( * ) acc x) (( - ) n_1 1))) in
+       (helper 1 n))
     |}<span data-count="7">]</span>
 ;;
 

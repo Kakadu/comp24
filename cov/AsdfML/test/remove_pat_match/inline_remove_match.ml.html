@@ -417,6 +417,29 @@
 <a id="L393"></a><span > </span>
 <a id="L394"></a><span class="visited"> </span>
 <a id="L395"></a><span > </span>
+<a id="L396"></a><span > </span>
+<a id="L397"></a><span > </span>
+<a id="L398"></a><span class="visited"> </span>
+<a id="L399"></a><span > </span>
+<a id="L400"></a><span > </span>
+<a id="L401"></a><span > </span>
+<a id="L402"></a><span > </span>
+<a id="L403"></a><span > </span>
+<a id="L404"></a><span > </span>
+<a id="L405"></a><span > </span>
+<a id="L406"></a><span > </span>
+<a id="L407"></a><span > </span>
+<a id="L408"></a><span class="visited"> </span>
+<a id="L409"></a><span > </span>
+<a id="L410"></a><span > </span>
+<a id="L411"></a><span > </span>
+<a id="L412"></a><span > </span>
+<a id="L413"></a><span > </span>
+<a id="L414"></a><span > </span>
+<a id="L415"></a><span > </span>
+<a id="L416"></a><span > </span>
+<a id="L417"></a><span class="visited"> </span>
+<a id="L418"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -816,6 +839,29 @@
 <a href="#L393">393</a>
 <a href="#L394">394</a>
 <a href="#L395">395</a>
+<a href="#L396">396</a>
+<a href="#L397">397</a>
+<a href="#L398">398</a>
+<a href="#L399">399</a>
+<a href="#L400">400</a>
+<a href="#L401">401</a>
+<a href="#L402">402</a>
+<a href="#L403">403</a>
+<a href="#L404">404</a>
+<a href="#L405">405</a>
+<a href="#L406">406</a>
+<a href="#L407">407</a>
+<a href="#L408">408</a>
+<a href="#L409">409</a>
+<a href="#L410">410</a>
+<a href="#L411">411</a>
+<a href="#L412">412</a>
+<a href="#L413">413</a>
+<a href="#L414">414</a>
+<a href="#L415">415</a>
+<a href="#L416">416</a>
+<a href="#L417">417</a>
+<a href="#L418">418</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -825,8 +871,8 @@ open Lib
 open Test.Utils
 
 let test code =
-  <span data-count="17">l</span>et open Format in
-  remove_match code (print<span data-count="17">f</span> "\n%a" Sast.pp_program)
+  <span data-count="18">l</span>et open Format in
+  remove_match code (print<span data-count="18">f</span> "\n%a" Sast.pp_program)
 ;;
 
 let%expect_test _ =
@@ -1210,6 +1256,29 @@ let%expect_test _ =
     let e = (`list_field __list_1 1)
     let f = (`list_hd (`get_tuple_field __tuple_0 3))
     let g = (`list_tl (`get_tuple_field __tuple_0 3))
+    |}<span data-count="7">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -&gt; acc
+        | n -&gt; helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  <span data-count="1">[</span>%expect
+    {|
+    let pow = (fun x n -&gt;
+       let rec helper = (fun acc n_0 -&gt;
+         if (( = ) n_0 0)
+         then acc
+         else let n_1 = n_0 in
+           (helper (( * ) acc x) (( - ) n_1 1))) in
+       (helper 1 n))
     |}<span data-count="7">]</span>
 ;;
 </code></pre>

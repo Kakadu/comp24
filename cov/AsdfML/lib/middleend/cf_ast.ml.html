@@ -180,14 +180,14 @@ and cf_definition = CFLet of id * id list * cf_expr
 
 type program = cf_definition list
 
-let cf_const c = <span data-count="84">C</span>FConst c
-let cf_var v = <span data-count="374">C</span>FVar v
-let cf_app f arg = <span data-count="285">C</span>FApp (f, arg)
-let cf_if_else cond if_expr else_expr = <span data-count="12">C</span>FIfElse (cond, if_expr, else_expr)
-let cf_let_in id body exp = <span data-count="65">C</span>FLetIn (id, body, exp)
+let cf_const c = <span data-count="87">C</span>FConst c
+let cf_var v = <span data-count="389">C</span>FVar v
+let cf_app f arg = <span data-count="297">C</span>FApp (f, arg)
+let cf_if_else cond if_expr else_expr = <span data-count="13">C</span>FIfElse (cond, if_expr, else_expr)
+let cf_let_in id body exp = <span data-count="67">C</span>FLetIn (id, body, exp)
 let cf_tuple e1 e2 es = <span data-count="11">C</span>FTuple (e1, e2, es)
 let cf_list exprs = <span data-count="2">C</span>FList exprs
-let cf_def id args expr = <span data-count="132">C</span>FLet (id, args, expr)
+let cf_def id args expr = <span data-count="136">C</span>FLet (id, args, expr)
 
 open Base
 open Format

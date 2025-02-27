@@ -245,44 +245,44 @@ open Cf_ast
 open State.IntStateM
 open State.IntStateM.Syntax
 
-let fresh_id name = <span data-count="111">f</span>resh_prefix (if String.equal name "" then <span data-count="10">"</span>ll" else <span data-count="101">"</span>ll_" ^ name)
+let fresh_id name = <span data-count="114">f</span>resh_prefix (if String.equal name "" then <span data-count="10">"</span>ll" else <span data-count="104">"</span>ll_" ^ name)
 
-let rec ll_expr env lift ?(name = <span data-count="663">N</span>one) = function
-  | <span data-count="84">S</span>Const c -&gt; return (cf_cons<span data-count="84">t</span> c, lift)
-  | <span data-count="347">S</span>Var id -&gt;
+let rec ll_expr env lift ?(name = <span data-count="691">N</span>one) = function
+  | <span data-count="87">S</span>Const c -&gt; return (cf_cons<span data-count="87">t</span> c, lift)
+  | <span data-count="361">S</span>Var id -&gt;
     let id =
       (match Map.find env id with
-       | <span data-count="339">N</span>one -&gt; id
-       | <span data-count="8">S</span>ome new_id -&gt; new_id)
+       | <span data-count="352">N</span>one -&gt; id
+       | <span data-count="9">S</span>ome new_id -&gt; new_id)
       |&gt; cf_var
     in
-    <span data-count="347">r</span>eturn (id, lift)
-  | <span data-count="285">S</span>App (l, r) -&gt;
-    let* l, lift = ll_exp<span data-count="285">r</span> env lift l in
-    <span data-count="285">l</span>et* r, lift = ll_exp<span data-count="285">r</span> env lift r in
-    <span data-count="285">r</span>eturn (cf_ap<span data-count="285">p</span> l r, lift)
-  | <span data-count="12">S</span>IfElse (i, t, e) -&gt;
-    let* i, lift = ll_exp<span data-count="12">r</span> env lift i in
-    <span data-count="12">l</span>et* t, lift = ll_exp<span data-count="12">r</span> env lift t in
-    <span data-count="12">l</span>et* e, lift = ll_exp<span data-count="12">r</span> env lift e in
-    <span data-count="12">r</span>eturn (cf_if_els<span data-count="12">e</span> i t e, lift)
-  | <span data-count="27">S</span>Fun (arg, args, exp) -&gt;
+    <span data-count="361">r</span>eturn (id, lift)
+  | <span data-count="297">S</span>App (l, r) -&gt;
+    let* l, lift = ll_exp<span data-count="297">r</span> env lift l in
+    <span data-count="297">l</span>et* r, lift = ll_exp<span data-count="297">r</span> env lift r in
+    <span data-count="297">r</span>eturn (cf_ap<span data-count="297">p</span> l r, lift)
+  | <span data-count="13">S</span>IfElse (i, t, e) -&gt;
+    let* i, lift = ll_exp<span data-count="13">r</span> env lift i in
+    <span data-count="13">l</span>et* t, lift = ll_exp<span data-count="13">r</span> env lift t in
+    <span data-count="13">l</span>et* e, lift = ll_exp<span data-count="13">r</span> env lift e in
+    <span data-count="13">r</span>eturn (cf_if_els<span data-count="13">e</span> i t e, lift)
+  | <span data-count="28">S</span>Fun (arg, args, exp) -&gt;
     let* id =
       match name with
-      | <span data-count="17">S</span>ome id -&gt; retur<span data-count="17">n</span> id
+      | <span data-count="18">S</span>ome id -&gt; retur<span data-count="18">n</span> id
       | <span data-count="10">N</span>one -&gt; fresh_i<span data-count="10">d</span> ""
     in
-    <span data-count="27">l</span>et* exp, lift = ll_exp<span data-count="27">r</span> env lift exp in
-    <span data-count="27">r</span>eturn (cf_va<span data-count="27">r</span> id, cf_de<span data-count="27">f</span> id (arg :: args) exp :: lift)
-  | <span data-count="65">S</span>LetIn ((SLet _ as def), exp) -&gt;
-    let* def, lift, _ = ll_de<span data-count="65">f</span> env lift def in
-    <span data-count="65">l</span>et id, body =
+    <span data-count="28">l</span>et* exp, lift = ll_exp<span data-count="28">r</span> env lift exp in
+    <span data-count="28">r</span>eturn (cf_va<span data-count="28">r</span> id, cf_de<span data-count="28">f</span> id (arg :: args) exp :: lift)
+  | <span data-count="67">S</span>LetIn ((SLet _ as def), exp) -&gt;
+    let* def, lift, _ = ll_de<span data-count="67">f</span> env lift def in
+    <span data-count="67">l</span>et id, body =
       match def with
-      | <span data-count="65">C</span>FLet (id, _, body) -&gt; id, body
+      | <span data-count="67">C</span>FLet (id, _, body) -&gt; id, body
     in
     let env = Map.remove env id in
-    <span data-count="65">l</span>et* exp, lift = ll_exp<span data-count="65">r</span> env lift exp ~name in
-    <span data-count="65">r</span>eturn (cf_let_i<span data-count="65">n</span> id body exp, lift)
+    <span data-count="67">l</span>et* exp, lift = ll_exp<span data-count="67">r</span> env lift exp ~name in
+    <span data-count="67">r</span>eturn (cf_let_i<span data-count="67">n</span> id body exp, lift)
   | <span data-count="2">S</span>List xs -&gt;
     List.fol<span data-count="2">d</span>
       xs
@@ -304,37 +304,37 @@ let rec ll_expr env lift ?(name = <span data-count="663">N</span>one) = function
         <span data-count="3">r</span>eturn (x :: acc, lift))
     &gt;&gt;| fun (xs, lift) -&gt; <span data-count="11">c</span>f_tupl<span data-count="11">e</span> x1 x2 (List.re<span data-count="11">v</span> xs), lift
 
-and ll_def ?(top = <span data-count="65">f</span>alse) env lift = function
+and ll_def ?(top = <span data-count="67">f</span>alse) env lift = function
   (* TODO: probably should decouple ELets and DLets *)
-  | <span data-count="34">S</span>Let (NonRec, id, SFun (arg, args, exp)) when top -&gt;
-    <span data-count="23">l</span>et* new_id = fresh_i<span data-count="23">d</span> id in
-    <span data-count="23">l</span>et* exp, lift = ll_exp<span data-count="23">r</span> env lift exp ~name:(Some new_id) in
-    <span data-count="23">r</span>eturn (cf_de<span data-count="23">f</span> id (arg :: args) exp, lift, env)
-  | <span data-count="9">S</span>Let (Rec, id, SFun (arg, args, exp)) when top -&gt;
+  | <span data-count="35">S</span>Let (NonRec, id, SFun (arg, args, exp)) when top -&gt;
+    <span data-count="24">l</span>et* new_id = fresh_i<span data-count="24">d</span> id in
+    <span data-count="24">l</span>et* exp, lift = ll_exp<span data-count="24">r</span> env lift exp ~name:(Some new_id) in
+    <span data-count="24">r</span>eturn (cf_de<span data-count="24">f</span> id (arg :: args) exp, lift, env)
+  | <span data-count="10">S</span>Let (Rec, id, SFun (arg, args, exp)) when top -&gt;
     <span data-count="4">l</span>et env = Map.set env ~key:id ~data:id in
     <span data-count="4">l</span>et* exp, lift = ll_exp<span data-count="4">r</span> env lift exp ~name:(Some id) in
     <span data-count="4">r</span>eturn (cf_de<span data-count="4">f</span> id (arg :: args) exp, lift, env)
-  | <span data-count="73">S</span>Let (NonRec, id, exp) -&gt;
-    let* new_id = fresh_i<span data-count="73">d</span> id in
-    <span data-count="73">l</span>et* exp, lift = ll_exp<span data-count="73">r</span> env lift exp ~name:(Some new_id) in
-    <span data-count="73">r</span>eturn (cf_de<span data-count="73">f</span> id [] exp, lift, env)
-  | <span data-count="5">S</span>Let (Rec, id, exp) -&gt;
-    let* new_id = fresh_i<span data-count="5">d</span> id in
-    <span data-count="5">l</span>et env = Map.set env ~key:id ~data:new_id in
-    <span data-count="5">l</span>et* exp, lift = ll_exp<span data-count="5">r</span> env lift exp ~name:(Some new_id) in
-    <span data-count="5">r</span>eturn (cf_de<span data-count="5">f</span> id [] exp, lift, env)
+  | <span data-count="74">S</span>Let (NonRec, id, exp) -&gt;
+    let* new_id = fresh_i<span data-count="74">d</span> id in
+    <span data-count="74">l</span>et* exp, lift = ll_exp<span data-count="74">r</span> env lift exp ~name:(Some new_id) in
+    <span data-count="74">r</span>eturn (cf_de<span data-count="74">f</span> id [] exp, lift, env)
+  | <span data-count="6">S</span>Let (Rec, id, exp) -&gt;
+    let* new_id = fresh_i<span data-count="6">d</span> id in
+    <span data-count="6">l</span>et env = Map.set env ~key:id ~data:new_id in
+    <span data-count="6">l</span>et* exp, lift = ll_exp<span data-count="6">r</span> env lift exp ~name:(Some new_id) in
+    <span data-count="6">r</span>eturn (cf_de<span data-count="6">f</span> id [] exp, lift, env)
 ;;
 
 let ll_program prog =
-  <span data-count="29">l</span>et empty = Map.empty (module String) in
-  <span data-count="29">L</span>ist.fol<span data-count="29">d</span> prog ~init:(retur<span data-count="29">n</span> []) ~f:(fun acc def -&gt;
-    <span data-count="40">l</span>et* acc = acc in
-    <span data-count="40">l</span>et* def, lift, _ = ll_de<span data-count="40">f</span> empty [] def ~top:true in
-    <span data-count="40">r</span>eturn ((def :: lift) @ acc))
+  <span data-count="30">l</span>et empty = Map.empty (module String) in
+  <span data-count="30">L</span>ist.fol<span data-count="30">d</span> prog ~init:(retur<span data-count="30">n</span> []) ~f:(fun acc def -&gt;
+    <span data-count="41">l</span>et* acc = acc in
+    <span data-count="41">l</span>et* def, lift, _ = ll_de<span data-count="41">f</span> empty [] def ~top:true in
+    <span data-count="41">r</span>eturn ((def :: lift) @ acc))
   &gt;&gt;| List.rev
 ;;
 
-let lambda_lifting program = <span data-count="29">r</span>un (ll_progra<span data-count="29">m</span> program)
+let lambda_lifting program = <span data-count="30">r</span>un (ll_progra<span data-count="30">m</span> program)
 (* |&gt; remove_toplevel_lifts *)
 </code></pre>
       </div>

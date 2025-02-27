@@ -185,8 +185,8 @@ open Sast
 let vars_pat, vars_pat_list =
   let open Set.Poly in
   let rec helper = function
-    | <span data-count="25">P</span>Const _ | <span data-count="18">P</span>Wild -&gt; empty
-    | <span data-count="200">P</span>Ident x -&gt; singleton x
+    | <span data-count="31">P</span>Const _ | <span data-count="18">P</span>Wild -&gt; empty
+    | <span data-count="215">P</span>Ident x -&gt; singleton x
     | <span data-count="11">P</span>Tuple (hd1, hd2, tl) -&gt;
       let xs = hd1 :: hd2 :: tl in
       union_list (List.ma<span data-count="11">p</span> xs ~f:helper)
@@ -200,42 +200,42 @@ let vars_pat, vars_pat_list =
 let rec vars_expr =
   let open Set.Poly in
   function
-  | <span data-count="115">E</span>Const _ -&gt; empty
-  | <span data-count="752">E</span>Var id -&gt; singleton id
-  | <span data-count="586">E</span>App (l, r) -&gt; union (vars_exp<span data-count="586">r</span> l) (vars_exp<span data-count="586">r</span> r)
+  | <span data-count="124">E</span>Const _ -&gt; empty
+  | <span data-count="806">E</span>Var id -&gt; singleton id
+  | <span data-count="628">E</span>App (l, r) -&gt; union (vars_exp<span data-count="628">r</span> l) (vars_exp<span data-count="628">r</span> r)
   | <span data-count="11">E</span>IfElse (c, t, e) -&gt; union_list [ vars_exp<span data-count="11">r</span> c; vars_exp<span data-count="11">r</span> t; vars_exp<span data-count="11">r</span> e ]
-  | <span data-count="71">E</span>Fun (p, ps, exp) -&gt; union (vars_pat_lis<span data-count="71">t</span> (p :: ps)) (vars_exp<span data-count="71">r</span> exp)
-  | <span data-count="45">E</span>LetIn ((DLet _ as def), exp) -&gt; union (vars_de<span data-count="45">f</span> def) (vars_exp<span data-count="45">r</span> exp)
+  | <span data-count="74">E</span>Fun (p, ps, exp) -&gt; union (vars_pat_lis<span data-count="74">t</span> (p :: ps)) (vars_exp<span data-count="74">r</span> exp)
+  | <span data-count="48">E</span>LetIn ((DLet _ as def), exp) -&gt; union (vars_de<span data-count="48">f</span> def) (vars_exp<span data-count="48">r</span> exp)
   | <span data-count="8">E</span>Tuple (hd1, hd2, tl) -&gt;
     let xs = hd1 :: hd2 :: tl in
     union_list (List.ma<span data-count="8">p</span> xs ~f:vars_expr)
   | <span data-count="3">E</span>List xs -&gt; union_list (List.ma<span data-count="3">p</span> xs ~f:vars_expr)
-  | <span data-count="28">E</span>Match (e, pe) -&gt;
+  | <span data-count="34">E</span>Match (e, pe) -&gt;
     let vars_cases =
       List.fold pe ~init:empty ~f:(fun acc (p, e) -&gt;
-        <span data-count="65">u</span>nion_list [ acc; vars_exp<span data-count="65">r</span> e; vars_pa<span data-count="65">t</span> p ])
+        <span data-count="77">u</span>nion_list [ acc; vars_exp<span data-count="77">r</span> e; vars_pa<span data-count="77">t</span> p ])
     in
-    <span data-count="28">u</span>nion (vars_exp<span data-count="28">r</span> e) vars_cases
+    <span data-count="34">u</span>nion (vars_exp<span data-count="34">r</span> e) vars_cases
 
 and vars_def =
   let open Set.Poly in
   function
-  | <span data-count="45">D</span>Let (_, pat, exp) -&gt; union (vars_exp<span data-count="45">r</span> exp) (vars_pa<span data-count="45">t</span> pat)
+  | <span data-count="48">D</span>Let (_, pat, exp) -&gt; union (vars_exp<span data-count="48">r</span> exp) (vars_pa<span data-count="48">t</span> pat)
 ;;
 
 let rec free_vars_sexpr =
   let open Set.Poly in
   function
-  | <span data-count="214">S</span>Const _ -&gt; empty
-  | <span data-count="1099">S</span>Var id -&gt; singleton id
-  | <span data-count="917">S</span>App (l, r) -&gt; union (free_vars_sexp<span data-count="917">r</span> l) (free_vars_sexp<span data-count="917">r</span> r)
-  | <span data-count="44">S</span>IfElse (c, t, e) -&gt;
-    union_list [ free_vars_sexp<span data-count="44">r</span> c; free_vars_sexp<span data-count="44">r</span> t; free_vars_sexp<span data-count="44">r</span> e ]
-  | <span data-count="231">S</span>Fun (p, ps, exp) -&gt; diff (free_vars_sexp<span data-count="231">r</span> exp) (of_lis<span data-count="231">t</span> (p :: ps))
-  | <span data-count="120">S</span>LetIn ((SLet (_, id, _) as def), exp) -&gt;
+  | <span data-count="224">S</span>Const _ -&gt; empty
+  | <span data-count="1143">S</span>Var id -&gt; singleton id
+  | <span data-count="953">S</span>App (l, r) -&gt; union (free_vars_sexp<span data-count="953">r</span> l) (free_vars_sexp<span data-count="953">r</span> r)
+  | <span data-count="48">S</span>IfElse (c, t, e) -&gt;
+    union_list [ free_vars_sexp<span data-count="48">r</span> c; free_vars_sexp<span data-count="48">r</span> t; free_vars_sexp<span data-count="48">r</span> e ]
+  | <span data-count="237">S</span>Fun (p, ps, exp) -&gt; diff (free_vars_sexp<span data-count="237">r</span> exp) (of_lis<span data-count="237">t</span> (p :: ps))
+  | <span data-count="126">S</span>LetIn ((SLet (_, id, _) as def), exp) -&gt;
     let free_def = free_vars_sdef def in
-    <span data-count="120">l</span>et free_expr = diff (free_vars_sexp<span data-count="120">r</span> exp) (singleto<span data-count="120">n</span> id) in
-    <span data-count="120">u</span>nion free_def free_expr
+    <span data-count="126">l</span>et free_expr = diff (free_vars_sexp<span data-count="126">r</span> exp) (singleto<span data-count="126">n</span> id) in
+    <span data-count="126">u</span>nion free_def free_expr
   | <span data-count="26">S</span>Tuple (hd1, hd2, tl) -&gt;
     let xs = hd1 :: hd2 :: tl in
     union_list (List.ma<span data-count="26">p</span> xs ~f:free_vars_sexpr)
@@ -244,8 +244,8 @@ let rec free_vars_sexpr =
 and free_vars_sdef =
   let open Set.Poly in
   function
-  | <span data-count="161">S</span>Let (NonRec, _, exp) -&gt; free_vars_sexpr exp
-  | <span data-count="25">S</span>Let (Rec, id, exp) -&gt; diff (free_vars_sexp<span data-count="25">r</span> exp) (singleto<span data-count="25">n</span> id)
+  | <span data-count="166">S</span>Let (NonRec, _, exp) -&gt; free_vars_sexpr exp
+  | <span data-count="28">S</span>Let (Rec, id, exp) -&gt; diff (free_vars_sexp<span data-count="28">r</span> exp) (singleto<span data-count="28">n</span> id)
 ;;
 </code></pre>
       </div>

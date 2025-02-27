@@ -231,38 +231,38 @@ open Ast
 
 <span data-count="0">t</span>ype sprogram = <span data-count="0">s</span>definition lis<span data-count="0">t</span> [@@deriving show { with_path = false }]
 
-let s_const c = <span data-count="337">S</span>Const c
-let s_var x = <span data-count="1199">S</span>Var x
-let s_app f x = <span data-count="1401">S</span>App (f, x)
+let s_const c = <span data-count="344">S</span>Const c
+let s_var x = <span data-count="1235">S</span>Var x
+let s_app f x = <span data-count="1439">S</span>App (f, x)
 
 let s_if_else cond e_true e_false =
-  <span data-count="76">m</span>atch cond with
+  <span data-count="80">m</span>atch cond with
   | <span data-count="12">S</span>Const (CBool true) -&gt; e_true
   | <span data-count="0">S</span>Const (CBool false) -&gt; e_false
-  | <span data-count="64">_</span> -&gt; SIfElse (cond, e_true, e_false)
+  | <span data-count="68">_</span> -&gt; SIfElse (cond, e_true, e_false)
 ;;
 
-let s_fun p ps e = <span data-count="300">S</span>Fun (p, ps, e)
-let s_let_in def e = <span data-count="318">S</span>LetIn (def, e)
+let s_fun p ps e = <span data-count="308">S</span>Fun (p, ps, e)
+let s_let_in def e = <span data-count="326">S</span>LetIn (def, e)
 let s_tuple e1 e2 es = <span data-count="40">S</span>Tuple (e1, e2, es)
 let s_list exprs = <span data-count="12">S</span>List exprs
-let s_let x e = <span data-count="97">S</span>Let (NonRec, x, e)
+let s_let x e = <span data-count="99">S</span>Let (NonRec, x, e)
 let s_let_rec x e = <span data-count="0">S</span>Let (Rec, x, e)
-let s_let_flag r x e = <span data-count="407">S</span>Let (r, x, e)
+let s_let_flag r x e = <span data-count="417">S</span>Let (r, x, e)
 
 open Format
 open Utils
 
 let rec pp_sexpr fmt = function
-  | <span data-count="117">S</span>Const c -&gt; fprintf fmt "%a" Pp_ast.pp_constant c
-  | <span data-count="440">S</span>Var v -&gt; fprintf fmt "%s" v
-  | <span data-count="217">S</span>App (e1, e2) -&gt;
+  | <span data-count="120">S</span>Const c -&gt; fprintf fmt "%a" Pp_ast.pp_constant c
+  | <span data-count="452">S</span>Var v -&gt; fprintf fmt "%s" v
+  | <span data-count="222">S</span>App (e1, e2) -&gt;
     let rec pp_rest fmt = function
-      | <span data-count="145">S</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_sexpr e2
-      | <span data-count="217">e</span> -&gt; fprintf fmt "(%a" pp_sexpr e
+      | <span data-count="150">S</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_sexpr e2
+      | <span data-count="222">e</span> -&gt; fprintf fmt "(%a" pp_sexpr e
     in
     fprintf fmt "%a %a)" pp_rest e1 pp_sexpr e2
-  | <span data-count="21">S</span>IfElse (c, t, e) -&gt;
+  | <span data-count="22">S</span>IfElse (c, t, e) -&gt;
     fprintf
       fmt
       "@,if %a @\n@[&lt;2&gt;then@ %a@] @\n@[&lt;2&gt;else@ %a@]"
@@ -272,27 +272,27 @@ let rec pp_sexpr fmt = function
       t
       pp_sexpr
       e
-  | <span data-count="49">S</span>Fun (p, ps, e) -&gt;
+  | <span data-count="51">S</span>Fun (p, ps, e) -&gt;
     let p = p :: ps in
     fprintf fmt "(fun ";
-    <span data-count="49">p</span>p_print_list
-      ~pp_sep:(fun fmt _ -&gt; <span data-count="41">f</span>printf fmt " ")
-      (fun fmt x -&gt; <span data-count="90">f</span>printf fmt "%s" x)
+    <span data-count="51">p</span>p_print_list
+      ~pp_sep:(fun fmt _ -&gt; <span data-count="43">f</span>printf fmt " ")
+      (fun fmt x -&gt; <span data-count="94">f</span>printf fmt "%s" x)
       fmt
       p;
-    <span data-count="49">f</span>printf fmt " -&gt;@ %a)" pp_sexpr e
-  | <span data-count="77">S</span>LetIn (d, e) -&gt; fprintf fmt "%a in@\n%a" pp_sdef d pp_sexpr e
+    <span data-count="51">f</span>printf fmt " -&gt;@ %a)" pp_sexpr e
+  | <span data-count="79">S</span>LetIn (d, e) -&gt; fprintf fmt "%a in@\n%a" pp_sdef d pp_sexpr e
   | <span data-count="10">S</span>Tuple (x1, x2, xs) -&gt;
     let xs = x1 :: x2 :: xs in
     pp_list ~sep:", " fmt pp_sexpr xs
   | <span data-count="4">S</span>List xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_sexpr xs
 
 and pp_sdef fmt = function
-  | <span data-count="123">S</span>Let (NonRec, name, e) -&gt; fprintf fmt "@[&lt;2&gt;let %s =@ %a@]" name pp_sexpr e
-  | <span data-count="8">S</span>Let (Rec, name, e) -&gt; fprintf fmt "@[&lt;2&gt;let rec %s =@ %a@]" name pp_sexpr e
+  | <span data-count="125">S</span>Let (NonRec, name, e) -&gt; fprintf fmt "@[&lt;2&gt;let %s =@ %a@]" name pp_sexpr e
+  | <span data-count="9">S</span>Let (Rec, name, e) -&gt; fprintf fmt "@[&lt;2&gt;let rec %s =@ %a@]" name pp_sexpr e
 ;;
 
-let pp_program fmt p = <span data-count="28">B</span>ase.List.iter p ~f:(fun d -&gt; <span data-count="54">f</span>printf fmt "%a@." pp_sdef d)
+let pp_program fmt p = <span data-count="29">B</span>ase.List.iter p ~f:(fun d -&gt; <span data-count="55">f</span>printf fmt "%a@." pp_sdef d)
 </code></pre>
       </div>
     </div>

@@ -449,7 +449,7 @@ let default_ctx =
 ;;
 
 let remaps_empty = Map.empt<span data-count="38">y</span> (module String)
-let remaps_merge l r = <span data-count="407">M</span>ap.merge_skewed l r ~combine:(fun ~key _ r -&gt; <span data-count="44">r</span>)
+let remaps_merge l r = <span data-count="425">M</span>ap.merge_skewed l r ~combine:(fun ~key _ r -&gt; <span data-count="50">r</span>)
 
 let remaps_to_str r =
   <span data-count="0">M</span>ap.to_alist r |&gt; <span data-count="0">L</span>ist.map ~f:(fun (k, v) -&gt; <span data-count="0">k</span> ^ " -&gt; " ^ v) |&gt; <span data-count="0">S</span>tring.concat ~sep:", "
@@ -459,43 +459,43 @@ let reserved_prefixes = [ "__"; "anf"; "ll_" ]
 let renamed_prefix = "__var_"
 
 let is_internal id =
-  <span data-count="1113">L</span>ist.exists reserved_prefixes ~f:(fun p -&gt; <span data-count="3326">S</span>tring.is_prefix id ~prefix:p)
+  <span data-count="1144">L</span>ist.exists reserved_prefixes ~f:(fun p -&gt; <span data-count="3423">S</span>tring.is_prefix id ~prefix:p)
 ;;
 
 let alpha_id (remaps : remaps) id =
-  <span data-count="1093">l</span>et rec gen_new_id ctx id =
-    <span data-count="510">m</span>atch Map.find ctx.count id with
-    | <span data-count="421">N</span>one -&gt;
+  <span data-count="1144">l</span>et rec gen_new_id ctx id =
+    <span data-count="531">m</span>atch Map.find ctx.count id with
+    | <span data-count="436">N</span>one -&gt;
       let new_id = id in
-      let ctx = { ctx with count = Map.se<span data-count="421">t</span> ctx.count ~key:id ~data:0 } in
+      let ctx = { ctx with count = Map.se<span data-count="436">t</span> ctx.count ~key:id ~data:0 } in
       new_id, ctx
-    | <span data-count="89">S</span>ome cnt -&gt;
-      let new_id = id ^ "_" ^ string_of_in<span data-count="89">t</span> cnt in
-      let ctx = { ctx with count = Map.se<span data-count="89">t</span> ctx.count ~key:id ~data:(cnt + 1) } in
-      if not (Map.me<span data-count="89">m</span> remaps new_i<span data-count="0">d</span> || Map.me<span data-count="89">m</span> ctx.count new_i<span data-count="1">d</span>)
-      then <span data-count="88">n</span>ew_id, ctx
+    | <span data-count="95">S</span>ome cnt -&gt;
+      let new_id = id ^ "_" ^ string_of_in<span data-count="95">t</span> cnt in
+      let ctx = { ctx with count = Map.se<span data-count="95">t</span> ctx.count ~key:id ~data:(cnt + 1) } in
+      if not (Map.me<span data-count="95">m</span> remaps new_i<span data-count="0">d</span> || Map.me<span data-count="95">m</span> ctx.count new_i<span data-count="1">d</span>)
+      then <span data-count="94">n</span>ew_id, ctx
       else <span data-count="1">g</span>en_new_id ctx id
   in
-  let id = if is_internal id then <span data-count="10">r</span>enamed_prefix ^ id else <span data-count="1083">i</span>d in
+  let id = if is_internal id then <span data-count="10">r</span>enamed_prefix ^ id else <span data-count="1134">i</span>d in
   match Map.find remaps id with
-  | <span data-count="434">S</span>ome new_id -&gt; return (new_id, remaps)
-  | <span data-count="659">N</span>one -&gt;
+  | <span data-count="458">S</span>ome new_id -&gt; return (new_id, remaps)
+  | <span data-count="686">N</span>one -&gt;
     let* ctx = get in
-    <span data-count="659">i</span>f Set.mem ctx.reserved id
-    then <span data-count="150">r</span>eturn (id, remaps)
-    else <span data-count="509">(</span>
+    <span data-count="686">i</span>f Set.mem ctx.reserved id
+    then <span data-count="156">r</span>eturn (id, remaps)
+    else <span data-count="530">(</span>
       let new_id, ctx = gen_new_id ctx id in
-      <span data-count="509">l</span>et* () = pu<span data-count="509">t</span> ctx in
-      <span data-count="509">l</span>et remaps = Map.set remaps ~key:id ~data:new_id in
-      <span data-count="509">r</span>eturn (new_id, remaps))
+      <span data-count="530">l</span>et* () = pu<span data-count="530">t</span> ctx in
+      <span data-count="530">l</span>et remaps = Map.set remaps ~key:id ~data:new_id in
+      <span data-count="530">r</span>eturn (new_id, remaps))
 ;;
 
 let rec alpha_pattern remaps = function
-  | <span data-count="17">P</span>Const _ as c -&gt; return (c, remaps)
+  | <span data-count="20">P</span>Const _ as c -&gt; return (c, remaps)
   | <span data-count="25">P</span>Wild -&gt; return (PWild, remaps)
-  | <span data-count="509">P</span>Ident id -&gt;
-    let* new_id, remaps = alpha_i<span data-count="509">d</span> remaps id in
-    <span data-count="509">r</span>eturn (PIdent new_id, remaps)
+  | <span data-count="530">P</span>Ident id -&gt;
+    let* new_id, remaps = alpha_i<span data-count="530">d</span> remaps id in
+    <span data-count="530">r</span>eturn (PIdent new_id, remaps)
   | <span data-count="38">P</span>Tuple (x1, x2, xs) -&gt;
     let* x1, remaps = alpha_patter<span data-count="38">n</span> remaps x1 in
     <span data-count="38">l</span>et* x2, remaps = alpha_patter<span data-count="38">n</span> remaps x2 in
@@ -529,38 +529,38 @@ let rec alpha_pattern remaps = function
 ;;
 
 let rec alpha_expr remaps = function
-  | <span data-count="189">E</span>Const c -&gt; return (EConst c, remaps)
-  | <span data-count="584">E</span>Var v -&gt;
-    let* new_id, remaps' = alpha_i<span data-count="584">d</span> remaps v in
-    <span data-count="584">r</span>eturn (EVar new_id, remaps')
-  | <span data-count="436">E</span>App (l, r) -&gt;
-    let* l, _ = alpha_exp<span data-count="436">r</span> remaps l in
-    <span data-count="436">l</span>et* r, _ = alpha_exp<span data-count="436">r</span> remaps r in
-    <span data-count="436">r</span>eturn (EApp (l, r), remaps)
+  | <span data-count="195">E</span>Const c -&gt; return (EConst c, remaps)
+  | <span data-count="614">E</span>Var v -&gt;
+    let* new_id, remaps' = alpha_i<span data-count="614">d</span> remaps v in
+    <span data-count="614">r</span>eturn (EVar new_id, remaps')
+  | <span data-count="460">E</span>App (l, r) -&gt;
+    let* l, _ = alpha_exp<span data-count="460">r</span> remaps l in
+    <span data-count="460">l</span>et* r, _ = alpha_exp<span data-count="460">r</span> remaps r in
+    <span data-count="460">r</span>eturn (EApp (l, r), remaps)
   | <span data-count="6">E</span>IfElse (i, t, e) -&gt;
     let* i, _ = alpha_exp<span data-count="6">r</span> remaps i in
     <span data-count="6">l</span>et* t, _ = alpha_exp<span data-count="6">r</span> remaps t in
     <span data-count="6">l</span>et* e, _ = alpha_exp<span data-count="6">r</span> remaps e in
     <span data-count="6">r</span>eturn (EIfElse (i, t, e), remaps)
-  | <span data-count="147">E</span>Fun (p, ps, e) -&gt;
-    let* p, remaps' = alpha_patter<span data-count="147">n</span> remaps_empty p in
-    <span data-count="147">l</span>et* ps, remaps' =
-      List.fol<span data-count="147">d</span>
+  | <span data-count="153">E</span>Fun (p, ps, e) -&gt;
+    let* p, remaps' = alpha_patter<span data-count="153">n</span> remaps_empty p in
+    <span data-count="153">l</span>et* ps, remaps' =
+      List.fol<span data-count="153">d</span>
         ps
-        ~init:(retur<span data-count="147">n</span> ([], remaps'))
+        ~init:(retur<span data-count="153">n</span> ([], remaps'))
         ~f:(fun acc p -&gt;
-          <span data-count="52">l</span>et* ps, remaps' = acc in
-          <span data-count="52">l</span>et* p, remaps' = alpha_patter<span data-count="52">n</span> remaps' p in
-          <span data-count="52">r</span>eturn (p :: ps, remaps'))
-      &gt;&gt;<span data-count="147">|</span> fun (ps, remaps) -&gt; <span data-count="147">L</span>ist.re<span data-count="147">v</span> ps, remaps
+          <span data-count="58">l</span>et* ps, remaps' = acc in
+          <span data-count="58">l</span>et* p, remaps' = alpha_patter<span data-count="58">n</span> remaps' p in
+          <span data-count="58">r</span>eturn (p :: ps, remaps'))
+      &gt;&gt;<span data-count="153">|</span> fun (ps, remaps) -&gt; <span data-count="153">L</span>ist.re<span data-count="153">v</span> ps, remaps
     in
-    <span data-count="147">l</span>et remaps'' = remaps_merge remaps remaps' in
-    <span data-count="147">l</span>et* e, _ = alpha_exp<span data-count="147">r</span> remaps'' e in
-    <span data-count="147">r</span>eturn (EFun (p, ps, e), remaps)
-  | <span data-count="80">E</span>LetIn (d, e) -&gt;
-    let* d, remaps' = alpha_de<span data-count="80">f</span> remaps d in
-    <span data-count="80">l</span>et* e, _ = alpha_exp<span data-count="80">r</span> remaps' e in
-    <span data-count="80">r</span>eturn (ELetIn (d, e), remaps)
+    <span data-count="153">l</span>et remaps'' = remaps_merge remaps remaps' in
+    <span data-count="153">l</span>et* e, _ = alpha_exp<span data-count="153">r</span> remaps'' e in
+    <span data-count="153">r</span>eturn (EFun (p, ps, e), remaps)
+  | <span data-count="83">E</span>LetIn (d, e) -&gt;
+    let* d, remaps' = alpha_de<span data-count="83">f</span> remaps d in
+    <span data-count="83">l</span>et* e, _ = alpha_exp<span data-count="83">r</span> remaps' e in
+    <span data-count="83">r</span>eturn (ELetIn (d, e), remaps)
   | <span data-count="27">E</span>Tuple (x1, x2, xs) -&gt;
     let* x1, _ = alpha_exp<span data-count="27">r</span> remaps x1 in
     <span data-count="27">l</span>et* x2, _ = alpha_exp<span data-count="27">r</span> remaps x2 in
@@ -579,40 +579,40 @@ let rec alpha_expr remaps = function
       &gt;&gt;<span data-count="15">|</span> List.rev
     in
     <span data-count="15">r</span>eturn (EList xs, remaps)
-  | <span data-count="18">E</span>Match (exp, cases) -&gt;
-    let* exp, _ = alpha_exp<span data-count="18">r</span> remaps exp in
-    <span data-count="18">l</span>et* cases =
-      mfol<span data-count="18">d</span> cases ~init:[] ~f:(fun acc (p, e) -&gt;
-        <span data-count="46">l</span>et* p, remaps' = alpha_patter<span data-count="46">n</span> remaps_empty p in
-        <span data-count="46">l</span>et remaps'' = remaps_merge remaps remaps' in
-        <span data-count="46">l</span>et* e, _ = alpha_exp<span data-count="46">r</span> remaps'' e in
-        <span data-count="46">r</span>eturn ((p, e) :: acc))
-      &gt;&gt;<span data-count="18">|</span> List.rev
+  | <span data-count="21">E</span>Match (exp, cases) -&gt;
+    let* exp, _ = alpha_exp<span data-count="21">r</span> remaps exp in
+    <span data-count="21">l</span>et* cases =
+      mfol<span data-count="21">d</span> cases ~init:[] ~f:(fun acc (p, e) -&gt;
+        <span data-count="52">l</span>et* p, remaps' = alpha_patter<span data-count="52">n</span> remaps_empty p in
+        <span data-count="52">l</span>et remaps'' = remaps_merge remaps remaps' in
+        <span data-count="52">l</span>et* e, _ = alpha_exp<span data-count="52">r</span> remaps'' e in
+        <span data-count="52">r</span>eturn ((p, e) :: acc))
+      &gt;&gt;<span data-count="21">|</span> List.rev
     in
-    <span data-count="18">r</span>eturn (EMatch (exp, cases), remaps)
+    <span data-count="21">r</span>eturn (EMatch (exp, cases), remaps)
 
 and alpha_def remaps = function
-  | <span data-count="214">D</span>Let (r, p, e) -&gt;
-    let* p, remaps' = alpha_patter<span data-count="214">n</span> remaps_empty p in
-    <span data-count="214">l</span>et remaps' = remaps_merge remaps remaps' in
-    <span data-count="214">l</span>et* e, _ =
+  | <span data-count="220">D</span>Let (r, p, e) -&gt;
+    let* p, remaps' = alpha_patter<span data-count="220">n</span> remaps_empty p in
+    <span data-count="220">l</span>et remaps' = remaps_merge remaps remaps' in
+    <span data-count="220">l</span>et* e, _ =
       match r with
-      | <span data-count="19">R</span>ec -&gt; alpha_exp<span data-count="19">r</span> remaps' e
-      | <span data-count="195">N</span>onRec -&gt; alpha_exp<span data-count="195">r</span> remaps e
+      | <span data-count="22">R</span>ec -&gt; alpha_exp<span data-count="22">r</span> remaps' e
+      | <span data-count="198">N</span>onRec -&gt; alpha_exp<span data-count="198">r</span> remaps e
     in
-    <span data-count="214">r</span>eturn (DLet (r, p, e), remaps')
+    <span data-count="220">r</span>eturn (DLet (r, p, e), remaps')
 ;;
 
 let alpha_program p =
-  <span data-count="94">r</span>un
-    (mfol<span data-count="94">d</span> p ~init:(remaps_empty, []) ~f:(fun acc x -&gt;
-       <span data-count="134">l</span>et remaps, defs = acc in
-       let* def, remaps' = alpha_de<span data-count="134">f</span> remaps x in
-       <span data-count="134">r</span>eturn (remaps', def :: defs)))
+  <span data-count="97">r</span>un
+    (mfol<span data-count="97">d</span> p ~init:(remaps_empty, []) ~f:(fun acc x -&gt;
+       <span data-count="137">l</span>et remaps, defs = acc in
+       let* def, remaps' = alpha_de<span data-count="137">f</span> remaps x in
+       <span data-count="137">r</span>eturn (remaps', def :: defs)))
     default_ctx
-  |&gt; <span data-count="94">f</span>st
-  |&gt; <span data-count="94">s</span>nd
-  |&gt; <span data-count="94">L</span>ist.rev
+  |&gt; <span data-count="97">f</span>st
+  |&gt; <span data-count="97">s</span>nd
+  |&gt; <span data-count="97">L</span>ist.rev
 ;;
 </code></pre>
       </div>

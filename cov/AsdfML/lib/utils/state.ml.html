@@ -170,17 +170,17 @@ open Base
 module StateM = struct
   type ('state, 'a) t = 'state -&gt; 'a * 'state
 
-  let return (x : 'a) : ('state, 'a) t = <span data-count="8722">f</span>un s -&gt; <span data-count="8722">x</span>, s
+  let return (x : 'a) : ('state, 'a) t = <span data-count="9115">f</span>un s -&gt; <span data-count="9115">x</span>, s
 
   let bind (m : ('state, 'a) t) (f : 'a -&gt; ('state, 'b) t) : ('state, 'b) t =
-    <span data-count="9851">f</span>un s -&gt;
-    <span data-count="9851">l</span>et a, new_state = m s in
-    <span data-count="9851">f</span> a new_state
+    <span data-count="10274">f</span>un s -&gt;
+    <span data-count="10274">l</span>et a, new_state = m s in
+    <span data-count="10274">f</span> a new_state
   ;;
 
-  let get : ('state, 'state) t = fun s -&gt; <span data-count="659">s</span>, s
-  let put (new_state : 'state) : ('state, unit) t = <span data-count="509">f</span>un _ -&gt; <span data-count="509">(</span>), new_state
-  let run (m : ('state, 'a) t) (init : 'state) : 'a * 'state = <span data-count="94">m</span> init
+  let get : ('state, 'state) t = fun s -&gt; <span data-count="686">s</span>, s
+  let put (new_state : 'state) : ('state, unit) t = <span data-count="530">f</span>un _ -&gt; <span data-count="530">(</span>), new_state
+  let run (m : ('state, 'a) t) (init : 'state) : 'a * 'state = <span data-count="97">m</span> init
   let modify (f : 'state -&gt; 'state) : ('state, unit) t = <span data-count="0">b</span>ind get (fun s -&gt; <span data-count="0">p</span>ut (<span data-count="0">f</span> s))
 
   module Syntax = struct
@@ -189,15 +189,15 @@ module StateM = struct
 
     let ( &gt;&gt;| ) : ('state, 'a) t -&gt; ('a -&gt; 'b) -&gt; ('state, 'b) t =
       fun m f state -&gt;
-      <span data-count="408">l</span>et value, st = m state in
-      <span data-count="816">f</span> value, st
+      <span data-count="422">l</span>et value, st = m state in
+      <span data-count="844">f</span> value, st
     ;;
   end
 
   open Syntax
 
   let mfold xs ~init ~f =
-    <span data-count="230">L</span>ist.fold xs ~init:(retur<span data-count="230">n</span> init) ~f:(fun acc x -&gt; <span data-count="330">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="330">f</span> acc x)
+    <span data-count="239">L</span>ist.fold xs ~init:(retur<span data-count="239">n</span> init) ~f:(fun acc x -&gt; <span data-count="342">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="342">f</span> acc x)
   ;;
 
   let mfoldi xs ~init ~f =
@@ -205,7 +205,7 @@ module StateM = struct
   ;;
 
   let mfold_right xs ~init ~f =
-    <span data-count="63">L</span>ist.fold_right xs ~init:(retur<span data-count="63">n</span> init) ~f:(fun x acc -&gt; <span data-count="87">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="87">f</span> x acc)
+    <span data-count="66">L</span>ist.fold_right xs ~init:(retur<span data-count="66">n</span> init) ~f:(fun x acc -&gt; <span data-count="93">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="93">f</span> x acc)
   ;;
 
   let mfoldi_right xs ~init ~f =
@@ -223,9 +223,9 @@ module IntStateM = struct
 
   type 'a t = (int, 'a) StateM.t
 
-  let fresh last = <span data-count="98">l</span>ast, last + 1
-  let fresh_prefix str last = <span data-count="163">s</span>tr ^ "_" ^ string_of_in<span data-count="163">t</span> last, last + 1
-  let run m = <span data-count="206">f</span>st (<span data-count="206">m</span> 0)
+  let fresh last = <span data-count="87">l</span>ast, last + 1
+  let fresh_prefix str last = <span data-count="166">s</span>tr ^ "_" ^ string_of_in<span data-count="166">t</span> last, last + 1
+  let run m = <span data-count="213">f</span>st (<span data-count="213">m</span> 0)
 end
 </code></pre>
       </div>
