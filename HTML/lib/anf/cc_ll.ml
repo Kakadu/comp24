@@ -375,15 +375,15 @@ let closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * 
 let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
   : decl list cc
   =
-  let rec helper global_env decls =
+  let rec helper global_env decls count =
     match decls with
     | [] -> return []
     | d :: ds ->
-      let* global_env, cd = closure_convert_decl global_env d in
-      let* cds = helper global_env ds in
-      return (cd :: cds)
+      let (global_env, cd), count, extra = closure_convert_decl global_env d count in
+      let* cds = helper global_env ds count in
+      return (extra @ cd :: cds)
   in
-  helper global_env decls
+  helper global_env decls 0
 ;;
 
 let closure_convert (prog : decl list) : decl list =
