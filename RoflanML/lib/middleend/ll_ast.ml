@@ -16,7 +16,10 @@ type llexpr =
   | LLLetIn of id * llexpr * llexpr (** let x = 1, only non-function bindings *)
   | LLApp of llexpr * llexpr (** Application f x y z *)
 
-type lldecl = LLDLet of is_rec * id * typed_arg list * llexpr
+type lldecl =
+  | LLDLet of is_rec * id * typed_arg list * llexpr
+  | LLDMutualLet of (id * typed_arg list * llexpr) list
+
 type llprogram = lldecl list
 
 let ll_to_ast =
@@ -38,6 +41,15 @@ let ll_to_ast =
         List.fold_right args ~init:(expr_to_ast e) ~f:(fun arg e -> EFun (arg, e))
       in
       DLet (is_rec, id, e)
+    | LLDMutualLet decls ->
+      let decls =
+        List.fold_right decls ~init:[] ~f:(fun (id, args, e) acc ->
+          let e =
+            List.fold_right args ~init:(expr_to_ast e) ~f:(fun arg e -> EFun (arg, e))
+          in
+          (id, e) :: acc)
+      in
+      DMutualLet (Rec, decls)
   in
   decl_to_ast
 ;;
