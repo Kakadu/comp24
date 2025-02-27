@@ -162,11 +162,11 @@
     then 1
     else (o (n - 1))
   let  fodd p n  = 
-    let e, o  = p
+    let e0, o0  = p
     in 
     if (n = 0)
     then 0
-    else (e (n - 1))
+    else (e0 (n - 1))
   let  tie  = (fixpoly (feven, fodd))
   let  modd meven n  = 
     if (n = 0)
@@ -225,3 +225,31 @@
   let  a1 a0  = (a0 + 3)
   let  sum a0  = (a1 a0)
   let  b  = a
+
+  $ ./lambdalift_demo.exe << EOF
+  > let a = 5
+  > let sum a = 
+  >   let (), a = (print_int 4, a) in a
+  > let b = a
+  let  a  = 5
+  let  sum a0  = 
+    let (), a1  = ((print_int 4), a0)
+    in a1
+  let  b  = a
+
+
+  $ ./lambdalift_demo.exe << EOF
+  > let sum e a = 
+  >   let (e, a) = (e, a) in
+  >   let (e, a) = (e, a) in (e, a)
+  let  sum e a  = 
+    let e0, a0  = (e, a)
+    in 
+    let e1, a1  = (e0, a0)
+    in (e1, a1)
+  $ ./lambdalift_demo.exe << EOF
+  > let sum = 
+  >   let (), () = (print_int 4, print_int 3)  in
+  >   0
+  let  unit, unit0  = ((print_int 4), (print_int 3))
+  let  sum  = unit; unit0; 0
