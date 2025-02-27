@@ -91,3 +91,43 @@ let%expect_test "test invalid let rec with pat binding" =
   [%expect
     {| ErrorType infering error: Only variables are allowed as left-hand side of `let rec' |}]
 ;;
+
+let%expect_test "test let statement" =
+  test {|let a = 4|};
+  [%expect {| val a : int |}]
+;;
+
+let%expect_test "test let statements" =
+  test {|let a = 4
+  let b = a|};
+  [%expect {|
+    val a : int
+    val b : int |}]
+;;
+
+let%expect_test "test let and statements" =
+  test {|let a = 4
+  and b = true
+  let c = a, b|};
+  [%expect {|
+    val a : int
+    val b : bool
+    val c : (int * bool) |}]
+;;
+
+let%expect_test "test let rec and statements" =
+  test {|let rec f a = a
+  and g b = true
+  let c = f (g 4)|};
+  [%expect {|
+    val g : 'c -> bool
+    val f : 'd -> 'd
+    val c : bool |}]
+;;
+
+let%expect_test "test wrong let exp and statements" =
+  test {|let a = 4 in a
+  let b = a|};
+  [%expect {|
+    ErrorType infering error: variable a is not found |}]
+;;

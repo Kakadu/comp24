@@ -19,6 +19,7 @@ type type_val =
   | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
+  | TUnit (** e.g. [unit]*)
 
 val pp_type_val : Format.formatter -> type_val -> unit
 val show_type_val : type_val -> string

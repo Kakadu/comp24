@@ -33,6 +33,7 @@ type type_val =
   | TParametric of type_val * type_val (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
+  | TUnit
 
 let enclose s = "(" ^ s ^ ")"
 
@@ -42,6 +43,7 @@ let rec show_type_val = function
   | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
   | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
   | TParametric (t1, t2) -> show_type_val t1 ^ " " ^ show_type_val t2
+  | TUnit -> "unit"
 ;;
 
 let pp_type_val fmt ty = Format.fprintf fmt "%s" @@ show_type_val ty
