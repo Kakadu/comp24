@@ -6,12 +6,51 @@ open Llast
 let set_empty = Set.empty (module String)
 let map_empty = Map.empty (module String)
 
-let get_name gvars name =
+let get_uniq_name gvars name =
   let rec helper gvars id =
     let name = String.concat [ name; Int.to_string id ] in
     if Set.mem gvars name then helper gvars (id + 1) else name
   in
   if Set.mem gvars name then helper gvars 0 else name
+;;
+
+let update_name name local_vars all_vars =
+  let new_name = get_uniq_name all_vars name in
+  let update_lvars = Map.set local_vars ~key:name ~data:new_name in
+  let update_all_vars = Set.add all_vars new_name in
+  new_name, update_lvars, update_all_vars
+;;
+
+let update_all_name_list name_list vars all_vars =
+  let new_name_list, new_vars, new_all_vars =
+    List.fold
+      ~init:([], vars, all_vars)
+      ~f:(fun (acc, acc_lvars, acc_fvars) n ->
+        let new_name, new_vars, new_all_vars =
+          if Poly.( = ) n "()"
+          then update_name "unit" acc_lvars acc_fvars
+          else update_name n acc_lvars acc_fvars
+        in
+        new_name :: acc, new_vars, new_all_vars)
+      name_list
+  in
+  List.rev new_name_list, new_vars, new_all_vars
+;;
+
+let update_name_list name_list vars all_vars =
+  let new_name_list, new_vars, new_all_vars =
+    List.fold
+      ~init:([], vars, all_vars)
+      ~f:(fun (acc, acc_vars, acc_all_vars) n ->
+        let new_name, new_vars, new_all_vars =
+          if Poly.( = ) n "()"
+          then n, acc_vars, acc_all_vars
+          else update_name n acc_vars acc_all_vars
+        in
+        new_name :: acc, new_vars, new_all_vars)
+      name_list
+  in
+  List.rev new_name_list, new_vars, new_all_vars
 ;;
 
 let rec pattern_to_string_list = function
@@ -48,54 +87,41 @@ let rec lift_llexpression new_lllet gvars fvars lvars = function
     let check_r, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars r in
     LLApp (check_l, check_r), new_lllet, fvars
   | CLetIn (r, n_list, args, e, ine) ->
-    let use_names =
-      List.fold
-        ~init:[]
-        ~f:(fun acc n ->
-          if Poly.( = ) n "()"
-          then (
-            let new_name = get_name fvars "unit" in
-            new_name :: acc)
-          else acc)
+    let count_unit =
+      List.fold_left
+        ~init:0
+        ~f:(fun acc name -> if String.( = ) name "()" then acc + 1 else acc)
         n_list
     in
     let new_names, new_lvars, new_fvars =
-      List.fold
-        ~init:([], lvars, fvars)
-        ~f:(fun (acc, lvars, fvars) n ->
-          if Poly.( = ) n "()"
-          then (
-            let unit_name = get_name fvars "unit" in
-            let lvars = Map.set lvars ~key:n ~data:unit_name in
-            let fvars = Set.add fvars unit_name in
-            unit_name :: acc, lvars, fvars)
-          else (
-            let new_name = get_name fvars n in
-            let lvars = Map.set lvars ~key:n ~data:new_name in
-            let fvars = Set.add fvars new_name in
-            new_name :: acc, lvars, fvars))
-        n_list
+      if count_unit = List.length n_list
+      then update_all_name_list n_list lvars fvars
+      else update_name_list n_list lvars fvars
     in
-    let lle, new_lllet, new_fvars = if Poly.(=) r Rec then lift_llexpression new_lllet gvars new_fvars new_lvars e else lift_llexpression new_lllet gvars new_fvars lvars e  in
-    let new_lllet, fvars =
-      if List.length new_names = List.length use_names || List.length new_names = 1
-      then LLLet (r, List.rev new_names, args, lle) :: new_lllet, new_fvars
-      else new_lllet, fvars
+    let lle, new_lllet, new_fvars =
+      if Poly.( = ) r Rec
+      then lift_llexpression new_lllet gvars new_fvars new_lvars e
+      else lift_llexpression new_lllet gvars new_fvars lvars e
+    in
+    let new_lllet =
+      if List.length new_names = count_unit || List.length new_names = 1
+      then LLLet (r, new_names, args, lle) :: new_lllet
+      else new_lllet
     in
     let drop_letin, new_lllet, fvars =
-      lift_llexpression new_lllet gvars fvars new_lvars ine
+      lift_llexpression new_lllet gvars new_fvars new_lvars ine
     in
     let new_body =
-      if List.length use_names = 0
+      if List.length new_names <> count_unit
       then drop_letin
-      else List.fold ~init:drop_letin ~f:(fun acc n -> LLVars (LLVar n, acc)) use_names
+      else List.fold ~init:drop_letin ~f:(fun acc n -> LLVars (LLVar n, acc)) @@ List.rev new_names
     in
-    let new_body =
-      if List.length new_names = List.length use_names || List.length new_names = 1
+    let new_lle =
+      if List.length new_names = count_unit || List.length new_names = 1
       then new_body
-      else LLLetIn (n_list, args, lle, new_body)
+      else LLLetIn (new_names, args, lle, new_body)
     in
-    new_body, new_lllet, fvars
+    new_lle, new_lllet, fvars
   | CTuple t ->
     let llt, new_lllet, fvars =
       List.fold
@@ -129,62 +155,37 @@ let lift_llbindings gvars fvars = function
       List.fold
         ~init:([], [], gvars, fvars)
         ~f:(fun (acc_new, acc_old, gvars, fvars) (r, n_list, args, e) ->
-          let gvars, new_names, fvars =
+          let new_names, gvars, fvars =
             if Poly.( = ) r Rec
-            then
-              List.fold
-                ~init:(gvars, [], fvars)
-                ~f:(fun (gvars, acc, fvars) n ->
-                  let new_n = get_name fvars n in
-                  let fvars = Set.add fvars new_n in
-                  let gvars = Map.set gvars ~key:n ~data:new_n in
-                  gvars, new_n :: acc, fvars)
-                n_list
-            else gvars, n_list, fvars
+            then update_all_name_list n_list gvars fvars
+            else n_list, gvars, fvars
           in
           let str_args =
             List.fold ~init:[] ~f:(fun acc arg -> acc @ pattern_to_string_list arg) args
           in
-          let lvars, new_fvars, new_args =
-            List.fold
-              ~init:(map_empty, fvars, [])
-              ~f:(fun (lvars, fvars, new_args) arg ->
-                if Poly.( <> ) arg "()"
-                then (
-                  let uniq_arg = get_name fvars arg in
-                  ( Map.set lvars ~key:arg ~data:uniq_arg
-                  , Set.add fvars uniq_arg
-                  , uniq_arg :: new_args ))
-                else lvars, fvars, arg :: new_args)
-              str_args
-          in
+          let new_args, lvars, new_fvars = update_name_list str_args map_empty fvars in
           let old_lets, new_lets, update_fvars =
             lift_llexpression acc_new gvars new_fvars lvars e
           in
           let fvars = Set.union fvars (Set.diff update_fvars new_fvars) in
-          let gvars, new_names, fvars =
+          let new_names, gvars, fvars =
             if Poly.( <> ) r Rec
-            then
-              List.fold
-                ~init:(gvars, [], fvars)
-                ~f:(fun (gvars, acc, fvars) n ->
-                  let new_n = get_name fvars n in
-                  let gvars = Map.set gvars ~key:n ~data:new_n in
-                  let fvars = Set.add fvars new_n in
-                  gvars, new_n :: acc, fvars)
-                n_list
-            else gvars, new_names, fvars
+            then update_all_name_list n_list gvars fvars
+            else new_names, gvars, fvars
           in
           let new_args =
-            if Poly.( = ) (List.rev new_args) str_args
+            if Poly.( = ) new_args str_args
             then args
             else
               List.fold ~init:[] ~f:(fun acc arg -> PVar (arg, TUnknown) :: acc) new_args
           in
-          acc_new @ new_lets, LLLet(r, new_names, new_args, old_lets) :: acc_old, gvars, fvars)
+          ( acc_new @ new_lets
+          , LLLet (r, new_names, new_args, old_lets) :: acc_old
+          , gvars
+          , fvars ))
         llbindings
     in
-    (List.rev new_lets) @ old_lets, gvars, fvars
+    List.rev new_lets @ old_lets, gvars, fvars
   | CExpression _ -> failwith "las;"
 ;;
 
@@ -267,41 +268,41 @@ let rec find_free gvars new_app = function
 let add_free gvars add_app = function
   | LLLet (r, n_list, args, lle) ->
     let new_llbindings =
-          let args_str =
-            List.fold
-              ~init:[]
-              ~f:(fun acc_args arg -> acc_args @ pattern_to_string_list arg)
-              args
-          in
-          let new_args_str = if Poly.( = ) r Rec then n_list @ args_str else args_str in
-          let new_gvars =
-            List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) new_args_str
-          in
-          let new_body, new_gvars_args = find_free new_gvars add_app lle in
-          let update_args = Set.diff new_gvars_args new_gvars in
-          let new_args =
-            List.fold
-              ~init:args
-              ~f:(fun acc_args arg -> [ PVar (arg, TUnknown) ] @ acc_args)
-              (List.rev @@ Set.to_list update_args)
-          in
-          let new_app =
-            if not (Set.is_empty update_args)
-            then
-              List.fold
-                ~init:add_app
-                ~f:(fun update_app name ->
-                  Map.set update_app ~key:name ~data:(Set.to_list update_args))
-                n_list
-            else add_app
-          in
-          let new_gvars =
-            List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) n_list
-          in
-          (r, n_list, new_args, new_body), new_gvars, new_app
+      let args_str =
+        List.fold
+          ~init:[]
+          ~f:(fun acc_args arg -> acc_args @ pattern_to_string_list arg)
+          args
+      in
+      let new_args_str = if Poly.( = ) r Rec then n_list @ args_str else args_str in
+      let new_gvars =
+        List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) new_args_str
+      in
+      let new_body, new_gvars_args = find_free new_gvars add_app lle in
+      let update_args = Set.diff new_gvars_args new_gvars in
+      let new_args =
+        List.fold
+          ~init:args
+          ~f:(fun acc_args arg -> [ PVar (arg, TUnknown) ] @ acc_args)
+          (List.rev @@ Set.to_list update_args)
+      in
+      let new_app =
+        if not (Set.is_empty update_args)
+        then
+          List.fold
+            ~init:add_app
+            ~f:(fun update_app name ->
+              Map.set update_app ~key:name ~data:(Set.to_list update_args))
+            n_list
+        else add_app
+      in
+      let new_gvars =
+        List.fold ~init:gvars ~f:(fun acc_gvars n -> Set.add acc_gvars n) n_list
+      in
+      (r, n_list, new_args, new_body), new_gvars, new_app
     in
-    let a, b, c = new_llbindings in
-    LLLet a, b, c
+    let (r, n, a, lle), b, c = new_llbindings in
+    LLLet (r, n, a, lle), b, c
   | LLExpression _ -> failwith ""
 ;;
 
