@@ -66,14 +66,14 @@ let remove_match prog =
       let* x1 = helper_expr x1 in
       let* x2 = helper_expr x2 in
       let* xs =
-        State.mfold_right xs ~init:[] ~f:(fun e acc ->
+        mfold_right xs ~init:[] ~f:(fun e acc ->
           let* e = helper_expr e in
           return (e :: acc))
       in
       return (s_tuple x1 x2 xs)
     | EList xs ->
       let* xs =
-        State.mfold_right xs ~init:[] ~f:(fun e acc ->
+        mfold_right xs ~init:[] ~f:(fun e acc ->
           let* e = helper_expr e in
           return (e :: acc))
       in
@@ -86,14 +86,14 @@ let remove_match prog =
           let xs = x1 :: x2 :: xs in
           let* tuple_id = fresh_prefix "tuple" in
           let* body =
-            State.mfoldi_right xs ~init:action ~f:(fun idx acc x ->
+            mfoldi_right xs ~init:action ~f:(fun idx acc x ->
               bind_pat_vars (tuple_field (s_var tuple_id) idx) x acc)
           in
           s_let_in (s_let tuple_id match_exp) body |> return
         | PList xs ->
           let* list_id = fresh_prefix "list" in
           let* body =
-            State.mfoldi_right xs ~init:action ~f:(fun idx action x ->
+            mfoldi_right xs ~init:action ~f:(fun idx action x ->
               bind_pat_vars (list_field (s_var list_id) idx) x action)
           in
           s_let_in (s_let list_id match_exp) body |> return

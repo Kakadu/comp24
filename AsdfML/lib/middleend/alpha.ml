@@ -1,7 +1,6 @@
 open Base
 open Ast
 open Utils
-open State
 
 type ctx =
   { count : (string, int, String.comparator_witness) Map.t
@@ -10,15 +9,10 @@ type ctx =
 
 type remaps = (string, string, String.comparator_witness) Map.t
 
-let remaps_empty = Map.empty (module String)
-let remaps_merge l r = Map.merge_skewed l r ~combine:(fun ~key l r -> r)
-
-let remaps_to_str r =
-  Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
-;;
-
 module State = struct
+  open State
   include StateM
+  include StateM.Syntax
 
   type 'a t = (ctx, 'a) StateM.t
 end
@@ -26,14 +20,24 @@ end
 open State
 open State.Syntax
 
+let default_ctx =
+  { count = Map.empty (module String)
+  ; reserved = List.map Std.stdlib ~f:(fun x -> x.name) |> Set.of_list (module String)
+  }
+;;
+
+let remaps_empty = Map.empty (module String)
+let remaps_merge l r = Map.merge_skewed l r ~combine:(fun ~key _ r -> r)
+
+let remaps_to_str r =
+  Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
+;;
+
 let alpha_id (remaps : remaps) id =
   dbg "remaps: %s\n" (remaps_to_str remaps);
   match Map.find remaps id with
-  | Some new_id ->
-    dbg "remap found: %s -> %s\n" id new_id;
-    return (new_id, remaps)
+  | Some new_id -> return (new_id, remaps)
   | None ->
-    dbg "remap not found: %s\n" id;
     let* ctx = get in
     if Set.mem ctx.reserved id
     then return (id, remaps)
@@ -133,8 +137,7 @@ let rec alpha_expr remaps = function
     let* x1, _ = alpha_expr remaps x1 in
     let* x2, _ = alpha_expr remaps x2 in
     let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
-        let* xs = acc in
+      mfold xs ~init:[] ~f:(fun xs x ->
         let* x, _ = alpha_expr remaps x in
         return (x :: xs))
       >>| List.rev
@@ -142,14 +145,23 @@ let rec alpha_expr remaps = function
     return (ETuple (x1, x2, xs), remaps)
   | EList xs ->
     let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
-        let* xs = acc in
+      mfold xs ~init:[] ~f:(fun xs x ->
         let* x, _ = alpha_expr remaps x in
         return (x :: xs))
       >>| List.rev
     in
     return (EList xs, remaps)
-  | EMatch (x, cases) -> failwith "TODO:"
+  | EMatch (exp, cases) ->
+    let* exp, _ = alpha_expr remaps exp in
+    let* cases =
+      mfold cases ~init:[] ~f:(fun acc (p, e) ->
+        let* p, remaps' = alpha_pattern remaps_empty p in
+        let remaps'' = remaps_merge remaps remaps' in
+        let* e, _ = alpha_expr remaps'' e in
+        return ((p, e) :: acc))
+      >>| List.rev
+    in
+    return (EMatch (exp, cases), remaps)
 
 and alpha_def remaps = function
   | DLet (r, p, e) ->
@@ -163,18 +175,13 @@ and alpha_def remaps = function
 ;;
 
 let alpha_program p =
-  let ctx =
-    { count = Map.empty (module String)
-    ; reserved = List.map Std.stdlib ~f:(fun x -> x.name) |> Set.of_list (module String)
-    }
-  in
   run
     (mfold p ~init:(remaps_empty, []) ~f:(fun acc x ->
        let remaps, defs = acc in
        let* def, remaps' = alpha_def remaps x in
        let remaps'' = remaps_merge remaps remaps' in
        return (remaps'', def :: defs)))
-    ctx
+    default_ctx
   |> fst
   |> snd
   |> List.rev

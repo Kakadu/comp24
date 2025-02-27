@@ -183,3 +183,20 @@ let%expect_test _ =
     let a_1 = 2
     |}]
 ;;
+
+let%expect_test _ =
+  test {|
+  let a = 42
+  let _ = match a with
+    | 42 -> 42 + a
+    | a -> a + a
+    | a_0 -> a_0 + a
+  |};
+  [%expect {|
+    let a = 42
+    let _ = match a with
+      | 42 -> (( + ) 42 a)
+      | a_0 -> (( + ) a_0 a_0)
+      | a_0 -> (( + ) a_0 a)
+    |}]
+;;
