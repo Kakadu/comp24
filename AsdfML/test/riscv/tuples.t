@@ -204,6 +204,21 @@ $ cat /tmp/tuples.s
     let _ = println_int c in
     0
   
+  init___temp_match_0 ANF:
+  let init___temp_match_0 _ = (1, 2, 3)
+  
+  init___tuple_0 ANF:
+  let init___tuple_0 _ = __temp_match_0
+  
+  init_a ANF:
+  let init_a _ = `get_tuple_field __tuple_0 0
+  
+  init_b ANF:
+  let init_b _ = `get_tuple_field __tuple_0 1
+  
+  init_c ANF:
+  let init_c _ = `get_tuple_field __tuple_0 2
+  
 $ cat /tmp/tuples.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
