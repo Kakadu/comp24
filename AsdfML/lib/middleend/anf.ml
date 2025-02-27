@@ -15,7 +15,16 @@ let new_var () =
   return ("anf" ^ string_of_int fresh)
 ;;
 
-let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.t)
+let new_or_bind = function
+  | Some x -> return x
+  | None -> new_var ()
+;;
+
+let rec anf_expr
+  ?(bind = None)
+  env
+  (expr : cf_expr)
+  (cont : imm_expr -> aexpr State.IntStateM.t)
   : aexpr State.IntStateM.t
   =
   match expr with
@@ -28,11 +37,11 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
   | CFVar x ->
     cont
       (ImmId
-         (match Map.find env x with
-          | Some v -> v
-          | None -> failwith (Format.sprintf "anf: variable `%s` not found" x)))
+         (if Set.mem env x
+          then x
+          else failwith (Format.sprintf "anf: variable `%s` not found" x)))
   | CFApp (CFApp (_, _), _) as app ->
-    let* name = new_var () in
+    let* name = new_or_bind bind in
     let* body = cont (ImmId name) in
     let[@warning "-8"] rec collect_args acc = function
       | CFApp ((CFApp _ as inner), a) -> collect_args (a :: acc) inner
@@ -50,13 +59,13 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       anf_args args (fun imm_args ->
         return (ALet (name, CApp (imm_func, imm_args), body))))
   | CFApp (func, arg) ->
-    let* name = new_var () in
+    let* name = new_or_bind bind in
     let* body = cont (ImmId name) in
     anf_expr env func (fun imm_func ->
       anf_expr env arg (fun imm_arg ->
         return (ALet (name, CApp (imm_func, [ imm_arg ]), body))))
   | CFIfElse (i, t, e) ->
-    let* name = new_var () in
+    let* name = new_or_bind bind in
     let* body = cont (ImmId name) in
     anf_expr env i (fun i ->
       let* t = anf_expr env t (fun x -> return @@ ACExpr (CImmExpr x)) in
@@ -67,8 +76,8 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
       let* body = anf_expr env body cont in
       return (ALet ("_", CImmExpr imm_expr, body)))
   | CFLetIn (id, expr, body) ->
-    let new_env = Map.set env ~key:id ~data:id in
-    anf_expr env expr (fun imm_expr ->
+    let new_env = Set.add env id in
+    anf_expr ~bind:(Some id) env expr (fun imm_expr ->
       let* body = anf_expr new_env body cont in
       return (ALet (id, CImmExpr imm_expr, body)))
   | CFList xs ->
@@ -90,20 +99,14 @@ let rec anf_expr env (expr : cf_expr) (cont : imm_expr -> aexpr State.IntStateM.
 let anf_def env (def : cf_definition) =
   match def with
   | CFLet (id, args, expr) ->
-    let env = List.fold args ~init:env ~f:(fun acc x -> Map.set acc ~key:x ~data:x) in
-    let env = Map.set env ~key:id ~data:id in
+    let env = List.fold args ~init:env ~f:Set.add in
+    let env = Set.add env id in
     let* aexpr = anf_expr env expr (fun x -> return (ACExpr (CImmExpr x))) in
     return (Fn (id, args, aexpr), env)
 ;;
 
 let default_env =
-  let env =
-    stdlib @ runtime
-    |> List.fold
-         ~init:(Map.empty (module String))
-         ~f:(fun acc x -> Map.set acc ~key:x.name ~data:x.name)
-  in
-  env
+  Set.of_list (module String) (List.map ~f:(fun x -> x.name) (stdlib @ runtime))
 ;;
 
 (** Removes `let ax = ... in ax` and `let ax = ay in ...` *)
@@ -121,14 +124,9 @@ let remove_useless_bindings fn =
     and useless_a = function
       | ALet (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equal id1 id2 ->
         useless_a @@ ACExpr (useless_c c)
-      | ALet (new_id, CImmExpr (ImmId old_id), a) ->
-        if (not (Alpha.is_internal new_id)) && not (String.is_prefix old_id ~prefix:"ll_")
-        then (
-          Hashtbl.set remaps ~key:old_id ~data:new_id;
-          useless_a a)
-        else (
-          Hashtbl.set remaps ~key:new_id ~data:old_id;
-          useless_a a)
+      | ALet (new_id, CImmExpr (ImmId old_id), a) when not (String.equal new_id old_id) ->
+        Hashtbl.set remaps ~key:new_id ~data:old_id;
+        useless_a a
       | ALet (id, c, a) -> ALet (id, useless_c c, useless_a a)
       | ACExpr c -> ACExpr (useless_c c)
     in
@@ -146,6 +144,7 @@ let remove_useless_bindings fn =
       | CApp (i1, i2) -> CApp (remap_i i1, List.map i2 ~f:remap_i)
       | CImmExpr i -> CImmExpr (remap_i i)
     and remap_a = function
+      | ALet (id1, CImmExpr (ImmId id2), a) when String.equal id1 id2 -> remap_a a
       | ALet (id, c, a) -> ALet (find_rec id, remap_c c, remap_a a)
       | ACExpr c -> ACExpr (remap_c c)
     in

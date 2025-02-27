@@ -393,3 +393,26 @@ let%expect_test _ =
     let g = (`list_tl (`get_tuple_field __tuple_0 3))
     |}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect
+    {|
+    let pow = (fun x n ->
+       let rec helper = (fun acc n_0 ->
+         if (( = ) n_0 0)
+         then acc
+         else let n_1 = n_0 in
+           (helper (( * ) acc x) (( - ) n_1 1))) in
+       (helper 1 n))
+    |}]
+;;

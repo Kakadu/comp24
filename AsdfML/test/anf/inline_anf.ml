@@ -115,15 +115,15 @@ let%expect_test _ =
       let x1 = `get_tuple_field arg_0 0 in
       let y1 = `get_tuple_field arg_0 1 in
       let z1 = `get_tuple_field arg_0 2 in
-      let anf13 = ( * ) y1 z2 in
-      let anf14 = ( * ) z1 y2 in
-      let x = ( - ) anf13 anf14 in
-      let anf11 = ( * ) z1 x2 in
-      let anf12 = ( * ) x1 z2 in
-      let y = ( - ) anf11 anf12 in
-      let anf9 = ( * ) x1 y2 in
-      let anf10 = ( * ) y1 x2 in
-      let z = ( - ) anf9 anf10 in
+      let anf4 = ( * ) y1 z2 in
+      let anf5 = ( * ) z1 y2 in
+      let x = ( - ) anf4 anf5 in
+      let anf2 = ( * ) z1 x2 in
+      let anf3 = ( * ) x1 z2 in
+      let y = ( - ) anf2 anf3 in
+      let anf0 = ( * ) x1 y2 in
+      let anf1 = ( * ) y1 x2 in
+      let z = ( - ) anf0 anf1 in
       (x, y, z)
     let main =
       let a = (1, 2, 3) in
@@ -147,29 +147,29 @@ let%expect_test _ =
   [%expect
     {|
     let map f list =
-      let anf10 = `list_is_empty list in
-      let anf1 = not anf10 in
+      let anf8 = `list_is_empty list in
+      let anf1 = not anf8 in
       if anf1
       then
         let hd = `list_hd list in
         let tl = `list_tl list in
-        let anf5 = f hd in
-        let anf6 = map f tl in
-        ( :: ) anf5 anf6
-      else let anf8 = `list_is_empty list in
-        if anf8
+        let anf3 = f hd in
+        let anf4 = map f tl in
+        ( :: ) anf3 anf4
+      else let anf6 = `list_is_empty list in
+        if anf6
         then []
         else panic ()
     let map_ f_0 list_0 =
-      let anf18 = `list_is_empty list_0 in
-      let anf12 = not anf18 in
-      if anf12
+      let anf14 = `list_is_empty list_0 in
+      let anf10 = not anf14 in
+      if anf10
       then
         let hd_0 = `list_hd list_0 in
         let tl_0 = `list_tl list_0 in
-        let anf16 = f_0 hd_0 in
-        let anf17 = map f_0 tl_0 in
-        ( :: ) anf16 anf17
+        let anf12 = f_0 hd_0 in
+        let anf13 = map f_0 tl_0 in
+        ( :: ) anf12 anf13
       else []
     |}]
 ;;
@@ -189,41 +189,41 @@ let%expect_test _ =
   [%expect
     {|
     let ll_helper_1 acc n_0 =
-      let anf26 = `get_tuple_field (n_0, acc) 0 in
-      let anf22 = ( = ) anf26 0 in
-      let anf25 = `get_tuple_field (n_0, acc) 1 in
-      let anf24 = `list_is_empty anf25 in
-      let anf23 = not anf24 in
-      let anf1 = ( && ) anf22 anf23 in
+      let anf23 = `get_tuple_field (n_0, acc) 0 in
+      let anf19 = ( = ) anf23 0 in
+      let anf22 = `get_tuple_field (n_0, acc) 1 in
+      let anf21 = `list_is_empty anf22 in
+      let anf20 = not anf21 in
+      let anf1 = ( && ) anf19 anf20 in
       if anf1
       then
         let __tuple_1 = (n_0, acc) in
-        let anf3 = `get_tuple_field __tuple_1 1 in
-        `list_hd anf3
+        let anf2 = `get_tuple_field __tuple_1 1 in
+        `list_hd anf2
       else
-        let anf21 = `get_tuple_field (n_0, acc) 1 in
-        let anf20 = `list_is_empty anf21 in
-        let anf15 = not anf20 in
-        let anf19 = `get_tuple_field (n_0, acc) 1 in
-        let anf18 = `list_tl anf19 in
+        let anf18 = `get_tuple_field (n_0, acc) 1 in
         let anf17 = `list_is_empty anf18 in
-        let anf16 = not anf17 in
-        let anf5 = ( && ) anf15 anf16 in
-        if anf5
+        let anf12 = not anf17 in
+        let anf16 = `get_tuple_field (n_0, acc) 1 in
+        let anf15 = `list_tl anf16 in
+        let anf14 = `list_is_empty anf15 in
+        let anf13 = not anf14 in
+        let anf4 = ( && ) anf12 anf13 in
+        if anf4
         then
           let __tuple_0 = (n_0, acc) in
-          let anf14 = `get_tuple_field __tuple_0 1 in
-          let x_0 = `list_hd anf14 in
-          let anf13 = `get_tuple_field __tuple_0 1 in
-          let anf12 = `list_tl anf13 in
-          let y = `list_hd anf12 in
-          let anf11 = ( + ) x_0 y in
-          let anf9 = ( :: ) anf11 acc in
-          let anf10 = ( - ) n_0 1 in
-          ll_helper_1 anf9 anf10
+          let anf11 = `get_tuple_field __tuple_0 1 in
+          let x_0 = `list_hd anf11 in
+          let anf10 = `get_tuple_field __tuple_0 1 in
+          let anf9 = `list_tl anf10 in
+          let y = `list_hd anf9 in
+          let anf8 = ( + ) x_0 y in
+          let anf6 = ( :: ) anf8 acc in
+          let anf7 = ( - ) n_0 1 in
+          ll_helper_1 anf6 anf7
         else -1
-    let fib n = let anf28 = ( - ) n 2 in
-      ll_helper_1 [1; 1] anf28
+    let fib n = let anf25 = ( - ) n 2 in
+      ll_helper_1 [1; 1] anf25
     |}]
 ;;
 
@@ -265,5 +265,30 @@ let%expect_test _ =
       let anf2 = ( + ) anf3 a3 in
       let anf1 = ( + ) anf2 a4 in
       ( + ) anf1 a5
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect
+    {|
+    let ll_helper_1 x acc n_0 =
+      let anf1 = ( = ) n_0 0 in
+      if anf1
+      then acc
+      else
+        let anf3 = ( * ) acc x in
+        let anf4 = ( - ) n_0 1 in
+        ll_helper_1 x anf3 anf4
+    let pow x n = ll_helper_1 x 1 n
     |}]
 ;;

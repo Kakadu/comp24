@@ -267,3 +267,24 @@ let%expect_test _ =
        (helper 1 n))
     |}]
 ;;
+
+let%expect_test _ =
+  test
+    {|
+    let pow x n =
+      let rec helper acc n =
+        match n with
+        | 0 -> acc
+        | n -> helper (acc * x) (n - 1)
+      in
+      helper 1 n
+  |};
+  [%expect
+    {|
+    let pow = (fun x n ->
+       let rec helper = (fun acc n_0 -> match n_0 with
+         | 0 -> acc
+         | n_1 -> (helper (( * ) acc x) (( - ) n_1 1))) in
+       (helper 1 n))
+    |}]
+;;
