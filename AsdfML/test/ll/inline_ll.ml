@@ -291,7 +291,8 @@ let%expect_test _ =
       in
       helper 1 n
   |};
-  [%expect {|
+  [%expect
+    {|
     let ll_helper_1 x acc n_0 =
       if (( = ) n_0 0)
       then acc
@@ -357,7 +358,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test_ll {|
+  test_ll
+    {|
   let ll_2 x = x
   let main =
     let one = 1 in
@@ -365,7 +367,8 @@ let%expect_test _ =
     let f2 = ll_2 in
     ()
   |};
-  [%expect {|
+  [%expect
+    {|
     let __var_ll_2 x = x
     let ll_f1_3 one x_0 = (( + ) x_0 one)
     let main = let one = 1 in

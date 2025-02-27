@@ -85,14 +85,12 @@ let remove_patterns program =
       let* x1 = helper_expr x1 in
       let* x2 = helper_expr x2 in
       let* xs =
-        mfold_right xs ~init:[] ~f:(fun x acc ->
-          helper_expr x >>| fun x -> x :: acc)
+        mfold_right xs ~init:[] ~f:(fun x acc -> helper_expr x >>| fun x -> x :: acc)
       in
       return @@ e_tuple x1 x2 xs
     | EList xs ->
       let* xs =
-        mfold_right xs ~init:[] ~f:(fun x acc ->
-          helper_expr x >>| fun x -> x :: acc)
+        mfold_right xs ~init:[] ~f:(fun x acc -> helper_expr x >>| fun x -> x :: acc)
       in
       return @@ e_list xs
     | EMatch (exp, cases) ->

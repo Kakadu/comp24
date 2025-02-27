@@ -7,7 +7,7 @@ open Test.Utils
 
 let test code =
   let open Format in
-  remove_patterns code (printf "\n%a" Pp_ast.pp_program )
+  remove_patterns code (printf "\n%a" Pp_ast.pp_program)
 ;;
 
 let%expect_test _ =
@@ -229,7 +229,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let __temp_match_0 = 42
     let x = __temp_match_0
     let (a, b, c) = (1, 2, 3)
@@ -257,7 +258,8 @@ let%expect_test _ =
       in
       helper 1 n
   |};
-  [%expect {|
+  [%expect
+    {|
     let pow = (fun x n ->
        let rec helper = (fun acc n_0 -> match n_0 with
          | 0 -> acc

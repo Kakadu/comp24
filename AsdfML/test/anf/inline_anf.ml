@@ -131,7 +131,7 @@ let%expect_test _ =
       let c = cross a b in
       print_tuple c
     |}]
-;; 
+;;
 
 let%expect_test _ =
   test
@@ -251,13 +251,14 @@ let%expect_test _ =
       let anf8 = ll_3 k_1 y_0 in
       square_cps x_1 anf8
     |}]
-;; 
+;;
 
 let%expect_test _ =
   test {|
     let f a0 a1 a2 a3 a4 a5 = a0 + a1 + a2 + a3 + a4 + a5
     |};
-  [%expect {|
+  [%expect
+    {|
     let f a0 a1 a2 a3 a4 a5 =
       let anf4 = ( + ) a0 a1 in
       let anf3 = ( + ) anf4 a2 in

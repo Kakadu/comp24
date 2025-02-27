@@ -137,7 +137,8 @@ let%expect_test "" =
     let (a,b) = (a,b)
     let (a,b) = (b,a)
   |};
-  [%expect {|
+  [%expect
+    {|
     let a = 1
     let b = 2
     let (a_0, b_0) = (a, b)
@@ -151,7 +152,8 @@ let%expect_test "" =
     let _::list = list
     let _::list = list
   |};
-  [%expect {|
+  [%expect
+    {|
     let list = [1; 2; 3]
     let _ :: list_0 = list
     let _ :: list_1 = list_0
@@ -185,14 +187,16 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
   let a = 42
   let _ = match a with
     | 42 -> 42 + a
     | a -> a + a
     | a_0 -> a_0 + a
   |};
-  [%expect {|
+  [%expect
+    {|
     let a = 42
     let _ = match a with
       | 42 -> (( + ) 42 a)
@@ -208,7 +212,8 @@ let%expect_test _ =
   let x = anf
   let y = ll_0 anf
   |};
-  [%expect {|
+  [%expect
+    {|
     let __var_ll_0 = (fun x -> x)
     let __var_anf = 42
     let x_0 = __var_anf
