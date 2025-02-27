@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cf_ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="91.30% coverage in lib/middleend/cf_ast.ml">
+    <meta name="description" content="100.00% coverage in lib/middleend/cf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,9 @@
           <span class="dirname">lib/middleend/</span>cf_ast.ml
         </a>
       </h1>
-      <h2>91.30%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -89,7 +88,7 @@
 <a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span class="unvisited"> </span>
+<a id="L67"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -181,26 +180,26 @@ and cf_definition = CFLet of id * id list * cf_expr
 
 type program = cf_definition list
 
-let cf_const c = <span data-count="82">C</span>FConst c
-let cf_var v = <span data-count="357">C</span>FVar v
-let cf_app f arg = <span data-count="256">C</span>FApp (f, arg)
+let cf_const c = <span data-count="84">C</span>FConst c
+let cf_var v = <span data-count="374">C</span>FVar v
+let cf_app f arg = <span data-count="285">C</span>FApp (f, arg)
 let cf_if_else cond if_expr else_expr = <span data-count="12">C</span>FIfElse (cond, if_expr, else_expr)
-let cf_let_in id body exp = <span data-count="62">C</span>FLetIn (id, body, exp)
+let cf_let_in id body exp = <span data-count="65">C</span>FLetIn (id, body, exp)
 let cf_tuple e1 e2 es = <span data-count="11">C</span>FTuple (e1, e2, es)
 let cf_list exprs = <span data-count="2">C</span>FList exprs
-let cf_def id args expr = <span data-count="142">C</span>FLet (id, args, expr)
+let cf_def id args expr = <span data-count="132">C</span>FLet (id, args, expr)
 
 open Base
 open Format
 open Utils
 
 let rec pp_expr fmt = function
-  | <span data-count="41">C</span>FConst c -&gt; fprintf fmt "%a" Pp_ast.pp_constant c
-  | <span data-count="182">C</span>FVar v -&gt; fprintf fmt "%s" v
-  | <span data-count="70">C</span>FApp (e1, e2) -&gt;
+  | <span data-count="43">C</span>FConst c -&gt; fprintf fmt "%a" Pp_ast.pp_constant c
+  | <span data-count="188">C</span>FVar v -&gt; fprintf fmt "%s" v
+  | <span data-count="71">C</span>FApp (e1, e2) -&gt;
     let rec pp_rest fmt = function
-      | <span data-count="61">C</span>FApp (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_expr e2
-      | <span data-count="70">e</span> -&gt; fprintf fmt "(%a" pp_expr e
+      | <span data-count="62">C</span>FApp (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 pp_expr e2
+      | <span data-count="71">e</span> -&gt; fprintf fmt "(%a" pp_expr e
     in
     fprintf fmt "%a %a)" pp_rest e1 pp_expr e2
   | <span data-count="5">C</span>FIfElse (c, t, e) -&gt;
@@ -213,7 +212,7 @@ let rec pp_expr fmt = function
       t
       pp_expr
       e
-  | <span data-count="35">C</span>FLetIn (id, body, exp) -&gt;
+  | <span data-count="38">C</span>FLetIn (id, body, exp) -&gt;
     fprintf fmt "@[&lt;2&gt;@,let %s =@ %a @]in@\n%a" id pp_expr body pp_expr exp
   | <span data-count="2">C</span>FTuple (x, y, xs) -&gt;
     let xs = x :: y :: xs in
@@ -221,14 +220,14 @@ let rec pp_expr fmt = function
   | <span data-count="1">C</span>FList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | <span data-count="43">C</span>FLet (id, args, e) -&gt;
+  | <span data-count="46">C</span>FLet (id, args, e) -&gt;
     (match args with
-     | <span data-count="7">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]\n" id pp_expr e
-     | <span data-count="36">_</span> -&gt;
-       fprintf fmt "@[&lt;2&gt;@,let %s %s =@ %a@]\n" id (String.conca<span data-count="36">t</span> args ~sep:" ") pp_expr e)
+     | <span data-count="8">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]" id pp_expr e
+     | <span data-count="38">_</span> -&gt;
+       fprintf fmt "@[&lt;2&gt;@,let %s %s =@ %a@]" id (String.conca<span data-count="38">t</span> args ~sep:" ") pp_expr e)
 ;;
 
-let pp_program fmt p = <span data-count="0">L</span>ist.iter p ~f:(fun d -&gt; <span data-count="0">f</span>printf fmt "%a@." pp_definition d)
+let pp_program fmt p = <span data-count="19">L</span>ist.iter p ~f:(fun d -&gt; <span data-count="46">f</span>printf fmt "%a@." pp_definition d)
 </code></pre>
       </div>
     </div>

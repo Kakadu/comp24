@@ -28,7 +28,7 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
@@ -959,7 +959,7 @@
 
 open Test.Utils
 
-let test = test_inferencer
+let test code = <span data-count="54">i</span>nfer code (Format.print<span data-count="54">f</span> "%a" Lib.Tast.pp_toplevel_types)
 
 let%expect_test _ =
   <span data-count="1">t</span>est {| let x = () |};

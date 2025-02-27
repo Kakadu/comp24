@@ -292,7 +292,7 @@ open Utils
 let rec pp_imm_expr fmt = function
   | <span data-count="38">I</span>mmInt n -&gt; fprintf fmt "%d" n
   | <span data-count="0">I</span>mmBool b -&gt; fprintf fmt "%b" b
-  | <span data-count="195">I</span>mmId id -&gt; fprintf fmt "%s" id
+  | <span data-count="235">I</span>mmId id -&gt; fprintf fmt "%s" id
   | <span data-count="1">I</span>mmUnit -&gt; fprintf fmt "()"
   | <span data-count="2">I</span>mmNil -&gt; fprintf fmt "[]"
   | <span data-count="9">I</span>mmTuple (x1, x2, xs) -&gt;
@@ -302,9 +302,9 @@ let rec pp_imm_expr fmt = function
 ;;
 
 let rec pp_cexpr fmt = function
-  | <span data-count="77">C</span>App (e1, e2) -&gt;
+  | <span data-count="91">C</span>App (e1, e2) -&gt;
     fprintf fmt "%a" pp_imm_expr e1;
-    <span data-count="77">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
+    <span data-count="91">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
   | <span data-count="7">C</span>IfElse (c, t, e) -&gt;
     fprintf
       fmt
@@ -315,29 +315,29 @@ let rec pp_cexpr fmt = function
       t
       pp_aexpr
       e
-  | <span data-count="14">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
+  | <span data-count="13">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
 
 and pp_aexpr fmt = function
-  | <span data-count="69">A</span>Let (id, cexpr, aexpr) -&gt;
+  | <span data-count="76">A</span>Let (id, cexpr, aexpr) -&gt;
     fprintf fmt "@[&lt;2&gt;@,let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
-  | <span data-count="29">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
+  | <span data-count="35">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
 ;;
 
 let pp_fn fmt = function
-  | <span data-count="15">F</span>n (id, args, aexpr) -&gt;
+  | <span data-count="21">F</span>n (id, args, aexpr) -&gt;
     (match args with
      | <span data-count="5">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]@." id pp_aexpr aexpr
-     | <span data-count="10">_</span> -&gt;
+     | <span data-count="16">_</span> -&gt;
        fprintf
          fmt
          "@[&lt;2&gt;@,let %s %s =@ %a@]@."
          id
-         (String.conca<span data-count="10">t</span> args ~sep:" ")
+         (String.conca<span data-count="16">t</span> args ~sep:" ")
          pp_aexpr
          aexpr)
 ;;
 
-let pp_program fmt = <span data-count="8">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
+let pp_program fmt = <span data-count="10">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
 </code></pre>
       </div>
     </div>

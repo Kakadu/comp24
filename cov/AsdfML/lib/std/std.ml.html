@@ -159,28 +159,28 @@ type std =
   }
 
 let stdlib : std list =
-  [ { name = "( + )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> int_typ; extern = "ml_add" }
-  ; { name = "( - )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> int_typ; extern = "ml_sub" }
-  ; { name = "( * )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> int_typ; extern = "ml_mul" }
-  ; { name = "( / )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> int_typ; extern = "ml_div" }
-  ; { name = "( &gt; )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_gt" }
-  ; { name = "( &lt; )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_lt" }
-  ; { name = "( &gt;= )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_ge" }
-  ; { name = "( &lt;= )"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_le" }
-  ; { name = "( = )"; typ = dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_eq" }
-  ; { name = "( &lt;&gt; )"; typ = dummy_ty ^-<span data-count="37">&gt;</span> dummy_ty ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_ne" }
-  ; { name = "( &amp;&amp; )"; typ = bool_typ ^-<span data-count="37">&gt;</span> bool_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_and" }
-  ; { name = "( || )"; typ = bool_typ ^-<span data-count="37">&gt;</span> bool_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_or" }
-  ; { name = "[ - ]"; typ = int_typ ^-<span data-count="37">&gt;</span> int_typ; extern = "ml_neg" }
-  ; { name = "not"; typ = bool_typ ^-<span data-count="37">&gt;</span> bool_typ; extern = "ml_not" }
+  [ { name = "( + )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> int_typ; extern = "ml_add" }
+  ; { name = "( - )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> int_typ; extern = "ml_sub" }
+  ; { name = "( * )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> int_typ; extern = "ml_mul" }
+  ; { name = "( / )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> int_typ; extern = "ml_div" }
+  ; { name = "( &gt; )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_gt" }
+  ; { name = "( &lt; )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_lt" }
+  ; { name = "( &gt;= )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_ge" }
+  ; { name = "( &lt;= )"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_le" }
+  ; { name = "( = )"; typ = dummy_ty ^-<span data-count="38">&gt;</span> dummy_ty ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_eq" }
+  ; { name = "( &lt;&gt; )"; typ = dummy_ty ^-<span data-count="38">&gt;</span> dummy_ty ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_ne" }
+  ; { name = "( &amp;&amp; )"; typ = bool_typ ^-<span data-count="38">&gt;</span> bool_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_and" }
+  ; { name = "( || )"; typ = bool_typ ^-<span data-count="38">&gt;</span> bool_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_or" }
+  ; { name = "[ - ]"; typ = int_typ ^-<span data-count="38">&gt;</span> int_typ; extern = "ml_neg" }
+  ; { name = "not"; typ = bool_typ ^-<span data-count="38">&gt;</span> bool_typ; extern = "ml_not" }
   ; { name = "( :: )"
-    ; typ = dummy_ty ^-<span data-count="37">&gt;</span> TList dummy_ty ^-<span data-count="37">&gt;</span> TList dummy_ty
+    ; typ = dummy_ty ^-<span data-count="38">&gt;</span> TList dummy_ty ^-<span data-count="38">&gt;</span> TList dummy_ty
     ; extern = "ml_list_cons"
     }
-  ; { name = "print_int"; typ = int_typ ^-<span data-count="37">&gt;</span> unit_typ; extern = "ml_print_int" }
-  ; { name = "print_bool"; typ = bool_typ ^-<span data-count="37">&gt;</span> unit_typ; extern = "ml_print_bool" }
-  ; { name = "print_tuple"; typ = dummy_ty ^-<span data-count="37">&gt;</span> unit_typ; extern = "ml_print_tuple" }
-  ; { name = "print_list"; typ = dummy_ty ^-<span data-count="37">&gt;</span> unit_typ; extern = "ml_print_list" }
+  ; { name = "print_int"; typ = int_typ ^-<span data-count="38">&gt;</span> unit_typ; extern = "ml_print_int" }
+  ; { name = "print_bool"; typ = bool_typ ^-<span data-count="38">&gt;</span> unit_typ; extern = "ml_print_bool" }
+  ; { name = "print_tuple"; typ = dummy_ty ^-<span data-count="38">&gt;</span> unit_typ; extern = "ml_print_tuple" }
+  ; { name = "print_list"; typ = dummy_ty ^-<span data-count="38">&gt;</span> unit_typ; extern = "ml_print_list" }
   ]
 ;;
 
@@ -195,7 +195,7 @@ let runtime : std list =
   ; { name = "`list_len"; typ = arg1; extern = "ml_list_len" }
   ; { name = "`list_is_empty"; typ = arg1; extern = "ml_list_is_empty" }
   ; { name = "`create_closure"; typ = arg2; extern = "create_closure" }
-  ; { name = "panic"; typ = unit_typ ^-<span data-count="37">&gt;</span> unit_typ; extern = "ml_panic" }
+  ; { name = "panic"; typ = unit_typ ^-<span data-count="38">&gt;</span> unit_typ; extern = "ml_panic" }
   ]
 ;;
 

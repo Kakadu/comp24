@@ -386,23 +386,23 @@ let gen_id =
   let is_keyword x =
     <span data-count="0">L</span>ist.mem x [ "let"; "rec"; "in"; "fun"; "if"; "then"; "else"; "match"; "with" ]
   in
-  let id = string_size ~gen:(char_rang<span data-count="37">e</span> 'a' 'z') (int_rang<span data-count="37">e</span> 1 5) in
-  <span data-count="37">i</span>d &gt;&gt;<span data-count="37">=</span> fun id_ -&gt; <span data-count="0">i</span>f is_keyword id_ then <span data-count="0">i</span>d else <span data-count="0">r</span>eturn id_
+  let id = string_size ~gen:(char_rang<span data-count="38">e</span> 'a' 'z') (int_rang<span data-count="38">e</span> 1 5) in
+  <span data-count="38">i</span>d &gt;&gt;<span data-count="38">=</span> fun id_ -&gt; <span data-count="0">i</span>f is_keyword id_ then <span data-count="0">i</span>d else <span data-count="0">r</span>eturn id_
 ;;
 
-<span data-count="0">t</span>ype id = (<span data-count="0">s</span>tring[@gen gen_id]) [@@deriving eq, show { with_path = false }, qcheck, eq<span data-count="37">]</span>
+<span data-count="0">t</span>ype id = (<span data-count="0">s</span>tring[@gen gen_id]) [@@deriving eq, show { with_path = false }, qcheck, eq<span data-count="38">]</span>
 
 <span data-count="0">t</span>ype rec_flag =
   <span data-count="0">|</span> Rec (** recursive *)
   <span data-count="0">|</span> NonRec (** non-recursive *)
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="148">]</span>
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="152">]</span>
 
 <span data-count="0">t</span>ype constant =
   <span data-count="0">|</span> CInt of in<span data-count="0">t</span> (** 42 *)
   <span data-count="0">|</span> CBool of boo<span data-count="0">l</span> (** true | false *)
   <span data-count="0">|</span> CUnit (** () *)
   <span data-count="0">|</span> CNil (** [] *)
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="222">]</span>
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="228">]</span>
 
 <span data-count="0">t</span>ype type_ann =
   <span data-count="0">|</span> TAInt (** int *)
@@ -417,7 +417,7 @@ let gen_id =
       (type_ann[@gen Gen.(gen_type_ann_size<span data-count="0">d</span> (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_size<span data-count="0">d</span> (n / div))]<span data-count="0">)</span> (** int -&gt; bool *)
   <span data-count="0">|</span> TAList of (type_ann[@gen Gen.(gen_type_ann_size<span data-count="0">d</span> (n / div))]) (** %type% list *)
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="74">]</span>
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="76">]</span>
 
 <span data-count="0">t</span>ype pattern =
   <span data-count="0">|</span> PConst of constant
@@ -436,7 +436,7 @@ let gen_id =
   <span data-count="0">|</span> PAnn of
       (pattern[@gen Gen.(gen_pattern_size<span data-count="0">d</span> (n / div))])
       * (type_ann[@gen Gen.(gen_type_ann_size<span data-count="0">d</span> (n / div))]<span data-count="0">)</span> (** (x: int) *)
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="74">]</span>
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="76">]</span>
 
 <span data-count="0">t</span>ype expr =
   <span data-count="0">|</span> EConst of constant (** 42, true, ()*)
@@ -479,33 +479,33 @@ let gen_id =
       rec_flag
       * (pattern[@gen gen_pattern_size<span data-count="0">d</span> (n / div)])
       * (expr[@gen gen_expr_size<span data-count="0">d</span> (n / div)]<span data-count="0">)</span> (** let (rec)? x = y *)
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="296">]</span>
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="304">]</span>
 
-<span data-count="0">t</span>ype program = (<span data-count="0">d</span>efinition lis<span data-count="0">t</span>[@gen Gen.(list_siz<span data-count="37">e</span> (1 -<span data-count="37">-</span> 3) gen_definition)])
-[@@deriving show { with_path = false }, qcheck, eq<span data-count="37">]</span>
+<span data-count="0">t</span>ype program = (<span data-count="0">d</span>efinition lis<span data-count="0">t</span>[@gen Gen.(list_siz<span data-count="38">e</span> (1 -<span data-count="38">-</span> 3) gen_definition)])
+[@@deriving show { with_path = false }, qcheck, eq<span data-count="38">]</span>
 
 let p_const c = <span data-count="0">P</span>Const c
 let p_wild = PWild
-let p_ident x = <span data-count="29">P</span>Ident x
+let p_ident x = <span data-count="32">P</span>Ident x
 let p_tuple hd1 hd2 tl = <span data-count="0">P</span>Tuple (hd1, hd2, tl)
 let p_list ps = <span data-count="0">P</span>List ps
 let p_cons hd tl = <span data-count="0">P</span>Cons (hd, tl)
 let p_ann p t = <span data-count="0">P</span>Ann (p, t)
 let e_const c = <span data-count="0">E</span>Const c
-let e_var x = <span data-count="29">E</span>Var x
-let e_app f x = <span data-count="363">E</span>App (f, x)
+let e_var x = <span data-count="32">E</span>Var x
+let e_app f x = <span data-count="398">E</span>App (f, x)
 let e_if_else cond e_true e_false = <span data-count="6">E</span>IfElse (cond, e_true, e_false)
-let e_fun p ps e = <span data-count="116">E</span>Fun (p, ps, e)
-let e_let_in def e = <span data-count="74">E</span>LetIn (def, e)
+let e_fun p ps e = <span data-count="130">E</span>Fun (p, ps, e)
+let e_let_in def e = <span data-count="79">E</span>LetIn (def, e)
 let e_tuple hd1 hd2 tl = <span data-count="17">E</span>Tuple (hd1, hd2, tl)
 let e_list exprs = <span data-count="5">E</span>List exprs
-let e_match e branches = <span data-count="42">E</span>Match (e, branches)
-let d_let p e = <span data-count="142">D</span>Let (NonRec, p, e)
-let d_let_rec p e = <span data-count="17">D</span>Let (Rec, p, e)
+let e_match e branches = <span data-count="45">E</span>Match (e, branches)
+let d_let p e = <span data-count="158">D</span>Let (NonRec, p, e)
+let d_let_rec p e = <span data-count="18">D</span>Let (Rec, p, e)
 
 let d_let_flag = function
-  | <span data-count="17">R</span>ec -&gt; d_let_rec
-  | <span data-count="128">N</span>onRec -&gt; d_let
+  | <span data-count="18">R</span>ec -&gt; d_let_rec
+  | <span data-count="142">N</span>onRec -&gt; d_let
 ;;
 </code></pre>
       </div>

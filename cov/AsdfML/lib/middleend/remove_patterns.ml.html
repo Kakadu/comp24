@@ -110,49 +110,47 @@
 <a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span class="visited"> </span>
 <a id="L88"></a><span class="visited"> </span>
-<a id="L89"></a><span class="visited"> </span>
-<a id="L90"></a><span > </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span > </span>
-<a id="L94"></a><span class="visited"> </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span > </span>
 <a id="L95"></a><span class="visited"> </span>
-<a id="L96"></a><span > </span>
+<a id="L96"></a><span class="visited"> </span>
 <a id="L97"></a><span class="visited"> </span>
 <a id="L98"></a><span class="visited"> </span>
 <a id="L99"></a><span class="visited"> </span>
 <a id="L100"></a><span class="visited"> </span>
 <a id="L101"></a><span class="visited"> </span>
-<a id="L102"></a><span class="visited"> </span>
+<a id="L102"></a><span > </span>
 <a id="L103"></a><span class="visited"> </span>
 <a id="L104"></a><span > </span>
 <a id="L105"></a><span class="visited"> </span>
-<a id="L106"></a><span > </span>
+<a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span class="visited"> </span>
 <a id="L108"></a><span class="visited"> </span>
-<a id="L109"></a><span class="visited"> </span>
-<a id="L110"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
 <a id="L111"></a><span > </span>
-<a id="L112"></a><span > </span>
-<a id="L113"></a><span > </span>
-<a id="L114"></a><span class="visited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
 <a id="L115"></a><span class="visited"> </span>
-<a id="L116"></a><span > </span>
+<a id="L116"></a><span class="visited"> </span>
 <a id="L117"></a><span class="visited"> </span>
 <a id="L118"></a><span class="visited"> </span>
-<a id="L119"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
 <a id="L120"></a><span class="visited"> </span>
 <a id="L121"></a><span > </span>
-<a id="L122"></a><span class="visited"> </span>
-<a id="L123"></a><span > </span>
-<a id="L124"></a><span > </span>
+<a id="L122"></a><span > </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span class="visited"> </span>
 <a id="L125"></a><span class="visited"> </span>
-<a id="L126"></a><span class="visited"> </span>
-<a id="L127"></a><span class="visited"> </span>
-<a id="L128"></a><span > </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span class="visited"> </span>
 <a id="L129"></a><span > </span>
-<a id="L130"></a><span class="visited"> </span>
-<a id="L131"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -286,8 +284,6 @@
 <a href="#L127">127</a>
 <a href="#L128">128</a>
 <a href="#L129">129</a>
-<a href="#L130">130</a>
-<a href="#L131">131</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -305,70 +301,70 @@ open State.IntStateM.Syntax
 (* Replaces complex patterns with explicit pattern-matching *)
 
 let is_simple = function
-  | <span data-count="206">P</span>Ident _ | <span data-count="6">P</span>Wild -&gt; true
-  | <span data-count="11">_</span> -&gt; false
+  | <span data-count="225">P</span>Ident _ | <span data-count="6">P</span>Wild -&gt; true
+  | <span data-count="12">_</span> -&gt; false
 ;;
 
 let remove_argument_patterns body pattern pattern_list =
-  <span data-count="116">l</span>et generate_arg_name used_names =
-    <span data-count="15">l</span>et rec find_unique () =
-      <span data-count="18">l</span>et* current_name = fresh_prefi<span data-count="18">x</span> "#arg" in
-      <span data-count="18">m</span>atch Set.find used_names ~f:(String.equa<span data-count="18">l</span> current_name) with
-      | <span data-count="15">N</span>one -&gt; return current_name
-      | <span data-count="3">_</span> -&gt; find_unique ()
+  <span data-count="130">l</span>et generate_arg_name used_names =
+    <span data-count="16">l</span>et rec find_unique () =
+      <span data-count="21">l</span>et* current_name = fresh_prefi<span data-count="21">x</span> "arg" in
+      <span data-count="21">m</span>atch Set.find used_names ~f:(String.equa<span data-count="21">l</span> current_name) with
+      | <span data-count="16">N</span>one -&gt; return current_name
+      | <span data-count="5">_</span> -&gt; find_unique ()
     in
-    run (find_uniqu<span data-count="15">e</span> ())
+    run (find_uniqu<span data-count="16">e</span> ())
   in
   let helper (used_names, current_expr) pattern =
-    <span data-count="154">m</span>atch pattern with
-    | <span data-count="136">P</span>Ident id -&gt; Set.ad<span data-count="136">d</span> used_names id, current_expr, pattern
+    <span data-count="179">m</span>atch pattern with
+    | <span data-count="160">P</span>Ident id -&gt; Set.ad<span data-count="160">d</span> used_names id, current_expr, pattern
     | <span data-count="3">P</span>Wild -&gt; used_names, current_expr, pattern
-    | <span data-count="15">_</span> -&gt;
+    | <span data-count="16">_</span> -&gt;
       let arg_name = generate_arg_name used_names in
-      <span data-count="15">(</span> Set.ad<span data-count="15">d</span> used_names arg_name
-      , e_matc<span data-count="15">h</span> (e_va<span data-count="15">r</span> arg_name) [ pattern, current_expr ]
-      , p_iden<span data-count="15">t</span> arg_name )
+      <span data-count="16">(</span> Set.ad<span data-count="16">d</span> used_names arg_name
+      , e_matc<span data-count="16">h</span> (e_va<span data-count="16">r</span> arg_name) [ pattern, current_expr ]
+      , p_iden<span data-count="16">t</span> arg_name )
   in
   let used_names = vars_expr body in
-  <span data-count="116">l</span>et used_names, exp, pattern' = helper (used_names, body) pattern in
-  <span data-count="116">l</span>et _, exp, pattern_list' =
+  <span data-count="130">l</span>et used_names, exp, pattern' = helper (used_names, body) pattern in
+  <span data-count="130">l</span>et _, exp, pattern_list' =
     List.fold_right
       ~f:(fun x acc -&gt;
-        <span data-count="38">l</span>et used_names, exp, pattern_list = acc in
+        <span data-count="49">l</span>et used_names, exp, pattern_list = acc in
         let used_names, current_expr, pattern' = helper (used_names, exp) x in
-        <span data-count="38">u</span>sed_names, current_expr, pattern' :: pattern_list)
+        <span data-count="49">u</span>sed_names, current_expr, pattern' :: pattern_list)
       ~init:(used_names, exp, [])
       pattern_list
   in
-  <span data-count="116">p</span>attern', pattern_list', exp
+  <span data-count="130">p</span>attern', pattern_list', exp
 ;;
 
 let remove_patterns program =
-  <span data-count="70">l</span>et rec helper_expr = function
-    | <span data-count="121">E</span>Const _ as c -&gt; return c
-    | <span data-count="476">E</span>Var _ as v -&gt; return v
-    | <span data-count="363">E</span>App (l, r) -&gt;
-      let* l = helper_exp<span data-count="363">r</span> l in
-      <span data-count="363">l</span>et* r = helper_exp<span data-count="363">r</span> r in
-      <span data-count="363">r</span>eturn @@ e_ap<span data-count="363">p</span> l r
+  <span data-count="76">l</span>et rec helper_expr = function
+    | <span data-count="126">E</span>Const _ as c -&gt; return c
+    | <span data-count="523">E</span>Var _ as v -&gt; return v
+    | <span data-count="398">E</span>App (l, r) -&gt;
+      let* l = helper_exp<span data-count="398">r</span> l in
+      <span data-count="398">l</span>et* r = helper_exp<span data-count="398">r</span> r in
+      <span data-count="398">r</span>eturn @@ e_ap<span data-count="398">p</span> l r
     | <span data-count="6">E</span>IfElse (i, t, e) -&gt;
       let* i = helper_exp<span data-count="6">r</span> i in
       <span data-count="6">l</span>et* t = helper_exp<span data-count="6">r</span> t in
       <span data-count="6">l</span>et* e = helper_exp<span data-count="6">r</span> e in
       <span data-count="6">r</span>eturn @@ e_if_els<span data-count="6">e</span> i t e
-    | <span data-count="116">E</span>Fun (p, ps, e) -&gt;
-      let* e = helper_exp<span data-count="116">r</span> e in
-      <span data-count="116">l</span>et p, ps, e = remove_argument_patterns e p ps in
-      <span data-count="116">r</span>eturn @@ e_fu<span data-count="116">n</span> p ps e
-    | <span data-count="71">E</span>LetIn (def, body) -&gt;
-      let* body = helper_exp<span data-count="71">r</span> body in
-      <span data-count="71">(</span>match def with
-       | <span data-count="71">D</span>Let (_, pat, exp) -&gt;
+    | <span data-count="130">E</span>Fun (p, ps, e) -&gt;
+      let* e = helper_exp<span data-count="130">r</span> e in
+      <span data-count="130">l</span>et p, ps, e = remove_argument_patterns e p ps in
+      <span data-count="130">r</span>eturn @@ e_fu<span data-count="130">n</span> p ps e
+    | <span data-count="75">E</span>LetIn (def, body) -&gt;
+      let* body = helper_exp<span data-count="75">r</span> body in
+      <span data-count="75">(</span>match def with
+       | <span data-count="75">D</span>Let (_, pat, exp) -&gt;
          if is_simple pat
          then
-           <span data-count="67">l</span>et* def = helper_de<span data-count="67">f</span> def in
-           <span data-count="67">l</span>et def = List.hd_exn def in
-           <span data-count="67">r</span>eturn @@ e_let_i<span data-count="67">n</span> def body
+           <span data-count="71">l</span>et* def = helper_de<span data-count="71">f</span> def in
+           <span data-count="71">l</span>et def = List.hd_exn def in
+           <span data-count="71">r</span>eturn @@ e_let_i<span data-count="71">n</span> def body
          else
            <span data-count="4">l</span>et* exp = helper_exp<span data-count="4">r</span> exp in
            <span data-count="4">r</span>eturn @@ e_matc<span data-count="4">h</span> exp [ pat, body ])
@@ -376,49 +372,47 @@ let remove_patterns program =
       let* x1 = helper_exp<span data-count="17">r</span> x1 in
       <span data-count="17">l</span>et* x2 = helper_exp<span data-count="17">r</span> x2 in
       <span data-count="17">l</span>et* xs =
-        State.mfold_righ<span data-count="17">t</span> xs ~init:[] ~f:(fun x acc -&gt;
-          <span data-count="7">h</span>elper_exp<span data-count="7">r</span> x &gt;&gt;| fun x -&gt; <span data-count="7">x</span> :: acc)
+        mfold_righ<span data-count="17">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="7">h</span>elper_exp<span data-count="7">r</span> x &gt;&gt;| fun x -&gt; <span data-count="7">x</span> :: acc)
       in
       <span data-count="17">r</span>eturn @@ e_tupl<span data-count="17">e</span> x1 x2 xs
     | <span data-count="5">E</span>List xs -&gt;
       let* xs =
-        State.mfold_righ<span data-count="5">t</span> xs ~init:[] ~f:(fun x acc -&gt;
-          <span data-count="13">h</span>elper_exp<span data-count="13">r</span> x &gt;&gt;| fun x -&gt; <span data-count="13">x</span> :: acc)
+        mfold_righ<span data-count="5">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="13">h</span>elper_exp<span data-count="13">r</span> x &gt;&gt;| fun x -&gt; <span data-count="13">x</span> :: acc)
       in
       <span data-count="5">r</span>eturn @@ e_lis<span data-count="5">t</span> xs
-    | <span data-count="16">E</span>Match (exp, cases) -&gt;
-      let* exp = helper_exp<span data-count="16">r</span> exp in
-      <span data-count="16">l</span>et* cases =
-        State.mfold_righ<span data-count="16">t</span> cases ~init:[] ~f:(fun (pat, exp) acc -&gt;
-          <span data-count="41">l</span>et* exp = helper_exp<span data-count="41">r</span> exp in
-          <span data-count="41">r</span>eturn ((pat, exp) :: acc))
+    | <span data-count="17">E</span>Match (exp, cases) -&gt;
+      let* exp = helper_exp<span data-count="17">r</span> exp in
+      <span data-count="17">l</span>et* cases =
+        mfold_righ<span data-count="17">t</span> cases ~init:[] ~f:(fun (pat, exp) acc -&gt;
+          <span data-count="43">l</span>et* exp = helper_exp<span data-count="43">r</span> exp in
+          <span data-count="43">r</span>eturn ((pat, exp) :: acc))
       in
-      <span data-count="16">r</span>eturn @@ e_matc<span data-count="16">h</span> exp cases
+      <span data-count="17">r</span>eturn @@ e_matc<span data-count="17">h</span> exp cases
   and helper_def : definition -&gt; (var_id, definition list) State.StateM.t = function
-    | <span data-count="152">D</span>Let (r, p, e) when is_simpl<span data-count="152">e</span> p -&gt;
-      <span data-count="145">l</span>et* e = helper_exp<span data-count="145">r</span> e in
-      <span data-count="145">r</span>eturn [ d_let_fla<span data-count="145">g</span> r p e ]
-    | <span data-count="7">D</span>Let (_, pat, e) -&gt;
+    | <span data-count="168">D</span>Let (r, p, e) when is_simpl<span data-count="168">e</span> p -&gt;
+      <span data-count="160">l</span>et* e = helper_exp<span data-count="160">r</span> e in
+      <span data-count="160">r</span>eturn [ d_let_fla<span data-count="160">g</span> r p e ]
+    | <span data-count="8">D</span>Let (_, pat, e) -&gt;
       (* Convert `let complex_pattern = expr`
          into `let temp_match = match expr with | complex_pattern -&gt; ()`
          and deal with it later in 'remove_match' *)
-      let* temp_match = fresh_prefi<span data-count="7">x</span> "#temp_match" in
-      <span data-count="7">l</span>et match_exp =
+      let* temp_match = fresh_prefi<span data-count="8">x</span> "__temp_match" in
+      <span data-count="8">l</span>et match_exp =
         d_let
-          (p_iden<span data-count="7">t</span> temp_match)
-          (e_let_i<span data-count="7">n</span>
-             (d_le<span data-count="7">t</span> (p_iden<span data-count="7">t</span> temp_match) e)
-             (e_matc<span data-count="7">h</span> (e_va<span data-count="7">r</span> temp_match) [ pat, e_va<span data-count="7">r</span> temp_match ]))
+          (p_iden<span data-count="8">t</span> temp_match)
+          (e_let_i<span data-count="8">n</span>
+             (d_le<span data-count="8">t</span> (p_iden<span data-count="8">t</span> temp_match) e)
+             (e_matc<span data-count="8">h</span> (e_va<span data-count="8">r</span> temp_match) [ pat, e_va<span data-count="8">r</span> temp_match ]))
       in
-      <span data-count="7">r</span>eturn @@ [ match_exp ]
+      <span data-count="8">r</span>eturn @@ [ match_exp ]
   in
   let helper_program program =
-    <span data-count="70">S</span>tate.mfol<span data-count="70">d</span> program ~init:[] ~f:(fun acc def -&gt;
-      <span data-count="85">l</span>et* defs = helper_de<span data-count="85">f</span> def in
-      <span data-count="85">r</span>eturn (defs @ acc))
+    <span data-count="76">m</span>fol<span data-count="76">d</span> program ~init:[] ~f:(fun acc def -&gt;
+      <span data-count="97">l</span>et* defs = helper_de<span data-count="97">f</span> def in
+      <span data-count="97">r</span>eturn (defs @ acc))
     &gt;&gt;| List.rev
   in
-  run (helper_progra<span data-count="70">m</span> program)
+  run (helper_progra<span data-count="76">m</span> program)
 ;;
 </code></pre>
       </div>

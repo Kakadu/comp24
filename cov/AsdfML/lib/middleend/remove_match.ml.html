@@ -427,46 +427,46 @@ let list_tl lst = <span data-count="34">s</span>_app (s_va<span data-count="34">
 let list_is_empty lst = <span data-count="22">s</span>_app (s_va<span data-count="22">r</span> "`list_is_empty") lst
 
 let pat_as_id = function
-  | <span data-count="339">P</span>Ident x -&gt; x
+  | <span data-count="372">P</span>Ident x -&gt; x
   | <span data-count="6">P</span>Wild -&gt; "_"
   | <span data-count="0">p</span> -&gt; failwith (Format.asprint<span data-count="0">f</span> "remove_match: non-id pattern %a" Ast.pp_pattern p)
 ;;
 
 let remove_match prog =
-  <span data-count="54">l</span>et rec helper_expr = function
-    | <span data-count="122">E</span>Const c -&gt; return (s_cons<span data-count="122">t</span> c)
-    | <span data-count="452">E</span>Var v -&gt; return (s_va<span data-count="452">r</span> v)
-    | <span data-count="317">E</span>App (l, r) -&gt;
-      let* l = helper_exp<span data-count="317">r</span> l in
-      <span data-count="317">l</span>et* r = helper_exp<span data-count="317">r</span> r in
-      <span data-count="317">r</span>eturn (s_ap<span data-count="317">p</span> l r)
+  <span data-count="57">l</span>et rec helper_expr = function
+    | <span data-count="124">E</span>Const c -&gt; return (s_cons<span data-count="124">t</span> c)
+    | <span data-count="484">E</span>Var v -&gt; return (s_va<span data-count="484">r</span> v)
+    | <span data-count="342">E</span>App (l, r) -&gt;
+      let* l = helper_exp<span data-count="342">r</span> l in
+      <span data-count="342">l</span>et* r = helper_exp<span data-count="342">r</span> r in
+      <span data-count="342">r</span>eturn (s_ap<span data-count="342">p</span> l r)
     | <span data-count="6">E</span>IfElse (i, t, e) -&gt;
       let* i = helper_exp<span data-count="6">r</span> i in
       <span data-count="6">l</span>et* t = helper_exp<span data-count="6">r</span> t in
       <span data-count="6">l</span>et* e = helper_exp<span data-count="6">r</span> e in
       <span data-count="6">r</span>eturn (s_if_els<span data-count="6">e</span> i t e)
-    | <span data-count="106">E</span>Fun (p, ps, e) -&gt;
-      let* e = helper_exp<span data-count="106">r</span> e in
-      <span data-count="106">l</span>et p = pat_as_id p in
-      <span data-count="106">l</span>et ps = List.map ps ~f:pat_as_id in
-      <span data-count="106">r</span>eturn (s_fu<span data-count="106">n</span> p ps e)
-    | <span data-count="64">E</span>LetIn (d, e) -&gt;
-      let* d = helper_de<span data-count="64">f</span> d in
-      <span data-count="64">l</span>et d = List.hd_exn d in
-      <span data-count="64">l</span>et* e = helper_exp<span data-count="64">r</span> e in
-      <span data-count="64">r</span>eturn (s_let_i<span data-count="64">n</span> d e)
+    | <span data-count="117">E</span>Fun (p, ps, e) -&gt;
+      let* e = helper_exp<span data-count="117">r</span> e in
+      <span data-count="117">l</span>et p = pat_as_id p in
+      <span data-count="117">l</span>et ps = List.map ps ~f:pat_as_id in
+      <span data-count="117">r</span>eturn (s_fu<span data-count="117">n</span> p ps e)
+    | <span data-count="67">E</span>LetIn (d, e) -&gt;
+      let* d = helper_de<span data-count="67">f</span> d in
+      <span data-count="67">l</span>et d = List.hd_exn d in
+      <span data-count="67">l</span>et* e = helper_exp<span data-count="67">r</span> e in
+      <span data-count="67">r</span>eturn (s_let_i<span data-count="67">n</span> d e)
     | <span data-count="18">E</span>Tuple (x1, x2, xs) -&gt;
       let* x1 = helper_exp<span data-count="18">r</span> x1 in
       <span data-count="18">l</span>et* x2 = helper_exp<span data-count="18">r</span> x2 in
       <span data-count="18">l</span>et* xs =
-        State.mfold_righ<span data-count="18">t</span> xs ~init:[] ~f:(fun e acc -&gt;
+        mfold_righ<span data-count="18">t</span> xs ~init:[] ~f:(fun e acc -&gt;
           <span data-count="9">l</span>et* e = helper_exp<span data-count="9">r</span> e in
           <span data-count="9">r</span>eturn (e :: acc))
       in
       <span data-count="18">r</span>eturn (s_tupl<span data-count="18">e</span> x1 x2 xs)
     | <span data-count="6">E</span>List xs -&gt;
       let* xs =
-        State.mfold_righ<span data-count="6">t</span> xs ~init:[] ~f:(fun e acc -&gt;
+        mfold_righ<span data-count="6">t</span> xs ~init:[] ~f:(fun e acc -&gt;
           <span data-count="15">l</span>et* e = helper_exp<span data-count="15">r</span> e in
           <span data-count="15">r</span>eturn (e :: acc))
       in
@@ -477,16 +477,16 @@ let remove_match prog =
         | <span data-count="71">P</span>Ident id -&gt; s_let_in (s_le<span data-count="71">t</span> id match_exp) action |&gt; <span data-count="71">r</span>eturn
         | <span data-count="16">P</span>Tuple (x1, x2, xs) -&gt;
           let xs = x1 :: x2 :: xs in
-          let* tuple_id = fresh_prefi<span data-count="16">x</span> "#tuple" in
+          let* tuple_id = fresh_prefi<span data-count="16">x</span> "__tuple" in
           <span data-count="16">l</span>et* body =
-            State.mfoldi_righ<span data-count="16">t</span> xs ~init:action ~f:(fun idx acc x -&gt;
+            mfoldi_righ<span data-count="16">t</span> xs ~init:action ~f:(fun idx acc x -&gt;
               <span data-count="41">b</span>ind_pat_vars (tuple_fiel<span data-count="41">d</span> (s_va<span data-count="41">r</span> tuple_id) idx) x acc)
           in
           <span data-count="16">s</span>_let_in (s_le<span data-count="16">t</span> tuple_id match_exp) body |&gt; <span data-count="16">r</span>eturn
         | <span data-count="7">P</span>List xs -&gt;
-          let* list_id = fresh_prefi<span data-count="7">x</span> "#list" in
+          let* list_id = fresh_prefi<span data-count="7">x</span> "__list" in
           <span data-count="7">l</span>et* body =
-            State.mfoldi_righ<span data-count="7">t</span> xs ~init:action ~f:(fun idx action x -&gt;
+            mfoldi_righ<span data-count="7">t</span> xs ~init:action ~f:(fun idx action x -&gt;
               <span data-count="12">b</span>ind_pat_vars (list_fiel<span data-count="12">d</span> (s_va<span data-count="12">r</span> list_id) idx) x action)
           in
           <span data-count="7">s</span>_let_in (s_le<span data-count="7">t</span> list_id match_exp) body |&gt; <span data-count="7">r</span>eturn
@@ -544,8 +544,8 @@ let remove_match prog =
             tl_cases
       in
       gen_match Fn.id cases
-  and helper_def ?(top = <span data-count="64">f</span>alse) = function
-    | <span data-count="133">D</span>Let (_, p, e) when top &amp;&amp; <span data-count="69">S</span>tring.is_prefi<span data-count="69">x</span> (pat_as_i<span data-count="69">d</span> p) ~prefix:"#temp_match" -&gt;
+  and helper_def ?(top = <span data-count="67">f</span>alse) = function
+    | <span data-count="142">D</span>Let (_, p, e) when top &amp;&amp; <span data-count="75">S</span>tring.is_prefi<span data-count="75">x</span> (pat_as_i<span data-count="75">d</span> p) ~prefix:"__temp_match" -&gt;
       <span data-count="3">l</span>et* e' = helper_exp<span data-count="3">r</span> e in
       <span data-count="3">l</span>et match_, binds =
         let rec extract_binds acc = function
@@ -563,12 +563,12 @@ let remove_match prog =
           failwith (Format.asprint<span data-count="0">f</span> "remove_match: unexpected expr %a\n" Sast.pp_sexpr e')
       in
       return (match_ :: binds)
-    | <span data-count="130">D</span>Let (r, p, e) -&gt;
-      let* e = helper_exp<span data-count="130">r</span> e in
-      <span data-count="130">l</span>et p = pat_as_id p in
-      <span data-count="130">[</span> s_let_fla<span data-count="130">g</span> r p e ] |&gt; return
+    | <span data-count="139">D</span>Let (r, p, e) -&gt;
+      let* e = helper_exp<span data-count="139">r</span> e in
+      <span data-count="139">l</span>et p = pat_as_id p in
+      <span data-count="139">[</span> s_let_fla<span data-count="139">g</span> r p e ] |&gt; return
   in
-  List.map prog ~f:(fun def -&gt; <span data-count="69">r</span>un (helper_de<span data-count="69">f</span> ~top:true def)) |&gt; <span data-count="54">L</span>ist.concat
+  List.map prog ~f:(fun def -&gt; <span data-count="75">r</span>un (helper_de<span data-count="75">f</span> ~top:true def)) |&gt; <span data-count="57">L</span>ist.concat
 ;;
 </code></pre>
       </div>
