@@ -102,14 +102,15 @@
   > let main = println_int (fact 5)
   > EOF
   ANF:
-  let ll_2 cont n res = let anf1 = ( * ) n res in
+  let ll_2 cont n_0 res = let anf1 = ( * ) n_0 res in
          cont anf1
-  let ll_helper_1 n cont =
-    let anf3 = ( <= ) n 1 in
+  let ll_helper_1 n_0 cont =
+    let anf3 = ( <= ) n_0 1 in
     if anf3 
     then cont 1 
-    else let anf6 = ( - ) n 1 in
-      let anf7 = ll_2 cont n in
+    else
+      let anf6 = ( - ) n_0 1 in
+      let anf7 = ll_2 cont n_0 in
       ll_helper_1 anf6 anf7
   let ll_3 x = x
   let fact n = ll_helper_1 n ll_3
@@ -133,14 +134,15 @@
   > let main = println_int (fact 5)
   > EOF
   ANF:
-  let ll_2 cont n res = let anf1 = ( * ) n res in
+  let ll_2 cont n_0 res = let anf1 = ( * ) n_0 res in
          cont anf1
-  let ll_helper_1 n cont =
-    let anf3 = ( <= ) n 1 in
+  let ll_helper_1 n_0 cont =
+    let anf3 = ( <= ) n_0 1 in
     if anf3 
     then cont 1 
-    else let anf6 = ( - ) n 1 in
-      let anf7 = ll_2 cont n in
+    else
+      let anf6 = ( - ) n_0 1 in
+      let anf7 = ll_2 cont n_0 in
       ll_helper_1 anf6 anf7
   let ll_3 x = x
   let fact n = ll_helper_1 n ll_3
