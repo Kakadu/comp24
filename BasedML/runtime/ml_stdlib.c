@@ -70,6 +70,6 @@ int64_t le_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml
 
 void print_int(int64_t a) {
     DEBUG_RUN(if (is_ml_ptr(a)) EXCEPTION_FMT("Debug \"print_int: get boxed arg\""););
-    printf("%ld", CONVERT_INT_ML_TO_NATIVE(a));
+    printf("%ld\n", CONVERT_INT_ML_TO_NATIVE(a));
     fflush(stdout);
 }
