@@ -202,10 +202,12 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
      return (MapString.of_seq (List.to_seq restored_lst))
 ;;
 
-let infer_prog decls =
-  let _, res = run (init_used_type_names decls *> infer_declarations decls) start_state in
+let infer_prog_with_custom_state state decls =
+  let _, res = run (init_used_type_names decls *> infer_declarations decls) state in
   res
 ;;
+
+let infer_prog decls = infer_prog_with_custom_state start_state decls
 
 let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in

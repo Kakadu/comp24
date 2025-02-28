@@ -3,21 +3,8 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 let () =
-  let is_stdlib = function
-    | "print_int"
-    | "( + )"
-    | "( :: )"
-    | "( * )"
-    | "( - )"
-    | "( == )"
-    | "( = )"
-    | "( / )"
-    | "( >= )"
-    | "( > )"
-    | "( <= )"
-    | "( < )"
-    | "( <> )" -> true
-    | _ -> false
+  let is_stdlib target_name =
+    List.exists (fun (nm, _, _, _) -> target_name = nm) Stdlib_funs.stdlib_funs
   in
   let s = Stdio.In_channel.input_all Stdlib.stdin in
   match Parser.parse_program s with
