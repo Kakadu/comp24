@@ -54,8 +54,10 @@ and get_fun_free_vars ps body =
   IdentifierSet.diff body_free_vars patterns_identifiers
 
 and get_function_free_vars cases =
-  let cases_vars = List.map (fun (p, e) -> get_case_free_vars (p, e)) cases in
-  List.fold_left IdentifierSet.union IdentifierSet.empty cases_vars
+  List.fold_left
+    IdentifierSet.union
+    IdentifierSet.empty
+    (List.map get_case_free_vars cases)
 
 and get_application_free_vars func args =
   let func_free_vars = get_expr_free_vars func in
