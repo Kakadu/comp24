@@ -16,5 +16,9 @@ let stdlib =
   ; "!="
   ; "&&"
   ; "||"
+  ; "RTE_ERROR_MATCH_FAILURE"
+; "GET_HEAD"
+; "GET_TALE"
+; "GET_NTH"
   ]
 ;;

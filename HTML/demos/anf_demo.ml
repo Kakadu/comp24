@@ -1,9 +1,16 @@
 let anf_demo s =
   match Parser.parse_program s with
   | Ok actual ->
-    let prog = Anf.Cc_ll.closure_convert actual in
-    let prog = Anf.Anf_conv.anf_program prog in
+    let prog = Patelim.Elim.p_elim_decls actual in
+    (match prog with
+    | Ok actual ->  
+      let prog = Anf.Cc_ll.closure_convert actual in
+
+      let prog = Anf.Anf_conv.anf_program prog in
     Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog prog
+      | Error _ -> failwith "todo")
+
+  
   | Error err -> Format.printf "%s\n" err
 ;;
 

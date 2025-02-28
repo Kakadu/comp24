@@ -77,9 +77,9 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aex
   | ETuple (e1, e2, es) ->
      anf_list env (e1::e2::es) (fun imm ->
      k (ImmTuple imm))
-  (* | EList (e1, e2) ->
+  | EList (e1, e2) ->
     anf_expr env e1 (fun imm1 ->
-      anf_expr env e2 (fun imm2 -> k (ImmTuple [ imm1; imm2 ]))) *)
+      anf_expr env e2 (fun imm2 -> k (ImmCons (imm1, imm2))))
   | EClsr (DLet (_, (pat, e1)), e2) ->
     anf_expr env e1 (fun imm1 ->
       let* aexpr = anf_expr env e2 k in

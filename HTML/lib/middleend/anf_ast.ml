@@ -8,6 +8,7 @@ type immexpr =
   | ImmConst of const
   | ImmIdentifier of ident
   | ImmTuple of immexpr list
+  | ImmCons of immexpr * immexpr
   | ImmConstraint of immexpr typed
 
 type cexpr =
