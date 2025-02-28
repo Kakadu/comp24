@@ -10,11 +10,11 @@
  (public_name infer)
  (libraries shaitanml_lib stdio))
 
-(executable
- (name cc)
- (modules Cc)
- (public_name cc)
- (libraries shaitanml_lib stdio))
+; (executable
+;  (name cc)
+;  (modules Cc)
+;  (public_name cc)
+;  (libraries shaitanml_lib stdio))
 
 (cram
  (deps

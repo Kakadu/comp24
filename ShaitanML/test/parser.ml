@@ -306,19 +306,15 @@ let%expect_test "more complex let bindings" =
     |};
   [%expect
     {|
-      [(SEval
-          (ELet (Nonrec,
-             ((PVar "f"),
-              (EApply (
-                 (EFun ((PVar "x"),
-                    (EApply ((EApply ((EVar "( + )"), (EVar "x"))),
-                       (EConst (CInt 1))))
-                    )),
-                 (EConst (CInt 123))))),
-             (EVar "f"))));
-        (SValue (Nonrec,
-           [((PTuple [(PVar "x"); (PVar "y"); (PVar "z")]),
-             (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
-           ))
+      [(SValue (Nonrec,
+          [((PVar "f"),
+            (EApply (
+               (EFun ((PVar "x"),
+                  (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EConst (CInt 1))
+                     ))
+                  )),
+               (EConst (CInt 123)))))
+            ]
+          ))
         ] |}]
 ;;

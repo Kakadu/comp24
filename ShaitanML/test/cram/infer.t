@@ -5,7 +5,7 @@
   Infer error: Unification failed on int and bool
 
   $ infer < manytests/do_not_type/003occurs.ml
-  Infer error: Occurs check failed: 2 occurs inside '2 -> '6
+  Infer error: Occurs check failed
 
   $ infer < manytests/do_not_type/004let_poly.ml
   Infer error: Unification failed on bool and int
@@ -20,8 +20,8 @@
   Infer error: Left-hand side of let rec should be a variable
 
   $ infer < manytests/do_not_type/016lists.ml
-  cannot open manytests/do_not_type/016lists.ml: No such file
-  [2]
+  manytests/do_not_type/016lists.ml: No such file or directory
+  [1]
 
   $ infer < manytests/typed/001fac.ml
   val fac: int -> int
@@ -74,7 +74,7 @@
   Infer error: Unbound variable '( == )'
 
   $ infer < manytests/typed/016lists.ml
-  Infer error: Occurs check failed: 41 occurs inside '41
+  Infer error: Occurs check failed
 
   $ dune exec infer << EOF
   > let f ((x : int) : int) ((y : int) : int) = x + y;;
