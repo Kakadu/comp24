@@ -258,6 +258,7 @@ module Memory = struct
   ;;
 
   let store_rvalue location rvalue =
+    let is_empty = Base.List.is_empty in
     match location, rvalue with
     | Loc_reg rd, Rv_reg src when rd = src -> []
     | Loc_reg rd, Rv_reg src -> [ Pseudo.mv ~rd ~src ]
@@ -269,7 +270,7 @@ module Memory = struct
       let temp_reg, save, restore = find_reg [] in
       let load = Pseudo.li temp_reg imm in
       let store =
-        if is_saved temp_reg
+        if is_empty save |> not
         then
           (* we extended stack for moving arg, and we need to store value on the stack, we add extra stack space with offset *)
           sd ~v:temp_reg (offset + (2 * word_size)) ~dst:Sp
@@ -282,12 +283,12 @@ module Memory = struct
       let store = sd ~v:temp_reg offset ~dst in
       save @ (load :: store :: restore)
     | Loc_mem (Sp, dst_offset), Rv_mem (Sp, src_offset) ->
-      (* we extended stack for moving arg, and we need to store value on the stack,
-         we add extra stack space with offset *)
       let temp_reg, save, restore = find_reg [] in
       let load, store =
-        if is_saved temp_reg
+        if is_empty save |> not
         then
+          (* we extended stack for moving arg, and we need to store value on the stack,
+         we add extra stack space with offset, also we add extra offset on dst offset *)
           ( ld ~rd:temp_reg (src_offset + (2 * word_size)) ~src:Sp
           , sd ~v:temp_reg (dst_offset + (2 * word_size)) ~dst:Sp )
         else ld ~rd:temp_reg src_offset ~src:Sp, sd ~v:temp_reg dst_offset ~dst:Sp
@@ -298,7 +299,7 @@ module Memory = struct
          we add extra stack space with offset *)
       let temp_reg, save, restore = find_reg [] in
       let load, store =
-        if is_saved temp_reg
+        if is_empty save |> not
         then
           ( ld ~rd:temp_reg (src_offset + (2 * word_size)) ~src:Sp
           , sd ~v:temp_reg dst_offset ~dst:dst_reg )
@@ -309,7 +310,7 @@ module Memory = struct
       let temp_reg, save, restore = find_reg [ src_reg ] in
       let load = ld ~rd:temp_reg src_offset ~src:Sp in
       let store =
-        if is_saved temp_reg
+        if is_empty save |> not
         then
           (* we extended stack for moving arg, and we need to store value on the stack,
              we add extra stack space with offset *)
@@ -349,7 +350,7 @@ module Function = struct
 
   let temporary_used_registers assignment arity =
     let args = List.init (min 8 arity) arg in
-    args @ used_registers assignment
+    args @ used_registers assignment @ !currently_used_free_registers
     |> List.filter (fun r -> is_saved r |> not)
     |> Utils.ListUtils.distinct
   ;;
@@ -607,7 +608,7 @@ let rec codegen_flambda location =
        save
        @ (save_reg
           @ resolve_callee
-          @ (put_count :: extend_stack :: put_envp :: put_args_on_stack))
+          @ (extend_stack  :: put_args_on_stack @ [put_envp; put_count]))
        @ ((put_callee_in_a0 :: call_closure :: save_retvalue) @ restore_reg)
        @ (shrink_stack :: restore)
      | Loc_mem _ ->

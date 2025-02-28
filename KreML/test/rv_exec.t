@@ -34,16 +34,17 @@
   3
 
   $ dune exec rv_codegen < manytests/typed/004manyargs.ml > test.S
-$ cat test.S
   $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
   $ qemu-riscv64-static test.out
-  Segmentation fault (core dumped)
-  [139]
+  1111111111
+  1
+  10
+  100
 
-$ dune exec rv_codegen < manytests/typed/005fix.ml > test.S
-$ cat test.S
-$ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
-$ qemu-riscv64-static test.out
+  $ dune exec rv_codegen < manytests/typed/005fix.ml > test.S
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+  $ qemu-riscv64-static test.out
+  720
 
 
   $ dune exec rv_codegen < manytests/typed/006partial.ml > test.S
@@ -80,7 +81,7 @@ $ qemu-riscv64-static test.out
   $ dune exec rv_codegen < manytests/typed/008ascription.ml > test.S
   $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
   $ qemu-riscv64-static test.out
-  3
+  8
 
 no main
 $ dune exec rv_codegen < manytests/typed/009let_poly.ml > test.S
