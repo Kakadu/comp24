@@ -112,7 +112,7 @@ let rec anf ctx llexpr expr_with_hole =
     in
     let rest, llexp = sep_llapp (LLApplication (left, right)) Fun.id in
     anf ctx llexp (fun imm_exp ->
-      anf_list ctx (List.rev rest) (fun imm_rest ->
+      anf_list ctx rest (fun imm_rest ->
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
@@ -123,7 +123,7 @@ let rec anf ctx llexpr expr_with_hole =
             return (CApplication (CImmExpr h, rest))
           | [] -> fail "Error while building application"
         in
-        let* built_app = build_app (imm_exp :: imm_rest) in
+        let* built_app = build_app (imm_exp :: List.rev imm_rest) in
         return (ALetIn (PIdentifier fresh_name, built_app, aexp))))
   | LLMatch (exp, cases) ->
     let rec convert_cases cases acc =
