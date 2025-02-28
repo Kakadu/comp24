@@ -45,16 +45,16 @@ MODIFY
   >   let (d::e) = [1; 2; 3] in
   >   let f (x, y) = x + y in 
   >   0
-  let abc = let #t = (1, (2, 3)) in
-  let a = ((#unpack_tuple #t) 0) in
-  let b = ((#unpack_tuple ((#unpack_tuple #t) 1)) 0) in
-  let c = ((#unpack_tuple ((#unpack_tuple #t) 1)) 1) in
-  let #t = (1::(2::(3::[]))) in
-  if ((> (#list_length #t)) 0)
-  then let d = (#list_hd #t) in
-  let e = (#list_tl #t) in
-  let f = (fun #p0 -> let x = ((#unpack_tuple #p0) 0) in
-  let y = ((#unpack_tuple #p0) 1) in
+  let abc = let #2 = (1, (2, 3)) in
+  let a = ((#unpack_tuple #2) 0) in
+  let b = ((#unpack_tuple ((#unpack_tuple #2) 1)) 0) in
+  let c = ((#unpack_tuple ((#unpack_tuple #2) 1)) 1) in
+  let #1 = (1::(2::(3::[]))) in
+  if ((> (#list_length #1)) 0)
+  then let d = (#list_hd #1) in
+  let e = (#list_tl #1) in
+  let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
+  let y = ((#unpack_tuple #0) 1) in
   ((+ x) y)) in
   0
   else #match_failure
@@ -63,12 +63,12 @@ MODIFY
   > let f x = 
   >  let g (a, b) (c :: d) e = x + 1
   >  in g 
-  let f = (fun x -> let g = (fun #p0 #p1 e -> let #t = (#p0, #p1) in
-  if ((> (#list_length ((#unpack_tuple #t) 1))) 0)
-  then let a = ((#unpack_tuple ((#unpack_tuple #t) 0)) 0) in
-  let b = ((#unpack_tuple ((#unpack_tuple #t) 0)) 1) in
-  let c = (#list_hd ((#unpack_tuple #t) 1)) in
-  let d = (#list_tl ((#unpack_tuple #t) 1)) in
+  let f = (fun x -> let g = (fun #0 #1 e -> let #2 = (#0, #1) in
+  if ((> (#list_length ((#unpack_tuple #2) 1))) 0)
+  then let a = ((#unpack_tuple ((#unpack_tuple #2) 0)) 0) in
+  let b = ((#unpack_tuple ((#unpack_tuple #2) 0)) 1) in
+  let c = (#list_hd ((#unpack_tuple #2) 1)) in
+  let d = (#list_tl ((#unpack_tuple #2) 1)) in
   ((+ x) 1)
   else #match_failure) in
   g)
@@ -78,8 +78,8 @@ MODIFY
   >   let f (x, y) = x + y in 
   >   let rec g a = h a and h a = g a in 
   >   1
-  let a = let f = (fun #p0 -> let x = ((#unpack_tuple #p0) 0) in
-  let y = ((#unpack_tuple #p0) 1) in
+  let a = let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
+  let y = ((#unpack_tuple #0) 1) in
   ((+ x) y)) in
   let rec g = (fun a -> (h a)) and h = (fun a -> (g a)) in
   1
@@ -113,9 +113,9 @@ MODIFY
 
   $ ./run_remove_patterns.exe << EOF
   > let (1, 2) = (2, 3)
-  let #t = (2, 3)
+  let #0 = (2, 3)
   
-  let (#tt) = if ((&& ((= ((#unpack_tuple #t) 0)) 1)) ((= ((#unpack_tuple #t) 1)) 2))
+  let () = if ((&& ((= ((#unpack_tuple #0) 0)) 1)) ((= ((#unpack_tuple #0) 1)) 2))
   then ()
   else #match_failure
 
@@ -154,6 +154,6 @@ MODIFY
   $ ./run_remove_patterns.exe << EOF
   > let a = match 1 + 2 with 
   > | x -> x
-  let a = let #t = ((+ 1) 2) in
-  let x = #t in
+  let a = let #0 = ((+ 1) 2) in
+  let x = #0 in
   x

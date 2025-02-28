@@ -13,6 +13,6 @@ let () =
     (match Inferencer.run_infer_program parsed with
      | Error err -> Format.printf "Type inference error: %a\n" Inferencer.pp_error err
      | Ok _ ->
-       let ast = Remove_patterns.run_remove_patterns_program parsed in
+       let _, ast = Remove_patterns.run_remove_patterns_program parsed in
        Format.printf "%a" Remove_patterns.PP.pp_rp_program ast)
 ;;

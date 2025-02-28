@@ -27,6 +27,7 @@ let rec ll_expr bindings = function
   (* only for anonymous functions *)
   | Rp_e_fun (args, body) ->
     let* fresh_name = fresh >>| get_name in
+    let bindings = List.fold args ~init:bindings ~f:Map.remove in
     let* decls, new_body = ll_expr bindings body in
     return
       ( decls @ [ Rp_non_rec (fresh_name, Rp_e_fun (args, new_body)) ]
@@ -73,6 +74,7 @@ let rec ll_expr bindings = function
 
 and ll_decl_body bindings = function
   | Rp_e_fun (args, body) ->
+    let bindings = List.fold args ~init:bindings ~f:Map.remove in
     let* decls, new_body = ll_expr bindings body in
     return (decls, Rp_e_fun (args, new_body))
   | e ->

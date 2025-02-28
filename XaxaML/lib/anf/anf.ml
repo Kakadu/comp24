@@ -137,8 +137,8 @@ end = struct
     | Ce_ite (a, e1, e2) ->
       let tab = create_tab tab_num in
       let if1 = "if " ^ atom_to_str a ^ tab in
-      let then1 = "then " ^ exp_to_str tab_num e1 ^ tab in
-      let else1 = "else " ^ exp_to_str tab_num e2 ^ tab in
+      let then1 = "then " ^ exp_to_str (tab_num + 2) e1 ^ tab in
+      let else1 = "else " ^ exp_to_str (tab_num + 2) e2 ^ tab in
       if1 ^ then1 ^ else1
     | Ce_cons_list (a1, a2) ->
       Format.sprintf "(%s :: %s)" (atom_to_str a1) (atom_to_str a2)

@@ -6,8 +6,7 @@ open XaxaML
 
 let () =
   let str = Stdio.In_channel.input_all Stdlib.stdin in
-  let parsed = Parser.run_parser_program str in
-  match parsed with
+  match Parser.run_parser_program str with
   | Result.Error err -> Format.printf "Parsing error%s\n" err
   | Result.Ok parsed ->
     (match Inferencer.run_infer_program parsed with
@@ -17,13 +16,11 @@ let () =
          "Types before modifications:\n%a"
          Inferencer.TypeEnv.pp_env
          last_typed_env;
-       let ast = Remove_patterns.run_remove_patterns_program parsed in
-       let used_names_num, ast = Alpha_conversion.run_alpha_conversion_program ast in
+       let names_num, ast = Remove_patterns.run_remove_patterns_program parsed in
+       let names_num, ast = Alpha_conversion.run_alpha_conversion_program names_num ast in
        let ast = Closure_conversion.run_closure_conversion_program ast in
-       let used_names_num, ast =
-         Lambda_lifting.run_lambda_lifting_program used_names_num ast
-       in
-       (match Anf.run_to_anf_program used_names_num ast with
+       let names_num, ast = Lambda_lifting.run_lambda_lifting_program names_num ast in
+       (match Anf.run_to_anf_program names_num ast with
         | Error err -> Format.printf "Error converting to ANF: %a\n" Anf.PP.pp_error err
         | Ok ast ->
           let restore_ast = Anf.Convert.to_ast ast in

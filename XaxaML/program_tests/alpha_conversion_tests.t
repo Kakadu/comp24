@@ -1,15 +1,15 @@
   $ ./run_alpha_conversion.exe << EOF
   > let (a, b, c) = (1, 2, 3)
   > let f a b = a + b
-  let #t = (1, 2, 3)
+  let #0 = (1, 2, 3)
   
-  let a = ((#unpack_tuple #t) 0)
+  let a = ((#unpack_tuple #0) 0)
   
-  let b = ((#unpack_tuple #t) 1)
+  let b = ((#unpack_tuple #0) 1)
   
-  let c = ((#unpack_tuple #t) 2)
+  let c = ((#unpack_tuple #0) 2)
   
-  let f = (fun #0 #1 -> ((+ #0) #1))
+  let f = (fun #1 #2 -> ((+ #1) #2))
   $ ./run_alpha_conversion.exe << EOF
   > let f a b =
   >   let a x = b + x in
@@ -26,16 +26,16 @@
   >     | [] -> 0
   >    in
   >    f xs 
-  let f = (fun #p0 xs -> let a = ((#unpack_tuple #p0) 0) in
-  let b = ((#unpack_tuple #p0) 1) in
-  let rec #0 = (fun #1 -> if ((> (#list_length #1)) 0)
-  then let #2 = (#list_hd #1) in
-  let #3 = (#list_tl #1) in
-  ((+ #2) (#0 #3))
-  else if ((= #1) [])
+  let f = (fun #0 xs -> let a = ((#unpack_tuple #0) 0) in
+  let b = ((#unpack_tuple #0) 1) in
+  let rec #1 = (fun #2 -> if ((> (#list_length #2)) 0)
+  then let #3 = (#list_hd #2) in
+  let #4 = (#list_tl #2) in
+  ((+ #3) (#1 #4))
+  else if ((= #2) [])
   then 0
   else #match_failure) in
-  (#0 xs))
+  (#1 xs))
 
   $ ./run_alpha_conversion.exe << EOF
   > let f = let f = 1 in f
@@ -70,10 +70,10 @@
   
   let b = 2
   
-  let x = let #t = (a, b) in
-  if ((= ((#unpack_tuple #t) 0)) 1)
-  then let c = ((#unpack_tuple #t) 1) in
-  let #0 = c in
-  let #1 = 2 in
+  let x = let #0 = (a, b) in
+  if ((= ((#unpack_tuple #0) 0)) 1)
+  then let c = ((#unpack_tuple #0) 1) in
+  let #1 = c in
+  let #2 = 2 in
   b
   else 0

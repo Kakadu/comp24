@@ -100,6 +100,6 @@ let ac_program program init_env =
   helper init_env (Map.empty (module String)) program
 ;;
 
-let run_alpha_conversion_program prog =
-  run (ac_program prog (StrSet.of_list Std_names.std_names)) 0
+let run_alpha_conversion_program init_num prog =
+  run (ac_program prog (StrSet.of_list Std_names.std_names)) init_num
 ;;

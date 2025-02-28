@@ -141,6 +141,10 @@ end
 
 open Base
 open Common
+open Common.MonadCounter
+
+let empty_bindings = Map.empty (module String)
+let get_name i = "#" ^ Int.to_string i
 
 let rec get_idents = function
   | Ast.P_typed (pat, _) -> get_idents pat
@@ -248,134 +252,149 @@ let match_failure = Rp_e_ident "#match_failure"
 
 let rec rp_expr = function
   | Ast.E_typed (e, _) -> rp_expr e
-  | E_const c -> Rp_e_const (convert_const c)
-  | E_ident v -> Rp_e_ident v
+  | E_const c -> return @@ Rp_e_const (convert_const c)
+  | E_ident v -> return @@ Rp_e_ident v
   | E_app (e1, e2) ->
-    let e1 = rp_expr e1 in
-    let e2 = rp_expr e2 in
-    Rp_e_app (e1, e2)
+    let* e1 = rp_expr e1 in
+    let* e2 = rp_expr e2 in
+    return @@ Rp_e_app (e1, e2)
   | E_ite (e1, e2, e3) ->
-    let e1 = rp_expr e1 in
-    let e2 = rp_expr e2 in
-    let e3 = rp_expr e3 in
-    Rp_e_ite (e1, e2, e3)
+    let* e1 = rp_expr e1 in
+    let* e2 = rp_expr e2 in
+    let* e3 = rp_expr e3 in
+    return @@ Rp_e_ite (e1, e2, e3)
   | E_cons_list (e1, e2) ->
-    let e1 = rp_expr e1 in
-    let e2 = rp_expr e2 in
-    Rp_e_cons_list (e1, e2)
+    let* e1 = rp_expr e1 in
+    let* e2 = rp_expr e2 in
+    return @@ Rp_e_cons_list (e1, e2)
   | E_tuple (e, e_list) ->
-    let e = rp_expr e in
-    let e_list = List.map e_list ~f:(fun e -> rp_expr e) in
-    Rp_e_tuple (e :: e_list)
+    let* e = rp_expr e in
+    let* e_list = RList.map e_list ~f:(fun e -> rp_expr e) in
+    return @@ Rp_e_tuple (e :: e_list)
   | E_fun (first, other, body) ->
     let last_args = first :: other in
-    let new_args =
-      List.mapi last_args ~f:(fun i arg ->
-        match arg with
-        | P_val v -> v
-        | P_const C_unit -> "()"
-        | _ -> "#p" ^ Int.to_string i)
+    let f1 (new_args, args_to_match, pat_list) arg =
+      match arg with
+      | Ast.P_val v -> return (v :: new_args, args_to_match, pat_list)
+      | P_const C_unit -> return ("()" :: new_args, args_to_match, pat_list)
+      | _ ->
+        let* fresh_name = fresh >>| get_name in
+        return (fresh_name :: new_args, fresh_name :: args_to_match, arg :: pat_list)
     in
-    let args_to_match =
-      List.filter_mapi last_args ~f:(fun i arg ->
-        match arg with
-        | P_val _ | P_const C_unit -> None
-        | _ -> Some ("#p" ^ Int.to_string i))
+    let* new_args, args_to_match, pat_list =
+      RList.fold_left last_args ~init:(return ([], [], [])) ~f:f1
     in
-    let pat_list =
-      List.filter last_args ~f:(function
-        | P_val _ | P_const C_unit -> false
-        | _ -> true)
-    in
-    let new_body = rp_expr body in
+    let new_args = List.rev new_args in
+    let args_to_match = List.rev args_to_match in
+    let pat_list = List.rev pat_list in
+    let* new_body = rp_expr body in
     (match List.length args_to_match with
-     | 0 -> Rp_e_fun (new_args, new_body)
+     | 0 -> return @@ Rp_e_fun (new_args, new_body)
      | 1 ->
        let pat = List.hd_exn pat_list in
        let to_match = Rp_e_ident (List.hd_exn args_to_match) in
        let case_expr = create_case to_match pat new_body match_failure in
-       Rp_e_fun (new_args, case_expr)
+       return @@ Rp_e_fun (new_args, case_expr)
      | _ ->
        let pat = Ast.P_tuple (List.hd_exn pat_list, List.tl_exn pat_list) in
        let to_match =
          let vals = List.map args_to_match ~f:(fun a -> Rp_e_ident a) in
          Rp_e_tuple vals
        in
-       let case_expr = create_case (Rp_e_ident "#t") pat new_body match_failure in
-       Rp_e_fun (new_args, Rp_e_let (Rp_non_rec ("#t", to_match), case_expr)))
-  | E_match (e, case_list) ->
-    (match e with
-     | E_ident _ | E_const _ -> rp_match (rp_expr e) case_list
-     | _ -> Rp_e_let (Rp_non_rec ("#t", rp_expr e), rp_match (Rp_e_ident "#t") case_list))
+       let* fresh_name = fresh >>| get_name in
+       let case_expr = create_case (Rp_e_ident fresh_name) pat new_body match_failure in
+       return
+       @@ Rp_e_fun (new_args, Rp_e_let (Rp_non_rec (fresh_name, to_match), case_expr)))
+  | E_match (e_last, case_list) ->
+    let* e = rp_expr e_last in
+    (match e_last with
+     | E_ident _ | E_const _ -> rp_match e case_list
+     | _ ->
+       let* fresh_name = fresh >>| get_name in
+       let* e_match = rp_match (Rp_e_ident fresh_name) case_list in
+       return @@ Rp_e_let (Rp_non_rec (fresh_name, e), e_match))
   | E_let (Non_rec (pat, _, e1), e2) ->
-    let e1 = rp_expr e1 in
-    let e2 = rp_expr e2 in
+    let* e1 = rp_expr e1 in
+    let* e2 = rp_expr e2 in
     (match pat with
-     | P_val name -> Rp_e_let (Rp_non_rec (name, e1), e2)
-     | P_const C_unit -> Rp_e_let (Rp_non_rec ("()", e1), e2)
+     | P_val name -> return @@ Rp_e_let (Rp_non_rec (name, e1), e2)
+     | P_const C_unit -> return @@ Rp_e_let (Rp_non_rec ("()", e1), e2)
      | _ ->
        (match e1 with
         | Rp_e_ident _ ->
           let case_expr = create_case e1 pat e2 match_failure in
-          case_expr
+          return case_expr
         | _ ->
-          let case_expr = create_case (Rp_e_ident "#t") pat e2 match_failure in
-          Rp_e_let (Rp_non_rec ("#t", e1), case_expr)))
+          let* fresh_name = fresh >>| get_name in
+          let case_expr = create_case (Rp_e_ident fresh_name) pat e2 match_failure in
+          return @@ Rp_e_let (Rp_non_rec (fresh_name, e1), case_expr)))
   | E_let (Rec decl_list, e) ->
-    let decl = rp_rec_decl decl_list in
-    let e = rp_expr e in
-    Rp_e_let (decl, e)
+    let* decl = rp_rec_decl decl_list in
+    let* e = rp_expr e in
+    return @@ Rp_e_let (decl, e)
 
 and rp_match to_match = function
   | (p, e) :: tl ->
     let checks = unpack_pat_checks to_match p in
     let decls = unpack_pat_decls to_match p in
-    let e = rp_expr e in
+    let* e = rp_expr e in
     let let_in = List.fold_right decls ~init:e ~f:(fun d acc -> Rp_e_let (d, acc)) in
     if List.is_empty checks
-    then let_in
-    else create_if checks let_in (rp_match to_match tl)
-  | _ -> Rp_e_ident "#match_failure"
+    then return let_in
+    else
+      let* match_e = rp_match to_match tl in
+      return @@ create_if checks let_in match_e
+  | _ -> return @@ Rp_e_ident "#match_failure"
 
 and rp_rec_decl decl_list =
   let f1 (pat, _, e) =
-    let e = rp_expr e in
-    match pat with
-    | Ast.P_val v -> v, e
-    | P_const C_unit -> "()", e
-    | _ -> "", e
+    let* e = rp_expr e in
+    return
+      (match pat with
+       | Ast.P_val v -> v, e
+       | P_const C_unit -> "()", e
+       | _ -> "", e)
   in
-  let new_decls = List.map decl_list ~f:f1 in
-  Rp_rec new_decls
+  let* new_decls = RList.map decl_list ~f:f1 in
+  return @@ Rp_rec new_decls
 ;;
 
 let rp_toplevel = function
-  | Ast.Expr e -> [ Rp_non_rec ("#t", rp_expr e) ]
+  | Ast.Expr e ->
+    let* fresh = fresh >>| get_name in
+    let* e = rp_expr e in
+    return [ Rp_non_rec (fresh, e) ]
   | Let_decl (Non_rec (pat, _, e)) ->
-    let e = rp_expr e in
+    let* e = rp_expr e in
     (match pat with
-     | P_val name -> [ Rp_non_rec (name, e) ]
-     | P_const C_unit -> [ Rp_non_rec ("()", e) ]
+     | P_val name -> return [ Rp_non_rec (name, e) ]
+     | P_const C_unit -> return [ Rp_non_rec ("()", e) ]
      | pat ->
-       let to_unpack = Rp_e_ident "#t" in
+       let* fresh_name = fresh >>| get_name in
+       let to_unpack = Rp_e_ident fresh_name in
        let checks = unpack_pat_checks to_unpack pat in
        let decls = unpack_pat_decls to_unpack pat in
        if List.is_empty checks
-       then Rp_non_rec ("#t", e) :: decls
+       then return (Rp_non_rec (fresh_name, e) :: decls)
        else (
          let ite =
            create_if checks (Rp_e_const Rp_c_unit) (Rp_e_ident "#match_failure")
          in
-         Rp_non_rec ("#t", e) :: Rp_non_rec ("(#tt)", ite) :: decls))
-  | Let_decl (Rec decl_list) -> [ rp_rec_decl decl_list ]
+         return (Rp_non_rec (fresh_name, e) :: Rp_non_rec ("()", ite) :: decls)))
+  | Let_decl (Rec decl_list) ->
+    let* decl_list = rp_rec_decl decl_list in
+    return [ decl_list ]
 ;;
 
-let run_remove_patterns_program program =
+let rp_program program =
   let rec helper = function
-    | [] -> []
-    | hd :: tl -> rp_toplevel hd @ helper tl
+    | [] -> return []
+    | hd :: tl ->
+      let* hd = rp_toplevel hd in
+      let* tl = helper tl in
+      return @@ hd @ tl
   in
   helper program
 ;;
 
-let run_remove_patterns_expr = rp_expr
+let run_remove_patterns_program p = run (rp_program p) 0
