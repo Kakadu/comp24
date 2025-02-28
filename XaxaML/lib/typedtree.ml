@@ -19,6 +19,7 @@ let bool_typ = T_prim "bool"
 let unit_typ = T_prim "unit"
 let arrow l r = T_arr (l, r)
 let ( @-> ) = arrow
+let list_typ typ = T_list typ
 
 (* map typed variables to letters *)
 let assign_names typ =
