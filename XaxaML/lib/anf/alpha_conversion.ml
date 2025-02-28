@@ -10,13 +10,18 @@ open Common.MonadCounter
 let get_name i = "#" ^ Int.to_string i
 
 let process_name env bindings name =
-  match StrSet.find env name with
-  | true ->
-    let* fresh = fresh in
-    let new_name = get_name fresh in
-    return
-      (StrSet.add env new_name, Map.update bindings name ~f:(fun _ -> new_name), new_name)
-  | false -> return (StrSet.add env name, bindings, name)
+  if String.equal name "()"
+  then return (env, bindings, "()")
+  else (
+    match StrSet.find env name with
+    | true ->
+      let* fresh = fresh in
+      let new_name = get_name fresh in
+      return
+        ( StrSet.add env new_name
+        , Map.update bindings name ~f:(fun _ -> new_name)
+        , new_name )
+    | false -> return (StrSet.add env name, bindings, name))
 ;;
 
 let rec ac_expr env bindings = function

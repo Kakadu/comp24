@@ -388,13 +388,16 @@ let rec infer_pattern env = function
     let* final_sub = Subst.compose sub sub_uni in
     return (final_sub, new_typ, env)
   | Ast.P_val name ->
-    let* fresh = fresh_var in
-    (match TypeEnv.find env name with
-     | Some _ -> fail (Multiple_bound name)
-     | None ->
-       let sheme = Scheme (TypeVarSet.empty, fresh) in
-       let env = TypeEnv.update env name sheme in
-       return (Subst.empty, fresh, env))
+    if Base.String.equal name "()"
+    then infer_pattern env (P_const C_unit)
+    else
+      let* fresh = fresh_var in
+      (match TypeEnv.find env name with
+       | Some _ -> fail (Multiple_bound name)
+       | None ->
+         let sheme = Scheme (TypeVarSet.empty, fresh) in
+         let env = TypeEnv.update env name sheme in
+         return (Subst.empty, fresh, env))
   | Ast.P_any ->
     let* fresh = fresh_var in
     return (Subst.empty, fresh, env)
@@ -426,8 +429,11 @@ let rec generalize_vars_in_pattern typ env = function
   | Ast.P_typed (pat, _) -> generalize_vars_in_pattern typ env pat
   | Ast.P_any | Ast.P_const _ -> return env
   | Ast.P_val name ->
-    let gen_scheme = generalize env typ in
-    return @@ TypeEnv.update env name gen_scheme
+    if Base.String.equal name "()"
+    then generalize_vars_in_pattern typ env (P_const C_unit)
+    else (
+      let gen_scheme = generalize env typ in
+      return @@ TypeEnv.update env name gen_scheme)
   | P_tuple (l, r) ->
     (match typ with
      | T_tuple (typ_l, typ_list) ->

@@ -273,17 +273,18 @@ let rec rp_expr = function
       List.mapi last_args ~f:(fun i arg ->
         match arg with
         | P_val v -> v
-        | _ -> "#" ^ Int.to_string i)
+        | P_const C_unit -> "()"
+        | _ -> "#p" ^ Int.to_string i)
     in
     let args_to_match =
       List.filter_mapi last_args ~f:(fun i arg ->
         match arg with
-        | P_val _ | P_const (C_unit) -> None
-        | _ -> Some ("#" ^ Int.to_string i))
+        | P_val _ | P_const C_unit -> None
+        | _ -> Some ("#p" ^ Int.to_string i))
     in
     let pat_list =
       List.filter last_args ~f:(function
-        | P_val _ | P_const (C_unit) -> false
+        | P_val _ | P_const C_unit -> false
         | _ -> true)
     in
     let new_body = rp_expr body in
@@ -311,6 +312,7 @@ let rec rp_expr = function
     let e2 = rp_expr e2 in
     (match pat with
      | P_val name -> Rp_e_let (Rp_non_rec (name, e1), e2)
+     | P_const C_unit -> Rp_e_let (Rp_non_rec ("()", e1), e2)
      | _ ->
        let case_expr = create_case (Rp_e_ident "#t") pat e2 match_failure in
        Rp_e_let (Rp_non_rec ("#t", e1), case_expr))
@@ -335,6 +337,7 @@ and rp_rec_decl decl_list =
     let e = rp_expr e in
     match pat with
     | Ast.P_val v -> v, e
+    | P_const C_unit -> "()", e
     | _ -> "", e
   in
   let new_decls = List.map decl_list ~f:f1 in
@@ -347,6 +350,7 @@ let rp_toplevel = function
     let e = rp_expr e in
     (match pat with
      | P_val name -> [ Rp_non_rec (name, e) ]
+     | P_const C_unit -> [ Rp_non_rec ("()", e) ]
      | pat ->
        let to_unpack = Rp_e_ident "#t" in
        let checks = unpack_pat_checks to_unpack pat in
