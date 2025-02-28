@@ -8,11 +8,10 @@
  (targets rv64_runtime.o)
  (deps runtime.c)
  (action
- (run riscv64-linux-gnu-gcc -o %{targets} -c %{deps}))
-)
+  (run riscv64-linux-gnu-gcc -o %{targets} -c %{deps})))
 
 (rule
  (targets rv64_runtime.a)
  (deps rv64_runtime.o)
  (action
- (run ar rcs %{targets} %{deps})))
+  (run ar rcs %{targets} %{deps})))

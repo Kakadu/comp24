@@ -8,6 +8,18 @@
 
   $ dune exec rv_codegen <<- EOF > test.S
   > let main =
+  >   let map f (x, y) = f x, f y in
+  >   let a, b = map (fun x -> x + 1) (1, 2) in
+  >   let () = print_int a in
+  >   let () = print_int b in
+  >   0
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+  $ qemu-riscv64-static test.out
+  2
+  3
+
+  $ dune exec rv_codegen <<- EOF > test.S
+  > let main =
   >   let a = 5 in
   >   let f x = a + x in
   >   let () = print_int (f 5) in
@@ -88,6 +100,7 @@ $ dune exec rv_codegen < manytests/typed/009let_poly.ml > test.S
 $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
 $ qemu-riscv64-static test.out
 
+debug it lol)
 $ dune exec rv_codegen < manytests/typed/015tuples.ml > test.S
 $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
 $ qemu-riscv64-static test.out

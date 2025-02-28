@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 type reg =
   | Zero
   | Ra
@@ -96,7 +100,7 @@ let ld ~rd offset  ~src = Itype(rd, src, offset, LD)
 module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
   type 'a t = 'a list
 
-  let remove reg regs = List.filter (( <> ) reg) regs
+  let remove reg = List.filter (( <> ) reg)
   let add = List.cons
   let find = List.find
   let size = List.length

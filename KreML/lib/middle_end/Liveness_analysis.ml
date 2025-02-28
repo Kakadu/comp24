@@ -1,14 +1,22 @@
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Flambda
 
-type range = { var: string; s: int; e: int }
-type analysis_result = (string * range list) list
+type range =
+  { var : string
+  ; s : int
+  ; e : int
+  }
 
+type analysis_result = (string * range list) list
 
 let rec analyse_expr expr counter res_start res_end =
   let open Base in
   match expr with
   | Fl_const _ -> counter, res_start, res_end
-  | Fl_closure { arrange; _} ->
+  | Fl_closure { arrange; _ } ->
     analyse_list (List.map arrange ~f:snd) counter res_start res_end
   | Fl_var id -> counter, res_start, Map.set res_end ~key:id ~data:counter
   | Fl_let (Some id, value, scope) ->
@@ -35,25 +43,25 @@ and analyse_list list counter res_start res_end =
 let analyse_fun = function
   | Fun_with_env { body; _ } | Fun_without_env { body; _ } ->
     let open Base in
-    let res_start = Map.empty (module String)
-    in
+    let res_start = Map.empty (module String) in
     let res_end = Map.empty (module String) in
     let _, ss, es = analyse_expr body 1 res_start res_end in
-    let ranges = Map.fold ss ~init:[] ~f:(fun ~key:var ~data:s acc ->
-      match Map.find es var with
-      | Some e -> {s; e; var}::acc
-      | None -> {s; e = s; var}::acc)
-    in List.sort ranges ~compare:(fun r1 r2 -> Base.Int.compare r1.s r2.s)
+    let ranges =
+      Map.fold ss ~init:[] ~f:(fun ~key:var ~data:s acc ->
+        match Map.find es var with
+        | Some e -> { s; e; var } :: acc
+        | None -> { s; e = s; var } :: acc)
+    in
+    List.sort ranges ~compare:(fun r1 r2 -> Base.Int.compare r1.s r2.s)
 ;;
 
-let analyse_program flstucture =
-  List.map (fun (id, f) -> id, analyse_fun f) flstucture
+let analyse_program flstucture = List.map (fun (id, f) -> id, analyse_fun f) flstucture
 
 let pp fmt analysis_result =
   let open Format in
   let print_vars fmt vars =
-    List.iter (fun {var; s; e} -> fprintf fmt "@[%s: [%i, %i]@]@." var s e) vars in
-  let print_fun (id, vars) =
-    fprintf fmt "@[%s:@, %a @] @." id print_vars vars in
+    List.iter (fun { var; s; e } -> fprintf fmt "@[%s: [%i, %i]@]@." var s e) vars
+  in
+  let print_fun (id, vars) = fprintf fmt "@[%s:@, %a @] @." id print_vars vars in
   List.iter print_fun analysis_result
-    
+;;

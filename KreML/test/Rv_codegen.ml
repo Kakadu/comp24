@@ -1,7 +1,10 @@
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Cursedml_lib
 open Cursedml_lib.Inferencer
-
-module Rv_allocator = Linear_scan_allocation.Allocator(Riscv.RegistersStorage)
+module Rv_allocator = Linear_scan_allocation.Allocator (Riscv.RegistersStorage)
 
 let () =
   let open Stdlib.Format in
@@ -14,7 +17,7 @@ let () =
        let mf_structure = Match_elimination.eliminate alpha in
        let arities, anf = Anf.transform mf_structure in
        let flstructure = Closure_conversion.cc arities anf in
-       let insns = Riscv_codegen.codegen_program  flstructure in
+       let insns = Riscv_codegen.codegen_program flstructure in
        Riscv_codegen.dump insns
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)

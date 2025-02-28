@@ -1,7 +1,10 @@
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Cursedml_lib
 open Cursedml_lib.Inferencer
-
-module Rv_allocator = Linear_scan_allocation.Allocator(Riscv.RegistersStorage)
+module Rv_allocator = Linear_scan_allocation.Allocator (Riscv.RegistersStorage)
 
 let () =
   let open Stdlib.Format in
@@ -17,7 +20,7 @@ let () =
        let regs = List.init 7 (fun i -> Riscv.Temp i) in
        let allocation = Rv_allocator.scan_program regs flstructure in
        Flambda.pp std_formatter flstructure;
-       Linear_scan_allocation.pp std_formatter Riscv.pp_reg allocation;
+       Linear_scan_allocation.pp std_formatter Riscv.pp_reg allocation
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input

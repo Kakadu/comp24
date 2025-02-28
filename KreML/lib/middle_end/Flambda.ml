@@ -64,8 +64,7 @@ let rec pp_flambda ppf = function
       (Anf_printer.binop_to_string binop)
       pp_flambda
       y
-  | Fl_unop (Not, x) ->
-    fprintf ppf "@[!%a @]" pp_flambda x
+  | Fl_unop (Not, x) -> fprintf ppf "@[!%a @]" pp_flambda x
   | Fl_getfield (idx, fl) -> fprintf ppf "@[%s %i %a@]" "getfield" idx pp_flambda fl
   | Fl_cons (x, xs) -> fprintf ppf "@[%a :: %a@]" pp_flambda x pp_flambda xs
   | Fl_tuple elems ->

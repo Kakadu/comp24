@@ -14,5 +14,5 @@ val list_cons : ident
 val partial_match : ident
 val partial_match_error : expr -> expr
 val runtime_funs : ident list
-val runtime_funs_with_arities: (ident * int) list
+val runtime_funs_with_arities : (ident * int) list
 val is_runtime_fun : ident -> bool

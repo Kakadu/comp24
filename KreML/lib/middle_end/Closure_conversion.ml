@@ -187,9 +187,9 @@ and cexpr e =
     let* x' = imm (return x) in
     let* y' = imm (return y) in
     Fl_binop (op, x', y') |> return
-  | CUnop(unop, x) ->
+  | CUnop (unop, x) ->
     let* x' = imm (return x) in
-    Fl_unop(unop, x') |> return
+    Fl_unop (unop, x') |> return
   | CIte (c, t, e) ->
     let* c' = imm (return c) in
     let* t' = aexpr (return t) in

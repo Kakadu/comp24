@@ -241,7 +241,7 @@ let rec codegen_flambda = function
     in
     let* name = get_curr_decl_name in
     return @@ codegen_binop name x y op
-  | Fl_unop(Not, x) ->
+  | Fl_unop (Not, x) ->
     let* x = codegen_flambda x in
     let* fresh = fresh_name "not" in
     build_not x fresh builder |> return
@@ -271,7 +271,7 @@ let rec codegen_flambda = function
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
-  | Fl_app (Fl_closure {name ="partial_match"; _}, [ arg ]) ->
+  | Fl_app (Fl_closure { name = "partial_match"; _ }, [ arg ]) ->
     (* special case to insert unreacheable *)
     let* arg = codegen_flambda arg in
     let callee = lookup_fun_exn Runtime.partial_match in
@@ -328,7 +328,7 @@ let rec codegen_flambda = function
       | _ ->
         dump_type ttype;
         dump_type etype;
-         Utils.unreachable ()
+        Utils.unreachable ()
     in
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;

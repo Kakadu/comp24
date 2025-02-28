@@ -17,6 +17,7 @@ type binop =
   | Or
 
 type unop = Not
+
 (* a > b <=> !(a <= b) <=> !(!(a>b))*)
 let resolve_binop = function
   | "*" -> Mul
@@ -140,14 +141,15 @@ let simplify_temp_binding name value scope =
 let rec transform_expr expr k : aexpr t =
   match expr with
   | Expr_const c -> Aconst c |> k
-  | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op && (op_is_normalized op |> not) ->
+  | Expr_app (Expr_app (Expr_var op, x), y)
+    when Ast.is_binary op && op_is_normalized op |> not ->
     let normalized = normalize_binop op x y in
     transform_expr normalized k
-  | Expr_app(Expr_var "!", x) ->
+  | Expr_app (Expr_var "!", x) ->
     transform_expr x (fun x' ->
       let* fresh = fresh_temp in
       let* scope = ivar fresh |> k in
-      temp_binding fresh (CUnop(Not, x')) scope |> return)
+      temp_binding fresh (CUnop (Not, x')) scope |> return)
   | Expr_app (Expr_app (Expr_var op, x), y) when Ast.is_binary op ->
     let binop = resolve_binop op in
     transform_expr x (fun x' ->
@@ -196,7 +198,9 @@ let rec transform_expr expr k : aexpr t =
     let* scope = ivar closure_name |> k in
     let* f, arity = resolve_fun expr in
     let* _ = put_arity fun_name arity in
-    let closure_binding = simplify_temp_binding closure_name (CImm(ivar fun_name)) scope in
+    let closure_binding =
+      simplify_temp_binding closure_name (CImm (ivar fun_name)) scope
+    in
     temp_binding fun_name f closure_binding |> return
   | Expr_let (rf, (Pat_var id, (Expr_fun _ as f)), scope) ->
     let* scope = transform_expr scope (fun imm -> AExpr (CImm imm) |> return) in

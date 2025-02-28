@@ -12,8 +12,7 @@ let current_fun_arity = ref 0
    temporary values (in memory operations, etc) if they are not  available right now *)
 let currently_used_free_registers = ref []
 
-let pop_used_free_regs_if_need save =
-  match save with
+let pop_used_free_regs_if_need = function
   | [] -> ()
   | _ -> currently_used_free_registers := List.tl !currently_used_free_registers
 ;;
@@ -288,7 +287,7 @@ module Memory = struct
         if is_empty save |> not
         then
           (* we extended stack for moving arg, and we need to store value on the stack,
-         we add extra stack space with offset, also we add extra offset on dst offset *)
+             we add extra stack space with offset, also we add extra offset on dst offset *)
           ( ld ~rd:temp_reg (src_offset + (2 * word_size)) ~src:Sp
           , sd ~v:temp_reg (dst_offset + (2 * word_size)) ~dst:Sp )
         else ld ~rd:temp_reg src_offset ~src:Sp, sd ~v:temp_reg dst_offset ~dst:Sp
@@ -476,7 +475,6 @@ module Function = struct
 
     let runtime_fun_arg_locations args_count =
       let ans = List.init args_count (fun i -> Loc_mem (Sp, word_size * (i + 1))) in
-      (* List.iter (fun loc -> pp_loc Format.std_formatter loc) ans; *)
       ans
     ;;
   end
@@ -608,7 +606,8 @@ let rec codegen_flambda location =
        save
        @ (save_reg
           @ resolve_callee
-          @ (extend_stack  :: put_args_on_stack @ [put_envp; put_count]))
+          @ (extend_stack :: put_args_on_stack)
+          @ [ put_envp; put_count ])
        @ ((put_callee_in_a0 :: call_closure :: save_retvalue) @ restore_reg)
        @ (shrink_stack :: restore)
      | Loc_mem _ ->
@@ -628,12 +627,11 @@ let rec codegen_flambda location =
       Function.Runtime.alloc_tuple (env_size + arity) some_reg_loc ~save_retvalue
     in
     let arrange_env_insns =
-      List.map
+      List.concat_map
         (fun (idx, arg) ->
           let loc = Loc_mem (some_reg, idx * word_size) in
           codegen_flambda loc arg)
         arrange
-      |> List.concat
     in
     let save_retvalue = Memory.store_rvalue location a0value in
     let alloc_closure_insns =
