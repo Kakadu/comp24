@@ -181,8 +181,7 @@ end = struct
       p
   ;;
 
-  let pp_error ppf e =
-    match e with
+  let pp_error ppf = function
     | IncorrectAst s -> Format.fprintf ppf "Got incorrect ast: %s" s
   ;;
 end
@@ -199,8 +198,7 @@ let update_bindings last new1 =
 
 let get_name i = "#" ^ Int.to_string i
 
-let const_to_aexp c =
-  match c with
+let const_to_aexp = function
   | Rp_c_int i -> ae_int i
   | Rp_c_bool b -> ae_bool b
   | Rp_c_unit -> Ae_unit
