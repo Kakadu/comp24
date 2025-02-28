@@ -314,8 +314,13 @@ let rec rp_expr = function
      | P_val name -> Rp_e_let (Rp_non_rec (name, e1), e2)
      | P_const C_unit -> Rp_e_let (Rp_non_rec ("()", e1), e2)
      | _ ->
-       let case_expr = create_case (Rp_e_ident "#t") pat e2 match_failure in
-       Rp_e_let (Rp_non_rec ("#t", e1), case_expr))
+       (match e1 with
+        | Rp_e_ident _ ->
+          let case_expr = create_case e1 pat e2 match_failure in
+          case_expr
+        | _ ->
+          let case_expr = create_case (Rp_e_ident "#t") pat e2 match_failure in
+          Rp_e_let (Rp_non_rec ("#t", e1), case_expr)))
   | E_let (Rec decl_list, e) ->
     let decl = rp_rec_decl decl_list in
     let e = rp_expr e in

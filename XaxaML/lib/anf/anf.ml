@@ -11,16 +11,19 @@ type aexp =
   | Ae_unit
   | Ae_val of string
   | Ae_empty_list
+  | Ae_tuple of aexp list
 
 let ae_int i = Ae_int i
 let ae_bool b = Ae_bool b
 let ae_val v = Ae_val v
+let ae_tuple lst = Ae_tuple lst
 
 (** compex expressions *)
 type cexp =
   | Ce_atom of aexp
   | Ce_app of aexp * aexp list
   | Ce_ite of aexp * exp * exp
+  | Ce_cons_list of aexp * aexp
 
 and exp =
   | E_let_in of string * cexp * exp
@@ -29,6 +32,7 @@ and exp =
 let ce_atom aexp = Ce_atom aexp
 let ce_app e e_list = Ce_app (e, e_list)
 let ce_ite i t e = Ce_ite (i, t, e)
+let ce_cons_list aexp1 aexp2 = Ce_cons_list (aexp1, aexp2)
 let e_let_in name cexp exp = E_let_in (name, cexp, exp)
 let e_complex cexp = E_complex cexp
 
@@ -48,12 +52,13 @@ module Convert : sig
 end = struct
   open Remove_patterns
 
-  let convert_aexp = function
+  let rec convert_aexp = function
     | Ae_int i -> Rp_e_const (Rp_c_int i)
     | Ae_bool b -> Rp_e_const (Rp_c_bool b)
     | Ae_unit -> Rp_e_const Rp_c_unit
     | Ae_val v -> Rp_e_ident v
     | Ae_empty_list -> Rp_e_const Rp_c_empty_list
+    | Ae_tuple lst -> Rp_e_tuple (List.map convert_aexp lst)
   ;;
 
   let rec convert_cexp = function
@@ -63,6 +68,8 @@ end = struct
         Rp_e_app (acc, convert_aexp arg))
     | Ce_ite (aexp, cexp1, cexp2) ->
       Rp_e_ite (convert_aexp aexp, convert_exp cexp1, convert_exp cexp2)
+    | Ce_cons_list (aexp1, aexp2) ->
+      Rp_e_cons_list (convert_aexp aexp1, convert_aexp aexp2)
 
   and convert_exp = function
     | E_let_in (name, cexp, exp) ->
@@ -98,7 +105,7 @@ module PP : sig
   val pp_anf_program : Format.formatter -> anf_program -> unit
   val pp_error : Format.formatter -> error -> unit
 end = struct
-  let atom_to_str = function
+  let rec atom_to_str = function
     | Ae_int i -> Int.to_string i
     | Ae_bool b -> Bool.to_string b
     | Ae_unit -> "()"
@@ -107,8 +114,18 @@ end = struct
         | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '#' -> true
         | _ -> false
       in
-      if Base.List.for_all (Base.String.to_list v) ~f:is_valname then v else "(" ^ v ^ ")"
+      if Base.List.for_all (Base.String.to_list v) ~f:is_valname
+      then v
+      else "( " ^ v ^ " )"
     | Ae_empty_list -> "[]"
+    | Ae_tuple lst ->
+      let hd = List.hd lst in
+      let tl = List.tl lst in
+      Base.List.fold
+        tl
+        ~init:("(" ^ atom_to_str hd)
+        ~f:(fun acc x -> acc ^ ", " ^ atom_to_str x)
+      ^ ")"
   ;;
 
   let create_tab num = "\n" ^ String.make num ' '
@@ -123,6 +140,8 @@ end = struct
       let then1 = "then " ^ exp_to_str tab_num e1 ^ tab in
       let else1 = "else " ^ exp_to_str tab_num e2 ^ tab in
       if1 ^ then1 ^ else1
+    | Ce_cons_list (a1, a2) ->
+      Format.sprintf "(%s :: %s)" (atom_to_str a1) (atom_to_str a2)
 
   and exp_to_str tab_num = function
     | E_let_in (name, c, e) ->
@@ -188,7 +207,16 @@ let const_to_aexp c =
   | Rp_c_empty_list -> Ae_empty_list
 ;;
 
-let rec to_cexp = function
+let rec to_aexp e =
+  match e with
+  | Rp_e_ident v -> return ([], ae_val v)
+  | Rp_e_const c -> return ([], const_to_aexp c)
+  | _ ->
+    let* fresh = fresh >>| get_name in
+    let* binds1, e = to_cexp e in
+    return (binds1 @ [ fresh, e ], ae_val fresh)
+
+and to_cexp = function
   | Rp_e_const c -> return ([], ce_atom @@ const_to_aexp c)
   | Rp_e_ident v -> return ([], ce_atom @@ ae_val v)
   | Rp_e_app (e1, e2) -> app_to_cexp e1 e2
@@ -197,21 +225,20 @@ let rec to_cexp = function
     let* binds2, e2 = to_cexp e2 in
     return (binds1 @ [ name, e1 ] @ binds2, e2)
   | Rp_e_ite (e1, e2, e3) ->
-    let* binds, e1 =
-      match e1 with
-      | Rp_e_ident v -> return ([], ae_val v)
-      | Rp_e_const c -> return ([], const_to_aexp c)
-      | _ ->
-        let* fresh = fresh >>| get_name in
-        let* binds1, e1 = to_cexp e1 in
-        return (binds1 @ [ fresh, e1 ], ae_val fresh)
-    in
+    let* binds, e1 = to_aexp e1 in
     let* e2 = to_exp e2 in
     let* e3 = to_exp e3 in
     return (binds, ce_ite e1 e2 e3)
   | Rp_e_let (Rp_rec _, _) ->
     fail @@ IncorrectAst "Ast contains recursive let-in declarations"
-  | _ -> fail @@ IncorrectAst ""
+  | Rp_e_fun _ -> fail @@ IncorrectAst "Ast contains no toplevel function"
+  | Rp_e_tuple e_list ->
+    let* binds, e_list = RList.map e_list ~f:to_aexp >>| List.unzip in
+    return (List.concat binds, ce_atom @@ ae_tuple e_list)
+  | Rp_e_cons_list (e1, e2) ->
+    let* binds1, e1 = to_aexp e1 in
+    let* binds2, e2 = to_aexp e2 in
+    return (binds1 @ binds2, ce_cons_list e1 e2)
 
 and app_to_cexp e1 e2 =
   let rec helper = function

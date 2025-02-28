@@ -34,6 +34,12 @@
  (public_name run_lambda_lifting)
  (libraries XaxaML.Lib stdio))
 
+(executable
+ (name run_to_anf)
+ (modules Run_to_anf)
+ (public_name run_to_anf)
+ (libraries XaxaML.Lib stdio))
+
 (cram
  (applies_to parser_tests)
  (deps ./run_parser.exe))
@@ -82,3 +88,21 @@
   ./run_lambda_lifting.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml))
+
+(cram
+ (applies_to to_anf_tests)
+ (deps
+  ./run_to_anf.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))

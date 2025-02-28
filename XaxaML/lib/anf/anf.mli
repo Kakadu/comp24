@@ -8,11 +8,13 @@ type aexp =
   | Ae_unit
   | Ae_val of string
   | Ae_empty_list
+  | Ae_tuple of aexp list
 
 type cexp =
   | Ce_atom of aexp
   | Ce_app of aexp * aexp list
   | Ce_ite of aexp * exp * exp
+  | Ce_cons_list of aexp * aexp
 
 and exp =
   | E_let_in of string * cexp * exp
