@@ -5,4 +5,4 @@
 open Ast.AbstractSyntaxTree
 
 (* Main type definition parser *)
-val parse_type : type_defenition Angstrom.t
+val parse_type : type_definition Angstrom.t

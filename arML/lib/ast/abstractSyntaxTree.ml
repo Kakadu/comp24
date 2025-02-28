@@ -12,7 +12,7 @@ type constant =
   | CUnit (** () *)
 [@@deriving show { with_path = false }]
 
-type ground_type_defenition =
+type ground_type_definition =
   | GTDInt (** Int type (x: int) *)
   | GTDBool (** Bool type (x: bool) *)
   | GTDUnit (** Unit type (x: unit) *)
@@ -20,13 +20,13 @@ type ground_type_defenition =
   | GTDString (** String type (x: string) *)
 [@@deriving show { with_path = false }]
 
-type type_defenition =
+type type_definition =
   | TDPolymorphic of identifier (** Polymorphic type (x: 'a) *)
-  | TDGround of ground_type_defenition (** Int, Bool, Char, etc type *)
-  | TDArrow of type_defenition * type_defenition (** Function type (f: (int -> int)) *)
-  | TDTuple of type_defenition * type_defenition * type_defenition list
+  | TDGround of ground_type_definition (** Int, Bool, Char, etc type *)
+  | TDArrow of type_definition * type_definition (** Function type (f: (int -> int)) *)
+  | TDTuple of type_definition * type_definition * type_definition list
   (** Tuple type (x: (int, bool)) *)
-  | TDList of type_defenition (** List type (x: int list) *)
+  | TDList of type_definition (** List type (x: int list) *)
 [@@deriving show { with_path = false }]
 
 type pattern =
@@ -36,7 +36,7 @@ type pattern =
   | PVar of identifier (** A variable pattern: 'x', 'y', etc *)
   | PTuple of pattern * pattern * pattern list (** Tuple of patterns: '(P1, P2, P3)' *)
   | PListConstructor of pattern * pattern (** List construction pattern: 'P1::P2' *)
-  | PTyped of pattern * type_defenition (** Assigning a type to a pattern: (P : int) *)
+  | PTyped of pattern * type_definition (** Assigning a type to a pattern: (P : int) *)
 [@@deriving show { with_path = false }]
 
 (** Binding pattern with expression *)
@@ -59,7 +59,7 @@ and expression =
   | ELetIn of case * case list * expression (** Let in: 'let f x = x in f 5 *)
   | ERecLetIn of case * case list * expression
   (** Recursive let in: 'let rec f x = if x = 1 then 1 else x + f (x-1)'*)
-  | ETyped of expression * type_defenition
+  | ETyped of expression * type_definition
   (** Assigning a type to an expression: (expr : int) *)
 [@@deriving show { with_path = false }]
 

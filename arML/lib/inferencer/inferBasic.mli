@@ -19,5 +19,5 @@ val infer_id
 
 (** Recursively translates a type defenition from the AST into a type representation. *)
 val get_type_by_defenition
-  :  type_defenition
+  :  type_definition
   -> (TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t
