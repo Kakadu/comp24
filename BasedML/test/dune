@@ -94,7 +94,7 @@
  (name anf_types_demo)
  (modules anf_types_demo)
  (public_name anf_types_demo)
- (libraries middleend stdio ast typeinference))
+ (libraries middleend stdio ast typeinference stdlib_funs))
 
 (cram
  (applies_to anf_types_tests)
