@@ -12,7 +12,7 @@ let () =
     (match
        Common.StateMonad.run
          (Middleend.Match_elimination.eliminate_match_in_declarations [] lifted)
-         0
+         Middleend.Match_elimination.empty_context
      with
      | _, Ok new_ast ->
        List.iter
