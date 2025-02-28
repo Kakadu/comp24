@@ -29,9 +29,9 @@ int64_t lambda2_f(int64_t cont, int64_t a, int64_t b) {
 }
 
 int64_t fib_cps_f(int64_t n, int64_t cont) {
-    if (n == CONVERT_INT_NATIVE_TO_ML(0))
+    if (CONVERT_INT_ML_TO_NATIVE(eq_ml(n, CONVERT_INT_NATIVE_TO_ML(0))))
         return mlrt_apply_args_to_closure(cont, 1, CONVERT_INT_NATIVE_TO_ML(0));
-    else if (n == CONVERT_INT_NATIVE_TO_ML(1))
+    else if (CONVERT_INT_ML_TO_NATIVE(eq_ml(n, CONVERT_INT_NATIVE_TO_ML(1))))
         return mlrt_apply_args_to_closure(cont, 1, CONVERT_INT_NATIVE_TO_ML(1));
     else {
         int64_t c = minus_mlint(n, CONVERT_INT_NATIVE_TO_ML(1));

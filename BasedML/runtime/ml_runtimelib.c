@@ -2,7 +2,7 @@
 #include <ffi.h>
 #include <stdarg.h>
 
-int8_t is_ml_ptr(int64_t arg) { return arg & 1; };
+int8_t is_ml_ptr(int64_t arg) { return !(arg & 1); };
 
 #ifndef GC
     #define START_COLOR 0
