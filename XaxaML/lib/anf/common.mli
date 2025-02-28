@@ -47,6 +47,7 @@ module MonadCounterError : sig
   val run : int -> ('a, 'e) t -> ('a, 'e) result
 
   module RList : sig
+    val map : 'a list -> f:('a -> ('b, 'e) t) -> ('b list, 'e) t
     val fold_left : 'a list -> init:('b, 'e) t -> f:('b -> 'a -> ('b, 'e) t) -> ('b, 'e) t
 
     val fold_right
