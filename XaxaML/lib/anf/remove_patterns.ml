@@ -144,18 +144,7 @@ open Common
 open Common.MonadCounter
 
 let empty_bindings = Map.empty (module String)
-let get_name i = "#" ^ Int.to_string i
-
-let rec get_idents = function
-  | Ast.P_typed (pat, _) -> get_idents pat
-  | P_any | P_const _ -> StrSet.empty
-  | P_val ident -> StrSet.singleton ident
-  | P_cons_list (p1, p2) -> StrSet.union (get_idents p1) (get_idents p2)
-  | P_tuple (hd, tl) -> StrSet.union (get_idents hd) (get_idents_from_list tl)
-
-and get_idents_from_list pat_list =
-  List.fold pat_list ~init:StrSet.empty ~f:(fun acc p -> StrSet.union acc (get_idents p))
-;;
+let get_name i = "a" ^ Int.to_string i
 
 let convert_const = function
   | Ast.C_bool b -> Rp_c_bool b
@@ -397,4 +386,4 @@ let rp_program program =
   helper program
 ;;
 
-let run_remove_patterns_program p = run (rp_program p) 0
+let run p = run (rp_program p) (NamesHolder.create p) 0

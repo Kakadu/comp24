@@ -13,7 +13,7 @@ let () =
     (match Inferencer.run_infer_program parsed with
      | Error err -> Format.printf "Type inference error: %a\n" Inferencer.pp_error err
      | Ok _ ->
-       let used_names_num, ast = Remove_patterns.run_remove_patterns_program parsed in
-       let _, ast = Alpha_conversion.run_alpha_conversion_program used_names_num ast in
+       let nh, names_count, ast = Remove_patterns.run parsed in
+       let _, _, ast = Alpha_conversion.run nh names_count ast in
        Format.printf "%a" Remove_patterns.PP.pp_rp_program ast)
 ;;

@@ -39,7 +39,8 @@ module PP : sig
   val pp_error : Format.formatter -> error -> unit
 end
 
-val run_to_anf_program
-  :  int
+val run_to_anf
+  :  Common.NamesHolder.t
+  -> int
   -> Remove_patterns.rp_program
   -> (anf_program, error) Result.t

@@ -7,7 +7,7 @@ open Common.MonadCounter
 open Base
 
 let empty_bindings = Map.empty (module String)
-let get_name i = "#" ^ Int.to_string i
+let get_name i = "a" ^ Int.to_string i
 
 let rec ll_expr bindings = function
   | Rp_e_const _ as orig -> return ([], orig)
@@ -111,4 +111,4 @@ let ll_program program =
   helper program
 ;;
 
-let run_lambda_lifting_program init_num p = run (ll_program p) init_num
+let run nh init_num p = run (ll_program p) nh init_num

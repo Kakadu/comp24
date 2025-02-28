@@ -17,8 +17,8 @@ let () =
          "Types before modifications:\n%a"
          Inferencer.TypeEnv.pp_env
          last_typed_env;
-       let used_names_num, ast = Remove_patterns.run_remove_patterns_program parsed in
-       let _, ast = Alpha_conversion.run_alpha_conversion_program used_names_num ast in
+       let nh, names_count, ast = Remove_patterns.run parsed in
+       let _, _, ast = Alpha_conversion.run nh names_count ast in
        let ast = Closure_conversion.run_closure_conversion_program ast in
        let restore_ast = Remove_patterns.ToAst.convert_program ast in
        (match Inferencer.run_infer_program restore_ast with

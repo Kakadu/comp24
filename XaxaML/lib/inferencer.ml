@@ -715,7 +715,13 @@ let infer_program prog =
 ;;
 
 let run_infer_expr e =
-  Result.map snd (run Std_names.type_var_count (infer_expr TypeEnv.std e))
+  Result.map
+    snd
+    (match run (infer_expr TypeEnv.std e) NamesHolder.empty Std_names.type_var_count with
+     | _, _, r -> r)
 ;;
 
-let run_infer_program p = run Std_names.type_var_count (infer_program p)
+let run_infer_program p =
+  match run (infer_program p) NamesHolder.empty Std_names.type_var_count with
+  | _, _, r -> r
+;;

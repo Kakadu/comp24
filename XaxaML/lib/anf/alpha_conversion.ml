@@ -7,7 +7,7 @@ open Remove_patterns
 open Common
 open Common.MonadCounter
 
-let get_name i = "#" ^ Int.to_string i
+let get_name i = "a" ^ Int.to_string i
 
 let process_name env bindings name =
   if String.equal name "()"
@@ -100,6 +100,6 @@ let ac_program program init_env =
   helper init_env (Map.empty (module String)) program
 ;;
 
-let run_alpha_conversion_program init_num prog =
-  run (ac_program prog (StrSet.of_list Std_names.std_names)) init_num
+let run nh init_num prog =
+  run (ac_program prog (StrSet.of_list Std_names.std_names)) nh init_num
 ;;

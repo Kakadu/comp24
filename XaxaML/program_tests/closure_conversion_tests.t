@@ -24,7 +24,7 @@
   then (k 1)
   else ((fac_cps ((- n) 1)) (((fun k n p -> (k ((* p) n))) k) n)))
   
-  let main = let () = (print_int ((fac_cps 4) (fun #0 -> #0))) in
+  let main = let () = (print_int ((fac_cps 4) (fun a0 -> a0))) in
   0
 
   $ ./run_closure_conversion.exe << EOF 
@@ -78,7 +78,7 @@
   val y : 'a -> int
   Modified ast:
   let rec y = (fun x -> let a = (fun x y z -> ((+ (y x)) z)) in
-  let b = (fun a #0 -> ((+ (a 5)) #0)) in
+  let b = (fun a a0 -> ((+ (a 5)) a0)) in
   ((b ((a x) y)) 5))
 
   $ ./run_closure_conversion.exe << EOF
@@ -91,6 +91,6 @@
   Types after modifications:
   val f : 'a -> int -> int
   Modified ast:
-  let f = (fun a b -> let #0 = (fun b x -> ((+ b) x)) in
-  let #1 = (fun #0 x -> ((+ (#0 1)) x)) in
-  ((+ ((#0 b) 1)) ((#1 (#0 b)) 2)))
+  let f = (fun a b -> let a0 = (fun b x -> ((+ b) x)) in
+  let a1 = (fun a0 x -> ((+ (a0 1)) x)) in
+  ((+ ((a0 b) 1)) ((a1 (a0 b)) 2)))

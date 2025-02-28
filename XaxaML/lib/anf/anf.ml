@@ -196,7 +196,7 @@ let update_bindings last new1 =
   Map.merge_skewed last new1 ~combine:(fun ~key:_ _ v2 -> v2)
 ;;
 
-let get_name i = "#" ^ Int.to_string i
+let get_name i = "a" ^ Int.to_string i
 
 let const_to_aexp = function
   | Rp_c_int i -> ae_int i
@@ -317,4 +317,7 @@ let anf_program program =
   helper program
 ;;
 
-let run_to_anf_program init_num p = run init_num (anf_program p)
+let run_to_anf nh init_num p =
+  match run (anf_program p) nh init_num with
+  | _, _, r -> r
+;;

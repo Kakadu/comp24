@@ -18,20 +18,20 @@
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
   Types after modifications:
-  val #1 : (int -> 'a) -> int -> int -> 'a
-  val #2 : 'a -> 'a
+  val a1 : (int -> 'a) -> int -> int -> 'a
+  val a2 : 'a -> 'a
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
   Modified ast:
-  let #1 = (fun k n p -> (k ((* p) n)))
+  let a1 = (fun k n p -> (k ((* p) n)))
   
   let rec fac_cps = (fun n k -> if ((= n) 1)
   then (k 1)
-  else ((fac_cps ((- n) 1)) ((#1 k) n)))
+  else ((fac_cps ((- n) 1)) ((a1 k) n)))
   
-  let #2 = (fun #0 -> #0)
+  let a2 = (fun a0 -> a0)
   
-  let main = let () = (print_int ((fac_cps 4) #2)) in
+  let main = let () = (print_int ((fac_cps 4) a2)) in
   0
 
   $ ./run_lambda_lifting.exe << EOF
@@ -44,18 +44,18 @@
   Types before modifications:
   val f : int -> int -> int
   Types after modifications:
-  val #2 : int -> int
-  val #3 : int -> int
-  val #4 : int -> int -> int
+  val a2 : int -> int
+  val a3 : int -> int
+  val a4 : int -> int -> int
   val f : int -> int -> int
   Modified ast:
-  let #2 = (fun y -> ((+ y) 1))
+  let a2 = (fun y -> ((+ y) 1))
   
-  let #3 = (fun x -> (#2 x))
+  let a3 = (fun x -> (a2 x))
   
-  let #4 = (fun #0 #1 -> ((+ #0) #1))
+  let a4 = (fun a0 a1 -> ((+ a0) a1))
   
-  let f = (fun a b -> (#3 ((#4 a) b)))
+  let f = (fun a b -> (a3 ((a4 a) b)))
 
   $ ./run_lambda_lifting.exe << EOF
   > let f = 
@@ -70,15 +70,15 @@
   Types before modifications:
   val f : bool * bool
   Types after modifications:
-  val #0 : int -> bool
-  val #1 : int -> bool
+  val a0 : int -> bool
+  val a1 : int -> bool
   val f : bool * bool
   Modified ast:
-  let rec #0 = (fun n -> if ((= n) 0)
+  let rec a0 = (fun n -> if ((= n) 0)
   then false
-  else (#1 ((- n) 1)))
-  and #1 = (fun n -> if ((= n) 0)
+  else (a1 ((- n) 1)))
+  and a1 = (fun n -> if ((= n) 0)
   then true
-  else (#0 ((- n) 1)))
+  else (a0 ((- n) 1)))
   
-  let f = ((#1 4), (#0 5))
+  let f = ((a1 4), (a0 5))

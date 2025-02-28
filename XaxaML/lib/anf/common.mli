@@ -17,6 +17,15 @@ module StrSet : sig
   val diff : t -> t -> t
 end
 
+module NamesHolder : sig
+  type t
+
+  val empty : t
+  val create : Ast.program -> t
+  val contains : t -> int -> bool
+  val pp_names_holder : Format.formatter -> t -> unit
+end
+
 module MonadCounter : sig
   type 'a t
 
@@ -26,7 +35,7 @@ module MonadCounter : sig
   val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
   val ( >>| ) : 'a t -> ('a -> 'b) -> 'b t
   val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-  val run : 'a t -> int -> int * 'a
+  val run : 'a t -> NamesHolder.t -> int -> NamesHolder.t * int * 'a
 
   module RList : sig
     val map : 'a list -> f:('a -> 'b t) -> 'b list t
@@ -44,7 +53,7 @@ module MonadCounterError : sig
   val ( >>= ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
   val ( >>| ) : ('a, 'e) t -> ('a -> 'b) -> ('b, 'e) t
   val ( let* ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
-  val run : int -> ('a, 'e) t -> ('a, 'e) result
+  val run : ('a, 'e) t -> NamesHolder.t -> int -> NamesHolder.t * int * ('a, 'e) result
 
   module RList : sig
     val map : 'a list -> f:('a -> ('b, 'e) t) -> ('b list, 'e) t
@@ -65,3 +74,6 @@ module MonadCounterError : sig
       -> ('d, 'e) t
   end
 end
+
+val get_idents : Ast.pattern -> StrSet.t
+val get_idents_from_list : Ast.pattern list -> StrSet.t

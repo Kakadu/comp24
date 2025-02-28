@@ -2,7 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-val run_lambda_lifting_program
-  :  int
+val run
+  :  Common.NamesHolder.t
+  -> int
   -> Remove_patterns.rp_program
-  -> int * Remove_patterns.rp_program
+  -> Common.NamesHolder.t * int * Remove_patterns.rp_program

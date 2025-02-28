@@ -32,4 +32,4 @@ module ToAst : sig
   val convert_program : rp_program -> Ast.program
 end
 
-val run_remove_patterns_program : Ast.program -> int * rp_program
+val run : Ast.program -> Common.NamesHolder.t * int * rp_program
