@@ -263,19 +263,19 @@ open Remove_patterns
 open Common.MonadCounter
 open Base
 
-let empty_bindings = Map.empt<span data-count="27">y</span> (module String)
-let get_name i = <span data-count="31">"</span>#" ^ Int.to_strin<span data-count="31">g</span> i
+let empty_bindings = Map.empt<span data-count="29">y</span> (module String)
+let get_name i = <span data-count="33">"</span>a" ^ Int.to_strin<span data-count="33">g</span> i
 
 let rec ll_expr bindings = function
-  | <span data-count="197">R</span>p_e_const _ as orig -&gt; return ([], orig)
-  | <span data-count="546">R</span>p_e_ident name as orig -&gt;
+  | <span data-count="203">R</span>p_e_const _ as orig -&gt; return ([], orig)
+  | <span data-count="555">R</span>p_e_ident name as orig -&gt;
     (match Map.find bindings name with
      | <span data-count="25">S</span>ome new_name -&gt; return ([], Rp_e_ident new_name)
-     | <span data-count="521">N</span>one -&gt; return ([], orig))
-  | <span data-count="489">R</span>p_e_app (e1, e2) -&gt;
-    let* decls1, e1 = ll_exp<span data-count="489">r</span> bindings e1 in
-    <span data-count="489">l</span>et* decls2, e2 = ll_exp<span data-count="489">r</span> bindings e2 in
-    <span data-count="489">r</span>eturn (decls1 @ decls2, Rp_e_app (e1, e2))
+     | <span data-count="530">N</span>one -&gt; return ([], orig))
+  | <span data-count="497">R</span>p_e_app (e1, e2) -&gt;
+    let* decls1, e1 = ll_exp<span data-count="497">r</span> bindings e1 in
+    <span data-count="497">l</span>et* decls2, e2 = ll_exp<span data-count="497">r</span> bindings e2 in
+    <span data-count="497">r</span>eturn (decls1 @ decls2, Rp_e_app (e1, e2))
   | <span data-count="36">R</span>p_e_ite (e1, e2, e3) -&gt;
     let* decls1, e1 = ll_exp<span data-count="36">r</span> bindings e1 in
     <span data-count="36">l</span>et* decls2, e2 = ll_exp<span data-count="36">r</span> bindings e2 in
@@ -297,17 +297,17 @@ let rec ll_expr bindings = function
     let* t = RList.ma<span data-count="8">p</span> e_list ~f:(ll_exp<span data-count="8">r</span> bindings) in
     <span data-count="8">l</span>et decls, e_list = List.unzip t in
     <span data-count="8">r</span>eturn (List.conca<span data-count="8">t</span> decls, Rp_e_tuple e_list)
-  | <span data-count="88">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
-    let* decls1, e1 = ll_decl_bod<span data-count="88">y</span> bindings e1 in
-    <span data-count="88">(</span>match e1 with
-     | <span data-count="12">R</span>p_e_fun _ -&gt;
-       let* fresh_name = fresh &gt;&gt;<span data-count="12">|</span> get_name in
-       <span data-count="12">l</span>et bindings = Map.update bindings name ~f:(fun _ -&gt; <span data-count="12">f</span>resh_name) in
-       <span data-count="12">l</span>et* decls2, e2 = ll_exp<span data-count="12">r</span> bindings e2 in
-       <span data-count="12">r</span>eturn (decls1 @ [ Rp_non_rec (fresh_name, e1) ] @ decls2, e2)
-     | <span data-count="76">_</span> -&gt;
-       let* decls2, e2 = ll_exp<span data-count="76">r</span> bindings e2 in
-       <span data-count="76">r</span>eturn (decls1 @ decls2, Rp_e_let (Rp_non_rec (name, e1), e2)))
+  | <span data-count="91">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
+    let* decls1, e1 = ll_decl_bod<span data-count="91">y</span> bindings e1 in
+    <span data-count="91">(</span>match e1 with
+     | <span data-count="14">R</span>p_e_fun _ -&gt;
+       let* fresh_name = fresh &gt;&gt;<span data-count="14">|</span> get_name in
+       <span data-count="14">l</span>et bindings = Map.update bindings name ~f:(fun _ -&gt; <span data-count="14">f</span>resh_name) in
+       <span data-count="14">l</span>et* decls2, e2 = ll_exp<span data-count="14">r</span> bindings e2 in
+       <span data-count="14">r</span>eturn (decls1 @ [ Rp_non_rec (fresh_name, e1) ] @ decls2, e2)
+     | <span data-count="77">_</span> -&gt;
+       let* decls2, e2 = ll_exp<span data-count="77">r</span> bindings e2 in
+       <span data-count="77">r</span>eturn (decls1 @ decls2, Rp_e_let (Rp_non_rec (name, e1), e2)))
   | <span data-count="4">R</span>p_e_let (Rp_rec decls, e2) -&gt;
     let* bindings =
       List.fol<span data-count="4">d</span> decls ~init:(retur<span data-count="4">n</span> bindings) ~f:(fun acc (name, _) -&gt;
@@ -330,19 +330,19 @@ let rec ll_expr bindings = function
     <span data-count="4">r</span>eturn (decls1 @ [ Rp_rec decl_bodies ] @ decls2, e2)
 
 and ll_decl_body bindings = function
-  | <span data-count="53">R</span>p_e_fun (args, body) -&gt;
+  | <span data-count="56">R</span>p_e_fun (args, body) -&gt;
     let bindings = List.fold args ~init:bindings ~f:Map.remove in
-    <span data-count="53">l</span>et* decls, new_body = ll_exp<span data-count="53">r</span> bindings body in
-    <span data-count="53">r</span>eturn (decls, Rp_e_fun (args, new_body))
-  | <span data-count="98">e</span> -&gt;
-    let* decls, e = ll_exp<span data-count="98">r</span> bindings e in
-    <span data-count="98">r</span>eturn (decls, e)
+    <span data-count="56">l</span>et* decls, new_body = ll_exp<span data-count="56">r</span> bindings body in
+    <span data-count="56">r</span>eturn (decls, Rp_e_fun (args, new_body))
+  | <span data-count="102">e</span> -&gt;
+    let* decls, e = ll_exp<span data-count="102">r</span> bindings e in
+    <span data-count="102">r</span>eturn (decls, e)
 ;;
 
 let ll_toplevel = function
-  | <span data-count="41">R</span>p_non_rec (name, e) -&gt;
-    let* decls, new_e = ll_decl_bod<span data-count="41">y</span> empty_bindings e in
-    <span data-count="41">r</span>eturn @@ decls @ [ Rp_non_rec (name, new_e) ]
+  | <span data-count="45">R</span>p_non_rec (name, e) -&gt;
+    let* decls, new_e = ll_decl_bod<span data-count="45">y</span> empty_bindings e in
+    <span data-count="45">r</span>eturn @@ decls @ [ Rp_non_rec (name, new_e) ]
   | <span data-count="15">R</span>p_rec decls -&gt;
     let* new_decls, bodies =
       List.fol<span data-count="15">d</span>
@@ -358,17 +358,17 @@ let ll_toplevel = function
 ;;
 
 let ll_program program =
-  <span data-count="23">l</span>et rec helper = function
-    | <span data-count="23">[</span>] -&gt; return []
-    | <span data-count="56">h</span>d :: tl -&gt;
-      let* decls1 = ll_topleve<span data-count="56">l</span> hd in
-      <span data-count="56">l</span>et* decls2 = helpe<span data-count="56">r</span> tl in
-      <span data-count="56">r</span>eturn @@ decls1 @ decls2
+  <span data-count="24">l</span>et rec helper = function
+    | <span data-count="24">[</span>] -&gt; return []
+    | <span data-count="60">h</span>d :: tl -&gt;
+      let* decls1 = ll_topleve<span data-count="60">l</span> hd in
+      <span data-count="60">l</span>et* decls2 = helpe<span data-count="60">r</span> tl in
+      <span data-count="60">r</span>eturn @@ decls1 @ decls2
   in
   helper program
 ;;
 
-let run_lambda_lifting_program init_num p = <span data-count="23">r</span>un (ll_progra<span data-count="23">m</span> p) init_num
+let run nh init_num p = <span data-count="24">r</span>un (ll_progra<span data-count="24">m</span> p) nh init_num
 </code></pre>
       </div>
     </div>

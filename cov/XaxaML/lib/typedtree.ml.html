@@ -231,61 +231,61 @@ module TypeVarSet = Stdlib.Set.Make (Int)
 
 type scheme = Scheme of TypeVarSet.t * typ
 
-let type_var x = <span data-count="1232">T</span>_var x
+let type_var x = <span data-count="1264">T</span>_var x
 let int_typ = T_prim "int"
 let bool_typ = T_prim "bool"
 let unit_typ = T_prim "unit"
-let arrow l r = <span data-count="4649">T</span>_arr (l, r)
+let arrow l r = <span data-count="4754">T</span>_arr (l, r)
 let ( @-&gt; ) = arrow
-let list_typ typ = <span data-count="111311">T</span>_list typ
+let list_typ typ = <span data-count="111519">T</span>_list typ
 
 (* map typed variables to letters *)
 let assign_names typ =
-  <span data-count="261">l</span>et calc_name letter num =
-    <span data-count="267">"</span>\'"
+  <span data-count="271">l</span>et calc_name letter num =
+    <span data-count="275">"</span>\'"
     ^
     if num = 0
-    then <span data-count="267">B</span>ase.Char.to_strin<span data-count="267">g</span> letter
+    then <span data-count="275">B</span>ase.Char.to_strin<span data-count="275">g</span> letter
     else <span data-count="0">B</span>ase.Char.to_strin<span data-count="0">g</span> letter ^ Int.to_strin<span data-count="0">g</span> num
   in
-  let next_letter c = <span data-count="128">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="128">t</span> c + 1) in
+  let next_letter c = <span data-count="136">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="136">t</span> c + 1) in
   let next letter num =
-    <span data-count="128">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="128">n</span>ext_lette<span data-count="128">r</span> letter, num
+    <span data-count="136">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="136">n</span>ext_lette<span data-count="136">r</span> letter, num
   in
   let rec helper names letter num = function
-    | <span data-count="267">T</span>_var n -&gt;
-      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="267">e</span> letter num) with
-       | <span data-count="128">`</span>Ok new_names -&gt; new_names, nex<span data-count="128">t</span> letter num
+    | <span data-count="275">T</span>_var n -&gt;
+      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="275">e</span> letter num) with
+       | <span data-count="136">`</span>Ok new_names -&gt; new_names, nex<span data-count="136">t</span> letter num
        | <span data-count="139">`</span>Duplicate -&gt; names, (letter, num))
-    | <span data-count="432">T</span>_arr (l, r) -&gt;
+    | <span data-count="443">T</span>_arr (l, r) -&gt;
       let names, (letter, num) = helper names letter num l in
-      <span data-count="432">h</span>elper names letter num r
+      <span data-count="443">h</span>elper names letter num r
     | <span data-count="52">T</span>_list t -&gt; helper names letter num t
     | <span data-count="42">T</span>_tuple (h, list) -&gt;
       List.fold_left
         (fun (names, (letter, num)) -&gt; <span data-count="89">h</span>elper names letter num)
         (names, (letter, num))
         (h :: list)
-    | <span data-count="473">_</span> -&gt; names, (letter, num)
+    | <span data-count="486">_</span> -&gt; names, (letter, num)
   in
-  let names, (_, _) = helper (Base.Map.empt<span data-count="261">y</span> (module Base.Int)) 'a' 0 typ in
-  <span data-count="261">n</span>ames
+  let names, (_, _) = helper (Base.Map.empt<span data-count="271">y</span> (module Base.Int)) 'a' 0 typ in
+  <span data-count="271">n</span>ames
 ;;
 
 let pp_internal ppf typ names_mapping =
-  <span data-count="261">l</span>et rec helper ppf = function
-    | <span data-count="267">T</span>_var n -&gt;
+  <span data-count="271">l</span>et rec helper ppf = function
+    | <span data-count="275">T</span>_var n -&gt;
       (match names_mapping with
-       | <span data-count="267">S</span>ome names -&gt;
-         (try Format.fprint<span data-count="267">f</span> ppf "%s" (Base.Map.find_ex<span data-count="267">n</span> names n) with
+       | <span data-count="275">S</span>ome names -&gt;
+         (try Format.fprint<span data-count="275">f</span> ppf "%s" (Base.Map.find_ex<span data-count="275">n</span> names n) with
           | <span data-count="0">B</span>ase.Not_found_s _ | <span data-count="0">S</span>tdlib.Not_found -&gt;
             Format.fprintf ppf "Names for types are counted incorrectly")
        | <span data-count="0">N</span>one -&gt; Format.fprintf ppf "%i" n)
-    | <span data-count="473">T</span>_prim s -&gt; Format.fprintf ppf "%s" s
-    | <span data-count="432">T</span>_arr (l, r) -&gt;
+    | <span data-count="486">T</span>_prim s -&gt; Format.fprintf ppf "%s" s
+    | <span data-count="443">T</span>_arr (l, r) -&gt;
       (match l with
        | <span data-count="50">T</span>_arr _ -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
-       | <span data-count="382">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
+       | <span data-count="393">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
     | <span data-count="42">T</span>_tuple (h, list) -&gt;
       let print_item item fmt =
         <span data-count="89">m</span>atch item with
@@ -302,8 +302,8 @@ let pp_internal ppf typ names_mapping =
 ;;
 
 let pp_typ ppf typ =
-  <span data-count="261">l</span>et names = assign_names typ in
-  <span data-count="261">p</span>p_internal ppf typ (Some names)
+  <span data-count="271">l</span>et names = assign_names typ in
+  <span data-count="271">p</span>p_internal ppf typ (Some names)
 ;;
 
 let pp_typ_debug ppf typ = <span data-count="0">p</span>p_internal ppf typ None

@@ -246,12 +246,12 @@ open Remove_patterns
 open Common
 open Common.MonadCounter
 
-let get_name i = <span data-count="39">"</span>#" ^ Int.to_strin<span data-count="39">g</span> i
+let get_name i = <span data-count="39">"</span>a" ^ Int.to_strin<span data-count="39">g</span> i
 
 let process_name env bindings name =
-  <span data-count="343">i</span>f String.equal name "()"
+  <span data-count="357">i</span>f String.equal name "()"
   then <span data-count="32">r</span>eturn (env, bindings, "()")
-  else <span data-count="311">(</span>
+  else <span data-count="325">(</span>
     match StrSet.find env name with
     | <span data-count="39">t</span>rue -&gt;
       let* fresh = fresh in
@@ -260,53 +260,53 @@ let process_name env bindings name =
         ( StrSet.ad<span data-count="39">d</span> env new_name
         , Map.updat<span data-count="39">e</span> bindings name ~f:(fun _ -&gt; <span data-count="39">n</span>ew_name)
         , new_name )
-    | <span data-count="272">f</span>alse -&gt; return (StrSet.ad<span data-count="272">d</span> env name, bindings, name))
+    | <span data-count="286">f</span>alse -&gt; return (StrSet.ad<span data-count="286">d</span> env name, bindings, name))
 ;;
 
 let rec ac_expr env bindings = function
-  | <span data-count="244">R</span>p_e_const _ as orig -&gt; return orig
-  | <span data-count="646">R</span>p_e_ident name as orig -&gt;
+  | <span data-count="250">R</span>p_e_const _ as orig -&gt; return orig
+  | <span data-count="655">R</span>p_e_ident name as orig -&gt;
     (match Map.find bindings name with
      | <span data-count="43">S</span>ome new_name -&gt; return @@ Rp_e_ident new_name
-     | <span data-count="603">N</span>one -&gt; return orig)
+     | <span data-count="612">N</span>one -&gt; return orig)
   | <span data-count="26">R</span>p_e_cons_list (l, r) -&gt;
     let* l = ac_exp<span data-count="26">r</span> env bindings l in
     <span data-count="26">l</span>et* r = ac_exp<span data-count="26">r</span> env bindings r in
     <span data-count="26">r</span>eturn @@ Rp_e_cons_list (l, r)
-  | <span data-count="570">R</span>p_e_app (e1, e2) -&gt;
-    let* e1 = ac_exp<span data-count="570">r</span> env bindings e1 in
-    <span data-count="570">l</span>et* e2 = ac_exp<span data-count="570">r</span> env bindings e2 in
-    <span data-count="570">r</span>eturn @@ Rp_e_app (e1, e2)
+  | <span data-count="578">R</span>p_e_app (e1, e2) -&gt;
+    let* e1 = ac_exp<span data-count="578">r</span> env bindings e1 in
+    <span data-count="578">l</span>et* e2 = ac_exp<span data-count="578">r</span> env bindings e2 in
+    <span data-count="578">r</span>eturn @@ Rp_e_app (e1, e2)
   | <span data-count="41">R</span>p_e_ite (e1, e2, e3) -&gt;
     let* e1 = ac_exp<span data-count="41">r</span> env bindings e1 in
     <span data-count="41">l</span>et* e2 = ac_exp<span data-count="41">r</span> env bindings e2 in
     <span data-count="41">l</span>et* e3 = ac_exp<span data-count="41">r</span> env bindings e3 in
     <span data-count="41">r</span>eturn @@ Rp_e_ite (e1, e2, e3)
-  | <span data-count="89">R</span>p_e_fun (args, body) -&gt;
+  | <span data-count="92">R</span>p_e_fun (args, body) -&gt;
     let* args, env, bindings =
-      RList.fold_lef<span data-count="89">t</span>
+      RList.fold_lef<span data-count="92">t</span>
         args
-        ~init:(retur<span data-count="89">n</span> ([], env, bindings))
+        ~init:(retur<span data-count="92">n</span> ([], env, bindings))
         ~f:(fun (names, env, bindings) name -&gt;
-          <span data-count="142">l</span>et* env, bindings, name = process_nam<span data-count="142">e</span> env bindings name in
-          <span data-count="142">r</span>eturn (name :: names, env, bindings))
+          <span data-count="149">l</span>et* env, bindings, name = process_nam<span data-count="149">e</span> env bindings name in
+          <span data-count="149">r</span>eturn (name :: names, env, bindings))
     in
-    <span data-count="89">l</span>et args = List.rev args in
-    <span data-count="89">l</span>et* body = ac_exp<span data-count="89">r</span> env bindings body in
-    <span data-count="89">r</span>eturn @@ Rp_e_fun (args, body)
+    <span data-count="92">l</span>et args = List.rev args in
+    <span data-count="92">l</span>et* body = ac_exp<span data-count="92">r</span> env bindings body in
+    <span data-count="92">r</span>eturn @@ Rp_e_fun (args, body)
   | <span data-count="10">R</span>p_e_tuple e_list -&gt;
     let* e_list = RList.ma<span data-count="10">p</span> e_list ~f:(ac_exp<span data-count="10">r</span> env bindings) in
     <span data-count="10">r</span>eturn @@ Rp_e_tuple e_list
-  | <span data-count="121">R</span>p_e_let (decl, e) -&gt;
-    let* new_env, new_bindings, new_decl = ac_dec<span data-count="121">l</span> env bindings decl in
-    <span data-count="121">l</span>et* new_e = ac_exp<span data-count="121">r</span> new_env new_bindings e in
-    <span data-count="121">r</span>eturn @@ Rp_e_let (new_decl, new_e)
+  | <span data-count="124">R</span>p_e_let (decl, e) -&gt;
+    let* new_env, new_bindings, new_decl = ac_dec<span data-count="124">l</span> env bindings decl in
+    <span data-count="124">l</span>et* new_e = ac_exp<span data-count="124">r</span> new_env new_bindings e in
+    <span data-count="124">r</span>eturn @@ Rp_e_let (new_decl, new_e)
 
 and ac_decl env bindings = function
-  | <span data-count="175">R</span>p_non_rec (name, e) -&gt;
-    let* new_env, new_bindings, new_name = process_nam<span data-count="175">e</span> env bindings name in
-    <span data-count="175">l</span>et* new_e = ac_exp<span data-count="175">r</span> new_env bindings e in
-    <span data-count="175">r</span>eturn (new_env, new_bindings, Rp_non_rec (new_name, new_e))
+  | <span data-count="182">R</span>p_non_rec (name, e) -&gt;
+    let* new_env, new_bindings, new_name = process_nam<span data-count="182">e</span> env bindings name in
+    <span data-count="182">l</span>et* new_e = ac_exp<span data-count="182">r</span> new_env bindings e in
+    <span data-count="182">r</span>eturn (new_env, new_bindings, Rp_non_rec (new_name, new_e))
   | <span data-count="23">R</span>p_rec decl_list -&gt;
     let names, exprs = List.unzip decl_list in
     <span data-count="23">l</span>et f1 acc cur_name =
@@ -329,18 +329,18 @@ and ac_decl env bindings = function
 ;;
 
 let ac_program program init_env =
-  <span data-count="36">l</span>et rec helper last_env last_bindings = function
-    | <span data-count="36">[</span>] -&gt; return []
-    | <span data-count="77">h</span>d :: tl -&gt;
-      let* cur_env, cur_bindings, cur_ast = ac_dec<span data-count="77">l</span> last_env last_bindings hd in
-      <span data-count="77">l</span>et* other_asts = helpe<span data-count="77">r</span> cur_env cur_bindings tl in
-      <span data-count="77">r</span>eturn (cur_ast :: other_asts)
+  <span data-count="37">l</span>et rec helper last_env last_bindings = function
+    | <span data-count="37">[</span>] -&gt; return []
+    | <span data-count="81">h</span>d :: tl -&gt;
+      let* cur_env, cur_bindings, cur_ast = ac_dec<span data-count="81">l</span> last_env last_bindings hd in
+      <span data-count="81">l</span>et* other_asts = helpe<span data-count="81">r</span> cur_env cur_bindings tl in
+      <span data-count="81">r</span>eturn (cur_ast :: other_asts)
   in
-  helper init_env (Map.empt<span data-count="36">y</span> (module String)) program
+  helper init_env (Map.empt<span data-count="37">y</span> (module String)) program
 ;;
 
-let run_alpha_conversion_program init_num prog =
-  <span data-count="36">r</span>un (ac_progra<span data-count="36">m</span> prog (StrSet.of_lis<span data-count="36">t</span> Std_names.std_names)) init_num
+let run nh init_num prog =
+  <span data-count="37">r</span>un (ac_progra<span data-count="37">m</span> prog (StrSet.of_lis<span data-count="37">t</span> Std_names.std_names)) nh init_num
 ;;
 </code></pre>
       </div>
