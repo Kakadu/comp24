@@ -52,11 +52,13 @@ type op =
   | ORI
   | XORI
   | LW
+  | LD
   | LH
   | LHU
   | LB
   (* S-type *)
   | SW
+  | SD
   | SH
   | SB
   (* B-type *)
@@ -87,8 +89,8 @@ type instruction =
 
 let extend_stack_insn size = Itype(Sp, Sp, -size, ADDI)
 let shrink_stack_insn size = Itype(Sp, Sp, size, ADDI)
-let sw ~v offset ~dst = Stype(v, offset, dst, SW)
-let lw ~rd offset  ~src = Itype(rd, src, offset, LW)
+let sd ~v offset ~dst = Stype(v, offset, dst, SD)
+let ld ~rd offset  ~src = Itype(rd, src, offset, LD)
 
 
 module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
@@ -112,8 +114,8 @@ module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = st
 end
 
 (* fp is not available *)
-let available_regs = List.init 8 temp @ List.init 11 (fun i -> saved (i + 1))
-let temporary_regs = List.init 8 temp
+let available_regs = List.init 7 temp @ List.init 11 (fun i -> saved (i + 1))
+let temporary_regs = List.init 7 temp
 
 
 let pp_reg fmt =
@@ -150,10 +152,12 @@ let pp_op fmt =
   | ORI -> p "ori"
   | XORI -> p "xori"
   | LW -> p "lw"
+  | LD -> p "ld"
   | LH -> p "lh"
   | LHU -> p "lhu"
   | LB -> p "lb"
   | SW -> p "sw"
+  | SD -> p "sd"
   | SH -> p "sh"
   | SB -> p "sb"
   | BEQ -> p "beq"
@@ -173,8 +177,8 @@ let pp_insn fmt =
   function
   | Rtype (rd, rs1, rs2, op) ->
     fprintf fmt "@[\t%a %a, %a, %a@]@." pp_op op pp_reg rd pp_reg rs1 pp_reg rs2
-  | Itype(rd, rs, imm, LW) ->
-    fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op LW pp_reg rd imm pp_reg rs
+  | Itype(rd, rs, imm, LD) ->
+    fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op LD pp_reg rd imm pp_reg rs
   | Itype (rd, rs, imm, op) ->
     fprintf fmt "@[\t%a %a, %a, %i@]@." pp_op op pp_reg rd pp_reg rs imm
   | Stype (value, offset, dst, op) ->

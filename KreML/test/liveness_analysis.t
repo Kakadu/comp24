@@ -42,7 +42,7 @@
   >   fun x y ->
   >     let temp = x + y in
   >     fun z -> z + temp + x
-  fresh_fun_1: t_0: [1, 2]
+  fresh_fun_1: t_2: [1, 2]
     
   fresh_fun_0: temp_4: [1, 2]
     

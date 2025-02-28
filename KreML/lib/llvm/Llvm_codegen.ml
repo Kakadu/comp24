@@ -161,6 +161,7 @@ let add_builtin_functions () =
   let _ = declare_function Runtime.list_cons list_cons_typ mdl in
   let pmtype = function_type (void_type context) [| int_type |] in
   let _ = declare_function Runtime.partial_match pmtype mdl in
+  let* _ = put_fun_type Runtime.partial_match pmtype in
   return ()
 ;;
 
@@ -270,7 +271,7 @@ let rec codegen_flambda = function
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
-  | Fl_app (Fl_var "partial_match", [ arg ]) ->
+  | Fl_app (Fl_closure {name ="partial_match"; _}, [ arg ]) ->
     (* special case to insert unreacheable *)
     let* arg = codegen_flambda arg in
     let callee = lookup_fun_exn Runtime.partial_match in

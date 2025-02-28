@@ -41,7 +41,7 @@ type op =
   | SRL
   | SUB
   | SRA
-  (* I-type *) (* reg < imm*) (* reg > imm ?*)
+  (* I-type *)
   | ADDI
   | SLTI
   | SLTIU
@@ -49,11 +49,13 @@ type op =
   | ORI
   | XORI
   | LW
+  | LD
   | LH
   | LHU
   | LB
   (* S-type *)
   | SW
+  | SD
   | SH
   | SB
   (* B-type *)
@@ -85,8 +87,8 @@ type instruction =
 
 val extend_stack_insn : int -> instruction
 val shrink_stack_insn : int -> instruction
-val sw : v:reg -> int -> dst: reg -> instruction
-val lw : rd:reg -> int -> src:reg -> instruction
+val sd : v:reg -> int -> dst: reg -> instruction
+val ld : rd:reg -> int -> src:reg -> instruction
 
 module RegistersStorage : sig
   include Registers_storage_intf.S with type 'a t = 'a list

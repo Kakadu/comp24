@@ -25,8 +25,8 @@
   >  let b = a in
   >  let c  = a in
   >  fun q w e r -> q + e + b + a
-  fresh_fun_0(q_3 w_4 e_5 r_6 a_0 b_1 ) {let t_0 = q_3 + e_5 in 
-                                          let t_1 = t_0 + b_1 in  t_1 + a_0  } 
+  fresh_fun_0(q_3 w_4 e_5 r_6 a_0 b_1 ) {let t_1 = q_3 + e_5 in 
+                                          let t_2 = t_1 + b_1 in  t_2 + a_0  } 
   
   f(a_0 ) {let b_1 = a_0 in 
             let c_2 = a_0 in 
@@ -48,7 +48,7 @@
   > let f x =
   > let a = 5 in
   > fun y -> x + a + y
-  fresh_fun_0(y_2 a_1 x_0 ) {let t_0 = x_0 + a_1 in  t_0 + y_2 } 
+  fresh_fun_0(y_2 a_1 x_0 ) {let t_1 = x_0 + a_1 in  t_1 + y_2 } 
   
   f(x_0 ) {let a_1 = 5 in 
             { name: fresh_fun_0, arity: 1 env_size: 2, arrange [1: a_1; 
@@ -59,7 +59,7 @@
   > let a = 10 in
   > let b = a in
   > fun u v ->  u + v * a
-  fresh_fun_0(u_4 v_5 a_2 ) {let t_0 = v_5 * a_2 in  u_4 + t_0 } 
+  fresh_fun_0(u_4 v_5 a_2 ) {let t_1 = v_5 * a_2 in  u_4 + t_1 } 
   
   f(x_0 y_1 ) {let a_2 = 10 in 
                 let b_3 = a_2 in 
@@ -72,8 +72,8 @@
   >   fun q ->
   >     if q > 0 then a + q
   >     else q - b
-  fresh_fun_0(q_3 a_1 b_2 ) {let t_0 = q_3 > 0 in 
-                              if t_0  then a_1 + q_3  else  q_3 - b_2  } 
+  fresh_fun_0(q_3 a_1 b_2 ) {let t_1 = q_3 > 0 in 
+                              if t_1  then a_1 + q_3  else  q_3 - b_2  } 
   
   f(x_0 ) {let a_1 = x_0 in 
             let b_2 = x_0 in 
@@ -245,7 +245,9 @@
                                 let t_3 = { name: map, arity: 2 env_size: 0, arrange [ ]}  ([ 
                                           f_0 xs_3  ]) in 
                                  t_2 :: t_3     
-                        else  partial_match ([ list_1  ])    } 
+                        else 
+                        { name: partial_match, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                        list_1  ])    } 
   
   iter(action_4 list_5 ) {let t_8 = list_5 = [] in 
                            if t_8  then ()  else 
@@ -256,7 +258,9 @@
                                      action_4 ([ x_6  ]); 
                                       { name: iter, arity: 2 env_size: 0, arrange [ ]}  ([ 
                                       action_4 xs_7  ]);  ()     
-                              else  partial_match ([ list_5  ])    } 
+                              else 
+                              { name: partial_match, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                              list_5  ])    } 
   
   square_11(x_10 ) {x_10 * x_10} 
   
@@ -301,4 +305,51 @@
                          t_6 t_7 3 t_8 100 1000 t_9 10000 -555555  ]) in 
                { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ 
                t_10  ])     } 
+  
+  $ dune exec closure_conv <<- EOF
+  > let f a =
+  >   let x = 5 in
+  >   fun y -> a + x + y
+  fresh_fun_0(y_2 a_0 x_1 ) {let t_1 = a_0 + x_1 in  t_1 + y_2 } 
+  
+  f(a_0 ) {let x_1 = 5 in 
+            { name: fresh_fun_0, arity: 1 env_size: 2, arrange [1: a_0; 
+            2: x_1;  ]}  } 
+  
+  $ dune exec closure_conv < manytests/typed/004manyargs.ml
+  wrap(f_0 ) {let t_0 = 1 = 1 in  if t_0  then f_0  else  f_0  } 
+  
+  test3(a_1 b_2 c_3 ) {let a_4 = { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                                 a_1  ]) in 
+                        let b_5 = { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                                  b_2  ]) in 
+                         let c_6 = { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                                   c_3  ]) in 
+                          0   } 
+  
+  test10(a_7 b_8 c_9 d_10 e_11 f_12 g_13 h_14 i_15 j_16 ) {let t_4 = a_7 + b_8 in 
+                                                            let t_5 = t_4 + c_9 in 
+                                                             let t_6 = 
+                                                             t_5 + d_10 in 
+                                                              let t_7 = 
+                                                              t_6 + e_11 in 
+                                                               let t_8 = 
+                                                               t_7 + f_12 in 
+                                                                let t_9 = 
+                                                                t_8 + g_13 in 
+                                                                 let t_10 = 
+                                                                 t_9 + h_14 in 
+                                                                  let t_11 = 
+                                                                  t_10 + i_15 in 
+                                                                   t_11 + j_16        } 
+  
+  main() {let rez_17 = { name: wrap, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                       { name: test10, arity: 10 env_size: 0, arrange [ ]}  
+                       1 10 100 1000 10000 100000 1000000 10000000 100000000 
+                       1000000000  ]) in 
+           { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ rez_17  ]); 
+            let temp2_19 = { name: wrap, arity: 1 env_size: 0, arrange [ ]}  ([ 
+                           { name: test3, arity: 3 env_size: 0, arrange [ ]}  
+                           1 10 100  ]) in 
+             0   } 
   

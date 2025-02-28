@@ -192,10 +192,12 @@ let rec transform_expr expr k : aexpr t =
   | Expr_fun _ ->
     (* it is guaranteed by let processing that function resolved here is anonymous *)
     let* fun_name = fresh_fun in
-    let* scope = ivar fun_name |> k in
+    let* closure_name = fresh_temp in
+    let* scope = ivar closure_name |> k in
     let* f, arity = resolve_fun expr in
     let* _ = put_arity fun_name arity in
-    temp_binding fun_name f scope |> return
+    let closure_binding = simplify_temp_binding closure_name (CImm(ivar fun_name)) scope in
+    temp_binding fun_name f closure_binding |> return
   | Expr_let (rf, (Pat_var id, (Expr_fun _ as f)), scope) ->
     let* scope = transform_expr scope (fun imm -> AExpr (CImm imm) |> return) in
     let* f, arity = resolve_fun f in

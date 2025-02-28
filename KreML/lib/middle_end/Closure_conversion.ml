@@ -51,13 +51,13 @@ module CC_state = struct
       List.fold_left
         (fun acc f -> Base.Map.set acc ~key:f ~data:[])
         freevars
-        Cstdlib.stdlib_funs
+        (Cstdlib.stdlib_funs @ Runtime.runtime_funs)
     in
     let arities =
       List.fold_left
         (fun acc (f, arity) -> Base.Map.set acc ~key:f ~data:arity)
         arities
-        Cstdlib.stdlib_funs_with_arity
+        (Cstdlib.stdlib_funs_with_arity @ Runtime.runtime_funs_with_arities)
     in
     (* let freevars = Base.Map.set freevars ~key:"print_int" ~data:([] : string list) in *)
     { global_env = []; freevars; arities }

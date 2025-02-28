@@ -26,10 +26,10 @@
     %a_1 = load i64, ptr %envelemptr_0, align 4
     %envelemptr_1 = getelementptr i64, ptr %env, i64 1
     %x_0 = load i64, ptr %envelemptr_1, align 4
-    %t_0 = add i64 %y_2, %z_3
-    %t_1 = add i64 %t_0, %a_1
-    %t_11 = add i64 %t_1, %x_0
-    ret i64 %t_11
+    %t_1 = add i64 %y_2, %z_3
+    %t_2 = add i64 %t_1, %a_1
+    %t_21 = add i64 %t_2, %x_0
+    ret i64 %t_21
   }
   
   define i64 @f(i64 %x_0) {
@@ -191,11 +191,11 @@
     %k_1 = load i64, ptr %envelemptr_0, align 4
     %envelemptr_1 = getelementptr i64, ptr %env, i64 1
     %n_0 = load i64, ptr %envelemptr_1, align 4
-    %t_4 = mul i64 %rec_call_2, %n_0
+    %t_5 = mul i64 %rec_call_2, %n_0
     %cast_2 = inttoptr i64 %k_1 to ptr
     %tupled_args_4 = call ptr @alloc_tuple(i64 1)
     %elemptr_5 = getelementptr i64, ptr %tupled_args_4, i64 0
-    store i64 %t_4, ptr %elemptr_5, align 4
+    store i64 %t_5, ptr %elemptr_5, align 4
     %call_closure_3 = call i64 @call_closure(ptr %cast_2, ptr %tupled_args_4, i64 1)
     ret i64 %call_closure_3
   }
@@ -221,13 +221,13 @@
     store i64 %k_1, ptr %envptr_14, align 4
     %envptr_15 = getelementptr i64, ptr %tupled_env_13, i64 2
     store i64 %n_0, ptr %envptr_15, align 4
-    %closure_temp_16 = call ptr @alloc_closure(ptr @fresh_fun_0, ptr %tupled_env_13, i64 1, i64 2)
-    %0 = ptrtoint ptr %closure_temp_16 to i64
-    %t_21 = call i64 @cps_fac(i64 %t_2, i64 %0)
+    %t_3 = call ptr @alloc_closure(ptr @fresh_fun_0, ptr %tupled_env_13, i64 1, i64 2)
+    %0 = ptrtoint ptr %t_3 to i64
+    %t_31 = call i64 @cps_fac(i64 %t_2, i64 %0)
     br label %merge_17
   
   merge_17:                                         ; preds = %else_12, %then_7
-    %phi_18 = phi i64 [ %call_closure_9, %then_7 ], [ %t_21, %else_12 ]
+    %phi_18 = phi i64 [ %call_closure_9, %then_7 ], [ %t_31, %else_12 ]
     ret i64 %phi_18
   }
   
@@ -239,8 +239,8 @@
   define i64 @main() {
   entry:
     %tupled_env_19 = call ptr @alloc_tuple(i64 1)
-    %closure_temp_20 = call ptr @alloc_closure(ptr @fresh_fun_1, ptr %tupled_env_19, i64 1, i64 0)
-    %0 = ptrtoint ptr %closure_temp_20 to i64
+    %t_7 = call ptr @alloc_closure(ptr @fresh_fun_1, ptr %tupled_env_19, i64 1, i64 0)
+    %0 = ptrtoint ptr %t_7 to i64
     %res_4 = call i64 @cps_fac(i64 6, i64 %0)
     ret i64 0
   }
@@ -340,10 +340,10 @@
     %envelemptr_1 = getelementptr i64, ptr %env, i64 1
     %x_0 = load i64, ptr %envelemptr_1, align 4
     %call_2 = call i64 @a()
-    %t_0 = add i64 %y_2, %call_2
-    %t_1 = add i64 %t_0, %x_0
-    %t_11 = add i64 %t_1, %b_1
-    ret i64 %t_11
+    %t_1 = add i64 %y_2, %call_2
+    %t_2 = add i64 %t_1, %x_0
+    %t_21 = add i64 %t_2, %b_1
+    ret i64 %t_21
   }
   
   define i64 @f(i64 %x_0) {
@@ -367,8 +367,8 @@
     store i64 3, ptr %elemptr_12, align 4
     %elemptr_13 = getelementptr i64, ptr %tupled_args_11, i64 1
     store i64 4, ptr %elemptr_13, align 4
-    %t_3 = call i64 @call_closure(ptr %closure_temp_9, ptr %tupled_args_11, i64 2)
-    %0 = call i64 @print_int(i64 %t_3)
+    %t_4 = call i64 @call_closure(ptr %closure_temp_9, ptr %tupled_args_11, i64 2)
+    %0 = call i64 @print_int(i64 %t_4)
     ret i64 0
   }
 
@@ -825,6 +825,3 @@
     %t_101 = call i64 @print_int(i64 %t_10)
     ret i64 %t_101
   }
-
-
-$ dune exec llvm_codegen < manytests/typed/004manyargs.ml
