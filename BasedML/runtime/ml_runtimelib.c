@@ -170,8 +170,10 @@ int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ..
 }
 
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num) {
-    DEBUG_RUN(if (!is_ml_ptr(box)) EXCEPTION_FMT("mlrt_get_box_field: get unboxed value (%lx) as box\n", box););
-    return ((box_t*)box)->values[field_num];
+    if (!is_ml_ptr(box))
+        return CONVERT_INT_NATIVE_TO_ML(0);
+    else
+        return ((box_t*)box)->values[field_num];
 }
 
 int64_t mlrt_check_tag(int64_t target, int64_t tag) { return CONVERT_INT_NATIVE_TO_ML(tag == get_tag(target)); }
