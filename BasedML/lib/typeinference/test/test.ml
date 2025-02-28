@@ -359,7 +359,7 @@ let%expect_test "Test avoiding already used type names" =
     let id1 = fun a -> a
     let id2 = fun a -> a
     let id3 = fun a -> a
-    let (x: '_p12) = 1
+    let (x: 'p12) = 1
     |};
   [%expect
     {|
@@ -379,8 +379,8 @@ let%expect_test "Test avoiding already used type names" =
      ""( >= )"": ('p10 -> ('p10 -> bool)),
      ""( || )"": (bool -> (bool -> bool)),
      ""id1"": ('p11 -> 'p11),
-     ""id2"": ('p12 -> 'p12),
-     ""id3"": ('p13 -> 'p13),
+     ""id2"": ('p13 -> 'p13),
+     ""id3"": ('p14 -> 'p14),
      ""print_int"": (int -> unit),
      ""x"": int,
      ] |}]
