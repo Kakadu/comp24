@@ -278,12 +278,12 @@ let rec rp_expr = function
     let args_to_match =
       List.filter_mapi last_args ~f:(fun i arg ->
         match arg with
-        | P_val _ -> None
+        | P_val _ | P_const (C_unit) -> None
         | _ -> Some ("#" ^ Int.to_string i))
     in
     let pat_list =
       List.filter last_args ~f:(function
-        | P_val _ -> false
+        | P_val _ | P_const (C_unit) -> false
         | _ -> true)
     in
     let new_body = rp_expr body in
