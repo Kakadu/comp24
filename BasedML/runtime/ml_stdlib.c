@@ -61,8 +61,6 @@ int8_t compare_ml(int64_t x, int64_t y) {
 
 int64_t eq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == 0); }
 int64_t neq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) != 0); }
-int64_t peq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML((x == y)); }
-int64_t pneq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML((x != y)); }
 
 int64_t g_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == 1); }
 int64_t ge_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) >= 0); }
@@ -75,6 +73,3 @@ void print_int(int64_t a) {
     printf("%ld", CONVERT_INT_ML_TO_NATIVE(a));
     fflush(stdout);
 }
-
-int64_t lor_ml(int64_t x, int64_t y) { return x || y; };
-int64_t land_ml(int64_t x, int64_t y) { return x && y; };
