@@ -10,7 +10,7 @@
   then 1
   else ((* n) (fac ((- n) 1))))
   
-  let main = let #t = (print_int (fac 4)) in
+  let main = let () = (print_int (fac 4)) in
   0
   $ ./run_closure_conversion.exe < manytests/typed/002fac.ml
   Types before modifications:
@@ -24,7 +24,7 @@
   then (k 1)
   else ((fac_cps ((- n) 1)) (((fun k n p -> (k ((* p) n))) k) n)))
   
-  let main = let #t = (print_int ((fac_cps 4) (fun #0 -> #0))) in
+  let main = let () = (print_int ((fac_cps 4) (fun #0 -> #0))) in
   0
 
   $ ./run_closure_conversion.exe << EOF 

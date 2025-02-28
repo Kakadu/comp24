@@ -26,8 +26,8 @@
   >     | [] -> 0
   >    in
   >    f xs 
-  let f = (fun #0 xs -> let a = ((#unpack_tuple #0) 0) in
-  let b = ((#unpack_tuple #0) 1) in
+  let f = (fun #p0 xs -> let a = ((#unpack_tuple #p0) 0) in
+  let b = ((#unpack_tuple #p0) 1) in
   let rec #0 = (fun #1 -> if ((> (#list_length #1)) 0)
   then let #2 = (#list_hd #1) in
   let #3 = (#list_tl #1) in

@@ -10,7 +10,7 @@
   then 1
   else ((* n) (fac ((- n) 1))))
   
-  let main = let #t = (print_int (fac 4)) in
+  let main = let () = (print_int (fac 4)) in
   0
 
   $ ./run_lambda_lifting.exe < manytests/typed/002fac.ml
@@ -31,7 +31,7 @@
   
   let #2 = (fun #0 -> #0)
   
-  let main = let #t = (print_int ((fac_cps 4) #2)) in
+  let main = let () = (print_int ((fac_cps 4) #2)) in
   0
 
   $ ./run_lambda_lifting.exe << EOF

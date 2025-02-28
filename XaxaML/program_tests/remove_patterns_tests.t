@@ -53,8 +53,8 @@ MODIFY
   if ((> (#list_length #t)) 0)
   then let d = (#list_hd #t) in
   let e = (#list_tl #t) in
-  let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
-  let y = ((#unpack_tuple #0) 1) in
+  let f = (fun #p0 -> let x = ((#unpack_tuple #p0) 0) in
+  let y = ((#unpack_tuple #p0) 1) in
   ((+ x) y)) in
   0
   else #match_failure
@@ -63,7 +63,7 @@ MODIFY
   > let f x = 
   >  let g (a, b) (c :: d) e = x + 1
   >  in g 
-  let f = (fun x -> let g = (fun #0 #1 e -> let #t = (#0, #1) in
+  let f = (fun x -> let g = (fun #p0 #p1 e -> let #t = (#p0, #p1) in
   if ((> (#list_length ((#unpack_tuple #t) 1))) 0)
   then let a = ((#unpack_tuple ((#unpack_tuple #t) 0)) 0) in
   let b = ((#unpack_tuple ((#unpack_tuple #t) 0)) 1) in
@@ -78,8 +78,8 @@ MODIFY
   >   let f (x, y) = x + y in 
   >   let rec g a = h a and h a = g a in 
   >   1
-  let a = let f = (fun #0 -> let x = ((#unpack_tuple #0) 0) in
-  let y = ((#unpack_tuple #0) 1) in
+  let a = let f = (fun #p0 -> let x = ((#unpack_tuple #p0) 0) in
+  let y = ((#unpack_tuple #p0) 1) in
   ((+ x) y)) in
   let rec g = (fun a -> (h a)) and h = (fun a -> (g a)) in
   1
