@@ -20,7 +20,7 @@
  (name anf_demo)
  (public_name anf_demo)
  (modules anf_demo)
- (libraries Parser Inferencer Anf stdio))
+ (libraries Parser Inferencer Anf stdio Patelim))
 
 (cram
  (applies_to parser_demo inferencer_demo cc_ll_demo anf_demo)

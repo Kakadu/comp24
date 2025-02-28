@@ -15,6 +15,7 @@ let rec pp_immexpr fmt = function
          pp_immexpr
          ", ")
       es
+  | ImmCons (hd, tl) -> fprintf fmt "%a :: %a" pp_immexpr hd pp_immexpr tl
   | ImmConstraint (e, typ) -> AstLib.Pp_ast.pp_typed fmt pp_immexpr (e, typ)
 
 let rec pp_cexpr fmt = function
