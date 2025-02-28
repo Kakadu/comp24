@@ -24,86 +24,7 @@ let pp_error ppf : error -> unit = function
   | Impossible_state -> Format.printf {|Inferencer run into impossible state|}
 ;;
 
-module R : sig
-  type 'a t
-
-  val return : 'a -> 'a t
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-  val fail : error -> 'a t
-
-  include Base.Monad.Infix with type 'a t := 'a t
-
-  module Syntax : sig
-    val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-  end
-
-  module RList : sig
-    val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
-    val fold_right : 'a list -> init:'b t -> f:('a -> 'b -> 'b t) -> 'b t
-  end
-
-  module RMap : sig
-    val fold : ('a, 'b, 'c) Base.Map.t -> init:'d t -> f:('d -> 'a -> 'b -> 'd t) -> 'd t
-  end
-
-  val fresh : int t
-  val run : 'a t -> ('a, error) Base.Result.t
-end = struct
-  open Base
-
-  type 'a t = int -> int * ('a, error) Result.t
-
-  let return x : 'a t = fun var -> var, Result.return x
-  let fail e : 'a t = fun var -> var, Result.fail e
-  let fresh : 'a t = fun var -> var + 1, Result.return var
-
-  let ( >>= ) (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun var ->
-    match m var with
-    | var, Result.Error err -> var, Result.fail err
-    | var, Result.Ok x -> f x var
-  ;;
-
-  let bind = ( >>= )
-
-  let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
-    fun var ->
-    match m var with
-    | var, Result.Error err -> var, Result.fail err
-    | var, Result.Ok x -> var, Result.return (f x)
-  ;;
-
-  module Syntax = struct
-    let ( let* ) = bind
-  end
-
-  module RMap = struct
-    let fold mp ~init ~f =
-      let open Syntax in
-      Map.fold mp ~init ~f:(fun ~key:k ~data:v acc ->
-        let* acc = acc in
-        f acc k v)
-    ;;
-  end
-
-  module RList = struct
-    let fold_left xs ~init ~f =
-      let open Syntax in
-      List.fold_left xs ~init ~f:(fun acc x ->
-        let* acc = acc in
-        f acc x)
-    ;;
-
-    let fold_right xs ~init ~f =
-      let open Syntax in
-      List.fold_right xs ~init ~f:(fun x acc ->
-        let* acc = acc in
-        f x acc)
-    ;;
-  end
-
-  let run m = snd (m Std_names.type_var_count)
-end
+open Common
 
 module Type = struct
   let rec occurs_in v = function
@@ -131,16 +52,15 @@ module Subst : sig
   type t
 
   val empty : t
-  val singleton : int -> typ -> t R.t
+  val singleton : int -> typ -> (t, error) MonadCounterError.t
   val remove : t -> int -> t
   val apply : t -> typ -> typ
-  val unify : typ -> typ -> t R.t
+  val unify : typ -> typ -> (t, error) MonadCounterError.t
   val pp_subst : Format.formatter -> t -> unit
-  val compose : t -> t -> t R.t
-  val compose_all : t list -> t R.t
+  val compose : t -> t -> (t, error) MonadCounterError.t
+  val compose_all : t list -> (t, error) MonadCounterError.t
 end = struct
-  open R
-  open R.Syntax
+  open MonadCounterError
   open Base
 
   type t = (int, typ, Int.comparator_witness) Map.t
@@ -389,8 +309,7 @@ end = struct
   ;;
 end
 
-open R
-open R.Syntax
+open MonadCounterError
 
 let fresh_var = fresh >>| fun n -> T_var n
 
@@ -789,5 +708,8 @@ let infer_program prog =
   helper TypeEnv.std prog
 ;;
 
-let run_infer_expr e = Result.map (fun (_, ty) -> ty) (run (infer_expr TypeEnv.std e))
-let run_infer_program p = run (infer_program p)
+let run_infer_expr e =
+  Result.map snd (run Std_names.type_var_count (infer_expr TypeEnv.std e))
+;;
+
+let run_infer_program p = run Std_names.type_var_count (infer_program p)

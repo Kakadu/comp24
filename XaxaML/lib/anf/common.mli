@@ -33,3 +33,34 @@ module MonadCounter : sig
     val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
   end
 end
+
+module MonadCounterError : sig
+  type ('a, 'e) t
+
+  val return : 'a -> ('a, 'e) t
+  val fresh : (int, 'e) t
+  val bind : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
+  val fail : 'e -> ('a, 'e) t
+  val ( >>= ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
+  val ( >>| ) : ('a, 'e) t -> ('a -> 'b) -> ('b, 'e) t
+  val ( let* ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
+  val run : int -> ('a, 'e) t -> ('a, 'e) result
+
+  module RList : sig
+    val fold_left : 'a list -> init:('b, 'e) t -> f:('b -> 'a -> ('b, 'e) t) -> ('b, 'e) t
+
+    val fold_right
+      :  'a list
+      -> init:('b, 'e) t
+      -> f:('a -> 'b -> ('b, 'e) t)
+      -> ('b, 'e) t
+  end
+
+  module RMap : sig
+    val fold
+      :  ('a, 'b, 'c) Base.Map.t
+      -> init:('d, 'e) t
+      -> f:('d -> 'a -> 'b -> ('d, 'e) t)
+      -> ('d, 'e) t
+  end
+end

@@ -82,3 +82,86 @@ end = struct
     ;;
   end
 end
+
+module MonadCounterError : sig
+  type ('a, 'e) t
+
+  val return : 'a -> ('a, 'e) t
+  val bind : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
+  val fail : 'e -> ('a, 'e) t
+
+  include Base.Monad.Infix2 with type ('a, 'e) t := ('a, 'e) t
+
+  val ( let* ) : ('a, 'e) t -> ('a -> ('b, 'e) t) -> ('b, 'e) t
+
+  module RList : sig
+    val fold_left : 'a list -> init:('b, 'e) t -> f:('b -> 'a -> ('b, 'e) t) -> ('b, 'e) t
+
+    val fold_right
+      :  'a list
+      -> init:('b, 'e) t
+      -> f:('a -> 'b -> ('b, 'e) t)
+      -> ('b, 'e) t
+  end
+
+  module RMap : sig
+    val fold
+      :  ('a, 'b, 'c) Base.Map.t
+      -> init:('d, 'e) t
+      -> f:('d -> 'a -> 'b -> ('d, 'e) t)
+      -> ('d, 'e) t
+  end
+
+  val fresh : (int, 'e) t
+  val run : int -> ('a, 'e) t -> ('a, 'e) Base.Result.t
+end = struct
+  open Base
+
+  type ('a, 'e) t = int -> int * ('a, 'e) Result.t
+
+  let return x var = var, Result.return x
+  let fail e var = var, Result.fail e
+  let fresh var = var + 1, Result.return var
+
+  let ( >>= ) (m : ('a, 'e) t) (f : 'a -> ('b, 'e) t) : ('b, 'e) t =
+    fun var ->
+    match m var with
+    | var, Result.Error err -> var, Result.fail err
+    | var, Result.Ok x -> f x var
+  ;;
+
+  let bind = ( >>= )
+
+  let ( >>| ) (m : ('a, 'e) t) (f : 'a -> 'b) : ('b, 'e) t =
+    fun var ->
+    match m var with
+    | var, Result.Error err -> var, Result.fail err
+    | var, Result.Ok x -> var, Result.return (f x)
+  ;;
+
+  let ( let* ) = bind
+
+  module RMap = struct
+    let fold mp ~init ~f =
+      Map.fold mp ~init ~f:(fun ~key:k ~data:v acc ->
+        let* acc = acc in
+        f acc k v)
+    ;;
+  end
+
+  module RList = struct
+    let fold_left xs ~init ~f =
+      List.fold_left xs ~init ~f:(fun acc x ->
+        let* acc = acc in
+        f acc x)
+    ;;
+
+    let fold_right xs ~init ~f =
+      List.fold_right xs ~init ~f:(fun x acc ->
+        let* acc = acc in
+        f x acc)
+    ;;
+  end
+
+  let run init m = snd (m init)
+end
