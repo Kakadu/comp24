@@ -298,7 +298,6 @@ let expr =
 (*----------------------------- Structure ------------------------------------*)
 
 let str_item =
-  let pseval = expr >>| fun e -> SEval e in
   let svalue f bl = SValue (f, bl) in
   let psvalue =
     lift2
@@ -306,7 +305,7 @@ let str_item =
       (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
       (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") expr)))
   in
-  choice [ pseval; psvalue ]
+   psvalue
 ;;
 
 let structure : structure t = sep_by (choice [ dsemi; ws ]) str_item

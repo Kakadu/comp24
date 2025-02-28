@@ -148,6 +148,10 @@ let prog_lift prog =
       ( LLVar fresh_name
       , LLSingleLet (Nonrec, LLLet (PVar fresh_name, arguments, lifted)) :: acc
       , state )
+    | ECons (left, right) ->
+      let lifted_left, acc, state = lift_expr ctx acc global_ctx state left in
+      let lifted_right, acc, state = lift_expr ctx acc global_ctx state right in
+      LLCons (lifted_left, lifted_right), acc, state
   in
   let lift_bindings global_ctx state = function
     | SValue (rec_flag, [ (pat, e) ]) ->

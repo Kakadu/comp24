@@ -9,6 +9,7 @@ type ll_expr =
   | LLTuple of ll_expr list
   | LLMatch of ll_expr * (pattern * ll_expr) list
   | LLLetIn of rec_flag * pattern * ll_expr * ll_expr
+  | LLCons of ll_expr * ll_expr
 
 
 type ll_declaration =
@@ -73,6 +74,12 @@ let rec pp_llexpr ppf exp =
     rec_call exp;
     fprintf " : ";
    pp_type_annot ppf tp;
+    fprintf ")"
+  | LLCons (exp1, exp2) ->
+    fprintf "(";
+    rec_call exp1;
+    fprintf " :: ";
+    rec_call exp2;
     fprintf ")"
 ;;
 

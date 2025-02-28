@@ -536,9 +536,6 @@ let infer_str_item env = function
     let* sub1 = Subst.compose s sub in
     let env3 = TypeEnv.apply sub1 env2 in
     return env3
-  | SEval e ->
-    let* _, _ = infer_exp env e in
-    return env
   | _ -> fail `NotStrItem
 ;;
 
