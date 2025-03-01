@@ -7,16 +7,17 @@ module CcLlTests = struct
     match Parser.parse_program s with
     | Ok actual ->
       let prog = Anf.Cc_ll.closure_convert actual in
-    (match prog with 
-    | Ok actual -> Format.printf "%a\n" AstLib.Pp_ast.pp_prog actual
-    | Error err -> Format.printf "%s\n" err)
+      (match prog with
+       | Ok actual -> Format.printf "%a\n" AstLib.Pp_ast.pp_prog actual
+       | Error err -> Format.printf "%s\n" err)
     | Error err -> Format.printf "%s\n" err
   ;;
 end
 
 let%expect_test "sanity check" =
   CcLlTests.cc_ll_test {|let test1 x = let test2 y = x + y in test2|};
-  [%expect {|
+  [%expect
+    {|
     let cc_ll_0 x y = (x + y);;
     let test1 x = (cc_ll_0 x) |}]
 ;;

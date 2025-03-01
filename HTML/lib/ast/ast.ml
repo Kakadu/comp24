@@ -145,5 +145,4 @@ let e_typed ?(typ = None) e : expr =
 let dlet rf let_body = DLet (rf, let_body)
 let dletmut rec_flag fst snd tl = DLetMut (rec_flag, fst, snd, tl)
 let prog (d_l : decl list) : prog = d_l
-
-let identifier id =(ident_of_definable @@ ident_letters id)
+let identifier id = ident_of_definable @@ ident_letters id

@@ -3,17 +3,16 @@ let anf_demo s =
   | Ok actual ->
     let prog = Anf.Cc_ll.closure_convert actual in
     (match prog with
-    | Ok actual -> 
-    let prog = Patelim.Elim.p_elim_decls actual in
-    (match prog with
-    | Ok actual ->  
-
-      let prog =  Anf.Anf_conv.run actual in
+     | Ok actual ->
+       let prog = Patelim.Elim.p_elim_decls actual in
        (match prog with
-      | Ok actual ->  Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
-      | Error err -> Format.printf "%s\n" err)
-    | Error err -> Format.printf "%s\n" err)
-   | Error err -> Format.printf "%s\n" err)
+        | Ok actual ->
+          let prog = Anf.Anf_conv.run actual in
+          (match prog with
+           | Ok actual -> Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
+           | Error err -> Format.printf "%s\n" err)
+        | Error err -> Format.printf "%s\n" err)
+     | Error err -> Format.printf "%s\n" err)
   | Error err -> Format.printf "%s\n" err
 ;;
 

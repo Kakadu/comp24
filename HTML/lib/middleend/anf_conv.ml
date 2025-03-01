@@ -17,13 +17,15 @@ open AstLib.Ast
 
 let pattern_to_identifier = function
   | PId s -> return @@ Id s
-  | PConstraint (PId s, ty) -> return @@ IdConstraint(s, ty)
+  | PConstraint (PId s, ty) -> return @@ IdConstraint (s, ty)
   | _ -> fail "other patterns not supported (anf is run after pattern elimination)"
+;;
 
 let pattern_or_op_to_identifier = function
   | POpPat p -> pattern_to_identifier p
   | POpOp s -> return @@ Id s
   | _ -> fail "other patterns not supported (anf is run after pattern elimination)"
+;;
 
 let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr t =
   let anf_list env exprs cont =
@@ -67,19 +69,15 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
       let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
       let let_expr = ALetIn (Id v, CIf (cimm, then_aexpr, else_aexpr), aexpr) in
       return let_expr)
-  | ETuple (e1, e2, es) ->
-     anf_list env (e1::e2::es) (fun imm ->
-     k (ImmTuple imm))
+  | ETuple (e1, e2, es) -> anf_list env (e1 :: e2 :: es) (fun imm -> k (ImmTuple imm))
   | EList (e1, e2) ->
-    anf_expr env e1 (fun imm1 ->
-      anf_expr env e2 (fun imm2 -> k (ImmCons (imm1, imm2))))
+    anf_expr env e1 (fun imm1 -> anf_expr env e2 (fun imm2 -> k (ImmCons (imm1, imm2))))
   | EClsr (DLet (_, (pat, e1)), e2) ->
     anf_expr env e1 (fun imm1 ->
       let* aexpr = anf_expr env e2 k in
       (* todo remove let a = b in *)
-      let* id =  pattern_or_op_to_identifier pat in
+      let* id = pattern_or_op_to_identifier pat in
       return (ALetIn (id, CImmExpr imm1, aexpr)))
-
   | _ -> fail "other expressions not supported"
 ;;
 
@@ -92,29 +90,27 @@ let rec unroll_efun (expr : expr) : pattern list * expr =
 ;;
 
 let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
-  let helper (pat_or_op, expr)= 
+  let helper (pat_or_op, expr) =
     let efun_pats, body_expr = unroll_efun expr in
     let* efun_ids = List.map pattern_to_identifier efun_pats |> sequence in
-  let env =
-    StringSet.union
-      env
-      (StringSet.from_list @@ List.concat_map bound_vars_pattern efun_pats)
+    let env =
+      StringSet.union
+        env
+        (StringSet.from_list @@ List.concat_map bound_vars_pattern efun_pats)
+    in
+    let* aexpr =
+      anf_expr env body_expr (fun immexpr -> return (ACExpr (CImmExpr immexpr)))
+    in
+    let* pat_or_op = pattern_or_op_to_identifier pat_or_op in
+    return (pat_or_op, efun_ids, aexpr)
   in
-  let* aexpr =
-    anf_expr env body_expr (fun immexpr -> return (ACExpr (CImmExpr immexpr)))
-  in
-  let* pat_or_op = pattern_or_op_to_identifier pat_or_op in
-  return (pat_or_op, efun_ids, aexpr)
-in
   match d with
   | DLet (rf, lb) ->
-       let* lb = helper lb in
-       return (ADSingleLet (rf, lb))
-
+    let* lb = helper lb in
+    return (ADSingleLet (rf, lb))
   | DLetMut (rf, lb, lb2, lbs) ->
     let* lbs = List.map helper (lb :: lb2 :: lbs) |> sequence in
     return (ADMutualRecDecl (rf, lbs))
-
 ;;
 
 let anf_program (decls : decl list) =
@@ -130,12 +126,7 @@ let anf_program (decls : decl list) =
     let decl = anf_decl env decls 0 in
     return (decl :: acc)
     ) ~init:(return []) decls in *)
-
-  let decls = Base.List.map decls ~f:(fun decls -> 
-   snd (anf_decl env decls 0)
-  )  in
-
-    
+  let decls = Base.List.map decls ~f:(fun decls -> snd (anf_decl env decls 0)) in
   decls
 ;;
 
@@ -149,4 +140,3 @@ let run prog =
   in
   sequence [] prog
 ;;
-

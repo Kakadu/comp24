@@ -17,18 +17,21 @@ module InferenceTests = struct
   ;;
 
   let%expect_test "Base minus" =
-    infer_test {| 
+    infer_test
+      {| 
       let ( - ) a = a = 100;;
       let a = (+) (-7) 5;;
     |};
-    [%expect {| 
+    [%expect
+      {| 
     val - : int -> bool
     val a : int 
     |}]
   ;;
 
   let%expect_test "Use redefined minus" =
-    infer_test {| 
+    infer_test
+      {| 
       let ( - ) a = a = 100
       let a = (+) ((-) 7) 5;;
     |};
@@ -49,9 +52,11 @@ module InferenceTests = struct
   ;;
 
   let%expect_test "operator definiton" =
-    infer_test {| 
+    infer_test
+      {| 
   let ( -$ ) a b = ( / ) a b|};
-    [%expect {| 
+    [%expect
+      {| 
     val -$ : int -> int -> int
     |}]
   ;;
@@ -62,10 +67,12 @@ module InferenceTests = struct
   ;;
 
   let%expect_test "operator application and redefinition" =
-    infer_test {| 
+    infer_test
+      {| 
   let a = ( + ) 5;; 
   let ( + ) = (fun x y -> x || y);;|};
-    [%expect {|
+    [%expect
+      {|
     val + : bool -> bool -> bool
     val a : int -> int |}]
   ;;
@@ -86,13 +93,15 @@ module InferenceTests = struct
     infer_test
       {|let f (g: ('a -> 'b)) (x: 'b) = 100
   let res = f (fun x -> true) false;;|};
-    [%expect {|
+    [%expect
+      {|
       val f : ('a -> 'b) -> 'b -> int
       val res : int |}]
   ;;
 
   let%expect_test "polymorphic annotated types unification error" =
-    infer_test {|let f (g: ('a -> 'b)) (x: 'b) = 100
+    infer_test
+      {|let f (g: ('a -> 'b)) (x: 'b) = 100
     let res = f (fun x -> true) 5;;|};
     [%expect
       {| Typecheck error: This expression has type int but an expression was expected of type bool |}]
@@ -125,7 +134,8 @@ module InferenceTests = struct
   let%expect_test "multiple let separated by ;;, pattern matching" =
     infer_test
       {| let f x = x;; let a = match [3;4;5] with | (hd::tl) -> (2, f true) | hd -> (f 2, false) |};
-    [%expect {|
+    [%expect
+      {|
     val a : int * bool
     val f : 'a -> 'a
 |}]
@@ -140,13 +150,15 @@ module InferenceTests = struct
         if x = 0 then false
         else even (x - 1)
 ;;|};
-    [%expect {|
+    [%expect
+      {|
       val even : int -> bool
       val odd : int -> bool |}]
   ;;
 
   let%expect_test "mutual recursion variable definiton" =
-    infer_test {|let rec x = [1, 2, 3]
+    infer_test
+      {|let rec x = [1, 2, 3]
     and y = [x]|};
     [%expect
       {|
@@ -155,16 +167,20 @@ module InferenceTests = struct
   ;;
 
   let%expect_test "let ... and ... variable definition error" =
-    infer_test {|let x = [1, 2, 3]
+    infer_test
+      {|let x = [1, 2, 3]
     and y = [x]|};
-    [%expect {|
+    [%expect
+      {|
     Typecheck error: Unbound value x |}]
   ;;
 
   let%expect_test "let ... and ... variable definition correct" =
-    infer_test {|let f (a: int): int = a
+    infer_test
+      {|let f (a: int): int = a
 and g (b: bool): bool = b;;|};
-    [%expect {|
+    [%expect
+      {|
   val f : int -> int
   val g : bool -> bool |}]
   ;;
@@ -179,7 +195,8 @@ and g (b: bool): bool = b;;|};
   ;;
 
   let%expect_test "mutual recursive functions wrong type" =
-    infer_test {|let rec f x = x 
+    infer_test
+      {|let rec f x = x 
 and g () = f 2 
 and h () = f true;;|};
     [%expect
@@ -188,7 +205,8 @@ Typecheck error: This expression has type bool but an expression was expected of
   ;;
 
   let%expect_test "mutual recursive functions" =
-    infer_test {|let rec f x = g x 1 
+    infer_test
+      {|let rec f x = g x 1 
                 and g x y = x + y;;|};
     [%expect
       {| 
@@ -202,7 +220,8 @@ Typecheck error: This expression has type bool but an expression was expected of
       {|let rec factorial = fun (n: int) -> 
   if n = 0 then 1 
   else n * factorial (n - 1);;|};
-    [%expect {| 
+    [%expect
+      {| 
 val factorial : int -> int
 |}]
   ;;
@@ -226,9 +245,11 @@ val result : 'a
   ;;
 
   let%expect_test "mutual recursive operators" =
-    infer_test {|let rec ( += ) x = x -$ 1 
+    infer_test
+      {|let rec ( += ) x = x -$ 1 
 and (-$) = fun x y -> ( + ) x y;;|};
-    [%expect {| 
+    [%expect
+      {| 
 val += : int -> int
 val -$ : int -> int -> int
 |}]
@@ -242,42 +263,48 @@ val -$ : int -> int -> int
   let result: int = double_x + incremented_y in
   result * result
 ;;|};
-    [%expect {| 
+    [%expect
+      {| 
 val final_value : int -> int -> int
 |}]
   ;;
 
   let%expect_test "nested let" =
     infer_test {|let a = let f x = x + 1 in let b = 5 in f (b + 1);;|};
-    [%expect {| 
+    [%expect
+      {| 
 val a : int
 |}]
   ;;
 
   let%expect_test "occurs check" =
     infer_test {|let f x = x x;;|};
-    [%expect {| 
+    [%expect
+      {| 
 Typecheck error: Occurs check failed
 |}]
   ;;
 
   let%expect_test "y combinator lambda" =
     infer_test {|let a = fun f -> (fun x -> f (x x)) (fun x -> f (x x));;|};
-    [%expect {| 
+    [%expect
+      {| 
 Typecheck error: Occurs check failed
 |}]
   ;;
 
   let%expect_test "equals boolean operator" =
     infer_test {|let f x y = (=) x y;;|};
-    [%expect {| 
+    [%expect
+      {| 
 val f : 'a -> 'a -> bool
 |}]
   ;;
 
   let%expect_test "or boolean operator" =
     infer_test {|let f x y = (x > false) || (y > 2);;|};
-    [%expect {| 
+    [%expect
+      {| 
 val f : bool -> int -> bool
 |}]
   ;;

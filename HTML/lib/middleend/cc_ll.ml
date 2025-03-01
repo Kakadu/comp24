@@ -7,27 +7,26 @@ open AstLib.Ast
 module CounterWriterMonad = struct
   type 'a cc = int -> ('a, string) Result.t * int * decl list
 
-  let return (x : 'a) : 'a cc = fun s -> (Ok x, s, [])
-
-  let fail (msg : string) : 'a cc = fun s -> (Error msg, s, [])
+  let return (x : 'a) : 'a cc = fun s -> Ok x, s, []
+  let fail (msg : string) : 'a cc = fun s -> Error msg, s, []
 
   let bind (m : 'a cc) (f : 'a -> 'b cc) : 'b cc =
     fun s ->
     match m s with
-    | (Ok x, s', d1) ->
-        let (y, s'', d2) = f x s' in
-        (y, s'', d1 @ d2)
-    | (Error e, s', d1) -> (Error e, s', d1)
+    | Ok x, s', d1 ->
+      let y, s'', d2 = f x s' in
+      y, s'', d1 @ d2
+    | Error e, s', d1 -> Error e, s', d1
   ;;
 
   let ( >>= ) = bind
   let ( let* ) = bind
 
   let fresh_name (prefix : string) : string cc =
-    fun s -> (Ok (prefix ^ string_of_int s), s + 1, [])
+    fun s -> Ok (prefix ^ string_of_int s), s + 1, []
   ;;
 
-  let tell (d : decl) : unit cc = fun s -> (Ok (), s, [d])
+  let tell (d : decl) : unit cc = fun s -> Ok (), s, [ d ]
 end
 
 open CounterWriterMonad
@@ -39,10 +38,10 @@ let ident_to_string (id : ident) =
   match id with
   | IdentOfDefinable (IdentLetters s) -> s
   | IdentOfDefinable (IdentOp s) -> s
-  | IdentOfBaseOp base_op ->  
+  | IdentOfBaseOp base_op ->
     (match base_op with
-    | Plus -> "base +"
-    | Minus -> "base -") 
+     | Plus -> "base +"
+     | Minus -> "base -")
 ;;
 
 let rec pattern_to_string (pat : pattern_or_op) : string list =
@@ -206,9 +205,9 @@ and substitute_decl (d : decl) (subst : (string * expr) list) : decl =
 ;;
 
 let rec closure_convert_expr
-  (global_env : StringSet.t)
-  (e : expr)
-  (rec_name : string option)
+          (global_env : StringSet.t)
+          (e : expr)
+          (rec_name : string option)
   : expr cc
   =
   match e with
@@ -380,8 +379,7 @@ let closure_convert_decl (global_env : StringSet.t) (d : decl) : StringSet.t cc 
     return global_env
 ;;
 
-let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
-  =
+let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list) =
   let rec helper global_env decls =
     match decls with
     | [] -> return global_env
@@ -395,7 +393,7 @@ let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
 let closure_convert (prog : decl list) : (decl list, string) result =
   let global_env = StringSet.from_list Common.Stdlib.stdlib in
   let global_env, _, decls = closure_convert_decl_list global_env prog 0 in
-  (match global_env with 
+  match global_env with
   | Ok _ -> Ok decls
-  | Error s -> Error s)
+  | Error s -> Error s
 ;;
