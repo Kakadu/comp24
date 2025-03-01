@@ -150,19 +150,19 @@
   $ ./lambdalift_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x  = ((f (fix f)) x)
   let  map f p  = 
-    let a, b  = p
+    let (a, b) = p
     in ((f a), (f b))
   let  lambada1 self l li x  = ((li (self l)) x)
   let  lambada0 map self l  = ((map ((lambada1 self) l)) l)
   let  fixpoly l  = ((fix (lambada0 map)) l)
   let  feven p n  = 
-    let e, o  = p
+    let (e, o) = p
     in 
     if (n = 0)
     then 1
     else (o (n - 1))
   let  fodd p n  = 
-    let e0, o0  = p
+    let (e0, o0) = p
     in 
     if (n = 0)
     then 0
@@ -181,7 +181,7 @@
   let  unit1 odd  = (print_int (odd 3))
   let  unit2 even  = (print_int (even 4))
   let  main  = unit; unit0; 
-    let even, odd  = tie
+    let (even, odd) = tie
     in (unit1 odd); (unit2 even); 0
   $ ./lambdalift_demo.exe < manytests/typed/016lists.ml
   let rec length xs  = (match xs with
@@ -229,11 +229,11 @@
   $ ./lambdalift_demo.exe << EOF
   > let a = 5
   > let sum a = 
-  >   let (), a = (print_int 4, a) in a
+  >   let ((), a) = (print_int 4, a) in a
   > let b = a
   let  a  = 5
   let  sum a0  = 
-    let (), a1  = ((print_int 4), a0)
+    let ((), a1) = ((print_int 4), a0)
     in a1
   let  b  = a
 
@@ -243,13 +243,13 @@
   >   let (e, a) = (e, a) in
   >   let (e, a) = (e, a) in (e, a)
   let  sum e a  = 
-    let e0, a0  = (e, a)
+    let (e0, a0) = (e, a)
     in 
-    let e1, a1  = (e0, a0)
+    let (e1, a1) = (e0, a0)
     in (e1, a1)
   $ ./lambdalift_demo.exe << EOF
   > let sum = 
-  >   let (), () = (print_int 4, print_int 3)  in
+  >   let ((), ()) = (print_int 4, print_int 3)  in
   >   0
-  let  unit, unit0  = ((print_int 4), (print_int 3))
+  let (unit, unit0) = ((print_int 4), (print_int 3))
   let  sum  = unit; unit0; 0

@@ -41,13 +41,12 @@ let rec pp_llexpression formatter e =
         Format.fprintf formatter "\n| %a -> %a" pp_pattern p pp_llexpression lle)
       p;
     Format.fprintf formatter ")"
-  | LLLetIn (n, args, e, ine) ->
+  | LLPatLetIn (names, e, ine) ->
     Format.fprintf
       formatter
-      "\n  let %s %a = %a\n  in %a"
-      (String.concat ", " n)
-      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
-      args
+      "\n  let %a = %a\n  in %a"
+      pp_pattern
+      names
       pp_llexpression
       e
       pp_llexpression
@@ -59,20 +58,20 @@ let pp_llbindings formatter bindings =
     (fun bind ->
       match bind with
       | LLLet (r, n_list, p, e) ->
-        let n_str = String.concat ", " n_list in
         Format.fprintf
           formatter
           "let %a %s %a = %a"
           pp_rec
           r
-          n_str
+          n_list
           (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
           p
           pp_llexpression
           e;
-          Format.fprintf
-          formatter
-          "\n"
+        Format.fprintf formatter "\n"
+      | LLLetPat (n_list, e) ->
+        Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_llexpression e;
+        Format.fprintf formatter "\n"
       | LLExpression e ->
         pp_llexpression formatter e;
         Format.fprintf formatter "\n")
