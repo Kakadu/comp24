@@ -7,46 +7,64 @@ open Ast
 type llvm_name = string
 type name = string
 
-type fun_type =
+type is_system =
   | UserFun
   | SystemFun
 
+type is_vararg =
+  | NotVararg
+  | Vararg
+
+type fun_type = is_system * is_vararg
 type std_fun = name * llvm_name * fun_type * type_name
 
+let default_type = UserFun, NotVararg
 let bin_op arg1 arg2 ret = TFunction (arg1, TFunction (arg2, ret))
 let universal_function = TFunction (TPoly "'_a", TPoly "'_b")
 
 let stdlib_funs : std_fun list =
-  [ "( + )", "plus_mlint", UserFun, bin_op TInt TInt TInt
-  ; "( - )", "minus_mlint", UserFun, bin_op TInt TInt TInt
-  ; "( * )", "mult_mlint", UserFun, bin_op TInt TInt TInt
-  ; "( / )", "div_mlint", UserFun, bin_op TInt TInt TInt
-  ; "( < )", "l_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( <= )", "le_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( > )", "g_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( >= )", "ge_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( = )", "eq_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( == )", "peq_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( <> )", "neq_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "( != )", "pneq_ml", UserFun, bin_op (TPoly "'_a") (TPoly "'_a") TBool
-  ; "print_int", "print_int", UserFun, TFunction (TInt, TUnit)
-  ; "( && )", "", UserFun, bin_op TBool TBool TBool
-  ; "( || )", "", UserFun, bin_op TBool TBool TBool
+  [ "( + )", "plus_mlint", default_type, bin_op TInt TInt TInt
+  ; "( - )", "minus_mlint", default_type, bin_op TInt TInt TInt
+  ; "( * )", "mult_mlint", default_type, bin_op TInt TInt TInt
+  ; "( / )", "div_mlint", default_type, bin_op TInt TInt TInt
+  ; "( < )", "l_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( <= )", "le_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( > )", "g_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( >= )", "ge_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( = )", "eq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( == )", "peq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( <> )", "neq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "( != )", "pneq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
+  ; "print_int", "print_int", default_type, TFunction (TInt, TUnit)
+  ; "( && )", "", default_type, bin_op TBool TBool TBool
+  ; "( || )", "", default_type, bin_op TBool TBool TBool
   ; ( "( :: )"
     , "mlrt_create_cons"
-    , UserFun
+    , default_type
     , bin_op (TPoly "'_a") (TList (TPoly "'_a")) (TList (TPoly "'_a")) )
   ; ( "get_field"
     , "mlrt_get_box_field"
-    , SystemFun
+    , (SystemFun, NotVararg)
     , TFunction (TPoly "'_a", TFunction (TInt, TPoly "'_b")) )
   ; ( "check_tag"
     , "mlrt_check_tag"
-    , SystemFun
+    , (SystemFun, NotVararg)
     , TFunction (TPoly "'_a", TFunction (TInt, TBool)) )
-  ; "match_error", "mltr_match_error", SystemFun, TFunction (TUnit, TPoly "_a")
-  ; "_create_tuple", "mlrt_create_tuple", SystemFun, TFunction (TInt, TPoly "'_vargs")
-  ; "_create_empty_closure", "mlrt_create_empty_closure", SystemFun, universal_function
-  ; "_apply_args_to_closure", "mlrt_apply_args_to_closure", SystemFun, universal_function
+  ; ( "match_error"
+    , "mltr_match_error"
+    , (SystemFun, NotVararg)
+    , TFunction (TUnit, TPoly "_a") )
+  ; ( "_create_tuple"
+    , "mlrt_create_tuple"
+    , (SystemFun, Vararg)
+    , TFunction (TInt, TPoly "'_vargs") )
+  ; ( "_create_empty_closure"
+    , "mlrt_create_empty_closure"
+    , (SystemFun, NotVararg)
+    , universal_function )
+  ; ( "_apply_args_to_closure"
+    , "mlrt_apply_args_to_closure"
+    , (SystemFun, Vararg)
+    , TFunction (TPoly "_closure", TFunction (TInt, TPoly "_varargs")) )
   ]
 ;;
