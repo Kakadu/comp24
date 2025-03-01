@@ -171,7 +171,7 @@ let%expect_test "test binary infix with prefix" =
        (Exp_apply ((Exp_ident "( + )"),
           (Exp_apply (
              (Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 2)))),
-             (Exp_apply ((Exp_ident "-"), (Exp_constant (Const_int 1))))))
+             (Exp_apply ((Exp_ident "( ~- )"), (Exp_constant (Const_int 1))))))
           )),
        (Exp_constant (Const_int 3))))
     |}]
@@ -181,7 +181,7 @@ let%expect_test "test binary prefix call" =
   test_expr "(+) 2 3";
   [%expect
     {|
-    (Exp_apply ((Exp_apply ((Exp_ident "+"), (Exp_constant (Const_int 2)))),
+    (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 2)))),
        (Exp_constant (Const_int 3))))
     |}]
 ;;
