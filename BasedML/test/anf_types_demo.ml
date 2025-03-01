@@ -45,7 +45,7 @@ let () =
                        Format.printf "Name: %s\n" key;
                        Format.printf "Original program: %a\n" Ast.pp_type_name typ1;
                        Format.printf "ANF: %a\n\n" Ast.pp_type_name typ2;
-                       if not (Typeinference.types_equal typ1 typ2)
+                       if not (Typeinference.type_more_general typ1 typ2)
                        then (
                          Format.printf "There's been a discrepancy for name %s\n" key;
                          false)

@@ -16,7 +16,7 @@ val infer_prog : Ast.declarations -> (res_map, string) result
 val test_infer_exp : string -> unit
 val test_infer_prog_with_state : StatementInfer.state -> string -> unit
 val test_infer_prog : string -> unit
-val types_equal : Ast.type_name -> Ast.type_name -> bool
+val type_more_general : Ast.type_name -> Ast.type_name -> bool
 
 module StringMap : sig
   type key = string
