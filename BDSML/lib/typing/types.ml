@@ -39,7 +39,13 @@ let enclose s = "(" ^ s ^ ")"
 
 let rec show_type_val = function
   | TBase b -> show_base_type b
-  | TArrow (l, r) -> show_type_val l ^ " -> " ^ show_type_val r
+  | TArrow (l, r) ->
+    let modifier =
+      match l with
+      | TArrow _ -> enclose
+      | _ -> Fun.id
+    in
+    modifier (show_type_val l) ^ " -> " ^ show_type_val r
   | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
   | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
   | TConstructor (Some t1, name) -> show_type_val t1 ^ " " ^ name
@@ -55,6 +61,7 @@ type error =
   | No_variable of string
   | Invalid_let
   | Invalid_list_constructor_argument
+  | Invalid_ast of string
 
 exception Unimplemented of string
 
