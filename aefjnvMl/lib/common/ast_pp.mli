@@ -2,4 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-val program_pp : Format.formatter -> Ast.structure_item list -> unit
+val pp_program : Format.formatter -> Ast.structure_item list -> unit

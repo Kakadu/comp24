@@ -11,7 +11,7 @@ let alpha_test s =
     let* ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.alpha_prefix ast in
     Ok ast'
   in
-  let ast_printer ast_ = Format.printf "%a\n" Common.Ast_pp.program_pp ast_ in
+  let ast_printer ast_ = Format.printf "%a\n" Common.Ast_pp.pp_program ast_ in
   print_result ast_printer ast'_t
 ;;
 

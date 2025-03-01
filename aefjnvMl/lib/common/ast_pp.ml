@@ -154,6 +154,6 @@ let structure_item_pp fmt item =
          vbs)
 ;;
 
-let program_pp fmt prog =
+let pp_program fmt prog =
   pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@\n") structure_item_pp fmt prog
 ;;

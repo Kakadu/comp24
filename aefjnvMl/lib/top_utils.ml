@@ -14,11 +14,21 @@ module Ast_test_utils = struct
     return ast
   ;;
 
+  let ( let+! ) x f =
+    let*! x = x in
+    return @@ f x
+  ;;
+
   let ( let* ) x f =
     let* x = x in
     let* ast = f x in
     let* _ = Inferencer.check_program ast in
     return ast
+  ;;
+
+  let ( let+ ) x f =
+    let* x = x in
+    return @@ f x
   ;;
 
   let print_error = function

@@ -11,7 +11,13 @@ module Ast_test_utils : sig
     -> ('a -> (structure_item list, error) result)
     -> (structure_item list, error) result
 
+  val ( let+ )
+    :  ('a, error) result
+    -> ('a -> structure_item list)
+    -> (structure_item list, error) result
+
   val print_error : error -> unit
   val print_result : ('a -> unit) -> ('a, error) result -> unit
   val ( let*! ) : ('a, 'b) result -> ('a -> ('c, 'b) result) -> ('c, 'b) result
+  val ( let+! ) : ('a, 'b) result -> ('a -> 'c) -> ('c, 'b) result
 end

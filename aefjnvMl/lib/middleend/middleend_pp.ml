@@ -4,5 +4,5 @@
 
 let pp_me_program ppf prog =
   let ast = Me_converter.convert_program prog in
-  Common.Ast_pp.program_pp ppf ast
+  Common.Ast_pp.pp_program ppf ast
 ;;
