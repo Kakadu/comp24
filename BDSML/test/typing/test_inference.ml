@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Test_utils
 
 let%expect_test "test int inference" =
