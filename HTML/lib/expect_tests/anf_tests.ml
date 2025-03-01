@@ -9,12 +9,12 @@ let anf_test s =
     let prog = Patelim.Elim.p_elim_decls actual in
     (match prog with
     | Ok actual ->  
-      let prog = Anf.Cc_ll.closure_convert actual in
-
-      let prog = Anf.Anf_conv.anf_program prog in
-    Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog prog
-      | Error _ -> failwith "hui")
-
+       let prog = Anf.Cc_ll.closure_convert actual in
+       let prog =  Anf.Anf_conv.run prog in
+       (match prog with
+      | Ok actual ->  Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
+      | Error err -> Format.printf "%s\n" err)
+    | Error err -> Format.printf "%s\n" err)
   
   | Error err -> Format.printf "%s\n" err
     ;;
