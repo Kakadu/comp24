@@ -36,6 +36,6 @@ build: [
 dev-repo: "git+https://github.com/oveeernight/comp24.git"
 depexts: [
   [ "llvm-17-dev" "gcc-13" "pkg-config" 
-    "qemu-user-static" "riscv-64-linux-gnu-gcc"
+    "qemu-user-static" "binutils-riscv64-linux-gnu" "gcc-riscv64-linux-gnu"
   ] {os-distribution = "ubuntu"}
 ]
