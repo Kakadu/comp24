@@ -5,8 +5,8 @@
   >   else
   >    fact_cps (n - 1) (fun acc -> cont (n * acc))
   Name: fact_cps
-  Original program: (int -> ((int -> 'p19) -> 'p19))
-  ANF: (int -> ((int -> 'p27) -> 'p27))
+  Original program: (int -> ((int -> 'p1f) -> 'p1f))
+  ANF: (int -> ((int -> 'p32) -> 'p32))
   
   All types are correct
 
@@ -34,8 +34,8 @@
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/002fac.ml
   Name: fac_cps
-  Original program: (int -> ((int -> 'p20) -> 'p20))
-  ANF: (int -> ((int -> 'p32) -> 'p32))
+  Original program: (int -> ((int -> 'p26) -> 'p26))
+  ANF: (int -> ((int -> 'p47) -> 'p47))
   
   Name: main
   Original program: int
@@ -55,8 +55,8 @@
   >   cont (a + b)))
   > EOF
   Name: fib_cps
-  Original program: (int -> ((int -> 'p23) -> 'p23))
-  ANF: (int -> ((int -> 'p40) -> 'p40))
+  Original program: (int -> ((int -> 'p29) -> 'p29))
+  ANF: (int -> ((int -> 'p4f) -> 'p4f))
   
   All types are correct
 
@@ -98,8 +98,8 @@
   ANF: (int -> (int -> (int -> int)))
   
   Name: wrap
-  Original program: ('p4c -> 'p4c)
-  ANF: ('p5d -> 'p5d)
+  Original program: ('p55 -> 'p55)
+  ANF: ('p7d -> 'p7d)
   
   All types are correct
 
@@ -109,8 +109,8 @@
   ANF: ((int -> int) -> (int -> int))
   
   Name: fix
-  Original program: ((('p22 -> 'p23) -> ('p22 -> 'p23)) -> ('p22 -> 'p23))
-  ANF: ((('p2b -> 'p2c) -> ('p2b -> 'p2c)) -> ('p2b -> 'p2c))
+  Original program: ((('p28 -> 'p29) -> ('p28 -> 'p29)) -> ('p28 -> 'p29))
+  ANF: ((('p3e -> 'p3f) -> ('p3e -> 'p3f)) -> ('p3e -> 'p3f))
   
   Name: main
   Original program: int
@@ -159,36 +159,36 @@
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/016lists.ml
-  Name: append
-  Original program: (('pdc list) -> (('pdc list) -> ('pdc list)))
-  ANF: (('p11c list) -> (('p11c list) -> ('p11c list)))
-  
-  Name: length
-  Original program: (('pe1 list) -> int)
-  ANF: (('p121 list) -> int)
-  
-  Name: concat
-  Original program: ((('pdf list) list) -> ('pdf list))
-  ANF: ((('p11f list) list) -> ('p11f list))
+  Name: iter
+  Original program: (('pe8 -> unit) -> (('pe8 list) -> unit))
+  ANF: (('p345 -> unit) -> (('p344 list) -> unit))
   
   Name: cartesian
-  Original program: (('pdd list) -> (('pde list) -> (('pdd * 'pde) list)))
-  ANF: (('p11d list) -> (('p11e list) -> (('p11d * 'p11e) list)))
+  Original program: (('pe2 list) -> (('pe3 list) -> (('pe2 * 'pe3) list)))
+  ANF: (('p33c list) -> (('p33d list) -> ('p33e list)))
   
-  Name: iter
-  Original program: (('pe0 -> unit) -> (('pe0 list) -> unit))
-  ANF: (('p120 -> unit) -> (('p120 list) -> unit))
+  Name: append
+  Original program: (('pe1 list) -> (('pe1 list) -> ('pe1 list)))
+  ANF: (('p33a list) -> (('p33b list) -> ('p33b list)))
+  
+  Name: concat
+  Original program: ((('pe5 list) list) -> ('pe5 list))
+  ANF: (('p340 list) -> ('p341 list))
+  
+  Name: length_tail
+  Original program: (('pea list) -> int)
+  ANF: (('p347 list) -> int)
+  
+  Name: length
+  Original program: (('pe9 list) -> int)
+  ANF: (('p346 list) -> int)
+  
+  Name: map
+  Original program: (('peb -> 'pec) -> (('peb list) -> ('pec list)))
+  ANF: (('p34d -> 'p34e) -> (('p34f list) -> ('p34e list)))
   
   Name: main
   Original program: int
   ANF: int
-  
-  Name: length_tail
-  Original program: (('pe2 list) -> int)
-  ANF: (('p122 list) -> int)
-  
-  Name: map
-  Original program: (('pe3 -> 'pe4) -> (('pe3 list) -> ('pe4 list)))
-  ANF: (('p127 -> 'p128) -> (('p127 list) -> ('p128 list)))
   
   All types are correct
