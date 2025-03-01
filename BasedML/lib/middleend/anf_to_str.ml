@@ -116,7 +116,7 @@ let anf_decl_to_string = function
       (pattern_to_string pat)
       (patterns |> List.map pattern_to_string |> String.concat " ")
       (aexpr_to_string body)
-  | ADMutualRecDecl (rec_flag, bindings) ->
+  | ADMutualRecDecl bindings ->
     let bindings_str =
       bindings
       |> List.mapi (fun i binding ->
@@ -132,7 +132,7 @@ let anf_decl_to_string = function
         if i <> 0 then Printf.sprintf " and %s" binding_str else binding_str)
       |> String.concat ""
     in
-    Printf.sprintf "let %s %s" (rec_flag_to_string rec_flag) bindings_str
+    Printf.sprintf "let %s %s" "rec" bindings_str
 ;;
 
 let program_to_string declarations =

@@ -167,9 +167,9 @@ let anf_decl env =
   | LLDSingleLet (rec_flag, LLLet (pat, args, e)) ->
     let* anf_let = process_lllet (LLLet (pat, args, e)) in
     return (ADSingleLet (rec_flag, anf_let))
-  | LLDMutualRecDecl (rec_flag, decls) ->
+  | LLDMutualRecDecl (_, decls) ->
     let* anf_decls = map1 process_lllet decls in
-    return (ADMutualRecDecl (rec_flag, anf_decls))
+    return (ADMutualRecDecl anf_decls)
 ;;
 
 let transform decls =

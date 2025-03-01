@@ -150,9 +150,8 @@ let restore_anf_decl fmt = function
       patterns
       pp_aexpr
       body
-  | ADMutualRecDecl (rec_flag, bindings) ->
-    Format.fprintf fmt "let ";
-    frestore_rec_flag fmt rec_flag;
+  | ADMutualRecDecl bindings ->
+    Format.fprintf fmt "let %s" "rec";
     Format.fprintf fmt " ";
     List.iteri
       (fun i binding ->
