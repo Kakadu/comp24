@@ -19,10 +19,10 @@ type cexpr =
   | CImmExpr of immexpr
 
 and aexpr =
-  | ALetIn of pattern * cexpr * aexpr
+  | ALetIn of string * cexpr * aexpr
   | ACExpr of cexpr
 
-type single_anf_binding = ALet of pattern * pattern list * aexpr
+type single_anf_binding = ALet of string * string list * aexpr
 
 type anf_decl =
   | ADSingleLet of rec_flag * single_anf_binding

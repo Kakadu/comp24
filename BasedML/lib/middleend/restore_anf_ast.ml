@@ -109,15 +109,7 @@ let rec restore_cexpr ppf = function
 and pp_aexpr ppf = function
   | ACExpr cexp -> fprintf ppf "%a" restore_cexpr cexp
   | ALetIn (pat, outer, inner) ->
-    fprintf
-      ppf
-      "let %a = %a in\n %a"
-      frestore_pattern
-      pat
-      restore_cexpr
-      outer
-      pp_aexpr
-      inner
+    fprintf ppf "let %s = %a in\n %a" pat restore_cexpr outer pp_aexpr inner
 ;;
 
 let frestore_rec_flag ppf = function
@@ -129,12 +121,11 @@ let restore_anf_decl fmt = function
   | ADSingleLet (rec_flag, ALet (pat, patterns, body)) ->
     Format.fprintf
       fmt
-      "let %a %a %a = %a;;"
+      "let %a %s %a = %a;;"
       frestore_rec_flag
       rec_flag
-      frestore_pattern
       pat
-      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " frestore_pattern pat))
+      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%s " pat))
       patterns
       pp_aexpr
       body
@@ -146,12 +137,8 @@ let restore_anf_decl fmt = function
         if i != 0 then Format.fprintf fmt " and ";
         match binding with
         | ALet (pat, patterns, exp) ->
-          Format.fprintf fmt " ";
-          frestore_pattern fmt pat;
-          (fun fmt ->
-            List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
-            fmt
-            patterns;
+          Format.fprintf fmt " %s" pat;
+          (fun fmt -> List.iter (fun pat -> Format.fprintf fmt " %s " pat)) fmt patterns;
           Format.fprintf fmt " = %a " pp_aexpr exp)
       bindings
 ;;

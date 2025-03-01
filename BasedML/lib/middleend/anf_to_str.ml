@@ -26,14 +26,6 @@ let rec type_name_to_string tp =
   | TList tp -> Printf.sprintf "(%s list)" (type_name_to_string tp)
 ;;
 
-let constant_to_string = function
-  | CInt i -> string_of_int i
-  | CBool false -> "false"
-  | CBool true -> "true"
-  | CNil -> "[]"
-  | CUnit -> "()"
-;;
-
 let list_to_string pp sep lst =
   let rec aux = function
     | [] -> ""
@@ -55,25 +47,6 @@ let rec imm_to_string = function
     Printf.sprintf "(%s : %s)" (imm_to_string imm) (type_name_to_string typ)
 ;;
 
-let rec pattern_to_string pat =
-  let rec_call = pattern_to_string in
-  match pat with
-  | PWildCard -> "_"
-  | PCons (h_pat, t_pat) -> Printf.sprintf "(%s :: %s)" (rec_call h_pat) (rec_call t_pat)
-  | PIdentifier x -> x
-  | PTuple lst ->
-    let tuple_str =
-      lst
-      |> List.mapi (fun i pat ->
-        if i <> 0 then Printf.sprintf ", %s" (rec_call pat) else rec_call pat)
-      |> String.concat ""
-    in
-    Printf.sprintf "(%s)" tuple_str
-  | PConstant c -> constant_to_string c
-  | PConstraint (pat, tp) ->
-    Printf.sprintf "(%s : %s)" (rec_call pat) (type_name_to_string tp)
-;;
-
 let rec cexpr_to_string = function
   | CImmExpr imm -> imm_to_string imm
   | CIfThenElse (cond, then_branch, else_branch) ->
@@ -90,7 +63,7 @@ and aexpr_to_string = function
   | ALetIn (pat, outer, inner) ->
     Printf.sprintf
       "let %s = %s in\n%s"
-      (pattern_to_string pat)
+      pat
       (cexpr_to_string outer)
       (aexpr_to_string inner)
 ;;
@@ -105,8 +78,8 @@ let anf_decl_to_string = function
     Printf.sprintf
       "let %s %s %s = %s;;"
       (rec_flag_to_string rec_flag)
-      (pattern_to_string pat)
-      (patterns |> List.map pattern_to_string |> String.concat " ")
+      pat
+      (patterns |> String.concat " ")
       (aexpr_to_string body)
   | ADMutualRecDecl bindings ->
     let bindings_str =
@@ -117,8 +90,8 @@ let anf_decl_to_string = function
           | ALet (pat, patterns, exp) ->
             Printf.sprintf
               "%s %s = %s"
-              (pattern_to_string pat)
-              (patterns |> List.map pattern_to_string |> String.concat " ")
+              pat
+              (patterns |> String.concat " ")
               (aexpr_to_string exp)
         in
         if i <> 0 then Printf.sprintf " and %s" binding_str else binding_str)
