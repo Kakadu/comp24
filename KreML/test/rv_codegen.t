@@ -63,13 +63,11 @@
   	addi sp, sp, -32
   	sd a0, 8(sp) 
   	sd ra, 16(sp) 
-  	sd t1, 24(sp) 
   	mv a0, t0
   	call fac
   	mv t0, a0
   	ld a0, 8(sp) 
   	ld ra, 16(sp) 
-  	ld t1, 24(sp) 
   	addi sp, sp, 32
   	mul a0, a0, t0
   .L_join_1:
@@ -97,7 +95,6 @@
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
   	sd t1, 32(sp) 
-  	sd t2, 40(sp) 
   	mv a0, t0
   	mv a1, t1
   	call fac
@@ -105,7 +102,6 @@
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
   	ld t1, 32(sp) 
-  	ld t2, 40(sp) 
   	addi sp, sp, 48
   .L_join_1:
   	ld s0, 8(sp) 
@@ -154,52 +150,47 @@
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
   	sd t1, 32(sp) 
-  	sd t2, 40(sp) 
-  	mv t3, a1
+  	mv t2, a1
   	addi sp, sp, -16
-  	li t4, 1
-  	sd t4, 8(sp) 
+  	li t3, 1
+  	sd t3, 8(sp) 
   	addi a1, sp, 8
   	li a2, 1
-  	mv a0, t3
+  	mv a0, t2
   	call call_closure
   	addi sp, sp, 16
   	ld a1, 8(sp) 
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
   	ld t1, 32(sp) 
-  	ld t2, 40(sp) 
   	addi sp, sp, 48
   	j .L_join_1
   .L_else_0:
   	addi t0, a0, -1
-  	addi sp, sp, -64
+  	addi sp, sp, -48
   	sd a0, 8(sp) 
   	sd a1, 16(sp) 
   	sd ra, 24(sp) 
   	sd t0, 32(sp) 
   	sd t1, 40(sp) 
-  	sd t2, 48(sp) 
   	li a0, 3
   	call alloc_tuple
-  	mv t3, a0
+  	mv t2, a0
   	ld a0, 8(sp) 
   	ld a1, 16(sp) 
   	ld ra, 24(sp) 
   	ld t0, 32(sp) 
   	ld t1, 40(sp) 
-  	ld t2, 48(sp) 
-  	addi sp, sp, 64
-  	sd a1, 8(t3) 
-  	sd a0, 16(t3) 
-  	addi sp, sp, -64
+  	addi sp, sp, 48
+  	sd a1, 8(t2) 
+  	sd a0, 16(t2) 
+  	addi sp, sp, -48
   	sd a0, 8(sp) 
   	sd a1, 16(sp) 
   	sd ra, 24(sp) 
   	sd t0, 32(sp) 
-  	sd t3, 40(sp) 
-  	sd t2, 48(sp) 
-  	mv a1, t3
+  	sd t2, 40(sp) 
+  	mv a1, t2
   	la  a0, fresh_fun_0
   	li a2, 1
   	li a3, 2
@@ -209,16 +200,13 @@
   	ld a1, 16(sp) 
   	ld ra, 24(sp) 
   	ld t0, 32(sp) 
-  	ld t3, 40(sp) 
-  	ld t2, 48(sp) 
-  	addi sp, sp, 64
-  	addi sp, sp, -64
+  	ld t2, 40(sp) 
+  	addi sp, sp, 48
+  	addi sp, sp, -48
   	sd a1, 8(sp) 
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
   	sd t1, 32(sp) 
-  	sd t3, 40(sp) 
-  	sd t2, 48(sp) 
   	mv a0, t0
   	mv a1, t1
   	call fack
@@ -226,9 +214,7 @@
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
   	ld t1, 32(sp) 
-  	ld t3, 40(sp) 
-  	ld t2, 48(sp) 
-  	addi sp, sp, 64
+  	addi sp, sp, 48
   .L_join_1:
   	ld s0, 8(sp) 
   	addi sp, sp, 16
@@ -292,25 +278,23 @@
   	ld a1, 16(sp) 
   	ld ra, 24(sp) 
   	addi sp, sp, 32
-  	addi sp, sp, -48
+  	addi sp, sp, -32
   	sd a1, 8(sp) 
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
-  	sd t1, 32(sp) 
-  	mv t2, a0
+  	mv t1, a0
   	addi sp, sp, -32
   	sd t0, 8(sp) 
   	sd a1, 16(sp) 
   	addi a1, sp, 8
   	li a2, 2
-  	mv a0, t2
+  	mv a0, t1
   	call call_closure
   	addi sp, sp, 32
   	ld a1, 8(sp) 
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
-  	ld t1, 32(sp) 
-  	addi sp, sp, 48
+  	addi sp, sp, 32
   	ld s0, 8(sp) 
   	addi sp, sp, 16
   	ret
@@ -319,33 +303,29 @@
   	sd s0, 8(sp) 
   	addi s0, sp, 16
   	slti t0, a1, 2
-  	mv t2, t0
-  	beq  t2, x0, .L_else_0
+  	mv t1, t0
+  	beq  t1, x0, .L_else_0
   	li a0, 1
   	j .L_join_1
   .L_else_0:
   	addi t0, a1, -1
-  	addi sp, sp, -48
+  	addi sp, sp, -32
   	sd a0, 8(sp) 
   	sd a1, 16(sp) 
   	sd ra, 24(sp) 
-  	sd t2, 32(sp) 
-  	sd t1, 40(sp) 
-  	mv t3, a0
+  	mv t1, a0
   	addi sp, sp, -16
   	sd t0, 8(sp) 
   	addi a1, sp, 8
   	li a2, 1
-  	mv a0, t3
+  	mv a0, t1
   	call call_closure
   	mv t0, a0
   	addi sp, sp, 16
   	ld a0, 8(sp) 
   	ld a1, 16(sp) 
   	ld ra, 24(sp) 
-  	ld t2, 32(sp) 
-  	ld t1, 40(sp) 
-  	addi sp, sp, 48
+  	addi sp, sp, 32
   	mul a0, a1, t0
   .L_join_1:
   	ld s0, 8(sp) 
@@ -480,8 +460,8 @@
   	ld t2, 24(sp) 
   	addi sp, sp, 32
   	addi sp, sp, -16
-  	li t3, 5
-  	sd t3, 8(sp) 
+  	li t2, 5
+  	sd t2, 8(sp) 
   	addi a1, sp, 8
   	li a2, 1
   	mv a0, t1
@@ -493,13 +473,11 @@
   	addi sp, sp, -32
   	sd ra, 8(sp) 
   	sd t0, 16(sp) 
-  	sd t1, 24(sp) 
   	mv a0, t0
   	call print_int
   	mv x0, a0
   	ld ra, 8(sp) 
   	ld t0, 16(sp) 
-  	ld t1, 24(sp) 
   	addi sp, sp, 32
   	li a0, 0
   	ld s0, 8(sp) 

@@ -136,8 +136,8 @@
   ef_11: t4
   f_6: t5
   g_7: t6
-  gh_12: t6
-  h_8: stacklock 0
+  gh_12: s1
+  h_8: s1
   t_0: t0
   t_1: t4
   
@@ -174,8 +174,8 @@
   
   f: 
    a_1: t0
-  ab_12: t0
-  b_2: stacklock 1
+  ab_12: t1
+  b_2: t1
   c_3: t2
   cd_10: t3
   d_4: t3
@@ -184,7 +184,7 @@
   f_6: t5
   g_7: t6
   gh_9: t6
-  h_8: t1
+  h_8: s1
   t_0: t3
   t_1: t4
   
@@ -244,7 +244,7 @@
   e_14: t4
   f_15: t5
   g_16: t6
-  h_17: stacklock 0
-  j_18: stacklock 1
-  k_19: stacklock 2
+  h_17: s1
+  j_18: s2
+  k_19: s3
   
