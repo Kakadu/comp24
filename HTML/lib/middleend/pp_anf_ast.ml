@@ -3,6 +3,11 @@ open AstLib.Pp_utils
 open Anf_ast
 open Format
 
+let pp_identifier fmt = function
+  | Id s -> fprintf fmt "%s" s
+  | IdConstraint (s, ty) ->  pp_typed fmt pp_print_string (s, ty)
+  
+
 let rec pp_immexpr fmt = function
   | ImmConst c -> pp_const fmt c
   | ImmIdentifier s -> pp_ident fmt s
@@ -34,25 +39,25 @@ let rec pp_cexpr fmt = function
 and pp_aexpr fmt = function
   | ALetIn (pat_or_op, cexpr, aexpr) ->
     fprintf fmt "let %a = %a in\n%a"
-      pp_pattern_or_op pat_or_op
+      pp_identifier pat_or_op
       pp_cexpr cexpr
       pp_aexpr aexpr
   | ACExpr cexpr ->
     pp_cexpr fmt cexpr
 
-let pp_patterns fmt pats =
+let pp_identifiers fmt pats =
   fprintf fmt " ";
   pp_print_list
     ~pp_sep:(fun fmt _ -> fprintf fmt " ")
-    (fun fmt value -> pp_pattern fmt value)
+    (fun fmt value -> pp_identifier fmt value)
     fmt
     pats
 
 let pp_let_body fmt = function
   | pat_or_op, pats, expr ->
     fprintf fmt "%a%a = %a"
-      pp_pattern_or_op pat_or_op
-      pp_patterns pats
+      pp_identifier pat_or_op
+      pp_identifiers pats
       pp_aexpr expr
 
 let pp_anf_decl fmt = function

@@ -33,7 +33,14 @@
   app_0
 
   $ ./anf_demo.exe < manytests/do_not_type/015tuples.ml
-  let rec (a, b)  = (a, b)
+  Fatal error: exception Failure("not expected")
+  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+  Called from Anf__Anf_conv.anf_decl.helper in file "lib/middleend/anf_conv.ml", line 124, characters 10-47
+  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
+  Called from Anf__Anf_conv.anf_program.(fun) in file "lib/middleend/anf_conv.ml", line 145, characters 37-57
+  Called from Stdlib__List.map in file "list.ml", line 92, characters 20-23
+  Called from Dune__exe__Anf_demo.anf_demo in file "demos/anf_demo.ml", line 9, characters 17-46
+  [2]
 
 PASS
   $ ./anf_demo.exe < manytests/typed/001fac.ml
@@ -317,75 +324,16 @@ PASS
   (app_0, app_1)
 
   $ ./anf_demo.exe < manytests/typed/015tuples.ml
-  let rec fix f x = let app_0 = fix f in
-  let app_1 = f app_0 x in
-  app_1;;
-  let map f p = let (a, b) = p in
-  let app_0 = f a in
-  let app_1 = f b in
-  (app_0, app_1);;
-  let cc_ll_0 self l li x = let app_0 = self l in
-  let app_1 = li app_0 x in
-  app_1;;
-  let cc_ll_1 self l = let app_0 = cc_ll_0 self l in
-  let app_1 = map app_0 l in
-  app_1;;
-  let fixpoly l = let app_0 = fix cc_ll_1 l in
-  app_0;;
-  let feven p n = let (e, o) = p in
-  let app_0 = (n == 0) in
-  let if_1 = if app_0 then 1 else let app_2 = (n - 1) in
-  let app_3 = o app_2 in
-  app_3 in
-  if_1;;
-  let fodd p n = let (e, o) = p in
-  let app_0 = (n == 0) in
-  let if_1 = if app_0 then 0 else let app_2 = (n - 1) in
-  let app_3 = e app_2 in
-  app_3 in
-  if_1;;
-  let tie  = let app_0 = fixpoly (feven, fodd) in
-  app_0;;
-  let rec meven n = let app_0 = (n = 0) in
-  let if_1 = if app_0 then 1 else let app_2 = (n - 1) in
-  let app_3 = modd app_2 in
-  app_3 in
-  if_1
-  and modd n = let app_4 = (n = 0) in
-  let if_5 = if app_4 then 1 else let app_6 = (n - 1) in
-  let app_7 = meven app_6 in
-  app_7 in
-  if_5;;
-  let main  = let app_0 = modd 1 in
-  let app_1 = print_int app_0 in
-  let EVALUATED_0 = app_1 in
-  let app_2 = (EVALUATED_0 ( = ) ()) in
-  let if_3 = if app_2 then () else let app_4 = RTE_ERROR_MATCH_FAILURE () in
-  app_4 in
-  let _ = if_3 in
-  let app_5 = meven 2 in
-  let app_6 = print_int app_5 in
-  let EVALUATED_1 = app_6 in
-  let app_7 = (EVALUATED_1 ( = ) ()) in
-  let if_8 = if app_7 then () else let app_9 = RTE_ERROR_MATCH_FAILURE () in
-  app_9 in
-  let _ = if_8 in
-  let (even, odd) = tie in
-  let app_10 = odd 3 in
-  let app_11 = print_int app_10 in
-  let EVALUATED_2 = app_11 in
-  let app_12 = (EVALUATED_2 ( = ) ()) in
-  let if_13 = if app_12 then () else let app_14 = RTE_ERROR_MATCH_FAILURE () in
-  app_14 in
-  let _ = if_13 in
-  let app_15 = even 4 in
-  let app_16 = print_int app_15 in
-  let EVALUATED_3 = app_16 in
-  let app_17 = (EVALUATED_3 ( = ) ()) in
-  let if_18 = if app_17 then () else let app_19 = RTE_ERROR_MATCH_FAILURE () in
-  app_19 in
-  let _ = if_18 in
-  0
+  Fatal error: exception Failure("not expected")
+  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+  Called from Anf__Anf_conv.anf_expr.(fun) in file "lib/middleend/anf_conv.ml", line 98, characters 16-47
+  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
+  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
+  Called from Anf__Anf_conv.anf_program.(fun) in file "lib/middleend/anf_conv.ml", line 145, characters 37-57
+  Called from Stdlib__List.map in file "list.ml", line 92, characters 20-23
+  Called from Stdlib__List.map in file "list.ml", line 92, characters 32-39
+  Called from Dune__exe__Anf_demo.anf_demo in file "demos/anf_demo.ml", line 9, characters 17-46
+  [2]
 
   $ ./anf_demo.exe < manytests/typed/016lists.ml
   let rec length xs = let app_0 = ([] ( = ) xs) in

@@ -3,6 +3,11 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open AstLib.Ast
+(* open Common.Base_bin_ops *)
+
+type identifier =
+  | Id of string
+  | IdConstraint of string typed
 
 type immexpr =
   | ImmConst of const
@@ -13,15 +18,16 @@ type immexpr =
 
 type cexpr =
   | CApp of cexpr * cexpr
+  (* | CBinOp of bin_op * cexpr * cexpr *)
   | CIf of immexpr * aexpr * aexpr
   | CImmExpr of immexpr
 
 and aexpr =
-  | ALetIn of pattern_or_op * cexpr * aexpr
+  | ALetIn of identifier * cexpr * aexpr
   | ACExpr of cexpr
 
   (* todo no patterns here *)
-type let_body = pattern_or_op * pattern list * aexpr
+type let_body = identifier * identifier list * aexpr
 
 type anf_decl =
   | ADSingleLet of rec_flag * let_body
