@@ -231,3 +231,27 @@ let%expect_test "test type tuple" =
   [%expect {|
     val a : (int * bool) -> (int * bool) |}]
 ;;
+
+let%expect_test "test predef ops" =
+  test {|let a = 1 + 2|};
+  [%expect {|
+    val a : int |}]
+;;
+
+let%expect_test "test predef ops 2" =
+  test {|(-) 1|};
+  [%expect {|
+    int -> int |}]
+;;
+
+let%expect_test "test predef ops 3" =
+  test {|-1|};
+  [%expect {|
+    int |}]
+;;
+
+let%expect_test "test predef ops 4" =
+  test {|(*)|};
+  [%expect {|
+    int -> int -> int |}]
+;;
