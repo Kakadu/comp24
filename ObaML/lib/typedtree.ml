@@ -30,11 +30,11 @@ let rec pretty_pp_ty_tuples fmt acc =
   | [] -> ()
   | [ h ] ->
     (match h with
-     | ITArr (_, _) -> fprintf fmt "(%a)" pretty_pp_ty (h, mp)
+     | ITArr (_, _) | ITTuple _ -> fprintf fmt "(%a)" pretty_pp_ty (h, mp)
      | _ -> fprintf fmt "%a" pretty_pp_ty (h, mp))
   | h :: tl ->
     (match h with
-     | ITArr (_, _) ->
+     | ITArr (_, _) | ITTuple _ ->
        fprintf fmt "(%a) * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp)
      | _ -> fprintf fmt "%a * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp))
 

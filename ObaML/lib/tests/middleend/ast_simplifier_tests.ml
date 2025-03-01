@@ -79,10 +79,10 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_simplify_and_print_result
-    {| let c = let (a, (b, c)) = (fun x -> (4, x, x)) 4 in (a, b, c);;  |};
+    {| let c = let (a, (b, c)) = (fun x -> (4, (x, x))) 4 in (a, b, c);;  |};
   [%expect
     {|
-    let c = let #gen_pat_expr#0 = ((fun x -> (4, x, x)) 4) in let a = ((#gen_tuple_getter# 0) #gen_pat_expr#0) in let b = ((#gen_tuple_getter# 0) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in let c = ((#gen_tuple_getter# 1) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in (a, b, c);; |}]
+    let c = let #gen_pat_expr#0 = ((fun x -> (4, (x, x))) 4) in let a = ((#gen_tuple_getter# 0) #gen_pat_expr#0) in let b = ((#gen_tuple_getter# 0) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in let c = ((#gen_tuple_getter# 1) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in (a, b, c);; |}]
 ;;
 
 let%expect_test "" =
@@ -117,10 +117,10 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_simplify_and_print_result {| let a = match b with | (5, (b, c), 4) -> (b, c) |};
+  parse_simplify_and_print_result {| let a b = match b with | (5, (b, c), 4) -> (b, c);; |};
   [%expect
     {|
-    let a = let #gen_pat_expr#0 = b in if ((5  =  ((#gen_tuple_getter# 0) #gen_pat_expr#0))  &&  (4  =  ((#gen_tuple_getter# 2) #gen_pat_expr#0))) then let b = ((#gen_tuple_getter# 0) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in let c = ((#gen_tuple_getter# 1) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in (b, c) else (#gen_matching_failed# ());;
+    let a b = let #gen_pat_expr#0 = b in if ((5  =  ((#gen_tuple_getter# 0) #gen_pat_expr#0))  &&  (4  =  ((#gen_tuple_getter# 2) #gen_pat_expr#0))) then let b = ((#gen_tuple_getter# 0) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in let c = ((#gen_tuple_getter# 1) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in (b, c) else (#gen_matching_failed# ());;
      |}]
 ;;
 
@@ -142,10 +142,10 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_simplify_and_print_result {| let a = fun b -> match b with | [] -> (h, tl) |};
+  parse_simplify_and_print_result {| let a = fun b -> match b with | [] -> () |};
   [%expect
     {|
-    let a b = let #gen_pat_expr#0 = b in if ([]  =  #gen_pat_expr#0) then (h, tl) else (#gen_matching_failed# ());;
+    let a b = let #gen_pat_expr#0 = b in if ([]  =  #gen_pat_expr#0) then () else (#gen_matching_failed# ());;
      |}]
 ;;
 
