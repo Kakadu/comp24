@@ -209,3 +209,17 @@ let%expect_test "pat type" =
           (Some (Pat_tuple [(Pat_var "a"); (Pat_construct ("[]", None))])))),
        (Type_constructor_param ((Type_single "int"), "list")))) |}]
 ;;
+
+let%expect_test "pat construct" =
+  test_pattern "Some";
+  [%expect
+    {|
+    (Pat_construct ("Some", None)) |}]
+;;
+
+let%expect_test "pat construct args" =
+  test_pattern "Some true";
+  [%expect
+    {|
+    (Pat_construct ("Some", (Some (Pat_constant (Const_bool true))))) |}]
+;;

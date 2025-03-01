@@ -15,6 +15,12 @@ let poli_constructors_names =
   [ "::", "list"; "[]", "list"; "Some", "optional"; "None", "optional" ]
 ;;
 
+let find_constructor name =
+  match List.find_opt (fun (s, _) -> name = s) poli_constructors_names with
+  | Some res -> return @@ snd res
+  | None -> fail @@ No_variable name
+;;
+
 let instantiate (scheme : Scheme.t) : type_val t =
   let vars, ty = scheme in
   VarSet.fold
@@ -82,6 +88,54 @@ let rec infer_base_type c =
     | Const_bool _ -> TBool
   in
   return (Subst.empty, TBase (const_to_type c))
+
+and infer_binding env pat (exp : expression) =
+  let rec helper env = function
+    | Pat_any ->
+      let+ fv = fresh_var in
+      env, Subst.empty, fv
+    | Pat_var name ->
+      let+ fv = fresh_var in
+      let env = TypeEnv.extend env name (Scheme.create VarSet.empty fv) in
+      env, Subst.empty, fv
+    | Pat_type (pat, tye) ->
+      let* env, sub1, ty = helper env pat in
+      let* ty2 = read_ast_type tye in
+      let* sub2 = Subst.unify ty ty2 in
+      let+ sub = Subst.compose sub1 sub2 in
+      env, sub, ty
+    | Pat_constant base ->
+      let+ sub, base_type = infer_base_type base in
+      env, sub, base_type
+    | Pat_tuple l ->
+      let+ env, sub, tys =
+        fold_left
+          (fun (env, sub, l) el ->
+            let* env, sub2, ty = helper env el in
+            let+ sub = Subst.compose sub sub2 in
+            env, sub, ty :: l)
+          (return (env, Subst.empty, []))
+          l
+      in
+      env, sub, TTuple (List.rev tys)
+    | Pat_or (l, r) ->
+      let* env, sub1, ty1 = helper env l in
+      let* env, sub2, ty2 = helper env r in
+      let* sub3 = Subst.unify ty1 ty2 in
+      let+ sub = Subst.compose_all [ sub1; sub2; sub3 ] in
+      env, sub, ty1
+    | Pat_construct (name, pat) ->
+      (match pat with
+       | Some x ->
+         let+ env, sub, ty = helper env x
+         and+ name = find_constructor name in
+         env, sub, TConstructor (Some ty, name)
+       | None -> return (env, Subst.empty, TConstructor (None, name)))
+  in
+  let* env, sub1, ty1 = helper env pat in
+  let* sub2, ty2 = infer_expression env exp in
+  let+ sub = Subst.compose sub1 sub2 in
+  sub, ty1, ty2
 
 and infer_if env cond bthen belse =
   let bool_type = TBase TBool in
@@ -188,16 +242,10 @@ and infer_typexpr env exp typexpr =
   let+ sub = Subst.compose s1 s2 in
   sub, t2
 
-and infer_construct env name =
-  let find_name name =
-    match List.find_opt (fun (s, _) -> name = s) poli_constructors_names with
-    | Some res -> return @@ snd res
-    | None -> fail @@ No_variable name
-  in
-  function
+and infer_construct env name = function
   | Some e ->
     let* s1, ty = infer_expression env e in
-    let* constr_name = find_name name in
+    let* constr_name = find_constructor name in
     if name = "::"
     then (
       match ty with
@@ -209,20 +257,42 @@ and infer_construct env name =
     else return (s1, TConstructor (Some ty, constr_name))
   | None ->
     let+ fv = fresh_var
-    and+ constr_name = find_name name in
+    and+ constr_name = find_constructor name in
     Subst.empty, TConstructor (Some fv, constr_name)
 
-and infer_expression env = function
+and infer_match env exp cases =
+  let* sub, ty = infer_expression env exp in
+  let* caseslist = map (fun case -> infer_binding env case.left case.right) cases in
+  let* sub2, ty1, ty2 =
+    fold_left
+      (fun (sub1, ty11, ty21) (sub2, ty12, ty22) ->
+        let* sub3 = Subst.unify ty11 ty12 in
+        let* sub4 = Subst.unify ty21 ty22 in
+        let+ sub = Subst.compose_all [ sub1; sub2; sub3; sub4 ] in
+        sub, ty11, ty21)
+      (return (List.hd caseslist))
+      caseslist
+  in
+  let* sub3 = Subst.unify ty ty1 in
+  let+ sub = Subst.compose_all [ sub; sub2; sub3 ] in
+  sub, ty2
+
+and infer_function env cases =
+  infer_fun env [ Pat_var "a" ] (Exp_match (Exp_ident "a", cases))
+
+and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = function
   | Exp_constant c -> infer_base_type c
   | Exp_if (cond, bthen, belse) -> infer_if env cond bthen belse
   | Exp_ident var -> lookup_env env var
   | Exp_fun (vars, exp) -> infer_fun env vars exp
+  | Exp_function cases -> infer_function env cases
   | Exp_let (rec_flag, bindings, expression) ->
     let* env, sub, _ = infer_let env rec_flag bindings in
     let* sub2, ty = infer_expression env expression in
     let+ sub = Subst.compose sub sub2 in
     sub, ty
   | Exp_apply (l, r) -> infer_apply env l r
+  | Exp_match (exp, cases) -> infer_match env exp cases
   | Exp_tuple l -> infer_tuple env l
   | Exp_construct (name, exp) -> infer_construct env name exp
   | Exp_type (exp, typexp) -> infer_typexpr env exp typexp

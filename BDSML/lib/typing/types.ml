@@ -71,7 +71,7 @@ module VarSet = Set.Make (TVarId)
 let rec occurs_in (v : TVarId.t) = function
   | TVar b -> b = v
   | TConstructor (Some l, _) -> occurs_in v l
-  | TTuple (f :: tl) -> occurs_in v f || (occurs_in v @@ TTuple tl)
+  | TTuple l -> List.fold_left (fun acc el -> acc || occurs_in v el) false l
   | TArrow (l, r) -> occurs_in v l || occurs_in v r
   | _ -> false
 ;;
@@ -80,7 +80,7 @@ let free_vars =
   let rec helper acc = function
     | TVar b -> VarSet.add b acc
     | TArrow (l, r) -> helper (helper acc l) r
-    | TTuple (h :: tl) -> helper (helper acc h) @@ TTuple tl
+    | TTuple l -> List.fold_left (fun acc l -> helper acc l) acc l
     | TConstructor (Some l, _) -> helper acc l
     | _ -> acc
   in
