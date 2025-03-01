@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open AstLib.Ast
 open Anf_ast
 open Utils
 
@@ -31,6 +30,18 @@ let rec gen_var (base : string) (global : StringSet.t) : string anf =
   let* fresh_id = fresh_name base in
   if StringSet.contains global fresh_id then gen_var base global else return fresh_id
 ;;
+
+open AstLib.Ast
+
+let pattern_to_identifier = function
+  | PId s -> Id s
+  | PConstraint (PId s, ty) -> IdConstraint(s, ty)
+  | _ -> failwith "not expected"
+
+let pattern_or_op_to_identifier = function
+  | POpPat p -> pattern_to_identifier p
+  | POpOp s -> Id s
+  | _ -> failwith "not expected"
 
 let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aexpr anf =
   let anf_list env exprs cont =
@@ -64,7 +75,7 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aex
         in
         let* capp = roll_capp @@ List.rev (fimm :: argsimm) in
         let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
-        let let_expr = ALetIn (POpPat (PId v), capp, aexpr) in
+        let let_expr = ALetIn (Id v, capp, aexpr) in
         return let_expr))
   | EIf (e1, e2, e3) ->
     anf_expr env e1 (fun cimm ->
@@ -72,7 +83,7 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aex
       let* then_aexpr = anf_expr env e2 (fun timm -> return (ACExpr (CImmExpr timm))) in
       let* else_aexpr = anf_expr env e3 (fun eimm -> return (ACExpr (CImmExpr eimm))) in
       let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
-      let let_expr = ALetIn (POpPat (PId v), CIf (cimm, then_aexpr, else_aexpr), aexpr) in
+      let let_expr = ALetIn (Id v, CIf (cimm, then_aexpr, else_aexpr), aexpr) in
       return let_expr)
   | ETuple (e1, e2, es) ->
      anf_list env (e1::e2::es) (fun imm ->
@@ -84,7 +95,9 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aex
     anf_expr env e1 (fun imm1 ->
       let* aexpr = anf_expr env e2 k in
       (* todo remove let a = b in *)
-      return (ALetIn (pat, CImmExpr imm1, aexpr)))
+      let id =  pattern_or_op_to_identifier pat in
+      return (ALetIn (id, CImmExpr imm1, aexpr)))
+
   | _ -> failwith "not implemented / needed"
 ;;
 
@@ -99,6 +112,7 @@ let rec unroll_efun (expr : expr) : pattern list * expr =
 let anf_decl (env : StringSet.t) (d : decl) : anf_decl anf =
   let helper (pat_or_op, expr)= 
     let efun_pats, body_expr = unroll_efun expr in
+    let efun_ids = List.map pattern_to_identifier efun_pats in
   let env =
     StringSet.union
       env
@@ -107,7 +121,7 @@ let anf_decl (env : StringSet.t) (d : decl) : anf_decl anf =
   let* aexpr =
     anf_expr env body_expr (fun immexpr -> return (ACExpr (CImmExpr immexpr)))
   in
-  return (pat_or_op, efun_pats, aexpr)
+  return (pattern_or_op_to_identifier pat_or_op, efun_ids, aexpr)
 in
   match d with
   | DLet (rf, lb) ->
