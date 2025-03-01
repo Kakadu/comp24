@@ -270,8 +270,9 @@ let rec closure_convert_expr
   | EClsr (decl, e) ->
     let* cdecl = closure_convert_let_in global_env decl in
     let* ce = closure_convert_expr global_env e rec_name in
+    return (EClsr (cdecl, ce))
     (* dirty hack for eliminating let a = expr in a *)
-    (match cdecl, ce with
+    (* (match cdecl, ce with
      | DLet (_, (POpPat (PId name), body)), EId _ ->
        let new_body = subst_eid ce [ name, body ] in
        return new_body
@@ -279,7 +280,7 @@ let rec closure_convert_expr
      | DLet (_, (POpPat (PId name), (EId _ as body))), _ ->
        let new_body = subst_eid ce [ name, body ] in
        return new_body
-     | _ -> return (EClsr (cdecl, ce)))
+     | _ -> return (EClsr (cdecl, ce))) *)
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let closure_convert_branch env (br : branch) : branch cc =

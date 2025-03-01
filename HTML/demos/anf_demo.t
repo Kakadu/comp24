@@ -225,8 +225,20 @@ PASS
   $ ./anf_demo.exe < manytests/typed/006partial3.ml
   let cc_ll_0 c = let app_0 = print_int c in
   app_0;;
-  let cc_ll_1 b = cc_ll_0;;
-  let foo a = cc_ll_1;;
+  let cc_ll_1 b = let app_0 = print_int b in
+  let EVALUATED_1 = app_0 in
+  let app_1 = (EVALUATED_1 ( = ) ()) in
+  let if_2 = if app_1 then () else let app_3 = RTE_ERROR_MATCH_FAILURE () in
+  app_3 in
+  let _ = if_2 in
+  cc_ll_0;;
+  let foo a = let app_0 = print_int a in
+  let EVALUATED_0 = app_0 in
+  let app_1 = (EVALUATED_0 ( = ) ()) in
+  let if_2 = if app_1 then () else let app_3 = RTE_ERROR_MATCH_FAILURE () in
+  app_3 in
+  let _ = if_2 in
+  cc_ll_1;;
   let main  = let app_0 = foo 4 8 9 in
   let EVALUATED_2 = app_0 in
   let app_1 = (EVALUATED_2 ( = ) ()) in
@@ -267,8 +279,16 @@ PASS
   let _ = if_1 in
   let app_3 = cc_ll_1 a in
   app_3;;
-  let cc_ll_3 P1 = cc_ll_2;;
-  let _start P0 = cc_ll_3;;
+  let cc_ll_3 P1 = let app_0 = (P1 ( = ) ()) in
+  let if_1 = if app_0 then () else let app_2 = RTE_ERROR_MATCH_FAILURE () in
+  app_2 in
+  let _ = if_1 in
+  cc_ll_2;;
+  let _start P0 = let app_0 = (P0 ( = ) ()) in
+  let if_1 = if app_0 then () else let app_2 = RTE_ERROR_MATCH_FAILURE () in
+  app_2 in
+  let _ = if_1 in
+  cc_ll_3;;
   let main  = let app_0 = print_int 1 in
   let app_1 = print_int 2 in
   let app_2 = print_int 4 in
@@ -302,19 +322,21 @@ PASS
 PASS
   $ ./anf_demo.exe < manytests/typed/009let_poly.ml
   let cc_ll_0 x = x;;
-  let temp  = let app_0 = cc_ll_0 1 in
-  let app_1 = cc_ll_0 true in
+  let temp  = let f = cc_ll_0 in
+  let app_0 = f 1 in
+  let app_1 = f true in
   (app_0, app_1)
 
   $ ./anf_demo.exe < manytests/typed/015tuples.ml
   other patterns not supported (anf is run after pattern elimination)
 
   $ ./anf_demo.exe < manytests/typed/016lists.ml
-  let rec length xs = let app_0 = ([] ( = ) xs) in
-  let if_1 = if app_0 then 0 else let app_2 = ([] ( != ) xs) in
-  let if_3 = if app_2 then let app_4 = GET_HEAD xs in
+  let rec length xs = let EVALUATED_0 = xs in
+  let app_0 = ([] ( = ) EVALUATED_0) in
+  let if_1 = if app_0 then 0 else let app_2 = ([] ( != ) EVALUATED_0) in
+  let if_3 = if app_2 then let app_4 = GET_HEAD EVALUATED_0 in
   let h = app_4 in
-  let app_5 = GET_TALE xs in
+  let app_5 = GET_TALE EVALUATED_0 in
   let tl = app_5 in
   let app_6 = length tl in
   let app_7 = (1 + app_6) in
@@ -335,84 +357,86 @@ PASS
   app_8 in
   if_3 in
   if_1;;
-  let length_tail  = let app_0 = cc_ll_0 0 in
+  let length_tail  = let helper = cc_ll_0 in
+  let app_0 = helper 0 in
   app_0;;
-  let rec map f xs = let app_0 = ([] ( = ) xs) in
-  let if_1 = if app_0 then [] else let app_2 = ([] ( != ) xs) in
-  let app_3 = GET_TALE xs in
+  let rec map f xs = let EVALUATED_2 = xs in
+  let app_0 = ([] ( = ) EVALUATED_2) in
+  let if_1 = if app_0 then [] else let app_2 = ([] ( != ) EVALUATED_2) in
+  let app_3 = GET_TALE EVALUATED_2 in
   let app_4 = ([] ( = ) app_3) in
   let app_5 = (app_2 ( && ) app_4) in
-  let if_6 = if app_5 then let app_7 = GET_HEAD xs in
+  let if_6 = if app_5 then let app_7 = GET_HEAD EVALUATED_2 in
   let a = app_7 in
   let app_8 = f a in
-  app_8 :: [] else let app_9 = ([] ( != ) xs) in
-  let app_10 = GET_TALE xs in
+  app_8 :: [] else let app_9 = ([] ( != ) EVALUATED_2) in
+  let app_10 = GET_TALE EVALUATED_2 in
   let app_11 = ([] ( != ) app_10) in
-  let app_12 = GET_TALE xs in
+  let app_12 = GET_TALE EVALUATED_2 in
   let app_13 = GET_TALE app_12 in
   let app_14 = ([] ( = ) app_13) in
   let app_15 = (app_11 ( && ) app_14) in
   let app_16 = (app_9 ( && ) app_15) in
-  let if_17 = if app_16 then let app_18 = GET_HEAD xs in
+  let if_17 = if app_16 then let app_18 = GET_HEAD EVALUATED_2 in
   let a = app_18 in
-  let app_19 = GET_TALE xs in
+  let app_19 = GET_TALE EVALUATED_2 in
   let app_20 = GET_HEAD app_19 in
   let b = app_20 in
   let app_21 = f a in
   let app_22 = f b in
-  app_21 :: app_22 :: [] else let app_23 = ([] ( != ) xs) in
-  let app_24 = GET_TALE xs in
+  app_21 :: app_22 :: [] else let app_23 = ([] ( != ) EVALUATED_2) in
+  let app_24 = GET_TALE EVALUATED_2 in
   let app_25 = ([] ( != ) app_24) in
-  let app_26 = GET_TALE xs in
+  let app_26 = GET_TALE EVALUATED_2 in
   let app_27 = GET_TALE app_26 in
   let app_28 = ([] ( != ) app_27) in
-  let app_29 = GET_TALE xs in
+  let app_29 = GET_TALE EVALUATED_2 in
   let app_30 = GET_TALE app_29 in
   let app_31 = GET_TALE app_30 in
   let app_32 = ([] ( = ) app_31) in
   let app_33 = (app_28 ( && ) app_32) in
   let app_34 = (app_25 ( && ) app_33) in
   let app_35 = (app_23 ( && ) app_34) in
-  let if_36 = if app_35 then let app_37 = GET_HEAD xs in
+  let if_36 = if app_35 then let app_37 = GET_HEAD EVALUATED_2 in
   let a = app_37 in
-  let app_38 = GET_TALE xs in
+  let app_38 = GET_TALE EVALUATED_2 in
   let app_39 = GET_HEAD app_38 in
   let b = app_39 in
-  let app_40 = GET_TALE xs in
+  let app_40 = GET_TALE EVALUATED_2 in
   let app_41 = GET_TALE app_40 in
   let app_42 = GET_HEAD app_41 in
   let c = app_42 in
   let app_43 = f a in
   let app_44 = f b in
   let app_45 = f c in
-  app_43 :: app_44 :: app_45 :: [] else let app_46 = ([] ( != ) xs) in
-  let app_47 = GET_TALE xs in
+  app_43 :: app_44 :: app_45 :: [] else let app_46 = ([] ( != ) EVALUATED_2) in
+  let app_47 = GET_TALE EVALUATED_2 in
   let app_48 = ([] ( != ) app_47) in
-  let app_49 = GET_TALE xs in
+  let app_49 = GET_TALE EVALUATED_2 in
   let app_50 = GET_TALE app_49 in
   let app_51 = ([] ( != ) app_50) in
-  let app_52 = GET_TALE xs in
+  let app_52 = GET_TALE EVALUATED_2 in
   let app_53 = GET_TALE app_52 in
   let app_54 = GET_TALE app_53 in
   let app_55 = ([] ( != ) app_54) in
   let app_56 = (app_51 ( && ) app_55) in
   let app_57 = (app_48 ( && ) app_56) in
   let app_58 = (app_46 ( && ) app_57) in
-  let if_59 = if app_58 then let app_60 = GET_HEAD xs in
+  let if_59 = if app_58 then let app_60 = GET_HEAD EVALUATED_2 in
   let a = app_60 in
-  let app_61 = GET_TALE xs in
+  let app_61 = GET_TALE EVALUATED_2 in
   let app_62 = GET_HEAD app_61 in
   let b = app_62 in
-  let app_63 = GET_TALE xs in
+  let app_63 = GET_TALE EVALUATED_2 in
   let app_64 = GET_TALE app_63 in
   let app_65 = GET_HEAD app_64 in
   let c = app_65 in
-  let app_66 = GET_TALE xs in
+  let app_66 = GET_TALE EVALUATED_2 in
   let app_67 = GET_TALE app_66 in
   let app_68 = GET_TALE app_67 in
   let app_69 = GET_HEAD app_68 in
   let d = app_69 in
-  let app_70 = GET_TALE xs in
+  let app_70 = GET_TALE EVALUATED_2 in
   let app_71 = GET_TALE app_70 in
   let app_72 = GET_TALE app_71 in
   let app_73 = GET_TALE app_72 in
@@ -429,11 +453,12 @@ PASS
   if_17 in
   if_6 in
   if_1;;
-  let rec append xs ys = let app_0 = ([] ( = ) xs) in
-  let if_1 = if app_0 then ys else let app_2 = ([] ( != ) xs) in
-  let if_3 = if app_2 then let app_4 = GET_HEAD xs in
+  let rec append xs ys = let EVALUATED_3 = xs in
+  let app_0 = ([] ( = ) EVALUATED_3) in
+  let if_1 = if app_0 then ys else let app_2 = ([] ( != ) EVALUATED_3) in
+  let if_3 = if app_2 then let app_4 = GET_HEAD EVALUATED_3 in
   let x = app_4 in
-  let app_5 = GET_TALE xs in
+  let app_5 = GET_TALE EVALUATED_3 in
   let xs = app_5 in
   let app_6 = append xs ys in
   x :: app_6 else let app_7 = RTE_ERROR_MATCH_FAILURE () in
@@ -453,12 +478,14 @@ PASS
   app_8 in
   if_3 in
   if_1;;
-  let concat  = cc_ll_1;;
-  let rec iter f xs = let app_0 = ([] ( = ) xs) in
-  let if_1 = if app_0 then () else let app_2 = ([] ( != ) xs) in
-  let if_3 = if app_2 then let app_4 = GET_HEAD xs in
+  let concat  = let helper = cc_ll_1 in
+  helper;;
+  let rec iter f xs = let EVALUATED_5 = xs in
+  let app_0 = ([] ( = ) EVALUATED_5) in
+  let if_1 = if app_0 then () else let app_2 = ([] ( != ) EVALUATED_5) in
+  let if_3 = if app_2 then let app_4 = GET_HEAD EVALUATED_5 in
   let h = app_4 in
-  let app_5 = GET_TALE xs in
+  let app_5 = GET_TALE EVALUATED_5 in
   let tl = app_5 in
   let app_6 = f h in
   let EVALUATED_7 = app_6 in
@@ -472,11 +499,12 @@ PASS
   if_3 in
   if_1;;
   let cc_ll_2 h a = (h, a);;
-  let rec cartesian xs ys = let app_0 = ([] ( = ) xs) in
-  let if_1 = if app_0 then [] else let app_2 = ([] ( != ) xs) in
-  let if_3 = if app_2 then let app_4 = GET_HEAD xs in
+  let rec cartesian xs ys = let EVALUATED_6 = xs in
+  let app_0 = ([] ( = ) EVALUATED_6) in
+  let if_1 = if app_0 then [] else let app_2 = ([] ( != ) EVALUATED_6) in
+  let if_3 = if app_2 then let app_4 = GET_HEAD EVALUATED_6 in
   let h = app_4 in
-  let app_5 = GET_TALE xs in
+  let app_5 = GET_TALE EVALUATED_6 in
   let tl = app_5 in
   let app_6 = cc_ll_2 h in
   let app_7 = map app_6 ys in

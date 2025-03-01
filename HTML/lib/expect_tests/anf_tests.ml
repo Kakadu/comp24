@@ -29,7 +29,8 @@ let%expect_test "sanity check" =
     let cc_ll_0 x y = let app_0 = (x + y) in
     app_0;;
     let test1 x = let app_0 = cc_ll_0 x in
-    app_0 |}]
+    let test2 = app_0 in
+    test2 |}]
 ;;
 
 let%expect_test "sanity check" =

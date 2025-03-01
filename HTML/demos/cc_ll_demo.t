@@ -112,7 +112,8 @@ PASS
 PASS
   $ ./cc_ll_demo.exe < manytests/typed/009let_poly.ml
   let cc_ll_0 x = x;;
-  let temp = ((cc_ll_0 1), (cc_ll_0 true))
+  let temp = let f = cc_ll_0
+  in ((f 1), (f true))
 
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x = ((f (fix f)) x);;
@@ -142,7 +143,8 @@ PASS
   let rec cc_ll_0 acc xs = match xs with
   | [] -> acc
   | h :: tl -> (cc_ll_0 (acc + 1) tl);;
-  let length_tail = (cc_ll_0 0);;
+  let length_tail = let helper = cc_ll_0
+  in (helper 0);;
   let rec map f xs = match xs with
   | [] -> []
   | a :: [] -> (f a) :: []
@@ -155,7 +157,8 @@ PASS
   let rec cc_ll_1 xs = match xs with
   | [] -> []
   | h :: tl -> ((append h) (cc_ll_1 tl));;
-  let concat = cc_ll_1;;
+  let concat = let helper = cc_ll_1
+  in helper;;
   let rec iter f xs = match xs with
   | [] -> ()
   | h :: tl -> let () = (f h)
