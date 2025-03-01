@@ -546,7 +546,7 @@ let infer_single_decl env (DDeclaration (pat, expr)) =
   return (env3, List.rev names_list)
 ;;
 
-let infer_decl env = function
+(* let infer_decl env = function
   | SingleDecl (rec_flag, single_decl) ->
     (match rec_flag with
      | NoRec -> infer_single_decl env single_decl
@@ -574,6 +574,21 @@ let infer_decl env = function
        in
        return (env, List.rev names_list)
      | Rec -> fail `Not_impl)
+;; *)
+
+let infer_decl env = function
+  | NoRecDecl decls ->
+    let* env, names_list =
+      Base.List.fold_left
+        ~f:(fun acc item ->
+          let* env, lst = acc in
+          let* env, names_list = infer_single_decl env item in
+          return (env, names_list @ lst))
+        ~init:(return (env, []))
+        decls
+    in
+    return (env, List.rev names_list)
+  | _ -> fail `Not_impl
 ;;
 
 let start_env =

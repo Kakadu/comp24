@@ -31,8 +31,8 @@ let%expect_test _ =
   inference {| let (h::tl) = [1;2;3]|};
   [%expect
     {|
-    val h : int
-    val tl : int list |}]
+    val tl : int list
+    val h : int |}]
 ;;
 
 let%expect_test _ =
@@ -74,8 +74,8 @@ let%expect_test _ =
   inference {| let h::tl = [1;2;3];; |};
   [%expect
     {|
-    val h : int
-    val tl : int list |}]
+    val tl : int list
+    val h : int |}]
 ;;
 
 let%expect_test _ =

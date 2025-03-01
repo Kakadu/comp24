@@ -323,22 +323,25 @@ let parse_declaration =
   | _ -> return @@ ddeclaration decl expression
 ;;
 
-let parse_single_declaration =
+(* let parse_single_declaration =
   keyword "let"
   *> let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
      parse_declaration >>| fun x -> SingleDecl (rec_flag, x)
-;;
+;; *)
 
-let parse_mutable_rec_declaration =
+let parse_declarations =
   keyword "let"
   *> let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
      parse_declaration
      >>= fun first_decl ->
-     many1 (keyword "and" *> parse_declaration)
-     >>= fun lst -> return @@ MutableRecDecl (rec_flag, first_decl :: lst)
+     many (keyword "and" *> parse_declaration)
+     >>= fun lst ->
+     match rec_flag with
+     | NoRec -> return @@ NoRecDecl (first_decl :: lst)
+     | Rec -> return @@ RecDecl (first_decl :: lst)
 ;;
 
-let parse_program = choice [ parse_mutable_rec_declaration; parse_single_declaration ]
+let parse_program = parse_declarations
 
 (* ------------------ *)
 

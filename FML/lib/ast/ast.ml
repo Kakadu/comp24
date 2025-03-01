@@ -54,8 +54,8 @@ type single_declaration = DDeclaration of pattern * expression
 [@@deriving show { with_path = false }]
 
 type declaration =
-  | SingleDecl of rec_flag * single_declaration
-  | MutableRecDecl of rec_flag * single_declaration list
+  | NoRecDecl of single_declaration list
+  | RecDecl of single_declaration list
 [@@deriving show { with_path = false }]
 
 type program = declaration list [@@deriving show { with_path = false }]
