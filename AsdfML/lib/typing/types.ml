@@ -46,6 +46,8 @@ let rec an_ty_to_ty = function
   | Ast.TABool -> bool_typ
   | Ast.TAUnit -> unit_typ
   | Ast.TAFun (l, r) -> TArrow (an_ty_to_ty l, an_ty_to_ty r)
-  | Ast.TATuple xs -> TTuple (List.map xs an_ty_to_ty)
+  | Ast.TATuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    TTuple (List.map xs an_ty_to_ty)
   | Ast.TAList x -> TList (an_ty_to_ty x)
 ;;

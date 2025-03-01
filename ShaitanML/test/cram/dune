@@ -1,0 +1,18 @@
+(executable
+ (name parser)
+ (modules Parser)
+ (public_name parser)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name infer)
+ (modules Infer)
+ (public_name infer)
+ (libraries shaitanml_lib stdio))
+
+(cram
+ (deps
+  (source_tree manytests)))
+
+(cram
+ (deps %{bin:parser} %{bin:infer}))

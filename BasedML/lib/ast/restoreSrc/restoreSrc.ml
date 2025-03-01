@@ -69,7 +69,7 @@ let rec frestore_expr ppf exp =
       exp_body
   | ETuple lst -> fprintf "(%a)" (pp_list_with_commas frestore_expr) lst
   | EMatch (pat_head, pat_exp_lst) ->
-    fprintf "(match %a with" frestore_pattern pat_head;
+    fprintf "(match %a with" frestore_expr pat_head;
     List.iter
       (fun (pat, exp) -> fprintf "\n| %a -> %a" frestore_pattern pat frestore_expr exp)
       pat_exp_lst;

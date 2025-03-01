@@ -1,8 +1,8 @@
-(** Copyright 2024-2025, KreML Compiler Commutnity *)
+(** Copyright 2024-2025, CursedML Compiler Commutnity *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-(** Abstract syntax tree for KreML and helper functions*)
+(** Abstract syntax tree for CursedML and helper functions*)
 
 (** Represents an identifier of variable or function*)
 type ident = string [@@deriving show]

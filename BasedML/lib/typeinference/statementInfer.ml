@@ -137,13 +137,15 @@ let restore_type : Ast.type_name -> (state, Ast.type_name) t =
   return (apply_substs subs tp)
 ;;
 
-let get_tv_from_env : env_map -> SetString.t =
+let get_tv_from_env : env_map -> (state, SetString.t) t =
   fun env ->
-  MapString.fold
-    (fun _var_name tp acc ->
-      match tp with
-      | TFFlat tp -> get_tv_from_tp acc tp
-      | TFSchem _ -> acc)
-    env
-    SetString.empty
+  let* subs = read_subs in
+  return
+    (MapString.fold
+       (fun _var_name tp acc ->
+         match tp with
+         | TFFlat tp -> get_tv_from_tp acc (apply_substs subs tp)
+         | TFSchem _ -> acc)
+       env
+       SetString.empty)
 ;;

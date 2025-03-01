@@ -4,45 +4,6 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
-open HamsterML__Closure_conversion;;
-
-open Base
-
-let lexer (s: string) =
-  let rec build_list lexbuf =
-    match HamsterML.Lexer.read lexbuf with
-    | EOF -> []
-    | token -> token :: build_list lexbuf
-  in
-  build_list (Lexing.from_string s)
-;;
-
-let parse (s : string) : expr list =
-  let lexbuf = Lexing.from_string s in
-  let ast = HamsterML__Parser.prog HamsterML__Lexer.read lexbuf in
-  ast
-;;
-
-let parse_expr (s : string) : expr =
-  let lexbuf = Lexing.from_string s in
-  let ast = HamsterML__Parser.prog_expr HamsterML__Lexer.read lexbuf in
-  ast
-;;
-
-let parse_pattern (s : string) : pattern =
-  let lexbuf = Lexing.from_string s in
-  let ast = HamsterML__Parser.prog_pattern HamsterML__Lexer.read lexbuf in
-  ast
-;;
-
-let unbound_identifiers exp = 
-  Set.to_list (HamsterML__Closure_conversion.unbound_variables (parse_expr exp))
-
-(* let typecheck (s : string) =
-  let std = Format.std_formatter in
-  let x = List.hd (parse s) in
-  let res = R.run (Infer.infer_expr TypeEnv.empty x) in
-  match res with
-  | Ok (s, t) -> Subst.pp std s; Format.fprintf std "\nType:%s" (show_inf_type t)
-  | Error e -> failwith (show_error e)
-;; *)
+open HamsterTest__LexerTest;;
+open HamsterTest__ParserTest;;
+open HamsterTest__TypingTest;;
