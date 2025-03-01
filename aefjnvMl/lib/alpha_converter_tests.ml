@@ -40,7 +40,7 @@ let c =
     let a = 1;;
     let b = a;;
     let c = let ac0_a = b in
-    ac0_a;; |}]
+        ac0_a;; |}]
 ;;
 
 let%expect_test "" =
@@ -63,7 +63,7 @@ let rec (+) b c = c + b
   |} in
   [%expect {|
     let rec op_plus b c =
-     (op_plus c) b;; |}]
+      (op_plus c) b;; |}]
 ;;
 
 let%expect_test "" =
@@ -75,9 +75,9 @@ let (+) b c = c + b
   [%expect
     {|
     let op_plus b c =
-     (( + ) c) b;;
+      (( + ) c) b;;
     let ac2_op_plus ac0_b ac1_c =
-     (op_plus ac1_c) ac0_b;; |}]
+      (op_plus ac1_c) ac0_b;; |}]
 ;;
 
 let%expect_test "" =
@@ -97,13 +97,17 @@ and odd n =
   [%expect
     {|
     let rec even n =
-     match n with
-      | 0 -> true
-      | x -> odd ((( - ) x) 1)
+      match n with
+        | 0 ->
+          true
+        | x ->
+          odd ((( - ) x) 1)
     and odd ac0_n =
-     match ac0_n with
-      | 0 -> false
-      | ac1_x -> even ((( - ) ac1_x) 1);; |}]
+      match ac0_n with
+        | 0 ->
+          false
+        | ac1_x ->
+          even ((( - ) ac1_x) 1);; |}]
 ;;
 
 let%expect_test "" =
