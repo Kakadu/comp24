@@ -15,11 +15,11 @@ module CcLlTests = struct
 end
 
 let%expect_test "sanity check" =
-  CcLlTests.cc_ll_test {|let test1 x = let test2 y = x + y in test2|};
+  CcLlTests.cc_ll_test {|let foo a = let _ = 5 in 10|};
   [%expect
     {|
-    let cc_ll_0 x y = (x + y);;
-    let test1 x = (cc_ll_0 x) |}]
+    let foo a = let _ = 5
+    in 10 |}]
 ;;
 
 let%expect_test "sanity check" =
@@ -68,7 +68,8 @@ let%expect_test "sanity check" =
     let rec cc_ll_0 acc xs = match xs with
     | [] -> acc
     | h :: tl -> (cc_ll_0 (acc + 1) tl);;
-    let length_tail = (cc_ll_0 0) |}]
+    let length_tail = let helper = cc_ll_0
+    in (helper 0) |}]
 ;;
 
 let%expect_test "sanity check" =
