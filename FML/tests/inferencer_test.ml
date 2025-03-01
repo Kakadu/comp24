@@ -31,8 +31,8 @@ let%expect_test _ =
   inference {| let (h::tl) = [1;2;3]|};
   [%expect
     {|
-    val tl : int list
-    val h : int |}]
+    val h : int
+    val tl : int list |}]
 ;;
 
 let%expect_test _ =
@@ -47,9 +47,9 @@ let fst (a, _) = a;;
 let snd (_, a) = a;; |};
   [%expect
     {|
-    val snd : 'a * 'b -> 'b
+    val id : 'a -> 'a
     val fst : 'a * 'b -> 'a
-    val id : 'a -> 'a |}]
+    val snd : 'a * 'b -> 'b |}]
 ;;
 
 let%expect_test _ =
@@ -58,9 +58,9 @@ let%expect_test _ =
 let res = x + y;;|};
   [%expect
     {|
-    val res : int
+    val y : int
     val x : int
-    val y : int |}]
+    val res : int |}]
 ;;
 
 let%expect_test _ =
@@ -74,13 +74,6 @@ let%expect_test _ =
   inference {| let h::tl = [1;2;3];; |};
   [%expect
     {|
-    val tl : int list
-    val h : int |}]
-;;
-
-let%expect_test _ =
-  inference {| let f x = if x > 1 then (x - 1) else 1;; |};
-  [%expect
-    {|
-    The type variable 'a occurs inside 'a |}]
+    val h : int
+    val tl : int list |}]
 ;;

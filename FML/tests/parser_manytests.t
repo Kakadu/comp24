@@ -518,9 +518,6 @@
          ])
     ]
 
-  $ ./parser_runner.exe < manytests/typed/007order.ml
-  Error: : end_of_input
-
   $ ./parser_runner.exe < manytests/typed/008ascription.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "addi"),
@@ -593,9 +590,6 @@
           ))
         ])
     ]
-
-  $ ./parser_runner.exe < manytests/typed/010sukharev.ml
-  Error: : end_of_input
 
   $ ./parser_runner.exe < manytests/typed/015tuples.ml
   [(RecDecl

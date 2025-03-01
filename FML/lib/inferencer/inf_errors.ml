@@ -10,4 +10,5 @@ type error =
   | `Unbound_variable of string
   | `Several_bounds of string
   | `Not_impl
+  | `InvalidRecLeftHand
   ]

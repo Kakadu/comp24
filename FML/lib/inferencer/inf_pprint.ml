@@ -66,7 +66,13 @@ let pp_type ppf typ =
 
 let pp_error ppf = function
   | `Occurs_check (v, k) ->
-    Format.fprintf ppf "The type variable %a occurs inside %a" pp_type (tvar v) pp_type k
+    Format.fprintf
+      ppf
+      "Type error: the type variable %a occurs inside %a"
+      pp_type
+      (tvar v)
+      pp_type
+      k
   | `Unification_failed (l, r) ->
     Format.fprintf
       ppf
@@ -78,6 +84,7 @@ let pp_error ppf = function
   | `Unbound_variable name -> Format.fprintf ppf "Type error: unbound variable '%s'" name
   | `Several_bounds name ->
     Format.fprintf ppf "Type error: variable '%s' is bound several times" name
+  | `InvalidRecLeftHand -> Format.fprintf ppf "Type error: left rec"
   | `Not_impl -> Format.fprintf ppf "TODO: Not implemented."
 ;;
 

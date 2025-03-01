@@ -211,14 +211,6 @@ let parse_efun p_expr =
   | _ -> fail "Syntax errror"
 ;;
 
-(* let rec parse_bundle pexpr =
-  let expr_with_pattern =
-    parse_pattern
-    >>= fun pat -> parse_bundle pexpr <|> token "=" *> pexpr >>| fun e -> EFun (pat, e)
-  in
-  expr_with_pattern
-;; *)
-
 let parse_eif arg =
   skip_wspace
   *> lift3
@@ -322,12 +314,6 @@ let parse_declaration =
   | _ when List.length args <> 0 -> fail "Syntax error"
   | _ -> return @@ ddeclaration decl expression
 ;;
-
-(* let parse_single_declaration =
-  keyword "let"
-  *> let* rec_flag = keyword "rec" *> return Rec <|> return NoRec in
-     parse_declaration >>| fun x -> SingleDecl (rec_flag, x)
-;; *)
 
 let parse_declarations =
   keyword "let"

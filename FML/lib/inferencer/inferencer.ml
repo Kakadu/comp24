@@ -336,6 +336,26 @@ let check_unique_vars =
   helper VarSet.empty
 ;;
 
+let check_unique_vars_list patterns =
+  let rec helper var_set = function
+    | [] -> return var_set
+    | PIdentifier name :: rest ->
+      if VarSet.mem name var_set
+      then fail (`Several_bounds name)
+      else helper (VarSet.add name var_set) rest
+    | PAny :: rest -> helper var_set rest
+    | PNill :: rest -> helper var_set rest
+    | PUnit :: rest -> helper var_set rest
+    | PConst _ :: rest -> helper var_set rest
+    | PTuple ts :: rest -> helper var_set (ts @ rest)
+    | PCons (hd, tl) :: rest ->
+      let* var_set = helper var_set [ hd ] in
+      helper var_set (tl :: rest)
+    | PConstraint (pat, _) :: rest -> helper var_set (pat :: rest)
+  in
+  helper VarSet.empty patterns
+;;
+
 let infer_const c =
   let ty =
     match c with
@@ -546,37 +566,9 @@ let infer_single_decl env (DDeclaration (pat, expr)) =
   return (env3, List.rev names_list)
 ;;
 
-(* let infer_decl env = function
-  | SingleDecl (rec_flag, single_decl) ->
-    (match rec_flag with
-     | NoRec -> infer_single_decl env single_decl
-     | Rec -> fail `Not_impl)
-    (* let* fv = fresh_var in
-       let env2 = TypeEnv.extend env name (Scheme (TVarSet.empty, fv)) in
-       let* sub1, ty1 = infer_expr env2 expr in
-       let* sub2 = Subst.unify ty1 fv in
-       let* sub3 = Subst.compose sub1 sub2 in
-       let ty3 = Subst.apply sub3 fv in
-       let new_acc = TypeEnv.extend acc_env name (Scheme (TVarSet.empty, ty3)) in
-       let new_names_list = update_name_list name acc_names in
-       helper (return (new_acc, new_names_list)) tl) *)
-  | MutableRecDecl (rec_flag, decl_list) ->
-    (match rec_flag with
-     | NoRec ->
-       let* env, names_list =
-         Base.List.fold_left
-           ~f:(fun acc item ->
-             let* env, lst = acc in
-             let* env, names_list = infer_single_decl env item in
-             return (env, names_list @ lst))
-           ~init:(return (env, []))
-           decl_list
-       in
-       return (env, List.rev names_list)
-     | Rec -> fail `Not_impl)
-;; *)
+let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
-let infer_decl env = function
+let infer_decl env name_list = function
   | NoRecDecl decls ->
     let* env, names_list =
       Base.List.fold_left
@@ -588,7 +580,45 @@ let infer_decl env = function
         decls
     in
     return (env, List.rev names_list)
-  | _ -> fail `Not_impl
+  | RecDecl decls ->
+    let tmp_vars env decls =
+      List.fold_left
+        (fun acc (DDeclaration (pat, _)) ->
+           let* env, vars = acc in
+           match pat with
+           | PIdentifier name ->
+             let* fv = fresh_var in
+             let env' = TypeEnv.extend env name (Scheme (TVarSet.empty, fv)) in
+             return (env', (name, fv) :: vars)
+           | _ -> fail `InvalidRecLeftHand)
+        (return (env, []))
+        decls
+    in
+    let infer_decls env cases temp_vars =
+      List.fold_left
+        (fun acc -> function
+           | DDeclaration (PIdentifier name, expr) ->
+             let* acc_env, acc_name_list = acc in
+             let* sub', ty_expr = infer_expr env expr in
+             let* tv =
+               match List.assoc_opt name temp_vars with
+               | Some temp_ty -> return temp_ty
+               | None -> fail (`Unbound_variable name)
+             in
+             let* sub'' = Subst.unify tv ty_expr in
+             let* final_sub = Subst.compose sub' sub'' in
+             let final_typ = Subst.apply final_sub tv in
+             let new_acc_env =
+               TypeEnv.extend acc_env name (Scheme (TVarSet.empty, final_typ))
+             in
+             let new_acc_names_list = update_name_list name acc_name_list in
+             return (new_acc_env, new_acc_names_list)
+           | _ -> fail `InvalidRecLeftHand)
+        (return (env, name_list))
+        cases
+    in
+    let* extended_env, temp_vars = tmp_vars env decls in
+    infer_decls extended_env decls temp_vars
 ;;
 
 let start_env =
@@ -603,6 +633,7 @@ let start_env =
     ; "( >= )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( <> )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( = )", TFunction (TVar 1, TFunction (TVar 1, TBool))
+    ; "( == )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( ~- )", TFunction (TInt, TInt)
     ; "not", TFunction (TBool, TBool)
     ; "print_int", TFunction (TInt, TUnit)
@@ -614,13 +645,16 @@ let start_env =
 ;;
 
 let infer_program program =
-  Base.List.fold_left
-    ~f:(fun acc item ->
-      let* env, lst = acc in
-      let* env, names_list = infer_decl env item in
-      return (env, names_list @ lst))
-    ~init:(return (start_env, []))
-    program
+  let* env, id_list =
+    Base.List.fold_left
+      ~f:(fun acc item ->
+        let* env, lst = acc in
+        let* env, names_list = infer_decl env [] item in
+        return (env, names_list @ lst))
+      ~init:(return (start_env, []))
+      program
+  in
+  return (env, List.rev id_list)
 ;;
 
 let run_program_inferencer program = run (infer_program program)
