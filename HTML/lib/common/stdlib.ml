@@ -20,5 +20,8 @@ let stdlib =
   ; "GET_HEAD"
   ; "GET_TALE"
   ; "GET_NTH"
+  ; "( = )"
+  ; "( != )"
+  ; "( && )"
   ]
 ;;

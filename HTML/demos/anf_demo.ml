@@ -1,10 +1,10 @@
 let anf_demo s =
   match Parser.parse_program s with
   | Ok actual ->
-    let prog = Anf.Cc_ll.closure_convert actual in
+    let prog = Patelim.Elim.p_elim_decls actual in
     (match prog with
      | Ok actual ->
-       let prog = Patelim.Elim.p_elim_decls actual in
+      let prog = Anf.Cc_ll.closure_convert actual in
        (match prog with
         | Ok actual ->
           let prog = Anf.Anf_conv.run actual in
