@@ -4,11 +4,12 @@
 
 open AstLib.Ast
 
-(* todo WriterT? *)
 module CounterWriterMonad = struct
   type 'a cc = int -> ('a, string) Result.t * int * decl list
 
   let return (x : 'a) : 'a cc = fun s -> (Ok x, s, [])
+
+  let fail (msg : string) : 'a cc = fun s -> (Error msg, s, [])
 
   let bind (m : 'a cc) (f : 'a -> 'b cc) : 'b cc =
     fun s ->
@@ -34,11 +35,14 @@ open Utils
 
 let cc_ll_prefix = "cc_ll_"
 
-let ident_to_string (id : ident) : string =
+let ident_to_string (id : ident) =
   match id with
   | IdentOfDefinable (IdentLetters s) -> s
   | IdentOfDefinable (IdentOp s) -> s
-  | IdentOfBaseOp _ -> failwith "base operator is not a variable"
+  | IdentOfBaseOp base_op ->  
+    (match base_op with
+    | Plus -> "base +"
+    | Minus -> "base -") 
 ;;
 
 let rec pattern_to_string (pat : pattern_or_op) : string list =
