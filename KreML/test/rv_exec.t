@@ -8,6 +8,20 @@
 
   $ dune exec rv_codegen <<- EOF > test.S
   > let main =
+  >   let rec fib n k = if n<2 then 1 else fib (n-1) (fun a -> fib (n-2) (fun b -> k (a+b))) in
+  >   let x = fib 5 (fun x -> x) in
+  >   let () = print_int x in
+  >   0
+  Fatal error: exception Failure("Reached unreachable by assumption code")
+
+  [2]
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+
+  $ qemu-riscv64-static test.out
+  0
+
+  $ dune exec rv_codegen <<- EOF > test.S
+  > let main =
   >   let map f (x, y) = f x, f y in
   >   let a, b = map (fun x -> x + 1) (1, 2) in
   >   let () = print_int a in
