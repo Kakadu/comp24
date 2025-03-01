@@ -46,7 +46,7 @@ let generalize env ty =
   Scheme.create free ty
 ;;
 
-let rec read_ast_type =
+let rec typexpr_to_type =
   let base_type_mapper = function
     | "int" -> Some TInt
     | "char" -> Some TChar
@@ -56,10 +56,10 @@ let rec read_ast_type =
   in
   function
   | Type_constructor_param (tye, name) ->
-    let+ tye = read_ast_type tye in
+    let+ tye = typexpr_to_type tye in
     TConstructor (Some tye, name)
   | Type_tuple m ->
-    let+ tys = map read_ast_type m in
+    let+ tys = map typexpr_to_type m in
     TTuple tys
   | Type_single name ->
     return
@@ -69,10 +69,10 @@ let rec read_ast_type =
   | Type_fun l ->
     let rec helper = function
       | h :: [] ->
-        let+ res = read_ast_type h in
+        let+ res = typexpr_to_type h in
         res
       | h :: tl ->
-        let+ h = read_ast_type h
+        let+ h = typexpr_to_type h
         and+ tl = helper tl in
         TArrow (h, tl)
       | _ -> fail (Invalid_ast "fun type without any type")
@@ -80,7 +80,7 @@ let rec read_ast_type =
     helper l
 ;;
 
-let rec infer_base_type c =
+let infer_base_type c =
   let const_to_type = function
     | Const_int _ -> TInt
     | Const_char _ -> TChar
@@ -88,56 +88,64 @@ let rec infer_base_type c =
     | Const_bool _ -> TBool
   in
   return (Subst.empty, TBase (const_to_type c))
+;;
 
-and infer_binding env pat (exp : expression) =
-  let rec helper env = function
-    | Pat_any ->
-      let+ fv = fresh_var in
-      env, Subst.empty, fv
-    | Pat_var name ->
-      let+ fv = fresh_var in
-      let env = TypeEnv.extend env name (Scheme.create VarSet.empty fv) in
-      env, Subst.empty, fv
-    | Pat_type (pat, tye) ->
-      let* env, sub1, ty = helper env pat in
-      let* ty2 = read_ast_type tye in
-      let* sub2 = Subst.unify ty ty2 in
-      let+ sub = Subst.compose sub1 sub2 in
-      env, sub, ty
-    | Pat_constant base ->
-      let+ sub, base_type = infer_base_type base in
-      env, sub, base_type
-    | Pat_tuple l ->
-      let+ env, sub, tys =
-        fold_left
-          (fun (env, sub, l) el ->
-            let* env, sub2, ty = helper env el in
-            let+ sub = Subst.compose sub sub2 in
-            env, sub, ty :: l)
-          (return (env, Subst.empty, []))
-          l
-      in
-      env, sub, TTuple (List.rev tys)
-    | Pat_or (l, r) ->
-      let* env, sub1, ty1 = helper env l in
-      let* env, sub2, ty2 = helper env r in
-      let* sub3 = Subst.unify ty1 ty2 in
-      let+ sub = Subst.compose_all [ sub1; sub2; sub3 ] in
-      env, sub, ty1
-    | Pat_construct (name, pat) ->
-      (match pat with
-       | Some x ->
-         let+ env, sub, ty = helper env x
-         and+ name = find_constructor name in
-         env, sub, TConstructor (Some ty, name)
-       | None -> return (env, Subst.empty, TConstructor (None, name)))
-  in
-  let* env, sub1, ty1 = helper env pat in
-  let* sub2, ty2 = infer_expression env exp in
-  let+ sub = Subst.compose sub1 sub2 in
-  sub, ty1, ty2
+let rec infer_pattern env = function
+  | Pat_any ->
+    let+ fv = fresh_var in
+    env, Subst.empty, fv
+  | Pat_var name ->
+    let+ fv = fresh_var in
+    let env = TypeEnv.extend env name (Scheme.create VarSet.empty fv) in
+    env, Subst.empty, fv
+  | Pat_type (pat, tye) ->
+    let* env, sub1, ty = infer_pattern env pat in
+    let* ty2 = typexpr_to_type tye in
+    let* sub2 = Subst.unify ty ty2 in
+    let+ sub = Subst.compose sub1 sub2 in
+    env, sub, ty
+  | Pat_constant base ->
+    let+ sub, base_type = infer_base_type base in
+    env, sub, base_type
+  | Pat_tuple l ->
+    let+ env, sub, tys =
+      fold_left
+        (fun (env, sub, l) el ->
+          let* env, sub2, ty = infer_pattern env el in
+          let+ sub = Subst.compose sub sub2 in
+          env, sub, ty :: l)
+        (return (env, Subst.empty, []))
+        l
+    in
+    env, sub, TTuple (List.rev tys)
+  | Pat_or (l, r) ->
+    let* env, sub1, ty1 = infer_pattern env l in
+    let* env, sub2, ty2 = infer_pattern env r in
+    let* sub3 = Subst.unify ty1 ty2 in
+    let+ sub = Subst.compose_all [ sub1; sub2; sub3 ] in
+    env, sub, ty1
+  | Pat_construct (name, pat) ->
+    (* only constructors with one type var is supported *)
+    (match pat with
+     | Some x ->
+       let* env, s1, ty = infer_pattern env x in
+       let* constr_name = find_constructor name in
+       if name = "::"
+       then (
+         match ty with
+         | TTuple [ l; r ] ->
+           let* sub = Subst.unify (TConstructor (Some l, "list")) r in
+           let+ sub = Subst.compose s1 sub in
+           env, sub, Subst.apply sub r
+         | _ -> fail Invalid_list_constructor_argument)
+       else return (env, s1, TConstructor (Some ty, constr_name))
+     | None ->
+       let+ fv = fresh_var
+       and+ constr_name = find_constructor name in
+       env, Subst.empty, TConstructor (Some fv, constr_name))
+;;
 
-and infer_if env cond bthen belse =
+let rec infer_if env cond bthen belse =
   let bool_type = TBase TBool in
   let* s1, t1 = infer_expression env cond in
   let* s2, t2 = infer_expression env bthen in
@@ -153,30 +161,29 @@ and infer_if env cond bthen belse =
   let+ united_sub = Subst.compose_all @@ else_branch_subs @ [ s3; s2; s1 ] in
   united_sub, res_type
 
-and infer_fun env vars exp =
-  let rec helper env = function
-    | var :: tl ->
-      let* fv = fresh_var in
-      let env =
-        match var with
-        | Pat_var name -> TypeEnv.extend env name (Scheme.create VarSet.empty fv)
-        | _ -> env
-      in
-      let+ env, vars = helper env tl in
-      env, fv :: vars
-    | _ -> return (env, [])
+and infer_fun env args exp =
+  let* env, sub1, args =
+    fold_left
+      (fun (env, sub, targs) arg ->
+        let* env, sub2, ty = infer_pattern env arg in
+        let+ sub = Subst.compose sub sub2 in
+        env, sub, ty :: targs)
+      (return (env, Subst.empty, []))
+      args
   in
-  let* env, fvs = helper env vars in
-  let+ sub, ty = infer_expression env exp in
+  let* sub2, ty = infer_expression env exp in
+  let+ sub = Subst.compose sub1 sub2 in
   ( sub
-  , List.fold_right (fun fv ty -> TArrow (Subst.apply sub fv, Subst.apply sub ty)) fvs ty
-  )
+  , List.fold_right
+      (fun fv ty -> TArrow (Subst.apply sub fv, Subst.apply sub ty))
+      (List.rev args)
+      ty )
 
 and infer_let env rec_flag bindings =
   match rec_flag with
   | Nonrecursive ->
     fold_left
-      (fun (env, sub, vars_types) bind ->
+      (fun (env, sub) bind ->
         match bind with
         | Val_binding (var, args, exp) ->
           let* s1, t1 = infer_fun env args exp in
@@ -184,9 +191,14 @@ and infer_let env rec_flag bindings =
           let sheme = generalize env t1 in
           let env = TypeEnv.extend env var sheme in
           let+ sub = Subst.compose sub s1 in
-          env, sub, (var, t1) :: vars_types
-        | _ -> raise @@ Unimplemented "infer_let")
-      (return (env, Subst.empty, []))
+          env, sub
+        | Pat_binding (pat, exp) ->
+          let* env, sub2, ty = infer_pattern env pat in
+          let* sub3, ty2 = infer_expression env exp in
+          let* sub4 = Subst.unify ty ty2 in
+          let+ sub = Subst.compose_all [ sub; sub2; sub3; sub4 ] in
+          TypeEnv.apply sub env, sub)
+      (return (env, Subst.empty))
       bindings
   | Recursive ->
     let* bind_data, env =
@@ -202,7 +214,7 @@ and infer_let env rec_flag bindings =
         bindings
     in
     fold_left
-      (fun (env, sub, vars_types) (fv, var, args, exp) ->
+      (fun (env, sub) (fv, var, args, exp) ->
         let* s1, t1 = infer_fun env args exp in
         let* s2 = Subst.unify (Subst.apply s1 fv) t1 in
         let* s = Subst.compose s2 s1 in
@@ -210,8 +222,8 @@ and infer_let env rec_flag bindings =
         let sheme = generalize env (Subst.apply s t1) in
         let env = TypeEnv.extend env var sheme in
         let+ sub = Subst.compose sub s1 in
-        env, sub, (var, t1) :: vars_types)
-      (return (env, Subst.empty, []))
+        env, sub)
+      (return (env, Subst.empty))
       bind_data
 
 and infer_apply env left right =
@@ -237,7 +249,7 @@ and infer_tuple env l =
 
 and infer_typexpr env exp typexpr =
   let* s1, t1 = infer_expression env exp in
-  let* t2 = read_ast_type typexpr in
+  let* t2 = typexpr_to_type typexpr in
   let* s2 = Subst.unify t1 t2 in
   let+ sub = Subst.compose s1 s2 in
   sub, t2
@@ -262,7 +274,15 @@ and infer_construct env name = function
 
 and infer_match env exp cases =
   let* sub, ty = infer_expression env exp in
-  let* caseslist = map (fun case -> infer_binding env case.left case.right) cases in
+  let* caseslist =
+    map
+      (fun case ->
+        let* env, sub1, ty1 = infer_pattern env case.left in
+        let* sub2, ty2 = infer_expression env case.right in
+        let+ sub = Subst.compose sub1 sub2 in
+        sub, ty1, ty2)
+      cases
+  in
   let* sub2, ty1, ty2 =
     fold_left
       (fun (sub1, ty11, ty21) (sub2, ty12, ty22) ->
@@ -287,7 +307,7 @@ and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = 
   | Exp_fun (vars, exp) -> infer_fun env vars exp
   | Exp_function cases -> infer_function env cases
   | Exp_let (rec_flag, bindings, expression) ->
-    let* env, sub, _ = infer_let env rec_flag bindings in
+    let* env, sub = infer_let env rec_flag bindings in
     let* sub2, ty = infer_expression env expression in
     let+ sub = Subst.compose sub sub2 in
     sub, ty
@@ -296,7 +316,11 @@ and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = 
   | Exp_tuple l -> infer_tuple env l
   | Exp_construct (name, exp) -> infer_construct env name exp
   | Exp_type (exp, typexp) -> infer_typexpr env exp typexp
-  | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
+  | Exp_sequence (exp1, exp2) ->
+    let* sub1, _ = infer_expression env exp1 in
+    let* sub2, ty = infer_expression env exp2 in
+    let+ sub = Subst.compose sub1 sub2 in
+    sub, ty
 ;;
 
 let predefine_operators =
@@ -315,7 +339,7 @@ let init_env =
       (fun (name, ty) ->
         match Parser.Typexpr_parser.parse_typexpr_str ty with
         | Result.Ok ty ->
-          let+ ty = read_ast_type ty in
+          let+ ty = typexpr_to_type ty in
           name, Scheme.create VarSet.empty ty
         | Result.Error s -> fail (Invalid_predefined_operators s))
       predefine_operators
@@ -334,9 +358,14 @@ let infer_structure_item prog =
          let types = types @ [ unnamed_expr, t ] in
          helper env tl types
        | Str_value (rec_flag, bindings) ->
-         let* env, _, vars_types = infer_let env rec_flag bindings in
-         let types = types @ List.rev vars_types in
-         helper env tl types)
+         let* new_env, _ = infer_let env rec_flag bindings in
+         let vars_types =
+           List.map (fun (var, sch) -> var, Scheme.get_type sch)
+           @@ TypeEnv.to_list
+           @@ TypeEnv.diff new_env env
+         in
+         let types = types @ vars_types in
+         helper new_env tl types)
   in
   let* env = init_env in
   helper env prog []
