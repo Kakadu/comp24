@@ -170,10 +170,14 @@ let rec aconvert_expression = function
   | Exp_ident name ->
     let* name' = get_bind name in
     return @@ eval name'
-  | Exp_apply (a, b) | Exp_list (a, b) ->
+  | Exp_apply (a, b) ->
     let* a' = aconvert_expression a in
     let* b' = aconvert_expression b in
     return @@ eapp a' b'
+  | Exp_list (a, b) ->
+    let* a' = aconvert_expression a in
+    let* b' = aconvert_expression b in
+    return @@ econs a' b'
   | Exp_ifthenelse (b, t, e) ->
     let* b' = aconvert_expression b in
     let* t' = aconvert_expression t in
