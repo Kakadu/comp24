@@ -15,7 +15,7 @@ let me_test s =
     let*! ast'' = Match_elim.eliminate_match_in_program ast' in
     Result.ok @@ Optimizations.optimize ast''
   in
-  let ast_printer ast_ = Format.printf "%a\n" Me_ast_pp.pp_me_program ast_ in
+  let ast_printer ast_ = Format.printf "%a\n" Middleend_pp.pp_me_program ast_ in
   print_result ast_printer ast'_t
 ;;
 
@@ -167,8 +167,7 @@ match ab with
     {|
     let me_1 = let ab = (1 []) ((2 []) []) in
     let me_3 = ab in
-    (
-    if (if (( >= ) get_list_len_plus_one me_3) 2
+    (if (if (( >= ) get_list_len_plus_one me_3) 2
      then (( >= ) get_list_len_plus_one ((get_by_idx me_3) 0)) 2
      else false)
      then let a = (get_by_idx ((get_by_idx me_3) 0)) 0 in
