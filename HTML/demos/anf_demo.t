@@ -33,14 +33,7 @@
   app_0
 
   $ ./anf_demo.exe < manytests/do_not_type/015tuples.ml
-  Fatal error: exception Failure("not expected")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Anf_conv.anf_decl.helper in file "lib/middleend/anf_conv.ml", line 124, characters 10-47
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.anf_program.(fun) in file "lib/middleend/anf_conv.ml", line 145, characters 37-57
-  Called from Stdlib__List.map in file "list.ml", line 92, characters 20-23
-  Called from Dune__exe__Anf_demo.anf_demo in file "demos/anf_demo.ml", line 9, characters 17-48
-  [2]
+  other patterns not supported (anf is run after pattern elimination)
 
 PASS
   $ ./anf_demo.exe < manytests/typed/001fac.ml
@@ -257,17 +250,7 @@ PASS
 
 PASS
   $ ./anf_demo.exe < manytests/typed/007order.ml
-  Fatal error: exception Failure("not implemented / needed")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Anf_conv.anf_expr.(fun) in file "lib/middleend/anf_conv.ml", line 96, characters 19-36
-  Called from Anf__Anf_conv.anf_expr.(fun) in file "lib/middleend/anf_conv.ml", line 85, characters 19-77
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.anf_program.(fun) in file "lib/middleend/anf_conv.ml", line 145, characters 37-57
-  Called from Stdlib__List.map in file "list.ml", line 92, characters 20-23
-  Called from Dune__exe__Anf_demo.anf_demo in file "demos/anf_demo.ml", line 9, characters 17-48
-  [2]
+  other expressions not supported
 
 PASS
   $ ./anf_demo.exe < manytests/typed/008ascription.ml
@@ -297,16 +280,7 @@ PASS
   (app_0, app_1)
 
   $ ./anf_demo.exe < manytests/typed/015tuples.ml
-  Fatal error: exception Failure("not expected")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Anf__Anf_conv.anf_expr.(fun) in file "lib/middleend/anf_conv.ml", line 98, characters 16-47
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.bind in file "lib/middleend/anf_conv.ml", line 14, characters 14-17
-  Called from Anf__Anf_conv.anf_program.(fun) in file "lib/middleend/anf_conv.ml", line 145, characters 37-57
-  Called from Stdlib__List.map in file "list.ml", line 92, characters 20-23
-  Called from Stdlib__List.map in file "list.ml", line 92, characters 32-39
-  Called from Dune__exe__Anf_demo.anf_demo in file "demos/anf_demo.ml", line 9, characters 17-48
-  [2]
+  other patterns not supported (anf is run after pattern elimination)
 
   $ ./anf_demo.exe < manytests/typed/016lists.ml
   let rec length xs = let EVALUATED_0 = xs in

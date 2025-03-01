@@ -16,14 +16,14 @@ let rec gen_var (base : string) (global : StringSet.t) : string t =
 open AstLib.Ast
 
 let pattern_to_identifier = function
-  | PId s -> Id s
-  | PConstraint (PId s, ty) -> IdConstraint(s, ty)
-  | _ -> failwith "not expected"
+  | PId s -> return @@ Id s
+  | PConstraint (PId s, ty) -> return @@ IdConstraint(s, ty)
+  | _ -> fail "other patterns not supported (anf is run after pattern elimination)"
 
 let pattern_or_op_to_identifier = function
   | POpPat p -> pattern_to_identifier p
-  | POpOp s -> Id s
-  | _ -> failwith "not expected"
+  | POpOp s -> return @@ Id s
+  | _ -> fail "other patterns not supported (anf is run after pattern elimination)"
 
 let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr t =
   let anf_list env exprs cont =
@@ -52,7 +52,7 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
           | h :: tl ->
             let* rest = roll_capp tl in
             return (CApp (rest, CImmExpr h))
-          | [] -> failwith "todo impossible"
+          | [] -> fail "impossible?"
           (* todo: identifier from ast *)
         in
         let* capp = roll_capp @@ List.rev (fimm :: argsimm) in
@@ -77,10 +77,10 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
     anf_expr env e1 (fun imm1 ->
       let* aexpr = anf_expr env e2 k in
       (* todo remove let a = b in *)
-      let id =  pattern_or_op_to_identifier pat in
+      let* id =  pattern_or_op_to_identifier pat in
       return (ALetIn (id, CImmExpr imm1, aexpr)))
 
-  | _ -> failwith "not implemented / needed"
+  | _ -> fail "other expressions not supported"
 ;;
 
 let rec unroll_efun (expr : expr) : pattern list * expr =
@@ -94,7 +94,7 @@ let rec unroll_efun (expr : expr) : pattern list * expr =
 let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
   let helper (pat_or_op, expr)= 
     let efun_pats, body_expr = unroll_efun expr in
-    let efun_ids = List.map pattern_to_identifier efun_pats in
+    let* efun_ids = List.map pattern_to_identifier efun_pats |> sequence in
   let env =
     StringSet.union
       env
@@ -103,7 +103,8 @@ let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
   let* aexpr =
     anf_expr env body_expr (fun immexpr -> return (ACExpr (CImmExpr immexpr)))
   in
-  return (pattern_or_op_to_identifier pat_or_op, efun_ids, aexpr)
+  let* pat_or_op = pattern_or_op_to_identifier pat_or_op in
+  return (pat_or_op, efun_ids, aexpr)
 in
   match d with
   | DLet (rf, lb) ->
