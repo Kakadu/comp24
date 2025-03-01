@@ -2,6 +2,7 @@ open Riscv
 open Flambda
 open Linear_scan_allocation
 
+let closures_cache = ref (Base.Map.empty (module Base.String))
 let word_size = 8
 let arg_regs_count = 8
 let curr_block = ref [ Global "main" ]
@@ -115,51 +116,23 @@ module Arith = struct
           let load = ld ~rd:yreg offset ~src:base in
           yreg, save @ [ load ], restore
       in
-      if imm_is_12_bytes imm
-      then (
-        let insns =
-          match op with
-          | Anf.Add -> [ Itype (rd, yreg, imm, ADDI) ]
-          | Anf.Sub ->
-            let negate = Pseudo.neg yreg in
-            [ negate; Itype (rd, yreg, -imm, ADDI); negate ]
-          | Anf.Mul | Anf.Div ->
-            let xreg, xsave, xrestore = find_reg [ yreg; rd ] in
-            let load = Pseudo.li xreg imm in
-            let insn =
-              match op with
-              | Anf.Mul -> Rtype (rd, xreg, yreg, MUL)
-              | Anf.Div -> Rtype (rd, xreg, yreg, DIV)
-              | _ -> Utils.unreachable ()
-            in
-            xsave @ [ load; insn ] @ xrestore
-          | Anf.Eq -> [ Itype (rd, yreg, -imm, ADDI); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> [ Itype (rd, yreg, -imm, ADDI) ]
-          | Anf.Gt -> [ Itype (rd, yreg, imm, SLTI) ]
-          (* imm < reg  <=> 0 < reg - imm*)
-          | Anf.Lt -> [ Itype (rd, yreg, -imm, ADDI); Rtype (rd, Zero, rd, SLT) ]
-          | Anf.And -> [ Itype (rd, yreg, imm, ANDI) ]
-          | Anf.Or -> [ Itype (rd, yreg, imm, ORI) ]
-        in
-        save @ insns @ restore)
-      else (
-        let xreg, xsave, xrestore = find_reg [ yreg; rd ] in
-        let load_x = Pseudo.li xreg imm in
-        let build_instr insns = build_complex_instr xsave (load_x :: insns) xrestore in
-        let insns =
-          match op with
-          | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
-          | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
-          | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
-          | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
-          | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
-          | Anf.Eq -> build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
-          | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
-          | Anf.And -> build_instr [ Rtype (rd, yreg, xreg, AND) ]
-          | Anf.Or -> build_instr [ Rtype (rd, yreg, xreg, OR) ]
-        in
-        save @ insns @ restore)
+      let xreg, xsave, xrestore = find_reg [ yreg; rd ] in
+      let load_x = Pseudo.li xreg imm in
+      let build_instr insns = build_complex_instr xsave (load_x :: insns) xrestore in
+      let insns =
+        match op with
+        | Anf.Add -> build_instr [ Rtype (rd, xreg, yreg, ADD) ]
+        | Anf.Sub -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+        | Anf.Mul -> build_instr [ Rtype (rd, xreg, yreg, MUL) ]
+        | Anf.Div -> build_instr [ Rtype (rd, xreg, yreg, DIV) ]
+        | Anf.Lt -> build_instr [ Rtype (rd, xreg, yreg, SLT) ]
+        | Anf.Gt -> build_instr [ Rtype (rd, yreg, xreg, SLT) ]
+        | Anf.Eq -> build_instr [ Rtype (rd, xreg, yreg, SUB); Pseudo.seqz ~rd ~src:rd ]
+        | Anf.Neq -> build_instr [ Rtype (rd, xreg, yreg, SUB) ]
+        | Anf.And -> build_instr [ Rtype (rd, yreg, xreg, AND) ]
+        | Anf.Or -> build_instr [ Rtype (rd, yreg, xreg, OR) ]
+      in
+      save @ insns @ restore
     | Fl_var x, Fl_const y ->
       let imm = const_to_int y in
       let xloc = Base.Map.find_exn !curr_assignment x in
@@ -486,11 +459,14 @@ let rec codegen_flambda location =
   | Fl_var id ->
     (match Base.Map.find !curr_assignment id with
      | None ->
-       print_endline @@ Format.sprintf "unbound var %s" id;
-       Utils.unreachable ()
-     | Some (Loc_reg reg) -> Rv_reg reg
-     | Some (Loc_mem (base, offset)) -> Rv_mem (base, offset))
-    |> Memory.store_rvalue location
+       (match Base.Map.find !closures_cache id with
+        | Some closure -> codegen_flambda location closure
+        | None ->
+          print_endline @@ Format.sprintf "unbound var %s" id;
+          Utils.unreachable ())
+     | Some (Loc_reg reg) -> Rv_reg reg |> Memory.store_rvalue location
+     | Some (Loc_mem (base, offset)) ->
+       Rv_mem (base, offset) |> Memory.store_rvalue location)
   | Fl_const c ->
     let const = Arith.const_to_int c in
     Rv_imm const |> Memory.store_rvalue location
@@ -572,8 +548,9 @@ let rec codegen_flambda location =
     append_reversed insns;
     let insns = codegen_flambda location scope in
     insns
-  | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
-    when arity = List.length args && arity < arg_regs_count && env_size = 0 && arity > 0
+  (* this optimization causes sefgaut xdd *)
+  (* | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
+    when arity = List.length args && arity < arg_regs_count && env_size = 0
     ->
     let save, restore =
       Function.Call.save_and_restore_insns ~caller_arity:!current_fun_arity location
@@ -584,7 +561,7 @@ let rec codegen_flambda location =
     let save_retvalue = Memory.store_rvalue location a0value in
     (match location with
      | Loc_reg _ -> save @ put_args_insns @ (call :: save_retvalue) @ restore
-     | Loc_mem _ -> save @ put_args_insns @ (call :: restore) @ save_retvalue)
+     | Loc_mem _ -> save @ put_args_insns @ (call :: restore) @ save_retvalue) *)
   | Fl_app (f, args) ->
     let save, restore =
       Function.Call.save_and_restore_insns ~caller_arity:!current_fun_arity location
@@ -718,7 +695,8 @@ let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
 
 module RvAllocator = Linear_scan_allocation.Allocator (RegistersStorage)
 
-let codegen_program flstructure =
+let codegen_program (flstructure, closures) =
+  closures_cache := closures;
   let available_regs = Riscv.available_regs in
   let regs_assignment = RvAllocator.scan_program available_regs flstructure in
   List.iter2

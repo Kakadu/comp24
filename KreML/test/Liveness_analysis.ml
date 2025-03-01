@@ -15,7 +15,7 @@ let () =
        let alpha = Alpha_transformer.transform structure in
        let mf_structure = Match_elimination.eliminate alpha in
        let arities, anf = Anf.transform mf_structure in
-       let flstructure = Closure_conversion.cc arities anf in
+       let flstructure = Closure_conversion.cc arities anf |> fst in
        let liveness_analysis = Liveness_analysis.analyse_program flstructure in
        Liveness_analysis.pp std_formatter liveness_analysis
      | Error error ->

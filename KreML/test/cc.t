@@ -353,3 +353,34 @@
                            1 10 100  ]) in 
              0   } 
   
+
+  $ dune exec closure_conv <<- EOF
+  > let main =
+  >   let rec fib n k = if n<2 then 1 else fib (n-1) (fun a -> fib (n-2) (fun b -> k (a+b))) in
+  >   let x = fib 5 (fun x -> x) in
+  >   let () = print_int x in
+  >   0
+  fresh_fun_2(b_4 a_3 k_2 ) {let t_10 = a_3 + b_4 in  k_2 ([ t_10  ]) } 
+  
+  fresh_fun_1(a_3 fib_0 k_2 n_1 ) {let t_7 = n_1 - 2 in 
+                                    let t_8 = { name: fresh_fun_2, arity: 1 env_size: 2, arrange [
+                                              1: a_3; 2: k_2;  ]}  in 
+                                     { name: fib_0, arity: 2 env_size: 0, arrange [ ]}  ([ 
+                                     t_7 t_8  ])  } 
+  
+  fib_0(n_1 k_2 ) {let t_3 = n_1 < 2 in 
+                    if t_3  then 1  else 
+                     let t_4 = n_1 - 1 in 
+                      let t_5 = { name: fresh_fun_1, arity: 1 env_size: 3, arrange [
+                                1: fib_0; 2: k_2; 3: n_1;  ]}  in 
+                       { name: fib_0, arity: 2 env_size: 0, arrange [ ]}  ([ 
+                       t_4 t_5  ])    } 
+  
+  fresh_fun_0(x_5 ) {x_5} 
+  
+  main() {let t_1 = { name: fresh_fun_0, arity: 1 env_size: 0, arrange [ ]}  in 
+           let x_6 = { name: fib_0, arity: 2 env_size: 0, arrange [ ]}  ([ 
+                     5 t_1  ]) in 
+            { name: print_int, arity: 1 env_size: 0, arrange [ ]}  ([ x_6  ]); 
+             0   } 
+  

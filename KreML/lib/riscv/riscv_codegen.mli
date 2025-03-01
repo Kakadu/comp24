@@ -5,5 +5,8 @@
 open Flambda
 open Riscv
 
-val codegen_program : flstructure -> instruction list
+val codegen_program
+  :  flstructure * (string, Flambda.flambda, Base.String.comparator_witness) Base.Map.t
+  -> instruction list
+
 val dump : instruction list -> unit

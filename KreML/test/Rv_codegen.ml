@@ -16,8 +16,8 @@ let () =
        let alpha = Alpha_transformer.transform structure in
        let mf_structure = Match_elimination.eliminate alpha in
        let arities, anf = Anf.transform mf_structure in
-       let flstructure = Closure_conversion.cc arities anf in
-       let insns = Riscv_codegen.codegen_program flstructure in
+       let ccinfo = Closure_conversion.cc arities anf in
+       let insns = Riscv_codegen.codegen_program ccinfo in
        Riscv_codegen.dump insns
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)

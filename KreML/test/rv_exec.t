@@ -34,6 +34,18 @@
 
   $ dune exec rv_codegen <<- EOF > test.S
   > let main =
+  >   let rec fib n k = if n<2 then k 1 else fib (n-1) (fun a -> fib (n-2) (fun b -> k (a+b))) in
+  >   let x = fib 10 (fun x -> x) in
+  >   let () = print_int x in
+  >   0
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+
+  $ qemu-riscv64-static test.out
+  89
+
+
+  $ dune exec rv_codegen <<- EOF > test.S
+  > let main =
   >   let a = 5 in
   >   let f x = a + x in
   >   let () = print_int (f 5) in
@@ -114,9 +126,13 @@ $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime
 $ qemu-riscv64-static test.out
 
 debug it lol)
-$ dune exec rv_codegen < manytests/typed/015tuples.ml > test.S
-$ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
-$ qemu-riscv64-static test.out
+  $ dune exec rv_codegen < manytests/typed/015tuples.ml > test.S
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+  $ qemu-riscv64-static test.out
+  1
+  1
+  1
+  1
 
   $ dune exec rv_codegen < manytests/typed/016lists.ml > test.S
   $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a

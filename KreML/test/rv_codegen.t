@@ -20,9 +20,36 @@
   	addi s0, sp, 16
   	addi sp, sp, -16
   	sd ra, 8(sp) 
+  	addi sp, sp, -32
+  	sd ra, 8(sp) 
+  	sd t0, 16(sp) 
   	li a0, 1
-  	call print_int
+  	call alloc_tuple
+  	mv t1, a0
+  	ld ra, 8(sp) 
+  	ld t0, 16(sp) 
+  	addi sp, sp, 32
+  	addi sp, sp, -32
+  	sd ra, 8(sp) 
+  	sd t1, 16(sp) 
+  	mv a1, t1
+  	la  a0, print_int
+  	li a2, 1
+  	li a3, 0
+  	call alloc_closure
+  	mv t0, a0
+  	ld ra, 8(sp) 
+  	ld t1, 16(sp) 
+  	addi sp, sp, 32
+  	addi sp, sp, -16
+  	li t1, 1
+  	sd t1, 8(sp) 
+  	addi a1, sp, 8
+  	li a2, 1
+  	mv a0, t0
+  	call call_closure
   	mv x0, a0
+  	addi sp, sp, 16
   	ld ra, 8(sp) 
   	addi sp, sp, 16
   	li a0, 0
@@ -63,9 +90,43 @@
   	addi sp, sp, -32
   	sd a0, 8(sp) 
   	sd ra, 16(sp) 
-  	mv a0, t0
-  	call fac
+  	addi sp, sp, -48
+  	sd a0, 8(sp) 
+  	sd ra, 16(sp) 
+  	sd t0, 24(sp) 
+  	sd t1, 32(sp) 
+  	li a0, 1
+  	call alloc_tuple
+  	mv t2, a0
+  	ld a0, 8(sp) 
+  	ld ra, 16(sp) 
+  	ld t0, 24(sp) 
+  	ld t1, 32(sp) 
+  	addi sp, sp, 48
+  	addi sp, sp, -48
+  	sd a0, 8(sp) 
+  	sd ra, 16(sp) 
+  	sd t0, 24(sp) 
+  	sd t2, 32(sp) 
+  	mv a1, t2
+  	la  a0, fac
+  	li a2, 1
+  	li a3, 0
+  	call alloc_closure
+  	mv t1, a0
+  	ld a0, 8(sp) 
+  	ld ra, 16(sp) 
+  	ld t0, 24(sp) 
+  	ld t2, 32(sp) 
+  	addi sp, sp, 48
+  	addi sp, sp, -16
+  	sd t0, 8(sp) 
+  	addi a1, sp, 8
+  	li a2, 1
+  	mv a0, t1
+  	call call_closure
   	mv t0, a0
+  	addi sp, sp, 16
   	ld a0, 8(sp) 
   	ld ra, 16(sp) 
   	addi sp, sp, 32
@@ -95,9 +156,51 @@
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
   	sd t1, 32(sp) 
-  	mv a0, t0
-  	mv a1, t1
-  	call fac
+  	addi sp, sp, -64
+  	sd a0, 8(sp) 
+  	sd a1, 16(sp) 
+  	sd ra, 24(sp) 
+  	sd t0, 32(sp) 
+  	sd t1, 40(sp) 
+  	sd t2, 48(sp) 
+  	li a0, 2
+  	call alloc_tuple
+  	mv t3, a0
+  	ld a0, 8(sp) 
+  	ld a1, 16(sp) 
+  	ld ra, 24(sp) 
+  	ld t0, 32(sp) 
+  	ld t1, 40(sp) 
+  	ld t2, 48(sp) 
+  	addi sp, sp, 64
+  	addi sp, sp, -64
+  	sd a0, 8(sp) 
+  	sd a1, 16(sp) 
+  	sd ra, 24(sp) 
+  	sd t0, 32(sp) 
+  	sd t1, 40(sp) 
+  	sd t3, 48(sp) 
+  	mv a1, t3
+  	la  a0, fac
+  	li a2, 2
+  	li a3, 0
+  	call alloc_closure
+  	mv t2, a0
+  	ld a0, 8(sp) 
+  	ld a1, 16(sp) 
+  	ld ra, 24(sp) 
+  	ld t0, 32(sp) 
+  	ld t1, 40(sp) 
+  	ld t3, 48(sp) 
+  	addi sp, sp, 64
+  	addi sp, sp, -32
+  	sd t0, 8(sp) 
+  	sd t1, 16(sp) 
+  	addi a1, sp, 8
+  	li a2, 2
+  	mv a0, t2
+  	call call_closure
+  	addi sp, sp, 32
   	ld a1, 8(sp) 
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
@@ -207,9 +310,51 @@
   	sd ra, 16(sp) 
   	sd t0, 24(sp) 
   	sd t1, 32(sp) 
-  	mv a0, t0
-  	mv a1, t1
-  	call fack
+  	addi sp, sp, -64
+  	sd a0, 8(sp) 
+  	sd a1, 16(sp) 
+  	sd ra, 24(sp) 
+  	sd t0, 32(sp) 
+  	sd t1, 40(sp) 
+  	sd t2, 48(sp) 
+  	li a0, 2
+  	call alloc_tuple
+  	mv t3, a0
+  	ld a0, 8(sp) 
+  	ld a1, 16(sp) 
+  	ld ra, 24(sp) 
+  	ld t0, 32(sp) 
+  	ld t1, 40(sp) 
+  	ld t2, 48(sp) 
+  	addi sp, sp, 64
+  	addi sp, sp, -64
+  	sd a0, 8(sp) 
+  	sd a1, 16(sp) 
+  	sd ra, 24(sp) 
+  	sd t0, 32(sp) 
+  	sd t1, 40(sp) 
+  	sd t3, 48(sp) 
+  	mv a1, t3
+  	la  a0, fack
+  	li a2, 2
+  	li a3, 0
+  	call alloc_closure
+  	mv t2, a0
+  	ld a0, 8(sp) 
+  	ld a1, 16(sp) 
+  	ld ra, 24(sp) 
+  	ld t0, 32(sp) 
+  	ld t1, 40(sp) 
+  	ld t3, 48(sp) 
+  	addi sp, sp, 64
+  	addi sp, sp, -32
+  	sd t0, 8(sp) 
+  	sd t1, 16(sp) 
+  	addi a1, sp, 8
+  	li a2, 2
+  	mv a0, t2
+  	call call_closure
+  	addi sp, sp, 32
   	ld a1, 8(sp) 
   	ld ra, 16(sp) 
   	ld t0, 24(sp) 
@@ -473,9 +618,39 @@
   	addi sp, sp, -32
   	sd ra, 8(sp) 
   	sd t0, 16(sp) 
-  	mv a0, t0
-  	call print_int
+  	addi sp, sp, -32
+  	sd ra, 8(sp) 
+  	sd t0, 16(sp) 
+  	sd t1, 24(sp) 
+  	li a0, 1
+  	call alloc_tuple
+  	mv t2, a0
+  	ld ra, 8(sp) 
+  	ld t0, 16(sp) 
+  	ld t1, 24(sp) 
+  	addi sp, sp, 32
+  	addi sp, sp, -32
+  	sd ra, 8(sp) 
+  	sd t0, 16(sp) 
+  	sd t2, 24(sp) 
+  	mv a1, t2
+  	la  a0, print_int
+  	li a2, 1
+  	li a3, 0
+  	call alloc_closure
+  	mv t1, a0
+  	ld ra, 8(sp) 
+  	ld t0, 16(sp) 
+  	ld t2, 24(sp) 
+  	addi sp, sp, 32
+  	addi sp, sp, -16
+  	sd t0, 8(sp) 
+  	addi a1, sp, 8
+  	li a2, 1
+  	mv a0, t1
+  	call call_closure
   	mv x0, a0
+  	addi sp, sp, 16
   	ld ra, 8(sp) 
   	ld t0, 16(sp) 
   	addi sp, sp, 32

@@ -38,14 +38,17 @@ end
 
 module CC_state = struct
   type freevars = (string, string list, Base.String.comparator_witness) Base.Map.t
+  type closures = (string, flambda, Base.String.comparator_witness) Base.Map.t
 
   type ctx =
     { global_env : flstructure
+    ; closures : closures
     ; freevars : freevars
     ; arities : arities
     }
 
   let empty_ctx arities =
+    let closures = Base.Map.empty (module Base.String) in
     let freevars = Base.Map.empty (module Base.String) in
     let freevars =
       List.fold_left
@@ -60,7 +63,7 @@ module CC_state = struct
         (Cstdlib.stdlib_funs_with_arity @ Runtime.runtime_funs_with_arities)
     in
     (* let freevars = Base.Map.set freevars ~key:"print_int" ~data:([] : string list) in *)
-    { global_env = []; freevars; arities }
+    { global_env = []; freevars; arities; closures }
   ;;
 
   module Monad = State (struct
@@ -108,6 +111,13 @@ module CC_state = struct
     in
     return ()
   ;;
+
+  let put_closure name cl =
+    let open Monad in
+    let* ({ closures; _ } as state) = get in
+    let* _ = put { state with closures = Base.Map.set closures ~key:name ~data:cl } in
+    return ()
+  ;;
 end
 
 open CC_state
@@ -137,16 +147,22 @@ let imm i =
           let env_size = List.length fv in
           let start_index = arity in
           let arrange = List.mapi (fun i id -> i + start_index, flvar id) fv in
-          Fl_closure { name = id; env_size; arrange; arity } |> return)
+          let cl = Fl_closure { name = id; env_size; arrange; arity } in
+          let* _ = put_closure id cl in
+          return cl)
      | Some (Fun_with_env { arity; param_names; _ }) ->
        let env_size = List.length param_names - arity in
        (* inherited args come after call args *)
        let _, fv = Base.List.split_n param_names arity in
        let start_index = arity in
        let arrange = List.mapi (fun i id -> i + start_index, flvar id) fv in
-       Fl_closure { name = id; env_size; arrange; arity } |> return
+       let cl = Fl_closure { name = id; env_size; arrange; arity } in
+       let* _ = put_closure id cl in
+       return cl
      | Some (Fun_without_env { arity; _ }) ->
-       Fl_closure { name = id; env_size = 0; arrange = []; arity } |> return)
+       let cl = Fl_closure { name = id; env_size = 0; arrange = []; arity } in
+       let* _ = put_closure id cl in
+       return cl)
   | Aconst c -> Fl_const c |> return
 ;;
 
@@ -275,6 +291,6 @@ let cc arities astracture =
     return ()
   in
   let state = List.fold_left add_item (return ()) astracture in
-  let { global_env; _ }, _ = run state (empty_ctx arities) in
-  List.rev global_env
+  let { global_env; closures; _ }, _ = run state (empty_ctx arities) in
+  List.rev global_env, closures
 ;;
