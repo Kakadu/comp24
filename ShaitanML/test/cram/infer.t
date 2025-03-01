@@ -20,8 +20,8 @@
   Infer error: Left-hand side of let rec should be a variable
 
   $ infer < manytests/do_not_type/016lists.ml
-  manytests/do_not_type/016lists.ml: No such file or directory
-  [1]
+  cannot open manytests/do_not_type/016lists.ml: No such file
+  [2]
 
   $ infer < manytests/typed/001fac.ml
   val fac: int -> int

@@ -10,15 +10,15 @@
  (public_name infer)
  (libraries shaitanml_lib stdio))
 
-; (executable
-;  (name cc)
-;  (modules Cc)
-;  (public_name cc)
-;  (libraries shaitanml_lib stdio))
+(executable
+ (name pat_elim)
+ (modules Pat_elim)
+ (public_name pat_elim)
+ (libraries shaitanml_lib stdio))
 
 (cram
  (deps
   (source_tree manytests)))
 
 (cram
- (deps %{bin:parser} %{bin:infer} %{bin:cc}))
+ (deps %{bin:parser} %{bin:infer} %{bin:pat_elim}))
