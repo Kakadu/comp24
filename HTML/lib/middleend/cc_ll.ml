@@ -6,25 +6,27 @@ open AstLib.Ast
 
 (* todo WriterT? *)
 module CounterWriterMonad = struct
-  type 'a cc = int -> 'a * int * decl list
+  type 'a cc = int -> ('a, string) Result.t * int * decl list
 
-  let return (x : 'a) : 'a cc = fun s -> x, s, []
+  let return (x : 'a) : 'a cc = fun s -> (Ok x, s, [])
 
   let bind (m : 'a cc) (f : 'a -> 'b cc) : 'b cc =
     fun s ->
-    let x, s', d1 = m s in
-    let y, s'', d2 = f x s' in
-    y, s'', d1 @ d2
+    match m s with
+    | (Ok x, s', d1) ->
+        let (y, s'', d2) = f x s' in
+        (y, s'', d1 @ d2)
+    | (Error e, s', d1) -> (Error e, s', d1)
   ;;
 
   let ( >>= ) = bind
   let ( let* ) = bind
 
   let fresh_name (prefix : string) : string cc =
-    fun s -> prefix ^ string_of_int s, s + 1, []
+    fun s -> (Ok (prefix ^ string_of_int s), s + 1, [])
   ;;
 
-  let tell (d : decl) : unit cc = fun s -> (), s, [ d ]
+  let tell (d : decl) : unit cc = fun s -> (Ok (), s, [d])
 end
 
 open CounterWriterMonad
@@ -352,11 +354,12 @@ let common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
   return (global_env, (pat_or_op, replace_fun_body body' expr))
 ;;
 
-let closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * decl) cc =
+let closure_convert_decl (global_env : StringSet.t) (d : decl) : StringSet.t cc =
   match d with
   | DLet (rf, (pat_or_op, expr)) ->
     let* global_env, lb = common_convert_decl global_env (rf, (pat_or_op, expr)) in
-    return (global_env, DLet (rf, lb))
+    let* () = tell @@ DLet (rf, lb) in
+    return global_env
   | DLetMut (rf, lb, lb2, lbs) ->
     let* global_env, clb = common_convert_decl global_env (Recursive, lb) in
     let* global_env, clb2 = common_convert_decl global_env (Recursive, lb2) in
@@ -369,25 +372,26 @@ let closure_convert_decl (global_env : StringSet.t) (d : decl) : (StringSet.t * 
         return (clb :: clbs)
     in
     let* clbs = conv lbs global_env in
-    return (global_env, DLetMut (rf, clb, clb2, clbs))
+    let* () = tell @@ DLetMut (rf, clb, clb2, clbs) in
+    return global_env
 ;;
 
 let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list)
-  : decl list cc
   =
-  let rec helper global_env decls count =
+  let rec helper global_env decls =
     match decls with
-    | [] -> return []
+    | [] -> return global_env
     | d :: ds ->
-      let (global_env, cd), count, extra = closure_convert_decl global_env d count in
-      let* cds = helper global_env ds count in
-      return (extra @ cd :: cds)
+      let* global_env = closure_convert_decl global_env d in
+      helper global_env ds
   in
-  helper global_env decls 0
+  helper global_env decls
 ;;
 
-let closure_convert (prog : decl list) : decl list =
+let closure_convert (prog : decl list) : (decl list, string) result =
   let global_env = StringSet.from_list Common.Stdlib.stdlib in
-  let decls, _, extra = closure_convert_decl_list global_env prog 0 in
-  extra @ decls
+  let global_env, _, decls = closure_convert_decl_list global_env prog 0 in
+  (match global_env with 
+  | Ok _ -> Ok decls
+  | Error s -> Error s)
 ;;
