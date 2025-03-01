@@ -2,7 +2,7 @@
 open AstLib.Ast
 open IR
 open Elim_utils
-open R
+open Common.Counter.R
 
 let is_pc (p : pattern) =
   match p with

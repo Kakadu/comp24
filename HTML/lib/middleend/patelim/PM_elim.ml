@@ -1,6 +1,6 @@
 open AstLib.Ast
 open Elim_utils
-open R
+open Common.Counter.R
 open Env
 open IR
 

@@ -4,31 +4,13 @@
 
 open Anf_ast
 open Utils
+open Common.Counter.R
 
-type 'a anf = int -> 'a * int
-
-let return (x : 'a) : 'a anf = fun s -> x, s
-
-let bind (m : 'a anf) (f : 'a -> 'b anf) : 'b anf =
-  fun s ->
-  let x, s' = m s in
-  f x s'
-;;
-
-let ( let* ) = bind
-
-let sequence lst =
-  let rec aux acc = function
-    | [] -> return (List.rev acc)
-    | x :: xs -> bind x (fun y -> aux (y :: acc) xs)
-  in
-  aux [] lst
-
-let fresh_name (prefix : string) : string anf = fun s -> prefix ^ string_of_int s, s + 1
-
-let rec gen_var (base : string) (global : StringSet.t) : string anf =
-  let* fresh_id = fresh_name base in
-  if StringSet.contains global fresh_id then gen_var base global else return fresh_id
+let rec gen_var (base : string) (global : StringSet.t) : string t =
+  (* let* fresh_id = fresh_name base in *)
+  let* fresh_var = fresh in
+  let fresh_name = base ^ string_of_int fresh_var in
+  if StringSet.contains global fresh_name then gen_var base global else return fresh_name
 ;;
 
 open AstLib.Ast
@@ -43,7 +25,7 @@ let pattern_or_op_to_identifier = function
   | POpOp s -> Id s
   | _ -> failwith "not expected"
 
-let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr anf) : aexpr anf =
+let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr t =
   let anf_list env exprs cont =
     let rec helper acc = function
       | [] -> cont (List.rev acc)
@@ -109,7 +91,7 @@ let rec unroll_efun (expr : expr) : pattern list * expr =
   | _ -> [], expr
 ;;
 
-let anf_decl (env : StringSet.t) (d : decl) : anf_decl anf =
+let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
   let helper (pat_or_op, expr)= 
     let efun_pats, body_expr = unroll_efun expr in
     let efun_ids = List.map pattern_to_identifier efun_pats in
@@ -134,7 +116,7 @@ in
 
 ;;
 
-let anf_program (decls : decl list) : anf_decl list =
+let anf_program (decls : decl list) =
   let rec get_initial_env ds acc =
     match ds with
     | [] -> acc
@@ -142,6 +124,28 @@ let anf_program (decls : decl list) : anf_decl list =
     | _ :: rest -> get_initial_env rest acc
   in
   let env = get_initial_env decls StringSet.empty in
-  let decls = List.map (fun decls -> anf_decl env decls 0 |> fst) decls in
+  (* let decls = Base.List.fold_right ~f:(fun decls acc -> 
+    let* acc = acc in 
+    let decl = anf_decl env decls 0 in
+    return (decl :: acc)
+    ) ~init:(return []) decls in *)
+
+  let decls = Base.List.map decls ~f:(fun decls -> 
+   snd (anf_decl env decls 0)
+  )  in
+
+    
   decls
 ;;
+
+let run prog =
+  let prog = anf_program prog in
+  let open Result in
+  let rec sequence acc = function
+    | [] -> Ok (List.rev acc)
+    | Ok x :: xs -> sequence (x :: acc) xs
+    | Error e :: _ -> Error e
+  in
+  sequence [] prog
+;;
+

@@ -1,6 +1,6 @@
 (library
  (name Common)
- (modules Ops Stdlib Base_bin_ops)
+ (modules Ops Stdlib Base_bin_ops Counter)
  (libraries base)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq))

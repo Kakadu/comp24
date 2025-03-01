@@ -6,8 +6,10 @@ let anf_demo s =
     (match prog with
     | Ok actual ->  
 
-      let prog = Anf.Anf_conv.anf_program actual in
-    Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog prog
+      let prog =  Anf.Anf_conv.run actual in
+       (match prog with
+      | Ok actual ->  Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
+      | Error err -> Format.printf "%s\n" err)
       | Error _ -> failwith "todo")
 
   
