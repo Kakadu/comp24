@@ -35,7 +35,7 @@
   let rec facCPS n k =
    match n with
     | 0 -> k 1
-    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k t cc1_cc_ac0_n -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
+    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k cc1_cc_ac0_n t -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
 
   $ dune exec ./cc_runner.exe << EOF
   > let nested1 = let nested2 = 5 in 
@@ -56,7 +56,7 @@
   let rec facCPS n k =
    match n with
     | 0 -> k 1
-    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k t cc1_cc_ac0_n -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
+    | cc_ac0_n -> (facCPS ((( - ) cc_ac0_n) 1)) (((fun cc0_k cc1_cc_ac0_n t -> cc0_k ((( * ) cc1_cc_ac0_n) t)) k) cc_ac0_n);;
 
   $ dune exec ./cc_runner.exe << EOF
   > let _start () () ()  () =

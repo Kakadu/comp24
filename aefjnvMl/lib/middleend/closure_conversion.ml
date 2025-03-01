@@ -91,6 +91,7 @@ let closure_conversion toplvl =
       etuple items
     | Exp_function (p, e) ->
       let ps, inner = eliminate_funs e in
+      let ps = List.rev ps in
       let p_vars = Base.List.concat_map (p :: ps) ~f:pattern_vars in
       let p_vars_set = set p_vars in
       let free_vars = Base.Set.diff (expr_vars inner) p_vars_set in
