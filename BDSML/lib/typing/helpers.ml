@@ -14,6 +14,14 @@ module Scheme = struct
     let s2 = VarSet.fold (fun k s -> Subst.remove k s) names sub in
     names, Subst.apply s2 ty
   ;;
+
+  let get_type (_, ty) = ty
+
+  let equal (_, t1) (_, t2) =
+    match Monads.run (Subst.unify t1 t2) @@ TVarId.create 0 with
+    | Error _ -> false
+    | _ -> true
+  ;;
 end
 
 module TypeEnv = struct
@@ -41,4 +49,15 @@ module TypeEnv = struct
   ;;
 
   let apply s env = Map.map (Scheme.apply s) env
+
+  let diff (env1 : t) (env2 : t) : t =
+    Map.filter
+      (fun key v ->
+        match Map.find_opt key env2 with
+        | Some v2 -> not (Scheme.equal v v2)
+        | None -> true)
+      env1
+  ;;
+
+  let to_list env = Map.bindings env
 end

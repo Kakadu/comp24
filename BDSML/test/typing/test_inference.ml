@@ -124,8 +124,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   [%expect {|
-    val g : 'c -> bool
     val f : 'd -> 'd
+    val g : 'c -> bool
     val c : bool |}]
 ;;
 
@@ -302,4 +302,33 @@ let%expect_test "test function" =
   test {|function | (a: cool_type) -> 3 | _ -> 4|};
   [%expect {|
     cool_type -> int |}]
+;;
+
+let%expect_test "test fun with pattern" =
+  test {|fun (a, [b]) -> a + b|};
+  [%expect {|
+    (int * int list) -> int |}]
+;;
+
+let%expect_test "test let with pattern" =
+  test {|let (Some m) = Some (3, true)
+  let (c, d) = m|};
+  [%expect {|
+    val m : (int * bool)
+    val c : int
+    val d : bool |}]
+;;
+
+let%expect_test "test let rewrite" =
+  test {|let m = 4
+  let m = true|};
+  [%expect {|
+    val m : int
+    val m : bool |}]
+;;
+
+let%expect_test "test sequence" =
+  test {|let a = "hello"; true|};
+  [%expect {|
+    val a : bool |}]
 ;;

@@ -64,8 +64,6 @@ type error =
   | Invalid_ast of string
   | Invalid_predefined_operators of string
 
-exception Unimplemented of string
-
 module VarSet = Set.Make (TVarId)
 
 let rec occurs_in (v : TVarId.t) = function

@@ -37,8 +37,6 @@ type error =
   | Invalid_ast of string
   | Invalid_predefined_operators of string
 
-exception Unimplemented of string
-
 module VarSet : Set.S with type elt = TVarId.t
 
 val occurs_in : TVarId.t -> type_val -> bool

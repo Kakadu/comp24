@@ -9,6 +9,7 @@ module Scheme : sig
 
   val create : VarSet.t -> type_val -> t
   val free_vars : t -> VarSet.t
+  val get_type : t -> type_val
 end
 
 module TypeEnv : sig
@@ -20,4 +21,6 @@ module TypeEnv : sig
   val init : (string * Scheme.t) list -> t
   val free_vars : t -> VarSet.t
   val apply : Subst.t -> t -> t
+  val diff : t -> t -> t
+  val to_list : t -> (string * Scheme.t) list
 end
