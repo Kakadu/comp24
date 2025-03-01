@@ -3,26 +3,24 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 module AnfTests = struct
-let anf_test s =
-  match Parser.parse_program s with
-  | Ok actual ->
-    let prog = Patelim.Elim.p_elim_decls actual in
-    (match prog with
-    | Ok actual ->  
-      let prog = Anf.Cc_ll.closure_convert actual in
-      (match prog with 
-      | Ok actual -> let prog =  Anf.Anf_conv.run actual in
+  let anf_test s =
+    match Parser.parse_program s with
+    | Ok actual ->
+      let prog = Patelim.Elim.p_elim_decls actual in
       (match prog with
-     | Ok actual ->  Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
-     | Error err -> Format.printf "%s\n" err)
-      | Error err -> Format.printf "%s\n" err)
-       
-    | Error err -> Format.printf "%s\n" err)
-  
-  | Error err -> Format.printf "%s\n" err
-    ;;
+       | Ok actual ->
+         let prog = Anf.Cc_ll.closure_convert actual in
+         (match prog with
+          | Ok actual ->
+            let prog = Anf.Anf_conv.run actual in
+            (match prog with
+             | Ok actual -> Format.printf "%a\n" Anf.Pp_anf_ast.pp_anf_prog actual
+             | Error err -> Format.printf "%s\n" err)
+          | Error err -> Format.printf "%s\n" err)
+       | Error err -> Format.printf "%s\n" err)
+    | Error err -> Format.printf "%s\n" err
+  ;;
 end
-
 
 let%expect_test "sanity check" =
   AnfTests.anf_test {|let test1 x = let test2 y = x + y in test2|};

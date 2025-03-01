@@ -547,16 +547,13 @@ let init_env =
   ; "!=", bin_op (tvar "_a") (tvar "_a") tbool
   ; "&&", bin_op tbool tbool tbool
   ; "||", bin_op tbool tbool tbool
-  ; "( = )", bin_op (tvar "_a") (tvar "_a") tbool 
-  ; "( != )", bin_op (tvar "_a") (tvar "_a") tbool  
-  ; "( && )", bin_op tbool tbool tbool  
-  (* todo ( + ) *)
-  ; "RTE_ERROR_MATCH_FAILURE", tarrow tunit (tvar "_a");
-  "GET_HEAD", tarrow (tlist @@ tvar "_a") (tvar "_a");
- "GET_TALE", tarrow (tlist @@ tvar "_a") (tlist @@ tvar "_a");
- "GET_NTH", tarrow (ttuple tint (tvar "_a") []) (tvar "_b") 
-
-
+  ; "( = )", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "( != )", bin_op (tvar "_a") (tvar "_a") tbool
+  ; "( && )", bin_op tbool tbool tbool (* todo ( + ) *)
+  ; "RTE_ERROR_MATCH_FAILURE", tarrow tunit (tvar "_a")
+  ; "GET_HEAD", tarrow (tlist @@ tvar "_a") (tvar "_a")
+  ; "GET_TALE", tarrow (tlist @@ tvar "_a") (tlist @@ tvar "_a")
+  ; "GET_NTH", tarrow (ttuple tint (tvar "_a") []) (tvar "_b")
   ]
 ;;
 

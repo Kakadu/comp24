@@ -34,7 +34,8 @@ module R = struct
   let sequence lst =
     let rec aux acc = function
       | [] -> return (List.rev acc)
-      | x :: xs -> x >>= (fun y -> aux (y :: acc) xs)
+      | x :: xs -> x >>= fun y -> aux (y :: acc) xs
     in
-    aux [] lst 
+    aux [] lst
+  ;;
 end
