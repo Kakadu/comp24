@@ -46,7 +46,9 @@ let generalize env ty =
   Scheme.create free ty
 ;;
 
-let rec typexpr_to_type =
+module TypeVars = Map.Make (String)
+
+let typexpr_to_type typexpr =
   let base_type_mapper = function
     | "int" -> Some TInt
     | "char" -> Some TChar
@@ -54,30 +56,45 @@ let rec typexpr_to_type =
     | "bool" -> Some TBool
     | _ -> None
   in
-  function
-  | Type_constructor_param (tye, name) ->
-    let+ tye = typexpr_to_type tye in
-    TConstructor (Some tye, name)
-  | Type_tuple m ->
-    let+ tys = map typexpr_to_type m in
-    TTuple tys
-  | Type_single name ->
-    return
+  let rec helper (type_vars : type_val TypeVars.t) = function
+    | Type_constructor_param (tye, name) ->
+      let+ tye, type_vars = helper type_vars tye in
+      TConstructor (Some tye, name), type_vars
+    | Type_tuple m ->
+      let+ tys, type_vars =
+        fold_left
+          (fun (acc, type_vars) ty ->
+            let+ ty, type_vars = helper type_vars ty in
+            ty :: acc, type_vars)
+          (return ([], type_vars))
+          m
+      in
+      TTuple (List.rev tys), type_vars
+    | Type_single name ->
       (match base_type_mapper name with
-       | Some t -> TBase t
-       | None -> TConstructor (None, name))
-  | Type_fun l ->
-    let rec helper = function
-      | h :: [] ->
-        let+ res = typexpr_to_type h in
-        res
-      | h :: tl ->
-        let+ h = typexpr_to_type h
-        and+ tl = helper tl in
-        TArrow (h, tl)
-      | _ -> fail (Invalid_ast "fun type without any type")
-    in
-    helper l
+       | Some t -> return (TBase t, type_vars)
+       | None ->
+         (match String.get name 0 with
+          | '\'' ->
+            (match TypeVars.find_opt name type_vars with
+             | None ->
+               let+ fv = fresh_var in
+               fv, TypeVars.add name fv type_vars
+             | Some v -> return (v, type_vars))
+          | _ -> return (TConstructor (None, name), type_vars)))
+    | Type_fun l ->
+      let rec helper2 type_vars = function
+        | h :: [] -> (helper type_vars) h
+        | h :: tl ->
+          let* h, type_vars = helper type_vars h in
+          let+ tl, type_vars = helper2 type_vars tl in
+          TArrow (h, tl), type_vars
+        | _ -> fail (Invalid_ast "fun type without any type")
+      in
+      helper2 type_vars l
+  in
+  let+ ty, _ = helper TypeVars.empty typexpr in
+  ty
 ;;
 
 let infer_base_type c =
@@ -330,6 +347,13 @@ let predefine_operators =
   ; "( / )", "int -> int -> int"
   ; "( ~- )", "int -> int"
   ; "( ~+ )", "int -> int"
+  ; "not", "bool -> bool"
+  ; "( > )", "'a -> 'a -> bool"
+  ; "( >= )", "'a -> 'a -> bool"
+  ; "( < )", "'a -> 'a -> bool"
+  ; "( <= )", "'a -> 'a -> bool"
+  ; "( = )", "'a -> 'a -> bool"
+  ; "( <> )", "'a -> 'a -> bool"
   ]
 ;;
 

@@ -36,17 +36,17 @@ let%expect_test "test if without else inference" =
 
 let%expect_test "test fun inference" =
   test "fun a -> a";
-  [%expect {| 'a -> 'a |}]
+  [%expect {| 'g -> 'g |}]
 ;;
 
 let%expect_test "test fun with several arguments inference" =
   test "fun a b c -> b";
-  [%expect {| 'a -> 'b -> 'c -> 'b |}]
+  [%expect {| 'g -> 'h -> 'i -> 'h |}]
 ;;
 
 let%expect_test "test let fun" =
   test "let a b = b in a";
-  [%expect {| 'b -> 'b |}]
+  [%expect {| 'h -> 'h |}]
 ;;
 
 let%expect_test "test let fun apply" =
@@ -71,7 +71,7 @@ let%expect_test "test tuple" =
 
 let%expect_test "test difficult tuple" =
   test "(let b = 4 in b, (3, 5), fun a -> a, 'a')";
-  [%expect {| (int * (int * int) * 'a -> ('a * char)) |}]
+  [%expect {| (int * (int * int) * 'g -> ('g * char)) |}]
 ;;
 
 let%expect_test "test let rec" =
@@ -87,7 +87,7 @@ let%expect_test "test let rec fun" =
 let%expect_test "test let rec and" =
   test {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
-  [%expect {| 'h -> bool -> int |}]
+  [%expect {| 'n -> bool -> int |}]
 ;;
 
 let%expect_test "test invalid let rec with pat binding" =
@@ -124,8 +124,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   [%expect {|
-    val f : 'd -> 'd
-    val g : 'c -> bool
+    val f : 'j -> 'j
+    val g : 'i -> bool
     val c : bool |}]
 ;;
 
@@ -139,7 +139,7 @@ let%expect_test "test wrong let exp and statements" =
 let%expect_test "test constructor" =
   test {|let a = []|};
   [%expect {|
-    val a : 'a list |}]
+    val a : 'g list |}]
 ;;
 
 let%expect_test "test constructor some with" =
@@ -331,4 +331,28 @@ let%expect_test "test sequence" =
   test {|let a = "hello"; true|};
   [%expect {|
     val a : bool |}]
+;;
+
+let%expect_test "test op not" =
+  test {|fun a -> not a|};
+  [%expect {|
+    bool -> bool |}]
+;;
+
+let%expect_test "test equal" =
+  test {|(=)|};
+  [%expect {|
+    'e -> 'e -> bool |}]
+;;
+
+let%expect_test "test less" =
+  test {|(>) 4|};
+  [%expect {|
+    int -> bool |}]
+;;
+
+let%expect_test "test not equal" =
+  test {|4 <> 5|};
+  [%expect {|
+    bool |}]
 ;;
