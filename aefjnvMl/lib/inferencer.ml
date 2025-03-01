@@ -508,7 +508,13 @@ let init_env =
     ]
   in
   let print_int_ty = func_print_int, sig_func_print_int in
-  let funs = (print_int_ty :: un_ops) @ bin_ops in
+  let internal_lib =
+    [ func_get_by_idx, ty_get_by_idx 1 2
+    ; func_get_list_len_plus_one, ty_get_list_len_plus_one 1
+    ; func_fail_pt_match, ty_fail_pt_match 1
+    ]
+  in
+  let funs = (print_int_ty :: un_ops) @ bin_ops @ internal_lib in
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
   in
