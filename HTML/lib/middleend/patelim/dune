@@ -1,14 +1,6 @@
 (library
  (name Patelim)
- (modules
-  Elim
-  Elim_utils
-  IR
-  IR_utils
-  PM_elim
-  PM_elim_tests
-  PC_elim
-  PC_elim_tests)
+ (modules Elim Elim_utils IR IR_utils PM_elim PC_elim)
  (libraries base Common AstLib Parser)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_expect))
