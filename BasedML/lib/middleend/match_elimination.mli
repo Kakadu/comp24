@@ -10,3 +10,7 @@ val eliminate_match_in_declarations
   :  Llast.lllet_declaration list
   -> Llast.lllet_declaration list
   -> (context, Llast.lllet_declaration list) Common.StateMonad.t
+
+val transform
+  :  Llast.lllet_declaration list
+  -> context * (Llast.lllet_declaration list, string) result

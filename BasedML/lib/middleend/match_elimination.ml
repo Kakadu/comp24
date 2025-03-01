@@ -351,3 +351,5 @@ let rec eliminate_match_in_declarations acc = function
   | [] -> List.rev acc |> return
   | _ -> fail "Error: unexpected declaration"
 ;;
+
+let transform ast = run (eliminate_match_in_declarations [] ast) empty_context

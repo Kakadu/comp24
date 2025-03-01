@@ -103,18 +103,6 @@ let rec restore_cexpr ppf = function
       then_branch
       pp_aexpr
       else_branch
-  | CMatch (pat_head, pat_exp_lst) ->
-    fprintf
-      ppf
-      "match %a with\n%a"
-      frestore_imm
-      pat_head
-      (fun ppf ->
-        pp_list
-          ppf
-          (fun ppf (pat, ae) -> fprintf ppf "| %a -> %a" frestore_pattern pat pp_aexpr ae)
-          "\n")
-      pat_exp_lst
   | CApplication (left, rigth) ->
     fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
 

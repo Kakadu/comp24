@@ -82,14 +82,6 @@ let rec cexpr_to_string = function
       (imm_to_string cond)
       (aexpr_to_string then_branch)
       (aexpr_to_string else_branch)
-  | CMatch (exp_head, pat_exp_lst) ->
-    let match_cases =
-      pat_exp_lst
-      |> List.map (fun (pat, ae) ->
-        Printf.sprintf "| %s -> %s" (pattern_to_string pat) (aexpr_to_string ae))
-      |> String.concat "\n"
-    in
-    Printf.sprintf "match %s with\n%s" (imm_to_string exp_head) match_cases
   | CApplication (left, right) ->
     Printf.sprintf "%s %s" (cexpr_to_string left) (cexpr_to_string right)
 
