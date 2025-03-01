@@ -24,9 +24,19 @@ let rec pp_llexpression formatter e =
       "\n  let %a %s %a = %a\n  in %a"
       pp_rec
       r
-      (String.concat ", " n)
+      n
       (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
       args
+      pp_llexpression
+      e
+      pp_llexpression
+      ine
+  | CPatLetIn (names, e, ine) ->
+    Format.fprintf
+      formatter
+      "\n  let %a = %a\n  in %a"
+      pp_pattern
+      names
       pp_llexpression
       e
       pp_llexpression
@@ -47,46 +57,55 @@ let rec pp_llexpression formatter e =
       (fun (p, lle) ->
         Format.fprintf formatter "\n| %a -> %a" pp_pattern p pp_llexpression lle)
       p;
-      Format.fprintf formatter ")"
+    Format.fprintf formatter ")"
 ;;
 
 let pp_llbindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
-      | CLet bindings_list ->
+      | CLets clets_list ->
         (* Перебираем все let-объявления внутри CLet *)
         List.iteri
-          (fun i (r, n_list, p, e) ->
-            let n_str = String.concat ", " n_list in
-            if i = 0
-            then
-              (* Первое объявление начинается с "let" *)
-              Format.fprintf
-                formatter
-                "let %a %s %a = %a"
-                pp_rec
-                r
-                n_str
-                (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
-                p
-                pp_llexpression
-                e
-            else
-              (* Все последующие объявления начинаются с "and" *)
-              Format.fprintf
-                formatter
-                "and %a %s %a = %a"
-                pp_rec
-                r
-                n_str
-                (fun fmt ->
-                  List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
-                p
-                pp_llexpression
-                e)
-          bindings_list;
+          (fun i clets ->
+            match clets with
+            | CLet (r, n, p, e) ->
+              if i = 0
+              then
+                (* Первое объявление начинается с "let" *)
+                Format.fprintf
+                  formatter
+                  "let %a %s %a = %a"
+                  pp_rec
+                  r
+                  n
+                  (fun fmt ->
+                    List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
+                  p
+                  pp_llexpression
+                  e
+              else
+                (* Все последующие объявления начинаются с "and" *)
+                Format.fprintf
+                  formatter
+                  "and %a %s %a = %a"
+                  pp_rec
+                  r
+                  n
+                  (fun fmt ->
+                    List.iter (fun pat -> Format.fprintf fmt "%a " pp_pattern pat))
+                  p
+                  pp_llexpression
+                  e
+            | CLetPat (names, e) ->
+              if i = 0
+              then
+                (* Первое объявление начинается с "let" *)
+                Format.fprintf formatter "let %a = %a" pp_pattern names pp_llexpression e
+              else
+                (* Все последующие объявления начинаются с "and" *)
+                Format.fprintf formatter "and %a = %a" pp_pattern names pp_llexpression e)
+          clets_list;
         Format.fprintf formatter "\n"
       | CExpression e ->
         pp_llexpression formatter e;

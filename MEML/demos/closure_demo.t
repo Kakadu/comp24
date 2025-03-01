@@ -193,7 +193,7 @@
   $ ./closure_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x  = ((f (fix f)) x)
   let  map f p  = 
-    let  a, b  = p
+    let (a, b) = p
     in ((f a), (f b))
   let  fixpoly l  = 
     let  lambada1 self l li x  = ((li (self l)) x)
@@ -201,13 +201,13 @@
     let  lambada0 map self l  = ((map ((lambada1 self) l)) l)
     in ((fix (lambada0 map)) l)
   let  feven p n  = 
-    let  e, o  = p
+    let (e, o) = p
     in 
     if (n = 0)
     then 1
     else (o (n - 1))
   let  fodd p n  = 
-    let  e, o  = p
+    let (e, o) = p
     in 
     if (n = 0)
     then 0
@@ -225,7 +225,7 @@
     in 
     let  ()  = (print_int (meven 2))
     in 
-    let  even, odd  = tie
+    let (even, odd) = tie
     in 
     let  ()  = (print_int (odd 3))
     in 
@@ -269,4 +269,3 @@
     in 
     let  ()  = (print_int (length ((cartesian [1; 2; ]) [1; 2; 3; 4; ])))
     in 0
-
