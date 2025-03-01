@@ -9,8 +9,9 @@ open Utils
 
 (** [int] *)
 let parse_single =
-  let+ id = parse_ident_name in
-  Type_single id
+  let+ prefix = ws *> option "" (string "\'")
+  and+ id = parse_ident_name in
+  Type_single (prefix ^ id)
 ;;
 
 (** [int t list] *)

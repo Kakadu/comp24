@@ -47,7 +47,11 @@ let rec show_type_val = function
     in
     modifier (show_type_val l) ^ " -> " ^ show_type_val r
   | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
-  | TVar id -> "'" ^ Char.escaped (Char.chr (id + 97))
+  | TVar id ->
+    let alph_size = Char.code 'z' - Char.code 'a' in
+    let symb = Char.chr @@ (Char.code 'a' + (id mod alph_size)) in
+    let count = (id / alph_size) + 1 in
+    "'" ^ String.make count symb
   | TConstructor (Some t1, name) -> show_type_val t1 ^ " " ^ name
   | TConstructor (None, name) -> name
   | TUnit -> "unit"
