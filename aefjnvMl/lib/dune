@@ -4,10 +4,7 @@
  (modules
   parser
   inferencer
-  alpha_converter_tests
-  match_elim_tests
-  top_utils
-  parser_tests)
+  top_utils)
  (libraries base angstrom ppx_deriving aefjnvMl.Common aefjnvMl.Middleend)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))

@@ -1,7 +1,7 @@
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-
+open AefjnvMl_lib
 open Top_utils.Ast_test_utils
 open Middleend
 
@@ -170,40 +170,57 @@ let main =
   [%expect
     {|
   let rec length xs =
-   match xs with
-    | [] -> 0
-    | (h :: tl) -> (( + ) 1) (length tl);;
+    match xs with
+      | [] ->
+        0
+      | (h :: tl) ->
+        (( + ) 1) (length tl);;
   let length_tail = let rec helper ac_acc ac0_xs =
-   match ac0_xs with
-    | [] -> ac_acc
-    | (ac1_h :: ac2_tl) -> (helper ((( + ) ac_acc) 1)) ac2_tl in
-  helper 0;;
+      match ac0_xs with
+        | [] ->
+          ac_acc
+        | (ac1_h :: ac2_tl) ->
+          (helper ((( + ) ac_acc) 1)) ac2_tl in
+      helper 0;;
   let rec map f ac3_xs =
-   match ac3_xs with
-    | [] -> []
-    | (a :: []) -> (f a :: [])
-    | (ac4_a :: (b :: [])) -> (f ac4_a :: (f b :: []))
-    | (ac5_a :: (ac6_b :: (c :: []))) -> (f ac5_a :: (f ac6_b :: (f c :: [])))
-    | (ac7_a :: (ac8_b :: (ac9_c :: (d :: ac10_tl)))) -> (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))));;
+    match ac3_xs with
+      | [] ->
+        []
+      | (a :: []) ->
+        (f a :: [])
+      | (ac4_a :: (b :: [])) ->
+        (f ac4_a :: (f b :: []))
+      | (ac5_a :: (ac6_b :: (c :: []))) ->
+        (f ac5_a :: (f ac6_b :: (f c :: [])))
+      | (ac7_a :: (ac8_b :: (ac9_c :: (d :: ac10_tl)))) ->
+        (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))));;
   let rec append ac11_xs ys =
-   match ac11_xs with
-    | [] -> ys
-    | (x :: ac12_xs) -> (x :: (append ac12_xs) ys);;
+    match ac11_xs with
+      | [] ->
+        ys
+      | (x :: ac12_xs) ->
+        (x :: (append ac12_xs) ys);;
   let concat = let rec ac13_helper ac14_xs =
-   match ac14_xs with
-    | [] -> []
-    | (ac15_h :: ac16_tl) -> (append ac15_h) (ac13_helper ac16_tl) in
-  ac13_helper;;
+      match ac14_xs with
+        | [] ->
+          []
+        | (ac15_h :: ac16_tl) ->
+          (append ac15_h) (ac13_helper ac16_tl) in
+      ac13_helper;;
   let rec iter ac17_f ac18_xs =
-   match ac18_xs with
-    | [] -> ()
-    | (ac19_h :: ac20_tl) -> let () = ac17_f ac19_h in
-  (iter ac17_f) ac20_tl;;
+    match ac18_xs with
+      | [] ->
+        ()
+      | (ac19_h :: ac20_tl) ->
+        let () = ac17_f ac19_h in
+          (iter ac17_f) ac20_tl;;
   let rec cartesian ac21_xs ac22_ys =
-   match ac21_xs with
-    | [] -> []
-    | (ac23_h :: ac24_tl) -> (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys);;
+    match ac21_xs with
+      | [] ->
+        []
+      | (ac23_h :: ac24_tl) ->
+        (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys);;
   let ac26_main = let () = (iter print_int) (1 :: (2 :: (3 :: []))) in
-  let () = print_int (length ((cartesian (1 :: (2 :: []))) (1 :: (2 :: (3 :: (4 :: [])))))) in
-  0;; |}]
+      let () = print_int (length ((cartesian (1 :: (2 :: []))) (1 :: (2 :: (3 :: (4 :: [])))))) in
+        0;; |}]
 ;;

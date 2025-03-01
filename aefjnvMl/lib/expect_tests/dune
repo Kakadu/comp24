@@ -1,0 +1,7 @@
+(library
+ (name expect_tests)
+ (modules parser_tests match_elim_tests alpha_converter_tests)
+ (libraries unix aefjnvMl_lib)
+ (preprocess
+  (pps ppx_expect))
+ (inline_tests))

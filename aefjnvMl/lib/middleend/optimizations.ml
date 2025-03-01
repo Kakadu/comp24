@@ -8,6 +8,7 @@
    - not false ---> true
 *)
 
+open Match_elimination
 open Me_ast
 open Common.Ast
 

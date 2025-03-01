@@ -1,0 +1,7 @@
+(library
+ (name match_elimination)
+ (public_name aefjnvMl.Middleend.Match_elimination)
+ (modules Match_elim Me_ast me_converter)
+ (libraries common)
+ (instrumentation
+  (backend bisect_ppx)))

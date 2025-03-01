@@ -5,12 +5,9 @@
   closure_conversion
   alpha_converter
   ll_ast
-  me_ast
-  me_converter
   middleend_pp
-  optimizations
-  match_elim)
- (libraries base common str)
+  optimizations)
+ (libraries base common match_elimination str)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)
