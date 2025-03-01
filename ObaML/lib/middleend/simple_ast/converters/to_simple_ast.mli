@@ -2,4 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-val simplify_ast : Ast.structure -> Simple_ast.sstructure
+val convert : Ast.structure -> Simple_ast.sstructure

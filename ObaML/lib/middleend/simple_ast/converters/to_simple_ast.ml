@@ -391,4 +391,4 @@ let simplify_structure structure =
     structure
 ;;
 
-let simplify_ast (structure : Ast.structure) = simplify_structure structure
+let convert (structure : Ast.structure) = simplify_structure structure

@@ -8,11 +8,15 @@
   Simple_ast_pretty_printer
   Parser
   Inferencer
+  Std
   Typedtree
+  State_monad
   Simple_ast
-  Ast_simplifier
+  To_simple_ast
+  To_ast
   Alpha_conversion
-  Closure_conversion)
+  Closure_conversion
+  Lambda_lifting)
  (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving.eq))
@@ -26,7 +30,8 @@
   Infer_tests
   Closure_conversion_tests
   Ast_simplifier_tests
-  Alpha_conversion_tests)
+  Alpha_conversion_tests
+  Lambda_lifting_tests)
  (libraries ObaML)
  (inline_tests)
  (preprocess

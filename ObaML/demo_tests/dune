@@ -10,11 +10,20 @@
  (public_name infer_tests)
  (libraries ObaML stdio))
 
+(executable
+ (name ast_simplifier_tests)
+ (modules ast_simplifier_tests)
+ (public_name ast_simplifier_tests)
+ (libraries ObaML stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
- (applies_to parser_tests infer_tests)
+ (applies_to parser_tests infer_tests ast_simplifier_tests)
  (deps
   ./parser_tests.exe
   ./infer_tests.exe
+  ./ast_simplifier_tests.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

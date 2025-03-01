@@ -10,8 +10,8 @@ open Format
 let parse_and_infer_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    (match Inferencer.run_stucture_infer parse_result with
-     | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env env
+    (match Inferencer.run_structure_infer parse_result with
+     | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env (Std.std_lst, env)
      | Error err -> printf "Infer: %a" Typedtree.pp_error err)
   | Error _ -> printf "Syntax error"
 ;;

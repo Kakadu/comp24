@@ -13,7 +13,7 @@ let print_result val_pp = function
 let parse_and_closure_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure = Ast_simplifier.simplify_ast parse_result in
+    let structure = To_simple_ast.convert parse_result in
     let structure = Closure_conversion.run_closure_conversion structure in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
   | Error _ -> printf "Syntax error"
@@ -112,7 +112,7 @@ let%expect_test "" =
     {| let rec y = fun x -> let a = fun z -> y x + z in let b = fun x -> a 5 + x in b 5;;  |};
   [%expect
     {|
-      let rec y x = let a x z = ((y x)  +  z) in let b a x = ((a 5)  +  x) in ((b (a x)) 5);; |}]
+      let rec y x = let a x y z = ((y x)  +  z) in let b a x = ((a 5)  +  x) in ((b ((a x) y)) 5);; |}]
 ;;
 
 let%expect_test "" =
@@ -123,11 +123,13 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| let rec fix f x = f (fix f) x
+  parse_and_closure_result
+    {| let rec fix f x = f (fix f) x
   let map f p = let (a,b) = p in (f a, f b)
   let fixpoly l =
     fix (fun self l -> map (fun li x -> li (self l) x) l) l |};
-  [%expect {|
+  [%expect
+    {|
       let rec fix f x = ((f (fix f)) x);;
       let map f p = let #gen_pat_expr#0 = p in let a = ((#gen_tuple_getter# 0) #gen_pat_expr#0) in let b = ((#gen_tuple_getter# 1) #gen_pat_expr#0) in ((f a), (f b));;
       let fixpoly l = ((fix (fun self l -> ((map (((fun l self li x -> ((li (self l)) x)) l) self)) l))) l);; |}]
@@ -140,19 +142,21 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| 
+  parse_and_closure_result
+    {| 
   let a x = let z = (fun zet -> zet + x) in
       let rec a x y = a (x + z 1) y in 
          a;;
 ;; |};
-  [%expect {|
+  [%expect
+    {|
       let a x = let z x zet = (zet  +  x) in let rec a z x y = (((a z) (x  +  (z 1))) y) in (a (z x));; |}]
 ;;
 
 let parse_and_closure_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure = Ast_simplifier.simplify_ast parse_result in
+    let structure = To_simple_ast.convert parse_result in
     let structure = Alpha_conversion.run_alpha_conversion structure in
     let structure = Closure_conversion.run_closure_conversion structure in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
