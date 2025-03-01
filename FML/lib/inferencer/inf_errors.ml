@@ -5,7 +5,7 @@
 open Typedtree
 
 type error =
-  [ `Occurs_check
+  [ `Occurs_check of type_var * typ
   | `Unification_failed of typ * typ
   | `Unbound_variable of string
   | `Several_bounds of string

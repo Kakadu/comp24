@@ -7,13 +7,11 @@ open Typedtree
 open Inf_errors
 
 module R : sig
-  type 'a t
+  include Base.Monad.Infix
 
   val return : 'a -> 'a t
   val bind : 'a t -> f:('a -> 'b t) -> 'b t
   val fail : error -> 'a t
-
-  include Base.Monad.Infix with type 'a t := 'a t
 
   module Syntax : sig
     val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
@@ -128,22 +126,24 @@ end = struct
   let empty = Base.Map.empty (module Base.Int)
 
   (* Creates a pair if no error occurs. *)
-  let mapping k v = if Type.occurs_in k v then fail `Occurs_check else return (k, v)
+  let mapping k v =
+    if Type.occurs_in k v then fail (`Occurs_check (k, v)) else return (k, v)
+  ;;
 
   let singleton k v =
     let* k, v = mapping k v in
     return (Base.Map.singleton (module Base.Int) k v)
   ;;
 
-  let find sub k = Base.Map.find sub k
-  let remove sub k = Base.Map.remove sub k
+  let find = Base.Map.find
+  let remove = Base.Map.remove
 
   (* Replace all type variables in a type with values ​​from the substitution. *)
   let apply sub =
     let rec helper = function
-      | TVar n ->
+      | TVar n as ty ->
         (match find sub n with
-         | None -> tvar n
+         | None -> ty
          | Some v -> v)
       | TFunction (l, r) -> tfunction (helper l) (helper r)
       | TList typ -> tlist (helper typ)
@@ -181,12 +181,16 @@ end = struct
     | None ->
       let v = apply sub v in
       let* new_sub = singleton k v in
-      let f1 ~key ~data acc =
+      RMap.fold_left sub ~init:(return new_sub) ~f:(fun k v acc ->
+        let v = apply new_sub v in
+        let* k, v = mapping k v in
+        return (Base.Map.update acc k ~f:(fun _ -> v)))
+      (* let f1 ~key ~data acc =
         let* acc = acc in
         let new_data = apply new_sub data in
         return (Base.Map.update acc key ~f:(fun _ -> new_data))
       in
-      Base.Map.fold sub ~init:(return new_sub) ~f:f1
+      Base.Map.fold sub ~init:(return new_sub) ~f:f1 *)
     | Some vl ->
       let* new_sub = unify v vl in
       compose sub new_sub
@@ -212,7 +216,7 @@ end
 
 module TypeEnv = struct
   (* A type enviroment is a map, the key of each element of which is a string,
-     which is the name of the let-binding or effect-declration,
+     which is the name of the let-binding,
      and the key is the schema of the type of expression to which the name is bound. *)
   type t = (string, scheme, Base.String.comparator_witness) Base.Map.t
 
@@ -230,7 +234,7 @@ module TypeEnv = struct
   (* Apply the substitution to each scheme from the enviroment. *)
   let apply env sub = Base.Map.map env ~f:(Scheme.apply sub)
   let extend env key schema = Base.Map.update ~f:(fun _ -> schema) env key
-  let find env key = Base.Map.find env key
+  let find = Base.Map.find
 
   let rec ext_by_pat env pat (Scheme (fvs, ty) as scheme) =
     match pat, ty with
@@ -245,7 +249,7 @@ module TypeEnv = struct
        | _ -> env)
     | PCons (h, tl), TList t ->
       let env1 = ext_by_pat env h (Scheme (fvs, t)) in
-      ext_by_pat env1 tl (Scheme (fvs, ty))
+      ext_by_pat env1 tl scheme
     | _ -> env
   ;;
 end
@@ -260,8 +264,7 @@ let fresh_var = fresh >>| tvar
 (* Create an expression type by using the altered scheme as follows:
    we take all the quantified variables in the type and replace them
    one by one with some type variable. *)
-let instantiate : scheme -> typ R.t =
-  fun (Scheme (bind_var, ty)) ->
+let instantiate (Scheme (bind_var, ty)) =
   TVarSet.fold
     (fun var_name acc ->
        let* acc = acc in
@@ -312,7 +315,7 @@ let annotation_to_type =
 let check_unique_vars =
   (* Checks that all variables in the pattern are unique.
      Used to detect severeal bound errors in tuple patterns,
-     list constructor patterns, and effects with arguments. *)
+     list constructor patterns. *)
   let rec helper var_set = function
     | PIdentifier v ->
       if VarSet.mem v var_set
@@ -353,10 +356,10 @@ let infer_id env id =
 
 let infer_pattern =
   let rec helper env = function
-    | PIdentifier i ->
+    | PIdentifier id ->
       let* fv = fresh_var in
       let schema = Scheme (TVarSet.empty, fv) in
-      let env = TypeEnv.extend env i schema in
+      let env = TypeEnv.extend env id schema in
       return (fv, env)
     | PAny | PNill ->
       let* fv = fresh_var in
@@ -403,6 +406,7 @@ let infer_pattern =
 let infer_expr =
   let rec helper env = function
     | EConst c -> infer_const c
+    | EUnit -> return (Subst.empty, tunit)
     | EIdentifier id -> infer_id env id
     | ENill ->
       let* fv = fresh_var in
@@ -513,7 +517,6 @@ let infer_expr =
       let* final_sub = Subst.compose sub1 sub2 in
       let final_ty = Subst.apply final_sub ty in
       return (final_sub, final_ty)
-    | _ -> fail `Not_impl
   in
   helper
 ;;
@@ -548,6 +551,15 @@ let infer_decl env = function
     (match rec_flag with
      | NoRec -> infer_single_decl env single_decl
      | Rec -> fail `Not_impl)
+    (* let* fv = fresh_var in
+       let env2 = TypeEnv.extend env name (Scheme (TVarSet.empty, fv)) in
+       let* sub1, ty1 = infer_expr env2 expr in
+       let* sub2 = Subst.unify ty1 fv in
+       let* sub3 = Subst.compose sub1 sub2 in
+       let ty3 = Subst.apply sub3 fv in
+       let new_acc = TypeEnv.extend acc_env name (Scheme (TVarSet.empty, ty3)) in
+       let new_names_list = update_name_list name acc_names in
+       helper (return (new_acc, new_names_list)) tl) *)
   | MutableRecDecl (rec_flag, decl_list) ->
     (match rec_flag with
      | NoRec ->

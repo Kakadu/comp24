@@ -1083,8 +1083,4 @@
       ))
     ]
 
-  $ ./parser_runner.exe < manytests/do_not_type/099.ml
-  manytests/do_not_type/099.ml: No such file or directory
-  [1]
-
 

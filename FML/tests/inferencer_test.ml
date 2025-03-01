@@ -69,3 +69,18 @@ let%expect_test _ =
     {|
     val f : ('a -> int) -> 'a -> int |}]
 ;;
+
+let%expect_test _ =
+  inference {| let h::tl = [1;2;3];; |};
+  [%expect
+    {|
+    val h : int
+    val tl : int list |}]
+;;
+
+let%expect_test _ =
+  inference {| let f x = if x > 1 then (x - 1) else 1;; |};
+  [%expect
+    {|
+    The type variable 'a occurs inside 'a |}]
+;;

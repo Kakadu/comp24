@@ -56,16 +56,17 @@ let pp_type ppf typ =
         (Format.pp_print_list
            ~pp_sep:(fun ppf () -> Format.fprintf ppf " * ")
            (fun ppf ty ->
-             match ty with
-             | TTuple _ | TFunction _ -> Format.fprintf ppf "(%a)" helper ty
-             | _ -> helper ppf ty))
+              match ty with
+              | TTuple _ | TFunction _ -> Format.fprintf ppf "(%a)" helper ty
+              | _ -> helper ppf ty))
         tl
   in
   helper ppf (recalculate_vars typ)
 ;;
 
 let pp_error ppf = function
-  | `Occurs_check -> Format.fprintf ppf "Type error: occurs check failed."
+  | `Occurs_check (v, k) ->
+    Format.fprintf ppf "The type variable %a occurs inside %a" pp_type (tvar v) pp_type k
   | `Unification_failed (l, r) ->
     Format.fprintf
       ppf

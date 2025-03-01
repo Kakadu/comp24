@@ -8,7 +8,7 @@
   TODO: Not implemented.
 
   $ ./inferencer_runner.exe < manytests/typed/004manyargs.ml
-  Type error: occurs check failed.
+  The type variable 'a occurs inside 'a
 
   $ ./inferencer_runner.exe < manytests/typed/005fix.ml
   TODO: Not implemented.
