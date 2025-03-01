@@ -366,11 +366,11 @@ let enil = Expr_const Const_nil
 let etuple fst snd rest = <span data-count="672">E</span>xpr_tuple (fst, snd, rest)
 let eite c e t = <span data-count="77">E</span>xpr_ite (c, e, t)
 
-let eite_simplified c e t =
+let eite_simplified c t e =
   <span data-count="0">m</span>atch c with
-  | <span data-count="0">E</span>xpr_const (Const_bool true) -&gt; c
+  | <span data-count="0">E</span>xpr_const (Const_bool true) -&gt; t
   | <span data-count="0">E</span>xpr_const (Const_bool false) -&gt; e
-  | <span data-count="0">_</span> -&gt; Expr_ite (c, e, t)
+  | <span data-count="0">_</span> -&gt; Expr_ite (c, t, e)
 ;;
 
 let efun p body = <span data-count="1589">E</span>xpr_fun (p, body)

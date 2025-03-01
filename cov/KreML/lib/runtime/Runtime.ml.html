@@ -18,10 +18,10 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:37.50%"></span>
-      <span class="unvisited" style="bottom:12.50%"></span>
-      <span class="unvisited" style="bottom:8.33%"></span>
-      <span class="unvisited" style="bottom:4.17%"></span>
+      <span class="unvisited" style="bottom:38.46%"></span>
+      <span class="unvisited" style="bottom:11.54%"></span>
+      <span class="unvisited" style="bottom:7.69%"></span>
+      <span class="unvisited" style="bottom:3.85%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -40,16 +40,18 @@
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="unvisited"> </span>
-<a id="L16"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span class="unvisited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span class="unvisited"> </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -78,6 +80,8 @@
 <a href="#L22">22</a>
 <a href="#L23">23</a>
 <a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, KreML Compiler Commutnity *)
 
@@ -87,6 +91,7 @@ open Ast
 
 let alloc_tuple = "alloc_tuple"
 let alloc_closure = "alloc_closure"
+let rv_alloc_closure = "rv_alloc_closure"
 let call_closure = "call_closure"
 let list_cons = "list_cons"
 let partial_match = "partial_match"
@@ -96,6 +101,7 @@ let partial_match_error e =
   <span data-count="0">E</span>xpr_app (Expr_var partial_match, e)
 ;;
 
+let runtime_funs_with_arities = [ partial_match, 1 ]
 let runtime_funs = [ alloc_closure; alloc_tuple; list_cons; partial_match ]
 
 let is_runtime_fun f =

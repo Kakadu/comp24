@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Liveness_analysis.ml &mdash; Coverage report</title>
+    <meta name="description" content="0.00% coverage in lib/middle_end/Liveness_analysis.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/middle_end/</span>Liveness_analysis.ml
+        </a>
+      </h1>
+      <h2>0.00%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:23.88%"></span>
+      <span class="unvisited" style="top:26.87%"></span>
+      <span class="unvisited" style="top:28.36%"></span>
+      <span class="unvisited" style="top:29.85%"></span>
+      <span class="unvisited" style="top:31.34%"></span>
+      <span class="unvisited" style="top:32.84%"></span>
+      <span class="unvisited" style="top:35.82%"></span>
+      <span class="unvisited" style="top:37.31%"></span>
+      <span class="unvisited" style="top:38.81%"></span>
+      <span class="unvisited" style="top:41.79%"></span>
+      <span class="unvisited" style="top:43.28%"></span>
+      <span class="unvisited" style="top:44.78%"></span>
+      <span class="unvisited" style="top:46.27%"></span>
+      <span class="unvisited" style="top:47.76%"></span>
+      <span class="unvisited" style="top:49.25%"></span>
+      <span class="unvisited" style="bottom:49.25%"></span>
+      <span class="unvisited" style="bottom:44.78%"></span>
+      <span class="unvisited" style="bottom:43.28%"></span>
+      <span class="unvisited" style="bottom:34.33%"></span>
+      <span class="unvisited" style="bottom:29.85%"></span>
+      <span class="unvisited" style="bottom:28.36%"></span>
+      <span class="unvisited" style="bottom:26.87%"></span>
+      <span class="unvisited" style="bottom:23.88%"></span>
+      <span class="unvisited" style="bottom:22.39%"></span>
+      <span class="unvisited" style="bottom:20.90%"></span>
+      <span class="unvisited" style="bottom:17.91%"></span>
+      <span class="unvisited" style="bottom:13.43%"></span>
+      <span class="unvisited" style="bottom:8.96%"></span>
+      <span class="unvisited" style="bottom:5.97%"></span>
+      <span class="unvisited" style="bottom:2.99%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="unvisited"> </span>
+<a id="L19"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="unvisited"> </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="unvisited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="unvisited"> </span>
+<a id="L48"></a><span class="unvisited"> </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="unvisited"> </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span class="unvisited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="unvisited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, CursedML Compiler Commutnity *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Flambda
+
+type range =
+  { var : string
+  ; s : int
+  ; e : int
+  }
+
+type analysis_result = (string * range list) list
+
+let rec analyse_expr expr counter res_start res_end =
+  <span data-count="0">l</span>et open Base in
+  match expr with
+  | <span data-count="0">F</span>l_const _ -&gt; counter, res_start, res_end
+  | <span data-count="0">F</span>l_closure { arrange; _ } -&gt;
+    analyse_list (List.ma<span data-count="0">p</span> arrange ~f:snd) counter res_start res_end
+  | <span data-count="0">F</span>l_var id -&gt; counter, res_start, Map.se<span data-count="0">t</span> res_end ~key:id ~data:counter
+  | <span data-count="0">F</span>l_let (Some id, value, scope) -&gt;
+    let res_start = Map.set res_start ~key:id ~data:counter in
+    <span data-count="0">l</span>et counter, res_start, res_end = analyse_expr value counter res_start res_end in
+    <span data-count="0">a</span>nalyse_expr scope (counter + 1) res_start res_end
+  | <span data-count="0">F</span>l_let (None, value, scope) -&gt;
+    let counter, starts, ends = analyse_expr value counter res_start res_end in
+    <span data-count="0">a</span>nalyse_expr scope (counter + 1) starts ends
+  | <span data-count="0">F</span>l_tuple elems -&gt; analyse_list elems counter res_start res_end
+  | <span data-count="0">F</span>l_app (f, args) -&gt; analyse_list (f :: args) counter res_start res_end
+  | <span data-count="0">F</span>l_binop (_, x, y) | <span data-count="0">F</span>l_cons (x, y) -&gt; analyse_list [ x; y ] counter res_start res_end
+  | <span data-count="0">F</span>l_unop (_, x) -&gt; analyse_expr x counter res_start res_end
+  | <span data-count="0">F</span>l_ite (c, t, e) -&gt; analyse_list [ c; t; e ] counter res_start res_end
+  | <span data-count="0">F</span>l_getfield (_, o) -&gt; analyse_expr o counter res_start res_end
+
+and analyse_list list counter res_start res_end =
+  <span data-count="0">L</span>ist.fold_left
+    (fun (c, s, e) expr -&gt; <span data-count="0">a</span>nalyse_expr expr c s e)
+    (counter, res_start, res_end)
+    list
+;;
+
+let analyse_fun = function
+  | <span data-count="0">F</span>un_with_env { body; _ } | <span data-count="0">F</span>un_without_env { body; _ } -&gt;
+    let open Base in
+    let res_start = Map.empty (module String) in
+    <span data-count="0">l</span>et res_end = Map.empty (module String) in
+    <span data-count="0">l</span>et _, ss, es = analyse_expr body 1 res_start res_end in
+    <span data-count="0">l</span>et ranges =
+      Map.fold ss ~init:[] ~f:(fun ~key:var ~data:s acc -&gt;
+        <span data-count="0">m</span>atch Map.find es var with
+        | <span data-count="0">S</span>ome e -&gt; { s; e; var } :: acc
+        | <span data-count="0">N</span>one -&gt; { s; e = s; var } :: acc)
+    in
+    <span data-count="0">L</span>ist.sort ranges ~compare:(fun r1 r2 -&gt; <span data-count="0">B</span>ase.Int.compare r1.s r2.s)
+;;
+
+let analyse_program flstucture = <span data-count="0">L</span>ist.map (fun (id, f) -&gt; <span data-count="0">i</span>d, analyse_fu<span data-count="0">n</span> f) flstucture
+
+let pp fmt analysis_result =
+  <span data-count="0">l</span>et open Format in
+  let print_vars fmt vars =
+    <span data-count="0">L</span>ist.iter (fun { var; s; e } -&gt; <span data-count="0">f</span>printf fmt "@[%s: [%i, %i]@]@." var s e) vars
+  in
+  let print_fun (id, vars) = <span data-count="0">f</span>printf fmt "@[%s:@, %a @] @." id print_vars vars in
+  List.iter print_fun analysis_result
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
