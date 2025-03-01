@@ -49,9 +49,10 @@ type expression =
   | EConst of const (** constant *)
   | EVar of name * type_of_var (** variable *)
   | EBinaryOp of binary_op * expression * expression (** binary operation *)
-  | EApp of expression * expression * type_of_var(** application *)
+  | EApp of expression * expression * type_of_var (** application *)
   | EIfElse of expression * expression * expression (** if z then v else n*)
-  | ELetIn of rec_flag * name list * expression * expression
+  | ELetIn of rec_flag * name * expression * expression
+  | ELetPatIn of pattern * expression * expression
   | EFun of pattern * expression (** fun z -> z + z *)
   | EList of expression * expression (** [1;2;3]*)
   | ETuple of expression list (** (1,2,3) *)
@@ -60,8 +61,12 @@ type expression =
 
 (** Binding type *)
 type bindings =
-  | Let of (rec_flag * name list * expression) list (** let id = expr *)
+  | Lets of lets list
   | Expression of expression (** simple expressions *)
+
+and lets =
+  | Let of (rec_flag * name * expression) (** let id = expr *)
+  | LetPat of (pattern * expression) (** let id = expr *)
 [@@deriving show { with_path = false }]
 
 (** Statements type *)

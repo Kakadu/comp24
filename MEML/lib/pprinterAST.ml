@@ -17,8 +17,7 @@ let pp_tuple printer formatter l =
 
 let rec pp_pattern formatter = function
   | PWild -> Format.fprintf formatter "_"
-  | PCon (hd, tl) ->
-    Format.fprintf formatter "(%a :: %a)" pp_pattern hd pp_pattern tl
+  | PCon (hd, tl) -> Format.fprintf formatter "(%a :: %a)" pp_pattern hd pp_pattern tl
   | PVar (n, _) -> Format.fprintf formatter "%s" n
   | PTuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_pattern) t
   | PConst c -> pp_constant formatter c
@@ -57,8 +56,7 @@ let rec pp_expression formatter e =
   | EVar (n, t) ->
     Format.fprintf formatter "%s" n;
     if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
-  | EFun (p, e) ->
-    Format.fprintf formatter "(fun %a -> %a)" pp_pattern p pp_expression e
+  | EFun (p, e) -> Format.fprintf formatter "(fun %a -> %a)" pp_pattern p pp_expression e
   | EApp (e1, e2, t) ->
     Format.fprintf formatter "(%a %a)" pp_expression e1 pp_expression e2;
     if t <> TUnknown then Format.fprintf formatter " : %a" pp_type t
@@ -75,34 +73,32 @@ let rec pp_expression formatter e =
   | ELetIn (r, n, e, ine) ->
     Format.fprintf
       formatter
-      "\n  let %a %a = %a\n  in %a"
+      "\n  let %a %s = %a\n  in %a"
       pp_rec
       r
-      (Format.pp_print_list
-         ~pp_sep:(fun ppf () -> Format.fprintf ppf " ")
-         Format.pp_print_string)
       n
+      pp_expression
+      e
+      pp_expression
+      ine
+  | ELetPatIn (names, e, ine) ->
+    Format.fprintf
+      formatter
+      "\n  let %a = %a\n  in %a"
+      pp_pattern
+      names
       pp_expression
       e
       pp_expression
       ine
   | ETuple t -> Format.fprintf formatter "(%a)" (pp_tuple pp_expression) t
   | EBinaryOp (op, l, r) ->
-    Format.fprintf
-      formatter
-      "(%a %a %a)"
-      pp_expression
-      l
-      pp_binop
-      op
-      pp_expression
-      r
+    Format.fprintf formatter "(%a %a %a)" pp_expression l pp_binop op pp_expression r
   | EList (head, tail) ->
     (* Рекурсивно выводим список *)
     let rec print_list formatter = function
       | EConst CNil -> Format.fprintf formatter ""
-      | EList (h, t) ->
-        Format.fprintf formatter "%a; %a" pp_expression h print_list t
+      | EList (h, t) -> Format.fprintf formatter "%a; %a" pp_expression h print_list t
       | _ -> Format.fprintf formatter "%a" pp_expression tail
     in
     Format.fprintf formatter "[%a]" print_list (EList (head, tail))
@@ -115,42 +111,33 @@ let rec pp_expression formatter e =
 ;;
 
 let pp_bindings formatter bindings =
-  List.iter
-    (fun bind ->
-      match bind with
-      | Let lets ->
-        List.iteri
-          (fun i (r, n, e) ->
-            if i = 0
-            then
-              Format.fprintf
-                formatter
-                "let %a %a = %a\n"
-                pp_rec
-                r
-                (Format.pp_print_list
-                   ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
-                   Format.pp_print_string)
-                n
-                pp_expression
-                e
-            else
-              Format.fprintf
-                formatter
-                "and %a %a = %a\n"
-                pp_rec
-                r
-                (Format.pp_print_list
-                   ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ")
-                   Format.pp_print_string)
-                n
-                pp_expression
-                e)
-          lets
-      | Expression e ->
-        pp_expression formatter e;
-        Format.fprintf formatter "\n")
-    bindings
+  match bindings with
+  | Lets lets_list ->
+    (* Обработка списка связываний *)
+    List.iteri
+      (fun i let_binding ->
+        match let_binding with
+        | Let (r, name, expr) ->
+          (* Обработка обычного связывания let id = expr *)
+          if i = 0
+          then
+            Format.fprintf formatter "let %a %s = %a\n" pp_rec r name pp_expression expr
+          else
+            Format.fprintf formatter "and %a %s = %a\n" pp_rec r name pp_expression expr
+        | LetPat (pat, expr) ->
+          (* Обработка связывания с паттерном let pattern = expr *)
+          if i = 0
+          then Format.fprintf formatter "let %a = %a\n" pp_pattern pat pp_expression expr
+          else Format.fprintf formatter "and %a = %a\n" pp_pattern pat pp_expression expr)
+      lets_list
+  | Expression expr ->
+    (* Обработка простого выражения *)
+    pp_expression formatter expr;
+    Format.fprintf formatter "\n"
 ;;
 
-let printer bindings = Format.asprintf "%a" pp_bindings bindings
+let pp_bindings_list formatter bindings_list =
+  List.iter (fun bindings -> pp_bindings formatter bindings) bindings_list
+;;
+
+let printer bindings_list = Format.asprintf "%a" pp_bindings_list bindings_list

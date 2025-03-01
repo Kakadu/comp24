@@ -24,7 +24,7 @@
   > x+3
   let  a = f
   and  b = 4
-  let  c, b = (2, 3)
+  let (c, b) = (2, 3)
   (x + 3)
   $ ./parser_demo.exe < manytests/do_not_type/001.ml
   let  recfac = (fun n -> 
@@ -40,8 +40,6 @@
   let  fix = (fun f -> ((fun x -> (f (fun f -> ((x x) f)))) (fun x -> (f (fun f -> ((x x) f))))))
   $ ./parser_demo.exe < manytests/do_not_type/004let_poly.ml
   let  temp = ((fun f -> ((f 1), (f true))) (fun x -> x))
-  $ ./parser_demo.exe < manytests/do_not_type/015tuples.ml
-  let rec a, b = (a, b)
   $ ./parser_demo.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> 
     if (n <= 1)
@@ -162,17 +160,17 @@
   $ ./parser_demo.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f -> (fun x -> ((f (fix f)) x)))
   let  map = (fun f -> (fun p -> 
-    let  a b = p
+    let (a, b) = p
     in ((f a), (f b))))
   let  fixpoly = (fun l -> ((fix (fun self -> (fun l -> ((map (fun li -> (fun x -> ((li (self l)) x)))) l)))) l))
   let  feven = (fun p -> (fun n -> 
-    let  e o = p
+    let (e, o) = p
     in 
     if (n = 0)
     then 1
     else (o (n - 1))))
   let  fodd = (fun p -> (fun n -> 
-    let  e o = p
+    let (e, o) = p
     in 
     if (n = 0)
     then 0
@@ -191,7 +189,7 @@
     in 
     let  () = (print_int (meven 2))
     in 
-    let  even odd = tie
+    let (even, odd) = tie
     in 
     let  () = (print_int (odd 3))
     in 

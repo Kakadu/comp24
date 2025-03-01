@@ -386,38 +386,22 @@ let infer =
       let* s5 = unify t2 t3 in
       let* final_subst = Subst.compose_all [ s5; s4; s3; s2; s1 ] in
       R.return (final_subst, Subst.apply s5 t2)
-    | ELetIn (Notrec, id_list, e1, e2) ->
+    | ELetIn (Notrec, id, e1, e2) ->
       let* s1, t1 = helper env e1 in
       let env2 = TypeEnv.apply s1 env in
       let t2 = generalize env2 t1 in
-      let* s2, t3 =
-        helper
-          ((List.fold_left ~init:env2 ~f:(fun acc_env id ->
-              TypeEnv.extend acc_env (id, t2)))
-             id_list)
-          e2
-      in
+      let* s2, t3 = helper (TypeEnv.extend env (id, t2)) e2 in
       let* final_subst = Subst.compose s1 s2 in
       return (final_subst, t3)
-    | ELetIn (Rec, id_list, e1, e2) ->
+    | ELetIn (Rec, id, e1, e2) ->
       let* tv = fresh_var in
-      let env =
-        (List.fold_left ~init:env ~f:(fun acc_env id ->
-           TypeEnv.extend acc_env (id, S (VarSet.empty, tv))))
-          id_list
-      in
+      let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
       let* s1, t1 = helper env e1 in
       let* s2 = unify (Subst.apply s1 tv) t1 in
       let* s = Subst.compose s2 s1 in
       let env = TypeEnv.apply s env in
       let t2 = generalize env (Subst.apply s tv) in
-      let* s2, t2 =
-        helper
-          ((List.fold_left ~init:env ~f:(fun acc_env id ->
-              TypeEnv.(extend (apply s acc_env) (id, t2))))
-             id_list)
-          e2
-      in
+      let* s2, t2 = helper TypeEnv.(extend (apply s env) (id, t2)) e2 in
       let* final_subst = Subst.compose s s2 in
       return (final_subst, t2)
     | _ -> failwith "match"
@@ -433,52 +417,40 @@ let infer_prog prog =
     match prog with
     | h :: tl ->
       (match h with
-       | Let lets -> (* lets — это список (r, id_list, expr) *)
+       | Let lets ->
+         (* lets — это список (r, id_list, expr) *)
          List.fold_left
-           ~f:(fun acc (r, id_list, expr) ->
+           ~f:(fun acc (r, id, expr) ->
              let* env, l = acc in
              match r with
              | Notrec ->
                let* s, t = infer env expr in
                let env = TypeEnv.apply s env in
                let t = generalize env t in
-               let env =
-                 List.fold_left
-                   ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t))
-                   ~init:env
-                   id_list
-               in
-               let l1 = l @ [ id_list, sc_to_type t ] in
+               let env = TypeEnv.extend env (id, t) in
+               let l1 = l @ [ id, sc_to_type t ] in
                return (env, l1)
              | Rec ->
                let* tv = fresh_var in
-               let env =
-                 List.fold_left
-                   ~f:(fun acc_env id ->
-                     TypeEnv.extend acc_env (id, S (VarSet.empty, tv)))
-                   ~init:env
-                   id_list
-               in
+               let env = TypeEnv.extend env (id, S (VarSet.empty, tv)) in
                let* s, t = infer env expr in
                let* s2 = unify (Subst.apply s tv) t in
                let* s = Subst.compose s2 s in
                let env = TypeEnv.apply s env in
                let t = generalize env (Subst.apply s tv) in
-               let env =
-                 List.fold_left
-                   ~f:(fun acc_env id -> TypeEnv.extend acc_env (id, t))
-                   ~init:env
-                   id_list
+               let env = TypeEnv.extend env (id, t)
                in
-               let l1 = l @ [ id_list, sc_to_type t ] in
+               let l1 = l @ [ id, sc_to_type t ] in
                return (env, l1))
            ~init:(return (env, l)) (* Начальное значение аккумулятора *)
-           lets (* Список для обработки *)
+           [ lets ]
+         (* Список для обработки *)
          >>= fun (env, l) -> helper env tl l
        | _ -> fail `Occurs_check)
     | [] -> return l
   in
   helper TypeEnv.empty prog []
+;;
 
 let w e = Result.map (run (infer TypeEnv.empty e)) ~f:snd
 let run_prog_inference prog = run (infer_prog prog)
@@ -486,10 +458,9 @@ let run_prog_inference prog = run (infer_prog prog)
 let print_prog_result prog =
   match run_prog_inference prog with
   | Ok l ->
-    List.iter l ~f:(fun (id_list, t) ->
-      let id_str = String.concat id_list in
+    List.iter l ~f:(fun (id, t) ->
       (* Объединяем список идентификаторов в строку *)
-      Stdlib.Format.printf "%s : %a\n" id_str pp_typ t)
+      Stdlib.Format.printf "%s : %a\n" id pp_typ t)
   | Error e -> print_typ_err e
 ;;
 
