@@ -89,7 +89,7 @@ let%expect_test "test let rec and" =
 let%expect_test "test invalid let rec with pat binding" =
   test {|let rec a, b = 3, 4 in a|};
   [%expect
-    {| ErrorType infering error: Only variables are allowed as left-hand side of `let rec' |}]
+    {| ErrorType infering error: only variables are allowed as left-hand side of `let rec' |}]
 ;;
 
 let%expect_test "test let statement" =
@@ -178,4 +178,52 @@ let%expect_test "test list 3" =
   test {|([2; 4]) :: []|};
   [%expect {|
     int list list |}]
+;;
+
+let%expect_test "test type" =
+  test {|fun a -> (a: int)|};
+  [%expect {|
+    int -> int |}]
+;;
+
+let%expect_test "test fun type" =
+  test {|let a b: int -> int = b|};
+  [%expect {|
+    val a : (int -> int) -> int -> int |}]
+;;
+
+let%expect_test "test type bool" =
+  test {|let a b: bool = b|};
+  [%expect {|
+    val a : bool -> bool |}]
+;;
+
+let%expect_test "test type string" =
+  test {|let a b: string = b|};
+  [%expect {|
+    val a : string -> string |}]
+;;
+
+let%expect_test "test type char" =
+  test {|let a b: char = b|};
+  [%expect {|
+    val a : char -> char |}]
+;;
+
+let%expect_test "test type fun hard" =
+  test {|let a b: (int -> int) -> int = b|};
+  [%expect {|
+    val a : ((int -> int) -> int) -> (int -> int) -> int |}]
+;;
+
+let%expect_test "test type constructor" =
+  test {|let a b: int list = b|};
+  [%expect {|
+    val a : int list -> int list |}]
+;;
+
+let%expect_test "test type tuple" =
+  test {|let a b: (int * bool) = b|};
+  [%expect {|
+    val a : (int * bool) -> (int * bool) |}]
 ;;

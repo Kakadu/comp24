@@ -144,12 +144,46 @@ and infer_tuple env l =
   in
   sub, TTuple (List.rev tys)
 
-(* and infer_typexpr env exp typexpr =
-   let* s1, t1 = infer_expression env exp in
-   let* t2 = let rec helper = function | Type_parametric ->
-   let* s2 = Subst.unify t1 *)
-(* function | Type_constructor_param (_, _) -> Subst.empty, TUnit
-   | Type_tuple (h::tl) -> *)
+and infer_typexpr env exp typexpr =
+  let base_type_mapper = function
+    | "int" -> Some TInt
+    | "char" -> Some TChar
+    | "string" -> Some TString
+    | "bool" -> Some TBool
+    | _ -> None
+  in
+  let* s1, t1 = infer_expression env exp in
+  let* t2 =
+    let rec helper = function
+      | Type_constructor_param (tye, name) ->
+        let+ tye = helper tye in
+        TConstructor (Some tye, name)
+      | Type_tuple m ->
+        let+ tys = map helper m in
+        TTuple tys
+      | Type_single name ->
+        return
+          (match base_type_mapper name with
+           | Some t -> TBase t
+           | None -> TConstructor (None, name))
+      | Type_fun l ->
+        let rec helper2 = function
+          | h :: [] ->
+            let+ res = helper h in
+            res
+          | h :: tl ->
+            let+ h = helper h
+            and+ tl = helper2 tl in
+            TArrow (h, tl)
+          | _ -> fail (Invalid_ast "fun type without any type")
+        in
+        helper2 l
+    in
+    helper typexpr
+  in
+  let* s2 = Subst.unify t1 t2 in
+  let+ sub = Subst.compose s1 s2 in
+  sub, t2
 
 and infer_construct env name =
   let find_name name =
@@ -188,7 +222,7 @@ and infer_expression env = function
   | Exp_apply (l, r) -> infer_apply env l r
   | Exp_tuple l -> infer_tuple env l
   | Exp_construct (name, exp) -> infer_construct env name exp
-  (* | Exp_type (exp, typexp) -> infer_typexpr env exp typexp *)
+  | Exp_type (exp, typexp) -> infer_typexpr env exp typexp
   | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
 ;;
 
@@ -215,8 +249,9 @@ let error_to_string = function
   | Unification_failed (val1, val2) ->
     "failed unification of types " ^ show_type_val val1 ^ " and " ^ show_type_val val2
   | No_variable v -> "variable " ^ v ^ " is not found"
-  | Invalid_let -> "Only variables are allowed as left-hand side of `let rec'"
-  | Invalid_list_constructor_argument -> "Invalid list constructor argument"
+  | Invalid_let -> "only variables are allowed as left-hand side of `let rec'"
+  | Invalid_list_constructor_argument -> "invalid list constructor argument"
+  | Invalid_ast s -> "invalid ast part: " ^ s
 ;;
 
 let infer_program prog =

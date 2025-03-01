@@ -30,6 +30,7 @@ type error =
   | No_variable of string
   | Invalid_let
   | Invalid_list_constructor_argument
+  | Invalid_ast of string
 
 exception Unimplemented of string
 
