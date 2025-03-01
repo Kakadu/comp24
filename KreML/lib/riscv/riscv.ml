@@ -14,19 +14,20 @@ let temp idx = Temp idx
 let saved idx = Saved idx
 let arg idx = Arg idx
 let fp = Saved 0
-let is_saved =
-  function
+
+let is_saved = function
   | Saved _ -> true
   | _ -> false
+;;
 
 type rvalue =
-| Rv_imm of int
-| Rv_reg of reg
-| Rv_mem of reg * int (** base, offset *)
-| Rv_function of Flambda.fun_decl
-| Rv_nop
+  | Rv_imm of int
+  | Rv_reg of reg
+  | Rv_mem of reg * int (** base, offset *)
+  | Rv_function of Flambda.fun_decl
+  | Rv_nop
 
-let a0value = Rv_reg(arg 0)
+let a0value = Rv_reg (arg 0)
 
 type location =
   | Loc_reg of reg
@@ -85,17 +86,14 @@ type instruction =
   | Stype of reg * int * reg * op (** value, offset, dst, op *)
   | Btype of reg * reg * string * op (** rs1, rs2, target, op *)
   | Utype of reg * int * op (** dst, imm, op *)
-  (* | Jtype of string * reg * op *)
-   (** signed offset, link reg, op *)
   | Pseudo of string (* can not unify signature *)
   | Label of string
   | Global of string
 
-let extend_stack_insn size = Itype(Sp, Sp, -size, ADDI)
-let shrink_stack_insn size = Itype(Sp, Sp, size, ADDI)
-let sd ~v offset ~dst = Stype(v, offset, dst, SD)
-let ld ~rd offset  ~src = Itype(rd, src, offset, LD)
-
+let extend_stack_insn size = Itype (Sp, Sp, -size, ADDI)
+let shrink_stack_insn size = Itype (Sp, Sp, size, ADDI)
+let sd ~v offset ~dst = Stype (v, offset, dst, SD)
+let ld ~rd offset ~src = Itype (rd, src, offset, LD)
 
 module RegistersStorage : Registers_storage_intf.S with type 'a t = 'a list = struct
   type 'a t = 'a list
@@ -120,7 +118,6 @@ end
 (* fp is not available *)
 let available_regs = List.init 7 temp @ List.init 11 (fun i -> saved (i + 1))
 let temporary_regs = List.init 7 temp
-
 
 let pp_reg fmt =
   let open Format in
@@ -181,45 +178,57 @@ let pp_insn fmt =
   function
   | Rtype (rd, rs1, rs2, op) ->
     fprintf fmt "@[\t%a %a, %a, %a@]@." pp_op op pp_reg rd pp_reg rs1 pp_reg rs2
-  | Itype(rd, rs, imm, LD) ->
+  | Itype (rd, rs, imm, LD) ->
     fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op LD pp_reg rd imm pp_reg rs
   | Itype (rd, rs, imm, op) ->
     fprintf fmt "@[\t%a %a, %a, %i@]@." pp_op op pp_reg rd pp_reg rs imm
   | Stype (value, offset, dst, op) ->
     fprintf fmt "@[\t%a %a, %i(%a) @]@." pp_op op pp_reg value offset pp_reg dst
-  | Btype(rs1, rs2, target, op) ->
+  | Btype (rs1, rs2, target, op) ->
     fprintf fmt "@[\t%a  %a, %a, %s@]@." pp_op op pp_reg rs1 pp_reg rs2 target
-  | Utype(rd, imm, op) ->
-    fprintf fmt "@[\t%a %a, %i@]@." pp_op op pp_reg rd imm
+  | Utype (rd, imm, op) -> fprintf fmt "@[\t%a %a, %i@]@." pp_op op pp_reg rd imm
   | Pseudo p -> fprintf fmt "@[\t%s@]@." p
-  | Label l -> fprintf  fmt "@[%s:@]@." l
+  | Label l -> fprintf fmt "@[%s:@]@." l
   | Global s -> fprintf fmt "@[.global %s@]@." s
 ;;
 
 module Pseudo = struct
   open Format
+
   let mv ~rd ~src =
     let insn = asprintf "mv %a, %a" pp_reg rd pp_reg src in
     Pseudo insn
+  ;;
+
   let li rd imm =
     let insn = asprintf "li %a, %i" pp_reg rd imm in
     Pseudo insn
+  ;;
+
   let la rd label =
     let insn = asprintf "la  %a, %s" pp_reg rd label in
     Pseudo insn
+  ;;
+
   let neg r =
     let insn = asprintf "neg %a" pp_reg r in
     Pseudo insn
+  ;;
 
   let seqz ~rd ~src =
     let insn = asprintf "seqz %a, %a" pp_reg rd pp_reg src in
     Pseudo insn
+  ;;
 
   let call label =
     let insn = Format.sprintf "call %s" label in
-     Pseudo insn
+    Pseudo insn
+  ;;
+
   let jump label =
     let insn = sprintf "j %s" label in
-    Pseudo (insn)
+    Pseudo insn
+  ;;
+
   let ret = Pseudo "ret"
 end

@@ -17,7 +17,9 @@ let () =
        let mf_structure = Match_elimination.eliminate alpha in
        let arities, anf = Anf.transform mf_structure in
        let flstructure = Closure_conversion.cc arities anf in
-       let regs = List.init 7 (fun i -> Riscv.Temp i) in
+       let regs =
+         List.init 7 (fun i -> Riscv.Temp i) @ List.init 11 (fun i -> Riscv.saved (i + 1))
+       in
        let allocation = Rv_allocator.scan_program regs flstructure in
        Flambda.pp std_formatter flstructure;
        Linear_scan_allocation.pp std_formatter Riscv.pp_reg allocation

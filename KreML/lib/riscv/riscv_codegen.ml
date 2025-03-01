@@ -12,15 +12,15 @@ let current_fun_arity = ref 0
    temporary values (in memory operations, etc) if they are not  available right now *)
 let currently_used_free_registers = ref []
 
-let pop_used_free_regs_if_need = function
-  | [] -> ()
-  | _ -> currently_used_free_registers := List.tl !currently_used_free_registers
+let pop_used_free_regs () =
+  currently_used_free_registers := List.tl !currently_used_free_registers
 ;;
 
 let curr_assignment = ref (Base.Map.empty (module Base.String))
 
 let find_reg forbidden =
   let forbidden = !currently_used_free_registers @ forbidden in
+  (* print_endline @@ Format.sprintf "forb length %i" (List.length forbidden); *)
   let used_temps =
     Base.Map.filter_map !curr_assignment ~f:(function
       | Loc_reg (Temp _ as r) -> Some r
@@ -307,7 +307,7 @@ module Memory = struct
       save @ (load :: store :: restore)
     | Loc_mem (Sp, dst_offset), Rv_mem (src_reg, src_offset) ->
       let temp_reg, save, restore = find_reg [ src_reg ] in
-      let load = ld ~rd:temp_reg src_offset ~src:Sp in
+      let load = ld ~rd:temp_reg src_offset ~src:src_reg in
       let store =
         if is_empty save |> not
         then
@@ -496,20 +496,23 @@ let rec codegen_flambda location =
     Rv_imm const |> Memory.store_rvalue location
   | Fl_tuple elems ->
     let size = List.length elems in
-    let a0 = arg 0 in
     let fill_tuple_insns =
       List.mapi
         (fun i e ->
-          let loc = Loc_mem (a0, i * word_size) in
+          let loc =
+            match location with
+            | Loc_reg r -> Loc_mem (r, i * word_size)
+            | Loc_mem (r, offset) -> Loc_mem (r, offset + (i * word_size))
+          in
           codegen_flambda loc e)
         elems
       |> List.concat
     in
     let save_tuple = Memory.store_rvalue location a0value in
-    Function.Runtime.alloc_tuple
-      size
-      location
-      ~save_retvalue:(fill_tuple_insns @ save_tuple)
+    let alloc_tuple =
+      Function.Runtime.alloc_tuple size location ~save_retvalue:save_tuple
+    in
+    alloc_tuple @ fill_tuple_insns
   | Fl_cons (x, xs) ->
     let save, restore =
       Function.Call.save_and_restore_insns ~caller_arity:!current_fun_arity location
@@ -530,36 +533,34 @@ let rec codegen_flambda location =
     let load_value = ld ~rd:some_reg (idx * word_size) ~src:some_reg in
     let store = Memory.store_rvalue location (Rv_reg some_reg) in
     let shrink_stack = Memory.shrink_stack_aligned word_size in
-    currently_used_free_registers := List.tl !currently_used_free_registers;
+    pop_used_free_regs ();
     save @ (extend_stack :: load_addr) @ (load_value :: store) @ (shrink_stack :: restore)
   | Fl_binop (op, x, y) ->
-    let rd, save, restore =
+    let rd, save, restore, borrowed_register =
       match location with
-      | Loc_reg reg -> reg, [], []
+      | Loc_reg reg -> reg, [], [], false
       | Loc_mem (_, _) ->
         let some_reg, save, restore = find_reg [] in
         currently_used_free_registers := some_reg :: !currently_used_free_registers;
-        some_reg, save, restore
+        some_reg, save, restore, true
     in
     let binop_insns = Arith.codegen_binop op x y rd in
     let store_to_loc = Memory.store_rvalue location (Rv_reg rd) in
-    pop_used_free_regs_if_need save;
+    if borrowed_register then pop_used_free_regs ();
     save @ binop_insns @ store_to_loc @ restore
   | Fl_unop (Anf.Not, x) ->
-    let rd, save, restore =
+    let rd, save, restore, borrowed_register =
       match location with
-      | Loc_reg reg -> reg, [], []
+      | Loc_reg reg -> reg, [], [], false
       | Loc_mem (_, _) ->
         let some_reg, save, restore = find_reg [] in
         currently_used_free_registers := some_reg :: !currently_used_free_registers;
-        let extend_stack = Memory.extend_stack_aligned word_size in
-        let shrink_stack = Memory.shrink_stack_aligned word_size in
-        some_reg, save @ [ extend_stack ], shrink_stack :: restore
+        some_reg, save, restore, true
     in
     let insns = codegen_flambda (Loc_reg rd) x in
     let invert = Itype (rd, rd, 1, XORI) in
     let store_to_loc = Memory.store_rvalue location (Rv_reg rd) in
-    pop_used_free_regs_if_need save;
+    if borrowed_register then pop_used_free_regs ();
     save @ insns @ (invert :: store_to_loc) @ restore
   | Fl_let (name, v, scope) ->
     let loc =
@@ -572,7 +573,8 @@ let rec codegen_flambda location =
     let insns = codegen_flambda location scope in
     insns
   | Fl_app (Fl_closure { name; env_size; arity; _ }, args)
-    when arity = List.length args && arity < arg_regs_count && env_size = 0 ->
+    when arity = List.length args && arity < arg_regs_count && env_size = 0 && arity > 0
+    ->
     let save, restore =
       Function.Call.save_and_restore_insns ~caller_arity:!current_fun_arity location
     in
@@ -594,13 +596,13 @@ let rec codegen_flambda location =
     let some_reg, save_reg, restore_reg = find_reg [] in
     currently_used_free_registers := some_reg :: !currently_used_free_registers;
     let resolve_callee = codegen_flambda (Loc_reg some_reg) f in
-    let put_callee_in_a0 = Pseudo.mv ~rd:(arg 0) ~src:some_reg in
+    let put_closure_in_a0 = Pseudo.mv ~rd:(arg 0) ~src:some_reg in
     let put_args_on_stack = List.map2 codegen_flambda arg_locations args |> List.concat in
     let put_envp = Itype (arg 1, Sp, word_size, ADDI) in
     let put_count = Pseudo.li (arg 2) args_count in
     let call_closure = Pseudo.call Runtime.call_closure in
     let save_retvalue = Memory.store_rvalue location a0value in
-    pop_used_free_regs_if_need save;
+    pop_used_free_regs ();
     (match location with
      | Loc_reg _ ->
        save
@@ -608,16 +610,26 @@ let rec codegen_flambda location =
           @ resolve_callee
           @ (extend_stack :: put_args_on_stack)
           @ [ put_envp; put_count ])
-       @ ((put_callee_in_a0 :: call_closure :: save_retvalue) @ restore_reg)
+       @ ((put_closure_in_a0 :: call_closure :: save_retvalue) @ restore_reg)
        @ (shrink_stack :: restore)
      | Loc_mem _ ->
        save
        @ (save_reg
           @ resolve_callee
-          @ (put_count :: extend_stack :: put_envp :: put_args_on_stack))
-       @ (put_callee_in_a0 :: call_closure :: restore_reg)
+          @ (extend_stack :: put_args_on_stack)
+          @ [ put_envp; put_count ])
+       @ (put_closure_in_a0 :: call_closure :: restore_reg)
        @ (shrink_stack :: restore)
        @ save_retvalue)
+  | Fl_closure { name; arity = 0; _ } ->
+    let save, restore =
+      Function.Call.save_and_restore_insns ~caller_arity:!current_fun_arity location
+    in
+    let call = Pseudo.call name in
+    let store = Memory.store_rvalue location a0value in
+    (match location with
+     | Loc_reg _ -> save @ (call :: store) @ restore
+     | Loc_mem _ -> save @ (call :: restore) @ store)
   | Fl_closure ({ arity; env_size; arrange; _ } as cl) ->
     let some_reg, save_reg, restore_reg = find_reg [] in
     currently_used_free_registers := some_reg :: !currently_used_free_registers;
@@ -641,6 +653,7 @@ let rec codegen_flambda location =
         ~retvalue_location:location
         ~save_retvalue
     in
+    pop_used_free_regs ();
     save_reg @ alloc_env @ arrange_env_insns @ alloc_closure_insns @ restore_reg
   | Fl_ite (c, t, e) ->
     let some_reg, save, restore = find_reg [] in
@@ -654,7 +667,7 @@ let rec codegen_flambda location =
     let else_label = fresh_label "else" in
     let join_label = fresh_label "join" in
     let branch = Btype (some_reg, Zero, else_label, BEQ) in
-    pop_used_free_regs_if_need save;
+    pop_used_free_regs ();
     curr_block := (branch :: cond) @ save @ !curr_block;
     let then_final_insns = codegen_flambda location t |> List.rev in
     let jump_join = Pseudo.jump join_label in
@@ -671,6 +684,7 @@ let convert_generic_assignment_to_rv generic =
 ;;
 
 let codegen_fun (fun_name, { param_names; arity; body }) regs_assignment =
+  (* print_endline @@ Format.sprintf "codgen fun %s, unused_free_Regs len %i" fun_name (List.length !currently_used_free_registers); *)
   let has_env = List.length param_names != arity || arity > arg_regs_count in
   let arity, param_names =
     if has_env then arity + 1, "env" :: param_names else arity, param_names

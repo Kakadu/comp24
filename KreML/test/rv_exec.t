@@ -101,9 +101,9 @@ $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime
 $ qemu-riscv64-static test.out
 
 debug it lol)
-$ dune exec rv_codegen < manytests/typed/015tuples.ml > test.S
-$ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
-$ qemu-riscv64-static test.out
+  $ dune exec rv_codegen < manytests/typed/015tuples.ml > test.S
+  $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
+  $ qemu-riscv64-static test.out
 
   $ dune exec rv_codegen < manytests/typed/016lists.ml > test.S
   $ riscv64-linux-gnu-gcc -static -o test.out test.S -L../runtime/ -l:rv64_runtime.a
