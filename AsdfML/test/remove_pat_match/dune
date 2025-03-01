@@ -1,7 +1,7 @@
 (library
- (name inline_parser)
+ (name inline_pat_match)
  (libraries AsdfML.Lib test)
- (modules Inline_parser Inline_alpha)
+ (modules Inline_remove_patterns Inline_remove_match)
  (preprocess
   (pps ppx_inline_test ppx_expect))
  (instrumentation
