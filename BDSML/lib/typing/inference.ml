@@ -10,7 +10,6 @@ open Parser.Ast
 let unnamed_expr = ""
 let start_type_var = TVarId.create 0
 let fresh_var = fresh >>| fun n -> TVar n
-let init_env = TypeEnv.empty
 
 let poli_constructors_names =
   [ "::", "list"; "[]", "list"; "Some", "optional"; "None", "optional" ]
@@ -39,6 +38,40 @@ let lookup_env env var =
 let generalize env ty =
   let free = VarSet.diff (free_vars ty) (TypeEnv.free_vars env) in
   Scheme.create free ty
+;;
+
+let rec read_ast_type =
+  let base_type_mapper = function
+    | "int" -> Some TInt
+    | "char" -> Some TChar
+    | "string" -> Some TString
+    | "bool" -> Some TBool
+    | _ -> None
+  in
+  function
+  | Type_constructor_param (tye, name) ->
+    let+ tye = read_ast_type tye in
+    TConstructor (Some tye, name)
+  | Type_tuple m ->
+    let+ tys = map read_ast_type m in
+    TTuple tys
+  | Type_single name ->
+    return
+      (match base_type_mapper name with
+       | Some t -> TBase t
+       | None -> TConstructor (None, name))
+  | Type_fun l ->
+    let rec helper = function
+      | h :: [] ->
+        let+ res = read_ast_type h in
+        res
+      | h :: tl ->
+        let+ h = read_ast_type h
+        and+ tl = helper tl in
+        TArrow (h, tl)
+      | _ -> fail (Invalid_ast "fun type without any type")
+    in
+    helper l
 ;;
 
 let rec infer_base_type c =
@@ -149,42 +182,8 @@ and infer_tuple env l =
   sub, TTuple (List.rev tys)
 
 and infer_typexpr env exp typexpr =
-  let base_type_mapper = function
-    | "int" -> Some TInt
-    | "char" -> Some TChar
-    | "string" -> Some TString
-    | "bool" -> Some TBool
-    | _ -> None
-  in
   let* s1, t1 = infer_expression env exp in
-  let* t2 =
-    let rec helper = function
-      | Type_constructor_param (tye, name) ->
-        let+ tye = helper tye in
-        TConstructor (Some tye, name)
-      | Type_tuple m ->
-        let+ tys = map helper m in
-        TTuple tys
-      | Type_single name ->
-        return
-          (match base_type_mapper name with
-           | Some t -> TBase t
-           | None -> TConstructor (None, name))
-      | Type_fun l ->
-        let rec helper2 = function
-          | h :: [] ->
-            let+ res = helper h in
-            res
-          | h :: tl ->
-            let+ h = helper h
-            and+ tl = helper2 tl in
-            TArrow (h, tl)
-          | _ -> fail (Invalid_ast "fun type without any type")
-        in
-        helper2 l
-    in
-    helper typexpr
-  in
+  let* t2 = read_ast_type typexpr in
   let* s2 = Subst.unify t1 t2 in
   let+ sub = Subst.compose s1 s2 in
   sub, t2
@@ -230,6 +229,30 @@ and infer_expression env = function
   | _ as t -> raise (Unimplemented (show_expression t ^ "infer_expr"))
 ;;
 
+let predefine_operators =
+  [ "( + )", "int -> int -> int"
+  ; "( - )", "int -> int -> int"
+  ; "( * )", "int -> int -> int"
+  ; "( / )", "int -> int -> int"
+  ; "( ~- )", "int -> int"
+  ; "( ~+ )", "int -> int"
+  ]
+;;
+
+let init_env =
+  let+ add_predefines =
+    map
+      (fun (name, ty) ->
+        match Parser.Typexpr_parser.parse_typexpr_str ty with
+        | Result.Ok ty ->
+          let+ ty = read_ast_type ty in
+          name, Scheme.create VarSet.empty ty
+        | Result.Error s -> fail (Invalid_predefined_operators s))
+      predefine_operators
+  in
+  TypeEnv.init add_predefines
+;;
+
 let infer_structure_item prog =
   let rec helper env prog types =
     match prog with
@@ -245,7 +268,8 @@ let infer_structure_item prog =
          let types = types @ List.rev vars_types in
          helper env tl types)
   in
-  helper init_env prog []
+  let* env = init_env in
+  helper env prog []
 ;;
 
 let error_to_string = function
@@ -256,6 +280,7 @@ let error_to_string = function
   | Invalid_let -> "only variables are allowed as left-hand side of `let rec'"
   | Invalid_list_constructor_argument -> "invalid list constructor argument"
   | Invalid_ast s -> "invalid ast part: " ^ s
+  | Invalid_predefined_operators s -> "invalid predefined operators: " ^ s
 ;;
 
 let infer_program prog =

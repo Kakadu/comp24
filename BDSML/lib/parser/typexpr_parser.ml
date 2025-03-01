@@ -59,3 +59,7 @@ let parse_skip_fun =
 
 (** [:int] *)
 let parse_typexpr : typexpr t = check_char ':' *> parse_typexpr_by_prior
+
+let parse_typexpr_str str =
+  Angstrom.parse_string ~consume:Angstrom.Consume.All parse_typexpr @@ ":" ^ str
+;;

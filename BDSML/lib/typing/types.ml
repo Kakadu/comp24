@@ -62,6 +62,7 @@ type error =
   | Invalid_let
   | Invalid_list_constructor_argument
   | Invalid_ast of string
+  | Invalid_predefined_operators of string
 
 exception Unimplemented of string
 
