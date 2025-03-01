@@ -97,7 +97,7 @@ let lift decl =
     | DLet (is_rec, id, e) ->
       let* e, lifted = lift_expr e lifted renames in
       return (LLDLet (is_rec, id, [], e), lifted)
-    | DMutualLet _ -> failwith "Not Implemented"
+    | DMutualLet _ -> fail "Not Implemented"
   in
   lift_decl decl [] (Map.empty (module String))
 ;;

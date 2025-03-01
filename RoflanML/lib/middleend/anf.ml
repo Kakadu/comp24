@@ -71,7 +71,7 @@ let anf_decl = function
   | LLDMutualLet _ -> fail "Not implemented"
 ;;
 
-let anf prog =
+let anf_program prog =
   run
   @@ List.fold_right prog ~init:(return []) ~f:(fun decl acc ->
     let* acc = acc in

@@ -707,7 +707,7 @@ module ANFTests = struct
     | Result.Ok prog ->
       (match lift_program (close_program prog env) with
        | Result.Ok prog ->
-         (match anf prog with
+         (match anf_program prog with
           | Result.Ok prog ->
             List.iter prog ~f:(fun decl ->
               Stdlib.Format.printf "%s\n" (ast_to_str (anf_to_ast decl)))
