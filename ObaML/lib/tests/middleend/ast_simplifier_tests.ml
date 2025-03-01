@@ -6,12 +6,12 @@ open ObaML
 open Format
 
 let parse_simplify_and_print_result str =
-   match Parser.structure_from_string str with
-   | Ok parse_result ->
-   let structure = To_simple_ast.convert parse_result in
-   printf "%a" Simple_ast_pretty_printer.print_structure structure
-   | Error _ -> printf "Syntax error"
-   ;;
+  match Parser.structure_from_string str with
+  | Ok parse_result ->
+    let structure = To_simple_ast.convert parse_result in
+    printf "%a" Simple_ast_pretty_printer.print_structure structure
+  | Error _ -> printf "Syntax error"
+;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| let a = 4;; |};
@@ -117,7 +117,8 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_simplify_and_print_result {| let a b = match b with | (5, (b, c), 4) -> (b, c);; |};
+  parse_simplify_and_print_result
+    {| let a b = match b with | (5, (b, c), 4) -> (b, c);; |};
   [%expect
     {|
     let a b = let #gen_pat_expr#0 = b in if ((5  =  ((#gen_tuple_getter# 0) #gen_pat_expr#0))  &&  (4  =  ((#gen_tuple_getter# 2) #gen_pat_expr#0))) then let b = ((#gen_tuple_getter# 0) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in let c = ((#gen_tuple_getter# 1) ((#gen_tuple_getter# 1) #gen_pat_expr#0)) in (b, c) else (#gen_matching_failed# ());;

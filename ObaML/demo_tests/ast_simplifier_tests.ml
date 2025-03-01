@@ -6,7 +6,8 @@ open ObaML
 
 let infer_and_print fmt structure =
   match Inferencer.run_structure_infer_with_custom_std structure Std.extended_std_lst with
-  | Ok env -> Format.fprintf fmt "%a" Inferencer.TypeEnv.pretty_pp_env (Std.extended_std_lst, env)
+  | Ok env ->
+    Format.fprintf fmt "%a" Inferencer.TypeEnv.pretty_pp_env (Std.extended_std_lst, env)
   | Error err -> Format.fprintf fmt "Infer: %a" Typedtree.pp_error err
 ;;
 
