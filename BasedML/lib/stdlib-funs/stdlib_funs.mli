@@ -4,6 +4,11 @@
 
 type llvm_name = string
 type name = string
-type std_fun = name * llvm_name * Ast.type_name
+
+type fun_type =
+  | UserFun
+  | SystemFun
+
+type std_fun = llvm_name * name * fun_type * Ast.type_name
 
 val stdlib_funs : std_fun list

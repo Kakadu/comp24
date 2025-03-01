@@ -33,6 +33,7 @@ val bool_typ : typ
 val unit_typ : typ
 val arrow : typ -> typ -> typ
 val ( @-> ) : typ -> typ -> typ
+val list_typ : typ -> typ
 
 (* pretty print types with letters *)
 val pp_typ : Format.formatter -> typ -> unit
