@@ -66,12 +66,12 @@ definition:
 | LETREC pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(Rec, pat, e)
-    | xs -> DLet(Rec, pat, EFun(xs, e))
+    | x :: xs -> DLet(Rec, pat, EFun(x, xs, e))
   }
 | LET pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(NonRec, pat, e)
-    | xs -> DLet(NonRec, pat, EFun(xs, e))
+    | x :: xs -> DLet(NonRec, pat, EFun(x, xs, e))
   }
 
 expr: 
@@ -93,7 +93,11 @@ ifelse:
 | LPAREN ifelse = ifelse RPAREN { ifelse }
 
 lambda:
-| FUN pat = nonempty_list(pattern) ARROW body = expr { EFun(pat, body) }
+| FUN pat = nonempty_list(pattern) ARROW body = expr { 
+    match pat with 
+    | p :: ps -> EFun(p, ps, body) 
+    | _ -> failwith "Empty nonempty_list"
+}
 | LPAREN lambda = lambda RPAREN { lambda }
 
 let_in:

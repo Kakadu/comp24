@@ -1,7 +1,7 @@
 (library
- (name inline_parser)
+ (name inline_ll)
  (libraries AsdfML.Lib test)
- (modules Inline_parser Inline_alpha)
+ (modules Inline_ll)
  (preprocess
   (pps ppx_inline_test ppx_expect))
  (instrumentation
