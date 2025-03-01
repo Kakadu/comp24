@@ -24,11 +24,19 @@ let parse_ptuple p =
 ;;
 
 let parse_pcons p =
-  let helper =
-    check_string "::"
-    *> return (fun p1 p2 -> Pat_construct ("::", Some (Pat_tuple [ p1; p2 ])))
+  let constructor =
+    let+ ident = ws *> parse_capitalized_ident
+    and+ arg = p >>| Option.some <|> return None in
+    Pat_construct (ident, arg)
   in
-  chainr1 p helper
+  let list_cons =
+    let helper =
+      check_string "::"
+      *> return (fun p1 p2 -> Pat_construct ("::", Some (Pat_tuple [ p1; p2 ])))
+    in
+    chainr1 p helper
+  in
+  constructor <|> list_cons
 ;;
 
 let parse_por p =

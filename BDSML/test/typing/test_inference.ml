@@ -255,3 +255,51 @@ let%expect_test "test predef ops 4" =
   [%expect {|
     int -> int -> int |}]
 ;;
+
+let%expect_test "test patter matching" =
+  test {|match 4 with 4 -> 4| a -> a | _ -> 3|};
+  [%expect {|
+    int |}]
+;;
+
+let%expect_test "test patter matching wrong left type" =
+  test {|match 4 with 4 -> 4| a -> a | _ -> 'c'|};
+  [%expect {|
+    ErrorType infering error: failed unification of types int and char |}]
+;;
+
+let%expect_test "test patter matching wrong right type" =
+  test {|match 4 with true -> 4| a -> a | _ -> 4|};
+  [%expect {|
+    ErrorType infering error: failed unification of types int and bool |}]
+;;
+
+let%expect_test "test patter matching wrong right type and expr" =
+  test {|match 4 with true -> 4 | _ -> 4|};
+  [%expect {|
+    ErrorType infering error: failed unification of types int and bool |}]
+;;
+
+let%expect_test "test patter matching tuple" =
+  test {|fun a -> match a with (4, m) -> m | _ -> true|};
+  [%expect {|
+    (int * bool) -> bool |}]
+;;
+
+let%expect_test "test patter matching tuple" =
+  test {|fun a -> match a with (m: bool) -> m|};
+  [%expect {|
+    bool -> bool |}]
+;;
+
+let%expect_test "test patter matching tuple" =
+  test {|fun a -> match a with | Some n -> n | None -> "Hello, word!"|};
+  [%expect {|
+    string optional -> string |}]
+;;
+
+let%expect_test "test function" =
+  test {|function | (a: cool_type) -> 3 | _ -> 4|};
+  [%expect {|
+    cool_type -> int |}]
+;;
