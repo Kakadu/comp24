@@ -6,7 +6,8 @@
   alpha_converter
   ll_ast
   me_ast
-  me_ast_pp
+  me_converter
+  middleend_pp
   optimizations
   match_elim)
  (libraries base common str)

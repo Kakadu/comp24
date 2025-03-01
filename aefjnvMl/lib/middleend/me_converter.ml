@@ -31,8 +31,3 @@ and convert_decl (MDecl (rec_flag, bindings)) =
 ;;
 
 let convert_program decls = List.map (fun decl -> Str_value (convert_decl decl)) decls
-
-let pp_me_program ppf prog =
-  let ast = convert_program prog in
-  Common.Ast_pp.program_pp ppf ast
-;;
