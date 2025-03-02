@@ -100,9 +100,6 @@ let simplify_arguments p_args expr : (expr * NameSet.t) R.t =
 (* 'Let' constructions that should be lifted *)
 type lifted_lets = ll_expr list
 
-(*  Transformed part of the expression + 'Let' constructions that should be lifted *)
-type ll_result = ll_expr * lifted_lets
-
 let rec ll_bind
   (acc : lifted_lets)
   (env : NameEnv.t)
@@ -120,10 +117,12 @@ let rec ll_bind
     let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
     R.return (env, new_bind, lifted)
 
-and ll_expr (acc : lifted_lets) (env : NameEnv.t) (expr : expr) : ll_result R.t =
+and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
+  : (ll_expr * lifted_lets) R.t
+  =
   match expr with
   | Let (rec_flag, (Var name, args, expr) :: tl_bind, in_scope) ->
-    let* env, new_bind, lifted = ll_bind acc env (name, args, expr) in
+    let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
     let* env, new_binds, lifted =
       List.fold
         tl_bind
@@ -141,6 +140,68 @@ and ll_expr (acc : lifted_lets) (env : NameEnv.t) (expr : expr) : ll_result R.t 
        let* ll_scope, lifted = ll_expr lifted env scope in
        R.return (LLLet (rec_flag, new_binds, Some ll_scope), lifted)
      | None -> R.return (LLLet (rec_flag, new_binds, None), lifted))
+  | EConst v -> R.return (LLConst v, lifted)
+  | EVar id ->
+    (match NameEnv.find id env with
+     | None -> R.return (LLVar id, lifted)
+     | Some new_id -> R.return (LLVar new_id, lifted))
+  | EList exprs ->
+    let* ll_exprs, lifted =
+      List.fold
+        exprs
+        ~init:(R.return ([], lifted))
+        ~f:(fun acc cur_expr ->
+          let* exprs, lifted = acc in
+          let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
+          R.return (ll_cur_expr :: exprs, lifted))
+    in
+    R.return (LLList ll_exprs, lifted)
+  | ETuple (e1, e2, tl) ->
+    let* ll_e1, lifted = ll_expr lifted env e1 in
+    let* ll_e2, lifted = ll_expr lifted env e2 in
+    let* ll_tl, lifted =
+      List.fold
+        tl
+        ~init:(R.return ([], lifted))
+        ~f:(fun acc cur_expr ->
+          let* exprs, lifted = acc in
+          let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
+          R.return (ll_cur_expr :: exprs, lifted))
+    in
+    R.return (LLTuple (ll_e1, ll_e2, ll_tl), lifted)
+  | EListConcat (lexpr, rexpr) ->
+    let* ll_lexpr, lifted = ll_expr lifted env lexpr in
+    let* ll_rexpr, lifted = ll_expr lifted env rexpr in
+    R.return (LLListConcat (ll_lexpr, ll_rexpr), lifted)
+  | EConstraint (expr, dt) ->
+    let* ll_expr, lifted = ll_expr lifted env expr in
+    R.return (LLConstraint (ll_expr, dt), lifted)
+  | If (cond, th, Some el) ->
+    let* ll_cond, lifted = ll_expr lifted env cond in
+    let* ll_th, lifted = ll_expr lifted env th in
+    let* ll_else, lifted = ll_expr lifted env el in
+    return (LLIf (ll_cond, ll_th, Some ll_else), lifted)
+  | If (cond, th, None) ->
+    let* ll_cond, lifted = ll_expr lifted env cond in
+    let* ll_th, lifted = ll_expr lifted env th in
+    return (LLIf (ll_cond, ll_th, None), lifted)
+  | Match (e, cases) ->
+    let* ll_e, lifted = ll_expr lifted env e in
+    let* ll_cases, lifted =
+      List.fold
+        cases
+        ~init:(R.return ([], lifted))
+        ~f:(fun acc case ->
+          let* cases, lifted = acc in
+          let pat, expr = case in
+          let* ll_expr, lifted = ll_expr lifted env expr in
+          R.return (((pat, ll_expr) : ll_case) :: cases, lifted))
+    in
+    R.return (LLMatch (ll_e, ll_cases), lifted)
+  | Application (lexpr, rexpr) ->
+    let* ll_lexpr, lifted = ll_expr lifted env lexpr in
+    let* ll_rexpr, lifted = ll_expr lifted env rexpr in
+    R.return (LLApplication (ll_lexpr, ll_rexpr), lifted)
   | _ -> failwith "Incorrect expression was encountered during LL"
 ;;
 
