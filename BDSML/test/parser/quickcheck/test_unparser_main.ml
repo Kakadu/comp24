@@ -2,11 +2,13 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Test_parser.Test_utils
 open Quickcheck
 
 let test_parser str =
-  pp_result Main_unparser.unparse_structure @@ Parser.Main_parser.parse str
+  print_string
+    (match Parser.Main_parser.parse str with
+     | Result.Ok s -> Main_unparser.unparse_structure s
+     | Result.Error e -> e)
 ;;
 
 let%expect_test "some bruh test" =
