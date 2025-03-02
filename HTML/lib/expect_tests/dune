@@ -7,7 +7,7 @@
   anf_tests
   PC_elim_tests
   PM_elim_tests)
- (libraries Parser Inferencer Anf Patelim)
+ (libraries Parser TypeInference Anf Patelim)
  (preprocess
   (pps ppx_expect))
  (inline_tests))

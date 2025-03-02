@@ -8,19 +8,19 @@
  (name inferencer_demo)
  (public_name inferencer_demo)
  (modules inferencer_demo)
- (libraries Parser Inferencer stdio))
+ (libraries Parser TypeInference stdio))
 
 (executable
  (name cc_ll_demo)
  (public_name cc_ll_demo)
  (modules cc_ll_demo)
- (libraries Parser Inferencer Anf stdio))
+ (libraries Parser Anf stdio))
 
 (executable
  (name anf_demo)
  (public_name anf_demo)
  (modules anf_demo)
- (libraries Parser Inferencer Anf stdio Patelim))
+ (libraries Parser TypeInference  Anf stdio Patelim))
 
 (cram
  (applies_to parser_demo inferencer_demo cc_ll_demo anf_demo)
