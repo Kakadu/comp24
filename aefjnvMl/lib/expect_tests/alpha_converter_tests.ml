@@ -2,6 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 open AefjnvMl_lib
+
 open Top_utils.Ast_test_utils
 open Middleend
 
@@ -21,7 +22,8 @@ let a = 1;;
 let b = 1;;
 let c = a + b;;
   |} in
-  [%expect {|
+  [%expect
+    {|
     let a = 1
     ;;
 
@@ -41,7 +43,8 @@ let c =
   a
 ;;
   |} in
-  [%expect {|
+  [%expect
+    {|
     let a = 1
     ;;
 
@@ -60,7 +63,8 @@ let ll_b = rt_a
 let main = 1
 ;;
   |} in
-  [%expect {|
+  [%expect
+    {|
     let ac_rt_a = 1
     ;;
 

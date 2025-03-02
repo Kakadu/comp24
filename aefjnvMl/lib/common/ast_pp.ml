@@ -89,25 +89,38 @@ let rec expression_pp (n_sp : int) fmt expr =
       fprintf fmt "match %a with@\n" (expression_pp n_sp) e;
       pp_print_list
         ~pp_sep:(fun fmt () -> fprintf fmt "@\n")
-        (fun fmt (pat, e) -> 
-          fprintf fmt "%a| %a -> \n%a%a" 
-          pp_spaces (n_sp) 
-          pattern_pp pat
-          pp_spaces (n_sp+2) 
-          (expression_pp (n_sp+4)) e)
+        (fun fmt (pat, e) ->
+          fprintf
+            fmt
+            "%a| %a -> \n%a%a"
+            pp_spaces
+            n_sp
+            pattern_pp
+            pat
+            pp_spaces
+            (n_sp + 2)
+            (expression_pp (n_sp + 4))
+            e)
         fmt
         cases
     | Exp_ifthenelse (e1, e2, e3) ->
       fprintf
         fmt
         "(if %a\n%athen\n%a%a\n%aelse\n%a%a)"
-        (expression_pp (n_sp+2)) e1
-        pp_spaces (n_sp-2)
-        pp_spaces n_sp
-        (expression_pp (n_sp+2)) e2
-        pp_spaces (n_sp-2)
-        pp_spaces n_sp
-        (expression_pp (n_sp+2)) e3
+        (expression_pp (n_sp + 2))
+        e1
+        pp_spaces
+        (n_sp - 2)
+        pp_spaces
+        n_sp
+        (expression_pp (n_sp + 2))
+        e2
+        pp_spaces
+        (n_sp - 2)
+        pp_spaces
+        n_sp
+        (expression_pp (n_sp + 2))
+        e3
     | Exp_apply (Exp_ident op, e) when Base_lib.is_binop op ->
       fprintf fmt "(( %s ) %a)" op (expression_pp n_sp) e
     | Exp_apply (e1, e2) ->
@@ -117,7 +130,8 @@ let rec expression_pp (n_sp : int) fmt expr =
         else fprintf fmt "%a %a" (helper (n_sp, true)) e1 (helper (n_sp, true)) e2
       in
       pp_app fmt e1 e2
-    | Exp_list (e1, e2) -> fprintf fmt "(%a :: %a)" (expression_pp n_sp) e1 (expression_pp n_sp) e2
+    | Exp_list (e1, e2) ->
+      fprintf fmt "(%a :: %a)" (expression_pp n_sp) e1 (expression_pp n_sp) e2
   in
   helper (n_sp, false) fmt expr
 
@@ -127,10 +141,16 @@ and decl_expression_pp fmt decl expr n_sp =
     fprintf
       fmt
       "let%a%a in\n%a%a"
-      rec_flag_pp rf
-      (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@\nand ") (value_binding_pp n_sp)) vbs
-      pp_spaces n_sp
-      (expression_pp (n_sp+2)) expr
+      rec_flag_pp
+      rf
+      (pp_print_list
+         ~pp_sep:(fun fmt () -> fprintf fmt "@\nand ")
+         (value_binding_pp n_sp))
+      vbs
+      pp_spaces
+      n_sp
+      (expression_pp (n_sp + 2))
+      expr
 
 and value_binding_pp n_sp fmt vb =
   match vb.vb_expr with
@@ -139,11 +159,15 @@ and value_binding_pp n_sp fmt vb =
     fprintf
       fmt
       "%a %a =\n%a%a"
-      pattern_pp vb.vb_pat
-      (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ") pattern_pp) args
-      pp_spaces n_sp
-      (expression_pp (n_sp+2)) body
-  | _ -> fprintf fmt "%a = %a" pattern_pp vb.vb_pat (expression_pp (n_sp+2)) vb.vb_expr
+      pattern_pp
+      vb.vb_pat
+      (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt " ") pattern_pp)
+      args
+      pp_spaces
+      n_sp
+      (expression_pp (n_sp + 2))
+      body
+  | _ -> fprintf fmt "%a = %a" pattern_pp vb.vb_pat (expression_pp (n_sp + 2)) vb.vb_expr
 ;;
 
 let structure_item_pp fmt item =
@@ -157,7 +181,10 @@ let structure_item_pp fmt item =
          "let%a%a\n;;\n"
          rec_flag_pp
          rf
-         (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@\nand ") (value_binding_pp 2)) vbs)
+         (pp_print_list
+            ~pp_sep:(fun fmt () -> fprintf fmt "@\nand ")
+            (value_binding_pp 2))
+         vbs)
 ;;
 
 let pp_program fmt prog =
