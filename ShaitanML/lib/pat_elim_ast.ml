@@ -93,3 +93,26 @@ let pp_pe_structure ppf p =
       else Format.fprintf ppf "%s\n\n" (decl_to_str a))
     p
 ;;
+
+type value_to_get =
+  | Tuple of int
+  | Cons_head
+  | Cons_tail
+  | Other
+
+let get_element e = function
+  | Tuple i -> PEEApp (PEEApp (PEEVar "tuple_element", e), PEEConst (PECint i))
+  | Cons_head -> PEEApp (PEEVar "list_head", e)
+  | Cons_tail -> PEEApp (PEEVar "list_tail", e)
+  | Other -> e
+;;
+
+let const_to_peconst =
+  let open Ast in
+  function
+  | CString s -> PECString s
+  | CInt i -> PECint i
+  | CBool b -> PECBool b
+  | CNil -> PECNil
+  | CUnit -> PECUnit
+;;

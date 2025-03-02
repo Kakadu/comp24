@@ -39,7 +39,7 @@ and get_idents_from_list pat_list =
     StrSet.union acc (get_idents p))
 ;;
 
-module NamesHolder = struct
+module Names = struct
   open Ast
   open Base
 
@@ -109,12 +109,12 @@ end
 module MonadCounter = struct
   open Base
 
-  type 'a t = NamesHolder.t * int -> NamesHolder.t * int * 'a
+  type 'a t = Names.t * int -> Names.t * int * 'a
 
   let return x (nh, var) = nh, var, x
 
   let fresh (nh, var) =
-    let rec helper num = if NamesHolder.contains nh num then helper (num + 1) else num in
+    let rec helper num = if Names.contains nh num then helper (num + 1) else num in
     let next = helper var in
     nh, next + 1, next
   ;;
@@ -158,13 +158,13 @@ end
 module MonadCounterError = struct
   open Base
 
-  type ('a, 'e) t = NamesHolder.t * int -> NamesHolder.t * int * ('a, 'e) Result.t
+  type ('a, 'e) t = Names.t * int -> Names.t * int * ('a, 'e) Result.t
 
   let return x (nh, var) = nh, var, Result.return x
   let fail e (nh, var) = nh, var, Result.fail e
 
   let fresh (nh, var) =
-    let rec helper num = if NamesHolder.contains nh num then helper (num + 1) else num in
+    let rec helper num = if Names.contains nh num then helper (num + 1) else num in
     let next = helper var in
     nh, next + 1, Result.return next
   ;;
