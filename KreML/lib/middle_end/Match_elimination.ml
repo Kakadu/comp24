@@ -6,6 +6,8 @@ open Ast
 
 let true_const = Expr_const (Const_bool true)
 
+(* match x with
+   | 1::2::[3] ->*)
 let rec match_condition p e =
   match p, e with
   | Pat_var id, _ -> true_const, [ id, e ]

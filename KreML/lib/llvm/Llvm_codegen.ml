@@ -161,11 +161,12 @@ let add_builtin_functions () =
   let _ = declare_function Runtime.list_cons list_cons_typ mdl in
   let pmtype = function_type (void_type context) [| int_type |] in
   let _ = declare_function Runtime.partial_match pmtype mdl in
+  let* _ = put_fun_type Runtime.partial_match pmtype in
   return ()
 ;;
 
 let set_globals () =
-  let _ = define_global "nil" (const_null ptr_type) mdl in
+  let _ = define_global "nil" (const_inttoptr (iconst 0) ptr_type) mdl in
   let _ = define_global "unit" (iconst 0) mdl in
   ()
 ;;
@@ -195,12 +196,10 @@ let codegen_binop name x y =
   function
   | Eq -> build_icmp Icmp.Eq x y name builder
   | Neq -> build_icmp Icmp.Ne x y name builder
-  | Gt -> build_icmp Icmp.Sgt x y name builder
-  | Geq -> build_icmp Icmp.Sge x y name builder
   | Lt -> build_icmp Icmp.Slt x y name builder
-  | Leq -> build_icmp Icmp.Sle x y name builder
-  | Plus | Or -> build_add x y name builder
-  | Minus -> build_sub x y name builder
+  | Gt -> build_icmp Icmp.Sgt x y name builder
+  | Add | Or -> build_add x y name builder
+  | Sub -> build_sub x y name builder
   | Mul | And -> build_mul x y name builder
   | Div -> build_sdiv x y name builder
 ;;
@@ -242,6 +241,10 @@ let rec codegen_flambda = function
     in
     let* name = get_curr_decl_name in
     return @@ codegen_binop name x y op
+  | Fl_unop (Not, x) ->
+    let* x = codegen_flambda x in
+    let* fresh = fresh_name "not" in
+    build_not x fresh builder |> return
   | Fl_cons (x, xs) ->
     let* x' = codegen_flambda x in
     let* xs' = codegen_flambda xs in
@@ -268,7 +271,7 @@ let rec codegen_flambda = function
     let elemptr = build_gep int_type obj [| iconst idx |] fresh builder in
     let* fresh = fresh_name "load" in
     build_load int_type elemptr fresh builder |> return
-  | Fl_app (Fl_var "partial_match", [ arg ]) ->
+  | Fl_app (Fl_closure { name = "partial_match"; _ }, [ arg ]) ->
     (* special case to insert unreacheable *)
     let* arg = codegen_flambda arg in
     let callee = lookup_fun_exn Runtime.partial_match in
@@ -322,7 +325,10 @@ let rec codegen_flambda = function
       | _, etype when etype = ptr_type ->
         position_at_end then_bb_after_gen builder;
         build_inttoptr t ptr_type "" builder, e
-      | _ -> Utils.unreachable ()
+      | _ ->
+        dump_type ttype;
+        dump_type etype;
+        Utils.unreachable ()
     in
     let merge_bb = append_block context fresh_merge f in
     position_at_end merge_bb builder;
@@ -506,7 +512,7 @@ let codegen_program program =
             | Fun_without_env { arity; _ } | Fun_with_env { arity; _ } ->
               let all_params = [ ptr_type ] @ List.init arity (fun _ -> int_type) in
               if List.length all_params > max_args_count
-              then Utils.list_take max_args_count all_params
+              then Utils.ListUtils.take max_args_count all_params
               else all_params
           in
           let fnty = function_type int_type (Array.of_list params) in
