@@ -77,11 +77,21 @@ let optimize_cons : pattern -> pattern -> pattern list =
   helper [ head_pt ] tail_pt
 ;;
 
-let sbinds_to_letin sbinds =
+let polimorfic_to_letin f values =
   List.fold_left
-    (fun acc_f (SBind (nm, me)) cont -> acc_f @@ me_nonrec_letin nm me cont)
+    (fun acc_f v cont ->
+      let nm, me = f v in
+      acc_f @@ me_nonrec_letin nm me cont)
     (fun cont -> cont)
-    sbinds
+    values
+;;
+
+let sbinds_to_nonrec_letin sbinds =
+  polimorfic_to_letin (fun (SBind (nm, me)) -> nm, me) sbinds
+;;
+
+let vbs_to_nonrec_letin vbs =
+  polimorfic_to_letin (fun { m_vb_pat; m_vb_expr } -> m_vb_pat, m_vb_expr) vbs
 ;;
 
 let sbind_to_me_vb (SBind (id, me)) = me_vb id me
@@ -199,13 +209,8 @@ let to_me_vb to_me_expr { vb_pat; vb_expr } =
 
 (* TODO: remove redudant and (refactor with letin or (;;) ) *)
 let elim_vb'list to_me_expr vb_l =
-  let* list_of_list =
-    revt
-    @@ fold_left_t vb_l ~init:(return []) ~f:(fun acc vb ->
-      let* vb'_l = to_me_vb to_me_expr vb in
-      return @@ (vb'_l :: acc))
-  in
-  return @@ List.concat list_of_list
+  let+ list_of_list = mapt vb_l (to_me_vb to_me_expr) in
+  List.concat list_of_list
 ;;
 
 let rec to_me_expr = function
@@ -213,12 +218,7 @@ let rec to_me_expr = function
   | Exp_ident name -> return @@ MExp_ident name
   | Exp_type (e', _) -> to_me_expr e'
   | Exp_tuple e'list ->
-    let+ me'list =
-      revt
-      @@ fold_left_t e'list ~init:(return []) ~f:(fun acc e' ->
-        let* me = to_me_expr e' in
-        return @@ (me :: acc))
-    in
+    let+ me'list = mapt e'list to_me_expr in
     MExp_tuple me'list
   | Exp_apply (e'fst, e'snd) ->
     let* me'fst = to_me_expr e'fst in
@@ -234,9 +234,11 @@ let rec to_me_expr = function
     let+ e3' = to_me_expr e3 in
     MExp_ifthenelse (e1', e2', e3')
   | Exp_let (Decl (r_flag, vb_l), e) ->
-    let* vb_l' = elim_vb'list to_me_expr vb_l in
     let* e' = to_me_expr e in
-    return @@ MExp_let (MDecl (r_flag, vb_l'), e')
+    let+ vb_l' = elim_vb'list to_me_expr vb_l in
+    (match r_flag with
+     | Recursive -> MExp_let (MDecl (Recursive, vb_l'), e')
+     | Nonrecursive -> vbs_to_nonrec_letin vb_l' e')
   | Exp_function (pt, e') ->
     let* fun_body = to_me_expr e' in
     let* potential_arg, me_potential_bind =
@@ -252,7 +254,7 @@ let rec to_me_expr = function
        potential_arg |-> fun_body'
      | Compound (cond_opt, sbinds) ->
        let fun_body' =
-         let then_f = sbinds_to_letin sbinds in
+         let then_f = sbinds_to_nonrec_letin sbinds in
          let then_br = then_f fun_body in
          match cond_opt with
          | Some cond -> ite_with_fail ~cond ~then_br
@@ -278,7 +280,7 @@ let rec to_me_expr = function
             fun _ -> acc_f @@ me_nonrec_letin name bind_body br_me
           | Const cond -> fun else_br -> acc_f @@ ite ~cond ~then_br:br_me ~else_br
           | Compound (cond_opt, sbinds) ->
-            let me_particial = sbinds_to_letin sbinds in
+            let me_particial = sbinds_to_nonrec_letin sbinds in
             (match cond_opt with
              | Some cond ->
                fun else_br -> acc_f @@ ite ~cond ~then_br:(me_particial br_me) ~else_br
@@ -292,17 +294,17 @@ let to_me_struct_item = function
     let* new_uniq_bind_nm = get_uniq_name in
     let m_vb_pat = Me_name new_uniq_bind_nm in
     let+ m_vb_expr = to_me_expr e in
-    MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ])
-  | Str_value (Decl (rflag, vb_l)) ->
+    [ MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ]) ]
+  | Str_value (Decl (r_flag, vb_l)) ->
     let+ vb_l' = elim_vb'list to_me_expr vb_l in
-    MDecl (rflag, vb_l')
+    (match r_flag with
+     | Recursive -> [ MDecl (Recursive, vb_l') ]
+     | Nonrecursive -> List.map (fun vb -> MDecl (Nonrecursive, [ vb ])) vb_l')
 ;;
 
 let to_me_program prog =
-  revt
-  @@ fold_left_t prog ~init:(return []) ~f:(fun acc str_item ->
-    let+ m_decl = to_me_struct_item str_item in
-    m_decl :: acc)
+  let+ m_decls = mapt prog to_me_struct_item in
+  List.concat m_decls
 ;;
 
 let eliminate_match_in_program prog =

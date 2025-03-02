@@ -33,6 +33,12 @@ module Base_SE_Monad : sig
     -> 'b
     -> 'c * ('d, 'e) result
 
+  val mapt
+    :  'a list
+    -> ('a -> 'b -> 'b * ('c, 'd) result)
+    -> 'b
+    -> 'b * ('c list, 'd) result
+
   val revt : ('a -> 'b * ('c list, 'd) result) -> 'a -> 'b * ('c list, 'd) result
   val ignore_t : ('a -> 'b * ('c, 'd) result) -> 'a -> 'b * (unit, 'd) result
 end

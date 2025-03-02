@@ -33,8 +33,8 @@ module StringAlphfaconverterMonad = struct
     let* _, old_bindings, _, _ = read in
     let* f_res = f in
     let* b_rules, _, f_id, pref = read in
-    let* () = save (b_rules, old_bindings, f_id, pref) in
-    return f_res
+    let+ () = save (b_rules, old_bindings, f_id, pref) in
+    f_res
   ;;
 
   let fresh_bind pre_formatter name =
@@ -55,7 +55,7 @@ module StringAlphfaconverterMonad = struct
       Banned_Set.add new_name b_set'
     in
     let* name', st' =
-      let* (b_prefs, b_set), bindings, fresh_id, a_pref = read in
+      let+ (b_prefs, b_set), bindings, fresh_id, a_pref = read in
       let should_rename_via_prefs =
         Base.List.fold_left b_prefs ~init:false ~f:(fun acc pref ->
           match acc with
@@ -74,10 +74,10 @@ module StringAlphfaconverterMonad = struct
       let bindings' = Bind_Map.add name name'' bindings in
       let b_set' = add_binding_in_ban_set name name'' b_set in
       let st'' = (b_prefs, b_set'), bindings', id', a_pref in
-      return (name'', st'')
+      name'', st''
     in
-    let* () = save st' in
-    return name'
+    let+ () = save st' in
+    name'
   ;;
 
   let get_bind name =
@@ -116,17 +116,12 @@ let rec aconvert_pattern = function
   | Pat_const c -> return @@ pconst c
   | Pat_cons (a, b) ->
     let* a' = aconvert_pattern a in
-    let* b' = aconvert_pattern b in
-    return @@ pcons a' b'
+    let+ b' = aconvert_pattern b in
+    pcons a' b'
   | Pat_any -> return pany
   | Pat_tuple tup ->
-    let* tup' =
-      revt
-      @@ fold_left_t tup ~init:(return []) ~f:(fun acc pt ->
-        let* pt' = aconvert_pattern pt in
-        return @@ (pt' :: acc))
-    in
-    return @@ ptuple tup'
+    let+ tup' = mapt tup aconvert_pattern in
+    ptuple tup'
   | Pat_constraint (pt, ct) ->
     let* pt' = aconvert_pattern pt in
     pt_with_ct_flag pt' ct
@@ -143,24 +138,13 @@ let aconvert_decl_part aconv_expr = function
          | _ -> fail "Impossible case with nonrec flag"
        in
        let* vb_expr' = aconv_expr vb_expr in
-       let* vb_pat' = aconvert_pattern vb_pat in
-       return @@ edecl rf [ { vb_pat = vb_pat'; vb_expr = vb_expr' } ]
+       let+ vb_pat' = aconvert_pattern vb_pat in
+       edecl rf [ { vb_pat = vb_pat'; vb_expr = vb_expr' } ]
      | Recursive ->
-       let vbl_fold_l f = fold_left_t vbl ~init:(return []) ~f in
-       let* vb_ptl' =
-         revt
-         @@ vbl_fold_l (fun acc { vb_pat; _ } ->
-           let* vb_pat' = aconvert_pattern vb_pat in
-           return @@ (vb_pat' :: acc))
-       in
-       let* vb_exprl' =
-         revt
-         @@ vbl_fold_l (fun acc { vb_expr; _ } ->
-           let* vb_expr' = aconv_expr vb_expr in
-           return @@ (vb_expr' :: acc))
-       in
+       let* vb_ptl' = mapt vbl (fun { vb_pat; _ } -> aconvert_pattern vb_pat) in
+       let+ vb_exprl' = mapt vbl (fun { vb_expr; _ } -> aconv_expr vb_expr) in
        let vbl' = List.map2 evalue_binding vb_ptl' vb_exprl' in
-       return @@ edecl rf vbl')
+       edecl rf vbl')
 ;;
 
 let rec aconvert_expression = function
@@ -168,54 +152,48 @@ let rec aconvert_expression = function
     let* e' = aconvert_expression e in
     e_with_ct_flag e' ct
   | Exp_ident name ->
-    let* name' = get_bind name in
-    return @@ eval name'
+    let+ name' = get_bind name in
+    eval name'
   | Exp_apply (a, b) ->
     let* a' = aconvert_expression a in
-    let* b' = aconvert_expression b in
-    return @@ eapp a' b'
+    let+ b' = aconvert_expression b in
+    eapp a' b'
   | Exp_list (a, b) ->
     let* a' = aconvert_expression a in
-    let* b' = aconvert_expression b in
-    return @@ econs a' b'
+    let+ b' = aconvert_expression b in
+    econs a' b'
   | Exp_ifthenelse (b, t, e) ->
     let* b' = aconvert_expression b in
     let* t' = aconvert_expression t in
-    let* e' = aconvert_expression e in
-    return @@ eite b' t' e'
+    let+ e' = aconvert_expression e in
+    eite b' t' e'
   | Exp_tuple etup ->
-    let* tup' =
-      revt
-      @@ fold_left_t etup ~init:(return []) ~f:(fun acc e ->
-        let* e' = aconvert_expression e in
-        return @@ (e' :: acc))
-    in
-    return @@ etuple tup'
+    let+ tup' = mapt etup aconvert_expression in
+    etuple tup'
   | Exp_constant c -> return @@ econst c
   | Exp_function (pt, e) ->
     binding_scope
     @@
     let* pt' = aconvert_pattern pt in
-    let* e' = aconvert_expression e in
-    return @@ efun pt' e'
+    let+ e' = aconvert_expression e in
+    efun pt' e'
   | Exp_match (e, ptNel) ->
     let* e' = aconvert_expression e in
-    let* ptNel' =
-      revt
-      @@ fold_left_t ptNel ~init:(return []) ~f:(fun acc (pt_, e_) ->
+    let+ ptNel' =
+      mapt ptNel (fun (pt_, e_) ->
         binding_scope
         @@
         let* pt'_ = aconvert_pattern pt_ in
-        let* e'_ = aconvert_expression e_ in
-        return ((pt'_, e'_) :: acc))
+        let+ e'_ = aconvert_expression e_ in
+        pt'_, e'_)
     in
-    return @@ ematch e' ptNel'
+    ematch e' ptNel'
   | Exp_let (d, e) ->
     binding_scope
     @@
     let* d' = aconvert_decl_part aconvert_expression d in
-    let* e' = aconvert_expression e in
-    return @@ elet d' e'
+    let+ e' = aconvert_expression e in
+    elet d' e'
 ;;
 
 let aconvert_decl = aconvert_decl_part aconvert_expression
@@ -225,12 +203,7 @@ let aconvert_structure_item = function
   | Str_value d -> aconvert_decl d >>| strval
 ;;
 
-let aconvert_program prog =
-  revt
-  @@ fold_left_t prog ~init:(return []) ~f:(fun acc sti ->
-    let* sti' = aconvert_structure_item sti in
-    return @@ (sti' :: acc))
-;;
+let aconvert_program prog = mapt prog aconvert_structure_item
 
 let rename_ast_with_uniq step_pref prog =
   let open Common.Naming in

@@ -40,6 +40,13 @@ module Base_SE_Monad = struct
     return @@ List.rev l
   ;;
 
+  let mapt xs f =
+    revt
+    @@ fold_left_t xs ~init:(return []) ~f:(fun acc x ->
+      let+ x' = f x in
+      x' :: acc)
+  ;;
+
   let ignore_t f =
     let* f_res = f in
     return @@ ignore f_res
