@@ -51,11 +51,11 @@ let inference_program program =
 (* Closure conversion *)
 
 let closure_conversion_expr_ast expr =
-  Ast.Pprint.print_expression (Middleend.Runner.run_closure_expression expr)
+  Ast.Pprint.print_expression (ClosureConversion.Runner.run_closure_expression expr)
 ;;
 
 let closure_conversion_program_ast program =
-  Ast.Pprint.print_program (Middleend.Runner.run_closure_program program)
+  Ast.Pprint.print_program (ClosureConversion.Runner.run_closure_program program)
 ;;
 
 let closure_conversion_expression expr =
@@ -67,6 +67,22 @@ let closure_conversion_expression expr =
 let closure_conversion_program program =
   match Parser.Runner.parse_program program with
   | Ok ast -> closure_conversion_program_ast ast
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+
+(* Lambda lifting *)
+
+let lambda_lifting_program_ast program =
+  LambdaLifting.Pprint.print_ll_program (LambdaLifting.Runner.run_ll_program program)
+;;
+
+let lambda_lifting_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+    lambda_lifting_program_ast closure_ast
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
