@@ -69,16 +69,15 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
       let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
       let let_expr = ALetIn (Id v, CIf (cimm, then_aexpr, else_aexpr), aexpr) in
       return let_expr)
-  | ETuple (e1, e2, es) -> anf_list env (e1 :: e2 :: es) (fun imm -> k (ImmTuple imm))
-  | EList (e1, e2) ->
-    anf_expr env e1 (fun imm1 -> anf_expr env e2 (fun imm2 -> k (ImmCons (imm1, imm2))))
   | EClsr (DLet (_, (pat, e1)), e2) ->
     anf_expr env e1 (fun imm1 ->
       let* aexpr = anf_expr env e2 k in
       (* todo remove let a = b in *)
       let* id = pattern_or_op_to_identifier pat in
       return (ALetIn (id, CImmExpr imm1, aexpr)))
-  | _ -> fail "other expressions not supported"
+  | ETuple _ -> fail "Tuple expressions are not supported in ANF conversion"
+  | EList _ -> fail "List expressions are not supported in ANF conversion"
+  | _ -> fail "other expressions are not supported in ANF conversion"
 ;;
 
 let rec unroll_efun (expr : expr) : pattern list * expr =
