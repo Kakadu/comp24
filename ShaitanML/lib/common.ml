@@ -49,8 +49,7 @@ module NamesHolder = struct
     | EVar ident -> StrSet.singleton ident
     | ECons (e1, e2) -> StrSet.union (expr e1) (expr e2)
     | EApply (e1, e2) -> StrSet.union (expr e1) (expr e2)
-    | EFun (pat, e) ->
-      StrSet.union (get_idents pat) (expr e)
+    | EFun (pat, e) -> StrSet.union (get_idents pat) (expr e)
     | EIf (e1, e2, e3) -> StrSet.union_list [ expr e1; expr e2; expr e3 ]
     | ELet (_, (p, e1), e2) ->
       StrSet.union (get_idents p) (StrSet.union (expr e1) (expr e2))
@@ -222,3 +221,26 @@ module MonadCounterError = struct
 
   let run m nh init = m (nh, init)
 end
+
+let builtins =
+  [ "( + )"
+  ; "( - )"
+  ; "( / )"
+  ; "( * )"
+  ; "( < )"
+  ; "( > )"
+  ; "( <= )"
+  ; "( >= )"
+  ; "( <> )"
+  ; "( = )"
+  ; "( != )"
+  ; "( && )"
+  ; "( || )"
+  ; "print_int"
+  ; "list_head"
+  ; "list_tail"
+  ; "list_len"
+  ; "tuple_element"
+  ; "fail_match"
+  ]
+;;
