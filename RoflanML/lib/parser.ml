@@ -79,7 +79,6 @@ let pid =
   else return s <?> "identifier"
 ;;
 
-
 let pbind_id = poperator <|> pstoken "()" <|> pid
 let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
 
@@ -137,7 +136,6 @@ let parse_bindings pexpr =
     (fun first rest -> first :: rest)
     (parse_binding pexpr)
     (many (pstoken "and" *> parse_binding pexpr))
-
 ;;
 
 let plet_decl_single pexpr =
@@ -192,7 +190,7 @@ let ppattern =
              | p1 :: p2 :: ps -> return (PTuple (p1, p2, ps))
              | [] -> fail "Unexpected empty list in tuple pattern")
         ; ppconst
-        ; (pstoken "_" >>| fun _ -> PVar "_")
+        ; (pstoken "_" >>| fun _ -> PWild)
         ; (pstoken "[]" >>| fun _ -> PEmpty)
         ; ppvar
         ]
@@ -273,7 +271,6 @@ let pexpr_fun () =
       op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
     let pe_cons = prbinop pe_bin pcons in
-
     let pe_tuple =
       lift2
         (fun e1 rest ->
@@ -282,7 +279,6 @@ let pexpr_fun () =
           | hd :: tl -> ETuple (e1, hd, tl))
         pe_cons
         (many (pstoken "," *> pe_cons))
-
     in
     choice [ plet_in pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe_tuple ])
 ;;
