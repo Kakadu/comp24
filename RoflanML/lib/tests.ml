@@ -54,7 +54,7 @@ module ParserTests = struct
            (EBranch ((EApp ((EApp ((EVar ">="), (EVar "h1"))), (EVar "h2"))),
               (EVar "h1"), (EVar "h2"))));
            ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
-           ((PVar "_"), (EConst (CInt 0)))]
+           (PWild, (EConst (CInt 0)))]
          ))
       |}]
   ;;
