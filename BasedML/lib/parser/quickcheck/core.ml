@@ -11,7 +11,9 @@ module Generator = struct
     fix
       (fun self () ->
         let* nm =
-          string_size ~gen:(oneof [ char_range 'a' 'z'; return '_' ]) (int_range 1 10)
+          string_size
+            ~gen:(oneof [ char_range 'a' 'z'; char_range '_' '_' ])
+            (int_range 1 10)
         in
         if Parser.is_keyword nm then self () else return nm)
       ()
@@ -117,7 +119,7 @@ module Generator = struct
         ; ( 1
           , let* len = int_range 2 5 in
             let sub_n = n / ((len * 2) + 1) in
-            let* hp = gen_pat sub_n in
+            let* he = gen_exp sub_n in
             let* p_e_lst =
               list_repeat
                 len
@@ -125,7 +127,7 @@ module Generator = struct
                  let* e = gen_exp sub_n in
                  return (p, e))
             in
-            return (Ast.EMatch (hp, p_e_lst)) )
+            return (Ast.EMatch (he, p_e_lst)) )
         ; ( 1
           , let* e = gen_exp (n / 2) in
             let* t = gen_type (n / 2) in

@@ -1,5 +1,5 @@
 %{
-    open Ast    
+    open Ast  
 %}
 
 // --- Tokens ---
@@ -66,9 +66,9 @@
 
 // --- Priorities ---
 %left ARROW
-%right COMMA DOUBLE_COLON
+%right COMMA DOUBLE_COLON 
 
-%nonassoc BAR RIGHT_PARENTHESIS
+%nonassoc BAR
 
 %left OR
 %left AND
@@ -117,8 +117,8 @@
 
 %inline uop:
     | NOT   { NOT }
-    | MINUS {UMINUS}
-    | PLUS  {UPLUS}
+    | MINUS { UMINUS }
+    | PLUS  { UPLUS }
 
 value:
     | TYPE_INT          { Int $1 }
@@ -131,26 +131,26 @@ value:
 prog : list (declare) EOF { $1 }
 
 (* for testing purposes *)
-prog_expr : expr EOF { $1 }
-prog_pattern : pattern EOF { $1 }
+prog_expr : expr EOF        { $1 }
+prog_pattern : pattern EOF  { $1 }
 
 declare:
     | _let  { $1 }
 
 (* possible elements in list *)
 list_expr:
-    | value                         { EConst $1 }
-    | id                            { EVar $1 }
-    | operation                     { $1 }
-    | prefix_bop                    { EOperation $1 }
-    | _fun                          { $1 }
-    | _if                           { $1 }
-    | _match                        { $1 }
-    | _list(list_expr)              { EList $1 }
-    | _tuple(tuple_expr)            { ETuple $1 }
-    | application                   { $1 }
-    | concat(concat_expr)           { let a,b = $1 in EListConcat (a,b) }
-    | _constraint (constraint_expr) { let a,b = $1 in EConstraint (a,b)  }
+    | value                                 { EConst $1 }
+    | id                                    { EVar $1 }
+    | operation                             { $1 }
+    | prefix_bop                            { EOperation $1 }
+    | _fun                                  { $1 }
+    | _if                                   { $1 }
+    | _match                                { $1 }
+    | _list(list_expr)                      { EList $1 }
+    | _tuple(tuple_expr)                    { let a, b, tl = $1 in ETuple (a, b, tl)  }
+    | application                           { $1 }
+    | concat(concat_expr)                   { let a,b = $1 in EListConcat (a, b) }
+    | _constraint (constraint_expr)         { let a,b = $1 in EConstraint (a,b)  }
 
 (* possible elements in tuple *)
 tuple_expr:
@@ -162,8 +162,8 @@ tuple_expr:
     | _match                                                        { $1 }
     | _list(list_expr)                                              { EList $1 }
     | application                                                   { $1 }
-    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
-    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a, b) }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { let a, b, tl = $2 in ETuple (a, b, tl) }
     | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
 (* possible left parts of application *)
@@ -180,13 +180,13 @@ r_app_expr:
     | value                                                         { EConst $1 }
     | id                                                            { EVar $1 }
     | _list(list_expr)                                              { EList $1 }
+    | prefix_bop;                                                   { EOperation $1 }
     | LEFT_PARENTHESIS; operation; RIGHT_PARENTHESIS                { $2 }
-    | LEFT_PARENTHESIS; concat(concat_expr); RIGHT_PARENTHESIS      { let a,b = $2 in EListConcat (a,b) }
-    | LEFT_PARENTHESIS; prefix_bop; RIGHT_PARENTHESIS               { EOperation $2 }
+    | LEFT_PARENTHESIS; concat(concat_expr); RIGHT_PARENTHESIS      { let a,b = $2 in EListConcat (a, b) }
     | LEFT_PARENTHESIS; _fun; RIGHT_PARENTHESIS                     { $2 }
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }
-    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { let a, b, tl = $2 in ETuple (a, b, tl) }
     | LEFT_PARENTHESIS; application; RIGHT_PARENTHESIS              { $2 }
     | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
@@ -209,10 +209,10 @@ concat_expr:
     | LEFT_PARENTHESIS; _if; RIGHT_PARENTHESIS                      { $2 }
     | LEFT_PARENTHESIS; _match; RIGHT_PARENTHESIS                   { $2 }   
     | _list(list_expr)                                              { EList $1 }
-    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { ETuple $2 }
+    | LEFT_PARENTHESIS; _tuple(tuple_expr); RIGHT_PARENTHESIS       { let a, b, tl = $2 in ETuple (a, b, tl) }
     | application                                                   { $1 }
-    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a,b) }
-    | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
+    | concat(concat_expr)                                           { let a,b = $1 in EListConcat (a, b) }
+    | _constraint (constraint_expr)                                 { let a,b = $1 in EConstraint (a,b)  }
 
 (* all possible elements to which we can apply type constraints *)
 (* there is no 'fun' or 'let' because we don't support explicit arrow types *)
@@ -236,8 +236,8 @@ expr:
     | _if                                               { $1 }
     | _match                                            { $1 }   
     | _list(list_expr)                                  { EList $1 }
-    | _tuple(tuple_expr)                                { ETuple $1 }
-    | concat(concat_expr)                               { let a,b = $1 in EListConcat (a,b) }
+    | _tuple(tuple_expr)                                { let a, b, tl = $1 in ETuple (a, b, tl) }
+    | concat(concat_expr)                               { let a,b = $1 in EListConcat (a, b) }
     | application                                       { $1 }
     | _let                                              { $1 }
     | _constraint (constraint_expr)                     { let a,b = $1 in EConstraint (a,b)  }
@@ -246,14 +246,13 @@ expr:
 
 (* possible elements in list *)
 list_pattern:
-    | LEFT_PARENTHESIS; p = pattern; RIGHT_PARENTHESIS      { p }
     | value                                                 { Const $1 } 
     | id                                                    { Var $1 }
     | WILDCARD                                              { Wildcard }
     | prefix_bop                                            { Operation $1 }
     | _list(list_pattern)                                   { List $1 }
-    | _tuple(tuple_pattern)                                 { Tuple $1 }
-    | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
+    | _tuple(tuple_pattern)                                 { let a, b, tl = $1 in Tuple (a, b, tl) }
+    | _constraint (constraint_pattern)                      { let a,b = $1 in Constraint (a,b)  }
 
 (* possible elements in tuple *)
 tuple_pattern:
@@ -262,7 +261,7 @@ tuple_pattern:
     | WILDCARD                                                      { Wildcard }
     | prefix_bop                                                    { Operation $1 }
     | _list(list_pattern)                                           { List $1 }
-    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
+    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { let a, b, tl = $2 in Tuple (a, b, tl) }
     | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
 (* possible elements in constructions like '1 :: [2; 3]' *)
@@ -271,8 +270,8 @@ concat_pattern:
     | id                                                            { Var $1 }
     | prefix_bop                                                    { Operation $1 }
     | _list(list_pattern)                                           { List $1 }
-    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { Tuple $2 }
-    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
+    | LEFT_PARENTHESIS; _tuple(tuple_pattern); RIGHT_PARENTHESIS    { let a, b, tl = $2 in Tuple (a, b, tl) }
+    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a, b) }
     | WILDCARD                                                      { Wildcard }
     | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
@@ -291,16 +290,16 @@ pattern:
     | id                                                            { Var $1 }
     | WILDCARD                                                      { Wildcard }
     | prefix_bop                                                    { Operation $1 }
-    | _tuple(tuple_pattern)                                         { Tuple $1 }
+    | _tuple(tuple_pattern)                                         { let a, b, tl = $1 in Tuple (a, b, tl) }
     | _list(list_pattern)                                           { List $1 }
-    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a,b) }
+    | concat(concat_pattern)                                        { let a,b = $1 in ListConcat (a, b) }
     | _constraint (constraint_pattern)                              { let a,b = $1 in Constraint (a,b)  }
 
 (* --- other rules --- *)
 
 concat (rule):
-    | rule; DOUBLE_COLON; rule                                      { $1, $3 }
-    | LEFT_PARENTHESIS; concat (rule); RIGHT_PARENTHESIS            { $2 }
+    | rule; DOUBLE_COLON; rule                                  { $1, $3 }
+    | LEFT_PARENTHESIS; concat (rule); RIGHT_PARENTHESIS  { $2 }
 
 (* default operations like "1 + 2" *)
 operation:
@@ -338,12 +337,13 @@ _list(rule):
     | LEFT_SQ_BRACKET; elements = separated_list(SEMICOLON, rule); RIGHT_SQ_BRACKET     { elements }
 
 _tuple (rule):
-    | lst = tuple_simple (rule)                                     { lst }
-    | LEFT_PARENTHESIS; lst = _tuple (rule); RIGHT_PARENTHESIS      { lst }    
+    | rule; COMMA; rule                                         { $1, $3, [] }
+    | rule; COMMA; rule; COMMA; tuple_simple (rule)             { $1, $3, $5 }
+    | LEFT_PARENTHESIS; _tuple (rule); RIGHT_PARENTHESIS        { $2 }    
 
 tuple_simple (rule):
-    | e1 = rule; COMMA; e2 = rule                   { [e1;e2] }
-    | e = rule; COMMA; t = tuple_simple(rule)       { e :: t }
+    | rule                                  { [$1] }
+    | rule; COMMA; tuple_simple(rule)       { $1 :: $3 }
 
 %inline rec_flag:
     | REC   { Recursive } 

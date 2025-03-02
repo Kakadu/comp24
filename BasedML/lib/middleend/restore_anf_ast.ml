@@ -59,6 +59,7 @@ let rec frestore_imm ppf c =
   | ImmIdentifier id -> fprintf "%s" id
   | ImmUnit -> fprintf "()"
   | ImmTuple tup -> fprintf "(%a)" (fun ppf -> pp_list ppf frestore_imm ", ") tup
+  | ImmConstraint (imm, typ) -> fprintf "(%a : %a)" frestore_imm imm pp_type_name typ
 ;;
 
 let rec frestore_pattern ppf pat =
@@ -106,7 +107,7 @@ let rec restore_cexpr ppf = function
     fprintf
       ppf
       "match %a with\n%a"
-      frestore_pattern
+      frestore_imm
       pat_head
       (fun ppf ->
         pp_list
@@ -116,7 +117,6 @@ let rec restore_cexpr ppf = function
       pat_exp_lst
   | CApplication (left, rigth) ->
     fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
-  | CConstraint (imm, typ) -> fprintf ppf "(%a : %a)" frestore_imm imm pp_type_name typ
 
 and pp_aexpr ppf = function
   | ACExpr cexp -> fprintf ppf "%a" restore_cexpr cexp
@@ -141,7 +141,7 @@ let restore_anf_decl fmt = function
   | ADSingleLet (rec_flag, ALet (pat, patterns, body)) ->
     Format.fprintf
       fmt
-      "let %a %a %a = %a"
+      "let %a %a %a = %a;;"
       frestore_rec_flag
       rec_flag
       frestore_pattern

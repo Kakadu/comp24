@@ -2,3 +2,11 @@
  (public_name AsdfML)
  (name main)
  (libraries Lib))
+
+(executable
+ (name quickcheck)
+ (public_name quickcheck)
+ (modules quickcheck)
+ (libraries qcheck AsdfML.Lib)
+ (instrumentation
+  (backend bisect_ppx)))

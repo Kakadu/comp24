@@ -1,0 +1,51 @@
+(executable
+ (name many_parser)
+ (modules many_parser)
+ (public_name many_parser)
+ (instrumentation
+  (backend bisect_ppx))
+ (libraries AsdfML.Lib test))
+
+(cram
+ (deps
+  %{bin:many_parser}
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  ; manytests/typed/003fib.ml  ; syntax error
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  ; manytests/typed/008ascription.ml  ; annotations in expressions are not supported
+  ; manytests/typed/015tuples.ml  ; mutually recursive definitions are not supported
+  manytests/typed/016lists.ml))
+
+(executable
+ (name many_inferencer)
+ (modules many_inferencer)
+ (public_name many_inferencer)
+ (instrumentation
+  (backend bisect_ppx))
+ (libraries AsdfML.Lib test))
+
+(cram
+ (deps
+  %{bin:many_inferencer}
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  ; manytests/typed/003fib.ml  ; syntax error
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  ; manytests/typed/008ascription.ml  ; annotations in expressions are not supported
+  ; manytests/typed/015tuples.ml  ; mutually recursive definitions are not supported
+  manytests/typed/016lists.ml))
