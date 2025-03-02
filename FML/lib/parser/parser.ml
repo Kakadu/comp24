@@ -120,6 +120,8 @@ let parse_operators =
         ; token "||" *> return "( || )"
         ; token "*" *> return "( * )"
         ; token "/" *> return "( / )"
+        ; token "~-" *> return "( ~- )"
+        ; token "~+" *> return "( ~+ )"
         ]
       <* skip_wspace)
   <* skip_wspace
@@ -265,9 +267,12 @@ let parse_expr_with_type pexpr =
   parens @@ lift2 econstraint pexpr (skip_wspace *> char ':' *> parse_type)
 ;;
 
-let parse_un_minus pexpr =
-  skip_wspace *> string "-" *> pexpr
-  >>| fun expr -> EApplication (EIdentifier "( ~- )", expr)
+let parse_unop pexpr =
+  skip_wspace
+  *> (string "-" *> pexpr
+      >>| (fun expr -> EApplication (EIdentifier "( ~- )", expr))
+      <|> (string "+" *> pexpr >>| fun expr -> EApplication (EIdentifier "( ~+ )", expr))
+     )
 ;;
 
 let parse_expr =
@@ -298,7 +303,7 @@ let parse_expr =
   in
   let expr = chainl1 apply (mul <|> div) in
   let expr = chainl1 expr (add <|> sub) in
-  let expr = expr <|> parse_un_minus expr in
+  let expr = expr <|> parse_unop expr in
   let expr = chainr1 expr parse_cons in
   let expr = chainl1 expr (choice [ lte; lt; gte; gt; eqq; eq; neq; or_; and_ ]) in
   parse_expr_with_type expr <|> expr

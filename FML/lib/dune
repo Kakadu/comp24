@@ -6,4 +6,6 @@
  (modules Ast Parser Inf_errors Inf_pprint Inferencer Typedtree)
  (libraries base angstrom)
  (preprocess
-  (pps ppx_deriving.show)))
+  (pps ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))

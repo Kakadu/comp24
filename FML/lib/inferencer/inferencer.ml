@@ -185,12 +185,6 @@ end = struct
         let v = apply new_sub v in
         let* k, v = mapping k v in
         return (Base.Map.update acc k ~f:(fun _ -> v)))
-      (* let f1 ~key ~data acc =
-        let* acc = acc in
-        let new_data = apply new_sub data in
-        return (Base.Map.update acc key ~f:(fun _ -> new_data))
-      in
-      Base.Map.fold sub ~init:(return new_sub) ~f:f1 *)
     | Some vl ->
       let* new_sub = unify v vl in
       compose sub new_sub
@@ -533,7 +527,7 @@ let infer_expr =
          let* sub, t = helper env e2 in
          let* sub = Subst.compose s2 sub in
          return (sub, t)
-       | _ -> fail `Not_impl)
+       | _ -> fail `InvalidRecLeftHand)
     | EConstraint (expr, expected_ty) ->
       let* sub1, ty = helper env expr in
       let* sub2 = Subst.unify ty (annotation_to_type expected_ty) in
@@ -544,45 +538,9 @@ let infer_expr =
   helper
 ;;
 
-let add_to_list =
-  let rec helper ps = function
-    | PIdentifier id -> id :: ps
-    | PTuple ps -> List.fold_left (fun acc p -> helper acc p) [] ps
-    | PCons (h, tl) ->
-      let ps1 = helper ps h in
-      helper ps1 tl
-    | _ -> ps
-  in
-  helper []
-;;
-
-let infer_single_decl env (DDeclaration (pat, expr)) =
-  let* s, t1 = infer_expr env expr in
-  let env = TypeEnv.apply env s in
-  let scheme = generalize env t1 in
-  let* t2, env1 = infer_pattern env pat in
-  let env2 = TypeEnv.ext_by_pat env1 pat scheme in
-  let names_list = add_to_list pat in
-  let* s1 = Subst.unify t1 t2 in
-  let* sub = Subst.compose s s1 in
-  let env3 = TypeEnv.apply env2 sub in
-  return (env3, List.rev names_list)
-;;
-
 let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
 let infer_decl env name_list = function
-  (* | NoRecDecl decls ->
-    let* env, names_list =
-      Base.List.fold_left
-        ~f:(fun acc item ->
-          let* env, lst = acc in
-          let* env, names_list = infer_single_decl env item in
-          return (env, names_list @ lst))
-        ~init:(return (env, []))
-        decls
-    in
-    return (env, List.rev names_list) *)
   | NoRecDecl decls ->
     let rec ext_with_pat env name_list = function
       | PIdentifier name, ty ->
@@ -653,7 +611,7 @@ let infer_decl env name_list = function
         (return (env, []))
         decls
     in
-    let infer_decls env cases temp_vars =
+    let infer_decls env decls temp_vars =
       List.fold_left
         (fun acc -> function
            | DDeclaration (PIdentifier name, expr) ->
@@ -674,7 +632,7 @@ let infer_decl env name_list = function
              return (new_acc_env, new_acc_names_list)
            | _ -> fail `InvalidRecLeftHand)
         (return (env, name_list))
-        cases
+        decls
     in
     let* extended_env, temp_vars = tmp_vars env decls in
     infer_decls extended_env decls temp_vars
@@ -694,6 +652,7 @@ let start_env =
     ; "( = )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( == )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( ~- )", TFunction (TInt, TInt)
+    ; "( ~+ )", TFunction (TInt, TInt)
     ; "not", TFunction (TBool, TBool)
     ; "print_int", TFunction (TInt, TUnit)
     ]
@@ -708,8 +667,8 @@ let infer_program program =
     Base.List.fold_left
       ~f:(fun acc item ->
         let* env, lst = acc in
-        let* env, names_list = infer_decl env [] item in
-        return (env, names_list @ lst))
+        let* env, names_list = infer_decl env lst item in
+        return (env, names_list))
       ~init:(return (start_env, []))
       program
   in

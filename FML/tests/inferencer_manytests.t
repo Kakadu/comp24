@@ -24,7 +24,6 @@
 
   $ ./inferencer_runner.exe < manytests/typed/006partial.ml
   val foo : int -> int
-  val foo : int -> int
   val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/006partial2.ml

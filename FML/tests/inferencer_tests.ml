@@ -77,3 +77,11 @@ let%expect_test _ =
     val h : int
     val tl : int list |}]
 ;;
+
+let%expect_test _ =
+  inference {| let h::tl = [1;2;3];; |};
+  [%expect
+    {|
+    val h : int
+    val tl : int list |}]
+;;
