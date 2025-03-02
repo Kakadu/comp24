@@ -1,5 +1,4 @@
 open AstLib.Pp_ast
-open AstLib.Pp_utils
 open Anf_ast
 open Format
 
@@ -11,18 +10,6 @@ let pp_identifier fmt = function
 let rec pp_immexpr fmt = function
   | ImmConst c -> pp_const fmt c
   | ImmIdentifier s -> pp_ident fmt s
-  | ImmTuple es ->
-    fprintf
-      fmt
-      "(%a)"
-      (pp_tuple
-         (function
-           (* | C _ | EList (_, _) -> true *)
-           | _ -> false)
-         pp_immexpr
-         ", ")
-      es
-  | ImmCons (hd, tl) -> fprintf fmt "%a :: %a" pp_immexpr hd pp_immexpr tl
   | ImmConstraint (e, typ) -> AstLib.Pp_ast.pp_typed fmt pp_immexpr (e, typ)
 ;;
 
