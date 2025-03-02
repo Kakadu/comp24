@@ -27,6 +27,6 @@ type let_body = identifier * identifier list * aexpr
 
 type anf_decl =
   | ADSingleLet of rec_flag * let_body
-  | ADMutualRecDecl of rec_flag * let_body list
+  | ADMutualRecDecl of rec_flag * let_body * let_body * let_body list
 
 type anf_prog = anf_decl list

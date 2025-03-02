@@ -55,7 +55,6 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
             let* rest = roll_capp tl in
             return (CApp (rest, CImmExpr h))
           | [] -> fail "impossible?"
-          (* todo: identifier from ast *)
         in
         let* capp = roll_capp @@ List.rev (fimm :: argsimm) in
         let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
@@ -107,9 +106,11 @@ let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
   | DLet (rf, lb) ->
     let* lb = helper lb in
     return (ADSingleLet (rf, lb))
-  | DLetMut (rf, lb, lb2, lbs) ->
-    let* lbs = List.map helper (lb :: lb2 :: lbs) |> sequence in
-    return (ADMutualRecDecl (rf, lbs))
+  | DLetMut (rf, lb1, lb2, lbs) ->
+    let* lb1 = helper lb1 in
+    let* lb2 = helper lb2 in
+    let* lbs = List.map helper lbs |> sequence in
+    return (ADMutualRecDecl (rf, lb1, lb2, lbs))
 ;;
 
 let anf_program (decls : decl list) =
@@ -120,11 +121,6 @@ let anf_program (decls : decl list) =
     | _ :: rest -> get_initial_env rest acc
   in
   let env = get_initial_env decls StringSet.empty in
-  (* let decls = Base.List.fold_right ~f:(fun decls acc -> 
-    let* acc = acc in 
-    let decl = anf_decl env decls 0 in
-    return (decl :: acc)
-    ) ~init:(return []) decls in *)
   let decls = Base.List.map decls ~f:(fun decls -> snd (anf_decl env decls 0)) in
   decls
 ;;

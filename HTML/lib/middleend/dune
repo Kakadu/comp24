@@ -1,6 +1,6 @@
 (library
  (name Anf)
- (modules cc_ll anf_ast anf_conv utils pp_anf_ast)
+ (modules cc_ll anf_ast anf_conv utils pp_anf_ast restore_ast)
  (libraries base Common AstLib Parser Patelim)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_expect))

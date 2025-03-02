@@ -51,7 +51,8 @@ let pp_let_body fmt = function
 let pp_anf_decl fmt = function
   | ADSingleLet (rec_flag, let_body) ->
     fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body let_body
-  | ADMutualRecDecl (rec_flag, let_bodies) ->
+  | ADMutualRecDecl (rec_flag, lb1, lb2, lbs) ->
+    let let_bodies = lb1 :: lb2 :: lbs in
     let pp_decls =
       pp_print_list ~pp_sep:(fun fmt _ -> fprintf fmt "\nand ") pp_let_body
     in
