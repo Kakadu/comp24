@@ -237,5 +237,3 @@ let rec ll_prog (prog : prog) : ll_prog R.t =
     let* ll_tl_exprs = ll_prog tl_exprs in
     R.return ([ ll_first_expr ] @ ll_tl_exprs)
 ;;
-
-let run_ll (prog : prog) = run (ll_prog prog)
