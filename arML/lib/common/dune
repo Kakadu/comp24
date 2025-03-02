@@ -2,6 +2,6 @@
  (name common)
  (public_name arML.common)
  (libraries base arML.ast)
- (modules identifierStructs stateMonad stateResultMonad)
+ (modules identifierStructs IdentifierSearcher stateMonad stateResultMonad)
  (instrumentation
   (backend bisect_ppx)))

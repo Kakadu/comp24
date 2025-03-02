@@ -4,7 +4,7 @@
 
 open Ast.AbstractSyntaxTree
 open Common.IdentifierStructs
-open IdentifierSearcher
+open Common.IdentifierSearcher
 
 let rec substitute_identifiers replacement_map expr =
   match expr with
@@ -52,10 +52,10 @@ let rec substitute_identifiers replacement_map expr =
     let cases' =
       List.map
         (fun (p, e) ->
-          ( p
-          , substitute_identifiers
-              (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
-              e ))
+           ( p
+           , substitute_identifiers
+               (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
+               e ))
         (case :: cases)
     in
     EFunction (List.hd cases', List.tl cases')
@@ -64,10 +64,10 @@ let rec substitute_identifiers replacement_map expr =
     let cases' =
       List.map
         (fun (p, e) ->
-          ( p
-          , substitute_identifiers
-              (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
-              e ))
+           ( p
+           , substitute_identifiers
+               (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
+               e ))
         (case :: cases)
     in
     EMatchWith (expr, List.hd cases', List.tl cases')

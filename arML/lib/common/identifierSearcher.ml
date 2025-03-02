@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast.AbstractSyntaxTree
-open Common.IdentifierStructs
+open IdentifierStructs
 
 let rec get_pattern_identifiers = function
   | PAny | PNill | PConst _ -> IdentifierSet.empty
@@ -105,8 +105,8 @@ and get_rec_let_in_free_vars cases e =
   let cases_free_vars =
     List.fold_left
       (fun acc (_, expr) ->
-        let free_vars = IdentifierSet.diff (get_expr_free_vars expr) bound_vars in
-        IdentifierSet.union acc free_vars)
+         let free_vars = IdentifierSet.diff (get_expr_free_vars expr) bound_vars in
+         IdentifierSet.union acc free_vars)
       IdentifierSet.empty
       cases
   in

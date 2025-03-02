@@ -3,10 +3,9 @@
 (library
  (name middleend)
  (public_name arML.middleend)
- (libraries base ast common)
+ (libraries base ast common lambdaLifting)
  (modules
   FunctionTransformer
-  IdentifierSearcher
   IdentifierSubstitutor
   NameCreator
   ClosureExpression

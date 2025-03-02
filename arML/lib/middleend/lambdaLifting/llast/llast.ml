@@ -16,7 +16,7 @@ and ll_expr =
   | LEEmptyList (** Empty list: '[]' *)
   | LEListConstructor of ll_expr * ll_expr (** List construction: 1 :: 2 :: [] *)
   | LEMatchWith of ll_expr * ll_case * ll_case list (** Pattern matching: match x with | y -> y *)
-  | LETyped of ll_expr * type_defenition (** Assigning a type to an expression: (expr : int) *)
+  | LETyped of ll_expr * type_definition(** Assigning a type to an expression: (expr : int) *)
 [@@deriving show { with_path = false }]
 
 type ll_decl_case = pattern * pattern list * ll_expr (** Binding mainPattern * patterns * expression *)

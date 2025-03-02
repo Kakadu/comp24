@@ -1,0 +1,9 @@
+(include_subdirs unqualified)
+
+(library
+ (name lambdaLifting)
+ (public_name arML.middleend.lambdaLifting)
+ (libraries base ast common)
+ (modules Llast Pprint LlExpression LlDeclaration LlProgram Runner)
+ (instrumentation
+  (backend bisect_ppx)))

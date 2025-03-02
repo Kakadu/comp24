@@ -71,3 +71,19 @@ let closure_conversion_program program =
 ;;
 
 (* -------------- *)
+
+(* Lambda lifting *)
+
+let lambda_lifting_program_ast program =
+  LambdaLifting.Pprint.print_ll_program (LambdaLifting.Runner.run_ll_program program)
+;;
+
+let lambda_lifting_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    let closure_ast = Middleend.Runner.run_closure_program ast in
+    lambda_lifting_program_ast closure_ast
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
