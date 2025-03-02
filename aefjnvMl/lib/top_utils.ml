@@ -21,6 +21,7 @@ module Ast_test_utils = struct
 
   let ( let* ) x f =
     let* x = x in
+    let* _ = Inferencer.check_program x in
     let* ast = f x in
     let* _ = Inferencer.check_program ast in
     return ast
