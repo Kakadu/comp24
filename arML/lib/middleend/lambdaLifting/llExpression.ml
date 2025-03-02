@@ -28,10 +28,7 @@ let rec ll_expression env replacement_map lifted = function
   | ETuple (e1, e2, es) -> ll_tuple env replacement_map lifted (e1, e2, es)
   | EMatchWith (e, c, cs) -> ll_match_with env replacement_map lifted (e, c, cs)
   | ETyped (e, t) -> ll_typed_expr env replacement_map lifted (e, t)
-  | _ ->
-    let _ = replacement_map in
-    let _ = env in
-    return (LEEmptyList, lifted)
+  | EFunction _ -> return @@ (LEIdentifier (Id ""), lifted)
 
 and ll_fun env replacement_map lifted (p, ps) body =
   let* name = get_new_ll_name env in
