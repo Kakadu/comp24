@@ -25,7 +25,9 @@ let rec substitute_identifiers_ll replacement_map expr =
   | LELetIn (case, cases, body) ->
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
     let cases' =
-      List.map (fun (p, e) -> p, substitute_identifiers_ll replacement_map e) (case :: cases)
+      List.map
+        (fun (p, e) -> p, substitute_identifiers_ll replacement_map e)
+        (case :: cases)
     in
     let body' =
       substitute_identifiers_ll
@@ -52,10 +54,10 @@ let rec substitute_identifiers_ll replacement_map expr =
     let cases' =
       List.map
         (fun (p, e) ->
-           ( p
-           , substitute_identifiers_ll
-               (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
-               e ))
+          ( p
+          , substitute_identifiers_ll
+              (remove_keys_from_map (get_pattern_identifiers p) replacement_map)
+              e ))
         (case :: cases)
     in
     LEMatchWith (expr', List.hd cases', List.tl cases')
@@ -63,3 +65,4 @@ let rec substitute_identifiers_ll replacement_map expr =
     let e' = substitute_identifiers_ll replacement_map e in
     LETyped (e', t)
   | _ -> expr
+;;

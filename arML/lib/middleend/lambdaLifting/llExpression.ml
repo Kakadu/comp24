@@ -17,8 +17,10 @@ let rec ll_expression env replacement_map lifted = function
   | EIdentifier id -> ll_identifier replacement_map lifted id
   | EEmptyList -> return (LEEmptyList, lifted)
   | EFun ((p, ps), body) -> ll_fun env replacement_map lifted (p, ps) body
-  | ELetIn (case, cases, expr) -> ll_let_in env replacement_map lifted (case :: cases, expr)
-  | ERecLetIn (case, cases, expr) -> ll_let_rec_in env replacement_map lifted (case :: cases, expr)
+  | ELetIn (case, cases, expr) ->
+    ll_let_in env replacement_map lifted (case :: cases, expr)
+  | ERecLetIn (case, cases, expr) ->
+    ll_let_rec_in env replacement_map lifted (case :: cases, expr)
   | EApplication (func, fst_arg, args) ->
     ll_application env replacement_map lifted (func, fst_arg, args)
   | EIfThenElse (c, b1, b2) -> ll_if_then_else env replacement_map lifted (c, b1, b2)
@@ -26,7 +28,7 @@ let rec ll_expression env replacement_map lifted = function
   | ETuple (e1, e2, es) -> ll_tuple env replacement_map lifted (e1, e2, es)
   | EMatchWith (e, c, cs) -> ll_match_with env replacement_map lifted (e, c, cs)
   | ETyped (e, t) -> ll_typed_expr env replacement_map lifted (e, t)
-  | _ -> 
+  | _ ->
     let _ = replacement_map in
     let _ = env in
     return (LEEmptyList, lifted)
@@ -44,18 +46,22 @@ and ll_let_in env replacement_map lifted (cases, body) =
   let* lifted_cases, lifted1, final_replacement_map =
     List.fold_left
       (fun acc (p, e) ->
-         let* acc_cases, acc_lifted, acc_replacement_map = acc in
-         match (p, e) with
-         | PVar id, EFun ((fp, fps), fbody) ->
-           let* lifted_fbody, lifted_exprs = ll_fun env replacement_map acc_lifted (fp, fps) fbody in
-           let ident = match lifted_fbody with
-             | LEIdentifier ik -> ik
-             | _ -> Id "" in
-           let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
-           return (acc_cases, lifted_exprs, updated_replacement_map)
-         | _ ->
-           let* lifted_e, lifted_next = ll_expression env replacement_map acc_lifted e in
-           return ((p, lifted_e) :: acc_cases, lifted_next, acc_replacement_map))
+        let* acc_cases, acc_lifted, acc_replacement_map = acc in
+        match p, e with
+        | PVar id, EFun ((fp, fps), fbody) ->
+          let* lifted_fbody, lifted_exprs =
+            ll_fun env replacement_map acc_lifted (fp, fps) fbody
+          in
+          let ident =
+            match lifted_fbody with
+            | LEIdentifier ik -> ik
+            | _ -> Id ""
+          in
+          let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
+          return (acc_cases, lifted_exprs, updated_replacement_map)
+        | _ ->
+          let* lifted_e, lifted_next = ll_expression env replacement_map acc_lifted e in
+          return ((p, lifted_e) :: acc_cases, lifted_next, acc_replacement_map))
       (return ([], lifted, replacement_map))
       cases
   in
@@ -68,39 +74,47 @@ and ll_let_rec_in env replacement_map lifted (cases, body) =
   let* lifted1, final_replacement_map =
     List.fold_left
       (fun acc (p, e) ->
-         let* acc_lifted, acc_replacement_map = acc in
-         match (p, e) with
-         | PVar id, EFun ((fp, fps), fbody) ->
-           let* lifted_fbody, lifted_exprs = ll_fun env replacement_map acc_lifted (fp, fps) fbody in
-           let ident = match lifted_fbody with
-             | LEIdentifier ik -> ik
-             | _ -> Id "" in
-           let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
-           return (lifted_exprs, updated_replacement_map)
-         | PVar id, _ ->
-           let* lifted_e, lifted_next = ll_expression env replacement_map acc_lifted e in
-           return (LDOrdinary((PVar id, [], lifted_e), []) :: lifted_next, acc_replacement_map)
-         | _ -> return (acc_lifted, acc_replacement_map))
+        let* acc_lifted, acc_replacement_map = acc in
+        match p, e with
+        | PVar id, EFun ((fp, fps), fbody) ->
+          let* lifted_fbody, lifted_exprs =
+            ll_fun env replacement_map acc_lifted (fp, fps) fbody
+          in
+          let ident =
+            match lifted_fbody with
+            | LEIdentifier ik -> ik
+            | _ -> Id ""
+          in
+          let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
+          return (lifted_exprs, updated_replacement_map)
+        | PVar id, _ ->
+          let* lifted_e, lifted_next = ll_expression env replacement_map acc_lifted e in
+          return
+            (LDOrdinary ((PVar id, [], lifted_e), []) :: lifted_next, acc_replacement_map)
+        | _ -> return (acc_lifted, acc_replacement_map))
       (return ([], replacement_map))
       cases
   in
-  let all_cases, all_subcases = 
-    List.fold_left (fun (acc_cases, acc_subcases) decl ->
+  let all_cases, all_subcases =
+    List.fold_left
+      (fun (acc_cases, acc_subcases) decl ->
         match decl with
-        | LDOrdinary (main_case, subcases) -> 
-          let substitute_case (p, ps, expr) = 
-            (p, ps, substitute_identifiers_ll final_replacement_map expr) 
+        | LDOrdinary (main_case, subcases) ->
+          let substitute_case (p, ps, expr) =
+            p, ps, substitute_identifiers_ll final_replacement_map expr
           in
           let new_main_case = substitute_case main_case in
           let new_subcases = List.map substitute_case subcases in
-          (new_main_case :: acc_cases, new_subcases @ acc_subcases)
-        | _ -> (acc_cases, acc_subcases)
-      ) ([], []) lifted1
+          new_main_case :: acc_cases, new_subcases @ acc_subcases
+        | _ -> acc_cases, acc_subcases)
+      ([], [])
+      lifted1
   in
-  let* rec_decl = match all_cases with
+  let* rec_decl =
+    match all_cases with
     | [] -> return lifted1
-    | main_case :: rest_cases -> 
-      return [LDRecursive (main_case, rest_cases @ all_subcases)]
+    | main_case :: rest_cases ->
+      return [ LDRecursive (main_case, rest_cases @ all_subcases) ]
   in
   let lifted1 = rec_decl @ lifted in
   let* lifted_body, lifted2 = ll_expression env final_replacement_map lifted1 body in
@@ -120,11 +134,9 @@ and ll_application env replacement_map lifted (func, fst_arg, args) =
   let* lifted_args, lifted3 =
     List.fold_right
       (fun arg acc ->
-         let* acc_exprs, acc_lifted = acc in
-         let* lifted_arg, lifted_next =
-           ll_expression env replacement_map acc_lifted arg
-         in
-         return (lifted_arg :: acc_exprs, lifted_next))
+        let* acc_exprs, acc_lifted = acc in
+        let* lifted_arg, lifted_next = ll_expression env replacement_map acc_lifted arg in
+        return (lifted_arg :: acc_exprs, lifted_next))
       args
       (return ([], lifted2))
   in
@@ -134,9 +146,9 @@ and ll_application env replacement_map lifted (func, fst_arg, args) =
 and ll_if_then_else env replacement_map lifted (c, b1, b2) =
   let* l_c, lifted1 = ll_expression env replacement_map lifted c in
   let* l_b1, lifted2 = ll_expression env replacement_map lifted1 b1 in
-  let* l_b2, lifted3 = 
+  let* l_b2, lifted3 =
     match b2 with
-    | Some expr -> 
+    | Some expr ->
       let* l_b2, lifted3 = ll_expression env replacement_map lifted2 expr in
       return @@ (Some l_b2, lifted3)
     | None -> return (None, lifted2)
@@ -154,9 +166,9 @@ and ll_tuple env replacement_map lifted (e1, e2, es) =
   let* l_es, lifted3 =
     List.fold_left
       (fun acc e ->
-         let* acc_es, acc_lifted = acc in
-         let* l_e, new_acc_lifted = ll_expression env replacement_map acc_lifted e in
-         return (l_e :: acc_es, new_acc_lifted))
+        let* acc_es, acc_lifted = acc in
+        let* l_e, new_acc_lifted = ll_expression env replacement_map acc_lifted e in
+        return (l_e :: acc_es, new_acc_lifted))
       (return @@ ([], lifted2))
       es
   in
@@ -172,9 +184,9 @@ and ll_match_with env replacement_map lifted (expr, (p, e), cases) =
   let* lifted_cases, lifted3 =
     List.fold_right
       (fun (p, e) acc ->
-         let* acc_cases, acc_lifted = acc in
-         let* l_e, lifted_next = ll_expression env replacement_map acc_lifted e in
-         return ((p, l_e) :: acc_cases, lifted_next))
+        let* acc_cases, acc_lifted = acc in
+        let* l_e, lifted_next = ll_expression env replacement_map acc_lifted e in
+        return ((p, l_e) :: acc_cases, lifted_next))
       cases
       (return ([], lifted2))
   in

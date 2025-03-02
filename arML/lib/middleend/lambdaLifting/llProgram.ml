@@ -14,9 +14,9 @@ let ll_program start_env program =
   let* lifted_decls, lifted_exprs =
     List.fold_right
       (fun item acc ->
-         let* acc = acc in
-         let* lifted_decl, lifted_e = ll_decl env replacement_map lifted item in
-         return (lifted_decl :: fst acc, List.rev lifted_e @ snd acc))
+        let* acc = acc in
+        let* lifted_decl, lifted_e = ll_decl env replacement_map lifted item in
+        return (lifted_decl :: fst acc, List.rev lifted_e @ snd acc))
       program
       (return ([], []))
   in

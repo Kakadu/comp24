@@ -11,9 +11,9 @@ open LlProgram
 let start_env program =
   List.fold_left
     (fun acc decl ->
-       match decl with
-       | DOrdinary (case, cases) | DRecursive (case, cases) ->
-         IdentifierSet.union acc (get_pattern_identifiers_from_cases (case :: cases)))
+      match decl with
+      | DOrdinary (case, cases) | DRecursive (case, cases) ->
+        IdentifierSet.union acc (get_pattern_identifiers_from_cases (case :: cases)))
     IdentifierSet.empty
     program
 ;;
@@ -24,4 +24,3 @@ let run_ll_program program =
   let result = run m first_state in
   fst result
 ;;
-

@@ -54,19 +54,19 @@ and closure_fun application_flag env fv_map = function
     let* new_args, replacement_map =
       IdentifierSet.fold
         (fun var acc ->
-           let* args, map = acc in
-           let patterns_identifiers =
-             List.fold_left
-               (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p))
-               IdentifierSet.empty
-               patters
-           in
-           let common_env = get_expr_free_vars expr in
-           let common_env = IdentifierSet.union common_env patterns_identifiers in
-           let common_env = IdentifierSet.union common_env env in
-           let* new_name = get_new_arg_name common_env in
-           let new_id = Id new_name in
-           return (IdentifierSet.add new_id args, IdentifierMap.add var new_id map))
+          let* args, map = acc in
+          let patterns_identifiers =
+            List.fold_left
+              (fun acc p -> IdentifierSet.union acc (get_pattern_identifiers p))
+              IdentifierSet.empty
+              patters
+          in
+          let common_env = get_expr_free_vars expr in
+          let common_env = IdentifierSet.union common_env patterns_identifiers in
+          let common_env = IdentifierSet.union common_env env in
+          let* new_name = get_new_arg_name common_env in
+          let new_id = Id new_name in
+          return (IdentifierSet.add new_id args, IdentifierMap.add var new_id map))
         free_vars
         (return (IdentifierSet.empty, IdentifierMap.empty))
     in
@@ -97,10 +97,10 @@ and closure_application env fv_map (func, arg1, args) =
   let* args_closure =
     List.fold_left
       (fun acc arg ->
-         let* acc = acc in
-         let* closed_arg = closure_expression env fv_map arg in
-         let new_acc = closed_arg :: acc in
-         return new_acc)
+        let* acc = acc in
+        let* closed_arg = closure_expression env fv_map arg in
+        let new_acc = closed_arg :: acc in
+        return new_acc)
       (return [])
       args
   in
@@ -125,9 +125,9 @@ and closure_tuple env fv_map (e1, e2, es) =
   let* es =
     List.fold_left
       (fun acc arg ->
-         let* acc = acc in
-         let* closed_expr = closure_expression env fv_map arg in
-         return (closed_expr :: acc))
+        let* acc = acc in
+        let* closed_expr = closure_expression env fv_map arg in
+        return (closed_expr :: acc))
       (return [])
       es
   in
@@ -146,10 +146,10 @@ and closure_case env fv_map ((p1, e1), cases) =
   let* cases =
     List.fold_left
       (fun acc (p, e) ->
-         let* acc = acc in
-         let* closure_e = closure_expression env fv_map e in
-         let new_acc = (p, closure_e) :: acc in
-         return new_acc)
+        let* acc = acc in
+        let* closure_e = closure_expression env fv_map e in
+        let new_acc = (p, closure_e) :: acc in
+        return new_acc)
       (return [])
       cases
   in
@@ -165,9 +165,9 @@ and closure_function env fv_map (case, cases) =
   let* common_env =
     List.fold_left
       (fun acc (_, e) ->
-         let* acc = acc in
-         let e_free_vars = get_expr_free_vars e in
-         return @@ IdentifierSet.union acc e_free_vars)
+        let* acc = acc in
+        let e_free_vars = get_expr_free_vars e in
+        return @@ IdentifierSet.union acc e_free_vars)
       (return env)
       (case :: cases)
   in
@@ -197,24 +197,24 @@ and closure_let_in env fv_map (case, cases) expr =
     let updated_fv_map =
       List.fold_left
         (fun acc (p, expr) ->
-           let free_vars = IdentifierSet.diff (get_expr_free_vars expr) env in
-           match p, expr with
-           | PVar id, EFun _ -> IdentifierMap.add id free_vars acc
-           | _ -> acc)
+          let free_vars = IdentifierSet.diff (get_expr_free_vars expr) env in
+          match p, expr with
+          | PVar id, EFun _ -> IdentifierMap.add id free_vars acc
+          | _ -> acc)
         fv_map
         cases
     in
     let* closed_cases =
       List.fold_left
         (fun acc (p, expr) ->
-           let* acc = acc in
-           match expr with
-           | EFun _ ->
-             let* closed_expr, _ = closure_fun false env fv_map expr in
-             return ((p, closed_expr) :: acc)
-           | _ ->
-             let* closed_expr = closure_expression env fv_map expr in
-             return ((p, closed_expr) :: acc))
+          let* acc = acc in
+          match expr with
+          | EFun _ ->
+            let* closed_expr, _ = closure_fun false env fv_map expr in
+            return ((p, closed_expr) :: acc)
+          | _ ->
+            let* closed_expr = closure_expression env fv_map expr in
+            return ((p, closed_expr) :: acc))
         (return [])
         cases
     in
@@ -227,12 +227,12 @@ and closure_rec_let_in env fv_map (case, cases) expr previous_replacement_maps =
   let apply_replacement_map_to_cases replacement_maps cases =
     List.map
       (fun (p, expr) ->
-         match p with
-         | PVar i ->
-           (match IdentifierMap.find_opt i replacement_maps with
-            | Some replacement_map -> p, substitute_identifiers replacement_map expr
-            | None -> p, expr)
-         | _ -> p, expr)
+        match p with
+        | PVar i ->
+          (match IdentifierMap.find_opt i replacement_maps with
+           | Some replacement_map -> p, substitute_identifiers replacement_map expr
+           | None -> p, expr)
+        | _ -> p, expr)
       cases
   in
   let cases = case :: cases in
@@ -241,28 +241,28 @@ and closure_rec_let_in env fv_map (case, cases) expr previous_replacement_maps =
   let updated_fv_map =
     List.fold_left
       (fun acc (p, expr) ->
-         let free_vars = IdentifierSet.diff (get_expr_free_vars expr) extended_env in
-         match p, expr with
-         | PVar id, EFun _ -> IdentifierMap.add id free_vars acc
-         | _ -> acc)
+        let free_vars = IdentifierSet.diff (get_expr_free_vars expr) extended_env in
+        match p, expr with
+        | PVar id, EFun _ -> IdentifierMap.add id free_vars acc
+        | _ -> acc)
       fv_map
       cases
   in
   let* closed_cases, current_replacement_maps =
     List.fold_left
       (fun acc (p, expr) ->
-         let* acc_cases, acc_replacement_map = acc in
-         match p, expr with
-         | PVar i, EFun _ ->
-           let* closed_expr, replacement_map =
-             closure_fun false extended_env updated_fv_map expr
-           in
-           return
-             ( (p, closed_expr) :: acc_cases
-             , IdentifierMap.add i replacement_map acc_replacement_map )
-         | _ ->
-           let* closed_expr = closure_expression extended_env updated_fv_map expr in
-           return ((p, closed_expr) :: acc_cases, acc_replacement_map))
+        let* acc_cases, acc_replacement_map = acc in
+        match p, expr with
+        | PVar i, EFun _ ->
+          let* closed_expr, replacement_map =
+            closure_fun false extended_env updated_fv_map expr
+          in
+          return
+            ( (p, closed_expr) :: acc_cases
+            , IdentifierMap.add i replacement_map acc_replacement_map )
+        | _ ->
+          let* closed_expr = closure_expression extended_env updated_fv_map expr in
+          return ((p, closed_expr) :: acc_cases, acc_replacement_map))
       (return ([], IdentifierMap.empty))
       cases
   in

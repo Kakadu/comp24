@@ -35,7 +35,7 @@ val closure_conversion_program : string -> unit
 (* Lambda lifting *)
 
 (* (** [lambda_lifting_expression input] transforms a expression by lifting all nested functions
-    to the top level. *)
+   to the top level. *)
    val lambda_lifting_expression : string -> unit *)
 
 (** [lambda_lifting_program input] transforms a program by lifting all nested functions

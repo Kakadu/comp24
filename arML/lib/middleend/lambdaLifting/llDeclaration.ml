@@ -25,11 +25,11 @@ let ll_decl env replacement_map lifted = function
     let* lifted_cases, lifted_exprs2 =
       List.fold_right
         (fun c acc ->
-           let* acc = acc in
-           let* (c_name, c_args, lifted_c), lifted_e =
-             ll_decl_case env replacement_map lifted c
-           in
-           return ((c_name, c_args, lifted_c) :: fst acc, lifted_e @ snd acc))
+          let* acc = acc in
+          let* (c_name, c_args, lifted_c), lifted_e =
+            ll_decl_case env replacement_map lifted c
+          in
+          return ((c_name, c_args, lifted_c) :: fst acc, lifted_e @ snd acc))
         cases
         (return ([], []))
     in
@@ -42,15 +42,23 @@ let ll_decl env replacement_map lifted = function
     let* lifted_cases, lifted_exprs2 =
       List.fold_right
         (fun c acc ->
-           let* acc = acc in
-           let* (c_name, c_args, lifted_c), lifted_e =
-             ll_decl_case env replacement_map lifted c
-           in
-           return ((c_name, c_args, lifted_c) :: fst acc, lifted_e @ snd acc))
+          let* acc = acc in
+          let* (c_name, c_args, lifted_c), lifted_e =
+            ll_decl_case env replacement_map lifted c
+          in
+          return ((c_name, c_args, lifted_c) :: fst acc, lifted_e @ snd acc))
         cases
         (return ([], []))
     in
-    return
-      ( LDRecursive ((name, args, lifted_case), lifted_cases)
-      , lifted_exprs1 @ lifted_exprs2 )
+    let extract_cases lifted_exprs =
+      List.fold_left
+        (fun acc expr ->
+          match expr with
+          | LDOrdinary (case, cases) -> (case :: cases) @ acc
+          | LDRecursive (case, cases) -> (case :: cases) @ acc)
+        []
+        lifted_exprs
+    in
+    let lifted_cases = lifted_cases @ extract_cases (lifted_exprs1 @ lifted_exprs2) in
+    return (LDRecursive ((name, args, lifted_case), lifted_cases), lifted)
 ;;

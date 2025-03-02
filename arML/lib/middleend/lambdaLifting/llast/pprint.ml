@@ -20,7 +20,9 @@ let rec pp_ll_expr ppf = function
     Format.fprintf
       ppf
       "(let %a in %a)"
-      (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ") pp_ll_let_in_case)
+      (Format.pp_print_list
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
+         pp_ll_let_in_case)
       (c :: cs)
       pp_ll_expr
       e
@@ -33,8 +35,8 @@ let rec pp_ll_expr ppf = function
       pp_ll_expr
       t
       (fun ppf -> function
-         | None -> ()
-         | Some e -> Format.fprintf ppf " else %a" pp_ll_expr e)
+        | None -> ()
+        | Some e -> Format.fprintf ppf " else %a" pp_ll_expr e)
       f
   | LETuple (e1, e2, es) ->
     Format.fprintf
@@ -56,7 +58,6 @@ let rec pp_ll_expr ppf = function
   | LETyped (e, t) -> Format.fprintf ppf "(%a : %a)" pp_ll_expr e pp_type_definition t
 
 and pp_ll_case ppf (p, e) = Format.fprintf ppf "%a -> %a" pp_pattern p pp_ll_expr e
-
 and pp_ll_let_in_case ppf (p, e) = Format.fprintf ppf "%a = %a" pp_pattern p pp_ll_expr e
 
 and pp_ll_decl_case ppf (p, args, e) =
