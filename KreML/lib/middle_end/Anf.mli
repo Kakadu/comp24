@@ -7,16 +7,16 @@ open Ast
 type binop =
   | Mul
   | Div
-  | Plus
-  | Minus
+  | Add
+  | Sub
   | Eq
   | Neq
-  | Gt
-  | Geq
   | Lt
-  | Leq
+  | Gt
   | And
   | Or
+
+type unop = Not
 
 type immediate =
   | Avar of ident
@@ -25,6 +25,7 @@ type immediate =
 type cexpr =
   | CImm of immediate
   | CBinop of binop * immediate * immediate
+  | CUnop of unop * immediate
   | CTuple of immediate list
   | CGetfield of int * immediate (* tuple or list access *)
   | CCons of immediate * immediate

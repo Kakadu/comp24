@@ -16,7 +16,7 @@ let () =
        let alpha_structure = Alpha_transformer.transform mf_structure in
        let arities, anf_structure = Anf.transform alpha_structure in
        (* Anf. std_formatter anf_structure; *)
-       let flstructure = Closure_conversion.cc arities anf_structure in
+       let flstructure = Closure_conversion.cc arities anf_structure |> fst in
        let mdl = Llvm_codegen.get_module flstructure in
        Llvm.print_module "out.ll" mdl
      | Error error ->

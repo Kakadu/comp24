@@ -16,7 +16,8 @@ let () =
        let mf_structure = Match_elimination.eliminate alpha in
        let arities, anf = Anf.transform mf_structure in
        let flstructure = Closure_conversion.cc arities anf |> fst in
-       Flambda.pp std_formatter flstructure
+       let liveness_analysis = Liveness_analysis.analyse_program flstructure in
+       Liveness_analysis.pp std_formatter liveness_analysis
      | Error error ->
        fprintf std_formatter "An error occured while type checking: %a" pp_error error)
   | Error _ -> fprintf std_formatter "Could not parse the program %s" input
