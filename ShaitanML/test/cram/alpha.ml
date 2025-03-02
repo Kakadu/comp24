@@ -30,8 +30,8 @@ let () =
   in
   match parse_and_infer s with
   | Ok ast ->
-    let nh, names_count, ast = Pat_elim.run ast in
-    let _, _, ast = Alpha.run nh names_count ast in
+    let nh, names_count, ast = Pat_elim.run_pat_elim ast in
+    let _, _, ast = Alpha.run_ac nh names_count ast in
     Format.printf "%a" Pat_elim_ast.pp_pe_structure ast
   | Error message -> Format.printf "%s" message
 ;;

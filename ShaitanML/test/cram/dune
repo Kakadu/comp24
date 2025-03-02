@@ -27,4 +27,4 @@
   (source_tree manytests)))
 
 (cram
- (deps %{bin:parser} %{bin:infer} %{bin:pat_elim} %{bin:alpha}))
+ (deps %{bin:parser} %{bin:infer} %{bin:pat_elim} %{bin:alpha} ))

@@ -2,22 +2,17 @@ open Base
 open Pat_elim_ast
 open Common
 open Common.MonadCounter
+open StrSet
 
-let get_name i = "a" ^ Int.to_string i
-
-let process_name env bindings name =
+let rename env binds name =
   if String.equal name "()"
-  then return (env, bindings, "()")
-  else (
-    match StrSet.find env name with
-    | true ->
-      let* fresh = fresh in
-      let new_name = get_name fresh in
-      return
-        ( StrSet.add env new_name
-        , Map.update bindings name ~f:(fun _ -> new_name)
-        , new_name )
-    | false -> return (StrSet.add env name, bindings, name))
+  then return (env, binds, "()")
+  else if StrSet.find env name
+  then
+    let* fresh = fresh in
+    let new_name = "a" ^ Int.to_string fresh in
+    return (add env new_name, Map.update binds name ~f:(fun _ -> new_name), new_name)
+  else return (add env name, binds, name)
 ;;
 
 let rec ac_expr env bindings = function
@@ -45,14 +40,14 @@ let rec ac_expr env bindings = function
         args
         ~init:(return ([], env, bindings))
         ~f:(fun (names, env, bindings) name ->
-          let* env, bindings, name = process_name env bindings name in
+          let* env, bindings, name = rename env bindings name in
           return (name :: names, env, bindings))
     in
     let args = List.rev args in
     let* body = ac_expr env bindings body in
     return @@ PEEFun (args, body)
-  | PEETuple e_list ->
-    let* e_list = RList.map e_list ~f:(ac_expr env bindings) in
+  | PEETuple el ->
+    let* e_list = RList.map el ~f:(ac_expr env bindings) in
     return @@ PEETuple e_list
   | PEELet (decl, e) ->
     let* new_env, new_bindings, new_decl = ac_decl env bindings decl in
@@ -61,14 +56,14 @@ let rec ac_expr env bindings = function
 
 and ac_decl env bindings = function
   | PENonrec (name, e) ->
-    let* new_env, new_bindings, new_name = process_name env bindings name in
+    let* new_env, new_bindings, new_name = rename env bindings name in
     let* new_e = ac_expr new_env bindings e in
     return (new_env, new_bindings, PENonrec (new_name, new_e))
   | PERec decl_list ->
     let names, exprs = List.unzip decl_list in
     let f1 acc cur_name =
       let* names, env, bindings = acc in
-      let* new_env, new_bindings, new_name = process_name env bindings cur_name in
+      let* new_env, new_bindings, new_name = rename env bindings cur_name in
       return (new_name :: names, new_env, new_bindings)
     in
     let* new_names, new_env, new_bindings =
@@ -85,17 +80,17 @@ and ac_decl env bindings = function
     return (new_env, new_bindings, PERec new_decls)
 ;;
 
-let ac_program program init_env =
-  let rec helper last_env last_bindings = function
+let ac_structure program env =
+  let rec helper env binds = function
     | [] -> return []
     | hd :: tl ->
-      let* cur_env, cur_bindings, cur_ast = ac_decl last_env last_bindings hd in
-      let* other_asts = helper cur_env cur_bindings tl in
-      return (cur_ast :: other_asts)
+      let* env, binds, ast = ac_decl env binds hd in
+      let* rest = helper env binds tl in
+      return (ast :: rest)
   in
-  helper init_env (Map.empty (module String)) program
+  helper env (Map.empty (module String)) program
 ;;
 
-let run nh init_num prog =
-  run (ac_program prog (StrSet.of_list Common.builtins)) nh init_num
+let run_ac nh init_num prog =
+  run (ac_structure prog (StrSet.of_list Common.builtins)) nh init_num
 ;;
