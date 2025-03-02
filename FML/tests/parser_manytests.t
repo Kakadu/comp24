@@ -88,13 +88,11 @@
                             (EIdentifier "n"))),
                          (EConst (CInt 1)))),
                       (EIdentifier "b"),
-                      (ELetIn (NoRec, (PIdentifier "n"),
-                         (EFun ((PConst (CInt 1)),
-                            (EApplication (
-                               (EApplication ((EIdentifier "( - )"),
-                                  (EIdentifier "n"))),
-                               (EConst (CInt 1))))
-                            )),
+                      (ELetIn (NoRec, (PIdentifier "n1"),
+                         (EApplication (
+                            (EApplication ((EIdentifier "( - )"),
+                               (EIdentifier "n"))),
+                            (EConst (CInt 1)))),
                          (ELetIn (NoRec, (PIdentifier "ab"),
                             (EApplication (
                                (EApplication ((EIdentifier "( + )"),
@@ -102,12 +100,10 @@
                                (EIdentifier "b"))),
                             (EApplication (
                                (EApplication (
-                                  (EApplication (
-                                     (EApplication ((EIdentifier "fib_acc"),
-                                        (EIdentifier "b"))),
-                                     (EIdentifier "ab"))),
-                                  (EIdentifier "n"))),
-                               (EConst (CInt 1))))
+                                  (EApplication ((EIdentifier "fib_acc"),
+                                     (EIdentifier "b"))),
+                                  (EIdentifier "ab"))),
+                               (EIdentifier "n1")))
                             ))
                          ))
                       ))
@@ -177,22 +173,20 @@
           ))
         ]);
     (NoRecDecl
-       [(DDeclaration ((PIdentifier "test"),
-           (EFun ((PConst (CInt 3)),
-              (EFun ((PIdentifier "a"),
-                 (EFun ((PIdentifier "b"),
-                    (EFun ((PIdentifier "c"),
-                       (ELetIn (NoRec, (PIdentifier "a"),
+       [(DDeclaration ((PIdentifier "test3"),
+           (EFun ((PIdentifier "a"),
+              (EFun ((PIdentifier "b"),
+                 (EFun ((PIdentifier "c"),
+                    (ELetIn (NoRec, (PIdentifier "a"),
+                       (EApplication ((EIdentifier "print_int"),
+                          (EIdentifier "a"))),
+                       (ELetIn (NoRec, (PIdentifier "b"),
                           (EApplication ((EIdentifier "print_int"),
-                             (EIdentifier "a"))),
-                          (ELetIn (NoRec, (PIdentifier "b"),
+                             (EIdentifier "b"))),
+                          (ELetIn (NoRec, (PIdentifier "c"),
                              (EApplication ((EIdentifier "print_int"),
-                                (EIdentifier "b"))),
-                             (ELetIn (NoRec, (PIdentifier "c"),
-                                (EApplication ((EIdentifier "print_int"),
-                                   (EIdentifier "c"))),
-                                (EConst (CInt 0))))
-                             ))
+                                (EIdentifier "c"))),
+                             (EConst (CInt 0))))
                           ))
                        ))
                     ))
@@ -201,34 +195,32 @@
            ))
          ]);
     (NoRecDecl
-       [(DDeclaration ((PIdentifier "test"),
-           (EFun ((PConst (CInt 10)),
-              (EFun ((PIdentifier "a"),
-                 (EFun ((PIdentifier "b"),
-                    (EFun ((PIdentifier "c"),
-                       (EFun ((PIdentifier "d"),
-                          (EFun ((PIdentifier "e"),
-                             (EFun ((PIdentifier "f"),
-                                (EFun ((PIdentifier "g"),
-                                   (EFun ((PIdentifier "h"),
-                                      (EFun ((PIdentifier "i"),
-                                         (EFun ((PIdentifier "j"),
+       [(DDeclaration ((PIdentifier "test10"),
+           (EFun ((PIdentifier "a"),
+              (EFun ((PIdentifier "b"),
+                 (EFun ((PIdentifier "c"),
+                    (EFun ((PIdentifier "d"),
+                       (EFun ((PIdentifier "e"),
+                          (EFun ((PIdentifier "f"),
+                             (EFun ((PIdentifier "g"),
+                                (EFun ((PIdentifier "h"),
+                                   (EFun ((PIdentifier "i"),
+                                      (EFun ((PIdentifier "j"),
+                                         (EApplication (
                                             (EApplication (
+                                               (EIdentifier "( + )"),
                                                (EApplication (
-                                                  (EIdentifier "( + )"),
                                                   (EApplication (
+                                                     (EIdentifier "( + )"),
                                                      (EApplication (
-                                                        (EIdentifier "( + )"),
                                                         (EApplication (
+                                                           (EIdentifier "( + )"),
                                                            (EApplication (
-                                                              (EIdentifier
-                                                                 "( + )"),
                                                               (EApplication (
+                                                                 (EIdentifier
+                                                                    "( + )"),
                                                                  (EApplication (
-                                                                    (EIdentifier
-                                                                      "( + )"),
                                                                     (EApplication (
-                                                                      (EApplication (
                                                                       (EIdentifier
                                                                       "( + )"),
                                                                       (EApplication (
@@ -257,19 +249,18 @@
                                                                       "d"))))),
                                                                       (EIdentifier
                                                                       "e"))))),
-                                                                      (EIdentifier
-                                                                      "f")))
-                                                                    )),
-                                                                 (EIdentifier
-                                                                    "g")
-                                                                 ))
-                                                              )),
-                                                           (EIdentifier "h")))
-                                                        )),
-                                                     (EIdentifier "i")))
-                                                  )),
-                                               (EIdentifier "j")))
-                                            ))
+                                                                    (EIdentifier
+                                                                      "f")
+                                                                    ))
+                                                                 )),
+                                                              (EIdentifier "g")
+                                                              ))
+                                                           )),
+                                                        (EIdentifier "h")))
+                                                     )),
+                                                  (EIdentifier "i")))
+                                               )),
+                                            (EIdentifier "j")))
                                          ))
                                       ))
                                    ))
@@ -296,10 +287,8 @@
                                       (EApplication (
                                          (EApplication (
                                             (EApplication (
-                                               (EApplication (
-                                                  (EIdentifier "wrap"),
-                                                  (EIdentifier "test"))),
-                                               (EConst (CInt 10)))),
+                                               (EIdentifier "wrap"),
+                                               (EIdentifier "test10"))),
                                             (EConst (CInt 1)))),
                                          (EConst (CInt 10)))),
                                       (EConst (CInt 100)))),
@@ -313,19 +302,15 @@
               (ELetIn (NoRec, PUnit,
                  (EApplication ((EIdentifier "print_int"), (EIdentifier "rez")
                     )),
-                 (ELetIn (NoRec, (PIdentifier "temp"),
-                    (EFun ((PConst (CInt 2)),
+                 (ELetIn (NoRec, (PIdentifier "temp2"),
+                    (EApplication (
                        (EApplication (
                           (EApplication (
-                             (EApplication (
-                                (EApplication (
-                                   (EApplication ((EIdentifier "wrap"),
-                                      (EIdentifier "test"))),
-                                   (EConst (CInt 3)))),
-                                (EConst (CInt 1)))),
-                             (EConst (CInt 10)))),
-                          (EConst (CInt 100))))
-                       )),
+                             (EApplication ((EIdentifier "wrap"),
+                                (EIdentifier "test3"))),
+                             (EConst (CInt 1)))),
+                          (EConst (CInt 10)))),
+                       (EConst (CInt 100)))),
                     (EConst (CInt 0))))
                  ))
               ))

@@ -381,9 +381,13 @@ let infer_pattern =
       let schema = Scheme (TVarSet.empty, fv) in
       let env = TypeEnv.extend env id schema in
       return (fv, env)
-    | PAny | PNill ->
+    | PAny ->
       let* fv = fresh_var in
       return (fv, env)
+    | PNill ->
+      let* fv = fresh_var in
+      let ty = TList fv in
+      return (ty, env)
     | PConst c ->
       let* _, ty = infer_const c in
       return (ty, env)
@@ -410,9 +414,9 @@ let infer_pattern =
       let* sub1 = Subst.unify (tlist t1) fv in
       let* sub2 = Subst.unify t2 fv in
       let* sub3 = Subst.compose sub1 sub2 in
-      let env = TypeEnv.apply env2 sub3 in
+      let env3 = TypeEnv.apply env2 sub3 in
       let ty3 = Subst.apply sub3 fv in
-      return (ty3, env)
+      return (ty3, env3)
     | PConstraint (pat, an) ->
       let* ty, env1 = helper env pat in
       let* sub = Subst.unify ty (annotation_to_type an) in
@@ -438,16 +442,13 @@ let infer_expr =
       let result = Subst.apply sub ty in
       return (sub, result)
     | EApplication (f, arg) ->
+      let* fv = fresh_var in
       let* sub1, f_ty = helper env f in
-      let env1 = TypeEnv.apply env sub1 in
-      let* sub2, arg_ty = helper env1 arg in
-      let* res_type = fresh_var in
-      let ty1 = Subst.apply sub2 f_ty in
-      let ty2 = tfunction arg_ty res_type in
-      let* sub3 = Subst.unify ty1 ty2 in
-      let* sub = Subst.compose_all [ sub1; sub2; sub3 ] in
-      let ty = Subst.apply sub res_type in
-      return (sub, ty)
+      let* sub2, arg_ty = helper (TypeEnv.apply env sub1) arg in
+      let* sub = Subst.unify (tfunction arg_ty fv) (Subst.apply sub2 f_ty) in
+      let* final_sub = Subst.compose_all [ sub1; sub2; sub ] in
+      let ty = Subst.apply final_sub fv in
+      return (final_sub, ty)
     | ECons (t1, t2) ->
       let* sub1, ty1 = helper env t1 in
       let env1 = TypeEnv.apply env sub1 in
@@ -459,14 +460,16 @@ let infer_expr =
       let ty = Subst.apply sub fv in
       return (sub, ty)
     | EIf (cond, b1, b2) ->
-      let* sub1, ty1 = helper env cond in
-      let* sub2, ty2 = helper env b1 in
-      let* sub3, ty3 = helper env b2 in
-      let* sub4 = Subst.unify ty1 tbool in
-      let* sub5 = Subst.unify ty2 ty3 in
-      let* sub = Subst.compose_all [ sub1; sub2; sub3; sub4; sub5 ] in
-      let ty = Subst.apply sub ty3 in
-      return (sub, ty)
+      let* sub_cond, ty_cond = helper env cond in
+      let* sub_b1, ty_b1 = helper env b1 in
+      let* sub_b2, ty_b2 = helper env b2 in
+      let* sub = Subst.unify ty_cond tbool in
+      let* fv = fresh_var in
+      let* sub1 = Subst.unify fv ty_b1 in
+      let* sub2 = Subst.unify fv ty_b2 in
+      let* subs = Subst.compose_all [ sub_cond; sub_b1; sub_b2; sub; sub1; sub2 ] in
+      let ty = Subst.apply subs ty_b1 in
+      return (subs, ty)
     | ETuple exprs ->
       let rec infer_tuple acc = function
         | [] -> return acc
@@ -569,7 +572,7 @@ let infer_single_decl env (DDeclaration (pat, expr)) =
 let update_name_list name names_list = name :: List.filter (( <> ) name) names_list
 
 let infer_decl env name_list = function
-  | NoRecDecl decls ->
+  (* | NoRecDecl decls ->
     let* env, names_list =
       Base.List.fold_left
         ~f:(fun acc item ->
@@ -579,7 +582,63 @@ let infer_decl env name_list = function
         ~init:(return (env, []))
         decls
     in
-    return (env, List.rev names_list)
+    return (env, List.rev names_list) *)
+  | NoRecDecl decls ->
+    let rec ext_with_pat env name_list = function
+      | PIdentifier name, ty ->
+        let generalized_ty = generalize env ty in
+        let new_names_list = update_name_list name name_list in
+        return (TypeEnv.extend env name generalized_ty, new_names_list)
+      | (PTuple ps as pat), (TVar _ as ty) ->
+        let* tvs =
+          List.fold_left
+            (fun acc _ ->
+               let* acc = acc in
+               let* fv = fresh_var in
+               return @@ (fv :: acc))
+            (return [])
+            ps
+        in
+        let new_ty = TTuple tvs in
+        let* sub = Subst.unify ty new_ty in
+        ext_with_pat (TypeEnv.apply env sub) name_list (pat, new_ty)
+      | PTuple ps, TTuple ts when List.length ts = List.length ps ->
+        List.fold_left2
+          (fun acc pat ty ->
+             let* env, name_list = acc in
+             ext_with_pat env name_list (pat, ty))
+          (return (env, name_list))
+          ps
+          ts
+      | (PCons _ as pat), (TVar _ as ty) ->
+        let* fv = fresh_var in
+        let new_ty = TList fv in
+        let* sub = Subst.unify ty new_ty in
+        ext_with_pat (TypeEnv.apply env sub) name_list (pat, new_ty)
+      | PCons (l, r), TList t ->
+        let* env, name_list = ext_with_pat env name_list (l, t) in
+        ext_with_pat env name_list (r, TList t)
+      | PAny, _ | PNill, TList _ -> return (env, name_list)
+      | (PConst _ as pat), pty ->
+        let* pt, _ = infer_pattern env pat in
+        let* _ = Subst.unify pt pty in
+        return (env, name_list)
+      | pat, ty ->
+        let* typ, _ = infer_pattern env pat in
+        fail @@ `Unification_failed (typ, ty)
+    in
+    let patterns = List.map (fun (DDeclaration (pat, _)) -> pat) decls in
+    let* _ = check_unique_vars_list patterns in
+    List.fold_left
+      (fun acc (DDeclaration (pat, expr)) ->
+         let* extended_env, name_list = acc in
+         let* _, ty_expr = infer_expr env expr in
+         let* extended_env, new_name_list =
+           ext_with_pat extended_env name_list (pat, ty_expr)
+         in
+         return (extended_env, new_name_list))
+      (return (env, name_list))
+      decls
   | RecDecl decls ->
     let tmp_vars env decls =
       List.fold_left

@@ -3,17 +3,22 @@
   val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/002fac.ml
-  val fac_cps : int -> (int -> int) -> int
+  val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/003fib.ml
-  Type error: unification failed - type int does not match expected type int -> int
+  val fib_acc : int -> int -> int -> int
+  val fib : int -> int
+  val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/004manyargs.ml
-  Type error: the type variable 'a occurs inside 'a
+  val wrap : 'a -> 'a
+  val test3 : int -> int -> int -> int
+  val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+  val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/005fix.ml
-  val fix : ((int -> int) -> int -> int) -> int -> int
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val fac : (int -> int) -> int -> int
   val main : int
 
@@ -37,9 +42,9 @@
   val temp : int * bool
 
   $ ./inferencer_runner.exe < manytests/typed/015tuples.ml
-  val fix : ((((int -> int) * (int -> int) -> int -> int) * ((int -> int) * (int -> int) -> int -> int) -> (int -> int) * (int -> int)) -> ((int -> int) * (int -> int) -> int -> int) * ((int -> int) * (int -> int) -> int -> int) -> (int -> int) * (int -> int)) -> ((int -> int) * (int -> int) -> int -> int) * ((int -> int) * (int -> int) -> int -> int) -> (int -> int) * (int -> int)
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val map : ('a -> 'b) -> 'a * 'a -> 'b * 'b
-  val fixpoly : ((int -> int) * (int -> int) -> int -> int) * ((int -> int) * (int -> int) -> int -> int) -> (int -> int) * (int -> int)
+  val fixpoly : (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) * (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) -> ('a -> 'b) * ('a -> 'b)
   val feven : 'a * (int -> int) -> int -> int
   val fodd : (int -> int) * 'a -> int -> int
   val tie : (int -> int) * (int -> int)
@@ -48,11 +53,11 @@
   val main : int
 
   $ ./inferencer_runner.exe < manytests/typed/016lists.ml
-  val length : int * int list -> int
+  val length : 'a list -> int
   val length_tail : 'a list -> int
   val map : ('a -> 'b) -> 'a list -> 'b list
   val append : 'a list -> 'a list -> 'a list
   val concat : 'a list list -> 'a list
-  val iter : (int -> unit) -> int list -> unit
-  val cartesian : int list -> int list -> int * int list
+  val iter : ('a -> unit) -> 'a list -> unit
+  val cartesian : 'a list -> 'b list -> 'a * 'b list
   val main : int

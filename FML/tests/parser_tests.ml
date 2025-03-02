@@ -13,8 +13,7 @@ let parse_with_print input =
 
 let%expect_test _ =
   parse_with_print {| let n = 5|};
-  [%expect
-    {| [(NoRecDecl [(DDeclaration ((PIdentifier "n"), (EConst (CInt 5))))])] |}]
+  [%expect {| [(NoRecDecl [(DDeclaration ((PIdentifier "n"), (EConst (CInt 5))))])] |}]
 ;;
 
 let%expect_test _ =
@@ -315,4 +314,38 @@ let%expect_test _ =
             ])
         ]
   |}]
+;;
+
+let%expect_test _ =
+  parse_with_print
+    {| let test3 a b c =
+  let a = print_int a in
+  let b = print_int b in
+  let c = print_int c in
+  0|};
+  [%expect
+    {|
+    [(NoRecDecl
+        [(DDeclaration ((PIdentifier "test3"),
+            (EFun ((PIdentifier "a"),
+               (EFun ((PIdentifier "b"),
+                  (EFun ((PIdentifier "c"),
+                     (ELetIn (NoRec, (PIdentifier "a"),
+                        (EApplication ((EIdentifier "print_int"),
+                           (EIdentifier "a"))),
+                        (ELetIn (NoRec, (PIdentifier "b"),
+                           (EApplication ((EIdentifier "print_int"),
+                              (EIdentifier "b"))),
+                           (ELetIn (NoRec, (PIdentifier "c"),
+                              (EApplication ((EIdentifier "print_int"),
+                                 (EIdentifier "c"))),
+                              (EConst (CInt 0))))
+                           ))
+                        ))
+                     ))
+                  ))
+               ))
+            ))
+          ])
+      ] |}]
 ;;

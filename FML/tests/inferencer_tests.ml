@@ -58,8 +58,8 @@ let%expect_test _ =
 let res = x + y;;|};
   [%expect
     {|
-    val y : int
     val x : int
+    val y : int
     val res : int |}]
 ;;
 

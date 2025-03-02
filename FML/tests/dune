@@ -1,6 +1,6 @@
 (library
  (name tests)
- (modules parser_tests inferencer_test)
+ (modules parser_tests inferencer_tests)
  (libraries fml_lib)
  (inline_tests)
  (preprocess

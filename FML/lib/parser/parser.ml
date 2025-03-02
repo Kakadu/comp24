@@ -56,7 +56,8 @@ let chainl1 e op =
 let rec chainr1 e op = e >>= fun a -> op >>= (fun f -> chainr1 e op >>| f a) <|> return a
 
 let parse_name =
-  skip_wspace *> take_while1 (fun c -> is_upper c || is_lower c || c = '_' || c = '\'')
+  skip_wspace
+  *> take_while1 (fun c -> is_upper c || is_lower c || is_digit c || c = '_' || c = '\'')
 ;;
 
 let parse_identifier constr =
