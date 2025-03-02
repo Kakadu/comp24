@@ -27,7 +27,7 @@ let closure_program start_env program =
          let* acc = acc in
          match body with
          | EFun _ ->
-           let transformed_body = FunctionTransformer.transform_fun body in
+           let transformed_body = Common.FunctionTransformer.transform_fun body in
            let* closure_body, _ = closure_fun false env fv_map transformed_body in
            return ((pattern, closure_body) :: acc)
          | _ ->

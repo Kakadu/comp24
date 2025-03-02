@@ -6,6 +6,8 @@ open Ast.AbstractSyntaxTree
 open Llast
 open Common.StateMonad
 
+let get_new_ll_name = Common.NameCreator.get_new_name "ll"
+
 let ll_expression env replacement_map lifted = function
   | EConstant const -> return @@ (LEConstant const, lifted)
   | _ -> 

@@ -3,7 +3,6 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast
-open Common
 open IdentifierStructs
 
 (** [transform_fun expr] converts nested functions into a single function with multiple parameters. *)
