@@ -3,6 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 module InferenceTests = struct
+  open TypeInference
   let infer_test s =
     match Parser.parse_program s with
     | Ok actual ->
