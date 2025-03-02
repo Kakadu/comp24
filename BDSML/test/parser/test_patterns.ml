@@ -196,7 +196,8 @@ let%expect_test "var hard" =
 
 let%expect_test "var hard" =
   test_pattern "->";
-  [%expect {|
+  [%expect
+    {|
     Error: It cannot be this way |}]
 ;;
 

@@ -1,3 +1,7 @@
+(** Copyright 2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Quickcheck
 open Parser
 
@@ -23,6 +27,7 @@ let test =
       | Result.Error s ->
         Format.printf "\n\n[!]: Parser error: %s\n" s;
         Format.printf "On test:\n %s\n" str;
+        Format.printf "\n\n The input ast was: \n %s\n" (Ast.show_structure input);
         false))
 ;;
 
@@ -30,5 +35,7 @@ let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no sh
   QCheck_runner.set_seed 52;
   let _ = QCheck_runner.run_tests ~colors:false [ test ] in
   ();
-  [%expect {||}]
+  [%expect
+    {|
+    |}]
 ;;

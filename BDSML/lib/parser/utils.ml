@@ -85,18 +85,21 @@ let is_keyword = function
 ;;
 
 let parse_lowercase_ident =
-  let parse_first =
+  let* parse_first =
     satisfy (function
       | 'a' .. 'z' | '_' -> true
       | _ -> false)
-    >>| Char.escaped
   in
   let parse_rest =
-    take_while (function
+    let is_rest = function
       | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '\'' -> true
-      | _ -> false)
+      | _ -> false
+    in
+    match parse_first with
+    | '_' -> take_while1 is_rest
+    | _ -> take_while is_rest
   in
-  lift2 String.( ^ ) parse_first parse_rest
+  lift2 String.( ^ ) (return (Char.escaped parse_first)) parse_rest
   >>= fun name ->
   if not (is_keyword name)
   then return name

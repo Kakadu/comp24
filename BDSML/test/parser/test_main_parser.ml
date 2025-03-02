@@ -7,7 +7,8 @@ let test_parser str =
 ;;
 
 let%expect_test "some beautiful test" =
-  test_parser {|
+  test_parser
+    {|
 let (+) a b = a - b
 let m = 4
 and mm = 6
@@ -95,4 +96,9 @@ let%expect_test "let is not an expression test" =
       [(Str_value (Nonrecursive,
           [(Val_binding ("a", [], (Exp_constant (Const_int 1))))]))
         ] |}]
+;;
+
+let%expect_test "let is not an expression test" =
+  test_parser {| |};
+  [%expect {| [] |}]
 ;;
