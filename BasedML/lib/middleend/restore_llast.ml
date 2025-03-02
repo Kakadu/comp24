@@ -89,7 +89,7 @@ let rec frestore_llexpr ppf exp =
     fprintf ")"
   | LLMatch (pat_head, pat_exp_lst) ->
     fprintf "(match ";
-    frestore_pattern ppf pat_head;
+    frestore_llexpr ppf pat_head;
     fprintf " with ";
     List.iter
       (fun (pat, exp) ->

@@ -5,8 +5,8 @@
   >   else
   >    fact_cps (n - 1) (fun acc -> cont (n * acc))
   Name: fact_cps
-  Original program: (int -> ((int -> '_p18) -> '_p18))
-  ANF: (int -> ((int -> '_p26) -> '_p26))
+  Original program: (int -> ((int -> 'p19) -> 'p19))
+  ANF: (int -> ((int -> 'p27) -> 'p27))
   
   All types are correct
 
@@ -34,8 +34,8 @@
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/002fac.ml
   Name: fac_cps
-  Original program: (int -> ((int -> '_p1f) -> '_p1f))
-  ANF: (int -> ((int -> '_p31) -> '_p31))
+  Original program: (int -> ((int -> 'p20) -> 'p20))
+  ANF: (int -> ((int -> 'p32) -> 'p32))
   
   Name: main
   Original program: int
@@ -55,19 +55,19 @@
   >   cont (a + b)))
   > EOF
   Name: fib_cps
-  Original program: (int -> ((int -> '_p22) -> '_p22))
-  ANF: (int -> ((int -> '_p3f) -> '_p3f))
+  Original program: (int -> ((int -> 'p23) -> 'p23))
+  ANF: (int -> ((int -> 'p40) -> 'p40))
   
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/003fib.ml
-  Name: fib_acc
-  Original program: (int -> (int -> (int -> int)))
-  ANF: (int -> (int -> (int -> int)))
-  
   Name: fib
   Original program: (int -> int)
   ANF: (int -> int)
+  
+  Name: fib_acc
+  Original program: (int -> (int -> (int -> int)))
+  ANF: (int -> (int -> (int -> int)))
   
   Name: main
   Original program: int
@@ -98,19 +98,19 @@
   ANF: (int -> (int -> (int -> int)))
   
   Name: wrap
-  Original program: ('_p4b -> '_p4b)
-  ANF: ('_p5c -> '_p5c)
+  Original program: ('p4c -> 'p4c)
+  ANF: ('p5d -> 'p5d)
   
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/005fix.ml
-  Name: fix
-  Original program: ((('_p21 -> '_p22) -> ('_p21 -> '_p22)) -> ('_p21 -> '_p22))
-  ANF: ((('_p2a -> '_p2b) -> ('_p2a -> '_p2b)) -> ('_p2a -> '_p2b))
-  
   Name: fac
   Original program: ((int -> int) -> (int -> int))
   ANF: ((int -> int) -> (int -> int))
+  
+  Name: fix
+  Original program: ((('p22 -> 'p23) -> ('p22 -> 'p23)) -> ('p22 -> 'p23))
+  ANF: ((('p2b -> 'p2c) -> ('p2b -> 'p2c)) -> ('p2b -> 'p2c))
   
   Name: main
   Original program: int
@@ -159,36 +159,36 @@
   All types are correct
 
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/016lists.ml
-  Name: iter
-  Original program: (('_pe6 -> unit) -> (('_pe6 list) -> unit))
-  ANF: (('_p11f -> unit) -> (('_p11f list) -> unit))
-  
-  Name: cartesian
-  Original program: (('_pe3 list) -> (('_pe4 list) -> (('_pe3 * '_pe4) list)))
-  ANF: (('_p11c list) -> (('_p11d list) -> (('_p11c * '_p11d) list)))
-  
   Name: append
-  Original program: (('_pe2 list) -> (('_pe2 list) -> ('_pe2 list)))
-  ANF: (('_p11b list) -> (('_p11b list) -> ('_p11b list)))
-  
-  Name: concat
-  Original program: ((('_pe5 list) list) -> ('_pe5 list))
-  ANF: ((('_p11e list) list) -> ('_p11e list))
-  
-  Name: length_tail
-  Original program: (('_pe8 list) -> int)
-  ANF: (('_p121 list) -> int)
+  Original program: (('pdc list) -> (('pdc list) -> ('pdc list)))
+  ANF: (('p11c list) -> (('p11c list) -> ('p11c list)))
   
   Name: length
-  Original program: (('_pe7 list) -> int)
-  ANF: (('_p120 list) -> int)
+  Original program: (('pe1 list) -> int)
+  ANF: (('p121 list) -> int)
+  
+  Name: concat
+  Original program: ((('pdf list) list) -> ('pdf list))
+  ANF: ((('p11f list) list) -> ('p11f list))
+  
+  Name: cartesian
+  Original program: (('pdd list) -> (('pde list) -> (('pdd * 'pde) list)))
+  ANF: (('p11d list) -> (('p11e list) -> (('p11d * 'p11e) list)))
+  
+  Name: iter
+  Original program: (('pe0 -> unit) -> (('pe0 list) -> unit))
+  ANF: (('p120 -> unit) -> (('p120 list) -> unit))
   
   Name: main
   Original program: int
   ANF: int
   
+  Name: length_tail
+  Original program: (('pe2 list) -> int)
+  ANF: (('p122 list) -> int)
+  
   Name: map
-  Original program: (('_pe9 -> '_pea) -> (('_pe9 list) -> ('_pea list)))
-  ANF: (('_p126 -> '_p127) -> (('_p126 list) -> ('_p127 list)))
+  Original program: (('pe3 -> 'pe4) -> (('pe3 list) -> ('pe4 list)))
+  ANF: (('p127 -> 'p128) -> (('p127 list) -> ('p128 list)))
   
   All types are correct

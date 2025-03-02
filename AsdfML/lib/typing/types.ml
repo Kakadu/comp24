@@ -6,7 +6,7 @@
 
 open Base
 
-type var_id = int [@@deriving show { with_path = false }]
+type var_id = int [@@deriving show { with_path = false }, eq]
 
 type ground =
   | TInt
@@ -18,9 +18,9 @@ type ty =
   | TGround of ground
   | TVar of var_id
   | TArrow of ty * ty
-  | TTuple of ty list
+  | TTuple of ty * ty * ty list
   | TList of ty
-[@@deriving show { with_path = false }]
+[@@deriving show { with_path = false }, eq]
 
 type error =
   [ `Occurs_check
@@ -46,6 +46,17 @@ let rec an_ty_to_ty = function
   | Ast.TABool -> bool_typ
   | Ast.TAUnit -> unit_typ
   | Ast.TAFun (l, r) -> TArrow (an_ty_to_ty l, an_ty_to_ty r)
-  | Ast.TATuple xs -> TTuple (List.map xs an_ty_to_ty)
+  | Ast.TATuple (hd1, hd2, tl) ->
+    TTuple (an_ty_to_ty hd1, an_ty_to_ty hd2, List.map tl an_ty_to_ty)
   | Ast.TAList x -> TList (an_ty_to_ty x)
 ;;
+
+let rec count_arrow_args = function
+  | TArrow (_, r) -> 1 + count_arrow_args r
+  | _ -> 0
+;;
+
+let dummy_ty = TVar (-1)
+let arg1 = dummy_ty ^-> dummy_ty
+let arg2 = dummy_ty ^-> dummy_ty ^-> dummy_ty
+let arg3 = dummy_ty ^-> dummy_ty ^-> dummy_ty ^-> dummy_ty

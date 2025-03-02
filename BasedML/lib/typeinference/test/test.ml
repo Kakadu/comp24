@@ -10,7 +10,7 @@ let%expect_test "" =
   [%expect
     {|
     res: (TFunction ((TTuple [TInt; TBool]), TBool))
-     substs: [("_p3", bool); ("_p2", int); ("_p1", (int * bool))] |}]
+     substs: [("p3", bool); ("p2", int); ("p1", (int * bool))] |}]
 ;;
 
 let%expect_test "Test list type" =
@@ -18,7 +18,7 @@ let%expect_test "Test list type" =
   [%expect
     {|
     res: (TFunction ((TList TInt), (TList TInt)))
-     substs: [("_p2", int); ("_p3", (int list)); ("_p1", (int list))] |}]
+     substs: [("p2", int); ("p3", (int list)); ("p1", (int list))] |}]
 ;;
 
 let%expect_test "Test if then else" =
@@ -26,7 +26,7 @@ let%expect_test "Test if then else" =
   [%expect
     {|
     res: (TFunction ((TTuple [TBool; TBool]), TBool))
-     substs: [("_p2", bool); ("_p3", bool); ("_p1", bool); ("_p0", (bool * bool))] |}]
+     substs: [("p2", bool); ("p3", bool); ("p1", bool); ("p0", (bool * bool))] |}]
 ;;
 
 let%expect_test "Test match (with error)" =
@@ -44,39 +44,38 @@ let%expect_test "Test occurs check" =
   | ([]: 'a list) -> tuper_var
   | (h :: tl: 'a list) -> h|};
   [%expect {|
-    Infer error: The type variable a occurs inside (TList (TPoly "a")) |}]
+    Infer error: The type variable p4 occurs inside (TList (TPoly "p4")) |}]
 ;;
 
 let%expect_test "Test unbound val" =
   test_infer_exp {|fun f list -> match nolist with
   | [] -> list
   | h :: tl -> h|};
-  [%expect {| Infer error: Unbound value nolist |}]
+  [%expect {| Infer error: Unbound value: nolist |}]
 ;;
 
 let%expect_test "Test some combinator" =
   test_infer_exp {|(fun f x -> f)(fun f x -> f)|};
   [%expect
     {|
-    res: (TFunction ((TPoly "_p2"),
-       (TFunction ((TPoly "_p3"), (TFunction ((TPoly "_p4"), (TPoly "_p3")))))))
-     substs: [("_p0", ('_p2 -> ('_p3 -> ('_p4 -> '_p3))));
-      ("_p1", ('_p3 -> ('_p4 -> '_p3)))] |}]
+    res: (TFunction ((TPoly "p2"),
+       (TFunction ((TPoly "p3"), (TFunction ((TPoly "p4"), (TPoly "p3")))))))
+     substs: [("p0", ('p2 -> ('p3 -> ('p4 -> 'p3)))); ("p1", ('p3 -> ('p4 -> 'p3)))] |}]
 ;;
 
 let%expect_test "Test let in" =
   test_infer_exp {|let x = 1 in x|};
   [%expect {|
     res: TInt
-     substs: [("_p0", int)] |}]
+     substs: [("p0", int)] |}]
 ;;
 
 let%expect_test "Test id fun" =
   test_infer_exp {|let id = fun x -> x in id|};
   [%expect
     {|
-    res: (TFunction ((TPoly "_p2"), (TPoly "_p2")))
-     substs: [("_p1", ('_p0 -> '_p0))] |}]
+    res: (TFunction ((TPoly "p2"), (TPoly "p2")))
+     substs: [("p1", ('p0 -> 'p0))] |}]
 ;;
 
 let%expect_test "Test pseudo fiboCPS" =
@@ -89,13 +88,12 @@ let%expect_test "Test pseudo fiboCPS" =
   [%expect
     {|
     res: TInt
-     substs: [("_p11", int); ("_p13", int); ("_p14", int);
-      ("_p12", ((int -> int) -> int)); ("_p9", int); ("_pd", '_pa);
-      ("_p10", '_pa); ("_pf", int); ("_pe", ((int -> '_pa) -> '_pa));
-      ("_p8", '_pa); ("_pc", int); ("_pb", ((int -> '_pa) -> '_pa));
-      ("_p0", (int -> ((int -> '_pa) -> '_pa))); ("_p6", '_pa); ("_p7", int);
-      ("_p3", '_pa); ("_p4", int); ("_p2", (int -> '_pa)); ("_p5", int);
-      ("_p1", int)] |}]
+     substs: [("p10", int); ("p12", int); ("p13", int); ("p11", ((int -> int) -> int));
+      ("p8", int); ("pc", 'p9); ("pf", 'p9); ("pe", int);
+      ("pd", ((int -> 'p9) -> 'p9)); ("p7", 'p9); ("pb", int);
+      ("pa", ((int -> 'p9) -> 'p9)); ("p0", (int -> ((int -> 'p9) -> 'p9)));
+      ("p5", 'p9); ("p6", int); ("p3", 'p9); ("p1", int); ("p2", (int -> 'p9));
+      ("p4", int)] |}]
 ;;
 
 let%expect_test "Test simplest generalise" =
@@ -103,8 +101,7 @@ let%expect_test "Test simplest generalise" =
   [%expect
     {|
     res: (TTuple [TInt; TBool])
-     substs: [("_p4", bool); ("_p5", bool); ("_p2", int); ("_p3", int);
-      ("_p1", ('_p0 -> '_p0))] |}]
+     substs: [("p4", bool); ("p5", bool); ("p2", int); ("p3", int); ("p1", ('p0 -> 'p0))] |}]
 ;;
 
 (* Declarations *)
@@ -121,7 +118,7 @@ let%expect_test "Test simple declarations" =
 let%expect_test "Test function decl" =
   test_infer_prog_with_state empty_state {|let a = fun s -> ()|};
   [%expect {|
-    [""a"": ('_p2 -> unit),
+    [""a"": ('p2 -> unit),
      ] |}]
 ;;
 
@@ -136,7 +133,7 @@ let%expect_test "Test declaration with constraint" =
 let%expect_test "Test id declaration" =
   test_infer_prog_with_state empty_state {|let id = fun x-> x|};
   [%expect {|
-    [""id"": ('_p2 -> '_p2),
+    [""id"": ('p2 -> 'p2),
      ] |}]
 ;;
 
@@ -146,7 +143,7 @@ let%expect_test "Test declaration with generalise" =
     {|let id = fun x-> x
     let (x, y) = (id true, id 2)|};
   [%expect {|
-    [""id"": ('_p9 -> '_p9),
+    [""id"": ('p9 -> 'p9),
      ""x"": bool,
      ""y"": int,
      ] |}]
@@ -156,7 +153,7 @@ let%expect_test "Test occurs check declaration" =
   test_infer_prog_with_state empty_state {|let rec f = fun x -> f|};
   [%expect
     {|
-    Infer error: The type variable _p0 occurs inside (TFunction ((TPoly "_p1"), (TPoly "_p0"))) |}]
+    Infer error: The type variable p0 occurs inside (TFunction ((TPoly "p1"), (TPoly "p0"))) |}]
 ;;
 
 let%expect_test "Test generalise in one scope" =
@@ -165,8 +162,8 @@ let%expect_test "Test generalise in one scope" =
     {|let rec id = fun x -> x and dup = fun x y -> (id x, id y)|};
   [%expect
     {|
-    [""dup"": ('_p7 -> ('_p7 -> ('_p7 * '_p7))),
-     ""id"": ('_p8 -> '_p8),
+    [""dup"": ('p7 -> ('p7 -> ('p7 * 'p7))),
+     ""id"": ('p8 -> 'p8),
      ] |}]
 ;;
 
@@ -179,8 +176,8 @@ let%expect_test "Test generalise scope 1" =
     {|
     [""a"": (int * int),
      ""b"": (bool * bool),
-     ""x"": (('_pf * '_pf) -> ('_pf * '_pf)),
-     ""y"": (('_p10 * '_p10) -> ('_p10 * '_p10)),
+     ""x"": (('pf * 'pf) -> ('pf * 'pf)),
+     ""y"": (('p10 * 'p10) -> ('p10 * 'p10)),
      ] |}]
 ;;
 
@@ -191,7 +188,7 @@ let%expect_test "Test generalise scope 2" =
   let (a, b) = ((x 1), (y (true, false)))|};
   [%expect
     {|
-    Infer error: Can not unify `TInt` and `(TTuple [(TPoly "_p9"); (TPoly "_p9")])` |}]
+    Infer error: Can not unify `TInt` and `(TTuple [(TPoly "p9"); (TPoly "p9")])` |}]
 ;;
 
 let%expect_test "Test pseudo EvenOrOdd" =
@@ -266,18 +263,21 @@ let%expect_test "Test pseudo Fibo" =
   |};
   [%expect
     {|
-    [""( * )"": (int -> (int -> int)),
+    [""( != )"": ('p1c -> ('p1c -> bool)),
+     ""( && )"": (bool -> (bool -> bool)),
+     ""( * )"": (int -> (int -> int)),
      ""( + )"": (int -> (int -> int)),
      ""( - )"": (int -> (int -> int)),
      ""( / )"": (int -> (int -> int)),
-     ""( :: )"": ('_p1d -> (('_p1d list) -> ('_p1d list))),
-     ""( < )"": ('_p1e -> ('_p1e -> bool)),
-     ""( <= )"": ('_p1f -> ('_p1f -> bool)),
-     ""( <> )"": ('_p20 -> ('_p20 -> bool)),
-     ""( = )"": ('_p21 -> ('_p21 -> bool)),
-     ""( == )"": ('_p22 -> ('_p22 -> bool)),
-     ""( > )"": ('_p23 -> ('_p23 -> bool)),
-     ""( >= )"": ('_p24 -> ('_p24 -> bool)),
+     ""( :: )"": ('p1d -> (('p1d list) -> ('p1d list))),
+     ""( < )"": ('p1e -> ('p1e -> bool)),
+     ""( <= )"": ('p1f -> ('p1f -> bool)),
+     ""( <> )"": ('p20 -> ('p20 -> bool)),
+     ""( = )"": ('p21 -> ('p21 -> bool)),
+     ""( == )"": ('p22 -> ('p22 -> bool)),
+     ""( > )"": ('p23 -> ('p23 -> bool)),
+     ""( >= )"": ('p24 -> ('p24 -> bool)),
+     ""( || )"": (bool -> (bool -> bool)),
      ""fibo"": (int -> int),
      ""print_int"": (int -> unit),
      ] |}]
@@ -295,20 +295,23 @@ let%expect_test "Test partial application" =
   let doubleList = fun lst -> map mulTwo lst|};
   [%expect
     {|
-     [""( * )"": (int -> (int -> int)),
+     [""( != )"": ('p1a -> ('p1a -> bool)),
+      ""( && )"": (bool -> (bool -> bool)),
+      ""( * )"": (int -> (int -> int)),
       ""( + )"": (int -> (int -> int)),
       ""( - )"": (int -> (int -> int)),
       ""( / )"": (int -> (int -> int)),
-      ""( :: )"": ('_p1b -> (('_p1b list) -> ('_p1b list))),
-      ""( < )"": ('_p1c -> ('_p1c -> bool)),
-      ""( <= )"": ('_p1d -> ('_p1d -> bool)),
-      ""( <> )"": ('_p1e -> ('_p1e -> bool)),
-      ""( = )"": ('_p1f -> ('_p1f -> bool)),
-      ""( == )"": ('_p20 -> ('_p20 -> bool)),
-      ""( > )"": ('_p21 -> ('_p21 -> bool)),
-      ""( >= )"": ('_p22 -> ('_p22 -> bool)),
+      ""( :: )"": ('p1b -> (('p1b list) -> ('p1b list))),
+      ""( < )"": ('p1c -> ('p1c -> bool)),
+      ""( <= )"": ('p1d -> ('p1d -> bool)),
+      ""( <> )"": ('p1e -> ('p1e -> bool)),
+      ""( = )"": ('p1f -> ('p1f -> bool)),
+      ""( == )"": ('p20 -> ('p20 -> bool)),
+      ""( > )"": ('p21 -> ('p21 -> bool)),
+      ""( >= )"": ('p22 -> ('p22 -> bool)),
+      ""( || )"": (bool -> (bool -> bool)),
       ""doubleList"": ((int list) -> (int list)),
-      ""map"": (('_p23 -> '_p24) -> (('_p23 list) -> ('_p24 list))),
+      ""map"": (('p23 -> 'p24) -> (('p23 list) -> ('p24 list))),
       ""mulTwo"": (int -> int),
       ""print_int"": (int -> unit),
       ] |}]
@@ -319,18 +322,21 @@ let%expect_test "Test default binops" =
   let (a, b) = ((true < false), (3 < 4))|};
   [%expect
     {|
-     [""( * )"": (int -> (int -> int)),
+     [""( != )"": ('p9 -> ('p9 -> bool)),
+      ""( && )"": (bool -> (bool -> bool)),
+      ""( * )"": (int -> (int -> int)),
       ""( + )"": (int -> (int -> int)),
       ""( - )"": (int -> (int -> int)),
       ""( / )"": (int -> (int -> int)),
-      ""( :: )"": ('_p9 -> (('_p9 list) -> ('_p9 list))),
-      ""( < )"": ('_pa -> ('_pa -> bool)),
-      ""( <= )"": ('_pb -> ('_pb -> bool)),
-      ""( <> )"": ('_pc -> ('_pc -> bool)),
-      ""( = )"": ('_pd -> ('_pd -> bool)),
-      ""( == )"": ('_pe -> ('_pe -> bool)),
-      ""( > )"": ('_pf -> ('_pf -> bool)),
-      ""( >= )"": ('_p10 -> ('_p10 -> bool)),
+      ""( :: )"": ('pa -> (('pa list) -> ('pa list))),
+      ""( < )"": ('pb -> ('pb -> bool)),
+      ""( <= )"": ('pc -> ('pc -> bool)),
+      ""( <> )"": ('pd -> ('pd -> bool)),
+      ""( = )"": ('pe -> ('pe -> bool)),
+      ""( == )"": ('pf -> ('pf -> bool)),
+      ""( > )"": ('p10 -> ('p10 -> bool)),
+      ""( >= )"": ('p11 -> ('p11 -> bool)),
+      ""( || )"": (bool -> (bool -> bool)),
       ""a"": bool,
       ""b"": bool,
       ""print_int"": (int -> unit),
@@ -353,25 +359,28 @@ let%expect_test "Test avoiding already used type names" =
     let id1 = fun a -> a
     let id2 = fun a -> a
     let id3 = fun a -> a
-    let (x: '_p12) = 1
+    let (x: 'p12) = 1
     |};
   [%expect
     {|
-    [""( * )"": (int -> (int -> int)),
+    [""( != )"": ('p8 -> ('p8 -> bool)),
+     ""( && )"": (bool -> (bool -> bool)),
+     ""( * )"": (int -> (int -> int)),
      ""( + )"": (int -> (int -> int)),
      ""( - )"": (int -> (int -> int)),
      ""( / )"": (int -> (int -> int)),
-     ""( :: )"": ('_p8 -> (('_p8 list) -> ('_p8 list))),
-     ""( < )"": ('_p9 -> ('_p9 -> bool)),
-     ""( <= )"": ('_pa -> ('_pa -> bool)),
-     ""( <> )"": ('_pb -> ('_pb -> bool)),
-     ""( = )"": ('_pc -> ('_pc -> bool)),
-     ""( == )"": ('_pd -> ('_pd -> bool)),
-     ""( > )"": ('_pe -> ('_pe -> bool)),
-     ""( >= )"": ('_pf -> ('_pf -> bool)),
-     ""id1"": ('_p10 -> '_p10),
-     ""id2"": ('_p11 -> '_p11),
-     ""id3"": ('_p13 -> '_p13),
+     ""( :: )"": ('p9 -> (('p9 list) -> ('p9 list))),
+     ""( < )"": ('pa -> ('pa -> bool)),
+     ""( <= )"": ('pb -> ('pb -> bool)),
+     ""( <> )"": ('pc -> ('pc -> bool)),
+     ""( = )"": ('pd -> ('pd -> bool)),
+     ""( == )"": ('pe -> ('pe -> bool)),
+     ""( > )"": ('pf -> ('pf -> bool)),
+     ""( >= )"": ('p10 -> ('p10 -> bool)),
+     ""( || )"": (bool -> (bool -> bool)),
+     ""id1"": ('p11 -> 'p11),
+     ""id2"": ('p13 -> 'p13),
+     ""id3"": ('p14 -> 'p14),
      ""print_int"": (int -> unit),
      ""x"": int,
      ] |}]
@@ -383,19 +392,22 @@ let%expect_test "Late binding var" =
   late|};
   [%expect
     {|
-    [""( * )"": (int -> (int -> int)),
+    [""( != )"": ('p4 -> ('p4 -> bool)),
+     ""( && )"": (bool -> (bool -> bool)),
+     ""( * )"": (int -> (int -> int)),
      ""( + )"": (int -> (int -> int)),
      ""( - )"": (int -> (int -> int)),
      ""( / )"": (int -> (int -> int)),
-     ""( :: )"": ('_p4 -> (('_p4 list) -> ('_p4 list))),
-     ""( < )"": ('_p5 -> ('_p5 -> bool)),
-     ""( <= )"": ('_p6 -> ('_p6 -> bool)),
-     ""( <> )"": ('_p7 -> ('_p7 -> bool)),
-     ""( = )"": ('_p8 -> ('_p8 -> bool)),
-     ""( == )"": ('_p9 -> ('_p9 -> bool)),
-     ""( > )"": ('_pa -> ('_pa -> bool)),
-     ""( >= )"": ('_pb -> ('_pb -> bool)),
-     ""f"": ((int -> '_pc) -> '_pc),
+     ""( :: )"": ('p5 -> (('p5 list) -> ('p5 list))),
+     ""( < )"": ('p6 -> ('p6 -> bool)),
+     ""( <= )"": ('p7 -> ('p7 -> bool)),
+     ""( <> )"": ('p8 -> ('p8 -> bool)),
+     ""( = )"": ('p9 -> ('p9 -> bool)),
+     ""( == )"": ('pa -> ('pa -> bool)),
+     ""( > )"": ('pb -> ('pb -> bool)),
+     ""( >= )"": ('pc -> ('pc -> bool)),
+     ""( || )"": (bool -> (bool -> bool)),
+     ""f"": ((int -> 'pd) -> 'pd),
      ""print_int"": (int -> unit),
      ] |}]
 ;;

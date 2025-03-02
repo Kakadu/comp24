@@ -17,8 +17,13 @@ let id = (alpha | '_') (alpha | digit | '_')*
 let int = digit*  
 let bool = ("not" whitespace+)? ("true" | "false")
 
+rule comment = parse
+| "*)" { () }
+| "(*" { comment lexbuf; comment lexbuf }
+| _ { comment lexbuf }
 
-rule token = parse
+and token = parse
+  | "(*" { comment lexbuf; token lexbuf } 
   | "()" { UNIT }
   | "[]" { NIL }
   | "_" { WILDCARD }
@@ -58,7 +63,7 @@ rule token = parse
     function
     | [ "not"; b ] -> not (bool_of_string b)
     | [ b ] -> bool_of_string b
-    | x -> raise (SyntaxError ("bool: " ^ Lexing.lexeme lexbuf))) 
+    | _ -> raise (SyntaxError ("bool: " ^ Lexing.lexeme lexbuf))) 
   }
   (* | "not" { NOT } *)
   | id { IDENT (Lexing.lexeme lexbuf) }

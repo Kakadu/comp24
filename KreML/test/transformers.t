@@ -96,9 +96,10 @@
   >  (fun x -> x + 1) x, (fun x -> x + 2) x
   let f = fun x_0 -> 
             let fresh_fun_0 =  fun x_1 -> x_1 + 1  in 
-             let t_0 =  fresh_fun_0 x_0 in 
-              let fresh_fun_1 =  fun x_2 -> x_2 + 2  in 
-               let t_1 =  fresh_fun_1 x_0 in  t_0, t_1
+             let t_0 =  fresh_fun_0 in 
+              let t_1 =  t_0 x_0 in 
+               let fresh_fun_1 =  fun x_2 -> x_2 + 2  in 
+                let t_2 =  fresh_fun_1 in  let t_3 =  t_2 x_0 in  t_1, t_3
              
   $ dune exec transformers <<- EOF
   > let apply x f = f x
@@ -107,7 +108,8 @@
   >   apply b (fun x -> x / 2)
   let apply = fun x_0 -> fun f_1 -> f_1 x_0 
   let a = let b_2 =  5 in 
-           let fresh_fun_0 =  fun x_3 -> x_3 / 2  in  apply b_2 fresh_fun_0 
+           let fresh_fun_0 =  fun x_3 -> x_3 / 2  in 
+            let t_1 =  fresh_fun_0 in  apply b_2 t_1 
 
   $ dune exec transformers <<- EOF
   > let f (a, b) = a +1, b + 1
@@ -155,7 +157,9 @@
   let f = fun x_0 -> 
             let t_0 =  x_0 = 0  in 
              if t_0  then 0  else 
-                let t_1 =  x_0 = 1  in  if t_1  then -1  else  true    
+                let t_1 =  x_0 = 1  in 
+                 if t_1  then -1  else  let n_1 =  x_0 in  n_1   
+                
              
 
   $ dune exec transformers <<- EOF
@@ -231,12 +235,45 @@
                  let fresh_fun_1 =  fun foo_2 -> foo_2 * 10  in  fresh_fun_1  
                
   let foo_4 = fun x_3 -> 
-                let t_2 =  foo false x_3 in 
-                 let t_3 =  foo true t_2 in 
-                  let t_4 =  foo false t_3 in  foo true t_4
+                let t_4 =  foo false x_3 in 
+                 let t_5 =  foo true t_4 in 
+                  let t_6 =  foo false t_5 in  foo true t_6
                  
-  let main = let t_6 =  foo_4 11 in  let unused_5 =  print_int t_6 in  0 
+  let main = let t_8 =  foo_4 11 in  let unused_5 =  print_int t_8 in  0 
 
+  $ dune exec transformers <<- EOF
+  > let sum_list l =
+  >   let rec helper acc l =
+  >   match l with
+  >   | x::xs -> helper (acc + x) xs
+  >   | [] -> acc in
+  >   helper 0 l
+  > let main =
+  >   let () = print_int (sum_list [1;2;3;4;5]) in
+  >   0
+  let sum_list = fun l_0 -> 
+                   let rec helper_1 = 
+                    fun acc_2 -> 
+                      fun l_3 -> 
+                        let t_1 =  l_3 <> []  in 
+                         if t_1 
+                            then let x_4 =   getfield 0 l_3  in 
+                                  let xs_5 =   getfield 1 l_3  in 
+                                   let t_2 =  acc_2 + x_4  in 
+                                    helper_1 t_2 xs_5 
+                            else 
+                            let t_6 =  l_3 = []  in 
+                             if t_6  then acc_2  else  partial_match l_3   
+                            
+                         in 
+                    helper_1 0 l_0 
+  let main = let t_8 =   5 :: []  in 
+              let t_9 =   4 :: t_8  in 
+               let t_10 =   3 :: t_9  in 
+                let t_11 =   2 :: t_10  in 
+                 let t_12 =   1 :: t_11  in 
+                  let t_13 =  sum_list t_12 in 
+                   let unused_6 =  print_int t_13 in  0 
 
 $ dune exec transformers < manytests/typed/001fac.ml
 $ dune exec transformers < manytests/typed/002fac.ml
@@ -250,3 +287,4 @@ $ dune exec transformers < manytests/typed/008ascription.ml
 $ dune exec transformers < manytests/typed/009let_poly.ml
 $ dune exec transformers < manytests/typed/015tuples.ml
 $ dune exec transformers < manytests/typed/016lists.ml
+

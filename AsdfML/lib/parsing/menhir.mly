@@ -53,18 +53,25 @@
 
 %%
 
+take_2_or_more(item):
+| hd = item tl = nonempty_list(item)   { hd :: tl }
+
+take_2_or_more_sep(item, sep):
+| hd = item sep tl = separated_nonempty_list(sep, item)   { hd :: tl }
+
+
 program : p = list(definition) EOF { p }
 
 definition: 
 | LETREC pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(Rec, pat, e)
-    | xs -> DLet(Rec, pat, EFun(xs, e))
+    | x :: xs -> DLet(Rec, pat, EFun(x, xs, e))
   }
 | LET pat = pattern args = list(pattern) EQ e = expr option(SS) { 
     match args with 
     | [] -> DLet(NonRec, pat, e)
-    | xs -> DLet(NonRec, pat, EFun(xs, e))
+    | x :: xs -> DLet(NonRec, pat, EFun(x, xs, e))
   }
 
 expr: 
@@ -73,23 +80,62 @@ expr:
 | e = expr_binary { e }
 | e = expr_unary { e }
 | app = application { app }
-| IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
-| FUN pat = nonempty_list(pattern) ARROW body = expr { EFun(pat, body) }
-| def = definition IN body = expr { ELetIn(def, body) }
+| ifelse = ifelse { ifelse }
+| lambda = lambda { lambda }
+| let_in = let_in { let_in }
 | t = tuple { t }
 | l = list_ { l }
 | m = match_ { m }
 | LPAREN e = expr RPAREN { e }
 
+ifelse:
+| IF cond = expr THEN tbranch = expr ELSE fbranch = expr { EIfElse(cond, tbranch, fbranch) }
+| LPAREN ifelse = ifelse RPAREN { ifelse }
+
+lambda:
+| FUN pat = nonempty_list(pattern) ARROW body = expr { 
+    match pat with 
+    | p :: ps -> EFun(p, ps, body) 
+    | _ -> failwith "Empty nonempty_list"
+}
+| LPAREN lambda = lambda RPAREN { lambda }
+
+let_in:
+| def = definition IN body = expr { ELetIn(def, body) }
+| LPAREN let_in = let_in RPAREN { let_in }
+
+application :
+| l = application r = app_expr { EApp(l, r) }
+| LPAREN a = let_in RPAREN { a }
+| LPAREN a = lambda RPAREN { a }
+| LPAREN a = ifelse RPAREN { a }
+| LPAREN a = match_ RPAREN { a }
+| a = app_expr { a }
+| op = op_binary { EVar(op) }
+
+app_expr: 
+| LPAREN e = expr RPAREN { e }
+| c = constant { EConst(c) }
+| t = tuple { t }
+| l = list_ { l }
+| v = identifier { EVar(v) }
+
 tuple:
-| LPAREN es = separated_nonempty_list(COMMA, expr) RPAREN { ETuple(es) }
+| LPAREN es = take_2_or_more_sep(expr, COMMA) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> ETuple(hd1, hd2, tl) 
+    | _ -> failwith "tuple with less than 2 elements"
+}
 
 list_:
 | LBRACK es = separated_nonempty_list(SEMI, expr) RBRACK { EList(es) }
 
 type_ann:
-| hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
-| LPAREN es = separated_nonempty_list(MUL, type_ann) RPAREN { TATuple(es) }
+| LPAREN es = take_2_or_more_sep(type_ann, MUL) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> TATuple(hd1, hd2, tl) 
+    | _ -> failwith "tuple type annotation with less than 2 elements"
+}
 | ann = type_ann id = identifier { 
     if String.equal id "list" 
     then TAList ann
@@ -99,37 +145,35 @@ type_ann:
     match id with 
     | "int" -> TAInt
     | "bool" -> TABool
-    | "()" -> TAUnit
     | _ -> failwith "unknown type annotation"
   }
+| UNIT { TAUnit }
+| hd = type_ann ARROW tl = type_ann { TAFun(hd, tl) }
+| LPAREN hd = type_ann ARROW tl = type_ann RPAREN { TAFun(hd, tl) }
 
 pattern: 
-| c = constant { PConst(c) }
+| c = constant { 
+    match c with 
+    | CInt _ | CBool _ | CUnit -> PConst(c)
+    | CNil -> PConst(CNil)
+  }
 | WILDCARD { PWild }
 | id = identifier { PIdent(id) }
 | LPAREN op = op_binary RPAREN { PIdent(op) }
 | LPAREN pat = pattern COLON ty = type_ann RPAREN { PAnn(pat, ty) }
-| LPAREN es = separated_nonempty_list(COMMA, pattern) RPAREN { PTuple(es) }
+| LPAREN es = take_2_or_more_sep(pattern, COMMA) RPAREN { 
+    match es with 
+    | hd1 :: hd2 :: tl -> PTuple(hd1,hd2,tl) 
+    | _ -> failwith "tuple pattern with less than 2 elements"
+}
 | LBRACK es = separated_nonempty_list(SEMI, pattern) RBRACK { PList(es) }
 | l = pattern CONS r = pattern { PCons(l, r) }
+| LPAREN p = pattern RPAREN { p }
 
 match_:
 | MATCH e = expr WITH option(BAR) cs = separated_nonempty_list(BAR, case) { EMatch(e, cs) }
 case:
 | p = pattern ARROW e = expr { (p, e) }
-
-application :
-| l = application r = app_expr { EApp(l, r) }
-| a = app_expr { a }
-| op = op_binary { EVar(op) }  // todo: cons
-
-app_expr: 
-| LPAREN e = expr RPAREN { e }
-| c = constant { EConst(c) }
-| t = tuple { t }
-| l = list_ { l }
-| v = identifier { EVar(v) }
-// | op = op_binary { EVar(op) }  // todo: cons
 
 expr_binary: 
 | left = expr op = op_binary right = expr { EApp(EApp(EVar(op), left), right) }
@@ -164,6 +208,7 @@ expr_unary:
 
 constant: 
 | i = INT { CInt i }
+| MINUS i = INT { CInt (-i) }
 | b = BOOL { CBool b }
 | UNIT { CUnit }
 | NIL { CNil }

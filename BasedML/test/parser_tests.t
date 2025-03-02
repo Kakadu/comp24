@@ -186,7 +186,7 @@
       (DLet ((PIdentifier "map"),
          (EFunction ((PIdentifier "f"),
             (EFunction ((PIdentifier "list"),
-               (EMatch ((PIdentifier "list"),
+               (EMatch ((EIdentifier "list"),
                   [((PConstant CNil), (EIdentifier "list"));
                     ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
                      (EApplication (
@@ -215,7 +215,7 @@
       (DLet ((PIdentifier "facCPS"),
          (EFunction ((PIdentifier "n"),
             (EFunction ((PIdentifier "k"),
-               (EMatch ((PIdentifier "n"),
+               (EMatch ((EIdentifier "n"),
                   [((PConstant (CInt 0)),
                     (EApplication ((EIdentifier "k"), (EConstant (CInt 1)))));
                     ((PIdentifier "n"),
@@ -254,7 +254,7 @@
   [(DMutualRecDecl (Rec,
       [(DLet ((PIdentifier "even"),
           (EFunction ((PIdentifier "n"),
-             (EMatch ((PIdentifier "n"),
+             (EMatch ((EIdentifier "n"),
                 [((PConstant (CInt 0)), (EConstant (CBool true)));
                   ((PIdentifier "x"),
                    (EApplication ((EIdentifier "odd"),
@@ -269,7 +269,7 @@
           ));
         (DLet ((PIdentifier "odd"),
            (EFunction ((PIdentifier "n"),
-              (EMatch ((PIdentifier "n"),
+              (EMatch ((EIdentifier "n"),
                  [((PConstant (CInt 0)), (EConstant (CBool false)));
                    ((PIdentifier "x"),
                     (EApplication ((EIdentifier "even"),
@@ -370,7 +370,7 @@
             (ELetIn (Rec, (PIdentifier "fiboCPS"),
                (EFunction ((PIdentifier "n"),
                   (EFunction ((PIdentifier "acc"),
-                     (EMatch ((PIdentifier "n"),
+                     (EMatch ((EIdentifier "n"),
                         [((PConstant (CInt 0)),
                           (EApplication ((EIdentifier "acc"),
                              (EConstant (CInt 0)))));

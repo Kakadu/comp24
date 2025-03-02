@@ -18,8 +18,7 @@ let parse_program ?(print_ast = false) (code : string)
   let lexbuf = Lexing.from_string code in
   try
     let ast = Menhir.program Lexer.token lexbuf in
-    if print_ast
-    then List.iter ast ~f:(fun d -> Pp_ast.pp_definition Format.std_formatter d);
+    if print_ast then Format.printf "%a" Pp_ast.pp_program ast;
     Ok ast
   with
   | SyntaxError msg ->

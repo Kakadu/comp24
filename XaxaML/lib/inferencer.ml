@@ -24,86 +24,7 @@ let pp_error ppf : error -> unit = function
   | Impossible_state -> Format.printf {|Inferencer run into impossible state|}
 ;;
 
-module R : sig
-  type 'a t
-
-  val return : 'a -> 'a t
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-  val fail : error -> 'a t
-
-  include Base.Monad.Infix with type 'a t := 'a t
-
-  module Syntax : sig
-    val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-  end
-
-  module RList : sig
-    val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
-    val fold_right : 'a list -> init:'b t -> f:('a -> 'b -> 'b t) -> 'b t
-  end
-
-  module RMap : sig
-    val fold : ('a, 'b, 'c) Base.Map.t -> init:'d t -> f:('d -> 'a -> 'b -> 'd t) -> 'd t
-  end
-
-  val fresh : int t
-  val run : 'a t -> ('a, error) Base.Result.t
-end = struct
-  open Base
-
-  type 'a t = int -> int * ('a, error) Result.t
-
-  let return x : 'a t = fun var -> var, Result.return x
-  let fail e : 'a t = fun var -> var, Result.fail e
-  let fresh : 'a t = fun var -> var + 1, Result.return var
-
-  let ( >>= ) (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun var ->
-    match m var with
-    | var, Result.Error err -> var, Result.fail err
-    | var, Result.Ok x -> f x var
-  ;;
-
-  let bind = ( >>= )
-
-  let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
-    fun var ->
-    match m var with
-    | var, Result.Error err -> var, Result.fail err
-    | var, Result.Ok x -> var, Result.return (f x)
-  ;;
-
-  module Syntax = struct
-    let ( let* ) = bind
-  end
-
-  module RMap = struct
-    let fold mp ~init ~f =
-      let open Syntax in
-      Map.fold mp ~init ~f:(fun ~key:k ~data:v acc ->
-        let* acc = acc in
-        f acc k v)
-    ;;
-  end
-
-  module RList = struct
-    let fold_left xs ~init ~f =
-      let open Syntax in
-      List.fold_left xs ~init ~f:(fun acc x ->
-        let* acc = acc in
-        f acc x)
-    ;;
-
-    let fold_right xs ~init ~f =
-      let open Syntax in
-      List.fold_right xs ~init ~f:(fun x acc ->
-        let* acc = acc in
-        f x acc)
-    ;;
-  end
-
-  let run m = snd (m 4)
-end
+open Common
 
 module Type = struct
   let rec occurs_in v = function
@@ -131,16 +52,15 @@ module Subst : sig
   type t
 
   val empty : t
-  val singleton : int -> typ -> t R.t
+  val singleton : int -> typ -> (t, error) MonadCounterError.t
   val remove : t -> int -> t
   val apply : t -> typ -> typ
-  val unify : typ -> typ -> t R.t
+  val unify : typ -> typ -> (t, error) MonadCounterError.t
   val pp_subst : Format.formatter -> t -> unit
-  val compose : t -> t -> t R.t
-  val compose_all : t list -> t R.t
+  val compose : t -> t -> (t, error) MonadCounterError.t
+  val compose_all : t list -> (t, error) MonadCounterError.t
 end = struct
-  open R
-  open R.Syntax
+  open MonadCounterError
   open Base
 
   type t = (int, typ, Int.comparator_witness) Map.t
@@ -164,7 +84,7 @@ end = struct
          | Some x -> x)
       | T_arr (l, r) -> T_arr (helper l, helper r)
       | T_tuple (h, list) -> T_tuple (helper h, List.map list ~f:helper)
-      | T_list t -> T_list (helper t)
+      | T_list t -> list_typ @@ helper t
       | other -> other
     in
     helper
@@ -323,6 +243,36 @@ end = struct
         "!="
         (Scheme (single_bind 3, type_var 3 @-> type_var 3 @-> bool_typ))
     in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_hd"
+        (Scheme (single_bind 4, list_typ (type_var 4) @-> type_var 4))
+    in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_tl"
+        (Scheme (single_bind 5, list_typ (type_var 5) @-> list_typ (type_var 5)))
+    in
+    let init_env =
+      add_to_std
+        init_env
+        "#list_length"
+        (Scheme (single_bind 6, list_typ (type_var 6) @-> int_typ))
+    in
+    let init_env =
+      (* Unfortunately, we cannot create more specific type for this function,
+         because its actual type will depend on the number of elements in the tuple *)
+      let type_var_set = TypeVarSet.add 8 (single_bind 7) in
+      add_to_std
+        init_env
+        "#unpack_tuple"
+        (Scheme (type_var_set, type_var 7 @-> int_typ @-> type_var 8))
+    in
+    let init_env =
+      add_to_std init_env "#match_failure" (Scheme (single_bind 9, type_var 9))
+    in
     init_env
   ;;
 
@@ -359,8 +309,7 @@ end = struct
   ;;
 end
 
-open R
-open R.Syntax
+open MonadCounterError
 
 let fresh_var = fresh >>| fun n -> T_var n
 
@@ -405,7 +354,7 @@ let convert_raw_typ raw_typ =
       return (names, T_arr (l_typ, r_typ))
     | Ast.RT_list t ->
       let* names, typ = helper names t in
-      return (names, T_list typ)
+      return (names, list_typ typ)
     | Ast.RT_tuple (h, tl) ->
       let rev_t = List.rev (h :: tl) in
       let last, other = List.hd rev_t, List.tl rev_t in
@@ -426,7 +375,7 @@ let infer_const = function
   | Ast.C_bool _ -> return bool_typ
   | Ast.C_empty_list ->
     let* fresh = fresh_var in
-    return (T_list fresh)
+    return (list_typ fresh)
   | Ast.C_unit -> return unit_typ
 ;;
 
@@ -439,13 +388,16 @@ let rec infer_pattern env = function
     let* final_sub = Subst.compose sub sub_uni in
     return (final_sub, new_typ, env)
   | Ast.P_val name ->
-    let* fresh = fresh_var in
-    (match TypeEnv.find env name with
-     | Some _ -> fail (Multiple_bound name)
-     | None ->
-       let sheme = Scheme (TypeVarSet.empty, fresh) in
-       let env = TypeEnv.update env name sheme in
-       return (Subst.empty, fresh, env))
+    if Base.String.equal name "()"
+    then infer_pattern env (P_const C_unit)
+    else
+      let* fresh = fresh_var in
+      (match TypeEnv.find env name with
+       | Some _ -> fail (Multiple_bound name)
+       | None ->
+         let sheme = Scheme (TypeVarSet.empty, fresh) in
+         let env = TypeEnv.update env name sheme in
+         return (Subst.empty, fresh, env))
   | Ast.P_any ->
     let* fresh = fresh_var in
     return (Subst.empty, fresh, env)
@@ -456,9 +408,9 @@ let rec infer_pattern env = function
     let* sub1, typ1, env1 = infer_pattern env l1 in
     let* sub2, typ2, env2 = infer_pattern (TypeEnv.apply sub1 env1) r1 in
     let* fresh = fresh_var in
-    let* sub_uni = Subst.unify typ2 (T_list fresh) in
+    let* sub_uni = Subst.unify typ2 (list_typ fresh) in
     let typ2 = Subst.apply sub_uni typ2 in
-    let* sub3 = Subst.unify (T_list typ1) typ2 in
+    let* sub3 = Subst.unify (list_typ typ1) typ2 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3; sub_uni ] in
     return (final_sub, Subst.apply sub3 typ2, env2)
   | Ast.P_tuple (h, list) ->
@@ -477,8 +429,11 @@ let rec generalize_vars_in_pattern typ env = function
   | Ast.P_typed (pat, _) -> generalize_vars_in_pattern typ env pat
   | Ast.P_any | Ast.P_const _ -> return env
   | Ast.P_val name ->
-    let gen_scheme = generalize env typ in
-    return @@ TypeEnv.update env name gen_scheme
+    if Base.String.equal name "()"
+    then generalize_vars_in_pattern typ env (P_const C_unit)
+    else (
+      let gen_scheme = generalize env typ in
+      return @@ TypeEnv.update env name gen_scheme)
   | P_tuple (l, r) ->
     (match typ with
      | T_tuple (typ_l, typ_list) ->
@@ -573,8 +528,10 @@ let rec infer_expr env expr =
     return (final_sub, typ2)
   | E_ite (e1, e2, e3) ->
     let* sub1, typ1 = infer_expr env e1 in
-    let* sub2, typ2 = infer_expr (TypeEnv.apply sub1 env) e2 in
-    let* sub3, typ3 = infer_expr (TypeEnv.apply sub2 env) e3 in
+    let env = TypeEnv.apply sub1 env in
+    let* sub2, typ2 = infer_expr env e2 in
+    let env = TypeEnv.apply sub2 env in
+    let* sub3, typ3 = infer_expr env e3 in
     let* sub_cond = Subst.unify typ1 bool_typ in
     let* sub_branches = Subst.unify typ2 typ3 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3; sub_cond; sub_branches ] in
@@ -597,7 +554,7 @@ let rec infer_expr env expr =
   | E_cons_list (e1, e2) ->
     let* sub1, typ1 = infer_expr env e1 in
     let* sub2, typ2 = infer_expr (TypeEnv.apply sub1 env) e2 in
-    let* sub3 = Subst.unify (T_list typ1) typ2 in
+    let* sub3 = Subst.unify (list_typ typ1) typ2 in
     let* final_sub = Subst.compose_all [ sub1; sub2; sub3 ] in
     return (final_sub, Subst.apply sub3 typ2)
   | E_match (e, list) ->
@@ -757,5 +714,14 @@ let infer_program prog =
   helper TypeEnv.std prog
 ;;
 
-let run_infer_expr e = Result.map (fun (_, ty) -> ty) (run (infer_expr TypeEnv.std e))
-let run_infer_program p = run (infer_program p)
+let run_infer_expr e =
+  Result.map
+    snd
+    (match run (infer_expr TypeEnv.std e) NamesHolder.empty Std_names.type_var_count with
+     | _, _, r -> r)
+;;
+
+let run_infer_program p =
+  match run (infer_program p) NamesHolder.empty Std_names.type_var_count with
+  | _, _, r -> r
+;;

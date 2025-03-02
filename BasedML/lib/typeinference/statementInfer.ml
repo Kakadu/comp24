@@ -36,7 +36,7 @@ let write_uts : used_types_set -> (state, unit) t =
 let fresh_tv : (state, Ast.type_name) t =
   let* env, substs, tv, uts = read in
   let rec gen_new_type_name tv =
-    let s = Format.sprintf "_p%x" tv in
+    let s = Format.sprintf "p%x" tv in
     match SetString.find_opt s uts with
     | Some _ -> gen_new_type_name (tv + 1)
     | None -> s, tv + 1, SetString.add s uts
