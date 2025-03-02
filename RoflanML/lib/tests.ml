@@ -15,9 +15,17 @@ module ParserTests = struct
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
+  let pp_decl_list ppf decls =
+    Stdlib.Format.pp_print_list
+      ~pp_sep:(fun ppf () -> Stdlib.Format.fprintf ppf "\n")
+      pp_decl
+      ppf
+      decls
+  ;;
+
   let parse_and_pp_decl input =
     match parse_decl input with
-    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl res
+    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl_list res
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -54,7 +62,7 @@ module ParserTests = struct
            (EBranch ((EApp ((EApp ((EVar ">="), (EVar "h1"))), (EVar "h2"))),
               (EVar "h1"), (EVar "h2"))));
            ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
-           (PWild, (EConst (CInt 0)))]
+           ((PVar "_"), (EConst (CInt 0)))]
          ))
       |}]
   ;;
@@ -802,6 +810,91 @@ module ANFTests = struct
       let ANF_0 = LL_0 1 in
       let ANF_1 = LL_1 2 in
       let ANF_2 = [ ANF_0; ANF_1 ] in ANF_2
+      |}]
+  ;;
+end
+
+module UnparseTests = struct
+  open Unparse
+
+  let%expect_test "print constant" =
+    let printed =
+      Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EConst (CInt 42))
+    in
+    Stdlib.Format.printf "%s\n" printed;
+    [%expect {| 42 |}]
+  ;;
+
+  let%expect_test "print variable" =
+    let printed = Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EVar "x") in
+    Stdlib.Format.printf "%s\n" printed;
+    [%expect {| x |}]
+  ;;
+
+  let%expect_test "print let-expression" =
+    (* let x = 1 in x *)
+    let printed =
+      Stdlib.Format.asprintf
+        "%a"
+        (unparse_expr ~top_level:true)
+        (ELetIn (NonRec, "x", EConst (CInt 1), EVar "x"))
+    in
+    Stdlib.Format.printf "%s\n" printed;
+    [%expect {| let x = 1 in x |}]
+  ;;
+
+  let%expect_test "print function with if-then-else" =
+    let arg = "x", Some TInt in
+    let body = EBranch (EVar "x", EConst (CInt 1), EConst (CInt 0)) in
+    let printed =
+      Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EFun (arg, body))
+    in
+    Stdlib.Format.printf "%s\n" printed;
+    [%expect {| fun (x : int) -> if x then 1 else 0 |}]
+  ;;
+end
+
+module QCheckTests = struct
+  open Unparse
+  open Check
+
+  let arbitrary_decl =
+    QCheck.make
+      (QCheck.Gen.sized (fun n ->
+         QCheck.Gen.map
+           (fun e -> [ DLet (NonRec, "x", e) ])
+           (Generator.gen_expr (min n 3))))
+      ~print:unparse_program
+      ~shrink:Shrinker.shrink_program
+  ;;
+
+  let parser_qtests =
+    [ QCheck.Test.make ~count:100 arbitrary_decl (fun ast ->
+        let src = unparse_program ast in
+        match Parser.parse src with
+        | Result.Ok ast' when Stdlib.( = ) ast' ast -> true
+        | Result.Ok ast' ->
+          Stdlib.Format.printf
+            "\n\n[!]: Different AST!\nSource: %S\nParsed: %s\nOriginal: %s\n"
+            src
+            (Ast.show_program ast')
+            (Ast.show_program ast);
+          false
+        | Result.Error err ->
+          Stdlib.Format.printf "\n\n[!]: Parser error: %s\nOn source:\n%S\n" err src;
+          false)
+    ]
+  ;;
+
+  let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no shrinker)" =
+    QCheck_runner.set_seed 42;
+    let _ = QCheck_runner.run_tests ~colors:false parser_qtests in
+    ();
+    [%expect
+      {|
+      random seed: 42
+      ================================================================================
+      success (ran 1 tests)
       |}]
   ;;
 end

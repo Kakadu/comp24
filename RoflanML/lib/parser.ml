@@ -79,11 +79,8 @@ let pid =
   else return s <?> "identifier"
 ;;
 
-(* Для имён связываний разрешаем альтернативу: оператор, "()", либо идентификатор *)
+
 let pbind_id = poperator <|> pstoken "()" <|> pid
-
-(* --- Парсер констант --- *)
-
 let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
 
 let pbool =
@@ -126,8 +123,6 @@ let ptyped_var =
   <|> (pid >>= fun id -> return (id, None))
 ;;
 
-(* --- Парсер связываний let --- *)
-
 let parse_binding pexpr =
   let rec pbody pexpr =
     ptyped_var
@@ -142,11 +137,10 @@ let parse_bindings pexpr =
     (fun first rest -> first :: rest)
     (parse_binding pexpr)
     (many (pstoken "and" *> parse_binding pexpr))
+
 ;;
 
-(* --- Верхнеуровневые let‑объявления --- *)
-
-let plet_decl pexpr =
+let plet_decl_single pexpr =
   pstoken "let"
   *> lift2
        (fun r bindings ->
@@ -157,7 +151,7 @@ let plet_decl pexpr =
        (parse_bindings pexpr)
 ;;
 
-(* --- Локальный let с in (поддерживает только одно связывание) --- *)
+let plet_decl pexpr = many1 (plet_decl_single pexpr)
 
 let plet_in pexpr =
   pstoken "let"
@@ -169,8 +163,6 @@ let plet_in pexpr =
        (parse_binding pexpr)
        (pstoken "in" *> pexpr)
 ;;
-
-(* --- Остальные парсеры выражений --- *)
 
 let pbranch pexpr =
   ptoken
@@ -186,7 +178,7 @@ let plist pexpr =
   psqparens (sep_by (pstoken ";") pexpr) >>| fun x -> EList x
 ;;
 
-let ppconst = choice [ pint; pbool ] >>| fun x -> PConst x
+let ppconst = choice [ pint; pbool; punit ] >>| fun x -> PConst x
 let ppvar = pid >>| fun x -> PVar x
 
 let ppattern =
@@ -200,7 +192,7 @@ let ppattern =
              | p1 :: p2 :: ps -> return (PTuple (p1, p2, ps))
              | [] -> fail "Unexpected empty list in tuple pattern")
         ; ppconst
-        ; (pstoken "_" >>| fun _ -> PWild)
+        ; (pstoken "_" >>| fun _ -> PVar "_")
         ; (pstoken "[]" >>| fun _ -> PEmpty)
         ; ppvar
         ]
@@ -281,6 +273,7 @@ let pexpr_fun () =
       op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
     let pe_cons = prbinop pe_bin pcons in
+
     let pe_tuple =
       lift2
         (fun e1 rest ->
@@ -289,6 +282,7 @@ let pexpr_fun () =
           | hd :: tl -> ETuple (e1, hd, tl))
         pe_cons
         (many (pstoken "," *> pe_cons))
+
     in
     choice [ plet_in pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe_tuple ])
 ;;
@@ -296,4 +290,7 @@ let pexpr_fun () =
 let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)
+
+let parse =
+  parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces >>| List.concat)
+;;

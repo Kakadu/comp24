@@ -5,5 +5,5 @@
 open Ast
 
 val parse_expr : id -> (expr, id) result
-val parse_decl : id -> (decl, id) result
+val parse_decl : id -> (decl list, id) result
 val parse : id -> (decl list, id) result
