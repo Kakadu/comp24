@@ -31,6 +31,6 @@ type ll_fun =
 
 type ll_structure_item =
   | LLGlobalV of ll_global_var
-  | LLDecl of ll_fun
+  | LLDecl of ll_fun * ll_fun list (** if mutual rec *)
 
 type ll_program = ll_structure_item list
