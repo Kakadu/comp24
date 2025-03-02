@@ -38,6 +38,8 @@ let parse_pattern (s : string) : pattern =
 let unbound_identifiers exp = 
   Set.to_list (HamsterML__Closure_conversion.unbound_variables (parse_expr exp))
 
+let cc_expr expr = parse_expr expr |> HamsterML__Closure_conversion.cc
+
 (* let typecheck (s : string) =
   let std = Format.std_formatter in
   let x = List.hd (parse s) in

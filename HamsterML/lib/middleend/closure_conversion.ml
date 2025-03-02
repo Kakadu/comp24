@@ -101,3 +101,19 @@ let rec free_vars_expr (exp : expr) =
 ;;
 
 let unbound_variables (exp : expr) = free_vars_expr exp
+
+let cc = function
+  | Fun (args, expr) ->
+    let unbound = unbound_variables expr in
+    let new_expr =
+      Let
+        ( Nonrecursive
+        , [ ( Var "anon"
+            , List.append args (Set.to_list unbound |> List.map ~f:(fun x -> Var x))
+            , expr )
+          ]
+        , None )
+    in
+    new_expr
+  | _ -> failwith "not yet implemented"
+;;
