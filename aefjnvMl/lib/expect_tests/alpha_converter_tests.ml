@@ -22,9 +22,14 @@ let b = 1;;
 let c = a + b;;
   |} in
   [%expect {|
-    let a = 1;;
-    let b = 1;;
-    let c = (( + ) a) b;; |}]
+    let a = 1
+    ;;
+
+    let b = 1
+    ;;
+
+    let c = (( + ) a) b
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -37,10 +42,15 @@ let c =
 ;;
   |} in
   [%expect {|
-    let a = 1;;
-    let b = a;;
+    let a = 1
+    ;;
+
+    let b = a
+    ;;
+
     let c = let ac0_a = b in
-        ac0_a;; |}]
+        ac0_a
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -51,9 +61,14 @@ let main = 1
 ;;
   |} in
   [%expect {|
-    let ac_rt_a = 1;;
-    let ac_ll_b = ac_rt_a;;
-    let ac0_main = 1;; |}]
+    let ac_rt_a = 1
+    ;;
+
+    let ac_ll_b = ac_rt_a
+    ;;
+
+    let ac0_main = 1
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -63,7 +78,8 @@ let rec (+) b c = c + b
   |} in
   [%expect {|
     let rec op_plus b c =
-      (op_plus c) b;; |}]
+      (op_plus c) b
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -75,9 +91,12 @@ let (+) b c = c + b
   [%expect
     {|
     let op_plus b c =
-      (( + ) c) b;;
+      (( + ) c) b
+    ;;
+
     let ac2_op_plus ac0_b ac1_c =
-      (op_plus ac1_c) ac0_b;; |}]
+      (op_plus ac1_c) ac0_b
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -107,7 +126,8 @@ and odd n =
         | 0 ->
           false
         | ac1_x ->
-          even ((( - ) ac1_x) 1);; |}]
+          even ((( - ) ac1_x) 1)
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -116,8 +136,11 @@ let a = 10;;
 let a, b = 1, 2;;
   |} in
   [%expect {|
-    let a = 10;;
-    let (ac0_a, b) = (1, 2);; |}]
+    let a = 10
+    ;;
+
+    let (ac0_a, b) = (1, 2)
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -174,14 +197,18 @@ let main =
       | [] ->
         0
       | (h :: tl) ->
-        (( + ) 1) (length tl);;
+        (( + ) 1) (length tl)
+  ;;
+
   let length_tail = let rec helper ac_acc ac0_xs =
       match ac0_xs with
         | [] ->
           ac_acc
         | (ac1_h :: ac2_tl) ->
           (helper ((( + ) ac_acc) 1)) ac2_tl in
-      helper 0;;
+      helper 0
+  ;;
+
   let rec map f ac3_xs =
     match ac3_xs with
       | [] ->
@@ -193,34 +220,45 @@ let main =
       | (ac5_a :: (ac6_b :: (c :: []))) ->
         (f ac5_a :: (f ac6_b :: (f c :: [])))
       | (ac7_a :: (ac8_b :: (ac9_c :: (d :: ac10_tl)))) ->
-        (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))));;
+        (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))))
+  ;;
+
   let rec append ac11_xs ys =
     match ac11_xs with
       | [] ->
         ys
       | (x :: ac12_xs) ->
-        (x :: (append ac12_xs) ys);;
+        (x :: (append ac12_xs) ys)
+  ;;
+
   let concat = let rec ac13_helper ac14_xs =
       match ac14_xs with
         | [] ->
           []
         | (ac15_h :: ac16_tl) ->
           (append ac15_h) (ac13_helper ac16_tl) in
-      ac13_helper;;
+      ac13_helper
+  ;;
+
   let rec iter ac17_f ac18_xs =
     match ac18_xs with
       | [] ->
         ()
       | (ac19_h :: ac20_tl) ->
         let () = ac17_f ac19_h in
-          (iter ac17_f) ac20_tl;;
+          (iter ac17_f) ac20_tl
+  ;;
+
   let rec cartesian ac21_xs ac22_ys =
     match ac21_xs with
       | [] ->
         []
       | (ac23_h :: ac24_tl) ->
-        (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys);;
+        (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys)
+  ;;
+
   let ac26_main = let () = (iter print_int) (1 :: (2 :: (3 :: []))) in
       let () = print_int (length ((cartesian (1 :: (2 :: []))) (1 :: (2 :: (3 :: (4 :: [])))))) in
-        0;; |}]
+        0
+  ;; |}]
 ;;

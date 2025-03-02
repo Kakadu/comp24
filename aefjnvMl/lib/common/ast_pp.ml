@@ -154,7 +154,7 @@ let structure_item_pp fmt item =
      | Decl (rf, vbs) ->
        fprintf
          fmt
-         "let%a%a;;"
+         "let%a%a\n;;\n"
          rec_flag_pp
          rf
          (pp_print_list ~pp_sep:(fun fmt () -> fprintf fmt "@\nand ") (value_binding_pp 2)) vbs)

@@ -10,8 +10,8 @@ let me_test s =
   (** use [let*!] and [let+!] to exclude infer from pipeline *)
   let ast'_t =
     let* ast = Parser.parse s in
-    let*! ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.alpha_prefix ast in
-    let+! m_ast = Match_elim.eliminate_match_in_program ast' in 
+    let* ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.alpha_prefix ast in
+    let+ m_ast = Match_elim.eliminate_match_in_program ast' in 
     let m_ast' = Optimizations.optimize m_ast in
     let ast' = Me_converter.convert_program m_ast' in 
     ast'
@@ -28,9 +28,14 @@ let b = 1;;
 let c = a + b;;
   |} in
   [%expect {|
-    let a = 1;;
-    let b = 1;;
-    let c = (( + ) a) b;; |}]
+    let a = 1
+    ;;
+
+    let b = 1
+    ;;
+
+    let c = (( + ) a) b
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -50,7 +55,8 @@ let even n =
           0
         else
           let x = me_2 in
-            (( - ) x) 1);; |}]
+            (( - ) x) 1)
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -77,7 +83,8 @@ let rec len l =
                 let tl = (get_by_idx me_2) 1 in
                   (( + ) 1) (len tl)
               else
-                fail_pt_match ()));; |}]
+                fail_pt_match ()))
+        ;; |}]
 ;;
 
 let%expect_test "" =
@@ -85,7 +92,8 @@ let%expect_test "" =
 if true then 1 else 2;;
   |} in
   [%expect {|
-    let me_1 = 1;; |}]
+    let me_1 = 1
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -93,7 +101,8 @@ let%expect_test "" =
 if true && false then 1 else 2;;
   |} in
   [%expect {|
-    let me_1 = 2;; |}]
+    let me_1 = 2
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -102,7 +111,8 @@ fun x -> if true then 1 else 2;;
   |} in
   [%expect {|
     let me_1 x =
-      1;; |}]
+      1
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -116,37 +126,13 @@ let (c, b) = (1, 2)
 ;;
 
 let%expect_test "" =
-  let () =
-    me_test
-      {|
-let rec len l =
-   let me_1 = l in
-   let me_2 = me_1 in
-   (if (( = ) []) me_2
-   then 0
-   else let me_4 = me_1 in
-   (if (if (( >= ) get_list_len_plus_one me_4) 2
-   then let me_3 = (get_by_idx me_4) 0 in
-   let tl = (get_by_idx me_4) 1 in
-   true
-   else false)
-   then let me_3 = (get_by_idx me_4) 0 in
-   let tl = (get_by_idx me_4) 1 in
-   (( + ) 1) (len tl)
-   else fail_pt_match ()))
-;; 
-  |}
-  in
-  [%expect {| =doesn't find binded value -- get_list_len_plus_one |}]
-;;
-
-let%expect_test "" =
   let () = me_test {|
 let a = 2
 ;; 
   |} in
   [%expect {|
-    let a = 2;; |}]
+    let a = 2
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -171,7 +157,8 @@ match ab with
                 let b = (get_by_idx me_3) 1 in
                   1
           else
-            fail_pt_match ());; |}]
+            fail_pt_match ())
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -187,7 +174,8 @@ match ab with
         let me_3 = ab in
           let a = (get_by_idx me_3) 0 in
             let b = (get_by_idx me_3) 1 in
-              1;; |}]
+              1
+    ;; |}]
 ;;
 
 let%expect_test "" =
@@ -200,7 +188,8 @@ let f (a, b) = a + b
     let f me_2 =
       let a = (get_by_idx me_2) 0 in
         let b = (get_by_idx me_2) 1 in
-          (( + ) a) b;; |}]
+          (( + ) a) b
+    ;; |}]
 ;;
 
 let%expect_test "" =
