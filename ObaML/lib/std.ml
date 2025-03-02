@@ -28,14 +28,14 @@ let std_lst =
 ;;
 
 let additional_std_lst =
-  [ "#gen_matching_failed#", Scheme (VarSet.singleton (-1), tprim_unit @-> type_var (-1))
-  ; ( "#gen_tuple_getter#"
+  [ "#matching_failed#", Scheme (VarSet.singleton (-1), tprim_unit @-> type_var (-1))
+  ; ( "#tuple_getter#"
     , Scheme (VarSet.of_list [ -1; -2 ], tprim_int @-> type_var (-1) @-> type_var (-2)) )
-  ; ( "#gen_list_getter_head#"
+  ; ( "#list_head_getter#"
     , Scheme (VarSet.singleton (-1), tlist (type_var (-1)) @-> type_var (-1)) )
-  ; ( "#gen_list_getter_tail#"
+  ; ( "#list_tail_getter#"
     , Scheme (VarSet.singleton (-1), tlist (type_var (-1)) @-> tlist (type_var (-1))) )
-  ; ( "#gen_list_getter_length#"
+  ; ( "#list_length_getter#"
     , Scheme (VarSet.singleton (-1), tlist (type_var (-1)) @-> tprim_int) )
   ]
 ;;

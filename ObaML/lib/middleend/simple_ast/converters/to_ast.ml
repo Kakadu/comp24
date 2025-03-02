@@ -2,9 +2,10 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let pattern_from_sident = function 
-| Simple_ast.SSpecial SUnit -> Ast.PConst (Ast.CUnit)
-| Simple_ast.SId id -> Ast.PVar id
+let pattern_from_sident = function
+  | Simple_ast.SSpecial SUnit -> Ast.PConst Ast.CUnit
+  | Simple_ast.SId id -> Ast.PVar id
+;;
 
 let rec convert_value_binding svalue_binding =
   let ident, sexpr = svalue_binding in

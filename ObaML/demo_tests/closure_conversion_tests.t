@@ -4,8 +4,14 @@
   val main : int
   
   Converted structure:
-  let rec fac n = if (n  <=  1) then 1 else (n  *  (fac (n  -  1)));;
-  let main = let #gen_pat_expr#0 = (print_int (fac 4)) in 0;;
+  let rec fac n = 
+  	if (n  <=  1)
+  	then 1
+  	else (n  *  (fac (n  -  1)));;
+  
+  let main = 
+  	let () = (print_int (fac 4)) in 0;;
+  
   
   Types after conversions:
   val fac : int -> int
@@ -17,8 +23,14 @@
   val main : int
   
   Converted structure:
-  let rec fac_cps n k = if (n  =  1) then (k 1) else ((fac_cps (n  -  1)) (((fun k n p -> (k (p  *  n))) k) n));;
-  let main = let #gen_pat_expr#0 = (print_int ((fac_cps 4) (fun print_int -> print_int))) in 0;;
+  let rec fac_cps n k = 
+  	if (n  =  1)
+  	then (k 1)
+  	else ((fac_cps (n  -  1)) (((fun k n p -> (k (p  *  n))) k) n));;
+  
+  let main = 
+  	let () = (print_int ((fac_cps 4) (fun print_int -> print_int))) in 0;;
+  
   
   Types after conversions:
   val fac_cps : int -> (int -> 'a) -> 'a
@@ -31,9 +43,22 @@
   val main : int
   
   Converted structure:
-  let rec fib_acc a b n = if (n  =  1) then b else let n1 = (n  -  1) in let ab = (a  +  b) in (((fib_acc b) ab) n1);;
-  let rec fib n = if (n  <  2) then n else ((fib (n  -  1))  +  (fib (n  -  2)));;
-  let main = let #gen_pat_expr#0 = (print_int (((fib_acc 0) 1) 4)) in let #gen_pat_expr#0 = (print_int (fib 4)) in 0;;
+  let rec fib_acc a b n = 
+  	if (n  =  1)
+  	then b
+  	else 
+  	let n1 = (n  -  1) in 
+  	let ab = (a  +  b) in (((fib_acc b) ab) n1);;
+  
+  let rec fib n = 
+  	if (n  <  2)
+  	then n
+  	else ((fib (n  -  1))  +  (fib (n  -  2)));;
+  
+  let main = 
+  	let () = (print_int (((fib_acc 0) 1) 4)) in 
+  	let () = (print_int (fib 4)) in 0;;
+  
   
   Types after conversions:
   val fib : int -> int
@@ -48,10 +73,23 @@
   val wrap : 'a -> 'a
   
   Converted structure:
-  let wrap f = if (1  =  1) then f else f;;
-  let test3 a b c = let a = (print_int a) in let b = (print_int b) in let c = (print_int c) in 0;;
+  let wrap f = 
+  	if (1  =  1)
+  	then f
+  	else f;;
+  
+  let test3 a b c = 
+  	let a = (print_int a) in 
+  	let b = (print_int b) in 
+  	let c = (print_int c) in 0;;
+  
   let test10 a b c d e f g h i j = (((((((((a  +  b)  +  c)  +  d)  +  e)  +  f)  +  g)  +  h)  +  i)  +  j);;
-  let main = let rez = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in let #gen_pat_expr#0 = (print_int rez) in let temp2 = ((((wrap test3) 1) 10) 100) in 0;;
+  
+  let main = 
+  	let rez = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in 
+  	let () = (print_int rez) in 
+  	let temp2 = ((((wrap test3) 1) 10) 100) in 0;;
+  
   
   Types after conversions:
   val main : int
@@ -67,8 +105,15 @@
   
   Converted structure:
   let rec fix f x = ((f (fix f)) x);;
-  let fac self n = if (n  <=  1) then 1 else (n  *  (self (n  -  1)));;
-  let main = let #gen_pat_expr#0 = (print_int ((fix fac) 6)) in 0;;
+  
+  let fac self n = 
+  	if (n  <=  1)
+  	then 1
+  	else (n  *  (self (n  -  1)));;
+  
+  let main = 
+  	let () = (print_int ((fix fac) 6)) in 0;;
+  
   
   Types after conversions:
   val fac : (int -> int) -> int -> int
@@ -81,9 +126,16 @@
   val main : int
   
   Converted structure:
-  let foo b = if b then (fun foo -> (foo  +  2)) else (fun foo -> (foo  *  10));;
+  let foo b = 
+  	if b
+  	then (fun foo -> (foo  +  2))
+  	else (fun foo -> (foo  *  10));;
+  
   let foo x = ((foo true) ((foo false) ((foo true) ((foo false) x))));;
-  let main = let #gen_pat_expr#0 = (print_int (foo 11)) in 0;;
+  
+  let main = 
+  	let () = (print_int (foo 11)) in 0;;
+  
   
   Types after conversions:
   val foo : int -> int
@@ -95,8 +147,17 @@
   val main : int
   
   Converted structure:
-  let foo a b c = let #gen_pat_expr#0 = (print_int a) in let #gen_pat_expr#0 = (print_int b) in let #gen_pat_expr#0 = (print_int c) in (a  +  (b  *  c));;
-  let main = let foo = (foo 1) in let foo = (foo 2) in let foo = (foo 3) in let #gen_pat_expr#0 = (print_int foo) in 0;;
+  let foo a b c = 
+  	let () = (print_int a) in 
+  	let () = (print_int b) in 
+  	let () = (print_int c) in (a  +  (b  *  c));;
+  
+  let main = 
+  	let foo = (foo 1) in 
+  	let foo = (foo 2) in 
+  	let foo = (foo 3) in 
+  	let () = (print_int foo) in 0;;
+  
   
   Types after conversions:
   val foo : int -> int -> int -> int
@@ -108,8 +169,13 @@
   val main : int
   
   Converted structure:
-  let foo a = let #gen_pat_expr#0 = (print_int a) in (fun b -> let #gen_pat_expr#0 = (print_int b) in (fun c -> (print_int c)));;
-  let main = let #gen_pat_expr#0 = (((foo 4) 8) 9) in 0;;
+  let foo a = 
+  	let () = (print_int a) in (fun b -> 
+  	let () = (print_int b) in (fun c -> (print_int c)));;
+  
+  let main = 
+  	let () = (((foo 4) 8) 9) in 0;;
+  
   
   Types after conversions:
   val foo : int -> int -> int -> unit
@@ -121,8 +187,12 @@
   val main : unit
   
   Converted structure:
-  let _start #gen_pat_expr#0 #gen_pat_expr#1 a #gen_pat_expr#2 b _c #gen_pat_expr#3 d __ = if ((((()  =  #gen_pat_expr#3)  &&  (()  =  #gen_pat_expr#2))  &&  (()  =  #gen_pat_expr#1))  &&  (()  =  #gen_pat_expr#0)) then let #gen_pat_expr#0 = (print_int (a  +  b)) in let #gen_pat_expr#0 = (print_int __) in (((a  *  b)  /  _c)  +  d) else (#gen_matching_failed# ());;
+  let _start () () a () b _c () d __ = 
+  	let () = (print_int (a  +  b)) in 
+  	let () = (print_int __) in (((a  *  b)  /  _c)  +  d);;
+  
   let main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (( ~- ) 1))) 10000) (( ~- ) 555555)));;
+  
   
   Types after conversions:
   val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
@@ -133,7 +203,9 @@
   val temp : int * bool
   
   Converted structure:
-  let temp = let f x = x in ((f 1), (f true));;
+  let temp = 
+  	let f x = x in ((f 1), (f true));;
+  
   
   Types after conversions:
   val temp : int * bool
@@ -150,20 +222,114 @@
   val map : ('a -> 'b) -> 'a list -> 'b list
   
   Converted structure:
-  let rec length xs = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then 0 else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in (1  +  (length tl)) else (#gen_matching_failed# ());;
-  let length_tail = let rec helper acc xs = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then acc else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in ((helper (acc  +  1)) tl) else (#gen_matching_failed# ()) in (helper 0);;
-  let rec map f xs = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then [] else if (((#gen_list_getter_length# #gen_pat_expr#0)  =  1)  &&  ([]  =  (#gen_list_getter_tail# #gen_pat_expr#0))) then let a = (#gen_list_getter_head# #gen_pat_expr#0) in (f a) :: [] else if (((#gen_list_getter_length# #gen_pat_expr#0)  =  2)  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) then let a = (#gen_list_getter_head# #gen_pat_expr#0) in let b = (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0)) in (f a) :: (f b) :: [] else if (((#gen_list_getter_length# #gen_pat_expr#0)  =  3)  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0))))) then let a = (#gen_list_getter_head# #gen_pat_expr#0) in let b = (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0)) in let c = (#gen_list_getter_head# (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0))) in (f a) :: (f b) :: (f c) :: [] else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  4) then let a = (#gen_list_getter_head# #gen_pat_expr#0) in let b = (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0)) in let c = (#gen_list_getter_head# (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0))) in let d = (#gen_list_getter_head# (#gen_list_getter_tail# (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) in let tl = (#gen_list_getter_tail# (#gen_list_getter_tail# (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) in (f a) :: (f b) :: (f c) :: (f d) :: ((map f) tl) else (#gen_matching_failed# ());;
-  let rec append xs ys = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then ys else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let x = (#gen_list_getter_head# #gen_pat_expr#0) in let xs = (#gen_list_getter_tail# #gen_pat_expr#0) in x :: ((append xs) ys) else (#gen_matching_failed# ());;
-  let concat = let rec helper xs = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then [] else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in ((append h) (helper tl)) else (#gen_matching_failed# ()) in helper;;
-  let rec iter f xs = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then () else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in let #gen_pat_expr#0 = (f h) in ((iter f) tl) else (#gen_matching_failed# ());;
-  let rec cartesian xs ys = let #gen_pat_expr#0 = xs in if ([]  =  #gen_pat_expr#0) then [] else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in ((append ((map ((fun h a -> (h, a)) h)) ys)) ((cartesian tl) ys)) else (#gen_matching_failed# ());;
-  let main = let #gen_pat_expr#0 = ((iter print_int) 1 :: 2 :: 3 :: []) in let #gen_pat_expr#0 = (print_int (length ((cartesian 1 :: 2 :: []) 1 :: 2 :: 3 :: 4 :: []))) in 0;;
+  let rec length xs = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then 0
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let h = (#list_head_getter# #pat#0) in 
+  	let tl = (#list_tail_getter# #pat#0) in (1  +  (length tl))
+  	else (#matching_failed# ());;
+  
+  let length_tail = 
+  	let rec helper #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# acc xs = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then acc
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let h = (#list_head_getter# #pat#0) in 
+  	let tl = (#list_tail_getter# #pat#0) in ((((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#) (acc  +  1)) tl)
+  	else (#matching_failed# ()) in (((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#) 0);;
+  
+  let rec map f xs = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then []
+  	else 
+  	if ((#list_length_getter# #pat#0)  =  1)
+  	then 
+  	let a = (#list_head_getter# #pat#0) in (f a) :: []
+  	else 
+  	if ((#list_length_getter# #pat#0)  =  2)
+  	then 
+  	let a = (#list_head_getter# #pat#0) in 
+  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in (f a) :: (f b) :: []
+  	else 
+  	if ((#list_length_getter# #pat#0)  =  3)
+  	then 
+  	let a = (#list_head_getter# #pat#0) in 
+  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
+  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in (f a) :: (f b) :: (f c) :: []
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  4)
+  	then 
+  	let a = (#list_head_getter# #pat#0) in 
+  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
+  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in 
+  	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in 
+  	let tl = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in (f a) :: (f b) :: (f c) :: (f d) :: ((map f) tl)
+  	else (#matching_failed# ());;
+  
+  let rec append xs ys = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then ys
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let x = (#list_head_getter# #pat#0) in 
+  	let xs = (#list_tail_getter# #pat#0) in x :: ((append xs) ys)
+  	else (#matching_failed# ());;
+  
+  let concat = 
+  	let rec helper #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# xs = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then []
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let h = (#list_head_getter# #pat#0) in 
+  	let tl = (#list_tail_getter# #pat#0) in ((append h) (((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#) tl))
+  	else (#matching_failed# ()) in ((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#);;
+  
+  let rec iter f xs = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then ()
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let h = (#list_head_getter# #pat#0) in 
+  	let tl = (#list_tail_getter# #pat#0) in 
+  	let () = (f h) in ((iter f) tl)
+  	else (#matching_failed# ());;
+  
+  let rec cartesian xs ys = 
+  	let #pat#0 = xs in 
+  	if (#pat#0  =  [])
+  	then []
+  	else 
+  	if ((#list_length_getter# #pat#0)  >=  1)
+  	then 
+  	let h = (#list_head_getter# #pat#0) in 
+  	let tl = (#list_tail_getter# #pat#0) in ((append ((map ((fun h a -> (h, a)) h)) ys)) ((cartesian tl) ys))
+  	else (#matching_failed# ());;
+  
+  let main = 
+  	let () = ((iter print_int) 1 :: 2 :: 3 :: []) in 
+  	let () = (print_int (length ((cartesian 1 :: 2 :: []) 1 :: 2 :: 3 :: 4 :: []))) in 0;;
+  
   
   Types after conversions:
   val append : 'a list -> 'a list -> 'a list
   val cartesian : 'a list -> 'b list -> ('a * 'b) list
   val concat : 'a list list -> 'a list
-  val iter : ('a -> 'b) -> 'a list -> unit
+  val iter : ('a -> unit) -> 'a list -> unit
   val length : 'a list -> int
   val length_tail : 'a list -> int
   val main : int

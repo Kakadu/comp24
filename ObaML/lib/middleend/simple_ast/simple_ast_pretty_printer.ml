@@ -59,9 +59,9 @@ and print_expr fmt = function
   | Simple_ast.SEFun (pat_lst, expr) ->
     fprintf fmt "(fun %a -> %a)" print_sid_lst pat_lst print_expr expr
   | Simple_ast.SELet (Ast.Nonrecursive, value_binding, expr) ->
-    fprintf fmt "let %a in %a" print_value_binding value_binding print_expr expr
+    fprintf fmt "\n\tlet %a in %a" print_value_binding value_binding print_expr expr
   | Simple_ast.SELet (Ast.Recursive, value_binding, expr) ->
-    fprintf fmt "let rec %a in %a" print_value_binding value_binding print_expr expr
+    fprintf fmt "\n\tlet rec %a in %a" print_value_binding value_binding print_expr expr
   | Simple_ast.SEApp
       (Simple_ast.SEApp ((Simple_ast.SEVar (Id var_name) as expr1), expr2), expr3)
     when List.mem var_name binop_vars = true ->
@@ -69,7 +69,15 @@ and print_expr fmt = function
   | Simple_ast.SEApp (expr1, expr2) ->
     fprintf fmt "(%a %a)" print_expr expr1 print_expr expr2
   | Simple_ast.SEIf (expr1, expr2, expr3) ->
-    fprintf fmt "if %a then %a else %a" print_expr expr1 print_expr expr2 print_expr expr3
+    fprintf
+      fmt
+      "\n\tif %a\n\tthen %a\n\telse %a"
+      print_expr
+      expr1
+      print_expr
+      expr2
+      print_expr
+      expr3
   | Simple_ast.SECons (expr1, expr2) ->
     fprintf fmt "%a :: %a" print_expr expr1 print_expr expr2
 
@@ -85,7 +93,7 @@ let rec print_value_binding_lst fmt (value_binding_lst : Simple_ast.svalue_bindi
   match value_binding_lst with
   | [] -> ()
   | [ h ] -> fprintf fmt "%a" print_value_binding h
-  | h :: tl -> fprintf fmt "%a and %a" print_value_binding h print_value_binding_lst tl
+  | h :: tl -> fprintf fmt "%a\nand %a" print_value_binding h print_value_binding_lst tl
 ;;
 
 let print_structure fmt structure =
@@ -93,9 +101,9 @@ let print_structure fmt structure =
     (fun structure_item ->
       match structure_item with
       | Simple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) ->
-        fprintf fmt "let %a;;\n" print_value_binding_lst value_binding_lst
+        fprintf fmt "let %a;;\n\n" print_value_binding_lst value_binding_lst
       | Simple_ast.SSILet (Ast.Recursive, value_binding_lst) ->
-        fprintf fmt "let rec %a;;\n" print_value_binding_lst value_binding_lst
+        fprintf fmt "let rec %a;;\n\n" print_value_binding_lst value_binding_lst
       | Simple_ast.SSIExpr expr -> fprintf fmt "%a" print_expr expr)
     structure
 ;;

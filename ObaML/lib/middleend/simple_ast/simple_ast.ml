@@ -4,12 +4,11 @@
 
 (** Simplified AST *)
 
-type sspecial = SUnit
-[@@deriving eq, show { with_path = false }]
+type sspecial = SUnit [@@deriving eq, show { with_path = false }]
 
-type sspident = 
+type sspident =
   | SId of Ast.identifier
-  | SSpecial of sspecial 
+  | SSpecial of sspecial
 [@@deriving eq, show { with_path = false }]
 
 type svalue_binding = sspident * sexpr

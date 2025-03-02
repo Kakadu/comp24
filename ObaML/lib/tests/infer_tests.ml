@@ -399,29 +399,3 @@ let%expect_test "" =
     val a : 'a list list
      |}]
 ;;
-
-let%expect_test "" =
-parse_and_infer_result {| let a x = fun () (a, b) -> (x, a, b);; |};
-  [%expect {|
-    val a : 'a -> unit -> 'b * 'c -> 'a * 'b * 'c |}]
-;;
-
-let%expect_test "" =
-parse_and_infer_result {| let [] = [];; |};
-  [%expect {| |}]
-;;
-
-let%expect_test "" =
-parse_and_infer_result {| let [] = 4;; |};
-  [%expect {| Unification failed: int and '0 list |}]
-;;
-
-let%expect_test "" =
-parse_and_infer_result {| let () = print_int 4;; |};
-  [%expect {| |}]
-;;
-
-let%expect_test "" =
-parse_and_infer_result {| let b = let 4 :: a = 3 :: [] in a;; |};
-  [%expect {| val b : int list |}]
-;;

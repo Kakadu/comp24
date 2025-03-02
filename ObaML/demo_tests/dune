@@ -27,7 +27,11 @@
   (backend bisect_ppx)))
 
 (cram
- (applies_to parser_tests infer_tests ast_simplifier_tests closure_conversion_tests)
+ (applies_to
+  parser_tests
+  infer_tests
+  ast_simplifier_tests
+  closure_conversion_tests)
  (deps
   ./parser_tests.exe
   ./infer_tests.exe

@@ -112,17 +112,19 @@ let get_vars_from_expr expr env =
     | Simple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) ->
       let var_name = get_var_name_from_sid ident in
       let new_acc = helper acc env expr1 in
-      let new_env = (match var_name with 
-      | None -> env 
-      | Some var_name -> VarSet.add var_name env)
-     in
+      let new_env =
+        match var_name with
+        | None -> env
+        | Some var_name -> VarSet.add var_name env
+      in
       helper new_acc new_env expr2
     | Simple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) ->
       let var_name = get_var_name_from_sid ident in
-      let new_env = (match var_name with 
-      | None -> env 
-      | Some var_name -> VarSet.add var_name env)
-     in
+      let new_env =
+        match var_name with
+        | None -> env
+        | Some var_name -> VarSet.add var_name env
+      in
       let new_acc = helper acc new_env expr1 in
       helper new_acc new_env expr2
     | Simple_ast.SEApp (expr1, expr2) -> helper (helper acc env expr1) env expr2
@@ -203,10 +205,11 @@ and convert_expr env global_env = function
        let vars_to_add, new_efun = convert_fun_expr env global_env f in
        let new_value_binding = ident, new_efun in
        let var_name = get_var_name_from_sid ident in
-       let updated_env = (match var_name with 
-       | None -> env 
-       | Some var_name -> VarMap.add var_name vars_to_add env)
-      in
+       let updated_env =
+         match var_name with
+         | None -> env
+         | Some var_name -> VarMap.add var_name vars_to_add env
+       in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, converted_expr2)
      | _ ->
@@ -232,9 +235,10 @@ and convert_expr env global_env = function
            updated_env
            vars_to_add
        in
-       let updated_env = (match ident_var_name with 
-       | None -> updated_env
-       | Some ident_var_name -> VarMap.add ident_var_name vars_to_add updated_env)
+       let updated_env =
+         match ident_var_name with
+         | None -> updated_env
+         | Some ident_var_name -> VarMap.add ident_var_name vars_to_add updated_env
        in
        let id_lst_to_add = get_sid_lst_from_var_names_lst vars_to_add in
        let all_vars = List.append id_lst_to_add id_lst in
@@ -242,17 +246,19 @@ and convert_expr env global_env = function
          Simple_ast.SEFun (all_vars, convert_expr updated_env global_env fexpr)
        in
        let converted_value_binding = ident, converted_expr1 in
-       let updated_env = (match ident_var_name with 
-       | None -> env 
-       | Some ident_var_name -> VarMap.add ident_var_name vars_to_add env)
-      in
+       let updated_env =
+         match ident_var_name with
+         | None -> env
+         | Some ident_var_name -> VarMap.add ident_var_name vars_to_add env
+       in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        Simple_ast.SELet (Ast.Recursive, converted_value_binding, converted_expr2)
      | _ ->
-       let updated_env = (match ident_var_name with 
-       | None -> env 
-       | Some ident_var_name -> VarMap.remove ident_var_name env) 
-      in
+       let updated_env =
+         match ident_var_name with
+         | None -> env
+         | Some ident_var_name -> VarMap.remove ident_var_name env
+       in
        let converted_expr1 = convert_expr updated_env global_env expr1 in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        Simple_ast.SELet (Ast.Recursive, (ident, converted_expr1), converted_expr2))
@@ -275,9 +281,9 @@ let get_var_names_from_value_binding_lst value_binding_lst =
   List.fold_left
     (fun acc value_binding ->
       let sid, _ = value_binding in
-      let opt_var_name = get_var_name_from_sid sid in 
-      match opt_var_name with 
-      | None -> acc 
+      let opt_var_name = get_var_name_from_sid sid in
+      match opt_var_name with
+      | None -> acc
       | Some var_name -> var_name :: acc)
     []
     value_binding_lst
