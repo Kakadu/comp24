@@ -9,12 +9,18 @@ open Common.StateMonad
 open LlProgram
 
 let start_env program =
+  let start_identifiers = 
+    List.fold_left
+      (fun acc var -> IdentifierSet.add (Id var) acc)
+      IdentifierSet.empty
+      Common.StartEnvironment.start_identifiers
+  in
   List.fold_left
     (fun acc decl ->
-      match decl with
-      | DOrdinary (case, cases) | DRecursive (case, cases) ->
-        IdentifierSet.union acc (get_pattern_identifiers_from_cases (case :: cases)))
-    IdentifierSet.empty
+       match decl with
+       | DOrdinary (case, cases) | DRecursive (case, cases) ->
+         IdentifierSet.union acc (get_pattern_identifiers_from_cases (case :: cases)))
+    start_identifiers
     program
 ;;
 
