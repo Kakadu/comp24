@@ -17,6 +17,6 @@ let () =
   match parse_and_infer s with
   | Ok ast ->
     let _, _, converted = Pat_elim.run ast in
-    Format.printf "%a" Pat_elim_ast.pp_rp_program converted
+    Format.printf "%a" Pat_elim_ast.pp_pe_structure converted
   | Error message -> Format.printf "%s" message
 ;;

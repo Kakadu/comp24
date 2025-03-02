@@ -11,8 +11,8 @@ type pe_const =
 
 type pe_expr =
   | PEEConst of pe_const
-  | PEEIdent of string
-  | PEEEif of pe_expr * pe_expr * pe_expr
+  | PEEVar of string
+  | PEEIf of pe_expr * pe_expr * pe_expr
   | PEEFun of string list * pe_expr
   | PEEApp of pe_expr * pe_expr
   | PEELet of pe_str_item * pe_expr
@@ -35,8 +35,8 @@ let const_to_str = function
 
 let rec expr_to_str = function
   | PEEConst c -> const_to_str c
-  | PEEIdent id -> id
-  | PEEEif (e1, e2, e3) ->
+  | PEEVar id -> id
+  | PEEIf (e1, e2, e3) ->
     Format.sprintf
       "if %s\nthen %s\nelse %s"
       (expr_to_str e1)
@@ -70,7 +70,7 @@ let rec expr_to_str = function
            (List.tl e_list))
 ;;
 
-let toplevel_to_str = function
+let decl_to_str = function
   | PENonrec (name, e) -> Format.sprintf "let %s = %s" name (expr_to_str e)
   | PERec decl_list ->
     let name1, e1 = List.hd decl_list in
@@ -82,14 +82,14 @@ let toplevel_to_str = function
         tl
 ;;
 
-let pp_rp_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
+let pp_pe_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
 
-let pp_rp_program ppf p =
+let pp_pe_structure ppf p =
   let len = List.length p in
   List.iteri
     (fun i a ->
       if i = len - 1
-      then Format.fprintf ppf "%s" (toplevel_to_str a)
-      else Format.fprintf ppf "%s\n\n" (toplevel_to_str a))
+      then Format.fprintf ppf "%s" (decl_to_str a)
+      else Format.fprintf ppf "%s\n\n" (decl_to_str a))
     p
 ;;

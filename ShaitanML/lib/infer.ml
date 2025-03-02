@@ -551,7 +551,15 @@ let start_env =
     ; "( >= )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
     ; "( <> )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
     ; "( = )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( != )", TArrow (TVar 1, TArrow (TVar 1, TPrim "bool"))
+    ; "( && )", TArrow (TPrim "bool", TArrow (TPrim "bool", TPrim "bool"))
+    ; "( || )", TArrow (TPrim "bool", TArrow (TPrim "bool", TPrim "bool"))
     ; "print_int", TArrow (TPrim "int", TPrim "unit")
+    ; "list_head", TArrow (TList (TVar 1), TVar 1)
+    ; "list_tail", TArrow (TList (TVar 1), TList (TVar 1))
+    ; "list_len", TArrow (TList (TVar 1), TPrim "int")
+    ; "tuple_element", TArrow (TVar 1, TArrow (TPrim "int", TVar 2))
+    ; "fail_match", TVar 1
     ]
   in
   let env = TypeEnv.empty in

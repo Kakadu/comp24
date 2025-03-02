@@ -11,8 +11,8 @@ end
 
 let rec identify_free_vars bound_set = function
   | PEEConst _ -> StrSet.empty
-  | PEEIdent id -> if StrSet.find bound_set id then StrSet.empty else StrSet.singleton id
-  | PEEEif (c, t, e) ->
+  | PEEVar id -> if StrSet.find bound_set id then StrSet.empty else StrSet.singleton id
+  | PEEIf (c, t, e) ->
     List.fold_left
       StrSet.union
       StrSet.empty
@@ -58,7 +58,7 @@ let build_function args body free_vars bindings =
     (fun acc name ->
       let arg =
         try Base.Map.find_exn bindings name with
-        | _ -> PEEIdent name
+        | _ -> PEEVar name
       in
       PEEApp (acc, arg))
     fn
@@ -67,12 +67,12 @@ let build_function args body free_vars bindings =
 
 let rec convert_expr env bindings = function
   | PEEConst _ as e -> e
-  | PEEIdent id as e ->
+  | PEEVar id as e ->
     (match Base.Map.find bindings id with
      | Some expr -> expr
      | None -> e)
-  | PEEEif (c, t, e) ->
-    PEEEif
+  | PEEIf (c, t, e) ->
+    PEEIf
       ( convert_expr env bindings c
       , convert_expr env bindings t
       , convert_expr env bindings e )
@@ -98,7 +98,7 @@ and handle_let_conversion env bindings decl next =
         in
         let converted = convert_expr env BoundVars.empty body in
         let fn = PEEFun (free @ params, converted) in
-        let binding = build_function [] (PEEIdent name) free bindings in
+        let binding = build_function [] (PEEVar name) free bindings in
         fn, Base.Map.singleton (module Base.String) name binding
       | _ -> convert_expr env bindings expr, BoundVars.empty
     in
@@ -115,7 +115,7 @@ and convert_rec_decls env bindings decls =
     | PEEFun (params, body) ->
       let exclude = StrSet.union (StrSet.of_list names) (StrSet.of_list params) in
       let free = StrSet.diff (identify_free_vars env body) exclude |> StrSet.to_list in
-      let binding = build_function [] (PEEIdent name) free bindings in
+      let binding = build_function [] (PEEVar name) free bindings in
       free :: fst acc, Base.Map.set (snd acc) ~key:name ~data:binding
     | _ -> [] :: fst acc, snd acc
   in
@@ -135,23 +135,8 @@ and convert_rec_decls env bindings decls =
   List.rev converted, bindings
 ;;
 
-let builtin_ops =
-  [ "( + )"
-  ; "( - )"
-  ; "( / )"
-  ; "( * )"
-  ; "( < )"
-  ; "( > )"
-  ; "( <= )"
-  ; "( >= )"
-  ; "( <> )"
-  ; "( = )"
-  ; "print_int"
-  ]
-;;
-
 let initial_env =
-  List.fold_left (fun acc op -> StrSet.add acc op) StrSet.empty builtin_ops
+  List.fold_left (fun acc op -> StrSet.add acc op) StrSet.empty Common.builtins
 ;;
 
 let convert_top_level env = function

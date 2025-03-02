@@ -16,9 +16,15 @@
  (public_name pat_elim)
  (libraries shaitanml_lib stdio))
 
+(executable
+ (name alpha)
+ (modules Alpha)
+ (public_name alpha)
+ (libraries shaitanml_lib stdio))
+
 (cram
  (deps
   (source_tree manytests)))
 
 (cram
- (deps %{bin:parser} %{bin:infer} %{bin:pat_elim}))
+ (deps %{bin:parser} %{bin:infer} %{bin:pat_elim} %{bin:alpha}))
