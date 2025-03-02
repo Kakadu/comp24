@@ -24,6 +24,7 @@ module Base_SE_Monad : sig
     -> 'b * ('e, 'd) result
 
   val ( >>| ) : ('a -> 'b * ('c, 'd) result) -> ('c -> 'e) -> 'a -> 'b * ('e, 'd) result
+  val ( let+ ) : ('a -> 'b * ('c, 'd) result) -> ('c -> 'e) -> 'a -> 'b * ('e, 'd) result
 
   val fold_left_t
     :  'a list

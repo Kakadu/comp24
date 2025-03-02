@@ -23,7 +23,7 @@ open CounterMonad
 open Common.Ast
 open Me_ast
 
-type semantic_bind = SBind of ident * m_expr
+type semantic_bind = SBind of me_ident * m_expr
 
 type alt_pt_tp =
   | Any of semantic_bind
@@ -45,8 +45,8 @@ let ite_with_fail ~cond ~then_br =
   ite ~cond ~then_br ~else_br
 ;;
 
-let me_nonrec_letin nm_s body cont =
-  let bind = [ { m_vb_pat = Me_name nm_s; m_vb_expr = body } ] in
+let me_nonrec_letin nm body cont =
+  let bind = [ { m_vb_pat = nm; m_vb_expr = body } ] in
   MExp_let (MDecl (Nonrecursive, bind), cont)
 ;;
 
@@ -84,7 +84,7 @@ let sbinds_to_letin sbinds =
     sbinds
 ;;
 
-let sbind_to_me_vb (SBind (id, me)) = me_vb (Me_name id) me
+let sbind_to_me_vb (SBind (id, me)) = me_vb id me
 
 let rec elim_pattern : m_expr -> pattern -> alt_pat t =
   fun mexpr ->
@@ -100,9 +100,9 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
         ~init:(return (0, []))
         ~f:(fun (idx, acc) pt ->
           let tuple_elem = me_get_by_idx mexpr idx in
-          let* alt_pt = elim_pattern tuple_elem pt in
+          let+ alt_pt = elim_pattern tuple_elem pt in
           let new_acc = alt_pt :: acc in
-          return (idx + 1, new_acc))
+          idx + 1, new_acc)
     in
     (* REVERSE-BACK *)
     let cond_opt, provided_sbinds =
@@ -131,18 +131,18 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
     return (cond_opt, provided_sbinds)
   in
   function
-  | Pat_var nm -> return @@ Var (SBind (nm, mexpr))
+  | Pat_var nm -> return @@ Var (SBind (Me_name nm, mexpr))
   | Pat_any ->
     let* any_name = get_uniq_name in
-    return @@ Any (SBind (any_name, mexpr))
+    return @@ Any (SBind (Me_name any_name, mexpr))
+  | Pat_const Const_unit -> return @@ Var (SBind (Me_unit, mexpr))
   | Pat_const c ->
     let me_cond = me_const_comperison c mexpr in
     return @@ Const me_cond
   | Pat_constraint (pt, _) -> elim_pattern mexpr pt
   | Pat_tuple pt'list ->
-    let* compound_cond, provided_sbinds = row_compound_alt_pat pt'list in
-    let alt_pat = Compound (compound_cond, provided_sbinds) in
-    return @@ alt_pat
+    let+ compound_cond, provided_sbinds = row_compound_alt_pat pt'list in
+    Compound (compound_cond, provided_sbinds)
   | Pat_cons (head_pt, tail_pt) ->
     let plain_pat_list = optimize_cons head_pt tail_pt in
     let* last_pat =
@@ -150,7 +150,7 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
       | x :: _ -> return x
       | _ -> fail "Pat_cons has at least two elements"
     in
-    let* compound_cond, provided_sbinds = row_compound_alt_pat plain_pat_list in
+    let+ compound_cond, provided_sbinds = row_compound_alt_pat plain_pat_list in
     let len_cond_me =
       let me_pt_elem_cnt = MExp_constant (Const_int (List.length plain_pat_list)) in
       let me_list_len = me_get_list_len_1 @@ mexpr in
@@ -159,53 +159,50 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
       | _ -> me_more_eq me_list_len me_pt_elem_cnt
     in
     let particial_alt_pt cond = Compound (Some cond, provided_sbinds) in
-    return
-    @@
-      (match compound_cond with
-      | None ->
-        let alt_pat = particial_alt_pt len_cond_me in
-        alt_pat
-      | Some cond ->
-        let new_cond = MExp_ifthenelse (len_cond_me, cond, me_bool false) in
-        let alt_pat = particial_alt_pt new_cond in
-        alt_pat)
+    (match compound_cond with
+     | None ->
+       let alt_pat = particial_alt_pt len_cond_me in
+       alt_pat
+     | Some cond ->
+       let new_cond = MExp_ifthenelse (len_cond_me, cond, me_bool false) in
+       let alt_pat = particial_alt_pt new_cond in
+       alt_pat)
 ;;
 
-let to_me_vbs to_me_expr { vb_pat; vb_expr } =
+let to_me_vb to_me_expr { vb_pat; vb_expr } =
   let generate_check_vb cond =
     let placeholder = MExp_constant Const_unit in
     let check_body = ite_with_fail ~cond ~then_br:placeholder in
-    let* check_nm = get_uniq_name in
+    let+ check_nm = get_uniq_name in
     let check_nm_me = Me_name (check_nm ^ "_ANY") in
-    return @@ me_vb check_nm_me check_body
+    me_vb check_nm_me check_body
   in
   let* bind_name = get_uniq_name in
   let main_nm = me_name bind_name in
   let* alt_pat = elim_pattern main_nm vb_pat in
   let* bind_body = to_me_expr vb_expr in
   match alt_pat with
-  | Var (SBind (name, _)) | Any (SBind (name, _)) ->
-    let name' = Me_name name in
-    return @@ [ me_vb name' bind_body ]
+  | Var (SBind (name, _)) | Any (SBind (name, _)) -> return @@ [ me_vb name bind_body ]
   | Const cond ->
     let main_vb = me_vb (Me_name bind_name) bind_body in
-    let* check_vb = generate_check_vb cond in
-    return @@ [ main_vb; check_vb ]
+    let+ check_vb = generate_check_vb cond in
+    [ main_vb; check_vb ]
   | Compound (cond_opt, sbinds) ->
     let provided_vbs = List.map sbind_to_me_vb sbinds in
     let main_vb = me_vb (Me_name bind_name) bind_body in
     (match cond_opt with
      | Some cond ->
-       let* check_vb = generate_check_vb cond in
-       return @@ [ main_vb; check_vb ] @ provided_vbs
+       let+ check_vb = generate_check_vb cond in
+       [ main_vb; check_vb ] @ provided_vbs
      | None -> return @@ (main_vb :: provided_vbs))
 ;;
 
+(* TODO: remove redudant and (refactor with letin or (;;) ) *)
 let elim_vb'list to_me_expr vb_l =
   let* list_of_list =
     revt
     @@ fold_left_t vb_l ~init:(return []) ~f:(fun acc vb ->
-      let* vb'_l = to_me_vbs to_me_expr vb in
+      let* vb'_l = to_me_vb to_me_expr vb in
       return @@ (vb'_l :: acc))
   in
   return @@ List.concat list_of_list
@@ -216,26 +213,26 @@ let rec to_me_expr = function
   | Exp_ident name -> return @@ MExp_ident name
   | Exp_type (e', _) -> to_me_expr e'
   | Exp_tuple e'list ->
-    let* me'list =
+    let+ me'list =
       revt
       @@ fold_left_t e'list ~init:(return []) ~f:(fun acc e' ->
         let* me = to_me_expr e' in
         return @@ (me :: acc))
     in
-    return @@ MExp_tuple me'list
+    MExp_tuple me'list
   | Exp_apply (e'fst, e'snd) ->
     let* me'fst = to_me_expr e'fst in
-    let* me'snd = to_me_expr e'snd in
-    return @@ MExp_apply (me'fst, me'snd)
+    let+ me'snd = to_me_expr e'snd in
+    MExp_apply (me'fst, me'snd)
   | Exp_list (e'fst, e'snd) ->
     let* me'fst = to_me_expr e'fst in
-    let* me'snd = to_me_expr e'snd in
-    return @@ MExp_list (me'fst, me'snd)
+    let+ me'snd = to_me_expr e'snd in
+    MExp_list (me'fst, me'snd)
   | Exp_ifthenelse (e1, e2, e3) ->
     let* e1' = to_me_expr e1 in
     let* e2' = to_me_expr e2 in
-    let* e3' = to_me_expr e3 in
-    return @@ MExp_ifthenelse (e1', e2', e3')
+    let+ e3' = to_me_expr e3 in
+    MExp_ifthenelse (e1', e2', e3')
   | Exp_let (Decl (r_flag, vb_l), e) ->
     let* vb_l' = elim_vb'list to_me_expr vb_l in
     let* e' = to_me_expr e in
@@ -243,11 +240,11 @@ let rec to_me_expr = function
   | Exp_function (pt, e') ->
     let* fun_body = to_me_expr e' in
     let* potential_arg, me_potential_bind =
-      let* new_name = get_uniq_name in
-      return @@ (new_name, me_name new_name)
+      let+ new_name = get_uniq_name in
+      Me_name new_name, me_name new_name
     in
     let* alt_pat = elim_pattern me_potential_bind pt in
-    let ( |-> ) name body = return @@ MExp_function (Me_name name, body) in
+    let ( |-> ) name body = return @@ MExp_function (name, body) in
     (match alt_pat with
      | Var (SBind (arg, _)) | Any (SBind (arg, _)) -> arg |-> fun_body
      | Const cond ->
@@ -265,18 +262,16 @@ let rec to_me_expr = function
   | Exp_match (main_e, branches) ->
     let* e_for_match' = to_me_expr main_e in
     let* bind_nm, me_bind_nm =
-      let* new_name = get_uniq_name in
-      return @@ (new_name, me_name new_name)
+      let+ new_name = get_uniq_name in
+      Me_name new_name, me_name new_name
     in
-    let* f_match' =
+    let+ f_match' =
       fold_left_t
         branches
         ~init:(return (me_nonrec_letin bind_nm e_for_match'))
         ~f:(fun acc_f (pt, br_e) ->
           let* alt_pt = elim_pattern me_bind_nm pt in
-          let* br_me = to_me_expr br_e in
-          return
-          @@
+          let+ br_me = to_me_expr br_e in
           match alt_pt with
           | Any _ -> fun _ -> acc_f br_me
           | Var (SBind (name, bind_body)) ->
@@ -289,25 +284,25 @@ let rec to_me_expr = function
                fun else_br -> acc_f @@ ite ~cond ~then_br:(me_particial br_me) ~else_br
              | None -> fun _ -> acc_f @@ me_particial br_me))
     in
-    return @@ f_match' fail_app
+    f_match' fail_app
 ;;
 
 let to_me_struct_item = function
   | Str_eval e ->
     let* new_uniq_bind_nm = get_uniq_name in
     let m_vb_pat = Me_name new_uniq_bind_nm in
-    let* m_vb_expr = to_me_expr e in
-    return @@ MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ])
+    let+ m_vb_expr = to_me_expr e in
+    MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ])
   | Str_value (Decl (rflag, vb_l)) ->
-    let* vb_l' = elim_vb'list to_me_expr vb_l in
-    return @@ MDecl (rflag, vb_l')
+    let+ vb_l' = elim_vb'list to_me_expr vb_l in
+    MDecl (rflag, vb_l')
 ;;
 
 let to_me_program prog =
   revt
   @@ fold_left_t prog ~init:(return []) ~f:(fun acc str_item ->
-    let* m_decl = to_me_struct_item str_item in
-    return @@ (m_decl :: acc))
+    let+ m_decl = to_me_struct_item str_item in
+    m_decl :: acc)
 ;;
 
 let eliminate_match_in_program prog =

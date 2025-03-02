@@ -27,6 +27,8 @@ module Base_SE_Monad = struct
     | Ok a' -> st', Ok (f a')
   ;;
 
+  let ( let+ ) x f = x >>| f
+
   let fold_left_t xs ~init ~f =
     Base.List.fold_left xs ~init ~f:(fun acc x ->
       let* acc = acc in
