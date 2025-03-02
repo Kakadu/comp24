@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast
-open Common.IdentifierStructs
+open IdentifierStructs
 
 (** Replaces identifiers in an expression according to the given map. *)
 val substitute_identifiers

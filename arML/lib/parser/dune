@@ -4,6 +4,7 @@
  (name parser)
  (public_name arML.parser)
  (libraries angstrom ast)
+ (modules_without_implementation error)
  (modules
   common
   expression

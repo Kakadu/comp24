@@ -6,14 +6,16 @@ open Ast.AbstractSyntaxTree
 open Common.StateMonad
 open Common.StateMonad.Syntax
 open Common.IdentifierStructs
-open IdentifierSearcher
-open IdentifierSubstitutor
+open Common.IdentifierSearcher
+open Common.IdentifierSubstitutor
+
+let get_new_arg_name = Common.NameCreator.get_new_name "cc"
 
 let rec closure_expression env fv_map = function
   | EIdentifier _ as expr -> closure_identifier env fv_map expr
   | EFun _ as expr ->
     let* fun_closure, _ =
-      closure_fun true env fv_map (FunctionTransformer.transform_fun expr)
+      closure_fun true env fv_map (Common.FunctionTransformer.transform_fun expr)
     in
     return fun_closure
   | ELetIn (case, cases, expr) -> closure_let_in env fv_map (case, cases) expr
@@ -62,7 +64,7 @@ and closure_fun application_flag env fv_map = function
           let common_env = get_expr_free_vars expr in
           let common_env = IdentifierSet.union common_env patterns_identifiers in
           let common_env = IdentifierSet.union common_env env in
-          let* new_name = NameCreator.get_new_arg_name common_env in
+          let* new_name = get_new_arg_name common_env in
           let new_id = Id new_name in
           return (IdentifierSet.add new_id args, IdentifierMap.add var new_id map))
         free_vars
@@ -171,7 +173,7 @@ and closure_function env fv_map (case, cases) =
   in
   let pattern_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
   let common_env = IdentifierSet.union common_env pattern_identifiers in
-  let* new_name = NameCreator.get_new_arg_name common_env in
+  let* new_name = get_new_arg_name common_env in
   let* case, cases = closure_case env fv_map (case, cases) in
   let new_pattern, new_identifier = PVar (Id new_name), EIdentifier (Id new_name) in
   let new_expr = EFun ((new_pattern, []), EMatchWith (new_identifier, case, cases)) in
@@ -185,7 +187,7 @@ and closure_let_in env fv_map (case, cases) expr =
   let pattern_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
   let env_for_decl_transform = IdentifierSet.union env pattern_identifiers in
   let* transformed_decl =
-    FunctionTransformer.transform_let_in
+    Common.FunctionTransformer.transform_let_in
       env_for_decl_transform
       (ELetIn (case, cases, expr))
   in

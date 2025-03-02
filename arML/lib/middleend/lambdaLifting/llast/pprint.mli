@@ -2,4 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-type error = Syntax_error
+open Llast
+
+(** Print program after lambda lifting *)
+val print_ll_program : ll_decl list -> unit

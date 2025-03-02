@@ -3,9 +3,9 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast.AbstractSyntaxTree
-open Common.StateMonad
-open Common.StateMonad.Syntax
-open Common.IdentifierStructs
+open StateMonad
+open StateMonad.Syntax
+open IdentifierStructs
 open IdentifierSearcher
 open IdentifierSubstitutor
 
@@ -14,6 +14,8 @@ let rec transform_fun = function
     transform_fun (EFun ((p1, ps1 @ (p2 :: ps2)), body))
   | e -> e
 ;;
+
+let get_new_arg_name = NameCreator.get_new_name "cc"
 
 let transform_let_in env = function
   | ELetIn (case, cases, expr) ->
@@ -42,7 +44,7 @@ let transform_let_in env = function
             let rec aux pattern acc_replacement_map =
               match pattern with
               | PVar (Id name) when IdentifierSet.mem (Id name) patterns_to_update ->
-                let* new_name = NameCreator.get_new_arg_name env in
+                let* new_name = get_new_arg_name env in
                 return
                   ( PVar (Id new_name)
                   , IdentifierMap.add (Id name) (Id new_name) acc_replacement_map )

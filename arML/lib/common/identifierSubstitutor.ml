@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast.AbstractSyntaxTree
-open Common.IdentifierStructs
+open IdentifierStructs
 open IdentifierSearcher
 
 let rec substitute_identifiers replacement_map expr =

@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast.AbstractSyntaxTree
-open Common.IdentifierStructs
+open IdentifierStructs
 
 let rec get_pattern_identifiers = function
   | PAny | PNill | PConst _ -> IdentifierSet.empty
