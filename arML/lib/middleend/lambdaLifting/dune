@@ -4,6 +4,13 @@
  (name lambdaLifting)
  (public_name arML.middleend.lambdaLifting)
  (libraries base ast common)
- (modules Llast Pprint LlExpression LlDeclaration LlProgram Runner)
+ (modules
+  Llast
+  Pprint
+  IdentifierSubstitutor
+  LlExpression
+  LlDeclaration
+  LlProgram
+  Runner)
  (instrumentation
   (backend bisect_ppx)))
