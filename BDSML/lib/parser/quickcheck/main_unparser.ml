@@ -12,7 +12,17 @@ let unparse_structure_item ppf = function
     fprintf ppf "let%a %a" unparse_rec_flag r Expr_unparser.unparse_let_binding_list l
 ;;
 
-let unparse_structure ppf sl =
+let unparse_structure structure =
+  asprintf
+    "%a"
+    (fun ppf structure ->
+      list_unparser ppf structure ~f:unparse_structure_item ~s:";;\n";
+      fprintf ppf ";;")
+    structure
+;;
+
+(*
+   let unparse_structure ppf sl =
   list_unparser ppf sl ~f:unparse_structure_item ~s:";;\n";
   fprintf ppf ";;"
-;;
+;; *)
