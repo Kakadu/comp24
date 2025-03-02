@@ -30,9 +30,14 @@
   $ ./inferencer_runner.exe < manytests/typed/006partial2.ml
   val foo : int -> int -> int -> int
   val main : int
+
   $ ./inferencer_runner.exe < manytests/typed/006partial3.ml
   val foo : int -> int -> int -> unit
   val main : int
+
+  $ ./inferencer_runner.exe < manytests/typed/007order.ml
+  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main : unit
 
   $ ./inferencer_runner.exe < manytests/typed/008ascription.ml
   val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int

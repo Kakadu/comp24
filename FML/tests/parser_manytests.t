@@ -502,7 +502,99 @@
            ))
          ])
     ]
-
+  $ ./parser_runner.exe < manytests/typed/007order.ml
+  [(NoRecDecl
+      [(DDeclaration ((PIdentifier "_start"),
+          (EFun (PUnit,
+             (EFun (PUnit,
+                (EFun ((PIdentifier "a"),
+                   (EFun (PUnit,
+                      (EFun ((PIdentifier "b"),
+                         (EFun ((PIdentifier "_c"),
+                            (EFun (PUnit,
+                               (EFun ((PIdentifier "d"),
+                                  (EFun ((PIdentifier "__"),
+                                     (ELetIn (NoRec, PUnit,
+                                        (EApplication (
+                                           (EIdentifier "print_int"),
+                                           (EApplication (
+                                              (EApplication (
+                                                 (EIdentifier "( + )"),
+                                                 (EIdentifier "a"))),
+                                              (EIdentifier "b")))
+                                           )),
+                                        (ELetIn (NoRec, PUnit,
+                                           (EApplication (
+                                              (EIdentifier "print_int"),
+                                              (EIdentifier "__"))),
+                                           (EApplication (
+                                              (EApplication (
+                                                 (EIdentifier "( + )"),
+                                                 (EApplication (
+                                                    (EApplication (
+                                                       (EIdentifier "( / )"),
+                                                       (EApplication (
+                                                          (EApplication (
+                                                             (EIdentifier
+                                                                "( * )"),
+                                                             (EIdentifier "a")
+                                                             )),
+                                                          (EIdentifier "b")))
+                                                       )),
+                                                    (EIdentifier "_c")))
+                                                 )),
+                                              (EIdentifier "d")))
+                                           ))
+                                        ))
+                                     ))
+                                  ))
+                               ))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
+          ))
+        ]);
+    (NoRecDecl
+       [(DDeclaration ((PIdentifier "main"),
+           (EApplication ((EIdentifier "print_int"),
+              (EApplication (
+                 (EApplication (
+                    (EApplication (
+                       (EApplication (
+                          (EApplication (
+                             (EApplication (
+                                (EApplication (
+                                   (EApplication (
+                                      (EApplication ((EIdentifier "_start"),
+                                         (EApplication (
+                                            (EIdentifier "print_int"),
+                                            (EConst (CInt 1))))
+                                         )),
+                                      (EApplication ((EIdentifier "print_int"),
+                                         (EConst (CInt 2))))
+                                      )),
+                                   (EConst (CInt 3)))),
+                                (EApplication ((EIdentifier "print_int"),
+                                   (EConst (CInt 4))))
+                                )),
+                             (EConst (CInt 100)))),
+                          (EConst (CInt 1000)))),
+                       (EApplication ((EIdentifier "print_int"),
+                          (EApplication ((EIdentifier "( ~- )"),
+                             (EConst (CInt 1))))
+                          ))
+                       )),
+                    (EConst (CInt 10000)))),
+                 (EApplication ((EIdentifier "( ~- )"), (EConst (CInt 555555))
+                    ))
+                 ))
+              ))
+           ))
+         ])
+    ]
   $ ./parser_runner.exe < manytests/typed/008ascription.ml
   [(NoRecDecl
       [(DDeclaration ((PIdentifier "addi"),
