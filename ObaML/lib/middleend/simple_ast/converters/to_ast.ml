@@ -2,12 +2,14 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let pvar var = Ast.PVar var
+let pattern_from_sident = function 
+| Simple_ast.SSpecial SUnit -> Ast.PConst (Ast.CUnit)
+| Simple_ast.SId id -> Ast.PVar id
 
 let rec convert_value_binding svalue_binding =
   let ident, sexpr = svalue_binding in
   let expr = convert_expr sexpr in
-  pvar ident, expr
+  pattern_from_sident ident, expr
 
 and convert_expr sexpr =
   let rec helper = function
@@ -25,7 +27,7 @@ and convert_expr sexpr =
       Ast.ETuple (List.rev rev_tup_lst)
     | Simple_ast.SEFun (ident_lst, sexpr) ->
       let rev_pat_lst =
-        List.fold_left (fun acc ident -> pvar ident :: acc) [] ident_lst
+        List.fold_left (fun acc ident -> pattern_from_sident ident :: acc) [] ident_lst
       in
       let expr = helper sexpr in
       Ast.EFun (List.rev rev_pat_lst, expr)

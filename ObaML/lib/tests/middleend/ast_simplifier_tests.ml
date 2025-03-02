@@ -20,6 +20,24 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
+  parse_simplify_and_print_result {| let a = fun [] -> [];; |};
+  [%expect {|
+    let a #gen_pat_expr#0 = if ([]  =  #gen_pat_expr#0) then [] else (#gen_matching_failed# ());; |}]
+;;
+
+let%expect_test "" =
+  parse_simplify_and_print_result {| let a x = fun () (a, b) -> (x, a, b);; |};
+  [%expect {|
+    let a x = (fun #gen_pat_expr#0 #gen_pat_expr#1 -> if (()  =  #gen_pat_expr#0) then let a = ((#gen_tuple_getter# 0) #gen_pat_expr#1) in let b = ((#gen_tuple_getter# 1) #gen_pat_expr#1) in (x, a, b) else (#gen_matching_failed# ()));; |}]
+;;
+
+let%expect_test "" =
+  parse_simplify_and_print_result {| let a = fun "a" -> 5;; |};
+  [%expect {|
+    let a #gen_pat_expr#0 = if ("a"  =  #gen_pat_expr#0) then 5 else (#gen_matching_failed# ());; |}]
+;;
+
+let%expect_test "" =
   parse_simplify_and_print_result {| let (a, b) = (4, 5);; |};
   [%expect
     {|
@@ -164,3 +182,30 @@ let%expect_test "" =
     let a x = let b = x in b;; 
     |}]
 ;;
+
+let%expect_test "" =
+  parse_simplify_and_print_result {| let () = print_int 5;; |};
+  [%expect {|
+    let #gen_pat_expr#0 = (print_int 5);;
+    let ;;
+    |}]
+;;
+
+let%expect_test "" =
+  parse_simplify_and_print_result {| let [] = [];; |};
+  [%expect {|
+    let #gen_pat_expr#0 = [];;
+    let ;;
+    |}]
+;;
+
+let%expect_test "" =
+parse_simplify_and_print_result {| let b = let 4 :: a = 3 :: [] in a;; |};
+  [%expect {| let b = let #gen_pat_expr#0 = 3 :: [] in let a = if (((#gen_list_getter_length# #gen_pat_expr#0)  >=  1)  &&  (4  =  (#gen_list_getter_head# #gen_pat_expr#0))) then (#gen_list_getter_tail# #gen_pat_expr#0) else (#gen_matching_failed# ()) in a;; |}]
+;;
+
+let%expect_test "" =
+parse_simplify_and_print_result {| let b = let a :: [] = 4 :: [] in a;; |};
+  [%expect {| let b = let #gen_pat_expr#0 = 4 :: [] in let a = if (((#gen_list_getter_length# #gen_pat_expr#0)  =  1)  &&  ([]  =  (#gen_list_getter_tail# #gen_pat_expr#0))) then (#gen_list_getter_head# #gen_pat_expr#0) else (#gen_matching_failed# ()) in a;; |}]
+;;
+

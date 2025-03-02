@@ -5,90 +5,162 @@
 open ObaML
 open Format
 
-let print_result val_pp = function
-  | Ok v -> Stdlib.Format.printf "%a" val_pp v
-  | Error _ -> Stdlib.Printf.printf "Syntax error"
+let infer_and_result fmt structure =
+  match Inferencer.run_structure_infer_with_custom_std structure Std.extended_std_lst with
+  | Ok env ->
+    Format.fprintf fmt "%a" Inferencer.TypeEnv.pretty_pp_env (Std.extended_std_lst, env)
+  | Error err -> Format.fprintf fmt "Infer: %a" Typedtree.pp_error err
 ;;
 
 let parse_and_closure_result str =
   match Parser.structure_from_string str with
-  | Ok parse_result ->
-    let structure = To_simple_ast.convert parse_result in
-    let structure = Closure_conversion.run_closure_conversion structure in
-    printf "%a" Simple_ast_pretty_printer.print_structure structure
+  | Ok structure ->
+    let simple_structure = To_simple_ast.convert structure in
+    let closure_structure = Closure_conversion.run_closure_conversion simple_structure in
+    let new_structure = To_ast.convert closure_structure in
+    Format.printf
+      "Types:\n%a\nConverted structure:\n%a\nTypes after conversions:\n%a"
+      infer_and_result
+      structure
+      Simple_ast_pretty_printer.print_structure
+      closure_structure
+      infer_and_result
+      new_structure
   | Error _ -> printf "Syntax error"
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| fun x -> fun y -> y + x |};
-  [%expect {| (fun x -> ((fun x y -> (y  +  x)) x)) |}]
+  parse_and_closure_result {| let a = fun x -> fun y -> y + x |};
+  [%expect {|
+    Types:
+    val a : int -> int -> int
+
+    Converted structure:
+    let a x = ((fun x y -> (y  +  x)) x);;
+
+    Types after conversions:
+    val a : int -> int -> int |}]
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| fun x -> fun y -> fun z -> z y x |};
-  [%expect {| (fun x -> ((fun x y -> (((fun x y z -> ((z y) x)) x) y)) x)) |}]
-;;
+  parse_and_closure_result {| let a = fun x -> fun y -> fun z -> z y x |};
+  [%expect {|
+    Types:
+    val a : 'a -> 'b -> ('b -> 'a -> 'c) -> 'c
 
-let%expect_test "" =
-  parse_and_closure_result {| let a = fun x -> x|};
-  [%expect {| let a x = x;; |}]
+    Converted structure:
+    let a x = ((fun x y -> (((fun x y z -> ((z y) x)) x) y)) x);;
+
+    Types after conversions:
+    val a : 'a -> 'b -> ('b -> 'a -> 'c) -> 'c |}]
 ;;
 
 let%expect_test "" =
   parse_and_closure_result {| let a x = fun y -> x + y|};
-  [%expect {| let a x = ((fun x y -> (x  +  y)) x);; |}]
+  [%expect {|
+    Types:
+    val a : int -> int -> int
+
+    Converted structure:
+    let a x = ((fun x y -> (x  +  y)) x);;
+
+    Types after conversions:
+    val a : int -> int -> int |}]
 ;;
 
 let%expect_test "" =
   parse_and_closure_result {| let a = fun x -> let b = x in b;;|};
-  [%expect {| let a x = let b = x in b;; |}]
+  [%expect {|
+    Types:
+    val a : 'a -> 'a
+
+    Converted structure:
+    let a x = let b = x in b;;
+
+    Types after conversions:
+    val a : 'a -> 'a |}]
 ;;
 
 let%expect_test "" =
   parse_and_closure_result
-    {| let gen seed1 seed2 = 
-  let gen n = n * seed2 + seed1 * 42 in
-  gen 0 :: [gen 1; gen 2; gen 3]|};
-  [%expect
-    {| let gen seed1 seed2 = let gen seed1 seed2 n = ((n  *  seed2)  +  (seed1  *  42)) in (((gen seed1) seed2) 0) :: (((gen seed1) seed2) 1) :: (((gen seed1) seed2) 2) :: (((gen seed1) seed2) 3) :: [];; |}]
-;;
-
-let%expect_test "" =
-  parse_and_closure_result
-    {| let fac n =
-  let rec fack n k =
-  if n <= 1 then k 1
-  else fack (n - 1) (fun m -> k (m * n))
-  in
-  fack n (fun x -> x) |};
-  [%expect
-    {| let fac n = let rec fack n k = if (n  <=  1) then (k 1) else ((fack (n  -  1)) (((fun k n m -> (k (m  *  n))) k) n)) in ((fack n) (fun x -> x));; |}]
-;;
-
-let%expect_test "" =
-  parse_and_closure_result
-    {| let main x = 
-  let const f = fun s -> f in
-   let rev_const f s = const s in
-  rev_const (fun _ -> x)|};
-  [%expect
-    {| let main x = let const f = ((fun f s -> f) f) in let rev_const const f s = (const s) in ((rev_const const) ((fun x #gen_pat_expr#0 -> x) x));; |}]
-;;
-
-let%expect_test "" =
-  parse_and_closure_result
-    {| 
- let add_cps x y = fun k -> k (x + y)
-   let square_cps x = fun k -> k (x * x)
-   let pythagoras_cps x y = fun k ->
-      square_cps x (fun x_squared ->
-        square_cps y (fun y_squared ->
-          add_cps x_squared y_squared k)) |};
+    {| let a x = let b y = (x * y * 52) :: 52 :: [] in match b 1 with 52 :: 52 :: [] -> "Nice" | _ -> "Bad" |};
   [%expect
     {|
-      let add_cps x y = (((fun x y k -> (k (x  +  y))) x) y);;
-      let square_cps x = ((fun x k -> (k (x  *  x))) x);;
-      let pythagoras_cps x y = (((fun x y k -> ((square_cps x) (((fun k y x_squared -> ((square_cps y) (((fun k x_squared y_squared -> (((add_cps x_squared) y_squared) k)) k) x_squared))) k) y))) x) y);; |}]
+      Types:
+      val a : int -> string
+
+      Converted structure:
+      let a x = let b x y = ((x  *  y)  *  52) :: 52 :: [] in let #gen_pat_expr#0 = ((b x) 1) in if (((((#gen_list_getter_length# #gen_pat_expr#0)  =  2)  &&  (52  =  (#gen_list_getter_head# #gen_pat_expr#0)))  &&  (52  =  (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0))))  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) then "Nice" else if true then "Bad" else (#gen_matching_failed# ());;
+
+      Types after conversions:
+      val a : int -> string |}]
+;;
+
+let%expect_test "" =
+  parse_and_closure_result
+    {| let a x = let b = (x * 52) :: 52 :: [] in match b with 52 :: 52 :: [] -> "Nice" | _ -> "Bad" |};
+  [%expect
+    {|
+      Types:
+      val a : int -> string
+
+      Converted structure:
+      let a x = let b = (x  *  52) :: 52 :: [] in let #gen_pat_expr#0 = b in if (((((#gen_list_getter_length# #gen_pat_expr#0)  =  2)  &&  (52  =  (#gen_list_getter_head# #gen_pat_expr#0)))  &&  (52  =  (#gen_list_getter_head# (#gen_list_getter_tail# #gen_pat_expr#0))))  &&  ([]  =  (#gen_list_getter_tail# (#gen_list_getter_tail# #gen_pat_expr#0)))) then "Nice" else if true then "Bad" else (#gen_matching_failed# ());;
+
+      Types after conversions:
+      val a : int -> string |}]
+;;
+
+let%expect_test "" =
+  parse_and_closure_result
+    {| let rec fix = fun f -> (fun x -> f (fix f) x)
+    let fac = fix (fun self -> (fun n -> if n <= 1 then 1 else n * self (n - 1)))
+    let a = fac 5 |};
+  [%expect
+    {|
+      Types:
+      val a : int
+      val fac : int -> int
+      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+
+      Converted structure:
+      let rec fix f = (((fun f fix x -> ((f (fix f)) x)) f) fix);;
+      let fac = (fix (fun self -> ((fun self n -> if (n  <=  1) then 1 else (n  *  (self (n  -  1)))) self)));;
+      let a = (fac 5);;
+
+      Types after conversions:
+      val a : int
+      val fac : int -> int
+      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b |}]
+;;
+
+let%expect_test "" =
+  parse_and_closure_result
+    {| let rev = fun lst ->
+      let rec helper = fun acc -> (fun lst ->
+      match lst with
+        | [] -> acc
+        | h :: tl -> helper (h :: acc) tl)
+      in
+      helper [] lst
+    let reversed1 = rev (1 :: 2 :: 3 :: 4 :: 5 :: [])
+    let reversed2 = rev (true :: false :: false :: false :: []) |};
+  [%expect
+    {|
+      Types:
+      val rev : 'a list -> 'a list
+      val reversed1 : int list
+      val reversed2 : bool list
+
+      Converted structure:
+      let rev lst = let rec helper acc = (((fun acc helper lst -> let #gen_pat_expr#0 = lst in if ([]  =  #gen_pat_expr#0) then acc else if ((#gen_list_getter_length# #gen_pat_expr#0)  >=  1) then let h = (#gen_list_getter_head# #gen_pat_expr#0) in let tl = (#gen_list_getter_tail# #gen_pat_expr#0) in ((helper h :: acc) tl) else (#gen_matching_failed# ())) acc) helper) in ((helper []) lst);;
+      let reversed1 = (rev 1 :: 2 :: 3 :: 4 :: 5 :: []);;
+      let reversed2 = (rev true :: false :: false :: false :: []);;
+
+      Types after conversions:
+      val rev : 'a list -> 'a list
+      val reversed1 : int list
+      val reversed2 : bool list |}]
 ;;
 
 let%expect_test "" =
@@ -96,7 +168,14 @@ let%expect_test "" =
     {| let rec y = fun x -> let a = y x in let b = fun x -> a + x in b 5;;|};
   [%expect
     {|
-      let rec y x = let a = (y x) in let b a x = (a  +  x) in ((b a) 5);; |}]
+      Types:
+      val y : 'a -> int
+
+      Converted structure:
+      let rec y x = let a = (y x) in let b a x = (a  +  x) in ((b a) 5);;
+
+      Types after conversions:
+      val y : 'a -> int |}]
 ;;
 
 let%expect_test "" =
@@ -104,7 +183,14 @@ let%expect_test "" =
     {| let rec y = fun x -> let rec a = y x in let b = fun x -> a + x in b 5;;|};
   [%expect
     {|
-      let rec y x = let rec a = (y x) in let b a x = (a  +  x) in ((b a) 5);; |}]
+      Types:
+      val y : 'a -> int
+
+      Converted structure:
+      let rec y x = let rec a = (y x) in let b a x = (a  +  x) in ((b a) 5);;
+
+      Types after conversions:
+      val y : 'a -> int |}]
 ;;
 
 let%expect_test "" =
@@ -112,33 +198,64 @@ let%expect_test "" =
     {| let rec y = fun x -> let a = fun z -> y x + z in let b = fun x -> a 5 + x in b 5;;  |};
   [%expect
     {|
-      let rec y x = let a x y z = ((y x)  +  z) in let b a x = ((a 5)  +  x) in ((b ((a x) y)) 5);; |}]
+      Types:
+      val y : 'a -> int
+
+      Converted structure:
+      let rec y x = let a x y z = ((y x)  +  z) in let b a x = ((a 5)  +  x) in ((b ((a x) y)) 5);;
+
+      Types after conversions:
+      val y : 'a -> int |}]
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| let f a b = 
-          let a x = b + x in a + b|};
+  parse_and_closure_result {| let f z y = let z x = y + x in z 5 + y|};
   [%expect {|
-      let f a b = let a b x = (b  +  x) in ((a b)  +  b);; |}]
+      Types:
+      val f : 'a -> int -> int
+
+      Converted structure:
+      let f z y = let z y x = (y  +  x) in (((z y) 5)  +  y);;
+
+      Types after conversions:
+      val f : 'a -> int -> int |}]
 ;;
 
 let%expect_test "" =
   parse_and_closure_result
     {| let rec fix f x = f (fix f) x
-  let map f p = let (a,b) = p in (f a, f b)
-  let fixpoly l =
-    fix (fun self l -> map (fun li x -> li (self l) x) l) l |};
+  let helper f p = f p
+  let zet l =
+    fix (fun self l -> helper (fun li x -> li (self l) x) l) l |};
   [%expect
     {|
+      Types:
+      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+      val helper : ('a -> 'b) -> 'a -> 'b
+      val zet : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+
+      Converted structure:
       let rec fix f x = ((f (fix f)) x);;
-      let map f p = let #gen_pat_expr#0 = p in let a = ((#gen_tuple_getter# 0) #gen_pat_expr#0) in let b = ((#gen_tuple_getter# 1) #gen_pat_expr#0) in ((f a), (f b));;
-      let fixpoly l = ((fix (fun self l -> ((map (((fun l self li x -> ((li (self l)) x)) l) self)) l))) l);; |}]
+      let helper f p = (f p);;
+      let zet l = ((fix (fun self l -> ((helper (((fun l self li x -> ((li (self l)) x)) l) self)) l))) l);;
+
+      Types after conversions:
+      val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+      val helper : ('a -> 'b) -> 'a -> 'b
+      val zet : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b |}]
 ;;
 
 let%expect_test "" =
   parse_and_closure_result {| let a x = let z = (fun zet -> zet + x) in z;; |};
   [%expect {|
-      let a x = let z x zet = (zet  +  x) in (z x);; |}]
+      Types:
+      val a : int -> int -> int
+
+      Converted structure:
+      let a x = let z x zet = (zet  +  x) in (z x);;
+
+      Types after conversions:
+      val a : int -> int -> int |}]
 ;;
 
 let%expect_test "" =
@@ -150,7 +267,14 @@ let%expect_test "" =
 ;; |};
   [%expect
     {|
-      let a x = let z x zet = (zet  +  x) in let rec a z x y = (((a z) (x  +  (z 1))) y) in (a (z x));; |}]
+      Types:
+      val a : int -> int -> 'a -> 'b
+
+      Converted structure:
+      let a x = let z x zet = (zet  +  x) in let rec a z x y = (((a z) (x  +  (z 1))) y) in (a (z x));;
+
+      Types after conversions:
+      val a : int -> int -> 'a -> 'b |}]
 ;;
 
 let parse_and_closure_result str =
@@ -165,10 +289,10 @@ let parse_and_closure_result str =
 
 let%expect_test "" =
   parse_and_closure_result
-    {| let f a b = 
-      let a x = b + x in 
-      let b x = a 1 + x in
-      a 1 + b 2;; |};
+    {| let f x y = 
+      let x z = y + z in 
+      let y z = x 1 + z in
+      x 1 + y 2;; |};
   [%expect
     {|
       let obaml0 obaml1 obaml2 = let obaml3 obaml2 obaml4 = (obaml2  +  obaml4) in let obaml5 obaml3 obaml6 = ((obaml3 1)  +  obaml6) in (((obaml3 obaml2) 1)  +  ((obaml5 (obaml3 obaml2)) 2));; |}]

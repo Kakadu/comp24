@@ -55,7 +55,13 @@ let%expect_test "" =
 let%expect_test "" =
   parse_alpha_convert_and_print_result {|fun x () x -> x () |};
   [%expect {|       
-  (fun obaml0 obaml1 obaml2 -> (obaml2 ())) |}]
+  (fun obaml0 obaml1 obaml2 -> if (()  =  obaml1) then (obaml2 ()) else (#gen_matching_failed# ())) |}]
+;;
+
+let%expect_test "" =
+  parse_alpha_convert_and_print_result {| let rec a a = a;; |};
+  [%expect {|       
+  let obaml0 obaml1 = obaml1;; |}]
 ;;
 
 let%expect_test "015tuples" =

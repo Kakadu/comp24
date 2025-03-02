@@ -28,54 +28,23 @@ let print_id fmt = function
   | Ast.Id ident -> fprintf fmt "%s" ident
 ;;
 
-let rec print_id_lst fmt = function
+let print_sid fmt = function
+  | Simple_ast.SSpecial SUnit -> fprintf fmt "()"
+  | Simple_ast.SId id -> fprintf fmt "%a" print_id id
+;;
+
+let rec print_sid_lst fmt = function
   | [] -> ()
-  | [ h ] -> fprintf fmt "%a" print_id h
-  | h :: tl -> fprintf fmt "%a %a" print_id h print_id_lst tl
+  | [ h ] -> fprintf fmt "%a" print_sid h
+  | h :: tl -> fprintf fmt "%a %a" print_sid h print_sid_lst tl
 ;;
 
 let print_const fmt = function
   | Ast.CInt num -> fprintf fmt "%d" num
-  | Ast.CString str -> fprintf fmt "%s" str
+  | Ast.CString str -> fprintf fmt "%S" str
   | Ast.CBool bool -> fprintf fmt "%s" (string_of_bool bool)
   | Ast.CEmptyList -> fprintf fmt "[]"
   | Ast.CUnit -> fprintf fmt "()"
-;;
-
-let rec print_tuple_type fmt = function
-  | [] -> ()
-  | [ h ] -> fprintf fmt "%a" print_type h
-  | h :: tl -> fprintf fmt "%a * %a" print_type h print_tuple_type tl
-
-and print_type fmt = function
-  | Ast.TInt -> fprintf fmt "int"
-  | Ast.TString -> fprintf fmt "string"
-  | Ast.TBool -> fprintf fmt "bool"
-  | Ast.TUnit -> fprintf fmt "unit"
-  | Ast.TVar id -> fprintf fmt "%a" print_id id
-  | Ast.TTuple typ_lst -> fprintf fmt "(%a)" print_tuple_type typ_lst
-  | Ast.TArrow (typ1, typ2) -> fprintf fmt "(%a -> %a)" print_type typ1 print_type typ2
-  | Ast.TList typ -> fprintf fmt "(%a) list" print_type typ
-;;
-
-let rec print_ptuple fmt = function
-  | [] -> ()
-  | [ h ] -> fprintf fmt "%a" print_pattern h
-  | h :: tl -> fprintf fmt "%a, %a" print_pattern h print_ptuple tl
-
-and print_pattern fmt = function
-  | Ast.PAny -> fprintf fmt "_"
-  | Ast.PConst const -> fprintf fmt "%a" print_const const
-  | Ast.PVar ident -> fprintf fmt "%a" print_id ident
-  | Ast.PTuple pat_lst -> fprintf fmt "(%a)" print_ptuple pat_lst
-  | Ast.PCons (pat1, pat2) -> fprintf fmt "%a :: %a" print_pattern pat1 print_pattern pat2
-  | Ast.PType (pat, typ) -> fprintf fmt "(%a : %a)" print_pattern pat print_type typ
-;;
-
-let rec print_pattern_lst fmt = function
-  | [] -> ()
-  | [ h ] -> fprintf fmt "%a" print_pattern h
-  | h :: tl -> fprintf fmt "%a %a" print_pattern h print_pattern_lst tl
 ;;
 
 let rec print_etuple fmt = function
@@ -88,7 +57,7 @@ and print_expr fmt = function
   | Simple_ast.SEVar id -> fprintf fmt "%a" print_id id
   | Simple_ast.SETuple exp_lst -> fprintf fmt "(%a)" print_etuple exp_lst
   | Simple_ast.SEFun (pat_lst, expr) ->
-    fprintf fmt "(fun %a -> %a)" print_id_lst pat_lst print_expr expr
+    fprintf fmt "(fun %a -> %a)" print_sid_lst pat_lst print_expr expr
   | Simple_ast.SELet (Ast.Nonrecursive, value_binding, expr) ->
     fprintf fmt "let %a in %a" print_value_binding value_binding print_expr expr
   | Simple_ast.SELet (Ast.Recursive, value_binding, expr) ->
@@ -108,8 +77,8 @@ and print_value_binding fmt value_binding =
   let ident, expr = value_binding in
   match expr with
   | Simple_ast.SEFun (ident_lst, fexpr) ->
-    fprintf fmt "%a = %a" print_id_lst (ident :: ident_lst) print_expr fexpr
-  | _ -> fprintf fmt "%a = %a" print_id ident print_expr expr
+    fprintf fmt "%a = %a" print_sid_lst (ident :: ident_lst) print_expr fexpr
+  | _ -> fprintf fmt "%a = %a" print_sid ident print_expr expr
 ;;
 
 let rec print_value_binding_lst fmt (value_binding_lst : Simple_ast.svalue_binding list) =

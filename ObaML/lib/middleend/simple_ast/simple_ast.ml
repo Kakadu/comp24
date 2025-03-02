@@ -4,13 +4,21 @@
 
 (** Simplified AST *)
 
-type svalue_binding = Ast.identifier * sexpr
+type sspecial = SUnit
+[@@deriving eq, show { with_path = false }]
+
+type sspident = 
+  | SId of Ast.identifier
+  | SSpecial of sspecial 
+[@@deriving eq, show { with_path = false }]
+
+type svalue_binding = sspident * sexpr
 
 and sexpr =
   | SEConst of Ast.constant
   | SEVar of Ast.identifier
   | SETuple of sexpr list
-  | SEFun of Ast.identifier list * sexpr
+  | SEFun of sspident list * sexpr
   | SELet of Ast.rec_flag * svalue_binding * sexpr
   | SEApp of sexpr * sexpr
   | SEIf of sexpr * sexpr * sexpr

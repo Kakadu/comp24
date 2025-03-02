@@ -38,7 +38,7 @@ and lift_lambdas_from_expr expr =
       let new_fobaml_id = id_from_var_name new_fobaml_var_name in
       let* new_fobaml_lst, new_expr = helper curr_fobaml_lst expr in
       let new_fobaml_value_binding =
-        new_fobaml_id, Simple_ast.SEFun (ident_lst, new_expr)
+        Simple_ast.SId new_fobaml_id, Simple_ast.SEFun (ident_lst, new_expr)
       in
       let new_fobaml =
         Simple_ast.SSILet (Ast.Nonrecursive, [ new_fobaml_value_binding ])

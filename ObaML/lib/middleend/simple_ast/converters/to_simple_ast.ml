@@ -36,29 +36,7 @@ let gen_list_getter_length lst =
   Simple_ast.SEApp (Simple_ast.SEVar gen_list_getter_length_id, lst)
 ;;
 
-let construct_new_fun_expr pat gen_var_name curr_expr =
-  let rec helper curr_gen_expr curr_expr = function
-    | Ast.PAny -> curr_expr
-    | Ast.PConst _ -> curr_expr
-    | Ast.PVar var_name ->
-      Simple_ast.SELet (Ast.Nonrecursive, (var_name, curr_gen_expr), curr_expr)
-    | Ast.PTuple tup_lst ->
-      let new_expr, _ =
-        List.fold_left
-          (fun acc tup_pat ->
-            let curr_expr, ind = acc in
-            helper (gen_tuple_getter_fun ind curr_gen_expr) curr_expr tup_pat, ind - 1)
-          (curr_expr, List.length tup_lst - 1)
-          (List.rev tup_lst)
-      in
-      new_expr
-    | Ast.PCons (pat1, pat2) ->
-      let h1 = helper (gen_list_getter_tail curr_expr) curr_expr pat2 in
-      helper (gen_list_getter_head curr_gen_expr) h1 pat1
-    | Ast.PType (pat, _) -> helper curr_gen_expr curr_expr pat
-  in
-  helper (Simple_ast.SEVar gen_var_name) curr_expr pat
-;;
+let true_condition = (Simple_ast.SEConst (Ast.CBool true))
 
 let construct_full_expr cases_conditions cases_expr =
   let rec helper = function
@@ -108,9 +86,8 @@ let concat_conditions curr_cond new_cond =
       (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id "( && )"), curr_cond), new_cond)
 ;;
 
-(** @param needs_to_check_cons_length = false only if we call helper for list tail *)
-let construct_equality_condition gen_decl_name case =
-  let pat, _ = case in
+let construct_equality_condition gen_decl_name pat curr_cond =
+  (** @param needs_to_check_cons_length = false only if we call helper for list tail *)
   let rec helper current_condition current_gen_expr needs_to_check_cons_length = function
     | Ast.PAny -> current_condition
     | Ast.PConst const ->
@@ -148,7 +125,31 @@ let construct_equality_condition gen_decl_name case =
       helper new_cond (gen_list_getter_tail current_gen_expr) false pat2
     | Ast.PType (pat, _) -> helper current_condition current_gen_expr true pat
   in
-  helper (Simple_ast.SEConst (Ast.CBool true)) (Simple_ast.SEVar gen_decl_name) true pat
+  helper curr_cond (Simple_ast.SEVar gen_decl_name) true pat
+;;
+
+let construct_new_fun_expr pat gen_var_name curr_expr =
+  let rec helper curr_gen_expr curr_expr = function
+    | Ast.PAny -> curr_expr
+    | Ast.PConst _ -> curr_expr
+    | Ast.PVar var_name ->
+      Simple_ast.SELet (Ast.Nonrecursive, (Simple_ast.SId var_name, curr_gen_expr), curr_expr)
+    | Ast.PTuple tup_lst ->
+      let new_expr, _ =
+        List.fold_left
+          (fun acc tup_pat ->
+            let curr_expr, ind = acc in
+            helper (gen_tuple_getter_fun ind curr_gen_expr) curr_expr tup_pat, ind - 1)
+          (curr_expr, List.length tup_lst - 1)
+          (List.rev tup_lst)
+      in
+      new_expr
+    | Ast.PCons (pat1, pat2) ->
+      let h1 = helper (gen_list_getter_tail curr_expr) curr_expr pat2 in
+      helper (gen_list_getter_head curr_gen_expr) h1 pat1
+    | Ast.PType (pat, _) -> helper curr_gen_expr curr_expr pat
+  in
+  helper (Simple_ast.SEVar gen_var_name) curr_expr pat
 ;;
 
 let rec construct_case_expr gen_decl_name case =
@@ -157,7 +158,7 @@ let rec construct_case_expr gen_decl_name case =
     | Ast.PAny -> current_expr
     | Ast.PConst _ -> current_expr
     | Ast.PVar var_name ->
-      Simple_ast.SELet (Ast.Nonrecursive, (var_name, current_gen_expr), current_expr)
+      Simple_ast.SELet (Ast.Nonrecursive, (Simple_ast.SId var_name, current_gen_expr), current_expr)
     | Ast.PTuple pat_lst ->
       let new_expr, _ =
         List.fold_left
@@ -215,17 +216,40 @@ and simplify_expr expr =
           (List.rev pat_lst)
           rev_new_fun_args
       in
-      Simple_ast.SEFun (List.rev rev_new_fun_args, new_expr)
+      let cond = 
+        List.fold_left2
+        (fun curr_cond pat gen_var_name -> 
+          match pat with 
+          | Ast.PVar _ -> curr_cond
+          | _ -> construct_equality_condition gen_var_name pat curr_cond)
+        true_condition
+        (List.rev pat_lst)
+        rev_new_fun_args
+      in
+      let expr_with_cond = 
+        (match cond with 
+        | Simple_ast.SEConst (Ast.CBool true) -> new_expr 
+        | _ -> Simple_ast.SEIf (cond, new_expr, gen_matching_failed))
+      in
+      let sp_new_fun_args = 
+        List.fold_left
+        (fun acc fun_arg -> 
+          Simple_ast.SId fun_arg :: acc )
+        []
+        rev_new_fun_args
+      in
+      Simple_ast.SEFun (sp_new_fun_args, expr_with_cond)
     | Ast.ELet (Ast.Nonrecursive, value_binding, expr2) ->
       let pat, expr1 = value_binding in
       (match pat with
        | Ast.PVar var_name ->
          Simple_ast.SELet
-           (Ast.Nonrecursive, (var_name, simplify_expr expr1), simplify_expr expr2)
+           (Ast.Nonrecursive, (Simple_ast.SId var_name, simplify_expr expr1), simplify_expr expr2)
        | _ ->
          let new_gen_decl_name = gen_pat_expr_name ^ string_of_int 0 in
+         let cond = construct_equality_condition (Ast.Id new_gen_decl_name) pat true_condition in 
          let rev_new_value_bindings =
-           construct_new_nonrec_value_decl value_binding new_gen_decl_name
+           construct_new_nonrec_value_decl value_binding new_gen_decl_name cond
          in
          let new_expr2 =
            List.fold_left
@@ -237,7 +261,7 @@ and simplify_expr expr =
          in
          let _, expr1 = value_binding in
          Simple_ast.SELet
-           (Ast.Nonrecursive, (Ast.Id new_gen_decl_name, simplify_expr expr1), new_expr2))
+           (Ast.Nonrecursive, (Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_expr expr1), new_expr2))
     | Ast.ELet (Ast.Recursive, value_binding, expr2) ->
       let ident, new_expr1 = construct_new_rec_value_binding value_binding in
       Simple_ast.SELet (Ast.Recursive, (ident, new_expr1), simplify_expr expr2)
@@ -251,7 +275,7 @@ and simplify_expr expr =
       (* пройти по каждому кейсу и достать equality condition *)
       let rev_equality_conditions =
         List.fold_left
-          (fun acc case -> construct_equality_condition new_gen_decl_name case :: acc)
+          (fun acc case -> let pat, _ = case in construct_equality_condition new_gen_decl_name pat true_condition :: acc)
           []
           case_lst
       in
@@ -267,7 +291,7 @@ and simplify_expr expr =
       (* собрать все через if *)
       let full_expr = construct_full_expr equality_conditions cases_expr in
       Simple_ast.SELet
-        (Ast.Nonrecursive, (new_gen_decl_name, simplify_expr expr), full_expr)
+        (Ast.Nonrecursive, (Simple_ast.SId new_gen_decl_name, simplify_expr expr), full_expr)
     | Ast.EIf (expr1, expr2, expr3) ->
       let new_expr1 = helper expr1 in
       let new_expr2 = helper expr2 in
@@ -281,12 +305,12 @@ and simplify_expr expr =
   in
   helper expr
 
-and construct_new_nonrec_value_decl value_binding gen_decl_name =
+and construct_new_nonrec_value_decl value_binding gen_decl_name cond =
   let pat, _ = value_binding in
   let rec helper acc curr_expr = function
     | Ast.PAny -> acc
     | Ast.PConst _ -> acc
-    | Ast.PVar var_id -> (var_id, curr_expr) :: acc
+    | Ast.PVar var_id -> (Simple_ast.SId var_id, curr_expr) :: acc
     | Ast.PTuple tup_lst ->
       let new_acc, _ =
         List.fold_left
@@ -302,7 +326,28 @@ and construct_new_nonrec_value_decl value_binding gen_decl_name =
       helper h1 (gen_list_getter_tail curr_expr) pat2
     | Ast.PType (pat, _) -> helper acc curr_expr pat
   in
-  helper [] (Simple_ast.SEVar (Ast.Id gen_decl_name)) pat
+  let rev_new_value_bindings = helper [] (Simple_ast.SEVar (Ast.Id gen_decl_name)) pat in
+  (* let vb_with_cond = (match new_value_bindings, cond with 
+    | [], _ | _, Simple_ast.SEConst (Ast.CBool true) -> new_value_bindings
+    | h :: tl, _ -> 
+      let ident, expr = h in 
+      (ident, Simple_ast.SEIf (cond, expr, gen_matching_failed)) :: tl)
+    in
+    List.rev vb_with_cond
+  in *)
+  let rev_new_vb_with_cond = 
+    (match cond with 
+    | Simple_ast.SEConst (Ast.CBool true) -> rev_new_value_bindings
+    | _ ->
+      let lst = List.fold_left
+      (fun acc decl -> 
+        let ident, expr = decl in 
+        (ident, Simple_ast.SEIf (cond, expr, gen_matching_failed)) :: acc)
+      []
+      rev_new_value_bindings
+      in List.rev lst) 
+  in
+  rev_new_vb_with_cond
 
 and construct_new_rec_value_binding value_binding =
   let pat, expr = value_binding in
@@ -311,7 +356,7 @@ and construct_new_rec_value_binding value_binding =
     | Ast.PVar var_id -> var_id
     | _ -> Ast.Id "Hello infer"
   in
-  var_id, simplify_expr expr
+  Simple_ast.SId var_id, simplify_expr expr
 
 and construct_new_rec_value_bindings value_binding_lst =
   let new_bindings_lst =
@@ -334,7 +379,7 @@ let simplify_structure_item structure_item =
             let new_gen_decl_name = gen_pat_expr_name ^ string_of_int gen_decl_number in
             let new_gen_decl =
               Simple_ast.SSILet
-                (Ast.Nonrecursive, [ Ast.Id new_gen_decl_name, simplify_expr expr ])
+                (Ast.Nonrecursive, [ Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_expr expr ])
             in
             ( new_gen_decl :: gen_decl_lst
             , new_gen_decl_name :: gen_decl_names
@@ -359,10 +404,11 @@ let simplify_structure_item structure_item =
           (fun acc value_binding gen_decl_name ->
             let pat, expr = value_binding in
             match pat with
-            | Ast.PVar var_name -> (var_name, simplify_expr expr) :: acc
+            | Ast.PVar var_name -> (Simple_ast.SId var_name, simplify_expr expr) :: acc
             | _ ->
+              let cond = construct_equality_condition (Ast.Id gen_decl_name) pat true_condition in 
               let rev_new_value_bindings =
-                construct_new_nonrec_value_decl value_binding gen_decl_name
+                construct_new_nonrec_value_decl value_binding gen_decl_name cond
               in
               List.append rev_new_value_bindings acc)
           []

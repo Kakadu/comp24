@@ -8,9 +8,9 @@ module VarMap = Stdlib.Map.Make (String)
 let fresh_var_name = "obaml"
 let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
 
-let get_var_name_from_id id =
-  match id with
-  | Ast.Id var_name -> var_name
+let get_var_name_from_sid = function
+  | Simple_ast.SId (Ast.Id var_name) -> Some var_name
+  | Simple_ast.SSpecial SUnit -> None
 ;;
 
 let rec convert_value_binding_expr env value_binding =
@@ -41,10 +41,13 @@ and convert_expr env expr =
         List.fold_left
           (fun acc id ->
             let* curr_id_lst, curr_env = acc in
-            let old_var = get_var_name_from_id id in
-            let* new_var = fresh_var in
-            let updated_env = VarMap.add old_var new_var curr_env in
-            return (Ast.Id new_var :: curr_id_lst, updated_env))
+            let old_var = get_var_name_from_sid id in
+            match old_var with
+            | None -> return (id :: curr_id_lst, curr_env)
+            | Some old_var ->
+              let* new_var = fresh_var in
+              let updated_env = VarMap.add old_var new_var curr_env in
+              return (Simple_ast.SId (Ast.Id new_var) :: curr_id_lst, updated_env))
           (return ([], env))
           id_lst
       in
@@ -52,22 +55,34 @@ and convert_expr env expr =
       return (Simple_ast.SEFun (List.rev rev_new_id_lst, updated_expr))
     | Simple_ast.SELet (Ast.Nonrecursive, value_binding, expr2) ->
       let old_var_id, expr1 = value_binding in
-      let old_var = get_var_name_from_id old_var_id in
-      let* new_var = fresh_var in
-      let new_value_binding = Ast.Id new_var, expr1 in
-      let* new_value_binding = convert_value_binding_expr env new_value_binding in
-      let updated_env = VarMap.add old_var new_var env in
-      let* new_expr2 = helper updated_env expr2 in
-      return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2))
+      let old_var = get_var_name_from_sid old_var_id in
+      (match old_var with 
+      | None -> 
+        let* new_value_binding = convert_value_binding_expr env value_binding in
+        let* new_expr2 = helper env expr2 in
+        return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2))
+      | Some old_var -> 
+        let* new_var = fresh_var in
+        let new_value_binding = Simple_ast.SId (Ast.Id new_var), expr1 in
+        let* new_value_binding = convert_value_binding_expr env new_value_binding in
+        let updated_env = VarMap.add old_var new_var env in
+        let* new_expr2 = helper updated_env expr2 in
+        return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2)))
     | Simple_ast.SELet (Ast.Recursive, value_binding, expr2) ->
       let old_var_id, expr1 = value_binding in
-      let old_var = get_var_name_from_id old_var_id in
-      let* new_var = fresh_var in
-      let updated_env = VarMap.add old_var new_var env in
-      let new_value_binding = Ast.Id new_var, expr1 in
-      let* new_value_binding = convert_value_binding_expr updated_env new_value_binding in
-      let* new_expr2 = helper updated_env expr2 in
-      return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2))
+      let old_var = get_var_name_from_sid old_var_id in
+      (match old_var with 
+      | None -> 
+        let* new_value_binding = convert_value_binding_expr env value_binding in
+        let* new_expr2 = helper env expr2 in
+        return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2))
+      | Some old_var -> 
+        let* new_var = fresh_var in
+        let updated_env = VarMap.add old_var new_var env in
+        let new_value_binding = Simple_ast.SId (Ast.Id new_var), expr1 in
+        let* new_value_binding = convert_value_binding_expr updated_env new_value_binding in
+        let* new_expr2 = helper updated_env expr2 in
+        return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2)))
     | Simple_ast.SEApp (expr1, expr2) ->
       let* new_expr1 = helper env expr1 in
       let* new_expr2 = helper env expr2 in
@@ -90,10 +105,13 @@ let update_value_binding_lst_vars env value_binding_lst =
     (fun acc value_binding ->
       let* value_bindings_with_new_vars, curr_env = acc in
       let old_var_id, expr = value_binding in
-      let old_var = get_var_name_from_id old_var_id in
-      let* new_var = fresh_var in
-      let updated_env = VarMap.add old_var new_var curr_env in
-      return ((Ast.Id new_var, expr) :: value_bindings_with_new_vars, updated_env))
+      let old_var = get_var_name_from_sid old_var_id in
+      (match old_var with 
+      | None -> return (value_binding :: value_bindings_with_new_vars, env)
+      | Some old_var ->
+        let* new_var = fresh_var in
+        let updated_env = VarMap.add old_var new_var curr_env in
+        return ((Simple_ast.SId (Ast.Id new_var), expr) :: value_bindings_with_new_vars, updated_env)))
     (return ([], env))
     value_binding_lst
 ;;
