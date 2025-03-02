@@ -20,9 +20,3 @@ let unparse_structure structure =
       fprintf ppf ";;")
     structure
 ;;
-
-(*
-   let unparse_structure ppf sl =
-  list_unparser ppf sl ~f:unparse_structure_item ~s:";;\n";
-  fprintf ppf ";;"
-;; *)

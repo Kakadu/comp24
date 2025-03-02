@@ -24,18 +24,18 @@ let shrink_pattern = function
 
 let rec shrink_let_binding = function
   | Pat_binding (p, e) ->
-    let* p' = shrink_pattern p in
-    let* e' = shrink_expr e in
-    return (Pat_binding (p', e'))
+    let+ p' = shrink_pattern p
+    and+ e' = shrink_expr e in
+    Pat_binding (p', e')
   | Val_binding (id, pl, e) ->
-    let* e' = shrink_expr e in
-    let* pl' = shrink_list shrink_pattern pl in
-    return (Val_binding (id, pl', e'))
+    let+ e' = shrink_expr e
+    and+ pl' = shrink_list shrink_pattern pl in
+    Val_binding (id, pl', e')
 
 and shrink_case c =
-  let* p = shrink_pattern c.left in
-  let* e = shrink_expr c.right in
-  return { left = p; right = e }
+  let+ p = shrink_pattern c.left
+  and+ e = shrink_expr c.right in
+  { left = p; right = e }
 
 and shrink_expr = function
   | Exp_type (e, t) ->
@@ -48,8 +48,8 @@ and shrink_expr = function
     let* pl' = shrink_list shrink_pattern pl in
     of_list [ Exp_fun (pl', e); e ]
   | Exp_function cl ->
-    let* cl' = shrink_list shrink_case cl in
-    return (Exp_function cl')
+    let+ cl' = shrink_list shrink_case cl in
+    Exp_function cl'
   | Exp_apply (e1, e2) -> of_list [ e1; e2 ]
   | Exp_match (e, cl) ->
     let* cl' = shrink_list shrink_case cl in
@@ -69,11 +69,11 @@ and shrink_expr = function
 
 let shrink_structure_item = function
   | Str_eval e ->
-    let* e' = shrink_expr e in
-    return (Str_eval e')
+    let+ e' = shrink_expr e in
+    Str_eval e'
   | Str_value (r, lb) ->
-    let* lb' = shrink_list shrink_let_binding lb in
-    return (Str_value (r, lb'))
+    let+ lb' = shrink_list shrink_let_binding lb in
+    Str_value (r, lb')
 ;;
 
 let shrink_structure sl = shrink_list shrink_structure_item sl
