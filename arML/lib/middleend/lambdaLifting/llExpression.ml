@@ -16,6 +16,7 @@ let rec ll_expression env replacement_map lifted = function
   | EIdentifier id -> ll_identifier replacement_map lifted id
   | EEmptyList -> return (LEEmptyList, lifted)
   | EFun ((p, ps), body) -> ll_fun env replacement_map lifted (p, ps) body
+  | ELetIn (case, cases, expr) -> ll_let_in env replacement_map lifted (case :: cases, expr)
   | EApplication (func, fst_arg, args) ->
     ll_application env replacement_map lifted (func, fst_arg, args)
   | EIfThenElse (c, b1, b2) -> ll_if_then_else env replacement_map lifted (c, b1, b2)
@@ -36,6 +37,30 @@ and ll_fun env replacement_map lifted (p, ps) body =
   let new_expr = LEIdentifier (Id name) in
   let lifted_expr = LDOrdinary ((PVar (Id name), p :: ps, lifted_body), []) in
   return @@ (new_expr, lifted_expr :: lifted_exprs)
+
+and ll_let_in env replacement_map lifted (cases, body) =
+  let* lifted_cases, lifted1, final_replacement_map =
+    List.fold_left
+      (fun acc (p, e) ->
+         let* acc_cases, acc_lifted, acc_replacement_map = acc in
+         match (p, e) with
+         | PVar id, EFun ((fp, fps), fbody) ->
+           let* lifted_fbody, lifted_exprs = ll_fun env replacement_map acc_lifted (fp, fps) fbody in
+           let ident = match lifted_fbody with
+             | LEIdentifier ik -> ik
+             | _ -> Id "a" in
+           let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
+           return (acc_cases, lifted_exprs, updated_replacement_map)
+         | _ ->
+           let* lifted_e, lifted_next = ll_expression env replacement_map acc_lifted e in
+           return ((p, lifted_e) :: acc_cases, lifted_next, acc_replacement_map))
+      (return ([], lifted, replacement_map))
+      cases
+  in
+  let* lifted_body, lifted2 = ll_expression env final_replacement_map lifted1 body in
+  match lifted_cases with
+  | hd :: tl -> return @@ (LELetIn (hd, tl, lifted_body), lifted2)
+  | _ -> return @@ (lifted_body, lifted2)
 
 and ll_identifier replacement_map lifted id =
   let new_id =
