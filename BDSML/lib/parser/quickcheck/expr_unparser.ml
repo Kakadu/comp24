@@ -29,7 +29,8 @@ let rec unparse_expr ppf = function
     fprintf ppf "match %a with %a" unparse_expr e unparse_case_list cl
   | Exp_tuple el -> fprintf ppf "(%a)" unparse_tuple el
   | Exp_construct (s, None) -> fprintf ppf "%s" s
-  | Exp_construct ("::", Some e) -> fprintf ppf "(::) %a" unparse_expr e
+  | Exp_construct ("::", Some (Exp_tuple [ l; r ])) ->
+    fprintf ppf "(%a :: %a)" unparse_expr l unparse_expr r
   | Exp_construct (s, Some e) -> fprintf ppf "%s %a" s unparse_expr e
   | Exp_if (e1, e2, None) -> fprintf ppf "if %a then %a" unparse_expr e1 unparse_expr e2
   | Exp_if (e1, e2, Some e3) ->

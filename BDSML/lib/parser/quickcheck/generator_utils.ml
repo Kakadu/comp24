@@ -1,3 +1,7 @@
+(** Copyright 2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open QCheck.Gen
 
 let gen_rest_of_ident =
@@ -8,15 +12,15 @@ let gen_rest_of_ident =
 ;;
 
 let gen_ident =
-  let* first_char = char_range 'a' 'z' in
-  let* rest = gen_rest_of_ident in
-  return (String.make 1 first_char ^ rest)
+  let+ first_char = char_range 'a' 'z'
+  and+ rest = gen_rest_of_ident in
+  String.make 1 first_char ^ rest
 ;;
 
 let gen_capitalized_ident =
-  let* first_char = char_range 'A' 'Z' in
-  let* rest = gen_rest_of_ident in
-  return (String.make 1 first_char ^ rest)
+  let+ first_char = char_range 'A' 'Z'
+  and+ rest = gen_rest_of_ident in
+  String.make 1 first_char ^ rest
 ;;
 
 let gen_list_helper main_gen_fun depth =
@@ -24,14 +28,20 @@ let gen_list_helper main_gen_fun depth =
   list_repeat len (main_gen_fun (depth / len))
 ;;
 
-let gen_construct gen construct depth tuple =
-  let* constr = oneof [ return "::"; return "[]"; gen_capitalized_ident ] in
+let rec gen_construct gen construct depth tuple_list ?(list_cons = false) =
+  let l = [ return "::"; return "[]" ] in
+  let* constr =
+    match list_cons with
+    | false -> oneof (gen_capitalized_ident :: l)
+    | _ -> oneof l
+  in
   match constr with
   | "::" ->
-    let* g = gen (depth / 2) in
-    return (construct (constr, Some g))
+    let+ g = gen (depth / 2)
+    and+ rest = gen_construct gen construct (depth / 2) tuple_list ~list_cons:true in
+    construct (constr, Some (tuple_list [ g; rest ]))
   | "[]" -> return (construct (constr, None))
   | _ ->
-    let* gt = gen_list_helper gen depth in
-    return (construct (constr, Some (tuple gt)))
+    let+ gt = gen_list_helper gen depth in
+    construct (constr, Some (tuple_list gt))
 ;;

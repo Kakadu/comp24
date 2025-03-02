@@ -36,7 +36,7 @@ let parse_pcons p =
     in
     chainr1 p helper
   in
-  constructor <|> list_cons
+  constructor <|> list_cons <|> p
 ;;
 
 let parse_por p =

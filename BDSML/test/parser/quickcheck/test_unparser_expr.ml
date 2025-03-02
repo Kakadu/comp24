@@ -195,17 +195,17 @@ let%expect_test "test match" =
 
 let%expect_test "test cons list" =
   test_expr "1 :: 2 :: []";
-  [%expect {| (::) (1, (::) (2, [])) |}]
+  [%expect {| (1 :: (2 :: [])) |}]
 ;;
 
 let%expect_test "test list" =
   test_expr "[ 1; 2 ]";
-  [%expect {| (::) (1, (::) (2, [])) |}]
+  [%expect {| (1 :: (2 :: [])) |}]
 ;;
 
 let%expect_test "test list ops inside" =
   test_expr "[ 4 > 3; 3 > 2 ]";
-  [%expect {| (::) (( > ) 4 3, (::) (( > ) 3 2, [])) |}]
+  [%expect {| (( > ) 4 3 :: (( > ) 3 2 :: [])) |}]
 ;;
 
 let%expect_test "test typexpr" =

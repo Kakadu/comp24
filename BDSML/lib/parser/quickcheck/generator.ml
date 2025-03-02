@@ -1,12 +1,25 @@
+(** Copyright 2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Parser.Ast
 open QCheck.Gen
 open Generator_utils
 
 let gen_constant =
   oneof
-    [ (small_int >|= fun x -> Const_int x)
-    ; (printable >|= fun c -> Const_char c)
-    ; (small_string >|= fun s -> Const_string s)
+    [ (let+ x = small_int in
+       Const_int x)
+    ; (let+ c = printable in
+       Const_char c)
+    ; (let+ s =
+         map
+           (fun s -> String.map (fun c -> if c = '"' then ' ' else c) s)
+           (string_size @@ int_range 2 5)
+       in
+       Const_string s)
+    ; (let+ b = bool in
+       Const_bool b)
     ]
 ;;
 
@@ -20,19 +33,27 @@ let rec gen_typexpr = function
          Type_tuple l)
       ; (let+ t = gen_typexpr (depth / 2)
          and+ id = gen_ident in
-         Type_params (t, id))
+         Type_constructor_param (t, id))
       ]
 ;;
 
 let gen_rec = oneof [ return Recursive; return Nonrecursive ]
 
-let rec gen_pattern = function
+let rec gen_pattern ?(top_level = false) = function
   | 0 ->
-    oneof
+    let gen_list =
       [ return Pat_any
-      ; (gen_ident >|= fun s -> Pat_var s)
-      ; (gen_constant >|= fun c -> Pat_constant c)
+      ; (let+ c = gen_constant in
+         Pat_constant c)
       ]
+    in
+    (match top_level with
+     | true -> oneof gen_list
+     | _ ->
+       oneof
+         ((let+ id = gen_ident in
+           Pat_var id)
+          :: gen_list))
   | depth ->
     oneof
       [ (let+ p = gen_pattern (depth / 2)
@@ -86,9 +107,6 @@ let rec gen_expr = function
          and+ e2 = gen_expr (depth / 3)
          and+ e3 = opt ~ratio:0.5 (gen_expr (depth / 3)) in
          Exp_if (e1, e2, e3))
-      ; (let+ e1 = gen_expr (depth / 2)
-         and+ e2 = gen_expr (depth / 2) in
-         Exp_sequence (e1, e2))
       ]
 
 and gen_case depth =
@@ -99,7 +117,7 @@ and gen_case depth =
 and gen_let_binding depth =
   let* e = gen_expr (depth / 2) in
   oneof
-    [ (let+ p = gen_pattern (depth / 2) in
+    [ (let+ p = gen_pattern ~top_level:true (depth / 2) in
        Pat_binding (p, e))
     ; (let+ id = gen_ident
        and+ pl = gen_list_helper gen_pattern (depth / 2) in

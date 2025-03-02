@@ -1,3 +1,7 @@
+(** Copyright 2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open QCheck.Iter
 open Parser.Ast
 open Shrinker_utils
@@ -5,7 +9,7 @@ open Shrinker_utils
 let shrink_typexpr = function
   | Type_tuple l -> of_list l
   | Type_fun l -> of_list l
-  | Type_params (t, _) -> return t
+  | Type_constructor_param (t, _) -> return t
   | _ -> empty
 ;;
 

@@ -42,41 +42,41 @@ let%expect_test "test tuple" =
 
 let%expect_test "test list 1" =
   test_pattern_unparser "[1; 2]";
-  [%expect {| (::) (1, (::) (2, [])) |}]
+  [%expect {| (1 :: (2 :: [])) |}]
 ;;
 
 let%expect_test "test list 2" =
   test_pattern_unparser "((1) :: (2) :: [])";
-  [%expect {| (::) (1, (::) (2, [])) |}]
+  [%expect {| (1 :: (2 :: [])) |}]
 ;;
 
 let%expect_test "test list 3" =
   test_pattern_unparser "[ [1] ]";
-  [%expect {| (::) ((::) (1, []), []) |}]
+  [%expect {| ((1 :: []) :: []) |}]
 ;;
 
 let%expect_test "test list 4" =
   test_pattern_unparser "[[[1]]]";
-  [%expect {| (::) ((::) ((::) (1, []), []), []) |}]
+  [%expect {| (((1 :: []) :: []) :: []) |}]
 ;;
 
 let%expect_test "test list 5" =
   test_pattern_unparser "[[[1]; [2]]; [[3]; [4]]]";
   [%expect
-    {| (::) ((::) ((::) (1, []), (::) ((::) (2, []), [])), (::) ((::) ((::) (3, []), (::) ((::) (4, []), [])), [])) |}]
+    {| (((1 :: []) :: ((2 :: []) :: [])) :: (((3 :: []) :: ((4 :: []) :: [])) :: [])) |}]
 ;;
 
 let%expect_test "cons test" =
   test_pattern_unparser "1 :: 2 :: 3";
-  [%expect {| (::) (1, (::) (2, 3)) |}]
+  [%expect {| (1 :: (2 :: 3)) |}]
 ;;
 
 let%expect_test "pat type" =
   test_pattern_unparser "([a]: int list)";
-  [%expect {| ((::) (a, []) : int list) |}]
+  [%expect {| ((a :: []) : int list) |}]
 ;;
 
 let%expect_test "or + list" =
   test_pattern_unparser "[a | b; c]";
-  [%expect {| (::) ((a | b), (::) (c, [])) |}]
+  [%expect {| ((a | b) :: (c :: [])) |}]
 ;;
