@@ -356,3 +356,21 @@ let%expect_test "test not equal" =
   [%expect {|
     bool |}]
 ;;
+
+let%expect_test "test match list" =
+  test {|let rec a n = match n with 
+  | h :: tl -> h + a tl
+  | [] -> 0
+  |};
+  [%expect {|
+    val a : int list -> int |}]
+;;
+
+let%expect_test "test function with list" =
+  test {|let rec a = function
+  | h :: tl -> h + a tl
+  | [] -> 0
+  |};
+  [%expect {|
+    val a : int list -> int |}]
+;;

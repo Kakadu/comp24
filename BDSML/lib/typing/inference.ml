@@ -288,8 +288,7 @@ and infer_construct env name = function
     and+ constr_name = find_constructor name in
     Subst.empty, TConstructor (Some fv, constr_name)
 
-and infer_match env exp cases =
-  let* sub, ty = infer_expression env exp in
+and infer_cases env cases =
   let* caseslist =
     map
       (fun case ->
@@ -299,7 +298,7 @@ and infer_match env exp cases =
         sub, ty1, ty2)
       cases
   in
-  let* sub2, ty1, ty2 =
+  let+ sub, ty1, ty2 =
     fold_left
       (fun (sub1, ty11, ty21) (sub2, ty12, ty22) ->
         let* sub3 = Subst.unify ty11 ty12 in
@@ -309,12 +308,21 @@ and infer_match env exp cases =
       (return (List.hd caseslist))
       caseslist
   in
+  sub, Subst.apply sub ty1, Subst.apply sub ty2
+
+and infer_match env exp cases =
+  let* sub, ty = infer_expression env exp in
+  let* sub2, ty1, ty2 = infer_cases env cases in
   let* sub3 = Subst.unify ty ty1 in
   let+ sub = Subst.compose_all [ sub; sub2; sub3 ] in
   sub, ty2
 
 and infer_function env cases =
-  infer_fun env [ Pat_var "a" ] (Exp_match (Exp_ident "a", cases))
+  let* fv = fresh_var in
+  let* sub, ty1, ty2 = infer_cases env cases in
+  let* sub2 = Subst.unify fv ty1 in
+  let+ sub = Subst.compose sub sub2 in
+  sub, TArrow (Subst.apply sub fv, ty2)
 
 and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = function
   | Exp_constant c -> infer_base_type c
