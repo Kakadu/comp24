@@ -2,22 +2,27 @@ open Ast
 open Base
 
 type ll_expr =
-  | LL_Const of value
-  | LL_Var of id
-  | LL_Operation of op
-  | LL_Tuple of ll_expr list
-  | LL_List of ll_expr list
-  | LL_ListConcat of ll_expr * ll_expr
-  | LL_Constraint of ll_expr * dataType
-  | LL_Application of ll_expr * ll_expr
-  | LL_Let of funType * bind list * ll_expr option
-  | LL_If of ll_expr * ll_expr * ll_expr option
-  | LL_Match of ll_expr * case list
+  | LLConst of value
+  | LLVar of id
+  | LLOperation of op
+  | LLTuple of ll_expr * ll_expr * ll_expr list
+  | LLList of ll_expr list
+  | LLListConcat of ll_expr * ll_expr
+  | LLConstraint of ll_expr * dataType
+  | LLApplication of ll_expr * ll_expr
+  | LLLet of funType * ll_bind list * ll_expr option
+  | LLIf of ll_expr * ll_expr * ll_expr option
+  | LLMatch of ll_expr * ll_case list
+[@@deriving show]
+
+and ll_bind = pattern * args * ll_expr
+and ll_case = pattern * ll_expr
+and ll_prog = ll_expr list
 
 module R = struct
   type 'a t = int -> 'a * int
 
-  let fresh last = last, last + 1
+  let fresh st = st, st + 1
 
   let ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t =
     fun m f state ->
@@ -37,40 +42,121 @@ module R = struct
   let run monad = fst @@ monad 0
 end
 
-type var_name = string
+type id = string
 
-module LL_Env = struct
-  type t = (var_name, String.comparator_witness) Set.t
+module NameSet = struct
+  type t = (id, String.comparator_witness) Set.t
 
   let empty : t = Set.empty (module String)
-  let extend (name : var_name) (env : t) : t = Set.add env name
+  let extend (name : id) (set : t) : t = Set.add set name
   let union : t -> t -> t = Set.union
+  let find (name : id) (set : t) = Set.find set ~f:(fun x -> String.equal x name)
 
-  let find_exn (name : var_name) (env : t) =
-    Set.find_exn env ~f:(fun x -> String.equal x name)
-  ;;
+  (* (a, b, c) => Var a, Var b, Var c *)
+  let to_args (set : t) : args = Set.fold set ~init:[] ~f:(fun acc id -> Var id :: acc)
 
-  let find (name : var_name) (env : t) = Set.find env ~f:(fun x -> String.equal x name)
-
-  let rec gen_name (env : t) =
+  let rec generate_name (set : t) =
     let open R in
-    let* fresh = R.fresh in
-    let varname = "LL_" ^ Int.to_string fresh in
-    match find varname env with
-    | None -> R.return (extend varname env, varname)
-    | Some _ -> gen_name env
+    let* fresh_num = R.fresh in
+    let varname = "LL_arg_" ^ Int.to_string fresh_num in
+    match find varname set with
+    | None -> R.return (extend varname set, varname)
+    | Some _ -> generate_name set
   ;;
 end
 
-let rec lift_pattern (env : LL_Env.t) = function
-  | Const _ | Wildcard -> env
-  | Var id -> LL_Env.extend id env
-  | Tuple pts ->
-    List.fold pts ~init:env ~f:(fun env p -> LL_Env.union env (lift_pattern env p))
-  | List   
-  | _ -> failwith "rofl"
+module NameEnv = struct
+  type t = (id, id, String.comparator_witness) Map.t
+
+  let empty : t = Map.empty (module String)
+  let find key (env : t) = Map.find env key
+  let extend (k, v) (env : t) = Map.set env ~key:k ~data:v
+
+  let rec generate_name (env : t) (name : id) =
+    let open R in
+    let* fresh_num = R.fresh in
+    let varname = "LL_fun_" ^ Int.to_string fresh_num in
+    match find varname env with
+    | None -> R.return (extend (name, varname) env, varname)
+    | Some _ -> generate_name env name
+  ;;
+end
+
+open R
+
+(* Simplify weird patterns in function arguments *)
+let simplify_arguments p_args expr : (expr * NameSet.t) R.t =
+  let rec helper (acc : expr) (names : NameSet.t) = function
+    | [] -> R.return (acc, names)
+    | Var id :: tl -> helper acc (NameSet.extend id names) tl
+    | head_p :: tl ->
+      let* names, new_name = NameSet.generate_name names in
+      (* match <new_name> with head_p -> acc *)
+      helper (Match (EVar new_name, [ head_p, acc ])) names tl
+  in
+  helper expr NameSet.empty p_args
 ;;
-(*
-| ListConcat
-| Constraint 
-| Operation *)
+
+(* 'Let' constructions that should be lifted *)
+type lifted_lets = ll_expr list
+
+(*  Transformed part of the expression + 'Let' constructions that should be lifted *)
+type ll_result = ll_expr * lifted_lets
+
+let rec ll_bind
+  (acc : lifted_lets)
+  (env : NameEnv.t)
+  ((name, args, expr) : string * args * expr)
+  =
+  match args with
+  | [] ->
+    let* llexpr, lifted = ll_expr acc env expr in
+    let (new_bind : ll_bind) = Var name, [], llexpr in
+    R.return (env, new_bind, lifted)
+  | args ->
+    let* env, new_name = NameEnv.generate_name env name in
+    let* expr, nameset = simplify_arguments args expr in
+    let* llexpr, lifted = ll_expr acc env expr in
+    let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
+    R.return (env, new_bind, lifted)
+
+and ll_expr (acc : lifted_lets) (env : NameEnv.t) (expr : expr) : ll_result R.t =
+  match expr with
+  | Let (rec_flag, (Var name, args, expr) :: tl_bind, in_scope) ->
+    let* env, new_bind, lifted = ll_bind acc env (name, args, expr) in
+    let* env, new_binds, lifted =
+      List.fold
+        tl_bind
+        ~init:(R.return (env, [ new_bind ], lifted))
+        ~f:(fun acc bnd ->
+          let* env, binds, lifted = acc in
+          match bnd with
+          | Var name, args, expr ->
+            let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+            R.return (env, new_bind :: binds, lifted)
+          | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
+    in
+    (match in_scope with
+     | Some scope ->
+       let* ll_scope, lifted = ll_expr lifted env scope in
+       R.return (LLLet (rec_flag, new_binds, Some ll_scope), lifted)
+     | None -> R.return (LLLet (rec_flag, new_binds, None), lifted))
+  | _ -> failwith "Incorrect expression was encountered during LL"
+;;
+
+(* let rec pattern_names (set : NameSet.t) =
+   let env_fold (set : NameSet.t) pts =
+   List.fold pts ~init:set ~f:(fun set p -> NameSet.union set (pattern_names set p))
+   in
+   function
+   | Const _ | Wildcard | Operation _ -> set
+   | Var id -> NameSet.extend id set
+   | Tuple (a, b, tl) ->
+   let pts = a :: b :: tl in
+   env_fold set pts
+   | List pts -> env_fold set pts
+   | ListConcat (l_pt, r_pt) ->
+   let l_env = pattern_names set l_pt in
+   pattern_names l_env r_pt
+   | Constraint (p, _) -> pattern_names set p
+   ;; *)
