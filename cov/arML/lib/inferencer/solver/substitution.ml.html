@@ -204,7 +204,7 @@ open TypeErrors
    the second is what it should be replaced with. *)
 type t = (int, typ, Base.Int.comparator_witness) Base.Map.t
 
-let empty = Base.Map.empt<span data-count="66">y</span> (module Base.Int)
+let empty = Base.Map.empt<span data-count="80">y</span> (module Base.Int)
 
 let singleton k v =
   <span data-count="5706">i</span>f OccursChecker.occurs_check k v

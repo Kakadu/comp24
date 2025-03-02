@@ -84,10 +84,10 @@ let parse_expression input =
 ;;
 
 let parse_program input =
-  <span data-count="121">l</span>et sep = option () (skip_wspace *<span data-count="121">&gt;</span> strin<span data-count="121">g</span> ";;" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> ()) in
-  <span data-count="121">p</span>arse_string
+  <span data-count="162">l</span>et sep = option () (skip_wspace *<span data-count="162">&gt;</span> strin<span data-count="162">g</span> ";;" *<span data-count="162">&gt;</span> retur<span data-count="162">n</span> ()) in
+  <span data-count="162">p</span>arse_string
     ~consume:All
-    (many<span data-count="121">1</span> (Declaration.parse_declaration &lt;<span data-count="121">*</span> sep &lt;<span data-count="121">*</span> skip_wspace))
+    (many<span data-count="162">1</span> (Declaration.parse_declaration &lt;<span data-count="162">*</span> sep &lt;<span data-count="162">*</span> skip_wspace))
     input
 ;;
 </code></pre>

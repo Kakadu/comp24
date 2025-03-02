@@ -685,7 +685,7 @@ open Common
 
 let parse_constant_expr =
   let* constant = parse_constant in
-  <span data-count="2053091">r</span>eturn @@ EConstant constant
+  <span data-count="2735826">r</span>eturn @@ EConstant constant
 ;;
 
 (* ---------------- *)
@@ -693,8 +693,8 @@ let parse_constant_expr =
 (* Identifiers expression parsers *)
 
 let parse_identifier_expr =
-  let* identifier = parse_identifier &lt;|<span data-count="66">&gt;</span> parse_operator in
-  <span data-count="1410482">r</span>eturn @@ EIdentifier identifier
+  let* identifier = parse_identifier &lt;|<span data-count="80">&gt;</span> parse_operator in
+  <span data-count="1878574">r</span>eturn @@ EIdentifier identifier
 ;;
 
 (* ---------------- *)
@@ -702,8 +702,8 @@ let parse_identifier_expr =
 (* Empty list parsers *)
 
 let parse_empty_list_expr =
-  let* _ = skip_wspace *<span data-count="66">&gt;</span> bracket<span data-count="66">s</span> skip_wspace in
-  <span data-count="33752">r</span>eturn EEmptyList
+  let* _ = skip_wspace *<span data-count="80">&gt;</span> bracket<span data-count="80">s</span> skip_wspace in
+  <span data-count="44968">r</span>eturn EEmptyList
 ;;
 
 (* ---------------- *)
@@ -711,43 +711,43 @@ let parse_empty_list_expr =
 (* Function parsers *)
 
 let parse_fun_expr pe =
-  <span data-count="62">l</span>et* args = strin<span data-count="62">g</span> "fun" *<span data-count="62">&gt;</span> skip_wspace1 *<span data-count="62">&gt;</span> sep_by<span data-count="62">1</span> skip_wspace Pattern.parse_pattern in
-  <span data-count="31984">l</span>et* args_tuple =
+  <span data-count="76">l</span>et* args = strin<span data-count="76">g</span> "fun" *<span data-count="76">&gt;</span> skip_wspace1 *<span data-count="76">&gt;</span> sep_by<span data-count="76">1</span> skip_wspace Pattern.parse_pattern in
+  <span data-count="42398">l</span>et* args_tuple =
     match args with
-    | <span data-count="31984">h</span>d :: tl -&gt; retur<span data-count="31984">n</span> (hd, tl)
+    | <span data-count="42398">h</span>d :: tl -&gt; retur<span data-count="42398">n</span> (hd, tl)
     | <span data-count="0">[</span>] -&gt; fai<span data-count="0">l</span> "Syntax error: function must have at least one argument."
   in
-  <span data-count="31984">l</span>et* typ_opt =
+  <span data-count="42398">l</span>et* typ_opt =
     let typ_parser =
       skip_wspace
-      *<span data-count="31984">&gt;</span> cha<span data-count="31984">r</span> ':'
-      *<span data-count="31984">&gt;</span> skip_wspace
+      *<span data-count="42398">&gt;</span> cha<span data-count="42398">r</span> ':'
+      *<span data-count="42398">&gt;</span> skip_wspace
       *&gt;
       let* typ = Type.parse_type in
       <span data-count="4">r</span>eturn @@ Some typ
     in
-    <span data-count="31984">o</span>ptio<span data-count="31984">n</span> None typ_parser
+    <span data-count="42398">o</span>ptio<span data-count="42398">n</span> None typ_parser
   in
-  <span data-count="31984">l</span>et* expr = skip_wspace *<span data-count="31984">&gt;</span> strin<span data-count="31984">g</span> "-&gt;" *<span data-count="31984">&gt;</span> skip_wspace *<span data-count="31984">&gt;</span> pe in
-  <span data-count="31984">l</span>et* expr =
+  <span data-count="42398">l</span>et* expr = skip_wspace *<span data-count="42398">&gt;</span> strin<span data-count="42398">g</span> "-&gt;" *<span data-count="42398">&gt;</span> skip_wspace *<span data-count="42398">&gt;</span> pe in
+  <span data-count="42398">l</span>et* expr =
     match typ_opt with
     | <span data-count="4">S</span>ome typ -&gt; retur<span data-count="4">n</span> @@ ETyped (expr, typ)
-    | <span data-count="31980">_</span> -&gt; retur<span data-count="31980">n</span> expr
+    | <span data-count="42394">_</span> -&gt; retur<span data-count="42394">n</span> expr
   in
-  <span data-count="31984">r</span>eturn @@ EFun (args_tuple, expr)
+  <span data-count="42398">r</span>eturn @@ EFun (args_tuple, expr)
 ;;
 
 let parse_function_expr pe =
-  <span data-count="62">l</span>et* _ = strin<span data-count="62">g</span> "function" *<span data-count="62">&gt;</span> skip_wspace1 in
-  <span data-count="42">l</span>et parse_case =
-    let* pattern = Pattern.parse_pattern &lt;<span data-count="42">*</span> skip_wspace in
+  <span data-count="76">l</span>et* _ = strin<span data-count="76">g</span> "function" *<span data-count="76">&gt;</span> skip_wspace1 in
+  <span data-count="44">l</span>et parse_case =
+    let* pattern = Pattern.parse_pattern &lt;<span data-count="44">*</span> skip_wspace in
     (* !!! *)
-    <span data-count="90">l</span>et* case_expr = strin<span data-count="90">g</span> "-&gt;" *<span data-count="90">&gt;</span> skip_wspace *<span data-count="90">&gt;</span> pe in
-    <span data-count="90">r</span>eturn (pattern, case_expr)
+    <span data-count="94">l</span>et* case_expr = strin<span data-count="94">g</span> "-&gt;" *<span data-count="94">&gt;</span> skip_wspace *<span data-count="94">&gt;</span> pe in
+    <span data-count="94">r</span>eturn (pattern, case_expr)
   in
-  let* first_case = cha<span data-count="42">r</span> '|' *<span data-count="42">&gt;</span> skip_wspace *<span data-count="42">&gt;</span> parse_case &lt;|<span data-count="42">&gt;</span> parse_case in
-  <span data-count="42">l</span>et* other_cases = man<span data-count="42">y</span> (skip_wspace *<span data-count="42">&gt;</span> cha<span data-count="42">r</span> '|' *<span data-count="42">&gt;</span> skip_wspace *<span data-count="42">&gt;</span> parse_case) in
-  <span data-count="42">r</span>eturn @@ EFunction (first_case, other_cases)
+  let* first_case = cha<span data-count="44">r</span> '|' *<span data-count="44">&gt;</span> skip_wspace *<span data-count="44">&gt;</span> parse_case &lt;|<span data-count="44">&gt;</span> parse_case in
+  <span data-count="44">l</span>et* other_cases = man<span data-count="44">y</span> (skip_wspace *<span data-count="44">&gt;</span> cha<span data-count="44">r</span> '|' *<span data-count="44">&gt;</span> skip_wspace *<span data-count="44">&gt;</span> parse_case) in
+  <span data-count="44">r</span>eturn @@ EFunction (first_case, other_cases)
 ;;
 
 (* ---------------- *)
@@ -755,17 +755,17 @@ let parse_function_expr pe =
 (* If then else parser *)
 
 let parse_if_then_else_expr pe =
-  <span data-count="62">l</span>et* cond = strin<span data-count="62">g</span> "if" *<span data-count="62">&gt;</span> pe in
-  <span data-count="5946">l</span>et* then_branch = skip_wspace *<span data-count="5946">&gt;</span> strin<span data-count="5946">g</span> "then" *<span data-count="5946">&gt;</span> pe in
-  <span data-count="5946">l</span>et* else_branch =
-    let opt p = <span data-count="5946">o</span>ption None (p &gt;&gt;<span data-count="5946">|</span> Option.some) in
-    let p_else = skip_wspace *&gt; strin<span data-count="5946">g</span> "else" in
-    <span data-count="5946">l</span>et* option_else_branch = op<span data-count="5946">t</span> p_else in
-    <span data-count="5946">m</span>atch option_else_branch with
-    | <span data-count="5946">S</span>ome _ -&gt; skip_wspace *<span data-count="5946">&gt;</span> pe &gt;&gt;| Option.some
+  <span data-count="76">l</span>et* cond = strin<span data-count="76">g</span> "if" *<span data-count="76">&gt;</span> pe in
+  <span data-count="7894">l</span>et* then_branch = skip_wspace *<span data-count="7894">&gt;</span> strin<span data-count="7894">g</span> "then" *<span data-count="7894">&gt;</span> pe in
+  <span data-count="7894">l</span>et* else_branch =
+    let opt p = <span data-count="7894">o</span>ption None (p &gt;&gt;<span data-count="7894">|</span> Option.some) in
+    let p_else = skip_wspace *&gt; strin<span data-count="7894">g</span> "else" in
+    <span data-count="7894">l</span>et* option_else_branch = op<span data-count="7894">t</span> p_else in
+    <span data-count="7894">m</span>atch option_else_branch with
+    | <span data-count="7894">S</span>ome _ -&gt; skip_wspace *<span data-count="7894">&gt;</span> pe &gt;&gt;| Option.some
     | <span data-count="0">N</span>one -&gt; return None
   in
-  <span data-count="5946">r</span>eturn @@ EIfThenElse (cond, then_branch, else_branch)
+  <span data-count="7894">r</span>eturn @@ EIfThenElse (cond, then_branch, else_branch)
 ;;
 
 (* ---------------- *)
@@ -773,9 +773,9 @@ let parse_if_then_else_expr pe =
 (* Application parser *)
 
 let parse_application_expr pe =
-  <span data-count="62">l</span>et* func = pe in
-  <span data-count="2226504">l</span>et* args = many<span data-count="2226504">1</span> (skip_wspace *<span data-count="2226504">&gt;</span> pe) in
-  <span data-count="786196">r</span>eturn @@ EApplication (func, List.h<span data-count="786196">d</span> args, List.t<span data-count="786196">l</span> args)
+  <span data-count="76">l</span>et* func = pe in
+  <span data-count="2966361">l</span>et* args = many<span data-count="2966361">1</span> (skip_wspace *<span data-count="2966361">&gt;</span> pe) in
+  <span data-count="1048092">r</span>eturn @@ EApplication (func, List.h<span data-count="1048092">d</span> args, List.t<span data-count="1048092">l</span> args)
 ;;
 
 (* ---------------- *)
@@ -783,21 +783,21 @@ let parse_application_expr pe =
 (* List parsers *)
 
 let parse_list_expr pe =
-  <span data-count="62">l</span>et main_parser = brackets @@ sep_b<span data-count="62">y</span> (skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> ';' &lt;<span data-count="62">*</span> skip_wspace) pe in
-  <span data-count="62">l</span>et rec constructor_helper = function
-    | <span data-count="230179">[</span>] -&gt; EEmptyList
-    | <span data-count="689704">h</span>d :: tl -&gt; EListConstructor (hd, constructor_helpe<span data-count="689704">r</span> tl)
+  <span data-count="76">l</span>et main_parser = brackets @@ sep_b<span data-count="76">y</span> (skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> ';' &lt;<span data-count="76">*</span> skip_wspace) pe in
+  <span data-count="76">l</span>et rec constructor_helper = function
+    | <span data-count="306834">[</span>] -&gt; EEmptyList
+    | <span data-count="919476">h</span>d :: tl -&gt; EListConstructor (hd, constructor_helpe<span data-count="919476">r</span> tl)
   in
   let* patterns = main_parser in
-  <span data-count="230179">r</span>eturn @@ constructor_helpe<span data-count="230179">r</span> patterns
+  <span data-count="306834">r</span>eturn @@ constructor_helpe<span data-count="306834">r</span> patterns
 ;;
 
 let parse_list_constructor_expr pe =
-  <span data-count="62">l</span>et constructor hd tl = <span data-count="730">E</span>ListConstructor (hd, tl) in
+  <span data-count="76">l</span>et constructor hd tl = <span data-count="923">E</span>ListConstructor (hd, tl) in
   let parse_constructor =
-    skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "::" *<span data-count="62">&gt;</span> skip_wspace *&gt; retur<span data-count="62">n</span> constructor
+    skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "::" *<span data-count="76">&gt;</span> skip_wspace *&gt; retur<span data-count="76">n</span> constructor
   in
-  <span data-count="62">c</span>hainr1 pe parse_constructor
+  <span data-count="76">c</span>hainr1 pe parse_constructor
 ;;
 
 (* ---------------- *)
@@ -805,12 +805,12 @@ let parse_list_constructor_expr pe =
 (* Tuple pattern parser *)
 
 let parse_tuple_expr pe =
-  <span data-count="62">p</span>arens
+  <span data-count="76">p</span>arens
   @@
-  let* patterns = sep_b<span data-count="62">y</span> (skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> ',' &lt;<span data-count="62">*</span> skip_wspace) pe in
-  <span data-count="63350">m</span>atch patterns with
-  | <span data-count="63008">p</span>1 :: p2 :: ps -&gt; return (ETuple (p1, p2, ps))
-  | <span data-count="342">_</span> -&gt; fail "Syntax error: tuple must have at least two patterns"
+  let* patterns = sep_b<span data-count="76">y</span> (skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> ',' &lt;<span data-count="76">*</span> skip_wspace) pe in
+  <span data-count="84208">m</span>atch patterns with
+  | <span data-count="83846">p</span>1 :: p2 :: ps -&gt; return (ETuple (p1, p2, ps))
+  | <span data-count="362">_</span> -&gt; fail "Syntax error: tuple must have at least two patterns"
 ;;
 
 (* ---------------- *)
@@ -818,48 +818,48 @@ let parse_tuple_expr pe =
 (* Let ... in ... parser *)
 
 let parse_let_in_expr pe =
-  <span data-count="62">l</span>et* decl =
-    skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "let" *<span data-count="62">&gt;</span> skip_wspace1 *<span data-count="62">&gt;</span> optio<span data-count="62">n</span> "" (strin<span data-count="62">g</span> "rec" &lt;<span data-count="62">*</span> skip_wspace1)
+  <span data-count="76">l</span>et* decl =
+    skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "let" *<span data-count="76">&gt;</span> skip_wspace1 *<span data-count="76">&gt;</span> optio<span data-count="76">n</span> "" (strin<span data-count="76">g</span> "rec" &lt;<span data-count="76">*</span> skip_wspace1)
   in
-  <span data-count="412240">l</span>et parse_binding () =
-    <span data-count="824480">l</span>et* args = many<span data-count="824480">1</span> Pattern.parse_pattern in
-    <span data-count="413530">l</span>et* typ_opt =
+  <span data-count="549587">l</span>et parse_binding () =
+    <span data-count="1099174">l</span>et* args = many<span data-count="1099174">1</span> Pattern.parse_pattern in
+    <span data-count="551295">l</span>et* typ_opt =
       let typ_parser =
         skip_wspace
-        *<span data-count="413530">&gt;</span> cha<span data-count="413530">r</span> ':'
-        *<span data-count="413530">&gt;</span> skip_wspace
+        *<span data-count="551295">&gt;</span> cha<span data-count="551295">r</span> ':'
+        *<span data-count="551295">&gt;</span> skip_wspace
         *&gt;
         let* typ = Type.parse_type in
         <span data-count="8">r</span>eturn @@ Some typ
       in
-      <span data-count="413530">o</span>ptio<span data-count="413530">n</span> None typ_parser
+      <span data-count="551295">o</span>ptio<span data-count="551295">n</span> None typ_parser
     in
-    <span data-count="413530">l</span>et tying = skip_wspace *&gt; strin<span data-count="413530">g</span> "=" in
-    <span data-count="413530">l</span>et main_pattern = List.hd args in
-    <span data-count="413530">l</span>et* binding_expr = tying *<span data-count="413530">&gt;</span> skip_wspace *<span data-count="413530">&gt;</span> pe in
-    <span data-count="413530">l</span>et* binding_expr =
+    <span data-count="551295">l</span>et tying = skip_wspace *&gt; strin<span data-count="551295">g</span> "=" in
+    <span data-count="551295">l</span>et main_pattern = List.hd args in
+    <span data-count="551295">l</span>et* binding_expr = tying *<span data-count="551295">&gt;</span> skip_wspace *<span data-count="551295">&gt;</span> pe in
+    <span data-count="551295">l</span>et* binding_expr =
       match args with
-      | <span data-count="12747">_</span> :: md :: tl -&gt; EFun ((md, tl), binding_expr) |&gt; retur<span data-count="12747">n</span>
-      | <span data-count="400783">_</span> -&gt; retur<span data-count="400783">n</span> binding_expr
+      | <span data-count="16963">_</span> :: md :: tl -&gt; EFun ((md, tl), binding_expr) |&gt; retur<span data-count="16963">n</span>
+      | <span data-count="534332">_</span> -&gt; retur<span data-count="534332">n</span> binding_expr
     in
-    <span data-count="413530">l</span>et* binding_expr =
+    <span data-count="551295">l</span>et* binding_expr =
       match typ_opt with
       | <span data-count="8">S</span>ome typ -&gt; retur<span data-count="8">n</span> @@ ETyped (binding_expr, typ)
-      | <span data-count="413522">_</span> -&gt; retur<span data-count="413522">n</span> binding_expr
+      | <span data-count="551287">_</span> -&gt; retur<span data-count="551287">n</span> binding_expr
     in
-    <span data-count="413530">r</span>eturn (main_pattern, binding_expr)
+    <span data-count="551295">r</span>eturn (main_pattern, binding_expr)
   in
-  let* main_binding = parse_bindin<span data-count="412240">g</span> () in
-  <span data-count="412240">l</span>et* and_bindings =
-    man<span data-count="412240">y</span> (skip_wspace *<span data-count="412240">&gt;</span> strin<span data-count="412240">g</span> "and" *<span data-count="412240">&gt;</span> skip_wspace1 *<span data-count="412240">&gt;</span> parse_bindin<span data-count="412240">g</span> ())
+  let* main_binding = parse_bindin<span data-count="549587">g</span> () in
+  <span data-count="549587">l</span>et* and_bindings =
+    man<span data-count="549587">y</span> (skip_wspace *<span data-count="549587">&gt;</span> strin<span data-count="549587">g</span> "and" *<span data-count="549587">&gt;</span> skip_wspace1 *<span data-count="549587">&gt;</span> parse_bindin<span data-count="549587">g</span> ())
   in
-  <span data-count="412240">l</span>et* in_expr = skip_wspace *<span data-count="412240">&gt;</span> strin<span data-count="412240">g</span> "in" *<span data-count="412240">&gt;</span> skip_wspace *<span data-count="412240">&gt;</span> pe in
-  <span data-count="373002">l</span>et let_binding main_binding and_bindings expr =
-    <span data-count="373002">m</span>atch decl with
-    | <span data-count="818">"</span>rec" -&gt; ERecLetIn (main_binding, and_bindings, expr)
-    | <span data-count="372184">_</span> -&gt; ELetIn (main_binding, and_bindings, expr)
+  <span data-count="549587">l</span>et* in_expr = skip_wspace *<span data-count="549587">&gt;</span> strin<span data-count="549587">g</span> "in" *<span data-count="549587">&gt;</span> skip_wspace *<span data-count="549587">&gt;</span> pe in
+  <span data-count="497282">l</span>et let_binding main_binding and_bindings expr =
+    <span data-count="497282">m</span>atch decl with
+    | <span data-count="1086">"</span>rec" -&gt; ERecLetIn (main_binding, and_bindings, expr)
+    | <span data-count="496196">_</span> -&gt; ELetIn (main_binding, and_bindings, expr)
   in
-  return (let_bindin<span data-count="373002">g</span> main_binding and_bindings in_expr)
+  return (let_bindin<span data-count="497282">g</span> main_binding and_bindings in_expr)
 ;;
 
 (* ---------------- *)
@@ -867,17 +867,17 @@ let parse_let_in_expr pe =
 (* Match with parser *)
 
 let parse_match_with_expr pe =
-  <span data-count="62">l</span>et* expr =
-    strin<span data-count="62">g</span> "match" *<span data-count="62">&gt;</span> skip_wspace *<span data-count="62">&gt;</span> pe &lt;<span data-count="62">*</span> skip_wspace &lt;<span data-count="62">*</span> strin<span data-count="62">g</span> "with" &lt;<span data-count="62">*</span> skip_wspace
+  <span data-count="76">l</span>et* expr =
+    strin<span data-count="76">g</span> "match" *<span data-count="76">&gt;</span> skip_wspace *<span data-count="76">&gt;</span> pe &lt;<span data-count="76">*</span> skip_wspace &lt;<span data-count="76">*</span> strin<span data-count="76">g</span> "with" &lt;<span data-count="76">*</span> skip_wspace
   in
-  <span data-count="19420">l</span>et parse_case =
-    let* pattern = skip_wspace *<span data-count="19420">&gt;</span> Pattern.parse_pattern &lt;<span data-count="19420">*</span> skip_wspace in
-    <span data-count="39092">l</span>et* case_expr = strin<span data-count="39092">g</span> "-&gt;" *<span data-count="39092">&gt;</span> skip_wspace *<span data-count="39092">&gt;</span> pe &lt;<span data-count="39092">*</span> skip_wspace in
-    <span data-count="39092">r</span>eturn (pattern, case_expr)
+  <span data-count="25856">l</span>et parse_case =
+    let* pattern = skip_wspace *<span data-count="25856">&gt;</span> Pattern.parse_pattern &lt;<span data-count="25856">*</span> skip_wspace in
+    <span data-count="52040">l</span>et* case_expr = strin<span data-count="52040">g</span> "-&gt;" *<span data-count="52040">&gt;</span> skip_wspace *<span data-count="52040">&gt;</span> pe &lt;<span data-count="52040">*</span> skip_wspace in
+    <span data-count="52040">r</span>eturn (pattern, case_expr)
   in
-  let* first_case = cha<span data-count="19420">r</span> '|' *<span data-count="19420">&gt;</span> skip_wspace *<span data-count="19420">&gt;</span> parse_case &lt;|<span data-count="19420">&gt;</span> parse_case in
-  <span data-count="19420">l</span>et* other_cases = man<span data-count="19420">y</span> (cha<span data-count="19420">r</span> '|' *<span data-count="19420">&gt;</span> skip_wspace *<span data-count="19420">&gt;</span> parse_case) in
-  <span data-count="19420">r</span>eturn (EMatchWith (expr, first_case, other_cases))
+  let* first_case = cha<span data-count="25856">r</span> '|' *<span data-count="25856">&gt;</span> skip_wspace *<span data-count="25856">&gt;</span> parse_case &lt;|<span data-count="25856">&gt;</span> parse_case in
+  <span data-count="25856">l</span>et* other_cases = man<span data-count="25856">y</span> (cha<span data-count="25856">r</span> '|' *<span data-count="25856">&gt;</span> skip_wspace *<span data-count="25856">&gt;</span> parse_case) in
+  <span data-count="25856">r</span>eturn (EMatchWith (expr, first_case, other_cases))
 ;;
 
 (* ---------------- *)
@@ -885,22 +885,22 @@ let parse_match_with_expr pe =
 (* Binary operation parser *)
 
 let parse_binary_operation_expr pe =
-  <span data-count="62">l</span>et addition = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '+' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( + )")) in
-  <span data-count="62">l</span>et subtraction = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '-' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( - )")) in
-  <span data-count="62">l</span>et multiplication = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '*' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( * )")) in
-  <span data-count="62">l</span>et division = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '/' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( / )")) in
-  <span data-count="62">l</span>et mod_div = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '%' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( % )")) in
-  <span data-count="62">l</span>et eqality1 = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '=' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( = )")) in
-  <span data-count="62">l</span>et eqality2 = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "==" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( == )")) in
-  <span data-count="62">l</span>et neqality1 = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "&lt;&gt;" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &lt;&gt; )")) in
-  <span data-count="62">l</span>et neqality2 = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "!=" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( != )")) in
-  <span data-count="62">l</span>et logand = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "&amp;&amp;" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &amp;&amp; )")) in
-  <span data-count="62">l</span>et logor = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "||" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( || )")) in
-  <span data-count="62">l</span>et larger = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '&gt;' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &gt; )")) in
-  <span data-count="62">l</span>et largerEq = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "&gt;=" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &gt;= )")) in
-  <span data-count="62">l</span>et less = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '&lt;' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &lt; )")) in
-  <span data-count="62">l</span>et lessEq = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "&lt;=" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "( &lt;= )")) in
-  <span data-count="62">l</span>et binary_operations =
+  <span data-count="76">l</span>et addition = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '+' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( + )")) in
+  <span data-count="76">l</span>et subtraction = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '-' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( - )")) in
+  <span data-count="76">l</span>et multiplication = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '*' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( * )")) in
+  <span data-count="76">l</span>et division = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '/' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( / )")) in
+  <span data-count="76">l</span>et mod_div = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '%' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( % )")) in
+  <span data-count="76">l</span>et eqality1 = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '=' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( = )")) in
+  <span data-count="76">l</span>et eqality2 = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "==" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( == )")) in
+  <span data-count="76">l</span>et neqality1 = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "&lt;&gt;" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &lt;&gt; )")) in
+  <span data-count="76">l</span>et neqality2 = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "!=" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( != )")) in
+  <span data-count="76">l</span>et logand = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "&amp;&amp;" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &amp;&amp; )")) in
+  <span data-count="76">l</span>et logor = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "||" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( || )")) in
+  <span data-count="76">l</span>et larger = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '&gt;' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &gt; )")) in
+  <span data-count="76">l</span>et largerEq = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "&gt;=" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &gt;= )")) in
+  <span data-count="76">l</span>et less = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '&lt;' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &lt; )")) in
+  <span data-count="76">l</span>et lessEq = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "&lt;=" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "( &lt;= )")) in
+  <span data-count="76">l</span>et binary_operations =
     [ multiplication
     ; division
     ; mod_div
@@ -918,17 +918,17 @@ let parse_binary_operation_expr pe =
     ; logor
     ]
   in
-  let application_constructor op left right = <span data-count="15101">E</span>Application (op, left, [ right ]) in
+  let application_constructor op left right = <span data-count="19755">E</span>Application (op, left, [ right ]) in
   let chainl1 e op =
-    <span data-count="992">l</span>et rec go acc =
-      <span data-count="35491931">l</span>ift<span data-count="35491931">2</span> (fun f x -&gt; <span data-count="15101">a</span>pplication_constructor f acc x) op e &gt;&gt;<span data-count="35491931">=</span> go &lt;|&gt; retur<span data-count="35491931">n</span> acc
+    <span data-count="1216">l</span>et rec go acc =
+      <span data-count="47290097">l</span>ift<span data-count="47290097">2</span> (fun f x -&gt; <span data-count="19755">a</span>pplication_constructor f acc x) op e &gt;&gt;<span data-count="47290097">=</span> go &lt;|&gt; retur<span data-count="47290097">n</span> acc
     in
     let* init = e in
-    <span data-count="35476830">g</span>o init
+    <span data-count="47270342">g</span>o init
   in
   List.fold_left
-    (fun acc x -&gt; <span data-count="930">c</span>hainl1 acc x)
-    (chainl<span data-count="62">1</span> pe multiplication)
+    (fun acc x -&gt; <span data-count="1140">c</span>hainl1 acc x)
+    (chainl<span data-count="76">1</span> pe multiplication)
     binary_operations
 ;;
 
@@ -937,17 +937,17 @@ let parse_binary_operation_expr pe =
 (* Unary operation parser *)
 
 let parse_unary_operation pe =
-  <span data-count="62">l</span>et unary_plus = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '+' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "U+")) in
-  <span data-count="62">l</span>et unary_minus = skip_wspace *<span data-count="62">&gt;</span> cha<span data-count="62">r</span> '-' *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "U-")) in
-  <span data-count="62">l</span>et unary_not = skip_wspace *<span data-count="62">&gt;</span> strin<span data-count="62">g</span> "not" *&gt; (retur<span data-count="62">n</span> @@ EIdentifier (Id "UNot")) in
-  <span data-count="62">l</span>et unary_operations = choice [ unary_plus; unary_minus; unary_not ] in
-  <span data-count="62">l</span>et application_constructor op expr = <span data-count="81">E</span>Application (op, expr, []) in
+  <span data-count="76">l</span>et unary_plus = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '+' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "U+")) in
+  <span data-count="76">l</span>et unary_minus = skip_wspace *<span data-count="76">&gt;</span> cha<span data-count="76">r</span> '-' *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "U-")) in
+  <span data-count="76">l</span>et unary_not = skip_wspace *<span data-count="76">&gt;</span> strin<span data-count="76">g</span> "not" *&gt; (retur<span data-count="76">n</span> @@ EIdentifier (Id "UNot")) in
+  <span data-count="76">l</span>et unary_operations = choice [ unary_plus; unary_minus; unary_not ] in
+  <span data-count="76">l</span>et application_constructor op expr = <span data-count="97">E</span>Application (op, expr, []) in
   let unary_chain =
     let* op = unary_operations in
-    <span data-count="81">l</span>et* expr = pe in
-    <span data-count="81">r</span>eturn @@ application_constructo<span data-count="81">r</span> op expr
+    <span data-count="97">l</span>et* expr = pe in
+    <span data-count="97">r</span>eturn @@ application_constructo<span data-count="97">r</span> op expr
   in
-  unary_chain &lt;|&gt; paren<span data-count="62">s</span> unary_chain
+  unary_chain &lt;|&gt; paren<span data-count="76">s</span> unary_chain
 ;;
 
 (* ---------------- *)
@@ -955,11 +955,11 @@ let parse_unary_operation pe =
 (* Type defition parsers *)
 
 let parse_type_defition pe =
-  <span data-count="62">p</span>arens
+  <span data-count="76">p</span>arens
   @@
   let* expr = pe in
-  <span data-count="342">l</span>et* typ = skip_wspace *<span data-count="342">&gt;</span> cha<span data-count="342">r</span> ':' *<span data-count="342">&gt;</span> Type.parse_type in
-  <span data-count="342">r</span>eturn @@ ETyped (expr, typ)
+  <span data-count="362">l</span>et* typ = skip_wspace *<span data-count="362">&gt;</span> cha<span data-count="362">r</span> ':' *<span data-count="362">&gt;</span> Type.parse_type in
+  <span data-count="362">r</span>eturn @@ ETyped (expr, typ)
 ;;
 
 (* ---------------- *)
@@ -967,31 +967,31 @@ let parse_type_defition pe =
 (* Main expression parser *)
 
 let parse_expression =
-  fi<span data-count="66">x</span>
+  fi<span data-count="80">x</span>
   @@ fun self -&gt;
-  <span data-count="62">s</span>kip_wspace
+  <span data-count="76">s</span>kip_wspace
   *&gt;
   let basic_parsers =
     choice
-      [ paren<span data-count="62">s</span> self
+      [ paren<span data-count="76">s</span> self
       ; parse_constant_expr
       ; parse_identifier_expr
       ; parse_empty_list_expr
-      ; parse_fun_exp<span data-count="62">r</span> self
-      ; parse_function_exp<span data-count="62">r</span> self
-      ; parse_if_then_else_exp<span data-count="62">r</span> self
-      ; parse_let_in_exp<span data-count="62">r</span> self
-      ; parse_match_with_exp<span data-count="62">r</span> self
-      ; parse_tuple_exp<span data-count="62">r</span> self
-      ; parse_list_exp<span data-count="62">r</span> self
-      ; parse_type_defitio<span data-count="62">n</span> self
+      ; parse_fun_exp<span data-count="76">r</span> self
+      ; parse_function_exp<span data-count="76">r</span> self
+      ; parse_if_then_else_exp<span data-count="76">r</span> self
+      ; parse_let_in_exp<span data-count="76">r</span> self
+      ; parse_match_with_exp<span data-count="76">r</span> self
+      ; parse_tuple_exp<span data-count="76">r</span> self
+      ; parse_list_exp<span data-count="76">r</span> self
+      ; parse_type_defitio<span data-count="76">n</span> self
       ]
   in
-  <span data-count="62">l</span>et chain_parsers = parse_application_exp<span data-count="62">r</span> basic_parsers &lt;|&gt; basic_parsers in
-  <span data-count="62">l</span>et chain_parsers = parse_list_constructor_exp<span data-count="62">r</span> chain_parsers &lt;|&gt; chain_parsers in
-  <span data-count="62">l</span>et chain_parsers = parse_binary_operation_exp<span data-count="62">r</span> chain_parsers &lt;|&gt; chain_parsers in
-  <span data-count="62">l</span>et chain_parsers = parse_unary_operatio<span data-count="62">n</span> chain_parsers &lt;|&gt; chain_parsers in
-  <span data-count="62">c</span>hain_parsers
+  <span data-count="76">l</span>et chain_parsers = parse_application_exp<span data-count="76">r</span> basic_parsers &lt;|&gt; basic_parsers in
+  <span data-count="76">l</span>et chain_parsers = parse_list_constructor_exp<span data-count="76">r</span> chain_parsers &lt;|&gt; chain_parsers in
+  <span data-count="76">l</span>et chain_parsers = parse_binary_operation_exp<span data-count="76">r</span> chain_parsers &lt;|&gt; chain_parsers in
+  <span data-count="76">l</span>et chain_parsers = parse_unary_operatio<span data-count="76">n</span> chain_parsers &lt;|&gt; chain_parsers in
+  <span data-count="76">c</span>hain_parsers
 ;;
 
 (* ---------------- *)

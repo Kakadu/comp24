@@ -417,19 +417,19 @@
 
 open AbstractSyntaxTree
 
-let pp_identifier ppf (Id id) = <span data-count="1278">F</span>ormat.fprintf ppf "%s" id
+let pp_identifier ppf (Id id) = <span data-count="2023">F</span>ormat.fprintf ppf "%s" id
 
 let pp_constant ppf = function
-  | <span data-count="168">C</span>Int i -&gt; Format.fprintf ppf "%d" i
-  | <span data-count="5">C</span>Bool b -&gt; Format.fprintf ppf "%b" b
+  | <span data-count="302">C</span>Int i -&gt; Format.fprintf ppf "%d" i
+  | <span data-count="11">C</span>Bool b -&gt; Format.fprintf ppf "%b" b
   | <span data-count="0">C</span>Char c -&gt; Format.fprintf ppf "'%s'" (Char.escape<span data-count="0">d</span> c)
   | <span data-count="0">C</span>String s -&gt; Format.fprintf ppf "\"%s\"" (String.escape<span data-count="0">d</span> s)
-  | <span data-count="43">C</span>Unit -&gt; Format.fprintf ppf "()"
+  | <span data-count="79">C</span>Unit -&gt; Format.fprintf ppf "()"
 ;;
 
 let pp_ground_type_definition ppf = function
-  | <span data-count="10">G</span>TDInt -&gt; Format.fprintf ppf "int"
-  | <span data-count="2">G</span>TDBool -&gt; Format.fprintf ppf "bool"
+  | <span data-count="13">G</span>TDInt -&gt; Format.fprintf ppf "int"
+  | <span data-count="3">G</span>TDBool -&gt; Format.fprintf ppf "bool"
   | <span data-count="0">G</span>TDUnit -&gt; Format.fprintf ppf "unit"
   | <span data-count="0">G</span>TDChar -&gt; Format.fprintf ppf "char"
   | <span data-count="0">G</span>TDString -&gt; Format.fprintf ppf "string"
@@ -437,7 +437,7 @@ let pp_ground_type_definition ppf = function
 
 let rec pp_type_definition ppf = function
   | <span data-count="0">T</span>DPolymorphic id -&gt; Format.fprintf ppf "'%a" pp_identifier id
-  | <span data-count="12">T</span>DGround gtd -&gt; pp_ground_type_definition ppf gtd
+  | <span data-count="16">T</span>DGround gtd -&gt; pp_ground_type_definition ppf gtd
   | <span data-count="2">T</span>DArrow (t1, t2) -&gt;
     Format.fprintf ppf "(%a -&gt; %a)" pp_type_definition t1 pp_type_definition t2
   | <span data-count="0">T</span>DTuple (t1, t2, ts) -&gt;
@@ -452,19 +452,19 @@ let rec pp_type_definition ppf = function
 ;;
 
 let rec pp_pattern ppf = function
-  | <span data-count="28">P</span>Any -&gt; Format.fprintf ppf "_"
-  | <span data-count="10">P</span>Nill -&gt; Format.fprintf ppf "[]"
-  | <span data-count="30">P</span>Const c -&gt; pp_constant ppf c
-  | <span data-count="492">P</span>Var id -&gt; pp_identifier ppf id
-  | <span data-count="20">P</span>Tuple (p1, p2, ps) -&gt;
+  | <span data-count="52">P</span>Any -&gt; Format.fprintf ppf "_"
+  | <span data-count="20">P</span>Nill -&gt; Format.fprintf ppf "[]"
+  | <span data-count="60">P</span>Const c -&gt; pp_constant ppf c
+  | <span data-count="793">P</span>Var id -&gt; pp_identifier ppf id
+  | <span data-count="27">P</span>Tuple (p1, p2, ps) -&gt;
     Format.fprintf
       ppf
       "(%a)"
-      (Format.pp_print_lis<span data-count="20">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="20">F</span>ormat.fprintf ppf ", ") pp_pattern)
+      (Format.pp_print_lis<span data-count="27">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="27">F</span>ormat.fprintf ppf ", ") pp_pattern)
       (p1 :: p2 :: ps)
-  | <span data-count="18">P</span>ListConstructor (p1, p2) -&gt;
+  | <span data-count="37">P</span>ListConstructor (p1, p2) -&gt;
     Format.fprintf ppf "(%a :: %a)" pp_pattern p1 pp_pattern p2
-  | <span data-count="3">P</span>Typed (p, t) -&gt; Format.fprintf ppf "(%a : %a)" pp_pattern p pp_type_definition t
+  | <span data-count="4">P</span>Typed (p, t) -&gt; Format.fprintf ppf "(%a : %a)" pp_pattern p pp_type_definition t
 ;;
 
 let rec pp_expression ppf = function

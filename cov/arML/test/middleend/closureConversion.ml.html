@@ -1113,33 +1113,33 @@ open ArML_lib.Runner
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; x |};
-  <span data-count="1">[</span>%expect {| (fun x -&gt; x) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (fun x -&gt; x) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; y |};
-  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; cc_0) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; cc_0) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; x + y |};
-  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; (( + ) x cc_0)) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; (( + ) x cc_0)) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; x + y + z |};
-  <span data-count="1">[</span>%expect {| ((fun cc_1 cc_0 x -&gt; (( + ) (( + ) x cc_0) cc_1)) z y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_1 cc_0 x -&gt; (( + ) (( + ) x cc_0) cc_1)) z y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; fun arg_0 -&gt; y |};
-  <span data-count="1">[</span>%expect {| ((fun cc_0 x arg_0 -&gt; cc_0) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_0 x arg_0 -&gt; cc_0) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; ((fun x -&gt; x + y) x z) |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_1 cc_0 x -&gt; (((fun cc_2 x -&gt; (( + ) x cc_2)) cc_0) x cc_1)) z y) |}<span data-count="5">]</span>
+    {| ((fun cc_1 cc_0 x -&gt; (((fun cc_2 x -&gt; (( + ) x cc_2)) cc_0) x cc_1)) z y) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1148,17 +1148,17 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| (fun x -&gt; x) y |};
-  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| (fun x -&gt; x + y) y |};
-  <span data-count="1">[</span>%expect {| (((fun cc_0 x -&gt; (( + ) x cc_0)) y) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (((fun cc_0 x -&gt; (( + ) x cc_0)) y) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| (fun x -&gt; x) (fun x -&gt; y) (fun _ -&gt; z) |};
-  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) ((fun cc_0 x -&gt; cc_0) y) ((fun cc_1 _ -&gt; cc_1) z)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) ((fun cc_0 x -&gt; cc_0) y) ((fun cc_1 _ -&gt; cc_1) z)) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1167,60 +1167,60 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x in f |};
-  <span data-count="1">[</span>%expect {| (let f x = x in f) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f x = x in f) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f = x + y in f |};
-  <span data-count="1">[</span>%expect {| (let f = (( + ) x y) in f) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f = (( + ) x y) in f) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = y in f |};
-  <span data-count="1">[</span>%expect {| (let f cc_0 x = cc_0 in (f y)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f cc_0 x = cc_0 in (f y)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x + y in f 0 |};
-  <span data-count="1">[</span>%expect {| (let f cc_0 x = (( + ) x cc_0) in ((f y) 0)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f cc_0 x = (( + ) x cc_0) in ((f y) 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = let g y = x + y in g 0 in f 0 |};
-  <span data-count="1">[</span>%expect {| (let f x = (let g cc_0 y = (( + ) cc_0 y) in ((g x) 0)) in (f 0)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f x = (let g cc_0 y = (( + ) cc_0 y) in ((g x) 0)) in (f 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = let g y = x + y + z in g 0 in f 0 |};
   <span data-count="1">[</span>%expect
-    {| (let f cc_0 x = (let g cc_2 cc_1 y = (( + ) (( + ) cc_1 y) cc_2) in ((g cc_0 x) 0)) in ((f z) 0)) |}<span data-count="5">]</span>
+    {| (let f cc_0 x = (let g cc_2 cc_1 y = (( + ) (( + ) cc_1 y) cc_2) in ((g cc_0 x) 0)) in ((f z) 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let f arg_0 = let g y = x + y + arg_0 + arg_1 in g 0 in f 0 |};
   <span data-count="1">[</span>%expect
-    {| (let f cc_1 cc_0 arg_0 = (let g cc_4 cc_3 cc_2 y = (( + ) (( + ) (( + ) cc_4 y) cc_2) cc_3) in ((g cc_1 cc_0 arg_0) 0)) in ((f x arg_1) 0)) |}<span data-count="5">]</span>
+    {| (let f cc_1 cc_0 arg_0 = (let g cc_4 cc_3 cc_2 y = (( + ) (( + ) (( + ) cc_4 y) cc_2) cc_3) in ((g cc_1 cc_0 arg_0) 0)) in ((f x arg_1) 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let (x, y) = (1, z) in x + y |};
-  <span data-count="1">[</span>%expect {| (let (x, y) = (1, z) in (( + ) x y)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let (x, y) = (1, z) in (( + ) x y)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let (x :: y) = (1 :: z) in x |};
-  <span data-count="1">[</span>%expect {| (let (x :: y) = (1 :: z) in x) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let (x :: y) = (1 :: z) in x) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = f x in f |};
-  <span data-count="1">[</span>%expect {| (let cc_0 cc_1 x = (cc_1 x) in (cc_0 f)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let cc_0 cc_1 x = (cc_1 x) in (cc_0 f)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun f -&gt; let f x = f x in f |};
-  <span data-count="1">[</span>%expect {| (fun f -&gt; (let cc_0 cc_1 x = (cc_1 x) in (cc_0 f))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (fun f -&gt; (let cc_0 cc_1 x = (cc_1 x) in (cc_0 f))) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1229,61 +1229,61 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x and g x = x in (f 0, g 0) |};
-  <span data-count="1">[</span>%expect {| (let f x = x and g x = x in ((f 0), (g 0))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f x = x and g x = x in ((f 0), (g 0))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x and g x = x + y in (f 0, g 0) |};
-  <span data-count="1">[</span>%expect {| (let f x = x and g cc_0 x = (( + ) x cc_0) in ((f 0), ((g y) 0))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let f x = x and g cc_0 x = (( + ) x cc_0) in ((f 0), ((g y) 0))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x + z and g x = x + y in (f 0, g 0) |};
   <span data-count="1">[</span>%expect
-    {| (let f cc_0 x = (( + ) x cc_0) and g cc_1 x = (( + ) x cc_1) in (((f z) 0), ((g y) 0))) |}<span data-count="5">]</span>
+    {| (let f cc_0 x = (( + ) x cc_0) and g cc_1 x = (( + ) x cc_1) in (((f z) 0), ((g y) 0))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = x and g x = f x in (f 0, g 0) |};
-  <span data-count="1">[</span>%expect {| (let cc_0 x = x and g cc_1 x = (cc_1 x) in ((cc_0 0), ((g f) 0))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let cc_0 x = x and g cc_1 x = (cc_1 x) in ((cc_0 0), ((g f) 0))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let f x = g x and g x = f x in (f 0, g 0) |};
   <span data-count="1">[</span>%expect
-    {| (let cc_0 cc_2 x = (cc_2 x) and cc_1 cc_3 x = (cc_3 x) in (((cc_0 g) 0), ((cc_1 f) 0))) |}<span data-count="5">]</span>
+    {| (let cc_0 cc_2 x = (cc_2 x) and cc_1 cc_3 x = (cc_3 x) in (((cc_0 g) 0), ((cc_1 f) 0))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let (x, y) = (1, 2) and g k = k in (x, y, g 1) |};
-  <span data-count="1">[</span>%expect {| (let (x, y) = (1, 2) and g k = k in (x, y, (g 1))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let (x, y) = (1, 2) and g k = k in (x, y, (g 1))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let (x, y) = (1, 2) and g k = k + x in (x, y, g 1) |};
   <span data-count="1">[</span>%expect
-    {| (let (cc_0, y) = (1, 2) and g cc_1 k = (( + ) k cc_1) in (cc_0, y, ((g x) 1))) |}<span data-count="5">]</span>
+    {| (let (cc_0, y) = (1, 2) and g cc_1 k = (( + ) k cc_1) in (cc_0, y, ((g x) 1))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let (x, y) = (1, 2) and g k = k + x + y in (x, y, g 1) |};
   <span data-count="1">[</span>%expect
-    {| (let (cc_0, cc_1) = (1, 2) and g cc_3 cc_2 k = (( + ) (( + ) k cc_2) cc_3) in (cc_0, cc_1, ((g y x) 1))) |}<span data-count="5">]</span>
+    {| (let (cc_0, cc_1) = (1, 2) and g cc_3 cc_2 k = (( + ) (( + ) k cc_2) cc_3) in (cc_0, cc_1, ((g y x) 1))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let (x :: y) = (1 :: 2) and g k = k + x + y in (x, y, g 1) |};
   <span data-count="1">[</span>%expect
-    {| (let (cc_0 :: cc_1) = (1 :: 2) and g cc_3 cc_2 k = (( + ) (( + ) k cc_2) cc_3) in (cc_0, cc_1, ((g y x) 1))) |}<span data-count="5">]</span>
+    {| (let (cc_0 :: cc_1) = (1 :: 2) and g cc_3 cc_2 k = (( + ) (( + ) k cc_2) cc_3) in (cc_0, cc_1, ((g y x) 1))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let (x, arg_0) = (1, 2) and g k = k + x + y in (x, arg_0, g 1) |};
   <span data-count="1">[</span>%expect
-    {| (let (cc_0, arg_0) = (1, 2) and g cc_2 cc_1 k = (( + ) (( + ) k cc_1) cc_2) in (cc_0, arg_0, ((g y x) 1))) |}<span data-count="5">]</span>
+    {| (let (cc_0, arg_0) = (1, 2) and g cc_2 cc_1 k = (( + ) (( + ) k cc_1) cc_2) in (cc_0, arg_0, ((g y x) 1))) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1292,26 +1292,26 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = f x in f |};
-  <span data-count="1">[</span>%expect {| (let rec f x = (f x) in f) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let rec f x = (f x) in f) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = f y in f |};
-  <span data-count="1">[</span>%expect {| (let rec f cc_0 x = ((f cc_0) cc_0) in (f y)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let rec f cc_0 x = ((f cc_0) cc_0) in (f y)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let rec f x = if x = 1 then x else x * f (x - 1) in f 5 |};
   <span data-count="1">[</span>%expect
-    {| (let rec f x = (if (( = ) x 1) then x else (( * ) x (f (( - ) x 1)))) in (f 5)) |}<span data-count="5">]</span>
+    {| (let rec f x = (if (( = ) x 1) then x else (( * ) x (f (( - ) x 1)))) in (f 5)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| let rec f _ = if x = 1 then x else x * f (x - 1) in f 5 |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_0 _ = (if (( = ) cc_0 1) then cc_0 else (( * ) cc_0 ((f cc_0) (( - ) cc_0 1)))) in ((f x) 5)) |}<span data-count="5">]</span>
+    {| (let rec f cc_0 _ = (if (( = ) cc_0 1) then cc_0 else (( * ) cc_0 ((f cc_0) (( - ) cc_0 1)))) in ((f x) 5)) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1320,48 +1320,48 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = f x and g x = g x in (f, g) |};
-  <span data-count="1">[</span>%expect {| (let rec f x = (f x) and g x = (g x) in (f, g)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let rec f x = (f x) and g x = (g x) in (f, g)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = f x and g x = x + g y in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f x = (f x) and g cc_0 x = (( + ) x ((g cc_0) cc_0)) in (f, (g y))) |}<span data-count="5">]</span>
+    {| (let rec f x = (f x) and g cc_0 x = (( + ) x ((g cc_0) cc_0)) in (f, (g y))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = x + f y  and g x = g x in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_0 x = (( + ) x ((f cc_0) cc_0)) and g x = (g x) in ((f y), g)) |}<span data-count="5">]</span>
+    {| (let rec f cc_0 x = (( + ) x ((f cc_0) cc_0)) and g x = (g x) in ((f y), g)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = g x and g x = f x in (f, g) |};
-  <span data-count="1">[</span>%expect {| (let rec f x = (g x) and g x = (f x) in (f, g)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (let rec f x = (g x) and g x = (f x) in (f, g)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = g x and g x = f y in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_1 x = ((g cc_1) x) and g cc_0 x = ((f cc_0) cc_0) in ((f y), (g y))) |}<span data-count="5">]</span>
+    {| (let rec f cc_1 x = ((g cc_1) x) and g cc_0 x = ((f cc_0) cc_0) in ((f y), (g y))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = g y and g x = f x in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_0 x = ((g cc_0) cc_0) and g cc_1 x = ((f cc_1) x) in ((f y), (g y))) |}<span data-count="5">]</span>
+    {| (let rec f cc_0 x = ((g cc_0) cc_0) and g cc_1 x = ((f cc_1) x) in ((f y), (g y))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = g y and g x = f y in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_0 x = ((g cc_0) cc_0) and g cc_1 x = ((f cc_1) cc_1) in ((f y), (g y))) |}<span data-count="5">]</span>
+    {| (let rec f cc_0 x = ((g cc_0) cc_0) and g cc_1 x = ((f cc_1) cc_1) in ((f y), (g y))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| let rec f x = g y and g x = f z in (f, g) |};
   <span data-count="1">[</span>%expect
-    {| (let rec f cc_2 cc_0 x = (((g cc_0) cc_2) cc_0) and g cc_3 cc_1 x = (((f cc_1) cc_3) cc_1) in (((f z) y), ((g y) z))) |}<span data-count="5">]</span>
+    {| (let rec f cc_2 cc_0 x = (((g cc_0) cc_2) cc_0) and g cc_3 cc_1 x = (((f cc_1) cc_3) cc_1) in (((f z) y), ((g y) z))) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1372,19 +1372,19 @@ let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| if x &gt; 0 then (fun x -&gt; x + y) x else (fun x y -&gt; x + y) x x |};
   <span data-count="1">[</span>%expect
-    {| (if (( &gt; ) x 0) then (((fun cc_0 x -&gt; (( + ) x cc_0)) y) x) else ((fun x y -&gt; (( + ) x y)) x x)) |}<span data-count="5">]</span>
+    {| (if (( &gt; ) x 0) then (((fun cc_0 x -&gt; (( + ) x cc_0)) y) x) else ((fun x y -&gt; (( + ) x y)) x x)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| if ((fun x -&gt; x + k) x) &gt; 0 then (fun x -&gt; x + y) x else (fun x y -&gt; x + y) x x |};
   <span data-count="1">[</span>%expect
-    {| (if (( &gt; ) (((fun cc_0 x -&gt; (( + ) x cc_0)) k) x) 0) then (((fun cc_1 x -&gt; (( + ) x cc_1)) y) x) else ((fun x y -&gt; (( + ) x y)) x x)) |}<span data-count="5">]</span>
+    {| (if (( &gt; ) (((fun cc_0 x -&gt; (( + ) x cc_0)) k) x) 0) then (((fun cc_1 x -&gt; (( + ) x cc_1)) y) x) else ((fun x y -&gt; (( + ) x y)) x x)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x -&gt; if x &gt; y then x else y |};
-  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; (if (( &gt; ) x cc_0) then x else cc_0)) y) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_0 x -&gt; (if (( &gt; ) x cc_0) then x else cc_0)) y) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1393,12 +1393,12 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| ((fun x -&gt; x), (fun x -&gt; y), (fun _ -&gt; z)) |};
-  <span data-count="1">[</span>%expect {| ((fun x -&gt; x), ((fun cc_0 x -&gt; cc_0) y), ((fun cc_1 _ -&gt; cc_1) z)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun x -&gt; x), ((fun cc_0 x -&gt; cc_0) y), ((fun cc_1 _ -&gt; cc_1) z)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x y -&gt; (x, y, z) |};
-  <span data-count="1">[</span>%expect {| ((fun cc_0 x y -&gt; (x, y, cc_0)) z) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun cc_0 x y -&gt; (x, y, cc_0)) z) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1407,13 +1407,13 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| (fun x -&gt; x) :: (fun x -&gt; y) :: (fun _ -&gt; z) |};
-  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) :: (((fun cc_0 x -&gt; cc_0) y) :: ((fun cc_1 _ -&gt; cc_1) z))) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun x -&gt; x) :: (((fun cc_0 x -&gt; cc_0) y) :: ((fun cc_1 _ -&gt; cc_1) z))) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun x y z -&gt; (x, y, z) :: [(k, m, n)] |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_2 cc_1 cc_0 x y z -&gt; ((x, y, z) :: ((cc_0, cc_1, cc_2) :: []))) n m k) |}<span data-count="5">]</span>
+    {| ((fun cc_2 cc_1 cc_0 x y z -&gt; ((x, y, z) :: ((cc_0, cc_1, cc_2) :: []))) n m k) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1422,42 +1422,42 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| match x with | (m, n) -&gt; m + n | _ -&gt; 0 |};
-  <span data-count="1">[</span>%expect {| (match x with (m, n) -&gt; (( + ) m n) | _ -&gt; 0) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (match x with (m, n) -&gt; (( + ) m n) | _ -&gt; 0) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| match x with | (m, n) -&gt; (fun _ -&gt; m + n) () | _ -&gt; 0 |};
   <span data-count="1">[</span>%expect
-    {| (match x with (m, n) -&gt; (((fun cc_1 cc_0 _ -&gt; (( + ) cc_0 cc_1)) n m) ()) | _ -&gt; 0) |}<span data-count="5">]</span>
+    {| (match x with (m, n) -&gt; (((fun cc_1 cc_0 _ -&gt; (( + ) cc_0 cc_1)) n m) ()) | _ -&gt; 0) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; match x with | (m, n) -&gt; (fun _ -&gt; m + n) () | _ -&gt; 0 |};
   <span data-count="1">[</span>%expect
-    {| (fun x -&gt; (match x with (m, n) -&gt; (((fun cc_1 cc_0 _ -&gt; (( + ) cc_0 cc_1)) n m) ()) | _ -&gt; 0)) |}<span data-count="5">]</span>
+    {| (fun x -&gt; (match x with (m, n) -&gt; (((fun cc_1 cc_0 _ -&gt; (( + ) cc_0 cc_1)) n m) ()) | _ -&gt; 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; match x with | (m, n) -&gt; (fun _ -&gt; m + n + k) () | _ -&gt; 0 |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_0 x -&gt; (match x with (m, n) -&gt; (((fun cc_3 cc_2 cc_1 _ -&gt; (( + ) (( + ) cc_2 cc_3) cc_1)) n m cc_0) ()) | _ -&gt; 0)) k) |}<span data-count="5">]</span>
+    {| ((fun cc_0 x -&gt; (match x with (m, n) -&gt; (((fun cc_3 cc_2 cc_1 _ -&gt; (( + ) (( + ) cc_2 cc_3) cc_1)) n m cc_0) ()) | _ -&gt; 0)) k) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; (match ((fun x -&gt; x + y) 1) with 5 -&gt; 0 | _ -&gt; (fun x -&gt; x + y + 1) 1) |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_0 x -&gt; (match (((fun cc_1 x -&gt; (( + ) x cc_1)) cc_0) 1) with 5 -&gt; 0 | _ -&gt; (((fun cc_2 x -&gt; (( + ) (( + ) x cc_2) 1)) cc_0) 1))) y) |}<span data-count="5">]</span>
+    {| ((fun cc_0 x -&gt; (match (((fun cc_1 x -&gt; (( + ) x cc_1)) cc_0) 1) with 5 -&gt; 0 | _ -&gt; (((fun cc_2 x -&gt; (( + ) (( + ) x cc_2) 1)) cc_0) 1))) y) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; (match ((fun x -&gt; x + y) 1) with 5 -&gt; 0 | _ -&gt; (fun x -&gt; x + z + 1) 1) |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_1 cc_0 x -&gt; (match (((fun cc_2 x -&gt; (( + ) x cc_2)) cc_0) 1) with 5 -&gt; 0 | _ -&gt; (((fun cc_3 x -&gt; (( + ) (( + ) x cc_3) 1)) cc_1) 1))) z y) |}<span data-count="5">]</span>
+    {| ((fun cc_1 cc_0 x -&gt; (match (((fun cc_2 x -&gt; (( + ) x cc_2)) cc_0) 1) with 5 -&gt; 0 | _ -&gt; (((fun cc_3 x -&gt; (( + ) (( + ) x cc_3) 1)) cc_1) 1))) z y) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1466,34 +1466,34 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| function | (m, n) -&gt; m + n | _ -&gt; 0 |};
-  <span data-count="1">[</span>%expect {| (fun cc_0 -&gt; (match cc_0 with (m, n) -&gt; (( + ) m n) | _ -&gt; 0)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (fun cc_0 -&gt; (match cc_0 with (m, n) -&gt; (( + ) m n) | _ -&gt; 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| function | (m, n) -&gt; (fun _ -&gt; m + n) () | _ -&gt; 0 |};
   <span data-count="1">[</span>%expect
-    {| (fun cc_0 -&gt; (match cc_0 with (m, n) -&gt; (((fun cc_2 cc_1 _ -&gt; (( + ) cc_1 cc_2)) n m) ()) | _ -&gt; 0)) |}<span data-count="5">]</span>
+    {| (fun cc_0 -&gt; (match cc_0 with (m, n) -&gt; (((fun cc_2 cc_1 _ -&gt; (( + ) cc_1 cc_2)) n m) ()) | _ -&gt; 0)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; function | (m, n) -&gt; (fun _ -&gt; m + n) () | _ -&gt; x |};
   <span data-count="1">[</span>%expect
-    {| (fun x -&gt; ((fun cc_3 cc_0 -&gt; (match cc_0 with (m, n) -&gt; (((fun cc_2 cc_1 _ -&gt; (( + ) cc_1 cc_2)) n m) ()) | _ -&gt; cc_3)) x)) |}<span data-count="5">]</span>
+    {| (fun x -&gt; ((fun cc_3 cc_0 -&gt; (match cc_0 with (m, n) -&gt; (((fun cc_2 cc_1 _ -&gt; (( + ) cc_1 cc_2)) n m) ()) | _ -&gt; cc_3)) x)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; function | (m, n) -&gt; (fun _ -&gt; m + n + k) () | _ -&gt; x + k |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_0 x -&gt; ((fun cc_6 cc_5 cc_1 -&gt; (match cc_1 with (m, n) -&gt; (((fun cc_4 cc_3 cc_2 _ -&gt; (( + ) (( + ) cc_3 cc_4) cc_2)) n m cc_5) ()) | _ -&gt; (( + ) cc_6 cc_5))) x cc_0)) k) |}<span data-count="5">]</span>
+    {| ((fun cc_0 x -&gt; ((fun cc_6 cc_5 cc_1 -&gt; (match cc_1 with (m, n) -&gt; (((fun cc_4 cc_3 cc_2 _ -&gt; (( + ) (( + ) cc_3 cc_4) cc_2)) n m cc_5) ()) | _ -&gt; (( + ) cc_6 cc_5))) x cc_0)) k) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression
     {| fun x -&gt; function | (m, n) -&gt; (fun _ -&gt; m + n + k) () | _ -&gt; x + z |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_1 cc_0 x -&gt; ((fun cc_8 cc_7 cc_6 cc_2 -&gt; (match cc_2 with (m, n) -&gt; (((fun cc_5 cc_4 cc_3 _ -&gt; (( + ) (( + ) cc_4 cc_5) cc_3)) n m cc_6) ()) | _ -&gt; (( + ) cc_7 cc_8))) cc_1 x cc_0)) z k) |}<span data-count="5">]</span>
+    {| ((fun cc_1 cc_0 x -&gt; ((fun cc_8 cc_7 cc_6 cc_2 -&gt; (match cc_2 with (m, n) -&gt; (((fun cc_5 cc_4 cc_3 _ -&gt; (( + ) (( + ) cc_4 cc_5) cc_3)) n m cc_6) ()) | _ -&gt; (( + ) cc_7 cc_8))) cc_1 x cc_0)) z k) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1502,18 +1502,18 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| ((fun (x : int) -&gt; (x : int)) : int -&gt; int) |};
-  <span data-count="1">[</span>%expect {| ((fun (x : int) -&gt; (x : int)) : (int -&gt; int)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| ((fun (x : int) -&gt; (x : int)) : (int -&gt; int)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| ((fun (x : int) -&gt; (y : int)) : int -&gt; int) |};
-  <span data-count="1">[</span>%expect {| (((fun cc_0 (x : int) -&gt; (cc_0 : int)) y) : (int -&gt; int)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (((fun cc_0 (x : int) -&gt; (cc_0 : int)) y) : (int -&gt; int)) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_expression {| fun (x : int) -&gt; if ((x &gt; y) : bool) then x else y |};
   <span data-count="1">[</span>%expect
-    {| ((fun cc_0 (x : int) -&gt; (if ((( &gt; ) x cc_0) : bool) then x else cc_0)) y) |}<span data-count="5">]</span>
+    {| ((fun cc_0 (x : int) -&gt; (if ((( &gt; ) x cc_0) : bool) then x else cc_0)) y) |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1522,7 +1522,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_program {| let f x = x |};
-  <span data-count="1">[</span>%expect {| let f x = x |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| let f x = x |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1533,7 +1533,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {|
     let f x = x
     let g x = x 
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1544,7 +1544,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect {|
     let f x y = x
     let g x = (f x)
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1557,7 +1557,7 @@ let%expect_test _ =
     {|
     let f x = (((fun cc_0 y -&gt; (( + ) cc_0 y)) x) 1)
     let g x = (f (((fun cc_1 y -&gt; cc_1) x) ()))
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1570,7 +1570,7 @@ let%expect_test _ =
     {|
     let (x, y) = (0, 0)
     let g z = (((fun cc_0 _ -&gt; (( + ) (( + ) x y) cc_0)) z) ())
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1582,7 +1582,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
     let (x, y) = (0, 0) and g x y z = (((fun cc_2 cc_1 cc_0 _ -&gt; (( + ) (( + ) cc_0 cc_1) cc_2)) z y x) ())
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)
@@ -1591,7 +1591,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   <span data-count="1">c</span>losure_conversion_program {| let rec f x = f x |};
-  <span data-count="1">[</span>%expect {| let rec f x = (f x) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| let rec f x = (f x) |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1602,7 +1602,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
     let rec fac x = (if (( = ) x 1) then x else (( * ) x (fac (( - ) x 1))))
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1613,7 +1613,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
       let rec fac x = (((fun cc_0 _ -&gt; (if (( = ) cc_0 1) then cc_0 else (( * ) cc_0 (fac (( - ) cc_0 1))))) x) ())
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1625,7 +1625,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
       let rec f x = (g x) and g y = (((fun cc_0 _ -&gt; (f cc_0)) y) ())
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 let%expect_test _ =
@@ -1637,7 +1637,7 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
       let rec f x = (((fun cc_0 _ -&gt; (g cc_0)) x) ()) and g y = (((fun cc_1 _ -&gt; (f cc_1)) y) ())
-    |}<span data-count="5">]</span>
+    |}<span data-count="7">]</span>
 ;;
 
 (* ---------------- *)

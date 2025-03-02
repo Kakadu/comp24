@@ -137,45 +137,45 @@ open Common
 
 let parse_declaration =
   let* decl =
-    skip_wspace *<span data-count="66">&gt;</span> strin<span data-count="66">g</span> "let" *<span data-count="66">&gt;</span> skip_wspace1 *<span data-count="66">&gt;</span> optio<span data-count="66">n</span> "" (strin<span data-count="66">g</span> "rec" &lt;<span data-count="66">*</span> skip_wspace1)
+    skip_wspace *<span data-count="80">&gt;</span> strin<span data-count="80">g</span> "let" *<span data-count="80">&gt;</span> skip_wspace1 *<span data-count="80">&gt;</span> optio<span data-count="80">n</span> "" (strin<span data-count="80">g</span> "rec" &lt;<span data-count="80">*</span> skip_wspace1)
   in
-  <span data-count="239">l</span>et parse_binding () =
-    <span data-count="478">l</span>et* args = many<span data-count="478">1</span> Pattern.parse_pattern in
-    <span data-count="274">l</span>et main_pattern = List.hd args in
-    <span data-count="274">l</span>et* typ_opt =
+  <span data-count="310">l</span>et parse_binding () =
+    <span data-count="620">l</span>et* args = many<span data-count="620">1</span> Pattern.parse_pattern in
+    <span data-count="350">l</span>et main_pattern = List.hd args in
+    <span data-count="350">l</span>et* typ_opt =
       let typ_parser =
         skip_wspace
-        *<span data-count="274">&gt;</span> cha<span data-count="274">r</span> ':'
-        *<span data-count="274">&gt;</span> skip_wspace
+        *<span data-count="350">&gt;</span> cha<span data-count="350">r</span> ':'
+        *<span data-count="350">&gt;</span> skip_wspace
         *&gt;
         let* typ = Type.parse_type in
         <span data-count="9">r</span>eturn @@ Some typ
       in
-      <span data-count="274">o</span>ptio<span data-count="274">n</span> None typ_parser
+      <span data-count="350">o</span>ptio<span data-count="350">n</span> None typ_parser
     in
-    <span data-count="274">l</span>et* expr = tying *<span data-count="274">&gt;</span> skip_wspace *<span data-count="274">&gt;</span> Expression.parse_expression in
-    <span data-count="274">l</span>et* expr =
+    <span data-count="350">l</span>et* expr = tying *<span data-count="350">&gt;</span> skip_wspace *<span data-count="350">&gt;</span> Expression.parse_expression in
+    <span data-count="350">l</span>et* expr =
       match args with
-      | <span data-count="164">_</span> :: md :: tl -&gt; EFun ((md, tl), expr) |&gt; retur<span data-count="164">n</span>
-      | <span data-count="110">_</span> -&gt; retur<span data-count="110">n</span> expr
+      | <span data-count="199">_</span> :: md :: tl -&gt; EFun ((md, tl), expr) |&gt; retur<span data-count="199">n</span>
+      | <span data-count="151">_</span> -&gt; retur<span data-count="151">n</span> expr
     in
-    <span data-count="274">l</span>et* expr =
+    <span data-count="350">l</span>et* expr =
       match typ_opt with
       | <span data-count="9">S</span>ome typ -&gt; retur<span data-count="9">n</span> @@ ETyped (expr, typ)
-      | <span data-count="265">_</span> -&gt; retur<span data-count="265">n</span> expr
+      | <span data-count="341">_</span> -&gt; retur<span data-count="341">n</span> expr
     in
-    <span data-count="274">r</span>eturn (main_pattern, expr)
+    <span data-count="350">r</span>eturn (main_pattern, expr)
   in
-  let* main_binding = parse_bindin<span data-count="239">g</span> () in
-  <span data-count="239">l</span>et* and_bindings =
-    man<span data-count="239">y</span> (skip_wspace *<span data-count="239">&gt;</span> strin<span data-count="239">g</span> "and" *<span data-count="239">&gt;</span> skip_wspace1 *<span data-count="239">&gt;</span> parse_bindin<span data-count="239">g</span> ())
+  let* main_binding = parse_bindin<span data-count="310">g</span> () in
+  <span data-count="310">l</span>et* and_bindings =
+    man<span data-count="310">y</span> (skip_wspace *<span data-count="310">&gt;</span> strin<span data-count="310">g</span> "and" *<span data-count="310">&gt;</span> skip_wspace1 *<span data-count="310">&gt;</span> parse_bindin<span data-count="310">g</span> ())
   in
-  <span data-count="239">l</span>et declaration_type main_binding and_bindings =
-    <span data-count="239">m</span>atch decl with
-    | <span data-count="62">"</span>rec" -&gt; DRecursive (main_binding, and_bindings)
-    | <span data-count="177">_</span> -&gt; DOrdinary (main_binding, and_bindings)
+  <span data-count="310">l</span>et declaration_type main_binding and_bindings =
+    <span data-count="310">m</span>atch decl with
+    | <span data-count="76">"</span>rec" -&gt; DRecursive (main_binding, and_bindings)
+    | <span data-count="234">_</span> -&gt; DOrdinary (main_binding, and_bindings)
   in
-  return (declaration_typ<span data-count="239">e</span> main_binding and_bindings)
+  return (declaration_typ<span data-count="310">e</span> main_binding and_bindings)
 ;;
 </code></pre>
       </div>

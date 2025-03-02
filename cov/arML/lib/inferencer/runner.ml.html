@@ -132,36 +132,36 @@ open InferProgram
 
 let start_env =
   let binary_ops =
-    [ "( + )", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "( - )", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "( * )", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "( / )", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "( % )", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="66">&gt;</span> TGround GTBool @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( || )", TGround GTBool @-<span data-count="66">&gt;</span> TGround GTBool @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( = )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( == )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( &gt; )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( &lt; )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( &gt;= )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( &lt;= )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( != )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
-    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="66">&gt;</span> TVar (-1) @-<span data-count="66">&gt;</span> TGround GTBool
+    [ "( + )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "( - )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "( * )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "( / )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "( % )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( || )", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( = )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( == )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( &gt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( &lt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( &gt;= )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( &lt;= )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( != )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
     ]
   in
   let unary_ops =
-    [ "U-", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "U+", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTInt
-    ; "UNot", TGround GTBool @-<span data-count="66">&gt;</span> TGround GTBool
+    [ "U-", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "U+", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
+    ; "UNot", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
     ]
   in
   let stdlib_functions =
-    [ "print_int", TGround GTInt @-<span data-count="66">&gt;</span> TGround GTUnit
-    ; "print_bool", TGround GTBool @-<span data-count="66">&gt;</span> TGround GTUnit
+    [ "print_int", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTUnit
+    ; "print_bool", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTUnit
     ]
   in
-  List.fold_lef<span data-count="66">t</span>
-    (fun env (op, ty) -&gt; <span data-count="1320">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="1320">e</span> TypeEnv.empty ty))
+  List.fold_lef<span data-count="80">t</span>
+    (fun env (op, ty) -&gt; <span data-count="1600">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="1600">e</span> TypeEnv.empty ty))
     TypeEnv.empty
     (binary_ops @ unary_ops @ stdlib_functions)
 ;;

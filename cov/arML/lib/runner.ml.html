@@ -18,11 +18,12 @@
       <h2>83.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:21.92%"></span>
-      <span class="unvisited" style="bottom:46.58%"></span>
-      <span class="unvisited" style="bottom:36.99%"></span>
-      <span class="unvisited" style="bottom:12.33%"></span>
-      <span class="unvisited" style="bottom:4.11%"></span>
+      <span class="unvisited" style="top:17.98%"></span>
+      <span class="unvisited" style="top:43.82%"></span>
+      <span class="unvisited" style="bottom:48.31%"></span>
+      <span class="unvisited" style="bottom:28.09%"></span>
+      <span class="unvisited" style="bottom:21.35%"></span>
+      <span class="unvisited" style="bottom:3.37%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -100,6 +101,22 @@
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span class="unvisited"> </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -177,6 +194,22 @@
 <a href="#L71">71</a>
 <a href="#L72">72</a>
 <a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
 
@@ -231,11 +264,11 @@ let inference_program program =
 (* Closure conversion *)
 
 let closure_conversion_expr_ast expr =
-  <span data-count="63">A</span>st.Pprint.print_expression (Middleend.Runner.run_closure_expressio<span data-count="63">n</span> expr)
+  <span data-count="63">A</span>st.Pprint.print_expression (ClosureConversion.Runner.run_closure_expressio<span data-count="63">n</span> expr)
 ;;
 
 let closure_conversion_program_ast program =
-  <span data-count="24">A</span>st.Pprint.print_program (Middleend.Runner.run_closure_progra<span data-count="24">m</span> program)
+  <span data-count="24">A</span>st.Pprint.print_program (ClosureConversion.Runner.run_closure_progra<span data-count="24">m</span> program)
 ;;
 
 let closure_conversion_expression expr =
@@ -247,6 +280,22 @@ let closure_conversion_expression expr =
 let closure_conversion_program program =
   <span data-count="24">m</span>atch Parser.Runner.parse_program program with
   | <span data-count="24">O</span>k ast -&gt; closure_conversion_program_ast ast
+  | <span data-count="0">E</span>rror _ -&gt; Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+
+(* Lambda lifting *)
+
+let lambda_lifting_program_ast program =
+  <span data-count="41">L</span>ambdaLifting.Pprint.print_ll_program (LambdaLifting.Runner.run_ll_progra<span data-count="41">m</span> program)
+;;
+
+let lambda_lifting_program program =
+  <span data-count="41">m</span>atch Parser.Runner.parse_program program with
+  | <span data-count="41">O</span>k ast -&gt;
+    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+    <span data-count="41">l</span>ambda_lifting_program_ast closure_ast
   | <span data-count="0">E</span>rror _ -&gt; Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 

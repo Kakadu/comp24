@@ -229,7 +229,7 @@
   (** Anonymous function with one argument and pattern matching: 'function | hd :: tl -&gt; (hd, tl) | _ -&gt; (0, 0)'*)
   | EApplication of expression * expression * <span data-count="1771">e</span>xpression lis<span data-count="708">t</span> (** Application: f x *)
   | EIfThenElse of expression * expression * <span data-count="92">e</span>xpression optio<span data-count="23">n</span>
-  (** if condition then true_branch else false branch (else option)*)
+  (** if condition then true_branch else false branch (else option) *)
   | ETuple of expression * expression * <span data-count="151">e</span>xpression lis<span data-count="93">t</span> (** Tuple: '(E1, E2, ..., En)' *)
   | EListConstructor of expression * expression (** List construction: 1 :: 2 :: [] *)
   | EEmptyList (** Empty list: '[]' *)
