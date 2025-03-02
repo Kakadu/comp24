@@ -205,19 +205,37 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   | _ -> failwith "Incorrect expression was encountered during LL"
 ;;
 
-(* let rec pattern_names (set : NameSet.t) =
-   let env_fold (set : NameSet.t) pts =
-   List.fold pts ~init:set ~f:(fun set p -> NameSet.union set (pattern_names set p))
-   in
-   function
-   | Const _ | Wildcard | Operation _ -> set
-   | Var id -> NameSet.extend id set
-   | Tuple (a, b, tl) ->
-   let pts = a :: b :: tl in
-   env_fold set pts
-   | List pts -> env_fold set pts
-   | ListConcat (l_pt, r_pt) ->
-   let l_env = pattern_names set l_pt in
-   pattern_names l_env r_pt
-   | Constraint (p, _) -> pattern_names set p
-   ;; *)
+let rec ll_prog (prog : prog) : ll_prog R.t =
+  match prog with
+  | [] -> R.return []
+  | first_expr :: tl_exprs ->
+    let* ll_first_expr =
+      match first_expr with
+      | Let (rec_flag, (Var name, args, body) :: tl_binds, in_scope) ->
+        let lifted = [] in
+        let env = NameEnv.empty in
+        let* env, new_bind, lifted = ll_bind lifted env (name, args, body) in
+        let* env, new_binds, lifted =
+          List.fold
+            tl_binds
+            ~init:(R.return (env, [ new_bind ], lifted))
+            ~f:(fun acc bnd ->
+              let* env, binds, lifted = acc in
+              match bnd with
+              | Var name, args, expr ->
+                let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+                R.return (env, new_bind :: binds, lifted)
+              | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
+        in
+        (match in_scope with
+         | Some scope ->
+           let* ll_scope, _ = ll_expr lifted env scope in
+           R.return (LLLet (rec_flag, new_binds, Some ll_scope))
+         | None -> R.return (LLLet (rec_flag, new_binds, None)))
+      | _ -> failwith "Incorrect starting point was encountered during LL"
+    in
+    let* ll_tl_exprs = ll_prog tl_exprs in
+    R.return ([ ll_first_expr ] @ ll_tl_exprs)
+;;
+
+let run_ll (prog : prog) = run (ll_prog prog)
