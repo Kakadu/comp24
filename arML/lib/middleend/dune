@@ -3,18 +3,6 @@
 (library
  (name middleend)
  (public_name arML.middleend)
-<<<<<<< HEAD
  (libraries base ast common closureConversion lambdaLifting)
-=======
- (libraries base ast common)
- (modules
-  FunctionTransformer
-  IdentifierSearcher
-  IdentifierSubstitutor
-  NameCreator
-  ClosureExpression
-  ClosureProgram
-  Runner)
->>>>>>> upstream/master
  (instrumentation
   (backend bisect_ppx)))

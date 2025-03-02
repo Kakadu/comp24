@@ -27,16 +27,12 @@ let closure_program start_env program =
          let* acc = acc in
          match body with
          | EFun _ ->
-           <<<<<<< HEAD
-       let transformed_body = Common.FunctionTransformer.transform_fun body in
-       =======
-       let transformed_body = FunctionTransformer.transform_fun body in
-       >>>>>>> upstream/master
-       let* closure_body, _ = closure_fun false env fv_map transformed_body in
-       return ((pattern, closure_body) :: acc)
-     | _ ->
-       let* closure_body = closure_expression env fv_map body in
-       return ((pattern, closure_body) :: acc))
+           let transformed_body = Common.FunctionTransformer.transform_fun body in
+           let* closure_body, _ = closure_fun false env fv_map transformed_body in
+           return ((pattern, closure_body) :: acc)
+         | _ ->
+           let* closure_body = closure_expression env fv_map body in
+           return ((pattern, closure_body) :: acc))
       (return [])
       cases
   in
