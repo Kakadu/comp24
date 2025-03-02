@@ -4,6 +4,7 @@
  (name inferencer)
  (public_name arML.inferencer)
  (libraries base ast common parser)
+ (modules_without_implementation TypeErrors)
  (modules
   TypeTree
   TypeErrors
