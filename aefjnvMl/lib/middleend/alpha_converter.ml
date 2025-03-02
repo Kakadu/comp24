@@ -19,11 +19,13 @@ module StringAlphfaconverterMonad = struct
   type ban_set = Banned_Set.t
   type reserved_re_prefs = Str.regexp list
   type ban_rules = reserved_re_prefs * ban_set
-  type name_space = ban_rules * bind_space * fresh_id * ident
 
-  include Common.Se_monad.Base_SE_Monad
-
-  type 'a t = (name_space, 'a, string) Common.Se_monad.Base_SE_Monad.t
+  include
+    Common.Monads.Base_SE_Monad
+      (struct
+        type t = ban_rules * bind_space * fresh_id * ident
+      end)
+      (String)
 
   let num_prefix current_prefix id = current_prefix ^ Int.to_string id
   let create_fresh_id id = id + 1

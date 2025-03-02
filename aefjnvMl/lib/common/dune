@@ -10,7 +10,7 @@
   ast_construct
   naming
   ast_pp
-  se_monad)
+  monads)
  (libraries base angstrom ppx_deriving)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))

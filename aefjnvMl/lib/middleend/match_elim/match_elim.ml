@@ -2,26 +2,20 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-module CounterMonad = struct
-  type fresh_id = int
 
-  let name_prefix = Common.Naming.me_prefix
 
-  include Common.Se_monad.Base_SE_Monad
-
-  type 'a t = (fresh_id, 'a, string) Common.Se_monad.Base_SE_Monad.t
-
-  let get_uniq_name : string t =
-    let* old_id = read in
-    let new_id = old_id + 1 in
-    let* () = save new_id in
-    return @@ name_prefix ^ "_" ^ Int.to_string new_id
-  ;;
-end
-
-open CounterMonad
 open Common.Ast
 open Me_ast
+
+open Common.Monads.CounterMonad (String)
+
+let name_prefix = Common.Naming.me_prefix
+let get_uniq_name : string t =
+  let* old_id = read in
+  let new_id = old_id + 1 in
+  let* () = save new_id in
+  return @@ name_prefix ^ "_" ^ Int.to_string new_id
+;;
 
 type semantic_bind = SBind of me_ident * m_expr
 

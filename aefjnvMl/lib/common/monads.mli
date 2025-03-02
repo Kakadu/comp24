@@ -2,8 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-module Base_SE_Monad : sig
-  type ('st, 'a, 'err) t = 'st -> 'st * ('a, 'err) result
+module Base_SE_Monad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
+  type 'a t = StateT.t -> StateT.t * ('a, ErrorT.t) result
 
   val run : ('a -> 'b) -> 'a -> 'b
   val fail : 'a -> 'b -> 'b * ('c, 'a) result
@@ -33,12 +33,19 @@ module Base_SE_Monad : sig
     -> 'b
     -> 'c * ('d, 'e) result
 
+  val revt : ('a -> 'b * ('c list, 'd) result) -> 'a -> 'b * ('c list, 'd) result
+
   val mapt
     :  'a list
     -> ('a -> 'b -> 'b * ('c, 'd) result)
     -> 'b
     -> 'b * ('c list, 'd) result
 
-  val revt : ('a -> 'b * ('c list, 'd) result) -> 'a -> 'b * ('c list, 'd) result
   val ignore_t : ('a -> 'b * ('c, 'd) result) -> 'a -> 'b * (unit, 'd) result
+end
+
+module CounterMonad : functor (ErrorT : Base.T) -> sig
+  include module type of Base_SE_Monad (Int) (ErrorT)
+
+  val fresh : int t
 end

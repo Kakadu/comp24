@@ -2,8 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-module Base_SE_Monad = struct
-  type ('st, 'a, 'err) t = 'st -> 'st * ('a, 'err) Result.t
+module Base_SE_Monad (StateT : Base.T) (ErrorT : Base.T) = struct
+  type 'a t = StateT.t -> StateT.t * ('a, ErrorT.t) Result.t
 
   let run at new_st = at new_st
   let fail e st = st, Base.Result.fail e
@@ -50,5 +50,15 @@ module Base_SE_Monad = struct
   let ignore_t f =
     let* f_res = f in
     return @@ ignore f_res
+  ;;
+end
+
+module CounterMonad (ErrorT : Base.T) = struct
+  include Base_SE_Monad (Int) (ErrorT)
+
+  let fresh : int t =
+    let* num = read in
+    let+ () = save @@ (num + 1) in
+    num
   ;;
 end
