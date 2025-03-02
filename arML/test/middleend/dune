@@ -1,7 +1,7 @@
 (library
  (name middleend_tests)
  (libraries arML_lib)
- (modules ClosureConversion)
+ (modules ClosureConversion LambdaLifting)
  (inline_tests)
  (instrumentation
   (backend bisect_ppx))

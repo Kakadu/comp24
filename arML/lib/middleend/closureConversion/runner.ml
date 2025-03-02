@@ -6,30 +6,7 @@ open Common.StateMonad
 open Common.IdentifierStructs
 open ClosureExpression
 open ClosureProgram
-
-let start_identifiers =
-  let binary_operations =
-    [ "( + )"
-    ; "( - )"
-    ; "( * )"
-    ; "( / )"
-    ; "( % )"
-    ; "( > )"
-    ; "( < )"
-    ; "( >= )"
-    ; "( <= )"
-    ; "( = )"
-    ; "( == )"
-    ; "( != )"
-    ; "( <> )"
-    ; "( && )"
-    ; "( || )"
-    ]
-  in
-  let unary_operations = [ "U-"; "U+"; "UNot" ] in
-  let stdlib_functions = [ "print_int"; "print_bool" ] in
-  binary_operations @ unary_operations @ stdlib_functions
-;;
+open Common.StartEnvironment
 
 let start_env =
   List.fold_left

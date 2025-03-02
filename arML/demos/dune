@@ -22,6 +22,14 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(executable
+ (name start_lambda_lifting_demos)
+ (public_name arML.start_lambda_lifting_demos)
+ (modules start_lambda_lifting_demos)
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (applies_to parser_demos)
  (deps
@@ -72,6 +80,24 @@
  (applies_to closure_conversion_demos)
  (deps
   ./start_closure_conversion_demos.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to lambda_lifting_demos)
+ (deps
+  ./start_lambda_lifting_demos.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
