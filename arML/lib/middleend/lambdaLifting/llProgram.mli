@@ -7,7 +7,7 @@ open Ast.AbstractSyntaxTree
 open Llast
 
 (** [ll_program] lift all nested functions in declarations on the top level *)
-val ll_program :
-  (declaration list -> IdentifierSet.t) ->
-  declaration list ->
-  (ll_decl list) Common.StateMonad.t
+val ll_program
+  :  (declaration list -> IdentifierSet.t)
+  -> declaration list
+  -> ll_decl list Common.StateMonad.t

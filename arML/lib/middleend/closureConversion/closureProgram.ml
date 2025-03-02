@@ -24,15 +24,15 @@ let closure_program start_env program =
   let process_cases env cases fv_map =
     List.fold_left
       (fun acc (pattern, body) ->
-         let* acc = acc in
-         match body with
-         | EFun _ ->
-           let transformed_body = Common.FunctionTransformer.transform_fun body in
-           let* closure_body, _ = closure_fun false env fv_map transformed_body in
-           return ((pattern, closure_body) :: acc)
-         | _ ->
-           let* closure_body = closure_expression env fv_map body in
-           return ((pattern, closure_body) :: acc))
+        let* acc = acc in
+        match body with
+        | EFun _ ->
+          let transformed_body = Common.FunctionTransformer.transform_fun body in
+          let* closure_body, _ = closure_fun false env fv_map transformed_body in
+          return ((pattern, closure_body) :: acc)
+        | _ ->
+          let* closure_body = closure_expression env fv_map body in
+          return ((pattern, closure_body) :: acc))
       (return [])
       cases
   in

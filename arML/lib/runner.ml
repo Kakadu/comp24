@@ -50,7 +50,7 @@ let inference_program program =
 
 (* Closure conversion *)
 
-let closure_conversion_expr_ast expr = 
+let closure_conversion_expr_ast expr =
   Ast.Pprint.print_expression (ClosureConversion.Runner.run_closure_expression expr)
 ;;
 

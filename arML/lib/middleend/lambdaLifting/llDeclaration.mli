@@ -6,12 +6,12 @@ open Common.IdentifierStructs
 open Ast.AbstractSyntaxTree
 open Llast
 
-(** [ll_expression] lift all nested functions and 
-    return tuple of declaration without nested functions and 
+(** [ll_expression] lift all nested functions and
+    return tuple of declaration without nested functions and
     list of new top-level declarations *)
-val ll_decl :
-  IdentifierSet.t ->
-  identifier IdentifierMap.t ->
-  ll_decl list ->
-  declaration ->
-  (ll_decl * ll_decl list) Common.StateMonad.t
+val ll_decl
+  :  IdentifierSet.t
+  -> identifier IdentifierMap.t
+  -> ll_decl list
+  -> declaration
+  -> (ll_decl * ll_decl list) Common.StateMonad.t
