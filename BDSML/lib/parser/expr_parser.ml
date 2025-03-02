@@ -6,6 +6,8 @@ open Angstrom
 open Ast
 open Utils
 
+let enclose s = "( " ^ s ^ " )"
+
 let parse_const =
   let+ const = Const_parser.parse_const in
   Exp_constant const
@@ -40,6 +42,11 @@ let parse_prefix_op =
   case1 <|> case2
 ;;
 
+let parse_prefix_plus_minus =
+  let+ op = char '-' <|> char '+' in
+  enclose ("~" ^ Char.escaped op)
+;;
+
 let parse_infix_op prefix =
   let case1 =
     let+ first_el = char '#' <|> char '|'
@@ -58,7 +65,9 @@ let parse_infix_op prefix =
 let parse_ident =
   let+ ident =
     ws
-    *> (parse_lowercase_ident <|> parse_prefix_op <|> remove_parents @@ parse_infix_op "")
+    *> (parse_lowercase_ident
+        <|> parse_prefix_op
+        <|> (remove_parents @@ parse_infix_op "" >>| enclose))
   in
   Exp_ident ident
 ;;
@@ -74,7 +83,7 @@ let parse_infix_with_prefixes prefixes = choice (List.map parse_infix_op prefixe
 
 let parse_bop (op : string t) =
   let+ parsed = ws *> op in
-  let ident = Exp_ident ("( " ^ parsed ^ " )") in
+  let ident = Exp_ident (enclose parsed) in
   fun e1 e2 -> Exp_apply (Exp_apply (ident, e1), e2)
 ;;
 
@@ -84,7 +93,7 @@ let infix_right_op parser prev = chainr1 prev (parse_bop parser)
 let application prev = chainl1 prev (return (fun e1 e2 -> Exp_apply (e1, e2)))
 
 let constructor prev =
-  let+ ident = parse_capitalized_ident
+  let+ ident = ws *> parse_capitalized_ident
   and+ arg = prev >>| Option.some <|> return None in
   Exp_construct (ident, arg)
 ;;
@@ -118,7 +127,7 @@ let parse_let_main_part prev =
       let val_bind =
         let addition p =
           let+ p = p in
-          "( " ^ p ^ " )"
+          enclose p
         in
         let+ ident =
           parse_ident_name
@@ -127,7 +136,7 @@ let parse_let_main_part prev =
         and+ expr = parse_expr in
         Val_binding (ident, pats, expr)
       in
-      pat_bind <|> val_bind
+      val_bind <|> pat_bind
     in
     sep_by1 (check_string "and" <* ws1) pat_expr
   in
@@ -236,7 +245,7 @@ let priority =
   ; infix_left_op @@ parse_infix_op "#"
   ; choice_pass_prev [ application; constructor; Fun.id ]
   ; infix_right_op @@ parse_infix_op "**"
-  ; prefix_op @@ choice [ string "-."; string "-" ]
+  ; prefix_op @@ parse_prefix_plus_minus
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "+"; "-" ]
   ; exp_list_cons

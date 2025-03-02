@@ -7,3 +7,4 @@ open Ast
 
 val parse_skip_fun : typexpr t
 val parse_typexpr : typexpr t
+val parse_typexpr_str : string -> (typexpr, string) result

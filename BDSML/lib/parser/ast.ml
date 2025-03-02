@@ -6,10 +6,11 @@ type constant =
   | Const_int of int (** Integer literal, e.g. [69] *)
   | Const_char of char (** Character literal, e.g. ['m'] *)
   | Const_string of string (** String literal, e.g. ["something"] *)
+  | Const_bool of bool (** Bool literal, [true] or [false] *)
 [@@deriving show { with_path = false }]
 
 type typexpr =
-  | Type_params of typexpr * string (** e.g. [int list] *)
+  | Type_constructor_param of typexpr * string (** e.g. [int list] *)
   | Type_tuple of typexpr list (** e.g. [int * int] *)
   | Type_single of string (** e.g. [int] *)
   | Type_fun of typexpr list (** e.g. [int -> int] *)
@@ -35,8 +36,8 @@ type pattern =
 [@@deriving show { with_path = false }]
 
 type let_binding =
-  | Pat_binding of pattern * expression
-  | Val_binding of string * pattern list * expression
+  | Pat_binding of pattern * expression (** e.g. [let (a, b) = (1, 2)] *)
+  | Val_binding of string * pattern list * expression (** e.g. [let f a b = a + b] *)
 [@@deriving show { with_path = false }]
 
 and case =

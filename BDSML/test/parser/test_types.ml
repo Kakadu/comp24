@@ -49,15 +49,19 @@ let%expect_test "parents fun test" =
 
 let%expect_test "simple params test" =
   test_types ":a t list";
-  [%expect {|
-    (Type_params ((Type_params ((Type_single "a"), "t")), "list"))
+  [%expect
+    {|
+    (Type_constructor_param ((Type_constructor_param ((Type_single "a"), "t")),
+       "list"))
     |}]
 ;;
 
 let%expect_test "parents params test" =
   test_types ":( ( ( a ) t ) list )";
-  [%expect {|
-    (Type_params ((Type_params ((Type_single "a"), "t")), "list"))
+  [%expect
+    {|
+    (Type_constructor_param ((Type_constructor_param ((Type_single "a"), "t")),
+       "list"))
     |}]
 ;;
 
@@ -67,7 +71,8 @@ let%expect_test "params combine test" =
     {|
     (Type_fun
        [(Type_tuple
-           [(Type_params ((Type_params ((Type_single "int"), "t")), "list"));
+           [(Type_constructor_param (
+               (Type_constructor_param ((Type_single "int"), "t")), "list"));
              (Type_single "int")]);
          (Type_single "int"); (Type_single "int")])
     |}]
@@ -79,11 +84,20 @@ let%expect_test "params combine parents test" =
     {|
     (Type_fun
        [(Type_tuple
-           [(Type_params ((Type_params ((Type_single "int"), "t")), "list"));
+           [(Type_constructor_param (
+               (Type_constructor_param ((Type_single "int"), "t")), "list"));
              (Type_single "int")]);
          (Type_tuple
             [(Type_fun [(Type_single "int"); (Type_single "int")]);
               (Type_single "string"); (Type_single "char")])
          ])
+    |}]
+;;
+
+let%expect_test "type variable" =
+  test_types ": 'a -> 'a";
+  [%expect
+    {|
+    (Type_fun [(Type_single "'a"); (Type_single "'a")])
     |}]
 ;;

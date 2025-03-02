@@ -18,6 +18,15 @@ let%expect_test "test just sum" =
     |}]
 ;;
 
+let%expect_test "test bool" =
+  test_expr "true, false";
+  [%expect
+    {|
+    (Exp_tuple
+       [(Exp_constant (Const_bool true)); (Exp_constant (Const_bool false))])
+    |}]
+;;
+
 let%expect_test "test sum priority" =
   test_expr "4 + 5 + 6";
   [%expect
@@ -162,7 +171,7 @@ let%expect_test "test binary infix with prefix" =
        (Exp_apply ((Exp_ident "( + )"),
           (Exp_apply (
              (Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 2)))),
-             (Exp_apply ((Exp_ident "-"), (Exp_constant (Const_int 1))))))
+             (Exp_apply ((Exp_ident "( ~- )"), (Exp_constant (Const_int 1))))))
           )),
        (Exp_constant (Const_int 3))))
     |}]
@@ -172,7 +181,7 @@ let%expect_test "test binary prefix call" =
   test_expr "(+) 2 3";
   [%expect
     {|
-    (Exp_apply ((Exp_apply ((Exp_ident "+"), (Exp_constant (Const_int 2)))),
+    (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 2)))),
        (Exp_constant (Const_int 3))))
     |}]
 ;;
@@ -266,8 +275,8 @@ let%expect_test "test let several" =
   [%expect
     {|
     (Exp_let (Recursive,
-       [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 4))));
-         (Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 6))))],
+       [(Val_binding ("a", [], (Exp_constant (Const_int 4))));
+         (Val_binding ("b", [], (Exp_constant (Const_int 6))))],
        (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "a"))),
           (Exp_ident "b")))
        ))
@@ -279,9 +288,9 @@ let%expect_test "test let in let" =
   [%expect
     {|
     (Exp_let (Nonrecursive,
-       [(Pat_binding ((Pat_var "a"),
+       [(Val_binding ("a", [],
            (Exp_let (Nonrecursive,
-              [(Pat_binding ((Pat_var "b"), (Exp_constant (Const_int 4))))],
+              [(Val_binding ("b", [], (Exp_constant (Const_int 4))))],
               (Exp_ident "b")))
            ))
          ],
@@ -295,7 +304,7 @@ let%expect_test "test num + let" =
     {|
     (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 4)))),
        (Exp_let (Nonrecursive,
-          [(Pat_binding ((Pat_var "a"), (Exp_constant (Const_int 5))))],
+          [(Val_binding ("a", [], (Exp_constant (Const_int 5))))],
           (Exp_ident "a")))
        ))
     |}]
@@ -355,8 +364,7 @@ let%expect_test "test if" =
 
 let%expect_test "test if without else" =
   test_expr "if a then b";
-  [%expect
-    {|
+  [%expect {|
     (Exp_if ((Exp_ident "a"), (Exp_ident "b"), None))
      |}]
 ;;
@@ -420,6 +428,23 @@ let%expect_test "test cons list" =
                      ))
                   ]))
        ))
+     |}]
+;;
+
+let%expect_test "test cons list 2" =
+  test_expr "(1 :: []) :: []";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_construct ("::",
+                    (Some (Exp_tuple
+                             [(Exp_constant (Const_int 1));
+                               (Exp_construct ("[]", None))]))
+                    ));
+                  (Exp_construct ("[]", None))]))
+       ))
+
      |}]
 ;;
 

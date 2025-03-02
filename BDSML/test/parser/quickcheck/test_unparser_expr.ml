@@ -72,7 +72,7 @@ let%expect_test "test prefix two args application" =
 
 let%expect_test "test binary infix with prefix" =
   test_expr "2 + - 1 + 3";
-  [%expect {| ( + ) (( + ) 2 (- 1)) 3 |}]
+  [%expect {| ( + ) (( + ) 2 (( ~- ) 1)) 3 |}]
 ;;
 
 let%expect_test "test tuple" =

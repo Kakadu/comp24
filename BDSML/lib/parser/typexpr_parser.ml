@@ -9,15 +9,16 @@ open Utils
 
 (** [int] *)
 let parse_single =
-  let+ id = parse_ident_name in
-  Type_single id
+  let+ prefix = ws *> option "" (string "\'")
+  and+ id = parse_ident_name in
+  Type_single (prefix ^ id)
 ;;
 
 (** [int t list] *)
 let parse_typeconstr prev =
   let rec go acc =
     (let+ main_type = ws1 *> parse_ident_name in
-     Type_params (acc, main_type))
+     Type_constructor_param (acc, main_type))
     >>= go
     <|> return acc
   in
@@ -59,3 +60,7 @@ let parse_skip_fun =
 
 (** [:int] *)
 let parse_typexpr : typexpr t = check_char ':' *> parse_typexpr_by_prior
+
+let parse_typexpr_str str =
+  Angstrom.parse_string ~consume:Angstrom.Consume.All parse_typexpr @@ ":" ^ str
+;;
