@@ -2,35 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-(* | Simple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) ->
-   let vars_to_add = VarSet.elements (get_vars_from_expr expr1 global_env) in
-   let new_value_binding =
-   match vars_to_add with
-   | [] -> ident, convert_expr env global_env expr1
-   | _ ->
-   let rev_id_lst_to_add =
-   List.fold_left
-   (fun acc new_var ->
-   let new_pat = Ast.Id new_var in
-   new_pat :: acc)
-   []
-   vars_to_add
-   in
-   let id_lst_to_add = List.rev rev_id_lst_to_add in
-   (match expr1 with
-   | Simple_ast.SEFun (fident_lst, fexpr) ->
-   let all_idents = List.append id_lst_to_add fident_lst in
-   ident, Simple_ast.SEFun (all_idents, convert_expr env global_env fexpr)
-   | _ ->
-   let converted_expr1 = convert_expr env global_env expr1 in
-   ident, Simple_ast.SEFun (id_lst_to_add, converted_expr1))
-   in
-   let var_name = get_var_name_from_id ident in
-   let updated_env = VarMap.add var_name vars_to_add env in
-   let updated_global_env = VarSet.add var_name global_env in
-   let converted_expr2 = convert_expr updated_env updated_global_env expr2 in
-   Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, converted_expr2) *)
-
 module VarMap = Stdlib.Map.Make (String)
 module VarSet = Stdlib.Set.Make (String)
 
@@ -54,11 +25,11 @@ let std_var_set =
   let init_var_set = VarSet.add "print_string" init_var_set in
   let init_var_set = VarSet.add "( ~+ )" init_var_set in
   let init_var_set = VarSet.add "( ~- )" init_var_set in
-  let init_var_set = VarSet.add "#gen_matching_failed#" init_var_set in
-  let init_var_set = VarSet.add "#gen_tuple_getter#" init_var_set in
-  let init_var_set = VarSet.add "#gen_list_getter_head#" init_var_set in
-  let init_var_set = VarSet.add "#gen_list_getter_tail#" init_var_set in
-  let init_var_set = VarSet.add "#gen_list_getter_length#" init_var_set in
+  let init_var_set = VarSet.add "#matching_failed#" init_var_set in
+  let init_var_set = VarSet.add "#tuple_getter#" init_var_set in
+  let init_var_set = VarSet.add "#list_head_getter#" init_var_set in
+  let init_var_set = VarSet.add "#list_tail_getter#" init_var_set in
+  let init_var_set = VarSet.add "#list_length_getter#" init_var_set in
   init_var_set
 ;;
 
@@ -134,14 +105,6 @@ let get_vars_from_expr expr env =
   in
   helper VarSet.empty env expr
 ;;
-
-(*     (match VarMap.find_opt var_name env with
-       | Some param_lst ->
-       List.fold_left
-       (fun exp param -> Simple_ast.SEApp (exp, Simple_ast.SEVar (Ast.Id param)))
-       s
-       param_lst
-       | None -> s) *)
 
 let recursively_add_params start_expr var_name env =
   let rec helper start_expr var_name =
@@ -261,7 +224,7 @@ and convert_expr env global_env = function
        in
        let converted_expr1 = convert_expr updated_env global_env expr1 in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
-       Simple_ast.SELet (Ast.Recursive, (ident, converted_expr1), converted_expr2))
+       Simple_ast.SELet (Ast.Nonrecursive, (ident, converted_expr1), converted_expr2))
   | Simple_ast.SEApp (expr1, expr2) ->
     let new_expr1 = convert_expr env global_env expr1 in
     let new_expr2 = convert_expr env global_env expr2 in
@@ -359,52 +322,3 @@ let run_expr_closure_conversion expr = convert_expr VarMap.empty std_var_set exp
 let run_closure_conversion (structure : Simple_ast.sstructure) =
   convert_structure std_var_set structure
 ;;
-
-(* it was on recursive let
-   let new_value_bindings =
-   List.fold_left
-   (fun acc (ident, expr) ->
-   match expr with
-   | Simple_ast.SEFun (fids, expr) ->
-   let new_expr = convert_expr VarMap.empty updated_global_env expr in
-   (ident, Simple_ast.SEFun (fids, new_expr)) :: acc
-   | _ ->
-   let new_expr = convert_expr VarMap.empty updated_global_env expr in
-   (ident, new_expr) :: acc)
-   []
-   value_binding_lst
-   in
-*)
-
-(* | Simple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) ->
-   let var_name = get_var_name_from_id ident in
-   let updated_global_env = VarSet.add var_name global_env in
-   let vars_to_add = VarSet.elements (get_vars_from_expr expr1 updated_global_env) in
-   let new_value_binding =
-   match vars_to_add with
-   | [] ->
-   (match expr1 with
-   | Simple_ast.SEFun (id_lst, fexpr) ->
-   ident, Simple_ast.SEFun (id_lst, convert_expr env global_env fexpr)
-   | _ -> ident, convert_expr env global_env expr1)
-   | _ ->
-   let rev_id_lst_to_add =
-   List.fold_left
-   (fun acc new_var ->
-   let new_pat = Ast.Id new_var in
-   new_pat :: acc)
-   []
-   vars_to_add
-   in
-   let id_lst_to_add = List.rev rev_id_lst_to_add in
-   (match expr1 with
-   | Simple_ast.SEFun (pat_lst, fexpr) ->
-   let all_pats = List.append id_lst_to_add pat_lst in
-   ident, Simple_ast.SEFun (all_pats, convert_expr env global_env fexpr)
-   | _ ->
-   let converted_expr1 = convert_expr env global_env expr1 in
-   ident, Simple_ast.SEFun (id_lst_to_add, converted_expr1))
-   in
-   let updated_env = VarMap.add var_name vars_to_add env in
-   let converted_expr2 = convert_expr updated_env updated_global_env expr2 in
-   Simple_ast.SELet (Ast.Recursive, new_value_binding, converted_expr2) *)

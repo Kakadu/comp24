@@ -280,7 +280,7 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = 2 :: [] in
+    	let #pat#0 = (2 :: []) in
     	let () =
     	if (((#list_length_getter# #pat#0)  =  1)  &&  ((#list_head_getter# #pat#0)  =  1))
     	then ()
@@ -293,7 +293,7 @@ let%expect_test "" =
   parse_simplify_and_print_result {| let 1 :: [] = 2 :: [];; |};
   [%expect
     {|
-    let #pat#0 = 2 :: [];;
+    let #pat#0 = (2 :: []);;
 
     let () = (((#list_length_getter# #pat#0)  =  1)  &&  ((#list_head_getter# #pat#0)  =  1));;
     |}]
@@ -304,7 +304,7 @@ let%expect_test "" =
   [%expect
     {|
       let b =
-      	let #pat#0 = 3 :: [] in
+      	let #pat#0 = (3 :: []) in
       	let () =
       	if (((#list_length_getter# #pat#0)  >=  1)  &&  ((#list_head_getter# #pat#0)  =  4))
       	then ()
@@ -317,7 +317,7 @@ let%expect_test "" =
   [%expect
     {|
       let b =
-      	let #pat#0 = 4 :: [] in
+      	let #pat#0 = (4 :: []) in
       	let () =
       	if ((#list_length_getter# #pat#0)  =  1)
       	then ()

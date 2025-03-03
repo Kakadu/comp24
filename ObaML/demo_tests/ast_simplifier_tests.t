@@ -56,7 +56,7 @@
   $ ./ast_simplifier_tests.exe << EOF
   > let a = match 1 :: [] with | 2 :: a -> a | 1 :: [] -> [];;
   let a = 
-  	let #pat#0 = 1 :: [] in 
+  	let #pat#0 = (1 :: []) in 
   	if (((#list_length_getter# #pat#0)  >=  1)  &&  ((#list_head_getter# #pat#0)  =  2))
   	then 
   	let a = (#list_tail_getter# #pat#0) in a
@@ -153,18 +153,18 @@
   	else 
   	if ((#list_length_getter# #pat#0)  =  1)
   	then 
-  	let a = (#list_head_getter# #pat#0) in (f a) :: []
+  	let a = (#list_head_getter# #pat#0) in ((f a) :: [])
   	else 
   	if ((#list_length_getter# #pat#0)  =  2)
   	then 
   	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in (f a) :: (f b) :: []
+  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in ((f a) :: ((f b) :: []))
   	else 
   	if ((#list_length_getter# #pat#0)  =  3)
   	then 
   	let a = (#list_head_getter# #pat#0) in 
   	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
-  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in (f a) :: (f b) :: (f c) :: []
+  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in ((f a) :: ((f b) :: ((f c) :: [])))
   	else 
   	if ((#list_length_getter# #pat#0)  >=  4)
   	then 
@@ -172,7 +172,7 @@
   	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
   	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in 
   	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in 
-  	let tl = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in (f a) :: (f b) :: (f c) :: (f d) :: ((map f) tl)
+  	let tl = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in ((f a) :: ((f b) :: ((f c) :: ((f d) :: ((map f) tl)))))
   	else (#matching_failed# ());;
   
   let rec append xs ys = 
@@ -183,7 +183,7 @@
   	if ((#list_length_getter# #pat#0)  >=  1)
   	then 
   	let x = (#list_head_getter# #pat#0) in 
-  	let xs = (#list_tail_getter# #pat#0) in x :: ((append xs) ys)
+  	let xs = (#list_tail_getter# #pat#0) in (x :: ((append xs) ys))
   	else (#matching_failed# ());;
   
   let concat = 
@@ -222,6 +222,6 @@
   	else (#matching_failed# ());;
   
   let main = 
-  	let () = ((iter print_int) 1 :: 2 :: 3 :: []) in 
-  	let () = (print_int (length ((cartesian 1 :: 2 :: []) 1 :: 2 :: 3 :: 4 :: []))) in 0;;
+  	let () = ((iter print_int) (1 :: (2 :: (3 :: [])))) in 
+  	let () = (print_int (length ((cartesian (1 :: (2 :: []))) (1 :: (2 :: (3 :: (4 :: []))))))) in 0;;
   

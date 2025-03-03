@@ -92,7 +92,7 @@ and convert_expr env expr =
        | None ->
          let* new_value_binding = convert_value_binding_expr env value_binding in
          let* new_expr2 = helper env expr2 in
-         return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2))
+         return (Simple_ast.SELet (Ast.Recursive, new_value_binding, new_expr2))
        | Some old_var ->
          let* new_var = checked_fresh_var old_var env in
          let updated_env = VarMap.add old_var new_var env in
@@ -101,7 +101,7 @@ and convert_expr env expr =
            convert_value_binding_expr updated_env new_value_binding
          in
          let* new_expr2 = helper updated_env expr2 in
-         return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2)))
+         return (Simple_ast.SELet (Ast.Recursive, new_value_binding, new_expr2)))
     | Simple_ast.SEApp (expr1, expr2) ->
       let* new_expr1 = helper env expr1 in
       let* new_expr2 = helper env expr2 in

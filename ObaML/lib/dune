@@ -11,12 +11,17 @@
   Std
   Typedtree
   State_monad
+  R
   Simple_ast
   To_simple_ast
   To_ast
   Alpha_conversion
   Closure_conversion
-  Lambda_lifting)
+  Lambda_lifting
+  Anf
+  Anf_pretty_printer
+  To_anf
+  Anf_to_simple_ast)
  (libraries base angstrom)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.ord ppx_deriving.eq))
@@ -31,7 +36,8 @@
   Closure_conversion_tests
   Ast_simplifier_tests
   Alpha_conversion_tests
-  Lambda_lifting_tests)
+  Lambda_lifting_tests
+  Anf_tests)
  (libraries ObaML)
  (inline_tests)
  (preprocess

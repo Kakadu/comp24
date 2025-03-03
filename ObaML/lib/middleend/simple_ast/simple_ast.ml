@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-(** Simplified AST *)
+(** Simple AST *)
 
 type sspecial = SUnit [@@deriving eq, show { with_path = false }]
 

@@ -16,14 +16,15 @@ let parse_and_closure_result str =
   match Parser.structure_from_string str with
   | Ok structure ->
     let simple_structure = To_simple_ast.convert structure in
-    let closure_structure = Closure_conversion.run_closure_conversion simple_structure in
-    let new_structure = To_ast.convert closure_structure in
+    let simple_structure = Alpha_conversion.run_alpha_conversion simple_structure Inner in
+    let simple_structure = Closure_conversion.run_closure_conversion simple_structure in
+    let new_structure = To_ast.convert simple_structure in
     Format.printf
       "Types:\n%a\nConverted structure:\n%a\nTypes after conversions:\n%a"
       infer_and_result
       structure
       Simple_ast_pretty_printer.print_structure
-      closure_structure
+      simple_structure
       infer_and_result
       new_structure
   | Error _ -> printf "Syntax error"
@@ -99,15 +100,15 @@ let%expect_test "" =
       val a : int -> string
 
       Converted structure:
-      let a = (((((fun #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# x ->
-      	let b x y = ((x  *  y)  *  52) :: 52 :: [] in
+      let a x =
+      	let b x y = (((x  *  y)  *  52) :: (52 :: [])) in
       	let #pat#0 = ((b x) 1) in
       	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ())) #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#);;
+      	else (#matching_failed# ());;
 
 
       Types after conversions:
@@ -123,15 +124,15 @@ let%expect_test "" =
       val a : int -> string
 
       Converted structure:
-      let a = (((((fun #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# x ->
-      	let b = (x  *  52) :: 52 :: [] in
+      let a x =
+      	let b = ((x  *  52) :: (52 :: [])) in
       	let #pat#0 = b in
       	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ())) #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#);;
+      	else (#matching_failed# ());;
 
 
       Types after conversions:
@@ -180,33 +181,33 @@ let%expect_test "" =
     let reversed2 = rev (true :: false :: false :: false :: []) |};
   [%expect
     {|
-      Types:
-      val rev : 'a list -> 'a list
-      val reversed1 : int list
-      val reversed2 : bool list
+    Types:
+    val rev : 'a list -> 'a list
+    val reversed1 : int list
+    val reversed2 : bool list
 
-      Converted structure:
-      let rev = (((((fun #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# lst ->
-      	let rec helper #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# acc = (((((((fun #list_head_getter# #list_length_getter# #list_tail_getter# #matching_failed# acc helper lst ->
-      	let #pat#0 = lst in
-      	if (#pat#0  =  [])
-      	then acc
-      	else
-      	if ((#list_length_getter# #pat#0)  >=  1)
-      	then
-      	let h = (#list_head_getter# #pat#0) in
-      	let tl = (#list_tail_getter# #pat#0) in ((helper h :: acc) tl)
-      	else (#matching_failed# ())) #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#) acc) ((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#)) in ((((((helper #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#) []) lst)) #list_head_getter#) #list_length_getter#) #list_tail_getter#) #matching_failed#);;
+    Converted structure:
+    let rev lst =
+    	let rec helper acc = (((fun acc helper oba0 ->
+    	let #pat#0 = oba0 in
+    	if (#pat#0  =  [])
+    	then acc
+    	else
+    	if ((#list_length_getter# #pat#0)  >=  1)
+    	then
+    	let h = (#list_head_getter# #pat#0) in
+    	let tl = (#list_tail_getter# #pat#0) in ((helper (h :: acc)) tl)
+    	else (#matching_failed# ())) acc) helper) in ((helper []) lst);;
 
-      let reversed1 = (rev 1 :: 2 :: 3 :: 4 :: 5 :: []);;
+    let reversed1 = (rev (1 :: (2 :: (3 :: (4 :: (5 :: []))))));;
 
-      let reversed2 = (rev true :: false :: false :: false :: []);;
+    let reversed2 = (rev (true :: (false :: (false :: (false :: [])))));;
 
 
-      Types after conversions:
-      val rev : 'a list -> 'a list
-      val reversed1 : int list
-      val reversed2 : bool list |}]
+    Types after conversions:
+    val rev : 'a list -> 'a list
+    val reversed1 : int list
+    val reversed2 : bool list |}]
 ;;
 
 let%expect_test "" =
@@ -220,7 +221,7 @@ let%expect_test "" =
       Converted structure:
       let rec y x =
       	let a = (y x) in
-      	let b a x = (a  +  x) in ((b a) 5);;
+      	let b a oba0 = (a  +  oba0) in ((b a) 5);;
 
 
       Types after conversions:
@@ -237,8 +238,8 @@ let%expect_test "" =
 
       Converted structure:
       let rec y x =
-      	let rec a = (y x) in
-      	let b a x = (a  +  x) in ((b a) 5);;
+      	let a = (y x) in
+      	let b a oba0 = (a  +  oba0) in ((b a) 5);;
 
 
       Types after conversions:
@@ -256,7 +257,7 @@ let%expect_test "" =
       Converted structure:
       let rec y x =
       	let a x y z = ((y x)  +  z) in
-      	let b a x = ((a 5)  +  x) in ((b ((a x) y)) 5);;
+      	let b a oba0 = ((a 5)  +  oba0) in ((b ((a x) y)) 5);;
 
 
       Types after conversions:
@@ -272,7 +273,7 @@ let%expect_test "" =
 
       Converted structure:
       let f z y =
-      	let z y x = (y  +  x) in (((z y) 5)  +  y);;
+      	let oba0 y x = (y  +  x) in (((oba0 y) 5)  +  y);;
 
 
       Types after conversions:
@@ -297,7 +298,7 @@ let%expect_test "" =
 
       let helper f p = (f p);;
 
-      let zet l = ((fix (fun self l -> ((helper (((fun l self li x -> ((li (self l)) x)) l) self)) l))) l);;
+      let zet l = ((fix (fun self oba0 -> ((helper (((fun oba0 self li x -> ((li (self oba0)) x)) oba0) self)) oba0))) l);;
 
 
       Types after conversions:
@@ -325,33 +326,23 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_closure_result
     {| 
-  let a x = let z = (fun zet -> zet + x) in
+  let rec a x = let z = (fun zet -> zet + x) in
       let rec a x y = a (x + z 1) y in 
          a;;
 ;; |};
   [%expect
     {|
-      Types:
-      val a : int -> int -> 'a -> 'b
+    Types:
+    val a : int -> int -> 'a -> 'b
 
-      Converted structure:
-      let a x =
-      	let z x zet = (zet  +  x) in
-      	let rec a z x y = (((a z) (x  +  (z 1))) y) in (a (z x));;
+    Converted structure:
+    let rec a x =
+    	let z x zet = (zet  +  x) in
+    	let rec oba0 z oba1 y = (((oba0 z) (oba1  +  (z 1))) y) in (oba0 (z x));;
 
 
-      Types after conversions:
-      val a : int -> int -> 'a -> 'b |}]
-;;
-
-let parse_and_closure_result str =
-  match Parser.structure_from_string str with
-  | Ok parse_result ->
-    let structure = To_simple_ast.convert parse_result in
-    let structure = Alpha_conversion.run_alpha_conversion structure Inner in
-    let structure = Closure_conversion.run_closure_conversion structure in
-    printf "%a" Simple_ast_pretty_printer.print_structure structure
-  | Error _ -> printf "Syntax error"
+    Types after conversions:
+    val a : int -> int -> 'a -> 'b |}]
 ;;
 
 let%expect_test "" =
@@ -362,7 +353,15 @@ let%expect_test "" =
       x 1 + y 2;; |};
   [%expect
     {|
+      Types:
+      val f : 'a -> int -> int
+
+      Converted structure:
       let f x y =
       	let oba0 y z = (y  +  z) in
-      	let oba1 oba0 z = ((oba0 1)  +  z) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));; |}]
+      	let oba1 oba0 z = ((oba0 1)  +  z) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
+
+
+      Types after conversions:
+      val f : 'a -> int -> int |}]
 ;;

@@ -4,21 +4,25 @@
 
 (** [All] - setting to convert all AST
     original:
-    let a b c = b + c
-    let b c d = c + d
+    let a = 1;;
+    let x = 1;;
+    let a x = a + x;;
 
     after conversion:
-    let o1 o2 o3 = o2 + o3
-    let o4 o5 o6 = o5 + o6
+    let a = 1;;
+    let x = 1;;
+    let oba0 oba1 = (a  +  oba1);;
 
     [Inner] - setting to convert only inner expressions
     original:
-    let a b c = b + c
-    let b c d = c + d
+    let a = 1;;
+    let x = 1;;
+    let a x = a + x;;
 
     after conversion:
-    let a o1 o2 = o1 + o2
-    let b o3 o4 = o3 + o4 *)
+    let a = 1;;
+    let x = 1;;
+    let a oba0 = (a  +  oba0);; *)
 type alpha_conversion_setting =
   | All
   | Inner

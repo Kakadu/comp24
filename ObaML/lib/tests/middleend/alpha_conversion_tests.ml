@@ -114,6 +114,19 @@ let%expect_test "006partial2" =
 ;;
 
 let%expect_test "" =
+  parse_inner_alpha_and_print {|
+    let a = 5
+
+    let a = let a = a in a;;
+  |};
+  [%expect {|
+      let a = 5;;
+
+      let a =
+      	let oba0 = a in oba0;; |}]
+;;
+
+let%expect_test "" =
   parse_inner_alpha_and_print
     {|
     let main = 5
@@ -136,7 +149,9 @@ let%expect_test "" =
 
 let parse_all_alpha_and_print str = parse_alpha_convert_and_print_result str All
 
-let%expect_test "loss one of `main` functions (the error will not be thrown)" =
+let%expect_test "loss one of `main` functions with ALL setting (the error will not be \
+                 thrown)"
+  =
   parse_all_alpha_and_print
     {|
     let main = 5

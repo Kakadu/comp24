@@ -79,7 +79,7 @@ and print_expr fmt = function
       print_expr
       expr3
   | Simple_ast.SECons (expr1, expr2) ->
-    fprintf fmt "%a :: %a" print_expr expr1 print_expr expr2
+    fprintf fmt "(%a :: %a)" print_expr expr1 print_expr expr2
 
 and print_value_binding fmt value_binding =
   let ident, expr = value_binding in

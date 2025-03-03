@@ -4,7 +4,7 @@
 
 open State_monad.StateMonad
 
-let fresh_var_name = "fobaml"
+let fresh_var_name = "foba"
 let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
 let id_from_var_name var_name = Ast.Id var_name
 
@@ -23,7 +23,7 @@ and lift_lambdas_from_expr expr =
     | Simple_ast.SEConst _ as const -> return (curr_fobaml_lst, const)
     | Simple_ast.SEVar _ as var -> return (curr_fobaml_lst, var)
     | Simple_ast.SETuple tup_lst ->
-      let* new_fobaml_lst, new_tup_lst =
+      let* new_fobaml_lst, rev_new_tup_lst =
         List.fold_left
           (fun acc tup_expr ->
             let* curr_fobaml_lst, new_tup_lst = acc in
@@ -32,7 +32,7 @@ and lift_lambdas_from_expr expr =
           (return (curr_fobaml_lst, []))
           tup_lst
       in
-      return (new_fobaml_lst, Simple_ast.SETuple new_tup_lst)
+      return (new_fobaml_lst, Simple_ast.SETuple (List.rev rev_new_tup_lst))
     | Simple_ast.SEFun (ident_lst, expr) ->
       let* new_fobaml_var_name = fresh_var in
       let new_fobaml_id = id_from_var_name new_fobaml_var_name in
