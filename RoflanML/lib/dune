@@ -3,7 +3,6 @@
  (public_name RoflanML.Lib)
  (modules
   Ast
-  Ast_to_str
   Parser
   Typing
   Typechecker
@@ -14,9 +13,11 @@
   Closure_conversion
   Ll_ast
   Lambda_lifting
+  Ast_to_str
   Anf_ast
-  Anf)
- (libraries base angstrom qcheck)
+  Anf
+  Llvm_gen)
+ (libraries base angstrom qcheck llvm)
  (inline_tests)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_expect))
