@@ -45,7 +45,8 @@ let%test _ =
           ]
         , Some
             (LLApplication
-               (LLApplication (LLOperation (Binary ADD), LLVar "LL_fun_0"), LLConst (Int 2))) )
+               ( LLApplication (LLOperation (Binary ADD), LLVar "LL_fun_0")
+               , LLConst (Int 2) )) )
     ]
 ;;
 
@@ -126,6 +127,26 @@ let%test _ =
         , [ ( Var "LL_fun_1"
             , [ Var "x"; Var "y" ]
             , LLApplication (LLApplication (LLVar "LL_fun_0", LLVar "x"), LLVar "y") )
+          ]
+        , None )
+    ]
+;;
+
+(*
+   let rec f x = g x and g x = x + 1
+   ---
+   let rec ll_fun_0 x = ll_fun_1 x and ll_fun_1 x = x + 1
+*)
+
+let%test _ =
+  lambda_lift_prog "let rec f x = g x and g x = x + 1"
+  = [ LLLet
+        ( Recursive
+        , [ Var "LL_fun_0", [ Var "x" ], LLApplication (LLVar "LL_fun_1", LLVar "x")
+          ; ( Var "LL_fun_1"
+            , [ Var "x" ]
+            , LLApplication
+                (LLApplication (LLOperation (Binary ADD), LLVar "x"), LLConst (Int 1)) )
           ]
         , None )
     ]
