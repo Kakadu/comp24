@@ -859,7 +859,7 @@ module Lltest = struct
   let%expect_test "LLVM generation for simple func let" =
     (* try pp_parse_and_anf_and_llvm "let x = 1" with *)
     (* | Failure msg -> *)
-    pp_parse_and_anf_and_llvm "let x arg argv= 1 ";
+    pp_parse_and_anf_and_llvm "let x arg argv = 1 ";
     (* Stdlib.print_endline "Caught exception: "; *)
     [%expect
       {|
@@ -879,10 +879,38 @@ module Lltest = struct
       |}]
   ;;
 
-  let%expect_test "LLVM generation for simple let" =
-    try pp_parse_and_anf_and_llvm "let x = 1 + 1" with
+  let%expect_test "LLVM generation" =
+    pp_parse_and_anf_and_llvm "let f x = x \n let r = f 42";
+    [%expect
+      {|
+      ; ModuleID = 'Roflan'
+      source_filename = "Roflan"
+
+      @x = global i64 1
+      @r = global i64 0
+
+      define i64 @x.1(i64 %0, i64 %1) {
+      entry:
+        %arg = alloca i64, align 8
+        store i64 %0, ptr %arg, align 4
+        %argv = alloca i64, align 8
+        store i64 %1, ptr %argv, align 4
+        ret i64 1
+      }
+
+      define i64 @f(i64 %0) {
+      entry:
+        %x = alloca i64, align 8
+        store i64 %0, ptr %x, align 4
+        ret ptr %x
+      }
+      |}]
+  ;;
+
+  (* let%expect_test "LLVM generation for simple let" =
+    try pp_parse_and_anf_and_llvm " " with
     | Failure msg ->
       Stdlib.print_endline ("Caught exception: " ^ msg);
       [%expect {| |}]
-  ;;
+  ;; *)
 end
