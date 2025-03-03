@@ -33,7 +33,7 @@ let remaps_to_str r =
   Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
 ;;
 
-let reserved_prefixes = [ "__"; "anf"; "ll_" ]
+let reserved_prefixes = [ "__"; "anf"; "ll_"; "_start"]
 let renamed_prefix = "__var_"
 
 let is_internal id =

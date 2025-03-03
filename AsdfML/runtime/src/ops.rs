@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 macro_rules! make_int_bin_op {
     ($name:ident, $op:tt) => {
         #[no_mangle]
@@ -20,8 +22,7 @@ make_int_bin_op!(ml_add, +);
 make_int_bin_op!(ml_sub, -);
 make_int_bin_op!(ml_mul, *);
 #[no_mangle]
-pub extern "C" fn ml_div(lhs: isize, rhs: isize) -> isize { 
-    lhs.checked_div(rhs).expect("Division by zero") }
+pub extern "C" fn ml_div(lhs: isize, rhs: isize) -> isize { lhs.checked_div(rhs).expect("Division by zero") }
 
 make_int_bin_op!(ml_gt, >);
 make_int_bin_op!(ml_lt, <);
@@ -37,7 +38,10 @@ make_bool_bin_op!(ml_or, ||);
 pub extern "C" fn ml_println_int(i: isize) { println!("{}", i) }
 
 #[no_mangle]
-pub extern "C" fn ml_print_int(i: isize) { print!("{} ", i) }
+pub extern "C" fn ml_print_int(i: isize) {
+    print!("{} ", i);
+    io::stdout().flush().unwrap()
+}
 
 #[no_mangle]
 pub extern "C" fn ml_println_bool(b: isize) { println!("{}", b != 0) }
@@ -46,7 +50,10 @@ pub extern "C" fn ml_println_bool(b: isize) { println!("{}", b != 0) }
 pub extern "C" fn ml_print_newline() { println!() }
 
 #[no_mangle]
-pub extern "C" fn ml_print_char(i: isize) { print!("{}", i as u8 as char) }
+pub extern "C" fn ml_print_char(i: isize) {
+    print!("{}", i as u8 as char);
+    io::stdout().flush().unwrap()
+}
 
 #[no_mangle]
 pub extern "C" fn ml_panic() { panic!("Panic from AsdfML") }
