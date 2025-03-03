@@ -1,201 +1,105 @@
-open Ast
+open Pat_elim_ast
+open Common.MonadCounter
 open Base
-open L_lifting_ast
+open Common
 
-module COUNTERMONAD = struct
-  let return value state = state, value
-
-  let ( >>= ) m f state =
-    let value, st = m state in
-    f st value
-  ;;
-
-  let ( let* ) = ( >>= )
-  let get state = state, state
-  let put state _ = state, ()
-  let run f = f
-end
-
-open COUNTERMONAD
-
-type bindings = Args_body of pattern list * expr
-
-let get_new_num =
-  let* i = get in
-  let* () = put (i + 1) in
-  return i
-;;
-
-let rec collect_bindings_from_pat = function
-  | PAny -> (module String) |> Set.empty
-  | PConst _ -> (module String) |> Set.empty
-  | PVar id -> Set.add ((module String) |> Set.empty) id
-  | PCons (left, right) ->
-    let collected_in_left = collect_bindings_from_pat left in
-    let collected_in_right = collect_bindings_from_pat right in
-    Set.union collected_in_left collected_in_right
-  | PConstraint (pat, _) -> collect_bindings_from_pat pat
-  | PTuple pats ->
-    List.fold_left
-      pats
-      ~init:((module String) |> Set.empty)
-      ~f:(fun acc h -> Set.union acc (collect_bindings_from_pat h))
-;;
-
-let rec new_name env =
-  let* new_num = get_new_num in
-  let name_candidate = String.concat [ "ll_"; Int.to_string new_num ] in
-  if Set.mem env name_candidate then new_name env else return name_candidate
-;;
-
-let rec collect_function_arguments collected = function
-  | EFun (pat, next) -> collect_function_arguments (pat :: collected) next
-  | expr -> Args_body (List.rev collected, expr)
-;;
-
-let rec init_env acc = function
-  | [] -> acc
-  | SValue (_, [ (pat, _) ]) :: tl ->
-    init_env (Set.union acc (collect_bindings_from_pat pat)) tl
-  | SValue (_, lst) :: tl ->
-    let bindings_from_mutual =
-      List.fold_left lst ~init:acc ~f:(fun acc (pat, _) ->
-        Set.union acc (collect_bindings_from_pat pat))
+let rec ll_expr env = function
+  | PEEConst _ as v -> return ([], v)
+  | PEEVar id as v ->
+    (match Map.find env id with
+     | Some x -> return ([], PEEVar x)
+     | None -> return ([], v))
+  | PEEApp (e1, e2) ->
+    let* str1, e1 = ll_expr env e1 in
+    let* sl2, e2 = ll_expr env e2 in
+    return (str1 @ sl2, PEEApp (e1, e2))
+  | PEEIf (e1, e2, e3) ->
+    let* str1, e1 = ll_expr env e1 in
+    let* str2, e2 = ll_expr env e2 in
+    let* str3, e3 = ll_expr env e3 in
+    return (str1 @ str2 @ str3, PEEIf (e1, e2, e3))
+  | PEEFun (args, body) ->
+    let* fresh = fresh >>| get_id in
+    let env = List.fold args ~init:env ~f:Map.remove in
+    let* str, body = ll_expr env body in
+    return (str @ [ PENonrec (fresh, PEEFun (args, body)) ], PEEVar fresh)
+  | PEECons (e1, e2) ->
+    let* str1, e1 = ll_expr env e1 in
+    let* str2, e2 = ll_expr env e2 in
+    return (str1 @ str2, PEECons (e1, e2))
+  | PEETuple e_list ->
+    let* t = map e_list ~f:(ll_expr env) in
+    let str, el = List.unzip t in
+    return (List.concat str, PEETuple el)
+  | PEELet (PENonrec (name, e1), e2) ->
+    let* str1, e1 = ll_inner env e1 in
+    (match e1 with
+     | PEEFun _ ->
+       let* fresh_name = fresh >>| get_id in
+       let bindings = Map.update env name ~f:(fun _ -> fresh_name) in
+       let* str2, e2 = ll_expr bindings e2 in
+       return (str1 @ [ PENonrec (fresh_name, e1) ] @ str2, e2)
+     | _ ->
+       let* str2, e2 = ll_expr env e2 in
+       return (str1 @ str2, PEELet (PENonrec (name, e1), e2)))
+  | PEELet (PERec cl, e) ->
+    let* env =
+      List.fold cl ~init:(return env) ~f:(fun acc (name, _) ->
+        let* acc = acc in
+        let* fresh = fresh >>| get_id in
+        return @@ Map.update acc name ~f:(fun _ -> fresh))
     in
-    init_env bindings_from_mutual tl
+    let* str1, cl =
+      List.fold
+        cl
+        ~init:(return ([], []))
+        ~f:(fun acc (name, e) ->
+          let* decls, decl_bodies = acc in
+          let* d, e = ll_inner env e in
+          let new_name = Map.find_exn env name in
+          return (decls @ d, (new_name, e) :: decl_bodies))
+    in
+    let cl = List.rev cl in
+    let* str2, e2 = ll_expr env e in
+    return (str1 @ [ PERec cl ] @ str2, e2)
+
+and ll_inner env = function
+  | PEEFun (args, body) ->
+    let env = List.fold args ~init:env ~f:Map.remove in
+    let* str, body = ll_expr env body in
+    return (str, PEEFun (args, body))
+  | e ->
+    let* str, e = ll_expr env e in
+    return (str, e)
 ;;
 
-let prog_lift prog =
-  let rec lift_expr ctx acc global_ctx state = function
-    | EConst const ->
-      (match const with
-       | CNil -> LLConst CNil, acc, state
-       | CUnit -> LLConst CUnit, acc, state
-       | CBool flag -> LLConst (CBool flag), acc, state
-       | CInt integer -> LLConst (CInt integer), acc, state
-       | CString s -> LLConst (CString s), acc, state)
-    | EVar id ->
-      (match Map.find ctx id with
-       | Some found -> LLVar found, acc, state
-       | None -> LLVar id, acc, state)
-    | EIf (guard_expr, if_expr, else_expr) ->
-      let lifted_guard, acc, state = lift_expr ctx acc global_ctx state guard_expr in
-      let lifted_if, acc, state = lift_expr ctx acc global_ctx state if_expr in
-      let lifted_elese, acc, state = lift_expr ctx acc global_ctx state else_expr in
-      LLIf (lifted_guard, lifted_if, lifted_elese), acc, state
-    | EApply (left_exp, right_exp) ->
-      let lifted_left, acc, state = lift_expr ctx acc global_ctx state left_exp in
-      let lifted_right, acc, state = lift_expr ctx acc global_ctx state right_exp in
-      LLApplication (lifted_left, lifted_right), acc, state
-    | EConstraint (expr, typ) ->
-      let lifted, ll_list, state = lift_expr ctx acc global_ctx state expr in
-      LLConstraint (lifted, typ), ll_list, state
-    | ETuple exp_list ->
-      let rec lift_exprs env acc global_ctx state = function
-        | [] -> [], acc, state
-        | e :: rest ->
-          let l, acc, state = lift_expr env acc global_ctx state e in
-          let ls, acc, state = lift_exprs env acc global_ctx state rest in
-          l :: ls, acc, state
-      in
-      let lifted_exprs, acc, state = lift_exprs ctx acc global_ctx state exp_list in
-      LLTuple lifted_exprs, acc, state
-    | EMatch (exp, branches) ->
-      let rec lift_branches env acc global_ctx state = function
-        | [] -> [], acc, state
-        | (p, e) :: rest ->
-          let lifted_expr, acc, state = lift_expr env acc global_ctx state e in
-          let lifted_branches, acc, state = lift_branches env acc global_ctx state rest in
-          (p, lifted_expr) :: lifted_branches, acc, state
-      in
-      let lifted_branches, acc, state = lift_branches ctx acc global_ctx state branches in
-      let lifted_exp, acc, state = lift_expr ctx acc global_ctx state exp in
-      LLMatch (lifted_exp, lifted_branches), acc, state
-    | ELet (rec_flag, (pat, outer), inner) ->
-      (match pat, outer with
-       | PVar id, EFun (_, _) ->
-         let args, new_outer =
-           match collect_function_arguments [] outer with
-           | Args_body (arg, expr) -> arg, expr
-         in
-         let state, fresh_name = run (new_name global_ctx) state in
-         let updated_ctx = Map.set ctx ~key:id ~data:fresh_name in
-         let lifted_outer, acc, state =
-           match rec_flag with
-           | Rec -> lift_expr updated_ctx acc global_ctx state new_outer
-           | Nonrec -> lift_expr ctx acc global_ctx state new_outer
-         in
-         lift_expr
-           updated_ctx
-           (LLSingleLet (rec_flag, LLLet (PVar fresh_name, args, lifted_outer)) :: acc)
-           global_ctx
-           state
-           inner
-       | _ ->
-         let lifted_outer, acc, state = lift_expr ctx acc global_ctx state outer in
-         let lifted_inner, acc, state = lift_expr ctx acc global_ctx state inner in
-         LLLetIn (rec_flag, pat, lifted_outer, lifted_inner), acc, state)
-    | EFun (pat, body) ->
-      let arguments, new_body =
-        match collect_function_arguments [] (EFun (pat, body)) with
-        | Args_body (arg, expr) -> arg, expr
-      in
-      let state, fresh_name = run (new_name global_ctx) state in
-      let lifted, acc, state =
-        let new_ctx = (module String) |> Map.empty in
-        lift_expr new_ctx acc global_ctx state new_body
-      in
-      ( LLVar fresh_name
-      , LLSingleLet (Nonrec, LLLet (PVar fresh_name, arguments, lifted)) :: acc
-      , state )
-    | ECons (left, right) ->
-      let lifted_left, acc, state = lift_expr ctx acc global_ctx state left in
-      let lifted_right, acc, state = lift_expr ctx acc global_ctx state right in
-      LLCons (lifted_left, lifted_right), acc, state
-  in
-  let lift_bindings global_ctx state = function
-    | SValue (rec_flag, [ (pat, e) ]) ->
-      let pats, expr =
-        match collect_function_arguments [] e with
-        | Args_body (args, expr) -> args, expr
-      in
-      let lifted, acc, state =
-        let new_ctx = (module String) |> Map.empty in
-        lift_expr new_ctx [] global_ctx state expr
-      in
-      LLSingleLet (rec_flag, LLLet (pat, pats, lifted)) :: acc, state
-    | SValue (rec_flag, dlets) ->
-      let rec dlets_helper lifted_acc llets_acc cur_state = function
-        | (pat, e) :: tl ->
-          let p, expr =
-            match collect_function_arguments [] e with
-            | Args_body (args, expr) -> args, expr
-          in
-          let lifted, acc, new_state =
-            let new_ctx = (module String) |> Map.empty in
-            lift_expr new_ctx [] global_ctx cur_state expr
-          in
-          dlets_helper
-            (LLLet (pat, p, lifted) :: lifted_acc)
-            (acc @ llets_acc)
-            new_state
-            tl
-        | [] -> List.rev lifted_acc, llets_acc, cur_state
-      in
-      let lifted_acc, llets_acc, cur_state = dlets_helper [] [] 0 dlets in
-      LLMutLetRec (rec_flag, lifted_acc) :: llets_acc, cur_state
-  in
-  let lift_fold prog =
-    List.fold_left prog ~init:([], 0) ~f:(fun (h, state) decl ->
-      let new_acc, state =
-        lift_bindings (init_env ((module String) |> Set.empty) prog) state decl
-      in
-      h @ List.rev new_acc, state)
-  in
-  lift_fold prog
+let ll_str_item = function
+  | PENonrec (name, e) ->
+    let* str, new_e = ll_inner empty e in
+    return @@ str @ [ PENonrec (name, new_e) ]
+  | PERec decls ->
+    let* str, cl =
+      List.fold
+        decls
+        ~init:(return ([], []))
+        ~f:(fun acc (name, e) ->
+          let* d1, d2 = acc in
+          let* d, e = ll_inner empty e in
+          return (d @ d1, (name, e) :: d2))
+    in
+    let rec_decl = [ PERec (List.rev cl) ] in
+    return @@ str @ rec_decl
 ;;
 
-let lift_ast prog =
-  let lifted, _ = prog_lift prog in
-  lifted
+let ll_structure structure =
+  let rec helper = function
+    | [] -> return []
+    | hd :: tl ->
+      let* str1 = ll_str_item hd in
+      let* str2 = helper tl in
+      return @@ str1 @ str2
+  in
+  helper structure
 ;;
+
+let run nh init_num p = run (ll_structure p) nh init_num
