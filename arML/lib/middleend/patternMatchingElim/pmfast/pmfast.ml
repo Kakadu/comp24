@@ -10,7 +10,7 @@ and pmf_expression =
   | PMFConstant of constant
   | PMFIdentifier of identifier
   | PMFApplication of pmf_expression * pmf_expression * pmf_expression list
-  | PMFLetIn of case * case list * pmf_expression
+  | PMFLetIn of pmf_case * pmf_case list * pmf_expression
   | PMFIfThenElse of pmf_expression * pmf_expression * pmf_expression option
   | PMFTuple of pmf_expression * pmf_expression * pmf_expression list
   | PMFListConstructor of pmf_expression * pmf_expression

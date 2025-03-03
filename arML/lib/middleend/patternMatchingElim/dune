@@ -3,7 +3,7 @@
 (library
  (name patternMatchingElim)
  (public_name arML.middleend.patternMatchingElim)
- (modules Pmfast)
+ (modules Pmfast Pprint)
  (libraries base ast common)
  (instrumentation
   (backend bisect_ppx)))
