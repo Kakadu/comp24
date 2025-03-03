@@ -45,3 +45,12 @@
 
 (cram
  (deps ./lambdalift_demo.exe))
+
+(executable
+ (name llvm_demo)
+ (modules llvm_demo)
+ (public_name llvm_demo)
+ (libraries MEML_lib stdio))
+
+(cram
+ (deps ./llvm_demo.exe))
