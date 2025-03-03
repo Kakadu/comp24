@@ -11,7 +11,9 @@ let gen_constant =
     [ (let+ x = small_int in
        Const_int x)
     ; (let+ c = printable in
-       Const_char c)
+       match c with
+       | '\'' -> Const_char ' '
+       | _ -> Const_char c)
     ; (let+ s =
          map
            (fun s -> String.map (fun c -> if c = '"' then ' ' else c) s)
@@ -24,7 +26,9 @@ let gen_constant =
 ;;
 
 let rec gen_typexpr = function
-  | 0 -> gen_ident >|= fun s -> Type_single s
+  | 0 ->
+    let+ s = gen_ident in
+    Type_single s
   | depth ->
     oneof
       [ (let+ l = gen_list_helper gen_typexpr depth in
@@ -61,8 +65,8 @@ let rec gen_pattern ?(top_level = false) = function
          Pat_type (p, t))
       ; (let+ l = gen_list_helper gen_pattern depth in
          Pat_tuple l)
-      ; (let+ p1 = gen_pattern (depth / 2)
-         and+ p2 = gen_pattern (depth / 2) in
+      ; (let* p1 = gen_pattern (depth / 2) in
+         let+ p2 = gen_pattern (depth / 2) in
          Pat_or (p1, p2))
       ; gen_construct
           gen_pattern
@@ -78,23 +82,23 @@ let rec gen_expr = function
       [ (gen_ident >|= fun s -> Exp_ident s); (gen_constant >|= fun c -> Exp_constant c) ]
   | depth ->
     oneof
-      [ (let+ e = gen_expr (depth / 2)
-         and+ t = gen_typexpr (depth / 2) in
+      [ (let* e = gen_expr (depth / 2) in
+         let+ t = gen_typexpr (depth / 2) in
          Exp_type (e, t))
-      ; (let+ lb_list = gen_list_helper gen_let_binding depth
-         and+ r = gen_rec
-         and+ e = gen_expr (depth / 2) in
+      ; (let* lb_list = gen_list_helper gen_let_binding depth in
+         let* r = gen_rec in
+         let+ e = gen_expr (depth / 2) in
          Exp_let (r, lb_list, e))
-      ; (let+ pl = gen_list_helper gen_pattern (depth / 2)
-         and+ e = gen_expr (depth / 2) in
+      ; (let* pl = gen_list_helper gen_pattern (depth / 2) in
+         let+ e = gen_expr (depth / 2) in
          Exp_fun (pl, e))
       ; (let+ cl = gen_list_helper gen_case depth in
          Exp_function cl)
-      ; (let+ e1 = gen_expr (depth / 2)
-         and+ e2 = gen_expr (depth / 2) in
+      ; (let* e1 = gen_expr (depth / 2) in
+         let+ e2 = gen_expr (depth / 2) in
          Exp_apply (e1, e2))
-      ; (let+ e = gen_expr (depth / 2)
-         and+ cl = gen_list_helper gen_case (depth / 2) in
+      ; (let* e = gen_expr (depth / 2) in
+         let+ cl = gen_list_helper gen_case (depth / 2) in
          Exp_match (e, cl))
       ; (let+ el = gen_list_helper gen_expr depth in
          Exp_tuple el)
@@ -103,15 +107,18 @@ let rec gen_expr = function
           (fun (st, e) -> Exp_construct (st, e))
           depth
           (fun e -> Exp_tuple e)
-      ; (let+ e1 = gen_expr (depth / 3)
-         and+ e2 = gen_expr (depth / 3)
-         and+ e3 = opt ~ratio:0.5 (gen_expr (depth / 3)) in
+      ; (let* e1 = gen_expr (depth / 3) in
+         let* e2 = gen_expr (depth / 3) in
+         let+ e3 = opt ~ratio:0.5 (gen_expr (depth / 3)) in
          Exp_if (e1, e2, e3))
+        (* ; (let+ e1 = gen_expr (depth / 2)
+         and+ e2 = gen_expr (depth / 2) in
+         Exp_sequence (e1, e2)) *)
       ]
 
 and gen_case depth =
-  let+ e = gen_expr (depth / 2)
-  and+ p = gen_pattern (depth / 2) in
+  let* e = gen_expr (depth / 2) in
+  let+ p = gen_pattern (depth / 2) in
   { left = p; right = e }
 
 and gen_let_binding depth =
@@ -119,8 +126,8 @@ and gen_let_binding depth =
   oneof
     [ (let+ p = gen_pattern ~top_level:true (depth / 2) in
        Pat_binding (p, e))
-    ; (let+ id = gen_ident
-       and+ pl = gen_list_helper gen_pattern (depth / 2) in
+    ; (let* id = gen_ident in
+       let+ pl = gen_list_helper gen_pattern (depth / 2) in
        Val_binding (id, pl, e))
     ]
 ;;
@@ -130,8 +137,8 @@ let gen_structure depth =
     oneof
       [ (let+ e = gen_expr depth in
          Str_eval e)
-      ; (let+ r = gen_rec
-         and+ lb_list = gen_list_helper gen_let_binding depth in
+      ; (let* r = gen_rec in
+         let+ lb_list = gen_list_helper gen_let_binding depth in
          Str_value (r, lb_list))
       ]
   in

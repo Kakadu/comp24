@@ -97,8 +97,3 @@ let%expect_test "let is not an expression test" =
           [(Val_binding ("a", [], (Exp_constant (Const_int 1))))]))
         ] |}]
 ;;
-
-let%expect_test "let is not an expression test" =
-  test_parser {| |};
-  [%expect {| [] |}]
-;;

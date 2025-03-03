@@ -29,7 +29,12 @@ let gen_list_helper main_gen_fun depth =
 ;;
 
 let rec gen_construct gen construct depth tuple_list ?(list_cons = false) =
-  let l = [ return "::"; return "[]" ] in
+  let l = [ return "[]" ] in
+  let l =
+    match depth with
+    | 0 -> l
+    | _ -> return "::" :: l
+  in
   let* constr =
     match list_cons with
     | false -> oneof (gen_capitalized_ident :: l)
