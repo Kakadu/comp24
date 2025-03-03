@@ -633,3 +633,71 @@ module QCheckTests = struct
       |}]
   ;;
 end
+
+module Lltest = struct
+  open Closure_conversion
+  open Lambda_lifting
+  open Roflanml_stdlib
+  open Anf
+  open Llvm_gen
+
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
+
+  let pp_parse_and_anf_and_llvm input =
+    match Parser.parse input with
+    | Result.Ok prog ->
+      (match lift_program (close_program prog env) with
+       | Result.Ok closed_prog ->
+         (match anf_program closed_prog with
+          | Result.Ok anf_prog ->
+            let llvm_mod = generate anf_prog in
+            Stdlib.Format.printf "%s\n" (Llvm.string_of_llmodule llvm_mod)
+          | Result.Error err -> Stdlib.print_endline ("ANF error: " ^ err))
+       | Result.Error err -> Stdlib.print_endline ("Closure conversion error: " ^ err))
+    | Result.Error err -> Stdlib.print_endline ("Failed to parse: " ^ err)
+  ;;
+
+  let%expect_test "LLVM generation for simple let (expect failure for undefined '+')" =
+    (* try pp_parse_and_anf_and_llvm "let x = 1" with *)
+    (* | Failure msg -> *)
+    pp_parse_and_anf_and_llvm "let x = 1 ";
+    (* Stdlib.print_endline "Caught exception: "; *)
+    [%expect
+      {|
+      ; ModuleID = 'Roflan'
+      source_filename = "Roflan"
+
+      @x = global i64 1
+      |}]
+  ;;
+
+  let%expect_test "LLVM generation for simple func let" =
+    (* try pp_parse_and_anf_and_llvm "let x = 1" with *)
+    (* | Failure msg -> *)
+    pp_parse_and_anf_and_llvm "let x arg argv= 1 ";
+    (* Stdlib.print_endline "Caught exception: "; *)
+    [%expect
+      {|
+      ; ModuleID = 'Roflan'
+      source_filename = "Roflan"
+
+      @x = global i64 1
+
+      define i64 @x.1(i64 %0, i64 %1) {
+      entry:
+        %arg = alloca i64, align 8
+        store i64 %0, ptr %arg, align 4
+        %argv = alloca i64, align 8
+        store i64 %1, ptr %argv, align 4
+        ret i64 1
+      }
+      |}]
+  ;;
+
+  let%expect_test "LLVM generation for simple let" =
+    try pp_parse_and_anf_and_llvm "let x = 1 + 1" with
+    | Failure msg ->
+      Stdlib.print_endline ("Caught exception: " ^ msg);
+      [%expect {| |}]
+  ;;
+end
