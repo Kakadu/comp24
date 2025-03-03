@@ -273,43 +273,41 @@ let rec get_all_id acc = function
   | PIdentifier x -> x :: acc
 ;;
 
-let process_simple_let = function
-  | LLLet (PIdentifier id, args, llexpr) ->
-    let rec get_new_args acc = function
-      | [] -> List.rev acc |> return
-      | PIdentifier id :: tl -> get_new_args (id :: acc) tl
-      | _ :: tl ->
-        let* name, counter = generate_unique_name "arg" 0 in
-        let new_name = Printf.sprintf "%s_%d" name counter in
-        get_new_args (new_name :: acc) tl
-    in
-    let rec bind_names_to_patterns base_exp names patterns =
-      match names, patterns with
-      | [], [] -> return base_exp
-      | _ :: names_tail, PIdentifier _ :: patterns_tail ->
-        bind_names_to_patterns base_exp names_tail patterns_tail
-      | name :: names_tail, pattern :: patterns_tail ->
-        let* ctx = read in
-        let* _ = write { reserved_names = Base.Set.add ctx.reserved_names name } in
-        let* inner_exp = bind_names_to_patterns base_exp names_tail patterns_tail in
-        return (LLLetIn (NotRec, pattern, LLIdentifier name, inner_exp))
-      | _ -> fail "Error: Mismatch in the lengths of names and patterns lists"
-    in
+let rec get_new_args acc = function
+  | [] -> List.rev acc |> return
+  | PIdentifier id :: tl -> get_new_args (id :: acc) tl
+  | _ :: tl ->
+    let* name, counter = generate_unique_name "arg" 0 in
+    let new_name = Printf.sprintf "%s_%d" name counter in
+    get_new_args (new_name :: acc) tl
+;;
+
+let rec bind_names_to_patterns base_exp names patterns =
+  match names, patterns with
+  | [], [] -> return base_exp
+  | _ :: names_tail, PIdentifier _ :: patterns_tail ->
+    bind_names_to_patterns base_exp names_tail patterns_tail
+  | name :: names_tail, pattern :: patterns_tail ->
     let* ctx = read in
-    let* _ = write { reserved_names = Base.Set.add ctx.reserved_names id } in
-    let* new_names = get_new_args [] args in
-    let* new_llexpr = bind_names_to_patterns llexpr new_names args in
-    let* llexpr_with_no_lets = match_of_pat_let new_llexpr in
-    let* llexpr_with_no_matches = eliminate_lexpr llexpr_with_no_lets in
-    LLLet
-      (PIdentifier id, List.map (fun x -> PIdentifier x) new_names, llexpr_with_no_matches)
-    |> return
-  | _ -> fail "Error: unexpected lllet"
+    let* _ = write { reserved_names = Base.Set.add ctx.reserved_names name } in
+    let* inner_exp = bind_names_to_patterns base_exp names_tail patterns_tail in
+    return (LLLetIn (NotRec, pattern, LLIdentifier name, inner_exp))
+  | _ -> fail "Error: Mismatch in the lengths of names and patterns lists"
 ;;
 
 let rec eliminate_match_in_declarations acc = function
   | LLDSingleLet (flag, LLLet (PIdentifier id, args, llexpr)) :: tl ->
-    let* new_let = process_simple_let (LLLet (PIdentifier id, args, llexpr)) in
+    let* new_let =
+      let* let_env = read in
+      write { reserved_names = Base.Set.add let_env.reserved_names id }
+      *>
+      let* fresh_names = get_new_args [] args in
+      let* new_llexpr = bind_names_to_patterns llexpr fresh_names args in
+      let* let_in_free_exp = match_of_pat_let new_llexpr in
+      let* match_free_exp = eliminate_lexpr let_in_free_exp in
+      let fresh_ids = List.map (fun x -> PIdentifier x) fresh_names in
+      LLLet (PIdentifier id, fresh_ids, match_free_exp) |> return
+    in
     eliminate_match_in_declarations (LLDSingleLet (flag, new_let) :: acc) tl
   | LLDSingleLet (flag, LLLet (arbitrary_pattern, [], llexpr)) :: tl ->
     let rec after_let_helper acc counter = function
@@ -348,7 +346,25 @@ let rec eliminate_match_in_declarations acc = function
          acc)
       tl
   | LLDMutualRecDecl (Rec, lets) :: tl ->
-    let* new_lets = map1 process_simple_let lets in
+    let* new_lets =
+      map1
+        (fun decl ->
+          match decl with
+          | LLLet (PIdentifier id, args, llexpr) ->
+            let* ctx = read in
+            let* _ = write { reserved_names = Base.Set.add ctx.reserved_names id } in
+            let* new_names = get_new_args [] args in
+            let* new_llexpr = bind_names_to_patterns llexpr new_names args in
+            let* llexpr_with_no_lets = match_of_pat_let new_llexpr in
+            let* llexpr_with_no_matches = eliminate_lexpr llexpr_with_no_lets in
+            LLLet
+              ( PIdentifier id
+              , List.map (fun x -> PIdentifier x) new_names
+              , llexpr_with_no_matches )
+            |> return
+          | _ -> fail "Error: unexpected declaration")
+        lets
+    in
     let new_mut_let = LLDMutualRecDecl (Rec, new_lets) in
     eliminate_match_in_declarations (new_mut_let :: acc) tl
   | [] -> List.rev acc |> return
