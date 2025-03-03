@@ -1,5 +1,6 @@
 open Ast
 open Base
+module Format = Stdlib.Format
 
 type ll_expr =
   | LLConst of value
@@ -82,6 +83,16 @@ module NameEnv = struct
     | None -> R.return (extend (name, varname) env, varname)
     | Some _ -> generate_name env name
   ;;
+
+  let pp fmt (env : t) =
+    let pp_names fmt (old_name, new_name) =
+      Format.fprintf fmt "%s -> %s" old_name new_name
+    in
+    if Map.is_empty env
+    then Format.fprintf fmt "NameEnv is empty!\n"
+    else
+      Map.iteri env ~f:(fun ~key ~data -> Format.fprintf fmt "%a\n" pp_names (key, data))
+  ;;
 end
 
 open R
@@ -107,13 +118,13 @@ let rec ll_bind
   (env : NameEnv.t)
   ((name, args, expr) : string * args * expr)
   =
+  let* env, new_name = NameEnv.generate_name env name in
   match args with
   | [] ->
     let* llexpr, lifted = ll_expr lifted env expr in
-    let (new_bind : ll_bind) = Var name, [], llexpr in
+    let (new_bind : ll_bind) = Var new_name, [], llexpr in
     R.return (env, new_bind, lifted)
   | args ->
-    let* env, new_name = NameEnv.generate_name env name in
     let* expr, nameset = simplify_arguments args expr in
     let* llexpr, lifted = ll_expr lifted env expr in
     let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
@@ -208,36 +219,36 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   | _ -> failwith "Incorrect expression was encountered during LL"
 ;;
 
-let rec ll_prog (prog : prog) : ll_prog R.t =
-  match prog with
-  | [] -> R.return []
-  | first_let :: tl_lets ->
-    let* ll_first_let =
-      match first_let with
-      | Let (rec_flag, (Var name, args, body) :: tl_binds, in_scope) ->
-        let lifted = [] in
-        let env = NameEnv.empty in
-        let* env, new_bind, lifted = ll_bind lifted env (name, args, body) in
-        let* env, new_binds, lifted =
-          List.fold
-            tl_binds
-            ~init:(R.return (env, [ new_bind ], lifted))
-            ~f:(fun acc bnd ->
-              let* env, binds, lifted = acc in
-              match bnd with
-              | Var name, args, expr ->
-                let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-                R.return (env, new_bind :: binds, lifted)
-              | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
-        in
-        let new_binds = List.rev new_binds in
-        (match in_scope with
-         | Some scope ->
-           let* ll_scope, lifted = ll_expr lifted env scope in
-           R.return (lifted @ [ LLLet (rec_flag, new_binds, Some ll_scope) ])
-         | None -> R.return (lifted @ [ LLLet (rec_flag, new_binds, None) ]))
-      | _ -> failwith "Incorrect starting point was encountered during LL"
-    in
-    let* ll_tl_lets = ll_prog tl_lets in
-    R.return (ll_first_let @ ll_tl_lets)
+let ll_prog (prog : prog) : ll_prog R.t =
+  let rec helper lifted env = function
+    | [] -> R.return []
+    | first_let :: tl_lets ->
+      let* ll_first_let, env =
+        match first_let with
+        | Let (rec_flag, (Var name, args, body) :: tl_binds, in_scope) ->
+          let* env, new_bind, lifted = ll_bind lifted env (name, args, body) in
+          let* env, new_binds, lifted =
+            List.fold
+              tl_binds
+              ~init:(R.return (env, [ new_bind ], lifted))
+              ~f:(fun acc bnd ->
+                let* env, binds, lifted = acc in
+                match bnd with
+                | Var name, args, expr ->
+                  let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+                  R.return (env, new_bind :: binds, lifted)
+                | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
+          in
+          let new_binds = List.rev new_binds in
+          (match in_scope with
+           | Some scope ->
+             let* ll_scope, lifted = ll_expr lifted env scope in
+             R.return (lifted @ [ LLLet (rec_flag, new_binds, Some ll_scope) ], env)
+           | None -> R.return (lifted @ [ LLLet (rec_flag, new_binds, None) ], env))
+        | _ -> failwith "Incorrect starting point was encountered during LL"
+      in
+      let* ll_tl_lets = helper lifted env tl_lets in
+      R.return (ll_first_let @ ll_tl_lets)
+  in
+  helper [] NameEnv.empty prog
 ;;
