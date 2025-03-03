@@ -9,6 +9,10 @@ let builder = builder context
 let i64_type = i64_type context
 let map_empty = Map.empty (module String)
 
+(* 1. Объявление print_int в LLVM IR *)
+let print_int_type = function_type i64_type [| i64_type |]
+let print_int_func = declare_function "print_int" print_int_type the_module
+
 let const_codegen = function
   | CInt i -> const_int i64_type i
   | CBool b ->
@@ -129,6 +133,9 @@ let rec llexpression_codegen local_vars global_vars the_function = function
       build_phi [ then_value, then_bb; else_value, else_bb ] "iftmp" builder
     in
     phi_node (* Возвращаем результат if-выражения *)
+  | LLVars (l, r) ->
+    let _ = llexpression_codegen local_vars global_vars the_function l in
+    llexpression_codegen local_vars global_vars the_function r
   | _ -> failwith "Unsupported expression"
 ;;
 
@@ -169,9 +176,15 @@ let codegen_llbindings global_vars = function
 ;;
 
 let codegen llstatments =
+  let let_map =
+    Map.set
+      map_empty
+      ~key:"print_int"
+      ~data:(print_int_type, print_int_func, [| i64_type |])
+  in
   let _ =
     List.fold
-      ~init:map_empty
+      ~init:let_map
       ~f:(fun let_map llbindings ->
         let new_map = codegen_llbindings let_map llbindings in
         new_map)
