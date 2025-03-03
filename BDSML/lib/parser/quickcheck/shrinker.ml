@@ -28,18 +28,18 @@ let shrink_pattern = function
 
 let rec shrink_let_binding = function
   | Pat_binding (p, e) ->
-    let+ p' = shrink_pattern p
-    and+ e' = shrink_expr e in
-    Pat_binding (p', e')
+    let* p' = shrink_pattern p in
+    let* e' = shrink_expr e in
+    of_list [ Pat_binding (p, e'); Pat_binding (p', e) ]
   | Val_binding (id, pl, e) ->
-    let+ e' = shrink_expr e
-    and+ pl' = shrink_list shrink_pattern pl in
-    Val_binding (id, pl', e')
+    let* e' = shrink_expr e in
+    let* pl' = shrink_list shrink_pattern pl in
+    of_list [ Val_binding (id, pl, e'); Val_binding (id, pl', e) ]
 
 and shrink_case c =
-  let+ p = shrink_pattern c.left
-  and+ e = shrink_expr c.right in
-  { left = p; right = e }
+  let* p = shrink_pattern c.left in
+  let* e = shrink_expr c.right in
+  of_list [ { left = c.left; right = e }; { left = p; right = c.right } ]
 
 and shrink_expr = function
   | Exp_type (e, t) ->

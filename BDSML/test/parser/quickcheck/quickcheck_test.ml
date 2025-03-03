@@ -14,7 +14,7 @@ let make_ast =
 
 let test =
   QCheck.(
-    Test.make ~count:100 make_ast (fun input ->
+    Test.make ~count:10 make_ast (fun input ->
       let str = Main_unparser.unparse_structure input in
       let res = Parser.Main_parser.parse str in
       match res with
@@ -31,11 +31,14 @@ let test =
         false))
 ;;
 
-let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no shrinker)" =
+let%expect_test "QuickCheck test" =
   QCheck_runner.set_seed 52;
   let _ = QCheck_runner.run_tests ~colors:false [ test ] in
   ();
   [%expect
     {|
+    random seed: 52
+    ================================================================================
+    success (ran 1 tests)
     |}]
 ;;

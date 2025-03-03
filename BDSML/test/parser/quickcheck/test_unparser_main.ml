@@ -20,8 +20,8 @@ m + let b = 6 in m + b;;
 |};
   [%expect
     {|
-    let ( + ) a b = ( - ) a b;;
+    let ( + ) a b = ((( - ) a) b);;
     let m = 4 and mm = 6;;
-    ( + ) m (let b = 6 in ( + ) m b);;
+    ((( + ) m) ((let b = 6 in ((( + ) m) b))));;
     |}]
 ;;

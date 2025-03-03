@@ -14,10 +14,10 @@ let rec unparse_pattern ppf = function
   | Pat_constant c -> fprintf ppf "%a" Const_unparser.unparse_const c
   | Pat_tuple l -> fprintf ppf "(%a)" unparse_tuple l
   | Pat_or (p1, p2) -> fprintf ppf "(%a | %a)" unparse_pattern p1 unparse_pattern p2
-  | Pat_construct (s, None) -> fprintf ppf "%s" s
+  | Pat_construct (s, None) -> fprintf ppf "(%s)" s
   | Pat_construct ("::", Some (Pat_tuple [ l; r ])) ->
     fprintf ppf "(%a :: %a)" unparse_pattern l unparse_pattern r
-  | Pat_construct (s, Some l) -> fprintf ppf "%s %a" s unparse_pattern l
+  | Pat_construct (s, Some l) -> fprintf ppf "(%s %a)" s unparse_pattern l
 
 and unparse_tuple ppf l = list_unparser ppf l ~f:unparse_pattern ~s:", "
 
