@@ -14,68 +14,66 @@ module StringAlphfaconverterMonad = struct
   module Banned_Set = Stdlib.Set.Make (Name_id)
   module Bind_Map = Stdlib.Map.Make (Name_id)
 
-  type fresh_id = int
   type bind_space = ident Bind_Map.t
   type ban_set = Banned_Set.t
   type reserved_re_prefs = Str.regexp list
   type ban_rules = reserved_re_prefs * ban_set
 
   include
-    Common.Monads.Base_SE_Monad
+    Common.Monads.GenericCounterMonad
       (struct
-        type t = ban_rules * bind_space * fresh_id * ident
+        type t = ban_rules * bind_space * ident
       end)
       (String)
 
   let num_prefix current_prefix id = current_prefix ^ Int.to_string id
-  let create_fresh_id id = id + 1
 
   let binding_scope : 'a t -> 'a t =
     fun f ->
-    let* _, old_bindings, _, _ = read in
+    let* _, old_bindings, _ = read in
     let* f_res = f in
-    let* b_rules, _, f_id, pref = read in
-    let+ () = save (b_rules, old_bindings, f_id, pref) in
+    let* b_rules, _, pref = read in
+    let+ () = save (b_rules, old_bindings, pref) in
     f_res
   ;;
 
   let fresh_bind pre_formatter name =
     let apply_prefix pref name_ = pref ^ "_" ^ name_ in
-    let get_uniq_name cur_pref new_name old_fresh_id b_set =
-      let rec helper name_ id_ =
+    let get_uniq_name cur_pref new_name b_set =
+      let rec helper name_ =
         match Banned_Set.find_opt name_ b_set with
-        | None -> id_, name_
+        | None -> return @@ name_
         | Some _ ->
-          let supported_name = apply_prefix (num_prefix cur_pref id_) new_name in
-          let fresh_id = create_fresh_id id_ in
-          helper supported_name fresh_id
+          let* fresh_id = fresh in
+          let supported_name = apply_prefix (num_prefix cur_pref fresh_id) new_name in
+          helper supported_name
       in
-      helper new_name old_fresh_id
+      helper new_name
     in
     let add_binding_in_ban_set orig_name new_name b_set =
       let b_set' = Banned_Set.add orig_name b_set in
       Banned_Set.add new_name b_set'
     in
     let* name', st' =
-      let+ (b_prefs, b_set), bindings, fresh_id, a_pref = read in
+      let* (b_prefs, b_set), bindings, a_pref = read in
       let should_rename_via_prefs =
         Base.List.fold_left b_prefs ~init:false ~f:(fun acc pref ->
           match acc with
           | true -> true
           | false -> Str.string_match pref name 0)
       in
-      let id', name'' =
+      let+ name'' =
         let start_name =
           let prepared_name = pre_formatter name in
           match should_rename_via_prefs with
           | true -> apply_prefix a_pref prepared_name
           | false -> prepared_name
         in
-        get_uniq_name a_pref start_name fresh_id b_set
+        get_uniq_name a_pref start_name b_set
       in
       let bindings' = Bind_Map.add name name'' bindings in
       let b_set' = add_binding_in_ban_set name name'' b_set in
-      let st'' = (b_prefs, b_set'), bindings', id', a_pref in
+      let st'' = (b_prefs, b_set'), bindings', a_pref in
       name'', st''
     in
     let+ () = save st' in
@@ -83,7 +81,7 @@ module StringAlphfaconverterMonad = struct
   ;;
 
   let get_bind name =
-    let* _, binds, _, _ = read in
+    let* _, binds, _ = read in
     match Bind_Map.find_opt name binds with
     | Some name' -> return name'
     | None -> fail ("=doesn't find binded value -- " ^ name)
@@ -224,8 +222,7 @@ let rename_ast_with_uniq step_pref prog =
       let helper acc name = Bind_Map.add name name acc in
       List.fold_left helper Bind_Map.empty std_lib_names
     in
-    let fresh_id = 0 in
-    ban_rules, bind_space, fresh_id, step_pref
+    ban_rules, bind_space, step_pref
   in
   let prog_alpha_converter = aconvert_program prog in
   let open Common.Errors in

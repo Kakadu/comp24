@@ -2,18 +2,14 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-
-
 open Common.Ast
 open Me_ast
-
 open Common.Monads.CounterMonad (String)
 
 let name_prefix = Common.Naming.me_prefix
+
 let get_uniq_name : string t =
-  let* old_id = read in
-  let new_id = old_id + 1 in
-  let* () = save new_id in
+  let* new_id = fresh in
   return @@ name_prefix ^ "_" ^ Int.to_string new_id
 ;;
 
@@ -303,7 +299,7 @@ let to_me_program prog =
 
 let eliminate_match_in_program prog =
   let open Common.Errors in
-  match run (to_me_program prog) 0 with
+  match run (to_me_program prog) with
   | _, Ok me_decl'list -> Result.Ok me_decl'list
   | _, Error msg -> Result.Error (illegal_state msg)
 ;;

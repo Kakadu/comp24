@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-module Base_SE_Monad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
+module BaseSEMonad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
   type 'a t = StateT.t -> StateT.t * ('a, ErrorT.t) result
 
   val run : ('a -> 'b) -> 'a -> 'b
@@ -44,8 +44,27 @@ module Base_SE_Monad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
   val ignore_t : ('a -> 'b * ('c, 'd) result) -> 'a -> 'b * (unit, 'd) result
 end
 
-module CounterMonad : functor (ErrorT : Base.T) -> sig
-  include module type of Base_SE_Monad (Int) (ErrorT)
+module GenericCounterMonad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
+  include module type of
+      BaseSEMonad
+        (struct
+          type t = int * StateT.t
+        end)
+        (ErrorT)
 
+  val run : (int * 'a -> 'b) -> 'a -> 'b
+  val save : 'a -> 'b * 'a -> ('b * 'a) * (unit, 'c) result
+  val read : StateT.t t
   val fresh : int t
+end
+
+module CounterMonad : functor (ErrorT : Base.T) -> sig
+  include module type of
+      GenericCounterMonad
+        (struct
+          type t = unit
+        end)
+        (ErrorT)
+
+  val run : (int * unit -> 'a) -> 'a
 end

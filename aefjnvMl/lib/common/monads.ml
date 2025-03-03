@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-module Base_SE_Monad (StateT : Base.T) (ErrorT : Base.T) = struct
+module BaseSEMonad (StateT : Base.T) (ErrorT : Base.T) = struct
   type 'a t = StateT.t -> StateT.t * ('a, ErrorT.t) Result.t
 
   let run at new_st = at new_st
@@ -53,12 +53,40 @@ module Base_SE_Monad (StateT : Base.T) (ErrorT : Base.T) = struct
   ;;
 end
 
-module CounterMonad (ErrorT : Base.T) = struct
-  include Base_SE_Monad (Int) (ErrorT)
+module GenericCounterMonad (StateT : Base.T) (ErrorT : Base.T) = struct
+  include
+    BaseSEMonad
+      (struct
+        type t = int * StateT.t
+      end)
+      (ErrorT)
+
+  let run at new_st = run at (0, new_st)
 
   let fresh : int t =
-    let* num = read in
-    let+ () = save @@ (num + 1) in
+    let* num, st = read in
+    let+ () = save (num + 1, st) in
     num
   ;;
+
+  let save st =
+    let* num, _ = read in
+    save (num, st)
+  ;;
+
+  let read : StateT.t t =
+    let+ _, st = read in
+    st
+  ;;
+end
+
+module CounterMonad (ErrorT : Base.T) = struct
+  include
+    GenericCounterMonad
+      (struct
+        type t = unit
+      end)
+      (ErrorT)
+
+  let run at = run at ()
 end
