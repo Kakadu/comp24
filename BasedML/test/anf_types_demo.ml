@@ -26,12 +26,8 @@ let () =
        (match Parser.parse_program (anf_helper "" (List.rev final)) with
         | Ok ast_after ->
           (match
-             ( Typeinference.infer_prog_with_custom_state
-                 Typeinference__StartState.start_state_with_system_fun
-                 ast_before
-             , Typeinference.infer_prog_with_custom_state
-                 Typeinference__StartState.start_state_with_system_fun
-                 ast_after )
+             ( Typeinference.infer_with_system_fun ast_before
+             , Typeinference.infer_with_system_fun ast_after )
            with
            | Ok map1, Ok map2 ->
              let all_types_match =

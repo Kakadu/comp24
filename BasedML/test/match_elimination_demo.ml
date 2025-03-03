@@ -9,11 +9,7 @@ let () =
     let lifted =
       ast |> Middleend.Closure_conversion.convert_ast |> Middleend.Lambda_lifting.lift_ast
     in
-    (match
-       Common.StateMonad.run
-         (Middleend.Match_elimination.eliminate_match_in_declarations [] lifted)
-         Middleend.Match_elimination.empty_context
-     with
+    (match Middleend.Match_elimination.transform lifted with
      | _, Ok new_ast ->
        List.iter
          (fun binding ->

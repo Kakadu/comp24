@@ -292,3 +292,7 @@ let type_more_general t1 t2 =
   let result, _ = is_first_more_general StringMap.empty t1 t2 in
   result
 ;;
+
+let infer_with_system_fun ast =
+  infer_prog_with_custom_state start_state_with_system_fun ast
+;;

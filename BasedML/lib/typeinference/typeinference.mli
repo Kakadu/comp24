@@ -63,3 +63,5 @@ module StringMap : sig
   val add_seq : (key * 'a) Seq.t -> 'a t -> 'a t
   val of_seq : (key * 'a) Seq.t -> 'a t
 end
+
+val infer_with_system_fun : Ast.declarations -> (res_map, string) result
