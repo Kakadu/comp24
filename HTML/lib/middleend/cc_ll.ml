@@ -31,18 +31,9 @@ end
 
 open CounterWriterMonad
 open Utils
+open Common.Ident_utils
 
 let cc_ll_prefix = "cc_ll_"
-
-let ident_to_string (id : ident) =
-  match id with
-  | IdentOfDefinable (IdentLetters s) -> s
-  | IdentOfDefinable (IdentOp s) -> s
-  | IdentOfBaseOp base_op ->
-    (match base_op with
-     | Plus -> "base +"
-     | Minus -> "base -")
-;;
 
 let rec pattern_to_string (pat : pattern_or_op) : string list =
   match pat with
@@ -205,9 +196,9 @@ and substitute_decl (d : decl) (subst : (string * expr) list) : decl =
 ;;
 
 let rec closure_convert_expr
-          (global_env : StringSet.t)
-          (e : expr)
-          (rec_name : string option)
+  (global_env : StringSet.t)
+  (e : expr)
+  (rec_name : string option)
   : expr cc
   =
   match e with
@@ -273,14 +264,14 @@ let rec closure_convert_expr
     return (EClsr (cdecl, ce))
     (* dirty hack for eliminating let a = expr in a *)
     (* (match cdecl, ce with
-     | DLet (_, (POpPat (PId name), body)), EId _ ->
+       | DLet (_, (POpPat (PId name), body)), EId _ ->
        let new_body = subst_eid ce [ name, body ] in
        return new_body
-     (* let a = b in ...*)
-     | DLet (_, (POpPat (PId name), (EId _ as body))), _ ->
+       (* let a = b in ...*)
+       | DLet (_, (POpPat (PId name), (EId _ as body))), _ ->
        let new_body = subst_eid ce [ name, body ] in
        return new_body
-     | _ -> return (EClsr (cdecl, ce))) *)
+       | _ -> return (EClsr (cdecl, ce))) *)
   | EMatch (e, br, brs) ->
     (* todo proper env *)
     let closure_convert_branch env (br : branch) : branch cc =

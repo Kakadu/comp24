@@ -1,7 +1,7 @@
 (library
  (name Common)
- (modules Ops Stdlib Base_bin_ops Counter)
- (libraries base)
+ (modules Ops Stdlib Base_bin_ops Ident_utils Counter)
+ (libraries base AstLib)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq))
  (instrumentation
