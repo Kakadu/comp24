@@ -53,7 +53,9 @@ module NameSet = struct
   let find (name : id) (set : t) = Set.find set ~f:(fun x -> String.equal x name)
 
   (* (a, b, c) => Var a, Var b, Var c *)
-  let to_args (set : t) : args = Set.fold set ~init:[] ~f:(fun acc id -> Var id :: acc)
+  let to_args (set : t) : args =
+    List.rev @@ Set.fold set ~init:[] ~f:(fun acc id -> Var id :: acc)
+  ;;
 
   let rec generate_name (set : t) =
     let open R in
@@ -101,19 +103,19 @@ let simplify_arguments p_args expr : (expr * NameSet.t) R.t =
 type lifted_lets = ll_expr list
 
 let rec ll_bind
-  (acc : lifted_lets)
+  (lifted : lifted_lets)
   (env : NameEnv.t)
   ((name, args, expr) : string * args * expr)
   =
   match args with
   | [] ->
-    let* llexpr, lifted = ll_expr acc env expr in
+    let* llexpr, lifted = ll_expr lifted env expr in
     let (new_bind : ll_bind) = Var name, [], llexpr in
     R.return (env, new_bind, lifted)
   | args ->
     let* env, new_name = NameEnv.generate_name env name in
     let* expr, nameset = simplify_arguments args expr in
-    let* llexpr, lifted = ll_expr acc env expr in
+    let* llexpr, lifted = ll_expr lifted env expr in
     let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
     R.return (env, new_bind, lifted)
 
@@ -141,6 +143,7 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
        R.return (LLLet (rec_flag, new_binds, Some ll_scope), lifted)
      | None -> R.return (LLLet (rec_flag, new_binds, None), lifted))
   | EConst v -> R.return (LLConst v, lifted)
+  | EOperation op -> R.return (LLOperation op, lifted)
   | EVar id ->
     (match NameEnv.find id env with
      | None -> R.return (LLVar id, lifted)
