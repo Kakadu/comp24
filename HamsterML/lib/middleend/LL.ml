@@ -123,7 +123,7 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   : (ll_expr * lifted_lets) R.t
   =
   match expr with
-  | Let (rec_flag, (Var name, args, expr) :: tl_bind, in_scope) ->
+  | Let (rec_flag, (Var name, args, expr) :: tl_bind, Some scope) ->
     let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
     let* env, new_binds, lifted =
       List.fold
@@ -137,11 +137,9 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
             R.return (env, new_bind :: binds, lifted)
           | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
     in
-    (match in_scope with
-     | Some scope ->
-       let* ll_scope, lifted = ll_expr lifted env scope in
-       R.return (LLLet (rec_flag, new_binds, Some ll_scope), lifted)
-     | None -> R.return (LLLet (rec_flag, new_binds, None), lifted))
+    let* ll_in_scope, lifted = ll_expr lifted env scope in
+    let ll_inner_let = LLLet (rec_flag, new_binds, None) in
+    R.return (ll_in_scope, ll_inner_let :: lifted)
   | EConst v -> R.return (LLConst v, lifted)
   | EOperation op -> R.return (LLOperation op, lifted)
   | EVar id ->
@@ -205,15 +203,17 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
     let* ll_lexpr, lifted = ll_expr lifted env lexpr in
     let* ll_rexpr, lifted = ll_expr lifted env rexpr in
     R.return (LLApplication (ll_lexpr, ll_rexpr), lifted)
+  | Let (_, _, None) ->
+    failwith "Incorrect 'Let' expression, can't perform LL without 'IN'"
   | _ -> failwith "Incorrect expression was encountered during LL"
 ;;
 
 let rec ll_prog (prog : prog) : ll_prog R.t =
   match prog with
   | [] -> R.return []
-  | first_expr :: tl_exprs ->
-    let* ll_first_expr =
-      match first_expr with
+  | first_let :: tl_lets ->
+    let* ll_first_let =
+      match first_let with
       | Let (rec_flag, (Var name, args, body) :: tl_binds, in_scope) ->
         let lifted = [] in
         let env = NameEnv.empty in
@@ -232,11 +232,11 @@ let rec ll_prog (prog : prog) : ll_prog R.t =
         in
         (match in_scope with
          | Some scope ->
-           let* ll_scope, _ = ll_expr lifted env scope in
-           R.return (LLLet (rec_flag, new_binds, Some ll_scope))
-         | None -> R.return (LLLet (rec_flag, new_binds, None)))
+           let* ll_scope, lifted = ll_expr lifted env scope in
+           R.return (LLLet (rec_flag, new_binds, Some ll_scope) :: lifted)
+         | None -> R.return (LLLet (rec_flag, new_binds, None) :: lifted))
       | _ -> failwith "Incorrect starting point was encountered during LL"
     in
-    let* ll_tl_exprs = ll_prog tl_exprs in
-    R.return ([ ll_first_expr ] @ ll_tl_exprs)
+    let* ll_tl_lets = ll_prog tl_lets in
+    R.return (List.rev @@ ll_first_let @ ll_tl_lets)
 ;;
