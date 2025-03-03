@@ -37,14 +37,6 @@ let show_idname old_name counter =
   if counter >= 0 then Printf.sprintf "%s_%d" old_name counter else old_name
 ;;
 
-let rec get_all_id acc = function
-  | PWildCard | PConstant _ -> acc
-  | PConstraint (pat, _tp) -> get_all_id acc pat
-  | PCons (pat1, pat2) -> get_all_id (get_all_id acc pat2) pat1
-  | PTuple plst -> List.fold_left get_all_id acc plst
-  | PIdentifier x -> x :: acc
-;;
-
 let rec generate_bindings =
   let optimized_conj operand1 operand2 =
     match operand1, operand2 with
@@ -273,10 +265,19 @@ let rec rename_pat = function
     PIdentifier (Printf.sprintf "%s_%d" old_name counter) |> return
 ;;
 
+let rec get_all_id acc = function
+  | PWildCard | PConstant _ -> acc
+  | PConstraint (pat, _tp) -> get_all_id acc pat
+  | PCons (pat1, pat2) -> get_all_id (get_all_id acc pat2) pat1
+  | PTuple plst -> List.fold_left get_all_id acc plst
+  | PIdentifier x -> x :: acc
+;;
+
 let process_simple_let = function
   | LLLet (PIdentifier id, args, llexpr) ->
     let rec get_new_args acc = function
       | [] -> List.rev acc |> return
+      | PIdentifier id :: tl -> get_new_args (id :: acc) tl
       | _ :: tl ->
         let* name, counter = generate_unique_name "arg" 0 in
         let new_name = Printf.sprintf "%s_%d" name counter in
@@ -285,6 +286,8 @@ let process_simple_let = function
     let rec bind_names_to_patterns base_exp names patterns =
       match names, patterns with
       | [], [] -> return base_exp
+      | _ :: names_tail, PIdentifier _ :: patterns_tail ->
+        bind_names_to_patterns base_exp names_tail patterns_tail
       | name :: names_tail, pattern :: patterns_tail ->
         let* ctx = read in
         let* _ = write { reserved_names = Base.Set.add ctx.reserved_names name } in

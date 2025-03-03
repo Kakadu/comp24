@@ -6,7 +6,7 @@
   >    fact_cps (n - 1) (fun acc -> cont (n * acc))
   Name: fact_cps
   Original program: (int -> ((int -> 'p1f) -> 'p1f))
-  ANF: (int -> ((int -> 'p32) -> 'p32))
+  ANF: (int -> ((int -> 'p2d) -> 'p2d))
   
   All types are correct
 
@@ -35,7 +35,7 @@
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/002fac.ml
   Name: fac_cps
   Original program: (int -> ((int -> 'p26) -> 'p26))
-  ANF: (int -> ((int -> 'p47) -> 'p47))
+  ANF: (int -> ((int -> 'p41) -> 'p41))
   
   Name: main
   Original program: int
@@ -56,7 +56,7 @@
   > EOF
   Name: fib_cps
   Original program: (int -> ((int -> 'p29) -> 'p29))
-  ANF: (int -> ((int -> 'p4f) -> 'p4f))
+  ANF: (int -> ((int -> 'p46) -> 'p46))
   
   All types are correct
 
@@ -99,7 +99,7 @@
   
   Name: wrap
   Original program: ('p55 -> 'p55)
-  ANF: ('p7d -> 'p7d)
+  ANF: ('p6f -> 'p6f)
   
   All types are correct
 
@@ -110,7 +110,7 @@
   
   Name: fix
   Original program: ((('p28 -> 'p29) -> ('p28 -> 'p29)) -> ('p28 -> 'p29))
-  ANF: ((('p3e -> 'p3f) -> ('p3e -> 'p3f)) -> ('p3e -> 'p3f))
+  ANF: ((('p3a -> 'p3b) -> ('p3a -> 'p3b)) -> ('p3a -> 'p3b))
   
   Name: main
   Original program: int
@@ -161,31 +161,31 @@
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/016lists.ml
   Name: iter
   Original program: (('pe8 -> unit) -> (('pe8 list) -> unit))
-  ANF: (('p345 -> unit) -> (('p344 list) -> unit))
+  ANF: (('p337 -> unit) -> (('p336 list) -> unit))
   
   Name: cartesian
   Original program: (('pe2 list) -> (('pe3 list) -> (('pe2 * 'pe3) list)))
-  ANF: (('p33c list) -> (('p33d list) -> ('p33e list)))
+  ANF: (('p32e list) -> (('p32f list) -> ('p330 list)))
   
   Name: append
   Original program: (('pe1 list) -> (('pe1 list) -> ('pe1 list)))
-  ANF: (('p33a list) -> (('p33b list) -> ('p33b list)))
+  ANF: (('p32c list) -> (('p32d list) -> ('p32d list)))
   
   Name: concat
   Original program: ((('pe5 list) list) -> ('pe5 list))
-  ANF: (('p340 list) -> ('p341 list))
+  ANF: (('p332 list) -> ('p333 list))
   
   Name: length_tail
   Original program: (('pea list) -> int)
-  ANF: (('p347 list) -> int)
+  ANF: (('p339 list) -> int)
   
   Name: length
   Original program: (('pe9 list) -> int)
-  ANF: (('p346 list) -> int)
+  ANF: (('p338 list) -> int)
   
   Name: map
   Original program: (('peb -> 'pec) -> (('peb list) -> ('pec list)))
-  ANF: (('p34d -> 'p34e) -> (('p34f list) -> ('p34e list)))
+  ANF: (('p33f -> 'p340) -> (('p341 list) -> ('p340 list)))
   
   Name: main
   Original program: int
