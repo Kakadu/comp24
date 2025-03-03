@@ -7,7 +7,10 @@ let rec remove_bound_vars_from_pattern free (pat : pattern) =
   | Wildcard | Operation _ | Const _ -> free
   | Var id -> Set.remove free id
   | ListConcat (p1, p2) -> remove_bound_vars_from_patterns free [ p1; p2 ]
-  | Tuple pats | List pats -> remove_bound_vars_from_patterns free pats
+  | Tuple (p1, p2, p_list) ->
+    let p = p1 :: p2 :: p_list in
+    remove_bound_vars_from_patterns free p
+  | List pats -> remove_bound_vars_from_patterns free pats
   | Constraint (p, _) -> remove_bound_vars_from_pattern free p
 
 and remove_bound_vars_from_patterns free (pats : pattern list) =
@@ -20,7 +23,13 @@ let rec bound_vars_in_pattern (pat : pattern) =
   | Wildcard | Operation _ | Const _ -> Set.empty (module String)
   | Var id -> Set.singleton (module String) id
   | ListConcat (p1, p2) -> Set.union (bound_vars_in_pattern p1) (bound_vars_in_pattern p2)
-  | Tuple pats | List pats ->
+  | Tuple (p1, p2, p_list) ->
+    let pats = p1 :: p2 :: p_list in
+    List.fold
+      pats
+      ~init:(Set.empty (module String))
+      ~f:(fun acc p -> Set.union acc (bound_vars_in_pattern p))
+  | List pats ->
     List.fold
       pats
       ~init:(Set.empty (module String))
@@ -33,7 +42,13 @@ let rec free_vars_expr (exp : expr) =
   match exp with
   | EConst _ | EOperation _ -> Set.empty (module String)
   | EVar id -> Set.singleton (module String) id
-  | ETuple exps | EList exps ->
+  | ETuple (e1, e2, e_list) ->
+    let exps = e1 :: e2 :: e_list in
+    List.fold
+      exps
+      ~init:(Set.empty (module String))
+      ~f:(fun acc e -> Set.union acc (free_vars_expr e))
+  | EList exps ->
     List.fold
       exps
       ~init:(Set.empty (module String))
