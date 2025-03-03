@@ -18,6 +18,22 @@ let%test _ =
 ;;
 
 let%test _ =
+  lambda_lift_prog "let a = 10 let b = a"
+  = [ LLLet (Nonrecursive, [ Var "a", [], LLConst (Int 10) ], None)
+    ; LLLet (Nonrecursive, [ Var "b", [], LLVar "a" ], None)
+    ]
+;;
+
+let%test _ =
+  lambda_lift_prog "let a = 10 and b = 20"
+  = [ LLLet
+        ( Nonrecursive
+        , [ Var "a", [], LLConst (Int 10); Var "b", [], LLConst (Int 20) ]
+        , None )
+    ]
+;;
+
+let%test _ =
   lambda_lift_prog "let rec a = 1 + 1 in a + 2"
   = [ LLLet
         ( Recursive

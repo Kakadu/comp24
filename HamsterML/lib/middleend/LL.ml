@@ -138,7 +138,7 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
           | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
     in
     let* ll_in_scope, lifted = ll_expr lifted env scope in
-    let ll_inner_let = LLLet (rec_flag, new_binds, None) in
+    let ll_inner_let = LLLet (rec_flag, List.rev new_binds, None) in
     R.return (ll_in_scope, ll_inner_let :: lifted)
   | EConst v -> R.return (LLConst v, lifted)
   | EOperation op -> R.return (LLOperation op, lifted)
@@ -230,6 +230,7 @@ let rec ll_prog (prog : prog) : ll_prog R.t =
                 R.return (env, new_bind :: binds, lifted)
               | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
         in
+        let new_binds = List.rev new_binds in
         (match in_scope with
          | Some scope ->
            let* ll_scope, lifted = ll_expr lifted env scope in
