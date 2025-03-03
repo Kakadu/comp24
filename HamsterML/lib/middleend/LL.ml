@@ -233,10 +233,10 @@ let rec ll_prog (prog : prog) : ll_prog R.t =
         (match in_scope with
          | Some scope ->
            let* ll_scope, lifted = ll_expr lifted env scope in
-           R.return (LLLet (rec_flag, new_binds, Some ll_scope) :: lifted)
-         | None -> R.return (LLLet (rec_flag, new_binds, None) :: lifted))
+           R.return (lifted @ [ LLLet (rec_flag, new_binds, Some ll_scope) ])
+         | None -> R.return (lifted @ [ LLLet (rec_flag, new_binds, None) ]))
       | _ -> failwith "Incorrect starting point was encountered during LL"
     in
     let* ll_tl_lets = ll_prog tl_lets in
-    R.return (List.rev @@ ll_first_let @ ll_tl_lets)
+    R.return (ll_first_let @ ll_tl_lets)
 ;;
