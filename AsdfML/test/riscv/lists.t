@@ -177,6 +177,20 @@ $ cat /tmp/lists.s
   [4, 9, 16]
   []
 
+
+  $ dune exec riscv -- -o /tmp/lists.s <<- EOF
+  > let rec map_cps f l k = match l with
+  >   | [] -> k []
+  >   | x :: xs -> map_cps f xs (fun t -> k (f x :: t))
+  > let main = 
+  >   let _ = (map_cps (fun x -> x * x) [1;2;3;4;5] (fun x -> print_list x)) in
+  >   0
+  > EOF
+  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ /tmp/lists
+  [1, 4, 9, 16, 25]
+
+
   $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
   > let [a; b; c] = [1; 2; 3]
   > let main = 
