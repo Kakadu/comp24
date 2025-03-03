@@ -680,15 +680,15 @@
   > let map f l = map_cps f l (fun x -> x)
   > EOF
   let  ll_0 f_0 k_0 x_0 t_0  = let anf_app_0 = f_0 x_0 in
-   let anf_app_1 = ( ^^ ) anf_app_0 t_0 in
+   let anf_app_1 = ( :: ) anf_app_0 t_0 in
    let anf_app_2 = k_0 anf_app_1 in
    anf_app_2;;
   let rec map_cps_0 f_0 l_0 k_0  = let anf_app_0 = ( = ) l_0 [] in
    let anf_ifthenelse_9 = if anf_app_0 then let anf_app_1 = k_0 [] in
-   anf_app_1 else let anf_app_2 = l_0 <> [] in
-   let anf_ifthenelse_8 = if anf_app_2 then let anf_app_3 = List.hd l_0 in
+   anf_app_1 else let anf_app_2 = check_tag l_0 0 in
+   let anf_ifthenelse_8 = if anf_app_2 then let anf_app_3 = get_field l_0 0 in
    let x_0 = anf_app_3 in
-   let anf_app_4 = List.tl l_0 in
+   let anf_app_4 = get_field l_0 1 in
    let xs_0 = anf_app_4 in
    let anf_app_5 = ll_0 f_0 k_0 x_0 in
    let anf_app_6 = map_cps_0 f_0 xs_0 anf_app_5 in
