@@ -84,7 +84,10 @@ let pp_error ppf = function
   | `Unbound_variable name -> Format.fprintf ppf "Type error: unbound variable '%s'" name
   | `Several_bounds name ->
     Format.fprintf ppf "Type error: variable '%s' is bound several times" name
-  | `InvalidRecLeftHand -> Format.fprintf ppf "Type error: left rec"
+  | `InvalidRecLeftHand ->
+    Format.fprintf
+      ppf
+      "Type error: Only variables are allowed as left-hand side of `let rec'"
   | `Not_impl -> Format.fprintf ppf "TODO: Not implemented."
 ;;
 

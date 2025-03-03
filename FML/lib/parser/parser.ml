@@ -294,8 +294,7 @@ let parse_expr =
       ]
   in
   let apply =
-    let rec build_application f args =
-      match args with
+    let rec build_application f = function
       | [] -> f
       | h :: t -> build_application (EApplication (f, h)) t
     in

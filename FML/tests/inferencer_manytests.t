@@ -65,3 +65,18 @@
   val iter : ('a -> unit) -> 'a list -> unit
   val cartesian : 'a list -> 'b list -> 'a * 'b list
   val main : int
+
+  $ ./inferencer_runner.exe < manytests/do_not_type/001.ml
+  Type error: unbound variable 'fac'
+  $ ./inferencer_runner.exe < manytests/do_not_type/002if.ml
+  Type error: unification failed - type bool does not match expected type int
+  $ ./inferencer_runner.exe < manytests/do_not_type/003occurs.ml
+  Type error: the type variable 'a occurs inside 'a -> 'b
+
+  $ ./inferencer_runner.exe < manytests/do_not_type/004let_poly.ml
+  Type error: unification failed - type int does not match expected type bool
+
+  $ ./inferencer_runner.exe < manytests/do_not_type/015tuples.ml
+  Type error: Only variables are allowed as left-hand side of `let rec'
+
+

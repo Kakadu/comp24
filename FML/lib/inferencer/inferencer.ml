@@ -10,7 +10,6 @@ module R : sig
   include Base.Monad.Infix
 
   val return : 'a -> 'a t
-  val bind : 'a t -> f:('a -> 'b t) -> 'b t
   val fail : error -> 'a t
 
   module Syntax : sig
@@ -109,7 +108,6 @@ module Subst : sig
 
   val empty : t
   val singleton : int -> typ -> t R.t
-  val find : t -> int -> typ option
   val remove : t -> int -> t
   val apply : t -> typ -> typ
   val unify : typ -> typ -> t R.t
