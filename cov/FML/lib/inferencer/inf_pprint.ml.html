@@ -305,9 +305,9 @@ let pp_type ppf typ =
         (Format.pp_print_lis<span data-count="14">t</span>
            ~pp_sep:(fun ppf () -&gt; <span data-count="14">F</span>ormat.fprintf ppf " * ")
            (fun ppf ty -&gt;
-              <span data-count="28">m</span>atch ty with
-              | <span data-count="0">T</span>Tuple _ | <span data-count="12">T</span>Function _ -&gt; Format.fprintf ppf "(%a)" helper ty
-              | <span data-count="16">_</span> -&gt; helper ppf ty))
+             <span data-count="28">m</span>atch ty with
+             | <span data-count="0">T</span>Tuple _ | <span data-count="12">T</span>Function _ -&gt; Format.fprintf ppf "(%a)" helper ty
+             | <span data-count="16">_</span> -&gt; helper ppf ty))
         tl
   in
   helper ppf (recalculate_var<span data-count="68">s</span> typ)
