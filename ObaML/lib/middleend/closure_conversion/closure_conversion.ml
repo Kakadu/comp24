@@ -2,36 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module VarMap = Stdlib.Map.Make (String)
-module VarSet = Stdlib.Set.Make (String)
-
-let std_var_set =
-  let init_var_set = VarSet.empty in
-  let init_var_set = VarSet.add "( * )" init_var_set in
-  let init_var_set = VarSet.add "( / )" init_var_set in
-  let init_var_set = VarSet.add "( + )" init_var_set in
-  let init_var_set = VarSet.add "( - )" init_var_set in
-  let init_var_set = VarSet.add "( = )" init_var_set in
-  let init_var_set = VarSet.add "( == )" init_var_set in
-  let init_var_set = VarSet.add "( <> )" init_var_set in
-  let init_var_set = VarSet.add "( != )" init_var_set in
-  let init_var_set = VarSet.add "( < )" init_var_set in
-  let init_var_set = VarSet.add "( <= )" init_var_set in
-  let init_var_set = VarSet.add "( > )" init_var_set in
-  let init_var_set = VarSet.add "( >= )" init_var_set in
-  let init_var_set = VarSet.add "( && )" init_var_set in
-  let init_var_set = VarSet.add "( || )" init_var_set in
-  let init_var_set = VarSet.add "print_int" init_var_set in
-  let init_var_set = VarSet.add "print_string" init_var_set in
-  let init_var_set = VarSet.add "( ~+ )" init_var_set in
-  let init_var_set = VarSet.add "( ~- )" init_var_set in
-  let init_var_set = VarSet.add "#matching_failed#" init_var_set in
-  let init_var_set = VarSet.add "#tuple_getter#" init_var_set in
-  let init_var_set = VarSet.add "#list_head_getter#" init_var_set in
-  let init_var_set = VarSet.add "#list_tail_getter#" init_var_set in
-  let init_var_set = VarSet.add "#list_length_getter#" init_var_set in
-  init_var_set
-;;
+open Containers
+open Std
 
 let get_var_name_from_sid = function
   | Simple_ast.SId (Ast.Id var_name) -> Some var_name
@@ -46,11 +18,11 @@ let get_var_names_from_sid_lst sid_lst =
       let new_acc =
         match var_name with
         | None -> acc
-        | Some var_name -> VarSet.add var_name acc
+        | Some var_name -> VarSSet.add var_name acc
       in
       helper new_acc tl
   in
-  helper VarSet.empty sid_lst
+  helper VarSSet.empty sid_lst
 ;;
 
 let get_sid_lst_from_var_names_lst var_names_lst =
@@ -69,15 +41,15 @@ let get_vars_from_expr expr env =
   let rec helper acc env = function
     | Simple_ast.SEConst _ -> acc
     | Simple_ast.SEVar (Id var_name) ->
-      (match VarSet.find_opt var_name env with
+      (match VarSSet.find_opt var_name env with
        | Some _ -> acc
-       | None -> VarSet.add var_name acc)
+       | None -> VarSSet.add var_name acc)
     | Simple_ast.SETuple exp_lst ->
       List.fold_left (fun acc exp -> helper acc env exp) acc exp_lst
     | Simple_ast.SEFun (id_lst, expr) ->
       let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
       let new_env =
-        VarSet.fold (fun var_name acc -> VarSet.add var_name acc) vars_from_id_lst env
+        VarSSet.fold (fun var_name acc -> VarSSet.add var_name acc) vars_from_id_lst env
       in
       helper acc new_env expr
     | Simple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) ->
@@ -86,7 +58,7 @@ let get_vars_from_expr expr env =
       let new_env =
         match var_name with
         | None -> env
-        | Some var_name -> VarSet.add var_name env
+        | Some var_name -> VarSSet.add var_name env
       in
       helper new_acc new_env expr2
     | Simple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) ->
@@ -94,7 +66,7 @@ let get_vars_from_expr expr env =
       let new_env =
         match var_name with
         | None -> env
-        | Some var_name -> VarSet.add var_name env
+        | Some var_name -> VarSSet.add var_name env
       in
       let new_acc = helper acc new_env expr1 in
       helper new_acc new_env expr2
@@ -103,12 +75,12 @@ let get_vars_from_expr expr env =
       helper (helper (helper acc env expr1) env expr2) env expr3
     | Simple_ast.SECons (expr1, expr2) -> helper (helper acc env expr1) env expr2
   in
-  helper VarSet.empty env expr
+  helper VarSSet.empty env expr
 ;;
 
 let recursively_add_params start_expr var_name env =
   let rec helper start_expr var_name =
-    match VarMap.find_opt var_name env with
+    match VarSMap.find_opt var_name env with
     | Some param_lst ->
       List.fold_left
         (fun exp param ->
@@ -124,12 +96,12 @@ let rec convert_fun_expr env global_env = function
   | Simple_ast.SEFun (id_lst, expr) as f ->
     let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
     let updated_env =
-      VarSet.fold (fun new_var acc -> VarMap.remove new_var acc) vars_from_id_lst env
+      VarSSet.fold (fun new_var acc -> VarSMap.remove new_var acc) vars_from_id_lst env
     in
-    let vars_to_add = VarSet.elements (get_vars_from_expr f global_env) in
+    let vars_to_add = VarSSet.elements (get_vars_from_expr f global_env) in
     let updated_env =
       List.fold_left
-        (fun acc new_var -> VarMap.remove new_var acc)
+        (fun acc new_var -> VarSMap.remove new_var acc)
         updated_env
         vars_to_add
     in
@@ -171,7 +143,7 @@ and convert_expr env global_env = function
        let updated_env =
          match var_name with
          | None -> env
-         | Some var_name -> VarMap.add var_name vars_to_add env
+         | Some var_name -> VarSMap.add var_name vars_to_add env
        in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, converted_expr2)
@@ -186,22 +158,22 @@ and convert_expr env global_env = function
      | Simple_ast.SEFun (id_lst, fexpr) as f ->
        let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
        let updated_env =
-         VarSet.fold (fun new_var acc -> VarMap.remove new_var acc) vars_from_id_lst env
+         VarSSet.fold (fun new_var acc -> VarSMap.remove new_var acc) vars_from_id_lst env
        in
-       let vars_to_add = VarSet.elements (get_vars_from_expr f global_env) in
+       let vars_to_add = VarSSet.elements (get_vars_from_expr f global_env) in
        let vars_to_add =
          List.filter (fun var_name -> Some var_name <> ident_var_name) vars_to_add
        in
        let updated_env =
          List.fold_left
-           (fun acc new_var -> VarMap.remove new_var acc)
+           (fun acc new_var -> VarSMap.remove new_var acc)
            updated_env
            vars_to_add
        in
        let updated_env =
          match ident_var_name with
          | None -> updated_env
-         | Some ident_var_name -> VarMap.add ident_var_name vars_to_add updated_env
+         | Some ident_var_name -> VarSMap.add ident_var_name vars_to_add updated_env
        in
        let id_lst_to_add = get_sid_lst_from_var_names_lst vars_to_add in
        let all_vars = List.append id_lst_to_add id_lst in
@@ -212,7 +184,7 @@ and convert_expr env global_env = function
        let updated_env =
          match ident_var_name with
          | None -> env
-         | Some ident_var_name -> VarMap.add ident_var_name vars_to_add env
+         | Some ident_var_name -> VarSMap.add ident_var_name vars_to_add env
        in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        Simple_ast.SELet (Ast.Recursive, converted_value_binding, converted_expr2)
@@ -220,7 +192,7 @@ and convert_expr env global_env = function
        let updated_env =
          match ident_var_name with
          | None -> env
-         | Some ident_var_name -> VarMap.remove ident_var_name env
+         | Some ident_var_name -> VarSMap.remove ident_var_name env
        in
        let converted_expr1 = convert_expr updated_env global_env expr1 in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
@@ -256,7 +228,7 @@ let convert_value_binding_lst global_env value_binding_lst =
   let rev_value_binding_lst =
     List.fold_left
       (fun acc (id, expr) ->
-        let new_expr = convert_expr VarMap.empty global_env expr in
+        let new_expr = convert_expr VarSMap.empty global_env expr in
         (id, new_expr) :: acc)
       []
       value_binding_lst
@@ -270,10 +242,10 @@ let convert_rec_value_binding_lst global_env value_binding_lst =
       (fun acc (id, expr) ->
         match expr with
         | Simple_ast.SEFun (id_lst, fexpr) ->
-          let updated_fexpr = convert_expr VarMap.empty global_env fexpr in
+          let updated_fexpr = convert_expr VarSMap.empty global_env fexpr in
           (id, Simple_ast.SEFun (id_lst, updated_fexpr)) :: acc
         | _ ->
-          let new_expr = convert_expr VarMap.empty global_env expr in
+          let new_expr = convert_expr VarSMap.empty global_env expr in
           (id, new_expr) :: acc)
       []
       value_binding_lst
@@ -289,7 +261,7 @@ let convert_structure_item global_env = function
     let new_value_bindings = convert_rec_value_binding_lst global_env value_binding_lst in
     Simple_ast.SSILet (Ast.Recursive, new_value_bindings)
   | Simple_ast.SSIExpr expr ->
-    let new_expr = convert_expr VarMap.empty global_env expr in
+    let new_expr = convert_expr VarSMap.empty global_env expr in
     Simple_ast.SSIExpr new_expr
 ;;
 
@@ -306,7 +278,7 @@ let convert_structure global_env (structure : Simple_ast.sstructure) =
         in
         let new_global_env =
           List.fold_left
-            (fun acc new_var -> VarSet.add new_var acc)
+            (fun acc new_var -> VarSSet.add new_var acc)
             global_env
             vars_from_structure_item
         in
@@ -317,8 +289,6 @@ let convert_structure global_env (structure : Simple_ast.sstructure) =
   List.rev rev_new_structure
 ;;
 
-let run_expr_closure_conversion expr = convert_expr VarMap.empty std_var_set expr
-
 let run_closure_conversion (structure : Simple_ast.sstructure) =
-  convert_structure std_var_set structure
+  convert_structure extended_std_var_set structure
 ;;

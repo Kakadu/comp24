@@ -3,9 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open Format
-module VarSet = Stdlib.Set.Make (Int)
-module VarMap = Stdlib.Map.Make (Int)
-module StringMap = Stdlib.Map.Make (String)
+open Containers
 
 type ty =
   | ITVar of int
@@ -42,7 +40,7 @@ and pretty_pp_ty fmt acc =
   let typ, mp = acc in
   match typ with
   | ITVar num ->
-    (match VarMap.find_opt num mp with
+    (match VarIMap.find_opt num mp with
      | Some x -> fprintf fmt "'%s" x
      | None -> fprintf fmt "'%d" num)
   | ITPrim str -> fprintf fmt "%s" str
@@ -58,7 +56,7 @@ and pretty_pp_ty fmt acc =
      | _ -> fprintf fmt "(%a) list" pretty_pp_ty (ty1, mp))
 ;;
 
-type scheme = Scheme of VarSet.t * ty
+type scheme = Scheme of VarISet.t * ty
 
 type error =
   [ `Occurs_check
@@ -76,9 +74,9 @@ let pp_error fmt = function
       fmt
       "Unification failed: %a and %a"
       pretty_pp_ty
-      (typ1, VarMap.empty)
+      (typ1, VarIMap.empty)
       pretty_pp_ty
-      (typ2, VarMap.empty)
+      (typ2, VarIMap.empty)
   | `Unexpected_type -> fprintf fmt "Unexpected type"
   | `Unbound_variable str -> fprintf fmt "Unbound value %S" str
   | `Several_bound str ->

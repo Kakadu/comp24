@@ -2,14 +2,19 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-let gen_matching_failed_id = Ast.Id "#matching_failed#"
+open RS
+open RS.RSMonad
+open RS.RSMonad.Syntax
+open Std
+
+let gen_matching_failed_id = Ast.Id matching_failed
 
 let gen_matching_failed =
   Simple_ast.SEApp (Simple_ast.SEVar gen_matching_failed_id, Simple_ast.SEConst Ast.CUnit)
 ;;
 
 let gen_pat_expr_name = "#pat#"
-let gen_tuple_getter_id = Ast.Id "#tuple_getter#"
+let gen_tuple_getter_id = Ast.Id tuple_getter
 
 let gen_tuple_getter_fun ind tuple =
   Simple_ast.SEApp
@@ -18,19 +23,19 @@ let gen_tuple_getter_fun ind tuple =
     , tuple )
 ;;
 
-let gen_list_getter_head_id = Ast.Id "#list_head_getter#"
+let gen_list_getter_head_id = Ast.Id list_head_getter
 
 let gen_list_getter_head lst =
   Simple_ast.SEApp (Simple_ast.SEVar gen_list_getter_head_id, lst)
 ;;
 
-let gen_list_getter_tail_id = Ast.Id "#list_tail_getter#"
+let gen_list_getter_tail_id = Ast.Id list_tail_getter
 
 let gen_list_getter_tail lst =
   Simple_ast.SEApp (Simple_ast.SEVar gen_list_getter_tail_id, lst)
 ;;
 
-let gen_list_getter_length_id = Ast.Id "#list_length_getter#"
+let gen_list_getter_length_id = Ast.Id list_length_getter
 
 let gen_list_getter_length lst =
   Simple_ast.SEApp (Simple_ast.SEVar gen_list_getter_length_id, lst)
@@ -70,8 +75,8 @@ let construct_lst_length_condition lst gen_decl_name =
   let lst_length, is_min_length = get_list_length lst in
   let op =
     match is_min_length with
-    | true -> Simple_ast.SEVar (Ast.Id "( >= )")
-    | false -> Simple_ast.SEVar (Ast.Id "( = )")
+    | true -> Simple_ast.SEVar (Ast.Id gte)
+    | false -> Simple_ast.SEVar (Ast.Id eq)
   in
   Simple_ast.SEApp
     ( Simple_ast.SEApp (op, gen_list_getter_length (Simple_ast.SEVar gen_decl_name))
@@ -83,7 +88,7 @@ let concat_conditions curr_cond new_cond =
   | Simple_ast.SEConst (Ast.CBool true) -> new_cond
   | _ ->
     Simple_ast.SEApp
-      (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id "( && )"), curr_cond), new_cond)
+      (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id la), curr_cond), new_cond)
 ;;
 
 (** @param needs_to_check_cons_length/needs_to_check_empty_list
@@ -103,7 +108,7 @@ let construct_equality_condition gen_decl_name pat curr_cond =
        | _ ->
          let new_condition =
            Simple_ast.SEApp
-             ( Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id "( = )"), current_gen_expr)
+             ( Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id eq), current_gen_expr)
              , Simple_ast.SEConst const )
          in
          concat_conditions current_condition new_condition)
@@ -501,10 +506,10 @@ let simplify_structure_item structure_item =
 let simplify_structure structure =
   List.fold_left
     (fun acc structure_item ->
-      let new_structure_items = simplify_structure_item structure_item in
-      List.append acc new_structure_items)
-    []
+      let* new_structure_items = simplify_structure_item structure_item in
+      return (List.append acc new_structure_items))
+    (return [])
     structure
 ;;
 
-let convert (structure : Ast.structure) = simplify_structure structure
+let convert (structure : Ast.structure) = run (simplify_structure structure)

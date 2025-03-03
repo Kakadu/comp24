@@ -2,10 +2,9 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open State_monad.StateMonad
+open S
+open S.SMonad
 
-let fresh_var_name = "foba"
-let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
 let id_from_var_name var_name = Ast.Id var_name
 
 let rec lift_lambdas_from_value_binding value_binding =

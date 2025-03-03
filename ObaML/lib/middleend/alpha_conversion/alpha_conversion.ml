@@ -2,23 +2,21 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open State_monad.StateMonad
-module VarMap = Stdlib.Map.Make (String)
+open S
+open S.SMonad
+open Containers
 
 type alpha_conversion_setting =
   | All
   | Inner
 
-let fresh_var_name = "oba"
-let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
-
 let checked_fresh_var old_var env =
-  match VarMap.find_opt old_var env with
+  match VarSMap.find_opt old_var env with
   | None -> return old_var
   | Some _ ->
     let rec helper env =
       let* new_var = fresh_var in
-      match VarMap.find_opt new_var env with
+      match VarSMap.find_opt new_var env with
       | None -> return new_var
       | Some _ -> helper env
     in
@@ -39,7 +37,7 @@ and convert_expr env expr =
   let rec helper env = function
     | Simple_ast.SEConst _ as contant -> return contant
     | Simple_ast.SEVar (Ast.Id var_name) as var ->
-      (match VarMap.find_opt var_name env with
+      (match VarSMap.find_opt var_name env with
        | Some x -> return (Simple_ast.SEVar (Ast.Id x))
        | None -> return var)
     | Simple_ast.SETuple expr_lst ->
@@ -63,7 +61,7 @@ and convert_expr env expr =
             | None -> return (id :: curr_id_lst, curr_env)
             | Some old_var ->
               let* new_var = checked_fresh_var old_var curr_env in
-              let updated_env = VarMap.add old_var new_var curr_env in
+              let updated_env = VarSMap.add old_var new_var curr_env in
               return (Simple_ast.SId (Ast.Id new_var) :: curr_id_lst, updated_env))
           (return ([], env))
           id_lst
@@ -82,7 +80,7 @@ and convert_expr env expr =
          let* new_var = checked_fresh_var old_var env in
          let new_value_binding = Simple_ast.SId (Ast.Id new_var), expr1 in
          let* new_value_binding = convert_value_binding_expr env new_value_binding in
-         let updated_env = VarMap.add old_var new_var env in
+         let updated_env = VarSMap.add old_var new_var env in
          let* new_expr2 = helper updated_env expr2 in
          return (Simple_ast.SELet (Ast.Nonrecursive, new_value_binding, new_expr2)))
     | Simple_ast.SELet (Ast.Recursive, value_binding, expr2) ->
@@ -95,7 +93,7 @@ and convert_expr env expr =
          return (Simple_ast.SELet (Ast.Recursive, new_value_binding, new_expr2))
        | Some old_var ->
          let* new_var = checked_fresh_var old_var env in
-         let updated_env = VarMap.add old_var new_var env in
+         let updated_env = VarSMap.add old_var new_var env in
          let new_value_binding = Simple_ast.SId (Ast.Id new_var), expr1 in
          let* new_value_binding =
            convert_value_binding_expr updated_env new_value_binding
@@ -133,7 +131,7 @@ let update_value_binding_lst_vars env value_binding_lst setting =
           | Inner -> return old_var
           | All -> checked_fresh_var old_var curr_env
         in
-        let updated_env = VarMap.add old_var new_var curr_env in
+        let updated_env = VarSMap.add old_var new_var curr_env in
         return
           ( (Simple_ast.SId (Ast.Id new_var), expr) :: value_bindings_with_new_vars
           , updated_env ))
@@ -175,7 +173,7 @@ let convert_structure structure setting =
         let* env, si_lst = acc in
         let* new_si, new_env = helper env structure_item in
         return (new_env, new_si :: si_lst))
-      (return (VarMap.empty, []))
+      (return (VarSMap.empty, []))
       structure
   in
   return (List.rev rev_structure)

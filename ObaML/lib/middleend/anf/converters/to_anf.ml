@@ -2,12 +2,9 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open R.R
-open R.R.Syntax
-module VarSet = Stdlib.Set.Make (String)
-
-let fresh_var_name = "aoba"
-let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
+open RS
+open RS.RSMonad
+open RS.RSMonad.Syntax
 
 let convert_ident ident =
   let helper = function

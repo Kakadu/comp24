@@ -2,4 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-val run_closure_conversion : Simple_ast.sstructure -> Simple_ast.sstructure
+let fresh_var_name = "oba"

@@ -2,30 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-(*
-   type immexpr =
-   | ImmId of string
-   | ImmInt of int
-   | ImmString of string
-   | ImmBool of bool
-   | ImmEmptyList
-   | ImmUnit
-   | ImmTuple of immexpr list
-
-   type cexpr =
-   | CImmExpr of immexpr
-   | CApp of immexpr * immexpr list
-   | CIf of immexpr * aexpr * aexpr
-   | CCons of immexpr * immexpr
-
-   and aexpr =
-   | ALet of string * cexpr * aexpr
-   | ACExpr of cexpr
-
-   type tp = TPLet of bool * (string * string list * aexpr) list
-   type program = tp list
-*)
-
 let convert_ident = function
   | "()" -> Simple_ast.SSpecial SUnit
   | _ as var_name -> Simple_ast.SId (Ast.Id var_name)
@@ -121,32 +97,3 @@ let convert_program program =
 ;;
 
 let convert (program : Anf.program) = convert_program program
-
-(*
-   type sspecial = SUnit [@@deriving eq, show { with_path = false }]
-
-   type sspident =
-   | SId of Ast.identifier
-   | SSpecial of sspecial
-   [@@deriving eq, show { with_path = false }]
-
-   type svalue_binding = sspident * sexpr
-
-   and sexpr =
-   | SEConst of Ast.constant
-   | SEVar of Ast.identifier
-   | SETuple of sexpr list
-   | SEFun of sspident list * sexpr
-   | SELet of Ast.rec_flag * svalue_binding * sexpr
-   | SEApp of sexpr * sexpr
-   | SEIf of sexpr * sexpr * sexpr
-   | SECons of sexpr * sexpr
-   [@@deriving eq, show { with_path = false }]
-
-   type sstructure_item =
-   | SSILet of Ast.rec_flag * svalue_binding list
-   | SSIExpr of sexpr
-   [@@deriving eq, show { with_path = false }]
-
-   type sstructure = sstructure_item list [@@deriving eq, show { with_path = false }]
-*)

@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module R : sig
+module RSMonad : sig
   type 'a t
 
   val return : 'a -> 'a t
@@ -64,3 +64,7 @@ end = struct
   let fresh : int t = fun last -> last + 1, Result.Ok last
   let run m = snd (m 0)
 end
+
+open RSMonad
+open Constants
+let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n

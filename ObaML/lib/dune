@@ -7,11 +7,13 @@
   Ast
   Simple_ast_pretty_printer
   Parser
+  Containers
   Inferencer
   Std
   Typedtree
-  State_monad
-  R
+  S
+  RS
+  Constants
   Simple_ast
   To_simple_ast
   To_ast

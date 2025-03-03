@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-module StateMonad = struct
+module SMonad = struct
   type 'a state = int -> int * 'a
 
   let ( >>= ) : 'a 'b. 'a state -> ('a -> 'b state) -> 'b state =
@@ -24,3 +24,7 @@ module StateMonad = struct
   let fresh last = last + 1, last
   let run m = snd (m 0)
 end
+
+open SMonad
+open Constants
+let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n
