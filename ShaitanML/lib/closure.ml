@@ -1,138 +1,139 @@
 open Pat_elim_ast
 open Common
+open Base
 
-module StringMap = Map.Make (String)
 
-let builtin_list =
-  [ "( + )"; "( - )"; "( / )"; "( * )"
-  ; "( < )"; "( > )"; "( <= )"; "( >= )"
-  ; "( <> )"; "( = )"; "print_int" ]
+let rec free_vars env =
+  let open StrSet in
+  function
+  | PEEConst _ -> empty
+  | PEEVar id -> if find env id then empty else singleton id
+  | PEEIf (e1, e2, e3) -> union_list [ free_vars env e1; free_vars env e2; free_vars env e3 ]
+  | PEEFun (args, body) ->
+    let binded = union env (of_list args) in
+    free_vars binded body
+  | PEEApp (e1, e2) -> union (free_vars env e1) (free_vars env e2)
+  | PEELet (PENonrec (name, e1), e2) ->
+    union (free_vars env e1) (free_vars (add env name) e2)
+  | PEELet (PERec cl, e) ->
+    let ids, el =
+      List.fold_right cl ~init:(empty, []) ~f:(fun (name, e) (ids, exprs) ->
+        add ids name, e :: exprs)
+    in
+    let binded = union env ids in
+    List.fold el ~init:(free_vars binded e) ~f:(fun acc e -> union acc (free_vars binded e))
+  | PEECons (e1, e2) -> union (free_vars env e1) (free_vars env e2)
+  | PEETuple el -> List.fold el ~init:empty ~f:(fun acc e -> union acc (free_vars env e))
+;;
 
-let empty_env = StringMap.empty
+let make_apply expr args env =
+  List.fold args ~init:expr ~f:(fun acc name ->
+    let arg =
+      match StrMap.find env name with
+      | Some e -> e
+      | None -> PEEVar name
+    in
+    PEEApp (acc, arg))
+;;
 
-let update_maps primary secondary =
-  StringMap.union (fun _ _ new_val -> Some new_val) primary secondary
-
-let rec free_vars env expr =
-  let union_maps = List.fold_left (fun acc map -> update_maps acc map) empty_env in
-  match expr with
-  | PEEConst _ -> empty_env
-  | PEEVar id ->
-    if StringMap.mem id env
-      then empty_env
-      else StringMap.singleton id ()
-  | PEEIf (cond, e1, e2) ->
-    union_maps [ free_vars env cond; free_vars env e1; free_vars env e2 ]
-  | PEEFun (args, body_expr) ->
-    let env' = List.fold_left (fun acc arg -> StringMap.add arg () acc) env args in
-    free_vars env' body_expr
-  | PEEApp (fn, arg) ->
-    update_maps (free_vars env fn) (free_vars env arg)
-  | PEELet (PENonrec (vname, val_expr), in_expr) ->
-    let val_fvs = free_vars env val_expr in
-    let env' = StringMap.add vname () env in
-    update_maps val_fvs (free_vars env' in_expr)
-  | PEELet (PERec defs, in_expr) ->
-    let def_names = List.map fst defs in
-    let env_with_names = List.fold_left (fun acc name -> StringMap.add name () acc) env def_names in
-    let def_fvs = List.fold_left (fun acc (_, expr) -> update_maps acc (free_vars env_with_names expr)) empty_env defs in
-    update_maps def_fvs (free_vars env_with_names in_expr)
-  | PEECons (first, rest) ->
-    update_maps (free_vars env first) (free_vars env rest)
-  | PEETuple elems ->
-    union_maps (List.map (free_vars env) elems)
-
-let expr_apply_args expr args env =
-  List.fold_left (fun acc_expr arg_name ->
-    let arg_expr = if StringMap.mem arg_name env then StringMap.find arg_name env else PEEVar arg_name in
-    PEEApp (acc_expr, arg_expr)) expr args
-
-let rec rewrite_expr global_env local_env expr =
-  match expr with
+let rec cc_expr global_env local_env = function
   | PEEConst _ as c -> c
-  | PEEVar x as v -> (match StringMap.find_opt x local_env with Some e -> e | None -> v)
-  | PEEIf (cond, e_true, e_false) ->
-    let cond' = rewrite_expr global_env local_env cond in
-    let e_true' = rewrite_expr global_env local_env e_true in
-    let e_false' = rewrite_expr global_env local_env e_false in
-    PEEIf (cond', e_true', e_false')
-  | PEEFun (params, body_expr) as original_fun ->
-    let fv_map = free_vars global_env original_fun in
-    let fv_list = StringMap.bindings fv_map |> List.map fst in
-    let body_new = rewrite_expr global_env empty_env body_expr in
-    let transformed_fun = PEEFun (fv_list @ params, body_new) in
-    expr_apply_args transformed_fun fv_list local_env
-  | PEEApp (fn, arg) ->
-    let fn' = rewrite_expr global_env local_env fn in
-    let arg' = rewrite_expr global_env local_env arg in
-    PEEApp (fn', arg')
-  | PEELet (PENonrec (id, bind_expr), in_expr) ->
-    let bind_expr', updated_env = rewrite_nonrec global_env local_env id bind_expr in
-    let local_env = update_maps local_env updated_env in
-    let in_expr' = rewrite_expr global_env local_env in_expr in
-    PEELet (PENonrec (id, bind_expr'), in_expr')
-  | PEELet (PERec defs, in_expr) ->
-    let rewritten_defs, updated_env = rewrite_recursive global_env local_env defs in
-    let local_env = update_maps local_env updated_env in
-    let in_expr' = rewrite_expr global_env local_env in_expr in
-    PEELet (PERec rewritten_defs, in_expr')
-  | PEECons (hd, tl) ->
-    PEECons (rewrite_expr global_env local_env hd, rewrite_expr global_env local_env tl)
-  | PEETuple elems ->
-    PEETuple (List.map (rewrite_expr global_env local_env) elems)
+  | PEEVar id as v ->
+    (match StrMap.find local_env id with
+     | Some new_expr -> new_expr
+     | None -> v)
+  | PEEIf (e1, e2, e3) ->
+    let e1 = cc_expr global_env local_env e1 in
+    let e2 = cc_expr global_env local_env e2 in
+    let e3 = cc_expr global_env local_env e3 in
+    PEEIf (e1, e2, e3)
+  | PEEFun (args, body) as v ->
+    let fvs = free_vars global_env v |> StrSet.to_list in
+    let body = cc_expr global_env empty body in
+    let e = PEEFun (fvs @ args, body) in
+    make_apply e fvs local_env
+  | PEEApp (e1, e2) ->
+    let e1 = cc_expr global_env local_env e1 in
+    let e2 = cc_expr global_env local_env e2 in
+    PEEApp (e1, e2)
+  | PEELet (PENonrec (name, e1), e2) ->
+    let e1, env1 = cc_nonrec global_env local_env name e1 in
+    let env2 = StrMap.merge_two local_env env1 in
+    let e2 = cc_expr global_env env2 e2 in
+    PEELet (PENonrec (name, e1), e2)
+  | PEELet (PERec decl_list, e2) ->
+    let cl, env1 = cc_rec global_env local_env decl_list in
+    let env2 = StrMap.merge_two local_env env1 in
+    let e2 = cc_expr global_env env2 e2 in
+    PEELet (PERec cl, e2)
+  | PEECons (e1, e2) ->
+    let e1 = cc_expr global_env local_env e1 in
+    let e2 = cc_expr global_env local_env e2 in
+    PEECons (e1, e2)
+  | PEETuple el ->
+    let el = List.map el ~f:(cc_expr global_env local_env) in
+    PEETuple el
 
-and rewrite_nonrec global_env local_env var expr =
-  match expr with
-  | PEEFun (params, body_expr) ->
-    let body_fvs = free_vars global_env body_expr |> StringMap.bindings |> List.map fst in
-    let body_transformed = rewrite_expr global_env empty_env body_expr in
-    let transformed_fun = PEEFun (body_fvs @ params, body_transformed) in
-    let new_binding = expr_apply_args (PEEVar var) body_fvs local_env in
-    transformed_fun, StringMap.singleton var new_binding
-  | _ ->
-    rewrite_expr global_env local_env expr, empty_env
+and cc_nonrec global_env local_env name = function
+  | PEEFun (args, body) ->
+    let fvs = StrSet.(to_list (diff (free_vars global_env body) (of_list args))) in
+    let body = cc_expr global_env empty body in
+    let e = PEEFun (fvs @ args, body) in
+    let apply = make_apply (PEEVar name) fvs local_env in
+    e, StrMap.singleton name apply
+  | expr -> cc_expr global_env local_env expr, empty
 
-and rewrite_recursive global_env prev_env defs=
-  let def_names = List.map fst defs in
-  let gather_fvs (fvs_acc, env_acc) (id, expr) =
+and cc_rec global_env prev_env cl =
+  let ids = List.map cl ~f:fst in
+  let f1 (free, env) (name, expr) =
     match expr with
-    | PEEFun (args, body_expr) ->
-      let exclude_names = args @ def_names in
-      let exclude_map = List.fold_left (fun acc n -> StringMap.add n () acc) empty_env exclude_names in
-      let body_fvs = free_vars global_env body_expr |> StringMap.filter (fun id _ -> not (StringMap.mem id exclude_map)) in
-      let fv_names = StringMap.bindings body_fvs |> List.map fst in
-      let new_expr = expr_apply_args (PEEVar id) fv_names prev_env in
-      (fv_names :: fvs_acc), StringMap.add id new_expr env_acc
-    | _ -> []::fvs_acc, env_acc
+    | PEEFun (args, body) ->
+      let remove = StrSet.union (StrSet.of_list ids) (StrSet.of_list args) in
+      let fvs = StrSet.diff (free_vars global_env body) remove |> StrSet.to_list in
+      let bind = make_apply (PEEVar name) fvs prev_env in
+      let env = StrMap.update env name ~f:(fun _ -> bind) in
+      fvs :: free, env
+    | _ -> [] :: free, env
   in
-  let fv_lists, combined_env = List.fold_left gather_fvs ([], prev_env) defs in
-  let new_defs = List.map2 (fun (id,expr) fv_names ->
-    match expr with
-    | PEEFun (args, body_expr) ->
-      let body_transformed = rewrite_expr global_env empty_env body_expr in
-      (id, PEEFun (fv_names @ args, body_transformed))
-    | _ -> (id, rewrite_expr global_env combined_env expr)
-  ) defs (List.rev fv_lists) in
-  new_defs, combined_env
-
-let transform_toplevel global_env = function
-  | PENonrec (var, expr) ->
-    let transformed_expr, _ = rewrite_nonrec global_env empty_env var expr in
-    StringMap.add var () global_env, PENonrec (var, transformed_expr)
-  | PERec defs ->
-    let vars = List.map fst defs in
-    let transformed_defs, _ = rewrite_recursive global_env empty_env defs in
-    let global_env = List.fold_left (fun env name -> StringMap.add name () env) global_env vars in
-    global_env, PERec transformed_defs
-
-let initial_env =
-  List.fold_left (fun acc name -> StringMap.add name () acc) empty_env builtin_list
-
-let perform_closure_conversion prog =
-  let rec loop env acc = function
-    | [] -> List.rev acc
-    | decl :: rest ->
-      let env', decl' = transform_toplevel env decl in
-      loop env' (decl' :: acc) rest
+  let fvs, env = List.fold cl ~init:([], prev_env) ~f:f1 in
+  let fvs = List.rev fvs in
+  let to_fold = List.zip_exn cl fvs in
+  let f1 decl_acc ((name, e), free) =
+    match e with
+    | PEEFun (args, body) ->
+      let new_body = cc_expr global_env empty body in
+      let efun = PEEFun (free @ args, new_body) in
+      (name, efun) :: decl_acc
+    | _ ->
+      let e = cc_expr global_env env e in
+      (name, e) :: decl_acc
   in
-  loop initial_env [] prog
+  let cl = List.fold to_fold ~init:[] ~f:f1 in
+  let cl = List.rev cl in
+  cl, env
+;;
+
+let cc_str_item global_env = function
+  | PENonrec (name, e) ->
+    let e1, _ = cc_nonrec global_env empty name e in
+    let env = StrSet.add global_env name in
+    env, PENonrec (name, e1)
+  | PERec decl_list ->
+    let ids = List.map decl_list ~f:fst in
+    let cl, _ = cc_rec global_env empty decl_list in
+    let env =
+      List.fold ids ~init:global_env ~f:(fun acc name -> StrSet.add acc name)
+    in
+    env, PERec cl
+;;
+
+let perform_closure_conversion structure =
+  let builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
+  let rec helper last_env = function
+    | [] -> []
+    | hd :: tl ->
+      let env, ast = cc_str_item last_env hd in
+      ast :: helper env tl
+  in
+  helper builtins structure
+;;
