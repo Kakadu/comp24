@@ -2,6 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
+open Ast
+
 type pe_const =
   | PECint of int
   | PECBool of bool
@@ -107,12 +109,14 @@ let get_element e = function
   | Other -> e
 ;;
 
-let const_to_peconst =
-  let open Ast in
-  function
-  | CString s -> PECString s
-  | CInt i -> PECint i
-  | CBool b -> PECBool b
-  | CNil -> PECNil
-  | CUnit -> PECUnit
+let const_to_peconst const =
+  let pe_const =
+    match const with
+    | CString s -> PECString s
+    | CInt i -> PECint i
+    | CBool b -> PECBool b
+    | CNil -> PECNil
+    | CUnit -> PECUnit
+  in
+  PEEConst pe_const
 ;;
