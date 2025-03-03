@@ -102,4 +102,4 @@ let ll_structure structure =
   helper structure
 ;;
 
-let run nh init_num p = run (ll_structure p) nh init_num
+let run_ll bindings init_num p = run (ll_structure p) bindings init_num

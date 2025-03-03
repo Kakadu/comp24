@@ -109,30 +109,30 @@ module MonadCounter = struct
 
   type 'a t = bindings * int -> bindings * int * 'a
 
-  let return x (nh, var) = nh, var, x
+  let return x (binds, var) = binds, var, x
 
-  let fresh (nh, var) =
-    let rec helper num = if contains nh num then helper (num + 1) else num in
+  let fresh (binds, var) =
+    let rec helper num = if contains binds num then helper (num + 1) else num in
     let next = helper var in
-    nh, next + 1, next
+    binds, next + 1, next
   ;;
 
   let bind (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun tup ->
-    let nh, var, x = m tup in
-    f x (nh, var)
+    fun t ->
+    let binds, var, x = m t in
+    f x (binds, var)
   ;;
 
   let ( >>= ) = bind
   let ( let* ) = bind
 
   let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
-    fun tup ->
-    let nh, var, x = m tup in
-    nh, var, f x
+    fun t ->
+    let binds, var, x = m t in
+    binds, var, f x
   ;;
 
-  let run (m : 'a t) nh start = m (nh, start)
+  let run (m : 'a t) binds start = m (binds, start)
 
   let map (xs : 'a list) ~(f : 'a -> 'b t) : 'b list t =
     let* xs =
@@ -156,20 +156,20 @@ module MonadCounterError = struct
 
   type ('a, 'e) t = bindings * int -> bindings * int * ('a, 'e) Result.t
 
-  let return x (nh, var) = nh, var, Result.return x
-  let fail e (nh, var) = nh, var, Result.fail e
+  let return x (binds, var) = binds, var, Result.return x
+  let fail e (binds, var) = binds, var, Result.fail e
 
-  let fresh (nh, var) =
-    let rec helper num = if contains nh num then helper (num + 1) else num in
+  let fresh (binds, var) =
+    let rec helper num = if contains binds num then helper (num + 1) else num in
     let next = helper var in
-    nh, next + 1, Result.return next
+    binds, next + 1, Result.return next
   ;;
 
   let ( >>= ) (m : ('a, 'e) t) (f : 'a -> ('b, 'e) t) : ('b, 'e) t =
     fun tup ->
     match m tup with
-    | nh, var, Result.Error err -> nh, var, Result.fail err
-    | nh, var, Result.Ok x -> f x (nh, var)
+    | binds, var, Result.Error err -> binds, var, Result.fail err
+    | binds, var, Result.Ok x -> f x (binds, var)
   ;;
 
   let bind = ( >>= )
@@ -177,8 +177,8 @@ module MonadCounterError = struct
   let ( >>| ) (m : ('a, 'e) t) (f : 'a -> 'b) : ('b, 'e) t =
     fun tup ->
     match m tup with
-    | nh, var, Result.Error err -> nh, var, Result.fail err
-    | nh, var, Result.Ok x -> nh, var, Result.return (f x)
+    | binds, var, Result.Error err -> binds, var, Result.fail err
+    | binds, var, Result.Ok x -> binds, var, Result.return (f x)
   ;;
 
   let ( let* ) = bind
@@ -211,7 +211,7 @@ module MonadCounterError = struct
     return @@ List.rev xs
   ;;
 
-  let run m nh init = m (nh, init)
+  let run m binds init = m (binds, init)
 end
 
 let builtins =

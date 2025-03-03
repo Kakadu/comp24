@@ -12,13 +12,9 @@ let () =
   in
   match parse_ s with
   | Ok ast ->
-    let nh, names_count, ast = Pat_elim.run_pat_elim ast in
+    let nh, names_count, ast = Pat_elim.run_pe ast in
     let _, _, ast = Alpha.run_ac nh names_count ast in
-    let ast_ = Closure.perform_closure_conversion ast in
-    (* let restore_ast = Pat_elim.convert_program ast in *)
-    (* let _, _, converted = Pat_elim.run ast in
-    let converted_ = Closure.closure_convert converted in
-    Format.printf "%a" Pat_elim_ast.pp_pe_structure converted_ *)
+    let ast_ = Closure.run_cc ast in
     Format.printf "%a" Pat_elim_ast.pp_pe_structure ast_
   | Error message -> Format.printf "%s" message
 ;;

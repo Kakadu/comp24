@@ -15,7 +15,7 @@
  (modules Pat_elim)
  (public_name pat_elim)
  (libraries shaitanml_lib stdio))
- 
+
  (executable
  (name closure)
  (modules Closure)
@@ -26,6 +26,12 @@
  (name alpha)
  (modules Alpha)
  (public_name alpha)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name l_lifting)
+ (modules L_lifting)
+ (public_name l_lifting)
  (libraries shaitanml_lib stdio))
 
 (cram

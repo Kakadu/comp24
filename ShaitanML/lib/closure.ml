@@ -127,7 +127,7 @@ let cc_str_item global_env = function
     env, PERec cl
 ;;
 
-let perform_closure_conversion structure =
+let run_cc structure =
   let builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
   let rec helper last_env = function
     | [] -> []
