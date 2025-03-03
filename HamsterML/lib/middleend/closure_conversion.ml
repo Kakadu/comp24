@@ -1,4 +1,4 @@
-open Base
+(* open Base
 open Ast
 
 (* Remove all the variables that are bound by a single pattern from free variables set *)
@@ -100,4 +100,4 @@ let rec free_vars_expr (exp : expr) =
     List.fold args ~init:free ~f:(fun acc arg -> remove_bound_vars_from_pattern acc arg)
 ;;
 
-let unbound_variables (exp : expr) = free_vars_expr exp
+let unbound_variables (exp : expr) = free_vars_expr exp *)

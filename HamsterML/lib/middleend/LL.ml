@@ -77,11 +77,14 @@ module NameEnv = struct
 
   let rec generate_name (env : t) (name : id) =
     let open R in
-    let* fresh_num = R.fresh in
-    let varname = "LL_fun_" ^ Int.to_string fresh_num in
-    match find varname env with
-    | None -> R.return (extend (name, varname) env, varname)
-    | Some _ -> generate_name env name
+    match find name env with
+    | None ->
+      let* fresh_num = R.fresh in
+      let new_name = "LL_fun_" ^ Int.to_string fresh_num in
+      (match find new_name env with
+       | None -> R.return (extend (name, new_name) env, new_name)
+       | Some _ -> generate_name env name)
+    | Some new_name -> R.return (env, new_name)
   ;;
 
   let pp fmt (env : t) =
@@ -113,6 +116,22 @@ let simplify_arguments p_args expr : (expr * NameSet.t) R.t =
 (* 'Let' constructions that should be lifted *)
 type lifted_lets = ll_expr list
 
+let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
+  List.fold binds ~init:(R.return env) ~f:(fun env bnd ->
+    match bnd with
+    | Var name, _, _ ->
+      let* env = env in
+      let* env, _ = NameEnv.generate_name env name in
+      R.return env
+    | _, _, _ -> failwith "Incorrect 'Let rec' pattern was encountered during LL")
+;;
+
+let extract_bind (bnd : bind) : id * args * expr =
+  match bnd with
+  | Var name, args, expr -> name, args, expr
+  | _ -> failwith "Incorrect 'Let' pattern was encountered during LL"
+;;
+
 let rec ll_bind
   (lifted : lifted_lets)
   (env : NameEnv.t)
@@ -134,19 +153,21 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   : (ll_expr * lifted_lets) R.t
   =
   match expr with
-  | Let (rec_flag, (Var name, args, expr) :: tl_bind, Some scope) ->
-    let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+  | Let (rec_flag, binds, Some scope) ->
+    let* env =
+      match rec_flag with
+      | Recursive -> collect_mutual_names env binds
+      | Nonrecursive -> R.return env
+    in
     let* env, new_binds, lifted =
       List.fold
-        tl_bind
-        ~init:(R.return (env, [ new_bind ], lifted))
+        binds
+        ~init:(R.return (env, [], lifted))
         ~f:(fun acc bnd ->
           let* env, binds, lifted = acc in
-          match bnd with
-          | Var name, args, expr ->
-            let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-            R.return (env, new_bind :: binds, lifted)
-          | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
+          let name, args, expr = extract_bind bnd in
+          let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+          R.return (env, new_bind :: binds, lifted))
     in
     let* ll_in_scope, lifted = ll_expr lifted env scope in
     let ll_inner_let = LLLet (rec_flag, List.rev new_binds, None) in
@@ -225,19 +246,21 @@ let ll_prog (prog : prog) : ll_prog R.t =
     | first_let :: tl_lets ->
       let* ll_first_let, env =
         match first_let with
-        | Let (rec_flag, (Var name, args, body) :: tl_binds, in_scope) ->
-          let* env, new_bind, lifted = ll_bind lifted env (name, args, body) in
+        | Let (rec_flag, binds, in_scope) ->
+          let* env =
+            match rec_flag with
+            | Recursive -> collect_mutual_names env binds (* update env *)
+            | Nonrecursive -> R.return env
+          in
           let* env, new_binds, lifted =
             List.fold
-              tl_binds
-              ~init:(R.return (env, [ new_bind ], lifted))
+              binds
+              ~init:(R.return (env, [], lifted))
               ~f:(fun acc bnd ->
                 let* env, binds, lifted = acc in
-                match bnd with
-                | Var name, args, expr ->
-                  let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-                  R.return (env, new_bind :: binds, lifted)
-                | _, _, _ -> failwith "Incorrect 'Let' pattern was encountered during LL")
+                let name, args, expr = extract_bind bnd in
+                let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+                R.return (env, new_bind :: binds, lifted))
           in
           let new_binds = List.rev new_binds in
           (match in_scope with
