@@ -17,8 +17,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {| let n = 5
+  parse_with_print {| let n = 5
 
   let f x = x|};
   [%expect
@@ -78,8 +77,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {|
+  parse_with_print {|
         let a = 4::[5; 6]|};
   [%expect
     {|
@@ -113,8 +111,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {|
+  parse_with_print {|
         let add_one (x: int) = 1 + x|};
   [%expect
     {|
@@ -132,8 +129,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {|
+  parse_with_print {|
         let (+) a = 1 + a |};
   [%expect
     {|
@@ -151,8 +147,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {|
+  parse_with_print {|
         let f a b = b + a |};
   [%expect
     {|
@@ -211,8 +206,7 @@ and second x = first (x + 1);;
 ;;
 
 let%expect_test _ =
-  parse_with_print
-    {|
+  parse_with_print {|
         let h::x::tl = 5::6::4::[]|};
   [%expect
     {|

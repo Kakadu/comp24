@@ -29,8 +29,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference {| let (h::tl) = [1;2;3]|};
-  [%expect
-    {|
+  [%expect {|
     val h : int
     val tl : int list |}]
 ;;
@@ -41,8 +40,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  inference
-    {| let id x = x;;
+  inference {| let id x = x;;
 let fst (a, _) = a;;
 let snd (_, a) = a;; |};
   [%expect
@@ -53,11 +51,9 @@ let snd (_, a) = a;; |};
 ;;
 
 let%expect_test _ =
-  inference
-    {| let x = 5 and y = 6;;
+  inference {| let x = 5 and y = 6;;
 let res = x + y;;|};
-  [%expect
-    {|
+  [%expect {|
     val x : int
     val y : int
     val res : int |}]
@@ -65,23 +61,20 @@ let res = x + y;;|};
 
 let%expect_test _ =
   inference {| let f g x = (g x : int);; |};
-  [%expect
-    {|
+  [%expect {|
     val f : ('a -> int) -> 'a -> int |}]
 ;;
 
 let%expect_test _ =
   inference {| let h::tl = [1;2;3];; |};
-  [%expect
-    {|
+  [%expect {|
     val h : int
     val tl : int list |}]
 ;;
 
 let%expect_test _ =
   inference {| let h::tl = [1;2;3];; |};
-  [%expect
-    {|
+  [%expect {|
     val h : int
     val tl : int list |}]
 ;;
@@ -92,15 +85,13 @@ let%expect_test _ =
   match lst with
   | [] -> acc
   | x :: xs -> fold_left f (f acc x) xs |};
-  [%expect
-    {|
+  [%expect {|
     val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a |}]
 ;;
 
 let%expect_test _ =
   inference {| let hd :: tl = [(fun _ -> 0); (fun x -> x/2); (fun x -> x+1)] |};
-  [%expect
-    {|
+  [%expect {|
     val hd : int -> int
     val tl : (int -> int) list |}]
 ;;
@@ -111,8 +102,7 @@ let%expect_test _ =
   match lst with
   | [] -> acc
   | x :: xs -> fold_left f (f acc x) xs |};
-  [%expect
-    {|
+  [%expect {|
     Type error: unbound variable 'fold_left' |}]
 ;;
 
@@ -125,8 +115,7 @@ let%expect_test _ =
 
 let%expect_test _ =
   inference {| let (a,a) = (5,6) |};
-  [%expect
-    {|
+  [%expect {|
     Type error: variable 'a' is bound several times |}]
 ;;
 

@@ -259,10 +259,10 @@ let fresh_var = fresh >>| tvar
 let instantiate (Scheme (bind_var, ty)) =
   TVarSet.fold
     (fun var_name acc ->
-       let* acc = acc in
-       let* fv = fresh_var in
-       let* sub = Subst.singleton var_name fv in
-       return (Subst.apply sub acc))
+      let* acc = acc in
+      let* fv = fresh_var in
+      let* sub = Subst.singleton var_name fv in
+      return (Subst.apply sub acc))
     bind_var
     (return ty)
 ;;
@@ -549,9 +549,9 @@ let infer_decl env name_list = function
         let* tvs =
           List.fold_left
             (fun acc _ ->
-               let* acc = acc in
-               let* fv = fresh_var in
-               return @@ (fv :: acc))
+              let* acc = acc in
+              let* fv = fresh_var in
+              return @@ (fv :: acc))
             (return [])
             ps
         in
@@ -561,8 +561,8 @@ let infer_decl env name_list = function
       | PTuple ps, TTuple ts when List.length ts = List.length ps ->
         List.fold_left2
           (fun acc pat ty ->
-             let* env, name_list = acc in
-             ext_with_pat env name_list (pat, ty))
+            let* env, name_list = acc in
+            ext_with_pat env name_list (pat, ty))
           (return (env, name_list))
           ps
           ts
@@ -587,48 +587,48 @@ let infer_decl env name_list = function
     let* _ = check_unique_vars_list patterns in
     List.fold_left
       (fun acc (DDeclaration (pat, expr)) ->
-         let* extended_env, name_list = acc in
-         let* _, ty_expr = infer_expr env expr in
-         let* extended_env, new_name_list =
-           ext_with_pat extended_env name_list (pat, ty_expr)
-         in
-         return (extended_env, new_name_list))
+        let* extended_env, name_list = acc in
+        let* _, ty_expr = infer_expr env expr in
+        let* extended_env, new_name_list =
+          ext_with_pat extended_env name_list (pat, ty_expr)
+        in
+        return (extended_env, new_name_list))
       (return (env, name_list))
       decls
   | RecDecl decls ->
     let tmp_vars env decls =
       List.fold_left
         (fun acc (DDeclaration (pat, _)) ->
-           let* env, vars = acc in
-           match pat with
-           | PIdentifier name ->
-             let* fv = fresh_var in
-             let env' = TypeEnv.extend env name (Scheme (TVarSet.empty, fv)) in
-             return (env', (name, fv) :: vars)
-           | _ -> fail `InvalidRecLeftHand)
+          let* env, vars = acc in
+          match pat with
+          | PIdentifier name ->
+            let* fv = fresh_var in
+            let env' = TypeEnv.extend env name (Scheme (TVarSet.empty, fv)) in
+            return (env', (name, fv) :: vars)
+          | _ -> fail `InvalidRecLeftHand)
         (return (env, []))
         decls
     in
     let infer_decls env decls temp_vars =
       List.fold_left
         (fun acc -> function
-           | DDeclaration (PIdentifier name, expr) ->
-             let* acc_env, acc_name_list = acc in
-             let* sub', ty_expr = infer_expr env expr in
-             let* tv =
-               match List.assoc_opt name temp_vars with
-               | Some temp_ty -> return temp_ty
-               | None -> fail (`Unbound_variable name)
-             in
-             let* sub'' = Subst.unify tv ty_expr in
-             let* final_sub = Subst.compose sub' sub'' in
-             let final_typ = Subst.apply final_sub tv in
-             let new_acc_env =
-               TypeEnv.extend acc_env name (Scheme (TVarSet.empty, final_typ))
-             in
-             let new_acc_names_list = update_name_list name acc_name_list in
-             return (new_acc_env, new_acc_names_list)
-           | _ -> fail `InvalidRecLeftHand)
+          | DDeclaration (PIdentifier name, expr) ->
+            let* acc_env, acc_name_list = acc in
+            let* sub', ty_expr = infer_expr env expr in
+            let* tv =
+              match List.assoc_opt name temp_vars with
+              | Some temp_ty -> return temp_ty
+              | None -> fail (`Unbound_variable name)
+            in
+            let* sub'' = Subst.unify tv ty_expr in
+            let* final_sub = Subst.compose sub' sub'' in
+            let final_typ = Subst.apply final_sub tv in
+            let new_acc_env =
+              TypeEnv.extend acc_env name (Scheme (TVarSet.empty, final_typ))
+            in
+            let new_acc_names_list = update_name_list name acc_name_list in
+            return (new_acc_env, new_acc_names_list)
+          | _ -> fail `InvalidRecLeftHand)
         (return (env, name_list))
         decls
     in

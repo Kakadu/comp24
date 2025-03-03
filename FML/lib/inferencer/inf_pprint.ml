@@ -56,9 +56,9 @@ let pp_type ppf typ =
         (Format.pp_print_list
            ~pp_sep:(fun ppf () -> Format.fprintf ppf " * ")
            (fun ppf ty ->
-              match ty with
-              | TTuple _ | TFunction _ -> Format.fprintf ppf "(%a)" helper ty
-              | _ -> helper ppf ty))
+             match ty with
+             | TTuple _ | TFunction _ -> Format.fprintf ppf "(%a)" helper ty
+             | _ -> helper ppf ty))
         tl
   in
   helper ppf (recalculate_vars typ)
