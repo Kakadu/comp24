@@ -27,4 +27,4 @@ setup.log
 
 # Local OPAM switch
 _opam/
-.vscode/settings.json
+.vscode/
