@@ -3,6 +3,12 @@
 (library
  (name middleend)
  (public_name arML.middleend)
- (libraries base ast common closureConversion lambdaLifting)
+ (libraries
+  base
+  ast
+  common
+  closureConversion
+  lambdaLifting
+  patternMatchingElim)
  (instrumentation
   (backend bisect_ppx)))

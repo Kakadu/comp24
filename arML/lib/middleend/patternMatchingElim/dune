@@ -1,0 +1,9 @@
+(include_subdirs unqualified)
+
+(library
+ (name patternMatchingElim)
+ (public_name arML.middleend.patternMatchingElim)
+ (modules Pmfast)
+ (libraries base ast common)
+ (instrumentation
+  (backend bisect_ppx)))
