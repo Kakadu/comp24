@@ -151,3 +151,33 @@ let%test _ =
         , None )
     ]
 ;;
+
+(* let rofl (a,b) = 1,2
+   ---
+   let ll_fun_0 ll_arg_1 = match ll_arg_1 with (a, b) -> (1,2)
+*)
+
+let%test _ =
+  lambda_lift_prog "let rofl (a,b) = 1,2"
+  = [ LLLet
+        ( Nonrecursive
+        , [ ( Var "LL_fun_0"
+            , [ Var "LL_arg_1" ]
+            , LLMatch
+                ( LLVar "LL_arg_1"
+                , [ ( Tuple (Var "a", Var "b", [])
+                    , LLTuple (LLConst (Int 1), LLConst (Int 2), []) )
+                  ] ) )
+          ]
+        , None )
+    ]
+;;
+
+let%test _ =
+  lambda_lift_prog "let f x = print_int x"
+  = [ LLLet
+        ( Nonrecursive
+        , [ Var "LL_fun_0", [ Var "x" ], LLApplication (LLVar "print_int", LLVar "x") ]
+        , None )
+    ]
+;;

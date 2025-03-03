@@ -247,11 +247,13 @@ let ll_prog (prog : prog) : ll_prog R.t =
       let* ll_first_let, env =
         match first_let with
         | Let (rec_flag, binds, in_scope) ->
+          (* Update environment according to rec_flag *)
           let* env =
             match rec_flag with
-            | Recursive -> collect_mutual_names env binds (* update env *)
+            | Recursive -> collect_mutual_names env binds
             | Nonrecursive -> R.return env
           in
+          (* Convert all binds *)
           let* env, new_binds, lifted =
             List.fold
               binds
@@ -262,6 +264,7 @@ let ll_prog (prog : prog) : ll_prog R.t =
                 let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
                 R.return (env, new_bind :: binds, lifted))
           in
+          (* Work with 'in' scope *)
           let new_binds = List.rev new_binds in
           (match in_scope with
            | Some scope ->
