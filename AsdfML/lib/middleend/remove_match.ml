@@ -105,6 +105,7 @@ let remove_match prog =
       let rec case_matched match_exp = function
         | PConst (CInt _ as c) | PConst (CBool _ as c) -> check_eq match_exp (SConst c)
         | PConst CNil -> list_is_empty match_exp
+        | PConst CUnit -> check_eq match_exp (SConst CUnit) (* TODO: <- *)
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
           List.foldi xs ~init:true_ ~f:(fun idx acc x ->
