@@ -19,8 +19,8 @@
   let inc x =
     sum x 1
   let t =
-    let a0 = sum 1 2 in
     let a1 = inc 2 in
+    let a0 = sum 1 2 in
     sum a0 a1
   $ ./run_to_anf.exe << EOF
   > let f a b = 
@@ -130,9 +130,9 @@
     let a4 = a0 1 in
     ( + ) a4 x
   let f a b =
-    let a5 = a2 b 1 in
     let a7 = a2 b in
     let a6 = a3 a7 2 in
+    let a5 = a2 b 1 in
     ( + ) a5 a6
   $ ./run_to_anf.exe << EOF
   > let abc = 
@@ -214,8 +214,8 @@
     let a6 = ( = ) n 1 in
     if a6
     then k 1
-    else let a7 = ( - ) n 1 in
-      let a8 = a3 k n in
+    else let a8 = a3 k n in
+      let a7 = ( - ) n 1 in
       fac_cps a7 a8
     
   let a4 a2 =
@@ -249,10 +249,10 @@
     let a4 = ( < ) n 2 in
     if a4
     then n
-    else let a6 = ( - ) n 1 in
-      let a5 = fib a6 in
-      let a8 = ( - ) n 2 in
+    else let a8 = ( - ) n 2 in
       let a7 = fib a8 in
+      let a6 = ( - ) n 1 in
+      let a5 = fib a6 in
       ( + ) a5 a7
     
   let a2 =
@@ -430,12 +430,12 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
     let a10 = ( / ) a11 _c in
     ( + ) a10 d
   let a8 =
-    let a13 = print_int 1 in
-    let a14 = print_int 2 in
-    let a15 = print_int 4 in
+    let a18 = ( ~- ) 555555 in
     let a17 = ( ~- ) 1 in
     let a16 = print_int a17 in
-    let a18 = ( ~- ) 555555 in
+    let a15 = print_int 4 in
+    let a14 = print_int 2 in
+    let a13 = print_int 1 in
     let a12 = a7 a13 a14 3 a15 100 1000 a16 10000 a18 in
     print_int a12
 
@@ -635,20 +635,20 @@ Some types are different due to the impossibility to type the function "#unpack_
     let a16 = ( = ) xs [] in
     if a16
     then []
-    else let a19 = #list_length xs in
-      let a18 = ( > ) a19 0 in
-      let a21 = #list_tl xs in
+    else let a21 = #list_tl xs in
       let a20 = ( = ) a21 [] in
+      let a19 = #list_length xs in
+      let a18 = ( > ) a19 0 in
       let a17 = ( && ) a18 a20 in
       if a17
       then let a = #list_hd xs in
         let a22 = f a in
         (a22 :: [])
-      else let a25 = #list_length xs in
-        let a24 = ( > ) a25 1 in
-        let a28 = #list_tl xs in
+      else let a28 = #list_tl xs in
         let a27 = #list_tl a28 in
         let a26 = ( = ) a27 [] in
+        let a25 = #list_length xs in
+        let a24 = ( > ) a25 1 in
         let a23 = ( && ) a24 a26 in
         if a23
         then let a = #list_hd xs in
@@ -658,12 +658,12 @@ Some types are different due to the impossibility to type the function "#unpack_
           let a32 = f b in
           let a31 = (a32 :: []) in
           (a30 :: a31)
-        else let a35 = #list_length xs in
-          let a34 = ( > ) a35 2 in
-          let a39 = #list_tl xs in
+        else let a39 = #list_tl xs in
           let a38 = #list_tl a39 in
           let a37 = #list_tl a38 in
           let a36 = ( = ) a37 [] in
+          let a35 = #list_length xs in
+          let a34 = ( > ) a35 2 in
           let a33 = ( && ) a34 a36 in
           if a33
           then let a = #list_hd xs in
@@ -765,9 +765,9 @@ Some types are different due to the impossibility to type the function "#unpack_
       if a79
       then let h = #list_hd xs in
         let tl = #list_tl xs in
+        let a83 = cartesian tl ys in
         let a82 = a7 h in
         let a81 = map a82 ys in
-        let a83 = cartesian tl ys in
         append a81 a83
       else #match_failure
       
@@ -777,12 +777,12 @@ Some types are different due to the impossibility to type the function "#unpack_
     let a85 = (2 :: a86) in
     let a84 = (1 :: a85) in
     let a2 = iter print_int a84 in
-    let a90 = (2 :: []) in
-    let a89 = (1 :: a90) in
     let a94 = (4 :: []) in
     let a93 = (3 :: a94) in
     let a92 = (2 :: a93) in
     let a91 = (1 :: a92) in
+    let a90 = (2 :: []) in
+    let a89 = (1 :: a90) in
     let a88 = cartesian a89 a91 in
     let a87 = length a88 in
     let a1 = print_int a87 in

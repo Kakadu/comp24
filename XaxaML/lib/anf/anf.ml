@@ -203,11 +203,10 @@ let const_to_aexp = function
   | Rp_c_empty_list -> Ae_empty_list
 ;;
 
-let rec to_aexp e =
-  match e with
+let rec to_aexp = function
   | Rp_e_ident v -> return ([], ae_val v)
   | Rp_e_const c -> return ([], const_to_aexp c)
-  | _ ->
+  | e ->
     let* fresh = fresh >>| get_name in
     let* binds1, e = to_cexp e in
     return (binds1 @ [ fresh, e ], ae_val fresh)
@@ -253,7 +252,7 @@ and app_to_cexp e1 e2 =
     | _ ->
       let* fresh = fresh >>| get_name in
       let* new_binds, f_cexp = to_cexp expr in
-      return (ae_val fresh :: cur_exprs, cur_binds @ new_binds @ [ fresh, f_cexp ])
+      return (ae_val fresh :: cur_exprs, new_binds @ [ fresh, f_cexp ] @ cur_binds)
   in
   let* exprs, binds = RList.fold_left (to_app :: args_e) ~init:(return ([], [])) ~f:f1 in
   let exprs = List.rev exprs in
@@ -262,13 +261,12 @@ and app_to_cexp e1 e2 =
   | Ae_val to_app -> return (binds, ce_app to_app args_e)
   | _ -> fail @@ IncorrectAst "Ast contains wrong-typed application"
 
-and to_exp = function
-  | _ as orig ->
-    let* binds, init = to_cexp orig in
-    RList.fold_right
-      binds
-      ~init:(return @@ e_complex init)
-      ~f:(fun (name, cexp) acc -> return @@ e_let_in name cexp acc)
+and to_exp e =
+  let* binds, init = to_cexp e in
+  RList.fold_right
+    binds
+    ~init:(return @@ e_complex init)
+    ~f:(fun (name, cexp) acc -> return @@ e_let_in name cexp acc)
 ;;
 
 let anf_toplevel = function

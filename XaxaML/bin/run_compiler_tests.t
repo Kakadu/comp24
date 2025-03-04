@@ -149,10 +149,10 @@
   let main =
     print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
   
-  1
-  2
-  4
   -1
+  4
+  2
+  1
   103
   -555555
   10000
