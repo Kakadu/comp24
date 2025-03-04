@@ -7,6 +7,7 @@ type constant =
   | Const_char of char (** Character literal, e.g. ['m'] *)
   | Const_string of string (** String literal, e.g. ["something"] *)
   | Const_bool of bool (** Bool literal, [true] or [false] *)
+  | Const_unit (** Unit literal, [()] *)
 [@@deriving show { with_path = false }]
 
 type typexpr =

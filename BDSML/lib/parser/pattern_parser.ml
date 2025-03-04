@@ -16,7 +16,7 @@ let parse_var =
 ;;
 
 let parse_ptuple p =
-  sep_by (check_char ',') p
+  sep_by1 (check_char ',') p
   >>= function
   | [] -> fail "It cannot be this way"
   | [ h ] -> return h
@@ -75,9 +75,9 @@ let parse_pattern =
   fix (fun self ->
     parse_by_priority priority
     @@ choice
-         [ parse_any
+         [ parse_var
          ; parse_pconst
-         ; parse_var
+         ; parse_any
          ; pat_typexpr self
          ; remove_parents self
          ; parse_plist self
