@@ -14,10 +14,10 @@ let () =
          "Types:\n%a\n"
          Inferencer.TypeEnv.pretty_pp_env
          (Std.std_lst, structure_env);
-       let simple_structure = To_simple_ast.convert structure in
-       let simple_structure, _ =
-         Alpha_conversion.run_alpha_conversion simple_structure Inner
+       let structure, _ =
+         Alpha_conversion.run_alpha_conversion structure
        in
+       let simple_structure = To_simple_ast.convert structure in
        let simple_structure =
          Closure_conversion.run_closure_conversion simple_structure
        in

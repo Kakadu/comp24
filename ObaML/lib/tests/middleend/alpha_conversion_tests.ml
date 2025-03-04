@@ -5,26 +5,24 @@
 open ObaML
 open Format
 
-let parse_alpha_convert_and_print_result str alpha_conversion_setting =
+let parse_alpha_convert_and_print_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure = To_simple_ast.convert parse_result in
     let structure, _ =
-      Alpha_conversion.run_alpha_conversion structure alpha_conversion_setting
+      Alpha_conversion.run_alpha_conversion parse_result
     in
-    printf "%a" Simple_ast_pretty_printer.print_structure structure
+    printf "%a" Ast.pp_structure structure
   | Error _ -> printf "Syntax error"
 ;;
 
-let parse_inner_alpha_and_print str = parse_alpha_convert_and_print_result str Inner
+let parse_inner_alpha_and_print str = parse_alpha_convert_and_print_result str
 
 let%expect_test "" =
   parse_inner_alpha_and_print {| let a = 4;; 
 let b = 4;;|};
   [%expect {|
-    let a = 4;;
-
-    let b = 4;; |}]
+    [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 4)))]));
+      (SILet (Nonrecursive, [((PVar (Id "b")), (EConst (CInt 4)))]))] |}]
 ;;
 
 let%expect_test "" =
@@ -33,23 +31,31 @@ let%expect_test "" =
   let (a, b) = (5, 6) and c = a;; |};
   [%expect
     {|
-    let a = 4;;
-
-    let #pat#0 = (5, 6);;
-
-    let a = ((#tuple_getter# 0) #pat#0)
-    and b = ((#tuple_getter# 1) #pat#0)
-    and c = a;; |}]
+    [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 4)))]));
+      (SILet (Nonrecursive,
+         [((PTuple [(PVar (Id "oba0")); (PVar (Id "b"))]),
+           (ETuple [(EConst (CInt 5)); (EConst (CInt 6))]));
+           ((PVar (Id "c")), (EVar (Id "a")))]
+         ))
+      ] |}]
 ;;
 
 let%expect_test "" =
   parse_inner_alpha_and_print {|let map p = let (a,b) = p in a + b |};
   [%expect
     {|       
-  let map p =
-  	let oba0 = p in
-  	let a = ((#tuple_getter# 0) oba0) in
-  	let b = ((#tuple_getter# 1) oba0) in (a  +  b);; |}]
+  [(SILet (Nonrecursive,
+      [((PVar (Id "map")),
+        (EFun ([(PVar (Id "p"))],
+           (ELet (Nonrecursive,
+              ((PTuple [(PVar (Id "a")); (PVar (Id "b"))]), (EVar (Id "p"))),
+              (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "a")))),
+                 (EVar (Id "b"))))
+              ))
+           )))
+        ]
+      ))
+    ] |}]
 ;;
 
 let%expect_test "" =
@@ -60,27 +66,60 @@ let%expect_test "" =
       x 1 + y 2;; |};
   [%expect
     {|
-      let f x y =
-      	let oba0 z = (y  +  z) in
-      	let oba1 oba2 = ((oba0 1)  +  oba2) in ((oba0 1)  +  (oba1 2));; |}]
+      [(SILet (Nonrecursive,
+          [((PVar (Id "f")),
+            (EFun ([(PVar (Id "x")); (PVar (Id "y"))],
+               (ELet (Nonrecursive,
+                  ((PVar (Id "oba0")),
+                   (EFun ([(PVar (Id "z"))],
+                      (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "y")))),
+                         (EVar (Id "z"))))
+                      ))),
+                  (ELet (Nonrecursive,
+                     ((PVar (Id "oba1")),
+                      (EFun ([(PVar (Id "oba2"))],
+                         (EApp (
+                            (EApp ((EVar (Id "( + )")),
+                               (EApp ((EVar (Id "oba0")), (EConst (CInt 1)))))),
+                            (EVar (Id "oba2"))))
+                         ))),
+                     (EApp (
+                        (EApp ((EVar (Id "( + )")),
+                           (EApp ((EVar (Id "oba0")), (EConst (CInt 1)))))),
+                        (EApp ((EVar (Id "oba1")), (EConst (CInt 2))))))
+                     ))
+                  ))
+               )))
+            ]
+          ))
+        ] |}]
 ;;
 
 let%expect_test "" =
   parse_inner_alpha_and_print {|fun x () x -> x () |};
   [%expect {|       
-  (fun x () oba0 -> (oba0 ())) |}]
+  [(SIExpr
+      (EFun ([(PVar (Id "x")); (PConst CUnit); (PVar (Id "oba0"))],
+         (EApp ((EVar (Id "oba0")), (EConst CUnit))))))
+    ] |}]
 ;;
 
 let%expect_test "" =
   parse_inner_alpha_and_print {| let rec a a = a;; |};
   [%expect {|       
-  let rec a oba0 = oba0;; |}]
+  [(SILet (Recursive,
+      [((PVar (Id "a")), (EFun ([(PVar (Id "oba0"))], (EVar (Id "oba0")))))]))
+    ] |}]
 ;;
 
 let%expect_test "" =
   parse_inner_alpha_and_print {| let rec oba0 x x = x;; |};
   [%expect {|       
-  let rec oba0 x oba1 = oba1;; |}]
+  [(SILet (Recursive,
+      [((PVar (Id "oba0")),
+        (EFun ([(PVar (Id "x")); (PVar (Id "oba1"))], (EVar (Id "oba1")))))]
+      ))
+    ] |}]
 ;;
 
 let%expect_test "006partial2" =
@@ -101,16 +140,48 @@ let%expect_test "006partial2" =
 |};
   [%expect
     {|
-    let foo a b c =
-    	let () = (print_int a) in
-    	let () = (print_int b) in
-    	let () = (print_int c) in (a  +  (b  *  c));;
-
-    let main =
-    	let oba0 = (foo 1) in
-    	let oba1 = (oba0 2) in
-    	let oba2 = (oba1 3) in
-    	let () = (print_int oba2) in 0;; |}]
+    [(SILet (Nonrecursive,
+        [((PVar (Id "foo")),
+          (EFun ([(PVar (Id "a")); (PVar (Id "b")); (PVar (Id "c"))],
+             (ELet (Nonrecursive,
+                ((PConst CUnit),
+                 (EApp ((EVar (Id "print_int")), (EVar (Id "a"))))),
+                (ELet (Nonrecursive,
+                   ((PConst CUnit),
+                    (EApp ((EVar (Id "print_int")), (EVar (Id "b"))))),
+                   (ELet (Nonrecursive,
+                      ((PConst CUnit),
+                       (EApp ((EVar (Id "print_int")), (EVar (Id "c"))))),
+                      (EApp ((EApp ((EVar (Id "( + )")), (EVar (Id "a")))),
+                         (EApp ((EApp ((EVar (Id "( * )")), (EVar (Id "b")))),
+                            (EVar (Id "c"))))
+                         ))
+                      ))
+                   ))
+                ))
+             )))
+          ]
+        ));
+      (SILet (Nonrecursive,
+         [((PVar (Id "main")),
+           (ELet (Nonrecursive,
+              ((PVar (Id "oba0")), (EApp ((EVar (Id "foo")), (EConst (CInt 1))))),
+              (ELet (Nonrecursive,
+                 ((PVar (Id "oba1")),
+                  (EApp ((EVar (Id "oba0")), (EConst (CInt 2))))),
+                 (ELet (Nonrecursive,
+                    ((PVar (Id "oba2")),
+                     (EApp ((EVar (Id "oba1")), (EConst (CInt 3))))),
+                    (ELet (Nonrecursive,
+                       ((PConst CUnit),
+                        (EApp ((EVar (Id "print_int")), (EVar (Id "oba2"))))),
+                       (EConst (CInt 0))))
+                    ))
+                 ))
+              )))
+           ]
+         ))
+      ] |}]
 ;;
 
 let%expect_test "" =
@@ -120,10 +191,14 @@ let%expect_test "" =
     let a = let a = a in a;;
   |};
   [%expect {|
-      let a = 5;;
-
-      let a =
-      	let oba0 = a in oba0;; |}]
+      [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 5)))]));
+        (SILet (Nonrecursive,
+           [((PVar (Id "oba0")),
+             (ELet (Nonrecursive, ((PVar (Id "oba1")), (EVar (Id "a"))),
+                (EVar (Id "oba1")))))
+             ]
+           ))
+        ] |}]
 ;;
 
 let%expect_test "" =
@@ -139,35 +214,21 @@ let%expect_test "" =
   |};
   [%expect
     {|
-      let main = 5;;
-
-      let main =
-      	let foo x = x in
-      	let oba0 = (foo 2) in
-      	let () = (print_int oba0) in 0;; |}]
-;;
-
-let parse_all_alpha_and_print str = parse_alpha_convert_and_print_result str All
-
-let%expect_test "loss one of `main` functions with ALL setting (the error will not be \
-                 thrown)"
-  =
-  parse_all_alpha_and_print
-    {|
-    let main = 5
-
-    let main =
-        let foo = (fun x -> x) in
-        let foo = foo 2 in
-        let () = print_int foo in
-        0
-  |};
-  [%expect
-    {|
-      let main = 5;;
-
-      let oba0 =
-      	let foo x = x in
-      	let oba1 = (foo 2) in
-      	let () = (print_int oba1) in 0;; |}]
+      [(SILet (Nonrecursive, [((PVar (Id "main")), (EConst (CInt 5)))]));
+        (SILet (Nonrecursive,
+           [((PVar (Id "oba0")),
+             (ELet (Nonrecursive,
+                ((PVar (Id "foo")), (EFun ([(PVar (Id "x"))], (EVar (Id "x"))))),
+                (ELet (Nonrecursive,
+                   ((PVar (Id "oba1")),
+                    (EApp ((EVar (Id "foo")), (EConst (CInt 2))))),
+                   (ELet (Nonrecursive,
+                      ((PConst CUnit),
+                       (EApp ((EVar (Id "print_int")), (EVar (Id "oba1"))))),
+                      (EConst (CInt 0))))
+                   ))
+                )))
+             ]
+           ))
+        ] |}]
 ;;

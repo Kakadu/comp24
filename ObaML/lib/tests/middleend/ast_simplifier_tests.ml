@@ -8,7 +8,10 @@ open Format
 let parse_simplify_and_print_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure = To_simple_ast.convert parse_result in
+    let structure, _ =
+      Alpha_conversion.run_alpha_conversion parse_result
+    in
+    let structure = To_simple_ast.convert structure in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
   | Error _ -> printf "Syntax error"
 ;;
@@ -23,39 +26,39 @@ let%expect_test "" =
   parse_simplify_and_print_result {| let a = fun [] -> [];; |};
   [%expect
     {|
-    let a #pat#0 =
-    	if (#pat#0  =  [])
+    let a pat0 =
+    	if (pat0  =  [])
     	then []
-    	else (#matching_failed# ());; |}]
+    	else (matching_failed ());; |}]
 ;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| let a x = fun () (a, b) -> (x, a, b);; |};
   [%expect
     {|
-    let a x = (fun () #pat#0 ->
-    	let a = ((#tuple_getter# 0) #pat#0) in
-    	let b = ((#tuple_getter# 1) #pat#0) in (x, a, b));; |}]
+    let a x = (fun () pat0 ->
+    	let oba0 = ((tuple_getter 0) pat0) in
+    	let b = ((tuple_getter 1) pat0) in (x, oba0, b));; |}]
 ;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| let a = fun "a" -> 5;; |};
   [%expect
     {|
-    let a #pat#0 =
-    	if (#pat#0  =  "a")
+    let a pat0 =
+    	if (pat0  =  "a")
     	then 5
-    	else (#matching_failed# ());; |}]
+    	else (matching_failed ());; |}]
 ;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| let (a, b) = (4, 5);; |};
   [%expect
     {|
-    let #pat#0 = (4, 5);;
+    let pat0 = (4, 5);;
 
-    let a = ((#tuple_getter# 0) #pat#0)
-    and b = ((#tuple_getter# 1) #pat#0);; |}]
+    let a = ((tuple_getter 0) pat0)
+    and b = ((tuple_getter 1) pat0);; |}]
 ;;
 
 let%expect_test "" =
@@ -66,10 +69,10 @@ let%expect_test "" =
     {|
     let a = 4;;
 
-    let #pat#0 = (4, a);;
+    let pat0 = (4, a);;
 
-    let a = ((#tuple_getter# 0) #pat#0)
-    and b = ((#tuple_getter# 1) #pat#0);; |}]
+    let oba0 = ((tuple_getter 0) pat0)
+    and b = ((tuple_getter 1) pat0);; |}]
 ;;
 
 let%expect_test "" =
@@ -80,10 +83,10 @@ let%expect_test "" =
     {|
     let a = 4;;
 
-    let #pat#0 = (5, 6);;
+    let pat0 = (5, 6);;
 
-    let a = ((#tuple_getter# 0) #pat#0)
-    and b = ((#tuple_getter# 1) #pat#0)
+    let oba0 = ((tuple_getter 0) pat0)
+    and b = ((tuple_getter 1) pat0)
     and c = a;; |}]
 ;;
 
@@ -96,21 +99,21 @@ let%expect_test "" =
     {|
     let a = 5;;
 
-    let #pat#1 = (a, a);;
+    let pat1 = (a, a);;
 
-    let a = 6
-    and c = ((#tuple_getter# 0) #pat#1)
-    and b = ((#tuple_getter# 1) #pat#1);; |}]
+    let oba0 = 6
+    and c = ((tuple_getter 0) pat1)
+    and b = ((tuple_getter 1) pat1);; |}]
 ;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| let (a, b) = (fun x -> (4, x)) 4;;  |};
   [%expect
     {|
-    let #pat#0 = ((fun x -> (4, x)) 4);;
+    let pat0 = ((fun x -> (4, x)) 4);;
 
-    let a = ((#tuple_getter# 0) #pat#0)
-    and b = ((#tuple_getter# 1) #pat#0);; |}]
+    let a = ((tuple_getter 0) pat0)
+    and b = ((tuple_getter 1) pat0);; |}]
 ;;
 
 let%expect_test "" =
@@ -119,9 +122,9 @@ let%expect_test "" =
   [%expect
     {|
     let c =
-    	let #pat#0 = ((fun x -> (4, x)) 4) in
-    	let a = ((#tuple_getter# 0) #pat#0) in
-    	let b = ((#tuple_getter# 1) #pat#0) in (a, b);; |}]
+    	let pat0 = ((fun x -> (4, x)) 4) in
+    	let a = ((tuple_getter 0) pat0) in
+    	let b = ((tuple_getter 1) pat0) in (a, b);; |}]
 ;;
 
 let%expect_test "" =
@@ -130,21 +133,21 @@ let%expect_test "" =
   [%expect
     {|
     let c =
-    	let #pat#0 = ((fun x -> (4, (x, x))) 4) in
-    	let a = ((#tuple_getter# 0) #pat#0) in
-    	let b = ((#tuple_getter# 0) ((#tuple_getter# 1) #pat#0)) in
-    	let c = ((#tuple_getter# 1) ((#tuple_getter# 1) #pat#0)) in (a, b, c);; |}]
+    	let pat0 = ((fun x -> (4, (x, x))) 4) in
+    	let a = ((tuple_getter 0) pat0) in
+    	let b = ((tuple_getter 0) ((tuple_getter 1) pat0)) in
+    	let oba0 = ((tuple_getter 1) ((tuple_getter 1) pat0)) in (a, b, oba0);; |}]
 ;;
 
 let%expect_test "" =
   parse_simplify_and_print_result {| fun x (y, z) (x1, x2) -> x |};
   [%expect
     {|
-    (fun x #pat#0 #pat#1 ->
-    	let y = ((#tuple_getter# 0) #pat#0) in
-    	let z = ((#tuple_getter# 1) #pat#0) in
-    	let x1 = ((#tuple_getter# 0) #pat#1) in
-    	let x2 = ((#tuple_getter# 1) #pat#1) in x) |}]
+    (fun x pat0 pat1 ->
+    	let y = ((tuple_getter 0) pat0) in
+    	let z = ((tuple_getter 1) pat0) in
+    	let x1 = ((tuple_getter 0) pat1) in
+    	let x2 = ((tuple_getter 1) pat1) in x) |}]
 ;;
 
 let%expect_test "" =
@@ -152,12 +155,12 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = b in
+    	let pat0 = b in
     	if true
     	then
-    	let d = ((#tuple_getter# 0) #pat#0) in
-    	let c = ((#tuple_getter# 1) #pat#0) in c
-    	else (#matching_failed# ());;
+    	let d = ((tuple_getter 0) pat0) in
+    	let c = ((tuple_getter 1) pat0) in c
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -166,12 +169,12 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = b in
+    	let pat0 = b in
     	if true
     	then
-    	let d = ((#tuple_getter# 0) #pat#0) in
-    	let c = ((#tuple_getter# 1) #pat#0) in c
-    	else (#matching_failed# ());;
+    	let d = ((tuple_getter 0) pat0) in
+    	let c = ((tuple_getter 1) pat0) in c
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -180,11 +183,11 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = b in
-    	if (((#tuple_getter# 0) #pat#0)  =  5)
+    	let pat0 = b in
+    	if (((tuple_getter 0) pat0)  =  5)
     	then
-    	let c = ((#tuple_getter# 1) #pat#0) in c
-    	else (#matching_failed# ());;
+    	let c = ((tuple_getter 1) pat0) in c
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -194,12 +197,12 @@ let%expect_test "" =
   [%expect
     {|
     let a b =
-    	let #pat#0 = b in
-    	if ((((#tuple_getter# 0) #pat#0)  =  5)  &&  (((#tuple_getter# 2) #pat#0)  =  4))
+    	let pat0 = b in
+    	if ((((tuple_getter 0) pat0)  =  5)  &&  (((tuple_getter 2) pat0)  =  4))
     	then
-    	let b = ((#tuple_getter# 0) ((#tuple_getter# 1) #pat#0)) in
-    	let c = ((#tuple_getter# 1) ((#tuple_getter# 1) #pat#0)) in (b, c)
-    	else (#matching_failed# ());;
+    	let oba0 = ((tuple_getter 0) ((tuple_getter 1) pat0)) in
+    	let c = ((tuple_getter 1) ((tuple_getter 1) pat0)) in (oba0, c)
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -209,15 +212,15 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = b in
-    	if (((#tuple_getter# 0) #pat#0)  =  5)
+    	let pat0 = b in
+    	if (((tuple_getter 0) pat0)  =  5)
     	then
-    	let a = ((#tuple_getter# 1) #pat#0) in (a, a)
+    	let oba0 = ((tuple_getter 1) pat0) in (oba0, oba0)
     	else
-    	if (((#tuple_getter# 1) #pat#0)  =  5)
+    	if (((tuple_getter 1) pat0)  =  5)
     	then
-    	let a = ((#tuple_getter# 0) #pat#0) in (a, a)
-    	else (#matching_failed# ());;
+    	let oba1 = ((tuple_getter 0) pat0) in (oba1, oba1)
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -226,12 +229,12 @@ let%expect_test "" =
   [%expect
     {|
     let a b =
-    	let #pat#0 = b in
-    	if ((#list_length_getter# #pat#0)  >=  1)
+    	let pat0 = b in
+    	if ((list_length_getter pat0)  >=  1)
     	then
-    	let h = (#list_head_getter# #pat#0) in
-    	let tl = (#list_tail_getter# #pat#0) in (h, tl)
-    	else (#matching_failed# ());;
+    	let h = (list_head_getter pat0) in
+    	let tl = (list_tail_getter pat0) in (h, tl)
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -240,10 +243,10 @@ let%expect_test "" =
   [%expect
     {|
     let a b =
-    	let #pat#0 = b in
-    	if (#pat#0  =  [])
+    	let pat0 = b in
+    	if (pat0  =  [])
     	then ()
-    	else (#matching_failed# ());;
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -252,10 +255,10 @@ let%expect_test "" =
   [%expect
     {|
     let a b =
-    	let #pat#0 = b in
-    	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  1))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  2))
+    	let pat0 = b in
+    	if ((((list_length_getter pat0)  =  2)  &&  ((list_head_getter pat0)  =  1))  &&  ((list_head_getter (list_tail_getter pat0))  =  2))
     	then 1
-    	else (#matching_failed# ());;
+    	else (matching_failed ());;
      |}]
 ;;
 
@@ -280,11 +283,11 @@ let%expect_test "" =
   [%expect
     {|
     let a =
-    	let #pat#0 = (2 :: []) in
+    	let pat0 = (2 :: []) in
     	let () =
-    	if (((#list_length_getter# #pat#0)  =  1)  &&  ((#list_head_getter# #pat#0)  =  1))
+    	if (((list_length_getter pat0)  =  1)  &&  ((list_head_getter pat0)  =  1))
     	then ()
-    	else (#matching_failed# ()) in
+    	else (matching_failed ()) in
     	let () = (print_int 5) in 0;;
     |}]
 ;;
@@ -293,9 +296,9 @@ let%expect_test "" =
   parse_simplify_and_print_result {| let 1 :: [] = 2 :: [];; |};
   [%expect
     {|
-    let #pat#0 = (2 :: []);;
+    let pat0 = (2 :: []);;
 
-    let () = (((#list_length_getter# #pat#0)  =  1)  &&  ((#list_head_getter# #pat#0)  =  1));;
+    let () = (((list_length_getter pat0)  =  1)  &&  ((list_head_getter pat0)  =  1));;
     |}]
 ;;
 
@@ -304,12 +307,12 @@ let%expect_test "" =
   [%expect
     {|
       let b =
-      	let #pat#0 = (3 :: []) in
+      	let pat0 = (3 :: []) in
       	let () =
-      	if (((#list_length_getter# #pat#0)  >=  1)  &&  ((#list_head_getter# #pat#0)  =  4))
+      	if (((list_length_getter pat0)  >=  1)  &&  ((list_head_getter pat0)  =  4))
       	then ()
-      	else (#matching_failed# ()) in
-      	let a = (#list_tail_getter# #pat#0) in a;; |}]
+      	else (matching_failed ()) in
+      	let a = (list_tail_getter pat0) in a;; |}]
 ;;
 
 let%expect_test "" =
@@ -317,10 +320,10 @@ let%expect_test "" =
   [%expect
     {|
       let b =
-      	let #pat#0 = (4 :: []) in
+      	let pat0 = (4 :: []) in
       	let () =
-      	if ((#list_length_getter# #pat#0)  =  1)
+      	if ((list_length_getter pat0)  =  1)
       	then ()
-      	else (#matching_failed# ()) in
-      	let a = (#list_head_getter# #pat#0) in a;; |}]
+      	else (matching_failed ()) in
+      	let a = (list_head_getter pat0) in a;; |}]
 ;;

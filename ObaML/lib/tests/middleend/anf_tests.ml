@@ -13,10 +13,10 @@ let parse_and_get_anf_result str =
          "Types:\n%a\n"
          Inferencer.TypeEnv.pretty_pp_env
          (Std.std_lst, structure_env);
-       let simple_structure = To_simple_ast.convert structure in
-       let simple_structure, varSet =
-         Alpha_conversion.run_alpha_conversion simple_structure Inner
+       let structure, varSet =
+         Alpha_conversion.run_alpha_conversion structure
        in
+       let simple_structure = To_simple_ast.convert structure in
        let simple_structure =
          Closure_conversion.run_closure_conversion simple_structure
        in
@@ -159,27 +159,27 @@ let%expect_test "" =
 
       Converted structure:
       let b x y =
-      	let oba1 = (( * ) x y) in
-      	let oba2 = (( * ) oba1 52) in
-      	let oba3 = 52 :: [] in oba2 :: oba3;;
+      	let oba0 = (( * ) x y) in
+      	let oba1 = (( * ) oba0 52) in
+      	let oba2 = 52 :: [] in oba1 :: oba2;;
 
       let a x =
-      	let oba0 = (b x 1) in
-      	let oba4 = (#list_length_getter# oba0) in
-      	let oba5 = (( = ) oba4 2) in
-      	let oba6 = (#list_head_getter# oba0) in
-      	let oba7 = (( = ) oba6 52) in
-      	let oba8 = (( && ) oba5 oba7) in
-      	let oba9 = (#list_tail_getter# oba0) in
-      	let oba10 = (#list_head_getter# oba9) in
-      	let oba11 = (( = ) oba10 52) in
-      	let oba12 = (( && ) oba8 oba11) in
-      	if oba12
+      	let pat0 = (b x 1) in
+      	let oba8 = (list_tail_getter pat0) in
+      	let oba9 = (list_head_getter oba8) in
+      	let oba10 = (( = ) oba9 52) in
+      	let oba5 = (list_head_getter pat0) in
+      	let oba6 = (( = ) oba5 52) in
+      	let oba3 = (list_length_getter pat0) in
+      	let oba4 = (( = ) oba3 2) in
+      	let oba7 = (( && ) oba4 oba6) in
+      	let oba11 = (( && ) oba7 oba10) in
+      	if oba11
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());;
+      	else (matching_failed ());;
 
 
       Types after conversions:
@@ -197,25 +197,25 @@ let%expect_test "" =
 
       Converted structure:
       let a x =
-      	let oba1 = (( * ) x 52) in
-      	let oba2 = 52 :: [] in
-      	let b = oba1 :: oba2 in
-      	let oba0 = b in
-      	let oba3 = (#list_length_getter# oba0) in
-      	let oba4 = (( = ) oba3 2) in
-      	let oba5 = (#list_head_getter# oba0) in
-      	let oba6 = (( = ) oba5 52) in
-      	let oba7 = (( && ) oba4 oba6) in
-      	let oba8 = (#list_tail_getter# oba0) in
-      	let oba9 = (#list_head_getter# oba8) in
-      	let oba10 = (( = ) oba9 52) in
-      	let oba11 = (( && ) oba7 oba10) in
-      	if oba11
+      	let oba0 = (( * ) x 52) in
+      	let oba1 = 52 :: [] in
+      	let b = oba0 :: oba1 in
+      	let pat0 = b in
+      	let oba7 = (list_tail_getter pat0) in
+      	let oba8 = (list_head_getter oba7) in
+      	let oba9 = (( = ) oba8 52) in
+      	let oba4 = (list_head_getter pat0) in
+      	let oba5 = (( = ) oba4 52) in
+      	let oba2 = (list_length_getter pat0) in
+      	let oba3 = (( = ) oba2 2) in
+      	let oba6 = (( && ) oba3 oba5) in
+      	let oba10 = (( && ) oba6 oba9) in
+      	if oba10
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());;
+      	else (matching_failed ());;
 
 
       Types after conversions:
@@ -283,42 +283,42 @@ let%expect_test "" =
     val reversed2 : bool list
 
     Converted structure:
-    let oba2 acc helper oba0 =
-    	let oba1 = oba0 in
-    	let oba3 = (( = ) oba1 []) in
-    	if oba3
+    let oba1 acc helper oba0 =
+    	let pat0 = oba0 in
+    	let oba2 = (( = ) pat0 []) in
+    	if oba2
     	then acc
     	else
-    	let oba4 = (#list_length_getter# oba1) in
-    	let oba5 = (( >= ) oba4 1) in
-    	if oba5
+    	let oba3 = (list_length_getter pat0) in
+    	let oba4 = (( >= ) oba3 1) in
+    	if oba4
     	then
-    	let h = (#list_head_getter# oba1) in
-    	let tl = (#list_tail_getter# oba1) in
-    	let oba6 = h :: acc in (helper oba6 tl)
-    	else (#matching_failed# ());;
+    	let h = (list_head_getter pat0) in
+    	let tl = (list_tail_getter pat0) in
+    	let oba5 = h :: acc in (helper oba5 tl)
+    	else (matching_failed ());;
 
-    let rec helper acc = (oba2 acc helper);;
+    let rec helper acc = (oba1 acc helper);;
 
     let rev lst = (helper [] lst);;
 
     let reversed1 =
-    	let oba7 = 5 :: [] in
-    	let oba8 = 4 :: oba7 in
-    	let oba9 = 3 :: oba8 in
-    	let oba10 = 2 :: oba9 in
-    	let oba11 = 1 :: oba10 in (rev oba11);;
+    	let oba6 = 5 :: [] in
+    	let oba7 = 4 :: oba6 in
+    	let oba8 = 3 :: oba7 in
+    	let oba9 = 2 :: oba8 in
+    	let oba10 = 1 :: oba9 in (rev oba10);;
 
     let reversed2 =
-    	let oba12 = false :: [] in
+    	let oba11 = false :: [] in
+    	let oba12 = false :: oba11 in
     	let oba13 = false :: oba12 in
-    	let oba14 = false :: oba13 in
-    	let oba15 = true :: oba14 in (rev oba15);;
+    	let oba14 = true :: oba13 in (rev oba14);;
 
 
     Types after conversions:
     val helper : 'a list -> 'a list -> 'a list
-    val oba2 : 'a list -> ('a list -> 'a list -> 'a list) -> 'a list -> 'a list
+    val oba1 : 'a list -> ('a list -> 'a list -> 'a list) -> 'a list -> 'a list
     val rev : 'a list -> 'a list
     val reversed1 : int list
     val reversed2 : bool list |}]
@@ -489,9 +489,9 @@ let%expect_test "" =
       	let oba3 = (oba0 1) in (( + ) oba3 oba2);;
 
       let f x y =
-      	let oba4 = (oba0 y 1) in
       	let oba5 = (oba0 y) in
-      	let oba6 = (oba1 oba5 2) in (( + ) oba4 oba6);;
+      	let oba6 = (oba1 oba5 2) in
+      	let oba4 = (oba0 y 1) in (( + ) oba4 oba6);;
 
 
       Types after conversions:
@@ -517,30 +517,30 @@ let%expect_test "tuple types cannot be fully infered because the exact type of \
 
       Converted structure:
       let rec fix f x =
-      	let oba6 = (fix f) in (f oba6 x);;
+      	let oba5 = (fix f) in (f oba5 x);;
 
       let map oba0 p =
-      	let oba1 = p in
-      	let a = (#tuple_getter# 0 oba1) in
-      	let b = (#tuple_getter# 1 oba1) in
-      	let oba7 = (oba0 a) in
-      	let oba8 = (oba0 b) in (oba7, oba8);;
+      	let pat0 = p in
+      	let a = (tuple_getter 0 pat0) in
+      	let b = (tuple_getter 1 pat0) in
+      	let oba6 = (oba0 a) in
+      	let oba7 = (oba0 b) in (oba6, oba7);;
 
-      let oba5 oba2 self li oba3 =
-      	let oba9 = (self oba2) in (li oba9 oba3);;
+      let oba4 oba1 self li oba2 =
+      	let oba8 = (self oba1) in (li oba8 oba2);;
 
-      let oba4 self oba2 =
-      	let oba10 = (oba5 oba2 self) in (map oba10 oba2);;
+      let oba3 self oba1 =
+      	let oba9 = (oba4 oba1 self) in (map oba9 oba1);;
 
-      let fixpoly l = (fix oba4 l);;
+      let fixpoly l = (fix oba3 l);;
 
 
       Types after conversions:
       val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
       val fixpoly : 'a -> ('b -> 'c) * ('b -> 'c)
       val map : ('b -> 'c) -> 'a -> 'c * 'c
-      val oba4 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
-      val oba5 : 'a -> ('a -> 'c) -> ('c -> 'b -> 'd) -> 'b -> 'd |}]
+      val oba3 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+      val oba4 : 'a -> ('a -> 'c) -> ('c -> 'b -> 'd) -> 'b -> 'd |}]
 ;;
 
 let%expect_test "" =
@@ -663,29 +663,29 @@ let%expect_test "" =
 
       Converted structure:
       let rec inner x y =
-      	let oba3 = (( = ) y 0) in
-      	if oba3
+      	let oba4 = (( = ) y 0) in
+      	if oba4
       	then x
       	else
       	let oba0 = (( + ) x y) in
-      	let oba4 = (( - ) y 1) in (inner x oba4);;
+      	let oba5 = (( - ) y 1) in (inner x oba5);;
 
       let rec middle x = (inner x x);;
 
       let rec outer n =
-      	let oba5 = (( = ) n 0) in
-      	if oba5
+      	let oba6 = (( = ) n 0) in
+      	if oba6
       	then 0
       	else
       	let result = (middle n) in
-      	let oba6 = (( - ) n 1) in
-      	let oba1 = (outer oba6) in (( + ) result oba1);;
+      	let oba7 = (( - ) n 1) in
+      	let oba1 = (outer oba7) in (( + ) result oba1);;
 
       let final_result = (outer 5);;
 
-      let outer oba2 = (( * ) oba2 oba2);;
+      let oba2 oba3 = (( * ) oba3 oba3);;
 
-      let final_transformed = (outer final_result);;
+      let final_transformed = (oba2 final_result);;
 
       let () = (print_int final_transformed);;
 
@@ -695,6 +695,7 @@ let%expect_test "" =
       val final_transformed : int
       val inner : int -> int -> int
       val middle : int -> int
+      val oba2 : int -> int
       val outer : int -> int |}]
 ;;
 
@@ -742,16 +743,16 @@ let%expect_test "" =
       Converted structure:
       let rec oba6 oba5 z =
       	let oba7 = (( + ) z oba5) in
-      	let oba12 = (( = ) z 1) in
-      	if oba12
+      	let oba15 = (( = ) z 1) in
+      	if oba15
       	then oba7
       	else
       	let oba8 = (( * ) oba7 2) in
-      	let oba13 = (( - ) z 1) in (oba6 oba5 oba13);;
+      	let oba16 = (( - ) z 1) in (oba6 oba5 oba16);;
 
       let rec oba4 oba3 y =
-      	let oba14 = (( = ) y 0) in
-      	if oba14
+      	let oba17 = (( = ) y 0) in
+      	if oba17
       	then oba3
       	else
       	let oba5 = (( + ) oba3 y) in (oba6 oba5 y);;
@@ -761,27 +762,28 @@ let%expect_test "" =
 
       let rec oba0 n =
       	let oba1 = (( * ) n 2) in
-      	let oba15 = (( = ) n 0) in
-      	if oba15
+      	let oba18 = (( = ) n 0) in
+      	if oba18
       	then 0
       	else
       	let oba9 = (oba2 oba1 n) in
-      	let oba16 = (( - ) n 1) in
-      	let oba10 = (oba0 oba16) in (( + ) oba9 oba10);;
+      	let oba19 = (( - ) n 1) in
+      	let oba10 = (oba0 oba19) in (( + ) oba9 oba10);;
 
-      let oba10 = (oba0 5);;
+      let oba11 = (oba0 5);;
 
-      let oba0 oba11 = (( - ) oba11 7);;
+      let oba12 oba13 = (( - ) oba13 7);;
 
-      let oba11 = (oba0 oba10);;
+      let oba14 = (oba12 oba11);;
 
-      let () = (print_int oba11);;
+      let () = (print_int oba14);;
 
 
       Types after conversions:
       val oba0 : int -> int
-      val oba10 : int
       val oba11 : int
+      val oba12 : int -> int
+      val oba14 : int
       val oba2 : int -> int -> int
       val oba4 : int -> int -> int
       val oba6 : int -> int -> int |}]

@@ -34,6 +34,14 @@
  (public_name anf_tests)
  (libraries ObaML stdio))
 
+(executable
+ (name llvm_compiler_tests)
+ (modules llvm_compiler_tests)
+ (public_name llvm_compiler_tests)
+ (libraries ObaML stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (applies_to
   parser_tests
@@ -41,7 +49,8 @@
   simplifier_tests
   closure_conversion_tests
   lambda_lifting_tests
-  anf_tests)
+  anf_tests
+  llvm_compiler_tests)
  (deps
   ./parser_tests.exe
   ./infer_tests.exe
@@ -49,6 +58,8 @@
   ./closure_conversion_tests.exe
   ./lambda_lifting_tests.exe
   ./anf_tests.exe
+  ./llvm_compiler_tests.exe
+  ../lib/llvm/runtime.c
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

@@ -27,29 +27,29 @@
   val main : int
   
   Converted structure:
-  let oba0 k n p = 
-  	let oba2 = (( * ) p n) in (k oba2);;
+  let oba1 k n p = 
+  	let oba3 = (( * ) p n) in (k oba3);;
   
   let rec fac_cps n k = 
-  	let oba3 = (( = ) n 1) in 
-  	if oba3
+  	let oba4 = (( = ) n 1) in 
+  	if oba4
   	then (k 1)
   	else 
-  	let oba4 = (( - ) n 1) in 
-  	let oba5 = (oba0 k n) in (fac_cps oba4 oba5);;
+  	let oba6 = (oba1 k n) in 
+  	let oba5 = (( - ) n 1) in (fac_cps oba5 oba6);;
   
-  let oba1 print_int = print_int;;
+  let oba2 oba0 = oba0;;
   
   let main = 
-  	let oba6 = (fac_cps 4 oba1) in 
-  	let () = (print_int oba6) in 0;;
+  	let oba7 = (fac_cps 4 oba2) in 
+  	let () = (print_int oba7) in 0;;
   
   
   Types after conversions:
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
-  val oba0 : (int -> 'a) -> int -> int -> 'a
-  val oba1 : 'a -> 'a
+  val oba1 : (int -> 'a) -> int -> int -> 'a
+  val oba2 : 'a -> 'a
 
   $ ./anf_tests.exe < manytests/typed/003fib.ml
   Types:
@@ -71,10 +71,10 @@
   	if oba2
   	then oba0
   	else 
-  	let oba3 = (( - ) oba0 1) in 
-  	let oba4 = (fib oba3) in 
   	let oba5 = (( - ) oba0 2) in 
-  	let oba6 = (fib oba5) in (( + ) oba4 oba6);;
+  	let oba6 = (fib oba5) in 
+  	let oba3 = (( - ) oba0 1) in 
+  	let oba4 = (fib oba3) in (( + ) oba4 oba6);;
   
   let main = 
   	let oba7 = (fib_acc 0 1 4) in 
@@ -163,30 +163,31 @@
   val main : int
   
   Converted structure:
-  let oba2 oba0 = (( + ) oba0 2);;
+  let oba3 oba0 = (( + ) oba0 2);;
   
-  let oba3 oba1 = (( * ) oba1 10);;
+  let oba4 oba1 = (( * ) oba1 10);;
   
   let foo b = 
   	if b
-  	then oba2
-  	else oba3;;
+  	then oba3
+  	else oba4;;
   
-  let foo x = 
-  	let oba4 = (foo false x) in 
-  	let oba5 = (foo true oba4) in 
-  	let oba6 = (foo false oba5) in (foo true oba6);;
+  let oba2 x = 
+  	let oba5 = (foo false x) in 
+  	let oba6 = (foo true oba5) in 
+  	let oba7 = (foo false oba6) in (foo true oba7);;
   
   let main = 
-  	let oba7 = (foo 11) in 
-  	let () = (print_int oba7) in 0;;
+  	let oba8 = (oba2 11) in 
+  	let () = (print_int oba8) in 0;;
   
   
   Types after conversions:
-  val foo : int -> int
+  val foo : bool -> int -> int
   val main : int
   val oba2 : int -> int
   val oba3 : int -> int
+  val oba4 : int -> int
 
   $ ./anf_tests.exe < manytests/typed/006partial2.ml
   Types:
@@ -249,12 +250,12 @@
   	let oba2 = (( / ) oba1 _c) in (( + ) oba2 d);;
   
   let main = 
-  	let oba3 = (print_int 1) in 
-  	let oba4 = (print_int 2) in 
-  	let oba5 = (print_int 4) in 
+  	let oba8 = (( ~- ) 555555) in 
   	let oba6 = (( ~- ) 1) in 
   	let oba7 = (print_int oba6) in 
-  	let oba8 = (( ~- ) 555555) in 
+  	let oba5 = (print_int 4) in 
+  	let oba4 = (print_int 2) in 
+  	let oba3 = (print_int 1) in 
   	let oba9 = (_start oba3 oba4 3 oba5 100 1000 oba7 10000 oba8) in (print_int oba9);;
   
   
@@ -348,15 +349,54 @@
   	let oba3 = (oba0 1) in (( + ) oba3 oba2);;
   
   let f x y = 
-  	let oba4 = (oba0 y 1) in 
   	let oba5 = (oba0 y) in 
-  	let oba6 = (oba1 oba5 2) in (( + ) oba4 oba6);;
+  	let oba6 = (oba1 oba5 2) in 
+  	let oba4 = (oba0 y 1) in (( + ) oba4 oba6);;
   
   
   Types after conversions:
   val f : 'a -> int -> int
   val oba0 : int -> int -> int
   val oba1 : (int -> int) -> int -> int
+  $ ./anf_tests.exe << EOF 
+  > let rec fib n k =
+  >   if n < 2
+  >   then k n
+  >   else fib (n - 1) (fun a -> fib (n - 2) (fun b -> k (a + b)))
+  > 
+  > let main = print_int(fib 6 (fun x -> x))
+  Types:
+  val fib : int -> (int -> 'a) -> 'a
+  val main : unit
+  
+  Converted structure:
+  let oba1 a k b = 
+  	let oba3 = (( + ) a b) in (k oba3);;
+  
+  let oba0 fib k n a = 
+  	let oba5 = (oba1 a k) in 
+  	let oba4 = (( - ) n 2) in (fib oba4 oba5);;
+  
+  let rec fib n k = 
+  	let oba6 = (( < ) n 2) in 
+  	if oba6
+  	then (k n)
+  	else 
+  	let oba8 = (oba0 fib k n) in 
+  	let oba7 = (( - ) n 1) in (fib oba7 oba8);;
+  
+  let oba2 x = x;;
+  
+  let main = 
+  	let oba9 = (fib 6 oba2) in (print_int oba9);;
+  
+  
+  Types after conversions:
+  val fib : int -> (int -> 'a) -> 'a
+  val main : unit
+  val oba0 : (int -> (int -> 'a) -> 'b) -> (int -> 'a) -> int -> int -> 'b
+  val oba1 : int -> (int -> 'a) -> int -> 'a
+  val oba2 : 'a -> 'a
 
   $ ./anf_tests.exe << EOF
   > let a = let x = 1 in
@@ -431,29 +471,29 @@
   
   Converted structure:
   let rec inner x y = 
-  	let oba3 = (( = ) y 0) in 
-  	if oba3
+  	let oba4 = (( = ) y 0) in 
+  	if oba4
   	then x
   	else 
   	let oba0 = (( + ) x y) in 
-  	let oba4 = (( - ) y 1) in (inner x oba4);;
+  	let oba5 = (( - ) y 1) in (inner x oba5);;
   
   let rec middle x = (inner x x);;
   
   let rec outer n = 
-  	let oba5 = (( = ) n 0) in 
-  	if oba5
+  	let oba6 = (( = ) n 0) in 
+  	if oba6
   	then 0
   	else 
   	let result = (middle n) in 
-  	let oba6 = (( - ) n 1) in 
-  	let oba1 = (outer oba6) in (( + ) result oba1);;
+  	let oba7 = (( - ) n 1) in 
+  	let oba1 = (outer oba7) in (( + ) result oba1);;
   
   let final_result = (outer 5);;
   
-  let outer oba2 = (( * ) oba2 oba2);;
+  let oba2 oba3 = (( * ) oba3 oba3);;
   
-  let final_transformed = (outer final_result);;
+  let final_transformed = (oba2 final_result);;
   
   let () = (print_int final_transformed);;
   
@@ -463,6 +503,7 @@
   val final_transformed : int
   val inner : int -> int -> int
   val middle : int -> int
+  val oba2 : int -> int
   val outer : int -> int
 
   $ ./anf_tests.exe << EOF
@@ -502,16 +543,16 @@
   Converted structure:
   let rec oba6 oba5 z = 
   	let oba7 = (( + ) z oba5) in 
-  	let oba12 = (( = ) z 1) in 
-  	if oba12
+  	let oba15 = (( = ) z 1) in 
+  	if oba15
   	then oba7
   	else 
   	let oba8 = (( * ) oba7 2) in 
-  	let oba13 = (( - ) z 1) in (oba6 oba5 oba13);;
+  	let oba16 = (( - ) z 1) in (oba6 oba5 oba16);;
   
   let rec oba4 oba3 y = 
-  	let oba14 = (( = ) y 0) in 
-  	if oba14
+  	let oba17 = (( = ) y 0) in 
+  	if oba17
   	then oba3
   	else 
   	let oba5 = (( + ) oba3 y) in (oba6 oba5 y);;
@@ -521,27 +562,28 @@
   
   let rec oba0 n = 
   	let oba1 = (( * ) n 2) in 
-  	let oba15 = (( = ) n 0) in 
-  	if oba15
+  	let oba18 = (( = ) n 0) in 
+  	if oba18
   	then 0
   	else 
   	let oba9 = (oba2 oba1 n) in 
-  	let oba16 = (( - ) n 1) in 
-  	let oba10 = (oba0 oba16) in (( + ) oba9 oba10);;
+  	let oba19 = (( - ) n 1) in 
+  	let oba10 = (oba0 oba19) in (( + ) oba9 oba10);;
   
-  let oba10 = (oba0 5);;
+  let oba11 = (oba0 5);;
   
-  let oba0 oba11 = (( - ) oba11 7);;
+  let oba12 oba13 = (( - ) oba13 7);;
   
-  let oba11 = (oba0 oba10);;
+  let oba14 = (oba12 oba11);;
   
-  let () = (print_int oba11);;
+  let () = (print_int oba14);;
   
   
   Types after conversions:
   val oba0 : int -> int
-  val oba10 : int
   val oba11 : int
+  val oba12 : int -> int
+  val oba14 : int
   val oba2 : int -> int -> int
   val oba4 : int -> int -> int
   val oba6 : int -> int -> int
@@ -573,7 +615,7 @@
   	let () = (foo ()) in 
   	let () = (bar ()) in 0;;
   
-  let main = (print_string "Main function");;
+  let oba0 = (print_string "Main function");;
   
   let () = (print_int 4);;
   
@@ -581,7 +623,8 @@
   Types after conversions:
   val bar : unit -> unit
   val foo : unit -> unit
-  val main : unit
+  val main : int
+  val oba0 : unit
 
   $ ./anf_tests.exe < manytests/typed/016lists.ml
   Types:
@@ -596,185 +639,185 @@
   
   Converted structure:
   let rec length xs = 
-  	let oba0 = xs in 
-  	let oba34 = (( = ) oba0 []) in 
-  	if oba34
+  	let pat0 = xs in 
+  	let oba27 = (( = ) pat0 []) in 
+  	if oba27
   	then 0
   	else 
-  	let oba35 = (#list_length_getter# oba0) in 
-  	let oba36 = (( >= ) oba35 1) in 
-  	if oba36
+  	let oba28 = (list_length_getter pat0) in 
+  	let oba29 = (( >= ) oba28 1) in 
+  	if oba29
   	then 
-  	let h = (#list_head_getter# oba0) in 
-  	let tl = (#list_tail_getter# oba0) in 
-  	let oba37 = (length tl) in (( + ) 1 oba37)
-  	else (#matching_failed# ());;
+  	let h = (list_head_getter pat0) in 
+  	let tl = (list_tail_getter pat0) in 
+  	let oba30 = (length tl) in (( + ) 1 oba30)
+  	else (matching_failed ());;
   
-  let rec helper acc oba1 = 
-  	let oba2 = oba1 in 
-  	let oba38 = (( = ) oba2 []) in 
-  	if oba38
+  let rec helper acc oba0 = 
+  	let pat0 = oba0 in 
+  	let oba31 = (( = ) pat0 []) in 
+  	if oba31
   	then acc
   	else 
-  	let oba39 = (#list_length_getter# oba2) in 
-  	let oba40 = (( >= ) oba39 1) in 
-  	if oba40
+  	let oba32 = (list_length_getter pat0) in 
+  	let oba33 = (( >= ) oba32 1) in 
+  	if oba33
   	then 
-  	let oba3 = (#list_head_getter# oba2) in 
-  	let oba4 = (#list_tail_getter# oba2) in 
-  	let oba41 = (( + ) acc 1) in (helper oba41 oba4)
-  	else (#matching_failed# ());;
+  	let oba1 = (list_head_getter pat0) in 
+  	let oba2 = (list_tail_getter pat0) in 
+  	let oba34 = (( + ) acc 1) in (helper oba34 oba2)
+  	else (matching_failed ());;
   
   let length_tail = (helper 0);;
   
-  let rec map f oba5 = 
-  	let oba6 = oba5 in 
-  	let oba42 = (( = ) oba6 []) in 
-  	if oba42
+  let rec map f oba3 = 
+  	let pat0 = oba3 in 
+  	let oba35 = (( = ) pat0 []) in 
+  	if oba35
   	then []
   	else 
-  	let oba43 = (#list_length_getter# oba6) in 
-  	let oba44 = (( = ) oba43 1) in 
-  	if oba44
+  	let oba36 = (list_length_getter pat0) in 
+  	let oba37 = (( = ) oba36 1) in 
+  	if oba37
   	then 
-  	let a = (#list_head_getter# oba6) in 
-  	let oba45 = (f a) in oba45 :: []
+  	let a = (list_head_getter pat0) in 
+  	let oba38 = (f a) in oba38 :: []
   	else 
-  	let oba46 = (#list_length_getter# oba6) in 
-  	let oba47 = (( = ) oba46 2) in 
-  	if oba47
+  	let oba39 = (list_length_getter pat0) in 
+  	let oba40 = (( = ) oba39 2) in 
+  	if oba40
   	then 
-  	let oba7 = (#list_head_getter# oba6) in 
-  	let oba48 = (#list_tail_getter# oba6) in 
-  	let b = (#list_head_getter# oba48) in 
-  	let oba49 = (f oba7) in 
-  	let oba50 = (f b) in 
-  	let oba51 = oba50 :: [] in oba49 :: oba51
+  	let oba4 = (list_head_getter pat0) in 
+  	let oba41 = (list_tail_getter pat0) in 
+  	let b = (list_head_getter oba41) in 
+  	let oba42 = (f oba4) in 
+  	let oba43 = (f b) in 
+  	let oba44 = oba43 :: [] in oba42 :: oba44
   	else 
-  	let oba52 = (#list_length_getter# oba6) in 
-  	let oba53 = (( = ) oba52 3) in 
-  	if oba53
+  	let oba45 = (list_length_getter pat0) in 
+  	let oba46 = (( = ) oba45 3) in 
+  	if oba46
   	then 
-  	let oba8 = (#list_head_getter# oba6) in 
-  	let oba54 = (#list_tail_getter# oba6) in 
-  	let oba9 = (#list_head_getter# oba54) in 
-  	let oba55 = (#list_tail_getter# oba6) in 
-  	let oba56 = (#list_tail_getter# oba55) in 
-  	let c = (#list_head_getter# oba56) in 
-  	let oba57 = (f oba8) in 
-  	let oba58 = (f oba9) in 
-  	let oba59 = (f c) in 
-  	let oba60 = oba59 :: [] in 
-  	let oba61 = oba58 :: oba60 in oba57 :: oba61
+  	let oba5 = (list_head_getter pat0) in 
+  	let oba47 = (list_tail_getter pat0) in 
+  	let oba6 = (list_head_getter oba47) in 
+  	let oba48 = (list_tail_getter pat0) in 
+  	let oba49 = (list_tail_getter oba48) in 
+  	let c = (list_head_getter oba49) in 
+  	let oba50 = (f oba5) in 
+  	let oba51 = (f oba6) in 
+  	let oba52 = (f c) in 
+  	let oba53 = oba52 :: [] in 
+  	let oba54 = oba51 :: oba53 in oba50 :: oba54
   	else 
-  	let oba62 = (#list_length_getter# oba6) in 
-  	let oba63 = (( >= ) oba62 4) in 
-  	if oba63
+  	let oba55 = (list_length_getter pat0) in 
+  	let oba56 = (( >= ) oba55 4) in 
+  	if oba56
   	then 
-  	let oba10 = (#list_head_getter# oba6) in 
-  	let oba64 = (#list_tail_getter# oba6) in 
-  	let oba11 = (#list_head_getter# oba64) in 
-  	let oba65 = (#list_tail_getter# oba6) in 
-  	let oba66 = (#list_tail_getter# oba65) in 
-  	let oba12 = (#list_head_getter# oba66) in 
-  	let oba67 = (#list_tail_getter# oba6) in 
-  	let oba68 = (#list_tail_getter# oba67) in 
-  	let oba69 = (#list_tail_getter# oba68) in 
-  	let d = (#list_head_getter# oba69) in 
-  	let oba70 = (#list_tail_getter# oba6) in 
-  	let oba71 = (#list_tail_getter# oba70) in 
-  	let oba72 = (#list_tail_getter# oba71) in 
-  	let oba13 = (#list_tail_getter# oba72) in 
-  	let oba73 = (f oba10) in 
-  	let oba74 = (f oba11) in 
-  	let oba75 = (f oba12) in 
-  	let oba76 = (f d) in 
-  	let oba77 = (map f oba13) in 
-  	let oba78 = oba76 :: oba77 in 
-  	let oba79 = oba75 :: oba78 in 
-  	let oba80 = oba74 :: oba79 in oba73 :: oba80
-  	else (#matching_failed# ());;
+  	let oba7 = (list_head_getter pat0) in 
+  	let oba57 = (list_tail_getter pat0) in 
+  	let oba8 = (list_head_getter oba57) in 
+  	let oba58 = (list_tail_getter pat0) in 
+  	let oba59 = (list_tail_getter oba58) in 
+  	let oba9 = (list_head_getter oba59) in 
+  	let oba60 = (list_tail_getter pat0) in 
+  	let oba61 = (list_tail_getter oba60) in 
+  	let oba62 = (list_tail_getter oba61) in 
+  	let d = (list_head_getter oba62) in 
+  	let oba63 = (list_tail_getter pat0) in 
+  	let oba64 = (list_tail_getter oba63) in 
+  	let oba65 = (list_tail_getter oba64) in 
+  	let oba10 = (list_tail_getter oba65) in 
+  	let oba66 = (f oba7) in 
+  	let oba67 = (f oba8) in 
+  	let oba68 = (f oba9) in 
+  	let oba69 = (f d) in 
+  	let oba70 = (map f oba10) in 
+  	let oba71 = oba69 :: oba70 in 
+  	let oba72 = oba68 :: oba71 in 
+  	let oba73 = oba67 :: oba72 in oba66 :: oba73
+  	else (matching_failed ());;
   
-  let rec append oba14 ys = 
-  	let oba15 = oba14 in 
-  	let oba81 = (( = ) oba15 []) in 
-  	if oba81
+  let rec append oba11 ys = 
+  	let pat0 = oba11 in 
+  	let oba74 = (( = ) pat0 []) in 
+  	if oba74
   	then ys
   	else 
-  	let oba82 = (#list_length_getter# oba15) in 
-  	let oba83 = (( >= ) oba82 1) in 
-  	if oba83
+  	let oba75 = (list_length_getter pat0) in 
+  	let oba76 = (( >= ) oba75 1) in 
+  	if oba76
   	then 
-  	let x = (#list_head_getter# oba15) in 
-  	let oba16 = (#list_tail_getter# oba15) in 
-  	let oba84 = (append oba16 ys) in x :: oba84
-  	else (#matching_failed# ());;
+  	let x = (list_head_getter pat0) in 
+  	let oba12 = (list_tail_getter pat0) in 
+  	let oba77 = (append oba12 ys) in x :: oba77
+  	else (matching_failed ());;
   
-  let rec oba17 oba18 = 
-  	let oba19 = oba18 in 
-  	let oba85 = (( = ) oba19 []) in 
+  let rec oba13 oba14 = 
+  	let pat0 = oba14 in 
+  	let oba78 = (( = ) pat0 []) in 
+  	if oba78
+  	then []
+  	else 
+  	let oba79 = (list_length_getter pat0) in 
+  	let oba80 = (( >= ) oba79 1) in 
+  	if oba80
+  	then 
+  	let oba15 = (list_head_getter pat0) in 
+  	let oba16 = (list_tail_getter pat0) in 
+  	let oba81 = (oba13 oba16) in (append oba15 oba81)
+  	else (matching_failed ());;
+  
+  let concat = oba13;;
+  
+  let rec iter oba17 oba18 = 
+  	let pat0 = oba18 in 
+  	let oba82 = (( = ) pat0 []) in 
+  	if oba82
+  	then ()
+  	else 
+  	let oba83 = (list_length_getter pat0) in 
+  	let oba84 = (( >= ) oba83 1) in 
+  	if oba84
+  	then 
+  	let oba19 = (list_head_getter pat0) in 
+  	let oba20 = (list_tail_getter pat0) in 
+  	let () = (oba17 oba19) in (iter oba17 oba20)
+  	else (matching_failed ());;
+  
+  let oba26 oba23 oba25 = (oba23, oba25);;
+  
+  let rec cartesian oba21 oba22 = 
+  	let pat0 = oba21 in 
+  	let oba85 = (( = ) pat0 []) in 
   	if oba85
   	then []
   	else 
-  	let oba86 = (#list_length_getter# oba19) in 
+  	let oba86 = (list_length_getter pat0) in 
   	let oba87 = (( >= ) oba86 1) in 
   	if oba87
   	then 
-  	let oba20 = (#list_head_getter# oba19) in 
-  	let oba21 = (#list_tail_getter# oba19) in 
-  	let oba88 = (oba17 oba21) in (append oba20 oba88)
-  	else (#matching_failed# ());;
-  
-  let concat = oba17;;
-  
-  let rec iter oba22 oba23 = 
-  	let oba24 = oba23 in 
-  	let oba89 = (( = ) oba24 []) in 
-  	if oba89
-  	then ()
-  	else 
-  	let oba90 = (#list_length_getter# oba24) in 
-  	let oba91 = (( >= ) oba90 1) in 
-  	if oba91
-  	then 
-  	let oba25 = (#list_head_getter# oba24) in 
-  	let oba26 = (#list_tail_getter# oba24) in 
-  	let () = (oba22 oba25) in (iter oba22 oba26)
-  	else (#matching_failed# ());;
-  
-  let oba33 oba30 oba32 = (oba30, oba32);;
-  
-  let rec cartesian oba27 oba28 = 
-  	let oba29 = oba27 in 
-  	let oba92 = (( = ) oba29 []) in 
-  	if oba92
-  	then []
-  	else 
-  	let oba93 = (#list_length_getter# oba29) in 
-  	let oba94 = (( >= ) oba93 1) in 
-  	if oba94
-  	then 
-  	let oba30 = (#list_head_getter# oba29) in 
-  	let oba31 = (#list_tail_getter# oba29) in 
-  	let oba95 = (oba33 oba30) in 
-  	let oba96 = (map oba95 oba28) in 
-  	let oba97 = (cartesian oba31 oba28) in (append oba96 oba97)
-  	else (#matching_failed# ());;
+  	let oba23 = (list_head_getter pat0) in 
+  	let oba24 = (list_tail_getter pat0) in 
+  	let oba90 = (cartesian oba24 oba22) in 
+  	let oba88 = (oba26 oba23) in 
+  	let oba89 = (map oba88 oba22) in (append oba89 oba90)
+  	else (matching_failed ());;
   
   let main = 
-  	let oba98 = 3 :: [] in 
-  	let oba99 = 2 :: oba98 in 
-  	let oba100 = 1 :: oba99 in 
-  	let () = (iter print_int oba100) in 
-  	let oba101 = 2 :: [] in 
-  	let oba102 = 1 :: oba101 in 
-  	let oba103 = 4 :: [] in 
-  	let oba104 = 3 :: oba103 in 
-  	let oba105 = 2 :: oba104 in 
-  	let oba106 = 1 :: oba105 in 
-  	let oba107 = (cartesian oba102 oba106) in 
-  	let oba108 = (length oba107) in 
-  	let () = (print_int oba108) in 0;;
+  	let oba91 = 3 :: [] in 
+  	let oba92 = 2 :: oba91 in 
+  	let oba93 = 1 :: oba92 in 
+  	let () = (iter print_int oba93) in 
+  	let oba96 = 4 :: [] in 
+  	let oba97 = 3 :: oba96 in 
+  	let oba98 = 2 :: oba97 in 
+  	let oba99 = 1 :: oba98 in 
+  	let oba94 = 2 :: [] in 
+  	let oba95 = 1 :: oba94 in 
+  	let oba100 = (cartesian oba95 oba99) in 
+  	let oba101 = (length oba100) in 
+  	let () = (print_int oba101) in 0;;
   
   
   Types after conversions:
@@ -787,5 +830,5 @@
   val length_tail : 'a list -> int
   val main : int
   val map : ('a -> 'b) -> 'a list -> 'b list
-  val oba17 : 'a list list -> 'a list
-  val oba33 : 'a -> 'b -> 'a * 'b
+  val oba13 : 'a list list -> 'a list
+  val oba26 : 'a -> 'b -> 'a * 'b

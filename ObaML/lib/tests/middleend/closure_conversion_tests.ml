@@ -13,10 +13,10 @@ let parse_and_closure_result str =
          "Types:\n%a\n"
          Inferencer.TypeEnv.pretty_pp_env
          (Std.std_lst, structure_env);
-       let simple_structure = To_simple_ast.convert structure in
-       let simple_structure, _ =
-         Alpha_conversion.run_alpha_conversion simple_structure Inner
+      let structure, _ =
+         Alpha_conversion.run_alpha_conversion structure
        in
+       let simple_structure = To_simple_ast.convert structure in
        let simple_structure =
          Closure_conversion.run_closure_conversion simple_structure
        in
@@ -112,13 +112,13 @@ let%expect_test "" =
       Converted structure:
       let a x =
       	let b x y = (((x  *  y)  *  52) :: (52 :: [])) in
-      	let oba0 = ((b x) 1) in
-      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
+      	let pat0 = ((b x) 1) in
+      	if ((((list_length_getter pat0)  =  2)  &&  ((list_head_getter pat0)  =  52))  &&  ((list_head_getter (list_tail_getter pat0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());;
+      	else (matching_failed ());;
 
 
       Types after conversions:
@@ -136,13 +136,13 @@ let%expect_test "" =
       Converted structure:
       let a x =
       	let b = ((x  *  52) :: (52 :: [])) in
-      	let oba0 = b in
-      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
+      	let pat0 = b in
+      	if ((((list_length_getter pat0)  =  2)  &&  ((list_head_getter pat0)  =  52))  &&  ((list_head_getter (list_tail_getter pat0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());;
+      	else (matching_failed ());;
 
 
       Types after conversions:
@@ -199,15 +199,15 @@ let%expect_test "" =
     Converted structure:
     let rev lst =
     	let rec helper acc = (((fun acc helper oba0 ->
-    	let oba1 = oba0 in
-    	if (oba1  =  [])
+    	let pat0 = oba0 in
+    	if (pat0  =  [])
     	then acc
     	else
-    	if ((#list_length_getter# oba1)  >=  1)
+    	if ((list_length_getter pat0)  >=  1)
     	then
-    	let h = (#list_head_getter# oba1) in
-    	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
-    	else (#matching_failed# ())) acc) helper) in ((helper []) lst);;
+    	let h = (list_head_getter pat0) in
+    	let tl = (list_tail_getter pat0) in ((helper (h :: acc)) tl)
+    	else (matching_failed ())) acc) helper) in ((helper []) lst);;
 
     let reversed1 = (rev (1 :: (2 :: (3 :: (4 :: (5 :: []))))));;
 

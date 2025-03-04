@@ -16,6 +16,6 @@
 (package
  (name ObaML)
  (synopsis "ObaML compiler")
- (depends ocaml dune ppx_expect ppx_deriving))
+ (depends ocaml dune ppx_expect ppx_deriving llvm))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
