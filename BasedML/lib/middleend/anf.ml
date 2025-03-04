@@ -112,14 +112,12 @@ let rec anf ctx llexpr expr_with_hole =
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
-        let rec build_app = function
-          | [ h; tl ] -> return (CApplication (CImmExpr h, CImmExpr tl))
-          | h :: tl ->
-            let* rest = build_app tl in
-            return (CApplication (CImmExpr h, rest))
+        let build_app imm_exp = function
+          | [ h ] -> CApplication (imm_exp, h, []) |> return
+          | h :: tl -> CApplication (imm_exp, h, tl) |> return
           | [] -> fail "Error while building application"
         in
-        let* built_app = build_app (imm_exp :: List.rev imm_rest) in
+        let* built_app = build_app imm_exp (List.rev imm_rest) in
         return (ALetIn (fresh_name, built_app, aexp))))
   | LLLetIn (_, PIdentifier id, outer, inner) ->
     let new_env = Lambda_lifting.collect_bindings_from_pat (PIdentifier id) in
