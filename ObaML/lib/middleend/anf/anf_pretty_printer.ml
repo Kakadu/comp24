@@ -37,8 +37,8 @@ and print_immexpr_lst fmt = function
 let rec print_cexpr fmt cexpr =
   match cexpr with
   | Anf.CImmExpr immexpr -> fprintf fmt "%a" print_immexpr immexpr
-  | Anf.CApp (immexpr, immexpr_lst) ->
-    fprintf fmt "(%a %a)" print_immexpr immexpr print_immexpr_lst immexpr_lst
+  | Anf.CApp (app_var, immexpr_lst) ->
+    fprintf fmt "(%s %a)" app_var print_immexpr_lst immexpr_lst
   | Anf.CIf (imm1, aex2, aex3) ->
     fprintf
       fmt

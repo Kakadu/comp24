@@ -1,4 +1,4 @@
-  $ ./ast_simplifier_tests.exe < manytests/typed/002fac.ml
+  $ ./simplifier_tests.exe < manytests/typed/002fac.ml
   let rec fac_cps n k = 
   	if (n  =  1)
   	then (k 1)
@@ -7,7 +7,7 @@
   let main = 
   	let () = (print_int ((fac_cps 4) (fun print_int -> print_int))) in 0;;
   
-  $ ./ast_simplifier_tests.exe < manytests/typed/004manyargs.ml
+  $ ./simplifier_tests.exe < manytests/typed/004manyargs.ml
   let wrap f = 
   	if (1  =  1)
   	then f
@@ -26,14 +26,14 @@
   	let temp2 = ((((wrap test3) 1) 10) 100) in 0;;
   
 
-  $ ./ast_simplifier_tests.exe << EOF
+  $ ./simplifier_tests.exe << EOF
   > let map f p = let (a,b) = p in (f a, f b)
   let map f p = 
   	let #pat#0 = p in 
   	let a = ((#tuple_getter# 0) #pat#0) in 
   	let b = ((#tuple_getter# 1) #pat#0) in ((f a), (f b));;
   
-  $ ./ast_simplifier_tests.exe << EOF
+  $ ./simplifier_tests.exe << EOF
   > let c = let (a, (b, c)) = (fun x -> (4, (x, x))) 4 in (a, b, c);;
   let c = 
   	let #pat#0 = ((fun x -> (4, (x, x))) 4) in 
@@ -42,7 +42,7 @@
   	let c = ((#tuple_getter# 1) ((#tuple_getter# 1) #pat#0)) in (a, b, c);;
   
 
-  $ ./ast_simplifier_tests.exe << EOF
+  $ ./simplifier_tests.exe << EOF
   > let a b = match b with | (5, (b, c), 4) -> (b, c);;
   let a b = 
   	let #pat#0 = b in 
@@ -53,7 +53,7 @@
   	else (#matching_failed# ());;
   
 
-  $ ./ast_simplifier_tests.exe << EOF
+  $ ./simplifier_tests.exe << EOF
   > let a = match 1 :: [] with | 2 :: a -> a | 1 :: [] -> [];;
   let a = 
   	let #pat#0 = (1 :: []) in 
@@ -66,7 +66,7 @@
   	else (#matching_failed# ());;
   
 
-  $ ./ast_simplifier_tests.exe << EOF
+  $ ./simplifier_tests.exe << EOF
   > let a b = fun x () (y, z) (x1, x2) -> b x;;
   let a b = (fun x () #pat#0 #pat#1 -> 
   	let y = ((#tuple_getter# 0) #pat#0) in 
@@ -75,7 +75,7 @@
   	let x2 = ((#tuple_getter# 1) #pat#1) in (b x));;
   
 
-  $ ./ast_simplifier_tests.exe < manytests/typed/015tuples.ml
+  $ ./simplifier_tests.exe < manytests/typed/015tuples.ml
   let rec fix f x = ((f (fix f)) x);;
   
   let map f p = 
@@ -122,7 +122,7 @@
   	let () = (print_int (even 4)) in 0;;
   
 
-  $ ./ast_simplifier_tests.exe < manytests/typed/016lists.ml
+  $ ./simplifier_tests.exe < manytests/typed/016lists.ml
   let rec length xs = 
   	let #pat#0 = xs in 
   	if (#pat#0  =  [])

@@ -11,9 +11,9 @@
  (libraries ObaML stdio))
 
 (executable
- (name ast_simplifier_tests)
- (modules ast_simplifier_tests)
- (public_name ast_simplifier_tests)
+ (name simplifier_tests)
+ (modules simplifier_tests)
+ (public_name simplifier_tests)
  (libraries ObaML stdio)
  (instrumentation
   (backend bisect_ppx)))
@@ -46,14 +46,14 @@
  (applies_to
   parser_tests
   infer_tests
-  ast_simplifier_tests
+  simplifier_tests
   closure_conversion_tests
   lambda_lifting_tests
   anf_tests)
  (deps
   ./parser_tests.exe
   ./infer_tests.exe
-  ./ast_simplifier_tests.exe
+  ./simplifier_tests.exe
   ./closure_conversion_tests.exe
   ./lambda_lifting_tests.exe
   ./anf_tests.exe

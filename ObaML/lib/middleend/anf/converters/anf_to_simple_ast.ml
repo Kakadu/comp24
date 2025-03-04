@@ -32,8 +32,8 @@ and convert_immexpr = function
 
 let rec convert_cexpr = function
   | Anf.CImmExpr immexpr -> convert_immexpr immexpr
-  | Anf.CApp (immexpr, args_lst) ->
-    let expr1 = convert_immexpr immexpr in
+  | Anf.CApp (app_var, args_lst) ->
+    let expr1 = Simple_ast.SEVar (Ast.Id app_var) in
     List.fold_left
       (fun curr_expr arg ->
         let converted_arg = convert_immexpr arg in

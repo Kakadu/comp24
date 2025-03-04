@@ -79,11 +79,11 @@ and convert_app_to_cexpr expr1 expr2 env =
       let* additions1, new_expr1, env = expr_to_cexpr expr1 env in
       let* all_additions, fresh1, env =
         match new_expr1 with
-        | Anf.CImmExpr new_imm_expr1 -> return (additions1, new_imm_expr1, env)
+        | Anf.CImmExpr (Anf.ImmId var_name) -> return (additions1, var_name, env)
         | _ ->
           let* fresh1, env = checked_fresh_var env in
           let all_additions = List.append additions1 [ fresh1, new_expr1 ] in
-          return (all_additions, Anf.ImmId fresh1, env)
+          return (all_additions, fresh1, env)
       in
       let* additions2, new_expr2, env = expr_to_cexpr expr2 env in
       let all_additions = List.append all_additions additions2 in

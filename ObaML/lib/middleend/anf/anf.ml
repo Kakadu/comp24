@@ -13,7 +13,7 @@ type immexpr =
 
 type cexpr =
   | CImmExpr of immexpr
-  | CApp of immexpr * immexpr list
+  | CApp of string * immexpr list
   | CIf of immexpr * aexpr * aexpr
   | CCons of immexpr * immexpr
 
