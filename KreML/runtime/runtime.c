@@ -28,19 +28,21 @@ int64_t print_int(int64_t n)
 
 void partial_match(int64_t o)
 {
-    printf("Partial match error occured");
+     printf("Partial match error occured");
     exit(1);
 }
 
 int64_t *alloc_tuple(int64_t count)
 {
     int64_t *tuple = malloc(sizeof(int64_t) * count);
+    // printf("alloced tuple with addr %i", (int)(tuple));
     return tuple;
 }
 
 int64_t *alloc_closure(int64_t (*fptr)(void *), int64_t *env, int64_t arity, int64_t freevars_count)
 {
     closure *c = malloc(sizeof(closure));
+    // printf("you just alloced closure with address %i and function addr %i\n", (int)c, (int)(fptr));
     c->fptr = fptr;
     c->env = env;
     c->arity = arity;
@@ -51,6 +53,7 @@ int64_t *alloc_closure(int64_t (*fptr)(void *), int64_t *env, int64_t arity, int
 
 closure *copy_closure(closure *c)
 {
+    // printf("copying closure with env addr %i", (int)(c->env));
     int64_t total_env_size = c->arity + c->freevars_count;
     closure *c_copy = malloc(sizeof(closure));
     c_copy->fptr = c->fptr;
@@ -62,16 +65,19 @@ closure *copy_closure(closure *c)
 
     int64_t *env = c->env;
 
-    for (int64_t i = 0; i < total_env_size; i++)
-    {
-        int64_t *copy_elem = (env_copy + i);
-        *copy_elem = *(env + i);
+    if (total_env_size > 0) {
+        for (int64_t i = 0; i < total_env_size; i++)
+        {
+            // int64_t *copy_elem = (env_copy + i);
+            *(env_copy + i) = *(env + i);
+        }
     }
     return c_copy;
 }
 
 int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
 {
+    // printf("you are calling closure with address %i, first arg %i, args_count %i\n", (int)c, (int)(*args), (int)(args_count));
     if (args_count == 0)
     {
         int64_t (*callee)() = (int64_t (*)())c->fptr;
@@ -149,6 +155,7 @@ int64_t call_closure(closure *c, int64_t *args, int64_t args_count)
                 if (arity == 1)
                 {
                     int64_t (*callee)(int64_t *, int64_t) = (int64_t (*)(int64_t *, int64_t))curr_c->fptr;
+                    // printf("calling function %i with arg %i and env %i", (int)callee, (int)(*curr_arg), (int)*envarg);
                     call_res = callee(envarg, *curr_arg);
                 }
                 else if (arity == 2)
@@ -211,6 +218,7 @@ typedef struct list_node
     struct list_node *next;
 } list_node;
 
+
 list_node *list_cons(int64_t v, list_node *tail)
 {
     list_node *new_node = malloc(sizeof(list_node));
@@ -218,3 +226,79 @@ list_node *list_cons(int64_t v, list_node *tail)
     new_node->next = tail;
     return new_node;
 }
+
+// #ifdef RISCV
+// void* rv_call_closure(closure* c, int64_t args_count) {
+//     closure* curr_c = copy_closure(c);
+//     for (int64_t i = 0; i < args_count; i++) {
+//         int64_t ac = curr_c->applied_count;
+//         int64_t env = curr_c->env;
+//         int64_t env_offset = ac * 8;
+//         if (i < 8) {
+//             asm volatile(
+//                 "li t0, %1"
+//                 "sw a%2, %3(t0)"
+//             );
+//         } else {
+//             int64_t arg_offset = (i - 7) * 8;
+//             asm volatile(
+//                 "lw t0, %1(fp)"
+//                 "li t1, %2"
+//                 "sw t0, %3(t1)"
+//             );
+//         }
+//         curr_c->applied_count++;
+//         if (curr_c->applied_count == curr_c->arity)
+//         {
+//             int64_t stack_args_count = max(0, curr_c->arity - 8);
+//             void *(*callee)(void *) = curr_c->fptr;
+//             int64_t *env = curr_c->env;
+//             asm volatile(
+//                 "la a0, %1"
+//                 ""
+//             )
+//         }
+//         else
+//         {
+//         }
+// }
+// }
+
+// void* invoke_closure(closure* c) {
+//     int64_t stack_args_count;
+//     int64_t reg_args_count;
+
+//     if (c->freevars_count > 0) {
+//         reg_args_count = min(8, c->arity + 1);
+//         stack_args_count = max(0, c->arity + 1 - 8);
+//     } else {
+//         reg_args_count = min(8, c->arity );
+//         stack_args_count = max(0, c->arity - 8);
+//     }
+//     void *(*callee)(void *) = c->fptr;
+//     int64_t *env = c->env;
+//     for (int64_t i = 0; i < reg_args_count; i++)
+//     {
+//         int64_t env_offset = i * 8;
+//         asm volatile(
+//             "lw a%1, %2(%3)"
+//         );
+//     }
+
+//     int64_t offset = stack_args_count * 8;
+//     asm volatile("subi, sp, sp, %1");
+//     for (int64_t i = 0; i < stack_args_count; i++)
+//     {
+//         int64_t env_offset = (i + 8) * 8;
+//         asm volatile(
+//             "lw t0, 0(%1)"
+//             "lw t1, %2(sp)"
+//             "sw t0, %3(t1)"
+//         )
+//     }
+    
+//     asm volatile(
+//         "la a0, %1"
+//         "")
+// }
+// #endif

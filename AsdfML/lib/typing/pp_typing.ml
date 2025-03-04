@@ -26,7 +26,7 @@ let rec int_to_alphabet_str n =
     ^ String.make 1 (Char.chr ((n mod 26) + Char.code 'a'))
 ;;
 
-let rec pp_typ fmt = function
+let rec pp_ty fmt = function
   | TVar var -> fprintf fmt "%s" (type_id_to_name var)
   | TGround x ->
     fprintf
@@ -37,24 +37,26 @@ let rec pp_typ fmt = function
        | TUnit -> "()")
   | TArrow (left, right) ->
     (match left with
-     | TArrow (_, _) -> fprintf fmt "(%a) -> %a" pp_typ left pp_typ right
-     | _ -> fprintf fmt "%a -> %a" pp_typ left pp_typ right)
-  | TTuple xs -> pp_list ~sep:" * " fmt pp_typ xs
-  | TList t -> fprintf fmt "%a list" pp_typ t
+     | TArrow (_, _) -> fprintf fmt "(%a) -> %a" pp_ty left pp_ty right
+     | _ -> fprintf fmt "%a -> %a" pp_ty left pp_ty right)
+  | TTuple (hd1, hd2, tl) ->
+    let xs = hd1 :: hd2 :: tl in
+    pp_list ~sep:" * " fmt pp_ty xs
+  | TList t -> fprintf fmt "%a list" pp_ty t
 ;;
 
 let pp_error fmt : error -> _ = function
   | `Occurs_check -> fprintf fmt "Occurs check failed"
   | `No_variable s -> fprintf fmt "Undefined variable '%s'" s
   | `Unification_failed (l, r) ->
-    fprintf fmt "Unification failed on %a and %a" pp_typ l pp_typ r
+    fprintf fmt "Unification failed on %a and %a" pp_ty l pp_ty r
   | `Arg_num_mismatch (pat, ty) ->
     fprintf
       fmt
       "Mismatched number of arguments in pattern %a and expression %a"
       Pp_ast.pp_pattern
       pat
-      pp_typ
+      pp_ty
       ty
   | `Syntax_error s -> fprintf fmt "Syntax error: %s" s
   | `TODO s -> fprintf fmt "TODO: %s" s
@@ -71,5 +73,5 @@ module VarSet = struct
 end
 
 let pp_scheme fmt = function
-  | xs, ty -> fprintf fmt "forall %a . %a" VarSet.pp xs pp_typ ty
+  | xs, ty -> fprintf fmt "forall %a . %a" VarSet.pp xs pp_ty ty
 ;;

@@ -1,5 +1,5 @@
 depexts: [
   [ "llvm-17-dev" "gcc-13" "pkg-config" 
-    "qemu-user-static"
+    "qemu-user-static" "binutils-riscv64-linux-gnu" "gcc-riscv64-linux-gnu"
   ] {os-distribution = "ubuntu"}
 ]

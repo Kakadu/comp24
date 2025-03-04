@@ -24,11 +24,14 @@ let () =
          0
      with
      | _, Ok lst ->
-       lst
-       |> Middleend.Closure_conversion.convert_ast
-       |> Middleend.Lambda_lifting.lift_ast
-       |> Middleend.Anf.transform
-       |> print_anf
+       let lifted =
+         lst
+         |> Middleend.Closure_conversion.convert_ast
+         |> Middleend.Lambda_lifting.lift_ast
+       in
+       (match Middleend.Match_elimination.transform lifted with
+        | _, Ok new_ast -> new_ast |> Middleend.Anf.transform |> print_anf
+        | _, Error message -> Format.printf "Error: %s\n" message)
      | _, Error err -> Format.printf "%s" err)
   | Error message -> Format.printf "Error: %s\n" message
 ;;

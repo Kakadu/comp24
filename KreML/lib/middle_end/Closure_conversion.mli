@@ -5,4 +5,7 @@
 open Anf
 open Flambda
 
-val cc : arities -> astructure -> flstructure
+val cc
+  :  arities
+  -> astructure
+  -> flstructure * (string, flambda, Base.String.comparator_witness) Base.Map.t
