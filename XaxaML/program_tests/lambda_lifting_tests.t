@@ -3,14 +3,14 @@
   val fac : int -> int
   val main : int
   Types after modifications:
+  val a1 : int
   val fac : int -> int
-  val main : int
   Modified ast:
   let rec fac = (fun n -> if ((<= n) 1)
   then 1
   else ((* n) (fac ((- n) 1))))
   
-  let main = let () = (print_int (fac 4)) in
+  let a1 = let a0 = (print_int (fac 4)) in
   0
 
   $ ./run_lambda_lifting.exe < manytests/typed/002fac.ml
@@ -18,20 +18,20 @@
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
   Types after modifications:
-  val a1 : (int -> 'a) -> int -> int -> 'a
-  val a2 : 'a -> 'a
+  val a1 : int
+  val a3 : (int -> 'a) -> int -> int -> 'a
+  val a4 : 'a -> 'a
   val fac_cps : int -> (int -> 'a) -> 'a
-  val main : int
   Modified ast:
-  let a1 = (fun k n p -> (k ((* p) n)))
+  let a3 = (fun k n p -> (k ((* p) n)))
   
   let rec fac_cps = (fun n k -> if ((= n) 1)
   then (k 1)
-  else ((fac_cps ((- n) 1)) ((a1 k) n)))
+  else ((fac_cps ((- n) 1)) ((a3 k) n)))
   
-  let a2 = (fun a0 -> a0)
+  let a4 = (fun a2 -> a2)
   
-  let main = let () = (print_int ((fac_cps 4) a2)) in
+  let a1 = let a0 = (print_int ((fac_cps 4) a4)) in
   0
 
   $ ./run_lambda_lifting.exe << EOF

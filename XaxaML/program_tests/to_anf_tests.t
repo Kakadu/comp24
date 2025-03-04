@@ -178,21 +178,21 @@
   val main : int
   
   Types after modifications:
+  val a1 : int
   val fac : int -> int
-  val main : int
   
   Modified ast:
   let rec fac n =
-    let a0 = ( <= ) n 1 in
-    if a0
+    let a2 = ( <= ) n 1 in
+    if a2
     then 1
-    else let a2 = ( - ) n 1 in
-      let a1 = fac a2 in
-      ( * ) n a1
+    else let a4 = ( - ) n 1 in
+      let a3 = fac a4 in
+      ( * ) n a3
     
-  let main =
-    let a3 = fac 4 in
-    let () = print_int a3 in
+  let a1 =
+    let a5 = fac 4 in
+    let a0 = print_int a5 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/002fac.ml
@@ -201,28 +201,28 @@
   val main : int
   
   Types after modifications:
-  val a1 : (int -> 'a) -> int -> int -> 'a
-  val a2 : 'a -> 'a
+  val a1 : int
+  val a3 : (int -> 'a) -> int -> int -> 'a
+  val a4 : 'a -> 'a
   val fac_cps : int -> (int -> 'a) -> 'a
-  val main : int
   
   Modified ast:
-  let a1 k n p =
-    let a3 = ( * ) p n in
-    k a3
+  let a3 k n p =
+    let a5 = ( * ) p n in
+    k a5
   let rec fac_cps n k =
-    let a4 = ( = ) n 1 in
-    if a4
+    let a6 = ( = ) n 1 in
+    if a6
     then k 1
-    else let a5 = ( - ) n 1 in
-      let a6 = a1 k n in
-      fac_cps a5 a6
+    else let a7 = ( - ) n 1 in
+      let a8 = a3 k n in
+      fac_cps a7 a8
     
-  let a2 a0 =
-    a0
-  let main =
-    let a7 = fac_cps 4 a2 in
-    let () = print_int a7 in
+  let a4 a2 =
+    a2
+  let a1 =
+    let a9 = fac_cps 4 a4 in
+    let a0 = print_int a9 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/003fib.ml
@@ -232,34 +232,34 @@
   val main : int
   
   Types after modifications:
+  val a2 : int
   val fib : int -> int
   val fib_acc : int -> int -> int -> int
-  val main : int
   
   Modified ast:
   let rec fib_acc a b n =
-    let a0 = ( = ) n 1 in
-    if a0
+    let a3 = ( = ) n 1 in
+    if a3
     then b
     else let n1 = ( - ) n 1 in
       let ab = ( + ) a b in
       fib_acc b ab n1
     
   let rec fib n =
-    let a1 = ( < ) n 2 in
-    if a1
+    let a4 = ( < ) n 2 in
+    if a4
     then n
-    else let a3 = ( - ) n 1 in
-      let a2 = fib a3 in
-      let a5 = ( - ) n 2 in
-      let a4 = fib a5 in
-      ( + ) a2 a4
+    else let a6 = ( - ) n 1 in
+      let a5 = fib a6 in
+      let a8 = ( - ) n 2 in
+      let a7 = fib a8 in
+      ( + ) a5 a7
     
-  let main =
-    let a6 = fib_acc 0 1 4 in
-    let () = print_int a6 in
-    let a7 = fib 4 in
-    let () = print_int a7 in
+  let a2 =
+    let a9 = fib_acc 0 1 4 in
+    let a1 = print_int a9 in
+    let a10 = fib 4 in
+    let a0 = print_int a10 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/004manyargs.ml
@@ -270,36 +270,36 @@
   val wrap : 'a -> 'a
   
   Types after modifications:
-  val main : int
+  val a4 : int
   val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
   val test3 : int -> int -> int -> int
   val wrap : 'a -> 'a
   
   Modified ast:
   let wrap f =
-    let a3 = ( = ) 1 1 in
-    if a3
+    let a5 = ( = ) 1 1 in
+    if a5
     then f
     else f
     
   let test3 a b c =
-    let a0 = print_int a in
-    let a1 = print_int b in
-    let a2 = print_int c in
+    let a1 = print_int a in
+    let a2 = print_int b in
+    let a3 = print_int c in
     0
   let test10 a b c d e f g h i j =
-    let a11 = ( + ) a b in
-    let a10 = ( + ) a11 c in
-    let a9 = ( + ) a10 d in
-    let a8 = ( + ) a9 e in
-    let a7 = ( + ) a8 f in
-    let a6 = ( + ) a7 g in
-    let a5 = ( + ) a6 h in
-    let a4 = ( + ) a5 i in
-    ( + ) a4 j
-  let main =
+    let a13 = ( + ) a b in
+    let a12 = ( + ) a13 c in
+    let a11 = ( + ) a12 d in
+    let a10 = ( + ) a11 e in
+    let a9 = ( + ) a10 f in
+    let a8 = ( + ) a9 g in
+    let a7 = ( + ) a8 h in
+    let a6 = ( + ) a7 i in
+    ( + ) a6 j
+  let a4 =
     let rez = wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
-    let () = print_int rez in
+    let a0 = print_int rez in
     let temp2 = wrap test3 1 10 100 in
     0
 
@@ -310,25 +310,25 @@
   val main : int
   
   Types after modifications:
+  val a1 : int
   val fac : (int -> int) -> int -> int
   val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val main : int
   
   Modified ast:
   let rec fix f x =
-    let a0 = fix f in
-    f a0 x
+    let a2 = fix f in
+    f a2 x
   let fac self n =
-    let a1 = ( <= ) n 1 in
-    if a1
+    let a3 = ( <= ) n 1 in
+    if a3
     then 1
-    else let a3 = ( - ) n 1 in
-      let a2 = self a3 in
-      ( * ) n a2
+    else let a5 = ( - ) n 1 in
+      let a4 = self a5 in
+      ( * ) n a4
     
-  let main =
-    let a4 = fix fac 6 in
-    let () = print_int a4 in
+  let a1 =
+    let a6 = fix fac 6 in
+    let a0 = print_int a6 in
     0
 
 Here second declaration of function "foo" was renamed to "#2" during modifications
@@ -338,30 +338,30 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
   val main : int
   
   Types after modifications:
-  val a2 : int -> int
   val a3 : int -> int
-  val a4 : int -> int
+  val a4 : int
+  val a5 : int -> int
+  val a6 : int -> int
   val foo : bool -> int -> int
-  val main : int
   
   Modified ast:
-  let a3 a0 =
-    ( + ) a0 2
-  let a4 a1 =
-    ( * ) a1 10
+  let a5 a1 =
+    ( + ) a1 2
+  let a6 a2 =
+    ( * ) a2 10
   let foo b =
     if b
-    then a3
-    else a4
+    then a5
+    else a6
     
-  let a2 x =
-    let a7 = foo false x in
-    let a6 = foo true a7 in
-    let a5 = foo false a6 in
-    foo true a5
-  let main =
-    let a8 = a2 11 in
-    let () = print_int a8 in
+  let a3 x =
+    let a9 = foo false x in
+    let a8 = foo true a9 in
+    let a7 = foo false a8 in
+    foo true a7
+  let a4 =
+    let a10 = a3 11 in
+    let a0 = print_int a10 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/006partial2.ml
@@ -370,21 +370,21 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
   val main : int
   
   Types after modifications:
+  val a4 : int
   val foo : int -> int -> int -> int
-  val main : int
   
   Modified ast:
   let foo a b c =
-    let () = print_int a in
-    let () = print_int b in
-    let () = print_int c in
-    let a3 = ( * ) b c in
-    ( + ) a a3
-  let main =
-    let a0 = foo 1 in
-    let a1 = a0 2 in
-    let a2 = a1 3 in
-    let () = print_int a2 in
+    let a2 = print_int a in
+    let a1 = print_int b in
+    let a0 = print_int c in
+    let a8 = ( * ) b c in
+    ( + ) a a8
+  let a4 =
+    let a5 = foo 1 in
+    let a6 = a5 2 in
+    let a7 = a6 3 in
+    let a3 = print_int a7 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/006partial3.ml
@@ -393,22 +393,22 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
   val main : int
   
   Types after modifications:
-  val a0 : int -> int -> unit
-  val a1 : int -> unit
+  val a3 : int
+  val a4 : int -> int -> unit
+  val a5 : int -> unit
   val foo : int -> int -> int -> unit
-  val main : int
   
   Modified ast:
-  let a1 c =
+  let a5 c =
     print_int c
-  let a0 b =
-    let () = print_int b in
-    a1
+  let a4 b =
+    let a0 = print_int b in
+    a5
   let foo a =
-    let () = print_int a in
-    a0
-  let main =
-    let () = foo 4 8 9 in
+    let a1 = print_int a in
+    a4
+  let a3 =
+    let a2 = foo 4 8 9 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/007order.ml
@@ -417,26 +417,27 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
   val main : unit
   
   Types after modifications:
-  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
-  val main : unit
+  val _start : 'a -> 'b -> int -> 'c -> int -> int -> 'd -> int -> int -> int
+  val a7 : unit
   
   Modified ast:
-  let _start () () a () b _c () d __ =
-    let a0 = ( + ) a b in
-    let () = print_int a0 in
-    let () = print_int __ in
-    let a2 = ( * ) a b in
-    let a1 = ( / ) a2 _c in
-    ( + ) a1 d
-  let main =
-    let a4 = print_int 1 in
-    let a5 = print_int 2 in
-    let a6 = print_int 4 in
-    let a8 = ( ~- ) 1 in
-    let a7 = print_int a8 in
-    let a9 = ( ~- ) 555555 in
-    let a3 = _start a4 a5 3 a6 100 1000 a7 10000 a9 in
-    print_int a3
+  let _start a0 a1 a a2 b _c a3 d __ =
+    let a6 = (a0, a1, a2, a3) in
+    let a8 = ( + ) a b in
+    let a5 = print_int a8 in
+    let a4 = print_int __ in
+    let a10 = ( * ) a b in
+    let a9 = ( / ) a10 _c in
+    ( + ) a9 d
+  let a7 =
+    let a12 = print_int 1 in
+    let a13 = print_int 2 in
+    let a14 = print_int 4 in
+    let a16 = ( ~- ) 1 in
+    let a15 = print_int a16 in
+    let a17 = ( ~- ) 555555 in
+    let a11 = _start a12 a13 3 a14 100 1000 a15 10000 a17 in
+    print_int a11
 
 The explicitly specified types were erased after type inference 
   $ ./run_to_anf.exe < manytests/typed/008ascription.ml
@@ -445,26 +446,26 @@ The explicitly specified types were erased after type inference
   val main : int
   
   Types after modifications:
-  val a0 : int -> bool -> int
-  val a1 : int -> bool
+  val a1 : int
+  val a2 : int -> bool -> int
+  val a3 : int -> bool
   val addi : ('a -> 'b -> 'c) -> ('a -> 'b) -> 'a -> 'c
-  val main : int
   
   Modified ast:
   let addi f g x =
-    let a2 = g x in
-    f x a2
-  let a0 x b =
+    let a4 = g x in
+    f x a4
+  let a2 x b =
     if b
     then ( + ) x 1
     else ( * ) x 2
     
-  let a1 _start =
-    let a3 = ( / ) _start 2 in
-    ( = ) a3 0
-  let main =
-    let a4 = addi a0 a1 4 in
-    let () = print_int a4 in
+  let a3 _start =
+    let a5 = ( / ) _start 2 in
+    ( = ) a5 0
+  let a1 =
+    let a6 = addi a2 a3 4 in
+    let a0 = print_int a6 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/009let_poly.ml
@@ -497,13 +498,13 @@ Some types are different due to the impossibility to type the function "#unpack_
   val tie : (int -> int) * (int -> int)
   
   Types after modifications:
-  val a1 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
-  val a2 : 'a -> ('a -> 'b) -> ('b -> 'c -> 'd) -> 'c -> 'd
+  val a5 : int
+  val a6 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+  val a7 : 'a -> ('a -> 'b) -> ('b -> 'c -> 'd) -> 'c -> 'd
   val feven : 'a -> int -> int
   val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val fixpoly : 'a -> ('b -> 'c) * ('b -> 'c)
   val fodd : 'a -> int -> int
-  val main : int
   val map : ('a -> 'b) -> 'c -> 'b * 'b
   val meven : int -> int
   val modd : int -> int
@@ -511,68 +512,68 @@ Some types are different due to the impossibility to type the function "#unpack_
   
   Modified ast:
   let rec fix f x =
-    let a3 = fix f in
-    f a3 x
+    let a8 = fix f in
+    f a8 x
   let map f p =
     let a = #unpack_tuple p 0 in
     let b = #unpack_tuple p 1 in
-    let a4 = f a in
-    let a5 = f b in
-    (a4, a5)
-  let a2 a0 self li x =
-    let a6 = self a0 in
-    li a6 x
-  let a1 self a0 =
-    let a7 = a2 a0 self in
-    map a7 a0
+    let a9 = f a in
+    let a10 = f b in
+    (a9, a10)
+  let a7 a4 self li x =
+    let a11 = self a4 in
+    li a11 x
+  let a6 self a4 =
+    let a12 = a7 a4 self in
+    map a12 a4
   let fixpoly l =
-    fix a1 l
+    fix a6 l
   let feven p n =
     let e = #unpack_tuple p 0 in
     let o = #unpack_tuple p 1 in
-    let a8 = ( == ) n 0 in
-    if a8
+    let a13 = ( == ) n 0 in
+    if a13
     then 1
-    else let a9 = ( - ) n 1 in
-      o a9
+    else let a14 = ( - ) n 1 in
+      o a14
     
   let fodd p n =
     let e = #unpack_tuple p 0 in
     let o = #unpack_tuple p 1 in
-    let a10 = ( == ) n 0 in
-    if a10
+    let a15 = ( == ) n 0 in
+    if a15
     then 0
-    else let a11 = ( - ) n 1 in
-      e a11
+    else let a16 = ( - ) n 1 in
+      e a16
     
   let tie =
-    let a12 = (feven, fodd) in
-    fixpoly a12
+    let a17 = (feven, fodd) in
+    fixpoly a17
   let rec modd n =
-    let a13 = ( = ) n 0 in
-    if a13
+    let a18 = ( = ) n 0 in
+    if a18
     then 1
-    else let a14 = ( - ) n 1 in
-      meven a14
+    else let a19 = ( - ) n 1 in
+      meven a19
     
   and meven n =
-    let a15 = ( = ) n 0 in
-    if a15
+    let a20 = ( = ) n 0 in
+    if a20
     then 1
-    else let a16 = ( - ) n 1 in
-      modd a16
+    else let a21 = ( - ) n 1 in
+      modd a21
     
-  let main =
-    let a17 = modd 1 in
-    let () = print_int a17 in
-    let a18 = meven 2 in
-    let () = print_int a18 in
+  let a5 =
+    let a22 = modd 1 in
+    let a3 = print_int a22 in
+    let a23 = meven 2 in
+    let a2 = print_int a23 in
     let even = #unpack_tuple tie 0 in
     let odd = #unpack_tuple tie 1 in
-    let a19 = odd 3 in
-    let () = print_int a19 in
-    let a20 = even 4 in
-    let () = print_int a20 in
+    let a24 = odd 3 in
+    let a1 = print_int a24 in
+    let a25 = even 4 in
+    let a0 = print_int a25 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/016lists.ml
@@ -587,122 +588,122 @@ Some types are different due to the impossibility to type the function "#unpack_
   val map : ('a -> 'b) -> 'a list -> 'b list
   
   Types after modifications:
-  val a1 : int -> 'a list -> int
-  val a2 : 'a list list -> 'a list
-  val a3 : 'a -> 'b -> 'a * 'b
+  val a4 : int
+  val a5 : int -> 'a list -> int
+  val a6 : 'a list list -> 'a list
+  val a7 : 'a -> 'b -> 'a * 'b
   val append : 'a list -> 'a list -> 'a list
   val cartesian : 'a list -> 'b list -> ('a * 'b) list
   val concat : 'a list list -> 'a list
-  val iter : ('a -> unit) -> 'a list -> unit
+  val iter : ('a -> 'b) -> 'a list -> unit
   val length : 'a list -> int
   val length_tail : 'a list -> int
-  val main : int
   val map : ('a -> 'b) -> 'a list -> 'b list
   
   Modified ast:
   let rec length xs =
-    let a4 = ( = ) xs [] in
-    if a4
-    then 0
-    else let a6 = #list_length xs in
-      let a5 = ( > ) a6 0 in
-      if a5
-      then let h = #list_hd xs in
-        let tl = #list_tl xs in
-        let a7 = length tl in
-        ( + ) 1 a7
-      else #match_failure
-      
-    
-  let rec a1 acc xs =
     let a8 = ( = ) xs [] in
     if a8
-    then acc
+    then 0
     else let a10 = #list_length xs in
       let a9 = ( > ) a10 0 in
       if a9
       then let h = #list_hd xs in
         let tl = #list_tl xs in
-        let a11 = ( + ) acc 1 in
-        a1 a11 tl
+        let a11 = length tl in
+        ( + ) 1 a11
+      else #match_failure
+      
+    
+  let rec a5 acc xs =
+    let a12 = ( = ) xs [] in
+    if a12
+    then acc
+    else let a14 = #list_length xs in
+      let a13 = ( > ) a14 0 in
+      if a13
+      then let h = #list_hd xs in
+        let tl = #list_tl xs in
+        let a15 = ( + ) acc 1 in
+        a5 a15 tl
       else #match_failure
       
     
   let length_tail =
-    a1 0
+    a5 0
   let rec map f xs =
-    let a12 = ( = ) xs [] in
-    if a12
+    let a16 = ( = ) xs [] in
+    if a16
     then []
-    else let a15 = #list_length xs in
-      let a14 = ( > ) a15 0 in
-      let a17 = #list_tl xs in
-      let a16 = ( = ) a17 [] in
-      let a13 = ( && ) a14 a16 in
-      if a13
+    else let a19 = #list_length xs in
+      let a18 = ( > ) a19 0 in
+      let a21 = #list_tl xs in
+      let a20 = ( = ) a21 [] in
+      let a17 = ( && ) a18 a20 in
+      if a17
       then let a = #list_hd xs in
-        let a18 = f a in
-        (a18 :: [])
-      else let a21 = #list_length xs in
-        let a20 = ( > ) a21 1 in
-        let a24 = #list_tl xs in
-        let a23 = #list_tl a24 in
-        let a22 = ( = ) a23 [] in
-        let a19 = ( && ) a20 a22 in
-        if a19
+        let a22 = f a in
+        (a22 :: [])
+      else let a25 = #list_length xs in
+        let a24 = ( > ) a25 1 in
+        let a28 = #list_tl xs in
+        let a27 = #list_tl a28 in
+        let a26 = ( = ) a27 [] in
+        let a23 = ( && ) a24 a26 in
+        if a23
         then let a = #list_hd xs in
-          let a25 = #list_tl xs in
-          let b = #list_hd a25 in
-          let a26 = f a in
-          let a28 = f b in
-          let a27 = (a28 :: []) in
-          (a26 :: a27)
-        else let a31 = #list_length xs in
-          let a30 = ( > ) a31 2 in
-          let a35 = #list_tl xs in
-          let a34 = #list_tl a35 in
-          let a33 = #list_tl a34 in
-          let a32 = ( = ) a33 [] in
-          let a29 = ( && ) a30 a32 in
-          if a29
+          let a29 = #list_tl xs in
+          let b = #list_hd a29 in
+          let a30 = f a in
+          let a32 = f b in
+          let a31 = (a32 :: []) in
+          (a30 :: a31)
+        else let a35 = #list_length xs in
+          let a34 = ( > ) a35 2 in
+          let a39 = #list_tl xs in
+          let a38 = #list_tl a39 in
+          let a37 = #list_tl a38 in
+          let a36 = ( = ) a37 [] in
+          let a33 = ( && ) a34 a36 in
+          if a33
           then let a = #list_hd xs in
-            let a36 = #list_tl xs in
-            let b = #list_hd a36 in
-            let a38 = #list_tl xs in
-            let a37 = #list_tl a38 in
-            let c = #list_hd a37 in
-            let a39 = f a in
-            let a41 = f b in
-            let a43 = f c in
-            let a42 = (a43 :: []) in
-            let a40 = (a41 :: a42) in
-            (a39 :: a40)
-          else let a45 = #list_length xs in
-            let a44 = ( > ) a45 3 in
-            if a44
+            let a40 = #list_tl xs in
+            let b = #list_hd a40 in
+            let a42 = #list_tl xs in
+            let a41 = #list_tl a42 in
+            let c = #list_hd a41 in
+            let a43 = f a in
+            let a45 = f b in
+            let a47 = f c in
+            let a46 = (a47 :: []) in
+            let a44 = (a45 :: a46) in
+            (a43 :: a44)
+          else let a49 = #list_length xs in
+            let a48 = ( > ) a49 3 in
+            if a48
             then let a = #list_hd xs in
-              let a46 = #list_tl xs in
-              let b = #list_hd a46 in
-              let a48 = #list_tl xs in
-              let a47 = #list_tl a48 in
-              let c = #list_hd a47 in
-              let a51 = #list_tl xs in
-              let a50 = #list_tl a51 in
-              let a49 = #list_tl a50 in
-              let d = #list_hd a49 in
-              let a54 = #list_tl xs in
+              let a50 = #list_tl xs in
+              let b = #list_hd a50 in
+              let a52 = #list_tl xs in
+              let a51 = #list_tl a52 in
+              let c = #list_hd a51 in
+              let a55 = #list_tl xs in
+              let a54 = #list_tl a55 in
               let a53 = #list_tl a54 in
-              let a52 = #list_tl a53 in
-              let tl = #list_tl a52 in
-              let a55 = f a in
-              let a57 = f b in
-              let a59 = f c in
-              let a61 = f d in
-              let a62 = map f tl in
+              let d = #list_hd a53 in
+              let a58 = #list_tl xs in
+              let a57 = #list_tl a58 in
+              let a56 = #list_tl a57 in
+              let tl = #list_tl a56 in
+              let a59 = f a in
+              let a61 = f b in
+              let a63 = f c in
+              let a65 = f d in
+              let a66 = map f tl in
+              let a64 = (a65 :: a66) in
+              let a62 = (a63 :: a64) in
               let a60 = (a61 :: a62) in
-              let a58 = (a59 :: a60) in
-              let a56 = (a57 :: a58) in
-              (a55 :: a56)
+              (a59 :: a60)
             else #match_failure
             
           
@@ -710,81 +711,81 @@ Some types are different due to the impossibility to type the function "#unpack_
       
     
   let rec append xs ys =
-    let a63 = ( = ) xs [] in
-    if a63
-    then ys
-    else let a65 = #list_length xs in
-      let a64 = ( > ) a65 0 in
-      if a64
-      then let x = #list_hd xs in
-        let a0 = #list_tl xs in
-        let a66 = append a0 ys in
-        (x :: a66)
-      else #match_failure
-      
-    
-  let rec a2 xs =
     let a67 = ( = ) xs [] in
     if a67
-    then []
+    then ys
     else let a69 = #list_length xs in
       let a68 = ( > ) a69 0 in
       if a68
-      then let h = #list_hd xs in
-        let tl = #list_tl xs in
-        let a70 = a2 tl in
-        append h a70
+      then let x = #list_hd xs in
+        let a3 = #list_tl xs in
+        let a70 = append a3 ys in
+        (x :: a70)
       else #match_failure
       
     
-  let concat =
-    a2
-  let rec iter f xs =
+  let rec a6 xs =
     let a71 = ( = ) xs [] in
     if a71
-    then ()
+    then []
     else let a73 = #list_length xs in
       let a72 = ( > ) a73 0 in
       if a72
       then let h = #list_hd xs in
         let tl = #list_tl xs in
-        let () = f h in
+        let a74 = a6 tl in
+        append h a74
+      else #match_failure
+      
+    
+  let concat =
+    a6
+  let rec iter f xs =
+    let a75 = ( = ) xs [] in
+    if a75
+    then ()
+    else let a77 = #list_length xs in
+      let a76 = ( > ) a77 0 in
+      if a76
+      then let h = #list_hd xs in
+        let tl = #list_tl xs in
+        let a0 = f h in
         iter f tl
       else #match_failure
       
     
-  let a3 h a =
+  let a7 h a =
     (h, a)
   let rec cartesian xs ys =
-    let a74 = ( = ) xs [] in
-    if a74
+    let a78 = ( = ) xs [] in
+    if a78
     then []
-    else let a76 = #list_length xs in
-      let a75 = ( > ) a76 0 in
-      if a75
+    else let a80 = #list_length xs in
+      let a79 = ( > ) a80 0 in
+      if a79
       then let h = #list_hd xs in
         let tl = #list_tl xs in
-        let a78 = a3 h in
-        let a77 = map a78 ys in
-        let a79 = cartesian tl ys in
-        append a77 a79
+        let a82 = a7 h in
+        let a81 = map a82 ys in
+        let a83 = cartesian tl ys in
+        append a81 a83
       else #match_failure
       
     
-  let main =
-    let a82 = (3 :: []) in
-    let a81 = (2 :: a82) in
-    let a80 = (1 :: a81) in
-    let () = iter print_int a80 in
-    let a86 = (2 :: []) in
-    let a85 = (1 :: a86) in
-    let a90 = (4 :: []) in
-    let a89 = (3 :: a90) in
-    let a88 = (2 :: a89) in
-    let a87 = (1 :: a88) in
-    let a84 = cartesian a85 a87 in
-    let a83 = length a84 in
-    let () = print_int a83 in
+  let a4 =
+    let a86 = (3 :: []) in
+    let a85 = (2 :: a86) in
+    let a84 = (1 :: a85) in
+    let a2 = iter print_int a84 in
+    let a90 = (2 :: []) in
+    let a89 = (1 :: a90) in
+    let a94 = (4 :: []) in
+    let a93 = (3 :: a94) in
+    let a92 = (2 :: a93) in
+    let a91 = (1 :: a92) in
+    let a88 = cartesian a89 a91 in
+    let a87 = length a88 in
+    let a1 = print_int a87 in
     0
 
 Test for names generation

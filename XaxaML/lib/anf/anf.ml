@@ -12,6 +12,7 @@ type aexp =
   | Ae_val of string
   | Ae_empty_list
   | Ae_tuple of aexp list
+[@@deriving show { with_path = false }]
 
 let ae_int i = Ae_int i
 let ae_bool b = Ae_bool b
@@ -21,13 +22,15 @@ let ae_tuple lst = Ae_tuple lst
 (** compex expressions *)
 type cexp =
   | Ce_atom of aexp
-  | Ce_app of aexp * aexp list
+  | Ce_app of string * aexp list
   | Ce_ite of aexp * exp * exp
   | Ce_cons_list of aexp * aexp
+[@@deriving show { with_path = false }]
 
 and exp =
   | E_let_in of string * cexp * exp
   | E_complex of cexp
+[@@deriving show { with_path = false }]
 
 let ce_atom aexp = Ce_atom aexp
 let ce_app e e_list = Ce_app (e, e_list)
@@ -36,14 +39,15 @@ let ce_cons_list aexp1 aexp2 = Ce_cons_list (aexp1, aexp2)
 let e_let_in name cexp exp = E_let_in (name, cexp, exp)
 let e_complex cexp = E_complex cexp
 
-type func = string * string list * exp
+type func = string * string list * exp [@@deriving show { with_path = false }]
 
 type toplevel =
   | Value of string * exp
   | Non_rec of func
   | Rec of func list
+[@@deriving show { with_path = false }]
 
-type anf_program = toplevel list
+type anf_program = toplevel list [@@deriving show { with_path = false }]
 type error = IncorrectAst of string
 
 module Convert : sig
@@ -64,7 +68,7 @@ end = struct
   let rec convert_cexp = function
     | Ce_atom atom -> convert_aexp atom
     | Ce_app (to_app, args) ->
-      Base.List.fold_left args ~init:(convert_aexp to_app) ~f:(fun acc arg ->
+      Base.List.fold_left args ~init:(Rp_e_ident to_app) ~f:(fun acc arg ->
         Rp_e_app (acc, convert_aexp arg))
     | Ce_ite (aexp, cexp1, cexp2) ->
       Rp_e_ite (convert_aexp aexp, convert_exp cexp1, convert_exp cexp2)
@@ -92,31 +96,25 @@ end = struct
   let to_ast p = to_rp_ast p |> Remove_patterns.ToAst.convert_program
 end
 
-let f a b c =
-  let sum a b = a + b in
-  let inc x =
-    let p t = t + 1 in
-    sum x (p 1)
-  in
-  if a > 0 then sum b c else inc c
-;;
-
 module PP : sig
   val pp_anf_program : Format.formatter -> anf_program -> unit
   val pp_error : Format.formatter -> error -> unit
 end = struct
+  let name_to_str name =
+    let is_valname = function
+      | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '#' -> true
+      | _ -> false
+    in
+    if Base.List.for_all (Base.String.to_list name) ~f:is_valname
+    then name
+    else "( " ^ name ^ " )"
+  ;;
+
   let rec atom_to_str = function
     | Ae_int i -> Int.to_string i
     | Ae_bool b -> Bool.to_string b
     | Ae_unit -> "()"
-    | Ae_val v ->
-      let is_valname = function
-        | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' | '#' -> true
-        | _ -> false
-      in
-      if Base.List.for_all (Base.String.to_list v) ~f:is_valname
-      then v
-      else "( " ^ v ^ " )"
+    | Ae_val v -> name_to_str v
     | Ae_empty_list -> "[]"
     | Ae_tuple lst ->
       let hd = List.hd lst in
@@ -133,7 +131,7 @@ end = struct
   let rec cexp_to_str tab_num = function
     | Ce_atom a -> atom_to_str a
     | Ce_app (a1, a_list) ->
-      List.fold_left (fun acc a -> acc ^ " " ^ atom_to_str a) (atom_to_str a1) a_list
+      List.fold_left (fun acc a -> acc ^ " " ^ atom_to_str a) (name_to_str a1) a_list
     | Ce_ite (a, e1, e2) ->
       let tab = create_tab tab_num in
       let if1 = "if " ^ atom_to_str a ^ tab in
@@ -260,7 +258,9 @@ and app_to_cexp e1 e2 =
   let* exprs, binds = RList.fold_left (to_app :: args_e) ~init:(return ([], [])) ~f:f1 in
   let exprs = List.rev exprs in
   let to_app, args_e = List.hd_exn exprs, List.tl_exn exprs in
-  return (binds, ce_app to_app args_e)
+  match to_app with
+  | Ae_val to_app -> return (binds, ce_app to_app args_e)
+  | _ -> fail @@ IncorrectAst "Ast contains wrong-typed application"
 
 and to_exp = function
   | _ as orig ->

@@ -4,3 +4,4 @@
 
 val std_names : string list
 val type_var_count : int
+val to_rename : string list
