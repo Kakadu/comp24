@@ -1,14 +1,13 @@
   $ dune exec ./anf_demo.exe << EOF
-  > let test = let nested_pat x = match x with | 5 -> a 5 | 6 -> 6 in nested_pat 7 
+  > let test = let nested_pat x = match x with | 5 -> 1000 + 0 | 6 -> 6 in nested_pat 7 
   > EOF
-  let  ll_0 unbound_a_0 x_0 = let anf_app_0 = ( = ) x_0 5 in
-  let anf_ifthenelse_5 = if anf_app_0 then let anf_app_1 = unbound_a_0 5  in
-  anf_app_1 else let anf_app_2 = ( = ) x_0 6 in
-  let anf_ifthenelse_4 = if anf_app_2 then 6 else let anf_app_3 = match_error ()  in
-  anf_app_3 in
-  anf_ifthenelse_4 in
-  anf_ifthenelse_5;;
-  let  test_0  = let anf_app_0 = ll_0 unbound_a_0 7 in
+  let  ll_0 x_0 = let anf_app_0 = ( = ) x_0 5 in
+  let anf_ifthenelse_4 = if anf_app_0 then 1000 else let anf_app_1 = ( = ) x_0 6 in
+  let anf_ifthenelse_3 = if anf_app_1 then 6 else let anf_app_2 = match_error ()  in
+  anf_app_2 in
+  anf_ifthenelse_3 in
+  anf_ifthenelse_4;;
+  let  test_0  = let anf_app_0 = ll_0 7  in
   anf_app_0;;
 
   $ dune exec ./anf_demo.exe << EOF
@@ -19,6 +18,23 @@
   anf_ifthenelse_1;;
   let  test_0  = let anf_app_0 = ll_0 7  in
   anf_app_0;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let f a = match a with | 5 -> 5 + 0 | 6 -> 6
+  > EOF
+  let  f_0 a_0 = let anf_app_0 = ( = ) a_0 5 in
+  let anf_ifthenelse_4 = if anf_app_0 then 5 else let anf_app_1 = ( = ) a_0 6 in
+  let anf_ifthenelse_3 = if anf_app_1 then 6 else let anf_app_2 = match_error ()  in
+  anf_app_2 in
+  anf_ifthenelse_3 in
+  anf_ifthenelse_4;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let test = (5 + 0, 6)
+  > EOF
+  let  test_0  = let anf_tuple_0 = (5, 6) in
+  anf_tuple_0;;
+
 
   $ dune exec ./anf_demo.exe << EOF
   > let rec fact_cps n cont =
@@ -49,7 +65,7 @@
   >   fib_cps (n - 2) (fun b ->
   >   cont (a + b)))
   > EOF
-  let  ll_1 a_0 cont_0 b_0 = let anf_app_0 = ( + ) a_0 b_0 in
+  let  ll_1 a_0 cont_0 b_0 = let anf_app_0 = ( + ) b_0 a_0 in
   let anf_app_1 = cont_0 anf_app_0  in
   anf_app_1;;
   let  ll_0 cont_0 fib_cps_0 n_0 a_0 = let anf_app_0 = ll_1 a_0 cont_0 in
@@ -93,7 +109,7 @@
   anf_ifthenelse_4;;
 
   $ dune exec ./anf_demo.exe < ./manytests/typed/002fac.ml
-  let  ll_0 k_0 n_0 p_0 = let anf_app_0 = ( * ) p_0 n_0 in
+  let  ll_0 k_0 n_0 p_0 = let anf_app_0 = ( * ) n_0 p_0 in
   let anf_app_1 = k_0 anf_app_0  in
   anf_app_1;;
   let rec fac_cps_0 n_0 k_0 = let anf_app_0 = ( = ) n_0 1 in
@@ -115,15 +131,15 @@
   let rec fib_acc_0 a_0 b_0 n_0 = let anf_app_0 = ( = ) n_0 1 in
   let anf_ifthenelse_4 = if anf_app_0 then b_0 else let anf_app_1 = ( - ) n_0 1 in
   let n1_0 = anf_app_1 in
-  let anf_app_2 = ( + ) a_0 b_0 in
+  let anf_app_2 = ( + ) b_0 a_0 in
   let ab_0 = anf_app_2 in
   let anf_app_3 = fib_acc_0 b_0 ab_0 n1_0 in
   anf_app_3 in
   anf_ifthenelse_4;;
   let rec fib_0 n_0 = let anf_app_0 = ( < ) n_0 2 in
-  let anf_ifthenelse_6 = if anf_app_0 then n_0 else let anf_app_1 = ( - ) n_0 2 in
+  let anf_ifthenelse_6 = if anf_app_0 then n_0 else let anf_app_1 = ( - ) n_0 1 in
   let anf_app_2 = fib_0 anf_app_1  in
-  let anf_app_3 = ( - ) n_0 1 in
+  let anf_app_3 = ( - ) n_0 2 in
   let anf_app_4 = fib_0 anf_app_3  in
   let anf_app_5 = ( + ) anf_app_4 anf_app_2 in
   anf_app_5 in
@@ -151,15 +167,15 @@
   let anf_app_2 = print_int c_0  in
   let c_1 = anf_app_2 in
   0;;
-  let  test10_0 a_2 b_2 c_2 d_0 e_0 f_1 g_0 h_0 i_0 j_0 = let anf_app_0 = ( + ) a_2 b_2 in
-  let anf_app_1 = ( + ) anf_app_0 c_2 in
-  let anf_app_2 = ( + ) anf_app_1 d_0 in
-  let anf_app_3 = ( + ) anf_app_2 e_0 in
-  let anf_app_4 = ( + ) anf_app_3 f_1 in
-  let anf_app_5 = ( + ) anf_app_4 g_0 in
-  let anf_app_6 = ( + ) anf_app_5 h_0 in
-  let anf_app_7 = ( + ) anf_app_6 i_0 in
-  let anf_app_8 = ( + ) anf_app_7 j_0 in
+  let  test10_0 a_2 b_2 c_2 d_0 e_0 f_1 g_0 h_0 i_0 j_0 = let anf_app_0 = ( + ) b_2 a_2 in
+  let anf_app_1 = ( + ) c_2 anf_app_0 in
+  let anf_app_2 = ( + ) d_0 anf_app_1 in
+  let anf_app_3 = ( + ) e_0 anf_app_2 in
+  let anf_app_4 = ( + ) f_1 anf_app_3 in
+  let anf_app_5 = ( + ) g_0 anf_app_4 in
+  let anf_app_6 = ( + ) h_0 anf_app_5 in
+  let anf_app_7 = ( + ) i_0 anf_app_6 in
+  let anf_app_8 = ( + ) j_0 anf_app_7 in
   anf_app_8;;
   let  main_0  = let anf_app_0 = wrap_0 test10_0 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
   let rez_0 = anf_app_0 in
@@ -178,7 +194,7 @@
   let  fac_0 self_0 n_0 = let anf_app_0 = ( <= ) n_0 1 in
   let anf_ifthenelse_4 = if anf_app_0 then 1 else let anf_app_1 = ( - ) n_0 1 in
   let anf_app_2 = self_0 anf_app_1  in
-  let anf_app_3 = ( * ) n_0 anf_app_2 in
+  let anf_app_3 = ( * ) anf_app_2 n_0 in
   anf_app_3 in
   anf_ifthenelse_4;;
   let  main_0  = let anf_app_0 = fix_0 fac_0 6 in
@@ -214,7 +230,7 @@
   let anf_app_3 = ( = ) anf_app_2 () in
   let anf_ifthenelse_11 = if anf_app_3 then let anf_app_4 = print_int c_0  in
   let anf_app_5 = ( = ) anf_app_4 () in
-  let anf_ifthenelse_9 = if anf_app_5 then let anf_app_6 = ( * ) b_0 c_0 in
+  let anf_ifthenelse_9 = if anf_app_5 then let anf_app_6 = ( * ) c_0 b_0 in
   let anf_app_7 = ( + ) a_0 anf_app_6 in
   anf_app_7 else let anf_app_8 = match_error ()  in
   anf_app_8 in
@@ -266,7 +282,7 @@
   let anf_app_8 = ( = ) anf_app_7 () in
   let anf_ifthenelse_13 = if anf_app_8 then let anf_app_9 = ( * ) a_0 b_0 in
   let anf_app_10 = ( / ) anf_app_9 _c_0 in
-  let anf_app_11 = ( + ) anf_app_10 d_0 in
+  let anf_app_11 = ( + ) d_0 anf_app_10 in
   anf_app_11 else let anf_app_12 = match_error ()  in
   anf_app_12 in
   anf_ifthenelse_13 else let anf_app_14 = match_error ()  in
@@ -294,8 +310,8 @@
   let anf_app_2 = f_0 x_0 anf_constraint_1 in
   let anf_constraint_3 = (anf_app_2 : int) in
   anf_constraint_3;;
-  let  ll_0 x_1 b_0 = let anf_ifthenelse_2 = if b_0 then let anf_app_0 = ( + ) x_1 1 in
-  anf_app_0 else let anf_app_1 = ( * ) x_1 2 in
+  let  ll_0 x_1 b_0 = let anf_ifthenelse_2 = if b_0 then let anf_app_0 = ( + ) 1 x_1 in
+  anf_app_0 else let anf_app_1 = ( + ) x_1 x_1 in
   anf_app_1 in
   anf_ifthenelse_2;;
   let  ll_1 _start_0 = let anf_app_0 = ( / ) _start_0 2 in
@@ -410,7 +426,7 @@
   let h_0 = anf_app_2 in
   let anf_app_3 = get_field xs_0 1 in
   let tl_0 = anf_app_3 in
-  let anf_app_4 = ( + ) acc_0 1 in
+  let anf_app_4 = ( + ) 1 acc_0 in
   let anf_app_5 = ll_0 anf_app_4 tl_0 in
   anf_app_5 else let anf_app_6 = match_error ()  in
   anf_app_6 in
@@ -602,7 +618,7 @@
   > let test_var = test (5 + 5) (6 + 6) (7 + 7)
   > EOF
   let  test_0 a1_0 a2_0 a3_0 = let anf_app_0 = ( + ) a1_0 a2_0 in
-  let anf_app_1 = ( + ) anf_app_0 a3_0 in
+  let anf_app_1 = ( + ) a3_0 anf_app_0 in
   anf_app_1;;
   let  test_var_0  = let anf_app_0 = ( + ) 7 7 in
   let anf_app_1 = ( + ) 6 6 in
@@ -620,7 +636,7 @@
   anf_app_0;;
   let  g_0 a_1 = let anf_app_0 = funct_0 5  in
   anf_app_0;;
-  let  funct_1 a_2 = let anf_app_0 = ( + ) a_2 500 in
+  let  funct_1 a_2 = let anf_app_0 = ( + ) 500 a_2 in
   anf_app_0;;
   let  res  = let anf_app_0 = g_0 5  in
   let anf_app_1 = print_int anf_app_0  in
