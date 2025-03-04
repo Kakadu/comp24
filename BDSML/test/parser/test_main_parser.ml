@@ -97,3 +97,8 @@ let%expect_test "let is not an expression test" =
           [(Val_binding ("a", [], (Exp_constant (Const_int 1))))]))
         ] |}]
 ;;
+
+let%expect_test "Shrink of Sukharev test pattern" =
+  test_parser {| let a = Some ( ( - ) 4 ) |};
+  [%expect {||}]
+;;

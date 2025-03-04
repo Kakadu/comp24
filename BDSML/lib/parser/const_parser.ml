@@ -30,4 +30,8 @@ let parse_bool =
   Const_bool res
 ;;
 
-let parse_const = ws *> choice [ parse_int; parse_char; parse_string; parse_bool ]
+let parse_unit = char '(' *> ws *> char ')' *> return Const_unit
+
+let parse_const =
+  ws *> choice [ parse_int; parse_char; parse_string; parse_bool; parse_unit ]
+;;
