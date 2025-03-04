@@ -3,33 +3,41 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open ObaML
-open Format
-
-let infer_and_result fmt structure =
-  match Inferencer.run_structure_infer_with_custom_std structure Std.extended_std_lst with
-  | Ok env ->
-    Format.fprintf fmt "%a" Inferencer.TypeEnv.pretty_pp_env (Std.extended_std_lst, env)
-  | Error err -> Format.fprintf fmt "Infer: %a" Typedtree.pp_error err
-;;
 
 let parse_and_closure_result str =
   match Parser.structure_from_string str with
   | Ok structure ->
-    let simple_structure = To_simple_ast.convert structure in
-    let simple_structure, _ =
-      Alpha_conversion.run_alpha_conversion simple_structure Inner
-    in
-    let simple_structure = Closure_conversion.run_closure_conversion simple_structure in
-    let new_structure = To_ast.convert simple_structure in
-    Format.printf
-      "Types:\n%a\nConverted structure:\n%a\nTypes after conversions:\n%a"
-      infer_and_result
-      structure
-      Simple_ast_pretty_printer.print_structure
-      simple_structure
-      infer_and_result
-      new_structure
-  | Error _ -> printf "Syntax error"
+    (match Inferencer.run_structure_infer structure with
+     | Ok structure_env ->
+       Format.printf
+         "Types:\n%a\n"
+         Inferencer.TypeEnv.pretty_pp_env
+         (Std.std_lst, structure_env);
+       let simple_structure = To_simple_ast.convert structure in
+       let simple_structure, _ =
+         Alpha_conversion.run_alpha_conversion simple_structure Inner
+       in
+       let simple_structure =
+         Closure_conversion.run_closure_conversion simple_structure
+       in
+       let new_structure = To_ast.convert simple_structure in
+       Format.printf
+         "Converted structure:\n%a\n"
+         Simple_ast_pretty_printer.print_structure
+         simple_structure;
+       (match
+          Inferencer.run_structure_infer_with_custom_std
+            new_structure
+            Std.extended_std_lst
+        with
+        | Ok new_structure_env ->
+          Format.printf
+            "Types after conversions:\n%a"
+            Inferencer.TypeEnv.pretty_pp_env
+            (Std.extended_std_lst, new_structure_env)
+        | Error e -> Format.printf "Infer: %a" Typedtree.pp_error e)
+     | Error e -> Format.printf "Infer: %a" Typedtree.pp_error e)
+  | Error err -> Format.printf "Parser: %s\n" err
 ;;
 
 let%expect_test "" =
