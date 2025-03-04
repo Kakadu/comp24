@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>typedtree.ml &mdash; Coverage report</title>
+    <meta name="description" content="90.62% coverage in lib/typedtree.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">lib/</span>typedtree.ml
+        </a>
+      </h1>
+      <h2>90.62%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:34.09%"></span>
+      <span class="unvisited" style="bottom:46.59%"></span>
+      <span class="unvisited" style="bottom:6.82%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="unvisited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="unvisited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2025, tepa46, Arsene-Baitenov *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
+open Format
+module VarSet = Stdlib.Set.Make (Int)
+module VarMap = Stdlib.Map.Make (Int)
+module StringMap = Stdlib.Map.Make (String)
+
+type ty =
+  | ITVar of int
+  | ITPrim of string
+  | ITArr of ty * ty
+  | ITTuple of ty list
+  | ITList of ty
+
+let type_var x = <span data-count="336">I</span>TVar x
+let tprim_int = ITPrim "int"
+let tprim_bool = ITPrim "bool"
+let tprim_string = ITPrim "string"
+let tprim_unit = ITPrim "unit"
+let tarr l r = <span data-count="1175">I</span>TArr (l, r)
+let ( @-&gt; ) = tarr
+let tlist ty = <span data-count="88">I</span>TList ty
+let ttuple ty_lst = <span data-count="26">I</span>TTuple ty_lst
+
+let rec pretty_pp_ty_tuples fmt acc =
+  <span data-count="45">l</span>et typ, mp = acc in
+  match typ with
+  | <span data-count="0">[</span>] -&gt; ()
+  | <span data-count="22">[</span> h ] -&gt;
+    (match h with
+     | <span data-count="6">I</span>TArr (_, _) -&gt; fprintf fmt "(%a)" pretty_pp_ty (h, mp)
+     | <span data-count="16">_</span> -&gt; fprintf fmt "%a" pretty_pp_ty (h, mp))
+  | <span data-count="23">h</span> :: tl -&gt;
+    (match h with
+     | <span data-count="6">I</span>TArr (_, _) -&gt;
+       fprintf fmt "(%a) * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp)
+     | <span data-count="17">_</span> -&gt; fprintf fmt "%a * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp))
+
+and pretty_pp_ty fmt acc =
+  <span data-count="502">l</span>et typ, mp = acc in
+  match typ with
+  | <span data-count="115">I</span>TVar num -&gt;
+    (match VarMap.find_opt num mp with
+     | <span data-count="115">S</span>ome x -&gt; fprintf fmt "'%s" x
+     | <span data-count="0">N</span>one -&gt; fprintf fmt "'%d" num)
+  | <span data-count="179">I</span>TPrim str -&gt; fprintf fmt "%s" str
+  | <span data-count="160">I</span>TArr (ty1, ty2) -&gt;
+    (match ty1, ty2 with
+     | <span data-count="24">I</span>TArr (_, _), _ -&gt;
+       fprintf fmt "(%a) -&gt; %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp)
+     | <span data-count="136">_</span> -&gt; fprintf fmt "%a -&gt; %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp))
+  | <span data-count="22">I</span>TTuple ty_lst -&gt; fprintf fmt "%a" pretty_pp_ty_tuples (ty_lst, mp)
+  | <span data-count="26">I</span>TList ty1 -&gt;
+    (match ty1 with
+     | <span data-count="16">I</span>TVar _ | <span data-count="7">I</span>TPrim _ | <span data-count="2">I</span>TList _ -&gt; fprintf fmt "%a list" pretty_pp_ty (ty1, mp)
+     | <span data-count="1">_</span> -&gt; fprintf fmt "(%a) list" pretty_pp_ty (ty1, mp))
+;;
+
+type scheme = Scheme of VarSet.t * ty
+
+type error =
+  [ `Occurs_check
+  | `Unification_failed of ty * ty
+  | `Unexpected_type
+  | `Unbound_variable of string
+  | `Several_bound of string
+  | `WrongRecursiveValueBinding
+  ]
+
+let pp_error fmt = function
+  | <span data-count="1">`</span>Occurs_check -&gt; fprintf fmt "Occurs check error"
+  | <span data-count="2">`</span>Unification_failed (typ1, typ2) -&gt;
+    fprintf
+      fmt
+      "Unification failed: %a and %a"
+      pretty_pp_ty
+      (typ1, VarMap.empty)
+      pretty_pp_ty
+      (typ2, VarMap.empty)
+  | <span data-count="0">`</span>Unexpected_type -&gt; fprintf fmt "Unexpected type"
+  | <span data-count="1">`</span>Unbound_variable str -&gt; fprintf fmt "Unbound value %S" str
+  | <span data-count="1">`</span>Several_bound str -&gt;
+    fprintf fmt "Variable %S is bound several times in this matching" str
+  | <span data-count="1">`</span>WrongRecursiveValueBinding -&gt;
+    fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>
