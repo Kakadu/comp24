@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>elim_utils.ml &mdash; Coverage report</title>
+    <meta name="description" content="97.62% coverage in lib/middleend/patelim/elim_utils.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/patelim/</span>elim_utils.ml
+        </a>
+      </h1>
+      <h2>97.62%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:38.60%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="unvisited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+</pre>
+<pre><code class="ocaml">open AstLib.Ast
+open IR
+
+module RuntimeEnv = struct
+  open Common.Counter.R
+
+  type runtime_member =
+    { name : string
+    ; typ : typ
+    }
+
+  let apply f x = <span data-count="229">r</span>eturn @@ eap<span data-count="229">p</span> (ei<span data-count="229">d</span> (ident_of_definabl<span data-count="229">e</span> (ident_letter<span data-count="229">s</span> f.name))) x
+
+  (** add it to infer *)
+  let generic = tva<span data-count="46">r</span> "a"
+
+  let get_head = { name = "GET_HEAD"; typ = tarro<span data-count="46">w</span> (tlis<span data-count="46">t</span> generic) generic }
+  let get_tl = { name = "GET_TALE"; typ = tarro<span data-count="46">w</span> (tlis<span data-count="46">t</span> generic) (tlis<span data-count="46">t</span> generic) }
+  let get_nth = { name = "GET_NTH"; typ = tarro<span data-count="46">w</span> (ttupl<span data-count="46">e</span> tint generic []) (tva<span data-count="46">r</span> "b") }
+  let not_exhaustive_pm = { name = "RTE_ERROR_MATCH_FAILURE"; typ = tarro<span data-count="46">w</span> tunit generic }
+  let init_env = [ get_head; get_tl; get_nth; not_exhaustive_pm ]
+end
+
+module Env = struct
+  open Common.Counter.R
+
+  let extend env id e = <span data-count="100">B</span>ase.Map.update env id ~f:(fun _ -&gt; <span data-count="100">e</span>)
+  let empty = Base.Map.empt<span data-count="46">y</span> (module Base.String)
+  let lookup_env id map = <span data-count="46">B</span>ase.Map.find map id
+
+  let merge m1 m2 =
+    <span data-count="39">B</span>ase.Map.fold_right m2 ~init:(retur<span data-count="39">n</span> m1) ~f:(fun ~key ~data acc -&gt;
+      <span data-count="46">l</span>et* acc = acc in
+      <span data-count="46">m</span>atch lookup_env key acc with
+      | <span data-count="0">S</span>ome _ -&gt; fail "Key intersection"
+      | <span data-count="46">N</span>one -&gt; return @@ exten<span data-count="46">d</span> acc key data)
+  ;;
+end
+
+module RuntimeUtils = struct
+  open RuntimeEnv
+  open IR
+
+  let apply_get_head head = <span data-count="70">a</span>pply get_head head
+  let apply_get_tl tl = <span data-count="70">a</span>pply get_tl tl
+  let apply_get_nth n e = <span data-count="8">a</span>pply get_nth (etupl<span data-count="8">e</span> (econs<span data-count="8">t</span> (CInt n)) e [])
+  let apply_not_exhaustive_pm () = <span data-count="81">a</span>pply not_exhaustive_pm (econs<span data-count="81">t</span> CUnit)
+  let create_var_for_eval n = <span data-count="69">"</span>EVALUATED_" ^ n
+
+  let create_pop_and_expr_for_eval evaluated =
+    <span data-count="69">l</span>et create_pop_for_eval evaluated = <span data-count="69">p</span>op_pat (pi<span data-count="69">d</span> evaluated) in
+    let create_expr_for_eval evaluated =
+      <span data-count="69">e</span>id (ident_of_definabl<span data-count="69">e</span> (ident_letter<span data-count="69">s</span> evaluated))
+    in
+    create_pop_for_eva<span data-count="69">l</span> evaluated, create_expr_for_eva<span data-count="69">l</span> evaluated
+  ;;
+end
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

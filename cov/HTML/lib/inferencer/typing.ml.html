@@ -370,74 +370,74 @@ type typ =
 let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit
-let tarrow left_type right_type = <span data-count="57095">T</span>Arr (left_type, right_type)
-let ttuple t1 t2 type_list = <span data-count="3052">T</span>Tuple (t1, t2, type_list)
-let tlist typ = <span data-count="4685">T</span>List typ
-let tvar n = <span data-count="31717">T</span>Var n
+let tarrow left_type right_type = <span data-count="227711">T</span>Arr (left_type, right_type)
+let ttuple t1 t2 type_list = <span data-count="7790">T</span>Tuple (t1, t2, type_list)
+let tlist typ = <span data-count="17699">T</span>List typ
+let tvar n = <span data-count="133256">T</span>Var n
 
 let rec pp_type fmt typ =
-  <span data-count="472">l</span>et open Format in
+  <span data-count="1452">l</span>et open Format in
   let arrow = function
-    | <span data-count="19">T</span>Arr _ -&gt; format_of_string "(%a)"
-    | <span data-count="132">_</span> -&gt; format_of_string "%a"
+    | <span data-count="55">T</span>Arr _ -&gt; format_of_string "(%a)"
+    | <span data-count="466">_</span> -&gt; format_of_string "%a"
   in
   match typ with
-  | <span data-count="169">T</span>Ground x -&gt;
+  | <span data-count="575">T</span>Ground x -&gt;
     (match x with
-     | <span data-count="139">G</span>Int -&gt; fprintf fmt "int"
-     | <span data-count="22">G</span>Bool -&gt; fprintf fmt "bool"
-     | <span data-count="8">G</span>Unit -&gt; fprintf fmt "Unit")
-  | <span data-count="109">T</span>Var var -&gt;
+     | <span data-count="481">G</span>Int -&gt; fprintf fmt "int"
+     | <span data-count="42">G</span>Bool -&gt; fprintf fmt "bool"
+     | <span data-count="52">G</span>Unit -&gt; fprintf fmt "Unit")
+  | <span data-count="263">T</span>Var var -&gt;
     let ascii_code_of_a = 97 in
-    fprintf fmt "%s" ("'" ^ Char.escape<span data-count="109">d</span> (Char.ch<span data-count="109">r</span> (int_of_strin<span data-count="109">g</span> var + ascii_code_of_a)))
-  | <span data-count="18">T</span>Tuple (typ1, typ2, value_list) -&gt;
+    fprintf fmt "%s" ("'" ^ Char.escape<span data-count="263">d</span> (Char.ch<span data-count="263">r</span> (int_of_strin<span data-count="263">g</span> var + ascii_code_of_a)))
+  | <span data-count="40">T</span>Tuple (typ1, typ2, value_list) -&gt;
     let value_list = typ1 :: typ2 :: value_list in
     let pp_tuple value_list =
-      <span data-count="18">l</span>et pp_el fmt typ =
-        <span data-count="38">l</span>et s =
+      <span data-count="40">l</span>et pp_el fmt typ =
+        <span data-count="82">l</span>et s =
           match typ with
           | <span data-count="0">T</span>Tuple _ -&gt; format_of_strin<span data-count="0">g</span> "(%a)"
-          | <span data-count="38">_</span> -&gt; format_of_strin<span data-count="38">g</span> "%a"
+          | <span data-count="82">_</span> -&gt; format_of_strin<span data-count="82">g</span> "%a"
         in
         fprintf fmt s pp_type typ
       in
       let pp_list fmt delimiter =
-        <span data-count="18">p</span>p_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="20">f</span>printf fmt delimiter) pp_el fmt
+        <span data-count="40">p</span>p_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="42">f</span>printf fmt delimiter) pp_el fmt
       in
       pp_list fmt " * " value_list
     in
     pp_tuple value_list
-  | <span data-count="25">T</span>List typ -&gt;
+  | <span data-count="53">T</span>List typ -&gt;
     fprintf
       fmt
       ((match typ with
-        | <span data-count="3">T</span>Ground _ | <span data-count="16">T</span>Var _ | <span data-count="2">T</span>List _ -&gt; "%a"
-        | <span data-count="4">_</span> -&gt; "(%a)")
-       ^<span data-count="25">^</span> " list")
+        | <span data-count="3">T</span>Ground _ | <span data-count="40">T</span>Var _ | <span data-count="4">T</span>List _ -&gt; "%a"
+        | <span data-count="6">_</span> -&gt; "(%a)")
+       ^<span data-count="53">^</span> " list")
       pp_type
       typ
-  | <span data-count="151">T</span>Arr (typ_left, typ_right) -&gt;
-    fprintf fmt (arro<span data-count="151">w</span> typ_left ^<span data-count="151">^</span> " -&gt; %a") pp_type typ_left pp_type typ_right
+  | <span data-count="521">T</span>Arr (typ_left, typ_right) -&gt;
+    fprintf fmt (arro<span data-count="521">w</span> typ_left ^<span data-count="521">^</span> " -&gt; %a") pp_type typ_left pp_type typ_right
 ;;
 
 let edit_numbers_in_typ typ =
-  <span data-count="89">l</span>et empty = Base.Map.empty (module Base.String) in
-  <span data-count="89">l</span>et add map old_n new_n = <span data-count="42">B</span>ase.Map.update map old_n ~f:(fun _ -&gt; <span data-count="42">n</span>ew_n) in
+  <span data-count="245">l</span>et empty = Base.Map.empty (module Base.String) in
+  <span data-count="245">l</span>et add map old_n new_n = <span data-count="100">B</span>ase.Map.update map old_n ~f:(fun _ -&gt; <span data-count="100">n</span>ew_n) in
   let lookup = Base.Map.find in
   let rec helper typ total map =
-    <span data-count="449">m</span>atch typ with
-    | <span data-count="105">T</span>Var x -&gt;
+    <span data-count="1417">m</span>atch typ with
+    | <span data-count="259">T</span>Var x -&gt;
       let n, total, map =
         match lookup map x with
-        | <span data-count="42">N</span>one -&gt; total, total + 1, ad<span data-count="42">d</span> map x total
-        | <span data-count="63">S</span>ome n -&gt; n, total, map
+        | <span data-count="100">N</span>one -&gt; total, total + 1, ad<span data-count="100">d</span> map x total
+        | <span data-count="159">S</span>ome n -&gt; n, total, map
       in
-      TVar (string_of_in<span data-count="105">t</span> n), total, map
-    | <span data-count="153">T</span>Ground _ -&gt; typ, total, map
-    | <span data-count="17">T</span>Tuple (t1, t2, xs) -&gt;
+      TVar (string_of_in<span data-count="259">t</span> n), total, map
+    | <span data-count="547">T</span>Ground _ -&gt; typ, total, map
+    | <span data-count="39">T</span>Tuple (t1, t2, xs) -&gt;
       let t1, total, map = helper t1 total map in
-      <span data-count="17">l</span>et t2, total, map = helper t2 total map in
-      <span data-count="17">l</span>et res, total, map =
+      <span data-count="39">l</span>et t2, total, map = helper t2 total map in
+      <span data-count="39">l</span>et res, total, map =
         List.fold_left
           (fun (acc, total, map) typ -&gt;
             <span data-count="2">l</span>et typ, total, map = helper typ total map in
@@ -445,24 +445,24 @@ let edit_numbers_in_typ typ =
           ([], total, map)
           xs
       in
-      <span data-count="17">T</span>Tuple (t1, t2, List.re<span data-count="17">v</span> res), total, map
-    | <span data-count="24">T</span>List ltyp -&gt;
+      <span data-count="39">T</span>Tuple (t1, t2, List.re<span data-count="39">v</span> res), total, map
+    | <span data-count="52">T</span>List ltyp -&gt;
       let res, total, map = helper ltyp total map in
-      <span data-count="24">T</span>List res, total, map
-    | <span data-count="150">T</span>Arr (l, r) -&gt;
+      <span data-count="52">T</span>List res, total, map
+    | <span data-count="520">T</span>Arr (l, r) -&gt;
       let res_l, total, map = helper l total map in
-      <span data-count="150">l</span>et res_r, total, map = helper r total map in
-      <span data-count="150">T</span>Arr (res_l, res_r), total, map
+      <span data-count="520">l</span>et res_r, total, map = helper r total map in
+      <span data-count="520">T</span>Arr (res_l, res_r), total, map
   in
   let typ, _, _ = helper typ 0 empty in
-  <span data-count="89">t</span>yp
+  <span data-count="245">t</span>yp
 ;;
 
 let print_typ fmt ?(carriage = <span data-count="0">f</span>alse) typ =
-  <span data-count="89">F</span>ormat.fprintf
+  <span data-count="245">F</span>ormat.fprintf
     fmt
-    ("%s" ^<span data-count="89">^</span> if carriage then <span data-count="89">"</span>\n" else <span data-count="0">"</span>")
-    (Format.asprint<span data-count="89">f</span> "%a" pp_type (edit_numbers_in_ty<span data-count="89">p</span> typ))
+    ("%s" ^<span data-count="245">^</span> if carriage then <span data-count="245">"</span>\n" else <span data-count="0">"</span>")
+    (Format.asprint<span data-count="245">f</span> "%a" pp_type (edit_numbers_in_ty<span data-count="245">p</span> typ))
 ;;
 
 type error =
@@ -474,9 +474,9 @@ type error =
   | UnexpectedRecursionLhs
 
 let pp_error fmt err =
-  <span data-count="17">l</span>et open Format in
+  <span data-count="33">l</span>et open Format in
   match err with
-  | <span data-count="3">O</span>ccursCheck -&gt; fprintf fmt "Occurs check failed"
+  | <span data-count="7">O</span>ccursCheck -&gt; fprintf fmt "Occurs check failed"
   | <span data-count="0">M</span>ismatchValues (t1, t2) -&gt;
     fprintf
       fmt
@@ -486,8 +486,8 @@ let pp_error fmt err =
       t1
       pp_type
       t2
-  | <span data-count="2">U</span>nboundValue identifier -&gt; fprintf fmt "Unbound value %s" identifier
-  | <span data-count="9">U</span>nificationFailed (t1, t2) -&gt;
+  | <span data-count="6">U</span>nboundValue identifier -&gt; fprintf fmt "Unbound value %s" identifier
+  | <span data-count="15">U</span>nificationFailed (t1, t2) -&gt;
     fprintf
       fmt
       "This expression has type %a but an expression was expected of type %a"
@@ -496,13 +496,13 @@ let pp_error fmt err =
       pp_type
       t2
   | <span data-count="0">W</span>ildcardNotExpected -&gt; fprintf fmt {| wildcard " _ " not expected |}
-  | <span data-count="3">U</span>nexpectedRecursionLhs -&gt;
+  | <span data-count="5">U</span>nexpectedRecursionLhs -&gt;
     fprintf fmt "Only variables are allowed as left-hand side of `let rec'"
 ;;
 
 let print_type_error error =
-  <span data-count="17">l</span>et s = Format.asprintf "%a" pp_error error in
-  <span data-count="17">F</span>ormat.printf "Typecheck error: %s\n" s
+  <span data-count="27">l</span>et s = Format.asprintf "%a" pp_error error in
+  <span data-count="27">F</span>ormat.printf "Typecheck error: %s\n" s
 ;;
 </code></pre>
       </div>

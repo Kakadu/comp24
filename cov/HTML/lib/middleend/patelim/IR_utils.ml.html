@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>IR_utils.ml &mdash; Coverage report</title>
+    <meta name="description" content="42.86% coverage in lib/middleend/patelim/IR_utils.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/patelim/</span>IR_utils.ml
+        </a>
+      </h1>
+      <h2>42.86%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:46.55%"></span>
+      <span class="unvisited" style="bottom:44.83%"></span>
+      <span class="unvisited" style="bottom:43.10%"></span>
+      <span class="unvisited" style="bottom:41.38%"></span>
+      <span class="unvisited" style="bottom:39.66%"></span>
+      <span class="unvisited" style="bottom:37.93%"></span>
+      <span class="unvisited" style="bottom:27.59%"></span>
+      <span class="unvisited" style="bottom:25.86%"></span>
+      <span class="unvisited" style="bottom:24.14%"></span>
+      <span class="unvisited" style="bottom:22.41%"></span>
+      <span class="unvisited" style="bottom:20.69%"></span>
+      <span class="unvisited" style="bottom:18.97%"></span>
+      <span class="unvisited" style="bottom:17.24%"></span>
+      <span class="unvisited" style="bottom:15.52%"></span>
+      <span class="unvisited" style="bottom:13.79%"></span>
+      <span class="unvisited" style="bottom:12.07%"></span>
+      <span class="unvisited" style="bottom:10.34%"></span>
+      <span class="unvisited" style="bottom:8.62%"></span>
+      <span class="unvisited" style="bottom:6.90%"></span>
+      <span class="unvisited" style="bottom:1.72%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span class="unvisited"> </span>
+<a id="L36"></a><span class="unvisited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="unvisited"> </span>
+<a id="L43"></a><span class="unvisited"> </span>
+<a id="L44"></a><span class="unvisited"> </span>
+<a id="L45"></a><span class="unvisited"> </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span class="unvisited"> </span>
+<a id="L48"></a><span class="unvisited"> </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
+<a id="L51"></a><span class="unvisited"> </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="unvisited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+</pre>
+<pre><code class="ocaml">open AstLib.Ast
+open IR
+open Common.Base_bin_ops
+
+let rec transform_back = function
+  | <span data-count="542">N</span>oPMEConst c -&gt; EConst c
+  | <span data-count="1028">N</span>oPMEId id -&gt; EId id
+  | <span data-count="139">N</span>oPMEBinOp (bin_op, e1, e2) -&gt;
+    EApp
+      ( EApp (EId (IdentOfDefinable (IdentOp (bin_op_to_st<span data-count="139">r</span> bin_op))), transform_bac<span data-count="139">k</span> e1)
+      , transform_bac<span data-count="139">k</span> e2 )
+  | <span data-count="757">N</span>oPMEApp (e1, e2) -&gt; EApp (transform_bac<span data-count="757">k</span> e1, transform_bac<span data-count="757">k</span> e2)
+  | <span data-count="194">N</span>oPMEFun (pat, expr) -&gt; EFun (pat, transform_bac<span data-count="194">k</span> expr)
+  | <span data-count="130">N</span>oPMEIf (i, t, e) -&gt; EIf (transform_bac<span data-count="130">k</span> i, transform_bac<span data-count="130">k</span> t, transform_bac<span data-count="130">k</span> e)
+  | <span data-count="235">N</span>oPMEClsr (decl, expr2) -&gt; EClsr (transform_back_dec<span data-count="235">l</span> decl, transform_bac<span data-count="235">k</span> expr2)
+  | <span data-count="8">N</span>oPMEConstraint (e, typ) -&gt; EConstraint (transform_bac<span data-count="8">k</span> e, typ)
+  | <span data-count="40">N</span>oPMEList (e1, e2) -&gt; EList (transform_bac<span data-count="40">k</span> e1, transform_bac<span data-count="40">k</span> e2)
+  | <span data-count="17">N</span>oPMETuple (e1, e2, els) -&gt;
+    ETuple (transform_bac<span data-count="17">k</span> e1, transform_bac<span data-count="17">k</span> e2, List.ma<span data-count="17">p</span> transform_back els)
+
+and transform_back_decl = function
+  | <span data-count="353">N</span>oPMDLet (rec_flag, (decl, expr)) -&gt;
+    let expr = transform_back expr in
+    <span data-count="353">D</span>Let (rec_flag, (decl, expr))
+  | <span data-count="2">N</span>oPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
+    let applied = tl in
+    let res = List.map (fun (pat, e) -&gt; <span data-count="0">p</span>at, transform_bac<span data-count="0">k</span> e) applied in
+    <span data-count="2">D</span>LetMut (rec_flag, (pat, transform_bac<span data-count="2">k</span> expr), (pat1, transform_bac<span data-count="2">k</span> expr1), res)
+;;
+
+let transform_expr_in_decl f =
+  <span data-count="0">l</span>et helper = function
+    | <span data-count="0">N</span>oPMDLet (rec_flag, (pat, expr)) -&gt; NoPMDLet (rec_flag, (pat, <span data-count="0">f</span> expr))
+    | <span data-count="0">N</span>oPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
+      let res = List.map (fun (pat, e) -&gt; <span data-count="0">p</span>at, <span data-count="0">f</span> e) tl in
+      <span data-count="0">N</span>oPMDLetMut (rec_flag, (pat, <span data-count="0">f</span> expr), (pat1, <span data-count="0">f</span> expr1), res)
+  in
+  helper
+;;
+
+let rec optimize e =
+  <span data-count="0">l</span>et rec helper = function
+    | <span data-count="0">N</span>oPMEBinOp (And, NoPMEConst (CBool true), e)
+    | <span data-count="0">N</span>oPMEBinOp (And, e, NoPMEConst (CBool true))
+    | <span data-count="0">N</span>oPMEIf (NoPMEConst (CBool true), e, _) -&gt; helper e
+    | <span data-count="0">N</span>oPMEApp (e1, e2) -&gt; eapp (helpe<span data-count="0">r</span> e1) (helpe<span data-count="0">r</span> e2)
+    | <span data-count="0">N</span>oPMEClsr (decl, expr) -&gt; eclsr (transform_expr_in_dec<span data-count="0">l</span> helper decl) (helpe<span data-count="0">r</span> expr)
+    | (<span data-count="0">N</span>oPMEConst _ | <span data-count="0">N</span>oPMEId _) as e -&gt; e
+    | <span data-count="0">N</span>oPMEConstraint (e, t) -&gt; e_typed ~typ:(Some t) (helpe<span data-count="0">r</span> e)
+    | <span data-count="0">N</span>oPMEFun (pat, e) -&gt; efun pat (helpe<span data-count="0">r</span> e)
+    | <span data-count="0">N</span>oPMEIf (i, t, e) -&gt; eif (helpe<span data-count="0">r</span> i) (helpe<span data-count="0">r</span> t) (helpe<span data-count="0">r</span> e)
+    | <span data-count="0">N</span>oPMEList (e1, e2) -&gt; elist (helpe<span data-count="0">r</span> e1) (helpe<span data-count="0">r</span> e2)
+    | <span data-count="0">N</span>oPMETuple (e1, e2, es) -&gt; etuple (helpe<span data-count="0">r</span> e1) (helpe<span data-count="0">r</span> e2) (List.ma<span data-count="0">p</span> helper es)
+    | <span data-count="0">N</span>oPMEBinOp (bop, e1, e2) -&gt; ebin_op bop (helpe<span data-count="0">r</span> e1) (helpe<span data-count="0">r</span> e2)
+  in
+  let optimized = helper e in
+  <span data-count="0">i</span>f optimized = e then <span data-count="0">e</span> else <span data-count="0">o</span>ptimize optimized
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

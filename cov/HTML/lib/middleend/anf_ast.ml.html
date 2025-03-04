@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>pp_utils.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in lib/ast/pp_utils.ml">
+    <title>anf_ast.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/middleend/anf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,7 +12,7 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">lib/ast/</span>pp_utils.ml
+          <span class="dirname">lib/middleend/</span>anf_ast.ml
         </a>
       </h1>
       <h2>100.00%</h2>
@@ -29,20 +29,31 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -68,28 +79,50 @@
 <a href="#L19">19</a>
 <a href="#L20">20</a>
 <a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, David Akhmedov, Danil Parfyonov *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Format
+open AstLib.Ast
+(* open Common.Base_bin_ops *)
 
-let pp_el parens_pred pp_e fmt e =
-  <span data-count="80">l</span>et s = if parens_pred e then <span data-count="6">"</span>(%a)" else <span data-count="74">"</span>%a" in
-  fprintf fmt (Scanf.format_from_strin<span data-count="80">g</span> s "%a") pp_e e
-;;
+type identifier =
+  | Id of string
+  | IdConstraint of string typed
 
-let pp_list parens_pred pp_e fmt delimiter =
-  <span data-count="40">p</span>p_print_list
-    ~pp_sep:(fun fmt _ -&gt; <span data-count="40">f</span>printf fmt delimiter)
-    (fun fmt value -&gt; <span data-count="80">p</span>p_el parens_pred pp_e fmt value)
-    fmt
-;;
+type immexpr =
+  | ImmConst of const
+  | ImmIdentifier of ident
+  | ImmConstraint of immexpr typed
 
-let pp_tuple parens_pred pp_e delim fmt value_list =
-  <span data-count="40">p</span>p_list parens_pred pp_e fmt delim value_list
-;;
+type cexpr =
+  | CApp of cexpr * cexpr
+  | CIf of immexpr * aexpr * aexpr
+  | CImmExpr of immexpr
+
+and aexpr =
+  | ALetIn of identifier * cexpr * aexpr
+  | ACExpr of cexpr
+
+type let_body = identifier * identifier list * aexpr
+
+type anf_decl =
+  | ADSingleLet of rec_flag * let_body
+  | ADMutualRecDecl of rec_flag * let_body * let_body * let_body list
+
+type anf_prog = anf_decl list
 </code></pre>
       </div>
     </div>
