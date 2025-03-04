@@ -31,8 +31,7 @@ module ParsingTests = struct
 
   let%expect_test "Let with nested let" =
     parse_test {| let a = let f x = x in 13 |};
-    [%expect
-      {| 
+    [%expect {| 
       let a = let f x = x
       in 13
       |}]
@@ -44,8 +43,7 @@ module ParsingTests = struct
   ;;
 
   let%expect_test "Mutual recursion with custom operators" =
-    parse_test
-      {|
+    parse_test {|
     let rec ( += ) x = x -$ 1 
     and (-$) = fun x y -> ( + ) x y;;
  |};
@@ -95,8 +93,7 @@ module ParsingTests = struct
       | hd, tl -> hd 
       | _ -> 0
     |};
-    [%expect
-      {|
+    [%expect {|
       let a = match l with
       | (hd, tl) -> hd
       | _ -> 0|}]
@@ -190,32 +187,27 @@ module ParsingTests = struct
 
   let%expect_test "Type annotation on function application result" =
     parse_test "let a = f x : int";
-    [%expect
-      {|
+    [%expect {|
       let a = ((f x) : int)
       |}]
   ;;
 
   let%expect_test "Double semicolon separator" =
-    parse_test
-      {|
+    parse_test {|
     let a = 42;;
     let b = 42;;
     |};
-    [%expect
-      {|
+    [%expect {|
       let a = 42;;
       let b = 42
       |}]
   ;;
 
   let%expect_test "Empty list pattern" =
-    parse_test
-      {|
+    parse_test {|
       let map [] = []
     |};
-    [%expect
-      {|
+    [%expect {|
       let map [] = []
       |}]
   ;;
