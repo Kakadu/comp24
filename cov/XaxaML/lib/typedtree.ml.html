@@ -231,31 +231,31 @@ module TypeVarSet = Stdlib.Set.Make (Int)
 
 type scheme = Scheme of TypeVarSet.t * typ
 
-let type_var x = <span data-count="1264">T</span>_var x
+let type_var x = <span data-count="1472">T</span>_var x
 let int_typ = T_prim "int"
 let bool_typ = T_prim "bool"
 let unit_typ = T_prim "unit"
-let arrow l r = <span data-count="4754">T</span>_arr (l, r)
+let arrow l r = <span data-count="5570">T</span>_arr (l, r)
 let ( @-&gt; ) = arrow
-let list_typ typ = <span data-count="111519">T</span>_list typ
+let list_typ typ = <span data-count="116865">T</span>_list typ
 
 (* map typed variables to letters *)
 let assign_names typ =
   <span data-count="271">l</span>et calc_name letter num =
-    <span data-count="275">"</span>\'"
+    <span data-count="280">"</span>\'"
     ^
     if num = 0
-    then <span data-count="275">B</span>ase.Char.to_strin<span data-count="275">g</span> letter
+    then <span data-count="280">B</span>ase.Char.to_strin<span data-count="280">g</span> letter
     else <span data-count="0">B</span>ase.Char.to_strin<span data-count="0">g</span> letter ^ Int.to_strin<span data-count="0">g</span> num
   in
-  let next_letter c = <span data-count="136">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="136">t</span> c + 1) in
+  let next_letter c = <span data-count="141">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="141">t</span> c + 1) in
   let next letter num =
-    <span data-count="136">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="136">n</span>ext_lette<span data-count="136">r</span> letter, num
+    <span data-count="141">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="141">n</span>ext_lette<span data-count="141">r</span> letter, num
   in
   let rec helper names letter num = function
-    | <span data-count="275">T</span>_var n -&gt;
-      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="275">e</span> letter num) with
-       | <span data-count="136">`</span>Ok new_names -&gt; new_names, nex<span data-count="136">t</span> letter num
+    | <span data-count="280">T</span>_var n -&gt;
+      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="280">e</span> letter num) with
+       | <span data-count="141">`</span>Ok new_names -&gt; new_names, nex<span data-count="141">t</span> letter num
        | <span data-count="139">`</span>Duplicate -&gt; names, (letter, num))
     | <span data-count="443">T</span>_arr (l, r) -&gt;
       let names, (letter, num) = helper names letter num l in
@@ -266,7 +266,7 @@ let assign_names typ =
         (fun (names, (letter, num)) -&gt; <span data-count="89">h</span>elper names letter num)
         (names, (letter, num))
         (h :: list)
-    | <span data-count="486">_</span> -&gt; names, (letter, num)
+    | <span data-count="481">_</span> -&gt; names, (letter, num)
   in
   let names, (_, _) = helper (Base.Map.empt<span data-count="271">y</span> (module Base.Int)) 'a' 0 typ in
   <span data-count="271">n</span>ames
@@ -274,14 +274,14 @@ let assign_names typ =
 
 let pp_internal ppf typ names_mapping =
   <span data-count="271">l</span>et rec helper ppf = function
-    | <span data-count="275">T</span>_var n -&gt;
+    | <span data-count="280">T</span>_var n -&gt;
       (match names_mapping with
-       | <span data-count="275">S</span>ome names -&gt;
-         (try Format.fprint<span data-count="275">f</span> ppf "%s" (Base.Map.find_ex<span data-count="275">n</span> names n) with
+       | <span data-count="280">S</span>ome names -&gt;
+         (try Format.fprint<span data-count="280">f</span> ppf "%s" (Base.Map.find_ex<span data-count="280">n</span> names n) with
           | <span data-count="0">B</span>ase.Not_found_s _ | <span data-count="0">S</span>tdlib.Not_found -&gt;
             Format.fprintf ppf "Names for types are counted incorrectly")
        | <span data-count="0">N</span>one -&gt; Format.fprintf ppf "%i" n)
-    | <span data-count="486">T</span>_prim s -&gt; Format.fprintf ppf "%s" s
+    | <span data-count="481">T</span>_prim s -&gt; Format.fprintf ppf "%s" s
     | <span data-count="443">T</span>_arr (l, r) -&gt;
       (match l with
        | <span data-count="50">T</span>_arr _ -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
