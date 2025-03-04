@@ -37,7 +37,7 @@ end
 let arg_prefix = "arg_"
 let let_prefix = "var_"
 
-let rec ac_pattern (env : NameEnv.t) = function
+let rec convert_pattern (env : NameEnv.t) = function
   | (Const _ | Wildcard | Operation (Unary _)) as orig -> return (env, orig)
   | Var id ->
     let* env, new_id = NameEnv.resolve_name env id arg_prefix in
@@ -47,33 +47,33 @@ let rec ac_pattern (env : NameEnv.t) = function
     let* env, new_id = NameEnv.resolve_name env op_id arg_prefix in
     return (env, Var new_id)
   | Constraint (p, dt) ->
-    let* env, ac_p = ac_pattern env p in
+    let* env, ac_p = convert_pattern env p in
     return (env, Constraint (ac_p, dt))
   | List pts ->
     let* env, ac_pts =
       fold_list pts ~init:(env, []) ~f:(fun (env, acc) p ->
-        let* env, ac_p = ac_pattern env p in
+        let* env, ac_p = convert_pattern env p in
         return (env, ac_p :: acc))
     in
     let ac_pts = List.rev ac_pts in
     return (env, List ac_pts)
   | ListConcat (p1, p2) ->
-    let* env, ac_p1 = ac_pattern env p1 in
-    let* env, ac_p2 = ac_pattern env p2 in
+    let* env, ac_p1 = convert_pattern env p1 in
+    let* env, ac_p2 = convert_pattern env p2 in
     return (env, ListConcat (ac_p1, ac_p2))
   | Tuple (a, b, pts) ->
-    let* env, ac_a = ac_pattern env a in
-    let* env, ac_b = ac_pattern env b in
+    let* env, ac_a = convert_pattern env a in
+    let* env, ac_b = convert_pattern env b in
     let* env, ac_pts =
       fold_list pts ~init:(env, []) ~f:(fun (env, acc) p ->
-        let* env, ac_p = ac_pattern env p in
+        let* env, ac_p = convert_pattern env p in
         return (env, ac_p :: acc))
     in
     let ac_pts = List.rev ac_pts in
     return (env, Tuple (ac_a, ac_b, ac_pts))
 ;;
 
-let ac_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
+let convert_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
   match arg with
   | Var id ->
     let* env, new_id = NameEnv.generate_new_name env id name_prefix in
@@ -82,38 +82,38 @@ let ac_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
     let op_id = BinOperator.to_string op in
     let* env, new_id = NameEnv.resolve_name env op_id name_prefix in
     return (env, Var new_id)
-  | arg -> ac_pattern env arg
+  | arg -> convert_pattern env arg
 ;;
 
 let collect_args (env : NameEnv.t) (args : args) =
   let* env, ac_args =
     fold_list args ~init:(env, []) ~f:(fun (env, acc) arg ->
-      let* env, ac_arg = ac_name_pattern env arg arg_prefix in
+      let* env, ac_arg = convert_name_pattern env arg arg_prefix in
       return (env, ac_arg :: acc))
   in
   return (env, List.rev ac_args)
 ;;
 
-let rec ac_bind (env : NameEnv.t) ((name, args, body) : bind) =
-  let* env, new_name = ac_name_pattern env name let_prefix in
+let rec convert_bind (env : NameEnv.t) ((name, args, body) : bind) =
+  let* env, new_name = convert_name_pattern env name let_prefix in
   let* args_env, ac_args = collect_args env args in
-  let* env, ac_body = ac_expr args_env body in
+  let* env, ac_body = convert_expr args_env body in
   let env = NameEnv.sub env args_env in
   return (env, ((new_name, ac_args, ac_body) : bind))
 
-and ac_expr (env : NameEnv.t) = function
+and convert_expr (env : NameEnv.t) = function
   | (EConst _ | EOperation _) as orig -> return (env, orig)
   | EVar id ->
     (match NameEnv.find id env with
      | Some new_id -> return (env, EVar new_id)
      | None -> return (env, EVar id))
   | Application (l, r) ->
-    let* env, ac_l = ac_expr env l in
-    let* env, ac_r = ac_expr env r in
+    let* env, ac_l = convert_expr env l in
+    let* env, ac_r = convert_expr env r in
     return (env, Application (ac_l, ac_r))
   | Fun (args, body) ->
     let* args_env, ac_args = collect_args env args in
-    let* env, ac_body = ac_expr args_env body in
+    let* env, ac_body = convert_expr args_env body in
     let env = NameEnv.sub args_env env in
     return (env, Fun (ac_args, ac_body))
   | _ -> failwith "Illegal expression was encountered during Alpha Conversion"
