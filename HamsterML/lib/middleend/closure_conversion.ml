@@ -117,18 +117,46 @@ let rec free_vars_expr (exp : expr) =
 
 let unbound_variables (exp : expr) = free_vars_expr exp
 
-let cc = function
-  | Fun (args, expr) ->
-    let unbound = unbound_variables expr in
-    let new_expr =
-      Let
-        ( Nonrecursive
-        , [ ( Var "anon"
-            , List.append args (Set.to_list unbound |> List.map ~f:(fun x -> Var x))
-            , expr )
-          ]
-        , None )
+(* Generate fresh variable names *)
+let fresh_var_counter = ref 0
+
+let fresh_var prefix =
+  let id = !fresh_var_counter in
+  fresh_var_counter := id + 1;
+  prefix ^ Int.to_string id
+;;
+
+(* Closure conversion function *)
+let rec cc_expr = function
+  | Let (fun_type, binds, in_expr_opt) ->
+    let cc_binds =
+      List.map binds ~f:(fun (pat, args, expr) ->
+        match expr with
+        | Fun (fun_args, fun_body) ->
+          let rec collect_nested_funs acc_args = function
+            | Fun (inner_args, inner_body) ->
+              collect_nested_funs (acc_args @ inner_args) inner_body
+            | body -> acc_args, body
+          in
+          let all_args, innermost_body = collect_nested_funs fun_args fun_body in
+          pat, args @ all_args, cc_expr innermost_body
+        | _ -> pat, args, cc_expr expr)
     in
-    new_expr
-  | _ -> failwith "not yet implemented"
+    let cc_in_expr = Option.map in_expr_opt ~f:cc_expr in
+    Let (fun_type, cc_binds, cc_in_expr)
+  | Fun (args, expr) -> Fun (args, cc_expr expr)
+  | EVar _ as e -> e
+  | EConst _ as e -> e
+  | EOperation _ as e -> e
+  | ETuple (e1, e2, es) ->
+    ETuple (cc_expr e1, cc_expr e2, List.map es ~f:cc_expr)
+  | EList es -> EList (List.map es ~f:cc_expr)
+  | EListConcat (e1, e2) -> EListConcat (cc_expr e1, cc_expr e2)
+  | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
+  | If (cond, then_expr, else_expr) ->
+    If (cc_expr cond, cc_expr then_expr, Option.map else_expr ~f:cc_expr)
+  | Match (expr, cases) ->
+    Match
+      (cc_expr expr, List.map cases ~f:(fun (pat, body) -> pat, cc_expr body))
+  | EConstraint (expr, ty) -> EConstraint (cc_expr expr, ty)
 ;;

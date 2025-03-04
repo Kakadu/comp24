@@ -8,10 +8,9 @@ open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
 open HamsterML__Closure_conversion;;
+open HamsterML__Pp_expr;;
 
-open Base
-
-let unbound_identifiers exp = 
-  Set.to_list (HamsterML__Closure_conversion.unbound_variables (parse_expr exp))
-
-let cc_expr expr = parse_expr expr |> HamsterML__Closure_conversion.cc
+let cc_expr expr =
+  let result = parse_expr expr |> HamsterML__Closure_conversion.cc_expr in
+  Stdlib.print_endline (pretty_print_expr result);
+  Stdlib.Format.printf "%a\n%!" pp_expr result
