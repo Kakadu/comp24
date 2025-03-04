@@ -103,33 +103,13 @@ let rec restore_cexpr ppf = function
       then_branch
       pp_aexpr
       else_branch
-  | CMatch (pat_head, pat_exp_lst) ->
-    fprintf
-      ppf
-      "match %a with\n%a"
-      frestore_imm
-      pat_head
-      (fun ppf ->
-        pp_list
-          ppf
-          (fun ppf (pat, ae) -> fprintf ppf "| %a -> %a" frestore_pattern pat pp_aexpr ae)
-          "\n")
-      pat_exp_lst
   | CApplication (left, rigth) ->
     fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
 
 and pp_aexpr ppf = function
   | ACExpr cexp -> fprintf ppf "%a" restore_cexpr cexp
   | ALetIn (pat, outer, inner) ->
-    fprintf
-      ppf
-      "let %a = %a in\n %a"
-      frestore_pattern
-      pat
-      restore_cexpr
-      outer
-      pp_aexpr
-      inner
+    fprintf ppf "let %s = %a in\n %a" pat restore_cexpr outer pp_aexpr inner
 ;;
 
 let frestore_rec_flag ppf = function
@@ -141,30 +121,24 @@ let restore_anf_decl fmt = function
   | ADSingleLet (rec_flag, ALet (pat, patterns, body)) ->
     Format.fprintf
       fmt
-      "let %a %a %a = %a;;"
+      "let %a %s %a = %a;;"
       frestore_rec_flag
       rec_flag
-      frestore_pattern
       pat
-      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%a " frestore_pattern pat))
+      (fun fmt -> List.iter (fun pat -> Format.fprintf fmt "%s " pat))
       patterns
       pp_aexpr
       body
-  | ADMutualRecDecl (rec_flag, bindings) ->
-    Format.fprintf fmt "let ";
-    frestore_rec_flag fmt rec_flag;
+  | ADMutualRecDecl bindings ->
+    Format.fprintf fmt "let %s" "rec";
     Format.fprintf fmt " ";
     List.iteri
       (fun i binding ->
         if i != 0 then Format.fprintf fmt " and ";
         match binding with
         | ALet (pat, patterns, exp) ->
-          Format.fprintf fmt " ";
-          frestore_pattern fmt pat;
-          (fun fmt ->
-            List.iter (fun pat -> Format.fprintf fmt " %a " frestore_pattern pat))
-            fmt
-            patterns;
+          Format.fprintf fmt " %s" pat;
+          (fun fmt -> List.iter (fun pat -> Format.fprintf fmt " %s " pat)) fmt patterns;
           Format.fprintf fmt " = %a " pp_aexpr exp)
       bindings
 ;;

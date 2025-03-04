@@ -9,14 +9,12 @@ open Stdlib.Format
 let binop_to_string = function
   | Mul -> "*"
   | Div -> "/"
-  | Plus -> "+"
-  | Minus -> "-"
+  | Add -> "+"
+  | Sub -> "-"
   | Eq -> "="
   | Neq -> "<>"
-  | Gt -> ">"
-  | Geq -> ">="
   | Lt -> "<"
-  | Leq -> "<="
+  | Gt -> ">"
   | And -> "&&"
   | Or -> "||"
 ;;
@@ -39,6 +37,7 @@ let rec pp_cexpr ppf = function
   | CGetfield (idx, i) -> fprintf ppf "@[ getfield %i %a @]" idx pp_imm i
   | CBinop (op, x, y) ->
     fprintf ppf "@[%a %s %a @]" pp_imm x (binop_to_string op) pp_imm y
+  | CUnop (Not, x) -> fprintf ppf "@[!%a @]" pp_imm x
   | CApp (f, args) -> fprintf ppf "@[%a %a@]" pp_imm f (pp_list "") args
   | CFun (f, a) -> fprintf ppf "@[<2>fun %s -> @,%a@,@]" f pp_aexpr a
   | CIte (c, t, e) ->

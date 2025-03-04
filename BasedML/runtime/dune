@@ -1,0 +1,30 @@
+(rule
+ (targets libmlrt.so)
+ (deps ml_runtimelib.c ml_runtimelib.h)
+ (action
+  (run
+   clang-16
+   -fPIC
+   -shared
+   ml_runtimelib.c
+   -lffi
+   -o
+   %{targets}
+   ;  -D DEBUG 
+   )))
+
+(rule
+ (targets libmlstd.so)
+ (deps ml_stdlib.c ml_stdlib.h ml_runtimelib.h libmlrt.so)
+ (action
+  (run
+   clang-16
+   -fPIC
+   -shared
+   ml_stdlib.c
+   -L./
+   -lmlrt
+   -o
+   %{targets}
+   ;  -D DEBUG
+   )))

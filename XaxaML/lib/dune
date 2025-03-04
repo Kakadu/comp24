@@ -3,7 +3,18 @@
 (library
  (name XaxaML)
  (public_name XaxaML.Lib)
- (modules Ast Parser Typedtree Inferencer)
+ (modules
+  Ast
+  Parser
+  Typedtree
+  Std_names
+  Inferencer
+  Common
+  Remove_patterns
+  Alpha_conversion
+  Closure_conversion
+  Lambda_lifting
+  Anf)
  (libraries base stdlib angstrom)
  (inline_tests)
  (preprocess
