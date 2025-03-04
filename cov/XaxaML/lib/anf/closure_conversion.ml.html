@@ -354,22 +354,22 @@ open Remove_patterns
 open Common
 open Base
 
-let empty_bindings = Map.empt<span data-count="49">y</span> (module String)
+let empty_bindings = Map.empt<span data-count="50">y</span> (module String)
 
 let update_bindings last new1 =
-  <span data-count="177">M</span>ap.merge_skewed last new1 ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
+  <span data-count="178">M</span>ap.merge_skewed last new1 ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
 ;;
 
 let rec get_free binded = function
-  | <span data-count="208">R</span>p_e_const _ -&gt; StrSet.empty
-  | <span data-count="993">R</span>p_e_ident ident -&gt;
-    if StrSet.find binded ident then <span data-count="565">S</span>trSet.empty else <span data-count="428">S</span>trSet.singleton ident
-  | <span data-count="66">R</span>p_e_ite (e1, e2, e3) -&gt;
-    StrSet.union_list [ get_fre<span data-count="66">e</span> binded e1; get_fre<span data-count="66">e</span> binded e2; get_fre<span data-count="66">e</span> binded e3 ]
+  | <span data-count="211">R</span>p_e_const _ -&gt; StrSet.empty
+  | <span data-count="1000">R</span>p_e_ident ident -&gt;
+    if StrSet.find binded ident then <span data-count="568">S</span>trSet.empty else <span data-count="432">S</span>trSet.singleton ident
+  | <span data-count="67">R</span>p_e_ite (e1, e2, e3) -&gt;
+    StrSet.union_list [ get_fre<span data-count="67">e</span> binded e1; get_fre<span data-count="67">e</span> binded e2; get_fre<span data-count="67">e</span> binded e3 ]
   | <span data-count="69">R</span>p_e_fun (args, e) -&gt;
     let binded = StrSet.union binded (StrSet.of_lis<span data-count="69">t</span> args) in
     <span data-count="69">g</span>et_free binded e
-  | <span data-count="797">R</span>p_e_app (e1, e2) -&gt; StrSet.union (get_fre<span data-count="797">e</span> binded e1) (get_fre<span data-count="797">e</span> binded e2)
+  | <span data-count="804">R</span>p_e_app (e1, e2) -&gt; StrSet.union (get_fre<span data-count="804">e</span> binded e1) (get_fre<span data-count="804">e</span> binded e2)
   | <span data-count="112">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
     StrSet.union (get_fre<span data-count="112">e</span> binded e1) (get_fre<span data-count="112">e</span> (StrSet.ad<span data-count="112">d</span> binded name) e2)
   | <span data-count="0">R</span>p_e_let (Rp_rec decls, e2) -&gt;
@@ -387,7 +387,7 @@ let rec get_free binded = function
 ;;
 
 let create_app expr to_apply bindings =
-  <span data-count="126">L</span>ist.fold to_apply ~init:expr ~f:(fun acc name -&gt;
+  <span data-count="127">L</span>ist.fold to_apply ~init:expr ~f:(fun acc name -&gt;
     <span data-count="31">l</span>et expr_to_app =
       match Map.find bindings name with
       | <span data-count="4">S</span>ome e -&gt; e
@@ -397,31 +397,31 @@ let create_app expr to_apply bindings =
 ;;
 
 let rec cc_expr global_env bindings = function
-  | <span data-count="367">R</span>p_e_const _ as orig -&gt; orig
-  | <span data-count="1024">R</span>p_e_ident ident as orig -&gt;
+  | <span data-count="372">R</span>p_e_const _ as orig -&gt; orig
+  | <span data-count="1033">R</span>p_e_ident ident as orig -&gt;
     (match Map.find bindings ident with
      | <span data-count="28">S</span>ome new_expr -&gt; new_expr
-     | <span data-count="996">N</span>one -&gt; orig)
-  | <span data-count="67">R</span>p_e_ite (if1, then1, else1) -&gt;
+     | <span data-count="1005">N</span>one -&gt; orig)
+  | <span data-count="68">R</span>p_e_ite (if1, then1, else1) -&gt;
     let if1 = cc_expr global_env bindings if1 in
-    <span data-count="67">l</span>et then1 = cc_expr global_env bindings then1 in
-    <span data-count="67">l</span>et else1 = cc_expr global_env bindings else1 in
-    <span data-count="67">R</span>p_e_ite (if1, then1, else1)
+    <span data-count="68">l</span>et then1 = cc_expr global_env bindings then1 in
+    <span data-count="68">l</span>et else1 = cc_expr global_env bindings else1 in
+    <span data-count="68">R</span>p_e_ite (if1, then1, else1)
     (* only for anonymous functions *)
   | <span data-count="26">R</span>p_e_fun (args, body) as orig -&gt;
     let free = get_free global_env orig |&gt; <span data-count="26">S</span>trSet.to_list in
     <span data-count="26">l</span>et new_body = cc_expr global_env empty_bindings body in
     <span data-count="26">l</span>et new_fun = Rp_e_fun (free @ args, new_body) in
     create_app new_fun free bindings
-  | <span data-count="904">R</span>p_e_app (e1, e2) -&gt;
+  | <span data-count="913">R</span>p_e_app (e1, e2) -&gt;
     let e1 = cc_expr global_env bindings e1 in
-    <span data-count="904">l</span>et e2 = cc_expr global_env bindings e2 in
-    <span data-count="904">R</span>p_e_app (e1, e2)
-  | <span data-count="171">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
+    <span data-count="913">l</span>et e2 = cc_expr global_env bindings e2 in
+    <span data-count="913">R</span>p_e_app (e1, e2)
+  | <span data-count="172">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
     let new_e1, new_bindings = cc_decl_non_rec global_env bindings name e1 in
-    <span data-count="171">l</span>et bindings = update_bindings bindings new_bindings in
-    <span data-count="171">l</span>et new_e2 = cc_expr global_env bindings e2 in
-    <span data-count="171">R</span>p_e_let (Rp_non_rec (name, new_e1), new_e2)
+    <span data-count="172">l</span>et bindings = update_bindings bindings new_bindings in
+    <span data-count="172">l</span>et new_e2 = cc_expr global_env bindings e2 in
+    <span data-count="172">R</span>p_e_let (Rp_non_rec (name, new_e1), new_e2)
   | <span data-count="6">R</span>p_e_let (Rp_rec decl_list, e2) -&gt;
     let new_decl_list, new_bindings = cc_decl_rec global_env bindings decl_list in
     <span data-count="6">l</span>et bindings = update_bindings bindings new_bindings in
@@ -444,60 +444,60 @@ and cc_decl_non_rec global_env bindings name = function
     <span data-count="60">l</span>et new_fun = Rp_e_fun (free @ args, new_body) in
     let new_bind = create_app (Rp_e_ident name) free bindings in
     <span data-count="60">n</span>ew_fun, Map.singleto<span data-count="60">n</span> (module String) name new_bind
-  | <span data-count="192">e</span>xpr -&gt; cc_exp<span data-count="192">r</span> global_env bindings expr, empty_bindings
+  | <span data-count="194">e</span>xpr -&gt; cc_exp<span data-count="194">r</span> global_env bindings expr, empty_bindings
 
 and cc_decl_rec global_env last_bindings decl_list =
-  <span data-count="36">l</span>et names = List.map decl_list ~f:(fun (name, _) -&gt; <span data-count="40">n</span>ame) in
-  <span data-count="36">l</span>et f1 (free_list, bindings) (name, expr) =
-    <span data-count="40">m</span>atch expr with
-    | <span data-count="40">R</span>p_e_fun (args, body) -&gt;
-      let to_exclude = StrSet.union (StrSet.of_lis<span data-count="40">t</span> names) (StrSet.of_lis<span data-count="40">t</span> args) in
-      <span data-count="40">l</span>et free = StrSet.diff (get_fre<span data-count="40">e</span> global_env body) to_exclude |&gt; <span data-count="40">S</span>trSet.to_list in
-      <span data-count="40">l</span>et bind = create_app (Rp_e_ident name) free last_bindings in
-      <span data-count="40">l</span>et bindings = Map.update bindings name ~f:(fun _ -&gt; <span data-count="40">b</span>ind) in
-      <span data-count="40">f</span>ree :: free_list, bindings
+  <span data-count="37">l</span>et names = List.map decl_list ~f:(fun (name, _) -&gt; <span data-count="41">n</span>ame) in
+  <span data-count="37">l</span>et f1 (free_list, bindings) (name, expr) =
+    <span data-count="41">m</span>atch expr with
+    | <span data-count="41">R</span>p_e_fun (args, body) -&gt;
+      let to_exclude = StrSet.union (StrSet.of_lis<span data-count="41">t</span> names) (StrSet.of_lis<span data-count="41">t</span> args) in
+      <span data-count="41">l</span>et free = StrSet.diff (get_fre<span data-count="41">e</span> global_env body) to_exclude |&gt; <span data-count="41">S</span>trSet.to_list in
+      <span data-count="41">l</span>et bind = create_app (Rp_e_ident name) free last_bindings in
+      <span data-count="41">l</span>et bindings = Map.update bindings name ~f:(fun _ -&gt; <span data-count="41">b</span>ind) in
+      <span data-count="41">f</span>ree :: free_list, bindings
     | <span data-count="0">_</span> -&gt; [] :: free_list, bindings
   in
   let free_list, bindings = List.fold decl_list ~init:([], last_bindings) ~f:f1 in
-  <span data-count="36">l</span>et free_list = List.rev free_list in
-  <span data-count="36">l</span>et to_fold = List.zip_exn decl_list free_list in
-  <span data-count="36">l</span>et f1 decl_acc ((name, expr), free) =
-    <span data-count="40">m</span>atch expr with
-    | <span data-count="40">R</span>p_e_fun (args, body) -&gt;
+  <span data-count="37">l</span>et free_list = List.rev free_list in
+  <span data-count="37">l</span>et to_fold = List.zip_exn decl_list free_list in
+  <span data-count="37">l</span>et f1 decl_acc ((name, expr), free) =
+    <span data-count="41">m</span>atch expr with
+    | <span data-count="41">R</span>p_e_fun (args, body) -&gt;
       let new_body = cc_expr global_env empty_bindings body in
-      <span data-count="40">l</span>et new_fun = Rp_e_fun (free @ args, new_body) in
+      <span data-count="41">l</span>et new_fun = Rp_e_fun (free @ args, new_body) in
       (name, new_fun) :: decl_acc
     | <span data-count="0">_</span> -&gt;
       let new_expr = cc_expr global_env bindings expr in
       <span data-count="0">(</span>name, new_expr) :: decl_acc
   in
   let new_decls = List.fold to_fold ~init:[] ~f:f1 in
-  <span data-count="36">l</span>et new_decls = List.rev new_decls in
-  <span data-count="36">n</span>ew_decls, bindings
+  <span data-count="37">l</span>et new_decls = List.rev new_decls in
+  <span data-count="37">n</span>ew_decls, bindings
 ;;
 
 let cc_toplevel global_env = function
-  | <span data-count="81">R</span>p_non_rec (name, e) -&gt;
+  | <span data-count="82">R</span>p_non_rec (name, e) -&gt;
     let new_decl, _ = cc_decl_non_rec global_env empty_bindings name e in
-    <span data-count="81">l</span>et new_env = StrSet.add global_env name in
-    <span data-count="81">n</span>ew_env, Rp_non_rec (name, new_decl)
-  | <span data-count="30">R</span>p_rec decl_list -&gt;
-    let names = List.map decl_list ~f:(fun (name, _) -&gt; <span data-count="32">n</span>ame) in
-    <span data-count="30">l</span>et new_decls, _ = cc_decl_rec global_env empty_bindings decl_list in
-    <span data-count="30">l</span>et new_env =
-      List.fold names ~init:global_env ~f:(fun acc name -&gt; <span data-count="32">S</span>trSet.add acc name)
+    <span data-count="82">l</span>et new_env = StrSet.add global_env name in
+    <span data-count="82">n</span>ew_env, Rp_non_rec (name, new_decl)
+  | <span data-count="31">R</span>p_rec decl_list -&gt;
+    let names = List.map decl_list ~f:(fun (name, _) -&gt; <span data-count="33">n</span>ame) in
+    <span data-count="31">l</span>et new_decls, _ = cc_decl_rec global_env empty_bindings decl_list in
+    <span data-count="31">l</span>et new_env =
+      List.fold names ~init:global_env ~f:(fun acc name -&gt; <span data-count="33">S</span>trSet.add acc name)
     in
-    <span data-count="30">n</span>ew_env, Rp_rec new_decls
+    <span data-count="31">n</span>ew_env, Rp_rec new_decls
 ;;
 
-let std_names = List.fol<span data-count="49">d</span> Std_names.std_names ~init:StrSet.empty ~f:StrSet.add
+let std_names = List.fol<span data-count="50">d</span> Std_names.std_names ~init:StrSet.empty ~f:StrSet.add
 
 let run_closure_conversion_program program =
-  <span data-count="44">l</span>et rec helper last_env = function
-    | <span data-count="44">[</span>] -&gt; []
-    | <span data-count="111">h</span>d :: tl -&gt;
+  <span data-count="45">l</span>et rec helper last_env = function
+    | <span data-count="45">[</span>] -&gt; []
+    | <span data-count="113">h</span>d :: tl -&gt;
       let cur_env, cur_ast = cc_toplevel last_env hd in
-      <span data-count="111">c</span>ur_ast :: helpe<span data-count="111">r</span> cur_env tl
+      <span data-count="113">c</span>ur_ast :: helpe<span data-count="113">r</span> cur_env tl
   in
   helper std_names program
 ;;
