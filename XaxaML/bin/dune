@@ -5,7 +5,7 @@
  (libraries XaxaML.Lib stdio))
 
 (cram
- (applies_to compiler_tests)
+ (applies_to run_compiler_tests)
  (deps
   ./compiler.exe
   runtime.cpp
@@ -22,3 +22,7 @@
   manytests/typed/009let_poly.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
+
+(cram
+ (applies_to print_bitcode_tests)
+ (deps ./compiler.exe runtime.cpp manytests/typed/001fac.ml))
