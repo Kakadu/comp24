@@ -69,10 +69,9 @@ let simplify_arguments p_args expr : (expr * NameSet.t) t =
 type lifted_lets = ll_expr list
 
 let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
-  List.fold binds ~init:(return env) ~f:(fun env bnd ->
+  fold_list binds ~init:env ~f:(fun env bnd ->
     match bnd with
     | Var name, _, _ ->
-      let* env = env in
       let* env, _ = NameEnv.generate_name env name in
       return env
     | _, _, _ -> failwith "Incorrect 'Let rec' pattern was encountered during LL")
@@ -112,14 +111,10 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
       | Nonrecursive -> return env
     in
     let* env, new_binds, lifted =
-      List.fold
-        binds
-        ~init:(return (env, [], lifted))
-        ~f:(fun acc bnd ->
-          let* env, binds, lifted = acc in
-          let name, args, expr = extract_bind bnd in
-          let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-          return (env, new_bind :: binds, lifted))
+      fold_list binds ~init:(env, [], lifted) ~f:(fun (env, binds, lifted) bnd ->
+        let name, args, expr = extract_bind bnd in
+        let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+        return (env, new_bind :: binds, lifted))
     in
     let* ll_in_scope, lifted = ll_expr lifted env scope in
     let ll_inner_let = LLLet (rec_flag, List.rev new_binds, None) in
@@ -132,26 +127,18 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
      | Some new_id -> return (LLVar new_id, lifted))
   | EList exprs ->
     let* ll_exprs, lifted =
-      List.fold
-        exprs
-        ~init:(return ([], lifted))
-        ~f:(fun acc cur_expr ->
-          let* exprs, lifted = acc in
-          let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
-          return (ll_cur_expr :: exprs, lifted))
+      fold_list exprs ~init:([], lifted) ~f:(fun (exprs, lifted) cur_expr ->
+        let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
+        return (ll_cur_expr :: exprs, lifted))
     in
     return (LLList ll_exprs, lifted)
   | ETuple (e1, e2, tl) ->
     let* ll_e1, lifted = ll_expr lifted env e1 in
     let* ll_e2, lifted = ll_expr lifted env e2 in
     let* ll_tl, lifted =
-      List.fold
-        tl
-        ~init:(return ([], lifted))
-        ~f:(fun acc cur_expr ->
-          let* exprs, lifted = acc in
-          let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
-          return (ll_cur_expr :: exprs, lifted))
+      fold_list tl ~init:([], lifted) ~f:(fun (exprs, lifted) cur_expr ->
+        let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
+        return (ll_cur_expr :: exprs, lifted))
     in
     return (LLTuple (ll_e1, ll_e2, ll_tl), lifted)
   | EListConcat (lexpr, rexpr) ->
@@ -173,14 +160,10 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   | Match (e, cases) ->
     let* ll_e, lifted = ll_expr lifted env e in
     let* ll_cases, lifted =
-      List.fold
-        cases
-        ~init:(return ([], lifted))
-        ~f:(fun acc case ->
-          let* cases, lifted = acc in
-          let pat, expr = case in
-          let* ll_expr, lifted = ll_expr lifted env expr in
-          return (((pat, ll_expr) : ll_case) :: cases, lifted))
+      fold_list cases ~init:([], lifted) ~f:(fun (cases, lifted) case ->
+        let pat, expr = case in
+        let* ll_expr, lifted = ll_expr lifted env expr in
+        return (((pat, ll_expr) : ll_case) :: cases, lifted))
     in
     return (LLMatch (ll_e, ll_cases), lifted)
   | Application (lexpr, rexpr) ->
@@ -207,14 +190,10 @@ let ll_prog (prog : prog) : ll_prog t =
           in
           (* Convert all binds *)
           let* env, new_binds, lifted =
-            List.fold
-              binds
-              ~init:(return (env, [], lifted))
-              ~f:(fun acc bnd ->
-                let* env, binds, lifted = acc in
-                let name, args, expr = extract_bind bnd in
-                let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-                return (env, new_bind :: binds, lifted))
+            fold_list binds ~init:(env, [], lifted) ~f:(fun (env, binds, lifted) bnd ->
+              let name, args, expr = extract_bind bnd in
+              let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+              return (env, new_bind :: binds, lifted))
           in
           (* Work with 'in' scope *)
           let new_binds = List.rev new_binds in

@@ -22,6 +22,23 @@ module R = struct
   let bind m f = m >>= f
   let return value st = value, st
   let run monad = fst @@ monad 0
+
+  let rec map_list list ~f =
+    match list with
+    | [] -> return []
+    | x :: xs ->
+      let* y = f x in
+      let* ys = map_list xs ~f in
+      return (y :: ys)
+  ;;
+
+  let rec fold_list list ~init ~f =
+    match list with
+    | [] -> return init
+    | x :: xs ->
+      let* acc = f init x in
+      fold_list xs ~init:acc ~f
+  ;;
 end
 
 type id = string
