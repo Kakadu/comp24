@@ -548,7 +548,8 @@ let rec infer_exp exp env =
   | Ast.EApp (exp1, exp2) ->
     let* return_type = fresh_var in
     let* subst1, typ1 = infer_exp exp1 env in
-    let* subst2, typ2 = infer_exp exp2 (TypeEnv.apply subst1 env) in
+    let env = TypeEnv.apply subst1 env in
+    let* subst2, typ2 = infer_exp exp2 env in
     let* subst3 = Subst.unify (Subst.apply subst2 typ1) (typ2 @-> return_type) in
     let* subst = Subst.compose_all [ subst1; subst2; subst3 ] in
     return (subst, Subst.apply subst return_type)
@@ -586,15 +587,18 @@ let rec infer_exp exp env =
     return (subst, typ)
   | Ast.EIf (exp1, exp2, exp3) ->
     let* subst1, typ1 = infer_exp exp1 env in
-    let* subst2, typ2 = infer_exp exp2 (TypeEnv.apply subst1 env) in
-    let* subst3, typ3 = infer_exp exp3 (TypeEnv.apply subst2 env) in
+    let env = TypeEnv.apply subst1 env in
+    let* subst2, typ2 = infer_exp exp2 env in
+    let env = TypeEnv.apply subst2 env in
+    let* subst3, typ3 = infer_exp exp3 env in
     let* subst4 = Subst.unify typ1 tprim_bool in
     let* subst5 = Subst.unify typ2 typ3 in
     let* subst = Subst.compose_all [ subst1; subst2; subst3; subst4; subst5 ] in
     return (subst, Subst.apply subst typ2)
   | Ast.ECons (exp1, exp2) ->
     let* subst1, typ1 = infer_exp exp1 env in
-    let* subst2, typ2 = infer_exp exp2 (TypeEnv.apply subst1 env) in
+    let env = TypeEnv.apply subst1 env in
+    let* subst2, typ2 = infer_exp exp2 env in
     let* subst3 = Subst.unify (tlist typ1) typ2 in
     let* subst = Subst.compose_all [ subst1; subst2; subst3 ] in
     return (subst, Subst.apply subst typ2)

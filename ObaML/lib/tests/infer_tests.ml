@@ -12,7 +12,7 @@ let parse_and_infer_result str =
   | Ok parse_result ->
     (match Inferencer.run_stucture_infer parse_result with
      | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env env
-     | Error err -> printf "%a" Typedtree.pp_error err)
+     | Error err -> printf "Infer: %a" Typedtree.pp_error err)
   | Error _ -> printf "Syntax error"
 ;;
 
@@ -346,7 +346,7 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_infer_result {| let (a, a) = (5, 4);; |};
   [%expect {|
-    Variable "a" is bound several times in this matching
+    Infer: Variable "a" is bound several times in this matching
      |}]
 ;;
 

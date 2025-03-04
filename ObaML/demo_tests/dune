@@ -2,17 +2,13 @@
  (name parser_tests)
  (modules parser_tests)
  (public_name parser_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (executable
  (name infer_tests)
  (modules infer_tests)
  (public_name infer_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (cram
  (applies_to parser_tests infer_tests)
