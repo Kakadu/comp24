@@ -34,19 +34,29 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(executable
+ (name anf_tests)
+ (modules anf_tests)
+ (public_name anf_tests)
+ (libraries ObaML stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (applies_to
   parser_tests
   infer_tests
   ast_simplifier_tests
   closure_conversion_tests
-  lambda_lifting_tests)
+  lambda_lifting_tests
+  anf_tests)
  (deps
   ./parser_tests.exe
   ./infer_tests.exe
   ./ast_simplifier_tests.exe
   ./closure_conversion_tests.exe
   ./lambda_lifting_tests.exe
+  ./anf_tests.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

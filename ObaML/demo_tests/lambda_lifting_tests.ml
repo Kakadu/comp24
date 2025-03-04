@@ -16,9 +16,11 @@ let () =
   match Parser.structure_from_string s with
   | Ok structure ->
     let simple_structure = To_simple_ast.convert structure in
-    let simple_structure = Alpha_conversion.run_alpha_conversion simple_structure Inner in
+    let simple_structure, varSet =
+      Alpha_conversion.run_alpha_conversion simple_structure Inner
+    in
     let simple_structure = Closure_conversion.run_closure_conversion simple_structure in
-    let simple_structure = Lambda_lifting.run_lambda_lifting simple_structure in
+    let simple_structure, _ = Lambda_lifting.run_lambda_lifting simple_structure varSet in
     let new_structure = To_ast.convert simple_structure in
     Format.printf
       "Types:\n%a\nConverted structure:\n%a\nTypes after conversions:\n%a"

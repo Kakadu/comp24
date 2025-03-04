@@ -16,7 +16,9 @@ let parse_and_closure_result str =
   match Parser.structure_from_string str with
   | Ok structure ->
     let simple_structure = To_simple_ast.convert structure in
-    let simple_structure = Alpha_conversion.run_alpha_conversion simple_structure Inner in
+    let simple_structure, _ =
+      Alpha_conversion.run_alpha_conversion simple_structure Inner
+    in
     let simple_structure = Closure_conversion.run_closure_conversion simple_structure in
     let new_structure = To_ast.convert simple_structure in
     Format.printf
@@ -102,8 +104,8 @@ let%expect_test "" =
       Converted structure:
       let a x =
       	let b x y = (((x  *  y)  *  52) :: (52 :: [])) in
-      	let #pat#0 = ((b x) 1) in
-      	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
+      	let oba0 = ((b x) 1) in
+      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
       	then "Nice"
       	else
       	if true
@@ -126,8 +128,8 @@ let%expect_test "" =
       Converted structure:
       let a x =
       	let b = ((x  *  52) :: (52 :: [])) in
-      	let #pat#0 = b in
-      	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
+      	let oba0 = b in
+      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
       	then "Nice"
       	else
       	if true
@@ -189,14 +191,14 @@ let%expect_test "" =
     Converted structure:
     let rev lst =
     	let rec helper acc = (((fun acc helper oba0 ->
-    	let #pat#0 = oba0 in
-    	if (#pat#0  =  [])
+    	let oba1 = oba0 in
+    	if (oba1  =  [])
     	then acc
     	else
-    	if ((#list_length_getter# #pat#0)  >=  1)
+    	if ((#list_length_getter# oba1)  >=  1)
     	then
-    	let h = (#list_head_getter# #pat#0) in
-    	let tl = (#list_tail_getter# #pat#0) in ((helper (h :: acc)) tl)
+    	let h = (#list_head_getter# oba1) in
+    	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
     	else (#matching_failed# ())) acc) helper) in ((helper []) lst);;
 
     let reversed1 = (rev (1 :: (2 :: (3 :: (4 :: (5 :: []))))));;
@@ -284,31 +286,31 @@ let%expect_test "" =
   parse_and_closure_result
     {| let rec fix f x = f (fix f) x
   let helper f p = f p
-  let zet l =
+  let u l =
     fix (fun self l -> helper (fun li x -> li (self l) x) l) l |};
   [%expect
     {|
       Types:
       val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
       val helper : ('a -> 'b) -> 'a -> 'b
-      val zet : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+      val u : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
 
       Converted structure:
       let rec fix f x = ((f (fix f)) x);;
 
-      let helper f p = (f p);;
+      let helper oba0 p = (oba0 p);;
 
-      let zet l = ((fix (fun self oba0 -> ((helper (((fun oba0 self li x -> ((li (self oba0)) x)) oba0) self)) oba0))) l);;
+      let u l = ((fix (fun self oba1 -> ((helper (((fun oba1 self li oba2 -> ((li (self oba1)) oba2)) oba1) self)) oba1))) l);;
 
 
       Types after conversions:
       val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
       val helper : ('a -> 'b) -> 'a -> 'b
-      val zet : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b |}]
+      val u : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b |}]
 ;;
 
 let%expect_test "" =
-  parse_and_closure_result {| let a x = let z = (fun zet -> zet + x) in z;; |};
+  parse_and_closure_result {| let a x = let z = (fun zu -> zu + x) in z;; |};
   [%expect
     {|
       Types:
@@ -316,7 +318,7 @@ let%expect_test "" =
 
       Converted structure:
       let a x =
-      	let z x zet = (zet  +  x) in (z x);;
+      	let z x zu = (zu  +  x) in (z x);;
 
 
       Types after conversions:
@@ -326,7 +328,7 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_closure_result
     {| 
-  let rec a x = let z = (fun zet -> zet + x) in
+  let rec a x = let z = (fun zu -> zu + x) in
       let rec a x y = a (x + z 1) y in 
          a;;
 ;; |};
@@ -337,7 +339,7 @@ let%expect_test "" =
 
     Converted structure:
     let rec a x =
-    	let z x zet = (zet  +  x) in
+    	let z x zu = (zu  +  x) in
     	let rec oba0 z oba1 y = (((oba0 z) (oba1  +  (z 1))) y) in (oba0 (z x));;
 
 
@@ -359,7 +361,7 @@ let%expect_test "" =
       Converted structure:
       let f x y =
       	let oba0 y z = (y  +  z) in
-      	let oba1 oba0 z = ((oba0 1)  +  z) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
+      	let oba1 oba0 oba2 = ((oba0 1)  +  oba2) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
 
 
       Types after conversions:

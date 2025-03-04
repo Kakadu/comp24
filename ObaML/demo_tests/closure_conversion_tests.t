@@ -75,7 +75,7 @@
   Converted structure:
   let f x y = 
   	let oba0 y z = (y  +  z) in 
-  	let oba1 oba0 z = ((oba0 1)  +  z) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
+  	let oba1 oba0 oba2 = ((oba0 1)  +  oba2) in (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
   
   
   Types after conversions:
@@ -99,14 +99,14 @@
   Converted structure:
   let rev lst = 
   	let rec helper acc = (((fun acc helper oba0 -> 
-  	let #pat#0 = oba0 in 
-  	if (#pat#0  =  [])
+  	let oba1 = oba0 in 
+  	if (oba1  =  [])
   	then acc
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba1)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((helper (h :: acc)) tl)
+  	let h = (#list_head_getter# oba1) in 
+  	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
   	else (#matching_failed# ())) acc) helper) in ((helper []) lst);;
   
   let reversed1 = (rev (1 :: (2 :: (3 :: (4 :: (5 :: []))))));;
@@ -132,101 +132,101 @@
   
   Converted structure:
   let rec length xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  	let oba0 = xs in 
+  	if (oba0  =  [])
   	then 0
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba0)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in (1  +  (length tl))
+  	let h = (#list_head_getter# oba0) in 
+  	let tl = (#list_tail_getter# oba0) in (1  +  (length tl))
   	else (#matching_failed# ());;
   
   let length_tail = 
-  	let rec helper acc xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  	let rec helper acc oba1 = 
+  	let oba2 = oba1 in 
+  	if (oba2  =  [])
   	then acc
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba2)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((helper (acc  +  1)) tl)
+  	let oba3 = (#list_head_getter# oba2) in 
+  	let oba4 = (#list_tail_getter# oba2) in ((helper (acc  +  1)) oba4)
   	else (#matching_failed# ()) in (helper 0);;
   
-  let rec map f xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec map f oba5 = 
+  	let oba6 = oba5 in 
+  	if (oba6  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  =  1)
+  	if ((#list_length_getter# oba6)  =  1)
   	then 
-  	let a = (#list_head_getter# #pat#0) in ((f a) :: [])
+  	let a = (#list_head_getter# oba6) in ((f a) :: [])
   	else 
-  	if ((#list_length_getter# #pat#0)  =  2)
+  	if ((#list_length_getter# oba6)  =  2)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in ((f a) :: ((f b) :: []))
+  	let oba7 = (#list_head_getter# oba6) in 
+  	let b = (#list_head_getter# (#list_tail_getter# oba6)) in ((f oba7) :: ((f b) :: []))
   	else 
-  	if ((#list_length_getter# #pat#0)  =  3)
+  	if ((#list_length_getter# oba6)  =  3)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
-  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in ((f a) :: ((f b) :: ((f c) :: [])))
+  	let oba8 = (#list_head_getter# oba6) in 
+  	let oba9 = (#list_head_getter# (#list_tail_getter# oba6)) in 
+  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# oba6))) in ((f oba8) :: ((f oba9) :: ((f c) :: [])))
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  4)
+  	if ((#list_length_getter# oba6)  >=  4)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
-  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in 
-  	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in 
-  	let tl = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in ((f a) :: ((f b) :: ((f c) :: ((f d) :: ((map f) tl)))))
+  	let oba10 = (#list_head_getter# oba6) in 
+  	let oba11 = (#list_head_getter# (#list_tail_getter# oba6)) in 
+  	let oba12 = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# oba6))) in 
+  	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# oba6)))) in 
+  	let oba13 = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# oba6)))) in ((f oba10) :: ((f oba11) :: ((f oba12) :: ((f d) :: ((map f) oba13)))))
   	else (#matching_failed# ());;
   
-  let rec append xs ys = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec append oba14 ys = 
+  	let oba15 = oba14 in 
+  	if (oba15  =  [])
   	then ys
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba15)  >=  1)
   	then 
-  	let x = (#list_head_getter# #pat#0) in 
-  	let oba0 = (#list_tail_getter# #pat#0) in (x :: ((append oba0) ys))
+  	let x = (#list_head_getter# oba15) in 
+  	let oba16 = (#list_tail_getter# oba15) in (x :: ((append oba16) ys))
   	else (#matching_failed# ());;
   
   let concat = 
-  	let rec helper xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  	let rec oba17 oba18 = 
+  	let oba19 = oba18 in 
+  	if (oba19  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba19)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((append h) (helper tl))
-  	else (#matching_failed# ()) in helper;;
+  	let oba20 = (#list_head_getter# oba19) in 
+  	let oba21 = (#list_tail_getter# oba19) in ((append oba20) (oba17 oba21))
+  	else (#matching_failed# ()) in oba17;;
   
-  let rec iter f xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec iter oba22 oba23 = 
+  	let oba24 = oba23 in 
+  	if (oba24  =  [])
   	then ()
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba24)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in 
-  	let () = (f h) in ((iter f) tl)
+  	let oba25 = (#list_head_getter# oba24) in 
+  	let oba26 = (#list_tail_getter# oba24) in 
+  	let () = (oba22 oba25) in ((iter oba22) oba26)
   	else (#matching_failed# ());;
   
-  let rec cartesian xs ys = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec cartesian oba27 oba28 = 
+  	let oba29 = oba27 in 
+  	if (oba29  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba29)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((append ((map ((fun h a -> (h, a)) h)) ys)) ((cartesian tl) ys))
+  	let oba30 = (#list_head_getter# oba29) in 
+  	let oba31 = (#list_tail_getter# oba29) in ((append ((map ((fun oba30 oba32 -> (oba30, oba32)) oba30)) oba28)) ((cartesian oba31) oba28))
   	else (#matching_failed# ());;
   
   let main = 

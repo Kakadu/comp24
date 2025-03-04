@@ -23,24 +23,24 @@
   val main : int
   
   Converted structure:
-  let foba0 k n p = (k (p  *  n));;
+  let oba0 k n p = (k (p  *  n));;
   
   let rec fac_cps n k = 
   	if (n  =  1)
   	then (k 1)
-  	else ((fac_cps (n  -  1)) ((foba0 k) n));;
+  	else ((fac_cps (n  -  1)) ((oba0 k) n));;
   
-  let foba1 print_int = print_int;;
+  let oba1 print_int = print_int;;
   
   let main = 
-  	let () = (print_int ((fac_cps 4) foba1)) in 0;;
+  	let () = (print_int ((fac_cps 4) oba1)) in 0;;
   
   
   Types after conversions:
   val fac_cps : int -> (int -> 'a) -> 'a
-  val foba0 : (int -> 'a) -> int -> int -> 'a
-  val foba1 : 'a -> 'a
   val main : int
+  val oba0 : (int -> 'a) -> int -> int -> 'a
+  val oba1 : 'a -> 'a
 
   $ ./lambda_lifting_tests.exe << EOF
   > let rec y x = let a = y x in let b = fun x -> a + x in b 5;;
@@ -87,7 +87,7 @@
   Converted structure:
   let oba0 y z = (y  +  z);;
   
-  let oba1 oba0 z = ((oba0 1)  +  z);;
+  let oba1 oba0 oba2 = ((oba0 1)  +  oba2);;
   
   let f x y = (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));;
   
@@ -113,18 +113,18 @@
   val reversed2 : bool list
   
   Converted structure:
-  let foba0 acc helper oba0 = 
-  	let #pat#0 = oba0 in 
-  	if (#pat#0  =  [])
+  let oba2 acc helper oba0 = 
+  	let oba1 = oba0 in 
+  	if (oba1  =  [])
   	then acc
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba1)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((helper (h :: acc)) tl)
+  	let h = (#list_head_getter# oba1) in 
+  	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
   	else (#matching_failed# ());;
   
-  let rec helper acc = ((foba0 acc) helper);;
+  let rec helper acc = ((oba2 acc) helper);;
   
   let rev lst = ((helper []) lst);;
   
@@ -134,8 +134,8 @@
   
   
   Types after conversions:
-  val foba0 : 'a list -> ('a list -> 'a list -> 'a list) -> 'a list -> 'a list
   val helper : 'a list -> 'a list -> 'a list
+  val oba2 : 'a list -> ('a list -> 'a list -> 'a list) -> 'a list -> 'a list
   val rev : 'a list -> 'a list
   val reversed1 : int list
   val reversed2 : bool list
@@ -153,105 +153,105 @@
   
   Converted structure:
   let rec length xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  	let oba0 = xs in 
+  	if (oba0  =  [])
   	then 0
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba0)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in (1  +  (length tl))
+  	let h = (#list_head_getter# oba0) in 
+  	let tl = (#list_tail_getter# oba0) in (1  +  (length tl))
   	else (#matching_failed# ());;
   
-  let rec helper acc xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec helper acc oba1 = 
+  	let oba2 = oba1 in 
+  	if (oba2  =  [])
   	then acc
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba2)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((helper (acc  +  1)) tl)
+  	let oba3 = (#list_head_getter# oba2) in 
+  	let oba4 = (#list_tail_getter# oba2) in ((helper (acc  +  1)) oba4)
   	else (#matching_failed# ());;
   
   let length_tail = (helper 0);;
   
-  let rec map f xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec map f oba5 = 
+  	let oba6 = oba5 in 
+  	if (oba6  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  =  1)
+  	if ((#list_length_getter# oba6)  =  1)
   	then 
-  	let a = (#list_head_getter# #pat#0) in ((f a) :: [])
+  	let a = (#list_head_getter# oba6) in ((f a) :: [])
   	else 
-  	if ((#list_length_getter# #pat#0)  =  2)
+  	if ((#list_length_getter# oba6)  =  2)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in ((f a) :: ((f b) :: []))
+  	let oba7 = (#list_head_getter# oba6) in 
+  	let b = (#list_head_getter# (#list_tail_getter# oba6)) in ((f oba7) :: ((f b) :: []))
   	else 
-  	if ((#list_length_getter# #pat#0)  =  3)
+  	if ((#list_length_getter# oba6)  =  3)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
-  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in ((f a) :: ((f b) :: ((f c) :: [])))
+  	let oba8 = (#list_head_getter# oba6) in 
+  	let oba9 = (#list_head_getter# (#list_tail_getter# oba6)) in 
+  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# oba6))) in ((f oba8) :: ((f oba9) :: ((f c) :: [])))
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  4)
+  	if ((#list_length_getter# oba6)  >=  4)
   	then 
-  	let a = (#list_head_getter# #pat#0) in 
-  	let b = (#list_head_getter# (#list_tail_getter# #pat#0)) in 
-  	let c = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# #pat#0))) in 
-  	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in 
-  	let tl = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# #pat#0)))) in ((f a) :: ((f b) :: ((f c) :: ((f d) :: ((map f) tl)))))
+  	let oba10 = (#list_head_getter# oba6) in 
+  	let oba11 = (#list_head_getter# (#list_tail_getter# oba6)) in 
+  	let oba12 = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# oba6))) in 
+  	let d = (#list_head_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# oba6)))) in 
+  	let oba13 = (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# (#list_tail_getter# oba6)))) in ((f oba10) :: ((f oba11) :: ((f oba12) :: ((f d) :: ((map f) oba13)))))
   	else (#matching_failed# ());;
   
-  let rec append xs ys = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec append oba14 ys = 
+  	let oba15 = oba14 in 
+  	if (oba15  =  [])
   	then ys
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba15)  >=  1)
   	then 
-  	let x = (#list_head_getter# #pat#0) in 
-  	let oba0 = (#list_tail_getter# #pat#0) in (x :: ((append oba0) ys))
+  	let x = (#list_head_getter# oba15) in 
+  	let oba16 = (#list_tail_getter# oba15) in (x :: ((append oba16) ys))
   	else (#matching_failed# ());;
   
-  let rec helper xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec oba17 oba18 = 
+  	let oba19 = oba18 in 
+  	if (oba19  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba19)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((append h) (helper tl))
+  	let oba20 = (#list_head_getter# oba19) in 
+  	let oba21 = (#list_tail_getter# oba19) in ((append oba20) (oba17 oba21))
   	else (#matching_failed# ());;
   
-  let concat = helper;;
+  let concat = oba17;;
   
-  let rec iter f xs = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec iter oba22 oba23 = 
+  	let oba24 = oba23 in 
+  	if (oba24  =  [])
   	then ()
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba24)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in 
-  	let () = (f h) in ((iter f) tl)
+  	let oba25 = (#list_head_getter# oba24) in 
+  	let oba26 = (#list_tail_getter# oba24) in 
+  	let () = (oba22 oba25) in ((iter oba22) oba26)
   	else (#matching_failed# ());;
   
-  let foba0 h a = (h, a);;
+  let oba33 oba30 oba32 = (oba30, oba32);;
   
-  let rec cartesian xs ys = 
-  	let #pat#0 = xs in 
-  	if (#pat#0  =  [])
+  let rec cartesian oba27 oba28 = 
+  	let oba29 = oba27 in 
+  	if (oba29  =  [])
   	then []
   	else 
-  	if ((#list_length_getter# #pat#0)  >=  1)
+  	if ((#list_length_getter# oba29)  >=  1)
   	then 
-  	let h = (#list_head_getter# #pat#0) in 
-  	let tl = (#list_tail_getter# #pat#0) in ((append ((map (foba0 h)) ys)) ((cartesian tl) ys))
+  	let oba30 = (#list_head_getter# oba29) in 
+  	let oba31 = (#list_tail_getter# oba29) in ((append ((map (oba33 oba30)) oba28)) ((cartesian oba31) oba28))
   	else (#matching_failed# ());;
   
   let main = 
@@ -263,10 +263,11 @@
   val append : 'a list -> 'a list -> 'a list
   val cartesian : 'a list -> 'b list -> ('a * 'b) list
   val concat : 'a list list -> 'a list
-  val foba0 : 'a -> 'b -> 'a * 'b
-  val helper : 'a list list -> 'a list
+  val helper : int -> 'a list -> int
   val iter : ('a -> unit) -> 'a list -> unit
   val length : 'a list -> int
   val length_tail : 'a list -> int
   val main : int
   val map : ('a -> 'b) -> 'a list -> 'b list
+  val oba17 : 'a list list -> 'a list
+  val oba33 : 'a -> 'b -> 'a * 'b

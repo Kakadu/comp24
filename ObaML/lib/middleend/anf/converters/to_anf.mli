@@ -2,4 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-val convert : Simple_ast.sstructure -> (Anf.program, string) Result.t
+open Containers
+
+val convert : Simple_ast.sstructure -> VarSSet.t -> (Anf.program, string) Result.t

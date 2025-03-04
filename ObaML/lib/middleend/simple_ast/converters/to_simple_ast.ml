@@ -2,9 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open RS
-open RS.RSMonad
-open RS.RSMonad.Syntax
 open Std
 
 let gen_matching_failed_id = Ast.Id matching_failed
@@ -43,19 +40,6 @@ let gen_list_getter_length lst =
 
 let true_condition = Simple_ast.SEConst (Ast.CBool true)
 
-let construct_full_expr cases_conditions cases_expr =
-  let rec helper = function
-    | [ cond ], [ expr ] -> Simple_ast.SEIf (cond, expr, gen_matching_failed)
-    | cond :: tl_cond, expr :: tl_expr ->
-      (match cond with
-       | Simple_ast.SEConst (Ast.CBool true) ->
-         Simple_ast.SEIf (cond, expr, gen_matching_failed)
-       | _ -> Simple_ast.SEIf (cond, expr, helper (tl_cond, tl_expr)))
-    | _ -> Simple_ast.SEVar (Ast.Id "Hello proger")
-  in
-  helper (cases_conditions, cases_expr)
-;;
-
 (** @return
       (list_lenght, is_min_length)
 
@@ -87,8 +71,7 @@ let concat_conditions curr_cond new_cond =
   match curr_cond with
   | Simple_ast.SEConst (Ast.CBool true) -> new_cond
   | _ ->
-    Simple_ast.SEApp
-      (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id la), curr_cond), new_cond)
+    Simple_ast.SEApp (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id la), curr_cond), new_cond)
 ;;
 
 (** @param needs_to_check_cons_length/needs_to_check_empty_list
@@ -190,6 +173,19 @@ let construct_new_fun_expr pat gen_var_name curr_expr =
   match gen_var_name with
   | Simple_ast.SId gen_var_name -> helper (Simple_ast.SEVar gen_var_name) curr_expr pat
   | Simple_ast.SSpecial SUnit -> curr_expr
+;;
+
+let construct_full_expr cases_conditions cases_expr =
+  let rec helper = function
+    | [ cond ], [ expr ] -> Simple_ast.SEIf (cond, expr, gen_matching_failed)
+    | cond :: tl_cond, expr :: tl_expr ->
+      (match cond with
+       | Simple_ast.SEConst (Ast.CBool true) ->
+         Simple_ast.SEIf (cond, expr, gen_matching_failed)
+       | _ -> Simple_ast.SEIf (cond, expr, helper (tl_cond, tl_expr)))
+    | _ -> Simple_ast.SEVar (Ast.Id "unexp_var")
+  in
+  helper (cases_conditions, cases_expr)
 ;;
 
 let rec construct_case_expr gen_decl_name case =
@@ -401,7 +397,7 @@ and construct_new_rec_value_binding value_binding =
   let var_id =
     match pat with
     | Ast.PVar var_id -> var_id
-    | _ -> Ast.Id "Hello infer"
+    | _ -> Ast.Id "unexp pat"
   in
   Simple_ast.SId var_id, simplify_expr expr
 
@@ -506,10 +502,10 @@ let simplify_structure_item structure_item =
 let simplify_structure structure =
   List.fold_left
     (fun acc structure_item ->
-      let* new_structure_items = simplify_structure_item structure_item in
-      return (List.append acc new_structure_items))
-    (return [])
+      let new_structure_items = simplify_structure_item structure_item in
+      List.append acc new_structure_items)
+    []
     structure
 ;;
 
-let convert (structure : Ast.structure) = run (simplify_structure structure)
+let convert (structure : Ast.structure) = simplify_structure structure

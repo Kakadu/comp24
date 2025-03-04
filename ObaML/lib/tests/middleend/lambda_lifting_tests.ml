@@ -9,9 +9,9 @@ let parse_and_lift_lambdas_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
     let structure = To_simple_ast.convert parse_result in
-    let structure = Alpha_conversion.run_alpha_conversion structure Inner in
+    let structure, varSet = Alpha_conversion.run_alpha_conversion structure Inner in
     let structure = Closure_conversion.run_closure_conversion structure in
-    let structure = Lambda_lifting.run_lambda_lifting structure in
+    let structure, _ = Lambda_lifting.run_lambda_lifting structure varSet in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
   | Error _ -> printf "Syntax error"
 ;;
@@ -19,28 +19,28 @@ let parse_and_lift_lambdas_result str =
 let%expect_test "" =
   parse_and_lift_lambdas_result {| let a = fun x -> fun y -> y + x |};
   [%expect {|
-    let foba0 x y = (y  +  x);;
+    let oba0 x y = (y  +  x);;
 
-    let a x = (foba0 x);; |}]
+    let a x = (oba0 x);; |}]
 ;;
 
 let%expect_test "" =
   parse_and_lift_lambdas_result {| let a = fun x -> fun y -> fun z -> z y x |};
   [%expect
     {|
-    let foba1 x y z = ((z y) x);;
+    let oba1 x y z = ((z y) x);;
 
-    let foba0 x y = ((foba1 x) y);;
+    let oba0 x y = ((oba1 x) y);;
 
-    let a x = (foba0 x);; |}]
+    let a x = (oba0 x);; |}]
 ;;
 
 let%expect_test "" =
   parse_and_lift_lambdas_result {| let a x = fun y -> x + y|};
   [%expect {|
-    let foba0 x y = (x  +  y);;
+    let oba0 x y = (x  +  y);;
 
-    let a x = (foba0 x);; |}]
+    let a x = (oba0 x);; |}]
 ;;
 
 let%expect_test "" =
@@ -58,8 +58,8 @@ let%expect_test "" =
       let b x y = (((x  *  y)  *  52) :: (52 :: []));;
 
       let a x =
-      	let #pat#0 = ((b x) 1) in
-      	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
+      	let oba0 = ((b x) 1) in
+      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
       	then "Nice"
       	else
       	if true
@@ -74,8 +74,8 @@ let%expect_test "" =
     {|
       let a x =
       	let b = ((x  *  52) :: (52 :: [])) in
-      	let #pat#0 = b in
-      	if ((((#list_length_getter# #pat#0)  =  2)  &&  ((#list_head_getter# #pat#0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# #pat#0))  =  52))
+      	let oba0 = b in
+      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
       	then "Nice"
       	else
       	if true
@@ -90,18 +90,18 @@ let%expect_test "" =
     let a = fac 5 |};
   [%expect
     {|
-      let foba0 f fix x = ((f (fix f)) x);;
+      let oba0 f fix x = ((f (fix f)) x);;
 
-      let rec fix f = ((foba0 f) fix);;
+      let rec fix f = ((oba0 f) fix);;
 
-      let foba2 self n =
+      let oba2 self n =
       	if (n  <=  1)
       	then 1
       	else (n  *  (self (n  -  1)));;
 
-      let foba1 self = (foba2 self);;
+      let oba1 self = (oba2 self);;
 
-      let fac = (fix foba1);;
+      let fac = (fix oba1);;
 
       let a = (fac 5);; |}]
 ;;
@@ -119,18 +119,18 @@ let%expect_test "" =
     let reversed2 = rev (true :: false :: false :: false :: []) |};
   [%expect
     {|
-    let foba0 acc helper oba0 =
-    	let #pat#0 = oba0 in
-    	if (#pat#0  =  [])
+    let oba2 acc helper oba0 =
+    	let oba1 = oba0 in
+    	if (oba1  =  [])
     	then acc
     	else
-    	if ((#list_length_getter# #pat#0)  >=  1)
+    	if ((#list_length_getter# oba1)  >=  1)
     	then
-    	let h = (#list_head_getter# #pat#0) in
-    	let tl = (#list_tail_getter# #pat#0) in ((helper (h :: acc)) tl)
+    	let h = (#list_head_getter# oba1) in
+    	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
     	else (#matching_failed# ());;
 
-    let rec helper acc = ((foba0 acc) helper);;
+    let rec helper acc = ((oba2 acc) helper);;
 
     let rev lst = ((helper []) lst);;
 
@@ -186,25 +186,25 @@ let%expect_test "" =
   parse_and_lift_lambdas_result
     {| let rec fix f x = f (fix f) x
   let helper f p = f p
-  let zet l =
+  let zu l =
     fix (fun self l -> helper (fun li x -> li (self l) x) l) l |};
   [%expect
     {|
       let rec fix f x = ((f (fix f)) x);;
 
-      let helper f p = (f p);;
+      let helper oba0 p = (oba0 p);;
 
-      let foba1 oba0 self li x = ((li (self oba0)) x);;
+      let oba4 oba1 self li oba2 = ((li (self oba1)) oba2);;
 
-      let foba0 self oba0 = ((helper ((foba1 oba0) self)) oba0);;
+      let oba3 self oba1 = ((helper ((oba4 oba1) self)) oba1);;
 
-      let zet l = ((fix foba0) l);; |}]
+      let zu l = ((fix oba3) l);; |}]
 ;;
 
 let%expect_test "" =
-  parse_and_lift_lambdas_result {| let a x = let z = (fun zet -> zet + x) in z;; |};
+  parse_and_lift_lambdas_result {| let a x = let z = (fun zu -> zu + x) in z;; |};
   [%expect {|
-      let z x zet = (zet  +  x);;
+      let z x zu = (zu  +  x);;
 
       let a x = (z x);; |}]
 ;;
@@ -212,13 +212,13 @@ let%expect_test "" =
 let%expect_test "" =
   parse_and_lift_lambdas_result
     {| 
-  let rec a x = let z = (fun zet -> zet + x) in
+  let rec a x = let z = (fun zu -> zu + x) in
       let rec a x y = a (x + z 1) y in 
          a;;
 ;; |};
   [%expect
     {|
-    let z x zet = (zet  +  x);;
+    let z x zu = (zu  +  x);;
 
     let rec oba0 z oba1 y = (((oba0 z) (oba1  +  (z 1))) y);;
 
@@ -235,7 +235,7 @@ let%expect_test "" =
     {|
       let oba0 y z = (y  +  z);;
 
-      let oba1 oba0 z = ((oba0 1)  +  z);;
+      let oba1 oba0 oba2 = ((oba0 1)  +  oba2);;
 
       let f x y = (((oba0 y) 1)  +  ((oba1 (oba0 y)) 2));; |}]
 ;;
@@ -250,16 +250,16 @@ let%expect_test "" =
     {|
       let rec fix f x = ((f (fix f)) x);;
 
-      let map f p =
-      	let #pat#0 = p in
-      	let a = ((#tuple_getter# 0) #pat#0) in
-      	let b = ((#tuple_getter# 1) #pat#0) in ((f a), (f b));;
+      let map oba0 p =
+      	let oba1 = p in
+      	let a = ((#tuple_getter# 0) oba1) in
+      	let b = ((#tuple_getter# 1) oba1) in ((oba0 a), (oba0 b));;
 
-      let foba1 oba0 self li x = ((li (self oba0)) x);;
+      let oba5 oba2 self li oba3 = ((li (self oba2)) oba3);;
 
-      let foba0 self oba0 = ((map ((foba1 oba0) self)) oba0);;
+      let oba4 self oba2 = ((map ((oba5 oba2) self)) oba2);;
 
-      let fixpoly l = ((fix foba0) l);; |}]
+      let fixpoly l = ((fix oba4) l);; |}]
 ;;
 
 let%expect_test "" =

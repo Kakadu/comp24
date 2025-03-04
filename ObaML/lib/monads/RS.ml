@@ -67,4 +67,5 @@ end
 
 open RSMonad
 open Constants
+
 let fresh_var = fresh >>| fun n -> fresh_var_name ^ string_of_int n

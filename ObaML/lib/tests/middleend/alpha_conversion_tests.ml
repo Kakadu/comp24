@@ -9,7 +9,7 @@ let parse_alpha_convert_and_print_result str alpha_conversion_setting =
   match Parser.structure_from_string str with
   | Ok parse_result ->
     let structure = To_simple_ast.convert parse_result in
-    let structure =
+    let structure, _ =
       Alpha_conversion.run_alpha_conversion structure alpha_conversion_setting
     in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
@@ -47,9 +47,9 @@ let%expect_test "" =
   [%expect
     {|       
   let map p =
-  	let #pat#0 = p in
-  	let a = ((#tuple_getter# 0) #pat#0) in
-  	let b = ((#tuple_getter# 1) #pat#0) in (a  +  b);; |}]
+  	let oba0 = p in
+  	let a = ((#tuple_getter# 0) oba0) in
+  	let b = ((#tuple_getter# 1) oba0) in (a  +  b);; |}]
 ;;
 
 let%expect_test "" =
@@ -62,7 +62,7 @@ let%expect_test "" =
     {|
       let f x y =
       	let oba0 z = (y  +  z) in
-      	let oba1 z = ((oba0 1)  +  z) in ((oba0 1)  +  (oba1 2));; |}]
+      	let oba1 oba2 = ((oba0 1)  +  oba2) in ((oba0 1)  +  (oba1 2));; |}]
 ;;
 
 let%expect_test "" =
