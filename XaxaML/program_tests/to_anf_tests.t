@@ -417,27 +417,27 @@ Here second declaration of function "foo" was renamed to "#2" during modificatio
   val main : unit
   
   Types after modifications:
-  val _start : 'a -> 'b -> int -> 'c -> int -> int -> 'd -> int -> int -> int
-  val a7 : unit
+  val a7 : 'a -> 'b -> int -> 'c -> int -> int -> 'd -> int -> int -> int
+  val a8 : unit
   
   Modified ast:
-  let _start a0 a1 a a2 b _c a3 d __ =
+  let a7 a0 a1 a a2 b _c a3 d __ =
     let a6 = (a0, a1, a2, a3) in
-    let a8 = ( + ) a b in
-    let a5 = print_int a8 in
+    let a9 = ( + ) a b in
+    let a5 = print_int a9 in
     let a4 = print_int __ in
-    let a10 = ( * ) a b in
-    let a9 = ( / ) a10 _c in
-    ( + ) a9 d
-  let a7 =
-    let a12 = print_int 1 in
-    let a13 = print_int 2 in
-    let a14 = print_int 4 in
-    let a16 = ( ~- ) 1 in
-    let a15 = print_int a16 in
-    let a17 = ( ~- ) 555555 in
-    let a11 = _start a12 a13 3 a14 100 1000 a15 10000 a17 in
-    print_int a11
+    let a11 = ( * ) a b in
+    let a10 = ( / ) a11 _c in
+    ( + ) a10 d
+  let a8 =
+    let a13 = print_int 1 in
+    let a14 = print_int 2 in
+    let a15 = print_int 4 in
+    let a17 = ( ~- ) 1 in
+    let a16 = print_int a17 in
+    let a18 = ( ~- ) 555555 in
+    let a12 = a7 a13 a14 3 a15 100 1000 a16 10000 a18 in
+    print_int a12
 
 The explicitly specified types were erased after type inference 
   $ ./run_to_anf.exe < manytests/typed/008ascription.ml
@@ -447,25 +447,25 @@ The explicitly specified types were erased after type inference
   
   Types after modifications:
   val a1 : int
-  val a2 : int -> bool -> int
-  val a3 : int -> bool
+  val a3 : int -> bool -> int
+  val a4 : int -> bool
   val addi : ('a -> 'b -> 'c) -> ('a -> 'b) -> 'a -> 'c
   
   Modified ast:
   let addi f g x =
-    let a4 = g x in
-    f x a4
-  let a2 x b =
+    let a5 = g x in
+    f x a5
+  let a3 x b =
     if b
     then ( + ) x 1
     else ( * ) x 2
     
-  let a3 _start =
-    let a5 = ( / ) _start 2 in
-    ( = ) a5 0
+  let a4 a2 =
+    let a6 = ( / ) a2 2 in
+    ( = ) a6 0
   let a1 =
-    let a6 = addi a2 a3 4 in
-    let a0 = print_int a6 in
+    let a7 = addi a3 a4 4 in
+    let a0 = print_int a7 in
     0
 
   $ ./run_to_anf.exe < manytests/typed/009let_poly.ml

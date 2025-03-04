@@ -33,6 +33,7 @@ let type_var_count = 10
 
 let to_rename =
   [ "main"
+  ; "_start"
   ; "create_int"
   ; "create_bool"
   ; "create_unit"

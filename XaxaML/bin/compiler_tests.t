@@ -1,8 +1,7 @@
-  $ clang-16 -c runtime.cpp -O3 $(pkg-config --cflags libffi) -std=c++11 -stdlib=libc++ -o runtime.o
+  $ clang-16 -c runtime.cpp -o runtime.o
   $ for f in manytests/typed/*.ml; do
   > ./compiler.exe < $f
-  > clang-16 -c out.ll -o out.o # -Wno-override-module -arch arm64
-  > clang-16 -o a.out out.o runtime.o $(pkg-config --libs libffi) -O3 -std=c++11 -stdlib=libc++
+  > clang-16 -lstdc++ -std=c++17 -lffi out.ll runtime.o -o a.out
   > echo "\n----------------------------------- $f"
   > cat $f
   > echo "\n"
