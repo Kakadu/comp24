@@ -33,6 +33,13 @@ module NameSet = struct
   let extend (name : id) (set : t) : t = Set.add set name
   let union : t -> t -> t = Set.union
   let find (name : id) (set : t) = Set.find set ~f:(fun x -> String.equal x name)
+
+  let pp fmt (set : t) =
+    let pp_names fmt name = Format.fprintf fmt "%s" name in
+    if Set.is_empty set
+    then Format.fprintf fmt "NameSet is empty!\n"
+    else Set.iter set ~f:(fun name -> Format.fprintf fmt "%a, " pp_names name)
+  ;;
 end
 
 module NameEnv = struct
