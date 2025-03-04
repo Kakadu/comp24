@@ -14,8 +14,7 @@ module PCElimTests = struct
 end
 
 let%expect_test _ =
-  PCElimTests.test
-    {|
+  PCElimTests.test {|
   let f 5 = x 
   |};
   [%expect
@@ -25,8 +24,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  PCElimTests.test
-    {|
+  PCElimTests.test {|
     let f 5 z 10 = x + z
   |};
   [%expect
@@ -38,12 +36,10 @@ let%expect_test _ =
 ;;
 
 let%expect_test "PC elimination doesn't affect patterns with vars" =
-  PCElimTests.test
-    {|
+  PCElimTests.test {|
     let f x = x + 1
   |};
-  [%expect
-    {|
+  [%expect {|
     let f x = (x + 1) |}]
 ;;
 
@@ -67,8 +63,7 @@ let%expect_test "PC elimination with PM" =
 ;;
 
 let%expect_test "Const at the left side" =
-  PCElimTests.test
-    {|
+  PCElimTests.test {|
    let 5 = x
   |};
   [%expect
@@ -78,8 +73,7 @@ let%expect_test "Const at the left side" =
 ;;
 
 let%expect_test "Complex structures are not supported yet" =
-  PCElimTests.test
-    {|
+  PCElimTests.test {|
    let (a, b) = (2, 3)
   |};
   [%expect {| let (a, b) = (2, 3) |}]

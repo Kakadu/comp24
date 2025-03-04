@@ -14,8 +14,7 @@ module PMElimTests = struct
 end
 
 let%expect_test _ =
-  PMElimTests.test
-    {|
+  PMElimTests.test {|
   let test1 x = 
     match (x) with 
     | a::b -> a + b 
@@ -48,8 +47,7 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  PMElimTests.test
-    {|
+  PMElimTests.test {|
     let a l = 
         match l with 
         | hd, tl -> hd
