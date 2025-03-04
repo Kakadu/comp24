@@ -6,6 +6,8 @@ open Angstrom
 open Base
 open Ast
 
+(* --- Вспомогательные функции --- *)
+
 let is_space = function
   | ' ' | '\t' | '\n' | '\r' -> true
   | _ -> false
@@ -49,7 +51,7 @@ let is_keyword = function
 ;;
 
 let is_operator_char = function
-  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' -> true
+  | '+' | '-' | '*' | '/' | '=' | '<' | '>' | '!' | '%' | '&' | '|' | '^' | ':' -> true
   | _ -> false
 ;;
 
@@ -66,6 +68,7 @@ let pstoken s = ptoken (Angstrom.string s)
 let pparens p = pstoken "(" *> take_while is_space *> p <* pstoken ")"
 let poperator = pparens (take_while1 is_operator_char) >>= return
 
+(* Парсер идентификатора: разрешаем также операторы и "()" как имена *)
 let pid =
   let pfirst = satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| Char.escaped in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
@@ -93,6 +96,8 @@ let punit = pstoken "()" *> return CUnit <?> "unit"
 let pconst = choice [ pint; pbool; punit ] >>| fun x -> EConst x
 let pvar = pbind_id >>| fun e -> EVar e
 let poperatorvar = poperator >>| fun op -> EVar op
+
+(* --- Парсер типов (упрощённо) --- *)
 
 let ptype =
   fix (fun ptype ->
@@ -185,7 +190,7 @@ let ppattern =
              | p1 :: p2 :: ps -> return (PTuple (p1, p2, ps))
              | [] -> fail "Unexpected empty list in tuple pattern")
         ; ppconst
-        ; (pstoken "_" >>| fun _ -> PVar "_")
+        ; (pstoken "_" >>| fun _ -> PWild)
         ; (pstoken "[]" >>| fun _ -> PEmpty)
         ; ppvar
         ]
@@ -232,6 +237,7 @@ let pebinop chain1 e pbinop =
 ;;
 
 let plbinop = pebinop chainl1
+let prbinop = pebinop chainr1
 let padd = pstoken "+" *> return "+"
 let psub = pstoken "-" *> return "-"
 let pmul = pstoken "*" *> return "*"
@@ -242,6 +248,9 @@ let ples = pstoken "<" *> return "<"
 let pleq = pstoken "<=" *> return "<="
 let pgre = pstoken ">" *> return ">"
 let pgeq = pstoken ">=" *> return ">="
+let pand = pstoken "&&" *> return "&&"
+let por = pstoken "||" *> return "||"
+let pcons = pstoken "::" *> return "::"
 
 let pexpr_fun () =
   fix (fun pexpr ->
@@ -259,16 +268,17 @@ let pexpr_fun () =
       let pe1 = pe_app in
       let pe2 = op_bin pe1 (pmul <|> pdiv) in
       let pe3 = op_bin pe2 (padd <|> psub) in
-      op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre ])
+      op_bin pe3 (choice [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
+    let pe_cons = prbinop pe_bin pcons in
     let pe_tuple =
       lift2
         (fun e1 rest ->
           match rest with
           | [] -> e1
           | hd :: tl -> ETuple (e1, hd, tl))
-        pe_bin
-        (many (pstoken "," *> pe_bin))
+        pe_cons
+        (many (pstoken "," *> pe_cons))
     in
     choice [ plet_in pexpr; pbranch pexpr; pmatch pexpr; pfun pexpr; pe_tuple ])
 ;;

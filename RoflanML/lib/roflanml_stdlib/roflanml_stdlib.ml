@@ -18,6 +18,15 @@ module RoflanML_Stdlib = struct
         Map.update stdlib op ~f:(fun _ -> TArrow (TVar 0, TArrow (TVar 0, TBase BBool))))
     in
     let stdlib =
+      List.fold [ "&&"; "||" ] ~init:stdlib ~f:(fun stdlib op ->
+        Map.update stdlib op ~f:(fun _ ->
+          TArrow (TBase BBool, TArrow (TBase BBool, TBase BBool))))
+    in
+    let stdlib =
+      Map.update stdlib "::" ~f:(fun _ ->
+        TArrow (TVar 0, TArrow (TList (TVar 0), TList (TVar 0))))
+    in
+    let stdlib =
       List.fold
         [ "print_int", BInt; "print_bool", BBool ]
         ~init:stdlib

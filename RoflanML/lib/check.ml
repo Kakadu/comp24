@@ -126,9 +126,9 @@ module Generator = struct
         [ (1, gen_const >|= fun c -> PConst c)
         ; ( 1
           , gen_name
-            >|= fun id ->
-            if String.length id > 0 && id.[0] = '_' then PVar "_" else PVar id )
-        ; 1, return (PVar "_")
+            >|= fun id -> if String.length id > 0 && id.[0] = '_' then PWild else PVar id
+          )
+        ; 1, return PWild
         ; 1, return PEmpty
         ]
     else
@@ -136,9 +136,9 @@ module Generator = struct
         [ (1, gen_const >|= fun c -> PConst c)
         ; ( 1
           , gen_name
-            >|= fun id ->
-            if String.length id > 0 && id.[0] = '_' then PVar "_" else PVar id )
-        ; 1, return (PVar "_")
+            >|= fun id -> if String.length id > 0 && id.[0] = '_' then PWild else PVar id
+          )
+        ; 1, return PWild
         ; 1, return PEmpty
         ; ( 1
           , let* p1 = gen_pattern (n / 2) in

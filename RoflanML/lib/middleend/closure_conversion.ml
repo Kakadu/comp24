@@ -5,28 +5,27 @@
 open Ast
 open Base
 open Common.Middleend_Common
-open Roflanml_stdlib
 
 let find_free_vars =
-  let rec find_free_vars_pattern pat =
+  let rec find_vars_pattern pat =
     match pat with
     | PWild | PEmpty | PConst _ -> Set.empty (module String)
     | PVar x -> Set.singleton (module String) x
-    | PCons (p1, p2, ps) ->
+    | PCons (p1, p2, ps) | PTuple (p1, p2, ps) ->
       Set.union_list
         (module String)
-        [ find_free_vars_pattern p1
-        ; find_free_vars_pattern p2
+        [ find_vars_pattern p1
+        ; find_vars_pattern p2
         ; List.fold
             ps
             ~init:(Set.empty (module String))
-            ~f:(fun acc p -> Set.union acc (find_free_vars_pattern p))
+            ~f:(fun acc p -> Set.union acc (find_vars_pattern p))
         ]
       (* According to OCaml rules, all patterns in POr must have same variables set *)
-    | POr (p1, _, _) -> find_free_vars_pattern p1
+    | POr (p1, _, _) -> find_vars_pattern p1
   in
   let rec find_free_vars_case env free_vars (pat, e) =
-    let env = Set.union env (find_free_vars_pattern pat) in
+    let env = Set.union env (find_vars_pattern pat) in
     helper env free_vars e
   and helper env free_vars = function
     | EConst _ -> Set.empty (module String)
@@ -117,6 +116,11 @@ let close e env =
       let cases = List.map cases ~f:(fun (pat, e) -> pat, close_expr e free_vars env) in
       EMatch (e, cases)
     | ELetIn (is_rec, id, (EFun (_, _) as e1), e2) ->
+      let env =
+        match is_rec with
+        | Rec -> Set.add env id
+        | NonRec -> env
+      in
       let free = Set.to_list (find_free_vars env free_vars e1) in
       let free_vars = Map.update free_vars id ~f:(fun _ -> free) in
       let args, e = uncurry e1 in
@@ -138,9 +142,14 @@ let close e env =
       closure_app f free
     | EApp (e1, e2) -> EApp (close_expr e1 free_vars env, close_expr e2 free_vars env)
   in
-  let close_decl e free_vars env =
+  let rec close_decl e free_vars env =
     match e with
     | DLet (is_rec, id, (EFun (_, _) as e)) ->
+      let env =
+        match is_rec with
+        | Rec -> Set.add env id
+        | NonRec -> env
+      in
       let free = Set.to_list (find_free_vars env free_vars e) in
       let free_vars = Map.update free_vars id ~f:(fun _ -> free) in
       let args, e = uncurry e in
@@ -149,20 +158,30 @@ let close e env =
       let f = closure_fun f free in
       DLet (is_rec, id, f)
     | DLet (is_rec, id, e) -> DLet (is_rec, id, close_expr e free_vars env)
+    | DMutualLet (_, decls) ->
+      let decls =
+        Base.List.fold_right decls ~init:[] ~f:(fun (id, e) acc ->
+          let decl = close_decl (DLet (Rec, id, e)) free_vars env in
+          match decl with
+          | DLet (_, id, e) -> (id, e) :: acc
+          | _ -> failwith "Not Reachable")
+      in
+      DMutualLet (Rec, decls)
   in
   close_decl e (Map.empty (module String)) env
 ;;
 
-let close_program prog =
+let close_program prog env =
   let prog, _ =
-    List.fold_left
-      prog
-      ~init:([], RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String))
-      ~f:(fun (closed, env) decl ->
-        match decl with
-        | DLet (_, id, _) ->
-          let e = close decl env in
-          e :: closed, Set.add env id)
+    List.fold_left prog ~init:([], env) ~f:(fun (closed, env) decl ->
+      match decl with
+      | DLet (_, id, _) ->
+        let e = close decl env in
+        e :: closed, Set.add env id
+      | DMutualLet (_, decls) ->
+        let env = List.fold decls ~init:env ~f:(fun env (id, _) -> Set.add env id) in
+        let e = close decl env in
+        e :: closed, env)
   in
   List.rev prog
 ;;

@@ -5,6 +5,7 @@
 open Base
 open Roflanml_lib
 open Ast
+open Ast_to_str
 open Parser
 
 module ParserTests = struct
@@ -61,7 +62,7 @@ module ParserTests = struct
            (EBranch ((EApp ((EApp ((EVar ">="), (EVar "h1"))), (EVar "h2"))),
               (EVar "h1"), (EVar "h2"))));
            ((PCons ((PVar "h1"), PEmpty, [])), (EVar "h1"));
-           ((PVar "_"), (EConst (CInt 0)))]
+           (PWild, (EConst (CInt 0)))]
          ))
       |}]
   ;;
@@ -265,6 +266,65 @@ module ParserTests = struct
                ))
             ))
          ))
+
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion" =
+    parse_and_pp_decl
+      "let rec even x = if x = 0 then true else odd (x - 1)\n\n\
+      \       and odd x = if x = 0 then false else even (x - 1)";
+    [%expect
+      {|
+      (DMutualLet (Rec,
+         [("even",
+           (EFun (("x", None),
+              (EBranch (
+                 (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                 (EConst (CBool true)),
+                 (EApp ((EVar "odd"),
+                    (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                 ))
+              )));
+           ("odd",
+            (EFun (("x", None),
+               (EBranch (
+                  (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                  (EConst (CBool false)),
+                  (EApp ((EVar "even"),
+                     (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                  ))
+               )))
+           ]
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons list parse" =
+    parse_and_pp_decl "let q = let x = [1; 2] in 1 :: x, 1 :: [1; 2]";
+    [%expect
+      {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "x", (EList [(EConst (CInt 1)); (EConst (CInt 2))]),
+            (ETuple ((EApp ((EApp ((EVar "::"), (EConst (CInt 1)))), (EVar "x"))),
+               (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+                  (EList [(EConst (CInt 1)); (EConst (CInt 2))]))),
+               []))
+            ))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons associativity" =
+    parse_and_pp_decl "let x = 1 :: 2 :: [3; 4]";
+    [%expect
+      {|
+      (DLet (NonRec, "x",
+         (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+            (EApp ((EApp ((EVar "::"), (EConst (CInt 2)))),
+               (EList [(EConst (CInt 3)); (EConst (CInt 4))])))
+            ))
+         ))
       |}]
   ;;
 end
@@ -275,13 +335,13 @@ module TypecheckerTests = struct
 
   let pp_infer decl =
     match run_infer decl with
-    | Ok ty -> Stdlib.Format.printf "%a" pp_ty ty
+    | Ok tys -> List.iter tys ~f:(Stdlib.Format.printf "%a\n" pp_ty)
     | Error err -> Stdlib.Format.printf "%a" pp_error err
   ;;
 
   let pp_parse_and_infer input =
     match Parser.parse_decl input with
-    | Result.Ok decl -> pp_infer decl
+    | Result.Ok (decl :: _) -> pp_infer decl
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -413,6 +473,36 @@ module TypecheckerTests = struct
     [%expect {| bool -> unit |}]
   ;;
 
+  let%expect_test "tuple pattern poly type inference" =
+    pp_parse_and_infer "let f x = match x with | (x, y) -> y, x";
+    [%expect {| 'a * 'b -> 'b * 'a |}]
+  ;;
+
+  let%expect_test "mutual recursion type inference 1" =
+    pp_parse_and_infer
+      "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
+       false else even (x - 1)";
+    [%expect
+      {|
+      int -> bool
+      int -> bool
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion type inference 2" =
+    pp_parse_and_infer "let rec f x = x && true and g x = x + 1";
+    [%expect
+      {|
+      bool -> bool
+      int -> int
+      |}]
+  ;;
+
+  let%expect_test "cons list type inference" =
+    pp_parse_and_infer "let q = 1 :: [3; 4]";
+    [%expect {| int list |}]
+  ;;
+
   (* Errors *)
 
   let%expect_test "unbound value error in expression" =
@@ -462,6 +552,11 @@ module TypecheckerTests = struct
     pp_parse_and_infer "let apply (g: int -> int) (x: bool) = g x";
     [%expect {| Failed to unify types int and bool |}]
   ;;
+
+  let%expect_test "mutual recursion occurs check" =
+    pp_parse_and_infer "let rec f x = g and g x = f";
+    [%expect {| The type variable 'a occurs inside 'c -> 'b -> 'a |}]
+  ;;
 end
 
 module CCTests = struct
@@ -472,7 +567,7 @@ module CCTests = struct
 
   let pp_parse_and_cc input =
     match Parser.parse_decl input with
-    | Result.Ok e -> Stdlib.Format.printf "%a" pp_decl (close e env)
+    | Result.Ok (e :: _) -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -480,10 +575,8 @@ module CCTests = struct
     pp_parse_and_cc "let q = let f x = x in f 10";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f", (EFun (("x", None), (EVar "x"))),
-            (EApp ((EVar "f"), (EConst (CInt 10))))))
-         ))
+      let q =
+      let f x = x in f 10
       |}]
   ;;
 
@@ -491,16 +584,9 @@ module CCTests = struct
     pp_parse_and_cc "let q = let f x = x + 1 in let g x = f x in g 10";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f",
-            (EFun (("x", None),
-               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-            (ELetIn (NonRec, "g",
-               (EFun (("f", None),
-                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-               (EApp ((EApp ((EVar "g"), (EVar "f"))), (EConst (CInt 10))))))
-            ))
-         ))
+      let q =
+      let f x = ( + ) x 1 in
+      let g f x = f x in g f 10
       |}]
   ;;
 
@@ -509,43 +595,11 @@ module CCTests = struct
       "let q = let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "f",
-            (EFun (("x", None),
-               (EApp ((EApp ((EVar "+"), (EVar "x"))), (EConst (CInt 1)))))),
-            (ELetIn (NonRec, "g",
-               (EFun (("f", None),
-                  (EFun (("x", None), (EApp ((EVar "f"), (EVar "x"))))))),
-               (ELetIn (NonRec, "k",
-                  (EFun (("f", None),
-                     (EFun (("g", None),
-                        (EFun (("x", None),
-                           (EApp ((EApp ((EVar "g"), (EVar "f"))), (EVar "x")))))
-                        ))
-                     )),
-                  (ELetIn (NonRec, "q",
-                     (EFun (("f", None),
-                        (EFun (("g", None),
-                           (EFun (("k", None),
-                              (EFun (("x", None),
-                                 (EApp (
-                                    (EApp ((EApp ((EVar "k"), (EVar "f"))),
-                                       (EVar "g"))),
-                                    (EVar "x")))
-                                 ))
-                              ))
-                           ))
-                        )),
-                     (EApp (
-                        (EApp (
-                           (EApp ((EApp ((EVar "q"), (EVar "f"))), (EVar "g"))),
-                           (EVar "k"))),
-                        (EConst (CInt 1))))
-                     ))
-                  ))
-               ))
-            ))
-         ))
+      let q =
+      let f x = ( + ) x 1 in
+      let g f x = f x in
+      let k f g x = g f x in
+      let q f g k x = k f g x in q f g k 1
       |}]
   ;;
 
@@ -553,28 +607,9 @@ module CCTests = struct
     pp_parse_and_cc "let q = let x = 1 in let y = 2 in fun z -> x + y + z";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "x", (EConst (CInt 1)),
-            (ELetIn (NonRec, "y", (EConst (CInt 2)),
-               (EApp (
-                  (EApp (
-                     (EFun (("x", None),
-                        (EFun (("y", None),
-                           (EFun (("z", None),
-                              (EApp (
-                                 (EApp ((EVar "+"),
-                                    (EApp ((EApp ((EVar "+"), (EVar "x"))),
-                                       (EVar "y")))
-                                    )),
-                                 (EVar "z")))
-                              ))
-                           ))
-                        )),
-                     (EVar "x"))),
-                  (EVar "y")))
-               ))
-            ))
-         ))
+      let q =
+      let x = 1 in
+      let y = 2 in (fun x y z -> ( + ) (( + ) x y) z) x y
       |}]
   ;;
 
@@ -582,43 +617,199 @@ module CCTests = struct
     pp_parse_and_cc "let q = let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
     [%expect
       {|
-      (DLet (NonRec, "q",
-         (ELetIn (NonRec, "x", (EConst (CInt 1)),
-            (EApp (
-               (EApp (
-                  (EFun (("x", None),
-                     (EFun (("f", None),
-                        (EFun (("y", None),
-                           (EApp (
-                              (EApp ((EVar "+"),
-                                 (EApp (
-                                    (EApp ((EVar "+"),
-                                       (EApp ((EVar "f"), (EVar "x"))))),
-                                    (EVar "x")))
-                                 )),
-                              (EConst (CInt 1))))
-                           ))
-                        ))
-                     )),
-                  (EVar "x"))),
-               (EApp (
-                  (EFun (("x", None),
-                     (EFun (("z", None),
-                        (EApp ((EApp ((EVar "+"), (EVar "x"))), (EVar "z")))))
-                     )),
-                  (EVar "x")))
-               ))
-            ))
-         ))
+      let q =
+      let x = 1 in (fun x f y -> ( + ) (( + ) (f x) x) 1) x ((fun x z -> ( + ) x z) x)
       |}]
   ;;
 
   let%expect_test "no closure with stdlib" =
     pp_parse_and_cc "let f x = print_int x";
+    [%expect {| let f x = print_int x |}]
+  ;;
+
+  let%expect_test "closure with rec" =
+    pp_parse_and_cc "let q = let f x = x + 1 in let rec g x = f x + g x in g";
     [%expect
       {|
-      (DLet (NonRec, "f",
-         (EFun (("x", None), (EApp ((EVar "print_int"), (EVar "x")))))))
+      let q =
+      let f x = ( + ) x 1 in
+      let rec g f x = ( + ) (f x) (g f x) in g f
+      |}]
+  ;;
+
+  let%expect_test "cps fact" =
+    pp_parse_and_cc
+      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
+       k (x * n)) in fact 10 (fun x -> x)";
+    [%expect
+      {|
+      let q =
+      let rec fact x k = match x with
+      | 1 -> k 1
+      | x -> fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x) in fact 10 (fun x -> x)
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion" =
+    pp_parse_and_cc
+      "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
+       false else even (x - 1)";
+    [%expect
+      {|
+      let rec even = (fun odd x -> if ( = ) x 0 then true else odd (( - ) x 1))
+      and
+      odd = (fun even x -> if ( = ) x 0 then false else even (( - ) x 1))
+      |}]
+  ;;
+end
+
+module LLTests = struct
+  open Closure_conversion
+  open Lambda_lifting
+  open Roflanml_stdlib
+  open Ll_ast
+
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
+
+  let pp_parse_and_ll input =
+    match Parser.parse input with
+    | Result.Ok prog ->
+      (match lift_program (close_program prog env) with
+       | Result.Ok prog ->
+         List.iter prog ~f:(fun decl ->
+           Stdlib.Format.printf "%s\n" (ast_to_str (ll_to_ast decl)))
+       | Result.Error _ -> Stdlib.print_endline "Failed to LL")
+    | _ -> Stdlib.print_endline "Failed to parse"
+  ;;
+
+  let%expect_test _ =
+    pp_parse_and_ll
+      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
+       k (x * n)) in fact 10 (fun x -> x)";
+    [%expect
+      {|
+      let LL_1 k x n = k (( * ) x n)
+
+      let rec LL_0 x k = match x with
+      | 1 -> k 1
+      | x -> LL_0 (( - ) x 1) (LL_1 k x)
+
+      let LL_2 x = x
+
+      let q = LL_0 10 LL_2
+      |}]
+  ;;
+end
+
+module ANFTests = struct
+  open Closure_conversion
+  open Lambda_lifting
+  open Roflanml_stdlib
+  open Anf_ast
+  open Anf
+
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
+
+  let pp_parse_and_anf input =
+    match Parser.parse input with
+    | Result.Ok prog ->
+      (match lift_program (close_program prog env) with
+       | Result.Ok prog ->
+         (match anf_program prog with
+          | Result.Ok prog ->
+            List.iter prog ~f:(fun decl ->
+              Stdlib.Format.printf "%s\n" (ast_to_str (anf_to_ast decl)))
+          | Result.Error err -> Stdlib.print_endline err)
+       | Result.Error _ -> Stdlib.print_endline "Failed to LL")
+    | _ -> Stdlib.print_endline "Failed to parse"
+  ;;
+
+  let%expect_test "anf simple" =
+    pp_parse_and_anf "let q = 1 + 2 + 3 * 4 + 5";
+    [%expect
+      {|
+      let q =
+      let ANF_0 = ( + ) 1 2 in
+      let ANF_1 = ( * ) 3 4 in
+      let ANF_2 = ( + ) ANF_0 ANF_1 in
+      let ANF_3 = ( + ) ANF_2 5 in ANF_3
+      |}]
+  ;;
+
+  let%expect_test "anf tuple" =
+    pp_parse_and_anf "let q = let f x y z = x + y + z in (f 1 2 3, 4, 5)";
+    [%expect
+      {|
+      let LL_0 x y z =
+      let ANF_2 = ( + ) x y in
+      let ANF_3 = ( + ) ANF_2 z in ANF_3
+
+      let q =
+      let ANF_0 = LL_0 1 2 3 in
+      let ANF_1 = ANF_0, 4, 5 in ANF_1
+      |}]
+  ;;
+
+  let%expect_test "anf partian app" =
+    pp_parse_and_anf "let q = let f x y z = x + y + z in let g x = f 1 2 in g 3";
+    [%expect
+      {|
+      let LL_0 x y z =
+      let ANF_2 = ( + ) x y in
+      let ANF_3 = ( + ) ANF_2 z in ANF_3
+
+      let LL_1 f x =
+      let ANF_1 = LL_0 1 2 in ANF_1
+
+      let q =
+      let ANF_0 = LL_1 LL_0 3 in ANF_0
+      |}]
+  ;;
+
+  let%expect_test "anf branch" =
+    pp_parse_and_anf
+      "let q = if true && false then let f x = x + 1 in f 1 else let g x = x - 1 in g 1";
+    [%expect
+      {|
+      let LL_0 x =
+      let ANF_5 = ( + ) x 1 in ANF_5
+
+      let LL_1 x =
+      let ANF_4 = ( - ) x 1 in ANF_4
+
+      let q =
+      let ANF_0 = ( && ) true false in
+      let ANF_1 = if ANF_0 then
+      let ANF_2 = LL_0 1 in ANF_2 else
+      let ANF_3 = LL_1 1 in ANF_3 in ANF_1
+      |}]
+  ;;
+
+  let%expect_test "anf closure" =
+    pp_parse_and_anf "let q = let x = 1 in let y = 2 in x / y";
+    [%expect
+      {|
+      let q =
+      let x = 1 in
+      let y = 2 in
+      let ANF_0 = ( / ) x y in ANF_0
+      |}]
+  ;;
+
+  let%expect_test "anf lists" =
+    pp_parse_and_anf "let q = [(fun x -> x * x) 1; (fun x -> x / x) 2]";
+    [%expect
+      {|
+      let LL_0 x =
+      let ANF_4 = ( * ) x x in ANF_4
+
+      let LL_1 x =
+      let ANF_3 = ( / ) x x in ANF_3
+
+      let q =
+      let ANF_0 = LL_0 1 in
+      let ANF_1 = LL_1 2 in
+      let ANF_2 = [ ANF_0; ANF_1 ] in ANF_2
       |}]
   ;;
 end
