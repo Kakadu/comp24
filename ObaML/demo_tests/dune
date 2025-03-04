@@ -14,33 +14,25 @@
  (name simplifier_tests)
  (modules simplifier_tests)
  (public_name simplifier_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (executable
  (name closure_conversion_tests)
  (modules closure_conversion_tests)
  (public_name closure_conversion_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (executable
  (name lambda_lifting_tests)
  (modules lambda_lifting_tests)
  (public_name lambda_lifting_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (executable
  (name anf_tests)
  (modules anf_tests)
  (public_name anf_tests)
- (libraries ObaML stdio)
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries ObaML stdio))
 
 (cram
  (applies_to

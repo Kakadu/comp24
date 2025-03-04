@@ -4,7 +4,7 @@
 
 open ObaML
 
-let parse_and_middleend_result str =
+let parse_and_get_anf_result str =
   match Parser.structure_from_string str with
   | Ok structure ->
     (match Inferencer.run_structure_infer structure with
@@ -46,7 +46,7 @@ let parse_and_middleend_result str =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a = fun x -> fun y -> y + x |};
+  parse_and_get_anf_result {| let a = fun x -> fun y -> y + x |};
   [%expect
     {|
     Types:
@@ -64,7 +64,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a = fun x -> fun y -> fun z -> z y x |};
+  parse_and_get_anf_result {| let a = fun x -> fun y -> fun z -> z y x |};
   [%expect
     {|
     Types:
@@ -85,7 +85,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a x = fun y -> x + y|};
+  parse_and_get_anf_result {| let a x = fun y -> x + y|};
   [%expect
     {|
     Types:
@@ -103,7 +103,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a x y z = x + y + z|};
+  parse_and_get_anf_result {| let a x y z = x + y + z|};
   [%expect
     {|
     Types:
@@ -119,7 +119,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a x y z = x y z|};
+  parse_and_get_anf_result {| let a x y z = x y z|};
   [%expect
     {|
     Types:
@@ -134,7 +134,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a = fun x -> let b = x in b;;|};
+  parse_and_get_anf_result {| let a = fun x -> let b = x in b;;|};
   [%expect
     {|
     Types:
@@ -150,7 +150,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let a x = let b y = (x * y * 52) :: 52 :: [] in match b 1 with 52 :: 52 :: [] -> "Nice" | _ -> "Bad" |};
   [%expect
     {|
@@ -188,7 +188,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let a x = let b = (x * 52) :: 52 :: [] in match b with 52 :: 52 :: [] -> "Nice" | _ -> "Bad" |};
   [%expect
     {|
@@ -223,7 +223,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec fix = fun f -> (fun x -> f (fix f) x)
     let fac = fix (fun self -> (fun n -> if n <= 1 then 1 else n * self (n - 1)))
     let a = fac 5 |};
@@ -265,7 +265,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rev = fun lst ->
       let rec helper = fun acc -> (fun lst ->
       match lst with
@@ -325,7 +325,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec y = fun x -> let a = y x in let b = fun x -> a + x in b 5;;|};
   [%expect
     {|
@@ -345,7 +345,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec y = fun x -> let a = fun z -> y x + z in let b = fun x -> a 5 + x in b 5;;  |};
   [%expect
     {|
@@ -370,7 +370,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let f z y = let z x = y + x in z 5 + y|};
+  parse_and_get_anf_result {| let f z y = let z x = y + x in z 5 + y|};
   [%expect
     {|
       Types:
@@ -389,7 +389,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec fix f x = f (fix f) x
   let helper f p = f p
   let zu l =
@@ -425,7 +425,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a x = let z = (fun zu -> zu + x) in z;; |};
+  parse_and_get_anf_result {| let a x = let z = (fun zu -> zu + x) in z;; |};
   [%expect
     {|
       Types:
@@ -443,7 +443,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| 
   let rec a x = let z = (fun zu -> zu + x) in
       let rec a x y = a (x + z 1) y in 
@@ -472,7 +472,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let f x y = 
       let x z = y + z in 
       let y z = x 1 + z in
@@ -503,7 +503,7 @@ let%expect_test "" =
 let%expect_test "tuple types cannot be fully infered because the exact type of \
                  `tuple_getter` is not clear"
   =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec fix f x = f (fix f) x
   let map f p = let (a,b) = p in (f a, f b)
   let fixpoly l =
@@ -544,7 +544,7 @@ let%expect_test "tuple types cannot be fully infered because the exact type of \
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a b c = if (b, c) = (5, 4) then 1 else 2;; |};
+  parse_and_get_anf_result {| let a b c = if (b, c) = (5, 4) then 1 else 2;; |};
   [%expect
     {|
       Types:
@@ -563,7 +563,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result {| let a b c d e = (b c, d e) = (8, 9);; |};
+  parse_and_get_anf_result {| let a b c d e = (b c, d e) = (8, 9);; |};
   [%expect
     {|
       Types:
@@ -580,7 +580,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let a = let x = 1 in
   let f x = 
     let y = x + 1 in
@@ -630,7 +630,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {| let rec outer n =
     let rec middle x =
       let rec inner y =
@@ -699,7 +699,7 @@ let%expect_test "" =
 ;;
 
 let%expect_test "" =
-  parse_and_middleend_result
+  parse_and_get_anf_result
     {|let rec oba0 n =
     let oba1 = n * 2 in
     let rec oba2 x =
