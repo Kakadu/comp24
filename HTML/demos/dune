@@ -20,15 +20,22 @@
  (name anf_demo)
  (public_name anf_demo)
  (modules anf_demo)
- (libraries Parser TypeInference  Anf stdio Patelim))
+ (libraries Parser TypeInference Anf stdio Patelim))
+
+(executable
+ (name alpha_demo)
+ (public_name alpha_demo)
+ (modules alpha_demo)
+ (libraries Parser TypeInference Anf stdio Patelim))
 
 (cram
- (applies_to parser_demo inferencer_demo cc_ll_demo anf_demo)
+ (applies_to parser_demo inferencer_demo cc_ll_demo anf_demo alpha_demo)
  (deps
   ./parser_demo.exe
   ./inferencer_demo.exe
   ./cc_ll_demo.exe
   ./anf_demo.exe
+  ./alpha_demo.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
