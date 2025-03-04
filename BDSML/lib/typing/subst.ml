@@ -2,8 +2,8 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Monads
 open Types
+open Monads
 module VarMap = Map.Make (TVarId)
 
 type t = type_val VarMap.t
