@@ -25,6 +25,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - run: sudo apt update
+
       - name: List installed OPAM packages
         run: opam list
 
@@ -52,15 +54,18 @@ jobs:
 #          echo "PROPERLY_FORMATTED=y" >> $GITHUB_ENV
 #          cd ${{ env.latest }} && opam exec -- dune build @fmt --profile=release || echo "PROPERLY_FORMATTED=n" >> $GITHUB_ENV
 
-      # TODO: Do we really don't need to install dependencies???
-      #- name: Installing dependencies
-      #  run: cd ${{ env.latest }} && opam install . --deps-only --with-test --with-doc
+      # We need to install dependencies because repo could have weird version of ocamlformat
+      - name: Installing dependencies for ${{ env.latest }}...
+        run: |
+          opam update
+          cd ./${{ env.latest }}
+          opam install . --depext-only --with-test --with-doc
+          opam install . --deps-only --with-test --with-doc
 
       - name: Checking ocamlformat
         run: |
           cd ${{ env.latest }}
           opam exec -- dune build @fmt --profile=release
-
 
       # TODO: onfail post a comment how to fix it
 

@@ -1,0 +1,17 @@
+(library
+ (name quickcheck)
+ (public_name BasedML.Parser.Quickcheck)
+ (modules core parser_test)
+ (libraries base ast parser qcheck restore_src)
+ (inline_tests)
+ (preprocess
+  (pps ppx_inline_test ppx_expect)))
+
+(executable
+ (name exe_qcheck)
+ (modules exe_qcheck)
+ (libraries quickcheck base ast parser qcheck restore_src))
+
+(cram
+ (applies_to test_qcheck)
+ (deps ./exe_qcheck.exe))
