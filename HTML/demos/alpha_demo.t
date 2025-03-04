@@ -10,9 +10,7 @@
   Typecheck error: This expression has type int but an expression was expected of type bool
   
   Type inference after:
-  val main : int
-  
-  let main.1  = 1
+  Typecheck error: This expression has type int but an expression was expected of type bool
 
   $ ./alpha_demo.exe < manytests/do_not_type/003occurs.ml
   Type inference before:

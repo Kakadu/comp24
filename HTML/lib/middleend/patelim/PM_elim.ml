@@ -9,16 +9,24 @@ let get_typ_of_pat = function
   | _ -> None
 ;;
 
-let rec is_pattern_suitable = function
+let rec is_pattern_suitable =
+  let e_binop_optimized op e1 e2 =
+    match e1, e2 with
+    | NoPMEConst (CBool true), NoPMEConst (CBool true) -> econst (CBool true)
+    | NoPMEConst (CBool true), e2 -> e2
+    | e1, NoPMEConst (CBool true) -> e1
+    | _ -> ebin_op op e1 e2
+  in
+  function
   | PId _, _ -> return @@ econst (CBool true)
-  | PConst x, e -> return @@ ebin_op Eq (econst x) e
+  | PConst x, e -> return @@ e_binop_optimized Eq (econst x) e
   | PList (p1, p2), e ->
-    let is_not_empty = ebin_op Neq (econst CNil) e in
+    let is_not_empty = e_binop_optimized Neq (econst CNil) e in
     let* head = RuntimeUtils.apply_get_head e in
     let* tl = RuntimeUtils.apply_get_tl e in
     let* head_res = is_pattern_suitable (p1, head) in
     let* tl_res = is_pattern_suitable (p2, tl) in
-    return @@ ebin_op And (ebin_op And is_not_empty head_res) tl_res
+    return @@ e_binop_optimized And (e_binop_optimized And is_not_empty head_res) tl_res
   | PTuple (p1, p2, ps), e ->
     let all_pats = p1 :: p2 :: ps in
     let check_nth n pat_n =
@@ -33,7 +41,7 @@ let rec is_pattern_suitable = function
         (fun acc pat ->
           let* res, i = acc in
           let* i_check = check_nth i pat in
-          let res = ebin_op And res i_check in
+          let res = e_binop_optimized And res i_check in
           return (res, i + 1))
         (return @@ (econst (CBool true), 0))
         all_pats
@@ -167,10 +175,5 @@ and pm_elim_decl decl =
   helper decl
 ;;
 
-let pm_elim_decls decls =
-  map
-    (fun x -> pm_elim_decl x >>| IR_utils.transform_expr_in_decl IR_utils.optimize)
-    decls
-;;
-
+let pm_elim_decls decls = map pm_elim_decl decls
 let pm_elim decls = run (pm_elim_decls decls)
