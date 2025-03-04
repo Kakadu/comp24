@@ -3,24 +3,9 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open Format
+open Std
 
-let binop_vars =
-  [ "( * )"
-  ; "( / )"
-  ; "( + )"
-  ; "( - )"
-  ; "( = )"
-  ; "( == )"
-  ; "( <> )"
-  ; "( != )"
-  ; "( < )"
-  ; "( <= )"
-  ; "( > )"
-  ; "( >= )"
-  ; "( && )"
-  ; "( || )"
-  ]
-;;
+let binop_vars = [ mult; div; plus; minus; eq; eqr; neq; neqr; lt; lte; gt; gte; la; lo ]
 
 let print_id fmt = function
   | Ast.Id ident when List.mem ident binop_vars = true ->
