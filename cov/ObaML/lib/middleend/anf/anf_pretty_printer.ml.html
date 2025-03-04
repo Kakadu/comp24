@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>anf_pretty_printer.ml &mdash; Coverage report</title>
+    <meta name="description" content="88.89% coverage in lib/middleend/anf/anf_pretty_printer.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/anf/</span>anf_pretty_printer.ml
+        </a>
+      </h1>
+      <h2>88.89%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:20.99%"></span>
+      <span class="unvisited" style="top:39.51%"></span>
+      <span class="unvisited" style="bottom:16.05%"></span>
+      <span class="unvisited" style="bottom:13.58%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="unvisited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2025, tepa46, Arsene-Baitenov *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
+open Format
+
+let print_id fmt id = <span data-count="683">f</span>printf fmt "%s" id
+
+let rec print_id_lst fmt ident_lst =
+  <span data-count="247">m</span>atch ident_lst with
+  | <span data-count="34">[</span>] -&gt; ()
+  | <span data-count="115">[</span> h ] -&gt; fprintf fmt "%a " print_id h
+  | <span data-count="98">h</span> :: tl -&gt; fprintf fmt "%a %a" print_id h print_id_lst tl
+;;
+
+let rec print_tuple fmt = function
+  | <span data-count="0">[</span>] -&gt; ()
+  | <span data-count="7">[</span> h ] -&gt; fprintf fmt "%a" print_immexpr h
+  | <span data-count="7">h</span> :: tl -&gt; fprintf fmt "%a, %a" print_immexpr h print_tuple tl
+
+and print_immexpr fmt immexpr =
+  <span data-count="843">m</span>atch immexpr with
+  | <span data-count="607">A</span>nf.ImmId s -&gt; fprintf fmt "%s" s
+  | <span data-count="175">A</span>nf.ImmInt n -&gt; fprintf fmt "%d" n
+  | <span data-count="8">A</span>nf.ImmString s -&gt; fprintf fmt "%S" s
+  | <span data-count="11">A</span>nf.ImmBool b -&gt; fprintf fmt "%b" b
+  | <span data-count="22">A</span>nf.ImmEmptyList -&gt; fprintf fmt "[]"
+  | <span data-count="13">A</span>nf.ImmUnit -&gt; fprintf fmt "()"
+  | <span data-count="7">A</span>nf.ImmTuple im_lst -&gt; fprintf fmt "(%a)" print_tuple im_lst
+
+and print_immexpr_lst fmt = function
+  | <span data-count="0">[</span>] -&gt; ()
+  | <span data-count="412">[</span> h ] -&gt; fprintf fmt "%a" print_immexpr h
+  | <span data-count="241">h</span> :: tl -&gt; fprintf fmt "%a %a" print_immexpr h print_immexpr_lst tl
+;;
+
+let rec print_cexpr fmt cexpr =
+  <span data-count="554">m</span>atch cexpr with
+  | <span data-count="66">A</span>nf.CImmExpr immexpr -&gt; fprintf fmt "%a" print_immexpr immexpr
+  | <span data-count="412">A</span>nf.CApp (app_var, immexpr_lst) -&gt;
+    fprintf fmt "(%s %a)" app_var print_immexpr_lst immexpr_lst
+  | <span data-count="42">A</span>nf.CIf (imm1, aex2, aex3) -&gt;
+    fprintf
+      fmt
+      "\n\tif %a\n\tthen %a\n\telse %a"
+      print_immexpr
+      imm1
+      print_aexpr
+      aex2
+      print_aexpr
+      aex3
+  | <span data-count="34">A</span>nf.CCons (imm1, imm2) -&gt; fprintf fmt "%a :: %a" print_immexpr imm1 print_immexpr imm2
+
+and print_aexpr fmt aexpr =
+  <span data-count="554">m</span>atch aexpr with
+  | <span data-count="321">A</span>nf.ALet (id, cexpr, aexpr) -&gt;
+    fprintf fmt "\n\tlet %a = %a in %a" print_id id print_cexpr cexpr print_aexpr aexpr
+  | <span data-count="233">A</span>nf.ACExpr cexpr -&gt; fprintf fmt "%a" print_cexpr cexpr
+;;
+
+let print_value_binding fmt value_binding =
+  <span data-count="149">l</span>et ident, args, aexpr = value_binding in
+  fprintf fmt "%a %a= %a" print_id ident print_id_lst args print_aexpr aexpr
+;;
+
+let rec print_value_binding_lst fmt value_binding_lst =
+  <span data-count="149">m</span>atch value_binding_lst with
+  | <span data-count="0">[</span>] -&gt; ()
+  | <span data-count="149">[</span> h ] -&gt; fprintf fmt "%a" print_value_binding h
+  | <span data-count="0">h</span> :: tl -&gt; fprintf fmt "%a\nand%a" print_value_binding h print_value_binding_lst tl
+;;
+
+let print_program fmt program =
+  <span data-count="41">L</span>ist.iter
+    (fun tp -&gt;
+      <span data-count="149">l</span>et rec_flag, value_bindings = tp in
+      match rec_flag with
+      | <span data-count="112">f</span>alse -&gt; fprintf fmt "let %a;;\n\n" print_value_binding_lst value_bindings
+      | <span data-count="37">t</span>rue -&gt; fprintf fmt "let rec %a;;\n\n" print_value_binding_lst value_bindings)
+    program
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>simple_ast.ml &mdash; Coverage report</title>
+    <meta name="description" content="0.00% coverage in lib/middleend/simple_ast/simple_ast.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/simple_ast/</span>simple_ast.ml
+        </a>
+      </h1>
+      <h2>0.00%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:21.88%"></span>
+      <span class="unvisited" style="top:28.12%"></span>
+      <span class="unvisited" style="top:31.25%"></span>
+      <span class="unvisited" style="top:34.38%"></span>
+      <span class="unvisited" style="top:43.75%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:46.88%"></span>
+      <span class="unvisited" style="bottom:43.75%"></span>
+      <span class="unvisited" style="bottom:40.62%"></span>
+      <span class="unvisited" style="bottom:37.50%"></span>
+      <span class="unvisited" style="bottom:34.38%"></span>
+      <span class="unvisited" style="bottom:31.25%"></span>
+      <span class="unvisited" style="bottom:28.12%"></span>
+      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="unvisited" style="bottom:15.62%"></span>
+      <span class="unvisited" style="bottom:12.50%"></span>
+      <span class="unvisited" style="bottom:9.38%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="unvisited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="unvisited"> </span>
+<a id="L10"></a><span class="unvisited"> </span>
+<a id="L11"></a><span class="unvisited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="unvisited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
+<a id="L19"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2025, tepa46, Arsene-Baitenov *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
+(** Simple AST *)
+
+<span data-count="0">t</span>ype sspecial = <span data-count="0">S</span>Unit [@@deriving eq, show { with_path = false }]
+
+<span data-count="0">t</span>ype sspident =
+  <span data-count="0">|</span> SId of Ast.identifier
+  <span data-count="0">|</span> SSpecial of sspecial
+[@@deriving eq, show { with_path = false }]
+
+<span data-count="0">t</span>ype svalue_binding = <span data-count="0">s</span>spident * sexpr
+
+<span data-count="0">a</span>nd sexpr =
+  <span data-count="0">|</span> SEConst of Ast.constant
+  <span data-count="0">|</span> SEVar of Ast.identifier
+  <span data-count="0">|</span> SETuple of <span data-count="0">s</span>expr lis<span data-count="0">t</span>
+  <span data-count="0">|</span> SEFun of <span data-count="0">s</span>spident lis<span data-count="0">t</span> * sexp<span data-count="0">r</span>
+  <span data-count="0">|</span> SELet of Ast.rec_flag * svalue_binding * sexp<span data-count="0">r</span>
+  <span data-count="0">|</span> SEApp of sexpr * sexp<span data-count="0">r</span>
+  <span data-count="0">|</span> SEIf of sexpr * sexpr * sexp<span data-count="0">r</span>
+  <span data-count="0">|</span> SECons of sexpr * sexp<span data-count="0">r</span>
+[@@deriving eq, show { with_path = false }]
+
+<span data-count="0">t</span>ype sstructure_item =
+  <span data-count="0">|</span> SSILet of Ast.rec_flag * <span data-count="0">s</span>value_binding lis<span data-count="0">t</span>
+  <span data-count="0">|</span> SSIExpr of sexpr
+[@@deriving eq, show { with_path = false }]
+
+<span data-count="0">t</span>ype sstructure = <span data-count="0">s</span>structure_item lis<span data-count="0">t</span> [@@deriving eq, show { with_path = false }]
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>
