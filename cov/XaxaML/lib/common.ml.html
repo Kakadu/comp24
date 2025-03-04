@@ -695,7 +695,7 @@ module MonadCounterError = struct
 
   type ('a, 'e) t = NamesHolder.t * int -&gt; NamesHolder.t * int * ('a, 'e) Result.t
 
-  let return x (nh, var) = <span data-count="376764">n</span>h, var, Result.retur<span data-count="376764">n</span> x
+  let return x (nh, var) = <span data-count="375207">n</span>h, var, Result.retur<span data-count="375207">n</span> x
   let fail e (nh, var) = <span data-count="18">n</span>h, var, Result.fai<span data-count="18">l</span> e
 
   let fresh (nh, var) =
@@ -705,10 +705,10 @@ module MonadCounterError = struct
   ;;
 
   let ( &gt;&gt;= ) (m : ('a, 'e) t) (f : 'a -&gt; ('b, 'e) t) : ('b, 'e) t =
-    <span data-count="380538">f</span>un tup -&gt;
-    <span data-count="380538">m</span>atch m tup with
+    <span data-count="378981">f</span>un tup -&gt;
+    <span data-count="378981">m</span>atch m tup with
     | <span data-count="71">n</span>h, var, Result.Error err -&gt; nh, var, Result.fai<span data-count="71">l</span> err
-    | <span data-count="380467">n</span>h, var, Result.Ok x -&gt; f x (nh, var)
+    | <span data-count="378910">n</span>h, var, Result.Ok x -&gt; f x (nh, var)
   ;;
 
   let bind = ( &gt;&gt;= )
@@ -725,8 +725,8 @@ module MonadCounterError = struct
   module RMap = struct
     let fold mp ~init ~f =
       <span data-count="11473">M</span>ap.fold mp ~init ~f:(fun ~key:k ~data:v acc -&gt;
-        <span data-count="18109">l</span>et* acc = acc in
-        <span data-count="18109">f</span> acc k v)
+        <span data-count="18102">l</span>et* acc = acc in
+        <span data-count="18102">f</span> acc k v)
     ;;
   end
 

@@ -1531,21 +1531,21 @@ open Common
 
 module Type = struct
   let rec occurs_in v = function
-    | <span data-count="12443">T</span>_var b -&gt; b = v
-    | <span data-count="12361">T</span>_arr (l, r) -&gt; occurs_i<span data-count="12361">n</span> v <span data-count="2">l</span> || occurs_in v r
+    | <span data-count="12394">T</span>_var b -&gt; b = v
+    | <span data-count="12358">T</span>_arr (l, r) -&gt; occurs_i<span data-count="12358">n</span> v <span data-count="2">l</span> || occurs_in v r
     | <span data-count="950">T</span>_tuple (h, list) -&gt;
       List.fold_left (fun occurs item -&gt; <span data-count="964">o</span>ccur<span data-count="0">s</span> || occurs_in v item) (occurs_i<span data-count="950">n</span> v h) list
-    | <span data-count="3712">T</span>_list t -&gt; occurs_in v t
-    | <span data-count="22581">_</span> -&gt; false
+    | <span data-count="3665">T</span>_list t -&gt; occurs_in v t
+    | <span data-count="22620">_</span> -&gt; false
   ;;
 
   let type_vars =
     let rec helper acc = function
-      | <span data-count="17108">T</span>_var b -&gt; TypeVarSet.add b acc
-      | <span data-count="30994">T</span>_arr (l, r) -&gt; helper (helpe<span data-count="30994">r</span> acc l) r
-      | <span data-count="569">T</span>_tuple (h, list) -&gt; List.fold_left helper (helpe<span data-count="569">r</span> acc h) list
-      | <span data-count="4611">T</span>_list t -&gt; helper acc t
-      | <span data-count="35641">_</span> -&gt; acc
+      | <span data-count="17122">T</span>_var b -&gt; TypeVarSet.add b acc
+      | <span data-count="30999">T</span>_arr (l, r) -&gt; helper (helpe<span data-count="30999">r</span> acc l) r
+      | <span data-count="567">T</span>_tuple (h, list) -&gt; List.fold_left helper (helpe<span data-count="567">r</span> acc h) list
+      | <span data-count="4623">T</span>_list t -&gt; helper acc t
+      | <span data-count="35630">_</span> -&gt; acc
     in
     helpe<span data-count="93">r</span> TypeVarSet.empty
   ;;
@@ -1571,24 +1571,24 @@ end = struct
   let empty = Map.empt<span data-count="93">y</span> (module Int)
 
   let singleton k v =
-    <span data-count="21701">i</span>f Type.occurs_in k v
+    <span data-count="21694">i</span>f Type.occurs_in k v
     then <span data-count="3">f</span>ail Occurs_check
-    else <span data-count="21698">r</span>eturn (Map.singleto<span data-count="21698">n</span> (module Int) k v)
+    else <span data-count="21691">r</span>eturn (Map.singleto<span data-count="21691">n</span> (module Int) k v)
   ;;
 
   let find = Map.find
   let remove = Map.remove
 
   let apply sub =
-    <span data-count="440921">l</span>et rec helper = function
-      | <span data-count="346648">T</span>_var tv as ty -&gt;
+    <span data-count="439375">l</span>et rec helper = function
+      | <span data-count="342642">T</span>_var tv as ty -&gt;
         (match find sub tv with
-         | <span data-count="341393">N</span>one -&gt; ty
-         | <span data-count="5255">S</span>ome x -&gt; x)
-      | <span data-count="246456">T</span>_arr (l, r) -&gt; T_arr (helpe<span data-count="246456">r</span> l, helpe<span data-count="246456">r</span> r)
-      | <span data-count="7897">T</span>_tuple (h, list) -&gt; T_tuple (helpe<span data-count="7897">r</span> h, List.ma<span data-count="7897">p</span> list ~f:helper)
-      | <span data-count="116232">T</span>_list t -&gt; list_typ @@ helpe<span data-count="116232">r</span> t
-      | <span data-count="349043">o</span>ther -&gt; other
+         | <span data-count="337385">N</span>one -&gt; ty
+         | <span data-count="5257">S</span>ome x -&gt; x)
+      | <span data-count="246557">T</span>_arr (l, r) -&gt; T_arr (helpe<span data-count="246557">r</span> l, helpe<span data-count="246557">r</span> r)
+      | <span data-count="7940">T</span>_tuple (h, list) -&gt; T_tuple (helpe<span data-count="7940">r</span> h, List.ma<span data-count="7940">p</span> list ~f:helper)
+      | <span data-count="113160">T</span>_list t -&gt; list_typ @@ helpe<span data-count="113160">r</span> t
+      | <span data-count="351647">o</span>ther -&gt; other
     in
     helper
   ;;
@@ -1617,15 +1617,15 @@ end = struct
     | <span data-count="9">_</span> -&gt; fail (Unification_failed (l, r))
 
   and extend sub typ_var ty =
-    <span data-count="18109">m</span>atch Map.find sub typ_var with
-    | <span data-count="17924">N</span>one -&gt;
-      let* new_sub = singleto<span data-count="17924">n</span> typ_var (appl<span data-count="17924">y</span> sub ty) in
-      <span data-count="17924">l</span>et upd ~key ~data acc =
-        <span data-count="303012">l</span>et* acc = acc in
-        <span data-count="303012">l</span>et ty = apply new_sub data in
-        <span data-count="303012">r</span>eturn (Map.updat<span data-count="303012">e</span> acc key ~f:(function <span data-count="303012">_</span> -&gt; ty))
+    <span data-count="18102">m</span>atch Map.find sub typ_var with
+    | <span data-count="17917">N</span>one -&gt;
+      let* new_sub = singleto<span data-count="17917">n</span> typ_var (appl<span data-count="17917">y</span> sub ty) in
+      <span data-count="17917">l</span>et upd ~key ~data acc =
+        <span data-count="301469">l</span>et* acc = acc in
+        <span data-count="301469">l</span>et ty = apply new_sub data in
+        <span data-count="301469">r</span>eturn (Map.updat<span data-count="301469">e</span> acc key ~f:(function <span data-count="301469">_</span> -&gt; ty))
       in
-      Map.fold sub ~init:(retur<span data-count="17924">n</span> new_sub) ~f:upd
+      Map.fold sub ~init:(retur<span data-count="17917">n</span> new_sub) ~f:upd
     | <span data-count="185">S</span>ome finded_type -&gt;
       let* sub2 = unif<span data-count="185">y</span> ty finded_type in
       <span data-count="185">c</span>ompose sub sub2
@@ -1644,8 +1644,8 @@ module Scheme = struct
   let free_vars (Scheme (bind_set, t)) = <span data-count="20447">T</span>ypeVarSet.diff (Type.type_var<span data-count="20447">s</span> t) bind_set
 
   let apply sub (Scheme (bind_set, ty)) =
-    <span data-count="111274">l</span>et sub = TypeVarSet.fold (fun v s -&gt; <span data-count="47883">S</span>ubst.remove s v) bind_set sub in
-    <span data-count="111274">S</span>cheme (bind_set, Subst.appl<span data-count="111274">y</span> sub ty)
+    <span data-count="111278">l</span>et sub = TypeVarSet.fold (fun v s -&gt; <span data-count="47879">S</span>ubst.remove s v) bind_set sub in
+    <span data-count="111278">S</span>cheme (bind_set, Subst.appl<span data-count="111278">y</span> sub ty)
   ;;
 
   (* print scheme with binded vars *)
@@ -1792,7 +1792,7 @@ end = struct
       <span data-count="20447">T</span>ypeVarSet.union acc (Scheme.free_var<span data-count="20447">s</span> (sn<span data-count="20447">d</span> data)))
   ;;
 
-  let apply sub env = <span data-count="3944">M</span>ap.map env ~f:(fun (flag, scheme) -&gt; <span data-count="111274">f</span>lag, Scheme.appl<span data-count="111274">y</span> sub scheme)
+  let apply sub env = <span data-count="3944">M</span>ap.map env ~f:(fun (flag, scheme) -&gt; <span data-count="111278">f</span>lag, Scheme.appl<span data-count="111278">y</span> sub scheme)
 
   let union env1 env2 =
     <span data-count="941">M</span>ap.fold env2 ~init:env1 ~f:(fun ~key ~data:(is_std, scheme) acc -&gt;
