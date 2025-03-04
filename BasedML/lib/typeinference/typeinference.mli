@@ -6,11 +6,17 @@ type res_map = Ast.type_name Help.MapString.t
 
 val pp_res_map : Format.formatter -> res_map -> unit
 val show_res_map : res_map -> string
+
+val infer_prog_with_custom_state
+  :  StatementInfer.state
+  -> Ast.declarations
+  -> (res_map, string) result
+
 val infer_prog : Ast.declarations -> (res_map, string) result
 val test_infer_exp : string -> unit
 val test_infer_prog_with_state : StatementInfer.state -> string -> unit
 val test_infer_prog : string -> unit
-val types_equal : Ast.type_name -> Ast.type_name -> bool
+val type_more_general : Ast.type_name -> Ast.type_name -> bool
 
 module StringMap : sig
   type key = string
@@ -57,3 +63,5 @@ module StringMap : sig
   val add_seq : (key * 'a) Seq.t -> 'a t -> 'a t
   val of_seq : (key * 'a) Seq.t -> 'a t
 end
+
+val infer_with_system_fun : Ast.declarations -> (res_map, string) result

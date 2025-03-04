@@ -74,11 +74,11 @@ let enil = Expr_const Const_nil
 let etuple fst snd rest = Expr_tuple (fst, snd, rest)
 let eite c e t = Expr_ite (c, e, t)
 
-let eite_simplified c e t =
+let eite_simplified c t e =
   match c with
-  | Expr_const (Const_bool true) -> c
+  | Expr_const (Const_bool true) -> t
   | Expr_const (Const_bool false) -> e
-  | _ -> Expr_ite (c, e, t)
+  | _ -> Expr_ite (c, t, e)
 ;;
 
 let efun p body = Expr_fun (p, body)

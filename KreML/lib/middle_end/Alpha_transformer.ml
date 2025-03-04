@@ -3,7 +3,6 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Ast
-open Utils
 
 type context = (string, string, Base.String.comparator_witness) Base.Map.t
 
@@ -47,13 +46,13 @@ let rec transform_pattern id_gen ctx = function
 ;;
 
 let rec transform_expr ctx e =
-  let id_gen = fresh_name in
+  let id_gen = Utils.fresh_name in
   match e with
   | Expr_const _ as e -> return e
   | Expr_var id ->
     let unique =
       match Base.Map.find ctx id with
-      | None -> internalfail @@ Format.sprintf "was not found %s" id
+      | None -> Utils.internalfail @@ Format.sprintf "was not found %s" id
       | Some i -> i
     in
     (* program is type checked *)
@@ -118,7 +117,7 @@ let rec transform_expr ctx e =
 
 let transform s =
   let renew_if_need ctx name =
-    if Base.Map.mem ctx name then fresh_name name else return name
+    if Base.Map.mem ctx name then Utils.fresh_name name else return name
   in
   let lookup ctx name = Base.Map.find_exn ctx name |> return in
   let default_ctx = default in

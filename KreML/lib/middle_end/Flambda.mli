@@ -13,6 +13,7 @@ type flambda =
   | Fl_const of const
   | Fl_var of ident
   | Fl_binop of binop * flambda * flambda
+  | Fl_unop of unop * flambda
   | Fl_getfield of int * flambda
   | Fl_cons of flambda * flambda
   | Fl_tuple of flambda list

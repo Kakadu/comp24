@@ -4,7 +4,7 @@
 
 open Test.Utils
 
-let test = test_inferencer
+let test code = infer code (Format.printf "%a" Lib.Tast.pp_toplevel_types)
 
 let%expect_test _ =
   test {| let x = () |};
@@ -162,7 +162,7 @@ let%expect_test _ =
     let x = fact 5
   |};
   [%expect {|
-    helper: int -> (int -> 'o) -> 'o
+    helper: int -> (int -> 'n) -> 'n
     fact: int -> int
     x: int
     |}]
@@ -424,4 +424,40 @@ let%expect_test _ =
     tup: (bool * int * 'a -> 'a)
     (x, y, z): (bool * int * 'c -> 'c)
     |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+    let sum tuples =
+      let rec helper acc tuples =
+        match tuples with
+        | [] -> acc
+        | (a, b, c) :: tl ->
+          let (x, y, z) = acc in
+          helper (a + x, b + y, c + z) tl
+      in
+      helper (0, 0, 0) tuples
+  |};
+  [%expect {| sum: (int * int * int) list -> (int * int * int) |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+    let f x =
+      match x with
+      | [ 1 ] -> 1
+      | [ a ] -> a
+      | hd :: tl -> hd
+      | _ -> 42
+  |};
+  [%expect {| f: int list -> int |}]
+;;
+
+let%expect_test _ =
+  test {| 
+    let f [[a; b]; [c; d]] = a + b + c + d
+  |};
+  [%expect {| f: int list list -> int |}]
 ;;

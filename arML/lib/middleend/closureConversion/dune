@@ -1,0 +1,9 @@
+(include_subdirs unqualified)
+
+(library
+ (name closureConversion)
+ (public_name arML.middleend.closureConversion)
+ (libraries base ast common)
+ (modules ClosureExpression ClosureProgram Runner)
+ (instrumentation
+  (backend bisect_ppx)))
