@@ -3,7 +3,7 @@ opam-version: "2.0"
 synopsis: "ObaML compiler"
 maintainer: ["Arseniy Baytenov" "Kirill Shishin"]
 authors: ["Arseniy Baytenov" "Kirill Shishin"]
-license: "LICENSE"
+license: "LGPL-2.1-or-later"
 homepage: "https://github.com/tepa46/comp24"
 bug-reports: "https://github.com/tepa46/comp24/issues"
 depends: [

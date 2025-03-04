@@ -11,9 +11,7 @@
 
 (maintainers "Arseniy Baytenov" "Kirill Shishin")
 
-(license LICENSE)
-
-(using menhir 2.0)
+(license LGPL-2.1-or-later)
 
 (package
  (name ObaML)
