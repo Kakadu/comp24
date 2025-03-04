@@ -3,7 +3,9 @@ open HamsterML.AC
 open ParserTest
 
 let alpha_conv_pattern (s : string) =
-  let _, res = HamsterML.Utils.R.run (convert_pattern NameEnv.empty "arg_" (parse_pattern s)) in
+  let _, res =
+    HamsterML.Utils.R.run (convert_pattern NameEnv.empty "arg_" (parse_pattern s))
+  in
   res
 ;;
 
@@ -38,4 +40,25 @@ let%test _ =
               , Application
                   (Application (EOperation (Binary ADD), EVar "arg_2"), EVar "arg_1") ) )
       )
+;;
+
+let%test _ =
+  alpha_conv_expr "let a = let a a a = a + 1 in a 1 2"
+  = Let
+      ( Nonrecursive
+      , [ ( Var "var_0"
+          , []
+          , Let
+              ( Nonrecursive
+              , [ ( Var "var_1"
+                  , [ Var "arg_1"; Var "arg_2" ]
+                  , Application
+                      (Application (EOperation (Binary ADD), EVar "arg_2"), EConst (Int 1))
+                  )
+                ]
+              , Some
+                  (Application (Application (EVar "var_1", EConst (Int 1)), EConst (Int 2)))
+              ) )
+        ]
+      , None )
 ;;
