@@ -34,46 +34,43 @@ module NameEnv = struct
   ;;
 end
 
-let arg_prefix = "arg_"
-let let_prefix = "var_"
-
-let rec convert_pattern (env : NameEnv.t) = function
+let rec convert_pattern (env : NameEnv.t) prefix = function
   | (Const _ | Wildcard | Operation (Unary _)) as orig -> return (env, orig)
   | Var id ->
-    let* env, new_id = NameEnv.resolve_name env id arg_prefix in
+    let* env, new_id = NameEnv.resolve_name env id prefix in
     return (env, Var new_id)
   | Operation (Binary op) ->
     let op_id = BinOperator.to_string op in
-    let* env, new_id = NameEnv.resolve_name env op_id arg_prefix in
+    let* env, new_id = NameEnv.resolve_name env op_id prefix in
     return (env, Var new_id)
   | Constraint (p, dt) ->
-    let* env, ac_p = convert_pattern env p in
+    let* env, ac_p = convert_pattern env prefix p in
     return (env, Constraint (ac_p, dt))
   | List pts ->
     let* env, ac_pts =
       fold_list pts ~init:(env, []) ~f:(fun (env, acc) p ->
-        let* env, ac_p = convert_pattern env p in
+        let* env, ac_p = convert_pattern env prefix p in
         return (env, ac_p :: acc))
     in
     let ac_pts = List.rev ac_pts in
     return (env, List ac_pts)
   | ListConcat (p1, p2) ->
-    let* env, ac_p1 = convert_pattern env p1 in
-    let* env, ac_p2 = convert_pattern env p2 in
+    let* env, ac_p1 = convert_pattern env prefix p1 in
+    let* env, ac_p2 = convert_pattern env prefix p2 in
     return (env, ListConcat (ac_p1, ac_p2))
   | Tuple (a, b, pts) ->
-    let* env, ac_a = convert_pattern env a in
-    let* env, ac_b = convert_pattern env b in
+    let* env, ac_a = convert_pattern env prefix a in
+    let* env, ac_b = convert_pattern env prefix b in
     let* env, ac_pts =
       fold_list pts ~init:(env, []) ~f:(fun (env, acc) p ->
-        let* env, ac_p = convert_pattern env p in
+        let* env, ac_p = convert_pattern env prefix p in
         return (env, ac_p :: acc))
     in
     let ac_pts = List.rev ac_pts in
     return (env, Tuple (ac_a, ac_b, ac_pts))
 ;;
 
-let convert_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
+let convert_arg_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
   match arg with
   | Var id ->
     let* env, new_id = NameEnv.generate_new_name env id name_prefix in
@@ -82,20 +79,29 @@ let convert_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string
     let op_id = BinOperator.to_string op in
     let* env, new_id = NameEnv.resolve_name env op_id name_prefix in
     return (env, Var new_id)
-  | arg -> convert_pattern env arg
+  | arg -> convert_pattern env name_prefix arg
 ;;
+
+let arg_prefix = "arg_"
+let let_prefix = "var_"
 
 let collect_args (env : NameEnv.t) (args : args) =
   let* env, ac_args =
     fold_list args ~init:(env, []) ~f:(fun (env, acc) arg ->
-      let* env, ac_arg = convert_name_pattern env arg arg_prefix in
+      let* env, ac_arg = convert_arg_pattern env arg arg_prefix in
       return (env, ac_arg :: acc))
   in
   return (env, List.rev ac_args)
 ;;
 
+let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
+  fold_list binds ~init:env ~f:(fun env (name, _, _) ->
+    let* env, _ = convert_pattern env let_prefix name in
+    return env)
+;;
+
 let rec convert_bind (env : NameEnv.t) ((name, args, body) : bind) =
-  let* env, new_name = convert_name_pattern env name let_prefix in
+  let* env, new_name = convert_pattern env let_prefix name in
   let* args_env, ac_args = collect_args env args in
   let* env, ac_body = convert_expr args_env body in
   let env = NameEnv.sub env args_env in
@@ -116,5 +122,22 @@ and convert_expr (env : NameEnv.t) = function
     let* env, ac_body = convert_expr args_env body in
     let env = NameEnv.sub args_env env in
     return (env, Fun (ac_args, ac_body))
+  | Let (rec_flag, binds, scope) ->
+    let* env =
+      match rec_flag with
+      | Recursive -> collect_mutual_names env binds
+      | Nonrecursive -> return env
+    in
+    let* env, new_binds =
+      fold_list binds ~init:(env, []) ~f:(fun (env, acc_binds) bnd ->
+        let* env, ac_bnd = convert_bind env bnd in
+        return (env, ac_bnd :: acc_binds))
+    in
+    let new_binds = List.rev new_binds in
+    (match scope with
+     | None -> return (env, Let (rec_flag, new_binds, None))
+     | Some scope ->
+       let* env, ac_scope = convert_expr env scope in
+       return (env, Let (rec_flag, new_binds, Some ac_scope)))
   | _ -> failwith "Illegal expression was encountered during Alpha Conversion"
 ;;

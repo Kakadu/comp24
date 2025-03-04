@@ -3,12 +3,12 @@ open HamsterML.AC
 open ParserTest
 
 let alpha_conv_pattern (s : string) =
-  let _, res = HamsterML.Utils.R.run (ac_pattern NameEnv.empty (parse_pattern s)) in
+  let _, res = HamsterML.Utils.R.run (convert_pattern NameEnv.empty "arg_" (parse_pattern s)) in
   res
 ;;
 
 let alpha_conv_expr (s : string) =
-  let _, res = HamsterML.Utils.R.run (ac_expr NameEnv.empty (parse_expr s)) in
+  let _, res = HamsterML.Utils.R.run (convert_expr NameEnv.empty (parse_expr s)) in
   res
 ;;
 
