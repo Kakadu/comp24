@@ -1,7 +1,7 @@
 (library
  (name typing)
  (public_name BDSML.Typing)
- (libraries base BDSML.Parser)
+ (libraries base BDSML.Parser BDSML.Utils)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq))
  (instrumentation

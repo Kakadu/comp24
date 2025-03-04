@@ -8,7 +8,7 @@ module TVarId = struct
   let to_string n = Int.to_string n
   let create n : t = n
   let compare = Int.compare
-  let ( + ) = ( + )
+  let add = ( + )
 end
 
 type base_type =
@@ -67,6 +67,13 @@ type error =
   | Invalid_list_constructor_argument
   | Invalid_ast of string
   | Invalid_predefined_operators of string
+
+module Monads =
+  Utils.Counter_monad.Make
+    (TVarId)
+    (struct
+      type t = error
+    end)
 
 module VarSet = Set.Make (TVarId)
 
