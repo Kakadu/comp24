@@ -51,9 +51,9 @@ let%test _ =
           , Let
               ( Nonrecursive
               , [ ( Var "var_1"
-                  , [ Var "arg_1"; Var "arg_2" ]
+                  , [ Var "arg_2"; Var "arg_3" ]
                   , Application
-                      (Application (EOperation (Binary ADD), EVar "arg_2"), EConst (Int 1))
+                      (Application (EOperation (Binary ADD), EVar "arg_3"), EConst (Int 1))
                   )
                 ]
               , Some

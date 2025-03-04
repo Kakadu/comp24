@@ -3,10 +3,6 @@ open Base
 module Format = Stdlib.Format
 open Utils.R
 
-module NameSet = struct
-  include Utils.NameSet
-end
-
 module NameEnv = struct
   include Utils.NameEnv
 
@@ -31,6 +27,12 @@ module NameEnv = struct
       match Map.find env2 key with
       | None -> extend (key, data) acc
       | Some _ -> acc)
+  ;;
+
+  let union (env1 : t) (env2 : t) : t =
+    Map.merge env1 env2 ~f:(fun ~key:_ ->
+        function
+        | `Left v | `Right v | `Both (_, v) -> Some v)
   ;;
 end
 
@@ -101,10 +103,12 @@ let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
 ;;
 
 let rec convert_bind (env : NameEnv.t) ((name, args, body) : bind) =
-  let* env, new_name = convert_pattern env let_prefix name in
-  let* args_env, ac_args = collect_args env args in
+  let* old_env, new_name = convert_arg_pattern env name let_prefix in
+  let* args_env, ac_args = collect_args old_env args in
+  (* ! Здесь тоже имена bind ! *)
   let* env, ac_body = convert_expr args_env body in
   let env = NameEnv.sub env args_env in
+  let env = NameEnv.union env old_env in
   return (env, ((new_name, ac_args, ac_body) : bind))
 
 and convert_expr (env : NameEnv.t) = function
