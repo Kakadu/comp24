@@ -4,6 +4,7 @@
 
 val empty_state : StatementInfer.state
 val start_state : StatementInfer.state
+val start_state_with_system_fun : StatementInfer.state
 
 val init_used_type_names
   :  Ast.let_declaration list

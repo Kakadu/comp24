@@ -202,10 +202,12 @@ let infer_declarations : Ast.declarations -> (state, res_map) t =
      return (MapString.of_seq (List.to_seq restored_lst))
 ;;
 
-let infer_prog decls =
-  let _, res = run (init_used_type_names decls *> infer_declarations decls) start_state in
+let infer_prog_with_custom_state state decls =
+  let _, res = run (init_used_type_names decls *> infer_declarations decls) state in
   res
 ;;
+
+let infer_prog decls = infer_prog_with_custom_state start_state decls
 
 let test_infer_exp string_exp =
   let res = Parser.parse Parser.p_exp string_exp in
@@ -248,52 +250,49 @@ let test_infer_prog string_exp =
 
 module StringMap = Map.Make (String)
 
-(* Helper function to compare two types with alpha equivalence *)
-let rec alpha_equivalent
-  (mapping_t1_to_t2 : string StringMap.t)
-  (mapping_t2_to_t1 : string StringMap.t)
+let rec is_first_more_general
+  (mapping_t2_to_t1 : type_name StringMap.t)
   (t1 : type_name)
   (t2 : type_name)
-  : bool * string StringMap.t * string StringMap.t
+  : bool * type_name StringMap.t
   =
   match t1, t2 with
-  | TUnit, TUnit | TInt, TInt | TBool, TBool -> true, mapping_t1_to_t2, mapping_t2_to_t1
-  | TPoly var1, TPoly var2 ->
-    let mapped_var2 = StringMap.find_opt var1 mapping_t1_to_t2 in
+  | TUnit, TUnit | TInt, TInt | TBool, TBool -> true, mapping_t2_to_t1
+  | var1, TPoly var2 ->
     let mapped_var1 = StringMap.find_opt var2 mapping_t2_to_t1 in
-    (match mapped_var2, mapped_var1 with
-     | Some mapped_var2', Some mapped_var1' ->
-       if mapped_var2' = var2 && mapped_var1' = var1
-       then true, mapping_t1_to_t2, mapping_t2_to_t1
-       else false, mapping_t1_to_t2, mapping_t2_to_t1
-     | None, None ->
-       let updated_mapping_t1_to_t2 = StringMap.add var1 var2 mapping_t1_to_t2 in
+    (match mapped_var1 with
+     | Some mapped_var1' ->
+       if mapped_var1' = var1 then true, mapping_t2_to_t1 else false, mapping_t2_to_t1
+     | None ->
        let updated_mapping_t2_to_t1 = StringMap.add var2 var1 mapping_t2_to_t1 in
-       true, updated_mapping_t1_to_t2, updated_mapping_t2_to_t1
-     | _ -> false, mapping_t1_to_t2, mapping_t2_to_t1)
+       true, updated_mapping_t2_to_t1)
   | TTuple ts1, TTuple ts2 ->
     if List.compare_lengths ts1 ts2 = 0
     then
       List.fold_right2
-        (fun tp1 tp2 (res, map1, map2) ->
-          if res then alpha_equivalent map1 map2 tp1 tp2 else false, map1, map2)
+        (fun tp1 tp2 (res, map2) ->
+          if res then is_first_more_general map2 tp1 tp2 else false, map2)
         ts1
         ts2
-        (true, mapping_t1_to_t2, mapping_t2_to_t1)
-    else false, mapping_t1_to_t2, mapping_t2_to_t1
+        (true, mapping_t2_to_t1)
+    else false, mapping_t2_to_t1
   | TFunction (dom1, codom1), TFunction (dom2, codom2) ->
-    let dom_equal, updated_mapping_t1_to_t2, updated_mapping_t2_to_t1 =
-      alpha_equivalent mapping_t1_to_t2 mapping_t2_to_t1 dom1 dom2
+    let dom_equal, updated_mapping_t2_to_t1 =
+      is_first_more_general mapping_t2_to_t1 dom1 dom2
     in
     if not dom_equal
-    then false, updated_mapping_t1_to_t2, updated_mapping_t2_to_t1
-    else alpha_equivalent updated_mapping_t1_to_t2 updated_mapping_t2_to_t1 codom1 codom2
-  | TList t1, TList t2 -> alpha_equivalent mapping_t1_to_t2 mapping_t2_to_t1 t1 t2
-  | _ -> false, mapping_t1_to_t2, mapping_t2_to_t1
+    then false, updated_mapping_t2_to_t1
+    else is_first_more_general updated_mapping_t2_to_t1 codom1 codom2
+  | TList t1, TList t2 -> is_first_more_general mapping_t2_to_t1 t1 t2
+  | _ -> false, mapping_t2_to_t1
 ;;
 
 (* Public function to compare two types *)
-let types_equal t1 t2 =
-  let result, _, _ = alpha_equivalent StringMap.empty StringMap.empty t1 t2 in
+let type_more_general t1 t2 =
+  let result, _ = is_first_more_general StringMap.empty t1 t2 in
   result
+;;
+
+let infer_with_system_fun ast =
+  infer_prog_with_custom_state start_state_with_system_fun ast
 ;;

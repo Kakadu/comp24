@@ -1,5 +1,5 @@
 (library
- (modules Ast Parser Lexer Typing Anf Closure_conversion Pp_expr)
+ (modules Ast Parser Lexer Typing Anf Closure_conversion Utils LL AC Pp_expr)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))

@@ -1,4 +1,4 @@
-open HamsterML__Ast
+open Ast
 open Base
 
 let rec pretty_print_expr e =

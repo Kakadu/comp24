@@ -1,6 +1,11 @@
 (library
  (name HamsterTest)
- (modules LexerTest ParserTest TypingTest)
+ (modules
+  LexerTest
+  ParserTest
+  TypingTest
+  LambdaLiftingTest
+  AlphaConversionTest)
  (libraries HamsterML)
  (inline_tests)
  (preprocess

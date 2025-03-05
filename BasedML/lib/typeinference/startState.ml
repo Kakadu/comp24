@@ -6,23 +6,42 @@ open StatementInfer
 open Help
 open Stdlib_funs
 
-let add_stdfun : std_fun -> (state, unit) t =
-  fun (name, _, tp) ->
-  let tvs = get_tv_from_tp SetString.empty tp in
-  if SetString.is_empty tvs
-  then write_flat_var_type name tp
-  else write_var_type name (TFSchem (tvs, tp))
+let add_stdfun : bool -> std_fun -> (state, unit) t =
+  fun declare_system_fun (name, _, fun_tp, tp) ->
+  let help =
+    let tvs = get_tv_from_tp SetString.empty tp in
+    if SetString.is_empty tvs
+    then write_flat_var_type name tp
+    else write_var_type name (TFSchem (tvs, tp))
+  in
+  match fun_tp with
+  | UserFun -> help
+  | SystemFun -> if declare_system_fun then help else return ()
 ;;
 
-let add_all_std_funs = map_list add_stdfun stdlib_funs
-let init_start_state = add_all_std_funs
-let empty_state : state = MapString.empty, [], 0, SetString.empty
-let (start_state : state), res = run init_start_state empty_state
+let add_all_std_funs declare_system_fun =
+  map_list (add_stdfun declare_system_fun) stdlib_funs
+;;
 
-let _check =
-  match res with
+let init_start_state declare_system_fun = add_all_std_funs declare_system_fun
+let empty_state : state = MapString.empty, [], 0, SetString.empty
+let (start_state : state), res1 = run (init_start_state false) empty_state
+let (start_state_with_system_fun : state), res2 = run (init_start_state true) empty_state
+
+let _check1 =
+  match res1 with
   | Result.Error x ->
     let _ = Format.printf "Error during init start state for infer:\n\t%s\n" x in
+    exit (-1)
+  | _ -> ()
+;;
+
+let _check2 =
+  match res2 with
+  | Result.Error x ->
+    let _ =
+      Format.printf "Error during init start state with system funs for infer:\n\t%s\n" x
+    in
     exit (-1)
   | _ -> ()
 ;;

@@ -4,13 +4,16 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
+open HamsterML__Closure_conversion;;
+open HamsterML__Pp_expr;;
 open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
-open HamsterML__Closure_conversion;;
-open HamsterML__Pp_expr;;
+open HamsterTest__LambdaLiftingTest;;
+open HamsterTest__AlphaConversionTest;;
 
 let cc_expr expr =
   let result = parse_expr expr |> HamsterML__Closure_conversion.cc_expr in
   Stdlib.print_endline (pretty_print_expr result);
   Stdlib.Format.printf "%a\n%!" pp_expr result
+

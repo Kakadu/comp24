@@ -1,0 +1,13 @@
+(rule
+ (target fib_cps.elf)
+ (deps
+  ./attachments/fib_test.c
+  ../../runtime/libmlrt.so
+  ../../runtime/libmlstd.so)
+ (action
+  (system
+   "clang-16 ./attachments/fib_test.c -I../../runtime -L../../runtime/ -lmlstd -lmlrt  -o  %{target}")))
+
+(cram
+ (applies_to runtime_test)
+ (deps ./fib_cps.elf ../../runtime/libmlrt.so ../../runtime/libmlstd.so))

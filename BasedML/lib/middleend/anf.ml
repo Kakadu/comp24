@@ -31,14 +31,12 @@ type prefix =
   | Tuple
   | Application
   | Constraint
-  | Matching
 
 let prefix_to_string = function
   | IfThenElse -> "anf_ifthenelse_"
   | Tuple -> "anf_tuple_"
   | Application -> "anf_app_"
   | Constraint -> "anf_constraint_"
-  | Matching -> "anf_matching_"
 ;;
 
 let get_new_num =
@@ -82,7 +80,7 @@ let rec anf ctx llexpr expr_with_hole =
       let* fresh_name = new_name Constraint ctx in
       let imm_id = ImmIdentifier fresh_name in
       let* aexp = expr_with_hole imm_id in
-      return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmConstraint (imm, typ)), aexp)))
+      return (ALetIn (fresh_name, CImmExpr (ImmConstraint (imm, typ)), aexp)))
   | LLIfThenElse (guard, then_branch, else_branch) ->
     anf ctx guard (fun imm_guard ->
       let* then_aexpr =
@@ -94,15 +92,13 @@ let rec anf ctx llexpr expr_with_hole =
       let* fresh_name = new_name IfThenElse ctx in
       let imm_id = ImmIdentifier fresh_name in
       let* aexp = expr_with_hole imm_id in
-      return
-        (ALetIn
-           (PIdentifier fresh_name, CIfThenElse (imm_guard, then_aexpr, else_aexpr), aexp)))
+      return (ALetIn (fresh_name, CIfThenElse (imm_guard, then_aexpr, else_aexpr), aexp)))
   | LLTuple elems ->
     anf_list ctx elems (fun list ->
       let* fresh_name = new_name Tuple ctx in
       let imm_id = ImmIdentifier fresh_name in
       let* aexp = expr_with_hole imm_id in
-      return (ALetIn (PIdentifier fresh_name, CImmExpr (ImmTuple list), aexp)))
+      return (ALetIn (fresh_name, CImmExpr (ImmTuple list), aexp)))
   | LLApplication (left, right) ->
     let rec sep_llapp exp cont =
       match exp with
@@ -112,7 +108,7 @@ let rec anf ctx llexpr expr_with_hole =
     in
     let rest, llexp = sep_llapp (LLApplication (left, right)) Fun.id in
     anf ctx llexp (fun imm_exp ->
-      anf_list ctx (List.rev rest) (fun imm_rest ->
+      anf_list ctx rest (fun imm_rest ->
         let* fresh_name = new_name Application ctx in
         let imm_id = ImmIdentifier fresh_name in
         let* aexp = expr_with_hole imm_id in
@@ -123,27 +119,14 @@ let rec anf ctx llexpr expr_with_hole =
             return (CApplication (CImmExpr h, rest))
           | [] -> fail "Error while building application"
         in
-        let* built_app = build_app (imm_exp :: imm_rest) in
-        return (ALetIn (PIdentifier fresh_name, built_app, aexp))))
-  | LLMatch (exp, cases) ->
-    let rec convert_cases cases acc =
-      match cases with
-      | (pat, exp) :: tl ->
-        let* aexpr = anf ctx exp (fun timm -> return (ACExpr (CImmExpr timm))) in
-        convert_cases tl ((pat, aexpr) :: acc)
-      | [] -> return (List.rev acc)
-    in
-    let* cases = convert_cases cases [] in
-    anf ctx exp (fun imm_exp ->
-      let* fresh_name = new_name Matching ctx in
-      let imm_id = ImmIdentifier fresh_name in
-      let* aexp = expr_with_hole imm_id in
-      return (ALetIn (PIdentifier fresh_name, CMatch (imm_exp, cases), aexp)))
-  | LLLetIn (_, pat, outer, inner) ->
-    let new_env = Lambda_lifting.collect_bindings_from_pat pat in
+        let* built_app = build_app (imm_exp :: List.rev imm_rest) in
+        return (ALetIn (fresh_name, built_app, aexp))))
+  | LLLetIn (_, PIdentifier id, outer, inner) ->
+    let new_env = Lambda_lifting.collect_bindings_from_pat (PIdentifier id) in
     anf new_env outer (fun imm_outer ->
       let* aexp = anf new_env inner expr_with_hole in
-      return (ALetIn (pat, CImmExpr imm_outer, aexp)))
+      return (ALetIn (id, CImmExpr imm_outer, aexp)))
+  | _ -> "Error: unexpected expression" |> fail
 ;;
 
 let rec map1 f = function
@@ -156,20 +139,28 @@ let anf_decl env =
     Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
   in
   let process_lllet = function
-    | LLLet (pat, args, e) ->
+    | LLLet (PIdentifier id, args, e) ->
+      let* new_args =
+        map1
+          (function
+            | PIdentifier x -> x |> return
+            | _ -> fail "Error: unexpected arguments")
+          args
+      in
       let* aexp =
         anf (List.fold_left collect_bindings env args) e (fun ie ->
           return (ACExpr (CImmExpr ie)))
       in
-      return (ALet (pat, args, aexp))
+      return (ALet (id, new_args, aexp))
+    | _ -> fail "Error: unexpected lllet"
   in
   function
   | LLDSingleLet (rec_flag, LLLet (pat, args, e)) ->
     let* anf_let = process_lllet (LLLet (pat, args, e)) in
     return (ADSingleLet (rec_flag, anf_let))
-  | LLDMutualRecDecl (rec_flag, decls) ->
+  | LLDMutualRecDecl (_, decls) ->
     let* anf_decls = map1 process_lllet decls in
-    return (ADMutualRecDecl (rec_flag, anf_decls))
+    return (ADMutualRecDecl anf_decls)
 ;;
 
 let transform decls =

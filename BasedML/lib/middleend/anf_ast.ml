@@ -16,17 +16,16 @@ type immexpr =
 type cexpr =
   | CApplication of cexpr * cexpr
   | CIfThenElse of immexpr * aexpr * aexpr
-  | CMatch of immexpr * (pattern * aexpr) list
   | CImmExpr of immexpr
 
 and aexpr =
-  | ALetIn of pattern * cexpr * aexpr
+  | ALetIn of string * cexpr * aexpr
   | ACExpr of cexpr
 
-type single_anf_binding = ALet of pattern * pattern list * aexpr
+type single_anf_binding = ALet of string * string list * aexpr
 
 type anf_decl =
   | ADSingleLet of rec_flag * single_anf_binding
-  | ADMutualRecDecl of rec_flag * single_anf_binding list (**List.length >= 2 *)
+  | ADMutualRecDecl of single_anf_binding list (**List.length >= 2 *)
 
 type anf_prog = anf_decl list
