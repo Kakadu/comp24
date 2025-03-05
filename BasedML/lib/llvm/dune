@@ -1,0 +1,6 @@
+(library
+ (name llvm_cg)
+ (public_name BasedML.Llvm_cg)
+ (modules codegen statement)
+ (libraries llvm stdlib_funs common middleend ast)
+)
