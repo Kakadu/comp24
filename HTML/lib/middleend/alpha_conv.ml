@@ -105,7 +105,28 @@ let get_new_id new_name = function
   | IdConstraint (_, typ) -> IdConstraint (new_name, typ)
 ;;
 
-let k _ = return ()
+let rec has_occurs_iexpr name iexpr =
+  match iexpr with
+  | ImmIdentifier id -> ident_to_string id = name
+  | ImmConstraint (imexpr, _) -> has_occurs_iexpr name imexpr
+  | _ -> false (* TODO: Implement for all immediate expression types *)
+
+and has_occurs_cexpr name cexpr =
+  match cexpr with
+  | CApp (cexpr1, cexpr2) -> has_occurs_cexpr name cexpr1 || has_occurs_cexpr name cexpr2
+  | CIf (iexpr, aexpr1, aexpr2) ->
+    has_occurs_iexpr name iexpr
+    || has_occurs_aexpr name aexpr1
+    || has_occurs_aexpr name aexpr2
+  | CImmExpr iexpr -> has_occurs_iexpr name iexpr
+
+and has_occurs_aexpr name aexpr =
+  match aexpr with
+  | ALetIn (id, cexpr, aexpr') ->
+    let name_letin = identifier_to_str id in
+    name_letin = name || has_occurs_cexpr name cexpr || has_occurs_aexpr name aexpr'
+  | ACExpr cexpr -> has_occurs_cexpr name cexpr
+;;
 
 let rec find_replace_occurs_iexpr name new_name k = function
   | ImmIdentifier id when ident_to_string id = name ->
@@ -147,7 +168,8 @@ and find_replace_occurs_cexpr name new_name k = function
 
 and find_replace_occurs_aexpr name new_name k = function
   | ALetIn (id, cexpr, aexpr) ->
-    let get_k name_letin =
+    let name_letin = identifier_to_str id in
+    let* k_name =
       let* counters = lookup_env_counters name_letin in
       let f name =
         let* counters_now = lookup_env_counters name in
@@ -167,23 +189,34 @@ and find_replace_occurs_aexpr name new_name k = function
             k name)
       | None -> Some f
     in
-    let name_letin = identifier_to_str id in
-    let* new_name_letin = gen_name name_letin LetIn in
-    let* k_name = get_k name in
     if name_letin = name
-    then (
+    then
+      let* new_name_letin = gen_name name_letin LetIn in
+      (* Generate new name only when it matches the target name *)
       let new_id = get_new_id new_name_letin id in
       let* cexpr' = find_replace_occurs_cexpr name new_name k_name cexpr in
       let* aexpr' = find_replace_occurs_aexpr name new_name_letin k_name aexpr in
-      return @@ ALetIn (new_id, cexpr', aexpr'))
+      return @@ ALetIn (new_id, cexpr', aexpr')
     else
-      let* _ = incr_counter name LetIn in
-      let* new_name_letin = gen_name name_letin LetIn in
-      let* aexpr' = find_replace_occurs_aexpr name_letin new_name_letin k aexpr in
-      let* cexpr'' = find_replace_occurs_cexpr name new_name k_name cexpr in
-      let* aexpr'' = find_replace_occurs_aexpr name new_name k_name aexpr' in
+      (* Only rename name_letin if it occurs in the sub-expressions *)
+      let* new_name_letin =
+        let* _ =
+          if has_occurs_cexpr name_letin cexpr || has_occurs_aexpr name_letin aexpr
+          then
+            let* _ = incr_counter name_letin LetIn in
+            return ()
+          else return ()
+        in
+        let* new_name_letin = gen_name name_letin LetIn in
+        return new_name_letin
+      in
+      let* aexpr = find_replace_occurs_aexpr name_letin new_name_letin k aexpr in
+      let* cexpr' = find_replace_occurs_cexpr name new_name k cexpr in
+      let* aexpr' = find_replace_occurs_aexpr name new_name k aexpr in
+      (* No k_name needed here *)
+      (*Return the original name*)
       let new_id = get_new_id new_name_letin id in
-      return @@ ALetIn (new_id, cexpr'', aexpr'')
+      return @@ ALetIn (new_id, cexpr', aexpr')
   | ACExpr cexpr ->
     let* cexpr' = find_replace_occurs_cexpr name new_name k cexpr in
     return @@ ACExpr cexpr'
@@ -222,10 +255,16 @@ let find_replace_occurs_lb name new_name (id, args, e) =
 ;;
 
 let find_replace_occurs_decl name = function
-  | ADSingleLet (rec_flag, lb) ->
+  | ADSingleLet (Not_recursive, lb) ->
     let* new_name = gen_name name TopLevel in
     let* lb' = find_replace_occurs_lb name new_name lb in
-    return @@ ADSingleLet (rec_flag, lb')
+    return @@ ADSingleLet (Not_recursive, lb')
+  | ADSingleLet (Recursive, lb) ->
+    let* counters = lookup_env_counters name in
+    let counters = { counters with top_level = counters.top_level + 1 } in
+    let new_name = gen_name_by_counters name counters TopLevel in
+    let* lb' = find_replace_occurs_lb name new_name lb in
+    return @@ ADSingleLet (Recursive, lb')
   | ADMutualRecDecl (Recursive, lb1, lb2, lb_tl) as dlet ->
     let names = get_names_of_decl dlet in
     if not @@ List.mem name names

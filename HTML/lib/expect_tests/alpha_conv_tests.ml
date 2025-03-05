@@ -26,32 +26,47 @@ end
 let%expect_test "sanity check" =
   AlphaConvTests.alpha_conv_test
     {|
-  let x = 0
-  let x = x
-  let x = x
-  let x = x
-  let x = x
-  let x = 3  
+    let rec fac n = if n<=1 then 1 else n * fac (n-1)
+
+    let main =
+      let () = print_int (fac 4) in
+      0
   |};
   [%expect
     {|
     ---ANF---
 
-    let x  = 0;;
-    let x  = x;;
-    let x  = x;;
-    let x  = x;;
-    let x  = x;;
-    let x  = 3
+    let rec fac n = let app_0 = (n <= 1) in
+    let if_1 = if app_0 then 1 else let app_2 = (n - 1) in
+    let app_3 = fac app_2 in
+    let app_4 = (n * app_3) in
+    app_4 in
+    if_1;;
+    let main  = let app_0 = fac 4 in
+    let app_1 = print_int app_0 in
+    let EVALUATED_0 = app_1 in
+    let app_2 = (EVALUATED_0 ( = ) ()) in
+    let if_3 = if app_2 then () else let app_4 = RTE_ERROR_MATCH_FAILURE () in
+    app_4 in
+    let _ = if_3 in
+    0
 
     ---Alpha conv.---
 
-    let x.1  = 0;;
-    let x.2  = x.1;;
-    let x.3  = x.2;;
-    let x.4  = x.3;;
-    let x.5  = x.4;;
-    let x.6  = 3 |}]
+    let rec fac.1 n = let app_0.l1 = (n <= 1) in
+    let if_1.l2 = if app_0.l1 then 1 else let app_2.l2 = (n - 1) in
+    let app_3.l4 = fac.1 app_2.l2 in
+    let app_4.l8 = (n * app_3.l4) in
+    app_4.l8 in
+    if_1.l2;;
+    let main.1  = let app_0.l3 = fac.1 4 in
+    let app_1.l4 = print_int app_0.l3 in
+    let EVALUATED_0.l8 = app_1.l4 in
+    let app_2.l18 = (EVALUATED_0.l8 ( = ) ()) in
+    let if_3.l32 = if app_2.l18 then () else let app_4.l40 = RTE_ERROR_MATCH_FAILURE () in
+    app_4.l40 in
+    let _.l0 = if_3.l32 in
+    0 |}]
 ;;
 
 let%expect_test "sanity check" =
@@ -77,11 +92,11 @@ let%expect_test "sanity check" =
     ---Alpha conv.---
 
     let x.1  = 0;;
-    let x.2  = let app_0.l3 = (x.1 >= 0) in
-    let if_1.l0 = if app_0.l3 then let x.l13 = 1 in
-    let app_2.l5 = (x.l13 + 1) in
-    app_2.l5 else x.1 in
-    if_1.l0;;
+    let x.2  = let app_0.l2 = (x.1 >= 0) in
+    let if_1.l4 = if app_0.l2 then let x.l4 = 1 in
+    let app_2.l8 = (x.l4 + 1) in
+    app_2.l8 else x.1 in
+    if_1.l4;;
     let x.3  = x.2 |}]
 ;;
 
@@ -110,15 +125,15 @@ let%expect_test "sanity check" =
 
     ---Alpha conv.---
 
-    let cc_ll_0.1 x y = let app_0.l0 = (x + y) in
-    app_0.l0;;
-    let a.1  = let x.l63 = 1 in
-    let app_0.l14 = cc_ll_0.1 x.l63 in
-    let f.l42 = app_0.l14 in
-    let x.l134 = 2 in
-    let x.l139 = 2 in
-    let app_1.l101 = f.l42 x.l139 in
-    app_1.l101 |}]
+    let cc_ll_0.1 x y = let app_0.l1 = (x + y) in
+    app_0.l1;;
+    let a.1  = let x.l19 = 1 in
+    let app_0.l5 = cc_ll_0.1 x.l19 in
+    let f.l8 = app_0.l5 in
+    let x.l33 = 2 in
+    let x.l35 = 2 in
+    let app_1.l63 = f.l8 x.l35 in
+    app_1.l63 |}]
 ;;
 
 let%expect_test "sanity check" =
@@ -145,13 +160,13 @@ let%expect_test "sanity check" =
 
     ---Alpha conv.---
 
-    let a.1  = let x.l0 = 1 in
-    let x.l1 = 2 in
+    let a.1  = let x.l1 = 1 in
+    let x.l3 = 2 in
     let x.l7 = 3 in
-    let x.l12 = 4 in
-    let x.l16 = 5 in
-    let app_0.l11 = f x.l16 in
-    app_0.l11 |}]
+    let x.l10 = 4 in
+    let x.l12 = 5 in
+    let app_0.l12 = f x.l12 in
+    app_0.l12 |}]
 ;;
 
 let%expect_test "sanity check" =
@@ -184,18 +199,18 @@ let%expect_test "sanity check" =
 
     ---Alpha conv.---
 
-    let rec meven.1 n = let app_0.l3 = (n = 0) in
-    let if_1.l1 = if app_0.l3 then 1 else let app_2.l7 = (n - 1) in
-    let app_3.l8 = modd.1 app_2.l7 in
+    let rec meven.1 n = let app_0.l4 = (n = 0) in
+    let if_1.l4 = if app_0.l4 then 1 else let app_2.l4 = (n - 1) in
+    let app_3.l8 = modd.1 app_2.l4 in
     app_3.l8 in
-    if_1.l1
-    and modd.1 n = let app_4.l3 = (n = 0) in
-    let if_5.l0 = if app_4.l3 then 1 else let app_6.l6 = (n - 1) in
-    let app_7.l5 = meven.1 app_6.l6 in
-    app_7.l5 in
-    if_5.l0;;
-    let modd.2  = let app_0.l7 = modd.1 3 in
-    app_0.l7;;
-    let meven.2  = let app_0.l7 = meven.1 modd.2 in
-    app_0.l7 |}]
+    if_1.l4
+    and modd.1 n = let app_4.l2 = (n = 0) in
+    let if_5.l4 = if app_4.l2 then 1 else let app_6.l4 = (n - 1) in
+    let app_7.l8 = meven.1 app_6.l4 in
+    app_7.l8 in
+    if_5.l4;;
+    let modd.2  = let app_0.l6 = modd.1 3 in
+    app_0.l6;;
+    let meven.2  = let app_0.l8 = meven.1 modd.2 in
+    app_0.l8 |}]
 ;;

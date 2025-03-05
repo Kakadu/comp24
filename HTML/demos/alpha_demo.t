@@ -41,19 +41,19 @@ PASS
   val fac : int -> int
   val main : int
   
-  let rec fac.1 n = let app_0.l0 = (n <= 1) in
-  let if_1.l0 = if app_0.l0 then 1 else let app_2.l2 = (n - 1) in
-  let app_3.l7 = fac.0 app_2.l2 in
-  let app_4.l9 = (n * app_3.l7) in
-  app_4.l9 in
-  if_1.l0;;
-  let main.1  = let app_0.l10 = fac.1 4 in
-  let app_1.l17 = print_int app_0.l10 in
-  let EVALUATED_0.l36 = app_1.l17 in
-  let app_2.l75 = (EVALUATED_0.l36 ( = ) ()) in
-  let if_3.l94 = if app_2.l75 then () else let app_4.l69 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l69 in
-  let _.l0 = if_3.l94 in
+  let rec fac.1 n = let app_0.l1 = (n <= 1) in
+  let if_1.l2 = if app_0.l1 then 1 else let app_2.l2 = (n - 1) in
+  let app_3.l4 = fac.1 app_2.l2 in
+  let app_4.l8 = (n * app_3.l4) in
+  app_4.l8 in
+  if_1.l2;;
+  let main.1  = let app_0.l3 = fac.1 4 in
+  let app_1.l4 = print_int app_0.l3 in
+  let EVALUATED_0.l8 = app_1.l4 in
+  let app_2.l18 = (EVALUATED_0.l8 ( = ) ()) in
+  let if_3.l32 = if app_2.l18 then () else let app_4.l40 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l40 in
+  let _.l0 = if_3.l32 in
   0
 
 PASS
@@ -68,24 +68,24 @@ PASS
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
   
-  let cc_ll_0.1 n k p = let app_0.l0 = (p * n) in
-  let app_1.l0 = k app_0.l0 in
-  app_1.l0;;
-  let rec fac_cps.1 n k = let app_0.l12 = (n = 1) in
-  let if_1.l0 = if app_0.l12 then let app_2.l33 = k 1 in
-  app_2.l33 else let app_3.l11 = (n - 1) in
-  let app_4.l35 = cc_ll_0.1 n k in
-  let app_5.l14 = fac_cps.0 app_3.l11 app_4.l35 in
-  app_5.l14 in
-  if_1.l0;;
+  let cc_ll_0.1 n k p = let app_0.l1 = (p * n) in
+  let app_1.l2 = k app_0.l1 in
+  app_1.l2;;
+  let rec fac_cps.1 n k = let app_0.l4 = (n = 1) in
+  let if_1.l4 = if app_0.l4 then let app_2.l12 = k 1 in
+  app_2.l12 else let app_3.l4 = (n - 1) in
+  let app_4.l24 = cc_ll_0.2 n k in
+  let app_5.l16 = fac_cps.1 app_3.l4 app_4.l24 in
+  app_5.l16 in
+  if_1.l4;;
   let cc_ll_1.1 print_int = print_int;;
-  let main.1  = let app_0.l32 = fac_cps.1 4 cc_ll_1.1 in
-  let app_1.l42 = print_int app_0.l32 in
-  let EVALUATED_0.l78 = app_1.l42 in
-  let app_2.l144 = (EVALUATED_0.l78 ( = ) ()) in
-  let if_3.l190 = if app_2.l144 then () else let app_4.l141 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l141 in
-  let _.l0 = if_3.l190 in
+  let main.1  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
+  let app_1.l10 = print_int app_0.l7 in
+  let EVALUATED_0.l16 = app_1.l10 in
+  let app_2.l36 = (EVALUATED_0.l16 ( = ) ()) in
+  let if_3.l64 = if app_2.l36 then () else let app_4.l72 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l72 in
+  let _.l0 = if_3.l64 in
   0
 
 PASS
@@ -100,36 +100,36 @@ PASS
   val fib_acc : int -> int -> int -> int
   val main : int
   
-  let rec fib_acc.1 a b n = let app_0.l0 = (n = 1) in
-  let if_1.l0 = if app_0.l0 then b else let app_2.l4 = (n - 1) in
-  let n1.l17 = app_2.l4 in
-  let app_3.l28 = (a + b) in
-  let ab.l52 = app_3.l28 in
-  let app_4.l61 = fib_acc.0 b ab.l52 n1.l17 in
-  app_4.l61 in
-  if_1.l0;;
-  let rec fib.1 n = let app_0.l25 = (n < 2) in
-  let if_1.l1 = if app_0.l25 then n else let app_2.l114 = (n - 1) in
-  let app_3.l75 = fib.0 app_2.l114 in
-  let app_4.l139 = (n - 2) in
-  let app_5.l631 = fib.0 app_4.l139 in
-  let app_6.l1098 = (app_3.l75 + app_5.l631) in
-  app_6.l1098 in
-  if_1.l1;;
-  let main.1  = let app_0.l46 = fib_acc.1 0 1 4 in
-  let app_1.l64 = print_int app_0.l46 in
-  let EVALUATED_0.l134 = app_1.l64 in
-  let app_2.l298 = (EVALUATED_0.l134 ( = ) ()) in
-  let if_3.l472 = if app_2.l298 then () else let app_4.l214 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l214 in
-  let _.l665 = if_3.l472 in
-  let app_5.l1812 = fib.1 4 in
-  let app_6.l3334 = print_int app_5.l1812 in
-  let EVALUATED_1.l6075 = app_6.l3334 in
-  let app_7.l11379 = (EVALUATED_1.l6075 ( = ) ()) in
-  let if_8.l18147 = if app_7.l11379 then () else let app_9.l15066 = RTE_ERROR_MATCH_FAILURE () in
-  app_9.l15066 in
-  let _.l672 = if_8.l18147 in
+  let rec fib_acc.1 a b n = let app_0.l1 = (n = 1) in
+  let if_1.l2 = if app_0.l1 then b else let app_2.l2 = (n - 1) in
+  let n1.l4 = app_2.l2 in
+  let app_3.l8 = (a + b) in
+  let ab.l16 = app_3.l8 in
+  let app_4.l32 = fib_acc.1 b ab.l16 n1.l4 in
+  app_4.l32 in
+  if_1.l2;;
+  let rec fib.1 n = let app_0.l4 = (n < 2) in
+  let if_1.l6 = if app_0.l4 then n else let app_2.l14 = (n - 1) in
+  let app_3.l16 = fib.1 app_2.l14 in
+  let app_4.l64 = (n - 2) in
+  let app_5.l96 = fib.1 app_4.l64 in
+  let app_6.l192 = (app_3.l16 + app_5.l96) in
+  app_6.l192 in
+  if_1.l6;;
+  let main.1  = let app_0.l6 = fib_acc.1 0 1 4 in
+  let app_1.l6 = print_int app_0.l6 in
+  let EVALUATED_0.l12 = app_1.l6 in
+  let app_2.l30 = (EVALUATED_0.l12 ( = ) ()) in
+  let if_3.l48 = if app_2.l30 then () else let app_4.l96 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l96 in
+  let _.l96 = if_3.l48 in
+  let app_5.l224 = fib.1 4 in
+  let app_6.l448 = print_int app_5.l224 in
+  let EVALUATED_1.l768 = app_6.l448 in
+  let app_7.l1536 = (EVALUATED_1.l768 ( = ) ()) in
+  let if_8.l3072 = if app_7.l1536 then () else let app_9.l3072 = RTE_ERROR_MATCH_FAILURE () in
+  app_9.l3072 in
+  let _.l96 = if_8.l3072 in
   0
 
 PASS
@@ -146,36 +146,36 @@ PASS
   val test3 : int -> int -> int -> int
   val wrap : 'a -> 'a
   
-  let wrap.1 f = let app_0.l0 = (1 = 1) in
-  let if_1.l0 = if app_0.l0 then f else f in
-  if_1.l0;;
-  let test3.1 a b c = let app_0.l23 = print_int a in
-  let a.l12 = app_0.l23 in
-  let app_1.l75 = print_int b in
-  let b.l30 = app_1.l75 in
-  let app_2.l224 = print_int c in
-  let c.l0 = app_2.l224 in
+  let wrap.1 f = let app_0.l1 = (1 = 1) in
+  let if_1.l2 = if app_0.l1 then f else f in
+  if_1.l2;;
+  let test3.1 a b c = let app_0.l5 = print_int a in
+  let a.l0 = app_0.l5 in
+  let app_1.l14 = print_int b in
+  let b.l0 = app_1.l14 in
+  let app_2.l52 = print_int c in
+  let c.l0 = app_2.l52 in
   0;;
-  let test10.1 a b c d e f g h i j = let app_0.l48 = (a + b) in
-  let app_1.l137 = (app_0.l48 + c) in
-  let app_2.l392 = (app_1.l137 + d) in
-  let app_3.l151 = (app_2.l392 + e) in
-  let app_4.l415 = (app_3.l151 + f) in
-  let app_5.l1570 = (app_4.l415 + g) in
-  let app_6.l936 = (app_5.l1570 + h) in
-  let app_7.l1678 = (app_6.l936 + i) in
-  let app_8.l2202 = (app_7.l1678 + j) in
-  app_8.l2202;;
-  let main.1  = let app_0.l67 = wrap.1 test10.1 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
-  let rez.l62 = app_0.l67 in
-  let app_1.l205 = print_int rez.l62 in
-  let EVALUATED_0.l236 = app_1.l205 in
-  let app_2.l627 = (EVALUATED_0.l236 ( = ) ()) in
-  let if_3.l697 = if app_2.l627 then () else let app_4.l596 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l596 in
-  let _.l510 = if_3.l697 in
-  let app_5.l2790 = wrap.1 test3.1 1 10 100 in
-  let temp2.l0 = app_5.l2790 in
+  let test10.1 a b c d e f g h i j = let app_0.l8 = (a + b) in
+  let app_1.l22 = (app_0.l8 + c) in
+  let app_2.l76 = (app_1.l22 + d) in
+  let app_3.l24 = (app_2.l76 + e) in
+  let app_4.l112 = (app_3.l24 + f) in
+  let app_5.l352 = (app_4.l112 + g) in
+  let app_6.l192 = (app_5.l352 + h) in
+  let app_7.l384 = (app_6.l192 + i) in
+  let app_8.l768 = (app_7.l384 + j) in
+  app_8.l768;;
+  let main.1  = let app_0.l10 = wrap.1 test10.1 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
+  let rez.l8 = app_0.l10 in
+  let app_1.l30 = print_int rez.l8 in
+  let EVALUATED_0.l32 = app_1.l30 in
+  let app_2.l108 = (EVALUATED_0.l32 ( = ) ()) in
+  let if_3.l128 = if app_2.l108 then () else let app_4.l176 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l176 in
+  let _.l0 = if_3.l128 in
+  let app_5.l608 = wrap.1 test3.1 1 10 100 in
+  let temp2.l0 = app_5.l608 in
   0
 
 PASS
@@ -190,22 +190,22 @@ PASS
   val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val main : int
   
-  let rec fix.1 f x = let app_0.l0 = fix.0 f in
-  let app_1.l0 = f app_0.l0 x in
-  app_1.l0;;
-  let fac.1 self n = let app_0.l11 = (n <= 1) in
-  let if_1.l0 = if app_0.l11 then 1 else let app_2.l41 = (n - 1) in
-  let app_3.l17 = self app_2.l41 in
-  let app_4.l32 = (n * app_3.l17) in
+  let rec fix.1 f x = let app_0.l1 = fix.1 f in
+  let app_1.l2 = f app_0.l1 x in
+  app_1.l2;;
+  let fac.1 self n = let app_0.l4 = (n <= 1) in
+  let if_1.l4 = if app_0.l4 then 1 else let app_2.l12 = (n - 1) in
+  let app_3.l8 = self app_2.l12 in
+  let app_4.l32 = (n * app_3.l8) in
   app_4.l32 in
-  if_1.l0;;
-  let main.1  = let app_0.l23 = fix.1 fac.1 6 in
-  let app_1.l30 = print_int app_0.l23 in
-  let EVALUATED_0.l57 = app_1.l30 in
-  let app_2.l118 = (EVALUATED_0.l57 ( = ) ()) in
-  let if_3.l141 = if app_2.l118 then () else let app_4.l104 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l104 in
-  let _.l0 = if_3.l141 in
+  if_1.l4;;
+  let main.1  = let app_0.l6 = fix.1 fac.1 6 in
+  let app_1.l8 = print_int app_0.l6 in
+  let EVALUATED_0.l12 = app_1.l8 in
+  let app_2.l28 = (EVALUATED_0.l12 ( = ) ()) in
+  let if_3.l48 = if app_2.l28 then () else let app_4.l64 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l64 in
+  let _.l0 = if_3.l48 in
   0
 
 PASS
@@ -220,24 +220,24 @@ PASS
   val foo : int -> int
   val main : int
   
-  let cc_ll_0.1 foo = let app_0.l0 = (foo + 2) in
-  app_0.l0;;
-  let cc_ll_1.1 foo = let app_0.l9 = (foo * 10) in
-  app_0.l9;;
-  let foo.1 b = let if_0.l0 = if b then cc_ll_0.1 else cc_ll_1.1 in
-  if_0.l0;;
-  let foo.2 x = let app_0.l24 = foo.1 false x in
-  let app_1.l43 = foo.1 true app_0.l24 in
-  let app_2.l102 = foo.1 false app_1.l43 in
-  let app_3.l19 = foo.1 true app_2.l102 in
-  app_3.l19;;
-  let main.1  = let app_0.l35 = foo.2 11 in
-  let app_1.l64 = print_int app_0.l35 in
-  let EVALUATED_0.l78 = app_1.l64 in
-  let app_2.l177 = (EVALUATED_0.l78 ( = ) ()) in
-  let if_3.l190 = if app_2.l177 then () else let app_4.l121 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l121 in
-  let _.l0 = if_3.l190 in
+  let cc_ll_0.1 foo = let app_0.l1 = (foo + 2) in
+  app_0.l1;;
+  let cc_ll_1.1 foo = let app_0.l5 = (foo * 10) in
+  app_0.l5;;
+  let foo.1 b = let if_0.l3 = if b then cc_ll_0.1 else cc_ll_1.1 in
+  if_0.l3;;
+  let foo.2 x = let app_0.l9 = foo.1 false x in
+  let app_1.l12 = foo.1 true app_0.l9 in
+  let app_2.l32 = foo.1 false app_1.l12 in
+  let app_3.l32 = foo.1 true app_2.l32 in
+  app_3.l32;;
+  let main.1  = let app_0.l11 = foo.2 11 in
+  let app_1.l16 = print_int app_0.l11 in
+  let EVALUATED_0.l16 = app_1.l16 in
+  let app_2.l48 = (EVALUATED_0.l16 ( = ) ()) in
+  let if_3.l64 = if app_2.l48 then () else let app_4.l64 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l64 in
+  let _.l0 = if_3.l64 in
   0
 
 PASS
@@ -250,39 +250,39 @@ PASS
   val foo : int -> int -> int -> int
   val main : int
   
-  let foo.1 a b c = let app_0.l0 = print_int a in
-  let EVALUATED_0.l18 = app_0.l0 in
-  let app_1.l55 = (EVALUATED_0.l18 ( = ) ()) in
-  let if_2.l118 = if app_1.l55 then () else let app_3.l12 = RTE_ERROR_MATCH_FAILURE () in
-  app_3.l12 in
-  let _.l34770 = if_2.l118 in
-  let app_4.l486 = print_int b in
-  let EVALUATED_1.l952 = app_4.l486 in
-  let app_5.l1850 = (EVALUATED_1.l952 ( = ) ()) in
-  let if_6.l3325 = if app_5.l1850 then () else let app_7.l1024 = RTE_ERROR_MATCH_FAILURE () in
-  app_7.l1024 in
-  let _.l37016 = if_6.l3325 in
-  let app_8.l12289 = print_int c in
-  let EVALUATED_2.l23554 = app_8.l12289 in
-  let app_9.l45059 = (EVALUATED_2.l23554 ( = ) ()) in
-  let if_10.l77828 = if app_9.l45059 then () else let app_11.l53244 = RTE_ERROR_MATCH_FAILURE () in
-  app_11.l53244 in
-  let _.l37086 = if_10.l77828 in
-  let app_12.l278524 = (b * c) in
-  let app_13.l458735 = (a + app_12.l278524) in
-  app_13.l458735;;
-  let main.1  = let app_0.l30 = foo.1 1 in
-  let foo.l566 = app_0.l30 in
-  let app_1.l145 = foo.l566 2 in
-  let foo.l721 = app_1.l145 in
-  let app_2.l277 = foo.l721 3 in
-  let foo.l756 = app_2.l277 in
-  let app_3.l1007 = print_int foo.l756 in
-  let EVALUATED_3.l1861 = app_3.l1007 in
-  let app_4.l3966 = (EVALUATED_3.l1861 ( = ) ()) in
-  let if_5.l5393 = if app_4.l3966 then () else let app_6.l4361 = RTE_ERROR_MATCH_FAILURE () in
-  app_6.l4361 in
-  let _.l37088 = if_5.l5393 in
+  let foo.1 a b c = let app_0.l1 = print_int a in
+  let EVALUATED_0.l2 = app_0.l1 in
+  let app_1.l4 = (EVALUATED_0.l2 ( = ) ()) in
+  let if_2.l8 = if app_1.l4 then () else let app_3.l8 = RTE_ERROR_MATCH_FAILURE () in
+  app_3.l8 in
+  let _.l481 = if_2.l8 in
+  let app_4.l32 = print_int b in
+  let EVALUATED_1.l64 = app_4.l32 in
+  let app_5.l128 = (EVALUATED_1.l64 ( = ) ()) in
+  let if_6.l256 = if app_5.l128 then () else let app_7.l256 = RTE_ERROR_MATCH_FAILURE () in
+  app_7.l256 in
+  let _.l513 = if_6.l256 in
+  let app_8.l1024 = print_int c in
+  let EVALUATED_2.l2048 = app_8.l1024 in
+  let app_9.l4096 = (EVALUATED_2.l2048 ( = ) ()) in
+  let if_10.l8192 = if app_9.l4096 then () else let app_11.l8192 = RTE_ERROR_MATCH_FAILURE () in
+  app_11.l8192 in
+  let _.l513 = if_10.l8192 in
+  let app_12.l32768 = (b * c) in
+  let app_13.l65536 = (a + app_12.l32768) in
+  app_13.l65536;;
+  let main.1  = let app_0.l3 = foo.1 1 in
+  let foo.l64 = app_0.l3 in
+  let app_1.l12 = foo.l64 2 in
+  let foo.l80 = app_1.l12 in
+  let app_2.l32 = foo.l80 3 in
+  let foo.l84 = app_2.l32 in
+  let app_3.l136 = print_int foo.l84 in
+  let EVALUATED_3.l256 = app_3.l136 in
+  let app_4.l544 = (EVALUATED_3.l256 ( = ) ()) in
+  let if_5.l1024 = if app_4.l544 then () else let app_6.l1024 = RTE_ERROR_MATCH_FAILURE () in
+  app_6.l1024 in
+  let _.l513 = if_5.l1024 in
   0
 
 PASS
@@ -297,28 +297,28 @@ PASS
   val foo : int -> int -> int -> Unit
   val main : int
   
-  let cc_ll_0.1 c = let app_0.l0 = print_int c in
-  app_0.l0;;
-  let cc_ll_1.1 b = let app_0.l15 = print_int b in
-  let EVALUATED_1.l14 = app_0.l15 in
-  let app_1.l60 = (EVALUATED_1.l14 ( = ) ()) in
-  let if_2.l75 = if app_1.l60 then () else let app_3.l36 = RTE_ERROR_MATCH_FAILURE () in
-  app_3.l36 in
-  let _.l0 = if_2.l75 in
+  let cc_ll_0.1 c = let app_0.l1 = print_int c in
+  app_0.l1;;
+  let cc_ll_1.1 b = let app_0.l5 = print_int b in
+  let EVALUATED_1.l4 = app_0.l5 in
+  let app_1.l16 = (EVALUATED_1.l4 ( = ) ()) in
+  let if_2.l32 = if app_1.l16 then () else let app_3.l32 = RTE_ERROR_MATCH_FAILURE () in
+  app_3.l32 in
+  let _.l0 = if_2.l32 in
   cc_ll_0.1;;
-  let foo.1 a = let app_0.l33 = print_int a in
-  let EVALUATED_0.l24 = app_0.l33 in
-  let app_1.l113 = (EVALUATED_0.l24 ( = ) ()) in
-  let if_2.l142 = if app_1.l113 then () else let app_3.l76 = RTE_ERROR_MATCH_FAILURE () in
-  app_3.l76 in
-  let _.l0 = if_2.l142 in
+  let foo.1 a = let app_0.l8 = print_int a in
+  let EVALUATED_0.l6 = app_0.l8 in
+  let app_1.l28 = (EVALUATED_0.l6 ( = ) ()) in
+  let if_2.l56 = if app_1.l28 then () else let app_3.l56 = RTE_ERROR_MATCH_FAILURE () in
+  app_3.l56 in
+  let _.l0 = if_2.l56 in
   cc_ll_1.1;;
-  let main.1  = let app_0.l45 = foo.1 4 8 9 in
-  let EVALUATED_2.l34 = app_0.l45 in
-  let app_1.l149 = (EVALUATED_2.l34 ( = ) ()) in
-  let if_2.l188 = if app_1.l149 then () else let app_3.l104 = RTE_ERROR_MATCH_FAILURE () in
-  app_3.l104 in
-  let _.l0 = if_2.l188 in
+  let main.1  = let app_0.l10 = foo.1 4 8 9 in
+  let EVALUATED_2.l8 = app_0.l10 in
+  let app_1.l36 = (EVALUATED_2.l8 ( = ) ()) in
+  let if_2.l72 = if app_1.l36 then () else let app_3.l72 = RTE_ERROR_MATCH_FAILURE () in
+  app_3.l72 in
+  let _.l0 = if_2.l72 in
   0
 
 
@@ -336,54 +336,54 @@ PASS
   val cc_ll_3 : Unit -> int -> Unit -> int -> int -> Unit -> int -> int -> int
   val main : Unit
   
-  let cc_ll_0.1 b a _c d __ = let app_0.l0 = (a + b) in
-  let app_1.l14 = print_int app_0.l0 in
-  let EVALUATED_4.l43 = app_1.l14 in
-  let app_2.l97 = (EVALUATED_4.l43 ( = ) ()) in
-  let if_3.l184 = if app_2.l97 then () else let app_4.l32 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l32 in
-  let _.l3255 = if_3.l184 in
-  let app_5.l700 = print_int __ in
-  let EVALUATED_5.l1342 = app_5.l700 in
-  let app_6.l2560 = (EVALUATED_5.l1342 ( = ) ()) in
-  let if_7.l4355 = if app_6.l2560 then () else let app_8.l2304 = RTE_ERROR_MATCH_FAILURE () in
-  app_8.l2304 in
-  let _.l3357 = if_7.l4355 in
-  let app_9.l15367 = (a * b) in
-  let app_10.l28680 = (app_9.l15367 / _c) in
-  let app_11.l45067 = (app_10.l28680 + d) in
-  app_11.l45067;;
-  let cc_ll_1.1 a b _c P3 = let app_0.l36 = (P3 ( = ) ()) in
-  let if_1.l19 = if app_0.l36 then () else let app_2.l144 = RTE_ERROR_MATCH_FAILURE () in
-  app_2.l144 in
-  let _.l3371 = if_1.l19 in
-  let app_3.l51 = cc_ll_0.1 b a _c in
-  app_3.l51;;
-  let cc_ll_2.1 a P2 = let app_0.l67 = (P2 ( = ) ()) in
-  let if_1.l40 = if app_0.l67 then () else let app_2.l186 = RTE_ERROR_MATCH_FAILURE () in
-  app_2.l186 in
-  let _.l3379 = if_1.l40 in
-  let app_3.l110 = cc_ll_1.1 a in
-  app_3.l110;;
-  let cc_ll_3.1 P1 = let app_0.l93 = (P1 ( = ) ()) in
-  let if_1.l54 = if app_0.l93 then () else let app_2.l227 = RTE_ERROR_MATCH_FAILURE () in
-  app_2.l227 in
-  let _.l3380 = if_1.l54 in
+  let cc_ll_0.1 b a _c d __ = let app_0.l1 = (a + b) in
+  let app_1.l2 = print_int app_0.l1 in
+  let EVALUATED_4.l4 = app_1.l2 in
+  let app_2.l8 = (EVALUATED_4.l4 ( = ) ()) in
+  let if_3.l16 = if app_2.l8 then () else let app_4.l16 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l16 in
+  let _.l32 = if_3.l16 in
+  let app_5.l64 = print_int __ in
+  let EVALUATED_5.l128 = app_5.l64 in
+  let app_6.l256 = (EVALUATED_5.l128 ( = ) ()) in
+  let if_7.l512 = if app_6.l256 then () else let app_8.l512 = RTE_ERROR_MATCH_FAILURE () in
+  app_8.l512 in
+  let _.l32 = if_7.l512 in
+  let app_9.l2048 = (a * b) in
+  let app_10.l4096 = (app_9.l2048 / _c) in
+  let app_11.l8192 = (app_10.l4096 + d) in
+  app_11.l8192;;
+  let cc_ll_1.1 a b _c P3 = let app_0.l7 = (P3 ( = ) ()) in
+  let if_1.l10 = if app_0.l7 then () else let app_2.l22 = RTE_ERROR_MATCH_FAILURE () in
+  app_2.l22 in
+  let _.l32 = if_1.l10 in
+  let app_3.l32 = cc_ll_0.1 b a _c in
+  app_3.l32;;
+  let cc_ll_2.1 a P2 = let app_0.l12 = (P2 ( = ) ()) in
+  let if_1.l18 = if app_0.l12 then () else let app_2.l34 = RTE_ERROR_MATCH_FAILURE () in
+  app_2.l34 in
+  let _.l32 = if_1.l18 in
+  let app_3.l56 = cc_ll_1.1 a in
+  app_3.l56;;
+  let cc_ll_3.1 P1 = let app_0.l16 = (P1 ( = ) ()) in
+  let if_1.l24 = if app_0.l16 then () else let app_2.l44 = RTE_ERROR_MATCH_FAILURE () in
+  app_2.l44 in
+  let _.l32 = if_1.l24 in
   cc_ll_2.1;;
-  let _start.1 P0 = let app_0.l114 = (P0 ( = ) ()) in
-  let if_1.l63 = if app_0.l114 then () else let app_2.l267 = RTE_ERROR_MATCH_FAILURE () in
-  app_2.l267 in
-  let _.l3380 = if_1.l63 in
+  let _start.1 P0 = let app_0.l19 = (P0 ( = ) ()) in
+  let if_1.l28 = if app_0.l19 then () else let app_2.l52 = RTE_ERROR_MATCH_FAILURE () in
+  app_2.l52 in
+  let _.l32 = if_1.l28 in
   cc_ll_3.1;;
-  let main.1  = let app_0.l131 = print_int 1 in
-  let app_1.l146 = print_int 2 in
-  let app_2.l334 = print_int 4 in
-  let app_3.l289 = - 1 in
-  let app_4.l604 = print_int app_3.l289 in
-  let app_5.l1565 = - 555555 in
-  let app_6.l4081 = _start.1 app_0.l131 app_1.l146 3 app_2.l334 100 1000 app_4.l604 10000 app_5.l1565 in
-  let app_7.l1869 = print_int app_6.l4081 in
-  app_7.l1869
+  let main.1  = let app_0.l21 = print_int 1 in
+  let app_1.l14 = print_int 2 in
+  let app_2.l60 = print_int 4 in
+  let app_3.l88 = - 1 in
+  let app_4.l112 = print_int app_3.l88 in
+  let app_5.l256 = - 555555 in
+  let app_6.l640 = _start.1 app_0.l21 app_1.l14 3 app_2.l60 100 1000 app_4.l112 10000 app_5.l256 in
+  let app_7.l768 = print_int app_6.l640 in
+  app_7.l768
 
 PASS
   $ ./alpha_demo.exe < manytests/typed/008ascription.ml
@@ -397,23 +397,23 @@ PASS
   val cc_ll_1 : int -> bool
   val main : int
   
-  let addi.1 f g x = let app_0.l0 = g x in
-  let app_1.l0 = f x (app_0.l0 : bool) in
-  (app_1.l0 : int);;
-  let cc_ll_0.1 x b = let if_0.l0 = if b then let app_1.l12 = (x + 1) in
-  app_1.l12 else let app_2.l32 = (x * 2) in
-  app_2.l32 in
-  if_0.l0;;
-  let cc_ll_1.1 _start = let app_0.l17 = (_start / 2) in
-  let app_1.l25 = (app_0.l17 = 0) in
-  app_1.l25;;
-  let main.1  = let app_0.l26 = addi.1 cc_ll_0.1 cc_ll_1.1 4 in
-  let app_1.l44 = print_int app_0.l26 in
-  let EVALUATED_0.l78 = app_1.l44 in
-  let app_2.l143 = (EVALUATED_0.l78 ( = ) ()) in
-  let if_3.l190 = if app_2.l143 then () else let app_4.l122 = RTE_ERROR_MATCH_FAILURE () in
-  app_4.l122 in
-  let _.l0 = if_3.l190 in
+  let addi.1 f g x = let app_0.l1 = g x in
+  let app_1.l2 = f x (app_0.l1 : bool) in
+  (app_1.l2 : int);;
+  let cc_ll_0.1 x b = let if_0.l2 = if b then let app_1.l8 = (x + 1) in
+  app_1.l8 else let app_2.l10 = (x * 2) in
+  app_2.l10 in
+  if_0.l2;;
+  let cc_ll_1.1 _start = let app_0.l6 = (_start / 2) in
+  let app_1.l14 = (app_0.l6 = 0) in
+  app_1.l14;;
+  let main.1  = let app_0.l8 = addi.1 cc_ll_0.1 cc_ll_1.1 4 in
+  let app_1.l18 = print_int app_0.l8 in
+  let EVALUATED_0.l16 = app_1.l18 in
+  let app_2.l34 = (EVALUATED_0.l16 ( = ) ()) in
+  let if_3.l64 = if app_2.l34 then () else let app_4.l64 = RTE_ERROR_MATCH_FAILURE () in
+  app_4.l64 in
+  let _.l0 = if_3.l64 in
   0
 PASS
   $ ./alpha_demo.exe < manytests/typed/009let_poly.ml
