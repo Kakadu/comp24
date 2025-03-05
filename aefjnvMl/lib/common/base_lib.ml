@@ -38,7 +38,9 @@ let func_get_by_idx = "get_by_idx"
 
 (*  *)
 let ty_get_list_len_plus_one binder = TArrow (TVar binder, TPrim "int")
-let func_get_list_len_plus_one = "get_list_len_plus_one"
+
+(** length + 1 *)
+let func_get_list_len_plus_one = "get_list_len"
 
 (*  *)
 let ty_fail_pt_match binder = TArrow (TPrim "unit", TVar binder)
@@ -91,5 +93,7 @@ let std_lib_names =
   ; un_op_prefix ^ un_op_not
   ; (*  *)
     func_print_int
+  ; func_get_by_idx
+  ; func_get_list_len_plus_one
   ]
 ;;
