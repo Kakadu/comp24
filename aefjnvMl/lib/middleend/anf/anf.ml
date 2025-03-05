@@ -97,7 +97,7 @@ let to_scoped id =
 let rec to_immexpr : ll_expr -> (bind list * immexpr) t = function
   | LL_const v -> return ([], const_to_immexpr v)
   | LL_ident id ->
-    let+ id' = to_scoped id in
+    let+ id' = to_scoped (Name id) in
     [], id_to_immexpr id'
   | expr ->
     let* id = new_me_name in
@@ -110,7 +110,7 @@ and to_cexpr : ll_expr -> (bind list * cexpr) t =
   function
   | LL_const v -> return ([], C_immexpr (const_to_immexpr v))
   | LL_ident id ->
-    let+ id' = to_scoped id in
+    let+ id' = to_scoped (Name id) in
     [], C_immexpr (id_to_immexpr id')
   | LL_let (id, expr, in') ->
     let* e_binds, cexpr = to_cexpr expr in
