@@ -51,8 +51,8 @@ let optimize_cons_to_rlist : ll_expr -> ll_expr -> ll_expr list =
 ;;
 
 let check_rlist_invariant = function
-  | (LL_const Const_nil as lst) :: pref -> return (lst, pref)
-  | _ -> fail "First element in reversed list should be a nil"
+  | lst :: pref -> return (lst, pref)
+  | _ -> fail "At least one elem shpuld be (nil)"
 ;;
 
 let is_global = function
