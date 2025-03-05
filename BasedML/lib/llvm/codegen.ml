@@ -265,8 +265,8 @@ let rec build_cexpr : Llvm.llbuilder -> cexpr -> (state, Llvm.llvalue) t =
       let last_inst = Llvm.build_br continue_blck branch_builder in
       return ((res, Llvm.instr_parent last_inst), branch_block)
     in
-    let* (then_r_lb, then_fb) = create_branch then_body in
-    let* (else_r_lb, else_fb) = create_branch else_body in
+    let* then_r_lb, then_fb = create_branch then_body in
+    let* else_r_lb, else_fb = create_branch else_body in
     let _ = Llvm.build_cond_br bool1 then_fb else_fb builder in
     let _ = Llvm.position_at_end continue_blck builder in
     return (Llvm.build_phi [ then_r_lb; else_r_lb ] "" builder)
