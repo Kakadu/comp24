@@ -986,7 +986,7 @@ let str_item =
       (toke<span data-count="100">n</span> "let" *<span data-count="100">&gt;</span> optio<span data-count="100">n</span> Nonrec (toke<span data-count="100">n</span> "rec" *<span data-count="100">&gt;</span> obligatory_ws *<span data-count="100">&gt;</span> retur<span data-count="100">n</span> Rec))
       (sep_b<span data-count="100">y</span> (toke<span data-count="100">n</span> "and") (bot<span data-count="100">h</span> pattern (lift<span data-count="100">2</span> efunf (man<span data-count="100">y</span> pattern &lt;<span data-count="100">*</span> toke<span data-count="100">n</span> "=") expr)))
   in
-   <span data-count="100">p</span>svalue
+  <span data-count="100">p</span>svalue
 ;;
 
 let structure : structure t = sep_b<span data-count="100">y</span> (choic<span data-count="100">e</span> [ dsemi; ws ]) str_item
