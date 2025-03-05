@@ -25,7 +25,7 @@ type illegal_state_error = Illegal_state_error of string
 type error =
   | Parser of parse_error
   | Infer of infer_error
-  | Alpha_converter of illegal_state_error
+  | Middleend of illegal_state_error
 
 (*================Constructors================*)
 

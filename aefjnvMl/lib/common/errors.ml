@@ -18,7 +18,7 @@ type infer_error =
 type error =
   | Parser of parse_error
   | Infer of infer_error
-  | Alpha_converter of illegal_state_error
+  | Middleend of illegal_state_error
 
 let occurs_check (b, t) = Infer (Occurs_check (b, t))
 let unbound_variable v = Infer (Unbound_variable v)
@@ -26,4 +26,4 @@ let unification_failed (t1, t2) = Infer (Unification_failed (t1, t2))
 let several_bounds v = Infer (Several_bounds v)
 let not_specify_rec = Infer Not_specify_rec
 let no_variable_rec = Infer No_variable_rec
-let illegal_state msg = Alpha_converter (Illegal_state_error msg)
+let illegal_state msg = Middleend (Illegal_state_error msg)

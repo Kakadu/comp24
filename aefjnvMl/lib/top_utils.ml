@@ -35,7 +35,7 @@ module Ast_test_utils = struct
   let print_error = function
     | Parser e -> Parser.PP.pp_error Format.std_formatter e
     | Infer e -> Inferencer.PP.pp_error Format.std_formatter e
-    | Alpha_converter (Illegal_state_error s) -> Format.print_string s
+    | Middleend (Illegal_state_error s) -> Format.print_string s
   ;;
 
   let print_result ast_printer = function
