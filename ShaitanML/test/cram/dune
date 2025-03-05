@@ -16,7 +16,7 @@
  (public_name pat_elim)
  (libraries shaitanml_lib stdio))
 
- (executable
+(executable
  (name closure)
  (modules Closure)
  (public_name closure)
@@ -45,4 +45,9 @@
   (source_tree manytests)))
 
 (cram
- (deps %{bin:parser} %{bin:infer} %{bin:pat_elim} %{bin:closure} %{bin:alpha}))
+ (deps
+  %{bin:parser}
+  %{bin:infer}
+  %{bin:pat_elim}
+  %{bin:closure}
+  %{bin:alpha}))

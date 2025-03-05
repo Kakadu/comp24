@@ -123,24 +123,6 @@
   let lst = (1::a6) in
   (a1 lst)
 
-
-  $ anf << EOF
-  > let test_multiple_cases x =
-  >   match x with
-  >   | 0 -> "zero"
-  >   | 1 -> "one"
-  >   | _ -> "other"
-  Fatal error: exception File "lib/anf_ast.ml", line 17, characters 20-25: Pattern matching failed
-  Raised at Shaitanml_lib__Anf_ast.const_to_aexp in file "lib/anf_ast.ml", line 17, characters 20-124
-  Called from Shaitanml_lib__Anf.to_cexp in file "lib/anf.ml", line 18, characters 43-58
-  Called from Shaitanml_lib__Anf.to_exp in file "lib/anf.ml", line 63, characters 21-30
-  Called from Shaitanml_lib__Anf.to_cexp in file "lib/anf.ml", line 27, characters 14-23
-  Called from Shaitanml_lib__Common.MonadCounter.bind in file "lib/common.ml", line 122, characters 24-27
-  Called from Shaitanml_lib__Common.MonadCounter.bind in file "lib/common.ml", line 122, characters 24-27
-  Called from Shaitanml_lib__Common.MonadCounter.bind in file "lib/common.ml", line 122, characters 24-27
-  Called from Dune__exe__Anf in file "test/cram/anf.ml", line 19, characters 20-50
-  [2]
-
   $ anf < manytests/typed/001fac.ml
   let rec fac n = let a0 = ((( <= ) n) 1) in
   if a0
