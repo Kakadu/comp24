@@ -388,7 +388,7 @@ open Pp_utils
 open Format
 
 let pp_const fmt = function
-  | <span data-count="487">C</span>Int a -&gt; fprintf fmt "%d" a
+  | <span data-count="501">C</span>Int a -&gt; fprintf fmt "%d" a
   | <span data-count="38">C</span>Bool a -&gt; fprintf fmt "%b" a
   | <span data-count="52">C</span>Nil -&gt; fprintf fmt "[]"
   | <span data-count="197">C</span>Unit -&gt; fprintf fmt "()"
@@ -397,12 +397,12 @@ let pp_const fmt = function
 let pp_ground_typ = pp_ground
 
 let pp_ident_definable fmt = function
-  | <span data-count="1475">I</span>dentLetters s -&gt; fprintf fmt "%s" s
+  | <span data-count="1513">I</span>dentLetters s -&gt; fprintf fmt "%s" s
   | <span data-count="1">I</span>dentOp s -&gt; fprintf fmt "( %s )" s
 ;;
 
 let pp_ident fmt = function
-  | <span data-count="1476">I</span>dentOfDefinable id -&gt; pp_ident_definable fmt id
+  | <span data-count="1514">I</span>dentOfDefinable id -&gt; pp_ident_definable fmt id
   | <span data-count="10">I</span>dentOfBaseOp bop -&gt;
     fprintf
       fmt
@@ -474,8 +474,8 @@ let rec pp_pattern_or_op fmt = function
 ;;
 
 let pp_rec_flag fmt = function
-  | <span data-count="45">R</span>ecursive -&gt; fprintf fmt " rec"
-  | <span data-count="361">N</span>ot_recursive -&gt; fprintf fmt ""
+  | <span data-count="47">R</span>ecursive -&gt; fprintf fmt " rec"
+  | <span data-count="365">N</span>ot_recursive -&gt; fprintf fmt ""
 ;;
 
 let rec pp_expr fmt = function

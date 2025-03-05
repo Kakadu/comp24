@@ -887,15 +887,15 @@ open AstLib.Ast
 module CounterWriterMonad = struct
   type 'a cc = int -&gt; ('a, string) Result.t * int * decl list
 
-  let return (x : 'a) : 'a cc = <span data-count="4653">f</span>un s -&gt; <span data-count="4653">O</span>k x, s, []
+  let return (x : 'a) : 'a cc = <span data-count="4696">f</span>un s -&gt; <span data-count="4696">O</span>k x, s, []
   let fail (msg : string) : 'a cc = <span data-count="0">f</span>un s -&gt; <span data-count="0">E</span>rror msg, s, []
 
   let bind (m : 'a cc) (f : 'a -&gt; 'b cc) : 'b cc =
-    <span data-count="4899">f</span>un s -&gt;
-    <span data-count="4899">m</span>atch m s with
-    | <span data-count="4899">O</span>k x, s', d1 -&gt;
+    <span data-count="4944">f</span>un s -&gt;
+    <span data-count="4944">m</span>atch m s with
+    | <span data-count="4944">O</span>k x, s', d1 -&gt;
       let y, s'', d2 = f x s' in
-      <span data-count="4899">y</span>, s'', d1 @ d2
+      <span data-count="4944">y</span>, s'', d1 @ d2
     | <span data-count="0">E</span>rror e, s', d1 -&gt; Error e, s', d1
   ;;
 
@@ -906,7 +906,7 @@ module CounterWriterMonad = struct
     <span data-count="76">f</span>un s -&gt; <span data-count="76">O</span>k (prefix ^ string_of_in<span data-count="76">t</span> s), s + 1, []
   ;;
 
-  let tell (d : decl) : unit cc = <span data-count="238">f</span>un s -&gt; <span data-count="238">O</span>k (), s, [ d ]
+  let tell (d : decl) : unit cc = <span data-count="241">f</span>un s -&gt; <span data-count="241">O</span>k (), s, [ d ]
 end
 
 open CounterWriterMonad
@@ -916,8 +916,8 @@ open Common.Ident_utils
 let cc_ll_prefix = "cc_ll_"
 
 let rec pattern_to_string (pat : pattern_or_op) : string list =
-  <span data-count="225">m</span>atch pat with
-  | <span data-count="225">P</span>OpPat p -&gt; bound_vars_pattern p
+  <span data-count="231">m</span>atch pat with
+  | <span data-count="231">P</span>OpPat p -&gt; bound_vars_pattern p
   | <span data-count="0">P</span>OpOp s -&gt; [ s ]
   | <span data-count="0">P</span>OrOpConstraint (p, _) -&gt; pattern_to_string p
 ;;
@@ -1013,13 +1013,13 @@ let pattern_of_free_vars (fv : string list) : pattern =
 ;;
 
 let rec get_efun_args_body local_env = function
-  | <span data-count="282">E</span>Fun (pat, e) -&gt; get_efun_args_body (bound_vars_patter<span data-count="282">n</span> pat @ local_env) e
-  | <span data-count="242">e</span>xpr -&gt; local_env, expr
+  | <span data-count="284">E</span>Fun (pat, e) -&gt; get_efun_args_body (bound_vars_patter<span data-count="284">n</span> pat @ local_env) e
+  | <span data-count="246">e</span>xpr -&gt; local_env, expr
 ;;
 
 let rec replace_fun_body body = function
-  | <span data-count="185">E</span>Fun (pat, e) -&gt; EFun (pat, replace_fun_bod<span data-count="185">y</span> body e)
-  | <span data-count="166">_</span> -&gt; body
+  | <span data-count="187">E</span>Fun (pat, e) -&gt; EFun (pat, replace_fun_bod<span data-count="187">y</span> body e)
+  | <span data-count="170">_</span> -&gt; body
 ;;
 
 let rec subst_eid (e : expr) (subst : (string * expr) list) : expr =
@@ -1081,11 +1081,11 @@ let rec closure_convert_expr
   (rec_name : string option)
   : expr cc
   =
-  <span data-count="3936">m</span>atch e with
+  <span data-count="3970">m</span>atch e with
   | <span data-count="9">E</span>Constraint (e, t) -&gt;
     let* ce = closure_convert_exp<span data-count="9">r</span> global_env e rec_name in
     <span data-count="9">r</span>eturn @@ EConstraint (ce, t)
-  | <span data-count="644">E</span>Const _ | <span data-count="1438">E</span>Id _ -&gt; return e
+  | <span data-count="651">E</span>Const _ | <span data-count="1451">E</span>Id _ -&gt; return e
   | <span data-count="76">E</span>Fun (_, _) as efun -&gt;
     let local_env, body = get_efun_args_body [] efun in
     <span data-count="76">l</span>et new_env = StringSet.union global_env (StringSet.from_lis<span data-count="76">t</span> local_env) in
@@ -1113,15 +1113,15 @@ let rec closure_convert_expr
         new_fun_id
     in
     <span data-count="76">r</span>eturn @@ applied_fun
-  | <span data-count="1286">E</span>App (e1, e2) -&gt;
-    let* ce1 = closure_convert_exp<span data-count="1286">r</span> global_env e1 rec_name in
-    <span data-count="1286">l</span>et* ce2 = closure_convert_exp<span data-count="1286">r</span> global_env e2 rec_name in
-    <span data-count="1286">r</span>eturn (EApp (ce1, ce2))
-  | <span data-count="136">E</span>If (e1, e2, e3) -&gt;
-    let* ce1 = closure_convert_exp<span data-count="136">r</span> global_env e1 rec_name in
-    <span data-count="136">l</span>et* ce2 = closure_convert_exp<span data-count="136">r</span> global_env e2 rec_name in
-    <span data-count="136">l</span>et* ce3 = closure_convert_exp<span data-count="136">r</span> global_env e3 rec_name in
-    <span data-count="136">r</span>eturn (EIf (ce1, ce2, ce3))
+  | <span data-count="1298">E</span>App (e1, e2) -&gt;
+    let* ce1 = closure_convert_exp<span data-count="1298">r</span> global_env e1 rec_name in
+    <span data-count="1298">l</span>et* ce2 = closure_convert_exp<span data-count="1298">r</span> global_env e2 rec_name in
+    <span data-count="1298">r</span>eturn (EApp (ce1, ce2))
+  | <span data-count="138">E</span>If (e1, e2, e3) -&gt;
+    let* ce1 = closure_convert_exp<span data-count="138">r</span> global_env e1 rec_name in
+    <span data-count="138">l</span>et* ce2 = closure_convert_exp<span data-count="138">r</span> global_env e2 rec_name in
+    <span data-count="138">l</span>et* ce3 = closure_convert_exp<span data-count="138">r</span> global_env e3 rec_name in
+    <span data-count="138">r</span>eturn (EIf (ce1, ce2, ce3))
   | <span data-count="60">E</span>List (e1, e2) -&gt;
     let* ce1 = closure_convert_exp<span data-count="60">r</span> global_env e1 rec_name in
     <span data-count="60">l</span>et* ce2 = closure_convert_exp<span data-count="60">r</span> global_env e2 rec_name in
@@ -1215,58 +1215,58 @@ and closure_convert_let_in global_env (d : decl) : decl cc =
 let common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
   : (StringSet.t * let_body) cc
   =
-  <span data-count="166">l</span>et _, body = get_efun_args_body (StringSet.element<span data-count="166">s</span> global_env) expr in
+  <span data-count="170">l</span>et _, body = get_efun_args_body (StringSet.element<span data-count="170">s</span> global_env) expr in
   (* horrible todo*)
-  <span data-count="166">l</span>et global_env =
+  <span data-count="170">l</span>et global_env =
     StringSet.union global_env
-    @@ StringSet.from_lis<span data-count="166">t</span>
-    @@ if rf = Recursive then <span data-count="45">p</span>attern_to_strin<span data-count="45">g</span> pat_or_op else <span data-count="121">[</span>]
+    @@ StringSet.from_lis<span data-count="170">t</span>
+    @@ if rf = Recursive then <span data-count="47">p</span>attern_to_strin<span data-count="47">g</span> pat_or_op else <span data-count="123">[</span>]
   in
-  <span data-count="166">l</span>et* body' = closure_convert_exp<span data-count="166">r</span> global_env body None in
-  <span data-count="166">l</span>et global_env =
-    StringSet.union global_env (StringSet.from_lis<span data-count="166">t</span> (pattern_to_strin<span data-count="166">g</span> pat_or_op))
+  <span data-count="170">l</span>et* body' = closure_convert_exp<span data-count="170">r</span> global_env body None in
+  <span data-count="170">l</span>et global_env =
+    StringSet.union global_env (StringSet.from_lis<span data-count="170">t</span> (pattern_to_strin<span data-count="170">g</span> pat_or_op))
   in
-  <span data-count="166">r</span>eturn (global_env, (pat_or_op, replace_fun_bod<span data-count="166">y</span> body' expr))
+  <span data-count="170">r</span>eturn (global_env, (pat_or_op, replace_fun_bod<span data-count="170">y</span> body' expr))
 ;;
 
 let closure_convert_decl (global_env : StringSet.t) (d : decl) : StringSet.t cc =
-  <span data-count="162">m</span>atch d with
-  | <span data-count="158">D</span>Let (rf, (pat_or_op, expr)) -&gt;
-    let* global_env, lb = common_convert_dec<span data-count="158">l</span> global_env (rf, (pat_or_op, expr)) in
-    <span data-count="158">l</span>et* () = tel<span data-count="158">l</span> @@ DLet (rf, lb) in
-    <span data-count="158">r</span>eturn global_env
-  | <span data-count="4">D</span>LetMut (rf, lb, lb2, lbs) -&gt;
-    let* global_env, clb = common_convert_dec<span data-count="4">l</span> global_env (Recursive, lb) in
-    <span data-count="4">l</span>et* global_env, clb2 = common_convert_dec<span data-count="4">l</span> global_env (Recursive, lb2) in
-    <span data-count="4">l</span>et rec conv lbs global_env =
-      <span data-count="4">m</span>atch lbs with
-      | <span data-count="4">[</span>] -&gt; return []
+  <span data-count="165">m</span>atch d with
+  | <span data-count="160">D</span>Let (rf, (pat_or_op, expr)) -&gt;
+    let* global_env, lb = common_convert_dec<span data-count="160">l</span> global_env (rf, (pat_or_op, expr)) in
+    <span data-count="160">l</span>et* () = tel<span data-count="160">l</span> @@ DLet (rf, lb) in
+    <span data-count="160">r</span>eturn global_env
+  | <span data-count="5">D</span>LetMut (rf, lb, lb2, lbs) -&gt;
+    let* global_env, clb = common_convert_dec<span data-count="5">l</span> global_env (Recursive, lb) in
+    <span data-count="5">l</span>et* global_env, clb2 = common_convert_dec<span data-count="5">l</span> global_env (Recursive, lb2) in
+    <span data-count="5">l</span>et rec conv lbs global_env =
+      <span data-count="5">m</span>atch lbs with
+      | <span data-count="5">[</span>] -&gt; return []
       | <span data-count="0">l</span>b :: xs -&gt;
         let* global_env, clb = common_convert_dec<span data-count="0">l</span> global_env (Recursive, lb) in
         <span data-count="0">l</span>et* clbs = con<span data-count="0">v</span> xs global_env in
         <span data-count="0">r</span>eturn (clb :: clbs)
     in
-    let* clbs = con<span data-count="4">v</span> lbs global_env in
-    <span data-count="4">l</span>et* () = tel<span data-count="4">l</span> @@ DLetMut (rf, clb, clb2, clbs) in
-    <span data-count="4">r</span>eturn global_env
+    let* clbs = con<span data-count="5">v</span> lbs global_env in
+    <span data-count="5">l</span>et* () = tel<span data-count="5">l</span> @@ DLetMut (rf, clb, clb2, clbs) in
+    <span data-count="5">r</span>eturn global_env
 ;;
 
 let closure_convert_decl_list (global_env : StringSet.t) (decls : decl list) =
-  <span data-count="68">l</span>et rec helper global_env decls =
-    <span data-count="230">m</span>atch decls with
-    | <span data-count="68">[</span>] -&gt; return global_env
-    | <span data-count="162">d</span> :: ds -&gt;
-      let* global_env = closure_convert_dec<span data-count="162">l</span> global_env d in
-      <span data-count="162">h</span>elper global_env ds
+  <span data-count="69">l</span>et rec helper global_env decls =
+    <span data-count="234">m</span>atch decls with
+    | <span data-count="69">[</span>] -&gt; return global_env
+    | <span data-count="165">d</span> :: ds -&gt;
+      let* global_env = closure_convert_dec<span data-count="165">l</span> global_env d in
+      <span data-count="165">h</span>elper global_env ds
   in
   helper global_env decls
 ;;
 
 let closure_convert (prog : decl list) : (decl list, string) result =
-  <span data-count="68">l</span>et global_env = StringSet.from_list Common.Stdlib.stdlib in
-  <span data-count="68">l</span>et global_env, _, decls = closure_convert_decl_list global_env prog 0 in
-  <span data-count="68">m</span>atch global_env with
-  | <span data-count="68">O</span>k _ -&gt; Ok decls
+  <span data-count="69">l</span>et global_env = StringSet.from_list Common.Stdlib.stdlib in
+  <span data-count="69">l</span>et global_env, _, decls = closure_convert_decl_list global_env prog 0 in
+  <span data-count="69">m</span>atch global_env with
+  | <span data-count="69">O</span>k _ -&gt; Ok decls
   | <span data-count="0">E</span>rror s -&gt; Error s
 ;;
 </code></pre>

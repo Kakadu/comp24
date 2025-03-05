@@ -167,11 +167,11 @@ open Common.Base_bin_ops
   (** Mutual let declaration *)
 [@@deriving eq, show { with_path = false }]
 
-let econst c = <span data-count="610">N</span>oPMEConst c
-let eid i = <span data-count="972">N</span>oPMEId i
-let efun pat e = <span data-count="384">N</span>oPMEFun (pat, e)
-let eapp f args = <span data-count="1477">N</span>oPMEApp (f, args)
-let eif e1 e2 e3 = <span data-count="194">N</span>oPMEIf (e1, e2, e3)
+let econst c = <span data-count="617">N</span>oPMEConst c
+let eid i = <span data-count="985">N</span>oPMEId i
+let efun pat e = <span data-count="388">N</span>oPMEFun (pat, e)
+let eapp f args = <span data-count="1501">N</span>oPMEApp (f, args)
+let eif e1 e2 e3 = <span data-count="198">N</span>oPMEIf (e1, e2, e3)
 let elist hd tl = <span data-count="80">N</span>oPMEList (hd, tl)
 let etuple e1 e2 l = <span data-count="34">N</span>oPMETuple (e1, e2, l)
 let eclsr d e = <span data-count="397">N</span>oPMEClsr (d, e)
@@ -183,7 +183,7 @@ let e_typed ?(typ = <span data-count="0">N</span>one) e : expr_no_pm =
   | <span data-count="3">N</span>one -&gt; e
 ;;
 
-let dlet rf let_body_no_pm = <span data-count="139">N</span>oPMDLet (rf, let_body_no_pm)
+let dlet rf let_body_no_pm = <span data-count="141">N</span>oPMDLet (rf, let_body_no_pm)
 let dletmut rec_flag fst snd tl = <span data-count="0">N</span>oPMDLetMut (rec_flag, fst, snd, tl)
 </code></pre>
       </div>

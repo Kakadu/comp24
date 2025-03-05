@@ -317,65 +317,65 @@ open Common.Counter.R
 
 let rec gen_var (base : string) (global : StringSet.t) : string t =
   (* let* fresh_id = fresh_name base in *)
-  <span data-count="598">l</span>et* fresh_var = fresh in
-  <span data-count="598">l</span>et fresh_name = base ^ string_of_in<span data-count="598">t</span> fresh_var in
-  if StringSet.contains global fresh_name then <span data-count="0">g</span>en_var base global else <span data-count="598">r</span>eturn fresh_name
+  <span data-count="608">l</span>et* fresh_var = fresh in
+  <span data-count="608">l</span>et fresh_name = base ^ string_of_in<span data-count="608">t</span> fresh_var in
+  if StringSet.contains global fresh_name then <span data-count="0">g</span>en_var base global else <span data-count="608">r</span>eturn fresh_name
 ;;
 
 open AstLib.Ast
 
 let pattern_to_identifier = function
-  | <span data-count="514">P</span>Id s -&gt; return @@ Id s
+  | <span data-count="520">P</span>Id s -&gt; return @@ Id s
   | <span data-count="0">P</span>Constraint (PId s, ty) -&gt; return @@ IdConstraint (s, ty)
   | <span data-count="6">_</span> -&gt; fail "other patterns not supported (anf is run after pattern elimination)"
 ;;
 
 let pattern_or_op_to_identifier = function
-  | <span data-count="305">P</span>OpPat p -&gt; pattern_to_identifier p
+  | <span data-count="309">P</span>OpPat p -&gt; pattern_to_identifier p
   | <span data-count="0">P</span>OpOp s -&gt; return @@ Id s
   | <span data-count="0">_</span> -&gt; fail "other patterns not supported (anf is run after pattern elimination)"
 ;;
 
 let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -&gt; aexpr t) : aexpr t =
-  <span data-count="2165">l</span>et anf_list env exprs cont =
-    <span data-count="493">l</span>et rec helper acc = function
-      | <span data-count="489">[</span>] -&gt; cont (List.re<span data-count="489">v</span> acc)
-      | <span data-count="800">h</span> :: tl -&gt; anf_expr env h (fun imm -&gt; <span data-count="796">h</span>elper (imm :: acc) tl)
+  <span data-count="2195">l</span>et anf_list env exprs cont =
+    <span data-count="501">l</span>et rec helper acc = function
+      | <span data-count="497">[</span>] -&gt; cont (List.re<span data-count="497">v</span> acc)
+      | <span data-count="812">h</span> :: tl -&gt; anf_expr env h (fun imm -&gt; <span data-count="808">h</span>elper (imm :: acc) tl)
     in
     helper [] exprs
   in
   match e with
   | <span data-count="7">E</span>Constraint (e, t) -&gt; anf_expr env e (fun e -&gt; <span data-count="7">k</span> (ImmConstraint (e, t)))
-  | <span data-count="425">E</span>Const c -&gt; k (ImmConst c)
-  | <span data-count="922">E</span>Id id -&gt; k (ImmIdentifier id)
-  | <span data-count="493">E</span>App _ -&gt;
+  | <span data-count="432">E</span>Const c -&gt; k (ImmConst c)
+  | <span data-count="935">E</span>Id id -&gt; k (ImmIdentifier id)
+  | <span data-count="501">E</span>App _ -&gt;
     let rec unroll_eapp acc = function
-      | <span data-count="800">E</span>App (e1, e2) -&gt; unroll_eapp (e2 :: acc) e1
-      | <span data-count="493">e</span> -&gt; e :: acc
+      | <span data-count="812">E</span>App (e1, e2) -&gt; unroll_eapp (e2 :: acc) e1
+      | <span data-count="501">e</span> -&gt; e :: acc
     in
     let args = unroll_eapp [] e in
-    <span data-count="493">l</span>et f, args = List.h<span data-count="493">d</span> args, List.t<span data-count="493">l</span> args in
+    <span data-count="501">l</span>et f, args = List.h<span data-count="501">d</span> args, List.t<span data-count="501">l</span> args in
     anf_expr env f (fun fimm -&gt;
-      <span data-count="493">a</span>nf_list env args (fun argsimm -&gt;
-        <span data-count="489">l</span>et* v = gen_va<span data-count="489">r</span> "app_" env in
-        <span data-count="489">l</span>et rec roll_capp = function
-          | <span data-count="489">[</span> h ] -&gt; return (CImmExpr h)
-          | <span data-count="794">h</span> :: tl -&gt;
-            let* rest = roll_cap<span data-count="794">p</span> tl in
-            <span data-count="794">r</span>eturn (CApp (rest, CImmExpr h))
+      <span data-count="501">a</span>nf_list env args (fun argsimm -&gt;
+        <span data-count="497">l</span>et* v = gen_va<span data-count="497">r</span> "app_" env in
+        <span data-count="497">l</span>et rec roll_capp = function
+          | <span data-count="497">[</span> h ] -&gt; return (CImmExpr h)
+          | <span data-count="806">h</span> :: tl -&gt;
+            let* rest = roll_cap<span data-count="806">p</span> tl in
+            <span data-count="806">r</span>eturn (CApp (rest, CImmExpr h))
           | <span data-count="0">[</span>] -&gt; fail "impossible?"
         in
-        let* capp = roll_cap<span data-count="489">p</span> @@ List.re<span data-count="489">v</span> (fimm :: argsimm) in
-        <span data-count="489">l</span>et* aexpr = <span data-count="489">k</span> @@ ImmIdentifier (ident_of_definabl<span data-count="489">e</span> @@ ident_letter<span data-count="489">s</span> v) in
-        <span data-count="457">l</span>et let_expr = ALetIn (Id v, capp, aexpr) in
+        let* capp = roll_cap<span data-count="497">p</span> @@ List.re<span data-count="497">v</span> (fimm :: argsimm) in
+        <span data-count="497">l</span>et* aexpr = <span data-count="497">k</span> @@ ImmIdentifier (ident_of_definabl<span data-count="497">e</span> @@ ident_letter<span data-count="497">s</span> v) in
+        <span data-count="465">l</span>et let_expr = ALetIn (Id v, capp, aexpr) in
         return let_expr))
-  | <span data-count="109">E</span>If (e1, e2, e3) -&gt;
+  | <span data-count="111">E</span>If (e1, e2, e3) -&gt;
     anf_expr env e1 (fun cimm -&gt;
-      <span data-count="109">l</span>et* v = gen_va<span data-count="109">r</span> "if_" env in
-      <span data-count="109">l</span>et* then_aexpr = anf_exp<span data-count="109">r</span> env e2 (fun timm -&gt; <span data-count="105">r</span>eturn (ACExpr (CImmExpr timm))) in
-      <span data-count="105">l</span>et* else_aexpr = anf_exp<span data-count="105">r</span> env e3 (fun eimm -&gt; <span data-count="101">r</span>eturn (ACExpr (CImmExpr eimm))) in
-      <span data-count="101">l</span>et* aexpr = <span data-count="101">k</span> @@ ImmIdentifier (ident_of_definabl<span data-count="101">e</span> @@ ident_letter<span data-count="101">s</span> v) in
-      <span data-count="97">l</span>et let_expr = ALetIn (Id v, CIf (cimm, then_aexpr, else_aexpr), aexpr) in
+      <span data-count="111">l</span>et* v = gen_va<span data-count="111">r</span> "if_" env in
+      <span data-count="111">l</span>et* then_aexpr = anf_exp<span data-count="111">r</span> env e2 (fun timm -&gt; <span data-count="107">r</span>eturn (ACExpr (CImmExpr timm))) in
+      <span data-count="107">l</span>et* else_aexpr = anf_exp<span data-count="107">r</span> env e3 (fun eimm -&gt; <span data-count="103">r</span>eturn (ACExpr (CImmExpr eimm))) in
+      <span data-count="103">l</span>et* aexpr = <span data-count="103">k</span> @@ ImmIdentifier (ident_of_definabl<span data-count="103">e</span> @@ ident_letter<span data-count="103">s</span> v) in
+      <span data-count="99">l</span>et let_expr = ALetIn (Id v, CIf (cimm, then_aexpr, else_aexpr), aexpr) in
       return let_expr)
   | <span data-count="191">E</span>Clsr (DLet (_, (pat, e1)), e2) -&gt;
     anf_expr env e1 (fun imm1 -&gt;
@@ -389,57 +389,57 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -&gt; aexpr t) : ae
 ;;
 
 let rec unroll_efun (expr : expr) : pattern list * expr =
-  <span data-count="379">m</span>atch expr with
-  | <span data-count="215">E</span>Fun (pat, body) -&gt;
+  <span data-count="385">m</span>atch expr with
+  | <span data-count="217">E</span>Fun (pat, body) -&gt;
     let pats, body' = unroll_efun body in
-    <span data-count="215">p</span>at :: pats, body'
-  | <span data-count="164">_</span> -&gt; [], expr
+    <span data-count="217">p</span>at :: pats, body'
+  | <span data-count="168">_</span> -&gt; [], expr
 ;;
 
 let anf_decl (env : StringSet.t) (d : decl) : anf_decl t =
-  <span data-count="162">l</span>et helper (pat_or_op, expr) =
-    <span data-count="164">l</span>et efun_pats, body_expr = unroll_efun expr in
-    <span data-count="164">l</span>et* efun_ids = List.map pattern_to_identifier efun_pats |&gt; <span data-count="164">s</span>equenc<span data-count="164">e</span> in
-    <span data-count="164">l</span>et env =
+  <span data-count="165">l</span>et helper (pat_or_op, expr) =
+    <span data-count="168">l</span>et efun_pats, body_expr = unroll_efun expr in
+    <span data-count="168">l</span>et* efun_ids = List.map pattern_to_identifier efun_pats |&gt; <span data-count="168">s</span>equenc<span data-count="168">e</span> in
+    <span data-count="168">l</span>et env =
       StringSet.union
         env
-        (StringSet.from_lis<span data-count="164">t</span> @@ List.concat_ma<span data-count="164">p</span> bound_vars_pattern efun_pats)
+        (StringSet.from_lis<span data-count="168">t</span> @@ List.concat_ma<span data-count="168">p</span> bound_vars_pattern efun_pats)
     in
-    <span data-count="164">l</span>et* aexpr =
-      anf_exp<span data-count="164">r</span> env body_expr (fun immexpr -&gt; <span data-count="146">r</span>eturn (ACExpr (CImmExpr immexpr)))
+    <span data-count="168">l</span>et* aexpr =
+      anf_exp<span data-count="168">r</span> env body_expr (fun immexpr -&gt; <span data-count="150">r</span>eturn (ACExpr (CImmExpr immexpr)))
     in
-    <span data-count="140">l</span>et* pat_or_op = pattern_or_op_to_identifie<span data-count="140">r</span> pat_or_op in
-    <span data-count="140">r</span>eturn (pat_or_op, efun_ids, aexpr)
+    <span data-count="144">l</span>et* pat_or_op = pattern_or_op_to_identifie<span data-count="144">r</span> pat_or_op in
+    <span data-count="144">r</span>eturn (pat_or_op, efun_ids, aexpr)
   in
   match d with
-  | <span data-count="160">D</span>Let (rf, lb) -&gt;
-    let* lb = helpe<span data-count="160">r</span> lb in
-    <span data-count="136">r</span>eturn (ADSingleLet (rf, lb))
-  | <span data-count="2">D</span>LetMut (rf, lb1, lb2, lbs) -&gt;
-    let* lb1 = helpe<span data-count="2">r</span> lb1 in
-    <span data-count="2">l</span>et* lb2 = helpe<span data-count="2">r</span> lb2 in
-    <span data-count="2">l</span>et* lbs = List.map helper lbs |&gt; <span data-count="2">s</span>equenc<span data-count="2">e</span> in
-    <span data-count="2">r</span>eturn (ADMutualRecDecl (rf, lb1, lb2, lbs))
+  | <span data-count="162">D</span>Let (rf, lb) -&gt;
+    let* lb = helpe<span data-count="162">r</span> lb in
+    <span data-count="138">r</span>eturn (ADSingleLet (rf, lb))
+  | <span data-count="3">D</span>LetMut (rf, lb1, lb2, lbs) -&gt;
+    let* lb1 = helpe<span data-count="3">r</span> lb1 in
+    <span data-count="3">l</span>et* lb2 = helpe<span data-count="3">r</span> lb2 in
+    <span data-count="3">l</span>et* lbs = List.map helper lbs |&gt; <span data-count="3">s</span>equenc<span data-count="3">e</span> in
+    <span data-count="3">r</span>eturn (ADMutualRecDecl (rf, lb1, lb2, lbs))
 ;;
 
 let anf_program (decls : decl list) =
-  <span data-count="45">l</span>et rec get_initial_env ds acc =
-    <span data-count="207">m</span>atch ds with
-    | <span data-count="45">[</span>] -&gt; acc
-    | <span data-count="158">D</span>Let (_, (POpPat (PId s), _)) :: rest -&gt; get_initial_env rest (StringSet.ad<span data-count="158">d</span> acc s)
-    | <span data-count="4">_</span> :: rest -&gt; get_initial_env rest acc
+  <span data-count="46">l</span>et rec get_initial_env ds acc =
+    <span data-count="211">m</span>atch ds with
+    | <span data-count="46">[</span>] -&gt; acc
+    | <span data-count="160">D</span>Let (_, (POpPat (PId s), _)) :: rest -&gt; get_initial_env rest (StringSet.ad<span data-count="160">d</span> acc s)
+    | <span data-count="5">_</span> :: rest -&gt; get_initial_env rest acc
   in
   let env = get_initial_env decls StringSet.empty in
-  <span data-count="45">l</span>et decls = Base.List.map decls ~f:(fun decls -&gt; <span data-count="162">s</span>nd (anf_dec<span data-count="162">l</span> env decls 0)) in
-  <span data-count="45">d</span>ecls
+  <span data-count="46">l</span>et decls = Base.List.map decls ~f:(fun decls -&gt; <span data-count="165">s</span>nd (anf_dec<span data-count="165">l</span> env decls 0)) in
+  <span data-count="46">d</span>ecls
 ;;
 
 let run prog =
-  <span data-count="45">l</span>et prog = anf_program prog in
-  <span data-count="45">l</span>et open Result in
+  <span data-count="46">l</span>et prog = anf_program prog in
+  <span data-count="46">l</span>et open Result in
   let rec sequence acc = function
-    | <span data-count="35">[</span>] -&gt; Ok (List.re<span data-count="35">v</span> acc)
-    | <span data-count="118">O</span>k x :: xs -&gt; sequence (x :: acc) xs
+    | <span data-count="36">[</span>] -&gt; Ok (List.re<span data-count="36">v</span> acc)
+    | <span data-count="121">O</span>k x :: xs -&gt; sequence (x :: acc) xs
     | <span data-count="10">E</span>rror e :: _ -&gt; Error e
   in
   sequence [] prog

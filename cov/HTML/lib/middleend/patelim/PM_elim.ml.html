@@ -492,21 +492,21 @@ let pm_elim =
 ;;
 
 let rec pm_elim_expr expr =
-  <span data-count="265">l</span>et rec helper = function
-    | <span data-count="279">E</span>Const x -&gt; return @@ econs<span data-count="279">t</span> x
-    | <span data-count="662">E</span>Id x -&gt; return @@ ei<span data-count="662">d</span> x
-    | <span data-count="29">E</span>If (i, t, e) -&gt;
-      let* i_res = helpe<span data-count="29">r</span> i in
-      <span data-count="29">l</span>et* t_res = helpe<span data-count="29">r</span> t in
-      <span data-count="29">l</span>et* e_res = helpe<span data-count="29">r</span> e in
-      <span data-count="29">r</span>eturn @@ ei<span data-count="29">f</span> i_res t_res e_res
-    | <span data-count="565">E</span>App (e1, e2) -&gt;
-      let* e1_res = helpe<span data-count="565">r</span> e1 in
-      <span data-count="565">l</span>et* e2_res = helpe<span data-count="565">r</span> e2 in
-      <span data-count="565">r</span>eturn @@ eap<span data-count="565">p</span> e1_res e2_res
-    | <span data-count="194">E</span>Fun (pat, e) -&gt;
-      let* e_res = helpe<span data-count="194">r</span> e in
-      <span data-count="194">r</span>eturn @@ efu<span data-count="194">n</span> pat e_res
+  <span data-count="269">l</span>et rec helper = function
+    | <span data-count="286">E</span>Const x -&gt; return @@ econs<span data-count="286">t</span> x
+    | <span data-count="675">E</span>Id x -&gt; return @@ ei<span data-count="675">d</span> x
+    | <span data-count="31">E</span>If (i, t, e) -&gt;
+      let* i_res = helpe<span data-count="31">r</span> i in
+      <span data-count="31">l</span>et* t_res = helpe<span data-count="31">r</span> t in
+      <span data-count="31">l</span>et* e_res = helpe<span data-count="31">r</span> e in
+      <span data-count="31">r</span>eturn @@ ei<span data-count="31">f</span> i_res t_res e_res
+    | <span data-count="577">E</span>App (e1, e2) -&gt;
+      let* e1_res = helpe<span data-count="577">r</span> e1 in
+      <span data-count="577">l</span>et* e2_res = helpe<span data-count="577">r</span> e2 in
+      <span data-count="577">r</span>eturn @@ eap<span data-count="577">p</span> e1_res e2_res
+    | <span data-count="196">E</span>Fun (pat, e) -&gt;
+      let* e_res = helpe<span data-count="196">r</span> e in
+      <span data-count="196">r</span>eturn @@ efu<span data-count="196">n</span> pat e_res
     | <span data-count="100">E</span>Clsr (decl, expr) -&gt;
       let* no_pm_decl = pm_elim_dec<span data-count="100">l</span> decl in
       <span data-count="100">l</span>et* expr_res = helpe<span data-count="100">r</span> expr in
@@ -543,28 +543,28 @@ let rec pm_elim_expr expr =
   helper expr
 
 and pm_elim_decl decl =
-  <span data-count="220">l</span>et helper decl =
-    <span data-count="220">m</span>atch decl with
-    | <span data-count="218">D</span>Let (rec_flag, (pat, expr)) -&gt;
-      let* no_pm_expr = pm_elim_exp<span data-count="218">r</span> expr in
-      <span data-count="218">r</span>eturn @@ NoPMDLet (rec_flag, (pat, no_pm_expr))
-    | <span data-count="2">D</span>LetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
+  <span data-count="223">l</span>et helper decl =
+    <span data-count="223">m</span>atch decl with
+    | <span data-count="220">D</span>Let (rec_flag, (pat, expr)) -&gt;
+      let* no_pm_expr = pm_elim_exp<span data-count="220">r</span> expr in
+      <span data-count="220">r</span>eturn @@ NoPMDLet (rec_flag, (pat, no_pm_expr))
+    | <span data-count="3">D</span>LetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
       let applied = tl in
       let* res =
-        ma<span data-count="2">p</span>
+        ma<span data-count="3">p</span>
           (fun (pat, e) -&gt;
             <span data-count="0">l</span>et* e = pm_elim_exp<span data-count="0">r</span> e in
             <span data-count="0">r</span>eturn (pat, e))
           applied
       in
-      <span data-count="2">l</span>et* expr = pm_elim_exp<span data-count="2">r</span> expr in
-      <span data-count="2">l</span>et* expr1 = pm_elim_exp<span data-count="2">r</span> expr1 in
-      <span data-count="2">r</span>eturn @@ NoPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), res)
+      <span data-count="3">l</span>et* expr = pm_elim_exp<span data-count="3">r</span> expr in
+      <span data-count="3">l</span>et* expr1 = pm_elim_exp<span data-count="3">r</span> expr1 in
+      <span data-count="3">r</span>eturn @@ NoPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), res)
   in
   helper decl
 ;;
 
-let pm_elim_decls decls = <span data-count="55">m</span>ap pm_elim_decl decls
+let pm_elim_decls decls = <span data-count="56">m</span>ap pm_elim_decl decls
 let pm_elim decls = <span data-count="4">r</span>un (pm_elim_decl<span data-count="4">s</span> decls)
 </code></pre>
       </div>

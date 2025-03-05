@@ -270,14 +270,14 @@ let is_pc (p : pattern) =
 let create_assertion_or_error cond error = <span data-count="61">e</span>if cond (econs<span data-count="61">t</span> CUnit) error
 
 let rec pc_elim_expr expr : expr_no_pm t =
-  <span data-count="2449">m</span>atch expr with
-  | <span data-count="343">N</span>oPMEConst _ -&gt; return expr
-  | <span data-count="874">N</span>oPMEId _ -&gt; return expr
-  | <span data-count="683">N</span>oPMEApp (f, args) -&gt;
-    let* f' = pc_elim_exp<span data-count="683">r</span> f in
-    <span data-count="683">l</span>et* args' = pc_elim_exp<span data-count="683">r</span> args in
-    <span data-count="683">r</span>eturn (eap<span data-count="683">p</span> f' args')
-  | <span data-count="190">N</span>oPMEFun (pat, e) -&gt;
+  <span data-count="2485">m</span>atch expr with
+  | <span data-count="350">N</span>oPMEConst _ -&gt; return expr
+  | <span data-count="887">N</span>oPMEId _ -&gt; return expr
+  | <span data-count="695">N</span>oPMEApp (f, args) -&gt;
+    let* f' = pc_elim_exp<span data-count="695">r</span> f in
+    <span data-count="695">l</span>et* args' = pc_elim_exp<span data-count="695">r</span> args in
+    <span data-count="695">r</span>eturn (eap<span data-count="695">p</span> f' args')
+  | <span data-count="192">N</span>oPMEFun (pat, e) -&gt;
     let* pat', e' =
       match pat with
       | <span data-count="12">P</span>Const c -&gt;
@@ -295,16 +295,16 @@ let rec pc_elim_expr expr : expr_no_pm t =
           <span data-count="12">r</span>eturn @@ ecls<span data-count="12">r</span> (dle<span data-count="12">t</span> Not_recursive (POpPat (PId "_"), assertion)) e'
         in
         <span data-count="12">r</span>eturn @@ (pat, assertion_in_let)
-      | <span data-count="178">_</span> -&gt;
-        let* e' = pc_elim_exp<span data-count="178">r</span> e in
-        <span data-count="178">r</span>eturn (pat, e')
+      | <span data-count="180">_</span> -&gt;
+        let* e' = pc_elim_exp<span data-count="180">r</span> e in
+        <span data-count="180">r</span>eturn (pat, e')
     in
-    <span data-count="190">r</span>eturn (efu<span data-count="190">n</span> pat' e')
-  | <span data-count="64">N</span>oPMEIf (e1, e2, e3) -&gt;
-    let* e1' = pc_elim_exp<span data-count="64">r</span> e1 in
-    <span data-count="64">l</span>et* e2' = pc_elim_exp<span data-count="64">r</span> e2 in
-    <span data-count="64">l</span>et* e3' = pc_elim_exp<span data-count="64">r</span> e3 in
-    <span data-count="64">r</span>eturn (ei<span data-count="64">f</span> e1' e2' e3')
+    <span data-count="192">r</span>eturn (efu<span data-count="192">n</span> pat' e')
+  | <span data-count="66">N</span>oPMEIf (e1, e2, e3) -&gt;
+    let* e1' = pc_elim_exp<span data-count="66">r</span> e1 in
+    <span data-count="66">l</span>et* e2' = pc_elim_exp<span data-count="66">r</span> e2 in
+    <span data-count="66">l</span>et* e3' = pc_elim_exp<span data-count="66">r</span> e3 in
+    <span data-count="66">r</span>eturn (ei<span data-count="66">f</span> e1' e2' e3')
   | <span data-count="40">N</span>oPMEList (hd, tl) -&gt;
     let* hd' = pc_elim_exp<span data-count="40">r</span> hd in
     <span data-count="40">l</span>et* tl' = pc_elim_exp<span data-count="40">r</span> tl in
@@ -327,10 +327,10 @@ let rec pc_elim_expr expr : expr_no_pm t =
     <span data-count="7">r</span>eturn (e_type<span data-count="7">d</span> ~typ:(Some typ) e')
 
 and pc_elim_decl decl : decl_no_pm t =
-  <span data-count="282">m</span>atch decl with
-  | <span data-count="280">N</span>oPMDLet (rec_flag, (pat, e)) -&gt;
-    let* e' = pc_elim_exp<span data-count="280">r</span> e in
-    <span data-count="280">(</span>match pat with
+  <span data-count="287">m</span>atch decl with
+  | <span data-count="284">N</span>oPMDLet (rec_flag, (pat, e)) -&gt;
+    let* e' = pc_elim_exp<span data-count="284">r</span> e in
+    <span data-count="284">(</span>match pat with
      | <span data-count="49">P</span>OpPat (PConst c) -&gt;
        let* fresh = fresh in
        <span data-count="49">l</span>et evaluated_name = RuntimeUtils.create_var_for_eval (string_of_in<span data-count="49">t</span> fresh) in
@@ -343,30 +343,30 @@ and pc_elim_decl decl : decl_no_pm t =
        <span data-count="49">l</span>et assertion = create_assertion_or_error cond error in
        <span data-count="49">l</span>et clsr = eclsr decl assertion in
        <span data-count="49">r</span>eturn (NoPMDLet (rec_flag, (POpPat (PId "_"), clsr)))
-     | <span data-count="231">_</span> -&gt; return (NoPMDLet (rec_flag, (pat, e'))))
-  | <span data-count="2">N</span>oPMDLetMut (rec_flag, let_body1, let_body2, tl) -&gt;
+     | <span data-count="235">_</span> -&gt; return (NoPMDLet (rec_flag, (pat, e'))))
+  | <span data-count="3">N</span>oPMDLetMut (rec_flag, let_body1, let_body2, tl) -&gt;
     (* convert decls to NoPMDLet, and then apply pc_elim_desk for each decl *)
     let create_decl = dlet rec_flag in
-    <span data-count="2">l</span>et* let_body1' = pc_elim_dec<span data-count="2">l</span> @@ dle<span data-count="2">t</span> rec_flag let_body1 in
-    <span data-count="2">l</span>et* let_body2' = pc_elim_dec<span data-count="2">l</span> @@ dle<span data-count="2">t</span> rec_flag let_body2 in
-    <span data-count="2">l</span>et all = List.map create_decl tl in
-    <span data-count="2">l</span>et* all = ma<span data-count="2">p</span> pc_elim_decl all in
-    <span data-count="2">l</span>et revert = function
-      | <span data-count="4">N</span>oPMDLet (_, x) -&gt; return x
+    <span data-count="3">l</span>et* let_body1' = pc_elim_dec<span data-count="3">l</span> @@ dle<span data-count="3">t</span> rec_flag let_body1 in
+    <span data-count="3">l</span>et* let_body2' = pc_elim_dec<span data-count="3">l</span> @@ dle<span data-count="3">t</span> rec_flag let_body2 in
+    <span data-count="3">l</span>et all = List.map create_decl tl in
+    <span data-count="3">l</span>et* all = ma<span data-count="3">p</span> pc_elim_decl all in
+    <span data-count="3">l</span>et revert = function
+      | <span data-count="6">N</span>oPMDLet (_, x) -&gt; return x
       | <span data-count="0">_</span> -&gt; fail "Unexpected value: NoPMDLet became NoPMDLetMut?!"
     in
-    let* let_body1'' = rever<span data-count="2">t</span> let_body1' in
-    <span data-count="2">l</span>et* let_body2'' = rever<span data-count="2">t</span> let_body2' in
-    <span data-count="2">l</span>et* reverted = ma<span data-count="2">p</span> revert all in
-    <span data-count="2">r</span>eturn (NoPMDLetMut (rec_flag, let_body1'', let_body2'', reverted))
+    let* let_body1'' = rever<span data-count="3">t</span> let_body1' in
+    <span data-count="3">l</span>et* let_body2'' = rever<span data-count="3">t</span> let_body2' in
+    <span data-count="3">l</span>et* reverted = ma<span data-count="3">p</span> revert all in
+    <span data-count="3">r</span>eturn (NoPMDLetMut (rec_flag, let_body1'', let_body2'', reverted))
 ;;
 
 let pc_elim_decls prog =
-  <span data-count="51">l</span>et* no_pm = PM_elim.pm_elim_decl<span data-count="51">s</span> prog in
-  <span data-count="51">m</span>ap pc_elim_decl no_pm
+  <span data-count="52">l</span>et* no_pm = PM_elim.pm_elim_decl<span data-count="52">s</span> prog in
+  <span data-count="52">m</span>ap pc_elim_decl no_pm
 ;;
 
-let pc_elim prog = <span data-count="51">r</span>un (pc_elim_decl<span data-count="51">s</span> prog)
+let pc_elim prog = <span data-count="52">r</span>un (pc_elim_decl<span data-count="52">s</span> prog)
 </code></pre>
       </div>
     </div>

@@ -168,15 +168,15 @@ open IR
 open Common.Base_bin_ops
 
 let rec transform_back = function
-  | <span data-count="542">N</span>oPMEConst c -&gt; EConst c
-  | <span data-count="1028">N</span>oPMEId id -&gt; EId id
+  | <span data-count="549">N</span>oPMEConst c -&gt; EConst c
+  | <span data-count="1041">N</span>oPMEId id -&gt; EId id
   | <span data-count="139">N</span>oPMEBinOp (bin_op, e1, e2) -&gt;
     EApp
       ( EApp (EId (IdentOfDefinable (IdentOp (bin_op_to_st<span data-count="139">r</span> bin_op))), transform_bac<span data-count="139">k</span> e1)
       , transform_bac<span data-count="139">k</span> e2 )
-  | <span data-count="757">N</span>oPMEApp (e1, e2) -&gt; EApp (transform_bac<span data-count="757">k</span> e1, transform_bac<span data-count="757">k</span> e2)
-  | <span data-count="194">N</span>oPMEFun (pat, expr) -&gt; EFun (pat, transform_bac<span data-count="194">k</span> expr)
-  | <span data-count="130">N</span>oPMEIf (i, t, e) -&gt; EIf (transform_bac<span data-count="130">k</span> i, transform_bac<span data-count="130">k</span> t, transform_bac<span data-count="130">k</span> e)
+  | <span data-count="769">N</span>oPMEApp (e1, e2) -&gt; EApp (transform_bac<span data-count="769">k</span> e1, transform_bac<span data-count="769">k</span> e2)
+  | <span data-count="196">N</span>oPMEFun (pat, expr) -&gt; EFun (pat, transform_bac<span data-count="196">k</span> expr)
+  | <span data-count="132">N</span>oPMEIf (i, t, e) -&gt; EIf (transform_bac<span data-count="132">k</span> i, transform_bac<span data-count="132">k</span> t, transform_bac<span data-count="132">k</span> e)
   | <span data-count="235">N</span>oPMEClsr (decl, expr2) -&gt; EClsr (transform_back_dec<span data-count="235">l</span> decl, transform_bac<span data-count="235">k</span> expr2)
   | <span data-count="8">N</span>oPMEConstraint (e, typ) -&gt; EConstraint (transform_bac<span data-count="8">k</span> e, typ)
   | <span data-count="40">N</span>oPMEList (e1, e2) -&gt; EList (transform_bac<span data-count="40">k</span> e1, transform_bac<span data-count="40">k</span> e2)
@@ -184,13 +184,13 @@ let rec transform_back = function
     ETuple (transform_bac<span data-count="17">k</span> e1, transform_bac<span data-count="17">k</span> e2, List.ma<span data-count="17">p</span> transform_back els)
 
 and transform_back_decl = function
-  | <span data-count="353">N</span>oPMDLet (rec_flag, (decl, expr)) -&gt;
+  | <span data-count="355">N</span>oPMDLet (rec_flag, (decl, expr)) -&gt;
     let expr = transform_back expr in
-    <span data-count="353">D</span>Let (rec_flag, (decl, expr))
-  | <span data-count="2">N</span>oPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
+    <span data-count="355">D</span>Let (rec_flag, (decl, expr))
+  | <span data-count="3">N</span>oPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
     let applied = tl in
     let res = List.map (fun (pat, e) -&gt; <span data-count="0">p</span>at, transform_bac<span data-count="0">k</span> e) applied in
-    <span data-count="2">D</span>LetMut (rec_flag, (pat, transform_bac<span data-count="2">k</span> expr), (pat1, transform_bac<span data-count="2">k</span> expr1), res)
+    <span data-count="3">D</span>LetMut (rec_flag, (pat, transform_bac<span data-count="3">k</span> expr), (pat1, transform_bac<span data-count="3">k</span> expr1), res)
 ;;
 
 let transform_expr_in_decl f =
