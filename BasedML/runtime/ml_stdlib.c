@@ -70,10 +70,11 @@ int64_t ge_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml
 int64_t l_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == -1); }
 int64_t le_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) <= 0); }
 
-void print_int(int64_t a) {
+int64_t print_int(int64_t a) {
     DEBUG_RUN(if (is_ml_ptr(a)) EXCEPTION_FMT("Debug \"print_int: get boxed arg\""););
     printf("%ld\n", CONVERT_INT_ML_TO_NATIVE(a));
     fflush(stdout);
+    return CONVERT_INT_NATIVE_TO_ML(0);
 }
 
 int64_t lor_ml(int64_t x, int64_t y) { return x || y; };
