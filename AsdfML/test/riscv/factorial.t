@@ -27,13 +27,9 @@
       sd s0,40(sp)
       addi s0,sp,32  # Prologue ends
       sd a0,0(s0)  # x
-      # Creating closure for ml_lt
-      la a0,ml_lt
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      li a2,2
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      li t1,2
+      slt a0,t0,t1  # x ( < ) 2
       sd a0,-8(s0)  # anf1
       ld t0,-8(s0)  # anf1
       beq t0,zero,.else_0
