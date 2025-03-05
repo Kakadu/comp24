@@ -1,3 +1,7 @@
+Some init for riscv
+  $ ln -s ../../runtime/riscv/libffi.so ../../runtime/riscv/libffi.so.8
+
+Other 
   $ ./llvm_demo.exe << EOF
   > let rec fact_cps n cont =
   > if (n = 0) then
@@ -14,11 +18,10 @@
   > let unit_list = map print_fac [1; 2; 3; 4; 5]
   > EOF
 
-
   $ cat out.ll
   ; ModuleID = 'Based_ml'
   source_filename = "Based_ml"
-  target triple = "x86_64-pc-linux-gnu"
+  target triple = "riscv64-unknown-linux-gnu"
   
   @plus_mlint_glob_llvm = global i64 0
   @minus_mlint_glob_llvm = global i64 0
@@ -256,7 +259,16 @@
   }
 
   $ clang-16 out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf
+  warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]
+  1 warning generated.
   $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
+  120
+  24
+  6
+  2
+  1
+
+  $ ./riscv_run.sh  out.ll
   120
   24
   6

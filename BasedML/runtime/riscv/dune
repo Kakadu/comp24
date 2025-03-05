@@ -1,0 +1,42 @@
+(rule
+ (targets libmlrt.so)
+ (deps ffi.h ffitarget.h libffi.so ../ml_runtimelib.c ../ml_runtimelib.h)
+ (action
+  (run
+   clang-16
+   --target=riscv64-linux-gnu
+   -fPIC
+   -shared
+   ../ml_runtimelib.c
+   -I./
+   -L./
+   -lffi
+   -o
+   %{targets}
+   ;  -D DEBUG 
+   )))
+
+(rule
+ (targets libmlstd.so)
+ (deps
+  ffi.h
+  ffitarget.h
+  libffi.so
+  ../ml_stdlib.c
+  ../ml_stdlib.h
+  ../ml_runtimelib.h
+  libmlrt.so)
+ (action
+  (run
+   clang-16
+   --target=riscv64-linux-gnu
+   -fPIC
+   -shared
+   ../ml_stdlib.c
+   -I./
+   -L./
+   -lmlrt
+   -o
+   %{targets}
+   ;  -D DEBUG
+   )))

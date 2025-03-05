@@ -9,7 +9,7 @@ open Middleend.Anf_ast
 let the_context = Llvm.global_context ()
 let the_module = Llvm.create_module the_context "Based_ml";;
 
-Llvm.set_target_triple "x86_64-pc-linux-gnu" the_module
+Llvm.set_target_triple "riscv64-unknown-linux-gnu" the_module
 
 (* let i1_t = Llvm.i1_type context *)
 let i64_t = Llvm.i64_type the_context

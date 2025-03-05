@@ -8,4 +8,8 @@
  (deps
   ./llvm_demo.exe
   ../../runtime/libmlrt.so
-  ../../runtime/libmlstd.so))
+  ../../runtime/libmlstd.so
+  ./riscv_run.sh
+  ../../runtime/riscv/libmlrt.so
+  ../../runtime/riscv/libmlstd.so
+  ../../runtime/riscv/libffi.so))
