@@ -3,20 +3,26 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 module CcLlTests = struct
+  open Common.Counter.R
+
+  let do_cc_ll_test s =
+    let+ actual = Parser.parse_program s in
+    let+ converted = Anf.Cc_ll.closure_convert actual in
+    Format.printf "%a\n" AstLib.Pp_ast.pp_prog converted;
+    Ok ()
+  ;;
+
   let cc_ll_test s =
-    match Parser.parse_program s with
-    | Ok actual ->
-      let prog = Anf.Cc_ll.closure_convert actual in
-      (match prog with
-       | Ok actual -> Format.printf "%a\n" AstLib.Pp_ast.pp_prog actual
-       | Error err -> Format.printf "%s\n" err)
-    | Error err -> Format.printf "%s\n" err
+    match do_cc_ll_test s with
+    | Ok _ -> ()
+    | Error err -> Format.printf "Error: %s\n" err
   ;;
 end
 
 let%expect_test "sanity check" =
   CcLlTests.cc_ll_test {|let foo a = let _ = 5 in 10|};
-  [%expect {|
+  [%expect
+    {|
     let foo a = let _ = 5
     in 10 |}]
 ;;

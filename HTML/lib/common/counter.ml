@@ -38,4 +38,10 @@ module R = struct
     in
     aux [] lst
   ;;
+
+  let ( let+ ) x f =
+    match x with
+    | Error err -> Error err
+    | Ok v -> f v
+  ;;
 end
