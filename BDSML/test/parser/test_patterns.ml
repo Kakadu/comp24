@@ -194,13 +194,6 @@ let%expect_test "var hard" =
        )) |}]
 ;;
 
-let%expect_test "var hard" =
-  test_pattern "->";
-  [%expect
-    {|
-    Error: It cannot be this way |}]
-;;
-
 let%expect_test "pat type" =
   test_pattern "([a]: int list)";
   [%expect

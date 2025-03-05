@@ -20,7 +20,7 @@ let ws1 =
   (skip_ws1 *> many skip_comments <|> many1 skip_comments) *> return ()
 ;;
 
-let remove_parents x = check_char '(' *> x <* check_char ')'
+let remove_parents x = check_char '(' *> ws *> x <* check_char ')'
 let remove_square_brackets x = check_char '[' *> x <* check_char ']'
 
 let is_keyword = function

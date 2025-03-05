@@ -734,7 +734,101 @@
       ))
     ]
   $ dune exec manytests_parser < manytests_link/typed/010sukharev.ml
-  Error: end_of_input
+  [(Str_value (Nonrecursive,
+      [(Val_binding ("_1", [],
+          (Exp_fun (
+             [(Pat_var "x"); (Pat_var "y");
+               (Pat_tuple [(Pat_var "a"); Pat_any])],
+             (Exp_apply (
+                (Exp_apply ((Exp_ident "( = )"),
+                   (Exp_apply (
+                      (Exp_apply ((Exp_ident "( - )"),
+                         (Exp_apply (
+                            (Exp_apply ((Exp_ident "( + )"), (Exp_ident "x"))),
+                            (Exp_ident "y")))
+                         )),
+                      (Exp_ident "a")))
+                   )),
+                (Exp_constant (Const_int 1))))
+             ))
+          ))
+        ]
+      ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("_2", [],
+           (Exp_let (Nonrecursive,
+              [(Pat_binding (
+                  (Pat_tuple
+                     [(Pat_var "x");
+                       (Pat_construct ("Some", (Some (Pat_var "f"))))]),
+                  (Exp_tuple
+                     [(Exp_constant (Const_int 1));
+                       (Exp_construct ("Some",
+                          (Some (Exp_apply ((Exp_ident "( + )"),
+                                   (Exp_constant (Const_int 4)))))
+                          ))
+                       ])
+                  ))
+                ],
+              (Exp_apply ((Exp_ident "f"), (Exp_ident "x")))))
+           ))
+         ]
+       ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("_3", [],
+           (Exp_construct ("Some",
+              (Some (Exp_tuple
+                       [(Exp_constant (Const_int 1));
+                         (Exp_constant (Const_string "hi"))]))
+              ))
+           ))
+         ]
+       ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("_4", [],
+           (Exp_let (Nonrecursive,
+              [(Pat_binding ((Pat_tuple [(Pat_var "a"); Pat_any]),
+                  (Exp_tuple
+                     [(Exp_constant (Const_int 1));
+                       (Exp_constant (Const_int 2));
+                       (Exp_constant (Const_int 3))])
+                  ))
+                ],
+              (Exp_ident "a")))
+           ))
+         ]
+       ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("int_of_option", [],
+           (Exp_function
+              [{ left = (Pat_construct ("Some", (Some (Pat_var "x"))));
+                 right = (Exp_ident "x") };
+                { left = (Pat_construct ("None", None));
+                  right = (Exp_constant (Const_int 0)) }
+                ])
+           ))
+         ]
+       ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("_5", [],
+           (Exp_let (Recursive,
+              [(Val_binding ("f", [(Pat_var "x")],
+                  (Exp_apply ((Exp_ident "f"), (Exp_constant (Const_int 5))))))
+                ],
+              (Exp_ident "f")))
+           ))
+         ]
+       ));
+    (Str_value (Nonrecursive,
+       [(Val_binding ("_42", [],
+           (Exp_function
+              [{ left = (Pat_constant (Const_int 42));
+                 right = (Exp_constant (Const_bool true)) };
+                { left = Pat_any; right = (Exp_constant (Const_bool false)) }])
+           ))
+         ]
+       ))
+    ]
   $ dune exec manytests_parser < manytests_link/typed/015tuples.ml
   [(Str_value (Recursive,
       [(Val_binding ("fix", [(Pat_var "f"); (Pat_var "x")],
