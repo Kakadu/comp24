@@ -16,6 +16,7 @@ depends: [
   "bisect_ppx"
   "odoc" {with-doc}
   "ocamlformat" {build}
+  "llvm" {>= "16.0.0" & < "17.0.0"}
 ]
 build: [
   ["dune" "subst"] {dev}
@@ -32,3 +33,6 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/toadharvard/XaxaML.git"
+depexts: [
+  [ "llvm-16-dev" "clang" "libffi-dev" ] {os-distribution = "ubuntu"}
+]
