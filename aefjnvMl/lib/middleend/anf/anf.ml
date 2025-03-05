@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Anf_ast
-open Ll_ast
+open Ll_conversion.Ll_ast
 open Match_elimination.Me_ast
 
 module Name_id = struct

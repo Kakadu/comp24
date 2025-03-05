@@ -17,9 +17,10 @@ let () =
     let* ast' = ok @@ Middleend.Closure_conversion.convert_program ast' in
     let* ast' = Alpha_converter.rename_ast_with_uniq cc_prefix ast' in
     let ast' =
-      let+! m_ast = Match_elimination.Match_elim.eliminate_match_in_program ast' in
+      let open Match_elimination in
+      let+! m_ast = Match_elim.eliminate_match_in_program ast' in
       let m_ast' = Optimizations.optimize m_ast in
-      Match_elimination.Me_converter.convert_program m_ast'
+      Me_converter.convert_program m_ast'
     in
     ast'
   in

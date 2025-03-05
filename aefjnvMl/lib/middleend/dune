@@ -4,11 +4,7 @@
  (modules
   closure_conversion
   alpha_converter
-  ll_ast
-  middleend_pp
-  anf
-  anf_ast
-  optimizations)
+  middleend_pp)
  (libraries base common match_elimination str)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
