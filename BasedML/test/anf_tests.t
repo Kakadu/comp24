@@ -638,7 +638,7 @@
   anf_app_0;;
   let  funct_1 a_2 = let anf_app_0 = ( + ) 500 a_2 in
   anf_app_0;;
-  let  res  = let anf_app_0 = g_0 5  in
+  let  res0  = let anf_app_0 = g_0 5  in
   let anf_app_1 = print_int anf_app_0  in
   let anf_app_2 = ( = ) anf_app_1 () in
   let anf_ifthenelse_5 = if anf_app_2 then let anf_tuple_3 = () in
@@ -673,8 +673,8 @@
   > let ( + ) a b = a - b
   > let test_var = test (5 + 5) (6 + 6) (7 + 7)
   > EOF
-  let  res  = let anf_tuple_0 = () in
-  anf_tuple_0;;
+  let  global_wildcard0  = let anf_app_0 = ( + ) unbound_b_0 unbound_a_0 in
+  anf_app_0;;
   let  ( + )_0 a_0 b_0 = let anf_app_0 = ( - ) a_0 b_0 in
   anf_app_0;;
   let  test_var_0  = let anf_app_0 = ( + )_0 7 7 in
@@ -715,3 +715,36 @@
   let  ll_1 x_0 = x_0;;
   let  map_0 f_0 l_0 = let anf_app_0 = map_cps_0 f_0 l_0 ll_1 in
   anf_app_0;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let _ = print_int 5
+  > let _ = print_int 6
+  > EOF
+  let  global_wildcard0  = let anf_app_0 = print_int 5  in
+  anf_app_0;;
+  let  global_wildcard1  = let anf_app_0 = print_int 6  in
+  anf_app_0;;
+
+  $ dune exec ./anf_demo.exe << EOF
+  > let h :: tl = 5 :: [6]
+  > let head :: tail = 5 :: [6]
+  > EOF
+  let  res0  = let h_0_0 = 5 in
+  let anf_app_0 = ( :: ) 6 [] in
+  let tl_0_0 = anf_app_0 in
+  let anf_tuple_1 = (tl_0_0, h_0_0) in
+  anf_tuple_1;;
+  let  tl_0  = let anf_app_0 = get_field res0 0 in
+  anf_app_0;;
+  let  h_0  = let anf_app_0 = get_field res0 1 in
+  anf_app_0;;
+  let  res1  = let head_0_0 = 5 in
+  let anf_app_0 = ( :: ) 6 [] in
+  let tail_0_0 = anf_app_0 in
+  let anf_tuple_1 = (tail_0_0, head_0_0) in
+  anf_tuple_1;;
+  let  tail_0  = let anf_app_0 = get_field res1 0 in
+  anf_app_0;;
+  let  head_0  = let anf_app_0 = get_field res1 1 in
+  anf_app_0;;
+

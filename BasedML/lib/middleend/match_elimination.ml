@@ -309,7 +309,16 @@ let rec eliminate_match_in_declarations acc = function
       LLLet (PIdentifier id, fresh_ids, match_free_exp) |> return
     in
     eliminate_match_in_declarations (LLDSingleLet (flag, new_let) :: acc) tl
+  | LLDSingleLet (flag, LLLet (PWildCard, [], llexpr)) :: tl ->
+    let* name, counter = generate_unique_name "global_wildcard" 0 in
+    let new_name = name ^ string_of_int counter in
+    let* eliminated_llexpr = eliminate_lexpr llexpr in
+    eliminate_match_in_declarations
+      (LLDSingleLet (flag, LLLet (PIdentifier new_name, [], eliminated_llexpr)) :: acc)
+      tl
   | LLDSingleLet (flag, LLLet (arbitrary_pattern, [], llexpr)) :: tl ->
+    let* name, counter = generate_unique_name "res" 0 in
+    let new_name = name ^ string_of_int counter in
     let rec after_let_helper acc counter = function
       | [] -> List.rev acc
       | h :: tl ->
@@ -320,7 +329,7 @@ let rec eliminate_match_in_declarations acc = function
                 ( PIdentifier h
                 , []
                 , LLApplication
-                    ( LLApplication (LLIdentifier "get_field", LLIdentifier "res")
+                    ( LLApplication (LLIdentifier "get_field", LLIdentifier new_name)
                     , LLConstant (CInt counter) ) ) )
         in
         after_let_helper (new_elem :: acc) (counter + 1) tl
@@ -342,7 +351,7 @@ let rec eliminate_match_in_declarations acc = function
       (List.append
          (List.append
             additional_lets
-            [ LLDSingleLet (flag, LLLet (PIdentifier "res", [], new_body)) ])
+            [ LLDSingleLet (flag, LLLet (PIdentifier new_name, [], new_body)) ])
          acc)
       tl
   | LLDMutualRecDecl (Rec, lets) :: tl ->
