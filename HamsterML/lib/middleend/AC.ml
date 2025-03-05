@@ -105,14 +105,18 @@ let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
 let rec convert_bind (env : NameEnv.t) ((name, args, body) : bind) =
   let* old_env, new_name = convert_arg_pattern env name let_prefix in
   let* args_env, ac_args = collect_args old_env args in
-  (* ! Здесь тоже имена bind ! *)
   let* env, ac_body = convert_expr args_env body in
   let env = NameEnv.sub env args_env in
   let env = NameEnv.union env old_env in
   return (env, ((new_name, ac_args, ac_body) : bind))
 
 and convert_expr (env : NameEnv.t) = function
-  | (EConst _ | EOperation _) as orig -> return (env, orig)
+  | (EConst _ | EOperation (Unary _)) as orig -> return (env, orig)
+  | EOperation (Binary op as bop) ->
+    let op_id = BinOperator.to_string op in
+    (match NameEnv.find op_id env with
+     | Some new_id -> return (env, EVar new_id)
+     | None -> return (env, EOperation bop))
   | EVar id ->
     (match NameEnv.find id env with
      | Some new_id -> return (env, EVar new_id)
@@ -143,5 +147,41 @@ and convert_expr (env : NameEnv.t) = function
      | Some scope ->
        let* env, ac_scope = convert_expr env scope in
        return (env, Let (rec_flag, new_binds, Some ac_scope)))
-  | _ -> failwith "Illegal expression was encountered during Alpha Conversion"
+  | EList exprs ->
+    let* ac_exprs =
+      map_list exprs ~f:(fun expr -> convert_expr env expr >>| fun (_, expr) -> expr)
+    in
+    return (env, EList ac_exprs)
+  | EListConcat (l, r) ->
+    let* _, ac_l = convert_expr env l in
+    let* _, ac_r = convert_expr env r in
+    return (env, EListConcat (ac_l, ac_r))
+  | ETuple (a, b, tl) ->
+    let* _, ac_a = convert_expr env a in
+    let* _, ac_b = convert_expr env b in
+    let* ac_tl =
+      map_list tl ~f:(fun expr -> convert_expr env expr >>| fun (_, expr) -> expr)
+    in
+    return (env, ETuple (ac_a, ac_b, ac_tl))
+  | EConstraint (expr, dt) ->
+    let* _, ac_expr = convert_expr env expr in
+    return (env, EConstraint (ac_expr, dt))
+  | If (_if, _then, _else) ->
+    let* _, ac_if = convert_expr env _if in
+    let* _, ac_then = convert_expr env _then in
+    (match _else with
+     | Some _else ->
+       let* _, ac_else = convert_expr env _else in
+       return (env, If (ac_if, ac_then, Some ac_else))
+     | None -> return (env, If (ac_if, ac_then, None)))
+  | Match (expr, cases) ->
+    let* _, ac_expr = convert_expr env expr in
+    let* ac_cases =
+      fold_list cases ~init:[] ~f:(fun acc (p, expr) ->
+        let* env, ac_p = convert_pattern env arg_prefix p in
+        let* _, ac_expr = convert_expr env expr in
+        return (((ac_p, ac_expr) : case) :: acc))
+    in
+    let ac_cases = List.rev ac_cases in
+    return (env, Match (ac_expr, ac_cases))
 ;;

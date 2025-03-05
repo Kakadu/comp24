@@ -62,3 +62,54 @@ let%test _ =
         ]
       , None )
 ;;
+
+let%test _ =
+  alpha_conv_expr "let rec f a b = let g a b = f a b in g a b"
+  = Let
+      ( Recursive
+      , [ ( Var "var_1"
+          , [ Var "arg_2"; Var "arg_3" ]
+          , Let
+              ( Nonrecursive
+              , [ ( Var "var_4"
+                  , [ Var "arg_5"; Var "arg_6" ]
+                  , Application (Application (EVar "var_1", EVar "arg_5"), EVar "arg_6") )
+                ]
+              , Some
+                  (Application (Application (EVar "var_4", EVar "arg_2"), EVar "arg_3"))
+              ) )
+        ]
+      , None )
+;;
+
+let%test _ =
+  alpha_conv_expr "let (+) a b = a - b"
+  = Let
+      ( Nonrecursive
+      , [ ( Var "var_0"
+          , [ Var "arg_1"; Var "arg_2" ]
+          , Application (Application (EOperation (Binary SUB), EVar "arg_1"), EVar "arg_2")
+          )
+        ]
+      , None )
+;;
+
+let%test _ =
+  alpha_conv_expr "let z x y = let (+) a b = a - b in x + y"
+  = Let
+      ( Nonrecursive
+      , [ ( Var "var_0"
+          , [ Var "arg_1"; Var "arg_2" ]
+          , Let
+              ( Nonrecursive
+              , [ ( Var "var_3"
+                  , [ Var "arg_4"; Var "arg_5" ]
+                  , Application
+                      (Application (EOperation (Binary SUB), EVar "arg_4"), EVar "arg_5")
+                  )
+                ]
+              , Some (Application (Application (EVar "var_3", EVar "arg_1"), EVar "arg_2"))
+              ) )
+        ]
+      , None )
+;;
