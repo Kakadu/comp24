@@ -3,28 +3,28 @@
   val fac : int -> int
   val main : int
   Types after modifications:
+  val a1 : int
   val fac : int -> int
-  val main : int
   Modified ast:
   let rec fac = (fun n -> if ((<= n) 1)
   then 1
   else ((* n) (fac ((- n) 1))))
   
-  let main = let () = (print_int (fac 4)) in
+  let a1 = let a0 = (print_int (fac 4)) in
   0
   $ ./run_closure_conversion.exe < manytests/typed/002fac.ml
   Types before modifications:
   val fac_cps : int -> (int -> 'a) -> 'a
   val main : int
   Types after modifications:
+  val a1 : int
   val fac_cps : int -> (int -> 'a) -> 'a
-  val main : int
   Modified ast:
   let rec fac_cps = (fun n k -> if ((= n) 1)
   then (k 1)
   else ((fac_cps ((- n) 1)) (((fun k n p -> (k ((* p) n))) k) n)))
   
-  let main = let () = (print_int ((fac_cps 4) (fun a0 -> a0))) in
+  let a1 = let a0 = (print_int ((fac_cps 4) (fun a2 -> a2))) in
   0
 
   $ ./run_closure_conversion.exe << EOF 
