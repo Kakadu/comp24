@@ -274,7 +274,7 @@ module TypecheckerTests = struct
 
   let pp_parse_and_infer input =
     match Parser.parse_decl input with
-    | Result.Ok (decl :: _) -> pp_infer decl
+    | Result.Ok decl -> pp_infer decl
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -495,7 +495,7 @@ module CCTests = struct
 
   let pp_parse_and_cc input =
     match Parser.parse_decl input with
-    | Result.Ok (e :: _) -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
+    | Result.Ok e -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
