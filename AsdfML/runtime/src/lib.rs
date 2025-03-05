@@ -1,4 +1,5 @@
 #![feature(box_as_ptr)]
+#![feature(stmt_expr_attributes)]
 #![allow(clippy::missing_safety_doc)]
 
 use log::LevelFilter;
