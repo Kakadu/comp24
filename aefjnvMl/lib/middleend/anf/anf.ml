@@ -26,7 +26,7 @@ type bind = ABind of string id_t * cexpr
 let new_me_name =
   let open Common.Naming in
   let+ num = fresh in
-  Name (with_pref anf_prefix @@ Int.to_string num)
+  Id_name (with_pref anf_prefix @@ Int.to_string num)
 ;;
 
 let const_to_immexpr =
@@ -56,8 +56,8 @@ let check_rlist_invariant = function
 ;;
 
 let is_global = function
-  | Unit -> return false
-  | Name id ->
+  | Id_unit -> return false
+  | Id_name id ->
     let+ nm_space = read in
     (match GlobalSet.find_opt id nm_space with
      | Some _ -> true
@@ -70,15 +70,15 @@ let save_global nm =
   | true -> fail "Impossible case"
   | false ->
     (match nm with
-     | Name nm ->
+     | Id_name nm ->
        let* nm_space = read in
        save @@ GlobalSet.add nm nm_space
-     | Unit -> return ())
+     | Id_unit -> return ())
 ;;
 
 let to_scoped_common builder = function
-  | Unit -> Unit
-  | Name v -> Name (builder v)
+  | Id_unit -> Id_unit
+  | Id_name v -> Id_name (builder v)
 ;;
 
 let to_local id = to_scoped_common (fun x -> Local_name x) id
@@ -97,7 +97,7 @@ let to_scoped id =
 let rec to_immexpr : ll_expr -> (bind list * immexpr) t = function
   | LL_const v -> return ([], const_to_immexpr v)
   | LL_ident id ->
-    let+ id' = to_scoped (Name id) in
+    let+ id' = to_scoped (Id_name id) in
     [], id_to_immexpr id'
   | expr ->
     let* id = new_me_name in
@@ -110,7 +110,7 @@ and to_cexpr : ll_expr -> (bind list * cexpr) t =
   function
   | LL_const v -> return ([], C_immexpr (const_to_immexpr v))
   | LL_ident id ->
-    let+ id' = to_scoped (Name id) in
+    let+ id' = to_scoped (Id_name id) in
     [], C_immexpr (id_to_immexpr id')
   | LL_let (id, expr, in') ->
     let* e_binds, cexpr = to_cexpr expr in
@@ -148,7 +148,7 @@ and to_cexpr : ll_expr -> (bind list * cexpr) t =
       helper arg [] f
     in
     let extract_name_from_imm = function
-      | Imm_id (Name id) -> return id
+      | Imm_id (Id_name id) -> return id
       | _ ->
         fail "Apply left part expects 0 argument(s), but is applied here to 1 argument(s)"
     in
@@ -190,12 +190,13 @@ let to_anf_decl = function
     (match r_flag, ll_fun'l with
      | Nonrecursive, [] ->
        let* anf_fun = to_func ll_fun in
-       let+ () = save_global (Name ll_fun.lldec_name) in
+       let+ () = save_global (Id_name ll_fun.lldec_name) in
        A_NonrecDecl anf_fun
      | Nonrecursive, _ -> fail "With [and] supports only rec funcs"
      | Recursive, ll_fun'l ->
        let* _ =
-         mapt (ll_fun :: ll_fun'l) (fun { lldec_name } -> save_global (Name lldec_name))
+         mapt (ll_fun :: ll_fun'l) (fun { lldec_name } ->
+           save_global (Id_name lldec_name))
        in
        let* anf_fun = to_func ll_fun in
        let+ anf_fun'l = mapt ll_fun'l to_func in

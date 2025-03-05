@@ -3,8 +3,8 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 type 'a id_t =
-  | Name of 'a
-  | Unit
+  | Id_name of 'a
+  | Id_unit
 
 type m_expr =
   | MExp_constant of Common.Ast.const

@@ -79,11 +79,11 @@ let rec to_ll_expr = function
     (match vb'l with
      | vb :: [] ->
        (match vb.m_vb_pat, vb.m_vb_expr with
-        | Name func_name, MExp_function (arg, body) ->
+        | Id_name func_name, MExp_function (arg, body) ->
           let* func = lift_lambda func_name (arg, body) in
           let* () = save_toplevel_decl r_flag func [] in
           to_ll_expr cont
-        | Unit, MExp_function _ -> fail "Impossible case (1)"
+        | Id_unit, MExp_function _ -> fail "Impossible case (1)"
         | _, not_function ->
           let* ll_bind = to_ll_expr not_function in
           let+ ll_cont = to_ll_expr cont in
@@ -105,7 +105,7 @@ and lift_lambda name (arg, row_body) =
 
 and lift_vb vb =
   match vb.m_vb_pat, vb.m_vb_expr with
-  | Name func_name, MExp_function (arg, body) -> lift_lambda func_name (arg, body)
+  | Id_name func_name, MExp_function (arg, body) -> lift_lambda func_name (arg, body)
   | _ -> fail "And can be used only with mutualrec cases [func and func and ... and func]"
 ;;
 
@@ -114,10 +114,10 @@ let to_ll_structure_item_reversed (MDecl (r_flag, vb'l)) =
     match vb'l with
     | vb :: [] ->
       (match vb.m_vb_pat, vb.m_vb_expr with
-       | Name func_name, MExp_function (arg, body) ->
+       | Id_name func_name, MExp_function (arg, body) ->
          let+ func = lift_lambda func_name (arg, body) in
          LL_Decl (r_flag, func, [])
-       | Unit, MExp_function _ -> fail "Impossible case (1)"
+       | Id_unit, MExp_function _ -> fail "Impossible case (1)"
        | _, not_function ->
          let+ ll_bind = to_ll_expr not_function in
          LL_GlobalV (vb.m_vb_pat, ll_bind))
