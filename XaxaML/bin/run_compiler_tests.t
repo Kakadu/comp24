@@ -250,3 +250,15 @@
   2
   3
   8
+
+FIBONACCI CPS
+  $ ./compiler.exe << EOF
+  > let rec fib n k =
+  >   if n < 2
+  >   then k n
+  >   else fib (n - 1) (fun a -> fib (n - 2) (fun b -> k (a + b)))
+  > 
+  > let main = print_int(fib 6 (fun x -> x))
+  $ clang-16 -lstdc++ -std=c++17 -lffi out.ll runtime.o -o a.out
+  $ ./a.out
+  8
