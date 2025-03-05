@@ -138,7 +138,7 @@ let parse_bindings pexpr =
     (many (pstoken "and" *> parse_binding pexpr))
 ;;
 
-let plet_decl_single pexpr =
+let plet_decl pexpr =
   pstoken "let"
   *> lift2
        (fun r bindings ->
@@ -148,8 +148,6 @@ let plet_decl_single pexpr =
        (choice [ pstoken "rec" *> return Rec; return NonRec ])
        (parse_bindings pexpr)
 ;;
-
-let plet_decl pexpr = many1 (plet_decl_single pexpr)
 
 let plet_in pexpr =
   pstoken "let"
@@ -286,7 +284,4 @@ let pexpr_fun () =
 let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-
-let parse =
-  parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces >>| List.concat)
-;;
+let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)

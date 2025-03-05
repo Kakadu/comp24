@@ -15,17 +15,9 @@ module ParserTests = struct
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
-  let pp_decl_list ppf decls =
-    Stdlib.Format.pp_print_list
-      ~pp_sep:(fun ppf () -> Stdlib.Format.fprintf ppf "\n")
-      pp_decl
-      ppf
-      decls
-  ;;
-
   let parse_and_pp_decl input =
     match parse_decl input with
-    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl_list res
+    | Result.Ok res -> Stdlib.Format.printf "%a" pp_decl res
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -341,7 +333,7 @@ module TypecheckerTests = struct
 
   let pp_parse_and_infer input =
     match Parser.parse_decl input with
-    | Result.Ok (decl :: _) -> pp_infer decl
+    | Result.Ok decl -> pp_infer decl
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
@@ -567,7 +559,7 @@ module CCTests = struct
 
   let pp_parse_and_cc input =
     match Parser.parse_decl input with
-    | Result.Ok (e :: _) -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
+    | Result.Ok e -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
     | _ -> Stdlib.print_endline "Failed to parse"
   ;;
 
