@@ -10,6 +10,8 @@ val me_prefix : string
 val cc_prefix : string
 val ll_prefix : string
 val runtime_prefix : string
+val anf_prefix : string
+val with_pref : string -> string -> string
 
 (* runtime naming *)
 val rt_'print_int' : string

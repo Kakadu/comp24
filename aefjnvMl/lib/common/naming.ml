@@ -6,8 +6,13 @@ let alpha_prefix = "ac"
 let cc_prefix = "cc"
 let me_prefix = "me"
 let ll_prefix = "ll"
+let anf_prefix = "nf"
 let runtime_prefix = "rt"
-let reserved_prefs = [ alpha_prefix; me_prefix; cc_prefix; ll_prefix; runtime_prefix ]
+let with_pref pref name = pref ^ "_" ^ name
+
+let reserved_prefs =
+  [ alpha_prefix; me_prefix; cc_prefix; ll_prefix; anf_prefix; runtime_prefix ]
+;;
 
 (* runtime lib *)
 let rt_func name = runtime_prefix ^ "_" ^ name
