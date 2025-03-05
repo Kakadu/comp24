@@ -1,8 +1,4 @@
 (library
  (name typing)
  (public_name BDSML.Typing)
- (libraries base BDSML.Parser BDSML.Utils)
- (preprocess
-  (pps ppx_deriving.show ppx_deriving.eq))
- (instrumentation
-  (backend bisect_ppx)))
+ (libraries base BDSML.Parser))

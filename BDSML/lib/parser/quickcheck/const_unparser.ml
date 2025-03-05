@@ -10,4 +10,5 @@ let unparse_const ppf = function
   | Const_char c -> fprintf ppf "\'%c\'" c
   | Const_string s -> fprintf ppf "\"%s\"" s
   | Const_bool s -> fprintf ppf "%s" @@ if s then "true" else "false"
+  | Const_unit -> fprintf ppf "()"
 ;;

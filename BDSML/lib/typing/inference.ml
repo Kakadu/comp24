@@ -102,6 +102,7 @@ let infer_base_type c =
     | Const_char _ -> TChar
     | Const_string _ -> TString
     | Const_bool _ -> TBool
+    | Const_unit -> TUnit
   in
   return (Subst.empty, TBase (const_to_type c))
 ;;
