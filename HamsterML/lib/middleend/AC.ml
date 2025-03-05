@@ -181,7 +181,8 @@ and convert_expr (env : NameEnv.t) = function
     return (env, Match (ac_expr, ac_cases))
 ;;
 
-let convert_prog (env : NameEnv.t) (prog : prog) : prog t =
+let convert_prog (prog : prog) : prog t =
+  let env = NameEnv.empty in
   let* _, ac_prog =
     fold_list prog ~init:(env, []) ~f:(fun (env, acc) expr ->
       let* env, ac_expr = convert_expr env expr in

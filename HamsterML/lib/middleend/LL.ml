@@ -30,7 +30,7 @@ module NameSet = struct
 
   let rec generate_name (set : t) =
     let* fresh_num = fresh in
-    let varname = "LL_arg_" ^ Int.to_string fresh_num in
+    let varname = "ll_arg_" ^ Int.to_string fresh_num in
     match find varname set with
     | None -> return (extend varname set, varname)
     | Some _ -> generate_name set
@@ -44,7 +44,7 @@ module NameEnv = struct
     match find name env with
     | None ->
       let* fresh_num = fresh in
-      let new_name = "LL_fun_" ^ Int.to_string fresh_num in
+      let new_name = "ll_var_" ^ Int.to_string fresh_num in
       (match find new_name env with
        | None -> return (extend (name, new_name) env, new_name)
        | Some _ -> generate_name env name)

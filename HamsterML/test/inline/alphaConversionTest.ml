@@ -15,7 +15,7 @@ let alpha_conv_expr (s : string) =
 ;;
 
 let alpha_conv_prog (s : string) =
-  let res = HamsterML.Utils.R.run (convert_prog NameEnv.empty (parse_prog s)) in
+  let res = HamsterML.Utils.R.run (convert_prog (parse_prog s)) in
   res
 ;;
 
