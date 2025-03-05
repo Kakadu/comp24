@@ -149,69 +149,12 @@ module MonadCounter = struct
       let* acc = acc in
       f acc x)
   ;;
-end
-
-module MonadCounterError = struct
-  open Base
-
-  type ('a, 'e) t = bindings * int -> bindings * int * ('a, 'e) Result.t
-
-  let return x (binds, var) = binds, var, Result.return x
-  let fail e (binds, var) = binds, var, Result.fail e
-
-  let fresh (binds, var) =
-    let rec helper num = if contains binds num then helper (num + 1) else num in
-    let next = helper var in
-    binds, next + 1, Result.return next
-  ;;
-
-  let ( >>= ) (m : ('a, 'e) t) (f : 'a -> ('b, 'e) t) : ('b, 'e) t =
-    fun tup ->
-    match m tup with
-    | binds, var, Result.Error err -> binds, var, Result.fail err
-    | binds, var, Result.Ok x -> f x (binds, var)
-  ;;
-
-  let bind = ( >>= )
-
-  let ( >>| ) (m : ('a, 'e) t) (f : 'a -> 'b) : ('b, 'e) t =
-    fun tup ->
-    match m tup with
-    | binds, var, Result.Error err -> binds, var, Result.fail err
-    | binds, var, Result.Ok x -> binds, var, Result.return (f x)
-  ;;
-
-  let ( let* ) = bind
-
-  let fold mp ~init ~f =
-    Map.fold mp ~init ~f:(fun ~key:k ~data:v acc ->
-      let* acc = acc in
-      f acc k v)
-  ;;
-
-  let fold_left xs ~init ~f =
-    List.fold_left xs ~init ~f:(fun acc x ->
-      let* acc = acc in
-      f acc x)
-  ;;
 
   let fold_right xs ~init ~f =
     List.fold_right xs ~init ~f:(fun x acc ->
       let* acc = acc in
       f x acc)
   ;;
-
-  let map (xs : 'a list) ~(f : 'a -> ('b, 'e) t) : ('b list, 'e) t =
-    let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
-        let* acc = acc in
-        let* x = f x in
-        return (x :: acc))
-    in
-    return @@ List.rev xs
-  ;;
-
-  let run m binds init = m (binds, init)
 end
 
 let builtins =
@@ -239,5 +182,4 @@ let builtins =
 
 let empty = Base.Map.empty (module Base.String)
 let get_id i = "a" ^ Int.to_string i
-
 let make_apply op expr1 expr2 = PEEApp (PEEApp (PEEVar op, expr1), expr2)
