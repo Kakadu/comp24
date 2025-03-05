@@ -226,3 +226,53 @@ $ cat /tmp/tuples.s
   2
   3
 
+  $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
+  > let tuple = (1, (2, 3))
+  > let (a, (b, c)) = tuple
+  > let main = 
+  >   let _ = println_int a in
+  >   let _ = println_int b in
+  >   let _ = println_int c in
+  >   0
+  > EOF
+  ANF:
+  let tuple = (1, (2, 3))
+  let __temp_match_0 = tuple
+  let __tuple_0 = __temp_match_0
+  let a = `get_tuple_field __tuple_0 0
+  let __tuple_1 = `get_tuple_field __tuple_0 1
+  let b = `get_tuple_field __tuple_1 0
+  let c = `get_tuple_field __tuple_1 1
+  let main =
+    let anf4 = println_int a in
+    let anf5 = println_int b in
+    let anf6 = println_int c in
+    0
+  
+  init_tuple ANF:
+  let init_tuple _ = (1, (2, 3))
+  
+  init___temp_match_0 ANF:
+  let init___temp_match_0 _ = tuple
+  
+  init___tuple_0 ANF:
+  let init___tuple_0 _ = __temp_match_0
+  
+  init_a ANF:
+  let init_a _ = `get_tuple_field __tuple_0 0
+  
+  init___tuple_1 ANF:
+  let init___tuple_1 _ = `get_tuple_field __tuple_0 1
+  
+  init_b ANF:
+  let init_b _ = `get_tuple_field __tuple_1 0
+  
+  init_c ANF:
+  let init_c _ = `get_tuple_field __tuple_1 1
+  
+$ cat /tmp/tuples.s
+  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ /tmp/tuples
+  1
+  2
+  3

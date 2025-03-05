@@ -54,14 +54,8 @@ and gen_imm fn_args (env : (id, loc, 'a) Map.t) dest
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
   | ImmId id ->
-    (* dbg "FN_ARGS: %s\n" (pp_fn_args fn_args);
-       dbg "ENV: %s\n" (pp_env env);
-       dbg "lookup %s = %b\n" id (Map.find fn_args id |> Option.is_some); *)
     let id = Std.lookup_extern id |> Option.value ~default:id in
     (match Map.find fn_args id with
-     (* | Some 0 ->
-        emit_load_reg dest (RFn id);
-        emit_load_reg dest (ROffset (dest, 0)) *)
      | Some 0 ->
        (* TODO: ?! *)
        (match Map.find env id with
