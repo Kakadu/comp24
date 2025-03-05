@@ -11,17 +11,16 @@ open Match_elimination.Me_ast
 
 type ll_expr =
   | LL_const of Common.Ast.const
-  | LL_ident of Common.Ast.ident
-  | LL_tuple of ll_expr list
-  | LL_apply of ll_expr * ll_expr
-  | LL_list of ll_expr * ll_expr
+  | LL_ident of me_ident
+  | LL_let of me_ident * ll_expr * ll_expr
   | LL_ifthenelse of ll_expr * ll_expr * ll_expr
-  | LL_let of ll_bind * ll_expr
-
-and ll_bind = me_ident * ll_expr
+  | LL_tuple of ll_expr list
+  | LL_list of ll_expr * ll_expr
+  (*  *)
+  | LL_apply of ll_expr * ll_expr
 
 type ll_fun =
-  { lldec_name : me_ident
+  { lldec_name : string
   ; lldec_args : me_ident * me_ident list
   ; lldec_body : ll_expr
   }
