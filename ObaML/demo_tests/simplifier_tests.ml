@@ -9,7 +9,9 @@ let () =
   match Parser.structure_from_string s with
   | Ok structure ->
     (match Inferencer.run_structure_infer structure with
-     | Ok env -> Format.printf "%a" Inferencer.TypeEnv.pretty_pp_env (Std.std_lst, env)
-     | Error err -> Format.printf "Infer: %a" Typedtree.pp_error err)
+     | Ok _ ->
+       let simple_structure = To_simple_ast.convert structure in
+       Format.printf "%a" Simple_ast_pretty_printer.print_structure simple_structure
+     | Error e -> Format.printf "Infer: %a" Typedtree.pp_error e)
   | Error err -> Format.printf "Parser: %s\n" err
 ;;

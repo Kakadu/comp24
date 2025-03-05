@@ -5,7 +5,14 @@
 module TypeEnv : sig
   type t
 
-  val pretty_pp_env : Format.formatter -> t -> unit
+  (** @param std: (string * Typedtree.scheme) list *)
+  val pretty_pp_env : Format.formatter -> (string * Typedtree.scheme) list * t -> unit
 end
 
-val run_stucture_infer : Ast.structure -> (TypeEnv.t, Typedtree.error) result
+(** @param std: (string * Typedtree.scheme) list *)
+val run_structure_infer_with_custom_std
+  :  Ast.structure
+  -> (string * Typedtree.scheme) list
+  -> (TypeEnv.t, Typedtree.error) result
+
+val run_structure_infer : Ast.structure -> (TypeEnv.t, Typedtree.error) result
