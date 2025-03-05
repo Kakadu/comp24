@@ -128,12 +128,12 @@ let to_ll_structure_item_reversed (MDecl (r_flag, vb'l)) =
     | [] -> fail "Impossible case (2)"
   in
   let+ lifted_rdecls = remove_saved_rdecls in
-  ll_str :: lifted_rdecls
+  List.rev @@ (ll_str :: lifted_rdecls)
 ;;
 
 let to_ll_program prog =
   let+ reversed_ll_str'l'l = mapt prog to_ll_structure_item_reversed in
-  List.rev @@ List.concat @@ reversed_ll_str'l'l
+  List.concat @@ reversed_ll_str'l'l
 ;;
 
 let lift_lambdas prog =
