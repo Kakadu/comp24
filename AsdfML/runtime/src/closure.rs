@@ -1,14 +1,41 @@
-use std::cmp::Ordering;
+use core::panic;
+use std::{
+    cmp::Ordering,
+    ffi::c_void,
+    fmt::{self, Debug, Formatter},
+};
 
+use backtrace::{self, Symbol};
 use log::debug;
 
 use crate::Tuple;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Closure {
     pub(crate) fn_ptr: *const fn(),
     pub(crate) arity: usize,
     pub(crate) args: Vec<isize>,
+}
+
+impl Debug for Closure {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut fn_name = None;
+        backtrace::resolve(self.fn_ptr as *mut c_void, |symbol: &Symbol| {
+            fn_name = symbol.name().map(|name| name.to_string());
+        });
+        let fn_info = match fn_name {
+            Some(name) => format!("{:?} ({})", &self.fn_ptr, name),
+            None => format!("{:?}", self.fn_ptr),
+        };
+
+        let args_info = format!("dec{:?} / hex{:x?}", self.args, self.args);
+
+        f.debug_struct("Closure")
+            .field("fn_ptr", &format_args!("{}", fn_info))
+            .field("arity", &self.arity)
+            .field("args", &format_args!("{}", args_info))
+            .finish()
+    }
 }
 
 type Fn1 = fn(isize) -> isize;
@@ -19,11 +46,6 @@ type Fn5 = fn(isize, isize, isize, isize, isize) -> isize;
 type Fn6 = fn(isize, isize, isize, isize, isize, isize) -> isize;
 type Fn7 = fn(isize, isize, isize, isize, isize, isize, isize) -> isize;
 type Fn8 = fn(isize, isize, isize, isize, isize, isize, isize, isize) -> isize;
-
-// TODO:
-// - types (i/u size) + in lib
-// - shitcode with apply_closure
-// - pass args as tuple?
 
 #[no_mangle]
 pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Closure {
@@ -37,104 +59,78 @@ pub extern "C" fn create_closure(fn_ptr: *const fn(), arity: usize) -> *mut Clos
 }
 
 fn apply_closure(closure: &mut Closure) -> Option<isize> {
-    debug!("Applying {:?} / Hex args: {:x?}", closure, closure.args);
+    debug!("Applying {:?}", closure);
     match closure.args.len().cmp(&closure.arity) {
         Ordering::Less => {
             debug!("Not enough args");
-            return None;
+            None
         }
         Ordering::Greater => {
-            panic!(
-                "Applied {} args to closure with arity {}",
-                closure.args.len(),
-                closure.arity
-            )
+            let rest = closure.args.split_off(closure.arity);
+            debug!("Too many args, {:?} goes to next closure", rest);
+            if let Some(res) = apply_closure(closure) {
+                let mut new_closure = unsafe { Box::from_raw(res as *mut Closure) };
+                new_closure.args.extend(rest);
+                apply_closure(&mut new_closure)
+            } else {
+                panic!("Closure does not returned a value");
+            }
         }
-        Ordering::Equal => {}
+        Ordering::Equal => {
+            let res = match closure.arity {
+                1 => {
+                    let func: Fn1 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    func(closure.args[0])
+                }
+                2 => {
+                    let func: Fn2 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    func(closure.args[0], closure.args[1])
+                }
+                3 => {
+                    let func: Fn3 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    func(closure.args[0], closure.args[1], closure.args[2])
+                }
+                4 => {
+                    let func: Fn4 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    func(closure.args[0], closure.args[1], closure.args[2], closure.args[3])
+                }
+                5 => {
+                    let func: Fn5 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    #[rustfmt::skip]
+                    func(closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4])
+                }
+                6 => {
+                    let func: Fn6 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    #[rustfmt::skip]
+                    func(closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4], closure.args[5] )
+                }
+                7 => {
+                    let func: Fn7 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    #[rustfmt::skip]
+                    func(closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4], closure.args[5], closure.args[6])
+                }
+                8 => {
+                    let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    #[rustfmt::skip]
+                    func(closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4], closure.args[5], closure.args[6], closure.args[7])
+                }
+                9.. => {
+                    let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
+                    let rest = Box::new(closure.args.split_off(7));
+                    #[rustfmt::skip]
+                    let res = func(
+                        closure.args[0], closure.args[1], closure.args[2], closure.args[3], closure.args[4], closure.args[5], closure.args[6],
+                        (Box::as_ptr(&rest)) as isize,
+                    );
+                    let _ = Box::into_raw(rest);
+                    res
+                }
+                _ => panic!("Unsupported arity: {}", closure.arity),
+            };
+            debug!("Closure result: {} / {:#x}", res, res);
+            Some(res)
+        }
     }
-    let res = match closure.arity {
-        1 => {
-            let func: Fn1 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(closure.args[0])
-        }
-        2 => {
-            let func: Fn2 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(closure.args[0], closure.args[1])
-        }
-        3 => {
-            let func: Fn3 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(closure.args[0], closure.args[1], closure.args[2])
-        }
-        4 => {
-            let func: Fn4 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(closure.args[0], closure.args[1], closure.args[2], closure.args[3])
-        }
-        5 => {
-            let func: Fn5 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(
-                closure.args[0],
-                closure.args[1],
-                closure.args[2],
-                closure.args[3],
-                closure.args[4],
-            )
-        }
-        6 => {
-            let func: Fn6 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(
-                closure.args[0],
-                closure.args[1],
-                closure.args[2],
-                closure.args[3],
-                closure.args[4],
-                closure.args[5],
-            )
-        }
-        7 => {
-            let func: Fn7 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(
-                closure.args[0],
-                closure.args[1],
-                closure.args[2],
-                closure.args[3],
-                closure.args[4],
-                closure.args[5],
-                closure.args[6],
-            )
-        }
-        8 => {
-            let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            func(
-                closure.args[0],
-                closure.args[1],
-                closure.args[2],
-                closure.args[3],
-                closure.args[4],
-                closure.args[5],
-                closure.args[6],
-                closure.args[7],
-            )
-        }
-        9.. => {
-            let func: Fn8 = unsafe { std::mem::transmute(closure.fn_ptr) };
-            let rest = Box::new(closure.args.split_off(7));
-            let res = func(
-                closure.args[0],
-                closure.args[1],
-                closure.args[2],
-                closure.args[3],
-                closure.args[4],
-                closure.args[5],
-                closure.args[6],
-                (Box::as_ptr(&rest)) as isize,
-            );
-            let _ = Box::into_raw(rest);
-            res
-        }
-        _ => panic!("Unsupported arity: {}", closure.arity),
-    };
-    debug!("Result: {} / {:#x}", res, res);
-    Some(res)
 }
 
 macro_rules! apply_closure_n {
@@ -157,7 +153,6 @@ apply_closure_n!(apply_closure_4, a1, a2, a3, a4);
 apply_closure_n!(apply_closure_5, a1, a2, a3, a4, a5);
 apply_closure_n!(apply_closure_6, a1, a2, a3, a4, a5, a6);
 apply_closure_n!(apply_closure_7, a1, a2, a3, a4, a5, a6, a7);
-apply_closure_n!(apply_closure_8, a1, a2, a3, a4, a5, a6, a7, a8);
 
 #[no_mangle]
 pub unsafe extern "C" fn apply_closure_9plus(
@@ -171,9 +166,8 @@ pub unsafe extern "C" fn apply_closure_9plus(
     tuple_ptr: *mut Tuple,
 ) -> isize {
     let mut closure = Box::new((*closure_ptr).clone());
-    debug!("tuple_ptr: {:?}", tuple_ptr);
     let tuple = Box::from_raw(tuple_ptr);
-    debug!("Tuple: {:?}", tuple);
+    debug!("Tuple with arguments {:?} at {:?}", tuple, tuple_ptr);
     closure.args.extend_from_slice(&[a1, a2, a3, a4, a5, a6]);
     closure.args.extend(tuple.iter());
     match apply_closure(&mut closure) {
