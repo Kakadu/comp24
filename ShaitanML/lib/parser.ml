@@ -305,7 +305,7 @@ let str_item =
       (token "let" *> option Nonrec (token "rec" *> obligatory_ws *> return Rec))
       (sep_by (token "and") (both pattern (lift2 efunf (many pattern <* token "=") expr)))
   in
-   psvalue
+  psvalue
 ;;
 
 let structure : structure t = sep_by (choice [ dsemi; ws ]) str_item

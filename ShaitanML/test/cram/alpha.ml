@@ -16,8 +16,8 @@ let () =
   in
   match parse_and_infer s with
   | Ok ast ->
-    let bindings, names_count, ast = Pat_elim.run_pe ast in
-    let _, _, ast = Alpha.run_ac bindings names_count ast in
+    let bindings, count, ast = Pat_elim.run_pe ast in
+    let _, _, ast = Alpha.run_ac bindings count ast in
     Format.printf "%a" Pat_elim_ast.pp_pe_structure ast
   | Error message -> Format.printf "%s" message
 ;;

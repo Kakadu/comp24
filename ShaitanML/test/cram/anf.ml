@@ -1,6 +1,5 @@
 open Shaitanml_lib
 
-
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
   let parse_and_infer s =
@@ -13,11 +12,11 @@ let () =
   in
   match parse_and_infer s with
   | Ok ast ->
-    let nh, names_count, ast = Pat_elim.run_pe ast in
-    let nh, names_count, ast = Alpha.run_ac nh names_count ast in
+    let bindings, count, ast = Pat_elim.run_pe ast in
+    let bindings, count, ast = Alpha.run_ac bindings count ast in
     let ast = Closure.run_cc ast in
-    let nh, names_count, ast = L_lifting.run_ll nh names_count ast in
-    let _, _, ast = Anf.run_to_anf nh, names_count, ast in
-    Format.printf "%a" Pat_elim_ast.pp_pe_structure ast
+    let bindings, count, ast = L_lifting.run_ll bindings count ast in
+    let _, _, ast = Anf.run_anf bindings count ast in
+    Format.printf "%a" Anf_ast.pp_anf_structure ast
   | Error message -> Format.printf "%s" message
 ;;

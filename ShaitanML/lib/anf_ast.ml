@@ -52,8 +52,7 @@ let rec atom_to_str = function
   | ImmBool b -> Bool.to_string b
   | ImmUnit -> "()"
   | ImmVar v -> v
-  | ImmNil ->
-    "[]"
+  | ImmNil -> "[]"
   | ImmTuple l ->
     Format.sprintf
       "(%s)"
@@ -64,14 +63,10 @@ let rec atom_to_str = function
            (List.tl_exn l))
 ;;
 
-
 let rec cexp_to_str = function
   | CImm a -> atom_to_str a
   | CEApply (a1, a_list) ->
-    List.fold_left
-      ~init:a1
-      ~f:(fun acc a -> "(" ^ acc ^ " " ^ atom_to_str a ^ ")")
-      a_list
+    List.fold_left ~init:a1 ~f:(fun acc a -> "(" ^ acc ^ " " ^ atom_to_str a ^ ")") a_list
   | CEIf (e1, e2, e3) ->
     Format.sprintf
       "if %s\nthen %s\nelse %s"

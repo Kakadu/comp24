@@ -2,13 +2,13 @@ open Pat_elim_ast
 open Common
 open Base
 
-
 let rec free_vars env =
   let open StrSet in
   function
   | PEEConst _ -> empty
   | PEEVar id -> if find env id then empty else singleton id
-  | PEEIf (e1, e2, e3) -> union_list [ free_vars env e1; free_vars env e2; free_vars env e3 ]
+  | PEEIf (e1, e2, e3) ->
+    union_list [ free_vars env e1; free_vars env e2; free_vars env e3 ]
   | PEEFun (args, body) ->
     let binded = union env (of_list args) in
     free_vars binded body
@@ -21,7 +21,8 @@ let rec free_vars env =
         add ids name, e :: exprs)
     in
     let binded = union env ids in
-    List.fold el ~init:(free_vars binded e) ~f:(fun acc e -> union acc (free_vars binded e))
+    List.fold el ~init:(free_vars binded e) ~f:(fun acc e ->
+      union acc (free_vars binded e))
   | PEECons (e1, e2) -> union (free_vars env e1) (free_vars env e2)
   | PEETuple el -> List.fold el ~init:empty ~f:(fun acc e -> union acc (free_vars env e))
 ;;
@@ -121,9 +122,7 @@ let cc_str_item global_env = function
   | PERec decl_list ->
     let ids = List.map decl_list ~f:fst in
     let cl, _ = cc_rec global_env empty decl_list in
-    let env =
-      List.fold ids ~init:global_env ~f:(fun acc name -> StrSet.add acc name)
-    in
+    let env = List.fold ids ~init:global_env ~f:(fun acc name -> StrSet.add acc name) in
     env, PERec cl
 ;;
 

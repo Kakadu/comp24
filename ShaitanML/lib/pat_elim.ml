@@ -4,7 +4,6 @@ open Base
 open Common
 open Common.MonadCounter
 
-
 let check_pat expr pat =
   let rec helper add expr = function
     | PConstraint (p, _) -> helper add expr p
@@ -22,9 +21,7 @@ let check_pat expr pat =
       in
       let min_length = length 0 r in
       let list_length = PEEApp (PEEVar "list_len", expr) in
-      let check =
-        make_apply "( > )" list_length (PEEConst (PECint min_length))
-      in
+      let check = make_apply "( > )" list_length (PEEConst (PECint min_length)) in
       let l = helper true (get_element expr Cons_head) l in
       let r = helper false (get_element expr Cons_tail) r in
       if add then (check :: l) @ r else l @ r
@@ -138,9 +135,7 @@ let rec pe_expr =
          PEETuple vals
        in
        let* fresh_name = fresh >>| get_id in
-       let case_expr =
-         make_case (PEEVar fresh_name) pat new_body (PEEVar "fail_match")
-       in
+       let case_expr = make_case (PEEVar fresh_name) pat new_body (PEEVar "fail_match") in
        return @@ PEEFun (new_args, PEELet (PENonrec (fresh_name, to_match), case_expr)))
   | EMatch (e_last, case_list) ->
     let* e = pe_expr e_last in
