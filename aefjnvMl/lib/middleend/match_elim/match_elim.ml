@@ -12,7 +12,7 @@ let get_uniq_name : string t =
   with_pref me_prefix @@ Int.to_string new_id
 ;;
 
-type semantic_bind = SBind of me_ident * m_expr
+type semantic_bind = SBind of string id_t * m_expr
 
 type alt_pt_tp =
   | Any of semantic_bind
@@ -130,11 +130,11 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
     return (cond_opt, provided_sbinds)
   in
   function
-  | Pat_var nm -> return @@ Var (SBind (Me_name nm, mexpr))
+  | Pat_var nm -> return @@ Var (SBind (Name nm, mexpr))
   | Pat_any ->
     let* any_name = get_uniq_name in
-    return @@ Any (SBind (Me_name any_name, mexpr))
-  | Pat_const Const_unit -> return @@ Var (SBind (Me_unit, mexpr))
+    return @@ Any (SBind (Name any_name, mexpr))
+  | Pat_const Const_unit -> return @@ Var (SBind (Unit, mexpr))
   | Pat_const c ->
     let me_cond = me_const_comperison c mexpr in
     return @@ Const me_cond
@@ -173,7 +173,7 @@ let to_me_vb to_me_expr { vb_pat; vb_expr } =
     let placeholder = MExp_constant Const_unit in
     let check_body = ite_with_fail ~cond ~then_br:placeholder in
     let+ check_nm = get_uniq_name in
-    let check_nm_me = Me_name (check_nm ^ "_ANY") in
+    let check_nm_me = Name (check_nm ^ "_ANY") in
     me_vb check_nm_me check_body
   in
   let* bind_name = get_uniq_name in
@@ -183,12 +183,12 @@ let to_me_vb to_me_expr { vb_pat; vb_expr } =
   match alt_pat with
   | Var (SBind (name, _)) | Any (SBind (name, _)) -> return @@ [ me_vb name bind_body ]
   | Const cond ->
-    let main_vb = me_vb (Me_name bind_name) bind_body in
+    let main_vb = me_vb (Name bind_name) bind_body in
     let+ check_vb = generate_check_vb cond in
     [ main_vb; check_vb ]
   | Compound (cond_opt, sbinds) ->
     let provided_vbs = List.map sbind_to_me_vb sbinds in
-    let main_vb = me_vb (Me_name bind_name) bind_body in
+    let main_vb = me_vb (Name bind_name) bind_body in
     (match cond_opt with
      | Some cond ->
        let+ check_vb = generate_check_vb cond in
@@ -232,7 +232,7 @@ let rec to_me_expr = function
     let* fun_body = to_me_expr e' in
     let* potential_arg, me_potential_bind =
       let+ new_name = get_uniq_name in
-      Me_name new_name, me_name new_name
+      Name new_name, me_name new_name
     in
     let* alt_pat = elim_pattern me_potential_bind pt in
     let ( |-> ) name body = return @@ MExp_function (name, body) in
@@ -254,7 +254,7 @@ let rec to_me_expr = function
     let* e_for_match' = to_me_expr main_e in
     let* bind_nm, me_bind_nm =
       let+ new_name = get_uniq_name in
-      Me_name new_name, me_name new_name
+      Name new_name, me_name new_name
     in
     let+ f_match' =
       fold_left_t
@@ -281,7 +281,7 @@ let rec to_me_expr = function
 let to_me_struct_item = function
   | Str_eval e ->
     let* new_uniq_bind_nm = get_uniq_name in
-    let m_vb_pat = Me_name new_uniq_bind_nm in
+    let m_vb_pat = Name new_uniq_bind_nm in
     let+ m_vb_expr = to_me_expr e in
     [ MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ]) ]
   | Str_value (Decl (r_flag, vb_l)) ->

@@ -6,8 +6,8 @@ open Common.Ast
 open Me_ast
 
 let convert_me_ident = function
-  | Me_unit -> Pat_const Const_unit
-  | Me_name s -> Pat_var s
+  | Unit -> Pat_const Const_unit
+  | Name s -> Pat_var s
 ;;
 
 let rec convert_expr = function

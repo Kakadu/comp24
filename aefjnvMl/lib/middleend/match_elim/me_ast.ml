@@ -2,9 +2,9 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-type me_ident =
-  | Me_unit
-  | Me_name of string
+type 'a id_t =
+  | Name of 'a
+  | Unit
 [@@deriving eq, show { with_path = false }]
 
 type m_expr =
@@ -14,14 +14,14 @@ type m_expr =
   | MExp_apply of m_expr * m_expr
   | MExp_list of m_expr * m_expr
   | MExp_ifthenelse of m_expr * m_expr * m_expr
-  | MExp_function of me_ident * m_expr
+  | MExp_function of string id_t * m_expr
   | MExp_let of m_decl * m_expr
 [@@deriving show { with_path = false }]
 
 and m_decl = MDecl of Common.Ast.rec_flag * value_binding list
 
 and value_binding =
-  { m_vb_pat : me_ident
+  { m_vb_pat : string id_t
   ; m_vb_expr : m_expr
   }
 

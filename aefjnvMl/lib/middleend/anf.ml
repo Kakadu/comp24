@@ -2,17 +2,31 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Common.Monads.CounterMonad (String)
 open Anf_ast
 open Ll_ast
 open Match_elimination.Me_ast
 
-type bind = ABind of me_ident * cexpr
+module Name_id = struct
+  type t = string
+
+  let compare = String.compare
+end
+
+module GlobalSet = Stdlib.Set.Make (Name_id)
+
+open
+  Common.Monads.GenericCounterMonad
+    (struct
+      type t = GlobalSet.t
+    end)
+    (String)
+
+type bind = ABind of string id_t * cexpr
 
 let new_me_name =
   let open Common.Naming in
   let+ num = fresh in
-  Me_name (with_pref anf_prefix @@ Int.to_string num)
+  Name (with_pref anf_prefix @@ Int.to_string num)
 ;;
 
 let const_to_immexpr =
@@ -41,20 +55,63 @@ let check_rlist_invariant = function
   | _ -> fail "First element in reversed list should be a nil"
 ;;
 
+let is_global = function
+  | Unit -> return false
+  | Name id ->
+    let+ nm_space = read in
+    (match GlobalSet.find_opt id nm_space with
+     | Some _ -> true
+     | None -> false)
+;;
+
+let save_global nm =
+  is_global nm
+  >>= function
+  | true -> fail "Impossible case"
+  | false ->
+    (match nm with
+     | Name nm ->
+       let* nm_space = read in
+       save @@ GlobalSet.add nm nm_space
+     | Unit -> return ())
+;;
+
+let to_scoped_common builder = function
+  | Unit -> Unit
+  | Name v -> Name (builder v)
+;;
+
+let to_local id = to_scoped_common (fun x -> Local_name x) id
+let to_global id = to_scoped_common (fun x -> Global_name x) id
+
+let to_scoped id =
+  let+ to_scoped' =
+    let+ cond = is_global id in
+    match cond with
+    | true -> to_global
+    | false -> to_local
+  in
+  to_scoped' id
+;;
+
 let rec to_immexpr : ll_expr -> (bind list * immexpr) t = function
   | LL_const v -> return ([], const_to_immexpr v)
-  | LL_ident id -> return ([], id_to_immexpr id)
+  | LL_ident id ->
+    let+ id' = to_scoped id in
+    [], id_to_immexpr id'
   | expr ->
     let* id = new_me_name in
     let+ binds, cexpr = to_cexpr expr in
     let new_bind = ABind (id, cexpr) in
-    binds @ [ new_bind ], id_to_immexpr id
+    binds @ [ new_bind ], id_to_immexpr @@ to_local id
 
 and to_cexpr : ll_expr -> (bind list * cexpr) t =
   let open Base in
   function
   | LL_const v -> return ([], C_immexpr (const_to_immexpr v))
-  | LL_ident id -> return ([], C_immexpr (id_to_immexpr id))
+  | LL_ident id ->
+    let+ id' = to_scoped id in
+    [], C_immexpr (id_to_immexpr id')
   | LL_let (id, expr, in') ->
     let* e_binds, cexpr = to_cexpr expr in
     let+ in_binds, in'' = to_cexpr in' in
@@ -91,7 +148,7 @@ and to_cexpr : ll_expr -> (bind list * cexpr) t =
       helper arg [] f
     in
     let extract_name_from_imm = function
-      | Imm_id (Me_name id) -> return id
+      | Imm_id (Name id) -> return id
       | _ ->
         fail "Apply left part expects 0 argument(s), but is applied here to 1 argument(s)"
     in
@@ -125,19 +182,37 @@ let to_func { lldec_name; lldec_args; lldec_body } =
 ;;
 
 let to_anf_decl = function
-  | LL_GlobalV (me_ident, expr) ->
-    let+ aexpr = to_aexpr expr in
-    A_GlobalV (me_ident, aexpr)
+  | LL_GlobalV (id, expr) ->
+    let* aexpr = to_aexpr expr in
+    let+ () = save_global id in
+    A_GlobalV (id, aexpr)
   | LL_Decl (r_flag, ll_fun, ll_fun'l) ->
-    let* anf_fun = to_func ll_fun in
-    let+ anf_fun'l = mapt ll_fun'l to_func in
-    ADMutualRecDecl (r_flag, anf_fun, anf_fun'l)
+    (match r_flag, ll_fun'l with
+     | Nonrecursive, [] ->
+       let* anf_fun = to_func ll_fun in
+       let+ () = save_global (Name ll_fun.lldec_name) in
+       A_NonrecDecl anf_fun
+     | Nonrecursive, _ -> fail "With [and] supports only rec funcs"
+     | Recursive, ll_fun'l ->
+       let* _ =
+         mapt (ll_fun :: ll_fun'l) (fun { lldec_name } -> save_global (Name lldec_name))
+       in
+       let* anf_fun = to_func ll_fun in
+       let+ anf_fun'l = mapt ll_fun'l to_func in
+       A_RecDecl (anf_fun, anf_fun'l))
 ;;
 
 let to_anf_prog ll_prog = mapt ll_prog to_anf_decl
 
-let convert_to_anf prog = 
+let convert_to_anf prog =
   let open Common.Errors in
-  match run (to_anf_prog prog) with
+  let open Common.Base_lib in
+  let global_name_space =
+    let global_by_default = std_lib_names in
+    let helper acc name = GlobalSet.add name acc in
+    List.fold_left helper GlobalSet.empty global_by_default
+  in
+  match run (to_anf_prog prog) global_name_space with
   | _, Ok anf_decl'l -> Result.Ok anf_decl'l
   | _, Error msg -> Result.Error (illegal_state msg)
+;;

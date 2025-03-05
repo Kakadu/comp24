@@ -4,34 +4,37 @@
 
 open Match_elimination.Me_ast
 
-(* TODO: MB ADD SCOPE CHECKING -- put Global funcs in specific type (reformat name and me_ident) *)
+type 'a scoped =
+  | Local_name of 'a
+  | Global_name of 'a
 
 type immexpr =
   | Imm_int of int
   | Imm_bool of bool
   | Imm_nil
-  | Imm_unit (** mb remove *)
-  | Imm_id of me_ident
+  | Imm_unit
+  | Imm_id of string scoped id_t
 
 type cexpr =
-  | C_apply of string * immexpr * immexpr list
+  | C_apply of string scoped * immexpr * immexpr list
   | C_ifthenelse of immexpr * aexpr * aexpr
   | C_tuple of immexpr list
   | C_rlist of immexpr * immexpr list (** reversed list <- first elem -- nil *)
   | C_immexpr of immexpr
 
 and aexpr =
-  | A_let of me_ident * cexpr * aexpr
+  | A_let of string id_t * cexpr * aexpr
   | A_cexpr of cexpr
 
 type anf_fun =
   { adec_name : string
-  ; adec_args : me_ident * me_ident list
+  ; adec_args : string id_t * string id_t list
   ; adec_body : aexpr
   }
 
 type anf_decl =
-  | A_GlobalV of me_ident * aexpr
-  | ADMutualRecDecl of Common.Ast.rec_flag * anf_fun * anf_fun list
+  | A_GlobalV of string id_t * aexpr
+  | A_NonrecDecl of anf_fun
+  | A_RecDecl of anf_fun * anf_fun list
 
 type anf_prog = anf_decl list
