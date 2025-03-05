@@ -473,8 +473,7 @@ module TypecheckerTests = struct
     pp_parse_and_infer
       "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
        false else even (x - 1)";
-    [%expect
-      {|
+    [%expect {|
       int -> bool
       int -> bool
       |}]
@@ -482,8 +481,7 @@ module TypecheckerTests = struct
 
   let%expect_test "mutual recursion type inference 2" =
     pp_parse_and_infer "let rec f x = x && true and g x = x + 1";
-    [%expect
-      {|
+    [%expect {|
       bool -> bool
       int -> int
       |}]

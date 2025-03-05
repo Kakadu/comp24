@@ -11,27 +11,26 @@ module Generator = struct
         in
         if Base.String.for_all nm ~f:(fun c -> c = '_')
         then self ()
-        else if
-          Base.List.mem
-            [ "let"
-            ; "rec"
-            ; "if"
-            ; "then"
-            ; "else"
-            ; "true"
-            ; "false"
-            ; "match"
-            ; "with"
-            ; "in"
-            ; "and"
-            ; "fun"
-            ; "type"
-            ; "int"
-            ; "string"
-            ; "bool"
-            ]
-            nm
-            ~equal:String.equal
+        else if Base.List.mem
+                  [ "let"
+                  ; "rec"
+                  ; "if"
+                  ; "then"
+                  ; "else"
+                  ; "true"
+                  ; "false"
+                  ; "match"
+                  ; "with"
+                  ; "in"
+                  ; "and"
+                  ; "fun"
+                  ; "type"
+                  ; "int"
+                  ; "string"
+                  ; "bool"
+                  ]
+                  nm
+                  ~equal:String.equal
         then self ()
         else return nm)
       ()
