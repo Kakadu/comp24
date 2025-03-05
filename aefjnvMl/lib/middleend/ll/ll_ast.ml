@@ -11,7 +11,7 @@ open Match_elimination.Me_ast
 
 type ll_expr =
   | LL_const of Common.Ast.const
-  | LL_ident of string id_t
+  | LL_ident of string
   | LL_let of string id_t * ll_expr * ll_expr
   | LL_ifthenelse of ll_expr * ll_expr * ll_expr
   | LL_tuple of ll_expr list
