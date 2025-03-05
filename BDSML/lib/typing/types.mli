@@ -16,6 +16,7 @@ type base_type =
   | TChar
   | TString
   | TBool
+  | TUnit
 
 type type_val =
   | TVar of TVarId.t (** e.g. ['a] *)
@@ -23,7 +24,6 @@ type type_val =
   | TConstructor of type_val option * string (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
-  | TUnit (** e.g. [unit]*)
 
 val pp_type_val : Format.formatter -> type_val -> unit
 val show_type_val : type_val -> string

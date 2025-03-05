@@ -16,13 +16,14 @@ type base_type =
   | TChar
   | TString
   | TBool
-[@@deriving show { with_path = false }]
+  | TUnit
 
 let show_base_type = function
   | TInt -> "int"
   | TChar -> "char"
   | TString -> "string"
   | TBool -> "bool"
+  | TUnit -> "unit"
 ;;
 
 let pp_base_type fmt ty = Format.fprintf fmt "%s" @@ show_base_type ty
@@ -33,7 +34,6 @@ type type_val =
   | TConstructor of type_val option * string (** e.g. [int list] *)
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -> int] *)
-  | TUnit
 
 let enclose s = "(" ^ s ^ ")"
 
@@ -54,7 +54,6 @@ let rec show_type_val = function
     "'" ^ String.make count symb
   | TConstructor (Some t1, name) -> show_type_val t1 ^ " " ^ name
   | TConstructor (None, name) -> name
-  | TUnit -> "unit"
 ;;
 
 let pp_type_val fmt ty = Format.fprintf fmt "%s" @@ show_type_val ty

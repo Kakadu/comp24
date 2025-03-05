@@ -50,7 +50,6 @@ let rec unify l r =
     compose subs1 subs2
   | TConstructor (Some t1, _), TConstructor (Some t2, _) -> unify t1 t2
   | TConstructor _, TConstructor _ -> return empty
-  | TUnit, TUnit -> return empty
   | TTuple l, TTuple r ->
     Monads.fold_left
       (fun sub (l, r) ->
