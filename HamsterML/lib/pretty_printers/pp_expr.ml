@@ -1,7 +1,10 @@
 open Ast
 open Base
 
-let rec pretty_print_expr e =
+let rec pretty_print_prog prog =
+  String.concat ~sep:"\n" @@ List.map prog ~f:pretty_print_expr
+
+and pretty_print_expr e =
   match e with
   | EConst v -> pretty_print_value v
   | EVar id -> id
