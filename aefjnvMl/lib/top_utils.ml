@@ -23,7 +23,7 @@ module Ast_test_utils = struct
     let* x = x in
     let* _ = Inferencer.check_program x in
     let* ast = f x in
-    let* _ = Inferencer.check_program ast in
+    let* _ = (* TODO: mb remove *) Inferencer.check_program ast in
     return ast
   ;;
 

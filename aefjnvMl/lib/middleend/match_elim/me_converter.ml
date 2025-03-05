@@ -30,4 +30,4 @@ and convert_decl (MDecl (rec_flag, bindings)) =
   Decl (rec_flag, List.map convert_value_binding bindings)
 ;;
 
-let convert_program decls = List.map (fun decl -> Str_value (convert_decl decl)) decls
+let convert_me_program decls = List.map (fun decl -> Str_value (convert_decl decl)) decls

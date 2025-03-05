@@ -15,7 +15,7 @@ let me_test s =
       let open Match_elimination in
       let+! m_ast = Match_elim.eliminate_match_in_program ast' in
       let m_ast' = Optimizations.optimize m_ast in
-      Me_converter.convert_program m_ast'
+      Me_converter.convert_me_program m_ast'
     in
     ast'
   in
