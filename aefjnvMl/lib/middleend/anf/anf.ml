@@ -12,12 +12,12 @@ module Name_id = struct
   let compare = String.compare
 end
 
-module GlobalSet = Stdlib.Set.Make (Name_id)
+module GlobalMap = Stdlib.Map.Make (Name_id)
 
 open
   Common.Monads.GenericCounterMonad
     (struct
-      type t = GlobalSet.t
+      type t = string scoped GlobalMap.t
     end)
     (String)
 
@@ -52,27 +52,26 @@ let optimize_cons_to_rlist : ll_expr -> ll_expr -> ll_expr list =
 
 let check_rlist_invariant = function
   | lst :: pref -> return (lst, pref)
-  | _ -> fail "At least one elem shpuld be (nil)"
+  | _ -> fail "At least one elem should be (nil)"
 ;;
 
-let is_global = function
-  | Id_unit -> return false
+let get_global = function
+  | Id_unit -> return None
   | Id_name id ->
     let+ nm_space = read in
-    (match GlobalSet.find_opt id nm_space with
-     | Some _ -> true
-     | None -> false)
+      GlobalMap.find_opt id nm_space 
 ;;
 
-let save_global nm =
-  is_global nm
+let save_global nm to_global =
+  get_global nm
   >>= function
-  | true -> fail "Impossible case"
-  | false ->
+  | Some _ -> fail "Impossible case"
+  | None ->
     (match nm with
      | Id_name nm ->
        let* nm_space = read in
-       save @@ GlobalSet.add nm nm_space
+       save @@ 
+       GlobalMap.add nm (to_global nm) nm_space
      | Id_unit -> return ())
 ;;
 
@@ -81,17 +80,17 @@ let to_scoped_common builder = function
   | Id_name v -> Id_name (builder v)
 ;;
 
-let to_local id = to_scoped_common (fun x -> Local_name x) id
-let to_global id = to_scoped_common (fun x -> Global_name x) id
+let to_local = to_scoped_common (fun x -> Local_id x)
+let gfunc = (fun x -> Global_func x)
+let to_gfunc = to_scoped_common gfunc
+let gvar = (fun x -> Global_var x)
+let to_gvar = to_scoped_common gvar
 
 let to_scoped id =
-  let+ to_scoped' =
-    let+ cond = is_global id in
+    let+ cond = get_global id in
     match cond with
-    | true -> to_global
-    | false -> to_local
-  in
-  to_scoped' id
+    | Some id -> Id_name id
+    | None -> to_local id
 ;;
 
 let rec to_immexpr : ll_expr -> (bind list * immexpr) t = function
@@ -184,19 +183,19 @@ let to_func { lldec_name; lldec_args; lldec_body } =
 let to_anf_decl = function
   | LL_GlobalV (id, expr) ->
     let* aexpr = to_aexpr expr in
-    let+ () = save_global id in
+    let+ () = save_global id gvar in
     A_GlobalV (id, aexpr)
   | LL_Decl (r_flag, ll_fun, ll_fun'l) ->
     (match r_flag, ll_fun'l with
      | Nonrecursive, [] ->
        let* anf_fun = to_func ll_fun in
-       let+ () = save_global (Id_name ll_fun.lldec_name) in
+       let+ () = save_global (Id_name ll_fun.lldec_name) gfunc in
        A_NonrecDecl anf_fun
      | Nonrecursive, _ -> fail "With [and] supports only rec funcs"
      | Recursive, ll_fun'l ->
        let* _ =
          mapt (ll_fun :: ll_fun'l) (fun { lldec_name } ->
-           save_global (Id_name lldec_name))
+           save_global (Id_name lldec_name) gfunc ) 
        in
        let* anf_fun = to_func ll_fun in
        let+ anf_fun'l = mapt ll_fun'l to_func in
@@ -210,8 +209,8 @@ let convert_to_anf prog =
   let open Common.Base_lib in
   let global_name_space =
     let global_by_default = std_lib_names in
-    let helper acc name = GlobalSet.add name acc in
-    List.fold_left helper GlobalSet.empty global_by_default
+    let helper acc name = GlobalMap.add name (gfunc name) acc in
+    List.fold_left helper GlobalMap.empty global_by_default
   in
   match run (to_anf_prog prog) global_name_space with
   | _, Ok anf_decl'l -> Result.Ok anf_decl'l

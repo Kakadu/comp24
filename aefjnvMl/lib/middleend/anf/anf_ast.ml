@@ -5,8 +5,9 @@
 open Match_elimination.Me_ast
 
 type 'a scoped =
-  | Local_name of 'a
-  | Global_name of 'a
+  | Local_id of 'a
+  | Global_func of 'a
+  | Global_var of 'a
 
 type immexpr =
   | Imm_int of int

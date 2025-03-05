@@ -8,12 +8,12 @@ open Ll_conversion.Ll_ast
 open Anf_ast
 
 let convert_scoped = function
-  | Local_name nm | Global_name nm -> nm
+  | Local_id nm | Global_func nm | Global_var nm -> nm
 ;;
 
 let convert_anf_id = function
   | Id_unit -> raise (Invalid_argument "Illigal case")
-  | Id_name (Local_name nm) | Id_name (Global_name nm) -> nm
+  | Id_name nm -> convert_scoped nm
 ;;
 
 let rec convert_aexpr = function
