@@ -1,0 +1,11 @@
+(executable
+ (public_name llvm_demo)
+ (name llvm_demo)
+ (modules llvm_demo)
+ (libraries base stdio llvm_cg typeinference))
+
+(cram
+ (deps
+  ./llvm_demo.exe
+  ../../runtime/libmlrt.so
+  ../../runtime/libmlstd.so))
