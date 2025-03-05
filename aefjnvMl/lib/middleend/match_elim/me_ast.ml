@@ -5,7 +5,6 @@
 type 'a id_t =
   | Name of 'a
   | Unit
-[@@deriving eq, show { with_path = false }]
 
 type m_expr =
   | MExp_constant of Common.Ast.const
@@ -16,7 +15,6 @@ type m_expr =
   | MExp_ifthenelse of m_expr * m_expr * m_expr
   | MExp_function of string id_t * m_expr
   | MExp_let of m_decl * m_expr
-[@@deriving show { with_path = false }]
 
 and m_decl = MDecl of Common.Ast.rec_flag * value_binding list
 
@@ -25,4 +23,4 @@ and value_binding =
   ; m_vb_expr : m_expr
   }
 
-type m_program = m_decl list [@@deriving show { with_path = false }]
+type m_program = m_decl list
