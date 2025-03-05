@@ -36,8 +36,8 @@ let stdlib_funs : std_fun list =
   ; "( <> )", "neq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
   ; "( != )", "pneq_ml", default_type, bin_op (TPoly "'_a") (TPoly "'_a") TBool
   ; "print_int", "print_int", default_type, TFunction (TInt, TUnit)
-  ; "( && )", "", default_type, bin_op TBool TBool TBool
-  ; "( || )", "", default_type, bin_op TBool TBool TBool
+  ; "( && )", "land_ml", default_type, bin_op TBool TBool TBool
+  ; "( || )", "lor_ml", default_type, bin_op TBool TBool TBool
   ; ( "( :: )"
     , "mlrt_create_cons"
     , default_type
