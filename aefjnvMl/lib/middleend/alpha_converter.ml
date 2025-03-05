@@ -38,14 +38,15 @@ module StringAlphfaconverterMonad = struct
   ;;
 
   let fresh_bind pre_formatter name =
-    let apply_prefix pref name_ = pref ^ "_" ^ name_ in
     let get_uniq_name cur_pref new_name b_set =
       let rec helper name_ =
         match Banned_Set.find_opt name_ b_set with
         | None -> return @@ name_
         | Some _ ->
           let* fresh_id = fresh in
-          let supported_name = apply_prefix (num_prefix cur_pref fresh_id) new_name in
+          let supported_name =
+            Common.Naming.with_pref (num_prefix cur_pref fresh_id) new_name
+          in
           helper supported_name
       in
       helper new_name
@@ -66,7 +67,7 @@ module StringAlphfaconverterMonad = struct
         let start_name =
           let prepared_name = pre_formatter name in
           match should_rename_via_prefs with
-          | true -> apply_prefix a_pref prepared_name
+          | true -> Common.Naming.with_pref a_pref prepared_name
           | false -> prepared_name
         in
         get_uniq_name a_pref start_name b_set

@@ -6,11 +6,10 @@ open Common.Ast
 open Me_ast
 open Common.Monads.CounterMonad (String)
 
-let name_prefix = Common.Naming.me_prefix
-
 let get_uniq_name : string t =
-  let* new_id = fresh in
-  return @@ name_prefix ^ "_" ^ Int.to_string new_id
+  let open Common.Naming in
+  let+ new_id = fresh in
+  with_pref me_prefix @@ Int.to_string new_id
 ;;
 
 type semantic_bind = SBind of me_ident * m_expr
