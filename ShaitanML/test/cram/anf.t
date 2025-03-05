@@ -1,3 +1,114 @@
+  $ anf << EOF
+  > let fac n =
+  >   let rec fack n k =
+  >     if n <= 1 then k 1
+  >     else fack (n-1) ((fun k n m -> k (m * n)) k n)
+  >   in
+  >   fack n (fun x -> x)
+  let a4 = (fun a1 a2 m -> (a1 ((( * ) m) a2)))
+  
+  let rec a3 = (fun a0 k -> if ((( <= ) a0) 1)
+  then (k 1)
+  else ((a3 ((( - ) a0) 1)) ((a4 k) a0)))
+  
+  let a5 = (fun x -> x)
+  
+  let fac = (fun n -> ((a3 n) a5))
+
+  $ anf << EOF
+  > let sum x =
+  >   let new_sum y = x + y in
+  >   new_sum 5
+  > EOF
+  let a0 = (fun x y -> ((( + ) x) y))
+  
+  let sum = (fun x -> ((a0 x) 5))
+
+  $ anf << EOF
+  >   let x y =
+  >   let z a = a (y + 1) in
+  >   z (fun x -> x)
+  let a1 = (fun y a -> (a ((( + ) y) 1)))
+  
+  let a2 = (fun a0 -> a0)
+  
+  let x = (fun y -> ((a1 y) a2))
+
+  $ anf << EOF
+  >     let fibo n =
+  >       let rec fibo_cps n acc =
+  >       if n < 3
+  >       then acc 1
+  >       else fibo_cps (n - 1) (fun x -> fibo_cps (n - 2) (fun y -> acc (x + y)))
+  >       in
+  >       fibo_cps n (fun x -> x)
+  let a3 = (fun acc x y -> (acc ((( + ) x) y)))
+  
+  let a2 = (fun a0 acc fibo_cps x -> ((fibo_cps ((( - ) a0) 2)) ((a3 acc) x)))
+  
+  let rec a1 = (fun a0 acc -> if ((( < ) a0) 3)
+  then (acc 1)
+  else ((a1 ((( - ) a0) 1)) (((a2 a0) acc) a1)))
+  
+  let a4 = (fun x -> x)
+  
+  let fibo = (fun n -> ((a1 n) a4))
+
+  $ anf << EOF
+  > let test_cons =
+  >   let (h::t) = [1; 2; 3] in
+  >   h + 1
+  let test_cons = let a0 = (1::(2::(3::[]))) in
+  if ((( > ) (list_len a0)) 0)
+  then let h = (list_head a0) in
+  let t = (list_tail a0) in
+  ((( + ) h) 1)
+  else fail_match
+
+
+  $ anf << EOF
+  > let test_tuple =
+  >   let (x, (y, z)) = (5, (10, 15)) in
+  >   x + y + z
+  let test_tuple = let a0 = (5, (10, 15)) in
+  let x = ((tuple_element a0) 0) in
+  let y = ((tuple_element ((tuple_element a0) 1)) 0) in
+  let z = ((tuple_element ((tuple_element a0) 1)) 1) in
+  ((( + ) ((( + ) x) y)) z)
+
+
+  $ anf << EOF
+  > let test_list =
+  >   let lst = [1; 2; 3; 4; 5] in
+  >   let rec sum lst = match lst with
+  >   | [] -> 0
+  >   | h::t -> h + (sum t)
+  > in
+  > sum lst
+  let rec a1 = (fun a0 -> if ((( = ) a0) [])
+  then 0
+  else if ((( > ) (list_len a0)) 0)
+  then let h = (list_head a0) in
+  let t = (list_tail a0) in
+  ((( + ) h) (a1 t))
+  else fail_match)
+  
+  let test_list = let lst = (1::(2::(3::(4::(5::[]))))) in
+  (a1 lst)
+
+
+  $ anf << EOF
+  > let test_multiple_cases x =
+  >   match x with
+  >   | 0 -> "zero"
+  >   | 1 -> "one"
+  >   | _ -> "other"
+  let test_multiple_cases = (fun x -> if ((( = ) x) 0)
+  then zero
+  else if ((( = ) x) 1)
+  then one
+  else other)
+
   $ anf < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
   then 1
@@ -119,4 +230,5 @@
 
   $ anf < manytests/typed/009let_poly.ml
   let a0 = (fun x -> x)
+  
   let temp = ((a0 1), (a0 true))
