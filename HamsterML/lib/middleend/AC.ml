@@ -21,24 +21,12 @@ module NameEnv = struct
     | None -> generate_new_name env name prefix
     | Some old_name -> return (env, old_name)
   ;;
-
-  let sub (env1 : t) (env2 : t) : t =
-    Map.fold env1 ~init:empty ~f:(fun ~key ~data acc ->
-      match Map.find env2 key with
-      | None -> extend (key, data) acc
-      | Some _ -> acc)
-  ;;
-
-  let union (env1 : t) (env2 : t) : t =
-    Map.merge env1 env2 ~f:(fun ~key:_ ->
-        function
-        | `Left v | `Right v | `Both (_, v) -> Some v)
-  ;;
 end
 
 let rec convert_pattern (env : NameEnv.t) prefix = function
   | (Const _ | Wildcard | Operation (Unary _)) as orig -> return (env, orig)
   | Var id ->
+    (* try to find name or create new one *)
     let* env, new_id = NameEnv.resolve_name env id prefix in
     return (env, Var new_id)
   | Operation (Binary op) ->
@@ -72,9 +60,10 @@ let rec convert_pattern (env : NameEnv.t) prefix = function
     return (env, Tuple (ac_a, ac_b, ac_pts))
 ;;
 
-let convert_arg_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
+let convert_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
   match arg with
   | Var id ->
+    (* creare new name anyway *)
     let* env, new_id = NameEnv.generate_new_name env id name_prefix in
     return (env, Var new_id)
   | Operation (Binary op) ->
@@ -90,7 +79,7 @@ let let_prefix = "var_"
 let collect_args (env : NameEnv.t) (args : args) =
   let* env, ac_args =
     fold_list args ~init:(env, []) ~f:(fun (env, acc) arg ->
-      let* env, ac_arg = convert_arg_pattern env arg arg_prefix in
+      let* env, ac_arg = convert_name_pattern env arg arg_prefix in
       return (env, ac_arg :: acc))
   in
   return (env, List.rev ac_args)
@@ -98,16 +87,21 @@ let collect_args (env : NameEnv.t) (args : args) =
 
 let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
   fold_list binds ~init:env ~f:(fun env (name, _, _) ->
-    let* env, _ = convert_pattern env let_prefix name in
+    let* env, _ = convert_name_pattern env name let_prefix in
     return env)
 ;;
 
-let rec convert_bind (env : NameEnv.t) ((name, args, body) : bind) =
-  let* old_env, new_name = convert_arg_pattern env name let_prefix in
-  let* args_env, ac_args = collect_args old_env args in
-  let* env, ac_body = convert_expr args_env body in
-  let env = NameEnv.sub env args_env in
-  let env = NameEnv.union env old_env in
+let rec convert_bind_nonrec (env : NameEnv.t) ((name, args, body) : bind) =
+  let* args_env, ac_args = collect_args env args in
+  let* _, ac_body = convert_expr args_env body in
+  let* name_env, new_name = convert_name_pattern env name let_prefix in
+  return (name_env, ((new_name, ac_args, ac_body) : bind))
+
+and convert_bind_rec (env : NameEnv.t) ((name, args, body) : bind) =
+  (* we add names during "collect mutual names", convert_pattern just gets them *)
+  let* name_env, new_name = convert_pattern env let_prefix name in
+  let* args_env, ac_args = collect_args name_env args in
+  let* _, ac_body = convert_expr args_env body in
   return (env, ((new_name, ac_args, ac_body) : bind))
 
 and convert_expr (env : NameEnv.t) = function
@@ -127,14 +121,15 @@ and convert_expr (env : NameEnv.t) = function
     return (env, Application (ac_l, ac_r))
   | Fun (args, body) ->
     let* args_env, ac_args = collect_args env args in
-    let* env, ac_body = convert_expr args_env body in
-    let env = NameEnv.sub args_env env in
+    let* _, ac_body = convert_expr args_env body in
     return (env, Fun (ac_args, ac_body))
   | Let (rec_flag, binds, scope) ->
-    let* env =
+    let* env, convert_bind =
       match rec_flag with
-      | Recursive -> collect_mutual_names env binds
-      | Nonrecursive -> return env
+      | Recursive ->
+        let* env = collect_mutual_names env binds in
+        return (env, convert_bind_rec)
+      | Nonrecursive -> return (env, convert_bind_nonrec)
     in
     let* env, new_binds =
       fold_list binds ~init:(env, []) ~f:(fun (env, acc_binds) bnd ->
@@ -184,4 +179,13 @@ and convert_expr (env : NameEnv.t) = function
     in
     let ac_cases = List.rev ac_cases in
     return (env, Match (ac_expr, ac_cases))
+;;
+
+let convert_prog (env : NameEnv.t) (prog : prog) : prog t =
+  let* _, ac_prog =
+    fold_list prog ~init:(env, []) ~f:(fun (env, acc) expr ->
+      let* env, ac_expr = convert_expr env expr in
+      return (env, ac_expr :: acc))
+  in
+  return @@ List.rev ac_prog
 ;;
