@@ -125,7 +125,23 @@ let dump_reg_args_to_stack args =
 ;;
 
 let direct_unops = [ "not"; "[ - ]" ]
-let direct_binops = [ "( + )"; "( - )"; "( * )"; "( / )"; "( && )"; "( || )" ]
+
+let direct_binops =
+  [ "( + )"
+  ; "( - )"
+  ; "( * )"
+  ; "( / )"
+  ; "( && )"
+  ; "( || )"
+  ; "( > )"
+  ; "( < )"
+  ; "( >= )"
+  ; "( <= )"
+  ; "( == )"
+  ; "( != )"
+  ]
+;;
+
 let is_direct_unop = List.mem direct_unops ~equal:String.equal
 let is_direct_binop = List.mem direct_binops ~equal:String.equal
 
@@ -138,15 +154,34 @@ let emit_direct_unop ?(comm = "") dest op a =
 
 let emit_direct_binop ?(comm = "") dest op a0 a1 =
   (* TODO: addi case *)
-  let op =
-    match op with
-    | "( + )" -> add
-    | "( - )" -> sub
-    | "( * )" -> mul
-    | "( / )" -> div
-    | "( && )" -> and_
-    | "( || )" -> or_
-    | _ -> failwith "emit_direct_math: invalid op"
-  in
-  emit op dest a0 a1 ~comm
+  match op with
+  | "( + )" -> emit add dest a0 a1 ~comm
+  | "( - )" -> emit sub dest a0 a1 ~comm
+  | "( * )" -> emit mul dest a0 a1 ~comm
+  | "( / )" -> emit div dest a0 a1 ~comm
+  | "( && )" -> emit and_ dest a0 a1 ~comm
+  | "( || )" -> emit or_ dest a0 a1 ~comm
+  | "( < )" -> emit slt dest a0 a1 ~comm
+  | "( > )" -> emit slt dest a1 a0 ~comm
+  | "( >= )" ->
+    emit slt dest a0 a1;
+    emit xori dest dest 1
+  | "( <= )" ->
+    emit slt dest a1 a0;
+    emit xori dest dest 1
+  | "( == )" ->
+    emit beq a0 a1 ".eq";
+    emit li dest 0;
+    emit j ".eq_end";
+    emit label ".eq";
+    emit li dest 1;
+    emit label ".eq_end"
+  | "( != )" ->
+    emit beq a0 a1 ".eq";
+    emit li dest 1;
+    emit j ".eq_end";
+    emit label ".eq";
+    emit li dest 0;
+    emit label ".eq_end"
+  | _ -> failwith "emit_direct_math: invalid op"
 ;;
