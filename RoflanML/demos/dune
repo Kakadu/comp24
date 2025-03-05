@@ -27,4 +27,3 @@
 (cram
  (applies_to demoANF)
  (deps ./demoANF.exe))
-
