@@ -56,13 +56,6 @@ let%test _ =
     ]
 ;;
 
-(*
-   let sum x y = let f a b = a + b in f x y
-   ---
-   let ll_var_1 a b = a + b
-   let ll_var_0 x y = ll_var_1 x y
-*)
-
 let%test _ =
   lambda_lift_prog "let sum x y = let f a b = a + b in f x y"
   = [ LLLet
@@ -84,28 +77,24 @@ let%test _ =
     ]
 ;;
 
-(* let rec fac n = if n<=1 then 1 else n * fac (n-1)
-   ---
-   let rec ll_var_0 n = if n<=1 then 1 else n * ll_var_0 (n-1)
-*)
-
 let%test _ =
   lambda_lift_prog "let rec fac n = if n<=1 then 1 else n * fac (n-1)"
   = [ LLLet
         ( Recursive
         , [ ( Var "ll_var_0"
-            , [ Var "n" ]
+            , [ Var "arg_1" ]
             , LLIf
                 ( LLApplication
-                    (LLApplication (LLOperation (Binary LTE), LLVar "n"), LLConst (Int 1))
+                    ( LLApplication (LLOperation (Binary LTE), LLVar "arg_1")
+                    , LLConst (Int 1) )
                 , LLConst (Int 1)
                 , Some
                     (LLApplication
-                       ( LLApplication (LLOperation (Binary MUL), LLVar "n")
+                       ( LLApplication (LLOperation (Binary MUL), LLVar "arg_1")
                        , LLApplication
                            ( LLVar "ll_var_0"
                            , LLApplication
-                               ( LLApplication (LLOperation (Binary SUB), LLVar "n")
+                               ( LLApplication (LLOperation (Binary SUB), LLVar "arg_1")
                                , LLConst (Int 1) ) ) )) ) )
           ]
         , None )
@@ -124,16 +113,17 @@ let%test _ =
   = [ LLLet
         ( Nonrecursive
         , [ ( Var "ll_var_0"
-            , [ Var "x"; Var "y" ]
+            , [ Var "arg_0"; Var "arg_1" ]
             , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "x"), LLVar "y") )
+                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLVar "arg_1") )
           ]
         , None )
     ; LLLet
         ( Nonrecursive
         , [ ( Var "ll_var_1"
-            , [ Var "x"; Var "y" ]
-            , LLApplication (LLApplication (LLVar "ll_var_0", LLVar "x"), LLVar "y") )
+            , [ Var "arg_3"; Var "arg_4" ]
+            , LLApplication
+                (LLApplication (LLVar "ll_var_0", LLVar "arg_3"), LLVar "arg_4") )
           ]
         , None )
     ]
@@ -149,11 +139,14 @@ let%test _ =
   lambda_lift_prog "let rec f x = g x and g x = x + 1"
   = [ LLLet
         ( Recursive
-        , [ Var "ll_var_0", [ Var "x" ], LLApplication (LLVar "ll_var_1", LLVar "x")
+        , [ ( Var "ll_var_0"
+            , [ Var "arg_2" ]
+            , LLApplication (LLVar "ll_var_1", LLVar "arg_2") )
           ; ( Var "ll_var_1"
-            , [ Var "x" ]
+            , [ Var "arg_3" ]
             , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "x"), LLConst (Int 1)) )
+                (LLApplication (LLOperation (Binary ADD), LLVar "arg_3"), LLConst (Int 1))
+            )
           ]
         , None )
     ]
@@ -169,10 +162,10 @@ let%test _ =
   = [ LLLet
         ( Nonrecursive
         , [ ( Var "ll_var_0"
-            , [ Var "LL_arg_1" ]
+            , [ Var "ll_arg_1" ]
             , LLMatch
-                ( LLVar "LL_arg_1"
-                , [ ( Tuple (Var "a", Var "b", [])
+                ( LLVar "ll_arg_1"
+                , [ ( Tuple (Var "arg_0", Var "arg_1", [])
                     , LLTuple (LLConst (Int 1), LLConst (Int 2), []) )
                   ] ) )
           ]
@@ -184,7 +177,10 @@ let%test _ =
   lambda_lift_prog "let f x = print_int x"
   = [ LLLet
         ( Nonrecursive
-        , [ Var "ll_var_0", [ Var "x" ], LLApplication (LLVar "print_int", LLVar "x") ]
+        , [ ( Var "ll_var_0"
+            , [ Var "arg_0" ]
+            , LLApplication (LLVar "print_int", LLVar "arg_0") )
+          ]
         , None )
     ]
 ;;
