@@ -115,8 +115,6 @@ let rec free_vars_expr (exp : expr) =
     List.fold args ~init:free ~f:(fun acc arg -> remove_bound_vars_from_pattern acc arg)
 ;;
 
-let unbound_variables (exp : expr) = free_vars_expr exp
-
 (* Generate fresh variable names *)
 let fresh_var_counter = ref 0
 
@@ -132,6 +130,12 @@ let rec cc_expr = function
     let cc_binds =
       List.map binds ~f:(fun (pat, args, expr) ->
         match expr with
+        | Application (Fun ([ Var _ ], body), EVar _)
+        | Application (Fun ([ Var _ ], body), EConst _) ->
+          (* when String.equal param_name arg_name -> *)
+          (match cc_expr body with
+           | Fun (inner_args, inner_body) -> pat, args @ inner_args, cc_expr inner_body
+           | inner_body -> pat, args, cc_expr inner_body)
         | Fun (fun_args, fun_body) ->
           let rec collect_nested_funs acc_args = function
             | Fun (inner_args, inner_body) ->
@@ -148,15 +152,22 @@ let rec cc_expr = function
   | EVar _ as e -> e
   | EConst _ as e -> e
   | EOperation _ as e -> e
-  | ETuple (e1, e2, es) ->
-    ETuple (cc_expr e1, cc_expr e2, List.map es ~f:cc_expr)
+  | ETuple (e1, e2, es) -> ETuple (cc_expr e1, cc_expr e2, List.map es ~f:cc_expr)
   | EList es -> EList (List.map es ~f:cc_expr)
   | EListConcat (e1, e2) -> EListConcat (cc_expr e1, cc_expr e2)
   | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
   | If (cond, then_expr, else_expr) ->
     If (cc_expr cond, cc_expr then_expr, Option.map else_expr ~f:cc_expr)
   | Match (expr, cases) ->
-    Match
-      (cc_expr expr, List.map cases ~f:(fun (pat, body) -> pat, cc_expr body))
+    Match (cc_expr expr, List.map cases ~f:(fun (pat, body) -> pat, cc_expr body))
   | EConstraint (expr, ty) -> EConstraint (cc_expr expr, ty)
 ;;
+
+(*
+   let f = fun x -> fun y -> x + y                =>    let f x y = x + y
+   let f = fyn x y -> x + y                       =>    let f x y = x + y
+   let f = fun x y -> fun a b -> a b x y          =>    let f x y a b = a b x y
+   let a = 1 in let b = 2 in let f = a + b in f   =>    let a = 1 in let b = 2 in let f arg1 arg2 = arg1 arg2 in f a b
+   let f = (fun x -> x + 1) 2                     =>    let f x = x + 1 in f 2
+   let a, b = 1, 2                                =>    let a = 1 in let b = 2 in a, b
+*)
