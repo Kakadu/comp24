@@ -231,13 +231,13 @@ module TypeVarSet = Stdlib.Set.Make (Int)
 
 type scheme = Scheme of TypeVarSet.t * typ
 
-let type_var x = <span data-count="1488">T</span>_var x
+let type_var x = <span data-count="1504">T</span>_var x
 let int_typ = T_prim "int"
 let bool_typ = T_prim "bool"
 let unit_typ = T_prim "unit"
-let arrow l r = <span data-count="5617">T</span>_arr (l, r)
+let arrow l r = <span data-count="5676">T</span>_arr (l, r)
 let ( @-&gt; ) = arrow
-let list_typ typ = <span data-count="113865">T</span>_list typ
+let list_typ typ = <span data-count="113973">T</span>_list typ
 
 (* map typed variables to letters *)
 let assign_names typ =

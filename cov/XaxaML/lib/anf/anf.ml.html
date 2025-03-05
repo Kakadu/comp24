@@ -709,9 +709,9 @@
   | Ae_tuple of <span data-count="0">a</span>exp lis<span data-count="0">t</span>
 [@@deriving show { with_path = false }]
 
-let ae_int i = <span data-count="280">A</span>e_int i
+let ae_int i = <span data-count="284">A</span>e_int i
 let ae_bool b = <span data-count="12">A</span>e_bool b
-let ae_val v = <span data-count="1308">A</span>e_val v
+let ae_val v = <span data-count="1340">A</span>e_val v
 let ae_tuple lst = <span data-count="13">A</span>e_tuple lst
 
 (** compex expressions *)
@@ -727,12 +727,12 @@ let ae_tuple lst = <span data-count="13">A</span>e_tuple lst
   | E_complex of cexp
 [@@deriving show { with_path = false }]
 
-let ce_atom aexp = <span data-count="108">C</span>e_atom aexp
-let ce_app e e_list = <span data-count="533">C</span>e_app (e, e_list)
-let ce_ite i t e = <span data-count="62">C</span>e_ite (i, t, e)
+let ce_atom aexp = <span data-count="109">C</span>e_atom aexp
+let ce_app e e_list = <span data-count="545">C</span>e_app (e, e_list)
+let ce_ite i t e = <span data-count="63">C</span>e_ite (i, t, e)
 let ce_cons_list aexp1 aexp2 = <span data-count="43">C</span>e_cons_list (aexp1, aexp2)
-let e_let_in name cexp exp = <span data-count="482">E</span>_let_in (name, cexp, exp)
-let e_complex cexp = <span data-count="264">E</span>_complex cexp
+let e_let_in name cexp exp = <span data-count="489">E</span>_let_in (name, cexp, exp)
+let e_complex cexp = <span data-count="271">E</span>_complex cexp
 
 <span data-count="0">t</span>ype func = <span data-count="0">s</span>trin<span data-count="0">g</span> * <span data-count="0">s</span>trin<span data-count="0">g</span> lis<span data-count="0">t</span> * exp [@@deriving show { with_path = false }]
 
@@ -883,16 +883,16 @@ open Remove_patterns
 open Common.MonadCounterError
 open Base
 
-let empty_bindings = Map.empt<span data-count="39">y</span> (module String)
+let empty_bindings = Map.empt<span data-count="40">y</span> (module String)
 
 let update_bindings last new1 =
   <span data-count="0">M</span>ap.merge_skewed last new1 ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
 ;;
 
-let get_name i = <span data-count="339">"</span>a" ^ Int.to_strin<span data-count="339">g</span> i
+let get_name i = <span data-count="346">"</span>a" ^ Int.to_strin<span data-count="346">g</span> i
 
 let const_to_aexp = function
-  | <span data-count="280">R</span>p_c_int i -&gt; ae_int i
+  | <span data-count="284">R</span>p_c_int i -&gt; ae_int i
   | <span data-count="12">R</span>p_c_bool b -&gt; ae_bool b
   | <span data-count="2">R</span>p_c_unit -&gt; Ae_unit
   | <span data-count="39">R</span>p_c_empty_list -&gt; Ae_empty_list
@@ -901,24 +901,24 @@ let const_to_aexp = function
 let rec to_aexp = function
   | <span data-count="22">R</span>p_e_ident v -&gt; return ([], ae_va<span data-count="22">l</span> v)
   | <span data-count="37">R</span>p_e_const c -&gt; return ([], const_to_aex<span data-count="37">p</span> c)
-  | <span data-count="119">e</span> -&gt;
-    let* fresh = fresh &gt;&gt;<span data-count="119">|</span> get_name in
-    <span data-count="119">l</span>et* binds1, e = to_cex<span data-count="119">p</span> e in
-    <span data-count="119">r</span>eturn (binds1 @ [ fresh, e ], ae_va<span data-count="119">l</span> fresh)
+  | <span data-count="120">e</span> -&gt;
+    let* fresh = fresh &gt;&gt;<span data-count="120">|</span> get_name in
+    <span data-count="120">l</span>et* binds1, e = to_cex<span data-count="120">p</span> e in
+    <span data-count="120">r</span>eturn (binds1 @ [ fresh, e ], ae_va<span data-count="120">l</span> fresh)
 
 and to_cexp = function
   | <span data-count="54">R</span>p_e_const c -&gt; return ([], ce_ato<span data-count="54">m</span> @@ const_to_aex<span data-count="54">p</span> c)
-  | <span data-count="41">R</span>p_e_ident v -&gt; return ([], ce_ato<span data-count="41">m</span> @@ ae_va<span data-count="41">l</span> v)
-  | <span data-count="533">R</span>p_e_app (e1, e2) -&gt; app_to_cexp e1 e2
+  | <span data-count="42">R</span>p_e_ident v -&gt; return ([], ce_ato<span data-count="42">m</span> @@ ae_va<span data-count="42">l</span> v)
+  | <span data-count="545">R</span>p_e_app (e1, e2) -&gt; app_to_cexp e1 e2
   | <span data-count="143">R</span>p_e_let (Rp_non_rec (name, e1), e2) -&gt;
     let* binds1, e1 = to_cex<span data-count="143">p</span> e1 in
     <span data-count="143">l</span>et* binds2, e2 = to_cex<span data-count="143">p</span> e2 in
     <span data-count="143">r</span>eturn (binds1 @ [ name, e1 ] @ binds2, e2)
-  | <span data-count="62">R</span>p_e_ite (e1, e2, e3) -&gt;
-    let* binds, e1 = to_aex<span data-count="62">p</span> e1 in
-    <span data-count="62">l</span>et* e2 = to_ex<span data-count="62">p</span> e2 in
-    <span data-count="62">l</span>et* e3 = to_ex<span data-count="62">p</span> e3 in
-    <span data-count="62">r</span>eturn (binds, ce_it<span data-count="62">e</span> e1 e2 e3)
+  | <span data-count="63">R</span>p_e_ite (e1, e2, e3) -&gt;
+    let* binds, e1 = to_aex<span data-count="63">p</span> e1 in
+    <span data-count="63">l</span>et* e2 = to_ex<span data-count="63">p</span> e2 in
+    <span data-count="63">l</span>et* e3 = to_ex<span data-count="63">p</span> e3 in
+    <span data-count="63">r</span>eturn (binds, ce_it<span data-count="63">e</span> e1 e2 e3)
   | <span data-count="0">R</span>p_e_let (Rp_rec _, _) -&gt;
     fail @@ IncorrectAst "Ast contains recursive let-in declarations"
   | <span data-count="0">R</span>p_e_fun _ -&gt; fail @@ IncorrectAst "Ast contains no toplevel function"
@@ -931,88 +931,88 @@ and to_cexp = function
     <span data-count="43">r</span>eturn (binds1 @ binds2, ce_cons_lis<span data-count="43">t</span> e1 e2)
 
 and app_to_cexp e1 e2 =
-  <span data-count="533">l</span>et rec helper = function
-    | <span data-count="835">R</span>p_e_app (e1, e2) -&gt;
+  <span data-count="545">l</span>et rec helper = function
+    | <span data-count="857">R</span>p_e_app (e1, e2) -&gt;
       let f, args_e = helper e1 in
-      <span data-count="835">f</span>, e2 :: args_e
-    | <span data-count="533">e</span> -&gt; e, []
+      <span data-count="857">f</span>, e2 :: args_e
+    | <span data-count="545">e</span> -&gt; e, []
   in
   let to_app, args_e = helper @@ Rp_e_app (e1, e2) in
-  <span data-count="533">l</span>et args_e = List.rev args_e in
-  <span data-count="533">l</span>et f1 acc expr =
-    <span data-count="1368">l</span>et cur_exprs, cur_binds = acc in
+  <span data-count="545">l</span>et args_e = List.rev args_e in
+  <span data-count="545">l</span>et f1 acc expr =
+    <span data-count="1402">l</span>et cur_exprs, cur_binds = acc in
     match expr with
-    | <span data-count="906">R</span>p_e_ident v -&gt; return (ae_va<span data-count="906">l</span> v :: cur_exprs, cur_binds)
-    | <span data-count="242">R</span>p_e_const c -&gt; return (const_to_aex<span data-count="242">p</span> c :: cur_exprs, cur_binds)
-    | <span data-count="220">_</span> -&gt;
-      let* fresh = fresh &gt;&gt;<span data-count="220">|</span> get_name in
-      <span data-count="220">l</span>et* new_binds, f_cexp = to_cex<span data-count="220">p</span> expr in
-      <span data-count="220">r</span>eturn (ae_va<span data-count="220">l</span> fresh :: cur_exprs, new_binds @ [ fresh, f_cexp ] @ cur_binds)
+    | <span data-count="930">R</span>p_e_ident v -&gt; return (ae_va<span data-count="930">l</span> v :: cur_exprs, cur_binds)
+    | <span data-count="246">R</span>p_e_const c -&gt; return (const_to_aex<span data-count="246">p</span> c :: cur_exprs, cur_binds)
+    | <span data-count="226">_</span> -&gt;
+      let* fresh = fresh &gt;&gt;<span data-count="226">|</span> get_name in
+      <span data-count="226">l</span>et* new_binds, f_cexp = to_cex<span data-count="226">p</span> expr in
+      <span data-count="226">r</span>eturn (ae_va<span data-count="226">l</span> fresh :: cur_exprs, new_binds @ [ fresh, f_cexp ] @ cur_binds)
   in
-  let* exprs, binds = RList.fold_lef<span data-count="533">t</span> (to_app :: args_e) ~init:(retur<span data-count="533">n</span> ([], [])) ~f:f1 in
-  <span data-count="533">l</span>et exprs = List.rev exprs in
-  <span data-count="533">l</span>et to_app, args_e = List.hd_ex<span data-count="533">n</span> exprs, List.tl_ex<span data-count="533">n</span> exprs in
+  let* exprs, binds = RList.fold_lef<span data-count="545">t</span> (to_app :: args_e) ~init:(retur<span data-count="545">n</span> ([], [])) ~f:f1 in
+  <span data-count="545">l</span>et exprs = List.rev exprs in
+  <span data-count="545">l</span>et to_app, args_e = List.hd_ex<span data-count="545">n</span> exprs, List.tl_ex<span data-count="545">n</span> exprs in
   match to_app with
-  | <span data-count="533">A</span>e_val to_app -&gt; return (binds, ce_ap<span data-count="533">p</span> to_app args_e)
+  | <span data-count="545">A</span>e_val to_app -&gt; return (binds, ce_ap<span data-count="545">p</span> to_app args_e)
   | <span data-count="0">_</span> -&gt; fail @@ IncorrectAst "Ast contains wrong-typed application"
 
 and to_exp e =
-  <span data-count="264">l</span>et* binds, init = to_cex<span data-count="264">p</span> e in
-  <span data-count="264">R</span>List.fold_right
+  <span data-count="271">l</span>et* binds, init = to_cex<span data-count="271">p</span> e in
+  <span data-count="271">R</span>List.fold_right
     binds
-    ~init:(retur<span data-count="264">n</span> @@ e_comple<span data-count="264">x</span> init)
-    ~f:(fun (name, cexp) acc -&gt; <span data-count="482">r</span>eturn @@ e_let_i<span data-count="482">n</span> name cexp acc)
+    ~init:(retur<span data-count="271">n</span> @@ e_comple<span data-count="271">x</span> init)
+    ~f:(fun (name, cexp) acc -&gt; <span data-count="489">r</span>eturn @@ e_let_i<span data-count="489">n</span> name cexp acc)
 ;;
 
 let anf_toplevel = function
-  | <span data-count="106">R</span>p_non_rec (name, e) -&gt;
+  | <span data-count="110">R</span>p_non_rec (name, e) -&gt;
     (match e with
-     | <span data-count="67">R</span>p_e_fun (args, body) -&gt;
-       let* new_body = to_ex<span data-count="67">p</span> body in
-       <span data-count="67">r</span>eturn @@ [ Non_rec (name, args, new_body) ]
-     | <span data-count="39">_</span> -&gt;
-       let* new_e = to_ex<span data-count="39">p</span> e in
-       <span data-count="39">r</span>eturn @@ [ Value (name, new_e) ])
-  | <span data-count="31">R</span>p_rec decls -&gt;
+     | <span data-count="70">R</span>p_e_fun (args, body) -&gt;
+       let* new_body = to_ex<span data-count="70">p</span> body in
+       <span data-count="70">r</span>eturn @@ [ Non_rec (name, args, new_body) ]
+     | <span data-count="40">_</span> -&gt;
+       let* new_e = to_ex<span data-count="40">p</span> e in
+       <span data-count="40">r</span>eturn @@ [ Value (name, new_e) ])
+  | <span data-count="32">R</span>p_rec decls -&gt;
     let vals =
       List.filter decls ~f:(fun (_, e) -&gt;
-        <span data-count="34">m</span>atch e with
-        | <span data-count="34">R</span>p_e_fun _ -&gt; false
+        <span data-count="35">m</span>atch e with
+        | <span data-count="35">R</span>p_e_fun _ -&gt; false
         | <span data-count="0">_</span> -&gt; true)
     in
-    <span data-count="31">l</span>et funcs =
+    <span data-count="32">l</span>et funcs =
       List.filter_map decls ~f:(fun (name, e) -&gt;
-        <span data-count="34">m</span>atch e with
-        | <span data-count="34">R</span>p_e_fun (args, body) -&gt; Some (name, args, body)
+        <span data-count="35">m</span>atch e with
+        | <span data-count="35">R</span>p_e_fun (args, body) -&gt; Some (name, args, body)
         | <span data-count="0">_</span> -&gt; None)
     in
-    <span data-count="31">l</span>et* vals =
-      RList.ma<span data-count="31">p</span> vals ~f:(fun (name, e) -&gt;
+    <span data-count="32">l</span>et* vals =
+      RList.ma<span data-count="32">p</span> vals ~f:(fun (name, e) -&gt;
         <span data-count="0">l</span>et* new_e = to_ex<span data-count="0">p</span> e in
         <span data-count="0">r</span>eturn @@ Value (name, new_e))
     in
-    <span data-count="31">l</span>et* funcs =
-      RList.ma<span data-count="31">p</span> funcs ~f:(fun (name, args, body) -&gt;
-        <span data-count="34">l</span>et* new_body = to_ex<span data-count="34">p</span> body in
-        <span data-count="34">r</span>eturn @@ (name, args, new_body))
+    <span data-count="32">l</span>et* funcs =
+      RList.ma<span data-count="32">p</span> funcs ~f:(fun (name, args, body) -&gt;
+        <span data-count="35">l</span>et* new_body = to_ex<span data-count="35">p</span> body in
+        <span data-count="35">r</span>eturn @@ (name, args, new_body))
     in
-    <span data-count="31">r</span>eturn @@ vals @ [ Rec funcs ]
+    <span data-count="32">r</span>eturn @@ vals @ [ Rec funcs ]
 ;;
 
 let anf_program program =
-  <span data-count="34">l</span>et rec helper = function
-    | <span data-count="34">[</span>] -&gt; return []
-    | <span data-count="137">h</span>d :: tl -&gt;
-      let* d1 = anf_topleve<span data-count="137">l</span> hd in
-      <span data-count="137">l</span>et* d2 = helpe<span data-count="137">r</span> tl in
-      <span data-count="137">r</span>eturn @@ d1 @ d2
+  <span data-count="35">l</span>et rec helper = function
+    | <span data-count="35">[</span>] -&gt; return []
+    | <span data-count="142">h</span>d :: tl -&gt;
+      let* d1 = anf_topleve<span data-count="142">l</span> hd in
+      <span data-count="142">l</span>et* d2 = helpe<span data-count="142">r</span> tl in
+      <span data-count="142">r</span>eturn @@ d1 @ d2
   in
   helper program
 ;;
 
 let run_to_anf nh init_num p =
-  <span data-count="34">m</span>atch run (anf_progra<span data-count="34">m</span> p) nh init_num with
-  | <span data-count="34">_</span>, _, r -&gt; r
+  <span data-count="35">m</span>atch run (anf_progra<span data-count="35">m</span> p) nh init_num with
+  | <span data-count="35">_</span>, _, r -&gt; r
 ;;
 </code></pre>
       </div>

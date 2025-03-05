@@ -146,51 +146,51 @@ open! Common_llvm
 open! Symbol_map
 
 let declare_func name llvm_t =
-  <span data-count="462">l</span>et func = declare_function name llvm_t the_module in
-  <span data-count="462">a</span>dd_symbol name func;
-  <span data-count="462">a</span>dd_function_type name llvm_t;
-  <span data-count="462">f</span>unc
+  <span data-count="495">l</span>et func = declare_function name llvm_t the_module in
+  <span data-count="495">a</span>dd_symbol name func;
+  <span data-count="495">a</span>dd_function_type name llvm_t;
+  <span data-count="495">f</span>unc
 ;;
 
 let foreign_funcs =
-  [ "create_int", function_typ<span data-count="19">e</span> value_ptr_t [| i64_t |]
-  ; "create_bool", function_typ<span data-count="19">e</span> value_ptr_t [| bool_t |]
-  ; "create_unit", function_typ<span data-count="19">e</span> value_ptr_t [||]
-  ; "get_int", function_typ<span data-count="19">e</span> i64_t [| value_ptr_t |]
-  ; "get_bool", function_typ<span data-count="19">e</span> bool_t [| value_ptr_t |]
-  ; "create_closure", function_typ<span data-count="19">e</span> value_ptr_t [| function_ptr_t; i64_t |]
-  ; "apply", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "print_int", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "print_bool", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "create_empty_list", function_typ<span data-count="19">e</span> value_ptr_t [||]
-  ; "list_cons", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "#list_hd", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "#list_tl", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "#list_length", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "create_tuple", var_arg_function_typ<span data-count="19">e</span> value_ptr_t [| i32_t |]
-  ; "#unpack_tuple", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "#match_failure", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "~+", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "~-", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t |]
-  ; "+", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "-", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "*", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "/", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&amp;&amp;", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "||", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&gt;", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&lt;", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&lt;=", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&gt;=", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "=", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "&lt;&gt;", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "==", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
-  ; "!=", function_typ<span data-count="19">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  [ "create_int", function_typ<span data-count="20">e</span> value_ptr_t [| i64_t |]
+  ; "create_bool", function_typ<span data-count="20">e</span> value_ptr_t [| bool_t |]
+  ; "create_unit", function_typ<span data-count="20">e</span> value_ptr_t [||]
+  ; "get_int", function_typ<span data-count="20">e</span> i64_t [| value_ptr_t |]
+  ; "get_bool", function_typ<span data-count="20">e</span> bool_t [| value_ptr_t |]
+  ; "create_closure", function_typ<span data-count="20">e</span> value_ptr_t [| function_ptr_t; i64_t |]
+  ; "apply", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "print_int", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "print_bool", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "create_empty_list", function_typ<span data-count="20">e</span> value_ptr_t [||]
+  ; "list_cons", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "#list_hd", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "#list_tl", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "#list_length", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "create_tuple", var_arg_function_typ<span data-count="20">e</span> value_ptr_t [| i32_t |]
+  ; "#unpack_tuple", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "#match_failure", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "~+", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "~-", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t |]
+  ; "+", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "-", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "*", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "/", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&amp;&amp;", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "||", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&gt;", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&lt;", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&lt;=", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&gt;=", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "=", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "&lt;&gt;", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "==", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
+  ; "!=", function_typ<span data-count="20">e</span> value_ptr_t [| value_ptr_t; value_ptr_t |]
   ]
 ;;
 
 let declare_foreign_function (name, llvm_t) =
-  <span data-count="462">i</span>gnore (declare_fun<span data-count="462">c</span> (map_stdlib_to_runtim<span data-count="462">e</span> name) llvm_t)
+  <span data-count="495">i</span>gnore (declare_fun<span data-count="495">c</span> (map_stdlib_to_runtim<span data-count="495">e</span> name) llvm_t)
 ;;
 </code></pre>
       </div>

@@ -155,57 +155,57 @@ open! Llvm
 open! Llvm_target
 
 (* В начале компилятора, при создании модуля *)
-let ctx = global_contex<span data-count="19">t</span> ()
-let the_module = create_modul<span data-count="19">e</span> ctx "XAXAML"
-let target_triple = Llvm_target.Target.default_tripl<span data-count="19">e</span> ()
-let () = Llvm.set_target_tripl<span data-count="19">e</span> target_triple the_module
+let ctx = global_contex<span data-count="20">t</span> ()
+let the_module = create_modul<span data-count="20">e</span> ctx "XAXAML"
+let target_triple = Llvm_target.Target.default_tripl<span data-count="20">e</span> ()
+let () = Llvm.set_target_tripl<span data-count="20">e</span> target_triple the_module
 
 let () =
   Llvm_all_backends.initialize ();
-  <span data-count="19">l</span>et target = Llvm_target.Target.by_triple target_triple in
-  <span data-count="19">l</span>et machine = Llvm_target.TargetMachine.create ~triple:target_triple target in
-  <span data-count="19">l</span>et data_layout = Llvm_target.TargetMachine.data_layout machine in
-  <span data-count="19">L</span>lvm.set_data_layou<span data-count="19">t</span> (Llvm_target.DataLayout.as_strin<span data-count="19">g</span> data_layout) the_module
+  <span data-count="20">l</span>et target = Llvm_target.Target.by_triple target_triple in
+  <span data-count="20">l</span>et machine = Llvm_target.TargetMachine.create ~triple:target_triple target in
+  <span data-count="20">l</span>et data_layout = Llvm_target.TargetMachine.data_layout machine in
+  <span data-count="20">L</span>lvm.set_data_layou<span data-count="20">t</span> (Llvm_target.DataLayout.as_strin<span data-count="20">g</span> data_layout) the_module
 ;;
 
-let builder = builde<span data-count="19">r</span> ctx
+let builder = builde<span data-count="20">r</span> ctx
 
 (* Базовые типы *)
-let i64_t = i64_typ<span data-count="19">e</span> ctx
-let i32_t = i32_typ<span data-count="19">e</span> ctx
-let i8_t = i8_typ<span data-count="19">e</span> ctx
-let bool_t = i1_typ<span data-count="19">e</span> ctx
-let void_t = void_typ<span data-count="19">e</span> ctx
+let i64_t = i64_typ<span data-count="20">e</span> ctx
+let i32_t = i32_typ<span data-count="20">e</span> ctx
+let i8_t = i8_typ<span data-count="20">e</span> ctx
+let bool_t = i1_typ<span data-count="20">e</span> ctx
+let void_t = void_typ<span data-count="20">e</span> ctx
 
 (* Определение Value* типа *)
-let value_ptr_t = pointer_typ<span data-count="19">e</span> ctx
+let value_ptr_t = pointer_typ<span data-count="20">e</span> ctx
 
 (* Определение FunctionPtr типа *)
-let function_ptr_t = pointer_typ<span data-count="19">e</span> ctx
+let function_ptr_t = pointer_typ<span data-count="20">e</span> ctx
 
 let map_stdlib_to_runtime = function
-  | <span data-count="32">"</span>+" -&gt; "add"
-  | <span data-count="25">"</span>-" -&gt; "sub"
-  | <span data-count="22">"</span>*" -&gt; "mul"
-  | <span data-count="16">"</span>/" -&gt; "div_op"
-  | <span data-count="30">"</span>=" -&gt; "eq"
-  | <span data-count="14">"</span>&lt;&gt;" -&gt; "ne"
-  | <span data-count="15">"</span>&lt;" -&gt; "lt"
-  | <span data-count="24">"</span>&gt;" -&gt; "gt"
-  | <span data-count="17">"</span>&lt;=" -&gt; "le"
-  | <span data-count="14">"</span>&gt;=" -&gt; "ge"
-  | <span data-count="17">"</span>&amp;&amp;" -&gt; "and_op"
-  | <span data-count="14">"</span>||" -&gt; "or_op"
-  | <span data-count="14">"</span>~+" -&gt; "uplus"
-  | <span data-count="16">"</span>~-" -&gt; "uminus"
-  | <span data-count="14">"</span>!=" -&gt; "phys_ne"
-  | <span data-count="16">"</span>==" -&gt; "phys_eq"
-  | <span data-count="30">"</span>#list_hd" -&gt; "list_hd"
-  | <span data-count="40">"</span>#list_tl" -&gt; "list_tl"
-  | <span data-count="24">"</span>#list_length" -&gt; "list_length"
-  | <span data-count="22">"</span>#unpack_tuple" -&gt; "unpack_tuple"
-  | <span data-count="21">"</span>#match_failure" -&gt; "match_failure"
-  | <span data-count="3426">o</span>ther -&gt; other
+  | <span data-count="34">"</span>+" -&gt; "add"
+  | <span data-count="28">"</span>-" -&gt; "sub"
+  | <span data-count="23">"</span>*" -&gt; "mul"
+  | <span data-count="17">"</span>/" -&gt; "div_op"
+  | <span data-count="31">"</span>=" -&gt; "eq"
+  | <span data-count="15">"</span>&lt;&gt;" -&gt; "ne"
+  | <span data-count="17">"</span>&lt;" -&gt; "lt"
+  | <span data-count="25">"</span>&gt;" -&gt; "gt"
+  | <span data-count="18">"</span>&lt;=" -&gt; "le"
+  | <span data-count="15">"</span>&gt;=" -&gt; "ge"
+  | <span data-count="18">"</span>&amp;&amp;" -&gt; "and_op"
+  | <span data-count="15">"</span>||" -&gt; "or_op"
+  | <span data-count="15">"</span>~+" -&gt; "uplus"
+  | <span data-count="17">"</span>~-" -&gt; "uminus"
+  | <span data-count="15">"</span>!=" -&gt; "phys_ne"
+  | <span data-count="17">"</span>==" -&gt; "phys_eq"
+  | <span data-count="31">"</span>#list_hd" -&gt; "list_hd"
+  | <span data-count="41">"</span>#list_tl" -&gt; "list_tl"
+  | <span data-count="25">"</span>#list_length" -&gt; "list_length"
+  | <span data-count="23">"</span>#unpack_tuple" -&gt; "unpack_tuple"
+  | <span data-count="22">"</span>#match_failure" -&gt; "match_failure"
+  | <span data-count="3620">o</span>ther -&gt; other
 ;;
 </code></pre>
       </div>

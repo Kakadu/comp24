@@ -499,10 +499,10 @@ open! Stdlib_llvm
 open! Symbol_map
 
 let rec compile_aexp : aexp -&gt; llvalue = function
-  | <span data-count="124">A</span>e_int i -&gt;
+  | <span data-count="128">A</span>e_int i -&gt;
     let create_int_func = lookup_symbol "create_int" in
-    <span data-count="124">l</span>et create_int_type = lookup_function_type "create_int" in
-    <span data-count="124">b</span>uild_call create_int_type create_int_func [| const_in<span data-count="124">t</span> i64_t i |] "boxed_int" builder
+    <span data-count="128">l</span>et create_int_type = lookup_function_type "create_int" in
+    <span data-count="128">b</span>uild_call create_int_type create_int_func [| const_in<span data-count="128">t</span> i64_t i |] "boxed_int" builder
   | <span data-count="5">A</span>e_bool b -&gt;
     let create_bool_func = lookup_symbol "create_bool" in
     <span data-count="5">l</span>et create_bool_type = lookup_function_type "create_bool" in
@@ -516,14 +516,14 @@ let rec compile_aexp : aexp -&gt; llvalue = function
     let create_unit_func = lookup_symbol "create_unit" in
     <span data-count="1">l</span>et create_unit_type = lookup_function_type "create_unit" in
     <span data-count="1">b</span>uild_call create_unit_type create_unit_func [||] "boxed_unit" builder
-  | <span data-count="360">A</span>e_val name -&gt;
+  | <span data-count="380">A</span>e_val name -&gt;
     let value = lookup_symbol name in
-    <span data-count="360">l</span>et maybe_closure =
+    <span data-count="380">l</span>et maybe_closure =
       match Llvm.classify_value value with
-      | <span data-count="22">L</span>lvm.ValueKind.Function -&gt;
-        let arity = Array.length (param<span data-count="22">s</span> value) in
-        <span data-count="22">c</span>ompile_closur<span data-count="22">e</span> value arity
-      | <span data-count="338">_</span> -&gt; value
+      | <span data-count="24">L</span>lvm.ValueKind.Function -&gt;
+        let arity = Array.length (param<span data-count="24">s</span> value) in
+        <span data-count="24">c</span>ompile_closur<span data-count="24">e</span> value arity
+      | <span data-count="356">_</span> -&gt; value
     in
     maybe_closure
   | <span data-count="19">A</span>e_empty_list -&gt;
@@ -544,22 +544,22 @@ let rec compile_aexp : aexp -&gt; llvalue = function
 
 and compile_app name args =
   (* Получаем значение функции *)
-  <span data-count="246">l</span>et func_val = lookup_symbol name in
+  <span data-count="258">l</span>et func_val = lookup_symbol name in
   (* Создаем замыкание для функции, если это функция *)
-  <span data-count="246">l</span>et maybe_closure =
+  <span data-count="258">l</span>et maybe_closure =
     match Llvm.classify_value func_val with
-    | <span data-count="218">L</span>lvm.ValueKind.Function -&gt;
-      let arity = Array.length (param<span data-count="218">s</span> func_val) in
-      <span data-count="218">c</span>ompile_closur<span data-count="218">e</span> func_val arity
-    | <span data-count="28">_</span> -&gt; func_val
+    | <span data-count="227">L</span>lvm.ValueKind.Function -&gt;
+      let arity = Array.length (param<span data-count="227">s</span> func_val) in
+      <span data-count="227">c</span>ompile_closur<span data-count="227">e</span> func_val arity
+    | <span data-count="31">_</span> -&gt; func_val
   in
   (* Применяем аргументы через apply *)
   let apply_func = lookup_symbol "apply" in
-  <span data-count="246">l</span>et apply_type = lookup_function_type "apply" in
-  <span data-count="246">L</span>ist.fold_left
+  <span data-count="258">l</span>et apply_type = lookup_function_type "apply" in
+  <span data-count="258">L</span>ist.fold_left
     (fun acc_closure arg -&gt;
-      <span data-count="382">l</span>et compiled_arg = compile_aexp arg in
-      <span data-count="382">b</span>uild_call
+      <span data-count="404">l</span>et compiled_arg = compile_aexp arg in
+      <span data-count="404">b</span>uild_call
         apply_type
         apply_func
         [| acc_closure; compiled_arg |]
@@ -569,34 +569,34 @@ and compile_app name args =
     args
 
 and compile_ite cond t f =
-  <span data-count="30">l</span>et cond_val = compile_aexp cond in
+  <span data-count="31">l</span>et cond_val = compile_aexp cond in
   (* Получаем функцию get_bool для извлечения булева значения *)
-  <span data-count="30">l</span>et get_bool_func = lookup_symbol "get_bool" in
-  <span data-count="30">l</span>et get_bool_type = lookup_function_type "get_bool" in
-  <span data-count="30">l</span>et bool_val =
+  <span data-count="31">l</span>et get_bool_func = lookup_symbol "get_bool" in
+  <span data-count="31">l</span>et get_bool_type = lookup_function_type "get_bool" in
+  <span data-count="31">l</span>et bool_val =
     build_call get_bool_type get_bool_func [| cond_val |] "cond_bool" builder
   in
   (* Создаем базовые блоки для IF-THEN-ELSE *)
-  <span data-count="30">l</span>et current_func = block_parent (insertion_bloc<span data-count="30">k</span> builder) in
-  <span data-count="30">l</span>et then_block = append_block ctx "then" current_func in
-  <span data-count="30">l</span>et else_block = append_block ctx "else" current_func in
-  <span data-count="30">l</span>et merge_block = append_block ctx "merge" current_func in
+  <span data-count="31">l</span>et current_func = block_parent (insertion_bloc<span data-count="31">k</span> builder) in
+  <span data-count="31">l</span>et then_block = append_block ctx "then" current_func in
+  <span data-count="31">l</span>et else_block = append_block ctx "else" current_func in
+  <span data-count="31">l</span>et merge_block = append_block ctx "merge" current_func in
   (* Создаем условный переход *)
-  <span data-count="30">i</span>gnore (build_cond_b<span data-count="30">r</span> bool_val then_block else_block builder);
+  <span data-count="31">i</span>gnore (build_cond_b<span data-count="31">r</span> bool_val then_block else_block builder);
   (* Компилируем THEN блок *)
   position_at_end then_block builder;
-  <span data-count="30">l</span>et then_val = compile_exp t in
-  <span data-count="30">i</span>gnore (build_b<span data-count="30">r</span> merge_block builder);
+  <span data-count="31">l</span>et then_val = compile_exp t in
+  <span data-count="31">i</span>gnore (build_b<span data-count="31">r</span> merge_block builder);
   let then_bb = insertion_block builder in
   (* Компилируем ELSE блок *)
-  <span data-count="30">p</span>osition_at_end else_block builder;
-  <span data-count="30">l</span>et else_val = compile_exp f in
-  <span data-count="30">i</span>gnore (build_b<span data-count="30">r</span> merge_block builder);
+  <span data-count="31">p</span>osition_at_end else_block builder;
+  <span data-count="31">l</span>et else_val = compile_exp f in
+  <span data-count="31">i</span>gnore (build_b<span data-count="31">r</span> merge_block builder);
   let else_bb = insertion_block builder in
   (* Создаем PHI-узел для объединения результатов *)
-  <span data-count="30">p</span>osition_at_end merge_block builder;
-  <span data-count="30">l</span>et phi = build_phi [ then_val, then_bb; else_val, else_bb ] "ite_result" builder in
-  <span data-count="30">p</span>hi
+  <span data-count="31">p</span>osition_at_end merge_block builder;
+  <span data-count="31">l</span>et phi = build_phi [ then_val, then_bb; else_val, else_bb ] "ite_result" builder in
+  <span data-count="31">p</span>hi
 
 and compile_cons_list car cdr =
   <span data-count="20">l</span>et compiled_car = compile_aexp car in
@@ -606,117 +606,117 @@ and compile_cons_list car cdr =
   <span data-count="20">b</span>uild_call cons_type cons_func [| compiled_car; compiled_cdr |] "list_cons" builder
 
 and compile_cexp = function
-  | <span data-count="50">C</span>e_atom aexp -&gt; compile_aexp aexp
-  | <span data-count="246">C</span>e_app (f, args) -&gt; compile_app f args
-  | <span data-count="30">C</span>e_ite (cond, t, f) -&gt; compile_ite cond t f
+  | <span data-count="51">C</span>e_atom aexp -&gt; compile_aexp aexp
+  | <span data-count="258">C</span>e_app (f, args) -&gt; compile_app f args
+  | <span data-count="31">C</span>e_ite (cond, t, f) -&gt; compile_ite cond t f
   | <span data-count="20">C</span>e_cons_list (car, cdr) -&gt; compile_cons_list car cdr
 
 and compile_exp = function
-  | <span data-count="119">E</span>_complex cexp -&gt; compile_cexp cexp
-  | <span data-count="227">E</span>_let_in (name, cexp, e) -&gt;
+  | <span data-count="126">E</span>_complex cexp -&gt; compile_cexp cexp
+  | <span data-count="234">E</span>_let_in (name, cexp, e) -&gt;
     let val_result = compile_cexp cexp in
-    <span data-count="227">a</span>dd_symbol name val_result;
-    <span data-count="227">c</span>ompile_exp e
+    <span data-count="234">a</span>dd_symbol name val_result;
+    <span data-count="234">c</span>ompile_exp e
 
 and compile_closure func arity =
   (* Создаем замыкание для функции *)
-  <span data-count="240">l</span>et create_closure_func = lookup_symbol "create_closure" in
-  <span data-count="240">l</span>et create_closure_type = lookup_function_type "create_closure" in
+  <span data-count="251">l</span>et create_closure_func = lookup_symbol "create_closure" in
+  <span data-count="251">l</span>et create_closure_type = lookup_function_type "create_closure" in
   (* Создаем указатель на функцию *)
-  <span data-count="240">l</span>et function_ptr = build_bitcast func (pointer_typ<span data-count="240">e</span> ctx) "func_ptr_cast" builder in
+  <span data-count="251">l</span>et function_ptr = build_bitcast func (pointer_typ<span data-count="251">e</span> ctx) "func_ptr_cast" builder in
   (* Создаем замыкание и возвращаем его *)
-  <span data-count="240">b</span>uild_call
+  <span data-count="251">b</span>uild_call
     create_closure_type
     create_closure_func
-    [| function_ptr; const_in<span data-count="240">t</span> i64_t arity |]
+    [| function_ptr; const_in<span data-count="251">t</span> i64_t arity |]
     "closure"
     builder
 ;;
 
 let declare_function (name, args, _) =
-  <span data-count="42">l</span>et func_type = function_type value_ptr_t (Array.mak<span data-count="42">e</span> (List.lengt<span data-count="42">h</span> args) value_ptr_t) in
-  <span data-count="42">l</span>et func = declare_function name func_type the_module in
-  <span data-count="42">a</span>dd_symbol name func;
-  <span data-count="42">a</span>dd_function_type name func_type;
-  <span data-count="42">f</span>unc
+  <span data-count="46">l</span>et func_type = function_type value_ptr_t (Array.mak<span data-count="46">e</span> (List.lengt<span data-count="46">h</span> args) value_ptr_t) in
+  <span data-count="46">l</span>et func = declare_function name func_type the_module in
+  <span data-count="46">a</span>dd_symbol name func;
+  <span data-count="46">a</span>dd_function_type name func_type;
+  <span data-count="46">f</span>unc
 ;;
 
 let compile_function (name, args, exp) =
   (* Получаем функцию, объявленную ранее *)
-  <span data-count="42">l</span>et func = lookup_symbol name in
+  <span data-count="46">l</span>et func = lookup_symbol name in
   (* Компилируем тело функции *)
-  <span data-count="42">l</span>et entry = append_block ctx "entry" func in
-  <span data-count="42">p</span>osition_at_end entry builder;
+  <span data-count="46">l</span>et entry = append_block ctx "entry" func in
+  <span data-count="46">p</span>osition_at_end entry builder;
   (* Получаем параметры функции *)
-  <span data-count="42">l</span>et llvm_params = params func in
+  <span data-count="46">l</span>et llvm_params = params func in
   (* Связываем параметры с именами аргументов *)
-  <span data-count="42">L</span>ist.iteri
+  <span data-count="46">L</span>ist.iteri
     (fun i arg_name -&gt;
-      <span data-count="87">l</span>et param = Array.get llvm_params i in
-      <span data-count="87">s</span>et_value_name arg_name param;
-      <span data-count="87">a</span>dd_symbol arg_name param)
+      <span data-count="97">l</span>et param = Array.get llvm_params i in
+      <span data-count="97">s</span>et_value_name arg_name param;
+      <span data-count="97">a</span>dd_symbol arg_name param)
     args;
   (* Компилируем тело функции *)
-  <span data-count="42">l</span>et body_return = compile_exp exp in
+  <span data-count="46">l</span>et body_return = compile_exp exp in
   (* Добавляем возврат - это должно быть последней инструкцией в блоке *)
-  <span data-count="42">i</span>gnore (build_re<span data-count="42">t</span> body_return builder)
+  <span data-count="46">i</span>gnore (build_re<span data-count="46">t</span> body_return builder)
 ;;
 
 let compile_value name value =
   (* Глобальная переменная должна быть уже создана, получаем её *)
-  <span data-count="17">l</span>et global_var = lookup_symbol name in
+  <span data-count="18">l</span>et global_var = lookup_symbol name in
   (* Компилируем значение в контексте main *)
-  <span data-count="17">l</span>et compiled_val = compile_exp value in
+  <span data-count="18">l</span>et compiled_val = compile_exp value in
   (* Сохраняем скомпилированное значение в глобальной переменной *)
-  <span data-count="17">i</span>gnore (build_stor<span data-count="17">e</span> compiled_val global_var builder);
+  <span data-count="18">i</span>gnore (build_stor<span data-count="18">e</span> compiled_val global_var builder);
   (* Добавляем символ, указывающий на скомпилированное значение *)
   add_symbol name compiled_val;
-  <span data-count="17">c</span>ompiled_val
+  <span data-count="18">c</span>ompiled_val
 ;;
 
 let declare_global_value name value =
   (* Создаем глобальную переменную для хранения значения *)
-  <span data-count="17">l</span>et global_var = define_global name (const_nul<span data-count="17">l</span> value_ptr_t) the_module in
-  <span data-count="17">a</span>dd_symbol name global_var;
+  <span data-count="18">l</span>et global_var = define_global name (const_nul<span data-count="18">l</span> value_ptr_t) the_module in
+  <span data-count="18">a</span>dd_symbol name global_var;
   (* Возвращаем созданную глобальную переменную *)
-  <span data-count="17">g</span>lobal_var
+  <span data-count="18">g</span>lobal_var
 ;;
 
 let compile_main program =
   (* Создаем точку входа программы *)
-  <span data-count="14">l</span>et main_type = function_type i32_t [||] in
-  <span data-count="14">l</span>et main_func = Llvm.declare_function "main" main_type the_module in
-  <span data-count="14">l</span>et entry = append_block ctx "entry" main_func in
-  <span data-count="14">p</span>osition_at_end entry builder;
+  <span data-count="15">l</span>et main_type = function_type i32_t [||] in
+  <span data-count="15">l</span>et main_func = Llvm.declare_function "main" main_type the_module in
+  <span data-count="15">l</span>et entry = append_block ctx "entry" main_func in
+  <span data-count="15">p</span>osition_at_end entry builder;
   (* Инициализируем значения *)
-  <span data-count="14">L</span>ist.iter
+  <span data-count="15">L</span>ist.iter
     (function
-      | <span data-count="17">V</span>alue (name, value) -&gt; ignore (compile_valu<span data-count="17">e</span> name value)
-      | <span data-count="41">_</span> -&gt; ())
+      | <span data-count="18">V</span>alue (name, value) -&gt; ignore (compile_valu<span data-count="18">e</span> name value)
+      | <span data-count="45">_</span> -&gt; ())
     program;
   (* Возвращаем успешный код завершения *)
-  <span data-count="14">i</span>gnore (build_re<span data-count="14">t</span> (const_in<span data-count="14">t</span> i32_t 0) builder)
+  <span data-count="15">i</span>gnore (build_re<span data-count="15">t</span> (const_in<span data-count="15">t</span> i32_t 0) builder)
 ;;
 
-let compile_program ?(verbose = <span data-count="14">f</span>alse) (program : anf_program) =
+let compile_program ?(verbose = <span data-count="15">f</span>alse) (program : anf_program) =
   (* Объявляем внешние функции и стандартные операции *)
-  <span data-count="14">L</span>ist.iter declare_foreign_function foreign_funcs;
+  <span data-count="15">L</span>ist.iter declare_foreign_function foreign_funcs;
   (* Компилируем определения функций и значений из программы *)
-  <span data-count="14">L</span>ist.iter
+  <span data-count="15">L</span>ist.iter
     (function
-      | <span data-count="26">N</span>on_rec func -&gt;
+      | <span data-count="29">N</span>on_rec func -&gt;
         let _ = declare_function func in
-        <span data-count="26">c</span>ompile_function func
-      | <span data-count="15">R</span>ec funcs -&gt;
-        List.iter (fun f -&gt; <span data-count="16">i</span>gnore (declare_functio<span data-count="16">n</span> f)) funcs;
-        <span data-count="15">L</span>ist.iter compile_function funcs
-      | <span data-count="17">V</span>alue (name, value) -&gt; ignore (declare_global_valu<span data-count="17">e</span> name value))
+        <span data-count="29">c</span>ompile_function func
+      | <span data-count="16">R</span>ec funcs -&gt;
+        List.iter (fun f -&gt; <span data-count="17">i</span>gnore (declare_functio<span data-count="17">n</span> f)) funcs;
+        <span data-count="16">L</span>ist.iter compile_function funcs
+      | <span data-count="18">V</span>alue (name, value) -&gt; ignore (declare_global_valu<span data-count="18">e</span> name value))
     program;
   (* Компилируем точку входа *)
-  <span data-count="14">c</span>ompile_main program;
+  <span data-count="15">c</span>ompile_main program;
   (* Вывод LLVM IR кода *)
-  <span data-count="14">p</span>rint_module "out.ll" the_module;
-  <span data-count="14">i</span>f verbose then <span data-count="0">d</span>ump_module the_module
+  <span data-count="15">p</span>rint_module "out.ll" the_module;
+  <span data-count="15">i</span>f verbose then <span data-count="0">d</span>ump_module the_module
 ;;
 </code></pre>
       </div>

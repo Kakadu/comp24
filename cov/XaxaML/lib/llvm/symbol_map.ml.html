@@ -97,27 +97,27 @@ open! Llvm
 open! Common_llvm
 
 (* Единая таблица символов для всех значений *)
-let symbols : (string, llvalue) Hashtbl.t = Hashtbl.creat<span data-count="19">e</span> 10
+let symbols : (string, llvalue) Hashtbl.t = Hashtbl.creat<span data-count="20">e</span> 10
 
 (* Отдельная таблица для хранения типов функций *)
-let function_types : (string, lltype) Hashtbl.t = Hashtbl.creat<span data-count="19">e</span> 10
+let function_types : (string, lltype) Hashtbl.t = Hashtbl.creat<span data-count="20">e</span> 10
 
 let lookup_symbol name =
-  <span data-count="1355">m</span>atch Hashtbl.find_opt symbols (map_stdlib_to_runtim<span data-count="1355">e</span> name) with
-  | <span data-count="1355">S</span>ome v -&gt; v
+  <span data-count="1420">m</span>atch Hashtbl.find_opt symbols (map_stdlib_to_runtim<span data-count="1420">e</span> name) with
+  | <span data-count="1420">S</span>ome v -&gt; v
   | <span data-count="0">N</span>one -&gt; failwith (Printf.sprint<span data-count="0">f</span> "Symbol not found: %s" name)
 ;;
 
 let lookup_function_type name =
-  <span data-count="690">m</span>atch Hashtbl.find_opt function_types (map_stdlib_to_runtim<span data-count="690">e</span> name) with
-  | <span data-count="690">S</span>ome t -&gt; t
+  <span data-count="718">m</span>atch Hashtbl.find_opt function_types (map_stdlib_to_runtim<span data-count="718">e</span> name) with
+  | <span data-count="718">S</span>ome t -&gt; t
   | <span data-count="0">N</span>one -&gt; failwith (Printf.sprint<span data-count="0">f</span> "Function type not found: %s" name)
 ;;
 
-let add_symbol name value = <span data-count="852">H</span>ashtbl.add symbols (map_stdlib_to_runtim<span data-count="852">e</span> name) value
+let add_symbol name value = <span data-count="908">H</span>ashtbl.add symbols (map_stdlib_to_runtim<span data-count="908">e</span> name) value
 
 let add_function_type name ftype =
-  <span data-count="504">H</span>ashtbl.add function_types (map_stdlib_to_runtim<span data-count="504">e</span> name) ftype
+  <span data-count="541">H</span>ashtbl.add function_types (map_stdlib_to_runtim<span data-count="541">e</span> name) ftype
 ;;
 </code></pre>
       </div>

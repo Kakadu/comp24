@@ -953,12 +953,12 @@ open Base
 open Common
 open Common.MonadCounter
 
-let empty_bindings = Map.empt<span data-count="65">y</span> (module String)
+let empty_bindings = Map.empt<span data-count="66">y</span> (module String)
 let get_name i = <span data-count="79">"</span>a" ^ Int.to_strin<span data-count="79">g</span> i
 
 let convert_const = function
   | <span data-count="16">A</span>st.C_bool b -&gt; Rp_c_bool b
-  | <span data-count="320">A</span>st.C_int i -&gt; Rp_c_int i
+  | <span data-count="324">A</span>st.C_int i -&gt; Rp_c_int i
   | <span data-count="51">A</span>st.C_empty_list -&gt; Rp_c_empty_list
   | <span data-count="2">A</span>st.C_unit -&gt; Rp_c_unit
 ;;
@@ -1051,17 +1051,17 @@ let match_failure = Rp_e_ident "#match_failure"
 
 let rec rp_expr = function
   | <span data-count="4">A</span>st.E_typed (e, _) -&gt; rp_expr e
-  | <span data-count="358">E</span>_const c -&gt; return @@ Rp_e_const (convert_cons<span data-count="358">t</span> c)
-  | <span data-count="850">E</span>_ident v -&gt; return @@ Rp_e_ident v
-  | <span data-count="733">E</span>_app (e1, e2) -&gt;
-    let* e1 = rp_exp<span data-count="733">r</span> e1 in
-    <span data-count="733">l</span>et* e2 = rp_exp<span data-count="733">r</span> e2 in
-    <span data-count="733">r</span>eturn @@ Rp_e_app (e1, e2)
-  | <span data-count="36">E</span>_ite (e1, e2, e3) -&gt;
-    let* e1 = rp_exp<span data-count="36">r</span> e1 in
-    <span data-count="36">l</span>et* e2 = rp_exp<span data-count="36">r</span> e2 in
-    <span data-count="36">l</span>et* e3 = rp_exp<span data-count="36">r</span> e3 in
-    <span data-count="36">r</span>eturn @@ Rp_e_ite (e1, e2, e3)
+  | <span data-count="362">E</span>_const c -&gt; return @@ Rp_e_const (convert_cons<span data-count="362">t</span> c)
+  | <span data-count="867">E</span>_ident v -&gt; return @@ Rp_e_ident v
+  | <span data-count="750">E</span>_app (e1, e2) -&gt;
+    let* e1 = rp_exp<span data-count="750">r</span> e1 in
+    <span data-count="750">l</span>et* e2 = rp_exp<span data-count="750">r</span> e2 in
+    <span data-count="750">r</span>eturn @@ Rp_e_app (e1, e2)
+  | <span data-count="37">E</span>_ite (e1, e2, e3) -&gt;
+    let* e1 = rp_exp<span data-count="37">r</span> e1 in
+    <span data-count="37">l</span>et* e2 = rp_exp<span data-count="37">r</span> e2 in
+    <span data-count="37">l</span>et* e3 = rp_exp<span data-count="37">r</span> e3 in
+    <span data-count="37">r</span>eturn @@ Rp_e_ite (e1, e2, e3)
   | <span data-count="60">E</span>_cons_list (e1, e2) -&gt;
     let* e1 = rp_exp<span data-count="60">r</span> e1 in
     <span data-count="60">l</span>et* e2 = rp_exp<span data-count="60">r</span> e2 in
@@ -1070,24 +1070,24 @@ let rec rp_expr = function
     let* e = rp_exp<span data-count="17">r</span> e in
     <span data-count="17">l</span>et* e_list = RList.ma<span data-count="17">p</span> e_list ~f:(fun e -&gt; <span data-count="18">r</span>p_expr e) in
     <span data-count="17">r</span>eturn @@ Rp_e_tuple (e :: e_list)
-  | <span data-count="148">E</span>_fun (first, other, body) -&gt;
+  | <span data-count="152">E</span>_fun (first, other, body) -&gt;
     let last_args = first :: other in
     let f1 (new_args, args_to_match, pat_list) arg =
-      <span data-count="250">m</span>atch arg with
-      | <span data-count="236">A</span>st.P_val v -&gt; return (v :: new_args, args_to_match, pat_list)
+      <span data-count="255">m</span>atch arg with
+      | <span data-count="241">A</span>st.P_val v -&gt; return (v :: new_args, args_to_match, pat_list)
       | <span data-count="14">_</span> -&gt;
         let* fresh_name = fresh &gt;&gt;<span data-count="14">|</span> get_name in
         <span data-count="14">r</span>eturn (fresh_name :: new_args, fresh_name :: args_to_match, arg :: pat_list)
     in
     let* new_args, args_to_match, pat_list =
-      RList.fold_lef<span data-count="148">t</span> last_args ~init:(retur<span data-count="148">n</span> ([], [], [])) ~f:f1
+      RList.fold_lef<span data-count="152">t</span> last_args ~init:(retur<span data-count="152">n</span> ([], [], [])) ~f:f1
     in
-    <span data-count="148">l</span>et new_args = List.rev new_args in
-    <span data-count="148">l</span>et args_to_match = List.rev args_to_match in
-    <span data-count="148">l</span>et pat_list = List.rev pat_list in
-    <span data-count="148">l</span>et* new_body = rp_exp<span data-count="148">r</span> body in
-    <span data-count="148">(</span>match List.length args_to_match with
-     | <span data-count="141">0</span> -&gt; return @@ Rp_e_fun (new_args, new_body)
+    <span data-count="152">l</span>et new_args = List.rev new_args in
+    <span data-count="152">l</span>et args_to_match = List.rev args_to_match in
+    <span data-count="152">l</span>et pat_list = List.rev pat_list in
+    <span data-count="152">l</span>et* new_body = rp_exp<span data-count="152">r</span> body in
+    <span data-count="152">(</span>match List.length args_to_match with
+     | <span data-count="145">0</span> -&gt; return @@ Rp_e_fun (new_args, new_body)
      | <span data-count="4">1</span> -&gt;
        let pat = List.hd_exn pat_list in
        <span data-count="4">l</span>et to_match = Rp_e_ident (List.hd_ex<span data-count="4">n</span> args_to_match) in
@@ -1144,15 +1144,15 @@ and rp_match to_match = function
   | <span data-count="17">_</span> -&gt; return @@ Rp_e_ident "#match_failure"
 
 and rp_rec_decl decl_list =
-  <span data-count="43">l</span>et f1 (pat, _, e) =
-    <span data-count="49">l</span>et* e = rp_exp<span data-count="49">r</span> e in
-    <span data-count="49">r</span>eturn
+  <span data-count="44">l</span>et f1 (pat, _, e) =
+    <span data-count="50">l</span>et* e = rp_exp<span data-count="50">r</span> e in
+    <span data-count="50">r</span>eturn
       (match pat with
-       | <span data-count="49">A</span>st.P_val v -&gt; v, e
+       | <span data-count="50">A</span>st.P_val v -&gt; v, e
        | <span data-count="0">_</span> -&gt; "", e)
   in
-  let* new_decls = RList.ma<span data-count="43">p</span> decl_list ~f:f1 in
-  <span data-count="43">r</span>eturn @@ Rp_rec new_decls
+  let* new_decls = RList.ma<span data-count="44">p</span> decl_list ~f:f1 in
+  <span data-count="44">r</span>eturn @@ Rp_rec new_decls
 ;;
 
 let rp_toplevel = function
@@ -1160,10 +1160,10 @@ let rp_toplevel = function
     let* fresh = fresh &gt;&gt;<span data-count="0">|</span> get_name in
     <span data-count="0">l</span>et* e = rp_exp<span data-count="0">r</span> e in
     <span data-count="0">r</span>eturn [ Rp_non_rec (fresh, e) ]
-  | <span data-count="101">L</span>et_decl (Non_rec (pat, _, e)) -&gt;
-    let* e = rp_exp<span data-count="101">r</span> e in
-    <span data-count="101">(</span>match pat with
-     | <span data-count="99">P</span>_val name -&gt; return [ Rp_non_rec (name, e) ]
+  | <span data-count="102">L</span>et_decl (Non_rec (pat, _, e)) -&gt;
+    let* e = rp_exp<span data-count="102">r</span> e in
+    <span data-count="102">(</span>match pat with
+     | <span data-count="100">P</span>_val name -&gt; return [ Rp_non_rec (name, e) ]
      | <span data-count="2">p</span>at -&gt;
        let* fresh_name = fresh &gt;&gt;<span data-count="2">|</span> get_name in
        <span data-count="2">l</span>et to_unpack = Rp_e_ident fresh_name in
@@ -1177,23 +1177,23 @@ let rp_toplevel = function
          in
          <span data-count="1">l</span>et* for_checks = fresh &gt;&gt;<span data-count="1">|</span> get_name in
          <span data-count="1">r</span>eturn (Rp_non_rec (fresh_name, e) :: Rp_non_rec (for_checks, ite) :: decls)))
-  | <span data-count="35">L</span>et_decl (Rec decl_list) -&gt;
-    let* decl_list = rp_rec_dec<span data-count="35">l</span> decl_list in
-    <span data-count="35">r</span>eturn [ decl_list ]
+  | <span data-count="36">L</span>et_decl (Rec decl_list) -&gt;
+    let* decl_list = rp_rec_dec<span data-count="36">l</span> decl_list in
+    <span data-count="36">r</span>eturn [ decl_list ]
 ;;
 
 let rp_program program =
-  <span data-count="60">l</span>et rec helper = function
-    | <span data-count="60">[</span>] -&gt; return []
-    | <span data-count="136">h</span>d :: tl -&gt;
-      let* hd = rp_topleve<span data-count="136">l</span> hd in
-      <span data-count="136">l</span>et* tl = helpe<span data-count="136">r</span> tl in
-      <span data-count="136">r</span>eturn @@ hd @ tl
+  <span data-count="61">l</span>et rec helper = function
+    | <span data-count="61">[</span>] -&gt; return []
+    | <span data-count="138">h</span>d :: tl -&gt;
+      let* hd = rp_topleve<span data-count="138">l</span> hd in
+      <span data-count="138">l</span>et* tl = helpe<span data-count="138">r</span> tl in
+      <span data-count="138">r</span>eturn @@ hd @ tl
   in
   helper program
 ;;
 
-let run p = <span data-count="60">r</span>un (rp_progra<span data-count="60">m</span> p) (NamesHolder.creat<span data-count="60">e</span> p) 0
+let run p = <span data-count="61">r</span>un (rp_progra<span data-count="61">m</span> p) (NamesHolder.creat<span data-count="61">e</span> p) 0
 </code></pre>
       </div>
     </div>
