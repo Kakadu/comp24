@@ -5,6 +5,7 @@
 open Typedtree
 open Ast
 open Format
+open Containers
 
 module R : sig
   type 'a t
@@ -84,13 +85,13 @@ module Type = struct
 
   let free_vars =
     let rec helper acc = function
-      | ITVar b -> VarSet.add b acc
+      | ITVar b -> VarISet.add b acc
       | ITPrim _ -> acc
       | ITArr (l, r) -> helper (helper acc l) r
       | ITTuple t -> List.fold_left (fun acc h -> helper acc h) acc t
       | ITList l -> helper acc l
     in
-    helper VarSet.empty
+    helper VarISet.empty
   ;;
 end
 
@@ -112,18 +113,18 @@ end = struct
   open R.Syntax
   open Base
 
-  type t = ty VarMap.t
+  type t = ty VarIMap.t
 
-  let empty = VarMap.empty
+  let empty = VarIMap.empty
   let mapping k vm = if Type.occurs_in k vm then fail `Occurs_check else return (k, vm)
 
   let singleton k vm =
     let* k, vm = mapping k vm in
-    return (VarMap.singleton k vm)
+    return (VarIMap.singleton k vm)
   ;;
 
-  let find k vm = VarMap.find_opt k vm
-  let remove k vm = VarMap.remove k vm
+  let find k vm = VarIMap.find_opt k vm
+  let remove k vm = VarIMap.remove k vm
 
   let apply s =
     let rec helper = function
@@ -140,7 +141,7 @@ end = struct
   ;;
 
   let fold mp init f =
-    VarMap.fold
+    VarIMap.fold
       (fun k vm acc ->
         let* acc = acc in
         f k vm acc)
@@ -173,14 +174,14 @@ end = struct
     | _ -> fail (`Unification_failed (l, r))
 
   and extend k v s =
-    match VarMap.find_opt k s with
+    match VarIMap.find_opt k s with
     | None ->
       let v = apply s v in
       let* s2 = singleton k v in
       fold s (return s2) (fun k v acc ->
         let v = apply s2 v in
         let* k, v = mapping k v in
-        return (VarMap.add k v acc))
+        return (VarIMap.add k v acc))
     | Some v2 ->
       let* s2 = unify v v2 in
       compose s s2
@@ -194,11 +195,11 @@ module Scheme = struct
   type t = scheme
 
   let free_vars = function
-    | Scheme (bs, t) -> VarSet.diff (Type.free_vars t) bs
+    | Scheme (bs, t) -> VarISet.diff (Type.free_vars t) bs
   ;;
 
   let apply subst (Scheme (names, ty)) =
-    let s2 = VarSet.fold (fun k s -> Subst.remove k s) names subst in
+    let s2 = VarISet.fold (fun k s -> Subst.remove k s) names subst in
     Scheme (names, Subst.apply s2 ty)
   ;;
 
@@ -214,15 +215,15 @@ module Scheme = struct
       if char_code <= z_char_code then str else str ^ get_additional_char_code char_code
     in
     let convert_map, _ =
-      VarSet.fold
+      VarISet.fold
         (fun key acc ->
           let convert_map, char_code = acc in
           let convert_map =
-            VarMap.add key (get_poly_type_by_char_code char_code) convert_map
+            VarIMap.add key (get_poly_type_by_char_code char_code) convert_map
           in
           convert_map, char_code + 1)
         st
-        (VarMap.empty, Char.code 'a')
+        (VarIMap.empty, Char.code 'a')
     in
     convert_map
   ;;
@@ -235,121 +236,34 @@ module Scheme = struct
 end
 
 module TypeEnv = struct
-  type t = scheme StringMap.t
+  type t = scheme VarSMap.t
 
-  let fold f init mp = StringMap.fold (fun k v acc -> f k v acc) mp init
-  let extend k v mp = StringMap.add k v mp
-  let empty = StringMap.empty
+  let fold f init mp = VarSMap.fold (fun k v acc -> f k v acc) mp init
+  let extend k v mp = VarSMap.add k v mp
+  let empty = VarSMap.empty
 
-  let init_env =
-    let init_env =
-      extend "( * )" (Scheme (VarSet.empty, tprim_int @-> tprim_int @-> tprim_int)) empty
-    in
-    let init_env =
-      extend
-        "( / )"
-        (Scheme (VarSet.empty, tprim_int @-> tprim_int @-> tprim_int))
-        init_env
-    in
-    let init_env =
-      extend
-        "( + )"
-        (Scheme (VarSet.empty, tprim_int @-> tprim_int @-> tprim_int))
-        init_env
-    in
-    let init_env =
-      extend
-        "( - )"
-        (Scheme (VarSet.empty, tprim_int @-> tprim_int @-> tprim_int))
-        init_env
-    in
-    let init_env =
-      extend
-        "( = )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( == )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( <> )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( != )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( < )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( <= )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( > )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( >= )"
-        (Scheme (VarSet.singleton (-1), type_var (-1) @-> type_var (-1) @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( && )"
-        (Scheme (VarSet.empty, tprim_bool @-> tprim_bool @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend
-        "( || )"
-        (Scheme (VarSet.empty, tprim_bool @-> tprim_bool @-> tprim_bool))
-        init_env
-    in
-    let init_env =
-      extend "print_int" (Scheme (VarSet.empty, tprim_int @-> tprim_unit)) init_env
-    in
-    let init_env =
-      extend "print_string" (Scheme (VarSet.empty, tprim_string @-> tprim_unit)) init_env
-    in
-    let init_env =
-      extend "( ~+ )" (Scheme (VarSet.empty, tprim_int @-> tprim_int)) init_env
-    in
-    let init_env =
-      extend "( ~- )" (Scheme (VarSet.empty, tprim_int @-> tprim_int)) init_env
-    in
-    init_env
+  let construct_std std_lst =
+    List.fold_left
+      (fun acc std_elm ->
+        let key, value = std_elm in
+        extend key value acc)
+      empty
+      std_lst
   ;;
 
-  let free_vars : t -> VarSet.t =
-    fold (fun _ s acc -> VarSet.union acc (Scheme.free_vars s)) VarSet.empty
+  let free_vars : t -> VarISet.t =
+    fold (fun _ s acc -> VarISet.union acc (Scheme.free_vars s)) VarISet.empty
   ;;
 
-  let apply s env = StringMap.map (Scheme.apply s) env
-  let find name xs = StringMap.find_opt name xs
+  let apply s env = VarSMap.map (Scheme.apply s) env
+  let find name xs = VarSMap.find_opt name xs
 
-  let pretty_pp_env fmt environment =
-    StringMap.iter
+  let pretty_pp_env fmt acc =
+    let std_lst, environment = acc in
+    VarSMap.iter
       (fun key data -> fprintf fmt "val %s : %a\n" key Scheme.pretty_pp_scheme data)
-      (StringMap.filter
-         (fun tag sch -> StringMap.find_opt tag init_env <> Some sch)
+      (VarSMap.filter
+         (fun tag sch -> VarSMap.find_opt tag (construct_std std_lst) <> Some sch)
          environment)
   ;;
 end
@@ -361,7 +275,7 @@ let fresh_var = fresh >>| fun n -> ITVar n
 
 let instantiate : scheme -> ty R.t =
   fun (Scheme (bs, t)) ->
-  VarSet.fold
+  VarISet.fold
     (fun name typ ->
       let* typ = typ in
       let* f1 = fresh_var in
@@ -373,7 +287,7 @@ let instantiate : scheme -> ty R.t =
 
 let generalize : TypeEnv.t -> Type.t -> Scheme.t =
   fun env ty ->
-  let free = VarSet.diff (Type.free_vars ty) (TypeEnv.free_vars env) in
+  let free = VarISet.diff (Type.free_vars ty) (TypeEnv.free_vars env) in
   Scheme (free, ty)
 ;;
 
@@ -395,11 +309,11 @@ let convert_ast_type ast_typ =
     | Ast.TBool -> return (env, tprim_bool)
     | Ast.TUnit -> return (env, tprim_unit)
     | Ast.TVar (Id var_name) ->
-      (match StringMap.find_opt var_name env with
+      (match VarSMap.find_opt var_name env with
        | Some f -> return (env, f)
        | None ->
          let* fresh_var = fresh_var in
-         let env = StringMap.add var_name fresh_var env in
+         let env = VarSMap.add var_name fresh_var env in
          return (env, fresh_var))
     | Ast.TTuple ast_typ_lst ->
       let* new_env, typ_lst =
@@ -420,7 +334,7 @@ let convert_ast_type ast_typ =
       let* env, typ = helper env ast_typ in
       return (env, tlist typ)
   in
-  helper StringMap.empty ast_typ >>= fun (_, typ) -> return typ
+  helper VarSMap.empty ast_typ >>= fun (_, typ) -> return typ
 ;;
 
 let infer_pattern pattern env =
@@ -432,13 +346,13 @@ let infer_pattern pattern env =
       let* env, typ = infer_const const env in
       return (env, typ, names)
     | Ast.PVar (Id var_name) ->
-      (match StringMap.find_opt var_name names with
+      (match VarSMap.find_opt var_name names with
        | Some _ -> fail (`Several_bound var_name)
        | None ->
          let* fresh_var = fresh_var in
-         let names = StringMap.add var_name fresh_var names in
+         let names = VarSMap.add var_name fresh_var names in
          return
-           ( TypeEnv.extend var_name (Scheme (VarSet.empty, fresh_var)) env
+           ( TypeEnv.extend var_name (Scheme (VarISet.empty, fresh_var)) env
            , fresh_var
            , names ))
     | Ast.PTuple pattern_lst ->
@@ -465,7 +379,7 @@ let infer_pattern pattern env =
       let env = TypeEnv.apply subst env in
       return (env, Subst.apply subst typ, names)
   in
-  let* env, ty, _ = helper env StringMap.empty pattern in
+  let* env, ty, _ = helper env VarSMap.empty pattern in
   return (env, ty)
 ;;
 
@@ -668,7 +582,7 @@ and infer_rec_let value_binding_lst env =
   return (subst, new_env)
 ;;
 
-let infer_structure (structure : Ast.structure) =
+let infer_structure (structure : Ast.structure) std =
   List.fold_left
     (fun acc si ->
       let* env = acc in
@@ -684,8 +598,17 @@ let infer_structure (structure : Ast.structure) =
       | Ast.SIExpr expr ->
         let* _ = infer_exp expr env in
         return env)
-    (return TypeEnv.init_env)
+    (return std)
     structure
 ;;
 
-let run_stucture_infer (structure : Ast.structure) = run (infer_structure structure)
+let run_structure_infer_with_custom_std
+  (structure : Ast.structure)
+  (std_list : (string * Typedtree.scheme) list)
+  =
+  run (infer_structure structure (TypeEnv.construct_std std_list))
+;;
+
+let run_structure_infer (structure : Ast.structure) =
+  run_structure_infer_with_custom_std structure Std.std_lst
+;;

@@ -871,3 +871,17 @@ let%expect_test _ =
           ))
         ] |}]
 ;;
+
+let%expect_test "" =
+  parse_and_print {| let a = [] :: [[]];;|};
+  [%expect
+    {|
+    [(SILet (Nonrecursive,
+        [((PVar (Id "a")),
+          (ECons ((EConst CEmptyList),
+             (ECons ((EConst CEmptyList), (EConst CEmptyList))))))
+          ]
+        ))
+      ]
+     |}]
+;;
