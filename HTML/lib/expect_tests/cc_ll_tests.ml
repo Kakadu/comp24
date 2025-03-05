@@ -21,8 +21,7 @@ end
 
 let%expect_test "sanity check" =
   CcLlTests.cc_ll_test {|let foo a = let _ = 5 in 10|};
-  [%expect
-    {|
+  [%expect {|
     let foo a = let _ = 5
     in 10 |}]
 ;;
