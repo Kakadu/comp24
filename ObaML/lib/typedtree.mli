@@ -1,10 +1,7 @@
 (** Copyright 2025, tepa46, Arsene-Baitenov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
-
-module VarSet : Set.S with type elt = int
-module VarMap : Map.S with type key = int
-module StringMap : Map.S with type key = string
+open Containers
 
 type ty =
   | ITVar of int
@@ -22,9 +19,9 @@ val tarr : ty -> ty -> ty
 val ( @-> ) : ty -> ty -> ty
 val tlist : ty -> ty
 val ttuple : ty list -> ty
-val pretty_pp_ty : Format.formatter -> ty * string VarMap.t -> unit
+val pretty_pp_ty : Format.formatter -> ty * string VarIMap.t -> unit
 
-type scheme = Scheme of VarSet.t * ty
+type scheme = Scheme of VarISet.t * ty
 
 type error =
   [ `Occurs_check
