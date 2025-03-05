@@ -170,12 +170,17 @@ int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ..
 }
 
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num) {
+    field_num = CONVERT_INT_ML_TO_NATIVE(field_num);
     if (!is_ml_ptr(box))
         return CONVERT_INT_NATIVE_TO_ML(0);
     else
         return ((box_t*)box)->values[field_num];
 }
 
-int64_t mlrt_check_tag(int64_t target, int64_t tag) { return CONVERT_INT_NATIVE_TO_ML(tag == get_tag(target)); }
+int64_t mlrt_check_tag(int64_t target, int64_t tag) {
+    tag = CONVERT_INT_ML_TO_NATIVE(tag);
+    DEBUG_RUN(printf("check_tag: %ld and %ld\n", get_tag(target), tag););
+    return CONVERT_INT_NATIVE_TO_ML(tag == get_tag(target));
+}
 
 void mltr_match_error() { EXCEPTION_FMT("Exception: Match_failure"); }
