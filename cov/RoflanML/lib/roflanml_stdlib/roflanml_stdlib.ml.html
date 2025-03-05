@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>roflanml_stdlib.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/roflanml_stdlib/roflanml_stdlib.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/roflanml_stdlib/</span>roflanml_stdlib.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Base
+open Typing
+
+module RoflanML_Stdlib = struct
+  let default =
+    let stdlib = Map.empty (module String) in
+    <span data-count="26">l</span>et stdlib =
+      List.fold [ "+"; "-"; "*"; "/" ] ~init:stdlib ~f:(fun stdlib op -&gt;
+        <span data-count="104">M</span>ap.update stdlib op ~f:(fun _ -&gt;
+          <span data-count="104">T</span>Arrow (TBase BInt, TArrow (TBase BInt, TBase BInt))))
+    in
+    <span data-count="26">l</span>et stdlib =
+      List.fold [ "="; "&lt;&gt;"; "&gt;"; "&gt;="; "&lt;"; "&lt;=" ] ~init:stdlib ~f:(fun stdlib op -&gt;
+        <span data-count="156">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="156">T</span>Arrow (TVar 0, TArrow (TVar 0, TBase BBool))))
+    in
+    <span data-count="26">l</span>et stdlib =
+      List.fold [ "&amp;&amp;"; "||" ] ~init:stdlib ~f:(fun stdlib op -&gt;
+        <span data-count="52">M</span>ap.update stdlib op ~f:(fun _ -&gt;
+          <span data-count="52">T</span>Arrow (TBase BBool, TArrow (TBase BBool, TBase BBool))))
+    in
+    <span data-count="26">l</span>et stdlib =
+      Map.update stdlib "::" ~f:(fun _ -&gt;
+        <span data-count="26">T</span>Arrow (TVar 0, TArrow (TList (TVar 0), TList (TVar 0))))
+    in
+    <span data-count="26">l</span>et stdlib =
+      List.fold
+        [ "print_int", BInt; "print_bool", BBool ]
+        ~init:stdlib
+        ~f:(fun stdlib (op, ty) -&gt;
+          <span data-count="52">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="52">T</span>Arrow (TBase ty, TBase BUnit)))
+    in
+    <span data-count="26">s</span>tdlib
+  ;;
+end
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
