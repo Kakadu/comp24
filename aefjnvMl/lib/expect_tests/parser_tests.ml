@@ -11,6 +11,21 @@ let parse_test s =
   | Error msg -> Top_utils.Ast_test_utils.print_error msg
 ;;
 
+let%expect_test "currying" =
+  let () = parse_test {|
+a (b c) d
+;;
+  |} in
+  [%expect
+    {|
+      [(Str_eval
+          (Exp_apply (
+             (Exp_apply ((Exp_ident "a"),
+                (Exp_apply ((Exp_ident "b"), (Exp_ident "c"))))),
+             (Exp_ident "d"))))
+        ] |}]
+;;
+
 let%expect_test "base bin ops" =
   let () = parse_test "1 + 2 / 3;;" in
   [%expect
