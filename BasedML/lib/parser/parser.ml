@@ -16,10 +16,12 @@ let is_keyword = function
   | "rec"
   | "match"
   | "fun"
-  | "then"
   | "false"
   | "true"
+  | "then"
   | "and"
+  | "with"
+  | "_"
   | "in" -> true
   | _ -> false
 ;;
@@ -40,7 +42,7 @@ let is_valid_fst_char_ident = function
 ;;
 
 let is_valid_fst_char_poly_type = function
-  | 'a' .. 'z' -> true
+  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' -> true
   | _ -> false
 ;;
 
@@ -50,12 +52,13 @@ let is_identifier_char = function
 ;;
 
 let is_op_symb = function
-  | "-" | "+" | "/" | "*" | "<" | "<=" | ">=" | "<>" | ">" | "::" | "=" -> true
+  | "-" | "+" | "/" | "*" | "<" | "<=" | ">=" | "<>" | ">" | "::" | "=" | "==" | "&&" ->
+    true
   | _ -> false
 ;;
 
 let is_inf_op_symb = function
-  | '-' | '+' | '/' | '*' | '<' | '>' | ':' | '=' -> true
+  | '-' | '+' | '/' | '*' | '<' | '>' | ':' | '=' | '&' -> true
   | _ -> false
 ;;
 
@@ -64,7 +67,6 @@ let between left right exp = left *> exp <* right
 
 let between_parens exp =
   skip_whitespace *> between (Angstrom.char '(') (Angstrom.char ')') exp
-  <* skip_whitespace
 ;;
 
 let chainl1 e op =
@@ -87,23 +89,27 @@ let p_ident_string p_valid_fst_char =
   | _ -> fail "Identifier parsing failed: first character must start with [a-z]"
 ;;
 
-let p_infix_ident =
+let p_infix_ident constr =
   let* some_str =
     between_parens (skip_whitespace *> take_while1 is_inf_op_symb <* skip_whitespace)
   in
   if some_str |> is_op_symb
-  then return (PIdentifier ("( " ^ some_str ^ " )"))
+  then return (constr ("( " ^ some_str ^ " )"))
   else fail "Parsed string wasn't an supported operator"
 ;;
+
+let p_infix_ident_pat = p_infix_ident (fun x -> PIdentifier x)
+let p_infix_ident_expr = p_infix_ident (fun x -> EIdentifier x)
 
 (* Type parsers *)
 
 let p_basic_type : type_name t =
   Angstrom.string "int" *> return TInt
   <|> Angstrom.string "bool" *> return TBool
+  <|> Angstrom.string "unit" *> return TUnit
   <|> char '\''
       *> let* typeNameChar = p_ident_string is_valid_fst_char_poly_type in
-         return (TPoly ("'" ^ typeNameChar))
+         return (TPoly typeNameChar)
 ;;
 
 let p_tuple_type p_type =
@@ -137,11 +143,15 @@ let p_type : type_name t =
 
 (* Constant parsers*)
 let p_cint =
-  let* sign =
-    skip_whitespace *> option "" (Angstrom.string "-" <|> Angstrom.string "+")
+  let p_number = skip_whitespace *> take_while1 is_digit in
+  let p_signed =
+    between_parens
+      (let* sign = skip_whitespace *> (Angstrom.string "-" <|> Angstrom.string "+") in
+       let* num = p_number in
+       return (sign ^ num))
   in
-  let* number = take_while1 is_digit in
-  return @@ CInt (sign ^ number |> int_of_string)
+  let* number = p_number <|> p_signed in
+  return @@ CInt (number |> int_of_string)
 ;;
 
 let p_cbool =
@@ -151,13 +161,19 @@ let p_cbool =
   return (CBool (bool_val |> bool_of_string))
 ;;
 
+let p_cunit =
+  Angstrom.char '(' *> skip_whitespace *> return CUnit
+  <* skip_whitespace
+  <* Angstrom.char ')'
+;;
+
 let p_const_expr =
-  let* const = p_cint <|> p_cbool in
+  let* const = p_cint <|> p_cbool <|> p_cunit in
   return (EConstant const)
 ;;
 
 let p_const_pattern =
-  let* const = p_cint <|> p_cbool in
+  let* const = p_cint <|> p_cbool <|> p_cunit in
   return (PConstant const)
 ;;
 
@@ -192,7 +208,7 @@ let p_list_no_constr p_exp =
 ;;
 
 let rec exp_cons_list_builder = function
-  | [] -> ENil
+  | [] -> EConstant CNil
   | h :: tl ->
     EApplication (EIdentifier "( :: )", h)
     |> fun app1 -> EApplication (app1, exp_cons_list_builder tl)
@@ -203,10 +219,24 @@ let p_list_not_empty_exp p_exp =
   return (exp_cons_list_builder exp_list)
 ;;
 
-let p_pnil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return PNil
-let p_enil = skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return ENil
+let p_pnil =
+  skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return (PConstant CNil)
+;;
+
+let p_enil =
+  skip_whitespace *> Angstrom.string "[" *> Angstrom.string "]" *> return (EConstant CNil)
+;;
+
 let p_list_exp p_exp = p_list_not_empty_exp p_exp <|> p_enil
-let p_wild_card_pattern = skip_whitespace *> Angstrom.string "_" *> return PWildCard
+
+let p_wild_card_pattern =
+  skip_whitespace
+  *> Angstrom.string "_"
+  *> let* next = peek_char in
+     match next with
+     | Some c when is_identifier_char c -> fail "a"
+     | _ -> return PWildCard
+;;
 
 (* Tuple parsers *)
 
@@ -223,18 +253,15 @@ let p_unit constr =
   *> Angstrom.string "("
   *> skip_whitespace
   *> Angstrom.string ")"
-  *> return (constr [])
+  *> return constr
 ;;
 
-let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x) <|> p_unit (fun x -> ETuple x)
-
-let p_tuple_pattern p_exp =
-  p_tuple p_exp (fun x -> PTuple x) <|> p_unit (fun x -> PTuple x)
-;;
+let p_tuple_expr p_exp = p_tuple p_exp (fun x -> ETuple x) <|> p_unit (EConstant CUnit)
+let p_tuple_pattern p_exp = p_tuple p_exp (fun x -> PTuple x) <|> p_unit (PConstant CUnit)
 
 let rec pat_cons_list_builder (ls : pattern list) =
   match ls with
-  | [] -> PNil
+  | [] -> PConstant CNil
   | h :: tl -> PCons (h, pat_cons_list_builder tl)
 ;;
 
@@ -252,7 +279,7 @@ let cons_delim_pattern =
 let p_list_pattern p_pattern = p_list_not_empty_pattern p_pattern <|> p_pnil
 
 (* final pattern parsers*)
-let p_cons_pattern p_pattern = chainl1 p_pattern cons_delim_pattern
+let p_cons_pattern p_pattern = chainr1 p_pattern cons_delim_pattern
 
 let p_pattern_with_type p_pat =
   let* pattern = skip_whitespace *> Angstrom.string "(" *> p_pat in
@@ -269,17 +296,18 @@ let p_pattern =
     let atomic_pat =
       p_ident_pattern
       <|> p_const_pattern
-      <|> p_infix_ident
+      <|> p_infix_ident_pat
       <|> between_parens p_pattern
       <|> p_list_pattern p_pattern
       <|> p_pattern_with_type p_pattern
+      <|> p_tuple_pattern p_pattern
     in
     let w_card_pat = p_wild_card_pattern <|> atomic_pat in
     let cons_pat = p_cons_pattern w_card_pat <|> w_card_pat in
-    let tuple_pat = p_tuple_pattern cons_pat <|> cons_pat in
-    tuple_pat)
+    cons_pat)
 ;;
 
+let p_patterns = sep_by (take_while1 is_whitespace) p_pattern
 (* Binary operations parsers & delimiter for chains*)
 
 let binary_operation op func =
@@ -301,6 +329,8 @@ let ls_or_eq_func = EIdentifier "( <= )"
 let eq_func = EIdentifier "( = )"
 let not_eq_func = EIdentifier "( <> )"
 let cons_func = EIdentifier "( :: )"
+let double_eq_func = EIdentifier "( == )"
+let double_eq_expr = binary_operation "==" double_eq_func
 let cons_delim_expr = binary_operation "::" cons_func
 let not_eq_delim = binary_operation "<>" not_eq_func
 let eq_delim = binary_operation "=" eq_func
@@ -333,9 +363,15 @@ let p_let_in p_exp =
        skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
+     let* args = p_patterns in
      let* let_expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
      let* body_expr = skip_whitespace *> Angstrom.string "in" *> p_exp in
-     return (ELetIn (flag, pattern, let_expr, body_expr))
+     return
+       (ELetIn
+          ( flag
+          , pattern
+          , List.fold_left (fun acc h -> EFunction (h, acc)) let_expr (List.rev args)
+          , body_expr ))
 ;;
 
 (* match parser *)
@@ -347,13 +383,20 @@ let p_match p_pattern p_expr =
     let* expr = skip_whitespace *> Angstrom.string "->" *> skip_whitespace *> p_expr in
     return (pattern, expr)
   in
-  let* sub_pat =
-    skip_whitespace *> Angstrom.string "match" *> skip_whitespace *> p_pattern
+  let* sub_exp =
+    skip_whitespace *> Angstrom.string "match" *> skip_whitespace *> p_expr
+    <* skip_whitespace
+    <* Angstrom.string "with"
   in
-  let* cases =
-    skip_whitespace *> Angstrom.string "with" *> many1 (p_match_case p_pattern p_expr)
+  let* fst_case =
+    let* pattern =
+      skip_whitespace *> option "" (Angstrom.string "|") *> skip_whitespace *> p_pattern
+    in
+    let* expr = skip_whitespace *> Angstrom.string "->" *> skip_whitespace *> p_expr in
+    return (pattern, expr)
   in
-  return @@ EMatch (sub_pat, cases)
+  let* cases = many1 (p_match_case p_pattern p_expr) in
+  return @@ EMatch (sub_exp, fst_case :: cases)
 ;;
 
 (* expression parser *)
@@ -371,20 +414,21 @@ let p_exp =
     let atomic_exp =
       p_const_expr
       <|> p_ident
+      <|> p_infix_ident_expr
+      <|> p_let_in p_exp
+      <|> p_match p_pattern p_exp
       <|> p_function p_exp
       <|> between_parens p_exp
       <|> p_list_exp p_exp
       <|> p_exp_with_type p_exp
-      <|> p_let_in p_exp
       <|> p_tuple_expr p_exp
       <|> p_if_then_else p_exp
-      <|> p_match p_pattern p_exp
     in
-    let cons_term = chainr1 atomic_exp cons_delim_expr <|> atomic_exp in
-    let app_term = chainl1 cons_term app_delim <|> cons_term in
-    let high_pr_op_term = chainl1 app_term (mul_delim <|> div_delim) in
+    let app_term = chainl1 atomic_exp app_delim <|> atomic_exp in
+    let cons_term = chainr1 app_term cons_delim_expr <|> app_term in
+    let high_pr_op_term = chainl1 cons_term (mul_delim <|> div_delim) in
     let low_pr_op_term = chainl1 high_pr_op_term (add_delim <|> sub_delim) in
-    let eq_term = chainl1 low_pr_op_term (eq_delim <|> not_eq_delim) in
+    let eq_term = chainl1 low_pr_op_term (double_eq_expr <|> eq_delim <|> not_eq_delim) in
     let gr_ls_term = chainl1 eq_term (gr_or_eq_delim <|> ls_or_eq_delim) in
     let gr_ls_eq_term = chainl1 gr_ls_term (gr_delim <|> ls_delim) in
     gr_ls_eq_term)
@@ -399,8 +443,14 @@ let p_let_decl p_exp =
        skip_whitespace *> Angstrom.string "rec " *> return Rec <|> return NotRec
      in
      let* pattern = skip_whitespace *> p_pattern in
+     let* args = p_patterns in
      let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-     return @@ DSingleLet (flag, DLet (pattern, expr))
+     return
+     @@ DSingleLet
+          ( flag
+          , DLet
+              ( pattern
+              , List.fold_left (fun acc h -> EFunction (h, acc)) expr (List.rev args) ) )
 ;;
 
 let p_mutually_rec_decl =
@@ -410,8 +460,11 @@ let p_mutually_rec_decl =
     *> skip_whitespace
     *>
     let* pattern = skip_whitespace *> p_pattern in
+    let* args = p_patterns in
     let* expr = skip_whitespace *> Angstrom.string "=" *> p_exp in
-    return (DLet (pattern, expr))
+    return
+      (DLet
+         (pattern, List.fold_left (fun acc h -> EFunction (h, acc)) expr (List.rev args)))
   in
   let* fst_dcl = p_let_decl p_exp in
   match fst_dcl with
@@ -427,7 +480,7 @@ let parse p s = parse_string ~consume:All p s
 let parse_program =
   parse
     (sep_by
-       (Angstrom.string ";;" <|> Angstrom.string "\n")
+       (Angstrom.string ";;" <|> take_while1 is_whitespace)
        (p_mutually_rec_decl <|> p_let_decl p_exp)
      <* option "" (Angstrom.string ";;" <|> take_while1 is_whitespace))
 ;;

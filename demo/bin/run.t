@@ -7,9 +7,9 @@
   runtime.o
   $ cat out.ll | grep -E 'source_filename|target datalayout|ModuleID' --invert-match
   target triple = "x86_64-pc-linux-gnu"
-
+  
   declare void @print_int(i64)
-
+  
   define i64 @main() {
   entry:
     call void @print_int(i64 70)

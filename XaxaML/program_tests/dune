@@ -1,0 +1,108 @@
+(executable
+ (name run_parser)
+ (modules Run_parser)
+ (public_name run_parser)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_infer)
+ (modules Run_infer)
+ (public_name run_infer)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_remove_patterns)
+ (modules Run_remove_patterns)
+ (public_name run_remove_patterns)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_alpha_conversion)
+ (modules Run_alpha_conversion)
+ (public_name run_alpha_conversion)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_closure_conversion)
+ (modules Run_closure_conversion)
+ (public_name run_closure_conversion)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_lambda_lifting)
+ (modules Run_lambda_lifting)
+ (public_name run_lambda_lifting)
+ (libraries XaxaML.Lib stdio))
+
+(executable
+ (name run_to_anf)
+ (modules Run_to_anf)
+ (public_name run_to_anf)
+ (libraries XaxaML.Lib stdio))
+
+(cram
+ (applies_to parser_tests)
+ (deps ./run_parser.exe))
+
+(cram
+ (applies_to infer_tests)
+ (deps
+  ./run_infer.exe
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to remove_patterns_tests)
+ (deps ./run_remove_patterns.exe))
+
+(cram
+ (applies_to alpha_conversion_tests)
+ (deps ./run_alpha_conversion.exe))
+
+(cram
+ (applies_to closure_conversion_tests)
+ (deps
+  ./run_closure_conversion.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml))
+
+(cram
+ (applies_to lambda_lifting_tests)
+ (deps
+  ./run_lambda_lifting.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml))
+
+(cram
+ (applies_to to_anf_tests)
+ (deps
+  ./run_to_anf.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))

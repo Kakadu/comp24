@@ -1,0 +1,31 @@
+(lang dune 3.12)
+
+(name XaxaML)
+
+(generate_opam_files true)
+
+(source
+ (github toadharvard/XaxaML))
+
+(authors "Artem Demchenko" "Vadim Yakshigulov")
+
+(maintainers "Artem Demchenko" "Vadim Yakshigulov")
+
+(homepage "https://github.com/toadharvard/XaxaML")
+
+(license LGPL-2.1-or-later)
+
+(package
+ (name XaxaML)
+ (synopsis "Compiler for XaXaML")
+ (description "Compiler for the XaXa Mini Language")
+(depends
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  (odoc :with-doc)
+  (ocamlformat :build)
+  ))
