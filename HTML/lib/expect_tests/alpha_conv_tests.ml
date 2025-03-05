@@ -1,30 +1,25 @@
 module AlphaConvTests = struct
+  open Common.Counter.R
+
+  let do_alpha_conv_test s =
+    let+ actual = Parser.parse_program s in
+    let+ actual_pe = Patelim.Elim.p_elim_decls actual in
+    let+ actual_cc = Anf.Cc_ll.closure_convert actual_pe in
+    let+ actual_anf = Anf.Anf_conv.run actual_cc in
+    let+ actual_alpha_conv = Anf.Alpha_conv.alpha_convert_prog actual_anf in
+    Format.printf
+      "---ANF---\n\n%a\n\n---Alpha conv.---\n\n%a\n"
+      Anf.Pp_anf_ast.pp_anf_prog
+      actual_anf
+      Anf.Pp_anf_ast.pp_anf_prog
+      actual_alpha_conv;
+    Ok ()
+  ;;
+
   let alpha_conv_test s =
-    match Parser.parse_program s with
-    | Ok actual ->
-      let prog_pe = Patelim.Elim.p_elim_decls actual in
-      (match prog_pe with
-       | Ok actual_pe ->
-         let prog_cc = Anf.Cc_ll.closure_convert actual_pe in
-         (match prog_cc with
-          | Ok actual_cc ->
-            let prog_anf = Anf.Anf_conv.run actual_cc in
-            (match prog_anf with
-             | Ok actual_anf ->
-               let prog_alpha_conv = Anf.Alpha_conv.alpha_convert_prog actual_anf in
-               (match prog_alpha_conv with
-                | Ok actual_alpha_conv ->
-                  Format.printf
-                    "---ANF---\n\n%a\n\n---Alpha conv.---\n\n%a\n"
-                    Anf.Pp_anf_ast.pp_anf_prog
-                    actual_anf
-                    Anf.Pp_anf_ast.pp_anf_prog
-                    actual_alpha_conv
-                | Error err -> Format.printf "%s\n" err)
-             | Error err -> Format.printf "%s\n" err)
-          | Error err -> Format.printf "%s\n" err)
-       | Error err -> Format.printf "%s\n" err)
-    | Error err -> Format.printf "%s\n" err
+    match do_alpha_conv_test s with
+    | Ok _ -> ()
+    | Error err -> Format.printf "Error: %s\n" err
   ;;
 end
 
