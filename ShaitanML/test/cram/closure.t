@@ -37,10 +37,3 @@
   then (acc 1)
   else ((fibo_cps ((( - ) a0) 1)) ((((fun a0 acc fibo_cps x -> ((fibo_cps ((( - ) a0) 2)) (((fun acc x y -> (acc ((( + ) x) y))) acc) x))) a0) acc) fibo_cps))) in
   ((fibo_cps n) (fun x -> x)))
-
-
-  $ ll << EOF
-  > let a = (fun x -> x)
-  > EOF
-  ll: not found
-  [127]

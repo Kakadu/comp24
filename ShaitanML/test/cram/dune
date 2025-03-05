@@ -34,6 +34,12 @@
  (public_name l_lifting)
  (libraries shaitanml_lib stdio))
 
+(executable
+ (name anf)
+ (modules Anf)
+ (public_name anf)
+ (libraries shaitanml_lib stdio))
+
 (cram
  (deps
   (source_tree manytests)))

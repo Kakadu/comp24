@@ -12,9 +12,11 @@
   Infer
   Typedtree
   L_lifting
-  Closure)
+  Closure
+  Anf
+  Anf_ast)
  (inline_tests)
- (libraries base angstrom)
+ (libraries base stdlib angstrom)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (instrumentation
