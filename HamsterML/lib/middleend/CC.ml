@@ -148,7 +148,7 @@ let rec cc_expr = function
             acc
             (match arg with
              | Var x -> x
-             | _ -> failwith "fuck"))
+             | _ -> failwith "not yet impelemented"))
     in
     let free = Set.diff unbound bound in
     let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
@@ -167,7 +167,7 @@ let rec cc_expr = function
                 acc
                 (match arg with
                  | Var x -> x
-                 | _ -> failwith "fuck"))
+                 | _ -> failwith "not yet implemented"))
         in
         let free = Set.diff unbound bound in
         let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
