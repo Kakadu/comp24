@@ -4,6 +4,7 @@
 
 open Ast
 open Pe_ast
+open Common
 
 
 let const_to_str = function
@@ -65,8 +66,6 @@ let decl_to_str = function
            tl)
 ;;
 
-let pp_pe_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
-
 let pp_pe_structure ppf p =
   let len = List.length p in
   List.iteri
@@ -100,101 +99,9 @@ let const_to_peconst const =
 ;;
 
 open Base
+open MonadCounter
 
-let make_apply op expr1 expr2 = Pe_EApp (Pe_EApp (Pe_EIdentifier op, expr1), expr2)
-
-module StrSet = struct
-  open Base
-
-  type t = (string, String.comparator_witness) Set.t
-
-  let empty = Set.empty (module String)
-  let singleton str = Set.singleton (module String) str
-  let union = Set.union
-  let union_list lst = Set.union_list (module String) lst
-  let find s str = Set.mem s str
-  let add = Set.add
-  let to_list = Set.to_list
-  let of_list = Set.of_list (module String)
-  let fold = Set.fold
-  let diff = Set.diff
-end
-
-
-
-type bindings = (int, Int.comparator_witness) Set.t
-
-let contains ng id =
-  match Set.find ng ~f:(Int.equal id) with
-  | Some _ -> true
-  | None -> false
-;;
-
-module MonadCounter = struct
-  open Base
-
-  type 'a t = bindings * int -> bindings * int * 'a
-
-  let return x (binds, var) = binds, var, x
-
-  let fresh (binds, var) =
-    let rec helper num = if contains binds num then helper (num + 1) else num in
-    let next = helper var in
-    binds, next + 1, next
-  ;;
-
-  let bind (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun t ->
-    let binds, var, x = m t in
-    f x (binds, var)
-  ;;
-
-  let ( >>= ) = bind
-  let ( let* ) = bind
-
-  let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
-    fun t ->
-    let binds, var, x = m t in
-    binds, var, f x
-  ;;
-
-  let run (m : 'a t) binds start = m (binds, start)
-
-  let map (xs : 'a list) ~(f : 'a -> 'b t) : 'b list t =
-    let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
-        let* acc = acc in
-        let* x = f x in
-        return (x :: acc))
-    in
-    return @@ List.rev xs
-  ;;
-
-  let fold_left (xs : 'a list) ~(init : 'b t) ~(f : 'b -> 'a -> 'b t) : 'b t =
-    List.fold xs ~init ~f:(fun acc x ->
-      let* acc = acc in
-      f acc x)
-  ;;
-
-  let fold_right xs ~init ~f =
-    List.fold_right xs ~init ~f:(fun x acc ->
-      let* acc = acc in
-      f x acc)
-  ;;
-end
-
-let rec get_binds_pat =
-  function
-  | PConstraint (pat, _) -> get_binds_pat pat
-  | PAny | PConst _ | PNill | PUnit  -> StrSet.empty
-  | PIdentifier ident -> StrSet.singleton ident
-  | PCons (p1, p2) -> StrSet.union (get_binds_pat p1) (get_binds_pat p2)
-  | PTuple pl ->
-    Base.List.fold pl ~init:StrSet.empty ~f:(fun acc p ->
-      StrSet.union acc (get_binds_pat p))
-;;
-
-let check_pat expr pat =
+let check_pattern expr pat =
   let rec helper add expr = function
     | PConstraint (p, _) -> helper add expr p
     | PConst c ->
@@ -219,7 +126,7 @@ let check_pat expr pat =
   helper true expr pat
 ;;
 
-let check_decls expr pat =
+let check_declaration expr pat =
   let rec helper name = function
     | PConstraint (p, _) -> helper name p
     | PCons (l, r) ->
@@ -243,19 +150,9 @@ let check_decls expr pat =
   Pe_Nonrec decls
 ;;
 
-
-
-let make_condition checks e1 e2 =
-  let cond =
-    List.fold (List.tl_exn checks) ~init:(List.hd_exn checks) ~f:(fun acc a ->
-      make_apply "( && )" acc a)
-  in
-  Pe_EIf (cond, e1, e2)
-;;
-
 let make_case expr pat case_expr not_match_expr =
-  let checks = check_pat expr pat in
-  let decl = check_decls expr pat in
+  let checks = check_pattern expr pat in
+  let decl = check_declaration expr pat in
   let let_expr =
     match decl with
     | Pe_Nonrec decl_list ->
@@ -267,9 +164,6 @@ let make_case expr pat case_expr not_match_expr =
   in
   if List.is_empty checks then let_expr else make_condition checks let_expr not_match_expr
 ;;
-
-open MonadCounter
-let get_id i = "a" ^ Int.to_string i
 
 let rec pe_expr =
   let open Ast in
@@ -374,8 +268,8 @@ let rec pe_expr =
 
 and pe_match to_match = function
   | (p, e) :: tl ->
-    let checks = check_pat to_match p in
-    let decls = check_decls to_match p in
+    let checks = check_pattern to_match p in
+    let decls = check_declaration to_match p in
     let* e = pe_expr e in
     let let_in =
       (match decls with
@@ -392,7 +286,7 @@ and pe_match to_match = function
   | _ -> return @@ Pe_EIdentifier "fail_match"
 ;;
 
-let pe_declaration = function
+let pe_program = function
   | NoRecDecl decl_list ->
     let* decls =
       map decl_list ~f:(fun (Ast.DDeclaration (pat, e)) ->
@@ -420,7 +314,7 @@ let pe_structure program =
   let rec helper = function
     | [] -> return []
     | hd :: tl ->
-      let* hd = pe_declaration hd in
+      let* hd = pe_program hd in
       let* tl = helper tl in
       return @@ hd :: tl
   in
@@ -445,8 +339,6 @@ let rec get_binds_expr = function
          StrSet.union (get_binds_pat p) (get_binds_expr e)))
   | ETuple e_list -> StrSet.union_list @@ List.map e_list ~f:get_binds_expr
 
-and get_binds_case (pat, e) = StrSet.union (get_binds_pat pat) (get_binds_expr e)
-
 and get_binds_declaration = function
   | NoRecDecl decl_list ->
     List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) ->
@@ -456,7 +348,7 @@ and get_binds_declaration = function
       StrSet.union acc (StrSet.union (get_binds_pat pat) (get_binds_expr e)))
 ;;
 
-let make_binds structure =
+let create_bundle structure =
   let make_id id =
     let is_digit = function
       | '0' .. '9' -> true
@@ -481,4 +373,4 @@ let make_binds structure =
   Set.filter_map (module Int) idents ~f:make_id
 ;;
 
-let run_pe structure = run (pe_structure structure) (make_binds structure) 0
+let run_pe structure = run (pe_structure structure) (create_bundle structure) 0
