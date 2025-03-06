@@ -59,7 +59,6 @@ and case = pattern * expr [@@deriving show { with_path = false }]
 and binding = pattern * expr [@@deriving show { with_path = false }]
 
 type str_item =
-  | SEval of expr (** Some expression *)
   | SValue of rec_flag * binding list (** let [rec] p1 = e1 and p2 = e2 and ... *)
 [@@deriving show { with_path = false }]
 
@@ -159,7 +158,6 @@ let fmt_str_item ppf decl =
         fmt_binding ppf binding)
       binding_list;
     fprintf "\n"
-  | SEval exp -> fprintf "%a\n" fmt_expr exp
 ;;
 
 let fmt_structure ppf decls = List.iter (fmt_str_item ppf) decls
