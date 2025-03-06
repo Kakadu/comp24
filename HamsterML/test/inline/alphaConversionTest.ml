@@ -19,6 +19,11 @@ let alpha_conv_prog (s : string) =
   res
 ;;
 
+let pp_alpha_conv_prog (s : string) =
+  let open HamsterML.PrinterAst in
+  s |> alpha_conv_prog |> pretty_print_prog |> print_string
+;;
+
 let%test _ =
   alpha_conv_pattern "a :: b :: a"
   = ListConcat (Var "arg_0", ListConcat (Var "arg_1", Var "arg_0"))
