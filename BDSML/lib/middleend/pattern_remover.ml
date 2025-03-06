@@ -5,8 +5,6 @@
 open Reduced_ast
 open Parser.Ast
 
-exception Unimplemented
-
 open
   Utils.Counter_monad.Make
     (Int)
@@ -189,7 +187,6 @@ and expr_to_rexpr = function
       | None -> return None
     in
     RExp_if (i, t, e)
-  | _ -> raise Unimplemented
 ;;
 
 let ast_to_rast prog =

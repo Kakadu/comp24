@@ -124,8 +124,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   [%expect {|
-    val f : 'j -> 'j
-    val g : 'i -> bool
+    val f : 'k -> 'k
+    val g : 'j -> bool
     val c : bool
     |}]
 ;;
@@ -139,7 +139,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect {| val a : 'g list |}]
+  [%expect {| val a : 'h list |}]
 ;;
 
 let%expect_test "test constructor some with" =
@@ -327,12 +327,6 @@ let%expect_test "test let rewrite" =
     val m : bool |}]
 ;;
 
-let%expect_test "test sequence" =
-  test {|let a = "hello"; true|};
-  [%expect {|
-    val a : bool |}]
-;;
-
 let%expect_test "test op not" =
   test {|fun a -> not a|};
   [%expect {|
@@ -341,7 +335,7 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   test {|(=)|};
-  [%expect {| 'g -> 'g -> bool |}]
+  [%expect {| 'h -> 'h -> bool |}]
 ;;
 
 let%expect_test "test less" =
@@ -381,7 +375,7 @@ let%expect_test "test poly inference" =
     f 'a' 'b';;
   |};
   [%expect {|
-    val f : 'g -> 'h -> ('g * 'h)
+    val f : 'h -> 'i -> ('h * 'i)
     (int * int)
     (char * char)
     |}]

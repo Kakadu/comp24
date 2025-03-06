@@ -15,7 +15,6 @@ type rexpr =
   | RExp_tuple of rexpr list (**  like Exp_tuple *)
   | RExp_construct of string * rexpr option (** like Exp_construct *)
   | RExp_if of rexpr * rexpr * rexpr option (** like Exp_if *)
-  | RExp_sequence of rexpr * rexpr (** like Exp_sequence *)
 
 type rstuct_item =
   | RStr_eval of rexpr
