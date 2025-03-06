@@ -3,13 +3,10 @@
  (modules run_remove_patterns)
  (libraries typing parser middleend quickcheck stdio))
 
-(cram
- (deps ./run_remove_patterns.exe))
-
 (executable
- (name run_lambda_lifting)
- (modules run_lambda_lifting)
+ (name run_alpha_conversion)
+ (modules run_alpha_conversion)
  (libraries typing parser middleend quickcheck stdio))
 
 (cram
- (deps ./run_lambda_lifting.exe))
+ (deps ./run_remove_patterns.exe ./run_alpha_conversion.exe))
