@@ -5,11 +5,11 @@ open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
 open HamsterML__CC;;
-open HamsterML__Pp_expr;;
+open HamsterML__PrinterAst;;
 open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
 open HamsterTest__LambdaLiftingTest;;
 open HamsterTest__AlphaConversionTest;;
 
-let cc expr = Stdlib.print_endline (pretty_print_expr(expr |> HamsterTest__AlphaConversionTest.alpha_conv_expr |> cc_expr));;
+let cc expr = Stdlib.print_endline (pretty_print_expr(expr |> alpha_conv_prog |> List.hd |> cc_expr));;
