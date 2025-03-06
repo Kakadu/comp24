@@ -3,5 +3,10 @@
  (modules run_remove_patterns)
  (libraries typing parser middleend quickcheck stdio))
 
+(executable
+ (name run_alpha_conversion)
+ (modules run_alpha_conversion)
+ (libraries typing parser middleend quickcheck stdio))
+
 (cram
- (deps ./run_remove_patterns.exe))
+ (deps ./run_remove_patterns.exe ./run_alpha_conversion.exe))
