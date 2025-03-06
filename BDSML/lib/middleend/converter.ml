@@ -23,7 +23,6 @@ let rec rexpr_to_expr = function
   | RExp_construct (name, v) -> Exp_construct (name, Option.map rexpr_to_expr v)
   | RExp_if (i, t, e) ->
     Exp_if (rexpr_to_expr i, rexpr_to_expr t, Option.map rexpr_to_expr e)
-  | RExp_sequence (l, r) -> Exp_sequence (rexpr_to_expr l, rexpr_to_expr r)
 ;;
 
 let rstruct_to_struct_item = function

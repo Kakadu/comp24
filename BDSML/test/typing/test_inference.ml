@@ -123,7 +123,10 @@ let%expect_test "test let rec and statements" =
   test {|let rec f a = a
   and g b = true
   let c = f (g 4)|};
-  [%expect {|
+  [%expect
+    {|
+    val f : 'k -> 'k
+    val g : 'j -> bool
     val f : 'k -> 'k
     val g : 'j -> bool
     val c : bool
@@ -139,7 +142,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect {| val a : 'h list |}]
+  [%expect {| val a : 'h list |}] [%expect {| val a : 'h list |}]
 ;;
 
 let%expect_test "test constructor some with" =
@@ -335,9 +338,7 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   test {|(=)|};
-  [%expect {|
-  [%expect {|
-    'e -> 'e -> bool |}]
+  [%expect {| 'h -> 'h -> bool |}]
 ;;
 
 let%expect_test "test less" =
@@ -377,7 +378,7 @@ let%expect_test "test poly inference" =
     f 'a' 'b';;
   |};
   [%expect {|
-    val f : 'g -> 'h -> ('g * 'h)
+    val f : 'h -> 'i -> ('h * 'i)
     (int * int)
     (char * char)
     |}]
