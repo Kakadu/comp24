@@ -667,7 +667,217 @@
           ))
         ])
     ]
-
+  $ ./parser_runner.exe < manytests/typed/011mapcps.ml
+  [(RecDecl
+      [(DDeclaration ((PIdentifier "map"),
+          (EFun ((PIdentifier "f"),
+             (EFun ((PIdentifier "xs"),
+                (EFun ((PIdentifier "k"),
+                   (EMatch ((EIdentifier "xs"),
+                      [(PNill, (EApplication ((EIdentifier "k"), ENill)));
+                        ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                         (EApplication (
+                            (EApplication (
+                               (EApplication ((EIdentifier "map"),
+                                  (EIdentifier "f"))),
+                               (EIdentifier "tl"))),
+                            (EFun ((PIdentifier "tl"),
+                               (EApplication ((EIdentifier "k"),
+                                  (ECons (
+                                     (EApplication ((EIdentifier "f"),
+                                        (EIdentifier "h"))),
+                                     (EIdentifier "tl")))
+                                  ))
+                               ))
+                            )))
+                        ]
+                      ))
+                   ))
+                ))
+             ))
+          ))
+        ]);
+    (RecDecl
+       [(DDeclaration ((PIdentifier "iter"),
+           (EFun ((PIdentifier "f"),
+              (EFun ((PIdentifier "xs"),
+                 (EMatch ((EIdentifier "xs"),
+                    [(PNill, EUnit);
+                      ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                       (ELetIn (NoRec, (PIdentifier "w"),
+                          (EApplication ((EIdentifier "f"), (EIdentifier "h"))),
+                          (EApplication (
+                             (EApplication ((EIdentifier "iter"),
+                                (EIdentifier "f"))),
+                             (EIdentifier "tl")))
+                          )))
+                      ]
+                    ))
+                 ))
+              ))
+           ))
+         ]);
+    (NoRecDecl
+       [(DDeclaration ((PIdentifier "main"),
+           (EApplication (
+              (EApplication ((EIdentifier "iter"), (EIdentifier "print_int"))),
+              (EApplication (
+                 (EApplication (
+                    (EApplication ((EIdentifier "map"),
+                       (EFun ((PIdentifier "x"),
+                          (EApplication (
+                             (EApplication ((EIdentifier "( + )"),
+                                (EIdentifier "x"))),
+                             (EConst (CInt 1))))
+                          ))
+                       )),
+                    (ECons ((EConst (CInt 1)),
+                       (ECons ((EConst (CInt 2)),
+                          (ECons ((EConst (CInt 3)), ENill))))
+                       ))
+                    )),
+                 (EFun ((PIdentifier "x"), (EIdentifier "x")))))
+              ))
+           ))
+         ])
+    ]
+  $ ./parser_runner.exe < manytests/typed/012fibcps.ml
+  [(RecDecl
+      [(DDeclaration ((PIdentifier "fib"),
+          (EFun ((PIdentifier "n"),
+             (EFun ((PIdentifier "k"),
+                (EIf (
+                   (EApplication (
+                      (EApplication ((EIdentifier "( < )"), (EIdentifier "n"))),
+                      (EConst (CInt 2)))),
+                   (EApplication ((EIdentifier "k"), (EIdentifier "n"))),
+                   (EApplication (
+                      (EApplication ((EIdentifier "fib"),
+                         (EApplication (
+                            (EApplication ((EIdentifier "( - )"),
+                               (EIdentifier "n"))),
+                            (EConst (CInt 1))))
+                         )),
+                      (EFun ((PIdentifier "a"),
+                         (EApplication (
+                            (EApplication ((EIdentifier "fib"),
+                               (EApplication (
+                                  (EApplication ((EIdentifier "( - )"),
+                                     (EIdentifier "n"))),
+                                  (EConst (CInt 2))))
+                               )),
+                            (EFun ((PIdentifier "b"),
+                               (EApplication ((EIdentifier "k"),
+                                  (EApplication (
+                                     (EApplication ((EIdentifier "( + )"),
+                                        (EIdentifier "a"))),
+                                     (EIdentifier "b")))
+                                  ))
+                               ))
+                            ))
+                         ))
+                      ))
+                   ))
+                ))
+             ))
+          ))
+        ]);
+    (NoRecDecl
+       [(DDeclaration ((PIdentifier "main"),
+           (EApplication ((EIdentifier "print_int"),
+              (EApplication (
+                 (EApplication ((EIdentifier "fib"), (EConst (CInt 6)))),
+                 (EFun ((PIdentifier "x"), (EIdentifier "x")))))
+              ))
+           ))
+         ])
+    ]
+  $ ./parser_runner.exe < manytests/typed/013foldfoldr.ml
+  [(NoRecDecl
+      [(DDeclaration ((PIdentifier "id"),
+          (EFun ((PIdentifier "x"), (EIdentifier "x")))))
+        ]);
+    (RecDecl
+       [(DDeclaration ((PIdentifier "fold_right"),
+           (EFun ((PIdentifier "f"),
+              (EFun ((PIdentifier "acc"),
+                 (EFun ((PIdentifier "xs"),
+                    (EMatch ((EIdentifier "xs"),
+                       [(PNill, (EIdentifier "acc"));
+                         ((PCons ((PIdentifier "h"), (PIdentifier "tl"))),
+                          (EApplication (
+                             (EApplication ((EIdentifier "f"),
+                                (EIdentifier "h"))),
+                             (EApplication (
+                                (EApplication (
+                                   (EApplication ((EIdentifier "fold_right"),
+                                      (EIdentifier "f"))),
+                                   (EIdentifier "acc"))),
+                                (EIdentifier "tl")))
+                             )))
+                         ]
+                       ))
+                    ))
+                 ))
+              ))
+           ))
+         ]);
+    (NoRecDecl
+       [(DDeclaration ((PIdentifier "foldl"),
+           (EFun ((PIdentifier "f"),
+              (EFun ((PIdentifier "a"),
+                 (EFun ((PIdentifier "bs"),
+                    (EApplication (
+                       (EApplication (
+                          (EApplication (
+                             (EApplication ((EIdentifier "fold_right"),
+                                (EFun ((PIdentifier "b"),
+                                   (EFun ((PIdentifier "g"),
+                                      (EFun ((PIdentifier "x"),
+                                         (EApplication ((EIdentifier "g"),
+                                            (EApplication (
+                                               (EApplication (
+                                                  (EIdentifier "f"),
+                                                  (EIdentifier "x"))),
+                                               (EIdentifier "b")))
+                                            ))
+                                         ))
+                                      ))
+                                   ))
+                                )),
+                             (EIdentifier "id"))),
+                          (EIdentifier "bs"))),
+                       (EIdentifier "a")))
+                    ))
+                 ))
+              ))
+           ))
+         ]);
+    (NoRecDecl
+       [(DDeclaration ((PIdentifier "main"),
+           (EApplication ((EIdentifier "print_int"),
+              (EApplication (
+                 (EApplication (
+                    (EApplication ((EIdentifier "foldl"),
+                       (EFun ((PIdentifier "x"),
+                          (EFun ((PIdentifier "y"),
+                             (EApplication (
+                                (EApplication ((EIdentifier "( * )"),
+                                   (EIdentifier "x"))),
+                                (EIdentifier "y")))
+                             ))
+                          ))
+                       )),
+                    (EConst (CInt 1)))),
+                 (ECons ((EConst (CInt 1)),
+                    (ECons ((EConst (CInt 2)),
+                       (ECons ((EConst (CInt 3)), ENill))))
+                    ))
+                 ))
+              ))
+           ))
+         ])
+    ]
   $ ./parser_runner.exe < manytests/typed/015tuples.ml
   [(RecDecl
       [(DDeclaration ((PIdentifier "fix"),
@@ -1154,3 +1364,4 @@
           (ETuple [(EIdentifier "a"); (EIdentifier "b")])))
         ])
     ]
+
