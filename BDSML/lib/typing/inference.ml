@@ -344,38 +344,18 @@ and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = 
   | Exp_type (exp, typexp) -> infer_typexpr env exp typexp
 ;;
 
-let predefine_operators =
-  [ "( + )", "int -> int -> int"
-  ; "( - )", "int -> int -> int"
-  ; "( * )", "int -> int -> int"
-  ; "( / )", "int -> int -> int"
-  ; "( ~- )", "int -> int"
-  ; "( ~+ )", "int -> int"
-  ; "not", "bool -> bool"
-  ; "( > )", "'a -> 'a -> bool"
-  ; "( >= )", "'a -> 'a -> bool"
-  ; "( < )", "'a -> 'a -> bool"
-  ; "( <= )", "'a -> 'a -> bool"
-  ; "( = )", "'a -> 'a -> bool"
-  ; "( <> )", "'a -> 'a -> bool"
-  ; "( || )", "bool -> bool -> bool"
-  ; "( == )", "'a -> 'a -> bool"
-  ; "print_int", "int -> unit"
-  ]
-;;
-
 let init_env =
   let+ add_predefines =
     let empty_env = TypeEnv.empty in
     map
-      (fun (name, ty) ->
+      (fun (name, ty, _) ->
         match Parser.Typexpr_parser.parse_typexpr_str ty with
         | Result.Ok ty ->
           let+ ty = typexpr_to_type ty in
           let scheme = generalize empty_env ty in
           name, scheme
         | Result.Error s -> fail (Invalid_predefined_operators s))
-      predefine_operators
+      Utils.Predefined_ops.predefine_operators
   in
   TypeEnv.init add_predefines
 ;;
