@@ -68,7 +68,7 @@ let pat_typexpr p =
 
 (** https://ocaml.org/manual/5.2/patterns.html#start-section *)
 let priority =
-  [ parse_pcons; choice_pass_prev [ parse_plist; Fun.id ]; parse_ptuple; parse_por ]
+  [ choice_pass_prev [ parse_plist; Fun.id ]; parse_pcons; parse_ptuple; parse_por ]
 ;;
 
 let parse_pattern =
