@@ -16,7 +16,7 @@ let identifier_to_str = function
 let codegen_const = function
   | CInt x -> return @@ const_int i64 x
   | CBool x -> return @@ const_int i64 (Bool.to_int x)
-  | CUnit -> return @@ const_pointer_null void
+  | CUnit -> return @@ const_int i64 0
   | _ -> fail "Not implemented"
 ;;
 
