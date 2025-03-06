@@ -103,6 +103,27 @@
   let temp = let f = (fun x -> x) in
   ((f 1), (f true))
 
+  $ ./pe_runner.exe < manytests/typed/011mapcps.ml
+  let rec map = (fun f xs k -> (k []))
+  
+  let rec iter = (fun f xs -> ())
+  
+  let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
+  $ ./pe_runner.exe < manytests/typed/012fibcps.ml
+  let rec fib = (fun n k -> if ((( < ) n) 2)
+  then (k n)
+  else ((fib ((( - ) n) 1)) (fun a -> ((fib ((( - ) n) 2)) (fun b -> (k ((( + ) a) b)))))))
+  
+  let main = (print_int ((fib 6) (fun x -> x)))
+  $ ./pe_runner.exe < manytests/typed/013foldfoldr.ml
+  let id = (fun x -> x)
+  
+  let rec fold_right = (fun f acc xs -> acc)
+  
+  let foldl = (fun f a bs -> ((((fold_right (fun b g x -> (g ((f x) b)))) id) bs) a))
+  
+  let main = (print_int (((foldl (fun x y -> ((( * ) x) y))) 1) (1::(2::(3::[])))))
+
   $ ./pe_runner.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f x -> ((f (fix f)) x))
   
@@ -174,3 +195,4 @@
 
   $ ./pe_runner.exe < manytests/do_not_type/015tuples.ml
   Infer error:
+

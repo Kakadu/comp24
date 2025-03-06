@@ -46,7 +46,9 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
-  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
 
@@ -70,10 +72,11 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
-  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
-
 
 (cram
  (applies_to pe_manytests)
@@ -95,6 +98,8 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
-  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
