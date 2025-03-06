@@ -28,17 +28,10 @@ let rec expr_to_str = function
       (List.fold_left (fun acc name -> acc ^ " " ^ name) "" args)
       (expr_to_str e)
   | Pe_EApp (e1, e2) -> Format.sprintf "(%s %s)" (expr_to_str e1) (expr_to_str e2)
-  | Pe_ELet (Pe_Nonrec (name, e1), e2) ->
+  | Pe_ELet (NoRec, name, e1, e2) ->
     Format.sprintf "let %s = %s in\n%s" name (expr_to_str e1) (expr_to_str e2)
-  | Pe_ELet (Pe_Rec decl_list, e2) ->
-    let name1, e1 = List.hd decl_list in
-    let tl = List.tl decl_list in
-    Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
-    ^ List.fold_left
-        (fun acc (name, e) -> acc ^ Format.sprintf " and %s = %s" name (expr_to_str e))
-        ""
-        tl
-    ^ Format.sprintf " in\n%s" (expr_to_str e2)
+  | Pe_ELet (Rec, name1, e1, e2) ->
+    Format.sprintf "let rec %s = %s in\n%s" name1 (expr_to_str e1) (expr_to_str e2)
   | Pe_ECons (e1, e2) -> Format.sprintf "(%s::%s)" (expr_to_str e1) (expr_to_str e2)
   | Pe_ETuple e_list ->
     Format.sprintf
@@ -51,15 +44,24 @@ let rec expr_to_str = function
 ;;
 
 let decl_to_str = function
-  | Pe_Nonrec (name, e) -> Format.sprintf "let %s = %s" name (expr_to_str e)
+  | Pe_Nonrec decl_list ->
+    (match decl_list with
+     | [] -> ""
+     | (name, e) :: tl ->
+       Format.sprintf "let %s = %s" name (expr_to_str e)
+       ^ List.fold_left
+           (fun acc (name, e) -> acc ^ Format.sprintf "\nlet %s = %s" name (expr_to_str e))
+           ""
+           tl)
   | Pe_Rec decl_list ->
-    let name1, e1 = List.hd decl_list in
-    let tl = List.tl decl_list in
-    Format.sprintf "let rec %s = %s" name1 (expr_to_str e1)
-    ^ List.fold_left
-        (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
-        ""
-        tl
+    (match decl_list with
+     | [] -> ""
+     | (name, e) :: tl ->
+       Format.sprintf "let rec %s = %s" name (expr_to_str e)
+       ^ List.fold_left
+           (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
+           ""
+           tl)
 ;;
 
 let pp_pe_expr ppf expr = Format.fprintf ppf "%s" (expr_to_str expr)
