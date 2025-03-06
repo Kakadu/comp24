@@ -1,6 +1,8 @@
 open Base
 open Ast
 
+let stdlib_names = Set.of_list (module String) [ "print_int"; "print_endline" ]
+
 (* Remove all the variables that are bound by a single pattern from free variables set *)
 let rec remove_bound_vars_from_pattern free (pat : pattern) =
   match pat with
@@ -39,27 +41,38 @@ let rec bound_vars_in_pattern (pat : pattern) =
 
 (* Find free variables in an expression *)
 let rec free_vars_expr (exp : expr) =
+  let remove_stdlib_names s = Set.diff s stdlib_names in
   match exp with
   | EConst _ | EOperation _ -> Set.empty (module String)
   | EVar id -> Set.singleton (module String) id
   | ETuple (e1, e2, e_list) ->
     let exps = e1 :: e2 :: e_list in
-    List.fold
-      exps
-      ~init:(Set.empty (module String))
-      ~f:(fun acc e -> Set.union acc (free_vars_expr e))
+    let free =
+      List.fold
+        exps
+        ~init:(Set.empty (module String))
+        ~f:(fun acc e -> Set.union acc (free_vars_expr e))
+    in
+    remove_stdlib_names free
   | EList exps ->
-    List.fold
-      exps
-      ~init:(Set.empty (module String))
-      ~f:(fun acc e -> Set.union acc (free_vars_expr e))
+    let free =
+      List.fold
+        exps
+        ~init:(Set.empty (module String))
+        ~f:(fun acc e -> Set.union acc (free_vars_expr e))
+    in
+    remove_stdlib_names free
   | EListConcat (e1, e2) | Application (e1, e2) ->
-    Set.union (free_vars_expr e1) (free_vars_expr e2)
+    let free = Set.union (free_vars_expr e1) (free_vars_expr e2) in
+    remove_stdlib_names free
   | If (e1, e2, e3_opt) ->
     let base = Set.union (free_vars_expr e1) (free_vars_expr e2) in
-    (match e3_opt with
-     | Some e -> Set.union base (free_vars_expr e)
-     | None -> base)
+    let free =
+      match e3_opt with
+      | Some e -> Set.union base (free_vars_expr e)
+      | None -> base
+    in
+    remove_stdlib_names free
   | Match (e, cases) ->
     let free_in_cases =
       List.fold
@@ -70,7 +83,8 @@ let rec free_vars_expr (exp : expr) =
           let body_free = remove_bound_vars_from_pattern body_free pat in
           Set.union acc body_free)
     in
-    Set.union (free_vars_expr e) free_in_cases
+    let free = Set.union (free_vars_expr e) free_in_cases in
+    remove_stdlib_names free
   | Let (fun_type, binds, in_expr_opt) ->
     (* Determine whether the let is recursive *)
     let is_rec =
@@ -108,7 +122,8 @@ let rec free_vars_expr (exp : expr) =
       | Some e -> Set.diff (free_vars_expr e) bound_names
       | None -> Set.empty (module String)
     in
-    Set.union free_in_binds free_in_in_expr
+    let free = Set.union free_in_binds free_in_in_expr in
+    remove_stdlib_names free
   | EConstraint (e, _) -> free_vars_expr e
   | Fun (args, body) ->
     let free = free_vars_expr body in
