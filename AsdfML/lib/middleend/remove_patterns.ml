@@ -14,7 +14,7 @@ open State.IntStateM.Syntax
 (* Replaces complex patterns with explicit pattern-matching *)
 
 let is_simple = function
-  | PIdent _ | PWild -> true
+  | PIdent _ | PWild | PConst CUnit -> true
   | _ -> false
 ;;
 

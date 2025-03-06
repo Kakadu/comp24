@@ -36,6 +36,7 @@ let list_is_empty lst = s_app (s_var "`list_is_empty") lst
 let pat_as_id = function
   | PIdent x -> x
   | PWild -> "_"
+  | PConst(CUnit) -> "()"
   | p -> failwith (Format.asprintf "remove_match: non-id pattern %a" Ast.pp_pattern p)
 ;;
 
@@ -105,7 +106,7 @@ let remove_match prog =
       let rec case_matched match_exp = function
         | PConst (CInt _ as c) | PConst (CBool _ as c) -> check_eq match_exp (SConst c)
         | PConst CNil -> list_is_empty match_exp
-        | PConst CUnit -> check_eq match_exp (SConst CUnit) (* TODO: <- *)
+        (* | PConst CUnit -> check_eq match_exp (SConst CUnit)  *)
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
           List.foldi xs ~init:true_ ~f:(fun idx acc x ->
