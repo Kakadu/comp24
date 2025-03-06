@@ -3,29 +3,7 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 open Ast
-
-type pe_const =
-  | Pe_Cint of int
-  | Pe_CBool of bool
-
-type pe_expr =
-  | Pe_EUnit
-  | Pe_ENill
-  | Pe_EIdentifier of string
-  | Pe_EConst of pe_const
-  | Pe_EVar of string
-  | Pe_EIf of pe_expr * pe_expr * pe_expr
-  | Pe_EFun of string list * pe_expr
-  | Pe_EApp of pe_expr * pe_expr
-  | Pe_ELet of pe_str_item * pe_expr
-  | Pe_ECons of pe_expr * pe_expr
-  | Pe_ETuple of pe_expr list
-
-and pe_str_item =
-  | Pe_Nonrec of string * pe_expr
-  | Pe_Rec of (string * pe_expr) list
-
-type pe_structure = pe_str_item list
+open Pe_ast
 
 let const_to_str = function
   | Pe_CBool b -> if b then "true" else "false"
