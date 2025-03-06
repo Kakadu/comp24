@@ -139,7 +139,7 @@ let fresh_var prefix =
   prefix ^ Int.to_string id
 ;;
 
-let rec cc_expr =
+let cc_expr =
   let pattern_list_to_vars patterns = List.map patterns ~f:(fun x -> Var x) in
   let args_list_to_id_set args =
     List.fold
@@ -153,7 +153,7 @@ let rec cc_expr =
   let extract_fun_args expr =
     let rec loop e acc =
       match e with
-      | Fun (fun_args, fun_body) -> loop fun_body (acc @ fun_args)
+      | Fun (fun_args, fun_body) -> loop fun_body (fun_args @ acc)
       | _ -> acc, e
     in
     loop expr []
@@ -162,50 +162,83 @@ let rec cc_expr =
     let unbound = free_vars_expr expr in
     let bound = args_list_to_id_set args in
     let free_vars = Set.diff unbound bound in
-    args @ pattern_list_to_vars (Set.to_list free_vars)
+    pattern_list_to_vars (Set.to_list free_vars) @ args
   in
-  function
-  | EVar _ as e -> e
-  | EConst _ as e -> e
-  | EOperation _ as e -> e
-  | ETuple (e1, e2, es) -> ETuple (cc_expr e1, cc_expr e2, List.map es ~f:cc_expr)
-  | EList es -> EList (List.map es ~f:cc_expr)
-  | EListConcat (e1, e2) -> EListConcat (cc_expr e1, cc_expr e2)
-  | If (cond, then_expr, else_expr) ->
-    If (cc_expr cond, cc_expr then_expr, Option.map else_expr ~f:cc_expr)
-  | Match (expr, cases) ->
-    Match (cc_expr expr, List.map cases ~f:(fun (pat, body) -> pat, cc_expr body))
-  | EConstraint (expr, ty) -> EConstraint (cc_expr expr, ty)
-  | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
-  | Fun (args, expr) ->
-    (* Process based on whether the expression to the right of the arrow is a `fun` expression *)
-    (match expr with
-     | Fun _ ->
-       let all_args, final_body = extract_fun_args (Fun (args, expr)) in
-       let new_args = add_free_vars all_args final_body in
-       Fun (new_args, cc_expr final_body)
-     | _ ->
-       let new_args = add_free_vars args expr in
-       Fun (new_args, cc_expr expr))
-  | Let (fun_type, binds, in_expr_opt) ->
-    let cc_binds =
-      List.map binds ~f:(fun (pat, args, expr) ->
-        let all_args, body = extract_fun_args expr in
-        let combined_args = all_args @ args in
-        let final_args =
-          match fun_type with
-          | Recursive ->
-            let unbound = free_vars_expr body in
-            let bound = args_list_to_id_set combined_args in
-            let fun_names = bound_vars_in_pattern pat in
-            let free_vars = Set.diff (Set.diff unbound bound) fun_names in
-            combined_args @ pattern_list_to_vars (Set.to_list free_vars)
-          | Nonrecursive -> add_free_vars combined_args body
-        in
-        pat, final_args, cc_expr body)
-    in
-    let new_in_expr_opt = Option.map in_expr_opt ~f:cc_expr in
-    Let (fun_type, cc_binds, new_in_expr_opt)
+  let rec process env = function
+    | EVar id ->
+      (match Map.find env id with
+       | Some captured_vars ->
+         (* Apply the function to its captured variables *)
+         List.fold captured_vars ~init:(EVar id) ~f:(fun acc var ->
+           Application (acc, EVar var))
+       | None -> EVar id)
+    | EConst _ as e -> e
+    | EOperation _ as e -> e
+    | ETuple (e1, e2, es) ->
+      ETuple (process env e1, process env e2, List.map es ~f:(process env))
+    | EList es -> EList (List.map es ~f:(process env))
+    | EListConcat (e1, e2) -> EListConcat (process env e1, process env e2)
+    | If (cond, then_expr, else_expr) ->
+      If (process env cond, process env then_expr, Option.map else_expr ~f:(process env))
+    | Match (expr, cases) ->
+      Match
+        (process env expr, List.map cases ~f:(fun (pat, body) -> pat, process env body))
+    | EConstraint (expr, ty) -> EConstraint (process env expr, ty)
+    | Application (e1, e2) -> Application (process env e1, process env e2)
+    | Fun (args, expr) ->
+      (* Process based on whether the expression to the right of the arrow is a `fun` expression *)
+      (match expr with
+       | Fun _ ->
+         let all_args, final_body = extract_fun_args (Fun (args, expr)) in
+         let new_args = add_free_vars all_args final_body in
+         let bound_vars = args_list_to_id_set new_args in
+         (* Create new environment where we remove bound parameters *)
+         let new_env = Map.filter_keys env ~f:(fun k -> not (Set.mem bound_vars k)) in
+         Fun (new_args, process new_env final_body)
+       | _ ->
+         let new_args = add_free_vars args expr in
+         let bound_vars = args_list_to_id_set new_args in
+         let new_env = Map.filter_keys env ~f:(fun k -> not (Set.mem bound_vars k)) in
+         Fun (new_args, process new_env expr))
+    | Let (fun_type, binds, in_expr_opt) ->
+      let new_env_ref = ref env in
+      let cc_binds =
+        List.map binds ~f:(fun (pat, args, expr) ->
+          let all_args, body = extract_fun_args expr in
+          let combined_args = args @ all_args in
+          let final_args =
+            match fun_type with
+            | Recursive ->
+              let unbound = free_vars_expr body in
+              let bound = args_list_to_id_set combined_args in
+              let fun_names = bound_vars_in_pattern pat in
+              let free_vars = Set.diff (Set.diff unbound bound) fun_names in
+              pattern_list_to_vars (Set.to_list free_vars) @ combined_args
+            | Nonrecursive -> add_free_vars combined_args body
+          in
+          (* Update environment with bound functions and their free variables *)
+          (match pat with
+           | Var id ->
+             let captured_vars =
+               List.filter_map final_args ~f:(function
+                 | Var v
+                   when not
+                          (List.exists combined_args ~f:(function
+                            | Var v' -> String.equal v v'
+                            | _ -> false)) -> Some v
+                 | _ -> None)
+             in
+             new_env_ref := Map.set !new_env_ref ~key:id ~data:captured_vars
+           | _ -> ());
+          let bound_vars = args_list_to_id_set final_args in
+          let body_env = Map.filter_keys env ~f:(fun k -> not (Set.mem bound_vars k)) in
+          pat, final_args, process body_env body)
+      in
+      let new_env = !new_env_ref in
+      let new_in_expr_opt = Option.map in_expr_opt ~f:(process new_env) in
+      Let (fun_type, cc_binds, new_in_expr_opt)
+  in
+  process (Map.empty (module String))
 ;;
 
 let cc_prog (prog : prog) =
