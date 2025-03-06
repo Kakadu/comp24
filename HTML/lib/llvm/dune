@@ -9,11 +9,10 @@
   ;
   ))
 
-(executable
- (public_name demo)
- (name main)
- (modules main)
- (libraries LL)
+(library
+ (name llvm_codegen)
+ (modules codegen Llvm_utils Runtime)
+ (libraries LL AstLib Common Anf)
  (instrumentation
   (backend bisect_ppx)))
 
