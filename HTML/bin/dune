@@ -5,7 +5,7 @@
  (libraries Parser TypeInference Anf stdio Patelim llvm_codegen))
 
 (cram
- (applies_to llvm_demo)
+ (applies_to llvm_ir_demo llvm_run_demo)
  (deps
   ./llvm_demo.exe
   ./runtime.c
