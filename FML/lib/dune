@@ -11,6 +11,7 @@
   Inferencer
   Typedtree
   Pattern_elim
+  Common
   Pe_ast)
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
