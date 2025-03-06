@@ -1,12 +1,9 @@
   $ dune exec ./anf_demo.exe << EOF
-  > let test = let nested_pat x = match x with | 5 -> 1000 + 0 | 6 -> 6 in nested_pat 7 
+  > let test = let nested_pat x = match x with | 5 -> 1000 + 0 | _ -> 6 in nested_pat 7 
   > EOF
   let  ll_0 x_0 = let anf_app_0 = ( == ) x_0 5 in
-  let anf_ifthenelse_4 = if anf_app_0 then 1000 else let anf_app_1 = ( == ) x_0 6 in
-  let anf_ifthenelse_3 = if anf_app_1 then 6 else let anf_app_2 = match_error ()  in
-  anf_app_2 in
-  anf_ifthenelse_3 in
-  anf_ifthenelse_4;;
+  let anf_ifthenelse_1 = if anf_app_0 then 1000 else 6 in
+  anf_ifthenelse_1;;
   let  test_0  = let anf_app_0 = ll_0 7  in
   anf_app_0;;
 
