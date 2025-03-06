@@ -85,16 +85,10 @@ let rec ll_bind
   match name with
   | Var name ->
     let* env, new_name = NameEnv.generate_name env name in
-    (match args with
-     | [] ->
-       let* llexpr, lifted = ll_expr lifted env expr in
-       let (new_bind : ll_bind) = Var new_name, [], llexpr in
-       return (env, new_bind, lifted)
-     | args ->
-       let* expr, nameset = simplify_arguments args expr in
-       let* llexpr, lifted = ll_expr lifted env expr in
-       let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
-       return (env, new_bind, lifted))
+    let* expr, nameset = simplify_arguments args expr in
+    let* llexpr, lifted = ll_expr lifted env expr in
+    let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
+    return (env, new_bind, lifted)
   | p_name ->
     let* llexpr, lifted = ll_expr lifted env expr in
     let (new_bind : ll_bind) = p_name, args, llexpr in
@@ -172,8 +166,6 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
     let* ll_lexpr, lifted = ll_expr lifted env lexpr in
     let* ll_rexpr, lifted = ll_expr lifted env rexpr in
     return (LLApplication (ll_lexpr, ll_rexpr), lifted)
-  | Let (_, _, None) ->
-    failwith "Incorrect 'Let' expression, can't perform LL without 'IN'"
   | _ -> failwith "Incorrect expression was encountered during LL"
 ;;
 
