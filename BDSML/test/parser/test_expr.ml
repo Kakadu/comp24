@@ -364,8 +364,7 @@ let%expect_test "test if" =
 
 let%expect_test "test if without else" =
   test_expr "if a then b";
-  [%expect
-    {|
+  [%expect {|
     (Exp_if ((Exp_ident "a"), (Exp_ident "b"), None))
      |}]
 ;;
@@ -377,30 +376,6 @@ let%expect_test "test if in expr" =
     (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_constant (Const_int 4)))),
        (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c"))))))
     |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 1" =
-  test_expr "if a then b; c";
-  [%expect
-    {|
-    (Exp_sequence ((Exp_if ((Exp_ident "a"), (Exp_ident "b"), None)),
-       (Exp_ident "c")))
-     |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 2" =
-  test_expr "if a then b; c else d";
-  [%expect {| Error: end_of_input |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 3" =
-  test_expr "if a then b else c; d";
-  [%expect
-    {|
-    (Exp_sequence (
-       (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c")))),
-       (Exp_ident "d")))
-     |}]
 ;;
 
 let%expect_test "test match" =
@@ -472,13 +447,15 @@ let%expect_test "test list inside" =
     {|
     (Exp_construct ("::",
        (Some (Exp_tuple
-                [(Exp_fun ([(Pat_var "c")],
-                    (Exp_sequence ((Exp_ident "c"),
-                       (Exp_fun ([(Pat_var "b")], (Exp_ident "b")))))
-                    ));
-                  (Exp_construct ("[]", None))]))
+                [(Exp_fun ([(Pat_var "c")], (Exp_ident "c")));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_fun ([(Pat_var "b")], (Exp_ident "b")));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
        ))
-     |}]
+    |}]
 ;;
 
 let%expect_test "test list inside parents" =
@@ -591,6 +568,27 @@ let%expect_test "test redefine operator" =
           (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "a"))),
              (Exp_apply ((Exp_ident "!"), (Exp_ident "b")))))
           ))
+       ))
+    |}]
+;;
+
+let%expect_test "happy birthday test" =
+  test_expr "[1;2] :: []";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_construct ("::",
+                    (Some (Exp_tuple
+                             [(Exp_constant (Const_int 1));
+                               (Exp_construct ("::",
+                                  (Some (Exp_tuple
+                                           [(Exp_constant (Const_int 2));
+                                             (Exp_construct ("[]", None))]))
+                                  ))
+                               ]))
+                    ));
+                  (Exp_construct ("[]", None))]))
        ))
     |}]
 ;;

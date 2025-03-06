@@ -67,7 +67,6 @@ and shrink_expr = function
     (match e3 with
      | Some e3 -> of_list [ e1; e2; e3 ]
      | None -> of_list [ e1; e2 ])
-  | Exp_sequence (e1, e2) -> of_list [ e1; e2 ]
   | _ -> empty
 ;;
 

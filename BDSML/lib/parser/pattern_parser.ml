@@ -16,7 +16,7 @@ let parse_var =
 ;;
 
 let parse_ptuple p =
-  sep_by (check_char ',') p
+  sep_by1 (check_char ',') p
   >>= function
   | [] -> fail "It cannot be this way"
   | [ h ] -> return h
@@ -68,16 +68,16 @@ let pat_typexpr p =
 
 (** https://ocaml.org/manual/5.2/patterns.html#start-section *)
 let priority =
-  [ parse_pcons; choice_pass_prev [ parse_plist; Fun.id ]; parse_ptuple; parse_por ]
+  [ choice_pass_prev [ parse_plist; Fun.id ]; parse_pcons; parse_ptuple; parse_por ]
 ;;
 
 let parse_pattern =
   fix (fun self ->
     parse_by_priority priority
     @@ choice
-         [ parse_any
+         [ parse_var
          ; parse_pconst
-         ; parse_var
+         ; parse_any
          ; pat_typexpr self
          ; remove_parents self
          ; parse_plist self

@@ -7,6 +7,7 @@ type constant =
   | Const_char of char (** Character literal, e.g. ['m'] *)
   | Const_string of string (** String literal, e.g. ["something"] *)
   | Const_bool of bool (** Bool literal, [true] or [false] *)
+  | Const_unit (** Unit literal, [()] *)
 [@@deriving show { with_path = false }]
 
 type typexpr =
@@ -71,7 +72,6 @@ and expression =
       - [C E]             when [exp] is [Some E],
       - [C (E1, ..., En)] when [exp] is [Some (Exp_tuple[E1;...;En])] *)
   | Exp_if of expression * expression * expression option (** [if E1 then E2 else E3] *)
-  | Exp_sequence of expression * expression (** [E1; E2] *)
 [@@deriving show { with_path = false }]
 
 type structure_item =

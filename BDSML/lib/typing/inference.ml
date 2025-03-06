@@ -53,6 +53,7 @@ let typexpr_to_type typexpr =
     | "char" -> Some TChar
     | "string" -> Some TString
     | "bool" -> Some TBool
+    | "unit" -> Some TUnit
     | _ -> None
   in
   let rec helper (type_vars : type_val TypeVars.t) = function
@@ -102,6 +103,7 @@ let infer_base_type c =
     | Const_char _ -> TChar
     | Const_string _ -> TString
     | Const_bool _ -> TBool
+    | Const_unit -> TUnit
   in
   return (Subst.empty, TBase (const_to_type c))
 ;;
@@ -340,11 +342,6 @@ and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = 
   | Exp_tuple l -> infer_tuple env l
   | Exp_construct (name, exp) -> infer_construct env name exp
   | Exp_type (exp, typexp) -> infer_typexpr env exp typexp
-  | Exp_sequence (exp1, exp2) ->
-    let* sub1, _ = infer_expression env exp1 in
-    let* sub2, ty = infer_expression env exp2 in
-    let+ sub = Subst.compose sub1 sub2 in
-    sub, ty
 ;;
 
 let predefine_operators =
@@ -362,6 +359,8 @@ let predefine_operators =
   ; "( = )", "'a -> 'a -> bool"
   ; "( <> )", "'a -> 'a -> bool"
   ; "( || )", "bool -> bool -> bool"
+  ; "( == )", "'a -> 'a -> bool"
+  ; "print_int", "int -> unit"
   ]
 ;;
 

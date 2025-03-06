@@ -1,0 +1,9 @@
+(library
+ (name test)
+ (libraries AsdfML.Lib)
+ (modules utils)
+ (preprocess
+  (pps ppx_inline_test ppx_expect))
+ (instrumentation
+  (backend bisect_ppx))
+ (inline_tests))

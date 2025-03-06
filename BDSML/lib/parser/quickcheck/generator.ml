@@ -112,8 +112,8 @@ let rec gen_expr = function
          let+ e3 = opt ~ratio:0.5 (gen_expr (depth / 3)) in
          Exp_if (e1, e2, e3))
         (* ; (let+ e1 = gen_expr (depth / 2)
-         and+ e2 = gen_expr (depth / 2) in
-         Exp_sequence (e1, e2)) *)
+           and+ e2 = gen_expr (depth / 2) in
+           Exp_sequence (e1, e2)) *)
       ]
 
 and gen_case depth =

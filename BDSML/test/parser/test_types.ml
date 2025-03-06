@@ -96,8 +96,7 @@ let%expect_test "params combine parents test" =
 
 let%expect_test "type variable" =
   test_types ": 'a -> 'a";
-  [%expect
-    {|
+  [%expect {|
     (Type_fun [(Type_single "'a"); (Type_single "'a")])
     |}]
 ;;
