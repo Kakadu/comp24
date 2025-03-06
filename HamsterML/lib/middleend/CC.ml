@@ -207,4 +207,13 @@ let rec cc_expr =
     let new_in_expr_opt = Option.map in_expr_opt ~f:cc_expr in
     Let (fun_type, cc_binds, new_in_expr_opt)
 ;;
+
+let cc_prog (prog : prog) =
+  let rec helper = function
+    | hd :: tl ->
+      let new_hd = cc_expr hd in
+      new_hd :: helper tl
+    | [] -> []
+  in
+  helper prog
 ;;
