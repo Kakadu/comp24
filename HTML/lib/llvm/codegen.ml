@@ -50,13 +50,13 @@ let codegen_binop = function
   | "-" -> fun x y -> build_sub x y "sub" builder
   | "*" -> fun x y -> build_mul x y "mul" builder
   | "/" -> fun x y -> build_sdiv x y "div" builder
-  | "=" -> fun x y -> build_icmp Icmp.Eq x y "eq" builder
-  | "!=" -> fun x y -> build_icmp Icmp.Ne x y "neq" builder
+  | "=" | "( = )" -> fun x y -> build_icmp Icmp.Eq x y "eq" builder
+  | "!=" | "( != )" -> fun x y -> build_icmp Icmp.Ne x y "neq" builder
   | "<" -> fun x y -> build_icmp Icmp.Slt x y "less" builder
   | "<=" -> fun x y -> build_icmp Icmp.Sle x y "leq" builder
   | ">" -> fun x y -> build_icmp Icmp.Sgt x y "gre" builder
   | ">=" -> fun x y -> build_icmp Icmp.Sge x y "geq" builder
-  | "&&" -> fun x y -> build_and x y "and" builder
+  | "&&" | "( && )" -> fun x y -> build_and x y "and" builder
   | "||" -> fun x y -> build_or x y "or" builder
   | _ -> failwith "Unknown binop"
 ;;

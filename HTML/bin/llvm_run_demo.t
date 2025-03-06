@@ -36,11 +36,5 @@
   0
   --LLVM--
   $ clang-16 out.ll runtime.o -lffi -o demo
-  /usr/bin/ld: /tmp/build_ed4f8f_dune/out-c2d0ff.o: in function `main.1':
-  HTML:(.text+0x138): undefined reference to `( = )'
-  /usr/bin/ld: HTML:(.text+0x189): undefined reference to `RTE_ERROR_MATCH_FAILURE'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
-  [1]
   $ echo $(./demo)
-  ./demo: not found
   

@@ -26,3 +26,4 @@ int64_t print_int(int64_t x);
 
 int64_t print_bool(int64_t x);
 
+int64_t RTE_ERROR_MATCH_FAILURE(int64_t _);

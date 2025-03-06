@@ -112,7 +112,11 @@ int64_t print_bool(int64_t x)
     return 0;
 }
 
-
+int64_t RTE_ERROR_MATCH_FAILURE(int64_t _) {
+    fprintf(stderr, "Match failure\n");
+    exit(EXIT_FAILURE);
+    return 0;
+}
 int main() { // TODO: remove it 
     return 0;
 }

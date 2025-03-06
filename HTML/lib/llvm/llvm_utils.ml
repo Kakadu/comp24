@@ -5,8 +5,8 @@ let map_ident_to_runtime = function
   | "-" -> "sub"
   | "*" -> "mul"
   | "/" -> "div"
-  | "=" -> "eq"
-  | "!=" -> "neq"
+  | "=" | "( = )" -> "eq"
+  | "!=" | "( != )" -> "neq"
   | "<" -> "less"
   | "<=" -> "leq"
   | ">" -> "gre"
@@ -15,6 +15,7 @@ let map_ident_to_runtime = function
   | "||" -> "or"
   | "base +" -> "uplus"
   | "base -" -> "uminus"
+  | "RTE_ERROR_MATCH_FAILURE" -> "RTE_ERROR_MATCH_FAILURE"
   | other -> other
 ;;
 
