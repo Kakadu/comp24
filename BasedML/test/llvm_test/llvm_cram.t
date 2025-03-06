@@ -198,7 +198,7 @@ Other
     br i1 %5, label %7, label %12
   
   continue:                                         ; preds = %continue1, %7
-    %6 = phi i64 [ %11, %7 ], [ %16, %continue1 ]
+    %6 = phi i64 [ %11, %7 ], [ %19, %continue1 ]
     ret i64 %6
   
   7:                                                ; preds = %entry
@@ -209,21 +209,24 @@ Other
     br label %continue
   
   12:                                               ; preds = %entry
-    %13 = call i64 @eq_ml(i64 %0, i64 1)
-    %14 = ashr i64 %13, 1
-    %15 = trunc i64 %14 to i1
-    br i1 %15, label %17, label %19
+    %13 = icmp eq i64 %0, 1
+    %14 = zext i1 %13 to i64
+    %15 = shl i64 %14, 1
+    %16 = add i64 %15, 1
+    %17 = ashr i64 %16, 1
+    %18 = trunc i64 %17 to i1
+    br i1 %18, label %20, label %22
   
-  continue1:                                        ; preds = %19, %17
-    %16 = phi i64 [ %18, %17 ], [ %20, %19 ]
+  continue1:                                        ; preds = %22, %20
+    %19 = phi i64 [ %21, %20 ], [ %23, %22 ]
     br label %continue
   
-  17:                                               ; preds = %12
-    %18 = call i64 (i64, i64, ...) @mlrt_apply_args_to_closure(i64 %2, i64 1, i64 1)
+  20:                                               ; preds = %12
+    %21 = call i64 (i64, i64, ...) @mlrt_apply_args_to_closure(i64 %2, i64 1, i64 1)
     br label %continue1
   
-  19:                                               ; preds = %12
-    %20 = call i64 @mltr_match_error(i64 1)
+  22:                                               ; preds = %12
+    %23 = call i64 @mltr_match_error(i64 1)
     br label %continue1
   }
   
