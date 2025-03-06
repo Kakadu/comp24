@@ -26,13 +26,13 @@ let rec codegen_imexpr = function
     let name = Common.Ident_utils.ident_to_string id in
     let* id_var = lookup_env_var name in
     (match id_var with
-     | Some v -> return (build_load2 i64 v name builder)
+     | Some v -> return (build_load i64 v name builder)
      | None ->
        (match lookup_function name the_module with
         | Some func ->
           let int_ptr = Llvm.build_ptrtoint func i64 "" builder in
           return
-            (build_call2
+            (build_call
                (function_type i64 [| i64; i64 |])
                (Option.get (lookup_function "create_closure" the_module))
                [| int_ptr
@@ -43,11 +43,6 @@ let rec codegen_imexpr = function
                builder)
         | None -> fail @@ Format.sprintf "Unknown variable %s" name))
   | ImmConstraint (immexpr, _) -> codegen_imexpr immexpr
-;;
-
-let is_binop = function
-  | "+" | "-" | "*" | "/" | "=" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" -> true
-  | _ -> false
 ;;
 
 let codegen_binop = function
@@ -68,24 +63,18 @@ let codegen_binop = function
 
 let rec codegen_cexpr = function
   | CImmExpr e -> codegen_imexpr e
-  (* | CApp (CApp (CImmExpr e1, CImmExpr (ImmIdentifier bin_op)), CImmExpr e2)
-    when is_binop (Common.Ident_utils.ident_to_string bin_op) ->
-    let e1' = codegen_immexpr e1 in
-    let e2' = codegen_immexpr e2 in
-    let* arg = codegen_cexpr argument in
-    return
-    @@ build_call2
-         (function_type i64 [| i64; i64; i64 |])
-         (Option.get (lookup_function "apply_args_to_closure" the_module))
-         [| calee; const_int i64 1; arg |]
-         "application_result"
-         builder *)
+  | CApp (CApp (CImmExpr (ImmIdentifier bin_op), CImmExpr e1), CImmExpr e2)
+    when Runtime.is_binop (Common.Ident_utils.ident_to_string bin_op) ->
+    let* e1' = codegen_imexpr e1 in
+    let* e2' = codegen_imexpr e2 in
+    let binop = codegen_binop (Common.Ident_utils.ident_to_string bin_op) in
+    return @@ binop e1' e2'
   | CApp (func, argument) ->
     let* calee = codegen_cexpr func in
     (*TODO ПЕРЕДЕЛАТЬ *)
     let* arg = codegen_cexpr argument in
     return
-    @@ build_call2
+    @@ build_call
          (function_type i64 [| i64; i64; i64 |])
          (Option.get (lookup_function "apply_args_to_closure" the_module))
          [| calee; const_int i64 1; arg |]

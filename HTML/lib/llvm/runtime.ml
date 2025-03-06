@@ -10,9 +10,14 @@ let codegen_funs =
   ]
 ;;
 
+let is_binop = function
+  | "+" | "-" | "*" | "/" | "=" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" -> true
+  | _ -> false
+;;
+
 let runtime_members =
   List.filter
-    (fun (name, _) -> not @@ List.mem name not_supported)
+    (fun (name, _) -> (not @@ List.mem name not_supported) && (not @@ is_binop name))
     Common.Stdlib.stdlib_typed
   @ codegen_funs
 ;;
