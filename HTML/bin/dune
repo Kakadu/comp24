@@ -9,6 +9,7 @@
  (deps
   ./llvm_demo.exe
   ./runtime.c
+  ./runtime.h
   ./test_llvm.sh
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
