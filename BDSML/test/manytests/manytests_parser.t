@@ -1306,12 +1306,21 @@
                      (Exp_apply ((Exp_ident "iter"), (Exp_ident "print_int"))),
                      (Exp_construct ("::",
                         (Some (Exp_tuple
-                                 [(Exp_sequence ((Exp_constant (Const_int 1)),
-                                     (Exp_sequence (
-                                        (Exp_constant (Const_int 2)),
-                                        (Exp_constant (Const_int 3))))
-                                     ));
-                                   (Exp_construct ("[]", None))]))
+                                 [(Exp_constant (Const_int 1));
+                                   (Exp_construct ("::",
+                                      (Some (Exp_tuple
+                                               [(Exp_constant (Const_int 2));
+                                                 (Exp_construct ("::",
+                                                    (Some (Exp_tuple
+                                                             [(Exp_constant
+                                                                 (Const_int 3));
+                                                               (Exp_construct (
+                                                                  "[]", None))
+                                                               ]))
+                                                    ))
+                                                 ]))
+                                      ))
+                                   ]))
                         ))
                      ))
                   ))
@@ -1324,25 +1333,45 @@
                               (Exp_apply ((Exp_ident "cartesian"),
                                  (Exp_construct ("::",
                                     (Some (Exp_tuple
-                                             [(Exp_sequence (
-                                                 (Exp_constant (Const_int 1)),
-                                                 (Exp_constant (Const_int 2))));
-                                               (Exp_construct ("[]", None))]))
+                                             [(Exp_constant (Const_int 1));
+                                               (Exp_construct ("::",
+                                                  (Some (Exp_tuple
+                                                           [(Exp_constant
+                                                               (Const_int 2));
+                                                             (Exp_construct (
+                                                                "[]", None))
+                                                             ]))
+                                                  ))
+                                               ]))
                                     ))
                                  )),
                               (Exp_construct ("::",
                                  (Some (Exp_tuple
-                                          [(Exp_sequence (
-                                              (Exp_constant (Const_int 1)),
-                                              (Exp_sequence (
-                                                 (Exp_constant (Const_int 2)),
-                                                 (Exp_sequence (
-                                                    (Exp_constant (Const_int 3)),
-                                                    (Exp_constant (Const_int 4))
-                                                    ))
-                                                 ))
-                                              ));
-                                            (Exp_construct ("[]", None))]))
+                                          [(Exp_constant (Const_int 1));
+                                            (Exp_construct ("::",
+                                               (Some (Exp_tuple
+                                                        [(Exp_constant
+                                                            (Const_int 2));
+                                                          (Exp_construct ("::",
+                                                             (Some (Exp_tuple
+                                                                      [(Exp_constant
+                                                                      (Const_int
+                                                                      3));
+                                                                      (Exp_construct (
+                                                                      "::",
+                                                                      (Some (
+                                                                      Exp_tuple
+                                                                      [(Exp_constant
+                                                                      (Const_int
+                                                                      4));
+                                                                      (Exp_construct (
+                                                                      "[]",
+                                                                      None))]))
+                                                                      ))]))
+                                                             ))
+                                                          ]))
+                                               ))
+                                            ]))
                                  ))
                               ))
                            ))

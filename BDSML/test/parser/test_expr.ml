@@ -379,30 +379,6 @@ let%expect_test "test if in expr" =
     |}]
 ;;
 
-let%expect_test "test for if by Andrey Sukhorev 1" =
-  test_expr "if a then b; c";
-  [%expect
-    {|
-    (Exp_sequence ((Exp_if ((Exp_ident "a"), (Exp_ident "b"), None)),
-       (Exp_ident "c")))
-     |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 2" =
-  test_expr "if a then b; c else d";
-  [%expect {| Error: end_of_input |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 3" =
-  test_expr "if a then b else c; d";
-  [%expect
-    {|
-    (Exp_sequence (
-       (Exp_if ((Exp_ident "a"), (Exp_ident "b"), (Some (Exp_ident "c")))),
-       (Exp_ident "d")))
-     |}]
-;;
-
 let%expect_test "test match" =
   test_expr "match 4 with|4 -> 1";
   [%expect
@@ -472,13 +448,15 @@ let%expect_test "test list inside" =
     {|
     (Exp_construct ("::",
        (Some (Exp_tuple
-                [(Exp_fun ([(Pat_var "c")],
-                    (Exp_sequence ((Exp_ident "c"),
-                       (Exp_fun ([(Pat_var "b")], (Exp_ident "b")))))
-                    ));
-                  (Exp_construct ("[]", None))]))
+                [(Exp_fun ([(Pat_var "c")], (Exp_ident "c")));
+                  (Exp_construct ("::",
+                     (Some (Exp_tuple
+                              [(Exp_fun ([(Pat_var "b")], (Exp_ident "b")));
+                                (Exp_construct ("[]", None))]))
+                     ))
+                  ]))
        ))
-     |}]
+    |}]
 ;;
 
 let%expect_test "test list inside parents" =

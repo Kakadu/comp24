@@ -341,11 +341,6 @@ and infer_expression (env : TypeEnv.t) : expression -> (Subst.t * type_val) t = 
   | Exp_tuple l -> infer_tuple env l
   | Exp_construct (name, exp) -> infer_construct env name exp
   | Exp_type (exp, typexp) -> infer_typexpr env exp typexp
-  | Exp_sequence (exp1, exp2) ->
-    let* sub1, _ = infer_expression env exp1 in
-    let* sub2, ty = infer_expression env exp2 in
-    let+ sub = Subst.compose sub1 sub2 in
-    sub, ty
 ;;
 
 let predefine_operators =

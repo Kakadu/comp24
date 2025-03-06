@@ -207,11 +207,6 @@ let if_parser prev =
   Exp_if (expr1, expr2, else_res)
 ;;
 
-let exp_sequence prev =
-  let del = check_string ";" *> return (fun a b -> Exp_sequence (a, b)) in
-  chainr1 prev del
-;;
-
 let exp_list_cons prev =
   let del =
     check_string "::"
@@ -258,7 +253,6 @@ let priority =
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
   ; choice_pass_prev [ if_parser; Fun.id ]
   ; choice_pass_prev [ list_parser; Fun.id ]
-  ; exp_sequence
   ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
 ;;

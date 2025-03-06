@@ -35,7 +35,6 @@ let rec unparse_expr ppf = function
   | Exp_if (e1, e2, None) -> fprintf ppf "(if %a then %a)" unparse_expr e1 unparse_expr e2
   | Exp_if (e1, e2, Some e3) ->
     fprintf ppf "(if %a then %a else %a)" unparse_expr e1 unparse_expr e2 unparse_expr e3
-  | Exp_sequence (e1, e2) -> fprintf ppf "%a;\n%a" unparse_expr e1 unparse_expr e2
 
 and unparse_let_binding_list ppf l =
   let unparse_let_binding ppf = function

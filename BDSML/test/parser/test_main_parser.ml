@@ -192,42 +192,6 @@ m + let b = 6 in m + b
     |}]
 ;;
 
-let%expect_test "structure item with sequence" =
-  test_parser
-    {|let (+) a b = a - b
-let m = 4
-and mm = 6;
-m + let b = 6 in m + b
-|};
-  [%expect
-    {|
-    [(Str_value (Nonrecursive,
-        [(Val_binding ("( + )", [(Pat_var "a"); (Pat_var "b")],
-            (Exp_apply ((Exp_apply ((Exp_ident "( - )"), (Exp_ident "a"))),
-               (Exp_ident "b")))
-            ))
-          ]
-        ));
-      (Str_value (Nonrecursive,
-         [(Val_binding ("m", [], (Exp_constant (Const_int 4))));
-           (Val_binding ("mm", [],
-              (Exp_sequence ((Exp_constant (Const_int 6)),
-                 (Exp_apply ((Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
-                    (Exp_let (Nonrecursive,
-                       [(Val_binding ("b", [], (Exp_constant (Const_int 6))))],
-                       (Exp_apply (
-                          (Exp_apply ((Exp_ident "( + )"), (Exp_ident "m"))),
-                          (Exp_ident "b")))
-                       ))
-                    ))
-                 ))
-              ))
-           ]
-         ))
-      ]
-    |}]
-;;
-
 let%expect_test "two str items" =
   test_parser
     {|
@@ -257,6 +221,5 @@ let%expect_test "list cons" =
   test_parser
     {|let [1; 2] :: [5] = [1; 2] :: [5]
 |};
-  [%expect
-    {| Error: end_of_input |}]
+  [%expect {| Error: end_of_input |}]
 ;;
