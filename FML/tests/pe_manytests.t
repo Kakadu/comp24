@@ -3,7 +3,7 @@
   then 1
   else ((( * ) n) (fac ((( - ) n) 1))))
   
-  let main = let a0 = (print_int (fac 4)) in
+  let main = let () = (print_int (fac 4)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/002fac.ml
@@ -11,7 +11,7 @@
   then (k 1)
   else ((fac_cps ((( - ) n) 1)) (fun p -> (k ((( * ) p) n)))))
   
-  let main = let a0 = (print_int ((fac_cps 4) (fun print_int -> print_int))) in
+  let main = let () = (print_int ((fac_cps 4) (fun print_int -> print_int))) in
   0
 
   $ ./pe_runner.exe < manytests/typed/003fib.ml
@@ -25,8 +25,8 @@
   then n
   else ((( + ) (fib ((( - ) n) 1))) (fib ((( - ) n) 2))))
   
-  let main = let a1 = (print_int (((fib_acc 0) 1) 4)) in
-  let a0 = (print_int (fib 4)) in
+  let main = let () = (print_int (((fib_acc 0) 1) 4)) in
+  let () = (print_int (fib 4)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/004manyargs.ml
@@ -42,7 +42,7 @@
   let test10 = (fun a b c d e f g h i j -> ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) a) b)) c)) d)) e)) f)) g)) h)) i)) j))
   
   let main = let rez = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in
-  let a0 = (print_int rez) in
+  let () = (print_int rez) in
   let temp2 = ((((wrap test3) 1) 10) 100) in
   0
 
@@ -53,7 +53,7 @@
   then 1
   else ((( * ) n) (self ((( - ) n) 1))))
   
-  let main = let a0 = (print_int ((fix fac) 6)) in
+  let main = let () = (print_int ((fix fac) 6)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/006partial.ml
@@ -63,38 +63,38 @@
   
   let foo = (fun x -> ((foo true) ((foo false) ((foo true) ((foo false) x)))))
   
-  let main = let a0 = (print_int (foo 11)) in
+  let main = let () = (print_int (foo 11)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/006partial2.ml
-  let foo = (fun a b c -> let a2 = (print_int a) in
-  let a1 = (print_int b) in
-  let a0 = (print_int c) in
+  let foo = (fun a b c -> let () = (print_int a) in
+  let () = (print_int b) in
+  let () = (print_int c) in
   ((( + ) a) ((( * ) b) c)))
   
   let main = let foo = (foo 1) in
   let foo = (foo 2) in
   let foo = (foo 3) in
-  let a3 = (print_int foo) in
+  let () = (print_int foo) in
   0
   $ ./pe_runner.exe < manytests/typed/006partial3.ml
-  let foo = (fun a -> let a1 = (print_int a) in
-  (fun b -> let a0 = (print_int b) in
+  let foo = (fun a -> let () = (print_int a) in
+  (fun b -> let () = (print_int b) in
   (fun c -> (print_int c))))
   
-  let main = let a2 = (((foo 4) 8) 9) in
+  let main = let () = (((foo 4) 8) 9) in
   0
   $ ./pe_runner.exe < manytests/typed/007order.ml
-  let _start = (fun a0 a1 a a2 b _c a3 d __ -> let a6 = (a0, a1, a2, a3) in
-  let a5 = (print_int ((( + ) a) b)) in
-  let a4 = (print_int __) in
+  let _start = (fun a0 a1 a a2 b _c a3 d __ -> let a4 = (a0, a1, a2, a3) in
+  let () = (print_int ((( + ) a) b)) in
+  let () = (print_int __) in
   ((( + ) ((( / ) ((( * ) a) b)) _c)) d))
   
   let main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (( ~- ) 1))) 10000) (( ~- ) 555555)))
   $ ./pe_runner.exe < manytests/typed/008ascription.ml
   let addi = (fun f g x -> ((f x) (g x)))
   
-  let main = let a0 = (print_int (((addi (fun x b -> if b
+  let main = let () = (print_int (((addi (fun x b -> if b
   then ((( + ) x) 1)
   else ((( * ) x) 2))) (fun _start -> ((( = ) ((( / ) _start) 2)) 0))) 4)) in
   0
@@ -133,12 +133,12 @@
   then 1
   else (meven ((( - ) n) 1)))
   
-  let main = let a3 = (print_int (modd 1)) in
-  let a2 = (print_int (meven 2)) in
+  let main = let () = (print_int (modd 1)) in
+  let () = (print_int (meven 2)) in
   let even = ((tuple_element tie) 0) in
   let odd = ((tuple_element tie) 1) in
-  let a1 = (print_int (odd 3)) in
-  let a0 = (print_int (even 4)) in
+  let () = (print_int (odd 3)) in
+  let () = (print_int (even 4)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/016lists.ml
@@ -158,8 +158,8 @@
   
   let rec cartesian = (fun xs ys -> [])
   
-  let main = let a1 = ((iter print_int) (1::(2::(3::[])))) in
-  let a0 = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in
+  let main = let () = ((iter print_int) (1::(2::(3::[])))) in
+  let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in
   0
  
   $ ./pe_runner.exe < manytests/do_not_type/001.ml

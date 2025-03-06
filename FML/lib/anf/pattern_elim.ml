@@ -351,6 +351,7 @@ let rec pe_expr =
     let* e2 = pe_expr e2 in
     (match pat with
      | PIdentifier name -> return @@ Pe_ELet (NoRec, name, e1, e2)
+     | PUnit -> return @@ Pe_ELet (NoRec, "()", e1, e2)
      | _ ->
        (match e1 with
         | Pe_EIdentifier _ ->
@@ -360,17 +361,16 @@ let rec pe_expr =
           let* fresh_name = fresh >>| get_id in
           let case_expr = make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match") in
           return @@ Pe_ELet (NoRec, fresh_name, e1, case_expr)))
-    | ELetIn (Rec, pat, e1, e2) ->
-      let* decl = pe_case [ pat, e1 ] in
-      let* e = pe_expr e2 in
-      let result =
-        match decl with
-        | Pe_Nonrec decl_list ->
-          List.fold_right decl_list ~init:e ~f:(fun (name, value) acc -> Pe_ELet (NoRec, name, value, acc))
-        | Pe_Rec decl_list ->
-          List.fold_right decl_list ~init:e ~f:(fun (name, value) acc -> Pe_ELet (Rec, name, value, acc))
-      in
-      return result
+      | ELetIn (Rec, pat, e1, e2) ->
+        let* e1 = pe_expr e1 in
+        let* e2 = pe_expr e2 in
+        (match pat with
+        | PIdentifier name -> return @@ Pe_ELet (Rec, name, e1, e2)
+        | PUnit -> return @@ Pe_ELet (Rec, "()", e1, e2)
+        | _ ->
+            let* fresh_name = fresh >>| get_id in
+            let case_expr = make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match") in
+            return @@ Pe_ELet (Rec, fresh_name, e1, case_expr))
 
 and pe_match to_match = function
   | (p, e) :: tl ->
@@ -390,17 +390,6 @@ and pe_match to_match = function
       let* match_e = pe_match to_match tl in
       return @@ make_condition checks let_in match_e
   | _ -> return @@ Pe_EIdentifier "fail_match"
-
-and pe_case decl_list =
-  let f1 (pat, e) =
-    let* e = pe_expr e in
-    return
-      (match pat with
-       | PIdentifier v -> v, e
-       | _ -> "", e)
-  in
-  let* new_decls = map decl_list ~f:f1 in
-  return @@ Pe_Rec new_decls
 ;;
 
 let pe_declaration = function
