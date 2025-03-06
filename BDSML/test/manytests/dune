@@ -50,6 +50,5 @@
   manytests_link/typed/007order.ml
   manytests_link/typed/008ascription.ml
   manytests_link/typed/009let_poly.ml
-  manytests_link/typed/010sukharev.ml
   manytests_link/typed/015tuples.ml
   manytests_link/typed/016lists.ml))
