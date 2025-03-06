@@ -221,5 +221,52 @@ let%expect_test "list cons" =
   test_parser
     {|let [1; 2] :: [5] = [1; 2] :: [5]
 |};
-  [%expect {| Error: end_of_input |}]
+  [%expect {|
+    [(Str_value (Nonrecursive,
+        [(Pat_binding (
+            (Pat_construct ("::",
+               (Some (Pat_tuple
+                        [(Pat_construct ("::",
+                            (Some (Pat_tuple
+                                     [(Pat_constant (Const_int 1));
+                                       (Pat_construct ("::",
+                                          (Some (Pat_tuple
+                                                   [(Pat_constant (Const_int 2));
+                                                     (Pat_construct ("[]", None))
+                                                     ]))
+                                          ))
+                                       ]))
+                            ));
+                          (Pat_construct ("::",
+                             (Some (Pat_tuple
+                                      [(Pat_constant (Const_int 5));
+                                        (Pat_construct ("[]", None))]))
+                             ))
+                          ]))
+               )),
+            (Exp_construct ("::",
+               (Some (Exp_tuple
+                        [(Exp_construct ("::",
+                            (Some (Exp_tuple
+                                     [(Exp_constant (Const_int 1));
+                                       (Exp_construct ("::",
+                                          (Some (Exp_tuple
+                                                   [(Exp_constant (Const_int 2));
+                                                     (Exp_construct ("[]", None))
+                                                     ]))
+                                          ))
+                                       ]))
+                            ));
+                          (Exp_construct ("::",
+                             (Some (Exp_tuple
+                                      [(Exp_constant (Const_int 5));
+                                        (Exp_construct ("[]", None))]))
+                             ))
+                          ]))
+               ))
+            ))
+          ]
+        ))
+      ]
+    |}]
 ;;
