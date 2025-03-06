@@ -21,32 +21,28 @@ let%expect_test "simple parents test" =
 
 let%expect_test "simple tuple test" =
   test_types ":int*int";
-  [%expect
-    {|
+  [%expect {|
     (Type_tuple [(Type_single "int"); (Type_single "int")])
     |}]
 ;;
 
 let%expect_test "parents tuple test" =
   test_types ":( ( ( int ) * ( int ) ) )";
-  [%expect
-    {|
+  [%expect {|
     (Type_tuple [(Type_single "int"); (Type_single "int")])
     |}]
 ;;
 
 let%expect_test "simple fun test" =
   test_types ":int->int";
-  [%expect
-    {|
+  [%expect {|
     (Type_fun [(Type_single "int"); (Type_single "int")])
     |}]
 ;;
 
 let%expect_test "parents fun test" =
   test_types ":( ( ( int ) -> ( int ) ) )";
-  [%expect
-    {|
+  [%expect {|
     (Type_fun [(Type_single "int"); (Type_single "int")])
     |}]
 ;;
@@ -100,8 +96,7 @@ let%expect_test "params combine parents test" =
 
 let%expect_test "type variable" =
   test_types ": 'a -> 'a";
-  [%expect
-    {|
+  [%expect {|
     (Type_fun [(Type_single "'a"); (Type_single "'a")])
     |}]
 ;;

@@ -364,8 +364,7 @@ let%expect_test "test if" =
 
 let%expect_test "test if without else" =
   test_expr "if a then b";
-  [%expect
-    {|
+  [%expect {|
     (Exp_if ((Exp_ident "a"), (Exp_ident "b"), None))
      |}]
 ;;
