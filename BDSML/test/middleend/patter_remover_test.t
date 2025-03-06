@@ -86,21 +86,42 @@ Test easy match
   > | 4 -> 'n'
   > | 3 -> 'm'
   > EOF
-  (if ((( = ) 4) 5) then 'n' else (if ((( = ) 3) 5) then 'm' else (__exception "Match_failure")));;
+  (let __reserved_0 = 5 in 
+   (if ((( = ) 4) __reserved_0) then 'n' else (if ((( = ) 3) __reserved_0) then 'm' else (__exception "Match_failure"))));;
 Test var match
   $ ./run_remove_patterns.exe <<- EOF
   > match 4 with
   > | 5 -> true
   > | a -> a = 1
   > EOF
-  (if ((( = ) 5) 4) then true else (if true then (let __var_a = 4 in 
-   ((( = ) __var_a) 1)) else (__exception "Match_failure")));;
+  (let __reserved_0 = 4 in 
+   (if ((( = ) 5) __reserved_0) then true else (if true then (let __var_a = __reserved_0 in 
+   ((( = ) __var_a) 1)) else (__exception "Match_failure"))));;
 Test hard match
   $ ./run_remove_patterns.exe <<- EOF
-  > let biba = 3, "biba";;
-  > match biba with
+  > match 3, "biba" with
   > | 3, "boba" -> true
-  > | a, b -> (b = "biba") || (b = 4))
+  > | b, a -> (a = "biba") || (b = 4)
   > | _, b -> b = "ocaml"
   > EOF
-  Parser error: : end_of_input
+  (let __reserved_0 = (3, "biba") in 
+   (if ((( && ) (((( && ) true) (((( = ) 3) (((__get_from_tuple __reserved_0) 0))))))) (((( = ) "boba") (((__get_from_tuple __reserved_0) 1))))) then (let __reserved_3 = __reserved_0 in 
+   true) else (if ((( && ) (((( && ) true) true))) true) then (let __reserved_2 = __reserved_0 in 
+   (let __var_b = ((__get_from_tuple __reserved_2) 0) in 
+   (let __var_a = ((__get_from_tuple __reserved_2) 1) in 
+   ((( || ) (((( = ) __var_a) "biba"))) (((( = ) __var_b) 4)))))) else (if ((( && ) (((( && ) true) true))) true) then (let __reserved_1 = __reserved_0 in 
+   (let __var_b = ((__get_from_tuple __reserved_1) 1) in 
+   ((( = ) __var_b) "ocaml"))) else (__exception "Match_failure")))));;
+Test function with constructors
+  $ ./run_remove_patterns.exe <<- EOF
+  > function | Some (x, y) -> x + 3 | None -> 0 
+  > EOF
+  (fun __reserved_0 -> (if ((( && ) (((__same_cons __reserved_0) Some))) (((( && ) (((( && ) true) true))) true))) then (let __reserved_1 = ((__disassemble Some) __reserved_0) in 
+   (let __var_x = ((__get_from_tuple __reserved_1) 0) in 
+   (let __var_y = ((__get_from_tuple __reserved_1) 1) in 
+   ((( + ) __var_x) 3)))) else (if ((__same_cons __reserved_0) None) then 0 else (__exception "Match_failure"))));;
+Test or
+  $ ./run_remove_patterns.exe <<- EOF
+  > function | 1 | 4 -> true
+  > EOF
+  (fun __reserved_0 -> (if ((( || ) (((( = ) 1) __reserved_0))) (((( = ) 4) __reserved_0))) then true else (__exception "Match_failure")));;
