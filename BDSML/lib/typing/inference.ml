@@ -92,7 +92,7 @@ let typexpr_to_type typexpr =
       in
       helper2 type_vars l
   in
-  let+ ty, vars = helper TypeVars.empty typexpr in
+  let+ ty, _ = helper TypeVars.empty typexpr in
   ty
 ;;
 
@@ -367,12 +367,14 @@ let predefine_operators =
 
 let init_env =
   let+ add_predefines =
+    let empty_env = TypeEnv.empty in
     map
       (fun (name, ty) ->
         match Parser.Typexpr_parser.parse_typexpr_str ty with
         | Result.Ok ty ->
           let+ ty = typexpr_to_type ty in
-          name, Scheme.create VarSet.empty ty
+          let scheme = generalize empty_env ty in
+          name, scheme
         | Result.Error s -> fail (Invalid_predefined_operators s))
       predefine_operators
   in

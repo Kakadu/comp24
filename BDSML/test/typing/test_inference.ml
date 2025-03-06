@@ -385,8 +385,7 @@ let%expect_test "test op not" =
 let%expect_test "test equal" =
   test {|(=)|};
   [%expect
-    {|
-    'e -> 'e -> bool |}]
+    {| 'g -> 'g -> bool |}]
 ;;
 
 let%expect_test "test less" =
