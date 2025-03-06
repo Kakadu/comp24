@@ -66,38 +66,38 @@ let simplify_arguments p_args expr : (expr * NameSet.t) t =
 ;;
 
 (* 'Let' constructions that should be lifted *)
-type lifted_lets = ll_expr list
+type lifted_lets = ll_expr list [@@deriving show]
 
-let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
+let collect_mutual_names (env : NameEnv.t) (binds : bind list) : NameEnv.t t =
   fold_list binds ~init:env ~f:(fun env bnd ->
     match bnd with
     | Var name, _, _ ->
       let* env, _ = NameEnv.generate_name env name in
       return env
-    | _, _, _ -> failwith "Incorrect 'Let rec' pattern was encountered during LL")
-;;
-
-let extract_bind (bnd : bind) : id * args * expr =
-  match bnd with
-  | Var name, args, expr -> name, args, expr
-  | _ -> failwith "Incorrect 'Let' pattern was encountered during LL"
+    | _ -> return env)
 ;;
 
 let rec ll_bind
   (lifted : lifted_lets)
   (env : NameEnv.t)
-  ((name, args, expr) : string * args * expr)
+  ((name, args, expr) : pattern * args * expr)
   =
-  let* env, new_name = NameEnv.generate_name env name in
-  match args with
-  | [] ->
+  match name with
+  | Var name ->
+    let* env, new_name = NameEnv.generate_name env name in
+    (match args with
+     | [] ->
+       let* llexpr, lifted = ll_expr lifted env expr in
+       let (new_bind : ll_bind) = Var new_name, [], llexpr in
+       return (env, new_bind, lifted)
+     | args ->
+       let* expr, nameset = simplify_arguments args expr in
+       let* llexpr, lifted = ll_expr lifted env expr in
+       let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
+       return (env, new_bind, lifted))
+  | p_name ->
     let* llexpr, lifted = ll_expr lifted env expr in
-    let (new_bind : ll_bind) = Var new_name, [], llexpr in
-    return (env, new_bind, lifted)
-  | args ->
-    let* expr, nameset = simplify_arguments args expr in
-    let* llexpr, lifted = ll_expr lifted env expr in
-    let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
+    let (new_bind : ll_bind) = p_name, args, llexpr in
     return (env, new_bind, lifted)
 
 and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
@@ -111,10 +111,12 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
       | Nonrecursive -> return env
     in
     let* env, new_binds, lifted =
-      fold_list binds ~init:(env, [], lifted) ~f:(fun (env, binds, lifted) bnd ->
-        let name, args, expr = extract_bind bnd in
-        let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-        return (env, new_bind :: binds, lifted))
+      fold_list
+        binds
+        ~init:(env, [], lifted)
+        ~f:(fun (env, binds, lifted) (name, args, expr) ->
+          let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+          return (env, new_bind :: binds, lifted))
     in
     let* ll_in_scope, lifted = ll_expr lifted env scope in
     let ll_inner_let = LLLet (rec_flag, List.rev new_binds, None) in
@@ -190,10 +192,12 @@ let ll_prog (prog : prog) : ll_prog t =
           in
           (* Convert all binds *)
           let* env, new_binds, lifted =
-            fold_list binds ~init:(env, [], lifted) ~f:(fun (env, binds, lifted) bnd ->
-              let name, args, expr = extract_bind bnd in
-              let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-              return (env, new_bind :: binds, lifted))
+            fold_list
+              binds
+              ~init:(env, [], lifted)
+              ~f:(fun (env, binds, lifted) (name, args, expr) ->
+                let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
+                return (env, new_bind :: binds, lifted))
           in
           (* Work with 'in' scope *)
           let new_binds = List.rev new_binds in

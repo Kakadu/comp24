@@ -185,4 +185,35 @@ let%test _ =
     ]
 ;;
 
-let%test _ = lambda_lift_prog "let main = let () = 10 in 0" = []
+let%test _ =
+  lambda_lift_prog "let main = let () = print_int 10 in 0"
+  = [ LLLet
+        ( Nonrecursive
+        , [ Const Unit, [], LLApplication (LLVar "print_int", LLConst (Int 10)) ]
+        , None )
+    ; LLLet (Nonrecursive, [ Var "ll_var_0", [], LLConst (Int 0) ], None)
+    ]
+;;
+
+let%test _ =
+  lambda_lift_prog "let f x = x + 1 let main = let () = print_int (f 1) in 0"
+  = [ LLLet
+        ( Nonrecursive
+        , [ ( Var "ll_var_0"
+            , [ Var "arg_0" ]
+            , LLApplication
+                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLConst (Int 1))
+            )
+          ]
+        , None )
+    ; LLLet
+        ( Nonrecursive
+        , [ ( Const Unit
+            , []
+            , LLApplication
+                (LLVar "print_int", LLApplication (LLVar "ll_var_0", LLConst (Int 1))) )
+          ]
+        , None )
+    ; LLLet (Nonrecursive, [ Var "ll_var_1", [], LLConst (Int 0) ], None)
+    ]
+;;
