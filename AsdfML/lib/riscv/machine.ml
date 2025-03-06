@@ -54,7 +54,10 @@ type instr =
   | Div of reg * reg * reg
   | Addi of reg * reg * int
   | Xori of reg * reg * int
+  | Xor of reg * reg * reg
   | Slt of reg * reg * reg
+  | Seqz of reg * reg
+  | Snez of reg * reg
   (* *)
   | And of reg * reg * reg
   | Or of reg * reg * reg
@@ -90,8 +93,12 @@ let pp_instr fmt =
     fprintf fmt "    div %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
   | Addi (dst, src, n) -> fprintf fmt "    addi %a,%a,%d" pp_reg dst pp_reg src n
   | Xori (dst, src, n) -> fprintf fmt "    xori %a,%a,%d" pp_reg dst pp_reg src n
+  | Xor (dst, src1, src2) ->
+    fprintf fmt "    xor %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
   | Slt (dst, src1, src2) ->
     fprintf fmt "    slt %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
+  | Seqz (dst, src) -> fprintf fmt "    seqz %a,%a" pp_reg dst pp_reg src
+  | Snez (dst, src) -> fprintf fmt "    snez %a,%a" pp_reg dst pp_reg src
   (* *)
   | And (dst, src1, src2) ->
     fprintf fmt "    and %a,%a,%a" pp_reg dst pp_reg src1 pp_reg src2
@@ -135,7 +142,10 @@ let mul k dst src1 src2 = k (Mul (dst, src1, src2))
 let div k dst src1 src2 = k (Div (dst, src1, src2))
 let addi k dst src n = k (Addi (dst, src, n))
 let xori k dst src n = k (Xori (dst, src, n))
+let xor k dst src1 src2 = k (Xor (dst, src1, src2))
 let slt k dst src1 src2 = k (Slt (dst, src1, src2))
+let seqz k dst src = k (Seqz (dst, src))
+let snez k dst src = k (Snez (dst, src))
 
 (*  *)
 let and_ k dst src1 src2 = k (And (dst, src1, src2))

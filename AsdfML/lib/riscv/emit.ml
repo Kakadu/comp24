@@ -137,8 +137,8 @@ let direct_binops =
   ; "( < )"
   ; "( >= )"
   ; "( <= )"
-  ; "( == )"
-  ; "( != )"
+  ; "( = )"
+  ; "( <> )"
   ]
 ;;
 
@@ -169,19 +169,11 @@ let emit_direct_binop ?(comm = "") dest op a0 a1 =
   | "( <= )" ->
     emit slt dest a1 a0;
     emit xori dest dest 1
-  | "( == )" ->
-    emit beq a0 a1 ".eq";
-    emit li dest 0;
-    emit j ".eq_end";
-    emit label ".eq";
-    emit li dest 1;
-    emit label ".eq_end"
-  | "( != )" ->
-    emit beq a0 a1 ".eq";
-    emit li dest 1;
-    emit j ".eq_end";
-    emit label ".eq";
-    emit li dest 0;
-    emit label ".eq_end"
+  | "( = )" ->
+    emit xor dest a0 a1;
+    emit seqz dest dest
+  | "( <> )" ->
+    emit xor dest a0 a1;
+    emit snez dest dest
   | _ -> failwith "emit_direct_math: invalid op"
 ;;
