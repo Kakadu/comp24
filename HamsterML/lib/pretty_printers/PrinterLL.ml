@@ -1,7 +1,9 @@
 open LL
 open Ast
+open PrinterAst
 
-let rec ll_to_prog (_ : ll_prog) = failwith "123"
+let rec ll_to_prog (prog : ll_prog) =
+  List.rev @@ Base.List.fold prog ~init:[] ~f:(fun acc expr -> ll_to_expr expr :: acc)
 
 and ll_to_expr (expr : ll_expr) : expr =
   match expr with
@@ -39,3 +41,5 @@ and ll_to_expr (expr : ll_expr) : expr =
     in
     Let (rec_flag, List.rev binds, None)
 ;;
+
+let pretty_print_ll_prog (prog : ll_prog) = prog |> ll_to_prog |> pretty_print_prog
