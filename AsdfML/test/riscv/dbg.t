@@ -60,11 +60,8 @@
   let main =
     let rez =
       wrap test10 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
-    let anf14 = println_int rez in
-    let anf12 = ( = ) anf14 () in
-    if anf12 
-    then 0 
-    else panic ()
+    let () = println_int rez in
+    0
   
 $ cat /tmp/dbg.s
   $ riscv64-unknown-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
@@ -75,25 +72,22 @@ $ cat /tmp/dbg.s
   [runtime::tuple]: Set [2] = 10000000 in [100000, 1000000, 10000000, 0, 0] at 0x240330
   [runtime::tuple]: Set [3] = 100000000 in [100000, 1000000, 10000000, 100000000, 0] at 0x240330
   [runtime::tuple]: Set [4] = 1000000000 in [100000, 1000000, 10000000, 100000000, 1000000000] at 0x240330
-  [runtime::closure]: Creating Closure { fn_ptr: 0x1e77a, arity: 10, args: dec[] / hex[] } at 0x2405e0
-  [runtime::closure]: Creating Closure { fn_ptr: 0x1e740, arity: 1, args: dec[] / hex[] } at 0x394d20
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e72a, arity: 10, args: dec[] / hex[] } at 0x2405e0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e6f0, arity: 1, args: dec[] / hex[] } at 0x29ba70
   [runtime::closure]: Tuple with arguments [100000, 1000000, 10000000, 100000000, 1000000000] at 0x240330
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e740, arity: 1, args: dec[2360800, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2405e0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e6f0, arity: 1, args: dec[2360800, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2405e0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
   [runtime::closure]: Too many args, [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] goes to next closure
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e740, arity: 1, args: dec[2360800] / hex[2405e0] }
-  [runtime::closure]: Creating Closure { fn_ptr: 0x24608 (ml_le), arity: 2, args: dec[] / hex[] } at 0x2601f0
-  [runtime::closure]: Applying Closure { fn_ptr: 0x24608 (ml_le), arity: 2, args: dec[1, 1] / hex[1, 1] }
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e6f0, arity: 1, args: dec[2360800] / hex[2405e0] }
+  [runtime::closure]: Creating Closure { fn_ptr: 0x23d4c (ml_le), arity: 2, args: dec[] / hex[] } at 0x27eaf0
+  [runtime::closure]: Applying Closure { fn_ptr: 0x23d4c (ml_le), arity: 2, args: dec[1, 1] / hex[1, 1] }
   [runtime::closure]: Closure result: 1 / 0x1
   [runtime::closure]: Closure result: 2360800 / 0x2405e0
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e77a, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
-  [runtime::tuple]: Getting 0 of [10000000, 100000000, 1000000000] at 0x241f10
-  [runtime::tuple]: Getting 1 of [10000000, 100000000, 1000000000] at 0x241f10
-  [runtime::tuple]: Getting 2 of [10000000, 100000000, 1000000000] at 0x241f10
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e72a, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+  [runtime::tuple]: Getting 0 of [10000000, 100000000, 1000000000] at 0x276bc0
+  [runtime::tuple]: Getting 1 of [10000000, 100000000, 1000000000] at 0x276bc0
+  [runtime::tuple]: Getting 2 of [10000000, 100000000, 1000000000] at 0x276bc0
   [runtime::closure]: Closure result: 1111111111 / 0x423a35c7
-  [runtime::closure]: Creating Closure { fn_ptr: 0x24266 (ml_div), arity: 1, args: dec[] / hex[] } at 0x130e330
-  [runtime::closure]: Applying Closure { fn_ptr: 0x24266 (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
+  [runtime::closure]: Creating Closure { fn_ptr: 0x23adc (ml_div), arity: 1, args: dec[] / hex[] } at 0x2751e0
+  [runtime::closure]: Applying Closure { fn_ptr: 0x23adc (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
   1111111111
   [runtime::closure]: Closure result: 0 / 0x0
-  [runtime::closure]: Creating Closure { fn_ptr: 0x24608 (ml_le), arity: 2, args: dec[] / hex[] } at 0x130aa60
-  [runtime::closure]: Applying Closure { fn_ptr: 0x24608 (ml_le), arity: 2, args: dec[0, 0] / hex[0, 0] }
-  [runtime::closure]: Closure result: 1 / 0x1
