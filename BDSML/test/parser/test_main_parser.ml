@@ -221,7 +221,8 @@ let%expect_test "list cons" =
   test_parser
     {|let [1; 2] :: [5] = [1; 2] :: [5]
 |};
-  [%expect {|
+  [%expect
+    {|
     [(Str_value (Nonrecursive,
         [(Pat_binding (
             (Pat_construct ("::",

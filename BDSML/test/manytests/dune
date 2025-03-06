@@ -4,7 +4,7 @@
  (public_name manytests_parser)
  (libraries test_parser parser stdio))
 
- (cram
+(cram
  (applies_to manytests_parser)
  (deps
   ./manytests_parser.exe
@@ -35,7 +35,7 @@
  (public_name manytests_inference)
  (libraries test_types stdio))
 
- (cram
+(cram
  (applies_to manytests_inference)
  (deps
   ./manytests_inference.exe
