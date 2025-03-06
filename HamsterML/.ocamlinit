@@ -11,5 +11,4 @@ open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
 open HamsterTest__LambdaLiftingTest;;
 open HamsterTest__AlphaConversionTest;;
-
-let cc expr = Stdlib.print_endline (pretty_print_expr(expr |> alpha_conv_prog |> List.hd |> cc_expr));;
+open HamsterTest__ClosureConversionTest;;
