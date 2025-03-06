@@ -15,8 +15,13 @@ let alpha_conv_expr (s : string) =
 ;;
 
 let alpha_conv_prog (s : string) =
-  let res = HamsterML.Utils.R.run (convert_prog NameEnv.empty (parse_prog s)) in
+  let res = HamsterML.Utils.R.run (convert_prog (parse_prog s)) in
   res
+;;
+
+let pp_alpha_conv_prog (s : string) =
+  let open HamsterML.PrinterAst in
+  s |> alpha_conv_prog |> pretty_print_prog |> print_string
 ;;
 
 let%test _ =
