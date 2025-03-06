@@ -6,7 +6,6 @@ open Ast
 open Pe_ast
 open Common
 
-
 let const_to_str = function
   | Pe_CBool b -> if b then "true" else "false"
   | Pe_Cint i -> Format.sprintf "%i" i
@@ -52,7 +51,8 @@ let decl_to_str = function
      | (name, e) :: tl ->
        Format.sprintf "let %s = %s" name (expr_to_str e)
        ^ List.fold_left
-           (fun acc (name, e) -> acc ^ Format.sprintf "\nlet %s = %s" name (expr_to_str e))
+           (fun acc (name, e) ->
+             acc ^ Format.sprintf "\nlet %s = %s" name (expr_to_str e))
            ""
            tl)
   | Pe_Rec decl_list ->
@@ -61,7 +61,8 @@ let decl_to_str = function
      | (name, e) :: tl ->
        Format.sprintf "let rec %s = %s" name (expr_to_str e)
        ^ List.fold_left
-           (fun acc (name, e) -> acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
+           (fun acc (name, e) ->
+             acc ^ Format.sprintf "\nand %s = %s" name (expr_to_str e))
            ""
            tl)
 ;;
@@ -101,26 +102,38 @@ let const_to_peconst const =
 open Base
 open MonadCounter
 
+(* let check_pattern expr pat =
+  let rec helper expr = function
+    | PConstraint (p, _) -> helper expr p
+    | PConst c -> [ make_apply "( = )" expr (const_to_peconst c) ]
+    | PTuple pl ->
+      List.concat @@ List.mapi pl ~f:(fun i p -> helper (get_element expr (Tuple i)) p)
+    | PCons (l, r) ->
+      let l = helper (get_element expr Cons_head) l in
+      
+      let r = helper (get_element expr Cons_tail) r in
+      l @ r
+    | PNill -> [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
+    | _ -> []
+  in
+  helper expr pat
+;; *)
+
 let check_pattern expr pat =
   let rec helper add expr = function
     | PConstraint (p, _) -> helper add expr p
-    | PConst c ->
-      (match c with
-       |  _ -> [ make_apply "( = )" expr (const_to_peconst c) ])
+    | PConst c -> [ make_apply "( = )" expr (const_to_peconst c) ]
     | PTuple pl ->
-      let t = List.mapi pl ~f:(fun i p -> helper true (get_element expr (Tuple i)) p) in
-      List.concat t
+      List.concat
+      @@ List.mapi pl ~f:(fun i p -> helper true (get_element expr (Tuple i)) p)
     | PCons (l, r) ->
-      let rec length l = function
-        | Ast.PCons (_, r) -> length (l + 1) r
-        | _ -> l
+      let check =
+        Pe_EApp (Pe_EIdentifier "not", Pe_EApp (Pe_EIdentifier "is_empty", expr))
       in
-      let min_length = length 0 r in
-      let list_length = Pe_EApp (Pe_EIdentifier "list_len", expr) in
-      let check = make_apply "( > )" list_length (Pe_EConst (Pe_Cint min_length)) in
       let l = helper true (get_element expr Cons_head) l in
       let r = helper false (get_element expr Cons_tail) r in
       if add then (check :: l) @ r else l @ r
+    | PNill -> [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
     | _ -> []
   in
   helper true expr pat
@@ -146,7 +159,7 @@ let check_declaration expr pat =
       get_element acc unpack)
   in
   let names = get_binds_pat pat in
-  let decls = List.map (StrSet.to_list names) ~f:(fun name -> (name, create_expr name)) in
+  let decls = List.map (StrSet.to_list names) ~f:(fun name -> name, create_expr name) in
   Pe_Nonrec decls
 ;;
 
@@ -230,7 +243,9 @@ let rec pe_expr =
          Pe_ETuple vals
        in
        let* fresh_name = fresh >>| get_id in
-       let case_expr = make_case (Pe_EIdentifier fresh_name) pat new_body (Pe_EIdentifier "fail_match") in
+       let case_expr =
+         make_case (Pe_EIdentifier fresh_name) pat new_body (Pe_EIdentifier "fail_match")
+       in
        return @@ Pe_EFun (new_args, Pe_ELet (NoRec, fresh_name, to_match, case_expr)))
   | EMatch (e_last, case_list) ->
     let* e = pe_expr e_last in
@@ -239,7 +254,7 @@ let rec pe_expr =
      | _ ->
        let* fresh_name = fresh >>| get_id in
        let* e_match = pe_match (Pe_EIdentifier fresh_name) case_list in
-       return @@ (Pe_ELet (NoRec, fresh_name, e, e_match)))
+       return @@ Pe_ELet (NoRec, fresh_name, e, e_match))
   | ELetIn (NoRec, pat, e1, e2) ->
     let* e1 = pe_expr e1 in
     let* e2 = pe_expr e2 in
@@ -253,18 +268,22 @@ let rec pe_expr =
           return case_expr
         | _ ->
           let* fresh_name = fresh >>| get_id in
-          let case_expr = make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match") in
+          let case_expr =
+            make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match")
+          in
           return @@ Pe_ELet (NoRec, fresh_name, e1, case_expr)))
-      | ELetIn (Rec, pat, e1, e2) ->
-        let* e1 = pe_expr e1 in
-        let* e2 = pe_expr e2 in
-        (match pat with
-        | PIdentifier name -> return @@ Pe_ELet (Rec, name, e1, e2)
-        | PUnit -> return @@ Pe_ELet (Rec, "()", e1, e2)
-        | _ ->
-            let* fresh_name = fresh >>| get_id in
-            let case_expr = make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match") in
-            return @@ Pe_ELet (Rec, fresh_name, e1, case_expr))
+  | ELetIn (Rec, pat, e1, e2) ->
+    let* e1 = pe_expr e1 in
+    let* e2 = pe_expr e2 in
+    (match pat with
+     | PIdentifier name -> return @@ Pe_ELet (Rec, name, e1, e2)
+     | PUnit -> return @@ Pe_ELet (Rec, "()", e1, e2)
+     | _ ->
+       let* fresh_name = fresh >>| get_id in
+       let case_expr =
+         make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match")
+       in
+       return @@ Pe_ELet (Rec, fresh_name, e1, case_expr))
 
 and pe_match to_match = function
   | (p, e) :: tl ->
@@ -272,11 +291,13 @@ and pe_match to_match = function
     let decls = check_declaration to_match p in
     let* e = pe_expr e in
     let let_in =
-      (match decls with
-       | Pe_Nonrec decl_list ->
-         List.fold_right decl_list ~init:e ~f:(fun (name, value) acc -> Pe_ELet (NoRec, name, value, acc))
-       | Pe_Rec decl_list ->
-         List.fold_right decl_list ~init:e ~f:(fun (name, value) acc -> Pe_ELet (Rec, name, value, acc)))
+      match decls with
+      | Pe_Nonrec decl_list ->
+        List.fold_right decl_list ~init:e ~f:(fun (name, value) acc ->
+          Pe_ELet (NoRec, name, value, acc))
+      | Pe_Rec decl_list ->
+        List.fold_right decl_list ~init:e ~f:(fun (name, value) acc ->
+          Pe_ELet (Rec, name, value, acc))
     in
     if List.is_empty checks
     then return let_in
@@ -305,7 +326,8 @@ let pe_program = function
         let* e = pe_expr e in
         match pat with
         | PIdentifier v -> return (v, e)
-        | _ -> return ("()", e)) (* TODO: более информативное сообщение *)
+        | _ -> return ("()", e))
+      (* TODO: более информативное сообщение *)
     in
     return (Pe_Rec decls)
 ;;
@@ -316,14 +338,14 @@ let pe_structure program =
     | hd :: tl ->
       let* hd = pe_program hd in
       let* tl = helper tl in
-      return @@ hd :: tl
+      return @@ (hd :: tl)
   in
   helper program
 ;;
 
 let rec get_binds_expr = function
   | EConstraint (e, _) -> get_binds_expr e
-  | EConst _ | EUnit |ENill-> StrSet.empty
+  | EConst _ | EUnit | ENill -> StrSet.empty
   | EIdentifier ident -> StrSet.singleton ident
   | ECons (e1, e2) -> StrSet.union (get_binds_expr e1) (get_binds_expr e2)
   | EApplication (e1, e2) -> StrSet.union (get_binds_expr e1) (get_binds_expr e2)
@@ -344,7 +366,7 @@ and get_binds_declaration = function
     List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) ->
       StrSet.union acc (StrSet.union (get_binds_pat pat) (get_binds_expr e)))
   | RecDecl decl_list ->
-     List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) ->
+    List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) ->
       StrSet.union acc (StrSet.union (get_binds_pat pat) (get_binds_expr e)))
 ;;
 
