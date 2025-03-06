@@ -1,0 +1,8 @@
+[toolchain]
+channel = "nightly-2025-01-30"
+components = [
+    # "rust-analyzer",
+    "rust-src",
+]
+profile = "default"
+targets = ["riscv64gc-unknown-linux-gnu"]

@@ -1,0 +1,11 @@
+(rule
+ (targets libruntime.a)
+ (deps
+  (source_tree ./src/)
+  (source_tree ./.cargo/)
+  (glob_files Cargo.*))
+ (action
+  (no-infer
+   (progn
+    (system
+     "pushd ../../../runtime && cargo build --release --color=always && popd && cp ../../../runtime/target/riscv64gc-unknown-linux-gnu/release/libruntime.a .")))))
