@@ -31,7 +31,6 @@ pub unsafe extern "C" fn ml_get_tuple_field(tuple_ptr: *const Tuple, idx: usize)
 
 #[no_mangle]
 pub unsafe extern "C" fn ml_print_tuple(tuple_ptr: *const Tuple) -> isize {
-    debug!("Printing tuple at {:?}", tuple_ptr);
     Box::with_raw_ref(tuple_ptr, |tuple| {
         println!(
             "({})",

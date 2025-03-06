@@ -30,9 +30,6 @@ let emit_store ?(comm = "") reg =
 ;;
 
 let emit_fn_decl name (args : Ast.id list) stack_size =
-  (* if List.length args > 8
-     then failwith "TODO: stack arguments"
-     else *)
   emit str (Format.sprintf {|
     .globl %s
     .type %s, @function|} name name);
@@ -61,10 +58,7 @@ let emit_load ?(comm = "") (dst : loc) (src : rvalue) =
       (match src_reg with
        | SP -> emit mv dst_reg sp ~comm
        | Reg _ | Temp _ ->
-         if not (equal_reg src_reg dst_reg)
-         then
-           emit mv dst_reg src_reg ~comm
-           (* | Offset (src_reg, off) -> emit ld dst_reg (src_reg, off) ~comm *))
+         if not (equal_reg src_reg dst_reg) then emit mv dst_reg src_reg ~comm)
     | ROffset (src, off) -> emit ld dst_reg (src, off) ~comm
   in
   let load_dst dst src =
@@ -153,7 +147,6 @@ let emit_direct_unop ?(comm = "") dest op a =
 ;;
 
 let emit_direct_binop ?(comm = "") dest op a0 a1 =
-  (* TODO: addi case *)
   match op with
   | "( + )" -> emit add dest a0 a1 ~comm
   | "( - )" -> emit sub dest a0 a1 ~comm
