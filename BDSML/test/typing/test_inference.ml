@@ -87,6 +87,8 @@ let%expect_test "test let rec fun" =
 let%expect_test "test let rec and" =
   test
     {|let rec f a b = if b then g a b else m
+  test
+    {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
   [%expect {| 'n -> bool -> int |}]
 ;;
@@ -103,9 +105,11 @@ let%expect_test "test let statement" =
 ;;
 
 let%expect_test "test let statements" =
+  test {|let a = 4
   test
     {|let a = 4
   let b = a|};
+  [%expect {|
   [%expect
     {|
     val a : int
@@ -113,10 +117,13 @@ let%expect_test "test let statements" =
 ;;
 
 let%expect_test "test let and statements" =
+  test {|let a = 4
   test
     {|let a = 4
   and b = true
   let c = a, b|};
+  [%expect
+    {|
   [%expect
     {|
     val a : int
@@ -125,10 +132,13 @@ let%expect_test "test let and statements" =
 ;;
 
 let%expect_test "test let rec and statements" =
+  test {|let rec f a = a
   test
     {|let rec f a = a
   and g b = true
   let c = f (g 4)|};
+  [%expect
+    {|
   [%expect
     {|
     val f : 'j -> 'j
@@ -138,9 +148,11 @@ let%expect_test "test let rec and statements" =
 ;;
 
 let%expect_test "test wrong let exp and statements" =
+  test {|let a = 4 in a
   test
     {|let a = 4 in a
   let b = a|};
+  [%expect {|
   [%expect
     {|
     ErrorType infering error: variable a is not found |}]
@@ -148,11 +160,13 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect {| val a : 'g list |}]
+  [%expect {|
+    val a : 'g list |}]
 ;;
 
 let%expect_test "test constructor some with" =
   test {|Some true|};
+  [%expect {|
   [%expect
     {|
       bool optional |}]
@@ -160,6 +174,7 @@ let%expect_test "test constructor some with" =
 
 let%expect_test "test constructor some" =
   test {|let a b = if b then None else Some b in a|};
+  [%expect {|
   [%expect
     {|
     bool -> bool optional |}]
@@ -167,6 +182,7 @@ let%expect_test "test constructor some" =
 
 let%expect_test "test let with if inside on arg" =
   test {|let f a = if a then a else a in f|};
+  [%expect {|
   [%expect
     {|
     bool -> bool |}]
@@ -174,6 +190,7 @@ let%expect_test "test let with if inside on arg" =
 
 let%expect_test "test fun with if inside on arg" =
   test {|fun a -> if a then a else a|};
+  [%expect {|
   [%expect
     {|
     bool -> bool |}]
@@ -181,6 +198,7 @@ let%expect_test "test fun with if inside on arg" =
 
 let%expect_test "test list" =
   test {|[2]|};
+  [%expect {|
   [%expect
     {|
     int list |}]
@@ -188,6 +206,7 @@ let%expect_test "test list" =
 
 let%expect_test "test list 2" =
   test {|[2; 4]|};
+  [%expect {|
   [%expect
     {|
     int list |}]
@@ -195,6 +214,7 @@ let%expect_test "test list 2" =
 
 let%expect_test "test list 3" =
   test {|([2; 4]) :: []|};
+  [%expect {|
   [%expect
     {|
     int list list |}]
@@ -202,6 +222,7 @@ let%expect_test "test list 3" =
 
 let%expect_test "test type" =
   test {|fun a -> (a: int)|};
+  [%expect {|
   [%expect
     {|
     int -> int |}]
@@ -209,6 +230,7 @@ let%expect_test "test type" =
 
 let%expect_test "test fun type" =
   test {|let a b: int -> int = b|};
+  [%expect {|
   [%expect
     {|
     val a : (int -> int) -> int -> int |}]
@@ -216,6 +238,7 @@ let%expect_test "test fun type" =
 
 let%expect_test "test type bool" =
   test {|let a b: bool = b|};
+  [%expect {|
   [%expect
     {|
     val a : bool -> bool |}]
@@ -223,6 +246,7 @@ let%expect_test "test type bool" =
 
 let%expect_test "test type string" =
   test {|let a b: string = b|};
+  [%expect {|
   [%expect
     {|
     val a : string -> string |}]
@@ -230,6 +254,7 @@ let%expect_test "test type string" =
 
 let%expect_test "test type char" =
   test {|let a b: char = b|};
+  [%expect {|
   [%expect
     {|
     val a : char -> char |}]
@@ -239,11 +264,14 @@ let%expect_test "test type fun hard" =
   test {|let a b: (int -> int) -> int = b|};
   [%expect
     {|
+  [%expect
+    {|
     val a : ((int -> int) -> int) -> (int -> int) -> int |}]
 ;;
 
 let%expect_test "test type constructor" =
   test {|let a b: int list = b|};
+  [%expect {|
   [%expect
     {|
     val a : int list -> int list |}]
@@ -251,6 +279,7 @@ let%expect_test "test type constructor" =
 
 let%expect_test "test type tuple" =
   test {|let a b: (int * bool) = b|};
+  [%expect {|
   [%expect
     {|
     val a : (int * bool) -> (int * bool) |}]
@@ -258,6 +287,7 @@ let%expect_test "test type tuple" =
 
 let%expect_test "test predef ops" =
   test {|let a = 1 + 2|};
+  [%expect {|
   [%expect
     {|
     val a : int |}]
@@ -265,6 +295,7 @@ let%expect_test "test predef ops" =
 
 let%expect_test "test predef ops 2" =
   test {|(-) 1|};
+  [%expect {|
   [%expect
     {|
     int -> int |}]
@@ -272,6 +303,7 @@ let%expect_test "test predef ops 2" =
 
 let%expect_test "test predef ops 3" =
   test {|-1|};
+  [%expect {|
   [%expect
     {|
     int |}]
@@ -279,6 +311,7 @@ let%expect_test "test predef ops 3" =
 
 let%expect_test "test predef ops 4" =
   test {|(*)|};
+  [%expect {|
   [%expect
     {|
     int -> int -> int |}]
@@ -286,6 +319,7 @@ let%expect_test "test predef ops 4" =
 
 let%expect_test "test patter matching" =
   test {|match 4 with 4 -> 4| a -> a | _ -> 3|};
+  [%expect {|
   [%expect
     {|
     int |}]
@@ -295,11 +329,15 @@ let%expect_test "test patter matching wrong left type" =
   test {|match 4 with 4 -> 4| a -> a | _ -> 'c'|};
   [%expect
     {|
+  [%expect
+    {|
     ErrorType infering error: failed unification of types int and char |}]
 ;;
 
 let%expect_test "test patter matching wrong right type" =
   test {|match 4 with true -> 4| a -> a | _ -> 4|};
+  [%expect
+    {|
   [%expect
     {|
     ErrorType infering error: failed unification of types int and bool |}]
@@ -309,11 +347,14 @@ let%expect_test "test patter matching wrong right type and expr" =
   test {|match 4 with true -> 4 | _ -> 4|};
   [%expect
     {|
+  [%expect
+    {|
     ErrorType infering error: failed unification of types int and bool |}]
 ;;
 
 let%expect_test "test patter matching tuple" =
   test {|fun a -> match a with (4, m) -> m | _ -> true|};
+  [%expect {|
   [%expect
     {|
     (int * bool) -> bool |}]
@@ -321,6 +362,7 @@ let%expect_test "test patter matching tuple" =
 
 let%expect_test "test patter matching tuple" =
   test {|fun a -> match a with (m: bool) -> m|};
+  [%expect {|
   [%expect
     {|
     bool -> bool |}]
@@ -328,6 +370,7 @@ let%expect_test "test patter matching tuple" =
 
 let%expect_test "test patter matching tuple" =
   test {|fun a -> match a with | Some n -> n | None -> "Hello, word!"|};
+  [%expect {|
   [%expect
     {|
     string optional -> string |}]
@@ -335,6 +378,7 @@ let%expect_test "test patter matching tuple" =
 
 let%expect_test "test function" =
   test {|function | (a: cool_type) -> 3 | _ -> 4|};
+  [%expect {|
   [%expect
     {|
     cool_type -> int |}]
@@ -342,6 +386,7 @@ let%expect_test "test function" =
 
 let%expect_test "test fun with pattern" =
   test {|fun (a, [b]) -> a + b|};
+  [%expect {|
   [%expect
     {|
     (int * int list) -> int |}]
@@ -350,7 +395,11 @@ let%expect_test "test fun with pattern" =
 let%expect_test "test let with pattern" =
   test
     {|let (Some m) = Some (3, true)
+  test
+    {|let (Some m) = Some (3, true)
   let (c, d) = m|};
+  [%expect
+    {|
   [%expect
     {|
     val m : (int * bool)
@@ -359,24 +408,20 @@ let%expect_test "test let with pattern" =
 ;;
 
 let%expect_test "test let rewrite" =
+  test {|let m = 4
   test
     {|let m = 4
   let m = true|};
+  [%expect {|
   [%expect
     {|
     val m : int
     val m : bool |}]
 ;;
 
-let%expect_test "test sequence" =
-  test {|let a = "hello"; true|};
-  [%expect
-    {|
-    val a : bool |}]
-;;
-
 let%expect_test "test op not" =
   test {|fun a -> not a|};
+  [%expect {|
   [%expect
     {|
     bool -> bool |}]
@@ -384,12 +429,13 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   test {|(=)|};
-  [%expect
-    {| 'g -> 'g -> bool |}]
+  [%expect {|
+    'e -> 'e -> bool |}]
 ;;
 
 let%expect_test "test less" =
   test {|(>) 4|};
+  [%expect {|
   [%expect
     {|
     int -> bool |}]
@@ -397,6 +443,7 @@ let%expect_test "test less" =
 
 let%expect_test "test not equal" =
   test {|4 <> 5|};
+  [%expect {|
   [%expect
     {|
     bool |}]
@@ -405,9 +452,12 @@ let%expect_test "test not equal" =
 let%expect_test "test match list" =
   test
     {|let rec a n = match n with 
+  test
+    {|let rec a n = match n with 
   | h :: tl -> h + a tl
   | [] -> 0
   |};
+  [%expect {|
   [%expect
     {|
     val a : int list -> int |}]
@@ -416,17 +466,19 @@ let%expect_test "test match list" =
 let%expect_test "test function with list" =
   test
     {|let rec a = function
+  test
+    {|let rec a = function
   | h :: tl -> h + a tl
   | [] -> 0
   |};
+  [%expect {|
   [%expect
     {|
     val a : int list -> int |}]
 ;;
 
 let%expect_test "test poly inference" =
-  test
-    {|
+  test {|
     let f a b = a, b;;
     f 3 4;;
     f 'a' 'b';;

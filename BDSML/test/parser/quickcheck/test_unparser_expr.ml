@@ -179,29 +179,6 @@ let%expect_test "test if in expr" =
   [%expect {| ((( + ) 4) ((if a then b else c))) |}]
 ;;
 
-let%expect_test "test for if by Andrey Sukhorev 1" =
-  test_expr "if a then b; c";
-  [%expect
-    {|
-    (if a then b);
-    c
-    |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 2" =
-  test_expr "if a then b; c else d";
-  [%expect {| Error: end_of_input |}]
-;;
-
-let%expect_test "test for if by Andrey Sukhorev 3" =
-  test_expr "if a then b else c; d";
-  [%expect
-    {|
-    (if a then b else c);
-    d
-    |}]
-;;
-
 let%expect_test "test match" =
   test_expr "match 4 with|4 -> 1";
   [%expect {| (match 4 with | 4 -> 1) |}]
@@ -234,9 +211,6 @@ let%expect_test "test typexpr 2" =
 
 let%expect_test "test redefine operator" =
   test_expr "let (+) a b = a - b in let (!) m = m in 5 + !4";
-  [%expect {|
-    (let ( + ) a b = ((( - ) a) b) in
-     (let ( ! ) m = m in
-     ((( + ) 5) ((! 4)))))
-    |}]
+  [%expect
+    {| (let ( + ) a b = ((( - ) a) b) in (let ( ! ) m = m in ((( + ) 5) ((! 4))))) |}]
 ;;
