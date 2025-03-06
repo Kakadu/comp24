@@ -3,13 +3,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ffi.h>
-
-typedef struct {
-    int64_t fun;
-    int64_t args_num;
-    int64_t args_applied;
-    int64_t applied_args[];
-} closure_t;
+#include "runtime.h"
 
 closure_t* create_closure(int64_t fun, int64_t args_num, int64_t args_applied) {
     size_t size = sizeof(closure_t) + args_num * sizeof(int64_t);
@@ -97,4 +91,28 @@ int64_t apply_args_to_closure(int64_t closure_ptr, int64_t new_args_num, ...) {
     int64_t res = _apply_args_to_closure((closure_t*)closure_ptr, new_args_num, &new_args);
     va_end(new_args);
     return res;
+}
+
+int64_t print_int(int64_t x)
+{
+    printf("%ld\n", x);
+    return 0;
+}
+
+int64_t print_bool(int64_t x)
+{
+    if (x == 0)
+    {
+        printf("false\n");
+    }
+    else
+    {
+        printf("true\n");
+    }
+    return 0;
+}
+
+
+int main() { // TODO: remove it 
+    return 0;
 }
