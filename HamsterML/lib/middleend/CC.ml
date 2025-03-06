@@ -139,7 +139,32 @@ let fresh_var prefix =
   prefix ^ Int.to_string id
 ;;
 
-let rec cc_expr = function
+let rec cc_expr =
+  let pattern_list_to_vars patterns = List.map patterns ~f:(fun x -> Var x) in
+  let args_list_to_id_set args =
+    List.fold
+      args
+      ~init:(Set.empty (module String))
+      ~f:(fun acc arg ->
+        match arg with
+        | Var x -> Set.add acc x
+        | _ -> acc)
+  in
+  let extract_fun_args expr =
+    let rec loop e acc =
+      match e with
+      | Fun (fun_args, fun_body) -> loop fun_body (acc @ fun_args)
+      | _ -> acc, e
+    in
+    loop expr []
+  in
+  let add_free_vars args expr =
+    let unbound = free_vars_expr expr in
+    let bound = args_list_to_id_set args in
+    let free_vars = Set.diff unbound bound in
+    args @ pattern_list_to_vars (Set.to_list free_vars)
+  in
+  function
   | EVar _ as e -> e
   | EConst _ as e -> e
   | EOperation _ as e -> e
@@ -153,46 +178,33 @@ let rec cc_expr = function
   | EConstraint (expr, ty) -> EConstraint (cc_expr expr, ty)
   | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
   | Fun (args, expr) ->
-    let unbound = free_vars_expr expr in
-    let bound =
-      List.fold
-        args
-        ~init:(Set.empty (module String))
-        ~f:(fun acc arg ->
-          Set.add
-            acc
-            (match arg with
-             | Var x -> x
-             | _ -> failwith "not yet impelemented"))
-    in
-    let free = Set.diff unbound bound in
-    let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
-    let new_expr = cc_expr expr in
-    Fun (new_args, new_expr)
-  | Let (funType, binds, in_expr_opt) ->
+    (* Process based on whether the expression to the right of the arrow is a `fun` expression *)
+    (match expr with
+     | Fun _ ->
+       let all_args, final_body = extract_fun_args (Fun (args, expr)) in
+       let new_args = add_free_vars all_args final_body in
+       Fun (new_args, cc_expr final_body)
+     | _ ->
+       let new_args = add_free_vars args expr in
+       Fun (new_args, cc_expr expr))
+  | Let (fun_type, binds, in_expr_opt) ->
     let cc_binds =
       List.map binds ~f:(fun (pat, args, expr) ->
-        let unbound = free_vars_expr expr in
-        let bound =
-          List.fold
-            args
-            ~init:(Set.empty (module String))
-            ~f:(fun acc arg ->
-              Set.add
-                acc
-                (match arg with
-                 | Var x -> x
-                 | _ -> failwith "not yet implemented"))
+        let all_args, body = extract_fun_args expr in
+        let combined_args = all_args @ args in
+        let final_args =
+          match fun_type with
+          | Recursive ->
+            let unbound = free_vars_expr body in
+            let bound = args_list_to_id_set combined_args in
+            let fun_names = bound_vars_in_pattern pat in
+            let free_vars = Set.diff (Set.diff unbound bound) fun_names in
+            combined_args @ pattern_list_to_vars (Set.to_list free_vars)
+          | Nonrecursive -> add_free_vars combined_args body
         in
-        let free = Set.diff unbound bound in
-        let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
-        let new_expr = cc_expr expr in
-        pat, new_args, new_expr)
+        pat, final_args, cc_expr body)
     in
-    let new_in_expr_opt =
-      match in_expr_opt with
-      | Some e -> Some (cc_expr e)
-      | None -> None
-    in
-    Let (funType, cc_binds, new_in_expr_opt)
+    let new_in_expr_opt = Option.map in_expr_opt ~f:cc_expr in
+    Let (fun_type, cc_binds, new_in_expr_opt)
+;;
 ;;
