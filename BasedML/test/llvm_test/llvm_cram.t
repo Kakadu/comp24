@@ -358,6 +358,23 @@ TU Andrey
   Error: This expression has type 'a * 'b * 'c
          but an expression was expected of type 'd * 'e
   [2]
+  $ ./llvm_demo.exe < ../manytests/typed/011mapcps.ml
+  $ ./riscv_run.sh  out.ll
+  2
+  3
+  4
+  $ ocaml -w -a ../manytests/typed/011mapcps.ml
+  234
+  $ ./llvm_demo.exe < ../manytests/typed/012fibcps.ml
+  $ ./riscv_run.sh  out.ll
+  8
+  $ ocaml -w -a ../manytests/typed/012fibcps.ml
+  8
+  $ ./llvm_demo.exe < ../manytests/typed/013foldfoldr.ml
+  $ ./riscv_run.sh  out.ll
+  6
+  $ ocaml -w -a ../manytests/typed/013foldfoldr.ml
+  6
   $ ./llvm_demo.exe < ../manytests/typed/015tuples.ml
   $ ./riscv_run.sh  out.ll
   1
