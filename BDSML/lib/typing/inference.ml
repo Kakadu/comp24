@@ -92,7 +92,7 @@ let typexpr_to_type typexpr =
       in
       helper2 type_vars l
   in
-  let+ ty, _ = helper TypeVars.empty typexpr in
+  let+ ty, vars = helper TypeVars.empty typexpr in
   ty
 ;;
 
@@ -361,6 +361,7 @@ let predefine_operators =
   ; "( <= )", "'a -> 'a -> bool"
   ; "( = )", "'a -> 'a -> bool"
   ; "( <> )", "'a -> 'a -> bool"
+  ; "( || )", "bool -> bool -> bool"
   ]
 ;;
 
