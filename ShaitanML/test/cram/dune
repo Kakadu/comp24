@@ -10,9 +10,44 @@
  (public_name infer)
  (libraries shaitanml_lib stdio))
 
+(executable
+ (name pat_elim)
+ (modules Pat_elim)
+ (public_name pat_elim)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name closure)
+ (modules Closure)
+ (public_name closure)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name alpha)
+ (modules Alpha)
+ (public_name alpha)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name l_lifting)
+ (modules L_lifting)
+ (public_name l_lifting)
+ (libraries shaitanml_lib stdio))
+
+(executable
+ (name anf)
+ (modules Anf)
+ (public_name anf)
+ (libraries shaitanml_lib stdio))
+
 (cram
  (deps
   (source_tree manytests)))
 
 (cram
- (deps %{bin:parser} %{bin:infer}))
+ (deps
+  %{bin:parser}
+  %{bin:infer}
+  %{bin:pat_elim}
+  %{bin:closure}
+  %{bin:alpha}))

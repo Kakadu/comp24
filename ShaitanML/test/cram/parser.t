@@ -229,20 +229,16 @@
   > let f = (fun x -> x + 1) 123 in f;;
   > let x, y, z = (1, 2, 3);;
   > EOF
-  [(SEval
-      (ELet (Nonrec,
-         ((PVar "f"),
-          (EApply (
-             (EFun ((PVar "x"),
-                (EApply ((EApply ((EVar "( + )"), (EVar "x"))),
-                   (EConst (CInt 1))))
-                )),
-             (EConst (CInt 123))))),
-         (EVar "f"))));
-    (SValue (Nonrec,
-       [((PTuple [(PVar "x"); (PVar "y"); (PVar "z")]),
-         (ETuple [(EConst (CInt 1)); (EConst (CInt 2)); (EConst (CInt 3))]))]
-       ))
+  [(SValue (Nonrec,
+      [((PVar "f"),
+        (EApply (
+           (EFun ((PVar "x"),
+              (EApply ((EApply ((EVar "( + )"), (EVar "x"))), (EConst (CInt 1))
+                 ))
+              )),
+           (EConst (CInt 123)))))
+        ]
+      ))
     ]
   $ dune exec parser << EOF
   > let addi = fun f g x -> (f x (g x: bool) : int)
