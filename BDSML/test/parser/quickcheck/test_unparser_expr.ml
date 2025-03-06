@@ -112,22 +112,36 @@ let%expect_test "test tuple constructor" =
 
 let%expect_test "test let in" =
   test_expr "let 4 = 4 in b";
-  [%expect {| (let 4 = 4 in b) |}]
+  [%expect {|
+    (let 4 = 4 in
+     b)
+    |}]
 ;;
 
 let%expect_test "test let several" =
   test_expr "let rec a = 4 and b = 6 in a+b";
-  [%expect {| (let rec a = 4 and b = 6 in ((( + ) a) b)) |}]
+  [%expect {|
+    (let rec a = 4
+     and b = 6 in
+     ((( + ) a) b))
+    |}]
 ;;
 
 let%expect_test "test let in let" =
   test_expr "let a = let b = 4 in b in a";
-  [%expect {| (let a = (let b = 4 in b) in a) |}]
+  [%expect {|
+    (let a = (let b = 4 in
+     b) in
+     a)
+    |}]
 ;;
 
 let%expect_test "test num + let" =
   test_expr "4 + let a = 5 in a";
-  [%expect {| ((( + ) 4) ((let a = 5 in a))) |}]
+  [%expect {|
+    ((( + ) 4) ((let a = 5 in
+     a)))
+    |}]
 ;;
 
 let%expect_test "test fun" =
@@ -220,5 +234,9 @@ let%expect_test "test typexpr 2" =
 
 let%expect_test "test redefine operator" =
   test_expr "let (+) a b = a - b in let (!) m = m in 5 + !4";
-  [%expect {| (let ( + ) a b = ((( - ) a) b) in (let ( ! ) m = m in ((( + ) 5) ((! 4))))) |}]
+  [%expect {|
+    (let ( + ) a b = ((( - ) a) b) in
+     (let ( ! ) m = m in
+     ((( + ) 5) ((! 4)))))
+    |}]
 ;;
