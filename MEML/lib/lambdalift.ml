@@ -226,13 +226,13 @@ let rec lift_llexpression new_lllet gvars fvars lvars = function
 ;;
 
 let lift_llbindings gvars fvars = function
-  | CLets clets ->
+  | CLets (r, clets) ->
     let new_lets, old_lets, gvars, fvars =
       List.fold
         ~init:([], [], gvars, fvars)
         ~f:(fun (acc_new, acc_old, gvars, fvars) clet ->
           match clet with
-          | CLet (r, n, args, e) ->
+          | CLet (n, args, e) ->
             let new_lets, old_lets, gvars, fvars =
               let new_names, gvars, fvars =
                 if Poly.( = ) r Rec && Poly.( = ) n "()"

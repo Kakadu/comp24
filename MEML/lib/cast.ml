@@ -14,11 +14,11 @@ type cexpression =
 [@@deriving show { with_path = false }]
 
 type cbindings =
-  | CLets of clets list
+  | CLets of rec_flag * clets list
   | CExpression of cexpression (** simple expressions *)
 
 and clets =
-  | CLet of (rec_flag * name * pattern list * cexpression) (** let id = expr *)
+  | CLet of (name * pattern list * cexpression) (** let id = expr *)
   | CLetPat of (pattern * cexpression) (** let id = expr *)
 [@@deriving show { with_path = false }]
 

@@ -64,12 +64,12 @@ let pp_llbindings formatter bindings =
   List.iter
     (fun bind ->
       match bind with
-      | CLets clets_list ->
+      | CLets (r, clets_list) ->
         (* Перебираем все let-объявления внутри CLet *)
         List.iteri
           (fun i clets ->
             match clets with
-            | CLet (r, n, p, e) ->
+            | CLet (n, p, e) ->
               if i = 0
               then
                 (* Первое объявление начинается с "let" *)

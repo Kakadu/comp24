@@ -234,25 +234,32 @@ let rec free_vars gvars lvars uvars lambadi = function
 ;;
 
 let closure_bindings id = function
-  | Lets bindings ->
+  | Let (r, bindings) ->
+    let names, _ = List.hd_exn bindings in
+    let gvars =
+      if Poly.( = ) r Notrec
+      then set_empty
+      else
+        List.fold ~init:set_empty ~f:(fun set name -> Set.add set name)
+        @@ pattern_to_string_list names
+    in
     let llbindings, _ =
       List.fold
         ~init:([], id)
         ~f:(fun (lacc, id) let_type ->
           match let_type with
-          | Let (r, n, e) ->
+          | PVar (n, _), e ->
             let args, e_body = arguments [] e in
             let llet, letfun, id, _, _, lambadi =
               closure_expression id set_empty [] [] e_body
             in
             let llet = create_let llet letfun in
-            let gvars = if Poly.( = ) r Notrec then set_empty else Set.add set_empty n in
             let not_free_llet, _, _, _, _ =
               free_vars gvars set_empty map_empty lambadi llet
             in
-            let lllet = CLet (r, n, args, not_free_llet) in
+            let lllet = CLet (n, args, not_free_llet) in
             lllet :: lacc, id
-          | LetPat (names, e) ->
+          | names, e ->
             let llet, letfun, id, _, _, lambadi =
               closure_expression id set_empty [] [] e
             in
@@ -264,7 +271,7 @@ let closure_bindings id = function
             lllet :: lacc, id)
         bindings
     in
-    CLets (List.rev llbindings)
+    CLets (Rec, List.rev llbindings)
   | Expression e ->
     let llet, letfun, _, _, _, lambadi = closure_expression id set_empty [] [] e in
     let llet = create_let llet letfun in

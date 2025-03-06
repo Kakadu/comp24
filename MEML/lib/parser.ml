@@ -159,9 +159,9 @@ let parse_pvar =
   brackets_or_not
   @@ (lift
         (fun a ->
-          if String.( <> ) a "_"
-          then PVar (a, TArrow (TInt, TArrow (TInt, TInt)))
-          else PWild)
+           if String.( <> ) a "_"
+           then PVar (a, TArrow (TInt, TArrow (TInt, TInt)))
+           else PWild)
         parse_rename
       <|> lift2
             (fun a b -> if String.( <> ) a "_" then PVar (a, b) else PWild)
@@ -213,11 +213,15 @@ let parse_pattern =
 
 (* EConst *)
 
-let parse_econst = (fun v -> EConst v) <$> choice [ parse_uint; parse_int; parse_bool ]
+let parse_econst = (fun v -> EConst v) <$> choice [ parse_uint; parse_bool ]
+
+let parse_econst_int =
+  (fun v -> EConst v) <$> choice [ parse_uint; parse_int; parse_bool ]
+;;
 
 (* EVar *)
 
-let parse_evar = lift2 (fun a b -> EVar (a, b)) parse_var parse_type
+let parse_evar = (brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type) <|> lift (fun a -> EVar (a, TUnknown)) parse_var
 
 (* EBinaryOp *)
 
@@ -302,20 +306,12 @@ let parse_rec =
 
 let parse_name = parse_rename <|> parse_var
 
-let parse_name_list =
-  brackets_or_not
-  @@ lift2
-       (fun a b -> a :: b)
-       (parse_pattern <* stoken ",")
-       (sep_by1 (stoken ",") parse_pattern)
-;;
-
 let parse_eletin expr =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
     (fun is_rec name args expr1 expr2 ->
-      let expr = constr_efun args expr1 in
-      ELetIn (is_rec, name, expr, expr2))
+       let expr = constr_efun args expr1 in
+       ELetIn (is_rec, name, expr, expr2))
     (parse_white_space *> stoken "let" *> parse_rec)
     parse_name
     (many parse_pattern)
@@ -368,7 +364,6 @@ let parse_ematch matching parse_expr =
   let pematch = stoken "match" *> matching <* stoken "with" in
   parse_white_space *> lift2 ematch pematch exprs
 ;;
-
 (* Expression parsers *)
 
 let parse_expression =
@@ -385,8 +380,7 @@ let parse_expression =
   in
   let parse_if =
     parse_ebinop pack
-    <|> brackets
-          (parse_ebinop pack <|> parse_eletin pack <|> parse_eapp pack pack)
+    <|> brackets (parse_ebinop pack <|> parse_eletin pack <|> parse_eapp pack pack)
   in
   let expression pack =
     parse_ebinop pack
@@ -418,6 +412,12 @@ let parse_expression =
     <|> econst
   in
   let eapp = brackets_or_not @@ parse_eapp (app_left pack) (app_right pack) in
+  let eapp_int =
+    brackets_or_not
+    @@ parse_eapp
+         (app_left (pack <|> parse_econst_int))
+         (app_right (pack <|> parse_econst_int))
+  in
   let elists =
     parse_econ (eapp <|> evar)
     <|> parse_cons_semicolon_expr
@@ -455,11 +455,23 @@ let parse_expression =
   in
   let eletin =
     parse_eletin (expression pack)
-    <|> brackets @@ parse_eletin pack 
+    <|> brackets @@ parse_eletin pack
     <|> ematch
     <|> eifelse
   in
-  choice [ eletin; eapp; efun; elists; ebinop; eifelse; tuples; evar; econst; ematch ]
+  choice
+    [ eletin
+    ; eapp
+    ; efun
+    ; elists
+    ; ebinop
+    ; eifelse
+    ; tuples
+    ; evar
+    ; econst
+    ; ematch
+    ; eapp_int
+    ]
 ;;
 
 (** Binding type *)
@@ -468,26 +480,30 @@ let parse_let parse =
   let parse_single_let =
     lift4
       (fun flag name args body ->
-        let body = constr_efun args body in
-        Let (flag, name, body))
+         let body = constr_efun args body in
+         flag, name, body)
       parse_rec
-      parse_name
+      parse_pattern
       (parse_white_space *> many (brackets_or_not parse_pattern))
       (stoken "=" *> parse)
   in
   let parse_single_multy_let =
-    lift2
-      (fun names body -> LetPat (names, body))
-      (parse_white_space *> brackets_or_not parse_pattern)
-      (parse_white_space *>  stoken "=" *> parse)
+    lift3
+      (fun name args body ->
+         let body = constr_efun args body in
+         name, body)
+      parse_pattern
+      (parse_white_space *> many (brackets_or_not parse_pattern))
+      (stoken "=" *> parse)
   in
   let parse_let_and =
-    (parse_single_let <|> parse_single_multy_let)
-    >>= fun first_let ->
-    many (stoken "and" *> (parse_single_let <|> parse_single_multy_let))
-    >>= fun rest_lets -> return (first_let :: rest_lets)
+    parse_single_let
+    >>= fun (r, p, e) ->
+    many (stoken "and" *> parse_single_multy_let)
+    >>= fun rest_lets -> return (r, (p, e) :: rest_lets)
   in
-  parse_white_space *> stoken "let" *> parse_let_and >>= fun lets -> return (Lets lets)
+  parse_white_space *> stoken "let" *> parse_let_and
+  >>= fun (r, lets) -> return (Let (r, lets))
 ;;
 
 let expr_main = (fun expr -> Expression expr) <$> parse_expression

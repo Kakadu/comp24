@@ -1,12 +1,11 @@
   $ ./parser_demo.exe <<- EOF
-  > let rec fibo_cps = fun n acc -> match n with
-  >   | 0 -> acc 0
-  >   | 1 -> acc 1
-  >   | _ -> fibo_cps (n - 1) (fun x -> fibo_cps (n - 2) (fun y -> acc (x + y)))
-  let rec fibo_cps = (fun n -> (fun acc -> (match n with
-  | 0 -> (acc 0)
-  | 1 -> (acc 1)
-  | _ -> ((fibo_cps (n - 1)) (fun x -> ((fibo_cps (n - 2)) (fun y -> (acc (x + y))))))))
+  > let rec meven n = if n = 0 then 1 else modd (n - 1)
+  > and a b = 4
+  let rec meven = (fun n -> 
+    if (n = 0)
+    then 1
+    else (modd (n - 1)))
+  and a = (fun b -> 4)
 
   $ ./parser_demo.exe <<- EOF
   > let rec fac_cps n k = match n with
@@ -23,14 +22,14 @@
   > let (c, b) = (2, 3)
   > x+3
   let  a = f
-  and  b = 4
-  let (c, b) = (2, 3)
+  and b = 4
+  let  (c, b) = (2, 3)
   (x + 3)
   $ ./parser_demo.exe < manytests/do_not_type/001.ml
   let  recfac = (fun n -> 
     if (n <= 1)
     then 1
-    else (n * (fac (n -1))))
+    else (n * (fac (n - 1))))
   $ ./parser_demo.exe < manytests/do_not_type/002if.ml
   let  main = 
     if true
@@ -44,7 +43,7 @@
   let rec fac = (fun n -> 
     if (n <= 1)
     then 1
-    else (n * (fac (n -1))))
+    else (n * (fac (n - 1))))
   let  main = 
     let  () = (print_int (fac 4))
     in 0
@@ -52,7 +51,7 @@
   let rec fac_cps = (fun n -> (fun k -> 
     if (n = 1)
     then (k 1)
-    else ((fac_cps (n -1)) (fun p -> (k (p * n))))))
+    else ((fac_cps (n - 1)) (fun p -> (k (p * n))))))
   let  main = 
     let  () = (print_int ((fac_cps 4) (fun print_int -> print_int)))
     in 0
@@ -61,7 +60,7 @@
     if (n = 1)
     then b
     else 
-    let  n1 = (n -1)
+    let  n1 = (n - 1)
     in 
     let  ab = (a + b)
     in (((fib_acc b) ab) n1))))
@@ -99,7 +98,7 @@
   let  fac = (fun self -> (fun n -> 
     if (n <= 1)
     then 1
-    else (n * (self (n -1)))))
+    else (n * (self (n - 1)))))
   let  main = 
     let  () = (print_int ((fix fac) 6))
     in 0
@@ -146,7 +145,7 @@
     in (((a * b) / _c) + d))))))))))
   let  main = (print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int -1)) 10000) -555555))
   $ ./parser_demo.exe < manytests/typed/008ascription.ml
-  let  addi = (fun f -> (fun g -> (fun x -> ((f x) (g x : bool)) : int)))
+  let  addi = (fun f -> (fun g -> (fun x -> ((f x) (g x) : bool) : int)))
   let  main = 
     let  () = (print_int (((addi (fun x -> (fun b -> 
     if b
@@ -180,7 +179,7 @@
     if (n = 0)
     then 1
     else (modd (n - 1)))
-  and  modd = (fun n -> 
+  and modd = (fun n -> 
     if (n = 0)
     then 1
     else (meven (n - 1)))

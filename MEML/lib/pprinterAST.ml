@@ -112,23 +112,18 @@ let rec pp_expression formatter e =
 
 let pp_bindings formatter bindings =
   match bindings with
-  | Lets lets_list ->
+  | Let (r, lets_list) ->
     (* Обработка списка связываний *)
     List.iteri
       (fun i let_binding ->
         match let_binding with
-        | Let (r, name, expr) ->
+        | (name, expr) ->
           (* Обработка обычного связывания let id = expr *)
           if i = 0
           then
-            Format.fprintf formatter "let %a %s = %a\n" pp_rec r name pp_expression expr
+            Format.fprintf formatter "let %a %a = %a\n" pp_rec r pp_pattern name pp_expression expr
           else
-            Format.fprintf formatter "and %a %s = %a\n" pp_rec r name pp_expression expr
-        | LetPat (pat, expr) ->
-          (* Обработка связывания с паттерном let pattern = expr *)
-          if i = 0
-          then Format.fprintf formatter "let %a = %a\n" pp_pattern pat pp_expression expr
-          else Format.fprintf formatter "and %a = %a\n" pp_pattern pat pp_expression expr)
+            Format.fprintf formatter "and %a = %a\n" pp_pattern name pp_expression expr)
       lets_list
   | Expression expr ->
     (* Обработка простого выражения *)

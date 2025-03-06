@@ -61,13 +61,9 @@ type expression =
 
 (** Binding type *)
 type bindings =
-  | Lets of lets list
+  | Let of rec_flag * (pattern * expression) list
   | Expression of expression (** simple expressions *)
-
-and lets =
-  | Let of (rec_flag * name * expression) (** let id = expr *)
-  | LetPat of (pattern * expression) (** let id = expr *)
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]
 
 (** Statements type *)
-type statements = bindings list [@@deriving show { with_path = false }]
+type statements = bindings list [@@deriving eq, show { with_path = false }]
