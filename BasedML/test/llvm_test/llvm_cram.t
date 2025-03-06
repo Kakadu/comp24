@@ -258,9 +258,7 @@ Other
     ret i64 %5
   }
 
-  $ clang-16 out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf
-  warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]
-  1 warning generated.
+  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf
   $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
   120
   24
@@ -274,3 +272,120 @@ Other
   6
   2
   1
+
+Manytests
+  $ ./llvm_demo.exe < ../manytests/typed/001fac.ml
+  $ ./riscv_run.sh  out.ll
+  24
+  $ ocaml -w -a ../manytests/typed/001fac.ml 
+  24
+  $ ./llvm_demo.exe < ../manytests/typed/002fac.ml
+  $ ./riscv_run.sh  out.ll
+  24
+  $ ocaml -w -a ../manytests/typed/002fac.ml 
+  24
+  $ ./llvm_demo.exe < ../manytests/typed/003fib.ml
+  $ ./riscv_run.sh  out.ll
+  3
+  3
+  $ ocaml -w -a ../manytests/typed/003fib.ml
+  33
+Riscv strange
+  $ ./llvm_demo.exe < ../manytests/typed/004manyargs.ml
+  $ ./riscv_run.sh  out.ll
+  137550073543
+  137438962408
+  1
+  10
+  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
+  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
+  1111111111
+  1
+  10
+  100
+  $ ocaml -w -a ../manytests/typed/004manyargs.ml
+  1111111111110100
+  $ ./llvm_demo.exe < ../manytests/typed/005fix.ml
+  $ ./riscv_run.sh  out.ll
+  720
+  $ ocaml -w -a ../manytests/typed/005fix.ml
+  720
+
+Riscv strange
+  $ ./llvm_demo.exe < ../manytests/typed/006partial.ml
+  $ ./riscv_run.sh  out.ll
+  3
+  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
+  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
+  1122
+  $ ocaml -w -a ../manytests/typed/006partial.ml
+  1122
+  $ ./llvm_demo.exe < ../manytests/typed/006partial2.ml
+  $ ./riscv_run.sh  out.ll
+  1
+  2
+  3
+  7
+  $ ocaml -w -a ../manytests/typed/006partial2.ml
+  1237
+Riscv strange
+  $ ./llvm_demo.exe < ../manytests/typed/006partial3.ml
+  $ ./riscv_run.sh  out.ll
+  4
+  4
+  4
+  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
+  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
+  4
+  8
+  9
+  $ ocaml -w -a ../manytests/typed/006partial3.ml
+  489
+  $ ./llvm_demo.exe < ../manytests/typed/007order.ml
+  $ ./riscv_run.sh  out.ll
+  -1
+  4
+  2
+  1
+  103
+  -555555
+  10000
+  $ ocaml -w -a ../manytests/typed/007order.ml
+  -1421103-55555510000
+  $ ./llvm_demo.exe < ../manytests/typed/008ascription.ml
+  $ ./riscv_run.sh  out.ll
+  8
+  $ ocaml -w -a ../manytests/typed/008ascription.ml
+  8
+No output :(
+  $ ./llvm_demo.exe < ../manytests/typed/009let_poly.ml
+  $ ./riscv_run.sh  out.ll
+  $ ocaml -w -a ../manytests/typed/009let_poly.ml
+TU Andrey
+  $ ./llvm_demo.exe < ../manytests/typed/010sukharev.ml
+  Parser error: : end_of_input
+  $ ./riscv_run.sh  out.ll
+  $ ocaml -w -a ../manytests/typed/010sukharev.ml
+  File "../manytests/typed/010sukharev.ml", line 9, characters 15-22:
+  9 |     let a, _ = 1, 2, 3 in a
+                     ^^^^^^^
+  Error: This expression has type 'a * 'b * 'c
+         but an expression was expected of type 'd * 'e
+  [2]
+  $ ./llvm_demo.exe < ../manytests/typed/015tuples.ml
+  $ ./riscv_run.sh  out.ll
+  1
+  1
+  1
+  1
+  $ ocaml -w -a ../manytests/typed/015tuples.ml
+  1111
+  $ ./llvm_demo.exe < ../manytests/typed/016lists.ml
+  $ ./riscv_run.sh  out.ll
+  1
+  2
+  3
+  8
+  $ ocaml -w -a ../manytests/typed/016lists.ml
+  1238
+
