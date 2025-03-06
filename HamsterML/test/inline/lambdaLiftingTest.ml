@@ -184,3 +184,5 @@ let%test _ =
         , None )
     ]
 ;;
+
+let%test _ = lambda_lift_prog "let main = let () = 10 in 0" = []
