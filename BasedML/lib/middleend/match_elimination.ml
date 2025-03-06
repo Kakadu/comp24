@@ -46,7 +46,8 @@ let rec generate_bindings =
   in
   function
   | BoundExpression (PConstant constant, expression) ->
-    ( LLApplication (LLApplication (LLIdentifier "( = )", expression), LLConstant constant)
+    ( LLApplication
+        (LLApplication (LLIdentifier "( == )", expression), LLConstant constant)
     , [] )
     |> return
   | BoundExpression (PTuple pattern_list, expression) ->
@@ -217,6 +218,10 @@ let rec eliminate_lexpr =
   | LLConstraint (llexpr, typ) ->
     let* new_llexpr = eliminate_lexpr llexpr in
     LLConstraint (new_llexpr, typ) |> return
+  | LLMatch (main_expr, [ (PConstant CUnit, case_body) ]) ->
+    let* name, count = generate_unique_name "local_unit_" 0 in
+    eliminate_lexpr
+      (LLMatch (main_expr, [ PIdentifier (name ^ string_of_int count), case_body ]))
   | LLMatch (main_expression, match_cases) ->
     let* match_free_main_expression = eliminate_lexpr main_expression in
     let* conditions =
@@ -311,6 +316,13 @@ let rec eliminate_match_in_declarations acc = function
     eliminate_match_in_declarations (LLDSingleLet (flag, new_let) :: acc) tl
   | LLDSingleLet (flag, LLLet (PWildCard, [], llexpr)) :: tl ->
     let* name, counter = generate_unique_name "global_wildcard" 0 in
+    let new_name = name ^ string_of_int counter in
+    let* eliminated_llexpr = eliminate_lexpr llexpr in
+    eliminate_match_in_declarations
+      (LLDSingleLet (flag, LLLet (PIdentifier new_name, [], eliminated_llexpr)) :: acc)
+      tl
+  | LLDSingleLet (flag, LLLet (PConstant CUnit, [], llexpr)) :: tl ->
+    let* name, counter = generate_unique_name "global_unit_" 0 in
     let new_name = name ^ string_of_int counter in
     let* eliminated_llexpr = eliminate_lexpr llexpr in
     eliminate_match_in_declarations
