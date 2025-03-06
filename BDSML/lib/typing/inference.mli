@@ -4,5 +4,6 @@
 
 open Parser.Ast
 open Types
+open Monads
 
 val infer_program : structure_item list -> ((string * type_val) list, string) result

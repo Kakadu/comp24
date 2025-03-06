@@ -2,7 +2,7 @@
   val fac : int -> int
   val main : int
   $ dune exec manytests_inference < manytests_link/typed/002fac.ml
-  val fac_cps : int -> (int -> 'u) -> 'u
+  val fac_cps : int -> (int -> 'v) -> 'v
   val main : int
   $ dune exec manytests_inference < manytests_link/typed/003fib.ml
   val fib_acc : int -> int -> int -> int
@@ -40,7 +40,7 @@
   val map : ('q -> 's) -> ('q * 'q) -> ('s * 's)
   val fixpoly : (('aa -> 'dd * 'aa -> 'dd) -> 'aa -> 'dd * ('aa -> 'dd * 'aa -> 'dd) -> 'aa -> 'dd) -> ('aa -> 'dd * 'aa -> 'dd)
   val feven : ('kk * int -> int) -> int -> int
-  val fodd : (int -> int * 'uu) -> int -> int
+  val fodd : (int -> int * 'vv) -> int -> int
   val tie : (int -> int * int -> int)
   val meven : int -> int
   val modd : int -> int

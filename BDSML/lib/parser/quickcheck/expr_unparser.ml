@@ -14,7 +14,7 @@ let rec unparse_expr ppf = function
   | Exp_let (r, l, e) ->
     fprintf
       ppf
-      "(let%a %a in %a)"
+      "(let%a %a in \n %a)"
       unparse_rec_flag
       r
       unparse_let_binding_list
@@ -43,7 +43,7 @@ and unparse_let_binding_list ppf l =
     | Val_binding (s, pl, e) ->
       fprintf ppf "%s%a = %a" s Pattern_unparser.unparse_pattern_list pl unparse_expr e
   in
-  list_unparser ppf l ~f:unparse_let_binding ~s:" and "
+  list_unparser ppf l ~f:unparse_let_binding ~s:"\n and "
 
 and unparse_case_list ppf l =
   let unparse_case ppf c =

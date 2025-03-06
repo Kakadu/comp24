@@ -1,0 +1,7 @@
+(executable
+ (name run_remove_patterns)
+ (modules run_remove_patterns)
+ (libraries typing parser middleend quickcheck stdio))
+
+(cram
+ (deps ./run_remove_patterns.exe))

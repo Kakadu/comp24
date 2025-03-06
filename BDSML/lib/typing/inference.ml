@@ -358,6 +358,7 @@ let predefine_operators =
   ; "( <= )", "'a -> 'a -> bool"
   ; "( = )", "'a -> 'a -> bool"
   ; "( <> )", "'a -> 'a -> bool"
+  ; "( || )", "bool -> bool -> bool"
   ; "( == )", "'a -> 'a -> bool"
   ; "print_int", "int -> unit"
   ]
@@ -365,12 +366,14 @@ let predefine_operators =
 
 let init_env =
   let+ add_predefines =
+    let empty_env = TypeEnv.empty in
     map
       (fun (name, ty) ->
         match Parser.Typexpr_parser.parse_typexpr_str ty with
         | Result.Ok ty ->
           let+ ty = typexpr_to_type ty in
-          name, Scheme.create VarSet.empty ty
+          let scheme = generalize empty_env ty in
+          name, scheme
         | Result.Error s -> fail (Invalid_predefined_operators s))
       predefine_operators
   in
