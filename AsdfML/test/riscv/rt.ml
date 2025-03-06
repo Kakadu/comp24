@@ -53,12 +53,9 @@ let sqrt_ x =
 ;;
 
 let normalize vec = 
-  let helper (x, y, z) = 
-    let len_sq = dot vec vec in
-    let len = sqrt_ (len_sq) in
-    if len = zero then (zero, zero, zero) else (map_vec (fun x -> div x len) vec) 
-  in 
-  helper vec
+  let len_sq = dot vec vec in
+  let len = sqrt_ (len_sq) in
+  if len = zero then (zero, zero, zero) else (map_vec (fun x -> div x len) vec) 
 ;;
 
 let abs x = if x < zero then -x else x
