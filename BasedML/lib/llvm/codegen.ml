@@ -229,7 +229,7 @@ let rec build_cexpr : Llvm.llbuilder -> cexpr -> (state, Llvm.llvalue) t =
      | "( && )", [ a; b ] -> return (Llvm.build_and a b "" builder)
      | "( || )", [ a; b ] -> return (Llvm.build_or a b "" builder)
      | "( == )", [ a; b ] -> return (build_icmp_ml builder Llvm.Icmp.Eq a b)
-     | "( != )", [ a; b ] -> return (build_icmp_ml builder Llvm.Icmp.Eq a b)
+     | "( != )", [ a; b ] -> return (build_icmp_ml builder Llvm.Icmp.Ne a b)
      | _, _ ->
        (* Optimize full args function call*)
        let fun_name = std_renaming fun_name in
