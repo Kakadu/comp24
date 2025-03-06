@@ -52,6 +52,11 @@ module NameEnv = struct
   ;;
 end
 
+let generate_lambda_name =
+  let* fresh_num = fresh in
+  return @@ "ll_lam_" ^ Int.to_string fresh_num
+;;
+
 (* Simplify weird patterns in function arguments *)
 let simplify_arguments p_args expr : (expr * NameSet.t) t =
   let rec helper (acc : expr) (names : NameSet.t) = function
@@ -80,17 +85,17 @@ let collect_mutual_names (env : NameEnv.t) (binds : bind list) : NameEnv.t t =
 let rec ll_bind
   (lifted : lifted_lets)
   (env : NameEnv.t)
-  ((name, args, expr) : pattern * args * expr)
+  ((name, args, body) : pattern * args * expr)
   =
   match name with
   | Var name ->
     let* env, new_name = NameEnv.generate_name env name in
-    let* expr, nameset = simplify_arguments args expr in
+    let* expr, nameset = simplify_arguments args body in
     let* llexpr, lifted = ll_expr lifted env expr in
     let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
     return (env, new_bind, lifted)
   | p_name ->
-    let* llexpr, lifted = ll_expr lifted env expr in
+    let* llexpr, lifted = ll_expr lifted env body in
     let (new_bind : ll_bind) = p_name, args, llexpr in
     return (env, new_bind, lifted)
 
@@ -98,6 +103,13 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   : (ll_expr * lifted_lets) t
   =
   match expr with
+  | Fun (args, body) ->
+    let* name = generate_lambda_name in
+    let* body, nameset = simplify_arguments args body in
+    let* llexpr, lifted = ll_expr lifted env body in
+    let (lam_bind : ll_bind) = Var name, NameSet.to_args nameset, llexpr in
+    let lam_let = LLLet (Nonrecursive, [ lam_bind ], None) in
+    return (LLVar name, lam_let :: lifted)
   | Let (rec_flag, binds, Some scope) ->
     let* env =
       match rec_flag with
