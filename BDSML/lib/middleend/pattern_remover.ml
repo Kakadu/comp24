@@ -40,6 +40,9 @@ let fun_exception name =
 ;;
 
 let same_constructor l r = two_arg_fun_helper "__same_cons" l r
+let get_cons_params cons par = two_arg_fun_helper "__get_cons_params" cons par
+let exp_or = two_arg_fun_helper "( || )"
+let exp_and = two_arg_fun_helper "( && )"
 
 let rec pattern_binder rexp = function
   | Pat_var v -> return [ user_var v, rexp ]
@@ -52,7 +55,12 @@ let rec pattern_binder rexp = function
         (List.mapi (fun i n -> i, n) l)
     in
     (fv, rexp) :: List.flatten res
-  | Pat_or _ -> fail (Invalid_pattern "or pattern cannot be bind")
+  | Pat_or (l, r) ->
+    let* l = pattern_binder rexp l in
+    let* r = pattern_binder rexp r in
+    if not @@ List.is_empty @@ l @ r
+    then fail (Invalid_pattern "BDSML doesn't allow vars in or patter")
+    else return []
   | Pat_construct (name, Some v) -> pattern_binder (disassemble_constructor name rexp) v
   | _ -> return []
 ;;
@@ -110,15 +118,18 @@ and match_cases exp cases =
       let res, _ =
         List.fold_left
           (fun (before, counter) el ->
-            ( two_arg_fun_helper
-                "( || )"
-                before
-                (construct_bool (fun_get_n exp counter) el)
-            , counter + 1 ))
+            exp_and before (construct_bool (fun_get_n exp counter) el), counter + 1)
           (RExp_constant (Const_bool true), 0)
           t
       in
       res
+    | Pat_or (l, r) -> exp_or (construct_bool exp l) (construct_bool exp r)
+    | Pat_construct (name, p) ->
+      let check = same_constructor exp (RExp_ident name) in
+      let params = get_cons_params (RExp_ident name) exp in
+      (match p with
+       | Some pat -> exp_and check @@ construct_bool params pat
+       | None -> check)
     | _ -> RExp_constant (Const_bool true)
   in
   let unpack_case before case =
@@ -153,7 +164,13 @@ and expr_to_rexpr = function
     RExp_apply (l, r)
   | Exp_match (exp, cases) ->
     let* rexp = expr_to_rexpr exp in
-    match_cases rexp cases
+    let* fv = fresh_var in
+    let+ m = match_cases (RExp_ident fv) cases in
+    RExp_let (fv, rexp, m)
+  | Exp_function cases ->
+    let* fv = fresh_var in
+    let+ m = match_cases (RExp_ident fv) cases in
+    RExp_fun ([ fv ], m)
   | Exp_tuple l ->
     let+ res = map expr_to_rexpr l in
     RExp_tuple res
@@ -190,8 +207,13 @@ let ast_to_rast prog =
   List.concat rast
 ;;
 
+let exp_to_string = function
+  | Invalid_pattern s -> "invalid pattern: " ^ s
+  | Invalid_ast s -> "invalid ast: " ^ s
+;;
+
 let remove_patterns structure =
   match run (ast_to_rast structure) 0 with
   | Result.Ok s -> s
-  | Result.Error _ -> []
+  | Result.Error s -> [ RStr_eval (fun_exception @@ exp_to_string s) ]
 ;;
