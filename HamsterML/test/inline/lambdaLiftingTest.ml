@@ -222,7 +222,7 @@ let%test _ =
   lambda_lift_prog
     {|let rec fac_cps n k =
       if n=1 then k 1 else
-      fac_cps (n-1) (fun p k n -> k (p*n)) k n |}
+      fac_cps (n-1) ((fun p k n -> k (p*n)) k n) |}
   = [ LLLet
         ( Nonrecursive
         , [ ( Var "ll_lam_1"
@@ -246,16 +246,13 @@ let%test _ =
                 , Some
                     (LLApplication
                        ( LLApplication
-                           ( LLApplication
-                               ( LLApplication
-                                   ( LLVar "ll_var_0"
-                                   , LLApplication
-                                       ( LLApplication
-                                           (LLOperation (Binary SUB), LLVar "arg_1")
-                                       , LLConst (Int 1) ) )
-                               , LLVar "ll_lam_1" )
-                           , LLVar "arg_2" )
-                       , LLVar "arg_1" )) ) )
+                           ( LLVar "ll_var_0"
+                           , LLApplication
+                               ( LLApplication (LLOperation (Binary SUB), LLVar "arg_1")
+                               , LLConst (Int 1) ) )
+                       , LLApplication
+                           (LLApplication (LLVar "ll_lam_1", LLVar "arg_2"), LLVar "arg_1")
+                       )) ) )
           ]
         , None )
     ]
