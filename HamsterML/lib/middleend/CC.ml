@@ -124,50 +124,60 @@ let fresh_var prefix =
   prefix ^ Int.to_string id
 ;;
 
-(* Closure conversion function *)
 let rec cc_expr = function
-  | Let (fun_type, binds, in_expr_opt) ->
-    let cc_binds =
-      List.map binds ~f:(fun (pat, args, expr) ->
-        match expr with
-        | Application (Fun ([ Var _ ], body), EVar _)
-        | Application (Fun ([ Var _ ], body), EConst _) ->
-          (* when String.equal param_name arg_name -> *)
-          (match cc_expr body with
-           | Fun (inner_args, inner_body) -> pat, args @ inner_args, cc_expr inner_body
-           | inner_body -> pat, args, cc_expr inner_body)
-        | Fun (fun_args, fun_body) ->
-          let rec collect_nested_funs acc_args = function
-            | Fun (inner_args, inner_body) ->
-              collect_nested_funs (acc_args @ inner_args) inner_body
-            | body -> acc_args, body
-          in
-          let all_args, innermost_body = collect_nested_funs fun_args fun_body in
-          pat, args @ all_args, cc_expr innermost_body
-        | _ -> pat, args, cc_expr expr)
-    in
-    let cc_in_expr = Option.map in_expr_opt ~f:cc_expr in
-    Let (fun_type, cc_binds, cc_in_expr)
-  | Fun (args, expr) -> Fun (args, cc_expr expr)
   | EVar _ as e -> e
   | EConst _ as e -> e
   | EOperation _ as e -> e
   | ETuple (e1, e2, es) -> ETuple (cc_expr e1, cc_expr e2, List.map es ~f:cc_expr)
   | EList es -> EList (List.map es ~f:cc_expr)
   | EListConcat (e1, e2) -> EListConcat (cc_expr e1, cc_expr e2)
-  | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
   | If (cond, then_expr, else_expr) ->
     If (cc_expr cond, cc_expr then_expr, Option.map else_expr ~f:cc_expr)
   | Match (expr, cases) ->
     Match (cc_expr expr, List.map cases ~f:(fun (pat, body) -> pat, cc_expr body))
   | EConstraint (expr, ty) -> EConstraint (cc_expr expr, ty)
+  | Application (e1, e2) -> Application (cc_expr e1, cc_expr e2)
+  | Fun (args, expr) ->
+    let unbound = free_vars_expr expr in
+    let bound =
+      List.fold
+        args
+        ~init:(Set.empty (module String))
+        ~f:(fun acc arg ->
+          Set.add
+            acc
+            (match arg with
+             | Var x -> x
+             | _ -> failwith "fuck"))
+    in
+    let free = Set.diff unbound bound in
+    let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
+    let new_expr = cc_expr expr in
+    Fun (new_args, new_expr)
+  | Let (funType, binds, in_expr_opt) ->
+    let cc_binds =
+      List.map binds ~f:(fun (pat, args, expr) ->
+        let unbound = free_vars_expr expr in
+        let bound =
+          List.fold
+            args
+            ~init:(Set.empty (module String))
+            ~f:(fun acc arg ->
+              Set.add
+                acc
+                (match arg with
+                 | Var x -> x
+                 | _ -> failwith "fuck"))
+        in
+        let free = Set.diff unbound bound in
+        let new_args = args @ List.map ~f:(fun x -> Var x) (Set.to_list free) in
+        let new_expr = cc_expr expr in
+        pat, new_args, new_expr)
+    in
+    let new_in_expr_opt =
+      match in_expr_opt with
+      | Some e -> Some (cc_expr e)
+      | None -> None
+    in
+    Let (funType, cc_binds, new_in_expr_opt)
 ;;
-
-(*
-   let f = fun x -> fun y -> x + y                =>    let f x y = x + y
-   let f = fyn x y -> x + y                       =>    let f x y = x + y
-   let f = fun x y -> fun a b -> a b x y          =>    let f x y a b = a b x y
-   let a = 1 in let b = 2 in let f = a + b in f   =>    let a = 1 in let b = 2 in let f arg1 arg2 = arg1 arg2 in f a b
-   let f = (fun x -> x + 1) 2                     =>    let f x = x + 1 in f 2
-   let a, b = 1, 2                                =>    let a = 1 in let b = 2 in a, b
-*)

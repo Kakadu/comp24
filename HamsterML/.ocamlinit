@@ -4,7 +4,7 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
-open HamsterML__Closure_conversion;;
+open HamsterML__CC;;
 open HamsterML__Pp_expr;;
 open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
@@ -12,8 +12,23 @@ open HamsterTest__TypingTest;;
 open HamsterTest__LambdaLiftingTest;;
 open HamsterTest__AlphaConversionTest;;
 
-let cc_expr expr =
-  let result = parse_expr expr |> HamsterML__Closure_conversion.cc_expr in
+(* let cc_expr expr =
+  let result = parse_expr expr |> HamsterML__CC.cc_expr in
   Stdlib.print_endline (pretty_print_expr result);
   Stdlib.Format.printf "%a\n%!" pp_expr result
+;;
 
+let cc_expr_no_parse expr =
+  let result = HamsterML__CC.cc_expr expr in
+  Stdlib.print_endline (pretty_print_expr result);
+  Stdlib.Format.printf "%a\n%!" pp_expr result
+;;
+
+
+let ac_expr (expr:string) =
+  let result = HamsterTest__AlphaConversionTest.alpha_conv_expr expr in result
+;;
+  
+let ac_cc_expr expr = expr |> ac_expr |> cc_expr_no_parse;; *)
+
+let cc expr = Stdlib.print_endline (pretty_print_expr(expr |> HamsterTest__AlphaConversionTest.alpha_conv_expr |> cc_expr));;
