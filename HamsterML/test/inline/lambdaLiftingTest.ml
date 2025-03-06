@@ -9,6 +9,11 @@ let lambda_lift_prog (s : string) =
   prog |> alpha_convert |> lambda_lift
 ;;
 
+let pp_lambda_lift_prog (s : string) =
+  let open HamsterML.PrinterLL in
+  lambda_lift_prog s |> pretty_print_ll_prog |> print_string
+;;
+
 let%test _ =
   lambda_lift_prog "let a = 1 + 1"
   = [ LLLet
