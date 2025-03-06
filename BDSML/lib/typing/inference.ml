@@ -53,6 +53,7 @@ let typexpr_to_type typexpr =
     | "char" -> Some TChar
     | "string" -> Some TString
     | "bool" -> Some TBool
+    | "unit" -> Some TUnit
     | _ -> None
   in
   let rec helper (type_vars : type_val TypeVars.t) = function
@@ -357,6 +358,8 @@ let predefine_operators =
   ; "( <= )", "'a -> 'a -> bool"
   ; "( = )", "'a -> 'a -> bool"
   ; "( <> )", "'a -> 'a -> bool"
+  ; "( == )", "'a -> 'a -> bool"
+  ; "print_int", "int -> unit"
   ]
 ;;
 

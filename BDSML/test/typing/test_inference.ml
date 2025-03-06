@@ -36,17 +36,17 @@ let%expect_test "test if without else inference" =
 
 let%expect_test "test fun inference" =
   test "fun a -> a";
-  [%expect {| 'g -> 'g |}]
+  [%expect {| 'h -> 'h |}]
 ;;
 
 let%expect_test "test fun with several arguments inference" =
   test "fun a b c -> b";
-  [%expect {| 'g -> 'h -> 'i -> 'h |}]
+  [%expect {| 'h -> 'i -> 'j -> 'i |}]
 ;;
 
 let%expect_test "test let fun" =
   test "let a b = b in a";
-  [%expect {| 'h -> 'h |}]
+  [%expect {| 'i -> 'i |}]
 ;;
 
 let%expect_test "test let fun apply" =
@@ -71,7 +71,7 @@ let%expect_test "test tuple" =
 
 let%expect_test "test difficult tuple" =
   test "(let b = 4 in b, (3, 5), fun a -> a, 'a')";
-  [%expect {| (int * (int * int) * 'g -> ('g * char)) |}]
+  [%expect {| (int * (int * int) * 'h -> ('h * char)) |}]
 ;;
 
 let%expect_test "test let rec" =
@@ -88,7 +88,7 @@ let%expect_test "test let rec and" =
   test
     {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
-  [%expect {| 'n -> bool -> int |}]
+  [%expect {| 'o -> bool -> int |}]
 ;;
 
 let%expect_test "test invalid let rec with pat binding" =
@@ -131,9 +131,10 @@ let%expect_test "test let rec and statements" =
   let c = f (g 4)|};
   [%expect
     {|
-    val f : 'j -> 'j
-    val g : 'i -> bool
-    val c : bool |}]
+    val f : 'k -> 'k
+    val g : 'j -> bool
+    val c : bool
+    |}]
 ;;
 
 let%expect_test "test wrong let exp and statements" =
@@ -147,9 +148,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect
-    {|
-    val a : 'g list |}]
+  [%expect {| val a : 'h list |}]
 ;;
 
 let%expect_test "test constructor some with" =
