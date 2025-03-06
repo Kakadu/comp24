@@ -4,6 +4,7 @@
 
 open Reduced_ast
 open Parser.Ast
+open Middleend_utils
 
 open
   Utils.Counter_monad.Make
@@ -31,10 +32,6 @@ let fun_get_n tup n =
 
 let disassemble_constructor name v =
   two_arg_fun_helper "__disassemble" (RExp_ident name) v
-;;
-
-let fun_exception name =
-  RExp_apply (RExp_ident "__exception", RExp_constant (Const_string name))
 ;;
 
 let same_constructor l r = two_arg_fun_helper "__same_cons" l r
@@ -202,11 +199,6 @@ let ast_to_rast prog =
   in
   let+ rast = map transform_struct prog in
   List.concat rast
-;;
-
-let exp_to_string = function
-  | Invalid_pattern s -> "invalid pattern: " ^ s
-  | Invalid_ast s -> "invalid ast: " ^ s
 ;;
 
 let remove_patterns structure =
