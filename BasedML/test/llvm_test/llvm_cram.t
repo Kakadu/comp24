@@ -290,15 +290,8 @@ Manytests
   3
   $ ocaml -w -a ../manytests/typed/003fib.ml
   33
-Riscv strange
   $ ./llvm_demo.exe < ../manytests/typed/004manyargs.ml
   $ ./riscv_run.sh  out.ll
-  137550073543
-  137438962408
-  1
-  10
-  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
-  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
   1111111111
   1
   10
@@ -311,13 +304,10 @@ Riscv strange
   $ ocaml -w -a ../manytests/typed/005fix.ml
   720
 
-Riscv strange
   $ ./llvm_demo.exe < ../manytests/typed/006partial.ml
   $ ./riscv_run.sh  out.ll
-  3
-  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
-  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
   1122
+
   $ ocaml -w -a ../manytests/typed/006partial.ml
   1122
   $ ./llvm_demo.exe < ../manytests/typed/006partial2.ml
@@ -332,13 +322,9 @@ Riscv strange
   $ ./llvm_demo.exe < ../manytests/typed/006partial3.ml
   $ ./riscv_run.sh  out.ll
   4
-  4
-  4
-  $ clang-16 -w out.ll -L../../runtime/ -lmlstd -lmlrt  -o  out.elf 
-  $ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../runtime/ ./out.elf
-  4
   8
   9
+
   $ ocaml -w -a ../manytests/typed/006partial3.ml
   489
   $ ./llvm_demo.exe < ../manytests/typed/007order.ml
