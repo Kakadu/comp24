@@ -91,9 +91,8 @@ and gen_imm fn_args (env : (id, loc, 'a) Map.t) dest
       emit_load list (RReg res));
     emit_load_reg dest (loc_to_rvalue list)
 
-and gen_cexpr fn_args env dest = function
-  | CApp (ImmId fn, args) when is_direct_binop fn ->
-    assert (List.length args = 2);
+and gen_cexpr env dest = function
+  | CApp (ImmId fn, args) when is_direct_binop fn && List.length args = 2 ->
     let fst = List.nth_exn args 0 in
     let snd = List.nth_exn args 1 in
     gen_imm fn_args env t0 fst;
@@ -104,8 +103,7 @@ and gen_cexpr fn_args env dest = function
       t0
       t1
       ~comm:(Format.asprintf "%a %s %a" pp_imm_expr fst fn pp_imm_expr snd)
-  | CApp (ImmId fn, args) when is_direct_unop fn ->
-    assert (List.length args = 1);
+  | CApp (ImmId fn, args) when is_direct_unop fn && List.length args = 1 ->
     let fst = List.nth_exn args 0 in
     gen_imm fn_args env t0 fst;
     emit_direct_unop dest fn t0 ~comm:(Format.asprintf "%s %a" fn pp_imm_expr fst)
