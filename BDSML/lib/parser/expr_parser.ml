@@ -243,6 +243,7 @@ let priority =
   ; prefix_op @@ parse_prefix_plus_minus
   ; infix_left_op @@ parse_infix_with_prefixes [ "*"; "/"; "%" ]
   ; infix_left_op @@ parse_infix_with_prefixes [ "+"; "-" ]
+  ; choice_pass_prev [ list_parser; Fun.id ]
   ; exp_list_cons
   ; infix_right_op @@ parse_infix_with_prefixes [ "@"; "^" ]
   ; infix_left_op
@@ -252,7 +253,6 @@ let priority =
   ; tuple
   ; infix_right_op @@ choice [ string "<-"; string ":=" ]
   ; choice_pass_prev [ if_parser; Fun.id ]
-  ; choice_pass_prev [ list_parser; Fun.id ]
   ; choice_pass_prev @@ spec_parser @ [ Fun.id ]
   ]
 ;;

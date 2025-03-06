@@ -572,3 +572,24 @@ let%expect_test "test redefine operator" =
        ))
     |}]
 ;;
+
+let%expect_test "happy birthday test" =
+  test_expr "[1;2] :: []";
+  [%expect
+    {|
+    (Exp_construct ("::",
+       (Some (Exp_tuple
+                [(Exp_construct ("::",
+                    (Some (Exp_tuple
+                             [(Exp_constant (Const_int 1));
+                               (Exp_construct ("::",
+                                  (Some (Exp_tuple
+                                           [(Exp_constant (Const_int 2));
+                                             (Exp_construct ("[]", None))]))
+                                  ))
+                               ]))
+                    ));
+                  (Exp_construct ("[]", None))]))
+       ))
+    |}]
+;;
