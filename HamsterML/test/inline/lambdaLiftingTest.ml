@@ -257,3 +257,21 @@ let%test _ =
         , None )
     ]
 ;;
+
+let%test _ =
+  lambda_lift_prog "let f = (fun x -> x + 1) 2"
+  = [ LLLet
+        ( Nonrecursive
+        , [ ( Var "ll_lam_1"
+            , [ Var "arg_0" ]
+            , LLApplication
+                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLConst (Int 1))
+            )
+          ]
+        , None )
+    ; LLLet
+        ( Nonrecursive
+        , [ Var "ll_var_0", [], LLApplication (LLVar "ll_lam_1", LLConst (Int 2)) ]
+        , None )
+    ]
+;;
