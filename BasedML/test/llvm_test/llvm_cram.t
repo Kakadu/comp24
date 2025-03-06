@@ -375,3 +375,85 @@ TU Andrey
   $ ocaml -w -a ../manytests/typed/016lists.ml
   1238
 
+Some llcode demonstration 
+  $ filter_output() { grep -E 'source_filename|target datalayout|ModuleID|global |declare|target' --invert-match |  sed '/define i64 @init_llvm() {/,/}/d' |  grep -v '^[[:space:]]*$'; } 
+  $ ./llvm_demo.exe << EOF
+  > let f a b = a*1 + b + 0 
+  > let _ = print_int (f 2 3)
+
+  $ cat out.ll | filter_output
+  define i64 @main() {
+  entry:
+    %0 = call i64 @init_llvm()
+    %1 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @f_0 to i64), i64 2)
+    store i64 %1, ptr @f_0_glob_llvm, align 4
+    %global_wildcard0_glob_llvm = call i64 @global_wildcard0()
+    store i64 %global_wildcard0_glob_llvm, ptr @global_wildcard0_glob_llvm, align 4
+    ret i64 0
+  }
+  define i64 @f_0(i64 %0, i64 %1) {
+  entry:
+    %2 = call i64 @plus_mlint(i64 %1, i64 %0)
+    ret i64 %2
+  }
+  define i64 @global_wildcard0() {
+  entry:
+    %0 = call i64 @f_0(i64 5, i64 7)
+    %1 = call i64 @print_int(i64 %0)
+    ret i64 %1
+  }
+
+
+  $ ./llvm_demo.exe << EOF
+  > let f a = a*1*1*1*1*1*1*1
+  > let _ = print_int (f 2)
+
+  $ cat out.ll | filter_output
+  define i64 @main() {
+  entry:
+    %0 = call i64 @init_llvm()
+    %1 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @f_0 to i64), i64 1)
+    store i64 %1, ptr @f_0_glob_llvm, align 4
+    %global_wildcard0_glob_llvm = call i64 @global_wildcard0()
+    store i64 %global_wildcard0_glob_llvm, ptr @global_wildcard0_glob_llvm, align 4
+    ret i64 0
+  }
+  define i64 @f_0(i64 %0) {
+  entry:
+    %1 = call i64 @mult_mlint(i64 %0, i64 3)
+    ret i64 %1
+  }
+  define i64 @global_wildcard0() {
+  entry:
+    %0 = call i64 @f_0(i64 5)
+    %1 = call i64 @print_int(i64 %0)
+    ret i64 %1
+  }
+
+
+  $ ./llvm_demo.exe << EOF
+  > let f a b = a == b 
+  > let bool1 = f 2 3
+  $ cat out.ll | filter_output
+  define i64 @main() {
+  entry:
+    %0 = call i64 @init_llvm()
+    %1 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @f_0 to i64), i64 2)
+    store i64 %1, ptr @f_0_glob_llvm, align 4
+    %bool1_0_glob_llvm = call i64 @bool1_0()
+    store i64 %bool1_0_glob_llvm, ptr @bool1_0_glob_llvm, align 4
+    ret i64 0
+  }
+  define i64 @f_0(i64 %0, i64 %1) {
+  entry:
+    %2 = icmp eq i64 %0, %1
+    %3 = zext i1 %2 to i64
+    %4 = shl i64 %3, 1
+    %5 = add i64 %4, 1
+    ret i64 %5
+  }
+  define i64 @bool1_0() {
+  entry:
+    %0 = call i64 @f_0(i64 5, i64 7)
+    ret i64 %0
+  }
