@@ -7,8 +7,7 @@ let test_parser str =
 ;;
 
 let%expect_test "some beautiful test" =
-  test_parser
-    {|
+  test_parser {|
 let (+) a b = a - b
 let m = 4
 and mm = 6
@@ -83,8 +82,7 @@ let%expect_test "Shrink of Sukharev test pattern" =
 ;;
 
 let%expect_test "Sukharev test pattern" =
-  test_parser
-    {| let _2 = let x, Some f = 1, Some ( ( + ) 4 ) in f x
+  test_parser {| let _2 = let x, Some f = 1, Some ( ( + ) 4 ) in f x
  |};
   [%expect
     {|
@@ -164,8 +162,7 @@ let%expect_test "infix +" =
 ;;
 
 let%expect_test "one structure item" =
-  test_parser
-    {|
+  test_parser {|
 let m = 4
 and mm = 6
 m + let b = 6 in m + b
@@ -193,8 +190,7 @@ m + let b = 6 in m + b
 ;;
 
 let%expect_test "two str items" =
-  test_parser
-    {|
+  test_parser {|
 let m = 4
 and mm = 6;;
 m + let b = 6 in m + b
@@ -218,8 +214,7 @@ m + let b = 6 in m + b
 ;;
 
 let%expect_test "list cons" =
-  test_parser
-    {|let [1; 2] :: [5] = [1; 2] :: [5]
+  test_parser {|let [1; 2] :: [5] = [1; 2] :: [5]
 |};
   [%expect
     {|

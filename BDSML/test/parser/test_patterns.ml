@@ -206,14 +206,12 @@ let%expect_test "pat type" =
 
 let%expect_test "pat construct" =
   test_pattern "Some";
-  [%expect
-    {|
+  [%expect {|
     (Pat_construct ("Some", None)) |}]
 ;;
 
 let%expect_test "pat construct args" =
   test_pattern "Some true";
-  [%expect
-    {|
+  [%expect {|
     (Pat_construct ("Some", (Some (Pat_constant (Const_bool true))))) |}]
 ;;

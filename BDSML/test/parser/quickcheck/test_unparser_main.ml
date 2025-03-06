@@ -12,8 +12,7 @@ let test_parser str =
 ;;
 
 let%expect_test "some bruh test" =
-  test_parser
-    {|
+  test_parser {|
 let (+) a b = a - b;;
 let m = 4 and mm = 6;;
 m + let b = 6 in m + b;;
