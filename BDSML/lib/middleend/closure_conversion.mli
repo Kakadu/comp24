@@ -2,6 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Reduced_ast
-
-val alpha_conversion : rstuct_item list -> rstuct_item list
+val closure_convert : Reduced_ast.rstuct_item list -> Reduced_ast.rstuct_item list
