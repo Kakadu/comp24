@@ -49,3 +49,18 @@
   $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
   $ echo $(./demo_008asciption)
   8
+
+  $ ./llvm_demo.exe << EOF
+  > let rec even x =
+  >   if x = 0 then true
+  >   else odd (x - 1)
+  > and odd x =
+  >   if x = 0 then false
+  >   else even (x - 1)
+  > let res =
+  > let () = print_bool (odd 1) in
+  > let () = print_bool (even 3) in
+  > 0
+  $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
+  $ echo $(./demo_008asciption)
+  true false

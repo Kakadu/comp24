@@ -147,7 +147,6 @@ int64_t print_int(int64_t x) {
 }
 
 int64_t print_bool(int64_t x) {
-    print_int(x);
     if (x == 0)
     {
         printf("false\n");
