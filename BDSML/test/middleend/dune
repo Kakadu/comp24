@@ -4,7 +4,7 @@
  (libraries typing parser middleend quickcheck stdio))
 
 (cram
- (deps ./run_remove_patterns.exe ./run_lambda_lifting.exe))
+ (deps ./run_remove_patterns.exe))
 
 (executable
  (name run_lambda_lifting)
