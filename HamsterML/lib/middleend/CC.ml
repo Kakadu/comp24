@@ -216,7 +216,7 @@ let cc_expr =
           let combined_args = args @ all_args in
           let final_args =
             match pat with
-            | Const Unit -> []  (* Don't add free variables to `let ()` *)
+            | Const Unit -> [] (* Don't add free variables to `let ()` *)
             | _ ->
               (match fun_type with
                | Recursive ->
@@ -225,14 +225,15 @@ let cc_expr =
                  let fun_names = bound_vars_in_pattern pat in
                  let free_vars = Set.diff (Set.diff unbound bound) fun_names in
                  pattern_list_to_vars (Set.to_list free_vars) @ combined_args
-               | Nonrecursive -> 
+               | Nonrecursive ->
                  (* Don't add free variables from nested `let ()` expressions *)
-                 match expr with
-                 | Let (_, inner_binds, _) when 
-                     List.exists inner_binds ~f:(fun (p, _, _) -> 
-                       match p with Const Unit -> true | _ -> false) -> 
-                   combined_args
-                 | _ -> add_free_vars combined_args body)
+                 (match expr with
+                  | Let (_, inner_binds, _)
+                    when List.exists inner_binds ~f:(fun (p, _, _) ->
+                           match p with
+                           | Const Unit -> true
+                           | _ -> false) -> combined_args
+                  | _ -> add_free_vars combined_args body))
           in
           (* Update environment with bound functions and their free variables *)
           (match pat with
