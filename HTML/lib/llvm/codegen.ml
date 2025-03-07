@@ -23,7 +23,13 @@ let codegen_const = function
 let rec codegen_imexpr = function
   | ImmConst c -> codegen_const c
   | ImmIdentifier id ->
-    let name = Common.Ident_utils.ident_to_string id in
+    let name = Common.Ident_utils.ident_to_string id  in
+    let name = (match name with 
+    | "<=" -> "leq"
+    | "=" | "( = )" -> "eq"
+      | _ -> name
+
+      ) in
     let* id_var = lookup_env_var name in
     (match id_var with
      | Some v -> return (build_load i64 v name builder)
@@ -70,19 +76,18 @@ let rec codegen_cexpr = function
     let binop = codegen_binop (Common.Ident_utils.ident_to_string bin_op) in
     return @@ binop e1' e2'
   | CApp (func, argument) ->
-    let* calee = codegen_cexpr func in
+    let* callee = codegen_cexpr func in
     (*TODO ПЕРЕДЕЛАТЬ *)
     let* arg = codegen_cexpr argument in
     return
     @@ build_call
          (function_type i64 [| i64; i64; i64 |])
          (Option.get (lookup_function "apply_args_to_closure" the_module))
-         [| calee; const_int i64 1; arg |]
+         [| callee; const_int i64 1; arg |]
          "application_result"
          builder
   | CIf (cond, then_, else_) ->
     let* cond = codegen_imexpr cond in
-    let cond = cond in
     let cond_val = build_icmp Icmp.Ne cond (const_int i64 0) "ifcondition" builder in
     let start_bb = insertion_block builder in
     let the_function = block_parent start_bb in
@@ -193,12 +198,6 @@ let codegen program =
   in
   let* result = codegen env program in
   return @@ Base.List.rev result
-;;
-
-let ( let+ ) x f =
-  match x with
-  | Error err -> Error err
-  | Ok v -> f v
 ;;
 
 let codegen s =

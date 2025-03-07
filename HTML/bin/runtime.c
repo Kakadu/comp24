@@ -93,14 +93,35 @@ int64_t apply_args_to_closure(int64_t closure_ptr, int64_t new_args_num, ...) {
     return res;
 }
 
-int64_t print_int(int64_t x)
-{
+int64_t eq(int64_t x, int64_t y) {
+    if (x == y) { return 1; }
+     else {
+        return 0;
+     }
+}
+
+int64_t leq(int64_t x, int64_t y) {
+    if (x <= y) { return 1; }
+     else {
+        return 0;
+     }
+}
+
+int64_t sub(int64_t x, int64_t y) {
+    return x - y;
+}
+
+int64_t mul(int64_t x, int64_t y) {
+    return x * y;
+}
+
+int64_t print_int(int64_t x) {
     printf("%ld\n", x);
     return 0;
 }
 
-int64_t print_bool(int64_t x)
-{
+int64_t print_bool(int64_t x) {
+    print_int(x);
     if (x == 0)
     {
         printf("false\n");
@@ -115,8 +136,5 @@ int64_t print_bool(int64_t x)
 int64_t RTE_ERROR_MATCH_FAILURE(int64_t _) {
     fprintf(stderr, "Match failure\n");
     exit(EXIT_FAILURE);
-    return 0;
-}
-int main() { // TODO: remove it 
     return 0;
 }

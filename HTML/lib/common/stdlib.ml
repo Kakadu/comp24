@@ -2,6 +2,7 @@ open AstLib.Ast
 
 let stdlib_typed =
   [ "print_int", TArr (TGround GInt, TGround GUnit)
+  ; "print_bool", TArr (TGround GBool, TGround GUnit)
   ; "print_newline", TArr (TGround GUnit, TGround GUnit)
   ; "base +", TArr (TGround GInt, TGround GInt)
   ; "base -", TArr (TGround GInt, TGround GInt)
@@ -24,6 +25,8 @@ let stdlib_typed =
   ; "( = )", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ; "( != )", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ; "( && )", TArr (TGround GBool, TArr (TGround GBool, TGround GBool))
+  ; "leq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "eq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ]
 ;;
 
