@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Pattern_remover
 open Reduced_ast
 open Middleend_utils
 
