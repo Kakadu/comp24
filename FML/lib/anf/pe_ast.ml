@@ -15,7 +15,6 @@ type pe_expr =
   | Pe_ENill
   | Pe_EIdentifier of string
   | Pe_EConst of pe_const
-  | Pe_EVar of string
   | Pe_EIf of pe_expr * pe_expr * pe_expr
   | Pe_EFun of string list * pe_expr
   | Pe_EApp of pe_expr * pe_expr

@@ -16,7 +16,6 @@ let rec expr_to_str = function
   | Pe_ENill -> "[]"
   | Pe_EIdentifier a -> a
   | Pe_EConst c -> const_to_str c
-  | Pe_EVar id -> id
   | Pe_EIf (e1, e2, e3) ->
     Format.sprintf
       "if %s\nthen %s\nelse %s"
@@ -84,9 +83,9 @@ type value_to_get =
   | Other
 
 let get_element e = function
-  | Tuple i -> Pe_EApp (Pe_EApp (Pe_EVar "tuple_element", e), Pe_EConst (Pe_Cint i))
-  | Cons_head -> Pe_EApp (Pe_EVar "list_head", e)
-  | Cons_tail -> Pe_EApp (Pe_EVar "list_tail", e)
+  | Tuple i -> Pe_EApp (Pe_EApp (Pe_EIdentifier "tuple_element", e), Pe_EConst (Pe_Cint i))
+  | Cons_head -> Pe_EApp (Pe_EIdentifier "list_head", e)
+  | Cons_tail -> Pe_EApp (Pe_EIdentifier "list_tail", e)
   | Other -> e
 ;;
 
