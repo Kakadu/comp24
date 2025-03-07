@@ -1,0 +1,8 @@
+(library
+ (name LAst)
+ (public_name neml.Ast)
+ (libraries base LMisc LTypes)
+ (preprocess
+  (pps ppx_deriving.show))
+ (instrumentation
+  (backend bisect_ppx)))
