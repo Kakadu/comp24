@@ -116,7 +116,22 @@ let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_
       convert_match_case (TupleConverter.get matched i) pattern_i action)
 ;;
 
-let rec convert_expr (expr : ll_expr) : me_expr =
+let rec convert_match (matched : ll_expr) (cases : ll_case list) =
+  match cases with
+  | [] -> failwith "No cases provided"
+  | (pattern, action) :: tail_cases ->
+    let me_action = convert_expr action in
+    let me_matched = convert_expr matched in
+    let branch = convert_match_case me_matched pattern me_action in
+    (match tail_cases with
+     | [] -> branch
+     | _ ->
+       _if
+         (match_compare me_matched pattern)
+         branch
+         (Some (convert_match matched tail_cases)))
+
+and convert_expr (expr : ll_expr) : me_expr =
   match expr with
   | LLConst v -> MEConst v
   | LLVar id -> MEVar id
@@ -144,5 +159,7 @@ let rec convert_expr (expr : ll_expr) : me_expr =
         (name, args, convert_expr body) :: acc)
     in
     MELet (rec_flag, List.rev binds, None)
-  | LLMatch (matched, cases) -> failwith "unsupported"
+  | LLMatch (matched, cases) -> convert_match matched cases
 ;;
+
+let convert_prog (prog : ll_prog) : me_prog = List.map prog ~f:convert_expr
