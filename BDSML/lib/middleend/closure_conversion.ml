@@ -29,7 +29,6 @@ let rec closure_exp = function
     let vars = UsedIdents.union vars vars2 in
     RExp_let (name, v, exp), vars
   | RExp_let_rec (binds, exp) ->
-    let exp, vars = closure_exp exp in
     let (new_vars, vars2), binds =
       List.fold_left_map
         (fun (new_vars, vars) (name, exp) ->
@@ -38,6 +37,7 @@ let rec closure_exp = function
         (UsedIdents.empty, UsedIdents.empty)
         binds
     in
+    let exp, vars = closure_exp exp in
     let vars = UsedIdents.union vars vars2 in
     let vars = UsedIdents.diff vars new_vars in
     RExp_let_rec (binds, exp), vars
