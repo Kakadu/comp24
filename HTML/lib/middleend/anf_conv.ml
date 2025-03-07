@@ -47,7 +47,7 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
     let args = unroll_eapp [] e in
     let f, args = List.hd args, List.tl args in
     anf_expr env f (fun fimm ->
-      anf_list env args (fun argsimm ->
+      anf_list env (List.rev args) (fun argsimm ->
         let* v = gen_var "app_" env in
         let rec roll_capp = function
           | [ h ] -> return (CImmExpr h)
@@ -56,7 +56,7 @@ let rec anf_expr (env : StringSet.t) (e : expr) (k : immexpr -> aexpr t) : aexpr
             return (CApp (rest, CImmExpr h))
           | [] -> fail "impossible?"
         in
-        let* capp = roll_capp @@ List.rev (fimm :: argsimm) in
+        let* capp = roll_capp @@ List.rev (fimm :: List.rev argsimm) in
         let* aexpr = k @@ ImmIdentifier (ident_of_definable @@ ident_letters v) in
         let let_expr = ALetIn (Id v, capp, aexpr) in
         return let_expr))

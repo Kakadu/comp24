@@ -73,9 +73,9 @@ PASS
   app_1;;
   let rec fac_cps n k = let app_0 = (n = 1) in
   let if_1 = if app_0 then let app_2 = k 1 in
-  app_2 else let app_3 = (n - 1) in
-  let app_4 = cc_ll_0 n k in
-  let app_5 = fac_cps app_3 app_4 in
+  app_2 else let app_3 = cc_ll_0 n k in
+  let app_4 = (n - 1) in
+  let app_5 = fac_cps app_4 app_3 in
   app_5 in
   if_1;;
   let cc_ll_1 print_int = print_int;;
@@ -109,11 +109,11 @@ PASS
   app_4 in
   if_1;;
   let rec fib n = let app_0 = (n < 2) in
-  let if_1 = if app_0 then n else let app_2 = (n - 1) in
+  let if_1 = if app_0 then n else let app_2 = (n - 2) in
   let app_3 = fib app_2 in
-  let app_4 = (n - 2) in
+  let app_4 = (n - 1) in
   let app_5 = fib app_4 in
-  let app_6 = (app_3 + app_5) in
+  let app_6 = (app_5 + app_3) in
   app_6 in
   if_1;;
   let main  = let app_0 = fib_acc 0 1 4 in
@@ -375,13 +375,13 @@ PASS
   app_2 in
   let _ = if_1 in
   cc_ll_3;;
-  let main  = let app_0 = print_int 1 in
-  let app_1 = print_int 2 in
-  let app_2 = print_int 4 in
-  let app_3 = - 1 in
-  let app_4 = print_int app_3 in
-  let app_5 = - 555555 in
-  let app_6 = _start app_0 app_1 3 app_2 100 1000 app_4 10000 app_5 in
+  let main  = let app_0 = - 555555 in
+  let app_1 = - 1 in
+  let app_2 = print_int app_1 in
+  let app_3 = print_int 4 in
+  let app_4 = print_int 2 in
+  let app_5 = print_int 1 in
+  let app_6 = _start app_5 app_4 3 app_3 100 1000 app_2 10000 app_0 in
   let app_7 = print_int app_6 in
   app_7
 

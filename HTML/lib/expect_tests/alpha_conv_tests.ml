@@ -236,9 +236,9 @@ let%expect_test "sanity check" =
     app_1;;
     let rec fac_cps n k = let app_0 = (n = 1) in
     let if_1 = if app_0 then let app_2 = k 1 in
-    app_2 else let app_3 = (n - 1) in
-    let app_4 = cc_ll_0 n k in
-    let app_5 = fac_cps app_3 app_4 in
+    app_2 else let app_3 = cc_ll_0 n k in
+    let app_4 = (n - 1) in
+    let app_5 = fac_cps app_4 app_3 in
     app_5 in
     if_1;;
     let cc_ll_1 x = x;;
@@ -252,9 +252,9 @@ let%expect_test "sanity check" =
     app_1.l2;;
     let rec fac_cps.1 n k = let app_0.l4 = (n = 1) in
     let if_1.l4 = if app_0.l4 then let app_2.l4 = k 1 in
-    app_2.l4 else let app_3.l4 = (n - 1) in
-    let app_4.l8 = cc_ll_0.1 n k in
-    let app_5.l16 = fac_cps.1 app_3.l4 app_4.l8 in
+    app_2.l4 else let app_3.l4 = cc_ll_0.1 n k in
+    let app_4.l8 = (n - 1) in
+    let app_5.l16 = fac_cps.1 app_4.l8 app_3.l4 in
     app_5.l16 in
     if_1.l4;;
     let cc_ll_1.1 x = x;;

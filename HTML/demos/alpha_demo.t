@@ -73,9 +73,9 @@ PASS
   app_1.l2;;
   let rec fac_cps.1 n k = let app_0.l4 = (n = 1) in
   let if_1.l4 = if app_0.l4 then let app_2.l12 = k 1 in
-  app_2.l12 else let app_3.l4 = (n - 1) in
-  let app_4.l24 = cc_ll_0.1 n k in
-  let app_5.l16 = fac_cps.1 app_3.l4 app_4.l24 in
+  app_2.l12 else let app_3.l4 = cc_ll_0.1 n k in
+  let app_4.l24 = (n - 1) in
+  let app_5.l16 = fac_cps.1 app_4.l24 app_3.l4 in
   app_5.l16 in
   if_1.l4;;
   let cc_ll_1.1 print_int = print_int;;
@@ -109,11 +109,11 @@ PASS
   app_4.l32 in
   if_1.l2;;
   let rec fib.1 n = let app_0.l4 = (n < 2) in
-  let if_1.l6 = if app_0.l4 then n else let app_2.l14 = (n - 1) in
+  let if_1.l6 = if app_0.l4 then n else let app_2.l14 = (n - 2) in
   let app_3.l16 = fib.1 app_2.l14 in
-  let app_4.l64 = (n - 2) in
+  let app_4.l64 = (n - 1) in
   let app_5.l96 = fib.1 app_4.l64 in
-  let app_6.l192 = (app_3.l16 + app_5.l96) in
+  let app_6.l192 = (app_5.l96 + app_3.l16) in
   app_6.l192 in
   if_1.l6;;
   let main  = let app_0.l6 = fib_acc.1 0 1 4 in
@@ -375,13 +375,13 @@ PASS
   app_2.l52 in
   let _.l32 = if_1.l28 in
   cc_ll_3.1;;
-  let main  = let app_0.l21 = print_int 1 in
-  let app_1.l14 = print_int 2 in
-  let app_2.l60 = print_int 4 in
-  let app_3.l88 = - 1 in
-  let app_4.l112 = print_int app_3.l88 in
-  let app_5.l256 = - 555555 in
-  let app_6.l640 = _start.1 app_0.l21 app_1.l14 3 app_2.l60 100 1000 app_4.l112 10000 app_5.l256 in
+  let main  = let app_0.l21 = - 555555 in
+  let app_1.l14 = - 1 in
+  let app_2.l60 = print_int app_1.l14 in
+  let app_3.l88 = print_int 4 in
+  let app_4.l112 = print_int 2 in
+  let app_5.l256 = print_int 1 in
+  let app_6.l640 = _start.1 app_5.l256 app_4.l112 3 app_3.l88 100 1000 app_2.l60 10000 app_0.l21 in
   let app_7.l768 = print_int app_6.l640 in
   app_7.l768
 
