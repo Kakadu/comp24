@@ -2,7 +2,17 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-open Common.StateMonad
+let st x f =
+  match x with
+  | Error err -> Error err
+  | Ok v -> f v
+;;
+
+let res x f =
+  match x with
+  | _, Error err -> Error err
+  | _, Ok v -> f v
+;;
 
 let unpack lst =
   let rec help lst = function
@@ -22,20 +32,11 @@ let unpack lst =
 ;;
 
 let middleend_transform_prog prog =
-  match Egraphs.simplify prog with
-  | Ok ast ->
-    (match
-       run
-         (Alpha_conversion.alpha_convert_decl_list Alpha_conversion.init_context [] ast)
-         0
-     with
-     | _, Ok lst ->
-       let lifted = lst |> Closure_conversion.convert_ast |> Lambda_lifting.lift_ast in
-       (match Match_elimination.transform lifted with
-        | _, Ok ast ->
-          let list_of_res = Anf.transform ast in
-          unpack list_of_res
-        | _, Error x -> Error x)
-     | _, Error x -> Error x)
-  | Error x -> Error x
+  st (Egraphs.simplify prog) (fun simplified ->
+    res (Alpha_conversion.transform simplified) (fun alpha_converted ->
+      let closure_converted = Closure_conversion.convert_ast alpha_converted in
+      let lifted = Lambda_lifting.lift_ast closure_converted in
+      res (Match_elimination.transform lifted) (fun match_free ->
+        let anf = Anf.transform match_free in
+        anf |> unpack)))
 ;;
