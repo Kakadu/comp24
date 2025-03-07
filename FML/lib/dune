@@ -12,7 +12,8 @@
   Typedtree
   Pattern_elim
   Common
-  Pe_ast)
+  Pe_ast
+  Alpha_conv)
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
  (preprocess
