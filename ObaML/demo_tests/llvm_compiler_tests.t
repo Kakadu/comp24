@@ -1,9 +1,8 @@
-  $ clang -c ../lib/llvm/runtime.c -o runtime.o
+  $ clang-16 -c ../lib/llvm/runtime.c -o runtime.o
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/001fac.ml | tee obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/001fac.ml | tee obaml_llvm.ll | sed '/target triple/d'; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ; ModuleID = 'ObaML'
   source_filename = "ObaML"
-  target triple = "arm64-apple-darwin23.4.0"
   
   declare ptr @create_int_val(i32)
   
@@ -114,44 +113,44 @@
   ------
   24
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/002fac.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/002fac.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   24
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/003fib.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/003fib.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   3
   3
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/004manyargs.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/004manyargs.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   1111111111
   1
   10
   100
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/005fix.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/005fix.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   720
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/006partial.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/006partial.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   1122
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/006partial2.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/006partial2.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   1
   2
   3
   7
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/006partial3.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/006partial3.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   4
   8
   9
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/007order.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/007order.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   -1
   4
@@ -161,35 +160,35 @@
   -555555
   10000
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/008ascription.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/008ascription.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   8
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/015tuples.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/015tuples.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   1
   1
   1
   1
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/016lists.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/016lists.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   1
   2
   3
   8
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/011mapcps.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/011mapcps.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   2
   3
   4
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/012fibcps.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/012fibcps.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   8
 
-  $ ./llvm_compiler_tests.exe < manytests/typed/013foldfoldr.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/013foldfoldr.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   6
 
@@ -199,7 +198,7 @@
   > let c = print_string a 
   > let main = let () = b in let () = c in 0
 
-  $ ./llvm_compiler_tests.exe < test4.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < test4.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   ObaML
   ObaML
@@ -208,7 +207,7 @@
   > let ( + ) a b = let () = print_int a in let () = print_int b in a + b;;
   > let main = 5 + 4;;
 
-  $ ./llvm_compiler_tests.exe < test5.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < test5.ml > obaml_llvm.ll ; echo "------" ; clang-16 -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   5
   4

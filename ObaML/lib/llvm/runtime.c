@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <ffi/ffi.h>
+#include <ffi.h>
 
 #define TAG_INT 0b000
 #define TAG_STRING 0b001

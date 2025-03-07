@@ -9,6 +9,7 @@ open Containers
 let checked_fresh_var old_var env =
   let is_bad_name =
     String.starts_with ~prefix:"pat" old_var
+    || String.starts_with ~prefix:"_start" old_var
     || VarSSet.find_opt old_var Std.extended_std_var_set != None
   in
   match VarSSet.find_opt old_var env, is_bad_name with

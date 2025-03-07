@@ -242,26 +242,26 @@
   val main : unit
   
   Converted structure:
-  let _start () () a () b _c () d __ = 
-  	let oba0 = (( + ) a b) in 
-  	let () = (print_int oba0) in 
+  let oba0 () () a () b _c () d __ = 
+  	let oba1 = (( + ) a b) in 
+  	let () = (print_int oba1) in 
   	let () = (print_int __) in 
-  	let oba1 = (( * ) a b) in 
-  	let oba2 = (( / ) oba1 _c) in (( + ) oba2 d);;
+  	let oba2 = (( * ) a b) in 
+  	let oba3 = (( / ) oba2 _c) in (( + ) oba3 d);;
   
   let main = 
-  	let oba8 = (( ~- ) 555555) in 
-  	let oba6 = (( ~- ) 1) in 
-  	let oba7 = (print_int oba6) in 
-  	let oba5 = (print_int 4) in 
-  	let oba4 = (print_int 2) in 
-  	let oba3 = (print_int 1) in 
-  	let oba9 = (_start oba3 oba4 3 oba5 100 1000 oba7 10000 oba8) in (print_int oba9);;
+  	let oba9 = (( ~- ) 555555) in 
+  	let oba7 = (( ~- ) 1) in 
+  	let oba8 = (print_int oba7) in 
+  	let oba6 = (print_int 4) in 
+  	let oba5 = (print_int 2) in 
+  	let oba4 = (print_int 1) in 
+  	let oba10 = (oba0 oba4 oba5 3 oba6 100 1000 oba8 10000 oba9) in (print_int oba10);;
   
   
   Types after conversions:
-  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
   val main : unit
+  val oba0 : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
 
   $ ./anf_tests.exe < manytests/typed/009let_poly.ml
   Types:
@@ -587,44 +587,6 @@
   val oba2 : int -> int -> int
   val oba4 : int -> int -> int
   val oba6 : int -> int -> int
-
-  $ ./anf_tests.exe << EOF
-  > let foo () =
-  >  print_string "This is foo"
-  > let bar () =
-  >  print_string "This is bar"
-  > let main =
-  >  let () = print_string "Main function" in 
-  >  let () = foo () in 
-  >  let () = bar () in 0
-  > let main =
-  >  print_string "Main function"
-  > let () = print_int 4
-  Types:
-  val bar : unit -> unit
-  val foo : unit -> unit
-  val main : unit
-  
-  Converted structure:
-  let foo () = (print_string "This is foo");;
-  
-  let bar () = (print_string "This is bar");;
-  
-  let main = 
-  	let () = (print_string "Main function") in 
-  	let () = (foo ()) in 
-  	let () = (bar ()) in 0;;
-  
-  let oba0 = (print_string "Main function");;
-  
-  let () = (print_int 4);;
-  
-  
-  Types after conversions:
-  val bar : unit -> unit
-  val foo : unit -> unit
-  val main : int
-  val oba0 : unit
 
   $ ./anf_tests.exe < manytests/typed/016lists.ml
   Types:
