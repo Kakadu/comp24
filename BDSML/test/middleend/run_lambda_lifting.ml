@@ -11,6 +11,8 @@ let test str =
      | Result.Ok _ ->
        print_string
          (Middleend.Pattern_remover.remove_patterns ast
+          |> Middleend.Alpha_conversion.alpha_conversion
+          |> Middleend.Closure_conversion.closure_convert
           |> Middleend.Lambda_lifting.ll
           |> Middleend.Converter.rast_to_ast
           |> Quickcheck.Main_unparser.unparse_structure))
