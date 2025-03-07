@@ -9,6 +9,7 @@
   Utils
   LL
   AC
+  ME
   PrinterAst
   PrinterLL)
  (libraries llvm)
