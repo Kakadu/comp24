@@ -1,0 +1,10 @@
+(include_subdirs qualified)
+
+(library
+ (name LInfer)
+ (public_name neml.Infer)
+ (libraries base LMisc LAst LTypes)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.ord ppx_sexp_conv))
+ (instrumentation
+  (backend bisect_ppx)))
