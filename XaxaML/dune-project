@@ -28,4 +28,6 @@
   bisect_ppx
   (odoc :with-doc)
   (ocamlformat :build)
+  (llvm (and (>= 16.0.0) (< 17.0.0)))
   ))
+  

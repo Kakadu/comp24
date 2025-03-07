@@ -16,6 +16,9 @@
   $ infer < manytests/do_not_type/015tuples.ml
   Infer error: Left-hand side of let rec should be a variable
 
+  $ infer < manytests/do_not_type/015tuples.ml
+  Infer error: Left-hand side of let rec should be a variable
+
   $ infer < manytests/typed/001fac.ml
   val fac: int -> int
   val main: int
@@ -96,7 +99,6 @@
   > ;;
   > EOF
   val map_cps: ('a -> 'b) -> 'a list -> 'b list
-
   $ dune exec infer << EOF
   > let f a b c d e = a b c d e;;
   > EOF
