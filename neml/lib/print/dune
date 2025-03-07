@@ -1,0 +1,8 @@
+(library
+ (name LPrint)
+ (public_name neml.Print)
+ (libraries base pprint LAst LMisc)
+ (preprocess
+  (pps ppx_deriving.enum))
+ (instrumentation
+  (backend bisect_ppx)))
