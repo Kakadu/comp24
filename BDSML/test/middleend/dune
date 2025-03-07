@@ -12,8 +12,8 @@
  (name run_closure_conversion)
  (modules run_closure_conversion)
  (libraries typing parser middleend quickcheck stdio))
- 
- (executable
+
+(executable
  (name run_lambda_lifting)
  (modules run_lambda_lifting)
  (libraries typing parser middleend quickcheck stdio))
