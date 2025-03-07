@@ -1,6 +1,10 @@
 open Llvm
 
 let map_ident_to_runtime = function
+  | "+" -> "add"
+  | "-" -> "sub"
+  | "*" -> "mul"
+  | "/" -> "divd"
   | "=" | "( = )" -> "eq"
   | "!=" | "( != )" -> "neq"
   | "<" -> "less"

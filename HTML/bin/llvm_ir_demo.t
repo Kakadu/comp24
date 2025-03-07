@@ -64,6 +64,14 @@
   
   declare i64 @uminus(i64)
   
+  declare i64 @add(i64, i64)
+  
+  declare i64 @sub(i64, i64)
+  
+  declare i64 @mul(i64, i64)
+  
+  declare i64 @divd(i64, i64)
+  
   declare i64 @leq(i64, i64)
   
   declare i64 @less(i64, i64)

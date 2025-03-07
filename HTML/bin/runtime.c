@@ -93,6 +93,22 @@ int64_t apply_args_to_closure(int64_t closure_ptr, int64_t new_args_num, ...) {
     return res;
 }
 
+int64_t add(int64_t x, int64_t y) {
+    return x + y;
+}
+
+int64_t sub(int64_t x, int64_t y) {
+    return x - y;
+}
+
+int64_t mul(int64_t x, int64_t y) {
+    return x * y;
+}
+
+int64_t divd(int64_t x, int64_t y) {
+    return x / y;
+}
+
 int64_t eq(int64_t x, int64_t y) {
     if (x == y) { return 1; }
     else { return 0; }

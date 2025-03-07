@@ -25,8 +25,6 @@ let stdlib_typed =
   ; "( = )", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ; "( != )", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ; "( && )", TArr (TGround GBool, TArr (TGround GBool, TGround GBool))
-  ; "leq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
-  ; "eq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ]
 ;;
 

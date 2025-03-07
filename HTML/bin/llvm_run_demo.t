@@ -64,3 +64,18 @@
   $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
   $ echo $(./demo_008asciption)
   true false
+
+  $ ./llvm_demo.exe << EOF
+  > let a = ( + ) 5
+  > let ( + ) = (fun x y -> x || y)
+  > let res = print_bool (true + false);;
+  $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
+  $ echo $(./demo_008asciption)
+  true
+
+  $ ./llvm_demo.exe << EOF
+  > let ( -$ ) a b = ( / ) a b
+  > let res = print_int (6 -$ 2)
+  $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
+  $ echo $(./demo_008asciption)
+  3
