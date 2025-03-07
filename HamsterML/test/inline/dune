@@ -5,7 +5,8 @@
   ParserTest
   TypingTest
   LambdaLiftingTest
-  AlphaConversionTest)
+  AlphaConversionTest
+  MatchEliminationTest)
  (libraries HamsterML)
  (inline_tests)
  (preprocess

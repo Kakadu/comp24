@@ -11,7 +11,8 @@
   AC
   ME
   PrinterAst
-  PrinterLL)
+  PrinterLL
+  PrinterME)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
