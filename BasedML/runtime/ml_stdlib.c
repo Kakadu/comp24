@@ -42,9 +42,11 @@ int8_t compare(int64_t x, int64_t y) {
 }
 
 int8_t compare_ml(int64_t x, int64_t y) {
+    DEBUG_RUN(printf("compare: %ld %ld\n", x, y););
     tag_t x_tag = get_tag(x);
     tag_t y_tag = get_tag(y);
-    int8_t tag_comp = compare(x, y);
+    DEBUG_RUN(printf("compare: tags %d %d\n", x_tag, y_tag););
+    int8_t tag_comp = compare(x_tag, y_tag);
     if (tag_comp == 0) {
         if (x_tag == T_UNBOXED) {
             // unboxed values
