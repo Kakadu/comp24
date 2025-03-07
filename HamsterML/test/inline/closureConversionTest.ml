@@ -59,8 +59,6 @@ let%expect_test "001fac.ml" =
     |}]
 ;;
 
-(* 002fac.ml *)
-
 let%expect_test "002fac.ml" =
   pp_closure_conv_prog
     {| 
@@ -73,8 +71,6 @@ let%expect_test "002fac.ml" =
       let var_5 = let () = (print_int ((var_0 4) (fun arg_4 -> arg_4))) in 0
     |}]
 ;;
-
-(* 003fib.ml *)
 
 let%expect_test "003fib.ml" =
   pp_closure_conv_prog
@@ -91,9 +87,7 @@ let%expect_test "003fib.ml" =
     |}]
 ;;
 
-(* 004manyargs.ml *)
-
-let%expect_test _ =
+let%expect_test "004manyargs.ml" =
   pp_closure_conv_prog
     {|
       let wrap f = if 1 = 1 then f else f
@@ -115,12 +109,16 @@ let%expect_test _ =
         let temp2 = wrap test3 1 10 100 in
         0
     |};
-  [%expect {| defines as functions |}]
+  [%expect
+    {| 
+      let var_1 arg_0 = if ((( = ) 1) 1) then arg_0 else arg_0
+      let var_8 arg_2 arg_3 arg_4 = let var_5 = (print_int arg_2) in let var_6 = (print_int arg_3) in let var_7 = (print_int arg_4) in 0
+      let var_19 arg_9 arg_10 arg_11 arg_12 arg_13 arg_14 arg_15 arg_16 arg_17 arg_18 = ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) ((( + ) arg_9) arg_10)) arg_11)) arg_12)) arg_13)) arg_14)) arg_15)) arg_16)) arg_17)) arg_18)
+      let var_22 = let var_20 = (((((((((((var_1 var_19) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in let () = (print_int var_20) in let var_21 = ((((var_1 var_8) 1) 10) 100) in 0
+    |}]
 ;;
 
-(* 005fix.ml *)
-
-let%expect_test _ =
+let%expect_test "005fix.ml" =
   pp_closure_conv_prog
     {|
       let rec fix f x = f (fix f) x
@@ -139,9 +137,7 @@ let%expect_test _ =
     |}]
 ;;
 
-(* 006partial.ml *)
-
-let%expect_test _ =
+let%expect_test "006partial.ml" =
   pp_closure_conv_prog
     {|   
       let foo b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)
@@ -151,12 +147,15 @@ let%expect_test _ =
         let () = print_int (foo 11) in
         0
     |};
-  [%expect {| type error |}]
+  [%expect
+    {|
+      let var_3 arg_0 = if arg_0 then (fun arg_1 -> ((( + ) arg_1) 2)) else (fun arg_2 -> ((( * ) arg_2) 10))
+      let var_5 arg_4 = ((var_3 true) ((var_3 false) ((var_3 true) ((var_3 false) arg_4))))
+      let var_6 = let () = (print_int (var_5 11)) in 0
+    |}]
 ;;
 
-(* 007order.ml *)
-
-let%expect_test _ =
+let%expect_test "007order.ml" =
   pp_closure_conv_prog
     {|
       let _start () () a () b _c () d __ =
@@ -168,12 +167,14 @@ let%expect_test _ =
       let main =
         print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
     |};
-  [%expect {| defines as functions |}]
+  [%expect
+    {|
+      let var_5 () () arg_0 () arg_1 arg_2 () arg_3 arg_4 = let () = (print_int ((( + ) arg_0) arg_1)) in let () = (print_int arg_4) in ((( + ) ((( / ) ((( * ) arg_0) arg_1)) arg_2)) arg_3)
+      let var_6 = (print_int (((((((((var_5 (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (- 1))) 10000) (- 555555)))          
+    |}]
 ;;
 
-(* 008ascription.ml *)
-
-let%expect_test _ =
+let%expect_test "008ascription.ml" =
   pp_closure_conv_prog
     {|
       let addi = fun f g x -> (f x (g x: bool) : int)
@@ -189,9 +190,7 @@ let%expect_test _ =
     |}]
 ;;
 
-(* 009let_poly.ml *)
-
-let%expect_test _ =
+let%expect_test "009let_poly.ml" =
   pp_closure_conv_prog
     {|
       let temp =
@@ -201,9 +200,7 @@ let%expect_test _ =
   [%expect {|let var_2 = let var_1 arg_0 = arg_0 in ((var_1 1), (var_1 true)) |}]
 ;;
 
-(* 015tuples.ml *)
-
-let%expect_test _ =
+let%expect_test "015tuples.ml" =
   pp_closure_conv_prog
     {|
       let rec fix f x = f (fix f) x
@@ -231,9 +228,7 @@ let%expect_test _ =
   [%expect {| syntax error |}]
 ;;
 
-(* 016lists.ml *)
-
-let%expect_test _ =
+let%expect_test "016lists.ml" =
   pp_closure_conv_prog
     {|
       let rec length xs =
@@ -278,5 +273,32 @@ let%expect_test _ =
         let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
         0
     |};
-  [%expect {| type error |}]
+  [%expect
+    {|
+      let rec var_0 arg_1 = match arg_1 with
+      | [] -> 0
+      | arg_2::arg_3 -> ((( + ) 1) (var_0 arg_3))
+      let var_9 = let rec var_4 arg_5 arg_6 = match arg_6 with
+      | [] -> arg_5
+      | arg_7::arg_8 -> ((var_4 ((( + ) arg_5) 1)) arg_8) in (var_4 0)
+      let rec var_10 arg_11 arg_12 = match arg_12 with
+      | [] -> []
+      | arg_13::[] -> [(arg_11 arg_13)]
+      | arg_14::arg_15::[] -> [(arg_11 arg_14); (arg_11 arg_15)]
+      | arg_16::arg_17::arg_18::[] -> [(arg_11 arg_16); (arg_11 arg_17); (arg_11 arg_18)]
+      | arg_19::arg_20::arg_21::arg_22::arg_23 -> (arg_11 arg_19)::(arg_11 arg_20)::(arg_11 arg_21)::(arg_11 arg_22)::((var_10 arg_11) arg_23)
+      let rec var_24 arg_25 arg_26 = match arg_25 with
+      | [] -> arg_26
+      | arg_27::arg_25 -> arg_27::((var_24 arg_25) arg_26)
+      let var_32 = let rec var_28 arg_29 = match arg_29 with
+      | [] -> []
+      | arg_30::arg_31 -> ((var_24 arg_30) (var_28 arg_31)) in var_28
+      let rec var_33 arg_34 arg_35 = match arg_35 with
+      | [] -> ()
+      | arg_36::arg_37 -> let () = (arg_34 arg_36) in ((var_33 arg_34) arg_37)
+      let rec var_38 arg_39 arg_40 = match arg_39 with
+      | [] -> []
+      | arg_41::arg_42 -> ((var_24 ((var_10 ((fun arg_41 arg_43 -> (arg_41, arg_43)) arg_41)) arg_40)) ((var_38 arg_42) arg_40))
+      let var_44 = let () = ((var_33 print_int) [1; 2; 3]) in let () = (print_int (var_0 ((var_38 [1; 2]) [1; 2; 3; 4]))) in 0
+    |}]
 ;;

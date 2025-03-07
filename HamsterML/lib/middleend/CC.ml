@@ -139,7 +139,7 @@ let fresh_var prefix =
   prefix ^ Int.to_string id
 ;;
 
-let cc_expr =
+let cc_expr global_names =
   let pattern_list_to_vars patterns = List.map patterns ~f:(fun x -> Var x) in
   let args_list_to_id_set args =
     List.fold
@@ -160,6 +160,8 @@ let cc_expr =
   in
   let add_free_vars args expr =
     let unbound = free_vars_expr expr in
+    (* Filter out global names from unbound vars *)
+    let unbound = Set.diff unbound global_names in
     let bound = args_list_to_id_set args in
     let free_vars = Set.diff unbound bound in
     pattern_list_to_vars (Set.to_list free_vars) @ args
@@ -218,6 +220,8 @@ let cc_expr =
             match fun_type with
             | Recursive ->
               let unbound = free_vars_expr body in
+              (* Filter out global names *)
+              let unbound = Set.diff unbound global_names in
               let bound = args_list_to_id_set combined_args in
               let fun_names = bound_vars_in_pattern pat in
               let free_vars = Set.diff (Set.diff unbound bound) fun_names in
@@ -263,9 +267,23 @@ let cc_expr =
 ;;
 
 let cc_prog (prog : prog) =
+  (* Collect global function names from top-level let bindings *)
+  let global_names =
+    List.fold prog ~init:(Set.empty (module String)) ~f:(fun acc expr ->
+      match expr with
+      | Let (_, binds, _) ->
+        List.fold binds ~init:acc ~f:(fun acc_inner (pat, _, _) ->
+          match pat with
+          | Var id -> Set.add acc_inner id
+          | _ -> acc_inner)
+      | _ -> acc)
+  in
+  
+  let cc_expr_with_globals = cc_expr global_names in
+  
   let rec helper = function
     | hd :: tl ->
-      let new_hd = cc_expr hd in
+      let new_hd = cc_expr_with_globals hd in
       new_hd :: helper tl
     | [] -> []
   in
