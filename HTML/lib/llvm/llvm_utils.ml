@@ -1,17 +1,13 @@
 open Llvm
 
 let map_ident_to_runtime = function
-  | "+" -> "add"
-  | "-" -> "sub"
-  | "*" -> "mul"
-  | "/" -> "div"
   | "=" | "( = )" -> "eq"
   | "!=" | "( != )" -> "neq"
   | "<" -> "less"
   | "<=" -> "leq"
   | ">" -> "gre"
   | ">=" -> "geq"
-  | "&&" -> "and"
+  | "&&" | "( && )" -> "and"
   | "||" -> "or"
   | "base +" -> "uplus"
   | "base -" -> "uminus"

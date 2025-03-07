@@ -10,14 +10,17 @@ let codegen_funs =
   ]
 ;;
 
-let is_binop = function
+let is_optimized_binop = function
   | "+" | "-" | "*" | "/" -> true
   | _ -> false
 ;;
 
+
 let runtime_members =
-  List.filter
-    (fun (name, _) -> (not @@ List.mem name not_supported) && (not @@ is_binop name))
-    Common.Stdlib.stdlib_typed
-  @ codegen_funs
+  let open Llvm_utils in
+  Common.Stdlib.stdlib_typed
+  |> List.filter (fun (name, _) ->
+      not (List.mem name not_supported || is_optimized_binop name))
+  |> List.map (fun (name, typ) -> (map_ident_to_runtime name, typ))
+  |> (@) codegen_funs
 ;;

@@ -95,24 +95,50 @@ int64_t apply_args_to_closure(int64_t closure_ptr, int64_t new_args_num, ...) {
 
 int64_t eq(int64_t x, int64_t y) {
     if (x == y) { return 1; }
-     else {
-        return 0;
-     }
+    else { return 0; }
+}
+
+int64_t neq(int64_t x, int64_t y) {
+    if (x != y) { return 1; }
+    else { return 0; }
+}
+
+int64_t less(int64_t x, int64_t y) {
+    if (x < y) { return 1; }
+    else { return 0; }
 }
 
 int64_t leq(int64_t x, int64_t y) {
     if (x <= y) { return 1; }
-     else {
-        return 0;
-     }
+    else { return 0; }
 }
 
-int64_t sub(int64_t x, int64_t y) {
-    return x - y;
+int64_t gre(int64_t x, int64_t y) {
+    if (x > y) { return 1; }
+    else { return 0; }
 }
 
-int64_t mul(int64_t x, int64_t y) {
-    return x * y;
+int64_t geq(int64_t x, int64_t y) {
+    if (x >= y) { return 1; }
+    else { return 0; }
+}
+
+int64_t and(int64_t x, int64_t y) {
+    if (x != 0 && y != 0) { return 1; }
+    else { return 0; }
+}
+
+int64_t or(int64_t x, int64_t y) {
+    if (x != 0 || y != 0) { return 1; }
+    else { return 0; }
+}
+
+int64_t uplus(int64_t x) {
+    return x;
+}
+
+int64_t uminus(int64_t x) {
+    return -x;
 }
 
 int64_t print_int(int64_t x) {

@@ -24,12 +24,7 @@ let rec codegen_imexpr = function
   | ImmConst c -> codegen_const c
   | ImmIdentifier id ->
     let name = Common.Ident_utils.ident_to_string id  in
-    let name = (match name with 
-    | "<=" -> "leq"
-    | "=" | "( = )" -> "eq"
-      | _ -> name
-
-      ) in
+    let name = map_ident_to_runtime name in
     let* id_var = lookup_env_var name in
     (match id_var with
      | Some v -> return (build_load i64 v name builder)
@@ -51,29 +46,21 @@ let rec codegen_imexpr = function
   | ImmConstraint (immexpr, _) -> codegen_imexpr immexpr
 ;;
 
-let codegen_binop = function
+let optimize = function
   | "+" -> fun x y -> build_add x y "add" builder
   | "-" -> fun x y -> build_sub x y "sub" builder
   | "*" -> fun x y -> build_mul x y "mul" builder
   | "/" -> fun x y -> build_sdiv x y "div" builder
-  | "=" | "( = )" -> fun x y -> build_icmp Icmp.Eq x y "eq" builder
-  | "!=" | "( != )" -> fun x y -> build_icmp Icmp.Ne x y "neq" builder
-  | "<" -> fun x y -> build_icmp Icmp.Slt x y "less" builder
-  | "<=" -> fun x y -> build_icmp Icmp.Sle x y "leq" builder
-  | ">" -> fun x y -> build_icmp Icmp.Sgt x y "gre" builder
-  | ">=" -> fun x y -> build_icmp Icmp.Sge x y "geq" builder
-  | "&&" | "( && )" -> fun x y -> build_and x y "and" builder
-  | "||" -> fun x y -> build_or x y "or" builder
-  | _ -> failwith "Unknown binop"
+  | _ -> failwith "No optimization for this binop"
 ;;
 
 let rec codegen_cexpr = function
   | CImmExpr e -> codegen_imexpr e
   | CApp (CApp (CImmExpr (ImmIdentifier bin_op), CImmExpr e1), CImmExpr e2)
-    when Runtime.is_binop (Common.Ident_utils.ident_to_string bin_op) ->
+    when Runtime.is_optimized_binop (Common.Ident_utils.ident_to_string bin_op) ->
     let* e1' = codegen_imexpr e1 in
     let* e2' = codegen_imexpr e2 in
-    let binop = codegen_binop (Common.Ident_utils.ident_to_string bin_op) in
+    let binop = optimize (Common.Ident_utils.ident_to_string bin_op) in
     return @@ binop e1' e2'
   | CApp (func, argument) ->
     let* callee = codegen_cexpr func in
@@ -205,6 +192,6 @@ let codegen s =
   match result with
   | Ok _ ->
     let _ = print_module "out.ll" the_module in
-    ()
-  | Error s -> Format.printf "%s" s
+    Ok ()
+  | Error s -> Error s
 ;;
