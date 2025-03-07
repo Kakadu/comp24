@@ -819,7 +819,7 @@ module QCheckTests = struct
   ;;
 end
 
-module Lltest = struct
+module LLVMtests = struct
   open Closure_conversion
   open Lambda_lifting
   open Roflanml_stdlib
@@ -835,82 +835,77 @@ module Lltest = struct
        | Result.Ok closed_prog ->
          (match anf_program closed_prog with
           | Result.Ok anf_prog ->
-            let llvm_mod = generate anf_prog in
+            let llvm_mod = compile_program anf_prog in
             Stdlib.Format.printf "%s\n" (Llvm.string_of_llmodule llvm_mod)
           | Result.Error err -> Stdlib.print_endline ("ANF error: " ^ err))
        | Result.Error err -> Stdlib.print_endline ("Closure conversion error: " ^ err))
     | Result.Error err -> Stdlib.print_endline ("Failed to parse: " ^ err)
   ;;
 
-  let%expect_test "LLVM generation for simple let (expect failure for undefined '+')" =
-    (* try pp_parse_and_anf_and_llvm "let x = 1" with *)
-    (* | Failure msg -> *)
-    pp_parse_and_anf_and_llvm "let x = 1 ";
-    (* Stdlib.print_endline "Caught exception: "; *)
+  let%expect_test "LLVM generation factorial" =
+    pp_parse_and_anf_and_llvm "let rec fact x = if x = 1 then x else x * fact (x - 1)";
     [%expect
       {|
       ; ModuleID = 'Roflan'
       source_filename = "Roflan"
 
-      @x = global i64 1
-      |}]
-  ;;
+      declare ptr @"="(ptr, ptr)
 
-  let%expect_test "LLVM generation for simple func let" =
-    (* try pp_parse_and_anf_and_llvm "let x = 1" with *)
-    (* | Failure msg -> *)
-    pp_parse_and_anf_and_llvm "let x arg argv = 1 ";
-    (* Stdlib.print_endline "Caught exception: "; *)
-    [%expect
-      {|
-      ; ModuleID = 'Roflan'
-      source_filename = "Roflan"
+      declare ptr @"+"(ptr, ptr)
 
-      @x = global i64 1
+      declare ptr @-(ptr, ptr)
 
-      define i64 @x.1(i64 %0, i64 %1) {
+      declare ptr @"*"(ptr, ptr)
+
+      declare ptr @create_int(i64)
+
+      declare ptr @create_bool(i1)
+
+      declare ptr @create_unit()
+
+      declare ptr @create_empty_list()
+
+      declare ptr @list_cons(ptr, ptr)
+
+      declare ptr @apply(ptr, ptr)
+
+      declare i1 @get_bool(ptr)
+
+      declare ptr @create_closure(ptr, i64)
+
+      define ptr @fact(ptr %x) {
       entry:
-        %arg = alloca i64, align 8
-        store i64 %0, ptr %arg, align 4
-        %argv = alloca i64, align 8
-        store i64 %1, ptr %argv, align 4
-        ret i64 1
+        %closure = call ptr @create_closure(ptr @"=", i64 2)
+        %apply_result = call ptr @apply(ptr %closure, ptr %x)
+        %boxed_int = call ptr @create_int(i64 1)
+        %apply_result1 = call ptr @apply(ptr %apply_result, ptr %boxed_int)
+        %cond_bool = call i1 @get_bool(ptr %apply_result1)
+        br i1 %cond_bool, label %then, label %else
+
+      then:                                             ; preds = %entry
+        br label %merge
+
+      else:                                             ; preds = %entry
+        %closure2 = call ptr @create_closure(ptr @-, i64 2)
+        %apply_result3 = call ptr @apply(ptr %closure2, ptr %x)
+        %boxed_int4 = call ptr @create_int(i64 1)
+        %apply_result5 = call ptr @apply(ptr %apply_result3, ptr %boxed_int4)
+        %closure6 = call ptr @create_closure(ptr @fact, i64 1)
+        %apply_result7 = call ptr @apply(ptr %closure6, ptr %apply_result5)
+        %closure8 = call ptr @create_closure(ptr @"*", i64 2)
+        %apply_result9 = call ptr @apply(ptr %closure8, ptr %x)
+        %apply_result10 = call ptr @apply(ptr %apply_result9, ptr %apply_result7)
+        br label %merge
+
+      merge:                                            ; preds = %else, %then
+        %branch_result = phi ptr [ %x, %then ], [ %apply_result10, %else ]
+        ret ptr %branch_result
+      }
+
+      define i32 @main() {
+      entry:
+        ret i32 0
       }
       |}]
   ;;
-
-  let%expect_test "LLVM generation" =
-    pp_parse_and_anf_and_llvm "let f x = x \n let r = f 42";
-    [%expect
-      {|
-      ; ModuleID = 'Roflan'
-      source_filename = "Roflan"
-
-      @x = global i64 1
-      @r = global i64 0
-
-      define i64 @x.1(i64 %0, i64 %1) {
-      entry:
-        %arg = alloca i64, align 8
-        store i64 %0, ptr %arg, align 4
-        %argv = alloca i64, align 8
-        store i64 %1, ptr %argv, align 4
-        ret i64 1
-      }
-
-      define i64 @f(i64 %0) {
-      entry:
-        %x = alloca i64, align 8
-        store i64 %0, ptr %x, align 4
-        ret ptr %x
-      }
-      |}]
-  ;;
-
-  (* let%expect_test "LLVM generation for simple let" =
-    try pp_parse_and_anf_and_llvm " " with
-    | Failure msg ->
-      Stdlib.print_endline ("Caught exception: " ^ msg);
-      [%expect {| |}]
-  ;; *)
 end
