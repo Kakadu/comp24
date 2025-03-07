@@ -412,6 +412,8 @@ let test_alpha_for_decls str =
   | Error err -> Format.printf "%s" err
 ;;
 
+let transform ast = run (alpha_convert_decl_list init_context [] ast) 0
+
 let%expect_test "" =
   test_alpha_for_decls {|
 let f a = let f a s = a + s in f a 5
