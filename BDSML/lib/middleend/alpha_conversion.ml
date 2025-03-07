@@ -66,7 +66,7 @@ let rec alpha_expr env = function
     let* env, rev_args =
       fold_left
         (fun (env, prev) name ->
-          let+ _, env = update_env name env in
+          let+ name, env = update_env name env in
           env, name :: prev)
         (return (env, []))
         args
