@@ -115,7 +115,7 @@ MODIFY
   > let (1, 2) = (2, 3)
   let a0 = (2, 3)
   
-  let () = if ((&& ((= ((#unpack_tuple a0) 0)) 1)) ((= ((#unpack_tuple a0) 1)) 2))
+  let a1 = if ((&& ((= ((#unpack_tuple a0) 0)) 1)) ((= ((#unpack_tuple a0) 1)) 2))
   then ()
   else #match_failure
 

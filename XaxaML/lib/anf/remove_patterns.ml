@@ -265,7 +265,6 @@ let rec rp_expr = function
     let f1 (new_args, args_to_match, pat_list) arg =
       match arg with
       | Ast.P_val v -> return (v :: new_args, args_to_match, pat_list)
-      | P_const C_unit -> return ("()" :: new_args, args_to_match, pat_list)
       | _ ->
         let* fresh_name = fresh >>| get_name in
         return (fresh_name :: new_args, fresh_name :: args_to_match, arg :: pat_list)
@@ -307,7 +306,6 @@ let rec rp_expr = function
     let* e2 = rp_expr e2 in
     (match pat with
      | P_val name -> return @@ Rp_e_let (Rp_non_rec (name, e1), e2)
-     | P_const C_unit -> return @@ Rp_e_let (Rp_non_rec ("()", e1), e2)
      | _ ->
        (match e1 with
         | Rp_e_ident _ ->
@@ -341,7 +339,6 @@ and rp_rec_decl decl_list =
     return
       (match pat with
        | Ast.P_val v -> v, e
-       | P_const C_unit -> "()", e
        | _ -> "", e)
   in
   let* new_decls = RList.map decl_list ~f:f1 in
@@ -357,7 +354,6 @@ let rp_toplevel = function
     let* e = rp_expr e in
     (match pat with
      | P_val name -> return [ Rp_non_rec (name, e) ]
-     | P_const C_unit -> return [ Rp_non_rec ("()", e) ]
      | pat ->
        let* fresh_name = fresh >>| get_name in
        let to_unpack = Rp_e_ident fresh_name in
@@ -369,7 +365,8 @@ let rp_toplevel = function
          let ite =
            create_if checks (Rp_e_const Rp_c_unit) (Rp_e_ident "#match_failure")
          in
-         return (Rp_non_rec (fresh_name, e) :: Rp_non_rec ("()", ite) :: decls)))
+         let* for_checks = fresh >>| get_name in
+         return (Rp_non_rec (fresh_name, e) :: Rp_non_rec (for_checks, ite) :: decls)))
   | Let_decl (Rec decl_list) ->
     let* decl_list = rp_rec_decl decl_list in
     return [ decl_list ]
