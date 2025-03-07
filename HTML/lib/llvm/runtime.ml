@@ -18,8 +18,7 @@ let is_optimized_binop = function
 let runtime_members =
   let open Llvm_utils in
   Common.Stdlib.stdlib_typed
-  |> List.filter (fun (name, _) ->
-    not (List.mem name not_supported))
+  |> List.filter (fun (name, _) -> not (List.mem name not_supported))
   |> List.map (fun (name, typ) -> map_ident_to_runtime name, typ)
   |> ( @ ) codegen_funs
 ;;

@@ -51,6 +51,7 @@
   8
 
   $ ./llvm_demo.exe << EOF
+  > 
   > let rec even x =
   >   if x = 0 then true
   >   else odd (x - 1)
@@ -61,21 +62,26 @@
   > let () = print_bool (odd 1) in
   > let () = print_bool (even 3) in
   > 0
+  > 
   $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
   $ echo $(./demo_008asciption)
   true false
 
   $ ./llvm_demo.exe << EOF
+  > 
   > let a = ( + ) 5
   > let ( + ) = (fun x y -> x || y)
   > let res = print_bool (true + false);;
+  > 
   $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
   $ echo $(./demo_008asciption)
   true
 
   $ ./llvm_demo.exe << EOF
+  > 
   > let ( -$ ) a b = ( / ) a b
   > let res = print_int (6 -$ 2)
+  > 
   $ clang-16 out.ll runtime.o -lffi -o demo_008asciption
   $ echo $(./demo_008asciption)
   3

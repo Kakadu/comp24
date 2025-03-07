@@ -65,15 +65,14 @@ let rec codegen_cexpr = function
     let* e2' = codegen_imexpr e2 in
     let binop = optimize (Common.Ident_utils.ident_to_string bin_op) in
     return @@ binop e1' e2'
-    
   | CApp _ as capp ->
     let rec unroll_capp acc = function
-    | CApp (e1, e2) -> unroll_capp (e2 :: acc) e1
-    | e -> e :: acc
+      | CApp (e1, e2) -> unroll_capp (e2 :: acc) e1
+      | e -> e :: acc
     in
     let* params = unroll_capp [] capp |> map codegen_cexpr in
     let callee, args = List.hd params, List.tl params in
-    let args = [callee; const_int i64 @@ List.length args] @ args |> Array.of_list in
+    let args = [ callee; const_int i64 @@ List.length args ] @ args |> Array.of_list in
     return
     @@ build_call
          (var_arg_function_type i64 [| i64; i64 |])
@@ -117,21 +116,21 @@ and codegen_aexpr = function
   | ACExpr cexpr -> codegen_cexpr cexpr
 ;;
 
-let do_declare_function id args = 
+let do_declare_function id args =
   let func_name = identifier_to_str id in
   let func_sig = function_type i64 (Array.make (List.length args) i64) in
   let func = declare_function func_name func_sig the_module in
   return func
+;;
 
-let codegen_let_body =
-  function
-  | ((id, [], aexpr)) ->
+let codegen_let_body = function
+  | id, [], aexpr ->
     let var_name = identifier_to_str id in
     let* body = codegen_aexpr aexpr in
     let var_global = define_global var_name (const_int i64 0) the_module in
     let (_ : llvalue) = build_store body var_global builder in
     return var_global
-  | ((id, args, aexpr)) ->
+  | id, args, aexpr ->
     let* func = do_declare_function id args in
     let () =
       Array.iter
@@ -158,15 +157,16 @@ let codegen_let_body =
 ;;
 
 let codegen_bexpr = function
-| ADSingleLet (_, lb) ->
-  let* lb = codegen_let_body lb in return [lb]
+  | ADSingleLet (_, lb) ->
+    let* lb = codegen_let_body lb in
+    return [ lb ]
   | ADMutualRecDecl (_, lb1, lb2, lbs) ->
-    let lbs = lb1 :: lb2 :: lbs in 
+    let lbs = lb1 :: lb2 :: lbs in
     let _ = List.map (fun (id, args, _) -> do_declare_function id args) lbs in
     let* lb1 = codegen_let_body lb1 in
     let* lb2 = codegen_let_body lb2 in
     let* lbs = map codegen_let_body lbs in
-    let lbs = lb1 :: lb2 :: lbs in 
+    let lbs = lb1 :: lb2 :: lbs in
     return lbs
 ;;
 
