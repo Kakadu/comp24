@@ -6,7 +6,7 @@ let codegen_funs =
   [ ( "create_closure"
     , TArr (TGround GInt, TArr (TGround GInt, TArr (TGround GInt, TGround GInt))) )
   ; ( "apply_args_to_closure"
-    , TArr (TGround GInt, TArr (TGround GInt, TArr (TGround GInt, TGround GInt))) )
+    , TArr (TGround GInt, TArr (TGround GInt, TArr (TGround GInt, TVar "'vararg"))) )
   ]
 ;;
 

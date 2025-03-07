@@ -65,15 +65,20 @@ let rec codegen_cexpr = function
     let* e2' = codegen_imexpr e2 in
     let binop = optimize (Common.Ident_utils.ident_to_string bin_op) in
     return @@ binop e1' e2'
-  | CApp (func, argument) ->
-    let* callee = codegen_cexpr func in
-    (*TODO ПЕРЕДЕЛАТЬ *)
-    let* arg = codegen_cexpr argument in
+    
+  | CApp _ as capp ->
+    let rec unroll_capp acc = function
+    | CApp (e1, e2) -> unroll_capp (e2 :: acc) e1
+    | e -> e :: acc
+    in
+    let* params = unroll_capp [] capp |> map codegen_cexpr in
+    let callee, args = List.hd params, List.tl params in
+    let args = [callee; const_int i64 @@ List.length args] @ args |> Array.of_list in
     return
     @@ build_call
-         (function_type i64 [| i64; i64; i64 |])
+         (var_arg_function_type i64 [| i64; i64 |])
          (Option.get (lookup_function "apply_args_to_closure" the_module))
-         [| callee; const_int i64 1; arg |]
+         args
          "application_result"
          builder
   | CIf (cond, then_, else_) ->
