@@ -74,7 +74,7 @@ PASS
   let rec fac_cps.1 n k = let app_0.l4 = (n = 1) in
   let if_1.l4 = if app_0.l4 then let app_2.l12 = k 1 in
   app_2.l12 else let app_3.l4 = (n - 1) in
-  let app_4.l24 = cc_ll_0.2 n k in
+  let app_4.l24 = cc_ll_0.1 n k in
   let app_5.l16 = fac_cps.1 app_3.l4 app_4.l24 in
   app_5.l16 in
   if_1.l4;;

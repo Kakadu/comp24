@@ -259,9 +259,14 @@ let find_replace_occurs_decl name = function
     let* new_name = gen_name name TopLevel in
     let* lb' = find_replace_occurs_lb name new_name lb in
     return @@ ADSingleLet (Not_recursive, lb')
-  | ADSingleLet (Recursive, lb) ->
+  | ADSingleLet (Recursive, ((id, _, _) as lb)) ->
     let* counters = lookup_env_counters name in
-    let counters = { counters with top_level = counters.top_level + 1 } in
+    let* counters =
+      let name_of_decl = identifier_to_str id in
+      if name_of_decl = name
+      then return { counters with top_level = counters.top_level + 1 }
+      else return counters
+    in
     let new_name = gen_name_by_counters name counters TopLevel in
     let* lb' = find_replace_occurs_lb name new_name lb in
     return @@ ADSingleLet (Recursive, lb')

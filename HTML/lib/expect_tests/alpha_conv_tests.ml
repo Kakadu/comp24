@@ -214,3 +214,50 @@ let%expect_test "sanity check" =
     let meven.2  = let app_0.l8 = meven.1 modd.2 in
     app_0.l8 |}]
 ;;
+
+let%expect_test "sanity check" =
+  AlphaConvTests.alpha_conv_test
+    {|
+    let rec fac_cps n k =
+  if n=1 then k 1 else
+  fac_cps (n-1) (fun p -> k (p*n))
+
+  let main =
+    fac_cps 4 (fun x -> x) 
+
+
+  |};
+  [%expect
+    {|
+    ---ANF---
+
+    let cc_ll_0 n k p = let app_0 = (p * n) in
+    let app_1 = k app_0 in
+    app_1;;
+    let rec fac_cps n k = let app_0 = (n = 1) in
+    let if_1 = if app_0 then let app_2 = k 1 in
+    app_2 else let app_3 = (n - 1) in
+    let app_4 = cc_ll_0 n k in
+    let app_5 = fac_cps app_3 app_4 in
+    app_5 in
+    if_1;;
+    let cc_ll_1 x = x;;
+    let main  = let app_0 = fac_cps 4 cc_ll_1 in
+    app_0
+
+    ---Alpha conv.---
+
+    let cc_ll_0.1 n k p = let app_0.l1 = (p * n) in
+    let app_1.l2 = k app_0.l1 in
+    app_1.l2;;
+    let rec fac_cps.1 n k = let app_0.l4 = (n = 1) in
+    let if_1.l4 = if app_0.l4 then let app_2.l4 = k 1 in
+    app_2.l4 else let app_3.l4 = (n - 1) in
+    let app_4.l8 = cc_ll_0.1 n k in
+    let app_5.l16 = fac_cps.1 app_3.l4 app_4.l8 in
+    app_5.l16 in
+    if_1.l4;;
+    let cc_ll_1.1 x = x;;
+    let main.1  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
+    app_0.l7 |}]
+;;
