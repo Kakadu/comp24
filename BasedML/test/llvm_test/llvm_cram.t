@@ -276,6 +276,39 @@ Other
   2
   1
 
+Operation/Function overide
+  $ ./llvm_demo.exe << EOF
+  > let _ = print_int (3 + 5)
+  > let ( + ) a b = 10*a+b
+  > let _ = print_int (3 + 5)
+  > let print_int (a, b) = let () = print_int a in print_int b
+  > let ( + ) (a, b) (c, d) = (a+c, b+d)
+  > let _ = print_int ((1, 2) + (3, 4))
+  $ ./riscv_run.sh  out.ll
+  8
+  35
+  13
+  42
+
+Test struct and physic equal
+  $ ./llvm_demo.exe << EOF
+  > let print_bool b = print_int (if b then 1 else 0)
+  > let lst1 = [1; 2; 3]
+  > let lst2 = [1; 2; 3]
+  > let _ = print_bool (lst1 == lst2)
+  > let _ = print_bool (lst1 = lst2)
+  > let _ = print_bool (2 == 1)
+  > let _ = print_bool (2 = 1)
+  > let _ = print_bool (1 == 1)
+  > let _ = print_bool (1 = 1)
+  $ ./riscv_run.sh  out.ll
+  0
+  1
+  0
+  0
+  1
+  1
+
 Manytests
   $ ./llvm_demo.exe < ../manytests/typed/001fac.ml
   $ ./riscv_run.sh  out.ll
@@ -321,7 +354,6 @@ Manytests
   7
   $ ocaml -w -a ../manytests/typed/006partial2.ml
   1237
-Riscv strange
   $ ./llvm_demo.exe < ../manytests/typed/006partial3.ml
   $ ./riscv_run.sh  out.ll
   4
