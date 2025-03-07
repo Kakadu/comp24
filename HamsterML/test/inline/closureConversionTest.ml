@@ -225,7 +225,17 @@ let%expect_test "015tuples.ml" =
         let () = print_int (even 4) in
         0
     |};
-  [%expect {| syntax error |}]
+  [%expect
+    {|
+      let rec var_0 arg_1 arg_2 = ((arg_1 (var_0 arg_1)) arg_2)
+      let var_7 arg_3 arg_4 = let (var_5, var_6) = arg_4 in ((arg_3 var_5), (arg_3 var_6))
+      let var_13 arg_8 = ((var_0 (fun arg_9 arg_10 -> ((var_7 (((fun arg_10 arg_9 arg_11 arg_12 -> ((arg_11 (arg_9 arg_10)) arg_12)) arg_10) arg_9)) arg_10))) arg_8)
+      let var_18 arg_14 arg_15 = let (var_16, var_17) = arg_14 in if ((( == ) arg_15) 0) then 1 else (var_17 ((( - ) arg_15) 1))
+      let var_23 arg_19 arg_20 = let (var_21, var_22) = arg_19 in if ((( == ) arg_20) 0) then 0 else (var_21 ((( - ) arg_20) 1))
+      let var_24 = (var_13 (var_18, var_23))
+      let rec var_25 arg_27 = if ((( = ) arg_27) 0) then 1 else (var_26 ((( - ) arg_27) 1)) and var_26 arg_28 = if ((( = ) arg_28) 0) then 1 else (var_25 ((( - ) arg_28) 1))
+      let var_31 = let () = (print_int (var_26 1)) in let () = (print_int (var_25 2)) in let (var_29, var_30) = var_24 in let () = (print_int (var_30 3)) in let () = (print_int (var_29 4)) in 0
+    |}]
 ;;
 
 let%expect_test "016lists.ml" =
