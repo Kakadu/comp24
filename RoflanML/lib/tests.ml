@@ -658,11 +658,14 @@ module LLVMtests = struct
   ;;
 
   let%expect_test "LLVM generation factorial" =
-    pp_parse_and_anf_and_llvm "let rec fact x = if x = 1 then x else x * fact (x - 1)";
+    pp_parse_and_anf_and_llvm
+      "let rec fact x = if x = 1 then x else x * fact (x - 1)\n      let () = fact 5";
     [%expect
       {|
       ; ModuleID = 'Roflan'
       source_filename = "Roflan"
+
+      @"()" = global ptr null
 
       declare ptr @"="(ptr, ptr)
 
@@ -719,6 +722,13 @@ module LLVMtests = struct
 
       define i32 @main() {
       entry:
+        %closure = call ptr @create_closure(ptr @fact, i64 1)
+        %boxed_int = call ptr @create_int(i64 5)
+        %apply_result = call ptr @apply(ptr %closure, ptr %boxed_int)
+        store ptr %apply_result, ptr @"()", align 8
+        %closure1 = call ptr @create_closure(ptr @fact, i64 1)
+        %arg = call ptr @create_int(i64 5)
+        %fact_result = call ptr @apply(ptr %closure1, ptr %arg)
         ret i32 0
       }
       |}]

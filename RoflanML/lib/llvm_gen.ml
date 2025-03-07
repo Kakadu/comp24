@@ -193,18 +193,39 @@ let generate_main program =
   let main_func = Llvm.declare_function "main" main_type llvm_module in
   let entry = append_block llvm_context "entry" main_func in
   position_at_end entry llvm_builder;
+  (* Инициализация глобальных переменных *)
   List.iter
     (function
       | ADLet (NonRec, name, [], body) ->
-        let global_var =
-          Llvm.define_global name (const_null value_pointer_type) llvm_module
-        in
-        register_symbol name global_var;
+        let global_var = define_global name (const_null value_pointer_type) llvm_module in
         let compiled_val = generate_aexpr body in
-        ignore (build_store compiled_val global_var llvm_builder);
-        register_symbol name compiled_val
+        ignore (build_store compiled_val global_var llvm_builder)
       | _ -> ())
     program;
+  (* Явный вызов функций из программы *)
+  let call_user_functions () =
+    try
+      let fact_func = find_symbol "fact" in
+      let closure = generate_closure fact_func 1 in
+      let arg =
+        build_call
+          (find_function_type "create_int")
+          (find_symbol "create_int")
+          [| const_int int64_type 5 |]
+          "arg"
+          llvm_builder
+      in
+      ignore
+        (build_call
+           (find_function_type "apply")
+           (find_symbol "apply")
+           [| closure; arg |]
+           "fact_result"
+           llvm_builder)
+    with
+    | _ -> ()
+  in
+  call_user_functions ();
   ignore (build_ret (const_int int32_type 0) llvm_builder)
 ;;
 
