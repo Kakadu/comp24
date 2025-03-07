@@ -269,23 +269,18 @@ let cc_expr global_names =
 let cc_prog (prog : prog) =
   (* Collect global function names from top-level let bindings *)
   let global_names =
-    List.fold prog ~init:(Set.empty (module String)) ~f:(fun acc expr ->
-      match expr with
-      | Let (_, binds, _) ->
-        List.fold binds ~init:acc ~f:(fun acc_inner (pat, _, _) ->
-          match pat with
-          | Var id -> Set.add acc_inner id
-          | _ -> acc_inner)
-      | _ -> acc)
+    List.fold
+      prog
+      ~init:(Set.empty (module String))
+      ~f:(fun acc expr ->
+        match expr with
+        | Let (_, binds, _) ->
+          List.fold binds ~init:acc ~f:(fun acc_inner (pat, _, _) ->
+            match pat with
+            | Var id -> Set.add acc_inner id
+            | _ -> acc_inner)
+        | _ -> acc)
   in
-  
   let cc_expr_with_globals = cc_expr global_names in
-  
-  let rec helper = function
-    | hd :: tl ->
-      let new_hd = cc_expr_with_globals hd in
-      new_hd :: helper tl
-    | [] -> []
-  in
-  helper prog
+  List.map prog ~f:cc_expr_with_globals
 ;;
