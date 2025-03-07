@@ -8,9 +8,7 @@ open Format
 let parse_alpha_convert_and_print_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure, _ =
-      Alpha_conversion.run_alpha_conversion parse_result
-    in
+    let structure, _ = Alpha_conversion.run_alpha_conversion parse_result in
     printf "%a" Ast.pp_structure structure
   | Error _ -> printf "Syntax error"
 ;;
@@ -20,7 +18,8 @@ let parse_inner_alpha_and_print str = parse_alpha_convert_and_print_result str
 let%expect_test "" =
   parse_inner_alpha_and_print {| let a = 4;; 
 let b = 4;;|};
-  [%expect {|
+  [%expect
+    {|
     [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 4)))]));
       (SILet (Nonrecursive, [((PVar (Id "b")), (EConst (CInt 4)))]))] |}]
 ;;
@@ -97,7 +96,8 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_inner_alpha_and_print {|fun x () x -> x () |};
-  [%expect {|       
+  [%expect
+    {|       
   [(SIExpr
       (EFun ([(PVar (Id "x")); (PConst CUnit); (PVar (Id "oba0"))],
          (EApp ((EVar (Id "oba0")), (EConst CUnit))))))
@@ -106,7 +106,8 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_inner_alpha_and_print {| let rec a a = a;; |};
-  [%expect {|       
+  [%expect
+    {|       
   [(SILet (Recursive,
       [((PVar (Id "a")), (EFun ([(PVar (Id "oba0"))], (EVar (Id "oba0")))))]))
     ] |}]
@@ -114,7 +115,8 @@ let%expect_test "" =
 
 let%expect_test "" =
   parse_inner_alpha_and_print {| let rec oba0 x x = x;; |};
-  [%expect {|       
+  [%expect
+    {|       
   [(SILet (Recursive,
       [((PVar (Id "oba0")),
         (EFun ([(PVar (Id "x")); (PVar (Id "oba1"))], (EVar (Id "oba1")))))]
@@ -190,7 +192,8 @@ let%expect_test "" =
 
     let a = let a = a in a;;
   |};
-  [%expect {|
+  [%expect
+    {|
       [(SILet (Nonrecursive, [((PVar (Id "a")), (EConst (CInt 5)))]));
         (SILet (Nonrecursive,
            [((PVar (Id "oba0")),

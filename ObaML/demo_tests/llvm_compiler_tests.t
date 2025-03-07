@@ -179,44 +179,17 @@
   3
   8
 
-  $ cat > test1.ml <<-EOF 
-  > let rec map f xs k  =
-  > match xs with
-  > | [] -> k []
-  > | h::tl -> map f tl (fun tl -> k (f h :: tl))
-  > let rec iter f xs =
-  > match xs with
-  > | [] -> ()
-  > | h::tl -> let w = f h in  iter f tl
-  > let main = iter print_int (map (fun x -> x+1) [1;2;3] (fun x -> x))
-
-  $ ./llvm_compiler_tests.exe < test1.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/011mapcps.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   2
   3
   4
 
-  $ cat > test2.ml <<-EOF 
-  > let rec fib n k =
-  > if n < 2
-  > then k n
-  > else fib (n - 1) (fun a -> fib (n - 2) (fun b -> k (a + b)))
-  > let main = print_int(fib 6 (fun x -> x))
-
-  $ ./llvm_compiler_tests.exe < test2.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/012fibcps.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   8
 
-  $ cat > test3.ml <<-EOF 
-  > let id x = x
-  > let rec fold_right f acc xs =
-  > match xs with
-  > | [] -> acc
-  > | h:: tl -> f h (fold_right f acc tl)
-  > let foldl f a bs = fold_right (fun b g x -> g (f x b)) id bs a
-  > let main = print_int (foldl (fun x y -> x * y) 1 [1;2;3])
-
-  $ ./llvm_compiler_tests.exe < test3.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
+  $ ./llvm_compiler_tests.exe < manytests/typed/013foldfoldr.ml > obaml_llvm.ll ; echo "------" ; clang -Wno-override-module -lffi obaml_llvm.ll runtime.o -o a.out; ./a.out
   ------
   6
 

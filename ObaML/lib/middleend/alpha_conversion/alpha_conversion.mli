@@ -4,6 +4,4 @@
 
 open Containers
 
-val run_alpha_conversion
-  :  Ast.structure
-  -> Ast.structure * VarSSet.t
+val run_alpha_conversion : Ast.structure -> Ast.structure * VarSSet.t

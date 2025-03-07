@@ -89,7 +89,7 @@
   	let pat0 = oba3 in 
   	let e = ((tuple_getter 0) pat0) in 
   	let o = ((tuple_getter 1) pat0) in 
-  	if (n  ==  0)
+  	if (n  =  0)
   	then 1
   	else (o (n  -  1));;
   
@@ -97,7 +97,7 @@
   	let pat0 = oba4 in 
   	let oba6 = ((tuple_getter 0) pat0) in 
   	let oba7 = ((tuple_getter 1) pat0) in 
-  	if (oba5  ==  0)
+  	if (oba5  =  0)
   	then 0
   	else (oba6 (oba5  -  1));;
   

@@ -13,9 +13,7 @@ let parse_and_get_anf_result str =
          "Types:\n%a\n"
          Inferencer.TypeEnv.pretty_pp_env
          (Std.std_lst, structure_env);
-       let structure, varSet =
-         Alpha_conversion.run_alpha_conversion structure
-       in
+       let structure, varSet = Alpha_conversion.run_alpha_conversion structure in
        let simple_structure = To_simple_ast.convert structure in
        let simple_structure =
          Closure_conversion.run_closure_conversion simple_structure

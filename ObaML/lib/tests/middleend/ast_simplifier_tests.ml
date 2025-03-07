@@ -8,9 +8,7 @@ open Format
 let parse_simplify_and_print_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure, _ =
-      Alpha_conversion.run_alpha_conversion parse_result
-    in
+    let structure, _ = Alpha_conversion.run_alpha_conversion parse_result in
     let structure = To_simple_ast.convert structure in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
   | Error _ -> printf "Syntax error"

@@ -76,5 +76,8 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))

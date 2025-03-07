@@ -66,8 +66,8 @@ let runtime_functions =
   ; gte, function_type ptr_type [| ptr_type; ptr_type |]
   ; uplus, function_type ptr_type [| ptr_type |]
   ; uminus, function_type ptr_type [| ptr_type |]
-  ; llor, function_type ptr_type [|ptr_type; ptr_type|]
-  ; lland, function_type ptr_type [|ptr_type; ptr_type|]
+  ; llor, function_type ptr_type [| ptr_type; ptr_type |]
+  ; lland, function_type ptr_type [| ptr_type; ptr_type |]
   ; create_empty_list_val, function_type ptr_type [||]
   ; add_elem_to_list_val, function_type ptr_type [| ptr_type; ptr_type |]
   ; list_head_getter, function_type ptr_type [| ptr_type |]
@@ -101,8 +101,8 @@ let name_to_runtime_func =
   let init = VarSMap.add "( >= )" gte init in
   let init = VarSMap.add "( ~+ )" uplus init in
   let init = VarSMap.add "( ~- )" uminus init in
-  let init = VarSMap.add "( || )" llor init in 
-  let init = VarSMap.add "( && )" lland init in 
+  let init = VarSMap.add "( || )" llor init in
+  let init = VarSMap.add "( && )" lland init in
   let init = VarSMap.add "list_head_getter" list_head_getter init in
   let init = VarSMap.add "list_tail_getter" list_tail_getter init in
   let init = VarSMap.add "list_length_getter" list_length_getter init in
@@ -185,7 +185,7 @@ let rec compile_immexpr env ext_env = function
   | Anf.ImmInt n ->
     let func, typ = find_ext_func_info ext_env create_int_val in
     build_call typ func [| const_int i32_type n |] "int_var" builder
-  | Anf.ImmString s -> 
+  | Anf.ImmString s ->
     let str_ptr = Llvm.build_global_stringptr s "tmp_str" builder in
     let func, typ = find_ext_func_info ext_env create_string_val in
     build_call typ func [| str_ptr |] "string_val" builder
