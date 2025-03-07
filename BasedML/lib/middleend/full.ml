@@ -2,18 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-let st x f =
-  match x with
-  | Error err -> Error err
-  | Ok v -> f v
-;;
-
-let res x f =
-  match x with
-  | _, Error err -> Error err
-  | _, Ok v -> f v
-;;
-
 let unpack lst =
   let rec help lst = function
     | Ok acc ->
@@ -31,12 +19,24 @@ let unpack lst =
   | x -> x
 ;;
 
+let ( let@ ) x f =
+  match x with
+  | Error err -> Error err
+  | Ok v -> f v
+;;
+
+let ( let$ ) x f =
+  match x with
+  | _, Error err -> Error err
+  | _, Ok v -> f v
+;;
+
 let middleend_transform_prog prog =
-  st (Egraphs.simplify prog) (fun simplified ->
-    res (Alpha_conversion.transform simplified) (fun alpha_converted ->
-      let closure_converted = Closure_conversion.convert_ast alpha_converted in
-      let lifted = Lambda_lifting.lift_ast closure_converted in
-      res (Match_elimination.transform lifted) (fun match_free ->
-        let anf = Anf.transform match_free in
-        anf |> unpack)))
+  let@ simplified = Egraphs.simplify prog in
+  let$ alpha_converted = Alpha_conversion.transform simplified in
+  let$ match_free =
+    Match_elimination.transform
+      (Lambda_lifting.lift_ast (Closure_conversion.convert_ast alpha_converted))
+  in
+  Anf.transform match_free |> unpack
 ;;
