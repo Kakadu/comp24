@@ -18,8 +18,12 @@ let fresh_var =
 ;;
 
 let user_var name =
-  match name.[0] with
-  | '(' -> name
+  match
+    List.find_opt
+      (fun (predef, _, _) -> predef = name)
+      Utils.Predefined_ops.predefine_operators
+  with
+  | Some (_, _, alt_name) -> alt_name
   | _ -> "__var_" ^ name
 ;;
 
