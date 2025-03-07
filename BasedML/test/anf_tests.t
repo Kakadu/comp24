@@ -310,7 +310,7 @@
   let e_0 = anf_app_0 in
   let anf_app_1 = get_field p_1 1 in
   let o_0 = anf_app_1 in
-  let anf_app_2 = ( == ) n_0 0 in
+  let anf_app_2 = ( = ) n_0 0 in
   let anf_ifthenelse_5 = if anf_app_2 then 1 else let anf_app_3 = ( - ) n_0 1 in
   let anf_app_4 = o_0 anf_app_3  in
   anf_app_4 in
@@ -319,7 +319,7 @@
   let e_1 = anf_app_0 in
   let anf_app_1 = get_field p_2 1 in
   let o_1 = anf_app_1 in
-  let anf_app_2 = ( == ) n_1 0 in
+  let anf_app_2 = ( = ) n_1 0 in
   let anf_ifthenelse_5 = if anf_app_2 then 0 else let anf_app_3 = ( - ) n_1 1 in
   let anf_app_4 = e_1 anf_app_3  in
   anf_app_4 in
