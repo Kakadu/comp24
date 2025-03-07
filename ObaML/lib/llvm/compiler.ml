@@ -242,17 +242,6 @@ let rec compile_cexpr env ext_env = function
         llvalues
     in
     last_val
-    (* Можно передавать в closure сразу новые аргументы. Требует модификацию runtime `apply_closure` функции*)
-    (* let args_array =
-       Array.of_list (closure :: const_int i32_type (List.length llvalues) :: llvalues)
-       in
-       ( build_call
-       apply_closure_func_type
-       apply_closure_func
-       args_array
-       "apply_closure_res"
-       builder
-       ) *)
   | Anf.CIf (imm, aexpr1, aexpr2) ->
     let cond_val = compile_immexpr env ext_env imm in
     let func, typ = find_ext_func_info ext_env get_i1_val in
