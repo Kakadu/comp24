@@ -41,41 +41,42 @@ let%expect_test _ =
 
 let%expect_test _ =
   pp_closure_conv_prog {| let f a b = let g = a in g + b |};
-  [%expect
-    {| let var_3 arg_0 arg_1 = let var_2 arg_0 = arg_0 in ((( + ) (var_2 arg_0)) arg_1) |}]
+  [%expect {| let var_3 arg_0 arg_1 = let var_2 = arg_0 in ((( + ) var_2) arg_1) |}]
 ;;
 
 (* 001fac.ml *)
 
-let%expect_test _ =
-  pp_closure_conv_prog {| let rec fac n = if n<=1 then 1 else n * fac (n-1) |};
+let%expect_test "001fac.ml" =
+  pp_closure_conv_prog
+    {| 
+      let rec fac n = if n<=1 then 1 else n * fac (n-1) 
+      let main = let () = print_int (fac 4) in 0
+    |};
   [%expect
-    {| let rec var_0 arg_1 = if ((( <= ) arg_1) 1) then 1 else ((( * ) arg_1) (var_0 ((( - ) arg_1) 1))) |}]
-;;
-
-let%expect_test _ =
-  pp_closure_conv_prog {| let main = let () = print_int (fac 4) in 0 |};
-  [%expect {| let var_0 = let () = (print_int (fac 4)) in 0 |}]
+    {| 
+      let rec var_0 arg_1 = if ((( <= ) arg_1) 1) then 1 else ((( * ) arg_1) (var_0 ((( - ) arg_1) 1)))
+      let var_2 = let () = (print_int (var_0 4)) in 0
+    |}]
 ;;
 
 (* 002fac.ml *)
 
-let%expect_test _ =
+let%expect_test "002fac.ml" =
   pp_closure_conv_prog
-    {| let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n)) |};
+    {| 
+      let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n)) 
+      let main = let () = print_int (fac_cps 4 (fun print_int -> print_int)) in 0
+    |};
   [%expect
-    {| let rec var_0 arg_1 arg_2 = if ((( = ) arg_1) 1) then (arg_2 1) else ((var_0 ((( - ) arg_1) 1)) (((fun arg_1 arg_2 arg_3 -> (arg_2 ((( * ) arg_3) arg_1))) arg_1) arg_2)) |}]
-;;
-
-let%expect_test _ =
-  pp_closure_conv_prog
-    {| let main = let () = print_int (fac_cps 4 (fun print_int -> print_int)) in 0 |};
-  [%expect {| let var_1 = let () = (print_int ((fac_cps 4) (fun arg_0 -> arg_0))) in 0 |}]
+    {| 
+      let rec var_0 arg_1 arg_2 = if ((( = ) arg_1) 1) then (arg_2 1) else ((var_0 ((( - ) arg_1) 1)) (((fun arg_1 arg_2 arg_3 -> (arg_2 ((( * ) arg_3) arg_1))) arg_1) arg_2)) 
+      let var_5 = let () = (print_int ((var_0 4) (fun arg_4 -> arg_4))) in 0
+    |}]
 ;;
 
 (* 003fib.ml *)
 
-let%expect_test _ =
+let%expect_test "003fib.ml" =
   pp_closure_conv_prog
     {| 
       let rec fib_acc a b n = if n=1 then b else let n1 = n-1 in let ab = a+b in fib_acc b ab n1
@@ -84,7 +85,7 @@ let%expect_test _ =
     |};
   [%expect
     {| 
-      let rec var_0 arg_1 arg_2 arg_3 = if ((( = ) arg_3) 1) then arg_2 else let var_4 arg_3 = ((( - ) arg_3) 1) in let var_5 arg_1 arg_2 = ((( + ) arg_1) arg_2) in (((var_0 arg_2) ((var_5 arg_1) arg_2)) (var_4 arg_3))
+      let rec var_0 arg_1 arg_2 arg_3 = if ((( = ) arg_3) 1) then arg_2 else let var_4 = ((( - ) arg_3) 1) in let var_5 = ((( + ) arg_1) arg_2) in (((var_0 arg_2) var_5) var_4)
       let rec var_6 arg_7 = if ((( < ) arg_7) 2) then arg_7 else ((( + ) (var_6 ((( - ) arg_7) 1))) (var_6 ((( - ) arg_7) 2)))
       let var_8 = let () = (print_int (((var_0 0) 1) 4)) in let () = (print_int (var_6 4)) in 0
     |}]
