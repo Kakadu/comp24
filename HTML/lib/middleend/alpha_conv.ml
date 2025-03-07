@@ -244,7 +244,7 @@ let find_replace_occurs_lb name new_name (id, args, e) =
   let* e' = find_replace_occurs_aexpr name new_name None e in
   let* id =
     let name_of_decl = identifier_to_str id in
-    if name_of_decl = name && name_of_decl <> "main"
+    if name_of_decl = name
     then
       let* _ = incr_counter name TopLevel in
       let* name = gen_name name TopLevel in

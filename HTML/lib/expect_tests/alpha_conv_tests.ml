@@ -59,7 +59,7 @@ let%expect_test "sanity check" =
     let app_4.l8 = (n * app_3.l4) in
     app_4.l8 in
     if_1.l2;;
-    let main  = let app_0.l3 = fac.1 4 in
+    let main.1  = let app_0.l3 = fac.1 4 in
     let app_1.l4 = print_int app_0.l3 in
     let EVALUATED_0.l8 = app_1.l4 in
     let app_2.l18 = (EVALUATED_0.l8 ( = ) ()) in
@@ -258,6 +258,6 @@ let%expect_test "sanity check" =
     app_5.l16 in
     if_1.l4;;
     let cc_ll_1.1 x = x;;
-    let main  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
+    let main.1  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
     app_0.l7 |}]
 ;;

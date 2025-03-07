@@ -47,7 +47,7 @@ PASS
   let app_4.l8 = (n * app_3.l4) in
   app_4.l8 in
   if_1.l2;;
-  let main  = let app_0.l3 = fac.1 4 in
+  let main.1  = let app_0.l3 = fac.1 4 in
   let app_1.l4 = print_int app_0.l3 in
   let EVALUATED_0.l8 = app_1.l4 in
   let app_2.l18 = (EVALUATED_0.l8 ( = ) ()) in
@@ -79,7 +79,7 @@ PASS
   app_5.l16 in
   if_1.l4;;
   let cc_ll_1.1 print_int = print_int;;
-  let main  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
+  let main.1  = let app_0.l7 = fac_cps.1 4 cc_ll_1.1 in
   let app_1.l10 = print_int app_0.l7 in
   let EVALUATED_0.l16 = app_1.l10 in
   let app_2.l36 = (EVALUATED_0.l16 ( = ) ()) in
@@ -116,7 +116,7 @@ PASS
   let app_6.l192 = (app_5.l96 + app_3.l16) in
   app_6.l192 in
   if_1.l6;;
-  let main  = let app_0.l6 = fib_acc.1 0 1 4 in
+  let main.1  = let app_0.l6 = fib_acc.1 0 1 4 in
   let app_1.l6 = print_int app_0.l6 in
   let EVALUATED_0.l12 = app_1.l6 in
   let app_2.l30 = (EVALUATED_0.l12 ( = ) ()) in
@@ -166,7 +166,7 @@ PASS
   let app_7.l384 = (app_6.l192 + i) in
   let app_8.l768 = (app_7.l384 + j) in
   app_8.l768;;
-  let main  = let app_0.l10 = wrap.1 test10.1 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
+  let main.1  = let app_0.l10 = wrap.1 test10.1 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000 in
   let rez.l8 = app_0.l10 in
   let app_1.l30 = print_int rez.l8 in
   let EVALUATED_0.l32 = app_1.l30 in
@@ -199,7 +199,7 @@ PASS
   let app_4.l32 = (n * app_3.l8) in
   app_4.l32 in
   if_1.l4;;
-  let main  = let app_0.l6 = fix.1 fac.1 6 in
+  let main.1  = let app_0.l6 = fix.1 fac.1 6 in
   let app_1.l8 = print_int app_0.l6 in
   let EVALUATED_0.l12 = app_1.l8 in
   let app_2.l28 = (EVALUATED_0.l12 ( = ) ()) in
@@ -231,7 +231,7 @@ PASS
   let app_2.l32 = foo.1 false app_1.l12 in
   let app_3.l32 = foo.1 true app_2.l32 in
   app_3.l32;;
-  let main  = let app_0.l11 = foo.2 11 in
+  let main.1  = let app_0.l11 = foo.2 11 in
   let app_1.l16 = print_int app_0.l11 in
   let EVALUATED_0.l16 = app_1.l16 in
   let app_2.l48 = (EVALUATED_0.l16 ( = ) ()) in
@@ -271,7 +271,7 @@ PASS
   let app_12.l32768 = (b * c) in
   let app_13.l65536 = (a + app_12.l32768) in
   app_13.l65536;;
-  let main  = let app_0.l3 = foo.1 1 in
+  let main.1  = let app_0.l3 = foo.1 1 in
   let foo.l64 = app_0.l3 in
   let app_1.l12 = foo.l64 2 in
   let foo.l80 = app_1.l12 in
@@ -313,7 +313,7 @@ PASS
   app_3.l56 in
   let _.l0 = if_2.l56 in
   cc_ll_1.1;;
-  let main  = let app_0.l10 = foo.1 4 8 9 in
+  let main.1  = let app_0.l10 = foo.1 4 8 9 in
   let EVALUATED_2.l8 = app_0.l10 in
   let app_1.l36 = (EVALUATED_2.l8 ( = ) ()) in
   let if_2.l72 = if app_1.l36 then () else let app_3.l72 = RTE_ERROR_MATCH_FAILURE () in
@@ -375,7 +375,7 @@ PASS
   app_2.l52 in
   let _.l32 = if_1.l28 in
   cc_ll_3.1;;
-  let main  = let app_0.l21 = - 555555 in
+  let main.1  = let app_0.l21 = - 555555 in
   let app_1.l14 = - 1 in
   let app_2.l60 = print_int app_1.l14 in
   let app_3.l88 = print_int 4 in
@@ -407,7 +407,7 @@ PASS
   let cc_ll_1.1 _start = let app_0.l6 = (_start / 2) in
   let app_1.l14 = (app_0.l6 = 0) in
   app_1.l14;;
-  let main  = let app_0.l8 = addi.1 cc_ll_0.1 cc_ll_1.1 4 in
+  let main.1  = let app_0.l8 = addi.1 cc_ll_0.1 cc_ll_1.1 4 in
   let app_1.l18 = print_int app_0.l8 in
   let EVALUATED_0.l16 = app_1.l18 in
   let app_2.l34 = (EVALUATED_0.l16 ( = ) ()) in
