@@ -332,16 +332,10 @@ and closure_convert_let_in global_env (d : decl) : decl cc =
     return (DLetMut (rf, lb1, lb2, lbs))
 ;;
 
-let common_convert_decl (global_env : StringSet.t) (rf, (pat_or_op, expr))
+let common_convert_decl (global_env : StringSet.t) (_, (pat_or_op, expr))
   : (StringSet.t * let_body) cc
   =
   let _, body = get_efun_args_body (StringSet.elements global_env) expr in
-  (* horrible todo*)
-  let global_env =
-    StringSet.union global_env
-    @@ StringSet.from_list
-    @@ if rf = Recursive then pattern_to_string pat_or_op else []
-  in
   let* body' = closure_convert_expr global_env body None in
   let global_env =
     StringSet.union global_env (StringSet.from_list (pattern_to_string pat_or_op))
