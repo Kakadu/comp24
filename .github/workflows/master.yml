@@ -43,6 +43,31 @@ jobs:
           opam exec -- ocaml .github/detect_latest_pr.ml -master -repo ${{ github.event.repository.name }} >> $GITHUB_ENV
           echo "${{ env.latest }}"
 
+      - name: Look for `rust-toolchain.toml`
+        run: |
+          cd ${{ env.latest }}
+          RUST_TOOLCHAIN=$(find . -name "rust-toolchain.toml" | head -n 1)
+          if [ -n "$RUST_TOOLCHAIN" ]; then
+            echo "RUST_TOOLCHAIN=$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+            echo "RUST_ROOT=$(dirname "$RUST_TOOLCHAIN")" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install rustup
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain none -y && . "$HOME/.cargo/env"
+            rustup --version
+            echo "CARGO_HOME=$HOME/.cargo" >> $GITHUB_ENV
+            echo "RUSTUP_HOME=$HOME/.rustup" >> $GITHUB_ENV
+            echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Setup Rust
+        if: ${{ env.RUST_TOOLCHAIN != '' }}
+        run: |
+            cd ${{ env.latest }}
+            cd ${{ env.RUST_ROOT }}
+            rustup show
+
       - name: Installing dependencies for ${{ env.latest }}
         run: |
           opam update
