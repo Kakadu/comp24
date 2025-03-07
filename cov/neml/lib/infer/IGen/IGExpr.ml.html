@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>IGExpr.ml &mdash; Coverage report</title>
+    <meta name="description" content="98.53% coverage in lib/infer/IGen/IGExpr.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/infer/IGen/</span>IGExpr.ml
+        </a>
+      </h1>
+      <h2>98.53%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:27.69%"></span>
+      <span class="some-visited" style="bottom:12.82%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="some-visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span > </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="visited"> </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span class="visited"> </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span class="visited"> </span>
+<a id="L125"></a><span > </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span class="visited"> </span>
+<a id="L130"></a><span class="visited"> </span>
+<a id="L131"></a><span class="visited"> </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span > </span>
+<a id="L134"></a><span > </span>
+<a id="L135"></a><span class="visited"> </span>
+<a id="L136"></a><span > </span>
+<a id="L137"></a><span > </span>
+<a id="L138"></a><span > </span>
+<a id="L139"></a><span > </span>
+<a id="L140"></a><span class="visited"> </span>
+<a id="L141"></a><span class="visited"> </span>
+<a id="L142"></a><span class="visited"> </span>
+<a id="L143"></a><span > </span>
+<a id="L144"></a><span > </span>
+<a id="L145"></a><span > </span>
+<a id="L146"></a><span class="visited"> </span>
+<a id="L147"></a><span class="visited"> </span>
+<a id="L148"></a><span class="visited"> </span>
+<a id="L149"></a><span > </span>
+<a id="L150"></a><span class="visited"> </span>
+<a id="L151"></a><span class="visited"> </span>
+<a id="L152"></a><span class="visited"> </span>
+<a id="L153"></a><span > </span>
+<a id="L154"></a><span class="visited"> </span>
+<a id="L155"></a><span > </span>
+<a id="L156"></a><span class="visited"> </span>
+<a id="L157"></a><span > </span>
+<a id="L158"></a><span class="visited"> </span>
+<a id="L159"></a><span > </span>
+<a id="L160"></a><span > </span>
+<a id="L161"></a><span > </span>
+<a id="L162"></a><span > </span>
+<a id="L163"></a><span > </span>
+<a id="L164"></a><span > </span>
+<a id="L165"></a><span class="visited"> </span>
+<a id="L166"></a><span class="visited"> </span>
+<a id="L167"></a><span class="visited"> </span>
+<a id="L168"></a><span > </span>
+<a id="L169"></a><span class="visited"> </span>
+<a id="L170"></a><span class="some-visited"> </span>
+<a id="L171"></a><span > </span>
+<a id="L172"></a><span class="visited"> </span>
+<a id="L173"></a><span class="visited"> </span>
+<a id="L174"></a><span class="visited"> </span>
+<a id="L175"></a><span > </span>
+<a id="L176"></a><span > </span>
+<a id="L177"></a><span > </span>
+<a id="L178"></a><span > </span>
+<a id="L179"></a><span class="visited"> </span>
+<a id="L180"></a><span > </span>
+<a id="L181"></a><span class="visited"> </span>
+<a id="L182"></a><span > </span>
+<a id="L183"></a><span class="visited"> </span>
+<a id="L184"></a><span class="visited"> </span>
+<a id="L185"></a><span > </span>
+<a id="L186"></a><span class="visited"> </span>
+<a id="L187"></a><span class="visited"> </span>
+<a id="L188"></a><span class="visited"> </span>
+<a id="L189"></a><span > </span>
+<a id="L190"></a><span > </span>
+<a id="L191"></a><span class="visited"> </span>
+<a id="L192"></a><span class="visited"> </span>
+<a id="L193"></a><span class="visited"> </span>
+<a id="L194"></a><span class="visited"> </span>
+<a id="L195"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
+<a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
+<a href="#L148">148</a>
+<a href="#L149">149</a>
+<a href="#L150">150</a>
+<a href="#L151">151</a>
+<a href="#L152">152</a>
+<a href="#L153">153</a>
+<a href="#L154">154</a>
+<a href="#L155">155</a>
+<a href="#L156">156</a>
+<a href="#L157">157</a>
+<a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
+<a href="#L167">167</a>
+<a href="#L168">168</a>
+<a href="#L169">169</a>
+<a href="#L170">170</a>
+<a href="#L171">171</a>
+<a href="#L172">172</a>
+<a href="#L173">173</a>
+<a href="#L174">174</a>
+<a href="#L175">175</a>
+<a href="#L176">176</a>
+<a href="#L177">177</a>
+<a href="#L178">178</a>
+<a href="#L179">179</a>
+<a href="#L180">180</a>
+<a href="#L181">181</a>
+<a href="#L182">182</a>
+<a href="#L183">183</a>
+<a href="#L184">184</a>
+<a href="#L185">185</a>
+<a href="#L186">186</a>
+<a href="#L187">187</a>
+<a href="#L188">188</a>
+<a href="#L189">189</a>
+<a href="#L190">190</a>
+<a href="#L191">191</a>
+<a href="#L192">192</a>
+<a href="#L193">193</a>
+<a href="#L194">194</a>
+<a href="#L195">195</a>
+</pre>
+<pre><code class="ocaml">[@@@ocaml.text "/*"]
+
+(** Copyright 2024, Andrei, PavlushaSource *)
+
+(** SPDX-License-Identifier: MIT *)
+
+[@@@ocaml.text "/*"]
+
+open! Base
+
+open LMisc
+open LAst
+open LTypes
+
+open IGCommon
+open IGMonad
+
+let rec gen : Expr.t -&gt; (As.t * Ty.t) IGMonad.t = function
+  | <span data-count="468">I</span>d id -&gt;
+      let* var = fresh in
+      <span data-count="468">r</span>eturn (As.singl<span data-count="468">e</span> id (VarSet.singl<span data-count="468">e</span> var), Ty.Var var)
+  | <span data-count="177">C</span>onst const -&gt;
+      return (As.empty, typeof_cons<span data-count="177">t</span> const)
+  | <span data-count="376">A</span>pply (efun, earg) -&gt;
+      let* as_fun, ty_fun = ge<span data-count="376">n</span> efun in
+      <span data-count="376">l</span>et* as_arg, ty_arg = ge<span data-count="376">n</span> earg in
+      <span data-count="376">l</span>et* ty_res = fresh &gt;&gt;<span data-count="376">|</span> fun var -&gt; <span data-count="376">T</span>y.Var var in
+
+      <span data-count="376">l</span>et* () = c<span data-count="376">s</span> [ty_fun == Arr (ty_arg, ty_res)] in
+      <span data-count="376">r</span>eturn (as_fun +<span data-count="376">+</span> as_arg, ty_res)
+  | <span data-count="123">F</span>un (args, expr) -&gt;
+      let* as_args, bounds, ty_args =
+        IGPat.gen_man<span data-count="123">y</span> ~dir:`Left (List1.to_lis<span data-count="123">t</span> args)
+      in
+
+      <span data-count="122">l</span>et* as_expr, ty_expr =
+        extend_var<span data-count="122">s</span> (Set.of_lis<span data-count="122">t</span> (module Var) (Map.dat<span data-count="122">a</span> bounds)) (ge<span data-count="122">n</span> expr)
+      in
+      <span data-count="122">l</span>et* () = resolve_as<span data-count="122">m</span> bounds as_expr `Eq in
+
+      <span data-count="122">l</span>et ty_res =
+        List.fold ty_args ~init:ty_expr ~f:(fun acc ty_arg -&gt;
+            <span data-count="196">T</span>y.Arr (ty_arg, acc) )
+      in
+
+      <span data-count="122">r</span>eturn (as_args +<span data-count="122">+</span> (as_expr -<span data-count="122">-</span> Map.key<span data-count="122">s</span> bounds), ty_res)
+  | <span data-count="46">T</span>uple exprs -&gt;
+      let* asm, tys = gen_man<span data-count="46">y</span> ~dir:`Right (List2.to_lis<span data-count="46">t</span> exprs) in
+      <span data-count="46">r</span>eturn (asm, Ty.Tuple (List2.of_list_ex<span data-count="46">n</span> tys))
+  | <span data-count="21">I</span>f (econd, ethen, eelse) -&gt;
+      let* as_cond, ty_cond = ge<span data-count="21">n</span> econd in
+      <span data-count="21">l</span>et* as_then, ty_then = ge<span data-count="21">n</span> ethen in
+      <span data-count="21">l</span>et* as_else, ty_else =
+        match eelse with <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> (As.empty, Ty.unit) | <span data-count="21">S</span>ome e -&gt; ge<span data-count="21">n</span> e
+      in
+
+      <span data-count="21">l</span>et* () = c<span data-count="21">s</span> [ty_cond == Ty.bool; ty_then == ty_else] in
+      <span data-count="21">r</span>eturn (as_cond +<span data-count="21">+</span> as_then +<span data-count="21">+</span> as_else, ty_then)
+  | <span data-count="4">S</span>eq exprs -&gt;
+      let* asm, tys = gen_man<span data-count="4">y</span> ~dir:`Left (List2.to_lis<span data-count="4">t</span> exprs) in
+      <span data-count="4">r</span>eturn (asm, List.hd_ex<span data-count="4">n</span> tys)
+  | <span data-count="89">C</span>onstruct (id, arg) -&gt;
+      let* var = fresh in
+      <span data-count="89">l</span>et as_con = As.single id (VarSet.singl<span data-count="89">e</span> var) in
+      <span data-count="89">l</span>et ty_con = Ty.Var var in
+
+      let* ty_res = fresh &gt;&gt;<span data-count="89">|</span> fun var -&gt; <span data-count="89">T</span>y.Var var in
+      <span data-count="89">l</span>et* as_arg =
+        match arg with
+        | <span data-count="48">N</span>one -&gt;
+            let* () = c<span data-count="48">s</span> [ty_con == ty_res] in
+            <span data-count="48">r</span>eturn As.empty
+        | <span data-count="41">S</span>ome arg -&gt;
+            let* as_arg, ty_arg = ge<span data-count="41">n</span> arg in
+            <span data-count="41">l</span>et* () = c<span data-count="41">s</span> [ty_con == Arr (ty_arg, ty_res)] in
+            <span data-count="41">r</span>eturn as_arg
+      in
+
+      <span data-count="89">r</span>eturn (as_con +<span data-count="89">+</span> as_arg, ty_res)
+  | <span data-count="3">C</span>onstraint (expr, ty) -&gt;
+      let* as_expr, ty_expr = ge<span data-count="3">n</span> expr in
+      <span data-count="3">l</span>et* () = c<span data-count="3">s</span> [ty_expr == ty] in
+      <span data-count="3">r</span>eturn (as_expr, ty_expr)
+  | <span data-count="65">L</span>et (recf, bindings, expr) -&gt;
+      let* as_bindings, bounds = gen_le<span data-count="65">t</span> recf (List1.to_lis<span data-count="65">t</span> bindings) in
+      <span data-count="61">l</span>et* as_expr, ty_expr = ge<span data-count="61">n</span> expr in
+
+      <span data-count="61">l</span>et* () = resolve_as<span data-count="61">m</span> bounds as_expr `ImplInst in
+      <span data-count="61">r</span>eturn (as_bindings +<span data-count="61">+</span> (as_expr -<span data-count="61">-</span> Map.key<span data-count="61">s</span> bounds), ty_expr)
+  | <span data-count="13">M</span>atch (scrutinee, cases) -&gt;
+      let* as_scr, ty_scr = ge<span data-count="13">n</span> scrutinee in
+
+      <span data-count="13">l</span>et gen_case Expr.{pat; expr= erhs} =
+        <span data-count="28">l</span>et* as_pat, bounds, ty_pat = IGPat.ge<span data-count="28">n</span> pat in
+        <span data-count="28">l</span>et* as_rhs, ty_rhs = ge<span data-count="28">n</span> erhs in
+
+        <span data-count="28">l</span>et* () = c<span data-count="28">s</span> [ty_pat == ty_scr] in
+        <span data-count="28">l</span>et* () = resolve_as<span data-count="28">m</span> bounds as_rhs `ImplInst in
+
+        <span data-count="28">r</span>eturn (as_pat +<span data-count="28">+</span> (as_rhs -<span data-count="28">-</span> Map.key<span data-count="28">s</span> bounds), ty_rhs)
+      in
+
+      let* ty_res = fresh &gt;&gt;<span data-count="13">|</span> fun var -&gt; <span data-count="13">T</span>y.Var var in
+      <span data-count="13">l</span>et* as_cases =
+        fol<span data-count="13">d</span> ~dir:`Left (List1.to_lis<span data-count="13">t</span> cases) ~init:As.empty ~f:(fun acc case -&gt;
+            <span data-count="28">l</span>et* as_case, ty_case = gen_cas<span data-count="28">e</span> case in
+            <span data-count="28">l</span>et* () = c<span data-count="28">s</span> [ty_case == ty_res] in
+            <span data-count="28">r</span>eturn (acc +<span data-count="28">+</span> as_case) )
+      in
+
+      <span data-count="13">r</span>eturn (as_scr +<span data-count="13">+</span> as_cases, ty_res)
+  | <span data-count="8">F</span>unction cases -&gt;
+      let* ty_scr = fresh &gt;&gt;<span data-count="8">|</span> fun var -&gt; <span data-count="8">T</span>y.Var var in
+
+      <span data-count="8">l</span>et gen_case Expr.{pat; expr= erhs} =
+        <span data-count="11">l</span>et* as_pat, bounds, ty_pat = IGPat.ge<span data-count="11">n</span> pat in
+        <span data-count="7">l</span>et* as_rhs, ty_rhs =
+          extend_var<span data-count="7">s</span> (Set.of_lis<span data-count="7">t</span> (module Var) (Map.dat<span data-count="7">a</span> bounds)) (ge<span data-count="7">n</span> erhs)
+        in
+
+        <span data-count="7">l</span>et* () = c<span data-count="7">s</span> [ty_pat == ty_scr] in
+        <span data-count="7">l</span>et* () = resolve_as<span data-count="7">m</span> bounds as_rhs `Eq in
+
+        <span data-count="7">r</span>eturn (as_pat +<span data-count="7">+</span> (as_rhs -<span data-count="7">-</span> Map.key<span data-count="7">s</span> bounds), ty_rhs)
+      in
+
+      let* ty_res = fresh &gt;&gt;<span data-count="8">|</span> fun var -&gt; <span data-count="8">T</span>y.Var var in
+      <span data-count="8">l</span>et* as_cases =
+        fol<span data-count="8">d</span> ~dir:`Left (List1.to_lis<span data-count="8">t</span> cases) ~init:As.empty ~f:(fun acc case -&gt;
+            <span data-count="11">l</span>et* as_case, ty_case = gen_cas<span data-count="11">e</span> case in
+            <span data-count="7">l</span>et* () = c<span data-count="7">s</span> [ty_case == ty_res] in
+            <span data-count="7">r</span>eturn (acc +<span data-count="7">+</span> as_case) )
+      in
+
+      <span data-count="4">r</span>eturn (as_cases, Ty.Arr (ty_scr, ty_res))
+
+and gen_many :
+    dir:[`Left | `Right] -&gt; Expr.t list -&gt; (As.t * Ty.t list) IGMonad.t =
+ fun ~dir l -&gt;
+  <span data-count="50">f</span>old l ~dir ~init:(As.empty, []) ~f:(fun (as_acc, tys_acc) expr -&gt;
+      <span data-count="103">l</span>et* as_expr, ty_expr = ge<span data-count="103">n</span> expr in
+      <span data-count="103">r</span>eturn (as_acc +<span data-count="103">+</span> as_expr, ty_expr :: tys_acc) )
+
+(** Create constraints for the type of every pattern and its occurrences in expression *)
+and resolve_asm (bounds : Bounds.t) (asm : As.t) (con : [`Eq | `ImplInst]) =
+  <span data-count="244">l</span>et* bound_vars = bound_vars in
+  <span data-count="244">M</span>ap.fold bounds ~init:(retur<span data-count="244">n</span> ()) ~f:(fun ~key:id ~data:var_pat acc -&gt;
+      <span data-count="299">l</span>et* () = acc in
+
+      <span data-count="299">l</span>et vars_expr = Map.find asm id |&gt; <span data-count="299">O</span>ption.value ~default:VarSet.empty in
+      <span data-count="299">S</span>et.fold vars_expr ~init:(retur<span data-count="299">n</span> ()) ~f:(fun acc var_expr -&gt;
+          <span data-count="315">l</span>et* () = acc in
+
+          <span data-count="315">l</span>et con =
+            match con with
+            | <span data-count="247">`</span>Eq -&gt;
+                Var var_expr == Var var_pat
+            | <span data-count="68">`</span>ImplInst -&gt;
+                ImplInst (Var var_expr, bound_vars, Var var_pat)
+          in
+          cs [con] ) )
+
+and gen_let (recf : Expr.rec_flag) (bindings : Expr.value_binding list) =
+  (* checks recursive binding for forbidden expressions *)
+  <span data-count="165">l</span>et check_rec (vb : Expr.value_binding) : unit t =
+    <span data-count="35">l</span>et* bound =
+      match vb.pat with <span data-count="30">V</span>ar id -&gt; retur<span data-count="30">n</span> id | <span data-count="5">p</span>at -&gt; fai<span data-count="5">l</span> (NotVarLHSRec pat)
+    in
+    <span data-count="30">m</span>atch vb.expr with
+    | <span data-count="26">F</span>un _ | <span data-count="0">F</span>unction _ | <span data-count="1">C</span>onst _ -&gt;
+        return ()
+    | <span data-count="1">I</span>d id when not (Id.equa<span data-count="1">l</span> id bound) -&gt;
+        <span data-count="1">r</span>eturn ()
+    | <span data-count="2">e</span>xpr -&gt;
+        fail (NotAllowedRHSRec expr)
+  in
+
+  let* asm, bounds =
+    fol<span data-count="165">d</span> ~dir:`Left bindings ~init:(As.empty, Bounds.empty)
+      ~f:(fun (as_acc, bounds_acc) vb -&gt;
+        <span data-count="167">l</span>et* () = match recf with <span data-count="35">R</span>ec -&gt; check_re<span data-count="35">c</span> vb | <span data-count="132">N</span>onrec -&gt; retur<span data-count="132">n</span> () in
+
+        <span data-count="160">l</span>et* as_pat, bounds_pat, ty_pat = IGPat.ge<span data-count="160">n</span> vb.pat in
+        <span data-count="159">l</span>et* as_expr, ty_expr = ge<span data-count="159">n</span> vb.expr in
+
+        <span data-count="159">l</span>et* () = c<span data-count="159">s</span> [ty_pat == ty_expr] in
+        <span data-count="159">l</span>et* bounds = Bounds.merg<span data-count="159">e</span> bounds_acc bounds_pat in
+        <span data-count="159">r</span>eturn (as_acc +<span data-count="159">+</span> as_pat +<span data-count="159">+</span> as_expr, bounds) )
+  in
+
+  <span data-count="157">m</span>atch recf with
+  | <span data-count="26">R</span>ec -&gt;
+      resolve_as<span data-count="26">m</span> bounds asm `Eq *&gt; retur<span data-count="26">n</span> (asm -<span data-count="26">-</span> Map.key<span data-count="26">s</span> bounds, bounds)
+  | <span data-count="131">N</span>onrec -&gt;
+      return (asm, bounds)
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

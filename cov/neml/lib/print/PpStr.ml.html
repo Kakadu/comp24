@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>PpStr.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/print/PpStr.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/print/</span>PpStr.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+</pre>
+<pre><code class="ocaml">[@@@ocaml.text "/*"]
+
+(** Copyright 2024, Andrei, PavlushaSource *)
+
+(** SPDX-License-Identifier: MIT *)
+
+[@@@ocaml.text "/*"]
+
+open! Base
+open PPrint
+
+open LAst
+open PpCommon
+
+let pp_stritem : StrItem.t -&gt; document =
+  let open StrItem in
+  function
+  | <span data-count="58">E</span>val expr -&gt;
+      PpExpr.pp expr
+  | <span data-count="24">L</span>et (rec_flag, bindings) -&gt;
+      plet PpPat.pp PpExpr.pp rec_flag bindings None
+  | <span data-count="13">T</span>ype {id; params; variants} -&gt;
+      let id = pp_id id in
+
+      <span data-count="13">l</span>et params =
+        match Set.to_list params with
+        | <span data-count="9">[</span>] -&gt;
+            empty
+        | <span data-count="3">[</span>var] -&gt;
+            PpTy.pp_va<span data-count="3">r</span> var ^<span data-count="3">^</span> space
+        | <span data-count="1">v</span>ars -&gt;
+            let params = List.map vars ~f:PpTy.pp_var in
+            <span data-count="1">p</span>aren<span data-count="1">s</span> (flo<span data-count="1">w</span> (comma ^<span data-count="1">^</span> brea<span data-count="1">k</span> 1) params) ^<span data-count="1">^</span> space
+      in
+
+      let variants =
+        let variants =
+          List.map variants ~f:(fun {id; arg} -&gt;
+              <span data-count="14">g</span>roup @@ pp_i<span data-count="14">d</span> id
+              ^<span data-count="14">^</span> optiona<span data-count="14">l</span>
+                   (fun ty -&gt; <span data-count="13">s</span>trin<span data-count="13">g</span> " of" ^^ nes<span data-count="13">t</span> 2 (brea<span data-count="13">k</span> 1 ^<span data-count="13">^</span> PpTy.p<span data-count="13">p</span> ty))
+                   arg )
+        in
+        <span data-count="13">l</span>et doc =
+          strin<span data-count="13">g</span> " ="
+          ^^ grou<span data-count="13">p</span>
+               ( brea<span data-count="13">k</span> 1
+               ^<span data-count="13">^</span> iffla<span data-count="13">t</span> empty (strin<span data-count="13">g</span> "| ")
+               ^<span data-count="13">^</span> separat<span data-count="13">e</span> (brea<span data-count="13">k</span> 1 ^<span data-count="13">^</span> strin<span data-count="13">g</span> "| ") variants )
+        in
+        <span data-count="13">i</span>f List.is_empty variants then <span data-count="2">e</span>mpty else <span data-count="11">d</span>oc
+      in
+
+      group @@ strin<span data-count="13">g</span> "type" ^<span data-count="13">^</span> grou<span data-count="13">p</span> (brea<span data-count="13">k</span> 1) ^<span data-count="13">^</span> params ^<span data-count="13">^</span> id ^<span data-count="13">^</span> variants
+
+let pp_structure (str : structure) : document =
+  <span data-count="94">l</span>et open PPrint in
+  let str = List.map str ~f:pp_stritem in
+  <span data-count="94">f</span>low (strin<span data-count="94">g</span> ";;" ^<span data-count="94">^</span> twic<span data-count="94">e</span> hardline) str
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

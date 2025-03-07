@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>IGPat.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/infer/IGen/IGPat.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/infer/IGen/</span>IGPat.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+</pre>
+<pre><code class="ocaml">[@@@ocaml.text "/*"]
+
+(** Copyright 2024, Andrei, PavlushaSource *)
+
+(** SPDX-License-Identifier: MIT *)
+
+[@@@ocaml.text "/*"]
+
+open! Base
+
+open LMisc
+open LAst
+open LTypes
+
+open IGCommon
+open IGMonad
+
+let rec gen : Pat.t -&gt; (As.t * Bounds.t * Ty.t) IGMonad.t = function
+  | <span data-count="375">V</span>ar id -&gt;
+      let* var = fresh in
+      <span data-count="375">r</span>eturn (As.empty, Bounds.singl<span data-count="375">e</span> id var, Ty.Var var)
+  | <span data-count="8">A</span>ny -&gt;
+      let* var = fresh in
+      <span data-count="8">r</span>eturn (As.empty, Bounds.empty, Ty.Var var)
+  | <span data-count="1">C</span>onst const -&gt;
+      return (As.empty, Bounds.empty, typeof_cons<span data-count="1">t</span> const)
+  | <span data-count="37">T</span>uple pats -&gt;
+      let* asm, bounds, tys = gen_man<span data-count="37">y</span> ~dir:`Right (List2.to_lis<span data-count="37">t</span> pats) in
+      <span data-count="36">r</span>eturn (asm, bounds, Ty.Tuple (List2.of_list_ex<span data-count="36">n</span> tys))
+  | <span data-count="47">C</span>onstraint (pat, ty) -&gt;
+      let* asm, bounds, ty_pat = ge<span data-count="47">n</span> pat in
+      <span data-count="47">l</span>et* () = c<span data-count="47">s</span> [ty_pat == ty] in
+      <span data-count="47">r</span>eturn (asm, bounds, ty_pat)
+  | <span data-count="84">C</span>onstruct (id, arg) -&gt;
+      let* var = fresh in
+      <span data-count="84">l</span>et as_con = As.single id (VarSet.singl<span data-count="84">e</span> var) in
+      <span data-count="84">l</span>et ty_con = Ty.Var var in
+
+      let* ty_res = fresh &gt;&gt;<span data-count="84">|</span> fun var -&gt; <span data-count="84">T</span>y.Var var in
+      <span data-count="84">l</span>et* as_arg, bounds_arg =
+        match arg with
+        | <span data-count="46">N</span>one -&gt;
+            let* () = c<span data-count="46">s</span> [ty_con == ty_res] in
+            <span data-count="46">r</span>eturn (As.empty, Bounds.empty)
+        | <span data-count="38">S</span>ome arg -&gt;
+            let* as_arg, bounds_arg, ty_arg = ge<span data-count="38">n</span> arg in
+            <span data-count="38">l</span>et* () = c<span data-count="38">s</span> [ty_con == Arr (ty_arg, ty_res)] in
+            <span data-count="38">r</span>eturn (as_arg, bounds_arg)
+      in
+
+      <span data-count="84">r</span>eturn (as_con +<span data-count="84">+</span> as_arg, bounds_arg, ty_res)
+  | <span data-count="4">O</span>r _ -&gt;
+      fail (NotImplemented "or patterns")
+
+and gen_many :
+       dir:[`Left | `Right]
+    -&gt; Pat.t list
+    -&gt; (As.t * Bounds.t * Ty.t list) IGMonad.t =
+ fun ~dir l -&gt;
+  <span data-count="160">f</span>old ~dir l ~init:(As.empty, Bounds.empty, [])
+    ~f:(fun (as_acc, bounds_acc, tys_acc) pat -&gt;
+      <span data-count="272">l</span>et* as_pat, bounds_pat, ty_pat = ge<span data-count="272">n</span> pat in
+      <span data-count="272">l</span>et* bounds = Bounds.merg<span data-count="272">e</span> bounds_acc bounds_pat in
+      <span data-count="270">r</span>eturn (as_acc +<span data-count="270">+</span> as_pat, bounds, ty_pat :: tys_acc) )
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>
