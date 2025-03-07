@@ -319,136 +319,136 @@ open S.SMonad
 open Containers
 
 let checked_fresh_var env =
-  <span data-count="37">l</span>et rec helper env =
-    <span data-count="128">l</span>et* new_var = fresh_var in
-    <span data-count="128">m</span>atch VarSSet.find_opt new_var env with
-    | <span data-count="37">N</span>one -&gt; return (new_var, VarSSet.ad<span data-count="37">d</span> new_var env)
-    | <span data-count="91">S</span>ome _ -&gt; helper env
+  <span data-count="59">l</span>et rec helper env =
+    <span data-count="185">l</span>et* new_var = fresh_var in
+    <span data-count="185">m</span>atch VarSSet.find_opt new_var env with
+    | <span data-count="59">N</span>one -&gt; return (new_var, VarSSet.ad<span data-count="59">d</span> new_var env)
+    | <span data-count="126">S</span>ome _ -&gt; helper env
   in
   helper env
 ;;
 
-let id_from_var_name var_name = <span data-count="37">A</span>st.Id var_name
+let id_from_var_name var_name = <span data-count="59">A</span>st.Id var_name
 
 let rec lift_lambdas_from_value_binding value_binding env =
-  <span data-count="349">l</span>et ident, expr = value_binding in
+  <span data-count="492">l</span>et ident, expr = value_binding in
   match expr with
-  | <span data-count="147">S</span>imple_ast.SEFun (fid_lst, fexpr) -&gt;
-    let* fobaml_lst, new_expr, env = lift_lambdas_from_exp<span data-count="147">r</span> fexpr env in
-    <span data-count="147">r</span>eturn (fobaml_lst, (ident, Simple_ast.SEFun (fid_lst, new_expr)), env)
-  | <span data-count="202">_</span> -&gt;
-    let* fobaml_lst, new_expr, env = lift_lambdas_from_exp<span data-count="202">r</span> expr env in
-    <span data-count="202">r</span>eturn (fobaml_lst, (ident, new_expr), env)
+  | <span data-count="182">S</span>imple_ast.SEFun (fid_lst, fexpr) -&gt;
+    let* fobaml_lst, new_expr, env = lift_lambdas_from_exp<span data-count="182">r</span> fexpr env in
+    <span data-count="182">r</span>eturn (fobaml_lst, (ident, Simple_ast.SEFun (fid_lst, new_expr)), env)
+  | <span data-count="310">_</span> -&gt;
+    let* fobaml_lst, new_expr, env = lift_lambdas_from_exp<span data-count="310">r</span> expr env in
+    <span data-count="310">r</span>eturn (fobaml_lst, (ident, new_expr), env)
 
 and lift_lambdas_from_expr expr env =
-  <span data-count="349">l</span>et rec helper curr_fobaml_lst env = function
-    | <span data-count="364">S</span>imple_ast.SEConst _ as const -&gt; return (curr_fobaml_lst, const, env)
-    | <span data-count="1228">S</span>imple_ast.SEVar _ as var -&gt; return (curr_fobaml_lst, var, env)
-    | <span data-count="11">S</span>imple_ast.SETuple tup_lst -&gt;
+  <span data-count="492">l</span>et rec helper curr_fobaml_lst env = function
+    | <span data-count="535">S</span>imple_ast.SEConst _ as const -&gt; return (curr_fobaml_lst, const, env)
+    | <span data-count="1771">S</span>imple_ast.SEVar _ as var -&gt; return (curr_fobaml_lst, var, env)
+    | <span data-count="14">S</span>imple_ast.SETuple tup_lst -&gt;
       let* new_fobaml_lst, rev_new_tup_lst, env =
-        List.fold_lef<span data-count="11">t</span>
+        List.fold_lef<span data-count="14">t</span>
           (fun acc tup_expr -&gt;
-            <span data-count="22">l</span>et* curr_fobaml_lst, new_tup_lst, env = acc in
-            <span data-count="22">l</span>et* new_fobaml_lst, new_tup_expr, env =
-              helpe<span data-count="22">r</span> curr_fobaml_lst env tup_expr
+            <span data-count="28">l</span>et* curr_fobaml_lst, new_tup_lst, env = acc in
+            <span data-count="28">l</span>et* new_fobaml_lst, new_tup_expr, env =
+              helpe<span data-count="28">r</span> curr_fobaml_lst env tup_expr
             in
-            <span data-count="22">r</span>eturn (new_fobaml_lst, new_tup_expr :: new_tup_lst, env))
-          (retur<span data-count="11">n</span> (curr_fobaml_lst, [], env))
+            <span data-count="28">r</span>eturn (new_fobaml_lst, new_tup_expr :: new_tup_lst, env))
+          (retur<span data-count="14">n</span> (curr_fobaml_lst, [], env))
           tup_lst
       in
-      <span data-count="11">r</span>eturn (new_fobaml_lst, Simple_ast.SETuple (List.re<span data-count="11">v</span> rev_new_tup_lst), env)
-    | <span data-count="37">S</span>imple_ast.SEFun (ident_lst, expr) -&gt;
-      let* new_fobaml_var_name, env = checked_fresh_va<span data-count="37">r</span> env in
-      <span data-count="37">l</span>et new_fobaml_id = id_from_var_name new_fobaml_var_name in
-      <span data-count="37">l</span>et* new_fobaml_lst, new_expr, env = helpe<span data-count="37">r</span> curr_fobaml_lst env expr in
-      <span data-count="37">l</span>et new_fobaml_value_binding =
+      <span data-count="14">r</span>eturn (new_fobaml_lst, Simple_ast.SETuple (List.re<span data-count="14">v</span> rev_new_tup_lst), env)
+    | <span data-count="59">S</span>imple_ast.SEFun (ident_lst, expr) -&gt;
+      let* new_fobaml_var_name, env = checked_fresh_va<span data-count="59">r</span> env in
+      <span data-count="59">l</span>et new_fobaml_id = id_from_var_name new_fobaml_var_name in
+      <span data-count="59">l</span>et* new_fobaml_lst, new_expr, env = helpe<span data-count="59">r</span> curr_fobaml_lst env expr in
+      <span data-count="59">l</span>et new_fobaml_value_binding =
         Simple_ast.SId new_fobaml_id, Simple_ast.SEFun (ident_lst, new_expr)
       in
       let new_fobaml =
         Simple_ast.SSILet (Ast.Nonrecursive, [ new_fobaml_value_binding ])
       in
       let new_fobaml_lst = List.append new_fobaml_lst [ new_fobaml ] in
-      <span data-count="37">r</span>eturn (new_fobaml_lst, Simple_ast.SEVar new_fobaml_id, env)
-    | <span data-count="212">S</span>imple_ast.SELet (rec_flag, value_binding, expr) -&gt;
+      <span data-count="59">r</span>eturn (new_fobaml_lst, Simple_ast.SEVar new_fobaml_id, env)
+    | <span data-count="301">S</span>imple_ast.SELet (rec_flag, value_binding, expr) -&gt;
       let* additional_fobaml_lst, new_value_binding, env =
-        lift_lambdas_from_value_bindin<span data-count="212">g</span> value_binding env
+        lift_lambdas_from_value_bindin<span data-count="301">g</span> value_binding env
       in
-      <span data-count="212">l</span>et new_fobaml_lst = List.append curr_fobaml_lst additional_fobaml_lst in
-      <span data-count="212">l</span>et _, vexp = value_binding in
+      <span data-count="301">l</span>et new_fobaml_lst = List.append curr_fobaml_lst additional_fobaml_lst in
+      <span data-count="301">l</span>et _, vexp = value_binding in
       (match vexp with
-       | <span data-count="56">S</span>imple_ast.SEFun _ -&gt;
+       | <span data-count="58">S</span>imple_ast.SEFun _ -&gt;
          let new_fobaml_lst =
            List.append
              new_fobaml_lst
              [ Simple_ast.SSILet (rec_flag, [ new_value_binding ]) ]
          in
-         <span data-count="56">l</span>et* new_fobaml_lst, new_expr, env = helpe<span data-count="56">r</span> new_fobaml_lst env expr in
-         <span data-count="56">r</span>eturn (new_fobaml_lst, new_expr, env)
-       | <span data-count="156">_</span> -&gt;
-         let* new_fobaml_lst, new_expr, env = helpe<span data-count="156">r</span> new_fobaml_lst env expr in
-         <span data-count="156">r</span>eturn
+         <span data-count="58">l</span>et* new_fobaml_lst, new_expr, env = helpe<span data-count="58">r</span> new_fobaml_lst env expr in
+         <span data-count="58">r</span>eturn (new_fobaml_lst, new_expr, env)
+       | <span data-count="243">_</span> -&gt;
+         let* new_fobaml_lst, new_expr, env = helpe<span data-count="243">r</span> new_fobaml_lst env expr in
+         <span data-count="243">r</span>eturn
            (new_fobaml_lst, Simple_ast.SELet (rec_flag, new_value_binding, new_expr), env))
-    | <span data-count="1012">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
-      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="1012">r</span> curr_fobaml_lst env expr1 in
-      <span data-count="1012">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="1012">r</span> new_fobaml_lst env expr2 in
-      <span data-count="1012">r</span>eturn (new_fobaml_lst, Simple_ast.SEApp (new_expr1, new_expr2), env)
-    | <span data-count="71">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
-      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="71">r</span> curr_fobaml_lst env expr1 in
-      <span data-count="71">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="71">r</span> new_fobaml_lst env expr2 in
-      <span data-count="71">l</span>et* new_fobaml_lst, new_expr3, env = helpe<span data-count="71">r</span> new_fobaml_lst env expr3 in
-      <span data-count="71">r</span>eturn (new_fobaml_lst, Simple_ast.SEIf (new_expr1, new_expr2, new_expr3), env)
-    | <span data-count="78">S</span>imple_ast.SECons (expr1, expr2) -&gt;
-      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="78">r</span> curr_fobaml_lst env expr1 in
-      <span data-count="78">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="78">r</span> new_fobaml_lst env expr2 in
-      <span data-count="78">r</span>eturn (new_fobaml_lst, Simple_ast.SECons (new_expr1, new_expr2), env)
+    | <span data-count="1479">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
+      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="1479">r</span> curr_fobaml_lst env expr1 in
+      <span data-count="1479">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="1479">r</span> new_fobaml_lst env expr2 in
+      <span data-count="1479">r</span>eturn (new_fobaml_lst, Simple_ast.SEApp (new_expr1, new_expr2), env)
+    | <span data-count="108">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
+      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="108">r</span> curr_fobaml_lst env expr1 in
+      <span data-count="108">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="108">r</span> new_fobaml_lst env expr2 in
+      <span data-count="108">l</span>et* new_fobaml_lst, new_expr3, env = helpe<span data-count="108">r</span> new_fobaml_lst env expr3 in
+      <span data-count="108">r</span>eturn (new_fobaml_lst, Simple_ast.SEIf (new_expr1, new_expr2, new_expr3), env)
+    | <span data-count="105">S</span>imple_ast.SECons (expr1, expr2) -&gt;
+      let* new_fobaml_lst, new_expr1, env = helpe<span data-count="105">r</span> curr_fobaml_lst env expr1 in
+      <span data-count="105">l</span>et* new_fobaml_lst, new_expr2, env = helpe<span data-count="105">r</span> new_fobaml_lst env expr2 in
+      <span data-count="105">r</span>eturn (new_fobaml_lst, Simple_ast.SECons (new_expr1, new_expr2), env)
   in
   helper [] env expr
 ;;
 
 let lift_lambdas_from_value_binding_lst value_binding_lst env =
-  <span data-count="137">l</span>et* new_fobaml_lst, rev_new_value_binding_lst, env =
-    List.fold_lef<span data-count="137">t</span>
+  <span data-count="190">l</span>et* new_fobaml_lst, rev_new_value_binding_lst, env =
+    List.fold_lef<span data-count="190">t</span>
       (fun acc value_binding -&gt;
-        <span data-count="137">l</span>et* curr_fobaml_lst, cur_new_value_binding_lst, env = acc in
-        <span data-count="137">l</span>et* new_fobaml_lst, new_value_binding, env =
-          lift_lambdas_from_value_bindin<span data-count="137">g</span> value_binding env
+        <span data-count="191">l</span>et* curr_fobaml_lst, cur_new_value_binding_lst, env = acc in
+        <span data-count="191">l</span>et* new_fobaml_lst, new_value_binding, env =
+          lift_lambdas_from_value_bindin<span data-count="191">g</span> value_binding env
         in
-        <span data-count="137">r</span>eturn
-          ( List.appen<span data-count="137">d</span> curr_fobaml_lst new_fobaml_lst
+        <span data-count="191">r</span>eturn
+          ( List.appen<span data-count="191">d</span> curr_fobaml_lst new_fobaml_lst
           , new_value_binding :: cur_new_value_binding_lst
           , env ))
-      (retur<span data-count="137">n</span> ([], [], env))
+      (retur<span data-count="190">n</span> ([], [], env))
       value_binding_lst
   in
-  <span data-count="137">r</span>eturn (new_fobaml_lst, List.re<span data-count="137">v</span> rev_new_value_binding_lst, env)
+  <span data-count="190">r</span>eturn (new_fobaml_lst, List.re<span data-count="190">v</span> rev_new_value_binding_lst, env)
 ;;
 
 let lift_lambdas_from_structure structure env =
-  <span data-count="67">l</span>et helper env = function
-    | <span data-count="137">S</span>imple_ast.SSILet (rec_flag, value_binding_lst) -&gt;
+  <span data-count="84">l</span>et helper env = function
+    | <span data-count="190">S</span>imple_ast.SSILet (rec_flag, value_binding_lst) -&gt;
       let* new_fobaml_lst, new_value_binding_lst, env =
-        lift_lambdas_from_value_binding_ls<span data-count="137">t</span> value_binding_lst env
+        lift_lambdas_from_value_binding_ls<span data-count="190">t</span> value_binding_lst env
       in
-      <span data-count="137">r</span>eturn (new_fobaml_lst, Simple_ast.SSILet (rec_flag, new_value_binding_lst), env)
+      <span data-count="190">r</span>eturn (new_fobaml_lst, Simple_ast.SSILet (rec_flag, new_value_binding_lst), env)
     | <span data-count="0">S</span>imple_ast.SSIExpr expr -&gt;
       let* new_fobaml_lst, new_expr, env = lift_lambdas_from_exp<span data-count="0">r</span> expr env in
       <span data-count="0">r</span>eturn (new_fobaml_lst, Simple_ast.SSIExpr new_expr, env)
   in
   let* rev_new_structure, env =
-    List.fold_lef<span data-count="67">t</span>
+    List.fold_lef<span data-count="84">t</span>
       (fun acc structure_item -&gt;
-        <span data-count="137">l</span>et* new_structure, env = acc in
-        <span data-count="137">l</span>et* new_fobaml_lst, new_structure_item, env = helpe<span data-count="137">r</span> env structure_item in
-        <span data-count="137">r</span>eturn
-          (List.appen<span data-count="137">d</span> (new_structure_item :: List.re<span data-count="137">v</span> new_fobaml_lst) new_structure, env))
-      (retur<span data-count="67">n</span> ([], env))
+        <span data-count="190">l</span>et* new_structure, env = acc in
+        <span data-count="190">l</span>et* new_fobaml_lst, new_structure_item, env = helpe<span data-count="190">r</span> env structure_item in
+        <span data-count="190">r</span>eturn
+          (List.appen<span data-count="190">d</span> (new_structure_item :: List.re<span data-count="190">v</span> new_fobaml_lst) new_structure, env))
+      (retur<span data-count="84">n</span> ([], env))
       structure
   in
-  <span data-count="67">r</span>eturn (List.re<span data-count="67">v</span> rev_new_structure, env)
+  <span data-count="84">r</span>eturn (List.re<span data-count="84">v</span> rev_new_structure, env)
 ;;
 
 let run_lambda_lifting (structure : Simple_ast.sstructure) (env : VarSSet.t) =
-  <span data-count="67">r</span>un (lift_lambdas_from_structur<span data-count="67">e</span> structure env)
+  <span data-count="84">r</span>un (lift_lambdas_from_structur<span data-count="84">e</span> structure env)
 ;;
 </code></pre>
       </div>

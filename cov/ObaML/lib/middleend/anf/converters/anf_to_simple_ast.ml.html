@@ -230,15 +230,15 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 let convert_ident = function
-  | <span data-count="33">"</span>()" -&gt; Simple_ast.SSpecial SUnit
-  | <span data-count="650">_</span> as var_name -&gt; Simple_ast.SId (Ast.Id var_name)
+  | <span data-count="27">"</span>()" -&gt; Simple_ast.SSpecial SUnit
+  | <span data-count="668">_</span> as var_name -&gt; Simple_ast.SId (Ast.Id var_name)
 ;;
 
 let convert_ident_lst ident_lst =
-  <span data-count="115">l</span>et rev_ident_lst =
-    List.fold_left (fun acc ident -&gt; <span data-count="213">c</span>onvert_iden<span data-count="213">t</span> ident :: acc) [] ident_lst
+  <span data-count="117">l</span>et rev_ident_lst =
+    List.fold_left (fun acc ident -&gt; <span data-count="221">c</span>onvert_iden<span data-count="221">t</span> ident :: acc) [] ident_lst
   in
-  <span data-count="115">L</span>ist.rev rev_ident_lst
+  <span data-count="117">L</span>ist.rev rev_ident_lst
 ;;
 
 let rec convert_tuple tup_lst =
@@ -248,42 +248,42 @@ let rec convert_tuple tup_lst =
   <span data-count="7">S</span>imple_ast.SETuple (List.re<span data-count="7">v</span> rev_tup_lst)
 
 and convert_immexpr = function
-  | <span data-count="607">A</span>nf.ImmId id -&gt; Simple_ast.SEVar (Ast.Id id)
-  | <span data-count="175">A</span>nf.ImmInt num -&gt; Simple_ast.SEConst (Ast.CInt num)
-  | <span data-count="8">A</span>nf.ImmString str -&gt; Simple_ast.SEConst (Ast.CString str)
+  | <span data-count="627">A</span>nf.ImmId id -&gt; Simple_ast.SEVar (Ast.Id id)
+  | <span data-count="177">A</span>nf.ImmInt num -&gt; Simple_ast.SEConst (Ast.CInt num)
+  | <span data-count="4">A</span>nf.ImmString str -&gt; Simple_ast.SEConst (Ast.CString str)
   | <span data-count="11">A</span>nf.ImmBool b -&gt; Simple_ast.SEConst (Ast.CBool b)
   | <span data-count="22">A</span>nf.ImmEmptyList -&gt; Simple_ast.SEConst Ast.CEmptyList
-  | <span data-count="13">A</span>nf.ImmUnit -&gt; Simple_ast.SEConst Ast.CUnit
+  | <span data-count="11">A</span>nf.ImmUnit -&gt; Simple_ast.SEConst Ast.CUnit
   | <span data-count="7">A</span>nf.ImmTuple tup_lst -&gt; convert_tuple tup_lst
 ;;
 
 let rec convert_cexpr = function
   | <span data-count="66">A</span>nf.CImmExpr immexpr -&gt; convert_immexpr immexpr
-  | <span data-count="412">A</span>nf.CApp (app_var, args_lst) -&gt;
+  | <span data-count="417">A</span>nf.CApp (app_var, args_lst) -&gt;
     let expr1 = Simple_ast.SEVar (Ast.Id app_var) in
     List.fold_left
       (fun curr_expr arg -&gt;
-        <span data-count="653">l</span>et converted_arg = convert_immexpr arg in
-        <span data-count="653">S</span>imple_ast.SEApp (curr_expr, converted_arg))
+        <span data-count="668">l</span>et converted_arg = convert_immexpr arg in
+        <span data-count="668">S</span>imple_ast.SEApp (curr_expr, converted_arg))
       expr1
       args_lst
-  | <span data-count="42">A</span>nf.CIf (immexpr, aexpr1, aexpr2) -&gt;
+  | <span data-count="43">A</span>nf.CIf (immexpr, aexpr1, aexpr2) -&gt;
     let expr1 = convert_immexpr immexpr in
-    <span data-count="42">l</span>et expr2 = convert_aexpr aexpr1 in
-    <span data-count="42">l</span>et expr3 = convert_aexpr aexpr2 in
-    <span data-count="42">S</span>imple_ast.SEIf (expr1, expr2, expr3)
+    <span data-count="43">l</span>et expr2 = convert_aexpr aexpr1 in
+    <span data-count="43">l</span>et expr3 = convert_aexpr aexpr2 in
+    <span data-count="43">S</span>imple_ast.SEIf (expr1, expr2, expr3)
   | <span data-count="34">A</span>nf.CCons (immexpr1, immexpr2) -&gt;
     let expr1 = convert_immexpr immexpr1 in
     <span data-count="34">l</span>et expr2 = convert_immexpr immexpr2 in
     <span data-count="34">S</span>imple_ast.SECons (expr1, expr2)
 
 and convert_aexpr = function
-  | <span data-count="321">A</span>nf.ALet (name, cexpr, aexpr) -&gt;
+  | <span data-count="325">A</span>nf.ALet (name, cexpr, aexpr) -&gt;
     let ident = convert_ident name in
-    <span data-count="321">l</span>et expr1 = convert_cexpr cexpr in
-    <span data-count="321">l</span>et expr2 = convert_aexpr aexpr in
-    <span data-count="321">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2)
-  | <span data-count="233">A</span>nf.ACExpr cexpr -&gt; convert_cexpr cexpr
+    <span data-count="325">l</span>et expr1 = convert_cexpr cexpr in
+    <span data-count="325">l</span>et expr2 = convert_aexpr aexpr in
+    <span data-count="325">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2)
+  | <span data-count="235">A</span>nf.ACExpr cexpr -&gt; convert_cexpr cexpr
 ;;
 
 let convert_value_binding value_binding =
@@ -291,8 +291,8 @@ let convert_value_binding value_binding =
   let ident = convert_ident name in
   <span data-count="149">l</span>et expr = convert_aexpr aexpr in
   <span data-count="149">m</span>atch args with
-  | <span data-count="34">[</span>] -&gt; ident, expr
-  | <span data-count="115">_</span> -&gt; ident, Simple_ast.SEFun (convert_ident_ls<span data-count="115">t</span> args, expr)
+  | <span data-count="32">[</span>] -&gt; ident, expr
+  | <span data-count="117">_</span> -&gt; ident, Simple_ast.SEFun (convert_ident_ls<span data-count="117">t</span> args, expr)
 ;;
 
 let convert_value_bindings value_bindings =
@@ -310,8 +310,8 @@ let convert_tp tp =
   let converted_value_bindings = convert_value_bindings value_bindings in
   <span data-count="149">l</span>et converted_rec_flag =
     match rec_flag with
-    | <span data-count="37">t</span>rue -&gt; Ast.Recursive
-    | <span data-count="112">f</span>alse -&gt; Ast.Nonrecursive
+    | <span data-count="38">t</span>rue -&gt; Ast.Recursive
+    | <span data-count="111">f</span>alse -&gt; Ast.Nonrecursive
   in
   Simple_ast.SSILet (converted_rec_flag, converted_value_bindings)
 ;;

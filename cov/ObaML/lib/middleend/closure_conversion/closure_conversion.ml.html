@@ -634,19 +634,19 @@ open Containers
 open Std
 
 let get_var_name_from_sid = function
-  | <span data-count="1023">S</span>imple_ast.SId (Ast.Id var_name) -&gt; Some var_name
-  | <span data-count="25">S</span>imple_ast.SSpecial SUnit -&gt; None
+  | <span data-count="1262">S</span>imple_ast.SId (Ast.Id var_name) -&gt; Some var_name
+  | <span data-count="38">S</span>imple_ast.SSpecial SUnit -&gt; None
 ;;
 
 let get_var_names_from_sid_lst sid_lst =
-  <span data-count="479">l</span>et rec helper acc = function
-    | <span data-count="479">[</span>] -&gt; acc
-    | <span data-count="627">h</span> :: tl -&gt;
+  <span data-count="568">l</span>et rec helper acc = function
+    | <span data-count="568">[</span>] -&gt; acc
+    | <span data-count="795">h</span> :: tl -&gt;
       let var_name = get_var_name_from_sid h in
-      <span data-count="627">l</span>et new_acc =
+      <span data-count="795">l</span>et new_acc =
         match var_name with
-        | <span data-count="12">N</span>one -&gt; acc
-        | <span data-count="615">S</span>ome var_name -&gt; VarSSet.ad<span data-count="615">d</span> var_name acc
+        | <span data-count="16">N</span>one -&gt; acc
+        | <span data-count="779">S</span>ome var_name -&gt; VarSSet.ad<span data-count="779">d</span> var_name acc
       in
       helper new_acc tl
   in
@@ -654,39 +654,39 @@ let get_var_names_from_sid_lst sid_lst =
 ;;
 
 let get_sid_lst_from_var_names_lst var_names_lst =
-  <span data-count="194">l</span>et rev_id_lst_to_add =
+  <span data-count="233">l</span>et rev_id_lst_to_add =
     List.fold_left
       (fun acc new_var -&gt;
-        <span data-count="114">l</span>et new_id = Simple_ast.SId (Ast.Id new_var) in
+        <span data-count="133">l</span>et new_id = Simple_ast.SId (Ast.Id new_var) in
         new_id :: acc)
       []
       var_names_lst
   in
-  <span data-count="194">L</span>ist.rev rev_id_lst_to_add
+  <span data-count="233">L</span>ist.rev rev_id_lst_to_add
 ;;
 
 let get_vars_from_expr expr env =
-  <span data-count="194">l</span>et rec helper acc env = function
-    | <span data-count="276">S</span>imple_ast.SEConst _ -&gt; acc
-    | <span data-count="1296">S</span>imple_ast.SEVar (Id var_name) -&gt;
+  <span data-count="233">l</span>et rec helper acc env = function
+    | <span data-count="315">S</span>imple_ast.SEConst _ -&gt; acc
+    | <span data-count="1530">S</span>imple_ast.SEVar (Id var_name) -&gt;
       (match VarSSet.find_opt var_name env with
-       | <span data-count="1151">S</span>ome _ -&gt; acc
-       | <span data-count="145">N</span>one -&gt; VarSSet.add var_name acc)
-    | <span data-count="11">S</span>imple_ast.SETuple exp_lst -&gt;
-      List.fold_left (fun acc exp -&gt; <span data-count="22">h</span>elper acc env exp) acc exp_lst
-    | <span data-count="285">S</span>imple_ast.SEFun (id_lst, expr) -&gt;
+       | <span data-count="1364">S</span>ome _ -&gt; acc
+       | <span data-count="166">N</span>one -&gt; VarSSet.add var_name acc)
+    | <span data-count="13">S</span>imple_ast.SETuple exp_lst -&gt;
+      List.fold_left (fun acc exp -&gt; <span data-count="26">h</span>elper acc env exp) acc exp_lst
+    | <span data-count="335">S</span>imple_ast.SEFun (id_lst, expr) -&gt;
       let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
-      <span data-count="285">l</span>et new_env =
-        VarSSet.fold (fun var_name acc -&gt; <span data-count="362">V</span>arSSet.add var_name acc) vars_from_id_lst env
+      <span data-count="335">l</span>et new_env =
+        VarSSet.fold (fun var_name acc -&gt; <span data-count="452">V</span>arSSet.add var_name acc) vars_from_id_lst env
       in
-      <span data-count="285">h</span>elper acc new_env expr
-    | <span data-count="153">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) -&gt;
+      <span data-count="335">h</span>elper acc new_env expr
+    | <span data-count="181">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) -&gt;
       let var_name = get_var_name_from_sid ident in
-      <span data-count="153">l</span>et new_acc = helper acc env expr1 in
-      <span data-count="153">l</span>et new_env =
+      <span data-count="181">l</span>et new_acc = helper acc env expr1 in
+      <span data-count="181">l</span>et new_env =
         match var_name with
-        | <span data-count="8">N</span>one -&gt; env
-        | <span data-count="145">S</span>ome var_name -&gt; VarSSet.ad<span data-count="145">d</span> var_name env
+        | <span data-count="18">N</span>one -&gt; env
+        | <span data-count="163">S</span>ome var_name -&gt; VarSSet.ad<span data-count="163">d</span> var_name env
       in
       helper new_acc new_env expr2
     | <span data-count="13">S</span>imple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) -&gt;
@@ -698,71 +698,71 @@ let get_vars_from_expr expr env =
       in
       let new_acc = helper acc new_env expr1 in
       <span data-count="13">h</span>elper new_acc new_env expr2
-    | <span data-count="1010">S</span>imple_ast.SEApp (expr1, expr2) -&gt; helper (helpe<span data-count="1010">r</span> acc env expr1) env expr2
-    | <span data-count="79">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
-      helper (helpe<span data-count="79">r</span> (helpe<span data-count="79">r</span> acc env expr1) env expr2) env expr3
-    | <span data-count="33">S</span>imple_ast.SECons (expr1, expr2) -&gt; helper (helpe<span data-count="33">r</span> acc env expr1) env expr2
+    | <span data-count="1193">S</span>imple_ast.SEApp (expr1, expr2) -&gt; helper (helpe<span data-count="1193">r</span> acc env expr1) env expr2
+    | <span data-count="89">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
+      helper (helpe<span data-count="89">r</span> (helpe<span data-count="89">r</span> acc env expr1) env expr2) env expr3
+    | <span data-count="34">S</span>imple_ast.SECons (expr1, expr2) -&gt; helper (helpe<span data-count="34">r</span> acc env expr1) env expr2
   in
   helper VarSSet.empty env expr
 ;;
 
 let recursively_add_params start_expr var_name env =
-  <span data-count="1575">l</span>et rec helper start_expr var_name =
-    <span data-count="1648">m</span>atch VarSMap.find_opt var_name env with
-    | <span data-count="102">S</span>ome param_lst -&gt;
+  <span data-count="2118">l</span>et rec helper start_expr var_name =
+    <span data-count="2191">m</span>atch VarSMap.find_opt var_name env with
+    | <span data-count="106">S</span>ome param_lst -&gt;
       List.fold_left
         (fun exp param -&gt;
           <span data-count="73">S</span>imple_ast.SEApp (exp, helpe<span data-count="73">r</span> (Simple_ast.SEVar (Ast.Id param)) param))
         start_expr
         param_lst
-    | <span data-count="1546">N</span>one -&gt; start_expr
+    | <span data-count="2085">N</span>one -&gt; start_expr
   in
   helper start_expr var_name
 ;;
 
 let rec convert_fun_expr env global_env = function
-  | <span data-count="169">S</span>imple_ast.SEFun (id_lst, expr) as f -&gt;
+  | <span data-count="206">S</span>imple_ast.SEFun (id_lst, expr) as f -&gt;
     let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
-    <span data-count="169">l</span>et updated_env =
-      VarSSet.fold (fun new_var acc -&gt; <span data-count="221">V</span>arSMap.remove new_var acc) vars_from_id_lst env
+    <span data-count="206">l</span>et updated_env =
+      VarSSet.fold (fun new_var acc -&gt; <span data-count="292">V</span>arSMap.remove new_var acc) vars_from_id_lst env
     in
-    <span data-count="169">l</span>et vars_to_add = VarSSet.elements (get_vars_from_exp<span data-count="169">r</span> f global_env) in
-    <span data-count="169">l</span>et updated_env =
+    <span data-count="206">l</span>et vars_to_add = VarSSet.elements (get_vars_from_exp<span data-count="206">r</span> f global_env) in
+    <span data-count="206">l</span>et updated_env =
       List.fold_left
-        (fun acc new_var -&gt; <span data-count="102">V</span>arSMap.remove new_var acc)
+        (fun acc new_var -&gt; <span data-count="121">V</span>arSMap.remove new_var acc)
         updated_env
         vars_to_add
     in
-    <span data-count="169">l</span>et updated_expr = convert_expr updated_env global_env expr in
-    <span data-count="169">l</span>et id_lst_to_add = get_sid_lst_from_var_names_lst vars_to_add in
-    <span data-count="169">l</span>et all_vars = List.append id_lst_to_add id_lst in
-    <span data-count="169">v</span>ars_to_add, Simple_ast.SEFun (all_vars, updated_expr)
+    <span data-count="206">l</span>et updated_expr = convert_expr updated_env global_env expr in
+    <span data-count="206">l</span>et id_lst_to_add = get_sid_lst_from_var_names_lst vars_to_add in
+    <span data-count="206">l</span>et all_vars = List.append id_lst_to_add id_lst in
+    <span data-count="206">v</span>ars_to_add, Simple_ast.SEFun (all_vars, updated_expr)
   | <span data-count="0">_</span> as expr -&gt; [], expr
 
 and convert_expr env global_env = function
-  | <span data-count="492">S</span>imple_ast.SEConst _ as const -&gt; const
-  | <span data-count="1520">S</span>imple_ast.SEVar (Ast.Id var_name) as s -&gt; recursively_add_params s var_name env
-  | <span data-count="12">S</span>imple_ast.SETuple exp_lst -&gt;
+  | <span data-count="663">S</span>imple_ast.SEConst _ as const -&gt; const
+  | <span data-count="2044">S</span>imple_ast.SEVar (Ast.Id var_name) as s -&gt; recursively_add_params s var_name env
+  | <span data-count="15">S</span>imple_ast.SETuple exp_lst -&gt;
     let rev_new_exp_lst =
       List.fold_left
         (fun lst exp -&gt;
-          <span data-count="24">l</span>et new_exp = convert_expr env global_env exp in
-          <span data-count="24">n</span>ew_exp :: lst)
+          <span data-count="30">l</span>et new_exp = convert_expr env global_env exp in
+          <span data-count="30">n</span>ew_exp :: lst)
         []
         exp_lst
     in
-    <span data-count="12">S</span>imple_ast.SETuple (List.re<span data-count="12">v</span> rev_new_exp_lst)
-  | <span data-count="118">S</span>imple_ast.SEFun _ as f -&gt;
+    <span data-count="15">S</span>imple_ast.SETuple (List.re<span data-count="15">v</span> rev_new_exp_lst)
+  | <span data-count="155">S</span>imple_ast.SEFun _ as f -&gt;
     let vars_to_add, new_efun = convert_fun_expr env global_env f in
-    <span data-count="118">L</span>ist.fold_left
+    <span data-count="155">L</span>ist.fold_left
       (fun acc var_to_add -&gt;
-        <span data-count="55">S</span>imple_ast.SEApp
+        <span data-count="74">S</span>imple_ast.SEApp
           ( acc
-          , recursively_add_param<span data-count="55">s</span> (Simple_ast.SEVar (Ast.Id var_to_add)) var_to_add env
+          , recursively_add_param<span data-count="74">s</span> (Simple_ast.SEVar (Ast.Id var_to_add)) var_to_add env
           ))
       new_efun
       vars_to_add
-  | <span data-count="253">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) -&gt;
+  | <span data-count="340">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, expr1), expr2) -&gt;
     (match expr1 with
      | <span data-count="51">S</span>imple_ast.SEFun _ as f -&gt;
        let vars_to_add, new_efun = convert_fun_expr env global_env f in
@@ -775,47 +775,47 @@ and convert_expr env global_env = function
        in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
        <span data-count="51">S</span>imple_ast.SELet (Ast.Nonrecursive, new_value_binding, converted_expr2)
-     | <span data-count="202">_</span> -&gt;
+     | <span data-count="289">_</span> -&gt;
        Simple_ast.SELet
          ( Ast.Nonrecursive
-         , (ident, convert_exp<span data-count="202">r</span> env global_env expr1)
-         , convert_exp<span data-count="202">r</span> env global_env expr2 ))
-  | <span data-count="27">S</span>imple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) -&gt;
+         , (ident, convert_exp<span data-count="289">r</span> env global_env expr1)
+         , convert_exp<span data-count="289">r</span> env global_env expr2 ))
+  | <span data-count="29">S</span>imple_ast.SELet (Ast.Recursive, (ident, expr1), expr2) -&gt;
     let ident_var_name = get_var_name_from_sid ident in
-    <span data-count="27">(</span>match expr1 with
-     | <span data-count="25">S</span>imple_ast.SEFun (id_lst, fexpr) as f -&gt;
+    <span data-count="29">(</span>match expr1 with
+     | <span data-count="27">S</span>imple_ast.SEFun (id_lst, fexpr) as f -&gt;
        let vars_from_id_lst = get_var_names_from_sid_lst id_lst in
-       <span data-count="25">l</span>et updated_env =
-         VarSSet.fold (fun new_var acc -&gt; <span data-count="32">V</span>arSMap.remove new_var acc) vars_from_id_lst env
+       <span data-count="27">l</span>et updated_env =
+         VarSSet.fold (fun new_var acc -&gt; <span data-count="35">V</span>arSMap.remove new_var acc) vars_from_id_lst env
        in
-       <span data-count="25">l</span>et vars_to_add = VarSSet.elements (get_vars_from_exp<span data-count="25">r</span> f global_env) in
-       <span data-count="25">l</span>et vars_to_add =
-         List.filter (fun var_name -&gt; <span data-count="31">S</span>ome var_name &lt;&gt; ident_var_name) vars_to_add
+       <span data-count="27">l</span>et vars_to_add = VarSSet.elements (get_vars_from_exp<span data-count="27">r</span> f global_env) in
+       <span data-count="27">l</span>et vars_to_add =
+         List.filter (fun var_name -&gt; <span data-count="33">S</span>ome var_name &lt;&gt; ident_var_name) vars_to_add
        in
-       <span data-count="25">l</span>et updated_env =
+       <span data-count="27">l</span>et updated_env =
          List.fold_left
            (fun acc new_var -&gt; <span data-count="12">V</span>arSMap.remove new_var acc)
            updated_env
            vars_to_add
        in
-       <span data-count="25">l</span>et updated_env =
+       <span data-count="27">l</span>et updated_env =
          match ident_var_name with
          | <span data-count="0">N</span>one -&gt; updated_env
-         | <span data-count="25">S</span>ome ident_var_name -&gt; VarSMap.ad<span data-count="25">d</span> ident_var_name vars_to_add updated_env
+         | <span data-count="27">S</span>ome ident_var_name -&gt; VarSMap.ad<span data-count="27">d</span> ident_var_name vars_to_add updated_env
        in
        let id_lst_to_add = get_sid_lst_from_var_names_lst vars_to_add in
-       <span data-count="25">l</span>et all_vars = List.append id_lst_to_add id_lst in
-       <span data-count="25">l</span>et converted_expr1 =
-         Simple_ast.SEFun (all_vars, convert_exp<span data-count="25">r</span> updated_env global_env fexpr)
+       <span data-count="27">l</span>et all_vars = List.append id_lst_to_add id_lst in
+       <span data-count="27">l</span>et converted_expr1 =
+         Simple_ast.SEFun (all_vars, convert_exp<span data-count="27">r</span> updated_env global_env fexpr)
        in
        let converted_value_binding = ident, converted_expr1 in
        let updated_env =
          match ident_var_name with
          | <span data-count="0">N</span>one -&gt; env
-         | <span data-count="25">S</span>ome ident_var_name -&gt; VarSMap.ad<span data-count="25">d</span> ident_var_name vars_to_add env
+         | <span data-count="27">S</span>ome ident_var_name -&gt; VarSMap.ad<span data-count="27">d</span> ident_var_name vars_to_add env
        in
        let converted_expr2 = convert_expr updated_env global_env expr2 in
-       <span data-count="25">S</span>imple_ast.SELet (Ast.Recursive, converted_value_binding, converted_expr2)
+       <span data-count="27">S</span>imple_ast.SELet (Ast.Recursive, converted_value_binding, converted_expr2)
      | <span data-count="2">_</span> -&gt;
        let updated_env =
          match ident_var_name with
@@ -825,100 +825,100 @@ and convert_expr env global_env = function
        let converted_expr1 = convert_expr updated_env global_env expr1 in
        <span data-count="2">l</span>et converted_expr2 = convert_expr updated_env global_env expr2 in
        <span data-count="2">S</span>imple_ast.SELet (Ast.Nonrecursive, (ident, converted_expr1), converted_expr2))
-  | <span data-count="1223">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
+  | <span data-count="1671">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
     let new_expr1 = convert_expr env global_env expr1 in
-    <span data-count="1223">l</span>et new_expr2 = convert_expr env global_env expr2 in
-    <span data-count="1223">S</span>imple_ast.SEApp (new_expr1, new_expr2)
-  | <span data-count="99">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
+    <span data-count="1671">l</span>et new_expr2 = convert_expr env global_env expr2 in
+    <span data-count="1671">S</span>imple_ast.SEApp (new_expr1, new_expr2)
+  | <span data-count="136">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
     let new_expr1 = convert_expr env global_env expr1 in
-    <span data-count="99">l</span>et new_expr2 = convert_expr env global_env expr2 in
-    <span data-count="99">l</span>et new_expr3 = convert_expr env global_env expr3 in
-    <span data-count="99">S</span>imple_ast.SEIf (new_expr1, new_expr2, new_expr3)
-  | <span data-count="122">S</span>imple_ast.SECons (expr1, expr2) -&gt;
+    <span data-count="136">l</span>et new_expr2 = convert_expr env global_env expr2 in
+    <span data-count="136">l</span>et new_expr3 = convert_expr env global_env expr3 in
+    <span data-count="136">S</span>imple_ast.SEIf (new_expr1, new_expr2, new_expr3)
+  | <span data-count="149">S</span>imple_ast.SECons (expr1, expr2) -&gt;
     let new_expr1 = convert_expr env global_env expr1 in
-    <span data-count="122">l</span>et new_expr2 = convert_expr env global_env expr2 in
-    <span data-count="122">S</span>imple_ast.SECons (new_expr1, new_expr2)
+    <span data-count="149">l</span>et new_expr2 = convert_expr env global_env expr2 in
+    <span data-count="149">S</span>imple_ast.SECons (new_expr1, new_expr2)
 ;;
 
 let get_var_names_from_value_binding_lst value_binding_lst =
-  <span data-count="177">L</span>ist.fold_left
+  <span data-count="230">L</span>ist.fold_left
     (fun acc value_binding -&gt;
-      <span data-count="177">l</span>et sid, _ = value_binding in
+      <span data-count="231">l</span>et sid, _ = value_binding in
       let opt_var_name = get_var_name_from_sid sid in
-      <span data-count="177">m</span>atch opt_var_name with
-      | <span data-count="5">N</span>one -&gt; acc
-      | <span data-count="172">S</span>ome var_name -&gt; var_name :: acc)
+      <span data-count="231">m</span>atch opt_var_name with
+      | <span data-count="4">N</span>one -&gt; acc
+      | <span data-count="227">S</span>ome var_name -&gt; var_name :: acc)
     []
     value_binding_lst
 ;;
 
 let convert_value_binding_lst global_env value_binding_lst =
-  <span data-count="124">l</span>et rev_value_binding_lst =
+  <span data-count="160">l</span>et rev_value_binding_lst =
     List.fold_left
       (fun acc (id, expr) -&gt;
-        <span data-count="124">l</span>et new_expr = convert_expr VarSMap.empty global_env expr in
-        <span data-count="124">(</span>id, new_expr) :: acc)
+        <span data-count="160">l</span>et new_expr = convert_expr VarSMap.empty global_env expr in
+        <span data-count="160">(</span>id, new_expr) :: acc)
       []
       value_binding_lst
   in
-  <span data-count="124">L</span>ist.rev rev_value_binding_lst
+  <span data-count="160">L</span>ist.rev rev_value_binding_lst
 ;;
 
 let convert_rec_value_binding_lst global_env value_binding_lst =
-  <span data-count="53">l</span>et rev_value_binding_lst =
+  <span data-count="70">l</span>et rev_value_binding_lst =
     List.fold_left
       (fun acc (id, expr) -&gt;
-        <span data-count="53">m</span>atch expr with
-        | <span data-count="53">S</span>imple_ast.SEFun (id_lst, fexpr) -&gt;
+        <span data-count="71">m</span>atch expr with
+        | <span data-count="71">S</span>imple_ast.SEFun (id_lst, fexpr) -&gt;
           let updated_fexpr = convert_expr VarSMap.empty global_env fexpr in
-          <span data-count="53">(</span>id, Simple_ast.SEFun (id_lst, updated_fexpr)) :: acc
+          <span data-count="71">(</span>id, Simple_ast.SEFun (id_lst, updated_fexpr)) :: acc
         | <span data-count="0">_</span> -&gt;
           let new_expr = convert_expr VarSMap.empty global_env expr in
           <span data-count="0">(</span>id, new_expr) :: acc)
       []
       value_binding_lst
   in
-  <span data-count="53">L</span>ist.rev rev_value_binding_lst
+  <span data-count="70">L</span>ist.rev rev_value_binding_lst
 ;;
 
 let convert_structure_item global_env = function
-  | <span data-count="124">S</span>imple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) -&gt;
+  | <span data-count="160">S</span>imple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) -&gt;
     let new_value_bindings = convert_value_binding_lst global_env value_binding_lst in
-    <span data-count="124">S</span>imple_ast.SSILet (Ast.Nonrecursive, new_value_bindings)
-  | <span data-count="53">S</span>imple_ast.SSILet (Ast.Recursive, value_binding_lst) -&gt;
+    <span data-count="160">S</span>imple_ast.SSILet (Ast.Nonrecursive, new_value_bindings)
+  | <span data-count="70">S</span>imple_ast.SSILet (Ast.Recursive, value_binding_lst) -&gt;
     let new_value_bindings = convert_rec_value_binding_lst global_env value_binding_lst in
-    <span data-count="53">S</span>imple_ast.SSILet (Ast.Recursive, new_value_bindings)
+    <span data-count="70">S</span>imple_ast.SSILet (Ast.Recursive, new_value_bindings)
   | <span data-count="0">S</span>imple_ast.SSIExpr expr -&gt;
     let new_expr = convert_expr VarSMap.empty global_env expr in
     <span data-count="0">S</span>imple_ast.SSIExpr new_expr
 ;;
 
 let convert_structure global_env (structure : Simple_ast.sstructure) =
-  <span data-count="90">l</span>et rev_new_structure, _ =
+  <span data-count="107">l</span>et rev_new_structure, _ =
     List.fold_left
       (fun (new_structure, global_env) structure_item -&gt;
-        <span data-count="177">l</span>et new_structure_item = convert_structure_item global_env structure_item in
-        <span data-count="177">l</span>et vars_from_structure_item =
+        <span data-count="230">l</span>et new_structure_item = convert_structure_item global_env structure_item in
+        <span data-count="230">l</span>et vars_from_structure_item =
           match structure_item with
-          | <span data-count="177">S</span>imple_ast.SSILet (_, value_binding_lst) -&gt;
-            get_var_names_from_value_binding_ls<span data-count="177">t</span> value_binding_lst
+          | <span data-count="230">S</span>imple_ast.SSILet (_, value_binding_lst) -&gt;
+            get_var_names_from_value_binding_ls<span data-count="230">t</span> value_binding_lst
           | <span data-count="0">S</span>imple_ast.SSIExpr _ -&gt; []
         in
         let new_global_env =
           List.fold_left
-            (fun acc new_var -&gt; <span data-count="172">V</span>arSSet.add new_var acc)
+            (fun acc new_var -&gt; <span data-count="227">V</span>arSSet.add new_var acc)
             global_env
             vars_from_structure_item
         in
-        <span data-count="177">n</span>ew_structure_item :: new_structure, new_global_env)
+        <span data-count="230">n</span>ew_structure_item :: new_structure, new_global_env)
       ([], global_env)
       structure
   in
-  <span data-count="90">L</span>ist.rev rev_new_structure
+  <span data-count="107">L</span>ist.rev rev_new_structure
 ;;
 
 let run_closure_conversion (structure : Simple_ast.sstructure) =
-  <span data-count="90">c</span>onvert_structure extended_std_var_set structure
+  <span data-count="107">c</span>onvert_structure extended_std_var_set structure
 ;;
 </code></pre>
       </div>

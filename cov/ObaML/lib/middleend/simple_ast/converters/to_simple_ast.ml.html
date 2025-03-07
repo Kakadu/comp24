@@ -1076,11 +1076,11 @@ let gen_matching_failed =
   Simple_ast.SEApp (Simple_ast.SEVar gen_matching_failed_id, Simple_ast.SEConst Ast.CUnit)
 ;;
 
-let gen_pat_expr_name = "#pat#"
+let gen_pat_expr_name = "pat"
 let gen_tuple_getter_id = Ast.Id tuple_getter
 
 let gen_tuple_getter_fun ind tuple =
-  <span data-count="248">S</span>imple_ast.SEApp
+  <span data-count="268">S</span>imple_ast.SEApp
     ( Simple_ast.SEApp
         (Simple_ast.SEVar gen_tuple_getter_id, Simple_ast.SEConst (Ast.CInt ind))
     , tuple )
@@ -1089,19 +1089,19 @@ let gen_tuple_getter_fun ind tuple =
 let gen_list_getter_head_id = Ast.Id list_head_getter
 
 let gen_list_getter_head lst =
-  <span data-count="246">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_head_id, lst)
+  <span data-count="288">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_head_id, lst)
 ;;
 
 let gen_list_getter_tail_id = Ast.Id list_tail_getter
 
 let gen_list_getter_tail lst =
-  <span data-count="246">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_tail_id, lst)
+  <span data-count="288">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_tail_id, lst)
 ;;
 
 let gen_list_getter_length_id = Ast.Id list_length_getter
 
 let gen_list_getter_length lst =
-  <span data-count="85">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_length_id, lst)
+  <span data-count="100">S</span>imple_ast.SEApp (Simple_ast.SEVar gen_list_getter_length_id, lst)
 ;;
 
 let true_condition = Simple_ast.SEConst (Ast.CBool true)
@@ -1113,29 +1113,29 @@ let true_condition = Simple_ast.SEConst (Ast.CBool true)
       1 :: 2 :: a -&gt; (2, true)
       1 :: 2 :: _ -&gt; (2, true) *)
 let get_list_length lst =
-  <span data-count="85">l</span>et rec helper acc = function
-    | <span data-count="38">A</span>st.PCons (_, (Ast.PCons _ as tl)) -&gt; helper (acc + 1) tl
-    | <span data-count="33">A</span>st.PCons (_, Ast.PConst Ast.CEmptyList) -&gt; acc + 1, false
-    | <span data-count="52">_</span> -&gt; acc + 1, true
+  <span data-count="100">l</span>et rec helper acc = function
+    | <span data-count="44">A</span>st.PCons (_, (Ast.PCons _ as tl)) -&gt; helper (acc + 1) tl
+    | <span data-count="36">A</span>st.PCons (_, Ast.PConst Ast.CEmptyList) -&gt; acc + 1, false
+    | <span data-count="64">_</span> -&gt; acc + 1, true
   in
   helper 0 lst
 ;;
 
 let construct_lst_length_condition lst gen_decl_name =
-  <span data-count="85">l</span>et lst_length, is_min_length = get_list_length lst in
-  <span data-count="85">l</span>et op =
+  <span data-count="100">l</span>et lst_length, is_min_length = get_list_length lst in
+  <span data-count="100">l</span>et op =
     match is_min_length with
-    | <span data-count="52">t</span>rue -&gt; Simple_ast.SEVar (Ast.Id gte)
-    | <span data-count="33">f</span>alse -&gt; Simple_ast.SEVar (Ast.Id eq)
+    | <span data-count="64">t</span>rue -&gt; Simple_ast.SEVar (Ast.Id gte)
+    | <span data-count="36">f</span>alse -&gt; Simple_ast.SEVar (Ast.Id eq)
   in
   Simple_ast.SEApp
-    ( Simple_ast.SEApp (op, gen_list_getter_lengt<span data-count="85">h</span> (Simple_ast.SEVar gen_decl_name))
+    ( Simple_ast.SEApp (op, gen_list_getter_lengt<span data-count="100">h</span> (Simple_ast.SEVar gen_decl_name))
     , Simple_ast.SEConst (Ast.CInt lst_length) )
 ;;
 
 let concat_conditions curr_cond new_cond =
-  <span data-count="188">m</span>atch curr_cond with
-  | <span data-count="147">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_cond
+  <span data-count="215">m</span>atch curr_cond with
+  | <span data-count="174">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_cond
   | <span data-count="41">_</span> -&gt;
     Simple_ast.SEApp (Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id la), curr_cond), new_cond)
 ;;
@@ -1143,7 +1143,7 @@ let concat_conditions curr_cond new_cond =
 (** @param needs_to_check_cons_length/needs_to_check_empty_list
       = false only if we call helper for list tail *)
 let construct_equality_condition gen_decl_name pat curr_cond =
-  <span data-count="218">l</span>et rec helper
+  <span data-count="253">l</span>et rec helper
     gen_decl_name
     current_condition
     current_gen_expr
@@ -1151,57 +1151,57 @@ let construct_equality_condition gen_decl_name pat curr_cond =
     needs_to_check_empty_list
     = function
     | <span data-count="12">A</span>st.PAny -&gt; current_condition
-    | <span data-count="136">A</span>st.PConst const -&gt;
+    | <span data-count="151">A</span>st.PConst const -&gt;
       (match const, needs_to_check_empty_list with
-       | <span data-count="33">A</span>st.CEmptyList, false -&gt; current_condition
-       | <span data-count="103">_</span> -&gt;
+       | <span data-count="36">A</span>st.CEmptyList, false -&gt; current_condition
+       | <span data-count="115">_</span> -&gt;
          let new_condition =
            Simple_ast.SEApp
              ( Simple_ast.SEApp (Simple_ast.SEVar (Ast.Id eq), current_gen_expr)
              , Simple_ast.SEConst const )
          in
          concat_conditions current_condition new_condition)
-    | <span data-count="240">A</span>st.PVar _ -&gt; current_condition
-    | <span data-count="60">A</span>st.PTuple pat_lst -&gt;
+    | <span data-count="283">A</span>st.PVar _ -&gt; current_condition
+    | <span data-count="65">A</span>st.PTuple pat_lst -&gt;
       let new_cond, _ =
         List.fold_left
           (fun acc pat -&gt;
-            <span data-count="124">l</span>et cond, ind = acc in
+            <span data-count="134">l</span>et cond, ind = acc in
             let new_cond =
               helper
                 gen_decl_name
                 cond
-                (gen_tuple_getter_fu<span data-count="124">n</span> ind current_gen_expr)
+                (gen_tuple_getter_fu<span data-count="134">n</span> ind current_gen_expr)
                 true
                 true
                 pat
             in
-            <span data-count="124">n</span>ew_cond, ind + 1)
+            <span data-count="134">n</span>ew_cond, ind + 1)
           (current_condition, 0)
           pat_lst
       in
-      <span data-count="60">n</span>ew_cond
-    | <span data-count="123">A</span>st.PCons (pat1, pat2) as cons -&gt;
+      <span data-count="65">n</span>ew_cond
+    | <span data-count="144">A</span>st.PCons (pat1, pat2) as cons -&gt;
       let current_condition =
         match needs_to_check_cons_length with
-        | <span data-count="85">t</span>rue -&gt;
+        | <span data-count="100">t</span>rue -&gt;
           let list_length_cond = construct_lst_length_condition cons gen_decl_name in
-          <span data-count="85">c</span>oncat_condition<span data-count="85">s</span> current_condition list_length_cond
-        | <span data-count="38">f</span>alse -&gt; current_condition
+          <span data-count="100">c</span>oncat_condition<span data-count="100">s</span> current_condition list_length_cond
+        | <span data-count="44">f</span>alse -&gt; current_condition
       in
       let new_cond =
         helper
           gen_decl_name
           current_condition
-          (gen_list_getter_hea<span data-count="123">d</span> current_gen_expr)
+          (gen_list_getter_hea<span data-count="144">d</span> current_gen_expr)
           true
           true
           pat1
       in
-      <span data-count="123">h</span>elper
+      <span data-count="144">h</span>elper
         gen_decl_name
         new_cond
-        (gen_list_getter_tai<span data-count="123">l</span> current_gen_expr)
+        (gen_list_getter_tai<span data-count="144">l</span> current_gen_expr)
         false
         false
         pat2
@@ -1209,13 +1209,13 @@ let construct_equality_condition gen_decl_name pat curr_cond =
       helper gen_decl_name current_condition current_gen_expr true true pat
   in
   match gen_decl_name with
-  | <span data-count="201">S</span>imple_ast.SId gen_decl_name -&gt;
+  | <span data-count="233">S</span>imple_ast.SId gen_decl_name -&gt;
     helper gen_decl_name curr_cond (Simple_ast.SEVar gen_decl_name) true true pat
-  | <span data-count="17">S</span>imple_ast.SSpecial SUnit -&gt; curr_cond
+  | <span data-count="20">S</span>imple_ast.SSpecial SUnit -&gt; curr_cond
 ;;
 
 let construct_new_fun_expr pat gen_var_name curr_expr =
-  <span data-count="29">l</span>et rec helper curr_gen_expr curr_expr = function
+  <span data-count="32">l</span>et rec helper curr_gen_expr curr_expr = function
     | <span data-count="0">A</span>st.PAny -&gt; curr_expr
     | <span data-count="4">A</span>st.PConst _ -&gt; curr_expr
     | <span data-count="16">A</span>st.PVar var_name -&gt;
@@ -1238,28 +1238,28 @@ let construct_new_fun_expr pat gen_var_name curr_expr =
   in
   match gen_var_name with
   | <span data-count="12">S</span>imple_ast.SId gen_var_name -&gt; helper (Simple_ast.SEVar gen_var_name) curr_expr pat
-  | <span data-count="17">S</span>imple_ast.SSpecial SUnit -&gt; curr_expr
+  | <span data-count="20">S</span>imple_ast.SSpecial SUnit -&gt; curr_expr
 ;;
 
 let construct_full_expr cases_conditions cases_expr =
-  <span data-count="78">l</span>et rec helper = function
-    | <span data-count="76">[</span> cond ], [ expr ] -&gt; Simple_ast.SEIf (cond, expr, gen_matching_failed)
-    | <span data-count="76">c</span>ond :: tl_cond, expr :: tl_expr -&gt;
+  <span data-count="90">l</span>et rec helper = function
+    | <span data-count="88">[</span> cond ], [ expr ] -&gt; Simple_ast.SEIf (cond, expr, gen_matching_failed)
+    | <span data-count="91">c</span>ond :: tl_cond, expr :: tl_expr -&gt;
       (match cond with
        | <span data-count="2">S</span>imple_ast.SEConst (Ast.CBool true) -&gt;
          Simple_ast.SEIf (cond, expr, gen_matching_failed)
-       | <span data-count="74">_</span> -&gt; Simple_ast.SEIf (cond, expr, helpe<span data-count="74">r</span> (tl_cond, tl_expr)))
+       | <span data-count="89">_</span> -&gt; Simple_ast.SEIf (cond, expr, helpe<span data-count="89">r</span> (tl_cond, tl_expr)))
     | <span data-count="0">_</span> -&gt; Simple_ast.SEVar (Ast.Id "unexp_var")
   in
   helper (cases_conditions, cases_expr)
 ;;
 
 let rec construct_case_expr gen_decl_name case =
-  <span data-count="154">l</span>et pat, expr = case in
+  <span data-count="181">l</span>et pat, expr = case in
   let rec helper current_expr current_gen_expr = function
     | <span data-count="12">A</span>st.PAny -&gt; current_expr
-    | <span data-count="122">A</span>st.PConst _ -&gt; current_expr
-    | <span data-count="160">A</span>st.PVar var_name -&gt;
+    | <span data-count="137">A</span>st.PConst _ -&gt; current_expr
+    | <span data-count="193">A</span>st.PVar var_name -&gt;
       Simple_ast.SELet
         (Ast.Nonrecursive, (Simple_ast.SId var_name, current_gen_expr), current_expr)
     | <span data-count="20">A</span>st.PTuple pat_lst -&gt;
@@ -1272,36 +1272,36 @@ let rec construct_case_expr gen_decl_name case =
           (List.re<span data-count="20">v</span> pat_lst)
       in
       <span data-count="20">n</span>ew_expr
-    | <span data-count="116">A</span>st.PCons (pat1, pat2) -&gt;
-      let new_expr = helper current_expr (gen_list_getter_tai<span data-count="116">l</span> current_gen_expr) pat2 in
-      <span data-count="116">h</span>elper new_expr (gen_list_getter_hea<span data-count="116">d</span> current_gen_expr) pat1
+    | <span data-count="137">A</span>st.PCons (pat1, pat2) -&gt;
+      let new_expr = helper current_expr (gen_list_getter_tai<span data-count="137">l</span> current_gen_expr) pat2 in
+      <span data-count="137">h</span>elper new_expr (gen_list_getter_hea<span data-count="137">d</span> current_gen_expr) pat1
     | <span data-count="0">A</span>st.PType (pat, _) -&gt; helper current_expr current_gen_expr pat
   in
-  helper (simplify_exp<span data-count="154">r</span> expr) (Simple_ast.SEVar gen_decl_name) pat
+  helper (simplify_exp<span data-count="181">r</span> expr) (Simple_ast.SEVar gen_decl_name) pat
 
 and simplify_expr expr =
-  <span data-count="1347">l</span>et rec helper = function
-    | <span data-count="857">A</span>st.EConst const -&gt; Simple_ast.SEConst const
-    | <span data-count="2069">A</span>st.EVar var -&gt; Simple_ast.SEVar var
-    | <span data-count="62">A</span>st.ETuple tup_lst -&gt;
+  <span data-count="1530">l</span>et rec helper = function
+    | <span data-count="1047">A</span>st.EConst const -&gt; Simple_ast.SEConst const
+    | <span data-count="2565">A</span>st.EVar var -&gt; Simple_ast.SEVar var
+    | <span data-count="66">A</span>st.ETuple tup_lst -&gt;
       let rev_new_tup_lst =
         List.fold_left
           (fun acc tup_expr -&gt;
-            <span data-count="130">l</span>et new_tup_expr = helper tup_expr in
-            <span data-count="130">n</span>ew_tup_expr :: acc)
+            <span data-count="138">l</span>et new_tup_expr = helper tup_expr in
+            <span data-count="138">n</span>ew_tup_expr :: acc)
           []
           tup_lst
       in
-      <span data-count="62">S</span>imple_ast.SETuple (List.re<span data-count="62">v</span> rev_new_tup_lst)
-    | <span data-count="483">A</span>st.EFun (pat_lst, expr) -&gt;
+      <span data-count="66">S</span>imple_ast.SETuple (List.re<span data-count="66">v</span> rev_new_tup_lst)
+    | <span data-count="555">A</span>st.EFun (pat_lst, expr) -&gt;
       (* заменить все паттерны на переменные *)
       let rev_new_fun_args, _ =
         List.fold_left
           (fun acc pat -&gt;
-            <span data-count="694">l</span>et new_fun_args, num = acc in
+            <span data-count="847">l</span>et new_fun_args, num = acc in
             match pat with
-            | <span data-count="665">A</span>st.PVar var_name -&gt; Simple_ast.SId var_name :: new_fun_args, num
-            | <span data-count="17">A</span>st.PConst CUnit -&gt; Simple_ast.SSpecial SUnit :: new_fun_args, num
+            | <span data-count="815">A</span>st.PVar var_name -&gt; Simple_ast.SId var_name :: new_fun_args, num
+            | <span data-count="20">A</span>st.PConst CUnit -&gt; Simple_ast.SSpecial SUnit :: new_fun_args, num
             | <span data-count="12">_</span> -&gt;
               let var_name = Ast.Id (gen_pat_expr_name ^ string_of_in<span data-count="12">t</span> num) in
               Simple_ast.SId var_name :: new_fun_args, num + 1)
@@ -1309,68 +1309,68 @@ and simplify_expr expr =
           pat_lst
       in
       (* сгенерировать новый expr на основе старого, добавив в него let объявления по паттернам *)
-      <span data-count="483">l</span>et simplified_expr = helper expr in
-      <span data-count="483">l</span>et new_expr =
+      <span data-count="555">l</span>et simplified_expr = helper expr in
+      <span data-count="555">l</span>et new_expr =
         List.fold_left2
           (fun curr_expr pat gen_var_name -&gt;
-            <span data-count="694">m</span>atch pat with
-            | <span data-count="665">A</span>st.PVar _ -&gt; curr_expr
-            | <span data-count="29">_</span> -&gt; construct_new_fun_expr pat gen_var_name curr_expr)
+            <span data-count="847">m</span>atch pat with
+            | <span data-count="815">A</span>st.PVar _ -&gt; curr_expr
+            | <span data-count="32">_</span> -&gt; construct_new_fun_expr pat gen_var_name curr_expr)
           simplified_expr
-          (List.re<span data-count="483">v</span> pat_lst)
+          (List.re<span data-count="555">v</span> pat_lst)
           rev_new_fun_args
       in
-      <span data-count="483">l</span>et cond =
+      <span data-count="555">l</span>et cond =
         List.fold_left2
           (fun curr_cond pat gen_var_name -&gt;
-            <span data-count="694">m</span>atch pat with
-            | <span data-count="665">A</span>st.PVar _ -&gt; curr_cond
-            | <span data-count="29">_</span> -&gt; construct_equality_condition gen_var_name pat curr_cond)
+            <span data-count="847">m</span>atch pat with
+            | <span data-count="815">A</span>st.PVar _ -&gt; curr_cond
+            | <span data-count="32">_</span> -&gt; construct_equality_condition gen_var_name pat curr_cond)
           true_condition
-          (List.re<span data-count="483">v</span> pat_lst)
+          (List.re<span data-count="555">v</span> pat_lst)
           rev_new_fun_args
       in
-      <span data-count="483">l</span>et expr_with_cond =
+      <span data-count="555">l</span>et expr_with_cond =
         match cond with
-        | <span data-count="479">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_expr
+        | <span data-count="551">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_expr
         | <span data-count="4">_</span> -&gt; Simple_ast.SEIf (cond, new_expr, gen_matching_failed)
       in
-      Simple_ast.SEFun (List.re<span data-count="483">v</span> rev_new_fun_args, expr_with_cond)
-    | <span data-count="312">A</span>st.ELet (Ast.Nonrecursive, value_binding, expr2) -&gt;
+      Simple_ast.SEFun (List.re<span data-count="555">v</span> rev_new_fun_args, expr_with_cond)
+    | <span data-count="354">A</span>st.ELet (Ast.Nonrecursive, value_binding, expr2) -&gt;
       let pat, expr1 = value_binding in
       (match pat with
-       | <span data-count="192">A</span>st.PVar var_name -&gt;
+       | <span data-count="191">A</span>st.PVar var_name -&gt;
          Simple_ast.SELet
            ( Ast.Nonrecursive
-           , (Simple_ast.SId var_name, simplify_exp<span data-count="192">r</span> expr1)
-           , simplify_exp<span data-count="192">r</span> expr2 )
-       | <span data-count="92">A</span>st.PConst CUnit -&gt;
+           , (Simple_ast.SId var_name, simplify_exp<span data-count="191">r</span> expr1)
+           , simplify_exp<span data-count="191">r</span> expr2 )
+       | <span data-count="129">A</span>st.PConst CUnit -&gt;
          Simple_ast.SELet
            ( Ast.Nonrecursive
-           , (Simple_ast.SSpecial SUnit, simplify_exp<span data-count="92">r</span> expr1)
-           , simplify_exp<span data-count="92">r</span> expr2 )
-       | <span data-count="28">_</span> -&gt;
-         let new_gen_decl_name = gen_pat_expr_name ^ string_of_in<span data-count="28">t</span> 0 in
+           , (Simple_ast.SSpecial SUnit, simplify_exp<span data-count="129">r</span> expr1)
+           , simplify_exp<span data-count="129">r</span> expr2 )
+       | <span data-count="34">_</span> -&gt;
+         let new_gen_decl_name = gen_pat_expr_name ^ string_of_in<span data-count="34">t</span> 0 in
          let rev_new_value_bindings =
            construct_new_nonrec_value_decl value_binding new_gen_decl_name
          in
-         <span data-count="28">l</span>et new_expr2 =
+         <span data-count="34">l</span>et new_expr2 =
            List.fold_left
              (fun exp value_binding -&gt;
-               <span data-count="52">l</span>et ident, value_binding_exp = value_binding in
+               <span data-count="64">l</span>et ident, value_binding_exp = value_binding in
                Simple_ast.SELet (Ast.Nonrecursive, (ident, value_binding_exp), exp))
-             (helpe<span data-count="28">r</span> expr2)
+             (helpe<span data-count="34">r</span> expr2)
              rev_new_value_bindings
          in
-         <span data-count="28">l</span>et cond =
+         <span data-count="34">l</span>et cond =
            construct_equality_condition
              (Simple_ast.SId (Ast.Id new_gen_decl_name))
              pat
              true_condition
          in
-         <span data-count="28">l</span>et new_expr2 =
+         <span data-count="34">l</span>et new_expr2 =
            match cond with
-           | <span data-count="22">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_expr2
+           | <span data-count="28">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; new_expr2
            | <span data-count="6">_</span> -&gt;
              Simple_ast.SELet
                ( Ast.Nonrecursive
@@ -1382,24 +1382,24 @@ and simplify_expr expr =
          let _, expr1 = value_binding in
          Simple_ast.SELet
            ( Ast.Nonrecursive
-           , (Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_exp<span data-count="28">r</span> expr1)
+           , (Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_exp<span data-count="34">r</span> expr1)
            , new_expr2 ))
-    | <span data-count="42">A</span>st.ELet (Ast.Recursive, value_binding, expr2) -&gt;
+    | <span data-count="46">A</span>st.ELet (Ast.Recursive, value_binding, expr2) -&gt;
       let ident, new_expr1 = construct_new_rec_value_binding value_binding in
-      <span data-count="42">S</span>imple_ast.SELet (Ast.Recursive, (ident, new_expr1), simplify_exp<span data-count="42">r</span> expr2)
-    | <span data-count="1580">A</span>st.EApp (expr1, expr2) -&gt;
+      <span data-count="46">S</span>imple_ast.SELet (Ast.Recursive, (ident, new_expr1), simplify_exp<span data-count="46">r</span> expr2)
+    | <span data-count="2049">A</span>st.EApp (expr1, expr2) -&gt;
       let new_expr1 = helper expr1 in
-      <span data-count="1580">l</span>et new_expr2 = helper expr2 in
-      <span data-count="1580">S</span>imple_ast.SEApp (new_expr1, new_expr2)
-    | <span data-count="78">A</span>st.EMatch (expr, case_lst) -&gt;
+      <span data-count="2049">l</span>et new_expr2 = helper expr2 in
+      <span data-count="2049">S</span>imple_ast.SEApp (new_expr1, new_expr2)
+    | <span data-count="90">A</span>st.EMatch (expr, case_lst) -&gt;
       (* достать декларацию для expr *)
-      let new_gen_decl_name = Ast.Id (gen_pat_expr_name ^ string_of_in<span data-count="78">t</span> 0) in
+      let new_gen_decl_name = Ast.Id (gen_pat_expr_name ^ string_of_in<span data-count="90">t</span> 0) in
       (* пройти по каждому кейсу и достать equality condition *)
       let rev_equality_conditions =
         List.fold_left
           (fun acc case -&gt;
-            <span data-count="154">l</span>et pat, _ = case in
-            construct_equality_conditio<span data-count="154">n</span>
+            <span data-count="181">l</span>et pat, _ = case in
+            construct_equality_conditio<span data-count="181">n</span>
               (Simple_ast.SId new_gen_decl_name)
               pat
               true_condition
@@ -1407,50 +1407,50 @@ and simplify_expr expr =
           []
           case_lst
       in
-      <span data-count="78">l</span>et equality_conditions = List.rev rev_equality_conditions in
+      <span data-count="90">l</span>et equality_conditions = List.rev rev_equality_conditions in
       (* пройтись по каждому кейсу и сгенерировать код для присвоения переменным паттерна *)
-      <span data-count="78">l</span>et rev_cases_expr =
+      <span data-count="90">l</span>et rev_cases_expr =
         List.fold_left
-          (fun acc case -&gt; <span data-count="154">c</span>onstruct_case_exp<span data-count="154">r</span> new_gen_decl_name case :: acc)
+          (fun acc case -&gt; <span data-count="181">c</span>onstruct_case_exp<span data-count="181">r</span> new_gen_decl_name case :: acc)
           []
           case_lst
       in
-      <span data-count="78">l</span>et cases_expr = List.rev rev_cases_expr in
+      <span data-count="90">l</span>et cases_expr = List.rev rev_cases_expr in
       (* собрать все через if *)
-      <span data-count="78">l</span>et full_expr = construct_full_expr equality_conditions cases_expr in
-      <span data-count="78">S</span>imple_ast.SELet
+      <span data-count="90">l</span>et full_expr = construct_full_expr equality_conditions cases_expr in
+      <span data-count="90">S</span>imple_ast.SELet
         ( Ast.Nonrecursive
-        , (Simple_ast.SId new_gen_decl_name, simplify_exp<span data-count="78">r</span> expr)
+        , (Simple_ast.SId new_gen_decl_name, simplify_exp<span data-count="90">r</span> expr)
         , full_expr )
-    | <span data-count="43">A</span>st.EIf (expr1, expr2, expr3) -&gt;
+    | <span data-count="63">A</span>st.EIf (expr1, expr2, expr3) -&gt;
       let new_expr1 = helper expr1 in
-      <span data-count="43">l</span>et new_expr2 = helper expr2 in
-      <span data-count="43">l</span>et new_expr3 = helper expr3 in
-      <span data-count="43">S</span>imple_ast.SEIf (new_expr1, new_expr2, new_expr3)
-    | <span data-count="249">A</span>st.ECons (expr1, expr2) -&gt;
+      <span data-count="63">l</span>et new_expr2 = helper expr2 in
+      <span data-count="63">l</span>et new_expr3 = helper expr3 in
+      <span data-count="63">S</span>imple_ast.SEIf (new_expr1, new_expr2, new_expr3)
+    | <span data-count="291">A</span>st.ECons (expr1, expr2) -&gt;
       let new_expr1 = helper expr1 in
-      <span data-count="249">l</span>et new_expr2 = helper expr2 in
-      <span data-count="249">S</span>imple_ast.SECons (new_expr1, new_expr2)
+      <span data-count="291">l</span>et new_expr2 = helper expr2 in
+      <span data-count="291">S</span>imple_ast.SECons (new_expr1, new_expr2)
     | <span data-count="0">A</span>st.EType (expr, _) -&gt; helper expr
   in
   helper expr
 
 and construct_new_nonrec_value_decl value_binding gen_decl_name =
-  <span data-count="35">l</span>et pat, _ = value_binding in
+  <span data-count="40">l</span>et pat, _ = value_binding in
   let rec helper acc curr_expr = function
     | <span data-count="0">A</span>st.PAny -&gt; acc
     | <span data-count="10">A</span>st.PConst _ -&gt; acc
-    | <span data-count="64">A</span>st.PVar var_id -&gt; (Simple_ast.SId var_id, curr_expr) :: acc
-    | <span data-count="32">A</span>st.PTuple tup_lst -&gt;
+    | <span data-count="74">A</span>st.PVar var_id -&gt; (Simple_ast.SId var_id, curr_expr) :: acc
+    | <span data-count="37">A</span>st.PTuple tup_lst -&gt;
       let new_acc, _ =
         List.fold_left
           (fun acc elm -&gt;
-            <span data-count="64">l</span>et cur_value_bindings, ind = acc in
-            helpe<span data-count="64">r</span> cur_value_bindings (gen_tuple_getter_fu<span data-count="64">n</span> ind curr_expr) elm, ind + 1)
+            <span data-count="74">l</span>et cur_value_bindings, ind = acc in
+            helpe<span data-count="74">r</span> cur_value_bindings (gen_tuple_getter_fu<span data-count="74">n</span> ind curr_expr) elm, ind + 1)
           (acc, 0)
           tup_lst
       in
-      <span data-count="32">n</span>ew_acc
+      <span data-count="37">n</span>ew_acc
     | <span data-count="7">A</span>st.PCons (pat1, pat2) -&gt;
       let h1 = helper acc (gen_list_getter_hea<span data-count="7">d</span> curr_expr) pat1 in
       <span data-count="7">h</span>elper h1 (gen_list_getter_tai<span data-count="7">l</span> curr_expr) pat2
@@ -1459,37 +1459,37 @@ and construct_new_nonrec_value_decl value_binding gen_decl_name =
   helper [] (Simple_ast.SEVar (Ast.Id gen_decl_name)) pat
 
 and construct_new_rec_value_binding value_binding =
-  <span data-count="106">l</span>et pat, expr = value_binding in
+  <span data-count="126">l</span>et pat, expr = value_binding in
   let var_id =
     match pat with
-    | <span data-count="106">A</span>st.PVar var_id -&gt; var_id
+    | <span data-count="126">A</span>st.PVar var_id -&gt; var_id
     | <span data-count="0">_</span> -&gt; Ast.Id "unexp pat"
   in
-  Simple_ast.SId var_id, simplify_exp<span data-count="106">r</span> expr
+  Simple_ast.SId var_id, simplify_exp<span data-count="126">r</span> expr
 
 and construct_new_rec_value_bindings value_binding_lst =
-  <span data-count="63">l</span>et new_bindings_lst =
+  <span data-count="78">l</span>et new_bindings_lst =
     List.fold_left
-      (fun acc value_binding -&gt; <span data-count="64">c</span>onstruct_new_rec_value_bindin<span data-count="64">g</span> value_binding :: acc)
+      (fun acc value_binding -&gt; <span data-count="80">c</span>onstruct_new_rec_value_bindin<span data-count="80">g</span> value_binding :: acc)
       []
       value_binding_lst
   in
-  <span data-count="63">L</span>ist.rev new_bindings_lst
+  <span data-count="78">L</span>ist.rev new_bindings_lst
 ;;
 
 let simplify_structure_item structure_item =
-  <span data-count="250">l</span>et helper = function
-    | <span data-count="185">A</span>st.SILet (Ast.Nonrecursive, value_binding_lst) -&gt;
+  <span data-count="286">l</span>et helper = function
+    | <span data-count="207">A</span>st.SILet (Ast.Nonrecursive, value_binding_lst) -&gt;
       let rev_gen_decl_lst, rev_gen_decl_names, _ =
         List.fold_left
           (fun acc value_binding -&gt;
-            <span data-count="188">l</span>et gen_decl_lst, gen_decl_names, gen_decl_number = acc in
+            <span data-count="209">l</span>et gen_decl_lst, gen_decl_names, gen_decl_number = acc in
             let _, expr = value_binding in
-            let new_gen_decl_name = gen_pat_expr_name ^ string_of_in<span data-count="188">t</span> gen_decl_number in
+            let new_gen_decl_name = gen_pat_expr_name ^ string_of_in<span data-count="209">t</span> gen_decl_number in
             let new_gen_decl =
               Simple_ast.SSILet
                 ( Ast.Nonrecursive
-                , [ Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_exp<span data-count="188">r</span> expr ] )
+                , [ Simple_ast.SId (Ast.Id new_gen_decl_name), simplify_exp<span data-count="209">r</span> expr ] )
             in
             ( new_gen_decl :: gen_decl_lst
             , new_gen_decl_name :: gen_decl_names
@@ -1497,44 +1497,44 @@ let simplify_structure_item structure_item =
           ([], [], 0)
           value_binding_lst
       in
-      <span data-count="185">l</span>et filtered_gen_decl_lst =
+      <span data-count="207">l</span>et filtered_gen_decl_lst =
         List.fold_left2
           (fun acc gen_decl value_binding -&gt;
-            <span data-count="188">l</span>et pat, _ = value_binding in
+            <span data-count="209">l</span>et pat, _ = value_binding in
             match pat with
-            | <span data-count="175">A</span>st.PVar _ | <span data-count="6">A</span>st.PConst Ast.CUnit -&gt; acc
-            | <span data-count="7">_</span> -&gt; gen_decl :: acc)
+            | <span data-count="198">A</span>st.PVar _ | <span data-count="5">A</span>st.PConst Ast.CUnit -&gt; acc
+            | <span data-count="6">_</span> -&gt; gen_decl :: acc)
           []
           rev_gen_decl_lst
-          (List.re<span data-count="185">v</span> value_binding_lst)
+          (List.re<span data-count="207">v</span> value_binding_lst)
       in
-      <span data-count="185">l</span>et gen_decl_names = List.rev rev_gen_decl_names in
-      <span data-count="185">l</span>et rev_updated_value_bindings =
+      <span data-count="207">l</span>et gen_decl_names = List.rev rev_gen_decl_names in
+      <span data-count="207">l</span>et rev_updated_value_bindings =
         List.fold_left2
           (fun acc value_binding gen_decl_name -&gt;
-            <span data-count="188">l</span>et pat, expr = value_binding in
+            <span data-count="209">l</span>et pat, expr = value_binding in
             match pat with
-            | <span data-count="175">A</span>st.PVar var_name -&gt; (Simple_ast.SId var_name, simplify_exp<span data-count="175">r</span> expr) :: acc
-            | <span data-count="6">A</span>st.PConst Ast.CUnit -&gt;
-              (Simple_ast.SSpecial SUnit, simplify_exp<span data-count="6">r</span> expr) :: acc
-            | <span data-count="7">_</span> -&gt;
+            | <span data-count="198">A</span>st.PVar var_name -&gt; (Simple_ast.SId var_name, simplify_exp<span data-count="198">r</span> expr) :: acc
+            | <span data-count="5">A</span>st.PConst Ast.CUnit -&gt;
+              (Simple_ast.SSpecial SUnit, simplify_exp<span data-count="5">r</span> expr) :: acc
+            | <span data-count="6">_</span> -&gt;
               let cond =
                 construct_equality_condition
                   (Simple_ast.SId (Ast.Id gen_decl_name))
                   pat
                   true_condition
               in
-              <span data-count="7">l</span>et rev_new_value_bindings =
+              <span data-count="6">l</span>et rev_new_value_bindings =
                 construct_new_nonrec_value_decl value_binding gen_decl_name
               in
-              <span data-count="7">(</span>match rev_new_value_bindings with
+              <span data-count="6">(</span>match rev_new_value_bindings with
                | <span data-count="1">[</span>] -&gt;
                  let new_value_binding = Simple_ast.SSpecial SUnit, cond in
                  new_value_binding :: acc
-               | <span data-count="6">_</span> -&gt;
+               | <span data-count="5">_</span> -&gt;
                  let rev_new_value_bindings =
                    match cond with
-                   | <span data-count="6">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; rev_new_value_bindings
+                   | <span data-count="5">S</span>imple_ast.SEConst (Ast.CBool true) -&gt; rev_new_value_bindings
                    | <span data-count="0">_</span> -&gt;
                      let lst =
                        List.fold_left
@@ -1552,29 +1552,29 @@ let simplify_structure_item structure_item =
           value_binding_lst
           gen_decl_names
       in
-      <span data-count="185">L</span>ist.append
+      <span data-count="207">L</span>ist.append
         filtered_gen_decl_lst
-        [ Simple_ast.SSILet (Ast.Nonrecursive, List.re<span data-count="185">v</span> rev_updated_value_bindings) ]
-    | <span data-count="63">A</span>st.SILet (Ast.Recursive, value_binding_lst) -&gt;
+        [ Simple_ast.SSILet (Ast.Nonrecursive, List.re<span data-count="207">v</span> rev_updated_value_bindings) ]
+    | <span data-count="78">A</span>st.SILet (Ast.Recursive, value_binding_lst) -&gt;
       let new_rec_value_binding_lst =
         construct_new_rec_value_bindings value_binding_lst
       in
-      <span data-count="63">[</span> Simple_ast.SSILet (Ast.Recursive, new_rec_value_binding_lst) ]
-    | <span data-count="2">A</span>st.SIExpr expr -&gt; [ Simple_ast.SSIExpr (simplify_exp<span data-count="2">r</span> expr) ]
+      <span data-count="78">[</span> Simple_ast.SSILet (Ast.Recursive, new_rec_value_binding_lst) ]
+    | <span data-count="1">A</span>st.SIExpr expr -&gt; [ Simple_ast.SSIExpr (simplify_exp<span data-count="1">r</span> expr) ]
   in
   helper structure_item
 ;;
 
 let simplify_structure structure =
-  <span data-count="136">L</span>ist.fold_left
+  <span data-count="142">L</span>ist.fold_left
     (fun acc structure_item -&gt;
-      <span data-count="250">l</span>et new_structure_items = simplify_structure_item structure_item in
-      <span data-count="250">L</span>ist.append acc new_structure_items)
+      <span data-count="286">l</span>et new_structure_items = simplify_structure_item structure_item in
+      <span data-count="286">L</span>ist.append acc new_structure_items)
     []
     structure
 ;;
 
-let convert (structure : Ast.structure) = <span data-count="136">s</span>implify_structure structure
+let convert (structure : Ast.structure) = <span data-count="142">s</span>implify_structure structure
 </code></pre>
       </div>
     </div>

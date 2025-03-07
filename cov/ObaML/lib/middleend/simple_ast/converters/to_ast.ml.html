@@ -222,19 +222,19 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 let pattern_from_sident = function
-  | <span data-count="43">S</span>imple_ast.SSpecial SUnit -&gt; Ast.PConst Ast.CUnit
-  | <span data-count="970">S</span>imple_ast.SId id -&gt; Ast.PVar id
+  | <span data-count="37">S</span>imple_ast.SSpecial SUnit -&gt; Ast.PConst Ast.CUnit
+  | <span data-count="988">S</span>imple_ast.SId id -&gt; Ast.PVar id
 ;;
 
 let rec convert_value_binding svalue_binding =
-  <span data-count="647">l</span>et ident, sexpr = svalue_binding in
+  <span data-count="651">l</span>et ident, sexpr = svalue_binding in
   let expr = convert_expr sexpr in
-  <span data-count="647">p</span>attern_from_siden<span data-count="647">t</span> ident, expr
+  <span data-count="651">p</span>attern_from_siden<span data-count="651">t</span> ident, expr
 
 and convert_expr sexpr =
-  <span data-count="647">l</span>et rec helper = function
-    | <span data-count="436">S</span>imple_ast.SEConst const -&gt; Ast.EConst const
-    | <span data-count="1697">S</span>imple_ast.SEVar var -&gt; Ast.EVar var
+  <span data-count="651">l</span>et rec helper = function
+    | <span data-count="432">S</span>imple_ast.SEConst const -&gt; Ast.EConst const
+    | <span data-count="1722">S</span>imple_ast.SEVar var -&gt; Ast.EVar var
     | <span data-count="9">S</span>imple_ast.SETuple stup_lst -&gt;
       let rev_tup_lst =
         List.fold_left
@@ -245,25 +245,25 @@ and convert_expr sexpr =
           stup_lst
       in
       <span data-count="9">A</span>st.ETuple (List.re<span data-count="9">v</span> rev_tup_lst)
-    | <span data-count="201">S</span>imple_ast.SEFun (ident_lst, sexpr) -&gt;
+    | <span data-count="203">S</span>imple_ast.SEFun (ident_lst, sexpr) -&gt;
       let rev_pat_lst =
-        List.fold_left (fun acc ident -&gt; <span data-count="366">p</span>attern_from_siden<span data-count="366">t</span> ident :: acc) [] ident_lst
+        List.fold_left (fun acc ident -&gt; <span data-count="374">p</span>attern_from_siden<span data-count="374">t</span> ident :: acc) [] ident_lst
       in
-      <span data-count="201">l</span>et expr = helper sexpr in
-      <span data-count="201">A</span>st.EFun (List.re<span data-count="201">v</span> rev_pat_lst, expr)
-    | <span data-count="428">S</span>imple_ast.SELet (rec_flag, svalue_binding, sexpr) -&gt;
+      <span data-count="203">l</span>et expr = helper sexpr in
+      <span data-count="203">A</span>st.EFun (List.re<span data-count="203">v</span> rev_pat_lst, expr)
+    | <span data-count="432">S</span>imple_ast.SELet (rec_flag, svalue_binding, sexpr) -&gt;
       let value_binding = convert_value_binding svalue_binding in
-      <span data-count="428">l</span>et expr = helper sexpr in
-      <span data-count="428">A</span>st.ELet (rec_flag, value_binding, expr)
-    | <span data-count="1187">S</span>imple_ast.SEApp (sexpr1, sexpr2) -&gt;
+      <span data-count="432">l</span>et expr = helper sexpr in
+      <span data-count="432">A</span>st.ELet (rec_flag, value_binding, expr)
+    | <span data-count="1202">S</span>imple_ast.SEApp (sexpr1, sexpr2) -&gt;
       let expr1 = helper sexpr1 in
-      <span data-count="1187">l</span>et expr2 = helper sexpr2 in
-      <span data-count="1187">A</span>st.EApp (expr1, expr2)
-    | <span data-count="91">S</span>imple_ast.SEIf (sexpr1, sexpr2, sexpr3) -&gt;
+      <span data-count="1202">l</span>et expr2 = helper sexpr2 in
+      <span data-count="1202">A</span>st.EApp (expr1, expr2)
+    | <span data-count="92">S</span>imple_ast.SEIf (sexpr1, sexpr2, sexpr3) -&gt;
       let expr1 = helper sexpr1 in
-      <span data-count="91">l</span>et expr2 = helper sexpr2 in
-      <span data-count="91">l</span>et expr3 = helper sexpr3 in
-      <span data-count="91">A</span>st.EIf (expr1, expr2, expr3)
+      <span data-count="92">l</span>et expr2 = helper sexpr2 in
+      <span data-count="92">l</span>et expr3 = helper sexpr3 in
+      <span data-count="92">A</span>st.EIf (expr1, expr2, expr3)
     | <span data-count="108">S</span>imple_ast.SECons (sexpr1, sexpr2) -&gt;
       let expr1 = helper sexpr1 in
       <span data-count="108">l</span>et expr2 = helper sexpr2 in

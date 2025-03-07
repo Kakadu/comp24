@@ -218,15 +218,15 @@ type ty =
   | ITTuple of ty list
   | ITList of ty
 
-let type_var x = <span data-count="1608">I</span>TVar x
+let type_var x = <span data-count="2016">I</span>TVar x
 let tprim_int = ITPrim "int"
 let tprim_bool = ITPrim "bool"
 let tprim_string = ITPrim "string"
 let tprim_unit = ITPrim "unit"
-let tarr l r = <span data-count="5808">I</span>TArr (l, r)
+let tarr l r = <span data-count="6716">I</span>TArr (l, r)
 let ( @-&gt; ) = tarr
-let tlist ty = <span data-count="861">I</span>TList ty
-let ttuple ty_lst = <span data-count="66">I</span>TTuple ty_lst
+let tlist ty = <span data-count="939">I</span>TList ty
+let ttuple ty_lst = <span data-count="54">I</span>TTuple ty_lst
 
 let rec pretty_pp_ty_tuples fmt acc =
   <span data-count="83">l</span>et typ, mp = acc in
@@ -243,18 +243,18 @@ let rec pretty_pp_ty_tuples fmt acc =
      | <span data-count="30">_</span> -&gt; fprintf fmt "%a * %a" pretty_pp_ty (h, mp) pretty_pp_ty_tuples (tl, mp))
 
 and pretty_pp_ty fmt acc =
-  <span data-count="2397">l</span>et typ, mp = acc in
+  <span data-count="2445">l</span>et typ, mp = acc in
   match typ with
-  | <span data-count="644">I</span>TVar num -&gt;
+  | <span data-count="656">I</span>TVar num -&gt;
     (match VarIMap.find_opt num mp with
-     | <span data-count="644">S</span>ome x -&gt; fprintf fmt "'%s" x
+     | <span data-count="656">S</span>ome x -&gt; fprintf fmt "'%s" x
      | <span data-count="0">N</span>one -&gt; fprintf fmt "'%d" num)
-  | <span data-count="702">I</span>TPrim str -&gt; fprintf fmt "%s" str
-  | <span data-count="838">I</span>TArr (ty1, ty2) -&gt;
+  | <span data-count="717">I</span>TPrim str -&gt; fprintf fmt "%s" str
+  | <span data-count="859">I</span>TArr (ty1, ty2) -&gt;
     (match ty1, ty2 with
-     | <span data-count="135">I</span>TArr (_, _), _ -&gt;
+     | <span data-count="141">I</span>TArr (_, _), _ -&gt;
        fprintf fmt "(%a) -&gt; %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp)
-     | <span data-count="703">_</span> -&gt; fprintf fmt "%a -&gt; %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp))
+     | <span data-count="718">_</span> -&gt; fprintf fmt "%a -&gt; %a" pretty_pp_ty (ty1, mp) pretty_pp_ty (ty2, mp))
   | <span data-count="41">I</span>TTuple ty_lst -&gt; fprintf fmt "%a" pretty_pp_ty_tuples (ty_lst, mp)
   | <span data-count="172">I</span>TList ty1 -&gt;
     (match ty1 with

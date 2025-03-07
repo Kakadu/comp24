@@ -199,13 +199,13 @@
 
 open Format
 
-let print_id fmt id = <span data-count="683">f</span>printf fmt "%s" id
+let print_id fmt id = <span data-count="695">f</span>printf fmt "%s" id
 
 let rec print_id_lst fmt ident_lst =
-  <span data-count="247">m</span>atch ident_lst with
-  | <span data-count="34">[</span>] -&gt; ()
-  | <span data-count="115">[</span> h ] -&gt; fprintf fmt "%a " print_id h
-  | <span data-count="98">h</span> :: tl -&gt; fprintf fmt "%a %a" print_id h print_id_lst tl
+  <span data-count="253">m</span>atch ident_lst with
+  | <span data-count="32">[</span>] -&gt; ()
+  | <span data-count="117">[</span> h ] -&gt; fprintf fmt "%a " print_id h
+  | <span data-count="104">h</span> :: tl -&gt; fprintf fmt "%a %a" print_id h print_id_lst tl
 ;;
 
 let rec print_tuple fmt = function
@@ -214,27 +214,27 @@ let rec print_tuple fmt = function
   | <span data-count="7">h</span> :: tl -&gt; fprintf fmt "%a, %a" print_immexpr h print_tuple tl
 
 and print_immexpr fmt immexpr =
-  <span data-count="843">m</span>atch immexpr with
-  | <span data-count="607">A</span>nf.ImmId s -&gt; fprintf fmt "%s" s
-  | <span data-count="175">A</span>nf.ImmInt n -&gt; fprintf fmt "%d" n
-  | <span data-count="8">A</span>nf.ImmString s -&gt; fprintf fmt "%S" s
+  <span data-count="859">m</span>atch immexpr with
+  | <span data-count="627">A</span>nf.ImmId s -&gt; fprintf fmt "%s" s
+  | <span data-count="177">A</span>nf.ImmInt n -&gt; fprintf fmt "%d" n
+  | <span data-count="4">A</span>nf.ImmString s -&gt; fprintf fmt "%S" s
   | <span data-count="11">A</span>nf.ImmBool b -&gt; fprintf fmt "%b" b
   | <span data-count="22">A</span>nf.ImmEmptyList -&gt; fprintf fmt "[]"
-  | <span data-count="13">A</span>nf.ImmUnit -&gt; fprintf fmt "()"
+  | <span data-count="11">A</span>nf.ImmUnit -&gt; fprintf fmt "()"
   | <span data-count="7">A</span>nf.ImmTuple im_lst -&gt; fprintf fmt "(%a)" print_tuple im_lst
 
 and print_immexpr_lst fmt = function
   | <span data-count="0">[</span>] -&gt; ()
-  | <span data-count="412">[</span> h ] -&gt; fprintf fmt "%a" print_immexpr h
-  | <span data-count="241">h</span> :: tl -&gt; fprintf fmt "%a %a" print_immexpr h print_immexpr_lst tl
+  | <span data-count="417">[</span> h ] -&gt; fprintf fmt "%a" print_immexpr h
+  | <span data-count="251">h</span> :: tl -&gt; fprintf fmt "%a %a" print_immexpr h print_immexpr_lst tl
 ;;
 
 let rec print_cexpr fmt cexpr =
-  <span data-count="554">m</span>atch cexpr with
+  <span data-count="560">m</span>atch cexpr with
   | <span data-count="66">A</span>nf.CImmExpr immexpr -&gt; fprintf fmt "%a" print_immexpr immexpr
-  | <span data-count="412">A</span>nf.CApp (app_var, immexpr_lst) -&gt;
+  | <span data-count="417">A</span>nf.CApp (app_var, immexpr_lst) -&gt;
     fprintf fmt "(%s %a)" app_var print_immexpr_lst immexpr_lst
-  | <span data-count="42">A</span>nf.CIf (imm1, aex2, aex3) -&gt;
+  | <span data-count="43">A</span>nf.CIf (imm1, aex2, aex3) -&gt;
     fprintf
       fmt
       "\n\tif %a\n\tthen %a\n\telse %a"
@@ -247,10 +247,10 @@ let rec print_cexpr fmt cexpr =
   | <span data-count="34">A</span>nf.CCons (imm1, imm2) -&gt; fprintf fmt "%a :: %a" print_immexpr imm1 print_immexpr imm2
 
 and print_aexpr fmt aexpr =
-  <span data-count="554">m</span>atch aexpr with
-  | <span data-count="321">A</span>nf.ALet (id, cexpr, aexpr) -&gt;
+  <span data-count="560">m</span>atch aexpr with
+  | <span data-count="325">A</span>nf.ALet (id, cexpr, aexpr) -&gt;
     fprintf fmt "\n\tlet %a = %a in %a" print_id id print_cexpr cexpr print_aexpr aexpr
-  | <span data-count="233">A</span>nf.ACExpr cexpr -&gt; fprintf fmt "%a" print_cexpr cexpr
+  | <span data-count="235">A</span>nf.ACExpr cexpr -&gt; fprintf fmt "%a" print_cexpr cexpr
 ;;
 
 let print_value_binding fmt value_binding =
@@ -270,8 +270,8 @@ let print_program fmt program =
     (fun tp -&gt;
       <span data-count="149">l</span>et rec_flag, value_bindings = tp in
       match rec_flag with
-      | <span data-count="112">f</span>alse -&gt; fprintf fmt "let %a;;\n\n" print_value_binding_lst value_bindings
-      | <span data-count="37">t</span>rue -&gt; fprintf fmt "let rec %a;;\n\n" print_value_binding_lst value_bindings)
+      | <span data-count="111">f</span>alse -&gt; fprintf fmt "let %a;;\n\n" print_value_binding_lst value_bindings
+      | <span data-count="38">t</span>rue -&gt; fprintf fmt "let rec %a;;\n\n" print_value_binding_lst value_bindings)
     program
 ;;
 </code></pre>

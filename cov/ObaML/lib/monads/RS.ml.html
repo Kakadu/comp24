@@ -208,25 +208,25 @@ end = struct
 
   let ( &gt;&gt;= ) : 'a 'b. 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t =
     fun m f st -&gt;
-    <span data-count="6818">l</span>et last, r = m st in
-    <span data-count="6818">m</span>atch r with
+    <span data-count="11481">l</span>et last, r = m st in
+    <span data-count="11481">m</span>atch r with
     | <span data-count="0">R</span>esult.Error x -&gt; last, Error x
-    | <span data-count="6818">O</span>k a -&gt; f a last
+    | <span data-count="11481">O</span>k a -&gt; f a last
   ;;
 
   let fail e st = <span data-count="0">s</span>t, Base.Result.fai<span data-count="0">l</span> e
-  let return x last = <span data-count="6508">l</span>ast, Base.Result.retur<span data-count="6508">n</span> x
-  let bind x ~f = <span data-count="6818">x</span> &gt;&gt;= f
+  let return x last = <span data-count="10927">l</span>ast, Base.Result.retur<span data-count="10927">n</span> x
+  let bind x ~f = <span data-count="11481">x</span> &gt;&gt;= f
 
   let ( &gt;&gt;| ) : 'a 'b. 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t =
     fun x f st -&gt;
-    <span data-count="351">m</span>atch x st with
-    | <span data-count="351">s</span>t, Ok x -&gt; st, Ok (<span data-count="351">f</span> x)
+    <span data-count="612">m</span>atch x st with
+    | <span data-count="612">s</span>t, Ok x -&gt; st, Ok (<span data-count="612">f</span> x)
     | <span data-count="0">s</span>t, Result.Error e -&gt; st, Result.Error e
   ;;
 
   module Syntax = struct
-    let ( let* ) x f = <span data-count="6818">b</span>ind x ~f
+    let ( let* ) x f = <span data-count="11481">b</span>ind x ~f
   end
 
   module RList = struct
@@ -238,14 +238,14 @@ end = struct
     ;;
   end
 
-  let fresh : int t = fun last -&gt; <span data-count="351">l</span>ast + 1, Result.Ok last
-  let run m = <span data-count="41">s</span>nd (<span data-count="41">m</span> 0)
+  let fresh : int t = fun last -&gt; <span data-count="612">l</span>ast + 1, Result.Ok last
+  let run m = <span data-count="58">s</span>nd (<span data-count="58">m</span> 0)
 end
 
 open RSMonad
 open Constants
 
-let fresh_var = fresh &gt;&gt;<span data-count="26">|</span> fun n -&gt; <span data-count="351">f</span>resh_var_name ^ string_of_in<span data-count="351">t</span> n
+let fresh_var = fresh &gt;&gt;<span data-count="43">|</span> fun n -&gt; <span data-count="612">f</span>resh_var_name ^ string_of_in<span data-count="612">t</span> n
 </code></pre>
       </div>
     </div>

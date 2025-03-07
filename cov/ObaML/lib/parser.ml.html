@@ -901,321 +901,321 @@ open Ast
 open Angstrom
 
 let is_keyword = function
-  | <span data-count="13">"</span>and"
-  | <span data-count="74">"</span>else"
+  | <span data-count="14">"</span>and"
+  | <span data-count="88">"</span>else"
   | <span data-count="2">"</span>false"
-  | <span data-count="102">"</span>fun"
+  | <span data-count="121">"</span>fun"
   | <span data-count="0">"</span>function"
   | <span data-count="0">"</span>if"
-  | <span data-count="311">"</span>in"
-  | <span data-count="189">"</span>let"
+  | <span data-count="350">"</span>in"
+  | <span data-count="223">"</span>let"
   | <span data-count="0">"</span>match"
   | <span data-count="0">"</span>rec"
-  | <span data-count="74">"</span>then"
+  | <span data-count="88">"</span>then"
   | <span data-count="8">"</span>true"
-  | <span data-count="71">"</span>with" -&gt; true
-  | <span data-count="3720">_</span> -&gt; false
+  | <span data-count="81">"</span>with" -&gt; true
+  | <span data-count="4297">_</span> -&gt; false
 ;;
 
 let chainl1 e op =
-  <span data-count="1027">l</span>et rec go acc = <span data-count="25081">l</span>ift<span data-count="25081">2</span> (fun f x -&gt; <span data-count="1334">f</span> acc x) op e &gt;&gt;<span data-count="25081">=</span> go &lt;|&gt; retur<span data-count="25081">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="23747">g</span>o init
+  <span data-count="1248">l</span>et rec go acc = <span data-count="28857">l</span>ift<span data-count="28857">2</span> (fun f x -&gt; <span data-count="1596">f</span> acc x) op e &gt;&gt;<span data-count="28857">=</span> go &lt;|&gt; retur<span data-count="28857">n</span> acc in
+  e &gt;&gt;= fun init -&gt; <span data-count="27261">g</span>o init
 ;;
 
-let rec chainr1 e op = <span data-count="609">e</span> &gt;&gt;= fun a -&gt; <span data-count="7098">o</span>p &gt;&gt;<span data-count="7098">=</span> (fun f -&gt; <span data-count="289">c</span>hainr<span data-count="289">1</span> e op &gt;&gt;| <span data-count="289">f</span> a) &lt;|&gt; retur<span data-count="7098">n</span> a
+let rec chainr1 e op = <span data-count="703">e</span> &gt;&gt;= fun a -&gt; <span data-count="8112">o</span>p &gt;&gt;<span data-count="8112">=</span> (fun f -&gt; <span data-count="314">c</span>hainr<span data-count="314">1</span> e op &gt;&gt;| <span data-count="314">f</span> a) &lt;|&gt; retur<span data-count="8112">n</span> a
 
 let is_space = function
-  | <span data-count="443327225">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="225751597">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="382265">_</span> -&gt; false
+  | <span data-count="437834762">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="272553466">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="408602">_</span> -&gt; false
 ;;
 
 let is_wildcard = function
-  | <span data-count="1271">'</span>_' -&gt; true
-  | <span data-count="101097">_</span> -&gt; false
+  | <span data-count="1596">'</span>_' -&gt; true
+  | <span data-count="109714">_</span> -&gt; false
 ;;
 
 let is_lchar = function
-  | <span data-count="51163">'</span>a' .. 'z' -&gt; true
-  | <span data-count="92807">_</span> -&gt; false
+  | <span data-count="59624">'</span>a' .. 'z' -&gt; true
+  | <span data-count="99996">_</span> -&gt; false
 ;;
 
 let is_uchar = function
   | <span data-count="10">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="119672">_</span> -&gt; false
+  | <span data-count="128678">_</span> -&gt; false
 ;;
 
-let is_char ch = <span data-count="143970">i</span>s_lcha<span data-count="143970">r</span> c<span data-count="51163">h</span> || is_uchar ch
+let is_char ch = <span data-count="159620">i</span>s_lcha<span data-count="159620">r</span> c<span data-count="59624">h</span> || is_uchar ch
 
 let is_digit = function
-  | <span data-count="2680">'</span>0' .. '9' -&gt; true
-  | <span data-count="143412">_</span> -&gt; false
+  | <span data-count="3025">'</span>0' .. '9' -&gt; true
+  | <span data-count="153871">_</span> -&gt; false
 ;;
 
 let is_core_operator_char = function
-  | <span data-count="0">'</span>$' | <span data-count="0">'</span>&amp;' | <span data-count="1">'</span>*' | <span data-count="9">'</span>+' | <span data-count="7">'</span>-' | <span data-count="0">'</span>/' | <span data-count="0">'</span>=' | <span data-count="0">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' | <span data-count="0">'</span>|' -&gt; true
-  | <span data-count="577">_</span> -&gt; false
+  | <span data-count="0">'</span>$' | <span data-count="0">'</span>&amp;' | <span data-count="1">'</span>*' | <span data-count="10">'</span>+' | <span data-count="9">'</span>-' | <span data-count="0">'</span>/' | <span data-count="0">'</span>=' | <span data-count="0">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' | <span data-count="0">'</span>|' -&gt; true
+  | <span data-count="684">_</span> -&gt; false
 ;;
 
 let is_operator_char = function
   | <span data-count="1">'</span>~' | <span data-count="0">'</span>!' | <span data-count="0">'</span>?' | <span data-count="0">'</span>%' | <span data-count="0">'</span>&lt;' | <span data-count="0">'</span>:' | <span data-count="0">'</span>.' -&gt; true
-  | <span data-count="594">c</span> -&gt; is_core_operator_char c
+  | <span data-count="704">c</span> -&gt; is_core_operator_char c
 ;;
 
-let operator_name oper_chars = <span data-count="396">"</span>( " ^ oper_chars ^ " )"
-let unary_operator_name oper_chars = <span data-count="7">o</span>perator_name ("~" ^ oper_chars)
-let spaces = take_whil<span data-count="80">e</span> is_space
-let pchunk p = <span data-count="4979">s</span>paces *&gt; p
-let check_chunk s = <span data-count="4820">p</span>chunk @@ strin<span data-count="4820">g</span> s
+let operator_name oper_chars = <span data-count="461">"</span>( " ^ oper_chars ^ " )"
+let unary_operator_name oper_chars = <span data-count="9">o</span>perator_name ("~" ^ oper_chars)
+let spaces = take_whil<span data-count="97">e</span> is_space
+let pchunk p = <span data-count="5975">s</span>paces *&gt; p
+let check_chunk s = <span data-count="5782">p</span>chunk @@ strin<span data-count="5782">g</span> s
 
 let check_token s =
-  <span data-count="1211">l</span>et* token = spaces *<span data-count="1211">&gt;</span> take_whil<span data-count="1211">e</span> (fun c -&gt; <span data-count="106422">i</span>s_cha<span data-count="106422">r</span> <span data-count="40427">c</span> || is_digi<span data-count="65995">t</span> <span data-count="1419">c</span> || is_wildcard c) in
-  <span data-count="91695794">i</span>f s = token then <span data-count="1975">r</span>eturn s else <span data-count="91693819">f</span>ail "invalid token name"
+  <span data-count="1471">l</span>et* token = spaces *<span data-count="1471">&gt;</span> take_whil<span data-count="1471">e</span> (fun c -&gt; <span data-count="118398">i</span>s_cha<span data-count="118398">r</span> <span data-count="47040">c</span> || is_digi<span data-count="71358">t</span> <span data-count="1577">c</span> || is_wildcard c) in
+  <span data-count="97993102">i</span>f s = token then <span data-count="2218">r</span>eturn s else <span data-count="97990884">f</span>ail "invalid token name"
 ;;
 
-let pparens p = <span data-count="636">c</span>heck_chun<span data-count="636">k</span> "(" *<span data-count="636">&gt;</span> p &lt;* check_chun<span data-count="636">k</span> ")"
+let pparens p = <span data-count="773">c</span>heck_chun<span data-count="773">k</span> "(" *<span data-count="773">&gt;</span> p &lt;* check_chun<span data-count="773">k</span> ")"
 
 (****************************Identifier*parser**************************)
 
 let parse_var_without_parens pv =
-  <span data-count="79">p</span>chun<span data-count="79">k</span>
-    (take_whil<span data-count="79">e</span> (fun ch -&gt; <span data-count="26875">i</span>s_ucha<span data-count="26875">r</span> c<span data-count="0">h</span> || is_digit ch)
-     &gt;&gt;<span data-count="79">=</span> function
-     | <span data-count="45842117">"</span>" -&gt;
-       take_while<span data-count="45842117">1</span> (fun ch -&gt; <span data-count="37792">i</span>s_wildcar<span data-count="37792">d</span> c<span data-count="244">h</span> || is_cha<span data-count="37548">r</span> c<span data-count="10746">h</span> || is_digit ch)
+  <span data-count="96">p</span>chun<span data-count="96">k</span>
+    (take_whil<span data-count="96">e</span> (fun ch -&gt; <span data-count="28692">i</span>s_ucha<span data-count="28692">r</span> c<span data-count="0">h</span> || is_digit ch)
+     &gt;&gt;<span data-count="96">=</span> function
+     | <span data-count="48990061">"</span>" -&gt;
+       take_while<span data-count="48990061">1</span> (fun ch -&gt; <span data-count="41529">i</span>s_wildcar<span data-count="41529">d</span> c<span data-count="307">h</span> || is_cha<span data-count="41222">r</span> c<span data-count="12594">h</span> || is_digit ch)
        &gt;&gt;= fun str -&gt;
-       <span data-count="4564">i</span>f is_keyword str then <span data-count="844">f</span>ail "invalid identifier name" else <span data-count="3720">r</span>eturn (Id str)
+       <span data-count="5272">i</span>f is_keyword str then <span data-count="975">f</span>ail "invalid identifier name" else <span data-count="4297">r</span>eturn (Id str)
      | <span data-count="86">_</span> -&gt; fail "invalid identifier name")
   &lt;|&gt; pv
 ;;
 
 let parse_var =
-  fi<span data-count="80">x</span>
+  fi<span data-count="97">x</span>
   @@ fun parse_var -&gt;
-  <span data-count="79">l</span>et pv = pparens parse_var in
-  <span data-count="79">l</span>et pv = parse_var_without_parens pv in
-  <span data-count="79">p</span>v
+  <span data-count="96">l</span>et pv = pparens parse_var in
+  <span data-count="96">l</span>et pv = parse_var_without_parens pv in
+  <span data-count="96">p</span>v
 ;;
 
 let parse_operator_without_parens =
-  pchun<span data-count="80">k</span> (take_while<span data-count="80">1</span> is_operator_char &gt;&gt;<span data-count="80">=</span> fun str -&gt; <span data-count="16">r</span>eturn (Id (operator_nam<span data-count="16">e</span> str)))
+  pchun<span data-count="97">k</span> (take_while<span data-count="97">1</span> is_operator_char &gt;&gt;<span data-count="97">=</span> fun str -&gt; <span data-count="19">r</span>eturn (Id (operator_nam<span data-count="19">e</span> str)))
 ;;
 
-let parse_operator_with_parens po = <span data-count="79">p</span>paren<span data-count="79">s</span> @@ parse_operator_without_parens &lt;|&gt; po
+let parse_operator_with_parens po = <span data-count="96">p</span>paren<span data-count="96">s</span> @@ parse_operator_without_parens &lt;|&gt; po
 
 let parse_operator =
-  fi<span data-count="80">x</span>
+  fi<span data-count="97">x</span>
   @@ fun parse_operator -&gt;
-  <span data-count="79">l</span>et po = pparens parse_operator in
-  <span data-count="79">l</span>et po = parse_operator_with_parens po in
-  <span data-count="79">p</span>o
+  <span data-count="96">l</span>et po = pparens parse_operator in
+  <span data-count="96">l</span>et po = parse_operator_with_parens po in
+  <span data-count="96">p</span>o
 ;;
 
-let parse_id = parse_var &lt;|<span data-count="80">&gt;</span> parse_operator
+let parse_id = parse_var &lt;|<span data-count="97">&gt;</span> parse_operator
 
 (****************************Constant*parser**************************)
 
 let parse_string_constant =
-  check_chun<span data-count="80">k</span> "\""
-  *<span data-count="80">&gt;</span> (take_whil<span data-count="80">e</span> (fun ch -&gt; <span data-count="231">c</span>h != '\"') &gt;&gt;<span data-count="80">=</span> fun str -&gt; <span data-count="36">r</span>eturn (CString str))
-  &lt;<span data-count="80">*</span> check_chun<span data-count="80">k</span> "\""
+  check_chun<span data-count="97">k</span> "\""
+  *<span data-count="97">&gt;</span> (take_whil<span data-count="97">e</span> (fun ch -&gt; <span data-count="185">c</span>h != '\"') &gt;&gt;<span data-count="97">=</span> fun str -&gt; <span data-count="33">r</span>eturn (CString str))
+  &lt;<span data-count="97">*</span> check_chun<span data-count="97">k</span> "\""
 ;;
 
 let parse_number_constant =
-  int_of_string &lt;$<span data-count="80">&gt;</span> spaces *<span data-count="80">&gt;</span> take_while<span data-count="80">1</span> is_digit &gt;&gt;<span data-count="80">=</span> fun num -&gt; <span data-count="764">r</span>eturn (CInt num)
+  int_of_string &lt;$<span data-count="97">&gt;</span> spaces *<span data-count="97">&gt;</span> take_while<span data-count="97">1</span> is_digit &gt;&gt;<span data-count="97">=</span> fun num -&gt; <span data-count="878">r</span>eturn (CInt num)
 ;;
 
 let parse_bool_constant =
-  check_toke<span data-count="80">n</span> "true" *<span data-count="80">&gt;</span> (retur<span data-count="80">n</span> @@ CBool true)
-  &lt;|<span data-count="80">&gt;</span> check_toke<span data-count="80">n</span> "false" *<span data-count="80">&gt;</span> (retur<span data-count="80">n</span> @@ CBool false)
+  check_toke<span data-count="97">n</span> "true" *<span data-count="97">&gt;</span> (retur<span data-count="97">n</span> @@ CBool true)
+  &lt;|<span data-count="97">&gt;</span> check_toke<span data-count="97">n</span> "false" *<span data-count="97">&gt;</span> (retur<span data-count="97">n</span> @@ CBool false)
 ;;
 
-let parse_empty_list_constant = check_chun<span data-count="80">k</span> "[]" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> CEmptyList
-let parse_unit_constant = check_chun<span data-count="80">k</span> "()" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> CUnit
+let parse_empty_list_constant = check_chun<span data-count="97">k</span> "[]" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> CEmptyList
+let parse_unit_constant = check_chun<span data-count="97">k</span> "()" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> CUnit
 
 let parse_constant =
   parse_string_constant
-  &lt;|<span data-count="80">&gt;</span> parse_number_constant
-  &lt;|<span data-count="80">&gt;</span> parse_bool_constant
-  &lt;|<span data-count="80">&gt;</span> parse_empty_list_constant
-  &lt;|<span data-count="80">&gt;</span> parse_unit_constant
+  &lt;|<span data-count="97">&gt;</span> parse_number_constant
+  &lt;|<span data-count="97">&gt;</span> parse_bool_constant
+  &lt;|<span data-count="97">&gt;</span> parse_empty_list_constant
+  &lt;|<span data-count="97">&gt;</span> parse_unit_constant
 ;;
 
 (****************************Types*parser**************************)
 
-let parse_type_var = check_chun<span data-count="80">k</span> "\'" *<span data-count="80">&gt;</span> parse_id &gt;&gt;<span data-count="80">=</span> fun id -&gt; <span data-count="20">r</span>eturn (TVar id)
+let parse_type_var = check_chun<span data-count="97">k</span> "\'" *<span data-count="97">&gt;</span> parse_id &gt;&gt;<span data-count="97">=</span> fun id -&gt; <span data-count="20">r</span>eturn (TVar id)
 
 let parse_tuple_type pt =
-  <span data-count="4">s</span>ep_by<span data-count="4">1</span> (check_chun<span data-count="4">k</span> "*") pt
+  <span data-count="5">s</span>ep_by<span data-count="5">1</span> (check_chun<span data-count="5">k</span> "*") pt
   &gt;&gt;= function
   | <span data-count="0">[</span>] -&gt; pt
-  | <span data-count="58">[</span> h ] -&gt; return h
+  | <span data-count="61">[</span> h ] -&gt; return h
   | <span data-count="7">h</span> :: tl -&gt; return (TTuple (h :: tl))
 ;;
 
 let parse_list_type pt =
-  <span data-count="4">p</span>t &lt;<span data-count="4">*</span> check_toke<span data-count="4">n</span> "list" &gt;&gt;= fun lst_type -&gt; <span data-count="5">r</span>eturn (TList lst_type)
+  <span data-count="5">p</span>t &lt;<span data-count="5">*</span> check_toke<span data-count="5">n</span> "list" &gt;&gt;= fun lst_type -&gt; <span data-count="5">r</span>eturn (TList lst_type)
 ;;
 
 let parse_arrow_type pt =
-  <span data-count="4">c</span>hainr1 pt (check_chun<span data-count="4">k</span> "-&gt;" *<span data-count="4">&gt;</span> retur<span data-count="4">n</span> (fun ty1 ty2 -&gt; <span data-count="18">T</span>Arrow (ty1, ty2)))
+  <span data-count="5">c</span>hainr1 pt (check_chun<span data-count="5">k</span> "-&gt;" *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> (fun ty1 ty2 -&gt; <span data-count="18">T</span>Arrow (ty1, ty2)))
 ;;
 
 let parse_type =
-  fi<span data-count="80">x</span>
+  fi<span data-count="97">x</span>
   @@ fun parse_type -&gt;
-  <span data-count="4">l</span>et pt = pparen<span data-count="4">s</span> parse_type &lt;|&gt; parse_type_var in
-  <span data-count="4">l</span>et pt = check_toke<span data-count="4">n</span> "int" *<span data-count="4">&gt;</span> retur<span data-count="4">n</span> TInt &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = check_toke<span data-count="4">n</span> "string" *<span data-count="4">&gt;</span> retur<span data-count="4">n</span> TString &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = check_toke<span data-count="4">n</span> "bool" *<span data-count="4">&gt;</span> retur<span data-count="4">n</span> TBool &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = check_toke<span data-count="4">n</span> "unit" *<span data-count="4">&gt;</span> retur<span data-count="4">n</span> TUnit &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = parse_list_typ<span data-count="4">e</span> pt &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = parse_tuple_typ<span data-count="4">e</span> pt &lt;|&gt; pt in
-  <span data-count="4">l</span>et pt = parse_arrow_typ<span data-count="4">e</span> pt &lt;|&gt; pt in
-  <span data-count="4">p</span>t
+  <span data-count="5">l</span>et pt = pparen<span data-count="5">s</span> parse_type &lt;|&gt; parse_type_var in
+  <span data-count="5">l</span>et pt = check_toke<span data-count="5">n</span> "int" *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> TInt &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = check_toke<span data-count="5">n</span> "string" *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> TString &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = check_toke<span data-count="5">n</span> "bool" *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> TBool &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = check_toke<span data-count="5">n</span> "unit" *<span data-count="5">&gt;</span> retur<span data-count="5">n</span> TUnit &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = parse_list_typ<span data-count="5">e</span> pt &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = parse_tuple_typ<span data-count="5">e</span> pt &lt;|&gt; pt in
+  <span data-count="5">l</span>et pt = parse_arrow_typ<span data-count="5">e</span> pt &lt;|&gt; pt in
+  <span data-count="5">p</span>t
 ;;
 
 (**************************Pattern*parser************************)
 
-let fcons = check_chun<span data-count="80">k</span> "::" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> (fun ptr1 ptr2 -&gt; <span data-count="149">P</span>Cons (ptr1, ptr2))
-let parse_cons pp = <span data-count="79">c</span>hainr1 pp fcons
-let parse_any = check_toke<span data-count="80">n</span> "_" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> PAny
+let fcons = check_chun<span data-count="97">k</span> "::" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> (fun ptr1 ptr2 -&gt; <span data-count="168">P</span>Cons (ptr1, ptr2))
+let parse_cons pp = <span data-count="96">c</span>hainr1 pp fcons
+let parse_any = check_toke<span data-count="97">n</span> "_" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> PAny
 
 let parse_tuple pp =
-  <span data-count="79">f</span>ix
+  <span data-count="96">f</span>ix
   @@ fun parse_tuple -&gt;
-  <span data-count="79">p</span>paren<span data-count="79">s</span> @@ sep_by<span data-count="79">1</span> (check_chun<span data-count="79">k</span> ",") (pp &lt;|<span data-count="79">&gt;</span> parse_tuple)
+  <span data-count="96">p</span>paren<span data-count="96">s</span> @@ sep_by<span data-count="96">1</span> (check_chun<span data-count="96">k</span> ",") (pp &lt;|<span data-count="96">&gt;</span> parse_tuple)
   &gt;&gt;= function
   | <span data-count="0">[</span>] -&gt; pp
   | <span data-count="3">[</span> h ] -&gt; return h
-  | <span data-count="60">h</span> :: tl -&gt; return (PTuple (h :: tl))
+  | <span data-count="64">h</span> :: tl -&gt; return (PTuple (h :: tl))
 ;;
 
 let ptype a b = <span data-count="22">P</span>Type (a, b)
-let parse_typed_pattern pp = <span data-count="79">p</span>parens @@ lift<span data-count="79">2</span> ptype pp (check_chun<span data-count="79">k</span> ":" *<span data-count="79">&gt;</span> parse_type)
+let parse_typed_pattern pp = <span data-count="96">p</span>parens @@ lift<span data-count="96">2</span> ptype pp (check_chun<span data-count="96">k</span> ":" *<span data-count="96">&gt;</span> parse_type)
 
 let parse_pattern =
-  fi<span data-count="80">x</span>
+  fi<span data-count="97">x</span>
   @@ fun parse_pattern -&gt;
-  <span data-count="79">l</span>et pp = pparen<span data-count="79">s</span> parse_pattern &lt;|&gt; parse_typed_patter<span data-count="79">n</span> parse_pattern in
-  <span data-count="79">l</span>et pp = parse_constant &gt;&gt;<span data-count="79">=</span> (fun const -&gt; <span data-count="273">r</span>eturn (PConst const)) &lt;|&gt; pp in
-  <span data-count="79">l</span>et pp = parse_id &gt;&gt;<span data-count="79">=</span> (fun ident -&gt; <span data-count="1609">r</span>eturn (PVar ident)) &lt;|&gt; pp in
-  <span data-count="79">l</span>et pp = parse_any &lt;|&gt; pp in
-  <span data-count="79">l</span>et pp = parse_tupl<span data-count="79">e</span> pp &lt;|&gt; pp in
-  <span data-count="79">l</span>et pp = parse_con<span data-count="79">s</span> pp &lt;|&gt; pp in
-  <span data-count="79">p</span>p
+  <span data-count="96">l</span>et pp = pparen<span data-count="96">s</span> parse_pattern &lt;|&gt; parse_typed_patter<span data-count="96">n</span> parse_pattern in
+  <span data-count="96">l</span>et pp = parse_constant &gt;&gt;<span data-count="96">=</span> (fun const -&gt; <span data-count="311">r</span>eturn (PConst const)) &lt;|&gt; pp in
+  <span data-count="96">l</span>et pp = parse_id &gt;&gt;<span data-count="96">=</span> (fun ident -&gt; <span data-count="1817">r</span>eturn (PVar ident)) &lt;|&gt; pp in
+  <span data-count="96">l</span>et pp = parse_any &lt;|&gt; pp in
+  <span data-count="96">l</span>et pp = parse_tupl<span data-count="96">e</span> pp &lt;|&gt; pp in
+  <span data-count="96">l</span>et pp = parse_con<span data-count="96">s</span> pp &lt;|&gt; pp in
+  <span data-count="96">p</span>p
 ;;
 
 (**************************Expr*parser************************)
 
 let bin_operation op =
-  <span data-count="1106">c</span>heck_chun<span data-count="1106">k</span> op
-  *&gt; retur<span data-count="1106">n</span> (fun exp1 exp2 -&gt; <span data-count="373">E</span>App (EApp (EVar (Id (operator_nam<span data-count="373">e</span> op)), exp1), exp2))
+  <span data-count="1344">c</span>heck_chun<span data-count="1344">k</span> op
+  *&gt; retur<span data-count="1344">n</span> (fun exp1 exp2 -&gt; <span data-count="433">E</span>App (EApp (EVar (Id (operator_nam<span data-count="433">e</span> op)), exp1), exp2))
 ;;
 
-let cons_operation = check_chun<span data-count="80">k</span> "::" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> (fun exp1 exp2 -&gt; <span data-count="122">E</span>Cons (exp1, exp2))
+let cons_operation = check_chun<span data-count="97">k</span> "::" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> (fun exp1 exp2 -&gt; <span data-count="128">E</span>Cons (exp1, exp2))
 
 let unary_operation op pfe =
-  <span data-count="158">c</span>heck_chun<span data-count="158">k</span> op *<span data-count="158">&gt;</span> pfe
-  &gt;&gt;= fun exp1 -&gt; <span data-count="7">r</span>eturn (EApp (EVar (Id (unary_operator_nam<span data-count="7">e</span> op)), exp1))
+  <span data-count="192">c</span>heck_chun<span data-count="192">k</span> op *<span data-count="192">&gt;</span> pfe
+  &gt;&gt;= fun exp1 -&gt; <span data-count="9">r</span>eturn (EApp (EVar (Id (unary_operator_nam<span data-count="9">e</span> op)), exp1))
 ;;
 
-let pfemul pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "*")
-let pfediv pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "/")
-let pfeadd pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "+")
-let pfesub pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "-")
-let pfeeq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "=")
-let pfereq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "==")
-let pfeneq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "&lt;&gt;")
-let pferneq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "!=")
-let pfeles pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "&lt;")
-let pfeleq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "&lt;=")
-let pfegre pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "&gt;")
-let pfegeq pfe = <span data-count="79">c</span>hainl1 pfe (bin_operatio<span data-count="79">n</span> "&gt;=")
-let pfeand pfe = <span data-count="79">c</span>hainr1 pfe (bin_operatio<span data-count="79">n</span> "&amp;&amp;")
-let pfeor pfe = <span data-count="79">c</span>hainr1 pfe (bin_operatio<span data-count="79">n</span> "||")
-let pfeunplus pfe = <span data-count="79">u</span>nary_operation "+" pfe
-let pfeunminus pfe = <span data-count="79">u</span>nary_operation "-" pfe
-let pfecons pfe = <span data-count="79">c</span>hainr1 pfe cons_operation
+let pfemul pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "*")
+let pfediv pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "/")
+let pfeadd pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "+")
+let pfesub pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "-")
+let pfeeq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "=")
+let pfereq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "==")
+let pfeneq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "&lt;&gt;")
+let pferneq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "!=")
+let pfeles pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "&lt;")
+let pfeleq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "&lt;=")
+let pfegre pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "&gt;")
+let pfegeq pfe = <span data-count="96">c</span>hainl1 pfe (bin_operatio<span data-count="96">n</span> "&gt;=")
+let pfeand pfe = <span data-count="96">c</span>hainr1 pfe (bin_operatio<span data-count="96">n</span> "&amp;&amp;")
+let pfeor pfe = <span data-count="96">c</span>hainr1 pfe (bin_operatio<span data-count="96">n</span> "||")
+let pfeunplus pfe = <span data-count="96">u</span>nary_operation "+" pfe
+let pfeunminus pfe = <span data-count="96">u</span>nary_operation "-" pfe
+let pfecons pfe = <span data-count="96">c</span>hainr1 pfe cons_operation
 
 let parse_binops pfe =
-  <span data-count="79">l</span>et pfe = pfemu<span data-count="79">l</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfedi<span data-count="79">v</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfead<span data-count="79">d</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfesu<span data-count="79">b</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfecon<span data-count="79">s</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfene<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pferne<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfee<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfere<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfele<span data-count="79">s</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfele<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfegr<span data-count="79">e</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfege<span data-count="79">q</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">p</span>fe
+  <span data-count="96">l</span>et pfe = pfemu<span data-count="96">l</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfedi<span data-count="96">v</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfead<span data-count="96">d</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfesu<span data-count="96">b</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfecon<span data-count="96">s</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfene<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pferne<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfee<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfere<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfele<span data-count="96">s</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfele<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfegr<span data-count="96">e</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfege<span data-count="96">q</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">p</span>fe
 ;;
 
-let parse_application pfe = <span data-count="79">c</span>hainl1 pfe (retur<span data-count="79">n</span> (fun exp1 exp2 -&gt; <span data-count="961">E</span>App (exp1, exp2)))
+let parse_application pfe = <span data-count="96">c</span>hainl1 pfe (retur<span data-count="96">n</span> (fun exp1 exp2 -&gt; <span data-count="1163">E</span>App (exp1, exp2)))
 
 let parse_list_constr pfe =
-  <span data-count="79">f</span>ix
+  <span data-count="96">f</span>ix
   @@ fun parse_list_constr -&gt;
-  <span data-count="79">c</span>heck_chun<span data-count="79">k</span> "["
-  *<span data-count="79">&gt;</span> (sep_b<span data-count="79">y</span> (check_chun<span data-count="79">k</span> ";") (pfe &lt;|<span data-count="79">&gt;</span> parse_list_constr)
-      &gt;&gt;<span data-count="79">=</span>
+  <span data-count="96">c</span>heck_chun<span data-count="96">k</span> "["
+  *<span data-count="96">&gt;</span> (sep_b<span data-count="96">y</span> (check_chun<span data-count="96">k</span> ";") (pfe &lt;|<span data-count="96">&gt;</span> parse_list_constr)
+      &gt;&gt;<span data-count="96">=</span>
       let rec helper = function
         | <span data-count="0">[</span>] -&gt; return (EConst CEmptyList)
-        | <span data-count="42">[</span> h ] -&gt; return (ECons (h, EConst CEmptyList))
-        | <span data-count="56">h</span> :: tl -&gt; helpe<span data-count="56">r</span> tl &gt;&gt;= fun x -&gt; <span data-count="56">r</span>eturn (ECons (h, x))
+        | <span data-count="50">[</span> h ] -&gt; return (ECons (h, EConst CEmptyList))
+        | <span data-count="69">h</span> :: tl -&gt; helpe<span data-count="69">r</span> tl &gt;&gt;= fun x -&gt; <span data-count="69">r</span>eturn (ECons (h, x))
       in
       helper)
-  &lt;* check_chun<span data-count="79">k</span> "]"
+  &lt;* check_chun<span data-count="96">k</span> "]"
 ;;
 
 let parse_tuple pfe =
-  <span data-count="79">s</span>ep_b<span data-count="79">y</span> (check_chun<span data-count="79">k</span> ",") pfe
+  <span data-count="96">s</span>ep_b<span data-count="96">y</span> (check_chun<span data-count="96">k</span> ",") pfe
   &gt;&gt;= function
-  | <span data-count="233">[</span>] -&gt; pfe
-  | <span data-count="1544">[</span> h ] -&gt; return h
-  | <span data-count="60">h</span> :: tl -&gt; return (ETuple (h :: tl))
+  | <span data-count="249">[</span>] -&gt; pfe
+  | <span data-count="1788">[</span> h ] -&gt; return h
+  | <span data-count="63">h</span> :: tl -&gt; return (ETuple (h :: tl))
 ;;
 
-let eif a b c = <span data-count="74">E</span>If (a, b, c)
+let eif a b c = <span data-count="88">E</span>If (a, b, c)
 
 let parse_if pfexp =
-  <span data-count="79">f</span>ix
+  <span data-count="96">f</span>ix
   @@ fun parse_if -&gt;
-  <span data-count="79">l</span>ift3
+  <span data-count="96">l</span>ift3
     eif
-    (check_toke<span data-count="79">n</span> "if" *<span data-count="79">&gt;</span> (pfexp &lt;|<span data-count="79">&gt;</span> parse_if))
-    (check_toke<span data-count="79">n</span> "then" *<span data-count="79">&gt;</span> (pfexp &lt;|<span data-count="79">&gt;</span> parse_if))
-    (check_toke<span data-count="79">n</span> "else" *<span data-count="79">&gt;</span> (pfexp &lt;|<span data-count="79">&gt;</span> parse_if))
+    (check_toke<span data-count="96">n</span> "if" *<span data-count="96">&gt;</span> (pfexp &lt;|<span data-count="96">&gt;</span> parse_if))
+    (check_toke<span data-count="96">n</span> "then" *<span data-count="96">&gt;</span> (pfexp &lt;|<span data-count="96">&gt;</span> parse_if))
+    (check_toke<span data-count="96">n</span> "else" *<span data-count="96">&gt;</span> (pfexp &lt;|<span data-count="96">&gt;</span> parse_if))
 ;;
 
-let ematch a b = <span data-count="71">E</span>Match (a, b)
+let ematch a b = <span data-count="81">E</span>Match (a, b)
 
 let parse_match pfe =
-  <span data-count="79">l</span>et caseWithout =
-    lift2 (fun pat expr -&gt; <span data-count="18">p</span>at, expr) (parse_pattern &lt;<span data-count="79">*</span> check_chun<span data-count="79">k</span> "-&gt;") pfe
+  <span data-count="96">l</span>et caseWithout =
+    lift2 (fun pat expr -&gt; <span data-count="20">p</span>at, expr) (parse_pattern &lt;<span data-count="96">*</span> check_chun<span data-count="96">k</span> "-&gt;") pfe
   in
-  <span data-count="79">l</span>et caseWith =
+  <span data-count="96">l</span>et caseWith =
     lift2
-      (fun pat expr -&gt; <span data-count="136">p</span>at, expr)
-      (check_chun<span data-count="79">k</span> "|" *<span data-count="79">&gt;</span> parse_pattern &lt;<span data-count="79">*</span> check_chun<span data-count="79">k</span> "-&gt;")
+      (fun pat expr -&gt; <span data-count="157">p</span>at, expr)
+      (check_chun<span data-count="96">k</span> "|" *<span data-count="96">&gt;</span> parse_pattern &lt;<span data-count="96">*</span> check_chun<span data-count="96">k</span> "-&gt;")
       pfe
   in
-  <span data-count="79">l</span>et allCases =
-    lift2 (fun first other -&gt; <span data-count="71">f</span>irst :: other) (caseWith &lt;|<span data-count="79">&gt;</span> caseWithout) (man<span data-count="79">y</span> @@ caseWith)
+  <span data-count="96">l</span>et allCases =
+    lift2 (fun first other -&gt; <span data-count="81">f</span>irst :: other) (caseWith &lt;|<span data-count="96">&gt;</span> caseWithout) (man<span data-count="96">y</span> @@ caseWith)
   in
-  <span data-count="79">l</span>ift2 ematch (check_toke<span data-count="79">n</span> "match" *<span data-count="79">&gt;</span> pfe &lt;<span data-count="79">*</span> check_toke<span data-count="79">n</span> "with") allCases
+  <span data-count="96">l</span>ift2 ematch (check_toke<span data-count="96">n</span> "match" *<span data-count="96">&gt;</span> pfe &lt;<span data-count="96">*</span> check_toke<span data-count="96">n</span> "with") allCases
 ;;
 
-let efun a b = <span data-count="220">E</span>Fun (a, b)
+let efun a b = <span data-count="242">E</span>Fun (a, b)
 
 let parse_fun pfe =
-  <span data-count="79">c</span>heck_toke<span data-count="79">n</span> "fun" *&gt; lift<span data-count="79">2</span> efun (many<span data-count="79">1</span> @@ parse_pattern) (check_chun<span data-count="79">k</span> "-&gt;" *<span data-count="79">&gt;</span> pfe)
+  <span data-count="96">c</span>heck_toke<span data-count="96">n</span> "fun" *&gt; lift<span data-count="96">2</span> efun (many<span data-count="96">1</span> @@ parse_pattern) (check_chun<span data-count="96">k</span> "-&gt;" *<span data-count="96">&gt;</span> pfe)
 ;;
 
-let elet a b c = <span data-count="311">E</span>Let (a, b, c)
+let elet a b c = <span data-count="350">E</span>Let (a, b, c)
 
 let add_pattern_type_to typ var_name = function
   | <span data-count="5">P</span>Type (_, pt) -&gt; TArrow (pt, typ)
@@ -1232,13 +1232,13 @@ let get_full_type binding_params typ =
 ;;
 
 let get_binding_expr binding_params binding_expr =
-  <span data-count="749">m</span>atch binding_params with
-  | <span data-count="501">[</span>] -&gt; binding_expr
-  | <span data-count="248">_</span> -&gt; EFun (binding_params, binding_expr)
+  <span data-count="840">m</span>atch binding_params with
+  | <span data-count="558">[</span>] -&gt; binding_expr
+  | <span data-count="282">_</span> -&gt; EFun (binding_params, binding_expr)
 ;;
 
 let parse_value_binding_with_type pfexp =
-  <span data-count="159">l</span>et* pat = parse_pattern in
+  <span data-count="193">l</span>et* pat = parse_pattern in
   <span data-count="9">l</span>et* binding_params = man<span data-count="9">y</span> @@ parse_pattern in
   <span data-count="9">l</span>et* typ = check_chun<span data-count="9">k</span> ":" *<span data-count="9">&gt;</span> parse_type in
   <span data-count="9">l</span>et* full_type = get_full_typ<span data-count="9">e</span> binding_params typ in
@@ -1247,66 +1247,66 @@ let parse_value_binding_with_type pfexp =
 ;;
 
 let parse_value_binding_without_type pfexp =
-  <span data-count="159">l</span>et* pat = parse_pattern in
-  <span data-count="749">l</span>et* binding_params = man<span data-count="749">y</span> @@ parse_pattern in
-  <span data-count="749">l</span>et* binding_expr = check_chun<span data-count="749">k</span> "=" *<span data-count="749">&gt;</span> pfexp in
-  <span data-count="740">r</span>eturn (pat, get_binding_exp<span data-count="740">r</span> binding_params binding_expr)
+  <span data-count="193">l</span>et* pat = parse_pattern in
+  <span data-count="840">l</span>et* binding_params = man<span data-count="840">y</span> @@ parse_pattern in
+  <span data-count="840">l</span>et* binding_expr = check_chun<span data-count="840">k</span> "=" *<span data-count="840">&gt;</span> pfexp in
+  <span data-count="831">r</span>eturn (pat, get_binding_exp<span data-count="831">r</span> binding_params binding_expr)
 ;;
 
 let parse_value_binding pfexp =
-  <span data-count="159">p</span>arse_value_binding_without_typ<span data-count="159">e</span> pfexp &lt;|&gt; parse_value_binding_with_typ<span data-count="159">e</span> pfexp
+  <span data-count="193">p</span>arse_value_binding_without_typ<span data-count="193">e</span> pfexp &lt;|&gt; parse_value_binding_with_typ<span data-count="193">e</span> pfexp
 ;;
 
 let parse_let pfexp =
-  <span data-count="79">c</span>heck_toke<span data-count="79">n</span> "let"
-  *&gt; lift<span data-count="79">3</span>
+  <span data-count="96">c</span>heck_toke<span data-count="96">n</span> "let"
+  *&gt; lift<span data-count="96">3</span>
        elet
-       (check_toke<span data-count="79">n</span> "rec" *<span data-count="79">&gt;</span> retur<span data-count="79">n</span> Recursive &lt;|<span data-count="79">&gt;</span> retur<span data-count="79">n</span> Nonrecursive)
-       (parse_value_bindin<span data-count="79">g</span> pfexp)
-       (check_toke<span data-count="79">n</span> "in" *<span data-count="79">&gt;</span> pfexp)
+       (check_toke<span data-count="96">n</span> "rec" *<span data-count="96">&gt;</span> retur<span data-count="96">n</span> Recursive &lt;|<span data-count="96">&gt;</span> retur<span data-count="96">n</span> Nonrecursive)
+       (parse_value_bindin<span data-count="96">g</span> pfexp)
+       (check_toke<span data-count="96">n</span> "in" *<span data-count="96">&gt;</span> pfexp)
 ;;
 
-let etype a b = <span data-count="14">E</span>Type (a, b)
-let parse_typed_expr pfexp = <span data-count="79">p</span>parens @@ lift<span data-count="79">2</span> etype pfexp (check_chun<span data-count="79">k</span> ":" *<span data-count="79">&gt;</span> parse_type)
+let etype a b = <span data-count="17">E</span>Type (a, b)
+let parse_typed_expr pfexp = <span data-count="96">p</span>parens @@ lift<span data-count="96">2</span> etype pfexp (check_chun<span data-count="96">k</span> ":" *<span data-count="96">&gt;</span> parse_type)
 
 (* doc:https://v2.ocaml.org/manual/expr.html#ss:precedence-and-associativity *)
 let parse_expr =
-  fi<span data-count="80">x</span>
+  fi<span data-count="97">x</span>
   @@ fun pfexpr -&gt;
-  <span data-count="79">l</span>et pfe = pparen<span data-count="79">s</span> pfexpr &lt;|<span data-count="79">&gt;</span> parse_list_const<span data-count="79">r</span> pfexpr &lt;|&gt; parse_typed_exp<span data-count="79">r</span> pfexpr in
-  <span data-count="79">l</span>et pfe = parse_id &gt;&gt;<span data-count="79">=</span> (fun ident -&gt; <span data-count="1802">r</span>eturn (EVar ident)) &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_constant &gt;&gt;<span data-count="79">=</span> (fun const -&gt; <span data-count="870">r</span>eturn (EConst const)) &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_applicatio<span data-count="79">n</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfeunminu<span data-count="79">s</span> pfe &lt;|<span data-count="79">&gt;</span> pfeunplu<span data-count="79">s</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_binop<span data-count="79">s</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfean<span data-count="79">d</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = pfeo<span data-count="79">r</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_tupl<span data-count="79">e</span> pfe &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_i<span data-count="79">f</span> pfexpr &lt;|&gt; pfe in
-  <span data-count="79">l</span>et pfe = parse_le<span data-count="79">t</span> pfexpr &lt;|<span data-count="79">&gt;</span> parse_matc<span data-count="79">h</span> pfexpr &lt;|<span data-count="79">&gt;</span> parse_fu<span data-count="79">n</span> pfexpr &lt;|&gt; pfe in
-  <span data-count="79">p</span>fe
+  <span data-count="96">l</span>et pfe = pparen<span data-count="96">s</span> pfexpr &lt;|<span data-count="96">&gt;</span> parse_list_const<span data-count="96">r</span> pfexpr &lt;|&gt; parse_typed_exp<span data-count="96">r</span> pfexpr in
+  <span data-count="96">l</span>et pfe = parse_id &gt;&gt;<span data-count="96">=</span> (fun ident -&gt; <span data-count="2112">r</span>eturn (EVar ident)) &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_constant &gt;&gt;<span data-count="96">=</span> (fun const -&gt; <span data-count="989">r</span>eturn (EConst const)) &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_applicatio<span data-count="96">n</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfeunminu<span data-count="96">s</span> pfe &lt;|<span data-count="96">&gt;</span> pfeunplu<span data-count="96">s</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_binop<span data-count="96">s</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfean<span data-count="96">d</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = pfeo<span data-count="96">r</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_tupl<span data-count="96">e</span> pfe &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_i<span data-count="96">f</span> pfexpr &lt;|&gt; pfe in
+  <span data-count="96">l</span>et pfe = parse_le<span data-count="96">t</span> pfexpr &lt;|<span data-count="96">&gt;</span> parse_matc<span data-count="96">h</span> pfexpr &lt;|<span data-count="96">&gt;</span> parse_fu<span data-count="96">n</span> pfexpr &lt;|&gt; pfe in
+  <span data-count="96">p</span>fe
 ;;
 
 (*********************Structure*Item*Parser*******************)
 
 let parse_let_declaration =
-  check_toke<span data-count="80">n</span> "let"
-  *<span data-count="80">&gt;</span> lift<span data-count="80">2</span>
-       (fun rec_flag binding_lst -&gt; <span data-count="425">S</span>ILet (rec_flag, binding_lst))
-       (check_toke<span data-count="80">n</span> "rec" *<span data-count="80">&gt;</span> retur<span data-count="80">n</span> Recursive &lt;|<span data-count="80">&gt;</span> retur<span data-count="80">n</span> Nonrecursive)
-       (sep_by<span data-count="80">1</span> (check_toke<span data-count="80">n</span> "and") (parse_value_bindin<span data-count="80">g</span> parse_expr))
+  check_toke<span data-count="97">n</span> "let"
+  *<span data-count="97">&gt;</span> lift<span data-count="97">2</span>
+       (fun rec_flag binding_lst -&gt; <span data-count="476">S</span>ILet (rec_flag, binding_lst))
+       (check_toke<span data-count="97">n</span> "rec" *<span data-count="97">&gt;</span> retur<span data-count="97">n</span> Recursive &lt;|<span data-count="97">&gt;</span> retur<span data-count="97">n</span> Nonrecursive)
+       (sep_by<span data-count="97">1</span> (check_toke<span data-count="97">n</span> "and") (parse_value_bindin<span data-count="97">g</span> parse_expr))
 ;;
 
-let parse_semicolon = man<span data-count="80">y</span> @@ check_chun<span data-count="80">k</span> ";;"
+let parse_semicolon = man<span data-count="97">y</span> @@ check_chun<span data-count="97">k</span> ";;"
 
 let parse_structure_item =
   parse_let_declaration
-  &lt;|<span data-count="80">&gt;</span> (parse_expr &gt;&gt;<span data-count="80">=</span> fun expr -&gt; <span data-count="6">r</span>eturn (SIExpr expr))
-  &lt;<span data-count="80">*</span> parse_semicolon
+  &lt;|<span data-count="97">&gt;</span> (parse_expr &gt;&gt;<span data-count="97">=</span> fun expr -&gt; <span data-count="6">r</span>eturn (SIExpr expr))
+  &lt;<span data-count="97">*</span> parse_semicolon
 ;;
 
 (**************************Structure*Parser************************)
-let parse_structure = parse_semicolon *<span data-count="80">&gt;</span> many<span data-count="80">1</span> parse_structure_item
+let parse_structure = parse_semicolon *<span data-count="97">&gt;</span> many<span data-count="97">1</span> parse_structure_item
 
 (**************************Parsers*****************************)
 let id_from_string str = <span data-count="14">p</span>arse_string ~consume:All (parse_id &lt;<span data-count="14">*</span> spaces) str
@@ -1319,7 +1319,7 @@ let structure_item_from_string str =
   <span data-count="4">p</span>arse_string ~consume:All (parse_structure_item &lt;<span data-count="4">*</span> spaces) str
 ;;
 
-let structure_from_string str = <span data-count="233">p</span>arse_string ~consume:All (parse_structure &lt;<span data-count="233">*</span> spaces) str
+let structure_from_string str = <span data-count="249">p</span>arse_string ~consume:All (parse_structure &lt;<span data-count="249">*</span> spaces) str
 </code></pre>
       </div>
     </div>

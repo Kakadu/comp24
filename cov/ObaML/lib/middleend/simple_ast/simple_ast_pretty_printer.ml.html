@@ -228,50 +228,50 @@ open Std
 let binop_vars = [ mult; div; plus; minus; eq; eqr; neq; neqr; lt; lte; gt; gte; la; lo ]
 
 let print_id fmt = function
-  | <span data-count="2236">A</span>st.Id ident when List.me<span data-count="2236">m</span> ident binop_vars = true -&gt;
-    <span data-count="211">f</span>printf fmt "%s" (String.su<span data-count="211">b</span> ident 1 (String.lengt<span data-count="211">h</span> ident - 2))
-  | <span data-count="2025">A</span>st.Id ident -&gt; fprintf fmt "%s" ident
+  | <span data-count="2138">A</span>st.Id ident when List.me<span data-count="2138">m</span> ident binop_vars = true -&gt;
+    <span data-count="205">f</span>printf fmt "%s" (String.su<span data-count="205">b</span> ident 1 (String.lengt<span data-count="205">h</span> ident - 2))
+  | <span data-count="1933">A</span>st.Id ident -&gt; fprintf fmt "%s" ident
 ;;
 
 let print_sid fmt = function
-  | <span data-count="34">S</span>imple_ast.SSpecial SUnit -&gt; fprintf fmt "()"
-  | <span data-count="755">S</span>imple_ast.SId id -&gt; fprintf fmt "%a" print_id id
+  | <span data-count="27">S</span>imple_ast.SSpecial SUnit -&gt; fprintf fmt "()"
+  | <span data-count="708">S</span>imple_ast.SId id -&gt; fprintf fmt "%a" print_id id
 ;;
 
 let rec print_sid_lst fmt = function
   | <span data-count="0">[</span>] -&gt; ()
-  | <span data-count="183">[</span> h ] -&gt; fprintf fmt "%a" print_sid h
-  | <span data-count="297">h</span> :: tl -&gt; fprintf fmt "%a %a" print_sid h print_sid_lst tl
+  | <span data-count="173">[</span> h ] -&gt; fprintf fmt "%a" print_sid h
+  | <span data-count="282">h</span> :: tl -&gt; fprintf fmt "%a %a" print_sid h print_sid_lst tl
 ;;
 
 let print_const fmt = function
-  | <span data-count="359">A</span>st.CInt num -&gt; fprintf fmt "%d" num
+  | <span data-count="336">A</span>st.CInt num -&gt; fprintf fmt "%d" num
   | <span data-count="9">A</span>st.CString str -&gt; fprintf fmt "%S" str
   | <span data-count="22">A</span>st.CBool bool -&gt; fprintf fmt "%s" (string_of_boo<span data-count="22">l</span> bool)
   | <span data-count="77">A</span>st.CEmptyList -&gt; fprintf fmt "[]"
-  | <span data-count="52">A</span>st.CUnit -&gt; fprintf fmt "()"
+  | <span data-count="51">A</span>st.CUnit -&gt; fprintf fmt "()"
 ;;
 
 let rec print_etuple fmt = function
   | <span data-count="0">[</span>] -&gt; ()
-  | <span data-count="29">[</span> h ] -&gt; fprintf fmt "%a" print_expr h
-  | <span data-count="32">h</span> :: tl -&gt; fprintf fmt "%a, %a" print_expr h print_etuple tl
+  | <span data-count="28">[</span> h ] -&gt; fprintf fmt "%a" print_expr h
+  | <span data-count="31">h</span> :: tl -&gt; fprintf fmt "%a, %a" print_expr h print_etuple tl
 
 and print_expr fmt = function
-  | <span data-count="519">S</span>imple_ast.SEConst const -&gt; fprintf fmt "%a" print_const const
-  | <span data-count="1481">S</span>imple_ast.SEVar id -&gt; fprintf fmt "%a" print_id id
-  | <span data-count="29">S</span>imple_ast.SETuple exp_lst -&gt; fprintf fmt "(%a)" print_etuple exp_lst
-  | <span data-count="27">S</span>imple_ast.SEFun (pat_lst, expr) -&gt;
+  | <span data-count="495">S</span>imple_ast.SEConst const -&gt; fprintf fmt "%a" print_const const
+  | <span data-count="1430">S</span>imple_ast.SEVar id -&gt; fprintf fmt "%a" print_id id
+  | <span data-count="28">S</span>imple_ast.SETuple exp_lst -&gt; fprintf fmt "(%a)" print_etuple exp_lst
+  | <span data-count="26">S</span>imple_ast.SEFun (pat_lst, expr) -&gt;
     fprintf fmt "(fun %a -&gt; %a)" print_sid_lst pat_lst print_expr expr
-  | <span data-count="249">S</span>imple_ast.SELet (Ast.Nonrecursive, value_binding, expr) -&gt;
+  | <span data-count="230">S</span>imple_ast.SELet (Ast.Nonrecursive, value_binding, expr) -&gt;
     fprintf fmt "\n\tlet %a in %a" print_value_binding value_binding print_expr expr
   | <span data-count="7">S</span>imple_ast.SELet (Ast.Recursive, value_binding, expr) -&gt;
     fprintf fmt "\n\tlet rec %a in %a" print_value_binding value_binding print_expr expr
-  | <span data-count="382">S</span>imple_ast.SEApp
+  | <span data-count="372">S</span>imple_ast.SEApp
       (Simple_ast.SEApp ((Simple_ast.SEVar (Id var_name) as expr1), expr2), expr3)
-    when List.me<span data-count="382">m</span> var_name binop_vars = true -&gt;
-    <span data-count="211">f</span>printf fmt "(%a %a %a)" print_expr expr2 print_expr expr1 print_expr expr3
-  | <span data-count="772">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
+    when List.me<span data-count="372">m</span> var_name binop_vars = true -&gt;
+    <span data-count="205">f</span>printf fmt "(%a %a %a)" print_expr expr2 print_expr expr1 print_expr expr3
+  | <span data-count="749">S</span>imple_ast.SEApp (expr1, expr2) -&gt;
     fprintf fmt "(%a %a)" print_expr expr1 print_expr expr2
   | <span data-count="97">S</span>imple_ast.SEIf (expr1, expr2, expr3) -&gt;
     fprintf
@@ -287,29 +287,29 @@ and print_expr fmt = function
     fprintf fmt "(%a :: %a)" print_expr expr1 print_expr expr2
 
 and print_value_binding fmt value_binding =
-  <span data-count="465">l</span>et ident, expr = value_binding in
+  <span data-count="427">l</span>et ident, expr = value_binding in
   match expr with
-  | <span data-count="156">S</span>imple_ast.SEFun (ident_lst, fexpr) -&gt;
+  | <span data-count="147">S</span>imple_ast.SEFun (ident_lst, fexpr) -&gt;
     fprintf fmt "%a = %a" print_sid_lst (ident :: ident_lst) print_expr fexpr
-  | <span data-count="309">_</span> -&gt; fprintf fmt "%a = %a" print_sid ident print_expr expr
+  | <span data-count="280">_</span> -&gt; fprintf fmt "%a = %a" print_sid ident print_expr expr
 ;;
 
 let rec print_value_binding_lst fmt (value_binding_lst : Simple_ast.svalue_binding list) =
-  <span data-count="209">m</span>atch value_binding_lst with
+  <span data-count="190">m</span>atch value_binding_lst with
   | <span data-count="0">[</span>] -&gt; ()
-  | <span data-count="199">[</span> h ] -&gt; fprintf fmt "%a" print_value_binding h
-  | <span data-count="10">h</span> :: tl -&gt; fprintf fmt "%a\nand %a" print_value_binding h print_value_binding_lst tl
+  | <span data-count="182">[</span> h ] -&gt; fprintf fmt "%a" print_value_binding h
+  | <span data-count="8">h</span> :: tl -&gt; fprintf fmt "%a\nand %a" print_value_binding h print_value_binding_lst tl
 ;;
 
 let print_structure fmt structure =
-  <span data-count="95">L</span>ist.iter
+  <span data-count="84">L</span>ist.iter
     (fun structure_item -&gt;
-      <span data-count="201">m</span>atch structure_item with
-      | <span data-count="153">S</span>imple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) -&gt;
+      <span data-count="183">m</span>atch structure_item with
+      | <span data-count="138">S</span>imple_ast.SSILet (Ast.Nonrecursive, value_binding_lst) -&gt;
         fprintf fmt "let %a;;\n\n" print_value_binding_lst value_binding_lst
-      | <span data-count="46">S</span>imple_ast.SSILet (Ast.Recursive, value_binding_lst) -&gt;
+      | <span data-count="44">S</span>imple_ast.SSILet (Ast.Recursive, value_binding_lst) -&gt;
         fprintf fmt "let rec %a;;\n\n" print_value_binding_lst value_binding_lst
-      | <span data-count="2">S</span>imple_ast.SSIExpr expr -&gt; fprintf fmt "%a" print_expr expr)
+      | <span data-count="1">S</span>imple_ast.SSIExpr expr -&gt; fprintf fmt "%a" print_expr expr)
     structure
 ;;
 </code></pre>

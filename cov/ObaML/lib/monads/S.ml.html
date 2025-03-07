@@ -98,28 +98,28 @@ module SMonad = struct
 
   let ( &gt;&gt;= ) : 'a 'b. 'a state -&gt; ('a -&gt; 'b state) -&gt; 'b state =
     fun m f st -&gt;
-    <span data-count="11908">l</span>et last, r = m st in
-    <span data-count="11908">f</span> r last
+    <span data-count="17568">l</span>et last, r = m st in
+    <span data-count="17568">f</span> r last
   ;;
 
-  let bind x ~f = <span data-count="11908">x</span> &gt;&gt;= f
-  let return x last = <span data-count="11698">l</span>ast, x
-  let ( let* ) x f = <span data-count="11908">b</span>ind x ~f
+  let bind x ~f = <span data-count="17568">x</span> &gt;&gt;= f
+  let return x last = <span data-count="17270">l</span>ast, x
+  let ( let* ) x f = <span data-count="17568">b</span>ind x ~f
 
   let ( &gt;&gt;| ) : 'a 'b. 'a state -&gt; ('a -&gt; 'b) -&gt; 'b state =
     fun x f st -&gt;
-    <span data-count="378">m</span>atch x st with
-    | <span data-count="378">s</span>t, x -&gt; st, <span data-count="378">f</span> x
+    <span data-count="534">m</span>atch x st with
+    | <span data-count="534">s</span>t, x -&gt; st, <span data-count="534">f</span> x
   ;;
 
-  let fresh last = <span data-count="378">l</span>ast + 1, last
-  let run m = <span data-count="168">s</span>nd (<span data-count="168">m</span> 0)
+  let fresh last = <span data-count="534">l</span>ast + 1, last
+  let run m = <span data-count="236">s</span>nd (<span data-count="236">m</span> 0)
 end
 
 open SMonad
 open Constants
 
-let fresh_var = fresh &gt;&gt;<span data-count="40">|</span> fun n -&gt; <span data-count="378">f</span>resh_var_name ^ string_of_in<span data-count="378">t</span> n
+let fresh_var = fresh &gt;&gt;<span data-count="66">|</span> fun n -&gt; <span data-count="534">f</span>resh_var_name ^ string_of_in<span data-count="534">t</span> n
 </code></pre>
       </div>
     </div>
