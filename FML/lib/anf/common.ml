@@ -6,6 +6,39 @@ open Base
 open Ast
 open Pe_ast
 
+module StrMap = struct
+  type 'a t = (string, 'a, String.comparator_witness) Map.t
+
+  let empty = Map.empty (module String)
+  let singleton str = Map.singleton (module String) str
+  let find m str = Map.find m str
+  let add = Map.add
+  let update = Map.update
+  let merge_two fst snd = Map.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -> v2)
+end
+
+let builtins =
+  [ "( + )"
+  ; "( - )"
+  ; "( / )"
+  ; "( * )"
+  ; "( < )"
+  ; "( > )"
+  ; "( <= )"
+  ; "( >= )"
+  ; "( <> )"
+  ; "( = )"
+  ; "( != )"
+  ; "( && )"
+  ; "( || )"
+  ; "print_int"
+  ; "list_head"
+  ; "list_tail"
+  ; "list_len"
+  ; "tuple_element"
+  ; "fail_match"
+  ]
+;;
 
 let make_apply op expr1 expr2 = Pe_EApp (Pe_EApp (Pe_EIdentifier op, expr1), expr2)
 
@@ -25,8 +58,6 @@ module StrSet = struct
   let fold = Set.fold
   let diff = Set.diff
 end
-
-
 
 type bindings = (int, Int.comparator_witness) Set.t
 
