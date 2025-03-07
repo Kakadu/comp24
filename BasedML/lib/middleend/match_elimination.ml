@@ -218,6 +218,10 @@ let rec eliminate_lexpr =
   | LLConstraint (llexpr, typ) ->
     let* new_llexpr = eliminate_lexpr llexpr in
     LLConstraint (new_llexpr, typ) |> return
+  | LLMatch (main_expr, [ (PWildCard, case_body) ]) ->
+    let* name, count = generate_unique_name "local_wildcard_" 0 in
+    eliminate_lexpr
+      (LLMatch (main_expr, [ PIdentifier (name ^ string_of_int count), case_body ]))
   | LLMatch (main_expr, [ (PConstant CUnit, case_body) ]) ->
     let* name, count = generate_unique_name "local_unit_" 0 in
     eliminate_lexpr
