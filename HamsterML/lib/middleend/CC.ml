@@ -199,7 +199,15 @@ let cc_expr =
          let new_args = add_free_vars args expr in
          let bound_vars = args_list_to_id_set new_args in
          let new_env = Map.filter_keys env ~f:(fun k -> not (Set.mem bound_vars k)) in
-         Fun (new_args, process new_env expr))
+         let final_fun_expr = Fun (new_args, process new_env expr) in
+         let added_args =
+           Set.diff (args_list_to_id_set new_args) (args_list_to_id_set args)
+         in
+         if Set.is_empty added_args
+         then final_fun_expr
+         else
+           List.fold (Set.to_list added_args) ~init:final_fun_expr ~f:(fun acc v ->
+             Application (acc, EVar v)))
     | Let (fun_type, binds, in_expr_opt) ->
       let new_env_ref = ref env in
       let cc_binds =

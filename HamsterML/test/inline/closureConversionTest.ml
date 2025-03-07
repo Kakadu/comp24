@@ -63,7 +63,8 @@ let%expect_test _ =
 let%expect_test _ =
   pp_closure_conv_prog
     {| let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n)) |};
-  [%expect {| not yet implemented |}]
+  [%expect
+    {| let rec var_0 arg_1 arg_2 = if ((( = ) arg_1) 1) then (arg_2 1) else ((var_0 ((( - ) arg_1) 1)) (((fun arg_1 arg_2 arg_3 -> (arg_2 ((( * ) arg_3) arg_1))) arg_1) arg_2)) |}]
 ;;
 
 let%expect_test _ =
