@@ -23,7 +23,7 @@ let codegen_const = function
 let rec codegen_imexpr = function
   | ImmConst c -> codegen_const c
   | ImmIdentifier id ->
-    let name = Common.Ident_utils.ident_to_string id  in
+    let name = Common.Ident_utils.ident_to_string id in
     let name = map_ident_to_runtime name in
     let* id_var = lookup_env_var name in
     (match id_var with
@@ -42,7 +42,10 @@ let rec codegen_imexpr = function
                |]
                "created_empty_closure"
                builder)
-        | None -> fail @@ Format.sprintf "Unknown variable %s" name))
+        | None ->
+          (match lookup_global name the_module with
+           | Some value -> return value
+           | _ -> fail @@ Format.sprintf "Unknown variable %s" name)))
   | ImmConstraint (immexpr, _) -> codegen_imexpr immexpr
 ;;
 
@@ -110,6 +113,12 @@ and codegen_aexpr = function
 ;;
 
 let codegen_bexpr = function
+  | ADSingleLet (_, (id, [], aexpr)) ->
+    let var_name = identifier_to_str id in
+    let* body = codegen_aexpr aexpr in
+    let var_global = define_global var_name (const_int i64 0) the_module in
+    let (_ : llvalue) = build_store body var_global builder in
+    return var_global
   | ADSingleLet (_, (id, args, aexpr)) ->
     let func_name = identifier_to_str id in
     let func_sig = function_type i64 (Array.make (List.length args) i64) in
@@ -173,22 +182,33 @@ let init_runtime =
     Runtime.runtime_members
 ;;
 
-let codegen program =
+let codegen prog cont =
   let* env = init_runtime in
-  let* _ = clean_env in
   let rec codegen acc = function
     | [] -> return acc
     | head :: tail ->
+      let () = cont () in
       let* llvalue = codegen_bexpr head in
       let* _ = clean_env in
       codegen (llvalue :: acc) tail
   in
-  let* result = codegen env program in
-  return @@ Base.List.rev result
+  let* result = codegen env prog in
+  return result
+;;
+
+let create_main prog =
+  let func_name = "main" in
+  let func_sig = function_type i64 [||] in
+  let main = declare_function func_name func_sig the_module in
+  let basic_block = append_block context "entry" main in
+  let cont () = position_at_end basic_block builder in
+  let* other = codegen prog cont in
+  let _ = build_ret (const_int i64 0) builder in
+  return @@ (main :: other)
 ;;
 
 let codegen s =
-  let _, result = codegen s Env.empty in
+  let _, result = create_main s Env.empty in
   match result with
   | Ok _ ->
     let _ = print_module "out.ll" the_module in
