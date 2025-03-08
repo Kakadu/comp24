@@ -1,5 +1,6 @@
   $ if [ -z "$latest" ]; then
   >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  >   alias qemu-riscv64-static='qemu-riscv64'
   > fi
 
 $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
@@ -8,7 +9,7 @@ $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
 > EOF
 $ cat /tmp/tuples.s
 $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-$ /tmp/tuples
+$ qemu-riscv64-static /tmp/tuples
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let main = 
@@ -56,7 +57,7 @@ $ /tmp/tuples
       addi sp,sp,32
       ret
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   (42, 1)
 
 
@@ -99,7 +100,7 @@ $ /tmp/tuples
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   (-16, 22, -10)
 
 
@@ -124,7 +125,7 @@ $ cat /tmp/tuples.s
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   1
   2
   true
@@ -160,7 +161,7 @@ $ cat /tmp/tuples.s
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   5
   0
 
@@ -202,7 +203,7 @@ $ cat /tmp/tuples.s
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   1
   2
   3
@@ -253,7 +254,7 @@ $ cat /tmp/tuples.s
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
-  $ /tmp/tuples
+  $ qemu-riscv64-static /tmp/tuples
   1
   2
   3
