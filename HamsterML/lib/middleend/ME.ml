@@ -22,7 +22,6 @@ module ListConverter : sig
   val tail : me_expr -> me_expr
   val len : me_expr -> me_expr
   val head : me_expr -> me_expr
-  val get : me_expr -> int -> me_expr
 end = struct
   let ensure_list (lst : me_expr) =
     match lst with
@@ -32,16 +31,11 @@ end = struct
 
   let len lst = MEApplication (MEVar "list_length", ensure_list lst)
 
-  let get lst i =
-    MEApplication (MEApplication (MEVar "list_get", ensure_list lst), MEConst (Int i))
-  ;;
-
   let head lst = MEApplication (MEVar "list_head", ensure_list lst)
   let tail lst = MEApplication (MEVar "list_tail", ensure_list lst)
 end
 
 module TupleConverter : sig
-  val len : me_expr -> me_expr
   val get : me_expr -> int -> me_expr
 end = struct
   let ensure_tuple (tpl : me_expr) =
@@ -49,8 +43,6 @@ end = struct
     | METuple _ -> tpl
     | _ -> failwith "Attempt to perform a tuple operation on a non-tuple"
   ;;
-
-  let len lst = MEApplication (MEVar "tuple_length", ensure_tuple lst)
 
   let get lst i =
     MEApplication (MEApplication (MEVar "tuple_get", ensure_tuple lst), MEConst (Int i))

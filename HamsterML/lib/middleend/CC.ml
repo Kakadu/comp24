@@ -131,13 +131,6 @@ let rec free_vars_expr (exp : expr) =
 ;;
 
 (* Generate fresh variable names *)
-let fresh_var_counter = ref 0
-
-let fresh_var prefix =
-  let id = !fresh_var_counter in
-  fresh_var_counter := id + 1;
-  prefix ^ Int.to_string id
-;;
 
 let cc_expr global_names =
   let pattern_list_to_vars patterns = List.map patterns ~f:(fun x -> Var x) in

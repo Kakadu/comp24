@@ -15,4 +15,5 @@ and ll_bind = Ast.pattern * Ast.args * ll_expr
 and ll_case = Ast.pattern * ll_expr
 and ll_prog = ll_expr list
 
+(* Apply lambda lifting *)
 val ll_prog : Ast.prog -> ll_prog Utils.R.t
