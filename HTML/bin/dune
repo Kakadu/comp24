@@ -10,7 +10,6 @@
   ./llvm_demo.exe
   ./runtime.c
   ./runtime.h
-  test.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
