@@ -7,6 +7,7 @@ edition = "2021"
 env_logger = "0.11.6"
 log = "0.4.22"
 backtrace = "*"
+safer-ffi = "0.1.13"
 
 [lib]
 crate-type = [

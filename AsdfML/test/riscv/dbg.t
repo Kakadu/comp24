@@ -102,10 +102,10 @@
       .type test10, @function
   test10:
       # args: a, b, c, d, e, f_0, g, h, i, j
-      addi sp,sp,-168
-      sd ra,168(sp)
-      sd s0,160(sp)
-      addi s0,sp,152  # Prologue ends
+      addi sp,sp,-144
+      sd ra,144(sp)
+      sd s0,136(sp)
+      addi s0,sp,128  # Prologue ends
       sd a0,0(s0)  # a
       sd a1,-8(s0)  # b
       sd a2,-16(s0)  # c
@@ -113,57 +113,51 @@
       sd a4,-32(s0)  # e
       sd a5,-40(s0)  # f_0
       sd a6,-48(s0)  # g
-      sd a7,-56(s0)  # Tuple for stack arguments
-      ld a0,-56(s0)
-      li a1,0
-      call ml_get_tuple_field
-      sd a0,-64(s0)
-      ld a0,-56(s0)
-      li a1,1
-      call ml_get_tuple_field
-      sd a0,-72(s0)
-      ld a0,-56(s0)
-      li a1,2
-      call ml_get_tuple_field
-      sd a0,-80(s0)
+      sd a7,-56(s0)  # Tuple for arguments
       ld t0,0(s0)  # a
       ld t1,-8(s0)  # b
       add a0,t0,t1  # a ( + ) b
-      sd a0,-88(s0)  # anf10
-      ld t0,-88(s0)  # anf10
+      sd a0,-64(s0)  # anf10
+      ld t0,-64(s0)  # anf10
       ld t1,-16(s0)  # c
       add a0,t0,t1  # anf10 ( + ) c
-      sd a0,-96(s0)  # anf9
-      ld t0,-96(s0)  # anf9
+      sd a0,-72(s0)  # anf9
+      ld t0,-72(s0)  # anf9
       ld t1,-24(s0)  # d
       add a0,t0,t1  # anf9 ( + ) d
-      sd a0,-104(s0)  # anf8
-      ld t0,-104(s0)  # anf8
+      sd a0,-80(s0)  # anf8
+      ld t0,-80(s0)  # anf8
       ld t1,-32(s0)  # e
       add a0,t0,t1  # anf8 ( + ) e
-      sd a0,-112(s0)  # anf7
-      ld t0,-112(s0)  # anf7
+      sd a0,-88(s0)  # anf7
+      ld t0,-88(s0)  # anf7
       ld t1,-40(s0)  # f_0
       add a0,t0,t1  # anf7 ( + ) f_0
-      sd a0,-120(s0)  # anf6
-      ld t0,-120(s0)  # anf6
+      sd a0,-96(s0)  # anf6
+      ld t0,-96(s0)  # anf6
       ld t1,-48(s0)  # g
       add a0,t0,t1  # anf6 ( + ) g
-      sd a0,-128(s0)  # anf5
-      ld t0,-128(s0)  # anf5
-      ld t1,-64(s0)  # h
+      sd a0,-104(s0)  # anf5
+      ld t0,-104(s0)  # anf5
+      ld t1,-56(s0)
+      ld t1,0(t1)
+      ld t1,0(t1)  # h
       add a0,t0,t1  # anf5 ( + ) h
-      sd a0,-136(s0)  # anf4
-      ld t0,-136(s0)  # anf4
-      ld t1,-72(s0)  # i
+      sd a0,-112(s0)  # anf4
+      ld t0,-112(s0)  # anf4
+      ld t1,-56(s0)
+      ld t1,0(t1)
+      ld t1,8(t1)  # i
       add a0,t0,t1  # anf4 ( + ) i
-      sd a0,-144(s0)  # anf3
-      ld t0,-144(s0)  # anf3
-      ld t1,-80(s0)  # j
+      sd a0,-120(s0)  # anf3
+      ld t0,-120(s0)  # anf3
+      ld t1,-56(s0)
+      ld t1,0(t1)
+      ld t1,16(t1)  # j
       add a0,t0,t1  # anf3 ( + ) j
-      ld s0,160(sp)  # Epilogue starts
-      ld ra,168(sp)
-      addi sp,sp,168
+      ld s0,136(sp)  # Epilogue starts
+      ld ra,144(sp)
+      addi sp,sp,144
       ret
   
       .globl main
@@ -239,25 +233,23 @@
       ret
   $ riscv64-unknown-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
   $ RUST_LOG=debug /tmp/dbg
-  [runtime::tuple]: Created tuple of size 5 at 0x240330
-  [runtime::tuple]: Set [0] = 100000 in [100000, 0, 0, 0, 0] at 0x240330
-  [runtime::tuple]: Set [1] = 1000000 in [100000, 1000000, 0, 0, 0] at 0x240330
-  [runtime::tuple]: Set [2] = 10000000 in [100000, 1000000, 10000000, 0, 0] at 0x240330
-  [runtime::tuple]: Set [3] = 100000000 in [100000, 1000000, 10000000, 100000000, 0] at 0x240330
-  [runtime::tuple]: Set [4] = 1000000000 in [100000, 1000000, 10000000, 100000000, 1000000000] at 0x240330
-  [runtime::closure]: Creating Closure { fn_ptr: 0x1e6f0, arity: 10, args: dec[] / hex[] } at 0x2405e0
-  [runtime::closure]: Creating Closure { fn_ptr: 0x1e6c0, arity: 1, args: dec[] / hex[] } at 0x29ba70
-  [runtime::closure]: Tuple with arguments [100000, 1000000, 10000000, 100000000, 1000000000] at 0x240330
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e6c0, arity: 1, args: dec[2360800, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2405e0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+  [runtime::tuple]: Created tuple of size 5 at 0x243330
+  [runtime::tuple]: Set [0] = 100000 in [100000, 0, 0, 0, 0] at 0x243330
+  [runtime::tuple]: Set [1] = 1000000 in [100000, 1000000, 0, 0, 0] at 0x243330
+  [runtime::tuple]: Set [2] = 10000000 in [100000, 1000000, 10000000, 0, 0] at 0x243330
+  [runtime::tuple]: Set [3] = 100000000 in [100000, 1000000, 10000000, 100000000, 0] at 0x243330
+  [runtime::tuple]: Set [4] = 1000000000 in [100000, 1000000, 10000000, 100000000, 1000000000] at 0x243330
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e8ac, arity: 10, args: dec[] / hex[] } at 0x2435e0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[] / hex[] } at 0x33b720
+  [runtime::closure]: Tuple with arguments [100000, 1000000, 10000000, 100000000, 1000000000] at 0x243330
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[2373088, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2435e0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
   [runtime::closure]: Too many args, [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] goes to next closure
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e6c0, arity: 1, args: dec[2360800] / hex[2405e0] }
-  [runtime::closure]: Closure result: 2360800 / 0x2405e0
-  [runtime::closure]: Applying Closure { fn_ptr: 0x1e6f0, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
-  [runtime::tuple]: Getting 0 of [10000000, 100000000, 1000000000] at 0x276bc0
-  [runtime::tuple]: Getting 1 of [10000000, 100000000, 1000000000] at 0x276bc0
-  [runtime::tuple]: Getting 2 of [10000000, 100000000, 1000000000] at 0x276bc0
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[2373088] / hex[2435e0] }
+  [runtime::closure]: Closure result: 2373088 / 0x2435e0
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e8ac, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+  [runtime::closure]: Tuple with arguments: [10000000, 100000000, 1000000000] at 0x2deae0
   [runtime::closure]: Closure result: 1111111111 / 0x423a35c7
-  [runtime::closure]: Creating Closure { fn_ptr: 0x23ad0 (ml_div), arity: 1, args: dec[] / hex[] } at 0x27eaf0
-  [runtime::closure]: Applying Closure { fn_ptr: 0x23ad0 (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
+  [runtime::closure]: Creating Closure { fn_ptr: 0x243aa (ml_div), arity: 1, args: dec[] / hex[] } at 0x263090
+  [runtime::closure]: Applying Closure { fn_ptr: 0x243aa (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
   1111111111
   [runtime::closure]: Closure result: 0 / 0x0
