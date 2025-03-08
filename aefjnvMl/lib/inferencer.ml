@@ -19,6 +19,7 @@ module R : sig
 
   module RList : sig
     val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
+    val map : 'a list -> ('a -> 'b t) -> 'b list t
   end
 
   module RMap : sig
@@ -73,6 +74,16 @@ end = struct
         let open Syntax in
         let* acc = acc in
         f acc x)
+    ;;
+
+    let map xs f =
+      let open Syntax in
+      let* res =
+        fold_left xs ~init:(return []) ~f:(fun acc x ->
+          let* x' = f x in
+          return (x' :: acc))
+      in
+      return @@ List.rev res
     ;;
   end
 
