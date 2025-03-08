@@ -15,9 +15,7 @@ module RuntimeEnv = struct
   let generic = tvar "a"
 
   let get_head = { name = "get_head"; typ = tarrow (tlist generic) generic }
-
   let get_tl = { name = "get_tale"; typ = tarrow (tlist generic) (tlist generic) }
-
   let get_nth = { name = "get_nth"; typ = tarrow (ttuple tint generic []) (tvar "b") }
   let not_exhaustive_pm = { name = "rte_error_match_failure"; typ = tarrow tunit generic }
   let init_env = [ get_head; get_tl; get_nth; not_exhaustive_pm ]
