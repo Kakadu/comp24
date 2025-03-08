@@ -8,7 +8,7 @@ $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
 >   
 > EOF
 $ cat /tmp/tuples.s
-$ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+$ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
 $ qemu-riscv64-static /tmp/tuples
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
@@ -56,7 +56,7 @@ $ qemu-riscv64-static /tmp/tuples
       ld ra,32(sp)
       addi sp,sp,32
       ret
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   (42, 1)
 
@@ -99,7 +99,7 @@ $ qemu-riscv64-static /tmp/tuples
     print_tuple c
   
 $ cat /tmp/tuples.s
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   (-16, 22, -10)
 
@@ -124,7 +124,7 @@ $ cat /tmp/tuples.s
          0
   
 $ cat /tmp/tuples.s
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   1
   2
@@ -160,7 +160,7 @@ $ cat /tmp/tuples.s
     0
   
 $ cat /tmp/tuples.s
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   5
   0
@@ -202,7 +202,7 @@ $ cat /tmp/tuples.s
   let init_c _ = `get_tuple_field __tuple_0 2
   
 $ cat /tmp/tuples.s
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   1
   2
@@ -253,7 +253,7 @@ $ cat /tmp/tuples.s
   let init_c _ = `get_tuple_field __tuple_1 1
   
 $ cat /tmp/tuples.s
-  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/tuples
   1
   2

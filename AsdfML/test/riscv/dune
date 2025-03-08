@@ -15,5 +15,5 @@
 ;  (public_name rt)
 ;  (libraries AsdfML.Lib test))
 
-; (cram
-;  (deps %{bin:riscv} rt.ml ../../runtime/libruntime.a))
+(cram
+ (deps %{bin:riscv} rt.ml ../../runtime/libruntime.a))

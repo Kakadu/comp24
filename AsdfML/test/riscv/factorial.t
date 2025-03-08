@@ -87,7 +87,7 @@
       addi sp,sp,24
       ret
 
-  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/factorial
   120
 
@@ -118,7 +118,7 @@
   let main = let anf10 = fact 5 in
     println_int anf10
   
-  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/factorial
   120
 
@@ -150,7 +150,7 @@
   let main = let anf10 = fact 5 in
     println_int anf10
   
-  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/factorial
   120
 
@@ -175,7 +175,7 @@
   >   let _ = println_int (fib 10) in
   >   ()
   > EOF
-  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/factorial
   2
   3
