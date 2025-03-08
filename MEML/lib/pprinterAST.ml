@@ -121,13 +121,20 @@ let pp_bindings formatter bindings =
     List.iteri
       (fun i let_binding ->
         match let_binding with
-        | (name, expr) ->
+        | name, expr ->
           (* Обработка обычного связывания let id = expr *)
           if i = 0
           then
-            Format.fprintf formatter "let %a %a = %a\n" pp_rec r pp_pattern name pp_expression expr
-          else
-            Format.fprintf formatter "and %a = %a\n" pp_pattern name pp_expression expr)
+            Format.fprintf
+              formatter
+              "let %a %a = %a\n"
+              pp_rec
+              r
+              pp_pattern
+              name
+              pp_expression
+              expr
+          else Format.fprintf formatter "and %a = %a\n" pp_pattern name pp_expression expr)
       lets_list
   | Expression expr ->
     (* Обработка простого выражения *)

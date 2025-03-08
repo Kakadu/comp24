@@ -191,9 +191,9 @@ module VarSet = struct
   let fold_left_m f acc set =
     fold
       (fun x acc ->
-         let open R.Syntax in
-         let* acc = acc in
-         f acc x)
+        let open R.Syntax in
+        let* acc = acc in
+        f acc x)
       acc
       set
   ;;
@@ -259,9 +259,9 @@ let instantiate : scheme -> ty R.t =
   fun (S (bs, t)) ->
   VarSet.fold_left_m
     (fun typ name ->
-       let* f1 = fresh_var in
-       let* s = Subst.singleton name f1 in
-       return (Subst.apply s typ))
+      let* f1 = fresh_var in
+      let* s = Subst.singleton name f1 in
+      return (Subst.apply s typ))
     bs
     (return t)
 ;;

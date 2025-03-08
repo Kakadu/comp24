@@ -3,7 +3,6 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Anfast
-
 open Llvm
 open Result
 open Ast
@@ -168,17 +167,17 @@ let llbindings_codegen = function
     in
     Array.iteri
       (fun i a ->
-         let name = List.nth names i in
-         set_value_name name a)
+        let name = List.nth names i in
+        set_value_name name a)
       (params func);
     let bb = append_block context "entry" func in
     position_at_end bb builder;
     Array.iteri
       (fun i a ->
-         let name = List.nth names i in
-         let alloca = build_alloca i64_type name builder in
-         let (_ : Llvm.llvalue) = build_store a alloca builder in
-         Hashtbl.add named_values name alloca)
+        let name = List.nth names i in
+        let alloca = build_alloca i64_type name builder in
+        let (_ : Llvm.llvalue) = build_store a alloca builder in
+        Hashtbl.add named_values name alloca)
       (params func);
     let* ret_val = llexpression_codegen body in
     let _ =
@@ -206,9 +205,9 @@ let codegen llstatments =
   let* result =
     List.fold_left
       (fun acc bexpr ->
-         let* acc = acc in
-         let* res = llbindings_codegen bexpr in
-         ok (res :: acc))
+        let* acc = acc in
+        let* res = llbindings_codegen bexpr in
+        ok (res :: acc))
       (ok runtime)
       llstatments
   in
