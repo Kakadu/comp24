@@ -1,5 +1,18 @@
 (library
- (modules Ast Parser Lexer Typing Anf Utils CC LL AC PrinterAst PrinterLL)
+ (modules
+  Ast
+  Parser
+  Lexer
+  Typing
+  Anf
+  Closure_conversion
+  Utils
+  LL
+  AC
+  ME
+  PrinterAst
+  PrinterLL
+  PrinterME)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
