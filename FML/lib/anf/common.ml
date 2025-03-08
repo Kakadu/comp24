@@ -6,7 +6,6 @@ open Base
 open Ast
 open Pe_ast
 
-let empty = Base.Map.empty (module Base.String)
 module StrMap = struct
   type 'a t = (string, 'a, String.comparator_witness) Map.t
 
