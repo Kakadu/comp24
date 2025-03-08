@@ -5,7 +5,7 @@
   Lexer
   Typing
   Anf
-  Closure_conversion
+  CC
   Utils
   LL
   AC

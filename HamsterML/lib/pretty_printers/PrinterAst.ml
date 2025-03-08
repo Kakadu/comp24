@@ -23,6 +23,14 @@ and pretty_print_expr e =
   | EListConcat (e1, e2) -> pretty_print_expr e1 ^ "::" ^ pretty_print_expr e2
   | EConstraint (e, dt) ->
     "(" ^ pretty_print_expr e ^ " : " ^ pretty_print_datatype dt ^ ")"
+  | Application (Application (EOperation (Binary bop), e1), e2) ->
+    "("
+    ^ pretty_print_expr e1
+    ^ " "
+    ^ BinOperator.to_string bop
+    ^ " "
+    ^ pretty_print_expr e2
+    ^ ")"
   | Application (e1, e2) -> "(" ^ pretty_print_expr e1 ^ " " ^ pretty_print_expr e2 ^ ")"
   | Let (ft, binds, body_opt) -> pretty_print_let ft binds body_opt
   | Fun (args, body) ->
@@ -59,21 +67,7 @@ and pretty_print_op = function
   | Binary bop -> pretty_print_bop bop
   | Unary uop -> pretty_print_uop uop
 
-and pretty_print_bop = function
-  | ADD -> "( + )"
-  | SUB -> "( - )"
-  | MUL -> "( * )"
-  | DIV -> "( / )"
-  | EQ -> "( = )"
-  | ID_EQ -> "( == )"
-  | NEQ -> "( != )"
-  | GT -> "( > )"
-  | GTE -> "( >= )"
-  | LT -> "( < )"
-  | LTE -> "( <= )"
-  | AND -> "( && )"
-  | OR -> "( || )"
-  | CONCAT -> "( ^ )"
+and pretty_print_bop bop = "( " ^ BinOperator.to_string bop ^ " )"
 
 and pretty_print_uop = function
   | NOT -> "not"
