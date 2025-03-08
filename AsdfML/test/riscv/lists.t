@@ -50,7 +50,7 @@
       ld ra,32(sp)
       addi sp,sp,32
       ret
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   [1, 2, 3]
 
@@ -86,7 +86,7 @@
            0 
          else panic ()
   
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   1
   2
@@ -132,7 +132,7 @@
     0
   
 $ cat /tmp/lists.s
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   3
   0
@@ -177,7 +177,7 @@ $ cat /tmp/lists.s
     0
   
 $ cat /tmp/lists.s
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   [4, 9, 16]
   []
@@ -191,7 +191,7 @@ $ cat /tmp/lists.s
   >   let _ = (map_cps (fun x -> x * x) [1;2;3;4;5] (fun x -> print_list x)) in
   >   0
   > EOF
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   [1, 4, 9, 16, 25]
 
@@ -453,7 +453,7 @@ $ cat /tmp/lists.s
       ld ra,64(sp)
       addi sp,sp,64
       ret
-  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc -static /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/lists
   1
   2
