@@ -343,26 +343,20 @@ $ /tmp/out
       sd s0,40(sp)
       addi s0,sp,32  # Prologue ends
       sd a0,0(s0)  # x
-      # Creating closure for ml_eq
-      la a0,ml_eq
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      li a2,0
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      li t1,0
+      xor a0,t0,t1
+      seqz a0,a0
       sd a0,-8(s0)  # anf1
       ld t0,-8(s0)  # anf1
       beq t0,zero,.else_0
       li a0,1
       j .end_0
   .else_0:
-      # Creating closure for ml_eq
-      la a0,ml_eq
-      li a1,2
-      call create_closure
-      ld a1,0(s0)  # x
-      li a2,1
-      call apply_closure_2
+      ld t0,0(s0)  # x
+      li t1,1
+      xor a0,t0,t1
+      seqz a0,a0
       sd a0,-16(s0)  # anf3
       ld t0,-16(s0)  # anf3
       beq t0,zero,.else_1
