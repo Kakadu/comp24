@@ -8,4 +8,4 @@
   (no-infer
    (progn
     (system
-     "pushd ../../../runtime && cargo build --release --color=always && popd && cp ../../../runtime/target/riscv64gc-unknown-linux-gnu/release/libruntime.a .")))))
+     "cd ../../../runtime && cargo build --release --color=always && cd - && cp ../../../runtime/target/riscv64gc-unknown-linux-gnu/release/libruntime.a .")))))
