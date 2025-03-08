@@ -1,12 +1,10 @@
 open HamsterML.LL
-open ParserTest
+open ClosureConversionTest
 
 let lambda_lift_prog (s : string) =
   let open HamsterML.Utils.R in
-  let prog = parse_prog s in
-  let alpha_convert prog = run @@ HamsterML.AC.convert_prog prog in
   let lambda_lift prog = run @@ ll_prog prog in
-  prog |> alpha_convert |> lambda_lift
+  s |> closure_conv_prog |> lambda_lift
 ;;
 
 let pp_lambda_lift_prog (s : string) =
@@ -14,190 +12,112 @@ let pp_lambda_lift_prog (s : string) =
   lambda_lift_prog s |> pretty_print_ll_prog |> print_string
 ;;
 
-let%test _ =
-  lambda_lift_prog "let a = 1 + 1"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , []
-            , LLApplication
-                ( LLApplication (LLOperation (Binary ADD), LLConst (Int 1))
-                , LLConst (Int 1) ) )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let a = 1 |};
+  [%expect {| let ll_var_0 = 1 |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let a = 10 let b = a"
-  = [ LLLet (Nonrecursive, [ Var "ll_var_0", [], LLConst (Int 10) ], None)
-    ; LLLet (Nonrecursive, [ Var "ll_var_1", [], LLVar "ll_var_0" ], None)
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let a = 1 + 1 |};
+  [%expect {| let ll_var_0 = (1 + 1) |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let a = 10 and b = 20"
-  = [ LLLet
-        ( Nonrecursive
-        , [ Var "ll_var_0", [], LLConst (Int 10); Var "ll_var_1", [], LLConst (Int 20) ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let a = 10 let b = a |};
+  [%expect {| 
+    let ll_var_0 = 10
+    let ll_var_1 = ll_var_0 
+    |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let rec a = 1 + 1 in a + 2"
-  = [ LLLet
-        ( Recursive
-        , [ ( Var "ll_var_0"
-            , []
-            , LLApplication
-                ( LLApplication (LLOperation (Binary ADD), LLConst (Int 1))
-                , LLConst (Int 1) ) )
-          ]
-        , Some
-            (LLApplication
-               ( LLApplication (LLOperation (Binary ADD), LLVar "ll_var_0")
-               , LLConst (Int 2) )) )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let a = 1 let a = a + 1 let rec a x = a 1 |};
+  [%expect
+    {| 
+    let ll_var_0 = 1
+    let ll_var_1 = (ll_var_0 + 1)
+    let rec ll_var_2 arg_3 = (ll_var_2 1)
+    |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let sum x y = let f a b = a + b in f x y"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_1"
-            , [ Var "arg_2"; Var "arg_3" ]
-            , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "arg_2"), LLVar "arg_3") )
-          ]
-        , None )
-    ; LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_0"; Var "arg_1" ]
-            , LLApplication
-                (LLApplication (LLVar "ll_var_1", LLVar "arg_0"), LLVar "arg_1") )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let a = 10 and b = 20 |};
+  [%expect {| 
+    let ll_var_0 = 10 and ll_var_1 = 20
+    |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let rec fac n = if n<=1 then 1 else n * fac (n-1)"
-  = [ LLLet
-        ( Recursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_1" ]
-            , LLIf
-                ( LLApplication
-                    ( LLApplication (LLOperation (Binary LTE), LLVar "arg_1")
-                    , LLConst (Int 1) )
-                , LLConst (Int 1)
-                , Some
-                    (LLApplication
-                       ( LLApplication (LLOperation (Binary MUL), LLVar "arg_1")
-                       , LLApplication
-                           ( LLVar "ll_var_0"
-                           , LLApplication
-                               ( LLApplication (LLOperation (Binary SUB), LLVar "arg_1")
-                               , LLConst (Int 1) ) ) )) ) )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let rec a = 1 + 1 in a + 2 |};
+  [%expect {| 
+    let rec ll_var_0 = (1 + 1) in (ll_var_0 + 2) 
+    |}]
 ;;
 
-(*
-   let sum x y = x + y let main x y = sum x y
-   ---
-   let ll_var_0 x y = x + y
-   let ll_var_1 x y = ll_var_0 x y
-*)
-
-let%test _ =
-  lambda_lift_prog "let sum x y = x + y let main x y = sum x y"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_0"; Var "arg_1" ]
-            , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLVar "arg_1") )
-          ]
-        , None )
-    ; LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_1"
-            , [ Var "arg_3"; Var "arg_4" ]
-            , LLApplication
-                (LLApplication (LLVar "ll_var_0", LLVar "arg_3"), LLVar "arg_4") )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let sum x y = let f a b = a + b in f x y|};
+  [%expect
+    {| 
+    let ll_var_1 arg_2 arg_3 = (arg_2 + arg_3)
+    let ll_var_0 arg_0 arg_1 = ((ll_var_1 arg_0) arg_1)
+    |}]
 ;;
 
-(*
-   let rec f x = g x and g x = x + 1
-   ---
-   let rec ll_var_0 x = ll_var_1 x and ll_var_1 x = x + 1
-*)
-
-let%test _ =
-  lambda_lift_prog "let rec f x = g x and g x = x + 1"
-  = [ LLLet
-        ( Recursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_2" ]
-            , LLApplication (LLVar "ll_var_1", LLVar "arg_2") )
-          ; ( Var "ll_var_1"
-            , [ Var "arg_3" ]
-            , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "arg_3"), LLConst (Int 1))
-            )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let sum x y = let res = x + y in res |};
+  [%expect {| 
+    !!!
+    |}]
 ;;
 
-(* let rofl (a,b) = 1,2
-   ---
-   let ll_var_0 ll_arg_1 = match ll_arg_1 with (a, b) -> (1,2)
-*)
-
-let%test _ =
-  lambda_lift_prog "let rofl (a,b) = 1,2"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , [ Var "ll_arg_1" ]
-            , LLMatch
-                ( LLVar "ll_arg_1"
-                , [ ( Tuple (Var "arg_0", Var "arg_1", [])
-                    , LLTuple (LLConst (Int 1), LLConst (Int 2), []) )
-                  ] ) )
-          ]
-        , None )
-    ]
+let%expect_test "fac" =
+  pp_lambda_lift_prog {| let rec fac n = if n<=1 then 1 else n * fac (n-1) |};
+  [%expect
+    {| 
+    let rec ll_var_0 arg_1 = if (arg_1 <= 1) then 1 else (arg_1 * (ll_var_0 (arg_1 - 1)))
+    |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let f x = print_int x"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_0" ]
-            , LLApplication (LLVar "print_int", LLVar "arg_0") )
-          ]
-        , None )
-    ]
+let%expect_test _ =
+  pp_lambda_lift_prog {| let sum x y = x + y let main = sum |};
+  [%expect
+    {| 
+    let ll_var_0 arg_0 arg_1 = (arg_0 + arg_1)
+    let ll_var_1 = ll_var_0
+    |}]
 ;;
 
-let%test _ =
-  lambda_lift_prog "let main = let () = print_int 10 in 0"
-  = [ LLLet
-        ( Nonrecursive
-        , [ Const Unit, [], LLApplication (LLVar "print_int", LLConst (Int 10)) ]
-        , None )
-    ; LLLet (Nonrecursive, [ Var "ll_var_0", [], LLConst (Int 0) ], None)
-    ]
+let%expect_test "mutual rec" =
+  pp_lambda_lift_prog {| let rec f x = g x and g x = x + 1 |};
+  [%expect
+    {| 
+    let rec ll_var_0 arg_2 = (ll_var_1 arg_2) and ll_var_1 arg_3 = (arg_3 + 1)
+    |}]
+;;
+
+let%expect_test "weird arguments elimination" =
+  pp_lambda_lift_prog {| let rofl (a,b) _ () = 1 |};
+  [%expect
+    {| 
+    let ll_var_0 ll_arg_1 ll_arg_2 ll_arg_3 = match ll_arg_3 with
+    | () -> match ll_arg_2 with
+    | _ -> match ll_arg_1 with
+    | (arg_0, arg_1) -> 1
+    |}]
+;;
+
+let%expect_test _ =
+  pp_lambda_lift_prog {| let f x = print_int x |};
+  [%expect {| 
+    let ll_var_0 arg_0 = (print_int arg_0)
+    |}]
+;;
+
+let%expect_test _ =
+  pp_lambda_lift_prog {| let main = let () = print_int 10 in 0 |};
+  [%expect {| 
+    let ll_var_0 = let () = print_int 10 in 0
+    |}]
 ;;
 
 let%test _ =
@@ -223,60 +143,11 @@ let%test _ =
     ]
 ;;
 
-let%test _ =
-  lambda_lift_prog
-    {|let rec fac_cps n k =
-      if n=1 then k 1 else
-      fac_cps (n-1) ((fun p k n -> k (p*n)) k n) |}
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_lam_1"
-            , [ Var "arg_3"; Var "arg_4"; Var "arg_5" ]
-            , LLApplication
-                ( LLVar "arg_4"
-                , LLApplication
-                    ( LLApplication (LLOperation (Binary MUL), LLVar "arg_3")
-                    , LLVar "arg_5" ) ) )
-          ]
-        , None )
-    ; LLLet
-        ( Recursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_1"; Var "arg_2" ]
-            , LLIf
-                ( LLApplication
-                    ( LLApplication (LLOperation (Binary EQ), LLVar "arg_1")
-                    , LLConst (Int 1) )
-                , LLApplication (LLVar "arg_2", LLConst (Int 1))
-                , Some
-                    (LLApplication
-                       ( LLApplication
-                           ( LLVar "ll_var_0"
-                           , LLApplication
-                               ( LLApplication (LLOperation (Binary SUB), LLVar "arg_1")
-                               , LLConst (Int 1) ) )
-                       , LLApplication
-                           (LLApplication (LLVar "ll_lam_1", LLVar "arg_2"), LLVar "arg_1")
-                       )) ) )
-          ]
-        , None )
-    ]
-;;
-
-let%test _ =
-  lambda_lift_prog "let f = (fun x -> x + 1) 2"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_lam_1"
-            , [ Var "arg_0" ]
-            , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLConst (Int 1))
-            )
-          ]
-        , None )
-    ; LLLet
-        ( Nonrecursive
-        , [ Var "ll_var_0", [], LLApplication (LLVar "ll_lam_1", LLConst (Int 2)) ]
-        , None )
-    ]
+let%expect_test "fac_cps" =
+  pp_lambda_lift_prog
+    {| let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n)) |};
+    [%expect {| 
+    let ll_lam_1 arg_1 arg_2 arg_3 = (arg_2 (arg_3 * arg_1))
+    let rec ll_var_0 arg_1 arg_2 = if (arg_1 = 1) then (arg_2 1) else ((ll_var_0 (arg_1 - 1)) ((ll_lam_1 arg_1) arg_2))
+    |}]
 ;;
