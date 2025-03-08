@@ -14,7 +14,9 @@
   Common
   Pe_ast
   Alpha_conv
-  Closure_conv)
+  Closure_conv
+  Lambda_lifting
+ )
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
  (preprocess

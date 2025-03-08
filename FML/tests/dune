@@ -38,6 +38,12 @@
  (modules closure_conv_runner)
  (libraries fml_lib stdio))
 
+ (executable
+ (name closure_conv_runner)
+ (public_name closure_conv_runner)
+ (modules closure_conv_runner)
+ (libraries fml_lib stdio))
+
 (cram
  (applies_to parser_manytests)
  (deps
@@ -142,7 +148,6 @@
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
 
-(cram
  (applies_to closure_conv_manytest)
  (deps
   ./closure_conv_runner.exe
@@ -167,3 +172,4 @@
   manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
+
