@@ -1,5 +1,6 @@
 open Base
 open Ast
+open Utils.R
 
 let stdlib_names = Set.of_list (module String) [ "print_int"; "print_endline" ]
 
@@ -266,7 +267,7 @@ let cc_expr global_names =
   process (Map.empty (module String))
 ;;
 
-let cc_prog (prog : prog) =
+let cc_prog (prog : prog) : prog t =
   (* Collect global function names from top-level let bindings *)
   let global_names =
     List.fold
@@ -282,5 +283,5 @@ let cc_prog (prog : prog) =
         | _ -> acc)
   in
   let cc_expr_with_globals = cc_expr global_names in
-  List.map prog ~f:cc_expr_with_globals
+  List.map prog ~f:cc_expr_with_globals |> return
 ;;
