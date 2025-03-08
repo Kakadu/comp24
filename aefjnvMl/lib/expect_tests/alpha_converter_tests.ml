@@ -81,8 +81,8 @@ let rec (+) b c = c + b
 ;;
   |} in
   [%expect {|
-    let rec op_plus b c =
-      (op_plus c) b
+    let rec add b c =
+      (add c) b
     ;; |}]
 ;;
 
@@ -94,12 +94,12 @@ let (+) b c = c + b
   |} in
   [%expect
     {|
-    let op_plus b c =
+    let add b c =
       (( + ) c) b
     ;;
 
-    let ac2_op_plus ac0_b ac1_c =
-      (op_plus ac1_c) ac0_b
+    let ac2_add ac0_b ac1_c =
+      (add ac1_c) ac0_b
     ;; |}]
 ;;
 

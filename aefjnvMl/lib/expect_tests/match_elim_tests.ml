@@ -53,13 +53,12 @@ let even n =
   [%expect
     {|
     let even n =
-      let me_1 = n in
-        (if (( = ) 0) me_1
-        then
-          0
-        else
-          let x = me_1 in
-            (( - ) x) 1)
+      (if (( = ) 0) n
+      then
+        0
+      else
+        let x = n in
+          (( - ) x) 1)
     ;; |}]
 ;;
 
@@ -77,17 +76,16 @@ let rec len l =
   [%expect
     {|
         let rec len l =
-          let me_1 = l in
-            (if (( = ) []) me_1
+          (if (( = ) []) l
+          then
+            0
+          else
+            (if (( >= ) get_list_len l) 2
             then
-              0
+              let tl = (get_by_idx l) 1 in
+                (( + ) 1) (len tl)
             else
-              (if (( >= ) get_list_len me_1) 2
-              then
-                let tl = (get_by_idx me_1) 1 in
-                  (( + ) 1) (len tl)
-              else
-                fail_pt_match ()))
+              part_match_fail ()))
         ;; |}]
 ;;
 
@@ -156,19 +154,18 @@ match ab with
   [%expect
     {|
     let me_0 = let ab = ((1 :: []) :: ((2 :: []) :: [])) in
-        let me_1 = ab in
-          (if (if (( >= ) get_list_len me_1) 2
-            then
-              (( >= ) get_list_len ((get_by_idx me_1) 0)) 2
-            else
-              false)
+        (if (if (( >= ) get_list_len ab) 2
           then
-            let a = (get_by_idx ((get_by_idx me_1) 0)) 0 in
-              let c = (get_by_idx ((get_by_idx me_1) 0)) 1 in
-                let b = (get_by_idx me_1) 1 in
-                  1
+            (( >= ) get_list_len ((get_by_idx ab) 0)) 2
           else
-            fail_pt_match ())
+            false)
+        then
+          let a = (get_by_idx ((get_by_idx ab) 0)) 0 in
+            let c = (get_by_idx ((get_by_idx ab) 0)) 1 in
+              let b = (get_by_idx ab) 1 in
+                1
+        else
+          part_match_fail ())
     ;; |}]
 ;;
 
@@ -182,10 +179,9 @@ match ab with
   [%expect
     {|
     let me_0 = let ab = (1, 2) in
-        let me_1 = ab in
-          let a = (get_by_idx me_1) 0 in
-            let b = (get_by_idx me_1) 1 in
-              1
+        let a = (get_by_idx ab) 0 in
+          let b = (get_by_idx ab) 1 in
+            1
     ;; |}]
 ;;
 
@@ -547,13 +543,13 @@ let main =
   in
   [%expect
     {|
-    let _start () () a () b _c () d __ =
+    let ac0__start () () a () b _c () d __ =
       let () = print_int ((( + ) a) b) in
         let () = print_int __ in
           (( + ) (( / ) (( * ) a) b) _c) d
     ;;
 
-    let ac0_main = print_int (((((((((_start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (( ~- ) 1))) 10000) (( ~- ) 555555))
+    let ac1_main = print_int (((((((((ac0__start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (~- 1))) 10000) (~- 555555))
     ;; |}]
 ;;
 
@@ -574,11 +570,11 @@ let main =
       (f x) (g x)
     ;;
 
-    let ac1_main = let () = print_int (((addi (fun ac0_x b -> (if b
+    let ac2_main = let () = print_int (((addi (fun ac0_x b -> (if b
         then
           (( + ) ac0_x) 1
         else
-          (( * ) ac0_x) 2))) (fun _start -> (( = ) (( / ) _start) 2) 0)) 4) in
+          (( * ) ac0_x) 2))) (fun ac1__start -> (( = ) (( / ) ac1__start) 2) 0)) 4) in
         0
     ;; |}]
 ;;
@@ -633,144 +629,137 @@ let main =
   [%expect
     {|
     let rec length xs =
-      let me_1 = xs in
-        (if (( = ) []) me_1
+      (if (( = ) []) xs
+      then
+        0
+      else
+        (if (( >= ) get_list_len xs) 2
         then
-          0
+          let h = (get_by_idx xs) 0 in
+            let tl = (get_by_idx xs) 1 in
+              (( + ) 1) (length tl)
         else
-          (if (( >= ) get_list_len me_1) 2
-          then
-            let h = (get_by_idx me_1) 0 in
-              let tl = (get_by_idx me_1) 1 in
-                (( + ) 1) (length tl)
-          else
-            fail_pt_match ()))
+          part_match_fail ()))
     ;;
 
     let length_tail = let rec helper ac_acc ac0_xs =
-        let me_5 = ac0_xs in
-          (if (( = ) []) me_5
+        (if (( = ) []) ac0_xs
+        then
+          ac_acc
+        else
+          (if (( >= ) get_list_len ac0_xs) 2
           then
-            ac_acc
+            let ac1_h = (get_by_idx ac0_xs) 0 in
+              let ac2_tl = (get_by_idx ac0_xs) 1 in
+                (helper ((( + ) ac_acc) 1)) ac2_tl
           else
-            (if (( >= ) get_list_len me_5) 2
-            then
-              let ac1_h = (get_by_idx me_5) 0 in
-                let ac2_tl = (get_by_idx me_5) 1 in
-                  (helper ((( + ) ac_acc) 1)) ac2_tl
-            else
-              fail_pt_match ())) in
+            part_match_fail ())) in
         helper 0
     ;;
 
     let rec map f ac3_xs =
-      let me_9 = ac3_xs in
-        (if (( = ) []) me_9
+      (if (( = ) []) ac3_xs
+      then
+        []
+      else
+        (if (if (( = ) 2) (get_list_len ac3_xs)
+          then
+            (( = ) []) ((get_by_idx ac3_xs) 1)
+          else
+            false)
         then
-          []
+          let a = (get_by_idx ac3_xs) 0 in
+            (f a :: [])
         else
-          (if (if (( = ) 2) (get_list_len me_9)
+          (if (if (( = ) 3) (get_list_len ac3_xs)
             then
-              (( = ) []) ((get_by_idx me_9) 1)
+              (( = ) []) ((get_by_idx ac3_xs) 2)
             else
               false)
           then
-            let a = (get_by_idx me_9) 0 in
-              (f a :: [])
+            let ac4_a = (get_by_idx ac3_xs) 0 in
+              let b = (get_by_idx ac3_xs) 1 in
+                (f ac4_a :: (f b :: []))
           else
-            (if (if (( = ) 3) (get_list_len me_9)
+            (if (if (( = ) 4) (get_list_len ac3_xs)
               then
-                (( = ) []) ((get_by_idx me_9) 2)
+                (( = ) []) ((get_by_idx ac3_xs) 3)
               else
                 false)
             then
-              let ac4_a = (get_by_idx me_9) 0 in
-                let b = (get_by_idx me_9) 1 in
-                  (f ac4_a :: (f b :: []))
+              let ac5_a = (get_by_idx ac3_xs) 0 in
+                let ac6_b = (get_by_idx ac3_xs) 1 in
+                  let c = (get_by_idx ac3_xs) 2 in
+                    (f ac5_a :: (f ac6_b :: (f c :: [])))
             else
-              (if (if (( = ) 4) (get_list_len me_9)
-                then
-                  (( = ) []) ((get_by_idx me_9) 3)
-                else
-                  false)
+              (if (( >= ) get_list_len ac3_xs) 5
               then
-                let ac5_a = (get_by_idx me_9) 0 in
-                  let ac6_b = (get_by_idx me_9) 1 in
-                    let c = (get_by_idx me_9) 2 in
-                      (f ac5_a :: (f ac6_b :: (f c :: [])))
+                let ac7_a = (get_by_idx ac3_xs) 0 in
+                  let ac8_b = (get_by_idx ac3_xs) 1 in
+                    let ac9_c = (get_by_idx ac3_xs) 2 in
+                      let d = (get_by_idx ac3_xs) 3 in
+                        let ac10_tl = (get_by_idx ac3_xs) 4 in
+                          (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))))
               else
-                (if (( >= ) get_list_len me_9) 5
-                then
-                  let ac7_a = (get_by_idx me_9) 0 in
-                    let ac8_b = (get_by_idx me_9) 1 in
-                      let ac9_c = (get_by_idx me_9) 2 in
-                        let d = (get_by_idx me_9) 3 in
-                          let ac10_tl = (get_by_idx me_9) 4 in
-                            (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))))
-                else
-                  fail_pt_match ())))))
+                part_match_fail ())))))
     ;;
 
     let rec append ac11_xs ys =
-      let me_13 = ac11_xs in
-        (if (( = ) []) me_13
+      (if (( = ) []) ac11_xs
+      then
+        ys
+      else
+        (if (( >= ) get_list_len ac11_xs) 2
         then
-          ys
+          let x = (get_by_idx ac11_xs) 0 in
+            let ac12_xs = (get_by_idx ac11_xs) 1 in
+              (x :: (append ac12_xs) ys)
         else
-          (if (( >= ) get_list_len me_13) 2
-          then
-            let x = (get_by_idx me_13) 0 in
-              let ac12_xs = (get_by_idx me_13) 1 in
-                (x :: (append ac12_xs) ys)
-          else
-            fail_pt_match ()))
+          part_match_fail ()))
     ;;
 
     let concat = let rec ac13_helper ac14_xs =
-        let me_18 = ac14_xs in
-          (if (( = ) []) me_18
+        (if (( = ) []) ac14_xs
+        then
+          []
+        else
+          (if (( >= ) get_list_len ac14_xs) 2
           then
-            []
+            let ac15_h = (get_by_idx ac14_xs) 0 in
+              let ac16_tl = (get_by_idx ac14_xs) 1 in
+                (append ac15_h) (ac13_helper ac16_tl)
           else
-            (if (( >= ) get_list_len me_18) 2
-            then
-              let ac15_h = (get_by_idx me_18) 0 in
-                let ac16_tl = (get_by_idx me_18) 1 in
-                  (append ac15_h) (ac13_helper ac16_tl)
-            else
-              fail_pt_match ())) in
+            part_match_fail ())) in
         ac13_helper
     ;;
 
     let rec iter ac17_f ac18_xs =
-      let me_21 = ac18_xs in
-        (if (( = ) []) me_21
+      (if (( = ) []) ac18_xs
+      then
+        ()
+      else
+        (if (( >= ) get_list_len ac18_xs) 2
         then
-          ()
+          let ac19_h = (get_by_idx ac18_xs) 0 in
+            let ac20_tl = (get_by_idx ac18_xs) 1 in
+              let () = ac17_f ac19_h in
+                (iter ac17_f) ac20_tl
         else
-          (if (( >= ) get_list_len me_21) 2
-          then
-            let ac19_h = (get_by_idx me_21) 0 in
-              let ac20_tl = (get_by_idx me_21) 1 in
-                let () = ac17_f ac19_h in
-                  (iter ac17_f) ac20_tl
-          else
-            fail_pt_match ()))
+          part_match_fail ()))
     ;;
 
     let rec cartesian ac21_xs ac22_ys =
-      let me_26 = ac21_xs in
-        (if (( = ) []) me_26
+      (if (( = ) []) ac21_xs
+      then
+        []
+      else
+        (if (( >= ) get_list_len ac21_xs) 2
         then
-          []
+          let ac23_h = (get_by_idx ac21_xs) 0 in
+            let ac24_tl = (get_by_idx ac21_xs) 1 in
+              (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys)
         else
-          (if (( >= ) get_list_len me_26) 2
-          then
-            let ac23_h = (get_by_idx me_26) 0 in
-              let ac24_tl = (get_by_idx me_26) 1 in
-                (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys)
-          else
-            fail_pt_match ()))
+          part_match_fail ()))
     ;;
 
     let ac26_main = let () = (iter print_int) (1 :: (2 :: (3 :: []))) in
@@ -870,5 +859,16 @@ let main =
                 let () = print_int (odd 3) in
                   let () = print_int (even 4) in
                     0
+    ;; |}]
+;;
+
+let%expect_test "" =
+  let () = me_test {|
+match () with
+| () -> 1
+  |} in
+  [%expect {|
+    let me_0 = let () = () in
+        1
     ;; |}]
 ;;

@@ -50,12 +50,12 @@ let%expect_test "infix op" =
 ;;
 
 let%expect_test "override un op" =
-  let () = parse_test "let (~!) a = a;;" in
+  let () = parse_test "let (~-) a = a;;" in
   [%expect
     {|
     [(Str_value
         (Decl (Nonrecursive,
-           [{ vb_pat = (Pat_var "~!");
+           [{ vb_pat = (Pat_var "~-");
               vb_expr = (Exp_function ((Pat_var "a"), (Exp_ident "a"))) }
              ]
            )))
@@ -63,12 +63,12 @@ let%expect_test "override un op" =
 ;;
 
 let%expect_test "apply un ops" =
-  let () = parse_test "let (~!) a = (~-) a;;" in
+  let () = parse_test "let (~-) a = (~-) a;;" in
   [%expect
     {|
     [(Str_value
         (Decl (Nonrecursive,
-           [{ vb_pat = (Pat_var "~!");
+           [{ vb_pat = (Pat_var "~-");
               vb_expr =
               (Exp_function ((Pat_var "a"),
                  (Exp_apply ((Exp_ident "~-"), (Exp_ident "a")))))
@@ -115,11 +115,6 @@ let%expect_test "bin exprs" =
               (Exp_constant (Const_bool false))))
            )))
       ] |}]
-;;
-
-let%expect_test "un op" =
-  let () = parse_test {|! vbool ;;|} in
-  [%expect {| [(Str_eval (Exp_apply ((Exp_ident "~!"), (Exp_ident "vbool"))))] |}]
 ;;
 
 let%expect_test "base list constructor" =

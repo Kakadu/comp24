@@ -81,11 +81,11 @@
   > let () = print_int 5 in 5
   > let main = print_int (_start (print_int 1) (print_int 2)  (print_int 3)   (print_int 4))
   > EOF
-  let _start () () () () =
+  let cc_ac0__start () () () () =
     let () = print_int 5 in
       5
   ;;
   
-  let cc_ac0_main = print_int ((((_start (print_int 1)) (print_int 2)) (print_int 3)) (print_int 4))
+  let cc_ac1_main = print_int ((((cc_ac0__start (print_int 1)) (print_int 2)) (print_int 3)) (print_int 4))
   ;;
   
