@@ -14,9 +14,11 @@
   let  a = 5
 
   $ dune exec ./egraphs_demo.exe << EOF
-  > let a = 5 / 1
+  > let a = match a with | 5 -> 5 + 0 | 6 -> 6
   > EOF
-  let  a = 5
+  let  a = (match a with
+  | 5 -> 5
+  | 6 -> 6)
 
   $ dune exec ./egraphs_demo.exe << EOF
   > let a = 1 * 1 * (0 + 5) * 1 - 0 / 1 + 0

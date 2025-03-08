@@ -15,8 +15,8 @@ let add_stdfun : bool -> std_fun -> (state, unit) t =
     else write_var_type name (TFSchem (tvs, tp))
   in
   match fun_tp with
-  | UserFun -> help
-  | SystemFun -> if declare_system_fun then help else return ()
+  | UserFun, _ -> help
+  | SystemFun, _ -> if declare_system_fun then help else return ()
 ;;
 
 let add_all_std_funs declare_system_fun =
