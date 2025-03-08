@@ -25,7 +25,7 @@ let rec pc_elim_expr expr : expr_no_pm t =
       match pat with
       | PConst c ->
         let* fresh_var = fresh in
-        let pat_id = "P" ^ string_of_int fresh_var in
+        let pat_id = "p" ^ string_of_int fresh_var in
         let pat = PId pat_id in
         let* assertion_in_let =
           let* apply_not_exhaustive_pm = RuntimeUtils.apply_not_exhaustive_pm () in

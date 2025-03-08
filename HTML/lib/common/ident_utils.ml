@@ -6,6 +6,6 @@ let ident_to_string id =
   | IdentOfDefinable (IdentOp s) -> s
   | IdentOfBaseOp base_op ->
     (match base_op with
-     | Plus -> "base +"
-     | Minus -> "base -")
+     | Plus -> "base_plus"
+     | Minus -> "base_minus")
 ;;

@@ -14,10 +14,12 @@ module RuntimeEnv = struct
   (** add it to infer *)
   let generic = tvar "a"
 
-  let get_head = { name = "GET_HEAD"; typ = tarrow (tlist generic) generic }
-  let get_tl = { name = "GET_TALE"; typ = tarrow (tlist generic) (tlist generic) }
-  let get_nth = { name = "GET_NTH"; typ = tarrow (ttuple tint generic []) (tvar "b") }
-  let not_exhaustive_pm = { name = "RTE_ERROR_MATCH_FAILURE"; typ = tarrow tunit generic }
+  let get_head = { name = "get_head"; typ = tarrow (tlist generic) generic }
+
+  let get_tl = { name = "get_tale"; typ = tarrow (tlist generic) (tlist generic) }
+
+  let get_nth = { name = "get_nth"; typ = tarrow (ttuple tint generic []) (tvar "b") }
+  let not_exhaustive_pm = { name = "rte_error_match_failure"; typ = tarrow tunit generic }
   let init_env = [ get_head; get_tl; get_nth; not_exhaustive_pm ]
 end
 
@@ -45,7 +47,7 @@ module RuntimeUtils = struct
   let apply_get_tl tl = apply get_tl tl
   let apply_get_nth n e = apply get_nth (etuple (econst (CInt n)) e [])
   let apply_not_exhaustive_pm () = apply not_exhaustive_pm (econst CUnit)
-  let create_var_for_eval n = "EVALUATED_" ^ n
+  let create_var_for_eval n = "evaluated_" ^ n
 
   let create_pop_and_expr_for_eval evaluated =
     let create_pop_for_eval evaluated = pop_pat (pid evaluated) in

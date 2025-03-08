@@ -5,17 +5,17 @@ let map_ident_to_runtime = function
   | "-" -> "sub"
   | "*" -> "mul"
   | "/" -> "divd"
-  | "=" | "( = )" -> "eq"
-  | "!=" | "( != )" -> "neq"
+  | "=" -> "eq"
+  | "!=" -> "neq"
   | "<" -> "less"
   | "<=" -> "leq"
   | ">" -> "gre"
   | ">=" -> "geq"
-  | "&&" | "( && )" -> "and"
+  | "&&" -> "and"
   | "||" -> "or"
-  | "base +" -> "uplus"
-  | "base -" -> "uminus"
-  | "RTE_ERROR_MATCH_FAILURE" -> "RTE_ERROR_MATCH_FAILURE"
+  | "base_plus" -> "uplus"
+  | "base_minus" -> "uminus"
+  | "rte_error_match_failure" -> "rte_error_match_failure"
   | other -> other
 ;;
 

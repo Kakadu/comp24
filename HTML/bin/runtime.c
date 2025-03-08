@@ -139,12 +139,12 @@ int64_t geq(int64_t x, int64_t y) {
     else { return 0; }
 }
 
-int64_t and(int64_t x, int64_t y) {
+int64_t and (int64_t x, int64_t y) {
     if (x != 0 && y != 0) { return 1; }
     else { return 0; }
 }
 
-int64_t or(int64_t x, int64_t y) {
+int64_t or (int64_t x, int64_t y) {
     if (x != 0 || y != 0) { return 1; }
     else { return 0; }
 }
@@ -174,7 +174,7 @@ int64_t print_bool(int64_t x) {
     return 0;
 }
 
-int64_t RTE_ERROR_MATCH_FAILURE(int64_t _) {
+int64_t rte_error_match_failure(int64_t _) {
     fprintf(stderr, "Match failure\n");
     exit(EXIT_FAILURE);
     return 0;

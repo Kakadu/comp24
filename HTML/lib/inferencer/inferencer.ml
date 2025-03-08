@@ -380,8 +380,8 @@ let rec infer env = function
       | CUnit -> return tunit
     in
     return (Subst.empty, typ)
-  | EId (IdentOfBaseOp Plus) -> lookup_env "base +" env
-  | EId (IdentOfBaseOp Minus) -> lookup_env "base -" env
+  | EId (IdentOfBaseOp Plus) -> lookup_env "base_plus" env
+  | EId (IdentOfBaseOp Minus) -> lookup_env "base_minus" env
   | EId (IdentOfDefinable (IdentLetters ident) | IdentOfDefinable (IdentOp ident)) ->
     (match ident with
      | "_" -> fail WildcardNotExpected
@@ -532,8 +532,8 @@ let init_env =
   let bin_op a b res = tarrow a @@ tarrow b res in
   [ "print_int", tarrow tint tunit
   ; "print_newline", tarrow tunit tunit
-  ; "base +", un_op tint tint
-  ; "base -", un_op tint tint
+  ; "base_plus", un_op tint tint
+  ; "base_minus", un_op tint tint
   ; "+", bin_op tint tint tint
   ; "-", bin_op tint tint tint
   ; "*", bin_op tint tint tint
@@ -547,13 +547,10 @@ let init_env =
   ; "!=", bin_op (tvar "_a") (tvar "_a") tbool
   ; "&&", bin_op tbool tbool tbool
   ; "||", bin_op tbool tbool tbool
-  ; "( = )", bin_op (tvar "_a") (tvar "_a") tbool
-  ; "( != )", bin_op (tvar "_a") (tvar "_a") tbool
-  ; "( && )", bin_op tbool tbool tbool (* todo ( + ) *)
-  ; "RTE_ERROR_MATCH_FAILURE", tarrow tunit (tvar "_a")
-  ; "GET_HEAD", tarrow (tlist @@ tvar "_a") (tvar "_a")
-  ; "GET_TALE", tarrow (tlist @@ tvar "_a") (tlist @@ tvar "_a")
-  ; "GET_NTH", tarrow (ttuple tint (tvar "_a") []) (tvar "_b")
+  ; "rte_error_match_failure", tarrow tunit (tvar "_a")
+  ; "get_head", tarrow (tlist @@ tvar "_a") (tvar "_a")
+  ; "get_tale", tarrow (tlist @@ tvar "_a") (tlist @@ tvar "_a")
+  ; "get_nth", tarrow (ttuple tint (tvar "_a") []) (tvar "_b")
   ]
 ;;
 
