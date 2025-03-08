@@ -5,7 +5,7 @@ let closure_conv_prog (s : string) =
   let open HamsterML.Utils.R in
   let prog = parse_prog s in
   let alpha_convert prog = run @@ HamsterML.AC.convert_prog prog in
-  let closure_convert prog = cc_prog prog in
+  let closure_convert prog = run @@ cc_prog prog in
   prog |> alpha_convert |> closure_convert
 ;;
 
@@ -44,7 +44,7 @@ let%expect_test _ =
   [%expect {| let var_3 arg_0 arg_1 = let var_2 = arg_0 in ((( + ) var_2) arg_1) |}]
 ;;
 
-(* 001fac.ml *)
+(* manytests *)
 
 let%expect_test "001fac.ml" =
   pp_closure_conv_prog
