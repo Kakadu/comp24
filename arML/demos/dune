@@ -38,6 +38,14 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(executable
+ (name start_alpha_conversion_demos)
+ (public_name arML.start_alpha_conversion_demos)
+ (modules start_alpha_conversion_demos)
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (applies_to parser_demos)
  (deps
@@ -124,6 +132,24 @@
  (applies_to pm_elimination_demos)
  (deps
   ./start_pm_elimination_demos.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
+
+(cram
+ (applies_to alpha_conversion_demos)
+ (deps
+  ./start_alpha_conversion_demos.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
