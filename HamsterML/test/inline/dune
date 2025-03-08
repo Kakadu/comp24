@@ -4,6 +4,7 @@
   LexerTest
   ParserTest
   TypingTest
+  ClosureConversionTest
   LambdaLiftingTest
   AlphaConversionTest
   MatchEliminationTest)

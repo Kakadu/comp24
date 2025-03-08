@@ -21,7 +21,8 @@ and pretty_print_expr e =
   | EList exprs ->
     "[" ^ String.concat ~sep:"; " (List.map ~f:pretty_print_expr exprs) ^ "]"
   | EListConcat (e1, e2) -> pretty_print_expr e1 ^ "::" ^ pretty_print_expr e2
-  | EConstraint (e, dt) -> pretty_print_expr e ^ " : " ^ pretty_print_datatype dt
+  | EConstraint (e, dt) ->
+    "(" ^ pretty_print_expr e ^ " : " ^ pretty_print_datatype dt ^ ")"
   | Application (e1, e2) -> "(" ^ pretty_print_expr e1 ^ " " ^ pretty_print_expr e2 ^ ")"
   | Let (ft, binds, body_opt) -> pretty_print_let ft binds body_opt
   | Fun (args, body) ->
@@ -63,16 +64,16 @@ and pretty_print_bop = function
   | SUB -> "( - )"
   | MUL -> "( * )"
   | DIV -> "( / )"
-  | EQ -> "="
-  | ID_EQ -> "=="
-  | NEQ -> "!="
-  | GT -> ">"
-  | GTE -> ">="
-  | LT -> "<"
-  | LTE -> "<="
-  | AND -> "&&"
-  | OR -> "||"
-  | CONCAT -> "^"
+  | EQ -> "( = )"
+  | ID_EQ -> "( == )"
+  | NEQ -> "( != )"
+  | GT -> "( > )"
+  | GTE -> "( >= )"
+  | LT -> "( < )"
+  | LTE -> "( <= )"
+  | AND -> "( && )"
+  | OR -> "( || )"
+  | CONCAT -> "( ^ )"
 
 and pretty_print_uop = function
   | NOT -> "not"
@@ -80,9 +81,9 @@ and pretty_print_uop = function
   | UPLUS -> "+"
 
 and pretty_print_datatype = function
-  | PInt -> "Int"
-  | PBool -> "Bool"
-  | PString -> "String"
+  | PInt -> "int"
+  | PBool -> "bool"
+  | PString -> "string"
 
 and pretty_print_pattern = function
   | Const v -> pretty_print_value v
@@ -100,7 +101,8 @@ and pretty_print_pattern = function
   | List pats ->
     "[" ^ String.concat ~sep:"; " (List.map ~f:pretty_print_pattern pats) ^ "]"
   | ListConcat (p1, p2) -> pretty_print_pattern p1 ^ "::" ^ pretty_print_pattern p2
-  | Constraint (p, dt) -> pretty_print_pattern p ^ " : " ^ pretty_print_datatype dt
+  | Constraint (p, dt) ->
+    "(" ^ pretty_print_pattern p ^ " : " ^ pretty_print_datatype dt ^ ")"
   | Operation op -> "(" ^ pretty_print_op op ^ ")"
 
 and pretty_print_let ft binds body_opt =
