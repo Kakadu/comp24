@@ -280,13 +280,10 @@ $ cat /tmp/lists.s
       ld a1,-24(s0)
       call apply_closure_1
       sd a0,-32(s0)  # anf3
-      # Creating closure for ml_eq
-      la a0,ml_eq
-      li a1,2
-      call create_closure
-      ld a1,-32(s0)  # anf3
-      li a2,3
-      call apply_closure_2
+      ld t0,-32(s0)  # anf3
+      li t1,3
+      xor a0,t0,t1
+      seqz a0,a0
       sd a0,-40(s0)  # anf1
       ld t0,-40(s0)  # anf1
       beq t0,zero,.else_0
