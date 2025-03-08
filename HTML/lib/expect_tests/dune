@@ -6,6 +6,7 @@
   cc_ll_tests
   anf_tests
   alpha_conv_tests
+  alpha_conve_tests
   PC_elim_tests
   PM_elim_tests)
  (libraries Parser TypeInference Anf Patelim)
