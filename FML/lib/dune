@@ -13,7 +13,8 @@
   Pattern_elim
   Common
   Pe_ast
-  Alpha_conv)
+  Alpha_conv
+  Closure_conv)
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
  (preprocess
