@@ -253,28 +253,28 @@ let rec to_me_expr = function
        potential_arg |-> fun_body')
   | Exp_match (main_e, branches) ->
     let* e_for_match' = to_me_expr main_e in
-    let* bind_nm, me_bind_nm =
-      let+ new_name = get_uniq_name in
-      Id_name new_name, me_name new_name
+    let* bind_me, before_match_me =
+      match main_e with
+      | Exp_constant _ | Exp_ident _ -> return @@ (e_for_match', fun x -> x)
+      | _ ->
+        let+ new_name = get_uniq_name in
+        me_name new_name, me_nonrec_letin (Id_name new_name) e_for_match'
     in
     let+ f_match' =
-      fold_left_t
-        branches
-        ~init:(return (me_nonrec_letin bind_nm e_for_match'))
-        ~f:(fun acc_f (pt, br_e) ->
-          let* alt_pt = elim_pattern me_bind_nm pt in
-          let+ br_me = to_me_expr br_e in
-          match alt_pt with
-          | Any _ -> fun _ -> acc_f br_me
-          | Var (SBind (name, bind_body)) ->
-            fun _ -> acc_f @@ me_nonrec_letin name bind_body br_me
-          | Const cond -> fun else_br -> acc_f @@ ite ~cond ~then_br:br_me ~else_br
-          | Compound (cond_opt, sbinds) ->
-            let me_particial = sbinds_to_nonrec_letin sbinds in
-            (match cond_opt with
-             | Some cond ->
-               fun else_br -> acc_f @@ ite ~cond ~then_br:(me_particial br_me) ~else_br
-             | None -> fun _ -> acc_f @@ me_particial br_me))
+      fold_left_t branches ~init:(return before_match_me) ~f:(fun acc_f (pt, br_e) ->
+        let* alt_pt = elim_pattern bind_me pt in
+        let+ br_me = to_me_expr br_e in
+        match alt_pt with
+        | Any _ -> fun _ -> acc_f br_me
+        | Var (SBind (name, bind_body)) ->
+          fun _ -> acc_f @@ me_nonrec_letin name bind_body br_me
+        | Const cond -> fun else_br -> acc_f @@ ite ~cond ~then_br:br_me ~else_br
+        | Compound (cond_opt, sbinds) ->
+          let me_particial = sbinds_to_nonrec_letin sbinds in
+          (match cond_opt with
+           | Some cond ->
+             fun else_br -> acc_f @@ ite ~cond ~then_br:(me_particial br_me) ~else_br
+           | None -> fun _ -> acc_f @@ me_particial br_me))
     in
     f_match' fail_app
 ;;
