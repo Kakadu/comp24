@@ -141,8 +141,7 @@ and gen_cexpr env dest = function
     in
     gen_imm env a0 fn;
     (*  *)
-    reg_args
-    |> List.iter ~f:(fun (arg, reg) ->
+    List.iter reg_args ~f:(fun (arg, reg) ->
       if is_rewrites_regs arg
       then emit_load_reg reg (loc_to_rvalue (Map.find_exn rw_arg_locs arg))
       else gen_imm env reg arg);
@@ -187,17 +186,7 @@ and gen_aexpr env dest = function
   | ACExpr cexpr -> gen_cexpr env dest cexpr
 
 and gen_fn ?(data_sec = None) init_fns = function
-  | Fn (id, [], _)
-    when (not (String.equal "main" id))
-         &&
-         match Map.find !fn_args id with
-         | None -> true
-         | Some 0 -> true
-         | _ -> false -> ()
   | Fn (id, args, aexpr) ->
-    (* on-stack args + in-reg args + RA + FP + 1 word for last expr *)
-    (* let stack_size = word * (3 + List.length args + Anf_ast.count_bindings fn) in *)
-    (*  *)
     (* TODO: this *)
     set_fn_code ();
     let args_loc = dump_reg_args_to_stack args in
@@ -273,11 +262,9 @@ let peephole (code : (instr * string) Queue.t) =
 ;;
 
 let collect_consts ast =
-  let helper consts = function
-    | Fn (id, [], exp) when String.( <> ) "main" id -> (id, "init_" ^ id, exp) :: consts
-    | _ -> consts
-  in
-  List.fold ast ~init:[] ~f:helper |> List.rev
+  List.partition_map ast ~f:(function
+    | Fn (id, [], exp) when String.( <> ) "main" id -> Either.first (id, "init_" ^ id, exp)
+    | x -> Either.second x)
 ;;
 
 let emit_data_section consts =
@@ -294,10 +281,10 @@ let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.progr
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     fn_args := init_env ast;
-    let consts = collect_consts ast in
+    let consts, fns = collect_consts ast in
     emit_data_section consts;
     emit str ".section .text";
-    gen_program ~print_anf consts ast;
+    gen_program ~print_anf consts fns;
     let code = peephole code in
     Queue.iter
       ~f:(fun (i, comm) ->
