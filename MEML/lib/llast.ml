@@ -14,9 +14,9 @@ type llexpression =
 [@@deriving show { with_path = false }]
 
 type llbindings =
-  | LLLet of (rec_flag * name * pattern list * llexpression) (** let id = expr *)
-  | LLLetPat of (pattern * llexpression) (** let id = expr *)
-  | LLExpression of llexpression (** simple expressions *)
+  | LLLet of (rec_flag * name * pattern list * llexpression)
+  | LLLetPat of (pattern * llexpression)
+  | LLExpression of llexpression
 [@@deriving show { with_path = false }]
 
 type llstatements = llbindings list [@@deriving show { with_path = false }]
