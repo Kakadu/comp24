@@ -68,15 +68,25 @@ let emit_load ?(comm = "") (dst : loc) (src : rvalue) =
     | LMem dst_off, _ ->
       load_src t1 src;
       emit ld t1 dst_off ~comm
+    | _ -> failwith "emit_load: invalid dst (LArr)"
   in
   load_dst dst src
 ;;
 
 let emit_load_reg ?(comm = "") reg src = emit_load (LReg reg) src ~comm
 
+let emit_load_tuple_field ?(comm = "") dst src =
+  match src with
+  | LArr (ptr, off) ->
+    emit_load_reg dst (loc_to_rvalue ptr);
+    emit_load_reg dst (ROffset (dst, 0));
+    emit_load_reg dst (ROffset (dst, off)) ~comm
+  | _ -> failwith "wip"
+;;
+
 let emit_fn_call name (args : rvalue list) =
   if List.length args > n_reg_args
-  then failwith "TODO: stack arguments"
+  then failwith "TODO: stack arguments are not implemented, use tuple in a7"
   else (
     List.zip_exn (List.take arg_regs (List.length args)) args
     |> List.iter ~f:(fun (reg, arg) -> emit_load (LReg reg) arg);
@@ -103,16 +113,13 @@ let dump_reg_args_to_stack args =
         let loc = emit_store reg ~comm:arg in
         (arg, loc) :: acc)
     in
-    let tuple_loc = emit_store tuple ~comm:"Tuple for stack arguments" in
+    let tuple_loc = emit_store tuple ~comm:"Tuple for arguments" in
     let heap_loc =
       List.split_n args (List.length arg_regs)
       |> snd
       |> List.foldi ~init:[] ~f:(fun idx acc arg ->
-        let loc =
-          emit_store
-            (emit_fn_call "ml_get_tuple_field" [ loc_to_rvalue tuple_loc; RInt idx ])
-        in
-        (* TODO: don't unpack tuple args *)
+        let loc = LArr (tuple_loc, idx * word) in
+        (* let loc = emit_store (emit_fn_call "ml_get_tuple_field" [ loc_to_rvalue tuple_loc; RInt idx ]) in *)
         (arg, loc) :: acc)
     in
     dumped @ heap_loc

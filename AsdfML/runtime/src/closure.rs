@@ -118,7 +118,8 @@ impl Closure {
                     }
                     9.. => {
                         let func: Fn8 = unsafe { std::mem::transmute(self.fn_ptr) };
-                        let rest = Box::new(self.args.split_off(7));
+                        let rest = Box::new(safer_ffi::Vec::from(self.args.split_off(7)));
+                        debug!("Tuple with arguments: {:?} at {:?}", rest, Box::as_ptr(&rest));
                         #[rustfmt::skip]
                         let res = func(
                             self.args[0], self.args[1], self.args[2], self.args[3], self.args[4], self.args[5], self.args[6],

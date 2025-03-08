@@ -22,11 +22,13 @@ type rvalue =
 type loc =
   | LReg of reg
   | LMem of offset
+  | LArr of loc * int
 [@@deriving show { with_path = false }]
 
 let rec loc_to_rvalue = function
   | LReg r -> RReg r
   | LMem o -> ROffset o
+  | LArr _ -> failwith "loc_to_rvalue: LArr"
 ;;
 
 let rec pp_reg ppf =
