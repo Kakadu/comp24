@@ -74,29 +74,26 @@
   entry:
     %empty_closure = call ptr @create_closure(ptr @lte, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
-    %apply_closure_res = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure, i32 1, ptr %0)
-    %apply_closure_res1 = call ptr (ptr, i32, ...) @apply_closure(ptr %apply_closure_res, i32 1, ptr %int_var)
-    %cond_i1 = call i1 @get_i1_val(ptr %apply_closure_res1)
+    %apply_closure_res = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
+    %cond_i1 = call i1 @get_i1_val(ptr %apply_closure_res)
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
-    %int_var2 = call ptr @create_int_val(i32 1)
+    %int_var1 = call ptr @create_int_val(i32 1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure3 = call ptr @create_closure(ptr @minus, i32 2)
-    %int_var4 = call ptr @create_int_val(i32 1)
-    %apply_closure_res5 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure3, i32 1, ptr %0)
-    %apply_closure_res6 = call ptr (ptr, i32, ...) @apply_closure(ptr %apply_closure_res5, i32 1, ptr %int_var4)
-    %empty_closure7 = call ptr @create_closure(ptr @fac, i32 1)
-    %apply_closure_res8 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure7, i32 1, ptr %apply_closure_res6)
-    %empty_closure9 = call ptr @create_closure(ptr @mult, i32 2)
-    %apply_closure_res10 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure9, i32 1, ptr %0)
-    %apply_closure_res11 = call ptr (ptr, i32, ...) @apply_closure(ptr %apply_closure_res10, i32 1, ptr %apply_closure_res8)
+    %empty_closure2 = call ptr @create_closure(ptr @minus, i32 2)
+    %int_var3 = call ptr @create_int_val(i32 1)
+    %apply_closure_res4 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure2, i32 2, ptr %0, ptr %int_var3)
+    %empty_closure5 = call ptr @create_closure(ptr @fac, i32 1)
+    %apply_closure_res6 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure5, i32 1, ptr %apply_closure_res4)
+    %empty_closure7 = call ptr @create_closure(ptr @mult, i32 2)
+    %apply_closure_res8 = call ptr (ptr, i32, ...) @apply_closure(ptr %empty_closure7, i32 2, ptr %0, ptr %apply_closure_res6)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %int_var2, %then ], [ %apply_closure_res11, %else ]
+    %if_res = phi ptr [ %int_var1, %then ], [ %apply_closure_res8, %else ]
     ret ptr %if_res
   }
   

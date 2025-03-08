@@ -229,19 +229,10 @@ let rec compile_cexpr env ext_env = function
     in
     let llvalues = List.rev rev_llvalues in
     let func, typ = find_ext_func_info ext_env apply_closure in
-    let last_val =
-      List.fold_left
-        (fun clos llval ->
-          build_call
-            typ
-            func
-            (Array.of_list [ clos; const_int i32_type 1; llval ])
-            "apply_closure_res"
-            builder)
-        closure
-        llvalues
+    let args_array =
+      Array.of_list (closure :: const_int i32_type (List.length llvalues) :: llvalues)
     in
-    last_val
+    build_call typ func args_array "apply_closure_res" builder
   | Anf.CIf (imm, aexpr1, aexpr2) ->
     let cond_val = compile_immexpr env ext_env imm in
     let func, typ = find_ext_func_info ext_env get_i1_val in

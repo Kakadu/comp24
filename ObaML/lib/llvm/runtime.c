@@ -952,11 +952,7 @@ struct TAGGED_VAL *call_closure(struct TAGGED_VAL *closure_val)
     return call_res;
 }
 
-struct TAGGED_VAL *apply_closure(struct TAGGED_VAL *closure_val, int32_t args_num, ...)
-{
-    va_list args;
-    va_start(args, args_num);
-
+struct TAGGED_VAL *_apply_closure(struct TAGGED_VAL *closure_val, int32_t args_num, struct TAGGED_VAL **new_args) {
     if (closure_val == NULL)
     {
         fprintf(stderr, "Exception $apply_closure$: num is NULL\n");
@@ -993,7 +989,11 @@ struct TAGGED_VAL *apply_closure(struct TAGGED_VAL *closure_val, int32_t args_nu
     }
     new_closure->fun_ptr = old_closure->fun_ptr;
     new_closure->args_num = old_closure->args_num;
-    new_closure->applied_args_num = old_closure->applied_args_num + args_num;
+    if(old_closure->applied_args_num + args_num > new_closure->args_num) {
+        new_closure->applied_args_num = new_closure->args_num;
+    } else {
+        new_closure->applied_args_num = old_closure->applied_args_num + args_num;
+    }
 
     struct TAGGED_VAL **new_applied_args = malloc(new_closure->applied_args_num * sizeof(struct TAGGED_VAL *));
     if (new_applied_args == NULL)
@@ -1007,6 +1007,36 @@ struct TAGGED_VAL *apply_closure(struct TAGGED_VAL *closure_val, int32_t args_nu
         new_applied_args[i] = old_closure->applied_args[i];
     }
 
+    for (int i = 0; i < new_closure->applied_args_num - old_closure->applied_args_num; i++)
+    {
+        new_applied_args[old_closure->applied_args_num + i] = new_args[i];
+    }
+
+    new_closure->applied_args = new_applied_args;
+
+    new_closuse_val->data.closure_val = new_closure;
+
+    if (new_closure->applied_args_num == new_closure->args_num)
+    {
+        struct TAGGED_VAL *res = call_closure(new_closuse_val);
+        if (old_closure->applied_args_num + args_num > new_closure->args_num) {
+            int32_t updated_args_num = old_closure->applied_args_num + args_num - new_closure->applied_args_num;
+
+            return _apply_closure(res, updated_args_num, &new_args[new_closure->applied_args_num - old_closure->applied_args_num]);
+        }
+
+        return res;
+    }
+
+    return new_closuse_val;
+}
+
+struct TAGGED_VAL *apply_closure(struct TAGGED_VAL *closure_val, int32_t args_num, ...)
+{
+    va_list args;
+    va_start(args, args_num);
+
+    struct TAGGED_VAL **new_args = malloc(args_num * sizeof(struct TAGGED_VAL *));
     for (int i = 0; i < args_num; i++)
     {
         struct TAGGED_VAL *arg = va_arg(args, struct TAGGED_VAL *);
@@ -1015,19 +1045,10 @@ struct TAGGED_VAL *apply_closure(struct TAGGED_VAL *closure_val, int32_t args_nu
             fprintf(stderr, "Exception $apply_closure$: new argument is NULL\n");
             exit(1);
         }
-        new_applied_args[old_closure->applied_args_num + i] = arg;
+        new_args[i] = arg;
     }
 
     va_end(args);
 
-    new_closure->applied_args = new_applied_args;
-
-    new_closuse_val->data.closure_val = new_closure;
-
-    if (new_closure->applied_args_num == new_closure->args_num)
-    {
-        return call_closure(new_closuse_val);
-    }
-
-    return new_closuse_val;
+    return _apply_closure(closure_val, args_num, new_args);
 }
