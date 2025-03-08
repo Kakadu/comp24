@@ -37,7 +37,10 @@ let suffix_binop_strings =
   ]
 ;;
 
-let base_binops = [ "+"; "-"; "*"; "/"; "<="; "<"; ">="; ">"; "=="; "!="; "&&"; "||" ]
+let base_binops =
+  [ "+"; "-"; "*"; "/"; "<="; "<"; ">="; ">"; "=="; "!="; "&&"; "||"; "=" ]
+;;
+
 let str_to_list x = Base.String.to_list x |> List.map Base.Char.to_string
 
 let is_op first_strings suffix_strings x =

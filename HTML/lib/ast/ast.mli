@@ -78,57 +78,52 @@ val equal_typ : typ -> typ -> bool
 val pp_typ : Format.formatter -> typ -> unit
 val show_typ : typ -> string
 
-type pattern =
-  | PId of ident_letters (** x *)
-  | PTuple of pattern_typed * pattern_typed * pattern_typed list (** (x, y) *)
-  | PList of pattern_typed * pattern_typed (** x :: xs *)
-  | PConst of const (** 3 *)
+(** typed element *)
+type 'a typed = 'a * typ
 
-(** typed pattern *)
-and pattern_typed = pattern * typ option
+val equal_typed : ('a -> 'a -> bool) -> 'a typed -> 'a typed -> bool
+val pp_typed : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a typed -> unit
+val show_typed : (Format.formatter -> 'a -> unit) -> 'a typed -> string
+
+type pattern =
+  | PId of ident_op
+  | PTuple of pattern * pattern * pattern list
+  | PList of pattern * pattern
+  | PConst of const (** 3 *)
+  | PConstraint of pattern typed (** Constraint *)
 
 val equal_pattern : pattern -> pattern -> bool
-val equal_pattern_typed : pattern_typed -> pattern_typed -> bool
 val pp_pattern : Format.formatter -> pattern -> unit
 val show_pattern : pattern -> string
-val pp_pattern_typed : Format.formatter -> pattern_typed -> unit
-val show_pattern_typed : pattern_typed -> string
 
 type pattern_or_op =
   | POpPat of pattern (** pattern *)
   | POpOp of ident_op (** custom operator *)
-
-(** typed pattern or op *)
-type pattern_or_op_typed = pattern_or_op * typ option
+  | POrOpConstraint of pattern_or_op typed (** Constraint *)
 
 val equal_pattern_or_op : pattern_or_op -> pattern_or_op -> bool
-val equal_pattern_or_op_typed : pattern_or_op_typed -> pattern_or_op_typed -> bool
 val pp_pattern_or_op : Format.formatter -> pattern_or_op -> unit
 val show_pattern_or_op : pattern_or_op -> string
-val pp_pattern_or_op_typed : Format.formatter -> pattern_or_op_typed -> unit
-val show_pattern_or_op_typed : pattern_or_op_typed -> string
 
 (** branch in match expr *)
-type branch = pattern_typed * expr_typed
+type branch = pattern * expr
 
 and expr =
   | EConst of const (** Const. Examples: 100; true *)
   | EId of ident (** Identifier. Examples: a, b, c *)
-  | EFun of pattern_typed * expr_typed (** Function. Examples: fun x -> x + 1 *)
-  | EApp of expr_typed * expr_typed (** Application. Examples: f (x - 1) *)
-  | EIf of expr_typed * expr_typed * expr_typed
+  | EFun of pattern * expr (** Function. Examples: fun x -> x + 1 *)
+  | EApp of expr * expr (** Application. Examples: f (x - 1) *)
+  | EIf of expr * expr * expr
   (** If-then-else. Examples: if x >= y then x - y else y - x *)
-  | EList of expr_typed * expr_typed (** Lists. Examples: [1; 2; 3] *)
-  | ETuple of expr_typed * expr_typed * expr_typed list (** Tuple. Examples: (1, 2, 3) *)
-  | EClsr of decl * expr_typed (** Closure. Examples: let inc x = x + 1 in inc 5*)
-  | EMatch of expr_typed * branch * branch list
+  | EList of expr * expr (** Lists. Examples: [1; 2; 3] *)
+  | ETuple of expr * expr * expr list (** Tuple. Examples: (1, 2, 3) *)
+  | EClsr of decl * expr (** Closure. Examples: let inc x = x + 1 in inc 5*)
+  | EMatch of expr * branch * branch list
   (** Matching. Examples: match l with | hd::tl -> hd | _ -> [] *)
-
-(** typed expression *)
-and expr_typed = expr * typ option
+  | EConstraint of expr typed (** Constraint *)
 
 (** let body: pattern and associated expression *)
-and let_body = pattern_or_op_typed * expr_typed
+and let_body = pattern_or_op * expr
 
 and decl =
   | DLet of rec_flag * let_body (** Let declaration *)
@@ -137,15 +132,12 @@ and decl =
 
 val equal_branch : branch -> branch -> bool
 val equal_expr : expr -> expr -> bool
-val equal_expr_typed : expr_typed -> expr_typed -> bool
 val equal_let_body : let_body -> let_body -> bool
 val equal_decl : decl -> decl -> bool
 val pp_branch : Format.formatter -> branch -> unit
 val show_branch : branch -> string
 val pp_expr : Format.formatter -> expr -> unit
 val show_expr : expr -> string
-val pp_expr_typed : Format.formatter -> expr_typed -> unit
-val show_expr_typed : expr_typed -> string
 val pp_let_body : Format.formatter -> let_body -> unit
 val show_let_body : let_body -> string
 val pp_decl : Format.formatter -> decl -> unit
@@ -169,23 +161,23 @@ val ttuple : typ -> typ -> typ list -> typ
 val tlist : typ -> typ
 val tvar : ident_letters -> typ
 val pid : ident_letters -> pattern
-val ptuple : pattern_typed -> pattern_typed -> pattern_typed list -> pattern
-val plist : pattern_typed -> pattern_typed -> pattern
-val p_typed : ?typ:typ option -> pattern -> pattern_typed
+val ptuple : pattern -> pattern -> pattern list -> pattern
+val plist : pattern -> pattern -> pattern
+val p_typed : ?typ:typ option -> pattern -> pattern
 val pop_pat : pattern -> pattern_or_op
 val pop_op : ident_op -> pattern_or_op
-val pop_typed : ?typ:typ option -> pattern_or_op -> pattern_or_op_typed
+val pop_typed : ?typ:typ option -> pattern_or_op -> pattern_or_op
 val pconst : const -> pattern
 val econst : const -> expr
 val eid : ident -> expr
-val efun : pattern_typed -> expr_typed -> expr
-val eapp : expr_typed -> expr_typed -> expr
-val eif : expr_typed -> expr_typed -> expr_typed -> expr
-val elist : expr_typed -> expr_typed -> expr
-val etuple : expr_typed -> expr_typed -> expr_typed list -> expr
-val eclsr : decl -> expr_typed -> expr
-val ematch : expr_typed -> branch -> branch list -> expr
-val e_typed : ?typ:typ option -> expr -> expr_typed
+val efun : pattern -> expr -> expr
+val eapp : expr -> expr -> expr
+val eif : expr -> expr -> expr -> expr
+val elist : expr -> expr -> expr
+val etuple : expr -> expr -> expr list -> expr
+val eclsr : decl -> expr -> expr
+val ematch : expr -> branch -> branch list -> expr
+val e_typed : ?typ:typ option -> expr -> expr
 val dlet : rec_flag -> let_body -> decl
 val dletmut : rec_flag -> let_body -> let_body -> let_body list -> decl
 val prog : decl list -> prog

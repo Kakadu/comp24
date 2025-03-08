@@ -1,7 +1,14 @@
 (library
  (name expect_tests)
- (modules parsing_tests inference_tests)
- (libraries Parser Inferencer unix)
+ (modules
+  parsing_tests
+  inference_tests
+  cc_ll_tests
+  anf_tests
+  alpha_conve_tests
+  PC_elim_tests
+  PM_elim_tests)
+ (libraries Parser TypeInference Anf Patelim)
  (preprocess
   (pps ppx_expect))
  (inline_tests))

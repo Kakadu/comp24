@@ -1,5 +1,5 @@
 (library
- (name Inferencer)
+ (name TypeInference)
  (modules Inferencer Typing)
  (libraries AstLib)
  (instrumentation

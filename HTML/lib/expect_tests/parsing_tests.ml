@@ -32,7 +32,7 @@ module ParsingTests = struct
   let%expect_test "Let with nested let" =
     parse_test {| let a = let f x = x in 13 |};
     [%expect {| 
-      let a = let f = (fun x -> x)
+      let a = let f x = x
       in 13
       |}]
   ;;
@@ -49,8 +49,8 @@ module ParsingTests = struct
  |};
     [%expect
       {| 
-      let rec ( += ) = (fun x -> (x -$ 1))
-      and ( -$ ) = (fun x -> (fun y -> (x + y)))
+      let rec ( += ) x = (x -$ 1)
+      and ( -$ ) x y = (x + y)
       |}]
   ;;
 
@@ -61,19 +61,19 @@ module ParsingTests = struct
 
   let%expect_test "Custom infix operator definition" =
     parse_test {| let ( += ) a b = (~-) 1 |};
-    [%expect {| let ( += ) = (fun a -> (fun b -> (( ~- ) 1))) |}]
+    [%expect {| let ( += ) a b = (( ~- ) 1) |}]
   ;;
 
   let%expect_test "Function with typed argument: function type" =
     parse_test {| let f (lst: (int -> int)) = g |};
-    [%expect {| let f = (fun (lst : int -> int) -> g) |}]
+    [%expect {| let f (lst : int -> int) = g |}]
   ;;
 
   let%expect_test "Double nested let" =
     parse_test {| let a = let f x = x + 1 in let b = 5 in f (b + 1) |};
     [%expect
       {| 
-      let a = let f = (fun x -> (x + 1))
+      let a = let f x = (x + 1)
       in let b = 5
       in f (b + 1)
     |}]
@@ -101,7 +101,7 @@ module ParsingTests = struct
 
   let%expect_test "Function with typed argument: polymorphic list" =
     parse_test {| let f (lst: ('b list)) = lst |};
-    [%expect {| let f = (fun (lst : 'b list) -> lst) |}]
+    [%expect {| let f (lst : 'b list) = lst |}]
   ;;
 
   let%expect_test "Unary minus parsing" =
@@ -126,22 +126,22 @@ module ParsingTests = struct
 
   let%expect_test "List pattern matching in function argument" =
     parse_test "let f (hd::tl) = 3";
-    [%expect {| let f = (fun hd :: tl -> 3) |}]
+    [%expect {| let f (hd :: tl) = 3 |}]
   ;;
 
   let%expect_test "Tuple pattern matching in function argument" =
     parse_test "let f (x,y) = x + y";
-    [%expect {| let f = (fun (x, y) -> (x + y)) |}]
+    [%expect {| let f (x, y) = (x + y) |}]
   ;;
 
   let%expect_test "Tuple pattern matching with typed element" =
     parse_test "let f ((x: 'a),y) =  x * y";
-    [%expect {| let f = (fun ((x : 'a), y) -> (x * y)) |}]
+    [%expect {| let f ((x : 'a), y) = (x * y) |}]
   ;;
 
   let%expect_test "List pattern matching with nested tuple pattern" =
     parse_test "let f (x :: (x, y)) = 3";
-    [%expect {| let f = (fun x :: (x, y) -> 3) |}]
+    [%expect {| let f (x :: (x, y)) = 3 |}]
   ;;
 
   let%expect_test "Complex mutual recursion with typed let binding" =
@@ -154,8 +154,8 @@ module ParsingTests = struct
       |};
     [%expect
       {|
-      let (blst : int) = let rec f = (fun x -> if (x > 0) then g (x - 1) else 1)
-      and g = (fun x -> if (x > 0) then (f (x - 1) + g (x - 2)) else 1)
+      let (blst : int) = let rec f x = if (x > 0) then g (x - 1) else 1
+      and g x = if (x > 0) then (f (x - 1) + g (x - 2)) else 1
       in (f 10) |}]
   ;;
 
@@ -170,18 +170,18 @@ module ParsingTests = struct
       |};
     [%expect
       {|
-      let xor = (fun (x : bool) -> (fun (y : bool) -> match (x, y) with
+      let xor (x : bool) (y : bool) = match (x, y) with
       | (true, true) -> false
       | (true, false) -> true
       | (false, true) -> true
-      | (false, false) -> false)) |}]
+      | (false, false) -> false |}]
   ;;
 
   let%expect_test "Deeply nested function application" =
     parse_test "let a = let f x = x in f (f (f (5 + f 5+5+5+f 5) + 5) + 5) + 5";
     [%expect
       {|
-      let a = let f = (fun x -> x)
+      let a = let f x = x
       in (f (f (f ((((5 + (f 5)) + 5) + 5) + (f 5)) + 5) + 5) + 5) |}]
   ;;
 
@@ -208,7 +208,7 @@ module ParsingTests = struct
       let map [] = []
     |};
     [%expect {|
-      let map = (fun [] -> [])
+      let map [] = []
       |}]
   ;;
 end

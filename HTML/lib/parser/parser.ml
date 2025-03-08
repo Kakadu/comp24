@@ -234,13 +234,16 @@ let pe_get_explicit_typ =
   else return None
 ;;
 
-let pe_typed pe =
-  let pe_typed = lift2 (fun res typ -> res, typ) pe pe_get_explicit_typ in
+let pe_typed cons pe =
+  let pe_typed = lift2 cons pe pe_get_explicit_typ in
   pe_typed <|> pe_parens pe_typed
 ;;
 
+let cons_pat_typed res typ = p_typed res ~typ
+let pe_typed_pat = pe_typed cons_pat_typed
+
 let rollback_not_list pe =
-  let* pat, _ = pe in
+  let* pat = pe in
   match pat with
   | PList (_, _) | PConst CNil -> return pat
   | _ -> fail "Rollback"
@@ -248,10 +251,7 @@ let rollback_not_list pe =
 
 let pe_list_pat_semicolon pe_pat =
   rollback_not_list
-  @@ pe_list_semicolon
-       (pe_typed pe_pat)
-       (fun hd tl -> p_typed @@ plist hd tl)
-       (p_typed (pconst CNil))
+  @@ pe_list_semicolon (pe_typed_pat pe_pat) (fun hd tl -> plist hd tl) (pconst CNil)
 ;;
 
 let delim_list_pat_colons = "::"
@@ -259,7 +259,7 @@ let delim_list_pat_colons = "::"
 let pe_list_pat_colons pe_pat =
   rollback_not_list
   @@ chainr1
-       (pe_typed pe_pat)
+       (pe_typed_pat pe_pat)
        (delim_list_pat_colons =?*> return (fun hd tl -> p_typed (plist hd tl)))
 ;;
 
@@ -270,7 +270,7 @@ let pe_lrf_pats pe_pat =
   choice [ pe_list_pat_semicolon pe_pat; pe_base_pat; pe_pat ]
 ;;
 
-let pe_tuple_pat pe_pat = pe_tuple (pe_typed pe_pat) ptuple
+let pe_tuple_pat pe_pat = pe_tuple (pe_typed_pat pe_pat) ptuple
 let pe_value_or_tuple_pat = pe_value_or_tuple pe_tuple_pat
 
 let pe_pattern =
@@ -286,17 +286,18 @@ let pe_pattern =
     choice [ pe_list_pat_colons term; pe_tuple_pat term; term ])
 ;;
 
-let pe_pattern_typed = pe_typed pe_pattern
+let pe_pattern_typed = pe_typed cons_pat_typed pe_pattern
 
 (****************************************************** Tuple ******************************************************)
-
-let pe_tuple_expr pe_expr = pe_tuple (pe_typed pe_expr) etuple
+let cons_expr_typed res typ = e_typed res ~typ
+let pe_typed_expr = pe_typed cons_expr_typed
+let pe_tuple_expr pe_expr = pe_tuple (pe_typed_expr pe_expr) etuple
 let pe_value_or_tuple_expr = pe_value_or_tuple pe_tuple_expr
 
 (****************************************************** Branching ******************************************************)
 
 let pe_branching pe_expr =
-  let pe_typed = pe_typed pe_expr in
+  let pe_typed = pe_typed_expr pe_expr in
   lift3
     eif
     ("if" =?*> pe_token1 pe_typed)
@@ -331,13 +332,13 @@ let get_chain e priority_group =
   chain e binop_binder
 ;;
 
-let pe_typed_if_in_parens pe = pe_parens (pe_typed pe) <|> (pe >>| e_typed)
+let pe_typed_if_in_parens pe = pe_parens (pe_typed_expr pe) <|> pe
 
 let rollback_not_app pe =
-  let* e, typ = pe in
-  match typ with
-  | None -> return e
-  | _ -> fail "Rollback"
+  let* e = pe in
+  match e with
+  | EConstraint (_, _) -> fail "Rollback"
+  | _ -> return e
 ;;
 
 let pe_bin_op_app pe_expr =
@@ -375,7 +376,7 @@ let pe_bin_op_app pe_expr =
 (****************************************************** List ******************************************************)
 
 let pe_list_expr_semicolon pe_expr =
-  pe_list_semicolon (pe_typed pe_expr) (fun x y -> elist x (e_typed y)) (econst CNil)
+  pe_list_semicolon (pe_typed_expr pe_expr) elist (econst CNil)
 ;;
 
 (****************************************************** Functions ******************************************************)
@@ -384,12 +385,17 @@ let pe_params = sep_by pe_space pe_pattern_typed
 let pe_fun_let_decl (pe_expr : expr t) =
   let delim_fun_decl = "=" in
   lift3
-    (fun params decl_typ (expr, typ) ->
-      let right_side = List.fold_right (fun x y -> efun x (e_typed y)) params expr in
-      decl_typ, (right_side, typ))
+    (fun params decl_typ expr ->
+      match expr with
+      | EConstraint (expr, typ) ->
+        let right_side = List.fold_right efun params expr in
+        decl_typ, e_typed right_side ~typ:(Some typ)
+      | expr ->
+        let right_side = List.fold_right efun params expr in
+        decl_typ, right_side)
     pe_params
     (pe_get_explicit_typ <* pe_stoken delim_fun_decl)
-    (pe_typed pe_expr)
+    (pe_typed_expr pe_expr)
 ;;
 
 let pe_fun_anon_expr pe_expr =
@@ -398,19 +404,17 @@ let pe_fun_anon_expr pe_expr =
   prefix_fun
   =?*> pe_space1
        *> lift2
-            (fun params expr_typed ->
-              let right_side, _ =
-                List.fold_right (fun x y -> e_typed @@ efun x y) params expr_typed
-              in
+            (fun params expr ->
+              let right_side = List.fold_right efun params expr in
               right_side)
             (pe_params <* pe_stoken delim_fun)
-            (pe_typed pe_expr)
+            (pe_typed_expr pe_expr)
 ;;
 
 (****************************************************** Pattern matching ******************************************************)
 
 let pe_match pe_expr =
-  let pe_typed = pe_typed pe_expr in
+  let pe_typed = pe_typed_expr pe_expr in
   "match"
   =?*>
   let pe_case =
@@ -430,7 +434,7 @@ let pe_rec_flag = pe_next_stoken "rec" *> return Recursive <|> return Not_recurs
 
 let pe_let_body pe_expr =
   lift2
-    (fun pat (pat_typ, (expr, expr_typ)) -> (pat, pat_typ), (expr, expr_typ))
+    (fun pat (pat_typ, expr) -> pop_typed ~typ:pat_typ pat, expr)
     (pe_token
        (choice
           [ pe_parens_or_non pe_pattern >>| pop_pat
@@ -439,22 +443,17 @@ let pe_let_body pe_expr =
     (pe_fun_let_decl pe_expr)
 ;;
 
-let pe_closure pe_decl pe_expr = lift2 eclsr pe_decl ("in" =?*> pe_typed pe_expr)
+let pe_closure pe_decl pe_expr = lift2 eclsr pe_decl ("in" =?*> pe_typed_expr pe_expr)
 
 let pe_let_decl pe_expr =
-  let pe_let_body_typed =
-    lift
-      (fun ((pat, pat_typ), (expr, expr_typ)) -> (pat, pat_typ), (expr, expr_typ))
-      (pe_let_body pe_expr)
-  in
+  let pe_let_body_typed = lift (fun (pat, expr) -> pat, expr) (pe_let_body pe_expr) in
   let* let_decl =
     "let"
     =?*> lift2 (fun rec_flag let_body -> rec_flag, let_body) pe_rec_flag pe_let_body_typed
   in
   let* let_decls_mut = many ("and" =?*> pe_let_body_typed) in
   match let_decl, let_decls_mut with
-  | (rec_flag, (pat_or_op_typed, expr_typed)), [] ->
-    return @@ dlet rec_flag (pat_or_op_typed, expr_typed)
+  | (rec_flag, (pat_or_op, expr)), [] -> return @@ dlet rec_flag (pat_or_op, expr)
   | ( (rec_flag, (pat_or_op_typed1, expr_typed1))
     , (pat_or_op_typed2, expr_typed2) :: tl_decls ) ->
     return

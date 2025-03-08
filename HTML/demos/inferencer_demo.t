@@ -2,7 +2,7 @@
   Typecheck error: Unbound value fac
 
   $ ./inferencer_demo.exe < manytests/do_not_type/002if.ml
-  Typecheck error: This expression has type int but an expression was expected of type bool
+  Typecheck error: This expression has type bool but an expression was expected of type int
 
   $ ./inferencer_demo.exe < manytests/do_not_type/003occurs.ml
   Typecheck error: Occurs check failed
@@ -56,9 +56,12 @@
   $ ./inferencer_demo.exe < manytests/typed/008ascription.ml
   val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
   val main : int
-
   $ ./inferencer_demo.exe < manytests/typed/009let_poly.ml
   val temp : int * bool
+
+  $ ./inferencer_demo.exe < manytests/typed/012fibcps.ml
+  val fib : int -> (int -> 'a) -> 'a
+  val main : Unit
 
   $ ./inferencer_demo.exe < manytests/typed/015tuples.ml
   val feven : 'a * int -> int -> int -> int
@@ -70,7 +73,6 @@
   val meven : int -> int
   val modd : int -> int
   val tie : int -> int * int -> int
-
   $ ./inferencer_demo.exe < manytests/typed/016lists.ml
   val append : 'a list -> 'a list -> 'a list
   val cartesian : 'a list -> 'b list -> ('a * 'b) list
@@ -80,4 +82,3 @@
   val length_tail : 'a list -> int
   val main : int
   val map : ('a -> 'b) -> 'a list -> 'b list
-
