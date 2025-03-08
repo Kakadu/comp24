@@ -199,15 +199,15 @@
   
   let fixpoly = (fun l -> ((fix a1) l))
   
-  let feven = (fun ( == ) p n -> let e = ((tuple_element p) 0) in
+  let feven = (fun p n -> let e = ((tuple_element p) 0) in
   let o = ((tuple_element p) 1) in
-  if ((( == ) n) 0)
+  if ((( = ) n) 0)
   then 1
   else (o ((( - ) n) 1)))
   
-  let fodd = (fun ( == ) p n -> let e = ((tuple_element p) 0) in
+  let fodd = (fun p n -> let e = ((tuple_element p) 0) in
   let o = ((tuple_element p) 1) in
-  if ((( == ) n) 0)
+  if ((( = ) n) 0)
   then 0
   else (e ((( - ) n) 1)))
   

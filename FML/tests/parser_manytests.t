@@ -944,7 +944,7 @@
                     (EIdentifier "p"),
                     (EIf (
                        (EApplication (
-                          (EApplication ((EIdentifier "( == )"),
+                          (EApplication ((EIdentifier "( = )"),
                              (EIdentifier "n"))),
                           (EConst (CInt 0)))),
                        (EConst (CInt 1)),
@@ -969,7 +969,7 @@
                     (EIdentifier "p"),
                     (EIf (
                        (EApplication (
-                          (EApplication ((EIdentifier "( == )"),
+                          (EApplication ((EIdentifier "( = )"),
                              (EIdentifier "n"))),
                           (EConst (CInt 0)))),
                        (EConst (CInt 0)),
