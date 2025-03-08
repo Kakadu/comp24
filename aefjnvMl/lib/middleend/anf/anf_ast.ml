@@ -17,11 +17,11 @@ type immexpr =
   | Imm_id of string scoped id_t
 
 type cexpr =
+  | C_immexpr of immexpr
   | C_apply of string scoped * immexpr * immexpr list
-  | C_ifthenelse of immexpr * aexpr * aexpr
   | C_tuple of immexpr list
   | C_rlist of immexpr * immexpr list (** reversed list <- first elem -- nil *)
-  | C_immexpr of immexpr
+  | C_ifthenelse of immexpr * aexpr * aexpr
 
 and aexpr =
   | A_let of string id_t * cexpr * aexpr

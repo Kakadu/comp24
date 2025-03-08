@@ -211,20 +211,21 @@ let rename_ast_with_uniq step_pref prog =
   let open Common.Base_lib in
   let name_space =
     let open LibF in
+    let open List in
     let ban_rules =
       let ban_set =
         let ban_names =
           forbidden_names @ map get_name base_lib_decls @ map get_rt_alias base_lib_decls
         in
         let helper acc name = Banned_Set.add name acc in
-        List.fold_left helper Banned_Set.empty ban_names
+        fold_left helper Banned_Set.empty ban_names
       in
-      let res_prefs = List.map Str.regexp reserved_prefs in
+      let res_prefs = map Str.regexp reserved_prefs in
       res_prefs, ban_set
     in
     let bind_space =
       let helper acc name = Bind_Map.add name name acc in
-      List.fold_left helper Bind_Map.empty std_lib_names
+      fold_left helper Bind_Map.empty (List.map get_name user_funcs)
     in
     ban_rules, bind_space, step_pref
   in

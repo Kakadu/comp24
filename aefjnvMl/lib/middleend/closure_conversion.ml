@@ -190,10 +190,11 @@ let closure_conversion toplvl =
 ;;
 
 let convert_program ast =
+  let open Base.List in
   let decls, _ =
-    Base.List.fold_left ast ~init:([], std_lib_names) ~f:(fun (ss, tlvls) s ->
+    fold_left ast ~init:([], std_lib_names) ~f:(fun (ss, tlvls) s ->
       let s, tlvls = closure_conversion tlvls s in
       s :: ss, tlvls)
   in
-  Base.List.rev decls
+  rev decls
 ;;

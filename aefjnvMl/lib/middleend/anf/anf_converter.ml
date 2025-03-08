@@ -61,11 +61,14 @@ let convert_anf_fun f =
 ;;
 
 let convert_anf_decl = function
-| A_GlobalV (id, e) -> LL_GlobalV (id, convert_aexpr e)
-| A_NonrecDecl f -> LL_Decl(Nonrecursive, convert_anf_fun f, [])
-| A_RecDecl (f1, f'l) -> 
-  LL_Decl(Recursive, convert_anf_fun f1, List.map convert_anf_fun f'l)
+  | A_GlobalV (id, e) -> LL_GlobalV (id, convert_aexpr e)
+  | A_NonrecDecl f -> LL_Decl (Nonrecursive, convert_anf_fun f, [])
+  | A_RecDecl (f1, f'l) ->
+    LL_Decl (Recursive, convert_anf_fun f1, List.map convert_anf_fun f'l)
+;;
 
 let convert_anf_prog_to_ll = List.map convert_anf_decl
 
-let convert_anf_program prog = Ll_conversion.Ll_converter.convert_ll_program (convert_anf_prog_to_ll prog)
+let convert_anf_program prog =
+  Ll_conversion.Ll_converter.convert_ll_program (convert_anf_prog_to_ll prog)
+;;

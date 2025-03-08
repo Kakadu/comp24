@@ -59,7 +59,7 @@ let get_global = function
   | Id_unit -> return None
   | Id_name id ->
     let+ nm_space = read in
-      GlobalMap.find_opt id nm_space 
+    GlobalMap.find_opt id nm_space
 ;;
 
 let save_global nm to_global =
@@ -70,8 +70,7 @@ let save_global nm to_global =
     (match nm with
      | Id_name nm ->
        let* nm_space = read in
-       save @@ 
-       GlobalMap.add nm (to_global nm) nm_space
+       save @@ GlobalMap.add nm (to_global nm) nm_space
      | Id_unit -> return ())
 ;;
 
@@ -81,16 +80,16 @@ let to_scoped_common builder = function
 ;;
 
 let to_local = to_scoped_common (fun x -> Local_id x)
-let gfunc = (fun x -> Global_func x)
+let gfunc x = Global_func x
 let to_gfunc = to_scoped_common gfunc
-let gvar = (fun x -> Global_var x)
+let gvar x = Global_var x
 let to_gvar = to_scoped_common gvar
 
 let to_scoped id =
-    let+ cond = get_global id in
-    match cond with
-    | Some id -> Id_name id
-    | None -> to_local id
+  let+ cond = get_global id in
+  match cond with
+  | Some id -> Id_name id
+  | None -> to_local id
 ;;
 
 let rec to_immexpr : ll_expr -> (bind list * immexpr) t = function
@@ -195,7 +194,7 @@ let to_anf_decl = function
      | Recursive, ll_fun'l ->
        let* _ =
          mapt (ll_fun :: ll_fun'l) (fun { lldec_name } ->
-           save_global (Id_name lldec_name) gfunc ) 
+           save_global (Id_name lldec_name) gfunc)
        in
        let* anf_fun = to_func ll_fun in
        let+ anf_fun'l = mapt ll_fun'l to_func in
