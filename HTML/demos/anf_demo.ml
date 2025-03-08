@@ -11,6 +11,8 @@ let anf_demo s =
   Format.printf "Type inference before:\n";
   Inferencer.run_inference prog |> Inferencer.print_env;
   Format.printf "\n";
+  let+ prog = Anf.Cc_ll.closure_convert prog in
+  let+ prog = Anf.Alpha_conve.alpha_convert_prog prog in
   let+ prog = Patelim.Elim.p_elim_decls prog in
   let+ prog = Anf.Cc_ll.closure_convert prog in
   let+ prog = Anf.Anf_conv.run prog in

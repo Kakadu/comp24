@@ -6,11 +6,12 @@ let ( let+ ) x f =
 
 let llvm_test s =
   let+ actual = Parser.parse_program s in
-  let+ actual_pe = Patelim.Elim.p_elim_decls actual in
+  let+ actual_cc = Anf.Cc_ll.closure_convert actual in
+  let+ actual_alpha_conv = Anf.Alpha_conve.alpha_convert_prog actual_cc in
+  let+ actual_pe = Patelim.Elim.p_elim_decls actual_alpha_conv in
   let+ actual_cc = Anf.Cc_ll.closure_convert actual_pe in
   let+ actual_anf = Anf.Anf_conv.run actual_cc in
-  let+ actual_alpha_conv = Anf.Alpha_conv.alpha_convert_prog actual_anf in
-  let+ _ = Llvm_codegen.Codegen.codegen actual_alpha_conv in
+  let+ _ = Llvm_codegen.Codegen.codegen actual_anf in
   Ok ()
 ;;
 
