@@ -77,8 +77,7 @@ let rec match_compare_pattern (matched : me_expr) (pattern : pattern) =
 let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_expr) =
   (* match arg_0 with arg_1 :: arg_2 -> arg_1 *)
   match pattern with
-  | Var _ as var -> _let var matched action
-  | Wildcard | Operation _ | Const _ -> action
+  | Wildcard | Operation _ | Const _ | Var _ -> action
   | Constraint (p, _) -> convert_match_case matched p action
   | Tuple (p1, p2, pts) ->
     List.foldi (p1 :: p2 :: pts) ~init:action ~f:(fun i action pattern_i ->
@@ -91,6 +90,27 @@ let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_
       convert_match_case (ListConverter.get matched i) pattern_i action)
 ;;
 
+let rec get_match_context (matched : me_expr) (pattern : pattern) : me_expr -> me_expr =
+  (* match x with *)
+  match pattern with
+  | Var _ as var -> _let var matched
+  | Wildcard | Operation _ | Const _ -> fun x -> x
+  | Constraint (p, _) -> convert_match_case matched p
+  | Tuple (p1, p2, pts) ->
+    let patterns = p1 :: p2 :: pts in
+    fun id ->
+      List.foldi patterns ~init:id ~f:(fun i acc pattern_i ->
+        get_match_context (TupleConverter.get matched i) pattern_i acc)
+  | List pts ->
+    fun act ->
+      List.foldi pts ~init:act ~f:(fun i acc pattern_i ->
+        get_match_context (ListConverter.get matched i) pattern_i acc)
+  | ListConcat (hd, tl) ->
+    let matched_hd = ListConverter.head matched in
+    let matched_tl = ListConverter.tail matched in
+    fun id -> _let hd matched_hd id |> _let tl matched_tl
+;;
+
 let rec convert_match (matched : ll_expr) (cases : ll_case list) =
   match cases with
   | [] -> failwith "No cases provided"
@@ -98,13 +118,15 @@ let rec convert_match (matched : ll_expr) (cases : ll_case list) =
     let me_action = convert_expr action in
     let me_matched = convert_expr matched in
     let branch = convert_match_case me_matched pattern me_action in
-    (match tail_cases with
-     | [] -> branch
-     | _ ->
-       _if
-         (match_compare_pattern me_matched pattern)
-         branch
-         (Some (convert_match matched tail_cases)))
+    get_match_context me_matched pattern
+    @@
+      (match tail_cases with
+      | [] -> branch
+      | _ ->
+        _if
+          (match_compare_pattern me_matched pattern)
+          branch
+          (Some (convert_match matched tail_cases)))
 
 and convert_expr (expr : ll_expr) : me_expr =
   match expr with
