@@ -2,11 +2,15 @@
  (targets libffi-3.4.7.tar.gz)
  (action
   (run
-   wget
-   https://github.com/libffi/libffi/releases/download/v3.4.7/libffi-3.4.7.tar.gz)))
+   curl
+   -L
+   https://github.com/libffi/libffi/releases/download/v3.4.7/libffi-3.4.7.tar.gz
+   --output
+   %{targets})))
 
 (rule
  (targets libffi-release)
  (deps libffi-3.4.7.tar.gz)
  (action
-  (system "tar --strip-components=1 -xzf libffi-3.4.7.tar.gz -C libffi-release")))
+  (system
+   "tar --strip-components=1 -xzf libffi-3.4.7.tar.gz --one-top-level=libffi-release")))
