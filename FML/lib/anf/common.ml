@@ -31,11 +31,13 @@ let builtins =
   ; "( != )"
   ; "( && )"
   ; "( || )"
+  ; "not"
   ; "print_int"
   ; "list_head"
   ; "list_tail"
   ; "list_len"
   ; "tuple_element"
+  ; "is_empty"
   ; "fail_match"
   ]
 ;;
@@ -120,10 +122,9 @@ module MonadCounter = struct
   ;;
 end
 
-let rec get_binds_pat =
-  function
+let rec get_binds_pat = function
   | PConstraint (pat, _) -> get_binds_pat pat
-  | PAny | PConst _ | PNill | PUnit  -> StrSet.empty
+  | PAny | PConst _ | PNill | PUnit -> StrSet.empty
   | PIdentifier ident -> StrSet.singleton ident
   | PCons (p1, p2) -> StrSet.union (get_binds_pat p1) (get_binds_pat p2)
   | PTuple pl ->
@@ -140,3 +141,4 @@ let make_condition checks e1 e2 =
 ;;
 
 let get_id i = "a" ^ Int.to_string i
+let empty = Base.Map.empty (module Base.String)
