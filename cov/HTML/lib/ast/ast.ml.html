@@ -479,56 +479,56 @@
 (** the whole program *)
 <span data-count="0">t</span>ype prog = <span data-count="0">d</span>ecl lis<span data-count="0">t</span> [@@deriving eq, show { with_path = false }]
 
-let ident_letters (s : ident_letters) = <span data-count="1441291">I</span>dentLetters s
-let ident_op (s : ident_op) = <span data-count="43444">I</span>dentOp s
-let ident_of_definable s = <span data-count="1484735">I</span>dentOfDefinable s
-let ident_of_base_op b = <span data-count="75">I</span>dentOfBaseOp b
+let ident_letters (s : ident_letters) = <span data-count="1442871">I</span>dentLetters s
+let ident_op (s : ident_op) = <span data-count="43946">I</span>dentOp s
+let ident_of_definable s = <span data-count="1486817">I</span>dentOfDefinable s
+let ident_of_base_op b = <span data-count="103">I</span>dentOfBaseOp b
 let tint = TGround GInt
 let tbool = TGround GBool
 let tunit = TGround GUnit
-let tarrow left_type right_type = <span data-count="329">T</span>Arr (left_type, right_type)
-let ttuple t1 t2 type_list = <span data-count="46">T</span>Tuple (t1, t2, type_list)
-let tlist typ = <span data-count="161">T</span>List typ
-let tvar n = <span data-count="659">T</span>Var n
-let pid (id : ident_letters) = <span data-count="1274059">P</span>Id id
-let ptuple p1 p2 p_list = <span data-count="40235">P</span>Tuple (p1, p2, p_list)
-let plist hd tl = <span data-count="38681">P</span>List (hd, tl)
+let tarrow left_type right_type = <span data-count="321">T</span>Arr (left_type, right_type)
+let ttuple t1 t2 type_list = <span data-count="44">T</span>Tuple (t1, t2, type_list)
+let tlist typ = <span data-count="155">T</span>List typ
+let tvar n = <span data-count="655">T</span>Var n
+let pid (id : ident_letters) = <span data-count="1280183">P</span>Id id
+let ptuple p1 p2 p_list = <span data-count="40406">P</span>Tuple (p1, p2, p_list)
+let plist hd tl = <span data-count="38864">P</span>List (hd, tl)
 
 let p_typed ?(typ = <span data-count="38681">N</span>one) (p : pattern) : pattern =
-  <span data-count="2015221">m</span>atch typ with
-  | <span data-count="668">S</span>ome typ -&gt; PConstraint (p, typ)
-  | <span data-count="2014553">N</span>one -&gt; p
+  <span data-count="2018273">m</span>atch typ with
+  | <span data-count="667">S</span>ome typ -&gt; PConstraint (p, typ)
+  | <span data-count="2017606">N</span>one -&gt; p
 ;;
 
-let pop_pat p = <span data-count="678696">P</span>OpPat p
-let pop_op p = <span data-count="11">P</span>OpOp p
+let pop_pat p = <span data-count="682468">P</span>OpPat p
+let pop_op p = <span data-count="23">P</span>OpOp p
 
 let pop_typed ?(typ = <span data-count="0">N</span>one) (pop : pattern_or_op) : pattern_or_op =
-  <span data-count="678584">m</span>atch typ with
+  <span data-count="679264">m</span>atch typ with
   | <span data-count="11">S</span>ome typ -&gt; POrOpConstraint (pop, typ)
-  | <span data-count="678573">N</span>one -&gt; pop
+  | <span data-count="679253">N</span>one -&gt; pop
 ;;
 
-let pconst c = <span data-count="1227419">P</span>Const c
-let econst c = <span data-count="1501692">E</span>Const c
-let eid i = <span data-count="1483900">E</span>Id i
-let efun pat e = <span data-count="129372">E</span>Fun (pat, e)
-let eapp f args = <span data-count="1380307">E</span>App (f, args)
-let eif e1 e2 e3 = <span data-count="20663">E</span>If (e1, e2, e3)
-let elist hd tl = <span data-count="1108763">E</span>List (hd, tl)
-let etuple e1 e2 l = <span data-count="35698">E</span>Tuple (e1, e2, l)
-let eclsr d e = <span data-count="451555">E</span>Clsr (d, e)
-let ematch e pair cl = <span data-count="37731">E</span>Match (e, pair, cl)
+let pconst c = <span data-count="1228204">P</span>Const c
+let econst c = <span data-count="1503475">E</span>Const c
+let eid i = <span data-count="1491902">E</span>Id i
+let efun pat e = <span data-count="131027">E</span>Fun (pat, e)
+let eapp f args = <span data-count="1388435">E</span>App (f, args)
+let eif e1 e2 e3 = <span data-count="20902">E</span>If (e1, e2, e3)
+let elist hd tl = <span data-count="1109091">E</span>List (hd, tl)
+let etuple e1 e2 l = <span data-count="35773">E</span>Tuple (e1, e2, l)
+let eclsr d e = <span data-count="452935">E</span>Clsr (d, e)
+let ematch e pair cl = <span data-count="37830">E</span>Match (e, pair, cl)
 
-let e_typed ?(typ = <span data-count="2717988">N</span>one) e : expr =
-  <span data-count="5265728">m</span>atch typ with
-  | <span data-count="58">S</span>ome typ -&gt; EConstraint (e, typ)
-  | <span data-count="5265670">N</span>one -&gt; e
+let e_typed ?(typ = <span data-count="2723950">N</span>one) e : expr =
+  <span data-count="5273093">m</span>atch typ with
+  | <span data-count="84">S</span>ome typ -&gt; EConstraint (e, typ)
+  | <span data-count="5273009">N</span>one -&gt; e
 ;;
 
-let dlet rf let_body = <span data-count="658962">D</span>Let (rf, let_body)
-let dletmut rec_flag fst snd tl = <span data-count="9810">D</span>LetMut (rec_flag, fst, snd, tl)
-let prog (d_l : decl list) : prog = <span data-count="185">d</span>_l
+let dlet rf let_body = <span data-count="661813">D</span>Let (rf, let_body)
+let dletmut rec_flag fst snd tl = <span data-count="9823">D</span>LetMut (rec_flag, fst, snd, tl)
+let prog (d_l : decl list) : prog = <span data-count="207">d</span>_l
 let identifier id = <span data-count="0">i</span>dent_of_definable @@ ident_letter<span data-count="0">s</span> id
 </code></pre>
       </div>

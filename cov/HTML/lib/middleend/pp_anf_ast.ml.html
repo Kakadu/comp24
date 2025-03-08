@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>pp_anf_ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="91.30% coverage in lib/middleend/pp_anf_ast.ml">
+    <meta name="description" content="78.26% coverage in lib/middleend/pp_anf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,14 @@
           <span class="dirname">lib/middleend/</span>pp_anf_ast.ml
         </a>
       </h1>
-      <h2>91.30%</h2>
+      <h2>78.26%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:11.29%"></span>
       <span class="unvisited" style="top:33.87%"></span>
+      <span class="unvisited" style="bottom:12.90%"></span>
+      <span class="unvisited" style="bottom:8.06%"></span>
+      <span class="unvisited" style="bottom:4.84%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -77,12 +80,12 @@
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
+<a id="L54"></a><span class="unvisited"> </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span class="unvisited"> </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span class="visited"> </span>
+<a id="L59"></a><span class="unvisited"> </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span class="visited"> </span>
@@ -158,18 +161,18 @@ open Anf_ast
 open Format
 
 let pp_identifier fmt = function
-  | <span data-count="749">I</span>d s -&gt; fprintf fmt "%s" s
+  | <span data-count="432">I</span>d s -&gt; fprintf fmt "%s" s
   | <span data-count="0">I</span>dConstraint (s, ty) -&gt; pp_typed fmt pp_print_string (s, ty)
 ;;
 
 let rec pp_immexpr fmt = function
-  | <span data-count="321">I</span>mmConst c -&gt; pp_const fmt c
-  | <span data-count="823">I</span>mmIdentifier s -&gt; pp_ident fmt s
-  | <span data-count="7">I</span>mmConstraint (e, typ) -&gt; AstLib.Pp_ast.pp_typed fmt pp_immexpr (e, typ)
+  | <span data-count="174">I</span>mmConst c -&gt; pp_const fmt c
+  | <span data-count="487">I</span>mmIdentifier s -&gt; pp_ident fmt s
+  | <span data-count="5">I</span>mmConstraint (e, typ) -&gt; AstLib.Pp_ast.pp_typed fmt pp_immexpr (e, typ)
 ;;
 
 let rec pp_cexpr fmt = function
-  | <span data-count="135">C</span>App (CApp (CImmExpr (ImmIdentifier (IdentOfDefinable (IdentOp bin_op))), op1), op2)
+  | <span data-count="76">C</span>App (CApp (CImmExpr (ImmIdentifier (IdentOfDefinable (IdentOp bin_op))), op1), op2)
     -&gt;
     (* bin op pattern *)
     fprintf fmt "(%a %s %a)" pp_cexpr op1 bin_op pp_cexpr op2
@@ -178,43 +181,43 @@ let rec pp_cexpr fmt = function
       , CApp
           (CApp (CImmExpr (ImmIdentifier (IdentOfDefinable (IdentOp bin_op))), op1), op2)
       ) -&gt; fprintf fmt "%a (%a %s %a)" pp_cexpr e1 pp_cexpr op1 bin_op pp_cexpr op2
-  | <span data-count="265">C</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_cexpr e1 pp_cexpr e2
-  | <span data-count="64">C</span>If (e_if, e_th, e_el) -&gt;
+  | <span data-count="171">C</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_cexpr e1 pp_cexpr e2
+  | <span data-count="36">C</span>If (e_if, e_th, e_el) -&gt;
     fprintf fmt "if %a then %a else %a" pp_immexpr e_if pp_aexpr e_th pp_aexpr e_el
-  | <span data-count="1080">C</span>ImmExpr e -&gt; pp_immexpr fmt e
+  | <span data-count="625">C</span>ImmExpr e -&gt; pp_immexpr fmt e
 
 and pp_aexpr fmt = function
-  | <span data-count="502">A</span>LetIn (pat_or_op, cexpr, aexpr) -&gt;
+  | <span data-count="286">A</span>LetIn (pat_or_op, cexpr, aexpr) -&gt;
     fprintf fmt "let %a = %a in\n%a" pp_identifier pat_or_op pp_cexpr cexpr pp_aexpr aexpr
-  | <span data-count="242">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
+  | <span data-count="128">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
 ;;
 
 let pp_identifiers fmt pats =
-  <span data-count="114">f</span>printf fmt " ";
-  <span data-count="114">p</span>p_print_list
-    ~pp_sep:(fun fmt _ -&gt; <span data-count="69">f</span>printf fmt " ")
-    (fun fmt value -&gt; <span data-count="133">p</span>p_identifier fmt value)
+  <span data-count="56">f</span>printf fmt " ";
+  <span data-count="56">p</span>p_print_list
+    ~pp_sep:(fun fmt _ -&gt; <span data-count="50">f</span>printf fmt " ")
+    (fun fmt value -&gt; <span data-count="90">p</span>p_identifier fmt value)
     fmt
     pats
 ;;
 
 let pp_let_body fmt = function
-  | <span data-count="114">p</span>at_or_op, pats, expr -&gt;
+  | <span data-count="56">p</span>at_or_op, pats, expr -&gt;
     fprintf fmt "%a%a = %a" pp_identifier pat_or_op pp_identifiers pats pp_aexpr expr
 ;;
 
 let pp_anf_decl fmt = function
-  | <span data-count="110">A</span>DSingleLet (rec_flag, let_body) -&gt;
+  | <span data-count="56">A</span>DSingleLet (rec_flag, let_body) -&gt;
     fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body let_body
-  | <span data-count="2">A</span>DMutualRecDecl (rec_flag, lb1, lb2, lbs) -&gt;
+  | <span data-count="0">A</span>DMutualRecDecl (rec_flag, lb1, lb2, lbs) -&gt;
     let let_bodies = lb1 :: lb2 :: lbs in
     let pp_decls =
-      pp_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="2">f</span>printf fmt "\nand ") pp_let_body
+      pp_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="0">f</span>printf fmt "\nand ") pp_let_body
     in
-    <span data-count="2">f</span>printf fmt "let%a %a" pp_rec_flag rec_flag pp_decls let_bodies
+    <span data-count="0">f</span>printf fmt "let%a %a" pp_rec_flag rec_flag pp_decls let_bodies
 ;;
 
-let pp_anf_prog = pp_print_lis<span data-count="45">t</span> ~pp_sep:(fun fmt _ -&gt; <span data-count="77">f</span>printf fmt ";;\n") pp_anf_decl
+let pp_anf_prog = pp_print_lis<span data-count="28">t</span> ~pp_sep:(fun fmt _ -&gt; <span data-count="39">f</span>printf fmt ";;\n") pp_anf_decl
 </code></pre>
       </div>
     </div>

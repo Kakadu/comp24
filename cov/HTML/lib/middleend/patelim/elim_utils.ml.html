@@ -153,31 +153,31 @@ module RuntimeEnv = struct
     ; typ : typ
     }
 
-  let apply f x = <span data-count="229">r</span>eturn @@ eap<span data-count="229">p</span> (ei<span data-count="229">d</span> (ident_of_definabl<span data-count="229">e</span> (ident_letter<span data-count="229">s</span> f.name))) x
+  let apply f x = <span data-count="159">r</span>eturn @@ eap<span data-count="159">p</span> (ei<span data-count="159">d</span> (ident_of_definabl<span data-count="159">e</span> (ident_letter<span data-count="159">s</span> f.name))) x
 
   (** add it to infer *)
-  let generic = tva<span data-count="46">r</span> "a"
+  let generic = tva<span data-count="44">r</span> "a"
 
-  let get_head = { name = "GET_HEAD"; typ = tarro<span data-count="46">w</span> (tlis<span data-count="46">t</span> generic) generic }
-  let get_tl = { name = "GET_TALE"; typ = tarro<span data-count="46">w</span> (tlis<span data-count="46">t</span> generic) (tlis<span data-count="46">t</span> generic) }
-  let get_nth = { name = "GET_NTH"; typ = tarro<span data-count="46">w</span> (ttupl<span data-count="46">e</span> tint generic []) (tva<span data-count="46">r</span> "b") }
-  let not_exhaustive_pm = { name = "RTE_ERROR_MATCH_FAILURE"; typ = tarro<span data-count="46">w</span> tunit generic }
+  let get_head = { name = "get_head"; typ = tarro<span data-count="44">w</span> (tlis<span data-count="44">t</span> generic) generic }
+  let get_tl = { name = "get_tale"; typ = tarro<span data-count="44">w</span> (tlis<span data-count="44">t</span> generic) (tlis<span data-count="44">t</span> generic) }
+  let get_nth = { name = "get_nth"; typ = tarro<span data-count="44">w</span> (ttupl<span data-count="44">e</span> tint generic []) (tva<span data-count="44">r</span> "b") }
+  let not_exhaustive_pm = { name = "rte_error_match_failure"; typ = tarro<span data-count="44">w</span> tunit generic }
   let init_env = [ get_head; get_tl; get_nth; not_exhaustive_pm ]
 end
 
 module Env = struct
   open Common.Counter.R
 
-  let extend env id e = <span data-count="100">B</span>ase.Map.update env id ~f:(fun _ -&gt; <span data-count="100">e</span>)
-  let empty = Base.Map.empt<span data-count="46">y</span> (module Base.String)
-  let lookup_env id map = <span data-count="46">B</span>ase.Map.find map id
+  let extend env id e = <span data-count="57">B</span>ase.Map.update env id ~f:(fun _ -&gt; <span data-count="57">e</span>)
+  let empty = Base.Map.empt<span data-count="44">y</span> (module Base.String)
+  let lookup_env id map = <span data-count="26">B</span>ase.Map.find map id
 
   let merge m1 m2 =
-    <span data-count="39">B</span>ase.Map.fold_right m2 ~init:(retur<span data-count="39">n</span> m1) ~f:(fun ~key ~data acc -&gt;
-      <span data-count="46">l</span>et* acc = acc in
-      <span data-count="46">m</span>atch lookup_env key acc with
+    <span data-count="23">B</span>ase.Map.fold_right m2 ~init:(retur<span data-count="23">n</span> m1) ~f:(fun ~key ~data acc -&gt;
+      <span data-count="26">l</span>et* acc = acc in
+      <span data-count="26">m</span>atch lookup_env key acc with
       | <span data-count="0">S</span>ome _ -&gt; fail "Key intersection"
-      | <span data-count="46">N</span>one -&gt; return @@ exten<span data-count="46">d</span> acc key data)
+      | <span data-count="26">N</span>one -&gt; return @@ exten<span data-count="26">d</span> acc key data)
   ;;
 end
 
@@ -185,18 +185,18 @@ module RuntimeUtils = struct
   open RuntimeEnv
   open IR
 
-  let apply_get_head head = <span data-count="70">a</span>pply get_head head
-  let apply_get_tl tl = <span data-count="70">a</span>pply get_tl tl
+  let apply_get_head head = <span data-count="38">a</span>pply get_head head
+  let apply_get_tl tl = <span data-count="38">a</span>pply get_tl tl
   let apply_get_nth n e = <span data-count="8">a</span>pply get_nth (etupl<span data-count="8">e</span> (econs<span data-count="8">t</span> (CInt n)) e [])
-  let apply_not_exhaustive_pm () = <span data-count="81">a</span>pply not_exhaustive_pm (econs<span data-count="81">t</span> CUnit)
-  let create_var_for_eval n = <span data-count="69">"</span>EVALUATED_" ^ n
+  let apply_not_exhaustive_pm () = <span data-count="75">a</span>pply not_exhaustive_pm (econs<span data-count="75">t</span> CUnit)
+  let create_var_for_eval n = <span data-count="60">"</span>evaluated_" ^ n
 
   let create_pop_and_expr_for_eval evaluated =
-    <span data-count="69">l</span>et create_pop_for_eval evaluated = <span data-count="69">p</span>op_pat (pi<span data-count="69">d</span> evaluated) in
+    <span data-count="60">l</span>et create_pop_for_eval evaluated = <span data-count="60">p</span>op_pat (pi<span data-count="60">d</span> evaluated) in
     let create_expr_for_eval evaluated =
-      <span data-count="69">e</span>id (ident_of_definabl<span data-count="69">e</span> (ident_letter<span data-count="69">s</span> evaluated))
+      <span data-count="60">e</span>id (ident_of_definabl<span data-count="60">e</span> (ident_letter<span data-count="60">s</span> evaluated))
     in
-    create_pop_for_eva<span data-count="69">l</span> evaluated, create_expr_for_eva<span data-count="69">l</span> evaluated
+    create_pop_for_eva<span data-count="60">l</span> evaluated, create_expr_for_eva<span data-count="60">l</span> evaluated
   ;;
 end
 </code></pre>

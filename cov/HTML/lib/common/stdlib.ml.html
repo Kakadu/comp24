@@ -49,6 +49,9 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -80,34 +83,40 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
 </pre>
-<pre><code class="ocaml">let stdlib =
-  [ "print_int"
-  ; "print_newline"
-  ; "base +"
-  ; "base -"
-  ; "+"
-  ; "-"
-  ; "*"
-  ; "/"
-  ; "&lt;="
-  ; "&lt;"
-  ; "&gt;="
-  ; "&gt;"
-  ; "="
-  ; "=="
-  ; "!="
-  ; "&amp;&amp;"
-  ; "||"
-  ; "RTE_ERROR_MATCH_FAILURE"
-  ; "GET_HEAD"
-  ; "GET_TALE"
-  ; "GET_NTH"
-  ; "( = )"
-  ; "( != )"
-  ; "( &amp;&amp; )"
+<pre><code class="ocaml">open AstLib.Ast
+
+let stdlib_typed =
+  [ "print_int", TArr (TGround GInt, TGround GUnit)
+  ; "print_bool", TArr (TGround GBool, TGround GUnit)
+  ; "print_newline", TArr (TGround GUnit, TGround GUnit)
+  ; "base_plus", TArr (TGround GInt, TGround GInt)
+  ; "base_minus", TArr (TGround GInt, TGround GInt)
+  ; "+", TArr (TGround GInt, TArr (TGround GInt, TGround GInt))
+  ; "-", TArr (TGround GInt, TArr (TGround GInt, TGround GInt))
+  ; "*", TArr (TGround GInt, TArr (TGround GInt, TGround GInt))
+  ; "/", TArr (TGround GInt, TArr (TGround GInt, TGround GInt))
+  ; "&lt;=", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "&lt;", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "&gt;=", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "&gt;", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "=", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "!=", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "&amp;&amp;", TArr (TGround GBool, TArr (TGround GBool, TGround GBool))
+  ; "||", TArr (TGround GBool, TArr (TGround GBool, TGround GBool))
+  ; "rte_error_match_failure", TArr (TGround GUnit, TGround GUnit)
+  ; "GET_HEAD", TArr (TList (TVar "_a"), TVar "_a")
+  ; "GET_TALE", TArr (TList (TVar "_a"), TList (TVar "_a"))
+  ; "GET_NTH", TArr (TVar "_a", TVar "_b")
+  ; "leq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
+  ; "eq", TArr (TVar "_a", TArr (TVar "_a", TGround GBool))
   ]
 ;;
+
+let stdlib = List.ma<span data-count="82">p</span> fst stdlib_typed
 </code></pre>
       </div>
     </div>

@@ -53,13 +53,13 @@
 <pre><code class="ocaml">open AstLib.Ast
 
 let ident_to_string id =
-  <span data-count="604567">m</span>atch id with
-  | <span data-count="483150">I</span>dentOfDefinable (IdentLetters s) -&gt; s
-  | <span data-count="121177">I</span>dentOfDefinable (IdentOp s) -&gt; s
-  | <span data-count="240">I</span>dentOfBaseOp base_op -&gt;
+  <span data-count="6562">m</span>atch id with
+  | <span data-count="5670">I</span>dentOfDefinable (IdentLetters s) -&gt; s
+  | <span data-count="866">I</span>dentOfDefinable (IdentOp s) -&gt; s
+  | <span data-count="26">I</span>dentOfBaseOp base_op -&gt;
     (match base_op with
-     | <span data-count="0">P</span>lus -&gt; "base +"
-     | <span data-count="240">M</span>inus -&gt; "base -")
+     | <span data-count="0">P</span>lus -&gt; "base_plus"
+     | <span data-count="26">M</span>inus -&gt; "base_minus")
 ;;
 </code></pre>
       </div>

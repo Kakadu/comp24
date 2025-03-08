@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>PM_elim.ml &mdash; Coverage report</title>
-    <meta name="description" content="98.28% coverage in lib/middleend/patelim/PM_elim.ml">
+    <meta name="description" content="94.25% coverage in lib/middleend/patelim/PM_elim.ml">
     <link rel="stylesheet" href="../../../coverage.css"/>
     <script src="../../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,13 @@
           <span class="dirname">lib/middleend/patelim/</span>PM_elim.ml
         </a>
       </h1>
-      <h2>98.28%</h2>
+      <h2>94.25%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="top:4.47%"></span>
+      <span class="unvisited" style="top:27.93%"></span>
+      <span class="unvisited" style="top:42.46%"></span>
+      <span class="unvisited" style="bottom:49.72%"></span>
       <span class="unvisited" style="bottom:6.70%"></span>
       <span class="unvisited" style="bottom:6.15%"></span>
     </div>
@@ -31,7 +35,7 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L8"></a><span class="unvisited"> </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
@@ -73,7 +77,7 @@
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span class="visited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
@@ -99,7 +103,7 @@
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span class="visited"> </span>
-<a id="L76"></a><span class="visited"> </span>
+<a id="L76"></a><span class="unvisited"> </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span > </span>
@@ -113,7 +117,7 @@
 <a id="L87"></a><span class="visited"> </span>
 <a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span > </span>
-<a id="L90"></a><span class="visited"> </span>
+<a id="L90"></a><span class="unvisited"> </span>
 <a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span > </span>
 <a id="L93"></a><span class="visited"> </span>
@@ -394,28 +398,28 @@ open Env
 open IR
 
 let get_typ_of_pat = function
-  | <span data-count="1">P</span>Constraint (_, typ) -&gt; Some typ
-  | <span data-count="3">_</span> -&gt; None
+  | <span data-count="0">P</span>Constraint (_, typ) -&gt; Some typ
+  | <span data-count="4">_</span> -&gt; None
 ;;
 
 let rec is_pattern_suitable =
   let e_binop_optimized op e1 e2 =
-    <span data-count="133">m</span>atch e1, e2 with
+    <span data-count="75">m</span>atch e1, e2 with
     | <span data-count="3">N</span>oPMEConst (CBool true), NoPMEConst (CBool true) -&gt; econst (CBool true)
     | <span data-count="1">N</span>oPMEConst (CBool true), e2 -&gt; e2
-    | <span data-count="51">e</span>1, NoPMEConst (CBool true) -&gt; e1
-    | <span data-count="78">_</span> -&gt; ebin_op op e1 e2
+    | <span data-count="28">e</span>1, NoPMEConst (CBool true) -&gt; e1
+    | <span data-count="43">_</span> -&gt; ebin_op op e1 e2
   in
   function
-  | <span data-count="56">P</span>Id _, _ -&gt; return @@ econs<span data-count="56">t</span> (CBool true)
-  | <span data-count="24">P</span>Const x, e -&gt; return @@ e_binop_optimize<span data-count="24">d</span> Eq (econs<span data-count="24">t</span> x) e
-  | <span data-count="35">P</span>List (p1, p2), e -&gt;
-    let is_not_empty = e_binop_optimized Neq (econs<span data-count="35">t</span> CNil) e in
-    <span data-count="35">l</span>et* head = RuntimeUtils.apply_get_hea<span data-count="35">d</span> e in
-    <span data-count="35">l</span>et* tl = RuntimeUtils.apply_get_t<span data-count="35">l</span> e in
-    <span data-count="35">l</span>et* head_res = is_pattern_suitabl<span data-count="35">e</span> (p1, head) in
-    <span data-count="35">l</span>et* tl_res = is_pattern_suitabl<span data-count="35">e</span> (p2, tl) in
-    <span data-count="35">r</span>eturn @@ e_binop_optimize<span data-count="35">d</span> And (e_binop_optimize<span data-count="35">d</span> And is_not_empty head_res) tl_res
+  | <span data-count="33">P</span>Id _, _ -&gt; return @@ econs<span data-count="33">t</span> (CBool true)
+  | <span data-count="14">P</span>Const x, e -&gt; return @@ e_binop_optimize<span data-count="14">d</span> Eq (econs<span data-count="14">t</span> x) e
+  | <span data-count="19">P</span>List (p1, p2), e -&gt;
+    let is_not_empty = e_binop_optimized Neq (econs<span data-count="19">t</span> CNil) e in
+    <span data-count="19">l</span>et* head = RuntimeUtils.apply_get_hea<span data-count="19">d</span> e in
+    <span data-count="19">l</span>et* tl = RuntimeUtils.apply_get_t<span data-count="19">l</span> e in
+    <span data-count="19">l</span>et* head_res = is_pattern_suitabl<span data-count="19">e</span> (p1, head) in
+    <span data-count="19">l</span>et* tl_res = is_pattern_suitabl<span data-count="19">e</span> (p2, tl) in
+    <span data-count="19">r</span>eturn @@ e_binop_optimize<span data-count="19">d</span> And (e_binop_optimize<span data-count="19">d</span> And is_not_empty head_res) tl_res
   | <span data-count="2">P</span>Tuple (p1, p2, ps), e -&gt;
     let all_pats = p1 :: p2 :: ps in
     let check_nth n pat_n =
@@ -436,18 +440,18 @@ let rec is_pattern_suitable =
         all_pats
     in
     <span data-count="2">r</span>eturn res
-  | <span data-count="1">P</span>Constraint (pat, typ), e -&gt; is_pattern_suitable (pat, e_type<span data-count="1">d</span> ~typ:(Some typ) e)
+  | <span data-count="0">P</span>Constraint (pat, typ), e -&gt; is_pattern_suitable (pat, e_type<span data-count="0">d</span> ~typ:(Some typ) e)
 ;;
 
 let rec get_pattern_vars = function
-  | <span data-count="24">P</span>Const _, _ | <span data-count="2">P</span>Id "_", _ -&gt; return empty
-  | <span data-count="54">P</span>Id id, e -&gt; return @@ exten<span data-count="54">d</span> empty id e
-  | <span data-count="35">P</span>List (p1, p2), e -&gt;
-    let* head = RuntimeUtils.apply_get_hea<span data-count="35">d</span> e in
-    <span data-count="35">l</span>et* tl = RuntimeUtils.apply_get_t<span data-count="35">l</span> e in
-    <span data-count="35">l</span>et* p1_map = get_pattern_var<span data-count="35">s</span> (p1, head) in
-    <span data-count="35">l</span>et* p2_map = get_pattern_var<span data-count="35">s</span> (p2, tl) in
-    <span data-count="35">E</span>nv.merge p1_map p2_map
+  | <span data-count="14">P</span>Const _, _ | <span data-count="2">P</span>Id "_", _ -&gt; return empty
+  | <span data-count="31">P</span>Id id, e -&gt; return @@ exten<span data-count="31">d</span> empty id e
+  | <span data-count="19">P</span>List (p1, p2), e -&gt;
+    let* head = RuntimeUtils.apply_get_hea<span data-count="19">d</span> e in
+    <span data-count="19">l</span>et* tl = RuntimeUtils.apply_get_t<span data-count="19">l</span> e in
+    <span data-count="19">l</span>et* p1_map = get_pattern_var<span data-count="19">s</span> (p1, head) in
+    <span data-count="19">l</span>et* p2_map = get_pattern_var<span data-count="19">s</span> (p2, tl) in
+    <span data-count="19">E</span>nv.merge p1_map p2_map
   | <span data-count="2">P</span>Tuple (p1, p2, ps), e -&gt;
     let all_pats = p1 :: p2 :: ps in
     let* res, _ =
@@ -462,109 +466,109 @@ let rec get_pattern_vars = function
         all_pats
     in
     <span data-count="2">r</span>eturn res
-  | <span data-count="1">P</span>Constraint (pat, typ), e -&gt; get_pattern_vars (pat, e_type<span data-count="1">d</span> ~typ:(Some typ) e)
+  | <span data-count="0">P</span>Constraint (pat, typ), e -&gt; get_pattern_vars (pat, e_type<span data-count="0">d</span> ~typ:(Some typ) e)
 ;;
 
 let pm_elim =
   let rec helper = function
-    | <span data-count="43">(</span>pat, e_res) :: tl, e -&gt;
-      let* cond = is_pattern_suitabl<span data-count="43">e</span> (pat, e) in
-      <span data-count="43">l</span>et* pattern_vars = get_pattern_var<span data-count="43">s</span> (pat, e) in
-      <span data-count="43">l</span>et* res_expr =
-        Base.Map.fold_righ<span data-count="43">t</span> pattern_vars ~init:(retur<span data-count="43">n</span> e_res) ~f:(fun ~key ~data acc -&gt;
-          <span data-count="54">l</span>et* acc = acc in
-          <span data-count="54">l</span>et pat = pid key in
-          <span data-count="54">l</span>et pat =
+    | <span data-count="26">(</span>pat, e_res) :: tl, e -&gt;
+      let* cond = is_pattern_suitabl<span data-count="26">e</span> (pat, e) in
+      <span data-count="26">l</span>et* pattern_vars = get_pattern_var<span data-count="26">s</span> (pat, e) in
+      <span data-count="26">l</span>et* res_expr =
+        Base.Map.fold_righ<span data-count="26">t</span> pattern_vars ~init:(retur<span data-count="26">n</span> e_res) ~f:(fun ~key ~data acc -&gt;
+          <span data-count="31">l</span>et* acc = acc in
+          <span data-count="31">l</span>et pat = pid key in
+          <span data-count="31">l</span>et pat =
             match data with
-            | <span data-count="1">N</span>oPMEConstraint (_, typ) -&gt; p_type<span data-count="1">d</span> ~typ:(Some typ) pat
-            | <span data-count="53">_</span> -&gt; pat
+            | <span data-count="0">N</span>oPMEConstraint (_, typ) -&gt; p_type<span data-count="0">d</span> ~typ:(Some typ) pat
+            | <span data-count="31">_</span> -&gt; pat
           in
-          let decl = dlet Not_recursive (pop_pa<span data-count="54">t</span> pat, data) in
-          <span data-count="54">r</span>eturn @@ ecls<span data-count="54">r</span> decl acc)
+          let decl = dlet Not_recursive (pop_pa<span data-count="31">t</span> pat, data) in
+          <span data-count="31">r</span>eturn @@ ecls<span data-count="31">r</span> decl acc)
       in
-      <span data-count="43">l</span>et* res_tl = helpe<span data-count="43">r</span> (tl, e) in
-      <span data-count="43">(</span>match cond with
+      <span data-count="26">l</span>et* res_tl = helpe<span data-count="26">r</span> (tl, e) in
+      <span data-count="26">(</span>match cond with
        | <span data-count="3">N</span>oPMEConst (CBool true) -&gt; return @@ res_expr
-       | <span data-count="40">_</span> -&gt; return @@ ei<span data-count="40">f</span> cond res_expr res_tl)
-    | <span data-count="20">[</span>], _ -&gt; RuntimeUtils.apply_not_exhaustive_pm ()
+       | <span data-count="23">_</span> -&gt; return @@ ei<span data-count="23">f</span> cond res_expr res_tl)
+    | <span data-count="13">[</span>], _ -&gt; RuntimeUtils.apply_not_exhaustive_pm ()
   in
   helper
 ;;
 
 let rec pm_elim_expr expr =
-  <span data-count="269">l</span>et rec helper = function
-    | <span data-count="286">E</span>Const x -&gt; return @@ econs<span data-count="286">t</span> x
-    | <span data-count="675">E</span>Id x -&gt; return @@ ei<span data-count="675">d</span> x
-    | <span data-count="31">E</span>If (i, t, e) -&gt;
-      let* i_res = helpe<span data-count="31">r</span> i in
-      <span data-count="31">l</span>et* t_res = helpe<span data-count="31">r</span> t in
-      <span data-count="31">l</span>et* e_res = helpe<span data-count="31">r</span> e in
-      <span data-count="31">r</span>eturn @@ ei<span data-count="31">f</span> i_res t_res e_res
+  <span data-count="248">l</span>et rec helper = function
+    | <span data-count="250">E</span>Const x -&gt; return @@ econs<span data-count="250">t</span> x
+    | <span data-count="655">E</span>Id x -&gt; return @@ ei<span data-count="655">d</span> x
+    | <span data-count="27">E</span>If (i, t, e) -&gt;
+      let* i_res = helpe<span data-count="27">r</span> i in
+      <span data-count="27">l</span>et* t_res = helpe<span data-count="27">r</span> t in
+      <span data-count="27">l</span>et* e_res = helpe<span data-count="27">r</span> e in
+      <span data-count="27">r</span>eturn @@ ei<span data-count="27">f</span> i_res t_res e_res
     | <span data-count="577">E</span>App (e1, e2) -&gt;
       let* e1_res = helpe<span data-count="577">r</span> e1 in
       <span data-count="577">l</span>et* e2_res = helpe<span data-count="577">r</span> e2 in
       <span data-count="577">r</span>eturn @@ eap<span data-count="577">p</span> e1_res e2_res
-    | <span data-count="196">E</span>Fun (pat, e) -&gt;
-      let* e_res = helpe<span data-count="196">r</span> e in
-      <span data-count="196">r</span>eturn @@ efu<span data-count="196">n</span> pat e_res
-    | <span data-count="100">E</span>Clsr (decl, expr) -&gt;
-      let* no_pm_decl = pm_elim_dec<span data-count="100">l</span> decl in
-      <span data-count="100">l</span>et* expr_res = helpe<span data-count="100">r</span> expr in
-      <span data-count="100">r</span>eturn @@ ecls<span data-count="100">r</span> no_pm_decl expr_res
-    | <span data-count="40">E</span>List (e1, e2) -&gt;
-      let* e1_res = helpe<span data-count="40">r</span> e1 in
-      <span data-count="40">l</span>et* e2_res = helpe<span data-count="40">r</span> e2 in
-      <span data-count="40">r</span>eturn @@ elis<span data-count="40">t</span> e1_res e2_res
-    | <span data-count="13">E</span>Tuple (e1, e2, els) -&gt;
-      let* e1_res = helpe<span data-count="13">r</span> e1 in
-      <span data-count="13">l</span>et* e2_res = helpe<span data-count="13">r</span> e2 in
-      <span data-count="13">l</span>et* no_pm_els = ma<span data-count="13">p</span> pm_elim_expr els in
-      <span data-count="13">r</span>eturn @@ etupl<span data-count="13">e</span> e1_res e2_res no_pm_els
+    | <span data-count="207">E</span>Fun (pat, e) -&gt;
+      let* e_res = helpe<span data-count="207">r</span> e in
+      <span data-count="207">r</span>eturn @@ efu<span data-count="207">n</span> pat e_res
+    | <span data-count="81">E</span>Clsr (decl, expr) -&gt;
+      let* no_pm_decl = pm_elim_dec<span data-count="81">l</span> decl in
+      <span data-count="81">l</span>et* expr_res = helpe<span data-count="81">r</span> expr in
+      <span data-count="81">r</span>eturn @@ ecls<span data-count="81">r</span> no_pm_decl expr_res
+    | <span data-count="20">E</span>List (e1, e2) -&gt;
+      let* e1_res = helpe<span data-count="20">r</span> e1 in
+      <span data-count="20">l</span>et* e2_res = helpe<span data-count="20">r</span> e2 in
+      <span data-count="20">r</span>eturn @@ elis<span data-count="20">t</span> e1_res e2_res
+    | <span data-count="6">E</span>Tuple (e1, e2, els) -&gt;
+      let* e1_res = helpe<span data-count="6">r</span> e1 in
+      <span data-count="6">l</span>et* e2_res = helpe<span data-count="6">r</span> e2 in
+      <span data-count="6">l</span>et* no_pm_els = ma<span data-count="6">p</span> pm_elim_expr els in
+      <span data-count="6">r</span>eturn @@ etupl<span data-count="6">e</span> e1_res e2_res no_pm_els
     | <span data-count="7">E</span>Constraint (e, typ) -&gt;
       let* e_res = helpe<span data-count="7">r</span> e in
       <span data-count="7">r</span>eturn @@ e_type<span data-count="7">d</span> ~typ:(Some typ) e_res
-    | <span data-count="20">E</span>Match (e, br, brs) -&gt;
-      let* e_res = helpe<span data-count="20">r</span> e in
-      <span data-count="20">l</span>et* fresh = fresh in
-      <span data-count="20">l</span>et evaluated_name = RuntimeUtils.create_var_for_eval (string_of_in<span data-count="20">t</span> fresh) in
-      <span data-count="20">l</span>et evaluated_pat, evaluated_e =
+    | <span data-count="13">E</span>Match (e, br, brs) -&gt;
+      let* e_res = helpe<span data-count="13">r</span> e in
+      <span data-count="13">l</span>et* fresh = fresh in
+      <span data-count="13">l</span>et evaluated_name = RuntimeUtils.create_var_for_eval (string_of_in<span data-count="13">t</span> fresh) in
+      <span data-count="13">l</span>et evaluated_pat, evaluated_e =
         RuntimeUtils.create_pop_and_expr_for_eval evaluated_name
       in
-      <span data-count="20">l</span>et* no_pm_els =
-        ma<span data-count="20">p</span>
+      <span data-count="13">l</span>et* no_pm_els =
+        ma<span data-count="13">p</span>
           (fun (pat, e) -&gt;
-            <span data-count="43">l</span>et* no_pm_el = pm_elim_exp<span data-count="43">r</span> e in
-            <span data-count="43">r</span>eturn (pat, no_pm_el))
+            <span data-count="26">l</span>et* no_pm_el = pm_elim_exp<span data-count="26">r</span> e in
+            <span data-count="26">r</span>eturn (pat, no_pm_el))
           (br :: brs)
       in
-      <span data-count="20">l</span>et* res = pm_eli<span data-count="20">m</span> (no_pm_els, evaluated_e) in
-      <span data-count="20">r</span>eturn @@ ecls<span data-count="20">r</span> (dle<span data-count="20">t</span> Not_recursive (evaluated_pat, e_res)) res
+      <span data-count="13">l</span>et* res = pm_eli<span data-count="13">m</span> (no_pm_els, evaluated_e) in
+      <span data-count="13">r</span>eturn @@ ecls<span data-count="13">r</span> (dle<span data-count="13">t</span> Not_recursive (evaluated_pat, e_res)) res
   in
   helper expr
 
 and pm_elim_decl decl =
-  <span data-count="223">l</span>et helper decl =
-    <span data-count="223">m</span>atch decl with
-    | <span data-count="220">D</span>Let (rec_flag, (pat, expr)) -&gt;
-      let* no_pm_expr = pm_elim_exp<span data-count="220">r</span> expr in
-      <span data-count="220">r</span>eturn @@ NoPMDLet (rec_flag, (pat, no_pm_expr))
-    | <span data-count="3">D</span>LetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
+  <span data-count="220">l</span>et helper decl =
+    <span data-count="220">m</span>atch decl with
+    | <span data-count="218">D</span>Let (rec_flag, (pat, expr)) -&gt;
+      let* no_pm_expr = pm_elim_exp<span data-count="218">r</span> expr in
+      <span data-count="218">r</span>eturn @@ NoPMDLet (rec_flag, (pat, no_pm_expr))
+    | <span data-count="2">D</span>LetMut (rec_flag, (pat, expr), (pat1, expr1), tl) -&gt;
       let applied = tl in
       let* res =
-        ma<span data-count="3">p</span>
+        ma<span data-count="2">p</span>
           (fun (pat, e) -&gt;
             <span data-count="0">l</span>et* e = pm_elim_exp<span data-count="0">r</span> e in
             <span data-count="0">r</span>eturn (pat, e))
           applied
       in
-      <span data-count="3">l</span>et* expr = pm_elim_exp<span data-count="3">r</span> expr in
-      <span data-count="3">l</span>et* expr1 = pm_elim_exp<span data-count="3">r</span> expr1 in
-      <span data-count="3">r</span>eturn @@ NoPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), res)
+      <span data-count="2">l</span>et* expr = pm_elim_exp<span data-count="2">r</span> expr in
+      <span data-count="2">l</span>et* expr1 = pm_elim_exp<span data-count="2">r</span> expr1 in
+      <span data-count="2">r</span>eturn @@ NoPMDLetMut (rec_flag, (pat, expr), (pat1, expr1), res)
   in
   helper decl
 ;;
 
-let pm_elim_decls decls = <span data-count="56">m</span>ap pm_elim_decl decls
+let pm_elim_decls decls = <span data-count="49">m</span>ap pm_elim_decl decls
 let pm_elim decls = <span data-count="4">r</span>un (pm_elim_decl<span data-count="4">s</span> decls)
 </code></pre>
       </div>

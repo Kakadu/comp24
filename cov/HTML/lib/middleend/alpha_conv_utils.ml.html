@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>alpha_conv_utils.ml &mdash; Coverage report</title>
+    <meta name="description" content="94.12% coverage in lib/middleend/alpha_conv_utils.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/middleend/</span>alpha_conv_utils.ml
+        </a>
+      </h1>
+      <h2>94.12%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:41.18%"></span>
+      <span class="unvisited" style="bottom:3.92%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+</pre>
+<pre><code class="ocaml">open AstLib.Ast
+open Common.Ident_utils
+
+let get_new_id new_name = function
+  | <span data-count="1142">I</span>dentOfDefinable (IdentLetters _) -&gt; IdentOfDefinable (IdentLetters new_name)
+  | <span data-count="189">I</span>dentOfDefinable (IdentOp _) -&gt; IdentOfDefinable (IdentOp new_name)
+  | <span data-count="8">a</span> -&gt; a
+;;
+
+let revert_str =
+  String.ma<span data-count="62">p</span> (function
+    | <span data-count="573">'</span>.' -&gt; '_'
+    | <span data-count="5586">a</span> -&gt; a)
+;;
+
+let rec revert_pat = function
+  | <span data-count="115">P</span>Const _ as p -&gt; p
+  | <span data-count="663">P</span>Id id -&gt; pid @@ revert_st<span data-count="663">r</span> id
+  | <span data-count="35">P</span>List (hd, tl) -&gt; plist (revert_pa<span data-count="35">t</span> hd) (revert_pa<span data-count="35">t</span> tl)
+  | <span data-count="11">P</span>Tuple (p1, p2, ps) -&gt; ptuple (revert_pa<span data-count="11">t</span> p1) (revert_pa<span data-count="11">t</span> p2) (List.ma<span data-count="11">p</span> revert_pat ps)
+  | <span data-count="0">P</span>Constraint (p, typ) -&gt; p_typed ~typ:(Some typ) (revert_pa<span data-count="0">t</span> p)
+;;
+
+let rec revert_expr =
+  let rec helper = function
+    | <span data-count="1069">E</span>Id id -&gt; eid (get_new_i<span data-count="1069">d</span> (revert_st<span data-count="1069">r</span> @@ ident_to_strin<span data-count="1069">g</span> id) id)
+    | <span data-count="407">E</span>Const _ as e -&gt; e
+    | <span data-count="923">E</span>App (e1, e2) -&gt; eapp (helpe<span data-count="923">r</span> e1) (helpe<span data-count="923">r</span> e2)
+    | <span data-count="47">E</span>If (e1, e2, e3) -&gt; eif (helpe<span data-count="47">r</span> e1) (helpe<span data-count="47">r</span> e2) (helpe<span data-count="47">r</span> e3)
+    | <span data-count="326">E</span>Fun (pat, e) -&gt; efun (revert_pa<span data-count="326">t</span> pat) (helpe<span data-count="326">r</span> e)
+    | <span data-count="40">E</span>List (e1, e2) -&gt; elist (revert_exp<span data-count="40">r</span> e1) (revert_exp<span data-count="40">r</span> e2)
+    | <span data-count="20">E</span>Match (e, case1, cases) -&gt;
+      let revert_branch (pat, expr) = <span data-count="43">r</span>evert_pa<span data-count="43">t</span> pat, helpe<span data-count="43">r</span> expr in
+      ematch (helpe<span data-count="20">r</span> e) (revert_branc<span data-count="20">h</span> case1) (List.ma<span data-count="20">p</span> revert_branch cases)
+    | <span data-count="11">E</span>Tuple (e1, e2, es) -&gt; etuple (helpe<span data-count="11">r</span> e1) (helpe<span data-count="11">r</span> e2) (List.ma<span data-count="11">p</span> revert_expr es)
+    | <span data-count="133">E</span>Clsr (decl, e) -&gt; eclsr (revert_dec<span data-count="133">l</span> decl) (helpe<span data-count="133">r</span> e)
+    | <span data-count="9">E</span>Constraint (e, typ) -&gt; e_typed ~typ:(Some typ) (helpe<span data-count="9">r</span> e)
+  in
+  helper
+
+and revert_decl = function
+  | <span data-count="357">D</span>Let (rec_flag, (pop, e)) -&gt; dlet rec_flag (revert_po<span data-count="357">p</span> pop, revert_exp<span data-count="357">r</span> e)
+  | <span data-count="4">D</span>LetMut (rec_flag, lb1, lb2, lbs) -&gt;
+    dletmut rec_flag (revert_l<span data-count="4">b</span> lb1) (revert_l<span data-count="4">b</span> lb2) (List.ma<span data-count="4">p</span> revert_lb lbs)
+
+and revert_pop = function
+  | <span data-count="363">P</span>OpPat pat -&gt; pop_pat (revert_pa<span data-count="363">t</span> pat)
+  | <span data-count="2">P</span>OpOp id -&gt; pop_op (revert_st<span data-count="2">r</span> id)
+  | <span data-count="0">P</span>OrOpConstraint (pop, typ) -&gt; pop_typed ~typ:(Some typ) (revert_po<span data-count="0">p</span> pop)
+
+and revert_lb (pop, e) = <span data-count="8">r</span>evert_po<span data-count="8">p</span> pop, revert_exp<span data-count="8">r</span> e
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

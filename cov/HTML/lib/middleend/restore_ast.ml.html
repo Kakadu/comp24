@@ -154,52 +154,52 @@
 open Anf_ast
 
 let rec convert_immexpr = function
-  | <span data-count="284">I</span>mmConst c -&gt; EConst c
-  | <span data-count="906">I</span>mmIdentifier ident -&gt; EId ident
-  | <span data-count="4">I</span>mmConstraint (e, ty) -&gt; EConstraint (convert_immexp<span data-count="4">r</span> e, ty)
+  | <span data-count="146">I</span>mmConst c -&gt; EConst c
+  | <span data-count="491">I</span>mmIdentifier ident -&gt; EId ident
+  | <span data-count="2">I</span>mmConstraint (e, ty) -&gt; EConstraint (convert_immexp<span data-count="2">r</span> e, ty)
 ;;
 
 let convert_id_to_pat = function
-  | <span data-count="598">I</span>d s -&gt; PId s
+  | <span data-count="322">I</span>d s -&gt; PId s
   | <span data-count="0">I</span>dConstraint (s, ty) -&gt; PConstraint (PId s, ty)
 ;;
 
 let rec convert_id_to_pat_or_op =
   let open Common.Ops in
   function
-  | <span data-count="88">I</span>d s when List.me<span data-count="88">m</span> s (base_unops @ base_binops) -&gt; <span data-count="0">P</span>OpOp s
-  | <span data-count="88">I</span>d s -&gt; POpPat (PId s)
+  | <span data-count="49">I</span>d s when List.me<span data-count="49">m</span> s (base_unops @ base_binops) -&gt; <span data-count="0">P</span>OpOp s
+  | <span data-count="49">I</span>d s -&gt; POpPat (PId s)
   | <span data-count="0">I</span>dConstraint (s, ty) -&gt; POrOpConstraint (convert_id_to_pat_or_o<span data-count="0">p</span> (Id s), ty)
 ;;
 
 let rec convert_cexpr = function
-  | <span data-count="516">C</span>App (ce1, ce2) -&gt; EApp (convert_cexp<span data-count="516">r</span> ce1, convert_cexp<span data-count="516">r</span> ce2)
-  | <span data-count="62">C</span>If (ie, ae1, ae2) -&gt; EIf (convert_immexp<span data-count="62">r</span> ie, convert_aexp<span data-count="62">r</span> ae1, convert_aexp<span data-count="62">r</span> ae2)
-  | <span data-count="1128">C</span>ImmExpr ie -&gt; convert_immexpr ie
+  | <span data-count="280">C</span>App (ce1, ce2) -&gt; EApp (convert_cexp<span data-count="280">r</span> ce1, convert_cexp<span data-count="280">r</span> ce2)
+  | <span data-count="32">C</span>If (ie, ae1, ae2) -&gt; EIf (convert_immexp<span data-count="32">r</span> ie, convert_aexp<span data-count="32">r</span> ae1, convert_aexp<span data-count="32">r</span> ae2)
+  | <span data-count="605">C</span>ImmExpr ie -&gt; convert_immexpr ie
 
 and convert_aexpr = function
-  | <span data-count="462">A</span>LetIn (id, ce, ae) -&gt;
+  | <span data-count="244">A</span>LetIn (id, ce, ae) -&gt;
     let pat = convert_id_to_pat id in
-    <span data-count="462">l</span>et expr = convert_cexpr ce in
-    <span data-count="462">l</span>et body = convert_aexpr ae in
-    <span data-count="462">E</span>Clsr (DLet (Not_recursive, (POpPat pat, expr)), body)
-  | <span data-count="212">A</span>CExpr ce -&gt; convert_cexpr ce
+    <span data-count="244">l</span>et expr = convert_cexpr ce in
+    <span data-count="244">l</span>et body = convert_aexpr ae in
+    <span data-count="244">E</span>Clsr (DLet (Not_recursive, (POpPat pat, expr)), body)
+  | <span data-count="113">A</span>CExpr ce -&gt; convert_cexpr ce
 ;;
 
 let convert_let_body (id, args, ae) =
   (* guaranteed no tuples lists etc.*)
-  <span data-count="88">l</span>et rec roll_efun = function
-    | <span data-count="88">[</span>] -&gt; convert_aexpr ae
-    | <span data-count="136">x</span> :: tl -&gt; EFun (convert_id_to_pa<span data-count="136">t</span> x, roll_efu<span data-count="136">n</span> tl)
+  <span data-count="49">l</span>et rec roll_efun = function
+    | <span data-count="49">[</span>] -&gt; convert_aexpr ae
+    | <span data-count="78">x</span> :: tl -&gt; EFun (convert_id_to_pa<span data-count="78">t</span> x, roll_efu<span data-count="78">n</span> tl)
   in
   let body = roll_efun args in
-  <span data-count="88">c</span>onvert_id_to_pat_or_o<span data-count="88">p</span> id, body
+  <span data-count="49">c</span>onvert_id_to_pat_or_o<span data-count="49">p</span> id, body
 ;;
 
 let convert_anf_decl = function
-  | <span data-count="88">A</span>DSingleLet (rf, let_body) -&gt;
+  | <span data-count="49">A</span>DSingleLet (rf, let_body) -&gt;
     let lb = convert_let_body let_body in
-    <span data-count="88">D</span>Let (rf, lb)
+    <span data-count="49">D</span>Let (rf, lb)
   | <span data-count="0">A</span>DMutualRecDecl (rf, lb1, lb2, lbs) -&gt;
     let lb1 = convert_let_body lb1 in
     <span data-count="0">l</span>et lb2 = convert_let_body lb2 in
@@ -207,7 +207,7 @@ let convert_anf_decl = function
     <span data-count="0">D</span>LetMut (rf, lb1, lb2, lbs)
 ;;
 
-let convert_anf_prog = List.ma<span data-count="45">p</span> convert_anf_decl
+let convert_anf_prog = List.ma<span data-count="28">p</span> convert_anf_decl
 </code></pre>
       </div>
     </div>

@@ -128,46 +128,46 @@
 
   type 'a t = int -&gt; int * ('a, string) Result.t
 
-  let fail error state = <span data-count="24">s</span>tate, fai<span data-count="24">l</span> error
-  let return value last = <span data-count="10443">l</span>ast, retur<span data-count="10443">n</span> value
+  let fail error state = <span data-count="11">s</span>tate, fai<span data-count="11">l</span> error
+  let return value last = <span data-count="9335">l</span>ast, retur<span data-count="9335">n</span> value
 
   let ( &gt;&gt;= ) (monad : 'a t) f state =
-    <span data-count="11055">l</span>et last, result = monad state in
-    <span data-count="11055">m</span>atch result with
-    | <span data-count="120">E</span>rror e -&gt; last, Error e
-    | <span data-count="10935">O</span>k value -&gt; f value last
+    <span data-count="9853">l</span>et last, result = monad state in
+    <span data-count="9853">m</span>atch result with
+    | <span data-count="58">E</span>rror e -&gt; last, Error e
+    | <span data-count="9795">O</span>k value -&gt; f value last
   ;;
 
   let ( let* ) = ( &gt;&gt;= )
   let ( &gt;&gt;| ) m f = <span data-count="0">m</span> &gt;&gt;= fun x -&gt; <span data-count="0">r</span>eturn @@ <span data-count="0">f</span> x
-  let fresh last = <span data-count="689">l</span>ast + 1, Ok last
-  let run m = <span data-count="56">s</span>nd (<span data-count="56">m</span> 0)
+  let fresh last = <span data-count="638">l</span>ast + 1, Ok last
+  let run m = <span data-count="49">s</span>nd (<span data-count="49">m</span> 0)
 
   let map f xs =
-    <span data-count="163">l</span>et* res =
-      List.fold_lef<span data-count="163">t</span>
+    <span data-count="125">l</span>et* res =
+      List.fold_lef<span data-count="125">t</span>
         (fun acc x -&gt;
-          <span data-count="285">l</span>et* acc = acc in
-          <span data-count="285">l</span>et* res = <span data-count="285">f</span> x in
-          <span data-count="285">r</span>eturn (res :: acc))
-        (retur<span data-count="163">n</span> [])
+          <span data-count="300">l</span>et* acc = acc in
+          <span data-count="300">l</span>et* res = <span data-count="300">f</span> x in
+          <span data-count="300">r</span>eturn (res :: acc))
+        (retur<span data-count="125">n</span> [])
         xs
     in
-    <span data-count="163">r</span>eturn (List.re<span data-count="163">v</span> res)
+    <span data-count="125">r</span>eturn (List.re<span data-count="125">v</span> res)
   ;;
 
   let sequence lst =
-    <span data-count="171">l</span>et rec aux acc = function
-      | <span data-count="171">[</span>] -&gt; return (List.re<span data-count="171">v</span> acc)
-      | <span data-count="217">x</span> :: xs -&gt; x &gt;&gt;= fun y -&gt; <span data-count="217">a</span>ux (y :: acc) xs
+    <span data-count="144">l</span>et rec aux acc = function
+      | <span data-count="144">[</span>] -&gt; return (List.re<span data-count="144">v</span> acc)
+      | <span data-count="209">x</span> :: xs -&gt; x &gt;&gt;= fun y -&gt; <span data-count="209">a</span>ux (y :: acc) xs
     in
     aux [] lst
   ;;
 
   let ( let+ ) x f =
-    <span data-count="55">m</span>atch x with
+    <span data-count="107">m</span>atch x with
     | <span data-count="0">E</span>rror err -&gt; Error err
-    | <span data-count="55">O</span>k v -&gt; f v
+    | <span data-count="107">O</span>k v -&gt; f v
   ;;
 end
 </code></pre>
