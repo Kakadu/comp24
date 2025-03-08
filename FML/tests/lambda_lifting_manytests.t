@@ -1,3 +1,20 @@
+  $ ./lambda_lifting_runner.exe << EOF
+  > let fac n =
+  > let rec fack n k =
+  > if n<=1 then k 1
+  > else fack (n - 1) ((fun k n m -> k (m * n)) k n)
+  > in
+  > fack n (fun x -> x)
+  > EOF
+  let a4 = (fun a1 a2 m -> (a1 ((( * ) m) a2)))
+  
+  let rec a3 = (fun a0 k -> if ((( <= ) a0) 1)
+  then (k 1)
+  else ((a3 ((( - ) a0) 1)) ((a4 k) a0)))
+  
+  let a5 = (fun x -> x)
+  
+  let fac = (fun n -> a3)
   $ ./lambda_lifting_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
   then 1
@@ -225,7 +242,7 @@
   else if (not (is_empty xs))
   then let h = (list_head xs) in
   let tl = (list_tail xs) in
-  ((helper ((( + ) acc) 1)) tl)
+  ((a1 ((( + ) acc) 1)) tl)
   else fail_match)
   
   let length_tail = a1
@@ -266,7 +283,7 @@
   else if (not (is_empty xs))
   then let h = (list_head xs) in
   let tl = (list_tail xs) in
-  ((append h) (helper tl))
+  ((append h) (a2 tl))
   else fail_match)
   
   let concat = a2

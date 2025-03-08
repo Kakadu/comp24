@@ -39,9 +39,9 @@ let rec ll_expr env = function
     let str, el = List.unzip t in
     return (List.concat str, Pe_ETuple el)
   | Pe_ELet (Rec, name, e1, e2) ->
-    let* str1, e1 = ll_inner env e1 in
     let* fresh_name = fresh >>| get_id in
-    let env = Map.set env ~key:name ~data:fresh_name in
+    let env = Map.set env ~key:name ~data:fresh_name in  
+    let* str1, e1 = ll_inner env e1 in
     let* str2, _ = ll_expr env e2 in
     return (str1 @ [ Pe_Rec [(fresh_name, e1)] ] @ str2, Pe_EIdentifier fresh_name)
   | Pe_ELet (rec_flag, name, e1, e2) ->
