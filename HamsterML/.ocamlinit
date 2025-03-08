@@ -12,3 +12,4 @@ open HamsterTest__TypingTest;;
 open HamsterTest__LambdaLiftingTest;;
 open HamsterTest__AlphaConversionTest;;
 open HamsterTest__ClosureConversionTest;;
+open HamsterTest__MatchEliminationTest;;
