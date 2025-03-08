@@ -1,3 +1,7 @@
+  $ if [ -z "$latest" ]; then
+  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  > fi
+
   $ dune exec riscv -- -anf -o /tmp/factorial.s <<- EOF
   > let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1)
   > let main = println_int (fact 5)
@@ -82,7 +86,7 @@
       addi sp,sp,24
       ret
 
-  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
   120
 
@@ -113,7 +117,7 @@
   let main = let anf10 = fact 5 in
     println_int anf10
   
-  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
   120
 
@@ -145,7 +149,7 @@
   let main = let anf10 = fact 5 in
     println_int anf10
   
-  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
   120
 
@@ -170,7 +174,7 @@
   >   let _ = println_int (fib 10) in
   >   ()
   > EOF
-  $ riscv64-unknown-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
   $ /tmp/factorial
   2
   3

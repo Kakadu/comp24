@@ -1,8 +1,12 @@
+  $ if [ -z "$latest" ]; then
+  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  > fi
+
 $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
 > 
 > EOF
 $ cat /tmp/out.s
-$ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+$ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
 $ /tmp/out
 
   $ dune exec riscv -- -anf -o /tmp/out.s <<- EOF
@@ -29,7 +33,7 @@ $ /tmp/out
       ld ra,24(sp)
       addi sp,sp,24
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   [42]
 
@@ -62,7 +66,7 @@ $ /tmp/out
       ld ra,24(sp)
       addi sp,sp,24
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   42
 
@@ -110,7 +114,7 @@ $ /tmp/out
       ld ra,40(sp)
       addi sp,sp,40
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   3
 
@@ -173,7 +177,7 @@ $ /tmp/out
       ld ra,24(sp)
       addi sp,sp,24
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   3
 
@@ -299,7 +303,7 @@ $ /tmp/out
       ld ra,40(sp)
       addi sp,sp,40
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   10
 
@@ -419,7 +423,7 @@ $ /tmp/out
       ld ra,40(sp)
       addi sp,sp,40
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   true
   false
@@ -444,7 +448,7 @@ $ /tmp/out
     println_int anf6
   
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   7
 
@@ -510,7 +514,7 @@ $ cat /tmp/out.s
       ld ra,64(sp)
       addi sp,sp,64
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   25
 
@@ -526,7 +530,7 @@ $ cat /tmp/out.s
   >   pythagoras_cps 3 4 (fun res -> println_int res)
   > EOF
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   25
 
@@ -539,7 +543,7 @@ $ cat /tmp/out.s
   >   ()
   > EOF
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   (42, 43, 44)
 
@@ -553,7 +557,7 @@ $ cat /tmp/out.s
   >   ()
   > EOF
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   8
 
@@ -567,7 +571,7 @@ $ cat /tmp/out.s
   >   ()
   > EOF
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   15
 
@@ -585,7 +589,7 @@ $ cat /tmp/out.s
   >   ()
   > EOF
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   100
 
@@ -617,6 +621,6 @@ $ cat /tmp/out.s
     ()
   
 $ cat /tmp/out.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a
   $ /tmp/out
   25
