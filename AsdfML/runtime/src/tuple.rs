@@ -2,11 +2,12 @@ use log::debug;
 
 use crate::WithRaw;
 
-pub(crate) type Tuple = Vec<isize>;
+// pub(crate) type Tuple = Vec<isize>;
+pub(crate) type Tuple = safer_ffi::Vec<isize>; // Like regular Vec, but with #[repr(C)]
 
 #[no_mangle]
 pub extern "C" fn ml_create_tuple(size: usize) -> *mut Tuple {
-    let tuple = Box::new(vec![0isize; size]);
+    let tuple = Box::new(safer_ffi::c_vec![0isize; size]);
     debug!("Created tuple of size {} at {:?}", size, Box::as_ptr(&tuple));
     Box::into_raw(tuple)
 }

@@ -69,7 +69,10 @@ and gen_imm (env : (id, loc, 'a) Map.t) dest = (* dbg "ENV: %s\n" (pp_env env); 
        emit_load_reg dest (RReg x) ~comm:id
      | None ->
        (match Map.find env id with
-        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
+        | Some x ->
+          (match x with
+           | LReg _ | LMem _ -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
+           | LArr _ -> emit_load_tuple_field dest x ~comm:id)
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> emit li dest 0
   | ImmNil ->
