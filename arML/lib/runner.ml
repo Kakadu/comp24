@@ -60,19 +60,13 @@ let closure_conversion_program_ast program =
 
 let closure_conversion_expression expr =
   match Parser.Runner.parse_expression expr with
-  | Ok [ ast ] -> 
-    (match Inferencer.Runner.run_expr_inferencer ast with
-     | Ok _ -> closure_conversion_expr_ast ast
-     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Ok [ ast ] -> closure_conversion_expr_ast ast
   | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
 let closure_conversion_program program =
   match Parser.Runner.parse_program program with
-  | Ok ast -> 
-    (match Inferencer.Runner.run_program_inferencer ast with
-     | Ok _ -> closure_conversion_program_ast ast
-     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Ok ast -> closure_conversion_program_ast ast
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
