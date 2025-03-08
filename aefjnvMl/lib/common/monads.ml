@@ -61,7 +61,7 @@ module GenericCounterMonad (StateT : Base.T) (ErrorT : Base.T) = struct
       end)
       (ErrorT)
 
-  let run at new_st = run at (0, new_st)
+  let run at start_id new_st = run at (start_id, new_st)
 
   let fresh : int t =
     let* num, st = read in
@@ -88,5 +88,5 @@ module CounterMonad (ErrorT : Base.T) = struct
       end)
       (ErrorT)
 
-  let run at = run at ()
+  let run at id = run at id ()
 end

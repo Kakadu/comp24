@@ -138,7 +138,7 @@ let to_ll_program prog =
 
 let lift_lambdas prog =
   let open Common.Errors in
-  match run (to_ll_program prog) [] with
+  match run (to_ll_program prog) 0 [] with
   | _, Ok ll_prog -> Ok ll_prog
   | _, Error msg -> Result.Error (illegal_state msg)
 ;;

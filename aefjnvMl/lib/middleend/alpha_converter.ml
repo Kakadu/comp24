@@ -227,7 +227,7 @@ let rename_ast_with_uniq step_pref prog =
   in
   let prog_alpha_converter = aconvert_program prog in
   let open Common.Errors in
-  match run prog_alpha_converter name_space with
+  match run prog_alpha_converter 0 name_space with
   | _, Ok prog' -> Result.Ok prog'
   | _, Error msg -> Result.Error (illegal_state msg)
 ;;

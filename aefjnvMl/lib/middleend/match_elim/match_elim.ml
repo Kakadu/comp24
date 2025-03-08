@@ -298,7 +298,7 @@ let to_me_program prog =
 
 let eliminate_match_in_program prog =
   let open Common.Errors in
-  match run (to_me_program prog) with
+  match run (to_me_program prog) 0 with
   | _, Ok me_decl'list -> Result.Ok me_decl'list
   | _, Error msg -> Result.Error (illegal_state msg)
 ;;

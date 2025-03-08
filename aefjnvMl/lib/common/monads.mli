@@ -52,7 +52,7 @@ module GenericCounterMonad : functor (StateT : Base.T) (ErrorT : Base.T) -> sig
         end)
         (ErrorT)
 
-  val run : (int * 'a -> 'b) -> 'a -> 'b
+  val run : (int * 'a -> 'b) -> int -> 'a -> 'b
   val save : 'a -> 'b * 'a -> ('b * 'a) * (unit, 'c) result
   val read : StateT.t t
   val fresh : int t
@@ -66,5 +66,5 @@ module CounterMonad : functor (ErrorT : Base.T) -> sig
         end)
         (ErrorT)
 
-  val run : (int * unit -> 'a) -> 'a
+  val run : (int * unit -> 'a) -> int -> 'a
 end

@@ -212,7 +212,7 @@ let convert_to_anf prog =
     let helper acc name = GlobalMap.add name (gfunc name) acc in
     List.fold_left helper GlobalMap.empty global_by_default
   in
-  match run (to_anf_prog prog) global_name_space with
+  match run (to_anf_prog prog) 0 global_name_space with
   | _, Ok anf_decl'l -> Result.Ok anf_decl'l
   | _, Error msg -> Result.Error (illegal_state msg)
 ;;
