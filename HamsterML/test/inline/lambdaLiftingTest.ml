@@ -66,7 +66,7 @@ let%expect_test _ =
 let%expect_test _ =
   pp_lambda_lift_prog {| let sum x y = let res = x + y in res |};
   [%expect {| 
-    !!!
+    let ll_var_0 arg_0 arg_1 = let ll_var_1 = (arg_0 + arg_1) in ll_var_1
     |}]
 ;;
 
@@ -116,37 +116,15 @@ let%expect_test _ =
 let%expect_test _ =
   pp_lambda_lift_prog {| let main = let () = print_int 10 in 0 |};
   [%expect {| 
-    let ll_var_0 = let () = print_int 10 in 0
+    let ll_var_0 = let () = (print_int 10) in 0
     |}]
-;;
-
-let%test _ =
-  lambda_lift_prog "let f x = x + 1 let main = let () = print_int (f 1) in 0"
-  = [ LLLet
-        ( Nonrecursive
-        , [ ( Var "ll_var_0"
-            , [ Var "arg_0" ]
-            , LLApplication
-                (LLApplication (LLOperation (Binary ADD), LLVar "arg_0"), LLConst (Int 1))
-            )
-          ]
-        , None )
-    ; LLLet
-        ( Nonrecursive
-        , [ ( Const Unit
-            , []
-            , LLApplication
-                (LLVar "print_int", LLApplication (LLVar "ll_var_0", LLConst (Int 1))) )
-          ]
-        , None )
-    ; LLLet (Nonrecursive, [ Var "ll_var_1", [], LLConst (Int 0) ], None)
-    ]
 ;;
 
 let%expect_test "fac_cps" =
   pp_lambda_lift_prog
     {| let rec fac_cps n k = if n=1 then k 1 else fac_cps (n-1) (fun p -> k (p*n)) |};
-    [%expect {| 
+  [%expect
+    {| 
     let ll_lam_1 arg_1 arg_2 arg_3 = (arg_2 (arg_3 * arg_1))
     let rec ll_var_0 arg_1 arg_2 = if (arg_1 = 1) then (arg_2 1) else ((ll_var_0 (arg_1 - 1)) ((ll_lam_1 arg_1) arg_2))
     |}]

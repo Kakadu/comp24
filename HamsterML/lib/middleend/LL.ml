@@ -1,6 +1,7 @@
 open Ast
 open Utils.R
 open Base
+module Format = Stdlib.Format
 
 type ll_expr =
   | LLConst of value
@@ -73,6 +74,7 @@ let simplify_arguments p_args expr : (expr * NameSet.t) t =
 (* 'Let' constructions that should be lifted *)
 type lifted_lets = ll_expr list [@@deriving show]
 
+(* add bind names to environment with new names *)
 let collect_mutual_names (env : NameEnv.t) (binds : bind list) : NameEnv.t t =
   fold_list binds ~init:env ~f:(fun env bnd ->
     match bnd with
@@ -82,23 +84,36 @@ let collect_mutual_names (env : NameEnv.t) (binds : bind list) : NameEnv.t t =
     | _ -> return env)
 ;;
 
+(* Check if a let binding defines a function or just a value *)
+let is_fun_binding (args : args) =
+  match args with
+  | [] -> false
+  | _ -> true
+;;
+
+let _if cond a b = if cond then a else b
+
+(* perform lambda lifting for every bind *)
 let rec ll_bind
   (lifted : lifted_lets)
   (env : NameEnv.t)
   ((name, args, body) : pattern * args * expr)
   =
+  (* main = let () = print_int 10 in 0 *)
   match name with
   | Var name ->
     let* env, new_name = NameEnv.generate_name env name in
-    let* expr, nameset = simplify_arguments args body in
-    let* llexpr, lifted = ll_expr lifted env expr in
-    let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llexpr in
+    (* ll_var_0 = let () = print_int 10 in 0 *)
+    let* body, nameset = simplify_arguments args body in
+    let* llbody, lifted = ll_expr lifted env body in
+    let (new_bind : ll_bind) = Var new_name, NameSet.to_args nameset, llbody in
     return (env, new_bind, lifted)
-  | p_name ->
-    let* llexpr, lifted = ll_expr lifted env body in
-    let (new_bind : ll_bind) = p_name, args, llexpr in
+  | pattern ->
+    let* llbody, lifted = ll_expr lifted env body in
+    let (new_bind : ll_bind) = pattern, args, llbody in
     return (env, new_bind, lifted)
 
+(* perform lambda lifting for every expr *)
 and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   : (ll_expr * lifted_lets) t
   =
@@ -111,22 +126,27 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
     let lam_let = LLLet (Nonrecursive, [ lam_bind ], None) in
     return (LLVar name, lam_let :: lifted)
   | Let (rec_flag, binds, Some scope) ->
+    (* Work with rec flag *)
     let* env =
       match rec_flag with
       | Recursive -> collect_mutual_names env binds
       | Nonrecursive -> return env
     in
-    let* env, new_binds, lifted =
+    (* Work with binds (bind1 and bind2 and ...) *)
+    let* env, new_binds, lifted, is_fun =
+      (* () = print_int 10 *)
       fold_list
         binds
-        ~init:(env, [], lifted)
-        ~f:(fun (env, binds, lifted) (name, args, expr) ->
+        ~init:(env, [], lifted, true)
+        ~f:(fun (env, binds, lifted, is_fun) (name, args, expr) ->
           let* env, new_bind, lifted = ll_bind lifted env (name, args, expr) in
-          return (env, new_bind :: binds, lifted))
+          return (env, new_bind :: binds, lifted, is_fun && is_fun_binding args))
     in
-    let* ll_in_scope, lifted = ll_expr lifted env scope in
-    let ll_inner_let = LLLet (rec_flag, List.rev new_binds, None) in
-    return (ll_in_scope, ll_inner_let :: lifted)
+    let* ll_scope, lifted = ll_expr lifted env scope in
+    let ll_new_let =
+      LLLet (rec_flag, List.rev new_binds, _if is_fun None (Some ll_scope))
+    in
+    return @@ _if is_fun (ll_scope, ll_new_let :: lifted) (ll_new_let, lifted)
   | EConst v -> return (LLConst v, lifted)
   | EOperation op -> return (LLOperation op, lifted)
   | EVar id ->
