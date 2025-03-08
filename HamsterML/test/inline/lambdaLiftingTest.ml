@@ -211,7 +211,7 @@ let%expect_test "004manyargs" =
     {| 
       let ll_var_0 arg_0 = if (1 = 1) then arg_0 else arg_0
       let ll_var_1 arg_2 arg_3 arg_4 = let ll_var_2 = (print_int arg_2) in let ll_var_3 = (print_int arg_3) in let ll_var_4 = (print_int arg_4) in 0
-      let ll_var_5 arg_10 arg_11 arg_12 arg_13 arg_14 arg_15 arg_16 arg_17 arg_18 arg_9 = (((((((((arg_9 + arg_10) + arg_11) + arg_12) + arg_13) + arg_14) + arg_15) + arg_16) + arg_17) + arg_18)
+      let ll_var_5 arg_9 arg_10 arg_11 arg_12 arg_13 arg_14 arg_15 arg_16 arg_17 arg_18 = (((((((((arg_9 + arg_10) + arg_11) + arg_12) + arg_13) + arg_14) + arg_15) + arg_16) + arg_17) + arg_18)
       let ll_var_6 = let ll_var_7 = (((((((((((ll_var_0 ll_var_5) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in let () = (print_int ll_var_7) in let ll_var_8 = ((((ll_var_0 ll_var_1) 1) 10) 100) in 0     
     |}]
 ;;
@@ -245,8 +245,8 @@ let%expect_test "006partial" =
     |};
   [%expect
     {|
-    let ll_lam_2 arg_2 = (arg_2 * 10)
     let ll_lam_1 arg_1 = (arg_1 + 2)
+    let ll_lam_2 arg_2 = (arg_2 * 10)
     let ll_var_0 arg_0 = if arg_0 then ll_lam_1 else ll_lam_2
     let ll_var_3 arg_4 = ((ll_var_0 true) ((ll_var_0 false) ((ll_var_0 true) ((ll_var_0 false) arg_4))))
     let ll_var_4 = let () = (print_int (ll_var_3 11)) in 0   
@@ -277,29 +277,27 @@ let%expect_test "006partial2" =
 ;;
 
 let%expect_test "006partial3" =
-  (* !!! *)
   pp_lambda_lift_prog
     {|
-  let foo a =
-  let () = print_int a in fun b ->
-  let () = print_int b in fun c ->
-  print_int c
+    let foo a =
+    let () = print_int a in fun b ->
+    let () = print_int b in fun c ->
+    print_int c
 
-  let main =
-    let () = foo 4 8 9 in
-    0 
+    let main =
+      let () = foo 4 8 9 in
+      0 
   |};
   [%expect
     {|
-    let ll_lam_1 arg_1 = let () = (print_int arg_1) in ll_lam_2
     let ll_lam_2 arg_2 = (print_int arg_2)
+    let ll_lam_1 arg_1 = let () = (print_int arg_1) in ll_lam_2
     let ll_var_0 arg_0 = let () = (print_int arg_0) in ll_lam_1
     let ll_var_3 = let () = (((ll_var_0 4) 8) 9) in 0
     |}]
 ;;
 
 let%expect_test "007order" =
-  (* !!! *)
   pp_lambda_lift_prog
     {|
   let _start () () a () b _c () d __ =
@@ -307,13 +305,12 @@ let%expect_test "007order" =
   let () = print_int __ in
   a*b / _c + d
 
-
   let main =
     print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
   |};
   [%expect
     {|
-      let ll_var_0 arg_0 arg_1 arg_2 arg_3 arg_4 ll_arg_1 ll_arg_2 ll_arg_3 ll_arg_4 = match ll_arg_4 with
+      let ll_var_0 ll_arg_1 ll_arg_2 arg_0 ll_arg_3 arg_1 arg_2 ll_arg_4 arg_3 arg_4 = match ll_arg_4 with
       | () -> match ll_arg_3 with
       | () -> match ll_arg_2 with
       | () -> match ll_arg_1 with
@@ -322,7 +319,7 @@ let%expect_test "007order" =
     |}]
 ;;
 
-let%expect_test "007order" =
+let%expect_test "008ascription" =
   pp_lambda_lift_prog
     {|
   let addi = fun f g x -> (f x (g x: bool) : int)
@@ -334,8 +331,8 @@ let%expect_test "007order" =
   [%expect
     {|
       let ll_var_0 arg_0 arg_1 arg_2 = (((arg_0 arg_2) ((arg_1 arg_2) : bool)) : int)
-      let ll_lam_3 arg_6 = ((arg_6 / 2) = 0)
       let ll_lam_2 arg_4 arg_5 = if arg_5 then (arg_4 + 1) else (arg_4 * 2)
+      let ll_lam_3 arg_6 = ((arg_6 / 2) = 0)
       let ll_var_1 = let () = (print_int (((ll_var_0 ll_lam_2) ll_lam_3) 4)) in 0
     |}]
 ;;
@@ -354,7 +351,6 @@ let%expect_test "009let_poly" =
 ;;
 
 let%expect_test "015tuples" =
-  (* !!! *)
   pp_lambda_lift_prog
     {|
   let rec fix f x = f (fix f) x
@@ -383,8 +379,8 @@ let%expect_test "015tuples" =
     {|
       let rec ll_var_0 arg_1 arg_2 = ((arg_1 (ll_var_0 arg_1)) arg_2)
       let ll_var_1 arg_3 arg_4 = let (var_5, var_6) = arg_4 in ((arg_3 var_5), (arg_3 var_6))
-      let ll_lam_3 arg_10 arg_9 = ((ll_var_1 ((ll_lam_4 arg_10) arg_9)) arg_10)
-      let ll_lam_4 arg_10 arg_11 arg_12 arg_9 = ((arg_11 (arg_9 arg_10)) arg_12)
+      let ll_lam_4 arg_10 arg_9 arg_11 arg_12 = ((arg_11 (arg_9 arg_10)) arg_12)
+      let ll_lam_3 arg_9 arg_10 = ((ll_var_1 ((ll_lam_4 arg_10) arg_9)) arg_10)
       let ll_var_2 arg_8 = ((ll_var_0 ll_lam_3) arg_8)
       let ll_var_5 arg_14 arg_15 = let (var_16, var_17) = arg_14 in if (arg_15 == 0) then 1 else (var_17 (arg_15 - 1))
       let ll_var_6 arg_19 arg_20 = let (var_21, var_22) = arg_19 in if (arg_20 == 0) then 0 else (var_21 (arg_20 - 1))
@@ -395,7 +391,6 @@ let%expect_test "015tuples" =
 ;;
 
 let%expect_test "016lists" =
-  (* !!! *)
   pp_lambda_lift_prog
     {|
   let rec length xs =
@@ -403,43 +398,42 @@ let%expect_test "016lists" =
   | [] -> 0
   | h::tl -> 1 + length tl
 
-let length_tail =
-  let rec helper acc xs =
-  match xs with
-  | [] -> acc
-  | h::tl -> helper (acc + 1) tl
-  in
-  helper 0
+  let length_tail =
+    let rec helper acc xs =
+    match xs with
+    | [] -> acc
+    | h::tl -> helper (acc + 1) tl
+    in
+    helper 0
 
-let rec map f xs =
-  match xs with
-  | [] -> []
-  | a::[] -> [f a]
-  | a::b::[] -> [f a; f b]
-  | a::b::c::[] -> [f a; f b; f c]
-  | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
-
-let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
-
-let concat =
-  let rec helper xs =
+  let rec map f xs =
     match xs with
     | [] -> []
-    | h::tl -> append h (helper tl)
-  in helper
+    | a::[] -> [f a]
+    | a::b::[] -> [f a; f b]
+    | a::b::c::[] -> [f a; f b; f c]
+    | a::b::c::d::tl -> f a :: f b :: f c :: f d :: map f tl
 
-let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
+  let rec append xs ys = match xs with [] -> ys | x::xs -> x::(append xs ys)
 
-let rec cartesian xs ys =
-  match xs with
-  | [] -> []
-  | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)
+  let concat =
+    let rec helper xs =
+      match xs with
+      | [] -> []
+      | h::tl -> append h (helper tl)
+    in helper
 
-let main =
-  let () = iter print_int [1;2;3] in
-  let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
-  0
+  let rec iter f xs = match xs with [] -> () | h::tl -> let () = f h in iter f tl
 
+  let rec cartesian xs ys =
+    match xs with
+    | [] -> []
+    | h::tl -> append (map (fun a -> (h,a)) ys) (cartesian tl ys)
+
+  let main =
+    let () = iter print_int [1;2;3] in
+    let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
+    0
   |};
   [%expect
     {|
@@ -452,8 +446,8 @@ let main =
       let ll_var_1 = (ll_var_2 0)
       let rec ll_var_3 arg_11 arg_12 = match arg_12 with
       | arg_19::arg_20::arg_21::arg_22::arg_23 -> (arg_11 arg_19)::(arg_11 arg_20)::(arg_11 arg_21)::(arg_11 arg_22)::((ll_var_3 arg_11) arg_23)
-      | arg_16::arg_17::arg_18::[] -> [(arg_11 arg_18); (arg_11 arg_17); (arg_11 arg_16)]
-      | arg_14::arg_15::[] -> [(arg_11 arg_15); (arg_11 arg_14)]
+      | arg_16::arg_17::arg_18::[] -> [(arg_11 arg_16); (arg_11 arg_17); (arg_11 arg_18)]
+      | arg_14::arg_15::[] -> [(arg_11 arg_14); (arg_11 arg_15)]
       | arg_13::[] -> [(arg_11 arg_13)]
       | [] -> []
       let rec ll_var_4 arg_25 arg_26 = match arg_25 with
@@ -470,6 +464,6 @@ let main =
       let rec ll_var_8 arg_39 arg_40 = match arg_39 with
       | arg_41::arg_42 -> ((ll_var_4 ((ll_var_3 (ll_lam_9 arg_41)) arg_40)) ((ll_var_8 arg_42) arg_40))
       | [] -> []
-      let ll_var_10 = let () = ((ll_var_7 print_int) [3; 2; 1]) in let () = (print_int (ll_var_0 ((ll_var_8 [2; 1]) [4; 3; 2; 1]))) in 0 
+      let ll_var_10 = let () = ((ll_var_7 print_int) [1; 2; 3]) in let () = (print_int (ll_var_0 ((ll_var_8 [1; 2]) [1; 2; 3; 4]))) in 0 
     |}]
 ;;

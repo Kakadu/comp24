@@ -26,7 +26,7 @@ module NameSet = struct
 
   (* (a, b, c) => Var a, Var b, Var c *)
   let to_args (set : t) : args =
-    List.rev @@ Set.fold set ~init:[] ~f:(fun acc id -> Var id :: acc)
+    List.rev @@ List.fold set ~init:[] ~f:(fun acc id -> Var id :: acc)
   ;;
 
   let rec generate_name (set : t) =
@@ -59,16 +59,17 @@ let generate_lambda_name =
 ;;
 
 (* Simplify weird patterns in function arguments *)
-let simplify_arguments p_args expr : (expr * NameSet.t) t =
-  let rec helper (acc : expr) (names : NameSet.t) = function
-    | [] -> return (acc, names)
-    | Var id :: tl -> helper acc (NameSet.extend id names) tl
-    | head_p :: tl ->
+let simplify_arguments args body : (expr * NameSet.t) t =
+  let rec helper (body : expr) (names : NameSet.t) = function
+    | [] -> return (body, names)
+    | Var id :: tl -> helper body (NameSet.extend id names) tl
+    | pattern :: tl ->
       let* names, new_name = NameSet.generate_name names in
       (* match <new_name> with head_p -> acc *)
-      helper (Match (EVar new_name, [ head_p, acc ])) names tl
+      (* match ll_arg_1 with pattern2 -> match ll_arg_0 with pattern -> expr *)
+      helper (Match (EVar new_name, [ pattern, body ])) names tl
   in
-  helper expr NameSet.empty p_args
+  helper body NameSet.empty args
 ;;
 
 (* 'Let' constructions that should be lifted *)
@@ -121,10 +122,11 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   | Fun (args, body) ->
     let* name = generate_lambda_name in
     let* body, nameset = simplify_arguments args body in
-    let* llexpr, lifted = ll_expr lifted env body in
-    let (lam_bind : ll_bind) = Var name, NameSet.to_args nameset, llexpr in
-    let lam_let = LLLet (Nonrecursive, [ lam_bind ], None) in
-    return (LLVar name, lam_let :: lifted)
+    let* llbody, body_lifted = ll_expr lifted env body in
+    let (bind : ll_bind) = Var name, NameSet.to_args nameset, llbody in
+    let lam_let = LLLet (Nonrecursive, [ bind ], None) in
+    let lifted = body_lifted @ [ lam_let ] in
+    return (LLVar name, lifted)
   | Let (rec_flag, binds, Some scope) ->
     (* Work with rec flag *)
     let* env =
@@ -159,7 +161,7 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
         let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
         return (ll_cur_expr :: exprs, lifted))
     in
-    return (LLList ll_exprs, lifted)
+    return (LLList (List.rev ll_exprs), lifted)
   | ETuple (e1, e2, tl) ->
     let* ll_e1, lifted = ll_expr lifted env e1 in
     let* ll_e2, lifted = ll_expr lifted env e2 in
@@ -168,7 +170,7 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
         let* ll_cur_expr, lifted = ll_expr lifted env cur_expr in
         return (ll_cur_expr :: exprs, lifted))
     in
-    return (LLTuple (ll_e1, ll_e2, ll_tl), lifted)
+    return (LLTuple (ll_e1, ll_e2, List.rev ll_tl), lifted)
   | EListConcat (lexpr, rexpr) ->
     let* ll_lexpr, lifted = ll_expr lifted env lexpr in
     let* ll_rexpr, lifted = ll_expr lifted env rexpr in

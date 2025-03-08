@@ -1,5 +1,5 @@
 type ll_expr =
-    LLConst of Ast.value
+  | LLConst of Ast.value
   | LLVar of string
   | LLOperation of Ast.op
   | LLTuple of ll_expr * ll_expr * ll_expr list
