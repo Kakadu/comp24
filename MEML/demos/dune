@@ -29,6 +29,15 @@
   manytests/typed/016lists.ml))
 
 (executable
+ (name inferencer_demo)
+ (modules inferencer_demo)
+ (public_name inferencer_demo)
+ (libraries MEML_lib stdio))
+
+(cram
+ (deps ./inferencer_demo.exe))
+
+(executable
  (name closure_demo)
  (modules closure_demo)
  (public_name closure_demo)
@@ -47,6 +56,15 @@
  (deps ./lambdalift_demo.exe))
 
 (executable
+ (name anf_demo)
+ (modules anf_demo)
+ (public_name anf_demo)
+ (libraries MEML_lib stdio))
+
+(cram
+ (deps ./anf_demo.exe))
+
+(executable
  (name llvm_demo)
  (modules llvm_demo)
  (public_name llvm_demo)
@@ -55,4 +73,25 @@
   (file ../lib/runtime.so)))
 
 (cram
- (deps ./llvm_demo.exe ../lib/runtime.so))
+ (deps
+  ./llvm_demo.exe
+  ../lib/runtime.so
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
+  manytests/do_not_type/099.ml
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
