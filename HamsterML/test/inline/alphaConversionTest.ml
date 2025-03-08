@@ -38,7 +38,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   pp_alpha_conv_prog {| let rec f a b = let g a b = f a b in g a b |};
-  [%expect {| let rec var_0 arg_1 arg_2 = let var_5 arg_3 arg_4 = ((var_0 arg_3) arg_4) in ((var_5 arg_1) arg_2)  |}]
+  [%expect
+    {| let rec var_0 arg_1 arg_2 = let var_5 arg_3 arg_4 = ((var_0 arg_3) arg_4) in ((var_5 arg_1) arg_2)  |}]
 ;;
 
 let%expect_test _ =
@@ -48,7 +49,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   pp_alpha_conv_prog {| let z x y = let (+) a b = a - b in x + y |};
-  [%expect {| let var_5 arg_0 arg_1 = let var_4 arg_2 arg_3 = (arg_2 - arg_3) in ((var_4 arg_0) arg_1) |}]
+  [%expect
+    {| let var_5 arg_0 arg_1 = let var_4 arg_2 arg_3 = (arg_2 - arg_3) in ((var_4 arg_0) arg_1) |}]
 ;;
 
 let%expect_test _ =
