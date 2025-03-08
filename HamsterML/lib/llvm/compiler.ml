@@ -1,10 +1,10 @@
 open Llvm
 
 (* LLVM setup *)
-let context = global_context ()
-let builder = builder context
-let the_module = create_module context "HamsterML_LLVM_Compiler"
-let i64 = i16_type context
+let global_context = global_context ()
+let builder = builder global_context
+let the_module = create_module global_context "HamsterML_LLVM_Compiler"
+let i64 = i16_type global_context
 let lookup_function_exception id llmodule = Option.get @@ lookup_function id llmodule
 
 (* TODO: codegen functions *)
