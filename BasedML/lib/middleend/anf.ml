@@ -161,21 +161,33 @@ let anf_decl env =
     return (ADMutualRecDecl anf_decls)
 ;;
 
+let collect_bindings decls =
+  List.fold_left
+    (fun acc -> function
+      | LLDSingleLet (_, LLLet (pat, _, _)) ->
+        Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
+      | LLDMutualRecDecl (_, decls) ->
+        List.fold_left
+          (fun acc (LLLet (pat, _, _)) ->
+            Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
+          acc
+          decls)
+    (Base.Set.empty (module Base.String))
+    decls
+;;
+
+let rec convert_decls decls acc =
+  let ctx = collect_bindings decls in
+  match decls with
+  | [] -> List.rev acc |> return
+  | h :: tl ->
+    let _, transformed = run (anf_decl ctx h) 0 in
+    (match transformed with
+     | Ok new_decl -> convert_decls tl (new_decl :: acc)
+     | Error _ -> fail "Error: ANF failed")
+;;
+
 let transform decls =
-  let collect_bindings decls =
-    List.fold_left
-      (fun acc -> function
-        | LLDSingleLet (_, LLLet (pat, _, _)) ->
-          Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat)
-        | LLDMutualRecDecl (_, decls) ->
-          List.fold_left
-            (fun acc (LLLet (pat, _, _)) ->
-              Base.Set.union acc (Lambda_lifting.collect_bindings_from_pat pat))
-            acc
-            decls)
-      (Base.Set.empty (module Base.String))
-      decls
-  in
   let ctx = collect_bindings decls in
   List.map
     (fun decl ->
@@ -183,3 +195,5 @@ let transform decls =
       transformed)
     decls
 ;;
+
+let transform_anf ast = convert_decls ast [] 0
