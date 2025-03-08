@@ -1,6 +1,14 @@
 (rule
  (targets libmlrt.so)
- (deps libffi_include libffi.so ../ml_runtimelib.c ../ml_runtimelib.h)
+ (deps
+  libffi_include
+  libffi.so
+  ../ml_runtimelib.h
+  ../ml_runtimelib.c
+  ../ml_gc.h
+  ../ml_gc.c
+  platform_spec_gc.h
+  platform_spec_gc.c)
  (action
   (run
    clang-16
@@ -8,6 +16,8 @@
    -fPIC
    -shared
    ../ml_runtimelib.c
+   ../ml_gc.c
+   platform_spec_gc.c
    -Ilibffi_include
    -L./
    -lffi
@@ -21,8 +31,8 @@
  (deps
   libffi_include
   libffi.so
-  ../ml_stdlib.c
   ../ml_stdlib.h
+  ../ml_stdlib.c
   ../ml_runtimelib.h
   libmlrt.so)
  (action
