@@ -1,4 +1,4 @@
-(** Copyright 2024-2025, Perevalov Efim, Dyachkov Vitaliy *)
+(** Copyright 2024-2025, Perevalov Efim, Ermolovich Anna *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
@@ -159,9 +159,9 @@ let parse_pvar =
   brackets_or_not
   @@ (lift
         (fun a ->
-           if String.( <> ) a "_"
-           then PVar (a, TArrow (TInt, TArrow (TInt, TInt)))
-           else PWild)
+          if String.( <> ) a "_"
+          then PVar (a, TArrow (TInt, TArrow (TInt, TInt)))
+          else PWild)
         parse_rename
       <|> lift2
             (fun a b -> if String.( <> ) a "_" then PVar (a, b) else PWild)
@@ -221,7 +221,10 @@ let parse_econst_int =
 
 (* EVar *)
 
-let parse_evar = (brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type) <|> lift (fun a -> EVar (a, TUnknown)) parse_var
+let parse_evar =
+  brackets @@ lift2 (fun a b -> EVar (a, b)) parse_var parse_type
+  <|> lift (fun a -> EVar (a, TUnknown)) parse_var
+;;
 
 (* EBinaryOp *)
 
@@ -310,8 +313,8 @@ let parse_eletin expr =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
     (fun is_rec name args expr1 expr2 ->
-       let expr = constr_efun args expr1 in
-       ELetIn (is_rec, name, expr, expr2))
+      let expr = constr_efun args expr1 in
+      ELetIn (is_rec, name, expr, expr2))
     (parse_white_space *> stoken "let" *> parse_rec)
     parse_name
     (many parse_pattern)
@@ -364,6 +367,7 @@ let parse_ematch matching parse_expr =
   let pematch = stoken "match" *> matching <* stoken "with" in
   parse_white_space *> lift2 ematch pematch exprs
 ;;
+
 (* Expression parsers *)
 
 let parse_expression =
@@ -480,8 +484,8 @@ let parse_let parse =
   let parse_single_let =
     lift4
       (fun flag name args body ->
-         let body = constr_efun args body in
-         flag, name, body)
+        let body = constr_efun args body in
+        flag, name, body)
       parse_rec
       parse_pattern
       (parse_white_space *> many (brackets_or_not parse_pattern))
@@ -490,8 +494,8 @@ let parse_let parse =
   let parse_single_multy_let =
     lift3
       (fun name args body ->
-         let body = constr_efun args body in
-         name, body)
+        let body = constr_efun args body in
+        name, body)
       parse_pattern
       (parse_white_space *> many (brackets_or_not parse_pattern))
       (stoken "=" *> parse)
