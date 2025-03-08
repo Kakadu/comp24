@@ -10,7 +10,7 @@ let gen_matching_failed =
   Simple_ast.SEApp (Simple_ast.SEVar gen_matching_failed_id, Simple_ast.SEConst Ast.CUnit)
 ;;
 
-let gen_pat_expr_name = "#pat#"
+let gen_pat_expr_name = "pat"
 let gen_tuple_getter_id = Ast.Id tuple_getter
 
 let gen_tuple_getter_fun ind tuple =
