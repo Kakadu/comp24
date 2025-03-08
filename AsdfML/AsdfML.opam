@@ -35,3 +35,8 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/ArtemKhel/comp24.git"
+depexts: [
+  [ "pkg-config" 
+    "qemu-user-static" "binutils-riscv64-linux-gnu" "gcc-riscv64-linux-gnu"
+  ] {os-distribution = "ubuntu"}
+]

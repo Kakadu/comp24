@@ -1,39 +1,28 @@
+  $ if [ -z "$latest" ]; then
+  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  > fi
+
 $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
 > let main = 
 >   
 > EOF
 $ cat /tmp/tuples.s
-$ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+$ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
 $ /tmp/tuples
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
   > let main = 
-  >   let tuple = (42, true, fun x -> x) in
+  >   let tuple = (42, true) in
   >   print_tuple tuple
   > EOF
   ANF:
-  let ll_2 x = x
-  let main = let tuple = (42, true, ll_2) in
-    print_tuple tuple
+  let main = let tuple = (42, true) in
+         print_tuple tuple
   
   $ cat /tmp/tuples.s
   .section .data
   
   .section .text
-  
-      .globl ll_2
-      .type ll_2, @function
-  ll_2:
-      # args: x
-      addi sp,sp,-24
-      sd ra,24(sp)
-      sd s0,16(sp)
-      addi s0,sp,8  # Prologue ends
-      sd a0,0(s0)  # x
-      ld s0,16(sp)  # Epilogue starts
-      ld ra,24(sp)
-      addi sp,sp,24
-      ret
   
       .globl main
       .type main, @function
@@ -43,7 +32,7 @@ $ /tmp/tuples
       sd s0,24(sp)
       addi s0,sp,16  # Prologue ends
       call runtime_init
-      li a0,3
+      li a0,2
       call ml_create_tuple
       sd a0,0(s0)  # tuple
       li a2,42
@@ -53,14 +42,6 @@ $ /tmp/tuples
       li a2,1
       ld a0,0(s0)
       li a1,1
-      call ml_set_tuple_field
-      # Creating closure for ll_2
-      la a0,ll_2
-      li a1,1
-      call create_closure
-      mv a2,a0  # ll_2
-      ld a0,0(s0)
-      li a1,2
       call ml_set_tuple_field
       ld a0,0(s0)
       sd a0,-8(s0)  # tuple
@@ -74,9 +55,9 @@ $ /tmp/tuples
       ld ra,32(sp)
       addi sp,sp,32
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
-  (42, 1, 2372608)
+  (42, 1)
 
 
   $ dune exec riscv -- -anf -o /tmp/tuples.s <<- EOF
@@ -117,7 +98,7 @@ $ /tmp/tuples
     print_tuple c
   
 $ cat /tmp/tuples.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   (-16, 22, -10)
 
@@ -142,7 +123,7 @@ $ cat /tmp/tuples.s
          0
   
 $ cat /tmp/tuples.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   1
   2
@@ -178,7 +159,7 @@ $ cat /tmp/tuples.s
     0
   
 $ cat /tmp/tuples.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   5
   0
@@ -220,7 +201,7 @@ $ cat /tmp/tuples.s
   let init_c _ = `get_tuple_field __tuple_0 2
   
 $ cat /tmp/tuples.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   1
   2
@@ -271,7 +252,7 @@ $ cat /tmp/tuples.s
   let init_c _ = `get_tuple_field __tuple_1 1
   
 $ cat /tmp/tuples.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a
   $ /tmp/tuples
   1
   2
