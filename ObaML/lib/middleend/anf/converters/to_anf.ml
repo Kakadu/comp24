@@ -65,7 +65,7 @@ and convert_app_to_cexpr expr1 expr2 env =
     | Simple_ast.SEApp (in_expr1, in_expr2) ->
       let* additions, app_var, args, env = helper in_expr1 in_expr2 env in
       let* additions2, new_expr2, env = expr_to_cexpr expr2 env in
-      let all_additions = List.append additions additions2 in
+      let all_additions = additions2 in
       let* all_additions, fresh, env =
         match new_expr2 with
         | Anf.CImmExpr new_imm_expr2 -> return (all_additions, new_imm_expr2, env)
@@ -74,10 +74,11 @@ and convert_app_to_cexpr expr1 expr2 env =
           let all_additions = List.append all_additions [ fresh, new_expr2 ] in
           return (all_additions, Anf.ImmId fresh, env)
       in
-      return (all_additions, app_var, List.append args [ fresh ], env)
+      return
+        (List.append all_additions additions, app_var, List.append args [ fresh ], env)
     | _ ->
       let* additions1, new_expr1, env = expr_to_cexpr expr1 env in
-      let* all_additions, fresh1, env =
+      let* all_additions1, fresh1, env =
         match new_expr1 with
         | Anf.CImmExpr (Anf.ImmId var_name) -> return (additions1, var_name, env)
         | _ ->
@@ -86,8 +87,8 @@ and convert_app_to_cexpr expr1 expr2 env =
           return (all_additions, fresh1, env)
       in
       let* additions2, new_expr2, env = expr_to_cexpr expr2 env in
-      let all_additions = List.append all_additions additions2 in
-      let* all_additions, fresh2, env =
+      let all_additions = additions2 in
+      let* all_additions2, fresh2, env =
         match new_expr2 with
         | Anf.CImmExpr new_imm_expr2 -> return (all_additions, new_imm_expr2, env)
         | _ ->
@@ -95,7 +96,7 @@ and convert_app_to_cexpr expr1 expr2 env =
           let all_additions = List.append all_additions [ fresh2, new_expr2 ] in
           return (all_additions, Anf.ImmId fresh2, env)
       in
-      return (all_additions, fresh1, [ fresh2 ], env)
+      return (List.append all_additions2 all_additions1, fresh1, [ fresh2 ], env)
   in
   let* all_additions, app_var, args, env = helper expr1 expr2 env in
   return (all_additions, Anf.CApp (app_var, args), env)

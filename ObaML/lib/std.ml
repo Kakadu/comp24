@@ -19,11 +19,11 @@ let pi = "print_int"
 let ps = "print_string"
 let uplus = "( ~+ )"
 let uminus = "( ~- )"
-let matching_failed = "#matching_failed#"
-let tuple_getter = "#tuple_getter#"
-let list_head_getter = "#list_head_getter#"
-let list_tail_getter = "#list_tail_getter#"
-let list_length_getter = "#list_length_getter#"
+let matching_failed = "matching_failed"
+let tuple_getter = "tuple_getter"
+let list_head_getter = "list_head_getter"
+let list_tail_getter = "list_tail_getter"
+let list_length_getter = "list_length_getter"
 
 let std_lst =
   [ mult, Scheme (VarISet.empty, tprim_int @-> tprim_int @-> tprim_int)

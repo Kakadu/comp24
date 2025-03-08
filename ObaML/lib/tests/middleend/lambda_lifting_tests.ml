@@ -8,8 +8,8 @@ open Format
 let parse_and_lift_lambdas_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    let structure = To_simple_ast.convert parse_result in
-    let structure, varSet = Alpha_conversion.run_alpha_conversion structure Inner in
+    let structure, varSet = Alpha_conversion.run_alpha_conversion parse_result in
+    let structure = To_simple_ast.convert structure in
     let structure = Closure_conversion.run_closure_conversion structure in
     let structure, _ = Lambda_lifting.run_lambda_lifting structure varSet in
     printf "%a" Simple_ast_pretty_printer.print_structure structure
@@ -58,13 +58,13 @@ let%expect_test "" =
       let b x y = (((x  *  y)  *  52) :: (52 :: []));;
 
       let a x =
-      	let oba0 = ((b x) 1) in
-      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
+      	let pat0 = ((b x) 1) in
+      	if ((((list_length_getter pat0)  =  2)  &&  ((list_head_getter pat0)  =  52))  &&  ((list_head_getter (list_tail_getter pat0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());; |}]
+      	else (matching_failed ());; |}]
 ;;
 
 let%expect_test "" =
@@ -74,13 +74,13 @@ let%expect_test "" =
     {|
       let a x =
       	let b = ((x  *  52) :: (52 :: [])) in
-      	let oba0 = b in
-      	if ((((#list_length_getter# oba0)  =  2)  &&  ((#list_head_getter# oba0)  =  52))  &&  ((#list_head_getter# (#list_tail_getter# oba0))  =  52))
+      	let pat0 = b in
+      	if ((((list_length_getter pat0)  =  2)  &&  ((list_head_getter pat0)  =  52))  &&  ((list_head_getter (list_tail_getter pat0))  =  52))
       	then "Nice"
       	else
       	if true
       	then "Bad"
-      	else (#matching_failed# ());; |}]
+      	else (matching_failed ());; |}]
 ;;
 
 let%expect_test "" =
@@ -119,18 +119,18 @@ let%expect_test "" =
     let reversed2 = rev (true :: false :: false :: false :: []) |};
   [%expect
     {|
-    let oba2 acc helper oba0 =
-    	let oba1 = oba0 in
-    	if (oba1  =  [])
+    let oba1 acc helper oba0 =
+    	let pat0 = oba0 in
+    	if (pat0  =  [])
     	then acc
     	else
-    	if ((#list_length_getter# oba1)  >=  1)
+    	if ((list_length_getter pat0)  >=  1)
     	then
-    	let h = (#list_head_getter# oba1) in
-    	let tl = (#list_tail_getter# oba1) in ((helper (h :: acc)) tl)
-    	else (#matching_failed# ());;
+    	let h = (list_head_getter pat0) in
+    	let tl = (list_tail_getter pat0) in ((helper (h :: acc)) tl)
+    	else (matching_failed ());;
 
-    let rec helper acc = ((oba2 acc) helper);;
+    let rec helper acc = ((oba1 acc) helper);;
 
     let rev lst = ((helper []) lst);;
 
@@ -251,15 +251,15 @@ let%expect_test "" =
       let rec fix f x = ((f (fix f)) x);;
 
       let map oba0 p =
-      	let oba1 = p in
-      	let a = ((#tuple_getter# 0) oba1) in
-      	let b = ((#tuple_getter# 1) oba1) in ((oba0 a), (oba0 b));;
+      	let pat0 = p in
+      	let a = ((tuple_getter 0) pat0) in
+      	let b = ((tuple_getter 1) pat0) in ((oba0 a), (oba0 b));;
 
-      let oba5 oba2 self li oba3 = ((li (self oba2)) oba3);;
+      let oba4 oba1 self li oba2 = ((li (self oba1)) oba2);;
 
-      let oba4 self oba2 = ((map ((oba5 oba2) self)) oba2);;
+      let oba3 self oba1 = ((map ((oba4 oba1) self)) oba1);;
 
-      let fixpoly l = ((fix oba4) l);; |}]
+      let fixpoly l = ((fix oba3) l);; |}]
 ;;
 
 let%expect_test "" =
