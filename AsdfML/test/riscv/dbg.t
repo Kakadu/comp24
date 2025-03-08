@@ -253,3 +253,162 @@
   [runtime::closure]: Applying Closure { fn_ptr: 0x243aa (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
   1111111111
   [runtime::closure]: Closure result: 0 / 0x0
+
+  $ dune exec riscv -- -anf -o /tmp/dbg.s <<- EOF
+  > let main = 
+  >     let () = println_int (( + ) 42 42) in
+  >     let (+) a b = a - b in
+  >     let () = println_int (( + ) 42 42) in
+  >     let println_int x = println_int (x + 1) in
+  >     let () = println_int ((+) 42 42) in
+  >     ()
+  > EOF
+  ANF:
+  let ll___ml_add_2 a b = ( - ) a b
+  let ll___ml_println_int_4 __ml_add x =
+    let anf2 = __ml_add x 1 in
+    println_int anf2
+  let main =
+    let anf5 = ( + ) 42 42 in
+    let () = println_int anf5 in
+    let anf4 = ll___ml_add_2 42 42 in
+    let () = println_int anf4 in
+    let anf3 = ll___ml_add_2 42 42 in
+    let () = ll___ml_println_int_4 ll___ml_add_2 anf3 in
+    ()
+  
+  $ cat /tmp/dbg.s
+  .section .data
+  
+  .section .text
+  
+      .globl ll___ml_add_2
+      .type ll___ml_add_2, @function
+  ll___ml_add_2:
+      # args: a, b
+      addi sp,sp,-32
+      sd ra,32(sp)
+      sd s0,24(sp)
+      addi s0,sp,16  # Prologue ends
+      sd a0,0(s0)  # a
+      sd a1,-8(s0)  # b
+      ld t0,0(s0)  # a
+      ld t1,-8(s0)  # b
+      sub a0,t0,t1  # a ( - ) b
+      ld s0,24(sp)  # Epilogue starts
+      ld ra,32(sp)
+      addi sp,sp,32
+      ret
+  
+      .globl ll___ml_println_int_4
+      .type ll___ml_println_int_4, @function
+  ll___ml_println_int_4:
+      # args: __ml_add, x
+      addi sp,sp,-40
+      sd ra,40(sp)
+      sd s0,32(sp)
+      addi s0,sp,24  # Prologue ends
+      sd a0,0(s0)  # __ml_add
+      sd a1,-8(s0)  # x
+      ld a0,0(s0)  # __ml_add
+      ld a1,-8(s0)  # x
+      li a2,1
+      call apply_closure_2
+      sd a0,-16(s0)  # anf2
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
+      li a1,1
+      call create_closure
+      ld a1,-16(s0)  # anf2
+      call apply_closure_1
+      ld s0,32(sp)  # Epilogue starts
+      ld ra,40(sp)
+      addi sp,sp,40
+      ret
+  
+      .globl main
+      .type main, @function
+  main:
+      addi sp,sp,-72
+      sd ra,72(sp)
+      sd s0,64(sp)
+      addi s0,sp,56  # Prologue ends
+      call runtime_init
+      li t0,42
+      li t1,42
+      add a0,t0,t1  # 42 ( + ) 42
+      sd a0,0(s0)  # anf5
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
+      li a1,1
+      call create_closure
+      ld a1,0(s0)  # anf5
+      call apply_closure_1
+      sd a0,-8(s0)  # ()
+      # Creating closure for ll___ml_add_2
+      la a0,ll___ml_add_2
+      li a1,2
+      call create_closure
+      li a1,42
+      li a2,42
+      call apply_closure_2
+      sd a0,-16(s0)  # anf4
+      # Creating closure for ml_println_int
+      la a0,ml_println_int
+      li a1,1
+      call create_closure
+      ld a1,-16(s0)  # anf4
+      call apply_closure_1
+      sd a0,-24(s0)  # ()
+      # Creating closure for ll___ml_add_2
+      la a0,ll___ml_add_2
+      li a1,2
+      call create_closure
+      li a1,42
+      li a2,42
+      call apply_closure_2
+      sd a0,-32(s0)  # anf3
+      # Creating closure for ll___ml_add_2
+      la a0,ll___ml_add_2
+      li a1,2
+      call create_closure
+      sd a0,-40(s0)
+      # Creating closure for ll___ml_println_int_4
+      la a0,ll___ml_println_int_4
+      li a1,2
+      call create_closure
+      ld a1,-40(s0)
+      ld a2,-32(s0)  # anf3
+      call apply_closure_2
+      sd a0,-48(s0)  # ()
+      li a0,0
+      ld s0,64(sp)  # Epilogue starts
+      ld ra,72(sp)
+      addi sp,sp,72
+      ret
+  $ riscv64-unknown-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
+  $ RUST_LOG=debug /tmp/dbg
+  [runtime::closure]: Creating Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[] / hex[] } at 0x243450
+  [runtime::closure]: Applying Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[84] / hex[54] }
+  84
+  [runtime::closure]: Closure result: 0 / 0x0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[] / hex[] } at 0x33b630
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
+  [runtime::closure]: Closure result: 0 / 0x0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[] / hex[] } at 0x1354590
+  [runtime::closure]: Applying Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[0] / hex[0] }
+  0
+  [runtime::closure]: Closure result: 0 / 0x0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[] / hex[] } at 0x1354600
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
+  [runtime::closure]: Closure result: 0 / 0x0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[] / hex[] } at 0x13544b0
+  [runtime::closure]: Creating Closure { fn_ptr: 0x1e8be, arity: 2, args: dec[] / hex[] } at 0x1354520
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e8be, arity: 2, args: dec[20268208, 0] / hex[13544b0, 0] }
+  [runtime::closure]: Applying Closure { fn_ptr: 0x1e89c, arity: 2, args: dec[0, 1] / hex[0, 1] }
+  [runtime::closure]: Closure result: -1 / 0xffffffffffffffff
+  [runtime::closure]: Creating Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[] / hex[] } at 0x13542f0
+  [runtime::closure]: Applying Closure { fn_ptr: 0x242fa (ml_div), arity: 1, args: dec[-1] / hex[ffffffffffffffff] }
+  -1
+  [runtime::closure]: Closure result: 0 / 0x0
+  [runtime::closure]: Closure result: 0 / 0x0
