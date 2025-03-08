@@ -4,6 +4,7 @@
 
 open Fml_lib.Parser
 open Fml_lib.Inferencer
+open Fml_lib.Pe_ast
 open Fml_lib.Pattern_elim
 open Fml_lib.Alpha_conv
 open Fml_lib.Closure_conv
