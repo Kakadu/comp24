@@ -208,7 +208,7 @@ let convert_to_anf prog =
   let open Common.Errors in
   let open Common.Base_lib in
   let global_name_space =
-    let global_by_default = std_lib_names in
+    let global_by_default = List.map LibF.get_name base_lib_decls in
     let helper acc name = GlobalMap.add name (gfunc name) acc in
     List.fold_left helper GlobalMap.empty global_by_default
   in

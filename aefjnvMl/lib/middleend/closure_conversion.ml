@@ -6,6 +6,11 @@ open Common.Ast
 open Common.Base_lib
 open Common.Ast_construct
 
+let std_lib_names =
+  let open LibF in
+  List.map get_name base_lib_decls
+;;
+
 let eliminate_funs =
   let rec helper patterns = function
     | Exp_function (p, e) -> helper (p :: patterns) e

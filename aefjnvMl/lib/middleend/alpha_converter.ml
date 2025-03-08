@@ -93,7 +93,7 @@ open StringAlphfaconverterMonad
 open Common.Ast
 open Common.Ast_construct
 
-let fresh_bind = fresh_bind Common.Base_lib.converte_infix
+let fresh_bind = fresh_bind Common.Base_lib.converte_op
 
 type core_type_flag =
   | On
@@ -210,9 +210,12 @@ let rename_ast_with_uniq step_pref prog =
   let open Common.Naming in
   let open Common.Base_lib in
   let name_space =
+    let open LibF in
     let ban_rules =
       let ban_set =
-        let ban_names = forbidden_names @ std_lib_names in
+        let ban_names =
+          forbidden_names @ map get_name base_lib_decls @ map get_rt_alias base_lib_decls
+        in
         let helper acc name = Banned_Set.add name acc in
         List.fold_left helper Banned_Set.empty ban_names
       in

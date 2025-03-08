@@ -5,6 +5,7 @@
 open Common.Ast
 open Me_ast
 open Common.Monads.CounterMonad (String)
+open Common.Base_lib.LibF
 
 let get_uniq_name : string t =
   let open Common.Naming in
@@ -22,9 +23,9 @@ type alt_pt_tp =
 
 type alt_pat = alt_pt_tp
 
-let fail_f = Me_ast.MExp_ident Common.Base_lib.func_fail_pt_match
-let get_by_idx_f = Me_ast.MExp_ident Common.Base_lib.func_get_by_idx
-let get_list_len_1_f = Me_ast.MExp_ident Common.Base_lib.func_get_list_len_plus_one
+let fail_f = Me_ast.MExp_ident (get_name part_match_fail)
+let get_by_idx_f = Me_ast.MExp_ident (get_name get_by_idx)
+let get_list_len_1_f = Me_ast.MExp_ident (get_name get_list_len)
 let fail_app = MExp_apply (fail_f, MExp_constant Const_unit)
 let me_name nm = MExp_ident nm
 let ite ~cond ~then_br ~else_br = MExp_ifthenelse (cond, then_br, else_br)
@@ -40,8 +41,8 @@ let me_nonrec_letin nm body cont =
 ;;
 
 let me_2n_op o arg1 arg2 = MExp_apply (MExp_apply (o, arg1), arg2)
-let me_eq = me_2n_op @@ MExp_ident Common.Base_lib.op_eq
-let me_more_eq = me_2n_op @@ MExp_ident Common.Base_lib.op_more_eq
+let me_eq = me_2n_op @@ MExp_ident (get_name op_eq)
+let me_more_eq = me_2n_op @@ MExp_ident (get_name op_more_eq)
 
 let me_const_comperison c1 me =
   let const = MExp_constant c1 in
@@ -49,7 +50,7 @@ let me_const_comperison c1 me =
 ;;
 
 let me_vb m_vb_pat m_vb_expr = { m_vb_pat; m_vb_expr }
-let me_and_func = me_2n_op (me_name Common.Base_lib.op_and)
+let me_and_func = me_2n_op (me_name @@ get_name op_and)
 let me_bool v = MExp_constant (Const_bool v)
 let me_get_by_idx e i = me_2n_op get_by_idx_f e (MExp_constant (Common.Ast.Const_int i))
 let me_get_list_len_1 me = MExp_apply (get_list_len_1_f, me)

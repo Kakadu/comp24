@@ -20,24 +20,24 @@ let eval_bconst = function
 ;;
 
 let is_bool_op =
-  let open Common.Base_lib in
+  let open Common.Base_lib.LibF in
   function
-  | name when name = op_and -> true
-  | name when name = op_or -> true
+  | name when name = get_name op_and -> true
+  | name when name = get_name op_or -> true
   | _ -> false
 ;;
 
 let optimize_bool_op op l r =
-  let open Common.Base_lib in
+  let open Common.Base_lib.LibF in
   let open Option in
   let l' = eval_bconst l in
   let r' = eval_bconst r in
   match l', r' with
   (* (&&) optimizations *)
-  | Some false, _ when op = op_and -> some @@ bool_const false
-  | Some true, _ when op = op_and -> some r
+  | Some false, _ when op = get_name op_and -> some @@ bool_const false
+  | Some true, _ when op = get_name op_and -> some r
   (* (||) optimizations *)
-  | Some true, _ when op = op_and -> some @@ bool_const true
+  | Some true, _ when op = get_name op_and -> some @@ bool_const true
   | _ -> None
 ;;
 

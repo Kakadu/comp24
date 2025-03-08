@@ -7,6 +7,7 @@ open Base
 open Common.Ast
 open Common.Base_lib
 open Common.Ast_construct
+open LibF
 
 (*===================== Check conditions =====================*)
 
@@ -119,25 +120,25 @@ let ident = unchecked_ident >>= check_ident
 
 let infix_op =
   choice
-    [ token op_mul
-    ; token op_div
-    ; token op_plus
-    ; token op_minus
-    ; token op_less_eq
-    ; token op_less
-    ; token op_more_eq
-    ; token op_more
-    ; token op_2eq
-    ; token op_eq
-    ; token op_not_eq
-    ; token op_and
-    ; token op_or
-    ]
+  @@ List.map
+       ~f:(fun f -> token @@ get_name f)
+       [ op_mul
+       ; op_div
+       ; op_plus
+       ; op_minus
+       ; op_less_eq
+       ; op_less
+       ; op_more_eq
+       ; op_more
+       ; op_eq2
+       ; op_eq
+       ; op_not_eq
+       ; op_and
+       ; op_or
+       ]
 ;;
 
-let un_op =
-  choice [ token (un_op_prefix ^ un_op_minus); token (un_op_prefix ^ un_op_not) ]
-;;
+let un_op = token @@ get_name un_op_minus
 
 (*===================== Core types =====================*)
 
@@ -308,19 +309,18 @@ let e_let pexpr = lift2 elet (e_decl pexpr) (token "in" *> pexpr)
 let bin_op chain1 e ops = chain1 e (ops >>| ebinop)
 let lbo = bin_op chainl1
 let rbo = bin_op chainr1
-let op l = choice (List.map ~f:(fun o -> token o >>| eval) l)
+let op l = choice (List.map ~f:(fun o -> token (get_name o) >>| eval) l)
 let mul_div = op [ op_mul; op_div ]
 let add_sub = op [ op_plus; op_minus ]
-let cmp = op [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq ]
+let cmp = op [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_eq2; op_eq ]
 let andop = op [ op_and ]
 let orop = op [ op_or ]
 
 let unop l =
-  choice
-    (List.map ~f:(fun o -> token o >>| fun un_name -> eval (un_op_prefix ^ un_name)) l)
+  choice (List.map ~f:(fun o -> token o >>| fun un_name -> eval (un un_name)) l)
 ;;
 
-let neg = unop [ un_op_not; un_op_minus ]
+let neg = unop [ f'sub' ]
 
 let expr =
   fix (fun pexpr ->
