@@ -27,7 +27,7 @@ module R = struct
   end
 
   module RList = struct
-  let fold_left map ~init ~f =
+    let fold_left map ~init ~f =
       Base.Map.fold map ~init ~f:(fun ~key ~data acc ->
         let open Syntax in
         let* acc = acc in
