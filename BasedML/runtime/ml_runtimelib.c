@@ -10,7 +10,7 @@ int8_t is_ml_ptr(int64_t arg) { return !(arg & 1); };
 
 void* ml_malloc(size_t size) {
 #ifdef GC
-    // some GC_code
+    return gc_malloc(size);
 #else
     return malloc(size);
 #endif
