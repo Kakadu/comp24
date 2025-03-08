@@ -38,11 +38,15 @@ let rec ll_expr env = function
     let* t = map e_list ~f:(ll_expr env) in
     let str, el = List.unzip t in
     return (List.concat str, Pe_ETuple el)
-   | Pe_ELet (rec_flag, name, e1, e2) ->
+  | Pe_ELet (Rec, name, e1, e2) ->
     let* str1, e1 = ll_inner env e1 in
-    (match rec_flag with
-     | NoRec ->
-       (match e1 with
+    let* fresh_name = fresh >>| get_id in
+    let env = Map.set env ~key:name ~data:fresh_name in
+    let* str2, _ = ll_expr env e2 in
+    return (str1 @ [ Pe_Rec [(fresh_name, e1)] ] @ str2, Pe_EIdentifier fresh_name)
+  | Pe_ELet (rec_flag, name, e1, e2) ->
+    let* str1, e1 = ll_inner env e1 in
+    (match e1 with
         | Pe_EFun _ ->
           let* fresh_name = fresh >>| get_id in
           let bindings = Map.set env ~key:name ~data:fresh_name in
@@ -51,11 +55,6 @@ let rec ll_expr env = function
         | _ ->
           let* str2, e2 = ll_expr env e2 in
           return (str1 @ str2, Pe_ELet (rec_flag, name, e1, e2)))
-     | Rec ->
-       let env = Map.set env ~key:name ~data:name in
-       let* str2, e2 = ll_expr env e2 in
-        return (str1 @ str2, Pe_ELet(rec_flag, name, e1, e2))
-    )
 
 and ll_inner env = function
   | Pe_EFun (args, body) ->

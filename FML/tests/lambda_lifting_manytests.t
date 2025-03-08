@@ -220,14 +220,15 @@
   ((( + ) 1) (length tl))
   else fail_match)
   
-  let length_tail = let rec helper = (fun acc xs -> if (is_empty xs)
+  let rec a1 = (fun acc xs -> if (is_empty xs)
   then acc
   else if (not (is_empty xs))
   then let h = (list_head xs) in
   let tl = (list_tail xs) in
   ((helper ((( + ) acc) 1)) tl)
-  else fail_match) in
-  (helper 0)
+  else fail_match)
+  
+  let length_tail = a1
   
   let rec map = (fun f xs -> if (is_empty xs)
   then []
@@ -260,14 +261,15 @@
   (x::((append a0) ys))
   else fail_match)
   
-  let concat = let rec helper = (fun xs -> if (is_empty xs)
+  let rec a2 = (fun xs -> if (is_empty xs)
   then []
   else if (not (is_empty xs))
   then let h = (list_head xs) in
   let tl = (list_tail xs) in
   ((append h) (helper tl))
-  else fail_match) in
-  helper
+  else fail_match)
+  
+  let concat = a2
   
   let rec iter = (fun f xs -> if (is_empty xs)
   then ()
@@ -278,14 +280,14 @@
   ((iter f) tl)
   else fail_match)
   
-  let a1 = (fun h a -> (h, a))
+  let a3 = (fun h a -> (h, a))
   
   let rec cartesian = (fun xs ys -> if (is_empty xs)
   then []
   else if (not (is_empty xs))
   then let h = (list_head xs) in
   let tl = (list_tail xs) in
-  ((append ((map (a1 h)) ys)) ((cartesian tl) ys))
+  ((append ((map (a3 h)) ys)) ((cartesian tl) ys))
   else fail_match)
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
