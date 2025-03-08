@@ -36,7 +36,6 @@ let counter_next () =
 
 (* TODO:
    - gen_imm may rewrite a0 a1 a2
-   - direct math should check if ops were redefined
    - save/restore sN regs
 *)
 
