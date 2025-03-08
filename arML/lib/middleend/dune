@@ -9,6 +9,7 @@
   common
   closureConversion
   lambdaLifting
-  patternMatchingElim)
+  patternMatchingElim
+  alphaConversion)
  (instrumentation
   (backend bisect_ppx)))

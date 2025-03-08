@@ -30,7 +30,7 @@ let rec generate_pattern_matching_restrictions expr = function
   | _ -> []
 ;;
 
-let generate_condition_if_needed (pat, expr) b1 b2 =
+let generate_condition_if_needed (pat, expr) (b1, b2) =
   let generate_condition restrictions =
     let rec helper = function
       | [] -> PMFConstant (CBool true)
