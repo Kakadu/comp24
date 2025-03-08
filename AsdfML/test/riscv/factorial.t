@@ -1,5 +1,6 @@
   $ if [ -z "$latest" ]; then
   >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  >   alias qemu-riscv64-static='qemu-riscv64'
   > fi
 
   $ dune exec riscv -- -anf -o /tmp/factorial.s <<- EOF
@@ -87,7 +88,7 @@
       ret
 
   $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
-  $ /tmp/factorial
+  $ qemu-riscv64-static /tmp/factorial
   120
 
   $ dune exec riscv -- -anf -o /tmp/factorial.s <<- EOF
@@ -118,7 +119,7 @@
     println_int anf10
   
   $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
-  $ /tmp/factorial
+  $ qemu-riscv64-static /tmp/factorial
   120
 
 
@@ -150,7 +151,7 @@
     println_int anf10
   
   $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
-  $ /tmp/factorial
+  $ qemu-riscv64-static /tmp/factorial
   120
 
 
@@ -175,7 +176,7 @@
   >   ()
   > EOF
   $ riscv64-linux-gnu-gcc /tmp/factorial.s -o /tmp/factorial -L../../runtime/ -l:libruntime.a
-  $ /tmp/factorial
+  $ qemu-riscv64-static /tmp/factorial
   2
   3
   5

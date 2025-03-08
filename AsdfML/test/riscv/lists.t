@@ -1,5 +1,6 @@
   $ if [ -z "$latest" ]; then
   >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  >   alias qemu-riscv64-static='qemu-riscv64'
   > fi
 
   $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
@@ -50,7 +51,7 @@
       addi sp,sp,32
       ret
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   [1, 2, 3]
 
 
@@ -86,7 +87,7 @@
          else panic ()
   
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   1
   2
   [3, 4]
@@ -132,7 +133,7 @@
   
 $ cat /tmp/lists.s
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   3
   0
 
@@ -177,7 +178,7 @@ $ cat /tmp/lists.s
   
 $ cat /tmp/lists.s
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   [4, 9, 16]
   []
 
@@ -191,7 +192,7 @@ $ cat /tmp/lists.s
   >   0
   > EOF
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   [1, 4, 9, 16, 25]
 
 
@@ -453,7 +454,7 @@ $ cat /tmp/lists.s
       addi sp,sp,64
       ret
   $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
-  $ /tmp/lists
+  $ qemu-riscv64-static /tmp/lists
   1
   2
   3

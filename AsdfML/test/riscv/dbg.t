@@ -28,11 +28,12 @@
 ;  
 ;$ cat /tmp/dbg.s
 ;  $ riscv64-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
-;  $ RUST_LOG=debug /tmp/dbg
+;  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
 ;  1024
 
   $ if [ -z "$latest" ]; then
   >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  >   alias qemu-riscv64-static='qemu-riscv64'
   > fi
 
   $ dune exec riscv -- -anf -o /tmp/dbg.s <<- EOF
@@ -235,7 +236,7 @@
       addi sp,sp,64
       ret
   $ riscv64-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
-  $ RUST_LOG=debug /tmp/dbg
+  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
   [runtime::tuple]: Created tuple of size 5 at 0x243330
   [runtime::tuple]: Set [0] = 100000 in [100000, 0, 0, 0, 0] at 0x243330
   [runtime::tuple]: Set [1] = 1000000 in [100000, 1000000, 0, 0, 0] at 0x243330
@@ -288,7 +289,7 @@
   
 $ cat /tmp/dbg.s
   $ riscv64-linux-gnu-gcc /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a
-  $ RUST_LOG=debug /tmp/dbg
+  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
   [runtime::closure]: Creating Closure { fn_ptr: 0x1e8dc, arity: 2, args: dec[] / hex[] } at 0x243450
   [runtime::closure]: Applying Closure { fn_ptr: 0x1e8dc, arity: 2, args: dec[2, 2] / hex[2, 2] }
   [runtime::closure]: Closure result: 8 / 0x8
