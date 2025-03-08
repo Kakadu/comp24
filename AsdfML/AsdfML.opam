@@ -13,6 +13,7 @@ depends: [
   "ppx_deriving"
   "ppx_expect"
   "qcheck"
+  "stdio"
   "ppx_deriving_qcheck"
   "ppx_inline_test" {with-test}
   "odoc" {with-doc}
