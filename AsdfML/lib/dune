@@ -1,7 +1,7 @@
 (library
  (name Lib)
  (public_name AsdfML.Lib)
- ; (libraries )
+ (libraries stdio)
  (inline_tests)
  (preprocess
   (pps
