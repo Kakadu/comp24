@@ -13,3 +13,9 @@ open HamsterTest__LambdaLiftingTest;;
 open HamsterTest__AlphaConversionTest;;
 open HamsterTest__ClosureConversionTest;;
 open HamsterTest__MatchEliminationTest;;
+
+let list_length = List.length;; 
+let list_head = List.hd;; 
+let list_tail = List.tl;;
+let tuple_get x i = match x with (_, res) when i = 1 -> res | (res, _) when i = 0 -> res | _ -> fst x;;
+let list_get x i = List.nth x i;;

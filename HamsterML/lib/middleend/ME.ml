@@ -18,34 +18,15 @@ type me_expr =
 and me_bind = pattern * args * me_expr
 and me_prog = me_expr list
 
-module ListConverter : sig
-  val tail : me_expr -> me_expr
-  val len : me_expr -> me_expr
-  val head : me_expr -> me_expr
-end = struct
-  let ensure_list (lst : me_expr) =
-    match lst with
-    | MEList _ -> lst
-    | _ -> failwith "Attempt to perform a list operation on a non-list"
-  ;;
-
-  let len lst = MEApplication (MEVar "list_length", ensure_list lst)
-  let head lst = MEApplication (MEVar "list_head", ensure_list lst)
-  let tail lst = MEApplication (MEVar "list_tail", ensure_list lst)
+module ListConverter = struct
+  let get lst i = MEApplication (MEApplication (MEVar "list_get", lst), MEConst (Int i))
+  let len lst = MEApplication (MEVar "list_length", lst)
+  let head lst = MEApplication (MEVar "list_head", lst)
+  let tail lst = MEApplication (MEVar "list_tail", lst)
 end
 
-module TupleConverter : sig
-  val get : me_expr -> int -> me_expr
-end = struct
-  let ensure_tuple (tpl : me_expr) =
-    match tpl with
-    | METuple _ -> tpl
-    | _ -> failwith "Attempt to perform a tuple operation on a non-tuple"
-  ;;
-
-  let get lst i =
-    MEApplication (MEApplication (MEVar "tuple_get", ensure_tuple lst), MEConst (Int i))
-  ;;
+module TupleConverter = struct
+  let get lst i = MEApplication (MEApplication (MEVar "tuple_get", lst), MEConst (Int i))
 end
 
 (* AND for conditions *)
@@ -63,35 +44,38 @@ let _false = MEConst (Bool false)
 let _int num = MEConst (Int num)
 let _let name body scope = MELet (Nonrecursive, [ name, [], body ], Some scope)
 
-let rec match_compare (matched : me_expr) (pattern : pattern) =
+let rec match_compare_pattern (matched : me_expr) (pattern : pattern) =
   match pattern with
   | Const v -> bin_op EQ (MEConst v) matched
   | Var id -> bin_op EQ (MEVar id) matched
   | Wildcard | Operation _ -> _true
-  | Constraint (p, _) -> match_compare matched p
+  | Constraint (p, _) -> match_compare_pattern matched p
   | Tuple (p1, p2, pts) ->
     List.foldi (p1 :: p2 :: pts) ~init:_true ~f:(fun i cond pattern_i ->
-      cond <|> match_compare (TupleConverter.get matched i) pattern_i)
+      cond <|> match_compare_pattern (TupleConverter.get matched i) pattern_i)
   | ListConcat (hd, tl) ->
-    let result =
-      match_compare (ListConverter.head matched) hd
-      <|> match_compare (ListConverter.tail matched) tl
-    in
-    let matched_is_correct = bin_op GTE (ListConverter.len matched) (_int 2) in
-    _if matched_is_correct result (Some _false)
+    let matched_hd = ListConverter.head matched in
+    let matched_tl = ListConverter.tail matched in
+    let matched_len = ListConverter.len matched in
+    _let hd matched_hd
+    @@ _let tl matched_tl
+    @@ (bin_op GTE matched_len (_int 2)
+        <|> match_compare_pattern matched_hd hd
+        <|> match_compare_pattern matched_tl tl)
   | List pts ->
     let pattern_list_len = _int (List.length pts) in
     let matched_list_len = ListConverter.len matched in
     let correctness = bin_op EQ pattern_list_len matched_list_len in
     let result =
       List.foldi pts ~init:_true ~f:(fun i cond pattern_i ->
-        cond <|> match_compare (TupleConverter.get matched i) pattern_i)
+        cond <|> match_compare_pattern (ListConverter.get matched i) pattern_i)
     in
     _if correctness result (Some _false)
 ;;
 
 (* match [matched] with [pattern] -> [action] *)
 let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_expr) =
+  (* match arg_0 with arg_1 :: arg_2 -> arg_1 *)
   match pattern with
   | Var _ as var -> _let var matched action
   | Wildcard | Operation _ | Const _ -> action
@@ -104,7 +88,7 @@ let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_
     |> convert_match_case (ListConverter.head matched) hd
   | List pts ->
     List.foldi pts ~init:action ~f:(fun i action pattern_i ->
-      convert_match_case (TupleConverter.get matched i) pattern_i action)
+      convert_match_case (ListConverter.get matched i) pattern_i action)
 ;;
 
 let rec convert_match (matched : ll_expr) (cases : ll_case list) =
@@ -118,7 +102,7 @@ let rec convert_match (matched : ll_expr) (cases : ll_case list) =
      | [] -> branch
      | _ ->
        _if
-         (match_compare me_matched pattern)
+         (match_compare_pattern me_matched pattern)
          branch
          (Some (convert_match matched tail_cases)))
 
@@ -150,7 +134,7 @@ and convert_expr (expr : ll_expr) : me_expr =
         (name, args, convert_expr body) :: acc)
     in
     MELet (rec_flag, List.rev binds, None)
-  | LLMatch (matched, cases) -> convert_match matched cases
+  | LLMatch (matched, cases) -> List.rev cases |> convert_match matched
 ;;
 
 let convert_prog (prog : ll_prog) : me_prog = List.map prog ~f:convert_expr
