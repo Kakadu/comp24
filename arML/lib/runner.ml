@@ -60,13 +60,19 @@ let closure_conversion_program_ast program =
 
 let closure_conversion_expression expr =
   match Parser.Runner.parse_expression expr with
-  | Ok [ ast ] -> closure_conversion_expr_ast ast
+  | Ok [ ast ] -> 
+    (match Inferencer.Runner.run_expr_inferencer ast with
+     | Ok _ -> closure_conversion_expr_ast ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
   | _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
 let closure_conversion_program program =
   match Parser.Runner.parse_program program with
-  | Ok ast -> closure_conversion_program_ast ast
+  | Ok ast -> 
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ -> closure_conversion_program_ast ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
@@ -80,9 +86,32 @@ let lambda_lifting_program_ast program =
 
 let lambda_lifting_program program =
   match Parser.Runner.parse_program program with
-  | Ok ast ->
-    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
-    lambda_lifting_program_ast closure_ast
+  | Ok ast -> 
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ -> 
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       lambda_lifting_program_ast closure_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+
+(* Pattern-matching elimination *)
+
+let eliminate_pm_program_ast program =
+  PatternMatchingElim.Pprint.print_pmf_program (PatternMatchingElim.Runner.run_pmf_program program)
+;;
+
+let eliminate_pm_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast -> 
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ -> 
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       eliminate_pm_program_ast lambda_lifted_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
