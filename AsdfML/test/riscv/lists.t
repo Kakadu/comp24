@@ -1,3 +1,7 @@
+  $ if [ -z "$latest" ]; then
+  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  > fi
+
   $ dune exec riscv -- -anf -o /tmp/lists.s <<- EOF
   > let main = 
   >   let a = [1;2;3] in
@@ -45,7 +49,7 @@
       ld ra,32(sp)
       addi sp,sp,32
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   [1, 2, 3]
 
@@ -81,7 +85,7 @@
            0 
          else panic ()
   
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   1
   2
@@ -127,7 +131,7 @@
     0
   
 $ cat /tmp/lists.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   3
   0
@@ -172,7 +176,7 @@ $ cat /tmp/lists.s
     0
   
 $ cat /tmp/lists.s
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   [4, 9, 16]
   []
@@ -186,7 +190,7 @@ $ cat /tmp/lists.s
   >   let _ = (map_cps (fun x -> x * x) [1;2;3;4;5] (fun x -> print_list x)) in
   >   0
   > EOF
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   [1, 4, 9, 16, 25]
 
@@ -448,7 +452,7 @@ $ cat /tmp/lists.s
       ld ra,64(sp)
       addi sp,sp,64
       ret
-  $ riscv64-unknown-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
+  $ riscv64-linux-gnu-gcc /tmp/lists.s -o /tmp/lists -L../../runtime/ -l:libruntime.a
   $ /tmp/lists
   1
   2
