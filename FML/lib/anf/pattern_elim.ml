@@ -23,10 +23,7 @@ let rec expr_to_str = function
       (expr_to_str e2)
       (expr_to_str e3)
   | Pe_EFun (args, e) ->
-    Format.sprintf
-      "(fun%s -> %s)"
-      (List.fold_left (fun acc name -> acc ^ " " ^ name) "" args)
-      (expr_to_str e)
+    Format.sprintf "(fun %s -> %s)" (String.concat " " args) (expr_to_str e)
   | Pe_EApp (e1, e2) -> Format.sprintf "(%s %s)" (expr_to_str e1) (expr_to_str e2)
   | Pe_ELet (NoRec, name, e1, e2) ->
     Format.sprintf "let %s = %s in\n%s" name (expr_to_str e1) (expr_to_str e2)
@@ -100,23 +97,6 @@ let const_to_peconst const =
 
 open Base
 open MonadCounter
-
-(* let check_pattern expr pat =
-  let rec helper expr = function
-    | PConstraint (p, _) -> helper expr p
-    | PConst c -> [ make_apply "( = )" expr (const_to_peconst c) ]
-    | PTuple pl ->
-      List.concat @@ List.mapi pl ~f:(fun i p -> helper (get_element expr (Tuple i)) p)
-    | PCons (l, r) ->
-      let l = helper (get_element expr Cons_head) l in
-      
-      let r = helper (get_element expr Cons_tail) r in
-      l @ r
-    | PNill -> [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
-    | _ -> []
-  in
-  helper expr pat
-;; *)
 
 let check_pattern expr pat =
   let rec helper add expr = function
