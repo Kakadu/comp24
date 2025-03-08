@@ -1,0 +1,14 @@
+(rule
+ (targets libffi.so include)
+ (deps
+  ../libffi-release
+  (source_tree ../libffi-release))
+ (action
+  (progn
+   (chdir
+    "../libffi-release"
+    (progn
+     (system
+      "./configure --host=riscv64-linux-gnu --targe=riscv64-linux-gnu --prefix=$PWD/../riscv64 > /dev/null")
+     (system "make install > /dev/null")))
+   (system "ln -s lib/libffi.so libffi.so"))))

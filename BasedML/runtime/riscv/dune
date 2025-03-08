@@ -1,6 +1,6 @@
 (rule
  (targets libmlrt.so)
- (deps ffi.h ffitarget.h libffi.so ../ml_runtimelib.c ../ml_runtimelib.h)
+ (deps libffi_include libffi.so ../ml_runtimelib.c ../ml_runtimelib.h)
  (action
   (run
    clang-16
@@ -8,7 +8,7 @@
    -fPIC
    -shared
    ../ml_runtimelib.c
-   -I./
+   -Ilibffi_include
    -L./
    -lffi
    -o
@@ -19,8 +19,7 @@
 (rule
  (targets libmlstd.so)
  (deps
-  ffi.h
-  ffitarget.h
+  libffi_include
   libffi.so
   ../ml_stdlib.c
   ../ml_stdlib.h
@@ -33,10 +32,23 @@
    -fPIC
    -shared
    ../ml_stdlib.c
-   -I./
+   -Ilibffi_include
    -L./
    -lmlrt
    -o
    %{targets}
    ;  -D DEBUG
    )))
+
+(rule
+ (targets libffi.so)
+ (deps ../libffi/riscv64/libffi.so)
+ (action
+  (run ln -s %{deps} %{targets})))
+
+(rule
+ (targets
+  (dir libffi_include))
+ (deps ../libffi/riscv64/include)
+ (action
+  (run ln -s %{deps} %{targets})))

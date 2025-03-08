@@ -1,4 +1,5 @@
 (lang dune 3.8)
+(using directory-targets 0.1)
 
 (name BasedML)
 
