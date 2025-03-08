@@ -10,5 +10,6 @@ let eliminate_pm_case (p, expr) (matched_branch, not_matched_branch) =
     | hd :: tl -> Pmfast.PMFLetIn (hd, let_expr tl)
   in
   let matched_branch = let_expr decls in
-  GenerateConditionsFromCase.generate_condition_if_needed (p, expr) matched_branch not_matched_branch
+  let branches = (matched_branch, not_matched_branch) in
+  GenerateConditionsFromCase.generate_condition_if_needed (p, expr) branches
 ;;
