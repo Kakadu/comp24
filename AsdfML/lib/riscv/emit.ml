@@ -14,10 +14,10 @@ let set_code () = cur_code := code
 let set_fn_code () = cur_code := fn_code
 
 let flush_fn () =
-  Queue.drain
+  Queue.iter
     fn_code
-    ~f:(fun (i, comm) -> Queue.enqueue code (i, comm))
-    ~while_:(fun _ -> true)
+    ~f:(fun (i, comm) -> Queue.enqueue code (i, comm));
+  Queue.clear fn_code
 ;;
 
 let empty_fn () = Queue.clear fn_code
