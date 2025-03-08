@@ -309,6 +309,16 @@ Test struct and physic equal
   1
   1
 
+Runtime lor, land 
+  $ ./llvm_demo.exe << EOF
+  > let print_bool b = print_int (if b then 1 else 0)
+  > let and_id = ( && ) true
+  > let _ = print_bool (and_id false)
+  > let _ = print_bool (and_id true)
+  $ ./riscv_run.sh  out.ll
+  0
+  1
+
 Manytests
   $ ./llvm_demo.exe < ../manytests/typed/001fac.ml
   $ ./riscv_run.sh  out.ll

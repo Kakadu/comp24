@@ -79,5 +79,5 @@ int64_t print_int(int64_t a) {
     return CONVERT_INT_NATIVE_TO_ML(0);
 }
 
-int64_t lor_ml(int64_t x, int64_t y) { return x || y; };
-int64_t land_ml(int64_t x, int64_t y) { return x && y; };
+int64_t lor_ml(int64_t x, int64_t y) { return x | y; };
+int64_t land_ml(int64_t x, int64_t y) { return x & y; };
