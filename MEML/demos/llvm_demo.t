@@ -1,34 +1,34 @@
 
-  $ ./llvm_demo.exe < manytests/typed/001fac.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/001fac.ml | lli-16 -load ../lib/runtime.so
   24
 
-  $ ./llvm_demo.exe < manytests/typed/002fac.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/002fac.ml | lli-16 -load ../lib/runtime.so
   24
 
-  $ ./llvm_demo.exe < manytests/typed/003fib.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/003fib.ml | lli-16 -load ../lib/runtime.so
   3
   3
-  $ ./llvm_demo.exe < manytests/typed/004manyargs.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/004manyargs.ml | lli-16 -load ../lib/runtime.so
   1111111111
 
-  $ ./llvm_demo.exe < manytests/typed/005fix.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/005fix.ml | lli-16 -load ../lib/runtime.so
   720
 
   $ ./llvm_demo.exe < manytests/typed/006partial.ml | lli-16 -load ../lib/runtime.so
   1122
 
-  $ ./llvm_demo.exe < manytests/typed/006partial2.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/006partial2.ml | lli-16 -load ../lib/runtime.so
   1
   2
   3
   7
 
-  $ ./llvm_demo.exe < manytests/typed/006partial3.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/006partial3.ml | lli-16 -load ../lib/runtime.so
   4
   8
   9
 
-  $ ./llvm_demo.exe < manytests/typed/007order.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/007order.ml | lli-16 -load ../lib/runtime.so
   1
   2
   4
@@ -37,7 +37,7 @@
   -555555
   10000
 
-  $ ./llvm_demo.exe < manytests/typed/008ascription.ml | lli-17 -load ../lib/runtime.so
+  $ ./llvm_demo.exe < manytests/typed/008ascription.ml | lli-16 -load ../lib/runtime.so
   8
 
   $ ./llvm_demo.exe << EOF | lli-16 -load ../lib/runtime.so

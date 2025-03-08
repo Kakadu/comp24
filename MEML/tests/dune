@@ -1,6 +1,6 @@
 (library
  (name tests)
- (modules Parser_tests )
+ (modules Parser_tests)
  (libraries MEML.Lib)
  (preprocess
   (pps ppx_expect ppx_deriving.show))
