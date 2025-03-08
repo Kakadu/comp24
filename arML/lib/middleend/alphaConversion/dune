@@ -4,6 +4,11 @@
  (name alphaConversion)
  (public_name arML.middleend.alphaConversion)
  (libraries base ast common patternMatchingElim)
- (modules AlphaConversion Runner)
+ (modules
+  ExpressionAlphaConversion
+  DeclarationAlphaConversion
+  ProgramAlphaConversion
+  NameGenerator
+  Runner)
  (instrumentation
   (backend bisect_ppx)))

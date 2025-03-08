@@ -110,3 +110,24 @@ let eliminate_pm_program program =
 ;;
 
 (* -------------- *)
+
+(* Alpha Conversion *)
+
+let alpha_conversion_program_ast program =
+  PatternMatchingElim.Pprint.print_pmf_program (AlphaConversion.Runner.run_alpha_conversion_program program)
+;;
+
+let alpha_conversion_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast -> 
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ -> 
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       let pattern_matching_eliminated_ast = PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast in
+       alpha_conversion_program_ast pattern_matching_eliminated_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
