@@ -7,10 +7,10 @@
 
   $ ./anf_demo.exe < manytests/do_not_type/002if.ml
   Type inference before:
-  Typecheck error: This expression has type int but an expression was expected of type bool
+  Typecheck error: This expression has type bool but an expression was expected of type int
   
   Type inference after:
-  Typecheck error: This expression has type int but an expression was expected of type bool
+  Typecheck error: This expression has type bool but an expression was expected of type int
 
   $ ./anf_demo.exe < manytests/do_not_type/003occurs.ml
   Type inference before:
@@ -422,6 +422,37 @@ PASS
   val temp : int * bool
   
   Tuple expressions are not supported in ANF conversion
+
+  $ ./anf_demo.exe < manytests/typed/012fibcps.ml
+  Type inference before:
+  val fib : int -> (int -> 'a) -> 'a
+  val main : Unit
+  
+  Type inference after:
+  val cc_ll_0_1 : (int -> 'a) -> int -> int -> 'a
+  val cc_ll_1_1 : int -> (int -> 'a) -> (int -> (int -> 'a) -> 'b) -> int -> 'b
+  val cc_ll_2_1 : 'a -> 'a
+  val fib_1 : int -> (int -> 'a) -> 'a
+  val main_1 : Unit
+  
+  let cc_ll_0_1 k a b = let app_0 = (a + b) in
+  let app_1 = k app_0 in
+  app_1;;
+  let cc_ll_1_1 n k fib a = let app_0 = cc_ll_0_1 k a in
+  let app_1 = (n - 2) in
+  let app_2 = fib app_1 app_0 in
+  app_2;;
+  let rec fib_1 n k = let app_0 = (n < 2) in
+  let if_1 = if app_0 then let app_2 = k n in
+  app_2 else let app_3 = cc_ll_1_1 n k fib_1 in
+  let app_4 = (n - 1) in
+  let app_5 = fib_1 app_4 app_3 in
+  app_5 in
+  if_1;;
+  let cc_ll_2_1 x = x;;
+  let main_1  = let app_0 = fib_1 6 cc_ll_2_1 in
+  let app_1 = print_int app_0 in
+  app_1
 
   $ ./anf_demo.exe < manytests/typed/015tuples.ml
   Type inference before:

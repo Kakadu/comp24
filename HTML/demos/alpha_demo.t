@@ -263,6 +263,24 @@ PASS
   let temp_1 = let f_l1 = cc_ll_0_1
   in ((f_l1 1), (f_l1 true))
 
+  $ ./alpha_demo.exe  < manytests/typed/012fibcps.ml
+  ---СС---
+  
+  let cc_ll_0 k a b = k (a + b);;
+  let cc_ll_1 n k fib a = (fib (n - 2) ((cc_ll_0 k) a));;
+  let rec fib n k = if (n < 2) then (k n) else (fib (n - 1) (((cc_ll_1 n) k) fib));;
+  let cc_ll_2 x = x;;
+  let main = (print_int ((fib 6) cc_ll_2))
+  
+  ---Alpha conv.---
+  
+  let cc_ll_0_1 k a b = k (a + b);;
+  let cc_ll_1_1 n k fib a = (fib (n - 2) ((cc_ll_0_1 k) a));;
+  let rec fib_1 n k = if (n < 2) then (k n) else (fib_1 (n - 1) (((cc_ll_1_1 n) k) fib_1));;
+  let cc_ll_2_1 x = x;;
+  let main_1 = (print_int ((fib_1 6) cc_ll_2_1))
+
+
   $ ./alpha_demo.exe < manytests/typed/015tuples.ml
   ---СС---
   
@@ -273,9 +291,9 @@ PASS
   let cc_ll_1 self l = ((map ((cc_ll_0 self) l)) l);;
   let fixpoly l = ((fix cc_ll_1) l);;
   let feven p n = let (e, o) = p
-  in if (n == 0) then 1 else o (n - 1);;
+  in if (n = 0) then 1 else o (n - 1);;
   let fodd p n = let (e, o) = p
-  in if (n == 0) then 0 else e (n - 1);;
+  in if (n = 0) then 0 else e (n - 1);;
   let tie = (fixpoly (feven, fodd));;
   let rec meven n = if (n = 0) then 1 else modd (n - 1)
   and modd n = if (n = 0) then 1 else meven (n - 1);;
@@ -295,9 +313,9 @@ PASS
   let cc_ll_1_1 self l = ((map_1 ((cc_ll_0_1 self) l)) l);;
   let fixpoly_1 l = ((fix_1 cc_ll_1_1) l);;
   let feven_1 p n = let (e_l1, o_l1) = p
-  in if (n == 0) then 1 else o_l1 (n - 1);;
+  in if (n = 0) then 1 else o_l1 (n - 1);;
   let fodd_1 p n = let (e_l2, o_l2) = p
-  in if (n == 0) then 0 else e_l2 (n - 1);;
+  in if (n = 0) then 0 else e_l2 (n - 1);;
   let tie_1 = (fixpoly_1 (feven_1, fodd_1));;
   let rec meven_1 n = if (n = 0) then 1 else modd_1 (n - 1)
   and modd_1 n = if (n = 0) then 1 else meven_1 (n - 1);;

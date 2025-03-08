@@ -115,6 +115,13 @@ PASS
   let temp = let f = cc_ll_0
   in ((f 1), (f true))
 
+  $ ./cc_ll_demo.exe < manytests/typed/012fibcps.ml
+  let cc_ll_0 k a b = k (a + b);;
+  let cc_ll_1 n k fib a = (fib (n - 2) ((cc_ll_0 k) a));;
+  let rec fib n k = if (n < 2) then (k n) else (fib (n - 1) (((cc_ll_1 n) k) fib));;
+  let cc_ll_2 x = x;;
+  let main = (print_int ((fib 6) cc_ll_2))
+
   $ ./cc_ll_demo.exe < manytests/typed/015tuples.ml
   let rec fix f x = ((f (fix f)) x);;
   let map f p = let (a, b) = p
@@ -123,9 +130,9 @@ PASS
   let cc_ll_1 self l = ((map ((cc_ll_0 self) l)) l);;
   let fixpoly l = ((fix cc_ll_1) l);;
   let feven p n = let (e, o) = p
-  in if (n == 0) then 1 else o (n - 1);;
+  in if (n = 0) then 1 else o (n - 1);;
   let fodd p n = let (e, o) = p
-  in if (n == 0) then 0 else e (n - 1);;
+  in if (n = 0) then 0 else e (n - 1);;
   let tie = (fixpoly (feven, fodd));;
   let rec meven n = if (n = 0) then 1 else modd (n - 1)
   and modd n = if (n = 0) then 1 else meven (n - 1);;

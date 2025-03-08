@@ -50,6 +50,11 @@
   $ echo $(./demo_008asciption)
   8
 
+  $ ./llvm_demo.exe < manytests/typed/012fibcps.ml
+  $ clang-16 out.ll runtime.o -lffi -o demo_012fibcps
+  $ echo $(./demo_012fibcps)
+  8
+
   $ ./llvm_demo.exe << EOF
   > 
   > let rec even x =

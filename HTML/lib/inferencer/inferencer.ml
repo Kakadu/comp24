@@ -27,7 +27,7 @@ module R = struct
   end
 
   module RList = struct
-    let fold_left map ~init ~f =
+  let fold_left map ~init ~f =
       Base.Map.fold map ~init ~f:(fun ~key ~data acc ->
         let open Syntax in
         let* acc = acc in
@@ -388,12 +388,11 @@ let rec infer env = function
      | _ -> lookup_env ident env)
   | EApp (e1, e2) ->
     let* subst_1, typ_1 = infer env e1 in
-    let* subst_2, typ_2 = infer (TypeEnv.apply subst_1 env) e2 in
+    let* subst_2, typ_2 = infer env e2 in
     let* type_variable = fresh_var in
     let* subst_3 = unify (tarrow typ_2 type_variable) (Subst.apply subst_2 typ_1) in
-    let type_result = Subst.apply subst_3 type_variable in
     let* subst_result = Subst.compose_all [ subst_1; subst_2; subst_3 ] in
-    return (subst_result, type_result)
+    return (subst_result, Subst.apply subst_result type_variable)
   | EFun (pat, expr) ->
     let* env_pat, typ_pat = infer_ptrn pat ~env in
     let* subst_expr, typ_expr = infer env_pat expr in
@@ -403,9 +402,11 @@ let rec infer env = function
     let* subst_thn, typ_thn = infer env thn in
     let* subst_els, typ_els = infer env els in
     let* subst_1 = unify (Subst.apply subst_els typ_cond) tbool in
-    let* subst_2 = unify typ_thn typ_els in
+    let* tv = fresh_var in
+    let* subst_2 = unify tv typ_thn in
+    let* subst_3 = unify tv typ_els in
     let* subst_result =
-      Subst.compose_all [ subst_cond; subst_thn; subst_els; subst_1; subst_2 ]
+      Subst.compose_all [ subst_cond; subst_thn; subst_els; subst_1; subst_2; subst_3 ]
     in
     let type_result = Subst.apply subst_result typ_thn in
     return (subst_result, type_result)
