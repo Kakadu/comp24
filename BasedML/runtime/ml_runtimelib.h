@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ml_gc.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,9 +33,6 @@ typedef enum {
     T_CLOSURE = 247,
     T_LAST_REAL_TAG = 255,
 } tag_t;
-
-// typedef enum { MLT_INT, MLT_BOOL, MLT_UNIT, MLT_FUNCTION, MLT_LAST_UNBOXED_TYPE, MLT_TUPLE, MLT_CONS } ml_type;
-// not used
 
 #pragma pack(push, 1)
 typedef struct {
