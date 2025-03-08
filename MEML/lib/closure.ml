@@ -1,14 +1,7 @@
 open Ast
 open Base
 open Cast
-
-let set_empty = Set.empty (module String)
-let map_empty = Map.empty (module String)
-
-let rec get_name gvars id =
-  let name = String.concat [ "lambada"; Int.to_string id ] in
-  if Set.mem gvars name then get_name gvars (id + 1) else name, id
-;;
+open Name_helper
 
 let rec arguments acc = function
   | EFun (p, e) -> arguments (p :: acc) e
@@ -121,7 +114,7 @@ let rec closure_expression id gvars lvars new_lets = function
     , lambadi1 @ lambadi2 )
   | EFun (p, e) ->
     let args, next_e = arguments [] (EFun (p, e)) in
-    let name, new_id = get_name gvars id in
+    let name, new_id = get_uniq_name gvars "lambada", id + 1 in
     let gvars = Set.add gvars name in
     let clo, lets, id, gvars, lvars, lambadi =
       closure_expression new_id gvars lvars new_lets next_e
@@ -271,7 +264,7 @@ let closure_bindings id = function
             lllet :: lacc, id)
         bindings
     in
-    CLets (Rec, List.rev llbindings)
+    CLets (r, List.rev llbindings)
   | Expression e ->
     let llet, letfun, _, _, _, lambadi = closure_expression id set_empty [] [] e in
     let llet = create_let llet letfun in
