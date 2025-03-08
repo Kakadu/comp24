@@ -15,7 +15,9 @@
   Pe_ast
   Alpha_conv
   Closure_conv
-  Lambda_lifting)
+  Lambda_lifting
+  Anf_ast
+  Anf)
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
  (preprocess
