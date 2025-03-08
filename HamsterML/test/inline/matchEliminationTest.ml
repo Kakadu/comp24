@@ -73,6 +73,12 @@ let%expect_test _ =
     {| let ll_var_0 arg_0 = let arg_2 = (list_tail arg_0) in let arg_1 = (list_head arg_0) in if let arg_1 = (list_head arg_0) in let arg_2 = (list_tail arg_0) in ((((list_length arg_0) >= 2) && (arg_1 = (list_head arg_0))) && (arg_2 = (list_tail arg_0))) then arg_1 else 0 |}]
 ;;
 
+let%expect_test _ =
+  pp_match_elim_prog {| let main x = match x with (a, b, c) -> a + b + c |};
+  [%expect
+    {| let ll_var_0 arg_0 = let arg_3 = ((tuple_get arg_0) 2) in let arg_2 = ((tuple_get arg_0) 1) in let arg_1 = ((tuple_get arg_0) 0) in ((arg_1 + arg_2) + arg_3) |}]
+;;
+
 let%expect_test "016lists" =
   pp_match_elim_prog
     {| 
