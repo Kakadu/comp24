@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>name_helper.ml &mdash; Coverage report</title>
+    <meta name="description" content="48.28% coverage in lib/name_helper.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">lib/</span>name_helper.ml
+        </a>
+      </h1>
+      <h2>48.28%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:47.27%"></span>
+      <span class="unvisited" style="bottom:45.45%"></span>
+      <span class="unvisited" style="bottom:41.82%"></span>
+      <span class="unvisited" style="bottom:40.00%"></span>
+      <span class="unvisited" style="bottom:30.91%"></span>
+      <span class="unvisited" style="bottom:23.64%"></span>
+      <span class="unvisited" style="bottom:16.36%"></span>
+      <span class="unvisited" style="bottom:12.73%"></span>
+      <span class="unvisited" style="bottom:10.91%"></span>
+      <span class="unvisited" style="bottom:1.82%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="unvisited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="unvisited"> </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span class="unvisited"> </span>
+<a id="L55"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, Perevalov Efim, Ermolovich Anna *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Base
+
+let set_empty = Set.empt<span data-count="88">y</span> (module String)
+let map_empty = Map.empt<span data-count="88">y</span> (module String)
+
+let get_uniq_name gvars name =
+  <span data-count="1355">l</span>et rec helper gvars id =
+    <span data-count="605">l</span>et name = String.concat [ name; Int.to_strin<span data-count="605">g</span> id ] in
+    <span data-count="605">i</span>f Set.mem gvars name then <span data-count="330">h</span>elper gvars (id + 1) else <span data-count="275">n</span>ame
+  in
+  if Set.mem gvars name then <span data-count="275">h</span>elper gvars 0 else <span data-count="1080">n</span>ame
+;;
+
+let update_name name local_vars all_vars =
+  <span data-count="1065">l</span>et new_name = get_uniq_name all_vars name in
+  <span data-count="1065">l</span>et update_lvars = Map.set local_vars ~key:name ~data:new_name in
+  <span data-count="1065">l</span>et update_all_vars = Set.add all_vars new_name in
+  <span data-count="1065">n</span>ew_name, update_lvars, update_all_vars
+;;
+
+let update_all_name_list name_list vars all_vars =
+  <span data-count="0">l</span>et new_name_list, new_vars, new_all_vars =
+    List.fold
+      ~init:([], vars, all_vars)
+      ~f:(fun (acc, acc_lvars, acc_fvars) n -&gt;
+        <span data-count="0">l</span>et new_name, new_vars, new_all_vars =
+          if Poly.( = ) n "()"
+          then <span data-count="0">u</span>pdate_nam<span data-count="0">e</span> "unit" acc_lvars acc_fvars
+          else <span data-count="0">u</span>pdate_nam<span data-count="0">e</span> n acc_lvars acc_fvars
+        in
+        new_name :: acc, new_vars, new_all_vars)
+      name_list
+  in
+  <span data-count="0">L</span>ist.re<span data-count="0">v</span> new_name_list, new_vars, new_all_vars
+;;
+
+let update_name_list name_list vars all_vars =
+  <span data-count="0">l</span>et new_name_list, new_vars, new_all_vars =
+    List.fold
+      ~init:([], vars, all_vars)
+      ~f:(fun (acc, acc_vars, acc_all_vars) n -&gt;
+        <span data-count="0">l</span>et new_name, new_vars, new_all_vars =
+          if Poly.( = ) n "()"
+          then <span data-count="0">n</span>, acc_vars, acc_all_vars
+          else <span data-count="0">u</span>pdate_nam<span data-count="0">e</span> n acc_vars acc_all_vars
+        in
+        new_name :: acc, new_vars, new_all_vars)
+      name_list
+  in
+  <span data-count="0">L</span>ist.re<span data-count="0">v</span> new_name_list, new_vars, new_all_vars
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>
