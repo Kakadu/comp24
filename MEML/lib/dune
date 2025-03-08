@@ -6,6 +6,7 @@
   Parser
   Inferencer
   Ty
+  PprinterTY
   Closure
   PprinterAST
   Cast
@@ -13,6 +14,11 @@
   Lambdalift
   Llast
   PprinterLLAST
+  Anf
+  Anfast
+  PprinterANF
+  Pattern_helper
+  Name_helper
   Codegen)
  (libraries base angstrom llvm llvm.analysis)
  (preprocess

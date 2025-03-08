@@ -1,24 +1,22 @@
+(** SPDX-License-Identifier: LGPL-3.0 *)
+open Anfast
+
 open Llvm
-open Llast
+open Result
 open Ast
-open Base
 
 let context = global_context ()
 let the_module = create_module context "MEML"
 let builder = builder context
 let i64_type = i64_type context
-let map_empty = Map.empty (module String)
-
-(* 1. Объявление print_int в LLVM IR *)
-let print_int_type = function_type i64_type [| i64_type |]
-let print_int_func = declare_function "print_int" print_int_type the_module
+let void_type = void_type context
+let named_values : (string, llvalue) Hashtbl.t = Hashtbl.create 20
+let ( let* ) = bind
 
 let const_codegen = function
-  | CInt i -> const_int i64_type i
-  | CBool b ->
-    let int_b = if b then 1 else 0 in
-    const_int i64_type int_b
-  | _ -> failwith "Unsupported constant"
+  | AInt x -> ok (const_int i64_type x)
+  | ABool b -> ok (const_int i64_type (Base.Bool.to_int b))
+  | _ -> error "List not Implemented"
 ;;
 
 let op_codegen code_lle1 code_lle2 builder = function
@@ -66,174 +64,150 @@ let op_codegen code_lle1 code_lle2 builder = function
       builder
 ;;
 
-let find global_vars v =
-  match Map.find global_vars v with
-  | Some value ->
-    let f_type, f_func, args = value in
-    if Array.length args = 0
-    then build_call f_type f_func [||] "call_result" builder
-    else f_func
-  | None -> failwith ("Undefined variable or function: " ^ v)
+let name_op = function
+  | Add -> "Add"
+  | Sub -> "Sub"
+  | Mul -> "Mul"
+  | Div -> "Div"
+  | And -> "And"
+  | Or -> "Or"
+  | Eq -> "Eq"
+  | Neq -> "Neq"
+  | Less -> "Less"
+  | Gre -> "Gre"
+  | Leq -> "Leq"
+  | Greq -> "Greq"
 ;;
 
-let rec llexpression_codegen local_vars global_vars the_function = function
-  | LLConst c -> const_codegen c
-  | LLEbinOp (op, lle1, lle2) ->
-    let code_lle1 = llexpression_codegen local_vars global_vars the_function lle1 in
-    let code_lle2 = llexpression_codegen local_vars global_vars the_function lle2 in
-    op_codegen code_lle1 code_lle2 builder op
-  | LLVar v ->
-    (* Ищем переменную сначала в local_vars, затем в global_vars *)
-    (match List.Assoc.find local_vars ~equal:String.( = ) v with
-     | Some value -> value
-     | None -> find global_vars v)
-  | LLApp (lle1, lle2) ->
-    let rec helper acc = function
-      | LLApp (lle1, lle2) -> helper (lle2 :: acc) lle1
-      | a -> llexpression_codegen local_vars global_vars the_function a, acc
-    in
-    let f_func, args = helper [] (LLApp (lle1, lle2)) in
-    let llvm_args =
-      List.fold
-        ~init:[]
-        ~f:(fun acc llarg ->
-          llexpression_codegen local_vars global_vars the_function llarg :: acc)
-        args
-    in
-    let arg_types = Array.init (List.length llvm_args) ~f:(fun _ -> i64_type) in
-    let f_type = function_type i64_type arg_types in
-    build_call f_type f_func (List.to_array llvm_args) "call_result" builder
-  | LLIfElse (cond_expr, then_expr, else_expr) ->
-    (* Генерируем код условия *)
-    let cond_value = llexpression_codegen local_vars global_vars the_function cond_expr in
-    (* Преобразуем i64 в i1 (0 -> false, все остальное -> true) *)
+let rec llexpression_codegen = function
+  | AConst c -> const_codegen c
+  | AVar "()" -> ok (const_pointer_null void_type)
+  | AVar id ->
+    (match Hashtbl.find_opt named_values id with
+     | Some v -> ok (build_load i64_type v id builder)
+     | None ->
+       (match lookup_function id the_module with
+        | Some v ->
+          ok
+            (build_call
+               (function_type i64_type [| i64_type; i64_type |])
+               (Option.get (lookup_function "addInClosure" the_module))
+               [| build_pointercast v i64_type "ptr_to_int" builder
+                ; params v |> Base.Array.length |> const_int i64_type
+               |]
+               "Closure"
+               builder)
+        | None -> error "Unknown variable"))
+  | ABinOp (op, l, r) ->
+    (match lookup_function (name_op op) the_module with
+     | Some _ -> llexpression_codegen @@ AApp (AApp (AVar (name_op op), l), r)
+     | None ->
+       let* l' = llexpression_codegen l in
+       let* r' = llexpression_codegen r in
+       let res = op_codegen l' r' builder op in
+       ok (build_zext res i64_type "to_int" builder))
+  | AApp (func, argument) ->
+    let* calee = llexpression_codegen func in
+    let* arg = llexpression_codegen argument in
+    ok
+      (build_call
+         (function_type i64_type [| i64_type; i64_type |])
+         (Option.get (lookup_function "appClosure" the_module))
+         [| calee; arg |]
+         "AppClosure"
+         builder)
+  | AIfElse (cond_expr, then_expr, else_expr) ->
+    let start_bb = insertion_block builder in
+    let the_function = block_parent start_bb in
+    let* cond_value = llexpression_codegen cond_expr in
     let zero = const_int i64_type 0 in
-    let cond_bool = build_icmp Icmp.Ne cond_value zero "ifcond" builder in
-    (* Создаём базовые блоки *)
+    let cond_bool = build_icmp Icmp.Ne cond_value zero "if" builder in
     let then_bb = append_block context "then" the_function in
     let else_bb = append_block context "else" the_function in
     let merge_bb = append_block context "merge" the_function in
-    (* Добавляем условный переход *)
     ignore (build_cond_br cond_bool then_bb else_bb builder);
-    (* === Генерируем код для then-блока === *)
     position_at_end then_bb builder;
-    let then_value = llexpression_codegen local_vars global_vars the_function then_expr in
+    let* then_value = llexpression_codegen then_expr in
     ignore (build_br merge_bb builder);
     let then_bb = insertion_block builder in
-    (* Фиксируем конец then-блока *)
-    (* === Генерируем код для else-блока === *)
     position_at_end else_bb builder;
-    let else_value = llexpression_codegen local_vars global_vars the_function else_expr in
+    let* else_value = llexpression_codegen else_expr in
     ignore (build_br merge_bb builder);
     let else_bb = insertion_block builder in
-    (* Фиксируем конец else-блока *)
-    (* === Генерируем merge-блок с phi-инструкцией === *)
     position_at_end merge_bb builder;
     let phi_node =
       build_phi [ then_value, then_bb; else_value, else_bb ] "iftmp" builder
     in
-    phi_node (* Возвращаем результат if-выражения *)
-  | LLVars (l, r) ->
-    let _ = llexpression_codegen local_vars global_vars the_function l in
-    llexpression_codegen local_vars global_vars the_function r
-  | _ -> failwith "Unsupported expression"
+    ok phi_node
+  | AVars (l, r) ->
+    let _ = llexpression_codegen l in
+    llexpression_codegen r
+  | _ -> error "Not implemented"
 ;;
 
-let pattern_codegen = function
-  | PVar (v, _) -> v
-  | _ -> failwith "Unsupported pattern"
-;;
-
-let codegen_llbindings global_vars = function
-  | LLLet (r, name, args, lle) ->
-    (* Создаём функцию f: define i64 @f() *)
-    let arg_types = Array.init (List.length args) ~f:(fun _ -> i64_type) in
-    let f_type = function_type i64_type arg_types in
-    let f_func = define_function name f_type the_module in
-    let new_map = Map.set global_vars ~key:name ~data:(f_type, f_func, arg_types) in
-    (* Именуем аргументы и создаём таблицу символов *)
-    let local_vars =
-      List.mapi
-        ~f:(fun i arg ->
-          let param = param f_func i in
-          set_value_name (pattern_codegen arg) param;
-          pattern_codegen arg, param)
-        args
+let llbindings_codegen = function
+  | ALet (_, id, args, body) ->
+    Hashtbl.clear named_values;
+    let ints = Array.make (List.length args) i64_type in
+    let ftype = function_type i64_type ints in
+    let* func =
+      match lookup_function id the_module with
+      | Some _ -> error "Function already exists"
+      | None -> ok @@ declare_function id ftype the_module
     in
-    (* Получаем начальный блок функции и позиционируемся в нём *)
-    let bb = entry_block f_func in
+    let* names =
+      let rec check acc = function
+        | [] -> ok (List.rev acc)
+        | "_" :: xs -> check ("wild" :: acc) xs
+        | id :: xs -> check (id :: acc) xs
+      in
+      check [] args
+    in
+    Array.iteri
+      (fun i a ->
+         let name = List.nth names i in
+         set_value_name name a)
+      (params func);
+    let bb = append_block context "entry" func in
     position_at_end bb builder;
-    (* Генерируем код для выражения lle, передавая таблицу символов *)
-    let result =
-      if Poly.( = ) r Notrec
-      then llexpression_codegen local_vars global_vars f_func lle
-      else llexpression_codegen local_vars new_map f_func lle
+    Array.iteri
+      (fun i a ->
+         let name = List.nth names i in
+         let alloca = build_alloca i64_type name builder in
+         let (_ : Llvm.llvalue) = build_store a alloca builder in
+         Hashtbl.add named_values name alloca)
+      (params func);
+    let* ret_val = llexpression_codegen body in
+    let _ =
+      if id = "main"
+      then build_ret (const_int i64_type 0) builder
+      else build_ret ret_val builder
     in
-    (* Добавляем возврат результата *)
-    ignore (build_ret result builder);
-    new_map
-  | _ -> failwith "Unsupported binding"
+    ok func
+  | _ -> error "Not implemented"
 ;;
 
 let codegen llstatments =
-  let let_map =
-    Map.set
-      map_empty
-      ~key:"print_int"
-      ~data:(print_int_type, print_int_func, [| i64_type |])
+  let runtime =
+    [ declare_function
+        "addInClosure"
+        (function_type i64_type [| i64_type; i64_type |])
+        the_module
+    ; declare_function
+        "appClosure"
+        (function_type i64_type [| i64_type; i64_type |])
+        the_module
+    ; declare_function "print_int" (function_type i64_type [| i64_type |]) the_module
+    ]
   in
-  let _ =
-    List.fold
-      ~init:let_map
-      ~f:(fun let_map llbindings ->
-        let new_map = codegen_llbindings let_map llbindings in
-        new_map)
+  let* result =
+    List.fold_left
+      (fun acc bexpr ->
+         let* acc = acc in
+         let* res = llbindings_codegen bexpr in
+         ok (res :: acc))
+      (ok runtime)
       llstatments
   in
-  Stdlib.print_endline (string_of_llmodule the_module)
+  ok (List.rev result)
 ;;
-
-(* let generate_llvm_ir () =
-  (* Создаём контекст и модуль *)
-  let context = global_context () in
-  let the_module = create_module context "MEML" in
-  let builder = builder context in
-  let i64_type = i64_type context in
-
-  (* Создаём функцию f: define i64 @f(i64 %a) *)
-  let f_type = function_type i64_type [| i64_type |] in  (* Функция принимает один аргумент типа i64 *)
-  let f_func = define_function "f" f_type the_module in
-
-  (* Получаем аргумент функции f *)
-  let arg = param f_func 0 in  (* Получаем первый аргумент (индекс 0) *)
-  set_value_name "a" arg;      (* Даём аргументу имя "a" *)
-
-  (* Получаем начальный блок функции f и позиционируемся в нём *)
-  let f_bb = entry_block f_func in
-  position_at_end f_bb builder;
-
-  (* Добавляем вычисление: a + 4 *)
-  let four = const_int i64_type 4 in
-  let result = build_add arg four "result" builder in
-
-  (* Добавляем возврат результата *)
-  ignore (build_ret result builder);
-
-  (* Создаём функцию main: define i64 @main() *)
-  let main_type = function_type i64_type [||] in  (* main не принимает аргументов *)
-  let main_func = define_function "main" main_type the_module in
-
-  (* Получаем начальный блок функции main и позиционируемся в нём *)
-  let main_bb = entry_block main_func in
-  position_at_end main_bb builder;
-
-  (* Вызываем функцию f с аргументом 5 *)
-  let five = const_int i64_type 5 in
-  let call_result = build_call f_type f_func [| five |] "call_result" builder in
-
-  (* Возвращаем результат вызова f *)
-  ignore (build_ret call_result builder);
-
-  (* Выводим LLVM IR *)
-  print_endline (string_of_llmodule the_module);
-;; *)
