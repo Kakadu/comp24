@@ -27,7 +27,7 @@ let rec codegen_imexpr = function
     let name = map_ident_to_runtime name in
     let* id_var = lookup_env_var name in
     (match id_var with
-     | Some v -> return (build_load i64 v name builder)
+     | Some v -> return v
      | None ->
        (match lookup_function name the_module with
         | Some func ->
@@ -108,10 +108,8 @@ let rec codegen_cexpr = function
 
 and codegen_aexpr = function
   | ALetIn (id, cexpr, aexpr) ->
-    let* body = codegen_cexpr cexpr in
-    let alloca = build_alloca i64 (identifier_to_str id) builder in
-    let (_ : llvalue) = build_store body alloca builder in
-    let* _ = update_var (identifier_to_str id) alloca in
+    let* value = codegen_cexpr cexpr in
+    let* _ = update_var (identifier_to_str id) value in
     codegen_aexpr aexpr
   | ACExpr cexpr -> codegen_cexpr cexpr
 ;;
@@ -141,10 +139,7 @@ let codegen_let_body = function
     let () = position_at_end basic_block builder in
     let* _ =
       map
-        (fun (name, value) ->
-          let alloca = build_alloca i64 (identifier_to_str name) builder in
-          let (_ : llvalue) = build_store value alloca builder in
-          update_var (identifier_to_str name) alloca)
+        (fun (name, value) -> update_var (identifier_to_str name) value)
         (Base.List.zip_exn args (Array.to_list @@ params func))
     in
     let* ret_val = codegen_aexpr aexpr in
