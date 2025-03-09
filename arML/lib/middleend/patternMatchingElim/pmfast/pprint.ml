@@ -35,8 +35,8 @@ let rec pp_pmf_expr ppf = function
       pp_pmf_expr
       t
       (fun ppf -> function
-        | None -> ()
-        | Some e -> Format.fprintf ppf " else %a" pp_pmf_expr e)
+         | None -> ()
+         | Some e -> Format.fprintf ppf " else %a" pp_pmf_expr e)
       f
   | PMFTuple (e1, e2, es) ->
     Format.fprintf

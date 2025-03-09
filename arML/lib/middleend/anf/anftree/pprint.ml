@@ -48,7 +48,7 @@ and pp_a_expr ppf = function
   | ALetIn (id, e, body) ->
     Format.fprintf
       ppf
-      "(let %a = %a in %a)"
+      "(let %a = %a in@\n%a)"
       pp_identifier
       id
       pp_complex_expr
@@ -74,11 +74,11 @@ let pp_anf_decl_case ppf (id, args, body) =
 ;;
 
 let pp_anf_decl ppf = function
-  | ADOrdinary decl -> Format.fprintf ppf "let %a" pp_anf_decl_case decl
+  | ADOrdinary decl -> Format.fprintf ppf "let %a \n" pp_anf_decl_case decl
   | ADRecursive (decl, decls) ->
     Format.fprintf
       ppf
-      "let rec %a"
+      "let rec %a \n"
       (Format.pp_print_list
          ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
          pp_anf_decl_case)

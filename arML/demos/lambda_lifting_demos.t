@@ -7,9 +7,6 @@ MANYTESTS
   let rec fac_cps n k = (if (( = ) n 1) then (k 1) else (fac_cps (( - ) n 1) (ll_1 n k))) and ll_1 cc_1 cc_0 p = (cc_0 (( * ) p cc_1))
   let ll_0 print_int = print_int
   let main = (let () = (print_int (fac_cps 4 ll_0)) in 0)
-<<<<<<< HEAD
-=======
->>>>>>> upstream/master
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/003fib.ml
   let rec fib_acc a b n = (if (( = ) n 1) then b else (let n1 = (( - ) n 1) in (let ab = (( + ) a b) in (fib_acc b ab n1))))

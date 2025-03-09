@@ -1,7 +1,13 @@
 (library
  (name arML_lib)
  (public_name arML.lib)
- (libraries arML.common arML.ast arML.parser arML.inferencer arML.middleend)
+ (libraries
+  arML.common
+  arML.ast
+  arML.parser
+  arML.inferencer
+  arML.middleend
+  arML.llvm_codegen)
  (instrumentation
   (backend bisect_ppx))
  (modules Runner))
