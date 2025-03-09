@@ -16,13 +16,29 @@ void* ml_malloc(size_t size) {
 #endif
 };
 
-void handle_global_vars(int n, ...) {
+void mlrt_handle_global_vars(int n, ...) {
     va_list globs;
     va_start(globs, n);
 #ifdef GC
     add_global_vars_to_gc(n, globs);
 #endif
     va_end(globs);
+}
+
+void mlrt_compact() {
+#ifdef GC
+    compact();
+#else
+    fprintf(stderr, "Warning: GC not implemented function mlrt_compact() don't have effect\n");
+#endif
+}
+
+void mlrt_print_gc_info() {
+#ifdef GC
+    print_gc_info();
+#else
+    fprintf(stderr, "Warning: GC not implemented function mlrt_print_gc_info() don't have effect\n");
+#endif
 }
 
 box_t* create_box_t(size_t size) {

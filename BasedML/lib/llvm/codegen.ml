@@ -32,12 +32,14 @@ let create_help_global name =
   Llvm.define_global (help_globname_by_orig name) (Llvm.const_int i64_t 0) the_module
 ;;
 
-let count_args fun_tp =
+let count_args =
   let rec function_deep acc = function
     | TFunction (_arg_tp, ret_tp) -> function_deep (acc + 1) ret_tp
     | _ -> acc
   in
-  function_deep 0 fun_tp
+  function
+  | TFunction (TUnit, _) -> 0
+  | _ as fun_tp -> function_deep 0 fun_tp
 ;;
 
 let gen_function_type_std tp vararg_flag =
