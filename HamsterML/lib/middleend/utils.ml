@@ -44,19 +44,20 @@ end
 type id = string
 
 module NameSet = struct
-  type t = (id, String.comparator_witness) Set.t
+  type t = id list
 
-  let empty : t = Set.empty (module String)
-  let extend (name : id) (set : t) : t = Set.add set name
-  let union : t -> t -> t = Set.union
-  let find (name : id) (set : t) = Set.find set ~f:(fun x -> String.equal x name)
+  let empty : t = []
 
-  let pp fmt (set : t) =
-    let pp_names fmt name = Format.fprintf fmt "%s" name in
-    if Set.is_empty set
-    then Format.fprintf fmt "NameSet is empty!\n"
-    else Set.iter set ~f:(fun name -> Format.fprintf fmt "%a, " pp_names name)
+  let extend (name : id) (set : t) : t =
+    if List.mem set name ~equal:String.equal then set else set @ [ name ]
   ;;
+
+  let union (s1 : t) (s2 : t) : t =
+    List.fold s2 ~init:s1 ~f:(fun acc name -> extend name acc)
+  ;;
+
+  let find (name : id) (set : t) = List.find set ~f:(String.equal name)
+  let pp fmt (set : t) = Format.fprintf fmt "[%s]" (String.concat ~sep:", " set)
 end
 
 module NameEnv = struct

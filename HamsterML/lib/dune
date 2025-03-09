@@ -5,13 +5,15 @@
   Lexer
   Typing
   Anf
-  Utils
+  AC
   CC
   LL
-  AC
+  ME
+  Compiler
+  Utils
   PrinterAst
   PrinterLL
-  Compiler)
+  PrinterME)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))

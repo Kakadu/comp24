@@ -4,9 +4,10 @@
   LexerTest
   ParserTest
   TypingTest
+  ClosureConversionTest
   LambdaLiftingTest
   AlphaConversionTest
-  ClosureConversionTest)
+  MatchEliminationTest)
  (libraries HamsterML)
  (inline_tests)
  (preprocess

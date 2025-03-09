@@ -10,20 +10,20 @@ type imm_expr =
   | ImmUnit
 
 type cexpr =
+  | COperation of op
   | CApplication of cexpr * cexpr
   | CIf of imm_expr * aexpr * aexpr
   | CConstructList of imm_expr * imm_expr
-  | CMatch of imm_expr * (pattern * aexpr) list
   | CImm of imm_expr
 
 and aexpr =
   | ALetIn of pattern * cexpr * aexpr
   | ACExpr of cexpr
 
-type single_anf_binding = ALet of pattern * pattern list * aexpr
+type single_anf_binding = ALet of pattern * id list * aexpr
 
 type anf_decl =
   | ADSingleLet of funType * single_anf_binding
-  | ADMutualRecDecl of funType * single_anf_binding
+  | ADMutualRecDecl of single_anf_binding list
 
 type anf_prog = anf_decl list
