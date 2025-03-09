@@ -355,10 +355,10 @@ Manytests
   33
   $ ./llvm_demo.exe < ../manytests/typed/004manyargs.ml
   $ ./riscv_run.sh  out.ll
-  137550110943
-  137438999816
+  1111111111
   1
   10
+  100
   $ ocaml -w -a ../manytests/typed/004manyargs.ml
   1111111111110100
   $ ./llvm_demo.exe < ../manytests/typed/005fix.ml
@@ -369,7 +369,7 @@ Manytests
 
   $ ./llvm_demo.exe < ../manytests/typed/006partial.ml
   $ ./riscv_run.sh  out.ll
-  3
+  1122
 
   $ ocaml -w -a ../manytests/typed/006partial.ml
   1122
@@ -384,8 +384,8 @@ Manytests
   $ ./llvm_demo.exe < ../manytests/typed/006partial3.ml
   $ ./riscv_run.sh  out.ll
   4
-  4
-  4
+  8
+  9
 
   $ ocaml -w -a ../manytests/typed/006partial3.ml
   489
@@ -434,7 +434,7 @@ TU Andrey
   8
   $ ./llvm_demo.exe < ../manytests/typed/013foldfoldr.ml
   $ ./riscv_run.sh  out.ll
-  824633999544
+  6
   $ ocaml -w -a ../manytests/typed/013foldfoldr.ml
   6
   $ ./llvm_demo.exe < ../manytests/typed/015tuples.ml
