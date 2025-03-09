@@ -54,3 +54,27 @@ MANYTESTS
   $ ./start_alpha_conversion_demos.exe < manytests/typed/009let_poly.ml
   let ll_0 x = x
   let temp = ((ll_0 1), (ll_0 true))
+
+  $ ./start_alpha_conversion_demos.exe < manytests/typed/015tuples.ml
+  let rec fix f x = (f (fix f) x)
+  let map ac_0 p = (let a = (unpack_tuple p 0) in (let b = (unpack_tuple p 1) in ((ac_0 a), (ac_0 b))))
+  let ll_1 cc_1 cc_0 li ac_1 = (li (cc_1 cc_0) ac_1)
+  let ll_0 self l = (map (ll_1 self l) l)
+  let fixpoly ac_2 = (fix ll_0 ac_2)
+  let feven ac_3 n = (let e = (unpack_tuple ac_3 0) in (let o = (unpack_tuple ac_3 1) in (if (( == ) n 0) then 1 else (o (( - ) n 1)))))
+  let fodd ac_5 ac_4 = (let e = (unpack_tuple ac_5 0) in (let o = (unpack_tuple ac_5 1) in (if (( == ) ac_4 0) then 0 else (e (( - ) ac_4 1)))))
+  let tie = (fixpoly (feven, fodd))
+  let rec meven ac_7 = (if (( = ) ac_7 0) then 1 else (modd (( - ) ac_7 1))) and modd ac_6 = (if (( = ) ac_6 0) then 1 else (meven (( - ) ac_6 1)))
+  let main = (let () = (print_int (modd 1)) in (let () = (print_int (meven 2)) in (let even = (unpack_tuple tie 0) in (let odd = (unpack_tuple tie 1) in (let () = (print_int (odd 3)) in (let () = (print_int (even 4)) in 0))))))
+
+  $ ./start_alpha_conversion_demos.exe < manytests/typed/016lists.ml
+  let rec length xs = (if (equal (get_list_length xs) 0) then 0 else (if (less_than 0 (get_list_length xs)) then (let h = (unpack_list_hd xs) in (let tl = (unpack_list_tl xs) in (( + ) 1 (length tl)))) else pattern_matching_failure))
+  let rec ll_2 acc ac_0 = (if (equal (get_list_length ac_0) 0) then acc else (if (less_than 0 (get_list_length ac_0)) then (let h = (unpack_list_hd ac_0) in (let tl = (unpack_list_tl ac_0) in (ll_2 (( + ) acc 1) tl))) else pattern_matching_failure))
+  let length_tail = (ll_2 0)
+  let rec map f ac_1 = (if (equal (get_list_length ac_1) 0) then [] else (if (logic_and (less_than 0 (get_list_length ac_1)) (equal (get_list_length (unpack_list_tl ac_1)) 0)) then (let a = (unpack_list_hd ac_1) in ((f a) :: [])) else (if (logic_and (less_than 1 (get_list_length ac_1)) (logic_and (less_than 0 (get_list_length (unpack_list_tl ac_1))) (equal (get_list_length (unpack_list_tl (unpack_list_tl ac_1))) 0))) then (let a = (unpack_list_hd ac_1) in (let b = (unpack_list_hd (unpack_list_tl ac_1)) in ((f a) :: ((f b) :: [])))) else (if (logic_and (less_than 2 (get_list_length ac_1)) (logic_and (less_than 1 (get_list_length (unpack_list_tl ac_1))) (logic_and (less_than 0 (get_list_length (unpack_list_tl (unpack_list_tl ac_1)))) (equal (get_list_length (unpack_list_tl (unpack_list_tl (unpack_list_tl ac_1)))) 0)))) then (let a = (unpack_list_hd ac_1) in (let b = (unpack_list_hd (unpack_list_tl ac_1)) in (let c = (unpack_list_hd (unpack_list_tl (unpack_list_tl ac_1))) in ((f a) :: ((f b) :: ((f c) :: [])))))) else (if (logic_and (less_than 3 (get_list_length ac_1)) (logic_and (less_than 2 (get_list_length (unpack_list_tl ac_1))) (logic_and (less_than 1 (get_list_length (unpack_list_tl (unpack_list_tl ac_1)))) (less_than 0 (get_list_length (unpack_list_tl (unpack_list_tl (unpack_list_tl ac_1)))))))) then (let a = (unpack_list_hd ac_1) in (let b = (unpack_list_hd (unpack_list_tl ac_1)) in (let c = (unpack_list_hd (unpack_list_tl (unpack_list_tl ac_1))) in (let d = (unpack_list_hd (unpack_list_tl (unpack_list_tl (unpack_list_tl ac_1)))) in (let tl = (unpack_list_tl (unpack_list_tl (unpack_list_tl (unpack_list_tl ac_1)))) in ((f a) :: ((f b) :: ((f c) :: ((f d) :: (map f tl)))))))))) else pattern_matching_failure)))))
+  let rec append ac_2 ys = (if (equal (get_list_length ac_2) 0) then ys else (if (less_than 0 (get_list_length ac_2)) then (let x = (unpack_list_hd ac_2) in (let ac_3 = (unpack_list_tl ac_2) in (x :: (append ac_3 ys)))) else pattern_matching_failure))
+  let rec ll_1 ac_4 = (if (equal (get_list_length ac_4) 0) then [] else (if (less_than 0 (get_list_length ac_4)) then (let h = (unpack_list_hd ac_4) in (let tl = (unpack_list_tl ac_4) in (append h (ll_1 tl)))) else pattern_matching_failure))
+  let concat = ll_1
+  let rec iter ac_6 ac_5 = (if (equal (get_list_length ac_5) 0) then () else (if (less_than 0 (get_list_length ac_5)) then (let h = (unpack_list_hd ac_5) in (let tl = (unpack_list_tl ac_5) in (let () = (ac_6 h) in (iter ac_6 tl)))) else pattern_matching_failure))
+  let rec cartesian ac_8 ac_7 = (if (equal (get_list_length ac_8) 0) then [] else (if (less_than 0 (get_list_length ac_8)) then (let h = (unpack_list_hd ac_8) in (let tl = (unpack_list_tl ac_8) in (append (map (ll_0 h) ac_7) (cartesian tl ac_7)))) else pattern_matching_failure)) and ll_0 cc_0 a = (cc_0, a)
+  let main = (let () = (iter print_int (1 :: (2 :: (3 :: [])))) in (let () = (print_int (length (cartesian (1 :: (2 :: [])) (1 :: (2 :: (3 :: (4 :: []))))))) in 0))

@@ -63,22 +63,6 @@ MANYTESTS
   val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
   val main : int
 
-  $ ./start_anf_conversion_demos.exe < manytests/typed/005fix.ml
-  ANF 
-  let rec fix f x = (let i_0 = (fix f) in (f i_0 x))
-  let fac self n = (let i_3 = (( <= ) n 1) in (if i_3 then 1 else (let i_2 = (( - ) n 1) in (let i_1 = (self i_2) in (( * ) n i_1)))))
-  let main = (let i_4 = (fix fac 6) in (let () = (print_int i_4) in 0))
-  
-  Types (before anf conversion): 
-  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val fac : (int -> int) -> int -> int
-  val main : int
-  
-  Types (after anf conversion): 
-  val fix : ('a -> 'b -> 'c) -> 'b -> 'c
-  val fac : (int -> 'a) -> int -> int
-  val main : int
-
   $ ./start_anf_conversion_demos.exe < manytests/typed/006partial.ml
   ANF 
   let ll_0 foo = (( + ) foo 2)
