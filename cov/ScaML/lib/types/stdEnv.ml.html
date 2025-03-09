@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>stdEnv.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/types/stdEnv.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/types/</span>stdEnv.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, Danil Slinchuk, Julia Kononova *)
+
+(** SPDX-License-Identifier: MIT *)
+
+open! Base
+open Smisc
+open Tys
+open Vars
+
+let id name = <span data-count="54">I</span>dent.Ident name
+
+let var x = <span data-count="3">T</span>y.Ty_var (Var x)
+
+let ( @&gt; ) ty_arg ty_res = <span data-count="45">T</span>y.Ty_arr (ty_arg, ty_res)
+
+let tuple tys = <span data-count="3">T</span>y.Ty_tuple (to_list2_ex<span data-count="3">n</span> tys)
+
+let no_vars ty = <span data-count="33">S</span>cheme.Forall (VarSet.empty, ty)
+
+let single_var ty = <span data-count="15">S</span>cheme.Forall (VarSet.singleto<span data-count="15">n</span> @@ Var "a", ty)
+let alpha = va<span data-count="3">r</span> "a"
+
+let arith = Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.int
+
+let alpha_option = Ty.Ty_con (i<span data-count="3">d</span> "option", [alpha])
+
+let alpha_list = Ty.Ty_con (i<span data-count="3">d</span> "list", [alpha])
+
+let env =
+  [ (i<span data-count="3">d</span> "id", single_va<span data-count="3">r</span> (alpha @<span data-count="3">&gt;</span> alpha))
+  ; (i<span data-count="3">d</span> "+", no_var<span data-count="3">s</span> arith)
+  ; (i<span data-count="3">d</span> "-", no_var<span data-count="3">s</span> arith)
+  ; (i<span data-count="3">d</span> "*", no_var<span data-count="3">s</span> arith)
+  ; (i<span data-count="3">d</span> "=", no_var<span data-count="3">s</span> (Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.bool))
+  ; (i<span data-count="3">d</span> "&lt;", no_var<span data-count="3">s</span> (Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.bool))
+  ; (i<span data-count="3">d</span> "&gt;", no_var<span data-count="3">s</span> (Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.bool))
+  ; (i<span data-count="3">d</span> "&gt;=", no_var<span data-count="3">s</span> (Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.bool))
+  ; (i<span data-count="3">d</span> "&lt;=", no_var<span data-count="3">s</span> (Ty.int @<span data-count="3">&gt;</span> Ty.int @<span data-count="3">&gt;</span> Ty.bool))
+  ; (i<span data-count="3">d</span> "true", no_var<span data-count="3">s</span> Ty.bool)
+  ; (i<span data-count="3">d</span> "false", no_var<span data-count="3">s</span> Ty.bool)
+  ; (i<span data-count="3">d</span> "()", no_var<span data-count="3">s</span> Ty.unit)
+  ; (i<span data-count="3">d</span> "Some", single_va<span data-count="3">r</span> (alpha @<span data-count="3">&gt;</span> alpha_option))
+  ; (i<span data-count="3">d</span> "None", single_va<span data-count="3">r</span> alpha_option)
+  ; (i<span data-count="3">d</span> "[]", single_va<span data-count="3">r</span> alpha_list)
+  ; (i<span data-count="3">d</span> "::", single_va<span data-count="3">r</span> (tupl<span data-count="3">e</span> [alpha; alpha_list] @<span data-count="3">&gt;</span> alpha_list)) ]
+  |&gt; Env.of_alist_ex<span data-count="3">n</span>
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
