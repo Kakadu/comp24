@@ -6,11 +6,10 @@ let function_type_table : (string, lltype) Hashtbl.t = Hashtbl.create 10
 
 let map_name_to_runtime name =
   match name with
-  | "+" -> "roflanml_add"
-  | "-" -> "roflanml_sub"
-  | "*" -> "roflanml_mul"
-  | "=" -> "roflanml_eq"
-  | "/" -> "roflanml_div"
+  | "+" -> "+"
+  | "-" -> "-"
+  | "*" -> "*"
+  | "=" -> "="
   | _ -> name
 ;;
 
@@ -194,39 +193,25 @@ let generate_main program =
   let main_func = Llvm.declare_function "main" main_type llvm_module in
   let entry = append_block llvm_context "entry" main_func in
   position_at_end entry llvm_builder;
-  (* Инициализация глобальных переменных *)
-  List.iter
-    (function
-      | ADLet (NonRec, name, [], body) ->
-        let global_var = define_global name (const_null value_pointer_type) llvm_module in
-        let compiled_val = generate_aexpr body in
-        ignore (build_store compiled_val global_var llvm_builder)
-      | _ -> ())
-    program;
-  (* Явный вызов функций из программы *)
-  let call_user_functions () =
-    try
-      let fact_func = find_symbol "fact" in
-      let closure = generate_closure fact_func 1 in
-      let arg =
-        build_call
-          (find_function_type "create_int")
-          (find_symbol "create_int")
-          [| const_int int64_type 5 |]
-          "arg"
-          llvm_builder
-      in
-      ignore
-        (build_call
-           (find_function_type "apply")
-           (find_symbol "apply")
-           [| closure; arg |]
-           "fact_result"
-           llvm_builder)
-    with
-    | _ -> ()
-  in
-  call_user_functions ();
+  (match
+     List.find_opt
+       (function
+         | ADLet (NonRec, name, [], _) when name = "()" -> true
+         | _ -> false)
+       program
+   with
+   | Some (ADLet (_, "()", [], body)) -> ignore (generate_aexpr body)
+   | _ ->
+     List.iter
+       (function
+         | ADLet (NonRec, name, [], body) when name <> "()" ->
+           let global_var =
+             define_global name (const_null value_pointer_type) llvm_module
+           in
+           let compiled_val = generate_aexpr body in
+           ignore (build_store compiled_val global_var llvm_builder)
+         | _ -> ())
+       program);
   ignore (build_ret (const_int int32_type 0) llvm_builder)
 ;;
 
@@ -240,31 +225,25 @@ let register_dummy_runtime () =
   in
   ignore
     (declare_dummy
-       "roflanml_eq"
+       "="
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "roflanml_add"
+       "+"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "roflanml_sub"
+       "-"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "roflanml_mul"
-       (Llvm.function_type
-          value_pointer_type
-          [| value_pointer_type; value_pointer_type |]));
-  ignore
-    (declare_dummy
-       "roflanml_div"
+       "*"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
@@ -291,11 +270,7 @@ let register_dummy_runtime () =
   ignore
     (declare_dummy
        "create_closure"
-       (Llvm.function_type value_pointer_type [| pointer_type llvm_context; int64_type |]));
-  ignore
-    (declare_dummy "print_int" (Llvm.function_type value_pointer_type [| int64_type |]));
-  ignore
-    (declare_dummy "print_bool" (Llvm.function_type value_pointer_type [| bool_type |]))
+       (Llvm.function_type value_pointer_type [| pointer_type llvm_context; int64_type |]))
 ;;
 
 let compile_program (program : aprogram) : Llvm.llmodule =
@@ -304,7 +279,7 @@ let compile_program (program : aprogram) : Llvm.llmodule =
     (function
       | ADLet (rec_flag, name, args, body) when args <> [] ->
         let _ = declare_function (name, args, body) in
-        generate_function (rec_flag, name, args, body)
+        ignore (generate_function (rec_flag, name, args, body))
       | _ -> ())
     program;
   generate_main program;

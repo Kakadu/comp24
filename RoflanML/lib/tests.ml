@@ -670,17 +670,13 @@ module LLVMtests = struct
       ; ModuleID = 'Roflan'
       source_filename = "Roflan"
 
-      @"()" = global ptr null
+      declare ptr @"="(ptr, ptr)
 
-      declare ptr @roflanml_eq(ptr, ptr)
+      declare ptr @"+"(ptr, ptr)
 
-      declare ptr @roflanml_add(ptr, ptr)
+      declare ptr @-(ptr, ptr)
 
-      declare ptr @roflanml_sub(ptr, ptr)
-
-      declare ptr @roflanml_mul(ptr, ptr)
-
-      declare ptr @roflanml_div(ptr, ptr)
+      declare ptr @"*"(ptr, ptr)
 
       declare ptr @create_int(i64)
 
@@ -698,13 +694,9 @@ module LLVMtests = struct
 
       declare ptr @create_closure(ptr, i64)
 
-      declare ptr @print_int(i64)
-
-      declare ptr @print_bool(i1)
-
       define ptr @fact(ptr %x) {
       entry:
-        %closure = call ptr @create_closure(ptr @roflanml_eq, i64 2)
+        %closure = call ptr @create_closure(ptr @"=", i64 2)
         %apply_result = call ptr @apply(ptr %closure, ptr %x)
         %boxed_int = call ptr @create_int(i64 1)
         %apply_result1 = call ptr @apply(ptr %apply_result, ptr %boxed_int)
@@ -715,13 +707,13 @@ module LLVMtests = struct
         br label %merge
 
       else:                                             ; preds = %entry
-        %closure2 = call ptr @create_closure(ptr @roflanml_sub, i64 2)
+        %closure2 = call ptr @create_closure(ptr @-, i64 2)
         %apply_result3 = call ptr @apply(ptr %closure2, ptr %x)
         %boxed_int4 = call ptr @create_int(i64 1)
         %apply_result5 = call ptr @apply(ptr %apply_result3, ptr %boxed_int4)
         %closure6 = call ptr @create_closure(ptr @fact, i64 1)
         %apply_result7 = call ptr @apply(ptr %closure6, ptr %apply_result5)
-        %closure8 = call ptr @create_closure(ptr @roflanml_mul, i64 2)
+        %closure8 = call ptr @create_closure(ptr @"*", i64 2)
         %apply_result9 = call ptr @apply(ptr %closure8, ptr %x)
         %apply_result10 = call ptr @apply(ptr %apply_result9, ptr %apply_result7)
         br label %merge
@@ -736,10 +728,6 @@ module LLVMtests = struct
         %closure = call ptr @create_closure(ptr @fact, i64 1)
         %boxed_int = call ptr @create_int(i64 5)
         %apply_result = call ptr @apply(ptr %closure, ptr %boxed_int)
-        store ptr %apply_result, ptr @"()", align 8
-        %closure1 = call ptr @create_closure(ptr @fact, i64 1)
-        %arg = call ptr @create_int(i64 5)
-        %fact_result = call ptr @apply(ptr %closure1, ptr %arg)
         ret i32 0
       }
       |}]
