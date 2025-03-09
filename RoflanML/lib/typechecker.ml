@@ -512,12 +512,12 @@ let check_program env prog =
     let* _, tys = infer env decl in
     match decl, tys with
     | DLet (_, id, _), [ ty ] ->
-      let env = TypeEnv.extend env (id, Scheme.S (VarSet.empty, ty)) in
+      let env = TypeEnv.extend env (id, generalize env ty) in
       return env
     | DMutualLet (_, decls), tys ->
       let env =
         Base.List.fold2_exn decls tys ~init:env ~f:(fun env (id, _) ty ->
-          TypeEnv.extend env (id, Scheme.S (VarSet.empty, ty)))
+          TypeEnv.extend env (id, generalize env ty))
       in
       return env
     | _ -> fail NotReachable

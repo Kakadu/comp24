@@ -58,19 +58,6 @@
   let f x = print_int x
 
   $ dune exec ./demoLL.exe << EOF
-  > let rec fact x k = 
-  > match x with 
-  > | 1 -> k 1
-  > | x -> fact (x - 1) (fun n -> k (x * n))
-  > EOF
-  
-  let ll_0 k x n = k (( * ) x n)
-  
-  let rec fact x k = match x with 
-  | 1 -> k 1
-  | x -> fact (( - ) x 1) (ll_0 k x)
-
-  $ dune exec ./demoLL.exe << EOF
   > let fs = (let y = 1 in fun x -> x + y), (let y = true in fun x -> x && y)
   > EOF
   
@@ -81,3 +68,12 @@
   let fs = 
   let y = 1 in ll_0 y, 
   let y = true in ll_1 y
+
+  $ dune exec ./demoLL.exe << EOF
+  > let rec fact x k = 
+  > if x = 2 then k 1 else fact (x - 1) (fun n -> k ( x * n)) 
+  > EOF
+  
+  let ll_0 k x n = k (( * ) x n)
+  
+  let rec fact x k = if ( = ) x 2 then k 1 else fact (( - ) x 1) (ll_0 k x)

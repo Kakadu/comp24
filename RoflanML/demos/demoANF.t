@@ -9,21 +9,22 @@
   let anf_3 = ( + ) anf_2 5 in anf_3
 
   $ dune exec ./demoANF.exe << EOF
-  > let q = let my_true x = true in let f x y z = x + y + z in (f 1 2 3, my_true true, my_true (fun x -> x))
+  > let my_true x = true
+  > let q = let f x y z = x + y + z in (f 1 2 3, my_true true, my_true (fun x -> x))
   > EOF
   
-  let ll_0 x = true
+  let my_true x = true
   
-  let ll_1 x y z = 
+  let ll_0 x y z = 
   let anf_4 = ( + ) x y in 
   let anf_5 = ( + ) anf_4 z in anf_5
   
-  let ll_2 x = x
+  let ll_1 x = x
   
   let q = 
-  let anf_0 = ll_1 1 2 3 in 
-  let anf_1 = ll_0 true in 
-  let anf_2 = ll_0 ll_2 in 
+  let anf_0 = ll_0 1 2 3 in 
+  let anf_1 = my_true true in 
+  let anf_2 = my_true ll_1 in 
   let anf_3 = anf_0, anf_1, anf_2 in anf_3
 
   $ dune exec ./demoANF.exe << EOF
@@ -81,5 +82,20 @@
   let anf_2 = [ anf_0; anf_1 ] in anf_2
 
 
-
+  $ dune exec ./demoANF.exe << EOF
+  > let rec fact x k = 
+  > if x = 2 then k 1 else fact (x - 1) (fun n -> k ( x * n)) 
+  > EOF
+  
+  let ll_0 k x n = 
+  let anf_6 = ( * ) x n in 
+  let anf_7 = k anf_6 in anf_7
+  
+  let rec fact x k = 
+  let anf_0 = ( = ) x 2 in 
+  let anf_1 = if anf_0 then 
+  let anf_2 = k 1 in anf_2 else 
+  let anf_3 = ( - ) x 1 in 
+  let anf_4 = ll_0 k x in 
+  let anf_5 = fact anf_3 anf_4 in anf_5 in anf_1
 

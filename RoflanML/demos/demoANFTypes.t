@@ -9,6 +9,19 @@
   All types are equal!
 
   $ dune exec ./demoANFTypes.exe << EOF
+  > let my_true x = true
+  > let q = let f x y z = x + y + z in (f 1 2 3, my_true true, my_true (fun x -> x))
+  > EOF
+  TypeEnv before ANF:
+  my_true: 'a -> bool
+  q: int * bool * bool
+  TypeEnv after ANF:
+  my_true: 'a -> bool
+  q: int * bool * bool
+  
+  All types are equal!
+
+  $ dune exec ./demoANFTypes.exe << EOF
   > let q = let f x y z = x + y + z in let g x = f 1 2 in g 3
   > EOF
   TypeEnv before ANF:
@@ -49,5 +62,14 @@
   All types are equal!
 
 
-
+  $ dune exec ./demoANFTypes.exe << EOF
+  > let rec fact x k = 
+  > if x = 2 then k 1 else fact (x - 1) (fun n -> k ( x * n)) 
+  > EOF
+  TypeEnv before ANF:
+  fact: int -> (int -> 'a) -> 'a
+  TypeEnv after ANF:
+  fact: int -> (int -> 'a) -> 'a
+  
+  All types are equal!
 

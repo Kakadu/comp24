@@ -25,9 +25,8 @@ end
 
 let gen_name prefix =
   let open Counter_Monad in
-  let fresh_id = fresh >>= fun x -> return (Int.to_string x) in
-  let* id = fresh_id in
-  return (prefix ^ "_" ^ id)
+  let* fresh_id = fresh >>= fun x -> return (Int.to_string x) in
+  return (prefix ^ "_" ^ fresh_id)
 ;;
 
 module Middleend_Common = struct

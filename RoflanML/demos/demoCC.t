@@ -45,15 +45,19 @@
   let f x = print_int x
 
   $ dune exec ./demoCC.exe << EOF
-  > let rec fact x k = 
-  > match x with 
-  > | 1 -> k 1
-  > | x -> fact (x - 1) (fun n -> k (x * n))
+  > let fs = (let y = 1 in fun x -> x + y), (let y = true in fun x -> x && y)
   > EOF
   
-  let rec fact x k = match x with 
-  | 1 -> k 1
-  | x -> fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x)
+  let fs = 
+  let y = 1 in (fun y x -> ( + ) x y) y, 
+  let y = true in (fun y x -> ( && ) x y) y
+
+  $ dune exec ./demoCC.exe << EOF
+  > let rec fact x k = 
+  > if x = 2 then k 1 else fact (x - 1) (fun n -> k ( x * n)) 
+  > EOF
+  
+  let rec fact x k = if ( = ) x 2 then k 1 else fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x)
 
   $ dune exec ./demoCC.exe << EOF
   > let rec even x = 
@@ -65,11 +69,3 @@
   let rec even = (fun x -> if ( = ) x 0 then true else odd (( - ) x 1))
   and
   odd = (fun x -> if ( = ) x 0 then false else even (( - ) x 1))
-
-  $ dune exec ./demoCC.exe << EOF
-  > let fs = (let y = 1 in fun x -> x + y), (let y = true in fun x -> x && y)
-  > EOF
-  
-  let fs = 
-  let y = 1 in (fun y x -> ( + ) x y) y, 
-  let y = true in (fun y x -> ( && ) x y) y
