@@ -4,14 +4,7 @@
 
 open Reduced_ast
 open Middleend_utils
-
-open
-  Utils.Counter_monad.Make
-    (Int)
-    (struct
-      type t = error
-    end)
-
+open Monads
 open Base
 
 let rec ll_expr bindings =
@@ -106,8 +99,4 @@ let ll_struct structure =
 ;;
 
 (*Must be used after alpha_conversion, pattern removing and closure_conversion*)
-let ll structure =
-  match run (ll_struct structure) 0 with
-  | Result.Ok s -> s
-  | Result.Error s -> [ RStr_eval (fun_exception @@ exp_to_string s) ]
-;;
+let ll structure = run (ll_struct structure) 0
