@@ -831,14 +831,19 @@ module LLVMtests = struct
   let pp_parse_and_anf_and_llvm input =
     match Parser.parse input with
     | Result.Ok prog ->
-      (match lift_program (close_program prog env) with
-       | Result.Ok closed_prog ->
-         (match anf_program closed_prog with
-          | Result.Ok anf_prog ->
-            let llvm_mod = compile_program anf_prog in
-            Stdlib.Format.printf "%s\n" (Llvm.string_of_llmodule llvm_mod)
-          | Result.Error err -> Stdlib.print_endline ("ANF error: " ^ err))
-       | Result.Error err -> Stdlib.print_endline ("Closure conversion error: " ^ err))
+      (match Typechecker.typecheck prog with
+       | Result.Ok _ ->
+         (match lift_program (close_program prog env) with
+          | Result.Ok closed_prog ->
+            (match anf_program closed_prog with
+             | Result.Ok anf_prog ->
+               let llvm_mod = compile_program anf_prog in
+               Stdlib.Format.printf "%s\n" (Llvm.string_of_llmodule llvm_mod)
+             | Result.Error err -> Stdlib.print_endline ("ANF error: " ^ err))
+          | Result.Error err -> Stdlib.print_endline ("Lambda lifting error: " ^ err))
+       | Result.Error err ->
+         Stdlib.print_endline "Failed to typecheck";
+         Stdlib.Format.printf "%a" Typing.pp_error err)
     | Result.Error err -> Stdlib.print_endline ("Failed to parse: " ^ err)
   ;;
 
@@ -852,13 +857,15 @@ module LLVMtests = struct
 
       @"()" = global ptr null
 
-      declare ptr @"="(ptr, ptr)
+      declare ptr @roflanml_eq(ptr, ptr)
 
-      declare ptr @"+"(ptr, ptr)
+      declare ptr @roflanml_add(ptr, ptr)
 
-      declare ptr @-(ptr, ptr)
+      declare ptr @roflanml_sub(ptr, ptr)
 
-      declare ptr @"*"(ptr, ptr)
+      declare ptr @roflanml_mul(ptr, ptr)
+
+      declare ptr @roflanml_div(ptr, ptr)
 
       declare ptr @create_int(i64)
 
@@ -876,9 +883,13 @@ module LLVMtests = struct
 
       declare ptr @create_closure(ptr, i64)
 
+      declare ptr @print_int(i64)
+
+      declare ptr @print_bool(i1)
+
       define ptr @fact(ptr %x) {
       entry:
-        %closure = call ptr @create_closure(ptr @"=", i64 2)
+        %closure = call ptr @create_closure(ptr @roflanml_eq, i64 2)
         %apply_result = call ptr @apply(ptr %closure, ptr %x)
         %boxed_int = call ptr @create_int(i64 1)
         %apply_result1 = call ptr @apply(ptr %apply_result, ptr %boxed_int)
@@ -889,13 +900,13 @@ module LLVMtests = struct
         br label %merge
 
       else:                                             ; preds = %entry
-        %closure2 = call ptr @create_closure(ptr @-, i64 2)
+        %closure2 = call ptr @create_closure(ptr @roflanml_sub, i64 2)
         %apply_result3 = call ptr @apply(ptr %closure2, ptr %x)
         %boxed_int4 = call ptr @create_int(i64 1)
         %apply_result5 = call ptr @apply(ptr %apply_result3, ptr %boxed_int4)
         %closure6 = call ptr @create_closure(ptr @fact, i64 1)
         %apply_result7 = call ptr @apply(ptr %closure6, ptr %apply_result5)
-        %closure8 = call ptr @create_closure(ptr @"*", i64 2)
+        %closure8 = call ptr @create_closure(ptr @roflanml_mul, i64 2)
         %apply_result9 = call ptr @apply(ptr %closure8, ptr %x)
         %apply_result10 = call ptr @apply(ptr %apply_result9, ptr %apply_result7)
         br label %merge
