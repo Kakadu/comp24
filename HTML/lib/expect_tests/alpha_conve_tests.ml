@@ -21,7 +21,7 @@ module AlphaConvTests = struct
   ;;
 end
 
-let%expect_test "no shadowing of patterns" =
+let%expect_test "variable shadowing in fun" =
   AlphaConvTests.alpha_conv_test
     {|
     let x =5 
@@ -50,7 +50,7 @@ let%expect_test "no shadowing of patterns" =
     in (fac_l1 fac__l1) |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "variable shadowing in match expression" =
   AlphaConvTests.alpha_conv_test
     {|
     let x = 5 
@@ -72,7 +72,7 @@ let%expect_test "sanity check" =
     | x -> x |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "sequential variable shadowing in lets" =
   AlphaConvTests.alpha_conv_test {|
     let x = 3
     let x = x
@@ -93,7 +93,7 @@ let%expect_test "sanity check" =
     let x_3 = x_2 |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "variable shadowing in if-else branches" =
   AlphaConvTests.alpha_conv_test
     {|
   let x = 0
@@ -118,7 +118,7 @@ let%expect_test "sanity check" =
     let x_3 = x_2 |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "lexical scoping in nested lets with functions" =
   AlphaConvTests.alpha_conv_test
     {|
     let a = let x = 1 in
@@ -148,7 +148,7 @@ let%expect_test "sanity check" =
     in (f_l1 x_l3) |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "deeply nested variable shadowing chain" =
   AlphaConvTests.alpha_conv_test
     {|
     let a = let x = 1 in
@@ -179,7 +179,7 @@ let%expect_test "sanity check" =
     in (f x_l5) |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "recursive function" =
   AlphaConvTests.alpha_conv_test
     {|
     let rec fac n = if n<=1 then 1 else n * fac (n-1)
@@ -203,7 +203,7 @@ let%expect_test "sanity check" =
     in 0 |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "mutual recursive function" =
   AlphaConvTests.alpha_conv_test
     {|
     let rec meven n = if n = 0 then 1 else modd (n - 1)
@@ -229,7 +229,7 @@ let%expect_test "sanity check" =
     let meven_2 = (meven_1 modd_2) |}]
 ;;
 
-let%expect_test "sanity check" =
+let%expect_test "CPS transformation" =
   AlphaConvTests.alpha_conv_test
     {|
     let rec fac_cps n k =
