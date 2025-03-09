@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>PM_elim.ml &mdash; Coverage report</title>
-    <meta name="description" content="94.25% coverage in lib/middleend/patelim/PM_elim.ml">
+    <meta name="description" content="98.28% coverage in lib/middleend/patelim/PM_elim.ml">
     <link rel="stylesheet" href="../../../coverage.css"/>
     <script src="../../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,9 @@
           <span class="dirname">lib/middleend/patelim/</span>PM_elim.ml
         </a>
       </h1>
-      <h2>94.25%</h2>
+      <h2>98.28%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:4.47%"></span>
-      <span class="unvisited" style="top:27.93%"></span>
-      <span class="unvisited" style="top:42.46%"></span>
-      <span class="unvisited" style="bottom:49.72%"></span>
       <span class="unvisited" style="bottom:6.70%"></span>
       <span class="unvisited" style="bottom:6.15%"></span>
     </div>
@@ -35,7 +31,7 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="unvisited"> </span>
+<a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
@@ -77,7 +73,7 @@
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
@@ -103,7 +99,7 @@
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span class="visited"> </span>
-<a id="L76"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="visited"> </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
 <a id="L79"></a><span > </span>
@@ -117,7 +113,7 @@
 <a id="L87"></a><span class="visited"> </span>
 <a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span > </span>
-<a id="L90"></a><span class="unvisited"> </span>
+<a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span > </span>
 <a id="L93"></a><span class="visited"> </span>
@@ -398,8 +394,8 @@ open Env
 open IR
 
 let get_typ_of_pat = function
-  | <span data-count="0">P</span>Constraint (_, typ) -&gt; Some typ
-  | <span data-count="4">_</span> -&gt; None
+  | <span data-count="1">P</span>Constraint (_, typ) -&gt; Some typ
+  | <span data-count="3">_</span> -&gt; None
 ;;
 
 let rec is_pattern_suitable =
@@ -440,7 +436,7 @@ let rec is_pattern_suitable =
         all_pats
     in
     <span data-count="2">r</span>eturn res
-  | <span data-count="0">P</span>Constraint (pat, typ), e -&gt; is_pattern_suitable (pat, e_type<span data-count="0">d</span> ~typ:(Some typ) e)
+  | <span data-count="1">P</span>Constraint (pat, typ), e -&gt; is_pattern_suitable (pat, e_type<span data-count="1">d</span> ~typ:(Some typ) e)
 ;;
 
 let rec get_pattern_vars = function
@@ -466,7 +462,7 @@ let rec get_pattern_vars = function
         all_pats
     in
     <span data-count="2">r</span>eturn res
-  | <span data-count="0">P</span>Constraint (pat, typ), e -&gt; get_pattern_vars (pat, e_type<span data-count="0">d</span> ~typ:(Some typ) e)
+  | <span data-count="1">P</span>Constraint (pat, typ), e -&gt; get_pattern_vars (pat, e_type<span data-count="1">d</span> ~typ:(Some typ) e)
 ;;
 
 let pm_elim =
@@ -480,8 +476,8 @@ let pm_elim =
           <span data-count="31">l</span>et pat = pid key in
           <span data-count="31">l</span>et pat =
             match data with
-            | <span data-count="0">N</span>oPMEConstraint (_, typ) -&gt; p_type<span data-count="0">d</span> ~typ:(Some typ) pat
-            | <span data-count="31">_</span> -&gt; pat
+            | <span data-count="1">N</span>oPMEConstraint (_, typ) -&gt; p_type<span data-count="1">d</span> ~typ:(Some typ) pat
+            | <span data-count="30">_</span> -&gt; pat
           in
           let decl = dlet Not_recursive (pop_pa<span data-count="31">t</span> pat, data) in
           <span data-count="31">r</span>eturn @@ ecls<span data-count="31">r</span> decl acc)

@@ -1037,37 +1037,37 @@ open Angstrom
 open AstLib.Ast
 
 let is_space = function
-  | <span data-count="170914165">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' | <span data-count="62829547">'</span>\n' -&gt; true
-  | <span data-count="569477170">_</span> -&gt; false
+  | <span data-count="170922786">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' | <span data-count="62830969">'</span>\n' -&gt; true
+  | <span data-count="569484062">_</span> -&gt; false
 ;;
 
 let pe_space = take_whil<span data-count="119">e</span> is_space
 let pe_space1 = take_while<span data-count="119">1</span> is_space
-let pe_token p = <span data-count="7309797">p</span>e_space *&gt; p
+let pe_token p = <span data-count="7310354">p</span>e_space *&gt; p
 let pe_token1 p = <span data-count="699">p</span>e_space1 *&gt; p
-let pe_stoken s = <span data-count="7309105">p</span>e_token @@ strin<span data-count="7309105">g</span> s
+let pe_stoken s = <span data-count="7309662">p</span>e_token @@ strin<span data-count="7309662">g</span> s
 let pe_stoken1 s = <span data-count="235">p</span>e_token1 @@ strin<span data-count="235">g</span> s
 let pe_next_stoken p = <span data-count="119">p</span>e_stoken<span data-count="119">1</span> p &lt;* pe_space1
 let pe_parens p = <span data-count="3249">p</span>e_stoke<span data-count="3249">n</span> "(" *<span data-count="3249">&gt;</span> p &lt;* pe_stoke<span data-count="3249">n</span> ")"
 let pe_parens_or_non p = <span data-count="252">p</span>e_paren<span data-count="252">s</span> p &lt;|&gt; p
 
 let is_digit = function
-  | <span data-count="1527412">'</span>0' .. '9' -&gt; true
-  | <span data-count="34323632">_</span> -&gt; false
+  | <span data-count="1527432">'</span>0' .. '9' -&gt; true
+  | <span data-count="34324139">_</span> -&gt; false
 ;;
 
 let is_lower = function
-  | <span data-count="16880868">'</span>a' .. 'z' -&gt; true
-  | <span data-count="17217117">_</span> -&gt; false
+  | <span data-count="16881171">'</span>a' .. 'z' -&gt; true
+  | <span data-count="17217364">_</span> -&gt; false
 ;;
 
 let is_upper = function
   | <span data-count="0">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="4581832">_</span> -&gt; false
+  | <span data-count="4581968">_</span> -&gt; false
 ;;
 
-let is_letter c = <span data-count="16881090">i</span>s_lowe<span data-count="16881090">r</span> <span data-count="12299258">c</span> || is_upper c
-let is_ident_char c = <span data-count="16885726">i</span>s_digi<span data-count="16885726">t</span> <span data-count="4636">c</span> || is_letter c
+let is_letter c = <span data-count="16881393">i</span>s_lowe<span data-count="16881393">r</span> <span data-count="12299425">c</span> || is_upper c
+let is_ident_char c = <span data-count="16886029">i</span>s_digi<span data-count="16886029">t</span> <span data-count="4636">c</span> || is_letter c
 
 let keywords =
   [ "if"
@@ -1090,13 +1090,13 @@ let keywords =
   ]
 ;;
 
-let is_keyword s = <span data-count="4581272">L</span>ist.mem s keywords
-let ( =?*&gt; ) string pe = <span data-count="7262167">p</span>e_stoke<span data-count="7262167">n</span> string *&gt; pe
+let is_keyword s = <span data-count="4581408">L</span>ist.mem s keywords
+let ( =?*&gt; ) string pe = <span data-count="7262721">p</span>e_stoke<span data-count="7262721">n</span> string *&gt; pe
 let ( =?&gt;&gt;| ) string value = <span data-count="714">p</span>e_stoke<span data-count="714">n</span> string *&gt; retur<span data-count="714">n</span> value
 
 (****************************************************** Consts ******************************************************)
 
-let pe_int = pe_toke<span data-count="119">n</span> (lif<span data-count="119">t</span> (fun hd -&gt; <span data-count="1498106">C</span>Int (int_of_strin<span data-count="1498106">g</span> hd)) (take_while<span data-count="119">1</span> is_digit))
+let pe_int = pe_toke<span data-count="119">n</span> (lif<span data-count="119">t</span> (fun hd -&gt; <span data-count="1498123">C</span>Int (int_of_strin<span data-count="1498123">g</span> hd)) (take_while<span data-count="119">1</span> is_digit))
 
 let pe_bool =
   choic<span data-count="119">e</span> [ "true" =?&gt;&gt;<span data-count="119">|</span> true; "false" =?&gt;&gt;<span data-count="119">|</span> false ]
@@ -1113,19 +1113,19 @@ open Common.Ops
 
 let pe_op first suffix base_ops =
   <span data-count="357">l</span>et rec helper = function
-    | <span data-count="6550924">h</span>d :: tl -&gt; hd =?*<span data-count="6550924">&gt;</span> retur<span data-count="6550924">n</span> hd &lt;|&gt; helpe<span data-count="6550924">r</span> tl
-    | <span data-count="364163">[</span>] -&gt; fail "Can't pe operator"
+    | <span data-count="6551464">h</span>d :: tl -&gt; hd =?*<span data-count="6551464">&gt;</span> retur<span data-count="6551464">n</span> hd &lt;|&gt; helpe<span data-count="6551464">r</span> tl
+    | <span data-count="364193">[</span>] -&gt; fail "Can't pe operator"
   in
   choice
     [ (let* first_string = helpe<span data-count="357">r</span> first in
-       <span data-count="363449">l</span>et* suffix_string_list = man<span data-count="363449">y</span> (helpe<span data-count="363449">r</span> suffix) in
-       <span data-count="363449">l</span>et res_string = String.concat "" (first_string :: suffix_string_list) in
-       <span data-count="363449">i</span>f List.mem res_string prohibited_ops
+       <span data-count="363479">l</span>et* suffix_string_list = man<span data-count="363479">y</span> (helpe<span data-count="363479">r</span> suffix) in
+       <span data-count="363479">l</span>et res_string = String.concat "" (first_string :: suffix_string_list) in
+       <span data-count="363479">i</span>f List.mem res_string prohibited_ops
        then
          <span data-count="190235">f</span>ail
            (let strings = [ "Can't use "; res_string; " as custom operator" ] in
             String.conca<span data-count="190235">t</span> "" strings)
-       else <span data-count="173214">r</span>eturn res_string)
+       else <span data-count="173244">r</span>eturn res_string)
     ; helpe<span data-count="357">r</span> base_ops
     ]
 ;;
@@ -1162,27 +1162,27 @@ let fourth_priority_group = { group = [ "%"; "*"; "/" ]; left_associative = true
 let fifth_priority_group = { group = [ "#" ]; left_associative = true }
 
 let pe_assert_token_is_not_ahead token =
-  <span data-count="3000354">p</span>e_space
+  <span data-count="3000392">p</span>e_space
   *&gt;
-  let* next = pe_space *<span data-count="3000354">&gt;</span> choic<span data-count="3000354">e</span> [ peek_strin<span data-count="3000354">g</span> (String.lengt<span data-count="3000354">h</span> token); retur<span data-count="3000354">n</span> "" ] in
-  <span data-count="8208210">r</span>eturn (next = token)
+  let* next = pe_space *<span data-count="3000392">&gt;</span> choic<span data-count="3000392">e</span> [ peek_strin<span data-count="3000392">g</span> (String.lengt<span data-count="3000392">h</span> token); retur<span data-count="3000392">n</span> "" ] in
+  <span data-count="8208343">r</span>eturn (next = token)
 ;;
 
 (****************************************************** Tuple ******************************************************)
 
 let pe_tuple ?(delim = <span data-count="348">"</span>,") pe wrap =
   <span data-count="365">l</span>et* list_res = sep_by<span data-count="365">1</span> (pe_stoke<span data-count="365">n</span> delim) pe in
-  <span data-count="845277">m</span>atch list_res with
+  <span data-count="845297">m</span>atch list_res with
   | <span data-count="75933">v</span>1 :: v2 :: tl -&gt; return (wra<span data-count="75933">p</span> v1 v2 tl)
-  | <span data-count="769344">_</span> -&gt; fail "Tuple arity must be greater than 1"
+  | <span data-count="769364">_</span> -&gt; fail "Tuple arity must be greater than 1"
 ;;
 
 let pe_value_or_tuple ?(delim = <span data-count="116">"</span>,") pe_tuple parser =
   (* speed up hack moment *)
   <span data-count="133">c</span>hoice
     [ (let* v = parser in
-       <span data-count="3000235">l</span>et* is_delim_ahead = pe_assert_token_is_not_ahea<span data-count="3000235">d</span> delim in
-       <span data-count="3000235">i</span>f is_delim_ahead then <span data-count="35698">f</span>ail "Rollback" else <span data-count="2964537">r</span>eturn v)
+       <span data-count="3000273">l</span>et* is_delim_ahead = pe_assert_token_is_not_ahea<span data-count="3000273">d</span> delim in
+       <span data-count="3000273">i</span>f is_delim_ahead then <span data-count="35698">f</span>ail "Rollback" else <span data-count="2964575">r</span>eturn v)
     ; pe_tupl<span data-count="133">e</span> parser
     ]
 ;;
@@ -1202,24 +1202,24 @@ let pe_list_semicolon pe wrap init =
 (****************************************************** Chains ******************************************************)
 
 let chainl1 pe op =
-  <span data-count="696">l</span>et rec go acc = <span data-count="19998233">l</span>ift<span data-count="19998233">2</span> (fun f x -&gt; <span data-count="1339502">f</span> acc x) op pe &gt;&gt;<span data-count="19998233">=</span> go &lt;|&gt; retur<span data-count="19998233">n</span> acc in
+  <span data-count="696">l</span>et rec go acc = <span data-count="19998515">l</span>ift<span data-count="19998515">2</span> (fun f x -&gt; <span data-count="1339520">f</span> acc x) op pe &gt;&gt;<span data-count="19998515">=</span> go &lt;|&gt; retur<span data-count="19998515">n</span> acc in
   pe &gt;&gt;= go
 ;;
 
-let rec chainr1 e op = <span data-count="39996">e</span> &gt;&gt;= fun a -&gt; <span data-count="7132807">o</span>p &gt;&gt;<span data-count="7132807">=</span> (fun f -&gt; <span data-count="39532">c</span>hainr<span data-count="39532">1</span> e op &gt;&gt;| <span data-count="39532">f</span> a) &lt;|&gt; retur<span data-count="7132807">n</span> a
+let rec chainr1 e op = <span data-count="39996">e</span> &gt;&gt;= fun a -&gt; <span data-count="7132915">o</span>p &gt;&gt;<span data-count="7132915">=</span> (fun f -&gt; <span data-count="39532">c</span>hainr<span data-count="39532">1</span> e op &gt;&gt;| <span data-count="39532">f</span> a) &lt;|&gt; retur<span data-count="7132915">n</span> a
 
 (****************************************************** Patterns, types ******************************************************)
 let pe_letters =
   lift<span data-count="119">2</span>
-    (fun hd tl -&gt; <span data-count="4581839">S</span>tring.mak<span data-count="4581839">e</span> 1 hd ^ tl)
-    (satisf<span data-count="119">y</span> (fun ch -&gt; <span data-count="17217124">c</span>h = '_<span data-count="229">'</span> || is_lower ch))
-    (take_whil<span data-count="119">e</span> (fun ch -&gt; <span data-count="17290715">c</span>h = '_<span data-count="404989">'</span> || is_ident_char ch))
+    (fun hd tl -&gt; <span data-count="4581975">S</span>tring.mak<span data-count="4581975">e</span> 1 hd ^ tl)
+    (satisf<span data-count="119">y</span> (fun ch -&gt; <span data-count="17217371">c</span>h = '_<span data-count="229">'</span> || is_lower ch))
+    (take_whil<span data-count="119">e</span> (fun ch -&gt; <span data-count="17291030">c</span>h = '_<span data-count="405001">'</span> || is_ident_char ch))
 ;;
 
 let pe_identifier_letters =
   pe_toke<span data-count="119">n</span> pe_letters
   &gt;&gt;<span data-count="119">=</span> fun ident -&gt;
-  <span data-count="4581272">i</span>f is_keyword ident then <span data-count="1862279">f</span>ail @@ ident ^ "? invalid syntax" else <span data-count="2718993">r</span>eturn ident
+  <span data-count="4581408">i</span>f is_keyword ident then <span data-count="1862331">f</span>ail @@ ident ^ "? invalid syntax" else <span data-count="2719077">r</span>eturn ident
 ;;
 
 let pe_identifier_definable =
@@ -1255,14 +1255,14 @@ let pe_get_explicit_typ =
   let* is_there_delim_ahead =
     choic<span data-count="119">e</span> [ pe_assert_token_is_not_ahea<span data-count="119">d</span> delim; retur<span data-count="119">n</span> false ]
   in
-  <span data-count="5207975">i</span>f is_there_delim_ahead
+  <span data-count="5208070">i</span>f is_there_delim_ahead
   then
     <span data-count="39423">c</span>hoice
       [ (let* typ = delim =?*<span data-count="39423">&gt;</span> pe_type in
          <span data-count="738">r</span>eturn (Some typ))
       ; retur<span data-count="39423">n</span> None
       ]
-  else <span data-count="5168552">r</span>eturn None
+  else <span data-count="5168647">r</span>eturn None
 ;;
 
 let pe_typed cons pe =
@@ -1270,14 +1270,14 @@ let pe_typed cons pe =
   <span data-count="1879">p</span>e_typed &lt;|&gt; pe_paren<span data-count="1879">s</span> pe_typed
 ;;
 
-let cons_pat_typed res typ = <span data-count="1979592">p</span>_typed res ~typ
+let cons_pat_typed res typ = <span data-count="1979638">p</span>_typed res ~typ
 let pe_typed_pat = pe_type<span data-count="119">d</span> cons_pat_typed
 
 let rollback_not_list pe =
   <span data-count="464">l</span>et* pat = pe in
-  <span data-count="923406">m</span>atch pat with
+  <span data-count="923426">m</span>atch pat with
   | <span data-count="38066">P</span>List (_, _) | <span data-count="75763">P</span>Const CNil -&gt; return pat
-  | <span data-count="809577">_</span> -&gt; fail "Rollback"
+  | <span data-count="809597">_</span> -&gt; fail "Rollback"
 ;;
 
 let pe_list_pat_semicolon pe_pat =
@@ -1320,7 +1320,7 @@ let pe_pattern =
 let pe_pattern_typed = pe_type<span data-count="119">d</span> cons_pat_typed pe_pattern
 
 (****************************************************** Tuple ******************************************************)
-let cons_expr_typed res typ = <span data-count="2549119">e</span>_typed res ~typ
+let cons_expr_typed res typ = <span data-count="2549154">e</span>_typed res ~typ
 let pe_typed_expr = pe_type<span data-count="119">d</span> cons_expr_typed
 let pe_tuple_expr pe_expr = <span data-count="116">p</span>e_tuple (pe_typed_exp<span data-count="116">r</span> pe_expr) etuple
 let pe_value_or_tuple_expr = pe_value_or_tupl<span data-count="119">e</span> pe_tuple_expr
@@ -1339,22 +1339,22 @@ let pe_branching pe_expr =
 (****************************************************** Application, unary, binary ops ******************************************************)
 
 let get_typed_ebinop_applier op =
-  <span data-count="173087">l</span>et cast_str_ident_op op = <span data-count="43932">e</span>id (op |&gt; ident_op |&gt; <span data-count="43932">i</span>dent_of_definabl<span data-count="43932">e</span>) in
+  <span data-count="173117">l</span>et cast_str_ident_op op = <span data-count="43941">e</span>id (op |&gt; ident_op |&gt; <span data-count="43941">i</span>dent_of_definabl<span data-count="43941">e</span>) in
   let typed_ebinop_applier x y =
-    <span data-count="43932">e</span>_typed @@ eap<span data-count="43932">p</span> (e_type<span data-count="43932">d</span> (eap<span data-count="43932">p</span> (e_type<span data-count="43932">d</span> (cast_str_ident_o<span data-count="43932">p</span> op)) x)) y
+    <span data-count="43941">e</span>_typed @@ eap<span data-count="43941">p</span> (e_type<span data-count="43941">d</span> (eap<span data-count="43941">p</span> (e_type<span data-count="43941">d</span> (cast_str_ident_o<span data-count="43941">p</span> op)) x)) y
   in
   typed_ebinop_applier
 ;;
 
 let binop_binder group =
   <span data-count="580">l</span>et* op = pe_binary_op in
-  <span data-count="173070">l</span>et rec helper bin_op_string = function
-    | <span data-count="384984">g</span>roup_string :: _ when String.starts_wit<span data-count="384984">h</span> ~prefix:group_string bin_op_string -&gt;
-      <span data-count="43929">r</span>eturn ()
-    | <span data-count="341055">_</span> :: tl -&gt; helper bin_op_string tl
-    | <span data-count="129141">[</span>] -&gt; fail "There is no matching operator"
+  <span data-count="173100">l</span>et rec helper bin_op_string = function
+    | <span data-count="385044">g</span>roup_string :: _ when String.starts_wit<span data-count="385044">h</span> ~prefix:group_string bin_op_string -&gt;
+      <span data-count="43938">r</span>eturn ()
+    | <span data-count="341106">_</span> :: tl -&gt; helper bin_op_string tl
+    | <span data-count="129162">[</span>] -&gt; fail "There is no matching operator"
   in
-  helpe<span data-count="173070">r</span> op group *&gt; retur<span data-count="173070">n</span> (get_typed_ebinop_applie<span data-count="173070">r</span> op)
+  helpe<span data-count="173100">r</span> op group *&gt; retur<span data-count="173100">n</span> (get_typed_ebinop_applie<span data-count="173100">r</span> op)
 ;;
 
 let get_chain e priority_group =
@@ -1367,9 +1367,9 @@ let pe_typed_if_in_parens pe = <span data-count="133">p</span>e_paren<span data-
 
 let rollback_not_app pe =
   <span data-count="116">l</span>et* e = pe in
-  <span data-count="3071646">m</span>atch e with
+  <span data-count="3071684">m</span>atch e with
   | <span data-count="4">E</span>Constraint (_, _) -&gt; fail "Rollback"
-  | <span data-count="3071642">_</span> -&gt; return e
+  | <span data-count="3071680">_</span> -&gt; return e
 ;;
 
 let pe_bin_op_app pe_expr =
@@ -1388,7 +1388,7 @@ let pe_bin_op_app pe_expr =
       <span data-count="103">r</span>eturn @@ e_type<span data-count="103">d</span> @@ eap<span data-count="103">p</span> (e_type<span data-count="103">d</span> (ei<span data-count="103">d</span> unop)) expr_typed
     in
     let pe_app pe_expr =
-      <span data-count="116">l</span>et term = chainl1 pe_expr (retur<span data-count="116">n</span> (fun x y -&gt; <span data-count="1295525">e</span>app (e_type<span data-count="1295525">d</span> x) (e_type<span data-count="1295525">d</span> y))) in
+      <span data-count="116">l</span>et term = chainl1 pe_expr (retur<span data-count="116">n</span> (fun x y -&gt; <span data-count="1295534">e</span>app (e_type<span data-count="1295534">d</span> x) (e_type<span data-count="1295534">d</span> y))) in
       <span data-count="116">l</span>et term =
         chainl1 (pe_typed_if_in_paren<span data-count="116">s</span> term) (retur<span data-count="116">n</span> (fun x y -&gt; <span data-count="49">e</span>_typed @@ eap<span data-count="49">p</span> x y))
       in
@@ -1417,13 +1417,13 @@ let pe_fun_let_decl (pe_expr : expr t) =
   <span data-count="235">l</span>et delim_fun_decl = "=" in
   lift3
     (fun params decl_typ expr -&gt;
-      <span data-count="679264">m</span>atch expr with
+      <span data-count="679278">m</span>atch expr with
       | <span data-count="6">E</span>Constraint (expr, typ) -&gt;
         let right_side = List.fold_right efun params expr in
         <span data-count="6">d</span>ecl_typ, e_type<span data-count="6">d</span> right_side ~typ:(Some typ)
-      | <span data-count="679258">e</span>xpr -&gt;
+      | <span data-count="679272">e</span>xpr -&gt;
         let right_side = List.fold_right efun params expr in
-        <span data-count="679258">d</span>ecl_typ, right_side)
+        <span data-count="679272">d</span>ecl_typ, right_side)
     pe_params
     (pe_get_explicit_typ &lt;<span data-count="235">*</span> pe_stoke<span data-count="235">n</span> delim_fun_decl)
     (pe_typed_exp<span data-count="235">r</span> pe_expr)
@@ -1449,15 +1449,15 @@ let pe_match pe_expr =
   <span data-count="116">"</span>match"
   =?*&gt;
   let pe_case =
-    lift2 (fun case value -&gt; <span data-count="75776">c</span>ase, value) pe_pattern_typed ("-&gt;" =?*<span data-count="116">&gt;</span> pe_typed)
+    lift2 (fun case value -&gt; <span data-count="75779">c</span>ase, value) pe_pattern_typed ("-&gt;" =?*<span data-count="116">&gt;</span> pe_typed)
   in
   <span data-count="116">l</span>et* expr =
     pe_token<span data-count="116">1</span> pe_typed &lt;<span data-count="116">*</span> (pe_stoke<span data-count="116">n</span> "with" &lt;<span data-count="116">*</span> choic<span data-count="116">e</span> [ pe_stoken<span data-count="116">1</span> "|"; pe_space ])
   in
-  <span data-count="37731">l</span>et* cases = sep_by<span data-count="37731">1</span> (pe_stoke<span data-count="37731">n</span> "|") pe_case in
-  <span data-count="37731">m</span>atch cases with
+  <span data-count="37734">l</span>et* cases = sep_by<span data-count="37734">1</span> (pe_stoke<span data-count="37734">n</span> "|") pe_case in
+  <span data-count="37734">m</span>atch cases with
   | <span data-count="0">[</span>] -&gt; fail "Pattern matching with 0 patterns?!"
-  | <span data-count="37731">h</span>d :: tl -&gt; return @@ ematc<span data-count="37731">h</span> expr hd tl
+  | <span data-count="37734">h</span>d :: tl -&gt; return @@ ematc<span data-count="37734">h</span> expr hd tl
 ;;
 
 (****************************************************** Decl, expression parsing ******************************************************)
@@ -1465,7 +1465,7 @@ let pe_rec_flag = pe_next_stoke<span data-count="119">n</span> "rec" *<span data
 
 let pe_let_body pe_expr =
   <span data-count="235">l</span>ift2
-    (fun pat (pat_typ, expr) -&gt; <span data-count="679264">p</span>op_type<span data-count="679264">d</span> ~typ:pat_typ pat, expr)
+    (fun pat (pat_typ, expr) -&gt; <span data-count="679278">p</span>op_type<span data-count="679278">d</span> ~typ:pat_typ pat, expr)
     (pe_toke<span data-count="235">n</span>
        (choic<span data-count="235">e</span>
           [ pe_parens_or_no<span data-count="235">n</span> pe_pattern &gt;&gt;<span data-count="235">|</span> pop_pat
@@ -1477,14 +1477,14 @@ let pe_let_body pe_expr =
 let pe_closure pe_decl pe_expr = <span data-count="116">l</span>ift2 eclsr pe_decl ("in" =?*<span data-count="116">&gt;</span> pe_typed_exp<span data-count="116">r</span> pe_expr)
 
 let pe_let_decl pe_expr =
-  <span data-count="235">l</span>et pe_let_body_typed = lift (fun (pat, expr) -&gt; <span data-count="679264">p</span>at, expr) (pe_let_bod<span data-count="235">y</span> pe_expr) in
+  <span data-count="235">l</span>et pe_let_body_typed = lift (fun (pat, expr) -&gt; <span data-count="679278">p</span>at, expr) (pe_let_bod<span data-count="235">y</span> pe_expr) in
   <span data-count="235">l</span>et* let_decl =
     "let"
-    =?*<span data-count="235">&gt;</span> lift<span data-count="235">2</span> (fun rec_flag let_body -&gt; <span data-count="669451">r</span>ec_flag, let_body) pe_rec_flag pe_let_body_typed
+    =?*<span data-count="235">&gt;</span> lift<span data-count="235">2</span> (fun rec_flag let_body -&gt; <span data-count="669465">r</span>ec_flag, let_body) pe_rec_flag pe_let_body_typed
   in
-  <span data-count="669451">l</span>et* let_decls_mut = man<span data-count="669451">y</span> ("and" =?*<span data-count="669451">&gt;</span> pe_let_body_typed) in
-  <span data-count="669451">m</span>atch let_decl, let_decls_mut with
-  | <span data-count="659640">(</span>rec_flag, (pat_or_op, expr)), [] -&gt; return @@ dle<span data-count="659640">t</span> rec_flag (pat_or_op, expr)
+  <span data-count="669465">l</span>et* let_decls_mut = man<span data-count="669465">y</span> ("and" =?*<span data-count="669465">&gt;</span> pe_let_body_typed) in
+  <span data-count="669465">m</span>atch let_decl, let_decls_mut with
+  | <span data-count="659654">(</span>rec_flag, (pat_or_op, expr)), [] -&gt; return @@ dle<span data-count="659654">t</span> rec_flag (pat_or_op, expr)
   | <span data-count="9811">(</span> (rec_flag, (pat_or_op_typed1, expr_typed1))
     , (pat_or_op_typed2, expr_typed2) :: tl_decls ) -&gt;
     return
@@ -1520,8 +1520,8 @@ let pe_decls =
 ;;
 
 let parse_program s =
-  <span data-count="207">m</span>atch Angstrom.parse_string ~consume:Consume.All pe_decls s with
-  | <span data-count="206">O</span>k v -&gt; Ok v
+  <span data-count="209">m</span>atch Angstrom.parse_string ~consume:Consume.All pe_decls s with
+  | <span data-count="208">O</span>k v -&gt; Ok v
   | <span data-count="1">E</span>rror msg -&gt;
     (match msg with
      | <span data-count="1">"</span>: end_of_input" -&gt; Error "Syntax error"

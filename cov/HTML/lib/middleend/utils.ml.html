@@ -105,7 +105,7 @@ module StringSet = struct
   let remove = Base.Set.remove
   let diff = Base.Set.diff
   let singleton = Base.Set.ad<span data-count="81">d</span> empty
-  let contains set key = <span data-count="923">B</span>ase.Set.mem set key
+  let contains set key = <span data-count="930">B</span>ase.Set.mem set key
   let union = Base.Set.union
   let union_all = Base.Set.union_lis<span data-count="81">t</span> (module Base.String)
   let elements = Base.Set.to_list
@@ -115,7 +115,7 @@ end
 
 let rec bound_vars_pattern = function
   | <span data-count="1">P</span>Constraint (p, _) -&gt; bound_vars_pattern p
-  | <span data-count="1167">P</span>Id s -&gt; [ s ]
+  | <span data-count="1174">P</span>Id s -&gt; [ s ]
   | <span data-count="4">P</span>Tuple (p1, p2, ps) -&gt;
     bound_vars_patter<span data-count="4">n</span> p1
     @ bound_vars_patter<span data-count="4">n</span> p2

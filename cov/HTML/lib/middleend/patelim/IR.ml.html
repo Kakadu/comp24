@@ -178,9 +178,9 @@ let eclsr d e = <span data-count="300">N</span>oPMEClsr (d, e)
 let ebin_op bop e1 e2 = <span data-count="143">N</span>oPMEBinOp (bop, e1, e2)
 
 let e_typed ?(typ = <span data-count="0">N</span>one) e : expr_no_pm =
-  <span data-count="18">m</span>atch typ with
-  | <span data-count="14">S</span>ome typ -&gt; NoPMEConstraint (e, typ)
-  | <span data-count="4">N</span>one -&gt; e
+  <span data-count="20">m</span>atch typ with
+  | <span data-count="17">S</span>ome typ -&gt; NoPMEConstraint (e, typ)
+  | <span data-count="3">N</span>one -&gt; e
 ;;
 
 let dlet rf let_body_no_pm = <span data-count="110">N</span>oPMDLet (rf, let_body_no_pm)

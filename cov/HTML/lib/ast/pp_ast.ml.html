@@ -388,7 +388,7 @@ open Pp_utils
 open Format
 
 let pp_const fmt = function
-  | <span data-count="734">C</span>Int a -&gt; fprintf fmt "%d" a
+  | <span data-count="748">C</span>Int a -&gt; fprintf fmt "%d" a
   | <span data-count="50">C</span>Bool a -&gt; fprintf fmt "%b" a
   | <span data-count="90">C</span>Nil -&gt; fprintf fmt "[]"
   | <span data-count="258">C</span>Unit -&gt; fprintf fmt "()"
@@ -397,12 +397,12 @@ let pp_const fmt = function
 let pp_ground_typ = pp_ground
 
 let pp_ident_definable fmt = function
-  | <span data-count="2021">I</span>dentLetters s -&gt; fprintf fmt "%s" s
+  | <span data-count="2041">I</span>dentLetters s -&gt; fprintf fmt "%s" s
   | <span data-count="1">I</span>dentOp s -&gt; fprintf fmt "( %s )" s
 ;;
 
 let pp_ident fmt = function
-  | <span data-count="2022">I</span>dentOfDefinable id -&gt; pp_ident_definable fmt id
+  | <span data-count="2042">I</span>dentOfDefinable id -&gt; pp_ident_definable fmt id
   | <span data-count="22">I</span>dentOfBaseOp bop -&gt;
     fprintf
       fmt
@@ -414,14 +414,14 @@ let pp_ident fmt = function
 ;;
 
 let rec pp_typ fmt typ =
-  <span data-count="38">l</span>et arrow = function
+  <span data-count="40">l</span>et arrow = function
     | <span data-count="0">T</span>Arr _ -&gt; format_of_string "(%a)"
     | <span data-count="1">_</span> -&gt; format_of_string "%a"
   in
   match typ with
-  | <span data-count="34">T</span>Ground x -&gt;
+  | <span data-count="36">T</span>Ground x -&gt;
     (match x with
-     | <span data-count="27">G</span>Int -&gt; fprintf fmt "int"
+     | <span data-count="29">G</span>Int -&gt; fprintf fmt "int"
      | <span data-count="7">G</span>Bool -&gt; fprintf fmt "bool"
      | <span data-count="0">G</span>Unit -&gt; fprintf fmt "Unit")
   | <span data-count="2">T</span>Var a -&gt; fprintf fmt "'%s" a
@@ -447,10 +447,10 @@ let rec pp_typ fmt typ =
     fprintf fmt (arro<span data-count="1">w</span> typ_left ^<span data-count="1">^</span> " -&gt; %a") pp_typ typ_left pp_typ typ_right
 ;;
 
-let pp_typed fmt pp_v (v, typ) = <span data-count="35">f</span>printf fmt "(%a : %a)" pp_v v pp_typ typ
+let pp_typed fmt pp_v (v, typ) = <span data-count="37">f</span>printf fmt "(%a : %a)" pp_v v pp_typ typ
 
 let rec pp_pattern fmt = function
-  | <span data-count="1207">P</span>Id id -&gt; fprintf fmt "%s" id
+  | <span data-count="1227">P</span>Id id -&gt; fprintf fmt "%s" id
   | <span data-count="176">P</span>Const c -&gt; fprintf fmt "%a" pp_const c
   | <span data-count="27">P</span>Tuple (p1, p2, tuple) -&gt;
     fprintf
@@ -464,31 +464,31 @@ let rec pp_pattern fmt = function
          ", ")
       (p1 :: p2 :: tuple)
   | <span data-count="67">P</span>List (left, right) -&gt; fprintf fmt "%a :: %a" pp_pattern left pp_pattern right
-  | <span data-count="5">P</span>Constraint (p, typ) -&gt; pp_typed fmt pp_pattern (p, typ)
+  | <span data-count="6">P</span>Constraint (p, typ) -&gt; pp_typed fmt pp_pattern (p, typ)
 ;;
 
 let rec pp_pattern_or_op fmt = function
-  | <span data-count="657">P</span>OpPat pat -&gt; fprintf fmt "%a" pp_pattern pat
+  | <span data-count="671">P</span>OpPat pat -&gt; fprintf fmt "%a" pp_pattern pat
   | <span data-count="4">P</span>OpOp op -&gt; fprintf fmt "( %s )" op
   | <span data-count="3">P</span>OrOpConstraint (pat, typ) -&gt; pp_typed fmt pp_pattern_or_op (pat, typ)
 ;;
 
 let pp_rec_flag fmt = function
-  | <span data-count="78">R</span>ecursive -&gt; fprintf fmt " rec"
-  | <span data-count="630">N</span>ot_recursive -&gt; fprintf fmt ""
+  | <span data-count="80">R</span>ecursive -&gt; fprintf fmt " rec"
+  | <span data-count="642">N</span>ot_recursive -&gt; fprintf fmt ""
 ;;
 
 let rec pp_expr fmt = function
-  | <span data-count="782">E</span>Const c -&gt; pp_const fmt c
-  | <span data-count="1557">E</span>Id s -&gt; pp_ident fmt s
+  | <span data-count="796">E</span>Const c -&gt; pp_const fmt c
+  | <span data-count="1577">E</span>Id s -&gt; pp_ident fmt s
   | <span data-count="30">E</span>Fun (pattern, expr) -&gt; fprintf fmt "(fun %a -&gt; %a)" pp_pattern pattern pp_expr expr
-  | <span data-count="247">E</span>App (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2) -&gt;
+  | <span data-count="251">E</span>App (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2) -&gt;
     (* bin op pattern *)
     fprintf fmt "(%a %s %a)" pp_expr op1 bin_op pp_expr op2
-  | <span data-count="87">E</span>App (e1, EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2)) -&gt;
+  | <span data-count="89">E</span>App (e1, EApp (EApp (EId (IdentOfDefinable (IdentOp bin_op)), op1), op2)) -&gt;
     fprintf fmt "%a (%a %s %a)" pp_expr e1 pp_expr op1 bin_op pp_expr op2
-  | <span data-count="863">E</span>App (e1, e2) -&gt; fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2
-  | <span data-count="96">E</span>If (e_if, e_th, e_el) -&gt;
+  | <span data-count="869">E</span>App (e1, e2) -&gt; fprintf fmt "(%a %a)" pp_expr e1 pp_expr e2
+  | <span data-count="98">E</span>If (e_if, e_th, e_el) -&gt;
     fprintf fmt "if %a then %a else %a" pp_expr e_if pp_expr e_th pp_expr e_el
   | <span data-count="95">E</span>List (hd, tl) -&gt; fprintf fmt "%a :: %a" pp_expr hd pp_expr tl
   | <span data-count="31">E</span>Tuple (e1, e2, es) -&gt;
@@ -502,45 +502,45 @@ let rec pp_expr fmt = function
          pp_expr
          ", ")
       (e1 :: e2 :: es)
-  | <span data-count="263">E</span>Clsr (decl, expr) -&gt; fprintf fmt "%a\nin %a" pp_decl decl pp_expr expr
-  | <span data-count="31">E</span>Match (expr, case1, cases) -&gt;
+  | <span data-count="267">E</span>Clsr (decl, expr) -&gt; fprintf fmt "%a\nin %a" pp_decl decl pp_expr expr
+  | <span data-count="33">E</span>Match (expr, case1, cases) -&gt;
     let pp_case fmt (pat_typed, expr) =
-      <span data-count="76">f</span>printf fmt "| %a -&gt; %a" pp_pattern pat_typed pp_expr expr
+      <span data-count="78">f</span>printf fmt "| %a -&gt; %a" pp_pattern pat_typed pp_expr expr
     in
     let pp_cases = pp_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="45">f</span>printf fmt "\n") pp_case in
-    <span data-count="31">f</span>printf fmt "match %a with\n%a" pp_expr expr pp_cases (case1 :: cases)
-  | <span data-count="22">E</span>Constraint (e, typ) -&gt; pp_typed fmt pp_expr (e, typ)
+    <span data-count="33">f</span>printf fmt "match %a with\n%a" pp_expr expr pp_cases (case1 :: cases)
+  | <span data-count="23">E</span>Constraint (e, typ) -&gt; pp_typed fmt pp_expr (e, typ)
 
 and pp_let_expr fmt expr =
-  <span data-count="661">l</span>et rec extract_fun_pats acc = function
-    | <span data-count="526">E</span>Fun (pat_typed, expr) -&gt; extract_fun_pats (pat_typed :: acc) expr
-    | <span data-count="661">e</span> -&gt; List.re<span data-count="661">v</span> acc, e
+  <span data-count="675">l</span>et rec extract_fun_pats acc = function
+    | <span data-count="530">E</span>Fun (pat_typed, expr) -&gt; extract_fun_pats (pat_typed :: acc) expr
+    | <span data-count="675">e</span> -&gt; List.re<span data-count="675">v</span> acc, e
   in
   let pats, expr_fun_body = extract_fun_pats [] expr in
-  <span data-count="661">l</span>et is_pat_with_parens = function
-    | <span data-count="25">P</span>Const _ | <span data-count="493">P</span>Id _ | <span data-count="2">P</span>Tuple _ | <span data-count="4">P</span>Constraint _ -&gt; false
+  <span data-count="675">l</span>et is_pat_with_parens = function
+    | <span data-count="25">P</span>Const _ | <span data-count="497">P</span>Id _ | <span data-count="2">P</span>Tuple _ | <span data-count="4">P</span>Constraint _ -&gt; false
     | <span data-count="2">_</span> -&gt; true
   in
   let pp_pattern_typed fmt pat =
-    <span data-count="526">l</span>et to_print = format_of_string @@ if is_pat_with_parens pat then <span data-count="2">"</span>(%a)" else <span data-count="524">"</span>%a" in
-    <span data-count="526">f</span>printf fmt to_print pp_pattern pat
+    <span data-count="530">l</span>et to_print = format_of_string @@ if is_pat_with_parens pat then <span data-count="2">"</span>(%a)" else <span data-count="528">"</span>%a" in
+    <span data-count="530">f</span>printf fmt to_print pp_pattern pat
   in
   let pp_pats_typed =
-    pp_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="266">f</span>printf fmt " ") pp_pattern_typed
+    pp_print_list ~pp_sep:(fun fmt _ -&gt; <span data-count="268">f</span>printf fmt " ") pp_pattern_typed
   in
-  <span data-count="661">l</span>et to_print =
-    format_of_string (if List.lengt<span data-count="661">h</span> pats &gt; 0 then <span data-count="260">"</span>%a = %a" else <span data-count="401">"</span>%a= %a")
+  <span data-count="675">l</span>et to_print =
+    format_of_string (if List.lengt<span data-count="675">h</span> pats &gt; 0 then <span data-count="262">"</span>%a = %a" else <span data-count="413">"</span>%a= %a")
   in
-  <span data-count="661">m</span>atch expr with
-  | <span data-count="14">E</span>Constraint (_, _) -&gt; fprintf fmt to_print pp_pats_typed pats pp_expr expr
-  | <span data-count="647">_</span> -&gt; fprintf fmt to_print pp_pats_typed pats pp_expr expr_fun_body
+  <span data-count="675">m</span>atch expr with
+  | <span data-count="15">E</span>Constraint (_, _) -&gt; fprintf fmt to_print pp_pats_typed pats pp_expr expr
+  | <span data-count="660">_</span> -&gt; fprintf fmt to_print pp_pats_typed pats pp_expr expr_fun_body
 
 and pp_decl fmt =
-  <span data-count="652">l</span>et pp_let_body fmt (pat_or_op, expr) =
-    <span data-count="661">f</span>printf fmt "%a %a" pp_pattern_or_op pat_or_op pp_let_expr expr
+  <span data-count="666">l</span>et pp_let_body fmt (pat_or_op, expr) =
+    <span data-count="675">f</span>printf fmt "%a %a" pp_pattern_or_op pat_or_op pp_let_expr expr
   in
   function
-  | <span data-count="643">D</span>Let (rec_flag, (pat_or_op, expr)) -&gt;
+  | <span data-count="657">D</span>Let (rec_flag, (pat_or_op, expr)) -&gt;
     fprintf fmt "let%a %a" pp_rec_flag rec_flag pp_let_body (pat_or_op, expr)
   | <span data-count="9">D</span>LetMut (rec_flag, decl1, decl2, decls) -&gt;
     let pp_decls =
@@ -549,7 +549,7 @@ and pp_decl fmt =
     <span data-count="9">f</span>printf fmt "let%a %a" pp_rec_flag rec_flag pp_decls (decl1 :: decl2 :: decls)
 ;;
 
-let pp_prog = pp_print_lis<span data-count="100">t</span> ~pp_sep:(fun fmt _ -&gt; <span data-count="236">f</span>printf fmt ";;\n") pp_decl
+let pp_prog = pp_print_lis<span data-count="100">t</span> ~pp_sep:(fun fmt _ -&gt; <span data-count="242">f</span>printf fmt ";;\n") pp_decl
 </code></pre>
       </div>
     </div>

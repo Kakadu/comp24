@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>alpha_conv_utils.ml &mdash; Coverage report</title>
-    <meta name="description" content="94.12% coverage in lib/middleend/alpha_conv_utils.ml">
+    <meta name="description" content="97.06% coverage in lib/middleend/alpha_conv_utils.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,9 @@
           <span class="dirname">lib/middleend/</span>alpha_conv_utils.ml
         </a>
       </h1>
-      <h2>94.12%</h2>
+      <h2>97.06%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:41.18%"></span>
       <span class="unvisited" style="bottom:3.92%"></span>
     </div>
     <div id="report">
@@ -44,7 +43,7 @@
 <a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
@@ -135,49 +134,49 @@
 open Common.Ident_utils
 
 let get_new_id new_name = function
-  | <span data-count="1142">I</span>dentOfDefinable (IdentLetters _) -&gt; IdentOfDefinable (IdentLetters new_name)
-  | <span data-count="189">I</span>dentOfDefinable (IdentOp _) -&gt; IdentOfDefinable (IdentOp new_name)
+  | <span data-count="1157">I</span>dentOfDefinable (IdentLetters _) -&gt; IdentOfDefinable (IdentLetters new_name)
+  | <span data-count="192">I</span>dentOfDefinable (IdentOp _) -&gt; IdentOfDefinable (IdentOp new_name)
   | <span data-count="8">a</span> -&gt; a
 ;;
 
 let revert_str =
   String.ma<span data-count="62">p</span> (function
-    | <span data-count="573">'</span>.' -&gt; '_'
-    | <span data-count="5586">a</span> -&gt; a)
+    | <span data-count="584">'</span>.' -&gt; '_'
+    | <span data-count="5655">a</span> -&gt; a)
 ;;
 
 let rec revert_pat = function
   | <span data-count="115">P</span>Const _ as p -&gt; p
-  | <span data-count="663">P</span>Id id -&gt; pid @@ revert_st<span data-count="663">r</span> id
+  | <span data-count="673">P</span>Id id -&gt; pid @@ revert_st<span data-count="673">r</span> id
   | <span data-count="35">P</span>List (hd, tl) -&gt; plist (revert_pa<span data-count="35">t</span> hd) (revert_pa<span data-count="35">t</span> tl)
   | <span data-count="11">P</span>Tuple (p1, p2, ps) -&gt; ptuple (revert_pa<span data-count="11">t</span> p1) (revert_pa<span data-count="11">t</span> p2) (List.ma<span data-count="11">p</span> revert_pat ps)
-  | <span data-count="0">P</span>Constraint (p, typ) -&gt; p_typed ~typ:(Some typ) (revert_pa<span data-count="0">t</span> p)
+  | <span data-count="1">P</span>Constraint (p, typ) -&gt; p_typed ~typ:(Some typ) (revert_pa<span data-count="1">t</span> p)
 ;;
 
 let rec revert_expr =
   let rec helper = function
-    | <span data-count="1069">E</span>Id id -&gt; eid (get_new_i<span data-count="1069">d</span> (revert_st<span data-count="1069">r</span> @@ ident_to_strin<span data-count="1069">g</span> id) id)
-    | <span data-count="407">E</span>Const _ as e -&gt; e
-    | <span data-count="923">E</span>App (e1, e2) -&gt; eapp (helpe<span data-count="923">r</span> e1) (helpe<span data-count="923">r</span> e2)
-    | <span data-count="47">E</span>If (e1, e2, e3) -&gt; eif (helpe<span data-count="47">r</span> e1) (helpe<span data-count="47">r</span> e2) (helpe<span data-count="47">r</span> e3)
-    | <span data-count="326">E</span>Fun (pat, e) -&gt; efun (revert_pa<span data-count="326">t</span> pat) (helpe<span data-count="326">r</span> e)
+    | <span data-count="1082">E</span>Id id -&gt; eid (get_new_i<span data-count="1082">d</span> (revert_st<span data-count="1082">r</span> @@ ident_to_strin<span data-count="1082">g</span> id) id)
+    | <span data-count="414">E</span>Const _ as e -&gt; e
+    | <span data-count="933">E</span>App (e1, e2) -&gt; eapp (helpe<span data-count="933">r</span> e1) (helpe<span data-count="933">r</span> e2)
+    | <span data-count="48">E</span>If (e1, e2, e3) -&gt; eif (helpe<span data-count="48">r</span> e1) (helpe<span data-count="48">r</span> e2) (helpe<span data-count="48">r</span> e3)
+    | <span data-count="328">E</span>Fun (pat, e) -&gt; efun (revert_pa<span data-count="328">t</span> pat) (helpe<span data-count="328">r</span> e)
     | <span data-count="40">E</span>List (e1, e2) -&gt; elist (revert_exp<span data-count="40">r</span> e1) (revert_exp<span data-count="40">r</span> e2)
-    | <span data-count="20">E</span>Match (e, case1, cases) -&gt;
-      let revert_branch (pat, expr) = <span data-count="43">r</span>evert_pa<span data-count="43">t</span> pat, helpe<span data-count="43">r</span> expr in
-      ematch (helpe<span data-count="20">r</span> e) (revert_branc<span data-count="20">h</span> case1) (List.ma<span data-count="20">p</span> revert_branch cases)
+    | <span data-count="21">E</span>Match (e, case1, cases) -&gt;
+      let revert_branch (pat, expr) = <span data-count="44">r</span>evert_pa<span data-count="44">t</span> pat, helpe<span data-count="44">r</span> expr in
+      ematch (helpe<span data-count="21">r</span> e) (revert_branc<span data-count="21">h</span> case1) (List.ma<span data-count="21">p</span> revert_branch cases)
     | <span data-count="11">E</span>Tuple (e1, e2, es) -&gt; etuple (helpe<span data-count="11">r</span> e1) (helpe<span data-count="11">r</span> e2) (List.ma<span data-count="11">p</span> revert_expr es)
-    | <span data-count="133">E</span>Clsr (decl, e) -&gt; eclsr (revert_dec<span data-count="133">l</span> decl) (helpe<span data-count="133">r</span> e)
+    | <span data-count="135">E</span>Clsr (decl, e) -&gt; eclsr (revert_dec<span data-count="135">l</span> decl) (helpe<span data-count="135">r</span> e)
     | <span data-count="9">E</span>Constraint (e, typ) -&gt; e_typed ~typ:(Some typ) (helpe<span data-count="9">r</span> e)
   in
   helper
 
 and revert_decl = function
-  | <span data-count="357">D</span>Let (rec_flag, (pop, e)) -&gt; dlet rec_flag (revert_po<span data-count="357">p</span> pop, revert_exp<span data-count="357">r</span> e)
+  | <span data-count="364">D</span>Let (rec_flag, (pop, e)) -&gt; dlet rec_flag (revert_po<span data-count="364">p</span> pop, revert_exp<span data-count="364">r</span> e)
   | <span data-count="4">D</span>LetMut (rec_flag, lb1, lb2, lbs) -&gt;
     dletmut rec_flag (revert_l<span data-count="4">b</span> lb1) (revert_l<span data-count="4">b</span> lb2) (List.ma<span data-count="4">p</span> revert_lb lbs)
 
 and revert_pop = function
-  | <span data-count="363">P</span>OpPat pat -&gt; pop_pat (revert_pa<span data-count="363">t</span> pat)
+  | <span data-count="370">P</span>OpPat pat -&gt; pop_pat (revert_pa<span data-count="370">t</span> pat)
   | <span data-count="2">P</span>OpOp id -&gt; pop_op (revert_st<span data-count="2">r</span> id)
   | <span data-count="0">P</span>OrOpConstraint (pop, typ) -&gt; pop_typed ~typ:(Some typ) (revert_po<span data-count="0">p</span> pop)
 
