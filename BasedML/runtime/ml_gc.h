@@ -9,13 +9,16 @@
 #endif
 
 #ifdef GC
+
+void gc_on_load();
+
 typedef enum { COLOR_UNPROCESSED = 0, COLOR_PROCESSED = 1 } color_t;
 
     #define START_COLOR COLOR_UNPROCESSED
 
 typedef void* (*malloc_f_t)(size_t sz);
 
-void add_global_vars_to_gc(size_t n, va_list globs);
+void add_global_vars_to_gc(int64_t n, va_list globs);
 
 void compact();
 

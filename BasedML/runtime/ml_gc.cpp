@@ -24,7 +24,9 @@ pool_t* the_pool;
         ({                                                                                                             \
             void* res = pool->pool_pointer;                                                                            \
             pool->pool_pointer += sz;                                                                                  \
-            DEBUG_RUN(printf("[CR]: Added something with address %lx\n", (int64_t)res););                              \
+            DEBUG_RUN(printf("[CR]: Added something with address %lx\n", (int64_t)res); print_gc_info();               \
+                      fflush(stdout););                                                                                \
+                                                                                                                       \
             pool->used_addresses.insert((box_t*)res);                                                                  \
             res;                                                                                                       \
         })
@@ -57,8 +59,12 @@ box_t* process_node(box_t* old_box, pool_t* old_pool) {
     DEBUG_RUN(printf("[PROC]: Try process %lx: ", old_box); fflush(stdout););
 
     if (!is_inside_pool(old_pool, old_box)) {
+        DEBUG_RUN(printf("NO\n"); fflush(stdout););
         return old_box;
     } else {
+
+        DEBUG_RUN(printf("YES\n"); fflush(stdout););
+    #undef DEBUG
         uint64_t orig_address = (uint64_t)old_box;
         old_box = *(--(old_pool->used_addresses.upper_bound(old_box)));
         uint64_t offset = orig_address - (uint64_t)old_box;
@@ -79,6 +85,9 @@ box_t* process_node(box_t* old_box, pool_t* old_pool) {
                 printf("func: %lx  | %lx\n", old_box->values[0], res->values[0]);
                 printf("num: %lx  | %lx\n", old_box->values[1], res->values[1]);
                 printf("applied: %lx  | %lx\n", old_box->values[2], res->values[2]);
+                for (int i = 3; i < old_box->header.size - 1; i++) {
+                    printf("args[%d]: %lx  | %lx\n", i, old_box->values[i], res->values[i]);
+                }
             });
             old_box->header.color = COLOR_PROCESSED;
             old_box->values[0] = (int64_t)res; // set new box address
@@ -120,17 +129,23 @@ void* safe_malloc(size_t sz) {
         return POOL_MALLOC(the_pool, sz);
     }
 }
-void* _init_gc_malloc(size_t sz) {
-    DEBUG_RUN(printf("[GC] ---- GC IS ALIVE\n"););
+
+void gc_on_load() {
     stack_bottom = (box_t**)get_stack_pointer();
     the_pool = create_pool_t(START_POOL_SIZE);
+}
+
+void* _init_gc_malloc(size_t sz) {
+    DEBUG_RUN(printf("[GC] ---- GC IS ALIVE\n"););
+    // stack_bottom = (box_t**)get_stack_pointer() + 0x100;
+    // the_pool = create_pool_t(START_POOL_SIZE);
     gc_malloc = (malloc_f_t)safe_malloc;
     return gc_malloc(sz);
 }
 
 malloc_f_t gc_malloc = _init_gc_malloc;
 
-void add_global_vars_to_gc(size_t n, va_list globs) {
+void add_global_vars_to_gc(int64_t n, va_list globs) {
     global_vars = (box_t***)calloc(n, sizeof(*global_vars));
     global_vars_end = global_vars + n;
     for (int i = 0; i < n; i++) {
@@ -147,6 +162,9 @@ void print_gc_info() {
     size_t used = the_pool->pool_pointer - the_pool->pool_bottom;
     size_t all = the_pool->pool_top - the_pool->pool_bottom;
     printf("Memory used: %#8lx/%#8lx\n", used, all);
+    DEBUG_RUN(printf("Bottom: %#8lx |  Ptr: %#8lx | Top: %#8lx\n", (int64_t)the_pool->pool_bottom,
+                     (int64_t)the_pool->pool_pointer, (int64_t)the_pool->pool_top);
+              printf("Stack bot: %lx | cur: %lx\n", stack_bottom, get_stack_pointer()););
 }
 
 #endif

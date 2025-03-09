@@ -32,14 +32,12 @@ let create_help_global name =
   Llvm.define_global (help_globname_by_orig name) (Llvm.const_int i64_t 0) the_module
 ;;
 
-let count_args =
+let count_args fun_tp =
   let rec function_deep acc = function
     | TFunction (_arg_tp, ret_tp) -> function_deep (acc + 1) ret_tp
     | _ -> acc
   in
-  function
-  | TFunction (TUnit, _) -> 0
-  | _ as fun_tp -> function_deep 0 fun_tp
+  function_deep 0 fun_tp
 ;;
 
 let gen_function_type_std tp vararg_flag =
@@ -123,6 +121,19 @@ let build_mlrt_create_empty_closure
       [| int_ptr; Llvm.const_int i64_t args_count |]
       builder
   in
+  return clos
+;;
+
+let build_mlrt_handle_global_vars : Llvm.llbuilder -> (state, Llvm.llvalue) t =
+  fun builder ->
+  let globs =
+    Llvm.fold_left_globals
+      (fun lst glb -> Llvm.build_ptrtoint glb i64_t "" builder :: lst)
+      []
+      the_module
+  in
+  let globs = Llvm.const_int i64_t (List.length globs) :: globs in
+  let* clos = build_fun_call "mlrt_handle_global_vars" (Array.of_list globs) builder in
   return clos
 ;;
 
@@ -345,10 +356,17 @@ let create_main : Llvm.llvalue -> anf_prog -> (state, unit) t =
   *> return ()
 ;;
 
+let add_global_handling : Llvm.llvalue -> (state, unit) t =
+  fun init_fun ->
+  let eb = Llvm.entry_block init_fun in
+  let ebuilder = Llvm.builder_at the_context (Llvm.instr_begin eb) in
+  build_mlrt_handle_global_vars ebuilder *> return ()
+;;
+
 let start_compile : anf_prog -> (state, unit) t =
   fun prog ->
   let* init_fun = declare_all_std_funs () *> create_init () in
-  create_main init_fun prog
+  create_main init_fun prog >>= fun _ -> add_global_handling init_fun
 ;;
 
 let compile out_name prog =
