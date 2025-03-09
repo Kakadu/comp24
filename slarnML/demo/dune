@@ -19,7 +19,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run %{gen} /mnt/c/Users/iashurenkov/Documents/Projects/comp23hw/slarnML/demo/main.ml %{targets})))
+  (run %{gen} ./slarnML/demo/main.ml %{targets})))
 
 (rule
  (targets main.o)
