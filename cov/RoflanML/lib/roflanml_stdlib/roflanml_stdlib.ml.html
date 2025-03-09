@@ -113,32 +113,32 @@ open Typing
 module RoflanML_Stdlib = struct
   let default =
     let stdlib = Map.empty (module String) in
-    <span data-count="34">l</span>et stdlib =
+    <span data-count="36">l</span>et stdlib =
       List.fold [ "+"; "-"; "*"; "/" ] ~init:stdlib ~f:(fun stdlib op -&gt;
-        <span data-count="136">M</span>ap.update stdlib op ~f:(fun _ -&gt;
-          <span data-count="136">T</span>Arrow (TBase BInt, TArrow (TBase BInt, TBase BInt))))
+        <span data-count="144">M</span>ap.update stdlib op ~f:(fun _ -&gt;
+          <span data-count="144">T</span>Arrow (TBase BInt, TArrow (TBase BInt, TBase BInt))))
     in
-    <span data-count="34">l</span>et stdlib =
+    <span data-count="36">l</span>et stdlib =
       List.fold [ "="; "&lt;&gt;"; "&gt;"; "&gt;="; "&lt;"; "&lt;=" ] ~init:stdlib ~f:(fun stdlib op -&gt;
-        <span data-count="204">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="204">T</span>Arrow (TVar 0, TArrow (TVar 0, TBase BBool))))
+        <span data-count="216">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="216">T</span>Arrow (TVar 0, TArrow (TVar 0, TBase BBool))))
     in
-    <span data-count="34">l</span>et stdlib =
+    <span data-count="36">l</span>et stdlib =
       List.fold [ "&amp;&amp;"; "||" ] ~init:stdlib ~f:(fun stdlib op -&gt;
-        <span data-count="68">M</span>ap.update stdlib op ~f:(fun _ -&gt;
-          <span data-count="68">T</span>Arrow (TBase BBool, TArrow (TBase BBool, TBase BBool))))
+        <span data-count="72">M</span>ap.update stdlib op ~f:(fun _ -&gt;
+          <span data-count="72">T</span>Arrow (TBase BBool, TArrow (TBase BBool, TBase BBool))))
     in
-    <span data-count="34">l</span>et stdlib =
+    <span data-count="36">l</span>et stdlib =
       Map.update stdlib "::" ~f:(fun _ -&gt;
-        <span data-count="34">T</span>Arrow (TVar 0, TArrow (TList (TVar 0), TList (TVar 0))))
+        <span data-count="36">T</span>Arrow (TVar 0, TArrow (TList (TVar 0), TList (TVar 0))))
     in
-    <span data-count="34">l</span>et stdlib =
+    <span data-count="36">l</span>et stdlib =
       List.fold
         [ "print_int", BInt; "print_bool", BBool ]
         ~init:stdlib
         ~f:(fun stdlib (op, ty) -&gt;
-          <span data-count="68">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="68">T</span>Arrow (TBase ty, TBase BUnit)))
+          <span data-count="72">M</span>ap.update stdlib op ~f:(fun _ -&gt; <span data-count="72">T</span>Arrow (TBase ty, TBase BUnit)))
     in
-    <span data-count="34">s</span>tdlib
+    <span data-count="36">s</span>tdlib
   ;;
 end
 </code></pre>

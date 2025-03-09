@@ -171,8 +171,8 @@ type llprogram = lldecl list
 
 let ll_to_ast =
   let rec expr_to_ast = function
-    | <span data-count="14">L</span>LConst c -&gt; EConst c
-    | <span data-count="68">L</span>LVar x -&gt; EVar x
+    | <span data-count="17">L</span>LConst c -&gt; EConst c
+    | <span data-count="79">L</span>LVar x -&gt; EVar x
     | <span data-count="1">L</span>LTuple (e1, e2, es) -&gt;
       ETuple (expr_to_as<span data-count="1">t</span> e1, expr_to_as<span data-count="1">t</span> e2, List.ma<span data-count="1">p</span> es ~f:expr_to_ast)
     | <span data-count="0">L</span>LList es -&gt; EList (List.ma<span data-count="0">p</span> es ~f:expr_to_ast)
@@ -180,14 +180,14 @@ let ll_to_ast =
     | <span data-count="0">L</span>LMatch (e, cases) -&gt;
       EMatch (expr_to_as<span data-count="0">t</span> e, List.ma<span data-count="0">p</span> cases ~f:(fun (pat, e) -&gt; <span data-count="0">p</span>at, expr_to_as<span data-count="0">t</span> e))
     | <span data-count="5">L</span>LLetIn (id, e1, e2) -&gt; ELetIn (NonRec, id, expr_to_as<span data-count="5">t</span> e1, expr_to_as<span data-count="5">t</span> e2)
-    | <span data-count="53">L</span>LApp (e1, e2) -&gt; EApp (expr_to_as<span data-count="53">t</span> e1, expr_to_as<span data-count="53">t</span> e2)
+    | <span data-count="62">L</span>LApp (e1, e2) -&gt; EApp (expr_to_as<span data-count="62">t</span> e1, expr_to_as<span data-count="62">t</span> e2)
   in
   let decl_to_ast = function
-    | <span data-count="21">L</span>LDLet (is_rec, id, args, e) -&gt;
+    | <span data-count="26">L</span>LDLet (is_rec, id, args, e) -&gt;
       let e =
-        List.fold_right args ~init:(expr_to_as<span data-count="21">t</span> e) ~f:(fun arg e -&gt; <span data-count="32">E</span>Fun (arg, e))
+        List.fold_right args ~init:(expr_to_as<span data-count="26">t</span> e) ~f:(fun arg e -&gt; <span data-count="37">E</span>Fun (arg, e))
       in
-      <span data-count="21">D</span>Let (is_rec, id, e)
+      <span data-count="26">D</span>Let (is_rec, id, e)
     | <span data-count="0">L</span>LDMutualLet decls -&gt;
       let decls =
         List.fold_right decls ~init:[] ~f:(fun (id, args, e) acc -&gt;

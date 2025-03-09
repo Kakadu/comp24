@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>closure_conversion.ml &mdash; Coverage report</title>
-    <meta name="description" content="66.67% coverage in lib/middleend/closure_conversion.ml">
+    <meta name="description" content="70.14% coverage in lib/middleend/closure_conversion.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/middleend/</span>closure_conversion.ml
         </a>
       </h1>
-      <h2>66.67%</h2>
+      <h2>70.14%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:5.88%"></span>
@@ -43,12 +43,7 @@
       <span class="unvisited" style="top:34.76%"></span>
       <span class="unvisited" style="top:35.29%"></span>
       <span class="unvisited" style="top:36.36%"></span>
-      <span class="unvisited" style="top:36.90%"></span>
       <span class="unvisited" style="top:38.50%"></span>
-      <span class="unvisited" style="top:39.04%"></span>
-      <span class="unvisited" style="top:40.64%"></span>
-      <span class="unvisited" style="top:41.18%"></span>
-      <span class="unvisited" style="top:41.71%"></span>
       <span class="unvisited" style="bottom:39.04%"></span>
       <span class="unvisited" style="bottom:37.97%"></span>
       <span class="unvisited" style="bottom:37.43%"></span>
@@ -126,16 +121,16 @@
 <a id="L66"></a><span class="unvisited"> </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span class="unvisited"> </span>
-<a id="L69"></a><span class="unvisited"> </span>
+<a id="L69"></a><span class="visited"> </span>
 <a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span class="unvisited"> </span>
-<a id="L73"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span class="unvisited"> </span>
-<a id="L77"></a><span class="unvisited"> </span>
-<a id="L78"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
 <a id="L79"></a><span class="visited"> </span>
 <a id="L80"></a><span > </span>
 <a id="L81"></a><span class="visited"> </span>
@@ -467,16 +462,16 @@ let find_free_vars =
     <span data-count="0">l</span>et env = Set.union env (find_vars_patter<span data-count="0">n</span> pat) in
     <span data-count="0">h</span>elper env free_vars e
   and helper env free_vars = function
-    | <span data-count="34">E</span>Const _ -&gt; Set.empty (module String)
-    | <span data-count="178">E</span>Var x -&gt;
+    | <span data-count="38">E</span>Const _ -&gt; Set.empty (module String)
+    | <span data-count="194">E</span>Var x -&gt;
       let fvs1 =
         match Map.find free_vars x with
         | <span data-count="10">S</span>ome lst -&gt; Set.of_lis<span data-count="10">t</span> (module String) lst
-        | <span data-count="168">N</span>one -&gt; Set.empt<span data-count="168">y</span> (module String)
+        | <span data-count="184">N</span>one -&gt; Set.empt<span data-count="184">y</span> (module String)
       in
       let fvs2 =
         if Set.mem env x
-        then <span data-count="146">S</span>et.empt<span data-count="146">y</span> (module String)
+        then <span data-count="162">S</span>et.empt<span data-count="162">y</span> (module String)
         else <span data-count="32">S</span>et.singleto<span data-count="32">n</span> (module String) x
       in
       Set.union fvs1 fvs2
@@ -505,40 +500,40 @@ let find_free_vars =
           ~f:(fun acc case -&gt; <span data-count="0">S</span>et.union acc (find_free_vars_cas<span data-count="0">e</span> env free_vars case))
       in
       <span data-count="0">S</span>et.union vs1 vs2
-    | <span data-count="0">E</span>LetIn (is_rec, id, e1, e2) -&gt;
+    | <span data-count="1">E</span>LetIn (is_rec, id, e1, e2) -&gt;
       let env =
         match is_rec with
         | <span data-count="0">R</span>ec -&gt; Set.ad<span data-count="0">d</span> env id
-        | <span data-count="0">N</span>onRec -&gt; env
+        | <span data-count="1">N</span>onRec -&gt; env
       in
       let vs1 = helper env free_vars e1 in
-      <span data-count="0">l</span>et env = Set.add env id in
-      <span data-count="0">l</span>et vs2 = helper env free_vars e2 in
-      <span data-count="0">S</span>et.union vs1 vs2
-    | <span data-count="72">E</span>Fun ((id, _), e) -&gt;
+      <span data-count="1">l</span>et env = Set.add env id in
+      <span data-count="1">l</span>et vs2 = helper env free_vars e2 in
+      <span data-count="1">S</span>et.union vs1 vs2
+    | <span data-count="79">E</span>Fun ((id, _), e) -&gt;
       let env = Set.add env id in
-      <span data-count="72">h</span>elper env free_vars e
-    | <span data-count="146">E</span>App (e1, e2) -&gt; Set.union (helpe<span data-count="146">r</span> env free_vars e1) (helpe<span data-count="146">r</span> env free_vars e2)
+      <span data-count="79">h</span>elper env free_vars e
+    | <span data-count="159">E</span>App (e1, e2) -&gt; Set.union (helpe<span data-count="159">r</span> env free_vars e1) (helpe<span data-count="159">r</span> env free_vars e2)
   in
   helper
 ;;
 
 let closure_app e args =
-  <span data-count="48">L</span>ist.fold_left args ~init:e ~f:(fun acc arg -&gt; <span data-count="36">E</span>App (acc, EVar arg))
+  <span data-count="49">L</span>ist.fold_left args ~init:e ~f:(fun acc arg -&gt; <span data-count="36">E</span>App (acc, EVar arg))
 ;;
 
 let closure_fun f args =
-  <span data-count="54">B</span>ase.List.fold_right args ~init:f ~f:(fun arg acc -&gt; <span data-count="36">E</span>Fun ((arg, None), acc))
+  <span data-count="60">B</span>ase.List.fold_right args ~init:f ~f:(fun arg acc -&gt; <span data-count="36">E</span>Fun ((arg, None), acc))
 ;;
 
 let close e env =
-  <span data-count="33">l</span>et rec close_expr e free_vars env =
-    <span data-count="540">m</span>atch e with
-    | <span data-count="86">E</span>Const c -&gt; EConst c
-    | <span data-count="196">E</span>Var x -&gt;
+  <span data-count="39">l</span>et rec close_expr e free_vars env =
+    <span data-count="580">m</span>atch e with
+    | <span data-count="92">E</span>Const c -&gt; EConst c
+    | <span data-count="213">E</span>Var x -&gt;
       (match Map.find free_vars x with
-       | <span data-count="28">S</span>ome vs -&gt; closure_app (EVar x) vs
-       | <span data-count="168">N</span>one -&gt; EVar x)
+       | <span data-count="29">S</span>ome vs -&gt; closure_app (EVar x) vs
+       | <span data-count="184">N</span>one -&gt; EVar x)
     | <span data-count="4">E</span>Tuple (e1, e2, es) -&gt;
       ETuple
         ( close_exp<span data-count="4">r</span> e1 free_vars env
@@ -554,24 +549,24 @@ let close e env =
       let e = close_expr e free_vars env in
       <span data-count="0">l</span>et cases = List.map cases ~f:(fun (pat, e) -&gt; <span data-count="0">p</span>at, close_exp<span data-count="0">r</span> e free_vars env) in
       <span data-count="0">E</span>Match (e, cases)
-    | <span data-count="24">E</span>LetIn (is_rec, id, (EFun (_, _) as e1), e2) -&gt;
+    | <span data-count="25">E</span>LetIn (is_rec, id, (EFun (_, _) as e1), e2) -&gt;
       let env =
         match is_rec with
         | <span data-count="0">R</span>ec -&gt; Set.ad<span data-count="0">d</span> env id
-        | <span data-count="24">N</span>onRec -&gt; env
+        | <span data-count="25">N</span>onRec -&gt; env
       in
-      let free = Set.to_list (find_free_var<span data-count="24">s</span> env free_vars e1) in
-      <span data-count="24">l</span>et free_vars = Map.update free_vars id ~f:(fun _ -&gt; <span data-count="24">f</span>ree) in
-      <span data-count="24">l</span>et args, e = uncurry e1 in
-      <span data-count="24">l</span>et e = close_expr e free_vars env in
-      <span data-count="24">l</span>et f = curry args e in
-      <span data-count="24">l</span>et f = closure_fun f free in
-      <span data-count="24">l</span>et e2 = close_expr e2 free_vars env in
-      <span data-count="24">E</span>LetIn (is_rec, id, f, e2)
-    | <span data-count="14">E</span>LetIn (is_rec, id, e1, e2) -&gt;
+      let free = Set.to_list (find_free_var<span data-count="25">s</span> env free_vars e1) in
+      <span data-count="25">l</span>et free_vars = Map.update free_vars id ~f:(fun _ -&gt; <span data-count="25">f</span>ree) in
+      <span data-count="25">l</span>et args, e = uncurry e1 in
+      <span data-count="25">l</span>et e = close_expr e free_vars env in
+      <span data-count="25">l</span>et f = curry args e in
+      <span data-count="25">l</span>et f = closure_fun f free in
+      <span data-count="25">l</span>et e2 = close_expr e2 free_vars env in
+      <span data-count="25">E</span>LetIn (is_rec, id, f, e2)
+    | <span data-count="15">E</span>LetIn (is_rec, id, e1, e2) -&gt;
       let e1 = close_expr e1 free_vars env in
-      <span data-count="14">l</span>et e2 = close_expr e2 free_vars env in
-      <span data-count="14">E</span>LetIn (is_rec, id, e1, e2)
+      <span data-count="15">l</span>et e2 = close_expr e2 free_vars env in
+      <span data-count="15">E</span>LetIn (is_rec, id, e1, e2)
     | <span data-count="20">E</span>Fun (_, _) as f -&gt;
       let free = Set.to_list (find_free_var<span data-count="20">s</span> env free_vars f) in
       <span data-count="20">l</span>et args, e = uncurry f in
@@ -579,24 +574,24 @@ let close e env =
       <span data-count="20">l</span>et f = curry args e in
       <span data-count="20">l</span>et f = closure_fun f free in
       <span data-count="20">c</span>losure_app f free
-    | <span data-count="186">E</span>App (e1, e2) -&gt; EApp (close_exp<span data-count="186">r</span> e1 free_vars env, close_exp<span data-count="186">r</span> e2 free_vars env)
+    | <span data-count="201">E</span>App (e1, e2) -&gt; EApp (close_exp<span data-count="201">r</span> e1 free_vars env, close_exp<span data-count="201">r</span> e2 free_vars env)
   in
   let rec close_decl e free_vars env =
-    <span data-count="35">m</span>atch e with
-    | <span data-count="10">D</span>Let (is_rec, id, (EFun (_, _) as e)) -&gt;
+    <span data-count="41">m</span>atch e with
+    | <span data-count="15">D</span>Let (is_rec, id, (EFun (_, _) as e)) -&gt;
       let env =
         match is_rec with
         | <span data-count="6">R</span>ec -&gt; Set.ad<span data-count="6">d</span> env id
-        | <span data-count="4">N</span>onRec -&gt; env
+        | <span data-count="9">N</span>onRec -&gt; env
       in
-      let free = Set.to_list (find_free_var<span data-count="10">s</span> env free_vars e) in
-      <span data-count="10">l</span>et free_vars = Map.update free_vars id ~f:(fun _ -&gt; <span data-count="10">f</span>ree) in
-      <span data-count="10">l</span>et args, e = uncurry e in
-      <span data-count="10">l</span>et e = close_expr e free_vars env in
-      <span data-count="10">l</span>et f = curry args e in
-      <span data-count="10">l</span>et f = closure_fun f free in
-      <span data-count="10">D</span>Let (is_rec, id, f)
-    | <span data-count="24">D</span>Let (is_rec, id, e) -&gt; DLet (is_rec, id, close_exp<span data-count="24">r</span> e free_vars env)
+      let free = Set.to_list (find_free_var<span data-count="15">s</span> env free_vars e) in
+      <span data-count="15">l</span>et free_vars = Map.update free_vars id ~f:(fun _ -&gt; <span data-count="15">f</span>ree) in
+      <span data-count="15">l</span>et args, e = uncurry e in
+      <span data-count="15">l</span>et e = close_expr e free_vars env in
+      <span data-count="15">l</span>et f = curry args e in
+      <span data-count="15">l</span>et f = closure_fun f free in
+      <span data-count="15">D</span>Let (is_rec, id, f)
+    | <span data-count="25">D</span>Let (is_rec, id, e) -&gt; DLet (is_rec, id, close_exp<span data-count="25">r</span> e free_vars env)
     | <span data-count="1">D</span>MutualLet (_, decls) -&gt;
       let decls =
         Base.List.fold_right decls ~init:[] ~f:(fun (id, e) acc -&gt;
@@ -607,22 +602,22 @@ let close e env =
       in
       <span data-count="1">D</span>MutualLet (Rec, decls)
   in
-  close_decl e (Map.empt<span data-count="33">y</span> (module String)) env
+  close_decl e (Map.empt<span data-count="39">y</span> (module String)) env
 ;;
 
 let close_program prog env =
-  <span data-count="31">l</span>et prog, _ =
+  <span data-count="33">l</span>et prog, _ =
     List.fold_left prog ~init:([], env) ~f:(fun (closed, env) decl -&gt;
-      <span data-count="33">m</span>atch decl with
-      | <span data-count="32">D</span>Let (_, id, _) -&gt;
+      <span data-count="39">m</span>atch decl with
+      | <span data-count="38">D</span>Let (_, id, _) -&gt;
         let e = close decl env in
-        <span data-count="32">e</span> :: closed, Set.ad<span data-count="32">d</span> env id
+        <span data-count="38">e</span> :: closed, Set.ad<span data-count="38">d</span> env id
       | <span data-count="1">D</span>MutualLet (_, decls) -&gt;
         let env = List.fold decls ~init:env ~f:(fun env (id, _) -&gt; <span data-count="2">S</span>et.add env id) in
         <span data-count="1">l</span>et e = close decl env in
         <span data-count="1">e</span> :: closed, env)
   in
-  <span data-count="31">L</span>ist.rev prog
+  <span data-count="33">L</span>ist.rev prog
 ;;
 </code></pre>
       </div>

@@ -625,26 +625,26 @@ open Ast
 (* --- Вспомогательные функции --- *)
 
 let is_space = function
-  | <span data-count="20030">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="1291">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="42191">_</span> -&gt; false
+  | <span data-count="20263">'</span> ' | <span data-count="0">'</span>\t' | <span data-count="1389">'</span>\n' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="42711">_</span> -&gt; false
 ;;
 
 let is_uppercase = function
   | <span data-count="1">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="2921">_</span> -&gt; false
+  | <span data-count="2976">_</span> -&gt; false
 ;;
 
 let is_lowercase = function
-  | <span data-count="3070">'</span>a' .. 'z' -&gt; true
-  | <span data-count="2922">_</span> -&gt; false
+  | <span data-count="3112">'</span>a' .. 'z' -&gt; true
+  | <span data-count="2977">_</span> -&gt; false
 ;;
 
 let is_digit = function
-  | <span data-count="326">'</span>0' .. '9' -&gt; true
-  | <span data-count="4035">_</span> -&gt; false
+  | <span data-count="340">'</span>0' .. '9' -&gt; true
+  | <span data-count="4095">_</span> -&gt; false
 ;;
 
-let is_letter x = <span data-count="5992">i</span>s_lowercas<span data-count="5992">e</span> <span data-count="3070">x</span> || is_uppercase x
+let is_letter x = <span data-count="6089">i</span>s_lowercas<span data-count="6089">e</span> <span data-count="3112">x</span> || is_uppercase x
 
 let is_keyword = function
   | <span data-count="0">"</span>let"
@@ -656,14 +656,14 @@ let is_keyword = function
   | <span data-count="0">"</span>false"
   | <span data-count="0">"</span>match"
   | <span data-count="62">"</span>with"
-  | <span data-count="97">"</span>in"
+  | <span data-count="99">"</span>in"
   | <span data-count="40">"</span>and"
   | <span data-count="2">"</span>fun"
   | <span data-count="0">"</span>type"
   | <span data-count="0">"</span>int"
   | <span data-count="0">"</span>string"
   | <span data-count="0">"</span>bool" -&gt; true
-  | <span data-count="992">_</span> -&gt; false
+  | <span data-count="1017">_</span> -&gt; false
 ;;
 
 let is_operator_char = function
@@ -671,52 +671,52 @@ let is_operator_char = function
   | <span data-count="11">_</span> -&gt; false
 ;;
 
-let rec chainr1 e op = <span data-count="70">e</span> &gt;&gt;= fun a -&gt; <span data-count="1174">o</span>p &gt;&gt;<span data-count="1174">=</span> (fun f -&gt; <span data-count="37">c</span>hainr<span data-count="37">1</span> e op &gt;&gt;| <span data-count="37">f</span> a) &lt;|&gt; retur<span data-count="1174">n</span> a
+let rec chainr1 e op = <span data-count="72">e</span> &gt;&gt;= fun a -&gt; <span data-count="1185">o</span>p &gt;&gt;<span data-count="1185">=</span> (fun f -&gt; <span data-count="37">c</span>hainr<span data-count="37">1</span> e op &gt;&gt;| <span data-count="37">f</span> a) &lt;|&gt; retur<span data-count="1185">n</span> a
 
 let chainl1 e op =
-  <span data-count="96">l</span>et rec go acc = <span data-count="3261">l</span>ift<span data-count="3261">2</span> (fun f x -&gt; <span data-count="102">f</span> acc x) op e &gt;&gt;<span data-count="3261">=</span> go &lt;|&gt; retur<span data-count="3261">n</span> acc in
+  <span data-count="102">l</span>et rec go acc = <span data-count="3305">l</span>ift<span data-count="3305">2</span> (fun f x -&gt; <span data-count="108">f</span> acc x) op e &gt;&gt;<span data-count="3305">=</span> go &lt;|&gt; retur<span data-count="3305">n</span> acc in
   e &gt;&gt;= go
 ;;
 
-let pspaces = skip_whil<span data-count="34">e</span> is_space
-let ptoken p = <span data-count="2534">s</span>kip_whil<span data-count="2534">e</span> is_space *&gt; p
-let pstoken s = <span data-count="2368">p</span>token (Angstrom.strin<span data-count="2368">g</span> s)
-let pparens p = <span data-count="102">p</span>stoke<span data-count="102">n</span> "(" *<span data-count="102">&gt;</span> take_whil<span data-count="102">e</span> is_space *<span data-count="102">&gt;</span> p &lt;* pstoke<span data-count="102">n</span> ")"
-let poperator = pparen<span data-count="34">s</span> (take_while<span data-count="34">1</span> is_operator_char) &gt;&gt;<span data-count="34">=</span> return
+let pspaces = skip_whil<span data-count="36">e</span> is_space
+let ptoken p = <span data-count="2648">s</span>kip_whil<span data-count="2648">e</span> is_space *&gt; p
+let pstoken s = <span data-count="2472">p</span>token (Angstrom.strin<span data-count="2472">g</span> s)
+let pparens p = <span data-count="108">p</span>stoke<span data-count="108">n</span> "(" *<span data-count="108">&gt;</span> take_whil<span data-count="108">e</span> is_space *<span data-count="108">&gt;</span> p &lt;* pstoke<span data-count="108">n</span> ")"
+let poperator = pparen<span data-count="36">s</span> (take_while<span data-count="36">1</span> is_operator_char) &gt;&gt;<span data-count="36">=</span> return
 
 (* Парсер идентификатора: разрешаем также операторы и "()" как имена *)
 let pid =
-  let pfirst = satisf<span data-count="34">y</span> (fun ch -&gt; <span data-count="1790">i</span>s_lette<span data-count="1790">r</span> c<span data-count="1130">h</span> || Char.equal ch '_') &gt;&gt;| Char.escaped in
-  <span data-count="34">l</span>et plast = take_while (fun ch -&gt; <span data-count="4202">i</span>s_lette<span data-count="4202">r</span> c<span data-count="1941">h</span> || is_digi<span data-count="2261">t</span> c<span data-count="13">h</span> || Char.equal ch '_') in
-  <span data-count="34">p</span>toke<span data-count="34">n</span> (lift<span data-count="34">2</span> ( ^ ) pfirst plast)
-  &gt;&gt;<span data-count="34">=</span> fun s -&gt;
-  <span data-count="1314">i</span>f is_keyword s
-  then <span data-count="322">f</span>ail ("Keyword identifiers are forbidden: " ^ s)
-  else <span data-count="992">r</span>etur<span data-count="992">n</span> s &lt;?&gt; "identifier"
+  let pfirst = satisf<span data-count="36">y</span> (fun ch -&gt; <span data-count="1829">i</span>s_lette<span data-count="1829">r</span> c<span data-count="1157">h</span> || Char.equal ch '_') &gt;&gt;| Char.escaped in
+  <span data-count="36">l</span>et plast = take_while (fun ch -&gt; <span data-count="4260">i</span>s_lette<span data-count="4260">r</span> c<span data-count="1956">h</span> || is_digi<span data-count="2304">t</span> c<span data-count="21">h</span> || Char.equal ch '_') in
+  <span data-count="36">p</span>toke<span data-count="36">n</span> (lift<span data-count="36">2</span> ( ^ ) pfirst plast)
+  &gt;&gt;<span data-count="36">=</span> fun s -&gt;
+  <span data-count="1341">i</span>f is_keyword s
+  then <span data-count="324">f</span>ail ("Keyword identifiers are forbidden: " ^ s)
+  else <span data-count="1017">r</span>etur<span data-count="1017">n</span> s &lt;?&gt; "identifier"
 ;;
 
-let pbind_id = poperator &lt;|<span data-count="34">&gt;</span> pstoke<span data-count="34">n</span> "()" &lt;|<span data-count="34">&gt;</span> pid
-let pint = ptoke<span data-count="34">n</span> (take_while<span data-count="34">1</span> is_digit &gt;&gt;<span data-count="34">|</span> fun x -&gt; <span data-count="287">C</span>Int (Int.of_strin<span data-count="287">g</span> x)) &lt;?<span data-count="34">&gt;</span> "integer"
+let pbind_id = poperator &lt;|<span data-count="36">&gt;</span> pstoke<span data-count="36">n</span> "()" &lt;|<span data-count="36">&gt;</span> pid
+let pint = ptoke<span data-count="36">n</span> (take_while<span data-count="36">1</span> is_digit &gt;&gt;<span data-count="36">|</span> fun x -&gt; <span data-count="293">C</span>Int (Int.of_strin<span data-count="293">g</span> x)) &lt;?<span data-count="36">&gt;</span> "integer"
 
 let pbool =
-  ptoke<span data-count="34">n</span>
-  @@ choic<span data-count="34">e</span>
-       [ pstoke<span data-count="34">n</span> "true" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> (CBool true)
-       ; pstoke<span data-count="34">n</span> "false" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> (CBool false)
-       ; fai<span data-count="34">l</span> "Expected 'true' or 'false'"
+  ptoke<span data-count="36">n</span>
+  @@ choic<span data-count="36">e</span>
+       [ pstoke<span data-count="36">n</span> "true" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> (CBool true)
+       ; pstoke<span data-count="36">n</span> "false" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> (CBool false)
+       ; fai<span data-count="36">l</span> "Expected 'true' or 'false'"
        ]
-  &lt;?<span data-count="34">&gt;</span> "boolean"
+  &lt;?<span data-count="36">&gt;</span> "boolean"
 ;;
 
-let punit = pstoke<span data-count="34">n</span> "()" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> CUnit &lt;?<span data-count="34">&gt;</span> "unit"
-let pconst = choic<span data-count="34">e</span> [ pint; pbool; punit ] &gt;&gt;<span data-count="34">|</span> fun x -&gt; <span data-count="421">E</span>Const x
-let pvar = pbind_id &gt;&gt;<span data-count="34">|</span> fun e -&gt; <span data-count="490">E</span>Var e
-let poperatorvar = poperator &gt;&gt;<span data-count="34">|</span> fun op -&gt; <span data-count="2">E</span>Var op
+let punit = pstoke<span data-count="36">n</span> "()" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> CUnit &lt;?<span data-count="36">&gt;</span> "unit"
+let pconst = choic<span data-count="36">e</span> [ pint; pbool; punit ] &gt;&gt;<span data-count="36">|</span> fun x -&gt; <span data-count="427">E</span>Const x
+let pvar = pbind_id &gt;&gt;<span data-count="36">|</span> fun e -&gt; <span data-count="501">E</span>Var e
+let poperatorvar = poperator &gt;&gt;<span data-count="36">|</span> fun op -&gt; <span data-count="2">E</span>Var op
 
 (* --- Парсер типов (упрощённо) --- *)
 
 let ptype =
-  fi<span data-count="34">x</span> (fun ptype -&gt;
+  fi<span data-count="36">x</span> (fun ptype -&gt;
     <span data-count="1">l</span>et pint_type = pstoke<span data-count="1">n</span> "int" *&gt; retur<span data-count="1">n</span> TInt in
     <span data-count="1">l</span>et pbool_type = pstoke<span data-count="1">n</span> "bool" *&gt; retur<span data-count="1">n</span> TBool in
     <span data-count="1">l</span>et punit_type = pstoke<span data-count="1">n</span> "unit" *&gt; retur<span data-count="1">n</span> TUnit in
@@ -734,67 +734,67 @@ let ptype =
 ;;
 
 let ptyped_var =
-  pparen<span data-count="34">s</span> (pid &gt;&gt;<span data-count="34">=</span> fun id -&gt; <span data-count="49">p</span>stoke<span data-count="49">n</span> ":" *<span data-count="49">&gt;</span> ptype &gt;&gt;| fun ty -&gt; <span data-count="49">i</span>d, Some ty)
-  &lt;|<span data-count="34">&gt;</span> (pid &gt;&gt;<span data-count="34">=</span> fun id -&gt; <span data-count="152">r</span>eturn (id, None))
+  pparen<span data-count="36">s</span> (pid &gt;&gt;<span data-count="36">=</span> fun id -&gt; <span data-count="49">p</span>stoke<span data-count="49">n</span> ":" *<span data-count="49">&gt;</span> ptype &gt;&gt;| fun ty -&gt; <span data-count="49">i</span>d, Some ty)
+  &lt;|<span data-count="36">&gt;</span> (pid &gt;&gt;<span data-count="36">=</span> fun id -&gt; <span data-count="158">r</span>eturn (id, None))
 ;;
 
 let parse_binding pexpr =
-  <span data-count="168">l</span>et rec pbody pexpr =
-    <span data-count="367">p</span>typed_var
+  <span data-count="178">l</span>et rec pbody pexpr =
+    <span data-count="381">p</span>typed_var
     &gt;&gt;= fun (id, ty_opt) -&gt;
-    <span data-count="113">p</span>bod<span data-count="113">y</span> pexpr &lt;|<span data-count="113">&gt;</span> pstoke<span data-count="113">n</span> "=" *<span data-count="113">&gt;</span> pexpr &gt;&gt;| fun e -&gt; <span data-count="113">E</span>Fun ((id, ty_opt), e)
+    <span data-count="119">p</span>bod<span data-count="119">y</span> pexpr &lt;|<span data-count="119">&gt;</span> pstoke<span data-count="119">n</span> "=" *<span data-count="119">&gt;</span> pexpr &gt;&gt;| fun e -&gt; <span data-count="119">E</span>Fun ((id, ty_opt), e)
   in
-  pbind_id &gt;&gt;= fun id -&gt; <span data-count="254">p</span>stoke<span data-count="254">n</span> "=" *<span data-count="254">&gt;</span> pexpr &lt;|<span data-count="254">&gt;</span> pbod<span data-count="254">y</span> pexpr &gt;&gt;| fun expr -&gt; <span data-count="254">i</span>d, expr
+  pbind_id &gt;&gt;= fun id -&gt; <span data-count="262">p</span>stoke<span data-count="262">n</span> "=" *<span data-count="262">&gt;</span> pexpr &lt;|<span data-count="262">&gt;</span> pbod<span data-count="262">y</span> pexpr &gt;&gt;| fun expr -&gt; <span data-count="262">i</span>d, expr
 ;;
 
 let parse_bindings pexpr =
-  <span data-count="68">l</span>ift2
-    (fun first rest -&gt; <span data-count="116">f</span>irst :: rest)
-    (parse_bindin<span data-count="68">g</span> pexpr)
-    (man<span data-count="68">y</span> (pstoke<span data-count="68">n</span> "and" *<span data-count="68">&gt;</span> parse_bindin<span data-count="68">g</span> pexpr))
+  <span data-count="72">l</span>ift2
+    (fun first rest -&gt; <span data-count="122">f</span>irst :: rest)
+    (parse_bindin<span data-count="72">g</span> pexpr)
+    (man<span data-count="72">y</span> (pstoke<span data-count="72">n</span> "and" *<span data-count="72">&gt;</span> parse_bindin<span data-count="72">g</span> pexpr))
 ;;
 
 let plet_decl pexpr =
-  <span data-count="68">p</span>stoke<span data-count="68">n</span> "let"
-  *&gt; lift<span data-count="68">2</span>
+  <span data-count="72">p</span>stoke<span data-count="72">n</span> "let"
+  *&gt; lift<span data-count="72">2</span>
        (fun r bindings -&gt;
-         <span data-count="116">m</span>atch bindings with
-         | <span data-count="92">[</span> (id, e) ] -&gt; DLet (r, id, e)
+         <span data-count="122">m</span>atch bindings with
+         | <span data-count="98">[</span> (id, e) ] -&gt; DLet (r, id, e)
          | <span data-count="24">b</span>inds -&gt; DMutualLet (r, binds))
-       (choic<span data-count="68">e</span> [ pstoke<span data-count="68">n</span> "rec" *<span data-count="68">&gt;</span> retur<span data-count="68">n</span> Rec; retur<span data-count="68">n</span> NonRec ])
-       (parse_binding<span data-count="68">s</span> pexpr)
+       (choic<span data-count="72">e</span> [ pstoke<span data-count="72">n</span> "rec" *<span data-count="72">&gt;</span> retur<span data-count="72">n</span> Rec; retur<span data-count="72">n</span> NonRec ])
+       (parse_binding<span data-count="72">s</span> pexpr)
 ;;
 
 let plet_in pexpr =
-  <span data-count="32">p</span>stoke<span data-count="32">n</span> "let"
-  *&gt; lift<span data-count="32">3</span>
+  <span data-count="34">p</span>stoke<span data-count="34">n</span> "let"
+  *&gt; lift<span data-count="34">3</span>
        (fun r binding body -&gt;
-         <span data-count="97">l</span>et id, e = binding in
+         <span data-count="99">l</span>et id, e = binding in
          ELetIn (r, id, e, body))
-       (choic<span data-count="32">e</span> [ pstoke<span data-count="32">n</span> "rec" *<span data-count="32">&gt;</span> retur<span data-count="32">n</span> Rec; retur<span data-count="32">n</span> NonRec ])
-       (parse_bindin<span data-count="32">g</span> pexpr)
-       (pstoke<span data-count="32">n</span> "in" *<span data-count="32">&gt;</span> pexpr)
+       (choic<span data-count="34">e</span> [ pstoke<span data-count="34">n</span> "rec" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> Rec; retur<span data-count="34">n</span> NonRec ])
+       (parse_bindin<span data-count="34">g</span> pexpr)
+       (pstoke<span data-count="34">n</span> "in" *<span data-count="34">&gt;</span> pexpr)
 ;;
 
 let pbranch pexpr =
-  <span data-count="32">p</span>token
-  @@ lift<span data-count="32">3</span>
+  <span data-count="34">p</span>token
+  @@ lift<span data-count="34">3</span>
        (fun cond t f -&gt; <span data-count="61">E</span>Branch (cond, t, f))
-       (pstoke<span data-count="32">n</span> "if" *<span data-count="32">&gt;</span> pexpr)
-       (pstoke<span data-count="32">n</span> "then" *<span data-count="32">&gt;</span> pexpr)
-       (pstoke<span data-count="32">n</span> "else" *<span data-count="32">&gt;</span> pexpr &lt;|<span data-count="32">&gt;</span> retur<span data-count="32">n</span> (EConst CUnit))
+       (pstoke<span data-count="34">n</span> "if" *<span data-count="34">&gt;</span> pexpr)
+       (pstoke<span data-count="34">n</span> "then" *<span data-count="34">&gt;</span> pexpr)
+       (pstoke<span data-count="34">n</span> "else" *<span data-count="34">&gt;</span> pexpr &lt;|<span data-count="34">&gt;</span> retur<span data-count="34">n</span> (EConst CUnit))
 ;;
 
 let plist pexpr =
-  <span data-count="32">l</span>et psqparens p = <span data-count="32">p</span>stoke<span data-count="32">n</span> "[" *<span data-count="32">&gt;</span> p &lt;* pstoke<span data-count="32">n</span> "]" in
-  psqparen<span data-count="32">s</span> (sep_b<span data-count="32">y</span> (pstoke<span data-count="32">n</span> ";") pexpr) &gt;&gt;| fun x -&gt; <span data-count="63">E</span>List x
+  <span data-count="34">l</span>et psqparens p = <span data-count="34">p</span>stoke<span data-count="34">n</span> "[" *<span data-count="34">&gt;</span> p &lt;* pstoke<span data-count="34">n</span> "]" in
+  psqparen<span data-count="34">s</span> (sep_b<span data-count="34">y</span> (pstoke<span data-count="34">n</span> ";") pexpr) &gt;&gt;| fun x -&gt; <span data-count="63">E</span>List x
 ;;
 
-let ppconst = choic<span data-count="34">e</span> [ pint; pbool; punit ] &gt;&gt;<span data-count="34">|</span> fun x -&gt; <span data-count="65">P</span>Const x
-let ppvar = pid &gt;&gt;<span data-count="34">|</span> fun x -&gt; <span data-count="56">P</span>Var x
+let ppconst = choic<span data-count="36">e</span> [ pint; pbool; punit ] &gt;&gt;<span data-count="36">|</span> fun x -&gt; <span data-count="65">P</span>Const x
+let ppvar = pid &gt;&gt;<span data-count="36">|</span> fun x -&gt; <span data-count="56">P</span>Var x
 
 let ppattern =
-  fi<span data-count="34">x</span> (fun ppattern -&gt;
+  fi<span data-count="36">x</span> (fun ppattern -&gt;
     <span data-count="1">l</span>et ppt =
       choice
         [ pparen<span data-count="1">s</span>
@@ -828,79 +828,79 @@ let ppattern =
 ;;
 
 let pcase ppattern pexpr =
-  <span data-count="32">l</span>ift2 (fun p e -&gt; <span data-count="130">p</span>, e) (pstoke<span data-count="32">n</span> "|" *<span data-count="32">&gt;</span> ppattern) (pstoke<span data-count="32">n</span> "-&gt;" *<span data-count="32">&gt;</span> pexpr)
+  <span data-count="34">l</span>ift2 (fun p e -&gt; <span data-count="130">p</span>, e) (pstoke<span data-count="34">n</span> "|" *<span data-count="34">&gt;</span> ppattern) (pstoke<span data-count="34">n</span> "-&gt;" *<span data-count="34">&gt;</span> pexpr)
 ;;
 
 let pmatch pexpr =
-  <span data-count="32">l</span>ift2
+  <span data-count="34">l</span>ift2
     (fun expr cases -&gt; <span data-count="62">E</span>Match (expr, cases))
-    (pstoke<span data-count="32">n</span> "match" *<span data-count="32">&gt;</span> pexpr &lt;<span data-count="32">*</span> pstoke<span data-count="32">n</span> "with")
-    (many<span data-count="32">1</span> (pcas<span data-count="32">e</span> ppattern pexpr))
+    (pstoke<span data-count="34">n</span> "match" *<span data-count="34">&gt;</span> pexpr &lt;<span data-count="34">*</span> pstoke<span data-count="34">n</span> "with")
+    (many<span data-count="34">1</span> (pcas<span data-count="34">e</span> ppattern pexpr))
 ;;
 
 let pfun pexpr =
-  <span data-count="64">l</span>et rec pbody pexpr =
-    <span data-count="152">p</span>typed_var
+  <span data-count="68">l</span>et rec pbody pexpr =
+    <span data-count="156">p</span>typed_var
     &gt;&gt;= fun id -&gt; <span data-count="88">p</span>bod<span data-count="88">y</span> pexpr &lt;|<span data-count="88">&gt;</span> pstoke<span data-count="88">n</span> "-&gt;" *<span data-count="88">&gt;</span> pexpr &gt;&gt;| fun e -&gt; <span data-count="88">E</span>Fun (id, e)
   in
-  pstoke<span data-count="64">n</span> "fun" *&gt; pbod<span data-count="64">y</span> pexpr
+  pstoke<span data-count="68">n</span> "fun" *&gt; pbod<span data-count="68">y</span> pexpr
 ;;
 
 let pebinop chain1 e pbinop =
-  <span data-count="128">c</span>hain1 e (pbinop &gt;&gt;<span data-count="128">|</span> fun op e1 e2 -&gt; <span data-count="107">E</span>App (EApp (EVar op, e1), e2))
+  <span data-count="136">c</span>hain1 e (pbinop &gt;&gt;<span data-count="136">|</span> fun op e1 e2 -&gt; <span data-count="113">E</span>App (EApp (EVar op, e1), e2))
 ;;
 
-let plbinop = pebino<span data-count="34">p</span> chainl1
-let prbinop = pebino<span data-count="34">p</span> chainr1
-let padd = pstoke<span data-count="34">n</span> "+" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "+"
-let psub = pstoke<span data-count="34">n</span> "-" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "-"
-let pmul = pstoke<span data-count="34">n</span> "*" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "*"
-let pdiv = pstoke<span data-count="34">n</span> "/" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "/"
-let peq = pstoke<span data-count="34">n</span> "=" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "="
-let pneq = pstoke<span data-count="34">n</span> "&lt;&gt;" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&lt;&gt;"
-let ples = pstoke<span data-count="34">n</span> "&lt;" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&lt;"
-let pleq = pstoke<span data-count="34">n</span> "&lt;=" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&lt;="
-let pgre = pstoke<span data-count="34">n</span> "&gt;" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&gt;"
-let pgeq = pstoke<span data-count="34">n</span> "&gt;=" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&gt;="
-let pand = pstoke<span data-count="34">n</span> "&amp;&amp;" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "&amp;&amp;"
-let por = pstoke<span data-count="34">n</span> "||" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "||"
-let pcons = pstoke<span data-count="34">n</span> "::" *<span data-count="34">&gt;</span> retur<span data-count="34">n</span> "::"
+let plbinop = pebino<span data-count="36">p</span> chainl1
+let prbinop = pebino<span data-count="36">p</span> chainr1
+let padd = pstoke<span data-count="36">n</span> "+" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "+"
+let psub = pstoke<span data-count="36">n</span> "-" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "-"
+let pmul = pstoke<span data-count="36">n</span> "*" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "*"
+let pdiv = pstoke<span data-count="36">n</span> "/" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "/"
+let peq = pstoke<span data-count="36">n</span> "=" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "="
+let pneq = pstoke<span data-count="36">n</span> "&lt;&gt;" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&lt;&gt;"
+let ples = pstoke<span data-count="36">n</span> "&lt;" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&lt;"
+let pleq = pstoke<span data-count="36">n</span> "&lt;=" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&lt;="
+let pgre = pstoke<span data-count="36">n</span> "&gt;" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&gt;"
+let pgeq = pstoke<span data-count="36">n</span> "&gt;=" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&gt;="
+let pand = pstoke<span data-count="36">n</span> "&amp;&amp;" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "&amp;&amp;"
+let por = pstoke<span data-count="36">n</span> "||" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "||"
+let pcons = pstoke<span data-count="36">n</span> "::" *<span data-count="36">&gt;</span> retur<span data-count="36">n</span> "::"
 
 let pexpr_fun () =
-  <span data-count="34">f</span>ix (fun pexpr -&gt;
-    <span data-count="32">l</span>et pe_base =
-      choice [ pparen<span data-count="32">s</span> pexpr; pconst; poperatorvar; pvar; plis<span data-count="32">t</span> pexpr; pfu<span data-count="32">n</span> pexpr ]
+  <span data-count="36">f</span>ix (fun pexpr -&gt;
+    <span data-count="34">l</span>et pe_base =
+      choice [ pparen<span data-count="34">s</span> pexpr; pconst; poperatorvar; pvar; plis<span data-count="34">t</span> pexpr; pfu<span data-count="34">n</span> pexpr ]
     in
-    <span data-count="32">l</span>et pe_app =
+    <span data-count="34">l</span>et pe_app =
       lift2
-        (fun f args -&gt; <span data-count="1119">L</span>ist.fold_left ~f:(fun f arg -&gt; <span data-count="136">E</span>App (f, arg)) ~init:f args)
+        (fun f args -&gt; <span data-count="1136">L</span>ist.fold_left ~f:(fun f arg -&gt; <span data-count="139">E</span>App (f, arg)) ~init:f args)
         pe_base
-        (man<span data-count="32">y</span> (cha<span data-count="32">r</span> ' ' *<span data-count="32">&gt;</span> ptoke<span data-count="32">n</span> pe_base))
+        (man<span data-count="34">y</span> (cha<span data-count="34">r</span> ' ' *<span data-count="34">&gt;</span> ptoke<span data-count="34">n</span> pe_base))
     in
-    <span data-count="32">l</span>et pe_bin =
-      let op_bin pe ops = <span data-count="96">p</span>lbinop pe ops in
+    <span data-count="34">l</span>et pe_bin =
+      let op_bin pe ops = <span data-count="102">p</span>lbinop pe ops in
       let pe1 = pe_app in
-      let pe2 = op_bin pe1 (pmul &lt;|<span data-count="32">&gt;</span> pdiv) in
-      <span data-count="32">l</span>et pe3 = op_bin pe2 (padd &lt;|<span data-count="32">&gt;</span> psub) in
-      <span data-count="32">o</span>p_bi<span data-count="32">n</span> pe3 (choic<span data-count="32">e</span> [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
+      let pe2 = op_bin pe1 (pmul &lt;|<span data-count="34">&gt;</span> pdiv) in
+      <span data-count="34">l</span>et pe3 = op_bin pe2 (padd &lt;|<span data-count="34">&gt;</span> psub) in
+      <span data-count="34">o</span>p_bi<span data-count="34">n</span> pe3 (choic<span data-count="34">e</span> [ peq; pneq; pgeq; pleq; ples; pgre; pand; por ])
     in
     let pe_cons = prbinop pe_bin pcons in
-    <span data-count="32">l</span>et pe_tuple =
+    <span data-count="34">l</span>et pe_tuple =
       lift2
         (fun e1 rest -&gt;
-          <span data-count="907">m</span>atch rest with
-          | <span data-count="854">[</span>] -&gt; e1
+          <span data-count="918">m</span>atch rest with
+          | <span data-count="865">[</span>] -&gt; e1
           | <span data-count="53">h</span>d :: tl -&gt; ETuple (e1, hd, tl))
         pe_cons
-        (man<span data-count="32">y</span> (pstoke<span data-count="32">n</span> "," *<span data-count="32">&gt;</span> pe_cons))
+        (man<span data-count="34">y</span> (pstoke<span data-count="34">n</span> "," *<span data-count="34">&gt;</span> pe_cons))
     in
-    <span data-count="32">c</span>hoice [ plet_i<span data-count="32">n</span> pexpr; pbranc<span data-count="32">h</span> pexpr; pmatc<span data-count="32">h</span> pexpr; pfu<span data-count="32">n</span> pexpr; pe_tuple ])
+    <span data-count="34">c</span>hoice [ plet_i<span data-count="34">n</span> pexpr; pbranc<span data-count="34">h</span> pexpr; pmatc<span data-count="34">h</span> pexpr; pfu<span data-count="34">n</span> pexpr; pe_tuple ])
 ;;
 
-let pexpr = pexpr_fu<span data-count="34">n</span> ()
-let parse_expr = parse_strin<span data-count="34">g</span> ~consume:Consume.All (pexpr &lt;<span data-count="34">*</span> pspaces)
-let parse_decl = parse_strin<span data-count="34">g</span> ~consume:Consume.All (plet_dec<span data-count="34">l</span> pexpr &lt;<span data-count="34">*</span> pspaces)
-let parse = parse_strin<span data-count="34">g</span> ~consume:Consume.All (many<span data-count="34">1</span> (plet_dec<span data-count="34">l</span> pexpr) &lt;<span data-count="34">*</span> pspaces)
+let pexpr = pexpr_fu<span data-count="36">n</span> ()
+let parse_expr = parse_strin<span data-count="36">g</span> ~consume:Consume.All (pexpr &lt;<span data-count="36">*</span> pspaces)
+let parse_decl = parse_strin<span data-count="36">g</span> ~consume:Consume.All (plet_dec<span data-count="36">l</span> pexpr &lt;<span data-count="36">*</span> pspaces)
+let parse = parse_strin<span data-count="36">g</span> ~consume:Consume.All (many<span data-count="36">1</span> (plet_dec<span data-count="36">l</span> pexpr) &lt;<span data-count="36">*</span> pspaces)
 </code></pre>
       </div>
     </div>
