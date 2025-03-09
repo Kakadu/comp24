@@ -2,4 +2,4 @@
  (name middleend)
  (public_name BDSML.middleend)
  (libraries BDSML.Parser BDSML.Utils)
- (modules_without_implementation reduced_ast))
+ (modules_without_implementation reduced_ast anf_ast))

@@ -4,6 +4,7 @@
 
 open Reduced_ast
 open Parser.Ast
+open Anf_ast
 
 let rec rexpr_to_expr = function
   | RExp_ident i -> Exp_ident i
@@ -35,3 +36,41 @@ let rstruct_to_struct_item = function
 ;;
 
 let rast_to_ast = List.map rstruct_to_struct_item
+
+let rec aexpr_to_ast = function
+  | AExp_ident s -> Exp_ident s
+  | AExp_constant c -> Exp_constant c
+  | AExp_tuple l -> Exp_tuple (List.map aexpr_to_ast l)
+  | AExp_construct (name, exp) -> Exp_construct (name, Option.map aexpr_to_ast exp)
+;;
+
+let rec cexpr_to_ast = function
+  | CExp_if (i, t, e) -> Exp_if (aexpr_to_ast i, cexpr_to_ast t, Some (cexpr_to_ast e))
+  | CExp_apply (f, args) ->
+    List.fold_left (fun f arg -> Exp_apply (f, aexpr_to_ast arg)) (aexpr_to_ast f) args
+  | CExp_atom e -> aexpr_to_ast e
+
+and lexpr_to_ast = function
+  | LLet_int (name, v, exp) ->
+    Exp_let (Nonrecursive, [ Val_binding (name, [], cexpr_to_ast v) ], lexpr_to_ast exp)
+  | LComplex exp -> cexpr_to_ast exp
+;;
+
+let absexpr_to_ast = function
+  | AbsStr_eval e -> Str_eval (cexpr_to_ast e)
+  | AbsStr_func (name, args, exp) ->
+    Str_value
+      ( Nonrecursive
+      , [ Val_binding (name, List.map (fun el -> Pat_var el) args, cexpr_to_ast exp) ] )
+  | AbsStr_value (name, exp) ->
+    Str_value (Nonrecursive, [ Val_binding (name, [], cexpr_to_ast exp) ])
+  | AbsStr_value_rec l ->
+    Str_value
+      ( Recursive
+      , List.map
+          (fun (name, args, exp) ->
+            Val_binding (name, List.map (fun el -> Pat_var el) args, cexpr_to_ast exp))
+          l )
+;;
+
+let anf_to_ast : anf -> structure = List.map absexpr_to_ast
