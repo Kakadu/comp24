@@ -111,3 +111,22 @@
   let anf_2 = anf_1 anf_0 in 
   let anf_3 = anf_1 anf_2 in 
   let anf_1 = anf_3 in anf_1
+
+  $ dune exec ./demoANF.exe << EOF
+  > let rec even x = 
+  > if x = 0 then true else odd (x - 1) 
+  > and 
+  > odd x = if x = 0 then false else even (x - 1)
+  > EOF
+  
+  let rec even = (fun x -> 
+  let anf_4 = ( = ) x 0 in 
+  let anf_5 = if anf_4 then true else 
+  let anf_6 = ( - ) x 1 in 
+  let anf_7 = odd anf_6 in anf_7 in anf_5)
+  and
+  odd = (fun x -> 
+  let anf_0 = ( = ) x 0 in 
+  let anf_1 = if anf_0 then false else 
+  let anf_2 = ( - ) x 1 in 
+  let anf_3 = even anf_2 in anf_3 in anf_1)

@@ -100,7 +100,7 @@ let lift decl bindings =
       let* e2, lifted = lift_expr e2 lifted renames in
       return (LLApp (e1, e2), lifted)
   in
-  let lift_decl decl lifted renames =
+  let rec lift_decl decl lifted renames =
     match decl with
     | DLet (is_rec, id, (EFun _ as f)) ->
       let args, e = uncurry f in
@@ -109,7 +109,19 @@ let lift decl bindings =
     | DLet (is_rec, id, e) ->
       let* e, lifted = lift_expr e lifted renames in
       return (LLDLet (is_rec, id, [], e), lifted)
-    | DMutualLet _ -> fail "Not Implemented"
+    | DMutualLet (_, decls) ->
+      let* decls, lifted =
+        List.fold_right
+          decls
+          ~init:(return ([], []))
+          ~f:(fun (id, e) acc ->
+            let* decls, lifted = acc in
+            let* lifted = lift_decl (DLet (Rec, id, e)) lifted renames in
+            match lifted with
+            | LLDLet (_, id, args, e), lifted -> return ((id, args, e) :: decls, lifted)
+            | _ -> fail "Unreachable")
+      in
+      return (LLDMutualLet decls, lifted)
   in
   lift_decl decl [] (Map.empty (module String))
 ;;

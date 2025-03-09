@@ -15,7 +15,10 @@ and aexpr =
   | ALetIn of string * cexpr * aexpr
   | ACExpr of cexpr
 
-type adecl = ADLet of is_rec * string * typed_arg list * aexpr
+type adecl =
+  | ADLet of is_rec * string * typed_arg list * aexpr
+  | ADMutualLet of (id * typed_arg list * aexpr) list
+
 type aprogram = adecl list
 
 val anf_to_ast : adecl -> decl

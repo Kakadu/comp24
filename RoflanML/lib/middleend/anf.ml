@@ -78,12 +78,21 @@ let anf_llexpr e expr_with_hole bindings =
   helper e expr_with_hole
 ;;
 
-let anf_decl decl bindings =
+let rec anf_decl decl bindings =
   match decl with
   | LLDLet (is_rec, id, args, e) ->
     let* e = anf_llexpr e (fun imm -> return @@ ACExpr (CImm imm)) bindings in
     return @@ ADLet (is_rec, id, args, e)
-  | LLDMutualLet _ -> fail "Not implemented"
+  | LLDMutualLet decls ->
+    let* decls =
+      List.fold_right decls ~init:(return []) ~f:(fun (id, args, e) decls ->
+        let* decls = decls in
+        let* decl = anf_decl (LLDLet (Rec, id, args, e)) bindings in
+        match decl with
+        | ADLet (_, id, args, e) -> return ((id, args, e) :: decls)
+        | _ -> fail "Unreachable")
+    in
+    return (ADMutualLet decls)
 ;;
 
 let anf_program prog =

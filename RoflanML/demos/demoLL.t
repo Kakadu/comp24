@@ -93,3 +93,26 @@
   let ll_3 x = ( + ) x x
   
   let f x = ll_3 (( / ) x 2)
+
+  $ dune exec ./demoLL.exe << EOF
+  > let rec f x = let g x = x + 1 in g (x + 2) 
+  > and g x = let f x = x + 2 in f (x + 1)
+  
+  let ll_0 x = ( + ) x 2
+  
+  let ll_1 x = ( + ) x 1
+  
+  let rec f = (fun x -> ll_1 (( + ) x 2))
+  and
+  g = (fun x -> ll_0 (( + ) x 1))
+
+  $ dune exec ./demoLL.exe << EOF
+  > let rec even x = 
+  > if x = 0 then true else odd (x - 1) 
+  > and 
+  > odd x = if x = 0 then false else even (x - 1)
+  > EOF
+  
+  let rec even = (fun x -> if ( = ) x 0 then true else odd (( - ) x 1))
+  and
+  odd = (fun x -> if ( = ) x 0 then false else even (( - ) x 1))

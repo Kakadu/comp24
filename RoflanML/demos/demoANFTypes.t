@@ -73,3 +73,17 @@
   
   All types are equal!
 
+  $ dune exec ./demoANFTypes.exe << EOF
+  > let rec even x = 
+  > if x = 0 then true else odd (x - 1) 
+  > and 
+  > odd x = if x = 0 then false else even (x - 1)
+  > EOF
+  TypeEnv before ANF:
+  even: int -> bool
+  odd: int -> bool
+  TypeEnv after ANF:
+  even: int -> bool
+  odd: int -> bool
+  
+  All types are equal!

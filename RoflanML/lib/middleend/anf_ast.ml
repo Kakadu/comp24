@@ -20,7 +20,10 @@ and aexpr =
   | ALetIn of id * cexpr * aexpr
   | ACExpr of cexpr
 
-type adecl = ADLet of is_rec * id * typed_arg list * aexpr
+type adecl =
+  | ADLet of is_rec * id * typed_arg list * aexpr
+  | ADMutualLet of (id * typed_arg list * aexpr) list
+
 type aprogram = adecl list
 
 let anf_to_ast =
@@ -47,6 +50,15 @@ let anf_to_ast =
         List.fold_right args ~init:(aexpr_to_ast ae) ~f:(fun arg e -> EFun (arg, e))
       in
       DLet (is_rec, id, e)
+    | ADMutualLet decls ->
+      let decls =
+        List.map decls ~f:(fun (id, args, ae) ->
+          let e =
+            List.fold_right args ~init:(aexpr_to_ast ae) ~f:(fun arg e -> EFun (arg, e))
+          in
+          id, e)
+      in
+      DMutualLet (Rec, decls)
   in
   adecl_to_ast
 ;;
