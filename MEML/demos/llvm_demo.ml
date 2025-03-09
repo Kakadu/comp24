@@ -18,10 +18,8 @@ let () =
      | Ok _ ->
        let codegen = codegen @@ anf @@ lambda_lift @@ closure ast in
        (match codegen with
-        | Ok llvalue_list ->
-          Base.List.iter llvalue_list ~f:(fun f ->
-            Format.printf "%s\n" (Llvm.string_of_llvalue f))
-        | Error e -> Stdlib.Format.printf "Comp Error: %s" e)
+        | Ok res -> Format.printf "%s" res
+        | Error e -> Format.printf "Comp Error: %s" e)
      | Error e -> Format.printf "Infer Error: %a\n" pp_error e)
   | Error message -> Format.printf "Parser Error: %s\n" message
 ;;

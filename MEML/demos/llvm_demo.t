@@ -82,13 +82,6 @@
   0
 
   $ ./llvm_demo.exe << EOF | lli-16 -load ../lib/runtime.so
-  > let a = print_int(2 + 1) 
-  > let ( + ) a b = a - b
-  > let main = let () = a in let () = print_int(2 + 1) in 0
-  3
-  1
-
-  $ ./llvm_demo.exe << EOF | lli-16 -load ../lib/runtime.so
   > let test = 5 
   > let test_fun a = a + test
   > let test = 6
@@ -108,3 +101,10 @@
   > let ogogo = app (app1 3 2) (app 1 1)
   > let main = print_int(ogogo)
   3
+
+  $ ./llvm_demo.exe << EOF | lli-16 -load ../lib/runtime.so
+  > let a = print_int(2 + 1) 
+  > let ( + ) a b = a - b
+  > let main = let () = a in let () = print_int(2 + 1) in 0
+  3
+  1

@@ -5,7 +5,12 @@
  (libraries MEML_lib stdio))
 
 (cram
- (applies_to parser_demo closure_demo lambdalift_demo)
+ (applies_to
+  parser_demo
+  inferencer_demo
+  closure_demo
+  lambdalift_demo
+  anf_demo)
  (deps
   ./parser_demo.exe
   manytests/do_not_type/001.ml
@@ -68,11 +73,10 @@
  (name llvm_demo)
  (modules llvm_demo)
  (public_name llvm_demo)
- (libraries MEML_lib stdio)
- (link_deps
-  (file ../lib/runtime.so)))
+ (libraries MEML_lib stdio))
 
 (cram
+ (applies_to llvmir_demo llvm_demo)
  (deps
   ./llvm_demo.exe
   ../lib/runtime.so

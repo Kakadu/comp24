@@ -1,195 +1,531 @@
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdarg.h>
+#include <ffi.h>
 
-typedef struct PartApp
+#define TAG_INT 0b000
+#define TAG_BOOL 0b001
+#define TAG_CLOSURE 0b010
+
+struct vals
 {
-    int64_t *fn;
-    int tcount;
-    int acount;
-    int64_t *args;
-} *Closure;
-
-static int64_t args0(Closure p)
-{
-    return ((int64_t(*)())p->fn)();
-}
-
-static int64_t args1(Closure p)
-{
-    return ((int64_t(*)(int64_t))p->fn)(p->args[0]);
-}
-
-static int64_t args2(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t))p->fn)(p->args[0], p->args[1]);
-}
-
-static int64_t args3(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2]);
-}
-
-static int64_t args4(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3]);
-}
-
-static int64_t args5(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4]);
-}
-
-static int64_t args6(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5]);
-}
-
-static int64_t args7(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6]);
-}
-
-static int64_t args8(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7]);
-}
-
-static int64_t args9(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8]);
-}
-
-static int64_t args10(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9]);
-}
-
-static int64_t args11(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10]);
-}
-
-static int64_t args12(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10], p->args[11]);
-}
-
-static int64_t args13(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10], p->args[11], p->args[12]);
-}
-
-static int64_t args14(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10], p->args[11], p->args[12], p->args[13]);
-}
-
-static int64_t args15(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10], p->args[11], p->args[12], p->args[13], p->args[14]);
-}
-
-static int64_t args16(Closure p)
-{
-    return ((int64_t(*)(int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t, int64_t))p->fn)(p->args[0], p->args[1], p->args[2], p->args[3], p->args[4], p->args[5], p->args[6], p->args[7], p->args[8], p->args[9], p->args[10], p->args[11], p->args[12], p->args[13], p->args[14], p->args[15]);
-}
-
-static int64_t (*argsrs[17])(Closure) = {
-    args0,
-    args1,
-    args2,
-    args3,
-    args4,
-    args5,
-    args6,
-    args7,
-    args8,
-    args9,
-    args10,
-    args11,
-    args12,
-    args13,
-    args14,
-    args15,
-    args16,
+    int8_t tag;
+    union
+    {
+        int32_t int_val;
+        bool bool_val;
+        struct closure *closure_val;
+    } type_val;
 };
 
-
-Closure newClosure(int64_t *fn, int tcount)
+struct closure
 {
-    Closure p = (Closure)malloc(sizeof(struct PartApp));
-    p->fn = fn;
-    p->tcount = tcount;
-    p->acount = 0;
-    p->args = (int64_t *)malloc(sizeof(int64_t) * tcount);
-    return p;
-}
+    void *fun_ptr;
+    u_int32_t args_num;
+    u_int32_t applied_args_num;
+    struct vals **applied_args;
+};
 
-Closure fromClosure(Closure p)
+struct vals *create_int_val(int32_t value)
 {
-    Closure p2 = (Closure)malloc(sizeof(struct PartApp));
-    p2->fn = p->fn;
-    p2->tcount = p->tcount;
-    p2->acount = p->acount;
-    p2->args = (int64_t *)malloc(sizeof(int64_t) * p->tcount);
-    for (int i = 0; i < p->acount; i++)
+    struct vals *val = malloc(sizeof(struct vals));
+    if (val == NULL)
     {
-        p2->args[i] = p->args[i];
+        fprintf(stderr, "Exception create $create_int_val$\n");
+        exit(1);
     }
-    return p2;
+
+    val->tag = TAG_INT;
+    val->type_val.int_val = value;
+    return val;
 }
 
-int64_t appClosure(int64_t pointer, int64_t arg)
+struct vals *create_bool_val(bool value)
 {
-    Closure p = (Closure)pointer;
-    // Create new partitial application structure for every application
-    Closure new = fromClosure(p);
-
-    new->args[p->acount] = arg;
-    new->acount++;
-    if (new->acount == new->tcount)
+    struct vals *val = malloc(sizeof(struct vals));
+    if (val == NULL)
     {
-        int64_t (*fn)(Closure) = argsrs[new->tcount];
-        int64_t res = fn(new);
-        free(new->args);
-        free(new);
-        return res;
+        fprintf(stderr, "Exception create $create_bool_val$\n");
+        exit(1);
+    }
+
+    val->tag = TAG_BOOL;
+
+    if (value == 1)
+    {
+        val->type_val.bool_val = true;
     }
     else
     {
-        if (new->acount > new->tcount)
-        {
-            printf("Error: too many arguments applied\n");
-            exit(1);
-        }
-        
+        val->type_val.bool_val = false;
     }
-    return (int64_t)new;
+
+    return val;
 }
 
-int64_t addInClosure(int64_t func, int64_t tcount)
+bool get_bool(struct vals *val)
 {
-    int64_t* fn = (int64_t*)func;
-    Closure new = NULL;
-    if (tcount > 16)
+    if (val == NULL)
     {
-        printf("Error: сannot create a function with more than 16 arguments");
+        fprintf(stderr, "Exception get $get_bool$\n");
         exit(1);
     }
-    new = newClosure(fn, tcount);
-    if (tcount == 0){
-        int64_t (*fn)(Closure) = argsrs[new->tcount];
-        int64_t res = fn(new);
-        free(new->args);
-        free(new);
-        return res;
+
+    if (val->tag != TAG_BOOL)
+    {
+        fprintf(stderr, "Exception get $get_bool$\n");
+        exit(1);
     }
-    return (int64_t) new;
+
+    return val->type_val.bool_val;
 }
 
-int64_t print_int(int64_t x)
+struct vals *eq(struct vals *val_a, struct vals *val_b);
+
+
+struct vals *mul(struct vals *val_a, struct vals *val_b)
 {
-    printf("%ld\n", x);
-    return 0;
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $mul$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $mul$\n");
+    }
+
+    int32_t a = val_a->type_val.int_val;
+    int32_t b = val_b->type_val.int_val;
+
+    return create_int_val(a * b);
+}
+
+struct vals *divv(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $div$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $div$\n");
+        exit(1);
+    }
+
+    int32_t a = val_a->type_val.int_val;
+    int32_t b = val_b->type_val.int_val;
+
+    if (b == 0)
+    {
+        fprintf(stderr, "Exception $div$ division by zero\n");
+        exit(1);
+    }
+
+    return create_int_val(a / b);
+}
+
+struct vals *plus(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $plus$n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $plus$\n");
+        exit(1);
+    }
+
+    int32_t a = val_a->type_val.int_val;
+    int32_t b = val_b->type_val.int_val;
+
+    return create_int_val(a + b);
+}
+
+struct vals *minus(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $minus$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $minus$\n");
+        exit(1);
+    }
+
+    int32_t a = val_a->type_val.int_val;
+    int32_t b = val_b->type_val.int_val;
+
+    return create_int_val(a - b);
+}
+
+struct vals *eq(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $eq$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != val_b->tag)
+    {
+        return create_bool_val(false);
+    }
+
+    if (val_a->tag == TAG_INT)
+    {
+        return create_bool_val(val_a->type_val.int_val == val_b->type_val.int_val);
+    }
+
+    if (val_a->tag == TAG_BOOL)
+    {
+        return create_bool_val(val_a->type_val.bool_val == val_b->type_val.bool_val);
+    }
+
+    fprintf(stderr, "Exception $eq$\n");
+    exit(1);
+}
+
+struct vals *neq(struct vals *val_a, struct vals *val_b)
+{
+    struct vals *res = eq(val_a, val_b);
+
+    return create_bool_val(res->type_val.bool_val);
+}
+
+struct vals *less(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $less$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $less$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val < val_b->type_val.int_val);
+}
+
+struct vals *leq(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $leq$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $leq$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val <= val_b->type_val.int_val);
+}
+
+struct vals *gre(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $gre$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $gre$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val > val_b->type_val.int_val);
+}
+
+struct vals *greq(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $greq$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $greq$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val >= val_b->type_val.int_val);
+}
+
+struct vals *or_(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $llor$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $gt$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val || val_b->type_val.int_val);
+}
+
+struct vals *and_(struct vals *val_a, struct vals *val_b)
+{
+    if (val_a == NULL || val_b == NULL)
+    {
+        fprintf(stderr, "Exception $lland$\n");
+        exit(1);
+    }
+
+    if (val_a->tag != TAG_INT || val_b->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $gt$\n");
+        exit(1);
+    }
+
+    return create_bool_val(val_a->type_val.int_val && val_b->type_val.int_val);
+}
+
+void print_int(struct vals *num)
+{
+    if (num == NULL)
+    {
+        fprintf(stderr, "Exception $print_int$\n");
+        exit(1);
+    }
+
+    if (num->tag != TAG_INT)
+    {
+        fprintf(stderr, "Exception $print_int$\n");
+        exit(1);
+    }
+
+    printf("%d\n", num->type_val.int_val);
+}
+
+struct vals *new_closure(void *fun_ptr, int32_t fun_args_num)
+{
+    struct closure *closure = malloc(sizeof(struct closure));
+    if (closure == NULL)
+    {
+        fprintf(stderr, "Exception $new_closure$n");
+        exit(1);
+    }
+
+    closure->fun_ptr = fun_ptr;
+    closure->args_num = fun_args_num;
+    closure->applied_args_num = 0;
+    closure->applied_args = malloc(0);
+
+    struct vals *closure_val = malloc(sizeof(struct vals));
+    if (closure_val == NULL)
+    {
+        fprintf(stderr, "Exception $new_closure$n");
+        exit(1);
+    }
+
+    closure_val->tag = TAG_CLOSURE;
+    closure_val->type_val.closure_val = closure;
+
+    return closure_val;
+}
+
+struct vals *call_closure(struct vals *closure_val)
+{
+    if (closure_val == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$\n");
+        exit(1);
+    }
+
+    if (closure_val->tag != TAG_CLOSURE)
+    {
+        fprintf(stderr, "Exception $call_closure$\n");
+        exit(1);
+    }
+
+    struct closure *closure = closure_val->type_val.closure_val;
+    if (closure == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$n");
+        exit(1);
+    }
+
+    size_t args_count = closure->args_num;
+
+    if (closure->applied_args_num != args_count)
+    {
+        fprintf(stderr, "Exception $call_closure$\n");
+        exit(1);
+    }
+
+    ffi_cif cif;
+    ffi_type **ffi_args_types = malloc(closure->args_num * sizeof(ffi_type *));
+    if (ffi_args_types == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$n");
+        exit(1);
+    }
+
+    void **args_val = malloc(closure->args_num * sizeof(void *));
+    if (args_val == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$n");
+        exit(1);
+    }
+
+    for (int i = 0; i < closure->args_num; i++)
+    {
+        ffi_args_types[i] = &ffi_type_pointer;
+        args_val[i] = &closure->applied_args[i];
+    }
+
+    if (ffi_prep_cif(
+            &cif,
+            FFI_DEFAULT_ABI,
+            closure->args_num,
+            &ffi_type_pointer,
+            ffi_args_types) != FFI_OK)
+    {
+        fprintf(stderr, "Exception $call_closure$n");
+        exit(1);
+    }
+
+    struct vals *call_res = malloc(sizeof(struct vals));
+    if (call_res == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$n");
+        exit(1);
+    }
+
+    ffi_call(&cif, closure->fun_ptr, &call_res, args_val);
+
+    if (call_res == NULL)
+    {
+        fprintf(stderr, "Exception $call_closure$\n");
+        exit(1);
+    }
+
+    return call_res;
+}
+
+struct vals *_apply_closure(struct vals *closure_val, int32_t args_num, struct vals **new_args) {
+    if (closure_val == NULL)
+    {
+        fprintf(stderr, "Exception $app_closure$\n");
+        exit(1);
+    }
+
+    if (closure_val->tag != TAG_CLOSURE)
+    {
+        fprintf(stderr, "Exception $app_closure$\n");
+        exit(1);
+    }
+
+    struct vals *new_closuse_val = malloc(sizeof(struct vals));
+    if (new_closuse_val == NULL)
+    {
+        fprintf(stderr, "Exception $app_closure$n");
+        exit(1);
+    }
+
+    new_closuse_val->tag = TAG_CLOSURE;
+
+    struct closure *old_closure = closure_val->type_val.closure_val;
+    if (old_closure == NULL)
+    {
+        fprintf(stderr, "Exception $app_closure$\n");
+        exit(1);
+    }
+
+    struct closure *new_closure = malloc(sizeof(struct closure));
+    if (new_closure == NULL)
+    {
+        fprintf(stderr, "Exception $app_closure$n");
+        exit(1);
+    }
+    new_closure->fun_ptr = old_closure->fun_ptr;
+    new_closure->args_num = old_closure->args_num;
+    if(old_closure->applied_args_num + args_num > new_closure->args_num) {
+        new_closure->applied_args_num = new_closure->args_num;
+    } else {
+        new_closure->applied_args_num = old_closure->applied_args_num + args_num;
+    }
+
+    struct vals **new_applied_args = malloc(new_closure->applied_args_num * sizeof(struct vals *));
+    if (new_applied_args == NULL)
+    {
+        fprintf(stderr, "Exception $app_closure$n");
+        exit(1);
+    }
+
+    for (int i = 0; i < old_closure->applied_args_num; i++)
+    {
+        new_applied_args[i] = old_closure->applied_args[i];
+    }
+
+    for (int i = 0; i < new_closure->applied_args_num - old_closure->applied_args_num; i++)
+    {
+        new_applied_args[old_closure->applied_args_num + i] = new_args[i];
+    }
+
+    new_closure->applied_args = new_applied_args;
+
+    new_closuse_val->type_val.closure_val = new_closure;
+
+    if (new_closure->applied_args_num == new_closure->args_num)
+    {
+        struct vals *res = call_closure(new_closuse_val);
+        if (old_closure->applied_args_num + args_num > new_closure->args_num) {
+            int32_t updated_args_num = old_closure->applied_args_num + args_num - new_closure->applied_args_num;
+
+            return _apply_closure(res, updated_args_num, &new_args[new_closure->applied_args_num - old_closure->applied_args_num]);
+        }
+
+        return res;
+    }
+
+    return new_closuse_val;
+}
+
+struct vals *app_closure(struct vals *closure_val, int32_t args_num, ...)
+{
+    va_list args;
+    va_start(args, args_num);
+
+    struct vals **new_args = malloc(args_num * sizeof(struct vals *));
+    for (int i = 0; i < args_num; i++)
+    {
+        struct vals *arg = va_arg(args, struct vals *);
+        if (arg == NULL)
+        {
+            fprintf(stderr, "Exception $app_closure$n");
+            exit(1);
+        }
+        new_args[i] = arg;
+    }
+
+    va_end(args);
+
+    return _apply_closure(closure_val, args_num, new_args);
 }
