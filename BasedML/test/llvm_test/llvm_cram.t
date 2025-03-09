@@ -301,7 +301,7 @@ Operation/Function overide
   8
   35
   13
-  42
+  24
 
 Test struct and physic equal
   $ ./llvm_demo.exe << EOF
