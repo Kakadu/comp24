@@ -99,3 +99,15 @@
   let anf_4 = ll_0 k x in 
   let anf_5 = fact anf_3 anf_4 in anf_5 in anf_1
 
+  $ dune exec ./demoANF.exe << EOF
+  > let anf_1 x = x + 1
+  > let q = let anf_1 = anf_1 (anf_1 (1 + 2)) in anf_1
+  
+  let anf_1 x = 
+  let anf_4 = ( + ) x 1 in anf_4
+  
+  let q = 
+  let anf_0 = ( + ) 1 2 in 
+  let anf_2 = anf_1 anf_0 in 
+  let anf_3 = anf_1 anf_2 in 
+  let anf_1 = anf_3 in anf_1

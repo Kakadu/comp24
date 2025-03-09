@@ -11,7 +11,19 @@ open Common.Middleend_Common
 
 let gen_name = gen_name "ll"
 
-let lift decl =
+let get_bindings prog =
+  List.fold
+    prog
+    ~init:(Set.empty (module String))
+    ~f:(fun acc decl ->
+      match decl with
+      | DLet (_, id, _) -> Set.add acc id
+      | DMutualLet (_, decls) ->
+        List.fold decls ~init:acc ~f:(fun acc (id, _) -> Set.add acc id))
+;;
+
+let lift decl bindings =
+  let gen_name = gen_name bindings in
   let rec lift_expr e lifted renames =
     match e with
     | EConst c -> return (LLConst c, lifted)
@@ -106,7 +118,7 @@ let lift_program prog =
   let helper prog =
     List.fold_left prog ~init:(return []) ~f:(fun acc decl ->
       let* acc = acc in
-      let* decl, lifted = lift decl in
+      let* decl, lifted = lift decl (get_bindings prog) in
       return (List.concat [ acc; List.rev (decl :: lifted) ]))
   in
   run (helper prog)

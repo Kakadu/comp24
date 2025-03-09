@@ -77,3 +77,19 @@
   let ll_0 k x n = k (( * ) x n)
   
   let rec fact x k = if ( = ) x 2 then k 1 else fact (( - ) x 1) (ll_0 k x)
+
+  $ dune exec ./demoLL.exe << EOF
+  > let ll_0 x = x
+  > let ll_1 x = x + 1
+  > let ll_2 x = x + 2
+  > let f x = let g x = x + x in g (x / 2)
+  
+  let ll_0 x = x
+  
+  let ll_1 x = ( + ) x 1
+  
+  let ll_2 x = ( + ) x 2
+  
+  let ll_3 x = ( + ) x x
+  
+  let f x = ll_3 (( / ) x 2)

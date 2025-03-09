@@ -9,7 +9,7 @@ module Counter_Monad : sig
   val run : (int -> 'a * 'b) -> 'b
 end
 
-val gen_name : string -> (string, 'a) Counter_Monad.t
+val gen_name : string -> (string, 'a) Base.Set.t -> (string, 'b) Counter_Monad.t
 
 open Ast
 

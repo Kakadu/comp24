@@ -23,10 +23,13 @@ module Counter_Monad = struct
   let run m = snd (m 0)
 end
 
-let gen_name prefix =
+let rec gen_name prefix bindings =
   let open Counter_Monad in
   let* fresh_id = fresh >>= fun x -> return (Int.to_string x) in
-  return (prefix ^ "_" ^ fresh_id)
+  let new_name = prefix ^ "_" ^ fresh_id in
+  if Set.mem bindings new_name
+  then gen_name prefix bindings
+  else return (prefix ^ "_" ^ fresh_id)
 ;;
 
 module Middleend_Common = struct
