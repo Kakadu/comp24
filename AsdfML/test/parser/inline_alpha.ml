@@ -222,7 +222,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
     let main = 
       let () = println_int (( + ) 42 42) in
       let (+) a b = a - b in
@@ -231,7 +232,8 @@ let%expect_test _ =
       let () = println_int ((+) 42 42) in
       ()
   |};
-  [%expect {|
+  [%expect
+    {|
     let main =
       let () = (println_int (( + ) 42 42)) in
       let __ml_add = (fun a b -> (( - ) a b)) in
