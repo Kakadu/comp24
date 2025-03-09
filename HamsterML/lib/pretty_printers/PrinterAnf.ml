@@ -1,6 +1,7 @@
 open Anf
 
 let rec pretty_print_imm = function
+  | ImmOperation op -> "(" ^ PrinterAst.pretty_print_op op ^ ")"
   | ImmInt n -> string_of_int n
   | ImmString s -> Printf.sprintf "\"%s\"" s
   | ImmBool b -> string_of_bool b
@@ -11,15 +12,19 @@ let rec pretty_print_imm = function
 ;;
 
 let rec pretty_print_cexpr = function
-  | COperation op -> "(" ^ PrinterAst.pretty_print_op op ^ ")"
   | CApplication (f, arg) ->
     Printf.sprintf "%s(%s)" (pretty_print_cexpr f) (pretty_print_cexpr arg)
-  | CIf (cond, then_expr, else_expr) ->
+  | CIf (cond, then_expr, Some else_expr) ->
     Printf.sprintf
       "if %s then %s else %s"
       (pretty_print_imm cond)
       (pretty_print_aexpr then_expr)
       (pretty_print_aexpr else_expr)
+  | CIf (cond, then_expr, None) ->
+    Printf.sprintf
+      "if %s then %s"
+      (pretty_print_imm cond)
+      (pretty_print_aexpr then_expr)
   | CConstructList (hd, tl) ->
     Printf.sprintf "%s :: %s" (pretty_print_imm hd) (pretty_print_imm tl)
   | CImm imm -> pretty_print_imm imm
