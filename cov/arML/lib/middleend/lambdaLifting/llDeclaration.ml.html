@@ -167,21 +167,21 @@ open LlExpression
 open Llast
 
 let ll_decl_case env replacement_map lifted = function
-  | <span data-count="36">m</span>ain_p, EFun ((p1, ps), body) -&gt;
-    let* lifted_body, lifted_exprs = ll_expressio<span data-count="36">n</span> env replacement_map lifted body in
-    <span data-count="36">r</span>eturn ((main_p, p1 :: ps, lifted_body), lifted_exprs)
-  | <span data-count="40">m</span>ain_p, expr -&gt;
-    let* lifted_expr, lifted_exprs = ll_expressio<span data-count="40">n</span> env replacement_map lifted expr in
-    <span data-count="40">r</span>eturn ((main_p, [], lifted_expr), lifted_exprs)
+  | <span data-count="98">m</span>ain_p, EFun ((p1, ps), body) -&gt;
+    let* lifted_body, lifted_exprs = ll_expressio<span data-count="98">n</span> env replacement_map lifted body in
+    <span data-count="98">r</span>eturn ((main_p, p1 :: ps, lifted_body), lifted_exprs)
+  | <span data-count="81">m</span>ain_p, expr -&gt;
+    let* lifted_expr, lifted_exprs = ll_expressio<span data-count="81">n</span> env replacement_map lifted expr in
+    <span data-count="81">r</span>eturn ((main_p, [], lifted_expr), lifted_exprs)
 ;;
 
 let ll_decl env replacement_map lifted = function
-  | <span data-count="57">D</span>Ordinary (case, cases) -&gt;
+  | <span data-count="134">D</span>Ordinary (case, cases) -&gt;
     let* (name, args, lifted_case), lifted_exprs1 =
-      ll_decl_cas<span data-count="57">e</span> env replacement_map lifted case
+      ll_decl_cas<span data-count="134">e</span> env replacement_map lifted case
     in
-    <span data-count="57">l</span>et* lifted_cases, lifted_exprs2 =
-      List.fold_righ<span data-count="57">t</span>
+    <span data-count="134">l</span>et* lifted_cases, lifted_exprs2 =
+      List.fold_righ<span data-count="134">t</span>
         (fun c acc -&gt;
           <span data-count="2">l</span>et* acc = acc in
           <span data-count="2">l</span>et* (c_name, c_args, lifted_c), lifted_e =
@@ -189,35 +189,35 @@ let ll_decl env replacement_map lifted = function
           in
           <span data-count="2">r</span>eturn ((c_name, c_args, lifted_c) :: fs<span data-count="2">t</span> acc, lifted_e @ sn<span data-count="2">d</span> acc))
         cases
-        (retur<span data-count="57">n</span> ([], []))
+        (retur<span data-count="134">n</span> ([], []))
     in
-    <span data-count="57">r</span>eturn
+    <span data-count="134">r</span>eturn
       (LDOrdinary ((name, args, lifted_case), lifted_cases), lifted_exprs1 @ lifted_exprs2)
-  | <span data-count="14">D</span>Recursive (case, cases) -&gt;
+  | <span data-count="39">D</span>Recursive (case, cases) -&gt;
     let* (name, args, lifted_case), lifted_exprs1 =
-      ll_decl_cas<span data-count="14">e</span> env replacement_map lifted case
+      ll_decl_cas<span data-count="39">e</span> env replacement_map lifted case
     in
-    <span data-count="14">l</span>et* lifted_cases, lifted_exprs2 =
-      List.fold_righ<span data-count="14">t</span>
+    <span data-count="39">l</span>et* lifted_cases, lifted_exprs2 =
+      List.fold_righ<span data-count="39">t</span>
         (fun c acc -&gt;
-          <span data-count="3">l</span>et* acc = acc in
-          <span data-count="3">l</span>et* (c_name, c_args, lifted_c), lifted_e =
-            ll_decl_cas<span data-count="3">e</span> env replacement_map lifted c
+          <span data-count="4">l</span>et* acc = acc in
+          <span data-count="4">l</span>et* (c_name, c_args, lifted_c), lifted_e =
+            ll_decl_cas<span data-count="4">e</span> env replacement_map lifted c
           in
-          <span data-count="3">r</span>eturn ((c_name, c_args, lifted_c) :: fs<span data-count="3">t</span> acc, lifted_e @ sn<span data-count="3">d</span> acc))
+          <span data-count="4">r</span>eturn ((c_name, c_args, lifted_c) :: fs<span data-count="4">t</span> acc, lifted_e @ sn<span data-count="4">d</span> acc))
         cases
-        (retur<span data-count="14">n</span> ([], []))
+        (retur<span data-count="39">n</span> ([], []))
     in
-    <span data-count="14">l</span>et extract_cases lifted_exprs =
-      <span data-count="14">L</span>ist.fold_left
+    <span data-count="39">l</span>et extract_cases lifted_exprs =
+      <span data-count="39">L</span>ist.fold_left
         (fun acc expr -&gt;
-          <span data-count="3">m</span>atch expr with
-          | <span data-count="3">L</span>DOrdinary (case, cases) -&gt; (case :: cases) @ acc
+          <span data-count="8">m</span>atch expr with
+          | <span data-count="8">L</span>DOrdinary (case, cases) -&gt; (case :: cases) @ acc
           | <span data-count="0">L</span>DRecursive (case, cases) -&gt; (case :: cases) @ acc)
         []
         lifted_exprs
     in
-    let lifted_cases = lifted_cases @ extract_case<span data-count="14">s</span> (lifted_exprs1 @ lifted_exprs2) in
+    let lifted_cases = lifted_cases @ extract_case<span data-count="39">s</span> (lifted_exprs1 @ lifted_exprs2) in
     return (LDRecursive ((name, args, lifted_case), lifted_cases), lifted)
 ;;
 </code></pre>

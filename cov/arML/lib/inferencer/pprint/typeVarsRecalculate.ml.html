@@ -111,30 +111,30 @@ open TypeTree
     This function renames type variables sequentially (starting from 0)
     to standardize type representations. *)
 let recalculate_vars typ =
-  <span data-count="257">l</span>et insert (old_v, new_v) acc =
-    <span data-count="171">m</span>atch Base.Map.find acc old_v with
-    | <span data-count="79">S</span>ome _ -&gt; new_v, acc
-    | <span data-count="92">N</span>one -&gt; new_v + 1, Base.Map.updat<span data-count="92">e</span> acc old_v ~f:(fun _ -&gt; <span data-count="92">n</span>ew_v)
+  <span data-count="311">l</span>et insert (old_v, new_v) acc =
+    <span data-count="191">m</span>atch Base.Map.find acc old_v with
+    | <span data-count="90">S</span>ome _ -&gt; new_v, acc
+    | <span data-count="101">N</span>one -&gt; new_v + 1, Base.Map.updat<span data-count="101">e</span> acc old_v ~f:(fun _ -&gt; <span data-count="101">n</span>ew_v)
   in
   let new_vars =
     let rec helper (last_v, acc) = function
-      | <span data-count="171">T</span>Var n -&gt; insert (n, last_v) acc
+      | <span data-count="191">T</span>Var n -&gt; insert (n, last_v) acc
       | <span data-count="40">T</span>List t -&gt; helper (last_v, acc) t
-      | <span data-count="57">T</span>Tuple tl -&gt; List.fold_left helper (last_v, acc) tl
-      | <span data-count="193">T</span>Arr (l, r) -&gt;
+      | <span data-count="59">T</span>Tuple tl -&gt; List.fold_left helper (last_v, acc) tl
+      | <span data-count="297">T</span>Arr (l, r) -&gt;
         let new_last_v, new_acc = helper (last_v, acc) l in
-        <span data-count="193">h</span>elper (new_last_v, new_acc) r
-      | <span data-count="344">T</span>Ground _ -&gt; last_v, acc
+        <span data-count="297">h</span>elper (new_last_v, new_acc) r
+      | <span data-count="484">T</span>Ground _ -&gt; last_v, acc
     in
-    let _, res = helper (0, Base.Map.empt<span data-count="257">y</span> (module Base.Int)) typ in
-    <span data-count="257">r</span>es
+    let _, res = helper (0, Base.Map.empt<span data-count="311">y</span> (module Base.Int)) typ in
+    <span data-count="311">r</span>es
   in
   let rec helper = function
-    | <span data-count="171">T</span>Var n -&gt; TVar (Base.Map.find_ex<span data-count="171">n</span> new_vars n)
+    | <span data-count="191">T</span>Var n -&gt; TVar (Base.Map.find_ex<span data-count="191">n</span> new_vars n)
     | <span data-count="40">T</span>List t -&gt; TList (helpe<span data-count="40">r</span> t)
-    | <span data-count="57">T</span>Tuple tl -&gt; TTuple (List.ma<span data-count="57">p</span> helper tl)
-    | <span data-count="193">T</span>Arr (l, r) -&gt; TArr (helpe<span data-count="193">r</span> l, helpe<span data-count="193">r</span> r)
-    | <span data-count="344">o</span>ther -&gt; other
+    | <span data-count="59">T</span>Tuple tl -&gt; TTuple (List.ma<span data-count="59">p</span> helper tl)
+    | <span data-count="297">T</span>Arr (l, r) -&gt; TArr (helpe<span data-count="297">r</span> l, helpe<span data-count="297">r</span> r)
+    | <span data-count="484">o</span>ther -&gt; other
   in
   helper typ
 ;;

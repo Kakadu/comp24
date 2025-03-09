@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>expressionToAnf.ml &mdash; Coverage report</title>
+    <meta name="description" content="72.45% coverage in lib/middleend/anf/expressionToAnf.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/anf/</span>expressionToAnf.ml
+        </a>
+      </h1>
+      <h2>72.45%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:12.98%"></span>
+      <span class="unvisited" style="top:40.46%"></span>
+      <span class="unvisited" style="top:43.51%"></span>
+      <span class="unvisited" style="bottom:47.33%"></span>
+      <span class="unvisited" style="bottom:45.80%"></span>
+      <span class="unvisited" style="bottom:45.04%"></span>
+      <span class="unvisited" style="bottom:44.27%"></span>
+      <span class="unvisited" style="bottom:43.51%"></span>
+      <span class="unvisited" style="bottom:42.75%"></span>
+      <span class="unvisited" style="bottom:41.98%"></span>
+      <span class="unvisited" style="bottom:40.46%"></span>
+      <span class="unvisited" style="bottom:39.69%"></span>
+      <span class="unvisited" style="bottom:38.17%"></span>
+      <span class="unvisited" style="bottom:36.64%"></span>
+      <span class="unvisited" style="bottom:35.88%"></span>
+      <span class="unvisited" style="bottom:35.11%"></span>
+      <span class="unvisited" style="bottom:34.35%"></span>
+      <span class="unvisited" style="bottom:31.30%"></span>
+      <span class="unvisited" style="bottom:30.53%"></span>
+      <span class="unvisited" style="bottom:19.08%"></span>
+      <span class="unvisited" style="bottom:18.32%"></span>
+      <span class="unvisited" style="bottom:17.56%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="unvisited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="unvisited"> </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="unvisited"> </span>
+<a id="L74"></a><span class="unvisited"> </span>
+<a id="L75"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span class="unvisited"> </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="unvisited"> </span>
+<a id="L84"></a><span class="unvisited"> </span>
+<a id="L85"></a><span class="unvisited"> </span>
+<a id="L86"></a><span class="unvisited"> </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="unvisited"> </span>
+<a id="L91"></a><span class="unvisited"> </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="unvisited"> </span>
+<a id="L107"></a><span class="unvisited"> </span>
+<a id="L108"></a><span class="unvisited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span class="visited"> </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span class="visited"> </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span > </span>
+<a id="L130"></a><span class="visited"> </span>
+<a id="L131"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Common.StateMonad
+open Common.StateMonad.Syntax
+open Common.IdentifierStructs
+open Ast.AbstractSyntaxTree
+open PatternMatchingElim.Pmfast
+open Anftree
+
+let get_new_anf_name = Common.NameCreator.get_new_nam<span data-count="108">e</span> "i"
+
+let rec expression_to_complex env = function
+  | <span data-count="20">P</span>MFConstant c -&gt; return @@ (CAtom (IConstant c), [], env)
+  | <span data-count="20">P</span>MFIdentifier i -&gt; return @@ (CAtom (IIdentifier i), [], env)
+  | <span data-count="0">P</span>MFEmptyList -&gt; return @@ (CAtom IEmptyList, [], env)
+  | <span data-count="52">P</span>MFLetIn ((name, expr1), expr2) -&gt;
+    let extended_env = IdentifierSet.add name env in
+    <span data-count="52">l</span>et* expr1', lets_in1, env1 = expression_to_comple<span data-count="52">x</span> extended_env expr1 in
+    <span data-count="52">l</span>et* expr2', lets_in2, env2 = expression_to_comple<span data-count="52">x</span> env1 expr2 in
+    <span data-count="52">l</span>et lets_in3 = [ name, expr1' ] in
+    let final_lets_in = List.concat [ lets_in1; lets_in3; lets_in2 ] in
+    <span data-count="52">r</span>eturn @@ (expr2', final_lets_in, env2)
+  | <span data-count="180">P</span>MFApplication (func, arg, args) -&gt;
+    let* args, lets_in, env =
+      List.fold_righ<span data-count="180">t</span>
+        (fun arg acc -&gt;
+          <span data-count="504">l</span>et* arg_acc, lets_in_acc, env_acc = acc in
+          <span data-count="504">m</span>atch arg with
+          | <span data-count="120">P</span>MFConstant c -&gt; return @@ (IConstant c :: arg_acc, lets_in_acc, env_acc)
+          | <span data-count="306">P</span>MFIdentifier v -&gt; return @@ (IIdentifier v :: arg_acc, lets_in_acc, env_acc)
+          | <span data-count="78">_</span> -&gt;
+            let* new_name = get_new_anf_nam<span data-count="78">e</span> env_acc in
+            <span data-count="78">l</span>et new_name = Id new_name in
+            let env_acc = IdentifierSet.add new_name env_acc in
+            <span data-count="78">l</span>et* arg', lets_in', env' = expression_to_comple<span data-count="78">x</span> env_acc arg in
+            <span data-count="78">l</span>et new_lets_in = [ new_name, arg' ] in
+            let final_lets_in = List.concat [ lets_in'; new_lets_in; lets_in_acc ] in
+            <span data-count="78">l</span>et new_atom = IIdentifier new_name in
+            return (new_atom :: arg_acc, final_lets_in, env'))
+        (func :: arg :: args)
+        (retur<span data-count="180">n</span> ([], [], env))
+    in
+    <span data-count="180">(</span>match args with
+     | <span data-count="180">h</span>d :: md :: tl -&gt; return @@ (CApplication (hd, md, tl), lets_in, env)
+     | _ -&gt; assert false)
+  | <span data-count="14">P</span>MFIfThenElse (c, b1, b2) -&gt;
+    let* b1', env = expression_to_an<span data-count="14">f</span> env b1 in
+    <span data-count="14">l</span>et* b2', env =
+      match b2 with
+      | <span data-count="14">S</span>ome b2 -&gt; expression_to_an<span data-count="14">f</span> env b2
+      | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> @@ (AComplex (CAtom (IConstant CUnit)), env)
+    in
+    <span data-count="14">l</span>et* c', lets_in, env =
+      match c with
+      | <span data-count="0">P</span>MFConstant c -&gt; retur<span data-count="0">n</span> (IConstant c, [], env)
+      | <span data-count="4">P</span>MFIdentifier v -&gt; retur<span data-count="4">n</span> (IIdentifier v, [], env)
+      | <span data-count="10">_</span> -&gt;
+        let* new_name = get_new_anf_nam<span data-count="10">e</span> env in
+        <span data-count="10">l</span>et new_name = Id new_name in
+        let env = IdentifierSet.add new_name env in
+        <span data-count="10">l</span>et* c', lets_in, env = expression_to_comple<span data-count="10">x</span> env c in
+        <span data-count="10">l</span>et new_lets_in = [ new_name, c' ] in
+        let final_lets_in = List.concat [ lets_in; new_lets_in ] in
+        <span data-count="10">r</span>eturn @@ (IIdentifier new_name, final_lets_in, env)
+    in
+    <span data-count="14">r</span>eturn @@ (CIfThenElse (c', b1', b2'), lets_in, env)
+  | <span data-count="0">P</span>MFListConstructor (l, r) -&gt;
+    let convert_to_immut c env =
+      <span data-count="0">m</span>atch c with
+      | <span data-count="0">P</span>MFConstant c -&gt; return (IConstant c, [], env)
+      | <span data-count="0">P</span>MFIdentifier v -&gt; return (IIdentifier v, [], env)
+      | <span data-count="0">_</span> -&gt;
+        let* new_name = get_new_anf_nam<span data-count="0">e</span> env in
+        <span data-count="0">l</span>et new_name = Id new_name in
+        let env = IdentifierSet.add new_name env in
+        <span data-count="0">l</span>et* c', lets_in, env = expression_to_comple<span data-count="0">x</span> env c in
+        <span data-count="0">l</span>et new_lets_in = [ new_name, c' ] in
+        let final_lets_in = List.concat [ lets_in; new_lets_in ] in
+        <span data-count="0">r</span>eturn @@ (IIdentifier new_name, final_lets_in, env)
+    in
+    let* l', lets_in1, env = convert_to_immu<span data-count="0">t</span> l env in
+    <span data-count="0">l</span>et* r', lets_in2, env = convert_to_immu<span data-count="0">t</span> r env in
+    <span data-count="0">l</span>et final_lets_in = List.concat [ lets_in1; lets_in2 ] in
+    <span data-count="0">r</span>eturn @@ (CListConstructor (l', r'), final_lets_in, env)
+  | <span data-count="2">P</span>MFTuple (e1, e2, es) -&gt;
+    let convert_to_immut c env =
+      <span data-count="4">m</span>atch c with
+      | <span data-count="0">P</span>MFConstant c -&gt; return (IConstant c, [], env)
+      | <span data-count="0">P</span>MFIdentifier v -&gt; return (IIdentifier v, [], env)
+      | <span data-count="4">_</span> -&gt;
+        let* new_name = get_new_anf_nam<span data-count="4">e</span> env in
+        <span data-count="4">l</span>et new_name = Id new_name in
+        let env = IdentifierSet.add new_name env in
+        <span data-count="4">l</span>et* c', lets_in, env = expression_to_comple<span data-count="4">x</span> env c in
+        <span data-count="4">l</span>et new_lets_in = [ new_name, c' ] in
+        let final_lets_in = List.concat [ lets_in; new_lets_in ] in
+        <span data-count="4">r</span>eturn @@ (IIdentifier new_name, final_lets_in, env)
+    in
+    let* e1', lets_in1, env = convert_to_immu<span data-count="2">t</span> e1 env in
+    <span data-count="2">l</span>et* e2', lets_in2, env = convert_to_immu<span data-count="2">t</span> e2 env in
+    <span data-count="2">l</span>et* e3', lets_in3, env =
+      List.fold_righ<span data-count="2">t</span>
+        (fun e acc -&gt;
+          <span data-count="0">l</span>et* acc_e, acc_lets_in, env = acc in
+          <span data-count="0">l</span>et* e', lets_in', env = convert_to_immu<span data-count="0">t</span> e env in
+          <span data-count="0">r</span>eturn @@ (e' :: acc_e, lets_in' :: acc_lets_in, env))
+        es
+        (retur<span data-count="2">n</span> ([], [], env))
+    in
+    <span data-count="2">l</span>et lets_in3 = List.concat lets_in3 in
+    <span data-count="2">l</span>et final_lets_in = List.concat [ lets_in1; lets_in2; lets_in3 ] in
+    <span data-count="2">r</span>eturn @@ (CAtom (ITuple (e1', e2', e3')), final_lets_in, env)
+  | <span data-count="4">P</span>MFTyped (e, t) -&gt;
+    let* e', lets_in, env = expression_to_comple<span data-count="4">x</span> env e in
+    <span data-count="4">r</span>eturn @@ (CTyped (e', t), lets_in, env)
+
+and expression_to_anf env expr =
+  <span data-count="92">l</span>et* expr', lets_in, env' = expression_to_comple<span data-count="92">x</span> env expr in
+  <span data-count="92">l</span>et* expr'' =
+    List.fold_righ<span data-count="92">t</span>
+      (fun case acc -&gt;
+        <span data-count="144">l</span>et* acc = acc in
+        <span data-count="144">l</span>et name, expr = case in
+        return @@ ALetIn (name, expr, acc))
+      lets_in
+      (retur<span data-count="92">n</span> (AComplex expr'))
+  in
+  <span data-count="92">r</span>eturn (expr'', env')
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

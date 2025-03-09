@@ -48,27 +48,38 @@
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
-<a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
-<a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
-<a id="L39"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
 <a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span class="visited"> </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -120,6 +131,17 @@
 <a href="#L45">45</a>
 <a href="#L46">46</a>
 <a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
 
@@ -132,42 +154,53 @@ open InferProgram
 
 let start_env =
   let binary_ops =
-    [ "( + )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "( - )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "( * )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "( / )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "( % )", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( || )", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( = )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( == )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( &gt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( &lt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( &gt;= )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( &lt;= )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( != )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
-    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="80">&gt;</span> TVar (-1) @-<span data-count="80">&gt;</span> TGround GTBool
+    [ "( + )", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "( - )", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "( * )", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "( / )", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "( % )", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( || )", TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( = )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( == )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( &gt; )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( &lt; )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( &gt;= )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( &lt;= )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( != )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "logic_and", TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "less_than", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
+    ; "equal", TVar (-1) @-<span data-count="108">&gt;</span> TVar (-1) @-<span data-count="108">&gt;</span> TGround GTBool
     ]
   in
   let unary_ops =
-    [ "U-", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "U+", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTInt
-    ; "UNot", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTBool
+    [ "U-", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "U+", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTInt
+    ; "UNot", TGround GTBool @-<span data-count="108">&gt;</span> TGround GTBool
     ]
   in
   let stdlib_functions =
-    [ "print_int", TGround GTInt @-<span data-count="80">&gt;</span> TGround GTUnit
-    ; "print_bool", TGround GTBool @-<span data-count="80">&gt;</span> TGround GTUnit
+    [ "print_int", TGround GTInt @-<span data-count="108">&gt;</span> TGround GTUnit
+    ; "print_bool", TGround GTBool @-<span data-count="108">&gt;</span> TGround GTUnit
+    ; "get_list_length", TList (TVar (-1)) @-<span data-count="108">&gt;</span> TGround GTInt
     ]
   in
-  List.fold_lef<span data-count="80">t</span>
-    (fun env (op, ty) -&gt; <span data-count="1600">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="1600">e</span> TypeEnv.empty ty))
+  let unpack_functions =
+    [ "unpack_tuple", TVar (-1) @-<span data-count="108">&gt;</span> TGround GTInt @-<span data-count="108">&gt;</span> TVar (-2)
+    ; "unpack_list_hd", TList (TVar (-1)) @-<span data-count="108">&gt;</span> TVar (-1)
+    ; "unpack_list_tl", TList (TVar (-1)) @-<span data-count="108">&gt;</span> TList (TVar (-1))
+    ; "pattern_matching_failure", TVar (-1)
+    ]
+  in
+  List.fold_lef<span data-count="108">t</span>
+    (fun env (op, ty) -&gt; <span data-count="3024">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="3024">e</span> TypeEnv.empty ty))
     TypeEnv.empty
-    (binary_ops @ unary_ops @ stdlib_functions)
+    (binary_ops @ unary_ops @ unpack_functions @ stdlib_functions)
 ;;
 
 let run_expr_inferencer expr = <span data-count="137">R</span>esult.map snd (ru<span data-count="137">n</span> (infer_exp<span data-count="137">r</span> start_env expr))
-let run_program_inferencer program = <span data-count="51">r</span>un (infer_progra<span data-count="51">m</span> start_env program)
+let run_program_inferencer program = <span data-count="150">r</span>un (infer_progra<span data-count="150">m</span> start_env program)
 </code></pre>
       </div>
     </div>

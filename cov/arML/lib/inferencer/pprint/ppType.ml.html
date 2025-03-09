@@ -141,51 +141,51 @@
 open TypeTree
 
 let pp_const_type ppf = function
-  | <span data-count="253">G</span>TInt -&gt; Format.fprintf ppf "int"
-  | <span data-count="64">G</span>TBool -&gt; Format.fprintf ppf "bool"
-  | <span data-count="14">G</span>TUnit -&gt; Format.fprintf ppf "unit"
+  | <span data-count="370">G</span>TInt -&gt; Format.fprintf ppf "int"
+  | <span data-count="73">G</span>TBool -&gt; Format.fprintf ppf "bool"
+  | <span data-count="28">G</span>TUnit -&gt; Format.fprintf ppf "unit"
   | <span data-count="3">G</span>TChar -&gt; Format.fprintf ppf "char"
   | <span data-count="10">G</span>TString -&gt; Format.fprintf ppf "string"
 ;;
 
 let pp_type ppf typ =
-  <span data-count="257">l</span>et rec helper ppf = function
-    | <span data-count="344">T</span>Ground t -&gt; pp_const_type ppf t
-    | <span data-count="171">T</span>Var v -&gt;
-      let var_name = Char.chr (Char.cod<span data-count="171">e</span> 'a' + v) in
-      <span data-count="171">F</span>ormat.fprintf ppf "'%c" var_name
-    | <span data-count="193">T</span>Arr (l, r) -&gt;
+  <span data-count="311">l</span>et rec helper ppf = function
+    | <span data-count="484">T</span>Ground t -&gt; pp_const_type ppf t
+    | <span data-count="191">T</span>Var v -&gt;
+      let var_name = Char.chr (Char.cod<span data-count="191">e</span> 'a' + v) in
+      <span data-count="191">F</span>ormat.fprintf ppf "'%c" var_name
+    | <span data-count="297">T</span>Arr (l, r) -&gt;
       (match l with
-       | <span data-count="14">T</span>Arr (_, _) -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
-       | <span data-count="179">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
+       | <span data-count="21">T</span>Arr (_, _) -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
+       | <span data-count="276">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
     | <span data-count="40">T</span>List t -&gt;
       (match t with
        | <span data-count="0">T</span>Arr (_, _) -&gt; Format.fprintf ppf "(%a) list" helper t
        | <span data-count="40">_</span> -&gt; Format.fprintf ppf "%a list" helper t)
-    | <span data-count="57">T</span>Tuple tl -&gt;
+    | <span data-count="59">T</span>Tuple tl -&gt;
       Format.fprintf
         ppf
         "%a"
-        (Format.pp_print_lis<span data-count="57">t</span>
-           ~pp_sep:(fun ppf () -&gt; <span data-count="65">F</span>ormat.fprintf ppf " * ")
+        (Format.pp_print_lis<span data-count="59">t</span>
+           ~pp_sep:(fun ppf () -&gt; <span data-count="67">F</span>ormat.fprintf ppf " * ")
            (fun ppf ty -&gt;
-             <span data-count="122">m</span>atch ty with
+             <span data-count="126">m</span>atch ty with
              | <span data-count="9">T</span>Tuple _ | <span data-count="21">T</span>Arr _ -&gt; Format.fprintf ppf "(%a)" helper ty
-             | <span data-count="92">_</span> -&gt; helper ppf ty))
+             | <span data-count="96">_</span> -&gt; helper ppf ty))
         tl
   in
-  helper ppf (TypeVarsRecalculate.recalculate_var<span data-count="257">s</span> typ)
+  helper ppf (TypeVarsRecalculate.recalculate_var<span data-count="311">s</span> typ)
 ;;
 
-let type_to_string typ = <span data-count="217">F</span>ormat.asprintf "%a" pp_type typ
+let type_to_string typ = <span data-count="271">F</span>ormat.asprintf "%a" pp_type typ
 let expr_without_name typ = <span data-count="109">"</span>- : " ^ type_to_strin<span data-count="109">g</span> typ
-let expr_with_name name typ = <span data-count="108">S</span>tring.concat " " [ "val"; name; ":"; type_to_strin<span data-count="108">g</span> typ ]
+let expr_with_name name typ = <span data-count="162">S</span>tring.concat " " [ "val"; name; ":"; type_to_strin<span data-count="162">g</span> typ ]
 let print_expr_type typ = <span data-count="109">F</span>ormat.printf "%s\n" (expr_without_nam<span data-count="109">e</span> typ)
 
 let print_program_type env names_list =
-  <span data-count="42">B</span>ase.List.iter names_list ~f:(fun name -&gt;
-    <span data-count="108">l</span>et (Schema.Schema (_, ty)) = Base.Map.find_exn env name in
-    <span data-count="108">F</span>ormat.printf "%s\n" (expr_with_nam<span data-count="108">e</span> name ty))
+  <span data-count="62">B</span>ase.List.iter names_list ~f:(fun name -&gt;
+    <span data-count="162">l</span>et (Schema.Schema (_, ty)) = Base.Map.find_exn env name in
+    <span data-count="162">F</span>ormat.printf "%s\n" (expr_with_nam<span data-count="162">e</span> name ty))
 ;;
 </code></pre>
       </div>

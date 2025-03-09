@@ -82,18 +82,18 @@ open TypeTree
 (* Return all type variables in type *)
 let type_vars =
   let rec helper acc = function
-    | <span data-count="4545">T</span>Var n -&gt; TypeVarSet.add n acc
-    | <span data-count="9209">T</span>Arr (left, right) -&gt; helper (helpe<span data-count="9209">r</span> acc left) right
-    | <span data-count="55">T</span>List typ -&gt; helper acc typ
-    | <span data-count="107">T</span>Tuple typ_list -&gt; List.fold_left helper acc typ_list
-    | <span data-count="10123">T</span>Ground _ -&gt; acc
+    | <span data-count="19589">T</span>Var n -&gt; TypeVarSet.add n acc
+    | <span data-count="31226">T</span>Arr (left, right) -&gt; helper (helpe<span data-count="31226">r</span> acc left) right
+    | <span data-count="2640">T</span>List typ -&gt; helper acc typ
+    | <span data-count="298">T</span>Tuple typ_list -&gt; List.fold_left helper acc typ_list
+    | <span data-count="31138">T</span>Ground _ -&gt; acc
   in
-  helpe<span data-count="80">r</span> TypeVarSet.empty
+  helpe<span data-count="108">r</span> TypeVarSet.empty
 ;;
 
 (* Syntactic sugar *)
 
-let ( @-&gt; ) left right = <span data-count="3644">T</span>Arr (left, right)
+let ( @-&gt; ) left right = <span data-count="7572">T</span>Arr (left, right)
 
 (* ---------------- *)
 </code></pre>

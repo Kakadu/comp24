@@ -85,19 +85,19 @@ open Common.IdentifierStructs
 open LlDeclaration
 
 let ll_program start_env program =
-  <span data-count="41">l</span>et env = start_env program in
-  <span data-count="41">l</span>et lifted = [] in
+  <span data-count="79">l</span>et env = start_env program in
+  <span data-count="79">l</span>et lifted = [] in
   let replacement_map = IdentifierMap.empty in
-  let* lifted_decls, lifted_exprs =
-    List.fold_righ<span data-count="41">t</span>
+  let* lifted_decls =
+    List.fold_righ<span data-count="79">t</span>
       (fun item acc -&gt;
-        <span data-count="71">l</span>et* acc = acc in
-        <span data-count="71">l</span>et* lifted_decl, lifted_e = ll_dec<span data-count="71">l</span> env replacement_map lifted item in
-        <span data-count="71">r</span>eturn (lifted_decl :: fs<span data-count="71">t</span> acc, List.re<span data-count="71">v</span> lifted_e @ sn<span data-count="71">d</span> acc))
+        <span data-count="173">l</span>et* acc = acc in
+        <span data-count="173">l</span>et* lifted_decl, lifted_e = ll_dec<span data-count="173">l</span> env replacement_map lifted item in
+        <span data-count="173">r</span>eturn (List.re<span data-count="173">v</span> lifted_e @ [ lifted_decl ] @ acc))
       program
-      (retur<span data-count="41">n</span> ([], []))
+      (retur<span data-count="79">n</span> [])
   in
-  <span data-count="41">r</span>eturn (lifted_exprs @ lifted_decls)
+  <span data-count="79">r</span>eturn lifted_decls
 ;;
 </code></pre>
       </div>

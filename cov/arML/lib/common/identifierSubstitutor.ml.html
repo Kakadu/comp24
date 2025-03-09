@@ -242,47 +242,47 @@ open IdentifierStructs
 open IdentifierSearcher
 
 let rec substitute_identifiers replacement_map expr =
-  <span data-count="3328">m</span>atch expr with
-  | <span data-count="1745">E</span>Identifier id -&gt;
+  <span data-count="5207">m</span>atch expr with
+  | <span data-count="2679">E</span>Identifier id -&gt;
     (match IdentifierMap.find_opt id replacement_map with
-     | <span data-count="158">S</span>ome new_id -&gt; EIdentifier new_id
-     | <span data-count="1587">N</span>one -&gt; expr)
-  | <span data-count="142">E</span>Fun ((p, ps), body) -&gt;
+     | <span data-count="172">S</span>ome new_id -&gt; EIdentifier new_id
+     | <span data-count="2507">N</span>one -&gt; expr)
+  | <span data-count="176">E</span>Fun ((p, ps), body) -&gt;
     let patterns_identifiers =
       List.fold_left
-        (fun acc p -&gt; <span data-count="276">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="276">s</span> p))
+        (fun acc p -&gt; <span data-count="327">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="327">s</span> p))
         IdentifierSet.empty
         (p :: ps)
     in
-    <span data-count="142">l</span>et body' =
+    <span data-count="176">l</span>et body' =
       substitute_identifiers
-        (remove_keys_from_ma<span data-count="142">p</span> patterns_identifiers replacement_map)
+        (remove_keys_from_ma<span data-count="176">p</span> patterns_identifiers replacement_map)
         body
     in
-    <span data-count="142">E</span>Fun ((p, ps), body')
-  | <span data-count="881">E</span>Application (f, arg1, args) -&gt;
+    <span data-count="176">E</span>Fun ((p, ps), body')
+  | <span data-count="1338">E</span>Application (f, arg1, args) -&gt;
     let f' = substitute_identifiers replacement_map f in
-    <span data-count="881">l</span>et arg1' = substitute_identifiers replacement_map arg1 in
-    <span data-count="881">l</span>et args' = List.map (substitute_identifier<span data-count="881">s</span> replacement_map) args in
-    <span data-count="881">E</span>Application (f', arg1', args')
-  | <span data-count="36">E</span>ListConstructor (l, r) -&gt;
+    <span data-count="1338">l</span>et arg1' = substitute_identifiers replacement_map arg1 in
+    <span data-count="1338">l</span>et args' = List.map (substitute_identifier<span data-count="1338">s</span> replacement_map) args in
+    <span data-count="1338">E</span>Application (f', arg1', args')
+  | <span data-count="53">E</span>ListConstructor (l, r) -&gt;
     let l = substitute_identifiers replacement_map l in
-    <span data-count="36">l</span>et r = substitute_identifiers replacement_map r in
-    <span data-count="36">E</span>ListConstructor (l, r)
-  | <span data-count="42">E</span>IfThenElse (cond, b1, b2) -&gt;
+    <span data-count="53">l</span>et r = substitute_identifiers replacement_map r in
+    <span data-count="53">E</span>ListConstructor (l, r)
+  | <span data-count="76">E</span>IfThenElse (cond, b1, b2) -&gt;
     let cond = substitute_identifiers replacement_map cond in
-    <span data-count="42">l</span>et b1 = substitute_identifiers replacement_map b1 in
-    <span data-count="42">l</span>et b2 =
+    <span data-count="76">l</span>et b1 = substitute_identifiers replacement_map b1 in
+    <span data-count="76">l</span>et b2 =
       match b2 with
-      | <span data-count="42">S</span>ome b2 -&gt; Some (substitute_identifier<span data-count="42">s</span> replacement_map b2)
+      | <span data-count="76">S</span>ome b2 -&gt; Some (substitute_identifier<span data-count="76">s</span> replacement_map b2)
       | <span data-count="0">N</span>one -&gt; None
     in
     EIfThenElse (cond, b1, b2)
-  | <span data-count="23">E</span>Tuple (e1, e2, es) -&gt;
+  | <span data-count="30">E</span>Tuple (e1, e2, es) -&gt;
     let e1 = substitute_identifiers replacement_map e1 in
-    <span data-count="23">l</span>et e2 = substitute_identifiers replacement_map e2 in
-    <span data-count="23">l</span>et es = List.map (fun e -&gt; <span data-count="8">s</span>ubstitute_identifiers replacement_map e) es in
-    <span data-count="23">E</span>Tuple (e1, e2, es)
+    <span data-count="30">l</span>et e2 = substitute_identifiers replacement_map e2 in
+    <span data-count="30">l</span>et es = List.map (fun e -&gt; <span data-count="8">s</span>ubstitute_identifiers replacement_map e) es in
+    <span data-count="30">E</span>Tuple (e1, e2, es)
   | <span data-count="0">E</span>Function (case, cases) -&gt;
     let cases' =
       List.map
@@ -294,32 +294,32 @@ let rec substitute_identifiers replacement_map expr =
         (case :: cases)
     in
     <span data-count="0">E</span>Function (List.h<span data-count="0">d</span> cases', List.t<span data-count="0">l</span> cases')
-  | <span data-count="32">E</span>MatchWith (expr, case, cases) -&gt;
+  | <span data-count="41">E</span>MatchWith (expr, case, cases) -&gt;
     let expr = substitute_identifiers replacement_map expr in
-    <span data-count="32">l</span>et cases' =
+    <span data-count="41">l</span>et cases' =
       List.map
         (fun (p, e) -&gt;
-          <span data-count="69">(</span> p
-          , substitute_identifier<span data-count="69">s</span>
-              (remove_keys_from_ma<span data-count="69">p</span> (get_pattern_identifier<span data-count="69">s</span> p) replacement_map)
+          <span data-count="90">(</span> p
+          , substitute_identifier<span data-count="90">s</span>
+              (remove_keys_from_ma<span data-count="90">p</span> (get_pattern_identifier<span data-count="90">s</span> p) replacement_map)
               e ))
         (case :: cases)
     in
-    <span data-count="32">E</span>MatchWith (expr, List.h<span data-count="32">d</span> cases', List.t<span data-count="32">l</span> cases')
-  | <span data-count="8">E</span>Typed (e, t) -&gt;
+    <span data-count="41">E</span>MatchWith (expr, List.h<span data-count="41">d</span> cases', List.t<span data-count="41">l</span> cases')
+  | <span data-count="14">E</span>Typed (e, t) -&gt;
     let e' = substitute_identifiers replacement_map e in
-    <span data-count="8">E</span>Typed (e', t)
-  | <span data-count="99">E</span>LetIn (case, cases, body) -&gt;
+    <span data-count="14">E</span>Typed (e', t)
+  | <span data-count="223">E</span>LetIn (case, cases, body) -&gt;
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
-    <span data-count="99">l</span>et cases' =
-      List.map (fun (p, e) -&gt; <span data-count="99">p</span>, substitute_identifier<span data-count="99">s</span> replacement_map e) (case :: cases)
+    <span data-count="223">l</span>et cases' =
+      List.map (fun (p, e) -&gt; <span data-count="223">p</span>, substitute_identifier<span data-count="223">s</span> replacement_map e) (case :: cases)
     in
-    <span data-count="99">l</span>et body' =
+    <span data-count="223">l</span>et body' =
       substitute_identifiers
-        (remove_keys_from_ma<span data-count="99">p</span> patterns_identifiers replacement_map)
+        (remove_keys_from_ma<span data-count="223">p</span> patterns_identifiers replacement_map)
         body
     in
-    <span data-count="99">E</span>LetIn (List.h<span data-count="99">d</span> cases', List.t<span data-count="99">l</span> cases', body')
+    <span data-count="223">E</span>LetIn (List.h<span data-count="223">d</span> cases', List.t<span data-count="223">l</span> cases', body')
   | <span data-count="0">E</span>RecLetIn (case, cases, body) -&gt;
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
     <span data-count="0">l</span>et replacement_map = remove_keys_from_map patterns_identifiers replacement_map in
@@ -328,7 +328,7 @@ let rec substitute_identifiers replacement_map expr =
     in
     <span data-count="0">l</span>et body' = substitute_identifiers replacement_map body in
     <span data-count="0">E</span>RecLetIn (List.h<span data-count="0">d</span> cases', List.t<span data-count="0">l</span> cases', body')
-  | <span data-count="320">_</span> -&gt; expr
+  | <span data-count="577">_</span> -&gt; expr
 ;;
 </code></pre>
       </div>

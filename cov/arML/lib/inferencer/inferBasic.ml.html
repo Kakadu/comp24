@@ -175,37 +175,37 @@ open TypeTree
 open TypeUtils
 
 (* Get a new type variable *)
-let fresh_var = fresh &gt;&gt;<span data-count="80">|</span> fun name -&gt; <span data-count="1208">T</span>Var name
+let fresh_var = fresh &gt;&gt;<span data-count="108">|</span> fun name -&gt; <span data-count="3211">T</span>Var name
 
 let infer_const = function
-  | <span data-count="318">C</span>Int _ -&gt; TGround GTInt
-  | <span data-count="74">C</span>Bool _ -&gt; TGround GTBool
+  | <span data-count="855">C</span>Int _ -&gt; TGround GTInt
+  | <span data-count="105">C</span>Bool _ -&gt; TGround GTBool
   | <span data-count="4">C</span>Char _ -&gt; TGround GTChar
   | <span data-count="24">C</span>String _ -&gt; TGround GTString
-  | <span data-count="43">C</span>Unit -&gt; TGround GTUnit
+  | <span data-count="178">C</span>Unit -&gt; TGround GTUnit
 ;;
 
 let infer_id env id =
   (* '_' - reserved for expressions whose result is not important to us. *)
-  <span data-count="752">m</span>atch id with
+  <span data-count="2212">m</span>atch id with
   | <span data-count="0">"</span>_" -&gt;
     let* fv = fresh_var in
     <span data-count="0">r</span>eturn (Substitution.empty, fv)
-  | <span data-count="752">_</span> -&gt; TypeEnv.lookup_env env id
+  | <span data-count="2212">_</span> -&gt; TypeEnv.lookup_env env id
 ;;
 
 (* Type definition to real type mapping *)
 
 let get_ground_type_by_defenition = function
-  | <span data-count="30">G</span>TDInt -&gt; GTInt
-  | <span data-count="9">G</span>TDBool -&gt; GTBool
+  | <span data-count="38">G</span>TDInt -&gt; GTInt
+  | <span data-count="15">G</span>TDBool -&gt; GTBool
   | <span data-count="3">G</span>TDChar -&gt; GTChar
   | <span data-count="2">G</span>TDString -&gt; GTString
   | <span data-count="1">G</span>TDUnit -&gt; GTUnit
 ;;
 
 let rec get_type_by_defenition = function
-  | <span data-count="45">T</span>DGround td -&gt; return @@ TGround (get_ground_type_by_defenitio<span data-count="45">n</span> td)
+  | <span data-count="59">T</span>DGround td -&gt; return @@ TGround (get_ground_type_by_defenitio<span data-count="59">n</span> td)
   | <span data-count="3">T</span>DArrow (l, r) -&gt;
     let* l_ty = get_type_by_defenitio<span data-count="3">n</span> l in
     <span data-count="3">l</span>et* r_ty = get_type_by_defenitio<span data-count="3">n</span> r in

@@ -57,8 +57,8 @@ open TypeTree
 
 let generalize : TypeEnv.t -&gt; typ -&gt; Schema.schema =
   fun env ty -&gt;
-  <span data-count="1766">l</span>et bound = TypeVarSet.diff (TypeUtils.type_var<span data-count="1766">s</span> ty) (TypeEnv.free_var<span data-count="1766">s</span> env) in
-  <span data-count="1766">S</span>chema (bound, ty)
+  <span data-count="3541">l</span>et bound = TypeVarSet.diff (TypeUtils.type_var<span data-count="3541">s</span> ty) (TypeEnv.free_var<span data-count="3541">s</span> env) in
+  <span data-count="3541">S</span>chema (bound, ty)
 ;;
 </code></pre>
       </div>

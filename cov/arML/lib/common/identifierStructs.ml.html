@@ -78,17 +78,17 @@ open Ast.AbstractSyntaxTree
 module IdentifierSet = Set.Make (struct
     type t = identifier
 
-    let compare (Id a) (Id b) = <span data-count="22072">S</span>tring.compare a b
+    let compare (Id a) (Id b) = <span data-count="56898">S</span>tring.compare a b
   end)
 
 module IdentifierMap = Map.Make (struct
     type t = identifier
 
-    let compare (Id a) (Id b) = <span data-count="1532">S</span>tring.compare a b
+    let compare (Id a) (Id b) = <span data-count="2478">S</span>tring.compare a b
   end)
 
 let remove_keys_from_map keys map =
-  <span data-count="646">I</span>dentifierSet.fold (fun key acc -&gt; <span data-count="810">I</span>dentifierMap.remove key acc) keys map
+  <span data-count="981">I</span>dentifierSet.fold (fun key acc -&gt; <span data-count="1227">I</span>dentifierMap.remove key acc) keys map
 ;;
 </code></pre>
       </div>

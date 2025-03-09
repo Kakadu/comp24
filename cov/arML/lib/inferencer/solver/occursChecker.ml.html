@@ -66,12 +66,12 @@ open TypeTree
 
 (*** Checks whether the passed type variable is contained in the passed type. *)
 let rec occurs_check v = function
-  | <span data-count="1862">T</span>Var b -&gt; b = v
-  | <span data-count="3268">T</span>Arr (left, right) -&gt; occurs_chec<span data-count="3268">k</span> v lef<span data-count="1">t</span> || occurs_check v right
-  | <span data-count="646">T</span>List typ -&gt; occurs_check v typ
-  | <span data-count="211">T</span>Tuple typ_list -&gt;
-    List.fold_left (fun acc item -&gt; <span data-count="424">a</span>c<span data-count="0">c</span> || occurs_check v item) false typ_list
-  | <span data-count="7324">T</span>Ground _ -&gt; false
+  | <span data-count="5179">T</span>Var b -&gt; b = v
+  | <span data-count="16454">T</span>Arr (left, right) -&gt; occurs_chec<span data-count="16454">k</span> v lef<span data-count="1">t</span> || occurs_check v right
+  | <span data-count="1533">T</span>List typ -&gt; occurs_check v typ
+  | <span data-count="515">T</span>Tuple typ_list -&gt;
+    List.fold_left (fun acc item -&gt; <span data-count="1032">a</span>c<span data-count="0">c</span> || occurs_check v item) false typ_list
+  | <span data-count="30435">T</span>Ground _ -&gt; false
 ;;
 </code></pre>
       </div>

@@ -144,49 +144,49 @@ type ('a, 'e) t = int -&gt; int * ('a, 'e) Result.t (* State and Result monad co
 
 let ( &gt;&gt;= ) : ('a, 'e) t -&gt; ('a -&gt; ('b, 'e) t) -&gt; ('b, 'e) t =
   fun m f s -&gt;
-  <span data-count="34440">m</span>atch m s with
+  <span data-count="121208">m</span>atch m s with
   | <span data-count="126">s</span>, Result.Error e -&gt; s, Error e
-  | <span data-count="34314">s</span>, Result.Ok v -&gt; f v s
+  | <span data-count="121082">s</span>, Result.Ok v -&gt; f v s
 ;;
 
 let ( &gt;&gt;| ) : ('a, 'e) t -&gt; ('a -&gt; 'b) -&gt; ('b, 'e) t =
   fun m f s -&gt;
-  <span data-count="1288">m</span>atch m s with
+  <span data-count="3399">m</span>atch m s with
   | <span data-count="0">s</span>, Result.Error e -&gt; s, Error e
-  | <span data-count="1288">s</span>, Result.Ok v -&gt; s, Base.Result.retur<span data-count="1288">n</span> @@ <span data-count="1288">f</span> v
+  | <span data-count="3399">s</span>, Result.Ok v -&gt; s, Base.Result.retur<span data-count="3399">n</span> @@ <span data-count="3399">f</span> v
 ;;
 
-let return v last = <span data-count="33177">l</span>ast, Base.Result.retur<span data-count="33177">n</span> v
+let return v last = <span data-count="117933">l</span>ast, Base.Result.retur<span data-count="117933">n</span> v
 let fail e state = <span data-count="37">s</span>tate, Base.Result.fai<span data-count="37">l</span> e
-let bind x ~f = <span data-count="34440">x</span> &gt;&gt;= f
-let fresh last = <span data-count="1288">l</span>ast + 1, Result.Ok last (* Get new state *)
+let bind x ~f = <span data-count="121208">x</span> &gt;&gt;= f
+let fresh last = <span data-count="3399">l</span>ast + 1, Result.Ok last (* Get new state *)
 
 module Syntax = struct
-  let ( let* ) x f = <span data-count="34440">b</span>ind x ~f (* Syntax sugar for bind *)
+  let ( let* ) x f = <span data-count="121208">b</span>ind x ~f (* Syntax sugar for bind *)
 end
 
 module RMap = struct
   (* Classic map folding. *)
   let fold_left mp ~init ~f =
-    <span data-count="3749">l</span>et open Syntax in
+    <span data-count="11010">l</span>et open Syntax in
     Base.Map.fold mp ~init ~f:(fun ~key ~data acc -&gt;
-      <span data-count="4431">l</span>et* acc = acc in
-      <span data-count="4430">f</span> key data acc)
+      <span data-count="15201">l</span>et* acc = acc in
+      <span data-count="15200">f</span> key data acc)
   ;;
 end
 
 module RList = struct
   (* Classic list folding. *)
   let fold_left lt ~init ~f =
-    <span data-count="1082">l</span>et open Syntax in
+    <span data-count="3055">l</span>et open Syntax in
     Base.List.fold_left lt ~init ~f:(fun acc item -&gt;
-      <span data-count="2866">l</span>et* acc = acc in
-      <span data-count="2861">f</span> acc item)
+      <span data-count="8054">l</span>et* acc = acc in
+      <span data-count="8049">f</span> acc item)
   ;;
 end
 
 (* Run and get the internal value. *)
-let run m = <span data-count="188">s</span>nd (<span data-count="188">m</span> 0)
+let run m = <span data-count="287">s</span>nd (<span data-count="287">m</span> 0)
 </code></pre>
       </div>
     </div>
