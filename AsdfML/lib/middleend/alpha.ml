@@ -21,8 +21,8 @@ open State
 open State.Syntax
 
 let default_ctx =
-  let reserved = List.map Std.stdlib ~f:(fun x -> x.name) in 
-  { count = reserved |> List.map ~f:(fun x -> (x, 0)) |> Map.of_alist_exn (module String)
+  let reserved = List.map Std.stdlib ~f:(fun x -> x.name) in
+  { count = reserved |> List.map ~f:(fun x -> x, 0) |> Map.of_alist_exn (module String)
   ; reserved = reserved |> Set.of_list (module String)
   }
 ;;
@@ -34,14 +34,14 @@ let remaps_to_str r =
   Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
 ;;
 
-let reserved_prefixes = [ "__"; "anf"; "ll_"; "_start"]
+let reserved_prefixes = [ "__"; "anf"; "ll_"; "_start" ]
 let renamed_prefix = "__var_"
 
 let is_internal id =
   List.exists reserved_prefixes ~f:(fun p -> String.is_prefix id ~prefix:p)
 ;;
 
-let alpha_id ?(is_def=false) (remaps : remaps) id =
+let alpha_id ?(is_def = false) (remaps : remaps) id =
   let rec gen_new_id ctx id =
     match Map.find ctx.count id with
     | None ->
@@ -64,7 +64,9 @@ let alpha_id ?(is_def=false) (remaps : remaps) id =
     if Set.mem ctx.reserved id && not is_def
     then return (id, remaps)
     else (
-      let id_ext = if is_def then "__" ^ (Std.lookup_extern id |> Option.value_exn) else id in
+      let id_ext =
+        if is_def then "__" ^ (Std.lookup_extern id |> Option.value_exn) else id
+      in
       let new_id, ctx = gen_new_id ctx id_ext in
       let* () = put ctx in
       let remaps = Map.set remaps ~key:id ~data:new_id in
@@ -173,7 +175,7 @@ let rec alpha_expr remaps = function
     return (EMatch (exp, cases), remaps)
 
 and alpha_def remaps = function
-  | DLet (r, PIdent(id), e) when Std.lookup_extern id |> Option.is_some ->
+  | DLet (r, PIdent id, e) when Std.lookup_extern id |> Option.is_some ->
     let* id, remaps' = alpha_id remaps id ~is_def:true in
     let remaps' = remaps_merge remaps remaps' in
     dbg "remaps: %s@\n" (remaps_to_str remaps');
