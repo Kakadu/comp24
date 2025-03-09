@@ -44,11 +44,10 @@
  (targets libffi.so)
  (deps ../libffi/riscv64/libffi.so)
  (action
-  (run ln -s %{deps} %{targets})))
+  (run cp %{deps} %{targets})))
 
 (rule
- (targets
-  (dir libffi_include))
+ (targets libffi_include)
  (deps ../libffi/riscv64/include)
  (action
-  (run ln -s %{deps} %{targets})))
+  (run cp -r %{deps} %{targets})))
