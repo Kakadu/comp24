@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef DEBUG
     #define DEBUG_RUN(code)                                                                                            \
         do {                                                                                                           \
@@ -59,3 +63,9 @@ int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ..
 int64_t mlrt_check_tag(int64_t target, int64_t tag);
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num);
 void mltr_match_error();
+
+void handle_global_vars(int n, ...);
+
+#ifdef __cplusplus
+}
+#endif
