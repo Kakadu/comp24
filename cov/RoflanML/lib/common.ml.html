@@ -51,23 +51,22 @@
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span class="visited"> </span>
 <a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
-<a id="L46"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -117,7 +116,6 @@
 <a href="#L43">43</a>
 <a href="#L44">44</a>
 <a href="#L45">45</a>
-<a href="#L46">46</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
@@ -128,42 +126,41 @@ open Base
 module Counter_Monad = struct
   type ('a, 'err) t = int -&gt; int * ('a, 'err) Result.t
 
-  let return : 'a -&gt; ('a, 'err) t = fun x st -&gt; <span data-count="22162">s</span>t, Result.Ok x
+  let return : 'a -&gt; ('a, 'err) t = fun x st -&gt; <span data-count="27290">s</span>t, Result.Ok x
   let fail : 'err -&gt; ('a, 'err) t = fun err st -&gt; <span data-count="48">s</span>t, Result.Error err
 
   let ( &gt;&gt;= ) : ('a, 'err) t -&gt; ('a -&gt; ('b, 'err) t) -&gt; ('b, 'err) t =
     fun m f st -&gt;
-    <span data-count="23129">l</span>et st, r = m st in
-    <span data-count="23129">m</span>atch r with
-    | <span data-count="23091">R</span>esult.Ok a -&gt; f a st
+    <span data-count="28393">l</span>et st, r = m st in
+    <span data-count="28393">m</span>atch r with
+    | <span data-count="28355">R</span>esult.Ok a -&gt; f a st
     | <span data-count="38">R</span>esult.Error err -&gt; fail err st
   ;;
 
   let ( let* ) = ( &gt;&gt;= )
-  let fresh st = <span data-count="1017">s</span>t + 1, Result.Ok st
-  let run m = <span data-count="98">s</span>nd (<span data-count="98">m</span> 0)
+  let fresh st = <span data-count="1164">s</span>t + 1, Result.Ok st
+  let run m = <span data-count="109">s</span>nd (<span data-count="109">m</span> 0)
 end
 
 let gen_name prefix =
-  <span data-count="36">l</span>et open Counter_Monad in
-  let fresh_id = fresh &gt;&gt;= fun x -&gt; <span data-count="74">r</span>eturn (Int.to_strin<span data-count="74">g</span> x) in
-  <span data-count="36">l</span>et* id = fresh_id in
-  <span data-count="74">r</span>eturn (prefix ^ "_" ^ id)
+  <span data-count="42">l</span>et open Counter_Monad in
+  let* fresh_id = fresh &gt;&gt;<span data-count="42">=</span> fun x -&gt; <span data-count="99">r</span>eturn (Int.to_strin<span data-count="99">g</span> x) in
+  <span data-count="99">r</span>eturn (prefix ^ "_" ^ fresh_id)
 ;;
 
 module Middleend_Common = struct
   open Ast
 
   let uncurry e =
-    <span data-count="118">l</span>et rec helper args = function
-      | <span data-count="192">E</span>Fun (x, e) -&gt; helper (x :: args) e
-      | <span data-count="118">e</span> -&gt; args, e
+    <span data-count="134">l</span>et rec helper args = function
+      | <span data-count="223">E</span>Fun (x, e) -&gt; helper (x :: args) e
+      | <span data-count="134">e</span> -&gt; args, e
     in
     let args, e = helper [] e in
-    <span data-count="118">L</span>ist.re<span data-count="118">v</span> args, e
+    <span data-count="134">L</span>ist.re<span data-count="134">v</span> args, e
   ;;
 
-  let curry args e = <span data-count="47">B</span>ase.List.fold_right args ~init:e ~f:(fun arg acc -&gt; <span data-count="57">E</span>Fun (arg, acc))
+  let curry args e = <span data-count="54">B</span>ase.List.fold_right args ~init:e ~f:(fun arg acc -&gt; <span data-count="68">E</span>Fun (arg, acc))
 end
 </code></pre>
       </div>

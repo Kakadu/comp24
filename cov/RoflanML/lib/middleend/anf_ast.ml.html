@@ -158,28 +158,28 @@ type aprogram = adecl list
 
 let anf_to_ast =
   let rec imm_to_ast = function
-    | <span data-count="41">I</span>mmConst c -&gt; EConst c
-    | <span data-count="116">I</span>mmVar id -&gt; EVar id
-    | <span data-count="1">I</span>mmTuple (imm1, imm2, imms) -&gt;
-      ETuple (imm_to_as<span data-count="1">t</span> imm1, imm_to_as<span data-count="1">t</span> imm2, List.ma<span data-count="1">p</span> imms ~f:imm_to_ast)
+    | <span data-count="52">I</span>mmConst c -&gt; EConst c
+    | <span data-count="174">I</span>mmVar id -&gt; EVar id
+    | <span data-count="2">I</span>mmTuple (imm1, imm2, imms) -&gt;
+      ETuple (imm_to_as<span data-count="2">t</span> imm1, imm_to_as<span data-count="2">t</span> imm2, List.ma<span data-count="2">p</span> imms ~f:imm_to_ast)
     | <span data-count="2">I</span>mmList imms -&gt; EList (List.ma<span data-count="2">p</span> imms ~f:imm_to_ast)
   in
   let rec cexpr_to_ast = function
-    | <span data-count="37">C</span>Imm imm -&gt; imm_to_ast imm
-    | <span data-count="2">C</span>Branch (cond, t, f) -&gt; EBranch (imm_to_as<span data-count="2">t</span> cond, aexpr_to_as<span data-count="2">t</span> t, aexpr_to_as<span data-count="2">t</span> f)
-    | <span data-count="41">C</span>App (imm, args) -&gt;
-      List.fold_left args ~init:(imm_to_as<span data-count="41">t</span> imm) ~f:(fun acc arg -&gt;
-        <span data-count="73">E</span>App (acc, imm_to_as<span data-count="73">t</span> arg))
+    | <span data-count="50">C</span>Imm imm -&gt; imm_to_ast imm
+    | <span data-count="4">C</span>Branch (cond, t, f) -&gt; EBranch (imm_to_as<span data-count="4">t</span> cond, aexpr_to_as<span data-count="4">t</span> t, aexpr_to_as<span data-count="4">t</span> f)
+    | <span data-count="60">C</span>App (imm, args) -&gt;
+      List.fold_left args ~init:(imm_to_as<span data-count="60">t</span> imm) ~f:(fun acc arg -&gt;
+        <span data-count="106">E</span>App (acc, imm_to_as<span data-count="106">t</span> arg))
   and aexpr_to_ast = function
-    | <span data-count="50">A</span>LetIn (id, ce, ae) -&gt; ELetIn (NonRec, id, cexpr_to_as<span data-count="50">t</span> ce, aexpr_to_as<span data-count="50">t</span> ae)
-    | <span data-count="30">A</span>CExpr ce -&gt; cexpr_to_ast ce
+    | <span data-count="72">A</span>LetIn (id, ce, ae) -&gt; ELetIn (NonRec, id, cexpr_to_as<span data-count="72">t</span> ce, aexpr_to_as<span data-count="72">t</span> ae)
+    | <span data-count="42">A</span>CExpr ce -&gt; cexpr_to_ast ce
   in
   let adecl_to_ast = function
-    | <span data-count="26">A</span>DLet (is_rec, id, args, ae) -&gt;
+    | <span data-count="34">A</span>DLet (is_rec, id, args, ae) -&gt;
       let e =
-        List.fold_right args ~init:(aexpr_to_as<span data-count="26">t</span> ae) ~f:(fun arg e -&gt; <span data-count="23">E</span>Fun (arg, e))
+        List.fold_right args ~init:(aexpr_to_as<span data-count="34">t</span> ae) ~f:(fun arg e -&gt; <span data-count="38">E</span>Fun (arg, e))
       in
-      <span data-count="26">D</span>Let (is_rec, id, e)
+      <span data-count="34">D</span>Let (is_rec, id, e)
   in
   adecl_to_ast
 ;;
