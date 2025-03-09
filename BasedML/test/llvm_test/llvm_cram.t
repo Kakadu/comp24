@@ -301,7 +301,7 @@ Operation/Function overide
   8
   35
   13
-  41
+  42
 
 Test struct and physic equal
   $ ./llvm_demo.exe << EOF
@@ -441,8 +441,8 @@ TU Andrey
   $ ./riscv_run.sh  out.ll
   1
   1
-  Segmentation fault (core dumped)
-  [139]
+  1
+  1
   $ ocaml -w -a ../manytests/typed/015tuples.ml
   1111
   $ ./llvm_demo.exe < ../manytests/typed/016lists.ml

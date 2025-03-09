@@ -75,22 +75,30 @@ box_t* process_node(box_t* old_box, pool_t* old_pool) {
 
             box_t* res = (box_t*)POOL_MALLOC(the_pool, old_box->header.size * 8);
             res->header = old_box->header;
+
+            int64_t fst_value_buf = old_box->values[0];
+            
             // number of elems in box = header.size-1
             for (int i = 0; i < old_box->header.size - 1; i++) {
-                res->values[i] = (int64_t)process_node((box_t*)old_box->values[i], old_pool);
+                if (i == 0) {
+                    old_box->header.color = COLOR_PROCESSED;
+                    old_box->values[0] = (int64_t)res; // set new box address
+                    res->values[i] = (int64_t)process_node((box_t*)fst_value_buf, old_pool);
+                } else {
+                    res->values[i] = (int64_t)process_node((box_t*)old_box->values[i], old_pool);
+                }
             }
 
             DEBUG_RUN(if (old_box->header.tag == (int8_t)T_CLOSURE) {
                 printf("Was | Became \n");
-                printf("func: %lx  | %lx\n", old_box->values[0], res->values[0]);
+                printf("func: %lx  | %lx\n", fst_value_buf, res->values[0]);
                 printf("num: %lx  | %lx\n", old_box->values[1], res->values[1]);
                 printf("applied: %lx  | %lx\n", old_box->values[2], res->values[2]);
                 for (int i = 3; i < old_box->header.size - 1; i++) {
                     printf("args[%d]: %lx  | %lx\n", i, old_box->values[i], res->values[i]);
                 }
             });
-            old_box->header.color = COLOR_PROCESSED;
-            old_box->values[0] = (int64_t)res; // set new box address
+
             return (box_t*)((uint64_t)res + offset);
         }
     }

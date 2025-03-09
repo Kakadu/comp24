@@ -95,7 +95,7 @@ int64_t mlrt_create_tuple(int64_t tuple_size, ...) {
     va_list tuple_elems;
     va_start(tuple_elems, tuple_size);
 
-    box_t* tuple_box = create_box_t(sizeof(box_header_t) + sizeof(tuple_size * 8));
+    box_t* tuple_box = create_box_t(sizeof(box_header_t) + tuple_size * 8);
     tuple_box->header.tag = T_TUPLE;
 
     for (int i = 0; i < tuple_size; i++)
@@ -223,10 +223,15 @@ int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ..
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num) {
     START_FUNCTION_NAME_PRINT;
     field_num = CONVERT_INT_ML_TO_NATIVE(field_num);
-    if (!is_ml_ptr(box))
+    DEBUG_RUN(printf("get box :%lx  field_num: %ld\n", box, field_num););
+    if (!is_ml_ptr(box)) {
+        DEBUG_RUN(printf("%s return poisoned value\n", __FUNCTION__););
         return CONVERT_INT_NATIVE_TO_ML(0);
-    else
-        return ((box_t*)box)->values[field_num];
+    } else {
+        int64_t res = ((box_t*)box)->values[field_num];
+        DEBUG_RUN(printf("%s ret %lx\n", __FUNCTION__, res););
+        return res;
+    }
 }
 
 int64_t mlrt_check_tag(int64_t target, int64_t tag) {
