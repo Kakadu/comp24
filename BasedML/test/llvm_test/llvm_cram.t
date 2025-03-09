@@ -536,3 +536,55 @@ Some llcode demonstration
     %0 = call i64 @f_0(i64 5, i64 7)
     ret i64 %0
   }
+
+GC Tests
+  $ ./llvm_demo.exe << EOF
+  > let init_lst i =
+  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
+  >  help i []
+  > let dont_remove_live_vars =
+  >   let _ = print_gc_info () in
+  >   let big_lst = init_lst 1000 in
+  >   let _ = compact () in
+  >   let _ = print_gc_info () in
+  >   let hd :: tl= big_lst in
+  >   hd
+
+  $ ./riscv_run.sh out.ll
+  Memory used:    0x280/   0x400
+  Memory used:   0x6058/  0x8000
+
+
+  $ ./llvm_demo.exe << EOF
+  > let init_lst i =
+  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
+  >  help i []
+  > let auto_remove_useless_var =
+  >   let _ = print_gc_info () in
+  >   let big_lst = init_lst 1000 in
+  >   let _ = print_gc_info () in
+  >   let smaller_lst = init_lst 500 in 
+  >   let _ = print_gc_info () in
+  >   ()
+
+  $ ./riscv_run.sh out.ll
+  Memory used:    0x280/   0x400
+  Memory used:   0x6058/  0x8000
+  Memory used:   0x3178/ 0x10000
+
+  $ ./llvm_demo.exe << EOF
+  > let init_lst i =
+  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
+  >  help i []
+  > let hand_remove_useless_var =
+  >   let _ = print_gc_info () in
+  >   let big_lst = init_lst 1000 in
+  >   let _ = print_gc_info () in
+  >   let _ = compact () in 
+  >   let _ = print_gc_info () in
+  >   ()
+
+  $ ./riscv_run.sh out.ll
+  Memory used:    0x280/   0x400
+  Memory used:   0x6058/  0x8000
+  Memory used:    0x280/  0x8000
