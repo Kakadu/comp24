@@ -295,17 +295,21 @@ Test struct and physic equal
   > let print_bool b = print_int (if b then 1 else 0)
   > let lst1 = [1; 2; 3]
   > let lst2 = [1; 2; 3]
+  > let lst3 = [1; 2; 2]
   > let _ = print_bool (lst1 == lst2)
   > let _ = print_bool (lst1 = lst2)
   > let _ = print_bool (2 == 1)
   > let _ = print_bool (2 = 1)
   > let _ = print_bool (1 == 1)
   > let _ = print_bool (1 = 1)
+  > let _ = print_bool (lst3 <> lst2)
+
   $ ./riscv_run.sh  out.ll
   0
   1
   0
   0
+  1
   1
   1
 

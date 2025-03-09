@@ -23,7 +23,7 @@ int8_t compare_boxed(int64_t x, int64_t y) {
         int64_t res = 0;
         for (int i = 1; i < xbox->header.size; i++) {
             int val_num = i - 1;
-            res = compare_ml(xbox->values[val_num], xbox->values[val_num]);
+            res = compare_ml(xbox->values[val_num], ybox->values[val_num]);
             if (res != 0)
                 break;
         }
