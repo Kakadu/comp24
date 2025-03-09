@@ -89,3 +89,27 @@
   let cc_ac1_main = print_int ((((cc_ac0__start (print_int 1)) (print_int 2)) (print_int 3)) (print_int 4))
   ;;
   
+
+  $ dune exec ./cc_runner.exe << EOF
+  > let rec even n =
+  > match n with
+  >  | 0 -> true
+  >  | x -> odd (x-1)
+  > and odd n =
+  > match n with
+  >  | 0 -> false
+  >  | x -> even (x-1);;
+  let rec even n =
+    match n with
+      | 0 -> 
+        true
+      | x -> 
+        odd ((( - ) x) 1)
+  and odd cc_ac0_n =
+    match cc_ac0_n with
+      | 0 -> 
+        false
+      | cc_ac1_x -> 
+        even ((( - ) cc_ac1_x) 1)
+  ;;
+  

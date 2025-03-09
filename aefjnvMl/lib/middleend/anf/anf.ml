@@ -39,7 +39,6 @@ let const_to_immexpr =
 ;;
 
 let id_to_immexpr v = Imm_id v
-let immexpr_to_cexpr v = C_immexpr v
 
 let optimize_cons_to_rlist : ll_expr -> ll_expr -> ll_expr list =
   fun head_pt tail_pt ->
@@ -81,9 +80,7 @@ let to_scoped_common builder = function
 
 let to_local = to_scoped_common (fun x -> Local_id x)
 let gfunc x = Global_func x
-let to_gfunc = to_scoped_common gfunc
 let gvar x = Global_var x
-let to_gvar = to_scoped_common gvar
 
 let to_scoped id =
   let+ cond = get_global id in
@@ -193,7 +190,7 @@ let to_anf_decl = function
      | Nonrecursive, _ -> fail "With [and] supports only rec funcs"
      | Recursive, ll_fun'l ->
        let* _ =
-         mapt (ll_fun :: ll_fun'l) (fun { lldec_name } ->
+         mapt (ll_fun :: ll_fun'l) (fun { lldec_name; _ } ->
            save_global (Id_name lldec_name) gfunc)
        in
        let* anf_fun = to_func ll_fun in

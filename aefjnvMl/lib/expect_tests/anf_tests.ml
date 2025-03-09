@@ -87,7 +87,25 @@ and odd n =
   in
   [%expect
     {|
-    The type variable 'a occurs inside int -> ('a -> 'a -> int -> bool) -> bool |}]
+    let rec even n =
+      let nf_0 = (( = ) 0) n in
+        (if nf_0
+        then
+          true
+        else
+          let x = n in
+            let nf_1 = (( - ) x) 1 in
+              odd nf_1)
+    and odd cc_ac0_n =
+      let nf_2 = (( = ) 0) cc_ac0_n in
+        (if nf_2
+        then
+          false
+        else
+          let cc_ac1_x = cc_ac0_n in
+            let nf_3 = (( - ) cc_ac1_x) 1 in
+              even nf_3)
+    ;; |}]
 ;;
 
 let%expect_test "" =

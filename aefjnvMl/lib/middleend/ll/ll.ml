@@ -43,11 +43,6 @@ let optimize_func arg body =
   (arg, args), body'
 ;;
 
-let deconstruct_vbl = function
-  | [] -> fail "Impossible case  (3)"
-  | vb :: tl -> return (vb, tl)
-;;
-
 let rec to_ll_expr = function
   | MExp_constant c -> return @@ LL_const c
   | MExp_ident id -> return @@ LL_ident id

@@ -83,7 +83,7 @@ let expr_vars =
 ;;
 
 let closure_conversion toplvl =
-  let rec closure_expr env = function
+  let rec closure_expr toplvl env = function
     | Exp_type (e, t) -> etype e t
     | Exp_constant c -> econst c
     | Exp_ident id as node ->
@@ -92,7 +92,7 @@ let closure_conversion toplvl =
        | Some vars ->
          Base.Set.fold_right (* ?? *) vars ~f:(fun v acc -> eapp acc (eval v)) ~init:node)
     | Exp_tuple exps ->
-      let items = Base.List.map exps ~f:(closure_expr env) in
+      let items = Base.List.map exps ~f:(closure_expr toplvl env) in
       etuple items
     | Exp_function (p, e) ->
       let ps, inner = eliminate_funs e in
@@ -104,30 +104,30 @@ let closure_conversion toplvl =
       let saturated =
         Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:(p :: ps)
       in
-      let expr = closure_expr env inner in
+      let expr = closure_expr toplvl env inner in
       let expr = construct_from_pats expr saturated in
       Base.Set.fold_right free_vars ~f:(fun v acc -> eapp acc (eval v)) ~init:expr
     | Exp_let (decl, e) ->
-      let decl, env = closure_decl env decl in
-      elet decl (closure_expr env e)
+      let decl, env = closure_decl toplvl env decl in
+      elet decl (closure_expr toplvl env e)
     | Exp_match (e, cases) ->
-      let e = closure_expr env e in
-      let cases = Base.List.map cases ~f:(fun (p, e) -> p, closure_expr env e) in
+      let e = closure_expr toplvl env e in
+      let cases = Base.List.map cases ~f:(fun (p, e) -> p, closure_expr toplvl env e) in
       ematch e cases
     | Exp_ifthenelse (e, e', e'') ->
-      let e = closure_expr env e in
-      let e' = closure_expr env e' in
-      let e'' = closure_expr env e'' in
+      let e = closure_expr toplvl env e in
+      let e' = closure_expr toplvl env e' in
+      let e'' = closure_expr toplvl env e'' in
       eite e e' e''
     | Exp_apply (e, e') ->
-      let e = closure_expr env e in
-      let e' = closure_expr env e' in
+      let e = closure_expr toplvl env e in
+      let e' = closure_expr toplvl env e' in
       eapp e e'
     | Exp_list (e, e') ->
-      let e = closure_expr env e in
-      let e' = closure_expr env e' in
+      let e = closure_expr toplvl env e in
+      let e' = closure_expr toplvl env e' in
       econs e e'
-  and closure_decl env =
+  and closure_decl toplvl env =
     let helper rec_flag env = function
       | { vb_pat = Pat_var v as pv; vb_expr } ->
         let ps, inner_expr = eliminate_funs vb_expr in
@@ -144,7 +144,7 @@ let closure_conversion toplvl =
           Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:ps
         in
         let env = Base.Map.set env ~key:v ~data:free_vars in
-        let expr = closure_expr env inner_expr in
+        let expr = closure_expr toplvl env inner_expr in
         let binding = { vb_pat = pv; vb_expr = construct_from_pats expr saturated } in
         binding, env
       | binding -> binding, env
@@ -181,10 +181,18 @@ let closure_conversion toplvl =
   let empty_map = Base.Map.empty (module Base.String) in
   function
   | Str_eval e ->
-    let e = closure_expr empty_map e in
+    let e = closure_expr toplvl empty_map e in
     Str_eval e, toplvl
-  | Str_value (Decl (_, bindings) as d) ->
-    let decl, _ = closure_decl empty_map d in
+  | Str_value (Decl (rec_flag, bindings) as d) ->
+    let ps, _ =
+        Base.List.fold_left
+          bindings
+          ~init:([], [])
+          ~f:(fun (ps, es) { vb_pat; vb_expr } -> vb_pat :: ps, vb_expr :: es)
+      in
+    let p_vars = Base.List.concat_map ps ~f:pattern_vars in
+    let saturated = if rec_flag = Recursive then toplvl @ p_vars else toplvl in
+    let decl, _ = closure_decl saturated empty_map d in
     let new_tpls = Base.List.concat_map bindings ~f:(fun b -> pattern_vars b.vb_pat) in
     Str_value decl, Base.List.append new_tpls toplvl
 ;;

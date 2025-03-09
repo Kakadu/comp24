@@ -2,6 +2,7 @@
  (name expect_tests)
  (modules
   parser_tests
+  infer_tests
   match_elim_tests
   alpha_converter_tests
   ll_tests
