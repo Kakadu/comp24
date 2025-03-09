@@ -121,21 +121,19 @@ let alpha_conversion rast =
             let+ e = alpha_expr env e in
             env, RStr_value (name, e) :: prev
           | RStr_value_rec vals ->
-            let* env =
+            let* env, names =
               fold_left
-                (fun env (name, _) ->
-                  let+ _, env = update_env name env in
-                  env)
-                (return env)
+                (fun (env, name_tl) (name, _) ->
+                  let+ name, env = update_env name env in
+                  env, name :: name_tl)
+                (return (env, []))
                 vals
             in
             let+ vals =
-              map
-                (fun (name, exp) ->
-                  let+ exp = alpha_expr env exp
-                  and+ name, _ = update_env name env in
-                  name, exp)
-                vals
+              map (fun ((_, exp), name) ->
+                let+ exp = alpha_expr env exp in
+                name, exp)
+              @@ List.combine vals (List.rev names)
             in
             env, RStr_value_rec vals :: prev)
         (return (env, []))
