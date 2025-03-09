@@ -76,6 +76,7 @@ and strip_types_def = function
 let strip_types_program = List.map ~f:strip_types_def
 
 let pp_texpr fmt e = strip_types_expr e |> Pp_ast.pp_expr fmt
+
 and pp_tdefinition fmt d = strip_types_def d |> Pp_ast.pp_definition fmt
 
 let pp_tprogram fmt p = List.map p ~f:strip_types_def |> Pp_ast.pp_program fmt

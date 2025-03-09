@@ -1,0 +1,5 @@
+depexts: [
+  [ "pkg-config" 
+    "qemu-user-static" "binutils-riscv64-linux-gnu" "gcc-riscv64-linux-gnu"
+  ] {os-distribution = "ubuntu"}
+]
