@@ -278,7 +278,9 @@ let%expect_test "Test pseudo Fibo" =
      ""( > )"": ('p23 -> ('p23 -> bool)),
      ""( >= )"": ('p24 -> ('p24 -> bool)),
      ""( || )"": (bool -> (bool -> bool)),
+     ""compact"": (unit -> unit),
      ""fibo"": (int -> int),
+     ""print_gc_info"": (unit -> unit),
      ""print_int"": (int -> unit),
      ] |}]
 ;;
@@ -310,9 +312,11 @@ let%expect_test "Test partial application" =
       ""( > )"": ('p21 -> ('p21 -> bool)),
       ""( >= )"": ('p22 -> ('p22 -> bool)),
       ""( || )"": (bool -> (bool -> bool)),
+      ""compact"": (unit -> unit),
       ""doubleList"": ((int list) -> (int list)),
       ""map"": (('p23 -> 'p24) -> (('p23 list) -> ('p24 list))),
       ""mulTwo"": (int -> int),
+      ""print_gc_info"": (unit -> unit),
       ""print_int"": (int -> unit),
       ] |}]
 ;;
@@ -339,6 +343,8 @@ let%expect_test "Test default binops" =
       ""( || )"": (bool -> (bool -> bool)),
       ""a"": bool,
       ""b"": bool,
+      ""compact"": (unit -> unit),
+      ""print_gc_info"": (unit -> unit),
       ""print_int"": (int -> unit),
       ] |}]
 ;;
@@ -378,9 +384,11 @@ let%expect_test "Test avoiding already used type names" =
      ""( > )"": ('pf -> ('pf -> bool)),
      ""( >= )"": ('p10 -> ('p10 -> bool)),
      ""( || )"": (bool -> (bool -> bool)),
+     ""compact"": (unit -> unit),
      ""id1"": ('p11 -> 'p11),
      ""id2"": ('p13 -> 'p13),
      ""id3"": ('p14 -> 'p14),
+     ""print_gc_info"": (unit -> unit),
      ""print_int"": (int -> unit),
      ""x"": int,
      ] |}]
@@ -407,7 +415,9 @@ let%expect_test "Late binding var" =
      ""( > )"": ('pb -> ('pb -> bool)),
      ""( >= )"": ('pc -> ('pc -> bool)),
      ""( || )"": (bool -> (bool -> bool)),
+     ""compact"": (unit -> unit),
      ""f"": ((int -> 'pd) -> 'pd),
+     ""print_gc_info"": (unit -> unit),
      ""print_int"": (int -> unit),
      ] |}]
 ;;

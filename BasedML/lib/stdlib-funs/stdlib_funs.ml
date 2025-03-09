@@ -71,6 +71,6 @@ let stdlib_funs : std_fun list =
     , (SystemFun, Vararg)
     , TFunction (TPoly "_globs_count", TPoly "_varargs") )
   ; "compact", "mlrt_compact", (UserFun, NotVararg), TFunction (TUnit, TUnit)
-  ; "_print_gc_info", "mlrt_print_gc_info", (UserFun, NotVararg), TFunction (TUnit, TUnit)
+  ; "print_gc_info", "mlrt_print_gc_info", (UserFun, NotVararg), TFunction (TUnit, TUnit)
   ]
 ;;
