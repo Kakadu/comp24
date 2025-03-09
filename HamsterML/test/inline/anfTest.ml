@@ -452,7 +452,8 @@ let%expect_test "016lists" =
     let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
     0
   |};
-  [%expect {|
+  [%expect
+    {|
     let rec anf_var_0 arg_1 = let anf_11 = ( = ) 0 in
     let anf_12 = list_length arg_1 in
     let anf_10 = anf_11 anf_12 in

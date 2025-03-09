@@ -65,7 +65,6 @@ module NameEnv = struct
 
   let empty : t = Map.empty (module String)
   let find key (env : t) = Map.find env key
-
   let find_exn key (env : t) = Map.find_exn env key
   let extend (k, v) (env : t) = Map.set env ~key:k ~data:v
 

@@ -26,5 +26,4 @@ type anf_decl =
 
 type anf_prog = anf_decl list
 
-
 val anf_prog : ME.me_prog -> anf_decl list Utils.R.t
