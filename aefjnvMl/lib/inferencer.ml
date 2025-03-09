@@ -351,7 +351,7 @@ let pattern_infer =
             let* env1, p1 = helper env pat in
             return (env1, p1 :: ts))
       in
-      let* _, env, ty = check_several_bounds (pattern_vars pat) env (ttuple ty) in
+      let* _, env, ty = check_several_bounds (pattern_vars pat) env (ttuple (List.rev ty)) in
       return (env, ty)
     | Pat_constraint (p, t) ->
       let* env', t' = helper env p in
