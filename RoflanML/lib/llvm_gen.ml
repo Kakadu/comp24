@@ -6,10 +6,11 @@ let function_type_table : (string, lltype) Hashtbl.t = Hashtbl.create 10
 
 let map_name_to_runtime name =
   match name with
-  | "+" -> "+"
-  | "-" -> "-"
-  | "*" -> "*"
-  | "=" -> "="
+  | "+" -> "roflanml_add"
+  | "-" -> "roflanml_sub"
+  | "*" -> "roflanml_mul"
+  | "=" -> "roflanml_eq"
+  | "/" -> "roflanml_div"
   | _ -> name
 ;;
 
@@ -239,25 +240,31 @@ let register_dummy_runtime () =
   in
   ignore
     (declare_dummy
-       "="
+       "roflanml_eq"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "+"
+       "roflanml_add"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "-"
+       "roflanml_sub"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "*"
+       "roflanml_mul"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "roflanml_div"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
@@ -284,7 +291,11 @@ let register_dummy_runtime () =
   ignore
     (declare_dummy
        "create_closure"
-       (Llvm.function_type value_pointer_type [| pointer_type llvm_context; int64_type |]))
+       (Llvm.function_type value_pointer_type [| pointer_type llvm_context; int64_type |]));
+  ignore
+    (declare_dummy "print_int" (Llvm.function_type value_pointer_type [| int64_type |]));
+  ignore
+    (declare_dummy "print_bool" (Llvm.function_type value_pointer_type [| bool_type |]))
 ;;
 
 let compile_program (program : aprogram) : Llvm.llmodule =
