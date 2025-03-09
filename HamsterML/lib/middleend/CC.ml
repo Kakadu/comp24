@@ -1,6 +1,5 @@
 open Base
 open Ast
-open Utils.R
 
 let stdlib_names = Set.of_list (module String) [ "print_int"; "print_endline" ]
 

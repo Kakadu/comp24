@@ -2,7 +2,6 @@ let closure_conv_prog (s : string) =
   let open HamsterML.CC in
   let open ParserTest in
   let open HamsterML.Utils.R in
-  let open ParserTest in
   let prog = parse_prog s in
   let alpha_convert prog = run @@ HamsterML.AC.convert_prog prog in
   let closure_convert prog = run @@ cc_prog prog in
