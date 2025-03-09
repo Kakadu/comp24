@@ -3,16 +3,16 @@ Test simple fun
   > let a = 4;;
   > fun b -> a
   let __var_a = 4;;
-  ((fun __var_a0 __reserved_0 -> (let __var_b = __reserved_0 in 
-   __var_a0)) __var_a);;
+  (fun __reserved_0 -> (let __var_b = __reserved_0 in 
+   __var_a));;
 Test fun in fun
   $ ./run_closure_conversion.exe <<- EOF
   > let a = 4;;
   > fun b -> fun c -> a + c + b
   let __var_a = 4;;
-  ((fun __var_a0 __reserved_0 -> (let __var_b = __reserved_0 in 
-   (((fun __var_a1 __var_b2 __reserved_1 -> (let __var_c = __reserved_1 in 
-   ((__op_plus (((__op_plus __var_a1) __var_c))) __var_b2))) __var_a0) __var_b))) __var_a);;
+  (fun __reserved_0 -> (let __var_b = __reserved_0 in 
+   ((fun __var_b0 __reserved_1 -> (let __var_c = __reserved_1 in 
+   ((__op_plus (((__op_plus __var_a) __var_c))) __var_b0))) __var_b)));;
 Test fun with let
   $ ./run_closure_conversion.exe <<- EOF
   > let a = 4;;
@@ -22,9 +22,9 @@ Test fun with let
   (fun __reserved_0 -> (let __var_b = __reserved_0 in 
    (let __var_a0 = 4 in 
    ((__op_plus __var_a0) __var_b))));;
-  ((fun __var_a0 __reserved_1 -> (let __var_b = __reserved_1 in 
-   (let __var_a1 = __var_a0 in 
-   ((__op_plus __var_a1) __var_b)))) __var_a);;
+  (fun __reserved_1 -> (let __var_b = __reserved_1 in 
+   (let __var_a1 = __var_a in 
+   ((__op_plus __var_a1) __var_b))));;
 Test let rec
   $ ./run_closure_conversion.exe <<- EOF
   > let a = 4;;
