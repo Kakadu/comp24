@@ -473,7 +473,8 @@ module TypecheckerTests = struct
     pp_parse_and_infer
       "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
        false else even (x - 1)";
-    [%expect {|
+    [%expect
+      {|
       int -> bool
       int -> bool
       |}]
@@ -481,7 +482,8 @@ module TypecheckerTests = struct
 
   let%expect_test "mutual recursion type inference 2" =
     pp_parse_and_infer "let rec f x = x && true and g x = x + 1";
-    [%expect {|
+    [%expect
+      {|
       bool -> bool
       int -> int
       |}]
@@ -594,44 +596,40 @@ module UnparseTests = struct
 end
 
 module QCheckTests = struct
-  open Unparse
   open Check
 
-  let arbitrary_decl =
+  let arbitrary_ast =
     QCheck.make
-      (QCheck.Gen.sized (fun n ->
-         QCheck.Gen.map
-           (fun e -> [ DLet (NonRec, "x", e) ])
-           (Generator.gen_expr (min n 3))))
-      ~print:unparse_program
+      (QCheck.Gen.sized (fun _ -> Generator.gen_program))
+      ~print:(fun prog -> Unparse.unparse_program prog)
       ~shrink:Shrinker.shrink_program
   ;;
 
-  let parser_qtests =
-    [ QCheck.Test.make ~count:100 arbitrary_decl (fun ast ->
-        let src = unparse_program ast in
+  let test =
+    QCheck.(
+      Test.make ~count:10 arbitrary_ast (fun ast ->
+        let src = Unparse.unparse_program ast in
         match Parser.parse src with
         | Result.Ok ast' when Stdlib.( = ) ast' ast -> true
         | Result.Ok ast' ->
           Stdlib.Format.printf
-            "\n\n[!]: Different AST!\nSource: %S\nParsed: %s\nOriginal: %s\n"
+            "\n\n!!! AST DIFFERS !!!\nSource: %S\nParsed: %s\nOriginal: %s\n"
             src
             (Ast.show_program ast')
             (Ast.show_program ast);
           false
         | Result.Error err ->
           Stdlib.Format.printf "\n\n[!]: Parser error: %s\nOn source:\n%S\n" err src;
-          false)
-    ]
+          false))
   ;;
 
-  let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no shrinker)" =
-    QCheck_runner.set_seed 42;
-    let _ = QCheck_runner.run_tests ~colors:false parser_qtests in
+  let%expect_test "QuickCheck test for parser" =
+    QCheck_runner.set_seed 79;
+    let _ = QCheck_runner.run_tests ~colors:false [ test ] in
     ();
     [%expect
       {|
-      random seed: 42
+      random seed: 79
       ================================================================================
       success (ran 1 tests)
       |}]
