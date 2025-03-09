@@ -41,6 +41,7 @@ int64_t fib_cps_f(int64_t n, int64_t cont) {
 }
 
 int main() {
+    handle_global_vars(4, &print_int_c, &fib_cps_c, &lambda1_c, &lambda2_c);
     print_int_c = mlrt_create_empty_closure((int64_t)print_int, 1);
     fib_cps_c = mlrt_create_empty_closure((int64_t)fib_cps_f, 2);
     lambda1_c = mlrt_create_empty_closure((int64_t)lambda1_f, 3);

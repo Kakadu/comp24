@@ -16,11 +16,20 @@ void* ml_malloc(size_t size) {
 #endif
 };
 
+void handle_global_vars(int n, ...) {
+    va_list globs;
+    va_start(globs, n);
+#ifdef GC
+    add_global_vars_to_gc(n, globs);
+#endif
+    va_end(globs);
+}
+
 box_t* create_box_t(size_t size) {
     if (size % 8 != 0)
         size += 8 - (size % 8);
 
-    box_t* res_box = ml_malloc(size);
+    box_t* res_box = (box_t*)ml_malloc(size);
     res_box->header.color = START_COLOR;
     res_box->header.size = size / 8;
     return res_box;
@@ -135,7 +144,7 @@ int64_t call_closure(box_t* closure_box, int64_t new_args_num, va_list* new_args
     int64_t res = 0;
 
     if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, args_count, &ffi_type_sint64, arg_types) == FFI_OK) {
-        ffi_call(&cif, (void*)closure->fun, &res, (void*)args);
+        ffi_call(&cif, (void (*)())closure->fun, &res, (void**)args);
     } else {
         EXCEPTION_FMT("call_closure: Failed to prepare call interface\n");
     }
