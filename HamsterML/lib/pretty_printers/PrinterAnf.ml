@@ -21,10 +21,7 @@ let rec pretty_print_cexpr = function
       (pretty_print_aexpr then_expr)
       (pretty_print_aexpr else_expr)
   | CIf (cond, then_expr, None) ->
-    Printf.sprintf
-      "if %s then %s"
-      (pretty_print_imm cond)
-      (pretty_print_aexpr then_expr)
+    Printf.sprintf "if %s then %s" (pretty_print_imm cond) (pretty_print_aexpr then_expr)
   | CConstructList (hd, tl) ->
     Printf.sprintf "%s :: %s" (pretty_print_imm hd) (pretty_print_imm tl)
   | CImm imm -> pretty_print_imm imm
@@ -32,27 +29,38 @@ let rec pretty_print_cexpr = function
 and pretty_print_aexpr = function
   | ALetIn (pat, expr, body) ->
     Printf.sprintf
-      "let %s = %s in %s"
+      "let %s = %s in\n%s"
       (PrinterAst.pretty_print_pattern pat)
       (pretty_print_cexpr expr)
       (pretty_print_aexpr body)
   | ACExpr cexpr -> pretty_print_cexpr cexpr
 ;;
 
-let pretty_print_single_binding (ALet (pat, args, body)) =
-  let args_str = String.concat " " args in
-  Printf.sprintf
-    "let %s %s = %s"
-    (PrinterAst.pretty_print_pattern pat)
-    args_str
-    (pretty_print_aexpr body)
+let pretty_print_single_binding rec_flag (ALet (pat, args, body)) =
+  match rec_flag with
+  | Ast.Recursive ->
+    let args_str = String.concat " " args in
+    Printf.sprintf
+      "let rec %s %s = %s"
+      (PrinterAst.pretty_print_pattern pat)
+      args_str
+      (pretty_print_aexpr body)
+  | _ ->
+    let args_str = String.concat " " args in
+    Printf.sprintf
+      "let %s %s = %s"
+      (PrinterAst.pretty_print_pattern pat)
+      args_str
+      (pretty_print_aexpr body)
 ;;
 
 let pretty_print_anf_decl = function
-  | ADSingleLet (_, binding) -> pretty_print_single_binding binding
+  | ADSingleLet (rec_flag, binding) -> pretty_print_single_binding rec_flag binding
   | ADMutualRecDecl bindings ->
     "let rec\n  "
-    ^ String.concat "\n  and " (List.map pretty_print_single_binding bindings)
+    ^ String.concat
+        "\n  and "
+        (List.map (pretty_print_single_binding Nonrecursive) bindings)
 ;;
 
 let pretty_print_anf prog = String.concat "\n\n" (List.map pretty_print_anf_decl prog)
