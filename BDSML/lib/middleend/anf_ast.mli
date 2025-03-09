@@ -16,7 +16,7 @@ type cexpr =
   | CExp_atom of aexpr
 
 and lexp =
-  | LLet_int of string * cexpr * lexp
+  | LLet_in of string * cexpr * lexp
   | LComplex of cexpr
 
 type func = string * string list * cexpr

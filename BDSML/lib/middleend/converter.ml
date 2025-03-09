@@ -51,7 +51,7 @@ let rec cexpr_to_ast = function
   | CExp_atom e -> aexpr_to_ast e
 
 and lexpr_to_ast = function
-  | LLet_int (name, v, exp) ->
+  | LLet_in (name, v, exp) ->
     Exp_let (Nonrecursive, [ Val_binding (name, [], cexpr_to_ast v) ], lexpr_to_ast exp)
   | LComplex exp -> cexpr_to_ast exp
 ;;
