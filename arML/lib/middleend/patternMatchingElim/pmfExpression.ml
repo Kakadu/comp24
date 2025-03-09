@@ -60,7 +60,9 @@ let rec eliminate_pm_expression env = function
     let* l', env = eliminate_pm_expression env l in
     let* r', env = eliminate_pm_expression env r in
     return @@ (PMFListConstructor (l', r'), env)
-  | LETyped (e, _) -> eliminate_pm_expression env e
+  | LETyped (e, t) -> 
+    let* e', env = eliminate_pm_expression env e in
+    return @@ (PMFTyped (e', t), env)
   | LELetIn ((p, e), [], body) ->
     let* e', env = eliminate_pm_expression env e in
     let* body', env = eliminate_pm_expression env body in

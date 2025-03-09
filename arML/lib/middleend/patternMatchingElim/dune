@@ -9,6 +9,7 @@
   UnpackFunctions
   ImmutBasicFunctions
   ListUtils
+  CollectIdentifiers
   GenerateDeclarationsFromCase
   GenerateConditionsFromCase
   PmfCase
