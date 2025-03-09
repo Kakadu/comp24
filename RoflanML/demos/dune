@@ -37,3 +37,13 @@
 (cram
  (applies_to demoANFTypes)
  (deps ./demoANFTypes.exe))
+
+(executable
+ (name exe_qcheck)
+ (modules exe_qcheck)
+ (public_name exe_qcheck)
+ (libraries Roflanml_lib stdio qcheck))
+
+(cram
+ (applies_to test_qcheck)
+ (deps ./exe_qcheck.exe))
