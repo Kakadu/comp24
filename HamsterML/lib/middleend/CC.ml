@@ -260,6 +260,7 @@ let cc_expr global_names =
 ;;
 
 let cc_prog (prog : prog) =
+  let open Utils.R in
   (* Collect global function names from top-level let bindings *)
   let global_names =
     List.fold
@@ -275,5 +276,5 @@ let cc_prog (prog : prog) =
         | _ -> acc)
   in
   let cc_expr_with_globals = cc_expr global_names in
-  List.map prog ~f:cc_expr_with_globals
+  List.map prog ~f:cc_expr_with_globals |> return
 ;;
