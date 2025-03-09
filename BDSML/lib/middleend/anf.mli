@@ -2,6 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Reduced_ast
-
-val alpha_conversion : rstuct_item list -> (rstruct, error) result
+val rast_to_anf : Reduced_ast.rstruct -> (Anf_ast.anf, Reduced_ast.error) result

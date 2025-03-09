@@ -4,15 +4,7 @@
 
 module Env = Map.Make (String)
 open Reduced_ast
-
-type empty
-
-open
-  Utils.Counter_monad.Make
-    (Int)
-    (struct
-      type t = empty
-    end)
+open Middleend_utils.Monads
 
 let fresh_name name =
   let+ num = fresh in
@@ -141,7 +133,5 @@ let alpha_conversion rast =
     in
     List.rev res
   in
-  match run res 0 with
-  | Result.Ok s -> s
-  | Result.Error _ -> []
+  run res 0
 ;;

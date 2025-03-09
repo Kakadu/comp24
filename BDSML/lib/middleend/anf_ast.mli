@@ -11,20 +11,20 @@ type aexpr =
   | AExp_construct of string * aexpr option
 
 type cexpr =
-  | CExp_if of aexpr * cexpr * cexpr
-  | CExp_apply of aexpr * aexpr list
+  | CExp_if of aexpr * lexpr * lexpr
+  | CExp_apply of string * aexpr list
   | CExp_atom of aexpr
 
-and lexp =
-  | LLet_in of string * cexpr * lexp
+and lexpr =
+  | LLet_in of string * cexpr * lexpr
   | LComplex of cexpr
 
-type func = string * string list * cexpr
+type func = string * string list * lexpr
 
 type absexpr =
-  | AbsStr_eval of cexpr
+  | AbsStr_eval of lexpr
   | AbsStr_func of func
-  | AbsStr_value of string * cexpr
+  | AbsStr_value of string * lexpr
   | AbsStr_value_rec of func list
 
 type anf = absexpr list
