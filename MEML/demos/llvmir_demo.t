@@ -94,7 +94,6 @@
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
     ret i32 0
   }
-  
   $ ./llvm_demo.exe < manytests/typed/001fac.ml 
   ; ModuleID = 'MEML'
   source_filename = "MEML"
