@@ -18,14 +18,14 @@
       <h2>72.50%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:27.16%"></span>
-      <span class="some-visited" style="bottom:35.80%"></span>
-      <span class="unvisited" style="bottom:30.86%"></span>
-      <span class="unvisited" style="bottom:25.93%"></span>
-      <span class="unvisited" style="bottom:9.88%"></span>
-      <span class="unvisited" style="bottom:8.64%"></span>
-      <span class="unvisited" style="bottom:4.94%"></span>
-      <span class="unvisited" style="bottom:2.47%"></span>
+      <span class="unvisited" style="top:27.50%"></span>
+      <span class="some-visited" style="bottom:35.00%"></span>
+      <span class="unvisited" style="bottom:30.00%"></span>
+      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="unvisited" style="bottom:10.00%"></span>
+      <span class="unvisited" style="bottom:8.75%"></span>
+      <span class="unvisited" style="bottom:5.00%"></span>
+      <span class="unvisited" style="bottom:2.50%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -97,20 +97,19 @@
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span class="visited"> </span>
 <a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span > </span>
+<a id="L72"></a><span class="unvisited"> </span>
 <a id="L73"></a><span class="unvisited"> </span>
-<a id="L74"></a><span class="unvisited"> </span>
+<a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span > </span>
-<a id="L77"></a><span class="unvisited"> </span>
-<a id="L78"></a><span > </span>
-<a id="L79"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span > </span>
 <a id="L80"></a><span > </span>
-<a id="L81"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -195,7 +194,6 @@
 <a href="#L78">78</a>
 <a href="#L79">79</a>
 <a href="#L80">80</a>
-<a href="#L81">81</a>
 </pre>
 <pre><code class="ocaml">open Base
 module Format = Stdlib.Format
@@ -264,7 +262,6 @@ module NameEnv = struct
 
   let empty : t = Map.empt<span data-count="23">y</span> (module String)
   let find key (env : t) = <span data-count="2991">M</span>ap.find env key
-
   let find_exn key (env : t) = <span data-count="215">M</span>ap.find_exn env key
   let extend (k, v) (env : t) = <span data-count="1079">M</span>ap.set env ~key:k ~data:v
 
