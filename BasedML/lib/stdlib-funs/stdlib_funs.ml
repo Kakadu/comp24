@@ -66,5 +66,11 @@ let stdlib_funs : std_fun list =
     , "mlrt_apply_args_to_closure"
     , (SystemFun, Vararg)
     , TFunction (TPoly "_closure", TFunction (TInt, TPoly "_varargs")) )
+  ; ( "_handle_global_vars"
+    , "mlrt_handle_global_vars"
+    , (SystemFun, Vararg)
+    , TFunction (TPoly "_globs_count", TPoly "_varargs") )
+  ; "compact", "mlrt_compact", (UserFun, NotVararg), TFunction (TUnit, TUnit)
+  ; "_print_gc_info", "mlrt_print_gc_info", (UserFun, NotVararg), TFunction (TUnit, TUnit)
   ]
 ;;

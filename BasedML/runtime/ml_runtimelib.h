@@ -64,7 +64,11 @@ int64_t mlrt_check_tag(int64_t target, int64_t tag);
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num);
 void mltr_match_error();
 
-void handle_global_vars(int n, ...);
+void mlrt_handle_global_vars(int n, ...);
+
+void mlrt_compact();
+
+void mlrt_print_gc_info();
 
 #ifdef __cplusplus
 }
