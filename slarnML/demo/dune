@@ -19,7 +19,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run %{gen} ./demo/main.ml %{targets})))
+  (run %{gen} ../demo/main.ml %{targets})))
 
 (rule
  (targets main.o)
