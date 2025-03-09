@@ -37,6 +37,9 @@ pool_t* create_pool_t(size_t sz) {
     pool->pool_bottom = start;
     pool->pool_pointer = start;
     pool->pool_top = start + sz;
+
+    // it is need if in runtime stack there is some intermediate value
+    // exmp: pointer to box's values
     pool->used_addresses = std::set<box_t*>();
 
     return pool;
@@ -77,7 +80,7 @@ box_t* process_node(box_t* old_box, pool_t* old_pool) {
             res->header = old_box->header;
 
             int64_t fst_value_buf = old_box->values[0];
-            
+
             // number of elems in box = header.size-1
             for (int i = 0; i < old_box->header.size - 1; i++) {
                 if (i == 0) {
@@ -111,7 +114,6 @@ void realloc_the_pool(size_t sz) {
     pool_t* old_pool = the_pool;
     the_pool = create_pool_t(sz);
 
-    fflush(stdout);
     for (box_t** iter = stack_top; iter < stack_bottom; iter++) {
         *iter = process_node(*iter, old_pool);
     }
@@ -122,7 +124,7 @@ void realloc_the_pool(size_t sz) {
     restore_callee_saved_registers();
 }
 
-void* safe_malloc(size_t sz) {
+void* gc_malloc(size_t sz) {
     DEBUG_RUN(printf("[GC] ---- Safe malloc!! sz = %lx\n", sz); fflush(stdout););
 
     if ((the_pool->pool_pointer + sz) <= the_pool->pool_top) {
@@ -142,16 +144,6 @@ void gc_on_load() {
     stack_bottom = (box_t**)get_stack_pointer();
     the_pool = create_pool_t(START_POOL_SIZE);
 }
-
-void* _init_gc_malloc(size_t sz) {
-    DEBUG_RUN(printf("[GC] ---- GC IS ALIVE\n"););
-    // stack_bottom = (box_t**)get_stack_pointer() + 0x100;
-    // the_pool = create_pool_t(START_POOL_SIZE);
-    gc_malloc = (malloc_f_t)safe_malloc;
-    return gc_malloc(sz);
-}
-
-malloc_f_t gc_malloc = _init_gc_malloc;
 
 void add_global_vars_to_gc(int64_t n, va_list globs) {
     global_vars = (box_t***)calloc(n, sizeof(*global_vars));
