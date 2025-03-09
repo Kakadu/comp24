@@ -22,5 +22,6 @@ module TypeEnv : sig
   val equal : t -> t -> bool
 end
 
+val type_eq : ty -> ty -> bool
 val run_infer : ?env:TypeEnv.t -> decl -> (ty list, error) result
 val typecheck : ?env:TypeEnv.t -> program -> (TypeEnv.t, error) result

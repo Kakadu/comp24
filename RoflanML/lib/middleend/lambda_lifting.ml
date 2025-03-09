@@ -9,7 +9,7 @@ open Common
 open Common.Counter_Monad
 open Common.Middleend_Common
 
-let gen_name = gen_name "LL"
+let gen_name = gen_name "ll"
 
 let lift decl =
   let rec lift_expr e lifted renames =

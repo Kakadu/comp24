@@ -8,7 +8,7 @@ open Anf_ast
 open Common
 open Common.Counter_Monad
 
-let gen_name = gen_name "ANF"
+let gen_name = gen_name "anf"
 
 let fold_app e =
   let rec helper e k =

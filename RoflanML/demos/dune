@@ -27,3 +27,13 @@
 (cram
  (applies_to demoANF)
  (deps ./demoANF.exe))
+
+(executable
+ (name demoANFTypes)
+ (modules demoANFTypes)
+ (public_name demoANFTypes)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoANFTypes)
+ (deps ./demoANFTypes.exe))

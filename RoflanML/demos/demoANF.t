@@ -3,58 +3,58 @@
   > EOF
   
   let q = 
-  let ANF_0 = ( + ) 1 2 in 
-  let ANF_1 = ( * ) 3 4 in 
-  let ANF_2 = ( + ) ANF_0 ANF_1 in 
-  let ANF_3 = ( + ) ANF_2 5 in ANF_3
+  let anf_0 = ( + ) 1 2 in 
+  let anf_1 = ( * ) 3 4 in 
+  let anf_2 = ( + ) anf_0 anf_1 in 
+  let anf_3 = ( + ) anf_2 5 in anf_3
 
   $ dune exec ./demoANF.exe << EOF
   > let q = let my_true x = true in let f x y z = x + y + z in (f 1 2 3, my_true true, my_true (fun x -> x))
   > EOF
   
-  let LL_0 x = true
+  let ll_0 x = true
   
-  let LL_1 x y z = 
-  let ANF_4 = ( + ) x y in 
-  let ANF_5 = ( + ) ANF_4 z in ANF_5
+  let ll_1 x y z = 
+  let anf_4 = ( + ) x y in 
+  let anf_5 = ( + ) anf_4 z in anf_5
   
-  let LL_2 x = x
+  let ll_2 x = x
   
   let q = 
-  let ANF_0 = LL_1 1 2 3 in 
-  let ANF_1 = LL_0 true in 
-  let ANF_2 = LL_0 LL_2 in 
-  let ANF_3 = ANF_0, ANF_1, ANF_2 in ANF_3
+  let anf_0 = ll_1 1 2 3 in 
+  let anf_1 = ll_0 true in 
+  let anf_2 = ll_0 ll_2 in 
+  let anf_3 = anf_0, anf_1, anf_2 in anf_3
 
   $ dune exec ./demoANF.exe << EOF
   > let q = let f x y z = x + y + z in let g x = f 1 2 in g 3
   > EOF
   
-  let LL_0 x y z = 
-  let ANF_2 = ( + ) x y in 
-  let ANF_3 = ( + ) ANF_2 z in ANF_3
+  let ll_0 x y z = 
+  let anf_2 = ( + ) x y in 
+  let anf_3 = ( + ) anf_2 z in anf_3
   
-  let LL_1 f x = 
-  let ANF_1 = LL_0 1 2 in ANF_1
+  let ll_1 f x = 
+  let anf_1 = ll_0 1 2 in anf_1
   
   let q = 
-  let ANF_0 = LL_1 LL_0 3 in ANF_0
+  let anf_0 = ll_1 ll_0 3 in anf_0
 
   $ dune exec ./demoANF.exe << EOF
   > let q = if true && false then let f x = x + 1 in f 1 else let g x = x - 1 in g 1
   > EOF
   
-  let LL_0 x = 
-  let ANF_5 = ( + ) x 1 in ANF_5
+  let ll_0 x = 
+  let anf_5 = ( + ) x 1 in anf_5
   
-  let LL_1 x = 
-  let ANF_4 = ( - ) x 1 in ANF_4
+  let ll_1 x = 
+  let anf_4 = ( - ) x 1 in anf_4
   
   let q = 
-  let ANF_0 = ( && ) true false in 
-  let ANF_1 = if ANF_0 then 
-  let ANF_2 = LL_0 1 in ANF_2 else 
-  let ANF_3 = LL_1 1 in ANF_3 in ANF_1
+  let anf_0 = ( && ) true false in 
+  let anf_1 = if anf_0 then 
+  let anf_2 = ll_0 1 in anf_2 else 
+  let anf_3 = ll_1 1 in anf_3 in anf_1
 
   $ dune exec ./demoANF.exe << EOF
   > let q = let x = 1 in let y = 2 in x / y
@@ -63,22 +63,22 @@
   let q = 
   let x = 1 in 
   let y = 2 in 
-  let ANF_0 = ( / ) x y in ANF_0
+  let anf_0 = ( / ) x y in anf_0
 
   $ dune exec ./demoANF.exe << EOF
   > let q = [(fun x -> x * x) 1; (fun x -> x / x) 2]
   > EOF
   
-  let LL_0 x = 
-  let ANF_4 = ( * ) x x in ANF_4
+  let ll_0 x = 
+  let anf_4 = ( * ) x x in anf_4
   
-  let LL_1 x = 
-  let ANF_3 = ( / ) x x in ANF_3
+  let ll_1 x = 
+  let anf_3 = ( / ) x x in anf_3
   
   let q = 
-  let ANF_0 = LL_0 1 in 
-  let ANF_1 = LL_1 2 in 
-  let ANF_2 = [ ANF_0; ANF_1 ] in ANF_2
+  let anf_0 = ll_0 1 in 
+  let anf_1 = ll_1 2 in 
+  let anf_2 = [ anf_0; anf_1 ] in anf_2
 
 
 

@@ -66,6 +66,8 @@ module Type = struct
   ;;
 end
 
+let type_eq = Type.equal
+
 module Subst = struct
   type t = (int, ty, Base.Int.comparator_witness) Base.Map.t
 
