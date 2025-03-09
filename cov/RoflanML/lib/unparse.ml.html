@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>unparse.ml &mdash; Coverage report</title>
-    <meta name="description" content="76.77% coverage in lib/unparse.ml">
+    <meta name="description" content="89.90% coverage in lib/unparse.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/</span>unparse.ml
         </a>
       </h1>
-      <h2>76.77%</h2>
+      <h2>89.90%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:25.63%"></span>
@@ -26,21 +26,8 @@
       <span class="unvisited" style="top:29.15%"></span>
       <span class="unvisited" style="top:29.65%"></span>
       <span class="unvisited" style="top:30.65%"></span>
-      <span class="unvisited" style="top:35.68%"></span>
-      <span class="unvisited" style="top:36.68%"></span>
-      <span class="unvisited" style="top:37.69%"></span>
-      <span class="unvisited" style="top:38.19%"></span>
-      <span class="unvisited" style="top:38.69%"></span>
-      <span class="unvisited" style="top:39.20%"></span>
-      <span class="unvisited" style="top:40.20%"></span>
-      <span class="unvisited" style="top:40.70%"></span>
-      <span class="unvisited" style="top:41.71%"></span>
       <span class="unvisited" style="top:46.23%"></span>
-      <span class="unvisited" style="bottom:10.05%"></span>
       <span class="unvisited" style="bottom:9.05%"></span>
-      <span class="unvisited" style="bottom:8.54%"></span>
-      <span class="unvisited" style="bottom:7.54%"></span>
-      <span class="unvisited" style="bottom:7.04%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -115,19 +102,19 @@
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span class="visited"> </span>
 <a id="L70"></a><span class="visited"> </span>
-<a id="L71"></a><span class="unvisited"> </span>
+<a id="L71"></a><span class="visited"> </span>
 <a id="L72"></a><span class="visited"> </span>
-<a id="L73"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span > </span>
-<a id="L75"></a><span class="unvisited"> </span>
-<a id="L76"></a><span class="unvisited"> </span>
-<a id="L77"></a><span class="unvisited"> </span>
-<a id="L78"></a><span class="unvisited"> </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
 <a id="L79"></a><span > </span>
-<a id="L80"></a><span class="unvisited"> </span>
-<a id="L81"></a><span class="unvisited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
 <a id="L82"></a><span > </span>
-<a id="L83"></a><span class="unvisited"> </span>
+<a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
@@ -223,13 +210,13 @@
 <a id="L176"></a><span class="visited"> </span>
 <a id="L177"></a><span class="visited"> </span>
 <a id="L178"></a><span > </span>
-<a id="L179"></a><span class="unvisited"> </span>
+<a id="L179"></a><span class="visited"> </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span class="unvisited"> </span>
-<a id="L182"></a><span class="unvisited"> </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span > </span>
-<a id="L184"></a><span class="unvisited"> </span>
-<a id="L185"></a><span class="unvisited"> </span>
+<a id="L184"></a><span class="visited"> </span>
+<a id="L185"></a><span class="visited"> </span>
 <a id="L186"></a><span > </span>
 <a id="L187"></a><span > </span>
 <a id="L188"></a><span > </span>
@@ -456,48 +443,48 @@ open Ast
 open Format
 
 let unparse_const ppf c =
-  <span data-count="165">m</span>atch c with
-  | <span data-count="76">C</span>Int i -&gt; fprintf ppf "%d" i
-  | <span data-count="51">C</span>Bool b -&gt; fprintf ppf "%s" (if b then <span data-count="24">"</span>true" else <span data-count="27">"</span>false")
-  | <span data-count="38">C</span>Unit -&gt; fprintf ppf "()"
+  <span data-count="304">m</span>atch c with
+  | <span data-count="137">C</span>Int i -&gt; fprintf ppf "%d" i
+  | <span data-count="92">C</span>Bool b -&gt; fprintf ppf "%s" (if b then <span data-count="47">"</span>true" else <span data-count="45">"</span>false")
+  | <span data-count="75">C</span>Unit -&gt; fprintf ppf "()"
 ;;
 
 let pp_list_with sep pp_elem ppf lst =
-  <span data-count="9">L</span>ist.iteri
+  <span data-count="48">L</span>ist.iteri
     (fun i x -&gt;
-      <span data-count="7">i</span>f i &lt;&gt; 0 then <span data-count="4">f</span>print<span data-count="4">f</span> ppf "%s" sep;
-      <span data-count="7">p</span>p_elem ppf x)
+      <span data-count="83">i</span>f i &lt;&gt; 0 then <span data-count="42">f</span>print<span data-count="42">f</span> ppf "%s" sep;
+      <span data-count="83">p</span>p_elem ppf x)
     lst
 ;;
 
 let rec unparse_pattern ppf pat =
-  <span data-count="66">m</span>atch pat with
-  | <span data-count="23">P</span>Wild -&gt; fprintf ppf "_"
-  | <span data-count="15">P</span>Empty -&gt; fprintf ppf "[]"
-  | <span data-count="7">P</span>Const c -&gt; unparse_const ppf c
-  | <span data-count="13">P</span>Var id -&gt; fprintf ppf "%s" id
-  | <span data-count="4">P</span>Cons (p1, p2, ps) -&gt;
+  <span data-count="192">m</span>atch pat with
+  | <span data-count="54">P</span>Wild -&gt; fprintf ppf "_"
+  | <span data-count="52">P</span>Empty -&gt; fprintf ppf "[]"
+  | <span data-count="43">P</span>Const c -&gt; unparse_const ppf c
+  | <span data-count="19">P</span>Var id -&gt; fprintf ppf "%s" id
+  | <span data-count="13">P</span>Cons (p1, p2, ps) -&gt;
     fprintf ppf "(";
-    <span data-count="4">u</span>nparse_pattern ppf p1;
-    <span data-count="4">f</span>printf ppf " :: ";
-    <span data-count="4">u</span>nparse_pattern ppf p2;
-    <span data-count="4">L</span>ist.iter
+    <span data-count="13">u</span>nparse_pattern ppf p1;
+    <span data-count="13">f</span>printf ppf " :: ";
+    <span data-count="13">u</span>nparse_pattern ppf p2;
+    <span data-count="13">L</span>ist.iter
       (fun p -&gt;
-        <span data-count="10">f</span>printf ppf " :: ";
-        <span data-count="10">u</span>nparse_pattern ppf p)
+        <span data-count="20">f</span>printf ppf " :: ";
+        <span data-count="20">u</span>nparse_pattern ppf p)
       ps;
-    <span data-count="4">f</span>printf ppf ")"
-  | <span data-count="4">P</span>Or (p1, p2, ps) -&gt;
+    <span data-count="13">f</span>printf ppf ")"
+  | <span data-count="11">P</span>Or (p1, p2, ps) -&gt;
     fprintf ppf "(";
-    <span data-count="4">u</span>nparse_pattern ppf p1;
-    <span data-count="4">f</span>printf ppf " | ";
-    <span data-count="4">u</span>nparse_pattern ppf p2;
-    <span data-count="4">L</span>ist.iter
+    <span data-count="11">u</span>nparse_pattern ppf p1;
+    <span data-count="11">f</span>printf ppf " | ";
+    <span data-count="11">u</span>nparse_pattern ppf p2;
+    <span data-count="11">L</span>ist.iter
       (fun p -&gt;
-        <span data-count="4">f</span>printf ppf " | ";
-        <span data-count="4">u</span>nparse_pattern ppf p)
+        <span data-count="14">f</span>printf ppf " | ";
+        <span data-count="14">u</span>nparse_pattern ppf p)
       ps;
-    <span data-count="4">f</span>printf ppf ")"
+    <span data-count="11">f</span>printf ppf ")"
   | <span data-count="0">P</span>Tuple (p1, p2, ps) -&gt;
     fprintf ppf "(";
     <span data-count="0">u</span>nparse_pattern ppf p1;
@@ -511,43 +498,43 @@ let rec unparse_pattern ppf pat =
     <span data-count="0">f</span>printf ppf ")"
 ;;
 
-let unparse_is_rec ppf rec_flag = <span data-count="126">f</span>printf ppf "%s" (if rec_flag = Rec then <span data-count="13">"</span>rec " else <span data-count="113">"</span>")
+let unparse_is_rec ppf rec_flag = <span data-count="83">f</span>printf ppf "%s" (if rec_flag = Rec then <span data-count="43">"</span>rec " else <span data-count="40">"</span>")
 
 let rec unparse_type ppf t =
-  <span data-count="12">m</span>atch t with
-  | <span data-count="2">T</span>Int -&gt; fprintf ppf "int"
-  | <span data-count="6">T</span>Bool -&gt; fprintf ppf "bool"
-  | <span data-count="3">T</span>Unit -&gt; fprintf ppf "unit"
-  | <span data-count="0">T</span>Fun (t1, t2) -&gt; fprintf ppf "(%a -&gt; %a)" unparse_type t1 unparse_type t2
-  | <span data-count="1">T</span>List t' -&gt; fprintf ppf "(%a list)" unparse_type t'
-  | <span data-count="0">T</span>Tuple (t1, t2, ts) -&gt;
+  <span data-count="56">m</span>atch t with
+  | <span data-count="11">T</span>Int -&gt; fprintf ppf "int"
+  | <span data-count="13">T</span>Bool -&gt; fprintf ppf "bool"
+  | <span data-count="21">T</span>Unit -&gt; fprintf ppf "unit"
+  | <span data-count="2">T</span>Fun (t1, t2) -&gt; fprintf ppf "(%a -&gt; %a)" unparse_type t1 unparse_type t2
+  | <span data-count="4">T</span>List t' -&gt; fprintf ppf "(%a list)" unparse_type t'
+  | <span data-count="5">T</span>Tuple (t1, t2, ts) -&gt;
     fprintf ppf "(";
-    <span data-count="0">u</span>nparse_type ppf t1;
-    <span data-count="0">f</span>printf ppf " * ";
-    <span data-count="0">u</span>nparse_type ppf t2;
-    <span data-count="0">L</span>ist.iter
+    <span data-count="5">u</span>nparse_type ppf t1;
+    <span data-count="5">f</span>printf ppf " * ";
+    <span data-count="5">u</span>nparse_type ppf t2;
+    <span data-count="5">L</span>ist.iter
       (fun t_elem -&gt;
-        <span data-count="0">f</span>printf ppf " * ";
-        <span data-count="0">u</span>nparse_type ppf t_elem)
+        <span data-count="10">f</span>printf ppf " * ";
+        <span data-count="10">u</span>nparse_type ppf t_elem)
       ts;
-    <span data-count="0">f</span>printf ppf ")"
+    <span data-count="5">f</span>printf ppf ")"
 ;;
 
 let print_arg ppf (id, ty_opt) =
-  <span data-count="32">m</span>atch ty_opt with
-  | <span data-count="21">N</span>one -&gt; fprintf ppf "%s" id
-  | <span data-count="11">S</span>ome ty -&gt; fprintf ppf "(%s : %a)" id unparse_type ty
+  <span data-count="48">m</span>atch ty_opt with
+  | <span data-count="20">N</span>one -&gt; fprintf ppf "%s" id
+  | <span data-count="28">S</span>ome ty -&gt; fprintf ppf "(%s : %a)" id unparse_type ty
 ;;
 
 let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
-  <span data-count="448">m</span>atch exp with
-  | <span data-count="158">E</span>Const c -&gt; unparse_const ppf c
-  | <span data-count="130">E</span>Var id -&gt; fprintf ppf "%s" id
-  | <span data-count="32">E</span>Fun (arg, e) -&gt;
+  <span data-count="790">m</span>atch exp with
+  | <span data-count="261">E</span>Const c -&gt; unparse_const ppf c
+  | <span data-count="213">E</span>Var id -&gt; fprintf ppf "%s" id
+  | <span data-count="48">E</span>Fun (arg, e) -&gt;
     if top_level
-    then <span data-count="30">f</span>printf ppf "fun %a -&gt; %a" print_arg arg (unparse_expr ~top_level:true) e
-    else <span data-count="2">f</span>printf ppf "(fun %a -&gt; %a)" print_arg arg (unparse_expr ~top_level:false) e
-  | <span data-count="29">E</span>App (e1, e2) -&gt;
+    then <span data-count="19">f</span>printf ppf "fun %a -&gt; %a" print_arg arg (unparse_expr ~top_level:true) e
+    else <span data-count="29">f</span>printf ppf "(fun %a -&gt; %a)" print_arg arg (unparse_expr ~top_level:false) e
+  | <span data-count="40">E</span>App (e1, e2) -&gt;
     fprintf
       ppf
       "(%a %a)"
@@ -555,10 +542,10 @@ let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
       e1
       (unparse_expr ~top_level:false)
       e2
-  | <span data-count="21">E</span>Branch (e_cond, e_then, e_else) -&gt;
+  | <span data-count="44">E</span>Branch (e_cond, e_then, e_else) -&gt;
     if top_level
     then
-      <span data-count="17">f</span>printf
+      <span data-count="8">f</span>printf
         ppf
         "if %a then %a else %a"
         (unparse_expr ~top_level:true)
@@ -568,7 +555,7 @@ let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
         (unparse_expr ~top_level:true)
         e_else
     else
-      <span data-count="4">f</span>printf
+      <span data-count="36">f</span>printf
         ppf
         "(if %a then %a else %a)"
         (unparse_expr ~top_level:false)
@@ -577,10 +564,10 @@ let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
         e_then
         (unparse_expr ~top_level:false)
         e_else
-  | <span data-count="26">E</span>LetIn (r, id, e_val, e_body) -&gt;
+  | <span data-count="51">E</span>LetIn (r, id, e_val, e_body) -&gt;
     if top_level
     then
-      <span data-count="15">f</span>printf
+      <span data-count="12">f</span>printf
         ppf
         "let %a%s = %a in %a"
         unparse_is_rec
@@ -591,7 +578,7 @@ let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
         (unparse_expr ~top_level:true)
         e_body
     else
-      <span data-count="11">f</span>printf
+      <span data-count="39">f</span>printf
         ppf
         "(let %a%s = %a in %a)"
         unparse_is_rec
@@ -601,49 +588,49 @@ let rec unparse_expr ?(top_level = <span data-count="0">f</span>alse) ppf exp =
         e_val
         (unparse_expr ~top_level:false)
         e_body
-  | <span data-count="24">E</span>Tuple (e1, e2, es) -&gt;
+  | <span data-count="34">E</span>Tuple (e1, e2, es) -&gt;
     fprintf ppf "(";
-    <span data-count="24">u</span>nparse_expr ~top_level:false ppf e1;
-    <span data-count="24">f</span>printf ppf ", ";
-    <span data-count="24">u</span>nparse_expr ~top_level:false ppf e2;
-    <span data-count="24">L</span>ist.iter
+    <span data-count="34">u</span>nparse_expr ~top_level:false ppf e1;
+    <span data-count="34">f</span>printf ppf ", ";
+    <span data-count="34">u</span>nparse_expr ~top_level:false ppf e2;
+    <span data-count="34">L</span>ist.iter
       (fun e -&gt;
-        <span data-count="29">f</span>printf ppf ", ";
-        <span data-count="29">u</span>nparse_expr ~top_level:false ppf e)
+        <span data-count="44">f</span>printf ppf ", ";
+        <span data-count="44">u</span>nparse_expr ~top_level:false ppf e)
       es;
-    <span data-count="24">f</span>printf ppf ")"
-  | <span data-count="9">E</span>List es -&gt; fprintf ppf "[%a]" (pp_list_wit<span data-count="9">h</span> "; " (unparse_expr ~top_level:false)) es
-  | <span data-count="19">E</span>Match (e, cases) -&gt;
+    <span data-count="34">f</span>printf ppf ")"
+  | <span data-count="48">E</span>List es -&gt; fprintf ppf "[%a]" (pp_list_wit<span data-count="48">h</span> "; " (unparse_expr ~top_level:false)) es
+  | <span data-count="51">E</span>Match (e, cases) -&gt;
     fprintf ppf "(match %a with" (unparse_expr ~top_level:false) e;
-    <span data-count="19">L</span>ist.iter
+    <span data-count="51">L</span>ist.iter
       (fun (p, e_case) -&gt;
-        <span data-count="36">f</span>printf ppf " | %a -&gt; %a" unparse_pattern p (unparse_expr ~top_level:false) e_case)
+        <span data-count="110">f</span>printf ppf " | %a -&gt; %a" unparse_pattern p (unparse_expr ~top_level:false) e_case)
       cases;
-    <span data-count="19">f</span>printf ppf ")"
+    <span data-count="51">f</span>printf ppf ")"
 ;;
 
 let unparse_decl ppf d =
-  <span data-count="100">m</span>atch d with
-  | <span data-count="100">D</span>Let (r, id, e) -&gt;
+  <span data-count="32">m</span>atch d with
+  | <span data-count="13">D</span>Let (r, id, e) -&gt;
     fprintf ppf "let %a%s = %a" unparse_is_rec r id (unparse_expr ~top_level:true) e
-  | <span data-count="0">D</span>MutualLet (r, binds) -&gt;
+  | <span data-count="19">D</span>MutualLet (r, binds) -&gt;
     (match binds with
      | <span data-count="0">[</span>] -&gt; () (* этого случая не должно быть *)
-     | <span data-count="0">(</span>id, e) :: rest -&gt;
+     | <span data-count="19">(</span>id, e) :: rest -&gt;
        fprintf ppf "let %a%s = %a" unparse_is_rec r id (unparse_expr ~top_level:true) e;
-       <span data-count="0">L</span>ist.iter
-         (fun (id, e) -&gt; <span data-count="0">f</span>printf ppf " and %s = %a" id (unparse_expr ~top_level:true) e)
+       <span data-count="19">L</span>ist.iter
+         (fun (id, e) -&gt; <span data-count="36">f</span>printf ppf " and %s = %a" id (unparse_expr ~top_level:true) e)
          rest)
 ;;
 
 let unparse_program prog =
-  <span data-count="100">a</span>sprintf
+  <span data-count="10">a</span>sprintf
     "%a"
     (fun ppf prog -&gt;
-      <span data-count="100">L</span>ist.iter
+      <span data-count="10">L</span>ist.iter
         (fun d -&gt;
-          <span data-count="100">u</span>nparse_decl ppf d;
-          <span data-count="100">f</span>printf ppf "\n")
+          <span data-count="32">u</span>nparse_decl ppf d;
+          <span data-count="32">f</span>printf ppf "\n")
         prog)
     prog
 ;;

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>check.ml &mdash; Coverage report</title>
-    <meta name="description" content="82.04% coverage in lib/check.ml">
+    <meta name="description" content="95.21% coverage in lib/check.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,25 +15,10 @@
           <span class="dirname">lib/</span>check.ml
         </a>
       </h1>
-      <h2>82.04%</h2>
+      <h2>95.21%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:17.44%"></span>
-      <span class="unvisited" style="bottom:44.10%"></span>
-      <span class="unvisited" style="bottom:43.59%"></span>
-      <span class="unvisited" style="bottom:40.51%"></span>
-      <span class="unvisited" style="bottom:40.00%"></span>
-      <span class="unvisited" style="bottom:39.49%"></span>
-      <span class="some-visited" style="bottom:30.77%"></span>
-      <span class="unvisited" style="bottom:18.46%"></span>
-      <span class="unvisited" style="bottom:17.95%"></span>
-      <span class="unvisited" style="bottom:17.44%"></span>
-      <span class="unvisited" style="bottom:15.90%"></span>
-      <span class="unvisited" style="bottom:15.38%"></span>
-      <span class="unvisited" style="bottom:14.87%"></span>
-      <span class="unvisited" style="bottom:13.85%"></span>
-      <span class="unvisited" style="bottom:13.33%"></span>
-      <span class="unvisited" style="bottom:12.31%"></span>
       <span class="unvisited" style="bottom:6.67%"></span>
       <span class="unvisited" style="bottom:6.15%"></span>
       <span class="unvisited" style="bottom:5.64%"></span>
@@ -152,16 +137,16 @@
 <a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span class="visited"> </span>
-<a id="L109"></a><span class="unvisited"> </span>
-<a id="L110"></a><span class="unvisited"> </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span class="visited"> </span>
 <a id="L111"></a><span > </span>
 <a id="L112"></a><span class="visited"> </span>
 <a id="L113"></a><span class="visited"> </span>
 <a id="L114"></a><span > </span>
 <a id="L115"></a><span class="visited"> </span>
-<a id="L116"></a><span class="unvisited"> </span>
-<a id="L117"></a><span class="unvisited"> </span>
-<a id="L118"></a><span class="unvisited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
 <a id="L119"></a><span > </span>
 <a id="L120"></a><span > </span>
 <a id="L121"></a><span > </span>
@@ -178,7 +163,7 @@
 <a id="L132"></a><span > </span>
 <a id="L133"></a><span > </span>
 <a id="L134"></a><span class="visited"> </span>
-<a id="L135"></a><span class="some-visited"> </span>
+<a id="L135"></a><span class="visited"> </span>
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span > </span>
 <a id="L138"></a><span class="visited"> </span>
@@ -202,19 +187,19 @@
 <a id="L156"></a><span class="visited"> </span>
 <a id="L157"></a><span > </span>
 <a id="L158"></a><span class="visited"> </span>
-<a id="L159"></a><span class="unvisited"> </span>
-<a id="L160"></a><span class="unvisited"> </span>
-<a id="L161"></a><span class="unvisited"> </span>
+<a id="L159"></a><span class="visited"> </span>
+<a id="L160"></a><span class="visited"> </span>
+<a id="L161"></a><span class="visited"> </span>
 <a id="L162"></a><span > </span>
 <a id="L163"></a><span class="visited"> </span>
-<a id="L164"></a><span class="unvisited"> </span>
-<a id="L165"></a><span class="unvisited"> </span>
-<a id="L166"></a><span class="unvisited"> </span>
+<a id="L164"></a><span class="visited"> </span>
+<a id="L165"></a><span class="visited"> </span>
+<a id="L166"></a><span class="visited"> </span>
 <a id="L167"></a><span > </span>
-<a id="L168"></a><span class="unvisited"> </span>
-<a id="L169"></a><span class="unvisited"> </span>
+<a id="L168"></a><span class="visited"> </span>
+<a id="L169"></a><span class="visited"> </span>
 <a id="L170"></a><span > </span>
-<a id="L171"></a><span class="unvisited"> </span>
+<a id="L171"></a><span class="visited"> </span>
 <a id="L172"></a><span > </span>
 <a id="L173"></a><span > </span>
 <a id="L174"></a><span > </span>
@@ -447,12 +432,12 @@ module Generator = struct
   let gen_name =
     fi<span data-count="3">x</span>
       (fun self () -&gt;
-        <span data-count="228">l</span>et* nm =
-          string_siz<span data-count="228">e</span> ~gen:(oneo<span data-count="228">f</span> [ char_rang<span data-count="228">e</span> 'a' 'z'; retur<span data-count="228">n</span> '_' ]) (int_rang<span data-count="228">e</span> 1 10)
+        <span data-count="460">l</span>et* nm =
+          string_siz<span data-count="460">e</span> ~gen:(oneo<span data-count="460">f</span> [ char_rang<span data-count="460">e</span> 'a' 'z'; retur<span data-count="460">n</span> '_' ]) (int_rang<span data-count="460">e</span> 1 10)
         in
-        <span data-count="228">i</span>f Base.String.for_all nm ~f:(fun c -&gt; <span data-count="422">c</span> = '_')
-        then <span data-count="26">s</span>elf ()
-        else <span data-count="202">i</span>f Base.List.mem
+        <span data-count="460">i</span>f Base.String.for_all nm ~f:(fun c -&gt; <span data-count="887">c</span> = '_')
+        then <span data-count="50">s</span>elf ()
+        else <span data-count="410">i</span>f Base.List.mem
                   [ "let"
                   ; "rec"
                   ; "if"
@@ -473,123 +458,123 @@ module Generator = struct
                   nm
                   ~equal:String.equal
         then <span data-count="0">s</span>elf ()
-        else <span data-count="202">r</span>eturn nm)
+        else <span data-count="410">r</span>eturn nm)
       ()
   ;;
 
   let gen_const =
     frequenc<span data-count="3">y</span>
-      [ (1, small_int &gt;|<span data-count="3">=</span> fun i -&gt; <span data-count="47">C</span>Int i)
-      ; (1, bool &gt;|<span data-count="3">=</span> fun b -&gt; <span data-count="51">C</span>Bool b)
+      [ (1, small_int &gt;|<span data-count="3">=</span> fun i -&gt; <span data-count="83">C</span>Int i)
+      ; (1, bool &gt;|<span data-count="3">=</span> fun b -&gt; <span data-count="92">C</span>Bool b)
       ; 1, retur<span data-count="3">n</span> CUnit
       ]
   ;;
 
   let rec gen_expr n =
-    <span data-count="3282">i</span>f n &lt;= 0
+    <span data-count="13215">i</span>f n &lt;= 0
     then
-      <span data-count="2684">f</span>requency
-        [ (1, gen_const &gt;|<span data-count="2684">=</span> fun c -&gt; <span data-count="107">E</span>Const c); (1, gen_name &gt;|<span data-count="2684">=</span> fun id -&gt; <span data-count="95">E</span>Var id) ]
+      <span data-count="10654">f</span>requency
+        [ (1, gen_const &gt;|<span data-count="10654">=</span> fun c -&gt; <span data-count="167">E</span>Const c); (1, gen_name &gt;|<span data-count="10654">=</span> fun id -&gt; <span data-count="171">E</span>Var id) ]
     else
-      <span data-count="598">f</span>requency
-        [ (1, gen_const &gt;|<span data-count="598">=</span> fun c -&gt; <span data-count="22">E</span>Const c)
-        ; (1, gen_name &gt;|<span data-count="598">=</span> fun id -&gt; <span data-count="32">E</span>Var id)
+      <span data-count="2561">f</span>requency
+        [ (1, gen_const &gt;|<span data-count="2561">=</span> fun c -&gt; <span data-count="40">E</span>Const c)
+        ; (1, gen_name &gt;|<span data-count="2561">=</span> fun id -&gt; <span data-count="39">E</span>Var id)
         ; ( 1
-          , let* lst = list_siz<span data-count="598">e</span> (int_rang<span data-count="598">e</span> 0 3) (gen_exp<span data-count="598">r</span> (n / 2)) in
-            <span data-count="9">r</span>eturn (EList lst) )
+          , let* lst = list_siz<span data-count="2561">e</span> (int_rang<span data-count="2561">e</span> 0 3) (gen_exp<span data-count="2561">r</span> (n / 2)) in
+            <span data-count="48">r</span>eturn (EList lst) )
         ; ( 1
-          , let* e1 = gen_exp<span data-count="598">r</span> (n / 2) in
-            <span data-count="24">l</span>et* e2 = gen_exp<span data-count="24">r</span> (n / 2) in
-            <span data-count="24">l</span>et* es = list_siz<span data-count="24">e</span> (int_rang<span data-count="24">e</span> 0 3) (gen_exp<span data-count="24">r</span> (n / 2)) in
-            <span data-count="24">r</span>eturn (ETuple (e1, e2, es)) )
+          , let* e1 = gen_exp<span data-count="2561">r</span> (n / 2) in
+            <span data-count="34">l</span>et* e2 = gen_exp<span data-count="34">r</span> (n / 2) in
+            <span data-count="34">l</span>et* es = list_siz<span data-count="34">e</span> (int_rang<span data-count="34">e</span> 0 3) (gen_exp<span data-count="34">r</span> (n / 2)) in
+            <span data-count="34">r</span>eturn (ETuple (e1, e2, es)) )
         ; ( 1
-          , let* cond = gen_exp<span data-count="598">r</span> (n / 2) in
-            <span data-count="20">l</span>et* et = gen_exp<span data-count="20">r</span> (n / 2) in
-            <span data-count="20">l</span>et* ef = gen_exp<span data-count="20">r</span> (n / 2) in
-            <span data-count="20">r</span>eturn (EBranch (cond, et, ef)) )
+          , let* cond = gen_exp<span data-count="2561">r</span> (n / 2) in
+            <span data-count="43">l</span>et* et = gen_exp<span data-count="43">r</span> (n / 2) in
+            <span data-count="43">l</span>et* ef = gen_exp<span data-count="43">r</span> (n / 2) in
+            <span data-count="43">r</span>eturn (EBranch (cond, et, ef)) )
         ; ( 1
-          , let* e = gen_exp<span data-count="598">r</span> (n / 2) in
-            <span data-count="19">l</span>et* cases =
-              list_siz<span data-count="19">e</span> (int_rang<span data-count="19">e</span> 1 3) (pai<span data-count="19">r</span> (gen_patter<span data-count="19">n</span> (n / 2)) (gen_exp<span data-count="19">r</span> (n / 2)))
+          , let* e = gen_exp<span data-count="2561">r</span> (n / 2) in
+            <span data-count="51">l</span>et* cases =
+              list_siz<span data-count="51">e</span> (int_rang<span data-count="51">e</span> 1 3) (pai<span data-count="51">r</span> (gen_patter<span data-count="51">n</span> (n / 2)) (gen_exp<span data-count="51">r</span> (n / 2)))
             in
-            <span data-count="19">r</span>eturn (EMatch (e, cases)) )
+            <span data-count="51">r</span>eturn (EMatch (e, cases)) )
         ; ( 1
-          , let* rec_flag = oneo<span data-count="598">f</span> [ retur<span data-count="598">n</span> Rec; retur<span data-count="598">n</span> NonRec ] in
-            <span data-count="25">l</span>et* id = gen_name in
-            <span data-count="25">l</span>et* e_val = gen_exp<span data-count="25">r</span> (n / 2) in
-            <span data-count="25">r</span>eturn (ELetIn (rec_flag, id, e_val, EConst (CInt 0))) )
+          , let* rec_flag = oneo<span data-count="2561">f</span> [ retur<span data-count="2561">n</span> Rec; retur<span data-count="2561">n</span> NonRec ] in
+            <span data-count="50">l</span>et* id = gen_name in
+            <span data-count="50">l</span>et* e_val = gen_exp<span data-count="50">r</span> (n / 2) in
+            <span data-count="50">r</span>eturn (ELetIn (rec_flag, id, e_val, EConst (CInt 0))) )
         ; ( 1
-          , let* arg = gen_typed_ar<span data-count="598">g</span> (n / 2) in
-            <span data-count="31">l</span>et* body = gen_exp<span data-count="31">r</span> (n / 2) in
-            <span data-count="31">r</span>eturn (EFun (arg, body)) )
+          , let* arg = gen_typed_ar<span data-count="2561">g</span> (n / 2) in
+            <span data-count="47">l</span>et* body = gen_exp<span data-count="47">r</span> (n / 2) in
+            <span data-count="47">r</span>eturn (EFun (arg, body)) )
         ; ( 1
-          , let* e1 = gen_exp<span data-count="598">r</span> (n / 2) in
-            <span data-count="29">l</span>et* e2 = gen_exp<span data-count="29">r</span> (n / 2) in
-            <span data-count="29">r</span>eturn (EApp (e1, e2)) )
+          , let* e1 = gen_exp<span data-count="2561">r</span> (n / 2) in
+            <span data-count="40">l</span>et* e2 = gen_exp<span data-count="40">r</span> (n / 2) in
+            <span data-count="40">r</span>eturn (EApp (e1, e2)) )
         ]
 
   and gen_typed_arg n =
-    <span data-count="598">l</span>et* id = gen_name in
-    <span data-count="31">f</span>requency
-      [ 1, retur<span data-count="31">n</span> (id, None)
+    <span data-count="2561">l</span>et* id = gen_name in
+    <span data-count="47">f</span>requency
+      [ 1, retur<span data-count="47">n</span> (id, None)
       ; ( 1
-        , let* ty = gen_typ<span data-count="31">e</span> n in
-          <span data-count="10">r</span>eturn (id, Some ty) )
+        , let* ty = gen_typ<span data-count="47">e</span> n in
+          <span data-count="27">r</span>eturn (id, Some ty) )
       ]
 
   and gen_type n =
-    <span data-count="82">i</span>f n &lt;= 0
-    then <span data-count="65">f</span>requency [ 1, retur<span data-count="65">n</span> TInt; 1, retur<span data-count="65">n</span> TBool; 1, retur<span data-count="65">n</span> TUnit ]
+    <span data-count="188">i</span>f n &lt;= 0
+    then <span data-count="145">f</span>requency [ 1, retur<span data-count="145">n</span> TInt; 1, retur<span data-count="145">n</span> TBool; 1, retur<span data-count="145">n</span> TUnit ]
     else
-      <span data-count="17">f</span>requency
-        [ 1, retur<span data-count="17">n</span> TInt
-        ; 1, retur<span data-count="17">n</span> TBool
-        ; 1, retur<span data-count="17">n</span> TUnit
+      <span data-count="43">f</span>requency
+        [ 1, retur<span data-count="43">n</span> TInt
+        ; 1, retur<span data-count="43">n</span> TBool
+        ; 1, retur<span data-count="43">n</span> TUnit
         ; ( 1
-          , let* t1 = gen_typ<span data-count="17">e</span> (n / 2) in
-            <span data-count="0">l</span>et* t2 = gen_typ<span data-count="0">e</span> (n / 2) in
-            <span data-count="0">r</span>eturn (TFun (t1, t2)) )
+          , let* t1 = gen_typ<span data-count="43">e</span> (n / 2) in
+            <span data-count="2">l</span>et* t2 = gen_typ<span data-count="2">e</span> (n / 2) in
+            <span data-count="2">r</span>eturn (TFun (t1, t2)) )
         ; ( 1
-          , let* t = gen_typ<span data-count="17">e</span> (n / 2) in
-            <span data-count="1">r</span>eturn (TList t) )
+          , let* t = gen_typ<span data-count="43">e</span> (n / 2) in
+            <span data-count="4">r</span>eturn (TList t) )
         ; ( 1
-          , let* t1 = gen_typ<span data-count="17">e</span> (n / 3) in
-            <span data-count="0">l</span>et* t2 = gen_typ<span data-count="0">e</span> (n / 3) in
-            <span data-count="0">l</span>et* ts = list_siz<span data-count="0">e</span> (int_rang<span data-count="0">e</span> 0 3) (gen_typ<span data-count="0">e</span> (n / 3)) in
-            <span data-count="0">r</span>eturn (TTuple (t1, t2, ts)) )
+          , let* t1 = gen_typ<span data-count="43">e</span> (n / 3) in
+            <span data-count="5">l</span>et* t2 = gen_typ<span data-count="5">e</span> (n / 3) in
+            <span data-count="5">l</span>et* ts = list_siz<span data-count="5">e</span> (int_rang<span data-count="5">e</span> 0 3) (gen_typ<span data-count="5">e</span> (n / 3)) in
+            <span data-count="5">r</span>eturn (TTuple (t1, t2, ts)) )
         ]
 
   and gen_pattern n =
-    <span data-count="47">i</span>f n &lt;= 0
+    <span data-count="233">i</span>f n &lt;= 0
     then
-      <span data-count="41">f</span>requency
-        [ (1, gen_const &gt;|<span data-count="41">=</span> fun c -&gt; <span data-count="7">P</span>Const c)
+      <span data-count="166">f</span>requency
+        [ (1, gen_const &gt;|<span data-count="166">=</span> fun c -&gt; <span data-count="32">P</span>Const c)
         ; ( 1
           , gen_name
-            &gt;|<span data-count="41">=</span> fun id -&gt; <span data-count="16">i</span>f String.lengt<span data-count="16">h</span> id &gt; 0 &amp;&amp; <span data-count="16">i</span>d.[0] = '_' then <span data-count="5">P</span>Wild else <span data-count="11">P</span>Var id
+            &gt;|<span data-count="166">=</span> fun id -&gt; <span data-count="21">i</span>f String.lengt<span data-count="21">h</span> id &gt; 0 &amp;&amp; <span data-count="21">i</span>d.[0] = '_' then <span data-count="10">P</span>Wild else <span data-count="11">P</span>Var id
           )
-        ; 1, retur<span data-count="41">n</span> PWild
-        ; 1, retur<span data-count="41">n</span> PEmpty
+        ; 1, retur<span data-count="166">n</span> PWild
+        ; 1, retur<span data-count="166">n</span> PEmpty
         ]
     else
-      <span data-count="6">f</span>requency
-        [ (1, gen_const &gt;|<span data-count="6">=</span> fun c -&gt; <span data-count="0">P</span>Const c)
+      <span data-count="67">f</span>requency
+        [ (1, gen_const &gt;|<span data-count="67">=</span> fun c -&gt; <span data-count="11">P</span>Const c)
         ; ( 1
           , gen_name
-            &gt;|<span data-count="6">=</span> fun id -&gt; <span data-count="3">i</span>f String.lengt<span data-count="3">h</span> id &gt; 0 &amp;&amp; <span data-count="3">i</span>d.[0] = '_' then <span data-count="1">P</span>Wild else <span data-count="2">P</span>Var id
+            &gt;|<span data-count="67">=</span> fun id -&gt; <span data-count="14">i</span>f String.lengt<span data-count="14">h</span> id &gt; 0 &amp;&amp; <span data-count="14">i</span>d.[0] = '_' then <span data-count="6">P</span>Wild else <span data-count="8">P</span>Var id
           )
-        ; 1, retur<span data-count="6">n</span> PWild
-        ; 1, retur<span data-count="6">n</span> PEmpty
+        ; 1, retur<span data-count="67">n</span> PWild
+        ; 1, retur<span data-count="67">n</span> PEmpty
         ; ( 1
-          , let* p1 = gen_patter<span data-count="6">n</span> (n / 2) in
-            <span data-count="4">l</span>et* p2 = gen_patter<span data-count="4">n</span> (n / 2) in
-            <span data-count="4">l</span>et* ps = list_siz<span data-count="4">e</span> (int_rang<span data-count="4">e</span> 0 3) (gen_patter<span data-count="4">n</span> (n / 2)) in
-            <span data-count="4">r</span>eturn (PCons (p1, p2, ps)) )
+          , let* p1 = gen_patter<span data-count="67">n</span> (n / 2) in
+            <span data-count="13">l</span>et* p2 = gen_patter<span data-count="13">n</span> (n / 2) in
+            <span data-count="13">l</span>et* ps = list_siz<span data-count="13">e</span> (int_rang<span data-count="13">e</span> 0 3) (gen_patter<span data-count="13">n</span> (n / 2)) in
+            <span data-count="13">r</span>eturn (PCons (p1, p2, ps)) )
         ; ( 1
-          , let* p1 = gen_patter<span data-count="6">n</span> (n / 2) in
-            <span data-count="4">l</span>et* p2 = gen_patter<span data-count="4">n</span> (n / 2) in
-            <span data-count="4">l</span>et* ps = list_siz<span data-count="4">e</span> (int_rang<span data-count="4">e</span> 0 3) (gen_patter<span data-count="4">n</span> (n / 2)) in
-            <span data-count="4">r</span>eturn (POr (p1, p2, ps)) )
+          , let* p1 = gen_patter<span data-count="67">n</span> (n / 2) in
+            <span data-count="11">l</span>et* p2 = gen_patter<span data-count="11">n</span> (n / 2) in
+            <span data-count="11">l</span>et* ps = list_siz<span data-count="11">e</span> (int_rang<span data-count="11">e</span> 0 3) (gen_patter<span data-count="11">n</span> (n / 2)) in
+            <span data-count="11">r</span>eturn (POr (p1, p2, ps)) )
         ]
   ;;
 
@@ -597,19 +582,19 @@ module Generator = struct
     frequenc<span data-count="3">y</span>
       [ ( 1
         , let* rec_flag = oneo<span data-count="3">f</span> [ retur<span data-count="3">n</span> Rec; retur<span data-count="3">n</span> NonRec ] in
-          <span data-count="0">l</span>et* id = gen_name in
-          <span data-count="0">l</span>et* e = gen_exp<span data-count="0">r</span> 5 in
-          <span data-count="0">r</span>eturn (DLet (rec_flag, id, e)) )
+          <span data-count="13">l</span>et* id = gen_name in
+          <span data-count="13">l</span>et* e = gen_exp<span data-count="13">r</span> 5 in
+          <span data-count="13">r</span>eturn (DLet (rec_flag, id, e)) )
       ; ( 1
         , let* rec_flag = oneo<span data-count="3">f</span> [ retur<span data-count="3">n</span> Rec; retur<span data-count="3">n</span> NonRec ] in
-          <span data-count="0">l</span>et* binds =
-            list_siz<span data-count="0">e</span>
-              (int_rang<span data-count="0">e</span> 2 4)
+          <span data-count="19">l</span>et* binds =
+            list_siz<span data-count="19">e</span>
+              (int_rang<span data-count="19">e</span> 2 4)
               (let* id = gen_name in
-               <span data-count="0">l</span>et* e = gen_exp<span data-count="0">r</span> 5 in
-               <span data-count="0">r</span>eturn (id, e))
+               <span data-count="55">l</span>et* e = gen_exp<span data-count="55">r</span> 5 in
+               <span data-count="55">r</span>eturn (id, e))
           in
-          <span data-count="0">r</span>eturn (DMutualLet (rec_flag, binds)) )
+          <span data-count="19">r</span>eturn (DMutualLet (rec_flag, binds)) )
       ]
   ;;
 
