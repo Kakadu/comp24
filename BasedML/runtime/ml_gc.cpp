@@ -146,7 +146,7 @@ void compact() {
 void print_gc_info() {
     size_t used = the_pool->pool_pointer - the_pool->pool_bottom;
     size_t all = the_pool->pool_top - the_pool->pool_bottom;
-    printf("Memory used: %8lx/%8lx\n", used, all);
+    printf("Memory used: %#8lx/%#8lx\n", used, all);
 }
 
 #endif
