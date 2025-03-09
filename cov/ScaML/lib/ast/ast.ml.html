@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="80.95% coverage in lib/ast/ast.ml">
+    <meta name="description" content="96.15% coverage in lib/ast/ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,10 @@
           <span class="dirname">lib/ast/</span>ast.ml
         </a>
       </h1>
-      <h2>80.95%</h2>
+      <h2>96.15%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:9.30%"></span>
-      <span class="unvisited" style="top:13.95%"></span>
-      <span class="unvisited" style="top:36.05%"></span>
-      <span class="some-visited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -37,7 +34,7 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span class="unvisited"> </span>
+<a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span class="visited"> </span>
@@ -53,10 +50,10 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
@@ -97,7 +94,7 @@
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
@@ -109,9 +106,9 @@
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
-<a id="L84"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span > </span>
-<a id="L86"></a><span class="some-visited"> </span>
+<a id="L86"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -210,14 +207,14 @@
 open! Base
 open Smisc
 
-<span data-count="38">t</span>ype constant = <span data-count="0">C</span>onst_integer of in<span data-count="19">t</span>  (** Integer such as [25] *)
+<span data-count="57">t</span>ype constant = <span data-count="0">C</span>onst_integer of in<span data-count="19">t</span>  (** Integer such as [25] *)
 [@@deriving eq, show {with_path= false}]
 
 (* ======= Types ======= *)
-<span data-count="0">t</span>ype ty = Types.Ty.t [@@deriving show {with_path= false}]
+<span data-count="20">t</span>ype ty = LTypes.Ty.t [@@deriving show {with_path= false}<span data-count="10">]</span>
 
 (* ======= Patterns ======= *)
-<span data-count="134">t</span>ype pattern =
+<span data-count="368">t</span>ype pattern =
   | Pat_any  (** The pattern [_] *)
   | Pat_var of Ident.t  (** A variable pattern such as [x] *)
   | Pat_constraint of pattern * ty  (** [(P : T)] *)
@@ -230,15 +227,15 @@ open Smisc
           - [C]   when [args] is [None]
           - [C P] when [args] is [Some P]
         *)
-[@@deriving show {with_path= false}]
+[@@deriving show {with_path= false}<span data-count="202">]</span>
 
 (* ======= Expressions ======= *)
-<span data-count="0">t</span>ype rec_flag =
+<span data-count="12">t</span>ype rec_flag =
   | Recursive  (** Recursive value binding *)
   | Nonrecursive  (** Nonrecursive value binding *)
 [@@deriving show {with_path= false}]
 
-<span data-count="91">t</span>ype value_binding = {pat: pattern; expr: expression}
+<span data-count="794">t</span>ype value_binding = {pat: pattern; expr: expression}
 [@@deriving show {with_path= false}<span data-count="26">]</span>
 
 (** Pattern matching case *)
@@ -274,11 +271,11 @@ open Smisc
         *)
   | Exp_ifthenelse of expression * expression * <span data-count="10">e</span>xpression optio<span data-count="3">n</span>
       (** [if E1 then E2 else E3] *)
-[@@deriving show {with_path= false}]
+[@@deriving show {with_path= false}<span data-count="690">]</span>
 
 (* ======= Module structure ======= *)
 
-<span data-count="17">t</span>ype structure_item =
+<span data-count="76">t</span>ype structure_item =
   | Str_eval of expression  (** [E] *)
   | Str_value of rec_flag * value_binding list1
       (** [Str_value(flag, [(P1, E1) ; ... ; (Pn, En)])] represents:
@@ -286,9 +283,9 @@ open Smisc
           - [let rec P1 = E1 and ... and Pn = EN ] when [flag] is [Recursive].
           Invariant: [n &gt;= 1]
         *)
-[@@deriving show {with_path= false}]
+[@@deriving show {with_path= false}<span data-count="52">]</span>
 
-<span data-count="0">t</span>ype structure = <span data-count="59">s</span>tructure_item lis<span data-count="12">t</span> [@@deriving show {with_path= false}]
+<span data-count="12">t</span>ype structure = <span data-count="59">s</span>tructure_item lis<span data-count="12">t</span> [@@deriving show {with_path= false}<span data-count="24">]</span>
 </code></pre>
       </div>
     </div>

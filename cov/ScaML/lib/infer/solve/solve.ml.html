@@ -312,7 +312,7 @@
 module Sub = Sub
 
 open! Base
-open Types
+open LTypes
 open Constraints
 open Monads.Std
 open Utils
@@ -320,7 +320,7 @@ open Smisc
 
 module SolveMonad : sig
   include Monad.S
-  val run : 'a t -&gt; ('a, TyError.t) result
+  val run : 'a t -&gt; ('a, TyError.t) Stdlib.result
   module Solve : sig
     val fresh_var : Var.t t
     val fail : TyError.t -&gt; 'a t

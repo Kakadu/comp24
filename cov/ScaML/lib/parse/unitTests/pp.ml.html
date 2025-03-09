@@ -25,16 +25,17 @@
 <a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
-<a id="L4"></a><span > </span>
+<a id="L4"></a><span class="visited"> </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -52,6 +53,7 @@
 <a href="#L11">11</a>
 <a href="#L12">12</a>
 <a href="#L13">13</a>
+<a href="#L14">14</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, Danil Slinchuk, Julia Kononova *)
 
@@ -59,13 +61,14 @@
 
 open! Base
 open Stdio
+module Format = Stdlib.Format
 
 let pp printer parser str =
   <span data-count="54">m</span>atch Angstrom.parse_string ~consume:Angstrom.Consume.All parser str with
   | <span data-count="45">O</span>k res -&gt;
       printer Format.std_formatter res
   | <span data-count="9">E</span>rror _ -&gt;
-      print_endline "syntax error"
+      print_endline "syntax error<span data-count="6">"</span>
 </code></pre>
       </div>
     </div>

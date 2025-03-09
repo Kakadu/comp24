@@ -25,7 +25,7 @@
 <a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
-<a id="L4"></a><span > </span>
+<a id="L4"></a><span class="visited"> </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
@@ -146,7 +146,7 @@ let%expect_test "parse_constr3" =
 let%expect_test "parse_constr4" =
   <span data-count="1">p</span>p Ast.pp_ty parse_ty "('a -&gt; int * (string, unit, 'b -&gt; 'c) foo bar) -&gt; e" ;
   <span data-count="1">[</span>%expect {|
-       ('a -&gt; int * (string, unit, ('b -&gt; 'c)) foo bar) -&gt; e |}<span data-count="7">]</span>
+       ('a -&gt; int * (string, unit, ('b -&gt; 'c)) foo bar) -&gt; e |}<span data-count="13">]</span>
 </code></pre>
       </div>
     </div>
