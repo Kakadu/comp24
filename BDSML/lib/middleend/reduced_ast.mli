@@ -26,3 +26,4 @@ type rstruct = rstuct_item list
 type error =
   | Invalid_pattern of string
   | Invalid_ast of string
+  | Invalid_previous_result of string * string
