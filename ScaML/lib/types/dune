@@ -1,0 +1,8 @@
+(library
+ (name LTypes)
+ (public_name ScaML.Types)
+ (libraries base smisc)
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_deriving.ord ppx_sexp_conv))
+ (instrumentation
+  (backend bisect_ppx)))
