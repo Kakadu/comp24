@@ -1,3 +1,8 @@
+;  $ if [ -z "$latest" ]; then
+;  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+;  >   alias qemu-riscv64-static='qemu-riscv64'
+;  > fi
+;
 ;  $ dune exec riscv -- -anf -o /tmp/dbg.s <<- EOF
 ;  > let pow x n =
 ;  >   let rec helper acc n =
@@ -29,8 +34,47 @@
 ;$ cat /tmp/dbg.s
 ;  $ riscv64-linux-gnu-gcc -static /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
 ;  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16786, arity: 2, args: dec[] / hex[] } at 0x2a8920
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16786, arity: 2, args: dec[2, 10] / hex[2, a] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8af0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 1, 10] / hex[2, 1, a] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8ba0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 2, 9] / hex[2, 2, 9] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8c50
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 4, 8] / hex[2, 4, 8] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8d00
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 8, 7] / hex[2, 8, 7] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8db0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 16, 6] / hex[2, 10, 6] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8e60
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 32, 5] / hex[2, 20, 5] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8f10
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 64, 4] / hex[2, 40, 4] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a8fc0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 128, 3] / hex[2, 80, 3] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a9070
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 256, 2] / hex[2, 100, 2] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a9120
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 512, 1] / hex[2, 200, 1] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 3, args: dec[] / hex[] } at 0x2a91d0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 3, args: dec[2, 1024, 0] / hex[2, 400, 0] }
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Closure result: 1024 / 0x400
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x19e1c, arity: 1, args: dec[] / hex[] } at 0x2a90c0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x19e1c, arity: 1, args: dec[1024] / hex[400] }
 ;  1024
-
+;  [runtime::closure]: Closure result: 0 / 0x0
+;
 ;  $ if [ -z "$latest" ]; then
 ;  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
 ;  >   alias qemu-riscv64-static='qemu-riscv64'
@@ -237,24 +281,24 @@
 ;      ret
 ;  $ riscv64-linux-gnu-gcc -static /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
 ;  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
-;  [runtime::tuple]: Created tuple of size 5 at 0x243330
-;  [runtime::tuple]: Set [0] = 100000 in [100000, 0, 0, 0, 0] at 0x243330
-;  [runtime::tuple]: Set [1] = 1000000 in [100000, 1000000, 0, 0, 0] at 0x243330
-;  [runtime::tuple]: Set [2] = 10000000 in [100000, 1000000, 10000000, 0, 0] at 0x243330
-;  [runtime::tuple]: Set [3] = 100000000 in [100000, 1000000, 10000000, 100000000, 0] at 0x243330
-;  [runtime::tuple]: Set [4] = 1000000000 in [100000, 1000000, 10000000, 100000000, 1000000000] at 0x243330
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e8ac, arity: 10, args: dec[] / hex[] } at 0x2435e0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[] / hex[] } at 0x33b720
-;  [runtime::closure]: Tuple with arguments [100000, 1000000, 10000000, 100000000, 1000000000] at 0x243330
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[2373088, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2435e0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+;  [runtime::tuple]: Created tuple of size 5 at 0x2a8800
+;  [runtime::tuple]: Set [0] = 100000 in [100000, 0, 0, 0, 0] at 0x2a8800
+;  [runtime::tuple]: Set [1] = 1000000 in [100000, 1000000, 0, 0, 0] at 0x2a8800
+;  [runtime::tuple]: Set [2] = 10000000 in [100000, 1000000, 10000000, 0, 0] at 0x2a8800
+;  [runtime::tuple]: Set [3] = 100000000 in [100000, 1000000, 10000000, 100000000, 0] at 0x2a8800
+;  [runtime::tuple]: Set [4] = 1000000000 in [100000, 1000000, 10000000, 100000000, 1000000000] at 0x2a8800
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16742, arity: 10, args: dec[] / hex[] } at 0x2a8ad0
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 1, args: dec[] / hex[] } at 0x2a8b20
+;  [runtime::closure]: Tuple with arguments [100000, 1000000, 10000000, 100000000, 1000000000] at 0x2a8800
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 1, args: dec[2788048, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[2a8ad0, 1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
 ;  [runtime::closure]: Too many args, [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] goes to next closure
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e87c, arity: 1, args: dec[2373088] / hex[2435e0] }
-;  [runtime::closure]: Closure result: 2373088 / 0x2435e0
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e8ac, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
-;  [runtime::closure]: Tuple with arguments: [10000000, 100000000, 1000000000] at 0x2deae0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 1, args: dec[2788048] / hex[2a8ad0] }
+;  [runtime::closure]: Closure result: 2788048 / 0x2a8ad0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16742, arity: 10, args: dec[1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] / hex[1, a, 64, 3e8, 2710, 186a0, f4240, 989680, 5f5e100, 3b9aca00] }
+;  [runtime::closure]: Tuple with arguments: [10000000, 100000000, 1000000000] at 0x2a9010
 ;  [runtime::closure]: Closure result: 1111111111 / 0x423a35c7
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x243aa (ml_div), arity: 1, args: dec[] / hex[] } at 0x263090
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x243aa (ml_div), arity: 1, args: dec[1111111111] / hex[423a35c7] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x1a87a, arity: 1, args: dec[] / hex[] } at 0x2a8b70
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x1a87a, arity: 1, args: dec[1111111111] / hex[423a35c7] }
 ;  1111111111
 ;  [runtime::closure]: Closure result: 0 / 0x0
 ;
@@ -290,34 +334,35 @@
 ;$ cat /tmp/dbg.s
 ;  $ riscv64-linux-gnu-gcc -static /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
 ;  $ RUST_LOG=debug qemu-riscv64-static /tmp/dbg
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e8dc, arity: 2, args: dec[] / hex[] } at 0x243450
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e8dc, arity: 2, args: dec[2, 2] / hex[2, 2] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16712, arity: 2, args: dec[] / hex[] } at 0x2a8920
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16712, arity: 2, args: dec[2, 2] / hex[2, 2] }
 ;  [runtime::closure]: Closure result: 8 / 0x8
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[] / hex[] } at 0x2e9e70
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[8] / hex[8] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[] / hex[] } at 0x2a89e0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[8] / hex[8] }
 ;  8
 ;  [runtime::closure]: Closure result: 0 / 0x0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[] / hex[] } at 0x1352860
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[84] / hex[54] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[] / hex[] } at 0x2a8ac0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[84] / hex[54] }
 ;  84
 ;  [runtime::closure]: Closure result: 0 / 0x0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e910, arity: 2, args: dec[] / hex[] } at 0x2434f0
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e910, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16746, arity: 2, args: dec[] / hex[] } at 0x2a8af0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16746, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
 ;  [runtime::closure]: Closure result: 0 / 0x0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[] / hex[] } at 0x13543b0
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[0] / hex[0] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[] / hex[] } at 0x2a8f70
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[0] / hex[0] }
 ;  0
 ;  [runtime::closure]: Closure result: 0 / 0x0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e910, arity: 2, args: dec[] / hex[] } at 0x1354420
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e910, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16746, arity: 2, args: dec[] / hex[] } at 0x2a8fc0
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16746, arity: 2, args: dec[42, 42] / hex[2a, 2a] }
 ;  [runtime::closure]: Closure result: 0 / 0x0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e910, arity: 2, args: dec[] / hex[] } at 0x13542d0
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x1e932, arity: 2, args: dec[] / hex[] } at 0x1354340
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e932, arity: 2, args: dec[20267728, 0] / hex[13542d0, 0] }
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x1e910, arity: 2, args: dec[0, 1] / hex[0, 1] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16746, arity: 2, args: dec[] / hex[] } at 0x2a8ff0
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x16768, arity: 2, args: dec[] / hex[] } at 0x2a9060
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16768, arity: 2, args: dec[2789360, 0] / hex[2a8ff0, 0] }
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x16746, arity: 2, args: dec[0, 1] / hex[0, 1] }
 ;  [runtime::closure]: Closure result: -1 / 0xffffffffffffffff
-;  [runtime::closure]: Creating Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[] / hex[] } at 0x1354490
-;  [runtime::closure]: Applying Closure { fn_ptr: 0x243a2 (ml_div), arity: 1, args: dec[-1] / hex[ffffffffffffffff] }
+;  [runtime::closure]: Creating Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[] / hex[] } at 0x2a9130
+;  [runtime::closure]: Applying Closure { fn_ptr: 0x19ec2, arity: 1, args: dec[-1] / hex[ffffffffffffffff] }
 ;  -1
 ;  [runtime::closure]: Closure result: 0 / 0x0
 ;  [runtime::closure]: Closure result: 0 / 0x0
+;

@@ -1,11 +1,9 @@
 use core::panic;
 use std::{
     cmp::Ordering,
-    ffi::c_void,
     fmt::{self, Debug, Formatter},
 };
 
-use backtrace::{self, Symbol};
 use log::debug;
 
 use crate::Tuple;
@@ -19,19 +17,10 @@ pub struct Closure {
 
 impl Debug for Closure {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut fn_name = None;
-        backtrace::resolve(self.fn_ptr as *mut c_void, |symbol: &Symbol| {
-            fn_name = symbol.name().map(|name| name.to_string());
-        });
-        let fn_info = match fn_name {
-            Some(name) => format!("{:?} ({})", &self.fn_ptr, name),
-            None => format!("{:?}", self.fn_ptr),
-        };
-
         let args_info = format!("dec{:?} / hex{:x?}", self.args, self.args);
 
         f.debug_struct("Closure")
-            .field("fn_ptr", &format_args!("{}", fn_info))
+            .field("fn_ptr", &self.fn_ptr)
             .field("arity", &self.arity)
             .field("args", &format_args!("{}", args_info))
             .finish()
