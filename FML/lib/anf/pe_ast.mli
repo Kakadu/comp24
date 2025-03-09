@@ -31,4 +31,4 @@ type pe_program = pe_declaration list
 val const_to_str : pe_const -> string
 val expr_to_str : pe_expr -> string
 val decl_to_str : pe_declaration -> string
-val pp_pe_structure : Format.formatter -> pe_declaration list -> unit
+val pp_pe_program : Format.formatter -> pe_program -> unit

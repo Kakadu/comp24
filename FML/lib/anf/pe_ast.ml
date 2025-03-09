@@ -85,7 +85,7 @@ let decl_to_str = function
            tl)
 ;;
 
-let pp_pe_structure ppf p =
+let pp_pe_program ppf p =
   let len = List.length p in
   List.iteri
     (fun i a ->

@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, Dmitry Pilyuk, Aleksandr Rozhkov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 open Common
 open Anf_ast
 open Pe_ast
@@ -88,7 +92,7 @@ and to_exp e =
     ~f:(fun (name, cexp) acc -> return @@ aexpr_let_in name cexp acc)
 ;;
 
-let anf_str_item = function
+let anf_declaranion = function
   | Pe_Nonrec decls ->
     let* bindings =
       map decls ~f:(fun (name, e) ->
@@ -119,7 +123,7 @@ let anf_structure structure =
   let rec helper = function
     | [] -> return []
     | hd :: tl ->
-      let* d1 = anf_str_item hd in
+      let* d1 = anf_declaranion hd in
       let* d2 = helper tl in
       return @@ d1 @ d2
   in

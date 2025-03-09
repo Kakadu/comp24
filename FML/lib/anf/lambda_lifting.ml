@@ -43,7 +43,7 @@ let rec ll_expr env = function
     let* str1, e1 = ll_inner env e1 in
     let* str2, e2 = ll_expr env e2 in
     return (str1 @ [ Pe_Rec [ fresh_name, e1 ] ] @ str2, e2)
-| Pe_ELet (NoRec, name, e1, e2) ->
+  | Pe_ELet (NoRec, name, e1, e2) ->
     let* str1, e1 = ll_inner env e1 in
     (match e1 with
      | Pe_EFun _ ->

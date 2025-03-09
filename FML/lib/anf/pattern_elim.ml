@@ -219,7 +219,7 @@ and pe_match to_match = function
   | _ -> return @@ Pe_EIdentifier "fail_match"
 ;;
 
-let pe_program = function
+let pe_declaration = function
   | NoRecDecl decl_list ->
     let* decls =
       map decl_list ~f:(fun (Ast.DDeclaration (pat, e)) ->
@@ -239,16 +239,15 @@ let pe_program = function
         match pat with
         | PIdentifier v -> return (v, e)
         | _ -> return ("()", e))
-      (* TODO: более информативное сообщение *)
     in
     return (Pe_Rec decls)
 ;;
 
-let pe_structure program =
+let pe_prog program =
   let rec helper = function
     | [] -> return []
     | hd :: tl ->
-      let* hd = pe_program hd in
+      let* hd = pe_declaration hd in
       let* tl = helper tl in
       return @@ (hd :: tl)
   in
@@ -307,4 +306,4 @@ let create_bundle structure =
   Set.filter_map (module Int) idents ~f:make_id
 ;;
 
-let run_pe structure = run (pe_structure structure) (create_bundle structure) 0
+let run_pe program = run (pe_prog program) (create_bundle program) 0

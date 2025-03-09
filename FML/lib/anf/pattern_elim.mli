@@ -6,4 +6,4 @@ open Ast
 open Pe_ast
 open Common
 
-val run_pe : declaration list -> bindings * int * pe_declaration list
+val run_pe : program -> bindings * int * pe_program
