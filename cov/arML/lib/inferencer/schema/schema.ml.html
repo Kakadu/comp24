@@ -74,15 +74,15 @@ open TypeTree
 type schema = Schema of TypeVarSet.t * typ
 
 let free_vars = function
-  | <span data-count="15661">S</span>chema (bind_vars, ty) -&gt; TypeVarSet.diff (TypeUtils.type_var<span data-count="15661">s</span> ty) bind_vars
+  | <span data-count="16740">S</span>chema (bind_vars, ty) -&gt; TypeVarSet.diff (TypeUtils.type_var<span data-count="16740">s</span> ty) bind_vars
 ;;
 
 let apply sub = function
-  | <span data-count="74289">S</span>chema (bind_vars, ty) -&gt;
+  | <span data-count="81683">S</span>chema (bind_vars, ty) -&gt;
     let sub2 =
-      TypeVarSet.fold (fun sub key -&gt; <span data-count="38512">S</span>ubstitution.remove key sub) bind_vars sub
+      TypeVarSet.fold (fun sub key -&gt; <span data-count="42345">S</span>ubstitution.remove key sub) bind_vars sub
     in
-    <span data-count="74289">S</span>chema (bind_vars, Substitution.appl<span data-count="74289">y</span> sub2 ty)
+    <span data-count="81683">S</span>chema (bind_vars, Substitution.appl<span data-count="81683">y</span> sub2 ty)
 ;;
 </code></pre>
       </div>

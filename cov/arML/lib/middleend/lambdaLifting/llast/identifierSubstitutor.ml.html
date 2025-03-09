@@ -187,21 +187,21 @@ open Common.IdentifierStructs
 open Common.IdentifierSearcher
 
 let get_pattern_identifiers_from_cases cases =
-  <span data-count="131">l</span>et patterns = List.map (fun (p, _) -&gt; <span data-count="137">p</span>) cases in
-  <span data-count="131">g</span>et_pattern_identifiers_from_list patterns
+  <span data-count="170">l</span>et patterns = List.map (fun (p, _) -&gt; <span data-count="178">p</span>) cases in
+  <span data-count="170">g</span>et_pattern_identifiers_from_list patterns
 ;;
 
 let rec substitute_identifiers_ll replacement_map expr =
-  <span data-count="92">m</span>atch expr with
-  | <span data-count="54">L</span>EIdentifier id -&gt;
+  <span data-count="111">m</span>atch expr with
+  | <span data-count="65">L</span>EIdentifier id -&gt;
     (match IdentifierMap.find_opt id replacement_map with
-     | <span data-count="17">S</span>ome new_id -&gt; LEIdentifier new_id
-     | <span data-count="37">N</span>one -&gt; expr)
-  | <span data-count="25">L</span>EApplication (f, arg1, args) -&gt;
+     | <span data-count="19">S</span>ome new_id -&gt; LEIdentifier new_id
+     | <span data-count="46">N</span>one -&gt; expr)
+  | <span data-count="29">L</span>EApplication (f, arg1, args) -&gt;
     let f' = substitute_identifiers_ll replacement_map f in
-    <span data-count="25">l</span>et arg1' = substitute_identifiers_ll replacement_map arg1 in
-    <span data-count="25">l</span>et args' = List.map (substitute_identifiers_l<span data-count="25">l</span> replacement_map) args in
-    <span data-count="25">L</span>EApplication (f', arg1', args')
+    <span data-count="29">l</span>et arg1' = substitute_identifiers_ll replacement_map arg1 in
+    <span data-count="29">l</span>et args' = List.map (substitute_identifiers_l<span data-count="29">l</span> replacement_map) args in
+    <span data-count="29">L</span>EApplication (f', arg1', args')
   | <span data-count="0">L</span>ELetIn (case, cases, body) -&gt;
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
     <span data-count="0">l</span>et cases' =
@@ -229,22 +229,22 @@ let rec substitute_identifiers_ll replacement_map expr =
     let l' = substitute_identifiers_ll replacement_map l in
     <span data-count="0">l</span>et r' = substitute_identifiers_ll replacement_map r in
     <span data-count="0">L</span>EListConstructor (l', r')
-  | <span data-count="4">L</span>EMatchWith (expr, case, cases) -&gt;
+  | <span data-count="6">L</span>EMatchWith (expr, case, cases) -&gt;
     let expr' = substitute_identifiers_ll replacement_map expr in
-    <span data-count="4">l</span>et cases' =
+    <span data-count="6">l</span>et cases' =
       List.map
         (fun (p, e) -&gt;
-          <span data-count="8">(</span> p
-          , substitute_identifiers_l<span data-count="8">l</span>
-              (remove_keys_from_ma<span data-count="8">p</span> (get_pattern_identifier<span data-count="8">s</span> p) replacement_map)
+          <span data-count="12">(</span> p
+          , substitute_identifiers_l<span data-count="12">l</span>
+              (remove_keys_from_ma<span data-count="12">p</span> (get_pattern_identifier<span data-count="12">s</span> p) replacement_map)
               e ))
         (case :: cases)
     in
-    <span data-count="4">L</span>EMatchWith (expr', List.h<span data-count="4">d</span> cases', List.t<span data-count="4">l</span> cases')
+    <span data-count="6">L</span>EMatchWith (expr', List.h<span data-count="6">d</span> cases', List.t<span data-count="6">l</span> cases')
   | <span data-count="0">L</span>ETyped (e, t) -&gt;
     let e' = substitute_identifiers_ll replacement_map e in
     <span data-count="0">L</span>ETyped (e', t)
-  | <span data-count="8">_</span> -&gt; expr
+  | <span data-count="10">_</span> -&gt; expr
 ;;
 </code></pre>
       </div>

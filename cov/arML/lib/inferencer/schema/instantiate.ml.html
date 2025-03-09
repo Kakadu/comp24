@@ -81,14 +81,14 @@ let instantiate
   : Schema.schema -&gt; (TypeTree.typ, TypeErrors.error) Common.StateResultMonad.t
   =
   fun (Schema (bind_var, ty)) -&gt;
-  <span data-count="2209">T</span>ypeVarSet.fold
+  <span data-count="2400">T</span>ypeVarSet.fold
     (fun var_name acc -&gt;
-      <span data-count="188">l</span>et* acc = acc in
-      <span data-count="188">l</span>et* fv = fresh &gt;&gt;<span data-count="188">|</span> fun name -&gt; <span data-count="188">T</span>Var name in
-      <span data-count="188">l</span>et* sub = Substitution.singleto<span data-count="188">n</span> var_name fv in
-      <span data-count="188">r</span>eturn (Substitution.appl<span data-count="188">y</span> sub acc))
+      <span data-count="202">l</span>et* acc = acc in
+      <span data-count="202">l</span>et* fv = fresh &gt;&gt;<span data-count="202">|</span> fun name -&gt; <span data-count="202">T</span>Var name in
+      <span data-count="202">l</span>et* sub = Substitution.singleto<span data-count="202">n</span> var_name fv in
+      <span data-count="202">r</span>eturn (Substitution.appl<span data-count="202">y</span> sub acc))
     bind_var
-    (retur<span data-count="2209">n</span> ty)
+    (retur<span data-count="2400">n</span> ty)
 ;;
 </code></pre>
       </div>

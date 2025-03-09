@@ -204,75 +204,75 @@ open TypeErrors
    the second is what it should be replaced with. *)
 type t = (int, typ, Base.Int.comparator_witness) Base.Map.t
 
-let empty = Base.Map.empt<span data-count="108">y</span> (module Base.Int)
+let empty = Base.Map.empt<span data-count="116">y</span> (module Base.Int)
 
 let singleton k v =
-  <span data-count="18644">i</span>f OccursChecker.occurs_check k v
+  <span data-count="20293">i</span>f OccursChecker.occurs_check k v
   then <span data-count="5">f</span>ail Occurs_check
-  else <span data-count="18639">r</span>eturn (Base.Map.singleto<span data-count="18639">n</span> (module Base.Int) k v)
+  else <span data-count="20288">r</span>eturn (Base.Map.singleto<span data-count="20288">n</span> (module Base.Int) k v)
 ;;
 
-let find sub k = <span data-count="114264">B</span>ase.Map.find sub k
-let remove sub k = <span data-count="38512">B</span>ase.Map.remove sub k
+let find sub k = <span data-count="128981">B</span>ase.Map.find sub k
+let remove sub k = <span data-count="42345">B</span>ase.Map.remove sub k
 
 (* Replace all type variables in a type with values ​​from the substitution. *)
 let apply sub =
-  <span data-count="151301">l</span>et rec helper = function
-    | <span data-count="99064">T</span>Var n -&gt;
+  <span data-count="165300">l</span>et rec helper = function
+    | <span data-count="112461">T</span>Var n -&gt;
       (match find sub n with
-       | <span data-count="93972">N</span>one -&gt; TVar n
-       | <span data-count="5092">S</span>ome v -&gt; v)
-    | <span data-count="196632">T</span>Arr (left, right) -&gt; TArr (helpe<span data-count="196632">r</span> left, helpe<span data-count="196632">r</span> right)
-    | <span data-count="16283">T</span>List typ -&gt; TList (helpe<span data-count="16283">r</span> typ)
-    | <span data-count="3090">T</span>Tuple t_list -&gt; TTuple (Base.List.ma<span data-count="3090">p</span> t_list ~f:helper)
-    | <span data-count="252044">o</span>ther -&gt; other
+       | <span data-count="106806">N</span>one -&gt; TVar n
+       | <span data-count="5655">S</span>ome v -&gt; v)
+    | <span data-count="213255">T</span>Arr (left, right) -&gt; TArr (helpe<span data-count="213255">r</span> left, helpe<span data-count="213255">r</span> right)
+    | <span data-count="19371">T</span>List typ -&gt; TList (helpe<span data-count="19371">r</span> typ)
+    | <span data-count="4078">T</span>Tuple t_list -&gt; TTuple (Base.List.ma<span data-count="4078">p</span> t_list ~f:helper)
+    | <span data-count="270261">o</span>ther -&gt; other
   in
   helper
 ;;
 
 (* Try to unify two types into a single type. *)
 let rec unify l r =
-  <span data-count="7612">m</span>atch l, r with
-  | <span data-count="1541">T</span>Ground l, TGround r when l = r -&gt; <span data-count="1526">r</span>eturn empty
-  | <span data-count="492">T</span>Var a, TVar b when a = b -&gt; <span data-count="163">r</span>eturn empty
-  | <span data-count="1127">T</span>Var a, t | <span data-count="2550">t</span>, TVar a -&gt; singleton a t
-  | <span data-count="1943">T</span>Arr (left1, right1), TArr (left2, right2) -&gt;
-    let* sub1 = unif<span data-count="1943">y</span> left1 left2 in
-    <span data-count="1937">l</span>et* sub2 = unif<span data-count="1937">y</span> (appl<span data-count="1937">y</span> sub1 right1) (appl<span data-count="1937">y</span> sub1 right2) in
-    <span data-count="1937">c</span>ompose sub1 sub2
-  | <span data-count="245">T</span>List typ1, TList typ2 -&gt; unify typ1 typ2
-  | <span data-count="41">T</span>Tuple t_list1, TTuple t_list2 -&gt;
+  <span data-count="8373">m</span>atch l, r with
+  | <span data-count="1657">T</span>Ground l, TGround r when l = r -&gt; <span data-count="1642">r</span>eturn empty
+  | <span data-count="592">T</span>Var a, TVar b when a = b -&gt; <span data-count="204">r</span>eturn empty
+  | <span data-count="1277">T</span>Var a, t | <span data-count="2780">t</span>, TVar a -&gt; singleton a t
+  | <span data-count="2104">T</span>Arr (left1, right1), TArr (left2, right2) -&gt;
+    let* sub1 = unif<span data-count="2104">y</span> left1 left2 in
+    <span data-count="2098">l</span>et* sub2 = unif<span data-count="2098">y</span> (appl<span data-count="2098">y</span> sub1 right1) (appl<span data-count="2098">y</span> sub1 right2) in
+    <span data-count="2098">c</span>ompose sub1 sub2
+  | <span data-count="303">T</span>List typ1, TList typ2 -&gt; unify typ1 typ2
+  | <span data-count="46">T</span>Tuple t_list1, TTuple t_list2 -&gt;
     (match
-       Base.List.fold2 t_list1 t_list2 ~init:(retur<span data-count="41">n</span> empty) ~f:(fun acc it1 it2 -&gt;
-         <span data-count="80">l</span>et* sub1 = acc in
-         <span data-count="80">l</span>et* sub2 = unif<span data-count="80">y</span> (appl<span data-count="80">y</span> sub1 it1) (appl<span data-count="80">y</span> sub1 it2) in
-         <span data-count="80">c</span>ompose sub1 sub2)
+       Base.List.fold2 t_list1 t_list2 ~init:(retur<span data-count="46">n</span> empty) ~f:(fun acc it1 it2 -&gt;
+         <span data-count="90">l</span>et* sub1 = acc in
+         <span data-count="90">l</span>et* sub2 = unif<span data-count="90">y</span> (appl<span data-count="90">y</span> sub1 it1) (appl<span data-count="90">y</span> sub1 it2) in
+         <span data-count="90">c</span>ompose sub1 sub2)
      with
-     | <span data-count="39">O</span>k r -&gt; r
+     | <span data-count="44">O</span>k r -&gt; r
      | <span data-count="2">_</span> -&gt; fail (Unification_failed (l, r)))
   | <span data-count="17">_</span> -&gt; fail (Unification_failed (l, r))
 
 (* Expanding the substitution with a new key-value. *)
 and extend k v sub =
-  <span data-count="15200">m</span>atch find sub k with
-  | <span data-count="14779">N</span>one -&gt;
+  <span data-count="16520">m</span>atch find sub k with
+  | <span data-count="16034">N</span>one -&gt;
     let v = apply sub v in
-    <span data-count="14779">l</span>et* new_sub = singleto<span data-count="14779">n</span> k v in
-    <span data-count="14779">l</span>et f1 ~key ~data acc =
-      <span data-count="52850">l</span>et* acc = acc in
-      <span data-count="52850">l</span>et new_data = apply new_sub data in
-      <span data-count="52850">r</span>eturn (Base.Map.updat<span data-count="52850">e</span> acc key ~f:(fun _ -&gt; <span data-count="52850">n</span>ew_data))
+    <span data-count="16034">l</span>et* new_sub = singleto<span data-count="16034">n</span> k v in
+    <span data-count="16034">l</span>et f1 ~key ~data acc =
+      <span data-count="57405">l</span>et* acc = acc in
+      <span data-count="57405">l</span>et new_data = apply new_sub data in
+      <span data-count="57405">r</span>eturn (Base.Map.updat<span data-count="57405">e</span> acc key ~f:(fun _ -&gt; <span data-count="57405">n</span>ew_data))
     in
-    Base.Map.fold sub ~init:(retur<span data-count="14779">n</span> new_sub) ~f:f1
-  | <span data-count="421">S</span>ome vl -&gt;
-    let* new_sub = unif<span data-count="421">y</span> v vl in
-    <span data-count="417">c</span>ompose sub new_sub
+    Base.Map.fold sub ~init:(retur<span data-count="16034">n</span> new_sub) ~f:f1
+  | <span data-count="486">S</span>ome vl -&gt;
+    let* new_sub = unif<span data-count="486">y</span> v vl in
+    <span data-count="482">c</span>ompose sub new_sub
 
 (* Two substitution's composition. *)
-and compose sub1 sub2 = <span data-count="11010">R</span>Map.fold_left sub2 ~init:(retur<span data-count="11010">n</span> sub1) ~f:extend
+and compose sub1 sub2 = <span data-count="12026">R</span>Map.fold_left sub2 ~init:(retur<span data-count="12026">n</span> sub1) ~f:extend
 
 (* Composition of an arbitrary number of substitutions. *)
-let compose_all sub_list = <span data-count="2561">R</span>List.fold_left sub_list ~init:(retur<span data-count="2561">n</span> empty) ~f:compose
+let compose_all sub_list = <span data-count="2785">R</span>List.fold_left sub_list ~init:(retur<span data-count="2785">n</span> empty) ~f:compose
 </code></pre>
       </div>
     </div>

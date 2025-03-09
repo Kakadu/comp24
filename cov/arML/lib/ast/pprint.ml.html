@@ -417,19 +417,19 @@
 
 open AbstractSyntaxTree
 
-let pp_identifier ppf (Id id) = <span data-count="2866">F</span>ormat.fprintf ppf "%s" id
+let pp_identifier ppf (Id id) = <span data-count="3393">F</span>ormat.fprintf ppf "%s" id
 
 let pp_constant ppf = function
-  | <span data-count="544">C</span>Int i -&gt; Format.fprintf ppf "%d" i
-  | <span data-count="21">C</span>Bool b -&gt; Format.fprintf ppf "%b" b
+  | <span data-count="637">C</span>Int i -&gt; Format.fprintf ppf "%d" i
+  | <span data-count="26">C</span>Bool b -&gt; Format.fprintf ppf "%b" b
   | <span data-count="0">C</span>Char c -&gt; Format.fprintf ppf "'%s'" (Char.escape<span data-count="0">d</span> c)
   | <span data-count="0">C</span>String s -&gt; Format.fprintf ppf "\"%s\"" (String.escape<span data-count="0">d</span> s)
-  | <span data-count="80">C</span>Unit -&gt; Format.fprintf ppf "()"
+  | <span data-count="81">C</span>Unit -&gt; Format.fprintf ppf "()"
 ;;
 
 let pp_ground_type_definition ppf = function
-  | <span data-count="15">G</span>TDInt -&gt; Format.fprintf ppf "int"
-  | <span data-count="5">G</span>TDBool -&gt; Format.fprintf ppf "bool"
+  | <span data-count="16">G</span>TDInt -&gt; Format.fprintf ppf "int"
+  | <span data-count="6">G</span>TDBool -&gt; Format.fprintf ppf "bool"
   | <span data-count="0">G</span>TDUnit -&gt; Format.fprintf ppf "unit"
   | <span data-count="0">G</span>TDChar -&gt; Format.fprintf ppf "char"
   | <span data-count="0">G</span>TDString -&gt; Format.fprintf ppf "string"
@@ -437,7 +437,7 @@ let pp_ground_type_definition ppf = function
 
 let rec pp_type_definition ppf = function
   | <span data-count="0">T</span>DPolymorphic id -&gt; Format.fprintf ppf "'%a" pp_identifier id
-  | <span data-count="20">T</span>DGround gtd -&gt; pp_ground_type_definition ppf gtd
+  | <span data-count="22">T</span>DGround gtd -&gt; pp_ground_type_definition ppf gtd
   | <span data-count="2">T</span>DArrow (t1, t2) -&gt;
     Format.fprintf ppf "(%a -&gt; %a)" pp_type_definition t1 pp_type_definition t2
   | <span data-count="0">T</span>DTuple (t1, t2, ts) -&gt;

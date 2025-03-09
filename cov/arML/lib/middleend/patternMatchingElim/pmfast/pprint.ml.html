@@ -237,27 +237,27 @@ open Ast.Pprint
 open Pmfast
 
 let rec pp_pmf_expr ppf = function
-  | <span data-count="183">P</span>MFConstant c -&gt; pp_constant ppf c
-  | <span data-count="577">P</span>MFIdentifier id -&gt; pp_identifier ppf id
-  | <span data-count="331">P</span>MFApplication (e1, e2, es) -&gt;
+  | <span data-count="282">P</span>MFConstant c -&gt; pp_constant ppf c
+  | <span data-count="954">P</span>MFIdentifier id -&gt; pp_identifier ppf id
+  | <span data-count="556">P</span>MFApplication (e1, e2, es) -&gt;
     Format.fprintf
       ppf
       "(%a %a)"
       pp_pmf_expr
       e1
-      (Format.pp_print_lis<span data-count="331">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="193">F</span>ormat.fprintf ppf " ") pp_pmf_expr)
+      (Format.pp_print_lis<span data-count="556">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="290">F</span>ormat.fprintf ppf " ") pp_pmf_expr)
       (e2 :: es)
-  | <span data-count="78">P</span>MFLetIn (c, e) -&gt;
+  | <span data-count="130">P</span>MFLetIn (c, e) -&gt;
     Format.fprintf
       ppf
       "(let %a in %a)"
-      (Format.pp_print_lis<span data-count="78">t</span>
+      (Format.pp_print_lis<span data-count="130">t</span>
          ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf " and ")
          pp_pmf_let_in_case)
       (c :: [])
       pp_pmf_expr
       e
-  | <span data-count="35">P</span>MFIfThenElse (cond, t, f) -&gt;
+  | <span data-count="58">P</span>MFIfThenElse (cond, t, f) -&gt;
     Format.fprintf
       ppf
       "(if %a then %a%a)"
@@ -267,58 +267,58 @@ let rec pp_pmf_expr ppf = function
       t
       (fun ppf -&gt; function
         | <span data-count="0">N</span>one -&gt; ()
-        | <span data-count="35">S</span>ome e -&gt; Format.fprintf ppf " else %a" pp_pmf_expr e)
+        | <span data-count="58">S</span>ome e -&gt; Format.fprintf ppf " else %a" pp_pmf_expr e)
       f
-  | <span data-count="4">P</span>MFTuple (e1, e2, es) -&gt;
+  | <span data-count="8">P</span>MFTuple (e1, e2, es) -&gt;
     Format.fprintf
       ppf
       "(%a)"
-      (Format.pp_print_lis<span data-count="4">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="4">F</span>ormat.fprintf ppf ", ") pp_pmf_expr)
+      (Format.pp_print_lis<span data-count="8">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="8">F</span>ormat.fprintf ppf ", ") pp_pmf_expr)
       (e1 :: e2 :: es)
-  | <span data-count="9">P</span>MFEmptyList -&gt; Format.fprintf ppf "[]"
-  | <span data-count="20">P</span>MFListConstructor (e1, e2) -&gt;
+  | <span data-count="18">P</span>MFEmptyList -&gt; Format.fprintf ppf "[]"
+  | <span data-count="40">P</span>MFListConstructor (e1, e2) -&gt;
     Format.fprintf ppf "(%a :: %a)" pp_pmf_expr e1 pp_pmf_expr e2
-  | <span data-count="2">P</span>MFTyped (e, t) -&gt; Format.fprintf ppf "(%a : %a)" pp_pmf_expr e pp_type_definition t
+  | <span data-count="4">P</span>MFTyped (e, t) -&gt; Format.fprintf ppf "(%a : %a)" pp_pmf_expr e pp_type_definition t
 
 and pp_pmf_let_in_case ppf (id, e) =
-  <span data-count="78">F</span>ormat.fprintf ppf "%a = %a" pp_identifier id pp_pmf_expr e
+  <span data-count="130">F</span>ormat.fprintf ppf "%a = %a" pp_identifier id pp_pmf_expr e
 
 and pp_pmf_decl_case ppf (id, args, e) =
-  <span data-count="73">m</span>atch args with
-  | <span data-count="21">[</span>] -&gt; Format.fprintf ppf "%a = %a" pp_identifier id pp_pmf_expr e
-  | <span data-count="52">_</span> -&gt;
+  <span data-count="114">m</span>atch args with
+  | <span data-count="32">[</span>] -&gt; Format.fprintf ppf "%a = %a" pp_identifier id pp_pmf_expr e
+  | <span data-count="82">_</span> -&gt;
     Format.fprintf
       ppf
       "%a %a = %a"
       pp_identifier
       id
-      (Format.pp_print_lis<span data-count="52">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="63">F</span>ormat.fprintf ppf " ") pp_identifier)
+      (Format.pp_print_lis<span data-count="82">t</span> ~pp_sep:(fun ppf () -&gt; <span data-count="90">F</span>ormat.fprintf ppf " ") pp_identifier)
       args
       pp_pmf_expr
       e
 ;;
 
 let pp_pmf_decl ppf = function
-  | <span data-count="50">P</span>MFDOrdinary c -&gt;
+  | <span data-count="80">P</span>MFDOrdinary c -&gt;
     Format.fprintf
       ppf
       "let %a"
-      (Format.pp_print_lis<span data-count="50">t</span>
+      (Format.pp_print_lis<span data-count="80">t</span>
          ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf " and ")
          pp_pmf_decl_case)
       (c :: [])
-  | <span data-count="19">P</span>MFDRecursive (c, cs) -&gt;
+  | <span data-count="28">P</span>MFDRecursive (c, cs) -&gt;
     Format.fprintf
       ppf
       "let rec %a"
-      (Format.pp_print_lis<span data-count="19">t</span>
-         ~pp_sep:(fun ppf () -&gt; <span data-count="4">F</span>ormat.fprintf ppf " and ")
+      (Format.pp_print_lis<span data-count="28">t</span>
+         ~pp_sep:(fun ppf () -&gt; <span data-count="6">F</span>ormat.fprintf ppf " and ")
          pp_pmf_decl_case)
       (c :: cs)
 ;;
 
 let pp_pmf_program ppf p =
-  <span data-count="18">F</span>ormat.pp_print_list ~pp_sep:(fun ppf () -&gt; <span data-count="51">F</span>ormat.fprintf ppf "\n") pp_pmf_decl ppf p
+  <span data-count="26">F</span>ormat.pp_print_list ~pp_sep:(fun ppf () -&gt; <span data-count="82">F</span>ormat.fprintf ppf "\n") pp_pmf_decl ppf p
 ;;
 
 let print_pmf_expression expr =
@@ -326,7 +326,7 @@ let print_pmf_expression expr =
 ;;
 
 let print_pmf_program program =
-  <span data-count="18">F</span>ormat.printf "%s\n" (Format.asprint<span data-count="18">f</span> "%a" pp_pmf_program program)
+  <span data-count="26">F</span>ormat.printf "%s\n" (Format.asprint<span data-count="26">f</span> "%a" pp_pmf_program program)
 ;;
 </code></pre>
       </div>

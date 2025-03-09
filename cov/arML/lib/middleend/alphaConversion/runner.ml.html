@@ -86,11 +86,11 @@ open ProgramAlphaConversion
 let start_env =
   let start_identifiers =
     List.fold_left
-      (fun acc var -&gt; <span data-count="2160">I</span>dentifierSet.add (Id var) acc)
+      (fun acc var -&gt; <span data-count="2320">I</span>dentifierSet.add (Id var) acc)
       IdentifierSet.empty
       Common.StartEnvironment.start_identifiers
   in
-  <span data-count="108">s</span>tart_identifiers
+  <span data-count="116">s</span>tart_identifiers
 ;;
 
 let run_alpha_conversion_program program =

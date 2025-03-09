@@ -119,35 +119,35 @@ open Common.IdentifierStructs
 open Common.IdentifierSearcher
 
 let rec generate_path_to_name_in_pattern name = function
-  | <span data-count="59">P</span>Var v when v = name -&gt; <span data-count="31">[</span> unpack_value ]
-  | <span data-count="8">P</span>Tuple (p1, p2, ps) -&gt;
+  | <span data-count="118">P</span>Var v when v = name -&gt; <span data-count="62">[</span> unpack_value ]
+  | <span data-count="16">P</span>Tuple (p1, p2, ps) -&gt;
     let paths =
       List.mapi
         (fun i p -&gt;
-          <span data-count="16">m</span>atch generate_path_to_name_in_pattern name p with
-          | <span data-count="8">[</span>] -&gt; None
-          | <span data-count="8">p</span>ath -&gt; Some (i, path))
+          <span data-count="32">m</span>atch generate_path_to_name_in_pattern name p with
+          | <span data-count="16">[</span>] -&gt; None
+          | <span data-count="16">p</span>ath -&gt; Some (i, path))
         (p1 :: p2 :: ps)
     in
-    <span data-count="8">(</span>match List.find_map Fun.id paths with
-     | <span data-count="8">S</span>ome (i, path) -&gt; unpack_tupl<span data-count="8">e</span> i :: path
+    <span data-count="16">(</span>match List.find_map Fun.id paths with
+     | <span data-count="16">S</span>ome (i, path) -&gt; unpack_tupl<span data-count="16">e</span> i :: path
      | <span data-count="0">N</span>one -&gt; [])
-  | <span data-count="36">P</span>ListConstructor (l, r) -&gt;
+  | <span data-count="72">P</span>ListConstructor (l, r) -&gt;
     (match generate_path_to_name_in_pattern name l with
-     | <span data-count="20">[</span>] -&gt; unpack_list_tail :: generate_path_to_name_in_patter<span data-count="20">n</span> name r
-     | <span data-count="16">p</span>ath -&gt; unpack_list_head :: path)
+     | <span data-count="40">[</span>] -&gt; unpack_list_tail :: generate_path_to_name_in_patter<span data-count="40">n</span> name r
+     | <span data-count="32">p</span>ath -&gt; unpack_list_head :: path)
   | <span data-count="0">P</span>Typed (p, _) -&gt; generate_path_to_name_in_pattern name p
-  | <span data-count="28">_</span> -&gt; []
+  | <span data-count="56">_</span> -&gt; []
 ;;
 
 let generate_declarations_from_case (p, expr) =
-  <span data-count="21">l</span>et unpack_expr name (p, expr) =
-    <span data-count="31">g</span>enerate_path_to_name_in_pattern name p
-    |&gt; <span data-count="31">L</span>ist.fold_left (fun acc unpack_fun -&gt; <span data-count="75">u</span>npack_fun acc) expr
+  <span data-count="42">l</span>et unpack_expr name (p, expr) =
+    <span data-count="62">g</span>enerate_path_to_name_in_pattern name p
+    |&gt; <span data-count="62">L</span>ist.fold_left (fun acc unpack_fun -&gt; <span data-count="150">u</span>npack_fun acc) expr
   in
   get_pattern_identifiers p
-  |&gt; <span data-count="21">I</span>dentifierSet.elements
-  |&gt; <span data-count="21">L</span>ist.map (fun name -&gt; <span data-count="31">n</span>ame, unpack_exp<span data-count="31">r</span> name (p, expr))
+  |&gt; <span data-count="42">I</span>dentifierSet.elements
+  |&gt; <span data-count="42">L</span>ist.map (fun name -&gt; <span data-count="62">n</span>ame, unpack_exp<span data-count="62">r</span> name (p, expr))
 ;;
 </code></pre>
       </div>

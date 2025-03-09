@@ -98,8 +98,8 @@ open ClosureProgram
 open Common.StartEnvironment
 
 let start_env =
-  List.fold_lef<span data-count="108">t</span>
-    (fun acc var -&gt; <span data-count="2160">I</span>dentifierSet.add (Id var) acc)
+  List.fold_lef<span data-count="116">t</span>
+    (fun acc var -&gt; <span data-count="2320">I</span>dentifierSet.add (Id var) acc)
     IdentifierSet.empty
     start_identifiers
 ;;
@@ -112,10 +112,10 @@ let run_closure_expression expression =
 ;;
 
 let run_closure_program program =
-  <span data-count="103">l</span>et first_state = 0 in
+  <span data-count="111">l</span>et first_state = 0 in
   let m = closure_program start_env program in
-  <span data-count="103">l</span>et result = run m first_state in
-  <span data-count="103">f</span>st result
+  <span data-count="111">l</span>et result = run m first_state in
+  <span data-count="111">f</span>st result
 ;;
 </code></pre>
       </div>

@@ -285,7 +285,7 @@ open Common
 
 let parse_constant_pattern =
   let* constant = parse_constant in
-  <span data-count="570061">r</span>eturn @@ PConst constant
+  <span data-count="682793">r</span>eturn @@ PConst constant
 ;;
 
 (* ---------------- *)
@@ -293,8 +293,8 @@ let parse_constant_pattern =
 (* Identifiers pattern parsers *)
 
 let parse_identifier_pattern =
-  let* identifier = parse_identifier &lt;|<span data-count="108">&gt;</span> parse_operator in
-  <span data-count="436075">r</span>eturn @@ PVar identifier
+  let* identifier = parse_identifier &lt;|<span data-count="116">&gt;</span> parse_operator in
+  <span data-count="519537">r</span>eturn @@ PVar identifier
 ;;
 
 (* ---------------- *)
@@ -302,8 +302,8 @@ let parse_identifier_pattern =
 (* Nil pattern parsers *)
 
 let parse_nil_pattern =
-  let* _ = bracket<span data-count="108">s</span> (strin<span data-count="108">g</span> "") in
-  <span data-count="32619">r</span>eturn PNill
+  let* _ = bracket<span data-count="116">s</span> (strin<span data-count="116">g</span> "") in
+  <span data-count="39131">r</span>eturn PNill
 ;;
 
 (* ---------------- *)
@@ -311,7 +311,7 @@ let parse_nil_pattern =
 (* Wildcard pattern parsers *)
 
 let parse_any_pattern =
-  let* _ = skip_wspace *<span data-count="108">&gt;</span> cha<span data-count="108">r</span> '_' in
+  let* _ = skip_wspace *<span data-count="116">&gt;</span> cha<span data-count="116">r</span> '_' in
   <span data-count="260">r</span>eturn PAny
 ;;
 
@@ -320,11 +320,11 @@ let parse_any_pattern =
 (* Tuple pattern parsers *)
 
 let parse_tuple_pattern pp =
-  <span data-count="104">p</span>arens
+  <span data-count="112">p</span>arens
   @@
-  let* patterns = sep_b<span data-count="104">y</span> (skip_wspace *<span data-count="104">&gt;</span> cha<span data-count="104">r</span> ',' &lt;<span data-count="104">*</span> skip_wspace) pp in
-  <span data-count="49177">m</span>atch patterns with
-  | <span data-count="49161">p</span>1 :: p2 :: ps -&gt; return (PTuple (p1, p2, ps))
+  let* patterns = sep_b<span data-count="112">y</span> (skip_wspace *<span data-count="112">&gt;</span> cha<span data-count="112">r</span> ',' &lt;<span data-count="112">*</span> skip_wspace) pp in
+  <span data-count="58943">m</span>atch patterns with
+  | <span data-count="58927">p</span>1 :: p2 :: ps -&gt; return (PTuple (p1, p2, ps))
   | <span data-count="16">_</span> -&gt; fail "Syntax error: tuple must have at least two patterns"
 ;;
 
@@ -333,8 +333,8 @@ let parse_tuple_pattern pp =
 (* List pattern parser *)
 
 let parse_list_pattern pp =
-  <span data-count="104">l</span>et main_parser = brackets @@ sep_b<span data-count="104">y</span> (skip_wspace *<span data-count="104">&gt;</span> cha<span data-count="104">r</span> ';' &lt;<span data-count="104">*</span> skip_wspace) pp in
-  <span data-count="104">l</span>et rec constructor_helper = function
+  <span data-count="112">l</span>et main_parser = brackets @@ sep_b<span data-count="112">y</span> (skip_wspace *<span data-count="112">&gt;</span> cha<span data-count="112">r</span> ';' &lt;<span data-count="112">*</span> skip_wspace) pp in
+  <span data-count="112">l</span>et rec constructor_helper = function
     | <span data-count="12">[</span>] -&gt; PNill
     | <span data-count="12">h</span>d :: tl -&gt; PListConstructor (hd, constructor_helpe<span data-count="12">r</span> tl)
   in
@@ -343,11 +343,11 @@ let parse_list_pattern pp =
 ;;
 
 let parse_list_constructor_pattern pp =
-  <span data-count="104">l</span>et constructor hd tl = <span data-count="33496">P</span>ListConstructor (hd, tl) in
+  <span data-count="112">l</span>et constructor hd tl = <span data-count="40164">P</span>ListConstructor (hd, tl) in
   let parse_constructor =
-    skip_wspace *<span data-count="104">&gt;</span> strin<span data-count="104">g</span> "::" *<span data-count="104">&gt;</span> skip_wspace *&gt; retur<span data-count="104">n</span> constructor
+    skip_wspace *<span data-count="112">&gt;</span> strin<span data-count="112">g</span> "::" *<span data-count="112">&gt;</span> skip_wspace *&gt; retur<span data-count="112">n</span> constructor
   in
-  <span data-count="104">c</span>hainr1 pp parse_constructor
+  <span data-count="112">c</span>hainr1 pp parse_constructor
 ;;
 
 (* ---------------- *)
@@ -355,10 +355,10 @@ let parse_list_constructor_pattern pp =
 (* Pattern's type definition parser *)
 
 let parse_typed_pattern pp =
-  <span data-count="104">p</span>arens
+  <span data-count="112">p</span>arens
   @@
   let* pat = pp in
-  <span data-count="49261">l</span>et* typ = skip_wspace *<span data-count="49261">&gt;</span> cha<span data-count="49261">r</span> ':' *<span data-count="49261">&gt;</span> Type.parse_type in
+  <span data-count="59027">l</span>et* typ = skip_wspace *<span data-count="59027">&gt;</span> cha<span data-count="59027">r</span> ':' *<span data-count="59027">&gt;</span> Type.parse_type in
   <span data-count="84">r</span>eturn @@ PTyped (pat, typ)
 ;;
 
@@ -367,9 +367,9 @@ let parse_typed_pattern pp =
 (* Main pattern parser *)
 
 let parse_pattern =
-  fi<span data-count="108">x</span>
+  fi<span data-count="116">x</span>
   @@ fun self -&gt;
-  <span data-count="104">l</span>et basic_pattern_parsers =
+  <span data-count="112">l</span>et basic_pattern_parsers =
     choice
       [ parse_constant_pattern
       ; parse_identifier_pattern
@@ -377,22 +377,22 @@ let parse_pattern =
       ; parse_nil_pattern
       ]
   in
-  <span data-count="104">l</span>et composite_pattern_parsers =
+  <span data-count="112">l</span>et composite_pattern_parsers =
     choice
       [ basic_pattern_parsers
-      ; paren<span data-count="104">s</span> self
-      ; parse_list_patter<span data-count="104">n</span> self
-      ; parse_typed_patter<span data-count="104">n</span> self
-      ; parse_tuple_patter<span data-count="104">n</span> self
+      ; paren<span data-count="112">s</span> self
+      ; parse_list_patter<span data-count="112">n</span> self
+      ; parse_typed_patter<span data-count="112">n</span> self
+      ; parse_tuple_patter<span data-count="112">n</span> self
       ]
   in
-  <span data-count="104">l</span>et chain_pattern_parsers =
+  <span data-count="112">l</span>et chain_pattern_parsers =
     choice
-      [ parse_list_constructor_patter<span data-count="104">n</span> composite_pattern_parsers
+      [ parse_list_constructor_patter<span data-count="112">n</span> composite_pattern_parsers
       ; composite_pattern_parsers
       ]
   in
-  <span data-count="104">c</span>hain_pattern_parsers
+  <span data-count="112">c</span>hain_pattern_parsers
 ;;
 
 (* ---------------- *)

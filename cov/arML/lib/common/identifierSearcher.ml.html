@@ -273,52 +273,52 @@ open Ast.AbstractSyntaxTree
 open IdentifierStructs
 
 let rec get_pattern_identifiers = function
-  | <span data-count="267">P</span>Any | <span data-count="92">P</span>Nill | <span data-count="643">P</span>Const _ -&gt; IdentifierSet.empty
-  | <span data-count="3690">P</span>Var id -&gt; IdentifierSet.singleton id
-  | <span data-count="126">P</span>Tuple (p1, p2, ps) -&gt;
+  | <span data-count="267">P</span>Any | <span data-count="130">P</span>Nill | <span data-count="765">P</span>Const _ -&gt; IdentifierSet.empty
+  | <span data-count="4128">P</span>Var id -&gt; IdentifierSet.singleton id
+  | <span data-count="153">P</span>Tuple (p1, p2, ps) -&gt;
     let idf = List.map get_pattern_identifiers (p1 :: p2 :: ps) in
-    <span data-count="126">L</span>ist.fold_left IdentifierSet.union IdentifierSet.empty idf
-  | <span data-count="145">P</span>ListConstructor (p1, p2) -&gt;
-    IdentifierSet.union (get_pattern_identifier<span data-count="145">s</span> p1) (get_pattern_identifier<span data-count="145">s</span> p2)
+    <span data-count="153">L</span>ist.fold_left IdentifierSet.union IdentifierSet.empty idf
+  | <span data-count="201">P</span>ListConstructor (p1, p2) -&gt;
+    IdentifierSet.union (get_pattern_identifier<span data-count="201">s</span> p1) (get_pattern_identifier<span data-count="201">s</span> p2)
   | <span data-count="13">P</span>Typed (p, _) -&gt; get_pattern_identifiers p
 ;;
 
 let get_pattern_identifiers_from_list lst =
-  <span data-count="2329">L</span>ist.fold_left
-    (fun acc p -&gt; <span data-count="2991">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="2991">s</span> p))
+  <span data-count="2581">L</span>ist.fold_left
+    (fun acc p -&gt; <span data-count="3310">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="3310">s</span> p))
     IdentifierSet.empty
     lst
 ;;
 
 let get_pattern_identifiers_from_cases cases =
-  <span data-count="877">l</span>et patterns = List.map (fun (p, _) -&gt; <span data-count="940">p</span>) cases in
-  <span data-count="877">g</span>et_pattern_identifiers_from_list patterns
+  <span data-count="993">l</span>et patterns = List.map (fun (p, _) -&gt; <span data-count="1057">p</span>) cases in
+  <span data-count="993">g</span>et_pattern_identifiers_from_list patterns
 ;;
 
 let rec get_expr_free_vars = function
-  | <span data-count="1115">E</span>Constant _ -&gt; IdentifierSet.empty
-  | <span data-count="4310">E</span>Identifier id -&gt; IdentifierSet.singleton id
-  | <span data-count="859">E</span>Fun ((p, ps), body) -&gt; get_fun_free_vars (p :: ps) body
+  | <span data-count="1234">E</span>Constant _ -&gt; IdentifierSet.empty
+  | <span data-count="4716">E</span>Identifier id -&gt; IdentifierSet.singleton id
+  | <span data-count="914">E</span>Fun ((p, ps), body) -&gt; get_fun_free_vars (p :: ps) body
   | <span data-count="6">E</span>Function (case, cases) -&gt; get_function_free_vars (case :: cases)
-  | <span data-count="2145">E</span>Application (func, arg1, args) -&gt; get_application_free_vars func (arg1 :: args)
-  | <span data-count="93">E</span>IfThenElse (cond, b1, b2) -&gt; get_if_then_else_free_vars cond b1 b2
-  | <span data-count="56">E</span>EmptyList -&gt; IdentifierSet.empty
-  | <span data-count="125">E</span>ListConstructor (e1, e2) -&gt;
-    IdentifierSet.union (get_expr_free_var<span data-count="125">s</span> e1) (get_expr_free_var<span data-count="125">s</span> e2)
-  | <span data-count="66">E</span>Tuple (e1, e2, es) -&gt; get_tuple_free_vars (e1 :: e2 :: es)
-  | <span data-count="54">E</span>MatchWith (e, case, cases) -&gt; get_match_with_free_vars e (case :: cases)
-  | <span data-count="232">E</span>LetIn (case, cases, e) -&gt; get_let_in_free_vars (case :: cases) e
+  | <span data-count="2359">E</span>Application (func, arg1, args) -&gt; get_application_free_vars func (arg1 :: args)
+  | <span data-count="103">E</span>IfThenElse (cond, b1, b2) -&gt; get_if_then_else_free_vars cond b1 b2
+  | <span data-count="72">E</span>EmptyList -&gt; IdentifierSet.empty
+  | <span data-count="160">E</span>ListConstructor (e1, e2) -&gt;
+    IdentifierSet.union (get_expr_free_var<span data-count="160">s</span> e1) (get_expr_free_var<span data-count="160">s</span> e2)
+  | <span data-count="72">E</span>Tuple (e1, e2, es) -&gt; get_tuple_free_vars (e1 :: e2 :: es)
+  | <span data-count="65">E</span>MatchWith (e, case, cases) -&gt; get_match_with_free_vars e (case :: cases)
+  | <span data-count="266">E</span>LetIn (case, cases, e) -&gt; get_let_in_free_vars (case :: cases) e
   | <span data-count="0">E</span>RecLetIn (case, cases, e) -&gt; get_rec_let_in_free_vars (case :: cases) e
-  | <span data-count="16">E</span>Typed (e, _) -&gt; get_expr_free_vars e
+  | <span data-count="18">E</span>Typed (e, _) -&gt; get_expr_free_vars e
 
 and get_case_free_vars (p, e) =
-  <span data-count="360">l</span>et bound_vars = get_pattern_identifiers p in
-  <span data-count="360">I</span>dentifierSet.diff (get_expr_free_var<span data-count="360">s</span> e) bound_vars
+  <span data-count="419">l</span>et bound_vars = get_pattern_identifiers p in
+  <span data-count="419">I</span>dentifierSet.diff (get_expr_free_var<span data-count="419">s</span> e) bound_vars
 
 and get_fun_free_vars ps body =
-  <span data-count="859">l</span>et body_free_vars = get_expr_free_vars body in
-  <span data-count="859">l</span>et patterns_identifiers = get_pattern_identifiers_from_list ps in
-  <span data-count="859">I</span>dentifierSet.diff body_free_vars patterns_identifiers
+  <span data-count="914">l</span>et body_free_vars = get_expr_free_vars body in
+  <span data-count="914">l</span>et patterns_identifiers = get_pattern_identifiers_from_list ps in
+  <span data-count="914">I</span>dentifierSet.diff body_free_vars patterns_identifiers
 
 and get_function_free_vars cases =
   <span data-count="6">L</span>ist.fold_left
@@ -327,40 +327,40 @@ and get_function_free_vars cases =
     (List.ma<span data-count="6">p</span> get_case_free_vars cases)
 
 and get_application_free_vars func args =
-  <span data-count="2145">l</span>et func_free_vars = get_expr_free_vars func in
-  <span data-count="2145">l</span>et args_free_vars = List.map get_expr_free_vars args in
-  <span data-count="2145">l</span>et args_free_vars =
+  <span data-count="2359">l</span>et func_free_vars = get_expr_free_vars func in
+  <span data-count="2359">l</span>et args_free_vars = List.map get_expr_free_vars args in
+  <span data-count="2359">l</span>et args_free_vars =
     List.fold_left IdentifierSet.union IdentifierSet.empty args_free_vars
   in
-  <span data-count="2145">I</span>dentifierSet.union func_free_vars args_free_vars
+  <span data-count="2359">I</span>dentifierSet.union func_free_vars args_free_vars
 
 and get_if_then_else_free_vars cond b1 b2 =
-  <span data-count="93">l</span>et cond_vars = get_expr_free_vars cond in
-  <span data-count="93">l</span>et b1_vars = get_expr_free_vars b1 in
-  <span data-count="93">l</span>et b2_vars =
-    Option.map get_expr_free_vars b2 |&gt; <span data-count="93">O</span>ption.value ~default:IdentifierSet.empty
+  <span data-count="103">l</span>et cond_vars = get_expr_free_vars cond in
+  <span data-count="103">l</span>et b1_vars = get_expr_free_vars b1 in
+  <span data-count="103">l</span>et b2_vars =
+    Option.map get_expr_free_vars b2 |&gt; <span data-count="103">O</span>ption.value ~default:IdentifierSet.empty
   in
-  <span data-count="93">I</span>dentifierSet.union cond_vars (IdentifierSet.unio<span data-count="93">n</span> b1_vars b2_vars)
+  <span data-count="103">I</span>dentifierSet.union cond_vars (IdentifierSet.unio<span data-count="103">n</span> b1_vars b2_vars)
 
 and get_tuple_free_vars es =
-  <span data-count="66">l</span>et vars = List.map get_expr_free_vars es in
-  <span data-count="66">L</span>ist.fold_left IdentifierSet.union IdentifierSet.empty vars
+  <span data-count="72">l</span>et vars = List.map get_expr_free_vars es in
+  <span data-count="72">L</span>ist.fold_left IdentifierSet.union IdentifierSet.empty vars
 
 and get_match_with_free_vars e cases =
-  <span data-count="54">l</span>et e_vars = get_expr_free_vars e in
-  <span data-count="54">l</span>et cases_vars = List.map get_case_free_vars cases in
-  <span data-count="54">L</span>ist.fold_left IdentifierSet.union e_vars cases_vars
+  <span data-count="65">l</span>et e_vars = get_expr_free_vars e in
+  <span data-count="65">l</span>et cases_vars = List.map get_case_free_vars cases in
+  <span data-count="65">L</span>ist.fold_left IdentifierSet.union e_vars cases_vars
 
 and get_let_in_free_vars cases e =
-  <span data-count="232">l</span>et get_case_bound_vars (p, _) = <span data-count="232">g</span>et_pattern_identifiers p in
+  <span data-count="266">l</span>et get_case_bound_vars (p, _) = <span data-count="266">g</span>et_pattern_identifiers p in
   let bound_vars = List.map get_case_bound_vars cases in
-  <span data-count="232">l</span>et bound_vars = List.fold_left IdentifierSet.union IdentifierSet.empty bound_vars in
-  <span data-count="232">l</span>et cases_free_vars = List.map get_case_free_vars cases in
-  <span data-count="232">l</span>et cases_free_vars =
+  <span data-count="266">l</span>et bound_vars = List.fold_left IdentifierSet.union IdentifierSet.empty bound_vars in
+  <span data-count="266">l</span>et cases_free_vars = List.map get_case_free_vars cases in
+  <span data-count="266">l</span>et cases_free_vars =
     List.fold_left IdentifierSet.union IdentifierSet.empty cases_free_vars
   in
-  <span data-count="232">l</span>et body_free_vars = IdentifierSet.diff (get_expr_free_var<span data-count="232">s</span> e) bound_vars in
-  <span data-count="232">I</span>dentifierSet.union cases_free_vars body_free_vars
+  <span data-count="266">l</span>et body_free_vars = IdentifierSet.diff (get_expr_free_var<span data-count="266">s</span> e) bound_vars in
+  <span data-count="266">I</span>dentifierSet.union cases_free_vars body_free_vars
 
 and get_rec_let_in_free_vars cases e =
   <span data-count="0">l</span>et bound_vars =

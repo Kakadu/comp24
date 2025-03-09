@@ -280,7 +280,7 @@ and pp_a_expr ppf = function
   | <span data-count="72">A</span>LetIn (id, e, body) -&gt;
     Format.fprintf
       ppf
-      "(let %a = %a in %a)"
+      "(let %a = %a in@\n%a)"
       pp_identifier
       id
       pp_complex_expr
@@ -306,11 +306,11 @@ let pp_anf_decl_case ppf (id, args, body) =
 ;;
 
 let pp_anf_decl ppf = function
-  | <span data-count="27">A</span>DOrdinary decl -&gt; Format.fprintf ppf "let %a" pp_anf_decl_case decl
+  | <span data-count="27">A</span>DOrdinary decl -&gt; Format.fprintf ppf "let %a \n" pp_anf_decl_case decl
   | <span data-count="4">A</span>DRecursive (decl, decls) -&gt;
     Format.fprintf
       ppf
-      "let rec %a"
+      "let rec %a \n"
       (Format.pp_print_lis<span data-count="4">t</span>
          ~pp_sep:(fun ppf () -&gt; <span data-count="1">F</span>ormat.fprintf ppf " and ")
          pp_anf_decl_case)

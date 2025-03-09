@@ -65,15 +65,15 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 let eliminate_pm_case (p, expr) (matched_branch, not_matched_branch) =
-  <span data-count="4">l</span>et decls = GenerateDeclarationsFromCase.generate_declarations_from_case (p, expr) in
-  <span data-count="4">l</span>et rec let_expr decls =
-    <span data-count="8">m</span>atch decls with
+  <span data-count="8">l</span>et decls = GenerateDeclarationsFromCase.generate_declarations_from_case (p, expr) in
+  <span data-count="8">l</span>et rec let_expr decls =
+    <span data-count="16">m</span>atch decls with
     | <span data-count="0">[</span>] -&gt; matched_branch
-    | <span data-count="4">[</span> lst ] -&gt; Pmfast.PMFLetIn (lst, matched_branch)
-    | <span data-count="4">h</span>d :: tl -&gt; Pmfast.PMFLetIn (hd, let_exp<span data-count="4">r</span> tl)
+    | <span data-count="8">[</span> lst ] -&gt; Pmfast.PMFLetIn (lst, matched_branch)
+    | <span data-count="8">h</span>d :: tl -&gt; Pmfast.PMFLetIn (hd, let_exp<span data-count="8">r</span> tl)
   in
   let matched_branch = let_expr decls in
-  <span data-count="4">l</span>et branches = matched_branch, not_matched_branch in
+  <span data-count="8">l</span>et branches = matched_branch, not_matched_branch in
   GenerateConditionsFromCase.generate_condition_if_needed (p, expr) branches
 ;;
 </code></pre>

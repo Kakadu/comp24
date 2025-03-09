@@ -188,29 +188,29 @@ open PmfCase
 open PmfExpression
 
 let eliminate_pm_fun env args expr =
-  <span data-count="96">l</span>et* env, processed_args, match_args, patterns =
+  <span data-count="126">l</span>et* env, processed_args, match_args, patterns =
     let rev = List.rev in
     let* env, processed_args, match_args, patterns =
-      List.fold_lef<span data-count="96">t</span>
+      List.fold_lef<span data-count="126">t</span>
         (fun acc arg -&gt;
-          <span data-count="217">l</span>et* env, processed_args, match_args, patterns = acc in
-          <span data-count="217">m</span>atch arg with
-          | <span data-count="205">P</span>Var var_name -&gt; return (env, var_name :: processed_args, match_args, patterns)
-          | <span data-count="12">P</span>Const CUnit -&gt; return (env, Id "()" :: processed_args, match_args, patterns)
+          <span data-count="274">l</span>et* env, processed_args, match_args, patterns = acc in
+          <span data-count="274">m</span>atch arg with
+          | <span data-count="258">P</span>Var var_name -&gt; return (env, var_name :: processed_args, match_args, patterns)
+          | <span data-count="16">P</span>Const CUnit -&gt; return (env, Id "()" :: processed_args, match_args, patterns)
           | <span data-count="0">_</span> -&gt;
             let* fresh_id = get_new_pmf_nam<span data-count="0">e</span> env in
             <span data-count="0">l</span>et fresh_id = Id fresh_id in
             let env = IdentifierSet.add fresh_id env in
             <span data-count="0">r</span>eturn
               (env, fresh_id :: processed_args, fresh_id :: match_args, arg :: patterns))
-        (retur<span data-count="96">n</span> (env, [], [], []))
+        (retur<span data-count="126">n</span> (env, [], [], []))
         args
     in
-    <span data-count="96">r</span>eturn @@ (env, re<span data-count="96">v</span> processed_args, re<span data-count="96">v</span> match_args, re<span data-count="96">v</span> patterns)
+    <span data-count="126">r</span>eturn @@ (env, re<span data-count="126">v</span> processed_args, re<span data-count="126">v</span> match_args, re<span data-count="126">v</span> patterns)
   in
-  <span data-count="96">l</span>et* new_body, env = eliminate_pm_expressio<span data-count="96">n</span> env expr in
-  <span data-count="96">m</span>atch match_args with
-  | <span data-count="96">[</span>] -&gt; return ((processed_args, new_body), env)
+  <span data-count="126">l</span>et* new_body, env = eliminate_pm_expressio<span data-count="126">n</span> env expr in
+  <span data-count="126">m</span>atch match_args with
+  | <span data-count="126">[</span>] -&gt; return ((processed_args, new_body), env)
   | <span data-count="0">[</span> single_match_arg ] -&gt;
     let pat = List.hd patterns in
     <span data-count="0">l</span>et to_match = PMFIdentifier single_match_arg in

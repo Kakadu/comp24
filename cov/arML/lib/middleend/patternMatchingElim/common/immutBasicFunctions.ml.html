@@ -91,22 +91,22 @@ open Ast.AbstractSyntaxTree
 open Pmfast
 
 let get_list_length lst =
-  <span data-count="26">l</span>et list_length_identifier = PMFIdentifier (Id "get_list_length") in
+  <span data-count="52">l</span>et list_length_identifier = PMFIdentifier (Id "get_list_length") in
   PMFApplication (list_length_identifier, lst, [])
 ;;
 
 let immut_equality l r =
-  <span data-count="10">l</span>et immut_equality_ident = PMFIdentifier (Id "equal") in
+  <span data-count="20">l</span>et immut_equality_ident = PMFIdentifier (Id "equal") in
   PMFApplication (immut_equality_ident, l, [ r ])
 ;;
 
 let immut_less_than l r =
-  <span data-count="16">l</span>et immut_less_than_ident = PMFIdentifier (Id "less_than") in
+  <span data-count="32">l</span>et immut_less_than_ident = PMFIdentifier (Id "less_than") in
   PMFApplication (immut_less_than_ident, l, [ r ])
 ;;
 
 let immut_and l r =
-  <span data-count="9">l</span>et immut_and_ident = PMFIdentifier (Id "logic_and") in
+  <span data-count="18">l</span>et immut_and_ident = PMFIdentifier (Id "logic_and") in
   PMFApplication (immut_and_ident, l, [ r ])
 ;;
 

@@ -97,11 +97,11 @@
 
 type 'a t = int -&gt; 'a * int
 
-let return x s = <span data-count="24111">x</span>, s
+let return x s = <span data-count="26791">x</span>, s
 
 let bind m f s =
-  <span data-count="24176">l</span>et a, s' = m s in
-  <span data-count="24176">f</span> a s'
+  <span data-count="26848">l</span>et a, s' = m s in
+  <span data-count="26848">f</span> a s'
 ;;
 
 let map m f s =
@@ -113,13 +113,13 @@ let ( &gt;&gt;= ) m f = <span data-count="0">b</span>ind m f
 let ( &gt;&gt;| ) m f = <span data-count="0">m</span>ap m f
 let get s = <span data-count="0">s</span>, s
 let put new_s _ = <span data-count="0">(</span>), new_s
-let fresh s = <span data-count="401">s</span>, s + 1
+let fresh s = <span data-count="417">s</span>, s + 1
 
 module Syntax = struct
-  let ( let* ) x f = <span data-count="24176">b</span>ind x f
+  let ( let* ) x f = <span data-count="26848">b</span>ind x f
 end
 
-let run m s = <span data-count="336">m</span> s
+let run m s = <span data-count="360">m</span> s
 </code></pre>
       </div>
     </div>

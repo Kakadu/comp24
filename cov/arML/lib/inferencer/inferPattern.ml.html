@@ -155,18 +155,18 @@ open Ast.AbstractSyntaxTree
 
 let infer_pattern =
   let rec helper env = function
-    | <span data-count="185">P</span>Const c -&gt; return (infer_cons<span data-count="185">t</span> c, env)
-    | <span data-count="766">P</span>Var (Id v) -&gt;
+    | <span data-count="207">P</span>Const c -&gt; return (infer_cons<span data-count="207">t</span> c, env)
+    | <span data-count="839">P</span>Var (Id v) -&gt;
       let* fv = fresh_var in
-      <span data-count="766">l</span>et schema = Schema.Schema (TypeTree.TypeVarSet.empty, fv) in
+      <span data-count="839">l</span>et schema = Schema.Schema (TypeTree.TypeVarSet.empty, fv) in
       let env = TypeEnv.extend env v schema in
-      <span data-count="766">r</span>eturn (fv, env)
+      <span data-count="839">r</span>eturn (fv, env)
     | <span data-count="22">P</span>Any -&gt;
       let* fv = fresh_var in
       <span data-count="22">r</span>eturn (fv, env)
-    | <span data-count="38">P</span>Nill -&gt;
+    | <span data-count="48">P</span>Nill -&gt;
       let* fv = fresh_var in
-      <span data-count="38">l</span>et ty = TypeTree.TList fv in
+      <span data-count="48">l</span>et ty = TypeTree.TList fv in
       return (ty, env)
     | <span data-count="39">P</span>Tuple (first_pattern, second_pattern, patterns) as tuple_p -&gt;
       let* _ = check_unique_var<span data-count="39">s</span> [ tuple_p ] in
@@ -181,18 +181,18 @@ let infer_pattern =
       in
       <span data-count="36">l</span>et ty = TypeTree.TTuple (List.re<span data-count="36">v</span> ty) in
       return (ty, env)
-    | <span data-count="64">P</span>ListConstructor (left, right) as list_cons -&gt;
-      let* _ = check_unique_var<span data-count="64">s</span> [ list_cons ] in
+    | <span data-count="80">P</span>ListConstructor (left, right) as list_cons -&gt;
+      let* _ = check_unique_var<span data-count="80">s</span> [ list_cons ] in
       (* Check several bounds *)
-      <span data-count="63">l</span>et* ty1, env' = helpe<span data-count="63">r</span> env left in
-      <span data-count="63">l</span>et* ty2, env'' = helpe<span data-count="63">r</span> env' right in
-      <span data-count="63">l</span>et* fv = fresh_var in
-      <span data-count="63">l</span>et* sub = Substitution.unif<span data-count="63">y</span> (TList ty1) fv in
-      <span data-count="63">l</span>et* sub' = Substitution.unif<span data-count="63">y</span> ty2 fv in
-      <span data-count="63">l</span>et* sub'' = Substitution.compos<span data-count="63">e</span> sub sub' in
-      <span data-count="63">l</span>et env''' = TypeEnv.apply env'' sub'' in
-      <span data-count="63">l</span>et ty3 = Substitution.apply sub'' fv in
-      <span data-count="63">r</span>eturn (ty3, env''')
+      <span data-count="79">l</span>et* ty1, env' = helpe<span data-count="79">r</span> env left in
+      <span data-count="79">l</span>et* ty2, env'' = helpe<span data-count="79">r</span> env' right in
+      <span data-count="79">l</span>et* fv = fresh_var in
+      <span data-count="79">l</span>et* sub = Substitution.unif<span data-count="79">y</span> (TList ty1) fv in
+      <span data-count="79">l</span>et* sub' = Substitution.unif<span data-count="79">y</span> ty2 fv in
+      <span data-count="79">l</span>et* sub'' = Substitution.compos<span data-count="79">e</span> sub sub' in
+      <span data-count="79">l</span>et env''' = TypeEnv.apply env'' sub'' in
+      <span data-count="79">l</span>et ty3 = Substitution.apply sub'' fv in
+      <span data-count="79">r</span>eturn (ty3, env''')
     | <span data-count="14">P</span>Typed (pattern, pattern_ty) -&gt;
       let* ty, env = helpe<span data-count="14">r</span> env pattern in
       <span data-count="14">l</span>et* expected_ty = get_type_by_defenitio<span data-count="14">n</span> pattern_ty in

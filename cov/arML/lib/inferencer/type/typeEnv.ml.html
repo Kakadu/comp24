@@ -102,25 +102,25 @@ open TypeTree
 (* Type environment is mapping top-level identifiers to their schema type *)
 type t = (string, Schema.schema, Base.String.comparator_witness) Base.Map.t
 
-let empty : t = Base.Map.empt<span data-count="108">y</span> (module Base.String)
+let empty : t = Base.Map.empt<span data-count="116">y</span> (module Base.String)
 
 let free_vars env =
-  <span data-count="3541">B</span>ase.Map.fold
+  <span data-count="3800">B</span>ase.Map.fold
     ~init:TypeVarSet.empty
-    ~f:(fun ~key:_ ~data acc -&gt; <span data-count="15661">T</span>ypeVarSet.union acc (Schema.free_var<span data-count="15661">s</span> data))
+    ~f:(fun ~key:_ ~data acc -&gt; <span data-count="16740">T</span>ypeVarSet.union acc (Schema.free_var<span data-count="16740">s</span> data))
     env
 ;;
 
-let apply env sub = <span data-count="2322">B</span>ase.Map.map env ~f:(Schema.appl<span data-count="2322">y</span> sub)
-let extend env key schema = <span data-count="4504">B</span>ase.Map.update ~f:(fun _ -&gt; <span data-count="4504">s</span>chema) env key
-let find env key = <span data-count="2212">B</span>ase.Map.find env key
+let apply env sub = <span data-count="2542">B</span>ase.Map.map env ~f:(Schema.appl<span data-count="2542">y</span> sub)
+let extend env key schema = <span data-count="4854">B</span>ase.Map.update ~f:(fun _ -&gt; <span data-count="4854">s</span>chema) env key
+let find env key = <span data-count="2403">B</span>ase.Map.find env key
 
 (* Search for an identifier in the environment. If not found - error. *)
 let lookup_env env name =
-  <span data-count="2212">m</span>atch find env name with
-  | <span data-count="2209">S</span>ome schema -&gt;
-    let* ty = Instantiate.instantiat<span data-count="2209">e</span> schema in
-    <span data-count="2209">r</span>eturn (Substitution.empty, ty)
+  <span data-count="2403">m</span>atch find env name with
+  | <span data-count="2400">S</span>ome schema -&gt;
+    let* ty = Instantiate.instantiat<span data-count="2400">e</span> schema in
+    <span data-count="2400">r</span>eturn (Substitution.empty, ty)
   | <span data-count="3">N</span>one -&gt; fail (TypeErrors.Unbound_variable name)
 ;;
 </code></pre>

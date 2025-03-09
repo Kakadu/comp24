@@ -74,15 +74,15 @@ open Common.StateResultMonad.Syntax
 open InferDeclaration
 
 let infer_program env program =
-  <span data-count="150">l</span>et rec helper acc = function
-    | <span data-count="141">[</span>] -&gt; acc
-    | <span data-count="326">h</span>d :: tl -&gt;
+  <span data-count="158">l</span>et rec helper acc = function
+    | <span data-count="149">[</span>] -&gt; acc
+    | <span data-count="354">h</span>d :: tl -&gt;
       let* acc_env, acc_name_list = acc in
-      <span data-count="326">l</span>et* new_acc_env, new_acc_name_list = infer_declaratio<span data-count="326">n</span> acc_env acc_name_list hd in
-      <span data-count="317">h</span>elper (retur<span data-count="317">n</span> (new_acc_env, new_acc_name_list)) tl
+      <span data-count="354">l</span>et* new_acc_env, new_acc_name_list = infer_declaratio<span data-count="354">n</span> acc_env acc_name_list hd in
+      <span data-count="345">h</span>elper (retur<span data-count="345">n</span> (new_acc_env, new_acc_name_list)) tl
   in
-  let* env, names = helpe<span data-count="150">r</span> (retur<span data-count="150">n</span> (env, [])) program in
-  <span data-count="141">r</span>eturn (env, List.re<span data-count="141">v</span> names)
+  let* env, names = helpe<span data-count="158">r</span> (retur<span data-count="158">n</span> (env, [])) program in
+  <span data-count="149">r</span>eturn (env, List.re<span data-count="149">v</span> names)
 ;;
 </code></pre>
       </div>

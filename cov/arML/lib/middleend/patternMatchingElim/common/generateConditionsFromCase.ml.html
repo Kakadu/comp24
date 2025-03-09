@@ -140,42 +140,42 @@ open ListUtils
 
 let rec generate_pattern_matching_restrictions expr = function
   | <span data-count="0">P</span>Const c when c &lt;&gt; CUnit -&gt; <span data-count="0">[</span> immut_equalit<span data-count="0">y</span> expr (PMFConstant c) ]
-  | <span data-count="10">P</span>Nill -&gt; [ immut_equalit<span data-count="10">y</span> (get_list_lengt<span data-count="10">h</span> expr) (PMFConstant (CInt 0)) ]
-  | <span data-count="4">P</span>Tuple (p1, p2, ps) -&gt;
+  | <span data-count="20">P</span>Nill -&gt; [ immut_equalit<span data-count="20">y</span> (get_list_lengt<span data-count="20">h</span> expr) (PMFConstant (CInt 0)) ]
+  | <span data-count="8">P</span>Tuple (p1, p2, ps) -&gt;
     let patterns = p1 :: p2 :: ps in
     let get_pattern_restrictions_on_expr pos pattern =
-      <span data-count="8">l</span>et unpacked_expr = unpack_tuple pos expr in
-      <span data-count="8">g</span>enerate_pattern_matching_restrictions unpacked_expr pattern
+      <span data-count="16">l</span>et unpacked_expr = unpack_tuple pos expr in
+      <span data-count="16">g</span>enerate_pattern_matching_restrictions unpacked_expr pattern
     in
-    List.mapi get_pattern_restrictions_on_expr patterns |&gt; <span data-count="4">L</span>ist.concat
-  | <span data-count="16">P</span>ListConstructor (l, r) as plst -&gt;
+    List.mapi get_pattern_restrictions_on_expr patterns |&gt; <span data-count="8">L</span>ist.concat
+  | <span data-count="32">P</span>ListConstructor (l, r) as plst -&gt;
     let pattern_depth = get_list_constr_pattern_depth plst in
-    <span data-count="16">l</span>et length_restriction =
-      immut_less_than (PMFConstant (CInt (pattern_depth - 1))) (get_list_lengt<span data-count="16">h</span> expr)
+    <span data-count="32">l</span>et length_restriction =
+      immut_less_than (PMFConstant (CInt (pattern_depth - 1))) (get_list_lengt<span data-count="32">h</span> expr)
     in
-    <span data-count="16">l</span>et head_expr = unpack_list_head expr in
-    <span data-count="16">l</span>et tail_expr = unpack_list_tail expr in
-    <span data-count="16">(</span>length_restriction :: generate_pattern_matching_restriction<span data-count="16">s</span> head_expr l)
-    @ generate_pattern_matching_restriction<span data-count="16">s</span> tail_expr r
+    <span data-count="32">l</span>et head_expr = unpack_list_head expr in
+    <span data-count="32">l</span>et tail_expr = unpack_list_tail expr in
+    <span data-count="32">(</span>length_restriction :: generate_pattern_matching_restriction<span data-count="32">s</span> head_expr l)
+    @ generate_pattern_matching_restriction<span data-count="32">s</span> tail_expr r
   | <span data-count="0">P</span>Typed (p, _) -&gt; generate_pattern_matching_restrictions expr p
-  | <span data-count="31">_</span> -&gt; []
+  | <span data-count="62">_</span> -&gt; []
 ;;
 
 let generate_condition_if_needed (pat, expr) (b1, b2) =
-  <span data-count="21">l</span>et generate_condition restrictions =
-    <span data-count="17">l</span>et rec helper = function
+  <span data-count="42">l</span>et generate_condition restrictions =
+    <span data-count="34">l</span>et rec helper = function
       | <span data-count="0">[</span>] -&gt; PMFConstant (CBool true)
-      | <span data-count="17">[</span> last ] -&gt; last
-      | <span data-count="9">h</span>d :: tl -&gt; immut_and hd (helpe<span data-count="9">r</span> tl)
+      | <span data-count="34">[</span> last ] -&gt; last
+      | <span data-count="18">h</span>d :: tl -&gt; immut_and hd (helpe<span data-count="18">r</span> tl)
     in
     helper restrictions
   in
   let checks = generate_pattern_matching_restrictions expr pat in
-  <span data-count="21">i</span>f checks = []
-  then <span data-count="4">b</span>1
-  else <span data-count="17">(</span>
+  <span data-count="42">i</span>f checks = []
+  then <span data-count="8">b</span>1
+  else <span data-count="34">(</span>
     let condition = generate_condition checks in
-    <span data-count="17">P</span>MFIfThenElse (condition, b1, Some b2))
+    <span data-count="34">P</span>MFIfThenElse (condition, b1, Some b2))
 ;;
 </code></pre>
       </div>

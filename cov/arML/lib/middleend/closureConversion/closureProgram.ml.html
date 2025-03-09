@@ -157,49 +157,49 @@ open Common.IdentifierSearcher
 open ClosureExpression
 
 let closure_program start_env program =
-  <span data-count="103">l</span>et new_declaration decl cases =
-    <span data-count="230">m</span>atch decl with
-    | <span data-count="174">D</span>Ordinary _ -&gt; DOrdinary (List.h<span data-count="174">d</span> cases, List.t<span data-count="174">l</span> cases)
-    | <span data-count="56">D</span>Recursive _ -&gt; DRecursive (List.h<span data-count="56">d</span> cases, List.t<span data-count="56">l</span> cases)
+  <span data-count="111">l</span>et new_declaration decl cases =
+    <span data-count="258">m</span>atch decl with
+    | <span data-count="195">D</span>Ordinary _ -&gt; DOrdinary (List.h<span data-count="195">d</span> cases, List.t<span data-count="195">l</span> cases)
+    | <span data-count="63">D</span>Recursive _ -&gt; DRecursive (List.h<span data-count="63">d</span> cases, List.t<span data-count="63">l</span> cases)
   in
   let update_env_with_cases env cases =
-    <span data-count="230">L</span>ist.fold_left
-      (fun acc (p, _) -&gt; <span data-count="240">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="240">s</span> p))
+    <span data-count="258">L</span>ist.fold_left
+      (fun acc (p, _) -&gt; <span data-count="269">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="269">s</span> p))
       env
       cases
   in
   let process_cases env cases fv_map =
-    <span data-count="230">L</span>ist.fold_left
+    <span data-count="258">L</span>ist.fold_left
       (fun acc (pattern, body) -&gt;
-        <span data-count="240">l</span>et* acc = acc in
-        <span data-count="240">m</span>atch body with
-        | <span data-count="141">E</span>Fun _ -&gt;
+        <span data-count="269">l</span>et* acc = acc in
+        <span data-count="269">m</span>atch body with
+        | <span data-count="159">E</span>Fun _ -&gt;
           let transformed_body = Common.FunctionTransformer.transform_fun body in
-          <span data-count="141">l</span>et* closure_body, _ = closure_fu<span data-count="141">n</span> false env fv_map transformed_body in
-          <span data-count="141">r</span>eturn ((pattern, closure_body) :: acc)
-        | <span data-count="99">_</span> -&gt;
-          let* closure_body = closure_expressio<span data-count="99">n</span> env fv_map body in
-          <span data-count="99">r</span>eturn ((pattern, closure_body) :: acc))
-      (retur<span data-count="230">n</span> [])
+          <span data-count="159">l</span>et* closure_body, _ = closure_fu<span data-count="159">n</span> false env fv_map transformed_body in
+          <span data-count="159">r</span>eturn ((pattern, closure_body) :: acc)
+        | <span data-count="110">_</span> -&gt;
+          let* closure_body = closure_expressio<span data-count="110">n</span> env fv_map body in
+          <span data-count="110">r</span>eturn ((pattern, closure_body) :: acc))
+      (retur<span data-count="258">n</span> [])
       cases
   in
   let rec helper acc env = function
-    | <span data-count="103">[</span>] -&gt; return (List.re<span data-count="103">v</span> acc)
-    | <span data-count="230">h</span>d :: tl -&gt;
+    | <span data-count="111">[</span>] -&gt; return (List.re<span data-count="111">v</span> acc)
+    | <span data-count="258">h</span>d :: tl -&gt;
       (match hd with
-       | <span data-count="174">D</span>Ordinary (case, cases) as decl -&gt;
-         let* processed_cases = process_case<span data-count="174">s</span> env (case :: cases) IdentifierMap.empty in
-         <span data-count="174">l</span>et updated_env = update_env_with_cases env (case :: cases) in
-         <span data-count="174">l</span>et new_decl = new_declaration decl (List.re<span data-count="174">v</span> processed_cases) in
-         <span data-count="174">l</span>et new_acc = new_decl :: acc in
+       | <span data-count="195">D</span>Ordinary (case, cases) as decl -&gt;
+         let* processed_cases = process_case<span data-count="195">s</span> env (case :: cases) IdentifierMap.empty in
+         <span data-count="195">l</span>et updated_env = update_env_with_cases env (case :: cases) in
+         <span data-count="195">l</span>et new_decl = new_declaration decl (List.re<span data-count="195">v</span> processed_cases) in
+         <span data-count="195">l</span>et new_acc = new_decl :: acc in
          helper new_acc updated_env tl
-       | <span data-count="56">D</span>Recursive (case, cases) as decl -&gt;
+       | <span data-count="63">D</span>Recursive (case, cases) as decl -&gt;
          let updated_env = update_env_with_cases env (case :: cases) in
-         <span data-count="56">l</span>et* processed_cases =
-           process_case<span data-count="56">s</span> updated_env (case :: cases) IdentifierMap.empty
+         <span data-count="63">l</span>et* processed_cases =
+           process_case<span data-count="63">s</span> updated_env (case :: cases) IdentifierMap.empty
          in
-         <span data-count="56">l</span>et new_decl = new_declaration decl (List.re<span data-count="56">v</span> processed_cases) in
-         <span data-count="56">l</span>et new_acc = new_decl :: acc in
+         <span data-count="63">l</span>et new_decl = new_declaration decl (List.re<span data-count="63">v</span> processed_cases) in
+         <span data-count="63">l</span>et new_acc = new_decl :: acc in
          helper new_acc updated_env tl)
   in
   helper [] start_env program

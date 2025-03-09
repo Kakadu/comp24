@@ -505,18 +505,18 @@ let lambda_lifting_program program =
 (* Pattern-matching elimination *)
 
 let eliminate_pm_program_ast program =
-  <span data-count="5">P</span>atternMatchingElim.Pprint.print_pmf_program
-    (PatternMatchingElim.Runner.run_pmf_progra<span data-count="5">m</span> program)
+  <span data-count="13">P</span>atternMatchingElim.Pprint.print_pmf_program
+    (PatternMatchingElim.Runner.run_pmf_progra<span data-count="13">m</span> program)
 ;;
 
 let eliminate_pm_program program =
-  <span data-count="5">m</span>atch Parser.Runner.parse_program program with
-  | <span data-count="5">O</span>k ast -&gt;
+  <span data-count="13">m</span>atch Parser.Runner.parse_program program with
+  | <span data-count="13">O</span>k ast -&gt;
     (match Inferencer.Runner.run_program_inferencer ast with
-     | <span data-count="5">O</span>k _ -&gt;
+     | <span data-count="13">O</span>k _ -&gt;
        let closure_ast = ClosureConversion.Runner.run_closure_program ast in
-       <span data-count="5">l</span>et lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
-       <span data-count="5">e</span>liminate_pm_program_ast lambda_lifted_ast
+       <span data-count="13">l</span>et lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       <span data-count="13">e</span>liminate_pm_program_ast lambda_lifted_ast
      | <span data-count="0">E</span>rror e -&gt; Inferencer.PpTypeErrors.print_inferencer_error e)
   | <span data-count="0">E</span>rror _ -&gt; Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;

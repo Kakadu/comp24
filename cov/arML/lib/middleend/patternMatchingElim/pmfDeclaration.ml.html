@@ -200,11 +200,11 @@ open ImmutBasicFunctions
 open PmfFunction
 
 let eliminate_pm_declaration env = function
-  | <span data-count="41">L</span>DOrdinary (((_, [], _) as case), _) -&gt;
+  | <span data-count="52">L</span>DOrdinary (((_, [], _) as case), _) -&gt;
     let process_case env (pat, _, e) =
-      <span data-count="41">l</span>et* e, env = eliminate_pm_expressio<span data-count="41">n</span> env e in
-      <span data-count="41">m</span>atch pat with
-      | <span data-count="41">P</span>Var name -&gt; return ([ name, [], e ], env)
+      <span data-count="52">l</span>et* e, env = eliminate_pm_expressio<span data-count="52">n</span> env e in
+      <span data-count="52">m</span>atch pat with
+      | <span data-count="52">P</span>Var name -&gt; return ([ name, [], e ], env)
       | <span data-count="0">P</span>Const CUnit -&gt; return ([ Id "()", [], e ], env)
       | <span data-count="0">_</span> -&gt;
         let* name = get_new_pmf_nam<span data-count="0">e</span> env in
@@ -222,37 +222,37 @@ let eliminate_pm_declaration env = function
          | <span data-count="0">P</span>MFConstant CUnit -&gt; return ((name, [], e) :: new_decls, env)
          | <span data-count="0">_</span> -&gt; return ((name, [], e) :: (Id "()", [], cond) :: new_decls, env))
     in
-    let* transformed_cases, env = process_cas<span data-count="41">e</span> env case in
-    <span data-count="41">l</span>et cases = List.map (fun c -&gt; <span data-count="41">P</span>MFDOrdinary c) transformed_cases in
-    <span data-count="41">r</span>eturn (cases, env)
-  | <span data-count="63">L</span>DOrdinary ((p, args, expr), _) -&gt;
+    let* transformed_cases, env = process_cas<span data-count="52">e</span> env case in
+    <span data-count="52">l</span>et cases = List.map (fun c -&gt; <span data-count="52">P</span>MFDOrdinary c) transformed_cases in
+    <span data-count="52">r</span>eturn (cases, env)
+  | <span data-count="82">L</span>DOrdinary ((p, args, expr), _) -&gt;
     let name =
       match p with
-      | <span data-count="63">P</span>Var v -&gt; v
+      | <span data-count="82">P</span>Var v -&gt; v
       | <span data-count="0">P</span>Const CUnit -&gt; Id "()"
       | <span data-count="0">_</span> -&gt; Id ""
     in
-    let* (new_args, new_expr), env = eliminate_pm_fu<span data-count="63">n</span> env args expr in
-    <span data-count="63">r</span>eturn @@ ([ PMFDOrdinary (name, new_args, new_expr) ], env)
-  | <span data-count="27">L</span>DRecursive (case, cases) -&gt;
+    let* (new_args, new_expr), env = eliminate_pm_fu<span data-count="82">n</span> env args expr in
+    <span data-count="82">r</span>eturn @@ ([ PMFDOrdinary (name, new_args, new_expr) ], env)
+  | <span data-count="36">L</span>DRecursive (case, cases) -&gt;
     let cases = case :: cases in
     let* new_cases, env =
-      List.fold_lef<span data-count="27">t</span>
+      List.fold_lef<span data-count="36">t</span>
         (fun acc (p, ps, body) -&gt;
-          <span data-count="33">l</span>et* acc, env = acc in
-          <span data-count="33">l</span>et name =
+          <span data-count="44">l</span>et* acc, env = acc in
+          <span data-count="44">l</span>et name =
             match p with
-            | <span data-count="33">P</span>Var v -&gt; v
+            | <span data-count="44">P</span>Var v -&gt; v
             | <span data-count="0">P</span>Const CUnit -&gt; Id "()"
             | <span data-count="0">_</span> -&gt; Id ""
           in
-          let* (new_args, new_expr), env = eliminate_pm_fu<span data-count="33">n</span> env ps body in
-          <span data-count="33">r</span>eturn @@ ((name, new_args, new_expr) :: acc, env))
-        (retur<span data-count="27">n</span> ([], env))
+          let* (new_args, new_expr), env = eliminate_pm_fu<span data-count="44">n</span> env ps body in
+          <span data-count="44">r</span>eturn @@ ((name, new_args, new_expr) :: acc, env))
+        (retur<span data-count="36">n</span> ([], env))
         cases
     in
-    <span data-count="27">l</span>et new_cases = List.rev new_cases in
-    <span data-count="27">r</span>eturn @@ ([ PMFDRecursive (List.h<span data-count="27">d</span> new_cases, List.t<span data-count="27">l</span> new_cases) ], env)
+    <span data-count="36">l</span>et new_cases = List.rev new_cases in
+    <span data-count="36">r</span>eturn @@ ([ PMFDRecursive (List.h<span data-count="36">d</span> new_cases, List.t<span data-count="36">l</span> new_cases) ], env)
 ;;
 </code></pre>
       </div>
