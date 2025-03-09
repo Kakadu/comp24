@@ -16,7 +16,13 @@ void* ml_malloc(size_t size) {
 #endif
 };
 
-void mlrt_handle_global_vars(int n, ...) {
+void on_load() {
+#ifdef GC
+    gc_on_load();
+#endif
+}
+
+void mlrt_handle_global_vars(int64_t n, ...) {
     va_list globs;
     va_start(globs, n);
 #ifdef GC
@@ -40,6 +46,18 @@ void mlrt_print_gc_info() {
     fprintf(stderr, "Warning: GC not implemented function mlrt_print_gc_info() don't have effect\n");
 #endif
 }
+
+#define START_FUNCTION_NAME_PRINT                                                                                      \
+    DEBUG_RUN({                                                                                                        \
+        printf("[START]: %s\n", __FUNCTION__);                                                                         \
+        fflush(stdout);                                                                                                \
+    })
+
+#define END_FUNCTION_NAME_PRINT                                                                                        \
+    DEBUG_RUN({                                                                                                        \
+        printf("[END]: %s\n", __FUNCTION__);                                                                           \
+        fflush(stdout);                                                                                                \
+    })
 
 box_t* create_box_t(size_t size) {
     if (size % 8 != 0)
@@ -96,6 +114,7 @@ typedef struct {
 } closure_t;
 
 int64_t mlrt_create_empty_closure(int64_t fun, int64_t args_num) {
+    START_FUNCTION_NAME_PRINT;
 
     box_t* closure_box = create_box_t(sizeof(box_header_t) + 0x18);
     closure_box->header.tag = T_CLOSURE;
@@ -105,17 +124,19 @@ int64_t mlrt_create_empty_closure(int64_t fun, int64_t args_num) {
     clos->args_applied = 0;
     clos->args_num = args_num;
 
+    END_FUNCTION_NAME_PRINT;
     return (int64_t)closure_box;
 }
 
-int64_t create_closure_by_src(box_t* src_box, int64_t new_args_num, va_list* new_args) {
+int64_t create_closure_by_src(box_t* src_box, int64_t new_args_num, int64_t* new_args) {
+    START_FUNCTION_NAME_PRINT;
     DEBUG_RUN(printf("## [START] create_closure_by_src()\n"););
+
     box_t* closure_box = create_box_t((src_box->header.size + new_args_num) * 8);
     closure_box->header.tag = T_CLOSURE;
-
     closure_t* src_clos = (closure_t*)&src_box->values;
-
     closure_t* clos = (closure_t*)&closure_box->values;
+
     clos->fun = src_clos->fun;
     clos->args_applied = src_clos->args_applied + new_args_num;
     clos->args_num = src_clos->args_num;
@@ -124,25 +145,23 @@ int64_t create_closure_by_src(box_t* src_box, int64_t new_args_num, va_list* new
         if (i < src_clos->args_applied)
             clos->applied_args[i] = src_clos->applied_args[i];
         else
-            clos->applied_args[i] = va_arg(*new_args, int64_t);
+            clos->applied_args[i] = new_args[i - src_clos->args_applied];
         DEBUG_RUN(printf("## applied_args[%d] = %ld\n", i, clos->applied_args[i]););
     }
 
     DEBUG_RUN(printf("## [END] create_closure_by_src()\n\n"););
+    END_FUNCTION_NAME_PRINT;
     return (int64_t)closure_box;
 }
 
-int64_t call_closure(box_t* closure_box, int64_t new_args_num, va_list* new_args) {
-    DEBUG_RUN(printf("## [START] call_closure()\n"););
-
+int64_t call_closure(box_t* closure_box, int64_t new_args_num, int64_t* new_args) {
+    START_FUNCTION_NAME_PRINT;
     closure_t* closure = (closure_t*)&closure_box->values;
     size_t args_count = closure->args_num;
 
     ffi_cif cif;
     ffi_type* arg_types[args_count];
     int64_t* args[args_count];
-
-    int64_t buffer_new_args[new_args_num];
 
     // Set up argument types (all are int64_t)
     for (int i = 0; i < args_count; ++i) {
@@ -151,51 +170,59 @@ int64_t call_closure(box_t* closure_box, int64_t new_args_num, va_list* new_args
             args[i] = &(closure->applied_args[i]);
         else {
             int na_num = i - closure->args_applied;
-            buffer_new_args[na_num] = va_arg(*new_args, int64_t);
-            args[i] = &(buffer_new_args[na_num]);
+            args[i] = &(new_args[na_num]);
         }
         DEBUG_RUN(printf("## *(args[%d]) = %ld\n", i, *(args[i])););
     }
 
     int64_t res = 0;
-
     if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, args_count, &ffi_type_sint64, arg_types) == FFI_OK) {
         ffi_call(&cif, (void (*)())closure->fun, &res, (void**)args);
     } else {
         EXCEPTION_FMT("call_closure: Failed to prepare call interface\n");
     }
 
-    DEBUG_RUN(printf("## [END] call_closure()\n\n"););
+    END_FUNCTION_NAME_PRINT;
     return res;
 }
 
-int64_t apply_args_to_closure(box_t* closure_box, int64_t new_args_num, va_list* new_args) {
-
+int64_t apply_args_to_closure(box_t* closure_box, int64_t new_args_num, int64_t* new_args) {
+    START_FUNCTION_NAME_PRINT;
     closure_t* closure = (closure_t*)&closure_box->values;
     int64_t args_num_until_apply = closure->args_num - closure->args_applied;
-
+    int64_t res;
     if (args_num_until_apply <= new_args_num) {
         int64_t call_res = call_closure(closure_box, args_num_until_apply, new_args);
         new_args_num -= args_num_until_apply;
         if (new_args_num == 0)
-            return call_res;
+            res = call_res;
         else {
-            return apply_args_to_closure((box_t*)call_res, new_args_num, new_args);
+            res = apply_args_to_closure((box_t*)call_res, new_args_num, new_args);
         }
     } else {
-        return create_closure_by_src(closure_box, new_args_num, new_args);
+        res = create_closure_by_src(closure_box, new_args_num, new_args);
     }
+
+    END_FUNCTION_NAME_PRINT;
+    return res;
 }
 
 int64_t mlrt_apply_args_to_closure(int64_t closure_box, int64_t new_args_num, ...) {
-    va_list new_args;
-    va_start(new_args, new_args_num);
-    int64_t res = apply_args_to_closure((box_t*)closure_box, new_args_num, &new_args);
-    va_end(new_args);
+    START_FUNCTION_NAME_PRINT;
+    va_list va_new_args;
+    va_start(va_new_args, new_args_num);
+
+    int64_t new_args[new_args_num];
+    for (int i = 0; i < new_args_num; i++)
+        new_args[i] = va_arg(va_new_args, int64_t);
+    int64_t res = apply_args_to_closure((box_t*)closure_box, new_args_num, new_args);
+    va_end(va_new_args);
+    END_FUNCTION_NAME_PRINT;
     return res;
 }
 
 int64_t mlrt_get_box_field(int64_t box, int64_t field_num) {
+    START_FUNCTION_NAME_PRINT;
     field_num = CONVERT_INT_ML_TO_NATIVE(field_num);
     if (!is_ml_ptr(box))
         return CONVERT_INT_NATIVE_TO_ML(0);
@@ -204,6 +231,7 @@ int64_t mlrt_get_box_field(int64_t box, int64_t field_num) {
 }
 
 int64_t mlrt_check_tag(int64_t target, int64_t tag) {
+    START_FUNCTION_NAME_PRINT;
     tag = CONVERT_INT_ML_TO_NATIVE(tag);
     DEBUG_RUN(printf("check_tag: %d and %ld\n", get_tag(target), tag););
     return CONVERT_INT_NATIVE_TO_ML(tag == get_tag(target));

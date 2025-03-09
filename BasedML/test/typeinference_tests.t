@@ -32,7 +32,9 @@
    ""( || )"": (bool -> (bool -> bool)),
    ""__"": int,
    ""___"": ('p37 list),
+   ""compact"": (unit -> unit),
    ""fibo"": (int -> int),
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ""six"": int,
    ]
@@ -71,8 +73,10 @@
    ""( > )"": ('p16 -> ('p16 -> bool)),
    ""( >= )"": ('p17 -> ('p17 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""fac"": (int -> int),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -92,8 +96,10 @@
    ""( > )"": ('p1e -> ('p1e -> bool)),
    ""( >= )"": ('p1f -> ('p1f -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""fac_cps"": (int -> ((int -> 'p20) -> 'p20)),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -113,9 +119,11 @@
    ""( > )"": ('p2f -> ('p2f -> bool)),
    ""( >= )"": ('p30 -> ('p30 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""fib"": (int -> int),
    ""fib_acc"": (int -> (int -> (int -> int))),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -135,7 +143,9 @@
    ""( > )"": ('p4a -> ('p4a -> bool)),
    ""( >= )"": ('p4b -> ('p4b -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ""test10"": (int -> (int -> (int -> (int -> (int -> (int -> (int -> (int -> (int -> (int -> int)))))))))),
    ""test3"": (int -> (int -> (int -> int))),
@@ -158,9 +168,11 @@
    ""( > )"": ('p20 -> ('p20 -> bool)),
    ""( >= )"": ('p21 -> ('p21 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""fac"": ((int -> int) -> (int -> int)),
    ""fix"": ((('p22 -> 'p23) -> ('p22 -> 'p23)) -> ('p22 -> 'p23)),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -180,8 +192,10 @@
    ""( > )"": ('p1e -> ('p1e -> bool)),
    ""( >= )"": ('p1f -> ('p1f -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""foo"": (int -> int),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -201,8 +215,10 @@
    ""( > )"": ('p1e -> ('p1e -> bool)),
    ""( >= )"": ('p1f -> ('p1f -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""foo"": (int -> (int -> (int -> int))),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -222,8 +238,10 @@
    ""( > )"": ('p15 -> ('p15 -> bool)),
    ""( >= )"": ('p16 -> ('p16 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""foo"": (int -> (int -> (int -> unit))),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -244,7 +262,9 @@
    ""( >= )"": ('p2d -> ('p2d -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
    ""_start"": (unit -> (unit -> (int -> (unit -> (int -> (int -> (unit -> (int -> (int -> int))))))))),
+   ""compact"": (unit -> unit),
    ""main"": unit,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -265,7 +285,9 @@
    ""( >= )"": ('p23 -> ('p23 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
    ""addi"": (('p24 -> (bool -> int)) -> (('p24 -> bool) -> ('p24 -> int))),
+   ""compact"": (unit -> unit),
    ""main"": int,
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
 
@@ -285,6 +307,8 @@
    ""( > )"": ('pe -> ('pe -> bool)),
    ""( >= )"": ('pf -> ('pf -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ""temp"": (int * bool),
    ]
@@ -305,6 +329,7 @@
    ""( > )"": ('p68 -> ('p68 -> bool)),
    ""( >= )"": ('p69 -> ('p69 -> bool)),
    ""( || )"": (bool -> (bool -> bool)),
+   ""compact"": (unit -> unit),
    ""feven"": (('p6a * (int -> int)) -> (int -> int)),
    ""fix"": ((('p6b -> 'p6c) -> ('p6b -> 'p6c)) -> ('p6b -> 'p6c)),
    ""fixpoly"": ((((('p6d -> 'p6e) * ('p6d -> 'p6e)) -> ('p6d -> 'p6e)) * ((('p6d -> 'p6e) * ('p6d -> 'p6e)) -> ('p6d -> 'p6e))) -> (('p6d -> 'p6e) * ('p6d -> 'p6e))),
@@ -313,6 +338,7 @@
    ""map"": (('p70 -> 'p71) -> (('p70 * 'p70) -> ('p71 * 'p71))),
    ""meven"": (int -> int),
    ""modd"": (int -> int),
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ""tie"": ((int -> int) * (int -> int)),
    ]
@@ -335,11 +361,13 @@
    ""( || )"": (bool -> (bool -> bool)),
    ""append"": (('pdc list) -> (('pdc list) -> ('pdc list))),
    ""cartesian"": (('pdd list) -> (('pde list) -> (('pdd * 'pde) list))),
+   ""compact"": (unit -> unit),
    ""concat"": ((('pdf list) list) -> ('pdf list)),
    ""iter"": (('pe0 -> unit) -> (('pe0 list) -> unit)),
    ""length"": (('pe1 list) -> int),
    ""length_tail"": (('pe2 list) -> int),
    ""main"": int,
    ""map"": (('pe3 -> 'pe4) -> (('pe3 list) -> ('pe4 list))),
+   ""print_gc_info"": (unit -> unit),
    ""print_int"": (int -> unit),
    ]
