@@ -14,7 +14,7 @@
   
   let a5 = (fun x -> x)
   
-  let fac = (fun n -> a3)
+  let fac = (fun n -> ((a3 n) a5))
   $ ./lambda_lifting_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
   then 1
@@ -131,8 +131,9 @@
   0
 
   $ ./lambda_lifting_runner.exe < manytests/typed/009let_poly.ml
-  let temp = let f = (fun x -> x) in
-  ((a0 1), (a0 true))
+  let a0 = (fun x -> x)
+  
+  let temp = ((a0 1), (a0 true))
 
   $ ./lambda_lifting_runner.exe < manytests/typed/011mapcps.ml
   let a1 = (fun f h k a0 -> (k ((f h)::a0)))
@@ -245,7 +246,7 @@
   ((a1 ((( + ) acc) 1)) tl)
   else fail_match)
   
-  let length_tail = a1
+  let length_tail = (a1 0)
   
   let rec map = (fun f xs -> if (is_empty xs)
   then []

@@ -1,3 +1,15 @@
+  $ ./alpha_conv_runner.exe << EOF
+  > let fac n =
+  > let rec fack n k =
+  > if n<=1 then k 1
+  > else fack (n - 1) ((fun k n m -> k (m * n)) k n)
+  > in
+  > fack n (fun x -> x)
+  > EOF
+  let fac = (fun n -> let rec fack = (fun a0 k -> if ((( <= ) a0) 1)
+  then (k 1)
+  else ((fack ((( - ) a0) 1)) (((fun a1 a2 m -> (a1 ((( * ) m) a2))) k) a0))) in
+  ((fack n) (fun x -> x)))
   $ ./alpha_conv_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
   then 1
