@@ -10,7 +10,7 @@ open LlDeclaration
 let ll_program start_env program =
   let env = start_env program in
   let lifted = [] in
-  let replacement_map = IdentifierMap.empty in
+  let replacement_map = IdentifierMap.empty in  
   let* lifted_decls =
     List.fold_right
       (fun item acc ->

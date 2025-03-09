@@ -349,7 +349,9 @@ let rec alpha_convert_decl_list ctx acc = function
              :: acc)
             tail
         | DLet (let_pat, let_body) :: tl ->
-          let* renamed_body, ctx_after_body = alpha_convert_expr ctx let_body in
+          let* renamed_body, ctx_after_body =
+            alpha_convert_expr { ctx with name_mapping = full_ctx.name_mapping } let_body
+          in
           let* renamed_let_pat, ctx_after_let_name =
             alpha_convert_pattern
               { ctx with reserved_names = ctx_after_body.reserved_names }

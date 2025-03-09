@@ -80,17 +80,22 @@ let lambda_lifting_program_ast program =
 
 let lambda_lifting_program program =
   match Parser.Runner.parse_program program with
+  <<<<<<< HEAD
   | Ok ast -> 
     (match Inferencer.Runner.run_program_inferencer ast with
      | Ok _ -> 
        let closure_ast = ClosureConversion.Runner.run_closure_program ast in
        lambda_lifting_program_ast closure_ast
      | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+    =======
+  | Ok ast ->
+    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+    lambda_lifting_program_ast closure_ast
+    >>>>>>> upstream/master
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
 (* -------------- *)
-
 (* Pattern-matching elimination *)
 
 let eliminate_pm_program_ast program =

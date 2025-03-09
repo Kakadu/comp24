@@ -3,6 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 let infer_and_print s =
+  let open TypeInference in
   match Parser.parse_program s with
   | Ok actual ->
     let env = Inferencer.run_inference actual in

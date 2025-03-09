@@ -39,7 +39,6 @@ val closure_conversion_program : string -> unit
 val lambda_lifting_program : string -> unit
 
 (* -------------- *)
-
 (* Pattern-matching elimination *)
 
 val eliminate_pm_program : string -> unit

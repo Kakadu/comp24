@@ -1,0 +1,21 @@
+(lang dune 3.8)
+
+(name ObaML)
+
+(generate_opam_files true)
+
+(source
+ (github tepa46/comp24))
+
+(authors "Arseniy Baytenov" "Kirill Shishin")
+
+(maintainers "Arseniy Baytenov" "Kirill Shishin")
+
+(license LGPL-2.1-or-later)
+
+(package
+ (name ObaML)
+ (synopsis "ObaML compiler")
+ (depends ocaml dune ppx_expect ppx_deriving llvm))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
