@@ -4,6 +4,20 @@ open HamsterML__Ast;;
 open HamsterML__Lexer;;
 open HamsterML__Parser;;
 open HamsterML__Typing;;
+open HamsterML__CC;;
+open HamsterML__PrinterAst;;
 open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
+open HamsterTest__LambdaLiftingTest;;
+open HamsterTest__AlphaConversionTest;;
+open HamsterTest__ClosureConversionTest;;
+open HamsterTest__MatchEliminationTest;;
+open HamsterTest__AnfTest;;
+
+
+let list_length = List.length;; 
+let list_head = List.hd;; 
+let list_tail = List.tl;;
+let tuple_get x i = match x with (_, res) when i = 1 -> res | (res, _) when i = 0 -> res | _ -> fst x;;
+let list_get x i = List.nth x i;;

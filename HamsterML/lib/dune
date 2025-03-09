@@ -1,5 +1,19 @@
 (library
- (modules Ast Parser Lexer Typing)
+ (modules
+  Ast
+  Parser
+  Lexer
+  Typing
+  Anf
+  CC
+  Utils
+  LL
+  AC
+  ME
+  PrinterAst
+  PrinterLL
+  PrinterME
+  PrinterAnf)
  (libraries llvm)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))

@@ -268,26 +268,7 @@ end
 type var_name = string
 
 module BinOperator = struct
-  let list : Ast.bop list =
-    [ ADD; SUB; MUL; DIV; EQ; ID_EQ; NEQ; GT; GTE; LT; LTE; AND; OR; CONCAT ]
-  ;;
-
-  let to_string : Ast.bop -> string = function
-    | ADD -> "+"
-    | SUB -> "-"
-    | MUL -> "*"
-    | DIV -> "/"
-    | EQ -> "="
-    | ID_EQ -> "=="
-    | NEQ -> "!="
-    | GT -> ">"
-    | GTE -> ">="
-    | LT -> "<"
-    | LTE -> "<="
-    | AND -> "&&"
-    | OR -> "||"
-    | CONCAT -> "^"
-  ;;
+  include Ast.BinOperator
 
   let to_inf_type : Ast.bop -> inf_type = function
     | ADD | SUB | MUL | DIV -> TArrow (TInt, TArrow (TInt, TInt))
