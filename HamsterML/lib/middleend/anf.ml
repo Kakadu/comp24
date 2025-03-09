@@ -2,6 +2,7 @@ open Ast
 open ME
 open Utils.R
 open Base
+module Format = Stdlib.Format
 
 type imm_expr =
   | ImmInt of int
@@ -23,7 +24,7 @@ and aexpr =
   | ALetIn of pattern * cexpr * aexpr
   | ACExpr of cexpr
 
-type single_anf_binding = ALet of pattern * id list * aexpr
+type single_anf_binding = ALet of id * id list * aexpr
 
 type anf_decl =
   | ADSingleLet of funType * single_anf_binding
@@ -35,14 +36,25 @@ module NameEnv = struct
   include Utils.NameEnv
 
   let rec generate_name (env : t) (name : id) =
-    match find name env with
-    | None ->
-      let* fresh_num = fresh in
-      let new_name = "anf_" ^ Int.to_string fresh_num in
-      (match find new_name env with
-       | None -> return (extend (name, new_name) env, new_name)
-       | Some _ -> generate_name env name)
-    | Some new_name -> return (env, new_name)
+    let* fresh_num = fresh in
+    let new_name = "anf_var_" ^ Int.to_string fresh_num in
+    match find new_name env with
+    | None -> return (extend (name, new_name) env, new_name)
+    | Some _ -> generate_name env name
+  ;;
+
+  let default =
+    List.fold
+      [ "list_get"
+      ; "list_length"
+      ; "list_head"
+      ; "list_tail"
+      ; "tuple_get"
+      ; "print_int"
+      ; "print_string"
+      ]
+      ~init:empty
+      ~f:(fun env name -> extend (name, name) env)
   ;;
 end
 
@@ -88,7 +100,9 @@ let extract_binds (binds : me_bind list) =
 let rec convert_expr (env : NameEnv.t) (expr : me_expr) (k : imm_expr -> aexpr t) =
   match expr with
   | MEConst v -> k @@ value_to_anf v
-  | MEVar id -> k @@ ImmId id
+  | MEVar id ->
+    (try k @@ ImmId (NameEnv.find_exn id env) with
+     | _ -> failwith id)
   | MEOperation op -> k @@ ImmOperation op
   | MEConstraint (expr, _) -> convert_expr env expr k
   | MEApplication (l, r) ->
@@ -107,7 +121,7 @@ let rec convert_expr (env : NameEnv.t) (expr : me_expr) (k : imm_expr -> aexpr t
     let exprs = expr1 :: expr2 :: exprs in
     let rec helper acc = function
       | hd :: tl -> convert_expr env hd (fun imm_hd -> helper (imm_hd :: acc) tl)
-      | [] -> k @@ ImmList (List.rev acc)
+      | [] -> k @@ ImmTuple (List.rev acc)
     in
     helper [] exprs
   | MEListConcat (l, r) ->
@@ -131,38 +145,74 @@ let rec convert_expr (env : NameEnv.t) (expr : me_expr) (k : imm_expr -> aexpr t
         return @@ _let_in (Var new_var) (_if imm_i imm_t None) scope))
   | MELet (rec_flag, binds, Some scope) ->
     let (pattern, body), other_binds = extract_binds binds in
+    let* new_env, pattern =
+      match pattern with
+      | Var name ->
+        let* new_name = get_fresh_name in
+        return (NameEnv.extend (name, new_name) env, Var new_name)
+      | _ -> return (env, pattern)
+    in
     convert_expr env body (fun imm_first_body ->
       match other_binds with
       | hd :: tl ->
         let new_scope = MELet (rec_flag, hd :: tl, Some scope) in
-        convert_expr env new_scope (fun imm_scope ->
+        convert_expr new_env new_scope (fun imm_scope ->
           return @@ _let_in pattern (CImm imm_first_body) (_ac imm_scope))
       | [] ->
-        convert_expr env scope (fun imm_scope ->
+        convert_expr new_env scope (fun imm_scope ->
           return @@ _let_in pattern (CImm imm_first_body) (_ac imm_scope)))
   | MELet (_, _, None) -> failwith "Inner Let can't exist without scope"
 ;;
 
 let anf_decl (env : NameEnv.t) (decl : me_expr) =
+  let collect_args env (args : id list) =
+    Base.List.fold_right args ~init:(return env) ~f:(fun id env ->
+      let* env = env in
+      return @@ NameEnv.extend (id, id) env)
+  in
+  let collect_function env name args body =
+    let* env = collect_args env args in
+    let* env, new_name = NameEnv.generate_name env name in
+    let* body = convert_expr env body (fun imm -> return @@ _ac imm) in
+    return (env, new_name, args, body)
+  in
+  let _pattern_to_name pattern =
+    match pattern with
+    | Var name -> name
+    | _ -> failwith "Global function names can't contain patterns after LL"
+  in
   let _args_to_ids (args : args) =
     List.map args ~f:(fun arg ->
       match arg with
       | Var id -> id
       | _ -> failwith "Arguments can't be pattern after LL")
   in
-  let _single_anf_binding (bind : me_bind) =
+  let _single_anf_binding (env : NameEnv.t) (bind : me_bind) =
     let pattern, args, body = bind in
-    let args = _args_to_ids args in
-    let* body = convert_expr env body (fun imm_body -> return @@ _ac imm_body) in
-    return @@ ALet (pattern, args, body)
+    let* env, pattern, args, body =
+      collect_function env (_pattern_to_name pattern) (_args_to_ids args) body
+    in
+    return (env, ALet (pattern, args, body))
   in
   match decl with
   | MELet (rec_flag, binds, None) ->
-    let* single_anf_binds = map_list binds ~f:_single_anf_binding in
+    let* env, single_anf_binds =
+      fold_list binds ~init:(env, []) ~f:(fun (env, binds) bind ->
+        let* env, bind = _single_anf_binding env bind in
+        return (env, binds @ [ bind ]))
+    in
     if List.length single_anf_binds = 1
-    then return @@ ADSingleLet (rec_flag, List.hd_exn single_anf_binds)
-    else return @@ ADMutualRecDecl single_anf_binds
+    then return @@ (env, ADSingleLet (rec_flag, List.hd_exn single_anf_binds))
+    else return @@ (env, ADMutualRecDecl single_anf_binds)
   | _ -> failwith "Incorrect starting point was encountered during ANF"
 ;;
 
-let anf_prog (prog : me_prog) : anf_prog t = map_list prog ~f:(anf_decl NameEnv.empty)
+let anf_prog (prog : me_prog) =
+  let* _, res_prog =
+    fold_list prog ~init:(NameEnv.default, []) ~f:(fun acc decl ->
+      let env, decls = acc in
+      let* env, decl = anf_decl env decl in
+      return (env, decl :: decls))
+  in
+  return @@ List.rev res_prog
+;;

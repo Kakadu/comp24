@@ -1,19 +1,19 @@
 open Anf
 
 let rec pretty_print_imm = function
-  | ImmOperation op -> "(" ^ PrinterAst.pretty_print_op op ^ ")"
+  | ImmOperation op -> PrinterAst.pretty_print_op op
   | ImmInt n -> string_of_int n
   | ImmString s -> Printf.sprintf "\"%s\"" s
   | ImmBool b -> string_of_bool b
   | ImmId id -> id
-  | ImmList lst -> "[" ^ String.concat ", " (List.map pretty_print_imm lst) ^ "]"
+  | ImmList lst -> "[" ^ String.concat "; " (List.map pretty_print_imm lst) ^ "]"
   | ImmTuple lst -> "(" ^ String.concat ", " (List.map pretty_print_imm lst) ^ ")"
   | ImmUnit -> "()"
 ;;
 
 let rec pretty_print_cexpr = function
   | CApplication (f, arg) ->
-    Printf.sprintf "%s(%s)" (pretty_print_cexpr f) (pretty_print_cexpr arg)
+    Printf.sprintf "%s %s" (pretty_print_cexpr f) (pretty_print_cexpr arg)
   | CIf (cond, then_expr, Some else_expr) ->
     Printf.sprintf
       "if %s then %s else %s"
@@ -40,18 +40,10 @@ let pretty_print_single_binding rec_flag (ALet (pat, args, body)) =
   match rec_flag with
   | Ast.Recursive ->
     let args_str = String.concat " " args in
-    Printf.sprintf
-      "let rec %s %s = %s"
-      (PrinterAst.pretty_print_pattern pat)
-      args_str
-      (pretty_print_aexpr body)
+    Printf.sprintf "let rec %s %s = %s" pat args_str (pretty_print_aexpr body)
   | _ ->
     let args_str = String.concat " " args in
-    Printf.sprintf
-      "let %s %s = %s"
-      (PrinterAst.pretty_print_pattern pat)
-      args_str
-      (pretty_print_aexpr body)
+    Printf.sprintf "let %s %s = %s" pat args_str (pretty_print_aexpr body)
 ;;
 
 let pretty_print_anf_decl = function

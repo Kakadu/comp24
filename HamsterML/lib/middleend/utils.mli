@@ -34,6 +34,7 @@ module NameEnv : sig
 
   val empty : t
   val find : id -> t -> id option
+  val find_exn : id -> t -> id
   val extend : id * id -> t -> (id, id, Base.String.comparator_witness) Base.Map.t
   val pp : Format.formatter -> t -> unit
 end
