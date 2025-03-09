@@ -168,7 +168,19 @@ let get_new_name name ident_typ old_name =
 ;;
 
 let rec find_replace_occurs_expr name new_name ident_typ e =
-  let rec helper = function
+  let rec helper =
+    let find_replace_pat_if_no_shadowing f (pat, expr) =
+      let names_letin = get_names_of_pop (POpPat pat) in
+      if List.exists (fun x -> x = name) names_letin
+      then return @@ f (pat, expr)
+      else
+        let* expr' = helper expr in
+        let* pop' = replace_names_of_pop (get_new_name name Pat) (POpPat pat) in
+        match pop' with
+        | POpPat pat -> return @@ f (pat, expr')
+        | _ -> fail "Non-pattern value was returned from find_replace_occurs_lb with %a?!"
+    in
+    function
     | a when get_base_name name <> name -> return a
     | EConst _ as e -> return e
     | EId id ->
@@ -203,16 +215,15 @@ let rec find_replace_occurs_expr name new_name ident_typ e =
       let* e' = helper e in
       return @@ e_typed ~typ:(Some typ) e'
     | EFun (pat, e) ->
-      let* pat', e' = find_replace_occurs_lb_pat name new_name Pat (pat, e) in
-      return @@ efun pat' e'
+      let* e' =
+        find_replace_pat_if_no_shadowing (fun (pat, expr) -> efun pat expr) (pat, e)
+      in
+      return @@ e'
     | EMatch (e, br, brs) ->
       let* e' = helper e in
-      let* br', brs' =
-        let find_replace_occurs_lb_pat = find_replace_occurs_lb_pat name new_name Pat in
-        let* br' = find_replace_occurs_lb_pat br in
-        let* brs' = map find_replace_occurs_lb_pat brs in
-        return (br', brs')
-      in
+      let handle_branch = find_replace_pat_if_no_shadowing Fun.id in
+      let* br' = handle_branch br in
+      let* brs' = map handle_branch brs in
       return @@ ematch e' br' brs'
     | EClsr ((DLet (rec_flag, (pop, e1)) as decl), e2) ->
       let names_letin = get_names_of_decl decl @ [ "" ] in

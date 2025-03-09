@@ -21,6 +21,57 @@ module AlphaConvTests = struct
   ;;
 end
 
+let%expect_test "no shadowing of patterns" =
+  AlphaConvTests.alpha_conv_test
+    {|
+    let x =5 
+    let x =
+      let rec fac x 
+      = if x <=1  then 1 else n * fac (x-1) in 
+      let fac_ = fac 10 in
+      fac fac_
+  |};
+  [%expect
+    {|
+    ---CC---
+
+    let x = 5;;
+    let rec cc_ll_0 n x = if (x <= 1) then 1 else (n * cc_ll_0 (x - 1));;
+    let x = let fac = (cc_ll_0 n)
+    in let fac_ = (fac 10)
+    in (fac fac_)
+
+    ---Alpha conv.---
+
+    let x_1 = 5;;
+    let rec cc_ll_0_1 n x = if (x <= 1) then 1 else (n * cc_ll_0_1 (x - 1));;
+    let x_2 = let fac_l1 = (cc_ll_0_1 n)
+    in let fac__l1 = (fac_l1 10)
+    in (fac_l1 fac__l1) |}]
+;;
+
+let%expect_test "sanity check" =
+  AlphaConvTests.alpha_conv_test
+    {|
+    let x = 5 
+    let x = match 1 with 
+    | x -> x
+  |};
+  [%expect
+    {|
+    ---CC---
+
+    let x = 5;;
+    let x = match 1 with
+    | x -> x
+
+    ---Alpha conv.---
+
+    let x_1 = 5;;
+    let x_2 = match 1 with
+    | x -> x |}]
+;;
+
 let%expect_test "sanity check" =
   AlphaConvTests.alpha_conv_test {|
     let x = 3

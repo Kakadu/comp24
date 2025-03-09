@@ -76,6 +76,6 @@ let%expect_test "typed pattern" =
   [%expect
     {|
     let a_1 = let evaluated_0 = l
-    in if (0 = (get_nth (1, evaluated_0))) then let a_p1 = (get_nth (0, evaluated_0))
+    in if (0 = (get_nth (1, evaluated_0))) then let (a : int) = ((get_nth (0, evaluated_0)) : int)
     in 3 else (rte_error_match_failure ()) |}]
 ;;
