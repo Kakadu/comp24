@@ -32,7 +32,7 @@ let rec pretty_print_cexpr = function
 and pretty_print_aexpr = function
   | ALetIn (pat, expr, body) ->
     Printf.sprintf
-      "let %s = %s in\n%s"
+      "let %s = %s in %s"
       (PrinterAst.pretty_print_pattern pat)
       (pretty_print_cexpr expr)
       (pretty_print_aexpr body)
