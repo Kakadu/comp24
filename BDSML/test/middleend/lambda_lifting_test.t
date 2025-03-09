@@ -22,8 +22,8 @@
 
   $ ./run_lambda_lifting.exe <<- EOF
   > let f x = let y = x + 1 in fun z -> y + z
-  let lifted_1 = (fun __var_y __reserved_1 -> (let __var_z = __reserved_1 in 
-   ((__op_plus __var_y) __var_z)));;
+  let lifted_1 = (fun __var_y0 __reserved_1 -> (let __var_z = __reserved_1 in 
+   ((__op_plus __var_y0) __var_z)));;
   let lifted_0 = (fun __reserved_0 -> (let __var_x = __reserved_0 in 
    (let __var_y = ((__op_plus __var_x) 1) in 
    (lifted_1 __var_y))));;

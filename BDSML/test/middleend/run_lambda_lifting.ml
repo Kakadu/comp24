@@ -13,6 +13,7 @@ let test str =
          (Middleend.Pattern_remover.remove_patterns ast
           |> Middleend.Alpha_conversion.alpha_conversion
           |> Middleend.Closure_conversion.closure_convert
+          |> Middleend.Alpha_conversion.alpha_conversion
           |> Middleend.Lambda_lifting.ll
           |> Middleend.Converter.rast_to_ast
           |> Quickcheck.Main_unparser.unparse_structure))
