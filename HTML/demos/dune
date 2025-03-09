@@ -8,13 +8,34 @@
  (name inferencer_demo)
  (public_name inferencer_demo)
  (modules inferencer_demo)
- (libraries Parser Inferencer stdio))
+ (libraries Parser TypeInference stdio))
+
+(executable
+ (name cc_ll_demo)
+ (public_name cc_ll_demo)
+ (modules cc_ll_demo)
+ (libraries Parser Anf stdio))
+
+(executable
+ (name anf_demo)
+ (public_name anf_demo)
+ (modules anf_demo)
+ (libraries Parser TypeInference Anf stdio Patelim))
+
+(executable
+ (name alpha_demo)
+ (public_name alpha_demo)
+ (modules alpha_demo)
+ (libraries Parser TypeInference Anf stdio Patelim))
 
 (cram
- (applies_to parser_demo inferencer_demo)
+ (applies_to parser_demo inferencer_demo cc_ll_demo anf_demo alpha_demo)
  (deps
   ./parser_demo.exe
   ./inferencer_demo.exe
+  ./cc_ll_demo.exe
+  ./anf_demo.exe
+  ./alpha_demo.exe
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
@@ -26,6 +47,9 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml
   manytests/do_not_type/001.ml
