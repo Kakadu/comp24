@@ -49,8 +49,8 @@
     else
       let n1 cc0_n =
         (( - ) cc0_n) 1 in
-        let ab cc1_a cc2_b =
-          (( + ) cc1_a) cc2_b in
+        let ab cc1_b cc2_a =
+          (( + ) cc2_a) cc1_b in
           ((fib_acc b) ((ab b) a)) (n1 n))
   ;;
   
@@ -77,7 +77,7 @@
       f)
   ;;
   
-  let test3 c b a =
+  let test3 a b c =
     let cc_ac0_a cc0_a =
       print_int cc0_a in
       let cc_ac1_b cc1_b =
@@ -87,7 +87,7 @@
           0
   ;;
   
-  let test10 j i h g cc_ac6_f e d cc_ac5_c cc_ac4_b cc_ac3_a =
+  let test10 cc_ac3_a cc_ac4_b cc_ac5_c d e cc_ac6_f g h i j =
     (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) (( + ) cc_ac3_a) cc_ac4_b) cc_ac5_c) d) e) cc_ac6_f) g) h) i) j
   ;;
   
@@ -99,7 +99,22 @@
   
 
   $ ./me_runner.exe < manytests/typed/005fix.ml
-  This expression has type int but an expression was expected of type 'a -> 'b
+  let rec fix f x =
+    (f (fix f)) x
+  ;;
+  
+  let fac self n =
+    (if (( <= ) n) 1
+    then
+      1
+    else
+      (( * ) n) (self ((( - ) n) 1)))
+  ;;
+  
+  let cc_ac0_main = let () = print_int ((fix fac) 6) in
+      0
+  ;;
+  
 
   $ ./me_runner.exe < manytests/typed/006partial.ml
   let cc_ac1_foo b =
@@ -135,10 +150,29 @@
   
 
   $ ./me_runner.exe < manytests/typed/007order.ml
-  This expression has type unit but an expression was expected of type int
+  let cc_ac0__start () () a () b _c () d __ =
+    let () = print_int ((( + ) a) b) in
+      let () = print_int __ in
+        (( + ) (( / ) (( * ) a) b) _c) d
+  ;;
+  
+  let cc_ac1_main = print_int (((((((((cc_ac0__start (print_int 1)) (print_int 2)) 3) (print_int 4)) 100) 1000) (print_int (~- 1))) 10000) (~- 555555))
+  ;;
+  
 
   $ ./me_runner.exe < manytests/typed/008ascription.ml
-  This expression has type int but an expression was expected of type int -> bool -> int
+  let addi f g x =
+    (f x) (g x)
+  ;;
+  
+  let cc_ac2_main = let () = print_int (((addi (fun cc_ac0_x b -> (if b
+      then
+        (( + ) cc_ac0_x) 1
+      else
+        (( * ) cc_ac0_x) 2))) (fun cc_ac1__start -> (( = ) (( / ) cc_ac1__start) 2) 0)) 4) in
+      0
+  ;;
+  
 
   $ ./me_runner.exe < manytests/typed/009let_poly.ml
   let temp = let f x =
@@ -148,7 +182,70 @@
   
 
   $ ./me_runner.exe < manytests/typed/015tuples.ml
-  This expression has type ('a -> 'b -> 'c) -> 'b -> 'c but an expression was expected of type 'a * 'a
+  let rec fix f x =
+    (f (fix f)) x
+  ;;
+  
+  let map cc_ac0_f p =
+    let me_4 = p in
+      let a = (get_by_idx me_4) 0 in
+        let b = (get_by_idx me_4) 1 in
+          (cc_ac0_f a, cc_ac0_f b)
+  ;;
+  
+  let fixpoly l =
+    (fix (fun self cc_ac1_l -> (map (((fun cc0_self cc1_cc_ac1_l li cc_ac2_x -> (li (cc0_self cc1_cc_ac1_l)) cc_ac2_x) self) cc_ac1_l)) cc_ac1_l)) l
+  ;;
+  
+  let feven cc_ac3_p n =
+    let me_16 = cc_ac3_p in
+      let e = (get_by_idx me_16) 0 in
+        let o = (get_by_idx me_16) 1 in
+          (if (( == ) n) 0
+          then
+            1
+          else
+            o ((( - ) n) 1))
+  ;;
+  
+  let fodd cc_ac4_p cc_ac5_n =
+    let me_20 = cc_ac4_p in
+      let cc_ac6_e = (get_by_idx me_20) 0 in
+        let cc_ac7_o = (get_by_idx me_20) 1 in
+          (if (( == ) cc_ac5_n) 0
+          then
+            0
+          else
+            cc_ac6_e ((( - ) cc_ac5_n) 1))
+  ;;
+  
+  let tie = fixpoly (feven, fodd)
+  ;;
+  
+  let rec cc_ac_meven cc_ac8_n =
+    (if (( = ) cc_ac8_n) 0
+    then
+      1
+    else
+      modd ((( - ) cc_ac8_n) 1))
+  and modd cc_ac9_n =
+    (if (( = ) cc_ac9_n) 0
+    then
+      1
+    else
+      cc_ac_meven ((( - ) cc_ac9_n) 1))
+  ;;
+  
+  let cc_ac10_main = let () = print_int (modd 1) in
+      let () = print_int (cc_ac_meven 2) in
+        let me_31 = tie in
+          let even = (get_by_idx me_31) 0 in
+            let odd = (get_by_idx me_31) 1 in
+              let () = print_int (odd 3) in
+                let () = print_int (even 4) in
+                  0
+  ;;
+  
 
   $ ./me_runner.exe < manytests/typed/016lists.ml
   let rec length xs =

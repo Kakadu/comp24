@@ -141,7 +141,7 @@ let closure_conversion toplvl =
           | Nonrecursive -> free_vars
         in
         let saturated =
-          Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:ps
+          Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:(List.rev ps)
         in
         let env = Base.Map.set env ~key:v ~data:free_vars in
         let expr = closure_expr toplvl env inner_expr in

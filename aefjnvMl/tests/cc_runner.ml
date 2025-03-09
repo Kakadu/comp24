@@ -11,8 +11,8 @@ let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
   let ast'_t =
     let open Common.Naming in
-    let* ast = Parser.parse s in
-    let* ast' = Alpha_converter.rename_ast_with_uniq alpha_prefix ast in
+    let*! ast = Parser.parse s in
+    let*! ast' = Alpha_converter.rename_ast_with_uniq alpha_prefix ast in
     let ast' = Middleend.Closure_conversion.convert_program ast' in
     let* ast' = Alpha_converter.rename_ast_with_uniq cc_prefix ast' in
     Ok ast'
