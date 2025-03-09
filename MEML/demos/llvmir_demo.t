@@ -1,4 +1,100 @@
 
+  $ ./llvm_demo.exe << EOF
+  > let sum a b c d = a + b + c + d
+  > let main = print_int(sum 1 2 3 4)
+  ; ModuleID = 'MEML'
+  source_filename = "MEML"
+  
+  declare ptr @create_int_val(i32)
+  
+  declare ptr @create_bool_val(i1)
+  
+  declare ptr @mul(ptr, ptr)
+  
+  declare ptr @divv(ptr, ptr)
+  
+  declare ptr @plus(ptr, ptr)
+  
+  declare ptr @minus(ptr, ptr)
+  
+  declare ptr @eq(ptr, ptr)
+  
+  declare ptr @neq(ptr, ptr)
+  
+  declare ptr @less(ptr, ptr)
+  
+  declare ptr @leq(ptr, ptr)
+  
+  declare ptr @gre(ptr, ptr)
+  
+  declare ptr @greq(ptr, ptr)
+  
+  declare ptr @or(ptr, ptr)
+  
+  declare ptr @and(ptr, ptr)
+  
+  declare void @print_int(ptr)
+  
+  declare ptr @new_closure(ptr, i32)
+  
+  declare ptr @app_closure(ptr, i32, ...)
+  
+  declare ptr @call_closure(ptr)
+  
+  declare i1 @get_bool(ptr)
+  
+  define ptr @bin_op1(ptr %0, ptr %1) {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
+    ret ptr %app_closure_res
+  }
+  
+  define ptr @bin_op0(ptr %0, ptr %1, ptr %2) {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
+    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %2)
+    ret ptr %app_closure_res2
+  }
+  
+  define ptr @bin_op(ptr %0, ptr %1, ptr %2, ptr %3) {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
+    %empty_closure1 = call ptr @new_closure(ptr @bin_op0, i32 3)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 3, ptr %0, ptr %1, ptr %2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %3)
+    ret ptr %app_closure_res2
+  }
+  
+  define ptr @sum(ptr %0, ptr %1, ptr %2, ptr %3) {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 4)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 4, ptr %0, ptr %1, ptr %2, ptr %3)
+    ret ptr %app_closure_res
+  }
+  
+  define ptr @app() {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @sum, i32 4)
+    %int_var = call ptr @create_int_val(i32 1)
+    %int_var1 = call ptr @create_int_val(i32 2)
+    %int_var2 = call ptr @create_int_val(i32 3)
+    %int_var3 = call ptr @create_int_val(i32 4)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 4, ptr %int_var, ptr %int_var1, ptr %int_var2, ptr %int_var3)
+    ret ptr %app_closure_res
+  }
+  
+  define i32 @main() {
+  entry:
+    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
+    %empty_closure1 = call ptr @new_closure(ptr @app, i32 0)
+    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
+    ret i32 0
+  }
+  
   $ ./llvm_demo.exe < manytests/typed/001fac.ml 
   ; ModuleID = 'MEML'
   source_filename = "MEML"
