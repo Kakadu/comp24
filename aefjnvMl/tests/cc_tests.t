@@ -1,6 +1,13 @@
   $ dune exec ./cc_runner.exe << EOF
   > let prog = 5 + 5
   > EOF
+  Bindings before transformations:
+  val prog: int
+  
+  Bindings after transformations:
+  val prog: int
+  
+  ------------------------------
   let prog = (( + ) 5) 5
   ;;
   
@@ -8,6 +15,13 @@
   $ dune exec ./cc_runner.exe << EOF
   > let test1 x = let test2 y = x + y in test2
   > EOF
+  Bindings before transformations:
+  val test1: int -> int -> int
+  
+  Bindings after transformations:
+  val test1: int -> int -> int
+  
+  ------------------------------
   let test1 x =
     let test2 cc0_x y =
       (( + ) cc0_x) y in
@@ -18,6 +32,13 @@
   $ dune exec ./cc_runner.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
+  Bindings before transformations:
+  val test1: 'a * 'b -> 'c -> 'a * 'b * 'c
+  
+  Bindings after transformations:
+  val test1: 'a * 'b -> 'c -> 'a * 'b * 'c
+  
+  ------------------------------
   let test1 (x, y) =
     let test2 cc0_y cc1_x i =
       (cc1_x, cc0_y, i) in
@@ -28,6 +49,13 @@
   $ dune exec ./cc_runner.exe << EOF
   > let test1 (x, y) = let test2 i = (x, y, i) in test2
   > EOF
+  Bindings before transformations:
+  val test1: 'a * 'b -> 'c -> 'a * 'b * 'c
+  
+  Bindings after transformations:
+  val test1: 'a * 'b -> 'c -> 'a * 'b * 'c
+  
+  ------------------------------
   let test1 (x, y) =
     let test2 cc0_y cc1_x i =
       (cc1_x, cc0_y, i) in
@@ -40,6 +68,13 @@
   >   | 0 -> k 1
   >   | n -> facCPS (n - 1) (fun t -> k (n * t))
   > EOF
+  Bindings before transformations:
+  val facCPS: int -> (int -> 'a) -> 'a
+  
+  Bindings after transformations:
+  val facCPS: int -> (int -> 'a) -> 'a
+  
+  ------------------------------
   let rec facCPS n k =
     match n with
       | 0 -> 
@@ -54,6 +89,13 @@
   > let nested3 = 6 in
   > let nested4 x = x + (fun i -> nested2 + nested3) 8 in nested4 55
   > EOF
+  Bindings before transformations:
+  val nested1: int
+  
+  Bindings after transformations:
+  val nested1: int
+  
+  ------------------------------
   let nested1 = let nested2 = 5 in
       let nested3 = 6 in
         let nested4 cc0_nested3 cc1_nested2 x =
@@ -67,6 +109,13 @@
   >   | 0 -> k 1
   >   | n -> facCPS (n - 1) (fun t -> k (n * t))
   > EOF
+  Bindings before transformations:
+  val facCPS: int -> (int -> 'a) -> 'a
+  
+  Bindings after transformations:
+  val facCPS: int -> (int -> 'a) -> 'a
+  
+  ------------------------------
   let rec facCPS n k =
     match n with
       | 0 -> 
@@ -81,6 +130,15 @@
   > let () = print_int 5 in 5
   > let main = print_int (_start (print_int 1) (print_int 2)  (print_int 3)   (print_int 4))
   > EOF
+  Bindings before transformations:
+  val _start: unit -> unit -> unit -> unit -> int
+  val main: unit
+  
+  Bindings after transformations:
+  val _start: unit -> unit -> unit -> unit -> int
+  val main: unit
+  
+  ------------------------------
   let cc_ac0__start () () () () =
     let () = print_int 5 in
       5
@@ -99,6 +157,15 @@
   > match n with
   >  | 0 -> false
   >  | x -> even (x-1);;
+  Bindings before transformations:
+  val even: int -> bool
+  val odd: int -> bool
+  
+  Bindings after transformations:
+  val even: int -> bool
+  val odd: int -> bool
+  
+  ------------------------------
   let rec even n =
     match n with
       | 0 -> 
@@ -115,6 +182,17 @@
   
 
   $ ./cc_runner.exe < manytests/typed/005fix.ml
+  Bindings before transformations:
+  val fac: (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val main: int
+  
+  Bindings after transformations:
+  val fac: (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val main: int
+  
+  ------------------------------
   let rec fix f x =
     (f (fix f)) x
   ;;
@@ -133,6 +211,15 @@
   
 
   $ ./cc_runner.exe < manytests/typed/006partial2.ml
+  Bindings before transformations:
+  val foo: int -> int -> int -> int
+  val main: int
+  
+  Bindings after transformations:
+  val foo: int -> int -> int -> int
+  val main: int
+  
+  ------------------------------
   let foo a b c =
     let () = print_int a in
       let () = print_int b in
@@ -149,6 +236,15 @@
   
 
   $ ./cc_runner.exe < manytests/typed/007order.ml
+  Bindings before transformations:
+  val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main: unit
+  
+  Bindings after transformations:
+  val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main: unit
+  
+  ------------------------------
   let cc_ac0__start () () a () b _c () d __ =
     let () = print_int ((( + ) a) b) in
       let () = print_int __ in
@@ -160,6 +256,15 @@
   
 
   $ ./cc_runner.exe < manytests/typed/008ascription.ml
+  Bindings before transformations:
+  val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
+  val main: int
+  
+  Bindings after transformations:
+  val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
+  val main: int
+  
+  ------------------------------
   let addi f g x =
     (f x) (g x)
   ;;
@@ -174,6 +279,29 @@
   
 
   $ ./cc_runner.exe < manytests/typed/015tuples.ml
+  Bindings before transformations:
+  val feven: 'a * (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fixpoly: ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) * ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) -> ('a -> 'b) * ('a -> 'b)
+  val fodd: (int -> int) * 'a -> int -> int
+  val main: int
+  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val meven: int -> int
+  val modd: int -> int
+  val tie: (int -> int) * (int -> int)
+  
+  Bindings after transformations:
+  val feven: 'a * (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fixpoly: ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) * ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) -> ('a -> 'b) * ('a -> 'b)
+  val fodd: (int -> int) * 'a -> int -> int
+  val main: int
+  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val meven: int -> int
+  val modd: int -> int
+  val tie: (int -> int) * (int -> int)
+  
+  ------------------------------
   let rec fix f x =
     (f (fix f)) x
   ;;
