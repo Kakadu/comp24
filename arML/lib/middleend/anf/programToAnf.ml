@@ -12,7 +12,7 @@ let program_to_anf env program =
     | hd :: tl ->
       let* d1, env = declaration_to_anf env hd in
       let* d2, env = helper env tl in
-      return @@ ((d1 @ d2), env)
+      return @@ (d1 @ d2, env)
   in
   helper env program
 ;;

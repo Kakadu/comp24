@@ -5,7 +5,9 @@
 open Common.IdentifierStructs
 open Pmfast
 
-let rec collect_identifiers_expr (expr : pmf_expression) (acc : IdentifierSet.t) : IdentifierSet.t =
+let rec collect_identifiers_expr (expr : pmf_expression) (acc : IdentifierSet.t)
+  : IdentifierSet.t
+  =
   match expr with
   | PMFConstant _ -> acc
   | PMFIdentifier id -> IdentifierSet.add id acc
@@ -32,6 +34,7 @@ let rec collect_identifiers_expr (expr : pmf_expression) (acc : IdentifierSet.t)
     collect_identifiers_expr e2 acc
   | PMFEmptyList -> acc
   | PMFTyped (e, _) -> collect_identifiers_expr e acc
+;;
 
 let collect_identifiers_decl (decl : pmf_decl) (acc : IdentifierSet.t) : IdentifierSet.t =
   match decl with
@@ -43,11 +46,17 @@ let collect_identifiers_decl (decl : pmf_decl) (acc : IdentifierSet.t) : Identif
     let acc = IdentifierSet.add id acc in
     let acc = List.fold_left (fun acc arg -> IdentifierSet.add arg acc) acc args in
     let acc = collect_identifiers_expr body acc in
-    List.fold_left (fun acc (id, args, body) ->
+    List.fold_left
+      (fun acc (id, args, body) ->
         let acc = IdentifierSet.add id acc in
         let acc = List.fold_left (fun acc arg -> IdentifierSet.add arg acc) acc args in
-        collect_identifiers_expr body acc
-      ) acc decls
+        collect_identifiers_expr body acc)
+      acc
+      decls
+;;
 
-let collect_all_identifiers (initial_set : IdentifierSet.t) (program : pmf_program) : IdentifierSet.t =
+let collect_all_identifiers (initial_set : IdentifierSet.t) (program : pmf_program)
+  : IdentifierSet.t
+  =
   List.fold_left (fun acc decl -> collect_identifiers_decl decl acc) initial_set program
+;;

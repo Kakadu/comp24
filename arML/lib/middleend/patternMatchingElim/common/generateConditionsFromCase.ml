@@ -20,13 +20,14 @@ let rec generate_pattern_matching_restrictions expr = function
     List.mapi get_pattern_restrictions_on_expr patterns |> List.concat
   | PListConstructor (l, r) as plst ->
     let pattern_depth = get_list_constr_pattern_depth plst in
-    let length_restriction = immut_less_than (PMFConstant (CInt (pattern_depth - 1))) (get_list_length expr) in
+    let length_restriction =
+      immut_less_than (PMFConstant (CInt (pattern_depth - 1))) (get_list_length expr)
+    in
     let head_expr = unpack_list_head expr in
     let tail_expr = unpack_list_tail expr in
-    length_restriction ::
-    (generate_pattern_matching_restrictions head_expr l) @
-    (generate_pattern_matching_restrictions tail_expr r)
-  | PTyped(p, _) -> generate_pattern_matching_restrictions expr p
+    (length_restriction :: generate_pattern_matching_restrictions head_expr l)
+    @ generate_pattern_matching_restrictions tail_expr r
+  | PTyped (p, _) -> generate_pattern_matching_restrictions expr p
   | _ -> []
 ;;
 
@@ -34,15 +35,15 @@ let generate_condition_if_needed (pat, expr) (b1, b2) =
   let generate_condition restrictions =
     let rec helper = function
       | [] -> PMFConstant (CBool true)
-      | [last] -> last
+      | [ last ] -> last
       | hd :: tl -> immut_and hd (helper tl)
     in
     helper restrictions
   in
   let checks = generate_pattern_matching_restrictions expr pat in
-  if (checks = [])
+  if checks = []
   then b1
-  else 
+  else (
     let condition = generate_condition checks in
-    PMFIfThenElse (condition, b1, Some b2)
+    PMFIfThenElse (condition, b1, Some b2))
 ;;

@@ -24,7 +24,8 @@ and a_expr =
   | AComplex of complex_expr
 [@@deriving show { with_path = false }]
 
-type anf_decl_case = identifier * identifier list * a_expr [@@deriving show { with_path = false }]
+type anf_decl_case = identifier * identifier list * a_expr
+[@@deriving show { with_path = false }]
 
 type anf_decl =
   | ADOrdinary of anf_decl_case

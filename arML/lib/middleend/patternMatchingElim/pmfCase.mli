@@ -5,5 +5,7 @@
 open Ast.AbstractSyntaxTree
 open Pmfast
 
-val eliminate_pm_case : (pattern * pmf_expression) -> (pmf_expression * pmf_expression) -> pmf_expression
-
+val eliminate_pm_case
+  :  pattern * pmf_expression
+  -> pmf_expression * pmf_expression
+  -> pmf_expression

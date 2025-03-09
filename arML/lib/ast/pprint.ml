@@ -88,8 +88,8 @@ let rec pp_expression ppf = function
       pp_expression
       t
       (fun ppf -> function
-         | None -> ()
-         | Some e -> Format.fprintf ppf " else %a" pp_expression e)
+        | None -> ()
+        | Some e -> Format.fprintf ppf " else %a" pp_expression e)
       f
   | ETuple (e1, e2, es) ->
     Format.fprintf

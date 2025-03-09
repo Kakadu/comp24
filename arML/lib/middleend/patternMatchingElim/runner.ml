@@ -17,11 +17,11 @@ let start_env program =
   in
   List.fold_left
     (fun acc decl ->
-       match decl with
-       | LDOrdinary (case, cases) | LDRecursive (case, cases) ->
-         let cases = case :: cases in
-         let cases = List.fold_right (fun (p, _, e) acc -> (p, e) :: acc) cases [] in
-         IdentifierSet.union acc (get_pattern_identifiers_from_cases cases))
+      match decl with
+      | LDOrdinary (case, cases) | LDRecursive (case, cases) ->
+        let cases = case :: cases in
+        let cases = List.fold_right (fun (p, _, e) acc -> (p, e) :: acc) cases [] in
+        IdentifierSet.union acc (get_pattern_identifiers_from_cases cases))
     start_identifiers
     program
 ;;

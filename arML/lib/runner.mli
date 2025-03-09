@@ -54,7 +54,6 @@ val alpha_conversion_program : string -> unit
 (* ANF conversion *)
 
 val convert_to_anf_and_back_types : string -> unit
-
 val anf_conversion_program : string -> unit
 
 (* -------------- *)

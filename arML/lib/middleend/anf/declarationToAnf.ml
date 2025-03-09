@@ -16,13 +16,13 @@ let declaration_to_anf env = function
     return ([ ADOrdinary (name, args, expr') ], env')
   | PMFDRecursive (case, cases) ->
     let cases = case :: cases in
-    let* cases', env' = 
+    let* cases', env' =
       List.fold_right
         (fun (name, args, expr) acc ->
-           let* acc, env = acc in
-           let env = IdentifierSet.add name env in
-           let* expr', env' = expression_to_anf env expr in
-           return @@ ((name, args, expr') :: acc, env'))
+          let* acc, env = acc in
+          let env = IdentifierSet.add name env in
+          let* expr', env' = expression_to_anf env expr in
+          return @@ ((name, args, expr') :: acc, env'))
         cases
         (return ([], env))
     in

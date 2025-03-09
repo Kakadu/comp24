@@ -4,7 +4,7 @@
 
 open Ast.AbstractSyntaxTree
 
-let find_with_index lst = 
+let find_with_index lst =
   let rec helper idx = function
     | [] -> None
     | x :: xs -> if not (List.length x = 0) then Some (idx, x) else helper (idx + 1) xs

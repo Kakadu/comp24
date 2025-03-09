@@ -2,7 +2,7 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-val eliminate_pm_program : 
-  Common.IdentifierStructs.IdentifierSet.t -> 
-  LambdaLifting.Llast.ll_program -> 
-  (Pmfast.pmf_program * Common.IdentifierStructs.IdentifierSet.t) Common.StateMonad.t
+val eliminate_pm_program
+  :  Common.IdentifierStructs.IdentifierSet.t
+  -> LambdaLifting.Llast.ll_program
+  -> (Pmfast.pmf_program * Common.IdentifierStructs.IdentifierSet.t) Common.StateMonad.t

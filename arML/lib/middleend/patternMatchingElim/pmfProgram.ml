@@ -10,11 +10,14 @@ open PmfDeclaration
 let rec simplify_ordinary_let_in acc = function
   | [] -> acc
   | hd :: tl ->
-    match hd with
-    | LDRecursive _ -> simplify_ordinary_let_in (hd :: acc) tl
-    | LDOrdinary (case, cases) -> simplify_ordinary_let_in (LDOrdinary (case, []) :: acc) (match cases with
-        | [] -> tl
-        | hd2 :: tl2 -> LDOrdinary(hd2, tl2) :: tl) 
+    (match hd with
+     | LDRecursive _ -> simplify_ordinary_let_in (hd :: acc) tl
+     | LDOrdinary (case, cases) ->
+       simplify_ordinary_let_in
+         (LDOrdinary (case, []) :: acc)
+         (match cases with
+          | [] -> tl
+          | hd2 :: tl2 -> LDOrdinary (hd2, tl2) :: tl))
 ;;
 
 let eliminate_pm_program start_env program =

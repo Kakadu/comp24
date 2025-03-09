@@ -18,6 +18,7 @@ let rec pp_immut_expr ppf = function
       "(%a)"
       (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf ", ") pp_immut_expr)
       (e1 :: e2 :: es)
+;;
 
 let rec pp_complex_expr ppf = function
   | CAtom e -> pp_immut_expr ppf e
@@ -55,6 +56,7 @@ and pp_a_expr ppf = function
       pp_a_expr
       body
   | AComplex e -> pp_complex_expr ppf e
+;;
 
 let pp_anf_decl_case ppf (id, args, body) =
   match args with
@@ -69,6 +71,7 @@ let pp_anf_decl_case ppf (id, args, body) =
       args
       pp_a_expr
       body
+;;
 
 let pp_anf_decl ppf = function
   | ADOrdinary decl -> Format.fprintf ppf "let %a" pp_anf_decl_case decl
@@ -76,14 +79,22 @@ let pp_anf_decl ppf = function
     Format.fprintf
       ppf
       "let rec %a"
-      (Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ") pp_anf_decl_case)
+      (Format.pp_print_list
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
+         pp_anf_decl_case)
       (decl :: decls)
+;;
 
 let pp_anf_program ppf program =
-  Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n") pp_anf_decl ppf program
+  Format.pp_print_list
+    ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n")
+    pp_anf_decl
+    ppf
+    program
+;;
 
-let print_anf_expression expr =
-  Format.printf "%s\n" (Format.asprintf "%a" pp_a_expr expr)
+let print_anf_expression expr = Format.printf "%s\n" (Format.asprintf "%a" pp_a_expr expr)
 
 let print_anf_program program =
   Format.printf "%s\n" (Format.asprintf "%a" pp_anf_program program)
+;;

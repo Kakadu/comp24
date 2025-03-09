@@ -10,11 +10,14 @@ open Common.IdentifierSearcher
 let rec generate_path_to_name_in_pattern name = function
   | PVar v when v = name -> [ unpack_value ]
   | PTuple (p1, p2, ps) ->
-    let paths = List.mapi (fun i p -> 
-        match generate_path_to_name_in_pattern name p with
-        | [] -> None
-        | path -> Some (i, path)
-      ) (p1 :: p2 :: ps) in
+    let paths =
+      List.mapi
+        (fun i p ->
+          match generate_path_to_name_in_pattern name p with
+          | [] -> None
+          | path -> Some (i, path))
+        (p1 :: p2 :: ps)
+    in
     (match List.find_map Fun.id paths with
      | Some (i, path) -> unpack_tuple i :: path
      | None -> [])
@@ -33,5 +36,5 @@ let generate_declarations_from_case (p, expr) =
   in
   get_pattern_identifiers p
   |> IdentifierSet.elements
-  |> List.map (fun name -> (name, unpack_expr name (p, expr)))
+  |> List.map (fun name -> name, unpack_expr name (p, expr))
 ;;

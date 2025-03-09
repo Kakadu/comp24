@@ -30,10 +30,6 @@
  (instrumentation
   (backend bisect_ppx)))
 
-<<<<<<<
-
-HEAD
-
 (executable
  (name start_pm_elimination_demos)
  (public_name arML.start_pm_elimination_demos)
@@ -57,12 +53,6 @@ HEAD
  (libraries arML.lib stdio)
  (instrumentation
   (backend bisect_ppx)))
-
-=======
-
->>>>>>>
-
-upstream/master
 
 (cram
  (applies_to parser_demos)
@@ -196,6 +186,4 @@ upstream/master
   manytests/typed/006partial3.ml
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
-  manytests/typed/009let_poly.ml
-  manytests/typed/015tuples.ml
-  manytests/typed/016lists.ml))
+  manytests/typed/009let_poly.ml))

@@ -5,19 +5,19 @@
 open Ast.AbstractSyntaxTree
 open Pmfast
 
-let unpack_tuple pos tup = 
-  let unpack_identifier = PMFIdentifier (Id ("unpack_tuple")) in
+let unpack_tuple pos tup =
+  let unpack_identifier = PMFIdentifier (Id "unpack_tuple") in
   let pos = PMFConstant (CInt pos) in
-  PMFApplication (unpack_identifier, tup, [pos])
+  PMFApplication (unpack_identifier, tup, [ pos ])
 ;;
 
 let unpack_list_head lst =
-  let unpack_identifier = PMFIdentifier (Id ("unpack_list_hd")) in
+  let unpack_identifier = PMFIdentifier (Id "unpack_list_hd") in
   PMFApplication (unpack_identifier, lst, [])
 ;;
 
 let unpack_list_tail lst =
-  let unpack_identifier = PMFIdentifier (Id ("unpack_list_tl")) in
+  let unpack_identifier = PMFIdentifier (Id "unpack_list_tl") in
   PMFApplication (unpack_identifier, lst, [])
 ;;
 

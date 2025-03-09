@@ -2,6 +2,4 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-val run_pmf_program : 
-  LambdaLifting.Llast.ll_program -> 
-  Pmfast.pmf_program
+val run_pmf_program : LambdaLifting.Llast.ll_program -> Pmfast.pmf_program

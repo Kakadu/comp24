@@ -37,8 +37,8 @@ let infer_expr =
         ps
         ~init:(return ([], env))
         ~f:(fun (acc_ty, acc_env) p ->
-            let* p_ty, p_env = infer_pattern acc_env p in
-            return (p_ty :: acc_ty, p_env))
+          let* p_ty, p_env = infer_pattern acc_env p in
+          return (p_ty :: acc_ty, p_env))
     in
     let* e_sub, e_ty = helper ps_env e in
     let fun_ty = List.fold_right (fun ty acc -> ty @-> acc) (List.rev ps_ty) e_ty in
@@ -48,16 +48,16 @@ let infer_expr =
     let* sub', func_ty = helper env func_expr in
     List.fold_left
       (fun acc arg_expr ->
-         let* acc_sub, acc_func_ty = acc in
-         let env' = TypeEnv.apply env acc_sub in
-         let* arg_sub, arg_ty = helper env' arg_expr in
-         let* fv = fresh_var in
-         let ty1 = Substitution.apply arg_sub acc_func_ty in
-         let ty2 = arg_ty @-> fv in
-         let* unify_sub = Substitution.unify ty1 ty2 in
-         let* combined_sub = Substitution.compose_all [ acc_sub; arg_sub; unify_sub ] in
-         let result_ty = Substitution.apply combined_sub fv in
-         return (combined_sub, result_ty))
+        let* acc_sub, acc_func_ty = acc in
+        let env' = TypeEnv.apply env acc_sub in
+        let* arg_sub, arg_ty = helper env' arg_expr in
+        let* fv = fresh_var in
+        let ty1 = Substitution.apply arg_sub acc_func_ty in
+        let ty2 = arg_ty @-> fv in
+        let* unify_sub = Substitution.unify ty1 ty2 in
+        let* combined_sub = Substitution.compose_all [ acc_sub; arg_sub; unify_sub ] in
+        let result_ty = Substitution.apply combined_sub fv in
+        return (combined_sub, result_ty))
       (return (sub', func_ty))
       args_exprs
   and infer_if_then_else env c b1 b2 =
@@ -110,9 +110,9 @@ let infer_expr =
         let* tvs =
           List.fold_left
             (fun acc _ ->
-               let* acc = acc in
-               let* fv = fresh_var in
-               return @@ (fv :: acc))
+              let* acc = acc in
+              let* fv = fresh_var in
+              return @@ (fv :: acc))
             (return [])
             (p1 :: p2 :: ps)
         in
@@ -125,8 +125,8 @@ let infer_expr =
         let* env, subs = extend_env_with_pattern env subs (p2, t2) in
         List.fold_left2
           (fun acc pat ty ->
-             let* env, subs' = acc in
-             extend_env_with_pattern env subs' (pat, ty))
+            let* env, subs' = acc in
+            extend_env_with_pattern env subs' (pat, ty))
           (return @@ (env, subs))
           ps
           rest
@@ -153,18 +153,18 @@ let infer_expr =
     let* cases_env, cases_sub =
       List.fold_left
         (fun acc (pat, expr) ->
-           let expr =
-             match expr with
-             | ETyped (EFun (ps, body), typ) -> EFun (ps, ETyped (body, typ))
-             | _ -> expr
-           in
-           let* env, sub = acc in
-           let* sub_expr, ty_expr = helper env expr in
-           let* env', sub' = extend_env_with_pattern env [] (pat, ty_expr) in
-           let* sub'' = Substitution.compose_all sub' in
-           let* sub''' = Substitution.compose sub sub_expr in
-           let* sub_final = Substitution.compose sub'' sub''' in
-           return (env', sub_final))
+          let expr =
+            match expr with
+            | ETyped (EFun (ps, body), typ) -> EFun (ps, ETyped (body, typ))
+            | _ -> expr
+          in
+          let* env, sub = acc in
+          let* sub_expr, ty_expr = helper env expr in
+          let* env', sub' = extend_env_with_pattern env [] (pat, ty_expr) in
+          let* sub'' = Substitution.compose_all sub' in
+          let* sub''' = Substitution.compose sub sub_expr in
+          let* sub_final = Substitution.compose sub'' sub''' in
+          return (env', sub_final))
         (return (env, Substitution.empty))
         cases
     in
@@ -184,40 +184,40 @@ let infer_expr =
     let add_temporary_vars env cases =
       List.fold_left
         (fun acc (pat, _) ->
-           let* env', vars = acc in
-           match pat with
-           | PVar (Id name) ->
-             let* fv = fresh_var in
-             let env'' = TypeEnv.extend env' name (Schema.Schema (TypeVarSet.empty, fv)) in
-             return (env'', (name, fv) :: vars)
-           | _ -> fail InvalidRecursionLeftHand)
+          let* env', vars = acc in
+          match pat with
+          | PVar (Id name) ->
+            let* fv = fresh_var in
+            let env'' = TypeEnv.extend env' name (Schema.Schema (TypeVarSet.empty, fv)) in
+            return (env'', (name, fv) :: vars)
+          | _ -> fail InvalidRecursionLeftHand)
         (return (env, []))
         cases
     in
     let process_cases env cases temp_vars =
       List.fold_left
         (fun acc (pat, expr) ->
-           let expr =
-             match expr with
-             | ETyped (EFun (ps, body), typ) -> EFun (ps, ETyped (body, typ))
-             | _ -> expr
-           in
-           let* extracted_var_name =
-             match pat with
-             | PVar (Id name) -> return name
-             | _ -> fail InvalidRecursionLeftHand
-           in
-           let* env, sub = acc in
-           let* sub_expr, ty_expr = helper env expr in
-           let env' = TypeEnv.apply env sub_expr in
-           let* env'' = extend_env_with_pattern env' (pat, ty_expr) in
-           let* sub_update =
-             match List.assoc_opt extracted_var_name temp_vars with
-             | Some temp_ty -> Substitution.unify temp_ty ty_expr
-             | None -> return Substitution.empty
-           in
-           let* sub_final = Substitution.compose sub sub_update in
-           return (env'', sub_final))
+          let expr =
+            match expr with
+            | ETyped (EFun (ps, body), typ) -> EFun (ps, ETyped (body, typ))
+            | _ -> expr
+          in
+          let* extracted_var_name =
+            match pat with
+            | PVar (Id name) -> return name
+            | _ -> fail InvalidRecursionLeftHand
+          in
+          let* env, sub = acc in
+          let* sub_expr, ty_expr = helper env expr in
+          let env' = TypeEnv.apply env sub_expr in
+          let* env'' = extend_env_with_pattern env' (pat, ty_expr) in
+          let* sub_update =
+            match List.assoc_opt extracted_var_name temp_vars with
+            | Some temp_ty -> Substitution.unify temp_ty ty_expr
+            | None -> return Substitution.empty
+          in
+          let* sub_final = Substitution.compose sub sub_update in
+          return (env'', sub_final))
         (return (env, Substitution.empty))
         cases
     in
