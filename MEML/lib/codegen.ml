@@ -51,16 +51,14 @@ let runtime =
   let leq = VarSMap.add "( <= )" "leq" less in
   let gre = VarSMap.add "( > )" "gre" leq in
   let greq = VarSMap.add "( >= )" "greq" gre in
-  let or_ = VarSMap.add "( || )" "or" greq in
-  let and_ = VarSMap.add "( & )" "and" or_ in
+  let or_ = VarSMap.add "( || )" "or_" greq in
+  let and_ = VarSMap.add "( & )" "and_" or_ in
   let print_int = VarSMap.add "print_int" "print_int" and_ in
   print_int
 ;;
 
 let check_runtime_typ runtime_name =
-  let res =
-    List.find_opt (fun (cur_name, _) -> cur_name = runtime_name) runtime_func
-  in
+  let res = List.find_opt (fun (cur_name, _) -> cur_name = runtime_name) runtime_func in
   match res with
   | Some (_, typ) -> ok (Some typ)
   | None -> error "Error: unbound runtime name"
@@ -300,8 +298,6 @@ let codegen_program program =
 
 let codegen program =
   match codegen_program program with
-  | Ok _ ->
-    Ok (string_of_llmodule the_module)
-  | Error e ->
-    Error e
+  | Ok _ -> Ok (string_of_llmodule the_module)
+  | Error e -> Error e
 ;;
