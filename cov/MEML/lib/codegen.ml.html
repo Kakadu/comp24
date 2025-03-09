@@ -842,8 +842,8 @@ let rec codegen_aexpression gvars env ext_env = function
     <span data-count="365">l</span>et rev_llvalues =
       List.fold_left
         (fun curr_lst im -&gt;
-           <span data-count="698">l</span>et new_llvalue = codegen_aexpression gvars env ext_env im in
-           <span data-count="698">n</span>ew_llvalue :: curr_lst)
+          <span data-count="698">l</span>et new_llvalue = codegen_aexpression gvars env ext_env im in
+          <span data-count="698">n</span>ew_llvalue :: curr_lst)
         []
         args
     in
@@ -925,8 +925,8 @@ let codgen_let gvars env ext_env = function
 let runtime =
   List.fold_lef<span data-count="29">t</span>
     (fun ext_env (name, typ) -&gt;
-       <span data-count="551">l</span>et ext_func = Llvm.declare_function name typ the_module in
-       <span data-count="551">V</span>arSMap.add name ext_func ext_env)
+      <span data-count="551">l</span>et ext_func = Llvm.declare_function name typ the_module in
+      <span data-count="551">V</span>arSMap.add name ext_func ext_env)
     VarSMap.empty
     runtime_func
 ;;
@@ -936,9 +936,9 @@ let codegen_program program =
   let env =
     List.fold_left
       (fun acc let_ -&gt;
-         <span data-count="297">l</span>et* env = acc in
-         <span data-count="297">l</span>et* lets = let<span data-count="297">s</span> env let_ in
-         <span data-count="297">O</span>k lets)
+        <span data-count="297">l</span>et* env = acc in
+        <span data-count="297">l</span>et* lets = let<span data-count="297">s</span> env let_ in
+        <span data-count="297">O</span>k lets)
       (Ok VarSMap.empty)
       program
   in
