@@ -9,16 +9,15 @@ let cexp_ite i t e = CEIf (i, t, e)
 let cexp_cons aexp1 aexp2 = CECons (aexp1, aexp2)
 let aexpr_let_in name cexp exp = ALetIn (name, cexp, exp)
 let aexpr_complex cexp = ACExpr cexp
-
 let imm_int int_ = ImmInt int_
 let imm_bool bool_ = ImmBool bool_
 let imm_var var_ = ImmIdentifier var_
 let imm_tuple lst_ = ImmTuple lst_
+
 let const_to_immexp = function
   | Pe_Cint i -> ImmInt i
   | Pe_CBool b -> ImmBool b
 ;;
-
 
 let rec to_immexp = function
   | Pe_EIdentifier v -> return ([], imm_var v)
@@ -76,7 +75,7 @@ and app_to_cexp e1 e2 =
   let* exprs, binds = fold_left (to_app :: args_e) ~init:(return ([], [])) ~f:f1 in
   let exprs = List.rev exprs in
   match List.hd_exn exprs with
-  | ImmIdentifier to_app -> 
+  | ImmIdentifier to_app ->
     let args_e = List.tl_exn exprs in
     return (binds, cexp_app to_app args_e)
   | _ -> failwith "Unexpected expression in application"
@@ -96,12 +95,12 @@ let anf_str_item = function
         match e with
         | Pe_EFun (args, body) ->
           let* new_body = to_exp body in
-          return (ADNoRec (ALet (name, args, new_body)))
+          return (ALet (name, args, new_body))
         | _ ->
           let* new_e = to_exp e in
-          return (ADNoRec (ALet (name, [], new_e))))
+          return (ALet (name, [], new_e)))
     in
-    return bindings
+    return [ ADNoRec bindings ]
   | Pe_Rec decls ->
     let* bindings =
       map decls ~f:(fun (name, e) ->

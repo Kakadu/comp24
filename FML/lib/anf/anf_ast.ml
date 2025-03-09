@@ -23,14 +23,13 @@ and aexpr =
 type anf_binding = ALet of string * string list * aexpr
 
 type anf_decl =
-  | ADNoRec of anf_binding 
+  | ADNoRec of anf_binding list
   | ADREC of anf_binding list
 
 type anf_prog = anf_decl list
 
 let imm_id id = ImmIdentifier id
 let cimmexpr immexpr = CImmExpr immexpr
-
 
 let rec atom_to_str = function
   | ImmInt i -> Int.to_string i
@@ -51,7 +50,10 @@ let rec atom_to_str = function
 let rec cexp_to_str = function
   | CImmExpr a -> atom_to_str a
   | CEApply (a1, a_list) ->
-    Base.List.fold_left ~init:a1 ~f:(fun acc a -> "(" ^ acc ^ " " ^ atom_to_str a ^ ")") a_list
+    Base.List.fold_left
+      ~init:a1
+      ~f:(fun acc a -> "(" ^ acc ^ " " ^ atom_to_str a ^ ")")
+      a_list
   | CEIf (e1, e2, e3) ->
     Format.sprintf
       "if %s\nthen %s\nelse %s"
@@ -75,8 +77,13 @@ let fun_to_str = function
 ;;
 
 let str_item_to_str = function
-  | ADNoRec (ALet (name, args, body)) ->
-    Format.sprintf "let %s" (fun_to_str (ALet (name, args, body)))
+  | ADNoRec func_list ->
+    let fun1 = Base.List.hd_exn func_list in
+    let tl = Base.List.tl_exn func_list in
+    Base.List.fold_left
+      tl
+      ~init:(Format.sprintf "let %s" (fun_to_str fun1))
+      ~f:(fun acc fun1 -> acc ^ "\nand " ^ fun_to_str fun1)
   | ADREC func_list ->
     let fun1 = Base.List.hd_exn func_list in
     let tl = Base.List.tl_exn func_list in
@@ -91,7 +98,7 @@ let pp_anf_structure ppf p =
   Base.List.iteri
     ~f:(fun i a ->
       if i = len - 1
-      then Format.sprintf ppf "%s" (str_item_to_str a)
-      else Format.sprintf ppf "%s\n\n" (str_item_to_str a))
+      then Format.fprintf ppf "%s" (str_item_to_str a)
+      else Format.fprintf ppf "%s\n\n" (str_item_to_str a))
     p
 ;;
