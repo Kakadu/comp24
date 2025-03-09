@@ -383,11 +383,11 @@ let rec alpha_convert_decl_list ctx acc = function
 let add_to_context_std_fun (ctx : context) ((name, llvm_name, fun_tp, _) : std_fun) =
   let reserved_names = Base.Set.add ctx.reserved_names llvm_name in
   match fun_tp with
-  | UserFun ->
+  | UserFun, _ ->
     let reserved_names = Base.Set.add reserved_names name in
     let name_map = Base.Map.add_exn ctx.name_mapping ~key:name ~data:(name, -1) in
     { name_mapping = name_map; reserved_names }
-  | SystemFun -> { name_mapping = ctx.name_mapping; reserved_names }
+  | SystemFun, _ -> { name_mapping = ctx.name_mapping; reserved_names }
 ;;
 
 let add_to_context_all_std_funs ctx =
@@ -411,6 +411,8 @@ let test_alpha_for_decls str =
      | _, Error err -> Format.printf "%s" err)
   | Error err -> Format.printf "%s" err
 ;;
+
+let transform ast = run (alpha_convert_decl_list init_context [] ast) 0
 
 let%expect_test "" =
   test_alpha_for_decls {|

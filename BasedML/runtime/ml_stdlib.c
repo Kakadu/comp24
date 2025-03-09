@@ -23,7 +23,7 @@ int8_t compare_boxed(int64_t x, int64_t y) {
         int64_t res = 0;
         for (int i = 1; i < xbox->header.size; i++) {
             int val_num = i - 1;
-            res = compare_ml(xbox->values[val_num], xbox->values[val_num]);
+            res = compare_ml(xbox->values[val_num], ybox->values[val_num]);
             if (res != 0)
                 break;
         }
@@ -42,9 +42,11 @@ int8_t compare(int64_t x, int64_t y) {
 }
 
 int8_t compare_ml(int64_t x, int64_t y) {
+    DEBUG_RUN(printf("compare: %ld %ld\n", x, y););
     tag_t x_tag = get_tag(x);
     tag_t y_tag = get_tag(y);
-    int8_t tag_comp = compare(x, y);
+    DEBUG_RUN(printf("compare: tags %d %d\n", x_tag, y_tag););
+    int8_t tag_comp = compare(x_tag, y_tag);
     if (tag_comp == 0) {
         if (x_tag == T_UNBOXED) {
             // unboxed values
@@ -61,6 +63,8 @@ int8_t compare_ml(int64_t x, int64_t y) {
 
 int64_t eq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == 0); }
 int64_t neq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) != 0); }
+int64_t peq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML((x == y)); }
+int64_t pneq_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML((x != y)); }
 
 int64_t g_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == 1); }
 int64_t ge_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) >= 0); }
@@ -68,8 +72,12 @@ int64_t ge_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml
 int64_t l_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) == -1); }
 int64_t le_ml(int64_t x, int64_t y) { return CONVERT_INT_NATIVE_TO_ML(compare_ml(x, y) <= 0); }
 
-void print_int(int64_t a) {
+int64_t print_int(int64_t a) {
     DEBUG_RUN(if (is_ml_ptr(a)) EXCEPTION_FMT("Debug \"print_int: get boxed arg\""););
     printf("%ld\n", CONVERT_INT_ML_TO_NATIVE(a));
     fflush(stdout);
+    return CONVERT_INT_NATIVE_TO_ML(0);
 }
+
+int64_t lor_ml(int64_t x, int64_t y) { return x | y; };
+int64_t land_ml(int64_t x, int64_t y) { return x & y; };
