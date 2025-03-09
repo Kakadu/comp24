@@ -260,7 +260,8 @@ let cc_expr global_names =
   process (Map.empty (module String))
 ;;
 
-let cc_prog (prog : prog) : prog t =
+let cc_prog (prog : prog) =
+  let open Utils.R in
   (* Collect global function names from top-level let bindings *)
   let global_names =
     List.fold
