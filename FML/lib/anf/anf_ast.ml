@@ -49,11 +49,7 @@ let rec atom_to_str = function
 
 let rec cexp_to_str = function
   | CImmExpr a -> atom_to_str a
-  | CEApply (a1, a_list) ->
-    Base.List.fold_left
-      ~init:a1
-      ~f:(fun acc a -> "(" ^ acc ^ " " ^ atom_to_str a ^ ")")
-      a_list
+  | CEApply (a1, a_list) -> String.concat " " (a1 :: List.map atom_to_str a_list)
   | CEIf (e1, e2, e3) ->
     Format.sprintf
       "if %s\nthen %s\nelse %s"
@@ -70,35 +66,24 @@ and exp_to_str = function
 
 let fun_to_str = function
   | ALet (name, args, body) ->
-    Format.sprintf
-      "%s = %s"
-      (Base.List.fold args ~init:name ~f:(fun acc arg -> acc ^ " " ^ arg))
-      (exp_to_str body)
+    Format.sprintf "%s = %s" (String.concat " " (name :: args)) (exp_to_str body)
 ;;
 
-let str_item_to_str = function
+let declaration_to_str = function
   | ADNoRec func_list ->
-    let fun1 = Base.List.hd_exn func_list in
-    let tl = Base.List.tl_exn func_list in
-    Base.List.fold_left
-      tl
-      ~init:(Format.sprintf "let %s" (fun_to_str fun1))
-      ~f:(fun acc fun1 -> acc ^ "\nand " ^ fun_to_str fun1)
+    let funs = List.map fun_to_str func_list in
+    "let " ^ String.concat "\nand " funs
   | ADREC func_list ->
-    let fun1 = Base.List.hd_exn func_list in
-    let tl = Base.List.tl_exn func_list in
-    Base.List.fold_left
-      tl
-      ~init:(Format.sprintf "let rec %s" (fun_to_str fun1))
-      ~f:(fun acc fun1 -> acc ^ "\nand " ^ fun_to_str fun1)
+    let funs = List.map fun_to_str func_list in
+    "let rec " ^ String.concat "\nand " funs
 ;;
 
-let pp_anf_structure ppf p =
+let pp_anf_program ppf p =
   let len = List.length p in
   Base.List.iteri
     ~f:(fun i a ->
       if i = len - 1
-      then Format.fprintf ppf "%s" (str_item_to_str a)
-      else Format.fprintf ppf "%s\n\n" (str_item_to_str a))
+      then Format.fprintf ppf "%s" (declaration_to_str a)
+      else Format.fprintf ppf "%s\n\n" (declaration_to_str a))
     p
 ;;

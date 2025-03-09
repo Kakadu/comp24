@@ -5,8 +5,4 @@
 open Pe_ast
 open Common
 
-val run_alpha_conv
-  :  bindings
-  -> int
-  -> pe_declaration list
-  -> bindings * int * pe_declaration list
+val run_alpha_conv : bindings -> int -> pe_program -> bindings * int * pe_program

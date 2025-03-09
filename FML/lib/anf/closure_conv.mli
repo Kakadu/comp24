@@ -4,4 +4,4 @@
 
 open Pe_ast
 
-val run_cc : pe_declaration list -> pe_declaration list
+val run_cc : pe_program -> pe_program

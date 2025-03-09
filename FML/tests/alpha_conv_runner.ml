@@ -22,6 +22,6 @@ let () =
   | Ok ast ->
     let bind, cnt, ast = run_pe ast in
     let _, _, ast = run_alpha_conv bind cnt ast in
-    Format.printf "%a" pp_pe_structure ast
+    Format.printf "%a" pp_pe_program ast
   | Error message -> Format.printf "%s" message
 ;;

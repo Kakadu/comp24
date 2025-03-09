@@ -20,6 +20,6 @@ let () =
   match parse_and_infer input with
   | Ok ast ->
     let _, _, converted = run_pe ast in
-    Format.printf "%a" pp_pe_structure converted
+    Format.printf "%a" pp_pe_program converted
   | Error message -> Format.printf "%s" message
 ;;

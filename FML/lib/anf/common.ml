@@ -35,7 +35,6 @@ let builtins =
   ; "print_int"
   ; "list_head"
   ; "list_tail"
-  ; "list_len"
   ; "tuple_element"
   ; "is_empty"
   ; "fail_match"

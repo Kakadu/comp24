@@ -28,6 +28,6 @@ let () =
     let ast = run_cc ast in
     let bind, cnt, ast = run_ll bind cnt ast in
     let _, _, ast = run_anf bind cnt ast in
-    Format.printf "%a" pp_anf_structure ast
+    Format.printf "%a" pp_anf_program ast
   | Error message -> Format.printf "%s" message
 ;;
