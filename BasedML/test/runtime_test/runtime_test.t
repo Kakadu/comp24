@@ -25,5 +25,5 @@
   13
   21
   34
-  Memory used:   0x17c0/  0x4000
+  Memory used:   0x1eb0/  0x4000
   Memory used:     0x80/  0x4000
