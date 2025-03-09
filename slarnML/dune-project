@@ -1,0 +1,33 @@
+(lang dune 3.11)
+
+(name slarnML)
+
+(generate_opam_files true)
+
+(cram enable)
+
+(license LGPL-3.0-or-later)
+
+(source
+ (github ioannessh/comp23hw))
+
+(authors "Ivan Shurenkov")
+
+(maintainers "Ivan Shurenkov")
+
+(package
+ (name slarnML)
+ (synopsis "SlarnML")
+ (version 0.0)
+ (depends 
+  ocaml 
+  dune
+  angstrom
+  base
+  (ppx_inline_test :with-test)
+  ppx_expect
+  ppx_deriving
+  bisect_ppx
+  (odoc :with-doc)
+  (ocamlformat :build)))
+
