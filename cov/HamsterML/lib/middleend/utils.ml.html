@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>utils.ml &mdash; Coverage report</title>
+    <meta name="description" content="72.50% coverage in lib/middleend/utils.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/middleend/</span>utils.ml
+        </a>
+      </h1>
+      <h2>72.50%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:27.16%"></span>
+      <span class="some-visited" style="bottom:35.80%"></span>
+      <span class="unvisited" style="bottom:30.86%"></span>
+      <span class="unvisited" style="bottom:25.93%"></span>
+      <span class="unvisited" style="bottom:9.88%"></span>
+      <span class="unvisited" style="bottom:8.64%"></span>
+      <span class="unvisited" style="bottom:4.94%"></span>
+      <span class="unvisited" style="bottom:2.47%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="some-visited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="unvisited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="unvisited"> </span>
+<a id="L74"></a><span class="unvisited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+</pre>
+<pre><code class="ocaml">open Base
+module Format = Stdlib.Format
+
+module R = struct
+  type 'a t = int -&gt; 'a * int
+
+  let fresh st = <span data-count="1236">s</span>t, st + 1
+
+  let ( &gt;&gt;= ) : 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t =
+    fun m f state -&gt;
+    <span data-count="13890">l</span>et value, st = m state in
+    <span data-count="13890">(</span><span data-count="13890">f</span> value) st
+  ;;
+
+  let ( &gt;&gt;| ) : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t =
+    fun m f state -&gt;
+    <span data-count="78">l</span>et value, st = m state in
+    <span data-count="156">f</span> value, st
+  ;;
+
+  let ( let* ) = ( &gt;&gt;= )
+  let bind m f = <span data-count="0">m</span> &gt;&gt;= f
+  let return value st = <span data-count="12875">v</span>alue, st
+  let run monad = <span data-count="221">f</span>st @@ mona<span data-count="221">d</span> 0
+
+  let rec map_list list ~f =
+    <span data-count="136">m</span>atch list with
+    | <span data-count="58">[</span>] -&gt; return []
+    | <span data-count="78">x</span> :: xs -&gt;
+      let* y = <span data-count="78">f</span> x in
+      <span data-count="78">l</span>et* ys = map_lis<span data-count="78">t</span> xs ~f in
+      <span data-count="78">r</span>eturn (y :: ys)
+  ;;
+
+  let rec fold_list list ~init ~f =
+    <span data-count="2862">m</span>atch list with
+    | <span data-count="1358">[</span>] -&gt; return init
+    | <span data-count="1504">x</span> :: xs -&gt;
+      let* acc = <span data-count="1504">f</span> init x in
+      <span data-count="1504">f</span>old_list xs ~init:acc ~f
+  ;;
+end
+
+type id = string
+
+module NameSet = struct
+  type t = id list
+
+  let empty : t = []
+
+  let extend (name : id) (set : t) : t =
+    <span data-count="183">i</span>f List.mem set name ~equal:String.equal then <span data-count="0">s</span>et else <span data-count="183">s</span>et @ [ name ]
+  ;;
+
+  let union (s1 : t) (s2 : t) : t =
+    <span data-count="0">L</span>ist.fold s2 ~init:s1 ~f:(fun acc name -&gt; <span data-count="0">e</span>xtend name acc)
+  ;;
+
+  let find (name : id) (set : t) = <span data-count="11">L</span>ist.find set ~f:(String.equa<span data-count="11">l</span> name)
+  let pp fmt (set : t) = <span data-count="0">F</span>ormat.fprintf fmt "[%s]" (String.conca<span data-count="0">t</span> ~sep:", " set)
+end
+
+module NameEnv = struct
+  type t = (id, id, String.comparator_witness) Map.t
+
+  let empty : t = Map.empt<span data-count="23">y</span> (module String)
+  let find key (env : t) = <span data-count="2991">M</span>ap.find env key
+
+  let find_exn key (env : t) = <span data-count="215">M</span>ap.find_exn env key
+  let extend (k, v) (env : t) = <span data-count="1079">M</span>ap.set env ~key:k ~data:v
+
+  let pp fmt (env : t) =
+    <span data-count="0">l</span>et pp_names fmt (old_name, new_name) =
+      <span data-count="0">F</span>ormat.fprintf fmt "%s -&gt; %s" old_name new_name
+    in
+    if Map.is_empty env
+    then <span data-count="0">F</span>ormat.fprintf fmt "NameEnv is empty!\n"
+    else
+      <span data-count="0">M</span>ap.iteri env ~f:(fun ~key ~data -&gt; <span data-count="0">F</span>ormat.fprintf fmt "%a\n" pp_names (key, data))
+  ;;
+end
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

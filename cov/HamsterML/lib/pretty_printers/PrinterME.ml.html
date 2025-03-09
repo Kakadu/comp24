@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>PrinterME.ml &mdash; Coverage report</title>
+    <meta name="description" content="88.10% coverage in lib/pretty_printers/PrinterME.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/pretty_printers/</span>PrinterME.ml
+        </a>
+      </h1>
+      <h2>88.10%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:33.33%"></span>
+      <span class="unvisited" style="bottom:38.46%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+</pre>
+<pre><code class="ocaml">open ME
+open Ast
+open PrinterAst
+
+let rec me_to_prog (prog : me_prog) =
+  <span data-count="10">L</span>ist.rev @@ Base.List.fol<span data-count="10">d</span> prog ~init:[] ~f:(fun acc expr -&gt; <span data-count="10">m</span>e_to_exp<span data-count="10">r</span> expr :: acc)
+
+and me_to_expr (expr : me_expr) : expr =
+  <span data-count="595">m</span>atch expr with
+  | <span data-count="79">M</span>EConst v -&gt; EConst v
+  | <span data-count="174">M</span>EVar id -&gt; EVar id
+  | <span data-count="55">M</span>EOperation op -&gt; EOperation op
+  | <span data-count="0">M</span>EConstraint (l, dt) -&gt; EConstraint (me_to_exp<span data-count="0">r</span> l, dt)
+  | <span data-count="4">M</span>EListConcat (l, r) -&gt; EListConcat (me_to_exp<span data-count="4">r</span> l, me_to_exp<span data-count="4">r</span> r)
+  | <span data-count="215">M</span>EApplication (l, r) -&gt; Application (me_to_exp<span data-count="215">r</span> l, me_to_exp<span data-count="215">r</span> r)
+  | <span data-count="8">M</span>EList lst -&gt; EList (List.ma<span data-count="8">p</span> me_to_expr lst)
+  | <span data-count="2">M</span>ETuple (a, b, tl) -&gt;
+    let a = me_to_expr a in
+    <span data-count="2">l</span>et b = me_to_expr b in
+    <span data-count="2">l</span>et tl = List.map me_to_expr tl in
+    <span data-count="2">E</span>Tuple (a, b, tl)
+  | <span data-count="19">M</span>EIf (_if, _then, Some _else) -&gt;
+    If (me_to_exp<span data-count="19">r</span> _if, me_to_exp<span data-count="19">r</span> _then, Some (me_to_exp<span data-count="19">r</span> _else))
+  | <span data-count="0">M</span>EIf (_if, _then, None) -&gt; If (me_to_exp<span data-count="0">r</span> _if, me_to_exp<span data-count="0">r</span> _then, None)
+  | <span data-count="29">M</span>ELet (rec_flag, binds, Some scope) -&gt;
+    let binds =
+      Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
+        <span data-count="29">(</span>name, args, me_to_exp<span data-count="29">r</span> body) :: acc)
+    in
+    <span data-count="29">L</span>et (rec_flag, List.re<span data-count="29">v</span> binds, Some (me_to_exp<span data-count="29">r</span> scope))
+  | <span data-count="10">M</span>ELet (rec_flag, binds, None) -&gt;
+    let binds =
+      Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
+        <span data-count="10">(</span>name, args, me_to_exp<span data-count="10">r</span> body) :: acc)
+    in
+    <span data-count="10">L</span>et (rec_flag, List.re<span data-count="10">v</span> binds, None)
+;;
+
+let pretty_print_me_prog (prog : me_prog) = <span data-count="10">p</span>rog |&gt; me_to_prog |&gt; <span data-count="10">p</span>retty_print_prog
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
