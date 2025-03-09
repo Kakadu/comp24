@@ -1,0 +1,4 @@
+(executable
+ (public_name BDSML)
+ (name main)
+ (libraries BDSML))
