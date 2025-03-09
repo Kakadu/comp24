@@ -5,13 +5,7 @@
 open Reduced_ast
 open Parser.Ast
 open Middleend_utils
-
-open
-  Utils.Counter_monad.Make
-    (Int)
-    (struct
-      type t = error
-    end)
+open Monads
 
 let fresh_var =
   let+ f = fresh in
@@ -205,8 +199,4 @@ let ast_to_rast prog =
   List.concat rast
 ;;
 
-let remove_patterns structure =
-  match run (ast_to_rast structure) 0 with
-  | Result.Ok s -> s
-  | Result.Error s -> [ RStr_eval (fun_exception @@ exp_to_string s) ]
-;;
+let remove_patterns structure = run (ast_to_rast structure) 0
