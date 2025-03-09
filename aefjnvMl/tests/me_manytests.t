@@ -47,11 +47,9 @@
     then
       b
     else
-      let n1 cc0_n =
-        (( - ) cc0_n) 1 in
-        let ab cc1_b cc2_a =
-          (( + ) cc2_a) cc1_b in
-          ((fib_acc b) ((ab b) a)) (n1 n))
+      let n1 = (( - ) n) 1 in
+        let ab = (( + ) a) b in
+          ((fib_acc b) ab) n1)
   ;;
   
   let rec fib cc_ac0_n =
@@ -78,12 +76,9 @@
   ;;
   
   let test3 a b c =
-    let cc_ac0_a cc0_a =
-      print_int cc0_a in
-      let cc_ac1_b cc1_b =
-        print_int cc1_b in
-        let cc_ac2_c cc2_c =
-          print_int cc2_c in
+    let cc_ac0_a = print_int a in
+      let cc_ac1_b = print_int b in
+        let cc_ac2_c = print_int c in
           0
   ;;
   
@@ -135,7 +130,20 @@
   
 
   $ ./me_runner.exe < manytests/typed/006partial2.ml
-  This expression has type ((int -> int -> int) -> int -> 'a) -> 'a but an expression was expected of type int
+  let foo a b c =
+    let () = print_int a in
+      let () = print_int b in
+        let () = print_int c in
+          (( + ) a) ((( * ) b) c)
+  ;;
+  
+  let cc_ac3_main = let cc_ac0_foo = foo 1 in
+      let cc_ac1_foo = cc_ac0_foo 2 in
+        let cc_ac2_foo = cc_ac1_foo 3 in
+          let () = print_int cc_ac2_foo in
+            0
+  ;;
+  
 
   $ ./me_runner.exe < manytests/typed/006partial3.ml
   let foo a =

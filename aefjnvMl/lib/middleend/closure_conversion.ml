@@ -140,6 +140,7 @@ let closure_conversion toplvl =
           | Recursive -> Base.Set.remove free_vars v
           | Nonrecursive -> free_vars
         in
+        let free_vars = if Base.Set.length p_vars_set == 0 then empty_set else free_vars in
         let saturated =
           Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:(List.rev ps)
         in

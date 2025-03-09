@@ -141,10 +141,8 @@
   ;;
   
   let cc_ac3_main = let cc_ac0_foo = foo 1 in
-      let cc_ac1_foo cc0_cc_ac0_foo =
-        cc0_cc_ac0_foo 2 in
-        let cc_ac2_foo cc1_cc_ac1_foo =
-          (cc1_cc_ac1_foo cc_ac0_foo) 3 in
+      let cc_ac1_foo = cc_ac0_foo 2 in
+        let cc_ac2_foo = cc_ac1_foo 3 in
           let () = print_int cc_ac2_foo in
             0
   ;;
