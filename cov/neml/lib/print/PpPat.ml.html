@@ -152,8 +152,8 @@ let pp : Pat.t -&gt; document =
   let rec p = function
     | <span data-count="1">A</span>ny -&gt;
         return Prec.Highest (cha<span data-count="1">r</span> '_')
-    | <span data-count="334">V</span>ar id -&gt;
-        return Prec.Highest (pp_i<span data-count="334">d</span> id)
+    | <span data-count="680">V</span>ar id -&gt;
+        return Prec.Highest (pp_i<span data-count="680">d</span> id)
     | <span data-count="124">C</span>onst x -&gt;
         return Prec.Highest (pp_cons<span data-count="124">t</span> x)
     | <span data-count="50">C</span>onstruct (I "::", Some (Tuple (l, r, []))) -&gt;
@@ -174,7 +174,7 @@ let pp : Pat.t -&gt; document =
         <span data-count="3">r</span>eturn Prec.Highest doc
   in
 
-  run<span data-count="7">f</span> p
+  run<span data-count="10">f</span> p
 </code></pre>
       </div>
     </div>

@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>PTy.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in lib/parse/PTy.ml">
+    <title>MOpt.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/middle/MOpt.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,7 +12,7 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">lib/parse/</span>PTy.ml
+          <span class="dirname">lib/middle/</span>MOpt.ml
         </a>
       </h1>
       <h2>100.00%</h2>
@@ -39,40 +39,40 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span class="visited"> </span>
 <a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -137,49 +137,49 @@
 
 [@@@ocaml.text "/*"]
 
-(* https://ocaml.org/manual/5.2/types.html#s:typexpr *)
-
 open! Base
-open Angstrom
 
-open LTypes
-open PCommon
+open LMisc
+open MCommon
 
-(** 'a, 'b *)
-let pvar = pty_var &gt;&gt;<span data-count="10">|</span> fun id -&gt; <span data-count="36">T</span>y.Var id
+(** Middleend optimizations *)
 
-(** ('k, 'v) map *)
-let pmulti_args_app pty =
-  <span data-count="7">l</span>et* args = paren<span data-count="7">s</span> @@ sep_by<span data-count="7">1</span> (ws *<span data-count="7">&gt;</span> cha<span data-count="7">r</span> ',') pty in
-  <span data-count="7">l</span>et* id = ws *<span data-count="7">&gt;</span> pty_con_id in
-  <span data-count="3">r</span>eturn (Ty.Con (id, args))
-
-let poprnd pty =
-  <span data-count="7">w</span>s
-  *&gt; choic<span data-count="7">e</span>
-       [ (pty_con_id &gt;&gt;<span data-count="7">|</span> fun id -&gt; <span data-count="198">T</span>y.Con (id, []))
-       ; pvar
-       ; pmulti_args_ap<span data-count="7">p</span> pty
-       ; paren<span data-count="7">s</span> pty ]
-
-(**
-  int list
-  ('k, 'v) map option option
-*)
-let papp pty =
-  <span data-count="7">l</span>et* arg = poprn<span data-count="7">d</span> pty in
-  <span data-count="241">l</span>et rec pcons acc =
-    <span data-count="254">o</span>ption acc (ws1 *<span data-count="254">&gt;</span> pty_con_id &gt;&gt;<span data-count="254">=</span> fun id -&gt; <span data-count="13">p</span>cons (Ty.Con (id, [acc])))
+(** Groups chained functions *)
+let group_funs =
+  let to_idset (l : Id.t List1.t) : IdSet.t =
+    <span data-count="34">L</span>ist1.to_list l |&gt; <span data-count="34">S</span>et.of_list (module Id)
   in
-  pcons arg
 
-let table =
-  let ptuple = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "*" &gt;&gt;| fun _ list2 -&gt; <span data-count="11">T</span>y.Tuple list2 in
-  <span data-count="10">l</span>et parr = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "-&gt;" &gt;&gt;| fun _ lhs rhs -&gt; <span data-count="82">T</span>y.Arr (lhs, rhs) in
+  let rec f : MSimpl.t -&gt; MSimpl.t = function
+    | <span data-count="6">F</span>un (Nonrec, args0, Fun (Nonrec, args1, body)) -&gt;
+        (* fun ARGS0 -&gt; fun ARGS1 -&gt; BODY
+           -&gt; fun ARGS0 .. ARGS1 -&gt; BODY *)
+        let args0 = List1.to_list args0 in
+        <span data-count="6">l</span>et args1 = List1.to_list args1 in
+        <span data-count="6">l</span>et args = List.concat [args0; args1] |&gt; <span data-count="6">L</span>ist1.of_list_exn in
+        <span data-count="6">f</span> (Fun (Nonrec, args, body))
+    | <span data-count="34">A</span>pply (Fun (Nonrec, args0, Apply (Fun (Nonrec, args1, body), s1)), s2)
+      when Set.is_empt<span data-count="34">y</span> @@ Set.inte<span data-count="34">r</span> (to_idse<span data-count="34">t</span> args0) (MSimpl.fre<span data-count="34">e</span> s1) -&gt;
+        (* (fun ARGS0 -&gt; (fun ARGS1 -&gt; BODY) S1) S2
+           -&gt; (fun ARGS0 .. ARGS1 BODY) S2 S1 *)
+        <span data-count="18">l</span>et args0 = List1.to_list args0 in
+        <span data-count="18">l</span>et args1 = List1.to_list args1 in
+        <span data-count="18">l</span>et args = List.concat [args0; args1] |&gt; <span data-count="18">L</span>ist1.of_list_exn in
+        <span data-count="18">f</span> (Apply (Apply (Fun (Nonrec, args, body), s2), s1))
+    | <span data-count="105">F</span>un (recf, args, sim) -&gt;
+        Fun (recf, args, <span data-count="105">f</span> sim)
+    | <span data-count="370">A</span>pply (sim1, sim2) -&gt;
+        Apply (<span data-count="370">f</span> sim1, <span data-count="370">f</span> sim2)
+    | (<span data-count="291">I</span>d _ | <span data-count="154">C</span>onst _) as sim -&gt;
+        sim
+    | <span data-count="12">I</span>f (scond, sthen, selse) -&gt;
+        If (<span data-count="12">f</span> scond, <span data-count="12">f</span> sthen, <span data-count="12">f</span> selse)
+    | <span data-count="20">S</span>eq sims -&gt;
+        Seq (List2.ma<span data-count="20">p</span> sims ~f)
+  in
+  f
 
-  <span data-count="10">[</span>[InfixN ptuple]; [InfixR parr]]
-
-let p : Ty.t t = fi<span data-count="10">x</span> (fun pty -&gt; <span data-count="7">p</span>operators ~table ~poprnd:(pap<span data-count="7">p</span> pty))
+let opt = group_funs
 </code></pre>
       </div>
     </div>

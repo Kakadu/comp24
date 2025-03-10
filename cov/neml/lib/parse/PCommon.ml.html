@@ -536,125 +536,125 @@ open LAst
 open LTypes
 
 (* ======= Utils ======= *)
-let unit = retur<span data-count="7">n</span> ()
+let unit = retur<span data-count="10">n</span> ()
 
-let skip_ws = skip_whil<span data-count="7">e</span> Char.is_whitespace
+let skip_ws = skip_whil<span data-count="10">e</span> Char.is_whitespace
 let skip_comments =
-  let scomment = strin<span data-count="7">g</span> "(*" *&gt; many_til<span data-count="7">l</span> any_char (strin<span data-count="7">g</span> "*)") in
-  <span data-count="7">s</span>ep_b<span data-count="7">y</span> skip_ws scomment *<span data-count="7">&gt;</span> unit
+  let scomment = strin<span data-count="10">g</span> "(*" *&gt; many_til<span data-count="10">l</span> any_char (strin<span data-count="10">g</span> "*)") in
+  <span data-count="10">s</span>ep_b<span data-count="10">y</span> skip_ws scomment *<span data-count="10">&gt;</span> unit
 
-let ws = skip_ws *<span data-count="7">&gt;</span> skip_comments *<span data-count="7">&gt;</span> skip_ws
+let ws = skip_ws *<span data-count="10">&gt;</span> skip_comments *<span data-count="10">&gt;</span> skip_ws
 let ws1 =
-  let paren = peek_char_fail &gt;&gt;= function <span data-count="10">'</span>(' -&gt; unit | <span data-count="7322">_</span> -&gt; fail "" in
-  <span data-count="7">c</span>hoic<span data-count="7">e</span> [ski<span data-count="7">p</span> Char.is_whitespace *<span data-count="7">&gt;</span> ws; paren *<span data-count="7">&gt;</span> skip_comments]
+  let paren = peek_char_fail &gt;&gt;= function <span data-count="13">'</span>(' -&gt; unit | <span data-count="14051">_</span> -&gt; fail "" in
+  <span data-count="10">c</span>hoic<span data-count="10">e</span> [ski<span data-count="10">p</span> Char.is_whitespace *<span data-count="10">&gt;</span> ws; paren *<span data-count="10">&gt;</span> skip_comments]
 
-let ident s = <span data-count="56">s</span>trin<span data-count="56">g</span> s &gt;&gt;| fun x -&gt; <span data-count="2227">I</span>d.I x
+let ident s = <span data-count="80">s</span>trin<span data-count="80">g</span> s &gt;&gt;| fun x -&gt; <span data-count="4391">I</span>d.I x
 
-let parens p = <span data-count="41">c</span>ha<span data-count="41">r</span> '(' *<span data-count="41">&gt;</span> ws *<span data-count="41">&gt;</span> p &lt;<span data-count="41">*</span> ws &lt;* cha<span data-count="41">r</span> ')'
-let spaced p = <span data-count="6229">w</span>s1 *<span data-count="6229">&gt;</span> p &lt;* ws1
-let opt p = <span data-count="8056">o</span>ption None (p &gt;&gt;<span data-count="8056">|</span> Option.some)
+let parens p = <span data-count="58">c</span>ha<span data-count="58">r</span> '(' *<span data-count="58">&gt;</span> ws *<span data-count="58">&gt;</span> p &lt;<span data-count="58">*</span> ws &lt;* cha<span data-count="58">r</span> ')'
+let spaced p = <span data-count="12235">w</span>s1 *<span data-count="12235">&gt;</span> p &lt;* ws1
+let opt p = <span data-count="15670">o</span>ption None (p &gt;&gt;<span data-count="15670">|</span> Option.some)
 
 (* ======= Identifiers ======= *)
 (* https://ocaml.org/manual/5.2/lex.html#sss:lex:identifiers *)
 
 let is_keyword = function
   (* https://ocaml.org/manual/5.2/lex.html#sss:keywords *)
-  | <span data-count="86">"</span>true"
-  | <span data-count="91">"</span>false"
-  | <span data-count="325">"</span>match"
-  | <span data-count="325">"</span>with"
-  | <span data-count="2846">"</span>let"
+  | <span data-count="164">"</span>true"
+  | <span data-count="168">"</span>false"
+  | <span data-count="641">"</span>match"
+  | <span data-count="641">"</span>with"
+  | <span data-count="5682">"</span>let"
   | <span data-count="0">"</span>rec"
-  | <span data-count="125">"</span>and"
-  | <span data-count="1731">"</span>in"
+  | <span data-count="252">"</span>and"
+  | <span data-count="3445">"</span>in"
   | <span data-count="1">"</span>type"
-  | <span data-count="100">"</span>function"
-  | <span data-count="288">"</span>fun"
-  | <span data-count="177">"</span>if"
-  | <span data-count="177">"</span>then"
-  | <span data-count="173">"</span>else" -&gt;
+  | <span data-count="188">"</span>function"
+  | <span data-count="551">"</span>fun"
+  | <span data-count="339">"</span>if"
+  | <span data-count="339">"</span>then"
+  | <span data-count="335">"</span>else" -&gt;
       true
-  | <span data-count="13315">_</span> -&gt;
+  | <span data-count="25234">_</span> -&gt;
       false
 
 let pident flag =
-  <span data-count="35">l</span>et is_first =
+  <span data-count="50">l</span>et is_first =
     match flag with
-    | <span data-count="21">`</span>LowerCase -&gt; (
-        function <span data-count="19233">'</span>a' .. 'z' | <span data-count="356">'</span>_' -&gt; true | <span data-count="18175">_</span> -&gt; false )
-    | <span data-count="14">`</span>Capitalized -&gt; (
-        function <span data-count="171">'</span>A' .. 'Z' -&gt; true | <span data-count="16943">_</span> -&gt; false )
+    | <span data-count="30">`</span>LowerCase -&gt; (
+        function <span data-count="37058">'</span>a' .. 'z' | <span data-count="701">'</span>_' -&gt; true | <span data-count="35539">_</span> -&gt; false )
+    | <span data-count="20">`</span>Capitalized -&gt; (
+        function <span data-count="221">'</span>A' .. 'Z' -&gt; true | <span data-count="33466">_</span> -&gt; false )
   in
 
-  let* first = satisf<span data-count="35">y</span> is_first &gt;&gt;<span data-count="35">|</span> String.of_char in
-  <span data-count="19760">l</span>et* rest =
-    take_whil<span data-count="19760">e</span> (function
-      | <span data-count="0">'</span>A' .. 'Z' | <span data-count="47335">'</span>a' .. 'z' | <span data-count="505">'</span>0' .. '9' | <span data-count="1468">'</span>_' | <span data-count="1">'</span>\'' -&gt;
+  let* first = satisf<span data-count="50">y</span> is_first &gt;&gt;<span data-count="50">|</span> String.of_char in
+  <span data-count="37980">l</span>et* rest =
+    take_whil<span data-count="37980">e</span> (function
+      | <span data-count="0">'</span>A' .. 'Z' | <span data-count="92784">'</span>a' .. 'z' | <span data-count="999">'</span>0' .. '9' | <span data-count="2930">'</span>_' | <span data-count="1">'</span>\'' -&gt;
           true
-      | <span data-count="19676">_</span> -&gt;
+      | <span data-count="37825">_</span> -&gt;
           false )
   in
 
-  <span data-count="19760">l</span>et id = first ^ rest in
-  if is_keyword id then <span data-count="6445">f</span>ail "keyword" else <span data-count="13315">r</span>eturn (Id.I id)
+  <span data-count="37980">l</span>et id = first ^ rest in
+  if is_keyword id then <span data-count="12746">f</span>ail "keyword" else <span data-count="25234">r</span>eturn (Id.I id)
 
 let pconstruct_id =
   let keywords =
     choice
-      [iden<span data-count="7">t</span> "true"; iden<span data-count="7">t</span> "false"; iden<span data-count="7">t</span> "()"; iden<span data-count="7">t</span> "[]"; paren<span data-count="7">s</span> (iden<span data-count="7">t</span> "::")]
+      [iden<span data-count="10">t</span> "true"; iden<span data-count="10">t</span> "false"; iden<span data-count="10">t</span> "()"; iden<span data-count="10">t</span> "[]"; paren<span data-count="10">s</span> (iden<span data-count="10">t</span> "::")]
   in
-  <span data-count="7">p</span>iden<span data-count="7">t</span> `Capitalized &lt;|<span data-count="7">&gt;</span> keywords
+  <span data-count="10">p</span>iden<span data-count="10">t</span> `Capitalized &lt;|<span data-count="10">&gt;</span> keywords
 
-let is_keyword_op = function <span data-count="441">"</span>|" | <span data-count="0">"</span>-&gt;" -&gt; true | <span data-count="569">_</span> -&gt; false
+let is_keyword_op = function <span data-count="866">"</span>|" | <span data-count="0">"</span>-&gt;" -&gt; true | <span data-count="1112">_</span> -&gt; false
 
 let pinfix_id ?starts () =
-  <span data-count="105">l</span>et* first =
-    Option.value_ma<span data-count="105">p</span> starts ~f:string
-      ~default:(satisf<span data-count="105">y</span> is_op_first_char &gt;&gt;<span data-count="105">|</span> Char.to_string)
+  <span data-count="150">l</span>et* first =
+    Option.value_ma<span data-count="150">p</span> starts ~f:string
+      ~default:(satisf<span data-count="150">y</span> is_op_first_char &gt;&gt;<span data-count="150">|</span> Char.to_string)
   in
-  <span data-count="1006">l</span>et* rest = take_whil<span data-count="1006">e</span> is_op_char in
+  <span data-count="1974">l</span>et* rest = take_whil<span data-count="1974">e</span> is_op_char in
 
-  <span data-count="1006">l</span>et id = first ^ rest in
-  if is_keyword_op id then <span data-count="441">f</span>ail "keyword" else <span data-count="565">r</span>eturn (Id.I id)
+  <span data-count="1974">l</span>et id = first ^ rest in
+  if is_keyword_op id then <span data-count="866">f</span>ail "keyword" else <span data-count="1108">r</span>eturn (Id.I id)
 
 let pprefix_id =
-  let* first = strin<span data-count="7">g</span> "!" in
+  let* first = strin<span data-count="10">g</span> "!" in
   <span data-count="4">l</span>et* rest = take_whil<span data-count="4">e</span> is_op_char in
 
   <span data-count="4">l</span>et id = first ^ rest in
   if is_keyword_op id then <span data-count="0">f</span>ail "keyword" else <span data-count="4">r</span>eturn (Id.I id)
 
 let pvalue_id =
-  let pop_id = pinfix_i<span data-count="7">d</span> () &lt;|&gt; pprefix_id in
-  <span data-count="7">p</span>iden<span data-count="7">t</span> `LowerCase &lt;|<span data-count="7">&gt;</span> paren<span data-count="7">s</span> pop_id
+  let pop_id = pinfix_i<span data-count="10">d</span> () &lt;|&gt; pprefix_id in
+  <span data-count="10">p</span>iden<span data-count="10">t</span> `LowerCase &lt;|<span data-count="10">&gt;</span> paren<span data-count="10">s</span> pop_id
 
-let pty_con_id = piden<span data-count="7">t</span> `LowerCase
+let pty_con_id = piden<span data-count="10">t</span> `LowerCase
 
 let pty_var =
-  cha<span data-count="7">r</span> '\'' *<span data-count="7">&gt;</span> ws *<span data-count="7">&gt;</span> (piden<span data-count="7">t</span> `LowerCase &lt;|<span data-count="7">&gt;</span> piden<span data-count="7">t</span> `Capitalized)
-  &gt;&gt;<span data-count="7">|</span> fun (Id.I var) -&gt; <span data-count="90">V</span>ar.V var
+  cha<span data-count="10">r</span> '\'' *<span data-count="10">&gt;</span> ws *<span data-count="10">&gt;</span> (piden<span data-count="10">t</span> `LowerCase &lt;|<span data-count="10">&gt;</span> piden<span data-count="10">t</span> `Capitalized)
+  &gt;&gt;<span data-count="10">|</span> fun (Id.I var) -&gt; <span data-count="90">V</span>ar.V var
 
 (* ======= Constants ======= *)
 
 let pconst =
   let pint =
-    let* num = take_whil<span data-count="7">e</span> Char.is_digit in
-    <span data-count="25172">m</span>atch Int.of_string_opt num with
-    | <span data-count="19400">N</span>one -&gt;
+    let* num = take_whil<span data-count="10">e</span> Char.is_digit in
+    <span data-count="49357">m</span>atch Int.of_string_opt num with
+    | <span data-count="38020">N</span>one -&gt;
         fail "not an integer"
-    | <span data-count="5772">S</span>ome x -&gt;
+    | <span data-count="11337">S</span>ome x -&gt;
         return (Const.Int x)
   in
 
-  let pchar = cha<span data-count="7">r</span> '\'' *<span data-count="7">&gt;</span> any_char &lt;<span data-count="7">*</span> cha<span data-count="7">r</span> '\'' &gt;&gt;| fun x -&gt; <span data-count="0">C</span>onst.Char x in
+  let pchar = cha<span data-count="10">r</span> '\'' *<span data-count="10">&gt;</span> any_char &lt;<span data-count="10">*</span> cha<span data-count="10">r</span> '\'' &gt;&gt;| fun x -&gt; <span data-count="0">C</span>onst.Char x in
 
-  <span data-count="7">l</span>et pstring =
-    cha<span data-count="7">r</span> '"' *<span data-count="7">&gt;</span> take_til<span data-count="7">l</span> (Char.( = <span data-count="7">)</span> '"')
-    &lt;<span data-count="7">*</span> advanc<span data-count="7">e</span> 1
-    &gt;&gt;| fun x -&gt; <span data-count="13">C</span>onst.String x
+  <span data-count="10">l</span>et pstring =
+    cha<span data-count="10">r</span> '"' *<span data-count="10">&gt;</span> take_til<span data-count="10">l</span> (Char.( = <span data-count="10">)</span> '"')
+    &lt;<span data-count="10">*</span> advanc<span data-count="10">e</span> 1
+    &gt;&gt;| fun x -&gt; <span data-count="20">C</span>onst.String x
   in
 
-  <span data-count="7">c</span>hoic<span data-count="7">e</span> [pint; pchar; pstring]
+  <span data-count="10">c</span>hoic<span data-count="10">e</span> [pint; pchar; pstring]
 
 (* ====== Value bindings ====== *)
 
@@ -663,18 +663,18 @@ let pconst =
   [let [rec] ValId1 PArg1 [: Ty] = E1 and P1 = E2 and ...]
 *)
 let plet pexpr ppat pty =
-  <span data-count="12">l</span>et pbinding =
+  <span data-count="17">l</span>et pbinding =
     let pfun =
       let* id = pvalue_id in
-      <span data-count="1516">l</span>et* args = ws1 *<span data-count="1516">&gt;</span> sep_by<span data-count="1516">1</span> ws1 ppat &gt;&gt;<span data-count="1516">|</span> List1.of_list_exn in
-      <span data-count="588">l</span>et* ty =
-        op<span data-count="588">t</span> (ws *<span data-count="588">&gt;</span> cha<span data-count="588">r</span> ':')
-        &gt;&gt;<span data-count="588">=</span> function <span data-count="587">N</span>one -&gt; return None | <span data-count="1">S</span>ome _ -&gt; pty &gt;&gt;| Option.some
+      <span data-count="2982">l</span>et* args = ws1 *<span data-count="2982">&gt;</span> sep_by<span data-count="2982">1</span> ws1 ppat &gt;&gt;<span data-count="2982">|</span> List1.of_list_exn in
+      <span data-count="1151">l</span>et* ty =
+        op<span data-count="1151">t</span> (ws *<span data-count="1151">&gt;</span> cha<span data-count="1151">r</span> ':')
+        &gt;&gt;<span data-count="1151">=</span> function <span data-count="1150">N</span>one -&gt; return None | <span data-count="1">S</span>ome _ -&gt; pty &gt;&gt;| Option.some
       in
-      <span data-count="588">l</span>et* expr = ws *<span data-count="588">&gt;</span> cha<span data-count="588">r</span> '=' *<span data-count="588">&gt;</span> pexpr in
+      <span data-count="1151">l</span>et* expr = ws *<span data-count="1151">&gt;</span> cha<span data-count="1151">r</span> '=' *<span data-count="1151">&gt;</span> pexpr in
 
-      <span data-count="588">l</span>et expr =
-        match ty with <span data-count="587">N</span>one -&gt; expr | <span data-count="1">S</span>ome ty -&gt; Expr.Constraint (expr, ty)
+      <span data-count="1151">l</span>et expr =
+        match ty with <span data-count="1150">N</span>one -&gt; expr | <span data-count="1">S</span>ome ty -&gt; Expr.Constraint (expr, ty)
       in
       return Expr.{pat= Pat.Var id; expr= Expr.Fun (args, expr)}
     in
@@ -682,31 +682,31 @@ let plet pexpr ppat pty =
     let psimple =
       let* pat =
         ppat
-        &gt;&gt;<span data-count="12">=</span> fun pat -&gt;
-        <span data-count="2473">o</span>p<span data-count="2473">t</span> (ws *<span data-count="2473">&gt;</span> cha<span data-count="2473">r</span> ':')
+        &gt;&gt;<span data-count="17">=</span> fun pat -&gt;
+        <span data-count="4896">o</span>p<span data-count="4896">t</span> (ws *<span data-count="4896">&gt;</span> cha<span data-count="4896">r</span> ':')
         &gt;&gt;= function
-        | <span data-count="2472">N</span>one -&gt;
+        | <span data-count="4895">N</span>one -&gt;
             return pat
         | <span data-count="1">S</span>ome _ -&gt;
             pty &gt;&gt;| fun ty -&gt; <span data-count="1">P</span>at.Constraint (pat, ty)
       in
-      <span data-count="2473">l</span>et* expr = ws *<span data-count="2473">&gt;</span> cha<span data-count="2473">r</span> '=' *<span data-count="2473">&gt;</span> pexpr in
-      <span data-count="2473">r</span>eturn Expr.{pat; expr}
+      <span data-count="4896">l</span>et* expr = ws *<span data-count="4896">&gt;</span> cha<span data-count="4896">r</span> '=' *<span data-count="4896">&gt;</span> pexpr in
+      <span data-count="4896">r</span>eturn Expr.{pat; expr}
     in
 
-    pfun &lt;|<span data-count="12">&gt;</span> psimple
+    pfun &lt;|<span data-count="17">&gt;</span> psimple
   in
 
   let* rec_flag =
-    strin<span data-count="12">g</span> "let"
-    *<span data-count="12">&gt;</span> choic<span data-count="12">e</span>
-         [space<span data-count="12">d</span> (strin<span data-count="12">g</span> "rec") *<span data-count="12">&gt;</span> retur<span data-count="12">n</span> Expr.Rec; ws1 *<span data-count="12">&gt;</span> retur<span data-count="12">n</span> Expr.Nonrec]
+    strin<span data-count="17">g</span> "let"
+    *<span data-count="17">&gt;</span> choic<span data-count="17">e</span>
+         [space<span data-count="17">d</span> (strin<span data-count="17">g</span> "rec") *<span data-count="17">&gt;</span> retur<span data-count="17">n</span> Expr.Rec; ws1 *<span data-count="17">&gt;</span> retur<span data-count="17">n</span> Expr.Nonrec]
   in
-  <span data-count="2995">l</span>et* bindings =
-    sep_by<span data-count="2995">1</span> (space<span data-count="2995">d</span> (strin<span data-count="2995">g</span> "and")) pbinding &gt;&gt;<span data-count="2995">|</span> List1.of_list_exn
+  <span data-count="5913">l</span>et* bindings =
+    sep_by<span data-count="5913">1</span> (space<span data-count="5913">d</span> (strin<span data-count="5913">g</span> "and")) pbinding &gt;&gt;<span data-count="5913">|</span> List1.of_list_exn
   in
 
-  <span data-count="2995">r</span>eturn (rec_flag, bindings)
+  <span data-count="5913">r</span>eturn (rec_flag, bindings)
 
 (* ======= Operators ======= *)
 
@@ -717,53 +717,53 @@ type 'oprnd operator =
   | InfixR of ('oprnd -&gt; 'oprnd -&gt; 'oprnd) t
 
 let pprefix pop prhs =
-  <span data-count="90">l</span>et pop_many =
-    let* hd, tl = many<span data-count="90">1</span> pop &gt;&gt;<span data-count="90">|</span> List1.of_list_exn in
-    <span data-count="14">r</span>eturn @@ List.fold_lef<span data-count="14">t</span> tl ~init:hd ~f:(fun acc f x -&gt; <span data-count="4">a</span>cc (<span data-count="4">f</span> x))
+  <span data-count="126">l</span>et pop_many =
+    let* hd, tl = many<span data-count="126">1</span> pop &gt;&gt;<span data-count="126">|</span> List1.of_list_exn in
+    <span data-count="22">r</span>eturn @@ List.fold_lef<span data-count="22">t</span> tl ~init:hd ~f:(fun acc f x -&gt; <span data-count="4">a</span>cc (<span data-count="4">f</span> x))
   in
-  let* apply = optio<span data-count="90">n</span> Fn.id pop_many in
-  <span data-count="229585">l</span>et* rhs = prhs in
-  <span data-count="208202">r</span>eturn (appl<span data-count="208202">y</span> rhs)
+  let* apply = optio<span data-count="126">n</span> Fn.id pop_many in
+  <span data-count="445662">l</span>et* rhs = prhs in
+  <span data-count="405216">r</span>eturn (appl<span data-count="405216">y</span> rhs)
 
 let pinfixn (pop : ('oprnd List2.t -&gt; 'oprnd) t) prhs fst =
-  <span data-count="197760">l</span>et* apply = pop in
-  <span data-count="1718">l</span>et* snd, tl = sep_by<span data-count="1718">1</span> pop prhs &gt;&gt;<span data-count="1718">|</span> List1.of_list_exn in
-  <span data-count="1693">r</span>eturn @@ appl<span data-count="1693">y</span> (fst, snd, tl)
+  <span data-count="385274">l</span>et* apply = pop in
+  <span data-count="3339">l</span>et* snd, tl = sep_by<span data-count="3339">1</span> pop prhs &gt;&gt;<span data-count="3339">|</span> List1.of_list_exn in
+  <span data-count="3293">r</span>eturn @@ appl<span data-count="3293">y</span> (fst, snd, tl)
 
 let rec pinfixl pop prhs lhs =
-  <span data-count="204192">l</span>et* apply = pop in
-  <span data-count="13282">l</span>et* rhs = prhs in
-  <span data-count="6432">l</span>et lhs' = apply lhs rhs in
-  <span data-count="6432">p</span>infix<span data-count="6432">l</span> pop prhs lhs' &lt;|&gt; retur<span data-count="6432">n</span> lhs'
+  <span data-count="398009">l</span>et* apply = pop in
+  <span data-count="26195">l</span>et* rhs = prhs in
+  <span data-count="12735">l</span>et lhs' = apply lhs rhs in
+  <span data-count="12735">p</span>infix<span data-count="12735">l</span> pop prhs lhs' &lt;|&gt; retur<span data-count="12735">n</span> lhs'
 
 let rec pinfixr pop prhs lhs =
-  <span data-count="198317">l</span>et* apply = pop in
-  <span data-count="557">l</span>et* rhs = prhs &gt;&gt;<span data-count="557">=</span> fun lhs' -&gt; <span data-count="557">p</span>infix<span data-count="557">r</span> pop prhs lhs' &lt;|&gt; retur<span data-count="557">n</span> lhs' in
-  <span data-count="557">r</span>eturn (appl<span data-count="557">y</span> lhs rhs)
+  <span data-count="386254">l</span>et* apply = pop in
+  <span data-count="980">l</span>et* rhs = prhs &gt;&gt;<span data-count="980">=</span> fun lhs' -&gt; <span data-count="980">p</span>infix<span data-count="980">r</span> pop prhs lhs' &lt;|&gt; retur<span data-count="980">n</span> lhs' in
+  <span data-count="980">r</span>eturn (appl<span data-count="980">y</span> lhs rhs)
 
 let plvl poprnd ops =
-  <span data-count="90">l</span>et prefixs, infixns, infixls, infixrs =
+  <span data-count="126">l</span>et prefixs, infixns, infixls, infixrs =
     List.fold_left ops ~init:([], [], [], [])
       ~f:(fun (prefixs, infixns, infixls, infixrs) -&gt; function
-      | <span data-count="10">P</span>refix p -&gt;
+      | <span data-count="14">P</span>refix p -&gt;
           (p :: prefixs, infixns, infixls, infixrs)
-      | <span data-count="20">I</span>nfixN p -&gt;
+      | <span data-count="28">I</span>nfixN p -&gt;
           (prefixs, p :: infixns, infixls, infixrs)
-      | <span data-count="25">I</span>nfixL p -&gt;
+      | <span data-count="35">I</span>nfixL p -&gt;
           (prefixs, infixns, p :: infixls, infixrs)
-      | <span data-count="35">I</span>nfixR p -&gt;
+      | <span data-count="49">I</span>nfixR p -&gt;
           (prefixs, infixns, infixls, p :: infixrs) )
   in
 
-  <span data-count="90">l</span>et pprefix = pprefix (choic<span data-count="90">e</span> prefixs) poprnd in
-  <span data-count="90">l</span>et pinfixn = pinfixn (choic<span data-count="90">e</span> infixns) pprefix in
-  <span data-count="90">l</span>et pinfixl = pinfixl (choic<span data-count="90">e</span> infixls) pprefix in
-  <span data-count="90">l</span>et pinfixr = pinfixr (choic<span data-count="90">e</span> infixrs) pprefix in
+  <span data-count="126">l</span>et pprefix = pprefix (choic<span data-count="126">e</span> prefixs) poprnd in
+  <span data-count="126">l</span>et pinfixn = pinfixn (choic<span data-count="126">e</span> infixns) pprefix in
+  <span data-count="126">l</span>et pinfixl = pinfixl (choic<span data-count="126">e</span> infixls) pprefix in
+  <span data-count="126">l</span>et pinfixr = pinfixr (choic<span data-count="126">e</span> infixrs) pprefix in
 
-  <span data-count="90">l</span>et* lhs = pprefix in
-  <span data-count="197760">c</span>hoice [pinfix<span data-count="197760">r</span> lhs; pinfix<span data-count="197760">l</span> lhs; pinfix<span data-count="197760">n</span> lhs; retur<span data-count="197760">n</span> lhs]
+  <span data-count="126">l</span>et* lhs = pprefix in
+  <span data-count="385274">c</span>hoice [pinfix<span data-count="385274">r</span> lhs; pinfix<span data-count="385274">l</span> lhs; pinfix<span data-count="385274">n</span> lhs; retur<span data-count="385274">n</span> lhs]
 
-let poperators ~table ~poprnd = <span data-count="15">L</span>ist.fold_left table ~init:poprnd ~f:plvl
+let poperators ~table ~poprnd = <span data-count="21">L</span>ist.fold_left table ~init:poprnd ~f:plvl
 </code></pre>
       </div>
     </div>

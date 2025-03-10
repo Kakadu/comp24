@@ -436,171 +436,171 @@ open LMisc
 open LAst
 open PCommon
 
-let pident = pvalue_id &gt;&gt;<span data-count="7">|</span> fun id -&gt; <span data-count="7581">E</span>xpr.Id id
-let pconst = pconst &gt;&gt;<span data-count="7">|</span> fun const -&gt; <span data-count="5585">E</span>xpr.Const const
-let pconstruct = pconstruct_id &gt;&gt;<span data-count="7">|</span> fun id -&gt; <span data-count="527">E</span>xpr.Construct (id, None)
+let pident = pvalue_id &gt;&gt;<span data-count="10">|</span> fun id -&gt; <span data-count="14659">E</span>xpr.Id id
+let pconst = pconst &gt;&gt;<span data-count="10">|</span> fun const -&gt; <span data-count="11085">E</span>xpr.Const const
+let pconstruct = pconstruct_id &gt;&gt;<span data-count="10">|</span> fun id -&gt; <span data-count="987">E</span>xpr.Construct (id, None)
 
 (**
   [let P1 = E1 and P2 = E2 and ... in E]
   [let rec ValId1 PArg1 = E1 and P1 = E2 and ... in E]
 *)
 let plet pexpr =
-  <span data-count="5">l</span>et* rec_flag, bindings = ple<span data-count="5">t</span> pexpr PPat.p PTy.p in
-  <span data-count="2846">l</span>et* expr = space<span data-count="2846">d</span> (strin<span data-count="2846">g</span> "in") *<span data-count="2846">&gt;</span> pexpr in
-  <span data-count="1672">r</span>eturn (Expr.Let (rec_flag, bindings, expr))
+  <span data-count="7">l</span>et* rec_flag, bindings = ple<span data-count="7">t</span> pexpr PPat.p PTy.p in
+  <span data-count="5682">l</span>et* expr = space<span data-count="5682">d</span> (strin<span data-count="5682">g</span> "in") *<span data-count="5682">&gt;</span> pexpr in
+  <span data-count="3337">r</span>eturn (Expr.Let (rec_flag, bindings, expr))
 
 (** [fun P1 ... Pn -&gt; E] *)
 let pfun pexpr =
-  <span data-count="5">l</span>et* args = strin<span data-count="5">g</span> "fun" *<span data-count="5">&gt;</span> ws1 *<span data-count="5">&gt;</span> sep_by<span data-count="5">1</span> ws1 PPat.p &gt;&gt;<span data-count="5">|</span> List1.of_list_exn in
-  <span data-count="288">l</span>et* expr = ws *<span data-count="288">&gt;</span> strin<span data-count="288">g</span> "-&gt;" *<span data-count="288">&gt;</span> pexpr in
-  <span data-count="288">r</span>eturn (Expr.Fun (args, expr))
+  <span data-count="7">l</span>et* args = strin<span data-count="7">g</span> "fun" *<span data-count="7">&gt;</span> ws1 *<span data-count="7">&gt;</span> sep_by<span data-count="7">1</span> ws1 PPat.p &gt;&gt;<span data-count="7">|</span> List1.of_list_exn in
+  <span data-count="551">l</span>et* expr = ws *<span data-count="551">&gt;</span> strin<span data-count="551">g</span> "-&gt;" *<span data-count="551">&gt;</span> pexpr in
+  <span data-count="551">r</span>eturn (Expr.Fun (args, expr))
 
 let pcases_ pexpr =
-  <span data-count="330">l</span>et pcase =
+  <span data-count="648">l</span>et pcase =
     let* pat = PPat.p in
-    <span data-count="866">l</span>et* expr = ws *<span data-count="866">&gt;</span> strin<span data-count="866">g</span> "-&gt;" *<span data-count="866">&gt;</span> pexpr in
-    <span data-count="866">r</span>eturn Expr.{pat; expr}
+    <span data-count="1695">l</span>et* expr = ws *<span data-count="1695">&gt;</span> strin<span data-count="1695">g</span> "-&gt;" *<span data-count="1695">&gt;</span> pexpr in
+    <span data-count="1695">r</span>eturn Expr.{pat; expr}
   in
-  let pipe (* optional | *) = ws &lt;<span data-count="330">*</span> cha<span data-count="330">r</span> '|' &lt;|&gt; ws1 in
-  <span data-count="330">p</span>ipe *<span data-count="330">&gt;</span> sep_by<span data-count="330">1</span> (ws *<span data-count="330">&gt;</span> cha<span data-count="330">r</span> '|') pcase &gt;&gt;| List1.of_list_exn
+  let pipe (* optional | *) = ws &lt;<span data-count="648">*</span> cha<span data-count="648">r</span> '|' &lt;|&gt; ws1 in
+  <span data-count="648">p</span>ipe *<span data-count="648">&gt;</span> sep_by<span data-count="648">1</span> (ws *<span data-count="648">&gt;</span> cha<span data-count="648">r</span> '|') pcase &gt;&gt;| List1.of_list_exn
 
 (** [match E0 with P1 -&gt; E1 | ... | Pn -&gt; En] *)
 let pmatch pexpr =
-  <span data-count="5">l</span>et* expr = strin<span data-count="5">g</span> "match" *<span data-count="5">&gt;</span> ws1 *<span data-count="5">&gt;</span> pexpr in
-  <span data-count="325">l</span>et* cases = ws1 *<span data-count="325">&gt;</span> strin<span data-count="325">g</span> "with" *<span data-count="325">&gt;</span> pcases<span data-count="325">_</span> pexpr in
-  <span data-count="325">r</span>eturn (Expr.Match (expr, cases))
+  <span data-count="7">l</span>et* expr = strin<span data-count="7">g</span> "match" *<span data-count="7">&gt;</span> ws1 *<span data-count="7">&gt;</span> pexpr in
+  <span data-count="641">l</span>et* cases = ws1 *<span data-count="641">&gt;</span> strin<span data-count="641">g</span> "with" *<span data-count="641">&gt;</span> pcases<span data-count="641">_</span> pexpr in
+  <span data-count="641">r</span>eturn (Expr.Match (expr, cases))
 
 (** [function P1 -&gt; E1 | ... | Pn -&gt; En] *)
 let pfunction pexpr =
-  <span data-count="5">s</span>trin<span data-count="5">g</span> "function" *<span data-count="5">&gt;</span> pcases<span data-count="5">_</span> pexpr &gt;&gt;| fun cases -&gt; <span data-count="100">E</span>xpr.Function cases
+  <span data-count="7">s</span>trin<span data-count="7">g</span> "function" *<span data-count="7">&gt;</span> pcases<span data-count="7">_</span> pexpr &gt;&gt;| fun cases -&gt; <span data-count="188">E</span>xpr.Function cases
 
 (** [a; b; c] *)
 let plist pexpr =
-  <span data-count="5">l</span>et nil = Expr.Construct (Id.I "[]", None) in
-  let list hd tl = <span data-count="3528">E</span>xpr.Construct (Id.I "::", Some (Expr.Tuple (hd, tl, []))) in
+  <span data-count="7">l</span>et nil = Expr.Construct (Id.I "[]", None) in
+  let list hd tl = <span data-count="7047">E</span>xpr.Construct (Id.I "::", Some (Expr.Tuple (hd, tl, []))) in
 
   let to_construct = function
-    | <span data-count="1176">E</span>xpr.Seq (e1, e2, tl) -&gt;
+    | <span data-count="2349">E</span>xpr.Seq (e1, e2, tl) -&gt;
         let tl = List.fold_right tl ~init:nil ~f:list in
-        <span data-count="1176">l</span>ist e1 (lis<span data-count="1176">t</span> e2 tl)
-    | <span data-count="9">e</span> -&gt;
+        <span data-count="2349">l</span>ist e1 (lis<span data-count="2349">t</span> e2 tl)
+    | <span data-count="16">e</span> -&gt;
         list e nil
   in
-  cha<span data-count="5">r</span> '[' *<span data-count="5">&gt;</span> (pexpr &gt;&gt;<span data-count="5">|</span> to_construct) &lt;<span data-count="5">*</span> ws &lt;<span data-count="5">*</span> op<span data-count="5">t</span> (cha<span data-count="5">r</span> ';') &lt;<span data-count="5">*</span> ws &lt;* cha<span data-count="5">r</span> ']'
+  cha<span data-count="7">r</span> '[' *<span data-count="7">&gt;</span> (pexpr &gt;&gt;<span data-count="7">|</span> to_construct) &lt;<span data-count="7">*</span> ws &lt;<span data-count="7">*</span> op<span data-count="7">t</span> (cha<span data-count="7">r</span> ';') &lt;<span data-count="7">*</span> ws &lt;* cha<span data-count="7">r</span> ']'
 
 (** [if a then b else c] *)
 let pif pexpr =
-  <span data-count="5">l</span>et* if' = strin<span data-count="5">g</span> "if" *<span data-count="5">&gt;</span> ws1 *<span data-count="5">&gt;</span> pexpr in
-  <span data-count="177">l</span>et* then' = space<span data-count="177">d</span> (strin<span data-count="177">g</span> "then") *<span data-count="177">&gt;</span> pexpr in
-  <span data-count="177">l</span>et* else' =
-    op<span data-count="177">t</span> (ws1 *<span data-count="177">&gt;</span> strin<span data-count="177">g</span> "else")
-    &gt;&gt;<span data-count="177">=</span> function <span data-count="173">S</span>ome _ -&gt; ws1 *<span data-count="173">&gt;</span> pexpr &gt;&gt;| Option.some | <span data-count="4">N</span>one -&gt; return None
+  <span data-count="7">l</span>et* if' = strin<span data-count="7">g</span> "if" *<span data-count="7">&gt;</span> ws1 *<span data-count="7">&gt;</span> pexpr in
+  <span data-count="339">l</span>et* then' = space<span data-count="339">d</span> (strin<span data-count="339">g</span> "then") *<span data-count="339">&gt;</span> pexpr in
+  <span data-count="339">l</span>et* else' =
+    op<span data-count="339">t</span> (ws1 *<span data-count="339">&gt;</span> strin<span data-count="339">g</span> "else")
+    &gt;&gt;<span data-count="339">=</span> function <span data-count="335">S</span>ome _ -&gt; ws1 *<span data-count="335">&gt;</span> pexpr &gt;&gt;| Option.some | <span data-count="4">N</span>one -&gt; return None
   in
-  <span data-count="177">r</span>eturn (Expr.If (if', then', else'))
+  <span data-count="339">r</span>eturn (Expr.If (if', then', else'))
 
 (**
   [ (expr) ]
   [ (expr: ty) ]
 *)
 let pparens pexpr =
-  <span data-count="5">l</span>et p =
+  <span data-count="7">l</span>et p =
     let* expr = pexpr in
-    <span data-count="2526">o</span>p<span data-count="2526">t</span> (ws *<span data-count="2526">&gt;</span> cha<span data-count="2526">r</span> ':')
+    <span data-count="4999">o</span>p<span data-count="4999">t</span> (ws *<span data-count="4999">&gt;</span> cha<span data-count="4999">r</span> ':')
     &gt;&gt;= function
-    | <span data-count="2518">N</span>one -&gt;
+    | <span data-count="4989">N</span>one -&gt;
         return expr
-    | <span data-count="8">S</span>ome _ -&gt;
-        PTy.p &gt;&gt;| fun ty -&gt; <span data-count="8">E</span>xpr.Constraint (expr, ty)
+    | <span data-count="10">S</span>ome _ -&gt;
+        PTy.p &gt;&gt;| fun ty -&gt; <span data-count="10">E</span>xpr.Constraint (expr, ty)
   in
   parens p
 
 let poprnd pexpr =
-  <span data-count="5">w</span>s
-  *&gt; choic<span data-count="5">e</span>
+  <span data-count="7">w</span>s
+  *&gt; choic<span data-count="7">e</span>
        [ pident
        ; pconst
        ; pconstruct
-       ; ple<span data-count="5">t</span> pexpr
-       ; pfu<span data-count="5">n</span> pexpr
-       ; pmatc<span data-count="5">h</span> pexpr
-       ; pfunctio<span data-count="5">n</span> pexpr
-       ; plis<span data-count="5">t</span> pexpr
-       ; pi<span data-count="5">f</span> pexpr
-       ; pparen<span data-count="5">s</span> pexpr ]
+       ; ple<span data-count="7">t</span> pexpr
+       ; pfu<span data-count="7">n</span> pexpr
+       ; pmatc<span data-count="7">h</span> pexpr
+       ; pfunctio<span data-count="7">n</span> pexpr
+       ; plis<span data-count="7">t</span> pexpr
+       ; pi<span data-count="7">f</span> pexpr
+       ; pparen<span data-count="7">s</span> pexpr ]
 
 (* ======= Operators ======= *)
 
 let table =
   let pprefix1 =
-    ws *<span data-count="7">&gt;</span> pprefix_id &gt;&gt;| fun id rhs -&gt; <span data-count="4">E</span>xpr.Apply (Expr.Id id, rhs)
+    ws *<span data-count="10">&gt;</span> pprefix_id &gt;&gt;| fun id rhs -&gt; <span data-count="4">E</span>xpr.Apply (Expr.Id id, rhs)
   in
 
-  <span data-count="7">l</span>et papply =
+  <span data-count="10">l</span>et papply =
     ws1
     &gt;&gt;| fun _ lhs rhs -&gt;
-    <span data-count="5826">m</span>atch lhs with
-    | <span data-count="29">E</span>xpr.Construct (id, None) -&gt;
+    <span data-count="11597">m</span>atch lhs with
+    | <span data-count="39">E</span>xpr.Construct (id, None) -&gt;
         (* constructor application *)
         Expr.Construct (id, Some rhs)
-    | <span data-count="5797">_</span> -&gt;
+    | <span data-count="11558">_</span> -&gt;
         (* function application *)
         Expr.Apply (lhs, rhs)
   in
 
-  <span data-count="7">l</span>et pprefix2 =
+  <span data-count="10">l</span>et pprefix2 =
     ws
-    *<span data-count="7">&gt;</span> choic<span data-count="7">e</span>
-         [strin<span data-count="7">g</span> "-" *<span data-count="7">&gt;</span> retur<span data-count="7">n</span> (Id.I "~-"); strin<span data-count="7">g</span> "+" *<span data-count="7">&gt;</span> retur<span data-count="7">n</span> (Id.I "~+")]
-    &gt;&gt;| fun id rhs -&gt; <span data-count="14">E</span>xpr.Apply (Expr.Id id, rhs)
+    *<span data-count="10">&gt;</span> choic<span data-count="10">e</span>
+         [strin<span data-count="10">g</span> "-" *<span data-count="10">&gt;</span> retur<span data-count="10">n</span> (Id.I "~-"); strin<span data-count="10">g</span> "+" *<span data-count="10">&gt;</span> retur<span data-count="10">n</span> (Id.I "~+")]
+    &gt;&gt;| fun id rhs -&gt; <span data-count="22">E</span>xpr.Apply (Expr.Id id, rhs)
   in
 
-  <span data-count="7">l</span>et ainfix id lhs rhs = <span data-count="527">E</span>xpr.Apply (Expr.Apply (Expr.Id id, lhs), rhs) in
+  <span data-count="10">l</span>et ainfix id lhs rhs = <span data-count="1059">E</span>xpr.Apply (Expr.Apply (Expr.Id id, lhs), rhs) in
 
-  let pinfix1 = ws *<span data-count="7">&gt;</span> pinfix_i<span data-count="7">d</span> ~starts:"**" () &gt;&gt;| ainfix in
+  let pinfix1 = ws *<span data-count="10">&gt;</span> pinfix_i<span data-count="10">d</span> ~starts:"**" () &gt;&gt;| ainfix in
 
-  <span data-count="7">l</span>et pinfix2 =
+  <span data-count="10">l</span>et pinfix2 =
     ws
-    *<span data-count="7">&gt;</span> choic<span data-count="7">e</span>
-         [ pinfix_i<span data-count="7">d</span> ~starts:"*" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"/" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"%" () ]
+    *<span data-count="10">&gt;</span> choic<span data-count="10">e</span>
+         [ pinfix_i<span data-count="10">d</span> ~starts:"*" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"/" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"%" () ]
     &gt;&gt;| ainfix
   in
 
-  <span data-count="7">l</span>et pinfix3 =
-    ws *<span data-count="7">&gt;</span> choic<span data-count="7">e</span> [pinfix_i<span data-count="7">d</span> ~starts:"+" (); pinfix_i<span data-count="7">d</span> ~starts:"-" ()] &gt;&gt;| ainfix
+  <span data-count="10">l</span>et pinfix3 =
+    ws *<span data-count="10">&gt;</span> choic<span data-count="10">e</span> [pinfix_i<span data-count="10">d</span> ~starts:"+" (); pinfix_i<span data-count="10">d</span> ~starts:"-" ()] &gt;&gt;| ainfix
   in
 
-  <span data-count="7">l</span>et plist =
-    ws *<span data-count="7">&gt;</span> strin<span data-count="7">g</span> "::"
+  <span data-count="10">l</span>et plist =
+    ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "::"
     &gt;&gt;| fun _ lhs rhs -&gt;
-    <span data-count="48">E</span>xpr.Construct (Id.I "::", Some (Expr.Tuple (lhs, rhs, [])))
+    <span data-count="92">E</span>xpr.Construct (Id.I "::", Some (Expr.Tuple (lhs, rhs, [])))
   in
 
-  <span data-count="7">l</span>et pinfix4 =
-    ws *<span data-count="7">&gt;</span> choic<span data-count="7">e</span> [pinfix_i<span data-count="7">d</span> ~starts:"@" (); pinfix_i<span data-count="7">d</span> ~starts:"^" ()] &gt;&gt;| ainfix
+  <span data-count="10">l</span>et pinfix4 =
+    ws *<span data-count="10">&gt;</span> choic<span data-count="10">e</span> [pinfix_i<span data-count="10">d</span> ~starts:"@" (); pinfix_i<span data-count="10">d</span> ~starts:"^" ()] &gt;&gt;| ainfix
   in
 
-  <span data-count="7">l</span>et pinfix5 =
+  <span data-count="10">l</span>et pinfix5 =
     ws
-    *<span data-count="7">&gt;</span> choic<span data-count="7">e</span>
-         [ pinfix_i<span data-count="7">d</span> ~starts:"=" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"&lt;" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"&gt;" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"|" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"&amp;" ()
-         ; pinfix_i<span data-count="7">d</span> ~starts:"$" ()
-         ; iden<span data-count="7">t</span> "!=" ]
+    *<span data-count="10">&gt;</span> choic<span data-count="10">e</span>
+         [ pinfix_i<span data-count="10">d</span> ~starts:"=" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"&lt;" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"&gt;" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"|" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"&amp;" ()
+         ; pinfix_i<span data-count="10">d</span> ~starts:"$" ()
+         ; iden<span data-count="10">t</span> "!=" ]
     &gt;&gt;| ainfix
   in
 
-  <span data-count="7">l</span>et pinfix6 = ws *<span data-count="7">&gt;</span> iden<span data-count="7">t</span> "&amp;&amp;" &gt;&gt;| ainfix in
-  <span data-count="7">l</span>et pinfix7 = ws *<span data-count="7">&gt;</span> iden<span data-count="7">t</span> "||" &gt;&gt;| ainfix in
+  <span data-count="10">l</span>et pinfix6 = ws *<span data-count="10">&gt;</span> iden<span data-count="10">t</span> "&amp;&amp;" &gt;&gt;| ainfix in
+  <span data-count="10">l</span>et pinfix7 = ws *<span data-count="10">&gt;</span> iden<span data-count="10">t</span> "||" &gt;&gt;| ainfix in
 
-  <span data-count="7">l</span>et ptuple = ws *<span data-count="7">&gt;</span> strin<span data-count="7">g</span> "," &gt;&gt;| fun _ list2 -&gt; <span data-count="306">E</span>xpr.Tuple list2 in
-  <span data-count="7">l</span>et pseq = ws *<span data-count="7">&gt;</span> strin<span data-count="7">g</span> ";" &gt;&gt;| fun _ list2 -&gt; <span data-count="1189">E</span>xpr.Seq list2 in
+  <span data-count="10">l</span>et ptuple = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "," &gt;&gt;| fun _ list2 -&gt; <span data-count="575">E</span>xpr.Tuple list2 in
+  <span data-count="10">l</span>et pseq = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> ";" &gt;&gt;| fun _ list2 -&gt; <span data-count="2362">E</span>xpr.Seq list2 in
 
-  <span data-count="7">[</span> [Prefix pprefix1]
+  <span data-count="10">[</span> [Prefix pprefix1]
   ; [InfixL papply]
   ; [Prefix pprefix2]
   ; [InfixR pinfix1]
@@ -614,7 +614,7 @@ let table =
   ; [InfixN ptuple]
   ; [InfixN pseq] ]
 
-let p : Expr.t t = fi<span data-count="7">x</span> (fun pexpr -&gt; <span data-count="5">p</span>operators ~table ~poprnd:(poprn<span data-count="5">d</span> pexpr))
+let p : Expr.t t = fi<span data-count="10">x</span> (fun pexpr -&gt; <span data-count="7">p</span>operators ~table ~poprnd:(poprn<span data-count="7">d</span> pexpr))
 </code></pre>
       </div>
     </div>
