@@ -1,2 +1,3 @@
 test/manytests/**
 test/riscv/rt.ml
+test/riscv/typed/*
