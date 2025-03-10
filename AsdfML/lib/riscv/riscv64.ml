@@ -280,6 +280,13 @@ let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.progr
   Stdio.Out_channel.with_file out_file ~f:(fun out ->
     let fmt = formatter_of_out_channel out in
     fn_args := init_env ast;
+    let ast =
+      if not (Map.mem !fn_args "main")
+      then (
+        Format.eprintf "main function not found\n";
+        Fn ("main", [], ACExpr (CImmExpr ImmUnit)) :: ast)
+      else ast
+    in
     let consts, fns = collect_consts ast in
     emit_data_section consts;
     emit str ".section .text";
