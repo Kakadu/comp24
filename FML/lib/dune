@@ -17,7 +17,8 @@
   Closure_conv
   Lambda_lifting
   Anf_ast
-  Anf)
+  Anf
+  Codegen)
  (modules_without_implementation inf_errors)
  (libraries base angstrom)
  (preprocess
