@@ -148,7 +148,7 @@ let%expect_test _ =
   [%expect
     {|
     let ll_2 cont n_0 res = (cont (( * ) n_0 res))
-    let ll_helper_1 n_0 cont =
+    let rec ll_helper_1 n_0 cont =
       if (( <= ) n_0 1)
       then (cont 1)
       else (ll_helper_1 (( - ) n_0 1) (ll_2 cont n_0))
@@ -172,7 +172,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let ll_helper_1 acc n_0 =
+    let rec ll_helper_1 acc n_0 =
       if (( <= ) n_0 1)
       then 1
       else (ll_helper_1 (( * ) acc n_0) (( - ) n_0 1))
@@ -226,7 +226,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let map f list =
+    let rec map f list =
       if (not (ml_list_is_empty list))
       then
         let hd = (ml_list_hd list) in
@@ -293,7 +293,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ll_helper_1 x acc n_0 =
+    let rec ll_helper_1 x acc n_0 =
       if (( = ) n_0 0)
       then acc
       else let n_1 = n_0 in
