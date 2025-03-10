@@ -2,7 +2,13 @@
  (name aefjnvMl_lib)
  (public_name aefjnvMl.Lib)
  (modules parser inferencer top_utils)
- (libraries base angstrom ppx_deriving aefjnvMl.Common aefjnvMl.Middleend)
+ (libraries
+  base
+  angstrom
+  ppx_deriving
+  aefjnvMl.Common
+  aefjnvMl.Middleend
+  aefjnvMl.Llvm_lib)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)
