@@ -625,3 +625,45 @@ $ cat /tmp/out.s
   $ riscv64-linux-gnu-gcc -static /tmp/out.s -o /tmp/out -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/out
   25
+
+  $ dune exec riscv -- -anf -o /tmp/dbg.s <<- EOF
+  > let ( * ) x y = x * y * 10
+  > let main = 
+  >   let () = 
+  >     let () = println_int (( * ) 2 2) in
+  >     let () = println_int (( + ) 42 42) in
+  >     let ( + ) a b = a - b in
+  >     let () = println_int (( + ) 42 42) in
+  >     let println_int x = println_int (x + 1) in
+  >     println_int (( + ) 42 42)
+  >   in
+  >   println_int(( + ) (( * ) 2 2) 2)
+  > EOF
+  ANF:
+  let __ml_mul x y = let anf1 = ( * ) x y in
+         ( * ) anf1 10
+  let ll___ml_add_5 a b = ( - ) a b
+  let ll___ml_println_int_7 __ml_add x_0 =
+    let anf4 = __ml_add x_0 1 in
+    println_int anf4
+  let main =
+    let anf12 = __ml_mul 2 2 in
+    let anf5 = println_int anf12 in
+    let anf11 = ( + ) 42 42 in
+    let anf5 = println_int anf11 in
+    let anf10 = ll___ml_add_5 42 42 in
+    let anf5 = println_int anf10 in
+    let anf9 = ll___ml_add_5 42 42 in
+    let anf5 = ll___ml_println_int_7 ll___ml_add_5 anf9 in
+    let anf8 = __ml_mul 2 2 in
+    let anf7 = ( + ) anf8 2 in
+    println_int anf7
+  
+$ cat /tmp/dbg.s
+  $ riscv64-linux-gnu-gcc -static /tmp/dbg.s -o /tmp/dbg -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
+  $ qemu-riscv64-static /tmp/dbg
+  40
+  84
+  0
+  -1
+  42
