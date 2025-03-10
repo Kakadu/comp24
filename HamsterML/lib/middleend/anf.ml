@@ -15,7 +15,7 @@ type imm_expr =
   | ImmUnit
 
 type cexpr =
-  | CApplication of cexpr * cexpr
+  | CApplication of cexpr * cexpr * cexpr list
   | CIf of imm_expr * aexpr * aexpr option
   | CConstructList of imm_expr * imm_expr
   | CImm of imm_expr
@@ -34,10 +34,8 @@ type anf_prog = anf_decl list
 
 module NameEnv = struct
   include Utils.NameEnv
-
 end
 
-let _application l r = CApplication (CImm l, CImm r)
 let _let_in pattern body scope = ALetIn (pattern, body, scope)
 let _ac x = ACExpr (CImm x)
 
@@ -76,31 +74,48 @@ let extract_binds (binds : me_bind list) =
     first_bind, other_binds
 ;;
 
-let rec convert_expr (expr : me_expr) (k : imm_expr -> aexpr t) =
+let _application f args =
+  let f = CImm f in
+  let args = List.map args ~f:(fun x -> CImm x) in
+  match args with
+  | [ arg ] -> return @@ CApplication (f, arg, [])
+  | arg :: args_tl -> return @@ CApplication (f, arg, args_tl)
+  | [] -> failwith "Empty application O_O"
+;;
+
+let rec flatten_application expr =
+  match expr with
+  | MEApplication (l, r) ->
+    let f, args = flatten_application l in
+    f, args @ [ r ]
+  | _ -> expr, []
+;;
+
+let rec convert_exprs exprs k =
+  let rec helper acc = function
+    | [] -> k (List.rev acc)
+    | h :: tl -> convert_expr h (fun imm -> helper (imm :: acc) tl)
+  in
+  helper [] exprs
+
+and convert_expr (expr : me_expr) (k : imm_expr -> aexpr t) =
   match expr with
   | MEConst v -> k @@ value_to_anf v
   | MEVar id -> k @@ ImmId id
   | MEOperation op -> k @@ ImmOperation op
   | MEConstraint (expr, _) -> convert_expr expr k
-  | MEApplication (l, r) ->
-    let* new_var = get_fresh_name in
-    let* scope = k @@ ImmId new_var in
-    convert_expr l (fun imm_l ->
-      convert_expr r (fun imm_r ->
-        return @@ _let_in (Var new_var) (_application imm_l imm_r) scope))
-  | MEList exprs ->
-    let rec helper acc = function
-      | hd :: tl -> convert_expr hd (fun imm_hd -> helper (imm_hd :: acc) tl)
-      | [] -> k @@ ImmList (List.rev acc)
-    in
-    helper [] exprs
+  | MEApplication (_, _) as app ->
+    let f, args = flatten_application app in
+    convert_expr f (fun imm_f ->
+      convert_exprs args (fun imm_args ->
+        let* name = get_fresh_name in
+        let* scope = k @@ ImmId name in
+        let* application = _application imm_f (List.rev imm_args) in
+        return @@ _let_in (Var name) application scope))
+  | MEList exprs -> convert_exprs exprs (fun imm_exprs -> k @@ ImmList imm_exprs)
   | METuple (expr1, expr2, exprs) ->
     let exprs = expr1 :: expr2 :: exprs in
-    let rec helper acc = function
-      | hd :: tl -> convert_expr hd (fun imm_hd -> helper (imm_hd :: acc) tl)
-      | [] -> k @@ ImmTuple (List.rev acc)
-    in
-    helper [] exprs
+    convert_exprs exprs (fun imm_exprs -> k @@ ImmTuple imm_exprs)
   | MEListConcat (l, r) ->
     let* new_var = get_fresh_name in
     let* scope = k @@ ImmId new_var in

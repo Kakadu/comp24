@@ -12,8 +12,11 @@ let rec pretty_print_imm = function
 ;;
 
 let rec pretty_print_cexpr = function
-  | CApplication (f, arg) ->
-    Printf.sprintf "%s %s" (pretty_print_cexpr f) (pretty_print_cexpr arg)
+  | CApplication (f, arg, args) ->
+    let f_str = pretty_print_cexpr f in
+    let arg_str = pretty_print_cexpr arg in
+    let args_str = String.concat " " (List.map pretty_print_cexpr args) in
+    Printf.sprintf "%s %s%s" f_str arg_str (if args = [] then "" else " " ^ args_str)
   | CIf (cond, then_expr, Some else_expr) ->
     Printf.sprintf
       "if %s then %s else %s"
