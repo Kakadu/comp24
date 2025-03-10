@@ -67,7 +67,15 @@
   val temp: int * bool
 
   $ infer < manytests/typed/015tuples.ml
-  Infer error: Unbound variable '( == )'
+  val feven: 'a * (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fixpoly: (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) * (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) -> ('a -> 'b) * ('a -> 'b)
+  val fodd: (int -> int) * 'a -> int -> int
+  val main: int
+  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val meven: int -> int
+  val modd: int -> int
+  val tie: (int -> int) * (int -> int)
 
   $ infer < manytests/typed/016lists.ml
   Infer error: Occurs check failed

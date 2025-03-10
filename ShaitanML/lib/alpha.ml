@@ -3,6 +3,15 @@ open Pat_elim_ast
 open Common
 open Common.MonadCounter
 
+let rename env binds name =
+  if StrSet.find env name
+  then
+    let* fresh = fresh >>| get_id in
+    let updated = Map.update binds name ~f:(fun _ -> fresh) in
+    return (StrSet.add env fresh, updated, fresh)
+  else return (StrSet.add env name, binds, name)
+;;
+
 let rec ac_expr env bindings = function
   | PEEConst _ as c -> return c
   | PEEVar x as v ->
@@ -44,9 +53,9 @@ let rec ac_expr env bindings = function
 
 and ac_str_item env bindings = function
   | PENonrec (name, e) ->
-    let* env, bindings, name = rename env bindings name in
+    let* new_env, new_bindings, new_name = rename env bindings name in
     let* e = ac_expr env bindings e in
-    return (env, bindings, PENonrec (name, e))
+    return (new_env, new_bindings, PENonrec (new_name, e))
   | PERec cl ->
     let ids, exps = List.unzip cl in
     let f1 acc id =
@@ -64,16 +73,6 @@ and ac_str_item env bindings = function
     in
     let* decls = List.fold2_exn ids exps ~init:(return []) ~f:f1 in
     return (env, bindings, PERec decls)
-
-and rename env binds name =
-  if String.equal name "()"
-  then return (env, binds, "()")
-  else if StrSet.find env name
-  then
-    let* fresh = fresh in
-    let id = get_id fresh in
-    return (StrSet.add env id, StrMap.update binds name ~f:(fun _ -> id), id)
-  else return (StrSet.add env name, binds, name)
 ;;
 
 let ac_structure program env =
@@ -84,9 +83,32 @@ let ac_structure program env =
       let* rest = helper env binds tl in
       return (ast :: rest)
   in
-  helper env (Map.empty (module String)) program
+  helper env empty program
 ;;
 
+(* let to_rename =
+   [ "main"
+  ; "_start"
+  ; "create_closure"
+  ; "add"
+  ; "sub"
+  ; "mul"
+  ; "divp"
+  ; "eq"
+  ; "neq"
+  ; "lt"
+  ; "gt"
+  ; "le"
+  ; "ge"
+  ; "and"
+  ; "or"
+  ; "fail_match"
+  ]
+*)
+
 let run_ac bindings init prog =
-  run (ac_structure prog (StrSet.of_list Common.builtins)) bindings init
+  run
+    (ac_structure prog (StrSet.union (StrSet.of_list Common.builtins) StrSet.empty))
+    bindings
+    init
 ;;
