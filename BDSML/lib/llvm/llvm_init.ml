@@ -23,6 +23,11 @@ let bool_t = i1_type context
 let void_t = void_type context
 let ptr_t = pointer_type context
 
+let build_list_type element_type =
+  let node_type = struct_type context [| element_type; ptr_t |] in
+  node_type
+;;
+
 (*Hashtable*)
 
 let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
