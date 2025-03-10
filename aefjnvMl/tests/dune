@@ -14,17 +14,29 @@
  (libraries aefjnvMl_lib stdio middleend))
 
 (executable
+ (name ll_runner)
+ (public_name ll_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
+(executable
  (name me_runner)
  (public_name me_runner)
  (libraries aefjnvMl_lib stdio middleend))
 
+(executable
+ (name anf_runner)
+ (public_name anf_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
 (cram
- (applies_to inferencer_manytests parser_manytests me_manytests cc_tests)
+ (applies_to inferencer_manytests parser_manytests me_manytests cc_manytests ll_manytests anf_manytests)
  (deps
   ./inferencer_runner.exe
   ./parser_runner.exe
   ./me_runner.exe
   ./cc_runner.exe
+  ./ll_runner.exe
+  ./anf_runner.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

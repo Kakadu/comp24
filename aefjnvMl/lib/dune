@@ -1,7 +1,7 @@
 (library
  (name aefjnvMl_lib)
  (public_name aefjnvMl.Lib)
- (modules parser inferencer top_utils)
+ (modules parser inferencer top_utils pp_env)
  (libraries
   base
   angstrom

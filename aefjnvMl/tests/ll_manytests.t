@@ -1,19 +1,19 @@
-  $ ./me_runner.exe < manytests/do_not_type/001.ml
+  $ ./ll_runner.exe < manytests/do_not_type/001.ml
   Unbound value 'fac'
 
-  $ ./me_runner.exe < manytests/do_not_type/002if.ml
+  $ ./ll_runner.exe < manytests/do_not_type/002if.ml
   This expression has type bool but an expression was expected of type int
 
-  $ ./me_runner.exe < manytests/do_not_type/003occurs.ml
+  $ ./ll_runner.exe < manytests/do_not_type/003occurs.ml
   The type variable 'a occurs inside 'a -> 'b
 
-  $ ./me_runner.exe < manytests/do_not_type/004let_poly.ml
+  $ ./ll_runner.exe < manytests/do_not_type/004let_poly.ml
   This expression has type int but an expression was expected of type bool
 
-  $ ./me_runner.exe < manytests/do_not_type/015tuples.ml
+  $ ./ll_runner.exe < manytests/do_not_type/015tuples.ml
   Only variables are allowed as left-side of 'let rec'
 
-  $ ./me_runner.exe < manytests/typed/001fac.ml
+  $ ./ll_runner.exe < manytests/typed/001fac.ml
   Bindings before transformations:
   val fac: int -> int
   val main: int
@@ -37,7 +37,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/002fac.ml
+  $ ./ll_runner.exe < manytests/typed/002fac.ml
   Bindings before transformations:
   val fac_cps: int -> (int -> 'a) -> 'a
   val main: int
@@ -48,20 +48,28 @@
   
   ------------------------------
   
+  let ll_0 cc0_n cc1_k p =
+    cc1_k ((( * ) p) cc0_n)
+  ;;
+  
   let rec fac_cps n k =
     (if (( = ) n) 1
     then
       k 1
     else
-      (fac_cps ((( - ) n) 1)) (((fun cc0_n cc1_k p -> cc1_k ((( * ) p) cc0_n)) n) k))
+      (fac_cps ((( - ) n) 1)) ((ll_0 n) k))
   ;;
   
-  let cc_ac1_main = let () = print_int ((fac_cps 4) (fun cc_ac0_print_int -> cc_ac0_print_int)) in
+  let ll_1 cc_ac0_print_int =
+    cc_ac0_print_int
+  ;;
+  
+  let cc_ac1_main = let () = print_int ((fac_cps 4) ll_1) in
       0
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/003fib.ml
+  $ ./ll_runner.exe < manytests/typed/003fib.ml
   Bindings before transformations:
   val fib: int -> int
   val fib_acc: int -> int -> int -> int
@@ -98,7 +106,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/004manyargs.ml
+  $ ./ll_runner.exe < manytests/typed/004manyargs.ml
   Bindings before transformations:
   val main: int
   val test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
@@ -139,7 +147,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/005fix.ml
+  $ ./ll_runner.exe < manytests/typed/005fix.ml
   Bindings before transformations:
   val fac: (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
@@ -169,7 +177,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial.ml
+  $ ./ll_runner.exe < manytests/typed/006partial.ml
   Bindings before transformations:
   val foo: int -> int
   val main: int
@@ -180,12 +188,20 @@
   
   ------------------------------
   
+  let ll_0 foo =
+    (( + ) foo) 2
+  ;;
+  
+  let ll_1 cc_ac0_foo =
+    (( * ) cc_ac0_foo) 10
+  ;;
+  
   let cc_ac1_foo b =
     (if b
     then
-      (fun foo -> (( + ) foo) 2)
+      ll_0
     else
-      (fun cc_ac0_foo -> (( * ) cc_ac0_foo) 10))
+      ll_1)
   ;;
   
   let cc_ac2_foo x =
@@ -197,7 +213,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial2.ml
+  $ ./ll_runner.exe < manytests/typed/006partial2.ml
   Bindings before transformations:
   val foo: int -> int -> int -> int
   val main: int
@@ -223,7 +239,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial3.ml
+  $ ./ll_runner.exe < manytests/typed/006partial3.ml
   Bindings before transformations:
   val foo: int -> int -> int -> unit
   val main: int
@@ -234,10 +250,18 @@
   
   ------------------------------
   
+  let ll_1 c =
+    print_int c
+  ;;
+  
+  let ll_0 b =
+    let () = print_int b in
+      ll_1
+  ;;
+  
   let foo a =
     let () = print_int a in
-      (fun b -> let () = print_int b in
-        (fun c -> print_int c))
+      ll_0
   ;;
   
   let cc_ac0_main = let () = ((foo 4) 8) 9 in
@@ -245,7 +269,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/007order.ml
+  $ ./ll_runner.exe < manytests/typed/007order.ml
   Bindings before transformations:
   val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
   val main: unit
@@ -266,7 +290,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/008ascription.ml
+  $ ./ll_runner.exe < manytests/typed/008ascription.ml
   Bindings before transformations:
   val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
   val main: int
@@ -281,16 +305,24 @@
     (f x) (g x)
   ;;
   
-  let cc_ac2_main = let () = print_int (((addi (fun cc_ac0_x b -> (if b
-      then
-        (( + ) cc_ac0_x) 1
-      else
-        (( * ) cc_ac0_x) 2))) (fun cc_ac1__start -> (( = ) (( / ) cc_ac1__start) 2) 0)) 4) in
+  let ll_0 cc_ac0_x b =
+    (if b
+    then
+      (( + ) cc_ac0_x) 1
+    else
+      (( * ) cc_ac0_x) 2)
+  ;;
+  
+  let ll_1 cc_ac1__start =
+    (( = ) (( / ) cc_ac1__start) 2) 0
+  ;;
+  
+  let cc_ac2_main = let () = print_int (((addi ll_0) ll_1) 4) in
       0
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/009let_poly.ml
+  $ ./ll_runner.exe < manytests/typed/009let_poly.ml
   Bindings before transformations:
   val temp: int * bool
   
@@ -299,13 +331,15 @@
   
   ------------------------------
   
-  let temp = let f x =
-      x in
-      (f 1, f true)
+  let f x =
+    x
+  ;;
+  
+  let temp = (f 1, f true)
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/015tuples.ml
+  $ ./ll_runner.exe < manytests/typed/015tuples.ml
   Bindings before transformations:
   val feven: 'a * (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
@@ -341,8 +375,16 @@
           (cc_ac0_f a, cc_ac0_f b)
   ;;
   
+  let ll_1 cc0_self cc1_cc_ac1_l li cc_ac2_x =
+    (li (cc0_self cc1_cc_ac1_l)) cc_ac2_x
+  ;;
+  
+  let ll_0 self cc_ac1_l =
+    (map ((ll_1 self) cc_ac1_l)) cc_ac1_l
+  ;;
+  
   let fixpoly l =
-    (fix (fun self cc_ac1_l -> (map (((fun cc0_self cc1_cc_ac1_l li cc_ac2_x -> (li (cc0_self cc1_cc_ac1_l)) cc_ac2_x) self) cc_ac1_l)) cc_ac1_l)) l
+    (fix ll_0) l
   ;;
   
   let feven cc_ac3_p n =
@@ -395,7 +437,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/016lists.ml
+  $ ./ll_runner.exe < manytests/typed/016lists.ml
   Bindings before transformations:
   val append: 'a list -> 'a list -> 'a list
   val cartesian: 'a list -> 'b list -> 'a * 'b list
@@ -432,19 +474,21 @@
         part_match_fail ()))
   ;;
   
-  let length_tail = let rec helper cc_ac_acc cc_ac0_xs =
-      (if (( = ) []) cc_ac0_xs
+  let rec helper cc_ac_acc cc_ac0_xs =
+    (if (( = ) []) cc_ac0_xs
+    then
+      cc_ac_acc
+    else
+      (if (( >= ) get_list_len cc_ac0_xs) 2
       then
-        cc_ac_acc
+        let cc_ac2_tl = (get_list_tail cc_ac0_xs) 1 in
+          let cc_ac1_h = (get_by_idx cc_ac0_xs) 0 in
+            (helper ((( + ) cc_ac_acc) 1)) cc_ac2_tl
       else
-        (if (( >= ) get_list_len cc_ac0_xs) 2
-        then
-          let cc_ac2_tl = (get_list_tail cc_ac0_xs) 1 in
-            let cc_ac1_h = (get_by_idx cc_ac0_xs) 0 in
-              (helper ((( + ) cc_ac_acc) 1)) cc_ac2_tl
-        else
-          part_match_fail ())) in
-      helper 0
+        part_match_fail ()))
+  ;;
+  
+  let length_tail = helper 0
   ;;
   
   let rec map f cc_ac3_xs =
@@ -496,19 +540,21 @@
         part_match_fail ()))
   ;;
   
-  let concat = let rec cc_ac13_helper cc_ac14_xs =
-      (if (( = ) []) cc_ac14_xs
+  let rec cc_ac13_helper cc_ac14_xs =
+    (if (( = ) []) cc_ac14_xs
+    then
+      []
+    else
+      (if (( >= ) get_list_len cc_ac14_xs) 2
       then
-        []
+        let cc_ac16_tl = (get_list_tail cc_ac14_xs) 1 in
+          let cc_ac15_h = (get_by_idx cc_ac14_xs) 0 in
+            (append cc_ac15_h) (cc_ac13_helper cc_ac16_tl)
       else
-        (if (( >= ) get_list_len cc_ac14_xs) 2
-        then
-          let cc_ac16_tl = (get_list_tail cc_ac14_xs) 1 in
-            let cc_ac15_h = (get_by_idx cc_ac14_xs) 0 in
-              (append cc_ac15_h) (cc_ac13_helper cc_ac16_tl)
-        else
-          part_match_fail ())) in
-      cc_ac13_helper
+        part_match_fail ()))
+  ;;
+  
+  let concat = cc_ac13_helper
   ;;
   
   let rec iter cc_ac17_f cc_ac18_xs =
@@ -526,6 +572,10 @@
         part_match_fail ()))
   ;;
   
+  let ll_0 cc0_cc_ac23_h cc_ac25_a =
+    (cc0_cc_ac23_h, cc_ac25_a)
+  ;;
+  
   let rec cartesian cc_ac21_xs cc_ac22_ys =
     (if (( = ) []) cc_ac21_xs
     then
@@ -535,7 +585,7 @@
       then
         let cc_ac24_tl = (get_list_tail cc_ac21_xs) 1 in
           let cc_ac23_h = (get_by_idx cc_ac21_xs) 0 in
-            (append ((map ((fun cc0_cc_ac23_h cc_ac25_a -> (cc0_cc_ac23_h, cc_ac25_a)) cc_ac23_h)) cc_ac22_ys)) ((cartesian cc_ac24_tl) cc_ac22_ys)
+            (append ((map (ll_0 cc_ac23_h)) cc_ac22_ys)) ((cartesian cc_ac24_tl) cc_ac22_ys)
       else
         part_match_fail ()))
   ;;

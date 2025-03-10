@@ -1,19 +1,19 @@
-  $ ./me_runner.exe < manytests/do_not_type/001.ml
+  $ ./cc_runner.exe < manytests/do_not_type/001.ml
   Unbound value 'fac'
 
-  $ ./me_runner.exe < manytests/do_not_type/002if.ml
+  $ ./cc_runner.exe < manytests/do_not_type/002if.ml
   This expression has type bool but an expression was expected of type int
 
-  $ ./me_runner.exe < manytests/do_not_type/003occurs.ml
+  $ ./cc_runner.exe < manytests/do_not_type/003occurs.ml
   The type variable 'a occurs inside 'a -> 'b
 
-  $ ./me_runner.exe < manytests/do_not_type/004let_poly.ml
+  $ ./cc_runner.exe < manytests/do_not_type/004let_poly.ml
   This expression has type int but an expression was expected of type bool
 
-  $ ./me_runner.exe < manytests/do_not_type/015tuples.ml
+  $ ./cc_runner.exe < manytests/do_not_type/015tuples.ml
   Only variables are allowed as left-side of 'let rec'
 
-  $ ./me_runner.exe < manytests/typed/001fac.ml
+  $ ./cc_runner.exe < manytests/typed/001fac.ml
   Bindings before transformations:
   val fac: int -> int
   val main: int
@@ -37,7 +37,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/002fac.ml
+  $ ./cc_runner.exe < manytests/typed/002fac.ml
   Bindings before transformations:
   val fac_cps: int -> (int -> 'a) -> 'a
   val main: int
@@ -61,7 +61,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/003fib.ml
+  $ ./cc_runner.exe < manytests/typed/003fib.ml
   Bindings before transformations:
   val fib: int -> int
   val fib_acc: int -> int -> int -> int
@@ -98,7 +98,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/004manyargs.ml
+  $ ./cc_runner.exe < manytests/typed/004manyargs.ml
   Bindings before transformations:
   val main: int
   val test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
@@ -139,7 +139,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/005fix.ml
+  $ ./cc_runner.exe < manytests/typed/005fix.ml
   Bindings before transformations:
   val fac: (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
@@ -169,7 +169,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial.ml
+  $ ./cc_runner.exe < manytests/typed/006partial.ml
   Bindings before transformations:
   val foo: int -> int
   val main: int
@@ -197,7 +197,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial2.ml
+  $ ./cc_runner.exe < manytests/typed/006partial2.ml
   Bindings before transformations:
   val foo: int -> int -> int -> int
   val main: int
@@ -223,7 +223,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/006partial3.ml
+  $ ./cc_runner.exe < manytests/typed/006partial3.ml
   Bindings before transformations:
   val foo: int -> int -> int -> unit
   val main: int
@@ -245,7 +245,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/007order.ml
+  $ ./cc_runner.exe < manytests/typed/007order.ml
   Bindings before transformations:
   val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
   val main: unit
@@ -266,7 +266,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/008ascription.ml
+  $ ./cc_runner.exe < manytests/typed/008ascription.ml
   Bindings before transformations:
   val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
   val main: int
@@ -290,7 +290,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/009let_poly.ml
+  $ ./cc_runner.exe < manytests/typed/009let_poly.ml
   Bindings before transformations:
   val temp: int * bool
   
@@ -305,7 +305,7 @@
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/015tuples.ml
+  $ ./cc_runner.exe < manytests/typed/015tuples.ml
   Bindings before transformations:
   val feven: 'a * (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
@@ -335,10 +335,8 @@
   ;;
   
   let map cc_ac0_f p =
-    let me_4 = p in
-      let a = (get_by_idx me_4) 0 in
-        let b = (get_by_idx me_4) 1 in
-          (cc_ac0_f a, cc_ac0_f b)
+    let (a, b) = p in
+      (cc_ac0_f a, cc_ac0_f b)
   ;;
   
   let fixpoly l =
@@ -346,25 +344,21 @@
   ;;
   
   let feven cc_ac3_p n =
-    let me_16 = cc_ac3_p in
-      let e = (get_by_idx me_16) 0 in
-        let o = (get_by_idx me_16) 1 in
-          (if (( == ) n) 0
-          then
-            1
-          else
-            o ((( - ) n) 1))
+    let (e, o) = cc_ac3_p in
+      (if (( == ) n) 0
+      then
+        1
+      else
+        o ((( - ) n) 1))
   ;;
   
   let fodd cc_ac4_p cc_ac5_n =
-    let me_20 = cc_ac4_p in
-      let cc_ac6_e = (get_by_idx me_20) 0 in
-        let cc_ac7_o = (get_by_idx me_20) 1 in
-          (if (( == ) cc_ac5_n) 0
-          then
-            0
-          else
-            cc_ac6_e ((( - ) cc_ac5_n) 1))
+    let (cc_ac6_e, cc_ac7_o) = cc_ac4_p in
+      (if (( == ) cc_ac5_n) 0
+      then
+        0
+      else
+        cc_ac6_e ((( - ) cc_ac5_n) 1))
   ;;
   
   let tie = fixpoly (feven, fodd)
@@ -386,16 +380,14 @@
   
   let cc_ac10_main = let () = print_int (modd 1) in
       let () = print_int (cc_ac_meven 2) in
-        let me_31 = tie in
-          let even = (get_by_idx me_31) 0 in
-            let odd = (get_by_idx me_31) 1 in
-              let () = print_int (odd 3) in
-                let () = print_int (even 4) in
-                  0
+        let (even, odd) = tie in
+          let () = print_int (odd 3) in
+            let () = print_int (even 4) in
+              0
   ;;
   
 
-  $ ./me_runner.exe < manytests/typed/016lists.ml
+  $ ./cc_runner.exe < manytests/typed/016lists.ml
   Bindings before transformations:
   val append: 'a list -> 'a list -> 'a list
   val cartesian: 'a list -> 'b list -> 'a * 'b list
@@ -419,125 +411,68 @@
   ------------------------------
   
   let rec length xs =
-    (if (( = ) []) xs
-    then
-      0
-    else
-      (if (( >= ) get_list_len xs) 2
-      then
-        let tl = (get_list_tail xs) 1 in
-          let h = (get_by_idx xs) 0 in
-            (( + ) 1) (length tl)
-      else
-        part_match_fail ()))
+    match xs with
+      | [] -> 
+        0
+      | (h :: tl) -> 
+        (( + ) 1) (length tl)
   ;;
   
   let length_tail = let rec helper cc_ac_acc cc_ac0_xs =
-      (if (( = ) []) cc_ac0_xs
-      then
-        cc_ac_acc
-      else
-        (if (( >= ) get_list_len cc_ac0_xs) 2
-        then
-          let cc_ac2_tl = (get_list_tail cc_ac0_xs) 1 in
-            let cc_ac1_h = (get_by_idx cc_ac0_xs) 0 in
-              (helper ((( + ) cc_ac_acc) 1)) cc_ac2_tl
-        else
-          part_match_fail ())) in
+      match cc_ac0_xs with
+        | [] -> 
+          cc_ac_acc
+        | (cc_ac1_h :: cc_ac2_tl) -> 
+          (helper ((( + ) cc_ac_acc) 1)) cc_ac2_tl in
       helper 0
   ;;
   
   let rec map f cc_ac3_xs =
-    (if (( = ) []) cc_ac3_xs
-    then
-      []
-    else
-      (if (( = ) 1) (get_list_len cc_ac3_xs)
-      then
-        let a = (get_by_idx cc_ac3_xs) 0 in
-          (f a :: [])
-      else
-        (if (( = ) 2) (get_list_len cc_ac3_xs)
-        then
-          let cc_ac4_a = (get_by_idx cc_ac3_xs) 0 in
-            let b = (get_by_idx cc_ac3_xs) 1 in
-              (f cc_ac4_a :: (f b :: []))
-        else
-          (if (( = ) 3) (get_list_len cc_ac3_xs)
-          then
-            let cc_ac5_a = (get_by_idx cc_ac3_xs) 0 in
-              let cc_ac6_b = (get_by_idx cc_ac3_xs) 1 in
-                let c = (get_by_idx cc_ac3_xs) 2 in
-                  (f cc_ac5_a :: (f cc_ac6_b :: (f c :: [])))
-          else
-            (if (( >= ) get_list_len cc_ac3_xs) 5
-            then
-              let cc_ac10_tl = (get_list_tail cc_ac3_xs) 4 in
-                let cc_ac7_a = (get_by_idx cc_ac3_xs) 0 in
-                  let cc_ac8_b = (get_by_idx cc_ac3_xs) 1 in
-                    let cc_ac9_c = (get_by_idx cc_ac3_xs) 2 in
-                      let d = (get_by_idx cc_ac3_xs) 3 in
-                        (f cc_ac7_a :: (f cc_ac8_b :: (f cc_ac9_c :: (f d :: (map f) cc_ac10_tl))))
-            else
-              part_match_fail ())))))
+    match cc_ac3_xs with
+      | [] -> 
+        []
+      | (a :: []) -> 
+        (f a :: [])
+      | (cc_ac4_a :: (b :: [])) -> 
+        (f cc_ac4_a :: (f b :: []))
+      | (cc_ac5_a :: (cc_ac6_b :: (c :: []))) -> 
+        (f cc_ac5_a :: (f cc_ac6_b :: (f c :: [])))
+      | (cc_ac7_a :: (cc_ac8_b :: (cc_ac9_c :: (d :: cc_ac10_tl)))) -> 
+        (f cc_ac7_a :: (f cc_ac8_b :: (f cc_ac9_c :: (f d :: (map f) cc_ac10_tl))))
   ;;
   
   let rec append cc_ac11_xs ys =
-    (if (( = ) []) cc_ac11_xs
-    then
-      ys
-    else
-      (if (( >= ) get_list_len cc_ac11_xs) 2
-      then
-        let cc_ac12_xs = (get_list_tail cc_ac11_xs) 1 in
-          let x = (get_by_idx cc_ac11_xs) 0 in
-            (x :: (append cc_ac12_xs) ys)
-      else
-        part_match_fail ()))
+    match cc_ac11_xs with
+      | [] -> 
+        ys
+      | (x :: cc_ac12_xs) -> 
+        (x :: (append cc_ac12_xs) ys)
   ;;
   
   let concat = let rec cc_ac13_helper cc_ac14_xs =
-      (if (( = ) []) cc_ac14_xs
-      then
-        []
-      else
-        (if (( >= ) get_list_len cc_ac14_xs) 2
-        then
-          let cc_ac16_tl = (get_list_tail cc_ac14_xs) 1 in
-            let cc_ac15_h = (get_by_idx cc_ac14_xs) 0 in
-              (append cc_ac15_h) (cc_ac13_helper cc_ac16_tl)
-        else
-          part_match_fail ())) in
+      match cc_ac14_xs with
+        | [] -> 
+          []
+        | (cc_ac15_h :: cc_ac16_tl) -> 
+          (append cc_ac15_h) (cc_ac13_helper cc_ac16_tl) in
       cc_ac13_helper
   ;;
   
   let rec iter cc_ac17_f cc_ac18_xs =
-    (if (( = ) []) cc_ac18_xs
-    then
-      ()
-    else
-      (if (( >= ) get_list_len cc_ac18_xs) 2
-      then
-        let cc_ac20_tl = (get_list_tail cc_ac18_xs) 1 in
-          let cc_ac19_h = (get_by_idx cc_ac18_xs) 0 in
-            let () = cc_ac17_f cc_ac19_h in
-              (iter cc_ac17_f) cc_ac20_tl
-      else
-        part_match_fail ()))
+    match cc_ac18_xs with
+      | [] -> 
+        ()
+      | (cc_ac19_h :: cc_ac20_tl) -> 
+        let () = cc_ac17_f cc_ac19_h in
+          (iter cc_ac17_f) cc_ac20_tl
   ;;
   
   let rec cartesian cc_ac21_xs cc_ac22_ys =
-    (if (( = ) []) cc_ac21_xs
-    then
-      []
-    else
-      (if (( >= ) get_list_len cc_ac21_xs) 2
-      then
-        let cc_ac24_tl = (get_list_tail cc_ac21_xs) 1 in
-          let cc_ac23_h = (get_by_idx cc_ac21_xs) 0 in
-            (append ((map ((fun cc0_cc_ac23_h cc_ac25_a -> (cc0_cc_ac23_h, cc_ac25_a)) cc_ac23_h)) cc_ac22_ys)) ((cartesian cc_ac24_tl) cc_ac22_ys)
-      else
-        part_match_fail ()))
+    match cc_ac21_xs with
+      | [] -> 
+        []
+      | (cc_ac23_h :: cc_ac24_tl) -> 
+        (append ((map ((fun cc0_cc_ac23_h cc_ac25_a -> (cc0_cc_ac23_h, cc_ac25_a)) cc_ac23_h)) cc_ac22_ys)) ((cartesian cc_ac24_tl) cc_ac22_ys)
   ;;
   
   let cc_ac26_main = let () = (iter print_int) (1 :: (2 :: (3 :: []))) in
