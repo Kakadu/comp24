@@ -54,7 +54,11 @@ let () =
       List.fold_left prog ~init:"" ~f:(fun acc decl ->
         acc ^ "\n" ^ ast_to_str @@ anf_to_ast @@ decl)
     in
-    let* prog = Parser.parse prog_str in
+    let* prog =
+      match Parser.parse prog_str with
+      | Ok prog -> return prog
+      | Error _ -> fail "Failed to parse after anf"
+    in
     let* anf_tyenv =
       match Typechecker.typecheck prog with
       | Ok tyenv ->
