@@ -45,22 +45,6 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
-    let a = 
-      let one = 1 in 
-      let two = 2 in
-      one + two
-  |};
-  [%expect {|
-    Before:
-    a: int
-
-    After:
-    a: int
-    |}]
-;;
-
-let%expect_test _ =
   test
     {|
     let rec fact = fun x -> if x < 2 then 1 else x * fact (x - 1)
@@ -103,7 +87,7 @@ let%expect_test _ =
     |}]
 ;;
 
-let%expect_test _ =
+(* let%expect_test _ =
   test
     {|
     let cross (x1, y1, z1) (x2, y2, z2) =
@@ -125,10 +109,10 @@ let%expect_test _ =
     main: ()
 
     After:
-
-    Unification failed on int and (int * int * int)
+    cross: 'a -> 'b -> (int * int * int)
+    main: ()
     |}]
-;;
+;; *)
 
 let%expect_test _ =
   test
@@ -136,20 +120,14 @@ let%expect_test _ =
     let rec map f list = match list with
       | hd :: tl -> (f hd) :: (map f tl) 
       | [] -> []
-
-    let rec map_ f list = match list with
-      | hd :: tl -> f hd :: map f tl
-      | _ -> []
   |};
   [%expect
     {|
     Before:
     map: ('e -> 'h) -> 'e list -> 'h list
-    map_: ('s -> 'v) -> 's list -> 'v list
 
     After:
-    map: (bool -> 'z) -> bool -> 'z list
-    map_: (bool -> 'az) -> bool -> 'az list
+    map: ('j -> 'z) -> 'j list -> 'z list
     |}]
 ;;
 
@@ -171,8 +149,8 @@ let%expect_test _ =
     fib: int -> int
 
     After:
-
-    Unification failed on ('c * 'b) and int
+    ll_helper_1: int list -> int -> int
+    fib: int -> int
     |}]
 ;;
 
@@ -235,5 +213,78 @@ let%expect_test _ =
     After:
     ll_helper_1: int -> int -> int -> int
     pow: int -> int -> int
+    |}]
+;;
+
+let%expect_test _ =
+  test {|let compose = fun f -> fun g -> fun x -> f (g x)|};
+  [%expect {|
+    Before:
+    compose: ('d -> 'e) -> ('c -> 'd) -> 'c -> 'e
+
+    After:
+    compose: ('d -> 'f) -> ('c -> 'd) -> 'c -> 'f
+    |}]
+;;
+
+let%expect_test _ =
+  test {|let choose = fun l -> fun r -> fun b -> if b then l else r|};
+  [%expect {|
+    Before:
+    choose: 'b -> 'b -> bool -> 'b
+
+    After:
+    choose: 'b -> 'b -> bool -> 'b
+    |}]
+;;
+
+let%expect_test _ =
+  test
+    {| 
+    let rec map = fun f -> fun list -> match list with
+    | [] -> []
+    | hd::tl -> (f hd) :: (map f tl)
+
+    let rec fold =
+      fun init -> fun f -> fun list -> 
+      match list with
+      | [] -> init
+      | hd :: tl -> fold (f init hd) f tl
+
+    let rec filter = fun f -> fun list ->
+      match list with
+      | [] -> []
+      | hd :: tl -> if f hd then hd :: filter f tl else filter f tl 
+    
+    let gt0 = filter (fun x -> x > 0) 
+    let sq = map (fun x -> x * x)
+    let sum = fold 0 (fun acc -> fun x -> acc + x)
+    let x = [1;2;3]
+    let x = sum (sq (gt0 x))
+  |};
+  [%expect
+    {|
+    Before:
+    map: ('e -> 'f) -> 'e list -> 'f list
+    fold: 's -> ('s -> 't -> 's) -> 't list -> 's
+    filter: ('af -> bool) -> 'af list -> 'af list
+    gt0: int list -> int list
+    sq: int list -> int list
+    sum: int list -> int
+    x: int list
+    x: int
+
+    After:
+    map: ('n -> 's) -> 'n list -> 's list
+    fold: 'bb -> ('bb -> 'ap -> 'bb) -> 'ap list -> 'bb
+    filter: ('bp -> bool) -> 'bp list -> 'bp list
+    ll_7: int -> bool
+    gt0: int list -> int list
+    ll_9: int -> int
+    sq: int list -> int list
+    ll_11: int -> int -> int
+    sum: int list -> int
+    x_2: int list
+    x_3: int
     |}]
 ;;

@@ -41,15 +41,27 @@ let stdlib : std list =
 ;;
 
 let runtime : std list =
-  [ { name = "ml_create_tuple"; typ = arg1; extern = "ml_create_tuple" }
-  ; { name = "ml_tuple_len"; typ = arg1; extern = "ml_tuple_len" }
-  ; { name = "ml_set_tuple_field"; typ = arg3; extern = "ml_set_tuple_field" }
-  ; { name = "ml_get_tuple_field"; typ = arg2; extern = "ml_get_tuple_field" }
-  ; { name = "ml_list_field"; typ = arg2; extern = "ml_list_field" }
-  ; { name = "ml_list_hd"; typ = arg1; extern = "ml_list_hd" }
-  ; { name = "ml_list_tl"; typ = arg1; extern = "ml_list_tl" }
-  ; { name = "ml_list_len"; typ = arg1; extern = "ml_list_len" }
-  ; { name = "ml_list_is_empty"; typ = arg1; extern = "ml_list_is_empty" }
+  [ { name = "ml_create_tuple"; typ = int_typ ^-> dummy_ty2; extern = "ml_create_tuple" }
+  ; { name = "ml_tuple_len"; typ = dummy_ty ^-> int_typ; extern = "ml_tuple_len" }
+  ; { name = "ml_set_tuple_field"
+    ; typ = dummy_ty ^-> dummy_ty2 ^-> dummy_ty3 ^-> dummy_ty4
+    ; extern = "ml_set_tuple_field"
+    }
+  ; { name = "ml_get_tuple_field"
+    ; typ = dummy_ty ^-> dummy_ty2 ^-> dummy_ty3
+    ; extern = "ml_get_tuple_field"
+    }
+  ; { name = "ml_list_field"
+    ; typ = dummy_list ^-> int_typ ^-> dummy_ty
+    ; extern = "ml_list_field"
+    }
+  ; { name = "ml_list_hd"; typ = dummy_list ^-> dummy_ty; extern = "ml_list_hd" }
+  ; { name = "ml_list_tl"; typ = dummy_list ^-> dummy_list; extern = "ml_list_tl" }
+  ; { name = "ml_list_len"; typ = dummy_list ^-> int_typ; extern = "ml_list_len" }
+  ; { name = "ml_list_is_empty"
+    ; typ = dummy_list ^-> bool_typ
+    ; extern = "ml_list_is_empty"
+    }
   ; { name = "ml_create_closure"; typ = arg2; extern = "create_closure" }
   ]
 ;;
