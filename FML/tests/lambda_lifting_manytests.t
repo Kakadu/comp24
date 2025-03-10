@@ -103,6 +103,8 @@
   let () = (print_int a2) in
   0
   $ ./lambda_lifting_runner.exe < manytests/typed/006partial3.ml
+  let a1 = (fun c -> (print_int c))
+  
   let a0 = (fun b -> let () = (print_int b) in
   a1)
   
@@ -161,6 +163,8 @@
   
   let main = ((iter print_int) (((map a2) (1::(2::(3::[])))) a3))
   $ ./lambda_lifting_runner.exe < manytests/typed/012fibcps.ml
+  let a1 = (fun a k b -> (k ((( + ) a) b)))
+  
   let a0 = (fun fib k n a -> ((fib ((( - ) n) 2)) ((a1 a) k)))
   
   let rec fib = (fun n k -> if ((( < ) n) 2)
@@ -195,6 +199,8 @@
   let map = (fun f p -> let a = ((tuple_element p) 0) in
   let b = ((tuple_element p) 1) in
   ((f a), (f b)))
+  
+  let a2 = (fun a0 self li x -> ((li (self a0)) x))
   
   let a1 = (fun self a0 -> ((map ((a2 a0) self)) a0))
   
