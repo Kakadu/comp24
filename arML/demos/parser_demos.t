@@ -650,7 +650,7 @@ MANYTESTS
                (EIdentifier (Id "p"))),
               [],
               (EIfThenElse (
-                 (EApplication ((EIdentifier (Id "( == )")),
+                 (EApplication ((EIdentifier (Id "( = )")),
                     (EIdentifier (Id "n")), [(EConstant (CInt 0))])),
                  (EConstant (CInt 1)),
                  (Some (EApplication ((EIdentifier (Id "o")),
@@ -669,7 +669,7 @@ MANYTESTS
                (EIdentifier (Id "p"))),
               [],
               (EIfThenElse (
-                 (EApplication ((EIdentifier (Id "( == )")),
+                 (EApplication ((EIdentifier (Id "( = )")),
                     (EIdentifier (Id "n")), [(EConstant (CInt 0))])),
                  (EConstant (CInt 0)),
                  (Some (EApplication ((EIdentifier (Id "e")),

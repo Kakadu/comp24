@@ -1,0 +1,16 @@
+(include_subdirs unqualified)
+
+(library
+ (name anf)
+ (public_name arML.middleend.anf)
+ (libraries base ast common patternMatchingElim)
+ (modules
+  Anftree
+  Pprint
+  ToBasicAstConverter
+  ExpressionToAnf
+  DeclarationToAnf
+  ProgramToAnf
+  Runner)
+ (instrumentation
+  (backend bisect_ppx)))

@@ -34,12 +34,26 @@ val closure_conversion_program : string -> unit
 
 (* Lambda lifting *)
 
-(* (** [lambda_lifting_expression input] transforms a expression by lifting all nested functions
-   to the top level. *)
-   val lambda_lifting_expression : string -> unit *)
-
 (** [lambda_lifting_program input] transforms a program by lifting all nested functions
     to the top level. *)
 val lambda_lifting_program : string -> unit
+
+(* -------------- *)
+(* Pattern-matching elimination *)
+
+val eliminate_pm_program : string -> unit
+
+(* -------------- *)
+
+(* Alpha conversion *)
+
+val alpha_conversion_program : string -> unit
+
+(* -------------- *)
+
+(* ANF conversion *)
+
+val convert_to_anf_and_back_types : string -> unit
+val anf_conversion_program : string -> unit
 
 (* -------------- *)

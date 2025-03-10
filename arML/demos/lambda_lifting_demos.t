@@ -4,8 +4,8 @@ MANYTESTS
   let main = (let () = (print_int (fac 4)) in 0)
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/002fac.ml
-  let ll_0 print_int = print_int
   let rec fac_cps n k = (if (( = ) n 1) then (k 1) else (fac_cps (( - ) n 1) (ll_1 n k))) and ll_1 cc_1 cc_0 p = (cc_0 (( * ) p cc_1))
+  let ll_0 print_int = print_int
   let main = (let () = (print_int (fac_cps 4 ll_0)) in 0)
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/003fib.ml
@@ -46,9 +46,9 @@ MANYTESTS
   let main = (print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (U- 1)) 10000 (U- 555555)))
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/008ascription.ml
+  let addi f g x = ((f x ((g x) : bool)) : int)
   let ll_0 x b = (if b then (( + ) x 1) else (( * ) x 2))
   let ll_1 _start = (( = ) (( / ) _start 2) 0)
-  let addi f g x = ((f x ((g x) : bool)) : int)
   let main = (let () = (print_int (addi ll_0 ll_1 4)) in 0)
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/009let_poly.ml
@@ -56,24 +56,24 @@ MANYTESTS
   let temp = ((ll_0 1), (ll_0 true))
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/015tuples.ml
-  let ll_1 cc_1 cc_0 li x = (li (cc_1 cc_0) x)
-  let ll_0 self l = (map (ll_1 self l) l)
   let rec fix f x = (f (fix f) x)
   let map f p = (let (a, b) = p in ((f a), (f b)))
+  let ll_1 cc_1 cc_0 li x = (li (cc_1 cc_0) x)
+  let ll_0 self l = (map (ll_1 self l) l)
   let fixpoly l = (fix ll_0 l)
-  let feven p n = (let (e, o) = p in (if (( == ) n 0) then 1 else (o (( - ) n 1))))
-  let fodd p n = (let (e, o) = p in (if (( == ) n 0) then 0 else (e (( - ) n 1))))
+  let feven p n = (let (e, o) = p in (if (( = ) n 0) then 1 else (o (( - ) n 1))))
+  let fodd p n = (let (e, o) = p in (if (( = ) n 0) then 0 else (e (( - ) n 1))))
   let tie = (fixpoly (feven, fodd))
   let rec meven n = (if (( = ) n 0) then 1 else (modd (( - ) n 1))) and modd n = (if (( = ) n 0) then 1 else (meven (( - ) n 1)))
   let main = (let () = (print_int (modd 1)) in (let () = (print_int (meven 2)) in (let (even, odd) = tie in (let () = (print_int (odd 3)) in (let () = (print_int (even 4)) in 0)))))
 
   $ ./start_lambda_lifting_demos.exe < manytests/typed/016lists.ml
-  let rec ll_2 acc xs = (match xs with [] -> acc | (h :: tl) -> (ll_2 (( + ) acc 1) tl))
-  let rec ll_1 xs = (match xs with [] -> [] | (h :: tl) -> (append h (ll_1 tl)))
   let rec length xs = (match xs with [] -> 0 | (h :: tl) -> (( + ) 1 (length tl)))
+  let rec ll_2 acc xs = (match xs with [] -> acc | (h :: tl) -> (ll_2 (( + ) acc 1) tl))
   let length_tail = (ll_2 0)
   let rec map f xs = (match xs with [] -> [] | (a :: []) -> ((f a) :: []) | (a :: (b :: [])) -> ((f a) :: ((f b) :: [])) | (a :: (b :: (c :: []))) -> ((f a) :: ((f b) :: ((f c) :: []))) | (a :: (b :: (c :: (d :: tl)))) -> ((f a) :: ((f b) :: ((f c) :: ((f d) :: (map f tl))))))
   let rec append xs ys = (match xs with [] -> ys | (x :: xs) -> (x :: (append xs ys)))
+  let rec ll_1 xs = (match xs with [] -> [] | (h :: tl) -> (append h (ll_1 tl)))
   let concat = ll_1
   let rec iter f xs = (match xs with [] -> () | (h :: tl) -> (let () = (f h) in (iter f tl)))
   let rec cartesian xs ys = (match xs with [] -> [] | (h :: tl) -> (append (map (ll_0 h) ys) (cartesian tl ys))) and ll_0 cc_0 a = (cc_0, a)

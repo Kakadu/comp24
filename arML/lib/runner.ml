@@ -81,8 +81,103 @@ let lambda_lifting_program_ast program =
 let lambda_lifting_program program =
   match Parser.Runner.parse_program program with
   | Ok ast ->
-    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
-    lambda_lifting_program_ast closure_ast
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ ->
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       lambda_lifting_program_ast closure_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+(* Pattern-matching elimination *)
+
+let eliminate_pm_program_ast program =
+  PatternMatchingElim.Pprint.print_pmf_program
+    (PatternMatchingElim.Runner.run_pmf_program program)
+;;
+
+let eliminate_pm_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ ->
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       eliminate_pm_program_ast lambda_lifted_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+
+(* Alpha Conversion *)
+
+let alpha_conversion_program_ast program =
+  PatternMatchingElim.Pprint.print_pmf_program
+    (AlphaConversion.Runner.run_alpha_conversion_program program)
+;;
+
+let alpha_conversion_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ ->
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       let pattern_matching_eliminated_ast =
+         PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
+       in
+       alpha_conversion_program_ast pattern_matching_eliminated_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+(* -------------- *)
+
+(* ANF conversion *)
+
+let convert_to_anf_and_back_types program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ ->
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       let pattern_matching_eliminated_ast =
+         PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
+       in
+       let alpha_converted_ast =
+         AlphaConversion.Runner.run_alpha_conversion_program
+           pattern_matching_eliminated_ast
+       in
+       let anf = Anf.Runner.run_anf_conversion_program alpha_converted_ast in
+       let new_ast = Anf.ToBasicAstConverter.anf_to_program anf in
+       inference_program_ast new_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+  | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
+;;
+
+let anf_conversion_program_ast program =
+  Anf.Pprint.print_anf_program (Anf.Runner.run_anf_conversion_program program)
+;;
+
+let anf_conversion_program program =
+  match Parser.Runner.parse_program program with
+  | Ok ast ->
+    (match Inferencer.Runner.run_program_inferencer ast with
+     | Ok _ ->
+       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+       let pattern_matching_eliminated_ast =
+         PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
+       in
+       let alpha_converted_ast =
+         AlphaConversion.Runner.run_alpha_conversion_program
+           pattern_matching_eliminated_ast
+       in
+       anf_conversion_program_ast alpha_converted_ast
+     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
