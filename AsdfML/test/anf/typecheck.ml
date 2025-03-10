@@ -218,7 +218,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {|let compose = fun f -> fun g -> fun x -> f (g x)|};
-  [%expect {|
+  [%expect
+    {|
     Before:
     compose: ('d -> 'e) -> ('c -> 'd) -> 'c -> 'e
 
@@ -229,7 +230,8 @@ let%expect_test _ =
 
 let%expect_test _ =
   test {|let choose = fun l -> fun r -> fun b -> if b then l else r|};
-  [%expect {|
+  [%expect
+    {|
     Before:
     choose: 'b -> 'b -> bool -> 'b
 

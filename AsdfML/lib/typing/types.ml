@@ -57,10 +57,10 @@ let rec count_arrow_args = function
 ;;
 
 let dummy_ty = TVar (-1)
-let dummy_ty2= TVar (-2)
-let dummy_ty3= TVar (-3)
-let dummy_ty4= TVar (-4)
-let dummy_list = TList (dummy_ty)
+let dummy_ty2 = TVar (-2)
+let dummy_ty3 = TVar (-3)
+let dummy_ty4 = TVar (-4)
+let dummy_list = TList dummy_ty
 let arg1 = dummy_ty ^-> dummy_ty2
 let arg2 = dummy_ty ^-> dummy_ty2 ^-> dummy_ty3
 let arg3 = dummy_ty ^-> dummy_ty2 ^-> dummy_ty3 ^-> dummy_ty4

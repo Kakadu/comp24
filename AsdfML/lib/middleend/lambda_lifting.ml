@@ -12,7 +12,7 @@ open State.IntStateM.Syntax
 
 let fresh_id name = fresh_prefix (if String.equal name "" then "ll" else "ll_" ^ name)
 
-let rec ll_expr env lift ?(name = None) ?(flag=NonRec)= function
+let rec ll_expr env lift ?(name = None) ?(flag = NonRec) = function
   | SConst c -> return (cf_const c, lift)
   | SVar id ->
     let id =
@@ -77,11 +77,11 @@ and ll_def ?(top = false) env lift = function
     return (cf_def id (arg :: args) exp, lift, env)
   | SLet (Rec, id, SFun (arg, args, exp)) when top ->
     let env = Map.set env ~key:id ~data:id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some id)~flag:Rec  in
+    let* exp, lift = ll_expr env lift exp ~name:(Some id) ~flag:Rec in
     return (cf_def_rec id (arg :: args) exp, lift, env)
   | SLet (NonRec, id, exp) ->
     let* new_id = fresh_id id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some new_id)~flag:NonRec  in
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) ~flag:NonRec in
     return (cf_def id [] exp, lift, env)
   | SLet (Rec, id, exp) ->
     let* new_id = fresh_id id in
