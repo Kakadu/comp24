@@ -26,7 +26,7 @@ let ptr_t = pointer_type context
 
 (*Hashtables*)
 
-let variable_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
+let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
 
 (*Builders functions*)
 
@@ -46,7 +46,7 @@ let rec build_construct = function
 ;;
 
 let build_ident name =
-  match Hashtbl.find_opt variable_table name with
+  match Hashtbl.find_opt variable_value_table name with
   | Some value -> build_load ptr_t value name builder
   | None -> failwith ("Unknown variable: " ^ name)
 ;;
