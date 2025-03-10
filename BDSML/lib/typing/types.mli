@@ -42,3 +42,4 @@ module VarSet : Set.S with type elt = TVarId.t
 
 val occurs_in : TVarId.t -> type_val -> bool
 val free_vars : type_val -> VarSet.t
+val print_types : (string * type_val) list -> unit

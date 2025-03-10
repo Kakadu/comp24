@@ -94,3 +94,16 @@ let free_vars =
   in
   helper VarSet.empty
 ;;
+
+let print_types res =
+  let rec helper acc = function
+    | (id, v) :: tl ->
+      acc
+      ^ (if id = "" then "" else "val " ^ id ^ " : ")
+      ^ show_type_val v
+      ^ "\n"
+      ^ helper acc tl
+    | _ -> acc
+  in
+  Format.print_string @@ helper "" res
+;;
