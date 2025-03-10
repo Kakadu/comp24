@@ -1,0 +1,14 @@
+(rule
+ (targets libffi.so include)
+ (deps ../libffi-3.4.7.tar.gz)
+ (action
+  (progn
+   (system
+    "tar --strip-components=1 -xzf ../libffi-3.4.7.tar.gz --one-top-level=libffi-release")
+   (chdir
+    "libffi-release"
+    (progn
+     (system
+      "./configure --host=riscv64-linux-gnu --targe=riscv64-linux-gnu --prefix=$PWD/../ > /dev/null")
+     (system "make install > /dev/null")))
+   (system "cp lib/libffi.so libffi.so"))))

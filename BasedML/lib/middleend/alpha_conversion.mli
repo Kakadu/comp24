@@ -15,3 +15,7 @@ val alpha_convert_decl_list
 
 val init_context : context
 val test_alpha_for_decls : string -> unit
+
+val transform
+  :  Ast.let_declaration list
+  -> int * (Ast.let_declaration list, string) result

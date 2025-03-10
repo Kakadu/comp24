@@ -91,7 +91,50 @@ let rec frestore_pattern ppf pat =
     fprintf ")"
 ;;
 
-let rec restore_cexpr ppf = function
+let rec restore_cexpr ppf =
+  let rec type_name_to_string tp =
+    match tp with
+    | TUnit -> "unit"
+    | TInt -> "int"
+    | TBool -> "bool"
+    | TPoly name -> Printf.sprintf "'%s" name
+    | TTuple lst ->
+      let type_str =
+        lst
+        |> List.mapi (fun i tp ->
+          if i <> 0
+          then Printf.sprintf " * %s" (type_name_to_string tp)
+          else type_name_to_string tp)
+        |> String.concat ""
+      in
+      Printf.sprintf "(%s)" type_str
+    | TFunction (tp_arg, tp_ret) ->
+      Printf.sprintf
+        "(%s -> %s)"
+        (type_name_to_string tp_arg)
+        (type_name_to_string tp_ret)
+    | TList tp -> Printf.sprintf "(%s list)" (type_name_to_string tp)
+  in
+  let list_to_string pp sep lst =
+    let rec aux = function
+      | [] -> ""
+      | [ x ] -> pp x
+      | x :: xs -> Printf.sprintf "%s%s%s" (pp x) sep (aux xs)
+    in
+    aux lst
+  in
+  let rec imm_to_string = function
+    | ImmInt i -> string_of_int i
+    | ImmBool false -> "false"
+    | ImmBool true -> "true"
+    | ImmNil -> "[]"
+    | ImmIdentifier id -> id
+    | ImmUnit -> "()"
+    | ImmTuple tup -> Printf.sprintf "(%s)" (list_to_string imm_to_string ", " tup)
+    | ImmConstraint (imm, typ) ->
+      Printf.sprintf "(%s : %s)" (imm_to_string imm) (type_name_to_string typ)
+  in
+  function
   | CImmExpr imm -> fprintf ppf "%a" frestore_imm imm
   | CIfThenElse (cond, then_branch, else_branch) ->
     fprintf
@@ -103,8 +146,12 @@ let rec restore_cexpr ppf = function
       then_branch
       pp_aexpr
       else_branch
-  | CApplication (left, rigth) ->
-    fprintf ppf "%a %a" restore_cexpr left restore_cexpr rigth
+  | CApplication (left, right, args) ->
+    Printf.printf
+      " %s %s %s "
+      (imm_to_string left)
+      (imm_to_string right)
+      (args |> List.map imm_to_string |> String.concat " ")
 
 and pp_aexpr ppf = function
   | ACExpr cexp -> fprintf ppf "%a" restore_cexpr cexp
