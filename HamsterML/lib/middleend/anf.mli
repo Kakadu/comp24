@@ -9,7 +9,7 @@ type imm_expr =
   | ImmUnit
 
 type cexpr =
-  | CApplication of cexpr * cexpr
+  | CApplication of cexpr * cexpr * cexpr list
   | CIf of imm_expr * aexpr * aexpr option
   | CConstructList of imm_expr * imm_expr
   | CImm of imm_expr
