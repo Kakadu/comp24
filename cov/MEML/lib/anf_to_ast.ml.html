@@ -304,7 +304,7 @@ let abindings_to_ebindings = function
   | <span data-count="0">A</span>Expression e -&gt; Expression (aexpression_to_expressio<span data-count="0">n</span> e)
 ;;
 
-let anf_to_ast anf = 
+let anf_to_ast anf =
   <span data-count="21">L</span>ist.rev @@ List.fol<span data-count="21">d</span> ~init:[] ~f:(fun acc a -&gt; <span data-count="184">a</span>bindings_to_ebinding<span data-count="184">s</span> a :: acc) anf
 ;;
 </code></pre>
