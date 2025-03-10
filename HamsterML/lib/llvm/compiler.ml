@@ -36,7 +36,7 @@ let build_unary_operation = function
   | UPLUS -> fun value _ _ -> value (* unary plus is an identity operation *)
 ;;
 
-let rec codegen_immexpr args_numbers env =
+let rec codegen_immexpr env =
   let list_helper lst =
     let allocated_list =
       build_call
@@ -49,7 +49,7 @@ let rec codegen_immexpr args_numbers env =
     let add = lookup_function_exception "hamsterml_add_to_list" the_module in
     let fnty = function_type i64 [| i64; i64 |] in
     Base.List.fold (Base.List.rev lst) ~init:allocated_list ~f:(fun acc elem ->
-      let elem = codegen_immexpr args_numbers env elem in
+      let elem = codegen_immexpr env elem in
       let acc = acc in
       build_call fnty add [| acc; elem |] "hamsterml_add_to_list" builder)
   in
@@ -67,7 +67,7 @@ let rec codegen_immexpr args_numbers env =
         builder
     in
     Base.List.fold tpl ~init:allocated_tuple ~f:(fun acc elem ->
-      let elem = codegen_immexpr args_numbers env elem in
+      let elem = codegen_immexpr env elem in
       let acc = acc in
       build_call
         (function_type i64 [| i64; i64 |])
@@ -95,14 +95,33 @@ let rec codegen_immexpr args_numbers env =
        else llv)
   | ImmOperation op ->
     (match op with
-     | Binary bop -> codegen_immexpr args_numbers env (ImmId (BinOperator.to_string bop))
-     | Unary uop -> codegen_immexpr args_numbers env (ImmId (UnOperator.to_string uop)))
+     | Binary bop -> codegen_immexpr env (ImmId (BinOperator.to_string bop))
+     | Unary uop -> codegen_immexpr env (ImmId (UnOperator.to_string uop)))
   | ImmUnit -> const_int i64 0
+;;
+
+let codegen_cexpr env = function
+  | CImm ie -> codegen_immexpr env ie
+  | CConstructList (ie1, ie2) ->
+    let arg_value = codegen_immexpr env ie1 in
+    let arg_list = codegen_immexpr env ie2 in
+    let add_to_list = lookup_function_exception "hamsterml_add_to_list" the_module in
+    let fnty = function_type i64 [| i64; i64 |] in
+    let result =
+      build_call
+        fnty
+        add_to_list
+        [| arg_list; arg_value |]
+        "hamsterml_add_to_list_n"
+        builder
+    in
+    result
+  | CApplication (ce1, ce2, ce_list) -> failwith "not yet implemented"
+  | CIf (ie, ae, ae_opt) -> failwith "not yet implemented"
 ;;
 
 (*
    TODO:
-   let codegen_cexpr = failwith "not yet implemented"
    let codegen_aexpr = failwith "not yet implemented"
    let codegen_global_scope_function = failwith "not yet implemented"
    let codegen = failwith "not yet implemented"
