@@ -1,0 +1,11 @@
+(include_subdirs unqualified)
+
+(library
+ (name llvm_codegen)
+ (public_name arML.llvm_codegen)
+ (libraries angstrom ast llvm anf)
+ (modules expressionCodegen)
+ (instrumentation
+  (backend bisect_ppx))
+ (preprocess
+  (pps ppx_deriving.show)))

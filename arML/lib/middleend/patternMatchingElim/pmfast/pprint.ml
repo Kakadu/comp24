@@ -88,7 +88,7 @@ let pp_pmf_decl ppf = function
 
 let pp_pmf_program ppf p =
   Format.pp_print_list
-    ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n\n") (* Пустая строка между объявлениями *)
+    ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n\n")
     pp_pmf_decl
     ppf
     p
