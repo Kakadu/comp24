@@ -306,30 +306,30 @@ and pe_str_item =
 type pe_structure = pe_str_item list
 
 let const_to_str = function
-  | <span data-count="15">P</span>ECBool b -&gt; if b then <span data-count="9">"</span>true" else <span data-count="6">"</span>false"
-  | <span data-count="245">P</span>ECint i -&gt; Format.sprintf "%i" i
+  | <span data-count="24">P</span>ECBool b -&gt; if b then <span data-count="14">"</span>true" else <span data-count="10">"</span>false"
+  | <span data-count="350">P</span>ECint i -&gt; Format.sprintf "%i" i
   | <span data-count="5">P</span>ECNil -&gt; "[]"
   | <span data-count="0">P</span>ECUnit -&gt; "()"
   | <span data-count="3">P</span>ECString s -&gt; s
 ;;
 
 let rec expr_to_str = function
-  | <span data-count="268">P</span>EEConst c -&gt; const_to_str c
-  | <span data-count="671">P</span>EEVar id -&gt; id
-  | <span data-count="36">P</span>EEIf (e1, e2, e3) -&gt;
+  | <span data-count="382">P</span>EEConst c -&gt; const_to_str c
+  | <span data-count="978">P</span>EEVar id -&gt; id
+  | <span data-count="48">P</span>EEIf (e1, e2, e3) -&gt;
     Format.sprintf
       "if %s\nthen %s\nelse %s"
-      (expr_to_st<span data-count="36">r</span> e1)
-      (expr_to_st<span data-count="36">r</span> e2)
-      (expr_to_st<span data-count="36">r</span> e3)
-  | <span data-count="97">P</span>EEFun (args, e) -&gt;
+      (expr_to_st<span data-count="48">r</span> e1)
+      (expr_to_st<span data-count="48">r</span> e2)
+      (expr_to_st<span data-count="48">r</span> e3)
+  | <span data-count="140">P</span>EEFun (args, e) -&gt;
     Format.sprintf
       "(fun%s -&gt; %s)"
-      (List.fold_lef<span data-count="97">t</span> (fun acc name -&gt; <span data-count="205">a</span>cc ^ " " ^ name) "" args)
-      (expr_to_st<span data-count="97">r</span> e)
-  | <span data-count="640">P</span>EEApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="640">r</span> e1) (expr_to_st<span data-count="640">r</span> e2)
-  | <span data-count="108">P</span>EELet (PENonrec (name, e1), e2) -&gt;
-    Format.sprintf "let %s = %s in\n%s" name (expr_to_st<span data-count="108">r</span> e1) (expr_to_st<span data-count="108">r</span> e2)
+      (List.fold_lef<span data-count="140">t</span> (fun acc name -&gt; <span data-count="292">a</span>cc ^ " " ^ name) "" args)
+      (expr_to_st<span data-count="140">r</span> e)
+  | <span data-count="914">P</span>EEApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="914">r</span> e1) (expr_to_st<span data-count="914">r</span> e2)
+  | <span data-count="159">P</span>EELet (PENonrec (name, e1), e2) -&gt;
+    Format.sprintf "let %s = %s in\n%s" name (expr_to_st<span data-count="159">r</span> e1) (expr_to_st<span data-count="159">r</span> e2)
   | <span data-count="4">P</span>EELet (PERec decl_list, e2) -&gt;
     let name1, e1 = List.hd decl_list in
     <span data-count="4">l</span>et tl = List.tl decl_list in
@@ -340,23 +340,23 @@ let rec expr_to_str = function
         tl
     ^ Format.sprint<span data-count="4">f</span> " in\n%s" (expr_to_st<span data-count="4">r</span> e2)
   | <span data-count="9">P</span>EECons (e1, e2) -&gt; Format.sprintf "(%s::%s)" (expr_to_st<span data-count="9">r</span> e1) (expr_to_st<span data-count="9">r</span> e2)
-  | <span data-count="9">P</span>EETuple e_list -&gt;
+  | <span data-count="15">P</span>EETuple e_list -&gt;
     Format.sprintf
       "(%s)"
-      (expr_to_st<span data-count="9">r</span> (List.h<span data-count="9">d</span> e_list)
-       ^ List.fold_lef<span data-count="9">t</span>
-           (fun acc e -&gt; <span data-count="10">a</span>cc ^ Format.sprint<span data-count="10">f</span> ", %s" (expr_to_st<span data-count="10">r</span> e))
+      (expr_to_st<span data-count="15">r</span> (List.h<span data-count="15">d</span> e_list)
+       ^ List.fold_lef<span data-count="15">t</span>
+           (fun acc e -&gt; <span data-count="24">a</span>cc ^ Format.sprint<span data-count="24">f</span> ", %s" (expr_to_st<span data-count="24">r</span> e))
            ""
-           (List.t<span data-count="9">l</span> e_list))
+           (List.t<span data-count="15">l</span> e_list))
 ;;
 
 let decl_to_str = function
-  | <span data-count="78">P</span>ENonrec (name, e) -&gt; Format.sprintf "let %s = %s" name (expr_to_st<span data-count="78">r</span> e)
-  | <span data-count="18">P</span>ERec decl_list -&gt;
+  | <span data-count="130">P</span>ENonrec (name, e) -&gt; Format.sprintf "let %s = %s" name (expr_to_st<span data-count="130">r</span> e)
+  | <span data-count="24">P</span>ERec decl_list -&gt;
     let name1, e1 = List.hd decl_list in
-    <span data-count="18">l</span>et tl = List.tl decl_list in
-    <span data-count="18">F</span>ormat.sprint<span data-count="18">f</span> "let rec %s = %s" name1 (expr_to_st<span data-count="18">r</span> e1)
-    ^ List.fold_lef<span data-count="18">t</span>
+    <span data-count="24">l</span>et tl = List.tl decl_list in
+    <span data-count="24">F</span>ormat.sprint<span data-count="24">f</span> "let rec %s = %s" name1 (expr_to_st<span data-count="24">r</span> e1)
+    ^ List.fold_lef<span data-count="24">t</span>
         (fun acc (name, e) -&gt; <span data-count="0">a</span>cc ^ Format.sprint<span data-count="0">f</span> "\nand %s = %s" name (expr_to_st<span data-count="0">r</span> e))
         ""
         tl
@@ -365,12 +365,12 @@ let decl_to_str = function
 let pp_pe_expr ppf expr = <span data-count="0">F</span>ormat.fprintf ppf "%s" (expr_to_st<span data-count="0">r</span> expr)
 
 let pp_pe_structure ppf p =
-  <span data-count="49">l</span>et len = List.length p in
-  <span data-count="49">L</span>ist.iteri
+  <span data-count="70">l</span>et len = List.length p in
+  <span data-count="70">L</span>ist.iteri
     (fun i a -&gt;
-      <span data-count="96">i</span>f i = len - 1
-      then <span data-count="49">F</span>ormat.fprintf ppf "%s" (decl_to_st<span data-count="49">r</span> a)
-      else <span data-count="47">F</span>ormat.fprintf ppf "%s\n\n" (decl_to_st<span data-count="47">r</span> a))
+      <span data-count="154">i</span>f i = len - 1
+      then <span data-count="70">F</span>ormat.fprintf ppf "%s" (decl_to_st<span data-count="70">r</span> a)
+      else <span data-count="84">F</span>ormat.fprintf ppf "%s\n\n" (decl_to_st<span data-count="84">r</span> a))
     p
 ;;
 
@@ -381,19 +381,19 @@ type value_to_get =
   | Other
 
 let get_element e = function
-  | <span data-count="33">T</span>uple i -&gt; PEEApp (PEEApp (PEEVar "tuple_element", e), PEEConst (PECint i))
-  | <span data-count="9">C</span>ons_head -&gt; PEEApp (PEEVar "list_head", e)
-  | <span data-count="12">C</span>ons_tail -&gt; PEEApp (PEEVar "list_tail", e)
-  | <span data-count="17">O</span>ther -&gt; e
+  | <span data-count="80">T</span>uple i -&gt; PEEApp (PEEApp (PEEVar "tuple_element", e), PEEConst (PECint i))
+  | <span data-count="13">C</span>ons_head -&gt; PEEApp (PEEVar "list_head", e)
+  | <span data-count="16">C</span>ons_tail -&gt; PEEApp (PEEVar "list_tail", e)
+  | <span data-count="31">O</span>ther -&gt; e
 ;;
 
 let const_to_peconst const =
-  <span data-count="243">l</span>et pe_const =
+  <span data-count="511">l</span>et pe_const =
     match const with
     | <span data-count="3">C</span>String s -&gt; PECString s
-    | <span data-count="220">C</span>Int i -&gt; PECint i
-    | <span data-count="15">C</span>Bool b -&gt; PECBool b
-    | <span data-count="5">C</span>Nil -&gt; PECNil
+    | <span data-count="467">C</span>Int i -&gt; PECint i
+    | <span data-count="33">C</span>Bool b -&gt; PECBool b
+    | <span data-count="8">C</span>Nil -&gt; PECNil
     | <span data-count="0">C</span>Unit -&gt; PECUnit
   in
   PEEConst pe_const

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>codegen.ml &mdash; Coverage report</title>
+    <meta name="description" content="97.30% coverage in lib/codegen.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">lib/</span>codegen.ml
+        </a>
+      </h1>
+      <h2>97.30%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:10.29%"></span>
+      <span class="unvisited" style="top:13.71%"></span>
+      <span class="unvisited" style="top:21.71%"></span>
+      <span class="unvisited" style="top:24.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span class="unvisited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span > </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span class="visited"> </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span > </span>
+<a id="L125"></a><span > </span>
+<a id="L126"></a><span class="visited"> </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span class="visited"> </span>
+<a id="L129"></a><span class="visited"> </span>
+<a id="L130"></a><span class="visited"> </span>
+<a id="L131"></a><span class="visited"> </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span class="visited"> </span>
+<a id="L134"></a><span > </span>
+<a id="L135"></a><span > </span>
+<a id="L136"></a><span > </span>
+<a id="L137"></a><span class="visited"> </span>
+<a id="L138"></a><span class="visited"> </span>
+<a id="L139"></a><span class="visited"> </span>
+<a id="L140"></a><span class="visited"> </span>
+<a id="L141"></a><span class="visited"> </span>
+<a id="L142"></a><span class="visited"> </span>
+<a id="L143"></a><span class="visited"> </span>
+<a id="L144"></a><span class="visited"> </span>
+<a id="L145"></a><span class="visited"> </span>
+<a id="L146"></a><span class="visited"> </span>
+<a id="L147"></a><span class="visited"> </span>
+<a id="L148"></a><span class="visited"> </span>
+<a id="L149"></a><span class="visited"> </span>
+<a id="L150"></a><span class="visited"> </span>
+<a id="L151"></a><span class="visited"> </span>
+<a id="L152"></a><span class="visited"> </span>
+<a id="L153"></a><span class="visited"> </span>
+<a id="L154"></a><span class="visited"> </span>
+<a id="L155"></a><span > </span>
+<a id="L156"></a><span > </span>
+<a id="L157"></a><span class="visited"> </span>
+<a id="L158"></a><span > </span>
+<a id="L159"></a><span > </span>
+<a id="L160"></a><span > </span>
+<a id="L161"></a><span class="visited"> </span>
+<a id="L162"></a><span class="visited"> </span>
+<a id="L163"></a><span class="visited"> </span>
+<a id="L164"></a><span class="visited"> </span>
+<a id="L165"></a><span > </span>
+<a id="L166"></a><span class="visited"> </span>
+<a id="L167"></a><span class="visited"> </span>
+<a id="L168"></a><span > </span>
+<a id="L169"></a><span class="visited"> </span>
+<a id="L170"></a><span > </span>
+<a id="L171"></a><span > </span>
+<a id="L172"></a><span > </span>
+<a id="L173"></a><span class="visited"> </span>
+<a id="L174"></a><span class="visited"> </span>
+<a id="L175"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
+<a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
+<a href="#L148">148</a>
+<a href="#L149">149</a>
+<a href="#L150">150</a>
+<a href="#L151">151</a>
+<a href="#L152">152</a>
+<a href="#L153">153</a>
+<a href="#L154">154</a>
+<a href="#L155">155</a>
+<a href="#L156">156</a>
+<a href="#L157">157</a>
+<a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
+<a href="#L167">167</a>
+<a href="#L168">168</a>
+<a href="#L169">169</a>
+<a href="#L170">170</a>
+<a href="#L171">171</a>
+<a href="#L172">172</a>
+<a href="#L173">173</a>
+<a href="#L174">174</a>
+<a href="#L175">175</a>
+</pre>
+<pre><code class="ocaml">open Llvm
+open Anf_ast
+open Llvm_utils
+
+let ctx = global_contex<span data-count="15">t</span> ()
+let module_ = create_modul<span data-count="15">e</span> ctx "ShaitanML"
+let builder = builde<span data-count="15">r</span> ctx
+let target_triple = Llvm_target.Target.default_tripl<span data-count="15">e</span> ()
+let () = Llvm.set_target_tripl<span data-count="15">e</span> target_triple module_
+let i64_t = i64_typ<span data-count="15">e</span> ctx
+
+let compile_binop op x y =
+  <span data-count="32">m</span>atch op with
+  | <span data-count="15">"</span>( + )" -&gt; build_add x y "add" builder
+  | <span data-count="9">"</span>( - )" -&gt; build_sub x y "sub" builder
+  | <span data-count="7">"</span>( * )" -&gt; build_mul x y "mul" builder
+  | <span data-count="1">"</span>( / )" -&gt; build_sdiv x y "div" builder
+  | <span data-count="0">_</span> -&gt; failwith ("Invalid operator: " ^ op)
+;;
+
+let rec compile_immexpr = function
+  | <span data-count="69">I</span>mmInt i -&gt; const_int i64_t i
+  | <span data-count="4">I</span>mmBool b -&gt; const_int i64_t (if b then <span data-count="2">1</span> else <span data-count="2">0</span>)
+  | <span data-count="0">I</span>mmUnit -&gt; const_int i64_t 0
+  | <span data-count="207">I</span>mmVar name -&gt;
+    let rt_name = id_to_runtime_name name in
+    <span data-count="207">(</span>match Llvm.lookup_function rt_name module_ with
+     | <span data-count="69">S</span>ome f -&gt;
+       let fptr = build_ptrtoint f i64_t "" builder in
+       <span data-count="69">b</span>uild_call
+         (function_typ<span data-count="69">e</span> i64_t [| i64_t; i64_t |])
+         (Option.ge<span data-count="69">t</span> @@ lookup_functio<span data-count="69">n</span> "create_closure" module_)
+         [| fptr; const_in<span data-count="69">t</span> i64_t (Array.lengt<span data-count="69">h</span> (param<span data-count="69">s</span> f)); const_in<span data-count="69">t</span> i64_t 0 |]
+         "empty_closure"
+         builder
+     | <span data-count="138">N</span>one -&gt;
+       (match lookup_global rt_name module_ with
+        | <span data-count="0">S</span>ome g -&gt; g
+        | <span data-count="138">N</span>one -&gt;
+          (match lookup_name rt_name with
+           | <span data-count="138">S</span>ome v -&gt; v
+           | <span data-count="0">N</span>one -&gt; failwith ("Unknown variable: " ^ name))))
+
+and compile_cexp =
+  let match_op = function
+    | <span data-count="15">"</span>( + )" | <span data-count="9">"</span>( - )" | <span data-count="7">"</span>( * )" | <span data-count="1">"</span>( / )" -&gt; true
+    | <span data-count="23">_</span> -&gt; false
+  in
+  function
+  | <span data-count="24">C</span>Imm imm -&gt; compile_immexpr imm
+  | <span data-count="55">C</span>EApply (op, [ ie1; ie2 ]) when match_o<span data-count="55">p</span> op -&gt;
+    <span data-count="32">l</span>et x = compile_immexpr ie1 in
+    <span data-count="32">l</span>et y = compile_immexpr ie2 in
+    <span data-count="32">c</span>ompile_binop op x y
+  | <span data-count="68">C</span>EApply (f, args) -&gt;
+    let rev_values =
+      List.fold_left
+        (fun acc ie -&gt;
+          <span data-count="182">l</span>et v = compile_immexpr ie in
+          <span data-count="182">v</span> :: acc)
+        []
+        (ImmVar f :: args)
+    in
+    <span data-count="68">l</span>et values = List.rev rev_values in
+    <span data-count="68">l</span>et f, args = List.h<span data-count="68">d</span> values, List.t<span data-count="68">l</span> values in
+    build_call
+      (var_arg_function_typ<span data-count="68">e</span> i64_t [| i64_t; i64_t |])
+      (Option.ge<span data-count="68">t</span> (lookup_functio<span data-count="68">n</span> "apply_args_to_closure" module_))
+      (Array.of_lis<span data-count="68">t</span> ([ f; const_in<span data-count="68">t</span> i64_t (List.lengt<span data-count="68">h</span> args) ] @ args))
+      "applied_closure"
+      builder
+  | <span data-count="10">C</span>EIf (i, t, e) -&gt;
+    let cond = compile_immexpr i in
+    <span data-count="10">l</span>et cond_val = build_icmp Icmp.Ne cond (const_in<span data-count="10">t</span> i64_t 0) "cond_val" builder in
+    <span data-count="10">l</span>et entry_bb = insertion_block builder in
+    <span data-count="10">l</span>et parent = block_parent entry_bb in
+    <span data-count="10">l</span>et then_bb = append_block ctx "then" parent in
+    <span data-count="10">p</span>osition_at_end then_bb builder;
+    <span data-count="10">l</span>et then_ = compile_aexp t in
+    <span data-count="10">l</span>et new_then_bb = insertion_block builder in
+    <span data-count="10">l</span>et else_bb = append_block ctx "else" parent in
+    <span data-count="10">p</span>osition_at_end else_bb builder;
+    <span data-count="10">l</span>et else_ = compile_aexp e in
+    <span data-count="10">l</span>et new_else_bb = insertion_block builder in
+    <span data-count="10">l</span>et merge_bb = append_block ctx "merge" parent in
+    <span data-count="10">p</span>osition_at_end merge_bb builder;
+    <span data-count="10">l</span>et phi = build_phi [ then_, new_then_bb; else_, new_else_bb ] "phi" builder in
+    <span data-count="10">p</span>osition_at_end entry_bb builder;
+    <span data-count="10">l</span>et (_ : llvalue) = build_cond_br cond_val then_bb else_bb builder in
+    <span data-count="10">p</span>osition_at_end new_then_bb builder;
+    <span data-count="10">l</span>et (_ : llvalue) = build_br merge_bb builder in
+    <span data-count="10">p</span>osition_at_end new_else_bb builder;
+    <span data-count="10">l</span>et (_ : llvalue) = build_br merge_bb builder in
+    <span data-count="10">p</span>osition_at_end merge_bb builder;
+    <span data-count="10">p</span>hi
+
+and compile_aexp = function
+  | <span data-count="58">A</span>CExpr c -&gt; compile_cexp c
+  | <span data-count="76">A</span>ELetIn (name, cexp, aexp) -&gt;
+    let v = compile_cexp cexp in
+    <span data-count="76">a</span>dd_sym name v;
+    <span data-count="76">c</span>ompile_aexp aexp
+;;
+
+let declare_func name args =
+  <span data-count="34">l</span>et signature = function_type i64_t (Array.mak<span data-count="34">e</span> (List.lengt<span data-count="34">h</span> args) i64_t) in
+  <span data-count="34">l</span>et func = declare_function name signature module_ in
+  <span data-count="34">f</span>unc
+;;
+
+let compile_func_body id args aexp =
+  <span data-count="27">l</span>et func = declare_func id args in
+  <span data-count="27">L</span>ist.iter
+    (fun (name, value) -&gt;
+      <span data-count="56">s</span>et_value_name name value;
+      <span data-count="56">a</span>dd_sym name value)
+    (Base.List.zip_ex<span data-count="27">n</span> args (Base.List.of_arra<span data-count="27">y</span> (param<span data-count="27">s</span> func)));
+  <span data-count="27">l</span>et bb = append_block ctx "entry" func in
+  <span data-count="27">p</span>osition_at_end bb builder;
+  <span data-count="27">l</span>et body = compile_aexp aexp in
+  <span data-count="27">l</span>et _ = build_ret body builder in
+  <span data-count="27">f</span>unc
+;;
+
+let compile_str_item = function
+  | <span data-count="11">V</span>alue (name, aexp) -&gt;
+    let body = compile_aexp aexp in
+    <span data-count="11">l</span>et gvar = define_global name (const_in<span data-count="11">t</span> i64_t 0) module_ in
+    <span data-count="11">i</span>gnore (build_stor<span data-count="11">e</span> body gvar builder)
+  | <span data-count="20">N</span>on_rec (id, args, aexp) -&gt; ignore (compile_func_bod<span data-count="20">y</span> id args aexp)
+  | <span data-count="7">R</span>ec funcs -&gt;
+    List.iter (fun (id, args, _) -&gt; <span data-count="7">i</span>gnore (declare_fun<span data-count="7">c</span> id args)) funcs;
+    <span data-count="7">L</span>ist.iter (fun (id, args, aexp) -&gt; <span data-count="7">i</span>gnore (compile_func_bod<span data-count="7">y</span> id args aexp)) funcs
+;;
+
+let init_runtime () =
+  <span data-count="11">l</span>et runtime_ =
+    [ "create_closure", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t; i64_t |]
+    ; "apply_args_to_closure", var_arg_function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t; i64_t |]
+    ; "print_int", function_typ<span data-count="11">e</span> i64_t [| i64_t |]
+    ; "print_bool", function_typ<span data-count="11">e</span> i64_t [| i64_t |]
+    ; "add", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "sub", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "mul", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "div", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "leq", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "less", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "geq", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "gre", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "eq", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "neq", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "and", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "or", function_typ<span data-count="11">e</span> i64_t [| i64_t; i64_t |]
+    ; "fail_match", function_typ<span data-count="11">e</span> i64_t [| i64_t |]
+    ]
+  in
+  List.iter (fun (name, ty) -&gt; <span data-count="187">i</span>gnore (declare_functio<span data-count="187">n</span> name ty module_)) runtime_
+;;
+
+let create_main s =
+  <span data-count="11">l</span>et main = declare_function "main" (function_typ<span data-count="11">e</span> i64_t [||]) module_ in
+  <span data-count="11">l</span>et bb = append_block ctx "entry" main in
+  <span data-count="11">i</span>nit_runtime ();
+  <span data-count="11">L</span>ist.iter
+    (fun str_item -&gt;
+      <span data-count="38">p</span>osition_at_end bb builder;
+      <span data-count="38">i</span>gnore (compile_str_ite<span data-count="38">m</span> str_item))
+    s;
+  <span data-count="11">i</span>gnore (build_re<span data-count="11">t</span> (const_in<span data-count="11">t</span> i64_t 0) builder)
+;;
+
+let compile_structure s =
+  <span data-count="11">c</span>reate_main s;
+  <span data-count="11">p</span>rint_module "out.ll" module_
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>common.ml &mdash; Coverage report</title>
-    <meta name="description" content="85.00% coverage in lib/common.ml">
+    <meta name="description" content="87.50% coverage in lib/common.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/</span>common.ml
         </a>
       </h1>
-      <h2>85.00%</h2>
+      <h2>87.50%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:7.03%"></span>
@@ -29,9 +29,6 @@
       <span class="unvisited" style="bottom:44.32%"></span>
       <span class="unvisited" style="bottom:43.78%"></span>
       <span class="some-visited" style="bottom:37.84%"></span>
-      <span class="unvisited" style="bottom:16.76%"></span>
-      <span class="unvisited" style="bottom:16.22%"></span>
-      <span class="unvisited" style="bottom:15.68%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -189,9 +186,9 @@
 <a id="L151"></a><span > </span>
 <a id="L152"></a><span > </span>
 <a id="L153"></a><span > </span>
-<a id="L154"></a><span class="unvisited"> </span>
-<a id="L155"></a><span class="unvisited"> </span>
-<a id="L156"></a><span class="unvisited"> </span>
+<a id="L154"></a><span class="visited"> </span>
+<a id="L155"></a><span class="visited"> </span>
+<a id="L156"></a><span class="visited"> </span>
 <a id="L157"></a><span > </span>
 <a id="L158"></a><span > </span>
 <a id="L159"></a><span > </span>
@@ -418,25 +415,25 @@ open Base
 module StrMap = struct
   type 'a t = (string, 'a, String.comparator_witness) Map.t
 
-  let empty = Map.empt<span data-count="53">y</span> (module String)
-  let singleton str = <span data-count="17">M</span>ap.singleton (module String) str
-  let find m str = <span data-count="834">M</span>ap.find m str
+  let empty = Map.empt<span data-count="103">y</span> (module String)
+  let singleton str = <span data-count="61">M</span>ap.singleton (module String) str
+  let find m str = <span data-count="2134">M</span>ap.find m str
   let add = Map.add
   let update = Map.update
-  let merge_two fst snd = <span data-count="32">M</span>ap.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
+  let merge_two fst snd = <span data-count="140">M</span>ap.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
 end
 
 module StrSet = struct
   type t = (string, String.comparator_witness) Set.t
 
-  let empty = Set.empt<span data-count="53">y</span> (module String)
-  let singleton str = <span data-count="1031">S</span>et.singleton (module String) str
+  let empty = Set.empt<span data-count="103">y</span> (module String)
+  let singleton str = <span data-count="2331">S</span>et.singleton (module String) str
   let union = Set.union
-  let union_list lst = <span data-count="51">S</span>et.union_list (module String) lst
-  let find s str = <span data-count="555">S</span>et.mem s str
+  let union_list lst = <span data-count="123">S</span>et.union_list (module String) lst
+  let find s str = <span data-count="1643">S</span>et.mem s str
   let add = Set.add
   let to_list = Set.to_list
-  let of_list = Set.of_lis<span data-count="53">t</span> (module String)
+  let of_list = Set.of_lis<span data-count="103">t</span> (module String)
   let fold = Set.fold
   let diff = Set.diff
 end
@@ -447,68 +444,68 @@ let rec get_binds_pat =
   let open Ast in
   function
   | <span data-count="0">P</span>Constraint (pat, _) -&gt; get_binds_pat pat
-  | <span data-count="2">P</span>Any | <span data-count="71">P</span>Const _ -&gt; StrSet.empty
-  | <span data-count="349">P</span>Var ident -&gt; StrSet.singleton ident
-  | <span data-count="10">P</span>Cons (p1, p2) -&gt; StrSet.union (get_binds_pa<span data-count="10">t</span> p1) (get_binds_pa<span data-count="10">t</span> p2)
-  | <span data-count="13">P</span>Tuple pl -&gt;
+  | <span data-count="2">P</span>Any | <span data-count="264">P</span>Const _ -&gt; StrSet.empty
+  | <span data-count="727">P</span>Var ident -&gt; StrSet.singleton ident
+  | <span data-count="14">P</span>Cons (p1, p2) -&gt; StrSet.union (get_binds_pa<span data-count="14">t</span> p1) (get_binds_pa<span data-count="14">t</span> p2)
+  | <span data-count="28">P</span>Tuple pl -&gt;
     Base.List.fold pl ~init:StrSet.empty ~f:(fun acc p -&gt;
-      <span data-count="27">S</span>trSet.union acc (get_binds_pa<span data-count="27">t</span> p))
+      <span data-count="71">S</span>trSet.union acc (get_binds_pa<span data-count="71">t</span> p))
 ;;
 
 let rec get_binds_expr = function
-  | <span data-count="6">E</span>Constraint (e, _) -&gt; get_binds_expr e
-  | <span data-count="239">E</span>Const _ -&gt; StrSet.empty
-  | <span data-count="583">E</span>Var ident -&gt; StrSet.singleton ident
-  | <span data-count="9">E</span>Cons (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="9">r</span> e1) (get_binds_exp<span data-count="9">r</span> e2)
-  | <span data-count="555">E</span>Apply (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="555">r</span> e1) (get_binds_exp<span data-count="555">r</span> e2)
-  | <span data-count="192">E</span>Fun (pat, e) -&gt; StrSet.union (get_binds_pa<span data-count="192">t</span> pat) (get_binds_exp<span data-count="192">r</span> e)
-  | <span data-count="28">E</span>If (e1, e2, e3) -&gt;
-    StrSet.union_list [ get_binds_exp<span data-count="28">r</span> e1; get_binds_exp<span data-count="28">r</span> e2; get_binds_exp<span data-count="28">r</span> e3 ]
-  | <span data-count="93">E</span>Let (_, (p, e1), e2) -&gt;
-    StrSet.union (get_binds_pa<span data-count="93">t</span> p) (StrSet.unio<span data-count="93">n</span> (get_binds_exp<span data-count="93">r</span> e1) (get_binds_exp<span data-count="93">r</span> e2))
-  | <span data-count="3">E</span>Match (e, p_list) -&gt;
+  | <span data-count="12">E</span>Constraint (e, _) -&gt; get_binds_expr e
+  | <span data-count="506">E</span>Const _ -&gt; StrSet.empty
+  | <span data-count="1230">E</span>Var ident -&gt; StrSet.singleton ident
+  | <span data-count="17">E</span>Cons (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="17">r</span> e1) (get_binds_exp<span data-count="17">r</span> e2)
+  | <span data-count="1180">E</span>Apply (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="1180">r</span> e1) (get_binds_exp<span data-count="1180">r</span> e2)
+  | <span data-count="400">E</span>Fun (pat, e) -&gt; StrSet.union (get_binds_pa<span data-count="400">t</span> pat) (get_binds_exp<span data-count="400">r</span> e)
+  | <span data-count="60">E</span>If (e1, e2, e3) -&gt;
+    StrSet.union_list [ get_binds_exp<span data-count="60">r</span> e1; get_binds_exp<span data-count="60">r</span> e2; get_binds_exp<span data-count="60">r</span> e3 ]
+  | <span data-count="201">E</span>Let (_, (p, e1), e2) -&gt;
+    StrSet.union (get_binds_pa<span data-count="201">t</span> p) (StrSet.unio<span data-count="201">n</span> (get_binds_exp<span data-count="201">r</span> e1) (get_binds_exp<span data-count="201">r</span> e2))
+  | <span data-count="4">E</span>Match (e, p_list) -&gt;
     StrSet.union_list
-      (get_binds_exp<span data-count="3">r</span> e
-       :: List.ma<span data-count="3">p</span> p_list ~f:(fun (p, e) -&gt;
-         <span data-count="7">S</span>trSet.union (get_binds_pa<span data-count="7">t</span> p) (get_binds_exp<span data-count="7">r</span> e)))
-  | <span data-count="8">E</span>Tuple e_list -&gt; StrSet.union_list @@ List.ma<span data-count="8">p</span> e_list ~f:get_binds_expr
+      (get_binds_exp<span data-count="4">r</span> e
+       :: List.ma<span data-count="4">p</span> p_list ~f:(fun (p, e) -&gt;
+         <span data-count="9">S</span>trSet.union (get_binds_pa<span data-count="9">t</span> p) (get_binds_exp<span data-count="9">r</span> e)))
+  | <span data-count="13">E</span>Tuple e_list -&gt; StrSet.union_list @@ List.ma<span data-count="13">p</span> e_list ~f:get_binds_expr
 
-and get_binds_case (pat, e) = <span data-count="94">S</span>trSet.union (get_binds_pa<span data-count="94">t</span> pat) (get_binds_exp<span data-count="94">r</span> e)
+and get_binds_case (pat, e) = <span data-count="196">S</span>trSet.union (get_binds_pa<span data-count="196">t</span> pat) (get_binds_exp<span data-count="196">r</span> e)
 
 and get_binds_str_item = function
-  | <span data-count="94">S</span>Value (_, bl) -&gt;
-    List.fold bl ~init:StrSet.empty ~f:(fun acc b -&gt; <span data-count="94">S</span>trSet.union acc (get_binds_cas<span data-count="94">e</span> b))
+  | <span data-count="196">S</span>Value (_, bl) -&gt;
+    List.fold bl ~init:StrSet.empty ~f:(fun acc b -&gt; <span data-count="196">S</span>trSet.union acc (get_binds_cas<span data-count="196">e</span> b))
 ;;
 
 let make_binds structure =
-  <span data-count="49">l</span>et make_id id =
-    <span data-count="399">l</span>et is_digit = function
+  <span data-count="99">l</span>et make_id id =
+    <span data-count="831">l</span>et is_digit = function
       | <span data-count="0">'</span>0' .. '9' -&gt; true
-      | <span data-count="8">_</span> -&gt; false
+      | <span data-count="15">_</span> -&gt; false
     in
     let char_to_digit c = <span data-count="0">C</span>har.to_in<span data-count="0">t</span> c - Char.to_in<span data-count="0">t</span> '0' in
     let rec helper acc = function
       | <span data-count="0">[</span>] -&gt; Some acc
-      | <span data-count="8">h</span>d :: tl -&gt;
-        if is_digit hd then <span data-count="0">h</span>elper ((acc * 10) + char_to_digi<span data-count="0">t</span> hd) tl else <span data-count="8">N</span>one
+      | <span data-count="15">h</span>d :: tl -&gt;
+        if is_digit hd then <span data-count="0">h</span>elper ((acc * 10) + char_to_digi<span data-count="0">t</span> hd) tl else <span data-count="15">N</span>one
     in
     let char_list = String.to_list id in
-    <span data-count="399">m</span>atch List.length char_list with
-    | <span data-count="399">x</span> when x &gt;= 2 &amp;&amp; <span data-count="248">x</span> &lt;= 10 &amp;&amp; <span data-count="247">C</span>har.equa<span data-count="247">l</span> (List.hd_ex<span data-count="247">n</span> char_list) 'a' -&gt;
-      <span data-count="8">h</span>elper 0 (List.tl_ex<span data-count="8">n</span> char_list)
-    | <span data-count="391">_</span> -&gt; None
+    <span data-count="831">m</span>atch List.length char_list with
+    | <span data-count="831">x</span> when x &gt;= 2 &amp;&amp; <span data-count="516">x</span> &lt;= 10 &amp;&amp; <span data-count="515">C</span>har.equa<span data-count="515">l</span> (List.hd_ex<span data-count="515">n</span> char_list) 'a' -&gt;
+      <span data-count="15">h</span>elper 0 (List.tl_ex<span data-count="15">n</span> char_list)
+    | <span data-count="816">_</span> -&gt; None
   in
   let idents =
     List.fold_left structure ~init:StrSet.empty ~f:(fun acc t -&gt;
-      <span data-count="94">S</span>trSet.union acc (get_binds_str_ite<span data-count="94">m</span> t))
+      <span data-count="196">S</span>trSet.union acc (get_binds_str_ite<span data-count="196">m</span> t))
   in
-  <span data-count="49">S</span>et.filter_map (module Int) idents ~f:make_id
+  <span data-count="99">S</span>et.filter_map (module Int) idents ~f:make_id
 ;;
 
 let contains ng id =
-  <span data-count="46">m</span>atch Set.find ng ~f:(Int.equa<span data-count="46">l</span> id) with
+  <span data-count="371">m</span>atch Set.find ng ~f:(Int.equa<span data-count="371">l</span> id) with
   | <span data-count="0">S</span>ome _ -&gt; true
-  | <span data-count="46">N</span>one -&gt; false
+  | <span data-count="371">N</span>one -&gt; false
 ;;
 
 let pp_bindings ppf ng =
@@ -522,51 +519,51 @@ module MonadCounter = struct
 
   type 'a t = bindings * int -&gt; bindings * int * 'a
 
-  let return x (binds, var) = <span data-count="5089">b</span>inds, var, x
+  let return x (binds, var) = <span data-count="14717">b</span>inds, var, x
 
   let fresh (binds, var) =
-    <span data-count="46">l</span>et rec helper num = <span data-count="46">i</span>f contains binds num then <span data-count="0">h</span>elper (num + 1) else <span data-count="46">n</span>um in
+    <span data-count="371">l</span>et rec helper num = <span data-count="371">i</span>f contains binds num then <span data-count="0">h</span>elper (num + 1) else <span data-count="371">n</span>um in
     let next = helper var in
-    <span data-count="46">b</span>inds, next + 1, next
+    <span data-count="371">b</span>inds, next + 1, next
   ;;
 
   let bind (m : 'a t) (f : 'a -&gt; 'b t) : 'b t =
-    <span data-count="5041">f</span>un t -&gt;
-    <span data-count="5041">l</span>et binds, var, x = m t in
-    <span data-count="5041">f</span> x (binds, var)
+    <span data-count="14821">f</span>un t -&gt;
+    <span data-count="14821">l</span>et binds, var, x = m t in
+    <span data-count="14821">f</span> x (binds, var)
   ;;
 
   let ( &gt;&gt;= ) = bind
   let ( let* ) = bind
 
   let ( &gt;&gt;| ) (m : 'a t) (f : 'a -&gt; 'b) : 'b t =
-    <span data-count="8">f</span>un t -&gt;
-    <span data-count="8">l</span>et binds, var, x = m t in
-    <span data-count="8">b</span>inds, var, <span data-count="8">f</span> x
+    <span data-count="375">f</span>un t -&gt;
+    <span data-count="375">l</span>et binds, var, x = m t in
+    <span data-count="375">b</span>inds, var, <span data-count="375">f</span> x
   ;;
 
-  let run (m : 'a t) binds start = <span data-count="94">m</span> (binds, start)
+  let run (m : 'a t) binds start = <span data-count="267">m</span> (binds, start)
 
   let map (xs : 'a list) ~(f : 'a -&gt; 'b t) : 'b list t =
-    <span data-count="37">l</span>et* xs =
-      List.fol<span data-count="37">d</span> xs ~init:(retur<span data-count="37">n</span> []) ~f:(fun acc x -&gt;
-        <span data-count="53">l</span>et* acc = acc in
-        <span data-count="53">l</span>et* x = <span data-count="53">f</span> x in
-        <span data-count="53">r</span>eturn (x :: acc))
+    <span data-count="114">l</span>et* xs =
+      List.fol<span data-count="114">d</span> xs ~init:(retur<span data-count="114">n</span> []) ~f:(fun acc x -&gt;
+        <span data-count="157">l</span>et* acc = acc in
+        <span data-count="157">l</span>et* x = <span data-count="157">f</span> x in
+        <span data-count="157">r</span>eturn (x :: acc))
     in
-    <span data-count="37">r</span>eturn @@ List.re<span data-count="37">v</span> xs
+    <span data-count="114">r</span>eturn @@ List.re<span data-count="114">v</span> xs
   ;;
 
   let fold_left (xs : 'a list) ~(init : 'b t) ~(f : 'b -&gt; 'a -&gt; 'b t) : 'b t =
-    <span data-count="192">L</span>ist.fold xs ~init ~f:(fun acc x -&gt;
-      <span data-count="382">l</span>et* acc = acc in
-      <span data-count="382">f</span> acc x)
+    <span data-count="636">L</span>ist.fold xs ~init ~f:(fun acc x -&gt;
+      <span data-count="1424">l</span>et* acc = acc in
+      <span data-count="1424">f</span> acc x)
   ;;
 
   let fold_right xs ~init ~f =
-    <span data-count="0">L</span>ist.fold_right xs ~init ~f:(fun x acc -&gt;
-      <span data-count="0">l</span>et* acc = acc in
-      <span data-count="0">f</span> x acc)
+    <span data-count="137">L</span>ist.fold_right xs ~init ~f:(fun x acc -&gt;
+      <span data-count="185">l</span>et* acc = acc in
+      <span data-count="185">f</span> x acc)
   ;;
 end
 
@@ -593,9 +590,9 @@ let builtins =
   ]
 ;;
 
-let empty = Base.Map.empt<span data-count="53">y</span> (module Base.String)
-let get_id i = <span data-count="46">"</span>a" ^ Int.to_strin<span data-count="46">g</span> i
-let make_apply op expr1 expr2 = <span data-count="10">P</span>EEApp (PEEApp (PEEVar op, expr1), expr2)
+let empty = Base.Map.empt<span data-count="103">y</span> (module Base.String)
+let get_id i = <span data-count="371">"</span>a" ^ Int.to_strin<span data-count="371">g</span> i
+let make_apply op expr1 expr2 = <span data-count="13">P</span>EEApp (PEEApp (PEEVar op, expr1), expr2)
 </code></pre>
       </div>
     </div>

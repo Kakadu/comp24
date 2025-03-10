@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>closure.ml &mdash; Coverage report</title>
-    <meta name="description" content="88.60% coverage in lib/closure.ml">
+    <meta name="description" content="93.86% coverage in lib/closure.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,15 +15,11 @@
           <span class="dirname">lib/</span>closure.ml
         </a>
       </h1>
-      <h2>88.60%</h2>
+      <h2>93.86%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:18.84%"></span>
-      <span class="unvisited" style="top:19.57%"></span>
       <span class="unvisited" style="top:24.64%"></span>
-      <span class="unvisited" style="bottom:49.28%"></span>
-      <span class="unvisited" style="bottom:47.83%"></span>
-      <span class="unvisited" style="bottom:47.10%"></span>
       <span class="unvisited" style="bottom:29.71%"></span>
       <span class="unvisited" style="bottom:21.74%"></span>
       <span class="unvisited" style="bottom:20.29%"></span>
@@ -57,7 +53,7 @@
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span class="unvisited"> </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
@@ -100,10 +96,10 @@
 <a id="L67"></a><span class="visited"> </span>
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span class="unvisited"> </span>
+<a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span class="unvisited"> </span>
-<a id="L73"></a><span class="unvisited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span class="visited"> </span>
 <a id="L76"></a><span class="visited"> </span>
@@ -317,136 +313,136 @@ open Common
 open Base
 
 let rec free_vars env =
-  <span data-count="548">l</span>et open StrSet in
+  <span data-count="2015">l</span>et open StrSet in
   function
-  | <span data-count="47">P</span>EEConst _ -&gt; empty
-  | <span data-count="235">P</span>EEVar id -&gt; if find env id then <span data-count="136">e</span>mpty else <span data-count="99">s</span>ingleton id
-  | <span data-count="12">P</span>EEIf (e1, e2, e3) -&gt;
-    union_list [ free_var<span data-count="12">s</span> env e1; free_var<span data-count="12">s</span> env e2; free_var<span data-count="12">s</span> env e3 ]
-  | <span data-count="34">P</span>EEFun (args, body) -&gt;
-    let binded = union env (of_lis<span data-count="34">t</span> args) in
-    <span data-count="34">f</span>ree_vars binded body
-  | <span data-count="203">P</span>EEApp (e1, e2) -&gt; union (free_var<span data-count="203">s</span> env e1) (free_var<span data-count="203">s</span> env e2)
-  | <span data-count="15">P</span>EELet (PENonrec (name, e1), e2) -&gt;
-    union (free_var<span data-count="15">s</span> env e1) (free_var<span data-count="15">s</span> (ad<span data-count="15">d</span> env name) e2)
-  | <span data-count="2">P</span>EELet (PERec cl, e) -&gt;
+  | <span data-count="180">P</span>EEConst _ -&gt; empty
+  | <span data-count="868">P</span>EEVar id -&gt; if find env id then <span data-count="494">e</span>mpty else <span data-count="374">s</span>ingleton id
+  | <span data-count="46">P</span>EEIf (e1, e2, e3) -&gt;
+    union_list [ free_var<span data-count="46">s</span> env e1; free_var<span data-count="46">s</span> env e2; free_var<span data-count="46">s</span> env e3 ]
+  | <span data-count="110">P</span>EEFun (args, body) -&gt;
+    let binded = union env (of_lis<span data-count="110">t</span> args) in
+    <span data-count="110">f</span>ree_vars binded body
+  | <span data-count="737">P</span>EEApp (e1, e2) -&gt; union (free_var<span data-count="737">s</span> env e1) (free_var<span data-count="737">s</span> env e2)
+  | <span data-count="67">P</span>EELet (PENonrec (name, e1), e2) -&gt;
+    union (free_var<span data-count="67">s</span> env e1) (free_var<span data-count="67">s</span> (ad<span data-count="67">d</span> env name) e2)
+  | <span data-count="4">P</span>EELet (PERec cl, e) -&gt;
     let ids, el =
       List.fold_right cl ~init:(empty, []) ~f:(fun (name, e) (ids, exprs) -&gt;
-        <span data-count="2">a</span>d<span data-count="2">d</span> ids name, e :: exprs)
+        <span data-count="4">a</span>d<span data-count="4">d</span> ids name, e :: exprs)
     in
-    <span data-count="2">l</span>et binded = union env ids in
-    <span data-count="2">L</span>ist.fold el ~init:(free_var<span data-count="2">s</span> binded e) ~f:(fun acc e -&gt;
-      <span data-count="2">u</span>nion acc (free_var<span data-count="2">s</span> binded e))
+    <span data-count="4">l</span>et binded = union env ids in
+    <span data-count="4">L</span>ist.fold el ~init:(free_var<span data-count="4">s</span> binded e) ~f:(fun acc e -&gt;
+      <span data-count="4">u</span>nion acc (free_var<span data-count="4">s</span> binded e))
   | <span data-count="0">P</span>EECons (e1, e2) -&gt; union (free_var<span data-count="0">s</span> env e1) (free_var<span data-count="0">s</span> env e2)
-  | <span data-count="0">P</span>EETuple el -&gt; List.fold el ~init:empty ~f:(fun acc e -&gt; <span data-count="0">u</span>nion acc (free_var<span data-count="0">s</span> env e))
+  | <span data-count="3">P</span>EETuple el -&gt; List.fold el ~init:empty ~f:(fun acc e -&gt; <span data-count="12">u</span>nion acc (free_var<span data-count="12">s</span> env e))
 ;;
 
 let make_apply expr args env =
-  <span data-count="38">L</span>ist.fold args ~init:expr ~f:(fun acc name -&gt;
-    <span data-count="13">l</span>et arg =
+  <span data-count="139">L</span>ist.fold args ~init:expr ~f:(fun acc name -&gt;
+    <span data-count="29">l</span>et arg =
       match StrMap.find env name with
       | <span data-count="0">S</span>ome e -&gt; e
-      | <span data-count="13">N</span>one -&gt; PEEVar name
+      | <span data-count="29">N</span>one -&gt; PEEVar name
     in
     PEEApp (acc, arg))
 ;;
 
 let rec cc_expr global_env local_env = function
-  | <span data-count="75">P</span>EEConst _ as c -&gt; c
-  | <span data-count="202">P</span>EEVar id as v -&gt;
+  | <span data-count="331">P</span>EEConst _ as c -&gt; c
+  | <span data-count="840">P</span>EEVar id as v -&gt;
     (match StrMap.find local_env id with
-     | <span data-count="6">S</span>ome new_expr -&gt; new_expr
-     | <span data-count="196">N</span>one -&gt; v)
-  | <span data-count="10">P</span>EEIf (e1, e2, e3) -&gt;
+     | <span data-count="17">S</span>ome new_expr -&gt; new_expr
+     | <span data-count="823">N</span>one -&gt; v)
+  | <span data-count="43">P</span>EEIf (e1, e2, e3) -&gt;
     let e1 = cc_expr global_env local_env e1 in
-    <span data-count="10">l</span>et e2 = cc_expr global_env local_env e2 in
-    <span data-count="10">l</span>et e3 = cc_expr global_env local_env e3 in
-    <span data-count="10">P</span>EEIf (e1, e2, e3)
-  | <span data-count="14">P</span>EEFun (args, body) as v -&gt;
-    let fvs = free_vars global_env v |&gt; <span data-count="14">S</span>trSet.to_list in
-    <span data-count="14">l</span>et body = cc_expr global_env empty body in
-    <span data-count="14">l</span>et e = PEEFun (fvs @ args, body) in
+    <span data-count="43">l</span>et e2 = cc_expr global_env local_env e2 in
+    <span data-count="43">l</span>et e3 = cc_expr global_env local_env e3 in
+    <span data-count="43">P</span>EEIf (e1, e2, e3)
+  | <span data-count="50">P</span>EEFun (args, body) as v -&gt;
+    let fvs = free_vars global_env v |&gt; <span data-count="50">S</span>trSet.to_list in
+    <span data-count="50">l</span>et body = cc_expr global_env empty body in
+    <span data-count="50">l</span>et e = PEEFun (fvs @ args, body) in
     make_apply e fvs local_env
-  | <span data-count="194">P</span>EEApp (e1, e2) -&gt;
+  | <span data-count="797">P</span>EEApp (e1, e2) -&gt;
     let e1 = cc_expr global_env local_env e1 in
-    <span data-count="194">l</span>et e2 = cc_expr global_env local_env e2 in
-    <span data-count="194">P</span>EEApp (e1, e2)
-  | <span data-count="30">P</span>EELet (PENonrec (name, e1), e2) -&gt;
+    <span data-count="797">l</span>et e2 = cc_expr global_env local_env e2 in
+    <span data-count="797">P</span>EEApp (e1, e2)
+  | <span data-count="135">P</span>EELet (PENonrec (name, e1), e2) -&gt;
     let e1, env1 = cc_nonrec global_env local_env name e1 in
-    <span data-count="30">l</span>et env2 = StrMap.merge_two local_env env1 in
-    <span data-count="30">l</span>et e2 = cc_expr global_env env2 e2 in
-    <span data-count="30">P</span>EELet (PENonrec (name, e1), e2)
-  | <span data-count="2">P</span>EELet (PERec decl_list, e2) -&gt;
+    <span data-count="135">l</span>et env2 = StrMap.merge_two local_env env1 in
+    <span data-count="135">l</span>et e2 = cc_expr global_env env2 e2 in
+    <span data-count="135">P</span>EELet (PENonrec (name, e1), e2)
+  | <span data-count="5">P</span>EELet (PERec decl_list, e2) -&gt;
     let cl, env1 = cc_rec global_env local_env decl_list in
-    <span data-count="2">l</span>et env2 = StrMap.merge_two local_env env1 in
-    <span data-count="2">l</span>et e2 = cc_expr global_env env2 e2 in
-    <span data-count="2">P</span>EELet (PERec cl, e2)
-  | <span data-count="0">P</span>EECons (e1, e2) -&gt;
+    <span data-count="5">l</span>et env2 = StrMap.merge_two local_env env1 in
+    <span data-count="5">l</span>et e2 = cc_expr global_env env2 e2 in
+    <span data-count="5">P</span>EELet (PERec cl, e2)
+  | <span data-count="8">P</span>EECons (e1, e2) -&gt;
     let e1 = cc_expr global_env local_env e1 in
-    <span data-count="0">l</span>et e2 = cc_expr global_env local_env e2 in
-    <span data-count="0">P</span>EECons (e1, e2)
-  | <span data-count="1">P</span>EETuple el -&gt;
-    let el = List.map el ~f:(cc_exp<span data-count="1">r</span> global_env local_env) in
-    <span data-count="1">P</span>EETuple el
+    <span data-count="8">l</span>et e2 = cc_expr global_env local_env e2 in
+    <span data-count="8">P</span>EECons (e1, e2)
+  | <span data-count="9">P</span>EETuple el -&gt;
+    let el = List.map el ~f:(cc_exp<span data-count="9">r</span> global_env local_env) in
+    <span data-count="9">P</span>EETuple el
 
 and cc_nonrec global_env local_env name = function
-  | <span data-count="17">P</span>EEFun (args, body) -&gt;
-    let fvs = StrSet.(to_lis<span data-count="17">t</span> (dif<span data-count="17">f</span> (free_var<span data-count="17">s</span> global_env body) (of_lis<span data-count="17">t</span> args))) in
+  | <span data-count="61">P</span>EEFun (args, body) -&gt;
+    let fvs = StrSet.(to_lis<span data-count="61">t</span> (dif<span data-count="61">f</span> (free_var<span data-count="61">s</span> global_env body) (of_lis<span data-count="61">t</span> args))) in
     let body = cc_expr global_env empty body in
-    <span data-count="17">l</span>et e = PEEFun (fvs @ args, body) in
+    <span data-count="61">l</span>et e = PEEFun (fvs @ args, body) in
     let apply = make_apply (PEEVar name) fvs local_env in
-    <span data-count="17">e</span>, StrMap.singleto<span data-count="17">n</span> name apply
-  | <span data-count="38">e</span>xpr -&gt; cc_exp<span data-count="38">r</span> global_env local_env expr, empty
+    <span data-count="61">e</span>, StrMap.singleto<span data-count="61">n</span> name apply
+  | <span data-count="176">e</span>xpr -&gt; cc_exp<span data-count="176">r</span> global_env local_env expr, empty
 
 and cc_rec global_env prev_env cl =
-  <span data-count="7">l</span>et ids = List.map cl ~f:fst in
-  <span data-count="7">l</span>et f1 (free, env) (name, expr) =
-    <span data-count="7">m</span>atch expr with
-    | <span data-count="7">P</span>EEFun (args, body) -&gt;
-      let remove = StrSet.union (StrSet.of_lis<span data-count="7">t</span> ids) (StrSet.of_lis<span data-count="7">t</span> args) in
-      <span data-count="7">l</span>et fvs = StrSet.diff (free_var<span data-count="7">s</span> global_env body) remove |&gt; <span data-count="7">S</span>trSet.to_list in
-      <span data-count="7">l</span>et bind = make_apply (PEEVar name) fvs prev_env in
-      <span data-count="7">l</span>et env = StrMap.update env name ~f:(fun _ -&gt; <span data-count="7">b</span>ind) in
-      <span data-count="7">f</span>vs :: free, env
+  <span data-count="28">l</span>et ids = List.map cl ~f:fst in
+  <span data-count="28">l</span>et f1 (free, env) (name, expr) =
+    <span data-count="28">m</span>atch expr with
+    | <span data-count="28">P</span>EEFun (args, body) -&gt;
+      let remove = StrSet.union (StrSet.of_lis<span data-count="28">t</span> ids) (StrSet.of_lis<span data-count="28">t</span> args) in
+      <span data-count="28">l</span>et fvs = StrSet.diff (free_var<span data-count="28">s</span> global_env body) remove |&gt; <span data-count="28">S</span>trSet.to_list in
+      <span data-count="28">l</span>et bind = make_apply (PEEVar name) fvs prev_env in
+      <span data-count="28">l</span>et env = StrMap.update env name ~f:(fun _ -&gt; <span data-count="28">b</span>ind) in
+      <span data-count="28">f</span>vs :: free, env
     | <span data-count="0">_</span> -&gt; [] :: free, env
   in
   let fvs, env = List.fold cl ~init:([], prev_env) ~f:f1 in
-  <span data-count="7">l</span>et fvs = List.rev fvs in
-  <span data-count="7">l</span>et to_fold = List.zip_exn cl fvs in
-  <span data-count="7">l</span>et f1 decl_acc ((name, e), free) =
-    <span data-count="7">m</span>atch e with
-    | <span data-count="7">P</span>EEFun (args, body) -&gt;
+  <span data-count="28">l</span>et fvs = List.rev fvs in
+  <span data-count="28">l</span>et to_fold = List.zip_exn cl fvs in
+  <span data-count="28">l</span>et f1 decl_acc ((name, e), free) =
+    <span data-count="28">m</span>atch e with
+    | <span data-count="28">P</span>EEFun (args, body) -&gt;
       let new_body = cc_expr global_env empty body in
-      <span data-count="7">l</span>et efun = PEEFun (free @ args, new_body) in
+      <span data-count="28">l</span>et efun = PEEFun (free @ args, new_body) in
       (name, efun) :: decl_acc
     | <span data-count="0">_</span> -&gt;
       let e = cc_expr global_env env e in
       <span data-count="0">(</span>name, e) :: decl_acc
   in
   let cl = List.fold to_fold ~init:[] ~f:f1 in
-  <span data-count="7">l</span>et cl = List.rev cl in
-  <span data-count="7">c</span>l, env
+  <span data-count="28">l</span>et cl = List.rev cl in
+  <span data-count="28">c</span>l, env
 ;;
 
 let cc_str_item global_env = function
-  | <span data-count="25">P</span>ENonrec (name, e) -&gt;
+  | <span data-count="102">P</span>ENonrec (name, e) -&gt;
     let e1, _ = cc_nonrec global_env empty name e in
-    <span data-count="25">l</span>et env = StrSet.add global_env name in
-    <span data-count="25">e</span>nv, PENonrec (name, e1)
-  | <span data-count="5">P</span>ERec decl_list -&gt;
+    <span data-count="102">l</span>et env = StrSet.add global_env name in
+    <span data-count="102">e</span>nv, PENonrec (name, e1)
+  | <span data-count="23">P</span>ERec decl_list -&gt;
     let ids = List.map decl_list ~f:fst in
-    <span data-count="5">l</span>et cl, _ = cc_rec global_env empty decl_list in
-    <span data-count="5">l</span>et env = List.fold ids ~init:global_env ~f:(fun acc name -&gt; <span data-count="5">S</span>trSet.add acc name) in
-    <span data-count="5">e</span>nv, PERec cl
+    <span data-count="23">l</span>et cl, _ = cc_rec global_env empty decl_list in
+    <span data-count="23">l</span>et env = List.fold ids ~init:global_env ~f:(fun acc name -&gt; <span data-count="23">S</span>trSet.add acc name) in
+    <span data-count="23">e</span>nv, PERec cl
 ;;
 
 let run_cc structure =
-  <span data-count="15">l</span>et builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
-  <span data-count="15">l</span>et rec helper last_env = function
-    | <span data-count="15">[</span>] -&gt; []
-    | <span data-count="30">h</span>d :: tl -&gt;
+  <span data-count="62">l</span>et builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
+  <span data-count="62">l</span>et rec helper last_env = function
+    | <span data-count="62">[</span>] -&gt; []
+    | <span data-count="125">h</span>d :: tl -&gt;
       let env, ast = cc_str_item last_env hd in
-      <span data-count="30">a</span>st :: helpe<span data-count="30">r</span> env tl
+      <span data-count="125">a</span>st :: helpe<span data-count="125">r</span> env tl
   in
   helper builtins structure
 ;;
