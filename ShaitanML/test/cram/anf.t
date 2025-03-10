@@ -32,12 +32,12 @@
   >   let x y =
   >   let z a = a (y + 1) in
   >   z (fun x -> x)
-  let a1 y a = let a3 = ((( + ) y) 1) in
-  (a a3)
+  let a0 y a = let a2 = ((( + ) y) 1) in
+  (a a2)
   
-  let a2 a0 = a0
+  let a1 x = x
   
-  let x y = ((a1 y) a2)
+  let x y = ((a0 y) a1)
 
   $ anf << EOF
   >     let fibo n =
@@ -124,164 +124,165 @@
   (a1 lst)
 
   $ anf < manytests/typed/001fac.ml
-  let rec fac n = let a0 = ((( <= ) n) 1) in
-  if a0
+  let rec fac n = let a1 = ((( <= ) n) 1) in
+  if a1
   then 1
-  else let a2 = ((( - ) n) 1) in
-  let a1 = (fac a2) in
-  ((( * ) n) a1)
+  else let a3 = ((( - ) n) 1) in
+  let a2 = (fac a3) in
+  ((( * ) n) a2)
   
-  let main = let a3 = (fac 4) in
-  let () = (print_int a3) in
+  let main = let a4 = (fac 4) in
+  let a0 = (print_int a4) in
   0
 
   $ anf < manytests/typed/002fac.ml
-  let a1 k n p = let a3 = ((( * ) p) n) in
-  (k a3)
+  let a2 k n p = let a4 = ((( * ) p) n) in
+  (k a4)
   
-  let rec fac_cps n k = let a4 = ((( = ) n) 1) in
-  if a4
+  let rec fac_cps n k = let a5 = ((( = ) n) 1) in
+  if a5
   then (k 1)
-  else let a6 = ((a1 k) n) in
-  let a5 = ((( - ) n) 1) in
-  ((fac_cps a5) a6)
+  else let a7 = ((a2 k) n) in
+  let a6 = ((( - ) n) 1) in
+  ((fac_cps a6) a7)
   
-  let a2 a0 = a0
+  let a3 a1 = a1
   
-  let main = let a7 = ((fac_cps 4) a2) in
-  let () = (print_int a7) in
+  let main = let a8 = ((fac_cps 4) a3) in
+  let a0 = (print_int a8) in
   0
 
   $ anf < manytests/typed/003fib.ml
-  let rec fib_acc a b n = let a0 = ((( = ) n) 1) in
-  if a0
+  let rec fib_acc a b n = let a2 = ((( = ) n) 1) in
+  if a2
   then b
   else let n1 = ((( - ) n) 1) in
   let ab = ((( + ) a) b) in
   (((fib_acc b) ab) n1)
   
-  let rec fib n = let a1 = ((( < ) n) 2) in
-  if a1
+  let rec fib n = let a3 = ((( < ) n) 2) in
+  if a3
   then n
-  else let a5 = ((( - ) n) 2) in
+  else let a7 = ((( - ) n) 2) in
+  let a6 = (fib a7) in
+  let a5 = ((( - ) n) 1) in
   let a4 = (fib a5) in
-  let a3 = ((( - ) n) 1) in
-  let a2 = (fib a3) in
-  ((( + ) a2) a4)
+  ((( + ) a4) a6)
   
-  let main = let a6 = (((fib_acc 0) 1) 4) in
-  let () = (print_int a6) in
-  let a7 = (fib 4) in
-  let () = (print_int a7) in
+  let main = let a8 = (((fib_acc 0) 1) 4) in
+  let a1 = (print_int a8) in
+  let a9 = (fib 4) in
+  let a0 = (print_int a9) in
   0
 
   $ anf < manytests/typed/004manyargs.ml
-  let wrap f = let a3 = ((( = ) 1) 1) in
-  if a3
+  let wrap f = let a4 = ((( = ) 1) 1) in
+  if a4
   then f
   else f
   
-  let test3 a0 a1 a2 a b c = let a0 = (print_int a0) in
-  let a1 = (print_int a1) in
-  let a2 = (print_int a2) in
+  let test3 a b c = let a1 = (print_int a) in
+  let a2 = (print_int b) in
+  let a3 = (print_int c) in
   0
   
-  let test10 a b c d e f g h i j = let a11 = ((( + ) a) b) in
-  let a10 = ((( + ) a11) c) in
-  let a9 = ((( + ) a10) d) in
-  let a8 = ((( + ) a9) e) in
-  let a7 = ((( + ) a8) f) in
-  let a6 = ((( + ) a7) g) in
-  let a5 = ((( + ) a6) h) in
-  let a4 = ((( + ) a5) i) in
-  ((( + ) a4) j)
+  let test10 a b c d e f g h i j = let a12 = ((( + ) a) b) in
+  let a11 = ((( + ) a12) c) in
+  let a10 = ((( + ) a11) d) in
+  let a9 = ((( + ) a10) e) in
+  let a8 = ((( + ) a9) f) in
+  let a7 = ((( + ) a8) g) in
+  let a6 = ((( + ) a7) h) in
+  let a5 = ((( + ) a6) i) in
+  ((( + ) a5) j)
   
   let main = let rez = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000) in
-  let () = (print_int rez) in
+  let a0 = (print_int rez) in
   let temp2 = ((((wrap test3) 1) 10) 100) in
   0
 
   $ anf < manytests/typed/005fix.ml
-  let rec fix f x = let a0 = (fix f) in
-  ((f a0) x)
+  let rec fix f x = let a1 = (fix f) in
+  ((f a1) x)
   
-  let fac self n = let a1 = ((( <= ) n) 1) in
-  if a1
+  let fac self n = let a2 = ((( <= ) n) 1) in
+  if a2
   then 1
-  else let a3 = ((( - ) n) 1) in
-  let a2 = (self a3) in
-  ((( * ) n) a2)
+  else let a4 = ((( - ) n) 1) in
+  let a3 = (self a4) in
+  ((( * ) n) a3)
   
-  let main = let a4 = ((fix fac) 6) in
-  let () = (print_int a4) in
+  let main = let a5 = ((fix fac) 6) in
+  let a0 = (print_int a5) in
   0
 
   $ anf < manytests/typed/006partial.ml
-  let a3 a0 = ((( + ) a0) 2)
+  let a2 foo = ((( + ) foo) 2)
   
-  let a4 a1 = ((( * ) a1) 10)
+  let a3 foo = ((( * ) foo) 10)
   
   let foo b = if b
-  then a3
-  else a4
+  then a2
+  else a3
   
-  let a2 a2 x = let a7 = ((a2 false) x) in
-  let a6 = ((a2 true) a7) in
-  let a5 = ((a2 false) a6) in
-  ((a2 true) a5)
+  let a1 x = let a6 = ((foo false) x) in
+  let a5 = ((foo true) a6) in
+  let a4 = ((foo false) a5) in
+  ((foo true) a4)
   
-  let main = let a8 = (a2 11) in
-  let () = (print_int a8) in
+  let main = let a7 = (a1 11) in
+  let a0 = (print_int a7) in
   0
 
   $ anf < manytests/typed/006partial2.ml
-  let foo a b c = let () = (print_int a) in
-  let () = (print_int b) in
-  let () = (print_int c) in
-  let a3 = ((( * ) b) c) in
-  ((( + ) a) a3)
+  let foo a b c = let a2 = (print_int a) in
+  let a1 = (print_int b) in
+  let a0 = (print_int c) in
+  let a7 = ((( * ) b) c) in
+  ((( + ) a) a7)
   
-  let main = let a0 = (a0 1) in
-  let a1 = (a1 2) in
-  let a2 = (a2 3) in
-  let () = (print_int a2) in
+  let main = let a4 = (foo 1) in
+  let a5 = (a4 2) in
+  let a6 = (a5 3) in
+  let a3 = (print_int a6) in
   0
 
   $ anf < manytests/typed/006partial3.ml
-  let a1 c = (print_int c)
+  let a4 c = (print_int c)
   
-  let a0 b = let () = (print_int b) in
-  a1
+  let a3 b = let a0 = (print_int b) in
+  a4
   
-  let foo a = let () = (print_int a) in
-  a0
+  let foo a = let a1 = (print_int a) in
+  a3
   
-  let main = let () = (((foo 4) 8) 9) in
+  let main = let a2 = (((foo 4) 8) 9) in
   0
 
   $ anf < manytests/typed/007order.ml
-  let _start () () a () b _c () d __ = let a0 = ((( + ) a) b) in
-  let () = (print_int a0) in
-  let () = (print_int __) in
-  let a2 = ((( * ) a) b) in
-  let a1 = ((( / ) a2) _c) in
-  ((( + ) a1) d)
+  let _start a0 a1 a a2 b _c a3 d __ = let a6 = (a0, a1, a2, a3) in
+  let a7 = ((( + ) a) b) in
+  let a5 = (print_int a7) in
+  let a4 = (print_int __) in
+  let a9 = ((( * ) a) b) in
+  let a8 = ((( / ) a9) _c) in
+  ((( + ) a8) d)
   
   let main = print_int
 
   $ anf < manytests/typed/008ascription.ml
-  let addi f g x = let a2 = (g x) in
-  ((f x) a2)
+  let addi f g x = let a3 = (g x) in
+  ((f x) a3)
   
-  let a0 x b = if b
+  let a1 x b = if b
   then ((( + ) x) 1)
   else ((( * ) x) 2)
   
-  let a1 _start = let a3 = ((( / ) _start) 2) in
-  ((( = ) a3) 0)
+  let a2 _start = let a4 = ((( / ) _start) 2) in
+  ((( = ) a4) 0)
   
-  let main = let a4 = (((addi a0) a1) 4) in
-  let () = (print_int a4) in
+  let main = let a5 = (((addi a1) a2) 4) in
+  let a0 = (print_int a5) in
   0
 
   $ anf < manytests/typed/009let_poly.ml

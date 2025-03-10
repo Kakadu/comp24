@@ -6,6 +6,7 @@
   Alpha
   Common
   Closure
+  Codegen
   Pat_elim
   Pat_elim_ast
   Parser
@@ -14,9 +15,10 @@
   L_lifting
   Closure
   Anf
-  Anf_ast)
+  Anf_ast
+  Llvm_utils)
  (inline_tests)
- (libraries base stdlib angstrom)
+ (libraries base stdlib angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (instrumentation
