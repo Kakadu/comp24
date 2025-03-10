@@ -108,7 +108,7 @@
   >   0
   > EOF
   ANF:
-  let ll_helper_1 acc list_0 =
+  let rec ll_helper_1 acc list_0 =
          let anf1 = ml_list_is_empty list_0 in
          if anf1 
          then acc 
@@ -152,7 +152,7 @@ $ cat /tmp/lists.s
   >   0
   > EOF
   ANF:
-  let map f list =
+  let rec map f list =
          let anf8 = ml_list_is_empty list in
          let anf1 = not anf8 in
          if anf1 

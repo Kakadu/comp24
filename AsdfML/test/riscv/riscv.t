@@ -318,7 +318,7 @@ $ qemu-riscv64-static /tmp/out
   >   println_bool (is_even 43)
   > EOF
   ANF:
-  let is_even x =
+  let rec is_even x =
          let anf1 = ( = ) x 0 in
          if anf1 
          then true 
