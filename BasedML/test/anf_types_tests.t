@@ -35,7 +35,7 @@
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/002fac.ml
   Name: fac_cps
   Original program: (int -> ((int -> 'p26) -> 'p26))
-  ANF: (int -> ((int -> 'p41) -> 'p41))
+  ANF: (int -> ((int -> 'p38) -> 'p38))
   
   Name: main
   Original program: int
@@ -99,7 +99,7 @@
   
   Name: wrap
   Original program: ('p55 -> 'p55)
-  ANF: ('p6f -> 'p6f)
+  ANF: ('p66 -> 'p66)
   
   All types are correct
 
@@ -110,7 +110,7 @@
   
   Name: fix
   Original program: ((('p28 -> 'p29) -> ('p28 -> 'p29)) -> ('p28 -> 'p29))
-  ANF: ((('p3a -> 'p3b) -> ('p3a -> 'p3b)) -> ('p3a -> 'p3b))
+  ANF: ((('p31 -> 'p32) -> ('p31 -> 'p32)) -> ('p31 -> 'p32))
   
   Name: main
   Original program: int
@@ -161,31 +161,31 @@
   $ dune exec ./anf_types_demo.exe < ./manytests/typed/016lists.ml
   Name: iter
   Original program: (('pe8 -> unit) -> (('pe8 list) -> unit))
-  ANF: (('p337 -> unit) -> (('p336 list) -> unit))
+  ANF: (('p31d -> 'p31e) -> (('p31c list) -> unit))
   
   Name: cartesian
   Original program: (('pe2 list) -> (('pe3 list) -> (('pe2 * 'pe3) list)))
-  ANF: (('p32e list) -> (('p32f list) -> ('p330 list)))
+  ANF: (('p314 list) -> (('p315 list) -> ('p316 list)))
   
   Name: append
   Original program: (('pe1 list) -> (('pe1 list) -> ('pe1 list)))
-  ANF: (('p32c list) -> (('p32d list) -> ('p32d list)))
+  ANF: (('p312 list) -> (('p313 list) -> ('p313 list)))
   
   Name: concat
   Original program: ((('pe5 list) list) -> ('pe5 list))
-  ANF: (('p332 list) -> ('p333 list))
+  ANF: (('p318 list) -> ('p319 list))
   
   Name: length_tail
   Original program: (('pea list) -> int)
-  ANF: (('p339 list) -> int)
+  ANF: (('p320 list) -> int)
   
   Name: length
   Original program: (('pe9 list) -> int)
-  ANF: (('p338 list) -> int)
+  ANF: (('p31f list) -> int)
   
   Name: map
   Original program: (('peb -> 'pec) -> (('peb list) -> ('pec list)))
-  ANF: (('p33f -> 'p340) -> (('p341 list) -> ('p340 list)))
+  ANF: (('p326 -> 'p327) -> (('p328 list) -> ('p327 list)))
   
   Name: main
   Original program: int

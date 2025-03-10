@@ -55,8 +55,12 @@ let rec cexpr_to_string = function
       (imm_to_string cond)
       (aexpr_to_string then_branch)
       (aexpr_to_string else_branch)
-  | CApplication (left, right) ->
-    Printf.sprintf "%s %s" (cexpr_to_string left) (cexpr_to_string right)
+  | CApplication (left, right, args) ->
+    Printf.sprintf
+      "%s %s %s"
+      (imm_to_string left)
+      (imm_to_string right)
+      (args |> List.map imm_to_string |> String.concat " ")
 
 and aexpr_to_string = function
   | ACExpr cexp -> cexpr_to_string cexp
