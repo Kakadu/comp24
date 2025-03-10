@@ -26,6 +26,7 @@ type alt_pat = alt_pt_tp
 let fail_f = Me_ast.MExp_ident (get_name part_match_fail)
 let get_by_idx_f = Me_ast.MExp_ident (get_name get_by_idx)
 let get_list_len_1_f = Me_ast.MExp_ident (get_name get_list_len)
+let get_list_tl = Me_ast.MExp_ident (get_name get_list_tail)
 let fail_app = MExp_apply (fail_f, MExp_constant Const_unit)
 let me_name nm = MExp_ident nm
 let ite ~cond ~then_br ~else_br = MExp_ifthenelse (cond, then_br, else_br)
@@ -53,6 +54,7 @@ let me_vb m_vb_pat m_vb_expr = { m_vb_pat; m_vb_expr }
 let me_and_func = me_2n_op (me_name @@ get_name op_and)
 let me_bool v = MExp_constant (Const_bool v)
 let me_get_by_idx e i = me_2n_op get_by_idx_f e (MExp_constant (Common.Ast.Const_int i))
+let me_get_list_tail e i = me_2n_op get_list_tl e (MExp_constant (Common.Ast.Const_int i))
 let me_get_list_len_1 me = MExp_apply (get_list_len_1_f, me)
 
 (** [(::) pt1, ((::) pt2, pt3))] --> [pt1 ; pt2 ; pt3] *)
@@ -145,20 +147,33 @@ let rec elim_pattern : m_expr -> pattern -> alt_pat t =
     Compound (compound_cond, provided_sbinds)
   | Pat_cons (head_pt, tail_pt) ->
     let plain_pat_list = optimize_cons head_pt tail_pt in
-    let* last_pat =
+    let row_lst_len = List.length plain_pat_list in
+    let* last_pat, prefix =
       match List.rev plain_pat_list with
-      | x :: _ -> return x
+      | x :: pref -> return (x, List.rev pref)
       | _ -> fail "Pat_cons has at least two elements"
     in
-    let+ compound_cond, provided_sbinds = row_compound_alt_pat plain_pat_list in
+    let last_bind =
+      match last_pat with
+      | Pat_var nm -> Some (SBind (Id_name nm, me_get_list_tail mexpr (row_lst_len - 1)))
+      | _ -> None
+    in
+    let+ compound_cond, provided_sbinds = row_compound_alt_pat prefix in
     let len_cond_me =
-      let me_pt_elem_cnt = MExp_constant (Const_int (List.length plain_pat_list)) in
+      let me_pt_elem_cnt v = MExp_constant (Const_int v) in
       let me_list_len = me_get_list_len_1 @@ mexpr in
       match last_pat with
-      | Pat_const Const_nil -> me_eq me_pt_elem_cnt me_list_len
-      | _ -> me_more_eq me_list_len me_pt_elem_cnt
+      | Pat_const Const_nil -> me_eq (me_pt_elem_cnt @@ (row_lst_len - 1)) me_list_len
+      | _ -> me_more_eq me_list_len (me_pt_elem_cnt row_lst_len)
     in
-    let particial_alt_pt cond = Compound (Some cond, provided_sbinds) in
+    let particial_alt_pt cond =
+      let provided_sbinds' =
+        match last_bind with
+        | Some sbind -> sbind :: provided_sbinds
+        | None -> provided_sbinds
+      in
+      Compound (Some cond, provided_sbinds')
+    in
     (match compound_cond with
      | None ->
        let alt_pat = particial_alt_pt len_cond_me in
