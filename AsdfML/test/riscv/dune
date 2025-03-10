@@ -16,4 +16,24 @@
 ;  (libraries AsdfML.Lib test))
 
 (cram
- (deps %{bin:riscv} rt.ml ../../runtime/libruntime.a))
+ (deps
+  %{bin:riscv}
+  rt.ml
+  ../../runtime/libruntime.a
+  ./typed/001fac.ml
+  ./typed/002fac.ml
+  ./typed/003fib.ml
+  ./typed/004manyargs.ml
+  ./typed/005fix.ml
+  ./typed/006partial.ml
+  ./typed/006partial2.ml
+  ./typed/006partial3.ml
+  ./typed/007order.ml
+  ./typed/008ascription.ml
+  ./typed/009let_poly.ml
+  ./typed/010sukharev.ml
+  ./typed/011mapcps.ml
+  ./typed/012fibcps.ml
+  ./typed/013foldfoldr.ml
+  ./typed/015tuples.ml
+  ./typed/016lists.ml))
