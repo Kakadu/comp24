@@ -78,17 +78,17 @@
   0
 
   $ ./lambda_lifting_runner.exe < manytests/typed/006partial.ml
-  let a3 = (fun a0 -> ((( + ) a0) 2))
+  let a1 = (fun foo -> ((( + ) foo) 2))
   
-  let a4 = (fun a1 -> ((( * ) a1) 10))
+  let a2 = (fun foo -> ((( * ) foo) 10))
   
   let foo = (fun b -> if b
-  then a3
-  else a4)
+  then a1
+  else a2)
   
-  let a2 = (fun a2 x -> ((a2 true) ((a2 false) ((a2 true) ((a2 false) x)))))
+  let a0 = (fun x -> ((foo true) ((foo false) ((foo true) ((foo false) x)))))
   
-  let main = let () = (print_int (a2 11)) in
+  let main = let () = (print_int (a0 11)) in
   0
 
   $ ./lambda_lifting_runner.exe < manytests/typed/006partial2.ml

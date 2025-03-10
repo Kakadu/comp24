@@ -70,12 +70,12 @@
 
   $ ./closure_conv_runner.exe < manytests/typed/006partial.ml
   let foo = (fun b -> if b
-  then (fun a0 -> ((( + ) a0) 2))
-  else (fun a1 -> ((( * ) a1) 10)))
+  then (fun foo -> ((( + ) foo) 2))
+  else (fun foo -> ((( * ) foo) 10)))
   
-  let a2 = (fun a2 x -> ((a2 true) ((a2 false) ((a2 true) ((a2 false) x)))))
+  let a0 = (fun x -> ((foo true) ((foo false) ((foo true) ((foo false) x)))))
   
-  let main = let () = (print_int (a2 11)) in
+  let main = let () = (print_int (a0 11)) in
   0
 
   $ ./closure_conv_runner.exe < manytests/typed/006partial2.ml
