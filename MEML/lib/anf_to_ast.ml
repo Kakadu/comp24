@@ -84,4 +84,5 @@ let abindings_to_ebindings = function
 ;;
 
 let anf_to_ast anf = 
-  List.rev @@ List.fold ~init:[] ~f:(fun acc a -> abindings_to_ebindings a :: acc ) anf
+  List.rev @@ List.fold ~init:[] ~f:(fun acc a -> abindings_to_ebindings a :: acc) anf
+;;
