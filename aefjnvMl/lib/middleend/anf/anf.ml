@@ -156,8 +156,8 @@ and to_cexpr : ll_expr -> (bind list * cexpr) t =
     let* fst_bind'l, imm_fst = to_immexpr e_fst_arg in
     let+ binds_n_args = mapt e_arg'l to_immexpr in
     let arg_binds'l, arg'l = List.unzip binds_n_args in
-    let arg_bind'l = List.concat arg_binds'l in
-    let new_binds = name_bind'l @ fst_bind'l @ arg_bind'l in
+    let arg_bind'l = List.concat (List.rev arg_binds'l) in
+    let new_binds = name_bind'l @ arg_bind'l @ fst_bind'l in
     new_binds, C_apply (name, imm_fst, arg'l)
 
 and to_aexpr : ll_expr -> aexpr t =

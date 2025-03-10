@@ -56,8 +56,8 @@ let main =
         then
           k 1
         else
-          let nf_2 = (( - ) n) 1 in
-            let nf_3 = (ll_0 n) k in
+          let nf_3 = (ll_0 n) k in
+            let nf_2 = (( - ) n) 1 in
               (fac_cps nf_2) nf_3)
     ;;
 
@@ -306,9 +306,9 @@ let main =
               then
                 let cc_ac24_tl = (get_list_tail cc_ac21_xs) 1 in
                   let cc_ac23_h = (get_by_idx cc_ac21_xs) 0 in
-                    let nf_43 = ll_0 cc_ac23_h in
-                      let nf_42 = (map nf_43) cc_ac22_ys in
-                        let nf_44 = (cartesian cc_ac24_tl) cc_ac22_ys in
+                    let nf_44 = (cartesian cc_ac24_tl) cc_ac22_ys in
+                      let nf_43 = ll_0 cc_ac23_h in
+                        let nf_42 = (map nf_43) cc_ac22_ys in
                           (append nf_42) nf_44
               else
                 part_match_fail ()))
@@ -316,8 +316,8 @@ let main =
 
     let cc_ac26_main = let nf_45 = (1 :: (2 :: (3 :: []))) in
         let () = (iter print_int) nf_45 in
-          let nf_48 = (1 :: (2 :: [])) in
-            let nf_49 = (1 :: (2 :: (3 :: (4 :: [])))) in
+          let nf_49 = (1 :: (2 :: (3 :: (4 :: [])))) in
+            let nf_48 = (1 :: (2 :: [])) in
               let nf_47 = (cartesian nf_48) nf_49 in
                 let nf_46 = length nf_47 in
                   let () = print_int nf_46 in

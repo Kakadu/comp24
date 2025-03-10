@@ -146,10 +146,6 @@ module LlvmMonad (Ctx : LlvmGlobalCtx) = struct
   ;;
 
   let localize_global_var global_var local_name =
-    (* let* cur_func = get_cur_func in *)
-    (* let* _, _, llfunc = lookup_func cur_func in *)
-    (* let ent_b = entry_block llfunc in *)
-    (* let builder = builder_at Ctx.ctx (Llvm.instr_begin ent_b) in *)
     let* builder = get_builder in
     let local_var = build_load Ctx.i64_t global_var local_name builder in
     let+ () = store_local_var local_name local_var in
