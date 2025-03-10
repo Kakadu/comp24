@@ -11,6 +11,7 @@ open Roflanml_lib.Closure_conversion
 open Roflanml_lib.Lambda_lifting
 open Roflanml_lib.Anf_ast
 open Roflanml_lib.Anf
+open Ast_to_str
 
 let get_bindings prog =
   List.fold
@@ -51,7 +52,11 @@ let () =
     let prog = close_program prog env in
     let* prog = lift_program prog in
     let* prog = anf_program prog in
-    let prog = List.map prog ~f:(fun decl -> anf_to_ast decl) in
+    let prog_str =
+      List.fold_left prog ~init:"" ~f:(fun acc decl ->
+        acc ^ "\n" ^ ast_to_str @@ anf_to_ast @@ decl)
+    in
+    let* prog = Parser.parse prog_str in
     let* anf_tyenv =
       match Typechecker.typecheck prog with
       | Ok tyenv ->
