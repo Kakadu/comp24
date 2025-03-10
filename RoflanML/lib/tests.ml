@@ -415,7 +415,8 @@ module TypecheckerTests = struct
     pp_parse_and_infer
       "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
        false else even (x - 1)";
-    [%expect {|
+    [%expect
+      {|
       int -> bool
       int -> bool
       |}]
@@ -423,7 +424,8 @@ module TypecheckerTests = struct
 
   let%expect_test "mutual recursion type inference 2" =
     pp_parse_and_infer "let rec f x = x && true and g x = x + 1";
-    [%expect {|
+    [%expect
+      {|
       bool -> bool
       int -> int
       |}]
@@ -849,7 +851,9 @@ module LLVMtests = struct
 
   let%expect_test "LLVM generation factorial" =
     pp_parse_and_anf_and_llvm
-      "let rec fact x = if x = 1 then x else x * fact (x - 1)\n      let () = fact 5";
+      "let rec fact n = if n = 1 then 1 else n * fact_tail (n - 1)\n\
+       and fact_tail n = if n = 1 then 1 else n * fact (n - 1)\n\n\
+       let ()= fact 5";
     [%expect
       {|
       ; ModuleID = 'Roflan'
@@ -879,32 +883,63 @@ module LLVMtests = struct
 
       declare ptr @create_closure(ptr, i64)
 
-      define ptr @fact(ptr %x) {
+      define ptr @fact(ptr %n) {
       entry:
         %closure = call ptr @create_closure(ptr @"=", i64 2)
-        %apply_result = call ptr @apply(ptr %closure, ptr %x)
+        %apply_result = call ptr @apply(ptr %closure, ptr %n)
         %boxed_int = call ptr @create_int(i64 1)
         %apply_result1 = call ptr @apply(ptr %apply_result, ptr %boxed_int)
         %cond_bool = call i1 @get_bool(ptr %apply_result1)
         br i1 %cond_bool, label %then, label %else
 
       then:                                             ; preds = %entry
+        %boxed_int2 = call ptr @create_int(i64 1)
         br label %merge
 
       else:                                             ; preds = %entry
-        %closure2 = call ptr @create_closure(ptr @-, i64 2)
-        %apply_result3 = call ptr @apply(ptr %closure2, ptr %x)
-        %boxed_int4 = call ptr @create_int(i64 1)
-        %apply_result5 = call ptr @apply(ptr %apply_result3, ptr %boxed_int4)
-        %closure6 = call ptr @create_closure(ptr @fact, i64 1)
-        %apply_result7 = call ptr @apply(ptr %closure6, ptr %apply_result5)
-        %closure8 = call ptr @create_closure(ptr @"*", i64 2)
-        %apply_result9 = call ptr @apply(ptr %closure8, ptr %x)
-        %apply_result10 = call ptr @apply(ptr %apply_result9, ptr %apply_result7)
+        %closure3 = call ptr @create_closure(ptr @-, i64 2)
+        %apply_result4 = call ptr @apply(ptr %closure3, ptr %n)
+        %boxed_int5 = call ptr @create_int(i64 1)
+        %apply_result6 = call ptr @apply(ptr %apply_result4, ptr %boxed_int5)
+        %closure7 = call ptr @create_closure(ptr @fact_tail, i64 1)
+        %apply_result8 = call ptr @apply(ptr %closure7, ptr %apply_result6)
+        %closure9 = call ptr @create_closure(ptr @"*", i64 2)
+        %apply_result10 = call ptr @apply(ptr %closure9, ptr %n)
+        %apply_result11 = call ptr @apply(ptr %apply_result10, ptr %apply_result8)
         br label %merge
 
       merge:                                            ; preds = %else, %then
-        %branch_result = phi ptr [ %x, %then ], [ %apply_result10, %else ]
+        %branch_result = phi ptr [ %boxed_int2, %then ], [ %apply_result11, %else ]
+        ret ptr %branch_result
+      }
+
+      define ptr @fact_tail(ptr %n) {
+      entry:
+        %closure = call ptr @create_closure(ptr @"=", i64 2)
+        %apply_result = call ptr @apply(ptr %closure, ptr %n)
+        %boxed_int = call ptr @create_int(i64 1)
+        %apply_result1 = call ptr @apply(ptr %apply_result, ptr %boxed_int)
+        %cond_bool = call i1 @get_bool(ptr %apply_result1)
+        br i1 %cond_bool, label %then, label %else
+
+      then:                                             ; preds = %entry
+        %boxed_int2 = call ptr @create_int(i64 1)
+        br label %merge
+
+      else:                                             ; preds = %entry
+        %closure3 = call ptr @create_closure(ptr @-, i64 2)
+        %apply_result4 = call ptr @apply(ptr %closure3, ptr %n)
+        %boxed_int5 = call ptr @create_int(i64 1)
+        %apply_result6 = call ptr @apply(ptr %apply_result4, ptr %boxed_int5)
+        %closure7 = call ptr @create_closure(ptr @fact, i64 1)
+        %apply_result8 = call ptr @apply(ptr %closure7, ptr %apply_result6)
+        %closure9 = call ptr @create_closure(ptr @"*", i64 2)
+        %apply_result10 = call ptr @apply(ptr %closure9, ptr %n)
+        %apply_result11 = call ptr @apply(ptr %apply_result10, ptr %apply_result8)
+        br label %merge
+
+      merge:                                            ; preds = %else, %then
+        %branch_result = phi ptr [ %boxed_int2, %then ], [ %apply_result11, %else ]
         ret ptr %branch_result
       }
 

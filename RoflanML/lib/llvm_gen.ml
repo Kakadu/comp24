@@ -277,6 +277,20 @@ let compile_program (program : aprogram) : Llvm.llmodule =
   register_dummy_runtime ();
   List.iter
     (function
+      | ADMutualLet funcs ->
+        List.iter
+          (fun (name, args, body) ->
+            let _ = declare_function (name, args, body) in
+            ())
+          funcs;
+        List.iter
+          (fun (name, args, body) ->
+            ignore (generate_function (Ast.Rec, name, args, body)))
+          funcs
+      | _ -> ())
+    program;
+  List.iter
+    (function
       | ADLet (rec_flag, name, args, body) when args <> [] ->
         let _ = declare_function (name, args, body) in
         ignore (generate_function (rec_flag, name, args, body))
