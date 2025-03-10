@@ -112,7 +112,7 @@ and gen_cexpr env dest = function
     let is_rewrites_regs = function
       | ImmNil | ImmTuple _ | ImmList _ -> true
       | ImmId id ->
-        (match Map.find !fn_args id with
+        (match Map.find !fn_args (Option.value (Std.lookup_extern id) ~default:id) with
          | Some _ -> true
          | None -> false)
       | _ -> false
