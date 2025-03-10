@@ -1,0 +1,13 @@
+(rule
+ (targets libMLstd.a)
+ (deps rt_funcs.c)
+ (action
+  (run
+   clang
+   -c
+   -fPIC
+   rt_funcs.c
+   -o
+   %{targets}
+   ; -D DEBUG
+   )))
