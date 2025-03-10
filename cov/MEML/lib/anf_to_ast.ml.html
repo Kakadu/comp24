@@ -18,22 +18,22 @@
       <h2>67.24%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:9.20%"></span>
-      <span class="unvisited" style="top:13.79%"></span>
-      <span class="unvisited" style="top:14.94%"></span>
-      <span class="unvisited" style="top:16.09%"></span>
-      <span class="unvisited" style="top:17.24%"></span>
-      <span class="unvisited" style="top:18.39%"></span>
-      <span class="unvisited" style="top:19.54%"></span>
-      <span class="unvisited" style="top:21.84%"></span>
-      <span class="unvisited" style="top:22.99%"></span>
-      <span class="unvisited" style="bottom:33.33%"></span>
-      <span class="unvisited" style="bottom:31.03%"></span>
-      <span class="unvisited" style="bottom:29.89%"></span>
-      <span class="unvisited" style="bottom:25.29%"></span>
-      <span class="unvisited" style="bottom:8.05%"></span>
-      <span class="unvisited" style="bottom:5.75%"></span>
-      <span class="unvisited" style="bottom:4.60%"></span>
+      <span class="unvisited" style="top:9.09%"></span>
+      <span class="unvisited" style="top:13.64%"></span>
+      <span class="unvisited" style="top:14.77%"></span>
+      <span class="unvisited" style="top:15.91%"></span>
+      <span class="unvisited" style="top:17.05%"></span>
+      <span class="unvisited" style="top:18.18%"></span>
+      <span class="unvisited" style="top:19.32%"></span>
+      <span class="unvisited" style="top:21.59%"></span>
+      <span class="unvisited" style="top:22.73%"></span>
+      <span class="unvisited" style="bottom:34.09%"></span>
+      <span class="unvisited" style="bottom:31.82%"></span>
+      <span class="unvisited" style="bottom:30.68%"></span>
+      <span class="unvisited" style="bottom:26.14%"></span>
+      <span class="unvisited" style="bottom:9.09%"></span>
+      <span class="unvisited" style="bottom:6.82%"></span>
+      <span class="unvisited" style="bottom:5.68%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -125,6 +125,7 @@
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
 <a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -216,6 +217,7 @@
 <a href="#L85">85</a>
 <a href="#L86">86</a>
 <a href="#L87">87</a>
+<a href="#L88">88</a>
 </pre>
 <pre><code class="ocaml">open Anfast
 open Ast
@@ -303,7 +305,8 @@ let abindings_to_ebindings = function
 ;;
 
 let anf_to_ast anf = 
-  <span data-count="21">L</span>ist.rev @@ List.fol<span data-count="21">d</span> ~init:[] ~f:(fun acc a -&gt; <span data-count="184">a</span>bindings_to_ebinding<span data-count="184">s</span> a :: acc ) anf
+  <span data-count="21">L</span>ist.rev @@ List.fol<span data-count="21">d</span> ~init:[] ~f:(fun acc a -&gt; <span data-count="184">a</span>bindings_to_ebinding<span data-count="184">s</span> a :: acc) anf
+;;
 </code></pre>
       </div>
     </div>
