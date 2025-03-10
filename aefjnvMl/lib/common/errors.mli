@@ -26,6 +26,7 @@ type error =
   | Parser of parse_error
   | Infer of infer_error
   | Middleend of illegal_state_error
+  | Llvm_gen of illegal_state_error
 
 (*================Constructors================*)
 
@@ -36,3 +37,4 @@ val several_bounds : string -> error
 val not_specify_rec : error
 val no_variable_rec : error
 val illegal_state : string -> error
+val llvm_error : string -> error
