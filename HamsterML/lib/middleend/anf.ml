@@ -41,8 +41,8 @@ let _ac x = ACExpr (CImm x)
 
 let _if i t e =
   match e with
-  | None -> CIf (i, _ac t, None)
-  | Some e -> CIf (i, _ac t, Some (_ac e))
+  | None -> CIf (i, t, None)
+  | Some e -> CIf (i, t, Some e)
 ;;
 
 let get_fresh_name =
@@ -83,12 +83,13 @@ let _application f args =
   | [] -> failwith "Empty application O_O"
 ;;
 
-let rec flatten_application expr =
-  match expr with
-  | MEApplication (l, r) ->
-    let f, args = flatten_application l in
-    f, args @ [ r ]
-  | _ -> expr, []
+let flatten_application =
+  let rec helper k expr =
+    match expr with
+    | MEApplication (l, r) -> helper (fun args -> k (r :: args)) l
+    | _ -> expr, k []
+  in
+  helper Fn.id
 ;;
 
 let rec convert_exprs exprs k =
@@ -112,10 +113,17 @@ and convert_expr (expr : me_expr) (k : imm_expr -> aexpr t) =
         let* scope = k @@ ImmId name in
         let* application = _application imm_f (List.rev imm_args) in
         return @@ _let_in (Var name) application scope))
-  | MEList exprs -> convert_exprs exprs (fun imm_exprs -> k @@ ImmList imm_exprs)
+  | MEList exprs ->
+    convert_exprs exprs (fun imm_exprs ->
+      let* name = get_fresh_name in
+      let* scope = k @@ ImmId name in
+      return @@ _let_in (Var name) (CImm (ImmTuple imm_exprs)) scope)
   | METuple (expr1, expr2, exprs) ->
     let exprs = expr1 :: expr2 :: exprs in
-    convert_exprs exprs (fun imm_exprs -> k @@ ImmTuple imm_exprs)
+    convert_exprs exprs (fun imm_exprs ->
+      let* name = get_fresh_name in
+      let* scope = k @@ ImmId name in
+      return @@ _let_in (Var name) (CImm (ImmTuple imm_exprs)) scope)
   | MEListConcat (l, r) ->
     let* new_var = get_fresh_name in
     let* scope = k @@ ImmId new_var in
@@ -123,18 +131,18 @@ and convert_expr (expr : me_expr) (k : imm_expr -> aexpr t) =
       convert_expr r (fun imm_r ->
         return @@ _let_in (Var new_var) (CConstructList (imm_l, imm_r)) scope))
   | MEIf (i, t, Some e) ->
-    let* new_var = get_fresh_name in
-    let* scope = k @@ ImmId new_var in
     convert_expr i (fun imm_i ->
-      convert_expr t (fun imm_t ->
-        convert_expr e (fun imm_e ->
-          return @@ _let_in (Var new_var) (_if imm_i imm_t (Some imm_e)) scope)))
+      let* aexpr_then = convert_expr t k in
+      let* aexpr_else = convert_expr e k in
+      let* name = get_fresh_name in
+      let* scope = k @@ ImmId name in
+      return @@ _let_in (Var name) (_if imm_i aexpr_then (Some aexpr_else)) scope)
   | MEIf (i, t, None) ->
-    let* new_var = get_fresh_name in
-    let* scope = k @@ ImmId new_var in
     convert_expr i (fun imm_i ->
-      convert_expr t (fun imm_t ->
-        return @@ _let_in (Var new_var) (_if imm_i imm_t None) scope))
+      let* aexpr_then = convert_expr t k in
+      let* name = get_fresh_name in
+      let* scope = k @@ ImmId name in
+      return @@ _let_in (Var name) (_if imm_i aexpr_then None) scope)
   | MELet (rec_flag, binds, Some scope) ->
     let (pattern, body), other_binds = extract_binds binds in
     convert_expr body (fun imm_first_body ->
