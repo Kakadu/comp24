@@ -102,6 +102,7 @@
   $ dune exec ./demoANF.exe << EOF
   > let anf_1 x = x + 1
   > let q = let anf_1 = anf_1 (anf_1 (1 + 2)) in anf_1
+  > EOF
   
   let anf_1 x = 
   let anf_4 = ( + ) x 1 in anf_4

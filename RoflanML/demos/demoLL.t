@@ -83,6 +83,7 @@
   > let ll_1 x = x + 1
   > let ll_2 x = x + 2
   > let f x = let g x = x + x in g (x / 2)
+  > EOF
   
   let ll_0 x = x
   
@@ -97,6 +98,7 @@
   $ dune exec ./demoLL.exe << EOF
   > let rec f x = let g x = x + 1 in g (x + 2) 
   > and g x = let f x = x + 2 in f (x + 1)
+  > EOF
   
   let ll_0 x = ( + ) x 2
   
