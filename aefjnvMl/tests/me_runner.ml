@@ -18,13 +18,13 @@ let () =
     let* ast' = Alpha_converter.rename_ast_with_uniq alpha_prefix ast in
     let* ast' = ok @@ Middleend.Closure_conversion.convert_program ast' in
     let* ast' = Alpha_converter.rename_ast_with_uniq cc_prefix ast' in
-    let ast' =
+    let* ast' =
       let open Match_elimination in
       let+! m_ast = Match_elim.eliminate_match_in_program ast' in
       let m_ast' = Optimizations.optimize m_ast in
       Me_converter.convert_me_program m_ast'
     in
-    let*! env_a = Inferencer.check_program ast in
+    let+! env_a = Inferencer.check_program ast' in
     let () = Pp_env.pp_env_after_modification env_a in
     ast'
   in

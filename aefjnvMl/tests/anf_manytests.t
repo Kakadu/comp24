@@ -19,8 +19,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val fac: int -> int
-  val main: int
   
   ------------------------------
   
@@ -47,8 +47,10 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac1_main: int
   val fac_cps: int -> (int -> 'a) -> 'a
-  val main: int
+  val ll_0: int -> (int -> 'a) -> int -> 'a
+  val ll_1: 'a -> 'a
   
   ------------------------------
   
@@ -85,9 +87,9 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac1_main: int
   val fib: int -> int
   val fib_acc: int -> int -> int -> int
-  val main: int
   
   ------------------------------
   
@@ -131,7 +133,7 @@
   val wrap: 'a -> 'a
   
   Bindings after transformations:
-  val main: int
+  val cc_ac7_main: int
   val test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
   val test3: int -> int -> int -> int
   val wrap: 'a -> 'a
@@ -180,9 +182,9 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val fac: (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val main: int
   
   ------------------------------
   
@@ -214,8 +216,11 @@
   val main: int
   
   Bindings after transformations:
-  val foo: int -> int
-  val main: int
+  val cc_ac1_foo: bool -> int -> int
+  val cc_ac2_foo: int -> int
+  val cc_ac3_main: int
+  val ll_0: int -> int
+  val ll_1: int -> int
   
   ------------------------------
   
@@ -254,8 +259,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac3_main: int
   val foo: int -> int -> int -> int
-  val main: int
   
   ------------------------------
   
@@ -281,8 +286,10 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val foo: int -> int -> int -> unit
-  val main: int
+  val ll_0: int -> int -> unit
+  val ll_1: int -> unit
   
   ------------------------------
   
@@ -311,8 +318,8 @@
   val main: unit
   
   Bindings after transformations:
-  val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
-  val main: unit
+  val cc_ac0__start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val cc_ac1_main: unit
   
   ------------------------------
   
@@ -342,8 +349,10 @@
   val main: int
   
   Bindings after transformations:
-  val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
-  val main: int
+  val addi: ('a -> 'b -> 'c) -> ('a -> 'b) -> 'a -> 'c
+  val cc_ac2_main: int
+  val ll_0: int -> bool -> int
+  val ll_1: int -> bool
   
   ------------------------------
   
@@ -376,6 +385,7 @@
   val temp: int * bool
   
   Bindings after transformations:
+  val f: 'a -> 'a
   val temp: int * bool
   
   ------------------------------
@@ -387,6 +397,144 @@
   let temp = let nf_0 = f 1 in
       let nf_1 = f true in
         (nf_0, nf_1)
+  ;;
+  
+
+  $ ./anf_runner.exe < manytests/typed/011mapcps.ml
+  Bindings before transformations:
+  val iter: ('a -> 'b) -> 'a list -> unit
+  val main: unit
+  val map: ('a -> 'b) -> 'a list -> ('b list -> 'c) -> 'c
+  
+  Bindings after transformations:
+  val cc_ac6_main: unit
+  val iter: ('a -> 'b) -> 'c list -> unit
+  val ll_0: ('a list -> 'b) -> 'c -> ('c -> 'a) -> 'a list -> 'b
+  val ll_1: int -> int
+  val ll_2: 'a -> 'a
+  val map: ('a -> 'b) -> 'c list -> ('b list -> 'd) -> 'd
+  
+  ------------------------------
+  
+  let ll_0 cc0_k cc1_h cc2_f cc_ac0_tl =
+    let nf_1 = cc2_f cc1_h in
+      let nf_0 = (nf_1 :: cc_ac0_tl) in
+        cc0_k nf_0
+  ;;
+  
+  let rec map f xs k =
+    let nf_2 = (( = ) []) xs in
+      (if nf_2
+      then
+        k []
+      else
+        let nf_4 = get_list_len xs in
+          let nf_3 = (( >= ) nf_4) 2 in
+            (if nf_3
+            then
+              let tl = (get_list_tail xs) 1 in
+                let h = (get_by_idx xs) 0 in
+                  let nf_5 = ((ll_0 k) h) f in
+                    ((map f) tl) nf_5
+            else
+              part_match_fail ()))
+  ;;
+  
+  let rec iter cc_ac1_f cc_ac2_xs =
+    let nf_6 = (( = ) []) cc_ac2_xs in
+      (if nf_6
+      then
+        ()
+      else
+        let nf_8 = get_list_len cc_ac2_xs in
+          let nf_7 = (( >= ) nf_8) 2 in
+            (if nf_7
+            then
+              let cc_ac4_tl = (get_list_tail cc_ac2_xs) 1 in
+                let cc_ac3_h = (get_by_idx cc_ac2_xs) 0 in
+                  let w = cc_ac1_f cc_ac3_h in
+                    (iter cc_ac1_f) cc_ac4_tl
+            else
+              part_match_fail ()))
+  ;;
+  
+  let ll_1 x =
+    (( + ) x) 1
+  ;;
+  
+  let ll_2 cc_ac5_x =
+    cc_ac5_x
+  ;;
+  
+  let cc_ac6_main = let nf_10 = (1 :: (2 :: (3 :: []))) in
+      let nf_9 = ((map ll_1) nf_10) ll_2 in
+        (iter print_int) nf_9
+  ;;
+  
+
+  $ ./anf_runner.exe < manytests/typed/012fibcps.ml
+  Bindings before transformations:
+  val fib: int -> (int -> 'a) -> 'a
+  val main: unit
+  
+  Unbound value 'fib'
+
+  $ ./anf_runner.exe < manytests/typed/013foldfoldr.ml
+  Bindings before transformations:
+  val fold_right: ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
+  val foldl: ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+  val id: 'a -> 'a
+  val main: unit
+  
+  Bindings after transformations:
+  val cc_ac3_main: unit
+  val fold_right: ('a -> 'b -> 'b) -> 'b -> 'c list -> 'b
+  val foldl: ('a -> 'b -> 'a) -> 'a -> 'c list -> 'a
+  val id: 'a -> 'a
+  val ll_0: ('a -> 'b -> 'c) -> 'b -> ('c -> 'd) -> 'a -> 'd
+  val ll_1: int -> int -> int
+  
+  ------------------------------
+  
+  let id x =
+    x
+  ;;
+  
+  let rec fold_right f cc_ac_acc xs =
+    let nf_0 = (( = ) []) xs in
+      (if nf_0
+      then
+        cc_ac_acc
+      else
+        let nf_2 = get_list_len xs in
+          let nf_1 = (( >= ) nf_2) 2 in
+            (if nf_1
+            then
+              let tl = (get_list_tail xs) 1 in
+                let h = (get_by_idx xs) 0 in
+                  let nf_3 = ((fold_right f) cc_ac_acc) tl in
+                    (f h) nf_3
+            else
+              part_match_fail ()))
+  ;;
+  
+  let ll_0 cc0_cc_ac0_f b g cc_ac1_x =
+    let nf_4 = (cc0_cc_ac0_f cc_ac1_x) b in
+      g nf_4
+  ;;
+  
+  let foldl cc_ac0_f a bs =
+    let nf_5 = ll_0 cc_ac0_f in
+      (((fold_right nf_5) id) bs) a
+  ;;
+  
+  let ll_1 cc_ac2_x y =
+    (( * ) cc_ac2_x) y
+  ;;
+  
+  let cc_ac3_main = let nf_7 = (1 :: (2 :: (3 :: []))) in
+      let nf_6 = ((foldl ll_1) 1) nf_7 in
+        print_int nf_6
   ;;
   
 
@@ -403,15 +551,17 @@
   val tie: (int -> int) * (int -> int)
   
   Bindings after transformations:
-  val feven: 'a * (int -> int) -> int -> int
+  val cc_ac10_main: int
+  val cc_ac_meven: int -> int
+  val feven: 'a -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val fixpoly: ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) * ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) -> ('a -> 'b) * ('a -> 'b)
-  val fodd: (int -> int) * 'a -> int -> int
-  val main: int
-  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
-  val meven: int -> int
+  val fixpoly: 'a -> ('b -> 'c) * ('b -> 'c)
+  val fodd: 'a -> int -> int
+  val ll_0: ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+  val ll_1: ('a -> 'b) -> 'a -> ('b -> 'c -> 'd) -> 'c -> 'd
+  val map: ('a -> 'b) -> 'c -> 'b * 'b
   val modd: int -> int
-  val tie: (int -> int) * (int -> int)
+  val tie: ('a -> 'b) * ('a -> 'b)
   
   ------------------------------
   
@@ -447,7 +597,7 @@
     let me_16 = cc_ac3_p in
       let e = (get_by_idx me_16) 0 in
         let o = (get_by_idx me_16) 1 in
-          let nf_5 = (( == ) n) 0 in
+          let nf_5 = (( = ) n) 0 in
             (if nf_5
             then
               1
@@ -460,7 +610,7 @@
     let me_20 = cc_ac4_p in
       let cc_ac6_e = (get_by_idx me_20) 0 in
         let cc_ac7_o = (get_by_idx me_20) 1 in
-          let nf_7 = (( == ) cc_ac5_n) 0 in
+          let nf_7 = (( = ) cc_ac5_n) 0 in
             (if nf_7
             then
               0
@@ -518,14 +668,17 @@
   val map: ('a -> 'b) -> 'a list -> 'b list
   
   Bindings after transformations:
-  val append: 'a list -> 'a list -> 'a list
-  val cartesian: 'a list -> 'b list -> 'a * 'b list
-  val concat: 'a list list -> 'a list
-  val iter: ('a -> unit) -> 'a list -> unit
+  val append: 'a list -> 'b list -> 'b list
+  val cartesian: 'a list -> 'b list -> 'c list
+  val cc_ac13_helper: 'a list -> 'b list
+  val cc_ac26_main: int
+  val concat: 'a list -> 'b list
+  val helper: int -> 'a list -> int
+  val iter: ('a -> unit) -> 'b list -> unit
   val length: 'a list -> int
   val length_tail: 'a list -> int
-  val main: int
-  val map: ('a -> 'b) -> 'a list -> 'b list
+  val ll_0: 'a -> 'b -> 'a * 'b
+  val map: ('a -> 'b) -> 'c list -> 'b list
   
   ------------------------------
   

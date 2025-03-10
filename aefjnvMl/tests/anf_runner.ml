@@ -14,19 +14,19 @@ let () =
     let*! env_b = Inferencer.check_program ast in
     let () = Pp_env.pp_env_before_modification env_b in
     let* ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.alpha_prefix ast in
-     let ast' = Middleend.Closure_conversion.convert_program ast' in
-     let* ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.cc_prefix ast' in
-     let ast' =
-       let open Match_elimination in
-       let*! m_ast = Match_elim.eliminate_match_in_program ast' in
-       let m_ast' = Optimizations.optimize m_ast in
-       let open Ll_conversion in
-       let*! ll_ast = Ll.lift_lambdas m_ast' in
-       let open Anf_conversion in
-       let+! anf_ast = Anf.convert_to_anf ll_ast in
-       Anf_converter.convert_anf_program anf_ast
+    let ast' = Middleend.Closure_conversion.convert_program ast' in
+    let* ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.cc_prefix ast' in
+    let* ast' =
+      let open Match_elimination in
+      let*! m_ast = Match_elim.eliminate_match_in_program ast' in
+      let m_ast' = Optimizations.optimize m_ast in
+      let open Ll_conversion in
+      let*! ll_ast = Ll.lift_lambdas m_ast' in
+      let open Anf_conversion in
+      let+! anf_ast = Anf.convert_to_anf ll_ast in
+      Anf_converter.convert_anf_program anf_ast
     in
-    let*! env_a = Inferencer.check_program ast in
+    let+! env_a = Inferencer.check_program ast' in
     let () = Pp_env.pp_env_after_modification env_a in
     ast'
   in

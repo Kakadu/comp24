@@ -19,8 +19,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val fac: int -> int
-  val main: int
   
   ------------------------------
   
@@ -43,8 +43,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac1_main: int
   val fac_cps: int -> (int -> 'a) -> 'a
-  val main: int
   
   ------------------------------
   
@@ -68,9 +68,9 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac1_main: int
   val fib: int -> int
   val fib_acc: int -> int -> int -> int
-  val main: int
   
   ------------------------------
   
@@ -106,7 +106,7 @@
   val wrap: 'a -> 'a
   
   Bindings after transformations:
-  val main: int
+  val cc_ac7_main: int
   val test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
   val test3: int -> int -> int -> int
   val wrap: 'a -> 'a
@@ -146,9 +146,9 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val fac: (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val main: int
   
   ------------------------------
   
@@ -175,8 +175,9 @@
   val main: int
   
   Bindings after transformations:
-  val foo: int -> int
-  val main: int
+  val cc_ac1_foo: bool -> int -> int
+  val cc_ac2_foo: int -> int
+  val cc_ac3_main: int
   
   ------------------------------
   
@@ -203,8 +204,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac3_main: int
   val foo: int -> int -> int -> int
-  val main: int
   
   ------------------------------
   
@@ -229,8 +230,8 @@
   val main: int
   
   Bindings after transformations:
+  val cc_ac0_main: int
   val foo: int -> int -> int -> unit
-  val main: int
   
   ------------------------------
   
@@ -251,8 +252,8 @@
   val main: unit
   
   Bindings after transformations:
-  val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
-  val main: unit
+  val cc_ac0__start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val cc_ac1_main: unit
   
   ------------------------------
   
@@ -272,8 +273,8 @@
   val main: int
   
   Bindings after transformations:
-  val addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
-  val main: int
+  val addi: ('a -> 'b -> 'c) -> ('a -> 'b) -> 'a -> 'c
+  val cc_ac2_main: int
   
   ------------------------------
   
@@ -305,6 +306,29 @@
   ;;
   
 
+  $ ./me_runner.exe < manytests/typed/012fibcps.ml
+  Bindings before transformations:
+  val fib: int -> (int -> 'a) -> 'a
+  val main: unit
+  
+  Bindings after transformations:
+  val cc_ac0_main: unit
+  val fib: int -> (int -> 'a) -> 'a
+  
+  ------------------------------
+  
+  let rec fib n k =
+    (if (( < ) n) 2
+    then
+      k n
+    else
+      (fib ((( - ) n) 1)) (((fun cc0_n cc1_k a -> (fib ((( - ) cc0_n) 2)) (((fun cc2_k cc3_a b -> cc2_k ((( + ) cc3_a) b)) cc1_k) a)) n) k))
+  ;;
+  
+  let cc_ac0_main = print_int ((fib 6) (fun x -> x))
+  ;;
+  
+
   $ ./me_runner.exe < manytests/typed/015tuples.ml
   Bindings before transformations:
   val feven: 'a * (int -> int) -> int -> int
@@ -318,15 +342,15 @@
   val tie: (int -> int) * (int -> int)
   
   Bindings after transformations:
-  val feven: 'a * (int -> int) -> int -> int
+  val cc_ac10_main: int
+  val cc_ac_meven: int -> int
+  val feven: 'a -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
-  val fixpoly: ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) * ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) -> ('a -> 'b) * ('a -> 'b)
-  val fodd: (int -> int) * 'a -> int -> int
-  val main: int
-  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
-  val meven: int -> int
+  val fixpoly: 'a -> ('b -> 'c) * ('b -> 'c)
+  val fodd: 'a -> int -> int
+  val map: ('a -> 'b) -> 'c -> 'b * 'b
   val modd: int -> int
-  val tie: (int -> int) * (int -> int)
+  val tie: ('a -> 'b) * ('a -> 'b)
   
   ------------------------------
   
@@ -349,7 +373,7 @@
     let me_16 = cc_ac3_p in
       let e = (get_by_idx me_16) 0 in
         let o = (get_by_idx me_16) 1 in
-          (if (( == ) n) 0
+          (if (( = ) n) 0
           then
             1
           else
@@ -360,7 +384,7 @@
     let me_20 = cc_ac4_p in
       let cc_ac6_e = (get_by_idx me_20) 0 in
         let cc_ac7_o = (get_by_idx me_20) 1 in
-          (if (( == ) cc_ac5_n) 0
+          (if (( = ) cc_ac5_n) 0
           then
             0
           else
@@ -407,14 +431,14 @@
   val map: ('a -> 'b) -> 'a list -> 'b list
   
   Bindings after transformations:
-  val append: 'a list -> 'a list -> 'a list
-  val cartesian: 'a list -> 'b list -> 'a * 'b list
-  val concat: 'a list list -> 'a list
-  val iter: ('a -> unit) -> 'a list -> unit
+  val append: 'a list -> 'b list -> 'b list
+  val cartesian: 'a list -> 'b list -> 'c list
+  val cc_ac26_main: int
+  val concat: 'a list -> 'b list
+  val iter: ('a -> unit) -> 'b list -> unit
   val length: 'a list -> int
   val length_tail: 'a list -> int
-  val main: int
-  val map: ('a -> 'b) -> 'a list -> 'b list
+  val map: ('a -> 'b) -> 'c list -> 'b list
   
   ------------------------------
   

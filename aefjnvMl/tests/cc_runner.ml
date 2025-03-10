@@ -17,7 +17,7 @@ let () =
     let*! ast' = Alpha_converter.rename_ast_with_uniq alpha_prefix ast in
     let ast' = Middleend.Closure_conversion.convert_program ast' in
     let* ast' = Alpha_converter.rename_ast_with_uniq cc_prefix ast' in
-    let*! env_a = Inferencer.check_program ast in
+    let*! env_a = Inferencer.check_program ast' in
     let () = Pp_env.pp_env_after_modification env_a in
     Ok ast'
   in
