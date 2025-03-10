@@ -144,3 +144,12 @@ val pp_prog : Format.formatter -> prog -> unit
 
 (* Convert a program to a string *)
 val show_prog : prog -> string
+
+(* Operators converter *)
+module BinOperator : sig
+  (* List of all binary operators *)
+  val list : bop list
+
+  (* Convert binary operator to string *)
+  val to_string : bop -> string
+end
