@@ -43,6 +43,40 @@ let c = a + b;;
 ;;
 
 let%expect_test "" =
+  let () =
+    me_test
+      {|
+let rec even n =
+  match n with
+    | 0 -> true
+    | x -> odd (x-1)
+and odd n =
+  match n with
+    | 0 -> false
+    | x -> even (x-1);;
+
+  |}
+  in
+  [%expect
+    {|
+    let rec even n =
+      (if (( = ) 0) n
+      then
+        true
+      else
+        let x = n in
+          odd ((( - ) x) 1))
+    and odd ac0_n =
+      (if (( = ) 0) ac0_n
+      then
+        false
+      else
+        let ac1_x = ac0_n in
+          even ((( - ) ac1_x) 1))
+    ;; |}]
+;;
+
+let%expect_test "" =
   let () = me_test {|
 let even n =
   match n with
@@ -82,7 +116,7 @@ let rec len l =
           else
             (if (( >= ) get_list_len l) 2
             then
-              let tl = (get_by_idx l) 1 in
+              let tl = (get_list_tail l) 1 in
                 (( + ) 1) (len tl)
             else
               part_match_fail ()))
@@ -160,9 +194,9 @@ match ab with
           else
             false)
         then
-          let a = (get_by_idx ((get_by_idx ab) 0)) 0 in
-            let c = (get_by_idx ((get_by_idx ab) 0)) 1 in
-              let b = (get_by_idx ab) 1 in
+          let b = (get_list_tail ab) 1 in
+            let c = (get_list_tail ((get_by_idx ab) 0)) 1 in
+              let a = (get_by_idx ((get_by_idx ab) 0)) 0 in
                 1
         else
           part_match_fail ())
@@ -635,8 +669,8 @@ let main =
       else
         (if (( >= ) get_list_len xs) 2
         then
-          let h = (get_by_idx xs) 0 in
-            let tl = (get_by_idx xs) 1 in
+          let tl = (get_list_tail xs) 1 in
+            let h = (get_by_idx xs) 0 in
               (( + ) 1) (length tl)
         else
           part_match_fail ()))
@@ -649,8 +683,8 @@ let main =
         else
           (if (( >= ) get_list_len ac0_xs) 2
           then
-            let ac1_h = (get_by_idx ac0_xs) 0 in
-              let ac2_tl = (get_by_idx ac0_xs) 1 in
+            let ac2_tl = (get_list_tail ac0_xs) 1 in
+              let ac1_h = (get_by_idx ac0_xs) 0 in
                 (helper ((( + ) ac_acc) 1)) ac2_tl
           else
             part_match_fail ())) in
@@ -662,30 +696,18 @@ let main =
       then
         []
       else
-        (if (if (( = ) 2) (get_list_len ac3_xs)
-          then
-            (( = ) []) ((get_by_idx ac3_xs) 1)
-          else
-            false)
+        (if (( = ) 1) (get_list_len ac3_xs)
         then
           let a = (get_by_idx ac3_xs) 0 in
             (f a :: [])
         else
-          (if (if (( = ) 3) (get_list_len ac3_xs)
-            then
-              (( = ) []) ((get_by_idx ac3_xs) 2)
-            else
-              false)
+          (if (( = ) 2) (get_list_len ac3_xs)
           then
             let ac4_a = (get_by_idx ac3_xs) 0 in
               let b = (get_by_idx ac3_xs) 1 in
                 (f ac4_a :: (f b :: []))
           else
-            (if (if (( = ) 4) (get_list_len ac3_xs)
-              then
-                (( = ) []) ((get_by_idx ac3_xs) 3)
-              else
-                false)
+            (if (( = ) 3) (get_list_len ac3_xs)
             then
               let ac5_a = (get_by_idx ac3_xs) 0 in
                 let ac6_b = (get_by_idx ac3_xs) 1 in
@@ -694,11 +716,11 @@ let main =
             else
               (if (( >= ) get_list_len ac3_xs) 5
               then
-                let ac7_a = (get_by_idx ac3_xs) 0 in
-                  let ac8_b = (get_by_idx ac3_xs) 1 in
-                    let ac9_c = (get_by_idx ac3_xs) 2 in
-                      let d = (get_by_idx ac3_xs) 3 in
-                        let ac10_tl = (get_by_idx ac3_xs) 4 in
+                let ac10_tl = (get_list_tail ac3_xs) 4 in
+                  let ac7_a = (get_by_idx ac3_xs) 0 in
+                    let ac8_b = (get_by_idx ac3_xs) 1 in
+                      let ac9_c = (get_by_idx ac3_xs) 2 in
+                        let d = (get_by_idx ac3_xs) 3 in
                           (f ac7_a :: (f ac8_b :: (f ac9_c :: (f d :: (map f) ac10_tl))))
               else
                 part_match_fail ())))))
@@ -711,8 +733,8 @@ let main =
       else
         (if (( >= ) get_list_len ac11_xs) 2
         then
-          let x = (get_by_idx ac11_xs) 0 in
-            let ac12_xs = (get_by_idx ac11_xs) 1 in
+          let ac12_xs = (get_list_tail ac11_xs) 1 in
+            let x = (get_by_idx ac11_xs) 0 in
               (x :: (append ac12_xs) ys)
         else
           part_match_fail ()))
@@ -725,8 +747,8 @@ let main =
         else
           (if (( >= ) get_list_len ac14_xs) 2
           then
-            let ac15_h = (get_by_idx ac14_xs) 0 in
-              let ac16_tl = (get_by_idx ac14_xs) 1 in
+            let ac16_tl = (get_list_tail ac14_xs) 1 in
+              let ac15_h = (get_by_idx ac14_xs) 0 in
                 (append ac15_h) (ac13_helper ac16_tl)
           else
             part_match_fail ())) in
@@ -740,8 +762,8 @@ let main =
       else
         (if (( >= ) get_list_len ac18_xs) 2
         then
-          let ac19_h = (get_by_idx ac18_xs) 0 in
-            let ac20_tl = (get_by_idx ac18_xs) 1 in
+          let ac20_tl = (get_list_tail ac18_xs) 1 in
+            let ac19_h = (get_by_idx ac18_xs) 0 in
               let () = ac17_f ac19_h in
                 (iter ac17_f) ac20_tl
         else
@@ -755,8 +777,8 @@ let main =
       else
         (if (( >= ) get_list_len ac21_xs) 2
         then
-          let ac23_h = (get_by_idx ac21_xs) 0 in
-            let ac24_tl = (get_by_idx ac21_xs) 1 in
+          let ac24_tl = (get_list_tail ac21_xs) 1 in
+            let ac23_h = (get_by_idx ac21_xs) 0 in
               (append ((map (fun ac25_a -> (ac23_h, ac25_a))) ac22_ys)) ((cartesian ac24_tl) ac22_ys)
         else
           part_match_fail ()))
