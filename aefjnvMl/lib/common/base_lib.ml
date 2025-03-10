@@ -112,6 +112,13 @@ module LibF = struct
     SysF ("get_list_len", alias "get_list_len", func1 (Ptyp_var "'_a") ~ret:Ptyp_int)
   ;;
 
+  let get_list_tail =
+    SysF
+      ( "get_list_tail"
+      , alias "get_list_tail"
+      , func2 (Ptyp_var "'_a") Ptyp_int ~ret:(Ptyp_var "'_a") )
+  ;;
+
   let part_match_fail =
     SysF ("part_match_fail", alias "fail", func1 Ptyp_unit ~ret:(Ptyp_var "'_a"))
   ;;
@@ -132,18 +139,18 @@ module LibF = struct
   let apply_arguments =
     SysF
       ( "rt_apply"
-      , alias "apply_co_closure"
+      , alias "apply_to_closure"
       , func2_varargs Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
   ;;
 
-  (** [append_to_list(tl, __reversed_args__)]
+  (** [append_to_list(n, tl, __reversed_args__)]
       - [tl] -- it is pointer to parrent
       - struct list <=> llist *)
   let append_to_list =
     SysF
       ( "rt_append_to_list"
       , alias "append_to_list"
-      , func1_varargs Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
+      , func2_varargs Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
   ;;
 
   let alloc_tuple =
@@ -156,7 +163,17 @@ end
 
 open LibF
 
-let sys_funcs = [ get_by_idx; get_list_len; part_match_fail ]
+let sys_funcs =
+  [ get_by_idx
+  ; get_list_tail
+  ; get_list_len
+  ; part_match_fail
+  ; create_empty_closure
+  ; apply_arguments
+  ; append_to_list
+  ; alloc_tuple
+  ]
+;;
 
 let user_funcs =
   let math_funcs = [ un_op_minus; op_mul; op_div; op_plus; op_minus ] in

@@ -45,6 +45,7 @@ module LibF : sig
   (*  *)
   val get_by_idx : env_func
   val get_list_len : env_func
+  val get_list_tail : env_func
   val part_match_fail : env_func
   val create_empty_closure : env_func
   val apply_arguments : env_func
