@@ -232,11 +232,11 @@ open Utils
 let pp_id = Ast.pp_id
 
 let rec pp_constant fmt = function
-  | <span data-count="361">C</span>Int i when i &gt;= 0 -&gt; <span data-count="348">f</span>printf fmt "%d" i
+  | <span data-count="376">C</span>Int i when i &gt;= 0 -&gt; <span data-count="363">f</span>printf fmt "%d" i
   | <span data-count="13">C</span>Int i -&gt; fprintf fmt "(%d)" i
   | <span data-count="29">C</span>Bool b -&gt; fprintf fmt "%b" b
-  | <span data-count="39">C</span>Unit -&gt; fprintf fmt "()"
-  | <span data-count="22">C</span>Nil -&gt; fprintf fmt "[]"
+  | <span data-count="44">C</span>Unit -&gt; fprintf fmt "()"
+  | <span data-count="23">C</span>Nil -&gt; fprintf fmt "[]"
 
 and pp_type_ann fmt = function
   | <span data-count="11">T</span>AInt -&gt; fprintf fmt "int"
@@ -254,9 +254,9 @@ and pp_type_ann fmt = function
   | <span data-count="3">T</span>AList x -&gt; fprintf fmt "%a list" pp_type_ann x
 
 and pp_pattern fmt = function
-  | <span data-count="43">P</span>Const c -&gt; fprintf fmt "%a" pp_constant c
-  | <span data-count="25">P</span>Wild -&gt; fprintf fmt "_"
-  | <span data-count="500">P</span>Ident id -&gt; fprintf fmt "%s" id
+  | <span data-count="46">P</span>Const c -&gt; fprintf fmt "%a" pp_constant c
+  | <span data-count="26">P</span>Wild -&gt; fprintf fmt "_"
+  | <span data-count="508">P</span>Ident id -&gt; fprintf fmt "%s" id
   | <span data-count="29">P</span>Tuple (hd1, hd2, tl) -&gt;
     let xs = hd1 :: hd2 :: tl in
     pp_list ~sep:", " fmt pp_pattern xs
@@ -264,20 +264,20 @@ and pp_pattern fmt = function
   | <span data-count="23">P</span>Cons (l, r) -&gt; fprintf fmt "%a :: %a" pp_pattern l pp_pattern r
   | <span data-count="11">P</span>Ann (pat, ty) -&gt; fprintf fmt "(%a: %a)" pp_pattern pat pp_type_ann ty
 
-and pp_pattern_list fmt p = <span data-count="96">p</span>p_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p
+and pp_pattern_list fmt p = <span data-count="99">p</span>p_list ~op:"" ~cl:"" ~sep:" " fmt pp_pattern p
 
 and pp_expr fmt =
-  <span data-count="1221">l</span>et parenthesize fmt = function
+  <span data-count="1260">l</span>et parenthesize fmt = function
     | (<span data-count="2">E</span>IfElse _ | <span data-count="1">E</span>Match _ | <span data-count="2">E</span>LetIn _) as e -&gt; fprintf fmt "(%a)" pp_expr e
-    | <span data-count="695">e</span> -&gt; fprintf fmt "%a" pp_expr e
+    | <span data-count="718">e</span> -&gt; fprintf fmt "%a" pp_expr e
   in
   function
-  | <span data-count="245">E</span>Const c -&gt; fprintf fmt "%a" pp_constant c
-  | <span data-count="507">E</span>Var v -&gt; fprintf fmt "%s" v
-  | <span data-count="236">E</span>App (e1, e2) -&gt;
+  | <span data-count="255">E</span>Const c -&gt; fprintf fmt "%a" pp_constant c
+  | <span data-count="519">E</span>Var v -&gt; fprintf fmt "%s" v
+  | <span data-count="245">E</span>App (e1, e2) -&gt;
     let rec pp_rest fmt = function
-      | <span data-count="175">E</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 parenthesize e2
-      | <span data-count="236">e</span> -&gt; fprintf fmt "(%a" parenthesize e
+      | <span data-count="180">E</span>App (e1, e2) -&gt; fprintf fmt "%a %a" pp_rest e1 parenthesize e2
+      | <span data-count="245">e</span> -&gt; fprintf fmt "(%a" parenthesize e
     in
     fprintf fmt "%a %a)" pp_rest e1 parenthesize e2
   | <span data-count="15">E</span>IfElse (c, t, e) -&gt;
@@ -290,12 +290,12 @@ and pp_expr fmt =
       t
       pp_expr
       e
-  | <span data-count="96">E</span>Fun (p, ps, e) -&gt;
+  | <span data-count="99">E</span>Fun (p, ps, e) -&gt;
     let p = p :: ps in
     fprintf fmt "(fun ";
-    <span data-count="96">p</span>p_pattern_list fmt p;
-    <span data-count="96">f</span>printf fmt " -&gt;@ %a)" pp_expr e
-  | <span data-count="47">E</span>LetIn (d, e) -&gt; fprintf fmt "%a in@\n%a" pp_definition d pp_expr e
+    <span data-count="99">p</span>p_pattern_list fmt p;
+    <span data-count="99">f</span>printf fmt " -&gt;@ %a)" pp_expr e
+  | <span data-count="52">E</span>LetIn (d, e) -&gt; fprintf fmt "%a in@\n%a" pp_definition d pp_expr e
   | <span data-count="19">E</span>Tuple (hd1, hd2, tl) -&gt;
     let xs = hd1 :: hd2 :: tl in
     pp_list ~sep:", " fmt pp_expr xs
@@ -308,13 +308,13 @@ and pp_expr fmt =
   | <span data-count="23">E</span>List xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | <span data-count="176">D</span>Let (NonRec, pat, e) -&gt; fprintf fmt "@[&lt;2&gt;@,let %a =@ %a@]" pp_pattern pat pp_expr e
+  | <span data-count="184">D</span>Let (NonRec, pat, e) -&gt; fprintf fmt "@[&lt;2&gt;@,let %a =@ %a@]" pp_pattern pat pp_expr e
   | <span data-count="21">D</span>Let (Rec, pat, e) -&gt; fprintf fmt "@[&lt;2&gt;@,let rec %a =@ %a@]" pp_pattern pat pp_expr e
 ;;
 
 let pp_program fmt p =
-  <span data-count="91">L</span>ist.iter p ~f:(fun d -&gt; <span data-count="150">f</span>printf fmt "%a@." pp_definition d);
-  <span data-count="91">f</span>printf fmt "@."
+  <span data-count="92">L</span>ist.iter p ~f:(fun d -&gt; <span data-count="153">f</span>printf fmt "%a@." pp_definition d);
+  <span data-count="92">f</span>printf fmt "@."
 ;;
 </code></pre>
       </div>

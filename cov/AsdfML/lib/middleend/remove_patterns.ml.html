@@ -301,118 +301,118 @@ open State.IntStateM.Syntax
 (* Replaces complex patterns with explicit pattern-matching *)
 
 let is_simple = function
-  | <span data-count="234">P</span>Ident _ | <span data-count="6">P</span>Wild -&gt; true
-  | <span data-count="12">_</span> -&gt; false
+  | <span data-count="441">P</span>Ident _ | <span data-count="76">P</span>Wild | <span data-count="54">P</span>Const CUnit -&gt; true
+  | <span data-count="17">_</span> -&gt; false
 ;;
 
 let remove_argument_patterns body pattern pattern_list =
-  <span data-count="136">l</span>et generate_arg_name used_names =
-    <span data-count="16">l</span>et rec find_unique () =
-      <span data-count="21">l</span>et* current_name = fresh_prefi<span data-count="21">x</span> "arg" in
-      <span data-count="21">m</span>atch Set.find used_names ~f:(String.equa<span data-count="21">l</span> current_name) with
-      | <span data-count="16">N</span>one -&gt; return current_name
-      | <span data-count="5">_</span> -&gt; find_unique ()
+  <span data-count="237">l</span>et generate_arg_name used_names =
+    <span data-count="22">l</span>et rec find_unique () =
+      <span data-count="34">l</span>et* current_name = fresh_prefi<span data-count="34">x</span> "arg" in
+      <span data-count="34">m</span>atch Set.find used_names ~f:(String.equa<span data-count="34">l</span> current_name) with
+      | <span data-count="22">N</span>one -&gt; return current_name
+      | <span data-count="12">_</span> -&gt; find_unique ()
     in
-    run (find_uniqu<span data-count="16">e</span> ())
+    run (find_uniqu<span data-count="22">e</span> ())
   in
   let helper (used_names, current_expr) pattern =
-    <span data-count="191">m</span>atch pattern with
-    | <span data-count="172">P</span>Ident id -&gt; Set.ad<span data-count="172">d</span> used_names id, current_expr, pattern
+    <span data-count="477">m</span>atch pattern with
+    | <span data-count="452">P</span>Ident id -&gt; Set.ad<span data-count="452">d</span> used_names id, current_expr, pattern
     | <span data-count="3">P</span>Wild -&gt; used_names, current_expr, pattern
-    | <span data-count="16">_</span> -&gt;
+    | <span data-count="22">_</span> -&gt;
       let arg_name = generate_arg_name used_names in
-      <span data-count="16">(</span> Set.ad<span data-count="16">d</span> used_names arg_name
-      , e_matc<span data-count="16">h</span> (e_va<span data-count="16">r</span> arg_name) [ pattern, current_expr ]
-      , p_iden<span data-count="16">t</span> arg_name )
+      <span data-count="22">(</span> Set.ad<span data-count="22">d</span> used_names arg_name
+      , e_matc<span data-count="22">h</span> (e_va<span data-count="22">r</span> arg_name) [ pattern, current_expr ]
+      , p_iden<span data-count="22">t</span> arg_name )
   in
   let used_names = vars_expr body in
-  <span data-count="136">l</span>et used_names, exp, pattern' = helper (used_names, body) pattern in
-  <span data-count="136">l</span>et _, exp, pattern_list' =
+  <span data-count="237">l</span>et used_names, exp, pattern' = helper (used_names, body) pattern in
+  <span data-count="237">l</span>et _, exp, pattern_list' =
     List.fold_right
       ~f:(fun x acc -&gt;
-        <span data-count="55">l</span>et used_names, exp, pattern_list = acc in
+        <span data-count="240">l</span>et used_names, exp, pattern_list = acc in
         let used_names, current_expr, pattern' = helper (used_names, exp) x in
-        <span data-count="55">u</span>sed_names, current_expr, pattern' :: pattern_list)
+        <span data-count="240">u</span>sed_names, current_expr, pattern' :: pattern_list)
       ~init:(used_names, exp, [])
       pattern_list
   in
-  <span data-count="136">p</span>attern', pattern_list', exp
+  <span data-count="237">p</span>attern', pattern_list', exp
 ;;
 
 let remove_patterns program =
-  <span data-count="79">l</span>et rec helper_expr = function
-    | <span data-count="132">E</span>Const _ as c -&gt; return c
-    | <span data-count="553">E</span>Var _ as v -&gt; return v
-    | <span data-count="422">E</span>App (l, r) -&gt;
-      let* l = helper_exp<span data-count="422">r</span> l in
-      <span data-count="422">l</span>et* r = helper_exp<span data-count="422">r</span> r in
-      <span data-count="422">r</span>eturn @@ e_ap<span data-count="422">p</span> l r
-    | <span data-count="6">E</span>IfElse (i, t, e) -&gt;
-      let* i = helper_exp<span data-count="6">r</span> i in
-      <span data-count="6">l</span>et* t = helper_exp<span data-count="6">r</span> t in
-      <span data-count="6">l</span>et* e = helper_exp<span data-count="6">r</span> e in
-      <span data-count="6">r</span>eturn @@ e_if_els<span data-count="6">e</span> i t e
-    | <span data-count="136">E</span>Fun (p, ps, e) -&gt;
-      let* e = helper_exp<span data-count="136">r</span> e in
-      <span data-count="136">l</span>et p, ps, e = remove_argument_patterns e p ps in
-      <span data-count="136">r</span>eturn @@ e_fu<span data-count="136">n</span> p ps e
-    | <span data-count="78">E</span>LetIn (def, body) -&gt;
-      let* body = helper_exp<span data-count="78">r</span> body in
-      <span data-count="78">(</span>match def with
-       | <span data-count="78">D</span>Let (_, pat, exp) -&gt;
+  <span data-count="125">l</span>et rec helper_expr = function
+    | <span data-count="492">E</span>Const _ as c -&gt; return c
+    | <span data-count="1421">E</span>Var _ as v -&gt; return v
+    | <span data-count="1328">E</span>App (l, r) -&gt;
+      let* l = helper_exp<span data-count="1328">r</span> l in
+      <span data-count="1328">l</span>et* r = helper_exp<span data-count="1328">r</span> r in
+      <span data-count="1328">r</span>eturn @@ e_ap<span data-count="1328">p</span> l r
+    | <span data-count="17">E</span>IfElse (i, t, e) -&gt;
+      let* i = helper_exp<span data-count="17">r</span> i in
+      <span data-count="17">l</span>et* t = helper_exp<span data-count="17">r</span> t in
+      <span data-count="17">l</span>et* e = helper_exp<span data-count="17">r</span> e in
+      <span data-count="17">r</span>eturn @@ e_if_els<span data-count="17">e</span> i t e
+    | <span data-count="237">E</span>Fun (p, ps, e) -&gt;
+      let* e = helper_exp<span data-count="237">r</span> e in
+      <span data-count="237">l</span>et p, ps, e = remove_argument_patterns e p ps in
+      <span data-count="237">r</span>eturn @@ e_fu<span data-count="237">n</span> p ps e
+    | <span data-count="195">E</span>LetIn (def, body) -&gt;
+      let* body = helper_exp<span data-count="195">r</span> body in
+      <span data-count="195">(</span>match def with
+       | <span data-count="195">D</span>Let (_, pat, exp) -&gt;
          if is_simple pat
          then
-           <span data-count="74">l</span>et* def = helper_de<span data-count="74">f</span> def in
-           <span data-count="74">l</span>et def = List.hd_exn def in
-           <span data-count="74">r</span>eturn @@ e_let_i<span data-count="74">n</span> def body
+           <span data-count="189">l</span>et* def = helper_de<span data-count="189">f</span> def in
+           <span data-count="189">l</span>et def = List.hd_exn def in
+           <span data-count="189">r</span>eturn @@ e_let_i<span data-count="189">n</span> def body
          else
-           <span data-count="4">l</span>et* exp = helper_exp<span data-count="4">r</span> exp in
-           <span data-count="4">r</span>eturn @@ e_matc<span data-count="4">h</span> exp [ pat, body ])
-    | <span data-count="17">E</span>Tuple (x1, x2, xs) -&gt;
-      let* x1 = helper_exp<span data-count="17">r</span> x1 in
-      <span data-count="17">l</span>et* x2 = helper_exp<span data-count="17">r</span> x2 in
-      <span data-count="17">l</span>et* xs =
-        mfold_righ<span data-count="17">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="7">h</span>elper_exp<span data-count="7">r</span> x &gt;&gt;| fun x -&gt; <span data-count="7">x</span> :: acc)
+           <span data-count="6">l</span>et* exp = helper_exp<span data-count="6">r</span> exp in
+           <span data-count="6">r</span>eturn @@ e_matc<span data-count="6">h</span> exp [ pat, body ])
+    | <span data-count="30">E</span>Tuple (x1, x2, xs) -&gt;
+      let* x1 = helper_exp<span data-count="30">r</span> x1 in
+      <span data-count="30">l</span>et* x2 = helper_exp<span data-count="30">r</span> x2 in
+      <span data-count="30">l</span>et* xs =
+        mfold_righ<span data-count="30">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="12">h</span>elper_exp<span data-count="12">r</span> x &gt;&gt;| fun x -&gt; <span data-count="12">x</span> :: acc)
       in
-      <span data-count="17">r</span>eturn @@ e_tupl<span data-count="17">e</span> x1 x2 xs
-    | <span data-count="5">E</span>List xs -&gt;
+      <span data-count="30">r</span>eturn @@ e_tupl<span data-count="30">e</span> x1 x2 xs
+    | <span data-count="19">E</span>List xs -&gt;
       let* xs =
-        mfold_righ<span data-count="5">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="13">h</span>elper_exp<span data-count="13">r</span> x &gt;&gt;| fun x -&gt; <span data-count="13">x</span> :: acc)
+        mfold_righ<span data-count="19">t</span> xs ~init:[] ~f:(fun x acc -&gt; <span data-count="54">h</span>elper_exp<span data-count="54">r</span> x &gt;&gt;| fun x -&gt; <span data-count="54">x</span> :: acc)
       in
-      <span data-count="5">r</span>eturn @@ e_lis<span data-count="5">t</span> xs
-    | <span data-count="20">E</span>Match (exp, cases) -&gt;
-      let* exp = helper_exp<span data-count="20">r</span> exp in
-      <span data-count="20">l</span>et* cases =
-        mfold_righ<span data-count="20">t</span> cases ~init:[] ~f:(fun (pat, exp) acc -&gt;
-          <span data-count="49">l</span>et* exp = helper_exp<span data-count="49">r</span> exp in
-          <span data-count="49">r</span>eturn ((pat, exp) :: acc))
+      <span data-count="19">r</span>eturn @@ e_lis<span data-count="19">t</span> xs
+    | <span data-count="36">E</span>Match (exp, cases) -&gt;
+      let* exp = helper_exp<span data-count="36">r</span> exp in
+      <span data-count="36">l</span>et* cases =
+        mfold_righ<span data-count="36">t</span> cases ~init:[] ~f:(fun (pat, exp) acc -&gt;
+          <span data-count="86">l</span>et* exp = helper_exp<span data-count="86">r</span> exp in
+          <span data-count="86">r</span>eturn ((pat, exp) :: acc))
       in
-      <span data-count="20">r</span>eturn @@ e_matc<span data-count="20">h</span> exp cases
+      <span data-count="36">r</span>eturn @@ e_matc<span data-count="36">h</span> exp cases
   and helper_def : definition -&gt; (var_id, definition list) State.StateM.t = function
-    | <span data-count="174">D</span>Let (r, p, e) when is_simpl<span data-count="174">e</span> p -&gt;
-      <span data-count="166">l</span>et* e = helper_exp<span data-count="166">r</span> e in
-      <span data-count="166">r</span>eturn [ d_let_fla<span data-count="166">g</span> r p e ]
-    | <span data-count="8">D</span>Let (_, pat, e) -&gt;
+    | <span data-count="393">D</span>Let (r, p, e) when is_simpl<span data-count="393">e</span> p -&gt;
+      <span data-count="382">l</span>et* e = helper_exp<span data-count="382">r</span> e in
+      <span data-count="382">r</span>eturn [ d_let_fla<span data-count="382">g</span> r p e ]
+    | <span data-count="11">D</span>Let (_, pat, e) -&gt;
       (* Convert `let complex_pattern = expr`
          into `let temp_match = match expr with | complex_pattern -&gt; ()`
          and deal with it later in 'remove_match' *)
-      let* temp_match = fresh_prefi<span data-count="8">x</span> "__temp_match" in
-      <span data-count="8">l</span>et match_exp =
+      let* temp_match = fresh_prefi<span data-count="11">x</span> "__temp_match" in
+      <span data-count="11">l</span>et match_exp =
         d_let
-          (p_iden<span data-count="8">t</span> temp_match)
-          (e_let_i<span data-count="8">n</span>
-             (d_le<span data-count="8">t</span> (p_iden<span data-count="8">t</span> temp_match) e)
-             (e_matc<span data-count="8">h</span> (e_va<span data-count="8">r</span> temp_match) [ pat, e_va<span data-count="8">r</span> temp_match ]))
+          (p_iden<span data-count="11">t</span> temp_match)
+          (e_let_i<span data-count="11">n</span>
+             (d_le<span data-count="11">t</span> (p_iden<span data-count="11">t</span> temp_match) e)
+             (e_matc<span data-count="11">h</span> (e_va<span data-count="11">r</span> temp_match) [ pat, e_va<span data-count="11">r</span> temp_match ]))
       in
-      <span data-count="8">r</span>eturn @@ [ match_exp ]
+      <span data-count="11">r</span>eturn @@ [ match_exp ]
   in
   let helper_program program =
-    <span data-count="79">m</span>fol<span data-count="79">d</span> program ~init:[] ~f:(fun acc def -&gt;
-      <span data-count="100">l</span>et* defs = helper_de<span data-count="100">f</span> def in
-      <span data-count="100">r</span>eturn (defs @ acc))
+    <span data-count="125">m</span>fol<span data-count="125">d</span> program ~init:[] ~f:(fun acc def -&gt;
+      <span data-count="204">l</span>et* defs = helper_de<span data-count="204">f</span> def in
+      <span data-count="204">r</span>eturn (defs @ acc))
     &gt;&gt;| List.rev
   in
-  run (helper_progra<span data-count="79">m</span> program)
+  run (helper_progra<span data-count="125">m</span> program)
 ;;
 </code></pre>
       </div>

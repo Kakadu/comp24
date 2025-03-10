@@ -210,68 +210,68 @@ let env_to_str env =
   |&gt; <span data-count="0">S</span>tring.concat ~sep:", "
 ;;
 
-let rec cc_expr globals env ?(apply = <span data-count="990">t</span>rue) = function
-  | <span data-count="103">S</span>Const c -&gt; s_const c
-  | <span data-count="422">S</span>Var id -&gt;
+let rec cc_expr globals env ?(apply = <span data-count="4038">t</span>rue) = function
+  | <span data-count="519">S</span>Const c -&gt; s_const c
+  | <span data-count="1608">S</span>Var id -&gt;
     (match Map.find env id with
-     | <span data-count="385">N</span>one -&gt; s_var id
-     | <span data-count="37">S</span>ome fvs -&gt;
-       fvs |&gt; Set.to_list |&gt; <span data-count="37">L</span>ist.map ~f:s_var |&gt; <span data-count="37">L</span>ist.fold ~init:(s_va<span data-count="37">r</span> id) ~f:s_app)
-  | <span data-count="339">S</span>App (l, r) -&gt; s_app (cc_exp<span data-count="339">r</span> globals env l) (cc_exp<span data-count="339">r</span> globals env r)
-  | <span data-count="15">S</span>IfElse (c, t, e) -&gt;
-    s_if_else (cc_exp<span data-count="15">r</span> globals env c) (cc_exp<span data-count="15">r</span> globals env t) (cc_exp<span data-count="15">r</span> globals env e)
-  | <span data-count="86">S</span>Fun (p, ps, body) as func -&gt;
+     | <span data-count="1523">N</span>one -&gt; s_var id
+     | <span data-count="85">S</span>ome fvs -&gt;
+       fvs |&gt; Set.to_list |&gt; <span data-count="85">L</span>ist.map ~f:s_var |&gt; <span data-count="85">L</span>ist.fold ~init:(s_va<span data-count="85">r</span> id) ~f:s_app)
+  | <span data-count="1499">S</span>App (l, r) -&gt; s_app (cc_exp<span data-count="1499">r</span> globals env l) (cc_exp<span data-count="1499">r</span> globals env r)
+  | <span data-count="62">S</span>IfElse (c, t, e) -&gt;
+    s_if_else (cc_exp<span data-count="62">r</span> globals env c) (cc_exp<span data-count="62">r</span> globals env t) (cc_exp<span data-count="62">r</span> globals env e)
+  | <span data-count="180">S</span>Fun (p, ps, body) as func -&gt;
     let pat = p :: ps in
-    let fvs = Set.diff (free_vars_sexp<span data-count="86">r</span> func) globals |&gt; <span data-count="86">S</span>et.to_list in
-    <span data-count="86">l</span>et body' = cc_expr globals env body in
-    <span data-count="86">(</span>match fvs with
-     | <span data-count="59">[</span>] -&gt; s_fun p ps body'
-     | <span data-count="27">h</span>d :: tl -&gt;
-       let p, ps = hd, List.appen<span data-count="27">d</span> tl pat in
+    let fvs = Set.diff (free_vars_sexp<span data-count="180">r</span> func) globals |&gt; <span data-count="180">S</span>et.to_list in
+    <span data-count="180">l</span>et body' = cc_expr globals env body in
+    <span data-count="180">(</span>match fvs with
+     | <span data-count="137">[</span>] -&gt; s_fun p ps body'
+     | <span data-count="43">h</span>d :: tl -&gt;
+       let p, ps = hd, List.appen<span data-count="43">d</span> tl pat in
        let closure_fun = s_fun p ps body' in
-       <span data-count="27">i</span>f apply
-       then <span data-count="12">f</span>vs |&gt; List.map ~f:s_var |&gt; <span data-count="12">L</span>ist.fold ~init:closure_fun ~f:s_app
-       else <span data-count="15">c</span>losure_fun)
-  | <span data-count="79">S</span>LetIn (def, exp) -&gt;
+       <span data-count="43">i</span>f apply
+       then <span data-count="25">f</span>vs |&gt; List.map ~f:s_var |&gt; <span data-count="25">L</span>ist.fold ~init:closure_fun ~f:s_app
+       else <span data-count="18">c</span>losure_fun)
+  | <span data-count="256">S</span>LetIn (def, exp) -&gt;
     let def', env', _ = cc_def globals env def ~apply:false in
-    <span data-count="79">l</span>et exp' = cc_expr globals env' exp in
-    <span data-count="79">s</span>_let_in def' exp'
-  | <span data-count="11">S</span>Tuple (x1, x2, xs) -&gt;
+    <span data-count="256">l</span>et exp' = cc_expr globals env' exp in
+    <span data-count="256">s</span>_let_in def' exp'
+  | <span data-count="30">S</span>Tuple (x1, x2, xs) -&gt;
     s_tuple
-      (cc_exp<span data-count="11">r</span> globals env x1)
-      (cc_exp<span data-count="11">r</span> globals env x2)
-      (List.ma<span data-count="11">p</span> xs ~f:(cc_exp<span data-count="11">r</span> globals env))
-  | <span data-count="3">S</span>List xs -&gt; List.map xs ~f:(cc_exp<span data-count="3">r</span> globals env) |&gt; <span data-count="3">s</span>_list
+      (cc_exp<span data-count="30">r</span> globals env x1)
+      (cc_exp<span data-count="30">r</span> globals env x2)
+      (List.ma<span data-count="30">p</span> xs ~f:(cc_exp<span data-count="30">r</span> globals env))
+  | <span data-count="18">S</span>List xs -&gt; List.map xs ~f:(cc_exp<span data-count="18">r</span> globals env) |&gt; <span data-count="18">s</span>_list
 
-and cc_def globals env ?(apply = <span data-count="58">t</span>rue) = function
-  | <span data-count="68">S</span>Let (flag, id, (SFun _ as func)) as def -&gt;
-    let fvs = Set.diff (free_vars_sde<span data-count="68">f</span> def) globals in
-    <span data-count="68">l</span>et env' = Map.set env ~key:id ~data:fvs in
-    <span data-count="68">l</span>et globals' = Set.add globals id in
-    <span data-count="68">l</span>et func = cc_expr globals' env' func ~apply in
-    <span data-count="68">s</span>_let_fla<span data-count="68">g</span> flag id func, env', globals'
-  | <span data-count="69">S</span>Let (flag, id, exp) -&gt;
+and cc_def globals env ?(apply = <span data-count="175">t</span>rue) = function
+  | <span data-count="134">S</span>Let (flag, id, (SFun _ as func)) as def -&gt;
+    let fvs = Set.diff (free_vars_sde<span data-count="134">f</span> def) globals in
+    <span data-count="134">l</span>et env' = Map.set env ~key:id ~data:fvs in
+    <span data-count="134">l</span>et globals' = Set.add globals id in
+    <span data-count="134">l</span>et func = cc_expr globals' env' func ~apply in
+    <span data-count="134">s</span>_let_fla<span data-count="134">g</span> flag id func, env', globals'
+  | <span data-count="297">S</span>Let (flag, id, exp) -&gt;
     let exp' = cc_expr globals env exp in
-    <span data-count="69">s</span>_let_fla<span data-count="69">g</span> flag id exp', env, globals
+    <span data-count="297">s</span>_let_fla<span data-count="297">g</span> flag id exp', env, globals
 ;;
 
 let default_globals =
   let open Std in
-  stdlib @ runtime |&gt; List.map ~f:(fun x -&gt; <span data-count="1140">x</span>.name) |&gt; <span data-count="38">S</span>et.Poly.of_lis<span data-count="38">t</span>
+  stdlib @ runtime |&gt; List.map ~f:(fun x -&gt; <span data-count="2739">x</span>.name) |&gt; <span data-count="83">S</span>et.Poly.of_lis<span data-count="83">t</span>
 ;;
 
-let closure_conversion ?(globals = <span data-count="41">d</span>efault_globals) (program : sprogram) =
-  <span data-count="41">l</span>et program = Simplify.simplify program in
-  <span data-count="41">l</span>et env = Map.Poly.empty in
+let closure_conversion ?(globals = <span data-count="87">d</span>efault_globals) (program : sprogram) =
+  <span data-count="87">l</span>et program = Simplify.simplify program in
+  <span data-count="87">l</span>et env = Map.Poly.empty in
   let helper prog =
-    <span data-count="41">L</span>ist.fold_map prog ~init:globals ~f:(fun globals -&gt;
+    <span data-count="87">L</span>ist.fold_map prog ~init:globals ~f:(fun globals -&gt;
         function
-        | <span data-count="58">S</span>Let (_, id, _) as def -&gt;
+        | <span data-count="175">S</span>Let (_, id, _) as def -&gt;
           let def', _, _ = cc_def globals env def in
-          <span data-count="58">l</span>et globals' = Set.add globals id in
-          <span data-count="58">g</span>lobals', def')
+          <span data-count="175">l</span>et globals' = Set.add globals id in
+          <span data-count="175">g</span>lobals', def')
   in
-  helper program |&gt; <span data-count="41">s</span>nd
+  helper program |&gt; <span data-count="87">s</span>nd
 ;;
 </code></pre>
       </div>

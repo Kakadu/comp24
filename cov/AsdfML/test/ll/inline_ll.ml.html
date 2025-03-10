@@ -401,6 +401,31 @@
 <a id="L377"></a><span > </span>
 <a id="L378"></a><span class="visited"> </span>
 <a id="L379"></a><span > </span>
+<a id="L380"></a><span > </span>
+<a id="L381"></a><span > </span>
+<a id="L382"></a><span class="visited"> </span>
+<a id="L383"></a><span > </span>
+<a id="L384"></a><span > </span>
+<a id="L385"></a><span > </span>
+<a id="L386"></a><span > </span>
+<a id="L387"></a><span > </span>
+<a id="L388"></a><span > </span>
+<a id="L389"></a><span > </span>
+<a id="L390"></a><span > </span>
+<a id="L391"></a><span > </span>
+<a id="L392"></a><span class="visited"> </span>
+<a id="L393"></a><span > </span>
+<a id="L394"></a><span > </span>
+<a id="L395"></a><span > </span>
+<a id="L396"></a><span > </span>
+<a id="L397"></a><span > </span>
+<a id="L398"></a><span > </span>
+<a id="L399"></a><span > </span>
+<a id="L400"></a><span > </span>
+<a id="L401"></a><span > </span>
+<a id="L402"></a><span > </span>
+<a id="L403"></a><span class="visited"> </span>
+<a id="L404"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -784,6 +809,31 @@
 <a href="#L377">377</a>
 <a href="#L378">378</a>
 <a href="#L379">379</a>
+<a href="#L380">380</a>
+<a href="#L381">381</a>
+<a href="#L382">382</a>
+<a href="#L383">383</a>
+<a href="#L384">384</a>
+<a href="#L385">385</a>
+<a href="#L386">386</a>
+<a href="#L387">387</a>
+<a href="#L388">388</a>
+<a href="#L389">389</a>
+<a href="#L390">390</a>
+<a href="#L391">391</a>
+<a href="#L392">392</a>
+<a href="#L393">393</a>
+<a href="#L394">394</a>
+<a href="#L395">395</a>
+<a href="#L396">396</a>
+<a href="#L397">397</a>
+<a href="#L398">398</a>
+<a href="#L399">399</a>
+<a href="#L400">400</a>
+<a href="#L401">401</a>
+<a href="#L402">402</a>
+<a href="#L403">403</a>
+<a href="#L404">404</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -793,8 +843,8 @@ open Lib
 open Test.Utils
 
 let test_ll code =
-  <span data-count="19">l</span>et open Format in
-  lambda_lift code (print<span data-count="19">f</span> "%a" Cf_ast.pp_program)
+  <span data-count="20">l</span>et open Format in
+  lambda_lift code (print<span data-count="20">f</span> "%a" Cf_ast.pp_program)
 ;;
 
 let%expect_test _ =
@@ -1014,10 +1064,10 @@ let%expect_test _ =
   <span data-count="1">[</span>%expect
     {|
     let map f list =
-      if (not (`list_is_empty list))
+      if (not (ml_list_is_empty list))
       then
-        let hd = (`list_hd list) in
-        let tl = (`list_tl list) in
+        let hd = (ml_list_hd list) in
+        let tl = (ml_list_tl list) in
         (( :: ) (f hd) (map f tl))
       else []
     |}<span data-count="5">]</span>
@@ -1161,6 +1211,31 @@ let%expect_test _ =
     let main = let one = 1 in
       let f1 = ll_f1_3 in
       let f2 = __var_ll_2 in
+      ()
+    |}<span data-count="5">]</span>
+;;
+
+let%expect_test _ =
+  <span data-count="1">t</span>est_ll
+    {|
+  let main = 
+      let () = println_int (( + ) 42 42) in
+      let (+) a b = a - b in
+      let () = println_int (( + ) 42 42) in
+      let println_int x = println_int (x + 1) in
+      let () = println_int ((+) 42 42) in
+      ()
+  |};
+  <span data-count="1">[</span>%expect
+    {|
+    let ll___ml_add_2 a b = (( - ) a b)
+    let ll___ml_println_int_4 __ml_add x = (println_int (__ml_add x 1))
+    let main =
+      let () = (println_int (( + ) 42 42)) in
+      let __ml_add = ll___ml_add_2 in
+      let () = (println_int (__ml_add 42 42)) in
+      let __ml_println_int = ll___ml_println_int_4 in
+      let () = (__ml_println_int __ml_add (__ml_add 42 42)) in
       ()
     |}<span data-count="5">]</span>
 ;;

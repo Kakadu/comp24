@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>anf_ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="37.78% coverage in lib/middleend/anf_ast.ml">
+    <meta name="description" content="40.00% coverage in lib/middleend/anf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">lib/middleend/</span>anf_ast.ml
         </a>
       </h1>
-      <h2>37.78%</h2>
+      <h2>40.00%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:9.18%"></span>
@@ -34,7 +34,6 @@
       <span class="unvisited" style="top:38.78%"></span>
       <span class="unvisited" style="top:39.80%"></span>
       <span class="unvisited" style="top:41.84%"></span>
-      <span class="unvisited" style="bottom:46.94%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -90,7 +89,7 @@
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span class="visited"> </span>
-<a id="L52"></a><span class="unvisited"> </span>
+<a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
@@ -290,22 +289,22 @@ open Format
 open Utils
 
 let rec pp_imm_expr fmt = function
-  | <span data-count="41">I</span>mmInt n -&gt; fprintf fmt "%d" n
-  | <span data-count="0">I</span>mmBool b -&gt; fprintf fmt "%b" b
-  | <span data-count="251">I</span>mmId id -&gt; fprintf fmt "%s" id
-  | <span data-count="1">I</span>mmUnit -&gt; fprintf fmt "()"
-  | <span data-count="2">I</span>mmNil -&gt; fprintf fmt "[]"
-  | <span data-count="9">I</span>mmTuple (x1, x2, xs) -&gt;
+  | <span data-count="233">I</span>mmInt n -&gt; fprintf fmt "%d" n
+  | <span data-count="4">I</span>mmBool b -&gt; fprintf fmt "%b" b
+  | <span data-count="1135">I</span>mmId id -&gt; fprintf fmt "%s" id
+  | <span data-count="7">I</span>mmUnit -&gt; fprintf fmt "()"
+  | <span data-count="5">I</span>mmNil -&gt; fprintf fmt "[]"
+  | <span data-count="22">I</span>mmTuple (x1, x2, xs) -&gt;
     let xs = x1 :: x2 :: xs in
     pp_list ~op:"(" ~cl:")" ~sep:", " fmt pp_imm_expr xs
-  | <span data-count="1">I</span>mmList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs
+  | <span data-count="7">I</span>mmList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs
 ;;
 
 let rec pp_cexpr fmt = function
-  | <span data-count="96">C</span>App (e1, e2) -&gt;
+  | <span data-count="295">C</span>App (e1, e2) -&gt;
     fprintf fmt "%a" pp_imm_expr e1;
-    <span data-count="96">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
-  | <span data-count="8">C</span>IfElse (c, t, e) -&gt;
+    <span data-count="295">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
+  | <span data-count="21">C</span>IfElse (c, t, e) -&gt;
     fprintf
       fmt
       "if %a @\n@[&lt;2&gt;then@ %a@] @\n@[&lt;2&gt;else@ %a@]"
@@ -315,29 +314,29 @@ let rec pp_cexpr fmt = function
       t
       pp_aexpr
       e
-  | <span data-count="14">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
+  | <span data-count="61">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
 
 and pp_aexpr fmt = function
-  | <span data-count="79">A</span>Let (id, cexpr, aexpr) -&gt;
+  | <span data-count="221">A</span>Let (id, cexpr, aexpr) -&gt;
     fprintf fmt "@[&lt;2&gt;@,let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
-  | <span data-count="39">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
+  | <span data-count="156">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
 ;;
 
 let pp_fn fmt = function
-  | <span data-count="23">F</span>n (id, args, aexpr) -&gt;
+  | <span data-count="114">F</span>n (id, args, aexpr) -&gt;
     (match args with
-     | <span data-count="5">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]@." id pp_aexpr aexpr
-     | <span data-count="18">_</span> -&gt;
+     | <span data-count="46">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]@." id pp_aexpr aexpr
+     | <span data-count="68">_</span> -&gt;
        fprintf
          fmt
          "@[&lt;2&gt;@,let %s %s =@ %a@]@."
          id
-         (String.conca<span data-count="18">t</span> args ~sep:" ")
+         (String.conca<span data-count="68">t</span> args ~sep:" ")
          pp_aexpr
          aexpr)
 ;;
 
-let pp_program fmt = <span data-count="11">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
+let pp_program fmt = <span data-count="35">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
 </code></pre>
       </div>
     </div>
