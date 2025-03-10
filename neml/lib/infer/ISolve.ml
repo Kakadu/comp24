@@ -27,7 +27,7 @@ module Sub = struct
       | Arr (ty1, ty2) ->
           Arr (f ty1, f ty2)
       | Tuple tys ->
-          Tuple (List.map (List2.to_list tys) ~f |> List2.of_list_exn)
+          Tuple (List2.map tys ~f)
       | Con (id, args) ->
           Con (id, List.map args ~f)
     in
