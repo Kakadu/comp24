@@ -1,8 +1,8 @@
-;  $ if [ -z "$latest" ]; then
-;  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
-;  >   alias qemu-riscv64-static='qemu-riscv64'
-;  > fi
-;
+  $ if [ -z "$latest" ]; then
+  >   alias riscv64-linux-gnu-gcc='riscv64-unknown-linux-gnu-gcc'
+  >   alias qemu-riscv64-static='qemu-riscv64'
+  > fi
+
 ;  $ dune exec riscv -- -anf -o /tmp/dbg.s <<- EOF
 ;  > let pow x n =
 ;  >   let rec helper acc n =
