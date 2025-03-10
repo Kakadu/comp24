@@ -4,7 +4,12 @@
  (name llvm_codegen)
  (public_name arML.llvm_codegen)
  (libraries angstrom ast llvm anf)
- (modules expressionCodegen)
+ (modules
+  llvmBasic
+  runtime
+  runtimeClosures
+  environmentSearchers
+  expressionCodegen)
  (instrumentation
   (backend bisect_ppx))
  (preprocess
