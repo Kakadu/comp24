@@ -103,3 +103,13 @@ module BinOperator = struct
     | CONCAT -> "^"
   ;;
 end
+
+module UnOperator = struct
+  let list : uop list = [ NOT; UMINUS; UPLUS ]
+
+  let to_string : uop -> string = function
+    | NOT -> "not"
+    | UMINUS -> "-"
+    | UPLUS -> "+"
+  ;;
+end

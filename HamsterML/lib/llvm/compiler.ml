@@ -9,6 +9,33 @@ let the_module = create_module global_context "HamsterML_LLVM_Compiler"
 let i64 = i16_type global_context
 let lookup_function_exception id llmodule = Option.get @@ lookup_function id llmodule
 
+let build_binary_operation = function
+  | ADD -> build_add
+  | SUB -> build_sub
+  | MUL -> build_mul
+  | DIV -> build_udiv
+  | EQ -> build_icmp Icmp.Eq
+  | NEQ -> build_icmp Icmp.Ne
+  | GT -> build_icmp Icmp.Sgt
+  | GTE -> build_icmp Icmp.Sge
+  | LT -> build_icmp Icmp.Slt
+  | LTE -> build_icmp Icmp.Sle
+  | AND -> build_and
+  | OR -> build_or
+  | CONCAT ->
+    fun lhs rhs name builder ->
+      let concat_fn = lookup_function_exception "hamsterml_concat" the_module in
+      let fnty = function_type i64 [| i64; i64 |] in
+      build_call fnty concat_fn [| lhs; rhs |] name builder
+  | ID_EQ -> failwith "'==' operation is not expected to be implemented"
+;;
+
+let build_unary_operation = function
+  | UMINUS -> build_neg
+  | NOT -> build_not
+  | UPLUS -> fun value _ _ -> value (* unary plus is an identity operation *)
+;;
+
 (* TODO: codegen functions *)
 let rec codegen_immexpr env =
   let list_helper lst =
@@ -53,12 +80,13 @@ let rec codegen_immexpr env =
     Base.List.init (Base.String.length s) ~f:(Base.String.get s)
     |> Base.List.map ~f:(fun c -> ImmInt (Base.Char.to_int c))
     |> list_helper
-  (* | ImmId id ->
-     (match Base.Map.find env id, id with
-     | Some llvalue -> llvalue) *)
+  | ImmId _ -> failwith "not yet implemented"
+  | ImmOperation op ->
+    (match op with
+     | Binary bop -> codegen_immexpr env (ImmId (BinOperator.to_string bop))
+     | Unary uop -> codegen_immexpr env (ImmId (UnOperator.to_string uop)))
   | ImmUnit -> const_int i64 0
-  | _ -> failwith "not yet implemented"
-;;
+
 
 (*
    let codegen_cexpr = failwith "not yet implemented"
@@ -66,30 +94,3 @@ let rec codegen_immexpr env =
    let codegen_global_scope_function = failwith "not yet implemented"
    let codegen = failwith "not yet implemented"
 *)
-
-let build_binary_operation = function
-  | ADD -> build_add
-  | SUB -> build_sub
-  | MUL -> build_mul
-  | DIV -> build_udiv
-  | EQ -> build_icmp Icmp.Eq
-  | NEQ -> build_icmp Icmp.Ne
-  | GT -> build_icmp Icmp.Sgt
-  | GTE -> build_icmp Icmp.Sge
-  | LT -> build_icmp Icmp.Slt
-  | LTE -> build_icmp Icmp.Sle
-  | AND -> build_and
-  | OR -> build_or
-  | CONCAT ->
-    fun lhs rhs name builder ->
-      let concat_fn = lookup_function_exception "hamsterml_concat" the_module in
-      let fnty = function_type i64 [| i64; i64 |] in
-      build_call fnty concat_fn [| lhs; rhs |] name builder
-  | ID_EQ -> failwith "'==' operation is not expected to be implemented"
-;;
-
-let build_unary_operation = function
-  | UMINUS -> build_neg
-  | NOT -> build_not
-  | UPLUS -> fun value _ _ -> value (* unary plus is an identity operation *)
-;;
