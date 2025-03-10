@@ -81,13 +81,12 @@ module Mapper (M : MONADERROR) = struct
         ; expr_to_sexpr e2
         ]
     | ETuple es -> List (Atom "tuple" :: List.map expr_to_sexpr es)
-    | EMatch (p, cases) ->
+    | EMatch (e, cases) ->
       List
-        [ Atom "match"
-        ; expr_to_sexpr p
-        ; List
-            (List.map (fun (p, e) -> List [ pattern_to_sexpr p; expr_to_sexpr e ]) cases)
-        ]
+        (Atom "match"
+         :: expr_to_sexpr e
+         :: List.flatten
+              (List.map (fun (p, e) -> [ pattern_to_sexpr p; expr_to_sexpr e ]) cases))
     | EConstraint (e, t) -> List [ Atom "constraint"; expr_to_sexpr e; type_to_sexpr t ]
 
   and rec_flag_to_sexpr = function
@@ -104,10 +103,9 @@ module Mapper (M : MONADERROR) = struct
       List [ Atom "single_let"; rec_flag_to_sexpr flag; single_let_to_sexpr let_expr ]
     | DMutualRecDecl (flag, lets) ->
       List
-        [ Atom "mutual_rec_decl"
-        ; rec_flag_to_sexpr flag
-        ; List (List.map single_let_to_sexpr lets)
-        ]
+        (Atom "mutual_rec_decl"
+         :: rec_flag_to_sexpr flag
+         :: List.map single_let_to_sexpr lets)
   ;;
 
   let sexpr_of_declarations decls = List.map sexpr_of_declaration decls
@@ -185,19 +183,20 @@ module Mapper (M : MONADERROR) = struct
     | List (Atom "tuple" :: es) ->
       let* es' = map1 expr_of_sexpr es in
       return (ETuple es')
-    | List [ Atom "match"; pat; List cases ] ->
-      let* pat' = expr_of_sexpr pat in
-      let* cases' =
-        map1
-          (function
-            | List [ p; e ] ->
-              let* p' = pattern_of_sexpr p in
-              let* e' = expr_of_sexpr e in
-              return (p', e')
-            | _ -> error "Invalid case in match")
-          cases
+    | List (Atom "match" :: e :: cases) ->
+      let* e' = expr_of_sexpr e in
+      let rec parse_cases cases =
+        match cases with
+        | [] -> return []
+        | p :: e :: rest ->
+          let* p' = pattern_of_sexpr p in
+          let* e' = expr_of_sexpr e in
+          let* rest' = parse_cases rest in
+          return ((p', e') :: rest')
+        | _ -> error "Invalid S-expression for match cases"
       in
-      return (EMatch (pat', cases'))
+      let* cases' = parse_cases cases in
+      return (EMatch (e', cases'))
     | List [ Atom "constraint"; e; t ] ->
       let* e' = expr_of_sexpr e in
       let* t' = type_of_sexpr t in
@@ -223,7 +222,7 @@ module Mapper (M : MONADERROR) = struct
       let* flag' = rec_flag_of_sexpr flag in
       let* let_expr' = single_let_of_sexpr let_expr in
       return (DSingleLet (flag', let_expr'))
-    | List [ Atom "mutual_rec_decl"; flag; List lets ] ->
+    | List (Atom "mutual_rec_decl" :: flag :: lets) ->
       let* flag' = rec_flag_of_sexpr flag in
       let* lets' = map1 single_let_of_sexpr lets in
       return (DMutualRecDecl (flag', lets'))

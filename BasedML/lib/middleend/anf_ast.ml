@@ -14,7 +14,7 @@ type immexpr =
   | ImmConstraint of immexpr * type_name
 
 type cexpr =
-  | CApplication of cexpr * cexpr
+  | CApplication of immexpr * immexpr * immexpr list
   | CIfThenElse of immexpr * aexpr * aexpr
   | CImmExpr of immexpr
 
