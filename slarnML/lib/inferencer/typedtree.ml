@@ -8,7 +8,6 @@ module VarSet = struct
   include Stdlib.Set.Make (Int)
 end
 
-
 type constTy =
   | UnitTy
   | IntTy
@@ -20,15 +19,13 @@ type ty =
   | ArrowTy of ty list
 [@@deriving show { with_path = false }]
 
-type undefinedType = 
+type undefinedType =
   | Type of ty
   | Key of binder
   | Undefined
-;;
 
 open Res
 
-let boolType = (Result(Type(PrimTy BoolTy)))
-let uniyType = (Result(Type(PrimTy UnitTy)))
-let intType = (Result(Type(PrimTy IntTy)))
-;;
+let boolType = Result (Type (PrimTy BoolTy))
+let uniyType = Result (Type (PrimTy UnitTy))
+let intType = Result (Type (PrimTy IntTy))

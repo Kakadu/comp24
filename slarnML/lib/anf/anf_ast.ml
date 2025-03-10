@@ -27,11 +27,9 @@ type cexpr =
   | AApp of immexpr * immexpr list
 [@@deriving show { with_path = false }]
 
-and aexpr = 
+and aexpr =
   | ALet of string * cexpr * aexpr
   | ACExpr of cexpr
 [@@deriving show { with_path = false }]
 
-type afun = 
-  | AFun of string * string list * aexpr 
-[@@deriving show { with_path = false }]
+type afun = AFun of string * string list * aexpr [@@deriving show { with_path = false }]
