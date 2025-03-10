@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>lambda_lifting.ml &mdash; Coverage report</title>
-    <meta name="description" content="83.50% coverage in lib/middleend/lambda_lifting.ml">
+    <meta name="description" content="86.61% coverage in lib/middleend/lambda_lifting.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,22 +15,20 @@
           <span class="dirname">lib/middleend/</span>lambda_lifting.ml
         </a>
       </h1>
-      <h2>83.50%</h2>
+      <h2>86.61%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:16.80%"></span>
-      <span class="unvisited" style="top:17.60%"></span>
-      <span class="unvisited" style="bottom:49.60%"></span>
-      <span class="unvisited" style="bottom:48.80%"></span>
-      <span class="unvisited" style="bottom:48.00%"></span>
-      <span class="unvisited" style="bottom:47.20%"></span>
-      <span class="unvisited" style="bottom:45.60%"></span>
-      <span class="unvisited" style="bottom:44.00%"></span>
-      <span class="unvisited" style="bottom:43.20%"></span>
-      <span class="unvisited" style="bottom:42.40%"></span>
-      <span class="unvisited" style="bottom:40.80%"></span>
-      <span class="unvisited" style="bottom:36.00%"></span>
-      <span class="unvisited" style="bottom:10.40%"></span>
+      <span class="unvisited" style="top:45.99%"></span>
+      <span class="unvisited" style="top:46.72%"></span>
+      <span class="unvisited" style="top:47.45%"></span>
+      <span class="unvisited" style="top:48.18%"></span>
+      <span class="unvisited" style="top:49.64%"></span>
+      <span class="unvisited" style="bottom:48.91%"></span>
+      <span class="unvisited" style="bottom:48.18%"></span>
+      <span class="unvisited" style="bottom:47.45%"></span>
+      <span class="unvisited" style="bottom:45.99%"></span>
+      <span class="unvisited" style="bottom:41.61%"></span>
+      <span class="unvisited" style="bottom:10.95%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -55,8 +53,8 @@
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
@@ -146,20 +144,32 @@
 <a id="L109"></a><span class="visited"> </span>
 <a id="L110"></a><span class="visited"> </span>
 <a id="L111"></a><span class="visited"> </span>
-<a id="L112"></a><span class="unvisited"> </span>
+<a id="L112"></a><span class="visited"> </span>
 <a id="L113"></a><span > </span>
 <a id="L114"></a><span class="visited"> </span>
 <a id="L115"></a><span > </span>
-<a id="L116"></a><span > </span>
+<a id="L116"></a><span class="visited"> </span>
 <a id="L117"></a><span > </span>
 <a id="L118"></a><span class="visited"> </span>
 <a id="L119"></a><span class="visited"> </span>
 <a id="L120"></a><span class="visited"> </span>
 <a id="L121"></a><span class="visited"> </span>
-<a id="L122"></a><span class="visited"> </span>
+<a id="L122"></a><span class="unvisited"> </span>
 <a id="L123"></a><span > </span>
 <a id="L124"></a><span class="visited"> </span>
 <a id="L125"></a><span > </span>
+<a id="L126"></a><span class="visited"> </span>
+<a id="L127"></a><span > </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span > </span>
+<a id="L130"></a><span class="visited"> </span>
+<a id="L131"></a><span class="visited"> </span>
+<a id="L132"></a><span class="visited"> </span>
+<a id="L133"></a><span class="visited"> </span>
+<a id="L134"></a><span class="visited"> </span>
+<a id="L135"></a><span > </span>
+<a id="L136"></a><span class="visited"> </span>
+<a id="L137"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -289,6 +299,18 @@
 <a href="#L123">123</a>
 <a href="#L124">124</a>
 <a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
@@ -301,28 +323,28 @@ open Common
 open Common.Counter_Monad
 open Common.Middleend_Common
 
-let gen_name = gen_nam<span data-count="27">e</span> "ll"
+let gen_name = gen_nam<span data-count="31">e</span> "ll"
 
 let get_bindings prog =
-  <span data-count="30">L</span>ist.fold
+  <span data-count="34">L</span>ist.fold
     prog
-    ~init:(Set.empt<span data-count="30">y</span> (module String))
+    ~init:(Set.empt<span data-count="34">y</span> (module String))
     ~f:(fun acc decl -&gt;
-      <span data-count="48">m</span>atch decl with
+      <span data-count="52">m</span>atch decl with
       | <span data-count="48">D</span>Let (_, id, _) -&gt; Set.add acc id
-      | <span data-count="0">D</span>MutualLet (_, decls) -&gt;
-        List.fold decls ~init:acc ~f:(fun acc (id, _) -&gt; <span data-count="0">S</span>et.add acc id))
+      | <span data-count="4">D</span>MutualLet (_, decls) -&gt;
+        List.fold decls ~init:acc ~f:(fun acc (id, _) -&gt; <span data-count="8">S</span>et.add acc id))
 ;;
 
 let lift decl bindings =
-  <span data-count="30">l</span>et gen_name = gen_name bindings in
-  <span data-count="30">l</span>et rec lift_expr e lifted renames =
-    <span data-count="475">m</span>atch e with
-    | <span data-count="72">E</span>Const c -&gt; return (LLConst c, lifted)
-    | <span data-count="177">E</span>Var x -&gt;
+  <span data-count="34">l</span>et gen_name = gen_name bindings in
+  <span data-count="34">l</span>et rec lift_expr e lifted renames =
+    <span data-count="585">m</span>atch e with
+    | <span data-count="94">E</span>Const c -&gt; return (LLConst c, lifted)
+    | <span data-count="217">E</span>Var x -&gt;
       (match Map.find renames x with
-       | <span data-count="27">S</span>ome id -&gt; return (LLVar id, lifted)
-       | <span data-count="150">N</span>one -&gt; return (LLVar x, lifted))
+       | <span data-count="29">S</span>ome id -&gt; return (LLVar id, lifted)
+       | <span data-count="188">N</span>one -&gt; return (LLVar x, lifted))
     | <span data-count="3">E</span>Tuple (e1, e2, es) -&gt;
       let* e1, lifted = lift_exp<span data-count="3">r</span> e1 lifted renames in
       <span data-count="3">l</span>et* e2, lifted = lift_exp<span data-count="3">r</span> e2 lifted renames in
@@ -347,11 +369,11 @@ let lift decl bindings =
             <span data-count="4">r</span>eturn (e :: es, lifted))
       in
       <span data-count="2">r</span>eturn (LLList (List.re<span data-count="2">v</span> es), lifted)
-    | <span data-count="5">E</span>Branch (cond, t, f) -&gt;
-      let* cond, lifted = lift_exp<span data-count="5">r</span> cond lifted renames in
-      <span data-count="5">l</span>et* t, lifted = lift_exp<span data-count="5">r</span> t lifted renames in
-      <span data-count="5">l</span>et* f, lifted = lift_exp<span data-count="5">r</span> f lifted renames in
-      <span data-count="5">r</span>eturn (LLBranch (cond, t, f), lifted)
+    | <span data-count="11">E</span>Branch (cond, t, f) -&gt;
+      let* cond, lifted = lift_exp<span data-count="11">r</span> cond lifted renames in
+      <span data-count="11">l</span>et* t, lifted = lift_exp<span data-count="11">r</span> t lifted renames in
+      <span data-count="11">l</span>et* f, lifted = lift_exp<span data-count="11">r</span> f lifted renames in
+      <span data-count="11">r</span>eturn (LLBranch (cond, t, f), lifted)
     | <span data-count="0">E</span>Match (e, cases) -&gt;
       let* e, lifted = lift_exp<span data-count="0">r</span> e lifted renames in
       <span data-count="0">l</span>et* cases, lifted =
@@ -364,19 +386,19 @@ let lift decl bindings =
             <span data-count="0">r</span>eturn ((p, e) :: cases, lifted))
       in
       <span data-count="0">r</span>eturn (LLMatch (e, List.re<span data-count="0">v</span> cases), lifted)
-    | <span data-count="18">E</span>LetIn (is_rec, id, (EFun _ as e1), e2) -&gt;
+    | <span data-count="20">E</span>LetIn (is_rec, id, (EFun _ as e1), e2) -&gt;
       let args, e = uncurry e1 in
-      <span data-count="18">l</span>et* new_name = gen_name in
-      <span data-count="18">l</span>et renames =
+      <span data-count="20">l</span>et* new_name = gen_name in
+      <span data-count="20">l</span>et renames =
         match is_rec with
         | <span data-count="0">R</span>ec -&gt; Map.updat<span data-count="0">e</span> renames id ~f:(fun _ -&gt; <span data-count="0">n</span>ew_name)
-        | <span data-count="18">N</span>onRec -&gt; renames
+        | <span data-count="20">N</span>onRec -&gt; renames
       in
-      let* e, lifted = lift_exp<span data-count="18">r</span> e lifted renames in
-      <span data-count="18">l</span>et lifted = LLDLet (is_rec, new_name, args, e) :: lifted in
-      let renames = Map.update renames id ~f:(fun _ -&gt; <span data-count="18">n</span>ew_name) in
-      <span data-count="18">l</span>et* e2, lifted = lift_exp<span data-count="18">r</span> e2 lifted renames in
-      <span data-count="18">r</span>eturn (e2, lifted)
+      let* e, lifted = lift_exp<span data-count="20">r</span> e lifted renames in
+      <span data-count="20">l</span>et lifted = LLDLet (is_rec, new_name, args, e) :: lifted in
+      let renames = Map.update renames id ~f:(fun _ -&gt; <span data-count="20">n</span>ew_name) in
+      <span data-count="20">l</span>et* e2, lifted = lift_exp<span data-count="20">r</span> e2 lifted renames in
+      <span data-count="20">r</span>eturn (e2, lifted)
     | <span data-count="10">E</span>LetIn (_, id, e1, e2) -&gt;
       let* e1, lifted = lift_exp<span data-count="10">r</span> e1 lifted renames in
       <span data-count="10">l</span>et* e2, lifted = lift_exp<span data-count="10">r</span> e2 lifted renames in
@@ -387,33 +409,45 @@ let lift decl bindings =
       <span data-count="14">l</span>et* e, lifted = lift_exp<span data-count="14">r</span> e lifted renames in
       <span data-count="14">l</span>et lifted = LLDLet (NonRec, new_name, args, e) :: lifted in
       return (LLVar new_name, lifted)
-    | <span data-count="174">E</span>App (e1, e2) -&gt;
-      let* e1, lifted = lift_exp<span data-count="174">r</span> e1 lifted renames in
-      <span data-count="174">l</span>et* e2, lifted = lift_exp<span data-count="174">r</span> e2 lifted renames in
-      <span data-count="174">r</span>eturn (LLApp (e1, e2), lifted)
+    | <span data-count="214">E</span>App (e1, e2) -&gt;
+      let* e1, lifted = lift_exp<span data-count="214">r</span> e1 lifted renames in
+      <span data-count="214">l</span>et* e2, lifted = lift_exp<span data-count="214">r</span> e2 lifted renames in
+      <span data-count="214">r</span>eturn (LLApp (e1, e2), lifted)
   in
-  let lift_decl decl lifted renames =
-    <span data-count="30">m</span>atch decl with
-    | <span data-count="11">D</span>Let (is_rec, id, (EFun _ as f)) -&gt;
+  let rec lift_decl decl lifted renames =
+    <span data-count="42">m</span>atch decl with
+    | <span data-count="19">D</span>Let (is_rec, id, (EFun _ as f)) -&gt;
       let args, e = uncurry f in
-      <span data-count="11">l</span>et* e, lifted = lift_exp<span data-count="11">r</span> e lifted renames in
-      <span data-count="11">r</span>eturn (LLDLet (is_rec, id, args, e), lifted)
+      <span data-count="19">l</span>et* e, lifted = lift_exp<span data-count="19">r</span> e lifted renames in
+      <span data-count="19">r</span>eturn (LLDLet (is_rec, id, args, e), lifted)
     | <span data-count="19">D</span>Let (is_rec, id, e) -&gt;
       let* e, lifted = lift_exp<span data-count="19">r</span> e lifted renames in
       <span data-count="19">r</span>eturn (LLDLet (is_rec, id, [], e), lifted)
-    | <span data-count="0">D</span>MutualLet _ -&gt; fail "Not Implemented"
+    | <span data-count="4">D</span>MutualLet (_, decls) -&gt;
+      let* decls, lifted =
+        List.fold_righ<span data-count="4">t</span>
+          decls
+          ~init:(retur<span data-count="4">n</span> ([], []))
+          ~f:(fun (id, e) acc -&gt;
+            <span data-count="8">l</span>et* decls, lifted = acc in
+            <span data-count="8">l</span>et* lifted = lift_dec<span data-count="8">l</span> (DLet (Rec, id, e)) lifted renames in
+            <span data-count="8">m</span>atch lifted with
+            | <span data-count="8">L</span>LDLet (_, id, args, e), lifted -&gt; return ((id, args, e) :: decls, lifted)
+            | <span data-count="0">_</span> -&gt; fail "Unreachable")
+      in
+      <span data-count="4">r</span>eturn (LLDMutualLet decls, lifted)
   in
-  lift_decl decl [] (Map.empt<span data-count="30">y</span> (module String))
+  lift_decl decl [] (Map.empt<span data-count="34">y</span> (module String))
 ;;
 
 let lift_program prog =
-  <span data-count="24">l</span>et helper prog =
-    <span data-count="24">L</span>ist.fold_left prog ~init:(retur<span data-count="24">n</span> []) ~f:(fun acc decl -&gt;
-      <span data-count="30">l</span>et* acc = acc in
-      <span data-count="30">l</span>et* decl, lifted = lif<span data-count="30">t</span> decl (get_binding<span data-count="30">s</span> prog) in
-      <span data-count="30">r</span>eturn (List.conca<span data-count="30">t</span> [ acc; List.re<span data-count="30">v</span> (decl :: lifted) ]))
+  <span data-count="28">l</span>et helper prog =
+    <span data-count="28">L</span>ist.fold_left prog ~init:(retur<span data-count="28">n</span> []) ~f:(fun acc decl -&gt;
+      <span data-count="34">l</span>et* acc = acc in
+      <span data-count="34">l</span>et* decl, lifted = lif<span data-count="34">t</span> decl (get_binding<span data-count="34">s</span> prog) in
+      <span data-count="34">r</span>eturn (List.conca<span data-count="34">t</span> [ acc; List.re<span data-count="34">v</span> (decl :: lifted) ]))
   in
-  run (helpe<span data-count="24">r</span> prog)
+  run (helpe<span data-count="28">r</span> prog)
 ;;
 </code></pre>
       </div>

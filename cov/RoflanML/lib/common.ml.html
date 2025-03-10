@@ -132,44 +132,44 @@ open Base
 module Counter_Monad = struct
   type ('a, 'err) t = int -&gt; int * ('a, 'err) Result.t
 
-  let return : 'a -&gt; ('a, 'err) t = fun x st -&gt; <span data-count="28018">s</span>t, Result.Ok x
+  let return : 'a -&gt; ('a, 'err) t = fun x st -&gt; <span data-count="32949">s</span>t, Result.Ok x
   let fail : 'err -&gt; ('a, 'err) t = fun err st -&gt; <span data-count="48">s</span>t, Result.Error err
 
   let ( &gt;&gt;= ) : ('a, 'err) t -&gt; ('a -&gt; ('b, 'err) t) -&gt; ('b, 'err) t =
     fun m f st -&gt;
-    <span data-count="29160">l</span>et st, r = m st in
-    <span data-count="29160">m</span>atch r with
-    | <span data-count="29122">R</span>esult.Ok a -&gt; f a st
+    <span data-count="34213">l</span>et st, r = m st in
+    <span data-count="34213">m</span>atch r with
+    | <span data-count="34175">R</span>esult.Ok a -&gt; f a st
     | <span data-count="38">R</span>esult.Error err -&gt; fail err st
   ;;
 
   let ( let* ) = ( &gt;&gt;= )
-  let fresh st = <span data-count="1208">s</span>t + 1, Result.Ok st
-  let run m = <span data-count="114">s</span>nd (<span data-count="114">m</span> 0)
+  let fresh st = <span data-count="1341">s</span>t + 1, Result.Ok st
+  let run m = <span data-count="125">s</span>nd (<span data-count="125">m</span> 0)
 end
 
 let rec gen_name prefix bindings =
-  <span data-count="70">l</span>et open Counter_Monad in
-  let* fresh_id = fresh &gt;&gt;<span data-count="70">=</span> fun x -&gt; <span data-count="108">r</span>eturn (Int.to_strin<span data-count="108">g</span> x) in
-  <span data-count="108">l</span>et new_name = prefix ^ "_" ^ fresh_id in
+  <span data-count="78">l</span>et open Counter_Monad in
+  let* fresh_id = fresh &gt;&gt;<span data-count="78">=</span> fun x -&gt; <span data-count="126">r</span>eturn (Int.to_strin<span data-count="126">g</span> x) in
+  <span data-count="126">l</span>et new_name = prefix ^ "_" ^ fresh_id in
   if Set.mem bindings new_name
   then <span data-count="4">g</span>en_name prefix bindings
-  else <span data-count="104">r</span>eturn (prefix ^ "_" ^ fresh_id)
+  else <span data-count="122">r</span>eturn (prefix ^ "_" ^ fresh_id)
 ;;
 
 module Middleend_Common = struct
   open Ast
 
   let uncurry e =
-    <span data-count="152">l</span>et rec helper args = function
-      | <span data-count="241">E</span>Fun (x, e) -&gt; helper (x :: args) e
-      | <span data-count="152">e</span> -&gt; args, e
+    <span data-count="180">l</span>et rec helper args = function
+      | <span data-count="269">E</span>Fun (x, e) -&gt; helper (x :: args) e
+      | <span data-count="180">e</span> -&gt; args, e
     in
     let args, e = helper [] e in
-    <span data-count="152">L</span>ist.re<span data-count="152">v</span> args, e
+    <span data-count="180">L</span>ist.re<span data-count="180">v</span> args, e
   ;;
 
-  let curry args e = <span data-count="60">B</span>ase.List.fold_right args ~init:e ~f:(fun arg acc -&gt; <span data-count="74">E</span>Fun (arg, acc))
+  let curry args e = <span data-count="70">B</span>ase.List.fold_right args ~init:e ~f:(fun arg acc -&gt; <span data-count="84">E</span>Fun (arg, acc))
 end
 </code></pre>
       </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>anf.ml &mdash; Coverage report</title>
-    <meta name="description" content="94.59% coverage in lib/middleend/anf.ml">
+    <meta name="description" content="97.59% coverage in lib/middleend/anf.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,11 @@
           <span class="dirname">lib/middleend/</span>anf.ml
         </a>
       </h1>
-      <h2>94.59%</h2>
+      <h2>97.59%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:21.05%"></span>
-      <span class="unvisited" style="top:22.11%"></span>
-      <span class="unvisited" style="bottom:26.32%"></span>
-      <span class="unvisited" style="bottom:9.47%"></span>
+      <span class="unvisited" style="bottom:32.69%"></span>
+      <span class="unvisited" style="bottom:10.58%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -45,8 +43,8 @@
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="unvisited"> </span>
-<a id="L21"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
@@ -111,115 +109,133 @@
 <a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span class="visited"> </span>
-<a id="L86"></a><span class="unvisited"> </span>
+<a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span > </span>
-<a id="L89"></a><span > </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
 <a id="L90"></a><span class="visited"> </span>
 <a id="L91"></a><span class="visited"> </span>
 <a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span class="visited"> </span>
-<a id="L94"></a><span class="visited"> </span>
-<a id="L95"></a><span > </span>
+<a id="L93"></a><span class="unvisited"> </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1"> 1</a>
-<a href="#L2"> 2</a>
-<a href="#L3"> 3</a>
-<a href="#L4"> 4</a>
-<a href="#L5"> 5</a>
-<a href="#L6"> 6</a>
-<a href="#L7"> 7</a>
-<a href="#L8"> 8</a>
-<a href="#L9"> 9</a>
-<a href="#L10">10</a>
-<a href="#L11">11</a>
-<a href="#L12">12</a>
-<a href="#L13">13</a>
-<a href="#L14">14</a>
-<a href="#L15">15</a>
-<a href="#L16">16</a>
-<a href="#L17">17</a>
-<a href="#L18">18</a>
-<a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
-<a href="#L36">36</a>
-<a href="#L37">37</a>
-<a href="#L38">38</a>
-<a href="#L39">39</a>
-<a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
-<a href="#L43">43</a>
-<a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
-<a href="#L49">49</a>
-<a href="#L50">50</a>
-<a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
-<a href="#L88">88</a>
-<a href="#L89">89</a>
-<a href="#L90">90</a>
-<a href="#L91">91</a>
-<a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
-<a href="#L95">95</a>
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
@@ -231,34 +247,34 @@ open Anf_ast
 open Common
 open Common.Counter_Monad
 
-let gen_name = gen_nam<span data-count="18">e</span> "anf"
+let gen_name = gen_nam<span data-count="20">e</span> "anf"
 
 let get_bindings prog =
-  <span data-count="36">L</span>ist.fold
+  <span data-count="38">L</span>ist.fold
     prog
-    ~init:(Set.empt<span data-count="36">y</span> (module String))
+    ~init:(Set.empt<span data-count="38">y</span> (module String))
     ~f:(fun acc decl -&gt;
-      <span data-count="102">m</span>atch decl with
+      <span data-count="104">m</span>atch decl with
       | <span data-count="102">L</span>LDLet (_, id, _, _) -&gt; Set.add acc id
-      | <span data-count="0">L</span>LDMutualLet decls -&gt;
-        List.fold decls ~init:acc ~f:(fun acc (id, _, _) -&gt; <span data-count="0">S</span>et.add acc id))
+      | <span data-count="2">L</span>LDMutualLet decls -&gt;
+        List.fold decls ~init:acc ~f:(fun acc (id, _, _) -&gt; <span data-count="4">S</span>et.add acc id))
 ;;
 
 let fold_app e =
-  <span data-count="64">l</span>et rec helper e k =
-    <span data-count="176">m</span>atch e with
-    | <span data-count="112">L</span>LApp (l, r) -&gt; helper l (fun args -&gt; <span data-count="112">k</span> (r :: args))
-    | <span data-count="64">e</span> -&gt; e, List.re<span data-count="64">v</span> (<span data-count="64">k</span> [])
+  <span data-count="76">l</span>et rec helper e k =
+    <span data-count="208">m</span>atch e with
+    | <span data-count="132">L</span>LApp (l, r) -&gt; helper l (fun args -&gt; <span data-count="132">k</span> (r :: args))
+    | <span data-count="76">e</span> -&gt; e, List.re<span data-count="76">v</span> (<span data-count="76">k</span> [])
   in
-  helper e (fun x -&gt; <span data-count="64">x</span>)
+  helper e (fun x -&gt; <span data-count="76">x</span>)
 ;;
 
 let anf_llexpr e expr_with_hole bindings =
-  <span data-count="36">l</span>et gen_name = gen_name bindings in
-  <span data-count="36">l</span>et rec helper e expr_with_hole =
-    <span data-count="244">m</span>atch e with
-    | <span data-count="55">L</span>LConst c -&gt; expr_with_hole (ImmConst c)
-    | <span data-count="112">L</span>LVar id -&gt; expr_with_hole (ImmVar id)
+  <span data-count="40">l</span>et gen_name = gen_name bindings in
+  <span data-count="40">l</span>et rec helper e expr_with_hole =
+    <span data-count="292">m</span>atch e with
+    | <span data-count="67">L</span>LConst c -&gt; expr_with_hole (ImmConst c)
+    | <span data-count="132">L</span>LVar id -&gt; expr_with_hole (ImmVar id)
     | <span data-count="2">L</span>LTuple (e1, e2, es) -&gt;
       helper e1 (fun imm1 -&gt;
         <span data-count="2">h</span>elper e2 (fun imm2 -&gt;
@@ -271,50 +287,59 @@ let anf_llexpr e expr_with_hole bindings =
         <span data-count="2">l</span>et* name = gen_name in
         <span data-count="2">l</span>et* ae = expr_with_hol<span data-count="2">e</span> (ImmVar name) in
         <span data-count="2">r</span>eturn @@ ALetIn (name, CImm (ImmList imms), ae))
-    | <span data-count="4">L</span>LBranch (cond, t, f) -&gt;
+    | <span data-count="8">L</span>LBranch (cond, t, f) -&gt;
       helper cond (fun imm -&gt;
-        <span data-count="4">l</span>et* name = gen_name in
-        <span data-count="4">l</span>et* body = expr_with_hol<span data-count="4">e</span> (ImmVar name) in
-        <span data-count="4">l</span>et* t_aexpr = helpe<span data-count="4">r</span> t (fun imm -&gt; <span data-count="4">r</span>eturn @@ ACExpr (CImm imm)) in
-        <span data-count="4">l</span>et* f_aexpr = helpe<span data-count="4">r</span> f (fun imm -&gt; <span data-count="4">r</span>eturn @@ ACExpr (CImm imm)) in
-        <span data-count="4">r</span>eturn (ALetIn (name, CBranch (imm, t_aexpr, f_aexpr), body)))
+        <span data-count="8">l</span>et* name = gen_name in
+        <span data-count="8">l</span>et* body = expr_with_hol<span data-count="8">e</span> (ImmVar name) in
+        <span data-count="8">l</span>et* t_aexpr = helpe<span data-count="8">r</span> t (fun imm -&gt; <span data-count="8">r</span>eturn @@ ACExpr (CImm imm)) in
+        <span data-count="8">l</span>et* f_aexpr = helpe<span data-count="8">r</span> f (fun imm -&gt; <span data-count="8">r</span>eturn @@ ACExpr (CImm imm)) in
+        <span data-count="8">r</span>eturn (ALetIn (name, CBranch (imm, t_aexpr, f_aexpr), body)))
     | <span data-count="5">L</span>LLetIn (id, e1, e2) -&gt;
       helper e1 (fun imm -&gt;
         <span data-count="5">l</span>et* ae = helpe<span data-count="5">r</span> e2 expr_with_hole in
         <span data-count="5">r</span>eturn @@ ALetIn (id, CImm imm, ae))
-    | <span data-count="64">L</span>LApp _ -&gt;
+    | <span data-count="76">L</span>LApp _ -&gt;
       let e, args = fold_app e in
-      <span data-count="64">h</span>elper e (fun imm -&gt;
-        <span data-count="64">a</span>nf_many args (fun imms -&gt;
-          <span data-count="64">l</span>et* name = gen_name in
-          <span data-count="64">l</span>et* ae = expr_with_hol<span data-count="64">e</span> (ImmVar name) in
-          <span data-count="64">l</span>et app = CApp (imm, imms) in
+      <span data-count="76">h</span>elper e (fun imm -&gt;
+        <span data-count="76">a</span>nf_many args (fun imms -&gt;
+          <span data-count="76">l</span>et* name = gen_name in
+          <span data-count="76">l</span>et* ae = expr_with_hol<span data-count="76">e</span> (ImmVar name) in
+          <span data-count="76">l</span>et app = CApp (imm, imms) in
           return @@ ALetIn (name, app, ae)))
     | <span data-count="0">L</span>LMatch _ -&gt; fail "Match is not implemented yet"
   and anf_many es k =
-    <span data-count="68">l</span>et rec fold acc = function
-      | <span data-count="118">h</span> :: tl -&gt; helper h (fun imm -&gt; <span data-count="118">f</span>old (imm :: acc) tl)
-      | <span data-count="68">[</span>] -&gt; k (List.re<span data-count="68">v</span> acc)
+    <span data-count="80">l</span>et rec fold acc = function
+      | <span data-count="138">h</span> :: tl -&gt; helper h (fun imm -&gt; <span data-count="138">f</span>old (imm :: acc) tl)
+      | <span data-count="80">[</span>] -&gt; k (List.re<span data-count="80">v</span> acc)
     in
     fold [] es
   in
   helper e expr_with_hole
 ;;
 
-let anf_decl decl bindings =
-  <span data-count="36">m</span>atch decl with
-  | <span data-count="36">L</span>LDLet (is_rec, id, args, e) -&gt;
-    let* e = anf_llexp<span data-count="36">r</span> e (fun imm -&gt; <span data-count="36">r</span>eturn @@ ACExpr (CImm imm)) bindings in
-    <span data-count="36">r</span>eturn @@ ADLet (is_rec, id, args, e)
-  | <span data-count="0">L</span>LDMutualLet _ -&gt; fail "Not implemented"
+let rec anf_decl decl bindings =
+  <span data-count="42">m</span>atch decl with
+  | <span data-count="40">L</span>LDLet (is_rec, id, args, e) -&gt;
+    let* e = anf_llexp<span data-count="40">r</span> e (fun imm -&gt; <span data-count="40">r</span>eturn @@ ACExpr (CImm imm)) bindings in
+    <span data-count="40">r</span>eturn @@ ADLet (is_rec, id, args, e)
+  | <span data-count="2">L</span>LDMutualLet decls -&gt;
+    let* decls =
+      List.fold_righ<span data-count="2">t</span> decls ~init:(retur<span data-count="2">n</span> []) ~f:(fun (id, args, e) decls -&gt;
+        <span data-count="4">l</span>et* decls = decls in
+        <span data-count="4">l</span>et* decl = anf_dec<span data-count="4">l</span> (LLDLet (Rec, id, args, e)) bindings in
+        <span data-count="4">m</span>atch decl with
+        | <span data-count="4">A</span>DLet (_, id, args, e) -&gt; return ((id, args, e) :: decls)
+        | <span data-count="0">_</span> -&gt; fail "Unreachable")
+    in
+    <span data-count="2">r</span>eturn (ADMutualLet decls)
 ;;
 
 let anf_program prog =
-  <span data-count="15">r</span>un
-  @@ List.fold_righ<span data-count="15">t</span> prog ~init:(retur<span data-count="15">n</span> []) ~f:(fun decl acc -&gt;
-    <span data-count="36">l</span>et* acc = acc in
-    <span data-count="36">l</span>et* decl = anf_dec<span data-count="36">l</span> decl (get_binding<span data-count="36">s</span> prog) in
-    <span data-count="36">r</span>eturn (decl :: acc))
+  <span data-count="17">r</span>un
+  @@ List.fold_righ<span data-count="17">t</span> prog ~init:(retur<span data-count="17">n</span> []) ~f:(fun decl acc -&gt;
+    <span data-count="38">l</span>et* acc = acc in
+    <span data-count="38">l</span>et* decl = anf_dec<span data-count="38">l</span> decl (get_binding<span data-count="38">s</span> prog) in
+    <span data-count="38">r</span>eturn (decl :: acc))
 ;;
 </code></pre>
       </div>

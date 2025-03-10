@@ -328,43 +328,43 @@ let map_type ast_type =
 ;;
 
 let map_var_types typ =
-  <span data-count="59">l</span>et rec find_vars vars = function
-    | <span data-count="88">T</span>Base _ -&gt; vars
+  <span data-count="63">l</span>et rec find_vars vars = function
+    | <span data-count="96">T</span>Base _ -&gt; vars
     | <span data-count="53">T</span>Var x -&gt; Base.Set.add vars x
-    | <span data-count="64">T</span>Arrow (l, r) -&gt;
+    | <span data-count="68">T</span>Arrow (l, r) -&gt;
       let vars_l = find_vars vars l in
-      <span data-count="64">f</span>ind_vars vars_l r
+      <span data-count="68">f</span>ind_vars vars_l r
     | <span data-count="13">T</span>Tuple (ty1, ty2, tys) -&gt;
       let vars1 = find_vars vars ty1 in
       <span data-count="13">l</span>et vars2 = find_vars vars1 ty2 in
       <span data-count="13">B</span>ase.List.fold_left ~init:vars2 ~f:find_vars tys
     | <span data-count="14">T</span>List typ -&gt; find_vars vars typ
   in
-  let vars = Base.Set.elements (find_var<span data-count="59">s</span> (Base.Set.empt<span data-count="59">y</span> (module Base.Int)) typ) in
-  <span data-count="59">l</span>et _, mapping =
+  let vars = Base.Set.elements (find_var<span data-count="63">s</span> (Base.Set.empt<span data-count="63">y</span> (module Base.Int)) typ) in
+  <span data-count="63">l</span>et _, mapping =
     Base.List.fold_left
-      ~init:(Char.cod<span data-count="59">e</span> 'a', Base.Map.empt<span data-count="59">y</span> (module Base.Int))
+      ~init:(Char.cod<span data-count="63">e</span> 'a', Base.Map.empt<span data-count="63">y</span> (module Base.Int))
       ~f:(fun (curr_char, mapping) var -&gt;
         <span data-count="33">c</span>urr_char + 1, Base.Map.se<span data-count="33">t</span> mapping ~key:var ~data:(Char.ch<span data-count="33">r</span> curr_char))
       vars
   in
-  <span data-count="59">m</span>apping
+  <span data-count="63">m</span>apping
 ;;
 
 let pp_ty fmt ty =
-  <span data-count="57">l</span>et pp_base_ty fmt = function
-    | <span data-count="54">B</span>Int -&gt; fprintf fmt "int"
-    | <span data-count="29">B</span>Bool -&gt; fprintf fmt "bool"
+  <span data-count="61">l</span>et pp_base_ty fmt = function
+    | <span data-count="58">B</span>Int -&gt; fprintf fmt "int"
+    | <span data-count="33">B</span>Bool -&gt; fprintf fmt "bool"
     | <span data-count="5">B</span>Unit -&gt; fprintf fmt "unit"
   in
   let mapping = map_var_types ty in
-  <span data-count="57">l</span>et rec helper fmt = function
-    | <span data-count="88">T</span>Base base_ty -&gt; fprintf fmt "%a" pp_base_ty base_ty
+  <span data-count="61">l</span>et rec helper fmt = function
+    | <span data-count="96">T</span>Base base_ty -&gt; fprintf fmt "%a" pp_base_ty base_ty
     | <span data-count="48">T</span>Var x -&gt; fprintf fmt "'%c" (Base.Map.find_ex<span data-count="48">n</span> mapping x)
-    | <span data-count="61">T</span>Arrow (l, r) -&gt;
+    | <span data-count="65">T</span>Arrow (l, r) -&gt;
       (match l with
        | <span data-count="7">T</span>Arrow _ -&gt; fprintf fmt "(%a) -&gt; %a" helper l helper r
-       | <span data-count="54">_</span> -&gt; fprintf fmt "%a -&gt; %a" helper l helper r)
+       | <span data-count="58">_</span> -&gt; fprintf fmt "%a -&gt; %a" helper l helper r)
     | <span data-count="13">T</span>Tuple (ty1, ty2, tys) -&gt;
       fprintf
         fmt
