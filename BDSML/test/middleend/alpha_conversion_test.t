@@ -46,8 +46,8 @@ Test redefine
   > EOF
   let __var_a = 1;;
   let rec __var_a0 = 2;;
-  let __var_a1 = (let __var_a2 = 3 in 
-   __var_a2);;
+  let __var_a2 = (let __var_a1 = 3 in 
+   __var_a1);;
   let __var_a3 = true;;
 Test operators
   $ ./run_alpha_conversion.exe <<- EOF

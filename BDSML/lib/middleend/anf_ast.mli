@@ -22,7 +22,6 @@ and lexpr =
 type func = string * string list * lexpr
 
 type absexpr =
-  | AbsStr_eval of lexpr
   | AbsStr_func of func
   | AbsStr_value of string * lexpr
   | AbsStr_value_rec of func list
