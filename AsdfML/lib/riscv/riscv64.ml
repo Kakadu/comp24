@@ -53,25 +53,25 @@ and gen_imm (env : (id, loc, 'a) Map.t) dest = (* dbg "ENV: %s\n" (pp_env env); 
   | ImmInt n -> emit li dest n
   | ImmBool b -> emit li dest (if b then 1 else 0)
   | ImmId id ->
-    let id = Std.lookup_extern id |> Option.value ~default:id in
-    (match Map.find !fn_args id with
-     | Some 0 ->
-       (* Constants *)
-       (match Map.find env id with
-        | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
-        | None ->
-          emit_load_reg dest (RFn id);
-          emit_load_reg dest (ROffset (dest, 0)))
-     | Some n_args ->
-       emit comment (Format.sprintf "Creating closure for %s" id);
-       let x = emit_fn_call "create_closure" [ RFn id; RInt n_args ] in
-       emit_load_reg dest (RReg x) ~comm:id
+    (match Map.find env id with
+     | Some x ->
+       (match x with
+        | LReg _ | LMem _ -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
+        | LArr _ -> emit_load_tuple_field dest x ~comm:id)
      | None ->
-       (match Map.find env id with
-        | Some x ->
-          (match x with
-           | LReg _ | LMem _ -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
-           | LArr _ -> emit_load_tuple_field dest x ~comm:id)
+       let id = Std.lookup_extern id |> Option.value ~default:id in
+       (match Map.find !fn_args id with
+        | Some 0 ->
+          (* Constants *)
+          (match Map.find env id with
+           | Some x -> emit_load_reg dest (loc_to_rvalue x) ~comm:id
+           | None ->
+             emit_load_reg dest (RFn id);
+             emit_load_reg dest (ROffset (dest, 0)))
+        | Some n_args ->
+          emit comment (Format.sprintf "Creating closure for %s" id);
+          let x = emit_fn_call "create_closure" [ RFn id; RInt n_args ] in
+          emit_load_reg dest (RReg x) ~comm:id
         | None -> failwith (Format.sprintf "unbound id: %s" id)))
   | ImmUnit -> emit li dest 0
   | ImmNil ->
