@@ -19,7 +19,7 @@ let () =
     | Ok parsed ->
       (match run_program_inferencer parsed with
        | Ok types -> Ok (parsed, types)
-       | Error _ -> Error (Format.asprintf "Infer error:"))
+       | Error _ -> Error (Format.asprintf "Infer error."))
     | Error e -> Error (Format.sprintf "Parsing error: %s" e)
   in
   match parse_and_infer input with

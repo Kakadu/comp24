@@ -27,8 +27,8 @@ let rec ll_expr env = function
   | Pe_EFun (args, body) ->
     let* fresh = fresh >>| get_id in
     let new_env = List.fold args ~init:env ~f:Map.remove in
-    let* _, body = ll_expr new_env body in
-    return ([ Pe_Nonrec [ fresh, Pe_EFun (args, body) ] ], Pe_EIdentifier fresh)
+    let* str, body = ll_expr new_env body in
+    return (str @ [ Pe_Nonrec [ fresh, Pe_EFun (args, body) ] ], Pe_EIdentifier fresh)
   | Pe_ECons (e1, e2) ->
     let* str1, e1 = ll_expr env e1 in
     let* str2, e2 = ll_expr env e2 in
