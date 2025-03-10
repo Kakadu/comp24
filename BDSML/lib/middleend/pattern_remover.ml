@@ -23,19 +23,35 @@ let user_var name =
 ;;
 
 let two_arg_fun_helper f a b = RExp_apply (RExp_apply (RExp_ident f, a), b)
+let thr (_, _, e) = e
+
+let fun_exception name =
+  RExp_apply
+    (RExp_ident (thr Utils.Predefined_ops.exception_), RExp_constant (Const_string name))
+;;
 
 let fun_get_n tup n =
-  two_arg_fun_helper "__get_from_tuple" tup @@ RExp_constant (Const_int n)
+  two_arg_fun_helper (thr Utils.Predefined_ops.get_from_tuple) tup
+  @@ RExp_constant (Const_int n)
 ;;
 
 let disassemble_constructor name v =
-  two_arg_fun_helper "__disassemble" (RExp_ident name) v
+  two_arg_fun_helper
+    (thr Utils.Predefined_ops.disassemble_constructor)
+    (RExp_constant (Const_string name))
+    v
 ;;
 
-let same_constructor l r = two_arg_fun_helper "__same_cons" l r
-let get_cons_params cons par = two_arg_fun_helper "__get_cons_params" cons par
-let exp_or = two_arg_fun_helper "( || )"
-let exp_and = two_arg_fun_helper "( && )"
+let var_nothing = Utils.Predefined_ops.var_nothing
+let same_constructor l r = two_arg_fun_helper (thr Utils.Predefined_ops.same_cons) l r
+
+let get_cons_params cons par =
+  two_arg_fun_helper (thr Utils.Predefined_ops.get_cons_param) cons par
+;;
+
+let exp_or = two_arg_fun_helper (thr Utils.Predefined_ops.op_or)
+let exp_and = two_arg_fun_helper (thr Utils.Predefined_ops.op_and)
+let exp_eq = two_arg_fun_helper (thr Utils.Predefined_ops.op_eq)
 
 let rec pattern_binder rexp = function
   | Pat_var v -> return [ user_var v, rexp ]
@@ -55,7 +71,10 @@ let rec pattern_binder rexp = function
     then fail (Invalid_pattern "BDSML doesn't allow vars in or patter")
     else return []
   | Pat_construct (name, Some v) -> pattern_binder (disassemble_constructor name rexp) v
-  | _ -> return []
+  | Pat_any -> return [ var_nothing, rexp ]
+  | Pat_constant s -> return [ var_nothing, exp_eq rexp @@ RExp_constant s ]
+  | Pat_construct (name, None) ->
+    return [ var_nothing, same_constructor rexp @@ RExp_construct (name, None) ]
 ;;
 
 let rec let_bindings_unpack r bindings =
@@ -106,7 +125,7 @@ and fun_to_rfun pats exp =
 
 and match_cases exp cases =
   let rec construct_bool exp = function
-    | Pat_constant c -> two_arg_fun_helper "( = )" (RExp_constant c) exp
+    | Pat_constant c -> exp_eq (RExp_constant c) exp
     | Pat_tuple t ->
       let res, _ =
         List.fold_left
@@ -118,8 +137,8 @@ and match_cases exp cases =
       res
     | Pat_or (l, r) -> exp_or (construct_bool exp l) (construct_bool exp r)
     | Pat_construct (name, p) ->
-      let check = same_constructor exp (RExp_ident name) in
-      let params = get_cons_params (RExp_ident name) exp in
+      let check = same_constructor exp (RExp_constant (Const_string name)) in
+      let params = get_cons_params (RExp_constant (Const_string name)) exp in
       (match p with
        | Some pat -> exp_and check @@ construct_bool params pat
        | None -> check)

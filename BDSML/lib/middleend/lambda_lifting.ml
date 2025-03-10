@@ -48,8 +48,8 @@ let rec ll_expr bindings =
      | RExp_fun _ ->
        let* ns = lift_name in
        let bindings' = Map.update bindings s ~f:(fun _ -> ns) in
-       let* d2, e2' = ll_expr bindings' e2 in
-       return (d1 @ [ RStr_value (ns, e1') ] @ d2, e2')
+       let+ d2, e2' = ll_expr bindings' e2 in
+       d1 @ [ RStr_value (ns, e1') ] @ d2, e2'
      | _ ->
        let+ d2, e2' = ll_expr bindings e2 in
        d1 @ d2, RExp_let (s, e1', e2'))
@@ -59,8 +59,8 @@ let rec ll_expr bindings =
     let* bindings' =
       List.fold names ~init:(return bindings) ~f:(fun acc name ->
         let* acc = acc in
-        let* fresh_name = lift_name in
-        return @@ Map.update acc name ~f:(fun _ -> fresh_name))
+        let+ fresh_name = lift_name in
+        Map.update acc name ~f:(fun _ -> fresh_name))
     in
     let+ d, e' = ll_expr bindings' e in
     let ds, es = List.unzip el' in
@@ -80,12 +80,23 @@ let ll_struct_item =
   | RStr_eval e ->
     let+ d, e' = ll_expr empty_bindings e in
     d @ [ RStr_eval e' ]
+  | RStr_value (s, RExp_fun (args, e)) ->
+    let+ d, e' = ll_expr empty_bindings e in
+    d @ [ RStr_value (s, RExp_fun (args, e')) ]
   | RStr_value (s, e) ->
     let+ d, e' = ll_expr empty_bindings e in
     d @ [ RStr_value (s, e') ]
   | RStr_value_rec l ->
     let names, el = List.unzip l in
-    let+ el' = map (ll_expr empty_bindings) el in
+    let+ el' =
+      map
+        (function
+          | RExp_fun (args, exp) ->
+            let+ rstrs, exp = ll_expr empty_bindings exp in
+            rstrs, RExp_fun (args, exp)
+          | _ as exp -> ll_expr empty_bindings exp)
+        el
+    in
     let ds, es = List.unzip el' in
     let dl = List.map2_exn names es ~f:(fun name e -> name, e) in
     List.concat ds @ [ RStr_value_rec dl ]

@@ -29,6 +29,7 @@ let test str =
       >>= Alpha_conversion.alpha_conversion
       >>= Lambda_lifting.ll
       >>= Anf.rast_to_anf
+      |> Result.map Equiv_remover.equiv_remove
       |> Result.map_error Middleend_utils.exp_to_string
     in
     (match res with

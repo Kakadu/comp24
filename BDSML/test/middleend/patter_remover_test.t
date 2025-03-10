@@ -35,13 +35,16 @@ Test let with patterns
   $ ./run_remove_patterns.exe <<- EOF
   > let [(a, _); (4, c)] = [ (1, 2); (3, 4) ] in a
   > EOF
-  (let __reserved_0 = ((__disassemble ::) (((1, 2) :: ((3, 4) :: ([]))))) in 
+  (let __reserved_0 = ((__disassemble "::") (((1, 2) :: ((3, 4) :: ([]))))) in 
    (let __reserved_1 = ((__get_from_tuple __reserved_0) 0) in 
    (let __var_a = ((__get_from_tuple __reserved_1) 0) in 
-   (let __reserved_2 = ((__disassemble ::) (((__get_from_tuple __reserved_0) 1))) in 
+   (let __nothing = ((__get_from_tuple __reserved_1) 1) in 
+   (let __reserved_2 = ((__disassemble "::") (((__get_from_tuple __reserved_0) 1))) in 
    (let __reserved_3 = ((__get_from_tuple __reserved_2) 0) in 
+   (let __nothing = ((__op_eq (((__get_from_tuple __reserved_3) 0))) 4) in 
    (let __var_c = ((__get_from_tuple __reserved_3) 1) in 
-   __var_a))))));;
+   (let __nothing = ((__same_cons (((__get_from_tuple __reserved_2) 1))) (([]))) in 
+   __var_a)))))))));;
 Test let fun
   $ ./run_remove_patterns.exe <<- EOF
   > let f (a, b) c = a + b + c in f (1, 2) 4
@@ -63,8 +66,9 @@ Test struct items
   let __reserved_0 = (1, 2);;
   let __var_a = ((__get_from_tuple __reserved_0) 0);;
   let __var_b = ((__get_from_tuple __reserved_0) 1);;
-  let __reserved_1 = ((__disassemble ::) ((3 :: ([]))));;
+  let __reserved_1 = ((__disassemble "::") ((3 :: ([]))));;
   let __var_c = ((__get_from_tuple __reserved_1) 0);;
+  let __nothing = ((__same_cons (((__get_from_tuple __reserved_1) 1))) (([])));;
   let __var_f = (fun __reserved_2 -> (let __var_a = __reserved_2 in 
    __var_a));;
   let rec __var_g = (fun __reserved_3 -> (let __var_a = __reserved_3 in 
@@ -87,7 +91,9 @@ Test easy match
   > | 3 -> 'm'
   > EOF
   (let __reserved_0 = 5 in 
-   (if ((( = ) 4) __reserved_0) then 'n' else (if ((( = ) 3) __reserved_0) then 'm' else (__exception "Match_failure"))));;
+   (if ((__op_eq 4) __reserved_0) then (let __nothing = ((__op_eq __reserved_0) 4) in 
+   'n') else (if ((__op_eq 3) __reserved_0) then (let __nothing = ((__op_eq __reserved_0) 3) in 
+   'm') else (__exception "Match_failure"))));;
 Test var match
   $ ./run_remove_patterns.exe <<- EOF
   > match 4 with
@@ -95,7 +101,8 @@ Test var match
   > | a -> a = 1
   > EOF
   (let __reserved_0 = 4 in 
-   (if ((( = ) 5) __reserved_0) then true else (if true then (let __var_a = __reserved_0 in 
+   (if ((__op_eq 5) __reserved_0) then (let __nothing = ((__op_eq __reserved_0) 5) in 
+   true) else (if true then (let __var_a = __reserved_0 in 
    ((__op_eq __var_a) 1)) else (__exception "Match_failure"))));;
 Test hard match
   $ ./run_remove_patterns.exe <<- EOF
@@ -105,23 +112,27 @@ Test hard match
   > | _, b -> b = "ocaml"
   > EOF
   (let __reserved_0 = (3, "biba") in 
-   (if ((( && ) (((( && ) true) (((( = ) 3) (((__get_from_tuple __reserved_0) 0))))))) (((( = ) "boba") (((__get_from_tuple __reserved_0) 1))))) then (let __reserved_3 = __reserved_0 in 
-   true) else (if ((( && ) (((( && ) true) true))) true) then (let __reserved_2 = __reserved_0 in 
+   (if ((__op_and (((__op_and true) (((__op_eq 3) (((__get_from_tuple __reserved_0) 0))))))) (((__op_eq "boba") (((__get_from_tuple __reserved_0) 1))))) then (let __reserved_3 = __reserved_0 in 
+   (let __nothing = ((__op_eq (((__get_from_tuple __reserved_3) 0))) 3) in 
+   (let __nothing = ((__op_eq (((__get_from_tuple __reserved_3) 1))) "boba") in 
+   true))) else (if ((__op_and (((__op_and true) true))) true) then (let __reserved_2 = __reserved_0 in 
    (let __var_b = ((__get_from_tuple __reserved_2) 0) in 
    (let __var_a = ((__get_from_tuple __reserved_2) 1) in 
-   ((__op_or (((__op_eq __var_a) "biba"))) (((__op_eq __var_b) 4)))))) else (if ((( && ) (((( && ) true) true))) true) then (let __reserved_1 = __reserved_0 in 
+   ((__op_or (((__op_eq __var_a) "biba"))) (((__op_eq __var_b) 4)))))) else (if ((__op_and (((__op_and true) true))) true) then (let __reserved_1 = __reserved_0 in 
+   (let __nothing = ((__get_from_tuple __reserved_1) 0) in 
    (let __var_b = ((__get_from_tuple __reserved_1) 1) in 
-   ((__op_eq __var_b) "ocaml"))) else (__exception "Match_failure")))));;
+   ((__op_eq __var_b) "ocaml")))) else (__exception "Match_failure")))));;
 Test function with constructors
   $ ./run_remove_patterns.exe <<- EOF
   > function | Some (x, y) -> x + 3 | None -> 0 
   > EOF
-  (fun __reserved_0 -> (if ((( && ) (((__same_cons __reserved_0) Some))) (((( && ) (((( && ) true) true))) true))) then (let __reserved_1 = ((__disassemble Some) __reserved_0) in 
+  (fun __reserved_0 -> (if ((__op_and (((__same_cons __reserved_0) "Some"))) (((__op_and (((__op_and true) true))) true))) then (let __reserved_1 = ((__disassemble "Some") __reserved_0) in 
    (let __var_x = ((__get_from_tuple __reserved_1) 0) in 
    (let __var_y = ((__get_from_tuple __reserved_1) 1) in 
-   ((__op_plus __var_x) 3)))) else (if ((__same_cons __reserved_0) None) then 0 else (__exception "Match_failure"))));;
+   ((__op_plus __var_x) 3)))) else (if ((__same_cons __reserved_0) "None") then (let __nothing = ((__same_cons __reserved_0) ((None))) in 
+   0) else (__exception "Match_failure"))));;
 Test or
   $ ./run_remove_patterns.exe <<- EOF
   > function | 1 | 4 -> true
   > EOF
-  (fun __reserved_0 -> (if ((( || ) (((( = ) 1) __reserved_0))) (((( = ) 4) __reserved_0))) then true else (__exception "Match_failure")));;
+  invalid pattern: BDSML doesn't allow vars in or patter

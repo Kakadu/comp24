@@ -68,7 +68,6 @@ and lexpr_to_ast = function
 ;;
 
 let absexpr_to_ast = function
-  | AbsStr_eval e -> Str_eval (lexpr_to_ast e)
   | AbsStr_func (name, args, exp) ->
     Str_value
       ( Nonrecursive
