@@ -8,7 +8,7 @@
   > let main = println_int (fact 5)
   > EOF
   ANF:
-  let fact x =
+  let rec fact x =
          let anf1 = ( < ) x 2 in
          if anf1 
          then 1 
@@ -105,7 +105,7 @@
   ANF:
   let ll_2 cont n_0 res = let anf1 = ( * ) n_0 res in
          cont anf1
-  let ll_helper_1 n_0 cont =
+  let rec ll_helper_1 n_0 cont =
     let anf3 = ( <= ) n_0 1 in
     if anf3 
     then cont 1 
@@ -137,7 +137,7 @@
   ANF:
   let ll_2 cont n_0 res = let anf1 = ( * ) n_0 res in
          cont anf1
-  let ll_helper_1 n_0 cont =
+  let rec ll_helper_1 n_0 cont =
     let anf3 = ( <= ) n_0 1 in
     if anf3 
     then cont 1 
