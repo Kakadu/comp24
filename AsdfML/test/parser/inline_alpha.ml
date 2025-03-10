@@ -211,6 +211,8 @@ let%expect_test _ =
   let anf = 42
   let x = anf
   let y = ll_0 anf
+  let init_x = 42
+  let ml_list_hd _ = []
   |};
   [%expect
     {|
@@ -218,6 +220,8 @@ let%expect_test _ =
     let __var_anf = 42
     let x_0 = __var_anf
     let y = (__var_ll_0 __var_anf)
+    let __var_init_x = 42
+    let __var_ml_list_hd = (fun _ -> [])
     |}]
 ;;
 
