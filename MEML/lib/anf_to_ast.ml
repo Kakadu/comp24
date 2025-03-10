@@ -83,6 +83,6 @@ let abindings_to_ebindings = function
   | AExpression e -> Expression (aexpression_to_expression e)
 ;;
 
-let anf_to_ast anf = 
+let anf_to_ast anf =
   List.rev @@ List.fold ~init:[] ~f:(fun acc a -> abindings_to_ebindings a :: acc) anf
 ;;
