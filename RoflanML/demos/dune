@@ -39,14 +39,14 @@
  (deps ./demoANF.exe))
 
 (executable
- (name demoANFTypes)
- (modules demoANFTypes)
- (public_name demoANFTypes)
+ (name demoANFParseAndTypes)
+ (modules demoANFParseAndTypes)
+ (public_name demoANFParseAndTypes)
  (libraries Roflanml_lib stdio))
 
 (cram
- (applies_to demoANFTypes)
- (deps ./demoANFTypes.exe))
+ (applies_to demoANFParseAndTypes)
+ (deps ./demoANFParseAndTypes.exe))
 
 (executable
  (name exe_qcheck)
