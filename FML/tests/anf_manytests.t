@@ -113,21 +113,21 @@
   0
 
   $ ./anf_runner.exe < manytests/typed/006partial.ml
-  let a3 a0 = ( + ) a0 2
+  let a1 foo = ( + ) foo 2
   
-  let a4 a1 = ( * ) a1 10
+  let a2 foo = ( * ) foo 10
   
   let foo b = if b
-  then a3
-  else a4
+  then a1
+  else a2
   
-  let a2 a2 x = let a7 = a2 false x in
-  let a6 = a2 true a7 in
-  let a5 = a2 false a6 in
-  a2 true a5
+  let a0 x = let a5 = foo false x in
+  let a4 = foo true a5 in
+  let a3 = foo false a4 in
+  foo true a3
   
-  let main = let a8 = a2 11 in
-  let () = print_int a8 in
+  let main = let a6 = a0 11 in
+  let () = print_int a6 in
   0
 
   $ ./anf_runner.exe < manytests/typed/006partial2.ml

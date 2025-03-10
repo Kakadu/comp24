@@ -63,25 +63,17 @@ and rename env binds name =
 
 let ac_declaration env bindings = function
   | Pe_Nonrec bindings_list ->
-    let ids, exps = List.unzip bindings_list in
-    let* ids, env, bindings =
-      fold_left
-        ids
+    let* decls, env, bindings =
+      List.fold_left
+        bindings_list
         ~init:(return ([], env, bindings))
-        ~f:(fun (ids, env, bindings) id ->
-          let* env, bindings, id = rename env bindings id in
-          return (id :: ids, env, bindings))
+        ~f:(fun acc (name, expr) ->
+          let* acc_decls, acc_env, acc_bindings = acc in
+          let* new_env, new_bindings, new_name = rename acc_env acc_bindings name in
+          let* e = ac_expr env bindings expr in
+          return ((new_name, e) :: acc_decls, new_env, new_bindings))
     in
-    let ids = List.rev ids in
-    let exps = List.map exps ~f:(ac_expr env bindings) in
-    let* bindings_list =
-      List.fold2_exn ids exps ~init:(return []) ~f:(fun acc name expr ->
-        let* acc = acc in
-        let* expr = expr in
-        return ((name, expr) :: acc))
-    in
-    let bindings_list = List.rev bindings_list in
-    return (env, bindings, Pe_Nonrec bindings_list)
+    return (env, bindings, Pe_Nonrec (List.rev decls))
   | Pe_Rec bindings_list ->
     let ids, exps = List.unzip bindings_list in
     let* ids, env, bindings =
