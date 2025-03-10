@@ -185,7 +185,7 @@ and gen_aexpr env dest = function
   | ACExpr cexpr -> gen_cexpr env dest cexpr
 
 and gen_fn ?(data_sec = None) init_fns = function
-  | Fn (id, args, aexpr) ->
+  | Fn (_, id, args, aexpr) ->
     (* TODO: this *)
     set_fn_code ();
     let args_loc = dump_reg_args_to_stack args in
@@ -217,7 +217,7 @@ and gen_fn ?(data_sec = None) init_fns = function
 
 let gen_const_inits ?(print_anf = false) consts =
   List.fold consts ~init:[] ~f:(fun acc (id, init_id, exp) ->
-    let fn = Fn (init_id, [ "_" ], exp) in
+    let fn = Fn (NonRec, init_id, [ "_" ], exp) in
     if print_anf then Format.printf "%s ANF:@\n%a@\n" init_id pp_fn fn;
     gen_fn [] fn ~data_sec:(Some id);
     init_id :: acc)
@@ -237,7 +237,7 @@ let init_env ast =
       ~init:(Map.empty (module String))
       ~f:(fun env fn ->
         match fn with
-        | Fn (id, args, _) -> Map.set env ~key:id ~data:(List.length args))
+        | Fn (_, id, args, _) -> Map.set env ~key:id ~data:(List.length args))
   in
   let env =
     stdlib @ runtime
@@ -262,7 +262,7 @@ let peephole (code : (instr * string) Queue.t) =
 
 let collect_consts ast =
   List.partition_map ast ~f:(function
-    | Fn (id, [], exp) when String.( <> ) "main" id -> Either.first (id, "init_" ^ id, exp)
+    | Fn (_, id, [], exp) when String.( <> ) "main" id -> Either.first (id, "init_" ^ id, exp)
     | x -> Either.second x)
 ;;
 
@@ -284,7 +284,7 @@ let compile ?(out_file = "/tmp/out.s") ?(print_anf = false) (ast : Anf_ast.progr
       if not (Map.mem !fn_args "main")
       then (
         Format.eprintf "main function not found\n";
-        Fn ("main", [], ACExpr (CImmExpr ImmUnit)) :: ast)
+        Fn (NonRec, "main", [], ACExpr (CImmExpr ImmUnit)) :: ast)
       else ast
     in
     let consts, fns = collect_consts ast in

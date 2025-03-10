@@ -12,7 +12,7 @@ open State.IntStateM.Syntax
 
 let fresh_id name = fresh_prefix (if String.equal name "" then "ll" else "ll_" ^ name)
 
-let rec ll_expr env lift ?(name = None) = function
+let rec ll_expr env lift ?(name = None) ?(flag=NonRec)= function
   | SConst c -> return (cf_const c, lift)
   | SVar id ->
     let id =
@@ -38,12 +38,12 @@ let rec ll_expr env lift ?(name = None) = function
       | None -> fresh_id ""
     in
     let* exp, lift = ll_expr env lift exp in
-    return (cf_var id, cf_def id (arg :: args) exp :: lift)
+    return (cf_var id, cf_def_flag flag id (arg :: args) exp :: lift)
   | SLetIn ((SLet _ as def), exp) ->
     let* def, lift, _ = ll_def env lift def in
     let id, body =
       match def with
-      | CFLet (id, _, body) -> id, body
+      | CFLet (_, id, _, body) -> id, body
     in
     let env = Map.remove env id in
     let* exp, lift = ll_expr env lift exp ~name in
@@ -73,21 +73,21 @@ and ll_def ?(top = false) env lift = function
   (* TODO: probably should decouple ELets and DLets *)
   | SLet (NonRec, id, SFun (arg, args, exp)) when top ->
     let* new_id = fresh_id id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) ~flag:NonRec in
     return (cf_def id (arg :: args) exp, lift, env)
   | SLet (Rec, id, SFun (arg, args, exp)) when top ->
     let env = Map.set env ~key:id ~data:id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some id) in
-    return (cf_def id (arg :: args) exp, lift, env)
+    let* exp, lift = ll_expr env lift exp ~name:(Some id)~flag:Rec  in
+    return (cf_def_rec id (arg :: args) exp, lift, env)
   | SLet (NonRec, id, exp) ->
     let* new_id = fresh_id id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id)~flag:NonRec  in
     return (cf_def id [] exp, lift, env)
   | SLet (Rec, id, exp) ->
     let* new_id = fresh_id id in
     let env = Map.set env ~key:id ~data:new_id in
-    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) in
-    return (cf_def id [] exp, lift, env)
+    let* exp, lift = ll_expr env lift exp ~name:(Some new_id) ~flag:Rec in
+    return (cf_def_rec id [] exp, lift, env)
 ;;
 
 let ll_program prog =
