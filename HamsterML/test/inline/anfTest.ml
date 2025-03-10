@@ -214,8 +214,7 @@ let%expect_test "006partial2" =
     |}]
 ;;
 
-
-   let%expect_test "006partial3" =
+let%expect_test "006partial3" =
   pp_anf_prog
     {|
     let foo a =
@@ -245,8 +244,6 @@ let%expect_test "006partial2" =
       0
     |}]
 ;;
-
-
 
 let%expect_test "007order" =
   pp_anf_prog
