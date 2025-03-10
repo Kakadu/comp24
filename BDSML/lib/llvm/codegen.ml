@@ -117,15 +117,8 @@ let compile_func f =
   func
 ;;
 
-let compile_absexpr = function
-  | AbsStr_eval a -> ignore @@ compile_lexpr a
+let compile_funcs = function
   | AbsStr_func f -> ignore @@ compile_func f
-  | AbsStr_value (s, l) ->
-    let value = compile_lexpr l in
-    let var_alloca = build_alloca (type_of value) s builder in
-    let _ = build_store value var_alloca builder in
-    let () = Hashtbl.add variable_value_table s var_alloca in
-    ignore @@ value
   | AbsStr_value_rec fl ->
     let () =
       List.iter
@@ -136,22 +129,38 @@ let compile_absexpr = function
         fl
     in
     ignore @@ List.map (fun func -> compile_func func) fl
+  | _ -> ()
 ;;
 
-let compile_anf anf = List.iter (fun expr -> compile_absexpr expr) anf
+let compile_values = function
+  | AbsStr_value (s, l) ->
+    let value = compile_lexpr l in
+    let var_alloca = build_alloca (type_of value) s builder in
+    let _ = build_store value var_alloca builder in
+    let () = Hashtbl.add variable_value_table s var_alloca in
+    ignore @@ value
+  | _ -> ()
+;;
 
-let compile_main =
-  let main_type = function_type int_t [||] in
-  let main_func = declare_function "main" main_type my_module in
-  let entry = append_block context "entry" main_func in
-  position_at_end entry builder;
+let declare_functions anf = List.iter (fun expr -> compile_funcs expr) anf
+let declare_values anf = List.iter (fun expr -> compile_values expr) anf
+
+let compile_main program =
+  let entry =
+    append_block
+      context
+      "entry"
+      (declare_function "main" (function_type int_t [||]) my_module)
+  in
+  let () = position_at_end entry builder in
+  let () = declare_values program in
   ignore (build_ret (const_int int_t 0) builder)
 ;;
 
 let compile_program ?(verbose = false) program =
   let () = predefined_init () in
-  let () = compile_anf program in
-  let () = compile_main in
+  let () = declare_functions program in
+  let () = compile_main program in
   print_module "out.ll" my_module;
   if verbose then dump_module my_module
 ;;
