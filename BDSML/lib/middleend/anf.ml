@@ -6,7 +6,7 @@ open Reduced_ast
 open Anf_ast
 open Middleend_utils.Monads
 
-let fresh_var = fresh >>| Int.to_string >>| ( ^ ) "__anf"
+let fresh_var = fresh >>| Int.to_string >>| ( ^ ) "__anf_"
 let invalid_prev res = Invalid_previous_result ("anf", res)
 let atom a = CExp_atom a
 let complex c = LComplex c
