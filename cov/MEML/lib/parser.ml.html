@@ -1094,8 +1094,8 @@ let start_parsing parser string = <span data-count="36">p</span>arse_string ~con
 (* Base *)
 
 let is_char = function
-  | <span data-count="138418121">'</span>a' .. 'z' -&gt; true
-  | <span data-count="302854560">_</span> -&gt; false
+  | <span data-count="138418936">'</span>a' .. 'z' -&gt; true
+  | <span data-count="302859146">_</span> -&gt; false
 ;;
 
 let is_bchar = function
@@ -1104,12 +1104,12 @@ let is_bchar = function
 ;;
 
 let is_digit = function
-  | <span data-count="24272822">'</span>0' .. '9' -&gt; true
-  | <span data-count="337202654">_</span> -&gt; false
+  | <span data-count="24274502">'</span>0' .. '9' -&gt; true
+  | <span data-count="337206091">_</span> -&gt; false
 ;;
 
 let is_keyword = function
-  | <span data-count="1562002">"</span>let"
+  | <span data-count="1562031">"</span>let"
   | <span data-count="1448570">"</span>rec"
   | <span data-count="23732">"</span>fun"
   | <span data-count="0">"</span>if"
@@ -1122,7 +1122,7 @@ let is_keyword = function
   | <span data-count="0">"</span>val"
   | <span data-count="15091759">"</span>in"
   | <span data-count="20585969">"</span>and" -&gt; true
-  | <span data-count="34750870">_</span> -&gt; false
+  | <span data-count="34752590">_</span> -&gt; false
 ;;
 
 let is_type = function
@@ -1131,29 +1131,29 @@ let is_type = function
 ;;
 
 let is_whitespace = function
-  | <span data-count="1569886260">'</span> ' | <span data-count="185920196">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="2848606139">_</span> -&gt; false
+  | <span data-count="1569892960">'</span> ' | <span data-count="185920420">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="2848639409">_</span> -&gt; false
 ;;
 
 let is_underscore = function
-  | <span data-count="302854560">c</span> -&gt; Char.equal c '_'
+  | <span data-count="302859146">c</span> -&gt; Char.equal c '_'
 ;;
 
 (* S1mple parsers *)
 
-let parse_white_space = take_whil<span data-count="121">e</span> is_whitespace
-let parse_white_space1 = take_while<span data-count="121">1</span> is_whitespace
-let parse_empty s = <span data-count="121">p</span>arse_white_space *<span data-count="121">&gt;</span> s &lt;* parse_white_space
+let parse_white_space = take_whil<span data-count="122">e</span> is_whitespace
+let parse_white_space1 = take_while<span data-count="122">1</span> is_whitespace
+let parse_empty s = <span data-count="122">p</span>arse_white_space *<span data-count="122">&gt;</span> s &lt;* parse_white_space
 let parse_white_space_str str = <span data-count="0">p</span>arse_white_space *<span data-count="0">&gt;</span> string_c<span data-count="0">i</span> str &lt;* parse_white_space
-let token s = <span data-count="482">p</span>arse_white_space *&gt; s
+let token s = <span data-count="486">p</span>arse_white_space *&gt; s
 let token1 s = <span data-count="0">p</span>arse_white_space1 *&gt; s
-let stoken s = <span data-count="59858">p</span>arse_white_space *&gt; strin<span data-count="59858">g</span> s
-let stoken1 s = <span data-count="121">p</span>arse_white_space1 *&gt; strin<span data-count="121">g</span> s
-let brackets p = <span data-count="10417">s</span>toke<span data-count="10417">n</span> "(" *<span data-count="10417">&gt;</span> p &lt;* stoke<span data-count="10417">n</span> ")"
-let brackets_or_not p = <span data-count="6908">b</span>racket<span data-count="6908">s</span> p &lt;|&gt; p
+let stoken s = <span data-count="60359">p</span>arse_white_space *&gt; strin<span data-count="60359">g</span> s
+let stoken1 s = <span data-count="122">p</span>arse_white_space1 *&gt; strin<span data-count="122">g</span> s
+let brackets p = <span data-count="10504">s</span>toke<span data-count="10504">n</span> "(" *<span data-count="10504">&gt;</span> p &lt;* stoke<span data-count="10504">n</span> ")"
+let brackets_or_not p = <span data-count="6966">b</span>racket<span data-count="6966">s</span> p &lt;|&gt; p
 
 let chainl1 e op =
-  <span data-count="24990">l</span>et rec go acc = <span data-count="52100911">l</span>ift<span data-count="52100911">2</span> (fun f x -&gt; <span data-count="1426239">f</span> acc x) op e &gt;&gt;<span data-count="52100911">=</span> go &lt;|&gt; retur<span data-count="52100911">n</span> acc in
+  <span data-count="25200">l</span>et rec go acc = <span data-count="52102837">l</span>ift<span data-count="52102837">2</span> (fun f x -&gt; <span data-count="1426242">f</span> acc x) op e &gt;&gt;<span data-count="52102837">=</span> go &lt;|&gt; retur<span data-count="52102837">n</span> acc in
   e &gt;&gt;= go
 ;;
 
@@ -1161,103 +1161,103 @@ let chainl1 e op =
 
 let parse_bool =
   parse_white_space
-  *<span data-count="121">&gt;</span> ((fun _ -&gt; <span data-count="233">C</span>Bool true)
-      &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "true"
-      &lt;|<span data-count="121">&gt;</span> ((fun _ -&gt; <span data-count="219">C</span>Bool false) &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "false"))
+  *<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="233">C</span>Bool true)
+      &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "true"
+      &lt;|<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="219">C</span>Bool false) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "false"))
 ;;
 
 let parse_uint =
-  let pd = parse_white_space *&gt; take_while<span data-count="121">1</span> is_digit in
-  <span data-count="121">l</span>if<span data-count="121">t</span> (fun digit -&gt; <span data-count="4621785">C</span>Int (Int.of_strin<span data-count="4621785">g</span> @@ digit)) pd
+  let pd = parse_white_space *&gt; take_while<span data-count="122">1</span> is_digit in
+  <span data-count="122">l</span>if<span data-count="122">t</span> (fun digit -&gt; <span data-count="4621925">C</span>Int (Int.of_strin<span data-count="4621925">g</span> @@ digit)) pd
 ;;
 
 let parse_int =
-  let ps = token (optio<span data-count="121">n</span> "" (stoke<span data-count="121">n</span> "-")) in
-  <span data-count="121">l</span>et pd = take_while1 is_digit in
-  <span data-count="121">l</span>ift<span data-count="121">2</span> (fun sign digit -&gt; <span data-count="74480">C</span>Int (Int.of_strin<span data-count="74480">g</span> @@ sign ^ digit)) ps pd
+  let ps = token (optio<span data-count="122">n</span> "" (stoke<span data-count="122">n</span> "-")) in
+  <span data-count="122">l</span>et pd = take_while1 is_digit in
+  <span data-count="122">l</span>ift<span data-count="122">2</span> (fun sign digit -&gt; <span data-count="74480">C</span>Int (Int.of_strin<span data-count="74480">g</span> @@ sign ^ digit)) ps pd
 ;;
 
-let parse_nil = parse_white_space *<span data-count="121">&gt;</span> ((fun _ -&gt; <span data-count="30498">C</span>Nil) &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "[]")
+let parse_nil = parse_white_space *<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="30498">C</span>Nil) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "[]")
 
 (* Var parsers *)
-let constr_type = (fun _ -&gt; <span data-count="194">T</span>Int) &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "int" &lt;|<span data-count="121">&gt;</span> ((fun _ -&gt; <span data-count="28">T</span>Bool) &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "bool")
-let parse_arrow = parse_empt<span data-count="121">y</span> @@ stoke<span data-count="121">n</span> "-&gt;"
+let constr_type = (fun _ -&gt; <span data-count="194">T</span>Int) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "int" &lt;|<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="28">T</span>Bool) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "bool")
+let parse_arrow = parse_empt<span data-count="122">y</span> @@ stoke<span data-count="122">n</span> "-&gt;"
 
 let parse_types =
-  fi<span data-count="121">x</span> (fun next -&gt;
+  fi<span data-count="122">x</span> (fun next -&gt;
     <span data-count="9">l</span>ift<span data-count="9">3</span> (fun t1 _ t2 -&gt; <span data-count="20">T</span>Arrow (t1, t2)) constr_type parse_arrow next &lt;|&gt; constr_type)
 ;;
 
 let parse_type =
-  parse_white_space *<span data-count="121">&gt;</span> cha<span data-count="121">r</span> ':' *<span data-count="121">&gt;</span> parse_white_space *<span data-count="121">&gt;</span> parse_types
-  &lt;|<span data-count="121">&gt;</span> ((fun _ -&gt; <span data-count="5258984">T</span>Unknown) &lt;$<span data-count="121">&gt;</span> strin<span data-count="121">g</span> "")
+  parse_white_space *<span data-count="122">&gt;</span> cha<span data-count="122">r</span> ':' *<span data-count="122">&gt;</span> parse_white_space *<span data-count="122">&gt;</span> parse_types
+  &lt;|<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="5259135">T</span>Unknown) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "")
 ;;
 
 let check_var cond =
-  <span data-count="121">p</span>arse_white_space *<span data-count="121">&gt;</span> take_while<span data-count="121">1</span> cond
+  <span data-count="122">p</span>arse_white_space *<span data-count="122">&gt;</span> take_while<span data-count="122">1</span> cond
   &gt;&gt;= fun v -&gt;
-  <span data-count="73542196">i</span>f is_keyword v
-  then <span data-count="38791326">f</span>ail ("You can not use \"" ^ v ^ "\" keywords as vars")
-  else <span data-count="34750870">i</span>f Char.is_digit @@ String.ge<span data-count="34750870">t</span> v 0
-  then <span data-count="19071591">f</span>ail "Identifier first symbol is letter, not digit"
-  else <span data-count="15679279">r</span>eturn v
+  <span data-count="73543945">i</span>f is_keyword v
+  then <span data-count="38791355">f</span>ail ("You can not use \"" ^ v ^ "\" keywords as vars")
+  else <span data-count="34752590">i</span>f Char.is_digit @@ String.ge<span data-count="34752590">t</span> v 0
+  then <span data-count="19073131">f</span>ail "Identifier first symbol is letter, not digit"
+  else <span data-count="15679459">r</span>eturn v
 ;;
 
 let parse_var =
   parse_white_space
-  *<span data-count="121">&gt;</span>
+  *<span data-count="122">&gt;</span>
   let is_entry = function
-    | <span data-count="441272681">c</span> -&gt; is_cha<span data-count="441272681">r</span> <span data-count="138418121">c</span> || is_underscor<span data-count="302854560">e</span> <span data-count="685596">c</span> || is_digit c
+    | <span data-count="441278082">c</span> -&gt; is_cha<span data-count="441278082">r</span> <span data-count="138418936">c</span> || is_underscor<span data-count="302859146">e</span> <span data-count="685631">c</span> || is_digit c
   in
-  strin<span data-count="121">g</span> "()" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "()" &lt;|<span data-count="121">&gt;</span> check_va<span data-count="121">r</span> is_entry
+  strin<span data-count="122">g</span> "()" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "()" &lt;|<span data-count="122">&gt;</span> check_va<span data-count="122">r</span> is_entry
 ;;
 
 (** Pattern parsers *)
 
 let parse_rename =
-  bracket<span data-count="121">s</span>
+  bracket<span data-count="122">s</span>
   @@ (parse_white_space
-      *<span data-count="121">&gt;</span> choic<span data-count="121">e</span>
-           [ strin<span data-count="121">g</span> "=" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Eq"
-           ; strin<span data-count="121">g</span> "&lt;&gt;" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Neq"
-           ; strin<span data-count="121">g</span> "&amp;&amp;" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "And"
-           ; strin<span data-count="121">g</span> "||" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Or"
-           ; strin<span data-count="121">g</span> "*" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Mul"
-           ; strin<span data-count="121">g</span> "/" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Div"
-           ; strin<span data-count="121">g</span> "%" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Mod"
-           ; strin<span data-count="121">g</span> "+" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Add"
-           ; strin<span data-count="121">g</span> "-" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Sub"
-           ; strin<span data-count="121">g</span> "&gt;=" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Greq"
-           ; strin<span data-count="121">g</span> "&gt;" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Gre"
-           ; strin<span data-count="121">g</span> "&lt;=" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Leq"
-           ; strin<span data-count="121">g</span> "&lt;" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "Less"
-           ; strin<span data-count="121">g</span> "" *<span data-count="121">&gt;</span> retur<span data-count="121">n</span> "()"
+      *<span data-count="122">&gt;</span> choic<span data-count="122">e</span>
+           [ strin<span data-count="122">g</span> "=" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Eq"
+           ; strin<span data-count="122">g</span> "&lt;&gt;" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Neq"
+           ; strin<span data-count="122">g</span> "&amp;&amp;" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "And"
+           ; strin<span data-count="122">g</span> "||" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Or"
+           ; strin<span data-count="122">g</span> "*" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Mul"
+           ; strin<span data-count="122">g</span> "/" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Div"
+           ; strin<span data-count="122">g</span> "%" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Mod"
+           ; strin<span data-count="122">g</span> "+" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Add"
+           ; strin<span data-count="122">g</span> "-" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Sub"
+           ; strin<span data-count="122">g</span> "&gt;=" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Greq"
+           ; strin<span data-count="122">g</span> "&gt;" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Gre"
+           ; strin<span data-count="122">g</span> "&lt;=" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Leq"
+           ; strin<span data-count="122">g</span> "&lt;" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "Less"
+           ; strin<span data-count="122">g</span> "" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "()"
            ])
-  &lt;<span data-count="121">*</span> parse_white_space
+  &lt;<span data-count="122">*</span> parse_white_space
 ;;
 
 let parse_pvar =
-  brackets_or_no<span data-count="121">t</span>
-  @@ (lif<span data-count="121">t</span>
+  brackets_or_no<span data-count="122">t</span>
+  @@ (lif<span data-count="122">t</span>
         (fun a -&gt;
           <span data-count="107">i</span>f String.( &lt;&gt; ) a "_"
           then <span data-count="107">P</span>Var (a, TArrow (TInt, TArrow (TInt, TInt)))
           else <span data-count="0">P</span>Wild)
         parse_rename
-      &lt;|<span data-count="121">&gt;</span> lift<span data-count="121">2</span>
-            (fun a b -&gt; <span data-count="1911361">i</span>f String.( &lt;&gt; ) a "_" then <span data-count="1911289">P</span>Var (a, b) else <span data-count="72">P</span>Wild)
+      &lt;|<span data-count="122">&gt;</span> lift<span data-count="122">2</span>
+            (fun a b -&gt; <span data-count="1911407">i</span>f String.( &lt;&gt; ) a "_" then <span data-count="1911335">P</span>Var (a, b) else <span data-count="72">P</span>Wild)
             parse_var
             parse_type)
 ;;
 
 let parse_pconst =
-  (fun v -&gt; <span data-count="30910">P</span>Const v) &lt;$<span data-count="121">&gt;</span> choic<span data-count="121">e</span> [ parse_uint; parse_int; parse_bool; parse_nil ]
+  (fun v -&gt; <span data-count="30910">P</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_int; parse_bool; parse_nil ]
 ;;
 
-let parse_wild = (fun _ -&gt; <span data-count="0">P</span>Wild) &lt;$<span data-count="121">&gt;</span> stoke<span data-count="121">n</span> "_"
+let parse_wild = (fun _ -&gt; <span data-count="0">P</span>Wild) &lt;$<span data-count="122">&gt;</span> stoke<span data-count="122">n</span> "_"
 
 let parse_tuple parser =
-  <span data-count="119">l</span>ift2 (fun a b -&gt; <span data-count="3052">P</span>Tuple (a :: b)) (toke<span data-count="119">n</span> parser) (many<span data-count="119">1</span> (stoke<span data-count="119">n</span> "," *<span data-count="119">&gt;</span> parser))
+  <span data-count="120">l</span>ift2 (fun a b -&gt; <span data-count="3052">P</span>Tuple (a :: b)) (toke<span data-count="120">n</span> parser) (many<span data-count="120">1</span> (stoke<span data-count="120">n</span> "," *<span data-count="120">&gt;</span> parser))
 ;;
 
 let rec constr_con = function
@@ -1268,150 +1268,150 @@ let rec constr_con = function
 ;;
 
 let parse_con c =
-  <span data-count="119">l</span>ift2
+  <span data-count="120">l</span>ift2
     (fun a b -&gt; <span data-count="16145">c</span>onstr_con @@ (a :: b))
-    (c &lt;<span data-count="119">*</span> stoke<span data-count="119">n</span> "::" &lt;|<span data-count="119">&gt;</span> (bracket<span data-count="119">s</span> c &lt;<span data-count="119">*</span> stoke<span data-count="119">n</span> "::"))
-    (sep_b<span data-count="119">y</span> (stoke<span data-count="119">n</span> "::") (c &lt;|<span data-count="119">&gt;</span> bracket<span data-count="119">s</span> c))
+    (c &lt;<span data-count="120">*</span> stoke<span data-count="120">n</span> "::" &lt;|<span data-count="120">&gt;</span> (bracket<span data-count="120">s</span> c &lt;<span data-count="120">*</span> stoke<span data-count="120">n</span> "::"))
+    (sep_b<span data-count="120">y</span> (stoke<span data-count="120">n</span> "::") (c &lt;|<span data-count="120">&gt;</span> bracket<span data-count="120">s</span> c))
 ;;
 
 let parse_con_2 parser constructor =
-  <span data-count="238">c</span>onstructor &lt;$&gt; (stoke<span data-count="238">n</span> "[" *<span data-count="238">&gt;</span> sep_by<span data-count="238">1</span> (stoke<span data-count="238">n</span> ";") parser &lt;<span data-count="238">*</span> stoke<span data-count="238">n</span> "]")
+  <span data-count="240">c</span>onstructor &lt;$&gt; (stoke<span data-count="240">n</span> "[" *<span data-count="240">&gt;</span> sep_by<span data-count="240">1</span> (stoke<span data-count="240">n</span> ";") parser &lt;<span data-count="240">*</span> stoke<span data-count="240">n</span> "]")
 ;;
 
 let parse_pattern =
-  fi<span data-count="121">x</span>
+  fi<span data-count="122">x</span>
   @@ fun pack -&gt;
-  <span data-count="119">l</span>et value = parse_pvar &lt;|&gt; parse_pconst in
-  <span data-count="119">l</span>et tuple = brackets @@ parse_tupl<span data-count="119">e</span> (value &lt;|<span data-count="119">&gt;</span> pack) in
-  <span data-count="119">l</span>et con =
-    parse_co<span data-count="119">n</span> (tuple &lt;|<span data-count="119">&gt;</span> parse_con_<span data-count="119">2</span> pack constr_con &lt;|<span data-count="119">&gt;</span> value)
-    &lt;|&gt; parse_con_<span data-count="119">2</span> (tuple &lt;|<span data-count="119">&gt;</span> pack) constr_con
+  <span data-count="120">l</span>et value = parse_pvar &lt;|&gt; parse_pconst in
+  <span data-count="120">l</span>et tuple = brackets @@ parse_tupl<span data-count="120">e</span> (value &lt;|<span data-count="120">&gt;</span> pack) in
+  <span data-count="120">l</span>et con =
+    parse_co<span data-count="120">n</span> (tuple &lt;|<span data-count="120">&gt;</span> parse_con_<span data-count="120">2</span> pack constr_con &lt;|<span data-count="120">&gt;</span> value)
+    &lt;|&gt; parse_con_<span data-count="120">2</span> (tuple &lt;|<span data-count="120">&gt;</span> pack) constr_con
   in
-  <span data-count="119">c</span>hoice [ con; tuple; value ]
+  <span data-count="120">c</span>hoice [ con; tuple; value ]
 ;;
 
 (** Expression type *)
 
 (* EConst *)
 
-let parse_econst = (fun v -&gt; <span data-count="4621825">E</span>Const v) &lt;$<span data-count="121">&gt;</span> choic<span data-count="121">e</span> [ parse_uint; parse_bool ]
+let parse_econst = (fun v -&gt; <span data-count="4621965">E</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_bool ]
 
 let parse_econst_int =
-  (fun v -&gt; <span data-count="74480">E</span>Const v) &lt;$<span data-count="121">&gt;</span> choic<span data-count="121">e</span> [ parse_uint; parse_int; parse_bool ]
+  (fun v -&gt; <span data-count="74480">E</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_int; parse_bool ]
 ;;
 
 (* EVar *)
 
 let parse_evar =
-  bracket<span data-count="121">s</span> @@ lift<span data-count="121">2</span> (fun a b -&gt; <span data-count="1474906">E</span>Var (a, b)) parse_var parse_type
-  &lt;|<span data-count="121">&gt;</span> lif<span data-count="121">t</span> (fun a -&gt; <span data-count="11392124">E</span>Var (a, TUnknown)) parse_var
+  bracket<span data-count="122">s</span> @@ lift<span data-count="122">2</span> (fun a b -&gt; <span data-count="1474941">E</span>Var (a, b)) parse_var parse_type
+  &lt;|<span data-count="122">&gt;</span> lif<span data-count="122">t</span> (fun a -&gt; <span data-count="11392206">E</span>Var (a, TUnknown)) parse_var
 ;;
 
 (* EBinaryOp *)
 
-let parse_op char_op op = <span data-count="1573">s</span>toke<span data-count="1573">n</span> char_op *&gt; retur<span data-count="1573">n</span> (fun e1 e2 -&gt; <span data-count="1426239">E</span>BinaryOp (op, e1, e2))
-let pmulti = parse_o<span data-count="121">p</span> "*" Mul &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "/" Div
-let padd = parse_o<span data-count="121">p</span> "+" Add &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "-" Sub
+let parse_op char_op op = <span data-count="1586">s</span>toke<span data-count="1586">n</span> char_op *&gt; retur<span data-count="1586">n</span> (fun e1 e2 -&gt; <span data-count="1426242">E</span>BinaryOp (op, e1, e2))
+let pmulti = parse_o<span data-count="122">p</span> "*" Mul &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "/" Div
+let padd = parse_o<span data-count="122">p</span> "+" Add &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "-" Sub
 
 let pcomp =
-  parse_o<span data-count="121">p</span> "&gt;=" Greq &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "&gt;" Gre &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "&lt;=" Leq &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "&lt;" Less
+  parse_o<span data-count="122">p</span> "&gt;=" Greq &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "&gt;" Gre &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "&lt;=" Leq &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "&lt;" Less
 ;;
 
-let peq = parse_o<span data-count="121">p</span> "==" Eq &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "=" Eq &lt;|<span data-count="121">&gt;</span> parse_o<span data-count="121">p</span> "&lt;&gt;" Neq
-let pconj = parse_o<span data-count="121">p</span> "&amp;&amp;" And
-let pdisj = parse_o<span data-count="121">p</span> "||" Or
+let peq = parse_o<span data-count="122">p</span> "==" Eq &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "=" Eq &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "&lt;&gt;" Neq
+let pconj = parse_o<span data-count="122">p</span> "&amp;&amp;" And
+let pdisj = parse_o<span data-count="122">p</span> "||" Or
 
 let parse_ebinop x =
-  <span data-count="4165">l</span>et multi = chainl1 x pmulti in
-  <span data-count="4165">l</span>et add = chainl1 multi padd in
-  <span data-count="4165">l</span>et comp = chainl1 add pcomp in
-  <span data-count="4165">l</span>et eq = chainl1 comp peq in
-  <span data-count="4165">l</span>et conj = chainl1 eq pconj in
-  <span data-count="4165">c</span>hainl<span data-count="4165">1</span> conj pdisj &lt;* parse_white_space
+  <span data-count="4200">l</span>et multi = chainl1 x pmulti in
+  <span data-count="4200">l</span>et add = chainl1 multi padd in
+  <span data-count="4200">l</span>et comp = chainl1 add pcomp in
+  <span data-count="4200">l</span>et eq = chainl1 comp peq in
+  <span data-count="4200">l</span>et conj = chainl1 eq pconj in
+  <span data-count="4200">c</span>hainl<span data-count="4200">1</span> conj pdisj &lt;* parse_white_space
 ;;
 
 (* EIfElse *)
 
 let parse_eifelse i expr =
-  <span data-count="2856">l</span>ift3
+  <span data-count="2880">l</span>ift3
     (fun e1 e2 e3 -&gt; <span data-count="711947">E</span>IfElse (e1, e2, e3))
-    (stoke<span data-count="2856">n</span> "if" *<span data-count="2856">&gt;</span> i)
-    (stoke<span data-count="2856">n</span> "then" *<span data-count="2856">&gt;</span> expr)
-    (stoke<span data-count="2856">n</span> "else" *<span data-count="2856">&gt;</span> expr)
+    (stoke<span data-count="2880">n</span> "if" *<span data-count="2880">&gt;</span> i)
+    (stoke<span data-count="2880">n</span> "then" *<span data-count="2880">&gt;</span> expr)
+    (stoke<span data-count="2880">n</span> "else" *<span data-count="2880">&gt;</span> expr)
 ;;
 
 (* EFun *)
 
-let constr_efun pl e = <span data-count="528864">L</span>ist.fold_right ~init:e ~f:(fun p e -&gt; <span data-count="16879">E</span>Fun (p, e)) pl
-let parse_fun_args = fi<span data-count="121">x</span> @@ fun p -&gt; <span data-count="54">m</span>any<span data-count="54">1</span> parse_pattern &lt;|&gt; bracket<span data-count="54">s</span> p
+let constr_efun pl e = <span data-count="528866">L</span>ist.fold_right ~init:e ~f:(fun p e -&gt; <span data-count="16883">E</span>Fun (p, e)) pl
+let parse_fun_args = fi<span data-count="122">x</span> @@ fun p -&gt; <span data-count="54">m</span>any<span data-count="54">1</span> parse_pattern &lt;|&gt; bracket<span data-count="54">s</span> p
 
 let parse_efun expr =
-  <span data-count="2737">b</span>rackets_or_not
-  @@ lift<span data-count="2737">2</span> constr_efun (stoke<span data-count="2737">n</span> "fun" *<span data-count="2737">&gt;</span> parse_fun_args) (stoke<span data-count="2737">n</span> "-&gt;" *<span data-count="2737">&gt;</span> expr)
+  <span data-count="2760">b</span>rackets_or_not
+  @@ lift<span data-count="2760">2</span> constr_efun (stoke<span data-count="2760">n</span> "fun" *<span data-count="2760">&gt;</span> parse_fun_args) (stoke<span data-count="2760">n</span> "-&gt;" *<span data-count="2760">&gt;</span> expr)
 ;;
 
 (* EApp *)
 
 let parse_eapp e1 e2 =
   (* Парсим функцию и аргументы *)
-  <span data-count="3094">p</span>arse_evar
-  &lt;|<span data-count="3094">&gt;</span> e1
+  <span data-count="3120">p</span>arse_evar
+  &lt;|<span data-count="3120">&gt;</span> e1
   &gt;&gt;= fun f -&gt;
-  <span data-count="8047349">m</span>any<span data-count="8047349">1</span> (parse_evar &lt;|<span data-count="8047349">&gt;</span> e2)
+  <span data-count="8047426">m</span>any<span data-count="8047426">1</span> (parse_evar &lt;|<span data-count="8047426">&gt;</span> e2)
   &gt;&gt;= fun args -&gt;
   (* Строим выражение без типов *)
-  <span data-count="1872818">l</span>et app_without_type =
+  <span data-count="1872888">l</span>et app_without_type =
     List.fold_left
-      ~f:(fun f_acc arg -&gt; <span data-count="2427527">E</span>App (f_acc, arg, TUnknown))
+      ~f:(fun f_acc arg -&gt; <span data-count="2427702">E</span>App (f_acc, arg, TUnknown))
         (* Используем TUnknown как временный тип *)
       ~init:f
       args
   in
   (* Парсим тип для внешней аппликации *)
-  <span data-count="1872818">p</span>arse_type
+  <span data-count="1872888">p</span>arse_type
   &gt;&gt;= fun ty -&gt;
   (* Заменяем TUnknown на вычисленный тип для внешней аппликации *)
-  <span data-count="1872818">l</span>et replace_outer_type expr new_ty =
-    <span data-count="1872818">m</span>atch expr with
-    | <span data-count="1872818">E</span>App (e1, e2, TUnknown) -&gt;
+  <span data-count="1872888">l</span>et replace_outer_type expr new_ty =
+    <span data-count="1872888">m</span>atch expr with
+    | <span data-count="1872888">E</span>App (e1, e2, TUnknown) -&gt;
       EApp (e1, e2, new_ty) (* Заменяем тип только для внешней аппликации *)
     | <span data-count="0">E</span>App (e1, e2, _) -&gt; EApp (e1, e2, TUnknown)
     | <span data-count="0">_</span> -&gt; expr
   in
-  return (replace_outer_typ<span data-count="1872818">e</span> app_without_type ty)
+  return (replace_outer_typ<span data-count="1872888">e</span> app_without_type ty)
 ;;
 
 (* ELetIn *)
 
 let parse_rec =
-  optio<span data-count="121">n</span> "false" (stoken<span data-count="121">1</span> "rec ")
-  &gt;&gt;<span data-count="121">|</span> fun x -&gt; <span data-count="1413235">i</span>f String.( &lt;&gt; ) x "false" then <span data-count="724378">R</span>ec else <span data-count="688857">N</span>otrec
+  optio<span data-count="122">n</span> "false" (stoken<span data-count="122">1</span> "rec ")
+  &gt;&gt;<span data-count="122">|</span> fun x -&gt; <span data-count="1413254">i</span>f String.( &lt;&gt; ) x "false" then <span data-count="724378">R</span>ec else <span data-count="688876">N</span>otrec
 ;;
 
-let parse_name = parse_rename &lt;|<span data-count="121">&gt;</span> parse_var
+let parse_name = parse_rename &lt;|<span data-count="122">&gt;</span> parse_var
 
 let parse_eletin expr =
-  <span data-count="3094">l</span>et lift5 f p1 p2 p3 p4 p5 = <span data-count="3094">f</span> &lt;$<span data-count="3094">&gt;</span> p1 &lt;*<span data-count="3094">&gt;</span> p2 &lt;*<span data-count="3094">&gt;</span> p3 &lt;*<span data-count="3094">&gt;</span> p4 &lt;*&gt; p5 in
-  lift<span data-count="3094">5</span>
+  <span data-count="3120">l</span>et lift5 f p1 p2 p3 p4 p5 = <span data-count="3120">f</span> &lt;$<span data-count="3120">&gt;</span> p1 &lt;*<span data-count="3120">&gt;</span> p2 &lt;*<span data-count="3120">&gt;</span> p3 &lt;*<span data-count="3120">&gt;</span> p4 &lt;*&gt; p5 in
+  lift<span data-count="3120">5</span>
     (fun is_rec name args expr1 expr2 -&gt;
       <span data-count="512704">l</span>et expr = constr_efun args expr1 in
       <span data-count="512704">E</span>LetIn (is_rec, name, expr, expr2))
-    (parse_white_space *<span data-count="3094">&gt;</span> stoke<span data-count="3094">n</span> "let" *<span data-count="3094">&gt;</span> parse_rec)
+    (parse_white_space *<span data-count="3120">&gt;</span> stoke<span data-count="3120">n</span> "let" *<span data-count="3120">&gt;</span> parse_rec)
     parse_name
-    (man<span data-count="3094">y</span> parse_pattern)
-    (stoke<span data-count="3094">n</span> "=" *<span data-count="3094">&gt;</span> expr)
-    (stoke<span data-count="3094">n</span> "in" *<span data-count="3094">&gt;</span> expr)
-  &lt;|&gt; lift<span data-count="3094">3</span>
+    (man<span data-count="3120">y</span> parse_pattern)
+    (stoke<span data-count="3120">n</span> "=" *<span data-count="3120">&gt;</span> expr)
+    (stoke<span data-count="3120">n</span> "in" *<span data-count="3120">&gt;</span> expr)
+  &lt;|&gt; lift<span data-count="3120">3</span>
         (fun names expr1 expr2 -&gt; <span data-count="1517">E</span>LetPatIn (names, expr1, expr2))
-        (parse_white_space *<span data-count="3094">&gt;</span> stoke<span data-count="3094">n</span> "let" *<span data-count="3094">&gt;</span> parse_pattern)
-        (stoke<span data-count="3094">n</span> "=" *<span data-count="3094">&gt;</span> expr)
-        (stoke<span data-count="3094">n</span> "in" *<span data-count="3094">&gt;</span> expr)
+        (parse_white_space *<span data-count="3120">&gt;</span> stoke<span data-count="3120">n</span> "let" *<span data-count="3120">&gt;</span> parse_pattern)
+        (stoke<span data-count="3120">n</span> "=" *<span data-count="3120">&gt;</span> expr)
+        (stoke<span data-count="3120">n</span> "in" *<span data-count="3120">&gt;</span> expr)
 ;;
 
 (* EList *)
 
 let parse_cons_semicolon_expr parser constructor =
-  <span data-count="357">c</span>onstructor &lt;$&gt; (stoke<span data-count="357">n</span> "[" *<span data-count="357">&gt;</span> sep_b<span data-count="357">y</span> (stoke<span data-count="357">n</span> ";") parser &lt;<span data-count="357">*</span> stoke<span data-count="357">n</span> "]")
+  <span data-count="360">c</span>onstructor &lt;$&gt; (stoke<span data-count="360">n</span> "[" *<span data-count="360">&gt;</span> sep_b<span data-count="360">y</span> (stoke<span data-count="360">n</span> ";") parser &lt;<span data-count="360">*</span> stoke<span data-count="360">n</span> "]")
 ;;
 
 let rec create_cons_sc = function
@@ -1421,130 +1421,130 @@ let rec create_cons_sc = function
 ;;
 
 let parse_econ c =
-  <span data-count="119">l</span>ift2
+  <span data-count="120">l</span>ift2
     (fun a b -&gt; <span data-count="10729">c</span>reate_cons_sc @@ (a :: b))
-    (c &lt;<span data-count="119">*</span> parse_white_space &lt;<span data-count="119">*</span> stoke<span data-count="119">n</span> "::")
-    (sep_by<span data-count="119">1</span> (parse_white_space *<span data-count="119">&gt;</span> stoke<span data-count="119">n</span> "::") c)
+    (c &lt;<span data-count="120">*</span> parse_white_space &lt;<span data-count="120">*</span> stoke<span data-count="120">n</span> "::")
+    (sep_by<span data-count="120">1</span> (parse_white_space *<span data-count="120">&gt;</span> stoke<span data-count="120">n</span> "::") c)
 ;;
 
 (* ETuple *)
 
 let parse_tuple_expr parser =
-  <span data-count="357">b</span>rackets
-  @@ lift<span data-count="357">2</span>
+  <span data-count="360">b</span>rackets
+  @@ lift<span data-count="360">2</span>
        (fun a b -&gt; <span data-count="55934">E</span>Tuple (a :: b))
-       (parser &lt;<span data-count="357">*</span> stoke<span data-count="357">n</span> ",")
-       (sep_by<span data-count="357">1</span> (stoke<span data-count="357">n</span> ",") parser)
+       (parser &lt;<span data-count="360">*</span> stoke<span data-count="360">n</span> ",")
+       (sep_by<span data-count="360">1</span> (stoke<span data-count="360">n</span> ",") parser)
 ;;
 
 (* EMatch *)
 
 let parse_ematch matching parse_expr =
-  <span data-count="119">l</span>et ematch c pl = <span data-count="14392">E</span>Match (c, pl) in
-  let wand = stoke<span data-count="119">n</span> "|" *<span data-count="119">&gt;</span> parse_pattern &lt;|&gt; parse_pattern in
-  <span data-count="119">l</span>et arrow = stoke<span data-count="119">n</span> "-&gt;" *&gt; parse_expr in
-  <span data-count="119">l</span>et expr = lift2 (fun value arrow_value -&gt; <span data-count="30716">v</span>alue, arrow_value) wand arrow in
-  <span data-count="119">l</span>et exprs = many1 expr in
-  <span data-count="119">l</span>et pematch = stoke<span data-count="119">n</span> "match" *<span data-count="119">&gt;</span> matching &lt;* stoke<span data-count="119">n</span> "with" in
-  <span data-count="119">p</span>arse_white_space *&gt; lift<span data-count="119">2</span> ematch pematch exprs
+  <span data-count="120">l</span>et ematch c pl = <span data-count="14392">E</span>Match (c, pl) in
+  let wand = stoke<span data-count="120">n</span> "|" *<span data-count="120">&gt;</span> parse_pattern &lt;|&gt; parse_pattern in
+  <span data-count="120">l</span>et arrow = stoke<span data-count="120">n</span> "-&gt;" *&gt; parse_expr in
+  <span data-count="120">l</span>et expr = lift2 (fun value arrow_value -&gt; <span data-count="30716">v</span>alue, arrow_value) wand arrow in
+  <span data-count="120">l</span>et exprs = many1 expr in
+  <span data-count="120">l</span>et pematch = stoke<span data-count="120">n</span> "match" *<span data-count="120">&gt;</span> matching &lt;* stoke<span data-count="120">n</span> "with" in
+  <span data-count="120">p</span>arse_white_space *&gt; lift<span data-count="120">2</span> ematch pematch exprs
 ;;
 
 (* Expression parsers *)
 
 let parse_expression =
-  fi<span data-count="121">x</span>
+  fi<span data-count="122">x</span>
   @@ fun pack -&gt;
-  <span data-count="119">l</span>et econst = parse_econst in
+  <span data-count="120">l</span>et econst = parse_econst in
   let evar = parse_evar in
   let tuples =
     parse_tuple_expr
       (econst
-       &lt;|<span data-count="119">&gt;</span> evar
-       &lt;|<span data-count="119">&gt;</span> parse_tuple_exp<span data-count="119">r</span> pack
-       &lt;|<span data-count="119">&gt;</span> parse_cons_semicolon_exp<span data-count="119">r</span> pack create_cons_sc)
+       &lt;|<span data-count="120">&gt;</span> evar
+       &lt;|<span data-count="120">&gt;</span> parse_tuple_exp<span data-count="120">r</span> pack
+       &lt;|<span data-count="120">&gt;</span> parse_cons_semicolon_exp<span data-count="120">r</span> pack create_cons_sc)
   in
-  <span data-count="119">l</span>et parse_if =
-    parse_ebino<span data-count="119">p</span> pack
-    &lt;|&gt; bracket<span data-count="119">s</span> (parse_ebino<span data-count="119">p</span> pack &lt;|<span data-count="119">&gt;</span> parse_eleti<span data-count="119">n</span> pack &lt;|<span data-count="119">&gt;</span> parse_eap<span data-count="119">p</span> pack pack)
+  <span data-count="120">l</span>et parse_if =
+    parse_ebino<span data-count="120">p</span> pack
+    &lt;|&gt; bracket<span data-count="120">s</span> (parse_ebino<span data-count="120">p</span> pack &lt;|<span data-count="120">&gt;</span> parse_eleti<span data-count="120">n</span> pack &lt;|<span data-count="120">&gt;</span> parse_eap<span data-count="120">p</span> pack pack)
   in
-  <span data-count="119">l</span>et expression pack =
-    <span data-count="1547">p</span>arse_ebino<span data-count="1547">p</span> pack
-    &lt;|<span data-count="1547">&gt;</span> parse_eap<span data-count="1547">p</span> pack pack
-    &lt;|<span data-count="1547">&gt;</span> brackets_or_no<span data-count="1547">t</span> @@ parse_eifels<span data-count="1547">e</span> parse_if pack
-    &lt;|<span data-count="1547">&gt;</span> parse_efu<span data-count="1547">n</span> pack
-    &lt;|<span data-count="1547">&gt;</span> parse_eleti<span data-count="1547">n</span> pack
-    &lt;|<span data-count="1547">&gt;</span> bracket<span data-count="1547">s</span> @@ choic<span data-count="1547">e</span> [ tuples; parse_ebino<span data-count="1547">p</span> pack ]
-    &lt;|<span data-count="1547">&gt;</span> evar
-    &lt;|<span data-count="1547">&gt;</span> econst
+  <span data-count="120">l</span>et expression pack =
+    <span data-count="1560">p</span>arse_ebino<span data-count="1560">p</span> pack
+    &lt;|<span data-count="1560">&gt;</span> parse_eap<span data-count="1560">p</span> pack pack
+    &lt;|<span data-count="1560">&gt;</span> brackets_or_no<span data-count="1560">t</span> @@ parse_eifels<span data-count="1560">e</span> parse_if pack
+    &lt;|<span data-count="1560">&gt;</span> parse_efu<span data-count="1560">n</span> pack
+    &lt;|<span data-count="1560">&gt;</span> parse_eleti<span data-count="1560">n</span> pack
+    &lt;|<span data-count="1560">&gt;</span> bracket<span data-count="1560">s</span> @@ choic<span data-count="1560">e</span> [ tuples; parse_ebino<span data-count="1560">p</span> pack ]
+    &lt;|<span data-count="1560">&gt;</span> evar
+    &lt;|<span data-count="1560">&gt;</span> econst
     &lt;|&gt; tuples
   in
   let app_left pack =
-    <span data-count="476">e</span>var
-    &lt;|&gt; (brackets_or_no<span data-count="476">t</span> @@ parse_eifels<span data-count="476">e</span> parse_if (expressio<span data-count="476">n</span> pack)
-         &lt;|<span data-count="476">&gt;</span> parse_efu<span data-count="476">n</span> pack
-         &lt;|<span data-count="476">&gt;</span> bracket<span data-count="476">s</span> @@ parse_eap<span data-count="476">p</span> pack pack
-         &lt;|<span data-count="476">&gt;</span> parse_eleti<span data-count="476">n</span> pack)
+    <span data-count="480">e</span>var
+    &lt;|&gt; (brackets_or_no<span data-count="480">t</span> @@ parse_eifels<span data-count="480">e</span> parse_if (expressio<span data-count="480">n</span> pack)
+         &lt;|<span data-count="480">&gt;</span> parse_efu<span data-count="480">n</span> pack
+         &lt;|<span data-count="480">&gt;</span> bracket<span data-count="480">s</span> @@ parse_eap<span data-count="480">p</span> pack pack
+         &lt;|<span data-count="480">&gt;</span> parse_eleti<span data-count="480">n</span> pack)
   in
   let app_right pack =
-    <span data-count="476">b</span>rackets_or_no<span data-count="476">t</span>
-    @@ (parse_ebino<span data-count="476">p</span> pack
-        &lt;|<span data-count="476">&gt;</span> brackets_or_no<span data-count="476">t</span> @@ parse_eifels<span data-count="476">e</span> parse_if (expressio<span data-count="476">n</span> pack)
-        &lt;|<span data-count="476">&gt;</span> parse_eap<span data-count="476">p</span> pack pack
-        &lt;|<span data-count="476">&gt;</span> parse_efu<span data-count="476">n</span> pack
-        &lt;|<span data-count="476">&gt;</span> parse_eleti<span data-count="476">n</span> pack)
-    &lt;|<span data-count="476">&gt;</span> tuples
-    &lt;|<span data-count="476">&gt;</span> evar
+    <span data-count="480">b</span>rackets_or_no<span data-count="480">t</span>
+    @@ (parse_ebino<span data-count="480">p</span> pack
+        &lt;|<span data-count="480">&gt;</span> brackets_or_no<span data-count="480">t</span> @@ parse_eifels<span data-count="480">e</span> parse_if (expressio<span data-count="480">n</span> pack)
+        &lt;|<span data-count="480">&gt;</span> parse_eap<span data-count="480">p</span> pack pack
+        &lt;|<span data-count="480">&gt;</span> parse_efu<span data-count="480">n</span> pack
+        &lt;|<span data-count="480">&gt;</span> parse_eleti<span data-count="480">n</span> pack)
+    &lt;|<span data-count="480">&gt;</span> tuples
+    &lt;|<span data-count="480">&gt;</span> evar
     &lt;|&gt; econst
   in
-  let eapp = brackets_or_not @@ parse_eap<span data-count="119">p</span> (app_lef<span data-count="119">t</span> pack) (app_righ<span data-count="119">t</span> pack) in
-  <span data-count="119">l</span>et eapp_int =
+  let eapp = brackets_or_not @@ parse_eap<span data-count="120">p</span> (app_lef<span data-count="120">t</span> pack) (app_righ<span data-count="120">t</span> pack) in
+  <span data-count="120">l</span>et eapp_int =
     brackets_or_not
-    @@ parse_eap<span data-count="119">p</span>
-         (app_lef<span data-count="119">t</span> (pack &lt;|<span data-count="119">&gt;</span> parse_econst_int))
-         (app_righ<span data-count="119">t</span> (pack &lt;|<span data-count="119">&gt;</span> parse_econst_int))
+    @@ parse_eap<span data-count="120">p</span>
+         (app_lef<span data-count="120">t</span> (pack &lt;|<span data-count="120">&gt;</span> parse_econst_int))
+         (app_righ<span data-count="120">t</span> (pack &lt;|<span data-count="120">&gt;</span> parse_econst_int))
   in
-  <span data-count="119">l</span>et elists =
-    parse_eco<span data-count="119">n</span> (eapp &lt;|<span data-count="119">&gt;</span> evar)
-    &lt;|&gt; parse_cons_semicolon_exp<span data-count="119">r</span>
+  <span data-count="120">l</span>et elists =
+    parse_eco<span data-count="120">n</span> (eapp &lt;|<span data-count="120">&gt;</span> evar)
+    &lt;|&gt; parse_cons_semicolon_exp<span data-count="120">r</span>
           (eapp
-           &lt;|<span data-count="119">&gt;</span> econst
-           &lt;|<span data-count="119">&gt;</span> evar
-           &lt;|<span data-count="119">&gt;</span> tuples
-           &lt;|<span data-count="119">&gt;</span> parse_cons_semicolon_exp<span data-count="119">r</span> pack create_cons_sc)
+           &lt;|<span data-count="120">&gt;</span> econst
+           &lt;|<span data-count="120">&gt;</span> evar
+           &lt;|<span data-count="120">&gt;</span> tuples
+           &lt;|<span data-count="120">&gt;</span> parse_cons_semicolon_exp<span data-count="120">r</span> pack create_cons_sc)
           create_cons_sc
   in
-  <span data-count="119">l</span>et ematch =
+  <span data-count="120">l</span>et ematch =
     brackets_or_not
-    @@ parse_ematc<span data-count="119">h</span> (econst &lt;|<span data-count="119">&gt;</span> tuples &lt;|<span data-count="119">&gt;</span> evar) (elists &lt;|<span data-count="119">&gt;</span> expressio<span data-count="119">n</span> pack)
+    @@ parse_ematc<span data-count="120">h</span> (econst &lt;|<span data-count="120">&gt;</span> tuples &lt;|<span data-count="120">&gt;</span> evar) (elists &lt;|<span data-count="120">&gt;</span> expressio<span data-count="120">n</span> pack)
   in
-  <span data-count="119">l</span>et eifelse = parse_eifelse parse_if (expressio<span data-count="119">n</span> pack) in
-  <span data-count="119">l</span>et efun =
-    brackets_or_no<span data-count="119">t</span> @@ parse_efu<span data-count="119">n</span> @@ parse_ebino<span data-count="119">p</span> pack
-    &lt;|<span data-count="119">&gt;</span> tuples
-    &lt;|<span data-count="119">&gt;</span> parse_tuple_exp<span data-count="119">r</span> (eapp &lt;|<span data-count="119">&gt;</span> evar &lt;|<span data-count="119">&gt;</span> econst)
-    &lt;|<span data-count="119">&gt;</span> parse_eap<span data-count="119">p</span> (app_lef<span data-count="119">t</span> pack) (app_righ<span data-count="119">t</span> pack)
-    &lt;|<span data-count="119">&gt;</span> brackets_or_no<span data-count="119">t</span> @@ parse_eifels<span data-count="119">e</span> parse_if (expressio<span data-count="119">n</span> pack)
-    &lt;|<span data-count="119">&gt;</span> parse_efu<span data-count="119">n</span> pack
-    &lt;|<span data-count="119">&gt;</span> parse_eleti<span data-count="119">n</span> pack
+  <span data-count="120">l</span>et eifelse = parse_eifelse parse_if (expressio<span data-count="120">n</span> pack) in
+  <span data-count="120">l</span>et efun =
+    brackets_or_no<span data-count="120">t</span> @@ parse_efu<span data-count="120">n</span> @@ parse_ebino<span data-count="120">p</span> pack
+    &lt;|<span data-count="120">&gt;</span> tuples
+    &lt;|<span data-count="120">&gt;</span> parse_tuple_exp<span data-count="120">r</span> (eapp &lt;|<span data-count="120">&gt;</span> evar &lt;|<span data-count="120">&gt;</span> econst)
+    &lt;|<span data-count="120">&gt;</span> parse_eap<span data-count="120">p</span> (app_lef<span data-count="120">t</span> pack) (app_righ<span data-count="120">t</span> pack)
+    &lt;|<span data-count="120">&gt;</span> brackets_or_no<span data-count="120">t</span> @@ parse_eifels<span data-count="120">e</span> parse_if (expressio<span data-count="120">n</span> pack)
+    &lt;|<span data-count="120">&gt;</span> parse_efu<span data-count="120">n</span> pack
+    &lt;|<span data-count="120">&gt;</span> parse_eleti<span data-count="120">n</span> pack
     &lt;|&gt; ematch
   in
-  <span data-count="119">l</span>et ebinop =
+  <span data-count="120">l</span>et ebinop =
     brackets_or_not
-    @@ parse_ebino<span data-count="119">p</span>
-         (parse_eleti<span data-count="119">n</span> pack
-          &lt;|<span data-count="119">&gt;</span> parse_eap<span data-count="119">p</span> (app_lef<span data-count="119">t</span> pack) (app_righ<span data-count="119">t</span> pack)
-          &lt;|<span data-count="119">&gt;</span> bracket<span data-count="119">s</span> @@ brackets_or_no<span data-count="119">t</span> @@ parse_eifels<span data-count="119">e</span> parse_if (expressio<span data-count="119">n</span> pack)
-          &lt;|<span data-count="119">&gt;</span> bracket<span data-count="119">s</span> @@ parse_ebino<span data-count="119">p</span> pack
-          &lt;|<span data-count="119">&gt;</span> evar
-          &lt;|<span data-count="119">&gt;</span> econst)
+    @@ parse_ebino<span data-count="120">p</span>
+         (parse_eleti<span data-count="120">n</span> pack
+          &lt;|<span data-count="120">&gt;</span> parse_eap<span data-count="120">p</span> (app_lef<span data-count="120">t</span> pack) (app_righ<span data-count="120">t</span> pack)
+          &lt;|<span data-count="120">&gt;</span> bracket<span data-count="120">s</span> @@ brackets_or_no<span data-count="120">t</span> @@ parse_eifels<span data-count="120">e</span> parse_if (expressio<span data-count="120">n</span> pack)
+          &lt;|<span data-count="120">&gt;</span> bracket<span data-count="120">s</span> @@ parse_ebino<span data-count="120">p</span> pack
+          &lt;|<span data-count="120">&gt;</span> evar
+          &lt;|<span data-count="120">&gt;</span> econst)
   in
-  <span data-count="119">l</span>et eletin =
-    parse_eleti<span data-count="119">n</span> (expressio<span data-count="119">n</span> pack)
-    &lt;|<span data-count="119">&gt;</span> bracket<span data-count="119">s</span> @@ parse_eleti<span data-count="119">n</span> pack
-    &lt;|<span data-count="119">&gt;</span> ematch
+  <span data-count="120">l</span>et eletin =
+    parse_eleti<span data-count="120">n</span> (expressio<span data-count="120">n</span> pack)
+    &lt;|<span data-count="120">&gt;</span> bracket<span data-count="120">s</span> @@ parse_eleti<span data-count="120">n</span> pack
+    &lt;|<span data-count="120">&gt;</span> ematch
     &lt;|&gt; eifelse
   in
-  <span data-count="119">c</span>hoice
+  <span data-count="120">c</span>hoice
     [ eletin
     ; eapp
     ; efun
@@ -1562,40 +1562,40 @@ let parse_expression =
 (** Binding type *)
 
 let parse_let parse =
-  <span data-count="121">l</span>et parse_single_let =
+  <span data-count="122">l</span>et parse_single_let =
     lift4
       (fun flag name args body -&gt;
-        <span data-count="309">l</span>et body = constr_efun args body in
-        <span data-count="309">f</span>lag, name, body)
+        <span data-count="311">l</span>et body = constr_efun args body in
+        <span data-count="311">f</span>lag, name, body)
       parse_rec
       parse_pattern
-      (parse_white_space *<span data-count="121">&gt;</span> man<span data-count="121">y</span> (brackets_or_no<span data-count="121">t</span> parse_pattern))
-      (stoke<span data-count="121">n</span> "=" *<span data-count="121">&gt;</span> parse)
+      (parse_white_space *<span data-count="122">&gt;</span> man<span data-count="122">y</span> (brackets_or_no<span data-count="122">t</span> parse_pattern))
+      (stoke<span data-count="122">n</span> "=" *<span data-count="122">&gt;</span> parse)
   in
-  <span data-count="121">l</span>et parse_single_multy_let =
+  <span data-count="122">l</span>et parse_single_multy_let =
     lift3
       (fun name args body -&gt;
         <span data-count="6">l</span>et body = constr_efun args body in
         <span data-count="6">n</span>ame, body)
       parse_pattern
-      (parse_white_space *<span data-count="121">&gt;</span> man<span data-count="121">y</span> (brackets_or_no<span data-count="121">t</span> parse_pattern))
-      (stoke<span data-count="121">n</span> "=" *<span data-count="121">&gt;</span> parse)
+      (parse_white_space *<span data-count="122">&gt;</span> man<span data-count="122">y</span> (brackets_or_no<span data-count="122">t</span> parse_pattern))
+      (stoke<span data-count="122">n</span> "=" *<span data-count="122">&gt;</span> parse)
   in
-  <span data-count="121">l</span>et parse_let_and =
+  <span data-count="122">l</span>et parse_let_and =
     parse_single_let
     &gt;&gt;= fun (r, p, e) -&gt;
-    <span data-count="309">m</span>an<span data-count="309">y</span> (stoke<span data-count="309">n</span> "and" *<span data-count="309">&gt;</span> parse_single_multy_let)
-    &gt;&gt;= fun rest_lets -&gt; <span data-count="309">r</span>eturn (r, (p, e) :: rest_lets)
+    <span data-count="311">m</span>an<span data-count="311">y</span> (stoke<span data-count="311">n</span> "and" *<span data-count="311">&gt;</span> parse_single_multy_let)
+    &gt;&gt;= fun rest_lets -&gt; <span data-count="311">r</span>eturn (r, (p, e) :: rest_lets)
   in
-  <span data-count="121">p</span>arse_white_space *<span data-count="121">&gt;</span> stoke<span data-count="121">n</span> "let" *<span data-count="121">&gt;</span> parse_let_and
-  &gt;&gt;= fun (r, lets) -&gt; <span data-count="309">r</span>eturn (Let (r, lets))
+  <span data-count="122">p</span>arse_white_space *<span data-count="122">&gt;</span> stoke<span data-count="122">n</span> "let" *<span data-count="122">&gt;</span> parse_let_and
+  &gt;&gt;= fun (r, lets) -&gt; <span data-count="311">r</span>eturn (Let (r, lets))
 ;;
 
-let expr_main = (fun expr -&gt; <span data-count="5">E</span>xpression expr) &lt;$<span data-count="121">&gt;</span> parse_expression
-let parse_bindings = parse_le<span data-count="121">t</span> parse_expression &lt;|<span data-count="121">&gt;</span> expr_main
-let parse_statements = many<span data-count="121">1</span> (toke<span data-count="121">n</span> parse_bindings &lt;<span data-count="121">*</span> toke<span data-count="121">n</span> (man<span data-count="121">y</span> (stoke<span data-count="121">n</span> ";;")))
-let parse_str p s = <span data-count="118">p</span>arse_string ~consume:All p s
-let parser str = <span data-count="118">p</span>arse_str parse_statements (String.stri<span data-count="118">p</span> str)
+let expr_main = (fun expr -&gt; <span data-count="5">E</span>xpression expr) &lt;$<span data-count="122">&gt;</span> parse_expression
+let parse_bindings = parse_le<span data-count="122">t</span> parse_expression &lt;|<span data-count="122">&gt;</span> expr_main
+let parse_statements = many<span data-count="122">1</span> (toke<span data-count="122">n</span> parse_bindings &lt;<span data-count="122">*</span> toke<span data-count="122">n</span> (man<span data-count="122">y</span> (stoke<span data-count="122">n</span> ";;")))
+let parse_str p s = <span data-count="119">p</span>arse_string ~consume:All p s
+let parser str = <span data-count="119">p</span>arse_str parse_statements (String.stri<span data-count="119">p</span> str)
 </code></pre>
       </div>
     </div>
