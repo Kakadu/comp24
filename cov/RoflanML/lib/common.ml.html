@@ -161,12 +161,12 @@ module Middleend_Common = struct
   open Ast
 
   let uncurry e =
-    <span data-count="180">l</span>et rec helper args = function
-      | <span data-count="269">E</span>Fun (x, e) -&gt; helper (x :: args) e
-      | <span data-count="180">e</span> -&gt; args, e
+    <span data-count="193">l</span>et rec helper args = function
+      | <span data-count="290">E</span>Fun (x, e) -&gt; helper (x :: args) e
+      | <span data-count="193">e</span> -&gt; args, e
     in
     let args, e = helper [] e in
-    <span data-count="180">L</span>ist.re<span data-count="180">v</span> args, e
+    <span data-count="193">L</span>ist.re<span data-count="193">v</span> args, e
   ;;
 
   let curry args e = <span data-count="70">B</span>ase.List.fold_right args ~init:e ~f:(fun arg acc -&gt; <span data-count="84">E</span>Fun (arg, acc))
