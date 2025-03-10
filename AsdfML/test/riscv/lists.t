@@ -67,19 +67,19 @@
   ANF:
   let main =
          let list = [1; 2; 3; 4] in
-         let anf12 = `list_is_empty list in
+         let anf12 = ml_list_is_empty list in
          let anf8 = not anf12 in
-         let anf11 = `list_tl list in
-         let anf10 = `list_is_empty anf11 in
+         let anf11 = ml_list_tl list in
+         let anf10 = ml_list_is_empty anf11 in
          let anf9 = not anf10 in
          let anf1 = ( && ) anf8 anf9 in
          if anf1 
          then
-           let a = `list_hd list in
-           let anf6 = `list_tl list in
-           let b = `list_hd anf6 in
-           let anf5 = `list_tl list in
-           let c = `list_tl anf5 in
+           let a = ml_list_hd list in
+           let anf6 = ml_list_tl list in
+           let b = ml_list_hd anf6 in
+           let anf5 = ml_list_tl list in
+           let c = ml_list_tl anf5 in
            let anf2 = println_int a in
            let anf3 = println_int b in
            let anf4 = print_list c in
@@ -109,15 +109,15 @@
   > EOF
   ANF:
   let ll_helper_1 acc list_0 =
-         let anf1 = `list_is_empty list_0 in
+         let anf1 = ml_list_is_empty list_0 in
          if anf1 
          then acc 
          else
-           let anf7 = `list_is_empty list_0 in
+           let anf7 = ml_list_is_empty list_0 in
            let anf3 = not anf7 in
            if anf3 
            then
-             let tl = `list_tl list_0 in
+             let tl = ml_list_tl list_0 in
              let anf5 = ( + ) acc 1 in
              ll_helper_1 anf5 tl 
            else panic ()
@@ -153,16 +153,16 @@ $ cat /tmp/lists.s
   > EOF
   ANF:
   let map f list =
-         let anf8 = `list_is_empty list in
+         let anf8 = ml_list_is_empty list in
          let anf1 = not anf8 in
          if anf1 
          then
-           let hd = `list_hd list in
-           let tl = `list_tl list in
+           let hd = ml_list_hd list in
+           let tl = ml_list_tl list in
            let anf3 = f hd in
            let anf4 = map f tl in
            ( :: ) anf3 anf4 
-         else let anf6 = `list_is_empty list in
+         else let anf6 = ml_list_is_empty list in
            if anf6 
            then [] 
            else panic ()
@@ -207,15 +207,15 @@ $ cat /tmp/lists.s
   ANF:
   let __temp_match_0 =
          let __temp_match_0 = [1; 2; 3] in
-         let anf3 = `list_len __temp_match_0 in
+         let anf3 = ml_list_len __temp_match_0 in
          let anf1 = ( = ) anf3 3 in
          if anf1 
          then __temp_match_0 
          else panic ()
   let __list_0 = __temp_match_0
-  let a = `list_field __list_0 0
-  let b = `list_field __list_0 1
-  let c = `list_field __list_0 2
+  let a = ml_list_field __list_0 0
+  let b = ml_list_field __list_0 1
+  let c = ml_list_field __list_0 2
   let main =
     let anf7 = println_int a in
     let anf8 = println_int b in
@@ -225,7 +225,7 @@ $ cat /tmp/lists.s
   init___temp_match_0 ANF:
   let init___temp_match_0 _ =
     let __temp_match_0 = [1; 2; 3] in
-    let anf3 = `list_len __temp_match_0 in
+    let anf3 = ml_list_len __temp_match_0 in
     let anf1 = ( = ) anf3 3 in
     if anf1 
     then __temp_match_0 
@@ -235,13 +235,13 @@ $ cat /tmp/lists.s
   let init___list_0 _ = __temp_match_0
   
   init_a ANF:
-  let init_a _ = `list_field __list_0 0
+  let init_a _ = ml_list_field __list_0 0
   
   init_b ANF:
-  let init_b _ = `list_field __list_0 1
+  let init_b _ = ml_list_field __list_0 1
   
   init_c ANF:
-  let init_c _ = `list_field __list_0 2
+  let init_c _ = ml_list_field __list_0 2
   
   $ cat /tmp/lists.s  
   .section .data

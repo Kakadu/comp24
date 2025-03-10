@@ -76,12 +76,12 @@ $ qemu-riscv64-static /tmp/tuples
   > EOF
   ANF:
   let cross arg_0 arg_1 =
-         let x2 = `get_tuple_field arg_1 0 in
-         let y2 = `get_tuple_field arg_1 1 in
-         let z2 = `get_tuple_field arg_1 2 in
-         let x1 = `get_tuple_field arg_0 0 in
-         let y1 = `get_tuple_field arg_0 1 in
-         let z1 = `get_tuple_field arg_0 2 in
+         let x2 = ml_get_tuple_field arg_1 0 in
+         let y2 = ml_get_tuple_field arg_1 1 in
+         let z2 = ml_get_tuple_field arg_1 2 in
+         let x1 = ml_get_tuple_field arg_0 0 in
+         let y1 = ml_get_tuple_field arg_0 1 in
+         let z1 = ml_get_tuple_field arg_0 2 in
          let anf4 = ( * ) y1 z2 in
          let anf5 = ( * ) z1 y2 in
          let x = ( - ) anf4 anf5 in
@@ -115,9 +115,9 @@ $ cat /tmp/tuples.s
   ANF:
   let main =
          let __tuple_0 = (1, 2, true) in
-         let a = `get_tuple_field __tuple_0 0 in
-         let b = `get_tuple_field __tuple_0 1 in
-         let c = `get_tuple_field __tuple_0 2 in
+         let a = ml_get_tuple_field __tuple_0 0 in
+         let b = ml_get_tuple_field __tuple_0 1 in
+         let c = ml_get_tuple_field __tuple_0 2 in
          let anf0 = println_int a in
          let anf1 = println_int b in
          let anf2 = println_bool c in
@@ -143,14 +143,14 @@ $ cat /tmp/tuples.s
   > EOF
   ANF:
   let div x =
-         let anf3 = `get_tuple_field x 1 in
+         let anf3 = ml_get_tuple_field x 1 in
          let anf1 = ( = ) anf3 0 in
          if anf1 
-         then let a = `get_tuple_field x 0 in
+         then let a = ml_get_tuple_field x 0 in
            0 
          else
-           let a_0 = `get_tuple_field x 0 in
-           let b = `get_tuple_field x 1 in
+           let a_0 = ml_get_tuple_field x 0 in
+           let b = ml_get_tuple_field x 1 in
            ( / ) a_0 b
   let main =
     let anf7 = div (10, 2) in
@@ -177,9 +177,9 @@ $ cat /tmp/tuples.s
   ANF:
   let __temp_match_0 = (1, 2, 3)
   let __tuple_0 = __temp_match_0
-  let a = `get_tuple_field __tuple_0 0
-  let b = `get_tuple_field __tuple_0 1
-  let c = `get_tuple_field __tuple_0 2
+  let a = ml_get_tuple_field __tuple_0 0
+  let b = ml_get_tuple_field __tuple_0 1
+  let c = ml_get_tuple_field __tuple_0 2
   let main =
     let anf3 = println_int a in
     let anf4 = println_int b in
@@ -193,13 +193,13 @@ $ cat /tmp/tuples.s
   let init___tuple_0 _ = __temp_match_0
   
   init_a ANF:
-  let init_a _ = `get_tuple_field __tuple_0 0
+  let init_a _ = ml_get_tuple_field __tuple_0 0
   
   init_b ANF:
-  let init_b _ = `get_tuple_field __tuple_0 1
+  let init_b _ = ml_get_tuple_field __tuple_0 1
   
   init_c ANF:
-  let init_c _ = `get_tuple_field __tuple_0 2
+  let init_c _ = ml_get_tuple_field __tuple_0 2
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
@@ -221,10 +221,10 @@ $ cat /tmp/tuples.s
   let tuple = (1, (2, 3))
   let __temp_match_0 = tuple
   let __tuple_0 = __temp_match_0
-  let a = `get_tuple_field __tuple_0 0
-  let __tuple_1 = `get_tuple_field __tuple_0 1
-  let b = `get_tuple_field __tuple_1 0
-  let c = `get_tuple_field __tuple_1 1
+  let a = ml_get_tuple_field __tuple_0 0
+  let __tuple_1 = ml_get_tuple_field __tuple_0 1
+  let b = ml_get_tuple_field __tuple_1 0
+  let c = ml_get_tuple_field __tuple_1 1
   let main =
     let anf4 = println_int a in
     let anf5 = println_int b in
@@ -241,16 +241,16 @@ $ cat /tmp/tuples.s
   let init___tuple_0 _ = __temp_match_0
   
   init_a ANF:
-  let init_a _ = `get_tuple_field __tuple_0 0
+  let init_a _ = ml_get_tuple_field __tuple_0 0
   
   init___tuple_1 ANF:
-  let init___tuple_1 _ = `get_tuple_field __tuple_0 1
+  let init___tuple_1 _ = ml_get_tuple_field __tuple_0 1
   
   init_b ANF:
-  let init_b _ = `get_tuple_field __tuple_1 0
+  let init_b _ = ml_get_tuple_field __tuple_1 0
   
   init_c ANF:
-  let init_c _ = `get_tuple_field __tuple_1 1
+  let init_c _ = ml_get_tuple_field __tuple_1 1
   
 $ cat /tmp/tuples.s
   $ riscv64-linux-gnu-gcc -static /tmp/tuples.s -o /tmp/tuples -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
