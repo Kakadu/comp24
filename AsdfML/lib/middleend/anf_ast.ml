@@ -27,7 +27,7 @@ and aexpr =
   | ACExpr of cexpr
 [@@deriving show { with_path = false }]
 
-type fn = Fn of id * id list * aexpr [@@deriving show { with_path = false }]
+type fn = Fn of rec_flag * id * id list * aexpr [@@deriving show { with_path = false }]
 type program = fn list [@@deriving show { with_path = false }]
 
 let count_bindings (fn : fn) =
@@ -38,7 +38,7 @@ let count_bindings (fn : fn) =
     | ALet (_, cexpr, aexpr) -> 1 + helper_cexpr cexpr + helper_aexpr aexpr
     | ACExpr cexpr -> helper_cexpr cexpr
   and helper = function
-    | Fn (_, _, aexpr) -> helper_aexpr aexpr
+    | Fn (_, _, _, aexpr) -> helper_aexpr aexpr
   in
   helper fn
 ;;
@@ -82,13 +82,19 @@ and pp_aexpr fmt = function
 ;;
 
 let pp_fn fmt = function
-  | Fn (id, args, aexpr) ->
+  | Fn (flag, id, args, aexpr) ->
+    let let_ =
+      match flag with
+      | NonRec -> "let"
+      | Rec -> "let rec"
+    in
     (match args with
-     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]@." id pp_aexpr aexpr
+     | [] -> fprintf fmt "@[<2>@,%s %s =@ %a@]@." let_ id pp_aexpr aexpr
      | _ ->
        fprintf
          fmt
-         "@[<2>@,let %s %s =@ %a@]@."
+         "@[<2>@,%s %s %s =@ %a@]@."
+         let_
          id
          (String.concat args ~sep:" ")
          pp_aexpr

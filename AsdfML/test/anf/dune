@@ -1,7 +1,7 @@
 (library
  (name inline_anf)
  (libraries AsdfML.Lib test)
- (modules Inline_anf)
+ (modules Inline_anf Typecheck)
  (preprocess
   (pps ppx_inline_test ppx_expect))
  (instrumentation

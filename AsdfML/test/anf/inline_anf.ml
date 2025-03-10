@@ -50,7 +50,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let fact x =
+    let rec fact x =
       let anf1 = ( < ) x 2 in
       if anf1
       then 1
@@ -78,7 +78,7 @@ let%expect_test _ =
     {|
     let ll_2 cont n_0 res = let anf1 = ( * ) n_0 res in
       cont anf1
-    let ll_helper_1 n_0 cont =
+    let rec ll_helper_1 n_0 cont =
       let anf3 = ( <= ) n_0 1 in
       if anf3
       then cont 1
@@ -146,7 +146,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let map f list =
+    let rec map f list =
       let anf8 = ml_list_is_empty list in
       let anf1 = not anf8 in
       if anf1
@@ -160,7 +160,7 @@ let%expect_test _ =
         if anf6
         then []
         else panic ()
-    let map_ f_0 list_0 =
+    let rec map_ f_0 list_0 =
       let anf14 = ml_list_is_empty list_0 in
       let anf10 = not anf14 in
       if anf10
@@ -188,7 +188,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ll_helper_1 acc n_0 =
+    let rec ll_helper_1 acc n_0 =
       let anf23 = ml_get_tuple_field (n_0, acc) 0 in
       let anf19 = ( = ) anf23 0 in
       let anf22 = ml_get_tuple_field (n_0, acc) 1 in
@@ -281,7 +281,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let ll_helper_1 x acc n_0 =
+    let rec ll_helper_1 x acc n_0 =
       let anf1 = ( = ) n_0 0 in
       if anf1
       then acc
