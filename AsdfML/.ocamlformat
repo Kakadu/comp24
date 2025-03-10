@@ -1,4 +1,6 @@
 profile=janestreet
 sequence-style=terminator
 max-indent=2
+module-item-spacing=preserve
+sequence-blank-line=preserve-one
 
