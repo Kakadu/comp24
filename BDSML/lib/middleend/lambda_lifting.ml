@@ -95,7 +95,7 @@ let ll_struct structure =
   List.fold structure ~init:(return []) ~f:(fun acc hd ->
     let+ decls1 = ll_struct_item hd
     and+ decls2 = acc in
-    decls1 @ decls2)
+    decls2 @ decls1)
 ;;
 
 (*Must be used after alpha_conversion, pattern removing and closure_conversion*)

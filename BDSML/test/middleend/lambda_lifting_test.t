@@ -28,3 +28,13 @@
    (let __var_y = ((__op_plus __var_x) 1) in 
    (lifted_1 __var_y))));;
   let __var_f = lifted_0;;
+
+  $ ./run_lambda_lifting.exe <<- EOF
+  > let a = 4;;
+  > let b = 5;;
+  > let f b = a + b;;
+  let __var_a = 4;;
+  let __var_b = 5;;
+  let lifted_0 = (fun __reserved_0 -> (let __var_b0 = __reserved_0 in 
+   ((__op_plus __var_a) __var_b0)));;
+  let __var_f = lifted_0;;
