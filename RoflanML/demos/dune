@@ -1,0 +1,49 @@
+(executable
+ (name demoCC)
+ (modules demoCC)
+ (public_name demoCC)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoCC)
+ (deps ./demoCC.exe))
+
+(executable
+ (name demoLL)
+ (modules demoLL)
+ (public_name demoLL)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoLL)
+ (deps ./demoLL.exe))
+
+(executable
+ (name demoANF)
+ (modules demoANF)
+ (public_name demoANF)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoANF)
+ (deps ./demoANF.exe))
+
+(executable
+ (name demoANFParseAndTypes)
+ (modules demoANFParseAndTypes)
+ (public_name demoANFParseAndTypes)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoANFParseAndTypes)
+ (deps ./demoANFParseAndTypes.exe))
+
+(executable
+ (name exe_qcheck)
+ (modules exe_qcheck)
+ (public_name exe_qcheck)
+ (libraries Roflanml_lib stdio qcheck))
+
+(cram
+ (applies_to test_qcheck)
+ (deps ./exe_qcheck.exe))

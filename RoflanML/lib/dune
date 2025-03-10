@@ -1,8 +1,22 @@
 (library
  (name Roflanml_lib)
  (public_name RoflanML.Lib)
- (modules Ast Parser Typing Typechecker)
- (libraries base angstrom)
+ (modules
+  Ast
+  Ast_to_str
+  Parser
+  Typing
+  Typechecker
+  Unparse
+  Check
+  Roflanml_stdlib
+  Common
+  Closure_conversion
+  Ll_ast
+  Lambda_lifting
+  Anf_ast
+  Anf)
+ (libraries base angstrom qcheck)
  (inline_tests)
  (preprocess
   (pps ppx_deriving.show ppx_deriving.eq ppx_expect))
@@ -24,3 +38,5 @@
 ;  (public_name RoflanML.Main) ; публичное имя исполняемого файла
 ;  (modules Main) ; указание на модуль Main (соответствует файлу main.ml)
 ;  (libraries RoflanML.Lib base angstrom)) ; библиотеки, которые использует исполняемый файл
+
+(include_subdirs unqualified)
