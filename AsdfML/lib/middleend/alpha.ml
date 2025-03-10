@@ -65,7 +65,9 @@ let alpha_id ?(is_def = false) (remaps : remaps) id =
     then return (id, remaps)
     else (
       let id_ext =
-        if Set.mem ctx.reserved id &&is_def then "__" ^ (Std.lookup_extern id |> Option.value_exn) else id
+        if Set.mem ctx.reserved id && is_def
+        then "__" ^ (Std.lookup_extern id |> Option.value_exn)
+        else id
       in
       let new_id, ctx = gen_new_id ctx id_ext in
       let* () = put ctx in
