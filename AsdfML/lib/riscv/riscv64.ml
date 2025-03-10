@@ -262,7 +262,8 @@ let peephole (code : (instr * string) Queue.t) =
 
 let collect_consts ast =
   List.partition_map ast ~f:(function
-    | Fn (_, id, [], exp) when String.( <> ) "main" id -> Either.first (id, "init_" ^ id, exp)
+    | Fn (_, id, [], exp) when String.( <> ) "main" id ->
+      Either.first (id, "init_" ^ id, exp)
     | x -> Either.second x)
 ;;
 

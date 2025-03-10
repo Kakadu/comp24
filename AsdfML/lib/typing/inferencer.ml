@@ -300,7 +300,7 @@ module TypeEnv = struct
 
   let builtins =
     let open Std in
-    stdlib@runtime |> List.map ~f:(fun x -> x.name, x.typ)
+    stdlib @ runtime |> List.map ~f:(fun x -> x.name, x.typ)
   ;;
 
   let default =
