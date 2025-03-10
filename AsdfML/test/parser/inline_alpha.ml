@@ -206,7 +206,8 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test {|
+  test
+    {|
   let ll_0 = fun x -> x
   let anf = 42
   let x = anf
