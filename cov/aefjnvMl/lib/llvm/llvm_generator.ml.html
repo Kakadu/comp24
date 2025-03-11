@@ -437,49 +437,49 @@ module LlvmCompiler (Ctx : LlvmGlobalCtx) = struct
   open Anf_conversion.Anf_ast
 
   let gen_scoped_name = function
-    | <span data-count="373">L</span>ocal_id name -&gt; load_var name
-    | <span data-count="31">G</span>lobal_func name -&gt; call_empty_closure_alloc name
-    | <span data-count="1">G</span>lobal_var name -&gt;
-      let* cache_var = load_local_var_op<span data-count="1">t</span> name in
-      <span data-count="1">(</span>match cache_var with
+    | <span data-count="746">L</span>ocal_id name -&gt; load_var name
+    | <span data-count="62">G</span>lobal_func name -&gt; call_empty_closure_alloc name
+    | <span data-count="2">G</span>lobal_var name -&gt;
+      let* cache_var = load_local_var_op<span data-count="2">t</span> name in
+      <span data-count="2">(</span>match cache_var with
        | <span data-count="0">S</span>ome x -&gt; return x
-       | <span data-count="1">N</span>one -&gt;
-         let* global_var = load_global_va<span data-count="1">r</span> name in
-         <span data-count="1">l</span>ocalize_global_var global_var name)
+       | <span data-count="2">N</span>one -&gt;
+         let* global_var = load_global_va<span data-count="2">r</span> name in
+         <span data-count="2">l</span>ocalize_global_var global_var name)
   ;;
 
   let gen_immexpr iexpr =
-    <span data-count="547">m</span>atch iexpr with
-    | <span data-count="155">I</span>mm_int i -&gt; return @@ rt_in<span data-count="155">t</span> i
-    | <span data-count="1">I</span>mm_bool b -&gt; return @@ rt_in<span data-count="1">t</span> @@ Bool.to_in<span data-count="1">t</span> b
-    | <span data-count="12">I</span>mm_unit | <span data-count="22">I</span>mm_nil | <span data-count="0">I</span>mm_id Id_unit -&gt; return @@ null
-    | <span data-count="357">I</span>mm_id (Id_name scoped_id) -&gt; gen_scoped_name scoped_id
+    <span data-count="1094">m</span>atch iexpr with
+    | <span data-count="310">I</span>mm_int i -&gt; return @@ rt_in<span data-count="310">t</span> i
+    | <span data-count="2">I</span>mm_bool b -&gt; return @@ rt_in<span data-count="2">t</span> @@ Bool.to_in<span data-count="2">t</span> b
+    | <span data-count="24">I</span>mm_unit | <span data-count="44">I</span>mm_nil | <span data-count="0">I</span>mm_id Id_unit -&gt; return @@ null
+    | <span data-count="714">I</span>mm_id (Id_name scoped_id) -&gt; gen_scoped_name scoped_id
   ;;
 
   let is_call_ready ready_args_n = function
-    | <span data-count="216">G</span>lobal_func name -&gt;
-      let+ _, full_args_n, _ = lookup_fun<span data-count="216">c</span> name in
-      <span data-count="216">(</span>match ready_args_n = full_args_n with
-       | <span data-count="203">t</span>rue -&gt; Some name
-       | <span data-count="13">f</span>alse -&gt; None)
-    | <span data-count="35">_</span> -&gt; return None
+    | <span data-count="432">G</span>lobal_func name -&gt;
+      let+ _, full_args_n, _ = lookup_fun<span data-count="432">c</span> name in
+      <span data-count="432">(</span>match ready_args_n = full_args_n with
+       | <span data-count="406">t</span>rue -&gt; Some name
+       | <span data-count="26">f</span>alse -&gt; None)
+    | <span data-count="70">_</span> -&gt; return None
   ;;
 
   let rec gen_cexpr : cexpr -&gt; llvalue t = function
-    | <span data-count="41">C</span>_immexpr imme -&gt; gen_immexpr imme
-    | <span data-count="4">C</span>_tuple imm'l -&gt;
-      let* llval'l = map<span data-count="4">t</span> imm'l gen_immexpr in
-      <span data-count="4">l</span>et n = List.length llval'l in
-      <span data-count="4">c</span>all_tuple_alloc n llval'l
+    | <span data-count="82">C</span>_immexpr imme -&gt; gen_immexpr imme
+    | <span data-count="8">C</span>_tuple imm'l -&gt;
+      let* llval'l = map<span data-count="8">t</span> imm'l gen_immexpr in
+      <span data-count="8">l</span>et n = List.length llval'l in
+      <span data-count="8">c</span>all_tuple_alloc n llval'l
     | <span data-count="0">C</span>_rlist (Imm_nil, []) -&gt; return @@ null
-    | <span data-count="11">C</span>_rlist (tl, rpref) -&gt;
-      let* tl' = gen_immexp<span data-count="11">r</span> tl in
-      <span data-count="11">l</span>et* args = map<span data-count="11">t</span> rpref gen_immexpr in
-      <span data-count="11">c</span>all_append_to_list (List.lengt<span data-count="11">h</span> args) tl' args
-    | <span data-count="251">C</span>_apply (f, fst_arg, arg'l) -&gt;
-      let* fst_arg' = gen_immexp<span data-count="251">r</span> fst_arg in
-      <span data-count="251">l</span>et* args' = map<span data-count="251">t</span> arg'l gen_immexpr in
-      <span data-count="251">l</span>et all_args = fst_arg' :: args' in
+    | <span data-count="22">C</span>_rlist (tl, rpref) -&gt;
+      let* tl' = gen_immexp<span data-count="22">r</span> tl in
+      <span data-count="22">l</span>et* args = map<span data-count="22">t</span> rpref gen_immexpr in
+      <span data-count="22">c</span>all_append_to_list (List.lengt<span data-count="22">h</span> args) tl' args
+    | <span data-count="502">C</span>_apply (f, fst_arg, arg'l) -&gt;
+      let* fst_arg' = gen_immexp<span data-count="502">r</span> fst_arg in
+      <span data-count="502">l</span>et* args' = map<span data-count="502">t</span> arg'l gen_immexpr in
+      <span data-count="502">l</span>et all_args = fst_arg' :: args' in
       (match f, all_args with
        | <span data-count="0">G</span>lobal_func "==", [ arg1; arg2 ] -&gt; gen_icmp Icmp.Eq arg1 arg2
        | <span data-count="0">G</span>lobal_func "&amp;&amp;", [ arg1; arg2 ] -&gt;
@@ -492,123 +492,123 @@ module LlvmCompiler (Ctx : LlvmGlobalCtx) = struct
          <span data-count="0">l</span>et untaged_arg1 = untag_rt_int builder arg1 in
          <span data-count="0">l</span>et untaged_arg2 = untag_rt_int builder arg2 in
          <span data-count="0">b</span>uild_or untaged_arg1 untaged_arg2 "" builder
-       | <span data-count="251">f</span>_name, args -&gt;
+       | <span data-count="502">f</span>_name, args -&gt;
          let args_for_apply_n = List.length args in
-         <span data-count="251">l</span>et* mb_call_name = is_call_read<span data-count="251">y</span> args_for_apply_n f_name in
-         <span data-count="251">(</span>match mb_call_name with
-          | <span data-count="203">S</span>ome f_name' -&gt; call_declared "" f_name' args
-          | <span data-count="48">N</span>one -&gt;
-            let* closure = gen_scoped_nam<span data-count="48">e</span> f_name in
-            <span data-count="48">c</span>all_apply_args_to_closure closure @@ all_args))
-    | <span data-count="34">C</span>_ifthenelse (cond, t, e) -&gt;
+         <span data-count="502">l</span>et* mb_call_name = is_call_read<span data-count="502">y</span> args_for_apply_n f_name in
+         <span data-count="502">(</span>match mb_call_name with
+          | <span data-count="406">S</span>ome f_name' -&gt; call_declared "" f_name' args
+          | <span data-count="96">N</span>one -&gt;
+            let* closure = gen_scoped_nam<span data-count="96">e</span> f_name in
+            <span data-count="96">c</span>all_apply_args_to_closure closure @@ all_args))
+    | <span data-count="68">C</span>_ifthenelse (cond, t, e) -&gt;
       let* cur_builder = get_builder in
-      <span data-count="34">l</span>et* cond' = gen_immexp<span data-count="34">r</span> cond in
-      <span data-count="34">l</span>et cond_i1 =
+      <span data-count="68">l</span>et* cond' = gen_immexp<span data-count="68">r</span> cond in
+      <span data-count="68">l</span>et cond_i1 =
         Llvm.build_trunc
-          (untag_rt_in<span data-count="34">t</span> cur_builder cond')
-          (Llvm.i1_typ<span data-count="34">e</span> Ctx.ctx)
+          (untag_rt_in<span data-count="68">t</span> cur_builder cond')
+          (Llvm.i1_typ<span data-count="68">e</span> Ctx.ctx)
           ""
           cur_builder
       in
-      <span data-count="34">l</span>et* cur_func =
+      <span data-count="68">l</span>et* cur_func =
         let* cur_fun_name = get_cur_func in
-        <span data-count="34">l</span>et+ _, _, func = lookup_fun<span data-count="34">c</span> cur_fun_name in
-        <span data-count="34">f</span>unc
+        <span data-count="68">l</span>et+ _, _, func = lookup_fun<span data-count="68">c</span> cur_fun_name in
+        <span data-count="68">f</span>unc
       in
-      <span data-count="34">l</span>et contin_bb = append_block Ctx.ctx "continuation" cur_func in
-      <span data-count="34">l</span>et gen_branch body =
-        <span data-count="68">l</span>et branch_block = append_block Ctx.ctx "" cur_func in
-        <span data-count="68">i</span>n_new_bb branch_block
+      <span data-count="68">l</span>et contin_bb = append_block Ctx.ctx "continuation" cur_func in
+      <span data-count="68">l</span>et gen_branch body =
+        <span data-count="136">l</span>et branch_block = append_block Ctx.ctx "" cur_func in
+        <span data-count="136">i</span>n_new_bb branch_block
         @@
-        let* aexp' = gen_aexp<span data-count="68">r</span> body in
-        <span data-count="68">l</span>et+ builder = get_builder in
-        <span data-count="68">l</span>et last_inst = build_br contin_bb builder in
-        <span data-count="68">(</span>aexp', instr_paren<span data-count="68">t</span> last_inst), branch_block
+        let* aexp' = gen_aexp<span data-count="136">r</span> body in
+        <span data-count="136">l</span>et+ builder = get_builder in
+        <span data-count="136">l</span>et last_inst = build_br contin_bb builder in
+        <span data-count="136">(</span>aexp', instr_paren<span data-count="136">t</span> last_inst), branch_block
       in
-      let* then_mb_res, then_bb = gen_branc<span data-count="34">h</span> t in
-      <span data-count="34">l</span>et+ else_mb_res, else_bb = gen_branc<span data-count="34">h</span> e in
-      <span data-count="34">l</span>et _ = build_cond_br cond_i1 then_bb else_bb cur_builder in
-      <span data-count="34">l</span>et _ = position_at_end contin_bb cur_builder in
-      <span data-count="34">b</span>uild_phi [ then_mb_res; else_mb_res ] "" cur_builder
+      let* then_mb_res, then_bb = gen_branc<span data-count="68">h</span> t in
+      <span data-count="68">l</span>et+ else_mb_res, else_bb = gen_branc<span data-count="68">h</span> e in
+      <span data-count="68">l</span>et _ = build_cond_br cond_i1 then_bb else_bb cur_builder in
+      <span data-count="68">l</span>et _ = position_at_end contin_bb cur_builder in
+      <span data-count="68">b</span>uild_phi [ then_mb_res; else_mb_res ] "" cur_builder
 
   and gen_aexpr = function
-    | <span data-count="132">A</span>_cexpr cexp -&gt; gen_cexpr cexp
-    | <span data-count="209">A</span>_let (name, cexpr, cont) -&gt;
-      let* cexpr' = gen_cexp<span data-count="209">r</span> cexpr in
-      <span data-count="209">(</span>match name with
-       | <span data-count="23">I</span>d_unit -&gt; gen_aexpr cont
-       | <span data-count="186">I</span>d_name nm -&gt;
-         let* () = store_local_va<span data-count="186">r</span> nm cexpr' in
-         <span data-count="186">g</span>en_aexpr cont)
+    | <span data-count="264">A</span>_cexpr cexp -&gt; gen_cexpr cexp
+    | <span data-count="418">A</span>_let (name, cexpr, cont) -&gt;
+      let* cexpr' = gen_cexp<span data-count="418">r</span> cexpr in
+      <span data-count="418">(</span>match name with
+       | <span data-count="46">I</span>d_unit -&gt; gen_aexpr cont
+       | <span data-count="372">I</span>d_name nm -&gt;
+         let* () = store_local_va<span data-count="372">r</span> nm cexpr' in
+         <span data-count="372">g</span>en_aexpr cont)
   ;;
 
   let declare_user_func { adec_name; adec_args; _ } =
-    <span data-count="47">l</span>et arg1, argsn = adec_args in
+    <span data-count="94">l</span>et arg1, argsn = adec_args in
     let args_n = List.length (arg1 :: argsn) in
-    <span data-count="47">l</span>et args_arr = Array.init args_n (fun _ -&gt; <span data-count="106">C</span>tx.i64_t) in
-    <span data-count="47">l</span>et fun_tp = function_type Ctx.i64_t args_arr in
-    <span data-count="47">d</span>eclare_func adec_name args_n fun_tp
+    <span data-count="94">l</span>et args_arr = Array.init args_n (fun _ -&gt; <span data-count="212">C</span>tx.i64_t) in
+    <span data-count="94">l</span>et fun_tp = function_type Ctx.i64_t args_arr in
+    <span data-count="94">d</span>eclare_func adec_name args_n fun_tp
   ;;
 
   let define_user_func { adec_name; adec_args; adec_body } =
-    <span data-count="47">l</span>et* _, _, func = lookup_fun<span data-count="47">c</span> adec_name in
-    <span data-count="47">l</span>et entry_bb = append_block Ctx.ctx "entry" func in
-    <span data-count="47">l</span>et arg1, argsn = adec_args in
+    <span data-count="94">l</span>et* _, _, func = lookup_fun<span data-count="94">c</span> adec_name in
+    <span data-count="94">l</span>et entry_bb = append_block Ctx.ctx "entry" func in
+    <span data-count="94">l</span>et arg1, argsn = adec_args in
     let* _ =
-      new_func_scope adec_name entry_b<span data-count="47">b</span>
+      new_func_scope adec_name entry_b<span data-count="94">b</span>
       @@
       let* builder = get_builder in
-      <span data-count="47">l</span>et args_vals = Array.to_list (Llvm.param<span data-count="47">s</span> func) in
-      <span data-count="47">l</span>et* args_names = map<span data-count="47">t</span> (arg1 :: argsn) gen_id in
-      <span data-count="47">l</span>et name_and_val = List.combine args_names args_vals in
-      <span data-count="47">l</span>et* _ = map<span data-count="47">t</span> name_and_val (fun (nm, llval) -&gt; <span data-count="106">s</span>tore_local_var nm llval) in
-      <span data-count="47">l</span>et+ res = gen_aexp<span data-count="47">r</span> adec_body in
-      <span data-count="47">L</span>lvm.build_ret res builder
+      <span data-count="94">l</span>et args_vals = Array.to_list (Llvm.param<span data-count="94">s</span> func) in
+      <span data-count="94">l</span>et* args_names = map<span data-count="94">t</span> (arg1 :: argsn) gen_id in
+      <span data-count="94">l</span>et name_and_val = List.combine args_names args_vals in
+      <span data-count="94">l</span>et* _ = map<span data-count="94">t</span> name_and_val (fun (nm, llval) -&gt; <span data-count="212">s</span>tore_local_var nm llval) in
+      <span data-count="94">l</span>et+ res = gen_aexp<span data-count="94">r</span> adec_body in
+      <span data-count="94">L</span>lvm.build_ret res builder
     in
-    <span data-count="47">c</span>heck_func adec_name func
+    <span data-count="94">c</span>heck_func adec_name func
   ;;
 
   (* Should be run only in main function *)
   let gen_anf_decl = function
-    | <span data-count="29">A</span>_NonrecDecl func -&gt;
-      let* _ = declare_user_fun<span data-count="29">c</span> func in
-      <span data-count="29">i</span>gnore_t @@ define_user_fun<span data-count="29">c</span> func
-    | <span data-count="17">A</span>_RecDecl (func1, funcn) -&gt;
+    | <span data-count="58">A</span>_NonrecDecl func -&gt;
+      let* _ = declare_user_fun<span data-count="58">c</span> func in
+      <span data-count="58">i</span>gnore_t @@ define_user_fun<span data-count="58">c</span> func
+    | <span data-count="34">A</span>_RecDecl (func1, funcn) -&gt;
       let all_funcs = func1 :: funcn in
-      let* _ = map<span data-count="17">t</span> all_funcs declare_user_func in
-      <span data-count="17">i</span>gnore_t @@ map<span data-count="17">t</span> all_funcs define_user_func
+      let* _ = map<span data-count="34">t</span> all_funcs declare_user_func in
+      <span data-count="34">i</span>gnore_t @@ map<span data-count="34">t</span> all_funcs define_user_func
       (* All global bindings declare as global variables, but defined only in main scope *)
-    | <span data-count="17">A</span>_GlobalV (bind_name, expr) -&gt;
-      let* bind_name = gen_i<span data-count="17">d</span> bind_name in
-      <span data-count="17">l</span>et global_var = create_global_var bind_name in
-      <span data-count="17">l</span>et* () = store_global_va<span data-count="17">r</span> bind_name global_var in
-      <span data-count="17">l</span>et* expr' = gen_aexp<span data-count="17">r</span> expr in
-      <span data-count="17">i</span>gnore_t
+    | <span data-count="34">A</span>_GlobalV (bind_name, expr) -&gt;
+      let* bind_name = gen_i<span data-count="34">d</span> bind_name in
+      <span data-count="34">l</span>et global_var = create_global_var bind_name in
+      <span data-count="34">l</span>et* () = store_global_va<span data-count="34">r</span> bind_name global_var in
+      <span data-count="34">l</span>et* expr' = gen_aexp<span data-count="34">r</span> expr in
+      <span data-count="34">i</span>gnore_t
       @@
       let+ builder = get_builder in
-      <span data-count="17">b</span>uild_store expr' global_var builder
+      <span data-count="34">b</span>uild_store expr' global_var builder
   ;;
 
-  let gen_prog prog = <span data-count="14">m</span>apt prog gen_anf_decl
+  let gen_prog prog = <span data-count="28">m</span>apt prog gen_anf_decl
 
   let compile_llvm_common prog =
-    <span data-count="14">l</span>et open Common.Naming in
+    <span data-count="28">l</span>et open Common.Naming in
     let main_func_tp = function_type Ctx.i64_t [||] in
-    <span data-count="14">l</span>et main_func = declare_function rt_'main' main_func_tp Ctx.g_module in
-    <span data-count="14">l</span>et entry_bb = append_block Ctx.ctx "entry" main_func in
-    <span data-count="14">l</span>et builder = builder_at Ctx.ctx (instr_begi<span data-count="14">n</span> entry_bb) in
-    <span data-count="14">l</span>et res =
+    <span data-count="28">l</span>et main_func = declare_function rt_'main' main_func_tp Ctx.g_module in
+    <span data-count="28">l</span>et entry_bb = append_block Ctx.ctx "entry" main_func in
+    <span data-count="28">l</span>et builder = builder_at Ctx.ctx (instr_begi<span data-count="28">n</span> entry_bb) in
+    <span data-count="28">l</span>et res =
       let st =
         let func_map =
           Defined_Map.add rt_'main' (main_func_tp, 0, main_func) Defined_Map.empty
         in
-        <span data-count="14">r</span>t_'main', builder, (func_map, Defined_Map.empty, Defined_Map.empty)
+        <span data-count="28">r</span>t_'main', builder, (func_map, Defined_Map.empty, Defined_Map.empty)
       in
-      ru<span data-count="14">n</span>
+      ru<span data-count="28">n</span>
         (let* _ = declare_stdlib_functions in
-         <span data-count="14">l</span>et* _ = in_new_bb entry_b<span data-count="14">b</span> @@ gen_pro<span data-count="14">g</span> prog in
-         <span data-count="14">l</span>et _ = build_ret (const_in<span data-count="14">t</span> Ctx.i64_t 0) builder in
-         <span data-count="14">c</span>heck_func rt_'main' main_func)
+         <span data-count="28">l</span>et* _ = in_new_bb entry_b<span data-count="28">b</span> @@ gen_pro<span data-count="28">g</span> prog in
+         <span data-count="28">l</span>et _ = build_ret (const_in<span data-count="28">t</span> Ctx.i64_t 0) builder in
+         <span data-count="28">c</span>heck_func rt_'main' main_func)
         0
         st
     in

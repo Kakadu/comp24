@@ -135,14 +135,14 @@ module Ast_test_utils = struct
   let ( let* ) = ( &gt;&gt;= )
 
   let ( let*! ) x f =
-    <span data-count="412">l</span>et* x = x in
-    <span data-count="402">l</span>et* ast = <span data-count="402">f</span> x in
-    <span data-count="391">r</span>eturn ast
+    <span data-count="496">l</span>et* x = x in
+    <span data-count="486">l</span>et* ast = <span data-count="486">f</span> x in
+    <span data-count="475">r</span>eturn ast
   ;;
 
   let ( let+! ) x f =
-    <span data-count="131">l</span>et*! x = x in
-    <span data-count="131">r</span>eturn @@ <span data-count="131">f</span> x
+    <span data-count="145">l</span>et*! x = x in
+    <span data-count="145">r</span>eturn @@ <span data-count="145">f</span> x
   ;;
 
   let ( let* ) x f =

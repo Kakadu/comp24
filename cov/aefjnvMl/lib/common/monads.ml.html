@@ -221,51 +221,51 @@
 module BaseSEMonad (StateT : Base.T) (ErrorT : Base.T) = struct
   type 'a t = StateT.t -&gt; StateT.t * ('a, ErrorT.t) Result.t
 
-  let run at new_st = <span data-count="371">a</span>t new_st
+  let run at new_st = <span data-count="455">a</span>t new_st
   let fail e st = <span data-count="0">s</span>t, Base.Result.fai<span data-count="0">l</span> e
-  let return x st = <span data-count="50755">s</span>t, Base.Result.retur<span data-count="50755">n</span> x
-  let read st = <span data-count="22673">(</span>retur<span data-count="22673">n</span> st) st
-  let save new_ctx _ = <span data-count="7815">n</span>ew_ctx, Result.o<span data-count="7815">k</span> ()
+  let return x st = <span data-count="68780">s</span>t, Base.Result.retur<span data-count="68780">n</span> x
+  let read st = <span data-count="30433">(</span>retur<span data-count="30433">n</span> st) st
+  let save new_ctx _ = <span data-count="10235">n</span>ew_ctx, Result.o<span data-count="10235">k</span> ()
 
   let ( &gt;&gt;= ) a f st =
-    <span data-count="58199">l</span>et st', res = a st in
-    <span data-count="58199">m</span>atch res with
+    <span data-count="78560">l</span>et st', res = a st in
+    <span data-count="78560">m</span>atch res with
     | <span data-count="0">E</span>rror x -&gt; st', Error x
-    | <span data-count="58199">O</span>k a -&gt; f a st'
+    | <span data-count="78560">O</span>k a -&gt; f a st'
   ;;
 
-  let ( let* ) x f = <span data-count="55541">x</span> &gt;&gt;= f
+  let ( let* ) x f = <span data-count="74731">x</span> &gt;&gt;= f
 
   let ( &gt;&gt;| ) a f st =
-    <span data-count="57970">l</span>et st', res = a st in
-    <span data-count="57970">m</span>atch res with
+    <span data-count="75131">l</span>et st', res = a st in
+    <span data-count="75131">m</span>atch res with
     | <span data-count="0">E</span>rror e -&gt; st', Error e
-    | <span data-count="57970">O</span>k a' -&gt; st', Ok (<span data-count="57970">f</span> a')
+    | <span data-count="75131">O</span>k a' -&gt; st', Ok (<span data-count="75131">f</span> a')
   ;;
 
-  let ( let+ ) x f = <span data-count="39272">x</span> &gt;&gt;| f
+  let ( let+ ) x f = <span data-count="50394">x</span> &gt;&gt;| f
 
   let fold_left_t xs ~init ~f =
-    <span data-count="3321">B</span>ase.List.fold_left xs ~init ~f:(fun acc x -&gt;
-      <span data-count="5297">l</span>et* acc = acc in
-      <span data-count="5297">f</span> acc x)
+    <span data-count="4774">B</span>ase.List.fold_left xs ~init ~f:(fun acc x -&gt;
+      <span data-count="7789">l</span>et* acc = acc in
+      <span data-count="7789">f</span> acc x)
   ;;
 
   let revt lt =
-    <span data-count="3155">l</span>et* l = lt in
-    <span data-count="3155">r</span>eturn @@ List.re<span data-count="3155">v</span> l
+    <span data-count="4581">l</span>et* l = lt in
+    <span data-count="4581">r</span>eturn @@ List.re<span data-count="4581">v</span> l
   ;;
 
   let mapt xs f =
-    <span data-count="3155">r</span>evt
-    @@ fold_left_<span data-count="3155">t</span> xs ~init:(retur<span data-count="3155">n</span> []) ~f:(fun acc x -&gt;
-      <span data-count="4984">l</span>et+ x' = <span data-count="4984">f</span> x in
-      <span data-count="4984">x</span>' :: acc)
+    <span data-count="4581">r</span>evt
+    @@ fold_left_<span data-count="4581">t</span> xs ~init:(retur<span data-count="4581">n</span> []) ~f:(fun acc x -&gt;
+      <span data-count="7426">l</span>et+ x' = <span data-count="7426">f</span> x in
+      <span data-count="7426">x</span>' :: acc)
   ;;
 
   let ignore_t f =
-    <span data-count="497">l</span>et* f_res = f in
-    <span data-count="497">r</span>eturn @@ ignore f_res
+    <span data-count="994">l</span>et* f_res = f in
+    <span data-count="994">r</span>eturn @@ ignore f_res
   ;;
 end
 
@@ -277,22 +277,22 @@ module GenericCounterMonad (StateT : Base.T) (ErrorT : Base.T) = struct
       end)
       (ErrorT)
 
-  let run at start_id new_st = <span data-count="371">r</span>un at (start_id, new_st)
+  let run at start_id new_st = <span data-count="455">r</span>un at (start_id, new_st)
 
   let fresh : int t =
     let* num, st = read in
-    <span data-count="1993">l</span>et+ () = sav<span data-count="1993">e</span> (num + 1, st) in
-    <span data-count="1993">n</span>um
+    <span data-count="2421">l</span>et+ () = sav<span data-count="2421">e</span> (num + 1, st) in
+    <span data-count="2421">n</span>um
   ;;
 
   let save st =
-    <span data-count="5822">l</span>et* num, _ = read in
-    <span data-count="5822">s</span>ave (num, st)
+    <span data-count="7814">l</span>et* num, _ = read in
+    <span data-count="7814">s</span>ave (num, st)
   ;;
 
   let read : StateT.t t =
     let+ _, st = read in
-    <span data-count="14858">s</span>t
+    <span data-count="20198">s</span>t
   ;;
 end
 
@@ -304,7 +304,7 @@ module CounterMonad (ErrorT : Base.T) = struct
       end)
       (ErrorT)
 
-  let run at id = <span data-count="89">r</span>un at id ()
+  let run at id = <span data-count="103">r</span>un at id ()
 end
 </code></pre>
       </div>

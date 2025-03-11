@@ -332,75 +332,75 @@ open
 
 let remove_saved_rdecls : ll_structure_item list t =
   let* rfuncs = read in
-  <span data-count="160">l</span>et+ () = sav<span data-count="160">e</span> [] in
-  <span data-count="160">r</span>funcs
+  <span data-count="206">l</span>et+ () = sav<span data-count="206">e</span> [] in
+  <span data-count="206">r</span>funcs
 ;;
 
 let save_decl func =
-  <span data-count="63">l</span>et* funcs = read in
-  <span data-count="63">s</span>ave @@ (func :: funcs)
+  <span data-count="80">l</span>et* funcs = read in
+  <span data-count="80">s</span>ave @@ (func :: funcs)
 ;;
 
 let save_toplevel_decl r_flag func other_funcs =
-  <span data-count="13">l</span>et decl = LL_Decl (r_flag, func, other_funcs) in
+  <span data-count="16">l</span>et decl = LL_Decl (r_flag, func, other_funcs) in
   save_decl decl
 ;;
 
 let new_me_name =
   let open Common.Naming in
   let+ num = fresh in
-  <span data-count="50">w</span>ith_pref ll_prefix @@ Int.to_strin<span data-count="50">g</span> num
+  <span data-count="64">w</span>ith_pref ll_prefix @@ Int.to_strin<span data-count="64">g</span> num
 ;;
 
 let optimize_func arg body =
-  <span data-count="167">l</span>et rec helper rargs = function
-    | <span data-count="186">M</span>Exp_function (arg', body') -&gt; helper (arg' :: rargs) body'
-    | <span data-count="167">b</span>ody' -&gt; List.re<span data-count="167">v</span> rargs, body'
+  <span data-count="214">l</span>et rec helper rargs = function
+    | <span data-count="245">M</span>Exp_function (arg', body') -&gt; helper (arg' :: rargs) body'
+    | <span data-count="214">b</span>ody' -&gt; List.re<span data-count="214">v</span> rargs, body'
   in
   let args, body' = helper [] body in
-  <span data-count="167">(</span>arg, args), body'
+  <span data-count="214">(</span>arg, args), body'
 ;;
 
 let rec to_ll_expr = function
-  | <span data-count="721">M</span>Exp_constant c -&gt; return @@ LL_const c
-  | <span data-count="1709">M</span>Exp_ident id -&gt; return @@ LL_ident id
-  | <span data-count="14">M</span>Exp_tuple tup -&gt;
-    let+ tup' = map<span data-count="14">t</span> tup to_ll_expr in
-    <span data-count="14">L</span>L_tuple tup'
-  | <span data-count="1575">M</span>Exp_apply (e1, e2) -&gt;
-    let* e1' = to_ll_exp<span data-count="1575">r</span> e1 in
-    <span data-count="1575">l</span>et+ e2' = to_ll_exp<span data-count="1575">r</span> e2 in
-    <span data-count="1575">L</span>L_apply (e1', e2')
-  | <span data-count="114">M</span>Exp_list (e1, e2) -&gt;
-    let* e1' = to_ll_exp<span data-count="114">r</span> e1 in
-    <span data-count="114">l</span>et+ e2' = to_ll_exp<span data-count="114">r</span> e2 in
-    <span data-count="114">L</span>L_list (e1', e2')
-  | <span data-count="137">M</span>Exp_ifthenelse (i, t, e) -&gt;
-    let* i' = to_ll_exp<span data-count="137">r</span> i in
-    <span data-count="137">l</span>et* t' = to_ll_exp<span data-count="137">r</span> t in
-    <span data-count="137">l</span>et+ e' = to_ll_exp<span data-count="137">r</span> e in
-    <span data-count="137">L</span>L_ifthenelse (i', t', e')
-  | <span data-count="50">M</span>Exp_function (arg, body) -&gt;
+  | <span data-count="911">M</span>Exp_constant c -&gt; return @@ LL_const c
+  | <span data-count="2169">M</span>Exp_ident id -&gt; return @@ LL_ident id
+  | <span data-count="18">M</span>Exp_tuple tup -&gt;
+    let+ tup' = map<span data-count="18">t</span> tup to_ll_expr in
+    <span data-count="18">L</span>L_tuple tup'
+  | <span data-count="2001">M</span>Exp_apply (e1, e2) -&gt;
+    let* e1' = to_ll_exp<span data-count="2001">r</span> e1 in
+    <span data-count="2001">l</span>et+ e2' = to_ll_exp<span data-count="2001">r</span> e2 in
+    <span data-count="2001">L</span>L_apply (e1', e2')
+  | <span data-count="141">M</span>Exp_list (e1, e2) -&gt;
+    let* e1' = to_ll_exp<span data-count="141">r</span> e1 in
+    <span data-count="141">l</span>et+ e2' = to_ll_exp<span data-count="141">r</span> e2 in
+    <span data-count="141">L</span>L_list (e1', e2')
+  | <span data-count="171">M</span>Exp_ifthenelse (i, t, e) -&gt;
+    let* i' = to_ll_exp<span data-count="171">r</span> i in
+    <span data-count="171">l</span>et* t' = to_ll_exp<span data-count="171">r</span> t in
+    <span data-count="171">l</span>et+ e' = to_ll_exp<span data-count="171">r</span> e in
+    <span data-count="171">L</span>L_ifthenelse (i', t', e')
+  | <span data-count="64">M</span>Exp_function (arg, body) -&gt;
     let* func_name = new_me_name in
-    <span data-count="50">l</span>et* func = lift_lambd<span data-count="50">a</span> func_name (arg, body) in
-    <span data-count="50">l</span>et+ () =
+    <span data-count="64">l</span>et* func = lift_lambd<span data-count="64">a</span> func_name (arg, body) in
+    <span data-count="64">l</span>et+ () =
       let decl = LL_Decl (Common.Ast.Nonrecursive, func, []) in
-      save_dec<span data-count="50">l</span> decl
+      save_dec<span data-count="64">l</span> decl
     in
-    <span data-count="50">L</span>L_ident func_name
-  | <span data-count="289">M</span>Exp_let (MDecl (r_flag, vb'l), cont) -&gt;
+    <span data-count="64">L</span>L_ident func_name
+  | <span data-count="367">M</span>Exp_let (MDecl (r_flag, vb'l), cont) -&gt;
     (match vb'l with
-     | <span data-count="289">v</span>b :: [] -&gt;
+     | <span data-count="367">v</span>b :: [] -&gt;
        (match vb.m_vb_pat, vb.m_vb_expr with
-        | <span data-count="13">I</span>d_name func_name, MExp_function (arg, body) -&gt;
-          let* func = lift_lambd<span data-count="13">a</span> func_name (arg, body) in
-          <span data-count="13">l</span>et* () = save_toplevel_dec<span data-count="13">l</span> r_flag func [] in
-          <span data-count="13">t</span>o_ll_expr cont
+        | <span data-count="16">I</span>d_name func_name, MExp_function (arg, body) -&gt;
+          let* func = lift_lambd<span data-count="16">a</span> func_name (arg, body) in
+          <span data-count="16">l</span>et* () = save_toplevel_dec<span data-count="16">l</span> r_flag func [] in
+          <span data-count="16">t</span>o_ll_expr cont
         | <span data-count="0">I</span>d_unit, MExp_function _ -&gt; fail "Impossible case (1)"
-        | <span data-count="276">_</span>, not_function -&gt;
-          let* ll_bind = to_ll_exp<span data-count="276">r</span> not_function in
-          <span data-count="276">l</span>et+ ll_cont = to_ll_exp<span data-count="276">r</span> cont in
-          <span data-count="276">L</span>L_let (vb.m_vb_pat, ll_bind, ll_cont))
+        | <span data-count="351">_</span>, not_function -&gt;
+          let* ll_bind = to_ll_exp<span data-count="351">r</span> not_function in
+          <span data-count="351">l</span>et+ ll_cont = to_ll_exp<span data-count="351">r</span> cont in
+          <span data-count="351">L</span>L_let (vb.m_vb_pat, ll_bind, ll_cont))
      | <span data-count="0">v</span>b :: vbl -&gt;
        let* func = lift_v<span data-count="0">b</span> vb in
        <span data-count="0">l</span>et* other_funcs = map<span data-count="0">t</span> vbl lift_vb in
@@ -409,50 +409,50 @@ let rec to_ll_expr = function
      | <span data-count="0">[</span>] -&gt; fail "Impossible case (2)")
 
 and lift_lambda name (arg, row_body) =
-  <span data-count="167">l</span>et+ lldec_args, lldec_body =
+  <span data-count="214">l</span>et+ lldec_args, lldec_body =
     let args, body = optimize_func arg row_body in
-    <span data-count="167">l</span>et+ ll_body = to_ll_exp<span data-count="167">r</span> body in
-    <span data-count="167">a</span>rgs, ll_body
+    <span data-count="214">l</span>et+ ll_body = to_ll_exp<span data-count="214">r</span> body in
+    <span data-count="214">a</span>rgs, ll_body
   in
-  <span data-count="167">{</span> lldec_name = name; lldec_args; lldec_body }
+  <span data-count="214">{</span> lldec_name = name; lldec_args; lldec_body }
 
 and lift_vb vb =
-  <span data-count="8">m</span>atch vb.m_vb_pat, vb.m_vb_expr with
-  | <span data-count="8">I</span>d_name func_name, MExp_function (arg, body) -&gt; lift_lambda func_name (arg, body)
+  <span data-count="10">m</span>atch vb.m_vb_pat, vb.m_vb_expr with
+  | <span data-count="10">I</span>d_name func_name, MExp_function (arg, body) -&gt; lift_lambda func_name (arg, body)
   | <span data-count="0">_</span> -&gt; fail "And can be used only with mutualrec cases [func and func and ... and func]"
 ;;
 
 let to_ll_structure_item_reversed (MDecl (r_flag, vb'l)) =
-  <span data-count="160">l</span>et* ll_str =
+  <span data-count="206">l</span>et* ll_str =
     match vb'l with
-    | <span data-count="156">v</span>b :: [] -&gt;
+    | <span data-count="201">v</span>b :: [] -&gt;
       (match vb.m_vb_pat, vb.m_vb_expr with
-       | <span data-count="96">I</span>d_name func_name, MExp_function (arg, body) -&gt;
-         let+ func = lift_lambd<span data-count="96">a</span> func_name (arg, body) in
-         <span data-count="96">L</span>L_Decl (r_flag, func, [])
+       | <span data-count="124">I</span>d_name func_name, MExp_function (arg, body) -&gt;
+         let+ func = lift_lambd<span data-count="124">a</span> func_name (arg, body) in
+         <span data-count="124">L</span>L_Decl (r_flag, func, [])
        | <span data-count="0">I</span>d_unit, MExp_function _ -&gt; fai<span data-count="0">l</span> "Impossible case (1)"
-       | <span data-count="60">_</span>, not_function -&gt;
-         let+ ll_bind = to_ll_exp<span data-count="60">r</span> not_function in
-         <span data-count="60">L</span>L_GlobalV (vb.m_vb_pat, ll_bind))
-    | <span data-count="4">v</span>b :: vbl -&gt;
-      let* func = lift_v<span data-count="4">b</span> vb in
-      <span data-count="4">l</span>et+ other_funcs = map<span data-count="4">t</span> vbl lift_vb in
-      <span data-count="4">L</span>L_Decl (r_flag, func, other_funcs)
+       | <span data-count="77">_</span>, not_function -&gt;
+         let+ ll_bind = to_ll_exp<span data-count="77">r</span> not_function in
+         <span data-count="77">L</span>L_GlobalV (vb.m_vb_pat, ll_bind))
+    | <span data-count="5">v</span>b :: vbl -&gt;
+      let* func = lift_v<span data-count="5">b</span> vb in
+      <span data-count="5">l</span>et+ other_funcs = map<span data-count="5">t</span> vbl lift_vb in
+      <span data-count="5">L</span>L_Decl (r_flag, func, other_funcs)
     | <span data-count="0">[</span>] -&gt; fai<span data-count="0">l</span> "Impossible case (2)"
   in
-  <span data-count="160">l</span>et+ lifted_rdecls = remove_saved_rdecls in
-  <span data-count="160">L</span>ist.rev @@ (ll_str :: lifted_rdecls)
+  <span data-count="206">l</span>et+ lifted_rdecls = remove_saved_rdecls in
+  <span data-count="206">L</span>ist.rev @@ (ll_str :: lifted_rdecls)
 ;;
 
 let to_ll_program prog =
-  <span data-count="48">l</span>et+ reversed_ll_str'l'l = map<span data-count="48">t</span> prog to_ll_structure_item_reversed in
-  <span data-count="48">L</span>ist.concat @@ reversed_ll_str'l'l
+  <span data-count="62">l</span>et+ reversed_ll_str'l'l = map<span data-count="62">t</span> prog to_ll_structure_item_reversed in
+  <span data-count="62">L</span>ist.concat @@ reversed_ll_str'l'l
 ;;
 
 let lift_lambdas prog =
-  <span data-count="48">l</span>et open Common.Errors in
-  match run (to_ll_progra<span data-count="48">m</span> prog) 0 [] with
-  | <span data-count="48">_</span>, Ok ll_prog -&gt; Ok ll_prog
+  <span data-count="62">l</span>et open Common.Errors in
+  match run (to_ll_progra<span data-count="62">m</span> prog) 0 [] with
+  | <span data-count="62">_</span>, Ok ll_prog -&gt; Ok ll_prog
   | <span data-count="0">_</span>, Error msg -&gt; Result.Error (illegal_stat<span data-count="0">e</span> msg)
 ;;
 </code></pre>

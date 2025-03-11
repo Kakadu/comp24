@@ -220,20 +220,20 @@
 open Me_ast
 open Common.Ast
 
-let bin_app o_ l_ r_ = <span data-count="892">M</span>Exp_apply (MExp_apply (o_, l_), r_)
+let bin_app o_ l_ r_ = <span data-count="1047">M</span>Exp_apply (MExp_apply (o_, l_), r_)
 let bool_const v = <span data-count="0">M</span>Exp_constant (Const_bool v)
 
 let eval_bconst = function
   | <span data-count="5">M</span>Exp_constant (Const_bool x) -&gt; Some x
-  | <span data-count="204">_</span> -&gt; None
+  | <span data-count="238">_</span> -&gt; None
 ;;
 
 let is_bool_op =
   let open Common.Base_lib.LibF in
   function
-  | <span data-count="797">n</span>ame when name = get_nam<span data-count="797">e</span> op_and -&gt; <span data-count="1">t</span>rue
-  | <span data-count="796">n</span>ame when name = get_nam<span data-count="796">e</span> op_or -&gt; <span data-count="0">t</span>rue
-  | <span data-count="796">_</span> -&gt; false
+  | <span data-count="930">n</span>ame when name = get_nam<span data-count="930">e</span> op_and -&gt; <span data-count="1">t</span>rue
+  | <span data-count="929">n</span>ame when name = get_nam<span data-count="929">e</span> op_or -&gt; <span data-count="0">t</span>rue
+  | <span data-count="929">_</span> -&gt; false
 ;;
 
 let optimize_bool_op op l r =
@@ -251,49 +251,49 @@ let optimize_bool_op op l r =
 ;;
 
 let optimize_vb optimize_me { m_vb_pat; m_vb_expr } =
-  <span data-count="721">{</span> m_vb_pat; m_vb_expr = optimize_m<span data-count="721">e</span> m_vb_expr }
+  <span data-count="846">{</span> m_vb_pat; m_vb_expr = optimize_m<span data-count="846">e</span> m_vb_expr }
 ;;
 
 let optimize_decl' optimize_me (MDecl (rflag, vb'list)) =
-  <span data-count="714">l</span>et vb_l' = List.map (optimize_v<span data-count="714">b</span> optimize_me) vb'list in
-  <span data-count="714">M</span>Decl (rflag, vb_l')
+  <span data-count="838">l</span>et vb_l' = List.map (optimize_v<span data-count="838">b</span> optimize_me) vb'list in
+  <span data-count="838">M</span>Decl (rflag, vb_l')
 ;;
 
 let rec optimize_me = function
-  | <span data-count="207">M</span>Exp_ifthenelse (cond, then_br, else_br) -&gt;
+  | <span data-count="241">M</span>Exp_ifthenelse (cond, then_br, else_br) -&gt;
     let cond' = optimize_me cond in
-    <span data-count="207">l</span>et then_br' = optimize_me then_br in
-    <span data-count="207">l</span>et else_br' = optimize_me else_br in
-    <span data-count="207">(</span>match eval_bconst cond' with
-     | <span data-count="204">N</span>one -&gt; MExp_ifthenelse (cond', then_br', else_br')
+    <span data-count="241">l</span>et then_br' = optimize_me then_br in
+    <span data-count="241">l</span>et else_br' = optimize_me else_br in
+    <span data-count="241">(</span>match eval_bconst cond' with
+     | <span data-count="238">N</span>one -&gt; MExp_ifthenelse (cond', then_br', else_br')
      (* [if true then A else B] |---&gt; [A] *)
      | <span data-count="2">S</span>ome true -&gt; then_br'
      (* [if false then A else B] |---&gt; [B] *)
      | <span data-count="1">S</span>ome false -&gt; else_br')
-  | <span data-count="893">M</span>Exp_apply (MExp_apply (o, l), r) -&gt;
+  | <span data-count="1048">M</span>Exp_apply (MExp_apply (o, l), r) -&gt;
     let o' = optimize_me o in
-    <span data-count="893">l</span>et l' = optimize_me l in
-    <span data-count="893">l</span>et r' = optimize_me r in
-    <span data-count="893">l</span>et unpack = function
+    <span data-count="1048">l</span>et l' = optimize_me l in
+    <span data-count="1048">l</span>et r' = optimize_me r in
+    <span data-count="1048">l</span>et unpack = function
       | <span data-count="1">S</span>ome x -&gt; x
       | <span data-count="0">N</span>one -&gt; bin_app o' l' r'
     in
     (match o' with
-     | <span data-count="797">M</span>Exp_ident name when is_bool_o<span data-count="797">p</span> name -&gt; <span data-count="1">o</span>ptimize_bool_op name l' r' |&gt; <span data-count="1">u</span>npack
-     | <span data-count="892">_</span> -&gt; bin_app o' l' r')
-  | <span data-count="1132">M</span>Exp_constant c -&gt; MExp_constant c
-  | <span data-count="2596">M</span>Exp_ident i -&gt; MExp_ident i
-  | <span data-count="24">M</span>Exp_tuple me'list -&gt; MExp_tuple (List.ma<span data-count="24">p</span> optimize_me me'list)
-  | <span data-count="158">M</span>Exp_list (me1, me2) -&gt; MExp_list (optimize_m<span data-count="158">e</span> me1, optimize_m<span data-count="158">e</span> me2)
-  | <span data-count="625">M</span>Exp_apply (me1, me2) -&gt; MExp_apply (optimize_m<span data-count="625">e</span> me1, optimize_m<span data-count="625">e</span> me2)
-  | <span data-count="539">M</span>Exp_function (var, me) -&gt; MExp_function (var, optimize_m<span data-count="539">e</span> me)
-  | <span data-count="448">M</span>Exp_let (decl, me) -&gt;
+     | <span data-count="930">M</span>Exp_ident name when is_bool_o<span data-count="930">p</span> name -&gt; <span data-count="1">o</span>ptimize_bool_op name l' r' |&gt; <span data-count="1">u</span>npack
+     | <span data-count="1047">_</span> -&gt; bin_app o' l' r')
+  | <span data-count="1322">M</span>Exp_constant c -&gt; MExp_constant c
+  | <span data-count="3056">M</span>Exp_ident i -&gt; MExp_ident i
+  | <span data-count="28">M</span>Exp_tuple me'list -&gt; MExp_tuple (List.ma<span data-count="28">p</span> optimize_me me'list)
+  | <span data-count="185">M</span>Exp_list (me1, me2) -&gt; MExp_list (optimize_m<span data-count="185">e</span> me1, optimize_m<span data-count="185">e</span> me2)
+  | <span data-count="741">M</span>Exp_apply (me1, me2) -&gt; MExp_apply (optimize_m<span data-count="741">e</span> me1, optimize_m<span data-count="741">e</span> me2)
+  | <span data-count="645">M</span>Exp_function (var, me) -&gt; MExp_function (var, optimize_m<span data-count="645">e</span> me)
+  | <span data-count="526">M</span>Exp_let (decl, me) -&gt;
     let me' = optimize_me me in
-    <span data-count="448">M</span>Exp_let (optimize_decl<span data-count="448">'</span> optimize_me decl, me')
+    <span data-count="526">M</span>Exp_let (optimize_decl<span data-count="526">'</span> optimize_me decl, me')
 ;;
 
-let optimize_decl = optimize_decl<span data-count="82">'</span> optimize_me
-let optimize prog = <span data-count="89">L</span>ist.map optimize_decl prog
+let optimize_decl = optimize_decl<span data-count="96">'</span> optimize_me
+let optimize prog = <span data-count="103">L</span>ist.map optimize_decl prog
 </code></pre>
       </div>
     </div>

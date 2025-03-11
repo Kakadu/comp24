@@ -244,45 +244,45 @@ module Runtime (Ctx : LlvmGlobalCtx) = struct
   let tp_to_lltp =
     let open Ast in
     function
-    | <span data-count="42">P</span>typ_unit | <span data-count="364">P</span>typ_var _ | <span data-count="602">P</span>typ_int | <span data-count="182">P</span>typ_bool -&gt; return Ctx.i64_t
+    | <span data-count="84">P</span>typ_unit | <span data-count="728">P</span>typ_var _ | <span data-count="1204">P</span>typ_int | <span data-count="364">P</span>typ_bool -&gt; return Ctx.i64_t
     | <span data-count="0">_</span> -&gt; fail "Unsupported base_lib func type: no need"
   ;;
 
   let create_func_type arg_tps ret_tp =
-    <span data-count="434">l</span>et open Common.Base_lib.LibF in
+    <span data-count="868">l</span>et open Common.Base_lib.LibF in
     let args_tp_arr = Array.of_list arg_tps in
-    <span data-count="434">f</span>unction
-    | <span data-count="350">N</span>oVarargs -&gt; function_type ret_tp args_tp_arr
-    | <span data-count="84">V</span>arargs _ -&gt; var_arg_function_type ret_tp args_tp_arr
+    <span data-count="868">f</span>unction
+    | <span data-count="700">N</span>oVarargs -&gt; function_type ret_tp args_tp_arr
+    | <span data-count="168">V</span>arargs _ -&gt; var_arg_function_type ret_tp args_tp_arr
   ;;
 
   (* name -&gt; Alias ... *)
   let declare_std_aliased_func f =
-    <span data-count="434">l</span>et name = get_name f in
-    <span data-count="434">l</span>et alias = get_rt_alias f in
-    <span data-count="434">l</span>et vararg_tp, (args_tp, ret_tp) = get_row_type f in
-    <span data-count="434">l</span>et* args = map<span data-count="434">t</span> args_tp tp_to_lltp in
-    <span data-count="434">l</span>et args_n = List.length args in
-    <span data-count="434">l</span>et* ret = tp_to_llt<span data-count="434">p</span> ret_tp in
-    <span data-count="434">l</span>et f_tp = create_func_type args ret vararg_tp in
-    <span data-count="434">i</span>gnore_t @@ aliased_declare_fun<span data-count="434">c</span> name alias args_n f_tp
+    <span data-count="868">l</span>et name = get_name f in
+    <span data-count="868">l</span>et alias = get_rt_alias f in
+    <span data-count="868">l</span>et vararg_tp, (args_tp, ret_tp) = get_row_type f in
+    <span data-count="868">l</span>et* args = map<span data-count="868">t</span> args_tp tp_to_lltp in
+    <span data-count="868">l</span>et args_n = List.length args in
+    <span data-count="868">l</span>et* ret = tp_to_llt<span data-count="868">p</span> ret_tp in
+    <span data-count="868">l</span>et f_tp = create_func_type args ret vararg_tp in
+    <span data-count="868">i</span>gnore_t @@ aliased_declare_fun<span data-count="868">c</span> name alias args_n f_tp
   ;;
 
   (* DEF values *)
-  let declare_stdlib_functions = map<span data-count="14">t</span> Base_lib.base_lib_decls declare_std_aliased_func
+  let declare_stdlib_functions = map<span data-count="28">t</span> Base_lib.base_lib_decls declare_std_aliased_func
 
   let gen_id =
     let open Match_elimination.Me_ast in
     function
-    | <span data-count="119">I</span>d_name nm -&gt; return nm
-    | <span data-count="4">I</span>d_unit -&gt;
+    | <span data-count="238">I</span>d_name nm -&gt; return nm
+    | <span data-count="8">I</span>d_unit -&gt;
       let+ fresh_n = fresh in
-      <span data-count="4">N</span>aming.runtime_prefix ^ Int.to_strin<span data-count="4">g</span> fresh_n
+      <span data-count="8">N</span>aming.runtime_prefix ^ Int.to_strin<span data-count="8">g</span> fresh_n
   ;;
 
-  let tag_int i = <span data-count="250">(</span>i lsl 1) + 1
-  let rt_int value = <span data-count="250">c</span>onst_int Ctx.i64_t (tag_in<span data-count="250">t</span> value)
-  let null : llvalue = const_in<span data-count="14">t</span> Ctx.i64_t 0
+  let tag_int i = <span data-count="500">(</span>i lsl 1) + 1
+  let rt_int value = <span data-count="500">c</span>onst_int Ctx.i64_t (tag_in<span data-count="500">t</span> value)
+  let null : llvalue = const_in<span data-count="28">t</span> Ctx.i64_t 0
 
   (* WRAPPERS *)
 
@@ -294,7 +294,7 @@ module Runtime (Ctx : LlvmGlobalCtx) = struct
       builder
   ;;
 
-  let untag_rt_int builder i = <span data-count="34">L</span>lvm.build_ashr i (Llvm.const_in<span data-count="34">t</span> Ctx.i64_t 1) "" builder
+  let untag_rt_int builder i = <span data-count="68">L</span>lvm.build_ashr i (Llvm.const_in<span data-count="68">t</span> Ctx.i64_t 1) "" builder
 
   let gen_icmp cmode val1 val2 =
     <span data-count="0">l</span>et* builder = get_builder in
@@ -306,24 +306,24 @@ module Runtime (Ctx : LlvmGlobalCtx) = struct
   (* SYS funcs *)
 
   let call_empty_closure_alloc name =
-    <span data-count="31">l</span>et* _, args_n, f = lookup_fun<span data-count="31">c</span> name in
-    <span data-count="31">l</span>et* builder = get_builder in
-    <span data-count="31">l</span>et casted_f = build_ptrtoint f Ctx.i64_t "" builder in
-    <span data-count="31">c</span>all_declared "" (get_nam<span data-count="31">e</span> create_empty_closure) [ casted_f; rt_in<span data-count="31">t</span> args_n ]
+    <span data-count="62">l</span>et* _, args_n, f = lookup_fun<span data-count="62">c</span> name in
+    <span data-count="62">l</span>et* builder = get_builder in
+    <span data-count="62">l</span>et casted_f = build_ptrtoint f Ctx.i64_t "" builder in
+    <span data-count="62">c</span>all_declared "" (get_nam<span data-count="62">e</span> create_empty_closure) [ casted_f; rt_in<span data-count="62">t</span> args_n ]
   ;;
 
   let call_tuple_alloc n values =
-    <span data-count="4">c</span>all_declared "" (get_nam<span data-count="4">e</span> alloc_tuple) @@ (rt_in<span data-count="4">t</span> n :: values)
+    <span data-count="8">c</span>all_declared "" (get_nam<span data-count="8">e</span> alloc_tuple) @@ (rt_in<span data-count="8">t</span> n :: values)
   ;;
 
   let call_append_to_list n tl reversed_args_to_append =
-    <span data-count="11">c</span>all_declared "" (get_nam<span data-count="11">e</span> append_to_list)
-    @@ (rt_in<span data-count="11">t</span> n :: tl :: reversed_args_to_append)
+    <span data-count="22">c</span>all_declared "" (get_nam<span data-count="22">e</span> append_to_list)
+    @@ (rt_in<span data-count="22">t</span> n :: tl :: reversed_args_to_append)
   ;;
 
   let call_apply_args_to_closure cl args =
-    <span data-count="48">l</span>et len = List.length args in
-    <span data-count="48">c</span>all_declared "" (get_nam<span data-count="48">e</span> apply_arguments) @@ (cl :: rt_in<span data-count="48">t</span> len :: args)
+    <span data-count="96">l</span>et len = List.length args in
+    <span data-count="96">c</span>all_declared "" (get_nam<span data-count="96">e</span> apply_arguments) @@ (cl :: rt_in<span data-count="96">t</span> len :: args)
   ;;
 end
 </code></pre>

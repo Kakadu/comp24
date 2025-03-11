@@ -491,190 +491,190 @@ type bind = ABind of string id_t * cexpr
 let new_me_name =
   let open Common.Naming in
   let+ num = fresh in
-  <span data-count="338">I</span>d_name (with_pref anf_prefi<span data-count="338">x</span> @@ Int.to_strin<span data-count="338">g</span> num)
+  <span data-count="472">I</span>d_name (with_pref anf_prefi<span data-count="472">x</span> @@ Int.to_strin<span data-count="472">g</span> num)
 ;;
 
 let const_to_immexpr =
   let open Common.Ast in
   function
-  | <span data-count="374">C</span>onst_int v -&gt; Imm_int v
-  | <span data-count="8">C</span>onst_bool v -&gt; Imm_bool v
-  | <span data-count="60">C</span>onst_nil -&gt; Imm_nil
-  | <span data-count="32">C</span>onst_unit -&gt; Imm_unit
+  | <span data-count="529">C</span>onst_int v -&gt; Imm_int v
+  | <span data-count="9">C</span>onst_bool v -&gt; Imm_bool v
+  | <span data-count="82">C</span>onst_nil -&gt; Imm_nil
+  | <span data-count="44">C</span>onst_unit -&gt; Imm_unit
 ;;
 
-let id_to_immexpr v = <span data-count="1512">I</span>mm_id v
+let id_to_immexpr v = <span data-count="2120">I</span>mm_id v
 
 let optimize_cons_to_rlist : ll_expr -&gt; ll_expr -&gt; ll_expr list =
   fun head_pt tail_pt -&gt;
-  <span data-count="30">l</span>et rec helper acc = function
-    | <span data-count="44">L</span>L_list (e1, e2) -&gt; helper (e1 :: acc) e2
-    | <span data-count="30">e</span>nd_pt -&gt; end_pt :: acc
+  <span data-count="41">l</span>et rec helper acc = function
+    | <span data-count="60">L</span>L_list (e1, e2) -&gt; helper (e1 :: acc) e2
+    | <span data-count="41">e</span>nd_pt -&gt; end_pt :: acc
   in
   helper [ head_pt ] tail_pt
 ;;
 
 let check_rlist_invariant = function
-  | <span data-count="30">l</span>st :: pref -&gt; return (lst, pref)
+  | <span data-count="41">l</span>st :: pref -&gt; return (lst, pref)
   | <span data-count="0">_</span> -&gt; fail "At least one elem should be (nil)"
 ;;
 
 let get_global = function
   | <span data-count="0">I</span>d_unit -&gt; return None
-  | <span data-count="1329">I</span>d_name id -&gt;
+  | <span data-count="1867">I</span>d_name id -&gt;
     let+ nm_space = read in
-    <span data-count="1329">G</span>lobalMap.find_opt id nm_space
+    <span data-count="1867">G</span>lobalMap.find_opt id nm_space
 ;;
 
 let save_global nm to_global =
-  <span data-count="155">g</span>et_globa<span data-count="155">l</span> nm
+  <span data-count="219">g</span>et_globa<span data-count="219">l</span> nm
   &gt;&gt;= function
   | <span data-count="0">S</span>ome _ -&gt; fail "Impossible case"
-  | <span data-count="155">N</span>one -&gt;
+  | <span data-count="219">N</span>one -&gt;
     (match nm with
-     | <span data-count="155">I</span>d_name nm -&gt;
+     | <span data-count="219">I</span>d_name nm -&gt;
        let* nm_space = read in
-       <span data-count="155">s</span>ave @@ GlobalMap.ad<span data-count="155">d</span> nm (to_globa<span data-count="155">l</span> nm) nm_space
+       <span data-count="219">s</span>ave @@ GlobalMap.ad<span data-count="219">d</span> nm (to_globa<span data-count="219">l</span> nm) nm_space
      | <span data-count="0">I</span>d_unit -&gt; return ())
 ;;
 
 let to_scoped_common builder = function
   | <span data-count="0">I</span>d_unit -&gt; Id_unit
-  | <span data-count="931">I</span>d_name v -&gt; Id_name (builde<span data-count="931">r</span> v)
+  | <span data-count="1304">I</span>d_name v -&gt; Id_name (builde<span data-count="1304">r</span> v)
 ;;
 
-let to_local = to_scoped_commo<span data-count="45">n</span> (fun x -&gt; <span data-count="931">L</span>ocal_id x)
-let gfunc x = <span data-count="1138">G</span>lobal_func x
-let gvar x = <span data-count="40">G</span>lobal_var x
+let to_local = to_scoped_commo<span data-count="59">n</span> (fun x -&gt; <span data-count="1304">L</span>ocal_id x)
+let gfunc x = <span data-count="1619">G</span>lobal_func x
+let gvar x = <span data-count="57">G</span>lobal_var x
 
 let to_scoped id =
-  <span data-count="1174">l</span>et+ cond = get_globa<span data-count="1174">l</span> id in
-  <span data-count="1174">m</span>atch cond with
-  | <span data-count="581">S</span>ome id -&gt; Id_name id
-  | <span data-count="593">N</span>one -&gt; to_local id
+  <span data-count="1648">l</span>et+ cond = get_globa<span data-count="1648">l</span> id in
+  <span data-count="1648">m</span>atch cond with
+  | <span data-count="816">S</span>ome id -&gt; Id_name id
+  | <span data-count="832">N</span>one -&gt; to_local id
 ;;
 
 let rec to_immexpr : ll_expr -&gt; (bind list * immexpr) t = function
-  | <span data-count="418">L</span>L_const v -&gt; return ([], const_to_immexp<span data-count="418">r</span> v)
-  | <span data-count="1129">L</span>L_ident id -&gt;
-    let+ id' = to_scope<span data-count="1129">d</span> (Id_name id) in
-    <span data-count="1129">[</span>], id_to_immexp<span data-count="1129">r</span> id'
-  | <span data-count="338">e</span>xpr -&gt;
+  | <span data-count="585">L</span>L_const v -&gt; return ([], const_to_immexp<span data-count="585">r</span> v)
+  | <span data-count="1585">L</span>L_ident id -&gt;
+    let+ id' = to_scope<span data-count="1585">d</span> (Id_name id) in
+    <span data-count="1585">[</span>], id_to_immexp<span data-count="1585">r</span> id'
+  | <span data-count="472">e</span>xpr -&gt;
     let* id = new_me_name in
-    <span data-count="338">l</span>et+ binds, cexpr = to_cexp<span data-count="338">r</span> expr in
-    <span data-count="338">l</span>et new_bind = ABind (id, cexpr) in
-    binds @ [ new_bind ], id_to_immexp<span data-count="338">r</span> @@ to_loca<span data-count="338">l</span> id
+    <span data-count="472">l</span>et+ binds, cexpr = to_cexp<span data-count="472">r</span> expr in
+    <span data-count="472">l</span>et new_bind = ABind (id, cexpr) in
+    binds @ [ new_bind ], id_to_immexp<span data-count="472">r</span> @@ to_loca<span data-count="472">l</span> id
 
 and to_cexpr : ll_expr -&gt; (bind list * cexpr) t =
   let open Base in
   function
-  | <span data-count="56">L</span>L_const v -&gt; return ([], C_immexpr (const_to_immexp<span data-count="56">r</span> v))
-  | <span data-count="45">L</span>L_ident id -&gt;
-    let+ id' = to_scope<span data-count="45">d</span> (Id_name id) in
-    <span data-count="45">[</span>], C_immexpr (id_to_immexp<span data-count="45">r</span> id')
-  | <span data-count="180">L</span>L_let (id, expr, in') -&gt;
-    let* e_binds, cexpr = to_cexp<span data-count="180">r</span> expr in
-    <span data-count="180">l</span>et+ in_binds, in'' = to_cexp<span data-count="180">r</span> in' in
-    <span data-count="180">l</span>et let_bind = ABind (id, cexpr) in
+  | <span data-count="79">L</span>L_const v -&gt; return ([], C_immexpr (const_to_immexp<span data-count="79">r</span> v))
+  | <span data-count="63">L</span>L_ident id -&gt;
+    let+ id' = to_scope<span data-count="63">d</span> (Id_name id) in
+    <span data-count="63">[</span>], C_immexpr (id_to_immexp<span data-count="63">r</span> id')
+  | <span data-count="255">L</span>L_let (id, expr, in') -&gt;
+    let* e_binds, cexpr = to_cexp<span data-count="255">r</span> expr in
+    <span data-count="255">l</span>et+ in_binds, in'' = to_cexp<span data-count="255">r</span> in' in
+    <span data-count="255">l</span>et let_bind = ABind (id, cexpr) in
     e_binds @ [ let_bind ] @ in_binds, in''
-  | <span data-count="90">L</span>L_ifthenelse (i, t, e) -&gt;
-    let* i_binds, i_cexpr = to_immexp<span data-count="90">r</span> i in
-    <span data-count="90">l</span>et* t_aexpr = to_aexp<span data-count="90">r</span> t in
-    <span data-count="90">l</span>et+ e_aexpr = to_aexp<span data-count="90">r</span> e in
-    <span data-count="90">i</span>_binds, C_ifthenelse (i_cexpr, t_aexpr, e_aexpr)
-  | <span data-count="9">L</span>L_tuple tup'l -&gt;
-    let+ binds_n_vals = map<span data-count="9">t</span> tup'l to_immexpr in
-    <span data-count="9">l</span>et binds'l, values'l = List.unzip binds_n_vals in
-    <span data-count="9">l</span>et tup_binds = List.concat binds'l in
-    <span data-count="9">t</span>up_binds, C_tuple values'l
-  | <span data-count="30">L</span>L_list (h, tl) -&gt;
+  | <span data-count="124">L</span>L_ifthenelse (i, t, e) -&gt;
+    let* i_binds, i_cexpr = to_immexp<span data-count="124">r</span> i in
+    <span data-count="124">l</span>et* t_aexpr = to_aexp<span data-count="124">r</span> t in
+    <span data-count="124">l</span>et+ e_aexpr = to_aexp<span data-count="124">r</span> e in
+    <span data-count="124">i</span>_binds, C_ifthenelse (i_cexpr, t_aexpr, e_aexpr)
+  | <span data-count="13">L</span>L_tuple tup'l -&gt;
+    let+ binds_n_vals = map<span data-count="13">t</span> tup'l to_immexpr in
+    <span data-count="13">l</span>et binds'l, values'l = List.unzip binds_n_vals in
+    <span data-count="13">l</span>et tup_binds = List.concat binds'l in
+    <span data-count="13">t</span>up_binds, C_tuple values'l
+  | <span data-count="41">L</span>L_list (h, tl) -&gt;
     let rexpr'l = optimize_cons_to_rlist h tl in
-    <span data-count="30">l</span>et* lst, pref'l = check_rlist_invarian<span data-count="30">t</span> rexpr'l in
-    <span data-count="30">l</span>et* lst_bind'l, lst_immexpr = to_immexp<span data-count="30">r</span> lst in
-    <span data-count="30">l</span>et+ pref_binds_n_vals = map<span data-count="30">t</span> pref'l to_immexpr in
-    <span data-count="30">l</span>et binds'l, values'l = List.unzip pref_binds_n_vals in
-    <span data-count="30">l</span>et list_binds =
+    <span data-count="41">l</span>et* lst, pref'l = check_rlist_invarian<span data-count="41">t</span> rexpr'l in
+    <span data-count="41">l</span>et* lst_bind'l, lst_immexpr = to_immexp<span data-count="41">r</span> lst in
+    <span data-count="41">l</span>et+ pref_binds_n_vals = map<span data-count="41">t</span> pref'l to_immexpr in
+    <span data-count="41">l</span>et binds'l, values'l = List.unzip pref_binds_n_vals in
+    <span data-count="41">l</span>et list_binds =
       let all_binds = lst_bind'l :: binds'l in
-      List.conca<span data-count="30">t</span> all_binds
+      List.conca<span data-count="41">t</span> all_binds
     in
     list_binds, C_rlist (lst_immexpr, values'l)
-  | <span data-count="623">L</span>L_apply (e_fun, e_arg) -&gt;
+  | <span data-count="874">L</span>L_apply (e_fun, e_arg) -&gt;
     let optimize_apply f arg =
       (* TODO: chech args passing order correctness *)
-      <span data-count="623">l</span>et rec helper fst_arg args = function
-        | <span data-count="427">L</span>L_apply (f', new_fst) -&gt; helper new_fst (fst_arg :: args) f'
-        | <span data-count="623">n</span>ame_e -&gt; name_e, fst_arg, args
+      <span data-count="874">l</span>et rec helper fst_arg args = function
+        | <span data-count="602">L</span>L_apply (f', new_fst) -&gt; helper new_fst (fst_arg :: args) f'
+        | <span data-count="874">n</span>ame_e -&gt; name_e, fst_arg, args
       in
       helper arg [] f
     in
     let extract_name_from_imm = function
-      | <span data-count="623">I</span>mm_id (Id_name id) -&gt; return id
+      | <span data-count="874">I</span>mm_id (Id_name id) -&gt; return id
       | <span data-count="0">_</span> -&gt;
         fail "Apply left part expects 0 argument(s), but is applied here to 1 argument(s)"
     in
     let name_e, e_fst_arg, e_arg'l = optimize_apply e_fun e_arg in
-    <span data-count="623">l</span>et* name_bind'l, imm_name = to_immexp<span data-count="623">r</span> name_e in
-    <span data-count="623">l</span>et* name = extract_name_from_im<span data-count="623">m</span> imm_name in
-    <span data-count="623">l</span>et* fst_bind'l, imm_fst = to_immexp<span data-count="623">r</span> e_fst_arg in
-    <span data-count="623">l</span>et+ binds_n_args = map<span data-count="623">t</span> e_arg'l to_immexpr in
-    <span data-count="623">l</span>et arg_binds'l, arg'l = List.unzip binds_n_args in
-    <span data-count="623">l</span>et arg_bind'l = List.concat (List.re<span data-count="623">v</span> arg_binds'l) in
-    <span data-count="623">l</span>et new_binds = name_bind'l @ arg_bind'l @ fst_bind'l in
+    <span data-count="874">l</span>et* name_bind'l, imm_name = to_immexp<span data-count="874">r</span> name_e in
+    <span data-count="874">l</span>et* name = extract_name_from_im<span data-count="874">m</span> imm_name in
+    <span data-count="874">l</span>et* fst_bind'l, imm_fst = to_immexp<span data-count="874">r</span> e_fst_arg in
+    <span data-count="874">l</span>et+ binds_n_args = map<span data-count="874">t</span> e_arg'l to_immexpr in
+    <span data-count="874">l</span>et arg_binds'l, arg'l = List.unzip binds_n_args in
+    <span data-count="874">l</span>et arg_bind'l = List.concat (List.re<span data-count="874">v</span> arg_binds'l) in
+    <span data-count="874">l</span>et new_binds = name_bind'l @ arg_bind'l @ fst_bind'l in
     new_binds, C_apply (name, imm_fst, arg'l)
 
 and to_aexpr : ll_expr -&gt; aexpr t =
-  let alet id cexpr aexpr = <span data-count="518">A</span>_let (id, cexpr, aexpr) in
+  let alet id cexpr aexpr = <span data-count="727">A</span>_let (id, cexpr, aexpr) in
   fun expr -&gt;
-    <span data-count="335">l</span>et+ binds, cexpr = to_cexp<span data-count="335">r</span> expr in
-    <span data-count="335">l</span>et basic_aexpr = A_cexpr cexpr in
+    <span data-count="467">l</span>et+ binds, cexpr = to_cexp<span data-count="467">r</span> expr in
+    <span data-count="467">l</span>et basic_aexpr = A_cexpr cexpr in
     let particial_aexpr =
       List.fold_left
-        (fun acc (ABind (id, cvalue)) next -&gt; <span data-count="518">a</span>cc @@ ale<span data-count="518">t</span> id cvalue next)
-        (fun x -&gt; <span data-count="335">x</span>)
+        (fun acc (ABind (id, cvalue)) next -&gt; <span data-count="727">a</span>cc @@ ale<span data-count="727">t</span> id cvalue next)
+        (fun x -&gt; <span data-count="467">x</span>)
         binds
     in
-    <span data-count="335">p</span>articial_aexpr basic_aexpr
+    <span data-count="467">p</span>articial_aexpr basic_aexpr
 ;;
 
 let to_func { lldec_name; lldec_args; lldec_body } =
-  <span data-count="115">l</span>et+ adec_body = to_aexp<span data-count="115">r</span> lldec_body in
-  <span data-count="115">{</span> adec_name = lldec_name; adec_args = lldec_args; adec_body }
+  <span data-count="162">l</span>et+ adec_body = to_aexp<span data-count="162">r</span> lldec_body in
+  <span data-count="162">{</span> adec_name = lldec_name; adec_args = lldec_args; adec_body }
 ;;
 
 let to_anf_decl = function
-  | <span data-count="40">L</span>L_GlobalV (id, expr) -&gt;
-    let* aexpr = to_aexp<span data-count="40">r</span> expr in
-    <span data-count="40">l</span>et+ () = save_globa<span data-count="40">l</span> id gvar in
-    <span data-count="40">A</span>_GlobalV (id, aexpr)
-  | <span data-count="112">L</span>L_Decl (r_flag, ll_fun, ll_fun'l) -&gt;
+  | <span data-count="57">L</span>L_GlobalV (id, expr) -&gt;
+    let* aexpr = to_aexp<span data-count="57">r</span> expr in
+    <span data-count="57">l</span>et+ () = save_globa<span data-count="57">l</span> id gvar in
+    <span data-count="57">A</span>_GlobalV (id, aexpr)
+  | <span data-count="158">L</span>L_Decl (r_flag, ll_fun, ll_fun'l) -&gt;
     (match r_flag, ll_fun'l with
-     | <span data-count="68">N</span>onrecursive, [] -&gt;
-       let* anf_fun = to_fun<span data-count="68">c</span> ll_fun in
-       <span data-count="68">l</span>et+ () = save_globa<span data-count="68">l</span> (Id_name ll_fun.lldec_name) gfunc in
-       <span data-count="68">A</span>_NonrecDecl anf_fun
+     | <span data-count="97">N</span>onrecursive, [] -&gt;
+       let* anf_fun = to_fun<span data-count="97">c</span> ll_fun in
+       <span data-count="97">l</span>et+ () = save_globa<span data-count="97">l</span> (Id_name ll_fun.lldec_name) gfunc in
+       <span data-count="97">A</span>_NonrecDecl anf_fun
      | <span data-count="0">N</span>onrecursive, _ -&gt; fail "With [and] supports only rec funcs"
-     | <span data-count="44">R</span>ecursive, ll_fun'l -&gt;
+     | <span data-count="61">R</span>ecursive, ll_fun'l -&gt;
        let* _ =
-         map<span data-count="44">t</span> (ll_fun :: ll_fun'l) (fun { lldec_name; _ } -&gt;
-           <span data-count="47">s</span>ave_global (Id_name lldec_name) gfunc)
+         map<span data-count="61">t</span> (ll_fun :: ll_fun'l) (fun { lldec_name; _ } -&gt;
+           <span data-count="65">s</span>ave_global (Id_name lldec_name) gfunc)
        in
-       <span data-count="44">l</span>et* anf_fun = to_fun<span data-count="44">c</span> ll_fun in
-       <span data-count="44">l</span>et+ anf_fun'l = map<span data-count="44">t</span> ll_fun'l to_func in
-       <span data-count="44">A</span>_RecDecl (anf_fun, anf_fun'l))
+       <span data-count="61">l</span>et* anf_fun = to_fun<span data-count="61">c</span> ll_fun in
+       <span data-count="61">l</span>et+ anf_fun'l = map<span data-count="61">t</span> ll_fun'l to_func in
+       <span data-count="61">A</span>_RecDecl (anf_fun, anf_fun'l))
 ;;
 
-let to_anf_prog ll_prog = <span data-count="33">m</span>apt ll_prog to_anf_decl
+let to_anf_prog ll_prog = <span data-count="47">m</span>apt ll_prog to_anf_decl
 
 let convert_to_anf prog =
-  <span data-count="33">l</span>et open Common.Errors in
+  <span data-count="47">l</span>et open Common.Errors in
   let open Common.Base_lib in
   let global_name_space =
     let global_by_default = List.map LibF.get_name base_lib_decls in
-    <span data-count="33">l</span>et helper acc name = <span data-count="1023">G</span>lobalMap.add name (gfun<span data-count="1023">c</span> name) acc in
-    List.fold_lef<span data-count="33">t</span> helper GlobalMap.empty global_by_default
+    <span data-count="47">l</span>et helper acc name = <span data-count="1457">G</span>lobalMap.add name (gfun<span data-count="1457">c</span> name) acc in
+    List.fold_lef<span data-count="47">t</span> helper GlobalMap.empty global_by_default
   in
-  match run (to_anf_pro<span data-count="33">g</span> prog) 0 global_name_space with
-  | <span data-count="33">_</span>, Ok anf_decl'l -&gt; Result.Ok anf_decl'l
+  match run (to_anf_pro<span data-count="47">g</span> prog) 0 global_name_space with
+  | <span data-count="47">_</span>, Ok anf_decl'l -&gt; Result.Ok anf_decl'l
   | <span data-count="0">_</span>, Error msg -&gt; Result.Error (illegal_stat<span data-count="0">e</span> msg)
 ;;
 </code></pre>

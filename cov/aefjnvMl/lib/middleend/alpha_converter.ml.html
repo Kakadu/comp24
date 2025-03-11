@@ -539,65 +539,65 @@ module StringAlphfaconverterMonad = struct
       end)
       (String)
 
-  let num_prefix current_prefix id = <span data-count="569">c</span>urrent_prefix ^ Int.to_strin<span data-count="569">g</span> id
+  let num_prefix current_prefix id = <span data-count="651">c</span>urrent_prefix ^ Int.to_strin<span data-count="651">g</span> id
 
   let binding_scope : 'a t -&gt; 'a t =
     fun f -&gt;
-    <span data-count="1952">l</span>et* _, old_bindings, _ = read in
-    <span data-count="1952">l</span>et* f_res = f in
-    <span data-count="1952">l</span>et* b_rules, _, pref = read in
-    <span data-count="1952">l</span>et+ () = sav<span data-count="1952">e</span> (b_rules, old_bindings, pref) in
-    <span data-count="1952">f</span>_res
+    <span data-count="2283">l</span>et* _, old_bindings, _ = read in
+    <span data-count="2283">l</span>et* f_res = f in
+    <span data-count="2283">l</span>et* b_rules, _, pref = read in
+    <span data-count="2283">l</span>et+ () = sav<span data-count="2283">e</span> (b_rules, old_bindings, pref) in
+    <span data-count="2283">f</span>_res
   ;;
 
   let fresh_bind pre_formatter name =
-    <span data-count="2349">l</span>et get_uniq_name cur_pref new_name b_set =
-      <span data-count="2349">l</span>et rec helper name_ =
-        <span data-count="2918">m</span>atch Banned_Set.find_opt name_ b_set with
-        | <span data-count="2349">N</span>one -&gt; return @@ name_
-        | <span data-count="569">S</span>ome _ -&gt;
+    <span data-count="2740">l</span>et get_uniq_name cur_pref new_name b_set =
+      <span data-count="2740">l</span>et rec helper name_ =
+        <span data-count="3391">m</span>atch Banned_Set.find_opt name_ b_set with
+        | <span data-count="2740">N</span>one -&gt; return @@ name_
+        | <span data-count="651">S</span>ome _ -&gt;
           let* fresh_id = fresh in
-          <span data-count="569">l</span>et supported_name =
-            Common.Naming.with_pref (num_prefi<span data-count="569">x</span> cur_pref fresh_id) new_name
+          <span data-count="651">l</span>et supported_name =
+            Common.Naming.with_pref (num_prefi<span data-count="651">x</span> cur_pref fresh_id) new_name
           in
-          <span data-count="569">h</span>elper supported_name
+          <span data-count="651">h</span>elper supported_name
       in
       helper new_name
     in
     let add_binding_in_ban_set orig_name new_name b_set =
-      <span data-count="2349">l</span>et b_set' = Banned_Set.add orig_name b_set in
-      <span data-count="2349">B</span>anned_Set.add new_name b_set'
+      <span data-count="2740">l</span>et b_set' = Banned_Set.add orig_name b_set in
+      <span data-count="2740">B</span>anned_Set.add new_name b_set'
     in
     let* name', st' =
       let* (b_prefs, b_set), bindings, a_pref = read in
-      <span data-count="2349">l</span>et should_rename_via_prefs =
+      <span data-count="2740">l</span>et should_rename_via_prefs =
         Base.List.fold_left b_prefs ~init:false ~f:(fun acc pref -&gt;
-          <span data-count="14094">m</span>atch acc with
-          | <span data-count="2276">t</span>rue -&gt; true
-          | <span data-count="11818">f</span>alse -&gt; Str.string_match pref name 0)
+          <span data-count="16440">m</span>atch acc with
+          | <span data-count="2685">t</span>rue -&gt; true
+          | <span data-count="13755">f</span>alse -&gt; Str.string_match pref name 0)
       in
-      <span data-count="2349">l</span>et+ name'' =
+      <span data-count="2740">l</span>et+ name'' =
         let start_name =
           let prepared_name = pre_formatter name in
-          <span data-count="2349">m</span>atch should_rename_via_prefs with
-          | <span data-count="458">t</span>rue -&gt; Common.Naming.with_pre<span data-count="458">f</span> a_pref prepared_name
-          | <span data-count="1891">f</span>alse -&gt; prepared_name
+          <span data-count="2740">m</span>atch should_rename_via_prefs with
+          | <span data-count="540">t</span>rue -&gt; Common.Naming.with_pre<span data-count="540">f</span> a_pref prepared_name
+          | <span data-count="2200">f</span>alse -&gt; prepared_name
         in
-        get_uniq_nam<span data-count="2349">e</span> a_pref start_name b_set
+        get_uniq_nam<span data-count="2740">e</span> a_pref start_name b_set
       in
-      <span data-count="2349">l</span>et bindings' = Bind_Map.add name name'' bindings in
-      <span data-count="2349">l</span>et b_set' = add_binding_in_ban_set name name'' b_set in
-      <span data-count="2349">l</span>et st'' = (b_prefs, b_set'), bindings', a_pref in
+      <span data-count="2740">l</span>et bindings' = Bind_Map.add name name'' bindings in
+      <span data-count="2740">l</span>et b_set' = add_binding_in_ban_set name name'' b_set in
+      <span data-count="2740">l</span>et st'' = (b_prefs, b_set'), bindings', a_pref in
       name'', st''
     in
-    <span data-count="2349">l</span>et+ () = sav<span data-count="2349">e</span> st' in
-    <span data-count="2349">n</span>ame'
+    <span data-count="2740">l</span>et+ () = sav<span data-count="2740">e</span> st' in
+    <span data-count="2740">n</span>ame'
   ;;
 
   let get_bind name =
-    <span data-count="3921">l</span>et* _, binds, _ = read in
-    <span data-count="3921">m</span>atch Bind_Map.find_opt name binds with
-    | <span data-count="3921">S</span>ome name' -&gt; return name'
+    <span data-count="4566">l</span>et* _, binds, _ = read in
+    <span data-count="4566">m</span>atch Bind_Map.find_opt name binds with
+    | <span data-count="4566">S</span>ome name' -&gt; return name'
     | <span data-count="0">N</span>one -&gt; fail ("=doesn't find binded value -- " ^ name)
   ;;
 end
@@ -606,7 +606,7 @@ open StringAlphfaconverterMonad
 open Common.Ast
 open Common.Ast_construct
 
-let fresh_bind = fresh_bin<span data-count="100">d</span> Common.Base_lib.converte_op
+let fresh_bind = fresh_bin<span data-count="114">d</span> Common.Base_lib.converte_op
 
 type core_type_flag =
   | On
@@ -621,106 +621,106 @@ let pt_with_ct_flag pt' ct =
 ;;
 
 let e_with_ct_flag e' ct =
-  <span data-count="12">m</span>atch ct_flag with
+  <span data-count="14">m</span>atch ct_flag with
   | <span data-count="0">O</span>n -&gt; return @@ etyp<span data-count="0">e</span> e' ct
-  | <span data-count="12">O</span>ff -&gt; return e'
+  | <span data-count="14">O</span>ff -&gt; return e'
 ;;
 
 let rec aconvert_pattern = function
-  | <span data-count="509">P</span>at_const c -&gt; return @@ pcons<span data-count="509">t</span> c
-  | <span data-count="271">P</span>at_cons (a, b) -&gt;
-    let* a' = aconvert_patter<span data-count="271">n</span> a in
-    <span data-count="271">l</span>et+ b' = aconvert_patter<span data-count="271">n</span> b in
-    <span data-count="271">p</span>cons a' b'
+  | <span data-count="589">P</span>at_const c -&gt; return @@ pcons<span data-count="589">t</span> c
+  | <span data-count="309">P</span>at_cons (a, b) -&gt;
+    let* a' = aconvert_patter<span data-count="309">n</span> a in
+    <span data-count="309">l</span>et+ b' = aconvert_patter<span data-count="309">n</span> b in
+    <span data-count="309">p</span>cons a' b'
   | <span data-count="1">P</span>at_any -&gt; return pany
-  | <span data-count="48">P</span>at_tuple tup -&gt;
-    let+ tup' = map<span data-count="48">t</span> tup aconvert_pattern in
-    <span data-count="48">p</span>tuple tup'
+  | <span data-count="56">P</span>at_tuple tup -&gt;
+    let+ tup' = map<span data-count="56">t</span> tup aconvert_pattern in
+    <span data-count="56">p</span>tuple tup'
   | <span data-count="0">P</span>at_constraint (pt, ct) -&gt;
     let* pt' = aconvert_patter<span data-count="0">n</span> pt in
     <span data-count="0">p</span>t_with_ct_flag pt' ct
-  | <span data-count="2349">P</span>at_var name -&gt; fresh_bin<span data-count="2349">d</span> name &gt;&gt;| pvar
+  | <span data-count="2740">P</span>at_var name -&gt; fresh_bin<span data-count="2740">d</span> name &gt;&gt;| pvar
 ;;
 
 let aconvert_decl_part aconv_expr = function
-  | <span data-count="1059">D</span>ecl (rf, vbl) -&gt;
+  | <span data-count="1233">D</span>ecl (rf, vbl) -&gt;
     (match rf with
-     | <span data-count="842">N</span>onrecursive -&gt;
+     | <span data-count="982">N</span>onrecursive -&gt;
        let* { vb_pat; vb_expr } =
          match vbl with
-         | <span data-count="842">v</span>b :: [] -&gt; retur<span data-count="842">n</span> vb
+         | <span data-count="982">v</span>b :: [] -&gt; retur<span data-count="982">n</span> vb
          | <span data-count="0">_</span> -&gt; fai<span data-count="0">l</span> "Impossible case with nonrec flag"
        in
-       <span data-count="842">l</span>et* vb_expr' = aconv_exp<span data-count="842">r</span> vb_expr in
-       <span data-count="842">l</span>et+ vb_pat' = aconvert_patter<span data-count="842">n</span> vb_pat in
-       <span data-count="842">e</span>decl rf [ { vb_pat = vb_pat'; vb_expr = vb_expr' } ]
-     | <span data-count="217">R</span>ecursive -&gt;
-       let* vb_ptl' = map<span data-count="217">t</span> vbl (fun { vb_pat; _ } -&gt; <span data-count="232">a</span>convert_pattern vb_pat) in
-       <span data-count="217">l</span>et+ vb_exprl' = map<span data-count="217">t</span> vbl (fun { vb_expr; _ } -&gt; <span data-count="232">a</span>conv_expr vb_expr) in
-       <span data-count="217">l</span>et vbl' = List.map2 evalue_binding vb_ptl' vb_exprl' in
-       <span data-count="217">e</span>decl rf vbl')
+       <span data-count="982">l</span>et* vb_expr' = aconv_exp<span data-count="982">r</span> vb_expr in
+       <span data-count="982">l</span>et+ vb_pat' = aconvert_patter<span data-count="982">n</span> vb_pat in
+       <span data-count="982">e</span>decl rf [ { vb_pat = vb_pat'; vb_expr = vb_expr' } ]
+     | <span data-count="251">R</span>ecursive -&gt;
+       let* vb_ptl' = map<span data-count="251">t</span> vbl (fun { vb_pat; _ } -&gt; <span data-count="268">a</span>convert_pattern vb_pat) in
+       <span data-count="251">l</span>et+ vb_exprl' = map<span data-count="251">t</span> vbl (fun { vb_expr; _ } -&gt; <span data-count="268">a</span>conv_expr vb_expr) in
+       <span data-count="251">l</span>et vbl' = List.map2 evalue_binding vb_ptl' vb_exprl' in
+       <span data-count="251">e</span>decl rf vbl')
 ;;
 
 let rec aconvert_expression = function
-  | <span data-count="12">E</span>xp_type (e, ct) -&gt;
-    let* e' = aconvert_expressio<span data-count="12">n</span> e in
-    <span data-count="12">e</span>_with_ct_flag e' ct
-  | <span data-count="3921">E</span>xp_ident name -&gt;
-    let+ name' = get_bin<span data-count="3921">d</span> name in
-    <span data-count="3921">e</span>val name'
-  | <span data-count="3364">E</span>xp_apply (a, b) -&gt;
-    let* a' = aconvert_expressio<span data-count="3364">n</span> a in
-    <span data-count="3364">l</span>et+ b' = aconvert_expressio<span data-count="3364">n</span> b in
-    <span data-count="3364">e</span>app a' b'
-  | <span data-count="352">E</span>xp_list (a, b) -&gt;
-    let* a' = aconvert_expressio<span data-count="352">n</span> a in
-    <span data-count="352">l</span>et+ b' = aconvert_expressio<span data-count="352">n</span> b in
-    <span data-count="352">e</span>cons a' b'
-  | <span data-count="144">E</span>xp_ifthenelse (b, t, e) -&gt;
-    let* b' = aconvert_expressio<span data-count="144">n</span> b in
-    <span data-count="144">l</span>et* t' = aconvert_expressio<span data-count="144">n</span> t in
-    <span data-count="144">l</span>et+ e' = aconvert_expressio<span data-count="144">n</span> e in
-    <span data-count="144">e</span>ite b' t' e'
-  | <span data-count="52">E</span>xp_tuple etup -&gt;
-    let+ tup' = map<span data-count="52">t</span> etup aconvert_expression in
-    <span data-count="52">e</span>tuple tup'
-  | <span data-count="1534">E</span>xp_constant c -&gt; return @@ econs<span data-count="1534">t</span> c
-  | <span data-count="1147">E</span>xp_function (pt, e) -&gt;
+  | <span data-count="14">E</span>xp_type (e, ct) -&gt;
+    let* e' = aconvert_expressio<span data-count="14">n</span> e in
+    <span data-count="14">e</span>_with_ct_flag e' ct
+  | <span data-count="4566">E</span>xp_ident name -&gt;
+    let+ name' = get_bin<span data-count="4566">d</span> name in
+    <span data-count="4566">e</span>val name'
+  | <span data-count="3921">E</span>xp_apply (a, b) -&gt;
+    let* a' = aconvert_expressio<span data-count="3921">n</span> a in
+    <span data-count="3921">l</span>et+ b' = aconvert_expressio<span data-count="3921">n</span> b in
+    <span data-count="3921">e</span>app a' b'
+  | <span data-count="406">E</span>xp_list (a, b) -&gt;
+    let* a' = aconvert_expressio<span data-count="406">n</span> a in
+    <span data-count="406">l</span>et+ b' = aconvert_expressio<span data-count="406">n</span> b in
+    <span data-count="406">e</span>cons a' b'
+  | <span data-count="166">E</span>xp_ifthenelse (b, t, e) -&gt;
+    let* b' = aconvert_expressio<span data-count="166">n</span> b in
+    <span data-count="166">l</span>et* t' = aconvert_expressio<span data-count="166">n</span> t in
+    <span data-count="166">l</span>et+ e' = aconvert_expressio<span data-count="166">n</span> e in
+    <span data-count="166">e</span>ite b' t' e'
+  | <span data-count="60">E</span>xp_tuple etup -&gt;
+    let+ tup' = map<span data-count="60">t</span> etup aconvert_expression in
+    <span data-count="60">e</span>tuple tup'
+  | <span data-count="1774">E</span>xp_constant c -&gt; return @@ econs<span data-count="1774">t</span> c
+  | <span data-count="1350">E</span>xp_function (pt, e) -&gt;
     binding_scope
     @@
-    let* pt' = aconvert_patter<span data-count="1147">n</span> pt in
-    <span data-count="1147">l</span>et+ e' = aconvert_expressio<span data-count="1147">n</span> e in
-    <span data-count="1147">e</span>fun pt' e'
-  | <span data-count="137">E</span>xp_match (e, ptNel) -&gt;
-    let* e' = aconvert_expressio<span data-count="137">n</span> e in
-    <span data-count="137">l</span>et+ ptNel' =
-      map<span data-count="137">t</span> ptNel (fun (pt_, e_) -&gt;
-        <span data-count="319">b</span>inding_scope
+    let* pt' = aconvert_patter<span data-count="1350">n</span> pt in
+    <span data-count="1350">l</span>et+ e' = aconvert_expressio<span data-count="1350">n</span> e in
+    <span data-count="1350">e</span>fun pt' e'
+  | <span data-count="157">E</span>xp_match (e, ptNel) -&gt;
+    let* e' = aconvert_expressio<span data-count="157">n</span> e in
+    <span data-count="157">l</span>et+ ptNel' =
+      map<span data-count="157">t</span> ptNel (fun (pt_, e_) -&gt;
+        <span data-count="365">b</span>inding_scope
         @@
-        let* pt'_ = aconvert_patter<span data-count="319">n</span> pt_ in
-        <span data-count="319">l</span>et+ e'_ = aconvert_expressio<span data-count="319">n</span> e_ in
-        <span data-count="319">p</span>t'_, e'_)
+        let* pt'_ = aconvert_patter<span data-count="365">n</span> pt_ in
+        <span data-count="365">l</span>et+ e'_ = aconvert_expressio<span data-count="365">n</span> e_ in
+        <span data-count="365">p</span>t'_, e'_)
     in
-    <span data-count="137">e</span>match e' ptNel'
-  | <span data-count="486">E</span>xp_let (d, e) -&gt;
+    <span data-count="157">e</span>match e' ptNel'
+  | <span data-count="568">E</span>xp_let (d, e) -&gt;
     binding_scope
     @@
-    let* d' = aconvert_decl_par<span data-count="486">t</span> aconvert_expression d in
-    <span data-count="486">l</span>et+ e' = aconvert_expressio<span data-count="486">n</span> e in
-    <span data-count="486">e</span>let d' e'
+    let* d' = aconvert_decl_par<span data-count="568">t</span> aconvert_expression d in
+    <span data-count="568">l</span>et+ e' = aconvert_expressio<span data-count="568">n</span> e in
+    <span data-count="568">e</span>let d' e'
 ;;
 
-let aconvert_decl = aconvert_decl_par<span data-count="100">t</span> aconvert_expression
+let aconvert_decl = aconvert_decl_par<span data-count="114">t</span> aconvert_expression
 
 let aconvert_structure_item = function
   | <span data-count="6">S</span>tr_eval e -&gt; aconvert_expressio<span data-count="6">n</span> e &gt;&gt;| streval
-  | <span data-count="573">S</span>tr_value d -&gt; aconvert_dec<span data-count="573">l</span> d &gt;&gt;| strval
+  | <span data-count="665">S</span>tr_value d -&gt; aconvert_dec<span data-count="665">l</span> d &gt;&gt;| strval
 ;;
 
-let aconvert_program prog = <span data-count="187">m</span>apt prog aconvert_structure_item
+let aconvert_program prog = <span data-count="215">m</span>apt prog aconvert_structure_item
 
 let rename_ast_with_uniq step_pref prog =
-  <span data-count="187">l</span>et open Common.Naming in
+  <span data-count="215">l</span>et open Common.Naming in
   let open Common.Base_lib in
   let name_space =
     let open LibF in
@@ -728,24 +728,24 @@ let rename_ast_with_uniq step_pref prog =
     let ban_rules =
       let ban_set =
         let ban_names =
-          forbidden_names @ ma<span data-count="187">p</span> get_name base_lib_decls @ ma<span data-count="187">p</span> get_rt_alias base_lib_decls
+          forbidden_names @ ma<span data-count="215">p</span> get_name base_lib_decls @ ma<span data-count="215">p</span> get_rt_alias base_lib_decls
         in
-        let helper acc name = <span data-count="11968">B</span>anned_Set.add name acc in
-        fold_lef<span data-count="187">t</span> helper Banned_Set.empty ban_names
+        let helper acc name = <span data-count="13760">B</span>anned_Set.add name acc in
+        fold_lef<span data-count="215">t</span> helper Banned_Set.empty ban_names
       in
       let res_prefs = map Str.regexp reserved_prefs in
-      <span data-count="187">r</span>es_prefs, ban_set
+      <span data-count="215">r</span>es_prefs, ban_set
     in
     let bind_space =
-      let helper acc name = <span data-count="4301">B</span>ind_Map.add name name acc in
-      fold_lef<span data-count="187">t</span> helper Bind_Map.empty (List.ma<span data-count="187">p</span> get_name user_funcs)
+      let helper acc name = <span data-count="4945">B</span>ind_Map.add name name acc in
+      fold_lef<span data-count="215">t</span> helper Bind_Map.empty (List.ma<span data-count="215">p</span> get_name user_funcs)
     in
     ban_rules, bind_space, step_pref
   in
   let prog_alpha_converter = aconvert_program prog in
-  <span data-count="187">l</span>et open Common.Errors in
+  <span data-count="215">l</span>et open Common.Errors in
   match run prog_alpha_converter 0 name_space with
-  | <span data-count="187">_</span>, Ok prog' -&gt; Result.Ok prog'
+  | <span data-count="215">_</span>, Ok prog' -&gt; Result.Ok prog'
   | <span data-count="0">_</span>, Error msg -&gt; Result.Error (illegal_stat<span data-count="0">e</span> msg)
 ;;
 </code></pre>

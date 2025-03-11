@@ -463,204 +463,204 @@ open Common.Ast_construct
 
 let std_lib_names =
   let open LibF in
-  List.ma<span data-count="100">p</span> get_name base_lib_decls
+  List.ma<span data-count="114">p</span> get_name base_lib_decls
 ;;
 
 let eliminate_funs =
   let rec helper patterns = function
-    | <span data-count="625">E</span>xp_function (p, e) -&gt; helper (p :: patterns) e
-    | <span data-count="522">e</span>xpr -&gt; patterns, expr
+    | <span data-count="746">E</span>xp_function (p, e) -&gt; helper (p :: patterns) e
+    | <span data-count="618">e</span>xpr -&gt; patterns, expr
   in
-  helpe<span data-count="100">r</span> []
+  helpe<span data-count="114">r</span> []
 ;;
 
 let pattern_vars =
   let rec helper acc = function
-    | <span data-count="2012">P</span>at_var v -&gt; v :: acc
-    | <span data-count="250">P</span>at_cons (e1, e2) -&gt; helper (helpe<span data-count="250">r</span> acc e1) e2
-    | <span data-count="20">P</span>at_tuple es -&gt; List.fold_left helper acc es
-    | <span data-count="329">_</span> -&gt; acc
+    | <span data-count="2378">P</span>at_var v -&gt; v :: acc
+    | <span data-count="290">P</span>at_cons (e1, e2) -&gt; helper (helpe<span data-count="290">r</span> acc e1) e2
+    | <span data-count="24">P</span>at_tuple es -&gt; List.fold_left helper acc es
+    | <span data-count="386">_</span> -&gt; acc
   in
-  helpe<span data-count="100">r</span> []
+  helpe<span data-count="114">r</span> []
 ;;
 
 let rec construct_from_pats expr = function
-  | <span data-count="759">h</span>d :: tl -&gt; efun hd (construct_from_pat<span data-count="759">s</span> expr tl)
-  | <span data-count="522">[</span>] -&gt; expr
+  | <span data-count="903">h</span>d :: tl -&gt; efun hd (construct_from_pat<span data-count="903">s</span> expr tl)
+  | <span data-count="618">[</span>] -&gt; expr
 ;;
 
-let empty_set = Base.Set.empt<span data-count="100">y</span> (module Base.String)
-let set = Base.Set.of_lis<span data-count="100">t</span> (module Base.String)
+let empty_set = Base.Set.empt<span data-count="114">y</span> (module Base.String)
+let set = Base.Set.of_lis<span data-count="114">t</span> (module Base.String)
 
 let expr_vars =
   let pat_set p =
-    <span data-count="753">B</span>ase.List.fold_left
-      (pattern_var<span data-count="753">s</span> p)
-      ~f:(fun acc p -&gt; <span data-count="714">B</span>ase.Set.add acc p)
+    <span data-count="885">B</span>ase.List.fold_left
+      (pattern_var<span data-count="885">s</span> p)
+      ~f:(fun acc p -&gt; <span data-count="837">B</span>ase.Set.add acc p)
       ~init:empty_set
   in
   let rec helper acc = function
     | <span data-count="0">E</span>xp_type (e, _) -&gt; helper acc e
-    | <span data-count="968">E</span>xp_constant _ -&gt; acc
-    | <span data-count="3084">E</span>xp_ident id -&gt; Base.Set.add acc id
-    | <span data-count="43">E</span>xp_tuple exps -&gt; List.fold_left helper acc exps
-    | <span data-count="213">E</span>xp_function (p, e) -&gt; Base.Set.diff (helpe<span data-count="213">r</span> acc e) (pat_se<span data-count="213">t</span> p)
-    | <span data-count="242">E</span>xp_let (d, e) -&gt;
+    | <span data-count="1138">E</span>xp_constant _ -&gt; acc
+    | <span data-count="3633">E</span>xp_ident id -&gt; Base.Set.add acc id
+    | <span data-count="50">E</span>xp_tuple exps -&gt; List.fold_left helper acc exps
+    | <span data-count="249">E</span>xp_function (p, e) -&gt; Base.Set.diff (helpe<span data-count="249">r</span> acc e) (pat_se<span data-count="249">t</span> p)
+    | <span data-count="288">E</span>xp_let (d, e) -&gt;
       let acc = helper acc e in
-      <span data-count="242">h</span>elper_decl acc d
-    | <span data-count="128">E</span>xp_match (e, cases) -&gt;
+      <span data-count="288">h</span>elper_decl acc d
+    | <span data-count="150">E</span>xp_match (e, cases) -&gt;
       let acc =
         Base.List.fold_left
           cases
-          ~f:(fun acc (p, e) -&gt; <span data-count="298">B</span>ase.Set.diff (helpe<span data-count="298">r</span> acc e) (pat_se<span data-count="298">t</span> p))
+          ~f:(fun acc (p, e) -&gt; <span data-count="348">B</span>ase.Set.diff (helpe<span data-count="348">r</span> acc e) (pat_se<span data-count="348">t</span> p))
           ~init:acc
       in
-      <span data-count="128">h</span>elper acc e
-    | <span data-count="99">E</span>xp_ifthenelse (e, e', e'') -&gt; helper (helpe<span data-count="99">r</span> (helpe<span data-count="99">r</span> acc e) e') e''
-    | <span data-count="2512">E</span>xp_apply (e, e') | <span data-count="237">E</span>xp_list (e, e') -&gt; helper (helpe<span data-count="2749">r</span> acc e) e'
+      <span data-count="150">h</span>elper acc e
+    | <span data-count="116">E</span>xp_ifthenelse (e, e', e'') -&gt; helper (helpe<span data-count="116">r</span> (helpe<span data-count="116">r</span> acc e) e') e''
+    | <span data-count="2957">E</span>xp_apply (e, e') | <span data-count="278">E</span>xp_list (e, e') -&gt; helper (helpe<span data-count="3235">r</span> acc e) e'
   and helper_decl acc = function
-    | <span data-count="228">D</span>ecl (Nonrecursive, [ { vb_pat; vb_expr } ]) -&gt;
-      Base.Set.diff (helpe<span data-count="228">r</span> acc vb_expr) (pat_se<span data-count="228">t</span> vb_pat)
-    | <span data-count="14">D</span>ecl (Recursive, bindings) -&gt;
+    | <span data-count="272">D</span>ecl (Nonrecursive, [ { vb_pat; vb_expr } ]) -&gt;
+      Base.Set.diff (helpe<span data-count="272">r</span> acc vb_expr) (pat_se<span data-count="272">t</span> vb_pat)
+    | <span data-count="16">D</span>ecl (Recursive, bindings) -&gt;
       let acc =
         Base.List.fold_left
           bindings
-          ~f:(fun acc { vb_pat = _; vb_expr } -&gt; <span data-count="14">h</span>elper acc vb_expr)
+          ~f:(fun acc { vb_pat = _; vb_expr } -&gt; <span data-count="16">h</span>elper acc vb_expr)
           ~init:acc
       in
-      <span data-count="14">B</span>ase.List.fold_left
+      <span data-count="16">B</span>ase.List.fold_left
         bindings
-        ~f:(fun acc { vb_pat; vb_expr = _ } -&gt; <span data-count="14">B</span>ase.Set.diff acc (pat_se<span data-count="14">t</span> vb_pat))
+        ~f:(fun acc { vb_pat; vb_expr = _ } -&gt; <span data-count="16">B</span>ase.Set.diff acc (pat_se<span data-count="16">t</span> vb_pat))
         ~init:acc
     | <span data-count="0">_</span> -&gt; acc
   in
-  helpe<span data-count="100">r</span> (se<span data-count="100">t</span> std_lib_names)
+  helpe<span data-count="114">r</span> (se<span data-count="114">t</span> std_lib_names)
 ;;
 
 let closure_conversion toplvl =
-  <span data-count="248">l</span>et rec closure_expr toplvl env = function
+  <span data-count="294">l</span>et rec closure_expr toplvl env = function
     | <span data-count="0">E</span>xp_type (e, t) -&gt; etype e t
-    | <span data-count="663">E</span>xp_constant c -&gt; econst c
-    | <span data-count="2236">E</span>xp_ident id as node -&gt;
+    | <span data-count="781">E</span>xp_constant c -&gt; econst c
+    | <span data-count="2636">E</span>xp_ident id as node -&gt;
       (match Base.Map.find env id with
-       | <span data-count="1962">N</span>one -&gt; node
-       | <span data-count="274">S</span>ome vars -&gt;
+       | <span data-count="2314">N</span>one -&gt; node
+       | <span data-count="322">S</span>ome vars -&gt;
          Base.Set.fold_right (* ?? *) vars ~f:(fun v acc -&gt; <span data-count="0">e</span>app acc (eva<span data-count="0">l</span> v)) ~init:node)
-    | <span data-count="29">E</span>xp_tuple exps -&gt;
-      let items = Base.List.map exps ~f:(closure_exp<span data-count="29">r</span> toplvl env) in
-      <span data-count="29">e</span>tuple items
-    | <span data-count="83">E</span>xp_function (p, e) -&gt;
+    | <span data-count="34">E</span>xp_tuple exps -&gt;
+      let items = Base.List.map exps ~f:(closure_exp<span data-count="34">r</span> toplvl env) in
+      <span data-count="34">e</span>tuple items
+    | <span data-count="97">E</span>xp_function (p, e) -&gt;
       let ps, inner = eliminate_funs e in
-      <span data-count="83">l</span>et ps = List.rev ps in
-      <span data-count="83">l</span>et p_vars = Base.List.concat_map (p :: ps) ~f:pattern_vars in
-      <span data-count="83">l</span>et p_vars_set = set p_vars in
-      <span data-count="83">l</span>et free_vars = Base.Set.diff (expr_var<span data-count="83">s</span> inner) p_vars_set in
-      <span data-count="83">l</span>et free_vars = Base.Set.diff free_vars (se<span data-count="83">t</span> toplvl) in
-      <span data-count="83">l</span>et saturated =
-        Base.Set.fold free_vars ~f:(fun acc v -&gt; <span data-count="51">p</span>va<span data-count="51">r</span> v :: acc) ~init:(p :: ps)
+      <span data-count="97">l</span>et ps = List.rev ps in
+      <span data-count="97">l</span>et p_vars = Base.List.concat_map (p :: ps) ~f:pattern_vars in
+      <span data-count="97">l</span>et p_vars_set = set p_vars in
+      <span data-count="97">l</span>et free_vars = Base.Set.diff (expr_var<span data-count="97">s</span> inner) p_vars_set in
+      <span data-count="97">l</span>et free_vars = Base.Set.diff free_vars (se<span data-count="97">t</span> toplvl) in
+      <span data-count="97">l</span>et saturated =
+        Base.Set.fold free_vars ~f:(fun acc v -&gt; <span data-count="60">p</span>va<span data-count="60">r</span> v :: acc) ~init:(p :: ps)
       in
-      <span data-count="83">l</span>et expr = closure_expr toplvl env inner in
-      <span data-count="83">l</span>et expr = construct_from_pats expr saturated in
-      <span data-count="83">B</span>ase.Set.fold_right free_vars ~f:(fun v acc -&gt; <span data-count="51">e</span>app acc (eva<span data-count="51">l</span> v)) ~init:expr
-    | <span data-count="237">E</span>xp_let (decl, e) -&gt;
+      <span data-count="97">l</span>et expr = closure_expr toplvl env inner in
+      <span data-count="97">l</span>et expr = construct_from_pats expr saturated in
+      <span data-count="97">B</span>ase.Set.fold_right free_vars ~f:(fun v acc -&gt; <span data-count="60">e</span>app acc (eva<span data-count="60">l</span> v)) ~init:expr
+    | <span data-count="282">E</span>xp_let (decl, e) -&gt;
       let decl, env = closure_decl toplvl env decl in
-      <span data-count="237">e</span>let decl (closure_exp<span data-count="237">r</span> toplvl env e)
-    | <span data-count="114">E</span>xp_match (e, cases) -&gt;
+      <span data-count="282">e</span>let decl (closure_exp<span data-count="282">r</span> toplvl env e)
+    | <span data-count="134">E</span>xp_match (e, cases) -&gt;
       let e = closure_expr toplvl env e in
-      <span data-count="114">l</span>et cases = Base.List.map cases ~f:(fun (p, e) -&gt; <span data-count="270">p</span>, closure_exp<span data-count="270">r</span> toplvl env e) in
-      <span data-count="114">e</span>match e cases
-    | <span data-count="94">E</span>xp_ifthenelse (e, e', e'') -&gt;
+      <span data-count="134">l</span>et cases = Base.List.map cases ~f:(fun (p, e) -&gt; <span data-count="316">p</span>, closure_exp<span data-count="316">r</span> toplvl env e) in
+      <span data-count="134">e</span>match e cases
+    | <span data-count="110">E</span>xp_ifthenelse (e, e', e'') -&gt;
       let e = closure_expr toplvl env e in
-      <span data-count="94">l</span>et e' = closure_expr toplvl env e' in
-      <span data-count="94">l</span>et e'' = closure_expr toplvl env e'' in
-      <span data-count="94">e</span>ite e e' e''
-    | <span data-count="1803">E</span>xp_apply (e, e') -&gt;
+      <span data-count="110">l</span>et e' = closure_expr toplvl env e' in
+      <span data-count="110">l</span>et e'' = closure_expr toplvl env e'' in
+      <span data-count="110">e</span>ite e e' e''
+    | <span data-count="2126">E</span>xp_apply (e, e') -&gt;
       let e = closure_expr toplvl env e in
-      <span data-count="1803">l</span>et e' = closure_expr toplvl env e' in
-      <span data-count="1803">e</span>app e e'
-    | <span data-count="170">E</span>xp_list (e, e') -&gt;
+      <span data-count="2126">l</span>et e' = closure_expr toplvl env e' in
+      <span data-count="2126">e</span>app e e'
+    | <span data-count="200">E</span>xp_list (e, e') -&gt;
       let e = closure_expr toplvl env e in
-      <span data-count="170">l</span>et e' = closure_expr toplvl env e' in
-      <span data-count="170">e</span>cons e e'
+      <span data-count="200">l</span>et e' = closure_expr toplvl env e' in
+      <span data-count="200">e</span>cons e e'
   and closure_decl toplvl env =
-    <span data-count="485">l</span>et helper rec_flag env = function
-      | <span data-count="439">{</span> vb_pat = Pat_var v as pv; vb_expr } -&gt;
+    <span data-count="576">l</span>et helper rec_flag env = function
+      | <span data-count="521">{</span> vb_pat = Pat_var v as pv; vb_expr } -&gt;
         let ps, inner_expr = eliminate_funs vb_expr in
-        <span data-count="439">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
-        <span data-count="439">l</span>et p_vars_set = set p_vars in
-        <span data-count="439">l</span>et free_vars = Base.Set.diff (expr_var<span data-count="439">s</span> inner_expr) p_vars_set in
-        <span data-count="439">l</span>et free_vars = Base.Set.diff free_vars (se<span data-count="439">t</span> toplvl) in
-        <span data-count="439">l</span>et free_vars =
+        <span data-count="521">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
+        <span data-count="521">l</span>et p_vars_set = set p_vars in
+        <span data-count="521">l</span>et free_vars = Base.Set.diff (expr_var<span data-count="521">s</span> inner_expr) p_vars_set in
+        <span data-count="521">l</span>et free_vars = Base.Set.diff free_vars (se<span data-count="521">t</span> toplvl) in
+        <span data-count="521">l</span>et free_vars =
           match rec_flag with
-          | <span data-count="204">R</span>ecursive -&gt; Base.Set.remov<span data-count="204">e</span> free_vars v
-          | <span data-count="235">N</span>onrecursive -&gt; free_vars
+          | <span data-count="240">R</span>ecursive -&gt; Base.Set.remov<span data-count="240">e</span> free_vars v
+          | <span data-count="281">N</span>onrecursive -&gt; free_vars
         in
         let free_vars =
-          if Base.Set.lengt<span data-count="439">h</span> p_vars_set == 0 then <span data-count="158">e</span>mpty_set else <span data-count="281">f</span>ree_vars
+          if Base.Set.lengt<span data-count="521">h</span> p_vars_set == 0 then <span data-count="189">e</span>mpty_set else <span data-count="332">f</span>ree_vars
         in
         let saturated =
-          Base.Set.fold free_vars ~f:(fun acc v -&gt; <span data-count="0">p</span>va<span data-count="0">r</span> v :: acc) ~init:(List.re<span data-count="439">v</span> ps)
+          Base.Set.fold free_vars ~f:(fun acc v -&gt; <span data-count="0">p</span>va<span data-count="0">r</span> v :: acc) ~init:(List.re<span data-count="521">v</span> ps)
         in
-        <span data-count="439">l</span>et env = Base.Map.set env ~key:v ~data:free_vars in
-        <span data-count="439">l</span>et expr = closure_expr toplvl env inner_expr in
-        <span data-count="439">l</span>et binding = { vb_pat = pv; vb_expr = construct_from_pat<span data-count="439">s</span> expr saturated } in
+        <span data-count="521">l</span>et env = Base.Map.set env ~key:v ~data:free_vars in
+        <span data-count="521">l</span>et expr = closure_expr toplvl env inner_expr in
+        <span data-count="521">l</span>et binding = { vb_pat = pv; vb_expr = construct_from_pat<span data-count="521">s</span> expr saturated } in
         binding, env
-      | <span data-count="154">b</span>inding -&gt; binding, env
+      | <span data-count="182">b</span>inding -&gt; binding, env
     in
     function
-    | <span data-count="389">D</span>ecl (Nonrecursive, [ binding ]) -&gt;
+    | <span data-count="463">D</span>ecl (Nonrecursive, [ binding ]) -&gt;
       let binding, env = helper Nonrecursive env binding in
-      <span data-count="389">e</span>dec<span data-count="389">l</span> Nonrecursive [ binding ], env
-    | <span data-count="96">D</span>ecl (Recursive, bindings) -&gt;
+      <span data-count="463">e</span>dec<span data-count="463">l</span> Nonrecursive [ binding ], env
+    | <span data-count="113">D</span>ecl (Recursive, bindings) -&gt;
       let ps, _ =
         Base.List.fold_left
           bindings
           ~init:([], [])
-          ~f:(fun (ps, es) { vb_pat; vb_expr } -&gt; <span data-count="102">v</span>b_pat :: ps, vb_expr :: es)
+          ~f:(fun (ps, es) { vb_pat; vb_expr } -&gt; <span data-count="120">v</span>b_pat :: ps, vb_expr :: es)
       in
-      <span data-count="96">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
-      <span data-count="96">l</span>et env =
+      <span data-count="113">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
+      <span data-count="113">l</span>et env =
         Base.List.fold_left p_vars ~init:env ~f:(fun acc pv -&gt;
-          <span data-count="102">B</span>ase.Map.set acc ~key:pv ~data:empty_set)
+          <span data-count="120">B</span>ase.Map.set acc ~key:pv ~data:empty_set)
       in
-      <span data-count="96">l</span>et env, bindings =
+      <span data-count="113">l</span>et env, bindings =
         Base.List.fold_left bindings ~init:(env, []) ~f:(fun (env, bindings) b -&gt;
-          <span data-count="102">l</span>et b, env = helper Recursive env b in
-          <span data-count="102">e</span>nv, b :: bindings)
+          <span data-count="120">l</span>et b, env = helper Recursive env b in
+          <span data-count="120">e</span>nv, b :: bindings)
       in
-      <span data-count="96">l</span>et env', bindings' =
+      <span data-count="113">l</span>et env', bindings' =
         Base.List.fold_left bindings ~init:(env, []) ~f:(fun (env, bindings) b -&gt;
-          <span data-count="102">l</span>et b, env = helper Recursive env b in
-          <span data-count="102">e</span>nv, b :: bindings)
+          <span data-count="120">l</span>et b, env = helper Recursive env b in
+          <span data-count="120">e</span>nv, b :: bindings)
       in
-      <span data-count="96">e</span>dec<span data-count="96">l</span> Recursive bindings', env'
+      <span data-count="113">e</span>dec<span data-count="113">l</span> Recursive bindings', env'
     | <span data-count="0">d</span>ecl -&gt; decl, env
   in
   let empty_map = Base.Map.empty (module Base.String) in
-  <span data-count="248">f</span>unction
+  <span data-count="294">f</span>unction
   | <span data-count="0">S</span>tr_eval e -&gt;
     let e = closure_expr toplvl empty_map e in
     <span data-count="0">S</span>tr_eval e, toplvl
-  | <span data-count="248">S</span>tr_value (Decl (rec_flag, bindings) as d) -&gt;
+  | <span data-count="294">S</span>tr_value (Decl (rec_flag, bindings) as d) -&gt;
     let ps, _ =
       Base.List.fold_left bindings ~init:([], []) ~f:(fun (ps, es) { vb_pat; vb_expr } -&gt;
-        <span data-count="254">v</span>b_pat :: ps, vb_expr :: es)
+        <span data-count="301">v</span>b_pat :: ps, vb_expr :: es)
     in
-    <span data-count="248">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
-    <span data-count="248">l</span>et saturated = if rec_flag = Recursive then <span data-count="82">t</span>oplvl @ p_vars else <span data-count="166">t</span>oplvl in
+    <span data-count="294">l</span>et p_vars = Base.List.concat_map ps ~f:pattern_vars in
+    <span data-count="294">l</span>et saturated = if rec_flag = Recursive then <span data-count="97">t</span>oplvl @ p_vars else <span data-count="197">t</span>oplvl in
     let decl, _ = closure_decl saturated empty_map d in
-    <span data-count="248">l</span>et new_tpls = Base.List.concat_map bindings ~f:(fun b -&gt; <span data-count="254">p</span>attern_vars b.vb_pat) in
-    <span data-count="248">S</span>tr_value decl, Base.List.appen<span data-count="248">d</span> new_tpls toplvl
+    <span data-count="294">l</span>et new_tpls = Base.List.concat_map bindings ~f:(fun b -&gt; <span data-count="301">p</span>attern_vars b.vb_pat) in
+    <span data-count="294">S</span>tr_value decl, Base.List.appen<span data-count="294">d</span> new_tpls toplvl
 ;;
 
 let convert_program ast =
-  <span data-count="76">l</span>et open Base.List in
+  <span data-count="90">l</span>et open Base.List in
   let decls, _ =
     fold_left ast ~init:([], std_lib_names) ~f:(fun (ss, tlvls) s -&gt;
-      <span data-count="248">l</span>et s, tlvls = closure_conversion tlvls s in
-      <span data-count="248">s</span> :: ss, tlvls)
+      <span data-count="294">l</span>et s, tlvls = closure_conversion tlvls s in
+      <span data-count="294">s</span> :: ss, tlvls)
   in
-  <span data-count="76">r</span>ev decls
+  <span data-count="90">r</span>ev decls
 ;;
 </code></pre>
       </div>

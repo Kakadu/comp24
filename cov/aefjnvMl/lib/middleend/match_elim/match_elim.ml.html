@@ -703,7 +703,7 @@ open Common.Base_lib.LibF
 let get_uniq_name : string t =
   let open Common.Naming in
   let+ new_id = fresh in
-  <span data-count="1032">w</span>ith_pref me_prefix @@ Int.to_strin<span data-count="1032">g</span> new_id
+  <span data-count="1226">w</span>ith_pref me_prefix @@ Int.to_strin<span data-count="1226">g</span> new_id
 ;;
 
 type semantic_bind = SBind of string id_t * m_expr
@@ -716,13 +716,13 @@ type alt_pt_tp =
 
 type alt_pat = alt_pt_tp
 
-let fail_f = Me_ast.MExp_ident (get_nam<span data-count="82">e</span> part_match_fail)
-let get_by_idx_f = Me_ast.MExp_ident (get_nam<span data-count="82">e</span> get_by_idx)
-let get_list_len_1_f = Me_ast.MExp_ident (get_nam<span data-count="82">e</span> get_list_len)
-let get_list_tl = Me_ast.MExp_ident (get_nam<span data-count="82">e</span> get_list_tail)
+let fail_f = Me_ast.MExp_ident (get_nam<span data-count="96">e</span> part_match_fail)
+let get_by_idx_f = Me_ast.MExp_ident (get_nam<span data-count="96">e</span> get_by_idx)
+let get_list_len_1_f = Me_ast.MExp_ident (get_nam<span data-count="96">e</span> get_list_len)
+let get_list_tl = Me_ast.MExp_ident (get_nam<span data-count="96">e</span> get_list_tail)
 let fail_app = MExp_apply (fail_f, MExp_constant Const_unit)
-let me_name nm = <span data-count="1107">M</span>Exp_ident nm
-let ite ~cond ~then_br ~else_br = <span data-count="139">M</span>Exp_ifthenelse (cond, then_br, else_br)
+let me_name nm = <span data-count="1315">M</span>Exp_ident nm
+let ite ~cond ~then_br ~else_br = <span data-count="162">M</span>Exp_ifthenelse (cond, then_br, else_br)
 
 let ite_with_fail ~cond ~then_br =
   <span data-count="0">l</span>et else_br = fail_app in
@@ -730,83 +730,83 @@ let ite_with_fail ~cond ~then_br =
 ;;
 
 let me_nonrec_letin nm body cont =
-  <span data-count="434">l</span>et bind = [ { m_vb_pat = nm; m_vb_expr = body } ] in
+  <span data-count="510">l</span>et bind = [ { m_vb_pat = nm; m_vb_expr = body } ] in
   MExp_let (MDecl (Nonrecursive, bind), cont)
 ;;
 
-let me_2n_op o arg1 arg2 = <span data-count="365">M</span>Exp_apply (MExp_apply (o, arg1), arg2)
-let me_eq = me_2n_o<span data-count="82">p</span> @@ MExp_ident (get_nam<span data-count="82">e</span> op_eq)
-let me_more_eq = me_2n_o<span data-count="82">p</span> @@ MExp_ident (get_nam<span data-count="82">e</span> op_more_eq)
+let me_2n_op o arg1 arg2 = <span data-count="425">M</span>Exp_apply (MExp_apply (o, arg1), arg2)
+let me_eq = me_2n_o<span data-count="96">p</span> @@ MExp_ident (get_nam<span data-count="96">e</span> op_eq)
+let me_more_eq = me_2n_o<span data-count="96">p</span> @@ MExp_ident (get_nam<span data-count="96">e</span> op_more_eq)
 
 let me_const_comperison c1 me =
-  <span data-count="61">l</span>et const = MExp_constant c1 in
+  <span data-count="71">l</span>et const = MExp_constant c1 in
   me_eq const me
 ;;
 
-let me_vb m_vb_pat m_vb_expr = <span data-count="528">{</span> m_vb_pat; m_vb_expr }
-let me_and_func = me_2n_o<span data-count="82">p</span> (me_nam<span data-count="82">e</span> @@ get_nam<span data-count="82">e</span> op_and)
+let me_vb m_vb_pat m_vb_expr = <span data-count="624">{</span> m_vb_pat; m_vb_expr }
+let me_and_func = me_2n_o<span data-count="96">p</span> (me_nam<span data-count="96">e</span> @@ get_nam<span data-count="96">e</span> op_and)
 let me_bool v = <span data-count="1">M</span>Exp_constant (Const_bool v)
-let me_get_by_idx e i = <span data-count="167">m</span>e_2n_op get_by_idx_f e (MExp_constant (Common.Ast.Const_int i))
-let me_get_list_tail e i = <span data-count="58">m</span>e_2n_op get_list_tl e (MExp_constant (Common.Ast.Const_int i))
-let me_get_list_len_1 me = <span data-count="79">M</span>Exp_apply (get_list_len_1_f, me)
+let me_get_by_idx e i = <span data-count="194">m</span>e_2n_op get_by_idx_f e (MExp_constant (Common.Ast.Const_int i))
+let me_get_list_tail e i = <span data-count="68">m</span>e_2n_op get_list_tl e (MExp_constant (Common.Ast.Const_int i))
+let me_get_list_len_1 me = <span data-count="92">M</span>Exp_apply (get_list_len_1_f, me)
 
 (** [(::) pt1, ((::) pt2, pt3))] --&gt; [pt1 ; pt2 ; pt3] *)
 let optimize_cons : pattern -&gt; pattern -&gt; pattern list =
   fun head_pt tail_pt -&gt;
-  <span data-count="79">L</span>ist.rev
+  <span data-count="92">L</span>ist.rev
   @@
   let rec helper acc = function
-    | <span data-count="42">P</span>at_cons (pt1, pt2) -&gt; helper (pt1 :: acc) pt2
-    | <span data-count="79">e</span>nd_pt -&gt; end_pt :: acc
+    | <span data-count="48">P</span>at_cons (pt1, pt2) -&gt; helper (pt1 :: acc) pt2
+    | <span data-count="92">e</span>nd_pt -&gt; end_pt :: acc
   in
-  helpe<span data-count="79">r</span> [ head_pt ] tail_pt
+  helpe<span data-count="92">r</span> [ head_pt ] tail_pt
 ;;
 
 let polimorfic_to_letin f values =
-  <span data-count="287">L</span>ist.fold_left
+  <span data-count="339">L</span>ist.fold_left
     (fun acc_f v cont -&gt;
-      <span data-count="428">l</span>et nm, me = f v in
-      <span data-count="428">a</span>cc_f @@ me_nonrec_leti<span data-count="428">n</span> nm me cont)
-    (fun cont -&gt; <span data-count="287">c</span>ont)
+      <span data-count="504">l</span>et nm, me = f v in
+      <span data-count="504">a</span>cc_f @@ me_nonrec_leti<span data-count="504">n</span> nm me cont)
+    (fun cont -&gt; <span data-count="339">c</span>ont)
     values
 ;;
 
 let sbinds_to_nonrec_letin sbinds =
-  <span data-count="80">p</span>olimorfic_to_letin (fun (SBind (nm, me)) -&gt; <span data-count="181">n</span>m, me) sbinds
+  <span data-count="93">p</span>olimorfic_to_letin (fun (SBind (nm, me)) -&gt; <span data-count="210">n</span>m, me) sbinds
 ;;
 
 let vbs_to_nonrec_letin vbs =
-  <span data-count="207">p</span>olimorfic_to_letin (fun { m_vb_pat; m_vb_expr } -&gt; <span data-count="247">m</span>_vb_pat, m_vb_expr) vbs
+  <span data-count="246">p</span>olimorfic_to_letin (fun { m_vb_pat; m_vb_expr } -&gt; <span data-count="294">m</span>_vb_pat, m_vb_expr) vbs
 ;;
 
-let sbind_to_me_vb (SBind (id, me)) = <span data-count="42">m</span>e_vb id me
+let sbind_to_me_vb (SBind (id, me)) = <span data-count="50">m</span>e_vb id me
 
 let rec elim_pattern : m_expr -&gt; pattern -&gt; alt_pat t =
   fun mexpr -&gt;
-  <span data-count="1338">l</span>et update_cond c_cond = function
+  <span data-count="1582">l</span>et update_cond c_cond = function
     | <span data-count="0">S</span>ome cond -&gt; me_and_func c_cond cond
     | <span data-count="1">N</span>one -&gt; c_cond
   in
   let row_compound_alt_pat pt'list =
     (* REVERSE *)
-    <span data-count="102">l</span>et* _, row_binds =
-      fold_left_<span data-count="102">t</span>
+    <span data-count="119">l</span>et* _, row_binds =
+      fold_left_<span data-count="119">t</span>
         pt'list
-        ~init:(retur<span data-count="102">n</span> (0, []))
+        ~init:(retur<span data-count="119">n</span> (0, []))
         ~f:(fun (idx, acc) pt -&gt;
-          <span data-count="167">l</span>et tuple_elem = me_get_by_idx mexpr idx in
-          <span data-count="167">l</span>et+ alt_pt = elim_patter<span data-count="167">n</span> tuple_elem pt in
-          <span data-count="167">l</span>et new_acc = alt_pt :: acc in
+          <span data-count="194">l</span>et tuple_elem = me_get_by_idx mexpr idx in
+          <span data-count="194">l</span>et+ alt_pt = elim_patter<span data-count="194">n</span> tuple_elem pt in
+          <span data-count="194">l</span>et new_acc = alt_pt :: acc in
           idx + 1, new_acc)
     in
     (* REVERSE-BACK *)
-    <span data-count="102">l</span>et cond_opt, provided_sbinds =
+    <span data-count="119">l</span>et cond_opt, provided_sbinds =
       List.fold_left
         (fun acc alt_pat -&gt;
-          <span data-count="167">l</span>et old_cond_opt, provided_sbinds = acc in
+          <span data-count="194">l</span>et old_cond_opt, provided_sbinds = acc in
           match alt_pat with
           | <span data-count="1">A</span>ny _ -&gt; old_cond_opt, provided_sbinds
-          | <span data-count="165">V</span>ar var_bind -&gt; old_cond_opt, var_bind :: provided_sbinds
+          | <span data-count="192">V</span>ar var_bind -&gt; old_cond_opt, var_bind :: provided_sbinds
           | <span data-count="0">C</span>onst c_cond -&gt;
             let updated_cond = update_cond c_cond old_cond_opt in
             <span data-count="0">S</span>ome updated_cond, provided_sbinds
@@ -823,54 +823,54 @@ let rec elim_pattern : m_expr -&gt; pattern -&gt; alt_pat t =
         (None, [])
         row_binds
     in
-    <span data-count="102">r</span>eturn (cond_opt, provided_sbinds)
+    <span data-count="119">r</span>eturn (cond_opt, provided_sbinds)
   in
   function
-  | <span data-count="1025">P</span>at_var nm -&gt; return @@ Var (SBind (Id_name nm, mexpr))
+  | <span data-count="1215">P</span>at_var nm -&gt; return @@ Var (SBind (Id_name nm, mexpr))
   | <span data-count="1">P</span>at_any -&gt;
     let* any_name = get_uniq_name in
     <span data-count="1">r</span>eturn @@ Any (SBind (Id_name any_name, mexpr))
-  | <span data-count="149">P</span>at_const Const_unit -&gt; return @@ Var (SBind (Id_unit, mexpr))
-  | <span data-count="61">P</span>at_const c -&gt;
+  | <span data-count="176">P</span>at_const Const_unit -&gt; return @@ Var (SBind (Id_unit, mexpr))
+  | <span data-count="71">P</span>at_const c -&gt;
     let me_cond = me_const_comperison c mexpr in
-    <span data-count="61">r</span>eturn @@ Const me_cond
+    <span data-count="71">r</span>eturn @@ Const me_cond
   | <span data-count="0">P</span>at_constraint (pt, _) -&gt; elim_pattern mexpr pt
-  | <span data-count="23">P</span>at_tuple pt'list -&gt;
-    let+ compound_cond, provided_sbinds = row_compound_alt_pa<span data-count="23">t</span> pt'list in
-    <span data-count="23">C</span>ompound (compound_cond, provided_sbinds)
-  | <span data-count="79">P</span>at_cons (head_pt, tail_pt) -&gt;
+  | <span data-count="27">P</span>at_tuple pt'list -&gt;
+    let+ compound_cond, provided_sbinds = row_compound_alt_pa<span data-count="27">t</span> pt'list in
+    <span data-count="27">C</span>ompound (compound_cond, provided_sbinds)
+  | <span data-count="92">P</span>at_cons (head_pt, tail_pt) -&gt;
     let plain_pat_list = optimize_cons head_pt tail_pt in
-    <span data-count="79">l</span>et row_lst_len = List.length plain_pat_list in
-    <span data-count="79">l</span>et* last_pat, prefix =
+    <span data-count="92">l</span>et row_lst_len = List.length plain_pat_list in
+    <span data-count="92">l</span>et* last_pat, prefix =
       match List.rev plain_pat_list with
-      | <span data-count="79">x</span> :: pref -&gt; retur<span data-count="79">n</span> (x, List.re<span data-count="79">v</span> pref)
+      | <span data-count="92">x</span> :: pref -&gt; retur<span data-count="92">n</span> (x, List.re<span data-count="92">v</span> pref)
       | <span data-count="0">_</span> -&gt; fai<span data-count="0">l</span> "Pat_cons has at least two elements"
     in
-    <span data-count="79">l</span>et last_bind =
+    <span data-count="92">l</span>et last_bind =
       match last_pat with
-      | <span data-count="58">P</span>at_var nm -&gt; Some (SBind (Id_name nm, me_get_list_tai<span data-count="58">l</span> mexpr (row_lst_len - 1)))
-      | <span data-count="21">_</span> -&gt; None
+      | <span data-count="68">P</span>at_var nm -&gt; Some (SBind (Id_name nm, me_get_list_tai<span data-count="68">l</span> mexpr (row_lst_len - 1)))
+      | <span data-count="24">_</span> -&gt; None
     in
-    let+ compound_cond, provided_sbinds = row_compound_alt_pa<span data-count="79">t</span> prefix in
-    <span data-count="79">l</span>et len_cond_me =
-      let me_pt_elem_cnt v = <span data-count="79">M</span>Exp_constant (Const_int v) in
+    let+ compound_cond, provided_sbinds = row_compound_alt_pa<span data-count="92">t</span> prefix in
+    <span data-count="92">l</span>et len_cond_me =
+      let me_pt_elem_cnt v = <span data-count="92">M</span>Exp_constant (Const_int v) in
       let me_list_len = me_get_list_len_1 @@ mexpr in
-      <span data-count="79">m</span>atch last_pat with
-      | <span data-count="21">P</span>at_const Const_nil -&gt; me_e<span data-count="21">q</span> (me_pt_elem_cn<span data-count="21">t</span> @@ (row_lst_len - 1)) me_list_len
-      | <span data-count="58">_</span> -&gt; me_more_e<span data-count="58">q</span> me_list_len (me_pt_elem_cn<span data-count="58">t</span> row_lst_len)
+      <span data-count="92">m</span>atch last_pat with
+      | <span data-count="24">P</span>at_const Const_nil -&gt; me_e<span data-count="24">q</span> (me_pt_elem_cn<span data-count="24">t</span> @@ (row_lst_len - 1)) me_list_len
+      | <span data-count="68">_</span> -&gt; me_more_e<span data-count="68">q</span> me_list_len (me_pt_elem_cn<span data-count="68">t</span> row_lst_len)
     in
     let particial_alt_pt cond =
-      <span data-count="79">l</span>et provided_sbinds' =
+      <span data-count="92">l</span>et provided_sbinds' =
         match last_bind with
-        | <span data-count="58">S</span>ome sbind -&gt; sbind :: provided_sbinds
-        | <span data-count="21">N</span>one -&gt; provided_sbinds
+        | <span data-count="68">S</span>ome sbind -&gt; sbind :: provided_sbinds
+        | <span data-count="24">N</span>one -&gt; provided_sbinds
       in
       Compound (Some cond, provided_sbinds')
     in
     (match compound_cond with
-     | <span data-count="78">N</span>one -&gt;
+     | <span data-count="91">N</span>one -&gt;
        let alt_pat = particial_alt_pt len_cond_me in
-       <span data-count="78">a</span>lt_pat
+       <span data-count="91">a</span>lt_pat
      | <span data-count="1">S</span>ome cond -&gt;
        let new_cond = MExp_ifthenelse (len_cond_me, cond, me_boo<span data-count="1">l</span> false) in
        let alt_pat = particial_alt_pt new_cond in
@@ -878,7 +878,7 @@ let rec elim_pattern : m_expr -&gt; pattern -&gt; alt_pat t =
 ;;
 
 let to_me_vb to_me_expr { vb_pat; vb_expr } =
-  <span data-count="486">l</span>et generate_check_vb cond =
+  <span data-count="574">l</span>et generate_check_vb cond =
     <span data-count="0">l</span>et placeholder = MExp_constant Const_unit in
     let check_body = ite_with_fail ~cond ~then_br:placeholder in
     let+ check_nm = get_uniq_name in
@@ -886,67 +886,67 @@ let to_me_vb to_me_expr { vb_pat; vb_expr } =
     me_vb check_nm_me check_body
   in
   let* bind_name = get_uniq_name in
-  <span data-count="486">l</span>et main_nm = me_name bind_name in
-  <span data-count="486">l</span>et* alt_pat = elim_patter<span data-count="486">n</span> main_nm vb_pat in
-  <span data-count="486">l</span>et* bind_body = to_me_exp<span data-count="486">r</span> vb_expr in
-  <span data-count="486">m</span>atch alt_pat with
-  | <span data-count="465">V</span>ar (SBind (name, _)) | <span data-count="0">A</span>ny (SBind (name, _)) -&gt; return @@ [ me_v<span data-count="465">b</span> name bind_body ]
+  <span data-count="574">l</span>et main_nm = me_name bind_name in
+  <span data-count="574">l</span>et* alt_pat = elim_patter<span data-count="574">n</span> main_nm vb_pat in
+  <span data-count="574">l</span>et* bind_body = to_me_exp<span data-count="574">r</span> vb_expr in
+  <span data-count="574">m</span>atch alt_pat with
+  | <span data-count="549">V</span>ar (SBind (name, _)) | <span data-count="0">A</span>ny (SBind (name, _)) -&gt; return @@ [ me_v<span data-count="549">b</span> name bind_body ]
   | <span data-count="0">C</span>onst cond -&gt;
     let main_vb = me_vb (Id_name bind_name) bind_body in
     <span data-count="0">l</span>et+ check_vb = generate_check_v<span data-count="0">b</span> cond in
     <span data-count="0">[</span> main_vb; check_vb ]
-  | <span data-count="21">C</span>ompound (cond_opt, sbinds) -&gt;
+  | <span data-count="25">C</span>ompound (cond_opt, sbinds) -&gt;
     let provided_vbs = List.map sbind_to_me_vb sbinds in
-    <span data-count="21">l</span>et main_vb = me_vb (Id_name bind_name) bind_body in
-    <span data-count="21">(</span>match cond_opt with
+    <span data-count="25">l</span>et main_vb = me_vb (Id_name bind_name) bind_body in
+    <span data-count="25">(</span>match cond_opt with
      | <span data-count="0">S</span>ome cond -&gt;
        let+ check_vb = generate_check_v<span data-count="0">b</span> cond in
        <span data-count="0">[</span> main_vb; check_vb ] @ provided_vbs
-     | <span data-count="21">N</span>one -&gt; return @@ (main_vb :: provided_vbs))
+     | <span data-count="25">N</span>one -&gt; return @@ (main_vb :: provided_vbs))
 ;;
 
 (* TODO: remove redudant and (refactor with letin or (;;) ) *)
 let elim_vb'list to_me_expr vb_l =
-  <span data-count="479">l</span>et+ list_of_list = map<span data-count="479">t</span> vb_l (to_me_v<span data-count="479">b</span> to_me_expr) in
-  <span data-count="479">L</span>ist.concat list_of_list
+  <span data-count="566">l</span>et+ list_of_list = map<span data-count="566">t</span> vb_l (to_me_v<span data-count="566">b</span> to_me_expr) in
+  <span data-count="566">L</span>ist.concat list_of_list
 ;;
 
 let rec to_me_expr = function
-  | <span data-count="708">E</span>xp_constant c -&gt; return @@ MExp_constant c
-  | <span data-count="1789">E</span>xp_ident name -&gt; return @@ MExp_ident name
+  | <span data-count="828">E</span>xp_constant c -&gt; return @@ MExp_constant c
+  | <span data-count="2116">E</span>xp_ident name -&gt; return @@ MExp_ident name
   | <span data-count="0">E</span>xp_type (e', _) -&gt; to_me_expr e'
-  | <span data-count="24">E</span>xp_tuple e'list -&gt;
-    let+ me'list = map<span data-count="24">t</span> e'list to_me_expr in
-    <span data-count="24">M</span>Exp_tuple me'list
-  | <span data-count="1543">E</span>xp_apply (e'fst, e'snd) -&gt;
-    let* me'fst = to_me_exp<span data-count="1543">r</span> e'fst in
-    <span data-count="1543">l</span>et+ me'snd = to_me_exp<span data-count="1543">r</span> e'snd in
-    <span data-count="1543">M</span>Exp_apply (me'fst, me'snd)
-  | <span data-count="158">E</span>xp_list (e'fst, e'snd) -&gt;
-    let* me'fst = to_me_exp<span data-count="158">r</span> e'fst in
-    <span data-count="158">l</span>et+ me'snd = to_me_exp<span data-count="158">r</span> e'snd in
-    <span data-count="158">M</span>Exp_list (me'fst, me'snd)
-  | <span data-count="67">E</span>xp_ifthenelse (e1, e2, e3) -&gt;
-    let* e1' = to_me_exp<span data-count="67">r</span> e1 in
-    <span data-count="67">l</span>et* e2' = to_me_exp<span data-count="67">r</span> e2 in
-    <span data-count="67">l</span>et+ e3' = to_me_exp<span data-count="67">r</span> e3 in
-    <span data-count="67">M</span>Exp_ifthenelse (e1', e2', e3')
-  | <span data-count="221">E</span>xp_let (Decl (r_flag, vb_l), e) -&gt;
-    let* e' = to_me_exp<span data-count="221">r</span> e in
-    <span data-count="221">l</span>et+ vb_l' = elim_vb'lis<span data-count="221">t</span> to_me_expr vb_l in
-    <span data-count="221">(</span>match r_flag with
-     | <span data-count="14">R</span>ecursive -&gt; MExp_let (MDecl (Recursive, vb_l'), e')
-     | <span data-count="207">N</span>onrecursive -&gt; vbs_to_nonrec_letin vb_l' e')
-  | <span data-count="539">E</span>xp_function (pt, e') -&gt;
-    let* fun_body = to_me_exp<span data-count="539">r</span> e' in
-    <span data-count="539">l</span>et* potential_arg, me_potential_bind =
+  | <span data-count="28">E</span>xp_tuple e'list -&gt;
+    let+ me'list = map<span data-count="28">t</span> e'list to_me_expr in
+    <span data-count="28">M</span>Exp_tuple me'list
+  | <span data-count="1826">E</span>xp_apply (e'fst, e'snd) -&gt;
+    let* me'fst = to_me_exp<span data-count="1826">r</span> e'fst in
+    <span data-count="1826">l</span>et+ me'snd = to_me_exp<span data-count="1826">r</span> e'snd in
+    <span data-count="1826">M</span>Exp_apply (me'fst, me'snd)
+  | <span data-count="185">E</span>xp_list (e'fst, e'snd) -&gt;
+    let* me'fst = to_me_exp<span data-count="185">r</span> e'fst in
+    <span data-count="185">l</span>et+ me'snd = to_me_exp<span data-count="185">r</span> e'snd in
+    <span data-count="185">M</span>Exp_list (me'fst, me'snd)
+  | <span data-count="78">E</span>xp_ifthenelse (e1, e2, e3) -&gt;
+    let* e1' = to_me_exp<span data-count="78">r</span> e1 in
+    <span data-count="78">l</span>et* e2' = to_me_exp<span data-count="78">r</span> e2 in
+    <span data-count="78">l</span>et+ e3' = to_me_exp<span data-count="78">r</span> e3 in
+    <span data-count="78">M</span>Exp_ifthenelse (e1', e2', e3')
+  | <span data-count="262">E</span>xp_let (Decl (r_flag, vb_l), e) -&gt;
+    let* e' = to_me_exp<span data-count="262">r</span> e in
+    <span data-count="262">l</span>et+ vb_l' = elim_vb'lis<span data-count="262">t</span> to_me_expr vb_l in
+    <span data-count="262">(</span>match r_flag with
+     | <span data-count="16">R</span>ecursive -&gt; MExp_let (MDecl (Recursive, vb_l'), e')
+     | <span data-count="246">N</span>onrecursive -&gt; vbs_to_nonrec_letin vb_l' e')
+  | <span data-count="645">E</span>xp_function (pt, e') -&gt;
+    let* fun_body = to_me_exp<span data-count="645">r</span> e' in
+    <span data-count="645">l</span>et* potential_arg, me_potential_bind =
       let+ new_name = get_uniq_name in
-      <span data-count="539">I</span>d_name new_name, me_nam<span data-count="539">e</span> new_name
+      <span data-count="645">I</span>d_name new_name, me_nam<span data-count="645">e</span> new_name
     in
-    <span data-count="539">l</span>et* alt_pat = elim_patter<span data-count="539">n</span> me_potential_bind pt in
-    <span data-count="539">l</span>et ( |-&gt; ) name body = <span data-count="539">r</span>eturn @@ MExp_function (name, body) in
+    <span data-count="645">l</span>et* alt_pat = elim_patter<span data-count="645">n</span> me_potential_bind pt in
+    <span data-count="645">l</span>et ( |-&gt; ) name body = <span data-count="645">r</span>eturn @@ MExp_function (name, body) in
     (match alt_pat with
-     | <span data-count="538">V</span>ar (SBind (arg, _)) | <span data-count="0">A</span>ny (SBind (arg, _)) -&gt; arg |-&gt; fun_body
+     | <span data-count="644">V</span>ar (SBind (arg, _)) | <span data-count="0">A</span>ny (SBind (arg, _)) -&gt; arg |-&gt; fun_body
      | <span data-count="0">C</span>onst cond -&gt;
        let fun_body' = ite_with_fail ~cond ~then_br:fun_body in
        potential_arg |-&gt; fun_body'
@@ -959,32 +959,32 @@ let rec to_me_expr = function
          | <span data-count="1">N</span>one -&gt; then_br
        in
        potential_arg |-&gt; fun_body')
-  | <span data-count="64">E</span>xp_match (main_e, branches) -&gt;
-    let* e_for_match' = to_me_exp<span data-count="64">r</span> main_e in
-    <span data-count="64">l</span>et* bind_me, before_match_me =
+  | <span data-count="74">E</span>xp_match (main_e, branches) -&gt;
+    let* e_for_match' = to_me_exp<span data-count="74">r</span> main_e in
+    <span data-count="74">l</span>et* bind_me, before_match_me =
       match main_e with
-      | <span data-count="1">E</span>xp_constant _ | <span data-count="63">E</span>xp_ident _ -&gt; retur<span data-count="64">n</span> @@ (e_for_match', fun x -&gt; <span data-count="64">x</span>)
+      | <span data-count="1">E</span>xp_constant _ | <span data-count="73">E</span>xp_ident _ -&gt; retur<span data-count="74">n</span> @@ (e_for_match', fun x -&gt; <span data-count="74">x</span>)
       | <span data-count="0">_</span> -&gt;
         let+ new_name = get_uniq_name in
         <span data-count="0">m</span>e_nam<span data-count="0">e</span> new_name, me_nonrec_leti<span data-count="0">n</span> (Id_name new_name) e_for_match'
     in
-    <span data-count="64">l</span>et+ f_match' =
-      fold_left_<span data-count="64">t</span> branches ~init:(retur<span data-count="64">n</span> before_match_me) ~f:(fun acc_f (pt, br_e) -&gt;
-        <span data-count="146">l</span>et* alt_pt = elim_patter<span data-count="146">n</span> bind_me pt in
-        <span data-count="146">l</span>et+ br_me = to_me_exp<span data-count="146">r</span> br_e in
-        <span data-count="146">m</span>atch alt_pt with
+    <span data-count="74">l</span>et+ f_match' =
+      fold_left_<span data-count="74">t</span> branches ~init:(retur<span data-count="74">n</span> before_match_me) ~f:(fun acc_f (pt, br_e) -&gt;
+        <span data-count="169">l</span>et* alt_pt = elim_patter<span data-count="169">n</span> bind_me pt in
+        <span data-count="169">l</span>et+ br_me = to_me_exp<span data-count="169">r</span> br_e in
+        <span data-count="169">m</span>atch alt_pt with
         | <span data-count="0">A</span>ny _ -&gt; fun _ -&gt; <span data-count="0">a</span>cc_f br_me
         | <span data-count="6">V</span>ar (SBind (name, bind_body)) -&gt;
           fun _ -&gt; <span data-count="6">a</span>cc_f @@ me_nonrec_leti<span data-count="6">n</span> name bind_body br_me
-        | <span data-count="61">C</span>onst cond -&gt; fun else_br -&gt; <span data-count="61">a</span>cc_f @@ ite ~cond ~then_br:br_me ~else_br
-        | <span data-count="79">C</span>ompound (cond_opt, sbinds) -&gt;
+        | <span data-count="71">C</span>onst cond -&gt; fun else_br -&gt; <span data-count="71">a</span>cc_f @@ ite ~cond ~then_br:br_me ~else_br
+        | <span data-count="92">C</span>ompound (cond_opt, sbinds) -&gt;
           let me_particial = sbinds_to_nonrec_letin sbinds in
-          <span data-count="79">(</span>match cond_opt with
-           | <span data-count="78">S</span>ome cond -&gt;
-             fun else_br -&gt; <span data-count="78">a</span>cc_f @@ ite ~cond ~then_br:(me_particia<span data-count="78">l</span> br_me) ~else_br
+          <span data-count="92">(</span>match cond_opt with
+           | <span data-count="91">S</span>ome cond -&gt;
+             fun else_br -&gt; <span data-count="91">a</span>cc_f @@ ite ~cond ~then_br:(me_particia<span data-count="91">l</span> br_me) ~else_br
            | <span data-count="1">N</span>one -&gt; fun _ -&gt; <span data-count="1">a</span>cc_f @@ me_particia<span data-count="1">l</span> br_me))
     in
-    <span data-count="64">f</span>_match' fail_app
+    <span data-count="74">f</span>_match' fail_app
 ;;
 
 let to_me_struct_item = function
@@ -993,22 +993,22 @@ let to_me_struct_item = function
     <span data-count="6">l</span>et m_vb_pat = Id_name new_uniq_bind_nm in
     let+ m_vb_expr = to_me_exp<span data-count="6">r</span> e in
     <span data-count="6">[</span> MDecl (Nonrecursive, [ { m_vb_pat; m_vb_expr } ]) ]
-  | <span data-count="258">S</span>tr_value (Decl (r_flag, vb_l)) -&gt;
-    let+ vb_l' = elim_vb'lis<span data-count="258">t</span> to_me_expr vb_l in
-    <span data-count="258">(</span>match r_flag with
-     | <span data-count="83">R</span>ecursive -&gt; [ MDecl (Recursive, vb_l') ]
-     | <span data-count="175">N</span>onrecursive -&gt; List.map (fun vb -&gt; <span data-count="177">M</span>Decl (Nonrecursive, [ vb ])) vb_l')
+  | <span data-count="304">S</span>tr_value (Decl (r_flag, vb_l)) -&gt;
+    let+ vb_l' = elim_vb'lis<span data-count="304">t</span> to_me_expr vb_l in
+    <span data-count="304">(</span>match r_flag with
+     | <span data-count="98">R</span>ecursive -&gt; [ MDecl (Recursive, vb_l') ]
+     | <span data-count="206">N</span>onrecursive -&gt; List.map (fun vb -&gt; <span data-count="208">M</span>Decl (Nonrecursive, [ vb ])) vb_l')
 ;;
 
 let to_me_program prog =
-  <span data-count="89">l</span>et+ m_decls = map<span data-count="89">t</span> prog to_me_struct_item in
-  <span data-count="89">L</span>ist.concat m_decls
+  <span data-count="103">l</span>et+ m_decls = map<span data-count="103">t</span> prog to_me_struct_item in
+  <span data-count="103">L</span>ist.concat m_decls
 ;;
 
 let eliminate_match_in_program prog =
-  <span data-count="89">l</span>et open Common.Errors in
-  match run (to_me_progra<span data-count="89">m</span> prog) 0 with
-  | <span data-count="89">_</span>, Ok me_decl'list -&gt; Result.Ok me_decl'list
+  <span data-count="103">l</span>et open Common.Errors in
+  match run (to_me_progra<span data-count="103">m</span> prog) 0 with
+  | <span data-count="103">_</span>, Ok me_decl'list -&gt; Result.Ok me_decl'list
   | <span data-count="0">_</span>, Error msg -&gt; Result.Error (illegal_stat<span data-count="0">e</span> msg)
 ;;
 </code></pre>

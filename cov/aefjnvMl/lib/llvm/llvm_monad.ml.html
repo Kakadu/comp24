@@ -402,109 +402,109 @@ module LlvmMonad (Ctx : LlvmGlobalCtx) = struct
 
   let get_builder : llbuilder t =
     let* _, b, _ = read in
-    <span data-count="753">r</span>eturn b
+    <span data-count="1506">r</span>eturn b
   ;;
 
   let get_cur_func : string t =
     let* f, _, _ = read in
-    <span data-count="34">r</span>eturn f
+    <span data-count="68">r</span>eturn f
   ;;
 
   let set_cur_func name =
-    <span data-count="47">l</span>et* _, a, b = read in
-    <span data-count="47">s</span>ave (name, a, b)
+    <span data-count="94">l</span>et* _, a, b = read in
+    <span data-count="94">s</span>ave (name, a, b)
   ;;
 
   let save_builder : llbuilder -&gt; unit t =
     fun builder -&gt;
-    <span data-count="258">l</span>et* cur_f, _, maps = read in
-    <span data-count="258">s</span>ave (cur_f, builder, maps)
+    <span data-count="516">l</span>et* cur_f, _, maps = read in
+    <span data-count="516">s</span>ave (cur_f, builder, maps)
   ;;
 
   let save_fun_def name tp =
-    <span data-count="481">l</span>et* cur_f, llvm_st, (def_tps, local_vars, glob_vars) = read in
-    <span data-count="481">s</span>ave (cur_f, llvm_st, (Defined_Map.ad<span data-count="481">d</span> name tp def_tps, local_vars, glob_vars))
+    <span data-count="962">l</span>et* cur_f, llvm_st, (def_tps, local_vars, glob_vars) = read in
+    <span data-count="962">s</span>ave (cur_f, llvm_st, (Defined_Map.ad<span data-count="962">d</span> name tp def_tps, local_vars, glob_vars))
   ;;
 
   (* REFACTOR IT ????? *)
 
   let load_local_var_opt nm =
-    <span data-count="374">l</span>et+ _, _, (_, scope_values, _) = read in
-    <span data-count="374">D</span>efined_Map.find_opt nm scope_values
+    <span data-count="748">l</span>et+ _, _, (_, scope_values, _) = read in
+    <span data-count="748">D</span>efined_Map.find_opt nm scope_values
   ;;
 
   let load_var nm =
-    <span data-count="373">l</span>et* var_opt = load_local_var_op<span data-count="373">t</span> nm in
-    <span data-count="373">m</span>atch var_opt with
-    | <span data-count="373">S</span>ome value -&gt; return value
+    <span data-count="746">l</span>et* var_opt = load_local_var_op<span data-count="746">t</span> nm in
+    <span data-count="746">m</span>atch var_opt with
+    | <span data-count="746">S</span>ome value -&gt; return value
     | <span data-count="0">N</span>one -&gt; fail @@ "No name in scope: " ^ nm
   ;;
 
   let store_local_var nm value =
-    <span data-count="293">l</span>et* cur_f, a, (f_map, scope_values, glob_vars) = read in
-    <span data-count="293">l</span>et scope_values' = Defined_Map.add nm value scope_values in
-    <span data-count="293">s</span>ave (cur_f, a, (f_map, scope_values', glob_vars))
+    <span data-count="586">l</span>et* cur_f, a, (f_map, scope_values, glob_vars) = read in
+    <span data-count="586">l</span>et scope_values' = Defined_Map.add nm value scope_values in
+    <span data-count="586">s</span>ave (cur_f, a, (f_map, scope_values', glob_vars))
   ;;
 
   let load_global_var nm =
-    <span data-count="1">l</span>et* _, _, (_, _, glob_vars) = read in
-    <span data-count="1">m</span>atch Defined_Map.find_opt nm glob_vars with
-    | <span data-count="1">S</span>ome value -&gt; return value
+    <span data-count="2">l</span>et* _, _, (_, _, glob_vars) = read in
+    <span data-count="2">m</span>atch Defined_Map.find_opt nm glob_vars with
+    | <span data-count="2">S</span>ome value -&gt; return value
     | <span data-count="0">N</span>one -&gt; fail @@ "No name in scope: " ^ nm
   ;;
 
   let store_global_var nm value =
-    <span data-count="17">l</span>et* cur_f, a, (f_map, scope_values, glob_vars) = read in
-    <span data-count="17">l</span>et glob_vars' = Defined_Map.add nm value glob_vars in
-    <span data-count="17">s</span>ave (cur_f, a, (f_map, scope_values, glob_vars'))
+    <span data-count="34">l</span>et* cur_f, a, (f_map, scope_values, glob_vars) = read in
+    <span data-count="34">l</span>et glob_vars' = Defined_Map.add nm value glob_vars in
+    <span data-count="34">s</span>ave (cur_f, a, (f_map, scope_values, glob_vars'))
   ;;
 
   (* ============ BUILDERS &amp; BLOCKS ============ *)
 
   let select_bb : llbasicblock -&gt; unit t =
     fun bb -&gt;
-    <span data-count="129">l</span>et+ builder' = get_builder in
-    <span data-count="129">i</span>gnore @@ position_at_en<span data-count="129">d</span> bb builder'
+    <span data-count="258">l</span>et+ builder' = get_builder in
+    <span data-count="258">i</span>gnore @@ position_at_en<span data-count="258">d</span> bb builder'
   ;;
 
   let in_new_bb bb f =
-    <span data-count="129">l</span>et* old_builder = get_builder in
-    <span data-count="129">l</span>et* () =
-      let new_builder = builder_at Ctx.ctx (instr_begi<span data-count="129">n</span> bb) in
-      <span data-count="129">s</span>ave_builde<span data-count="129">r</span> new_builder
+    <span data-count="258">l</span>et* old_builder = get_builder in
+    <span data-count="258">l</span>et* () =
+      let new_builder = builder_at Ctx.ctx (instr_begi<span data-count="258">n</span> bb) in
+      <span data-count="258">s</span>ave_builde<span data-count="258">r</span> new_builder
     in
-    <span data-count="129">l</span>et* () = select_b<span data-count="129">b</span> bb in
-    <span data-count="129">l</span>et* f_res = f in
-    <span data-count="129">l</span>et+ () = save_builde<span data-count="129">r</span> old_builder in
-    <span data-count="129">f</span>_res
+    <span data-count="258">l</span>et* () = select_b<span data-count="258">b</span> bb in
+    <span data-count="258">l</span>et* f_res = f in
+    <span data-count="258">l</span>et+ () = save_builde<span data-count="258">r</span> old_builder in
+    <span data-count="258">f</span>_res
   ;;
 
   (* ============ FUNCTIONS ============ *)
 
   let aliased_declare_func key_name name args_n fun_tp =
-    <span data-count="481">l</span>et f = declare_function name fun_tp Ctx.g_module in
-    <span data-count="481">s</span>ave_fun_def key_name (fun_tp, args_n, f)
+    <span data-count="962">l</span>et f = declare_function name fun_tp Ctx.g_module in
+    <span data-count="962">s</span>ave_fun_def key_name (fun_tp, args_n, f)
   ;;
 
-  let declare_func name = <span data-count="47">a</span>liased_declare_func name name
+  let declare_func name = <span data-count="94">a</span>liased_declare_func name name
 
   let lookup_func : string -&gt; (lltype * int * llvalue) t =
     fun fn_name -&gt;
-    <span data-count="625">l</span>et* _, _, (defs, _, _) = read in
-    <span data-count="625">m</span>atch Defined_Map.find_opt fn_name defs with
-    | <span data-count="625">S</span>ome tp -&gt; return tp
+    <span data-count="1250">l</span>et* _, _, (defs, _, _) = read in
+    <span data-count="1250">m</span>atch Defined_Map.find_opt fn_name defs with
+    | <span data-count="1250">S</span>ome tp -&gt; return tp
     | <span data-count="0">N</span>one -&gt; fail @@ "Type of {" ^ fn_name ^ "} not found"
   ;;
 
   let call_declared : string -&gt; string -&gt; llvalue list -&gt; llvalue t =
     fun return_name fn_name params -&gt;
-    <span data-count="297">l</span>et params_arr = Array.of_list params in
-    <span data-count="297">l</span>et* fn_tp, _, fn = lookup_fun<span data-count="297">c</span> fn_name in
-    <span data-count="297">l</span>et+ builder = get_builder in
-    <span data-count="297">b</span>uild_call fn_tp fn params_arr return_name builder
+    <span data-count="594">l</span>et params_arr = Array.of_list params in
+    <span data-count="594">l</span>et* fn_tp, _, fn = lookup_fun<span data-count="594">c</span> fn_name in
+    <span data-count="594">l</span>et+ builder = get_builder in
+    <span data-count="594">b</span>uild_call fn_tp fn params_arr return_name builder
   ;;
 
-  let void_call_declared = call_declare<span data-count="28">d</span> ""
+  let void_call_declared = call_declare<span data-count="56">d</span> ""
 
   let add_ret : llvalue -&gt; unit t =
     fun rc -&gt;
@@ -515,29 +515,29 @@ module LlvmMonad (Ctx : LlvmGlobalCtx) = struct
   (* ============ UTILS ============ *)
 
   let create_global_var name =
-    <span data-count="17">L</span>lvm.define_global name (const_in<span data-count="17">t</span> Ctx.i64_t 0) Ctx.g_module
+    <span data-count="34">L</span>lvm.define_global name (const_in<span data-count="34">t</span> Ctx.i64_t 0) Ctx.g_module
   ;;
 
   let localize_global_var global_var local_name =
-    <span data-count="1">l</span>et* builder = get_builder in
-    <span data-count="1">l</span>et local_var = build_load Ctx.i64_t global_var local_name builder in
-    <span data-count="1">l</span>et+ () = store_local_va<span data-count="1">r</span> local_name local_var in
-    <span data-count="1">l</span>ocal_var
+    <span data-count="2">l</span>et* builder = get_builder in
+    <span data-count="2">l</span>et local_var = build_load Ctx.i64_t global_var local_name builder in
+    <span data-count="2">l</span>et+ () = store_local_va<span data-count="2">r</span> local_name local_var in
+    <span data-count="2">l</span>ocal_var
   ;;
 
   let new_func_scope f_name ent_bb f =
-    <span data-count="47">l</span>et* f_name_old, _, (_, vb_map_old, _) = read in
-    <span data-count="47">l</span>et* () = set_cur_fun<span data-count="47">c</span> f_name in
-    <span data-count="47">l</span>et* res = in_new_b<span data-count="47">b</span> ent_bb f in
-    <span data-count="47">l</span>et* _, a, (b, _, c) = read in
-    <span data-count="47">l</span>et+ () = sav<span data-count="47">e</span> (f_name_old, a, (b, vb_map_old, c)) in
-    <span data-count="47">r</span>es
+    <span data-count="94">l</span>et* f_name_old, _, (_, vb_map_old, _) = read in
+    <span data-count="94">l</span>et* () = set_cur_fun<span data-count="94">c</span> f_name in
+    <span data-count="94">l</span>et* res = in_new_b<span data-count="94">b</span> ent_bb f in
+    <span data-count="94">l</span>et* _, a, (b, _, c) = read in
+    <span data-count="94">l</span>et+ () = sav<span data-count="94">e</span> (f_name_old, a, (b, vb_map_old, c)) in
+    <span data-count="94">r</span>es
   ;;
 
   let check_func f_name func =
-    <span data-count="61">m</span>atch Llvm_analysis.verify_function func with
+    <span data-count="122">m</span>atch Llvm_analysis.verify_function func with
     | <span data-count="0">f</span>alse -&gt; fail @@ "The generated code has an error in func:" ^ f_name
-    | <span data-count="61">t</span>rue -&gt; return func
+    | <span data-count="122">t</span>rue -&gt; return func
   ;;
 end
 </code></pre>
