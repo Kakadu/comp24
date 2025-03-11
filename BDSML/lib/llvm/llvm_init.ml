@@ -28,14 +28,25 @@ let build_list_type element_type =
   node_type
 ;;
 
-(*Hashtable*)
-
-let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
-
 (*Predefined*)
 
 let predefined =
-  [ "__op_plus", function_type int_t [| int_t; int_t |]
+  [ "create_int", function_type ptr_t [| int_t |]
+  ; "create_bool", function_type ptr_t [| bool_t |]
+  ; "create_unit", function_type ptr_t [||]
+  ; "create_char", function_type ptr_t [| char_t |]
+  ; "create_string", var_arg_function_type ptr_t [||]
+  ; "create_apply", var_arg_function_type ptr_t [||]
+  ; "create_tuple", var_arg_function_type ptr_t [| int_t |]
+  ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
+  ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
+  ; "create_empty_list", function_type ptr_t [||]
+  ; "create_cons", function_type ptr_t [| bool_t; ptr_t |]
+  ; "create_closure", function_type ptr_t [| ptr_t; int_t |]
+  ; "get_int", function_type int_t [| ptr_t |]
+  ; "get_bool", function_type bool_t [| ptr_t |]
+  ; "get_char", function_type char_t [| ptr_t |]
+  ; "__op_plus", function_type int_t [| int_t; int_t |]
   ; "__op_minus", function_type int_t [| int_t; int_t |]
   ; "__op_mult", function_type int_t [| int_t; int_t |]
   ; "__op_div", function_type int_t [| int_t; int_t |]
@@ -55,6 +66,22 @@ let predefined =
   ]
 ;;
 
+(*Hashtable*)
+
+let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
+let variable_type_table : (string, Llvm.lltype) Hashtbl.t = Hashtbl.create 10
+
+let find t key =
+  match Hashtbl.find_opt t key with
+  | Some v -> v
+  | None -> failwith ("Couldn't find value for key" ^ key)
+;;
+
 let predefined_init () =
-  ignore @@ List.map (fun (str, t) -> declare_function str t my_module) predefined
+  ignore
+  @@ List.map
+       (fun (str, t) ->
+         let () = ignore @@ declare_function str t my_module in
+         Hashtbl.add variable_type_table str t)
+       predefined
 ;;
