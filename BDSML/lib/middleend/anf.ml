@@ -15,7 +15,7 @@ let let_in name v exp = LLet_in (name, v, exp)
 type let_part = string * cexpr
 
 let let_part_to_lexp parts final =
-  fold_left (fun next (name, exp) -> return @@ let_in name exp next) (return final) parts
+  List.fold_right (fun (name, v) lexp -> let_in name v lexp) parts final
 ;;
 
 let rec rexp_to_aexp : rexpr -> (let_part list * aexpr) t = function
@@ -86,7 +86,7 @@ and rexp_to_cexp : rexpr -> (let_part list * cexpr) t = function
 
 and rexp_to_lexp rexp : lexpr t =
   let+ lexps, cexp = rexp_to_cexp rexp in
-  List.fold_right (fun (name, v) lexp -> let_in name v lexp) lexps (complex cexp)
+  let_part_to_lexp lexps (complex cexp)
 ;;
 
 let struct_to_anf = function
@@ -103,11 +103,26 @@ let struct_to_anf = function
     let+ funs =
       map
         (fun (name, exp) ->
-          match exp with
-          | RExp_fun (args, rexp) ->
-            let+ lexp = rexp_to_lexp rexp in
-            name, args, lexp
-          | _ -> fail @@ invalid_prev "BDSML doesn't support vars in \"let rec in\"")
+          let rec helper acc = function
+            | RExp_fun (args, rexp) ->
+              let+ lexp = rexp_to_lexp rexp in
+              let rem_args =
+                let rec helper2 l r =
+                  match l, r with
+                  | (cur_lexp, cexp) :: tl, arg :: tl2 ->
+                    cur_lexp @ [ arg, cexp ] @ helper2 tl tl2
+                  | _, _ -> []
+                in
+                helper2 acc args
+              in
+              let lexp = let_part_to_lexp rem_args lexp in
+              name, List.filter (( <> ) name) args, lexp
+            | RExp_apply (l, r) ->
+              let* lexps, cexp = rexp_to_cexp r in
+              helper ((lexps, cexp) :: acc) l
+            | _ -> fail @@ invalid_prev "BDSML doesn't support vars in \"let rec\""
+          in
+          helper [] exp)
         rexps
     in
     AbsStr_value_rec funs

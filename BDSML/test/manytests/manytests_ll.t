@@ -176,16 +176,15 @@
    (let __var_h = ((__get_from_tuple __reserved_2) 0) in 
    (let __var_tl = ((__get_from_tuple __reserved_2) 1) in 
    ((__op_plus 1) ((__var_length __var_tl)))))) else (__exception "Match_failure"))))));;
-  let lifted_3 = (fun __var_helper0 __reserved_3 __reserved_4 -> (let __var_acc = __reserved_3 in 
+  let rec __var_helper = (fun __reserved_3 __reserved_4 -> (let __var_acc = __reserved_3 in 
    (let __var_xs = __reserved_4 in 
    (let __reserved_5 = __var_xs in 
    (if ((__same_cons __reserved_5) "[]") then (let __nothing = ((__same_cons __reserved_5) (([]))) in 
    __var_acc) else (if ((__op_and (((__same_cons __reserved_5) "::"))) (((__op_and (((__op_and true) true))) true))) then (let __reserved_6 = ((__disassemble "::") __reserved_5) in 
    (let __var_h = ((__get_from_tuple __reserved_6) 0) in 
    (let __var_tl = ((__get_from_tuple __reserved_6) 1) in 
-   ((__var_helper0 (((__op_plus __var_acc) 1))) __var_tl)))) else (__exception "Match_failure")))))));;
-  let rec lifted_4 = (lifted_3 __var_helper);;
-  let __var_length_tail = (lifted_4 0);;
+   ((__var_helper (((__op_plus __var_acc) 1))) __var_tl)))) else (__exception "Match_failure")))))));;
+  let __var_length_tail = (__var_helper 0);;
   let rec __var_map = (fun __reserved_7 __reserved_8 -> (let __var_f = __reserved_7 in 
    (let __var_xs = __reserved_8 in 
    (let __reserved_9 = __var_xs in 
@@ -223,15 +222,14 @@
    (let __var_x = ((__get_from_tuple __reserved_23) 0) in 
    (let __var_xs0 = ((__get_from_tuple __reserved_23) 1) in 
    (__var_x :: ((__var_append __var_xs0) __var_ys))))) else (__exception "Match_failure")))))));;
-  let lifted_1 = (fun __var_helper1 __reserved_24 -> (let __var_xs = __reserved_24 in 
+  let rec __var_helper = (fun __reserved_24 -> (let __var_xs = __reserved_24 in 
    (let __reserved_25 = __var_xs in 
    (if ((__same_cons __reserved_25) "[]") then (let __nothing = ((__same_cons __reserved_25) (([]))) in 
    ([])) else (if ((__op_and (((__same_cons __reserved_25) "::"))) (((__op_and (((__op_and true) true))) true))) then (let __reserved_26 = ((__disassemble "::") __reserved_25) in 
    (let __var_h = ((__get_from_tuple __reserved_26) 0) in 
    (let __var_tl = ((__get_from_tuple __reserved_26) 1) in 
-   ((__var_append __var_h) ((__var_helper1 __var_tl)))))) else (__exception "Match_failure"))))));;
-  let rec lifted_2 = (lifted_1 __var_helper);;
-  let __var_concat = lifted_2;;
+   ((__var_append __var_h) ((__var_helper __var_tl)))))) else (__exception "Match_failure"))))));;
+  let __var_concat = __var_helper;;
   let rec __var_iter = (fun __reserved_27 __reserved_28 -> (let __var_f = __reserved_27 in 
    (let __var_xs = __reserved_28 in 
    (let __reserved_29 = __var_xs in 
@@ -241,8 +239,8 @@
    (let __var_tl = ((__get_from_tuple __reserved_30) 1) in 
    (let __nothing = ((__op_eq ((__var_f __var_h))) ()) in 
    ((__var_iter __var_f) __var_tl))))) else (__exception "Match_failure")))))));;
-  let lifted_0 = (fun __var_h2 __reserved_35 -> (let __var_a = __reserved_35 in 
-   (__var_h2, __var_a)));;
+  let lifted_0 = (fun __var_h0 __reserved_35 -> (let __var_a = __reserved_35 in 
+   (__var_h0, __var_a)));;
   let rec __var_cartesian = (fun __reserved_31 __reserved_32 -> (let __var_xs = __reserved_31 in 
    (let __var_ys = __reserved_32 in 
    (let __reserved_33 = __var_xs in 
