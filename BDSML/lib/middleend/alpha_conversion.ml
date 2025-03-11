@@ -109,8 +109,8 @@ let alpha_conversion rast =
             let+ e = alpha_expr env e in
             env, RStr_eval e :: prev
           | RStr_value (name, e) ->
-            let* name, env = update_env name env in
-            let+ e = alpha_expr env e in
+            let+ e = alpha_expr env e
+            and+ name, env = update_env name env in
             env, RStr_value (name, e) :: prev
           | RStr_value_rec vals ->
             let* env, names =

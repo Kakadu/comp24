@@ -37,8 +37,16 @@ let rstruct_to_struct_item = function
 
 let rast_to_ast = List.map rstruct_to_struct_item
 
+let find_in_ops name =
+  match
+    List.find_opt (fun (_, _, n) -> name = n) Utils.Predefined_ops.predefine_operators
+  with
+  | Some (n, _, _) -> n
+  | None -> name
+;;
+
 let rec aexpr_to_ast = function
-  | AExp_ident s -> Exp_ident s
+  | AExp_ident s -> Exp_ident (find_in_ops s)
   | AExp_constant c -> Exp_constant c
   | AExp_tuple l -> Exp_tuple (List.map aexpr_to_ast l)
   | AExp_construct (name, exp) -> Exp_construct (name, Option.map aexpr_to_ast exp)
@@ -47,7 +55,10 @@ let rec aexpr_to_ast = function
 let rec cexpr_to_ast = function
   | CExp_if (i, t, e) -> Exp_if (aexpr_to_ast i, lexpr_to_ast t, Some (lexpr_to_ast e))
   | CExp_apply (f, args) ->
-    List.fold_left (fun f arg -> Exp_apply (f, aexpr_to_ast arg)) (Exp_ident f) args
+    List.fold_left
+      (fun f arg -> Exp_apply (f, aexpr_to_ast arg))
+      (Exp_ident (find_in_ops f))
+      args
   | CExp_atom e -> aexpr_to_ast e
 
 and lexpr_to_ast = function
@@ -57,7 +68,6 @@ and lexpr_to_ast = function
 ;;
 
 let absexpr_to_ast = function
-  | AbsStr_eval e -> Str_eval (lexpr_to_ast e)
   | AbsStr_func (name, args, exp) ->
     Str_value
       ( Nonrecursive

@@ -37,17 +37,17 @@ let%expect_test "test if without else inference" =
 
 let%expect_test "test fun inference" =
   test "fun a -> a";
-  [%expect {| 'h -> 'h |}]
+  [%expect {| 'p -> 'p |}]
 ;;
 
 let%expect_test "test fun with several arguments inference" =
   test "fun a b c -> b";
-  [%expect {| 'h -> 'i -> 'j -> 'i |}]
+  [%expect {| 'p -> 'q -> 'r -> 'q |}]
 ;;
 
 let%expect_test "test let fun" =
   test "let a b = b in a";
-  [%expect {| 'i -> 'i |}]
+  [%expect {| 'q -> 'q |}]
 ;;
 
 let%expect_test "test let fun apply" =
@@ -72,7 +72,7 @@ let%expect_test "test tuple" =
 
 let%expect_test "test difficult tuple" =
   test "(let b = 4 in b, (3, 5), fun a -> a, 'a')";
-  [%expect {| (int * (int * int) * 'h -> ('h * char)) |}]
+  [%expect {| (int * (int * int) * 'p -> ('p * char)) |}]
 ;;
 
 let%expect_test "test let rec" =
@@ -88,7 +88,7 @@ let%expect_test "test let rec fun" =
 let%expect_test "test let rec and" =
   test {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
-  [%expect {| 'o -> bool -> int |}]
+  [%expect {| 'w -> bool -> int |}]
 ;;
 
 let%expect_test "test invalid let rec with pat binding" =
@@ -125,8 +125,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   [%expect {|
-    val f : 'k -> 'k
-    val g : 'j -> bool
+    val f : 's -> 's
+    val g : 'r -> bool
     val c : bool
     |}]
 ;;
@@ -140,7 +140,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect {| val a : 'h list |}]
+  [%expect {| val a : 'p list |}]
 ;;
 
 let%expect_test "test constructor some with" =
@@ -336,7 +336,7 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   test {|(=)|};
-  [%expect {| 'h -> 'h -> bool |}]
+  [%expect {| 'p -> 'p -> bool |}]
 ;;
 
 let%expect_test "test less" =
@@ -376,7 +376,7 @@ let%expect_test "test poly inference" =
     f 'a' 'b';;
   |};
   [%expect {|
-    val f : 'h -> 'i -> ('h * 'i)
+    val f : 'p -> 'q -> ('p * 'q)
     (int * int)
     (char * char)
     |}]

@@ -6,9 +6,12 @@ module RenameBack = Map.Make (String)
 open Anf_ast
 
 let get_name env name =
-  match RenameBack.find_opt name env with
-  | Some n -> n
-  | None -> name
+  let rec helper name =
+    match RenameBack.find_opt name env with
+    | Some n -> helper n
+    | None -> name
+  in
+  helper name
 ;;
 
 let rec aexpr_remover env = function
@@ -44,7 +47,6 @@ and lexpr_remover env = function
 let rec abs_remover env = function
   | h :: tl ->
     let helper = function
-      | AbsStr_eval e -> AbsStr_eval (lexpr_remover env e) :: abs_remover env tl
       | AbsStr_func (name, args, exp) ->
         AbsStr_func (name, args, lexpr_remover env exp) :: abs_remover env tl
       | AbsStr_value (name, LComplex (CExp_atom (AExp_ident name2))) ->
