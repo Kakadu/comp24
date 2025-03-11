@@ -17,6 +17,7 @@ type aexpression =
   | AIfElse of aexpression * aexpression * aexpression
   | ABinOp of binary_op * aexpression * aexpression
   | APatLetIn of pattern * aexpression * aexpression
+  | ALetIn of name * aexpression * aexpression
   | AApp of aexpression * aexpression
   | ATuple of aexpression list
   | AList of aexpression * aexpression

@@ -59,6 +59,10 @@ let rec aexpression_to_expression = function
     let el = aexpression_to_expression l in
     let er = aexpression_to_expression r in
     EList (el, er)
+  | ALetIn (n, ae, aine) ->
+    let e = aexpression_to_expression ae in
+    let ine = aexpression_to_expression aine in
+    ELetIn (Notrec, n, e, ine)
 ;;
 
 let name_to_pattern = function

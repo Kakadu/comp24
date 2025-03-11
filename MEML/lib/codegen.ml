@@ -223,6 +223,10 @@ let rec codegen_aexpression gvars env ext_env = function
   | AVars (l, r) ->
     let _ = codegen_aexpression gvars env ext_env l in
     codegen_aexpression gvars env ext_env r
+  | ALetIn (name, cexpr, aexpr) ->
+    let* cexpr_val = codegen_aexpression gvars env ext_env cexpr in
+    let env = VarSMap.add name cexpr_val env in
+    codegen_aexpression gvars env ext_env aexpr
   | _ -> error "Not implemented"
 ;;
 

@@ -43,39 +43,18 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op1(ptr %0, ptr %1) {
+  define ptr @sum(ptr %0, ptr %1, ptr %2, ptr %3) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
+    %empty_closure1 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %app_closure_res, ptr %2)
+    %empty_closure3 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 2, ptr %app_closure_res2, ptr %3)
+    ret ptr %app_closure_res4
   }
   
-  define ptr @bin_op0(ptr %0, ptr %1, ptr %2) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %2)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op(ptr %0, ptr %1, ptr %2, ptr %3) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op0, i32 3)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 3, ptr %0, ptr %1, ptr %2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %3)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @sum(ptr %0, ptr %1, ptr %2, ptr %3) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 4)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 4, ptr %0, ptr %1, ptr %2, ptr %3)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app() {
+  define i32 @main() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @sum, i32 4)
     %int_var = call ptr @create_int_val(i32 1)
@@ -83,15 +62,8 @@
     %int_var2 = call ptr @create_int_val(i32 3)
     %int_var3 = call ptr @create_int_val(i32 4)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 4, ptr %int_var, ptr %int_var1, ptr %int_var2, ptr %int_var3)
-    ret ptr %app_closure_res
-  }
-  
-  define i32 @main() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
+    %empty_closure4 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res5 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure4, i32 1, ptr %app_closure_res)
     ret i32 0
   }
   $ ./llvm_demo.exe < manytests/typed/001fac.ml 
@@ -136,76 +108,41 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op(ptr %0) {
+  define ptr @fac(ptr %0) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @leq, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op0(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op0, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %1)
-    %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %app_closure_res)
-    ret ptr %app_closure_res1
-  }
-  
-  define ptr @bin_op1(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @app, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %app_closure_res)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @fac(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
     %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
-    %int_var = call ptr @create_int_val(i32 1)
+    %int_var1 = call ptr @create_int_val(i32 1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 2)
-    %empty_closure2 = call ptr @new_closure(ptr @fac, i32 1)
-    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %empty_closure2, ptr %0)
+    %empty_closure2 = call ptr @new_closure(ptr @minus, i32 2)
+    %int_var3 = call ptr @create_int_val(i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 2, ptr %0, ptr %int_var3)
+    %empty_closure5 = call ptr @new_closure(ptr @mul, i32 2)
+    %empty_closure6 = call ptr @new_closure(ptr @fac, i32 1)
+    %app_closure_res7 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure6, i32 1, ptr %app_closure_res4)
+    %app_closure_res8 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 2, ptr %0, ptr %app_closure_res7)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %int_var, %then ], [ %app_closure_res3, %else ]
+    %if_res = phi ptr [ %int_var1, %then ], [ %app_closure_res8, %else ]
     ret ptr %if_res
-  }
-  
-  define ptr @app0() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @fac, i32 1)
-    %int_var = call ptr @create_int_val(i32 4)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
   }
   
   define ptr @unit() {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app0, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
+    %empty_closure = call ptr @new_closure(ptr @fac, i32 1)
+    %int_var = call ptr @create_int_val(i32 4)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
+    %empty_closure1 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res2
   }
   
   define i32 @main() {
@@ -257,67 +194,39 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %0)
-    ret ptr %app_closure_res
-  }
-  
   define ptr @lambada(ptr %0, ptr %1, ptr %2) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %2)
+    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %2, ptr %1)
     %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %app_closure_res)
     ret ptr %app_closure_res1
   }
   
-  define ptr @bin_op0(ptr %0) {
+  define ptr @fac_cps(ptr %0, ptr %1) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @eq, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @lambada, i32 3)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op1(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @fac_cps(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op0, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
     %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %1, i32 1, ptr %int_var)
+    %int_var1 = call ptr @create_int_val(i32 1)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %1, i32 1, ptr %int_var1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure2 = call ptr @new_closure(ptr @fac_cps, i32 2)
-    %empty_closure3 = call ptr @new_closure(ptr @bin_op1, i32 1)
-    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %0)
-    %empty_closure5 = call ptr @new_closure(ptr @app, i32 2)
-    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 2, ptr %1, ptr %0)
-    %app_closure_res7 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 2, ptr %app_closure_res4, ptr %app_closure_res6)
+    %empty_closure3 = call ptr @new_closure(ptr @minus, i32 2)
+    %int_var4 = call ptr @create_int_val(i32 1)
+    %app_closure_res5 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 2, ptr %0, ptr %int_var4)
+    %empty_closure6 = call ptr @new_closure(ptr @lambada, i32 3)
+    %app_closure_res7 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure6, i32 2, ptr %1, ptr %0)
+    %empty_closure8 = call ptr @new_closure(ptr @fac_cps, i32 2)
+    %app_closure_res9 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure8, i32 2, ptr %app_closure_res5, ptr %app_closure_res7)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %app_closure_res1, %then ], [ %app_closure_res7, %else ]
+    %if_res = phi ptr [ %app_closure_res2, %then ], [ %app_closure_res9, %else ]
     ret ptr %if_res
   }
   
@@ -326,22 +235,15 @@
     ret ptr %0
   }
   
-  define ptr @app0() {
+  define ptr @unit() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @fac_cps, i32 2)
     %int_var = call ptr @create_int_val(i32 4)
     %empty_closure1 = call ptr @new_closure(ptr @lambada0, i32 1)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %int_var, ptr %empty_closure1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @unit() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app0, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
+    %empty_closure2 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res3
   }
   
   define i32 @main() {
@@ -393,7 +295,7 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op(ptr %0) {
+  define ptr @n1(ptr %0) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
@@ -401,53 +303,18 @@
     ret ptr %app_closure_res
   }
   
-  define ptr @n1(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op0(ptr %0, ptr %1) {
+  define ptr @ab(ptr %0, ptr %1) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
     ret ptr %app_closure_res
   }
   
-  define ptr @ab(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op0, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op1(ptr %0) {
+  define ptr @fib_acc(ptr %0, ptr %1, ptr %2) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @eq, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @n1, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app0(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @ab, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @fib_acc(ptr %0, ptr %1, ptr %2) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op1, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %2, ptr %int_var)
     %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
@@ -455,12 +322,12 @@
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure1 = call ptr @new_closure(ptr @fib_acc, i32 3)
-    %empty_closure2 = call ptr @new_closure(ptr @app0, i32 2)
-    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 2, ptr %0, ptr %1)
-    %empty_closure4 = call ptr @new_closure(ptr @app, i32 1)
-    %app_closure_res5 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure4, i32 1, ptr %2)
-    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 3, ptr %1, ptr %app_closure_res3, ptr %app_closure_res5)
+    %empty_closure1 = call ptr @new_closure(ptr @ab, i32 2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
+    %empty_closure3 = call ptr @new_closure(ptr @n1, i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %2)
+    %empty_closure5 = call ptr @new_closure(ptr @fib_acc, i32 3)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 3, ptr %1, ptr %app_closure_res2, ptr %app_closure_res4)
     br label %merge
   
   merge:                                            ; preds = %else, %then
@@ -468,54 +335,11 @@
     ret ptr %if_res
   }
   
-  define ptr @bin_op2(ptr %0) {
+  define ptr @fib(ptr %0) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @less, i32 2)
     %int_var = call ptr @create_int_val(i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op3(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
-    %int_var = call ptr @create_int_val(i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app1(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op3, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %1)
-    %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %app_closure_res)
-    ret ptr %app_closure_res1
-  }
-  
-  define ptr @bin_op5(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op4(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op5, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %app_closure_res)
-    %empty_closure3 = call ptr @new_closure(ptr @app1, i32 2)
-    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 2, ptr %0, ptr %1)
-    %app_closure_res5 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res2, ptr %app_closure_res4)
-    ret ptr %app_closure_res5
-  }
-  
-  define ptr @fib(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op2, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
     %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
@@ -523,50 +347,45 @@
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op4, i32 2)
-    %empty_closure2 = call ptr @new_closure(ptr @fib, i32 1)
-    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %empty_closure2, ptr %0)
+    %empty_closure1 = call ptr @new_closure(ptr @minus, i32 2)
+    %int_var2 = call ptr @create_int_val(i32 1)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %int_var2)
+    %empty_closure4 = call ptr @new_closure(ptr @minus, i32 2)
+    %int_var5 = call ptr @create_int_val(i32 2)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure4, i32 2, ptr %0, ptr %int_var5)
+    %empty_closure7 = call ptr @new_closure(ptr @plus, i32 2)
+    %empty_closure8 = call ptr @new_closure(ptr @fib, i32 1)
+    %app_closure_res9 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure8, i32 1, ptr %app_closure_res3)
+    %empty_closure10 = call ptr @new_closure(ptr @fib, i32 1)
+    %app_closure_res11 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure10, i32 1, ptr %app_closure_res6)
+    %app_closure_res12 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure7, i32 2, ptr %app_closure_res9, ptr %app_closure_res11)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %0, %then ], [ %app_closure_res3, %else ]
+    %if_res = phi ptr [ %0, %then ], [ %app_closure_res12, %else ]
     ret ptr %if_res
   }
   
-  define ptr @app2() {
+  define ptr @unit() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @fib_acc, i32 3)
     %int_var = call ptr @create_int_val(i32 0)
     %int_var1 = call ptr @create_int_val(i32 1)
     %int_var2 = call ptr @create_int_val(i32 4)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 3, ptr %int_var, ptr %int_var1, ptr %int_var2)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @unit() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app2, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app3() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @fib, i32 1)
-    %int_var = call ptr @create_int_val(i32 4)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
+    %empty_closure3 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res4
   }
   
   define ptr @unit0() {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app3, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
+    %empty_closure = call ptr @new_closure(ptr @fib, i32 1)
+    %int_var = call ptr @create_int_val(i32 4)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
+    %empty_closure1 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res2
   }
   
   define i32 @main() {
@@ -620,20 +439,13 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op() {
+  define ptr @wrap(ptr %0) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @eq, i32 2)
     %int_var = call ptr @create_int_val(i32 1)
     %int_var1 = call ptr @create_int_val(i32 1)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %int_var, ptr %int_var1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @wrap(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure)
-    %cond_i1 = call i1 @get_bool(ptr %call_closure_res)
+    %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
@@ -674,90 +486,27 @@
     ret ptr %int_var
   }
   
-  define ptr @bin_op8(ptr %0, ptr %1) {
+  define ptr @test10(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8, ptr %9) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op7(ptr %0, ptr %1, ptr %2) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op8, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %2)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op6(ptr %0, ptr %1, ptr %2, ptr %3) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op7, i32 3)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 3, ptr %0, ptr %1, ptr %2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %3)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op5(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op6, i32 4)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 4, ptr %0, ptr %1, ptr %2, ptr %3)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %4)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op4(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op5, i32 5)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 5, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %5)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op3(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op4, i32 6)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 6, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %6)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op2(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op3, i32 7)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 7, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %7)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op1(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op2, i32 8)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 8, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %8)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op0(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8, ptr %9) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 9)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 9, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %9)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @test10(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8, ptr %9) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op0, i32 10)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 10, ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8, ptr %9)
-    ret ptr %app_closure_res
+    %empty_closure1 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %app_closure_res, ptr %2)
+    %empty_closure3 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 2, ptr %app_closure_res2, ptr %3)
+    %empty_closure5 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 2, ptr %app_closure_res4, ptr %4)
+    %empty_closure7 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res8 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure7, i32 2, ptr %app_closure_res6, ptr %5)
+    %empty_closure9 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res10 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure9, i32 2, ptr %app_closure_res8, ptr %6)
+    %empty_closure11 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res12 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure11, i32 2, ptr %app_closure_res10, ptr %7)
+    %empty_closure13 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res14 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure13, i32 2, ptr %app_closure_res12, ptr %8)
+    %empty_closure15 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res16 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure15, i32 2, ptr %app_closure_res14, ptr %9)
+    ret ptr %app_closure_res16
   }
   
   define ptr @rez() {
@@ -847,91 +596,49 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @app(ptr %0, ptr %1) {
-  entry:
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %1, i32 1, ptr %0)
-    ret ptr %app_closure_res
-  }
-  
   define ptr @fix(ptr %0, ptr %1) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @app, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @fix, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %empty_closure1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 2, ptr %app_closure_res, ptr %1)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @leq, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op0(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @minus, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app0(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op0, i32 1)
+    %empty_closure = call ptr @new_closure(ptr @fix, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
-    %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %1, i32 1, ptr %app_closure_res)
+    %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 2, ptr %app_closure_res, ptr %1)
     ret ptr %app_closure_res1
-  }
-  
-  define ptr @bin_op1(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @app0, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %app_closure_res)
-    ret ptr %app_closure_res2
   }
   
   define ptr @fac(ptr %0, ptr %1) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %1)
+    %empty_closure = call ptr @new_closure(ptr @leq, i32 2)
+    %int_var = call ptr @create_int_val(i32 1)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %int_var)
     %cond_i1 = call i1 @get_bool(ptr %app_closure_res)
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
-    %int_var = call ptr @create_int_val(i32 1)
+    %int_var1 = call ptr @create_int_val(i32 1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %1, ptr %0)
+    %empty_closure2 = call ptr @new_closure(ptr @minus, i32 2)
+    %int_var3 = call ptr @create_int_val(i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 2, ptr %1, ptr %int_var3)
+    %empty_closure5 = call ptr @new_closure(ptr @mul, i32 2)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %app_closure_res4)
+    %app_closure_res7 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 2, ptr %1, ptr %app_closure_res6)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %int_var, %then ], [ %app_closure_res2, %else ]
+    %if_res = phi ptr [ %int_var1, %then ], [ %app_closure_res7, %else ]
     ret ptr %if_res
   }
   
-  define ptr @app1() {
+  define ptr @unit() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @fix, i32 2)
     %empty_closure1 = call ptr @new_closure(ptr @fac, i32 2)
     %int_var = call ptr @create_int_val(i32 6)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %empty_closure1, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @unit() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app1, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
+    %empty_closure2 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure2, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res3
   }
   
   define i32 @main() {
@@ -1005,33 +712,19 @@
     ret ptr %app_closure_res
   }
   
-  define ptr @bin_op0(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op(ptr %0, ptr %1, ptr %2) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op0, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %1, ptr %2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %app_closure_res)
-    ret ptr %app_closure_res2
-  }
-  
   define ptr @foo(ptr %0, ptr %1, ptr %2) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @unit, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
-    %empty_closure1 = call ptr @new_closure(ptr @unit0, i32 1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %1)
-    %empty_closure3 = call ptr @new_closure(ptr @unit1, i32 1)
-    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %2)
-    %empty_closure5 = call ptr @new_closure(ptr @bin_op, i32 3)
-    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 3, ptr %0, ptr %1, ptr %2)
-    ret ptr %app_closure_res6
+    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %2)
+    %empty_closure1 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %app_closure_res)
+    %empty_closure3 = call ptr @new_closure(ptr @unit, i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %0)
+    %empty_closure5 = call ptr @new_closure(ptr @unit0, i32 1)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 1, ptr %1)
+    %empty_closure7 = call ptr @new_closure(ptr @unit1, i32 1)
+    %app_closure_res8 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure7, i32 1, ptr %2)
+    ret ptr %app_closure_res2
   }
   
   define ptr @foo0() {
@@ -1215,19 +908,12 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @bin_op(ptr %0, ptr %1) {
+  define ptr @unit(ptr %0, ptr %1) {
   entry:
     %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @unit(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %app_closure_res)
+    %empty_closure1 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %app_closure_res)
     ret ptr %app_closure_res2
   }
   
@@ -1238,100 +924,44 @@
     ret ptr %app_closure_res
   }
   
-  define ptr @bin_op2(ptr %0, ptr %1) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op1(ptr %0, ptr %1, ptr %2) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @divv, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op2, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %1, ptr %2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %0)
-    ret ptr %app_closure_res2
-  }
-  
-  define ptr @bin_op0(ptr %0, ptr %1, ptr %2, ptr %3) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op1, i32 3)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 3, ptr %0, ptr %1, ptr %2)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %3)
-    ret ptr %app_closure_res2
-  }
-  
   define ptr @_start(ptr %0, ptr %1, ptr %2, ptr %3, ptr %4, ptr %5, ptr %6, ptr %7, ptr %8) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @unit, i32 2)
+    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %2, ptr %4)
-    %empty_closure1 = call ptr @new_closure(ptr @unit0, i32 1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %8)
-    %empty_closure3 = call ptr @new_closure(ptr @bin_op0, i32 4)
-    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 4, ptr %5, ptr %2, ptr %4, ptr %7)
+    %empty_closure1 = call ptr @new_closure(ptr @divv, i32 2)
+    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %app_closure_res, ptr %5)
+    %empty_closure3 = call ptr @new_closure(ptr @plus, i32 2)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 2, ptr %app_closure_res2, ptr %7)
+    %empty_closure5 = call ptr @new_closure(ptr @unit, i32 2)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure5, i32 2, ptr %2, ptr %4)
+    %empty_closure7 = call ptr @new_closure(ptr @unit0, i32 1)
+    %app_closure_res8 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure7, i32 1, ptr %8)
     ret ptr %app_closure_res4
-  }
-  
-  define ptr @app0() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %int_var = call ptr @create_int_val(i32 -1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app1() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %int_var = call ptr @create_int_val(i32 4)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app2() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %int_var = call ptr @create_int_val(i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app3() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @app() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @_start, i32 9)
-    %empty_closure1 = call ptr @new_closure(ptr @app3, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %empty_closure2 = call ptr @new_closure(ptr @app2, i32 0)
-    %call_closure_res3 = call ptr @call_closure(ptr %empty_closure2)
-    %int_var = call ptr @create_int_val(i32 3)
-    %empty_closure4 = call ptr @new_closure(ptr @app1, i32 0)
-    %call_closure_res5 = call ptr @call_closure(ptr %empty_closure4)
-    %int_var6 = call ptr @create_int_val(i32 100)
-    %int_var7 = call ptr @create_int_val(i32 1000)
-    %empty_closure8 = call ptr @new_closure(ptr @app0, i32 0)
-    %call_closure_res9 = call ptr @call_closure(ptr %empty_closure8)
-    %int_var10 = call ptr @create_int_val(i32 10000)
-    %int_var11 = call ptr @create_int_val(i32 -555555)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 9, ptr %call_closure_res, ptr %call_closure_res3, ptr %int_var, ptr %call_closure_res5, ptr %int_var6, ptr %int_var7, ptr %call_closure_res9, ptr %int_var10, ptr %int_var11)
-    ret ptr %app_closure_res
   }
   
   define i32 @main() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
+    %int_var = call ptr @create_int_val(i32 1)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %int_var)
+    %empty_closure1 = call ptr @new_closure(ptr @print_int, i32 1)
+    %int_var2 = call ptr @create_int_val(i32 2)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %int_var2)
+    %empty_closure4 = call ptr @new_closure(ptr @print_int, i32 1)
+    %int_var5 = call ptr @create_int_val(i32 4)
+    %app_closure_res6 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure4, i32 1, ptr %int_var5)
+    %empty_closure7 = call ptr @new_closure(ptr @print_int, i32 1)
+    %int_var8 = call ptr @create_int_val(i32 -1)
+    %app_closure_res9 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure7, i32 1, ptr %int_var8)
+    %empty_closure10 = call ptr @new_closure(ptr @_start, i32 9)
+    %int_var11 = call ptr @create_int_val(i32 3)
+    %int_var12 = call ptr @create_int_val(i32 100)
+    %int_var13 = call ptr @create_int_val(i32 1000)
+    %int_var14 = call ptr @create_int_val(i32 10000)
+    %int_var15 = call ptr @create_int_val(i32 -555555)
+    %app_closure_res16 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure10, i32 9, ptr %app_closure_res, ptr %app_closure_res3, ptr %int_var11, ptr %app_closure_res6, ptr %int_var12, ptr %int_var13, ptr %app_closure_res9, ptr %int_var14, ptr %int_var15)
+    %empty_closure17 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res18 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure17, i32 1, ptr %app_closure_res16)
     ret i32 0
   }
   $ ./llvm_demo.exe < manytests/typed/008ascription.ml 
@@ -1376,34 +1006,11 @@
   
   declare i1 @get_bool(ptr)
   
-  define ptr @app(ptr %0, ptr %1) {
-  entry:
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 1, ptr %1)
-    ret ptr %app_closure_res
-  }
-  
   define ptr @addi(ptr %0, ptr %1, ptr %2) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @app, i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %1, ptr %2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %1, i32 1, ptr %2)
     %app_closure_res1 = call ptr (ptr, i32, ...) @app_closure(ptr %0, i32 2, ptr %2, ptr %app_closure_res)
     ret ptr %app_closure_res1
-  }
-  
-  define ptr @bin_op(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
-    %int_var = call ptr @create_int_val(i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op0(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @mul, i32 2)
-    %int_var = call ptr @create_int_val(i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
   }
   
   define ptr @lambada(ptr %0, ptr %1) {
@@ -1412,62 +1019,43 @@
     br i1 %cond_i1, label %then, label %else
   
   then:                                             ; preds = %entry
-    %empty_closure = call ptr @new_closure(ptr @bin_op, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
+    %empty_closure = call ptr @new_closure(ptr @plus, i32 2)
+    %int_var = call ptr @create_int_val(i32 1)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op0, i32 1)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %0)
+    %empty_closure1 = call ptr @new_closure(ptr @mul, i32 2)
+    %int_var2 = call ptr @create_int_val(i32 2)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %0, ptr %int_var2)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %if_res = phi ptr [ %app_closure_res, %then ], [ %app_closure_res2, %else ]
+    %if_res = phi ptr [ %app_closure_res, %then ], [ %app_closure_res3, %else ]
     ret ptr %if_res
-  }
-  
-  define ptr @bin_op2(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @divv, i32 2)
-    %int_var = call ptr @create_int_val(i32 2)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @bin_op1(ptr %0) {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @eq, i32 2)
-    %empty_closure1 = call ptr @new_closure(ptr @bin_op2, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 1, ptr %0)
-    %int_var = call ptr @create_int_val(i32 0)
-    %app_closure_res2 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %app_closure_res, ptr %int_var)
-    ret ptr %app_closure_res2
   }
   
   define ptr @lambada0(ptr %0) {
   entry:
-    %empty_closure = call ptr @new_closure(ptr @bin_op1, i32 1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %0)
-    ret ptr %app_closure_res
+    %empty_closure = call ptr @new_closure(ptr @divv, i32 2)
+    %int_var = call ptr @create_int_val(i32 2)
+    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 2, ptr %0, ptr %int_var)
+    %empty_closure1 = call ptr @new_closure(ptr @eq, i32 2)
+    %int_var2 = call ptr @create_int_val(i32 0)
+    %app_closure_res3 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure1, i32 2, ptr %app_closure_res, ptr %int_var2)
+    ret ptr %app_closure_res3
   }
   
-  define ptr @app0() {
+  define ptr @unit() {
   entry:
     %empty_closure = call ptr @new_closure(ptr @addi, i32 3)
     %empty_closure1 = call ptr @new_closure(ptr @lambada, i32 2)
     %empty_closure2 = call ptr @new_closure(ptr @lambada0, i32 1)
     %int_var = call ptr @create_int_val(i32 4)
     %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 3, ptr %empty_closure1, ptr %empty_closure2, ptr %int_var)
-    ret ptr %app_closure_res
-  }
-  
-  define ptr @unit() {
-  entry:
-    %empty_closure = call ptr @new_closure(ptr @print_int, i32 1)
-    %empty_closure1 = call ptr @new_closure(ptr @app0, i32 0)
-    %call_closure_res = call ptr @call_closure(ptr %empty_closure1)
-    %app_closure_res = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure, i32 1, ptr %call_closure_res)
-    ret ptr %app_closure_res
+    %empty_closure3 = call ptr @new_closure(ptr @print_int, i32 1)
+    %app_closure_res4 = call ptr (ptr, i32, ...) @app_closure(ptr %empty_closure3, i32 1, ptr %app_closure_res)
+    ret ptr %app_closure_res4
   }
   
   define i32 @main() {

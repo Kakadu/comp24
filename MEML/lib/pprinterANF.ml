@@ -54,29 +54,38 @@ let rec pp_aexpression formatter e =
       e
       pp_aexpression
       ine
+  | ALetIn (n, e, ine) ->
+    Format.fprintf
+      formatter
+      "\n  let %s = %a\n  in %a"
+      n
+      pp_aexpression
+      e
+      pp_aexpression
+      ine
 ;;
 
 let pp_abindings formatter bindings =
   List.iter
     (fun bind ->
-      match bind with
-      | ALet (r, n_list, p, e) ->
-        Format.fprintf
-          formatter
-          "let %a %s %s = %a"
-          pp_rec
-          r
-          n_list
-          (String.concat " " p)
-          pp_aexpression
-          e;
-        Format.fprintf formatter "\n"
-      | ALetPat (n_list, e) ->
-        Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_aexpression e;
-        Format.fprintf formatter "\n"
-      | AExpression e ->
-        pp_aexpression formatter e;
-        Format.fprintf formatter "\n")
+       match bind with
+       | ALet (r, n_list, p, e) ->
+         Format.fprintf
+           formatter
+           "let %a %s %s = %a"
+           pp_rec
+           r
+           n_list
+           (String.concat " " p)
+           pp_aexpression
+           e;
+         Format.fprintf formatter "\n"
+       | ALetPat (n_list, e) ->
+         Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_aexpression e;
+         Format.fprintf formatter "\n"
+       | AExpression e ->
+         pp_aexpression formatter e;
+         Format.fprintf formatter "\n")
     bindings
 ;;
 
