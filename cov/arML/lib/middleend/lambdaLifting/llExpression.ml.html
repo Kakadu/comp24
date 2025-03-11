@@ -446,41 +446,41 @@ open Common.IdentifierStructs
 open Common.IdentifierSearcher
 open IdentifierSubstitutor
 
-let get_new_ll_name = Common.NameCreator.get_new_nam<span data-count="116">e</span> "ll"
+let get_new_ll_name = Common.NameCreator.get_new_nam<span data-count="127">e</span> "ll"
 
 let rec ll_expression env replacement_map lifted = function
-  | <span data-count="500">E</span>Constant const -&gt; return @@ (LEConstant const, lifted)
-  | <span data-count="1311">E</span>Identifier id -&gt; ll_identifier replacement_map lifted id
+  | <span data-count="573">E</span>Constant const -&gt; return @@ (LEConstant const, lifted)
+  | <span data-count="1488">E</span>Identifier id -&gt; ll_identifier replacement_map lifted id
   | <span data-count="31">E</span>EmptyList -&gt; return (LEEmptyList, lifted)
-  | <span data-count="69">E</span>Fun ((p, ps), body) -&gt; ll_fun env replacement_map lifted (p, ps) body
-  | <span data-count="182">E</span>LetIn (case, cases, expr) -&gt;
+  | <span data-count="80">E</span>Fun ((p, ps), body) -&gt; ll_fun env replacement_map lifted (p, ps) body
+  | <span data-count="208">E</span>LetIn (case, cases, expr) -&gt;
     ll_let_in env replacement_map lifted (case :: cases, expr)
   | <span data-count="14">E</span>RecLetIn (case, cases, expr) -&gt;
     ll_let_rec_in env replacement_map lifted (case :: cases, expr)
-  | <span data-count="714">E</span>Application (func, fst_arg, args) -&gt;
+  | <span data-count="814">E</span>Application (func, fst_arg, args) -&gt;
     ll_application env replacement_map lifted (func, fst_arg, args)
-  | <span data-count="52">E</span>IfThenElse (c, b1, b2) -&gt; ll_if_then_else env replacement_map lifted (c, b1, b2)
+  | <span data-count="62">E</span>IfThenElse (c, b1, b2) -&gt; ll_if_then_else env replacement_map lifted (c, b1, b2)
   | <span data-count="68">E</span>ListConstructor (l, r) -&gt; ll_list_constructor env replacement_map lifted (l, r)
   | <span data-count="22">E</span>Tuple (e1, e2, es) -&gt; ll_tuple env replacement_map lifted (e1, e2, es)
   | <span data-count="23">E</span>MatchWith (e, c, cs) -&gt; ll_match_with env replacement_map lifted (e, c, cs)
-  | <span data-count="11">E</span>Typed (e, t) -&gt; ll_typed_expr env replacement_map lifted (e, t)
+  | <span data-count="13">E</span>Typed (e, t) -&gt; ll_typed_expr env replacement_map lifted (e, t)
   | <span data-count="0">E</span>Function _ -&gt; return @@ (LEIdentifier (Id ""), lifted)
 
 and ll_fun env replacement_map lifted (p, ps) body =
-  <span data-count="100">l</span>et* name = get_new_ll_nam<span data-count="100">e</span> env in
-  <span data-count="100">l</span>et pattern_identifiers = get_pattern_identifiers_from_list (p :: ps) in
-  <span data-count="100">l</span>et new_replacement_map = remove_keys_from_map pattern_identifiers replacement_map in
-  <span data-count="100">l</span>et* lifted_body, lifted_exprs = ll_expressio<span data-count="100">n</span> env new_replacement_map lifted body in
-  <span data-count="100">l</span>et new_expr = LEIdentifier (Id name) in
+  <span data-count="111">l</span>et* name = get_new_ll_nam<span data-count="111">e</span> env in
+  <span data-count="111">l</span>et pattern_identifiers = get_pattern_identifiers_from_list (p :: ps) in
+  <span data-count="111">l</span>et new_replacement_map = remove_keys_from_map pattern_identifiers replacement_map in
+  <span data-count="111">l</span>et* lifted_body, lifted_exprs = ll_expressio<span data-count="111">n</span> env new_replacement_map lifted body in
+  <span data-count="111">l</span>et new_expr = LEIdentifier (Id name) in
   let lifted_expr = LDOrdinary ((PVar (Id name), p :: ps, lifted_body), []) in
   return @@ (new_expr, lifted_expr :: lifted_exprs)
 
 and ll_let_in env replacement_map lifted (cases, body) =
-  <span data-count="182">l</span>et* lifted_cases, lifted1, final_replacement_map =
-    List.fold_lef<span data-count="182">t</span>
+  <span data-count="208">l</span>et* lifted_cases, lifted1, final_replacement_map =
+    List.fold_lef<span data-count="208">t</span>
       (fun acc (p, e) -&gt;
-        <span data-count="187">l</span>et* acc_cases, acc_lifted, acc_replacement_map = acc in
-        <span data-count="187">m</span>atch p, e with
+        <span data-count="213">l</span>et* acc_cases, acc_lifted, acc_replacement_map = acc in
+        <span data-count="213">m</span>atch p, e with
         | <span data-count="14">P</span>Var id, EFun ((fp, fps), fbody) -&gt;
           let* lifted_fbody, lifted_exprs =
             ll_fu<span data-count="14">n</span> env replacement_map acc_lifted (fp, fps) fbody
@@ -492,15 +492,15 @@ and ll_let_in env replacement_map lifted (cases, body) =
           in
           let updated_replacement_map = IdentifierMap.add id ident acc_replacement_map in
           <span data-count="14">r</span>eturn (acc_cases, lifted_exprs, updated_replacement_map)
-        | <span data-count="173">_</span> -&gt;
-          let* lifted_e, lifted_next = ll_expressio<span data-count="173">n</span> env replacement_map acc_lifted e in
-          <span data-count="173">r</span>eturn ((p, lifted_e) :: acc_cases, lifted_next, acc_replacement_map))
-      (retur<span data-count="182">n</span> ([], lifted, replacement_map))
+        | <span data-count="199">_</span> -&gt;
+          let* lifted_e, lifted_next = ll_expressio<span data-count="199">n</span> env replacement_map acc_lifted e in
+          <span data-count="199">r</span>eturn ((p, lifted_e) :: acc_cases, lifted_next, acc_replacement_map))
+      (retur<span data-count="208">n</span> ([], lifted, replacement_map))
       cases
   in
-  <span data-count="182">l</span>et* lifted_body, lifted2 = ll_expressio<span data-count="182">n</span> env final_replacement_map lifted1 body in
-  <span data-count="182">m</span>atch lifted_cases with
-  | <span data-count="171">h</span>d :: tl -&gt; return @@ (LELetIn (hd, tl, lifted_body), lifted2)
+  <span data-count="208">l</span>et* lifted_body, lifted2 = ll_expressio<span data-count="208">n</span> env final_replacement_map lifted1 body in
+  <span data-count="208">m</span>atch lifted_cases with
+  | <span data-count="197">h</span>d :: tl -&gt; return @@ (LELetIn (hd, tl, lifted_body), lifted2)
   | <span data-count="11">_</span> -&gt; return @@ (lifted_body, lifted2)
 
 and ll_let_rec_in env replacement_map lifted (cases, body) =
@@ -559,39 +559,39 @@ and ll_let_rec_in env replacement_map lifted (cases, body) =
   <span data-count="14">r</span>eturn @@ (lifted_body, lifted2)
 
 and ll_identifier replacement_map lifted id =
-  <span data-count="1311">l</span>et new_id =
+  <span data-count="1488">l</span>et new_id =
     match IdentifierMap.find_opt id replacement_map with
     | <span data-count="37">S</span>ome name -&gt; LEIdentifier name
-    | <span data-count="1274">N</span>one -&gt; LEIdentifier id
+    | <span data-count="1451">N</span>one -&gt; LEIdentifier id
   in
   return @@ (new_id, lifted)
 
 and ll_application env replacement_map lifted (func, fst_arg, args) =
-  <span data-count="714">l</span>et* lifted_func, lifted1 = ll_expressio<span data-count="714">n</span> env replacement_map lifted func in
-  <span data-count="714">l</span>et* lifted_fst_arg, lifted2 = ll_expressio<span data-count="714">n</span> env replacement_map lifted1 fst_arg in
-  <span data-count="714">l</span>et* lifted_args, lifted3 =
-    List.fold_righ<span data-count="714">t</span>
+  <span data-count="814">l</span>et* lifted_func, lifted1 = ll_expressio<span data-count="814">n</span> env replacement_map lifted func in
+  <span data-count="814">l</span>et* lifted_fst_arg, lifted2 = ll_expressio<span data-count="814">n</span> env replacement_map lifted1 fst_arg in
+  <span data-count="814">l</span>et* lifted_args, lifted3 =
+    List.fold_righ<span data-count="814">t</span>
       (fun arg acc -&gt;
-        <span data-count="466">l</span>et* acc_exprs, acc_lifted = acc in
-        <span data-count="466">l</span>et* lifted_arg, lifted_next = ll_expressio<span data-count="466">n</span> env replacement_map acc_lifted arg in
-        <span data-count="466">r</span>eturn (lifted_arg :: acc_exprs, lifted_next))
+        <span data-count="543">l</span>et* acc_exprs, acc_lifted = acc in
+        <span data-count="543">l</span>et* lifted_arg, lifted_next = ll_expressio<span data-count="543">n</span> env replacement_map acc_lifted arg in
+        <span data-count="543">r</span>eturn (lifted_arg :: acc_exprs, lifted_next))
       args
-      (retur<span data-count="714">n</span> ([], lifted2))
+      (retur<span data-count="814">n</span> ([], lifted2))
   in
-  <span data-count="714">l</span>et ll_appl = LEApplication (lifted_func, lifted_fst_arg, lifted_args) in
+  <span data-count="814">l</span>et ll_appl = LEApplication (lifted_func, lifted_fst_arg, lifted_args) in
   return @@ (ll_appl, lifted3)
 
 and ll_if_then_else env replacement_map lifted (c, b1, b2) =
-  <span data-count="52">l</span>et* l_c, lifted1 = ll_expressio<span data-count="52">n</span> env replacement_map lifted c in
-  <span data-count="52">l</span>et* l_b1, lifted2 = ll_expressio<span data-count="52">n</span> env replacement_map lifted1 b1 in
-  <span data-count="52">l</span>et* l_b2, lifted3 =
+  <span data-count="62">l</span>et* l_c, lifted1 = ll_expressio<span data-count="62">n</span> env replacement_map lifted c in
+  <span data-count="62">l</span>et* l_b1, lifted2 = ll_expressio<span data-count="62">n</span> env replacement_map lifted1 b1 in
+  <span data-count="62">l</span>et* l_b2, lifted3 =
     match b2 with
-    | <span data-count="52">S</span>ome expr -&gt;
-      let* l_b2, lifted3 = ll_expressio<span data-count="52">n</span> env replacement_map lifted2 expr in
-      <span data-count="52">r</span>eturn @@ (Some l_b2, lifted3)
+    | <span data-count="62">S</span>ome expr -&gt;
+      let* l_b2, lifted3 = ll_expressio<span data-count="62">n</span> env replacement_map lifted2 expr in
+      <span data-count="62">r</span>eturn @@ (Some l_b2, lifted3)
     | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> (None, lifted2)
   in
-  <span data-count="52">r</span>eturn @@ (LEIfThenElse (l_c, l_b1, l_b2), lifted3)
+  <span data-count="62">r</span>eturn @@ (LEIfThenElse (l_c, l_b1, l_b2), lifted3)
 
 and ll_list_constructor env replacement_map lifted (hd, tl) =
   <span data-count="68">l</span>et* l_hd, lifted1 = ll_expressio<span data-count="68">n</span> env replacement_map lifted hd in
@@ -631,8 +631,8 @@ and ll_match_with env replacement_map lifted (expr, (p, e), cases) =
   <span data-count="23">r</span>eturn @@ (LEMatchWith (l_expr, l_case, lifted_cases), lifted3)
 
 and ll_typed_expr env replacement_map lifted (e, t) =
-  <span data-count="11">l</span>et* l_e, lifted1 = ll_expressio<span data-count="11">n</span> env replacement_map lifted e in
-  <span data-count="11">r</span>eturn @@ (LETyped (l_e, t), lifted1)
+  <span data-count="13">l</span>et* l_e, lifted1 = ll_expressio<span data-count="13">n</span> env replacement_map lifted e in
+  <span data-count="13">r</span>eturn @@ (LETyped (l_e, t), lifted1)
 ;;
 </code></pre>
       </div>

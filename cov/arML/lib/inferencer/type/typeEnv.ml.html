@@ -102,17 +102,17 @@ open TypeTree
 (* Type environment is mapping top-level identifiers to their schema type *)
 type t = (string, Schema.schema, Base.String.comparator_witness) Base.Map.t
 
-let empty : t = Base.Map.empt<span data-count="116">y</span> (module Base.String)
+let empty : t = Base.Map.empt<span data-count="127">y</span> (module Base.String)
 
 let free_vars env =
-  <span data-count="3800">B</span>ase.Map.fold
+  <span data-count="4362">B</span>ase.Map.fold
     ~init:TypeVarSet.empty
-    ~f:(fun ~key:_ ~data acc -&gt; <span data-count="16740">T</span>ypeVarSet.union acc (Schema.free_var<span data-count="16740">s</span> data))
+    ~f:(fun ~key:_ ~data acc -&gt; <span data-count="17844">T</span>ypeVarSet.union acc (Schema.free_var<span data-count="17844">s</span> data))
     env
 ;;
 
 let apply env sub = <span data-count="2542">B</span>ase.Map.map env ~f:(Schema.appl<span data-count="2542">y</span> sub)
-let extend env key schema = <span data-count="4854">B</span>ase.Map.update ~f:(fun _ -&gt; <span data-count="4854">s</span>chema) env key
+let extend env key schema = <span data-count="5416">B</span>ase.Map.update ~f:(fun _ -&gt; <span data-count="5416">s</span>chema) env key
 let find env key = <span data-count="2403">B</span>ase.Map.find env key
 
 (* Search for an identifier in the environment. If not found - error. *)

@@ -166,23 +166,23 @@ open Pmfast
 let rec collect_identifiers_expr (expr : pmf_expression) (acc : IdentifierSet.t)
   : IdentifierSet.t
   =
-  <span data-count="722">m</span>atch expr with
-  | <span data-count="140">P</span>MFConstant _ -&gt; acc
-  | <span data-count="330">P</span>MFIdentifier id -&gt; IdentifierSet.add id acc
-  | <span data-count="180">P</span>MFApplication (func, arg, args) -&gt;
+  <span data-count="1121">m</span>atch expr with
+  | <span data-count="213">P</span>MFConstant _ -&gt; acc
+  | <span data-count="518">P</span>MFIdentifier id -&gt; IdentifierSet.add id acc
+  | <span data-count="280">P</span>MFApplication (func, arg, args) -&gt;
     let acc = collect_identifiers_expr func acc in
-    <span data-count="180">l</span>et acc = collect_identifiers_expr arg acc in
-    <span data-count="180">L</span>ist.fold_left (fun acc e -&gt; <span data-count="144">c</span>ollect_identifiers_expr e acc) acc args
-  | <span data-count="52">P</span>MFLetIn ((id, body), in_expr) -&gt;
+    <span data-count="280">l</span>et acc = collect_identifiers_expr arg acc in
+    <span data-count="280">L</span>ist.fold_left (fun acc e -&gt; <span data-count="221">c</span>ollect_identifiers_expr e acc) acc args
+  | <span data-count="78">P</span>MFLetIn ((id, body), in_expr) -&gt;
     let acc = IdentifierSet.add id acc in
-    <span data-count="52">l</span>et acc = collect_identifiers_expr body acc in
-    <span data-count="52">c</span>ollect_identifiers_expr in_expr acc
-  | <span data-count="14">P</span>MFIfThenElse (cond, then_expr, else_expr) -&gt;
+    <span data-count="78">l</span>et acc = collect_identifiers_expr body acc in
+    <span data-count="78">c</span>ollect_identifiers_expr in_expr acc
+  | <span data-count="24">P</span>MFIfThenElse (cond, then_expr, else_expr) -&gt;
     let acc = collect_identifiers_expr cond acc in
-    <span data-count="14">l</span>et acc = collect_identifiers_expr then_expr acc in
-    <span data-count="14">(</span>match else_expr with
+    <span data-count="24">l</span>et acc = collect_identifiers_expr then_expr acc in
+    <span data-count="24">(</span>match else_expr with
      | <span data-count="0">N</span>one -&gt; acc
-     | <span data-count="14">S</span>ome e -&gt; collect_identifiers_expr e acc)
+     | <span data-count="24">S</span>ome e -&gt; collect_identifiers_expr e acc)
   | <span data-count="2">P</span>MFTuple (e1, e2, es) -&gt;
     let acc = collect_identifiers_expr e1 acc in
     <span data-count="2">l</span>et acc = collect_identifiers_expr e2 acc in
@@ -191,24 +191,24 @@ let rec collect_identifiers_expr (expr : pmf_expression) (acc : IdentifierSet.t)
     let acc = collect_identifiers_expr e1 acc in
     <span data-count="0">c</span>ollect_identifiers_expr e2 acc
   | <span data-count="0">P</span>MFEmptyList -&gt; acc
-  | <span data-count="4">P</span>MFTyped (e, _) -&gt; collect_identifiers_expr e acc
+  | <span data-count="6">P</span>MFTyped (e, _) -&gt; collect_identifiers_expr e acc
 ;;
 
 let collect_identifiers_decl (decl : pmf_decl) (acc : IdentifierSet.t) : IdentifierSet.t =
-  <span data-count="62">m</span>atch decl with
-  | <span data-count="54">P</span>MFDOrdinary (id, args, body) -&gt;
+  <span data-count="97">m</span>atch decl with
+  | <span data-count="82">P</span>MFDOrdinary (id, args, body) -&gt;
     let acc = IdentifierSet.add id acc in
-    <span data-count="54">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="82">I</span>dentifierSet.add arg acc) acc args in
-    <span data-count="54">c</span>ollect_identifiers_expr body acc
-  | <span data-count="8">P</span>MFDRecursive ((id, args, body), decls) -&gt;
+    <span data-count="82">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="116">I</span>dentifierSet.add arg acc) acc args in
+    <span data-count="82">c</span>ollect_identifiers_expr body acc
+  | <span data-count="15">P</span>MFDRecursive ((id, args, body), decls) -&gt;
     let acc = IdentifierSet.add id acc in
-    <span data-count="8">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="14">I</span>dentifierSet.add arg acc) acc args in
-    <span data-count="8">l</span>et acc = collect_identifiers_expr body acc in
-    <span data-count="8">L</span>ist.fold_left
+    <span data-count="15">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="26">I</span>dentifierSet.add arg acc) acc args in
+    <span data-count="15">l</span>et acc = collect_identifiers_expr body acc in
+    <span data-count="15">L</span>ist.fold_left
       (fun acc (id, args, body) -&gt;
-        <span data-count="2">l</span>et acc = IdentifierSet.add id acc in
-        <span data-count="2">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="6">I</span>dentifierSet.add arg acc) acc args in
-        <span data-count="2">c</span>ollect_identifiers_expr body acc)
+        <span data-count="5">l</span>et acc = IdentifierSet.add id acc in
+        <span data-count="5">l</span>et acc = List.fold_left (fun acc arg -&gt; <span data-count="15">I</span>dentifierSet.add arg acc) acc args in
+        <span data-count="5">c</span>ollect_identifiers_expr body acc)
       acc
       decls
 ;;
@@ -216,7 +216,7 @@ let collect_identifiers_decl (decl : pmf_decl) (acc : IdentifierSet.t) : Identif
 let collect_all_identifiers (initial_set : IdentifierSet.t) (program : pmf_program)
   : IdentifierSet.t
   =
-  <span data-count="20">L</span>ist.fold_left (fun acc decl -&gt; <span data-count="62">c</span>ollect_identifiers_decl decl acc) initial_set program
+  <span data-count="31">L</span>ist.fold_left (fun acc decl -&gt; <span data-count="97">c</span>ollect_identifiers_decl decl acc) initial_set program
 ;;
 </code></pre>
       </div>

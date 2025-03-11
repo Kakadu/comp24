@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>runner.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in lib/middleend/alphaConversion/runner.ml">
+    <title>environmentSearchers.ml &mdash; Coverage report</title>
+    <meta name="description" content="83.33% coverage in lib/llvm/common/environmentSearchers.ml">
     <link rel="stylesheet" href="../../../coverage.css"/>
     <script src="../../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,12 +12,14 @@
     <div id="header">
       <h1>
         <a href="../../../index.html">
-          <span class="dirname">lib/middleend/alphaConversion/</span>runner.ml
+          <span class="dirname">lib/llvm/common/</span>environmentSearchers.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>83.33%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="top:48.00%"></span>
+      <span class="unvisited" style="bottom:28.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,22 +32,23 @@
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span > </span>
-<a id="L10"></a><span > </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="unvisited"> </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -74,30 +77,32 @@
 <a href="#L22">22</a>
 <a href="#L23">23</a>
 <a href="#L24">24</a>
+<a href="#L25">25</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Common.StateMonad
-open Common.IdentifierStructs
-open ProgramAlphaConversion
+open Runtime
+open Environment
 
-let start_env =
-  let start_identifiers =
-    List.fold_left
-      (fun acc var -&gt; <span data-count="2921">I</span>dentifierSet.add (Id var) acc)
-      IdentifierSet.empty
-      Common.StartEnvironment.start_identifiers
-  in
-  <span data-count="127">s</span>tart_identifiers
+let func_in_runtime_env runtime name =
+  <span data-count="61">l</span>et runtime_name = name_to_runtime_mapping name in
+  <span data-count="61">m</span>atch RuntimeEnv.find_opt runtime_name runtime with
+  | <span data-count="61">S</span>ome value -&gt; value
+  | <span data-count="0">N</span>one -&gt; failwith "The name was not found in the environment"
 ;;
 
-let run_alpha_conversion_program program =
-  <span data-count="44">l</span>et first_state = 0 in
-  let m = program_alpha_conversion start_env program in
-  <span data-count="44">l</span>et result = run m first_state in
-  <span data-count="44">f</span>st result
+let get_func_info runtime name =
+  <span data-count="284">m</span>atch RuntimeEnv.find_op<span data-count="284">t</span> name runtime, List.assoc_op<span data-count="284">t</span> name runtime_functions with
+  | <span data-count="284">S</span>ome llval, Some lltyp -&gt; llval, lltyp
+  | <span data-count="0">_</span> -&gt; failwith "Error: unbound name (runtime func)"
+;;
+
+let get_func_value runtime env name =
+  <span data-count="238">m</span>atch Env.find_opt name env with
+  | <span data-count="177">S</span>ome value -&gt; value
+  | <span data-count="61">N</span>one -&gt; func_in_runtime_env runtime name
 ;;
 </code></pre>
       </div>

@@ -102,26 +102,26 @@ open Common.StateMonad
 open LlProgram
 
 let start_env program =
-  <span data-count="87">l</span>et start_identifiers =
+  <span data-count="98">l</span>et start_identifiers =
     List.fold_left
-      (fun acc var -&gt; <span data-count="1740">I</span>dentifierSet.add (Id var) acc)
+      (fun acc var -&gt; <span data-count="2254">I</span>dentifierSet.add (Id var) acc)
       IdentifierSet.empty
       Common.StartEnvironment.start_identifiers
   in
-  <span data-count="87">L</span>ist.fold_left
+  <span data-count="98">L</span>ist.fold_left
     (fun acc decl -&gt;
-      <span data-count="201">m</span>atch decl with
-      | <span data-count="155">D</span>Ordinary (case, cases) | <span data-count="46">D</span>Recursive (case, cases) -&gt;
-        IdentifierSet.union acc (get_pattern_identifiers_from_case<span data-count="201">s</span> (case :: cases)))
+      <span data-count="228">m</span>atch decl with
+      | <span data-count="175">D</span>Ordinary (case, cases) | <span data-count="53">D</span>Recursive (case, cases) -&gt;
+        IdentifierSet.union acc (get_pattern_identifiers_from_case<span data-count="228">s</span> (case :: cases)))
     start_identifiers
     program
 ;;
 
 let run_ll_program program =
-  <span data-count="87">l</span>et first_state = 0 in
+  <span data-count="98">l</span>et first_state = 0 in
   let m = ll_program start_env program in
-  <span data-count="87">l</span>et result = run m first_state in
-  <span data-count="87">f</span>st result
+  <span data-count="98">l</span>et result = run m first_state in
+  <span data-count="98">f</span>st result
 ;;
 </code></pre>
       </div>

@@ -363,45 +363,45 @@ open Ast.AbstractSyntaxTree
 (* Helper functions *)
 
 let is_whitespace = function
-  | <span data-count="43798876">'</span> ' | <span data-count="26571027">'</span>\n' -&gt; true
-  | <span data-count="231107497">_</span> -&gt; false
+  | <span data-count="43923073">'</span> ' | <span data-count="26635557">'</span>\n' -&gt; true
+  | <span data-count="231420911">_</span> -&gt; false
 ;;
 
 let is_upper_char = function
   | <span data-count="0">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="16946997">_</span> -&gt; false
+  | <span data-count="16974879">_</span> -&gt; false
 ;;
 
 let is_lower_char = function
-  | <span data-count="24541456">'</span>a' .. 'z' -&gt; true
-  | <span data-count="16947896">_</span> -&gt; false
+  | <span data-count="24590816">'</span>a' .. 'z' -&gt; true
+  | <span data-count="16975826">_</span> -&gt; false
 ;;
 
 let is_digit_char = function
-  | <span data-count="4245208">'</span>0' .. '9' -&gt; true
-  | <span data-count="33109847">_</span> -&gt; false
+  | <span data-count="4267152">'</span>0' .. '9' -&gt; true
+  | <span data-count="33163605">_</span> -&gt; false
 ;;
 
 let is_acceptable_service_char = function
-  | <span data-count="677763">'</span>_' | <span data-count="104">'</span>\'' -&gt; true
-  | <span data-count="16253679">_</span> -&gt; false
+  | <span data-count="678979">'</span>_' | <span data-count="104">'</span>\'' -&gt; true
+  | <span data-count="16278719">_</span> -&gt; false
 ;;
 
 let is_operator_char = function
   | <span data-count="0">'</span>+' | <span data-count="0">'</span>-' | <span data-count="0">'</span>*' | <span data-count="0">'</span>/' | <span data-count="0">'</span>=' | <span data-count="0">'</span>&lt;' | <span data-count="0">'</span>&gt;' | <span data-count="0">'</span>!' | <span data-count="0">'</span>&amp;' | <span data-count="0">'</span>|' | <span data-count="0">'</span>^' | <span data-count="0">'</span>%' -&gt; true
-  | <span data-count="185002">_</span> -&gt; false
+  | <span data-count="185018">_</span> -&gt; false
 ;;
 
 let is_keyword = function
-  | <span data-count="830469">"</span>let"
-  | <span data-count="12000">"</span>if"
-  | <span data-count="12000">"</span>then"
-  | <span data-count="12000">"</span>else"
+  | <span data-count="832585">"</span>let"
+  | <span data-count="12082">"</span>if"
+  | <span data-count="12082">"</span>then"
+  | <span data-count="12082">"</span>else"
   | <span data-count="48">"</span>int"
   | <span data-count="0">"</span>string"
   | <span data-count="0">"</span>bool"
   | <span data-count="0">"</span>rec"
-  | <span data-count="63352">"</span>fun"
+  | <span data-count="63462">"</span>fun"
   | <span data-count="0">"</span>char"
   | <span data-count="44">"</span>function"
   | <span data-count="0">"</span>false"
@@ -409,8 +409,8 @@ let is_keyword = function
   | <span data-count="38724">"</span>match"
   | <span data-count="38724">"</span>with"
   | <span data-count="7384">"</span>and"
-  | <span data-count="754382">"</span>in" -&gt; true
-  | <span data-count="3350827">_</span> -&gt; false
+  | <span data-count="756236">"</span>in" -&gt; true
+  | <span data-count="3358777">_</span> -&gt; false
 ;;
 
 let chainl1 e op =
@@ -418,40 +418,40 @@ let chainl1 e op =
   e &gt;&gt;= go
 ;;
 
-let rec chainr1 e op = <span data-count="41779">e</span> &gt;&gt;= fun a -&gt; <span data-count="5764288">o</span>p &gt;&gt;<span data-count="5764288">=</span> (fun f -&gt; <span data-count="41544">c</span>hainr<span data-count="41544">1</span> e op &gt;&gt;| <span data-count="41544">f</span> a) &lt;|&gt; retur<span data-count="5764288">n</span> a
+let rec chainr1 e op = <span data-count="41802">e</span> &gt;&gt;= fun a -&gt; <span data-count="5773261">o</span>p &gt;&gt;<span data-count="5773261">=</span> (fun f -&gt; <span data-count="41544">c</span>hainr<span data-count="41544">1</span> e op &gt;&gt;| <span data-count="41544">f</span> a) &lt;|&gt; retur<span data-count="5773261">n</span> a
 
 (* ---------------- *)
 
 (* Helper parsers *)
 
-let skip_wspace = skip_whil<span data-count="116">e</span> is_whitespace
-let skip_wspace1 = take_while<span data-count="116">1</span> is_whitespace
-let parens p = <span data-count="1135">s</span>kip_wspace *<span data-count="1135">&gt;</span> cha<span data-count="1135">r</span> '(' *<span data-count="1135">&gt;</span> skip_wspace *<span data-count="1135">&gt;</span> p &lt;<span data-count="1135">*</span> skip_wspace &lt;* cha<span data-count="1135">r</span> ')'
-let brackets p = <span data-count="456">s</span>kip_wspace *<span data-count="456">&gt;</span> cha<span data-count="456">r</span> '[' *<span data-count="456">&gt;</span> p &lt;<span data-count="456">*</span> skip_wspace &lt;* cha<span data-count="456">r</span> ']'
-let arrow = skip_wspace *<span data-count="116">&gt;</span> strin<span data-count="116">g</span> "-&gt;"
-let trait = skip_wspace *<span data-count="116">&gt;</span> strin<span data-count="116">g</span> "|"
-let tying = skip_wspace *<span data-count="116">&gt;</span> strin<span data-count="116">g</span> "="
+let skip_wspace = skip_whil<span data-count="127">e</span> is_whitespace
+let skip_wspace1 = take_while<span data-count="127">1</span> is_whitespace
+let parens p = <span data-count="1246">s</span>kip_wspace *<span data-count="1246">&gt;</span> cha<span data-count="1246">r</span> '(' *<span data-count="1246">&gt;</span> skip_wspace *<span data-count="1246">&gt;</span> p &lt;<span data-count="1246">*</span> skip_wspace &lt;* cha<span data-count="1246">r</span> ')'
+let brackets p = <span data-count="500">s</span>kip_wspace *<span data-count="500">&gt;</span> cha<span data-count="500">r</span> '[' *<span data-count="500">&gt;</span> p &lt;<span data-count="500">*</span> skip_wspace &lt;* cha<span data-count="500">r</span> ']'
+let arrow = skip_wspace *<span data-count="127">&gt;</span> strin<span data-count="127">g</span> "-&gt;"
+let trait = skip_wspace *<span data-count="127">&gt;</span> strin<span data-count="127">g</span> "|"
+let tying = skip_wspace *<span data-count="127">&gt;</span> strin<span data-count="127">g</span> "="
 
 (* ---------------- *)
 
 (* Constant parsers *)
 
 let parse_constant =
-  fi<span data-count="116">x</span>
+  fi<span data-count="127">x</span>
   @@ fun self -&gt;
-  <span data-count="112">s</span>kip_wspace
+  <span data-count="123">s</span>kip_wspace
   *&gt;
-  let parse_cint = take_while<span data-count="112">1</span> is_digit_char &gt;&gt;<span data-count="112">|</span> int_of_string &gt;&gt;| fun x -&gt; <span data-count="4114309">C</span>Int x in
-  <span data-count="112">l</span>et parse_cstring =
-    cha<span data-count="112">r</span> '"' *<span data-count="112">&gt;</span> take_whil<span data-count="112">e</span> (( != ) '"') &lt;<span data-count="112">*</span> cha<span data-count="112">r</span> '"' &gt;&gt;| fun x -&gt; <span data-count="202">C</span>String x
+  let parse_cint = take_while<span data-count="123">1</span> is_digit_char &gt;&gt;<span data-count="123">|</span> int_of_string &gt;&gt;| fun x -&gt; <span data-count="4121953">C</span>Int x in
+  <span data-count="123">l</span>et parse_cstring =
+    cha<span data-count="123">r</span> '"' *<span data-count="123">&gt;</span> take_whil<span data-count="123">e</span> (( != ) '"') &lt;<span data-count="123">*</span> cha<span data-count="123">r</span> '"' &gt;&gt;| fun x -&gt; <span data-count="202">C</span>String x
   in
-  <span data-count="112">l</span>et parse_cchar = cha<span data-count="112">r</span> '\'' *<span data-count="112">&gt;</span> any_char &lt;<span data-count="112">*</span> cha<span data-count="112">r</span> '\'' &gt;&gt;| fun x -&gt; <span data-count="230">C</span>Char x in
-  <span data-count="112">l</span>et parse_cbool =
-    strin<span data-count="112">g</span> "true" &lt;|<span data-count="112">&gt;</span> strin<span data-count="112">g</span> "false" &gt;&gt;<span data-count="112">|</span> bool_of_string &gt;&gt;| fun x -&gt; <span data-count="744">C</span>Bool x
+  <span data-count="123">l</span>et parse_cchar = cha<span data-count="123">r</span> '\'' *<span data-count="123">&gt;</span> any_char &lt;<span data-count="123">*</span> cha<span data-count="123">r</span> '\'' &gt;&gt;| fun x -&gt; <span data-count="230">C</span>Char x in
+  <span data-count="123">l</span>et parse_cbool =
+    strin<span data-count="123">g</span> "true" &lt;|<span data-count="123">&gt;</span> strin<span data-count="123">g</span> "false" &gt;&gt;<span data-count="123">|</span> bool_of_string &gt;&gt;| fun x -&gt; <span data-count="760">C</span>Bool x
   in
-  <span data-count="112">l</span>et parse_cunit = strin<span data-count="112">g</span> "()" &gt;&gt;| fun _ -&gt; <span data-count="691531">C</span>Unit in
-  <span data-count="112">p</span>aren<span data-count="112">s</span> self
-  &lt;|<span data-count="112">&gt;</span> choic<span data-count="112">e</span> [ parse_cint; parse_cstring; parse_cchar; parse_cbool; parse_cunit ]
+  <span data-count="123">l</span>et parse_cunit = strin<span data-count="123">g</span> "()" &gt;&gt;| fun _ -&gt; <span data-count="692473">C</span>Unit in
+  <span data-count="123">p</span>aren<span data-count="123">s</span> self
+  &lt;|<span data-count="123">&gt;</span> choic<span data-count="123">e</span> [ parse_cint; parse_cstring; parse_cchar; parse_cbool; parse_cunit ]
 ;;
 
 (* ---------------- *)
@@ -459,22 +459,22 @@ let parse_constant =
 (* Identifiers *)
 
 let parse_name =
-  fi<span data-count="116">x</span>
+  fi<span data-count="127">x</span>
   @@ fun self -&gt;
-  <span data-count="112">s</span>kip_wspace
+  <span data-count="123">s</span>kip_wspace
   *&gt;
   let is_acceptable x =
-    <span data-count="36368722">i</span>s_lower_cha<span data-count="36368722">r</span> <span data-count="19421725">x</span> || is_upper_cha<span data-count="16946997">r</span> <span data-count="0">x</span> || is_digit_cha<span data-count="16946997">r</span> <span data-count="15451">x</span> || is_acceptable_service_char x
+    <span data-count="36433736">i</span>s_lower_cha<span data-count="36433736">r</span> <span data-count="19458857">x</span> || is_upper_cha<span data-count="16974879">r</span> <span data-count="0">x</span> || is_digit_cha<span data-count="16974879">r</span> <span data-count="17077">x</span> || is_acceptable_service_char x
   in
-  paren<span data-count="112">s</span> self &lt;|<span data-count="112">&gt;</span> take_while<span data-count="112">1</span> is_acceptable
+  paren<span data-count="123">s</span> self &lt;|<span data-count="123">&gt;</span> take_while<span data-count="123">1</span> is_acceptable
 ;;
 
 let parse_uncapitalized_name =
   let* name = parse_name in
-  <span data-count="5120630">i</span>f is_lower_char name.[0]
-  then <span data-count="5119731">r</span>eturn name
+  <span data-count="5132906">i</span>f is_lower_char name.[0]
+  then <span data-count="5131959">r</span>eturn name
   else
-    <span data-count="899">f</span>ail
+    <span data-count="947">f</span>ail
       "Syntax error: the some name started with a capital letter when a small letter was \
        expected"
 ;;
@@ -491,20 +491,20 @@ let parse_capitalized_name =
 
 let parse_name_started_with_underscore =
   let* name = parse_name in
-  <span data-count="899">i</span>f name.[0] = '_' &amp;&amp; <span data-count="899">S</span>tring.lengt<span data-count="899">h</span> name &gt; 1
-  then <span data-count="639">r</span>eturn name
+  <span data-count="947">i</span>f name.[0] = '_' &amp;&amp; <span data-count="947">S</span>tring.lengt<span data-count="947">h</span> name &gt; 1
+  then <span data-count="687">r</span>eturn name
   else <span data-count="260">f</span>ail "Syntax error: expected '_' at the beggining of the identifier"
 ;;
 
 let parse_identifier =
-  let* name = parse_uncapitalized_name &lt;|<span data-count="116">&gt;</span> parse_name_started_with_underscore in
-  <span data-count="5119954">i</span>f is_keyword name
-  then <span data-count="1769127">f</span>ail "Syntax error: keywords cannot be used as identifiers"
-  else <span data-count="3350827">r</span>eturn @@ Id name
+  let* name = parse_uncapitalized_name &lt;|<span data-count="127">&gt;</span> parse_name_started_with_underscore in
+  <span data-count="5132230">i</span>f is_keyword name
+  then <span data-count="1773453">f</span>ail "Syntax error: keywords cannot be used as identifiers"
+  else <span data-count="3358777">r</span>eturn @@ Id name
 ;;
 
 let parse_operator =
-  let* operator = paren<span data-count="116">s</span> (take_while<span data-count="116">1</span> is_operator_char) in
+  let* operator = paren<span data-count="127">s</span> (take_while<span data-count="127">1</span> is_operator_char) in
   <span data-count="0">r</span>eturn @@ Id ("( " ^ operator ^ " )")
 ;;
 

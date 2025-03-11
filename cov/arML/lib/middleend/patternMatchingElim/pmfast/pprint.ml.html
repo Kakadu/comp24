@@ -250,9 +250,9 @@ let rec pp_pmf_expr ppf = function
   | <span data-count="130">P</span>MFLetIn (c, e) -&gt;
     Format.fprintf
       ppf
-      "(let %a in %a)"
+      "let %a in@,%a"
       (Format.pp_print_lis<span data-count="130">t</span>
-         ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf "@,and ")
          pp_pmf_let_in_case)
       (c :: [])
       pp_pmf_expr
@@ -304,7 +304,7 @@ let pp_pmf_decl ppf = function
       ppf
       "let %a"
       (Format.pp_print_lis<span data-count="80">t</span>
-         ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -&gt; <span data-count="0">F</span>ormat.fprintf ppf "@,and ")
          pp_pmf_decl_case)
       (c :: [])
   | <span data-count="28">P</span>MFDRecursive (c, cs) -&gt;
@@ -312,13 +312,13 @@ let pp_pmf_decl ppf = function
       ppf
       "let rec %a"
       (Format.pp_print_lis<span data-count="28">t</span>
-         ~pp_sep:(fun ppf () -&gt; <span data-count="6">F</span>ormat.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -&gt; <span data-count="6">F</span>ormat.fprintf ppf "@,and ")
          pp_pmf_decl_case)
       (c :: cs)
 ;;
 
 let pp_pmf_program ppf p =
-  <span data-count="26">F</span>ormat.pp_print_list ~pp_sep:(fun ppf () -&gt; <span data-count="82">F</span>ormat.fprintf ppf "\n") pp_pmf_decl ppf p
+  <span data-count="26">F</span>ormat.pp_print_list ~pp_sep:(fun ppf () -&gt; <span data-count="82">F</span>ormat.fprintf ppf "\n\n") pp_pmf_decl ppf p
 ;;
 
 let print_pmf_expression expr =

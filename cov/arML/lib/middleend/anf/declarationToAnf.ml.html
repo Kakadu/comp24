@@ -99,23 +99,23 @@ open PatternMatchingElim.Pmfast
 open ExpressionToAnf
 
 let declaration_to_anf env = function
-  | <span data-count="54">P</span>MFDOrdinary (name, args, expr) -&gt;
+  | <span data-count="82">P</span>MFDOrdinary (name, args, expr) -&gt;
     let env = IdentifierSet.add name env in
-    <span data-count="54">l</span>et* expr', env' = expression_to_an<span data-count="54">f</span> env expr in
-    <span data-count="54">r</span>eturn ([ ADOrdinary (name, args, expr') ], env')
-  | <span data-count="8">P</span>MFDRecursive (case, cases) -&gt;
+    <span data-count="82">l</span>et* expr', env' = expression_to_an<span data-count="82">f</span> env expr in
+    <span data-count="82">r</span>eturn ([ ADOrdinary (name, args, expr') ], env')
+  | <span data-count="15">P</span>MFDRecursive (case, cases) -&gt;
     let cases = case :: cases in
     let* cases', env' =
-      List.fold_righ<span data-count="8">t</span>
+      List.fold_righ<span data-count="15">t</span>
         (fun (name, args, expr) acc -&gt;
-          <span data-count="10">l</span>et* acc, env = acc in
-          <span data-count="10">l</span>et env = IdentifierSet.add name env in
-          <span data-count="10">l</span>et* expr', env' = expression_to_an<span data-count="10">f</span> env expr in
-          <span data-count="10">r</span>eturn @@ ((name, args, expr') :: acc, env'))
+          <span data-count="20">l</span>et* acc, env = acc in
+          <span data-count="20">l</span>et env = IdentifierSet.add name env in
+          <span data-count="20">l</span>et* expr', env' = expression_to_an<span data-count="20">f</span> env expr in
+          <span data-count="20">r</span>eturn @@ ((name, args, expr') :: acc, env'))
         cases
-        (retur<span data-count="8">n</span> ([], env))
+        (retur<span data-count="15">n</span> ([], env))
     in
-    <span data-count="8">r</span>eturn ([ ADRecursive (List.h<span data-count="8">d</span> cases', List.t<span data-count="8">l</span> cases') ], env')
+    <span data-count="15">r</span>eturn ([ ADRecursive (List.h<span data-count="15">d</span> cases', List.t<span data-count="15">l</span> cases') ], env')
 ;;
 </code></pre>
       </div>

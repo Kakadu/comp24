@@ -189,68 +189,68 @@ open NameGenerator
 open ExpressionAlphaConversion
 
 let declaration_alpha_conversion env replacement_map = function
-  | <span data-count="94">P</span>MFDOrdinary (name, args, body) -&gt;
+  | <span data-count="122">P</span>MFDOrdinary (name, args, body) -&gt;
     let* name', env, replacement_map' =
-      generate_new_name_if_neede<span data-count="94">d</span> name env replacement_map
+      generate_new_name_if_neede<span data-count="122">d</span> name env replacement_map
     in
-    <span data-count="94">l</span>et* args', env, replacement_map'' =
-      List.fold_righ<span data-count="94">t</span>
+    <span data-count="122">l</span>et* args', env, replacement_map'' =
+      List.fold_righ<span data-count="122">t</span>
         (fun arg_name acc -&gt;
-          <span data-count="138">l</span>et* acc, env, replacement_map = acc in
-          <span data-count="138">l</span>et* new_arg_name, env, replacement_map =
-            generate_new_name_if_neede<span data-count="138">d</span> arg_name env replacement_map
+          <span data-count="172">l</span>et* acc, env, replacement_map = acc in
+          <span data-count="172">l</span>et* new_arg_name, env, replacement_map =
+            generate_new_name_if_neede<span data-count="172">d</span> arg_name env replacement_map
           in
-          <span data-count="138">r</span>eturn (new_arg_name :: acc, env, replacement_map))
+          <span data-count="172">r</span>eturn (new_arg_name :: acc, env, replacement_map))
         args
-        (retur<span data-count="94">n</span> ([], env, replacement_map))
+        (retur<span data-count="122">n</span> ([], env, replacement_map))
     in
-    <span data-count="94">l</span>et* body' = expression_alpha_conversio<span data-count="94">n</span> env replacement_map'' body in
-    <span data-count="94">r</span>eturn @@ (PMFDOrdinary (name', args', body'), env, replacement_map')
-  | <span data-count="22">P</span>MFDRecursive (case, cases) -&gt;
+    <span data-count="122">l</span>et* body' = expression_alpha_conversio<span data-count="122">n</span> env replacement_map'' body in
+    <span data-count="122">r</span>eturn @@ (PMFDOrdinary (name', args', body'), env, replacement_map')
+  | <span data-count="29">P</span>MFDRecursive (case, cases) -&gt;
     let cases = case :: cases in
     let fun_names =
       List.fold_left
-        (fun acc (name, _, _) -&gt; <span data-count="27">I</span>dentifierSet.add name acc)
+        (fun acc (name, _, _) -&gt; <span data-count="37">I</span>dentifierSet.add name acc)
         IdentifierSet.empty
         cases
     in
-    <span data-count="22">l</span>et replacement_map = remove_keys_from_map fun_names replacement_map in
-    <span data-count="22">l</span>et bypass_func (name, args, body) acc =
-      <span data-count="54">l</span>et* acc, env, replacement_map, replacement_map_to_save = acc in
-      <span data-count="54">l</span>et* _, _, replacement_map_to_save =
-        generate_new_name_if_neede<span data-count="54">d</span> name env replacement_map_to_save
+    <span data-count="29">l</span>et replacement_map = remove_keys_from_map fun_names replacement_map in
+    <span data-count="29">l</span>et bypass_func (name, args, body) acc =
+      <span data-count="74">l</span>et* acc, env, replacement_map, replacement_map_to_save = acc in
+      <span data-count="74">l</span>et* _, _, replacement_map_to_save =
+        generate_new_name_if_neede<span data-count="74">d</span> name env replacement_map_to_save
       in
-      <span data-count="54">l</span>et* name', env, replacement_map =
-        generate_new_name_if_neede<span data-count="54">d</span> name env replacement_map
+      <span data-count="74">l</span>et* name', env, replacement_map =
+        generate_new_name_if_neede<span data-count="74">d</span> name env replacement_map
       in
-      <span data-count="54">l</span>et* args', env, replacement_map =
-        List.fold_righ<span data-count="54">t</span>
+      <span data-count="74">l</span>et* args', env, replacement_map =
+        List.fold_righ<span data-count="74">t</span>
           (fun arg_name acc -&gt;
-            <span data-count="100">l</span>et* acc, env, replacement_map = acc in
-            <span data-count="100">l</span>et* new_arg_name, env, replacement_map =
-              generate_new_name_if_neede<span data-count="100">d</span> arg_name env replacement_map
+            <span data-count="142">l</span>et* acc, env, replacement_map = acc in
+            <span data-count="142">l</span>et* new_arg_name, env, replacement_map =
+              generate_new_name_if_neede<span data-count="142">d</span> arg_name env replacement_map
             in
-            <span data-count="100">r</span>eturn (new_arg_name :: acc, env, replacement_map))
+            <span data-count="142">r</span>eturn (new_arg_name :: acc, env, replacement_map))
           args
-          (retur<span data-count="54">n</span> ([], env, replacement_map))
+          (retur<span data-count="74">n</span> ([], env, replacement_map))
       in
-      <span data-count="54">l</span>et* body' = expression_alpha_conversio<span data-count="54">n</span> env replacement_map body in
-      <span data-count="54">r</span>eturn
+      <span data-count="74">l</span>et* body' = expression_alpha_conversio<span data-count="74">n</span> env replacement_map body in
+      <span data-count="74">r</span>eturn
       @@ ((name', args', body') :: acc, env, replacement_map, replacement_map_to_save)
     in
     let* cases', env, replacement_map, to_save =
-      List.fold_righ<span data-count="22">t</span>
+      List.fold_righ<span data-count="29">t</span>
         bypass_func
         cases
-        (retur<span data-count="22">n</span> ([], env, replacement_map, replacement_map))
+        (retur<span data-count="29">n</span> ([], env, replacement_map, replacement_map))
     in
-    <span data-count="22">l</span>et* cases', _, _, to_save =
-      List.fold_righ<span data-count="22">t</span>
+    <span data-count="29">l</span>et* cases', _, _, to_save =
+      List.fold_righ<span data-count="29">t</span>
         bypass_func
         cases'
-        (retur<span data-count="22">n</span> ([], IdentifierSet.empty, replacement_map, to_save))
+        (retur<span data-count="29">n</span> ([], IdentifierSet.empty, replacement_map, to_save))
     in
-    <span data-count="22">r</span>eturn @@ (PMFDRecursive (List.h<span data-count="22">d</span> cases', List.t<span data-count="22">l</span> cases'), env, to_save)
+    <span data-count="29">r</span>eturn @@ (PMFDRecursive (List.h<span data-count="29">d</span> cases', List.t<span data-count="29">l</span> cases'), env, to_save)
 ;;
 </code></pre>
       </div>

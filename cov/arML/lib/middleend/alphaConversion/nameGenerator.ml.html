@@ -116,34 +116,34 @@ open Common.IdentifierStructs
 open Ast.AbstractSyntaxTree
 open PatternMatchingElim.Pmfast
 
-let get_new_ac_name = Common.NameCreator.get_new_nam<span data-count="116">e</span> "ac"
+let get_new_ac_name = Common.NameCreator.get_new_nam<span data-count="127">e</span> "ac"
 
 let generate_new_name (Id name) env replacement_map =
-  <span data-count="90">i</span>f name = "()"
-  then <span data-count="28">r</span>eturn (Id name, env, replacement_map)
+  <span data-count="108">i</span>f name = "()"
+  then <span data-count="31">r</span>eturn (Id name, env, replacement_map)
   else
-    <span data-count="62">l</span>et* new_name = get_new_ac_nam<span data-count="62">e</span> env in
-    <span data-count="62">l</span>et new_name = Id new_name in
+    <span data-count="77">l</span>et* new_name = get_new_ac_nam<span data-count="77">e</span> env in
+    <span data-count="77">l</span>et new_name = Id new_name in
     let new_replacement_map = IdentifierMap.add (Id name) new_name replacement_map in
-    <span data-count="62">l</span>et new_env = IdentifierSet.add new_name env in
-    <span data-count="62">r</span>eturn @@ (new_name, new_env, new_replacement_map)
+    <span data-count="77">l</span>et new_env = IdentifierSet.add new_name env in
+    <span data-count="77">r</span>eturn @@ (new_name, new_env, new_replacement_map)
 ;;
 
 let generate_new_name_if_needed name env replacement_map =
-  <span data-count="587">i</span>f IdentifierSet.mem name env
-  then <span data-count="90">g</span>enerate_new_name name env replacement_map
-  else <span data-count="497">(</span>
+  <span data-count="759">i</span>f IdentifierSet.mem name env
+  then <span data-count="108">g</span>enerate_new_name name env replacement_map
+  else <span data-count="651">(</span>
     let new_env = IdentifierSet.add name env in
-    <span data-count="497">r</span>eturn @@ (name, new_env, replacement_map))
+    <span data-count="651">r</span>eturn @@ (name, new_env, replacement_map))
 ;;
 
 let replace_name_if_needed (Id name) replacement_map =
-  <span data-count="1175">i</span>f name = "()"
+  <span data-count="1436">i</span>f name = "()"
   then <span data-count="0">r</span>eturn @@ PMFIdentifier (Id name)
-  else <span data-count="1175">(</span>
+  else <span data-count="1436">(</span>
     match IdentifierMap.find_opt (Id name) replacement_map with
-    | <span data-count="1054">N</span>one -&gt; return @@ PMFIdentifier (Id name)
-    | <span data-count="121">S</span>ome new_name -&gt; return @@ PMFIdentifier new_name)
+    | <span data-count="1296">N</span>one -&gt; return @@ PMFIdentifier (Id name)
+    | <span data-count="140">S</span>ome new_name -&gt; return @@ PMFIdentifier new_name)
 ;;
 </code></pre>
       </div>

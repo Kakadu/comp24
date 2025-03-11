@@ -242,39 +242,39 @@ open IdentifierStructs
 open IdentifierSearcher
 
 let rec substitute_identifiers replacement_map expr =
-  <span data-count="5796">m</span>atch expr with
-  | <span data-count="2961">E</span>Identifier id -&gt;
+  <span data-count="6265">m</span>atch expr with
+  | <span data-count="3195">E</span>Identifier id -&gt;
     (match IdentifierMap.find_opt id replacement_map with
-     | <span data-count="176">S</span>ome new_id -&gt; EIdentifier new_id
-     | <span data-count="2785">N</span>one -&gt; expr)
-  | <span data-count="190">E</span>Fun ((p, ps), body) -&gt;
+     | <span data-count="183">S</span>ome new_id -&gt; EIdentifier new_id
+     | <span data-count="3012">N</span>one -&gt; expr)
+  | <span data-count="202">E</span>Fun ((p, ps), body) -&gt;
     let patterns_identifiers =
       List.fold_left
-        (fun acc p -&gt; <span data-count="350">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="350">s</span> p))
+        (fun acc p -&gt; <span data-count="370">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="370">s</span> p))
         IdentifierSet.empty
         (p :: ps)
     in
-    <span data-count="190">l</span>et body' =
+    <span data-count="202">l</span>et body' =
       substitute_identifiers
-        (remove_keys_from_ma<span data-count="190">p</span> patterns_identifiers replacement_map)
+        (remove_keys_from_ma<span data-count="202">p</span> patterns_identifiers replacement_map)
         body
     in
-    <span data-count="190">E</span>Fun ((p, ps), body')
-  | <span data-count="1479">E</span>Application (f, arg1, args) -&gt;
+    <span data-count="202">E</span>Fun ((p, ps), body')
+  | <span data-count="1596">E</span>Application (f, arg1, args) -&gt;
     let f' = substitute_identifiers replacement_map f in
-    <span data-count="1479">l</span>et arg1' = substitute_identifiers replacement_map arg1 in
-    <span data-count="1479">l</span>et args' = List.map (substitute_identifier<span data-count="1479">s</span> replacement_map) args in
-    <span data-count="1479">E</span>Application (f', arg1', args')
+    <span data-count="1596">l</span>et arg1' = substitute_identifiers replacement_map arg1 in
+    <span data-count="1596">l</span>et args' = List.map (substitute_identifier<span data-count="1596">s</span> replacement_map) args in
+    <span data-count="1596">E</span>Application (f', arg1', args')
   | <span data-count="70">E</span>ListConstructor (l, r) -&gt;
     let l = substitute_identifiers replacement_map l in
     <span data-count="70">l</span>et r = substitute_identifiers replacement_map r in
     <span data-count="70">E</span>ListConstructor (l, r)
-  | <span data-count="84">E</span>IfThenElse (cond, b1, b2) -&gt;
+  | <span data-count="94">E</span>IfThenElse (cond, b1, b2) -&gt;
     let cond = substitute_identifiers replacement_map cond in
-    <span data-count="84">l</span>et b1 = substitute_identifiers replacement_map b1 in
-    <span data-count="84">l</span>et b2 =
+    <span data-count="94">l</span>et b1 = substitute_identifiers replacement_map b1 in
+    <span data-count="94">l</span>et b2 =
       match b2 with
-      | <span data-count="84">S</span>ome b2 -&gt; Some (substitute_identifier<span data-count="84">s</span> replacement_map b2)
+      | <span data-count="94">S</span>ome b2 -&gt; Some (substitute_identifier<span data-count="94">s</span> replacement_map b2)
       | <span data-count="0">N</span>one -&gt; None
     in
     EIfThenElse (cond, b1, b2)
@@ -306,20 +306,20 @@ let rec substitute_identifiers replacement_map expr =
         (case :: cases)
     in
     <span data-count="50">E</span>MatchWith (expr, List.h<span data-count="50">d</span> cases', List.t<span data-count="50">l</span> cases')
-  | <span data-count="16">E</span>Typed (e, t) -&gt;
+  | <span data-count="18">E</span>Typed (e, t) -&gt;
     let e' = substitute_identifiers replacement_map e in
-    <span data-count="16">E</span>Typed (e', t)
-  | <span data-count="257">E</span>LetIn (case, cases, body) -&gt;
+    <span data-count="18">E</span>Typed (e', t)
+  | <span data-count="286">E</span>LetIn (case, cases, body) -&gt;
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
-    <span data-count="257">l</span>et cases' =
-      List.map (fun (p, e) -&gt; <span data-count="257">p</span>, substitute_identifier<span data-count="257">s</span> replacement_map e) (case :: cases)
+    <span data-count="286">l</span>et cases' =
+      List.map (fun (p, e) -&gt; <span data-count="286">p</span>, substitute_identifier<span data-count="286">s</span> replacement_map e) (case :: cases)
     in
-    <span data-count="257">l</span>et body' =
+    <span data-count="286">l</span>et body' =
       substitute_identifiers
-        (remove_keys_from_ma<span data-count="257">p</span> patterns_identifiers replacement_map)
+        (remove_keys_from_ma<span data-count="286">p</span> patterns_identifiers replacement_map)
         body
     in
-    <span data-count="257">E</span>LetIn (List.h<span data-count="257">d</span> cases', List.t<span data-count="257">l</span> cases', body')
+    <span data-count="286">E</span>LetIn (List.h<span data-count="286">d</span> cases', List.t<span data-count="286">l</span> cases', body')
   | <span data-count="0">E</span>RecLetIn (case, cases, body) -&gt;
     let patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
     <span data-count="0">l</span>et replacement_map = remove_keys_from_map patterns_identifiers replacement_map in
@@ -328,7 +328,7 @@ let rec substitute_identifiers replacement_map expr =
     in
     <span data-count="0">l</span>et body' = substitute_identifiers replacement_map body in
     <span data-count="0">E</span>RecLetIn (List.h<span data-count="0">d</span> cases', List.t<span data-count="0">l</span> cases', body')
-  | <span data-count="654">_</span> -&gt; expr
+  | <span data-count="719">_</span> -&gt; expr
 ;;
 </code></pre>
       </div>

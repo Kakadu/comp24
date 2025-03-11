@@ -72,12 +72,12 @@ open Common.StateMonad.Syntax
 open DeclarationToAnf
 
 let program_to_anf env program =
-  <span data-count="20">l</span>et rec helper env = function
-    | <span data-count="20">[</span>] -&gt; return ([], env)
-    | <span data-count="62">h</span>d :: tl -&gt;
-      let* d1, env = declaration_to_an<span data-count="62">f</span> env hd in
-      <span data-count="62">l</span>et* d2, env = helpe<span data-count="62">r</span> env tl in
-      <span data-count="62">r</span>eturn @@ (d1 @ d2, env)
+  <span data-count="31">l</span>et rec helper env = function
+    | <span data-count="31">[</span>] -&gt; return ([], env)
+    | <span data-count="97">h</span>d :: tl -&gt;
+      let* d1, env = declaration_to_an<span data-count="97">f</span> env hd in
+      <span data-count="97">l</span>et* d2, env = helpe<span data-count="97">r</span> env tl in
+      <span data-count="97">r</span>eturn @@ (d1 @ d2, env)
   in
   helper env program
 ;;

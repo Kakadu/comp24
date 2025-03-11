@@ -106,28 +106,28 @@ open LambdaLifting.Llast
 open LambdaLifting.IdentifierSubstitutor
 
 let start_env program =
-  <span data-count="46">l</span>et start_identifiers =
+  <span data-count="57">l</span>et start_identifiers =
     List.fold_left
-      (fun acc var -&gt; <span data-count="920">I</span>dentifierSet.add (Id var) acc)
+      (fun acc var -&gt; <span data-count="1311">I</span>dentifierSet.add (Id var) acc)
       IdentifierSet.empty
       Common.StartEnvironment.start_identifiers
   in
-  <span data-count="46">L</span>ist.fold_left
+  <span data-count="57">L</span>ist.fold_left
     (fun acc decl -&gt;
-      <span data-count="170">m</span>atch decl with
-      | <span data-count="134">L</span>DOrdinary (case, cases) | <span data-count="36">L</span>DRecursive (case, cases) -&gt;
+      <span data-count="205">m</span>atch decl with
+      | <span data-count="162">L</span>DOrdinary (case, cases) | <span data-count="43">L</span>DRecursive (case, cases) -&gt;
         let cases = case :: cases in
-        let cases = List.fold_right (fun (p, _, e) acc -&gt; <span data-count="178">(</span>p, e) :: acc) cases [] in
-        <span data-count="170">I</span>dentifierSet.union acc (get_pattern_identifiers_from_case<span data-count="170">s</span> cases))
+        let cases = List.fold_right (fun (p, _, e) acc -&gt; <span data-count="216">(</span>p, e) :: acc) cases [] in
+        <span data-count="205">I</span>dentifierSet.union acc (get_pattern_identifiers_from_case<span data-count="205">s</span> cases))
     start_identifiers
     program
 ;;
 
 let run_pmf_program program =
-  <span data-count="46">l</span>et first_state = 0 in
-  let m = eliminate_pm_program (start_en<span data-count="46">v</span> program) program in
-  <span data-count="46">l</span>et result = run m first_state in
-  <span data-count="46">f</span>st (fs<span data-count="46">t</span> result)
+  <span data-count="57">l</span>et first_state = 0 in
+  let m = eliminate_pm_program (start_en<span data-count="57">v</span> program) program in
+  <span data-count="57">l</span>et result = run m first_state in
+  <span data-count="57">f</span>st (fs<span data-count="57">t</span> result)
 ;;
 </code></pre>
       </div>

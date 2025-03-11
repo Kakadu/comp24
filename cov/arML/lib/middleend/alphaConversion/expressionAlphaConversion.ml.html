@@ -171,33 +171,33 @@ open PatternMatchingElim.Pmfast
 open NameGenerator
 
 let rec expression_alpha_conversion env replacement_map = function
-  | <span data-count="350">P</span>MFConstant c -&gt; return @@ PMFConstant c
-  | <span data-count="1175">P</span>MFIdentifier v -&gt; replace_name_if_needed v replacement_map
+  | <span data-count="440">P</span>MFConstant c -&gt; return @@ PMFConstant c
+  | <span data-count="1436">P</span>MFIdentifier v -&gt; replace_name_if_needed v replacement_map
   | <span data-count="15">P</span>MFEmptyList -&gt; return @@ PMFEmptyList
-  | <span data-count="668">P</span>MFApplication (a1, a2, args) -&gt;
-    let* a1' = expression_alpha_conversio<span data-count="668">n</span> env replacement_map a1 in
-    <span data-count="668">l</span>et* a2' = expression_alpha_conversio<span data-count="668">n</span> env replacement_map a2 in
-    <span data-count="668">l</span>et* args' =
-      List.fold_righ<span data-count="668">t</span>
+  | <span data-count="805">P</span>MFApplication (a1, a2, args) -&gt;
+    let* a1' = expression_alpha_conversio<span data-count="805">n</span> env replacement_map a1 in
+    <span data-count="805">l</span>et* a2' = expression_alpha_conversio<span data-count="805">n</span> env replacement_map a2 in
+    <span data-count="805">l</span>et* args' =
+      List.fold_righ<span data-count="805">t</span>
         (fun arg acc -&gt;
-          <span data-count="391">l</span>et* acc = acc in
-          <span data-count="391">l</span>et* arg' = expression_alpha_conversio<span data-count="391">n</span> env replacement_map arg in
-          <span data-count="391">r</span>eturn (arg' :: acc))
+          <span data-count="497">l</span>et* acc = acc in
+          <span data-count="497">l</span>et* arg' = expression_alpha_conversio<span data-count="497">n</span> env replacement_map arg in
+          <span data-count="497">r</span>eturn (arg' :: acc))
         args
-        (retur<span data-count="668">n</span> [])
+        (retur<span data-count="805">n</span> [])
     in
-    <span data-count="668">r</span>eturn @@ PMFApplication (a1', a2', args')
-  | <span data-count="74">P</span>MFIfThenElse (c, b1, b2) -&gt;
-    let* c' = expression_alpha_conversio<span data-count="74">n</span> env replacement_map c in
-    <span data-count="74">l</span>et* b1' = expression_alpha_conversio<span data-count="74">n</span> env replacement_map b1 in
-    <span data-count="74">l</span>et* b2' =
+    <span data-count="805">r</span>eturn @@ PMFApplication (a1', a2', args')
+  | <span data-count="90">P</span>MFIfThenElse (c, b1, b2) -&gt;
+    let* c' = expression_alpha_conversio<span data-count="90">n</span> env replacement_map c in
+    <span data-count="90">l</span>et* b1' = expression_alpha_conversio<span data-count="90">n</span> env replacement_map b1 in
+    <span data-count="90">l</span>et* b2' =
       match b2 with
-      | <span data-count="74">S</span>ome b2 -&gt;
-        let* b2' = expression_alpha_conversio<span data-count="74">n</span> env replacement_map b2 in
-        <span data-count="74">r</span>eturn @@ Some b2'
+      | <span data-count="90">S</span>ome b2 -&gt;
+        let* b2' = expression_alpha_conversio<span data-count="90">n</span> env replacement_map b2 in
+        <span data-count="90">r</span>eturn @@ Some b2'
       | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> @@ None
     in
-    <span data-count="74">r</span>eturn @@ PMFIfThenElse (c', b1', b2')
+    <span data-count="90">r</span>eturn @@ PMFIfThenElse (c', b1', b2')
   | <span data-count="7">P</span>MFTuple (e1, e2, es) -&gt;
     let* e1' = expression_alpha_conversio<span data-count="7">n</span> env replacement_map e1 in
     <span data-count="7">l</span>et* e2' = expression_alpha_conversio<span data-count="7">n</span> env replacement_map e2 in
@@ -215,16 +215,16 @@ let rec expression_alpha_conversion env replacement_map = function
     let* l' = expression_alpha_conversio<span data-count="31">n</span> env replacement_map l in
     <span data-count="31">l</span>et* r' = expression_alpha_conversio<span data-count="31">n</span> env replacement_map r in
     <span data-count="31">r</span>eturn @@ PMFListConstructor (l', r')
-  | <span data-count="147">P</span>MFLetIn ((name, expr1), expr2) -&gt;
+  | <span data-count="175">P</span>MFLetIn ((name, expr1), expr2) -&gt;
     let* new_name, env, replacement_map' =
-      generate_new_name_if_neede<span data-count="147">d</span> name env replacement_map
+      generate_new_name_if_neede<span data-count="175">d</span> name env replacement_map
     in
-    <span data-count="147">l</span>et* expr1' = expression_alpha_conversio<span data-count="147">n</span> env replacement_map expr1 in
-    <span data-count="147">l</span>et* expr2' = expression_alpha_conversio<span data-count="147">n</span> env replacement_map' expr2 in
-    <span data-count="147">r</span>eturn @@ PMFLetIn ((new_name, expr1'), expr2')
-  | <span data-count="6">P</span>MFTyped (expr, typ) -&gt;
-    let* expr' = expression_alpha_conversio<span data-count="6">n</span> env replacement_map expr in
-    <span data-count="6">r</span>eturn @@ PMFTyped (expr', typ)
+    <span data-count="175">l</span>et* expr1' = expression_alpha_conversio<span data-count="175">n</span> env replacement_map expr1 in
+    <span data-count="175">l</span>et* expr2' = expression_alpha_conversio<span data-count="175">n</span> env replacement_map' expr2 in
+    <span data-count="175">r</span>eturn @@ PMFLetIn ((new_name, expr1'), expr2')
+  | <span data-count="8">P</span>MFTyped (expr, typ) -&gt;
+    let* expr' = expression_alpha_conversio<span data-count="8">n</span> env replacement_map expr in
+    <span data-count="8">r</span>eturn @@ PMFTyped (expr', typ)
 ;;
 </code></pre>
       </div>

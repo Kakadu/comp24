@@ -87,20 +87,20 @@ open PatternMatchingElim.CollectIdentifiers
 open ProgramToAnf
 
 let start_env program =
-  <span data-count="20">l</span>et start_identifiers =
+  <span data-count="31">l</span>et start_identifiers =
     List.fold_left
-      (fun acc var -&gt; <span data-count="400">I</span>dentifierSet.add (Id var) acc)
+      (fun acc var -&gt; <span data-count="713">I</span>dentifierSet.add (Id var) acc)
       IdentifierSet.empty
       Common.StartEnvironment.start_identifiers
   in
-  <span data-count="20">c</span>ollect_all_identifiers start_identifiers program
+  <span data-count="31">c</span>ollect_all_identifiers start_identifiers program
 ;;
 
 let run_anf_conversion_program program =
-  <span data-count="20">l</span>et first_state = 0 in
-  let m = program_to_anf (start_en<span data-count="20">v</span> program) program in
-  <span data-count="20">l</span>et result = run m first_state in
-  <span data-count="20">f</span>st (fs<span data-count="20">t</span> result)
+  <span data-count="31">l</span>et first_state = 0 in
+  let m = program_to_anf (start_en<span data-count="31">v</span> program) program in
+  <span data-count="31">l</span>et result = run m first_state in
+  <span data-count="31">f</span>st (fs<span data-count="31">t</span> result)
 ;;
 </code></pre>
       </div>

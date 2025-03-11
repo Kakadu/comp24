@@ -212,42 +212,42 @@ open IdentifierSubstitutor
 let rec transform_fun = function
   | <span data-count="3">E</span>Fun ((p1, ps1), EFun ((p2, ps2), body)) -&gt;
     transform_fun (EFun ((p1, ps1 @ (p2 :: ps2)), body))
-  | <span data-count="304">e</span> -&gt; e
+  | <span data-count="331">e</span> -&gt; e
 ;;
 
-let get_new_arg_name = NameCreator.get_new_nam<span data-count="116">e</span> "cc"
+let get_new_arg_name = NameCreator.get_new_nam<span data-count="127">e</span> "cc"
 
 let transform_let_in env = function
-  | <span data-count="245">E</span>LetIn (case, cases, expr) -&gt;
+  | <span data-count="271">E</span>LetIn (case, cases, expr) -&gt;
     let main_patterns_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
-    <span data-count="245">l</span>et patterns_to_update = IdentifierSet.empty in
+    <span data-count="271">l</span>et patterns_to_update = IdentifierSet.empty in
     let patterns_to_update =
       List.fold_left
         (fun acc (_, case_expr) -&gt;
-          <span data-count="260">l</span>et ce_free_vars = get_expr_free_vars case_expr in
-          <span data-count="260">l</span>et inner_expr_free_vars = get_expr_free_vars expr in
-          <span data-count="260">l</span>et predicate1 v = <span data-count="466">I</span>dentifierSet.mem v main_patterns_identifiers in
-          let predicate2 v = <span data-count="47">I</span>dentifierSet.mem v inner_expr_free_vars in
+          <span data-count="286">l</span>et ce_free_vars = get_expr_free_vars case_expr in
+          <span data-count="286">l</span>et inner_expr_free_vars = get_expr_free_vars expr in
+          <span data-count="286">l</span>et predicate1 v = <span data-count="520">I</span>dentifierSet.mem v main_patterns_identifiers in
+          let predicate2 v = <span data-count="53">I</span>dentifierSet.mem v inner_expr_free_vars in
           IdentifierSet.fold
             (fun v acc -&gt;
-              <span data-count="466">i</span>f predicate<span data-count="466">1</span> v &amp;&amp; <span data-count="47">p</span>redicate<span data-count="47">2</span> v then <span data-count="17">I</span>dentifierSet.add v acc else <span data-count="449">a</span>cc)
+              <span data-count="520">i</span>f predicate<span data-count="520">1</span> v &amp;&amp; <span data-count="53">p</span>redicate<span data-count="53">2</span> v then <span data-count="18">I</span>dentifierSet.add v acc else <span data-count="502">a</span>cc)
             ce_free_vars
             acc)
         patterns_to_update
         (case :: cases)
     in
-    <span data-count="245">l</span>et* updated_cases, replacement_map =
-      List.fold_lef<span data-count="245">t</span>
+    <span data-count="271">l</span>et* updated_cases, replacement_map =
+      List.fold_lef<span data-count="271">t</span>
         (fun acc (p, expr) -&gt;
-          <span data-count="260">l</span>et* acc_cases, acc_replacement_map = acc in
-          <span data-count="260">l</span>et update_pattern pattern =
-            <span data-count="260">l</span>et rec aux pattern acc_replacement_map =
-              <span data-count="316">m</span>atch pattern with
-              | <span data-count="158">P</span>Var (Id name) when IdentifierSet.me<span data-count="158">m</span> (Id name) patterns_to_update -&gt;
-                <span data-count="17">l</span>et* new_name = get_new_arg_nam<span data-count="17">e</span> env in
-                <span data-count="17">r</span>eturn
+          <span data-count="286">l</span>et* acc_cases, acc_replacement_map = acc in
+          <span data-count="286">l</span>et update_pattern pattern =
+            <span data-count="286">l</span>et rec aux pattern acc_replacement_map =
+              <span data-count="342">m</span>atch pattern with
+              | <span data-count="168">P</span>Var (Id name) when IdentifierSet.me<span data-count="168">m</span> (Id name) patterns_to_update -&gt;
+                <span data-count="18">l</span>et* new_name = get_new_arg_nam<span data-count="18">e</span> env in
+                <span data-count="18">r</span>eturn
                   ( PVar (Id new_name)
-                  , IdentifierMap.ad<span data-count="17">d</span> (Id name) (Id new_name) acc_replacement_map )
+                  , IdentifierMap.ad<span data-count="18">d</span> (Id name) (Id new_name) acc_replacement_map )
               | <span data-count="24">P</span>Tuple (p1, p2, ps) -&gt;
                 let* new_p1, map1 = au<span data-count="24">x</span> p1 acc_replacement_map in
                 <span data-count="24">l</span>et* new_p2, map2 = au<span data-count="24">x</span> p2 map1 in
@@ -267,18 +267,18 @@ let transform_let_in env = function
                 let* new_p1, map1 = au<span data-count="4">x</span> p1 acc_replacement_map in
                 <span data-count="4">l</span>et* new_p2, final_map = au<span data-count="4">x</span> p2 map1 in
                 <span data-count="4">r</span>eturn (PListConstructor (new_p1, new_p2), final_map)
-              | <span data-count="271">_</span> -&gt; return (pattern, acc_replacement_map)
+              | <span data-count="296">_</span> -&gt; return (pattern, acc_replacement_map)
             in
             aux pattern acc_replacement_map
           in
-          let* new_pattern, updated_map = update_patter<span data-count="260">n</span> p in
-          <span data-count="260">r</span>eturn ((new_pattern, expr) :: acc_cases, updated_map))
-        (retur<span data-count="245">n</span> ([], IdentifierMap.empty))
+          let* new_pattern, updated_map = update_patter<span data-count="286">n</span> p in
+          <span data-count="286">r</span>eturn ((new_pattern, expr) :: acc_cases, updated_map))
+        (retur<span data-count="271">n</span> ([], IdentifierMap.empty))
         (case :: cases)
     in
-    <span data-count="245">l</span>et updated_cases = List.rev updated_cases in
-    <span data-count="245">l</span>et updated_expr = substitute_identifiers replacement_map expr in
-    <span data-count="245">r</span>eturn @@ ELetIn (List.h<span data-count="245">d</span> updated_cases, List.t<span data-count="245">l</span> updated_cases, updated_expr)
+    <span data-count="271">l</span>et updated_cases = List.rev updated_cases in
+    <span data-count="271">l</span>et updated_expr = substitute_identifiers replacement_map expr in
+    <span data-count="271">r</span>eturn @@ ELetIn (List.h<span data-count="271">d</span> updated_cases, List.t<span data-count="271">l</span> updated_cases, updated_expr)
   | <span data-count="0">e</span>xpr -&gt; return expr
 ;;
 </code></pre>

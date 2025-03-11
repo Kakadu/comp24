@@ -49,6 +49,8 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -80,6 +82,8 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
 
@@ -105,7 +109,9 @@ let start_identifiers =
     ]
   in
   let unary_operations = [ "U-"; "U+"; "UNot" ] in
-  let stdlib_functions = [ "print_int"; "print_bool" ] in
+  let stdlib_functions =
+    [ "print_int"; "print_bool"; "print_string"; "print_char"; "check_cond" ]
+  in
   binary_operations @ unary_operations @ stdlib_functions
 ;;
 </code></pre>

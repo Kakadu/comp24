@@ -102,27 +102,27 @@ open LambdaLifting.Llast
 open PmfDeclaration
 
 let rec simplify_ordinary_let_in acc = function
-  | <span data-count="46">[</span>] -&gt; acc
-  | <span data-count="170">h</span>d :: tl -&gt;
+  | <span data-count="57">[</span>] -&gt; acc
+  | <span data-count="205">h</span>d :: tl -&gt;
     (match hd with
-     | <span data-count="36">L</span>DRecursive _ -&gt; simplify_ordinary_let_in (hd :: acc) tl
-     | <span data-count="134">L</span>DOrdinary (case, cases) -&gt;
+     | <span data-count="43">L</span>DRecursive _ -&gt; simplify_ordinary_let_in (hd :: acc) tl
+     | <span data-count="162">L</span>DOrdinary (case, cases) -&gt;
        simplify_ordinary_let_in
          (LDOrdinary (case, []) :: acc)
          (match cases with
-          | <span data-count="134">[</span>] -&gt; tl
+          | <span data-count="162">[</span>] -&gt; tl
           | <span data-count="0">h</span>d2 :: tl2 -&gt; LDOrdinary (hd2, tl2) :: tl))
 ;;
 
 let eliminate_pm_program start_env program =
-  <span data-count="46">l</span>et rec helper env = function
-    | <span data-count="46">[</span>] -&gt; return ([], env)
-    | <span data-count="170">h</span>d :: tl -&gt;
-      let* hd, env = eliminate_pm_declaratio<span data-count="170">n</span> env hd in
-      <span data-count="170">l</span>et* tl, env = helpe<span data-count="170">r</span> env tl in
-      <span data-count="170">r</span>eturn @@ (hd @ tl, env)
+  <span data-count="57">l</span>et rec helper env = function
+    | <span data-count="57">[</span>] -&gt; return ([], env)
+    | <span data-count="205">h</span>d :: tl -&gt;
+      let* hd, env = eliminate_pm_declaratio<span data-count="205">n</span> env hd in
+      <span data-count="205">l</span>et* tl, env = helpe<span data-count="205">r</span> env tl in
+      <span data-count="205">r</span>eturn @@ (hd @ tl, env)
   in
-  helper start_env (List.re<span data-count="46">v</span> (simplify_ordinary_let_i<span data-count="46">n</span> [] program))
+  helper start_env (List.re<span data-count="57">v</span> (simplify_ordinary_let_i<span data-count="57">n</span> [] program))
 ;;
 </code></pre>
       </div>

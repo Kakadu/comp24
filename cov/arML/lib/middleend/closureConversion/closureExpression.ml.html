@@ -626,31 +626,31 @@ open Common.IdentifierStructs
 open Common.IdentifierSearcher
 open Common.IdentifierSubstitutor
 
-let get_new_arg_name = Common.NameCreator.get_new_nam<span data-count="116">e</span> "cc"
+let get_new_arg_name = Common.NameCreator.get_new_nam<span data-count="127">e</span> "cc"
 
 let rec closure_expression env fv_map = function
-  | <span data-count="2087">E</span>Identifier _ as expr -&gt; closure_identifier env fv_map expr
-  | <span data-count="145">E</span>Fun _ as expr -&gt;
+  | <span data-count="2258">E</span>Identifier _ as expr -&gt; closure_identifier env fv_map expr
+  | <span data-count="156">E</span>Fun _ as expr -&gt;
     let* fun_closure, _ =
-      closure_fu<span data-count="145">n</span> true env fv_map (Common.FunctionTransformer.transform_fu<span data-count="145">n</span> expr)
+      closure_fu<span data-count="156">n</span> true env fv_map (Common.FunctionTransformer.transform_fu<span data-count="156">n</span> expr)
     in
-    <span data-count="145">r</span>eturn fun_closure
-  | <span data-count="245">E</span>LetIn (case, cases, expr) -&gt; closure_let_in env fv_map (case, cases) expr
+    <span data-count="156">r</span>eturn fun_closure
+  | <span data-count="271">E</span>LetIn (case, cases, expr) -&gt; closure_let_in env fv_map (case, cases) expr
   | <span data-count="28">E</span>RecLetIn (case, cases, expr) -&gt;
     closure_rec_let_in env fv_map (case, cases) expr IdentifierMap.empty
-  | <span data-count="1088">E</span>Application (func, arg1, args) -&gt; closure_application env fv_map (func, arg1, args)
-  | <span data-count="73">E</span>IfThenElse (cond, b1, b2) -&gt; closure_if_then_else env fv_map (cond, b1, b2)
+  | <span data-count="1185">E</span>Application (func, arg1, args) -&gt; closure_application env fv_map (func, arg1, args)
+  | <span data-count="83">E</span>IfThenElse (cond, b1, b2) -&gt; closure_if_then_else env fv_map (cond, b1, b2)
   | <span data-count="64">E</span>Tuple (e1, e2, es) -&gt; closure_tuple env fv_map (e1, e2, es)
   | <span data-count="94">E</span>ListConstructor (l, r) -&gt; closure_list_constructor env fv_map (l, r)
   | <span data-count="6">E</span>Function (case, cases) -&gt; closure_function env fv_map (case, cases)
   | <span data-count="41">E</span>MatchWith (expr, case, cases) -&gt; closure_match_with env fv_map expr (case, cases)
-  | <span data-count="18">E</span>Typed (e, typ) -&gt; closure_typed_expression env fv_map (e, typ)
-  | <span data-count="737">e</span>xpr -&gt; return expr
+  | <span data-count="20">E</span>Typed (e, typ) -&gt; closure_typed_expression env fv_map (e, typ)
+  | <span data-count="810">e</span>xpr -&gt; return expr
 
 and closure_identifier env fv_map = function
-  | <span data-count="2087">E</span>Identifier id as expr -&gt;
+  | <span data-count="2258">E</span>Identifier id as expr -&gt;
     (match IdentifierMap.find_opt id fv_map with
-     | <span data-count="1922">N</span>one -&gt; return expr
+     | <span data-count="2093">N</span>one -&gt; return expr
      | <span data-count="165">S</span>ome free_vars -&gt;
        let args =
          IdentifierSet.fold (fun var acc -&gt; <span data-count="54">E</span>Identifier var :: acc) free_vars []
@@ -662,46 +662,46 @@ and closure_identifier env fv_map = function
 
 and closure_fun application_flag env fv_map = function
   (* If [application_flag] is true, it adds application with new arguments around the new function *)
-  | <span data-count="404">E</span>Fun ((p, ps), body) as expr -&gt;
+  | <span data-count="431">E</span>Fun ((p, ps), body) as expr -&gt;
     let patters = p :: ps in
     let free_vars = get_expr_free_vars expr in
-    <span data-count="404">l</span>et free_vars = IdentifierSet.diff free_vars env in
-    <span data-count="404">l</span>et pattern_identifiers = get_pattern_identifiers_from_list patters in
-    <span data-count="404">l</span>et fv_map = remove_keys_from_map pattern_identifiers fv_map in
-    <span data-count="404">l</span>et* new_args, replacement_map =
-      IdentifierSet.fol<span data-count="404">d</span>
+    <span data-count="431">l</span>et free_vars = IdentifierSet.diff free_vars env in
+    <span data-count="431">l</span>et pattern_identifiers = get_pattern_identifiers_from_list patters in
+    <span data-count="431">l</span>et fv_map = remove_keys_from_map pattern_identifiers fv_map in
+    <span data-count="431">l</span>et* new_args, replacement_map =
+      IdentifierSet.fol<span data-count="431">d</span>
         (fun var acc -&gt;
-          <span data-count="139">l</span>et* args, map = acc in
-          <span data-count="139">l</span>et patterns_identifiers =
+          <span data-count="145">l</span>et* args, map = acc in
+          <span data-count="145">l</span>et patterns_identifiers =
             List.fold_left
-              (fun acc p -&gt; <span data-count="157">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="157">s</span> p))
+              (fun acc p -&gt; <span data-count="163">I</span>dentifierSet.union acc (get_pattern_identifier<span data-count="163">s</span> p))
               IdentifierSet.empty
               patters
           in
-          <span data-count="139">l</span>et common_env = get_expr_free_vars expr in
-          <span data-count="139">l</span>et common_env = IdentifierSet.union common_env patterns_identifiers in
-          <span data-count="139">l</span>et common_env = IdentifierSet.union common_env env in
-          <span data-count="139">l</span>et* new_name = get_new_arg_nam<span data-count="139">e</span> common_env in
-          <span data-count="139">l</span>et new_id = Id new_name in
-          return (IdentifierSet.ad<span data-count="139">d</span> new_id args, IdentifierMap.ad<span data-count="139">d</span> var new_id map))
+          <span data-count="145">l</span>et common_env = get_expr_free_vars expr in
+          <span data-count="145">l</span>et common_env = IdentifierSet.union common_env patterns_identifiers in
+          <span data-count="145">l</span>et common_env = IdentifierSet.union common_env env in
+          <span data-count="145">l</span>et* new_name = get_new_arg_nam<span data-count="145">e</span> common_env in
+          <span data-count="145">l</span>et new_id = Id new_name in
+          return (IdentifierSet.ad<span data-count="145">d</span> new_id args, IdentifierMap.ad<span data-count="145">d</span> var new_id map))
         free_vars
-        (retur<span data-count="404">n</span> (IdentifierSet.empty, IdentifierMap.empty))
+        (retur<span data-count="431">n</span> (IdentifierSet.empty, IdentifierMap.empty))
     in
-    <span data-count="404">l</span>et old_free_vars =
-      IdentifierSet.fold (fun var acc -&gt; <span data-count="139">E</span>Identifier var :: acc) free_vars []
+    <span data-count="431">l</span>et old_free_vars =
+      IdentifierSet.fold (fun var acc -&gt; <span data-count="145">E</span>Identifier var :: acc) free_vars []
     in
-    <span data-count="404">l</span>et closed_vars =
-      IdentifierSet.fold (fun var acc -&gt; <span data-count="139">P</span>Var var :: acc) new_args patters
+    <span data-count="431">l</span>et closed_vars =
+      IdentifierSet.fold (fun var acc -&gt; <span data-count="145">P</span>Var var :: acc) new_args patters
     in
-    <span data-count="404">l</span>et* closure_body = closure_expressio<span data-count="404">n</span> env fv_map body in
-    <span data-count="404">l</span>et updated_body = substitute_identifiers replacement_map closure_body in
-    <span data-count="404">(</span>match closed_vars with
+    <span data-count="431">l</span>et* closure_body = closure_expressio<span data-count="431">n</span> env fv_map body in
+    <span data-count="431">l</span>et updated_body = substitute_identifiers replacement_map closure_body in
+    <span data-count="431">(</span>match closed_vars with
      | <span data-count="0">[</span>] -&gt; return (expr, replacement_map)
-     | <span data-count="404">h</span>ead :: tail -&gt;
+     | <span data-count="431">h</span>ead :: tail -&gt;
        (match old_free_vars, application_flag with
-        | <span data-count="303">[</span>], _ | <span data-count="33">_</span>, false -&gt;
+        | <span data-count="327">[</span>], _ | <span data-count="33">_</span>, false -&gt;
           return @@ (EFun ((head, tail), updated_body), replacement_map)
-        | <span data-count="68">h</span>d :: tl, true -&gt;
+        | <span data-count="71">h</span>d :: tl, true -&gt;
           return
           @@ (EApplication (EFun ((head, tail), updated_body), hd, tl), replacement_map)))
   | <span data-count="0">e</span>xpr -&gt;
@@ -709,32 +709,32 @@ and closure_fun application_flag env fv_map = function
     <span data-count="0">r</span>eturn @@ (closure_expr, IdentifierMap.empty)
 
 and closure_application env fv_map (func, arg1, args) =
-  <span data-count="1088">l</span>et* func_closure = closure_expressio<span data-count="1088">n</span> env fv_map func in
-  <span data-count="1088">l</span>et* arg1_closure = closure_expressio<span data-count="1088">n</span> env fv_map arg1 in
-  <span data-count="1088">l</span>et* args_closure =
-    List.fold_lef<span data-count="1088">t</span>
+  <span data-count="1185">l</span>et* func_closure = closure_expressio<span data-count="1185">n</span> env fv_map func in
+  <span data-count="1185">l</span>et* arg1_closure = closure_expressio<span data-count="1185">n</span> env fv_map arg1 in
+  <span data-count="1185">l</span>et* args_closure =
+    List.fold_lef<span data-count="1185">t</span>
       (fun acc arg -&gt;
-        <span data-count="654">l</span>et* acc = acc in
-        <span data-count="654">l</span>et* closed_arg = closure_expressio<span data-count="654">n</span> env fv_map arg in
-        <span data-count="654">l</span>et new_acc = closed_arg :: acc in
+        <span data-count="728">l</span>et* acc = acc in
+        <span data-count="728">l</span>et* closed_arg = closure_expressio<span data-count="728">n</span> env fv_map arg in
+        <span data-count="728">l</span>et new_acc = closed_arg :: acc in
         return new_acc)
-      (retur<span data-count="1088">n</span> [])
+      (retur<span data-count="1185">n</span> [])
       args
   in
-  <span data-count="1088">l</span>et args_closure = List.rev args_closure in
-  <span data-count="1088">r</span>eturn @@ EApplication (func_closure, arg1_closure, args_closure)
+  <span data-count="1185">l</span>et args_closure = List.rev args_closure in
+  <span data-count="1185">r</span>eturn @@ EApplication (func_closure, arg1_closure, args_closure)
 
 and closure_if_then_else env fv_map (cond, b1, b2) =
-  <span data-count="73">l</span>et* closure_cond = closure_expressio<span data-count="73">n</span> env fv_map cond in
-  <span data-count="73">l</span>et* closure_b1 = closure_expressio<span data-count="73">n</span> env fv_map b1 in
-  <span data-count="73">l</span>et* closure_b2 =
+  <span data-count="83">l</span>et* closure_cond = closure_expressio<span data-count="83">n</span> env fv_map cond in
+  <span data-count="83">l</span>et* closure_b1 = closure_expressio<span data-count="83">n</span> env fv_map b1 in
+  <span data-count="83">l</span>et* closure_b2 =
     match b2 with
-    | <span data-count="73">S</span>ome expr -&gt;
-      let* closure_b2 = closure_expressio<span data-count="73">n</span> env fv_map expr in
-      <span data-count="73">r</span>eturn @@ Some closure_b2
+    | <span data-count="83">S</span>ome expr -&gt;
+      let* closure_b2 = closure_expressio<span data-count="83">n</span> env fv_map expr in
+      <span data-count="83">r</span>eturn @@ Some closure_b2
     | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> None
   in
-  <span data-count="73">r</span>eturn @@ EIfThenElse (closure_cond, closure_b1, closure_b2)
+  <span data-count="83">r</span>eturn @@ EIfThenElse (closure_cond, closure_b1, closure_b2)
 
 and closure_tuple env fv_map (e1, e2, es) =
   <span data-count="64">l</span>et* e1 = closure_expressio<span data-count="64">n</span> env fv_map e1 in
@@ -797,47 +797,47 @@ and closure_function env fv_map (case, cases) =
   closure_expression env fv_map new_expr
 
 and closure_typed_expression env fv_map (e, typ) =
-  <span data-count="18">l</span>et* closure_e = closure_expressio<span data-count="18">n</span> env fv_map e in
-  <span data-count="18">r</span>eturn @@ ETyped (closure_e, typ)
+  <span data-count="20">l</span>et* closure_e = closure_expressio<span data-count="20">n</span> env fv_map e in
+  <span data-count="20">r</span>eturn @@ ETyped (closure_e, typ)
 
 and closure_let_in env fv_map (case, cases) expr =
-  <span data-count="245">l</span>et pattern_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
-  <span data-count="245">l</span>et env_for_decl_transform = IdentifierSet.union env pattern_identifiers in
-  <span data-count="245">l</span>et* transformed_decl =
-    Common.FunctionTransformer.transform_let_i<span data-count="245">n</span>
+  <span data-count="271">l</span>et pattern_identifiers = get_pattern_identifiers_from_cases (case :: cases) in
+  <span data-count="271">l</span>et env_for_decl_transform = IdentifierSet.union env pattern_identifiers in
+  <span data-count="271">l</span>et* transformed_decl =
+    Common.FunctionTransformer.transform_let_i<span data-count="271">n</span>
       env_for_decl_transform
       (ELetIn (case, cases, expr))
   in
-  <span data-count="245">m</span>atch transformed_decl with
-  | <span data-count="245">E</span>LetIn (case, cases, expr) -&gt;
+  <span data-count="271">m</span>atch transformed_decl with
+  | <span data-count="271">E</span>LetIn (case, cases, expr) -&gt;
     let cases = case :: cases in
     let updated_fv_map =
       List.fold_left
         (fun acc (p, expr) -&gt;
-          <span data-count="260">l</span>et free_vars = IdentifierSet.diff (get_expr_free_var<span data-count="260">s</span> expr) env in
-          <span data-count="260">m</span>atch p, expr with
+          <span data-count="286">l</span>et free_vars = IdentifierSet.diff (get_expr_free_var<span data-count="286">s</span> expr) env in
+          <span data-count="286">m</span>atch p, expr with
           | <span data-count="41">P</span>Var id, EFun _ -&gt; IdentifierMap.add id free_vars acc
-          | <span data-count="219">_</span> -&gt; acc)
+          | <span data-count="245">_</span> -&gt; acc)
         fv_map
         cases
     in
-    <span data-count="245">l</span>et* closed_cases =
-      List.fold_lef<span data-count="245">t</span>
+    <span data-count="271">l</span>et* closed_cases =
+      List.fold_lef<span data-count="271">t</span>
         (fun acc (p, expr) -&gt;
-          <span data-count="260">l</span>et* acc = acc in
-          <span data-count="260">m</span>atch expr with
+          <span data-count="286">l</span>et* acc = acc in
+          <span data-count="286">m</span>atch expr with
           | <span data-count="41">E</span>Fun _ -&gt;
             let* closed_expr, _ = closure_fu<span data-count="41">n</span> false env fv_map expr in
             <span data-count="41">r</span>eturn ((p, closed_expr) :: acc)
-          | <span data-count="219">_</span> -&gt;
-            let* closed_expr = closure_expressio<span data-count="219">n</span> env fv_map expr in
-            <span data-count="219">r</span>eturn ((p, closed_expr) :: acc))
-        (retur<span data-count="245">n</span> [])
+          | <span data-count="245">_</span> -&gt;
+            let* closed_expr = closure_expressio<span data-count="245">n</span> env fv_map expr in
+            <span data-count="245">r</span>eturn ((p, closed_expr) :: acc))
+        (retur<span data-count="271">n</span> [])
         cases
     in
-    <span data-count="245">l</span>et closed_cases = List.rev closed_cases in
-    <span data-count="245">l</span>et* closed_body = closure_expressio<span data-count="245">n</span> env updated_fv_map expr in
-    <span data-count="245">r</span>eturn @@ ELetIn (List.h<span data-count="245">d</span> closed_cases, List.t<span data-count="245">l</span> closed_cases, closed_body)
+    <span data-count="271">l</span>et closed_cases = List.rev closed_cases in
+    <span data-count="271">l</span>et* closed_body = closure_expressio<span data-count="271">n</span> env updated_fv_map expr in
+    <span data-count="271">r</span>eturn @@ ELetIn (List.h<span data-count="271">d</span> closed_cases, List.t<span data-count="271">l</span> closed_cases, closed_body)
   | <span data-count="0">e</span>xpr -&gt; return expr
 
 and closure_rec_let_in env fv_map (case, cases) expr previous_replacement_maps =

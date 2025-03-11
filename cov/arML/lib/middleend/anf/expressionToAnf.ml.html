@@ -322,63 +322,63 @@ open Ast.AbstractSyntaxTree
 open PatternMatchingElim.Pmfast
 open Anftree
 
-let get_new_anf_name = Common.NameCreator.get_new_nam<span data-count="116">e</span> "i"
+let get_new_anf_name = Common.NameCreator.get_new_nam<span data-count="127">e</span> "i"
 
 let rec expression_to_complex env = function
-  | <span data-count="20">P</span>MFConstant c -&gt; return @@ (CAtom (IConstant c), [], env)
-  | <span data-count="20">P</span>MFIdentifier i -&gt; return @@ (CAtom (IIdentifier i), [], env)
+  | <span data-count="34">P</span>MFConstant c -&gt; return @@ (CAtom (IConstant c), [], env)
+  | <span data-count="30">P</span>MFIdentifier i -&gt; return @@ (CAtom (IIdentifier i), [], env)
   | <span data-count="0">P</span>MFEmptyList -&gt; return @@ (CAtom IEmptyList, [], env)
-  | <span data-count="52">P</span>MFLetIn ((name, expr1), expr2) -&gt;
+  | <span data-count="78">P</span>MFLetIn ((name, expr1), expr2) -&gt;
     let extended_env = IdentifierSet.add name env in
-    <span data-count="52">l</span>et* expr1', lets_in1, env1 = expression_to_comple<span data-count="52">x</span> extended_env expr1 in
-    <span data-count="52">l</span>et* expr2', lets_in2, env2 = expression_to_comple<span data-count="52">x</span> env1 expr2 in
-    <span data-count="52">l</span>et lets_in3 = [ name, expr1' ] in
+    <span data-count="78">l</span>et* expr1', lets_in1, env1 = expression_to_comple<span data-count="78">x</span> extended_env expr1 in
+    <span data-count="78">l</span>et* expr2', lets_in2, env2 = expression_to_comple<span data-count="78">x</span> env1 expr2 in
+    <span data-count="78">l</span>et lets_in3 = [ name, expr1' ] in
     let final_lets_in = List.concat [ lets_in1; lets_in3; lets_in2 ] in
-    <span data-count="52">r</span>eturn @@ (expr2', final_lets_in, env2)
-  | <span data-count="180">P</span>MFApplication (func, arg, args) -&gt;
+    <span data-count="78">r</span>eturn @@ (expr2', final_lets_in, env2)
+  | <span data-count="280">P</span>MFApplication (func, arg, args) -&gt;
     let* args, lets_in, env =
-      List.fold_righ<span data-count="180">t</span>
+      List.fold_righ<span data-count="280">t</span>
         (fun arg acc -&gt;
-          <span data-count="504">l</span>et* arg_acc, lets_in_acc, env_acc = acc in
-          <span data-count="504">m</span>atch arg with
-          | <span data-count="120">P</span>MFConstant c -&gt; return @@ (IConstant c :: arg_acc, lets_in_acc, env_acc)
-          | <span data-count="306">P</span>MFIdentifier v -&gt; return @@ (IIdentifier v :: arg_acc, lets_in_acc, env_acc)
-          | <span data-count="78">_</span> -&gt;
-            let* new_name = get_new_anf_nam<span data-count="78">e</span> env_acc in
-            <span data-count="78">l</span>et new_name = Id new_name in
+          <span data-count="781">l</span>et* arg_acc, lets_in_acc, env_acc = acc in
+          <span data-count="781">m</span>atch arg with
+          | <span data-count="179">P</span>MFConstant c -&gt; return @@ (IConstant c :: arg_acc, lets_in_acc, env_acc)
+          | <span data-count="482">P</span>MFIdentifier v -&gt; return @@ (IIdentifier v :: arg_acc, lets_in_acc, env_acc)
+          | <span data-count="120">_</span> -&gt;
+            let* new_name = get_new_anf_nam<span data-count="120">e</span> env_acc in
+            <span data-count="120">l</span>et new_name = Id new_name in
             let env_acc = IdentifierSet.add new_name env_acc in
-            <span data-count="78">l</span>et* arg', lets_in', env' = expression_to_comple<span data-count="78">x</span> env_acc arg in
-            <span data-count="78">l</span>et new_lets_in = [ new_name, arg' ] in
+            <span data-count="120">l</span>et* arg', lets_in', env' = expression_to_comple<span data-count="120">x</span> env_acc arg in
+            <span data-count="120">l</span>et new_lets_in = [ new_name, arg' ] in
             let final_lets_in = List.concat [ lets_in'; new_lets_in; lets_in_acc ] in
-            <span data-count="78">l</span>et new_atom = IIdentifier new_name in
+            <span data-count="120">l</span>et new_atom = IIdentifier new_name in
             return (new_atom :: arg_acc, final_lets_in, env'))
         (func :: arg :: args)
-        (retur<span data-count="180">n</span> ([], [], env))
+        (retur<span data-count="280">n</span> ([], [], env))
     in
-    <span data-count="180">(</span>match args with
-     | <span data-count="180">h</span>d :: md :: tl -&gt; return @@ (CApplication (hd, md, tl), lets_in, env)
+    <span data-count="280">(</span>match args with
+     | <span data-count="280">h</span>d :: md :: tl -&gt; return @@ (CApplication (hd, md, tl), lets_in, env)
      | _ -&gt; assert false)
-  | <span data-count="14">P</span>MFIfThenElse (c, b1, b2) -&gt;
-    let* b1', env = expression_to_an<span data-count="14">f</span> env b1 in
-    <span data-count="14">l</span>et* b2', env =
+  | <span data-count="24">P</span>MFIfThenElse (c, b1, b2) -&gt;
+    let* b1', env = expression_to_an<span data-count="24">f</span> env b1 in
+    <span data-count="24">l</span>et* b2', env =
       match b2 with
-      | <span data-count="14">S</span>ome b2 -&gt; expression_to_an<span data-count="14">f</span> env b2
+      | <span data-count="24">S</span>ome b2 -&gt; expression_to_an<span data-count="24">f</span> env b2
       | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> @@ (AComplex (CAtom (IConstant CUnit)), env)
     in
-    <span data-count="14">l</span>et* c', lets_in, env =
+    <span data-count="24">l</span>et* c', lets_in, env =
       match c with
       | <span data-count="0">P</span>MFConstant c -&gt; retur<span data-count="0">n</span> (IConstant c, [], env)
-      | <span data-count="4">P</span>MFIdentifier v -&gt; retur<span data-count="4">n</span> (IIdentifier v, [], env)
-      | <span data-count="10">_</span> -&gt;
-        let* new_name = get_new_anf_nam<span data-count="10">e</span> env in
-        <span data-count="10">l</span>et new_name = Id new_name in
+      | <span data-count="6">P</span>MFIdentifier v -&gt; retur<span data-count="6">n</span> (IIdentifier v, [], env)
+      | <span data-count="18">_</span> -&gt;
+        let* new_name = get_new_anf_nam<span data-count="18">e</span> env in
+        <span data-count="18">l</span>et new_name = Id new_name in
         let env = IdentifierSet.add new_name env in
-        <span data-count="10">l</span>et* c', lets_in, env = expression_to_comple<span data-count="10">x</span> env c in
-        <span data-count="10">l</span>et new_lets_in = [ new_name, c' ] in
+        <span data-count="18">l</span>et* c', lets_in, env = expression_to_comple<span data-count="18">x</span> env c in
+        <span data-count="18">l</span>et new_lets_in = [ new_name, c' ] in
         let final_lets_in = List.concat [ lets_in; new_lets_in ] in
-        <span data-count="10">r</span>eturn @@ (IIdentifier new_name, final_lets_in, env)
+        <span data-count="18">r</span>eturn @@ (IIdentifier new_name, final_lets_in, env)
     in
-    <span data-count="14">r</span>eturn @@ (CIfThenElse (c', b1', b2'), lets_in, env)
+    <span data-count="24">r</span>eturn @@ (CIfThenElse (c', b1', b2'), lets_in, env)
   | <span data-count="0">P</span>MFListConstructor (l, r) -&gt;
     let convert_to_immut c env =
       <span data-count="0">m</span>atch c with
@@ -425,22 +425,22 @@ let rec expression_to_complex env = function
     <span data-count="2">l</span>et lets_in3 = List.concat lets_in3 in
     <span data-count="2">l</span>et final_lets_in = List.concat [ lets_in1; lets_in2; lets_in3 ] in
     <span data-count="2">r</span>eturn @@ (CAtom (ITuple (e1', e2', e3')), final_lets_in, env)
-  | <span data-count="4">P</span>MFTyped (e, t) -&gt;
-    let* e', lets_in, env = expression_to_comple<span data-count="4">x</span> env e in
-    <span data-count="4">r</span>eturn @@ (CTyped (e', t), lets_in, env)
+  | <span data-count="6">P</span>MFTyped (e, t) -&gt;
+    let* e', lets_in, env = expression_to_comple<span data-count="6">x</span> env e in
+    <span data-count="6">r</span>eturn @@ (CTyped (e', t), lets_in, env)
 
 and expression_to_anf env expr =
-  <span data-count="92">l</span>et* expr', lets_in, env' = expression_to_comple<span data-count="92">x</span> env expr in
-  <span data-count="92">l</span>et* expr'' =
-    List.fold_righ<span data-count="92">t</span>
+  <span data-count="150">l</span>et* expr', lets_in, env' = expression_to_comple<span data-count="150">x</span> env expr in
+  <span data-count="150">l</span>et* expr'' =
+    List.fold_righ<span data-count="150">t</span>
       (fun case acc -&gt;
-        <span data-count="144">l</span>et* acc = acc in
-        <span data-count="144">l</span>et name, expr = case in
+        <span data-count="220">l</span>et* acc = acc in
+        <span data-count="220">l</span>et name, expr = case in
         return @@ ALetIn (name, expr, acc))
       lets_in
-      (retur<span data-count="92">n</span> (AComplex expr'))
+      (retur<span data-count="150">n</span> (AComplex expr'))
   in
-  <span data-count="92">r</span>eturn (expr'', env')
+  <span data-count="150">r</span>eturn (expr'', env')
 ;;
 </code></pre>
       </div>

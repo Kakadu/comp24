@@ -204,7 +204,7 @@ open TypeErrors
    the second is what it should be replaced with. *)
 type t = (int, typ, Base.Int.comparator_witness) Base.Map.t
 
-let empty = Base.Map.empt<span data-count="116">y</span> (module Base.Int)
+let empty = Base.Map.empt<span data-count="127">y</span> (module Base.Int)
 
 let singleton k v =
   <span data-count="20293">i</span>f OccursChecker.occurs_check k v
@@ -217,15 +217,15 @@ let remove sub k = <span data-count="42345">B</span>ase.Map.remove sub k
 
 (* Replace all type variables in a type with values ​​from the substitution. *)
 let apply sub =
-  <span data-count="165300">l</span>et rec helper = function
+  <span data-count="170384">l</span>et rec helper = function
     | <span data-count="112461">T</span>Var n -&gt;
       (match find sub n with
        | <span data-count="106806">N</span>one -&gt; TVar n
        | <span data-count="5655">S</span>ome v -&gt; v)
-    | <span data-count="213255">T</span>Arr (left, right) -&gt; TArr (helpe<span data-count="213255">r</span> left, helpe<span data-count="213255">r</span> right)
+    | <span data-count="218339">T</span>Arr (left, right) -&gt; TArr (helpe<span data-count="218339">r</span> left, helpe<span data-count="218339">r</span> right)
     | <span data-count="19371">T</span>List typ -&gt; TList (helpe<span data-count="19371">r</span> typ)
     | <span data-count="4078">T</span>Tuple t_list -&gt; TTuple (Base.List.ma<span data-count="4078">p</span> t_list ~f:helper)
-    | <span data-count="270261">o</span>ther -&gt; other
+    | <span data-count="280429">o</span>ther -&gt; other
   in
   helper
 ;;

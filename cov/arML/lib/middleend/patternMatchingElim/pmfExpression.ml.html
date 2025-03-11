@@ -281,36 +281,36 @@ open GenerateDeclarationsFromCase
 open GenerateConditionsFromCase
 open PmfCase
 
-let get_new_pmf_name = Common.NameCreator.get_new_nam<span data-count="116">e</span> "pmf"
+let get_new_pmf_name = Common.NameCreator.get_new_nam<span data-count="127">e</span> "pmf"
 
 let rec eliminate_pm_expression env = function
-  | <span data-count="354">L</span>EConstant c -&gt; return @@ (PMFConstant c, env)
-  | <span data-count="936">L</span>EIdentifier id -&gt; return @@ (PMFIdentifier id, env)
+  | <span data-count="427">L</span>EConstant c -&gt; return @@ (PMFConstant c, env)
+  | <span data-count="1124">L</span>EIdentifier id -&gt; return @@ (PMFIdentifier id, env)
   | <span data-count="18">L</span>EEmptyList -&gt; return @@ (PMFEmptyList, env)
-  | <span data-count="494">L</span>EApplication (func, arg, args) -&gt;
-    let* func', env = eliminate_pm_expressio<span data-count="494">n</span> env func in
-    <span data-count="494">l</span>et* arg', env = eliminate_pm_expressio<span data-count="494">n</span> env arg in
-    <span data-count="494">l</span>et* args', env =
-      List.fold_righ<span data-count="494">t</span>
+  | <span data-count="594">L</span>EApplication (func, arg, args) -&gt;
+    let* func', env = eliminate_pm_expressio<span data-count="594">n</span> env func in
+    <span data-count="594">l</span>et* arg', env = eliminate_pm_expressio<span data-count="594">n</span> env arg in
+    <span data-count="594">l</span>et* args', env =
+      List.fold_righ<span data-count="594">t</span>
         (fun arg acc -&gt;
-          <span data-count="348">l</span>et* acc, env = acc in
-          <span data-count="348">l</span>et* new_arg, env = eliminate_pm_expressio<span data-count="348">n</span> env arg in
-          <span data-count="348">r</span>eturn (new_arg :: acc, env))
+          <span data-count="425">l</span>et* acc, env = acc in
+          <span data-count="425">l</span>et* new_arg, env = eliminate_pm_expressio<span data-count="425">n</span> env arg in
+          <span data-count="425">r</span>eturn (new_arg :: acc, env))
         args
-        (retur<span data-count="494">n</span> ([], env))
+        (retur<span data-count="594">n</span> ([], env))
     in
-    <span data-count="494">r</span>eturn @@ (PMFApplication (func', arg', args'), env)
-  | <span data-count="38">L</span>EIfThenElse (c, b1, b2) -&gt;
-    let* c', env = eliminate_pm_expressio<span data-count="38">n</span> env c in
-    <span data-count="38">l</span>et* b1', env = eliminate_pm_expressio<span data-count="38">n</span> env b1 in
-    <span data-count="38">l</span>et* b2', env =
+    <span data-count="594">r</span>eturn @@ (PMFApplication (func', arg', args'), env)
+  | <span data-count="48">L</span>EIfThenElse (c, b1, b2) -&gt;
+    let* c', env = eliminate_pm_expressio<span data-count="48">n</span> env c in
+    <span data-count="48">l</span>et* b1', env = eliminate_pm_expressio<span data-count="48">n</span> env b1 in
+    <span data-count="48">l</span>et* b2', env =
       match b2 with
-      | <span data-count="38">S</span>ome expr -&gt;
-        let* b2', env = eliminate_pm_expressio<span data-count="38">n</span> env expr in
-        <span data-count="38">r</span>eturn @@ (Some b2', env)
+      | <span data-count="48">S</span>ome expr -&gt;
+        let* b2', env = eliminate_pm_expressio<span data-count="48">n</span> env expr in
+        <span data-count="48">r</span>eturn @@ (Some b2', env)
       | <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> (None, env)
     in
-    <span data-count="38">r</span>eturn @@ (PMFIfThenElse (c', b1', b2'), env)
+    <span data-count="48">r</span>eturn @@ (PMFIfThenElse (c', b1', b2'), env)
   | <span data-count="10">L</span>ETuple (e1, e2, es) -&gt;
     let* e1', env = eliminate_pm_expressio<span data-count="10">n</span> env e1 in
     <span data-count="10">l</span>et* e2', env = eliminate_pm_expressio<span data-count="10">n</span> env e2 in
@@ -328,16 +328,16 @@ let rec eliminate_pm_expression env = function
     let* l', env = eliminate_pm_expressio<span data-count="40">n</span> env l in
     <span data-count="40">l</span>et* r', env = eliminate_pm_expressio<span data-count="40">n</span> env r in
     <span data-count="40">r</span>eturn @@ (PMFListConstructor (l', r'), env)
-  | <span data-count="8">L</span>ETyped (e, t) -&gt;
-    let* e', env = eliminate_pm_expressio<span data-count="8">n</span> env e in
-    <span data-count="8">r</span>eturn @@ (PMFTyped (e', t), env)
-  | <span data-count="128">L</span>ELetIn ((p, e), [], body) -&gt;
-    let* e', env = eliminate_pm_expressio<span data-count="128">n</span> env e in
-    <span data-count="128">l</span>et* body', env = eliminate_pm_expressio<span data-count="128">n</span> env body in
-    <span data-count="128">l</span>et branches = body', pattern_matching_failure_flag in
+  | <span data-count="10">L</span>ETyped (e, t) -&gt;
+    let* e', env = eliminate_pm_expressio<span data-count="10">n</span> env e in
+    <span data-count="10">r</span>eturn @@ (PMFTyped (e', t), env)
+  | <span data-count="154">L</span>ELetIn ((p, e), [], body) -&gt;
+    let* e', env = eliminate_pm_expressio<span data-count="154">n</span> env e in
+    <span data-count="154">l</span>et* body', env = eliminate_pm_expressio<span data-count="154">n</span> env body in
+    <span data-count="154">l</span>et branches = body', pattern_matching_failure_flag in
     (match e', p with
-     | <span data-count="40">e</span>xpr, PVar name -&gt; return @@ (PMFLetIn ((name, expr), body'), env)
-     | <span data-count="80">e</span>xpr, PConst CUnit -&gt; return @@ (PMFLetIn ((Id "()", expr), body'), env)
+     | <span data-count="50">e</span>xpr, PVar name -&gt; return @@ (PMFLetIn ((name, expr), body'), env)
+     | <span data-count="96">e</span>xpr, PConst CUnit -&gt; return @@ (PMFLetIn ((Id "()", expr), body'), env)
      | <span data-count="8">P</span>MFIdentifier _, _ -&gt; return @@ (eliminate_pm_cas<span data-count="8">e</span> (p, e') branches, env)
      | <span data-count="0">_</span> -&gt;
        let* name = get_new_pmf_nam<span data-count="0">e</span> env in

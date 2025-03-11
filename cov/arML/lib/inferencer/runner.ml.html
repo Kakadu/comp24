@@ -63,23 +63,25 @@
 <a id="L39"></a><span class="visited"> </span>
 <a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span > </span>
-<a id="L43"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
-<a id="L46"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
 <a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="visited"> </span>
-<a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span > </span>
-<a id="L54"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
-<a id="L58"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -142,6 +144,8 @@
 <a href="#L56">56</a>
 <a href="#L57">57</a>
 <a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, raf-nr and ksenmel *)
 
@@ -154,47 +158,49 @@ open InferProgram
 
 let start_env =
   let binary_ops =
-    [ "( + )", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "( - )", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "( * )", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "( / )", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "( % )", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( || )", TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( = )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( == )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( &gt; )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( &lt; )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( &gt;= )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( &lt;= )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( != )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "logic_and", TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "less_than", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
-    ; "equal", TVar (-1) @-<span data-count="116">&gt;</span> TVar (-1) @-<span data-count="116">&gt;</span> TGround GTBool
+    [ "( + )", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "( - )", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "( * )", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "( / )", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "( % )", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "( &amp;&amp; )", TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( || )", TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( = )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( == )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( &gt; )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( &lt; )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( &gt;= )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( &lt;= )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( != )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "( &lt;&gt; )", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "logic_and", TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "less_than", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
+    ; "equal", TVar (-1) @-<span data-count="127">&gt;</span> TVar (-1) @-<span data-count="127">&gt;</span> TGround GTBool
     ]
   in
   let unary_ops =
-    [ "U-", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "U+", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTInt
-    ; "UNot", TGround GTBool @-<span data-count="116">&gt;</span> TGround GTBool
+    [ "U-", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "U+", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTInt
+    ; "UNot", TGround GTBool @-<span data-count="127">&gt;</span> TGround GTBool
     ]
   in
   let stdlib_functions =
-    [ "print_int", TGround GTInt @-<span data-count="116">&gt;</span> TGround GTUnit
-    ; "print_bool", TGround GTBool @-<span data-count="116">&gt;</span> TGround GTUnit
-    ; "get_list_length", TList (TVar (-1)) @-<span data-count="116">&gt;</span> TGround GTInt
+    [ "print_int", TGround GTInt @-<span data-count="127">&gt;</span> TGround GTUnit
+    ; "print_bool", TGround GTBool @-<span data-count="127">&gt;</span> TGround GTUnit
+    ; "print_string", TGround GTString @-<span data-count="127">&gt;</span> TGround GTUnit
+    ; "print_char", TGround GTChar @-<span data-count="127">&gt;</span> TGround GTUnit
+    ; "get_list_length", TList (TVar (-1)) @-<span data-count="127">&gt;</span> TGround GTInt
     ]
   in
   let unpack_functions =
-    [ "unpack_tuple", TVar (-1) @-<span data-count="116">&gt;</span> TGround GTInt @-<span data-count="116">&gt;</span> TVar (-2)
-    ; "unpack_list_hd", TList (TVar (-1)) @-<span data-count="116">&gt;</span> TVar (-1)
-    ; "unpack_list_tl", TList (TVar (-1)) @-<span data-count="116">&gt;</span> TList (TVar (-1))
+    [ "unpack_tuple", TVar (-1) @-<span data-count="127">&gt;</span> TGround GTInt @-<span data-count="127">&gt;</span> TVar (-2)
+    ; "unpack_list_hd", TList (TVar (-1)) @-<span data-count="127">&gt;</span> TVar (-1)
+    ; "unpack_list_tl", TList (TVar (-1)) @-<span data-count="127">&gt;</span> TList (TVar (-1))
     ; "pattern_matching_failure", TVar (-1)
     ]
   in
-  List.fold_lef<span data-count="116">t</span>
-    (fun env (op, ty) -&gt; <span data-count="3248">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="3248">e</span> TypeEnv.empty ty))
+  List.fold_lef<span data-count="127">t</span>
+    (fun env (op, ty) -&gt; <span data-count="3810">T</span>ypeEnv.extend env op (Generalize.generaliz<span data-count="3810">e</span> TypeEnv.empty ty))
     TypeEnv.empty
     (binary_ops @ unary_ops @ unpack_functions @ stdlib_functions)
 ;;

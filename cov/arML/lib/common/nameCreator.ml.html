@@ -63,9 +63,9 @@ open StateMonad.Syntax
 open IdentifierStructs
 
 let rec get_new_name prefix env =
-  <span data-count="417">l</span>et* new_s = fresh in
-  <span data-count="417">l</span>et new_name = String.concat "_" [ prefix; Int.to_strin<span data-count="417">g</span> new_s ] in
-  <span data-count="417">i</span>f IdentifierSet.mem (Id new_name) env then <span data-count="0">g</span>et_new_name prefix env else <span data-count="417">r</span>eturn new_name
+  <span data-count="500">l</span>et* new_s = fresh in
+  <span data-count="500">l</span>et new_name = String.concat "_" [ prefix; Int.to_strin<span data-count="500">g</span> new_s ] in
+  <span data-count="500">i</span>f IdentifierSet.mem (Id new_name) env then <span data-count="0">g</span>et_new_name prefix env else <span data-count="500">r</span>eturn new_name
 ;;
 </code></pre>
       </div>
