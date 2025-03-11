@@ -47,10 +47,10 @@ jobs:
 
       - name: Is it a D task? ${{  github.event.pull_request.title  }}
         run: |
-          echo "IsD=${{ startsWith(github.event.pull_request.title, '[D]') }}" >> $GITHUB_ENV
+          echo "IsD=${{ startsWith(github.event.pull_request.title, '[D]') || startsWith(github.event.pull_request.title, '[E]') }}" >> $GITHUB_ENV
 
-      - name: isD = ${{ env.IsD }}
-        run: echo "${{ env.IsD }}"
+      - name: isD = ${{ env.IsD }} !isD = ${{ !(env.IsD) }} also ${{ !env.IsD }}
+        run: echo "${{ env.IsD }}" "${{ !(env.IsD) }}"
 
       - name: Pin linter to the latest version
         run: |
@@ -153,7 +153,7 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        if: ${{ !env.IsD }}
+        if: ${{ !(env.IsD) }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
