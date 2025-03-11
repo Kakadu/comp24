@@ -57,3 +57,9 @@ val convert_to_anf_and_back_types : string -> unit
 val anf_conversion_program : string -> unit
 
 (* -------------- *)
+
+(* LLVM *)
+
+val llvm_codegen_program : string -> unit
+
+(* -------------- *)

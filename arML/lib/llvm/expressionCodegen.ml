@@ -32,7 +32,7 @@ and compile_anf_expression runtime env = function
 
 and compile_if_then_else runtime env cond_expr then_expr else_expr =
   let cond_value = compile_immut_expression runtime env cond_expr in
-  let bool_func, bool_func_type = get_func_info runtime "get_i1_val" in
+  let bool_func, bool_func_type = get_func_info runtime "check_cond" in
   let cond_bool =
     build_call bool_func_type bool_func [| cond_value |] "cond_bool" builder
   in
