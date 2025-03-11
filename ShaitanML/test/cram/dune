@@ -40,9 +40,19 @@
  (public_name anf)
  (libraries shaitanml_lib stdio))
 
+(executable
+ (name llvm_codegen)
+ (modules Llvm_codegen)
+ (public_name llvm_codegen)
+ (libraries shaitanml_lib stdio))
+
 (cram
  (deps
   (source_tree manytests)))
+
+(cram
+ (applies_to llvm llvm_codegen)
+ (deps ./runtime.c))
 
 (cram
  (deps
@@ -50,4 +60,7 @@
   %{bin:infer}
   %{bin:pat_elim}
   %{bin:closure}
-  %{bin:alpha}))
+  %{bin:alpha}
+  %{bin:l_lifting}
+  %{bin:anf}
+  %{bin:llvm_codegen}))

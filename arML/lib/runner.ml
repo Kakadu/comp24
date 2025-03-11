@@ -194,8 +194,7 @@ let llvm_codegen_program program =
       PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
     in
     let alpha_converted_ast =
-      AlphaConversion.Runner.run_alpha_conversion_program
-        pattern_matching_eliminated_ast
+      AlphaConversion.Runner.run_alpha_conversion_program pattern_matching_eliminated_ast
     in
     let anf = Anf.Runner.run_anf_conversion_program alpha_converted_ast in
     let llvm_code = Llvm_codegen.Runner.run_llvm_program_codegen anf in

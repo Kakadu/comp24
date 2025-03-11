@@ -88,7 +88,6 @@ MANYTESTS
 
   $ ./start_alpha_conversion_demos.exe < manytests/typed/008ascription.ml
   let addi f g x = ((f x ((g x) : bool)) : int)
-  
   let ll_0 ac_0 b = (if b then (( + ) ac_0 1) else (( * ) ac_0 2))
   
   let ll_1 _start = (( = ) (( / ) _start 2) 0)

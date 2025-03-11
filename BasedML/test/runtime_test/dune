@@ -8,6 +8,33 @@
   (system
    "clang-16 ./attachments/fib_test.c -I../../runtime -L../../runtime/ -lmlstd -lmlrt  -o  %{target}")))
 
+(rule
+ (target fib_cps_riscv.elf)
+ (deps
+  ./attachments/fib_test.c
+  ../../runtime/riscv/libffi.so
+  ../../runtime/riscv/libmlrt.so
+  ../../runtime/riscv/libmlstd.so)
+ (action
+  (run
+   clang-16
+   --target=riscv64-linux-gnu
+   ./attachments/fib_test.c
+   -I../../runtime/
+   -L../../runtime/riscv
+   -lmlstd
+   -lmlrt
+   -lffi
+   -o
+   %{target})))
+
 (cram
  (applies_to runtime_test)
- (deps ./fib_cps.elf ../../runtime/libmlrt.so ../../runtime/libmlstd.so))
+ (deps
+  ./fib_cps.elf
+  ../../runtime/libmlrt.so
+  ../../runtime/libmlstd.so
+  fib_cps_riscv.elf
+  ../../runtime/riscv/libmlrt.so
+  ../../runtime/riscv/libmlstd.so
+  ../../runtime/riscv/libffi.so))

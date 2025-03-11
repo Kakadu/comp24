@@ -1,7 +1,6 @@
 MANYTESTS
   $ ./start_pm_elimination_demos.exe < manytests/typed/001fac.ml
   let rec fac n = (if (( <= ) n 1) then 1 else (( * ) n (fac (( - ) n 1))))
-  
   let main = let () = (print_int (fac 4)) in
   0
 
@@ -179,3 +178,4 @@ MANYTESTS
   let main = let () = (iter print_int (1 :: (2 :: (3 :: [])))) in
   let () = (print_int (length (cartesian (1 :: (2 :: [])) (1 :: (2 :: (3 :: (4 :: []))))))) in
   0
+  

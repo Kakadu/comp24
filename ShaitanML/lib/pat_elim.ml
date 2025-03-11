@@ -109,7 +109,6 @@ let rec pe_expr =
       match arg with
       | PVar v when not (List.mem new_args v ~equal:String.equal) ->
         return (v :: new_args, args_to_match, pat_list)
-      | PConst CUnit -> return ("()" :: new_args, args_to_match, pat_list)
       | _ ->
         let* fresh_name = fresh >>| get_id in
         return (fresh_name :: new_args, fresh_name :: args_to_match, arg :: pat_list)
@@ -150,7 +149,6 @@ let rec pe_expr =
     let* e2 = pe_expr e2 in
     (match pat with
      | PVar name -> return @@ PEELet (PENonrec (name, e1), e2)
-     | PConst CUnit -> return @@ PEELet (PENonrec ("()", e1), e2)
      | _ ->
        (match e1 with
         | PEEVar _ ->
@@ -184,7 +182,6 @@ and pe_case decl_list =
     return
       (match pat with
        | Ast.PVar v -> v, e
-       | PConst CUnit -> "()", e
        | _ -> "", e)
   in
   let* new_decls = map decl_list ~f:f1 in
@@ -196,7 +193,6 @@ let pe_str_item = function
     let* e = pe_expr e in
     (match pat with
      | PVar name -> return [ PENonrec (name, e) ]
-     | PConst CUnit -> return [ PENonrec ("()", e) ]
      | pat ->
        let* fresh_name = fresh >>| get_id in
        let to_unpack = PEEVar fresh_name in
@@ -206,7 +202,8 @@ let pe_str_item = function
        then return (PENonrec (fresh_name, e) :: decls)
        else (
          let ite = make_condition checks (PEEConst PECUnit) (PEEVar "fail_match") in
-         return (PENonrec (fresh_name, e) :: PENonrec ("()", ite) :: decls)))
+         let* for_checks = fresh >>| get_id in
+         return (PENonrec (fresh_name, e) :: PENonrec (for_checks, ite) :: decls)))
   | Ast.SValue (Rec, cl) ->
     let* cl = pe_case cl in
     return [ cl ]

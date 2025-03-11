@@ -4,7 +4,6 @@
 
 open LlvmBasic
 open Ast.AbstractSyntaxTree
-
 module Env = Map.Make (String)
 
 let rec declare_functions_in_env env = function
@@ -16,8 +15,12 @@ let rec declare_functions_in_env env = function
 ;;
 
 let declare_program_functions funcs env =
-  let funcs_without_expr = List.map (fun (Id name, args, _) -> 
-      let args = List.map (fun (Id a) -> a) args in
-      (name, fun_name_to_fun_type_mapping args name)) funcs in
+  let funcs_without_expr =
+    List.map
+      (fun (Id name, args, _) ->
+        let args = List.map (fun (Id a) -> a) args in
+        name, fun_name_to_fun_type_mapping args name)
+      funcs
+  in
   declare_functions_in_env env funcs_without_expr
 ;;

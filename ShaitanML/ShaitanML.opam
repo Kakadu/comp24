@@ -19,6 +19,7 @@ depends: [
   "qcheck"
   "odoc" {with-doc}
   "ocamlformat" {build}
+  "llvm" {= "16.0.6+nnp"}
   "base"
 ]
 build: [

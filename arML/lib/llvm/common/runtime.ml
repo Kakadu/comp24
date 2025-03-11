@@ -32,7 +32,7 @@ let runtime_functions =
   let logical_operations =
     [ "bOr", function_type ptr_ty [| ptr_ty; ptr_ty |]
     ; "bAnd", function_type ptr_ty [| ptr_ty; ptr_ty |]
-    ; "check_cond", function_type bool_ty [| ptr_ty |];
+    ; "check_cond", function_type bool_ty [| ptr_ty |]
     ]
   in
   let comparison_operations =

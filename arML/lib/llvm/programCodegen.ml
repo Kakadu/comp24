@@ -14,12 +14,12 @@ let compile_program program =
   let initial_env =
     List.fold_left
       (fun env decl ->
-         let funcs =
-           match decl with
-           | ADOrdinary func_def -> [ func_def ]
-           | ADRecursive (first_func, other_funcs) -> first_func :: other_funcs
-         in
-         declare_program_functions funcs env)
+        let funcs =
+          match decl with
+          | ADOrdinary func_def -> [ func_def ]
+          | ADRecursive (first_func, other_funcs) -> first_func :: other_funcs
+        in
+        declare_program_functions funcs env)
       Env.empty
       program
   in
@@ -39,7 +39,12 @@ let compile_program program =
         param_names
         (Array.to_list (Llvm.params func_ref))
     in
-    let return_value = compile_anf_expression (declare_functions_in_env RuntimeEnv.empty Runtime.runtime_functions) updated_env body_expr in
+    let return_value =
+      compile_anf_expression
+        (declare_functions_in_env RuntimeEnv.empty Runtime.runtime_functions)
+        updated_env
+        body_expr
+    in
     let return_instr =
       if func_name = "main"
       then Llvm.build_ret (const_int i32_ty 0) builder
@@ -49,12 +54,12 @@ let compile_program program =
   in
   List.iter
     (fun decl ->
-       let functions =
-         match decl with
-         | ADOrdinary func -> [ func ]
-         | ADRecursive (first_func, other_funcs) -> first_func :: other_funcs
-       in
-       List.iter process_function functions)
+      let functions =
+        match decl with
+        | ADOrdinary func -> [ func ]
+        | ADRecursive (first_func, other_funcs) -> first_func :: other_funcs
+      in
+      List.iter process_function functions)
     program;
   string_of_llmodule the_module
 ;;
