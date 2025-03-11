@@ -153,22 +153,22 @@
 
 open Base
 
-let set_empty = Set.empt<span data-count="89">y</span> (module String)
-let map_empty = Map.empt<span data-count="89">y</span> (module String)
+let set_empty = Set.empt<span data-count="92">y</span> (module String)
+let map_empty = Map.empt<span data-count="92">y</span> (module String)
 
 let get_uniq_name gvars name =
-  <span data-count="1371">l</span>et rec helper gvars id =
-    <span data-count="608">l</span>et name = String.concat [ name; Int.to_strin<span data-count="608">g</span> id ] in
-    <span data-count="608">i</span>f Set.mem gvars name then <span data-count="331">h</span>elper gvars (id + 1) else <span data-count="277">n</span>ame
+  <span data-count="1393">l</span>et rec helper gvars id =
+    <span data-count="611">l</span>et name = String.concat [ name; Int.to_strin<span data-count="611">g</span> id ] in
+    <span data-count="611">i</span>f Set.mem gvars name then <span data-count="332">h</span>elper gvars (id + 1) else <span data-count="279">n</span>ame
   in
-  if Set.mem gvars name then <span data-count="277">h</span>elper gvars 0 else <span data-count="1094">n</span>ame
+  if Set.mem gvars name then <span data-count="279">h</span>elper gvars 0 else <span data-count="1114">n</span>ame
 ;;
 
 let update_name name local_vars all_vars =
-  <span data-count="1077">l</span>et new_name = get_uniq_name all_vars name in
-  <span data-count="1077">l</span>et update_lvars = Map.set local_vars ~key:name ~data:new_name in
-  <span data-count="1077">l</span>et update_all_vars = Set.add all_vars new_name in
-  <span data-count="1077">n</span>ew_name, update_lvars, update_all_vars
+  <span data-count="1095">l</span>et new_name = get_uniq_name all_vars name in
+  <span data-count="1095">l</span>et update_lvars = Map.set local_vars ~key:name ~data:new_name in
+  <span data-count="1095">l</span>et update_all_vars = Set.add all_vars new_name in
+  <span data-count="1095">n</span>ew_name, update_lvars, update_all_vars
 ;;
 
 let update_all_name_list name_list vars all_vars =

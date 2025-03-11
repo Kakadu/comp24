@@ -210,17 +210,17 @@ open Anfast
 open PprinterAST
 
 let pp_aconst formatter = function
-  | <span data-count="116">A</span>Int i -&gt; Format.fprintf formatter "%d" i
+  | <span data-count="120">A</span>Int i -&gt; Format.fprintf formatter "%d" i
   | <span data-count="2">A</span>Bool false -&gt; Format.fprintf formatter "false"
   | <span data-count="3">A</span>Bool true -&gt; Format.fprintf formatter "true"
   | <span data-count="0">A</span>Nil -&gt; Format.fprintf formatter "[]"
 ;;
 
 let rec pp_aexpression formatter e =
-  <span data-count="959">m</span>atch e with
-  | <span data-count="121">A</span>Const c -&gt; pp_aconst formatter c
-  | <span data-count="458">A</span>Var n -&gt; Format.fprintf formatter "%s" n
-  | <span data-count="283">A</span>App (e1, e2) -&gt;
+  <span data-count="999">m</span>atch e with
+  | <span data-count="125">A</span>Const c -&gt; pp_aconst formatter c
+  | <span data-count="477">A</span>Var n -&gt; Format.fprintf formatter "%s" n
+  | <span data-count="297">A</span>App (e1, e2) -&gt;
     Format.fprintf formatter "(%a %a)" pp_aexpression e1 pp_aexpression e2
   | <span data-count="14">A</span>IfElse (i, t, e) -&gt;
     Format.fprintf
@@ -233,7 +233,7 @@ let rec pp_aexpression formatter e =
       pp_aexpression
       e
   | <span data-count="3">A</span>Tuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="3">e</span> pp_aexpression) t
-  | <span data-count="61">A</span>BinOp (op, l, r) -&gt;
+  | <span data-count="64">A</span>BinOp (op, l, r) -&gt;
     Format.fprintf formatter "(%a %a %a)" pp_aexpression l pp_binop op pp_aexpression r
   | <span data-count="18">A</span>Vars (head, tail) -&gt;
     let rec print_list formatter = function
@@ -261,20 +261,20 @@ let rec pp_aexpression formatter e =
 ;;
 
 let pp_abindings formatter bindings =
-  <span data-count="21">L</span>ist.iter
+  <span data-count="22">L</span>ist.iter
     (fun bind -&gt;
-      <span data-count="184">m</span>atch bind with
-      | <span data-count="184">A</span>Let (r, n_list, p, e) -&gt;
+      <span data-count="190">m</span>atch bind with
+      | <span data-count="190">A</span>Let (r, n_list, p, e) -&gt;
         Format.fprintf
           formatter
           "let %a %s %s = %a"
           pp_rec
           r
           n_list
-          (String.conca<span data-count="184">t</span> " " p)
+          (String.conca<span data-count="190">t</span> " " p)
           pp_aexpression
           e;
-        <span data-count="184">F</span>ormat.fprintf formatter "\n"
+        <span data-count="190">F</span>ormat.fprintf formatter "\n"
       | <span data-count="0">A</span>LetPat (n_list, e) -&gt;
         Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_aexpression e;
         <span data-count="0">F</span>ormat.fprintf formatter "\n"
@@ -284,7 +284,7 @@ let pp_abindings formatter bindings =
     bindings
 ;;
 
-let pp_anf bindings = <span data-count="21">F</span>ormat.asprintf "%a" pp_abindings bindings
+let pp_anf bindings = <span data-count="22">F</span>ormat.asprintf "%a" pp_abindings bindings
 </code></pre>
       </div>
     </div>

@@ -224,7 +224,7 @@ open Ast
 open Base
 
 let aconst_to_const = function
-  | <span data-count="116">A</span>Int i -&gt; CInt i
+  | <span data-count="120">A</span>Int i -&gt; CInt i
   | <span data-count="5">A</span>Bool b -&gt; CBool b
   | <span data-count="0">A</span>Nil -&gt; CNil
 ;;
@@ -242,31 +242,31 @@ let rec a_pattern = function
 ;;
 
 let rec aexpression_to_expression = function
-  | <span data-count="458">A</span>Var v -&gt; EVar (v, TUnknown)
+  | <span data-count="477">A</span>Var v -&gt; EVar (v, TUnknown)
   | <span data-count="18">A</span>Vars (l, r) -&gt;
     let el = aexpression_to_expression l in
     <span data-count="18">l</span>et er = aexpression_to_expression r in
     <span data-count="18">E</span>LetIn (Notrec, "()", el, er)
-  | <span data-count="121">A</span>Const c -&gt;
+  | <span data-count="125">A</span>Const c -&gt;
     let ec = aconst_to_const c in
-    <span data-count="121">E</span>Const ec
+    <span data-count="125">E</span>Const ec
   | <span data-count="14">A</span>IfElse (i, t, e) -&gt;
     let ei = aexpression_to_expression i in
     <span data-count="14">l</span>et et = aexpression_to_expression t in
     <span data-count="14">l</span>et ee = aexpression_to_expression e in
     <span data-count="14">E</span>IfElse (ei, et, ee)
-  | <span data-count="61">A</span>BinOp (op, l, r) -&gt;
+  | <span data-count="64">A</span>BinOp (op, l, r) -&gt;
     let el = aexpression_to_expression l in
-    <span data-count="61">l</span>et er = aexpression_to_expression r in
-    <span data-count="61">E</span>BinaryOp (op, el, er)
+    <span data-count="64">l</span>et er = aexpression_to_expression r in
+    <span data-count="64">E</span>BinaryOp (op, el, er)
   | <span data-count="1">A</span>PatLetIn (names, e, ine) -&gt;
     let ee = aexpression_to_expression e in
     <span data-count="1">l</span>et eine = aexpression_to_expression ine in
     <span data-count="1">E</span>LetPatIn (names, ee, eine)
-  | <span data-count="283">A</span>App (l, r) -&gt;
+  | <span data-count="297">A</span>App (l, r) -&gt;
     let el = aexpression_to_expression l in
-    <span data-count="283">l</span>et er = aexpression_to_expression r in
-    <span data-count="283">E</span>App (el, er, TUnknown)
+    <span data-count="297">l</span>et er = aexpression_to_expression r in
+    <span data-count="297">E</span>App (el, er, TUnknown)
   | <span data-count="3">A</span>Tuple t -&gt;
     ETuple
       (List.re<span data-count="3">v</span>
@@ -284,20 +284,20 @@ let rec aexpression_to_expression = function
 
 let name_to_pattern = function
   | <span data-count="0">"</span>_" -&gt; PWild
-  | <span data-count="416">n</span> -&gt; PVar (n, TUnknown)
+  | <span data-count="435">n</span> -&gt; PVar (n, TUnknown)
 ;;
 
 let rec args_to_fun e = function
-  | <span data-count="184">[</span>] -&gt; e
-  | <span data-count="232">h</span>d :: tl -&gt;
+  | <span data-count="190">[</span>] -&gt; e
+  | <span data-count="245">h</span>d :: tl -&gt;
     let n = name_to_pattern hd in
-    <span data-count="232">E</span>Fun (n, args_to_fu<span data-count="232">n</span> e tl)
+    <span data-count="245">E</span>Fun (n, args_to_fu<span data-count="245">n</span> e tl)
 ;;
 
 let abindings_to_ebindings = function
-  | <span data-count="184">A</span>Let (r, n, args, e) -&gt;
+  | <span data-count="190">A</span>Let (r, n, args, e) -&gt;
     let ee = aexpression_to_expression e in
-    <span data-count="184">L</span>et (r, [ name_to_patter<span data-count="184">n</span> n, args_to_fu<span data-count="184">n</span> ee args ])
+    <span data-count="190">L</span>et (r, [ name_to_patter<span data-count="190">n</span> n, args_to_fu<span data-count="190">n</span> ee args ])
   | <span data-count="0">A</span>LetPat (p, e) -&gt;
     let ee = aexpression_to_expression e in
     <span data-count="0">L</span>et (Notrec, [ p, ee ])
@@ -305,7 +305,7 @@ let abindings_to_ebindings = function
 ;;
 
 let anf_to_ast anf =
-  <span data-count="21">L</span>ist.rev @@ List.fol<span data-count="21">d</span> ~init:[] ~f:(fun acc a -&gt; <span data-count="184">a</span>bindings_to_ebinding<span data-count="184">s</span> a :: acc) anf
+  <span data-count="22">L</span>ist.rev @@ List.fol<span data-count="22">d</span> ~init:[] ~f:(fun acc a -&gt; <span data-count="190">a</span>bindings_to_ebinding<span data-count="190">s</span> a :: acc) anf
 ;;
 </code></pre>
       </div>

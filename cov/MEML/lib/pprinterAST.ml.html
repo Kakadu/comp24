@@ -342,7 +342,7 @@
 open Ast
 
 let pp_constant formatter = function
-  | <span data-count="321">C</span>Int i -&gt; Format.fprintf formatter "%d" i
+  | <span data-count="329">C</span>Int i -&gt; Format.fprintf formatter "%d" i
   | <span data-count="7">C</span>Bool false -&gt; Format.fprintf formatter "false"
   | <span data-count="11">C</span>Bool true -&gt; Format.fprintf formatter "true"
   | <span data-count="13">C</span>Nil -&gt; Format.fprintf formatter "[]"
@@ -359,18 +359,18 @@ let pp_tuple printer formatter l =
 let rec pp_pattern formatter = function
   | <span data-count="0">P</span>Wild -&gt; Format.fprintf formatter "_"
   | <span data-count="16">P</span>Con (hd, tl) -&gt; Format.fprintf formatter "(%a :: %a)" pp_pattern hd pp_pattern tl
-  | <span data-count="412">P</span>Var (n, _) -&gt; Format.fprintf formatter "%s" n
+  | <span data-count="420">P</span>Var (n, _) -&gt; Format.fprintf formatter "%s" n
   | <span data-count="20">P</span>Tuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="20">e</span> pp_pattern) t
   | <span data-count="11">P</span>Const c -&gt; pp_constant formatter c
 ;;
 
 let pp_rec formatter = function
   | <span data-count="40">R</span>ec -&gt; Format.fprintf formatter "rec"
-  | <span data-count="432">N</span>otrec -&gt; ()
+  | <span data-count="442">N</span>otrec -&gt; ()
 ;;
 
 let pp_binop formatter = function
-  | <span data-count="91">A</span>dd -&gt; Format.fprintf formatter "+"
+  | <span data-count="100">A</span>dd -&gt; Format.fprintf formatter "+"
   | <span data-count="44">S</span>ub -&gt; Format.fprintf formatter "-"
   | <span data-count="33">M</span>ul -&gt; Format.fprintf formatter "*"
   | <span data-count="8">D</span>iv -&gt; Format.fprintf formatter "/"

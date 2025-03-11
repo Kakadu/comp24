@@ -289,10 +289,10 @@ open Ast
 open PprinterAST
 
 let rec pp_llexpression formatter e =
-  <span data-count="594">m</span>atch e with
-  | <span data-count="103">C</span>Const c -&gt; pp_constant formatter c
-  | <span data-count="222">C</span>Var n -&gt; Format.fprintf formatter "%s" n
-  | <span data-count="141">C</span>App (e1, e2) -&gt;
+  <span data-count="612">m</span>atch e with
+  | <span data-count="107">C</span>Const c -&gt; pp_constant formatter c
+  | <span data-count="228">C</span>Var n -&gt; Format.fprintf formatter "%s" n
+  | <span data-count="146">C</span>App (e1, e2) -&gt;
     Format.fprintf formatter "(%a %a)" pp_llexpression e1 pp_llexpression e2
   | <span data-count="13">C</span>IfElse (i, t, e) -&gt;
     Format.fprintf
@@ -328,7 +328,7 @@ let rec pp_llexpression formatter e =
       pp_llexpression
       ine
   | <span data-count="4">C</span>Tuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="4">e</span> pp_llexpression) t
-  | <span data-count="54">C</span>EbinOp (op, l, r) -&gt;
+  | <span data-count="57">C</span>EbinOp (op, l, r) -&gt;
     Format.fprintf formatter "(%a %a %a)" pp_llexpression l pp_binop op pp_llexpression r
   | <span data-count="0">C</span>List (head, tail) -&gt;
     let rec print_list formatter = function
@@ -347,26 +347,26 @@ let rec pp_llexpression formatter e =
 ;;
 
 let pp_llbindings formatter bindings =
-  <span data-count="17">L</span>ist.iter
+  <span data-count="18">L</span>ist.iter
     (fun bind -&gt;
-      <span data-count="41">m</span>atch bind with
-      | <span data-count="41">C</span>Lets (r, clets_list) -&gt;
+      <span data-count="43">m</span>atch bind with
+      | <span data-count="43">C</span>Lets (r, clets_list) -&gt;
         (* Перебираем все let-объявления внутри CLet *)
         List.iteri
           (fun i clets -&gt;
-            <span data-count="42">m</span>atch clets with
-            | <span data-count="42">C</span>Let (n, p, e) -&gt;
+            <span data-count="44">m</span>atch clets with
+            | <span data-count="44">C</span>Let (n, p, e) -&gt;
               if i = 0
               then
                 (* Первое объявление начинается с "let" *)
-                <span data-count="41">F</span>ormat.fprintf
+                <span data-count="43">F</span>ormat.fprintf
                   formatter
                   "let %a %s %a = %a"
                   pp_rec
                   r
                   n
                   (fun fmt -&gt;
-                    <span data-count="41">L</span>ist.iter (fun pat -&gt; <span data-count="55">F</span>ormat.fprintf fmt "%a " pp_pattern pat))
+                    <span data-count="43">L</span>ist.iter (fun pat -&gt; <span data-count="59">F</span>ormat.fprintf fmt "%a " pp_pattern pat))
                   p
                   pp_llexpression
                   e
@@ -392,14 +392,14 @@ let pp_llbindings formatter bindings =
                 (* Все последующие объявления начинаются с "and" *)
                 <span data-count="0">F</span>ormat.fprintf formatter "and %a = %a" pp_pattern names pp_llexpression e)
           clets_list;
-        <span data-count="41">F</span>ormat.fprintf formatter "\n"
+        <span data-count="43">F</span>ormat.fprintf formatter "\n"
       | <span data-count="0">C</span>Expression e -&gt;
         pp_llexpression formatter e;
         <span data-count="0">F</span>ormat.fprintf formatter "\n")
     bindings
 ;;
 
-let pp_closure bindings = <span data-count="17">F</span>ormat.asprintf "%a" pp_llbindings bindings
+let pp_closure bindings = <span data-count="18">F</span>ormat.asprintf "%a" pp_llbindings bindings
 </code></pre>
       </div>
     </div>

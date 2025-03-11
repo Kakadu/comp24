@@ -656,7 +656,7 @@ open Name_helper
 open Pattern_helper
 
 let anf_const = function
-  | <span data-count="305">C</span>Int i -&gt; AInt i
+  | <span data-count="309">C</span>Int i -&gt; AInt i
   | <span data-count="9">C</span>Bool b -&gt; ABool b
   | <span data-count="0">C</span>Nil -&gt; ANil
 ;;
@@ -677,17 +677,17 @@ let rec anf_pattern = function
 ;;
 
 let rec anf_llexpression new_anf_let gvars fvars lvars = function
-  | <span data-count="652">L</span>LVar v -&gt;
+  | <span data-count="658">L</span>LVar v -&gt;
     let new_vars =
       match Map.find lvars v with
-      | <span data-count="311">S</span>ome p -&gt; AVar p
-      | <span data-count="341">N</span>one -&gt;
+      | <span data-count="315">S</span>ome p -&gt; AVar p
+      | <span data-count="343">N</span>one -&gt;
         (match Map.find gvars v with
-         | <span data-count="247">S</span>ome p -&gt; AVar p
-         | <span data-count="94">N</span>one -&gt; AVar v)
+         | <span data-count="248">S</span>ome p -&gt; AVar p
+         | <span data-count="95">N</span>one -&gt; AVar v)
     in
     new_vars, new_anf_let, fvars
-  | <span data-count="304">L</span>LConst c -&gt; AConst (anf_cons<span data-count="304">t</span> c), new_anf_let, fvars
+  | <span data-count="308">L</span>LConst c -&gt; AConst (anf_cons<span data-count="308">t</span> c), new_anf_let, fvars
   | <span data-count="25">L</span>LIfElse (i, t, e) -&gt;
     let check_i, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars i in
     <span data-count="25">l</span>et check_t, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars t in
@@ -706,37 +706,37 @@ let rec anf_llexpression new_anf_let gvars fvars lvars = function
     <span data-count="10">l</span>et app = AApp (anf_l, anf_r) in
     let new_anf_let = ALet (Notrec, name_app, [], app) :: new_anf_let in
     anf_llexpression new_anf_let gvars fvars lvars (LLEbinOp (op, e1, LLVar name_app))
-  | <span data-count="151">L</span>LEbinOp (op, e1, e2) -&gt;
+  | <span data-count="154">L</span>LEbinOp (op, e1, e2) -&gt;
     let new_name = get_uniq_name fvars "bin_op" in
-    <span data-count="151">l</span>et new_fvars = Set.add fvars new_name in
-    <span data-count="151">l</span>et gvars = Map.set gvars ~key:new_name ~data:new_name in
-    <span data-count="151">l</span>et anf_e1, new_anf_let, new_fvars =
+    <span data-count="154">l</span>et new_fvars = Set.add fvars new_name in
+    <span data-count="154">l</span>et gvars = Map.set gvars ~key:new_name ~data:new_name in
+    <span data-count="154">l</span>et anf_e1, new_anf_let, new_fvars =
       anf_llexpression new_anf_let gvars new_fvars lvars e1
     in
-    <span data-count="151">l</span>et anf_e2, new_anf_let, fvars =
+    <span data-count="154">l</span>et anf_e2, new_anf_let, fvars =
       anf_llexpression new_anf_let gvars new_fvars lvars e2
     in
-    <span data-count="151">l</span>et anf_binop = ABinOp (op, anf_e1, anf_e2) in
+    <span data-count="154">l</span>et anf_binop = ABinOp (op, anf_e1, anf_e2) in
     let new_anf_let = ALet (Notrec, new_name, [], anf_binop) :: new_anf_let in
     AVar new_name, new_anf_let, fvars
-  | <span data-count="73">L</span>LApp (l, LLApp (rl, rr)) -&gt;
+  | <span data-count="74">L</span>LApp (l, LLApp (rl, rr)) -&gt;
     let name_app = get_uniq_name fvars "app" in
-    <span data-count="73">l</span>et new_fvars = Set.add fvars name_app in
-    <span data-count="73">l</span>et gvars = Map.set gvars ~key:name_app ~data:name_app in
-    <span data-count="73">l</span>et anf_rl, new_anf_let, new_fvars =
+    <span data-count="74">l</span>et new_fvars = Set.add fvars name_app in
+    <span data-count="74">l</span>et gvars = Map.set gvars ~key:name_app ~data:name_app in
+    <span data-count="74">l</span>et anf_rl, new_anf_let, new_fvars =
       anf_llexpression new_anf_let gvars new_fvars lvars rl
     in
-    <span data-count="73">l</span>et anf_rr, new_anf_let, fvars =
+    <span data-count="74">l</span>et anf_rr, new_anf_let, fvars =
       anf_llexpression new_anf_let gvars new_fvars lvars rr
     in
-    <span data-count="73">l</span>et app = AApp (anf_rl, anf_rr) in
+    <span data-count="74">l</span>et app = AApp (anf_rl, anf_rr) in
     let new_anf_let = ALet (Notrec, name_app, [], app) :: new_anf_let in
     let check_l, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars l in
-    <span data-count="73">A</span>App (check_l, AVar name_app), new_anf_let, fvars
-  | <span data-count="258">L</span>LApp (l, r) -&gt;
+    <span data-count="74">A</span>App (check_l, AVar name_app), new_anf_let, fvars
+  | <span data-count="261">L</span>LApp (l, r) -&gt;
     let check_l, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars l in
-    <span data-count="258">l</span>et check_r, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars r in
-    <span data-count="258">A</span>App (check_l, check_r), new_anf_let, fvars
+    <span data-count="261">l</span>et check_r, new_anf_let, fvars = anf_llexpression new_anf_let gvars fvars lvars r in
+    <span data-count="261">A</span>App (check_l, check_r), new_anf_let, fvars
   | <span data-count="1">L</span>LPatLetIn (n, e, ine) -&gt;
     let anf_e1, new_anf_let, new_fvars =
       anf_llexpression new_anf_let gvars fvars lvars e
@@ -784,76 +784,76 @@ let rec anf_llexpression new_anf_let gvars fvars lvars = function
 ;;
 
 let lift_anf_bindings gvars fvars = function
-  | <span data-count="253">L</span>LLet (r, n, args, e) -&gt;
+  | <span data-count="255">L</span>LLet (r, n, args, e) -&gt;
     let new_lets, old_lets, gvars, fvars =
       let new_names, gvars, fvars =
-        if Poly.( = <span data-count="253">)</span> r Rec &amp;&amp; <span data-count="17">P</span>oly.( = <span data-count="17">)</span> n "()"
+        if Poly.( = <span data-count="255">)</span> r Rec &amp;&amp; <span data-count="17">P</span>oly.( = <span data-count="17">)</span> n "()"
         then <span data-count="0">u</span>pdate_nam<span data-count="0">e</span> "unit" gvars fvars
-        else <span data-count="253">i</span>f Poly.( = ) r Rec
+        else <span data-count="255">i</span>f Poly.( = ) r Rec
         then <span data-count="17">u</span>pdate_nam<span data-count="17">e</span> n gvars fvars
-        else <span data-count="236">n</span>, gvars, fvars
+        else <span data-count="238">n</span>, gvars, fvars
       in
       let new_args, lvars, new_fvars =
         List.fold
           ~init:([], map_empty, fvars)
           ~f:(fun (acc_args, acc_lvars, acc_fvars) arg -&gt;
-            <span data-count="258">l</span>et new_arg, new_lvars, new_fvars =
+            <span data-count="262">l</span>et new_arg, new_lvars, new_fvars =
               uniq_pattern_name_and_skip_unit acc_lvars acc_fvars arg
             in
-            <span data-count="258">n</span>ew_arg :: acc_args, new_lvars, new_fvars)
+            <span data-count="262">n</span>ew_arg :: acc_args, new_lvars, new_fvars)
           args
       in
-      <span data-count="253">l</span>et new_args =
-        List.fold ~init:[] ~f:(fun acc arg -&gt; <span data-count="258">a</span>cc @ pattern_to_string_lis<span data-count="258">t</span> arg)
-        @@ List.re<span data-count="253">v</span> new_args
+      <span data-count="255">l</span>et new_args =
+        List.fold ~init:[] ~f:(fun acc arg -&gt; <span data-count="262">a</span>cc @ pattern_to_string_lis<span data-count="262">t</span> arg)
+        @@ List.re<span data-count="255">v</span> new_args
       in
-      <span data-count="253">l</span>et old_lets, new_lets, update_fvars =
+      <span data-count="255">l</span>et old_lets, new_lets, update_fvars =
         anf_llexpression [] gvars new_fvars lvars e
       in
-      <span data-count="253">l</span>et fvars = Set.union fvars (Set.dif<span data-count="253">f</span> update_fvars new_fvars) in
-      <span data-count="253">l</span>et new_names, gvars, fvars =
-        if Poly.( &lt;&gt; <span data-count="253">)</span> r Rec &amp;&amp; <span data-count="236">P</span>oly.( = <span data-count="236">)</span> n "()"
+      <span data-count="255">l</span>et fvars = Set.union fvars (Set.dif<span data-count="255">f</span> update_fvars new_fvars) in
+      <span data-count="255">l</span>et new_names, gvars, fvars =
+        if Poly.( &lt;&gt; <span data-count="255">)</span> r Rec &amp;&amp; <span data-count="238">P</span>oly.( = <span data-count="238">)</span> n "()"
         then <span data-count="0">u</span>pdate_nam<span data-count="0">e</span> "unit" gvars fvars
-        else <span data-count="253">i</span>f Poly.( &lt;&gt; ) r Rec
-        then <span data-count="236">u</span>pdate_nam<span data-count="236">e</span> n gvars fvars
+        else <span data-count="255">i</span>f Poly.( &lt;&gt; ) r Rec
+        then <span data-count="238">u</span>pdate_nam<span data-count="238">e</span> n gvars fvars
         else <span data-count="17">n</span>ew_names, gvars, fvars
       in
       new_lets, ALet (r, new_names, new_args, old_lets), gvars, fvars
     in
-    List.re<span data-count="253">v</span> new_lets @ [ old_lets ], gvars, fvars
+    List.re<span data-count="255">v</span> new_lets @ [ old_lets ], gvars, fvars
   | <span data-count="0">_</span> -&gt; failwith ""
 ;;
 
 let lift_statments statments =
-  <span data-count="48">L</span>ist.fold
+  <span data-count="49">L</span>ist.fold
     ~init:([], map_empty, set_empty)
     ~f:(fun (acc, gvars, fvars) anf_binding -&gt;
-      <span data-count="253">l</span>et anf_bindings, gvars, fvars = lift_anf_bindings gvars fvars anf_binding in
-      <span data-count="253">a</span>cc @ anf_bindings, gvars, fvars)
+      <span data-count="255">l</span>et anf_bindings, gvars, fvars = lift_anf_bindings gvars fvars anf_binding in
+      <span data-count="255">a</span>cc @ anf_bindings, gvars, fvars)
     statments
 ;;
 
 let rec find_free gvars new_app = function
-  | <span data-count="884">A</span>Var v -&gt;
+  | <span data-count="894">A</span>Var v -&gt;
     let a, gvars =
       match Map.find new_app v with
-      | <span data-count="164">S</span>ome p -&gt;
-        List.fol<span data-count="164">d</span>
-          ~init:(AVar v, Set.ad<span data-count="164">d</span> gvars v)
-          ~f:(fun (acc, gvars) a -&gt; <span data-count="387">A</span>App (acc, AVar a), Set.ad<span data-count="387">d</span> gvars a)
+      | <span data-count="167">S</span>ome p -&gt;
+        List.fol<span data-count="167">d</span>
+          ~init:(AVar v, Set.ad<span data-count="167">d</span> gvars v)
+          ~f:(fun (acc, gvars) a -&gt; <span data-count="396">A</span>App (acc, AVar a), Set.ad<span data-count="396">d</span> gvars a)
           p
-      | <span data-count="720">N</span>one -&gt; AVar v, Set.ad<span data-count="720">d</span> gvars v
+      | <span data-count="727">N</span>one -&gt; AVar v, Set.ad<span data-count="727">d</span> gvars v
     in
     a, gvars
-  | <span data-count="314">A</span>Const c -&gt; AConst c, gvars
-  | <span data-count="414">A</span>App (e1, e2) -&gt;
+  | <span data-count="318">A</span>Const c -&gt; AConst c, gvars
+  | <span data-count="419">A</span>App (e1, e2) -&gt;
     let new_e1, update_gvars = find_free gvars new_app e1 in
-    <span data-count="414">l</span>et new_e2, update_gvars = find_free update_gvars new_app e2 in
-    <span data-count="414">A</span>App (new_e1, new_e2), update_gvars
-  | <span data-count="161">A</span>BinOp (op, e1, e2) -&gt;
+    <span data-count="419">l</span>et new_e2, update_gvars = find_free update_gvars new_app e2 in
+    <span data-count="419">A</span>App (new_e1, new_e2), update_gvars
+  | <span data-count="164">A</span>BinOp (op, e1, e2) -&gt;
     let new_e1, new_gvars = find_free gvars new_app e1 in
-    <span data-count="161">l</span>et new_e2, new_gvars = find_free new_gvars new_app e2 in
-    <span data-count="161">A</span>BinOp (op, new_e1, new_e2), new_gvars
+    <span data-count="164">l</span>et new_e2, new_gvars = find_free new_gvars new_app e2 in
+    <span data-count="164">A</span>BinOp (op, new_e1, new_e2), new_gvars
   | <span data-count="35">A</span>IfElse (i, t, e) -&gt;
     let new_i, new_gvars = find_free gvars new_app i in
     <span data-count="35">l</span>et new_t, new_gvars = find_free new_gvars new_app t in
@@ -888,27 +888,27 @@ let rec find_free gvars new_app = function
 ;;
 
 let add_free gvars add_app = function
-  | <span data-count="487">A</span>Let (r, n, args, anf_e) -&gt;
+  | <span data-count="493">A</span>Let (r, n, args, anf_e) -&gt;
     let new_anf_bindings =
-      let new_args_str = if Poly.( = ) r Rec then <span data-count="17">n</span> :: args else <span data-count="470">a</span>rgs in
+      let new_args_str = if Poly.( = ) r Rec then <span data-count="17">n</span> :: args else <span data-count="476">a</span>rgs in
       let new_gvars =
-        List.fold ~init:gvars ~f:(fun acc_gvars n -&gt; <span data-count="276">S</span>et.add acc_gvars n) new_args_str
+        List.fold ~init:gvars ~f:(fun acc_gvars n -&gt; <span data-count="280">S</span>et.add acc_gvars n) new_args_str
       in
-      <span data-count="487">l</span>et new_body, new_gvars_args = find_free new_gvars add_app anf_e in
-      <span data-count="487">l</span>et update_args = Set.diff new_gvars_args new_gvars in
-      <span data-count="487">l</span>et new_args =
+      <span data-count="493">l</span>et new_body, new_gvars_args = find_free new_gvars add_app anf_e in
+      <span data-count="493">l</span>et update_args = Set.diff new_gvars_args new_gvars in
+      <span data-count="493">l</span>et new_args =
         List.fold
           ~init:args
-          ~f:(fun acc_args arg -&gt; <span data-count="387">a</span>rg :: acc_args)
-          (List.re<span data-count="487">v</span> @@ Set.to_lis<span data-count="487">t</span> update_args)
+          ~f:(fun acc_args arg -&gt; <span data-count="396">a</span>rg :: acc_args)
+          (List.re<span data-count="493">v</span> @@ Set.to_lis<span data-count="493">t</span> update_args)
       in
-      <span data-count="487">l</span>et new_app =
-        if not (Set.is_empt<span data-count="487">y</span> update_args)
-        then <span data-count="164">M</span>ap.se<span data-count="164">t</span> add_app ~key:n ~data:(Set.to_lis<span data-count="164">t</span> update_args)
-        else <span data-count="323">a</span>dd_app
+      <span data-count="493">l</span>et new_app =
+        if not (Set.is_empt<span data-count="493">y</span> update_args)
+        then <span data-count="167">M</span>ap.se<span data-count="167">t</span> add_app ~key:n ~data:(Set.to_lis<span data-count="167">t</span> update_args)
+        else <span data-count="326">a</span>dd_app
       in
       let new_gvars = Set.add gvars n in
-      <span data-count="487">(</span>r, n, new_args, new_body), new_gvars, new_app
+      <span data-count="493">(</span>r, n, new_args, new_body), new_gvars, new_app
     in
     let (r, n, a, anf_e), b, c = new_anf_bindings in
     ALet (r, n, a, anf_e), b, c
@@ -927,18 +927,18 @@ let add_free gvars add_app = function
 ;;
 
 let anf statments =
-  <span data-count="48">l</span>et a, _, _ = lift_statments statments in
-  <span data-count="48">l</span>et gvars = Set.add set_empty "print_int" in
-  <span data-count="48">l</span>et gvars = Set.add gvars "()" in
-  <span data-count="48">l</span>et b, _, _ =
+  <span data-count="49">l</span>et a, _, _ = lift_statments statments in
+  <span data-count="49">l</span>et gvars = Set.add set_empty "print_int" in
+  <span data-count="49">l</span>et gvars = Set.add gvars "()" in
+  <span data-count="49">l</span>et b, _, _ =
     List.fold
       ~init:([], gvars, map_empty)
       ~f:(fun (acc, gvars, new_app) anf_binding -&gt;
-        <span data-count="487">l</span>et a, b, c = add_free gvars new_app anf_binding in
-        <span data-count="487">a</span> :: acc, b, c)
+        <span data-count="493">l</span>et a, b, c = add_free gvars new_app anf_binding in
+        <span data-count="493">a</span> :: acc, b, c)
       a
   in
-  <span data-count="48">L</span>ist.rev b
+  <span data-count="49">L</span>ist.rev b
 ;;
 </code></pre>
       </div>

@@ -216,10 +216,10 @@ open Ast
 open PprinterAST
 
 let rec pp_llexpression formatter e =
-  <span data-count="659">m</span>atch e with
-  | <span data-count="111">L</span>LConst c -&gt; pp_constant formatter c
-  | <span data-count="279">L</span>LVar n -&gt; Format.fprintf formatter "%s" n
-  | <span data-count="162">L</span>LApp (e1, e2) -&gt;
+  <span data-count="677">m</span>atch e with
+  | <span data-count="115">L</span>LConst c -&gt; pp_constant formatter c
+  | <span data-count="285">L</span>LVar n -&gt; Format.fprintf formatter "%s" n
+  | <span data-count="167">L</span>LApp (e1, e2) -&gt;
     Format.fprintf formatter "(%a %a)" pp_llexpression e1 pp_llexpression e2
   | <span data-count="13">L</span>LIfElse (i, t, e) -&gt;
     Format.fprintf
@@ -232,7 +232,7 @@ let rec pp_llexpression formatter e =
       pp_llexpression
       e
   | <span data-count="9">L</span>LTuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="9">e</span> pp_llexpression) t
-  | <span data-count="55">L</span>LEbinOp (op, l, r) -&gt;
+  | <span data-count="58">L</span>LEbinOp (op, l, r) -&gt;
     Format.fprintf formatter "(%a %a %a)" pp_llexpression l pp_binop op pp_llexpression r
   | <span data-count="23">L</span>LVars (head, tail) -&gt;
     let rec print_list formatter = function
@@ -267,21 +267,21 @@ let rec pp_llexpression formatter e =
 ;;
 
 let pp_llbindings formatter bindings =
-  <span data-count="21">L</span>ist.iter
+  <span data-count="22">L</span>ist.iter
     (fun bind -&gt;
-      <span data-count="107">m</span>atch bind with
-      | <span data-count="106">L</span>LLet (r, n_list, p, e) -&gt;
+      <span data-count="109">m</span>atch bind with
+      | <span data-count="108">L</span>LLet (r, n_list, p, e) -&gt;
         Format.fprintf
           formatter
           "let %a %s %a = %a"
           pp_rec
           r
           n_list
-          (fun fmt -&gt; <span data-count="106">L</span>ist.iter (fun pat -&gt; <span data-count="114">F</span>ormat.fprintf fmt "%a " pp_pattern pat))
+          (fun fmt -&gt; <span data-count="108">L</span>ist.iter (fun pat -&gt; <span data-count="118">F</span>ormat.fprintf fmt "%a " pp_pattern pat))
           p
           pp_llexpression
           e;
-        <span data-count="106">F</span>ormat.fprintf formatter "\n"
+        <span data-count="108">F</span>ormat.fprintf formatter "\n"
       | <span data-count="1">L</span>LLetPat (n_list, e) -&gt;
         Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_llexpression e;
         <span data-count="1">F</span>ormat.fprintf formatter "\n"
@@ -291,7 +291,7 @@ let pp_llbindings formatter bindings =
     bindings
 ;;
 
-let pp_lambda_lifting bindings = <span data-count="21">F</span>ormat.asprintf "%a" pp_llbindings bindings
+let pp_lambda_lifting bindings = <span data-count="22">F</span>ormat.asprintf "%a" pp_llbindings bindings
 </code></pre>
       </div>
     </div>
