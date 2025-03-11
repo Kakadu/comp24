@@ -1,5 +1,10 @@
+(** Copyright 2024-2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Llvm
 open Llvm_target
+open Utils.Predefined_ops
 
 (*Env init*)
 let context = global_context ()
@@ -30,7 +35,7 @@ let build_list_type element_type =
 
 (*Predefined*)
 
-let predefined =
+let predefined_funcs =
   [ "create_int", function_type ptr_t [| int_t |]
   ; "create_bool", function_type ptr_t [| bool_t |]
   ; "create_unit", function_type ptr_t [||]
@@ -47,30 +52,16 @@ let predefined =
   ; "get_int", function_type int_t [| ptr_t |]
   ; "get_bool", function_type bool_t [| ptr_t |]
   ; "get_char", function_type char_t [| ptr_t |]
-  ; "__op_plus", function_type int_t [| int_t; int_t |]
-  ; "__op_minus", function_type int_t [| int_t; int_t |]
-  ; "__op_mult", function_type int_t [| int_t; int_t |]
-  ; "__op_div", function_type int_t [| int_t; int_t |]
-  ; "__op_neg", function_type int_t [| int_t |]
-  ; "__op_pos", function_type int_t [| int_t |]
-  ; "not", function_type bool_t [| bool_t |]
-  ; "__op_gt", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_ge", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_lt", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_le", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_eq", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_neq", function_type bool_t [| ptr_t; ptr_t |]
-  ; "__op_or", function_type bool_t [| bool_t; bool_t |]
-  ; "__op_and", function_type bool_t [| bool_t; bool_t |]
-  ; "__op_phys_eq", function_type bool_t [| ptr_t; ptr_t |]
-  ; "print_int", function_type void_t [| int_t |]
   ]
 ;;
 
 (*Hashtable*)
 
 let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
-let variable_type_table : (string, Llvm.lltype) Hashtbl.t = Hashtbl.create 10
+
+let variable_type_table : (string, Llvm.lltype) Hashtbl.t =
+  Hashtbl.create (List.length predefined_funcs * 2)
+;;
 
 let find t key =
   match Hashtbl.find_opt t key with
@@ -84,5 +75,16 @@ let predefined_init () =
        (fun (str, t) ->
          let () = ignore @@ declare_function str t my_module in
          Hashtbl.add variable_type_table str t)
-       predefined
+       predefined_funcs;
+  ignore
+  @@ List.map
+       (fun op ->
+         let t =
+           match op.alt_name with
+           | "print_int" -> op.llvm_t void_t ptr_t
+           | _ -> op.llvm_t ptr_t ptr_t
+         in
+         let () = ignore @@ declare_function op.alt_name t my_module in
+         Hashtbl.add variable_type_table op.alt_name t)
+       predefine_operators
 ;;

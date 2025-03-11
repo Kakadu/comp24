@@ -25,5 +25,5 @@ let () =
         | Result.Ok res ->
           (match Anf.rast_to_anf res with
            | Result.Error _ -> Format.printf "Converting to anf error\n"
-           | Result.Ok res -> Codegen.compile_program ~verbose:true res)))
+           | Result.Ok res -> Codegen.compile_program res)))
 ;;
