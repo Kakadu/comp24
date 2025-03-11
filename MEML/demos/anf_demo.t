@@ -1,5 +1,23 @@
 
   $ ./anf_demo.exe << EOF
+  > let sum a b c d = a + b + c + d
+  > let main = print_int(sum 1 2 3 4)
+  Types: 
+  val app: int
+  val bin_op: int -> int -> int -> int -> int
+  val bin_op0: int -> int -> int -> int
+  val bin_op1: int -> int -> int
+  val main: unit
+  val sum: int -> int -> int -> int -> int
+  
+  let  bin_op1 a b = (a + b)
+  let  bin_op0 a b c = (((bin_op1 a) b) + c)
+  let  bin_op a b c d = ((((bin_op0 a) b) c) + d)
+  let  sum a b c d = ((((bin_op a) b) c) d)
+  let  app  = ((((sum 1) 2) 3) 4)
+  let  main  = (print_int app)
+
+  $ ./anf_demo.exe << EOF
   > let sum = let a x = (fun y -> x + y) 2 in a 1
   Types: 
   val a: int -> int

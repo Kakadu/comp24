@@ -1,5 +1,11 @@
 
   $ ./closure_demo.exe << EOF
+  > let sum a b c d = a + b + c + d
+  > let main = print_int(sum 1 2 3 4)
+  let  sum a b c d  = (((a + b) + c) + d)
+  let  main  = (print_int ((((sum 1) 2) 3) 4))
+
+  $ ./closure_demo.exe << EOF
   > let sum = let a x = (fun y -> x + y) 2 in a 1
   let  sum  = 
     let  lambada x y  = (x + y)
