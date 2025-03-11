@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>lexer.ml &mdash; Coverage report</title>
-    <meta name="description" content="83.87% coverage in lib/parsing/lexer.ml">
+    <meta name="description" content="84.13% coverage in lib/parsing/lexer.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,17 +15,17 @@
           <span class="dirname">lib/parsing/</span>lexer.ml
         </a>
       </h1>
-      <h2>83.87%</h2>
+      <h2>84.13%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:11.99%"></span>
-      <span class="unvisited" style="bottom:11.33%"></span>
-      <span class="unvisited" style="bottom:6.00%"></span>
-      <span class="unvisited" style="bottom:5.00%"></span>
-      <span class="unvisited" style="bottom:4.66%"></span>
-      <span class="unvisited" style="bottom:4.33%"></span>
+      <span class="unvisited" style="bottom:12.28%"></span>
+      <span class="unvisited" style="bottom:11.62%"></span>
+      <span class="unvisited" style="bottom:6.31%"></span>
+      <span class="unvisited" style="bottom:5.31%"></span>
+      <span class="unvisited" style="bottom:4.98%"></span>
+      <span class="unvisited" style="bottom:4.65%"></span>
       <span class="unvisited" style="bottom:0.60%"></span>
-      <span class="unvisited" style="bottom:0.47%"></span>
+      <span class="unvisited" style="bottom:0.46%"></span>
       <span class="unvisited" style="bottom:0.27%"></span>
       <span class="unvisited" style="bottom:0.20%"></span>
     </div>
@@ -1494,18 +1494,18 @@
 <a id="L1460"></a><span > </span>
 <a id="L1461"></a><span class="visited"> </span>
 <a id="L1462"></a><span > </span>
-<a id="L1463"></a><span class="visited"> </span>
+<a id="L1463"></a><span > </span>
 <a id="L1464"></a><span > </span>
 <a id="L1465"></a><span > </span>
 <a id="L1466"></a><span class="visited"> </span>
 <a id="L1467"></a><span > </span>
-<a id="L1468"></a><span > </span>
-<a id="L1469"></a><span class="visited"> </span>
+<a id="L1468"></a><span class="visited"> </span>
+<a id="L1469"></a><span > </span>
 <a id="L1470"></a><span > </span>
-<a id="L1471"></a><span > </span>
-<a id="L1472"></a><span class="visited"> </span>
+<a id="L1471"></a><span class="visited"> </span>
+<a id="L1472"></a><span > </span>
 <a id="L1473"></a><span > </span>
-<a id="L1474"></a><span > </span>
+<a id="L1474"></a><span class="visited"> </span>
 <a id="L1475"></a><span > </span>
 <a id="L1476"></a><span > </span>
 <a id="L1477"></a><span class="visited"> </span>
@@ -1515,24 +1515,29 @@
 <a id="L1481"></a><span > </span>
 <a id="L1482"></a><span class="visited"> </span>
 <a id="L1483"></a><span > </span>
-<a id="L1484"></a><span class="visited"> </span>
+<a id="L1484"></a><span > </span>
 <a id="L1485"></a><span > </span>
 <a id="L1486"></a><span > </span>
 <a id="L1487"></a><span class="visited"> </span>
 <a id="L1488"></a><span > </span>
-<a id="L1489"></a><span > </span>
+<a id="L1489"></a><span class="visited"> </span>
 <a id="L1490"></a><span > </span>
 <a id="L1491"></a><span > </span>
-<a id="L1492"></a><span class="unvisited"> </span>
+<a id="L1492"></a><span class="visited"> </span>
 <a id="L1493"></a><span > </span>
-<a id="L1494"></a><span class="unvisited"> </span>
+<a id="L1494"></a><span > </span>
 <a id="L1495"></a><span > </span>
 <a id="L1496"></a><span > </span>
 <a id="L1497"></a><span class="unvisited"> </span>
-<a id="L1498"></a><span class="unvisited"> </span>
-<a id="L1499"></a><span > </span>
+<a id="L1498"></a><span > </span>
+<a id="L1499"></a><span class="unvisited"> </span>
 <a id="L1500"></a><span > </span>
 <a id="L1501"></a><span > </span>
+<a id="L1502"></a><span class="unvisited"> </span>
+<a id="L1503"></a><span class="unvisited"> </span>
+<a id="L1504"></a><span > </span>
+<a id="L1505"></a><span > </span>
+<a id="L1506"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -3038,6 +3043,11 @@
 <a href="#L1499">1499</a>
 <a href="#L1500">1500</a>
 <a href="#L1501">1501</a>
+<a href="#L1502">1502</a>
+<a href="#L1503">1503</a>
+<a href="#L1504">1504</a>
+<a href="#L1505">1505</a>
+<a href="#L1506">1506</a>
 </pre>
 <pre><code class="ocaml"># 1 "lib/parsing/lexer.mll"
  
@@ -3049,9 +3059,9 @@ exception SyntaxError of string
 # 9 "lib/parsing/lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base =
-   "\000\000\206\255\207\255\077\000\194\000\152\000\002\000\003\000\
+   "\000\000\205\255\206\255\077\000\194\000\152\000\002\000\003\000\
     \031\000\035\000\222\255\223\255\224\255\061\000\227\255\228\255\
-    \229\255\077\000\232\255\233\255\234\255\178\000\016\001\012\000\
+    \076\000\078\000\232\255\233\255\234\255\178\000\016\001\013\000\
     \001\000\091\001\166\001\241\001\060\002\135\002\210\002\029\003\
     \104\003\179\003\254\003\073\004\148\004\254\255\001\000\003\000\
     \223\004\042\005\117\005\192\005\011\006\086\006\161\006\236\006\
@@ -3059,27 +3069,27 @@ let __ocaml_lex_tables = {
     \143\009\218\009\037\010\112\010\187\010\006\011\081\011\156\011\
     \231\011\050\012\125\012\200\012\019\013\094\013\169\013\244\013\
     \063\014\138\014\213\014\032\015\107\015\182\015\001\016\076\016\
-    \151\016\239\255\238\255\213\255\005\000\242\016\096\000\214\255\
-    \231\255\226\255\220\255\219\255\217\255\215\255\211\255\080\017\
-    ";
+    \151\016\239\255\238\255\212\255\005\000\242\016\097\000\214\255\
+    \231\255\213\255\226\255\220\255\219\255\217\255\215\255\210\255\
+    \080\017";
   Lexing.lex_backtrk =
-   "\255\255\255\255\255\255\047\000\049\000\043\000\039\000\037\000\
-    \049\000\034\000\255\255\255\255\255\255\030\000\255\255\255\255\
-    \255\255\025\000\255\255\255\255\255\255\020\000\019\000\018\000\
-    \049\000\047\000\047\000\047\000\047\000\047\000\047\000\047\000\
-    \047\000\047\000\047\000\047\000\047\000\255\255\001\000\000\000\
-    \005\000\010\000\002\000\047\000\047\000\047\000\047\000\003\000\
-    \047\000\047\000\004\000\047\000\047\000\047\000\006\000\047\000\
-    \045\000\047\000\047\000\007\000\047\000\047\000\008\000\047\000\
-    \047\000\046\000\047\000\009\000\047\000\011\000\047\000\047\000\
-    \047\000\012\000\047\000\047\000\013\000\047\000\014\000\047\000\
+   "\255\255\255\255\255\255\048\000\050\000\044\000\039\000\037\000\
+    \050\000\034\000\255\255\255\255\255\255\030\000\255\255\255\255\
+    \026\000\025\000\255\255\255\255\255\255\020\000\019\000\018\000\
+    \050\000\048\000\048\000\048\000\048\000\048\000\048\000\048\000\
+    \048\000\048\000\048\000\048\000\048\000\255\255\001\000\000\000\
+    \005\000\010\000\002\000\048\000\048\000\048\000\048\000\003\000\
+    \048\000\048\000\004\000\048\000\048\000\048\000\006\000\048\000\
+    \046\000\048\000\048\000\007\000\048\000\048\000\008\000\048\000\
+    \048\000\047\000\048\000\009\000\048\000\011\000\048\000\048\000\
+    \048\000\012\000\048\000\048\000\013\000\048\000\014\000\048\000\
     \015\000\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
-    ";
+    \255\255";
   Lexing.lex_default =
    "\001\000\000\000\000\000\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\000\000\000\000\000\000\255\255\000\000\000\000\
-    \000\000\255\255\000\000\000\000\000\000\255\255\255\255\255\255\
+    \255\255\255\255\000\000\000\000\000\000\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\000\000\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
@@ -3088,8 +3098,8 @@ let __ocaml_lex_tables = {
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\000\000\000\000\000\000\255\255\255\255\255\255\000\000\
-    \000\000\000\000\000\000\000\000\000\000\000\000\000\000\255\255\
-    ";
+    \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
+    \255\255";
   Lexing.lex_trans =
    "\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\039\000\037\000\037\000\039\000\038\000\000\000\000\000\
@@ -3098,17 +3108,17 @@ let __ocaml_lex_tables = {
     \039\000\008\000\004\000\039\000\000\000\084\000\024\000\081\000\
     \021\000\020\000\012\000\014\000\015\000\013\000\083\000\011\000\
     \005\000\005\000\005\000\005\000\005\000\005\000\005\000\005\000\
-    \005\000\005\000\017\000\016\000\006\000\009\000\007\000\093\000\
-    \092\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
+    \005\000\005\000\017\000\016\000\006\000\009\000\007\000\094\000\
+    \093\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
-    \003\000\003\000\003\000\019\000\091\000\018\000\010\000\022\000\
-    \090\000\026\000\034\000\003\000\003\000\032\000\031\000\003\000\
+    \003\000\003\000\003\000\019\000\092\000\018\000\010\000\022\000\
+    \091\000\026\000\034\000\003\000\003\000\032\000\031\000\003\000\
     \003\000\036\000\003\000\003\000\030\000\028\000\025\000\003\000\
     \003\000\003\000\029\000\035\000\033\000\003\000\003\000\027\000\
-    \003\000\003\000\003\000\089\000\023\000\003\000\003\000\003\000\
-    \003\000\003\000\003\000\003\000\003\000\003\000\003\000\088\000\
-    \082\000\087\000\000\000\000\000\000\000\000\000\003\000\003\000\
+    \003\000\003\000\003\000\090\000\023\000\003\000\003\000\003\000\
+    \003\000\003\000\003\000\003\000\003\000\003\000\003\000\089\000\
+    \088\000\082\000\087\000\000\000\000\000\000\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
@@ -3119,18 +3129,18 @@ let __ocaml_lex_tables = {
     \005\000\005\000\005\000\005\000\005\000\005\000\005\000\005\000\
     \005\000\005\000\084\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\083\000\085\000\000\000\000\000\000\000\
-    \000\000\000\000\095\000\095\000\094\000\095\000\095\000\095\000\
-    \095\000\000\000\095\000\095\000\095\000\000\000\095\000\000\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\000\000\000\000\000\000\000\000\
-    \002\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\000\000\095\000\
-    \095\000\095\000\000\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\000\000\095\000\
+    \000\000\000\000\096\000\096\000\095\000\096\000\096\000\096\000\
+    \096\000\000\000\096\000\096\000\096\000\000\000\096\000\000\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\000\000\000\000\000\000\000\000\
+    \002\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\000\000\096\000\
+    \096\000\096\000\000\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\000\000\096\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
@@ -3649,18 +3659,18 @@ let __ocaml_lex_tables = {
     \085\000\085\000\085\000\085\000\085\000\085\000\085\000\085\000\
     \085\000\085\000\085\000\085\000\085\000\085\000\085\000\085\000\
     \085\000\085\000\085\000\085\000\085\000\085\000\000\000\085\000\
-    \095\000\095\000\094\000\095\000\095\000\095\000\095\000\000\000\
-    \095\000\095\000\095\000\000\000\095\000\000\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\000\000\000\000\000\000\000\000\000\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\000\000\095\000\095\000\095\000\
-    \000\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\000\000\095\000\000\000\000\000\
+    \096\000\096\000\095\000\096\000\096\000\096\000\096\000\000\000\
+    \096\000\096\000\096\000\000\000\096\000\000\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\000\000\000\000\000\000\000\000\000\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\000\000\096\000\096\000\096\000\
+    \000\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\000\000\096\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
@@ -3695,8 +3705,8 @@ let __ocaml_lex_tables = {
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\013\000\000\000\003\000\003\000\003\000\
-    \003\000\003\000\003\000\003\000\003\000\003\000\003\000\017\000\
-    \023\000\086\000\255\255\255\255\255\255\255\255\003\000\003\000\
+    \003\000\003\000\003\000\003\000\003\000\003\000\003\000\016\000\
+    \017\000\023\000\086\000\255\255\255\255\255\255\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
     \003\000\003\000\003\000\003\000\003\000\003\000\003\000\003\000\
@@ -4237,18 +4247,18 @@ let __ocaml_lex_tables = {
     \085\000\085\000\085\000\085\000\085\000\085\000\085\000\085\000\
     \085\000\085\000\085\000\085\000\085\000\085\000\085\000\085\000\
     \085\000\085\000\085\000\085\000\085\000\085\000\255\255\085\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\255\255\
-    \095\000\095\000\095\000\255\255\095\000\255\255\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\255\255\255\255\255\255\255\255\255\255\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\255\255\095\000\095\000\095\000\
-    \255\255\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\095\000\095\000\095\000\095\000\
-    \095\000\095\000\095\000\095\000\255\255\095\000\255\255\255\255\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\255\255\
+    \096\000\096\000\096\000\255\255\096\000\255\255\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\255\255\255\255\255\255\255\255\255\255\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\255\255\096\000\096\000\096\000\
+    \255\255\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\096\000\096\000\096\000\096\000\
+    \096\000\096\000\096\000\096\000\255\255\096\000\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
@@ -4281,259 +4291,264 @@ let __ocaml_lex_tables = {
 }
 
 let rec read lexbuf =
-   <span data-count="15312">_</span>_ocaml_lex_read_rec lexbuf 0
+   <span data-count="15327">_</span>_ocaml_lex_read_rec lexbuf 0
 and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
-  <span data-count="15312">m</span>atch Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
-      | <span data-count="5962">0</span> -&gt;
-# 26 "lib/parsing/lexer.mll"
+  <span data-count="15327">m</span>atch Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
+      | <span data-count="5974">0</span> -&gt;
+# 28 "lib/parsing/lexer.mll"
                 ( read lexbuf )
 # 1250 "lib/parsing/lexer.ml"
 
   | <span data-count="783">1</span> -&gt;
-# 27 "lib/parsing/lexer.mll"
+# 29 "lib/parsing/lexer.mll"
                 ( new_line lexbuf; <span data-count="783">r</span>ead lexbuf )
 # 1255 "lib/parsing/lexer.ml"
 
   | <span data-count="37">2</span> -&gt;
-# 28 "lib/parsing/lexer.mll"
+# 30 "lib/parsing/lexer.mll"
                 ( INT )
 # 1260 "lib/parsing/lexer.ml"
 
   | <span data-count="9">3</span> -&gt;
-# 29 "lib/parsing/lexer.mll"
+# 31 "lib/parsing/lexer.mll"
                 ( STRING )
 # 1265 "lib/parsing/lexer.ml"
 
   | <span data-count="20">4</span> -&gt;
-# 30 "lib/parsing/lexer.mll"
+# 32 "lib/parsing/lexer.mll"
                 ( BOOL )
 # 1270 "lib/parsing/lexer.ml"
 
   | <span data-count="76">5</span> -&gt;
-# 31 "lib/parsing/lexer.mll"
+# 33 "lib/parsing/lexer.mll"
                 ( IF )
 # 1275 "lib/parsing/lexer.ml"
 
   | <span data-count="76">6</span> -&gt;
-# 32 "lib/parsing/lexer.mll"
+# 34 "lib/parsing/lexer.mll"
                 ( THEN )
 # 1280 "lib/parsing/lexer.ml"
 
   | <span data-count="76">7</span> -&gt;
-# 33 "lib/parsing/lexer.mll"
+# 35 "lib/parsing/lexer.mll"
                 ( ELSE )
 # 1285 "lib/parsing/lexer.ml"
 
   | <span data-count="133">8</span> -&gt;
-# 34 "lib/parsing/lexer.mll"
+# 36 "lib/parsing/lexer.mll"
                 ( FUN )
 # 1290 "lib/parsing/lexer.ml"
 
   | <span data-count="505">9</span> -&gt;
-# 35 "lib/parsing/lexer.mll"
+# 37 "lib/parsing/lexer.mll"
                 ( LET )
 # 1295 "lib/parsing/lexer.ml"
 
   | <span data-count="217">1</span>0 -&gt;
-# 36 "lib/parsing/lexer.mll"
+# 38 "lib/parsing/lexer.mll"
                 ( IN )
 # 1300 "lib/parsing/lexer.ml"
 
   | <span data-count="91">1</span>1 -&gt;
-# 37 "lib/parsing/lexer.mll"
+# 39 "lib/parsing/lexer.mll"
                 ( REC )
 # 1305 "lib/parsing/lexer.ml"
 
   | <span data-count="62">1</span>2 -&gt;
-# 38 "lib/parsing/lexer.mll"
+# 40 "lib/parsing/lexer.mll"
                 ( MATCH )
 # 1310 "lib/parsing/lexer.ml"
 
   | <span data-count="62">1</span>3 -&gt;
-# 39 "lib/parsing/lexer.mll"
+# 41 "lib/parsing/lexer.mll"
                 ( WITH )
 # 1315 "lib/parsing/lexer.ml"
 
   | <span data-count="11">1</span>4 -&gt;
-# 40 "lib/parsing/lexer.mll"
+# 42 "lib/parsing/lexer.mll"
                 ( LET_AND )
 # 1320 "lib/parsing/lexer.ml"
 
   | <span data-count="0">1</span>5 -&gt;
-# 41 "lib/parsing/lexer.mll"
+# 43 "lib/parsing/lexer.mll"
                 ( NOT )
 # 1325 "lib/parsing/lexer.ml"
 
   | <span data-count="3">1</span>6 -&gt;
-# 42 "lib/parsing/lexer.mll"
+# 44 "lib/parsing/lexer.mll"
                 ( AND )
 # 1330 "lib/parsing/lexer.ml"
 
   | <span data-count="0">1</span>7 -&gt;
-# 43 "lib/parsing/lexer.mll"
+# 45 "lib/parsing/lexer.mll"
                 ( OR  )
 # 1335 "lib/parsing/lexer.ml"
 
   | <span data-count="126">1</span>8 -&gt;
-# 44 "lib/parsing/lexer.mll"
+# 46 "lib/parsing/lexer.mll"
                 ( BAR )
 # 1340 "lib/parsing/lexer.ml"
 
   | <span data-count="12">1</span>9 -&gt;
-# 45 "lib/parsing/lexer.mll"
+# 47 "lib/parsing/lexer.mll"
                 ( WILDCARD )
 # 1345 "lib/parsing/lexer.ml"
 
   | <span data-count="467">2</span>0 -&gt;
-# 46 "lib/parsing/lexer.mll"
+# 48 "lib/parsing/lexer.mll"
                 ( LEFT_PARENTHESIS )
 # 1350 "lib/parsing/lexer.ml"
 
   | <span data-count="467">2</span>1 -&gt;
-# 47 "lib/parsing/lexer.mll"
+# 49 "lib/parsing/lexer.mll"
                 ( RIGHT_PARENTHESIS )
 # 1355 "lib/parsing/lexer.ml"
 
   | <span data-count="175">2</span>2 -&gt;
-# 48 "lib/parsing/lexer.mll"
+# 50 "lib/parsing/lexer.mll"
                 ( LEFT_SQ_BRACKET )
 # 1360 "lib/parsing/lexer.ml"
 
   | <span data-count="175">2</span>3 -&gt;
-# 49 "lib/parsing/lexer.mll"
+# 51 "lib/parsing/lexer.mll"
                 ( RIGHT_SQ_BRACKET )
 # 1365 "lib/parsing/lexer.ml"
 
   | <span data-count="193">2</span>4 -&gt;
-# 50 "lib/parsing/lexer.mll"
+# 52 "lib/parsing/lexer.mll"
                 ( DOUBLE_COLON )
 # 1370 "lib/parsing/lexer.ml"
 
   | <span data-count="66">2</span>5 -&gt;
-# 51 "lib/parsing/lexer.mll"
+# 53 "lib/parsing/lexer.mll"
                 ( COLON )
 # 1375 "lib/parsing/lexer.ml"
 
   | <span data-count="87">2</span>6 -&gt;
-# 52 "lib/parsing/lexer.mll"
+# 54 "lib/parsing/lexer.mll"
                 ( SEMICOLON )
 # 1380 "lib/parsing/lexer.ml"
 
   | <span data-count="154">2</span>7 -&gt;
-# 53 "lib/parsing/lexer.mll"
+# 55 "lib/parsing/lexer.mll"
                 ( COMMA )
 # 1385 "lib/parsing/lexer.ml"
 
   | <span data-count="161">2</span>8 -&gt;
-# 54 "lib/parsing/lexer.mll"
+# 56 "lib/parsing/lexer.mll"
                 ( PLUS )
 # 1390 "lib/parsing/lexer.ml"
 
   | <span data-count="281">2</span>9 -&gt;
-# 55 "lib/parsing/lexer.mll"
+# 57 "lib/parsing/lexer.mll"
                 ( ARROW )
 # 1395 "lib/parsing/lexer.ml"
 
   | <span data-count="75">3</span>0 -&gt;
-# 56 "lib/parsing/lexer.mll"
+# 58 "lib/parsing/lexer.mll"
                 ( MINUS )
 # 1400 "lib/parsing/lexer.ml"
 
   | <span data-count="44">3</span>1 -&gt;
-# 57 "lib/parsing/lexer.mll"
+# 59 "lib/parsing/lexer.mll"
                 ( ASTERISK )
 # 1405 "lib/parsing/lexer.ml"
 
   | <span data-count="10">3</span>2 -&gt;
-# 58 "lib/parsing/lexer.mll"
+# 60 "lib/parsing/lexer.mll"
                 ( SLASH )
 # 1410 "lib/parsing/lexer.ml"
 
   | <span data-count="0">3</span>3 -&gt;
-# 59 "lib/parsing/lexer.mll"
+# 61 "lib/parsing/lexer.mll"
                 ( CARET )
 # 1415 "lib/parsing/lexer.ml"
 
   | <span data-count="556">3</span>4 -&gt;
-# 60 "lib/parsing/lexer.mll"
+# 62 "lib/parsing/lexer.mll"
                 ( EQUAL )
 # 1420 "lib/parsing/lexer.ml"
 
   | <span data-count="5">3</span>5 -&gt;
-# 61 "lib/parsing/lexer.mll"
+# 63 "lib/parsing/lexer.mll"
                 ( IDENTICAL_EQ )
 # 1425 "lib/parsing/lexer.ml"
 
   | <span data-count="0">3</span>6 -&gt;
-# 62 "lib/parsing/lexer.mll"
+# 64 "lib/parsing/lexer.mll"
                 ( NOT_EQUAL)
 # 1430 "lib/parsing/lexer.ml"
 
   | <span data-count="0">3</span>7 -&gt;
-# 63 "lib/parsing/lexer.mll"
+# 65 "lib/parsing/lexer.mll"
                 ( GREATER_THAN )
 # 1435 "lib/parsing/lexer.ml"
 
   | <span data-count="0">3</span>8 -&gt;
-# 64 "lib/parsing/lexer.mll"
+# 66 "lib/parsing/lexer.mll"
                 ( GREATER_THAN_EQUAL )
 # 1440 "lib/parsing/lexer.ml"
 
   | <span data-count="6">3</span>9 -&gt;
-# 65 "lib/parsing/lexer.mll"
+# 67 "lib/parsing/lexer.mll"
                 ( LESS_THAN )
 # 1445 "lib/parsing/lexer.ml"
 
   | <span data-count="15">4</span>0 -&gt;
-# 66 "lib/parsing/lexer.mll"
+# 68 "lib/parsing/lexer.mll"
                 ( LESS_THAN_EQUAL )
 # 1450 "lib/parsing/lexer.ml"
 
   | <span data-count="1">4</span>1 -&gt;
-# 67 "lib/parsing/lexer.mll"
+# 69 "lib/parsing/lexer.mll"
                 ( read lexbuf )
 # 1455 "lib/parsing/lexer.ml"
 
-  | <span data-count="148">4</span>2 -&gt;
-# 68 "lib/parsing/lexer.mll"
-                ( TYPE_UNIT )
+  | <span data-count="3">4</span>2 -&gt;
+# 70 "lib/parsing/lexer.mll"
+                ( read lexbuf )
 # 1460 "lib/parsing/lexer.ml"
 
-  | <span data-count="792">4</span>3 -&gt;
-# 69 "lib/parsing/lexer.mll"
-                ( TYPE_INT (int_of_strin<span data-count="792">g</span> (Lexing.lexem<span data-count="792">e</span> lexbuf)) )
+  | <span data-count="148">4</span>3 -&gt;
+# 71 "lib/parsing/lexer.mll"
+                ( TYPE_UNIT )
 # 1465 "lib/parsing/lexer.ml"
 
-  | <span data-count="2">4</span>4 -&gt;
-# 70 "lib/parsing/lexer.mll"
+  | <span data-count="792">4</span>4 -&gt;
+# 72 "lib/parsing/lexer.mll"
+                ( TYPE_INT (int_of_strin<span data-count="792">g</span> (Lexing.lexem<span data-count="792">e</span> lexbuf)) )
+# 1470 "lib/parsing/lexer.ml"
+
+  | <span data-count="2">4</span>5 -&gt;
+# 73 "lib/parsing/lexer.mll"
                 ( let str = Lexing.lexeme lexbuf in
                     <span data-count="2">T</span>YPE_STRING (String.su<span data-count="2">b</span> str 1 (String.lengt<span data-count="2">h</span> str - 2)))
-# 1471 "lib/parsing/lexer.ml"
-
-  | <span data-count="28">4</span>5 -&gt;
-# 72 "lib/parsing/lexer.mll"
-                ( TYPE_BOOL (true) )
 # 1476 "lib/parsing/lexer.ml"
 
-  | <span data-count="13">4</span>6 -&gt;
-# 73 "lib/parsing/lexer.mll"
-                ( TYPE_BOOL (false) )
+  | <span data-count="28">4</span>6 -&gt;
+# 75 "lib/parsing/lexer.mll"
+                ( TYPE_BOOL (true) )
 # 1481 "lib/parsing/lexer.ml"
 
-  | <span data-count="2825">4</span>7 -&gt;
-# 74 "lib/parsing/lexer.mll"
-                ( IDENTIFIER (Lexing.lexem<span data-count="2825">e</span> lexbuf))
+  | <span data-count="13">4</span>7 -&gt;
+# 76 "lib/parsing/lexer.mll"
+                ( TYPE_BOOL (false) )
 # 1486 "lib/parsing/lexer.ml"
 
-  | <span data-count="305">4</span>8 -&gt;
-# 75 "lib/parsing/lexer.mll"
-                ( EOF )
+  | <span data-count="2825">4</span>8 -&gt;
+# 77 "lib/parsing/lexer.mll"
+                ( IDENTIFIER (Lexing.lexem<span data-count="2825">e</span> lexbuf))
 # 1491 "lib/parsing/lexer.ml"
 
-  | <span data-count="0">4</span>9 -&gt;
-# 76 "lib/parsing/lexer.mll"
-        ( raise (SyntaxError ("Unexpected char: " ^ Lexing.lexem<span data-count="0">e</span> lexbuf)) )
+  | <span data-count="305">4</span>9 -&gt;
+# 78 "lib/parsing/lexer.mll"
+                ( EOF )
 # 1496 "lib/parsing/lexer.ml"
+
+  | <span data-count="0">5</span>0 -&gt;
+# 79 "lib/parsing/lexer.mll"
+        ( raise (SyntaxError ("Unexpected char: " ^ Lexing.lexem<span data-count="0">e</span> lexbuf)) )
+# 1501 "lib/parsing/lexer.ml"
 
   | <span data-count="0">_</span>_ocaml_lex_state -&gt; lexbuf.Lexing.refill_buff lexbuf;
       <span data-count="0">_</span>_ocaml_lex_read_rec lexbuf __ocaml_lex_state
