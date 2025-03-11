@@ -4,6 +4,34 @@
   target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
   target triple = "x86_64-pc-linux-gnu"
   
+  declare ptr @create_int(i64 %0)
+  
+  declare ptr @create_bool(i1 %0)
+  
+  declare ptr @create_unit()
+  
+  declare ptr @create_char(i8 %0)
+  
+  declare ptr @create_string(...)
+  
+  declare ptr @create_apply(...)
+  
+  declare ptr @create_tuple(i64 %0, ...)
+  
+  declare ptr @create_list(ptr %0, ptr %1)
+  
+  declare ptr @create_empty_list()
+  
+  declare ptr @create_cons(i1 %0, ptr %1)
+  
+  declare ptr @create_closure(ptr %0, i64 %1)
+  
+  declare i64 @get_int(ptr %0)
+  
+  declare i1 @get_bool(ptr %0)
+  
+  declare i8 @get_char(ptr %0)
+  
   declare i64 @__op_plus(i64 %0, i64 %1)
   
   declare i64 @__op_minus(i64 %0, i64 %1)
@@ -38,19 +66,15 @@
   
   declare void @print_int(i64 %0)
   
+  define ptr @abs_value(ptr %n) {
+  entry:
+    %boxed_int = call ptr @create_int(i64 52)
+    %n1 = load ptr, ptr %n, align 8
+    %call_tmp = call i64 @__op_plus(ptr %boxed_int, ptr %n1)
+    ret i64 %call_tmp
+  }
+  
   define i64 @main() {
   entry:
-    %list_node = alloca { i64, ptr }, align 8
-    %value_ptr = getelementptr inbounds { i64, ptr }, ptr %list_node, i32 0, i32 0
-    %next_ptr = getelementptr inbounds { i64, ptr }, ptr %list_node, i32 0, i32 1
-    store i64 2, ptr %value_ptr, align 8
-    store ptr null, ptr %next_ptr, align 8
-    %list_node1 = alloca { i64, ptr }, align 8
-    %value_ptr2 = getelementptr inbounds { i64, ptr }, ptr %list_node1, i32 0, i32 0
-    %next_ptr3 = getelementptr inbounds { i64, ptr }, ptr %list_node1, i32 0, i32 1
-    store i64 1, ptr %value_ptr2, align 8
-    store ptr %list_node, ptr %next_ptr3, align 8
-    %x = alloca ptr, align 8
-    store ptr %list_node1, ptr %x, align 8
     ret i64 0
   }

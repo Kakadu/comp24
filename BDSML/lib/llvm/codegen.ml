@@ -3,55 +3,57 @@ open Llvm_init
 open Middleend.Anf_ast
 open Parser.Ast
 
-let build_nil = const_null ptr_t
+let lookup_func str =
+  match lookup_function str my_module with
+  | Some f -> f
+  | None -> failwith "func defenetly should be defined"
+;;
 
-let build_cons element list_ptr list_type =
-  let node_alloc = build_alloca list_type "list_node" builder in
-  let value_field = build_struct_gep list_type node_alloc 0 "value_ptr" builder in
-  let next_field = build_struct_gep list_type node_alloc 1 "next_ptr" builder in
-  let _ = build_store element value_field builder in
-  let _ = build_store list_ptr next_field builder in
-  node_alloc
+let compile_simple_type t v =
+  let name = "create_" ^ t in
+  let func = lookup_func name in
+  let ft = find variable_type_table name in
+  build_call ft func v ("boxed_" ^ t) builder
 ;;
 
 let rec compile_aexpr = function
   | AExp_constant c ->
     (match c with
-     | Const_int i -> const_int int_t i
-     | Const_bool b -> const_int bool_t (if b then 1 else 0)
-     | Const_char c -> const_int char_t @@ Char.code c
-     | Const_string s -> const_string context s
-     | Const_unit ->
-       let fn_t = function_type void_t [||] in
-       define_function "unit_t" fn_t my_module)
+     | Const_int i -> compile_simple_type "int" [| const_int int_t i |]
+     | Const_bool b ->
+       compile_simple_type "bool" [| const_int bool_t (if b then 1 else 0) |]
+     | Const_char c -> compile_simple_type "char" [| const_int char_t @@ Char.code c |]
+     | Const_string s -> compile_simple_type "string" [| const_stringz context s |]
+     | Const_unit -> compile_simple_type "unit" [||])
   | AExp_tuple elems ->
-    let types = List.map compile_aexpr elems in
-    const_struct context (Array.of_list types)
-  | AExp_construct ("::", Some (AExp_tuple [ head; _ ])) as l ->
+    let args = List.map compile_aexpr elems in
+    let len = List.length args in
+    compile_simple_type "tuple" (Array.of_list (const_int int_t len :: args))
+  | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) ->
     let head' = compile_aexpr head in
-    let head_type = type_of head' in
-    compile_list l (build_list_type head_type)
-  | AExp_construct ("[]", _) -> build_nil
+    let tail' = compile_aexpr tail in
+    compile_simple_type "list" [| head'; tail' |]
+  | AExp_construct ("[]", _) -> compile_simple_type "empty_list" [||]
   | AExp_construct ("None", _) ->
-    const_struct context [| const_int bool_t 0; const_null ptr_t |]
+    compile_simple_type "cons" [| const_int bool_t 0; const_null ptr_t |]
   | AExp_construct ("Some", x) ->
     (match x with
      | None -> failwith "Impossible"
-     | Some x -> const_struct context [| const_int bool_t 1; compile_aexpr x |])
+     | Some x ->
+       let x' = compile_aexpr x in
+       compile_simple_type "cons" [| const_int bool_t 0; x' |])
   | AExp_construct (_, _) -> failwith "Not implemented"
   | AExp_ident id ->
-    (match Hashtbl.find_opt variable_value_table id with
-     | Some value -> build_load ptr_t value id builder
-     | None -> failwith ("Unknown variable: " ^ id))
+    let value = find variable_value_table id in
+    maybe_closure (build_load ptr_t value id builder)
 
-and compile_list list_expr list_type =
-  match list_expr with
-  | AExp_construct ("[]", None) -> build_nil
-  | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) ->
-    let compiled_head = compile_aexpr head in
-    let compiled_tail = compile_list tail list_type in
-    build_cons compiled_head compiled_tail list_type
-  | _ -> failwith "Not a valid list"
+and maybe_closure value =
+  match classify_value value with
+  | ValueKind.Function ->
+    let arity = Array.length (params value) in
+    let function_ptr = build_bitcast value ptr_t "func_ptr_cast" builder in
+    compile_simple_type "closure" [| function_ptr; const_int int_t arity |]
+  | _ -> value
 ;;
 
 let rec compile_cexpr = function
@@ -78,36 +80,36 @@ let rec compile_cexpr = function
      | None -> failwith ("Undefined function: " ^ s)
      | Some fn ->
        let compiled_args = List.map compile_aexpr ael in
-       build_call (type_of fn) fn (Array.of_list compiled_args) "call_tmp" builder)
+       let fnt = find variable_type_table s in
+       build_call fnt fn (Array.of_list compiled_args) "call_tmp" builder)
   | CExp_atom ae -> compile_aexpr ae
 
 and compile_lexpr = function
   | LLet_in (s, c, l) ->
     let value = compile_cexpr c in
-    let var_alloca = build_alloca (type_of value) s builder in
-    let _ = build_store value var_alloca builder in
-    Hashtbl.add variable_value_table s var_alloca;
-    let body_val = compile_lexpr l in
-    Hashtbl.remove variable_value_table s;
-    body_val
+    Hashtbl.add variable_value_table s value;
+    compile_lexpr l
   | LComplex c -> compile_cexpr c
 ;;
 
 let compile_func f =
   let name, args, body = f in
-  let ast = Middleend.Converter.anf_to_ast [ AbsStr_func f ] in
-  let bruh = Typing.Inference.infer_program ast in
-  let param_types = Array.make (List.length args) ptr_t in
-  let func_type = function_type ptr_t param_types in
-  let func = define_function name func_type my_module in
+  let () =
+    ignore
+    @@ declare_function
+         name
+         (function_type ptr_t (Array.init (List.length args) (fun _ -> ptr_t)))
+         my_module
+  in
+  let func = lookup_func name in
   let entry = append_block context "entry" func in
   position_at_end entry builder;
+  let func_params = params func in
   List.iteri
     (fun i arg_name ->
-      let param = param func i in
-      let param_alloca = build_alloca (Llvm.type_of param) arg_name builder in
-      let _ = build_store param param_alloca builder in
-      Hashtbl.add variable_value_table arg_name param_alloca)
+      let param = Array.get func_params i in
+      set_value_name arg_name param;
+      Hashtbl.add variable_value_table arg_name param)
     args;
   let body_value = compile_lexpr body in
   let _ = build_ret body_value builder in
@@ -126,20 +128,21 @@ let compile_funcs = function
         fl
     in
     ignore @@ List.map (fun func -> compile_func func) fl
-  | _ -> ()
+  | AbsStr_value (s, _) ->
+    let global_var = define_global s (const_null ptr_t) my_module in
+    Hashtbl.add variable_value_table s global_var
 ;;
 
 let compile_values = function
   | AbsStr_value (s, l) ->
-    let value = compile_lexpr l in
-    let var_alloca = build_alloca (type_of value) s builder in
-    let _ = build_store value var_alloca builder in
-    let () = Hashtbl.add variable_value_table s var_alloca in
-    ignore @@ value
+    let global_var = find variable_value_table s in
+    let compiled_val = compile_lexpr l in
+    ignore (build_store compiled_val global_var builder);
+    Hashtbl.add variable_value_table s compiled_val
   | _ -> ()
 ;;
 
-let declare_functions anf = List.iter (fun expr -> compile_funcs expr) anf
+let declare_everything anf = List.iter (fun expr -> compile_funcs expr) anf
 let declare_values anf = List.iter (fun expr -> compile_values expr) anf
 
 let compile_main program =
@@ -156,7 +159,7 @@ let compile_main program =
 
 let compile_program ?(verbose = false) program =
   let () = predefined_init () in
-  let () = declare_functions program in
+  let () = declare_everything program in
   let () = compile_main program in
   print_module "out.ll" my_module;
   if verbose then dump_module my_module
