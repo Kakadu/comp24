@@ -6,6 +6,8 @@ open HamsterML__Parser;;
 open HamsterML__Typing;;
 open HamsterML__CC;;
 open HamsterML__PrinterAst;;
+open HamsterML__Compiler;;
+
 open HamsterTest__LexerTest;;
 open HamsterTest__ParserTest;;
 open HamsterTest__TypingTest;;
@@ -21,3 +23,6 @@ let list_head = List.hd;;
 let list_tail = List.tl;;
 let tuple_get x i = match x with (_, res) when i = 1 -> res | (res, _) when i = 0 -> res | _ -> fst x;;
 let list_get x i = List.nth x i;;
+
+let codegen s = s |> anf_prog |> codegen
+let print_llvm_module the_module = let open Llvm in print_string (string_of_llmodule the_module)

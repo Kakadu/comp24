@@ -6,7 +6,7 @@ open Anf
 let global_context = global_context ()
 let builder = builder global_context
 let the_module = create_module global_context "HamsterML_LLVM_Compiler"
-let i64 = i16_type global_context
+let i64 = i64_type global_context
 let lookup_function_exception id llmodule = Option.get @@ lookup_function id llmodule
 
 let build_binary_operation = function
@@ -81,26 +81,22 @@ let rec codegen_immexpr env =
     |> list_helper
   | ImmId id ->
     (match Base.Map.find env id with
-     | Some value ->
-       let llval = value in
-       build_load i64 llval id builder
+     | Some value -> build_load i64 value id builder
      | None ->
-       let llv = lookup_function_exception id the_module in
-       if params llv |> Base.Array.length = 0
-       then (
-         let fnty = function_type i64 [| i64 |] in
-         let func = lookup_function_exception "hamsterml_apply0" the_module in
-         let args = [| build_pointercast llv i64 "ptr_to_i64_n" builder |] in
-         build_call fnty func args "hamsterml_apply0_n" builder)
-       else llv)
+       (match lookup_function id the_module with
+        | Some llv -> llv
+        | None -> failwith ("Unknown identifier: " ^ id)))
   | ImmOperation op ->
     (match op with
-     | Binary bop -> codegen_immexpr env (ImmId (BinOperator.to_string bop))
+     | Binary bop ->
+       let op_name = BinOperator.to_string bop in
+       (match lookup_function op_name the_module with
+        | Some llv -> llv
+        | None -> failwith ("Operator not pre-defined: " ^ op_name))
      | Unary uop -> codegen_immexpr env (ImmId (UnOperator.to_string uop)))
   | ImmUnit -> const_int i64 0
-;;
 
-let rec codegen_cexpr env = function
+and codegen_cexpr env = function
   | CImm ie -> codegen_immexpr env ie
   | CConstructList (ie1, ie2) ->
     let arg_value = codegen_immexpr env ie1 in
@@ -116,22 +112,46 @@ let rec codegen_cexpr env = function
         builder
     in
     result
-  | CApplication (ce1, ce2, ce_list) ->
-    let fun_name =
-      match ce1 with
-      | CImm (ImmId id) -> id
-      | _ -> failwith "not a function"
-    in
+  | CApplication (CImm (ImmId fun_name), arg, rest_args) ->
     let function_value =
       match Base.Map.find env fun_name with
-      | Some value -> build_load i64 value fun_name builder
-      | None -> lookup_function_exception fun_name the_module
+      | Some alloca -> build_load i64 alloca fun_name builder
+      | None ->
+        (match lookup_function fun_name the_module with
+         | Some fn -> fn
+         | None ->
+           (match fun_name with
+            | "+" | "-" | "*" | "/" | "<=" | ">=" | "<" | ">" | "=" | "!=" ->
+              let op =
+                match fun_name with
+                | "+" -> ADD
+                | "-" -> SUB
+                | "*" -> MUL
+                | "/" -> DIV
+                | "<=" -> LTE
+                | ">=" -> GTE
+                | "<" -> LT
+                | ">" -> GT
+                | "=" -> EQ
+                | "!=" -> NEQ
+                | _ -> failwith ("Unsupported operation: " ^ fun_name)
+              in
+              lookup_function_exception (BinOperator.to_string op) the_module
+            | _ -> failwith ("Unknown function: " ^ fun_name)))
     in
-    let args = Base.List.map ~f:(codegen_cexpr env) (ce2 :: ce_list) in
+    let args = Base.List.map ~f:(codegen_cexpr env) (arg :: rest_args) in
     let args_arr = Array.of_list args in
     let arg_types = Array.make (Array.length args_arr) i64 in
     let fnty = function_type i64 arg_types in
     build_call fnty function_value args_arr "calltmp" builder
+  | CApplication (func_expr, arg, rest_args) ->
+    (* Handle function application with expression as function *)
+    let function_value = codegen_cexpr env func_expr in
+    let args = Base.List.map ~f:(codegen_cexpr env) (arg :: rest_args) in
+    let args_arr = Array.of_list args in
+    let arg_types = Array.make (Array.length args_arr) i64 in
+    let fnty = function_type i64 arg_types in
+    build_call fnty function_value args_arr "indirect_calltmp" builder
   | CIf (ie_condition, ae_then, ae_opt_else) ->
     let start_bb = insertion_block builder in
     let condition = codegen_immexpr env ie_condition in
@@ -139,10 +159,15 @@ let rec codegen_cexpr env = function
     let then_block = append_block global_context "then" the_function in
     let else_block = append_block global_context "else" the_function in
     let merge_block = append_block global_context "ifcont" the_function in
+    (* Create conditional branch instruction at end of current block *)
+    position_at_end start_bb builder;
+    ignore (build_cond_br condition then_block else_block builder);
+    (* Generate 'then' block *)
     position_at_end then_block builder;
     let then_value = codegen_aexpr env ae_then in
     let then_block_end = insertion_block builder in
     ignore (build_br merge_block builder);
+    (* Generate 'else' block *)
     position_at_end else_block builder;
     let else_value =
       match ae_opt_else with
@@ -151,8 +176,7 @@ let rec codegen_cexpr env = function
     in
     let else_block_end = insertion_block builder in
     ignore (build_br merge_block builder);
-    position_at_end start_bb builder;
-    ignore (build_cond_br condition then_block else_block builder);
+    (* Generate merge block with phi node *)
     position_at_end merge_block builder;
     let incoming = [ then_value, then_block_end; else_value, else_block_end ] in
     let phi = build_phi incoming "iftmp" builder in
@@ -160,20 +184,24 @@ let rec codegen_cexpr env = function
 
 and codegen_aexpr env = function
   | ACExpr cexpr -> codegen_cexpr env cexpr
-  | ALetIn (_, cexpr, aexpr) ->
+  | ALetIn (Var id, cexpr, aexpr) ->
     let cexpr_value = codegen_cexpr env cexpr in
-    let alloca = build_alloca i64 "_" builder in
-    let _ = build_store cexpr_value alloca builder in
-    let env = Base.Map.add_exn env ~key:"_" ~data:alloca in
-    let aexpr_value = codegen_aexpr env aexpr in
-    aexpr_value
+    let alloca = build_alloca i64 id builder in
+    ignore (build_store cexpr_value alloca builder);
+    let new_env = Base.Map.set env ~key:id ~data:alloca in
+    codegen_aexpr new_env aexpr
+  | ALetIn (_, _, _) -> failwith "Only variable patterns are supported in let bindings"
 ;;
 
 let codegen_single_anf_binding = function
   | ALet (fun_name, arg_list, ae) ->
     let arg_types = Array.of_list (Base.List.map arg_list ~f:(fun _ -> i64)) in
     let func_type = function_type i64 arg_types in
-    let llvm_function = define_function fun_name func_type the_module in
+    let llvm_function =
+      match lookup_function fun_name the_module with
+      | Some f -> f
+      | None -> declare_function fun_name func_type the_module
+    in
     let entry_bb = append_block global_context "entry" llvm_function in
     position_at_end entry_bb builder;
     let fun_symtab =
@@ -183,35 +211,107 @@ let codegen_single_anf_binding = function
         ~f:(fun i table llvm_arg ->
           let arg_name = Base.List.nth_exn arg_list i in
           set_value_name arg_name llvm_arg;
-          Base.Map.add_exn table ~key:arg_name ~data:llvm_arg)
+          let alloca = build_alloca i64 arg_name builder in
+          ignore (build_store llvm_arg alloca builder);
+          Base.Map.set table ~key:arg_name ~data:alloca)
     in
     let body_val = codegen_aexpr fun_symtab ae in
-    let _ = build_ret body_val builder in
+    ignore (build_ret body_val builder);
     llvm_function
 ;;
 
 let codegen_anf_decl = function
   | ADSingleLet (_, single_anf_binding) -> codegen_single_anf_binding single_anf_binding
   | ADMutualRecDecl bindings ->
+    (* For mutual recursion, first declare all functions *)
     let llvalues = Base.List.map bindings ~f:codegen_single_anf_binding in
     (match Base.List.last llvalues with
      | Some llvalue -> llvalue
      | None -> const_null i64)
 ;;
 
-let stdlib = [ "print_int", 2 ]
+let stdlib =
+  [ "print_int", 1
+  ; "+", 2
+  ; "-", 2
+  ; "*", 2
+  ; "/", 2
+  ; "<=", 2
+  ; ">=", 2
+  ; "<", 2
+  ; ">", 2
+  ; "=", 2
+  ; "!=", 2
+  ]
+;;
 
 let codegen program =
-  let env =
-    Base.List.map stdlib ~f:(fun (id, args_num) ->
-      declare_function id (function_type i64 (Array.make args_num i64)) the_module)
+  (* Declare standard library functions *)
+  (* let stdlib =
+     Base.List.map stdlib ~f:(fun (id, args_num) ->
+     declare_function id (function_type i64 (Array.make args_num i64)) the_module)
+     in *)
+  (* Define binary operation wrapper functions *)
+  let define_binary_op op name =
+    let fnty = function_type i64 [| i64; i64 |] in
+    let fn = declare_function name fnty the_module in
+    let entry = append_block global_context "entry" fn in
+    position_at_end entry builder;
+    let lhs = param fn 0 in
+    let rhs = param fn 1 in
+    let build_op = build_binary_operation op in
+    let result = build_op lhs rhs "result" builder in
+    let final_result =
+      match op with
+      | EQ | NEQ | GT | GTE | LT | LTE -> build_zext result i64 "extended_result" builder
+      | _ -> result
+    in
+    ignore (build_ret final_result builder);
+    fn
   in
+  (* Create wrappers for binary operations *)
+  let _ = define_binary_op ADD "+" in
+  let _ = define_binary_op SUB "-" in
+  let _ = define_binary_op MUL "*" in
+  let _ = define_binary_op DIV "/" in
+  let _ = define_binary_op LTE "<=" in
+  let _ = define_binary_op GTE ">=" in
+  let _ = define_binary_op LT "<" in
+  let _ = define_binary_op GT ">" in
+  let _ = define_binary_op EQ "=" in
+  let _ = define_binary_op NEQ "!=" in
+  (* Add a main function to make the program executable *)
+  let define_main () =
+    let main_type = function_type i64 [||] in
+    let main_fn = declare_function "main" main_type the_module in
+    let entry = append_block global_context "entry" main_fn in
+    position_at_end entry builder;
+    (* If we have an entry function among our declarations, call it *)
+    let main_ret_val =
+      match
+        Base.List.find program ~f:(function
+          | ADSingleLet (_, ALet (name, [], _)) when name = "main" -> true
+          | _ -> false)
+      with
+      | Some _ ->
+        let main_impl = lookup_function_exception "main" the_module in
+        build_call (function_type i64 [||]) main_impl [||] "main_result" builder
+      | None -> const_int i64 0 (* Default return if no main function defined *)
+    in
+    ignore (build_ret main_ret_val builder);
+    main_fn
+  in
+  (* Generate code for program *)
   let rec codegen acc env = function
     | [] -> acc
     | head :: tail ->
       let head = codegen_anf_decl head in
       codegen (head :: acc) env tail
   in
-  let result = codegen env Base.Map.Poly.empty program in
-  Base.List.rev result
+  let result = codegen [] Base.Map.Poly.empty program in
+  (* Define main function after processing all declarations *)
+  let _ = define_main () in
+  ignore (Base.List.rev result);
+  (*TODO: remove ignore later*)
+  Llvm.print_module "output.ll" the_module
 ;;
