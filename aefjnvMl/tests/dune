@@ -1,31 +1,37 @@
 (executable
  (name parser_runner)
  (public_name psrser_runner)
+ (modules parser_runner)
  (libraries aefjnvMl_lib stdio))
 
 (executable
  (name inferencer_runner)
  (public_name inferencer_runner)
+ (modules inferencer_runner)
  (libraries aefjnvMl_lib stdio))
 
 (executable
  (name cc_runner)
  (public_name cc_runner)
+ (modules cc_runner)
  (libraries aefjnvMl_lib stdio middleend))
 
 (executable
  (name ll_runner)
  (public_name ll_runner)
+ (modules ll_runner)
  (libraries aefjnvMl_lib stdio middleend))
 
 (executable
  (name me_runner)
  (public_name me_runner)
+ (modules me_runner)
  (libraries aefjnvMl_lib stdio middleend))
 
 (executable
  (name anf_runner)
  (public_name anf_runner)
+ (modules anf_runner)
  (libraries aefjnvMl_lib stdio middleend))
 
 (cram
