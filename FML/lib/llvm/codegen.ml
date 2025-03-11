@@ -100,7 +100,16 @@ let rec compile_cexpr = function
     (match lookup_function name module_ with
      (* | Some f when Array.length (params f) = List.length args ->
         build_call (type_of f) f (Array.of_list compiled_args) name builder *)
-     | Some f ->
+     | Some _ ->
+       let f = compile_immexpr (ImmIdentifier name) in
+       build_call
+         (var_arg_function_type i64_t [| i64_t; i64_t |])
+         (Option.get (lookup_function "apply_args" module_))
+         (Array.of_list
+            ([ f; const_int i64_t (List.length compiled_args) ] @ compiled_args))
+         "applied_closure"
+         builder
+     (* | Some f ->
        let fun_ptr = build_ptrtoint f i64_t "" builder in
        let cl =
          build_call
@@ -116,14 +125,16 @@ let rec compile_cexpr = function
          (Array.of_list
             ([ cl; const_int i64_t (List.length compiled_args) ] @ compiled_args))
          "applied_closure"
-         builder
+         builder *)
      | None ->
-       (match lookup_global name module_ with
-        | Some g -> g
-        | None ->
-          (match lookup_name name with
-           | Some v -> v
-           | None -> failwith ("Unknown variable: " ^ name))))
+       let f = compile_immexpr (ImmIdentifier name) in
+       build_call
+         (var_arg_function_type i64_t [| i64_t; i64_t |])
+         (Option.get (lookup_function "apply_args" module_))
+         (Array.of_list
+            ([ f; const_int i64_t (List.length compiled_args) ] @ compiled_args))
+         "applied_closure"
+         builder)
   | CEIf (cond, then_e, else_e) ->
     (* let cond_v =
        build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder *)
