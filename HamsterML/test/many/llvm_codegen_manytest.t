@@ -1,8 +1,8 @@
-  $ ./LlvmCodegenRunner.exe << EOF | lli -load ../../lib/runtime.so
+  $ ./LlvmCodegenRunner.exe << EOF | lli-16 -load ../../lib/runtime.so
   > let a = print_int 1
   1
 
-  $ ./LlvmCodegenRunner.exe < manytests/typed/001fac.ml | lli -load ../../lib/runtime.so
+  $ ./LlvmCodegenRunner.exe < manytests/typed/001fac.ml | lli-16 -load ../../lib/runtime.so
   24
 
   $ ./LlvmCodegenRunner.exe << EOF
