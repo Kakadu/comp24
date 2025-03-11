@@ -47,3 +47,17 @@
 (cram
  (applies_to test_qcheck)
  (deps ./exe_qcheck.exe))
+
+(executable
+ (name demoLlVM)
+ (modules demoLlVM)
+ (public_name demoLlVM)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoLlVM)
+ (deps ./demoLlVM.exe
+ ../manytests/typed/001fac.ml
+ ../manytests/typed/002fac.ml
+ ../manytests/typed/003fib.ml
+ ../manytests/typed/004manyargs.ml))

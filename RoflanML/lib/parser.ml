@@ -259,7 +259,7 @@ let pexpr_fun () =
       lift2
         (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
         pe_base
-        (many (char ' ' *> ptoken pe_base))
+        (many (pspaces *> ptoken pe_base))
     in
     let pe_bin =
       let op_bin pe ops = plbinop pe ops in
