@@ -31,7 +31,7 @@ let disassemble_constructor = "__disassemble", "'a -> 'b", "__disassemble"
 let get_from_tuple = "__get_from_tuple", "'a -> int -> 'c", "__get_from_tuple"
 let same_cons = "__same_cons", "'a -> 'b -> bool", "__same_cons"
 let get_cons_param = "__get_cons_param", "'a -> 'b", "__get_cons_param"
-let exception_ = "__exception", "string -> unit", "__exception"
+let exception_ = "__exception", "string -> 'a", "__exception"
 
 (** List with all ops*)
 let predefine_operators =
