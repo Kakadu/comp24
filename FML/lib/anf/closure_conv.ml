@@ -22,7 +22,6 @@ let rec free_vars binded =
   | Pe_ELet (Rec, name, e1, e2) ->
     let binded = add binded name in
     union (free_vars binded e1) (free_vars binded e2)
-    (* hmmmmm....*)
   | Pe_ECons (e1, e2) -> union (free_vars binded e1) (free_vars binded e2)
   | Pe_ETuple es ->
     List.fold es ~init:empty ~f:(fun acc e -> union acc (free_vars binded e))
