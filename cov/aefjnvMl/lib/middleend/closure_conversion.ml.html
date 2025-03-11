@@ -463,7 +463,7 @@ open Common.Ast_construct
 
 let std_lib_names =
   let open LibF in
-  List.ma<span data-count="114">p</span> get_name base_lib_decls
+  List.ma<span data-count="119">p</span> get_name base_lib_decls
 ;;
 
 let eliminate_funs =
@@ -471,7 +471,7 @@ let eliminate_funs =
     | <span data-count="746">E</span>xp_function (p, e) -&gt; helper (p :: patterns) e
     | <span data-count="618">e</span>xpr -&gt; patterns, expr
   in
-  helpe<span data-count="114">r</span> []
+  helpe<span data-count="119">r</span> []
 ;;
 
 let pattern_vars =
@@ -481,7 +481,7 @@ let pattern_vars =
     | <span data-count="24">P</span>at_tuple es -&gt; List.fold_left helper acc es
     | <span data-count="386">_</span> -&gt; acc
   in
-  helpe<span data-count="114">r</span> []
+  helpe<span data-count="119">r</span> []
 ;;
 
 let rec construct_from_pats expr = function
@@ -489,8 +489,8 @@ let rec construct_from_pats expr = function
   | <span data-count="618">[</span>] -&gt; expr
 ;;
 
-let empty_set = Base.Set.empt<span data-count="114">y</span> (module Base.String)
-let set = Base.Set.of_lis<span data-count="114">t</span> (module Base.String)
+let empty_set = Base.Set.empt<span data-count="119">y</span> (module Base.String)
+let set = Base.Set.of_lis<span data-count="119">t</span> (module Base.String)
 
 let expr_vars =
   let pat_set p =
@@ -534,7 +534,7 @@ let expr_vars =
         ~init:acc
     | <span data-count="0">_</span> -&gt; acc
   in
-  helpe<span data-count="114">r</span> (se<span data-count="114">t</span> std_lib_names)
+  helpe<span data-count="119">r</span> (se<span data-count="119">t</span> std_lib_names)
 ;;
 
 let closure_conversion toplvl =

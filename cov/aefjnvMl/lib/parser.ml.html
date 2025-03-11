@@ -796,21 +796,21 @@ let is_digit = Char.is_digit
 
 let is_upper = function
   | <span data-count="0">'</span>A' .. 'Z' -&gt; true
-  | <span data-count="298694">_</span> -&gt; false
+  | <span data-count="301370">_</span> -&gt; false
 ;;
 
 let is_lower = function
-  | <span data-count="228174">'</span>a' .. 'z' -&gt; true
-  | <span data-count="205330">_</span> -&gt; false
+  | <span data-count="230088">'</span>a' .. 'z' -&gt; true
+  | <span data-count="207634">_</span> -&gt; false
 ;;
 
 let is_keyword = function
-  | <span data-count="3268">"</span>let"
+  | <span data-count="3288">"</span>let"
   | <span data-count="0">"</span>if"
-  | <span data-count="974">"</span>else"
+  | <span data-count="982">"</span>else"
   | <span data-count="0">"</span>fun"
   | <span data-count="0">"</span>function"
-  | <span data-count="974">"</span>then"
+  | <span data-count="982">"</span>then"
   | <span data-count="0">"</span>rec"
   | <span data-count="0">"</span>true"
   | <span data-count="0">"</span>false"
@@ -824,84 +824,84 @@ let is_keyword = function
   | <span data-count="9">"</span>unit"
   | <span data-count="52">"</span>and"
   | <span data-count="1570">"</span>in" -&gt; true
-  | <span data-count="58517">_</span> -&gt; false
+  | <span data-count="59277">_</span> -&gt; false
 ;;
 
-let is_alpha c = <span data-count="298694">i</span>s_uppe<span data-count="298694">r</span> <span data-count="0">c</span> || is_lower c
+let is_alpha c = <span data-count="301370">i</span>s_uppe<span data-count="301370">r</span> <span data-count="0">c</span> || is_lower c
 
 let is_ident_char = function
-  | <span data-count="177402">'</span>a' .. 'z' | <span data-count="0">'</span>A' .. 'Z' | <span data-count="650">'</span>0' .. '9' | <span data-count="7072">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
-  | <span data-count="68477">_</span> -&gt; false
+  | <span data-count="178386">'</span>a' .. 'z' | <span data-count="0">'</span>A' .. 'Z' | <span data-count="650">'</span>0' .. '9' | <span data-count="7072">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
+  | <span data-count="69283">_</span> -&gt; false
 ;;
 
 (*===================== Control characters =====================*)
 
-let skip_whitespace = take_whil<span data-count="175">e</span> is_whitespace
-let ptoken p = <span data-count="2866">s</span>kip_whitespace *&gt; p
-let token p = <span data-count="13091">s</span>kip_whitespace *&gt; strin<span data-count="13091">g</span> p
-let lp = toke<span data-count="175">n</span> "("
-let rp = toke<span data-count="175">n</span> ")"
-let parens p = <span data-count="5560">l</span>p *<span data-count="5560">&gt;</span> p &lt;* rp
-let sbrcts p = <span data-count="346">t</span>oke<span data-count="346">n</span> "[" *<span data-count="346">&gt;</span> p &lt;* toke<span data-count="346">n</span> "]"
-let dsmcln = toke<span data-count="175">n</span> ";;"
+let skip_whitespace = take_whil<span data-count="180">e</span> is_whitespace
+let ptoken p = <span data-count="2906">s</span>kip_whitespace *&gt; p
+let token p = <span data-count="13406">s</span>kip_whitespace *&gt; strin<span data-count="13406">g</span> p
+let lp = toke<span data-count="180">n</span> "("
+let rp = toke<span data-count="180">n</span> ")"
+let parens p = <span data-count="5635">l</span>p *<span data-count="5635">&gt;</span> p &lt;* rp
+let sbrcts p = <span data-count="356">t</span>oke<span data-count="356">n</span> "[" *<span data-count="356">&gt;</span> p &lt;* toke<span data-count="356">n</span> "]"
+let dsmcln = toke<span data-count="180">n</span> ";;"
 
 (*===================== Fold infix operators =====================*)
 
 let chainl1 e op =
-  <span data-count="692">l</span>et rec go acc = <span data-count="193526">l</span>ift<span data-count="193526">2</span> (fun f x -&gt; <span data-count="35186">f</span> acc x) op e &gt;&gt;<span data-count="193526">=</span> go &lt;|&gt; retur<span data-count="193526">n</span> acc in
+  <span data-count="712">l</span>et rec go acc = <span data-count="195258">l</span>ift<span data-count="195258">2</span> (fun f x -&gt; <span data-count="35574">f</span> acc x) op e &gt;&gt;<span data-count="195258">=</span> go &lt;|&gt; retur<span data-count="195258">n</span> acc in
   e &gt;&gt;= go
 ;;
 
 let rec chainr1 e op =
-  <span data-count="1619">e</span> &gt;&gt;= fun sub_e -&gt; <span data-count="121420">o</span>p &gt;&gt;<span data-count="121420">=</span> (fun f -&gt; <span data-count="914">c</span>hainr<span data-count="914">1</span> e op &gt;&gt;| <span data-count="914">f</span> sub_e) &lt;|&gt; retur<span data-count="121420">n</span> sub_e
+  <span data-count="1639">e</span> &gt;&gt;= fun sub_e -&gt; <span data-count="122522">o</span>p &gt;&gt;<span data-count="122522">=</span> (fun f -&gt; <span data-count="914">c</span>hainr<span data-count="914">1</span> e op &gt;&gt;| <span data-count="914">f</span> sub_e) &lt;|&gt; retur<span data-count="122522">n</span> sub_e
 ;;
 
 (*===================== Constants =====================*)
 
 let c_int =
-  ptoke<span data-count="175">n</span> @@ take_while<span data-count="175">1</span> is_digit
-  &gt;&gt;<span data-count="175">=</span> fun whole -&gt;
-  <span data-count="20784">l</span>et num = Stdlib.int_of_string_opt whole in
-  <span data-count="20784">m</span>atch num with
-  | <span data-count="20784">S</span>ome n -&gt; return @@ cin<span data-count="20784">t</span> n
+  ptoke<span data-count="180">n</span> @@ take_while<span data-count="180">1</span> is_digit
+  &gt;&gt;<span data-count="180">=</span> fun whole -&gt;
+  <span data-count="20844">l</span>et num = Stdlib.int_of_string_opt whole in
+  <span data-count="20844">m</span>atch num with
+  | <span data-count="20844">S</span>ome n -&gt; return @@ cin<span data-count="20844">t</span> n
   | <span data-count="0">N</span>one -&gt; fail "Integer literal exceeds the range of representable integers of type int"
 ;;
 
 let c_bool =
-  ptoke<span data-count="175">n</span> @@ take_while<span data-count="175">1</span> is_alpha
-  &gt;&gt;<span data-count="175">=</span> function
-  | <span data-count="890">"</span>true" -&gt; return @@ cboo<span data-count="890">l</span> true
-  | <span data-count="2232">"</span>false" -&gt; return @@ cboo<span data-count="2232">l</span> false
-  | <span data-count="64409">_</span> -&gt; fail "not a bool"
+  ptoke<span data-count="180">n</span> @@ take_while<span data-count="180">1</span> is_alpha
+  &gt;&gt;<span data-count="180">=</span> function
+  | <span data-count="926">"</span>true" -&gt; return @@ cboo<span data-count="926">l</span> true
+  | <span data-count="2236">"</span>false" -&gt; return @@ cboo<span data-count="2236">l</span> false
+  | <span data-count="65205">_</span> -&gt; fail "not a bool"
 ;;
 
-let c_nil = toke<span data-count="175">n</span> "[]" *<span data-count="175">&gt;</span> retur<span data-count="175">n</span> cnil
-let c_unit = toke<span data-count="175">n</span> "()" *<span data-count="175">&gt;</span> retur<span data-count="175">n</span> cunit
-let const = choic<span data-count="175">e</span> [ c_int; c_bool; c_nil; c_unit ]
+let c_nil = toke<span data-count="180">n</span> "[]" *<span data-count="180">&gt;</span> retur<span data-count="180">n</span> cnil
+let c_unit = toke<span data-count="180">n</span> "()" *<span data-count="180">&gt;</span> retur<span data-count="180">n</span> cunit
+let const = choic<span data-count="180">e</span> [ c_int; c_bool; c_nil; c_unit ]
 
 (*===================== Identifiers =====================*)
 
 let check_ident i =
-  <span data-count="65788">i</span>f is_keyword i
-  then <span data-count="7271">f</span>ail "keyword"
-  else <span data-count="58517">i</span>f String.equal "_" i
+  <span data-count="66584">i</span>f is_keyword i
+  then <span data-count="7307">f</span>ail "keyword"
+  else <span data-count="59277">i</span>f String.equal "_" i
   then <span data-count="22">f</span>ail "wildcard not expected"
-  else <span data-count="58495">r</span>eturn i
+  else <span data-count="59255">r</span>eturn i
 ;;
 
 let unchecked_ident =
-  ptoke<span data-count="175">n</span> peek_char
-  &gt;&gt;<span data-count="175">=</span> function
-  | <span data-count="136198">S</span>ome x when Char.equa<span data-count="136198">l</span> x '_<span data-count="1388">'</span> || is_lowe<span data-count="134810">r</span> <span data-count="67091">x</span> -&gt; <span data-count="68479">t</span>ake_while is_ident_char
-  | <span data-count="69699">_</span> -&gt; fail "not a valid identifier"
+  ptoke<span data-count="180">n</span> peek_char
+  &gt;&gt;<span data-count="180">=</span> function
+  | <span data-count="137740">S</span>ome x when Char.equa<span data-count="137740">l</span> x '_<span data-count="1388">'</span> || is_lowe<span data-count="136352">r</span> <span data-count="67897">x</span> -&gt; <span data-count="69285">t</span>ake_while is_ident_char
+  | <span data-count="70485">_</span> -&gt; fail "not a valid identifier"
 ;;
 
-let ident = unchecked_ident &gt;&gt;<span data-count="175">=</span> check_ident
+let ident = unchecked_ident &gt;&gt;<span data-count="180">=</span> check_ident
 
 let infix_op =
-  choic<span data-count="175">e</span>
-  @@ List.ma<span data-count="175">p</span>
-       ~f:(fun f -&gt; <span data-count="2275">t</span>oken @@ get_nam<span data-count="2275">e</span> f)
+  choic<span data-count="180">e</span>
+  @@ List.ma<span data-count="180">p</span>
+       ~f:(fun f -&gt; <span data-count="2340">t</span>oken @@ get_nam<span data-count="2340">e</span> f)
        [ op_mul
        ; op_div
        ; op_plus
@@ -918,12 +918,12 @@ let infix_op =
        ]
 ;;
 
-let un_op = toke<span data-count="175">n</span> @@ get_nam<span data-count="175">e</span> un_op_minus
+let un_op = toke<span data-count="180">n</span> @@ get_nam<span data-count="180">e</span> un_op_minus
 
 (*===================== Core types =====================*)
 
 let p_core_type =
-  fi<span data-count="175">x</span> (fun core_type -&gt;
+  fi<span data-count="180">x</span> (fun core_type -&gt;
     <span data-count="13">l</span>et p_tint = toke<span data-count="13">n</span> "int" *&gt; retur<span data-count="13">n</span> ptint in
     <span data-count="13">l</span>et p_tbool = toke<span data-count="13">n</span> "bool" *&gt; retur<span data-count="13">n</span> ptbool in
     <span data-count="13">l</span>et p_tunit = toke<span data-count="13">n</span> "unit" *&gt; retur<span data-count="13">n</span> ptunit in
@@ -945,61 +945,61 @@ let p_core_type =
 
 (*===================== Patterns =====================*)
 
-let p_const = const &gt;&gt;<span data-count="175">|</span> pconst
-let p_var = ident &gt;&gt;<span data-count="175">|</span> pvar
-let p_cons = toke<span data-count="175">n</span> "::" *<span data-count="175">&gt;</span> retur<span data-count="175">n</span> pcons
-let p_any = toke<span data-count="175">n</span> "_" *<span data-count="175">&gt;</span> skip_whitespace *<span data-count="175">&gt;</span> retur<span data-count="175">n</span> pany
-let tuple ident f = <span data-count="519">l</span>ift2 (fun h tl -&gt; <span data-count="2351">f</span> @@ (h :: tl)) ident (many<span data-count="519">1</span> (toke<span data-count="519">n</span> "," *<span data-count="519">&gt;</span> ident))
-let p_tuple pat = <span data-count="173">p</span>aren<span data-count="173">s</span> (tupl<span data-count="173">e</span> pat ptuple) &lt;|&gt; tupl<span data-count="173">e</span> pat ptuple
-let p_type_annotation = toke<span data-count="175">n</span> ":" *<span data-count="175">&gt;</span> p_core_type
+let p_const = const &gt;&gt;<span data-count="180">|</span> pconst
+let p_var = ident &gt;&gt;<span data-count="180">|</span> pvar
+let p_cons = toke<span data-count="180">n</span> "::" *<span data-count="180">&gt;</span> retur<span data-count="180">n</span> pcons
+let p_any = toke<span data-count="180">n</span> "_" *<span data-count="180">&gt;</span> skip_whitespace *<span data-count="180">&gt;</span> retur<span data-count="180">n</span> pany
+let tuple ident f = <span data-count="534">l</span>ift2 (fun h tl -&gt; <span data-count="2393">f</span> @@ (h :: tl)) ident (many<span data-count="534">1</span> (toke<span data-count="534">n</span> "," *<span data-count="534">&gt;</span> ident))
+let p_tuple pat = <span data-count="178">p</span>aren<span data-count="178">s</span> (tupl<span data-count="178">e</span> pat ptuple) &lt;|&gt; tupl<span data-count="178">e</span> pat ptuple
+let p_type_annotation = toke<span data-count="180">n</span> ":" *<span data-count="180">&gt;</span> p_core_type
 
 let pattern =
-  fi<span data-count="175">x</span> (fun pattern -&gt;
-    <span data-count="173">l</span>et term = choice [ paren<span data-count="173">s</span> pattern; p_const; p_var; p_any ] in
-    <span data-count="173">l</span>et term = p_tupl<span data-count="173">e</span> term &lt;|&gt; term in
-    <span data-count="173">l</span>et cons = chainr1 term p_cons in
-    <span data-count="173">l</span>et with_tp = parens @@ lift<span data-count="173">2</span> pconstraint pattern p_type_annotation in
-    <span data-count="173">c</span>ons &lt;|<span data-count="173">&gt;</span> term &lt;|&gt; with_tp)
+  fi<span data-count="180">x</span> (fun pattern -&gt;
+    <span data-count="178">l</span>et term = choice [ paren<span data-count="178">s</span> pattern; p_const; p_var; p_any ] in
+    <span data-count="178">l</span>et term = p_tupl<span data-count="178">e</span> term &lt;|&gt; term in
+    <span data-count="178">l</span>et cons = chainr1 term p_cons in
+    <span data-count="178">l</span>et with_tp = parens @@ lift<span data-count="178">2</span> pconstraint pattern p_type_annotation in
+    <span data-count="178">c</span>ons &lt;|<span data-count="178">&gt;</span> term &lt;|&gt; with_tp)
 ;;
 
 (*===================== Expressions =====================*)
 
-let e_const = const &gt;&gt;<span data-count="175">|</span> econst
-let e_val = choic<span data-count="175">e</span> [ ident; paren<span data-count="175">s</span> infix_op; paren<span data-count="175">s</span> un_op ] &gt;&gt;<span data-count="175">|</span> eval
-let e_cons = toke<span data-count="175">n</span> "::" *<span data-count="175">&gt;</span> retur<span data-count="175">n</span> econs
+let e_const = const &gt;&gt;<span data-count="180">|</span> econst
+let e_val = choic<span data-count="180">e</span> [ ident; paren<span data-count="180">s</span> infix_op; paren<span data-count="180">s</span> un_op ] &gt;&gt;<span data-count="180">|</span> eval
+let e_cons = toke<span data-count="180">n</span> "::" *<span data-count="180">&gt;</span> retur<span data-count="180">n</span> econs
 
 let e_list_basic expr =
-  <span data-count="346">l</span>et rec create_cons = function
+  <span data-count="356">l</span>et rec create_cons = function
     | <span data-count="2198">[</span>] -&gt; econst cnil
     | <span data-count="5608">h</span> :: tl -&gt; econs h (create_con<span data-count="5608">s</span> tl)
   in
-  sbrct<span data-count="346">s</span> @@ sep_b<span data-count="346">y</span> (toke<span data-count="346">n</span> ";") expr &gt;&gt;| create_cons
+  sbrct<span data-count="356">s</span> @@ sep_b<span data-count="356">y</span> (toke<span data-count="356">n</span> ";") expr &gt;&gt;| create_cons
 ;;
 
-let e_list_cons expr = <span data-count="173">c</span>hainr1 (expr &lt;|<span data-count="173">&gt;</span> e_list_basi<span data-count="173">c</span> expr) e_cons
-let e_tuple expr = <span data-count="173">t</span>uple expr etuple
-let e_app expr = <span data-count="173">c</span>hainl1 expr (retur<span data-count="173">n</span> eapp)
-let e_ite b t e = <span data-count="173">l</span>ift3 eite (toke<span data-count="173">n</span> "if" *<span data-count="173">&gt;</span> b) (toke<span data-count="173">n</span> "then" *<span data-count="173">&gt;</span> t) (toke<span data-count="173">n</span> "else" *<span data-count="173">&gt;</span> e)
-let p_type_annotation_opt = p_type_annotation &gt;&gt;<span data-count="175">|</span> (fun tp -&gt; <span data-count="11">S</span>ome tp) &lt;|<span data-count="175">&gt;</span> retur<span data-count="175">n</span> None
+let e_list_cons expr = <span data-count="178">c</span>hainr1 (expr &lt;|<span data-count="178">&gt;</span> e_list_basi<span data-count="178">c</span> expr) e_cons
+let e_tuple expr = <span data-count="178">t</span>uple expr etuple
+let e_app expr = <span data-count="178">c</span>hainl1 expr (retur<span data-count="178">n</span> eapp)
+let e_ite b t e = <span data-count="178">l</span>ift3 eite (toke<span data-count="178">n</span> "if" *<span data-count="178">&gt;</span> b) (toke<span data-count="178">n</span> "then" *<span data-count="178">&gt;</span> t) (toke<span data-count="178">n</span> "else" *<span data-count="178">&gt;</span> e)
+let p_type_annotation_opt = p_type_annotation &gt;&gt;<span data-count="180">|</span> (fun tp -&gt; <span data-count="11">S</span>ome tp) &lt;|<span data-count="180">&gt;</span> retur<span data-count="180">n</span> None
 
 let e_fun p_expr =
-  <span data-count="173">l</span>et pars_args = many1 pattern in
-  <span data-count="173">l</span>et pars_fun =
-    toke<span data-count="173">n</span> "fun"
-    *&gt; lift<span data-count="173">4</span>
-         (fun args tp_opt _ expr -&gt; <span data-count="2973">a</span>rgs, tp_opt, expr)
+  <span data-count="178">l</span>et pars_args = many1 pattern in
+  <span data-count="178">l</span>et pars_fun =
+    toke<span data-count="178">n</span> "fun"
+    *&gt; lift<span data-count="178">4</span>
+         (fun args tp_opt _ expr -&gt; <span data-count="3069">a</span>rgs, tp_opt, expr)
          pars_args
          p_type_annotation_opt
-         (toke<span data-count="173">n</span> "-&gt;")
+         (toke<span data-count="178">n</span> "-&gt;")
          p_expr
   in
-  <span data-count="173">p</span>ars_fun
+  <span data-count="178">p</span>ars_fun
   &gt;&gt;= fun (args, tp_opt, expr) -&gt;
-  <span data-count="2973">(</span>match List.re<span data-count="2973">v</span> args, tp_opt with
-   | <span data-count="2973">h</span> :: tl, None -&gt; retur<span data-count="2973">n</span> (h, tl)
+  <span data-count="3069">(</span>match List.re<span data-count="3069">v</span> args, tp_opt with
+   | <span data-count="3069">h</span> :: tl, None -&gt; retur<span data-count="3069">n</span> (h, tl)
    | <span data-count="0">h</span> :: tl, Some tp -&gt; retur<span data-count="0">n</span> (pconstrain<span data-count="0">t</span> h tp, tl)
    | <span data-count="0">_</span> -&gt; fai<span data-count="0">l</span> "The function must have at least one argument")
-  &gt;&gt;| fun (h, tl) -&gt; <span data-count="2973">L</span>ist.fold_left ~init:(efu<span data-count="2973">n</span> h expr) ~f:(fun acc x -&gt; <span data-count="768">e</span>fun x acc) tl
+  &gt;&gt;| fun (h, tl) -&gt; <span data-count="3069">L</span>ist.fold_left ~init:(efu<span data-count="3069">n</span> h expr) ~f:(fun acc x -&gt; <span data-count="768">e</span>fun x acc) tl
 ;;
 
 let rec constr_nested_expr t = function
@@ -1008,125 +1008,125 @@ let rec constr_nested_expr t = function
 ;;
 
 let e_value_binding pexpr =
-  <span data-count="2166">l</span>et pars_main_p =
-    choice [ ptoke<span data-count="2166">n</span> pattern; paren<span data-count="2166">s</span> infix_op &gt;&gt;<span data-count="2166">|</span> pvar; paren<span data-count="2166">s</span> un_op &gt;&gt;<span data-count="2166">|</span> pvar ]
+  <span data-count="2186">l</span>et pars_main_p =
+    choice [ ptoke<span data-count="2186">n</span> pattern; paren<span data-count="2186">s</span> infix_op &gt;&gt;<span data-count="2186">|</span> pvar; paren<span data-count="2186">s</span> un_op &gt;&gt;<span data-count="2186">|</span> pvar ]
   in
-  <span data-count="2166">l</span>et pars_args = skip_whitespace *&gt; man<span data-count="2166">y</span> pattern in
-  <span data-count="2166">l</span>et validate_main_p main_p args =
-    <span data-count="1844">m</span>atch main_p, args with
+  <span data-count="2186">l</span>et pars_args = skip_whitespace *&gt; man<span data-count="2186">y</span> pattern in
+  <span data-count="2186">l</span>et validate_main_p main_p args =
+    <span data-count="1854">m</span>atch main_p, args with
     | <span data-count="0">P</span>at_constraint _, _ :: _ -&gt;
       fail
         "Explicitly specifying the binding type is only available before '='. Syntax \
          error: let (a: int) b c ... = ..."
-    | <span data-count="1844">p</span>at, _ -&gt; return pat
+    | <span data-count="1854">p</span>at, _ -&gt; return pat
   in
   let collect_main_p tp_opt exp =
-    <span data-count="1844">m</span>atch tp_opt with
+    <span data-count="1854">m</span>atch tp_opt with
     | <span data-count="11">S</span>ome tp -&gt; constr_nested_expr tp exp
-    | <span data-count="1833">N</span>one -&gt; exp
+    | <span data-count="1843">N</span>one -&gt; exp
   in
   let collect_expr args expr =
-    <span data-count="1844">l</span>et f acc x = <span data-count="844">e</span>fun x acc in
+    <span data-count="1854">l</span>et f acc x = <span data-count="844">e</span>fun x acc in
     match List.rev args with
-    | <span data-count="668">h</span> :: tl -&gt; List.fold_left ~init:(efu<span data-count="668">n</span> h expr) ~f tl
-    | <span data-count="1176">_</span> -&gt; expr
+    | <span data-count="672">h</span> :: tl -&gt; List.fold_left ~init:(efu<span data-count="672">n</span> h expr) ~f tl
+    | <span data-count="1182">_</span> -&gt; expr
   in
   let construct_value_binding (main_p, args, tp_opt, expr) =
-    <span data-count="1844">v</span>alidate_main_<span data-count="1844">p</span> main_p args
+    <span data-count="1854">v</span>alidate_main_<span data-count="1854">p</span> main_p args
     &gt;&gt;= fun main_valid_p -&gt;
-    <span data-count="1844">r</span>etur<span data-count="1844">n</span> (collect_exp<span data-count="1844">r</span> args expr)
-    &gt;&gt;<span data-count="1844">|</span> collect_main_<span data-count="1844">p</span> tp_opt
-    &gt;&gt;| fun expr -&gt; <span data-count="1844">e</span>value_binding main_valid_p expr
+    <span data-count="1854">r</span>etur<span data-count="1854">n</span> (collect_exp<span data-count="1854">r</span> args expr)
+    &gt;&gt;<span data-count="1854">|</span> collect_main_<span data-count="1854">p</span> tp_opt
+    &gt;&gt;| fun expr -&gt; <span data-count="1854">e</span>value_binding main_valid_p expr
   in
-  lift<span data-count="2166">4</span>
-    (fun main_p args tp_opt expr -&gt; <span data-count="1844">m</span>ain_p, args, tp_opt, expr)
+  lift<span data-count="2186">4</span>
+    (fun main_p args tp_opt expr -&gt; <span data-count="1854">m</span>ain_p, args, tp_opt, expr)
     pars_main_p
     pars_args
     p_type_annotation_opt
-    (toke<span data-count="2166">n</span> "=" *<span data-count="2166">&gt;</span> pexpr)
+    (toke<span data-count="2186">n</span> "=" *<span data-count="2186">&gt;</span> pexpr)
   &gt;&gt;= construct_value_binding
 ;;
 
 let e_decl pexpr =
-  <span data-count="348">l</span>et pars_decl =
+  <span data-count="358">l</span>et pars_decl =
     let is_rec_flag = function
-      | <span data-count="353">"</span>rec" -&gt; return Recursive
-      | <span data-count="924">_</span> -&gt; fail "Nonrec"
+      | <span data-count="355">"</span>rec" -&gt; return Recursive
+      | <span data-count="932">_</span> -&gt; fail "Nonrec"
     in
     let is_and_flag = function
       | <span data-count="26">"</span>and" -&gt; return true
       | <span data-count="1388">_</span> -&gt; fail "No mutual recursion"
     in
-    let pars_d_rec = unchecked_ident &gt;&gt;<span data-count="348">=</span> is_rec_flag &lt;|&gt; retur<span data-count="348">n</span> Nonrecursive in
-    <span data-count="348">l</span>et pars_let = token "let" in
-    <span data-count="348">l</span>et pars_secondary_vb = (unchecked_ident &gt;&gt;<span data-count="348">=</span> is_and_flag) *&gt; e_value_bindin<span data-count="348">g</span> pexpr in
-    <span data-count="348">p</span>ars_let *<span data-count="348">&gt;</span> pars_d_rec
-    &gt;&gt;<span data-count="348">=</span> fun rflag -&gt;
-    <span data-count="1818">e</span>_value_bindin<span data-count="1818">g</span> pexpr
+    let pars_d_rec = unchecked_ident &gt;&gt;<span data-count="358">=</span> is_rec_flag &lt;|&gt; retur<span data-count="358">n</span> Nonrecursive in
+    <span data-count="358">l</span>et pars_let = token "let" in
+    <span data-count="358">l</span>et pars_secondary_vb = (unchecked_ident &gt;&gt;<span data-count="358">=</span> is_and_flag) *&gt; e_value_bindin<span data-count="358">g</span> pexpr in
+    <span data-count="358">p</span>ars_let *<span data-count="358">&gt;</span> pars_d_rec
+    &gt;&gt;<span data-count="358">=</span> fun rflag -&gt;
+    <span data-count="1828">e</span>_value_bindin<span data-count="1828">g</span> pexpr
     &gt;&gt;= fun first_vb -&gt;
-    <span data-count="1818">m</span>an<span data-count="1818">y</span> pars_secondary_vb &gt;&gt;| fun secondary_vbs -&gt; <span data-count="1818">r</span>flag, first_vb :: secondary_vbs
+    <span data-count="1828">m</span>an<span data-count="1828">y</span> pars_secondary_vb &gt;&gt;| fun secondary_vbs -&gt; <span data-count="1828">r</span>flag, first_vb :: secondary_vbs
   in
-  let construct_decl (rflag, vb_list) = <span data-count="1818">r</span>eturn @@ edec<span data-count="1818">l</span> rflag vb_list in
+  let construct_decl (rflag, vb_list) = <span data-count="1828">r</span>eturn @@ edec<span data-count="1828">l</span> rflag vb_list in
   pars_decl &gt;&gt;= construct_decl
 ;;
 
-let e_ptrn_matching pexpr = <span data-count="558">l</span>ift2 (fun k v -&gt; <span data-count="494">k</span>, v) (pattern &lt;<span data-count="558">*</span> toke<span data-count="558">n</span> "-&gt;") pexpr
+let e_ptrn_matching pexpr = <span data-count="568">l</span>ift2 (fun k v -&gt; <span data-count="494">k</span>, v) (pattern &lt;<span data-count="568">*</span> toke<span data-count="568">n</span> "-&gt;") pexpr
 
 let e_match pexpr =
-  <span data-count="173">t</span>oke<span data-count="173">n</span> "match"
-  *&gt; lift<span data-count="173">2</span>
+  <span data-count="178">t</span>oke<span data-count="178">n</span> "match"
+  *&gt; lift<span data-count="178">2</span>
        ematch
-       (pexpr &lt;<span data-count="173">*</span> toke<span data-count="173">n</span> "with")
-       (e_ptrn_matchin<span data-count="173">g</span> pexpr
-        &lt;|<span data-count="173">&gt;</span> toke<span data-count="173">n</span> "|" *<span data-count="173">&gt;</span> e_ptrn_matchin<span data-count="173">g</span> pexpr
-        &gt;&gt;<span data-count="173">=</span> fun p -&gt; <span data-count="212">m</span>an<span data-count="212">y</span> (toke<span data-count="212">n</span> "|" *<span data-count="212">&gt;</span> e_ptrn_matchin<span data-count="212">g</span> pexpr) &gt;&gt;| fun ps -&gt; <span data-count="212">p</span> :: ps)
+       (pexpr &lt;<span data-count="178">*</span> toke<span data-count="178">n</span> "with")
+       (e_ptrn_matchin<span data-count="178">g</span> pexpr
+        &lt;|<span data-count="178">&gt;</span> toke<span data-count="178">n</span> "|" *<span data-count="178">&gt;</span> e_ptrn_matchin<span data-count="178">g</span> pexpr
+        &gt;&gt;<span data-count="178">=</span> fun p -&gt; <span data-count="212">m</span>an<span data-count="212">y</span> (toke<span data-count="212">n</span> "|" *<span data-count="212">&gt;</span> e_ptrn_matchin<span data-count="212">g</span> pexpr) &gt;&gt;| fun ps -&gt; <span data-count="212">p</span> :: ps)
 ;;
 
-let e_let pexpr = <span data-count="173">l</span>ift2 elet (e_dec<span data-count="173">l</span> pexpr) (toke<span data-count="173">n</span> "in" *<span data-count="173">&gt;</span> pexpr)
+let e_let pexpr = <span data-count="178">l</span>ift2 elet (e_dec<span data-count="178">l</span> pexpr) (toke<span data-count="178">n</span> "in" *<span data-count="178">&gt;</span> pexpr)
 
 (*===================== Binary/Unary operators =====================*)
 
-let bin_op chain1 e ops = <span data-count="865">c</span>hain1 e (ops &gt;&gt;<span data-count="865">|</span> ebinop)
-let lbo = bin_o<span data-count="175">p</span> chainl1
-let rbo = bin_o<span data-count="175">p</span> chainr1
-let op l = <span data-count="875">c</span>hoice (List.ma<span data-count="875">p</span> ~f:(fun o -&gt; <span data-count="2275">t</span>oke<span data-count="2275">n</span> (get_nam<span data-count="2275">e</span> o) &gt;&gt;| eval) l)
-let mul_div = o<span data-count="175">p</span> [ op_mul; op_div ]
-let add_sub = o<span data-count="175">p</span> [ op_plus; op_minus ]
-let cmp = o<span data-count="175">p</span> [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_eq2; op_eq ]
-let andop = o<span data-count="175">p</span> [ op_and ]
-let orop = o<span data-count="175">p</span> [ op_or ]
+let bin_op chain1 e ops = <span data-count="890">c</span>hain1 e (ops &gt;&gt;<span data-count="890">|</span> ebinop)
+let lbo = bin_o<span data-count="180">p</span> chainl1
+let rbo = bin_o<span data-count="180">p</span> chainr1
+let op l = <span data-count="900">c</span>hoice (List.ma<span data-count="900">p</span> ~f:(fun o -&gt; <span data-count="2340">t</span>oke<span data-count="2340">n</span> (get_nam<span data-count="2340">e</span> o) &gt;&gt;| eval) l)
+let mul_div = o<span data-count="180">p</span> [ op_mul; op_div ]
+let add_sub = o<span data-count="180">p</span> [ op_plus; op_minus ]
+let cmp = o<span data-count="180">p</span> [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_eq2; op_eq ]
+let andop = o<span data-count="180">p</span> [ op_and ]
+let orop = o<span data-count="180">p</span> [ op_or ]
 
 let unop l =
-  <span data-count="175">c</span>hoice (List.ma<span data-count="175">p</span> ~f:(fun o -&gt; <span data-count="175">t</span>oke<span data-count="175">n</span> o &gt;&gt;| fun un_name -&gt; <span data-count="2942">e</span>val (u<span data-count="2942">n</span> un_name)) l)
+  <span data-count="180">c</span>hoice (List.ma<span data-count="180">p</span> ~f:(fun o -&gt; <span data-count="180">t</span>oke<span data-count="180">n</span> o &gt;&gt;| fun un_name -&gt; <span data-count="2942">e</span>val (u<span data-count="2942">n</span> un_name)) l)
 ;;
 
-let neg = uno<span data-count="175">p</span> [ f'sub' ]
+let neg = uno<span data-count="180">p</span> [ f'sub' ]
 
 let expr =
-  fi<span data-count="175">x</span> (fun pexpr -&gt;
-    <span data-count="173">l</span>et etp = parens @@ lift<span data-count="173">2</span> etype pexpr p_type_annotation in
-    <span data-count="173">l</span>et term = choice [ etp; paren<span data-count="173">s</span> pexpr; e_const; e_val ] in
-    <span data-count="173">l</span>et term = e_list_basi<span data-count="173">c</span> term &lt;|&gt; term in
-    <span data-count="173">l</span>et term = e_app term in
-    <span data-count="173">l</span>et term = lbo (term &lt;|<span data-count="173">&gt;</span> lift<span data-count="173">2</span> eunop neg term) mul_div in
-    <span data-count="173">l</span>et term = e_list_con<span data-count="173">s</span> term &lt;|&gt; term in
-    <span data-count="173">l</span>et term = lbo term add_sub in
-    <span data-count="173">l</span>et term = lbo term cmp in
-    <span data-count="173">l</span>et term = rbo term andop in
-    <span data-count="173">l</span>et term = rbo term orop in
-    <span data-count="173">l</span>et term = e_tupl<span data-count="173">e</span> term &lt;|&gt; term in
-    <span data-count="173">c</span>hoice [ e_it<span data-count="173">e</span> pexpr pexpr pexpr; e_le<span data-count="173">t</span> pexpr; e_matc<span data-count="173">h</span> pexpr; e_fu<span data-count="173">n</span> pexpr; term ])
+  fi<span data-count="180">x</span> (fun pexpr -&gt;
+    <span data-count="178">l</span>et etp = parens @@ lift<span data-count="178">2</span> etype pexpr p_type_annotation in
+    <span data-count="178">l</span>et term = choice [ etp; paren<span data-count="178">s</span> pexpr; e_const; e_val ] in
+    <span data-count="178">l</span>et term = e_list_basi<span data-count="178">c</span> term &lt;|&gt; term in
+    <span data-count="178">l</span>et term = e_app term in
+    <span data-count="178">l</span>et term = lbo (term &lt;|<span data-count="178">&gt;</span> lift<span data-count="178">2</span> eunop neg term) mul_div in
+    <span data-count="178">l</span>et term = e_list_con<span data-count="178">s</span> term &lt;|&gt; term in
+    <span data-count="178">l</span>et term = lbo term add_sub in
+    <span data-count="178">l</span>et term = lbo term cmp in
+    <span data-count="178">l</span>et term = rbo term andop in
+    <span data-count="178">l</span>et term = rbo term orop in
+    <span data-count="178">l</span>et term = e_tupl<span data-count="178">e</span> term &lt;|&gt; term in
+    <span data-count="178">c</span>hoice [ e_it<span data-count="178">e</span> pexpr pexpr pexpr; e_le<span data-count="178">t</span> pexpr; e_matc<span data-count="178">h</span> pexpr; e_fu<span data-count="178">n</span> pexpr; term ])
 ;;
 
-let del = (dsmcln &lt;|<span data-count="175">&gt;</span> skip_whitespace) *<span data-count="175">&gt;</span> skip_whitespace
-let decl = ptoke<span data-count="175">n</span> (e_dec<span data-count="175">l</span> expr)
-let str_item = expr &gt;&gt;<span data-count="175">|</span> streval &lt;|<span data-count="175">&gt;</span> (decl &gt;&gt;<span data-count="175">|</span> strval)
-let program = del *<span data-count="175">&gt;</span> many<span data-count="175">1</span> (str_item &lt;<span data-count="175">*</span> del)
+let del = (dsmcln &lt;|<span data-count="180">&gt;</span> skip_whitespace) *<span data-count="180">&gt;</span> skip_whitespace
+let decl = ptoke<span data-count="180">n</span> (e_dec<span data-count="180">l</span> expr)
+let str_item = expr &gt;&gt;<span data-count="180">|</span> streval &lt;|<span data-count="180">&gt;</span> (decl &gt;&gt;<span data-count="180">|</span> strval)
+let program = del *<span data-count="180">&gt;</span> many<span data-count="180">1</span> (str_item &lt;<span data-count="180">*</span> del)
 let parse_syntax_err msg = <span data-count="0">C</span>ommon.Errors.Parser (Syntax_error msg)
 
 let parse s =
-  <span data-count="226">m</span>atch parse_string ~consume:All program s with
-  | <span data-count="226">O</span>k v -&gt; Ok v
+  <span data-count="231">m</span>atch parse_string ~consume:All program s with
+  | <span data-count="231">O</span>k v -&gt; Ok v
   | <span data-count="0">E</span>rror msg -&gt; Error (parse_syntax_er<span data-count="0">r</span> msg)
 ;;
 

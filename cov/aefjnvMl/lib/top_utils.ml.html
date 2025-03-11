@@ -135,14 +135,14 @@ module Ast_test_utils = struct
   let ( let* ) = ( &gt;&gt;= )
 
   let ( let*! ) x f =
-    <span data-count="496">l</span>et* x = x in
-    <span data-count="486">l</span>et* ast = <span data-count="486">f</span> x in
+    <span data-count="506">l</span>et* x = x in
+    <span data-count="491">l</span>et* ast = <span data-count="491">f</span> x in
     <span data-count="475">r</span>eturn ast
   ;;
 
   let ( let+! ) x f =
-    <span data-count="145">l</span>et*! x = x in
-    <span data-count="145">r</span>eturn @@ <span data-count="145">f</span> x
+    <span data-count="131">l</span>et*! x = x in
+    <span data-count="131">r</span>eturn @@ <span data-count="131">f</span> x
   ;;
 
   let ( let* ) x f =
@@ -160,7 +160,7 @@ module Ast_test_utils = struct
 
   let print_error = function
     | <span data-count="0">P</span>arser e -&gt; Parser.PP.pp_error Format.std_formatter e
-    | <span data-count="34">I</span>nfer e -&gt; Inferencer.PP.pp_error Format.std_formatter e
+    | <span data-count="39">I</span>nfer e -&gt; Inferencer.PP.pp_error Format.std_formatter e
     | <span data-count="0">M</span>iddleend (Illegal_state_error s) -&gt; Format.print_string s
     | <span data-count="0">L</span>lvm_gen (Illegal_state_error s) -&gt; Format.print_string s
   ;;

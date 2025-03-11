@@ -542,17 +542,17 @@ module LibF = struct
     | SysF of string * rt_alias * (int * Ast.core_type * vararg)
 
   let get_row_func = function
-    | <span data-count="29888">S</span>tdF (name, alias, tp) | <span data-count="20740">S</span>ysF (name, alias, tp) -&gt; name, alias, tp
+    | <span data-count="30408">S</span>tdF (name, alias, tp) | <span data-count="21080">S</span>ysF (name, alias, tp) -&gt; name, alias, tp
   ;;
 
   let get_name f =
-    <span data-count="38008">l</span>et name, _, _ = get_row_func f in
-    <span data-count="38008">n</span>ame
+    <span data-count="38713">l</span>et name, _, _ = get_row_func f in
+    <span data-count="38713">n</span>ame
   ;;
 
   let get_type f =
-    <span data-count="5084">l</span>et _, _, tp = get_row_func f in
-    <span data-count="5084">t</span>p
+    <span data-count="5239">l</span>et _, _, tp = get_row_func f in
+    <span data-count="5239">t</span>p
   ;;
 
   let get_rt_alias f =
@@ -574,99 +574,99 @@ module LibF = struct
 
   let rt_pref = "rt"
   let vararg = "_varargs"
-  let rt nm = <span data-count="4094">r</span>t_pref ^ "_" ^ nm
+  let rt nm = <span data-count="4209">r</span>t_pref ^ "_" ^ nm
 
   let rt' (Alias rt_name) =
     <span data-count="3">l</span>et prefix_n = String.lengt<span data-count="3">h</span> rt_pref + 1 in
     String.sub rt_name prefix_n (String.lengt<span data-count="3">h</span> rt_name - prefix_n)
   ;;
 
-  let alias nm = <span data-count="4094">A</span>lias (r<span data-count="4094">t</span> nm)
-  let func1 argt1 ~ret = <span data-count="712">1</span>, Ptyp_arrow (argt1, ret), NoVarargs
-  let func2 argt1 argt2 ~ret = <span data-count="2848">2</span>, Ptyp_arrow (argt1, Ptyp_arrow (argt2, ret)), NoVarargs
-  let un op = <span data-count="3120">"</span>~" ^ op
+  let alias nm = <span data-count="4209">A</span>lias (r<span data-count="4209">t</span> nm)
+  let func1 argt1 ~ret = <span data-count="732">1</span>, Ptyp_arrow (argt1, ret), NoVarargs
+  let func2 argt1 argt2 ~ret = <span data-count="2928">2</span>, Ptyp_arrow (argt1, Ptyp_arrow (argt2, ret)), NoVarargs
+  let un op = <span data-count="3125">"</span>~" ^ op
 
   (* FUNCS *)
-  let op_mul = StdF ("*", alia<span data-count="178">s</span> "mul", func<span data-count="178">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
-  let op_div = StdF ("/", alia<span data-count="178">s</span> "div", func<span data-count="178">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
-  let op_plus = StdF ("+", alia<span data-count="178">s</span> "add", func<span data-count="178">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
-  let op_minus = StdF ("-", alia<span data-count="178">s</span> "sub", func<span data-count="178">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
+  let op_mul = StdF ("*", alia<span data-count="183">s</span> "mul", func<span data-count="183">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
+  let op_div = StdF ("/", alia<span data-count="183">s</span> "div", func<span data-count="183">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
+  let op_plus = StdF ("+", alia<span data-count="183">s</span> "add", func<span data-count="183">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
+  let op_minus = StdF ("-", alia<span data-count="183">s</span> "sub", func<span data-count="183">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int)
 
   let op_less_eq =
-    StdF ("&lt;=", alia<span data-count="178">s</span> "leq", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("&lt;=", alia<span data-count="183">s</span> "leq", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_more_eq =
-    StdF ("&gt;=", alia<span data-count="178">s</span> "meq", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("&gt;=", alia<span data-count="183">s</span> "meq", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_less =
-    StdF ("&lt;", alia<span data-count="178">s</span> "less", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("&lt;", alia<span data-count="183">s</span> "less", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_more =
-    StdF ("&gt;", alia<span data-count="178">s</span> "more", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("&gt;", alia<span data-count="183">s</span> "more", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_eq =
-    StdF ("=", alia<span data-count="178">s</span> "eq", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("=", alia<span data-count="183">s</span> "eq", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_eq2 =
-    StdF ("==", alia<span data-count="178">s</span> "eq2", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("==", alia<span data-count="183">s</span> "eq2", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
   let op_not_eq =
-    StdF ("&lt;&gt;", alia<span data-count="178">s</span> "neq", func<span data-count="178">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
+    StdF ("&lt;&gt;", alia<span data-count="183">s</span> "neq", func<span data-count="183">2</span> (Ptyp_var "'_a") (Ptyp_var "'_a") ~ret:Ptyp_bool)
   ;;
 
-  let op_and = StdF ("&amp;&amp;", alia<span data-count="178">s</span> "and", func<span data-count="178">2</span> Ptyp_bool Ptyp_bool ~ret:Ptyp_bool)
-  let op_or = StdF ("||", alia<span data-count="178">s</span> "or", func<span data-count="178">2</span> Ptyp_bool Ptyp_bool ~ret:Ptyp_bool)
+  let op_and = StdF ("&amp;&amp;", alia<span data-count="183">s</span> "and", func<span data-count="183">2</span> Ptyp_bool Ptyp_bool ~ret:Ptyp_bool)
+  let op_or = StdF ("||", alia<span data-count="183">s</span> "or", func<span data-count="183">2</span> Ptyp_bool Ptyp_bool ~ret:Ptyp_bool)
   let f'sub' = "-"
-  let un_op_minus = StdF (u<span data-count="178">n</span> f'sub', alia<span data-count="178">s</span> "unminus", func<span data-count="178">1</span> Ptyp_int ~ret:Ptyp_int)
-  let func_print_int = StdF ("print_int", alia<span data-count="178">s</span> "print_int", func<span data-count="178">1</span> Ptyp_int ~ret:Ptyp_unit)
+  let un_op_minus = StdF (u<span data-count="183">n</span> f'sub', alia<span data-count="183">s</span> "unminus", func<span data-count="183">1</span> Ptyp_int ~ret:Ptyp_int)
+  let func_print_int = StdF ("print_int", alia<span data-count="183">s</span> "print_int", func<span data-count="183">1</span> Ptyp_int ~ret:Ptyp_unit)
 
   (* INTERN *)
   let get_by_idx =
     SysF
       ( "get_by_idx"
-      , alia<span data-count="178">s</span> "get_by_idx"
-      , func<span data-count="178">2</span> (Ptyp_var "'_a") Ptyp_int ~ret:(Ptyp_var "'_b") )
+      , alia<span data-count="183">s</span> "get_by_idx"
+      , func<span data-count="183">2</span> (Ptyp_var "'_a") Ptyp_int ~ret:(Ptyp_var "'_b") )
   ;;
 
   let get_list_len =
-    SysF ("get_list_len", alia<span data-count="178">s</span> "get_list_len", func<span data-count="178">1</span> (Ptyp_var "'_a") ~ret:Ptyp_int)
+    SysF ("get_list_len", alia<span data-count="183">s</span> "get_list_len", func<span data-count="183">1</span> (Ptyp_var "'_a") ~ret:Ptyp_int)
   ;;
 
   let get_list_tail =
     SysF
       ( "get_list_tail"
-      , alia<span data-count="178">s</span> "get_list_tail"
-      , func<span data-count="178">2</span> (Ptyp_var "'_a") Ptyp_int ~ret:(Ptyp_var "'_a") )
+      , alia<span data-count="183">s</span> "get_list_tail"
+      , func<span data-count="183">2</span> (Ptyp_var "'_a") Ptyp_int ~ret:(Ptyp_var "'_a") )
   ;;
 
   let part_match_fail =
-    SysF ("part_match_fail", alia<span data-count="178">s</span> "fail", func<span data-count="178">1</span> Ptyp_unit ~ret:(Ptyp_var "'_a"))
+    SysF ("part_match_fail", alia<span data-count="183">s</span> "fail", func<span data-count="183">1</span> Ptyp_unit ~ret:(Ptyp_var "'_a"))
   ;;
 
   let create_empty_closure =
     SysF
       ( "rt_create_empty_closure"
-      , alia<span data-count="178">s</span> "alloc_closure"
-      , func<span data-count="178">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int )
+      , alia<span data-count="183">s</span> "alloc_closure"
+      , func<span data-count="183">2</span> Ptyp_int Ptyp_int ~ret:Ptyp_int )
   ;;
 
-  let func1_varargs argt1 ~ret ~va_tp = <span data-count="178">2</span>, Ptyp_arrow (argt1, ret), Varargs va_tp
+  let func1_varargs argt1 ~ret ~va_tp = <span data-count="183">2</span>, Ptyp_arrow (argt1, ret), Varargs va_tp
 
   let func2_varargs argt1 argt2 ~ret ~va_tp =
-    <span data-count="356">2</span>, Ptyp_arrow (argt1, Ptyp_arrow (argt2, ret)), Varargs va_tp
+    <span data-count="366">2</span>, Ptyp_arrow (argt1, Ptyp_arrow (argt2, ret)), Varargs va_tp
   ;;
 
   let apply_arguments =
     SysF
       ( "rt_apply"
-      , alia<span data-count="178">s</span> "apply_to_closure"
-      , func2_vararg<span data-count="178">s</span> Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
+      , alia<span data-count="183">s</span> "apply_to_closure"
+      , func2_vararg<span data-count="183">s</span> Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
   ;;
 
   (** [append_to_list(n, tl, __reversed_args__)]
@@ -675,15 +675,15 @@ module LibF = struct
   let append_to_list =
     SysF
       ( "rt_append_to_list"
-      , alia<span data-count="178">s</span> "append_to_list"
-      , func2_vararg<span data-count="178">s</span> Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
+      , alia<span data-count="183">s</span> "append_to_list"
+      , func2_vararg<span data-count="183">s</span> Ptyp_int Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
   ;;
 
   let alloc_tuple =
     SysF
       ( "rt_alloc_tuple"
-      , alia<span data-count="178">s</span> "alloc_tuple"
-      , func1_vararg<span data-count="178">s</span> Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
+      , alia<span data-count="183">s</span> "alloc_tuple"
+      , func1_vararg<span data-count="183">s</span> Ptyp_int ~ret:Ptyp_int ~va_tp:Ptyp_int )
   ;;
 end
 
@@ -706,7 +706,7 @@ let user_funcs =
   let eq_funcs = [ op_less_eq; op_less; op_more_eq; op_more; op_eq2; op_eq; op_not_eq ] in
   let bool_funcs = [ op_and; op_or ] in
   let spec_funcs = [ func_print_int ] in
-  List.conca<span data-count="178">t</span> [ math_funcs; eq_funcs; bool_funcs; spec_funcs; sys_funcs ]
+  List.conca<span data-count="183">t</span> [ math_funcs; eq_funcs; bool_funcs; spec_funcs; sys_funcs ]
 ;;
 
 let base_lib_decls = sys_funcs @ user_funcs
@@ -717,43 +717,43 @@ let get_op_decls =
   let decls =
     List.filter
       (function
-        | <span data-count="2670">S</span>tdF (name, _, _) -&gt;
+        | <span data-count="2745">S</span>tdF (name, _, _) -&gt;
           (match String.get name 0 with
-           | <span data-count="178">'</span>a' .. 'z' | <span data-count="0">'</span>A' .. 'Z' | <span data-count="0">'</span>_' -&gt; false
-           | <span data-count="2492">_</span> -&gt; true)
-        | <span data-count="1424">_</span> -&gt; false)
+           | <span data-count="183">'</span>a' .. 'z' | <span data-count="0">'</span>A' .. 'Z' | <span data-count="0">'</span>_' -&gt; false
+           | <span data-count="2562">_</span> -&gt; true)
+        | <span data-count="1464">_</span> -&gt; false)
       user_funcs
   in
-  <span data-count="178">L</span>ist.ma<span data-count="178">p</span>
+  <span data-count="183">L</span>ist.ma<span data-count="183">p</span>
     (function
-      | <span data-count="2492">S</span>tdF (nm, alias, tp) -&gt; nm, alias, tp
+      | <span data-count="2562">S</span>tdF (nm, alias, tp) -&gt; nm, alias, tp
       | <span data-count="0">S</span>ysF _ -&gt; raise @@ Invalid_argument "Ops can be only from stdlib")
     decls
 ;;
 
 let get_infix_ops =
   let ops = get_op_decls in
-  List.filte<span data-count="178">r</span>
+  List.filte<span data-count="183">r</span>
     (function
-      | <span data-count="2314">_</span>, _, (2, _, _) -&gt; true
-      | <span data-count="178">_</span> -&gt; false)
+      | <span data-count="2379">_</span>, _, (2, _, _) -&gt; true
+      | <span data-count="183">_</span> -&gt; false)
     ops
 ;;
 
 let get_un_ops =
   let ops = get_op_decls in
-  List.filte<span data-count="178">r</span>
+  List.filte<span data-count="183">r</span>
     (function
-      | <span data-count="178">_</span>, _, (1, _, _) -&gt; true
-      | <span data-count="2314">_</span> -&gt; false)
+      | <span data-count="183">_</span>, _, (1, _, _) -&gt; true
+      | <span data-count="2379">_</span> -&gt; false)
     ops
 ;;
 
 let create_named_map =
-  List.fold_lef<span data-count="178">t</span> (fun acc decl -&gt; <span data-count="8010">D</span>eclMap.add (get_nam<span data-count="8010">e</span> decl) decl acc) DeclMap.empty
+  List.fold_lef<span data-count="183">t</span> (fun acc decl -&gt; <span data-count="8235">D</span>eclMap.add (get_nam<span data-count="8235">e</span> decl) decl acc) DeclMap.empty
 ;;
 
-let base_lib_map = create_named_ma<span data-count="178">p</span> base_lib_decls
+let base_lib_map = create_named_ma<span data-count="183">p</span> base_lib_decls
 let find_by_name : string -&gt; env_func = fun name -&gt; <span data-count="0">D</span>eclMap.find name base_lib_map
 
 let is_binop name =
@@ -763,7 +763,7 @@ let is_binop name =
 ;;
 
 let op_map =
-  create_named_ma<span data-count="178">p</span> @@ Base.List.ma<span data-count="178">p</span> get_op_decls ~f:(fun (a, b, c) -&gt; <span data-count="2492">S</span>tdF (a, b, c))
+  create_named_ma<span data-count="183">p</span> @@ Base.List.ma<span data-count="183">p</span> get_op_decls ~f:(fun (a, b, c) -&gt; <span data-count="2562">S</span>tdF (a, b, c))
 ;;
 
 let converte_op op =

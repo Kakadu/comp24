@@ -234,7 +234,7 @@ module BaseSEMonad (StateT : Base.T) (ErrorT : Base.T) = struct
     | <span data-count="78560">O</span>k a -&gt; f a st'
   ;;
 
-  let ( let* ) x f = <span data-count="74731">x</span> &gt;&gt;= f
+  let ( let* ) x f = <span data-count="74756">x</span> &gt;&gt;= f
 
   let ( &gt;&gt;| ) a f st =
     <span data-count="75131">l</span>et st', res = a st in
@@ -243,7 +243,7 @@ module BaseSEMonad (StateT : Base.T) (ErrorT : Base.T) = struct
     | <span data-count="75131">O</span>k a' -&gt; st', Ok (<span data-count="75131">f</span> a')
   ;;
 
-  let ( let+ ) x f = <span data-count="50394">x</span> &gt;&gt;| f
+  let ( let+ ) x f = <span data-count="50429">x</span> &gt;&gt;| f
 
   let fold_left_t xs ~init ~f =
     <span data-count="4774">B</span>ase.List.fold_left xs ~init ~f:(fun acc x -&gt;

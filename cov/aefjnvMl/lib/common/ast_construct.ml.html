@@ -130,8 +130,8 @@
 
 open Ast
 
-let cint n = <span data-count="20784">C</span>onst_int n
-let cbool b = <span data-count="3122">C</span>onst_bool b
+let cint n = <span data-count="20844">C</span>onst_int n
+let cbool b = <span data-count="3162">C</span>onst_bool b
 let cnil = Const_nil
 let cunit = Const_unit
 
@@ -148,30 +148,30 @@ let ptarrow before_pt after_pt = <span data-count="4">P</span>typ_arrow (before_
 (*===================== pattern =====================*)
 
 let pconst c = <span data-count="2219">P</span>at_const c
-let pvar c = <span data-count="17423">P</span>at_var c
+let pvar c = <span data-count="17643">P</span>at_var c
 let pcons a b = <span data-count="741">P</span>at_cons (a, b)
 let pany = Pat_any
-let ptuple ps = <span data-count="171">P</span>at_tuple ps
+let ptuple ps = <span data-count="173">P</span>at_tuple ps
 let pconstraint p ct = <span data-count="16">P</span>at_constraint (p, ct)
 
 (*===================== expression =====================*)
 
 let etype e tp = <span data-count="141">E</span>xp_type (e, tp)
-let econst c = <span data-count="28655">E</span>xp_constant c
-let eval c = <span data-count="59152">E</span>xp_ident c
-let eapp f a = <span data-count="33611">E</span>xp_apply (f, a)
+let econst c = <span data-count="28755">E</span>xp_constant c
+let eval c = <span data-count="59716">E</span>xp_ident c
+let eapp f a = <span data-count="33975">E</span>xp_apply (f, a)
 let ematch v ptrns = <span data-count="503">E</span>xp_match (v, ptrns)
-let efun i e = <span data-count="7524">E</span>xp_function (i, e)
-let ebinop o l r = <span data-count="7692">E</span>xp_apply (Exp_apply (o, l), r)
+let efun i e = <span data-count="7624">E</span>xp_function (i, e)
+let ebinop o l r = <span data-count="7716">E</span>xp_apply (Exp_apply (o, l), r)
 let eunop o e = <span data-count="2942">E</span>xp_apply (o, e)
-let eite b t e = <span data-count="763">E</span>xp_ifthenelse (b, t, e)
+let eite b t e = <span data-count="767">E</span>xp_ifthenelse (b, t, e)
 let elet d e = <span data-count="1636">E</span>xp_let (d, e)
-let etuple es = <span data-count="2330">E</span>xp_tuple es
+let etuple es = <span data-count="2370">E</span>xp_tuple es
 let econs a b = <span data-count="6682">E</span>xp_list (a, b)
-let evalue_binding vb_pat vb_expr = <span data-count="2112">{</span> vb_pat; vb_expr }
-let edecl rec_flag bind_list = <span data-count="3627">D</span>ecl (rec_flag, bind_list)
+let evalue_binding vb_pat vb_expr = <span data-count="2122">{</span> vb_pat; vb_expr }
+let edecl rec_flag bind_list = <span data-count="3637">D</span>ecl (rec_flag, bind_list)
 let streval e = <span data-count="24">S</span>tr_eval e
-let strval d = <span data-count="1181">S</span>tr_value d
+let strval d = <span data-count="1186">S</span>tr_value d
 </code></pre>
       </div>
     </div>

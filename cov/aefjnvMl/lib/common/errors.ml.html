@@ -114,9 +114,9 @@ type error =
   | Middleend of illegal_state_error
   | Llvm_gen of illegal_state_error
 
-let occurs_check (b, t) = <span data-count="7">I</span>nfer (Occurs_check (b, t))
-let unbound_variable v = <span data-count="7">I</span>nfer (Unbound_variable v)
-let unification_failed (t1, t2) = <span data-count="11">I</span>nfer (Unification_failed (t1, t2))
+let occurs_check (b, t) = <span data-count="8">I</span>nfer (Occurs_check (b, t))
+let unbound_variable v = <span data-count="8">I</span>nfer (Unbound_variable v)
+let unification_failed (t1, t2) = <span data-count="13">I</span>nfer (Unification_failed (t1, t2))
 let several_bounds v = <span data-count="3">I</span>nfer (Several_bounds v)
 let not_specify_rec = Infer Not_specify_rec
 let no_variable_rec = Infer No_variable_rec
