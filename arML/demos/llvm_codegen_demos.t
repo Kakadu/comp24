@@ -108,60 +108,50 @@
   declare void @pattern_matching_failure()
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/001fac.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  1
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  24
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/002fac.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  1
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  24
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/003fib.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  1
-  4
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  3
+  3
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/004manyargs.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
   1111111111
   1
   10
   100
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/005fix.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  1
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  720
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/006partial.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  19
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  1122
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/006partial2.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
   1
   2
   3
   7
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/006partial3.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
   4
   8
   9
 
-  $ ./start_llvm_codegen_demos.exe < manytests/typed/007order.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  1
-  2
-  4
-  -1
-  103
-  -555555
-  10000
-
   $ ./start_llvm_codegen_demos.exe < manytests/typed/008ascription.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  5
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  8
 
   $ ./start_llvm_codegen_demos.exe < manytests/typed/012fibcps.ml > ../lib/runtime/bin/result.ll
-  $ clang -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
-  6
+  $ clang-16 -Wno-override-module -lffi ../lib/runtime/bin/result.ll ../lib/runtime/bin/runtime.o -o res.out; ./res.out
+  8

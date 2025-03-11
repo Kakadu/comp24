@@ -1,6 +1,7 @@
 #include "taggedValue.h"
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 VAL *ct_int_v(int32_t value)
 {
@@ -48,5 +49,5 @@ VAL *ct_unit_v()
 bool check_cond(VAL *val)
 {
     tag_checker(val, TAG_BOOL);
-    return val->data;
+    return *((int8_t *)val->data);
 }

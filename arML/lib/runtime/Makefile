@@ -1,7 +1,7 @@
 .PHONY: all clean run
 
-CC = clang
-CFLAGS = -Wall -Wextra -O2 -I. -lffi
+CC = clang-16
+CFLAGS = -Wall -Wextra -O2 -I. -I/Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk/usr/include/ffi
 LDFLAGS = -r
 
 SRCS = taggedValue.c basicFunctions.c closures.c binaryOperations.c unaryOperations.c printers.c

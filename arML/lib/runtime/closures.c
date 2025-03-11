@@ -133,7 +133,7 @@ VAL *invoke_closure_with_args(VAL *closure_obj, int32_t num_args, ...)
     va_list argptr;
     va_start(argptr, num_args);
 
-    VAL **args = allocate_memory(num_args * sizeof(struct TAGGED_VAL *));
+    VAL **args = allocate_memory(num_args * sizeof(VAL *));
     for (int i = 0; i < num_args; i++)
     {
         VAL *arg = va_arg(argptr, VAL *);
