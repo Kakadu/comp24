@@ -292,24 +292,24 @@ let rec pp_aexpression formatter e =
 let pp_abindings formatter bindings =
   <span data-count="19">L</span>ist.iter
     (fun bind -&gt;
-       <span data-count="96">m</span>atch bind with
-       | <span data-count="96">A</span>Let (r, n_list, p, e) -&gt;
-         Format.fprintf
-           formatter
-           "let %a %s %s = %a"
-           pp_rec
-           r
-           n_list
-           (String.conca<span data-count="96">t</span> " " p)
-           pp_aexpression
-           e;
-         <span data-count="96">F</span>ormat.fprintf formatter "\n"
-       | <span data-count="0">A</span>LetPat (n_list, e) -&gt;
-         Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_aexpression e;
-         <span data-count="0">F</span>ormat.fprintf formatter "\n"
-       | <span data-count="0">A</span>Expression e -&gt;
-         pp_aexpression formatter e;
-         <span data-count="0">F</span>ormat.fprintf formatter "\n")
+      <span data-count="96">m</span>atch bind with
+      | <span data-count="96">A</span>Let (r, n_list, p, e) -&gt;
+        Format.fprintf
+          formatter
+          "let %a %s %s = %a"
+          pp_rec
+          r
+          n_list
+          (String.conca<span data-count="96">t</span> " " p)
+          pp_aexpression
+          e;
+        <span data-count="96">F</span>ormat.fprintf formatter "\n"
+      | <span data-count="0">A</span>LetPat (n_list, e) -&gt;
+        Format.fprintf formatter "let %a = %a" pp_pattern n_list pp_aexpression e;
+        <span data-count="0">F</span>ormat.fprintf formatter "\n"
+      | <span data-count="0">A</span>Expression e -&gt;
+        pp_aexpression formatter e;
+        <span data-count="0">F</span>ormat.fprintf formatter "\n")
     bindings
 ;;
 
