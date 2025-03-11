@@ -348,8 +348,8 @@ let init_env =
   let+ add_predefines =
     let empty_env = TypeEnv.empty in
     map
-      (fun (name, ty, _) ->
-        match Parser.Typexpr_parser.parse_typexpr_str ty with
+      (fun Utils.Predefined_ops.{ name; t } ->
+        match Parser.Typexpr_parser.parse_typexpr_str t with
         | Result.Ok ty ->
           let+ ty = typexpr_to_type ty in
           let scheme = generalize empty_env ty in

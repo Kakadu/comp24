@@ -91,8 +91,8 @@ let rec alpha_expr env = function
 
 let init_env =
   fold_left
-    (fun env (_, _, name) ->
-      let+ _, env = update_env name env in
+    (fun env Utils.Predefined_ops.{ alt_name } ->
+      let+ _, env = update_env alt_name env in
       env)
     (return Env.empty)
     Utils.Predefined_ops.predefine_operators

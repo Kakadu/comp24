@@ -37,17 +37,17 @@ let%expect_test "test if without else inference" =
 
 let%expect_test "test fun inference" =
   test "fun a -> a";
-  [%expect {| 'p -> 'p |}]
+  [%expect {| 'q -> 'q |}]
 ;;
 
 let%expect_test "test fun with several arguments inference" =
   test "fun a b c -> b";
-  [%expect {| 'p -> 'q -> 'r -> 'q |}]
+  [%expect {| 'q -> 'r -> 's -> 'r |}]
 ;;
 
 let%expect_test "test let fun" =
   test "let a b = b in a";
-  [%expect {| 'q -> 'q |}]
+  [%expect {| 'r -> 'r |}]
 ;;
 
 let%expect_test "test let fun apply" =
@@ -72,7 +72,7 @@ let%expect_test "test tuple" =
 
 let%expect_test "test difficult tuple" =
   test "(let b = 4 in b, (3, 5), fun a -> a, 'a')";
-  [%expect {| (int * (int * int) * 'p -> ('p * char)) |}]
+  [%expect {| (int * (int * int) * 'q -> ('q * char)) |}]
 ;;
 
 let%expect_test "test let rec" =
@@ -88,7 +88,7 @@ let%expect_test "test let rec fun" =
 let%expect_test "test let rec and" =
   test {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
-  [%expect {| 'w -> bool -> int |}]
+  [%expect {| 'x -> bool -> int |}]
 ;;
 
 let%expect_test "test invalid let rec with pat binding" =
@@ -125,8 +125,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   [%expect {|
-    val f : 's -> 's
-    val g : 'r -> bool
+    val f : 't -> 't
+    val g : 's -> bool
     val c : bool
     |}]
 ;;
@@ -140,7 +140,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   test {|let a = []|};
-  [%expect {| val a : 'p list |}]
+  [%expect {| val a : 'q list |}]
 ;;
 
 let%expect_test "test constructor some with" =
@@ -336,7 +336,7 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   test {|(=)|};
-  [%expect {| 'p -> 'p -> bool |}]
+  [%expect {| 'q -> 'q -> bool |}]
 ;;
 
 let%expect_test "test less" =
@@ -376,7 +376,7 @@ let%expect_test "test poly inference" =
     f 'a' 'b';;
   |};
   [%expect {|
-    val f : 'p -> 'q -> ('p * 'q)
+    val f : 'q -> 'r -> ('q * 'r)
     (int * int)
     (char * char)
     |}]
@@ -389,8 +389,9 @@ let%expect_test "test poly inference" =
            ( "abs_value"
            , [ "n" ]
            , LComplex
-               (CExp_apply ("__op_plus", [ AExp_constant (Const_int 52); AExp_ident "n" ]))
-           )
+               (CExp_apply
+                  ( Utils.Predefined_ops.op_plus.name
+                  , [ AExp_constant (Const_int 52); AExp_ident "n" ] )) )
        ])
   |> function
   | Result.Ok res ->
@@ -406,10 +407,7 @@ let%expect_test "test poly inference" =
     Format.print_string @@ helper "" res
   | Result.Error s ->
     Format.eprintf "Error%s" s;
-    [%expect
-      {|
-    val f : 'h -> 'i -> ('h * 'i)
-    (int * int)
-    (char * char)
-    |}]
+    [%expect.unreachable];
+    [%expect.unreachable];
+  [%expect {| val abs_value : int -> int |}]
 ;;
