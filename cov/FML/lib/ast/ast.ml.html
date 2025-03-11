@@ -212,10 +212,10 @@
 
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
-<span data-count="0">t</span>ype id = <span data-count="576">s</span>tring [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype id = <span data-count="677">s</span>tring [@@deriving show { with_path = false }]
 
-<span data-count="282">t</span>ype const =
-  | CInt of in<span data-count="129">t</span> (** 1 *)
+<span data-count="306">t</span>ype const =
+  | CInt of in<span data-count="141">t</span> (** 1 *)
   | CBool of boo<span data-count="12">l</span> (** true *)
 [@@deriving show { with_path = false }]
 
@@ -233,7 +233,7 @@
   | AFunction of type_annotation * type_annotation
 [@@deriving show { with_path = false }]
 
-<span data-count="478">t</span>ype pattern =
+<span data-count="563">t</span>ype pattern =
   | PNill (** [] *)
   | PAny (**  _ *)
   | PUnit (** () *)
@@ -244,7 +244,7 @@
   | PConstraint of pattern * type_annotation
 [@@deriving show { with_path = false }]
 
-<span data-count="1511">t</span>ype expression =
+<span data-count="1743">t</span>ype expression =
   | EUnit
   | ENill
   | EConstraint of expression * type_annotation
@@ -256,46 +256,46 @@
   | ETuple of <span data-count="54">e</span>xpression lis<span data-count="12">t</span>
   | EIf of expression * expression * expression (** if e1 then e2 else e3 *)
   | ECons of expression * expression (** [a; b; c], a :: [b; c]*)
-  | EMatch of expression * <span data-count="102">(</span><span data-count="42">p</span>attern * expression) lis<span data-count="30">t</span>
+  | EMatch of expression * <span data-count="132">(</span><span data-count="54">p</span>attern * expression) lis<span data-count="39">t</span>
   (** match e with p1 -&gt; e1 |...| pn -&gt; en *)
 [@@deriving show { with_path = false }]
 
-<span data-count="67">t</span>ype single_declaration = DDeclaration of pattern * expression
+<span data-count="76">t</span>ype single_declaration = DDeclaration of pattern * expression
 [@@deriving show { with_path = false }]
 
-<span data-count="130">t</span>ype declaration =
-  | NoRecDecl of <span data-count="245">s</span>ingle_declaration lis<span data-count="49">t</span>
-  | RecDecl of <span data-count="88">s</span>ingle_declaration lis<span data-count="18">t</span>
+<span data-count="148">t</span>ype declaration =
+  | NoRecDecl of <span data-count="270">s</span>ingle_declaration lis<span data-count="54">t</span>
+  | RecDecl of <span data-count="108">s</span>ingle_declaration lis<span data-count="22">t</span>
 [@@deriving show { with_path = false }]
 
-<span data-count="0">t</span>ype program = <span data-count="295">d</span>eclaration lis<span data-count="65">t</span> [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype program = <span data-count="334">d</span>eclaration lis<span data-count="74">t</span> [@@deriving show { with_path = false }]
 
-let cint x = <span data-count="37690">C</span>Int x
-let cbool x = <span data-count="107">C</span>Bool x
+let cint x = <span data-count="136937">C</span>Int x
+let cbool x = <span data-count="432">C</span>Bool x
 
 (* Constructors for patterns *)
 let pany _ = <span data-count="8">P</span>Any
-let pnill _ = <span data-count="664">P</span>Nill
-let punit _ = <span data-count="1825">P</span>Unit
+let pnill _ = <span data-count="2361">P</span>Nill
+let punit _ = <span data-count="6812">P</span>Unit
 let pconst c = <span data-count="2">P</span>Const c
-let pident v = <span data-count="7270">P</span>Identifier v
-let pcons l r = <span data-count="755">P</span>Cons (l, r)
-let ptuple l = <span data-count="67">P</span>Tuple l
+let pident v = <span data-count="29352">P</span>Identifier v
+let pcons l r = <span data-count="2662">P</span>Cons (l, r)
+let ptuple l = <span data-count="221">P</span>Tuple l
 let pconstraint p t = <span data-count="1">P</span>Constraint (p, t)
 
 (* ------------------------- *)
 
 (* Constructors for expressions *)
 
-let econst c = <span data-count="37795">E</span>Const c
-let eidentifier v = <span data-count="24500">E</span>Identifier v
-let etuple l = <span data-count="1652">E</span>Tuple l
-let efun arg expr = <span data-count="3602">E</span>Fun (arg, expr)
-let econstraint e t = <span data-count="5">E</span>Constraint (e, t)
+let econst c = <span data-count="137367">E</span>Const c
+let eidentifier v = <span data-count="92228">E</span>Identifier v
+let etuple l = <span data-count="5776">E</span>Tuple l
+let efun arg expr = <span data-count="14686">E</span>Fun (arg, expr)
+let econstraint e t = <span data-count="17">E</span>Constraint (e, t)
 (* ---------------------------- *)
 
 (* Constructor for declaration *)
-let ddeclaration pat expr = <span data-count="133">D</span>Declaration (pat, expr)
+let ddeclaration pat expr = <span data-count="511">D</span>Declaration (pat, expr)
 </code></pre>
       </div>
     </div>

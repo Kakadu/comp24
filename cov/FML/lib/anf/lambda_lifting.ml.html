@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>lambda_lifting.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/anf/lambda_lifting.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">lib/anf/</span>lambda_lifting.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
+<a href="#L95">95</a>
+<a href="#L96">96</a>
+<a href="#L97">97</a>
+<a href="#L98">98</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024-2025, Dmitry Pilyuk, Aleksandr Rozhkov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
+open Base
+open Pe_ast
+open Common
+open Common.MonadCounter
+
+let rec ll_expr env = function
+  | <span data-count="4">P</span>e_EUnit -&gt; return ([], Pe_EUnit)
+  | <span data-count="24">P</span>e_ENill -&gt; return ([], Pe_ENill)
+  | <span data-count="336">P</span>e_EConst _ as v -&gt; return ([], v)
+  | <span data-count="1267">P</span>e_EIdentifier id as v -&gt;
+    (match Map.find env id with
+     | <span data-count="16">S</span>ome x -&gt; return ([], Pe_EIdentifier x)
+     | <span data-count="1251">N</span>one -&gt; return ([], v))
+  | <span data-count="1077">P</span>e_EApp (e1, e2) -&gt;
+    let* str1, e1 = ll_exp<span data-count="1077">r</span> env e1 in
+    <span data-count="1077">l</span>et* sl2, e2 = ll_exp<span data-count="1077">r</span> env e2 in
+    <span data-count="1077">r</span>eturn (str1 @ sl2, Pe_EApp (e1, e2))
+  | <span data-count="85">P</span>e_EIf (e1, e2, e3) -&gt;
+    let* str1, e1 = ll_exp<span data-count="85">r</span> env e1 in
+    <span data-count="85">l</span>et* str2, e2 = ll_exp<span data-count="85">r</span> env e2 in
+    <span data-count="85">l</span>et* str3, e3 = ll_exp<span data-count="85">r</span> env e3 in
+    <span data-count="85">r</span>eturn (str1 @ str2 @ str3, Pe_EIf (e1, e2, e3))
+  | <span data-count="55">P</span>e_EFun (args, body) -&gt;
+    let* fresh = fresh &gt;&gt;<span data-count="55">|</span> get_id in
+    <span data-count="55">l</span>et new_env = List.fold args ~init:env ~f:Map.remove in
+    <span data-count="55">l</span>et* str, body = ll_exp<span data-count="55">r</span> new_env body in
+    <span data-count="55">r</span>eturn (str @ [ Pe_Nonrec [ fresh, Pe_EFun (args, body) ] ], Pe_EIdentifier fresh)
+  | <span data-count="54">P</span>e_ECons (e1, e2) -&gt;
+    let* str1, e1 = ll_exp<span data-count="54">r</span> env e1 in
+    <span data-count="54">l</span>et* str2, e2 = ll_exp<span data-count="54">r</span> env e2 in
+    <span data-count="54">r</span>eturn (str1 @ str2, Pe_ECons (e1, e2))
+  | <span data-count="10">P</span>e_ETuple e_list -&gt;
+    let* t = ma<span data-count="10">p</span> e_list ~f:(ll_exp<span data-count="10">r</span> env) in
+    <span data-count="10">l</span>et str, el = List.unzip t in
+    <span data-count="10">r</span>eturn (List.conca<span data-count="10">t</span> str, Pe_ETuple el)
+  | <span data-count="6">P</span>e_ELet (Rec, name, e1, e2) -&gt;
+    let* fresh_name = fresh &gt;&gt;<span data-count="6">|</span> get_id in
+    <span data-count="6">l</span>et env = Map.set env ~key:name ~data:fresh_name in
+    <span data-count="6">l</span>et* str1, e1 = ll_inne<span data-count="6">r</span> env e1 in
+    <span data-count="6">l</span>et* str2, e2 = ll_exp<span data-count="6">r</span> env e2 in
+    <span data-count="6">r</span>eturn (str1 @ [ Pe_Rec [ fresh_name, e1 ] ] @ str2, e2)
+  | <span data-count="175">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
+    let* str1, e1 = ll_inne<span data-count="175">r</span> env e1 in
+    <span data-count="175">(</span>match e1 with
+     | <span data-count="2">P</span>e_EFun _ -&gt;
+       let* fresh_name = fresh &gt;&gt;<span data-count="2">|</span> get_id in
+       <span data-count="2">l</span>et bindings = Map.set env ~key:name ~data:fresh_name in
+       <span data-count="2">l</span>et* str2, e2 = ll_exp<span data-count="2">r</span> bindings e2 in
+       <span data-count="2">r</span>eturn (str1 @ [ Pe_Nonrec [ fresh_name, e1 ] ] @ str2, e2)
+     | <span data-count="173">_</span> -&gt;
+       let* str2, e2 = ll_exp<span data-count="173">r</span> env e2 in
+       <span data-count="173">r</span>eturn (str1 @ str2, Pe_ELet (NoRec, name, e1, e2)))
+
+and ll_inner env = function
+  | <span data-count="93">P</span>e_EFun (args, body) -&gt;
+    let env = List.fold args ~init:env ~f:Map.remove in
+    <span data-count="93">l</span>et* str, body = ll_exp<span data-count="93">r</span> env body in
+    <span data-count="93">r</span>eturn (str, Pe_EFun (args, body))
+  | <span data-count="223">e</span> -&gt;
+    let* str, e = ll_exp<span data-count="223">r</span> env e in
+    <span data-count="223">r</span>eturn (str, e)
+;;
+
+let ll_str_item = function
+  | <span data-count="93">P</span>e_Nonrec bindings -&gt;
+    let* lifted_bindings =
+      ma<span data-count="93">p</span> bindings ~f:(fun (name, e) -&gt;
+        <span data-count="93">l</span>et* str, new_e = ll_inne<span data-count="93">r</span> empty e in
+        <span data-count="93">r</span>eturn (str, (name, new_e)))
+    in
+    <span data-count="93">l</span>et strs, new_bindings = List.unzip lifted_bindings in
+    <span data-count="93">r</span>eturn (List.conca<span data-count="93">t</span> strs @ [ Pe_Nonrec new_bindings ])
+  | <span data-count="40">P</span>e_Rec bindings -&gt;
+    let* lifted_bindings =
+      ma<span data-count="40">p</span> bindings ~f:(fun (name, e) -&gt;
+        <span data-count="42">l</span>et* str, new_e = ll_inne<span data-count="42">r</span> empty e in
+        <span data-count="42">r</span>eturn (str, (name, new_e)))
+    in
+    <span data-count="40">l</span>et strs, new_bindings = List.unzip lifted_bindings in
+    <span data-count="40">r</span>eturn (List.conca<span data-count="40">t</span> strs @ [ Pe_Rec new_bindings ])
+;;
+
+let ll_structure structure =
+  <span data-count="46">l</span>et rec helper = function
+    | <span data-count="46">[</span>] -&gt; return []
+    | <span data-count="133">h</span>d :: tl -&gt;
+      let* str1 = ll_str_ite<span data-count="133">m</span> hd in
+      <span data-count="133">l</span>et* str2 = helpe<span data-count="133">r</span> tl in
+      <span data-count="133">r</span>eturn @@ str1 @ str2
+  in
+  helper structure
+;;
+
+let run_ll bindings init_num p = <span data-count="46">r</span>un (ll_structur<span data-count="46">e</span> p) bindings init_num
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>
