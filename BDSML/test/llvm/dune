@@ -6,5 +6,4 @@
 
 (cram
  (applies_to test_codegen)
- (deps
-  ./test_codegen.exe))
+ (deps ./test_codegen.exe))
