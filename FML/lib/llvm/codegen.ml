@@ -41,28 +41,23 @@ let compile_binop op x y =
   | "( - )" -> build_sub x y "sub" builder
   | "( * )" -> build_mul x y "mul" builder
   | "( / )" -> build_sdiv x y "div" builder
-  (* | "( = )" | "( == )" -> build_icmp Icmp.Eq x y "eq" builder
-  | "( <> )" | "( != )" -> build_icmp Icmp.Ne x y "ne" builder
-  | "( > )" -> build_icmp Icmp.Sgt x y "sgt" builder
-  | "( >= )" -> build_icmp Icmp.Sge x y "sge" builder
-  | "( < )" -> build_icmp Icmp.Slt x y "slt" builder
-  | "( <= )" -> build_icmp Icmp.Sle x y "sle" builder *)
+  | "( = )" | "( == )" ->
+    build_zext (build_icmp Icmp.Eq x y "eq" builder) i64_t "eq_i64t" builder
+  | "( <> )" | "( != )" ->
+    build_zext (build_icmp Icmp.Ne x y "ne" builder) i64_t "ne_i64t" builder
+  | "( > )" -> build_zext (build_icmp Icmp.Sgt x y "sgt" builder) i64_t "sgt_i64t" builder
+  | "( >= )" ->
+    build_zext (build_icmp Icmp.Sge x y "sge" builder) i64_t "sge_i64t" builder
+  | "( < )" -> build_zext (build_icmp Icmp.Slt x y "slt" builder) i64_t "slt_i64t" builder
+  | "( <= )" ->
+    build_zext (build_icmp Icmp.Sle x y "sle" builder) i64_t "sle_i64t" builder
   | _ -> failwith ("Invalid operator: " ^ op)
 ;;
 
 let is_binop = function
-  | "( + )"
-  | "( - )"
-  | "( * )"
-  | "( / )" -> true
-  (* | "( = )"
-  | "( == )"
-  | "( <> )"
-  | "( != )"
-  | "( > )"
-  | "( >= )"
-  | "( < )"
-  | "( <= )" -> true *)
+  | "( + )" | "( - )" | "( * )" | "( / )" -> true
+  | "( = )" | "( == )" | "( <> )" | "( != )" | "( > )" | "( >= )" | "( < )" | "( <= )" ->
+    true
   | _ -> false
 ;;
 
@@ -98,35 +93,10 @@ let rec compile_cexpr = function
   | CEApply (name, args) ->
     let compiled_args = List.map compile_immexpr args in
     (match lookup_function name module_ with
-     (* | Some f when Array.length (params f) = List.length args ->
-        build_call (type_of f) f (Array.of_list compiled_args) name builder *)
-     | Some _ ->
-       let f = compile_immexpr (ImmIdentifier name) in
-       build_call
-         (var_arg_function_type i64_t [| i64_t; i64_t |])
-         (Option.get (lookup_function "apply_args" module_))
-         (Array.of_list
-            ([ f; const_int i64_t (List.length compiled_args) ] @ compiled_args))
-         "applied_closure"
-         builder
-     (* | Some f ->
-       let fun_ptr = build_ptrtoint f i64_t "" builder in
-       let cl =
-         build_call
-           (function_type i64_t [| i64_t; i64_t |])
-           (Option.get @@ lookup_function "create_closure" module_)
-           [| fun_ptr; const_int i64_t (Array.length (params f)); const_int i64_t 0 |]
-           "closure"
-           builder
-       in
-       build_call
-         (var_arg_function_type i64_t [| i64_t; i64_t |])
-         (Option.get (lookup_function "apply_args" module_))
-         (Array.of_list
-            ([ cl; const_int i64_t (List.length compiled_args) ] @ compiled_args))
-         "applied_closure"
-         builder *)
-     | None ->
+     | Some f when Array.length (params f) = List.length args ->
+       let func_type = function_type i64_t (Array.make (List.length args) i64_t) in
+       build_call func_type f (Array.of_list compiled_args) "call" builder
+     | _ ->
        let f = compile_immexpr (ImmIdentifier name) in
        build_call
          (var_arg_function_type i64_t [| i64_t; i64_t |])
@@ -137,8 +107,8 @@ let rec compile_cexpr = function
          builder)
   | CEIf (cond, then_e, else_e) ->
     let cond_v =
-       build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder in
-    (* let cond_v = compile_immexpr cond in *)
+      build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder
+    in
     let entry_block = insertion_block builder in
     let parent = block_parent entry_block in
     let then_block = append_block ctx "then" parent in
@@ -229,10 +199,6 @@ let init_runtime =
 ;;
 
 let create_main program =
-  (* let main_type = function_type i64_t [||] in
-     let main = declare_function "main" main_type module_ in
-     let bb = append_block ctx "entry" main in
-     position_at_end bb builder; *)
   init_runtime;
   List.iter (fun decl -> ignore (compile_anf_decl decl)) program;
   let _ = build_ret (const_int i64_t 0) builder in
