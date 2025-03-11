@@ -52,7 +52,7 @@ val arb_type_ann : type_ann QCheck.arbitrary
 val equal_type_ann : type_ann -> type_ann -> bool
 
 type pattern =
-  | PConst of constant
+  | PConst of constant (** 42 *)
   | PWild (** _ *)
   | PIdent of id (** x *)
   | PTuple of pattern * pattern * pattern list (** (a, b) *)
