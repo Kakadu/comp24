@@ -216,6 +216,7 @@ let generate_main program =
            let global_var =
              define_global name (const_null value_pointer_type) llvm_module
            in
+           register_symbol name global_var;
            let compiled_val = generate_aexpr body in
            ignore (build_store compiled_val global_var llvm_builder)
          | _ -> ())
