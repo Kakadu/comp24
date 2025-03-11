@@ -55,8 +55,8 @@ let runtime_functions =
   in
   let closure_functions =
     [ "ct_closure", function_type ptr_ty [| ptr_ty; i32_ty |]
-    ; "apply_args_to_fun", var_arg_function_type ptr_ty [| ptr_ty; i32_ty |]
-    ; "call_fun", function_type ptr_ty [| ptr_ty |]
+    ; "invoke_closure_with_args", var_arg_function_type ptr_ty [| ptr_ty; i32_ty |]
+    ; "invoke_closure", function_type ptr_ty [| ptr_ty |]
     ]
   in
   let pattern_matching_functions =

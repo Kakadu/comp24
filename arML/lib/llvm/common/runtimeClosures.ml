@@ -14,7 +14,7 @@ let create_fun_closure runtime id_val args_num =
   closure
 ;;
 
-let call_fun runtime closure =
-  let func, typ = get_func_info runtime "call_fun" in
+let invoke_closure runtime closure =
+  let func, typ = get_func_info runtime "invoke_closure" in
   build_call typ func [| closure |] "fun_call" builder
 ;;

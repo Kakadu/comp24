@@ -79,7 +79,7 @@ and compile_identifier_expression runtime env name =
   let wrap_function runtime func =
     let arg_count = Array.length (params func) in
     let closure = create_fun_closure runtime func arg_count in
-    if arg_count = 0 then call_fun runtime closure else closure
+    if arg_count = 0 then invoke_closure runtime closure else closure
   in
   let resolve_function runtime env name =
     let value = get_func_value runtime env name in
@@ -96,7 +96,7 @@ and compile_func_call runtime env func_expr arg_exprs =
     | _ -> failwith "Error: Invalid function call"
   in
   let compiled_args = List.map (compile_immut_expression runtime env) arg_exprs in
-  let closure_func, closure_type = get_func_info runtime "apply_args_to_fun" in
+  let closure_func, closure_type = get_func_info runtime "invoke_closure_with_args" in
   let closure_args =
     Array.of_list
       (compiled_func :: const_int i32_ty (List.length compiled_args) :: compiled_args)
