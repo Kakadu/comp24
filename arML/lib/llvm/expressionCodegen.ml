@@ -11,7 +11,7 @@ let rec compile_immut_expression runtime env = function
   | IConstant const ->
     (match const with
      | CInt i ->
-       let f_value, ty = get_func_info runtime "ct_int_v" in 
+       let f_value, ty = get_func_info runtime "ct_int_v" in
        build_call ty f_value [| const_int i32_ty i |] "val_int" builder
      | CBool b ->
        let f_value, ty = get_func_info runtime "ct_bool_v" in
@@ -38,4 +38,11 @@ and compile_complex_expression runtime env = function
   | CIfThenElse _ -> assert false
   | CTyped (c, _) -> compile_complex_expression runtime env c
   | CListConstructor _ -> failwith "List unsupported in llvm codegen"
+
+and compile_anf_expression runtime env = function
+  | AComplex c -> compile_complex_expression runtime env c
+  | ALetIn (n, e1, e2) ->
+    compile_anf_expression
+      runtime
+      (RuntimeEnv.add name (compile_complex_expression runtime env c) env)
 ;;
