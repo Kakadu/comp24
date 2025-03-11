@@ -15,8 +15,13 @@
 
 (executable
  (name LlvmCodegenRunner)
+ (modules LlvmCodegenRunner)
  (public_name LlvmCodegenRunner)
- (libraries HamsterTest))
+ (libraries HamsterTest HamsterML llvm stdio))
+
+(cram
+ (applies_to llvm_codegen_manytest)
+ (deps ./LlvmCodegenRunner.exe ../../_build/default/lib/runtime.so manytests/typed/001fac.ml))
 
 (cram
  (deps

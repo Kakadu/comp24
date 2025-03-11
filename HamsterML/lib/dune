@@ -15,7 +15,7 @@
   PrinterLL
   PrinterME
   PrinterAnf)
- (libraries llvm)
+ (libraries llvm base llvm.analysis)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)
@@ -26,9 +26,8 @@
 
 (rule
  (targets runtime.so)
- (deps llvm/runtime.c)
+ (deps runtime.c)
  (action
   (run gcc -fPIC -shared %{deps} -o %{targets})))
 
 (include_subdirs unqualified)
-
