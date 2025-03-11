@@ -8,8 +8,11 @@
   llvmBasic
   runtime
   runtimeClosures
+  environment
   environmentSearchers
-  expressionCodegen)
+  expressionCodegen
+  programCodegen
+  Runner)
  (instrumentation
   (backend bisect_ppx))
  (preprocess
