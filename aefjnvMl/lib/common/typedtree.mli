@@ -11,6 +11,7 @@ module VarSet : sig
   val union : t -> t -> t
   val diff : t -> t -> t
   val fold : (elt -> 'a -> 'a) -> t -> 'a -> 'a
+  val pp : Format.formatter -> t -> unit
 end
 
 type binder = int
@@ -31,6 +32,13 @@ type ty =
   | TArrow of ty * ty
   | TList of ty
 
+val tint : ty
+val tbool : ty
+val tunit : ty
+val tarrow : ty -> ty -> ty
+val tvar : binder -> ty
+val tlist : ty -> ty
+val ttuple : ty list -> ty
 val equal_ty : ty -> ty -> bool
 val pp_ty : Format.formatter -> ty -> unit
 val show_ty : ty -> string
