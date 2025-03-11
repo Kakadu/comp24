@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>me_converter.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/middleend/match_elim/me_converter.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/match_elim/</span>me_converter.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+</pre>
+<pre><code class="ocaml">(** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
+open Common.Ast
+open Me_ast
+
+let convert_me_ident = function
+  | <span data-count="58">I</span>d_unit -&gt; Pat_const Const_unit
+  | <span data-count="396">I</span>d_name s -&gt; Pat_var s
+;;
+
+let rec convert_expr = function
+  | <span data-count="404">M</span>Exp_constant c -&gt; Exp_constant c
+  | <span data-count="886">M</span>Exp_ident i -&gt; Exp_ident i
+  | <span data-count="10">M</span>Exp_tuple es -&gt;
+    let converted = List.map convert_expr es in
+    <span data-count="10">E</span>xp_tuple converted
+  | <span data-count="834">M</span>Exp_apply (e1, e2) -&gt; Exp_apply (convert_exp<span data-count="834">r</span> e1, convert_exp<span data-count="834">r</span> e2)
+  | <span data-count="44">M</span>Exp_list (e1, e2) -&gt; Exp_list (convert_exp<span data-count="44">r</span> e1, convert_exp<span data-count="44">r</span> e2)
+  | <span data-count="67">M</span>Exp_ifthenelse (e1, e2, e3) -&gt;
+    Exp_ifthenelse (convert_exp<span data-count="67">r</span> e1, convert_exp<span data-count="67">r</span> e2, convert_exp<span data-count="67">r</span> e3)
+  | <span data-count="186">M</span>Exp_function (param, body) -&gt; Exp_function (convert_me_iden<span data-count="186">t</span> param, convert_exp<span data-count="186">r</span> body)
+  | <span data-count="159">M</span>Exp_let (decl, body) -&gt; Exp_let (convert_dec<span data-count="159">l</span> decl, convert_exp<span data-count="159">r</span> body)
+
+and convert_value_binding vb =
+  <span data-count="268">{</span> vb_pat = convert_me_iden<span data-count="268">t</span> vb.m_vb_pat; vb_expr = convert_exp<span data-count="268">r</span> vb.m_vb_expr }
+
+and convert_decl (MDecl (rec_flag, bindings)) =
+  <span data-count="265">D</span>ecl (rec_flag, List.ma<span data-count="265">p</span> convert_value_binding bindings)
+;;
+
+let convert_me_program decls = <span data-count="41">L</span>ist.map (fun decl -&gt; <span data-count="106">S</span>tr_value (convert_dec<span data-count="106">l</span> decl)) decls
+</code></pre>
+      </div>
+    </div>
+    <script src="../../../coverage.js"></script>
+  </body>
+</html>

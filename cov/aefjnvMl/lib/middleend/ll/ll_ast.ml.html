@@ -2,24 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>errors.ml &mdash; Coverage report</title>
-    <meta name="description" content="66.67% coverage in lib/common/errors.ml">
-    <link rel="stylesheet" href="../../coverage.css"/>
-    <script src="../../highlight.pack.js"></script>
+    <title>ll_ast.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in lib/middleend/ll/ll_ast.ml">
+    <link rel="stylesheet" href="../../../coverage.css"/>
+    <script src="../../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
   </head>
   <body>
     <div id="header">
       <h1>
-        <a href="../../index.html">
-          <span class="dirname">lib/common/</span>errors.ml
+        <a href="../../../index.html">
+          <span class="dirname">lib/middleend/ll/</span>ll_ast.ml
         </a>
       </h1>
-      <h2>66.67%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:3.23%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -47,14 +45,14 @@
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span class="unvisited"> </span>
-<a id="L31"></a><span class="unvisited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -95,36 +93,36 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Typedtree
+(** TODO (mutual rec):
+    - mutaual recursion can be only with [rec] (invariant)
+      --&gt; [and] can be only with functions
+      --&gt; mutaual recursion can be only in ll_decl as global funcs (ll-guarantees) *)
 
-type parse_error = Syntax_error of string
-type illegal_state_error = Illegal_state_error of string
+open Match_elimination.Me_ast
 
-type infer_error =
-  | Occurs_check of int * ty
-  | Unbound_variable of string
-  | Unification_failed of ty * ty
-  | Several_bounds of string
-  | Not_specify_rec
-  | No_variable_rec
+type ll_expr =
+  | LL_const of Common.Ast.const
+  | LL_ident of string
+  | LL_let of string id_t * ll_expr * ll_expr
+  | LL_ifthenelse of ll_expr * ll_expr * ll_expr
+  | LL_tuple of ll_expr list
+  | LL_list of ll_expr * ll_expr
+  | LL_apply of ll_expr * ll_expr
 
-type error =
-  | Parser of parse_error
-  | Infer of infer_error
-  | Middleend of illegal_state_error
-  | Llvm_gen of illegal_state_error
+type ll_fun =
+  { lldec_name : string
+  ; lldec_args : string id_t * string id_t list
+  ; lldec_body : ll_expr
+  }
 
-let occurs_check (b, t) = <span data-count="7">I</span>nfer (Occurs_check (b, t))
-let unbound_variable v = <span data-count="7">I</span>nfer (Unbound_variable v)
-let unification_failed (t1, t2) = <span data-count="11">I</span>nfer (Unification_failed (t1, t2))
-let several_bounds v = <span data-count="3">I</span>nfer (Several_bounds v)
-let not_specify_rec = Infer Not_specify_rec
-let no_variable_rec = Infer No_variable_rec
-let illegal_state msg = <span data-count="0">M</span>iddleend (Illegal_state_error msg)
-let llvm_error msg = <span data-count="0">L</span>lvm_gen (Illegal_state_error msg)
+type ll_structure_item =
+  | LL_GlobalV of string id_t * ll_expr
+  | LL_Decl of Common.Ast.rec_flag * ll_fun * ll_fun list (** if mutual rec *)
+
+type ll_program = ll_structure_item list
 </code></pre>
       </div>
     </div>
-    <script src="../../coverage.js"></script>
+    <script src="../../../coverage.js"></script>
   </body>
 </html>
