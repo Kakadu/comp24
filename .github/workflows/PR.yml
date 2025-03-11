@@ -157,7 +157,7 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        if: ${{ !startsWith(github.event.pull_request.title, '[D]') && !startsWith(github.event.pull_request.title, '[E]') }
+        if: ${{ !startsWith(github.event.pull_request.title, '[D]') && !startsWith(github.event.pull_request.title, '[E]') }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
