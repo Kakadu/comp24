@@ -104,14 +104,6 @@ module Type = struct
   ;;
 end
 
-let tint = TPrim "int"
-let tbool = TPrim "bool"
-let tunit = TPrim "unit"
-let tarrow l r = TArrow (l, r)
-let tvar x = TVar x
-let tlist x = TList x
-let ttuple ts = TTuple ts
-
 open R
 open R.Syntax
 
@@ -309,7 +301,7 @@ let const_infer fst = function
   | Const_unit -> return (fst, tunit)
 ;;
 
-let rec convert_ty_annot env = function
+let rec convert_ty_annot = function
   | Ptyp_int -> return tint
   | Ptyp_bool -> return tbool
   | Ptyp_unit -> return tunit
@@ -317,18 +309,18 @@ let rec convert_ty_annot env = function
     let* var = poly_var s in
     return var
   | Ptyp_list t ->
-    let* el_ty = convert_ty_annot env t in
+    let* el_ty = convert_ty_annot t in
     return @@ tlist el_ty
   | Ptyp_tuple ts ->
     let* ty =
       RList.fold_left ts ~init:(return []) ~f:(fun ts t ->
-        let* p1 = convert_ty_annot env t in
+        let* p1 = convert_ty_annot t in
         return @@ (p1 :: ts))
     in
     return @@ ttuple ty
   | Ptyp_arrow (t, t') ->
-    let* t1 = convert_ty_annot env t in
-    let* t2 = convert_ty_annot env t' in
+    let* t1 = convert_ty_annot t in
+    let* t2 = convert_ty_annot t' in
     return @@ tarrow t1 t2
 ;;
 
@@ -359,11 +351,13 @@ let pattern_infer =
             let* env1, p1 = helper env pat in
             return (env1, p1 :: ts))
       in
-      let* _, env, ty = check_several_bounds (pattern_vars pat) env (ttuple ty) in
+      let* _, env, ty =
+        check_several_bounds (pattern_vars pat) env (ttuple (List.rev ty))
+      in
       return (env, ty)
     | Pat_constraint (p, t) ->
       let* env', t' = helper env p in
-      let* t_sp = convert_ty_annot env' t in
+      let* t_sp = convert_ty_annot t in
       let* sub = Subst.unify t' t_sp in
       let env = TypeEnv.apply sub env' in
       return (env, Subst.apply sub t')
@@ -446,7 +440,7 @@ let rec infer =
       return (final_subs, trez)
     | Exp_type (e, t) ->
       let* s1, t1 = helper env e in
-      let* t2 = convert_ty_annot env t in
+      let* t2 = convert_ty_annot t in
       let* sub = Subst.unify t1 t2 in
       let trez = Subst.apply sub t1 in
       let* final_subs = Subst.compose_all [ s1; sub ] in
@@ -485,40 +479,27 @@ and infer_decl env = function
         | _ -> fail no_variable_rec)
 ;;
 
-let init_env =
-  let bin_ops =
-    [ op_mul, int_ty_op
-    ; op_div, int_ty_op
-    ; op_plus, int_ty_op
-    ; op_minus, int_ty_op
-    ; op_and, bool_ty_op
-    ; op_or, bool_ty_op
-    ; op_more, comp_ty_op 1
-    ; op_less, comp_ty_op 1
-    ; op_more_eq, comp_ty_op 1
-    ; op_less_eq, comp_ty_op 1
-    ; op_eq, comp_ty_op 1
-    ; op_2eq, comp_ty_op 1
-    ; op_not_eq, comp_ty_op 1
-    ]
-  in
-  let un_ops =
-    [ un_op_prefix ^ un_op_minus, sig_un_op_minus
-    ; un_op_prefix ^ un_op_not, sig_un_op_not
-    ]
-  in
-  let print_int_ty = func_print_int, sig_func_print_int in
-  let funs = (print_int_ty :: un_ops) @ bin_ops in
+let env_with_base_lib funcs env =
   let bind_ty env id typ =
     TypeEnv.extend env (id, generalize env typ Nonrecursive ~pattern_name:None)
   in
-  Base.List.fold_left funs ~init:TypeEnv.empty ~f:(fun env (id, typ) ->
-    bind_ty env id typ)
+  RList.fold_left funcs ~init:(return env) ~f:(fun env' (id, tp) ->
+    let* typ = convert_ty_annot tp in
+    return @@ bind_ty env' id typ)
 ;;
 
-let check_program program =
+let predef_funcs =
+  let open LibF in
+  let get_decl f =
+    let _, tp, _ = get_type f in
+    get_name f, tp
+  in
+  List.map get_decl (sys_funcs @ user_funcs)
+;;
+
+let check_program_internal funcs program =
   let helper env =
-    RList.fold_left program ~init:(return env) ~f:(fun env ->
+    RList.fold_left program ~init:(env_with_base_lib funcs env) ~f:(fun env ->
         function
         | Str_eval e ->
           let* _, _ = infer env e in
@@ -527,8 +508,10 @@ let check_program program =
           let* _, env = infer_decl env d in
           return env)
   in
-  run (helper init_env)
+  run (helper TypeEnv.empty)
 ;;
+
+let check_program = check_program_internal predef_funcs
 
 module PP = struct
   (* Convert binders for further replacement with strings
@@ -602,9 +585,16 @@ module PP = struct
     helper ppf (new_ty, false)
   ;;
 
+  let stand_alone_init_env =
+    run (env_with_base_lib predef_funcs TypeEnv.empty)
+    |> function
+    | Ok env -> env
+    | Error _ -> raise @@ Failure "Impossible case"
+  ;;
+
   let pp_program ppf env =
     Base.Map.iteri env ~f:(fun ~key:v ~data:(S (_, ty)) ->
-      match TypeEnv.find init_env v with
+      match TypeEnv.find stand_alone_init_env v with
       | Some (S (_, init_ty)) when ty = init_ty -> ()
       | _ -> Format.fprintf ppf "val %s: %a\n" v pp_type ty)
   ;;
