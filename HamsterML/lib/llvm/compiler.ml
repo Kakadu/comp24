@@ -50,7 +50,6 @@ let rec codegen_immexpr env =
     let fnty = function_type i64 [| i64; i64 |] in
     Base.List.fold (Base.List.rev lst) ~init:allocated_list ~f:(fun acc elem ->
       let elem = codegen_immexpr env elem in
-      let acc = acc in
       build_call fnty add [| acc; elem |] "hamsterml_add_to_list" builder)
   in
   function
@@ -68,7 +67,6 @@ let rec codegen_immexpr env =
     in
     Base.List.fold tpl ~init:allocated_tuple ~f:(fun acc elem ->
       let elem = codegen_immexpr env elem in
-      let acc = acc in
       build_call
         (function_type i64 [| i64; i64 |])
         (lookup_function_exception "hamsterml_fill_tuple" the_module)
@@ -103,15 +101,12 @@ and codegen_cexpr env = function
     let arg_list = codegen_immexpr env ie2 in
     let add_to_list = lookup_function_exception "hamsterml_add_to_list" the_module in
     let fnty = function_type i64 [| i64; i64 |] in
-    let result =
-      build_call
-        fnty
-        add_to_list
-        [| arg_list; arg_value |]
-        "hamsterml_add_to_list_n"
-        builder
-    in
-    result
+    build_call
+      fnty
+      add_to_list
+      [| arg_list; arg_value |]
+      "hamsterml_add_to_list_n"
+      builder
   | CApplication (CImm (ImmId fun_name), arg, rest_args) ->
     let function_value =
       match Base.Map.find env fun_name with
@@ -145,7 +140,6 @@ and codegen_cexpr env = function
     let fnty = function_type i64 arg_types in
     build_call fnty function_value args_arr "calltmp" builder
   | CApplication (func_expr, arg, rest_args) ->
-    (* Handle function application with expression as function *)
     let function_value = codegen_cexpr env func_expr in
     let args = Base.List.map ~f:(codegen_cexpr env) (arg :: rest_args) in
     let args_arr = Array.of_list args in
@@ -154,20 +148,18 @@ and codegen_cexpr env = function
     build_call fnty function_value args_arr "indirect_calltmp" builder
   | CIf (ie_condition, ae_then, ae_opt_else) ->
     let start_bb = insertion_block builder in
-    let condition = codegen_immexpr env ie_condition in
+    let condition_i64 = codegen_immexpr env ie_condition in
+    let condition = build_icmp Icmp.Ne condition_i64 (const_int i64 0) "ifcond" builder in
     let the_function = block_parent (insertion_block builder) in
     let then_block = append_block global_context "then" the_function in
     let else_block = append_block global_context "else" the_function in
     let merge_block = append_block global_context "ifcont" the_function in
-    (* Create conditional branch instruction at end of current block *)
     position_at_end start_bb builder;
     ignore (build_cond_br condition then_block else_block builder);
-    (* Generate 'then' block *)
     position_at_end then_block builder;
     let then_value = codegen_aexpr env ae_then in
     let then_block_end = insertion_block builder in
     ignore (build_br merge_block builder);
-    (* Generate 'else' block *)
     position_at_end else_block builder;
     let else_value =
       match ae_opt_else with
@@ -176,11 +168,9 @@ and codegen_cexpr env = function
     in
     let else_block_end = insertion_block builder in
     ignore (build_br merge_block builder);
-    (* Generate merge block with phi node *)
     position_at_end merge_block builder;
     let incoming = [ then_value, then_block_end; else_value, else_block_end ] in
-    let phi = build_phi incoming "iftmp" builder in
-    phi
+    build_phi incoming "iftmp" builder
 
 and codegen_aexpr env = function
   | ACExpr cexpr -> codegen_cexpr env cexpr
@@ -190,7 +180,11 @@ and codegen_aexpr env = function
     ignore (build_store cexpr_value alloca builder);
     let new_env = Base.Map.set env ~key:id ~data:alloca in
     codegen_aexpr new_env aexpr
-  | ALetIn (_, _, _) -> failwith "Only variable patterns are supported in let bindings"
+  | ALetIn (Const Unit, cexpr, aexpr) ->
+    ignore (codegen_cexpr env cexpr);
+    codegen_aexpr env aexpr
+  | ALetIn (_, _, _) ->
+    failwith "Only variable and unit patterns are supported in let bindings"
 ;;
 
 let codegen_single_anf_binding = function
@@ -220,10 +214,41 @@ let codegen_single_anf_binding = function
 let codegen_anf_decl = function
   | ADSingleLet (_, single_anf_binding) -> codegen_single_anf_binding single_anf_binding
   | ADMutualRecDecl bindings ->
-    (* For mutual recursion, first declare all functions *)
-    let llvalues = Base.List.map bindings ~f:codegen_single_anf_binding in
-    (match Base.List.last llvalues with
-     | Some llvalue -> llvalue
+    (* First declare all functions so they can reference each other *)
+    let function_declarations =
+      Base.List.map bindings ~f:(function ALet (name, args, _) ->
+        let fn_type =
+          function_type i64 (Array.of_list (Base.List.map args ~f:(fun _ -> i64)))
+        in
+        let fn = declare_function name fn_type the_module in
+        set_linkage Linkage.Internal fn;
+        name, args, fn)
+    in
+    (* Define all function bodies with access to all declarations *)
+    Base.List.iter function_declarations ~f:(fun (name, args, fn) ->
+      let binding =
+        Base.List.find_exn bindings ~f:(function ALet (n, _, _) -> n = name)
+      in
+      let entry_bb = append_block global_context "entry" fn in
+      position_at_end entry_bb builder;
+      let fun_env =
+        Base.Array.foldi
+          (params fn)
+          ~init:(Base.Map.empty (module Base.String))
+          ~f:(fun i env llvm_arg ->
+            let arg_name = Base.List.nth_exn args i in
+            set_value_name arg_name llvm_arg;
+            let alloca = build_alloca i64 arg_name builder in
+            ignore (build_store llvm_arg alloca builder);
+            Base.Map.set env ~key:arg_name ~data:alloca)
+      in
+      match binding with
+      | ALet (_, _, body) ->
+        let body_val = codegen_aexpr fun_env body in
+        ignore (build_ret body_val builder));
+    (* Return the last function, matching the behavior of single binding *)
+    (match Base.List.last function_declarations with
+     | Some (_, _, llvalue) -> llvalue
      | None -> const_null i64)
 ;;
 
@@ -283,7 +308,6 @@ let codegen program =
     let main_fn = declare_function "main" main_type the_module in
     let entry = append_block global_context "entry" main_fn in
     position_at_end entry builder;
-    (* Find the user's main function or the last defined top-level function *)
     let main_ret_val =
       match lookup_function "main" the_module with
       | Some user_main when user_main != main_fn ->
@@ -296,7 +320,7 @@ let codegen program =
          with
          | Some user_main_fn ->
            build_call (function_type i64 [||]) user_main_fn [||] "main_result" builder
-         | None -> const_int i64 0 (* No suitable entry point found *))
+         | None -> const_int i64 0)
     in
     ignore (build_ret main_ret_val builder);
     main_fn
