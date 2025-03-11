@@ -12,46 +12,46 @@ let fresh_var =
   "__reserved_" ^ Int.to_string f
 ;;
 
-let user_var name =
+let user_var name1 =
   match
     List.find_opt
-      (fun (predef, _, _) -> predef = name)
+      (fun Utils.Predefined_ops.{ name } -> name = name1)
       Utils.Predefined_ops.predefine_operators
   with
-  | Some (_, _, alt_name) -> alt_name
-  | _ -> "__var_" ^ name
+  | Some Utils.Predefined_ops.{ alt_name } -> alt_name
+  | _ -> "__var_" ^ name1
 ;;
 
 let two_arg_fun_helper f a b = RExp_apply (RExp_apply (RExp_ident f, a), b)
-let thr (_, _, e) = e
 
 let fun_exception name =
   RExp_apply
-    (RExp_ident (thr Utils.Predefined_ops.exception_), RExp_constant (Const_string name))
+    ( RExp_ident Utils.Predefined_ops.exception_.alt_name
+    , RExp_constant (Const_string name) )
 ;;
 
 let fun_get_n tup n =
-  two_arg_fun_helper (thr Utils.Predefined_ops.get_from_tuple) tup
+  two_arg_fun_helper Utils.Predefined_ops.get_from_tuple.alt_name tup
   @@ RExp_constant (Const_int n)
 ;;
 
 let disassemble_constructor name v =
   two_arg_fun_helper
-    (thr Utils.Predefined_ops.disassemble_constructor)
+    Utils.Predefined_ops.disassemble_constructor.alt_name
     (RExp_constant (Const_string name))
     v
 ;;
 
 let var_nothing = Utils.Predefined_ops.var_nothing
-let same_constructor l r = two_arg_fun_helper (thr Utils.Predefined_ops.same_cons) l r
+let same_constructor l r = two_arg_fun_helper Utils.Predefined_ops.same_cons.alt_name l r
 
 let get_cons_params cons par =
-  two_arg_fun_helper (thr Utils.Predefined_ops.get_cons_param) cons par
+  two_arg_fun_helper Utils.Predefined_ops.get_cons_param.alt_name cons par
 ;;
 
-let exp_or = two_arg_fun_helper (thr Utils.Predefined_ops.op_or)
-let exp_and = two_arg_fun_helper (thr Utils.Predefined_ops.op_and)
-let exp_eq = two_arg_fun_helper (thr Utils.Predefined_ops.op_eq)
+let exp_or = two_arg_fun_helper Utils.Predefined_ops.op_or.alt_name
+let exp_and = two_arg_fun_helper Utils.Predefined_ops.op_and.alt_name
+let exp_eq = two_arg_fun_helper Utils.Predefined_ops.op_eq.alt_name
 
 let rec pattern_binder rexp = function
   | Pat_var v -> return [ user_var v, rexp ]

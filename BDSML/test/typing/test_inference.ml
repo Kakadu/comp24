@@ -389,8 +389,9 @@ let%expect_test "test poly inference" =
            ( "abs_value"
            , [ "n" ]
            , LComplex
-               (CExp_apply ("__op_plus", [ AExp_constant (Const_int 52); AExp_ident "n" ]))
-           )
+               (CExp_apply
+                  ( Utils.Predefined_ops.op_plus.name
+                  , [ AExp_constant (Const_int 52); AExp_ident "n" ] )) )
        ])
   |> function
   | Result.Ok res ->
@@ -406,10 +407,7 @@ let%expect_test "test poly inference" =
     Format.print_string @@ helper "" res
   | Result.Error s ->
     Format.eprintf "Error%s" s;
-    [%expect
-      {|
-    val f : 'h -> 'i -> ('h * 'i)
-    (int * int)
-    (char * char)
-    |}]
+    [%expect.unreachable];
+    [%expect.unreachable];
+  [%expect {| val abs_value : int -> int |}]
 ;;
