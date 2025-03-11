@@ -4,10 +4,17 @@
  (modules llvm_runner)
  (libraries stdio aefjnvMl_lib aefjnvMl.Llvm_lib))
 
+(executable
+ (name codegen_runner)
+ (public_name codegen_runner)
+ (modules codegen_runner)
+ (libraries stdio aefjnvMl_lib aefjnvMl.Llvm_lib))
+
 (cram
- (applies_to llvm_manytests)
+ (applies_to llvm_manytests codegen_manytests)
  (deps
   ./llvm_runner.exe
+  ./codegen_runner.exe
   ../lib/llvm/runtime/rt_funcs.c
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
