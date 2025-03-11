@@ -1,5 +1,25 @@
   $ clang-16 -c -fPIC ../lib/llvm/runtime/rt_funcs.c -o libMLstd.a
 
+  $ ./llvm_runner.exe < manytests/do_not_type/001.ml
+  Unbound value 'fac'
+
+
+  $ ./llvm_runner.exe < manytests/do_not_type/002if.ml
+  This expression has type bool but an expression was expected of type int
+
+
+  $ ./llvm_runner.exe < manytests/do_not_type/003occurs.ml
+  The type variable 'a occurs inside 'a -> 'b
+
+
+  $ ./llvm_runner.exe < manytests/do_not_type/004let_poly.ml
+  This expression has type int but an expression was expected of type bool
+
+
+  $ ./llvm_runner.exe < manytests/do_not_type/015tuples.ml
+  Only variables are allowed as left-side of 'let rec'
+
+
   $ ./llvm_runner.exe < manytests/typed/001fac.ml
   $ clang-16 libMLstd.a test.ll -lffi -Wno-override-module -o demo001_fac.exe
   $ ./demo001_fac.exe

@@ -2,7 +2,7 @@
  (name llvm_runner)
  (public_name llvm_runner)
  (modules llvm_runner)
- (libraries stdio aefjnvMl_lib aefjnvMl.Llvm_lib))
+ (libraries stdio aefjnvMl_lib middleend aefjnvMl.Llvm_lib))
 
 (executable
  (name codegen_runner)
@@ -16,6 +16,11 @@
   ./llvm_runner.exe
   ./codegen_runner.exe
   ../lib/llvm/runtime/rt_funcs.c
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
+  manytests/do_not_type/004let_poly.ml
+  manytests/do_not_type/015tuples.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml

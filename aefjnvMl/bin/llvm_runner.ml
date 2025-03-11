@@ -8,8 +8,9 @@ open Top_utils.Ast_test_utils
 
 let _ =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  let+! ast'_t =
+  let ast'_t =
     let*! ast = Parser.parse s in
+    let*! _ = Inferencer.check_program ast in
     let*! ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.alpha_prefix ast in
     let ast' = Middleend.Closure_conversion.convert_program ast' in
     let*! ast' = Alpha_converter.rename_ast_with_uniq Common.Naming.cc_prefix ast' in
@@ -24,6 +25,7 @@ let _ =
     in
     ast'
   in
-  let _ = Llvm_lib.Compiler.compile_llvm2ll "test.ll" ast'_t in
-  Ok ast'_t
+  match ast'_t with
+  | Ok ast -> Llvm_lib.Compiler.compile_llvm2ll "test.ll" ast
+  | Error err -> print_error err
 ;;
