@@ -6,10 +6,18 @@ let function_type_table : (string, lltype) Hashtbl.t = Hashtbl.create 10
 
 let map_name_to_runtime name =
   match name with
-  | "+" -> "+"
-  | "-" -> "-"
-  | "*" -> "*"
-  | "=" -> "="
+  | "+" -> "RoflanML_add"
+  | "-" -> "RoflanML_sub"
+  | "*" -> "RoflanML_mul"
+  | "/" -> "RoflanML_div"
+  | "=" -> "RoflanML_eq"
+  | "<>" -> "RoflanML_neq"
+  | ">" -> "RoflanML_gt"
+  | ">=" -> "RoflanML_ge"
+  | "<" -> "RoflanML_lt"
+  | "<=" -> "RoflanML_le"
+  | "||" -> "RoflanML_or"
+  | "&&" -> "RoflanML_and"
   | _ -> name
 ;;
 
@@ -46,22 +54,22 @@ let rec generate_immexpr (expr : immexpr) : llvalue =
     (match c with
      | CInt i ->
        build_call
-         (find_function_type "create_int")
-         (find_symbol "create_int")
+         (find_function_type "Create_int")
+         (find_symbol "Create_int")
          [| const_int int64_type i |]
          "boxed_int"
          llvm_builder
      | CBool b ->
        build_call
-         (find_function_type "create_bool")
-         (find_symbol "create_bool")
+         (find_function_type "Create_bool")
+         (find_symbol "Create_bool")
          [| const_int bool_type (if b then 1 else 0) |]
          "boxed_bool"
          llvm_builder
      | CUnit ->
        build_call
-         (find_function_type "create_unit")
-         (find_symbol "create_unit")
+         (find_function_type "Create_unit")
+         (find_symbol "Create_unit")
          [||]
          "boxed_unit"
          llvm_builder)
@@ -75,16 +83,16 @@ let rec generate_immexpr (expr : immexpr) : llvalue =
   | ImmTuple (e1, e2, rest) ->
     let elements = List.map generate_immexpr (e1 :: e2 :: rest) in
     build_call
-      (find_function_type "create_tuple")
-      (find_symbol "create_tuple")
+      (find_function_type "Create_tuple")
+      (find_symbol "Create_tuple")
       (Array.of_list (const_int int32_type (List.length elements) :: elements))
       "tuple"
       llvm_builder
   | ImmList lst ->
     let empty_list =
       build_call
-        (find_function_type "create_empty_list")
-        (find_symbol "create_empty_list")
+        (find_function_type "Create_empty_list")
+        (find_symbol "Create_empty_list")
         [||]
         "empty_list"
         llvm_builder
@@ -92,8 +100,8 @@ let rec generate_immexpr (expr : immexpr) : llvalue =
     List.fold_right
       (fun elem acc ->
         build_call
-          (find_function_type "list_cons")
-          (find_symbol "list_cons")
+          (find_function_type "List_cons")
+          (find_symbol "List_cons")
           [| generate_immexpr elem; acc |]
           "list_cons"
           llvm_builder)
@@ -107,8 +115,8 @@ and generate_cexpr (expr : cexpr) : llvalue =
     let cond_val = generate_immexpr cond_expr in
     let bool_val =
       build_call
-        (find_function_type "get_bool")
-        (find_symbol "get_bool")
+        (find_function_type "Get_bool")
+        (find_symbol "Get_bool")
         [| cond_val |]
         "cond_bool"
         llvm_builder
@@ -138,8 +146,8 @@ and generate_cexpr (expr : cexpr) : llvalue =
     List.fold_left
       (fun acc arg ->
         build_call
-          (find_function_type "apply")
-          (find_symbol "apply")
+          (find_function_type "Apply")
+          (find_symbol "Apply")
           [| acc; generate_immexpr arg |]
           "apply_result"
           llvm_builder)
@@ -156,8 +164,8 @@ and generate_aexpr (expr : aexpr) : llvalue =
 
 and generate_closure func arity =
   build_call
-    (find_function_type "create_closure")
-    (find_symbol "create_closure")
+    (find_function_type "Create_closure")
+    (find_symbol "Create_closure")
     [| build_bitcast func (pointer_type llvm_context) "func_ptr_cast" llvm_builder
      ; const_int int64_type arity
     |]
@@ -225,51 +233,102 @@ let register_dummy_runtime () =
   in
   ignore
     (declare_dummy
-       "="
+       "RoflanML_eq"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "+"
+       "RoflanML_neq"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "-"
+       "RoflanML_gt"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "*"
-       (Llvm.function_type
-          value_pointer_type
-          [| value_pointer_type; value_pointer_type |]));
-  ignore
-    (declare_dummy "create_int" (Llvm.function_type value_pointer_type [| int64_type |]));
-  ignore
-    (declare_dummy "create_bool" (Llvm.function_type value_pointer_type [| bool_type |]));
-  ignore (declare_dummy "create_unit" (Llvm.function_type value_pointer_type [||]));
-  ignore (declare_dummy "create_empty_list" (Llvm.function_type value_pointer_type [||]));
-  ignore
-    (declare_dummy
-       "list_cons"
+       "RoflanML_ge"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "apply"
+       "RoflanML_lt"
        (Llvm.function_type
           value_pointer_type
           [| value_pointer_type; value_pointer_type |]));
   ignore
-    (declare_dummy "get_bool" (Llvm.function_type bool_type [| value_pointer_type |]));
+    (declare_dummy
+       "RoflanML_le"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
   ignore
     (declare_dummy
-       "create_closure"
+       "RoflanML_or"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "RoflanML_and"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "RoflanML_add"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "RoflanML_sub"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "RoflanML_mul"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "RoflanML_div"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy "Create_int" (Llvm.function_type value_pointer_type [| int64_type |]));
+  ignore
+    (declare_dummy "Create_bool" (Llvm.function_type value_pointer_type [| bool_type |]));
+  ignore (declare_dummy "Create_unit" (Llvm.function_type value_pointer_type [||]));
+  ignore
+    (declare_dummy
+       "Apply"
+       (Llvm.function_type
+          value_pointer_type
+          [| value_pointer_type; value_pointer_type |]));
+  ignore
+    (declare_dummy "Get_int" (Llvm.function_type int64_type [| value_pointer_type |]));
+  ignore
+    (declare_dummy "Get_bool" (Llvm.function_type bool_type [| value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "print_int"
+       (Llvm.function_type value_pointer_type [| value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "print_bool"
+       (Llvm.function_type value_pointer_type [| value_pointer_type |]));
+  ignore
+    (declare_dummy
+       "Create_closure"
        (Llvm.function_type value_pointer_type [| pointer_type llvm_context; int64_type |]))
 ;;
 

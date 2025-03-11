@@ -1,0 +1,11 @@
+(executable
+ (name compiler)
+ (modules Compiler)
+ (public_name compiler)
+ (libraries RoflanML.Lib stdio))
+
+(cram
+ (applies_to compile)
+ (deps
+  ./compiler.exe
+  runtime.cpp))
