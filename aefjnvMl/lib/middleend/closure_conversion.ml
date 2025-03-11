@@ -140,7 +140,9 @@ let closure_conversion toplvl =
           | Recursive -> Base.Set.remove free_vars v
           | Nonrecursive -> free_vars
         in
-        let free_vars = if Base.Set.length p_vars_set == 0 then empty_set else free_vars in
+        let free_vars =
+          if Base.Set.length p_vars_set == 0 then empty_set else free_vars
+        in
         let saturated =
           Base.Set.fold free_vars ~f:(fun acc v -> pvar v :: acc) ~init:(List.rev ps)
         in
@@ -186,11 +188,9 @@ let closure_conversion toplvl =
     Str_eval e, toplvl
   | Str_value (Decl (rec_flag, bindings) as d) ->
     let ps, _ =
-        Base.List.fold_left
-          bindings
-          ~init:([], [])
-          ~f:(fun (ps, es) { vb_pat; vb_expr } -> vb_pat :: ps, vb_expr :: es)
-      in
+      Base.List.fold_left bindings ~init:([], []) ~f:(fun (ps, es) { vb_pat; vb_expr } ->
+        vb_pat :: ps, vb_expr :: es)
+    in
     let p_vars = Base.List.concat_map ps ~f:pattern_vars in
     let saturated = if rec_flag = Recursive then toplvl @ p_vars else toplvl in
     let decl, _ = closure_decl saturated empty_map d in
