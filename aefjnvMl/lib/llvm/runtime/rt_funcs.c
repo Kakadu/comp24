@@ -178,7 +178,7 @@ elem_t rt_(print_int)(num_t value) {
 #ifdef DEBUG
         printf("[ INT: %ld ]\n", REMOVE_INT_TAG(value));
 #else
-        printf("%ld", REMOVE_INT_TAG(value));
+        printf("%ld\\n", REMOVE_INT_TAG(value));
 #endif
         fflush(stdout);
         return (elem_t)NULL;
