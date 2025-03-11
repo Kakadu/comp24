@@ -79,9 +79,13 @@ let rec compile_cexpr = function
     (match func with
      | None -> failwith ("Undefined function: " ^ s)
      | Some fn ->
-       let compiled_args = List.map compile_aexpr ael in
-       let fnt = find variable_type_table s in
-       build_call fnt fn (Array.of_list compiled_args) "call_tmp" builder)
+       let fn' = maybe_closure fn in
+       List.fold_left
+         (fun acc_closure arg ->
+           let compiled_arg = compile_aexpr arg in
+           compile_simple_type "apply" [| acc_closure; compiled_arg |])
+         fn'
+         ael)
   | CExp_atom ae -> compile_aexpr ae
 
 and compile_lexpr = function

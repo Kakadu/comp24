@@ -43,6 +43,7 @@ let predefined =
   ; "create_empty_list", function_type ptr_t [||]
   ; "create_cons", function_type ptr_t [| bool_t; ptr_t |]
   ; "create_closure", function_type ptr_t [| ptr_t; int_t |]
+  ; "create_apply", function_type ptr_t [| ptr_t; ptr_t |]
   ; "get_int", function_type int_t [| ptr_t |]
   ; "get_bool", function_type bool_t [| ptr_t |]
   ; "get_char", function_type char_t [| ptr_t |]
