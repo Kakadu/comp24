@@ -188,21 +188,18 @@ let anf_conversion_program program =
 let llvm_codegen_program program =
   match Parser.Runner.parse_program program with
   | Ok ast ->
-    (match Inferencer.Runner.run_program_inferencer ast with
-     | Ok _ ->
-       let closure_ast = ClosureConversion.Runner.run_closure_program ast in
-       let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
-       let pattern_matching_eliminated_ast =
-         PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
-       in
-       let alpha_converted_ast =
-         AlphaConversion.Runner.run_alpha_conversion_program
-           pattern_matching_eliminated_ast
-       in
-       let anf = Anf.Runner.run_anf_conversion_program alpha_converted_ast in
-       let llvm_code = Llvm_codegen.Runner.run_llvm_program_codegen anf in
-       Format.printf "%s" llvm_code
-     | Error e -> Inferencer.PpTypeErrors.print_inferencer_error e)
+    let closure_ast = ClosureConversion.Runner.run_closure_program ast in
+    let lambda_lifted_ast = LambdaLifting.Runner.run_ll_program closure_ast in
+    let pattern_matching_eliminated_ast =
+      PatternMatchingElim.Runner.run_pmf_program lambda_lifted_ast
+    in
+    let alpha_converted_ast =
+      AlphaConversion.Runner.run_alpha_conversion_program
+        pattern_matching_eliminated_ast
+    in
+    let anf = Anf.Runner.run_anf_conversion_program alpha_converted_ast in
+    let llvm_code = Llvm_codegen.Runner.run_llvm_program_codegen anf in
+    Format.printf "%s" llvm_code
   | Error _ -> Parser.PpParsingError.print_parser_error Parser.Error.Syntax_error
 ;;
 
