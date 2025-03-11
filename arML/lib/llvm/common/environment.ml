@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-open Llvm
 open LlvmBasic
 open Ast.AbstractSyntaxTree
 
@@ -14,11 +13,6 @@ let rec declare_functions_in_env env = function
     let ext_func = Llvm.declare_function name typ the_module in
     let new_env = Env.add name ext_func env in
     declare_functions_in_env new_env rest
-;;
-
-let fun_name_to_fun_type_mapping args = function
-  | "main" -> function_type i32_ty (Array.make (List.length args) ptr_ty)
-  | _ -> function_type ptr_ty (Array.make (List.length args) ptr_ty)
 ;;
 
 let declare_program_functions funcs env =

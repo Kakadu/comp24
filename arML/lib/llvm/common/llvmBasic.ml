@@ -13,3 +13,8 @@ let i8_ty = Llvm.i8_type context
 let bool_ty = Llvm.i1_type context
 let ptr_ty = Llvm.pointer_type context
 let void_ty = Llvm.void_type context
+
+let fun_name_to_fun_type_mapping args = function
+  | "main" -> function_type i32_ty (Array.make (List.length args) ptr_ty)
+  | _ -> function_type ptr_ty (Array.make (List.length args) ptr_ty)
+;;
