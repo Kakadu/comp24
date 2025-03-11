@@ -23,12 +23,4 @@ type ty =
   | TList of ty (** [['a; 'b; ...]] *)
 [@@deriving eq, show { with_path = false }]
 
-let tint = TPrim "int"
-let tbool = TPrim "bool"
-let tunit = TPrim "unit"
-let tarrow l r = TArrow (l, r)
-let tvar x = TVar x
-let tlist x = TList x
-let ttuple ts = TTuple ts
-
 type scheme = S of binder_set * ty [@@deriving show { with_path = false }]
