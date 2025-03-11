@@ -14,8 +14,8 @@ val arb_id : string QCheck.arbitrary
 val equal_id : id -> id -> bool
 
 type rec_flag =
-  | Rec
-  | NonRec
+  | Rec (** recursive *)
+  | NonRec (** non-recursive *)
 
 val pp_rec_flag : Format.formatter -> rec_flag -> unit
 val show_rec_flag : rec_flag -> string
@@ -24,10 +24,10 @@ val arb_rec_flag : rec_flag QCheck.arbitrary
 val equal_rec_flag : rec_flag -> rec_flag -> bool
 
 type constant =
-  | CInt of int
-  | CBool of bool
-  | CUnit
-  | CNil
+  | CInt of int (** 42 *)
+  | CBool of bool (** true | false *)
+  | CUnit (** () *)
+  | CNil (** [] *)
 
 val pp_constant : Format.formatter -> constant -> unit
 val show_constant : constant -> string
@@ -36,12 +36,12 @@ val arb_constant : constant QCheck.arbitrary
 val equal_constant : constant -> constant -> bool
 
 type type_ann =
-  | TAInt
-  | TABool
-  | TAUnit
-  | TATuple of type_ann * type_ann * type_ann list
-  | TAFun of type_ann * type_ann
-  | TAList of type_ann
+  | TAInt (** int *)
+  | TABool (** bool *)
+  | TAUnit (** () *)
+  | TATuple of type_ann * type_ann * type_ann list (** (int * bool) *)
+  | TAFun of type_ann * type_ann (** int -> bool *)
+  | TAList of type_ann (** %type% list *)
 
 val pp_type_ann : Format.formatter -> type_ann -> unit
 val show_type_ann : type_ann -> string
@@ -53,12 +53,12 @@ val equal_type_ann : type_ann -> type_ann -> bool
 
 type pattern =
   | PConst of constant
-  | PWild
-  | PIdent of id
-  | PTuple of pattern * pattern * pattern list
-  | PList of pattern list
-  | PCons of pattern * pattern
-  | PAnn of pattern * type_ann
+  | PWild (** _ *)
+  | PIdent of id (** x *)
+  | PTuple of pattern * pattern * pattern list (** (a, b) *)
+  | PList of pattern list (**  *)
+  | PCons of pattern * pattern (** hd :: tl *)
+  | PAnn of pattern * type_ann (** (x: int) *)
 
 val pp_pattern : Format.formatter -> pattern -> unit
 val show_pattern : pattern -> string
@@ -69,17 +69,17 @@ val arb_pattern : pattern QCheck.arbitrary
 val equal_pattern : pattern -> pattern -> bool
 
 type expr =
-  | EConst of constant
-  | EVar of id
-  | EApp of expr * expr
-  | EIfElse of expr * expr * expr
-  | EFun of pattern * pattern list * expr
-  | ELetIn of definition * expr
-  | ETuple of expr * expr * expr list
-  | EList of expr list
-  | EMatch of (expr * (pattern * expr) list)
+  | EConst of constant (** 42, true, ()*)
+  | EVar of id (** x *)
+  | EApp of expr * expr (** f x *)
+  | EIfElse of expr * expr * expr (** if x then y else z *)
+  | EFun of pattern * pattern list * expr (** fun x -> y *)
+  | ELetIn of definition * expr (** let x = y in z *)
+  | ETuple of expr * expr * expr list (** (x, fun x -> x, 42) *)
+  | EList of expr list (**  *)
+  | EMatch of (expr * (pattern * expr) list) (** match x with ... *)
 
-and definition = DLet of rec_flag * pattern * expr
+and definition = DLet of rec_flag * pattern * expr (** let (rec)? x = y *)
 
 val pp_expr : Format.formatter -> expr -> unit
 val show_expr : expr -> string

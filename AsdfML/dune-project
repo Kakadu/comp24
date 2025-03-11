@@ -33,6 +33,6 @@
   (ppx_inline_test :with-test)
   (odoc :with-doc)
   (ocamlformat :build)
-  (llvm (= "16.0.6+nnp"))
+  ; (llvm (= "16.0.6+nnp"))
   )
  (tags ()))

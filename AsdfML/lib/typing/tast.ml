@@ -83,7 +83,6 @@ let pp_tprogram fmt p = List.map p ~f:strip_types_def |> Pp_ast.pp_program fmt
 
 let pp_toplevel_types fmt p =
   let open Format in
-  List.iter p ~f:(fun d ->
-    match d with
-    | TDLet (t, _, p, _) -> fprintf fmt "%a: %a\n" pp_pattern p pp_ty t)
+  List.iter p ~f:(function TDLet (t, _, p, _) ->
+    fprintf fmt "%a: %a\n" pp_pattern p pp_ty t)
 ;;
