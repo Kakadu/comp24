@@ -44,7 +44,6 @@ let predefined_funcs =
   ; "create_apply", var_arg_function_type ptr_t [||]
   ; "create_tuple", var_arg_function_type ptr_t [| int_t |]
   ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
-  ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
   ; "create_empty_list", function_type ptr_t [||]
   ; "create_cons", function_type ptr_t [| bool_t; ptr_t |]
   ; "create_closure", function_type ptr_t [| ptr_t; int_t |]
