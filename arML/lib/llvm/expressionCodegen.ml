@@ -17,7 +17,7 @@ let rec compile_immut_expression runtime env = function
 
 and compile_complex_expression runtime env = function
   | CAtom a -> compile_immut_expression runtime env a
-  | CApplication _ -> assert false
+  | CApplication (f, arg, args) -> compile_func_call runtime env f (arg :: args)
   | CIfThenElse (c, b1, b2) -> compile_c_if_then_else runtime env c b1 b2
   | CTyped (c, _) -> compile_complex_expression runtime env c
   | CListConstructor _ -> failwith "List unsupported in llvm codegen"
@@ -91,4 +91,17 @@ and compile_identifier_expression runtime env name =
     | _ -> value
   in
   resolve_function runtime env name
+
+and compile_func_call runtime env func_expr arg_exprs =
+  let compiled_func =
+    match func_expr with
+    | IIdentifier (Id func_name) -> compile_identifier_expression runtime env func_name
+    | _ -> failwith "Error: Invalid function call"
+  in
+  let compiled_args = List.map (compile_immut_expression runtime env) arg_exprs in
+
+  let closure_func, closure_type = get_func_info runtime "apply_closure" in
+  let closure_args = Array.of_list (compiled_func :: const_int i32_ty (List.length compiled_args) :: compiled_args) in
+
+  build_call closure_type closure_func closure_args "closure_call_result" builder
 ;;
