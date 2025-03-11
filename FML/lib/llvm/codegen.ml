@@ -117,11 +117,17 @@ let rec compile_cexpr = function
             ([ cl; const_int i64_t (List.length compiled_args) ] @ compiled_args))
          "applied_closure"
          builder
-     | None -> failwith "Not a function")
+     | None ->
+       (match lookup_global name module_ with
+        | Some g -> g
+        | None ->
+          (match lookup_name name with
+           | Some v -> v
+           | None -> failwith ("Unknown variable: " ^ name))))
   | CEIf (cond, then_e, else_e) ->
     (* let cond_v =
        build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder *)
-    let cond_v = compile_immexpr in
+    let cond_v = compile_immexpr cond in
     let entry_block = insertion_block builder in
     let parent = block_parent entry_block in
     let then_block = append_block ctx "then" parent in
