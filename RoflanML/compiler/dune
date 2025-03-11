@@ -5,7 +5,16 @@
  (libraries RoflanML.Lib stdio))
 
 (cram
- (applies_to compile)
- (deps
-  ./compiler.exe
-  runtime.cpp))
+ (applies_to compiler)
+ (deps ./compiler.exe
+ runtime.cpp
+ ../manytests/typed/000.ml
+ ../manytests/typed/001fac.ml
+ ../manytests/typed/002fac.ml
+ ../manytests/typed/003fib.ml
+ ../manytests/typed/004manyargs.ml
+ ../manytests/typed/005fix.ml
+ ../manytests/typed/006partial.ml
+ ../manytests/typed/006partial2.ml
+ ../manytests/typed/006partial3.ml
+ ))

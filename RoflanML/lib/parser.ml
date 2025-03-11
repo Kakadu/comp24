@@ -73,6 +73,7 @@ let pid =
   let pfirst = satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| Char.escaped in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
   ptoken (lift2 ( ^ ) pfirst plast)
+  <|> pstoken "()"
   >>= fun s ->
   if is_keyword s
   then fail ("Keyword identifiers are forbidden: " ^ s)

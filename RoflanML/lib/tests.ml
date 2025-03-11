@@ -5,7 +5,6 @@
 open Base
 open Roflanml_lib
 open Ast
-open Ast_to_str
 open Parser
 
 module ParserTests = struct
@@ -258,6 +257,65 @@ module ParserTests = struct
                ))
             ))
          ))
+
+      |}]
+  ;;
+
+  let%expect_test "mutual recursion" =
+    parse_and_pp_decl
+      "let rec even x = if x = 0 then true else odd (x - 1)\n\n\
+      \       and odd x = if x = 0 then false else even (x - 1)";
+    [%expect
+      {|
+      (DMutualLet (Rec,
+         [("even",
+           (EFun (("x", None),
+              (EBranch (
+                 (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                 (EConst (CBool true)),
+                 (EApp ((EVar "odd"),
+                    (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                 ))
+              )));
+           ("odd",
+            (EFun (("x", None),
+               (EBranch (
+                  (EApp ((EApp ((EVar "="), (EVar "x"))), (EConst (CInt 0)))),
+                  (EConst (CBool false)),
+                  (EApp ((EVar "even"),
+                     (EApp ((EApp ((EVar "-"), (EVar "x"))), (EConst (CInt 1))))))
+                  ))
+               )))
+           ]
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons list parse" =
+    parse_and_pp_decl "let q = let x = [1; 2] in 1 :: x, 1 :: [1; 2]";
+    [%expect
+      {|
+      (DLet (NonRec, "q",
+         (ELetIn (NonRec, "x", (EList [(EConst (CInt 1)); (EConst (CInt 2))]),
+            (ETuple ((EApp ((EApp ((EVar "::"), (EConst (CInt 1)))), (EVar "x"))),
+               (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+                  (EList [(EConst (CInt 1)); (EConst (CInt 2))]))),
+               []))
+            ))
+         ))
+      |}]
+  ;;
+
+  let%expect_test "cons associativity" =
+    parse_and_pp_decl "let x = 1 :: 2 :: [3; 4]";
+    [%expect
+      {|
+      (DLet (NonRec, "x",
+         (EApp ((EApp ((EVar "::"), (EConst (CInt 1)))),
+            (EApp ((EApp ((EVar "::"), (EConst (CInt 2)))),
+               (EList [(EConst (CInt 3)); (EConst (CInt 4))])))
+            ))
+         ))
       |}]
   ;;
 end
@@ -429,6 +487,16 @@ module TypecheckerTests = struct
       |}]
   ;;
 
+  let%expect_test "cons list type inference" =
+    pp_parse_and_infer "let q = 1 :: [3; 4]";
+    [%expect {| int list |}]
+  ;;
+
+  let%expect_test "let poly" =
+    pp_parse_and_infer "let q = let f x = true in (f true, f (fun x -> x))";
+    [%expect {| bool * bool |}]
+  ;;
+
   (* Errors *)
 
   let%expect_test "unbound value error in expression" =
@@ -485,481 +553,42 @@ module TypecheckerTests = struct
   ;;
 end
 
-module CCTests = struct
-  open Closure_conversion
-  open Roflanml_stdlib
-
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
-
-  let pp_parse_and_cc input =
-    match Parser.parse_decl input with
-    | Result.Ok e -> Stdlib.Format.printf "%s" (ast_to_str (close e env))
-    | _ -> Stdlib.print_endline "Failed to parse"
-  ;;
-
-  let%expect_test "no closure" =
-    pp_parse_and_cc "let q = let f x = x in f 10";
-    [%expect
-      {|
-      let q =
-      let f x = x in f 10
-      |}]
-  ;;
-
-  let%expect_test "let closure" =
-    pp_parse_and_cc "let q = let f x = x + 1 in let g x = f x in g 10";
-    [%expect
-      {|
-      let q =
-      let f x = ( + ) x 1 in
-      let g f x = f x in g f 10
-      |}]
-  ;;
-
-  let%expect_test "let chain closure" =
-    pp_parse_and_cc
-      "let q = let f x = x + 1 in let g x = f x in let k x = g x in let q x = k x in q 1";
-    [%expect
-      {|
-      let q =
-      let f x = ( + ) x 1 in
-      let g f x = f x in
-      let k f g x = g f x in
-      let q f g k x = k f g x in q f g k 1
-      |}]
-  ;;
-
-  let%expect_test "fun closure" =
-    pp_parse_and_cc "let q = let x = 1 in let y = 2 in fun z -> x + y + z";
-    [%expect
-      {|
-      let q =
-      let x = 1 in
-      let y = 2 in (fun x y z -> ( + ) (( + ) x y) z) x y
-      |}]
-  ;;
-
-  let%expect_test "fun chain closure" =
-    pp_parse_and_cc "let q = let x = 1 in (fun f y -> (f x) + x + 1) (fun z -> x + z)";
-    [%expect
-      {|
-      let q =
-      let x = 1 in (fun x f y -> ( + ) (( + ) (f x) x) 1) x ((fun x z -> ( + ) x z) x)
-      |}]
-  ;;
-
-  let%expect_test "no closure with stdlib" =
-    pp_parse_and_cc "let f x = print_int x";
-    [%expect {| let f x = print_int x |}]
-  ;;
-
-  let%expect_test "closure with rec" =
-    pp_parse_and_cc "let q = let f x = x + 1 in let rec g x = f x + g x in g";
-    [%expect
-      {|
-      let q =
-      let f x = ( + ) x 1 in
-      let rec g f x = ( + ) (f x) (g f x) in g f
-      |}]
-  ;;
-
-  let%expect_test "cps fact" =
-    pp_parse_and_cc
-      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
-       k (x * n)) in fact 10 (fun x -> x)";
-    [%expect
-      {|
-      let q =
-      let rec fact x k = match x with
-      | 1 -> k 1
-      | x -> fact (( - ) x 1) ((fun k x n -> k (( * ) x n)) k x) in fact 10 (fun x -> x)
-      |}]
-  ;;
-
-  let%expect_test "mutual recursion" =
-    pp_parse_and_cc
-      "let rec even x = if x = 0 then true else odd (x - 1) and odd x = if x = 0 then \
-       false else even (x - 1)";
-    [%expect
-      {|
-      let rec even = (fun odd x -> if ( = ) x 0 then true else odd (( - ) x 1))
-      and
-      odd = (fun even x -> if ( = ) x 0 then false else even (( - ) x 1))
-      |}]
-  ;;
-end
-
-module LLTests = struct
-  open Closure_conversion
-  open Lambda_lifting
-  open Roflanml_stdlib
-  open Ll_ast
-
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
-
-  let pp_parse_and_ll input =
-    match Parser.parse input with
-    | Result.Ok prog ->
-      (match lift_program (close_program prog env) with
-       | Result.Ok prog ->
-         List.iter prog ~f:(fun decl ->
-           Stdlib.Format.printf "%s\n" (ast_to_str (ll_to_ast decl)))
-       | Result.Error _ -> Stdlib.print_endline "Failed to LL")
-    | _ -> Stdlib.print_endline "Failed to parse"
-  ;;
-
-  let%expect_test _ =
-    pp_parse_and_ll
-      "let q = let rec fact x k = match x with | 1 -> k 1 | x -> fact (x - 1) (fun n -> \
-       k (x * n)) in fact 10 (fun x -> x)";
-    [%expect
-      {|
-      let LL_1 k x n = k (( * ) x n)
-
-      let rec LL_0 x k = match x with
-      | 1 -> k 1
-      | x -> LL_0 (( - ) x 1) (LL_1 k x)
-
-      let LL_2 x = x
-
-      let q = LL_0 10 LL_2
-      |}]
-  ;;
-end
-
-module ANFTests = struct
-  open Closure_conversion
-  open Lambda_lifting
-  open Roflanml_stdlib
-  open Anf_ast
-  open Anf
-
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
-
-  let pp_parse_and_anf input =
-    match Parser.parse input with
-    | Result.Ok prog ->
-      (match lift_program (close_program prog env) with
-       | Result.Ok prog ->
-         (match anf_program prog with
-          | Result.Ok prog ->
-            List.iter prog ~f:(fun decl ->
-              Stdlib.Format.printf "%s\n" (ast_to_str (anf_to_ast decl)))
-          | Result.Error err -> Stdlib.print_endline err)
-       | Result.Error _ -> Stdlib.print_endline "Failed to LL")
-    | _ -> Stdlib.print_endline "Failed to parse"
-  ;;
-
-  let%expect_test "anf simple" =
-    pp_parse_and_anf "let q = 1 + 2 + 3 * 4 + 5";
-    [%expect
-      {|
-      let q =
-      let ANF_0 = ( + ) 1 2 in
-      let ANF_1 = ( * ) 3 4 in
-      let ANF_2 = ( + ) ANF_0 ANF_1 in
-      let ANF_3 = ( + ) ANF_2 5 in ANF_3
-      |}]
-  ;;
-
-  let%expect_test "anf tuple" =
-    pp_parse_and_anf "let q = let f x y z = x + y + z in (f 1 2 3, 4, 5)";
-    [%expect
-      {|
-      let LL_0 x y z =
-      let ANF_2 = ( + ) x y in
-      let ANF_3 = ( + ) ANF_2 z in ANF_3
-
-      let q =
-      let ANF_0 = LL_0 1 2 3 in
-      let ANF_1 = ANF_0, 4, 5 in ANF_1
-      |}]
-  ;;
-
-  let%expect_test "anf partian app" =
-    pp_parse_and_anf "let q = let f x y z = x + y + z in let g x = f 1 2 in g 3";
-    [%expect
-      {|
-      let LL_0 x y z =
-      let ANF_2 = ( + ) x y in
-      let ANF_3 = ( + ) ANF_2 z in ANF_3
-
-      let LL_1 f x =
-      let ANF_1 = LL_0 1 2 in ANF_1
-
-      let q =
-      let ANF_0 = LL_1 LL_0 3 in ANF_0
-      |}]
-  ;;
-
-  let%expect_test "anf branch" =
-    pp_parse_and_anf
-      "let q = if true && false then let f x = x + 1 in f 1 else let g x = x - 1 in g 1";
-    [%expect
-      {|
-      let LL_0 x =
-      let ANF_5 = ( + ) x 1 in ANF_5
-
-      let LL_1 x =
-      let ANF_4 = ( - ) x 1 in ANF_4
-
-      let q =
-      let ANF_0 = ( && ) true false in
-      let ANF_1 = if ANF_0 then
-      let ANF_2 = LL_0 1 in ANF_2 else
-      let ANF_3 = LL_1 1 in ANF_3 in ANF_1
-      |}]
-  ;;
-
-  let%expect_test "anf closure" =
-    pp_parse_and_anf "let q = let x = 1 in let y = 2 in x / y";
-    [%expect
-      {|
-      let q =
-      let x = 1 in
-      let y = 2 in
-      let ANF_0 = ( / ) x y in ANF_0
-      |}]
-  ;;
-
-  let%expect_test "anf lists" =
-    pp_parse_and_anf "let q = [(fun x -> x * x) 1; (fun x -> x / x) 2]";
-    [%expect
-      {|
-      let LL_0 x =
-      let ANF_4 = ( * ) x x in ANF_4
-
-      let LL_1 x =
-      let ANF_3 = ( / ) x x in ANF_3
-
-      let q =
-      let ANF_0 = LL_0 1 in
-      let ANF_1 = LL_1 2 in
-      let ANF_2 = [ ANF_0; ANF_1 ] in ANF_2
-      |}]
-  ;;
-end
-
 module UnparseTests = struct
   open Unparse
 
   let%expect_test "print constant" =
-    let ast = [ EConst (CInt 42) ] in
-    let printed = unparse_program ast in
-    Format.printf "%s\n" printed;
+    let printed =
+      Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EConst (CInt 42))
+    in
+    Stdlib.Format.printf "%s\n" printed;
     [%expect {| 42 |}]
   ;;
 
   let%expect_test "print variable" =
-    let ast = [ EVar "x" ] in
-    let printed = unparse_program ast in
-    Format.printf "%s\n" printed;
+    let printed = Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EVar "x") in
+    Stdlib.Format.printf "%s\n" printed;
     [%expect {| x |}]
   ;;
 
   let%expect_test "print let-expression" =
     (* let x = 1 in x *)
-    let ast = [ ELet (NonRec, "x", EConst (CInt 1), Some (EVar "x")) ] in
-    let printed = unparse_program ast in
-    Format.printf "%s\n" printed;
+    let printed =
+      Stdlib.Format.asprintf
+        "%a"
+        (unparse_expr ~top_level:true)
+        (ELetIn (NonRec, "x", EConst (CInt 1), EVar "x"))
+    in
+    Stdlib.Format.printf "%s\n" printed;
     [%expect {| let x = 1 in x |}]
   ;;
 
   let%expect_test "print function with if-then-else" =
     let arg = "x", Some TInt in
     let body = EBranch (EVar "x", EConst (CInt 1), EConst (CInt 0)) in
-    let ast = [ EFun (arg, body) ] in
-    let printed = unparse_program ast in
-    Format.printf "%s\n" printed;
+    let printed =
+      Stdlib.Format.asprintf "%a" (unparse_expr ~top_level:true) (EFun (arg, body))
+    in
+    Stdlib.Format.printf "%s\n" printed;
     [%expect {| fun (x : int) -> if x then 1 else 0 |}]
-  ;;
-end
-
-module QCheckTests = struct
-  open Unparse
-
-  let arbitrary_decl =
-    QCheck.make
-      (QCheck.Gen.sized (fun n ->
-         QCheck.Gen.map
-           (fun e -> [ ELet (NonRec, "x", e, None) ])
-           (Check.Generator.gen_expr (min n 500))))
-      ~print:unparse_program
-      ~shrink:Check.Shrinker.shrink_program
-  ;;
-
-  let parser_qtests =
-    [ QCheck.Test.make ~count:100 arbitrary_decl (fun ast ->
-        let src = unparse_program ast in
-        match Parser.parse src with
-        | Result.Ok ast' when ast' = ast -> true
-        | Result.Ok ast' ->
-          Format.printf
-            "\n\n[!]: Different AST!\nSource: %S\nParsed: %s\nOriginal: %s\n"
-            src
-            (Ast.show_program ast')
-            (Ast.show_program ast);
-          false
-        | Result.Error err ->
-          Format.printf "\n\n[!]: Parser error: %s\nOn source:\n%S\n" err src;
-          false)
-    ]
-  ;;
-
-  let%expect_test "QuickCheck round-trip test for declarations (depth ≤ 3, no shrinker)" =
-    QCheck_runner.set_seed 42;
-    let _ = QCheck_runner.run_tests ~colors:false parser_qtests in
-    ();
-    [%expect
-      {|
-      random seed: 42
-      ================================================================================
-      success (ran 1 tests)
-      |}]
-  ;;
-end
-
-module LLVMtests = struct
-  open Closure_conversion
-  open Lambda_lifting
-  open Roflanml_stdlib
-  open Anf
-  open Llvm_gen
-
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String)
-
-  let pp_parse_and_anf_and_llvm input =
-    match Parser.parse input with
-    | Result.Ok prog ->
-      (match Typechecker.typecheck prog with
-       | Result.Ok _ ->
-         (match lift_program (close_program prog env) with
-          | Result.Ok closed_prog ->
-            (match anf_program closed_prog with
-             | Result.Ok anf_prog ->
-               let llvm_mod = compile_program anf_prog in
-               Stdlib.Format.printf "%s\n" (Llvm.string_of_llmodule llvm_mod)
-             | Result.Error err -> Stdlib.print_endline ("ANF error: " ^ err))
-          | Result.Error err -> Stdlib.print_endline ("Lambda lifting error: " ^ err))
-       | Result.Error err ->
-         Stdlib.print_endline "Failed to typecheck";
-         Stdlib.Format.printf "%a" Typing.pp_error err)
-    | Result.Error err -> Stdlib.print_endline ("Failed to parse: " ^ err)
-  ;;
-
-  let%expect_test "LLVM generation factorial" =
-    pp_parse_and_anf_and_llvm
-      "let rec fact n = if n = 1 then 1 else n * fact_tail (n - 1)\n\
-       and fact_tail n = if n = 1 then 1 else n * fact (n - 1)\n\n\
-       let ()= fact 5";
-    [%expect
-      {|
-      ; ModuleID = 'Roflan'
-      source_filename = "Roflan"
-
-      declare ptr @RoflanML_eq(ptr, ptr)
-
-      declare ptr @RoflanML_neq(ptr, ptr)
-
-      declare ptr @RoflanML_gt(ptr, ptr)
-
-      declare ptr @RoflanML_ge(ptr, ptr)
-
-      declare ptr @RoflanML_lt(ptr, ptr)
-
-      declare ptr @RoflanML_le(ptr, ptr)
-
-      declare ptr @RoflanML_or(ptr, ptr)
-
-      declare ptr @RoflanML_and(ptr, ptr)
-
-      declare ptr @RoflanML_add(ptr, ptr)
-
-      declare ptr @RoflanML_sub(ptr, ptr)
-
-      declare ptr @RoflanML_mul(ptr, ptr)
-
-      declare ptr @RoflanML_div(ptr, ptr)
-
-      declare ptr @Create_int(i64)
-
-      declare ptr @Create_bool(i1)
-
-      declare ptr @Create_unit()
-
-      declare ptr @Apply(ptr, ...)
-
-      declare i64 @Get_int(ptr)
-
-      declare i1 @Get_bool(ptr)
-
-      declare ptr @print_int(ptr)
-
-      declare ptr @print_bool(ptr)
-
-      declare ptr @Create_closure(ptr, i64)
-
-      define ptr @fact(ptr %n) {
-      entry:
-        %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
-        %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
-        %cond_bool = call i1 @Get_bool(ptr %apply_result)
-        br i1 %cond_bool, label %then, label %else
-
-      then:                                             ; preds = %entry
-        %boxed_int1 = call ptr @Create_int(i64 1)
-        br label %merge
-
-      else:                                             ; preds = %entry
-        %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
-        %boxed_int3 = call ptr @Create_int(i64 1)
-        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
-        %closure5 = call ptr @Create_closure(ptr @fact_tail, i64 1)
-        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
-        %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
-        br label %merge
-
-      merge:                                            ; preds = %else, %then
-        %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
-        ret ptr %branch_result
-      }
-
-      define ptr @fact_tail(ptr %n) {
-      entry:
-        %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
-        %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
-        %cond_bool = call i1 @Get_bool(ptr %apply_result)
-        br i1 %cond_bool, label %then, label %else
-
-      then:                                             ; preds = %entry
-        %boxed_int1 = call ptr @Create_int(i64 1)
-        br label %merge
-
-      else:                                             ; preds = %entry
-        %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
-        %boxed_int3 = call ptr @Create_int(i64 1)
-        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
-        %closure5 = call ptr @Create_closure(ptr @fact, i64 1)
-        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
-        %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
-        br label %merge
-
-      merge:                                            ; preds = %else, %then
-        %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
-        ret ptr %branch_result
-      }
-
-      define i32 @main() {
-      entry:
-        %closure = call ptr @Create_closure(ptr @fact, i64 1)
-        %boxed_int = call ptr @Create_int(i64 5)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 1, ptr %boxed_int)
-        ret i32 0
-      }
-      |}]
   ;;
 end
