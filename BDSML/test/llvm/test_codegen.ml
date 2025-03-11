@@ -6,17 +6,13 @@ let () =
   let compiled4 =
     Codegen.compile_program
       ~verbose:true
-      [ AbsStr_value
-          ( "x"
+      [ AbsStr_func
+          ( "abs_value"
+          , [ "n" ]
           , LComplex
-              (CExp_atom
-                 (AExp_tuple
-                    [ AExp_constant (Const_int 42)
-                    ; AExp_constant (Const_char 'c')
-                    ; AExp_constant (Const_bool true)
-                    ; AExp_constant (Const_string "BDSM")
-                    ; AExp_constant Const_unit
-                    ])) )
+              (CExp_apply ("__op_plus", [ AExp_constant (Const_int 52); AExp_ident "n" ]))
+          )
+
       ]
   in
   ignore compiled4

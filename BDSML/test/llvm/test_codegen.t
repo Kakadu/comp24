@@ -40,11 +40,17 @@
   
   define i64 @main() {
   entry:
-    %x = alloca { i64, i8, i1, [4 x i8], ptr }, align 8
-    store { i64, i8, i1, [4 x i8], ptr } { i64 42, i8 99, i1 true, [4 x i8] c"BDSM", ptr @unit_t }, ptr %x, align 8
+    %list_node = alloca { i64, ptr }, align 8
+    %value_ptr = getelementptr inbounds { i64, ptr }, ptr %list_node, i32 0, i32 0
+    %next_ptr = getelementptr inbounds { i64, ptr }, ptr %list_node, i32 0, i32 1
+    store i64 2, ptr %value_ptr, align 8
+    store ptr null, ptr %next_ptr, align 8
+    %list_node1 = alloca { i64, ptr }, align 8
+    %value_ptr2 = getelementptr inbounds { i64, ptr }, ptr %list_node1, i32 0, i32 0
+    %next_ptr3 = getelementptr inbounds { i64, ptr }, ptr %list_node1, i32 0, i32 1
+    store i64 1, ptr %value_ptr2, align 8
+    store ptr %list_node, ptr %next_ptr3, align 8
+    %x = alloca ptr, align 8
+    store ptr %list_node1, ptr %x, align 8
     ret i64 0
-  }
-  
-  define void @unit_t() {
-  entry:
   }

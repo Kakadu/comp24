@@ -3,13 +3,18 @@ open Llvm_init
 open Middleend.Anf_ast
 open Parser.Ast
 
-let rec compile_aexpr =
-  let rec build_list = function
-    | AExp_construct ("[]", None) -> []
-    | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) -> head :: build_list tail
-    | _ -> failwith "Not a list"
-  in
-  function
+let build_nil = const_null ptr_t
+
+let build_cons element list_ptr list_type =
+  let node_alloc = build_alloca list_type "list_node" builder in
+  let value_field = build_struct_gep list_type node_alloc 0 "value_ptr" builder in
+  let next_field = build_struct_gep list_type node_alloc 1 "next_ptr" builder in
+  let _ = build_store element value_field builder in
+  let _ = build_store list_ptr next_field builder in
+  node_alloc
+;;
+
+let rec compile_aexpr = function
   | AExp_constant c ->
     (match c with
      | Const_int i -> const_int int_t i
@@ -22,11 +27,11 @@ let rec compile_aexpr =
   | AExp_tuple elems ->
     let types = List.map compile_aexpr elems in
     const_struct context (Array.of_list types)
-  | AExp_construct ("::", _) as l ->
-    let l' = build_list l in
-    let types = List.map compile_aexpr l' in
-    const_struct context (Array.of_list types)
-  | AExp_construct ("[]", _) -> const_struct context (Array.of_list [])
+  | AExp_construct ("::", Some (AExp_tuple [ head; _ ])) as l ->
+    let head' = compile_aexpr head in
+    let head_type = type_of head' in
+    compile_list l (build_list_type head_type)
+  | AExp_construct ("[]", _) -> build_nil
   | AExp_construct ("None", _) ->
     const_struct context [| const_int bool_t 0; const_null ptr_t |]
   | AExp_construct ("Some", x) ->
@@ -38,6 +43,15 @@ let rec compile_aexpr =
     (match Hashtbl.find_opt variable_value_table id with
      | Some value -> build_load ptr_t value id builder
      | None -> failwith ("Unknown variable: " ^ id))
+
+and compile_list list_expr list_type =
+  match list_expr with
+  | AExp_construct ("[]", None) -> build_nil
+  | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) ->
+    let compiled_head = compile_aexpr head in
+    let compiled_tail = compile_list tail list_type in
+    build_cons compiled_head compiled_tail list_type
+  | _ -> failwith "Not a valid list"
 ;;
 
 let rec compile_cexpr = function
@@ -81,39 +95,22 @@ and compile_lexpr = function
 
 let compile_func f =
   let name, args, body = f in
-  let param_types = Array.make (List.length args) int_t in
-  let func_type = function_type int_t param_types in
+  let ast = Middleend.Converter.anf_to_ast [ AbsStr_func f ] in
+  let bruh = Typing.Inference.infer_program ast in
+  let param_types = Array.make (List.length args) ptr_t in
+  let func_type = function_type ptr_t param_types in
   let func = define_function name func_type my_module in
-  let entry_block = append_block context "entry" func in
-  let builder = builder_at_end context entry_block in
+  let entry = append_block context "entry" func in
+  position_at_end entry builder;
   List.iteri
     (fun i arg_name ->
-      let param = Llvm.param func i in
-      let param_alloca = Llvm.build_alloca (Llvm.type_of param) arg_name builder in
-      let _ = Llvm.build_store param param_alloca builder in
+      let param = param func i in
+      let param_alloca = build_alloca (Llvm.type_of param) arg_name builder in
+      let _ = build_store param param_alloca builder in
       Hashtbl.add variable_value_table arg_name param_alloca)
     args;
   let body_value = compile_lexpr body in
-  let _ = Llvm.build_ret body_value builder in
-  func
-;;
-
-let compile_func f =
-  let name, args, body = f in
-  let param_types = Array.make (List.length args) int_t in
-  let func_type = function_type int_t param_types in
-  let func = define_function name func_type my_module in
-  let entry_block = append_block context "entry" func in
-  let builder = builder_at_end context entry_block in
-  List.iteri
-    (fun i arg_name ->
-      let param = Llvm.param func i in
-      let param_alloca = Llvm.build_alloca (Llvm.type_of param) arg_name builder in
-      let _ = Llvm.build_store param param_alloca builder in
-      Hashtbl.add variable_value_table arg_name param_alloca)
-    args;
-  let body_value = compile_lexpr body in
-  let _ = Llvm.build_ret body_value builder in
+  let _ = build_ret body_value builder in
   func
 ;;
 
