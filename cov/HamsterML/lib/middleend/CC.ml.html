@@ -613,7 +613,7 @@
 <pre><code class="ocaml">open Base
 open Ast
 
-let stdlib_names = Set.of_lis<span data-count="10">t</span> (module String) [ "print_int"; "print_endline" ]
+let stdlib_names = Set.of_lis<span data-count="14">t</span> (module String) [ "print_int"; "print_endline" ]
 
 (* Remove all the variables that are bound by a single pattern from free variables set *)
 let rec remove_bound_vars_from_pattern free (pat : pattern) =
@@ -633,9 +633,9 @@ and remove_bound_vars_from_patterns free (pats : pattern list) =
 
 (* Collect the bound variables that a pattern binds, e.g. `match x with ...` *)
 let rec bound_vars_in_pattern (pat : pattern) =
-  <span data-count="86">m</span>atch pat with
+  <span data-count="88">m</span>atch pat with
   | <span data-count="0">W</span>ildcard | <span data-count="0">O</span>peration _ | <span data-count="5">C</span>onst _ -&gt; Set.empty (module String)
-  | <span data-count="75">V</span>ar id -&gt; Set.singleton (module String) id
+  | <span data-count="77">V</span>ar id -&gt; Set.singleton (module String) id
   | <span data-count="0">L</span>istConcat (p1, p2) -&gt; Set.union (bound_vars_in_patter<span data-count="0">n</span> p1) (bound_vars_in_patter<span data-count="0">n</span> p2)
   | <span data-count="6">T</span>uple (p1, p2, p_list) -&gt;
     let pats = p1 :: p2 :: p_list in
@@ -653,10 +653,10 @@ let rec bound_vars_in_pattern (pat : pattern) =
 
 (* Find free variables in an expression *)
 let rec free_vars_expr (exp : expr) =
-  <span data-count="1544">l</span>et remove_stdlib_names s = <span data-count="667">S</span>et.diff s stdlib_names in
+  <span data-count="1580">l</span>et remove_stdlib_names s = <span data-count="683">S</span>et.diff s stdlib_names in
   match exp with
-  | <span data-count="145">E</span>Const _ | <span data-count="138">E</span>Operation _ -&gt; Set.empty (module String)
-  | <span data-count="567">E</span>Var id -&gt; Set.singleton (module String) id
+  | <span data-count="151">E</span>Const _ | <span data-count="144">E</span>Operation _ -&gt; Set.empty (module String)
+  | <span data-count="575">E</span>Var id -&gt; Set.singleton (module String) id
   | <span data-count="8">E</span>Tuple (e1, e2, e_list) -&gt;
     let exps = e1 :: e2 :: e_list in
     let free =
@@ -674,14 +674,14 @@ let rec free_vars_expr (exp : expr) =
         ~f:(fun acc e -&gt; <span data-count="27">S</span>et.union acc (free_vars_exp<span data-count="27">r</span> e))
     in
     <span data-count="23">r</span>emove_stdlib_names free
-  | <span data-count="19">E</span>ListConcat (e1, e2) | <span data-count="528">A</span>pplication (e1, e2) -&gt;
-    let free = Set.union (free_vars_exp<span data-count="547">r</span> e1) (free_vars_exp<span data-count="547">r</span> e2) in
-    <span data-count="547">r</span>emove_stdlib_names free
-  | <span data-count="32">I</span>f (e1, e2, e3_opt) -&gt;
-    let base = Set.union (free_vars_exp<span data-count="32">r</span> e1) (free_vars_exp<span data-count="32">r</span> e2) in
-    <span data-count="32">l</span>et free =
+  | <span data-count="19">E</span>ListConcat (e1, e2) | <span data-count="542">A</span>pplication (e1, e2) -&gt;
+    let free = Set.union (free_vars_exp<span data-count="561">r</span> e1) (free_vars_exp<span data-count="561">r</span> e2) in
+    <span data-count="561">r</span>emove_stdlib_names free
+  | <span data-count="34">I</span>f (e1, e2, e3_opt) -&gt;
+    let base = Set.union (free_vars_exp<span data-count="34">r</span> e1) (free_vars_exp<span data-count="34">r</span> e2) in
+    <span data-count="34">l</span>et free =
       match e3_opt with
-      | <span data-count="32">S</span>ome e -&gt; Set.unio<span data-count="32">n</span> base (free_vars_exp<span data-count="32">r</span> e)
+      | <span data-count="34">S</span>ome e -&gt; Set.unio<span data-count="34">n</span> base (free_vars_exp<span data-count="34">r</span> e)
       | <span data-count="0">N</span>one -&gt; base
     in
     remove_stdlib_names free
@@ -745,21 +745,21 @@ let rec free_vars_expr (exp : expr) =
 (* Generate fresh variable names *)
 
 let cc_expr global_names =
-  <span data-count="66">l</span>et pattern_list_to_vars patterns = <span data-count="128">L</span>ist.map patterns ~f:(fun x -&gt; <span data-count="15">V</span>ar x) in
+  <span data-count="70">l</span>et pattern_list_to_vars patterns = <span data-count="130">L</span>ist.map patterns ~f:(fun x -&gt; <span data-count="15">V</span>ar x) in
   let args_list_to_id_set args =
-    <span data-count="473">L</span>ist.fold
+    <span data-count="483">L</span>ist.fold
       args
-      ~init:(Set.empt<span data-count="473">y</span> (module String))
+      ~init:(Set.empt<span data-count="483">y</span> (module String))
       ~f:(fun acc arg -&gt;
-        <span data-count="591">m</span>atch arg with
-        | <span data-count="573">V</span>ar x -&gt; Set.add acc x
+        <span data-count="595">m</span>atch arg with
+        | <span data-count="577">V</span>ar x -&gt; Set.add acc x
         | <span data-count="18">_</span> -&gt; acc)
   in
   let extract_fun_args expr =
-    <span data-count="255">l</span>et rec loop e acc =
-      <span data-count="270">m</span>atch e with
+    <span data-count="263">l</span>et rec loop e acc =
+      <span data-count="278">m</span>atch e with
       | <span data-count="15">F</span>un (fun_args, fun_body) -&gt; loop fun_body (fun_args @ acc)
-      | <span data-count="255">_</span> -&gt; acc, e
+      | <span data-count="263">_</span> -&gt; acc, e
     in
     loop expr []
   in
@@ -772,26 +772,26 @@ let cc_expr global_names =
     <span data-count="81">p</span>attern_list_to_var<span data-count="81">s</span> (Set.to_lis<span data-count="81">t</span> free_vars) @ args
   in
   let rec process env = function
-    | <span data-count="711">E</span>Var id -&gt;
+    | <span data-count="725">E</span>Var id -&gt;
       (match Map.find env id with
        | <span data-count="29">S</span>ome captured_vars -&gt;
          (* Apply the function to its captured variables *)
          List.fold captured_vars ~init:(EVar id) ~f:(fun acc var -&gt;
            <span data-count="0">A</span>pplication (acc, EVar var))
-       | <span data-count="682">N</span>one -&gt; EVar id)
-    | <span data-count="329">E</span>Const _ as e -&gt; e
-    | <span data-count="152">E</span>Operation _ as e -&gt; e
+       | <span data-count="696">N</span>one -&gt; EVar id)
+    | <span data-count="341">E</span>Const _ as e -&gt; e
+    | <span data-count="158">E</span>Operation _ as e -&gt; e
     | <span data-count="11">E</span>Tuple (e1, e2, es) -&gt;
       ETuple (proces<span data-count="11">s</span> env e1, proces<span data-count="11">s</span> env e2, List.ma<span data-count="11">p</span> es ~f:(proces<span data-count="11">s</span> env))
     | <span data-count="32">E</span>List es -&gt; EList (List.ma<span data-count="32">p</span> es ~f:(proces<span data-count="32">s</span> env))
     | <span data-count="19">E</span>ListConcat (e1, e2) -&gt; EListConcat (proces<span data-count="19">s</span> env e1, proces<span data-count="19">s</span> env e2)
-    | <span data-count="32">I</span>f (cond, then_expr, else_expr) -&gt;
-      If (proces<span data-count="32">s</span> env cond, proces<span data-count="32">s</span> env then_expr, Option.ma<span data-count="32">p</span> else_expr ~f:(proces<span data-count="32">s</span> env))
+    | <span data-count="34">I</span>f (cond, then_expr, else_expr) -&gt;
+      If (proces<span data-count="34">s</span> env cond, proces<span data-count="34">s</span> env then_expr, Option.ma<span data-count="34">p</span> else_expr ~f:(proces<span data-count="34">s</span> env))
     | <span data-count="31">M</span>atch (expr, cases) -&gt;
       Match
         (proces<span data-count="31">s</span> env expr, List.ma<span data-count="31">p</span> cases ~f:(fun (pat, body) -&gt; <span data-count="74">p</span>at, proces<span data-count="74">s</span> env body))
     | <span data-count="6">E</span>Constraint (expr, ty) -&gt; EConstraint (proces<span data-count="6">s</span> env expr, ty)
-    | <span data-count="746">A</span>pplication (e1, e2) -&gt; Application (proces<span data-count="746">s</span> env e1, proces<span data-count="746">s</span> env e2)
+    | <span data-count="766">A</span>pplication (e1, e2) -&gt; Application (proces<span data-count="766">s</span> env e1, proces<span data-count="766">s</span> env e2)
     | <span data-count="30">F</span>un (args, expr) -&gt;
       (* Process based on whether the expression to the right of the arrow is a `fun` expression *)
       (match expr with
@@ -815,80 +815,80 @@ let cc_expr global_names =
          else
            <span data-count="9">L</span>ist.fold (Set.to_lis<span data-count="9">t</span> added_args) ~init:final_fun_expr ~f:(fun acc v -&gt;
              <span data-count="15">A</span>pplication (acc, EVar v)))
-    | <span data-count="251">L</span>et (fun_type, binds, in_expr_opt) -&gt;
+    | <span data-count="259">L</span>et (fun_type, binds, in_expr_opt) -&gt;
       let new_env_ref = ref env in
       let cc_binds =
         List.map binds ~f:(fun (pat, args, expr) -&gt;
-          <span data-count="255">l</span>et all_args, body = extract_fun_args expr in
-          <span data-count="255">l</span>et combined_args = args @ all_args in
+          <span data-count="263">l</span>et all_args, body = extract_fun_args expr in
+          <span data-count="263">l</span>et combined_args = args @ all_args in
           let final_args =
             match fun_type with
-            | <span data-count="47">R</span>ecursive -&gt;
+            | <span data-count="49">R</span>ecursive -&gt;
               let unbound = free_vars_expr body in
               (* Filter out global names *)
-              <span data-count="47">l</span>et unbound = Set.diff unbound global_names in
-              <span data-count="47">l</span>et bound = args_list_to_id_set combined_args in
-              <span data-count="47">l</span>et fun_names = bound_vars_in_pattern pat in
-              <span data-count="47">l</span>et free_vars = Set.diff (Set.dif<span data-count="47">f</span> unbound bound) fun_names in
-              <span data-count="47">p</span>attern_list_to_var<span data-count="47">s</span> (Set.to_lis<span data-count="47">t</span> free_vars) @ combined_args
-            | <span data-count="208">N</span>onrecursive -&gt;
+              <span data-count="49">l</span>et unbound = Set.diff unbound global_names in
+              <span data-count="49">l</span>et bound = args_list_to_id_set combined_args in
+              <span data-count="49">l</span>et fun_names = bound_vars_in_pattern pat in
+              <span data-count="49">l</span>et free_vars = Set.diff (Set.dif<span data-count="49">f</span> unbound bound) fun_names in
+              <span data-count="49">p</span>attern_list_to_var<span data-count="49">s</span> (Set.to_lis<span data-count="49">t</span> free_vars) @ combined_args
+            | <span data-count="214">N</span>onrecursive -&gt;
               (* Don't add free variables from nested `let ()` expressions *)
               (match expr with
-               | <span data-count="58">L</span>et (_, inner_binds, _)
-                 when List.exist<span data-count="58">s</span> inner_binds ~f:(fun (p, _, _) -&gt;
-                        <span data-count="58">m</span>atch p with
-                        | <span data-count="32">C</span>onst Unit -&gt; true
-                        | <span data-count="26">_</span> -&gt; false) -&gt; <span data-count="32">c</span>ombined_args
-               | <span data-count="176">_</span> -&gt;
-                 if List.is_empt<span data-count="176">y</span> args &amp;&amp; <span data-count="135">L</span>ist.is_empt<span data-count="135">y</span> all_args
+               | <span data-count="60">L</span>et (_, inner_binds, _)
+                 when List.exist<span data-count="60">s</span> inner_binds ~f:(fun (p, _, _) -&gt;
+                        <span data-count="60">m</span>atch p with
+                        | <span data-count="34">C</span>onst Unit -&gt; true
+                        | <span data-count="26">_</span> -&gt; false) -&gt; <span data-count="34">c</span>ombined_args
+               | <span data-count="180">_</span> -&gt;
+                 if List.is_empt<span data-count="180">y</span> args &amp;&amp; <span data-count="139">L</span>ist.is_empt<span data-count="139">y</span> all_args
                  then
-                   <span data-count="125">a</span>rgs
+                   <span data-count="129">a</span>rgs
                    (* Don't add free vars if args list is empty and no fun in body *)
                  else <span data-count="51">a</span>dd_free_var<span data-count="51">s</span> combined_args body)
           in
           (* Update environment with bound functions and their free variables *)
           (match pat with
-           | <span data-count="187">V</span>ar id -&gt;
+           | <span data-count="193">V</span>ar id -&gt;
              let captured_vars =
                List.filter_map final_args ~f:(function
-                 | <span data-count="209">V</span>ar v
+                 | <span data-count="211">V</span>ar v
                    when not
-                          (List.exist<span data-count="209">s</span> combined_args ~f:(function
-                            | <span data-count="457">V</span>ar v' -&gt; String.equal v v'
+                          (List.exist<span data-count="211">s</span> combined_args ~f:(function
+                            | <span data-count="459">V</span>ar v' -&gt; String.equal v v'
                             | <span data-count="48">_</span> -&gt; false)) -&gt; <span data-count="0">S</span>ome v
-                 | <span data-count="224">_</span> -&gt; None)
+                 | <span data-count="226">_</span> -&gt; None)
              in
-             <span data-count="187">n</span>ew_env_ref := Map.se<span data-count="187">t</span> !new_env_ref ~key:id ~data:captured_vars
-           | <span data-count="68">_</span> -&gt; ());
+             <span data-count="193">n</span>ew_env_ref := Map.se<span data-count="193">t</span> !new_env_ref ~key:id ~data:captured_vars
+           | <span data-count="70">_</span> -&gt; ());
           let bound_vars = args_list_to_id_set final_args in
-          <span data-count="255">l</span>et body_env = Map.filter_keys env ~f:(fun k -&gt; <span data-count="29">n</span>ot (Set.me<span data-count="29">m</span> bound_vars k)) in
-          <span data-count="255">p</span>at, final_args, proces<span data-count="255">s</span> body_env body)
+          <span data-count="263">l</span>et body_env = Map.filter_keys env ~f:(fun k -&gt; <span data-count="29">n</span>ot (Set.me<span data-count="29">m</span> bound_vars k)) in
+          <span data-count="263">p</span>at, final_args, proces<span data-count="263">s</span> body_env body)
       in
-      <span data-count="251">l</span>et new_env = !new_env_ref in
-      let new_in_expr_opt = Option.map in_expr_opt ~f:(proces<span data-count="251">s</span> new_env) in
-      <span data-count="251">L</span>et (fun_type, cc_binds, new_in_expr_opt)
+      <span data-count="259">l</span>et new_env = !new_env_ref in
+      let new_in_expr_opt = Option.map in_expr_opt ~f:(proces<span data-count="259">s</span> new_env) in
+      <span data-count="259">L</span>et (fun_type, cc_binds, new_in_expr_opt)
   in
-  process (Map.empt<span data-count="66">y</span> (module String))
+  process (Map.empt<span data-count="70">y</span> (module String))
 ;;
 
 let cc_prog (prog : prog) =
-  <span data-count="66">l</span>et open Utils.R in
+  <span data-count="70">l</span>et open Utils.R in
   (* Collect global function names from top-level let bindings *)
   let global_names =
     List.fold
       prog
-      ~init:(Set.empt<span data-count="66">y</span> (module String))
+      ~init:(Set.empt<span data-count="70">y</span> (module String))
       ~f:(fun acc expr -&gt;
-        <span data-count="146">m</span>atch expr with
-        | <span data-count="146">L</span>et (_, binds, _) -&gt;
+        <span data-count="152">m</span>atch expr with
+        | <span data-count="152">L</span>et (_, binds, _) -&gt;
           List.fold binds ~init:acc ~f:(fun acc_inner (pat, _, _) -&gt;
-            <span data-count="150">m</span>atch pat with
-            | <span data-count="150">V</span>ar id -&gt; Set.add acc_inner id
+            <span data-count="156">m</span>atch pat with
+            | <span data-count="156">V</span>ar id -&gt; Set.add acc_inner id
             | <span data-count="0">_</span> -&gt; acc_inner)
         | <span data-count="0">_</span> -&gt; acc)
   in
-  <span data-count="66">l</span>et cc_expr_with_globals = cc_expr global_names in
-  <span data-count="66">L</span>ist.map prog ~f:cc_expr_with_globals |&gt; <span data-count="66">r</span>eturn
+  <span data-count="70">l</span>et cc_expr_with_globals = cc_expr global_names in
+  <span data-count="70">L</span>ist.map prog ~f:cc_expr_with_globals |&gt; <span data-count="70">r</span>eturn
 ;;
 </code></pre>
       </div>

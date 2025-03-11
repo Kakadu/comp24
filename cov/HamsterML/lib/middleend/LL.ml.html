@@ -558,7 +558,7 @@ module NameSet = struct
 
   (* (a, b, c) =&gt; Var a, Var b, Var c *)
   let to_args (set : t) : args =
-    <span data-count="152">L</span>ist.rev @@ List.fol<span data-count="152">d</span> set ~init:[] ~f:(fun acc id -&gt; <span data-count="182">V</span>ar id :: acc)
+    <span data-count="158">L</span>ist.rev @@ List.fol<span data-count="158">d</span> set ~init:[] ~f:(fun acc id -&gt; <span data-count="184">V</span>ar id :: acc)
   ;;
 
   let rec generate_name (set : t) =
@@ -574,14 +574,14 @@ module NameEnv = struct
   include Utils.NameEnv
 
   let rec generate_name (env : t) (name : id) =
-    <span data-count="163">m</span>atch find name env with
-    | <span data-count="131">N</span>one -&gt;
+    <span data-count="171">m</span>atch find name env with
+    | <span data-count="137">N</span>one -&gt;
       let* fresh_num = fresh in
-      <span data-count="131">l</span>et new_name = "ll_var_" ^ Int.to_strin<span data-count="131">g</span> fresh_num in
+      <span data-count="137">l</span>et new_name = "ll_var_" ^ Int.to_strin<span data-count="137">g</span> fresh_num in
       (match find new_name env with
-       | <span data-count="131">N</span>one -&gt; return (exten<span data-count="131">d</span> (name, new_name) env, new_name)
+       | <span data-count="137">N</span>one -&gt; return (exten<span data-count="137">d</span> (name, new_name) env, new_name)
        | <span data-count="0">S</span>ome _ -&gt; generate_name env name)
-    | <span data-count="32">S</span>ome new_name -&gt; return (env, new_name)
+    | <span data-count="34">S</span>ome new_name -&gt; return (env, new_name)
   ;;
 end
 
@@ -592,9 +592,9 @@ let generate_lambda_name =
 
 (* Simplify weird patterns in function arguments *)
 let simplify_arguments args body : (expr * NameSet.t) t =
-  <span data-count="152">l</span>et rec helper (body : expr) (names : NameSet.t) = function
-    | <span data-count="152">[</span>] -&gt; return (body, names)
-    | <span data-count="171">V</span>ar id :: tl -&gt; helper body (NameSet.exten<span data-count="171">d</span> id names) tl
+  <span data-count="158">l</span>et rec helper (body : expr) (names : NameSet.t) = function
+    | <span data-count="158">[</span>] -&gt; return (body, names)
+    | <span data-count="173">V</span>ar id :: tl -&gt; helper body (NameSet.exten<span data-count="173">d</span> id names) tl
     | <span data-count="11">p</span>attern :: tl -&gt;
       let* names, new_name = NameSet.generate_nam<span data-count="11">e</span> names in
       (* match &lt;new_name&gt; with head_p -&gt; acc *)
@@ -609,22 +609,22 @@ let simplify_arguments args body : (expr * NameSet.t) t =
 
 (* add bind names to environment with new names *)
 let collect_mutual_names (env : NameEnv.t) (binds : bind list) : NameEnv.t t =
-  <span data-count="30">f</span>old_list binds ~init:env ~f:(fun env bnd -&gt;
-    <span data-count="32">m</span>atch bnd with
-    | <span data-count="32">V</span>ar name, _, _ -&gt;
-      let* env, _ = NameEnv.generate_nam<span data-count="32">e</span> env name in
-      <span data-count="32">r</span>eturn env
+  <span data-count="32">f</span>old_list binds ~init:env ~f:(fun env bnd -&gt;
+    <span data-count="34">m</span>atch bnd with
+    | <span data-count="34">V</span>ar name, _, _ -&gt;
+      let* env, _ = NameEnv.generate_nam<span data-count="34">e</span> env name in
+      <span data-count="34">r</span>eturn env
     | <span data-count="0">_</span> -&gt; return env)
 ;;
 
 (* Check if a let binding defines a function or just a value *)
 let is_fun_binding (args : args) =
-  <span data-count="73">m</span>atch args with
-  | <span data-count="66">[</span>] -&gt; false
+  <span data-count="75">m</span>atch args with
+  | <span data-count="68">[</span>] -&gt; false
   | <span data-count="7">_</span> -&gt; true
 ;;
 
-let _if cond a b = <span data-count="146">i</span>f cond then <span data-count="14">a</span> else <span data-count="132">b</span>
+let _if cond a b = <span data-count="150">i</span>f cond then <span data-count="14">a</span> else <span data-count="136">b</span>
 
 (* perform lambda lifting for every bind *)
 let rec ll_bind
@@ -633,24 +633,24 @@ let rec ll_bind
   ((name, args, body) : pattern * args * expr)
   =
   (* main = let () = print_int 10 in 0 *)
-  <span data-count="178">m</span>atch name with
-  | <span data-count="131">V</span>ar name -&gt;
-    let* env, new_name = NameEnv.generate_nam<span data-count="131">e</span> env name in
+  <span data-count="186">m</span>atch name with
+  | <span data-count="137">V</span>ar name -&gt;
+    let* env, new_name = NameEnv.generate_nam<span data-count="137">e</span> env name in
     (* ll_var_0 = let () = print_int 10 in 0 *)
-    <span data-count="131">l</span>et* body, nameset = simplify_argument<span data-count="131">s</span> args body in
-    <span data-count="131">l</span>et* llbody, lifted = ll_exp<span data-count="131">r</span> lifted env body in
-    <span data-count="131">l</span>et (new_bind : ll_bind) = Var new_name, NameSet.to_arg<span data-count="131">s</span> nameset, llbody in
+    <span data-count="137">l</span>et* body, nameset = simplify_argument<span data-count="137">s</span> args body in
+    <span data-count="137">l</span>et* llbody, lifted = ll_exp<span data-count="137">r</span> lifted env body in
+    <span data-count="137">l</span>et (new_bind : ll_bind) = Var new_name, NameSet.to_arg<span data-count="137">s</span> nameset, llbody in
     return (env, new_bind, lifted)
-  | <span data-count="47">p</span>attern -&gt;
-    let* llbody, lifted = ll_exp<span data-count="47">r</span> lifted env body in
-    <span data-count="47">l</span>et (new_bind : ll_bind) = pattern, args, llbody in
+  | <span data-count="49">p</span>attern -&gt;
+    let* llbody, lifted = ll_exp<span data-count="49">r</span> lifted env body in
+    <span data-count="49">l</span>et (new_bind : ll_bind) = pattern, args, llbody in
     return (env, new_bind, lifted)
 
 (* perform lambda lifting for every expr *)
 and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   : (ll_expr * lifted_lets) t
   =
-  <span data-count="1535">m</span>atch expr with
+  <span data-count="1591">m</span>atch expr with
   | <span data-count="21">F</span>un (args, body) -&gt;
     let* name = generate_lambda_name in
     <span data-count="21">l</span>et* body, nameset = simplify_argument<span data-count="21">s</span> args body in
@@ -659,34 +659,34 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
     let lam_let = LLLet (Nonrecursive, [ bind ], None) in
     let lifted = body_lifted @ [ lam_let ] in
     return (LLVar name, lifted)
-  | <span data-count="73">L</span>et (rec_flag, binds, Some scope) -&gt;
+  | <span data-count="75">L</span>et (rec_flag, binds, Some scope) -&gt;
     (* Work with rec flag *)
     let* env =
       match rec_flag with
       | <span data-count="4">R</span>ecursive -&gt; collect_mutual_name<span data-count="4">s</span> env binds
-      | <span data-count="69">N</span>onrecursive -&gt; retur<span data-count="69">n</span> env
+      | <span data-count="71">N</span>onrecursive -&gt; retur<span data-count="71">n</span> env
     in
     (* Work with binds (bind1 and bind2 and ...) *)
-    <span data-count="73">l</span>et* env, new_binds, lifted, is_fun =
+    <span data-count="75">l</span>et* env, new_binds, lifted, is_fun =
       (* () = print_int 10 *)
-      fold_lis<span data-count="73">t</span>
+      fold_lis<span data-count="75">t</span>
         binds
         ~init:(env, [], lifted, true)
         ~f:(fun (env, binds, lifted, is_fun) (name, args, expr) -&gt;
-          <span data-count="73">l</span>et* env, new_bind, lifted = ll_bin<span data-count="73">d</span> lifted env (name, args, expr) in
-          <span data-count="73">r</span>eturn (env, new_bind :: binds, lifted, is_fun &amp;&amp; <span data-count="73">i</span>s_fun_bindin<span data-count="73">g</span> args))
+          <span data-count="75">l</span>et* env, new_bind, lifted = ll_bin<span data-count="75">d</span> lifted env (name, args, expr) in
+          <span data-count="75">r</span>eturn (env, new_bind :: binds, lifted, is_fun &amp;&amp; <span data-count="75">i</span>s_fun_bindin<span data-count="75">g</span> args))
     in
-    <span data-count="73">l</span>et* ll_scope, lifted = ll_exp<span data-count="73">r</span> lifted env scope in
-    <span data-count="73">l</span>et ll_new_let =
-      LLLet (rec_flag, List.re<span data-count="73">v</span> new_binds, _i<span data-count="73">f</span> is_fun None (Some ll_scope))
+    <span data-count="75">l</span>et* ll_scope, lifted = ll_exp<span data-count="75">r</span> lifted env scope in
+    <span data-count="75">l</span>et ll_new_let =
+      LLLet (rec_flag, List.re<span data-count="75">v</span> new_binds, _i<span data-count="75">f</span> is_fun None (Some ll_scope))
     in
-    return @@ _i<span data-count="73">f</span> is_fun (ll_scope, ll_new_let :: lifted) (ll_new_let, lifted)
-  | <span data-count="229">E</span>Const v -&gt; return (LLConst v, lifted)
-  | <span data-count="101">E</span>Operation op -&gt; return (LLOperation op, lifted)
-  | <span data-count="501">E</span>Var id -&gt;
+    return @@ _i<span data-count="75">f</span> is_fun (ll_scope, ll_new_let :: lifted) (ll_new_let, lifted)
+  | <span data-count="241">E</span>Const v -&gt; return (LLConst v, lifted)
+  | <span data-count="107">E</span>Operation op -&gt; return (LLOperation op, lifted)
+  | <span data-count="515">E</span>Var id -&gt;
     (match NameEnv.find id env with
-     | <span data-count="390">N</span>one -&gt; return (LLVar id, lifted)
-     | <span data-count="111">S</span>ome new_id -&gt; return (LLVar new_id, lifted))
+     | <span data-count="400">N</span>one -&gt; return (LLVar id, lifted)
+     | <span data-count="115">S</span>ome new_id -&gt; return (LLVar new_id, lifted))
   | <span data-count="23">E</span>List exprs -&gt;
     let* ll_exprs, lifted =
       fold_lis<span data-count="23">t</span> exprs ~init:([], lifted) ~f:(fun (exprs, lifted) cur_expr -&gt;
@@ -710,11 +710,11 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
   | <span data-count="4">E</span>Constraint (expr, dt) -&gt;
     let* ll_expr, lifted = ll_exp<span data-count="4">r</span> lifted env expr in
     <span data-count="4">r</span>eturn (LLConstraint (ll_expr, dt), lifted)
-  | <span data-count="20">I</span>f (cond, th, Some el) -&gt;
-    let* ll_cond, lifted = ll_exp<span data-count="20">r</span> lifted env cond in
-    <span data-count="20">l</span>et* ll_th, lifted = ll_exp<span data-count="20">r</span> lifted env th in
-    <span data-count="20">l</span>et* ll_else, lifted = ll_exp<span data-count="20">r</span> lifted env el in
-    <span data-count="20">r</span>eturn (LLIf (ll_cond, ll_th, Some ll_else), lifted)
+  | <span data-count="22">I</span>f (cond, th, Some el) -&gt;
+    let* ll_cond, lifted = ll_exp<span data-count="22">r</span> lifted env cond in
+    <span data-count="22">l</span>et* ll_th, lifted = ll_exp<span data-count="22">r</span> lifted env th in
+    <span data-count="22">l</span>et* ll_else, lifted = ll_exp<span data-count="22">r</span> lifted env el in
+    <span data-count="22">r</span>eturn (LLIf (ll_cond, ll_th, Some ll_else), lifted)
   | <span data-count="0">I</span>f (cond, th, None) -&gt;
     let* ll_cond, lifted = ll_exp<span data-count="0">r</span> lifted env cond in
     <span data-count="0">l</span>et* ll_th, lifted = ll_exp<span data-count="0">r</span> lifted env th in
@@ -728,46 +728,46 @@ and ll_expr (lifted : lifted_lets) (env : NameEnv.t) (expr : expr)
         <span data-count="68">r</span>eturn (((pat, ll_expr) : ll_case) :: cases, lifted))
     in
     <span data-count="35">r</span>eturn (LLMatch (ll_e, ll_cases), lifted)
-  | <span data-count="507">A</span>pplication (lexpr, rexpr) -&gt;
-    let* ll_lexpr, lifted = ll_exp<span data-count="507">r</span> lifted env lexpr in
-    <span data-count="507">l</span>et* ll_rexpr, lifted = ll_exp<span data-count="507">r</span> lifted env rexpr in
-    <span data-count="507">r</span>eturn (LLApplication (ll_lexpr, ll_rexpr), lifted)
+  | <span data-count="527">A</span>pplication (lexpr, rexpr) -&gt;
+    let* ll_lexpr, lifted = ll_exp<span data-count="527">r</span> lifted env lexpr in
+    <span data-count="527">l</span>et* ll_rexpr, lifted = ll_exp<span data-count="527">r</span> lifted env rexpr in
+    <span data-count="527">r</span>eturn (LLApplication (ll_lexpr, ll_rexpr), lifted)
   | <span data-count="0">_</span> -&gt; failwith "Incorrect expression was encountered during LL"
 ;;
 
 let ll_prog (prog : prog) : ll_prog t =
-  <span data-count="49">l</span>et rec helper lifted env = function
-    | <span data-count="49">[</span>] -&gt; return []
-    | <span data-count="102">f</span>irst_let :: tl_lets -&gt;
+  <span data-count="53">l</span>et rec helper lifted env = function
+    | <span data-count="53">[</span>] -&gt; return []
+    | <span data-count="108">f</span>irst_let :: tl_lets -&gt;
       let* ll_first_let, env =
         match first_let with
-        | <span data-count="102">L</span>et (rec_flag, binds, in_scope) -&gt;
+        | <span data-count="108">L</span>et (rec_flag, binds, in_scope) -&gt;
           (* Update environment according to rec_flag *)
           let* env =
             match rec_flag with
-            | <span data-count="26">R</span>ecursive -&gt; collect_mutual_name<span data-count="26">s</span> env binds
-            | <span data-count="76">N</span>onrecursive -&gt; retur<span data-count="76">n</span> env
+            | <span data-count="28">R</span>ecursive -&gt; collect_mutual_name<span data-count="28">s</span> env binds
+            | <span data-count="80">N</span>onrecursive -&gt; retur<span data-count="80">n</span> env
           in
           (* Convert all binds *)
-          <span data-count="102">l</span>et* env, new_binds, lifted =
-            fold_lis<span data-count="102">t</span>
+          <span data-count="108">l</span>et* env, new_binds, lifted =
+            fold_lis<span data-count="108">t</span>
               binds
               ~init:(env, [], lifted)
               ~f:(fun (env, binds, lifted) (name, args, expr) -&gt;
-                <span data-count="105">l</span>et* env, new_bind, lifted = ll_bin<span data-count="105">d</span> lifted env (name, args, expr) in
-                <span data-count="105">r</span>eturn (env, new_bind :: binds, lifted))
+                <span data-count="111">l</span>et* env, new_bind, lifted = ll_bin<span data-count="111">d</span> lifted env (name, args, expr) in
+                <span data-count="111">r</span>eturn (env, new_bind :: binds, lifted))
           in
           (* Work with 'in' scope *)
-          <span data-count="102">l</span>et new_binds = List.rev new_binds in
-          <span data-count="102">(</span>match in_scope with
+          <span data-count="108">l</span>et new_binds = List.rev new_binds in
+          <span data-count="108">(</span>match in_scope with
            | <span data-count="1">S</span>ome scope -&gt;
              let* ll_scope, lifted = ll_exp<span data-count="1">r</span> lifted env scope in
              <span data-count="1">r</span>eturn (lifted @ [ LLLet (rec_flag, new_binds, Some ll_scope) ], env)
-           | <span data-count="101">N</span>one -&gt; return (lifted @ [ LLLet (rec_flag, new_binds, None) ], env))
+           | <span data-count="107">N</span>one -&gt; return (lifted @ [ LLLet (rec_flag, new_binds, None) ], env))
         | <span data-count="0">_</span> -&gt; failwith "Incorrect starting point was encountered during LL"
       in
-      <span data-count="102">l</span>et* ll_tl_lets = helpe<span data-count="102">r</span> lifted env tl_lets in
-      <span data-count="102">r</span>eturn (ll_first_let @ ll_tl_lets)
+      <span data-count="108">l</span>et* ll_tl_lets = helpe<span data-count="108">r</span> lifted env tl_lets in
+      <span data-count="108">r</span>eturn (ll_first_let @ ll_tl_lets)
   in
   helper [] NameEnv.empty prog
 ;;

@@ -466,23 +466,23 @@ module NameEnv = struct
   include Utils.NameEnv
 end
 
-let _let_in pattern body scope = <span data-count="348">A</span>LetIn (pattern, body, scope)
-let _ac x = <span data-count="117">A</span>CExpr (CImm x)
+let _let_in pattern body scope = <span data-count="366">A</span>LetIn (pattern, body, scope)
+let _ac x = <span data-count="127">A</span>CExpr (CImm x)
 
 let _if i t e =
-  <span data-count="37">m</span>atch e with
+  <span data-count="39">m</span>atch e with
   | <span data-count="0">N</span>one -&gt; CIf (i, t, None)
-  | <span data-count="37">S</span>ome e -&gt; CIf (i, t, Some e)
+  | <span data-count="39">S</span>ome e -&gt; CIf (i, t, Some e)
 ;;
 
 let get_fresh_name =
   let* fresh_num = fresh in
-  <span data-count="307">l</span>et fresh_name = "anf_" ^ Int.to_strin<span data-count="307">g</span> fresh_num in
+  <span data-count="323">l</span>et fresh_name = "anf_" ^ Int.to_strin<span data-count="323">g</span> fresh_num in
   return @@ fresh_name
 ;;
 
 let value_to_anf = function
-  | <span data-count="99">I</span>nt i -&gt; ImmInt i
+  | <span data-count="111">I</span>nt i -&gt; ImmInt i
   | <span data-count="25">B</span>ool b -&gt; ImmBool b
   | <span data-count="0">S</span>tring s -&gt; ImmString s
   | <span data-count="3">U</span>nit -&gt; ImmUnit
@@ -490,59 +490,59 @@ let value_to_anf = function
 
 (* bind -&gt; name, expr *)
 let extract_inner_bind (bind : me_bind) =
-  <span data-count="76">l</span>et pattern, args, body = bind in
-  if List.lengt<span data-count="76">h</span> args = 0
-  then <span data-count="76">p</span>attern, body
+  <span data-count="78">l</span>et pattern, args, body = bind in
+  if List.lengt<span data-count="78">h</span> args = 0
+  then <span data-count="78">p</span>attern, body
   else <span data-count="0">f</span>ailwith "Inner bind can't contain arguments"
 ;;
 
 let extract_binds (binds : me_bind list) =
-  <span data-count="76">m</span>atch binds with
+  <span data-count="78">m</span>atch binds with
   | <span data-count="0">[</span>] -&gt; failwith "Inner let can't contains zero bindings"
-  | <span data-count="76">f</span>irst_bind :: other_binds -&gt;
+  | <span data-count="78">f</span>irst_bind :: other_binds -&gt;
     let first_bind = extract_inner_bind first_bind in
-    <span data-count="76">f</span>irst_bind, other_binds
+    <span data-count="78">f</span>irst_bind, other_binds
 ;;
 
 let _application f args =
-  <span data-count="253">l</span>et f = CImm f in
-  let args = List.map args ~f:(fun x -&gt; <span data-count="394">C</span>Imm x) in
-  <span data-count="253">m</span>atch args with
-  | <span data-count="132">[</span> arg ] -&gt; return @@ CApplication (f, arg, [])
-  | <span data-count="121">a</span>rg :: args_tl -&gt; return @@ CApplication (f, arg, args_tl)
+  <span data-count="267">l</span>et f = CImm f in
+  let args = List.map args ~f:(fun x -&gt; <span data-count="414">C</span>Imm x) in
+  <span data-count="267">m</span>atch args with
+  | <span data-count="140">[</span> arg ] -&gt; return @@ CApplication (f, arg, [])
+  | <span data-count="127">a</span>rg :: args_tl -&gt; return @@ CApplication (f, arg, args_tl)
   | <span data-count="0">[</span>] -&gt; failwith "Empty application O_O"
 ;;
 
 let flatten_application =
   let rec helper k expr =
-    <span data-count="629">m</span>atch expr with
-    | <span data-count="382">M</span>EApplication (l, r) -&gt; helper (fun args -&gt; <span data-count="382">k</span> (r :: args)) l
-    | <span data-count="247">_</span> -&gt; expr, <span data-count="247">k</span> []
+    <span data-count="663">m</span>atch expr with
+    | <span data-count="402">M</span>EApplication (l, r) -&gt; helper (fun args -&gt; <span data-count="402">k</span> (r :: args)) l
+    | <span data-count="261">_</span> -&gt; expr, <span data-count="261">k</span> []
   in
-  helpe<span data-count="10">r</span> Fn.id
+  helpe<span data-count="14">r</span> Fn.id
 ;;
 
 let rec convert_exprs exprs k =
-  <span data-count="261">l</span>et rec helper acc = function
-    | <span data-count="267">[</span>] -&gt; k (List.re<span data-count="267">v</span> acc)
-    | <span data-count="401">h</span> :: tl -&gt; convert_expr h (fun imm -&gt; <span data-count="407">h</span>elper (imm :: acc) tl)
+  <span data-count="275">l</span>et rec helper acc = function
+    | <span data-count="281">[</span>] -&gt; k (List.re<span data-count="281">v</span> acc)
+    | <span data-count="421">h</span> :: tl -&gt; convert_expr h (fun imm -&gt; <span data-count="427">h</span>elper (imm :: acc) tl)
   in
   helper [] exprs
 
 and convert_expr (expr : me_expr) (k : imm_expr -&gt; aexpr t) =
-  <span data-count="951">m</span>atch expr with
-  | <span data-count="127">M</span>EConst v -&gt; k @@ value_to_an<span data-count="127">f</span> v
-  | <span data-count="377">M</span>EVar id -&gt; k @@ ImmId id
-  | <span data-count="79">M</span>EOperation op -&gt; k @@ ImmOperation op
+  <span data-count="1001">m</span>atch expr with
+  | <span data-count="139">M</span>EConst v -&gt; k @@ value_to_an<span data-count="139">f</span> v
+  | <span data-count="391">M</span>EVar id -&gt; k @@ ImmId id
+  | <span data-count="85">M</span>EOperation op -&gt; k @@ ImmOperation op
   | <span data-count="2">M</span>EConstraint (expr, _) -&gt; convert_expr expr k
-  | <span data-count="247">M</span>EApplication (_, _) as app -&gt;
+  | <span data-count="261">M</span>EApplication (_, _) as app -&gt;
     let f, args = flatten_application app in
-    <span data-count="247">c</span>onvert_expr f (fun imm_f -&gt;
-      <span data-count="247">c</span>onvert_exprs args (fun imm_args -&gt;
-        <span data-count="253">l</span>et* name = get_fresh_name in
-        <span data-count="253">l</span>et* scope = <span data-count="253">k</span> @@ ImmId name in
-        <span data-count="253">l</span>et* application = _applicatio<span data-count="253">n</span> imm_f (List.re<span data-count="253">v</span> imm_args) in
-        <span data-count="253">r</span>eturn @@ _let_i<span data-count="253">n</span> (Var name) application scope))
+    <span data-count="261">c</span>onvert_expr f (fun imm_f -&gt;
+      <span data-count="261">c</span>onvert_exprs args (fun imm_args -&gt;
+        <span data-count="267">l</span>et* name = get_fresh_name in
+        <span data-count="267">l</span>et* scope = <span data-count="267">k</span> @@ ImmId name in
+        <span data-count="267">l</span>et* application = _applicatio<span data-count="267">n</span> imm_f (List.re<span data-count="267">v</span> imm_args) in
+        <span data-count="267">r</span>eturn @@ _let_i<span data-count="267">n</span> (Var name) application scope))
   | <span data-count="12">M</span>EList exprs -&gt;
     convert_exprs exprs (fun imm_exprs -&gt;
       <span data-count="12">l</span>et* name = get_fresh_name in
@@ -560,66 +560,66 @@ and convert_expr (expr : me_expr) (k : imm_expr -&gt; aexpr t) =
     <span data-count="3">c</span>onvert_expr l (fun imm_l -&gt;
       <span data-count="3">c</span>onvert_expr r (fun imm_r -&gt;
         <span data-count="3">r</span>eturn @@ _let_i<span data-count="3">n</span> (Var new_var) (CConstructList (imm_l, imm_r)) scope))
-  | <span data-count="26">M</span>EIf (i, t, Some e) -&gt;
+  | <span data-count="28">M</span>EIf (i, t, Some e) -&gt;
     convert_expr i (fun imm_i -&gt;
-      <span data-count="37">l</span>et* aexpr_then = convert_exp<span data-count="37">r</span> t k in
-      <span data-count="37">l</span>et* aexpr_else = convert_exp<span data-count="37">r</span> e k in
-      <span data-count="37">l</span>et* name = get_fresh_name in
-      <span data-count="37">l</span>et* scope = <span data-count="37">k</span> @@ ImmId name in
-      <span data-count="37">r</span>eturn @@ _let_i<span data-count="37">n</span> (Var name) (_i<span data-count="37">f</span> imm_i aexpr_then (Some aexpr_else)) scope)
+      <span data-count="39">l</span>et* aexpr_then = convert_exp<span data-count="39">r</span> t k in
+      <span data-count="39">l</span>et* aexpr_else = convert_exp<span data-count="39">r</span> e k in
+      <span data-count="39">l</span>et* name = get_fresh_name in
+      <span data-count="39">l</span>et* scope = <span data-count="39">k</span> @@ ImmId name in
+      <span data-count="39">r</span>eturn @@ _let_i<span data-count="39">n</span> (Var name) (_i<span data-count="39">f</span> imm_i aexpr_then (Some aexpr_else)) scope)
   | <span data-count="0">M</span>EIf (i, t, None) -&gt;
     convert_expr i (fun imm_i -&gt;
       <span data-count="0">l</span>et* aexpr_then = convert_exp<span data-count="0">r</span> t k in
       <span data-count="0">l</span>et* name = get_fresh_name in
       <span data-count="0">l</span>et* scope = <span data-count="0">k</span> @@ ImmId name in
       <span data-count="0">r</span>eturn @@ _let_i<span data-count="0">n</span> (Var name) (_i<span data-count="0">f</span> imm_i aexpr_then None) scope)
-  | <span data-count="76">M</span>ELet (rec_flag, binds, Some scope) -&gt;
+  | <span data-count="78">M</span>ELet (rec_flag, binds, Some scope) -&gt;
     let (pattern, body), other_binds = extract_binds binds in
-    <span data-count="76">c</span>onvert_expr body (fun imm_first_body -&gt;
-      <span data-count="76">m</span>atch other_binds with
+    <span data-count="78">c</span>onvert_expr body (fun imm_first_body -&gt;
+      <span data-count="78">m</span>atch other_binds with
       | <span data-count="0">h</span>d :: tl -&gt;
         let new_scope = MELet (rec_flag, hd :: tl, Some scope) in
         convert_expr new_scope (fun imm_scope -&gt;
           <span data-count="0">r</span>eturn @@ _let_i<span data-count="0">n</span> pattern (CImm imm_first_body) (_a<span data-count="0">c</span> imm_scope))
-      | <span data-count="76">[</span>] -&gt;
+      | <span data-count="78">[</span>] -&gt;
         convert_expr scope (fun imm_scope -&gt;
-          <span data-count="41">r</span>eturn @@ _let_i<span data-count="41">n</span> pattern (CImm imm_first_body) (_a<span data-count="41">c</span> imm_scope)))
+          <span data-count="43">r</span>eturn @@ _let_i<span data-count="43">n</span> pattern (CImm imm_first_body) (_a<span data-count="43">c</span> imm_scope)))
   | <span data-count="0">M</span>ELet (_, _, None) -&gt; failwith "Inner Let can't exist without scope"
 ;;
 
 let anf_decl (decl : me_expr) =
-  <span data-count="43">l</span>et collect_function name args body =
-    <span data-count="43">l</span>et* body = convert_exp<span data-count="43">r</span> body (fun imm -&gt; <span data-count="76">r</span>eturn @@ _a<span data-count="76">c</span> imm) in
-    <span data-count="43">r</span>eturn (name, args, body)
+  <span data-count="49">l</span>et collect_function name args body =
+    <span data-count="49">l</span>et* body = convert_exp<span data-count="49">r</span> body (fun imm -&gt; <span data-count="84">r</span>eturn @@ _a<span data-count="84">c</span> imm) in
+    <span data-count="49">r</span>eturn (name, args, body)
   in
   let _pattern_to_name pattern =
-    <span data-count="43">m</span>atch pattern with
-    | <span data-count="43">V</span>ar name -&gt; name
+    <span data-count="49">m</span>atch pattern with
+    | <span data-count="49">V</span>ar name -&gt; name
     | <span data-count="0">_</span> -&gt; failwith "Global function names can't contain patterns after LL"
   in
   let _args_to_ids (args : args) =
-    <span data-count="43">L</span>ist.map args ~f:(fun arg -&gt;
-      <span data-count="65">m</span>atch arg with
-      | <span data-count="65">V</span>ar id -&gt; id
+    <span data-count="49">L</span>ist.map args ~f:(fun arg -&gt;
+      <span data-count="67">m</span>atch arg with
+      | <span data-count="67">V</span>ar id -&gt; id
       | <span data-count="0">_</span> -&gt; failwith "Arguments can't be pattern after LL")
   in
   let _single_anf_binding (bind : me_bind) =
-    <span data-count="43">l</span>et pattern, args, body = bind in
+    <span data-count="49">l</span>et pattern, args, body = bind in
     let* pattern, args, body =
-      collect_functio<span data-count="43">n</span> (_pattern_to_nam<span data-count="43">e</span> pattern) (_args_to_id<span data-count="43">s</span> args) body
+      collect_functio<span data-count="49">n</span> (_pattern_to_nam<span data-count="49">e</span> pattern) (_args_to_id<span data-count="49">s</span> args) body
     in
-    <span data-count="43">r</span>eturn (ALet (pattern, args, body))
+    <span data-count="49">r</span>eturn (ALet (pattern, args, body))
   in
   match decl with
-  | <span data-count="43">M</span>ELet (rec_flag, binds, None) -&gt;
-    let* single_anf_binds = map_lis<span data-count="43">t</span> binds ~f:_single_anf_binding in
-    <span data-count="43">i</span>f List.lengt<span data-count="43">h</span> single_anf_binds = 1
-    then <span data-count="43">r</span>eturn @@ ADSingleLet (rec_flag, List.hd_ex<span data-count="43">n</span> single_anf_binds)
+  | <span data-count="49">M</span>ELet (rec_flag, binds, None) -&gt;
+    let* single_anf_binds = map_lis<span data-count="49">t</span> binds ~f:_single_anf_binding in
+    <span data-count="49">i</span>f List.lengt<span data-count="49">h</span> single_anf_binds = 1
+    then <span data-count="49">r</span>eturn @@ ADSingleLet (rec_flag, List.hd_ex<span data-count="49">n</span> single_anf_binds)
     else <span data-count="0">r</span>eturn @@ ADMutualRecDecl single_anf_binds
   | <span data-count="0">_</span> -&gt; failwith "Incorrect starting point was encountered during ANF"
 ;;
 
-let anf_prog (prog : me_prog) = <span data-count="11">m</span>ap_list prog ~f:anf_decl
+let anf_prog (prog : me_prog) = <span data-count="15">m</span>ap_list prog ~f:anf_decl
 </code></pre>
       </div>
     </div>

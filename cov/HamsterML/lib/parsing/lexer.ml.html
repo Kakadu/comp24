@@ -4281,17 +4281,17 @@ let __ocaml_lex_tables = {
 }
 
 let rec read lexbuf =
-   <span data-count="15168">_</span>_ocaml_lex_read_rec lexbuf 0
+   <span data-count="15312">_</span>_ocaml_lex_read_rec lexbuf 0
 and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
-  <span data-count="15168">m</span>atch Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
-      | <span data-count="5908">0</span> -&gt;
+  <span data-count="15312">m</span>atch Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
+      | <span data-count="5962">0</span> -&gt;
 # 26 "lib/parsing/lexer.mll"
                 ( read lexbuf )
 # 1250 "lib/parsing/lexer.ml"
 
-  | <span data-count="773">1</span> -&gt;
+  | <span data-count="783">1</span> -&gt;
 # 27 "lib/parsing/lexer.mll"
-                ( new_line lexbuf; <span data-count="773">r</span>ead lexbuf )
+                ( new_line lexbuf; <span data-count="783">r</span>ead lexbuf )
 # 1255 "lib/parsing/lexer.ml"
 
   | <span data-count="37">2</span> -&gt;
@@ -4309,17 +4309,17 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( BOOL )
 # 1270 "lib/parsing/lexer.ml"
 
-  | <span data-count="74">5</span> -&gt;
+  | <span data-count="76">5</span> -&gt;
 # 31 "lib/parsing/lexer.mll"
                 ( IF )
 # 1275 "lib/parsing/lexer.ml"
 
-  | <span data-count="74">6</span> -&gt;
+  | <span data-count="76">6</span> -&gt;
 # 32 "lib/parsing/lexer.mll"
                 ( THEN )
 # 1280 "lib/parsing/lexer.ml"
 
-  | <span data-count="74">7</span> -&gt;
+  | <span data-count="76">7</span> -&gt;
 # 33 "lib/parsing/lexer.mll"
                 ( ELSE )
 # 1285 "lib/parsing/lexer.ml"
@@ -4329,17 +4329,17 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( FUN )
 # 1290 "lib/parsing/lexer.ml"
 
-  | <span data-count="497">9</span> -&gt;
+  | <span data-count="505">9</span> -&gt;
 # 35 "lib/parsing/lexer.mll"
                 ( LET )
 # 1295 "lib/parsing/lexer.ml"
 
-  | <span data-count="215">1</span>0 -&gt;
+  | <span data-count="217">1</span>0 -&gt;
 # 36 "lib/parsing/lexer.mll"
                 ( IN )
 # 1300 "lib/parsing/lexer.ml"
 
-  | <span data-count="89">1</span>1 -&gt;
+  | <span data-count="91">1</span>1 -&gt;
 # 37 "lib/parsing/lexer.mll"
                 ( REC )
 # 1305 "lib/parsing/lexer.ml"
@@ -4384,12 +4384,12 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( WILDCARD )
 # 1345 "lib/parsing/lexer.ml"
 
-  | <span data-count="463">2</span>0 -&gt;
+  | <span data-count="467">2</span>0 -&gt;
 # 46 "lib/parsing/lexer.mll"
                 ( LEFT_PARENTHESIS )
 # 1350 "lib/parsing/lexer.ml"
 
-  | <span data-count="463">2</span>1 -&gt;
+  | <span data-count="467">2</span>1 -&gt;
 # 47 "lib/parsing/lexer.mll"
                 ( RIGHT_PARENTHESIS )
 # 1355 "lib/parsing/lexer.ml"
@@ -4434,12 +4434,12 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( ARROW )
 # 1395 "lib/parsing/lexer.ml"
 
-  | <span data-count="73">3</span>0 -&gt;
+  | <span data-count="75">3</span>0 -&gt;
 # 56 "lib/parsing/lexer.mll"
                 ( MINUS )
 # 1400 "lib/parsing/lexer.ml"
 
-  | <span data-count="42">3</span>1 -&gt;
+  | <span data-count="44">3</span>1 -&gt;
 # 57 "lib/parsing/lexer.mll"
                 ( ASTERISK )
 # 1405 "lib/parsing/lexer.ml"
@@ -4454,7 +4454,7 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( CARET )
 # 1415 "lib/parsing/lexer.ml"
 
-  | <span data-count="548">3</span>4 -&gt;
+  | <span data-count="556">3</span>4 -&gt;
 # 60 "lib/parsing/lexer.mll"
                 ( EQUAL )
 # 1420 "lib/parsing/lexer.ml"
@@ -4484,7 +4484,7 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( LESS_THAN )
 # 1445 "lib/parsing/lexer.ml"
 
-  | <span data-count="13">4</span>0 -&gt;
+  | <span data-count="15">4</span>0 -&gt;
 # 66 "lib/parsing/lexer.mll"
                 ( LESS_THAN_EQUAL )
 # 1450 "lib/parsing/lexer.ml"
@@ -4494,14 +4494,14 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( read lexbuf )
 # 1455 "lib/parsing/lexer.ml"
 
-  | <span data-count="146">4</span>2 -&gt;
+  | <span data-count="148">4</span>2 -&gt;
 # 68 "lib/parsing/lexer.mll"
                 ( TYPE_UNIT )
 # 1460 "lib/parsing/lexer.ml"
 
-  | <span data-count="780">4</span>3 -&gt;
+  | <span data-count="792">4</span>3 -&gt;
 # 69 "lib/parsing/lexer.mll"
-                ( TYPE_INT (int_of_strin<span data-count="780">g</span> (Lexing.lexem<span data-count="780">e</span> lexbuf)) )
+                ( TYPE_INT (int_of_strin<span data-count="792">g</span> (Lexing.lexem<span data-count="792">e</span> lexbuf)) )
 # 1465 "lib/parsing/lexer.ml"
 
   | <span data-count="2">4</span>4 -&gt;
@@ -4520,12 +4520,12 @@ and __ocaml_lex_read_rec lexbuf __ocaml_lex_state =
                 ( TYPE_BOOL (false) )
 # 1481 "lib/parsing/lexer.ml"
 
-  | <span data-count="2803">4</span>7 -&gt;
+  | <span data-count="2825">4</span>7 -&gt;
 # 74 "lib/parsing/lexer.mll"
-                ( IDENTIFIER (Lexing.lexem<span data-count="2803">e</span> lexbuf))
+                ( IDENTIFIER (Lexing.lexem<span data-count="2825">e</span> lexbuf))
 # 1486 "lib/parsing/lexer.ml"
 
-  | <span data-count="301">4</span>8 -&gt;
+  | <span data-count="305">4</span>8 -&gt;
 # 75 "lib/parsing/lexer.mll"
                 ( EOF )
 # 1491 "lib/parsing/lexer.ml"

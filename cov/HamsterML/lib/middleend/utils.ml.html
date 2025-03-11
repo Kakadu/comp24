@@ -202,12 +202,12 @@ module Format = Stdlib.Format
 module R = struct
   type 'a t = int -&gt; 'a * int
 
-  let fresh st = <span data-count="1213">s</span>t, st + 1
+  let fresh st = <span data-count="1243">s</span>t, st + 1
 
   let ( &gt;&gt;= ) : 'a t -&gt; ('a -&gt; 'b t) -&gt; 'b t =
     fun m f state -&gt;
-    <span data-count="13985">l</span>et value, st = m state in
-    <span data-count="13985">(</span><span data-count="13985">f</span> value) st
+    <span data-count="14371">l</span>et value, st = m state in
+    <span data-count="14371">(</span><span data-count="14371">f</span> value) st
   ;;
 
   let ( &gt;&gt;| ) : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t =
@@ -218,24 +218,24 @@ module R = struct
 
   let ( let* ) = ( &gt;&gt;= )
   let bind m f = <span data-count="0">m</span> &gt;&gt;= f
-  let return value st = <span data-count="12989">v</span>alue, st
-  let run monad = <span data-count="217">f</span>st @@ mona<span data-count="217">d</span> 0
+  let return value st = <span data-count="13361">v</span>alue, st
+  let run monad = <span data-count="233">f</span>st @@ mona<span data-count="233">d</span> 0
 
   let rec map_list list ~f =
-    <span data-count="276">m</span>atch list with
-    | <span data-count="112">[</span>] -&gt; return []
-    | <span data-count="164">x</span> :: xs -&gt;
-      let* y = <span data-count="164">f</span> x in
-      <span data-count="164">l</span>et* ys = map_lis<span data-count="164">t</span> xs ~f in
-      <span data-count="164">r</span>eturn (y :: ys)
+    <span data-count="298">m</span>atch list with
+    | <span data-count="122">[</span>] -&gt; return []
+    | <span data-count="176">x</span> :: xs -&gt;
+      let* y = <span data-count="176">f</span> x in
+      <span data-count="176">l</span>et* ys = map_lis<span data-count="176">t</span> xs ~f in
+      <span data-count="176">r</span>eturn (y :: ys)
   ;;
 
   let rec fold_list list ~init ~f =
-    <span data-count="2706">m</span>atch list with
-    | <span data-count="1296">[</span>] -&gt; return init
-    | <span data-count="1410">x</span> :: xs -&gt;
-      let* acc = <span data-count="1410">f</span> init x in
-      <span data-count="1410">f</span>old_list xs ~init:acc ~f
+    <span data-count="2766">m</span>atch list with
+    | <span data-count="1328">[</span>] -&gt; return init
+    | <span data-count="1438">x</span> :: xs -&gt;
+      let* acc = <span data-count="1438">f</span> init x in
+      <span data-count="1438">f</span>old_list xs ~init:acc ~f
   ;;
 end
 
@@ -247,7 +247,7 @@ module NameSet = struct
   let empty : t = []
 
   let extend (name : id) (set : t) : t =
-    <span data-count="182">i</span>f List.mem set name ~equal:String.equal then <span data-count="0">s</span>et else <span data-count="182">s</span>et @ [ name ]
+    <span data-count="184">i</span>f List.mem set name ~equal:String.equal then <span data-count="0">s</span>et else <span data-count="184">s</span>et @ [ name ]
   ;;
 
   let union (s1 : t) (s2 : t) : t =
@@ -261,10 +261,10 @@ end
 module NameEnv = struct
   type t = (id, id, String.comparator_witness) Map.t
 
-  let empty : t = Map.empt<span data-count="23">y</span> (module String)
-  let find key (env : t) = <span data-count="2930">M</span>ap.find env key
+  let empty : t = Map.empt<span data-count="27">y</span> (module String)
+  let find key (env : t) = <span data-count="2988">M</span>ap.find env key
   let find_exn key (env : t) = <span data-count="0">M</span>ap.find_exn env key
-  let extend (k, v) (env : t) = <span data-count="874">M</span>ap.set env ~key:k ~data:v
+  let extend (k, v) (env : t) = <span data-count="888">M</span>ap.set env ~key:k ~data:v
 
   let pp fmt (env : t) =
     <span data-count="0">l</span>et pp_names fmt (old_name, new_name) =

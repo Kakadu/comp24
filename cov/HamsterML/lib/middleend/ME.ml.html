@@ -407,7 +407,7 @@ let ( &lt;|&gt; ) a b =
 ;;
 
 let bin_op op a b = <span data-count="56">M</span>EApplication (MEApplication (MEOperation (Binary op), a), b)
-let _if i t e = <span data-count="45">M</span>EIf (i, t, e)
+let _if i t e = <span data-count="47">M</span>EIf (i, t, e)
 let _true = MEConst (Bool true)
 let _false = MEConst (Bool false)
 let _int num = <span data-count="29">M</span>EConst (Int num)
@@ -498,37 +498,37 @@ let rec convert_match (matched : ll_expr) (cases : ll_case list) =
           (Some (convert_matc<span data-count="23">h</span> matched tail_cases)))
 
 and convert_expr (expr : ll_expr) : me_expr =
-  <span data-count="733">m</span>atch expr with
-  | <span data-count="105">L</span>LConst v -&gt; MEConst v
-  | <span data-count="248">L</span>LVar id -&gt; MEVar id
-  | <span data-count="37">L</span>LOperation op -&gt; MEOperation op
+  <span data-count="795">m</span>atch expr with
+  | <span data-count="117">L</span>LConst v -&gt; MEConst v
+  | <span data-count="262">L</span>LVar id -&gt; MEVar id
+  | <span data-count="43">L</span>LOperation op -&gt; MEOperation op
   | <span data-count="2">L</span>LConstraint (l, dt) -&gt; MEConstraint (convert_exp<span data-count="2">r</span> l, dt)
   | <span data-count="9">L</span>LListConcat (l, r) -&gt; MEListConcat (convert_exp<span data-count="9">r</span> l, convert_exp<span data-count="9">r</span> r)
-  | <span data-count="207">L</span>LApplication (l, r) -&gt; MEApplication (convert_exp<span data-count="207">r</span> l, convert_exp<span data-count="207">r</span> r)
+  | <span data-count="227">L</span>LApplication (l, r) -&gt; MEApplication (convert_exp<span data-count="227">r</span> l, convert_exp<span data-count="227">r</span> r)
   | <span data-count="15">L</span>LList lst -&gt; MEList (List.ma<span data-count="15">p</span> lst ~f:convert_expr)
   | <span data-count="4">L</span>LTuple (a, b, tl) -&gt;
     let a = convert_expr a in
     <span data-count="4">l</span>et b = convert_expr b in
     <span data-count="4">l</span>et tl = List.map tl ~f:convert_expr in
     <span data-count="4">M</span>ETuple (a, b, tl)
-  | <span data-count="6">L</span>LIf (i, t, Some e) -&gt; _if (convert_exp<span data-count="6">r</span> i) (convert_exp<span data-count="6">r</span> t) (Some (convert_exp<span data-count="6">r</span> e))
+  | <span data-count="8">L</span>LIf (i, t, Some e) -&gt; _if (convert_exp<span data-count="8">r</span> i) (convert_exp<span data-count="8">r</span> t) (Some (convert_exp<span data-count="8">r</span> e))
   | <span data-count="0">L</span>LIf (i, t, None) -&gt; _if (convert_exp<span data-count="0">r</span> i) (convert_exp<span data-count="0">r</span> t) None
-  | <span data-count="26">L</span>LLet (rec_flag, binds, Some scope) -&gt;
+  | <span data-count="28">L</span>LLet (rec_flag, binds, Some scope) -&gt;
     let binds =
       Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
-        <span data-count="26">(</span>name, args, convert_exp<span data-count="26">r</span> body) :: acc)
+        <span data-count="28">(</span>name, args, convert_exp<span data-count="28">r</span> body) :: acc)
     in
-    <span data-count="26">M</span>ELet (rec_flag, List.re<span data-count="26">v</span> binds, Some (convert_exp<span data-count="26">r</span> scope))
-  | <span data-count="53">L</span>LLet (rec_flag, binds, None) -&gt;
+    <span data-count="28">M</span>ELet (rec_flag, List.re<span data-count="28">v</span> binds, Some (convert_exp<span data-count="28">r</span> scope))
+  | <span data-count="59">L</span>LLet (rec_flag, binds, None) -&gt;
     let binds =
       Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
-        <span data-count="53">(</span>name, args, convert_exp<span data-count="53">r</span> body) :: acc)
+        <span data-count="59">(</span>name, args, convert_exp<span data-count="59">r</span> body) :: acc)
     in
-    <span data-count="53">M</span>ELet (rec_flag, List.re<span data-count="53">v</span> binds, None)
+    <span data-count="59">M</span>ELet (rec_flag, List.re<span data-count="59">v</span> binds, None)
   | <span data-count="21">L</span>LMatch (matched, cases) -&gt; List.rev cases |&gt; <span data-count="21">c</span>onvert_match matched
 ;;
 
-let convert_prog (prog : ll_prog) : me_prog = <span data-count="21">L</span>ist.map prog ~f:convert_expr
+let convert_prog (prog : ll_prog) : me_prog = <span data-count="25">L</span>ist.map prog ~f:convert_expr
 </code></pre>
       </div>
     </div>

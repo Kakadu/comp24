@@ -430,27 +430,27 @@ module NameEnv = struct
 
   (* generates name with overlap *)
   let rec generate_new_name (env : t) (name : id) (prefix : string) =
-    <span data-count="743">l</span>et* fresh_num = fresh in
-    <span data-count="743">l</span>et new_name = prefix ^ Int.to_strin<span data-count="743">g</span> fresh_num in
+    <span data-count="751">l</span>et* fresh_num = fresh in
+    <span data-count="751">l</span>et new_name = prefix ^ Int.to_strin<span data-count="751">g</span> fresh_num in
     match find new_name env with
-    | <span data-count="743">N</span>one -&gt; return (exten<span data-count="743">d</span> (name, new_name) env, new_name)
+    | <span data-count="751">N</span>one -&gt; return (exten<span data-count="751">d</span> (name, new_name) env, new_name)
     | <span data-count="0">S</span>ome _ -&gt; generate_new_name env name prefix
   ;;
 
   (* generates new name or returns old one if it exists *)
   let resolve_name (env : t) (name : id) (prefix : string) =
-    <span data-count="204">m</span>atch find name env with
+    <span data-count="206">m</span>atch find name env with
     | <span data-count="134">N</span>one -&gt; generate_new_name env name prefix
-    | <span data-count="70">S</span>ome old_name -&gt; return (env, old_name)
+    | <span data-count="72">S</span>ome old_name -&gt; return (env, old_name)
   ;;
 end
 
 let rec convert_pattern (env : NameEnv.t) prefix = function
-  | (<span data-count="114">C</span>onst _ | <span data-count="7">W</span>ildcard | <span data-count="0">O</span>peration (Unary _)) as orig -&gt; return (env, orig)
-  | <span data-count="202">V</span>ar id -&gt;
+  | (<span data-count="116">C</span>onst _ | <span data-count="7">W</span>ildcard | <span data-count="0">O</span>peration (Unary _)) as orig -&gt; return (env, orig)
+  | <span data-count="204">V</span>ar id -&gt;
     (* try to find name or create new one *)
-    let* env, new_id = NameEnv.resolve_nam<span data-count="202">e</span> env id prefix in
-    <span data-count="202">r</span>eturn (env, Var new_id)
+    let* env, new_id = NameEnv.resolve_nam<span data-count="204">e</span> env id prefix in
+    <span data-count="204">r</span>eturn (env, Var new_id)
   | <span data-count="0">O</span>peration (Binary op) -&gt;
     let op_id = BinOperator.to_string op in
     <span data-count="0">l</span>et* env, new_id = NameEnv.resolve_nam<span data-count="0">e</span> env op_id prefix in
@@ -483,87 +483,87 @@ let rec convert_pattern (env : NameEnv.t) prefix = function
 ;;
 
 let convert_name_pattern (env : NameEnv.t) (arg : pattern) (name_prefix : string) =
-  <span data-count="726">m</span>atch arg with
-  | <span data-count="609">V</span>ar id -&gt;
+  <span data-count="736">m</span>atch arg with
+  | <span data-count="617">V</span>ar id -&gt;
     (* creare new name anyway *)
-    let* env, new_id = NameEnv.generate_new_nam<span data-count="609">e</span> env id name_prefix in
-    <span data-count="609">r</span>eturn (env, Var new_id)
+    let* env, new_id = NameEnv.generate_new_nam<span data-count="617">e</span> env id name_prefix in
+    <span data-count="617">r</span>eturn (env, Var new_id)
   | <span data-count="2">O</span>peration (Binary op) -&gt;
     let op_id = BinOperator.to_string op in
     <span data-count="2">l</span>et* env, new_id = NameEnv.resolve_nam<span data-count="2">e</span> env op_id name_prefix in
     <span data-count="2">r</span>eturn (env, Var new_id)
-  | <span data-count="115">a</span>rg -&gt; convert_pattern env name_prefix arg
+  | <span data-count="117">a</span>rg -&gt; convert_pattern env name_prefix arg
 ;;
 
 let arg_prefix = "arg_"
 let let_prefix = "var_"
 
 let collect_args (env : NameEnv.t) (args : args) =
-  <span data-count="420">l</span>et* env, ac_args =
-    fold_lis<span data-count="420">t</span> args ~init:(env, []) ~f:(fun (env, acc) arg -&gt;
-      <span data-count="367">l</span>et* env, ac_arg = convert_name_patter<span data-count="367">n</span> env arg arg_prefix in
-      <span data-count="367">r</span>eturn (env, ac_arg :: acc))
+  <span data-count="428">l</span>et* env, ac_args =
+    fold_lis<span data-count="428">t</span> args ~init:(env, []) ~f:(fun (env, acc) arg -&gt;
+      <span data-count="369">l</span>et* env, ac_arg = convert_name_patter<span data-count="369">n</span> env arg arg_prefix in
+      <span data-count="369">r</span>eturn (env, ac_arg :: acc))
   in
-  <span data-count="420">r</span>eturn (env, List.re<span data-count="420">v</span> ac_args)
+  <span data-count="428">r</span>eturn (env, List.re<span data-count="428">v</span> ac_args)
 ;;
 
 let collect_mutual_names (env : NameEnv.t) (binds : bind list) =
-  <span data-count="61">f</span>old_list binds ~init:env ~f:(fun env (name, _, _) -&gt;
-    <span data-count="66">l</span>et* env, _ = convert_name_patter<span data-count="66">n</span> env name let_prefix in
-    <span data-count="66">r</span>eturn env)
+  <span data-count="63">f</span>old_list binds ~init:env ~f:(fun env (name, _, _) -&gt;
+    <span data-count="68">l</span>et* env, _ = convert_name_patter<span data-count="68">n</span> env name let_prefix in
+    <span data-count="68">r</span>eturn env)
 ;;
 
 let rec convert_bind_nonrec (env : NameEnv.t) ((name, args, body) : bind) =
-  <span data-count="293">l</span>et* args_env, ac_args = collect_arg<span data-count="293">s</span> env args in
-  <span data-count="293">l</span>et* _, ac_body = convert_exp<span data-count="293">r</span> args_env body in
-  <span data-count="293">l</span>et* name_env, new_name = convert_name_patter<span data-count="293">n</span> env name let_prefix in
-  <span data-count="293">r</span>eturn (name_env, ((new_name, ac_args, ac_body) : bind))
+  <span data-count="299">l</span>et* args_env, ac_args = collect_arg<span data-count="299">s</span> env args in
+  <span data-count="299">l</span>et* _, ac_body = convert_exp<span data-count="299">r</span> args_env body in
+  <span data-count="299">l</span>et* name_env, new_name = convert_name_patter<span data-count="299">n</span> env name let_prefix in
+  <span data-count="299">r</span>eturn (name_env, ((new_name, ac_args, ac_body) : bind))
 
 and convert_bind_rec (env : NameEnv.t) ((name, args, body) : bind) =
   (* we add names during "collect mutual names", convert_pattern just gets them *)
-  <span data-count="66">l</span>et* name_env, new_name = convert_patter<span data-count="66">n</span> env let_prefix name in
-  <span data-count="66">l</span>et* args_env, ac_args = collect_arg<span data-count="66">s</span> name_env args in
-  <span data-count="66">l</span>et* _, ac_body = convert_exp<span data-count="66">r</span> args_env body in
-  <span data-count="66">r</span>eturn (env, ((new_name, ac_args, ac_body) : bind))
+  <span data-count="68">l</span>et* name_env, new_name = convert_patter<span data-count="68">n</span> env let_prefix name in
+  <span data-count="68">l</span>et* args_env, ac_args = collect_arg<span data-count="68">s</span> name_env args in
+  <span data-count="68">l</span>et* _, ac_body = convert_exp<span data-count="68">r</span> args_env body in
+  <span data-count="68">r</span>eturn (env, ((new_name, ac_args, ac_body) : bind))
 
 and convert_expr (env : NameEnv.t) = function
-  | (<span data-count="449">E</span>Const _ | <span data-count="8">E</span>Operation (Unary _)) as orig -&gt; return (env, orig)
-  | <span data-count="202">E</span>Operation (Binary op as bop) -&gt;
+  | (<span data-count="461">E</span>Const _ | <span data-count="8">E</span>Operation (Unary _)) as orig -&gt; return (env, orig)
+  | <span data-count="208">E</span>Operation (Binary op as bop) -&gt;
     let op_id = BinOperator.to_string op in
-    <span data-count="202">(</span>match NameEnv.find op_id env with
+    <span data-count="208">(</span>match NameEnv.find op_id env with
      | <span data-count="1">S</span>ome new_id -&gt; return (env, EVar new_id)
-     | <span data-count="201">N</span>one -&gt; return (env, EOperation bop))
-  | <span data-count="986">E</span>Var id -&gt;
+     | <span data-count="207">N</span>one -&gt; return (env, EOperation bop))
+  | <span data-count="1000">E</span>Var id -&gt;
     (match NameEnv.find id env with
-     | <span data-count="862">S</span>ome new_id -&gt; return (env, EVar new_id)
-     | <span data-count="124">N</span>one -&gt; return (env, EVar id))
-  | <span data-count="1028">A</span>pplication (l, r) -&gt;
-    let* env, ac_l = convert_exp<span data-count="1028">r</span> env l in
-    <span data-count="1028">l</span>et* env, ac_r = convert_exp<span data-count="1028">r</span> env r in
-    <span data-count="1028">r</span>eturn (env, Application (ac_l, ac_r))
+     | <span data-count="872">S</span>ome new_id -&gt; return (env, EVar new_id)
+     | <span data-count="128">N</span>one -&gt; return (env, EVar id))
+  | <span data-count="1048">A</span>pplication (l, r) -&gt;
+    let* env, ac_l = convert_exp<span data-count="1048">r</span> env l in
+    <span data-count="1048">l</span>et* env, ac_r = convert_exp<span data-count="1048">r</span> env r in
+    <span data-count="1048">r</span>eturn (env, Application (ac_l, ac_r))
   | <span data-count="61">F</span>un (args, body) -&gt;
     let* args_env, ac_args = collect_arg<span data-count="61">s</span> env args in
     <span data-count="61">l</span>et* _, ac_body = convert_exp<span data-count="61">r</span> args_env body in
     <span data-count="61">r</span>eturn (env, Fun (ac_args, ac_body))
-  | <span data-count="353">L</span>et (rec_flag, binds, scope) -&gt;
+  | <span data-count="361">L</span>et (rec_flag, binds, scope) -&gt;
     let* env, convert_bind =
       match rec_flag with
-      | <span data-count="61">R</span>ecursive -&gt;
-        let* env = collect_mutual_name<span data-count="61">s</span> env binds in
-        <span data-count="61">r</span>eturn (env, convert_bind_rec)
-      | <span data-count="292">N</span>onrecursive -&gt; retur<span data-count="292">n</span> (env, convert_bind_nonrec)
+      | <span data-count="63">R</span>ecursive -&gt;
+        let* env = collect_mutual_name<span data-count="63">s</span> env binds in
+        <span data-count="63">r</span>eturn (env, convert_bind_rec)
+      | <span data-count="298">N</span>onrecursive -&gt; retur<span data-count="298">n</span> (env, convert_bind_nonrec)
     in
-    <span data-count="353">l</span>et* env, new_binds =
-      fold_lis<span data-count="353">t</span> binds ~init:(env, []) ~f:(fun (env, acc_binds) bnd -&gt;
-        <span data-count="359">l</span>et* env, ac_bnd = convert_bin<span data-count="359">d</span> env bnd in
-        <span data-count="359">r</span>eturn (env, ac_bnd :: acc_binds))
+    <span data-count="361">l</span>et* env, new_binds =
+      fold_lis<span data-count="361">t</span> binds ~init:(env, []) ~f:(fun (env, acc_binds) bnd -&gt;
+        <span data-count="367">l</span>et* env, ac_bnd = convert_bin<span data-count="367">d</span> env bnd in
+        <span data-count="367">r</span>eturn (env, ac_bnd :: acc_binds))
     in
-    <span data-count="353">l</span>et new_binds = List.rev new_binds in
-    <span data-count="353">(</span>match scope with
-     | <span data-count="203">N</span>one -&gt; return (env, Let (rec_flag, new_binds, None))
-     | <span data-count="150">S</span>ome scope -&gt;
-       let* env, ac_scope = convert_exp<span data-count="150">r</span> env scope in
-       <span data-count="150">r</span>eturn (env, Let (rec_flag, new_binds, Some ac_scope)))
+    <span data-count="361">l</span>et new_binds = List.rev new_binds in
+    <span data-count="361">(</span>match scope with
+     | <span data-count="209">N</span>one -&gt; return (env, Let (rec_flag, new_binds, None))
+     | <span data-count="152">S</span>ome scope -&gt;
+       let* env, ac_scope = convert_exp<span data-count="152">r</span> env scope in
+       <span data-count="152">r</span>eturn (env, Let (rec_flag, new_binds, Some ac_scope)))
   | <span data-count="42">E</span>List exprs -&gt;
     let* ac_exprs =
       map_lis<span data-count="42">t</span> exprs ~f:(fun expr -&gt; <span data-count="73">c</span>onvert_exp<span data-count="73">r</span> env expr &gt;&gt;| fun (_, expr) -&gt; <span data-count="73">e</span>xpr)
@@ -583,13 +583,13 @@ and convert_expr (env : NameEnv.t) = function
   | <span data-count="8">E</span>Constraint (expr, dt) -&gt;
     let* _, ac_expr = convert_exp<span data-count="8">r</span> env expr in
     <span data-count="8">r</span>eturn (env, EConstraint (ac_expr, dt))
-  | <span data-count="44">I</span>f (_if, _then, _else) -&gt;
-    let* _, ac_if = convert_exp<span data-count="44">r</span> env _if in
-    <span data-count="44">l</span>et* _, ac_then = convert_exp<span data-count="44">r</span> env _then in
-    <span data-count="44">(</span>match _else with
-     | <span data-count="44">S</span>ome _else -&gt;
-       let* _, ac_else = convert_exp<span data-count="44">r</span> env _else in
-       <span data-count="44">r</span>eturn (env, If (ac_if, ac_then, Some ac_else))
+  | <span data-count="46">I</span>f (_if, _then, _else) -&gt;
+    let* _, ac_if = convert_exp<span data-count="46">r</span> env _if in
+    <span data-count="46">l</span>et* _, ac_then = convert_exp<span data-count="46">r</span> env _then in
+    <span data-count="46">(</span>match _else with
+     | <span data-count="46">S</span>ome _else -&gt;
+       let* _, ac_else = convert_exp<span data-count="46">r</span> env _else in
+       <span data-count="46">r</span>eturn (env, If (ac_if, ac_then, Some ac_else))
      | <span data-count="0">N</span>one -&gt; return (env, If (ac_if, ac_then, None)))
   | <span data-count="38">M</span>atch (expr, cases) -&gt;
     let* _, ac_expr = convert_exp<span data-count="38">r</span> env expr in
@@ -604,13 +604,13 @@ and convert_expr (env : NameEnv.t) = function
 ;;
 
 let convert_prog (prog : prog) : prog t =
-  <span data-count="91">l</span>et env = NameEnv.empty in
+  <span data-count="95">l</span>et env = NameEnv.empty in
   let* _, ac_prog =
-    fold_lis<span data-count="91">t</span> prog ~init:(env, []) ~f:(fun (env, acc) expr -&gt;
-      <span data-count="204">l</span>et* env, ac_expr = convert_exp<span data-count="204">r</span> env expr in
-      <span data-count="204">r</span>eturn (env, ac_expr :: acc))
+    fold_lis<span data-count="95">t</span> prog ~init:(env, []) ~f:(fun (env, acc) expr -&gt;
+      <span data-count="210">l</span>et* env, ac_expr = convert_exp<span data-count="210">r</span> env expr in
+      <span data-count="210">r</span>eturn (env, ac_expr :: acc))
   in
-  <span data-count="91">r</span>eturn @@ List.re<span data-count="91">v</span> ac_prog
+  <span data-count="95">r</span>eturn @@ List.re<span data-count="95">v</span> ac_prog
 ;;
 </code></pre>
       </div>

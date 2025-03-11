@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="67.92% coverage in lib/parsing/ast.ml">
+    <meta name="description" content="64.29% coverage in lib/parsing/ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,22 +15,25 @@
           <span class="dirname">lib/parsing/</span>ast.ml
         </a>
       </h1>
-      <h2>67.92%</h2>
+      <h2>64.29%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:0.95%"></span>
-      <span class="unvisited" style="top:5.71%"></span>
-      <span class="unvisited" style="top:10.48%"></span>
-      <span class="unvisited" style="top:16.19%"></span>
-      <span class="unvisited" style="top:32.38%"></span>
-      <span class="unvisited" style="top:47.62%"></span>
-      <span class="unvisited" style="bottom:41.90%"></span>
-      <span class="unvisited" style="bottom:35.24%"></span>
-      <span class="some-visited" style="bottom:32.38%"></span>
-      <span class="some-visited" style="bottom:29.52%"></span>
-      <span class="unvisited" style="bottom:28.57%"></span>
-      <span class="unvisited" style="bottom:26.67%"></span>
-      <span class="some-visited" style="bottom:21.90%"></span>
+      <span class="some-visited" style="top:0.87%"></span>
+      <span class="unvisited" style="top:5.22%"></span>
+      <span class="unvisited" style="top:9.57%"></span>
+      <span class="unvisited" style="top:14.78%"></span>
+      <span class="unvisited" style="top:29.57%"></span>
+      <span class="unvisited" style="top:43.48%"></span>
+      <span class="unvisited" style="bottom:46.96%"></span>
+      <span class="unvisited" style="bottom:40.87%"></span>
+      <span class="some-visited" style="bottom:38.26%"></span>
+      <span class="some-visited" style="bottom:35.65%"></span>
+      <span class="unvisited" style="bottom:34.78%"></span>
+      <span class="unvisited" style="bottom:33.04%"></span>
+      <span class="some-visited" style="bottom:28.70%"></span>
+      <span class="unvisited" style="bottom:3.48%"></span>
+      <span class="unvisited" style="bottom:2.61%"></span>
+      <span class="unvisited" style="bottom:1.74%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -140,6 +143,16 @@
 <a id="L103"></a><span class="visited"> </span>
 <a id="L104"></a><span > </span>
 <a id="L105"></a><span > </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span > </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span class="unvisited"> </span>
+<a id="L112"></a><span class="unvisited"> </span>
+<a id="L113"></a><span class="unvisited"> </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -249,6 +262,16 @@
 <a href="#L103">103</a>
 <a href="#L104">104</a>
 <a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
 </pre>
 <pre><code class="ocaml"><span data-count="0">t</span>ype id = <span data-count="38">s</span>tring [@@deriving show]
 
@@ -340,8 +363,8 @@ module BinOperator = struct
 
   let to_string : bop -&gt; string = function
     | <span data-count="254">A</span>DD -&gt; "+"
-    | <span data-count="129">S</span>UB -&gt; "-"
-    | <span data-count="104">M</span>UL -&gt; "*"
+    | <span data-count="133">S</span>UB -&gt; "-"
+    | <span data-count="108">M</span>UL -&gt; "*"
     | <span data-count="54">D</span>IV -&gt; "/"
     | <span data-count="145">E</span>Q -&gt; "="
     | <span data-count="45">I</span>D_EQ -&gt; "=="
@@ -349,10 +372,20 @@ module BinOperator = struct
     | <span data-count="36">G</span>T -&gt; "&gt;"
     | <span data-count="52">G</span>TE -&gt; "&gt;="
     | <span data-count="44">L</span>T -&gt; "&lt;"
-    | <span data-count="57">L</span>TE -&gt; "&lt;="
+    | <span data-count="61">L</span>TE -&gt; "&lt;="
     | <span data-count="76">A</span>ND -&gt; "&amp;&amp;"
     | <span data-count="36">O</span>R -&gt; "||"
     | <span data-count="36">C</span>ONCAT -&gt; "^"
+  ;;
+end
+
+module UnOperator = struct
+  let list : uop list = [ NOT; UMINUS; UPLUS ]
+
+  let to_string : uop -&gt; string = function
+    | <span data-count="0">N</span>OT -&gt; "not"
+    | <span data-count="0">U</span>MINUS -&gt; "-"
+    | <span data-count="0">U</span>PLUS -&gt; "+"
   ;;
 end
 </code></pre>
