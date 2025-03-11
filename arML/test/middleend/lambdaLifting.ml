@@ -181,8 +181,8 @@ let%expect_test _ =
     {|
     let ll_2 cc_0 _ = cc_0
     let ll_1 x = x
-    let ll_0 x = (( * ) x x)
     let f = (ll_1 0) and g x = ((ll_2 x) ())
+    let ll_0 x = (( * ) x x)
     let h x y = (( + ) x (ll_0 y)) |}]
 ;;
 
