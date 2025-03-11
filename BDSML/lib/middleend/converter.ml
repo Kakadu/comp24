@@ -39,9 +39,11 @@ let rast_to_ast = List.map rstruct_to_struct_item
 
 let find_in_ops name =
   match
-    List.find_opt (fun (_, _, n) -> name = n) Utils.Predefined_ops.predefine_operators
+    List.find_opt
+      (fun Utils.Predefined_ops.{ alt_name } -> name = alt_name)
+      Utils.Predefined_ops.predefine_operators
   with
-  | Some (n, _, _) -> n
+  | Some Utils.Predefined_ops.{ name } -> name
   | None -> name
 ;;
 

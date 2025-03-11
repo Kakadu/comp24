@@ -12,7 +12,7 @@ let rec closure_exp apps env = function
     when (Option.is_none @@ TopDecl.find_opt x env)
          && (Option.is_none
              @@ List.find_opt
-                  (fun (_, _, n) -> x = n)
+                  (fun Utils.Predefined_ops.{ alt_name } -> x = alt_name)
                   Utils.Predefined_ops.predefine_operators) ->
     let promote_apply x =
       match ApplyPromote.find_opt x apps with
