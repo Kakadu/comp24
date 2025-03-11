@@ -5,6 +5,7 @@
 open Llvm
 open LlvmBasic
 open EnvironmentSearchers
+open Runtime
 open Anf.Anftree
 
 let rec compile_immut_expression runtime env = function
@@ -35,14 +36,43 @@ let rec compile_immut_expression runtime env = function
 and compile_complex_expression runtime env = function
   | CAtom a -> compile_immut_expression runtime env a
   | CApplication _ -> assert false
-  | CIfThenElse _ -> assert false
+  | CIfThenElse (c, b1, b2) -> compile_c_if_then_else runtime env c b1 b2
   | CTyped (c, _) -> compile_complex_expression runtime env c
   | CListConstructor _ -> failwith "List unsupported in llvm codegen"
 
 and compile_anf_expression runtime env = function
   | AComplex c -> compile_complex_expression runtime env c
-  | ALetIn (n, e1, e2) ->
+  | ALetIn (Id n, e1, e2) ->
     compile_anf_expression
       runtime
-      (RuntimeEnv.add name (compile_complex_expression runtime env c) env)
+      (RuntimeEnv.add n (compile_complex_expression runtime env e1) env)
+      e2
+
+and compile_c_if_then_else runtime env condition then_branch else_branch =
+  let condition_value = compile_immut_expression runtime env condition in
+  let func, func_type = get_func_info runtime "get_i1_val" in
+  let condition_bool =
+    build_call func_type func [| condition_value |] "condition_bool" builder
+  in
+  let parent_function = Llvm.block_parent (Llvm.insertion_block builder) in
+  let then_block = Llvm.append_block context "then_branch" parent_function in
+  let else_block = Llvm.append_block context "else_branch" parent_function in
+  let merge_block = Llvm.append_block context "merge_branch" parent_function in
+  ignore (Llvm.build_cond_br condition_bool then_block else_block builder);
+  Llvm.position_at_end then_block builder;
+  let then_result = compile_anf_expression runtime env then_branch in
+  ignore (Llvm.build_br merge_block builder);
+  let then_block_end = Llvm.insertion_block builder in
+  Llvm.position_at_end else_block builder;
+  let else_result = compile_anf_expression runtime env else_branch in
+  ignore (Llvm.build_br merge_block builder);
+  let else_block_end = Llvm.insertion_block builder in
+  Llvm.position_at_end merge_block builder;
+  let phi_node =
+    Llvm.build_phi
+      [ then_result, then_block_end; else_result, else_block_end ]
+      "if_result"
+      builder
+  in
+  phi_node
 ;;
