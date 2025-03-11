@@ -887,7 +887,7 @@ module LLVMtests = struct
 
       declare ptr @Create_unit()
 
-      declare ptr @Apply(ptr, ptr)
+      declare ptr @Apply(ptr, ...)
 
       declare i64 @Get_int(ptr)
 
@@ -902,60 +902,54 @@ module LLVMtests = struct
       define ptr @fact(ptr %n) {
       entry:
         %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
-        %apply_result = call ptr @Apply(ptr %closure, ptr %n)
         %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result1 = call ptr @Apply(ptr %apply_result, ptr %boxed_int)
-        %cond_bool = call i1 @Get_bool(ptr %apply_result1)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %n, ptr %boxed_int)
+        %cond_bool = call i1 @Get_bool(ptr %apply_result)
         br i1 %cond_bool, label %then, label %else
 
       then:                                             ; preds = %entry
-        %boxed_int2 = call ptr @Create_int(i64 1)
+        %boxed_int1 = call ptr @Create_int(i64 1)
         br label %merge
 
       else:                                             ; preds = %entry
-        %closure3 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
-        %apply_result4 = call ptr @Apply(ptr %closure3, ptr %n)
-        %boxed_int5 = call ptr @Create_int(i64 1)
-        %apply_result6 = call ptr @Apply(ptr %apply_result4, ptr %boxed_int5)
-        %closure7 = call ptr @Create_closure(ptr @fact_tail, i64 1)
-        %apply_result8 = call ptr @Apply(ptr %closure7, ptr %apply_result6)
-        %closure9 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result10 = call ptr @Apply(ptr %closure9, ptr %n)
-        %apply_result11 = call ptr @Apply(ptr %apply_result10, ptr %apply_result8)
+        %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
+        %boxed_int3 = call ptr @Create_int(i64 1)
+        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, ptr %n, ptr %boxed_int3)
+        %closure5 = call ptr @Create_closure(ptr @fact_tail, i64 1)
+        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, ptr %apply_result4)
+        %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
+        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, ptr %n, ptr %apply_result6)
         br label %merge
 
       merge:                                            ; preds = %else, %then
-        %branch_result = phi ptr [ %boxed_int2, %then ], [ %apply_result11, %else ]
+        %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
         ret ptr %branch_result
       }
 
       define ptr @fact_tail(ptr %n) {
       entry:
         %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
-        %apply_result = call ptr @Apply(ptr %closure, ptr %n)
         %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result1 = call ptr @Apply(ptr %apply_result, ptr %boxed_int)
-        %cond_bool = call i1 @Get_bool(ptr %apply_result1)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %n, ptr %boxed_int)
+        %cond_bool = call i1 @Get_bool(ptr %apply_result)
         br i1 %cond_bool, label %then, label %else
 
       then:                                             ; preds = %entry
-        %boxed_int2 = call ptr @Create_int(i64 1)
+        %boxed_int1 = call ptr @Create_int(i64 1)
         br label %merge
 
       else:                                             ; preds = %entry
-        %closure3 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
-        %apply_result4 = call ptr @Apply(ptr %closure3, ptr %n)
-        %boxed_int5 = call ptr @Create_int(i64 1)
-        %apply_result6 = call ptr @Apply(ptr %apply_result4, ptr %boxed_int5)
-        %closure7 = call ptr @Create_closure(ptr @fact, i64 1)
-        %apply_result8 = call ptr @Apply(ptr %closure7, ptr %apply_result6)
-        %closure9 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result10 = call ptr @Apply(ptr %closure9, ptr %n)
-        %apply_result11 = call ptr @Apply(ptr %apply_result10, ptr %apply_result8)
+        %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
+        %boxed_int3 = call ptr @Create_int(i64 1)
+        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, ptr %n, ptr %boxed_int3)
+        %closure5 = call ptr @Create_closure(ptr @fact, i64 1)
+        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, ptr %apply_result4)
+        %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
+        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, ptr %n, ptr %apply_result6)
         br label %merge
 
       merge:                                            ; preds = %else, %then
-        %branch_result = phi ptr [ %boxed_int2, %then ], [ %apply_result11, %else ]
+        %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
         ret ptr %branch_result
       }
 
@@ -963,7 +957,7 @@ module LLVMtests = struct
       entry:
         %closure = call ptr @Create_closure(ptr @fact, i64 1)
         %boxed_int = call ptr @Create_int(i64 5)
-        %apply_result = call ptr @Apply(ptr %closure, ptr %boxed_int)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %boxed_int)
         ret i32 0
       }
       |}]

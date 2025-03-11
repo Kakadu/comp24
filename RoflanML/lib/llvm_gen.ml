@@ -143,16 +143,13 @@ and generate_cexpr (expr : cexpr) : llvalue =
       | ValueKind.Function -> generate_closure func_val (Array.length (params func_val))
       | _ -> func_val
     in
-    List.fold_left
-      (fun acc arg ->
-        build_call
-          (find_function_type "Apply")
-          (find_symbol "Apply")
-          [| acc; generate_immexpr arg |]
-          "apply_result"
-          llvm_builder)
-      maybe_closure
-      arg_exprs
+    let args = maybe_closure :: List.map generate_immexpr arg_exprs in
+    build_call
+      (find_function_type "Apply")
+      (find_symbol "Apply")
+      (Array.of_list args)
+      "apply_result"
+      llvm_builder
 
 and generate_aexpr (expr : aexpr) : llvalue =
   match expr with
@@ -311,9 +308,7 @@ let register_dummy_runtime () =
   ignore
     (declare_dummy
        "Apply"
-       (Llvm.function_type
-          value_pointer_type
-          [| value_pointer_type; value_pointer_type |]));
+       (Llvm.var_arg_function_type value_pointer_type [| value_pointer_type |]));
   ignore
     (declare_dummy "Get_int" (Llvm.function_type int64_type [| value_pointer_type |]));
   ignore
