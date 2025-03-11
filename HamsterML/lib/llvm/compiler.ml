@@ -30,11 +30,11 @@ let build_binary_operation = function
   | ID_EQ -> failwith "'==' operation is not expected to be implemented"
 ;;
 
-let build_unary_operation = function
-  | UMINUS -> build_neg
-  | NOT -> build_not
-  | UPLUS -> fun value _ _ -> value
-;;
+(* let build_unary_operation = function
+   | UMINUS -> build_neg
+   | NOT -> build_not
+   | UPLUS -> fun value _ _ -> value
+   ;; *)
 
 let rec codegen_immexpr env =
   let list_helper lst =
