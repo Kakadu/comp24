@@ -3,7 +3,7 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Runtime
-module Env = Map.Make (String)
+open Environment
 
 let func_in_runtime_env runtime name =
   let runtime_name = name_to_runtime_mapping name in
