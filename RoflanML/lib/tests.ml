@@ -718,7 +718,7 @@ module LLVMtests = struct
       entry:
         %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
         %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %n, ptr %boxed_int)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
         %cond_bool = call i1 @Get_bool(ptr %apply_result)
         br i1 %cond_bool, label %then, label %else
 
@@ -729,11 +729,11 @@ module LLVMtests = struct
       else:                                             ; preds = %entry
         %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
         %boxed_int3 = call ptr @Create_int(i64 1)
-        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, ptr %n, ptr %boxed_int3)
+        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
         %closure5 = call ptr @Create_closure(ptr @fact_tail, i64 1)
-        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, ptr %apply_result4)
+        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
         %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, ptr %n, ptr %apply_result6)
+        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
         br label %merge
 
       merge:                                            ; preds = %else, %then
@@ -745,7 +745,7 @@ module LLVMtests = struct
       entry:
         %closure = call ptr @Create_closure(ptr @RoflanML_eq, i64 2)
         %boxed_int = call ptr @Create_int(i64 1)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %n, ptr %boxed_int)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
         %cond_bool = call i1 @Get_bool(ptr %apply_result)
         br i1 %cond_bool, label %then, label %else
 
@@ -756,11 +756,11 @@ module LLVMtests = struct
       else:                                             ; preds = %entry
         %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
         %boxed_int3 = call ptr @Create_int(i64 1)
-        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, ptr %n, ptr %boxed_int3)
+        %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
         %closure5 = call ptr @Create_closure(ptr @fact, i64 1)
-        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, ptr %apply_result4)
+        %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
         %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
-        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, ptr %n, ptr %apply_result6)
+        %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
         br label %merge
 
       merge:                                            ; preds = %else, %then
@@ -772,7 +772,7 @@ module LLVMtests = struct
       entry:
         %closure = call ptr @Create_closure(ptr @fact, i64 1)
         %boxed_int = call ptr @Create_int(i64 5)
-        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, ptr %boxed_int)
+        %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 1, ptr %boxed_int)
         ret i32 0
       }
       |}]
