@@ -49,23 +49,23 @@
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span class="visited"> </span>
-<a id="L35"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
 <a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
 <a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span > </span>
-<a id="L41"></a><span > </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
@@ -73,22 +73,36 @@
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
-<a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
-<a id="L60"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span class="visited"> </span>
-<a id="L63"></a><span class="visited"> </span>
-<a id="L64"></a><span class="visited"> </span>
-<a id="L65"></a><span > </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -160,6 +174,20 @@
 <a href="#L65">65</a>
 <a href="#L66">66</a>
 <a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -176,18 +204,20 @@ type cf_expr =
   | CFTuple of cf_expr * cf_expr * cf_expr list
   | CFList of cf_expr list
 
-and cf_definition = CFLet of id * id list * cf_expr
+and cf_definition = CFLet of rec_flag * id * id list * cf_expr
 
 type program = cf_definition list
 
-let cf_const c = <span data-count="503">C</span>FConst c
-let cf_var v = <span data-count="1650">C</span>FVar v
-let cf_app f arg = <span data-count="1487">C</span>FApp (f, arg)
-let cf_if_else cond if_expr else_expr = <span data-count="60">C</span>FIfElse (cond, if_expr, else_expr)
-let cf_let_in id body exp = <span data-count="244">C</span>FLetIn (id, body, exp)
-let cf_tuple e1 e2 es = <span data-count="30">C</span>FTuple (e1, e2, es)
-let cf_list exprs = <span data-count="17">C</span>FList exprs
-let cf_def id args expr = <span data-count="475">C</span>FLet (id, args, expr)
+let cf_const c = <span data-count="542">C</span>FConst c
+let cf_var v = <span data-count="1869">C</span>FVar v
+let cf_app f arg = <span data-count="1657">C</span>FApp (f, arg)
+let cf_if_else cond if_expr else_expr = <span data-count="75">C</span>FIfElse (cond, if_expr, else_expr)
+let cf_let_in id body exp = <span data-count="261">C</span>FLetIn (id, body, exp)
+let cf_tuple e1 e2 es = <span data-count="36">C</span>FTuple (e1, e2, es)
+let cf_list exprs = <span data-count="19">C</span>FList exprs
+let cf_def id args expr = <span data-count="399">C</span>FLet (NonRec, id, args, expr)
+let cf_def_rec id args expr = <span data-count="42">C</span>FLet (Rec, id, args, expr)
+let cf_def_flag f id args expr = <span data-count="83">C</span>FLet (f, id, args, expr)
 
 open Base
 open Format
@@ -220,11 +250,23 @@ let rec pp_expr fmt = function
   | <span data-count="1">C</span>FList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | <span data-count="49">C</span>FLet (id, args, e) -&gt;
+  | <span data-count="49">C</span>FLet (flag, id, args, e) -&gt;
+    let let_ =
+      match flag with
+      | <span data-count="45">N</span>onRec -&gt; "let"
+      | <span data-count="4">R</span>ec -&gt; "let rec"
+    in
     (match args with
-     | <span data-count="9">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]" id pp_expr e
+     | <span data-count="9">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,%s %s =@ %a@]" let_ id pp_expr e
      | <span data-count="40">_</span> -&gt;
-       fprintf fmt "@[&lt;2&gt;@,let %s %s =@ %a@]" id (String.conca<span data-count="40">t</span> args ~sep:" ") pp_expr e)
+       fprintf
+         fmt
+         "@[&lt;2&gt;@,%s %s %s =@ %a@]"
+         let_
+         id
+         (String.conca<span data-count="40">t</span> args ~sep:" ")
+         pp_expr
+         e)
 ;;
 
 let pp_program fmt p = <span data-count="20">L</span>ist.iter p ~f:(fun d -&gt; <span data-count="49">f</span>printf fmt "%a@." pp_definition d)

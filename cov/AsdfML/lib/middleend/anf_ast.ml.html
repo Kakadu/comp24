@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>anf_ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="40.00% coverage in lib/middleend/anf_ast.ml">
+    <meta name="description" content="42.55% coverage in lib/middleend/anf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,25 +15,25 @@
           <span class="dirname">lib/middleend/</span>anf_ast.ml
         </a>
       </h1>
-      <h2>40.00%</h2>
+      <h2>42.55%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:9.18%"></span>
-      <span class="unvisited" style="top:10.20%"></span>
-      <span class="unvisited" style="top:11.22%"></span>
-      <span class="unvisited" style="top:15.31%"></span>
-      <span class="unvisited" style="top:16.33%"></span>
-      <span class="unvisited" style="top:19.39%"></span>
-      <span class="unvisited" style="top:20.41%"></span>
-      <span class="unvisited" style="top:25.51%"></span>
-      <span class="unvisited" style="top:30.61%"></span>
-      <span class="unvisited" style="top:31.63%"></span>
-      <span class="unvisited" style="top:34.69%"></span>
-      <span class="unvisited" style="top:35.71%"></span>
-      <span class="unvisited" style="top:36.73%"></span>
-      <span class="unvisited" style="top:38.78%"></span>
-      <span class="unvisited" style="top:39.80%"></span>
-      <span class="unvisited" style="top:41.84%"></span>
+      <span class="unvisited" style="top:8.65%"></span>
+      <span class="unvisited" style="top:9.62%"></span>
+      <span class="unvisited" style="top:10.58%"></span>
+      <span class="unvisited" style="top:14.42%"></span>
+      <span class="unvisited" style="top:15.38%"></span>
+      <span class="unvisited" style="top:18.27%"></span>
+      <span class="unvisited" style="top:19.23%"></span>
+      <span class="unvisited" style="top:24.04%"></span>
+      <span class="unvisited" style="top:28.85%"></span>
+      <span class="unvisited" style="top:29.81%"></span>
+      <span class="unvisited" style="top:32.69%"></span>
+      <span class="unvisited" style="top:33.65%"></span>
+      <span class="unvisited" style="top:34.62%"></span>
+      <span class="unvisited" style="top:36.54%"></span>
+      <span class="unvisited" style="top:37.50%"></span>
+      <span class="unvisited" style="top:39.42%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -124,120 +124,132 @@
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span class="visited"> </span>
 <a id="L86"></a><span > </span>
-<a id="L87"></a><span class="visited"> </span>
+<a id="L87"></a><span > </span>
 <a id="L88"></a><span class="visited"> </span>
-<a id="L89"></a><span > </span>
+<a id="L89"></a><span class="visited"> </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span > </span>
-<a id="L92"></a><span > </span>
+<a id="L92"></a><span class="visited"> </span>
 <a id="L93"></a><span class="visited"> </span>
 <a id="L94"></a><span > </span>
 <a id="L95"></a><span > </span>
 <a id="L96"></a><span > </span>
 <a id="L97"></a><span > </span>
-<a id="L98"></a><span class="visited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span > </span>
+<a id="L104"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1"> 1</a>
-<a href="#L2"> 2</a>
-<a href="#L3"> 3</a>
-<a href="#L4"> 4</a>
-<a href="#L5"> 5</a>
-<a href="#L6"> 6</a>
-<a href="#L7"> 7</a>
-<a href="#L8"> 8</a>
-<a href="#L9"> 9</a>
-<a href="#L10">10</a>
-<a href="#L11">11</a>
-<a href="#L12">12</a>
-<a href="#L13">13</a>
-<a href="#L14">14</a>
-<a href="#L15">15</a>
-<a href="#L16">16</a>
-<a href="#L17">17</a>
-<a href="#L18">18</a>
-<a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
-<a href="#L36">36</a>
-<a href="#L37">37</a>
-<a href="#L38">38</a>
-<a href="#L39">39</a>
-<a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
-<a href="#L43">43</a>
-<a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
-<a href="#L49">49</a>
-<a href="#L50">50</a>
-<a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
-<a href="#L88">88</a>
-<a href="#L89">89</a>
-<a href="#L90">90</a>
-<a href="#L91">91</a>
-<a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
-<a href="#L95">95</a>
-<a href="#L96">96</a>
-<a href="#L97">97</a>
-<a href="#L98">98</a>
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -268,7 +280,7 @@ type id = string
   | ACExpr of cexpr
 [@@deriving show { with_path = false }]
 
-<span data-count="0">t</span>ype fn = Fn of id * <span data-count="0">i</span>d lis<span data-count="0">t</span> * aexpr [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype fn = Fn of rec_flag * id * <span data-count="0">i</span>d lis<span data-count="0">t</span> * aexpr [@@deriving show { with_path = false }]
 <span data-count="0">t</span>ype program = <span data-count="0">f</span>n lis<span data-count="0">t</span> [@@deriving show { with_path = false }]
 
 let count_bindings (fn : fn) =
@@ -279,7 +291,7 @@ let count_bindings (fn : fn) =
     | <span data-count="0">A</span>Let (_, cexpr, aexpr) -&gt; 1 + helper_cexp<span data-count="0">r</span> cexpr + helper_aexp<span data-count="0">r</span> aexpr
     | <span data-count="0">A</span>CExpr cexpr -&gt; helper_cexpr cexpr
   and helper = function
-    | <span data-count="0">F</span>n (_, _, aexpr) -&gt; helper_aexpr aexpr
+    | <span data-count="0">F</span>n (_, _, _, aexpr) -&gt; helper_aexpr aexpr
   in
   helper fn
 ;;
@@ -289,22 +301,22 @@ open Format
 open Utils
 
 let rec pp_imm_expr fmt = function
-  | <span data-count="233">I</span>mmInt n -&gt; fprintf fmt "%d" n
+  | <span data-count="265">I</span>mmInt n -&gt; fprintf fmt "%d" n
   | <span data-count="4">I</span>mmBool b -&gt; fprintf fmt "%b" b
-  | <span data-count="1135">I</span>mmId id -&gt; fprintf fmt "%s" id
-  | <span data-count="7">I</span>mmUnit -&gt; fprintf fmt "()"
-  | <span data-count="5">I</span>mmNil -&gt; fprintf fmt "[]"
-  | <span data-count="22">I</span>mmTuple (x1, x2, xs) -&gt;
+  | <span data-count="1413">I</span>mmId id -&gt; fprintf fmt "%s" id
+  | <span data-count="11">I</span>mmUnit -&gt; fprintf fmt "()"
+  | <span data-count="8">I</span>mmNil -&gt; fprintf fmt "[]"
+  | <span data-count="28">I</span>mmTuple (x1, x2, xs) -&gt;
     let xs = x1 :: x2 :: xs in
     pp_list ~op:"(" ~cl:")" ~sep:", " fmt pp_imm_expr xs
-  | <span data-count="7">I</span>mmList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs
+  | <span data-count="9">I</span>mmList xs -&gt; pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_imm_expr xs
 ;;
 
 let rec pp_cexpr fmt = function
-  | <span data-count="295">C</span>App (e1, e2) -&gt;
+  | <span data-count="404">C</span>App (e1, e2) -&gt;
     fprintf fmt "%a" pp_imm_expr e1;
-    <span data-count="295">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
-  | <span data-count="21">C</span>IfElse (c, t, e) -&gt;
+    <span data-count="404">p</span>p_list ~op:" " ~sep:" " ~cl:"" fmt pp_imm_expr e2
+  | <span data-count="36">C</span>IfElse (c, t, e) -&gt;
     fprintf
       fmt
       "if %a @\n@[&lt;2&gt;then@ %a@] @\n@[&lt;2&gt;else@ %a@]"
@@ -314,29 +326,35 @@ let rec pp_cexpr fmt = function
       t
       pp_aexpr
       e
-  | <span data-count="61">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
+  | <span data-count="75">C</span>ImmExpr e -&gt; pp_imm_expr fmt e
 
 and pp_aexpr fmt = function
-  | <span data-count="221">A</span>Let (id, cexpr, aexpr) -&gt;
+  | <span data-count="297">A</span>Let (id, cexpr, aexpr) -&gt;
     fprintf fmt "@[&lt;2&gt;@,let %s =@ %a @]in@\n%a" id pp_cexpr cexpr pp_aexpr aexpr
-  | <span data-count="156">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
+  | <span data-count="218">A</span>CExpr cexpr -&gt; pp_cexpr fmt cexpr
 ;;
 
 let pp_fn fmt = function
-  | <span data-count="114">F</span>n (id, args, aexpr) -&gt;
+  | <span data-count="146">F</span>n (flag, id, args, aexpr) -&gt;
+    let let_ =
+      match flag with
+      | <span data-count="126">N</span>onRec -&gt; "let"
+      | <span data-count="20">R</span>ec -&gt; "let rec"
+    in
     (match args with
-     | <span data-count="46">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,let %s =@ %a@]@." id pp_aexpr aexpr
-     | <span data-count="68">_</span> -&gt;
+     | <span data-count="54">[</span>] -&gt; fprintf fmt "@[&lt;2&gt;@,%s %s =@ %a@]@." let_ id pp_aexpr aexpr
+     | <span data-count="92">_</span> -&gt;
        fprintf
          fmt
-         "@[&lt;2&gt;@,let %s %s =@ %a@]@."
+         "@[&lt;2&gt;@,%s %s %s =@ %a@]@."
+         let_
          id
-         (String.conca<span data-count="68">t</span> args ~sep:" ")
+         (String.conca<span data-count="92">t</span> args ~sep:" ")
          pp_aexpr
          aexpr)
 ;;
 
-let pp_program fmt = <span data-count="35">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
+let pp_program fmt = <span data-count="47">p</span>p_list ~op:"" ~cl:"" ~sep:"" fmt pp_fn
 </code></pre>
       </div>
     </div>

@@ -109,23 +109,23 @@ open Vars
 (** Remove trivial applications and merge nested lambdas *)
 let simplify =
   let rec expr = function
-    | <span data-count="519">(</span>SConst _ as e) | <span data-count="1694">(</span>SVar _ as e) -&gt; e
-    | <span data-count="1564">S</span>App (l, r) -&gt; s_app (exp<span data-count="1564">r</span> l) (exp<span data-count="1564">r</span> r)
-    | <span data-count="62">S</span>IfElse (i, t, e) -&gt; s_if_else (exp<span data-count="62">r</span> i) (exp<span data-count="62">r</span> t) (exp<span data-count="62">r</span> e)
-    | <span data-count="49">S</span>Fun (arg1, args1, (SApp (inner, SVar arg2) as apply)) when String.equa<span data-count="49">l</span> arg1 arg2
+    | <span data-count="564">(</span>SConst _ as e) | <span data-count="1995">(</span>SVar _ as e) -&gt; e
+    | <span data-count="1790">S</span>App (l, r) -&gt; s_app (exp<span data-count="1790">r</span> l) (exp<span data-count="1790">r</span> r)
+    | <span data-count="88">S</span>IfElse (i, t, e) -&gt; s_if_else (exp<span data-count="88">r</span> i) (exp<span data-count="88">r</span> t) (exp<span data-count="88">r</span> e)
+    | <span data-count="54">S</span>Fun (arg1, args1, (SApp (inner, SVar arg2) as apply)) when String.equa<span data-count="54">l</span> arg1 arg2
       -&gt;
-      <span data-count="13">l</span>et inner' = expr inner in
-      <span data-count="13">(</span>match inner' with
+      <span data-count="14">l</span>et inner' = expr inner in
+      <span data-count="14">(</span>match inner' with
        | <span data-count="1">S</span>Fun _ -&gt; expr inner'
-       | <span data-count="12">_</span> -&gt; SFun (arg1, args1, apply))
-    | <span data-count="20">S</span>Fun (arg1, args1, SFun (arg2, args2, body)) -&gt;
-      s_fun arg1 (args1 @ [ arg2 ] @ args2) (exp<span data-count="20">r</span> body) |&gt; <span data-count="20">e</span>xpr
-    | <span data-count="180">S</span>Fun (p, ps, e) -&gt; s_fun p ps (exp<span data-count="180">r</span> e)
-    | <span data-count="256">S</span>LetIn (d, e2) -&gt; s_let_in (de<span data-count="256">f</span> d) (exp<span data-count="256">r</span> e2)
-    | <span data-count="30">S</span>Tuple (x1, x2, xs) -&gt; s_tuple (exp<span data-count="30">r</span> x1) (exp<span data-count="30">r</span> x2) (List.ma<span data-count="30">p</span> xs ~f:expr)
-    | <span data-count="18">S</span>List xs -&gt; s_list (List.ma<span data-count="18">p</span> xs ~f:expr)
+       | <span data-count="13">_</span> -&gt; SFun (arg1, args1, apply))
+    | <span data-count="32">S</span>Fun (arg1, args1, SFun (arg2, args2, body)) -&gt;
+      s_fun arg1 (args1 @ [ arg2 ] @ args2) (exp<span data-count="32">r</span> body) |&gt; <span data-count="32">e</span>xpr
+    | <span data-count="208">S</span>Fun (p, ps, e) -&gt; s_fun p ps (exp<span data-count="208">r</span> e)
+    | <span data-count="281">S</span>LetIn (d, e2) -&gt; s_let_in (de<span data-count="281">f</span> d) (exp<span data-count="281">r</span> e2)
+    | <span data-count="36">S</span>Tuple (x1, x2, xs) -&gt; s_tuple (exp<span data-count="36">r</span> x1) (exp<span data-count="36">r</span> x2) (List.ma<span data-count="36">p</span> xs ~f:expr)
+    | <span data-count="20">S</span>List xs -&gt; s_list (List.ma<span data-count="20">p</span> xs ~f:expr)
   and def = function
-    | <span data-count="431">S</span>Let (r, p, e) -&gt; s_let_flag r p (exp<span data-count="431">r</span> e)
+    | <span data-count="478">S</span>Let (r, p, e) -&gt; s_let_flag r p (exp<span data-count="478">r</span> e)
   in
   List.map ~f:def
 ;;

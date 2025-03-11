@@ -231,24 +231,24 @@ open Ast
 
 <span data-count="0">t</span>ype sprogram = <span data-count="0">s</span>definition lis<span data-count="0">t</span> [@@deriving show { with_path = false }]
 
-let s_const c = <span data-count="1181">S</span>Const c
-let s_var x = <span data-count="3588">S</span>Var x
-let s_app f x = <span data-count="4977">S</span>App (f, x)
+let s_const c = <span data-count="1254">S</span>Const c
+let s_var x = <span data-count="3986">S</span>Var x
+let s_app f x = <span data-count="5533">S</span>App (f, x)
 
 let s_if_else cond e_true e_false =
-  <span data-count="232">m</span>atch cond with
+  <span data-count="288">m</span>atch cond with
   | <span data-count="22">S</span>Const (CBool true) -&gt; e_true
   | <span data-count="0">S</span>Const (CBool false) -&gt; e_false
-  | <span data-count="210">_</span> -&gt; SIfElse (cond, e_true, e_false)
+  | <span data-count="266">_</span> -&gt; SIfElse (cond, e_true, e_false)
 ;;
 
-let s_fun p ps e = <span data-count="602">S</span>Fun (p, ps, e)
-let s_let_in def e = <span data-count="873">S</span>LetIn (def, e)
-let s_tuple e1 e2 es = <span data-count="94">S</span>Tuple (e1, e2, es)
-let s_list exprs = <span data-count="57">S</span>List exprs
-let s_let x e = <span data-count="174">S</span>Let (NonRec, x, e)
+let s_fun p ps e = <span data-count="702">S</span>Fun (p, ps, e)
+let s_let_in def e = <span data-count="932">S</span>LetIn (def, e)
+let s_tuple e1 e2 es = <span data-count="109">S</span>Tuple (e1, e2, es)
+let s_list exprs = <span data-count="63">S</span>List exprs
+let s_let x e = <span data-count="188">S</span>Let (NonRec, x, e)
 let s_let_rec x e = <span data-count="0">S</span>Let (Rec, x, e)
-let s_let_flag r x e = <span data-count="1224">S</span>Let (r, x, e)
+let s_let_flag r x e = <span data-count="1335">S</span>Let (r, x, e)
 
 open Format
 open Utils

@@ -391,167 +391,167 @@ open Utils
 open Std
 
 let new_var () =
-  <span data-count="706">l</span>et* fresh = fresh in
-  <span data-count="706">r</span>eturn ("anf" ^ string_of_in<span data-count="706">t</span> fresh)
+  <span data-count="819">l</span>et* fresh = fresh in
+  <span data-count="819">r</span>eturn ("anf" ^ string_of_in<span data-count="819">t</span> fresh)
 ;;
 
 let new_or_bind = function
-  | <span data-count="117">S</span>ome x -&gt; return x
-  | <span data-count="706">N</span>one -&gt; new_var ()
+  | <span data-count="128">S</span>ome x -&gt; return x
+  | <span data-count="819">N</span>one -&gt; new_var ()
 ;;
 
 let rec anf_expr
-  ?(bind = <span data-count="2801">N</span>one)
+  ?(bind = <span data-count="3191">N</span>one)
   env
   (expr : cf_expr)
   (cont : imm_expr -&gt; aexpr State.IntStateM.t)
   : aexpr State.IntStateM.t
   =
-  <span data-count="2967">m</span>atch expr with
-  | <span data-count="452">C</span>FConst c -&gt;
+  <span data-count="3374">m</span>atch expr with
+  | <span data-count="491">C</span>FConst c -&gt;
     (match c with
-     | <span data-count="408">A</span>st.CInt n -&gt; cont (ImmInt n)
+     | <span data-count="440">A</span>st.CInt n -&gt; cont (ImmInt n)
      | <span data-count="9">A</span>st.CBool b -&gt; cont (ImmBool b)
-     | <span data-count="25">A</span>st.CUnit -&gt; cont ImmUnit
-     | <span data-count="10">A</span>st.CNil -&gt; cont ImmNil)
-  | <span data-count="1447">C</span>FVar x -&gt;
+     | <span data-count="29">A</span>st.CUnit -&gt; cont ImmUnit
+     | <span data-count="13">A</span>st.CNil -&gt; cont ImmNil)
+  | <span data-count="1666">C</span>FVar x -&gt;
     cont
       (ImmId
          (if Set.mem env x
-          then <span data-count="1447">x</span>
+          then <span data-count="1666">x</span>
           else <span data-count="0">f</span>ailwith (Format.sprint<span data-count="0">f</span> "anf: variable `%s` not found" x)))
-  | <span data-count="421">C</span>FApp (CFApp (_, _), _) as app -&gt;
-    let* name = new_or_bin<span data-count="421">d</span> bind in
-    <span data-count="421">l</span>et* body = con<span data-count="421">t</span> (ImmId name) in
-    <span data-count="421">l</span>et[@warning "-8"] rec collect_args acc = function
-      | <span data-count="571">C</span>FApp ((CFApp _ as inner), a) -&gt; collect_args (a :: acc) inner
-      | <span data-count="421">C</span>FApp (f, a) -&gt; f, a :: acc
+  | <span data-count="478">C</span>FApp (CFApp (_, _), _) as app -&gt;
+    let* name = new_or_bin<span data-count="478">d</span> bind in
+    <span data-count="478">l</span>et* body = con<span data-count="478">t</span> (ImmId name) in
+    <span data-count="478">l</span>et[@warning "-8"] rec collect_args acc = function
+      | <span data-count="632">C</span>FApp ((CFApp _ as inner), a) -&gt; collect_args (a :: acc) inner
+      | <span data-count="478">C</span>FApp (f, a) -&gt; f, a :: acc
     in
     let func, args = collect_args [] app in
-    <span data-count="421">a</span>nf_expr env func (fun imm_func -&gt;
-      <span data-count="421">l</span>et rec anf_args args cont =
-        <span data-count="1413">m</span>atch args with
-        | <span data-count="421">[</span>] -&gt; cont []
-        | <span data-count="992">h</span>ead :: tail -&gt;
+    <span data-count="478">a</span>nf_expr env func (fun imm_func -&gt;
+      <span data-count="478">l</span>et rec anf_args args cont =
+        <span data-count="1588">m</span>atch args with
+        | <span data-count="478">[</span>] -&gt; cont []
+        | <span data-count="1110">h</span>ead :: tail -&gt;
           anf_expr env head (fun imm_hd -&gt;
-            <span data-count="992">a</span>nf_args tail (fun anf_tl -&gt; <span data-count="992">c</span>ont (imm_hd :: anf_tl)))
+            <span data-count="1110">a</span>nf_args tail (fun anf_tl -&gt; <span data-count="1110">c</span>ont (imm_hd :: anf_tl)))
       in
       anf_args args (fun imm_args -&gt;
-        <span data-count="421">r</span>eturn (ALet (name, CApp (imm_func, imm_args), body))))
-  | <span data-count="347">C</span>FApp (func, arg) -&gt;
-    let* name = new_or_bin<span data-count="347">d</span> bind in
-    <span data-count="347">l</span>et* body = con<span data-count="347">t</span> (ImmId name) in
-    <span data-count="347">a</span>nf_expr env func (fun imm_func -&gt;
-      <span data-count="347">a</span>nf_expr env arg (fun imm_arg -&gt;
-        <span data-count="347">r</span>eturn (ALet (name, CApp (imm_func, [ imm_arg ]), body))))
-  | <span data-count="55">C</span>FIfElse (i, t, e) -&gt;
-    let* name = new_or_bin<span data-count="55">d</span> bind in
-    <span data-count="55">l</span>et* body = con<span data-count="55">t</span> (ImmId name) in
-    <span data-count="55">a</span>nf_expr env i (fun i -&gt;
-      <span data-count="55">l</span>et* t = anf_exp<span data-count="55">r</span> env t (fun x -&gt; <span data-count="55">r</span>eturn @@ ACExpr (CImmExpr x)) in
-      <span data-count="55">l</span>et* e = anf_exp<span data-count="55">r</span> env e (fun x -&gt; <span data-count="55">r</span>eturn @@ ACExpr (CImmExpr x)) in
-      <span data-count="55">r</span>eturn (ALet (name, CIfElse (i, t, e), body)))
+        <span data-count="478">r</span>eturn (ALet (name, CApp (imm_func, imm_args), body))))
+  | <span data-count="399">C</span>FApp (func, arg) -&gt;
+    let* name = new_or_bin<span data-count="399">d</span> bind in
+    <span data-count="399">l</span>et* body = con<span data-count="399">t</span> (ImmId name) in
+    <span data-count="399">a</span>nf_expr env func (fun imm_func -&gt;
+      <span data-count="399">a</span>nf_expr env arg (fun imm_arg -&gt;
+        <span data-count="399">r</span>eturn (ALet (name, CApp (imm_func, [ imm_arg ]), body))))
+  | <span data-count="70">C</span>FIfElse (i, t, e) -&gt;
+    let* name = new_or_bin<span data-count="70">d</span> bind in
+    <span data-count="70">l</span>et* body = con<span data-count="70">t</span> (ImmId name) in
+    <span data-count="70">a</span>nf_expr env i (fun i -&gt;
+      <span data-count="70">l</span>et* t = anf_exp<span data-count="70">r</span> env t (fun x -&gt; <span data-count="70">r</span>eturn @@ ACExpr (CImmExpr x)) in
+      <span data-count="70">l</span>et* e = anf_exp<span data-count="70">r</span> env e (fun x -&gt; <span data-count="70">r</span>eturn @@ ACExpr (CImmExpr x)) in
+      <span data-count="70">r</span>eturn (ALet (name, CIfElse (i, t, e), body)))
   | <span data-count="35">C</span>FLetIn ("_", expr, body) -&gt;
     anf_expr env expr (fun imm_expr -&gt;
       <span data-count="35">l</span>et* body = anf_exp<span data-count="35">r</span> env body cont in
       <span data-count="35">r</span>eturn (ALet ("_", CImmExpr imm_expr, body)))
-  | <span data-count="166">C</span>FLetIn (id, expr, body) -&gt;
+  | <span data-count="183">C</span>FLetIn (id, expr, body) -&gt;
     let new_env = Set.add env id in
-    <span data-count="166">a</span>nf_expr ~bind:(Some id) env expr (fun imm_expr -&gt;
-      <span data-count="166">l</span>et* body = anf_exp<span data-count="166">r</span> new_env body cont in
-      <span data-count="166">r</span>eturn (ALet (id, CImmExpr imm_expr, body)))
-  | <span data-count="16">C</span>FList xs -&gt;
+    <span data-count="183">a</span>nf_expr ~bind:(Some id) env expr (fun imm_expr -&gt;
+      <span data-count="183">l</span>et* body = anf_exp<span data-count="183">r</span> new_env body cont in
+      <span data-count="183">r</span>eturn (ALet (id, CImmExpr imm_expr, body)))
+  | <span data-count="18">C</span>FList xs -&gt;
     let rec helper acc = function
-      | <span data-count="16">[</span>] -&gt; cont (ImmList (List.re<span data-count="16">v</span> acc))
-      | <span data-count="46">x</span> :: xs -&gt; anf_expr env x (fun x -&gt; <span data-count="46">h</span>elper (x :: acc) xs)
+      | <span data-count="18">[</span>] -&gt; cont (ImmList (List.re<span data-count="18">v</span> acc))
+      | <span data-count="51">x</span> :: xs -&gt; anf_expr env x (fun x -&gt; <span data-count="51">h</span>elper (x :: acc) xs)
     in
     helper [] xs
-  | <span data-count="28">C</span>FTuple (x1, x2, xs) -&gt;
+  | <span data-count="34">C</span>FTuple (x1, x2, xs) -&gt;
     anf_expr env x1 (fun x1' -&gt;
-      <span data-count="28">a</span>nf_expr env x2 (fun x2' -&gt;
-        <span data-count="28">l</span>et rec helper acc = function
-          | <span data-count="28">[</span>] -&gt; cont (ImmTuple (x1', x2', List.re<span data-count="28">v</span> acc))
+      <span data-count="34">a</span>nf_expr env x2 (fun x2' -&gt;
+        <span data-count="34">l</span>et rec helper acc = function
+          | <span data-count="34">[</span>] -&gt; cont (ImmTuple (x1', x2', List.re<span data-count="34">v</span> acc))
           | <span data-count="9">x</span> :: rest -&gt; anf_expr env x (fun x' -&gt; <span data-count="9">h</span>elper (x' :: acc) rest)
         in
         helper [] xs))
 ;;
 
 let anf_def env (def : cf_definition) =
-  <span data-count="182">m</span>atch def with
-  | <span data-count="182">C</span>FLet (id, args, expr) -&gt;
+  <span data-count="214">m</span>atch def with
+  | <span data-count="214">C</span>FLet (flag, id, args, expr) -&gt;
     let env = List.fold args ~init:env ~f:Set.add in
-    <span data-count="182">l</span>et* aexpr = anf_exp<span data-count="182">r</span> env expr (fun x -&gt; <span data-count="182">r</span>eturn (ACExpr (CImmExpr x))) in
-    <span data-count="182">r</span>eturn (Fn (id, args, aexpr), env)
+    <span data-count="214">l</span>et* aexpr = anf_exp<span data-count="214">r</span> env expr (fun x -&gt; <span data-count="214">r</span>eturn (ACExpr (CImmExpr x))) in
+    <span data-count="214">r</span>eturn (Fn (flag, id, args, aexpr), env)
 ;;
 
 let default_env =
-  Set.of_lis<span data-count="83">t</span> (module String) (List.ma<span data-count="83">p</span> ~f:(fun x -&gt; <span data-count="2739">x</span>.name) (stdlib @ runtime))
+  Set.of_lis<span data-count="84">t</span> (module String) (List.ma<span data-count="84">p</span> ~f:(fun x -&gt; <span data-count="2772">x</span>.name) (stdlib @ runtime))
 ;;
 
 (** Removes `let ax = ... in ax` and `let ax = ay in ...` *)
 let remove_useless_bindings fn =
-  <span data-count="182">l</span>et remaps = Hashtbl.create (module String) in
-  <span data-count="182">l</span>et rec find_rec id =
-    <span data-count="2557">m</span>atch Hashtbl.find remaps id with
-    | <span data-count="39">S</span>ome value -&gt; find_rec value
-    | <span data-count="2518">N</span>one -&gt; id
+  <span data-count="214">l</span>et remaps = Hashtbl.create (module String) in
+  <span data-count="214">l</span>et rec find_rec id =
+    <span data-count="2915">m</span>atch Hashtbl.find remaps id with
+    | <span data-count="43">S</span>ome value -&gt; find_rec value
+    | <span data-count="2872">N</span>one -&gt; id
   in
   let useless =
     let rec useless_c = function
-      | <span data-count="136">C</span>IfElse (c, a1, a2) -&gt; CIfElse (c, useless_<span data-count="136">a</span> a1, useless_<span data-count="136">a</span> a2)
-      | <span data-count="1903">x</span> -&gt; x
+      | <span data-count="173">C</span>IfElse (c, a1, a2) -&gt; CIfElse (c, useless_<span data-count="173">a</span> a1, useless_<span data-count="173">a</span> a2)
+      | <span data-count="2196">x</span> -&gt; x
     and useless_a = function
-      | <span data-count="215">A</span>Let (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equa<span data-count="215">l</span> id1 id2 -&gt;
-        <span data-count="213">u</span>seless_a @@ ACExpr (useless_<span data-count="213">c</span> c)
-      | <span data-count="288">A</span>Let (new_id, CImmExpr (ImmId old_id), a) when not (String.equa<span data-count="288">l</span> new_id old_id) -&gt;
-        <span data-count="60">H</span>ashtbl.set remaps ~key:new_id ~data:old_id;
-        <span data-count="60">u</span>seless_a a
-      | <span data-count="1372">A</span>Let (id, c, a) -&gt; ALet (id, useless_<span data-count="1372">c</span> c, useless_<span data-count="1372">a</span> a)
-      | <span data-count="454">A</span>CExpr c -&gt; ACExpr (useless_<span data-count="454">c</span> c)
+      | <span data-count="266">A</span>Let (id1, c, ACExpr (CImmExpr (ImmId id2))) when String.equa<span data-count="266">l</span> id1 id2 -&gt;
+        <span data-count="264">u</span>seless_a @@ ACExpr (useless_<span data-count="264">c</span> c)
+      | <span data-count="320">A</span>Let (new_id, CImmExpr (ImmId old_id), a) when not (String.equa<span data-count="320">l</span> new_id old_id) -&gt;
+        <span data-count="64">H</span>ashtbl.set remaps ~key:new_id ~data:old_id;
+        <span data-count="64">u</span>seless_a a
+      | <span data-count="1545">A</span>Let (id, c, a) -&gt; ALet (id, useless_<span data-count="1545">c</span> c, useless_<span data-count="1545">a</span> a)
+      | <span data-count="560">A</span>CExpr c -&gt; ACExpr (useless_<span data-count="560">c</span> c)
     in
     function
-    | <span data-count="182">F</span>n (id, args, a) -&gt; Fn (id, args, useless_<span data-count="182">a</span> a)
+    | <span data-count="214">F</span>n (f, id, args, a) -&gt; Fn (f, id, args, useless_<span data-count="214">a</span> a)
   in
   let remap =
     let rec remap_i = function
-      | <span data-count="1882">I</span>mmId id -&gt; ImmId (find_re<span data-count="1882">c</span> id)
-      | <span data-count="28">I</span>mmTuple (x1, x2, xs) -&gt; ImmTuple (remap_<span data-count="28">i</span> x1, remap_<span data-count="28">i</span> x2, List.ma<span data-count="28">p</span> ~f:remap_i xs)
-      | <span data-count="16">I</span>mmList xs -&gt; ImmList (List.ma<span data-count="16">p</span> ~f:remap_i xs)
-      | <span data-count="452">x</span> -&gt; x
+      | <span data-count="2160">I</span>mmId id -&gt; ImmId (find_re<span data-count="2160">c</span> id)
+      | <span data-count="34">I</span>mmTuple (x1, x2, xs) -&gt; ImmTuple (remap_<span data-count="34">i</span> x1, remap_<span data-count="34">i</span> x2, List.ma<span data-count="34">p</span> ~f:remap_i xs)
+      | <span data-count="18">I</span>mmList xs -&gt; ImmList (List.ma<span data-count="18">p</span> ~f:remap_i xs)
+      | <span data-count="491">x</span> -&gt; x
     and remap_c = function
-      | <span data-count="55">C</span>IfElse (c, a1, a2) -&gt; CIfElse (remap_<span data-count="55">i</span> c, remap_<span data-count="55">a</span> a1, remap_<span data-count="55">a</span> a2)
-      | <span data-count="768">C</span>App (i1, i2) -&gt; CApp (remap_<span data-count="768">i</span> i1, List.ma<span data-count="768">p</span> i2 ~f:remap_i)
-      | <span data-count="105">C</span>ImmExpr i -&gt; CImmExpr (remap_<span data-count="105">i</span> i)
+      | <span data-count="70">C</span>IfElse (c, a1, a2) -&gt; CIfElse (remap_<span data-count="70">i</span> c, remap_<span data-count="70">a</span> a1, remap_<span data-count="70">a</span> a2)
+      | <span data-count="877">C</span>App (i1, i2) -&gt; CApp (remap_<span data-count="877">i</span> i1, List.ma<span data-count="877">p</span> i2 ~f:remap_i)
+      | <span data-count="119">C</span>ImmExpr i -&gt; CImmExpr (remap_<span data-count="119">i</span> i)
     and remap_a = function
-      | <span data-count="115">A</span>Let (id1, CImmExpr (ImmId id2), a) when String.equa<span data-count="115">l</span> id1 id2 -&gt; <span data-count="115">r</span>emap_a a
-      | <span data-count="636">A</span>Let (id, c, a) -&gt; ALet (find_re<span data-count="636">c</span> id, remap_<span data-count="636">c</span> c, remap_<span data-count="636">a</span> a)
-      | <span data-count="292">A</span>CExpr c -&gt; ACExpr (remap_<span data-count="292">c</span> c)
+      | <span data-count="125">A</span>Let (id1, CImmExpr (ImmId id2), a) when String.equa<span data-count="125">l</span> id1 id2 -&gt; <span data-count="125">r</span>emap_a a
+      | <span data-count="712">A</span>Let (id, c, a) -&gt; ALet (find_re<span data-count="712">c</span> id, remap_<span data-count="712">c</span> c, remap_<span data-count="712">a</span> a)
+      | <span data-count="354">A</span>CExpr c -&gt; ACExpr (remap_<span data-count="354">c</span> c)
     in
     function
-    | <span data-count="182">F</span>n (id, args, a) -&gt; Fn (id, args, remap_<span data-count="182">a</span> a)
+    | <span data-count="214">F</span>n (f, id, args, a) -&gt; Fn (f, id, args, remap_<span data-count="214">a</span> a)
   in
-  remap (useles<span data-count="182">s</span> fn)
+  remap (useles<span data-count="214">s</span> fn)
 ;;
 
 let collect_toplevels env =
-  <span data-count="56">L</span>ist.fold ~init:env ~f:(fun env x -&gt;
-    <span data-count="182">m</span>atch x with
-    | <span data-count="182">C</span>FLet (id, _, _) -&gt; Set.add env id)
+  <span data-count="68">L</span>ist.fold ~init:env ~f:(fun env x -&gt;
+    <span data-count="214">m</span>atch x with
+    | <span data-count="214">C</span>FLet (_, id, _, _) -&gt; Set.add env id)
 ;;
 
 let anf (ast : Cf_ast.program) : Anf_ast.program =
-  <span data-count="56">l</span>et default_env = collect_toplevels default_env ast in
-  <span data-count="56">l</span>et helper ast =
-    <span data-count="56">L</span>ist.fol<span data-count="56">d</span>
+  <span data-count="68">l</span>et default_env = collect_toplevels default_env ast in
+  <span data-count="68">l</span>et helper ast =
+    <span data-count="68">L</span>ist.fol<span data-count="68">d</span>
       ast
-      ~init:(retur<span data-count="56">n</span> (([] : fn list), default_env))
+      ~init:(retur<span data-count="68">n</span> (([] : fn list), default_env))
       ~f:(fun acc x -&gt;
-        <span data-count="182">l</span>et* fns, env = acc in
-        <span data-count="182">l</span>et* x, env = anf_de<span data-count="182">f</span> env x in
-        <span data-count="182">r</span>eturn (x :: fns, env))
-    &gt;&gt;| fun (defs, _) -&gt; <span data-count="56">L</span>ist.rev defs
+        <span data-count="214">l</span>et* fns, env = acc in
+        <span data-count="214">l</span>et* x, env = anf_de<span data-count="214">f</span> env x in
+        <span data-count="214">r</span>eturn (x :: fns, env))
+    &gt;&gt;| fun (defs, _) -&gt; <span data-count="68">L</span>ist.rev defs
   in
-  run (helpe<span data-count="56">r</span> ast) |&gt; <span data-count="56">L</span>ist.map ~f:remove_useless_bindings
+  run (helpe<span data-count="68">r</span> ast) |&gt; <span data-count="68">L</span>ist.map ~f:remove_useless_bindings
 ;;
 </code></pre>
       </div>

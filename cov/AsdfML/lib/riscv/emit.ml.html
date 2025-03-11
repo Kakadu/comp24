@@ -411,8 +411,8 @@ open Base
 open Machine
 
 let stack_pos = ref 0
-let code : (instr * string) Queue.t = Queue.creat<span data-count="61">e</span> ()
-let fn_code : (instr * string) Queue.t = Queue.creat<span data-count="61">e</span> ()
+let code : (instr * string) Queue.t = Queue.creat<span data-count="62">e</span> ()
+let fn_code : (instr * string) Queue.t = Queue.creat<span data-count="62">e</span> ()
 let cur_code = ref code
 let emit ?(comm = <span data-count="3663">"</span>") instr = <span data-count="7619">i</span>nstr (fun i -&gt; <span data-count="7596">Q</span>ueue.enqueue !cur_code (i, comm))
 let set_code () = <span data-count="159">c</span>ur_code := code
@@ -546,8 +546,8 @@ let direct_binops =
   ]
 ;;
 
-let is_direct_unop = List.me<span data-count="61">m</span> direct_unops ~equal:String.equal
-let is_direct_binop = List.me<span data-count="61">m</span> direct_binops ~equal:String.equal
+let is_direct_unop = List.me<span data-count="62">m</span> direct_unops ~equal:String.equal
+let is_direct_binop = List.me<span data-count="62">m</span> direct_binops ~equal:String.equal
 
 let emit_direct_unop ?(comm = <span data-count="0">"</span>") dest op a =
   <span data-count="27">m</span>atch op with

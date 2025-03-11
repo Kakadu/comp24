@@ -18,16 +18,16 @@
       <h2>63.16%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:14.52%"></span>
-      <span class="unvisited" style="top:17.74%"></span>
-      <span class="unvisited" style="top:27.42%"></span>
-      <span class="unvisited" style="top:29.03%"></span>
-      <span class="unvisited" style="top:30.65%"></span>
-      <span class="unvisited" style="top:32.26%"></span>
-      <span class="unvisited" style="top:33.87%"></span>
-      <span class="unvisited" style="top:35.48%"></span>
-      <span class="unvisited" style="bottom:38.71%"></span>
-      <span class="unvisited" style="bottom:24.19%"></span>
+      <span class="unvisited" style="top:13.64%"></span>
+      <span class="unvisited" style="top:16.67%"></span>
+      <span class="unvisited" style="top:25.76%"></span>
+      <span class="unvisited" style="top:27.27%"></span>
+      <span class="unvisited" style="top:28.79%"></span>
+      <span class="unvisited" style="top:30.30%"></span>
+      <span class="unvisited" style="top:31.82%"></span>
+      <span class="unvisited" style="top:33.33%"></span>
+      <span class="unvisited" style="bottom:42.42%"></span>
+      <span class="unvisited" style="bottom:28.79%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -91,9 +91,13 @@
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
-<a id="L60"></a><span class="visited"> </span>
-<a id="L61"></a><span class="visited"> </span>
-<a id="L62"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -160,6 +164,10 @@
 <a href="#L60">60</a>
 <a href="#L61">61</a>
 <a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024, Artem Khelmianov *)
 
@@ -172,9 +180,9 @@ open Base
 <span data-count="0">t</span>ype var_id = <span data-count="0">i</span>nt [@@deriving show { with_path = false }, eq]
 
 <span data-count="0">t</span>ype ground =
-  <span data-count="1078">|</span> TInt
-  <span data-count="51">|</span> TBool
-  <span data-count="57">|</span> TUnit
+  <span data-count="1237">|</span> TInt
+  <span data-count="86">|</span> TBool
+  <span data-count="61">|</span> TUnit
 [@@deriving show { with_path = false }, eq]
 
 <span data-count="0">t</span>ype ty =
@@ -197,7 +205,7 @@ type error =
 let int_typ = TGround TInt
 let bool_typ = TGround TBool
 let unit_typ = TGround TUnit
-let arrow l r = <span data-count="2373640">T</span>Arrow (l, r)
+let arrow l r = <span data-count="2474412">T</span>Arrow (l, r)
 let var x = <span data-count="0">T</span>Var x
 let ( ^-&gt; ) = arrow
 
@@ -220,9 +228,13 @@ let rec count_arrow_args = function
 ;;
 
 let dummy_ty = TVar (-1)
-let arg1 = dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty
-let arg2 = dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty
-let arg3 = dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty ^-<span data-count="83">&gt;</span> dummy_ty
+let dummy_ty2 = TVar (-2)
+let dummy_ty3 = TVar (-3)
+let dummy_ty4 = TVar (-4)
+let dummy_list = TList dummy_ty
+let arg1 = dummy_ty ^-<span data-count="84">&gt;</span> dummy_ty2
+let arg2 = dummy_ty ^-<span data-count="84">&gt;</span> dummy_ty2 ^-<span data-count="84">&gt;</span> dummy_ty3
+let arg3 = dummy_ty ^-<span data-count="84">&gt;</span> dummy_ty2 ^-<span data-count="84">&gt;</span> dummy_ty3 ^-<span data-count="84">&gt;</span> dummy_ty4
 </code></pre>
       </div>
     </div>

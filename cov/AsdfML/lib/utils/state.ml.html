@@ -170,17 +170,17 @@ open Base
 module StateM = struct
   type ('state, 'a) t = 'state -&gt; 'a * 'state
 
-  let return (x : 'a) : ('state, 'a) t = <span data-count="26045">f</span>un s -&gt; <span data-count="26045">x</span>, s
+  let return (x : 'a) : ('state, 'a) t = <span data-count="28545">f</span>un s -&gt; <span data-count="28545">x</span>, s
 
   let bind (m : ('state, 'a) t) (f : 'a -&gt; ('state, 'b) t) : ('state, 'b) t =
-    <span data-count="29180">f</span>un s -&gt;
-    <span data-count="29180">l</span>et a, new_state = m s in
-    <span data-count="29180">f</span> a new_state
+    <span data-count="31964">f</span>un s -&gt;
+    <span data-count="31964">l</span>et a, new_state = m s in
+    <span data-count="31964">f</span> a new_state
   ;;
 
-  let get : ('state, 'state) t = fun s -&gt; <span data-count="1505">s</span>, s
-  let put (new_state : 'state) : ('state, unit) t = <span data-count="1032">f</span>un _ -&gt; <span data-count="1032">(</span>), new_state
-  let run (m : ('state, 'a) t) (init : 'state) : 'a * 'state = <span data-count="144">m</span> init
+  let get : ('state, 'state) t = fun s -&gt; <span data-count="1618">s</span>, s
+  let put (new_state : 'state) : ('state, unit) t = <span data-count="1117">f</span>un _ -&gt; <span data-count="1117">(</span>), new_state
+  let run (m : ('state, 'a) t) (init : 'state) : 'a * 'state = <span data-count="156">m</span> init
   let modify (f : 'state -&gt; 'state) : ('state, unit) t = <span data-count="0">b</span>ind get (fun s -&gt; <span data-count="0">p</span>ut (<span data-count="0">f</span> s))
 
   module Syntax = struct
@@ -189,15 +189,15 @@ module StateM = struct
 
     let ( &gt;&gt;| ) : ('state, 'a) t -&gt; ('a -&gt; 'b) -&gt; ('state, 'b) t =
       fun m f state -&gt;
-      <span data-count="799">l</span>et value, st = m state in
-      <span data-count="1598">f</span> value, st
+      <span data-count="895">l</span>et value, st = m state in
+      <span data-count="1790">f</span> value, st
     ;;
   end
 
   open Syntax
 
   let mfold xs ~init ~f =
-    <span data-count="377">L</span>ist.fold xs ~init:(retur<span data-count="377">n</span> init) ~f:(fun acc x -&gt; <span data-count="640">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="640">f</span> acc x)
+    <span data-count="410">L</span>ist.fold xs ~init:(retur<span data-count="410">n</span> init) ~f:(fun acc x -&gt; <span data-count="702">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="702">f</span> acc x)
   ;;
 
   let mfoldi xs ~init ~f =
@@ -205,16 +205,16 @@ module StateM = struct
   ;;
 
   let mfold_right xs ~init ~f =
-    <span data-count="140">L</span>ist.fold_right xs ~init:(retur<span data-count="140">n</span> init) ~f:(fun x acc -&gt; <span data-count="226">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="226">f</span> x acc)
+    <span data-count="154">L</span>ist.fold_right xs ~init:(retur<span data-count="154">n</span> init) ~f:(fun x acc -&gt; <span data-count="249">a</span>cc &gt;&gt;= fun acc -&gt; <span data-count="249">f</span> x acc)
   ;;
 
   let mfoldi_right xs ~init ~f =
-    <span data-count="34">l</span>et len = List.lengt<span data-count="34">h</span> xs - 1 in
+    <span data-count="36">l</span>et len = List.lengt<span data-count="36">h</span> xs - 1 in
     snd
-      (List.fold_righ<span data-count="34">t</span>
+      (List.fold_righ<span data-count="36">t</span>
          xs
-         ~init:(len, retur<span data-count="34">n</span> init)
-         ~f:(fun v (i, acc) -&gt; <span data-count="80">i</span> - 1, acc &gt;&gt;<span data-count="80">=</span> fun acc -&gt; <span data-count="80">f</span> i acc v))
+         ~init:(len, retur<span data-count="36">n</span> init)
+         ~f:(fun v (i, acc) -&gt; <span data-count="84">i</span> - 1, acc &gt;&gt;<span data-count="84">=</span> fun acc -&gt; <span data-count="84">f</span> i acc v))
   ;;
 end
 
@@ -223,9 +223,9 @@ module IntStateM = struct
 
   type 'a t = (int, 'a) StateM.t
 
-  let fresh last = <span data-count="706">l</span>ast, last + 1
-  let fresh_prefix str last = <span data-count="496">s</span>tr ^ "_" ^ string_of_in<span data-count="496">t</span> last, last + 1
-  let run m = <span data-count="460">f</span>st (<span data-count="460">m</span> 0)
+  let fresh last = <span data-count="819">l</span>ast, last + 1
+  let fresh_prefix str last = <span data-count="539">s</span>tr ^ "_" ^ string_of_in<span data-count="539">t</span> last, last + 1
+  let run m = <span data-count="518">f</span>st (<span data-count="518">m</span> 0)
 end
 </code></pre>
       </div>
