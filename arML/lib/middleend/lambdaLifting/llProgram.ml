@@ -11,14 +11,14 @@ let ll_program start_env program =
   let env = start_env program in
   let lifted = [] in
   let replacement_map = IdentifierMap.empty in
-  let* lifted_decls, lifted_exprs =
+  let* lifted_decls =
     List.fold_right
       (fun item acc ->
         let* acc = acc in
         let* lifted_decl, lifted_e = ll_decl env replacement_map lifted item in
-        return (lifted_decl :: fst acc, List.rev lifted_e @ snd acc))
+        return (List.rev lifted_e @ [ lifted_decl ] @ acc))
       program
-      (return ([], []))
+      (return [])
   in
-  return (lifted_exprs @ lifted_decls)
+  return lifted_decls
 ;;
