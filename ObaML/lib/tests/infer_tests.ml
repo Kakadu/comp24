@@ -10,8 +10,8 @@ open Format
 let parse_and_infer_result str =
   match Parser.structure_from_string str with
   | Ok parse_result ->
-    (match Inferencer.run_stucture_infer parse_result with
-     | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env env
+    (match Inferencer.run_structure_infer parse_result with
+     | Ok env -> printf "%a" Inferencer.TypeEnv.pretty_pp_env (Std.std_lst, env)
      | Error err -> printf "Infer: %a" Typedtree.pp_error err)
   | Error _ -> printf "Syntax error"
 ;;
@@ -356,5 +356,46 @@ let%expect_test "" =
   [%expect {|
     val ( + ) : 'a -> 'a
     val b : string
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let rec a = (fun a x -> a x) a;; |};
+  [%expect {|
+    val a : 'a -> 'b
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let (a, b) = (fun x -> (4, x)) 4;; |};
+  [%expect {|
+    val a : int
+    val b : int
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result
+    {| let a = match 1 :: 2 :: [] with 
+  | 1 :: 2 :: 3 :: [] -> 1
+  | 1 :: 2 :: [] -> 2;; |};
+  [%expect {|
+    val a : int
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a :: b :: c = 1 :: []|};
+  [%expect {|
+    val a : int
+    val b : int
+    val c : int list
+     |}]
+;;
+
+let%expect_test "" =
+  parse_and_infer_result {| let a = [] :: [[]];;|};
+  [%expect {|
+    val a : 'a list list
      |}]
 ;;

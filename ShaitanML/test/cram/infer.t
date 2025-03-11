@@ -16,6 +16,9 @@
   $ infer < manytests/do_not_type/015tuples.ml
   Infer error: Left-hand side of let rec should be a variable
 
+  $ infer < manytests/do_not_type/015tuples.ml
+  Infer error: Left-hand side of let rec should be a variable
+
   $ infer < manytests/typed/001fac.ml
   val fac: int -> int
   val main: int
@@ -64,7 +67,15 @@
   val temp: int * bool
 
   $ infer < manytests/typed/015tuples.ml
-  Infer error: Unbound variable '( == )'
+  val feven: 'a * (int -> int) -> int -> int
+  val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fixpoly: (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) * (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) -> ('a -> 'b) * ('a -> 'b)
+  val fodd: (int -> int) * 'a -> int -> int
+  val main: int
+  val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val meven: int -> int
+  val modd: int -> int
+  val tie: (int -> int) * (int -> int)
 
   $ infer < manytests/typed/016lists.ml
   Infer error: Occurs check failed
@@ -96,7 +107,6 @@
   > ;;
   > EOF
   val map_cps: ('a -> 'b) -> 'a list -> 'b list
-
   $ dune exec infer << EOF
   > let f a b c d e = a b c d e;;
   > EOF

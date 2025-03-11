@@ -23,4 +23,4 @@
  (name arML)
  (allow_empty)
  (synopsis "A small miniML compiler")
- (depends ocaml dune bisect_ppx))
+ (depends ocaml dune bisect_ppx llvm))

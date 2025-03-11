@@ -1,9 +1,24 @@
 (library
  (name shaitanml_lib)
  (public_name ShaitanML.Lib)
- (modules Ast Parser Infer Typedtree)
+ (modules
+  Ast
+  Alpha
+  Common
+  Closure
+  Codegen
+  Pat_elim
+  Pat_elim_ast
+  Parser
+  Infer
+  Typedtree
+  L_lifting
+  Closure
+  Anf
+  Anf_ast
+  Llvm_utils)
  (inline_tests)
- (libraries base angstrom)
+ (libraries base stdlib angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (instrumentation

@@ -9,3 +9,7 @@ val anf_decl
   -> int * (Anf_ast.anf_decl, string) result
 
 val transform : Llast.lllet_declaration list -> (Anf_ast.anf_decl, string) result list
+
+val transform_anf
+  :  Llast.lllet_declaration list
+  -> int * (Anf_ast.anf_decl list, string) result

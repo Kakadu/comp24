@@ -1,0 +1,23 @@
+(include_subdirs unqualified)
+
+(library
+ (name patternMatchingElim)
+ (public_name arML.middleend.patternMatchingElim)
+ (modules
+  Pmfast
+  Pprint
+  UnpackFunctions
+  ImmutBasicFunctions
+  ListUtils
+  CollectIdentifiers
+  GenerateDeclarationsFromCase
+  GenerateConditionsFromCase
+  PmfCase
+  PmfFunction
+  PmfExpression
+  PmfDeclaration
+  PmfProgram
+  Runner)
+ (libraries base ast common lambdaLifting)
+ (instrumentation
+  (backend bisect_ppx)))

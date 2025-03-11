@@ -600,7 +600,7 @@
             (ELet (Nonrecursive,
                ((PTuple [(PVar (Id "e")); (PVar (Id "o"))]), (EVar (Id "p"))),
                (EIf (
-                  (EApp ((EApp ((EVar (Id "( == )")), (EVar (Id "n")))),
+                  (EApp ((EApp ((EVar (Id "( = )")), (EVar (Id "n")))),
                      (EConst (CInt 0)))),
                   (EConst (CInt 1)),
                   (EApp ((EVar (Id "o")),
@@ -618,7 +618,7 @@
             (ELet (Nonrecursive,
                ((PTuple [(PVar (Id "e")); (PVar (Id "o"))]), (EVar (Id "p"))),
                (EIf (
-                  (EApp ((EApp ((EVar (Id "( == )")), (EVar (Id "n")))),
+                  (EApp ((EApp ((EVar (Id "( = )")), (EVar (Id "n")))),
                      (EConst (CInt 0)))),
                   (EConst (CInt 0)),
                   (EApp ((EVar (Id "e")),
