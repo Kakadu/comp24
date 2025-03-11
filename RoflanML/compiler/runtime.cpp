@@ -1,7 +1,9 @@
 #include <ffi.h>
 #include <stdio.h>
 
+#include <cstdarg>
 #include <cstdint>
+#include <iostream>
 #include <stdexcept>
 #include <variant>
 #include <vector>
@@ -17,40 +19,48 @@ using RoflanMLObject = std::variant<Int, bool, Unit, Closure*>;
 
 // Stdlib print functions
 
-RoflanMLObject* print_int(RoflanMLObject* obj) {
+extern "C" RoflanMLObject* print_int(RoflanMLObject* obj) {
     printf("%ld", std::get<Int>(*obj));
     fflush(stdout);
-    return new RoflanMLObject(Unit());
+    return new RoflanMLObject(Unit{nullptr});
 }
 
-RoflanMLObject* print_bool(RoflanMLObject* obj) {
+extern "C" RoflanMLObject* print_bool(RoflanMLObject* obj) {
     printf(std::get<Bool>(*obj) ? "true" : "false");
     fflush(stdout);
-    return new RoflanMLObject(Unit());
+    return new RoflanMLObject(Unit{nullptr});
 }
 
 // Boxed creation
 
-RoflanMLObject* Create_int(Int v) { return new RoflanMLObject(v); }
-RoflanMLObject* Create_bool(Bool v) { return new RoflanMLObject(v); }
-RoflanMLObject* Create_unit() { return new RoflanMLObject(Unit{nullptr}); }
+extern "C" RoflanMLObject* Create_int(Int v) {
+    std::cout << "Calling create_int" << std::endl;
+    return new RoflanMLObject(v);
+}
+extern "C" RoflanMLObject* Create_bool(Bool v) { return new RoflanMLObject(v); }
+extern "C" RoflanMLObject* Create_unit() {
+    return new RoflanMLObject(Unit{nullptr});
+}
 
 // Boxed gettes
 
-Int Get_int(RoflanMLObject* obj) { return std::get<Int>(*obj); }
-Bool Get_bool(RoflanMLObject* obj) { return std::get<Bool>(*obj); }
+extern "C" Int Get_int(RoflanMLObject* obj) { return std::get<Int>(*obj); }
+extern "C" Bool Get_bool(RoflanMLObject* obj) { return std::get<Bool>(*obj); }
 
 // Comparison operators
 
-RoflanMLObject* RoflanML_eq(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_eq(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     return Create_bool(*left == *right);
 }
 
-RoflanMLObject* RoflanML_neq(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_neq(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
     return Create_bool(*left != *right);
 }
 
-RoflanMLObject* RoflanML_gt(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_gt(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     if (std::holds_alternative<Int>(*left) &&
         std::holds_alternative<Int>(*right)) {
         return Create_bool(std::get<Int>(*left) > std::get<Int>(*right));
@@ -64,7 +74,8 @@ RoflanMLObject* RoflanML_gt(RoflanMLObject* left, RoflanMLObject* right) {
         "RoflanML_gt works only with bool or integer types");
 }
 
-RoflanMLObject* RoflanML_ge(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_ge(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     if (std::holds_alternative<Int>(*left) &&
         std::holds_alternative<Int>(*right)) {
         return Create_bool(std::get<Int>(*left) >= std::get<Int>(*right));
@@ -78,7 +89,8 @@ RoflanMLObject* RoflanML_ge(RoflanMLObject* left, RoflanMLObject* right) {
         "RoflanML_ge works only with bool or integer types");
 }
 
-RoflanMLObject* RoflanML_lt(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_lt(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     if (std::holds_alternative<Int>(*left) &&
         std::holds_alternative<Int>(*right)) {
         return Create_bool(std::get<Int>(*left) < std::get<Int>(*right));
@@ -92,7 +104,8 @@ RoflanMLObject* RoflanML_lt(RoflanMLObject* left, RoflanMLObject* right) {
         "RoflanML_lt works only with bool or integer types");
 }
 
-RoflanMLObject* RoflanML_le(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_le(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     if (std::holds_alternative<Int>(*left) &&
         std::holds_alternative<Int>(*right)) {
         return Create_bool(std::get<Int>(*left) <= std::get<Int>(*right));
@@ -108,63 +121,94 @@ RoflanMLObject* RoflanML_le(RoflanMLObject* left, RoflanMLObject* right) {
 
 // Boolean binary operators
 
-RoflanMLObject* RoflanML_or(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_or(RoflanMLObject* left,
+                                       RoflanMLObject* right) {
     return Create_bool(std::get<Bool>(*left) || std::get<Bool>(*right));
 }
 
-RoflanMLObject* RoflanML_and(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_and(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
     return Create_bool(std::get<Bool>(*left) && std::get<Bool>(*right));
 }
 
 // Integer binary operators
 
-RoflanMLObject* RoflanML_add(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_add(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
+    std::cout << "Calling add" << std::endl;
     return Create_int(std::get<Int>(*left) + std::get<Int>(*right));
 }
 
-RoflanMLObject* RoflanML_sub(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_sub(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
     return Create_int(std::get<Int>(*left) - std::get<Int>(*right));
 }
 
-RoflanMLObject* RoflanML_mul(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_mul(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
     return Create_int(std::get<Int>(*left) * std::get<Int>(*right));
 }
 
-RoflanMLObject* RoflanML_div(RoflanMLObject* left, RoflanMLObject* right) {
+extern "C" RoflanMLObject* RoflanML_div(RoflanMLObject* left,
+                                        RoflanMLObject* right) {
     return Create_int(std::get<Int>(*left) / std::get<Int>(*right));
 }
 
 struct Closure {
     Ptr const function;
     uint32_t arity;
-    std::vector<Ptr> args;
+    std::vector<RoflanMLObject*> args;
 };
 
-RoflanMLObject* Create_closure(Ptr function, uint32_t arity) {
+extern "C" RoflanMLObject* Create_closure(Ptr function, uint32_t arity) {
+    std::cout << "Creating closure" << std::endl;
     return new RoflanMLObject(new Closure{function, arity, {}});
 }
 
-RoflanMLObject* Apply(RoflanMLObject* closure, RoflanMLObject* arg) {
+extern "C" RoflanMLObject* Apply(RoflanMLObject* closure, ...) {
+    va_list args;
+    va_start(args, closure);
+    int64_t number_of_args = va_arg(args, int64_t);
+
+    std::cout << "Number of args: " << number_of_args << std::endl;
     auto as_closure_type = *std::get<Closure*>(*closure);
+
+    if (as_closure_type.args.size() + number_of_args > as_closure_type.arity) {
+        throw std::runtime_error("Trying to apply to much arguments");
+    }
+
     auto new_closure = new Closure{as_closure_type.function,
                                    as_closure_type.arity, as_closure_type.args};
-    new_closure->args.push_back(static_cast<Ptr>(arg));
+    for (int i = 0; i < number_of_args; ++i) {
+        new_closure->args.push_back(va_arg(args, RoflanMLObject*));
+    }
 
     if (new_closure->args.size() != new_closure->arity) {
         return new RoflanMLObject(new_closure);
     }
 
     ffi_cif cif;
+    std::cout << "CIF created" << std::endl;
+    std::cout << "FPtr: " << new_closure->function << std::endl;
+    fflush(stdout);
     auto arg_types = new ffi_type* [new_closure->arity] { &ffi_type_pointer };
+    std::cout << "arg_types created" << std::endl;
+    auto args_ptrs = new void*[new_closure->arity];
+    for (int i = 0; i < new_closure->arity; ++i) {
+        args_ptrs[i] = &new_closure->args[i];
+    }
+    std::cout << "args_ptrs created" << std::endl;
+
     if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, new_closure->arity,
                      &ffi_type_pointer, arg_types) != FFI_OK) {
-        throw std::runtime_error("Failed to apply argument");
+        throw std::runtime_error("Failed ffi_prep_cif");
     }
     RoflanMLObject* apply_result = nullptr;
-    ffi_call(&cif, FFI_FN(new_closure->function), &apply_result,
-             new_closure->args.data());
-
-    delete arg_types;
+    std::cout << "Before ffi_call" << std::endl;
+    ffi_call(&cif, FFI_FN(new_closure->function), &apply_result, args_ptrs);
+    std::cout << "After ffi_call" << std::endl;
+    delete[] arg_types;
+    delete[] args_ptrs;
     delete new_closure;
     return apply_result;
 }
