@@ -160,7 +160,7 @@ let declare_func name args =
 ;;
 
 let compile_anf_binding (ALet (name, args, body)) =
-  if List.length args = 0
+  if List.length args = 0 && name <> "main"
   then (
     let body = compile_aexpr body in
     let gvar = define_global name (const_int i64_t 0) module_ in
@@ -212,14 +212,14 @@ let init_runtime =
 ;;
 
 let create_main program =
-  let main_type = function_type i64_t [||] in
-  let main = declare_function "main" main_type module_ in
-  let bb = append_block ctx "entry" main in
-  position_at_end bb builder;
+  (* let main_type = function_type i64_t [||] in
+     let main = declare_function "main" main_type module_ in
+     let bb = append_block ctx "entry" main in
+     position_at_end bb builder; *)
   init_runtime;
   List.iter (fun decl -> ignore (compile_anf_decl decl)) program;
   let _ = build_ret (const_int i64_t 0) builder in
-  main
+  ()
 ;;
 
 let compile_program program =
