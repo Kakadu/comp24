@@ -95,39 +95,22 @@ and compile_lexpr = function
 
 let compile_func f =
   let name, args, body = f in
-  let param_types = Array.make (List.length args) int_t in
-  let func_type = function_type int_t param_types in
+  let ast = Middleend.Converter.anf_to_ast [ AbsStr_func f ] in
+  let bruh = Typing.Inference.infer_program ast in
+  let param_types = Array.make (List.length args) ptr_t in
+  let func_type = function_type ptr_t param_types in
   let func = define_function name func_type my_module in
-  let entry_block = append_block context "entry" func in
-  let builder = builder_at_end context entry_block in
+  let entry = append_block context "entry" func in
+  position_at_end entry builder;
   List.iteri
     (fun i arg_name ->
-      let param = Llvm.param func i in
-      let param_alloca = Llvm.build_alloca (Llvm.type_of param) arg_name builder in
-      let _ = Llvm.build_store param param_alloca builder in
+      let param = param func i in
+      let param_alloca = build_alloca (Llvm.type_of param) arg_name builder in
+      let _ = build_store param param_alloca builder in
       Hashtbl.add variable_value_table arg_name param_alloca)
     args;
   let body_value = compile_lexpr body in
-  let _ = Llvm.build_ret body_value builder in
-  func
-;;
-
-let compile_func f =
-  let name, args, body = f in
-  let param_types = Array.make (List.length args) int_t in
-  let func_type = function_type int_t param_types in
-  let func = define_function name func_type my_module in
-  let entry_block = append_block context "entry" func in
-  let builder = builder_at_end context entry_block in
-  List.iteri
-    (fun i arg_name ->
-      let param = Llvm.param func i in
-      let param_alloca = Llvm.build_alloca (Llvm.type_of param) arg_name builder in
-      let _ = Llvm.build_store param param_alloca builder in
-      Hashtbl.add variable_value_table arg_name param_alloca)
-    args;
-  let body_value = compile_lexpr body in
-  let _ = Llvm.build_ret body_value builder in
+  let _ = build_ret body_value builder in
   func
 ;;
 
