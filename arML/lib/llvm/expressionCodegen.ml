@@ -18,7 +18,7 @@ let rec compile_immut_expression runtime env = function
 and compile_complex_expression runtime env = function
   | CAtom a -> compile_immut_expression runtime env a
   | CApplication (f, arg, args) -> compile_func_call runtime env f (arg :: args)
-  | CIfThenElse (c, b1, b2) -> compile_c_if_then_else runtime env c b1 b2
+  | CIfThenElse (c, b1, b2) -> compile_if_then_else runtime env c b1 b2
   | CTyped (c, _) -> compile_complex_expression runtime env c
   | CListConstructor _ -> failwith "List unsupported in llvm codegen"
 
@@ -30,33 +30,30 @@ and compile_anf_expression runtime env = function
       (RuntimeEnv.add n (compile_complex_expression runtime env e1) env)
       e2
 
-and compile_c_if_then_else runtime env condition then_branch else_branch =
-  let condition_value = compile_immut_expression runtime env condition in
-  let func, func_type = get_func_info runtime "get_i1_val" in
-  let condition_bool =
-    build_call func_type func [| condition_value |] "condition_bool" builder
+and compile_if_then_else runtime env cond_expr then_expr else_expr =
+  let cond_value = compile_immut_expression runtime env cond_expr in
+  let bool_func, bool_func_type = get_func_info runtime "get_i1_val" in
+  let cond_bool =
+    build_call bool_func_type bool_func [| cond_value |] "cond_bool" builder
   in
-  let parent_function = Llvm.block_parent (Llvm.insertion_block builder) in
-  let then_block = Llvm.append_block context "then_branch" parent_function in
-  let else_block = Llvm.append_block context "else_branch" parent_function in
-  let merge_block = Llvm.append_block context "merge_branch" parent_function in
-  ignore (Llvm.build_cond_br condition_bool then_block else_block builder);
-  Llvm.position_at_end then_block builder;
-  let then_result = compile_anf_expression runtime env then_branch in
-  ignore (Llvm.build_br merge_block builder);
-  let then_block_end = Llvm.insertion_block builder in
-  Llvm.position_at_end else_block builder;
-  let else_result = compile_anf_expression runtime env else_branch in
-  ignore (Llvm.build_br merge_block builder);
-  let else_block_end = Llvm.insertion_block builder in
-  Llvm.position_at_end merge_block builder;
-  let phi_node =
-    Llvm.build_phi
-      [ then_result, then_block_end; else_result, else_block_end ]
-      "if_result"
-      builder
-  in
-  phi_node
+  let current_func = block_parent (insertion_block builder) in
+  let then_block = append_block context "then_block" current_func in
+  let else_block = append_block context "else_block" current_func in
+  let merge_block = append_block context "merge_block" current_func in
+  build_cond_br cond_bool then_block else_block builder |> ignore;
+  position_at_end then_block builder;
+  let then_result = compile_anf_expression runtime env then_expr in
+  let then_end_block = Llvm.insertion_block builder in
+  build_br merge_block builder |> ignore;
+  position_at_end else_block builder;
+  let else_result = compile_anf_expression runtime env else_expr in
+  let else_end_block = Llvm.insertion_block builder in
+  build_br merge_block builder |> ignore;
+  position_at_end merge_block builder;
+  build_phi
+    [ then_result, then_end_block; else_result, else_end_block ]
+    "if_expr_result"
+    builder
 
 and compile_constant_expressions runtime = function
   | CInt i ->
@@ -83,7 +80,7 @@ and compile_identifier_expression runtime env name =
     let arg_count = Array.length (params func) in
     let closure = create_fun_closure runtime func arg_count in
     if arg_count = 0 then call_fun runtime closure else closure
-  in 
+  in
   let resolve_function runtime env name =
     let value = get_func_value runtime env name in
     match Llvm.classify_value value with
@@ -99,9 +96,10 @@ and compile_func_call runtime env func_expr arg_exprs =
     | _ -> failwith "Error: Invalid function call"
   in
   let compiled_args = List.map (compile_immut_expression runtime env) arg_exprs in
-
-  let closure_func, closure_type = get_func_info runtime "apply_closure" in
-  let closure_args = Array.of_list (compiled_func :: const_int i32_ty (List.length compiled_args) :: compiled_args) in
-
+  let closure_func, closure_type = get_func_info runtime "apply_args_to_fun" in
+  let closure_args =
+    Array.of_list
+      (compiled_func :: const_int i32_ty (List.length compiled_args) :: compiled_args)
+  in
   build_call closure_type closure_func closure_args "closure_call_result" builder
 ;;

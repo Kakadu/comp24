@@ -3,7 +3,6 @@
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 open Runtime
-
 module Env = Map.Make (String)
 
 let func_in_runtime_env runtime name =
@@ -11,6 +10,7 @@ let func_in_runtime_env runtime name =
   match RuntimeEnv.find_opt runtime_name runtime with
   | Some value -> value
   | None -> failwith "The name was not found in the environment"
+;;
 
 let get_func_info runtime name =
   match RuntimeEnv.find_opt name runtime, List.assoc_opt name runtime_functions with
