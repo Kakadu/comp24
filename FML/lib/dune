@@ -20,7 +20,7 @@
   Anf
   Codegen)
  (modules_without_implementation inf_errors)
- (libraries base angstrom llvm)
+ (libraries base angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
   (pps ppx_deriving.show))
  (instrumentation

@@ -5,8 +5,35 @@
 open Llvm
 open Anf_ast
 
+let sym_to_value : (string, llvalue) Hashtbl.t = Hashtbl.create 1
+let sym_to_type : (string, lltype) Hashtbl.t = Hashtbl.create 1
+let lookup_name name = Hashtbl.find_opt sym_to_value name
+let lookup_type name = Hashtbl.find_opt sym_to_type name
+let add_sym name value = Hashtbl.add sym_to_value name value
+let add_type name ty = Hashtbl.add sym_to_type name ty
+
+let id_to_runtime_name = function
+  | "( + )" -> "add"
+  | "( - )" -> "sub"
+  | "( * )" -> "mul"
+  | "( / )" -> "divd"
+  | "( = )" -> "eq"
+  | "( != )" -> "neq"
+  | "( < )" -> "less"
+  | "( <= )" -> "leq"
+  | "( > )" -> "gre"
+  | "( >= )" -> "geq"
+  | "( && )" -> "and"
+  | "( || )" -> "or"
+  | other -> other
+;;
+
 let ctx = global_context ()
 let builder = builder ctx
+let module_ = create_module ctx "FML"
+let target_triple = Llvm_target.Target.default_triple ()
+let () = Llvm.set_target_triple target_triple module_
+let i64_t = i64_type ctx
 
 let compile_binop op x y =
   match op with
@@ -15,4 +42,57 @@ let compile_binop op x y =
   | "( * )" -> build_mul x y "mul" builder
   | "( / )" -> build_sdiv x y "div" builder
   | _ -> failwith ("Invalid operator: " ^ op)
+;;
+
+let compile_immexpr = function
+  | ImmInt n -> const_int i64_t n
+  | ImmBool b -> const_int i64_t (Bool.to_int b)
+  | ImmUnit -> const_int i64_t 0
+  | ImmIdentifier name ->
+    let name = id_to_runtime_name name in
+    (match lookup_function name module_ with
+     | Some f ->
+       let fun_ptr = build_ptrtoint f i64_t "" builder in
+       build_call
+         (function_type i64_t [| i64_t; i64_t |])
+         (Option.get @@ lookup_function "create_closure" module_)
+         [| fun_ptr; const_int i64_t (Array.length (params f)); const_int i64_t 0 |]
+         "empty_closure"
+         builder
+     | None ->
+       (match lookup_global name module_ with
+        | Some g -> g
+        | None ->
+          (match lookup_name name with
+           | Some v -> v
+           | None -> failwith ("Unknown variable: " ^ name))))
+  | _ -> failwith "Not implemented"
+;;
+
+let rec compile_cexpr = function
+  | CImmExpr expr -> compile_immexpr expr
+  | CEApply (name, args) ->
+    let compiled_args = List.map compile_immexpr args in
+    (match lookup_function name module_ with
+     | Some f when Array.length (params f) = List.length args ->
+       build_call (type_of f) f (Array.of_list compiled_args) name builder
+     | Some f ->
+       let fun_ptr = build_ptrtoint f i64_t "" builder in
+       let cl =
+         build_call
+           (function_type i64_t [| i64_t; i64_t |])
+           (Option.get @@ lookup_function "create_closure" module_)
+           [| fun_ptr; const_int i64_t (Array.length (params f)); const_int i64_t 0 |]
+           "closure"
+           builder
+       in
+       build_call
+         (var_arg_function_type i64_t [| i64_t; i64_t |])
+         (Option.get (lookup_function "apply_args_to_closure" module_))
+         (Array.of_list
+            ([ cl; const_int i64_t (List.length compiled_args) ] @ compiled_args))
+         "applied_closure"
+         builder
+     | None -> failwith "Not a function")
+  | _ -> failwith "Not impemented"
 ;;
