@@ -7,7 +7,7 @@ open LlvmBasic
 open EnvironmentSearchers
 open Anf.Anftree
 
-let compile_immut_expression runtime env = function
+let rec compile_immut_expression runtime env = function
   | IConstant const ->
     (match const with
      | CInt i ->
@@ -28,6 +28,14 @@ let compile_immut_expression runtime env = function
      | CUnit ->
        let f_value, ty = get_func_info runtime "ct_int_v" in
        build_call ty f_value [| const_int i32_ty 0 |] "val_unit" builder)
+  | IIdentifier _ -> assert false
   | ITuple _ -> failwith "Tuples unsupported in llvm codegen"
   | IEmptyList -> failwith "List unsupported in llvm codegen"
+
+and compile_complex_expression runtime env = function
+  | CAtom a -> compile_immut_expression runtime env a
+  | CApplication _ -> assert false
+  | CIfThenElse _ -> assert false
+  | CTyped (c, _) -> compile_complex_expression runtime env c
+  | CListConstructor _ -> failwith "List unsupported in llvm codegen"
 ;;
