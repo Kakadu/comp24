@@ -119,9 +119,9 @@ let rec compile_cexpr = function
          builder
      | None -> failwith "Not a function")
   | CEIf (cond, then_e, else_e) ->
-    let cond_v =
-      build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder
-    in
+    (* let cond_v =
+       build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder *)
+    let cond_v = compile_immexpr in
     let entry_block = insertion_block builder in
     let parent = block_parent entry_block in
     let then_block = append_block ctx "then" parent in
