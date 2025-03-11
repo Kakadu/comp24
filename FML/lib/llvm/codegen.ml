@@ -98,8 +98,8 @@ let rec compile_cexpr = function
   | CEApply (name, args) ->
     let compiled_args = List.map compile_immexpr args in
     (match lookup_function name module_ with
-     | Some f when Array.length (params f) = List.length args ->
-       build_call (type_of f) f (Array.of_list compiled_args) name builder
+     (* | Some f when Array.length (params f) = List.length args ->
+        build_call (type_of f) f (Array.of_list compiled_args) name builder *)
      | Some f ->
        let fun_ptr = build_ptrtoint f i64_t "" builder in
        let cl =
@@ -112,7 +112,7 @@ let rec compile_cexpr = function
        in
        build_call
          (var_arg_function_type i64_t [| i64_t; i64_t |])
-         (Option.get (lookup_function "apply_args_to_closure" module_))
+         (Option.get (lookup_function "apply_args" module_))
          (Array.of_list
             ([ cl; const_int i64_t (List.length compiled_args) ] @ compiled_args))
          "applied_closure"
@@ -160,18 +160,24 @@ let declare_func name args =
 ;;
 
 let compile_anf_binding (ALet (name, args, body)) =
-  let func = declare_func name args in
-  let bb = append_block ctx "entry" func in
-  position_at_end bb builder;
-  List.iteri
-    (fun i arg_name ->
-      let arg_value = param func i in
-      set_value_name arg_name arg_value;
-      add_sym arg_name arg_value)
-    args;
-  let body_val = compile_aexpr body in
-  let _ = build_ret body_val builder in
-  func
+  if List.length args = 0
+  then (
+    let body = compile_aexpr body in
+    let gvar = define_global name (const_int i64_t 0) module_ in
+    ignore (build_store body gvar builder))
+  else (
+    let func = declare_func name args in
+    let bb = append_block ctx "entry" func in
+    position_at_end bb builder;
+    List.iteri
+      (fun i arg_name ->
+        let arg_value = param func i in
+        set_value_name arg_name arg_value;
+        add_sym arg_name arg_value)
+      args;
+    let body_val = compile_aexpr body in
+    let _ = build_ret body_val builder in
+    ignore func)
 ;;
 
 let compile_anf_decl = function
