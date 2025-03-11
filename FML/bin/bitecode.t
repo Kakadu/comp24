@@ -62,7 +62,6 @@
     %call = call i64 @fac(i64 4)
     %call1 = call i64 @print_int(i64 %call)
     ret i64 0
-    ret i64 0
   }
  
   $ ./compiler.exe < manytests/typed/002fac.ml
@@ -143,6 +142,5 @@
     %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @a2 to i64), i64 1, i64 0)
     %call = call i64 @fac_cps(i64 4, i64 %empty_closure)
     %call1 = call i64 @print_int(i64 %call)
-    ret i64 0
     ret i64 0
   }
