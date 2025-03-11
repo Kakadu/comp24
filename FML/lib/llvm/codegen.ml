@@ -94,5 +94,37 @@ let rec compile_cexpr = function
          "applied_closure"
          builder
      | None -> failwith "Not a function")
+  | CEIf (cond, then_e, else_e) ->
+    let cond_v =
+      build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder
+    in
+    let entry_block = insertion_block builder in
+    let parent = block_parent entry_block in
+    let then_block = append_block ctx "then" parent in
+    position_at_end then_block builder;
+    let then_ = compile_aexpr then_e in
+    let new_then_block = insertion_block builder in
+    let else_block = append_block ctx "else" parent in
+    position_at_end else_block builder;
+    let else_ = compile_aexpr else_e in
+    let new_else_block = insertion_block builder in
+    let merge_bb = append_block ctx "merge" parent in
+    position_at_end merge_bb builder;
+    let phi = build_phi [ then_, new_then_block; else_, new_else_block ] "phi" builder in
+    position_at_end entry_block builder;
+    let (_ : llvalue) = build_cond_br cond_v then_block else_block builder in
+    position_at_end new_then_block builder;
+    let (_ : llvalue) = build_br merge_bb builder in
+    position_at_end new_else_block builder;
+    let (_ : llvalue) = build_br merge_bb builder in
+    position_at_end merge_bb builder;
+    phi
   | _ -> failwith "Not impemented"
+
+and compile_aexpr = function
+  | ACExpr expr -> compile_cexpr expr
+  | ALetIn (name, ce, ae) ->
+    let v = compile_cexpr ce in
+    add_sym name v;
+    compile_aexpr ae
 ;;
