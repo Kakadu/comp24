@@ -22,8 +22,9 @@ let%expect_test _ =
     {|
     let rec fact =
       fun n ->
-        if (<=) n 1
-        then 1 else (*) n (fact ((-) n 1))
+        if ( <= ) n 1
+        then 1
+        else ( * ) n (fact (( - ) n 1))
     |}]
 
 (* ======= Patterns ======= *)
@@ -90,13 +91,16 @@ let%expect_test _ =
   [%expect {| function a -> true | b -> false |}]
 
 let%expect_test _ =
-  run {| fun x y -> x + y |} ; [%expect {| fun x y -> (+) x y |}]
+  run {| fun x y -> x + y |} ; [%expect {| fun x y -> ( + ) x y |}]
 
 let%expect_test _ = run {| a0b'c_d |} ; [%expect {| a0b'c_d |}]
 
 let%expect_test _ =
   run "a >>= b ++ c ** d !+ e" ;
-  [%expect {| (>>=) a ((++) b ((**) c (d ((!+) e)))) |}]
+  [%expect {|
+    ( >>= ) a
+      (( ++ ) b (( ** ) c (d (( !+ ) e))))
+    |}]
 
 let%expect_test _ =
   run {| let rec a = 1 and b = 2 in let e = 3 in a |} ;
@@ -154,28 +158,28 @@ let%expect_test _ = run {| a, (b, c) |} ; [%expect {| a, (b, c) |}]
 let%expect_test _ = run {| (a, b), c |} ; [%expect {| (a, b), c |}]
 
 let%expect_test _ =
-  run {| 1 + - + + 3 |} ; [%expect {| (+) 1 ((~-) ((~+) ((~+) 3))) |}]
+  run {| 1 + - + + 3 |} ; [%expect {| ( + ) 1 (( ~- ) (( ~+ ) (( ~+ ) 3))) |}]
 
-let%expect_test _ = run {| !%< 123; !0 |} ; [%expect {| (!%<) 123; (!) 0 |}]
+let%expect_test _ = run {| !%< 123; !0 |} ; [%expect {| ( !%< ) 123; ( ! ) 0 |}]
 
-let%expect_test _ = run {| --+1 |} ; [%expect {| (~-) ((~-) ((~+) 1)) |}]
+let%expect_test _ = run {| --+1 |} ; [%expect {| ( ~- ) (( ~- ) (( ~+ ) 1)) |}]
 
-let%expect_test _ = run {| f(1+2+3) |} ; [%expect {| f ((+) ((+) 1 2) 3) |}]
+let%expect_test _ = run {| f(1+2+3) |} ; [%expect {| f (( + ) (( + ) 1 2) 3) |}]
 
 let%expect_test _ =
   run {| if(a && b) then(1+2) else(3) |} ;
-  [%expect {| if (&&) a b then (+) 1 2 else 3 |}]
+  [%expect {| if ( && ) a b then ( + ) 1 2 else 3 |}]
 
 let%expect_test _ =
   run {| id let a = 1 in a |} ;
   [%expect {| id (let a = 1 in a) |}]
 
 let%expect_test _ =
-  run {| ! let a = 1 in a |} ; [%expect {| (!) (let a = 1 in a) |}]
+  run {| ! let a = 1 in a |} ; [%expect {| ( ! ) (let a = 1 in a) |}]
 
 let%expect_test _ =
   run {| 1 + let a = 1 in a |} ;
-  [%expect {| (+) 1 (let a = 1 in a) |}]
+  [%expect {| ( + ) 1 (let a = 1 in a) |}]
 
 let%expect_test _ = run {| ( a : int ) |} ; [%expect {| (a : int) |}]
 
@@ -233,25 +237,25 @@ let%expect_test _ =
 
 let%expect_test _ =
   run {| let (f, s) = (f + s, f - s) |} ;
-  [%expect {| let f, s = (+) f s, (-) f s |}]
+  [%expect {| let f, s = ( + ) f s, ( - ) f s |}]
 
 let%expect_test _ =
   run {| let (>>=) a b = a ** b |} ;
-  [%expect {| let (>>=) = fun a b -> (**) a b |}]
+  [%expect {| let ( >>= ) = fun a b -> ( ** ) a b |}]
 
 let%expect_test _ =
   run {| let (++) a b = a + b |} ;
-  [%expect {| let (++) = fun a b -> (+) a b |}]
+  [%expect {| let ( ++ ) = fun a b -> ( + ) a b |}]
 
 let%expect_test _ =
   run
     {| let(*sus*)rec(*firstcomment*)f n = (* second comment *) (* third
          comment*) n + 1 |} ;
-  [%expect {| let rec f = fun n -> (+) n 1 |}]
+  [%expect {| let rec f = fun n -> ( + ) n 1 |}]
 
 let%expect_test _ =
   run {| letrec f n = n + 1 |} ;
-  [%expect {| (=) (letrec f n) ((+) n 1) |}]
+  [%expect {| ( = ) (letrec f n) (( + ) n 1) |}]
 
 let%expect_test _ = run {| let reca = 1 |} ; [%expect {| let reca = 1 |}]
 
@@ -267,7 +271,6 @@ let%expect_test _ = run {| 1a |} ; [%expect {| syntax error |}]
 
 let%expect_test _ = run {| 1 ;; a |} ; [%expect {|
     1;;
-
     a
     |}]
 

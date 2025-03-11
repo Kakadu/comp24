@@ -19,7 +19,7 @@ let infixr op l r = group @@ l ^^ group (break 1) ^^ op ^^ r
 let pp_id (Id.I id) =
   match id with
   | id when is_op_char (String.get id 0) ->
-      PPrint.parens (string id)
+      PPrint.parens (char ' ' ^^ string id ^^ char ' ')
   | id ->
       string id
 

@@ -30,6 +30,10 @@ module List1 = struct
         raise (Invalid_argument "empty list")
 
   let to_list : 'a t -> 'a list = fun (hd, tl) -> hd :: tl
+
+  let map ((hd, tl) : 'a t) ~(f : 'a -> 'b) : 'b t = (f hd, List.map tl ~f)
+
+  let cons (hd : 'a) ((fst, snd) : 'a t) : 'a t = (hd, fst :: snd)
 end
 
 (** List containing at least 2 elements *)
@@ -44,6 +48,9 @@ module List2 = struct
         raise (Invalid_argument "not enough elements")
 
   let to_list : 'a t -> 'a list = fun (fst, snd, tl) -> fst :: snd :: tl
+
+  let map ((fst, snd, tl) : 'a t) ~(f : 'a -> 'b) : 'b t =
+    (f fst, f snd, List.map tl ~f)
 end
 
 (* https://ocaml.org/manual/5.0/lex.html#sss:lex-ops-symbols *)
