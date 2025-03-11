@@ -13,6 +13,11 @@
  (public_name AlphaConversionRunner)
  (libraries HamsterTest))
 
+(executable
+ (name LlvmCodegenRunner)
+ (public_name LlvmCodegenRunner)
+ (libraries HamsterTest))
+
 (cram
  (deps
   %{bin:AlphaConversionRunner}

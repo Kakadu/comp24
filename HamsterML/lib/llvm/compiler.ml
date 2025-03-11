@@ -195,13 +195,10 @@ and codegen_aexpr env = function
 
 let codegen_single_anf_binding = function
   | ALet (fun_name, arg_list, ae) ->
-    let arg_types = Array.of_list (Base.List.map arg_list ~f:(fun _ -> i64)) in
-    let func_type = function_type i64 arg_types in
-    let llvm_function =
-      match lookup_function fun_name the_module with
-      | Some f -> f
-      | None -> declare_function fun_name func_type the_module
+    let func_type =
+      function_type i64 (Array.of_list (Base.List.map arg_list ~f:(fun _ -> i64)))
     in
+    let llvm_function = declare_function fun_name func_type the_module in
     let entry_bb = append_block global_context "entry" llvm_function in
     position_at_end entry_bb builder;
     let fun_symtab =
@@ -247,10 +244,10 @@ let stdlib =
 
 let codegen program =
   (* Declare standard library functions *)
-  (* let stdlib =
-     Base.List.map stdlib ~f:(fun (id, args_num) ->
-     declare_function id (function_type i64 (Array.make args_num i64)) the_module)
-     in *)
+  let _ =
+    Base.List.map stdlib ~f:(fun (id, args_num) ->
+      declare_function id (function_type i64 (Array.make args_num i64)) the_module)
+  in
   (* Define binary operation wrapper functions *)
   let define_binary_op op name =
     let fnty = function_type i64 [| i64; i64 |] in
@@ -286,17 +283,20 @@ let codegen program =
     let main_fn = declare_function "main" main_type the_module in
     let entry = append_block global_context "entry" main_fn in
     position_at_end entry builder;
-    (* If we have an entry function among our declarations, call it *)
+    (* Find the user's main function or the last defined top-level function *)
     let main_ret_val =
-      match
-        Base.List.find program ~f:(function
-          | ADSingleLet (_, ALet (name, [], _)) when name = "main" -> true
-          | _ -> false)
-      with
-      | Some _ ->
-        let main_impl = lookup_function_exception "main" the_module in
-        build_call (function_type i64 [||]) main_impl [||] "main_result" builder
-      | None -> const_int i64 0 (* Default return if no main function defined *)
+      match lookup_function "main" the_module with
+      | Some user_main when user_main != main_fn ->
+        build_call (function_type i64 [||]) user_main [||] "main_result" builder
+      | _ ->
+        (match
+           Base.List.find_map program ~f:(function
+             | ADSingleLet (_, ALet (name, [], _)) -> lookup_function name the_module
+             | _ -> None)
+         with
+         | Some user_main_fn ->
+           build_call (function_type i64 [||]) user_main_fn [||] "main_result" builder
+         | None -> const_int i64 0 (* No suitable entry point found *))
     in
     ignore (build_ret main_ret_val builder);
     main_fn
@@ -311,7 +311,5 @@ let codegen program =
   let result = codegen [] Base.Map.Poly.empty program in
   (* Define main function after processing all declarations *)
   let _ = define_main () in
-  ignore (Base.List.rev result);
-  (*TODO: remove ignore later*)
-  Llvm.print_module "output.ll" the_module
+  Base.List.rev result
 ;;

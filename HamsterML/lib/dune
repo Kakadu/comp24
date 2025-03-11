@@ -24,4 +24,11 @@
  (name HamsterML)
  (public_name HamsterML))
 
+(rule
+ (targets runtime.so)
+ (deps llvm/runtime.c)
+ (action
+  (run gcc -fPIC -shared %{deps} -o %{targets})))
+
 (include_subdirs unqualified)
+
