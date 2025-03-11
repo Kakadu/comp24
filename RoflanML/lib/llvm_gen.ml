@@ -143,7 +143,10 @@ and generate_cexpr (expr : cexpr) : llvalue =
       | ValueKind.Function -> generate_closure func_val (Array.length (params func_val))
       | _ -> func_val
     in
-    let args = maybe_closure :: List.map generate_immexpr arg_exprs in
+    let n = List.length arg_exprs in
+    let args =
+      maybe_closure :: const_int int64_type n :: List.map generate_immexpr arg_exprs
+    in
     build_call
       (find_function_type "Apply")
       (find_symbol "Apply")
