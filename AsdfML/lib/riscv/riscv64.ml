@@ -235,8 +235,8 @@ let init_env ast =
     List.fold
       ast
       ~init:(Map.empty (module String))
-      ~f:(fun env fn ->
-        match fn with
+      ~f:(fun env ->
+        function
         | Fn (_, id, args, _) -> Map.set env ~key:id ~data:(List.length args))
   in
   let env =
