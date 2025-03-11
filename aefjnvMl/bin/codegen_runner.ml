@@ -24,7 +24,7 @@ let _ =
     in
     ast'
   in
-  (match Llvm_lib.Compiler.compile_program ast'_t with
+  match Llvm_lib.Compiler.compile_program ast'_t with
   | Ok program -> Format.printf "%s" program
-  | Error err -> print_error err)
+  | Error err -> print_error err
 ;;
