@@ -3,7 +3,7 @@
  (deps rt_funcs.c)
  (action
   (run
-   clang
+   clang-16
    -c
    -fPIC
    rt_funcs.c
