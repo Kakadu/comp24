@@ -18,14 +18,14 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:24.14%"></span>
-      <span class="unvisited" style="top:27.59%"></span>
-      <span class="unvisited" style="top:31.03%"></span>
-      <span class="unvisited" style="top:44.83%"></span>
-      <span class="unvisited" style="bottom:27.59%"></span>
-      <span class="unvisited" style="bottom:13.79%"></span>
-      <span class="unvisited" style="bottom:10.34%"></span>
-      <span class="unvisited" style="bottom:6.90%"></span>
+      <span class="unvisited" style="top:23.33%"></span>
+      <span class="unvisited" style="top:26.67%"></span>
+      <span class="unvisited" style="top:30.00%"></span>
+      <span class="unvisited" style="top:43.33%"></span>
+      <span class="unvisited" style="bottom:26.67%"></span>
+      <span class="unvisited" style="bottom:13.33%"></span>
+      <span class="unvisited" style="bottom:10.00%"></span>
+      <span class="unvisited" style="bottom:6.67%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -50,15 +50,16 @@
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span class="unvisited"> </span>
 <a id="L27"></a><span class="unvisited"> </span>
-<a id="L28"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
 <a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -92,6 +93,7 @@
 <a href="#L27">27</a>
 <a href="#L28">28</a>
 <a href="#L29">29</a>
+<a href="#L30">30</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, Perevalov Efim, Ermolovich Anna *)
 
@@ -112,6 +114,7 @@ open Ast
   | AIfElse of aexpression * aexpression * aexpression
   | ABinOp of binary_op * aexpression * aexpression
   | APatLetIn of pattern * aexpression * aexpression
+  | ALetIn of name * aexpression * aexpression
   | AApp of aexpression * aexpression
   | ATuple of <span data-count="0">a</span>expression lis<span data-count="0">t</span>
   | AList of aexpression * aexpression

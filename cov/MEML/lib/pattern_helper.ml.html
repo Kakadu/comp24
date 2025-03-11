@@ -192,8 +192,8 @@ open Base
 let rec pattern_to_string_list = function
   | <span data-count="2">P</span>Wild -&gt; []
   | <span data-count="10">P</span>Const _ -&gt; []
-  | <span data-count="618">P</span>Var (name, _) -&gt; [ name ]
-  | <span data-count="23">P</span>Tuple patterns -&gt; List.concat_map patterns ~f:pattern_to_string_list
+  | <span data-count="344">P</span>Var (name, _) -&gt; [ name ]
+  | <span data-count="18">P</span>Tuple patterns -&gt; List.concat_map patterns ~f:pattern_to_string_list
   | <span data-count="0">P</span>Con (hd, tl) -&gt; pattern_to_string_lis<span data-count="0">t</span> hd @ pattern_to_string_lis<span data-count="0">t</span> tl
 ;;
 
@@ -226,23 +226,23 @@ let rec uniq_pattern_name vars all_vars = function
 let rec uniq_pattern_name_and_skip_unit vars all_vars = function
   | <span data-count="0">P</span>Wild -&gt; PWild, vars, all_vars
   | <span data-count="0">P</span>Const c -&gt; PConst c, vars, all_vars
-  | <span data-count="505">P</span>Var (name, t) -&gt;
+  | <span data-count="237">P</span>Var (name, t) -&gt;
     let new_name, new_vars, new_all_vars =
       if Poly.( = ) name "()"
-      then <span data-count="30">"</span>()", vars, all_vars
-      else <span data-count="475">u</span>pdate_nam<span data-count="475">e</span> name vars all_vars
+      then <span data-count="17">"</span>()", vars, all_vars
+      else <span data-count="220">u</span>pdate_nam<span data-count="220">e</span> name vars all_vars
     in
     PVar (new_name, t), new_vars, new_all_vars
-  | <span data-count="11">P</span>Tuple t -&gt;
+  | <span data-count="8">P</span>Tuple t -&gt;
     let new_t, new_v, new_av =
       List.fold
         ~init:([], vars, all_vars)
         ~f:(fun (acc, v, av) n -&gt;
-          <span data-count="22">l</span>et new_n, new_v, new_av = uniq_pattern_name_and_skip_unit v av n in
-          <span data-count="22">n</span>ew_n :: acc, new_v, new_av)
+          <span data-count="16">l</span>et new_n, new_v, new_av = uniq_pattern_name_and_skip_unit v av n in
+          <span data-count="16">n</span>ew_n :: acc, new_v, new_av)
         t
     in
-    <span data-count="11">P</span>Tuple (List.re<span data-count="11">v</span> new_t), new_v, new_av
+    <span data-count="8">P</span>Tuple (List.re<span data-count="8">v</span> new_t), new_v, new_av
   | <span data-count="0">P</span>Con (hd, tl) -&gt;
     let new_hd, new_vars, new_all_vars =
       uniq_pattern_name_and_skip_unit vars all_vars hd

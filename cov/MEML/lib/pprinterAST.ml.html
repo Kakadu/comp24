@@ -349,9 +349,9 @@ let pp_constant formatter = function
 ;;
 
 let pp_tuple printer formatter l =
-  <span data-count="42">L</span>ist.iteri
+  <span data-count="38">L</span>ist.iteri
     (fun i e -&gt;
-      <span data-count="87">i</span>f i &lt;&gt; 0 then <span data-count="45">F</span>ormat.fprint<span data-count="45">f</span> formatter ", " else <span data-count="42">(</span>);
+      <span data-count="78">i</span>f i &lt;&gt; 0 then <span data-count="40">F</span>ormat.fprint<span data-count="40">f</span> formatter ", " else <span data-count="38">(</span>);
       printer formatter e)
     l
 ;;
@@ -359,14 +359,14 @@ let pp_tuple printer formatter l =
 let rec pp_pattern formatter = function
   | <span data-count="0">P</span>Wild -&gt; Format.fprintf formatter "_"
   | <span data-count="16">P</span>Con (hd, tl) -&gt; Format.fprintf formatter "(%a :: %a)" pp_pattern hd pp_pattern tl
-  | <span data-count="420">P</span>Var (n, _) -&gt; Format.fprintf formatter "%s" n
-  | <span data-count="20">P</span>Tuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="20">e</span> pp_pattern) t
+  | <span data-count="418">P</span>Var (n, _) -&gt; Format.fprintf formatter "%s" n
+  | <span data-count="19">P</span>Tuple t -&gt; Format.fprintf formatter "(%a)" (pp_tupl<span data-count="19">e</span> pp_pattern) t
   | <span data-count="11">P</span>Const c -&gt; pp_constant formatter c
 ;;
 
 let pp_rec formatter = function
   | <span data-count="40">R</span>ec -&gt; Format.fprintf formatter "rec"
-  | <span data-count="442">N</span>otrec -&gt; ()
+  | <span data-count="348">N</span>otrec -&gt; ()
 ;;
 
 let pp_binop formatter = function
