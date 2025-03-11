@@ -13,18 +13,18 @@ let add_sym name value = Hashtbl.add sym_to_value name value
 let add_type name ty = Hashtbl.add sym_to_type name ty
 
 let id_to_runtime_name = function
-  | "( + )" -> "add"
-  | "( - )" -> "sub"
-  | "( * )" -> "mul"
-  | "( / )" -> "divd"
-  | "( = )" -> "eq"
-  | "( != )" -> "neq"
-  | "( < )" -> "less"
-  | "( <= )" -> "leq"
-  | "( > )" -> "gre"
-  | "( >= )" -> "geq"
-  | "( && )" -> "and"
-  | "( || )" -> "or"
+  | "( + )" -> "rt_add"
+  | "( - )" -> "rt_sub"
+  | "( * )" -> "rt_mul"
+  | "( / )" -> "rt_divd"
+  | "( = )" -> "rt_eq"
+  | "( != )" -> "rt_neq"
+  | "( < )" -> "rt_less"
+  | "( <= )" -> "rt_leq"
+  | "( > )" -> "rt_gre"
+  | "( >= )" -> "rt_geq"
+  | "( && )" -> "rt_and"
+  | "( || )" -> "rt_or"
   | other -> other
 ;;
 
@@ -41,12 +41,12 @@ let compile_binop op x y =
   | "( - )" -> build_sub x y "sub" builder
   | "( * )" -> build_mul x y "mul" builder
   | "( / )" -> build_sdiv x y "div" builder
-  | "( = )" | "( == )" -> build_icmp Icmp.Eq x y "eq" builder
+  (* | "( = )" | "( == )" -> build_icmp Icmp.Eq x y "eq" builder
   | "( <> )" | "( != )" -> build_icmp Icmp.Ne x y "ne" builder
   | "( > )" -> build_icmp Icmp.Sgt x y "sgt" builder
   | "( >= )" -> build_icmp Icmp.Sge x y "sge" builder
   | "( < )" -> build_icmp Icmp.Slt x y "slt" builder
-  | "( <= )" -> build_icmp Icmp.Sle x y "sle" builder
+  | "( <= )" -> build_icmp Icmp.Sle x y "sle" builder *)
   | _ -> failwith ("Invalid operator: " ^ op)
 ;;
 
@@ -54,15 +54,15 @@ let is_binop = function
   | "( + )"
   | "( - )"
   | "( * )"
-  | "( / )"
-  | "( = )"
+  | "( / )" -> true
+  (* | "( = )"
   | "( == )"
   | "( <> )"
   | "( != )"
   | "( > )"
   | "( >= )"
   | "( < )"
-  | "( <= )" -> true
+  | "( <= )" -> true *)
   | _ -> false
 ;;
 
@@ -136,9 +136,9 @@ let rec compile_cexpr = function
          "applied_closure"
          builder)
   | CEIf (cond, then_e, else_e) ->
-    (* let cond_v =
-       build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder *)
-    let cond_v = compile_immexpr cond in
+    let cond_v =
+       build_icmp Icmp.Ne (compile_immexpr cond) (const_int i64_t 0) "cond_v" builder in
+    (* let cond_v = compile_immexpr cond in *)
     let entry_block = insertion_block builder in
     let parent = block_parent entry_block in
     let then_block = append_block ctx "then" parent in
@@ -210,18 +210,18 @@ let init_runtime =
     [ "create_closure", function_type i64_t [| i64_t; i64_t; i64_t |]
     ; "apply_args", var_arg_function_type i64_t [| i64_t; i64_t; i64_t |]
     ; "print_int", function_type i64_t [| i64_t |]
-    ; "add", function_type i64_t [| i64_t; i64_t |]
-    ; "sub", function_type i64_t [| i64_t; i64_t |]
-    ; "mul", function_type i64_t [| i64_t; i64_t |]
-    ; "div", function_type i64_t [| i64_t; i64_t |]
-    ; "leq", function_type i64_t [| i64_t; i64_t |]
-    ; "less", function_type i64_t [| i64_t; i64_t |]
-    ; "geq", function_type i64_t [| i64_t; i64_t |]
-    ; "gre", function_type i64_t [| i64_t; i64_t |]
-    ; "eq", function_type i64_t [| i64_t; i64_t |]
-    ; "neq", function_type i64_t [| i64_t; i64_t |]
-    ; "and", function_type i64_t [| i64_t; i64_t |]
-    ; "or", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_add", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_sub", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_mul", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_div", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_leq", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_less", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_geq", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_gre", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_eq", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_neq", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_and", function_type i64_t [| i64_t; i64_t |]
+    ; "rt_or", function_type i64_t [| i64_t; i64_t |]
     ; "fail_match", function_type i64_t [| i64_t |]
     ]
   in
