@@ -80,3 +80,26 @@ and funType =
 [@@deriving show]
 
 type prog = expr list [@@deriving show]
+
+module BinOperator = struct
+  let list : bop list =
+    [ ADD; SUB; MUL; DIV; EQ; ID_EQ; NEQ; GT; GTE; LT; LTE; AND; OR; CONCAT ]
+  ;;
+
+  let to_string : bop -> string = function
+    | ADD -> "+"
+    | SUB -> "-"
+    | MUL -> "*"
+    | DIV -> "/"
+    | EQ -> "="
+    | ID_EQ -> "=="
+    | NEQ -> "!="
+    | GT -> ">"
+    | GTE -> ">="
+    | LT -> "<"
+    | LTE -> "<="
+    | AND -> "&&"
+    | OR -> "||"
+    | CONCAT -> "^"
+  ;;
+end
