@@ -63,7 +63,6 @@ $ cat /tmp/many.s
   $ riscv64-linux-gnu-gcc -static /tmp/many.s -o /tmp/many -L../../runtime/ -l:libruntime.a -Wl,--no-warnings
   $ qemu-riscv64-static /tmp/many
   1 2 4 -1 103 -555555 10000 
-TODO: should be -1 4 2 1 103 -555555 10000 
 
 
 type annotations on expressions
