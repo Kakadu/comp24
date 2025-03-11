@@ -38,6 +38,8 @@ let start_env =
   let stdlib_functions =
     [ "print_int", TGround GTInt @-> TGround GTUnit
     ; "print_bool", TGround GTBool @-> TGround GTUnit
+    ; "print_string", TGround GTString @-> TGround GTUnit
+    ; "print_char", TGround GTChar @-> TGround GTUnit
     ; "get_list_length", TList (TVar (-1)) @-> TGround GTInt
     ]
   in
