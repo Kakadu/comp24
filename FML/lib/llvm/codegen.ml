@@ -200,9 +200,7 @@ let init_runtime =
 
 let create_main program =
   init_runtime;
-  List.iter (fun decl -> ignore (compile_anf_decl decl)) program;
-  let _ = build_ret (const_int i64_t 0) builder in
-  ()
+  List.iter (fun decl -> ignore (compile_anf_decl decl)) program
 ;;
 
 let compile_program program =
