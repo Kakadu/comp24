@@ -7,29 +7,11 @@ open LlvmBasic
 open EnvironmentSearchers
 open Runtime
 open Anf.Anftree
+open RuntimeClosures
 
 let rec compile_immut_expression runtime env = function
-  | IConstant const ->
-    (match const with
-     | CInt i ->
-       let f_value, ty = get_func_info runtime "ct_int_v" in
-       build_call ty f_value [| const_int i32_ty i |] "val_int" builder
-     | CBool b ->
-       let f_value, ty = get_func_info runtime "ct_bool_v" in
-       let v = if b then 1 else 0 in
-       build_call ty f_value [| const_int bool_ty v |] "val_bool" builder
-     | CString s ->
-       let f_value, ty = get_func_info runtime "ct_str_v" in
-       let str_global = build_global_stringptr s "str" builder in
-       build_call ty f_value [| str_global |] "val_str" builder
-     | CChar c ->
-       let f_value, ty = get_func_info runtime "ct_int_v" in
-       let char_as_int = int_of_char c in
-       build_call ty f_value [| const_int i32_ty char_as_int |] "val_char" builder
-     | CUnit ->
-       let f_value, ty = get_func_info runtime "ct_int_v" in
-       build_call ty f_value [| const_int i32_ty 0 |] "val_unit" builder)
-  | IIdentifier _ -> assert false
+  | IConstant const -> compile_constant_expressions runtime const
+  | IIdentifier (Id n) -> compile_identifier_expression runtime env n
   | ITuple _ -> failwith "Tuples unsupported in llvm codegen"
   | IEmptyList -> failwith "List unsupported in llvm codegen"
 
@@ -75,4 +57,38 @@ and compile_c_if_then_else runtime env condition then_branch else_branch =
       builder
   in
   phi_node
+
+and compile_constant_expressions runtime = function
+  | CInt i ->
+    let f_value, ty = get_func_info runtime "ct_int_v" in
+    build_call ty f_value [| const_int i32_ty i |] "val_int" builder
+  | CBool b ->
+    let f_value, ty = get_func_info runtime "ct_bool_v" in
+    let v = if b then 1 else 0 in
+    build_call ty f_value [| const_int bool_ty v |] "val_bool" builder
+  | CString s ->
+    let f_value, ty = get_func_info runtime "ct_str_v" in
+    let str_global = build_global_stringptr s "str" builder in
+    build_call ty f_value [| str_global |] "val_str" builder
+  | CChar c ->
+    let f_value, ty = get_func_info runtime "ct_int_v" in
+    let char_as_int = int_of_char c in
+    build_call ty f_value [| const_int i32_ty char_as_int |] "val_char" builder
+  | CUnit ->
+    let f_value, ty = get_func_info runtime "ct_int_v" in
+    build_call ty f_value [| const_int i32_ty 0 |] "val_unit" builder
+
+and compile_identifier_expression runtime env name =
+  let wrap_function runtime func =
+    let arg_count = Array.length (params func) in
+    let closure = create_fun_closure runtime func arg_count in
+    if arg_count = 0 then call_fun runtime closure else closure
+  in 
+  let resolve_function runtime env name =
+    let value = get_func_value runtime env name in
+    match Llvm.classify_value value with
+    | ValueKind.Function -> wrap_function runtime value
+    | _ -> value
+  in
+  resolve_function runtime env name
 ;;
