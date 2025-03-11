@@ -33,11 +33,11 @@ let builtins =
   ; "( || )"
   ; "not"
   ; "print_int"
-  ; "list_head"
-  ; "list_tail"
-  ; "tuple_element"
-  ; "is_empty"
-  ; "fail_match"
+  ; "#list_head"
+  ; "#list_tail"
+  ; "#tuple_element"
+  ; "#is_empty"
+  ; "#fail_match"
   ]
 ;;
 
