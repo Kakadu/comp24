@@ -38,9 +38,9 @@
   
   define i64 @fac(i64 %n) {
   entry:
-    %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @rt_leq to i64), i64 2, i64 0)
-    %applied_closure = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure, i64 2, i64 %n, i64 1)
-    %cond_v = icmp ne i64 %applied_closure, 0
+    %sle = icmp sle i64 %n, 1
+    %sle_i64t = zext i1 %sle to i64
+    %cond_v = icmp ne i64 %sle_i64t, 0
     br i1 %cond_v, label %then, label %else
   
   then:                                             ; preds = %entry
@@ -48,9 +48,8 @@
   
   else:                                             ; preds = %entry
     %sub = sub i64 %n, 1
-    %empty_closure1 = call i64 @create_closure(i64 ptrtoint (ptr @fac to i64), i64 1, i64 0)
-    %applied_closure2 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure1, i64 1, i64 %sub)
-    %mul = mul i64 %n, %applied_closure2
+    %call = call i64 @fac(i64 %sub)
+    %mul = mul i64 %n, %call
     br label %merge
   
   merge:                                            ; preds = %else, %then
@@ -60,10 +59,8 @@
   
   define i64 @main() {
   entry:
-    %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @fac to i64), i64 1, i64 0)
-    %applied_closure = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure, i64 1, i64 4)
-    %empty_closure1 = call i64 @create_closure(i64 ptrtoint (ptr @print_int to i64), i64 1, i64 0)
-    %applied_closure2 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure1, i64 1, i64 %applied_closure)
+    %call = call i64 @fac(i64 4)
+    %call1 = call i64 @print_int(i64 %call)
     ret i64 0
     ret i64 0
   }
@@ -115,25 +112,24 @@
   
   define i64 @fac_cps(i64 %n, i64 %k) {
   entry:
-    %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @rt_eq to i64), i64 2, i64 0)
-    %applied_closure = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure, i64 2, i64 %n, i64 1)
-    %cond_v = icmp ne i64 %applied_closure, 0
+    %eq = icmp eq i64 %n, 1
+    %eq_i64t = zext i1 %eq to i64
+    %cond_v = icmp ne i64 %eq_i64t, 0
     br i1 %cond_v, label %then, label %else
   
   then:                                             ; preds = %entry
-    %applied_closure1 = call i64 (i64, i64, ...) @apply_args(i64 %k, i64 1, i64 1)
+    %applied_closure = call i64 (i64, i64, ...) @apply_args(i64 %k, i64 1, i64 1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %empty_closure2 = call i64 @create_closure(i64 ptrtoint (ptr @a1 to i64), i64 3, i64 0)
-    %applied_closure3 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure2, i64 2, i64 %k, i64 %n)
+    %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @a1 to i64), i64 3, i64 0)
+    %applied_closure1 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure, i64 2, i64 %k, i64 %n)
     %sub = sub i64 %n, 1
-    %empty_closure4 = call i64 @create_closure(i64 ptrtoint (ptr @fac_cps to i64), i64 2, i64 0)
-    %applied_closure5 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure4, i64 2, i64 %sub, i64 %applied_closure3)
+    %call = call i64 @fac_cps(i64 %sub, i64 %applied_closure1)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %phi = phi i64 [ %applied_closure1, %then ], [ %applied_closure5, %else ]
+    %phi = phi i64 [ %applied_closure, %then ], [ %call, %else ]
     ret i64 %phi
   }
   
@@ -145,10 +141,8 @@
   define i64 @main() {
   entry:
     %empty_closure = call i64 @create_closure(i64 ptrtoint (ptr @a2 to i64), i64 1, i64 0)
-    %empty_closure1 = call i64 @create_closure(i64 ptrtoint (ptr @fac_cps to i64), i64 2, i64 0)
-    %applied_closure = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure1, i64 2, i64 4, i64 %empty_closure)
-    %empty_closure2 = call i64 @create_closure(i64 ptrtoint (ptr @print_int to i64), i64 1, i64 0)
-    %applied_closure3 = call i64 (i64, i64, ...) @apply_args(i64 %empty_closure2, i64 1, i64 %applied_closure)
+    %call = call i64 @fac_cps(i64 4, i64 %empty_closure)
+    %call1 = call i64 @print_int(i64 %call)
     ret i64 0
     ret i64 0
   }
