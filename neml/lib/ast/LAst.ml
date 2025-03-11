@@ -65,6 +65,8 @@ module Expr = struct
     | Seq of t List2.t  (** [E1; E2] *)
     | Constraint of t * Ty.t  (** [(E : T)] *)
   [@@deriving show {with_path= false}]
+
+  let unit = Construct (I "()", None)
 end
 
 module StrItem = struct

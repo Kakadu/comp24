@@ -29,7 +29,8 @@ let%expect_test _ =
   [%expect
     {|
     (OccursIn ((V "gen15"),
-       (Arr ((Var (V "gen15")), (Arr ((Var (V "gen13")), (Var (V "gen18")))))))) |}]
+       (Arr ((Var (V "gen15")), (Arr ((Var (V "gen13")), (Var (V "gen18"))))))))
+    |}]
 
 let%expect_test _ =
   run "./manytests/do_not_type/004let_poly.ml" ;
@@ -48,13 +49,15 @@ let%expect_test _ =
   run "./manytests/typed/001fac.ml" ;
   [%expect {|
     fac: int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/002fac.ml" ;
   [%expect {|
     fac_cps: int -> (int -> 'a) -> 'a
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/003fib.ml" ;
@@ -62,7 +65,8 @@ let%expect_test _ =
     {|
     fib_acc: int -> int -> int -> int
     fib: int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/004manyargs.ml" ;
@@ -71,7 +75,8 @@ let%expect_test _ =
     wrap: 'a -> 'a
     test3: int -> int -> int -> int
     test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/005fix.ml" ;
@@ -79,40 +84,47 @@ let%expect_test _ =
     {|
     fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
     fac: (int -> int) -> int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/006partial.ml" ;
-  [%expect {|
+  [%expect
+    {|
     foo: bool -> int -> int
     foo: int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/006partial2.ml" ;
   [%expect {|
     foo: int -> int -> int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/006partial3.ml" ;
   [%expect {|
     foo: int -> int -> int -> unit
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/007order.ml" ;
   [%expect
     {|
     (UnificationFail ((Arr ((Con ((I "int"), [])), (Var (V "gen11")))),
-       (Con ((I "unit"), [])))) |}]
+       (Con ((I "unit"), []))))
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/008ascription.ml" ;
   [%expect
     {|
     addi: ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/009let_poly.ml" ;
@@ -126,7 +138,8 @@ let%expect_test _ =
     _2: int
     _3: (int * string) option
     (UnificationMismatch ([(Var (V "gen2")); (Var (V "gen1"))],
-       [(Con ((I "int"), [])); (Con ((I "int"), [])); (Con ((I "int"), []))])) |}]
+       [(Con ((I "int"), [])); (Con ((I "int"), [])); (Con ((I "int"), []))]))
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/011mapcps.ml" ;
@@ -134,13 +147,15 @@ let%expect_test _ =
     {|
     map: ('a -> 'b) -> 'a list -> ('b list -> 'c) -> 'c
     iter: ('a -> 'b) -> 'a list -> unit
-    main: unit |}]
+    main: unit
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/012fibcps.ml" ;
   [%expect {|
     fib: int -> (int -> 'a) -> 'a
-    main: unit |}]
+    main: unit
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/013foldfoldr.ml" ;
@@ -149,7 +164,8 @@ let%expect_test _ =
     id: 'a -> 'a
     fold_right: ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
     foldl: ('a -> 'b -> 'c) -> 'c -> 'b list -> 'c
-    main: unit |}]
+    main: unit
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/015tuples.ml" ;
@@ -163,7 +179,8 @@ let%expect_test _ =
     tie: (int -> int) * (int -> int)
     meven: int -> int
     modd: int -> int
-    main: int |}]
+    main: int
+    |}]
 
 let%expect_test _ =
   run "./manytests/typed/016lists.ml" ;
@@ -176,4 +193,5 @@ let%expect_test _ =
     concat: ('a list) list -> 'a list
     iter: ('a -> unit) -> 'a list -> unit
     cartesian: 'a list -> 'b list -> ('a * 'b) list
-    main: int |}]
+    main: int
+    |}]

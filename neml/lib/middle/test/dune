@@ -1,0 +1,10 @@
+(library
+ (name MiddleTest)
+ (libraries base stdio LAst LParse LPrint LMiddle)
+ (preprocess
+  (pps ppx_expect))
+ (inline_tests
+  (deps
+   (glob_files_rec "./manytests/*")))
+ (instrumentation
+  (backend bisect_ppx)))
