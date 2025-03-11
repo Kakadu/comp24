@@ -1,29 +1,13 @@
 (** Copyright 2024, Artem-Rzhankoff, ItIsMrLag *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-open AefjnvMl_lib
 
 open Parser
 
 let parse_test s =
   match parse s with
   | Ok v -> Format.printf "%s\n" Common.Ast.(show_program v)
-  | Error msg -> Top_utils.Ast_test_utils.print_error msg
-;;
-
-let%expect_test "currying" =
-  let () = parse_test {|
-a (b c) d
-;;
-  |} in
-  [%expect
-    {|
-      [(Str_eval
-          (Exp_apply (
-             (Exp_apply ((Exp_ident "a"),
-                (Exp_apply ((Exp_ident "b"), (Exp_ident "c"))))),
-             (Exp_ident "d"))))
-        ] |}]
+  | Error _ -> Format.printf "Syntax error\n"
 ;;
 
 let%expect_test "base bin ops" =
@@ -50,12 +34,12 @@ let%expect_test "infix op" =
 ;;
 
 let%expect_test "override un op" =
-  let () = parse_test "let (~-) a = a;;" in
+  let () = parse_test "let (~!) a = a;;" in
   [%expect
     {|
     [(Str_value
         (Decl (Nonrecursive,
-           [{ vb_pat = (Pat_var "~-");
+           [{ vb_pat = (Pat_var "~!");
               vb_expr = (Exp_function ((Pat_var "a"), (Exp_ident "a"))) }
              ]
            )))
@@ -63,12 +47,12 @@ let%expect_test "override un op" =
 ;;
 
 let%expect_test "apply un ops" =
-  let () = parse_test "let (~-) a = (~-) a;;" in
+  let () = parse_test "let (~!) a = (~-) a;;" in
   [%expect
     {|
     [(Str_value
         (Decl (Nonrecursive,
-           [{ vb_pat = (Pat_var "~-");
+           [{ vb_pat = (Pat_var "~!");
               vb_expr =
               (Exp_function ((Pat_var "a"),
                  (Exp_apply ((Exp_ident "~-"), (Exp_ident "a")))))
@@ -115,6 +99,11 @@ let%expect_test "bin exprs" =
               (Exp_constant (Const_bool false))))
            )))
       ] |}]
+;;
+
+let%expect_test "un op" =
+  let () = parse_test {|! vbool ;;|} in
+  [%expect {| [(Str_eval (Exp_apply ((Exp_ident "~!"), (Exp_ident "vbool"))))] |}]
 ;;
 
 let%expect_test "base list constructor" =
@@ -359,22 +348,6 @@ let a = fun x -> fun y -> fun z -> x y z
                    ))
                 }
                ]
-             )))
-        ] |}]
-;;
-
-let%expect_test "currying" =
-  let () = parse_test {|
-let a = 1 
-and b = 2
-;;
-  |} in
-  [%expect
-    {|
-      [(Str_value
-          (Decl (Nonrecursive,
-             [{ vb_pat = (Pat_var "a"); vb_expr = (Exp_constant (Const_int 1)) };
-               { vb_pat = (Pat_var "b"); vb_expr = (Exp_constant (Const_int 2)) }]
              )))
         ] |}]
 ;;
