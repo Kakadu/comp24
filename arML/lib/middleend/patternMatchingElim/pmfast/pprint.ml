@@ -19,9 +19,9 @@ let rec pp_pmf_expr ppf = function
   | PMFLetIn (c, e) ->
     Format.fprintf
       ppf
-      "(let %a in %a)"
+      "let %a in@,%a"
       (Format.pp_print_list
-         ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf "@,and ")
          pp_pmf_let_in_case)
       (c :: [])
       pp_pmf_expr
@@ -73,7 +73,7 @@ let pp_pmf_decl ppf = function
       ppf
       "let %a"
       (Format.pp_print_list
-         ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf "@,and ")
          pp_pmf_decl_case)
       (c :: [])
   | PMFDRecursive (c, cs) ->
@@ -81,13 +81,13 @@ let pp_pmf_decl ppf = function
       ppf
       "let rec %a"
       (Format.pp_print_list
-         ~pp_sep:(fun ppf () -> Format.fprintf ppf " and ")
+         ~pp_sep:(fun ppf () -> Format.fprintf ppf "@,and ")
          pp_pmf_decl_case)
       (c :: cs)
 ;;
 
 let pp_pmf_program ppf p =
-  Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n") pp_pmf_decl ppf p
+  Format.pp_print_list ~pp_sep:(fun ppf () -> Format.fprintf ppf "\n\n") pp_pmf_decl ppf p
 ;;
 
 let print_pmf_expression expr =

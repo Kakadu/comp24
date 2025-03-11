@@ -54,6 +54,14 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(executable
+ (name start_llvm_codegen_demos)
+ (public_name arML.start_llvm_codegen_demos)
+ (modules start_llvm_codegen_demos)
+ (libraries arML.lib stdio)
+ (instrumentation
+  (backend bisect_ppx)))
+
 (cram
  (applies_to parser_demos)
  (deps
@@ -187,3 +195,28 @@
   manytests/typed/007order.ml
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml))
+
+(cram
+ (applies_to llvm_codegen_demos)
+ (deps
+  ../lib/runtime/Makefile
+  ../lib/runtime/taggedValue.h
+  ../lib/runtime/taggedValue.c
+  ../lib/runtime/basicFunctions.c
+  ../lib/runtime/binaryOperations.c
+  ../lib/runtime/unaryOperations.c
+  ../lib/runtime/printers.c
+  ../lib/runtime/closures.c
+  ./start_llvm_codegen_demos.exe
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/012fibcps.ml))
