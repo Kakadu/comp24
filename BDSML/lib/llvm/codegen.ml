@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, Kuarni and LeonidElkin *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Llvm
 open Llvm_init
 open Middleend.Anf_ast
@@ -58,21 +62,26 @@ and maybe_closure value =
 
 let rec compile_cexpr = function
   | CExp_if (ae, l1, l2) ->
-    let ae' = compile_aexpr ae in
-    let func = block_parent (insertion_block builder) in
-    let then_block = append_block context "then" func in
-    let else_block = append_block context "else" func in
-    let merge_block = append_block context "merge" func in
-    let () = ignore (build_cond_br ae' then_block else_block builder) in
-    let () = position_at_end then_block builder in
+    let cond_val = compile_aexpr ae in
+    let bool_func = lookup_func "get_bool" in
+    let bool_func_type = find variable_type_table "get_bool" in
+    let bool_val =
+      build_call bool_func_type bool_func [| cond_val |] "cond_bool" builder
+    in
+    let current_func = block_parent (insertion_block builder) in
+    let then_block = append_block context "then" current_func in
+    let else_block = append_block context "else" current_func in
+    let merge_block = append_block context "merge" current_func in
+    ignore (build_cond_br bool_val then_block else_block builder);
+    position_at_end then_block builder;
     let then_val = compile_lexpr l1 in
-    let () = ignore (build_br merge_block builder) in
+    ignore (build_br merge_block builder);
     let then_bb = insertion_block builder in
-    let () = position_at_end else_block builder in
+    position_at_end else_block builder;
     let else_val = compile_lexpr l2 in
-    let () = ignore (build_br merge_block builder) in
+    ignore (build_br merge_block builder);
     let else_bb = insertion_block builder in
-    let () = position_at_end merge_block builder in
+    position_at_end merge_block builder;
     build_phi [ then_val, then_bb; else_val, else_bb ] "ite_result" builder
   | CExp_apply (s, ael) ->
     let func = lookup_function s my_module in
@@ -122,16 +131,7 @@ let compile_func f =
 
 let compile_funcs = function
   | AbsStr_func f -> ignore @@ compile_func f
-  | AbsStr_value_rec fl ->
-    let () =
-      List.iter
-        (fun (name, args, _) ->
-          let param_types = Array.make (List.length args) int_t in
-          let func_type = function_type int_t param_types in
-          ignore (declare_function name func_type my_module))
-        fl
-    in
-    ignore @@ List.map (fun func -> compile_func func) fl
+  | AbsStr_value_rec fl -> List.iter (fun f -> ignore @@ compile_func f) fl
   | AbsStr_value (s, _) ->
     let global_var = define_global s (const_null ptr_t) my_module in
     Hashtbl.add variable_value_table s global_var

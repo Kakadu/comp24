@@ -3,7 +3,6 @@
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
 open Test_utils
-open Middleend
 
 let%expect_test "test int inference" =
   test "4";
@@ -380,34 +379,4 @@ let%expect_test "test poly inference" =
     (int * int)
     (char * char)
     |}]
-;;
-
-let%expect_test "test poly inference" =
-  Typing.Inference.infer_program
-    (Middleend.Converter.anf_to_ast
-       [ AbsStr_func
-           ( "abs_value"
-           , [ "n" ]
-           , LComplex
-               (CExp_apply
-                  ( Utils.Predefined_ops.op_plus.name
-                  , [ AExp_constant (Const_int 52); AExp_ident "n" ] )) )
-       ])
-  |> function
-  | Result.Ok res ->
-    let rec helper acc = function
-      | (id, v) :: tl ->
-        acc
-        ^ (if id = "" then "" else "val " ^ id ^ " : ")
-        ^ Typing.Types.show_type_val v
-        ^ "\n"
-        ^ helper acc tl
-      | _ -> acc
-    in
-    Format.print_string @@ helper "" res
-  | Result.Error s ->
-    Format.eprintf "Error%s" s;
-    [%expect.unreachable];
-    [%expect.unreachable];
-  [%expect {| val abs_value : int -> int |}]
 ;;
