@@ -6,51 +6,8 @@ open Angstrom
 open Base
 open Common.Ast
 open Common.Base_lib
-
-(*===================== const =====================*)
-
-let cint n = Const_int n
-let cbool b = Const_bool b
-let cnil = Const_nil
-let cunit = Const_unit
-
-(*===================== core_type =====================*)
-
-let ptint = Ptyp_int
-let ptbool = Ptyp_bool
-let ptunit = Ptyp_unit
-let ptlist tp = Ptyp_list tp
-let ptvar idnt = Ptyp_var idnt
-let pttuple pt_list = Ptyp_tuple pt_list
-let ptarrow before_pt after_pt = Ptyp_arrow (before_pt, after_pt)
-
-(*===================== pattern =====================*)
-
-let pconst c = Pat_const c
-let pvar c = Pat_var c
-let pcons a b = Pat_cons (a, b)
-let pany = Pat_any
-let ptuple ps = Pat_tuple ps
-let pconstraint p ct = Pat_constraint (p, ct)
-
-(*===================== expression =====================*)
-
-let etype e tp = Exp_type (e, tp)
-let econst c = Exp_constant c
-let eval c = Exp_ident c
-let eapp f a = Exp_apply (f, a)
-let ematch v ptrns = Exp_match (v, ptrns)
-let efun i e = Exp_function (i, e)
-let ebinop o l r = Exp_apply (Exp_apply (o, l), r)
-let eunop o e = Exp_apply (o, e)
-let eite b t e = Exp_ifthenelse (b, t, e)
-let elet d e = Exp_let (d, e)
-let etuple es = Exp_tuple es
-let econs a b = Exp_list (a, b)
-let evalue_binding vb_pat vb_expr = { vb_pat; vb_expr }
-let edecl rec_flag bind_list = Decl (rec_flag, bind_list)
-let streval e = Str_eval e
-let strval d = Str_value d
+open Common.Ast_construct
+open LibF
 
 (*===================== Check conditions =====================*)
 
@@ -163,25 +120,25 @@ let ident = unchecked_ident >>= check_ident
 
 let infix_op =
   choice
-    [ token op_mul
-    ; token op_div
-    ; token op_plus
-    ; token op_minus
-    ; token op_less_eq
-    ; token op_less
-    ; token op_more
-    ; token op_more_eq
-    ; token op_eq
-    ; token op_2eq
-    ; token op_not_eq
-    ; token op_and
-    ; token op_or
-    ]
+  @@ List.map
+       ~f:(fun f -> token @@ get_name f)
+       [ op_mul
+       ; op_div
+       ; op_plus
+       ; op_minus
+       ; op_less_eq
+       ; op_less
+       ; op_more_eq
+       ; op_more
+       ; op_eq2
+       ; op_eq
+       ; op_not_eq
+       ; op_and
+       ; op_or
+       ]
 ;;
 
-let un_op =
-  choice [ token (un_op_prefix ^ un_op_minus); token (un_op_prefix ^ un_op_not) ]
-;;
+let un_op = token @@ get_name un_op_minus
 
 (*===================== Core types =====================*)
 
@@ -329,13 +286,8 @@ let e_decl pexpr =
     >>= fun first_vb ->
     many pars_secondary_vb >>| fun secondary_vbs -> rflag, first_vb :: secondary_vbs
   in
-  let validate_decl (rflag, vb_list) =
-    match rflag, vb_list with
-    | Nonrecursive, _ :: _ :: _ -> fail "Using 'and' available only with 'rec' flag"
-    | x -> return x
-  in
   let construct_decl (rflag, vb_list) = return @@ edecl rflag vb_list in
-  pars_decl >>= validate_decl >>= construct_decl
+  pars_decl >>= construct_decl
 ;;
 
 let e_ptrn_matching pexpr = lift2 (fun k v -> k, v) (pattern <* token "->") pexpr
@@ -357,19 +309,18 @@ let e_let pexpr = lift2 elet (e_decl pexpr) (token "in" *> pexpr)
 let bin_op chain1 e ops = chain1 e (ops >>| ebinop)
 let lbo = bin_op chainl1
 let rbo = bin_op chainr1
-let op l = choice (List.map ~f:(fun o -> token o >>| eval) l)
+let op l = choice (List.map ~f:(fun o -> token (get_name o) >>| eval) l)
 let mul_div = op [ op_mul; op_div ]
 let add_sub = op [ op_plus; op_minus ]
-let cmp = op [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_2eq; op_eq ]
+let cmp = op [ op_not_eq; op_less_eq; op_less; op_more_eq; op_more; op_eq2; op_eq ]
 let andop = op [ op_and ]
 let orop = op [ op_or ]
 
 let unop l =
-  choice
-    (List.map ~f:(fun o -> token o >>| fun un_name -> eval (un_op_prefix ^ un_name)) l)
+  choice (List.map ~f:(fun o -> token o >>| fun un_name -> eval (un un_name)) l)
 ;;
 
-let neg = unop [ un_op_not; un_op_minus ]
+let neg = unop [ f'sub' ]
 
 let expr =
   fix (fun pexpr ->
@@ -396,17 +347,17 @@ let parse_syntax_err msg = Common.Errors.Parser (Syntax_error msg)
 let parse s =
   match parse_string ~consume:All program s with
   | Ok v -> Ok v
-  | Error _ -> Error (parse_syntax_err "Syntax error")
+  | Error msg -> Error (parse_syntax_err msg)
 ;;
 
 let parse_prefix s =
   match parse_string ~consume:Prefix program s with
   | Ok v -> Ok v
-  | Error _ -> Error (parse_syntax_err "Syntax error")
+  | Error msg -> Error (parse_syntax_err msg)
 ;;
 
 module PP = struct
   let pp_error ppf = function
-    | Common.Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "%s" msg
+    | Common.Errors.Syntax_error msg -> Stdlib.Format.fprintf ppf "Syntax error: %s" msg
   ;;
 end

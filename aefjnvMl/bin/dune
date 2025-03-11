@@ -1,3 +1,35 @@
 (executable
- (public_name AefjnvMl)
- (name main))
+ (name llvm_runner)
+ (public_name llvm_runner)
+ (modules llvm_runner)
+ (libraries stdio aefjnvMl_lib aefjnvMl.Llvm_lib))
+
+(executable
+ (name codegen_runner)
+ (public_name codegen_runner)
+ (modules codegen_runner)
+ (libraries stdio aefjnvMl_lib aefjnvMl.Llvm_lib))
+
+(cram
+ (applies_to llvm_manytests codegen_manytests)
+ (deps
+  ./llvm_runner.exe
+  ./codegen_runner.exe
+  ../lib/llvm/runtime/rt_funcs.c
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/009let_poly.ml
+  manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
