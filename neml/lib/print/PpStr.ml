@@ -56,4 +56,4 @@ let pp_stritem : StrItem.t -> document =
 let pp_structure (str : structure) : document =
   let open PPrint in
   let str = List.map str ~f:pp_stritem in
-  flow (string ";;" ^^ twice hardline) str
+  flow (string ";;" ^^ hardline) str
