@@ -128,3 +128,80 @@ and compile_aexpr = function
     add_sym name v;
     compile_aexpr ae
 ;;
+
+let declare_func name args =
+  let arg_types = Array.make (List.length args) i64_t in
+  let func_type = function_type i64_t arg_types in
+  declare_function name func_type module_
+;;
+
+let compile_anf_binding (ALet (name, args, body)) =
+  let func = declare_func name args in
+  let bb = append_block ctx "entry" func in
+  position_at_end bb builder;
+
+  List.iteri (fun i arg_name ->
+    let arg_value = param func i in
+    set_value_name arg_name arg_value;
+    add_sym arg_name arg_value;
+  ) args;
+
+  let body_val = compile_aexpr body in
+  let _ = build_ret body_val builder in
+  func
+;;
+
+
+let compile_anf_decl = function
+  | ADNoRec bindings ->
+    List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
+  | ADREC bindings ->
+    List.iter (fun (ALet (name, args, _)) -> ignore (declare_func name args)) bindings;
+    List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
+;;
+
+
+
+let init_runtime () =
+  let runtime_ =
+    [ "create_closure", function_type i64_t [| i64_t; i64_t; i64_t |]
+    ; "apply_args_to_closure", var_arg_function_type i64_t [| i64_t; i64_t; i64_t |]
+    ; "print_int", function_type i64_t [| i64_t |]
+    ; "print_bool", function_type i64_t [| i64_t |]
+    ; "add", function_type i64_t [| i64_t; i64_t |]
+    ; "sub", function_type i64_t [| i64_t; i64_t |]
+    ; "mul", function_type i64_t [| i64_t; i64_t |]
+    ; "div", function_type i64_t [| i64_t; i64_t |]
+    ; "leq", function_type i64_t [| i64_t; i64_t |]
+    ; "less", function_type i64_t [| i64_t; i64_t |]
+    ; "geq", function_type i64_t [| i64_t; i64_t |]
+    ; "gre", function_type i64_t [| i64_t; i64_t |]
+    ; "eq", function_type i64_t [| i64_t; i64_t |]
+    ; "neq", function_type i64_t [| i64_t; i64_t |]
+    ; "and", function_type i64_t [| i64_t; i64_t |]
+    ; "or", function_type i64_t [| i64_t; i64_t |]
+    ; "fail_match", function_type i64_t [| i64_t |]
+    ]
+  in
+  List.iter (fun (name, ty) -> ignore (declare_function name ty module_)) runtime_
+;;
+
+
+let create_main program =
+  let main_type = function_type i64_t [||] in
+  let main = declare_function "main" main_type module_ in
+  let bb = append_block ctx "entry" main in
+  position_at_end bb builder;
+
+  init_runtime ();
+
+  List.iter (fun decl -> ignore (compile_anf_decl decl)) program;
+
+  let _ = build_ret (const_int i64_t 0) builder in
+  main
+;;
+
+let compile_program program filename =
+  let _ = create_main program in
+  print_module filename module_
+;;
