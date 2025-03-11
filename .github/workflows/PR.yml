@@ -157,13 +157,13 @@ jobs:
           echo "ZANUDA_REPORT_FILE_PATH=${{ env.LINTS_PATH }}/lints.txt" >> $GITHUB_ENV
 
       - name: Running linter in ${{ env.latest }}...
-        if: ${{ (env.IsNormal == true) }}
+        if: ${{ env.IsNormal }}
         run: |
           cd ${{ env.latest }}
           opam exec -- zanuda -dir . -add-prefix ${{ env.latest }}/ -no-no_toplevel_eval -ordjsonl ${{ env.RDJSON_FILE_PATH }} > ${{ env.ZANUDA_REPORT_FILE_PATH }}
 
       - name: SKIPPING linter in ${{ env.latest }}...
-        if: ${{ (env.IsD == true) }}
+        if: ${{ env.IsD }}
         run: |
           cd ${{ env.latest }}
           echo '' > ${{ env.ZANUDA_REPORT_FILE_PATH }}
