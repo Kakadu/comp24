@@ -5,8 +5,8 @@
 open Llvm
 open Anf_ast
 
-let sym_to_value : (string, llvalue) Hashtbl.t = Hashtbl.create 1
-let sym_to_type : (string, lltype) Hashtbl.t = Hashtbl.create 1
+let sym_to_value : (string, llvalue) Hashtbl.t = Hashtbl.create 10
+let sym_to_type : (string, lltype) Hashtbl.t = Hashtbl.create 10
 let lookup_name name = Hashtbl.find_opt sym_to_value name
 let lookup_type name = Hashtbl.find_opt sym_to_type name
 let add_sym name value = Hashtbl.add sym_to_value name value
@@ -41,7 +41,29 @@ let compile_binop op x y =
   | "( - )" -> build_sub x y "sub" builder
   | "( * )" -> build_mul x y "mul" builder
   | "( / )" -> build_sdiv x y "div" builder
+  | "( = )" | "( == )" -> build_icmp Icmp.Eq x y "eq" builder
+  | "( <> )" | "( != )" -> build_icmp Icmp.Ne x y "ne" builder
+  | "( > )" -> build_icmp Icmp.Sgt x y "sgt" builder
+  | "( >= )" -> build_icmp Icmp.Sge x y "sge" builder
+  | "( < )" -> build_icmp Icmp.Slt x y "slt" builder
+  | "( <= )" -> build_icmp Icmp.Sle x y "sle" builder
   | _ -> failwith ("Invalid operator: " ^ op)
+;;
+
+let is_binop = function
+  | "( + )"
+  | "( - )"
+  | "( * )"
+  | "( / )"
+  | "( = )"
+  | "( == )"
+  | "( <> )"
+  | "( != )"
+  | "( > )"
+  | "( >= )"
+  | "( < )"
+  | "( <= )" -> true
+  | _ -> false
 ;;
 
 let compile_immexpr = function
@@ -71,6 +93,8 @@ let compile_immexpr = function
 
 let rec compile_cexpr = function
   | CImmExpr expr -> compile_immexpr expr
+  | CEApply (name, [ arg1; arg2 ]) when is_binop name ->
+    compile_binop name (compile_immexpr arg1) (compile_immexpr arg2)
   | CEApply (name, args) ->
     let compiled_args = List.map compile_immexpr args in
     (match lookup_function name module_ with
@@ -139,18 +163,16 @@ let compile_anf_binding (ALet (name, args, body)) =
   let func = declare_func name args in
   let bb = append_block ctx "entry" func in
   position_at_end bb builder;
-
-  List.iteri (fun i arg_name ->
-    let arg_value = param func i in
-    set_value_name arg_name arg_value;
-    add_sym arg_name arg_value;
-  ) args;
-
+  List.iteri
+    (fun i arg_name ->
+      let arg_value = param func i in
+      set_value_name arg_name arg_value;
+      add_sym arg_name arg_value)
+    args;
   let body_val = compile_aexpr body in
   let _ = build_ret body_val builder in
   func
 ;;
-
 
 let compile_anf_decl = function
   | ADNoRec bindings ->
@@ -160,14 +182,11 @@ let compile_anf_decl = function
     List.iter (fun binding -> ignore (compile_anf_binding binding)) bindings
 ;;
 
-
-
-let init_runtime () =
+let init_runtime =
   let runtime_ =
     [ "create_closure", function_type i64_t [| i64_t; i64_t; i64_t |]
-    ; "apply_args_to_closure", var_arg_function_type i64_t [| i64_t; i64_t; i64_t |]
+    ; "apply_args", var_arg_function_type i64_t [| i64_t; i64_t; i64_t |]
     ; "print_int", function_type i64_t [| i64_t |]
-    ; "print_bool", function_type i64_t [| i64_t |]
     ; "add", function_type i64_t [| i64_t; i64_t |]
     ; "sub", function_type i64_t [| i64_t; i64_t |]
     ; "mul", function_type i64_t [| i64_t; i64_t |]
@@ -186,22 +205,18 @@ let init_runtime () =
   List.iter (fun (name, ty) -> ignore (declare_function name ty module_)) runtime_
 ;;
 
-
 let create_main program =
   let main_type = function_type i64_t [||] in
   let main = declare_function "main" main_type module_ in
   let bb = append_block ctx "entry" main in
   position_at_end bb builder;
-
-  init_runtime ();
-
+  init_runtime;
   List.iter (fun decl -> ignore (compile_anf_decl decl)) program;
-
   let _ = build_ret (const_int i64_t 0) builder in
   main
 ;;
 
-let compile_program program filename =
+let compile_program program =
   let _ = create_main program in
-  print_module filename module_
+  print_module "out.ll" module_
 ;;
