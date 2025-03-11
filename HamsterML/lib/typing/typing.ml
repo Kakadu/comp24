@@ -14,22 +14,37 @@ type inf_type =
   | TArrow of inf_type * inf_type (* 'a -> 'a *)
   | TPVar of var_id
 
-let rec pp_inf_type fmt = function
-  | TInt -> Format.fprintf fmt "int"
-  | TBool -> Format.fprintf fmt "bool"
-  | TString -> Format.fprintf fmt "string"
-  | TUnit -> Format.fprintf fmt "unit"
-  | TList t -> Format.fprintf fmt "%a list" pp_inf_type t
-  | TTuple types ->
-    Format.fprintf
-      fmt
-      "(%a)"
-      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " * ") pp_inf_type)
-      types
-  | TArrow ((TArrow (_, _) as t1), t2) ->
-    Format.fprintf fmt "(%a) -> %a" pp_inf_type t1 pp_inf_type t2
-  | TArrow (t1, t2) -> Format.fprintf fmt "%a -> %a" pp_inf_type t1 pp_inf_type t2
-  | TPVar v -> Format.fprintf fmt "'%d" v
+let pp_inf_type fmt typ =
+  let module VarMap = Stdlib.Map.Make (Int) in
+  let mapping = ref VarMap.empty in
+  let counter = ref 0 in
+  let rec aux fmt = function
+    | TInt -> Format.fprintf fmt "int"
+    | TBool -> Format.fprintf fmt "bool"
+    | TString -> Format.fprintf fmt "string"
+    | TUnit -> Format.fprintf fmt "unit"
+    | TList t -> Format.fprintf fmt "%a list" aux t
+    | TTuple ts ->
+      Format.fprintf
+        fmt
+        "(%a)"
+        (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt " * ") aux)
+        ts
+    | TArrow ((TArrow (_, _) as t1), t2) -> Format.fprintf fmt "(%a) -> %a" aux t1 aux t2
+    | TArrow (t1, t2) -> Format.fprintf fmt "%a -> %a" aux t1 aux t2
+    | TPVar v ->
+      let letter =
+        match VarMap.find_opt v !mapping with
+        | None ->
+          let l = String.make 1 (Stdlib.char_of_int (97 + !counter)) in
+          mapping := VarMap.add v l !mapping;
+          Stdlib.incr counter;
+          l
+        | Some l -> l
+      in
+      Format.fprintf fmt "'%s" letter
+  in
+  aux fmt typ
 ;;
 
 type error =
