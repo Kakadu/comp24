@@ -154,9 +154,9 @@ let remove_useless_bindings fn =
 ;;
 
 let collect_toplevels env =
-  List.fold ~init:env ~f:(fun env x ->
-    match x with
-    | CFLet (_, id, _, _) -> Set.add env id)
+  List.fold ~init:env ~f:(fun env ->
+      function
+      | CFLet (_, id, _, _) -> Set.add env id)
 ;;
 
 let anf (ast : Cf_ast.program) : Anf_ast.program =
