@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Runtime (aefjnvMl.Llvm_lib.Llvm_rt_support.Runtime)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../_odoc-theme/odoc.css"/><meta name="generator" content="odoc 2.4.4"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../index.html">aefjnvMl</a> &#x00BB; <a href="../../index.html">Llvm_lib</a> &#x00BB; <a href="../index.html">Llvm_rt_support</a> &#x00BB; Runtime</nav><header class="odoc-preamble"><h1>Module <code><span>Llvm_rt_support.Runtime</span></code></h1></header><nav class="odoc-toc"><ul><li><a href="#parameters">Parameters</a></li><li><a href="#signature">Signature</a></li></ul></nav><div class="odoc-content"><h2 id="parameters"><a href="#parameters" class="anchor"></a>Parameters</h2><div class="odoc-spec"><div class="spec parameter anchored" id="argument-1-Ctx"><a href="#argument-1-Ctx" class="anchor"></a><code><span><span class="keyword">module</span> </span><span><a href="argument-1-Ctx/index.html">Ctx</a></span><span> : <a href="../../Llvm_monad/module-type-LlvmGlobalCtx/index.html">Llvm_monad.LlvmGlobalCtx</a></span></code></div></div><h2 id="signature"><a href="#signature" class="anchor"></a>Signature</h2><div class="odoc-spec"><div class="spec value anchored" id="val-tp_to_lltp"><a href="#val-tp_to_lltp" class="anchor"></a><code><span><span class="keyword">val</span> tp_to_lltp : 
+  <span><a href="../../../Common/Ast/index.html#type-core_type">Common.Ast.core_type</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span>
+  <span class="type-var">'a</span> * <span><span>(<span class="xref-unresolved">Llvm</span>.lltype, string)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-create_func_type"><a href="#val-create_func_type" class="anchor"></a><code><span><span class="keyword">val</span> create_func_type : 
+  <span><span><span class="xref-unresolved">Llvm</span>.lltype list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="xref-unresolved">Llvm</span>.lltype <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../Common/Base_lib/LibF/index.html#type-vararg">Common.Base_lib.LibF.vararg</a> <span class="arrow">&#45;&gt;</span></span>
+  <span class="xref-unresolved">Llvm</span>.lltype</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-declare_std_aliased_func"><a href="#val-declare_std_aliased_func" class="anchor"></a><code><span><span class="keyword">val</span> declare_std_aliased_func : 
+  <span><a href="../../../Common/Base_lib/LibF/index.html#type-env_func">Common.Base_lib.LibF.env_func</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(unit, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-declare_stdlib_functions"><a href="#val-declare_stdlib_functions" class="anchor"></a><code><span><span class="keyword">val</span> declare_stdlib_functions : 
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span>unit list</span>, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-gen_id"><a href="#val-gen_id" class="anchor"></a><code><span><span class="keyword">val</span> gen_id : 
+  <span><span>string <a href="../../../Match_elimination/Me_ast/index.html#type-id_t">Match_elimination.Me_ast.id_t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(string, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-tag_int"><a href="#val-tag_int" class="anchor"></a><code><span><span class="keyword">val</span> tag_int : <span>int <span class="arrow">&#45;&gt;</span></span> int</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-rt_int"><a href="#val-rt_int" class="anchor"></a><code><span><span class="keyword">val</span> rt_int : <span>int <span class="arrow">&#45;&gt;</span></span> <span class="xref-unresolved">Llvm</span>.llvalue</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-null"><a href="#val-null" class="anchor"></a><code><span><span class="keyword">val</span> null : <span class="xref-unresolved">Llvm</span>.llvalue</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-gen_rt_int"><a href="#val-gen_rt_int" class="anchor"></a><code><span><span class="keyword">val</span> gen_rt_int : <span><span class="xref-unresolved">Llvm</span>.llbuilder <span class="arrow">&#45;&gt;</span></span> <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span> <span class="xref-unresolved">Llvm</span>.llvalue</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-untag_rt_int"><a href="#val-untag_rt_int" class="anchor"></a><code><span><span class="keyword">val</span> untag_rt_int : <span><span class="xref-unresolved">Llvm</span>.llbuilder <span class="arrow">&#45;&gt;</span></span> <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span> <span class="xref-unresolved">Llvm</span>.llvalue</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-gen_icmp"><a href="#val-gen_icmp" class="anchor"></a><code><span><span class="keyword">val</span> gen_icmp : 
+  <span><span class="xref-unresolved">Llvm</span>.Icmp.t <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span class="xref-unresolved">Llvm</span>.llvalue, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-call_empty_closure_alloc"><a href="#val-call_empty_closure_alloc" class="anchor"></a><code><span><span class="keyword">val</span> call_empty_closure_alloc : 
+  <span>string <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span class="xref-unresolved">Llvm</span>.llvalue, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-call_tuple_alloc"><a href="#val-call_tuple_alloc" class="anchor"></a><code><span><span class="keyword">val</span> call_tuple_alloc : 
+  <span>int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="xref-unresolved">Llvm</span>.llvalue list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span class="xref-unresolved">Llvm</span>.llvalue, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-call_append_to_list"><a href="#val-call_append_to_list" class="anchor"></a><code><span><span class="keyword">val</span> call_append_to_list : 
+  <span>int <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="xref-unresolved">Llvm</span>.llvalue list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span class="xref-unresolved">Llvm</span>.llvalue, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-call_apply_args_to_closure"><a href="#val-call_apply_args_to_closure" class="anchor"></a><code><span><span class="keyword">val</span> call_apply_args_to_closure : 
+  <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="xref-unresolved">Llvm</span>.llvalue list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(int
+   * <span>(string
+      * <span class="xref-unresolved">Llvm</span>.llbuilder
+      * <span>(<span><span>(<span class="xref-unresolved">Llvm</span>.lltype * int * <span class="xref-unresolved">Llvm</span>.llvalue)</span> <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>
+         * <span><span class="xref-unresolved">Llvm</span>.llvalue <span class="xref-unresolved">Stdlib__Map</span>.Make(<span class="xref-unresolved">Stdlib</span>.String).t</span>)</span>)</span>)</span>
+  * <span><span>(<span class="xref-unresolved">Llvm</span>.llvalue, <span class="xref-unresolved">Stdlib</span>.String.t)</span> <span class="xref-unresolved">Stdlib</span>.result</span></span></code></div></div></div></body></html>
