@@ -22,6 +22,6 @@ let start_identifiers =
     ]
   in
   let unary_operations = [ "U-"; "U+"; "UNot" ] in
-  let stdlib_functions = [ "print_int"; "print_bool" ] in
+  let stdlib_functions = [ "print_int"; "print_bool"; "print_string"; "print_char" ] in
   binary_operations @ unary_operations @ stdlib_functions
 ;;
