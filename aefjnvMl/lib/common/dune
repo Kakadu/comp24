@@ -1,7 +1,7 @@
 (library
  (name common)
  (public_name aefjnvMl.Common)
- (modules errors ast typedtree base_lib ast_construct naming ast_pp monads)
+ (modules errors ast typedtree base_lib)
  (libraries base angstrom ppx_deriving)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
