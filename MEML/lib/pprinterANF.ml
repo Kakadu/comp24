@@ -76,7 +76,7 @@ let pp_abindings formatter bindings =
           pp_rec
           r
           n_list
-         (String.concat " " p)
+          (String.concat " " p)
           pp_aexpression
           e;
         Format.fprintf formatter "\n"
@@ -86,7 +86,7 @@ let pp_abindings formatter bindings =
       | AExpression e ->
         pp_aexpression formatter e;
         Format.fprintf formatter "\n")
-     bindings
- ;;
+    bindings
+;;
 
 let pp_anf bindings = Format.asprintf "%a" pp_abindings bindings
