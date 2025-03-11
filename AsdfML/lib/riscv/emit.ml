@@ -18,8 +18,6 @@ let flush_fn () =
   Queue.clear fn_code
 ;;
 
-let empty_fn () = Queue.clear fn_code
-
 let emit_store ?(comm = "") reg =
   let stack_loc = fp, !stack_pos in
   emit sd reg stack_loc ~comm;
@@ -73,13 +71,12 @@ let emit_load ?(comm = "") (dst : loc) (src : rvalue) =
 
 let emit_load_reg ?(comm = "") reg src = emit_load (LReg reg) src ~comm
 
-let emit_load_tuple_field ?(comm = "") dst src =
-  match src with
+let emit_load_tuple_field ?(comm = "") dst = function
   | LArr (ptr, off) ->
     emit_load_reg dst (loc_to_rvalue ptr);
     emit_load_reg dst (ROffset (dst, 0));
     emit_load_reg dst (ROffset (dst, off)) ~comm
-  | _ -> failwith "wip"
+  | _ -> failwith "not tuple"
 ;;
 
 let emit_fn_call name (args : rvalue list) =
