@@ -36,19 +36,18 @@ Test let with let rec in
   > in
   > helper 0
   Types before middleend:
-  val length_tail : 'u list -> int
+  val length_tail : 'r list -> int
   
   Types after anf:
-  val __var_helper : int -> 's -> int
-  val __var_length_tail : 's -> int
+  Inference error: Type infering error: failed unification of types int and string
   
   let rec __var_helper __reserved_0 __reserved_1 = (let __anf_0 = ((same_cons __reserved_1) "[]") in 
-   (if __anf_0 then (let __nothing = ((same_cons __reserved_1) (([]))) in 
+   (if __anf_0 then (let __nothing = ((same_cons __reserved_1) 3) in 
    __reserved_0) else (let __anf_1 = ((same_cons __reserved_1) "::") in 
    (let __anf_2 = ((( && ) true) true) in 
    (let __anf_3 = ((( && ) __anf_2) true) in 
    (let __anf_4 = ((( && ) __anf_1) __anf_3) in 
-   (if __anf_4 then (let __reserved_3 = ((disassemble "::") __reserved_1) in 
+   (if __anf_4 then (let __reserved_3 = (disassemble __reserved_1) in 
    (let __var_h = ((get_from_tuple __reserved_3) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_3) 1) in 
    (let __anf_5 = ((( + ) __reserved_0) 1) in 
@@ -64,19 +63,18 @@ Test let with let rec in with several capture
   > in
   > helper 0;;
   Types before middleend:
-  val f : int -> 'v list -> int
+  val f : int -> 's list -> int
   
   Types after anf:
-  val __var_helper : int -> int -> 't -> int
-  val __var_f : int -> 't -> int
+  Inference error: Type infering error: failed unification of types int and string
   
   let rec __var_helper __var_a0 __reserved_1 __reserved_2 = (let __anf_0 = ((same_cons __reserved_2) "[]") in 
-   (if __anf_0 then (let __nothing = ((same_cons __reserved_2) (([]))) in 
+   (if __anf_0 then (let __nothing = ((same_cons __reserved_2) 3) in 
    __reserved_1) else (let __anf_1 = ((same_cons __reserved_2) "::") in 
    (let __anf_2 = ((( && ) true) true) in 
    (let __anf_3 = ((( && ) __anf_2) true) in 
    (let __anf_4 = ((( && ) __anf_1) __anf_3) in 
-   (if __anf_4 then (let __reserved_4 = ((disassemble "::") __reserved_2) in 
+   (if __anf_4 then (let __reserved_4 = (disassemble __reserved_2) in 
    (let __var_h = ((get_from_tuple __reserved_4) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_4) 1) in 
    (let __anf_5 = ((( + ) __reserved_1) __var_a0) in 

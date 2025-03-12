@@ -17,17 +17,13 @@
   
   declare ptr @create_char(i8 %0)
   
-  declare ptr @create_string(...)
+  declare ptr @create_string(i64 %0, ...)
   
   declare ptr @apply(ptr %0, i64 %1, ...)
   
   declare ptr @create_tuple(i64 %0, ...)
   
-  declare ptr @create_list(ptr %0, ptr %1)
-  
-  declare ptr @create_empty_list()
-  
-  declare ptr @create_cons(i1 %0, ptr %1)
+  declare ptr @create_constructor(i64 %0, ptr %1)
   
   declare ptr @create_function(ptr %0, i64 %1)
   
@@ -71,13 +67,13 @@
   
   declare void @print_int(ptr %0)
   
+  declare void @print_string(ptr %0)
+  
   declare ptr @disassemble(ptr %0)
   
   declare ptr @get_from_tuple(ptr %0, ptr %1)
   
   declare ptr @same_cons(ptr %0, ptr %1)
-  
-  declare ptr @get_cons_param(ptr %0)
   
   declare ptr @exception(ptr %0)
   
