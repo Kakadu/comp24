@@ -18,4 +18,5 @@
  ../manytests/typed/006partial3.ml
  tests/017op.ml
  tests/018print.ml
+ tests/019and.ml
  ))

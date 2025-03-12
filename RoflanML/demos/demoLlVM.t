@@ -1012,3 +1012,125 @@
   
   
   
+  
+  --------------- ../compiler/tests/019and.ml
+  ; ModuleID = 'Roflan'
+  source_filename = "Roflan"
+  
+  @main.1 = global ptr null
+  
+  declare ptr @RoflanML_eq(ptr, ptr)
+  
+  declare ptr @RoflanML_neq(ptr, ptr)
+  
+  declare ptr @RoflanML_gt(ptr, ptr)
+  
+  declare ptr @RoflanML_ge(ptr, ptr)
+  
+  declare ptr @RoflanML_lt(ptr, ptr)
+  
+  declare ptr @RoflanML_le(ptr, ptr)
+  
+  declare ptr @RoflanML_or(ptr, ptr)
+  
+  declare ptr @RoflanML_and(ptr, ptr)
+  
+  declare ptr @RoflanML_add(ptr, ptr)
+  
+  declare ptr @RoflanML_sub(ptr, ptr)
+  
+  declare ptr @RoflanML_mul(ptr, ptr)
+  
+  declare ptr @RoflanML_div(ptr, ptr)
+  
+  declare ptr @Create_int(i64)
+  
+  declare ptr @Create_bool(i1)
+  
+  declare ptr @Create_unit()
+  
+  declare ptr @Apply(ptr, ...)
+  
+  declare i64 @Get_int(ptr)
+  
+  declare i1 @Get_bool(ptr)
+  
+  declare ptr @print_int(ptr)
+  
+  declare ptr @print_bool(ptr)
+  
+  declare ptr @Create_closure(ptr, i64)
+  
+  define ptr @fac(ptr %n) {
+  entry:
+    %closure = call ptr @Create_closure(ptr @RoflanML_le, i64 2)
+    %boxed_int = call ptr @Create_int(i64 1)
+    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
+    %cond_bool = call i1 @Get_bool(ptr %apply_result)
+    br i1 %cond_bool, label %then, label %else
+  
+  then:                                             ; preds = %entry
+    %boxed_int1 = call ptr @Create_int(i64 1)
+    br label %merge
+  
+  else:                                             ; preds = %entry
+    %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
+    %boxed_int3 = call ptr @Create_int(i64 1)
+    %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
+    %closure5 = call ptr @Create_closure(ptr @another_fac, i64 1)
+    %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
+    %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
+    %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
+    br label %merge
+  
+  merge:                                            ; preds = %else, %then
+    %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
+    ret ptr %branch_result
+  }
+  
+  define ptr @another_fac(ptr %n) {
+  entry:
+    %closure = call ptr @Create_closure(ptr @RoflanML_le, i64 2)
+    %boxed_int = call ptr @Create_int(i64 1)
+    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %n, ptr %boxed_int)
+    %cond_bool = call i1 @Get_bool(ptr %apply_result)
+    br i1 %cond_bool, label %then, label %else
+  
+  then:                                             ; preds = %entry
+    %boxed_int1 = call ptr @Create_int(i64 1)
+    br label %merge
+  
+  else:                                             ; preds = %entry
+    %closure2 = call ptr @Create_closure(ptr @RoflanML_sub, i64 2)
+    %boxed_int3 = call ptr @Create_int(i64 1)
+    %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 2, ptr %n, ptr %boxed_int3)
+    %closure5 = call ptr @Create_closure(ptr @fac, i64 1)
+    %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 1, ptr %apply_result4)
+    %closure7 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
+    %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %n, ptr %apply_result6)
+    br label %merge
+  
+  merge:                                            ; preds = %else, %then
+    %branch_result = phi ptr [ %boxed_int1, %then ], [ %apply_result8, %else ]
+    ret ptr %branch_result
+  }
+  
+  define i32 @main() {
+  entry:
+    %closure = call ptr @Create_closure(ptr @fac, i64 1)
+    %boxed_int = call ptr @Create_int(i64 4)
+    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 1, ptr %boxed_int)
+    %closure1 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %apply_result2 = call ptr (ptr, ...) @Apply(ptr %closure1, i64 1, ptr %apply_result)
+    %closure3 = call ptr @Create_closure(ptr @another_fac, i64 1)
+    %boxed_int4 = call ptr @Create_int(i64 4)
+    %apply_result5 = call ptr (ptr, ...) @Apply(ptr %closure3, i64 1, ptr %boxed_int4)
+    %closure6 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %apply_result7 = call ptr (ptr, ...) @Apply(ptr %closure6, i64 1, ptr %apply_result5)
+    %boxed_int8 = call ptr @Create_int(i64 0)
+    store ptr %boxed_int8, ptr @main.1, align 8
+    ret i32 0
+  }
+  
+  
+  
