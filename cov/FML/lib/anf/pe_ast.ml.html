@@ -254,68 +254,68 @@ type pe_program = pe_declaration list
 
 let const_to_str = function
   | <span data-count="20">P</span>e_CBool b -&gt; if b then <span data-count="12">"</span>true" else <span data-count="8">"</span>false"
-  | <span data-count="493">P</span>e_Cint i -&gt; Format.sprintf "%i" i
+  | <span data-count="352">P</span>e_Cint i -&gt; Format.sprintf "%i" i
 ;;
 
 let rec expr_to_str = function
-  | <span data-count="8">P</span>e_EUnit -&gt; "()"
-  | <span data-count="48">P</span>e_ENill -&gt; "[]"
-  | <span data-count="2158">P</span>e_EIdentifier a -&gt; a
-  | <span data-count="513">P</span>e_EConst c -&gt; const_to_str c
-  | <span data-count="147">P</span>e_EIf (e1, e2, e3) -&gt;
+  | <span data-count="2">P</span>e_EUnit -&gt; "()"
+  | <span data-count="12">P</span>e_ENill -&gt; "[]"
+  | <span data-count="1181">P</span>e_EIdentifier a -&gt; a
+  | <span data-count="372">P</span>e_EConst c -&gt; const_to_str c
+  | <span data-count="66">P</span>e_EIf (e1, e2, e3) -&gt;
     Format.sprintf
       "if %s\nthen %s\nelse %s"
-      (expr_to_st<span data-count="147">r</span> e1)
-      (expr_to_st<span data-count="147">r</span> e2)
-      (expr_to_st<span data-count="147">r</span> e3)
-  | <span data-count="232">P</span>e_EFun (args, e) -&gt;
-    Format.sprintf "(fun %s -&gt; %s)" (String.conca<span data-count="232">t</span> " " args) (expr_to_st<span data-count="232">r</span> e)
-  | <span data-count="1758">P</span>e_EApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="1758">r</span> e1) (expr_to_st<span data-count="1758">r</span> e2)
-  | <span data-count="295">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
-    Format.sprintf "let %s = %s in\n%s" name (expr_to_st<span data-count="295">r</span> e1) (expr_to_st<span data-count="295">r</span> e2)
-  | <span data-count="8">P</span>e_ELet (Rec, name1, e1, e2) -&gt;
-    Format.sprintf "let rec %s = %s in\n%s" name1 (expr_to_st<span data-count="8">r</span> e1) (expr_to_st<span data-count="8">r</span> e2)
-  | <span data-count="108">P</span>e_ECons (e1, e2) -&gt; Format.sprintf "(%s::%s)" (expr_to_st<span data-count="108">r</span> e1) (expr_to_st<span data-count="108">r</span> e2)
-  | <span data-count="20">P</span>e_ETuple e_list -&gt;
+      (expr_to_st<span data-count="66">r</span> e1)
+      (expr_to_st<span data-count="66">r</span> e2)
+      (expr_to_st<span data-count="66">r</span> e3)
+  | <span data-count="151">P</span>e_EFun (args, e) -&gt;
+    Format.sprintf "(fun %s -&gt; %s)" (String.conca<span data-count="151">t</span> " " args) (expr_to_st<span data-count="151">r</span> e)
+  | <span data-count="1063">P</span>e_EApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="1063">r</span> e1) (expr_to_st<span data-count="1063">r</span> e2)
+  | <span data-count="160">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
+    Format.sprintf "let %s = %s in\n%s" name (expr_to_st<span data-count="160">r</span> e1) (expr_to_st<span data-count="160">r</span> e2)
+  | <span data-count="2">P</span>e_ELet (Rec, name1, e1, e2) -&gt;
+    Format.sprintf "let rec %s = %s in\n%s" name1 (expr_to_st<span data-count="2">r</span> e1) (expr_to_st<span data-count="2">r</span> e2)
+  | <span data-count="27">P</span>e_ECons (e1, e2) -&gt; Format.sprintf "(%s::%s)" (expr_to_st<span data-count="27">r</span> e1) (expr_to_st<span data-count="27">r</span> e2)
+  | <span data-count="11">P</span>e_ETuple e_list -&gt;
     Format.sprintf
       "(%s)"
-      (expr_to_st<span data-count="20">r</span> (List.h<span data-count="20">d</span> e_list)
-       ^ List.fold_lef<span data-count="20">t</span>
-           (fun acc e -&gt; <span data-count="28">a</span>cc ^ Format.sprint<span data-count="28">f</span> ", %s" (expr_to_st<span data-count="28">r</span> e))
+      (expr_to_st<span data-count="11">r</span> (List.h<span data-count="11">d</span> e_list)
+       ^ List.fold_lef<span data-count="11">t</span>
+           (fun acc e -&gt; <span data-count="19">a</span>cc ^ Format.sprint<span data-count="19">f</span> ", %s" (expr_to_st<span data-count="19">r</span> e))
            ""
-           (List.t<span data-count="20">l</span> e_list))
+           (List.t<span data-count="11">l</span> e_list))
 ;;
 
 let decl_to_str = function
-  | <span data-count="165">P</span>e_Nonrec decl_list -&gt;
+  | <span data-count="126">P</span>e_Nonrec decl_list -&gt;
     (match decl_list with
      | <span data-count="0">[</span>] -&gt; ""
-     | <span data-count="165">(</span>name, e) :: tl -&gt;
-       Format.sprint<span data-count="165">f</span> "let %s = %s" name (expr_to_st<span data-count="165">r</span> e)
-       ^ List.fold_lef<span data-count="165">t</span>
+     | <span data-count="126">(</span>name, e) :: tl -&gt;
+       Format.sprint<span data-count="126">f</span> "let %s = %s" name (expr_to_st<span data-count="126">r</span> e)
+       ^ List.fold_lef<span data-count="126">t</span>
            (fun acc (name, e) -&gt;
              <span data-count="0">a</span>cc ^ Format.sprint<span data-count="0">f</span> "\nlet %s = %s" name (expr_to_st<span data-count="0">r</span> e))
            ""
            tl)
-  | <span data-count="67">P</span>e_Rec decl_list -&gt;
+  | <span data-count="37">P</span>e_Rec decl_list -&gt;
     (match decl_list with
      | <span data-count="0">[</span>] -&gt; ""
-     | <span data-count="67">(</span>name, e) :: tl -&gt;
-       Format.sprint<span data-count="67">f</span> "let rec %s = %s" name (expr_to_st<span data-count="67">r</span> e)
-       ^ List.fold_lef<span data-count="67">t</span>
+     | <span data-count="37">(</span>name, e) :: tl -&gt;
+       Format.sprint<span data-count="37">f</span> "let rec %s = %s" name (expr_to_st<span data-count="37">r</span> e)
+       ^ List.fold_lef<span data-count="37">t</span>
            (fun acc (name, e) -&gt;
-             <span data-count="4">a</span>cc ^ Format.sprint<span data-count="4">f</span> "\nand %s = %s" name (expr_to_st<span data-count="4">r</span> e))
+             <span data-count="1">a</span>cc ^ Format.sprint<span data-count="1">f</span> "\nand %s = %s" name (expr_to_st<span data-count="1">r</span> e))
            ""
            tl)
 ;;
 
 let pp_pe_program ppf p =
-  <span data-count="67">l</span>et len = List.length p in
-  <span data-count="67">L</span>ist.iteri
+  <span data-count="55">l</span>et len = List.length p in
+  <span data-count="55">L</span>ist.iteri
     (fun i a -&gt;
-      <span data-count="232">i</span>f i = len - 1
-      then <span data-count="67">F</span>ormat.fprintf ppf "%s" (decl_to_st<span data-count="67">r</span> a)
-      else <span data-count="165">F</span>ormat.fprintf ppf "%s\n\n" (decl_to_st<span data-count="165">r</span> a))
+      <span data-count="163">i</span>f i = len - 1
+      then <span data-count="55">F</span>ormat.fprintf ppf "%s" (decl_to_st<span data-count="55">r</span> a)
+      else <span data-count="108">F</span>ormat.fprintf ppf "%s\n\n" (decl_to_st<span data-count="108">r</span> a))
     p
 ;;
 </code></pre>

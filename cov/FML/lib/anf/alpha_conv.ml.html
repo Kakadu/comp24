@@ -262,106 +262,106 @@ open Common.MonadCounter
 open Common.StrSet
 
 let rec ac_expr env bindings = function
-  | <span data-count="7">P</span>e_EUnit -&gt; return Pe_EUnit
-  | <span data-count="39">P</span>e_ENill -&gt; return Pe_ENill
-  | <span data-count="580">P</span>e_EConst _ as c -&gt; return c
-  | <span data-count="2091">P</span>e_EIdentifier x as v -&gt;
+  | <span data-count="2">P</span>e_EUnit -&gt; return Pe_EUnit
+  | <span data-count="12">P</span>e_ENill -&gt; return Pe_ENill
+  | <span data-count="453">P</span>e_EConst _ as c -&gt; return c
+  | <span data-count="1322">P</span>e_EIdentifier x as v -&gt;
     (match StrMap.find bindings x with
-     | <span data-count="61">S</span>ome x -&gt; return @@ Pe_EIdentifier x
-     | <span data-count="2030">N</span>one -&gt; return v)
-  | <span data-count="88">P</span>e_ECons (h, t) -&gt;
-    let* h = ac_exp<span data-count="88">r</span> env bindings h in
-    <span data-count="88">l</span>et* t = ac_exp<span data-count="88">r</span> env bindings t in
-    <span data-count="88">r</span>eturn @@ Pe_ECons (h, t)
-  | <span data-count="1778">P</span>e_EApp (e1, e2) -&gt;
-    let* e1 = ac_exp<span data-count="1778">r</span> env bindings e1 in
-    <span data-count="1778">l</span>et* e2 = ac_exp<span data-count="1778">r</span> env bindings e2 in
-    <span data-count="1778">r</span>eturn @@ Pe_EApp (e1, e2)
-  | <span data-count="142">P</span>e_EIf (e1, e2, e3) -&gt;
-    let* e1 = ac_exp<span data-count="142">r</span> env bindings e1 in
-    <span data-count="142">l</span>et* e2 = ac_exp<span data-count="142">r</span> env bindings e2 in
-    <span data-count="142">l</span>et* e3 = ac_exp<span data-count="142">r</span> env bindings e3 in
-    <span data-count="142">r</span>eturn @@ Pe_EIf (e1, e2, e3)
-  | <span data-count="258">P</span>e_EFun (args, body) -&gt;
+     | <span data-count="50">S</span>ome x -&gt; return @@ Pe_EIdentifier x
+     | <span data-count="1272">N</span>one -&gt; return v)
+  | <span data-count="27">P</span>e_ECons (h, t) -&gt;
+    let* h = ac_exp<span data-count="27">r</span> env bindings h in
+    <span data-count="27">l</span>et* t = ac_exp<span data-count="27">r</span> env bindings t in
+    <span data-count="27">r</span>eturn @@ Pe_ECons (h, t)
+  | <span data-count="1224">P</span>e_EApp (e1, e2) -&gt;
+    let* e1 = ac_exp<span data-count="1224">r</span> env bindings e1 in
+    <span data-count="1224">l</span>et* e2 = ac_exp<span data-count="1224">r</span> env bindings e2 in
+    <span data-count="1224">r</span>eturn @@ Pe_EApp (e1, e2)
+  | <span data-count="78">P</span>e_EIf (e1, e2, e3) -&gt;
+    let* e1 = ac_exp<span data-count="78">r</span> env bindings e1 in
+    <span data-count="78">l</span>et* e2 = ac_exp<span data-count="78">r</span> env bindings e2 in
+    <span data-count="78">l</span>et* e3 = ac_exp<span data-count="78">r</span> env bindings e3 in
+    <span data-count="78">r</span>eturn @@ Pe_EIf (e1, e2, e3)
+  | <span data-count="185">P</span>e_EFun (args, body) -&gt;
     let* args, env, bindings =
-      fold_lef<span data-count="258">t</span>
+      fold_lef<span data-count="185">t</span>
         args
-        ~init:(retur<span data-count="258">n</span> ([], env, bindings))
+        ~init:(retur<span data-count="185">n</span> ([], env, bindings))
         ~f:(fun (names, env, bindings) name -&gt;
-          <span data-count="492">l</span>et* env, bindings, name = renam<span data-count="492">e</span> env bindings name in
-          <span data-count="492">r</span>eturn (name :: names, env, bindings))
+          <span data-count="361">l</span>et* env, bindings, name = renam<span data-count="361">e</span> env bindings name in
+          <span data-count="361">r</span>eturn (name :: names, env, bindings))
     in
-    <span data-count="258">l</span>et args = List.rev args in
-    <span data-count="258">l</span>et* body = ac_exp<span data-count="258">r</span> env bindings body in
-    <span data-count="258">r</span>eturn @@ Pe_EFun (args, body)
-  | <span data-count="19">P</span>e_ETuple el -&gt;
-    let* e_list = ma<span data-count="19">p</span> el ~f:(ac_exp<span data-count="19">r</span> env bindings) in
-    <span data-count="19">r</span>eturn @@ Pe_ETuple e_list
-  | <span data-count="307">P</span>e_ELet (rec_flag, name, e1, e2) -&gt;
-    let* new_e1 = ac_exp<span data-count="307">r</span> env bindings e1 in
-    <span data-count="307">l</span>et* env, bindings, new_name = renam<span data-count="307">e</span> env bindings name in
-    <span data-count="307">l</span>et* new_e2 = ac_exp<span data-count="307">r</span> env bindings e2 in
-    <span data-count="307">r</span>eturn @@ Pe_ELet (rec_flag, new_name, new_e1, new_e2)
+    <span data-count="185">l</span>et args = List.rev args in
+    <span data-count="185">l</span>et* body = ac_exp<span data-count="185">r</span> env bindings body in
+    <span data-count="185">r</span>eturn @@ Pe_EFun (args, body)
+  | <span data-count="11">P</span>e_ETuple el -&gt;
+    let* e_list = ma<span data-count="11">p</span> el ~f:(ac_exp<span data-count="11">r</span> env bindings) in
+    <span data-count="11">r</span>eturn @@ Pe_ETuple e_list
+  | <span data-count="194">P</span>e_ELet (rec_flag, name, e1, e2) -&gt;
+    let* new_e1 = ac_exp<span data-count="194">r</span> env bindings e1 in
+    <span data-count="194">l</span>et* env, bindings, new_name = renam<span data-count="194">e</span> env bindings name in
+    <span data-count="194">l</span>et* new_e2 = ac_exp<span data-count="194">r</span> env bindings e2 in
+    <span data-count="194">r</span>eturn @@ Pe_ELet (rec_flag, new_name, new_e1, new_e2)
 
 and rename env binds name =
-  <span data-count="1032">i</span>f String.equal name "()"
-  then <span data-count="110">r</span>eturn (env, binds, "()")
-  else <span data-count="922">i</span>f find env name
+  <span data-count="724">i</span>f String.equal name "()"
+  then <span data-count="92">r</span>eturn (env, binds, "()")
+  else <span data-count="632">i</span>f find env name
   then
-    <span data-count="64">l</span>et* fresh = fresh in
-    <span data-count="64">l</span>et id = get_id fresh in
-    <span data-count="64">r</span>eturn (ad<span data-count="64">d</span> env id, StrMap.updat<span data-count="64">e</span> binds name ~f:(fun _ -&gt; <span data-count="64">i</span>d), id)
-  else <span data-count="858">r</span>eturn (ad<span data-count="858">d</span> env name, binds, name)
+    <span data-count="56">l</span>et* fresh = fresh in
+    <span data-count="56">l</span>et id = get_id fresh in
+    <span data-count="56">r</span>eturn (ad<span data-count="56">d</span> env id, StrMap.updat<span data-count="56">e</span> binds name ~f:(fun _ -&gt; <span data-count="56">i</span>d), id)
+  else <span data-count="576">r</span>eturn (ad<span data-count="576">d</span> env name, binds, name)
 ;;
 
 let ac_declaration env bindings = function
-  | <span data-count="162">P</span>e_Nonrec bindings_list -&gt;
+  | <span data-count="126">P</span>e_Nonrec bindings_list -&gt;
     let* decls, env, bindings =
-      List.fold_lef<span data-count="162">t</span>
+      List.fold_lef<span data-count="126">t</span>
         bindings_list
-        ~init:(retur<span data-count="162">n</span> ([], env, bindings))
+        ~init:(retur<span data-count="126">n</span> ([], env, bindings))
         ~f:(fun acc (name, expr) -&gt;
-          <span data-count="162">l</span>et* acc_decls, acc_env, acc_bindings = acc in
-          <span data-count="162">l</span>et* new_env, new_bindings, new_name = renam<span data-count="162">e</span> acc_env acc_bindings name in
-          <span data-count="162">l</span>et* e = ac_exp<span data-count="162">r</span> env bindings expr in
-          <span data-count="162">r</span>eturn ((new_name, e) :: acc_decls, new_env, new_bindings))
+          <span data-count="126">l</span>et* acc_decls, acc_env, acc_bindings = acc in
+          <span data-count="126">l</span>et* new_env, new_bindings, new_name = renam<span data-count="126">e</span> acc_env acc_bindings name in
+          <span data-count="126">l</span>et* e = ac_exp<span data-count="126">r</span> env bindings expr in
+          <span data-count="126">r</span>eturn ((new_name, e) :: acc_decls, new_env, new_bindings))
     in
-    <span data-count="162">r</span>eturn (env, bindings, Pe_Nonrec (List.re<span data-count="162">v</span> decls))
-  | <span data-count="67">P</span>e_Rec bindings_list -&gt;
+    <span data-count="126">r</span>eturn (env, bindings, Pe_Nonrec (List.re<span data-count="126">v</span> decls))
+  | <span data-count="42">P</span>e_Rec bindings_list -&gt;
     let ids, exps = List.unzip bindings_list in
-    <span data-count="67">l</span>et* ids, env, bindings =
-      fold_lef<span data-count="67">t</span>
+    <span data-count="42">l</span>et* ids, env, bindings =
+      fold_lef<span data-count="42">t</span>
         ids
-        ~init:(retur<span data-count="67">n</span> ([], env, bindings))
+        ~init:(retur<span data-count="42">n</span> ([], env, bindings))
         ~f:(fun (ids, env, bindings) id -&gt;
-          <span data-count="71">l</span>et* env, bindings, id = renam<span data-count="71">e</span> env bindings id in
-          <span data-count="71">r</span>eturn (id :: ids, env, bindings))
+          <span data-count="43">l</span>et* env, bindings, id = renam<span data-count="43">e</span> env bindings id in
+          <span data-count="43">r</span>eturn (id :: ids, env, bindings))
     in
-    <span data-count="67">l</span>et ids = List.rev ids in
-    <span data-count="67">l</span>et exps = List.map exps ~f:(ac_exp<span data-count="67">r</span> env bindings) in
-    <span data-count="67">l</span>et* bindings_list =
-      List.fold2_ex<span data-count="67">n</span> ids exps ~init:(retur<span data-count="67">n</span> []) ~f:(fun acc name expr -&gt;
-        <span data-count="71">l</span>et* acc = acc in
-        <span data-count="71">l</span>et* expr = expr in
-        <span data-count="71">r</span>eturn ((name, expr) :: acc))
+    <span data-count="42">l</span>et ids = List.rev ids in
+    <span data-count="42">l</span>et exps = List.map exps ~f:(ac_exp<span data-count="42">r</span> env bindings) in
+    <span data-count="42">l</span>et* bindings_list =
+      List.fold2_ex<span data-count="42">n</span> ids exps ~init:(retur<span data-count="42">n</span> []) ~f:(fun acc name expr -&gt;
+        <span data-count="43">l</span>et* acc = acc in
+        <span data-count="43">l</span>et* expr = expr in
+        <span data-count="43">r</span>eturn ((name, expr) :: acc))
     in
-    <span data-count="67">l</span>et bindings_list = List.rev bindings_list in
-    <span data-count="67">r</span>eturn (env, bindings, Pe_Rec bindings_list)
+    <span data-count="42">l</span>et bindings_list = List.rev bindings_list in
+    <span data-count="42">r</span>eturn (env, bindings, Pe_Rec bindings_list)
 ;;
 
 let ac_program program env =
-  <span data-count="79">l</span>et rec helper env bindings = function
-    | <span data-count="79">[</span>] -&gt; return []
-    | <span data-count="229">h</span>d :: tl -&gt;
-      let* env, bindings, ast = ac_declaratio<span data-count="229">n</span> env bindings hd in
-      <span data-count="229">l</span>et* rest = helpe<span data-count="229">r</span> env bindings tl in
-      <span data-count="229">r</span>eturn (ast :: rest)
+  <span data-count="68">l</span>et rec helper env bindings = function
+    | <span data-count="68">[</span>] -&gt; return []
+    | <span data-count="168">h</span>d :: tl -&gt;
+      let* env, bindings, ast = ac_declaratio<span data-count="168">n</span> env bindings hd in
+      <span data-count="168">l</span>et* rest = helpe<span data-count="168">r</span> env bindings tl in
+      <span data-count="168">r</span>eturn (ast :: rest)
   in
-  helper env (Map.empt<span data-count="79">y</span> (module String)) program
+  helper env (Map.empt<span data-count="68">y</span> (module String)) program
 ;;
 
 let run_alpha_conv bindings init prog =
-  <span data-count="79">r</span>un (ac_progra<span data-count="79">m</span> prog (of_lis<span data-count="79">t</span> builtins)) bindings init
+  <span data-count="68">r</span>un (ac_progra<span data-count="68">m</span> prog (of_lis<span data-count="68">t</span> builtins)) bindings init
 ;;
 </code></pre>
       </div>
