@@ -66,16 +66,16 @@
 
 (cram
  (applies_to demoLlVM)
- (deps ./demoLlVM.exe
- ../manytests/typed/001fac.ml
- ../manytests/typed/002fac.ml
- ../manytests/typed/003fib.ml
- ../manytests/typed/004manyargs.ml
- ../manytests/typed/005fix.ml
- ../manytests/typed/006partial.ml
- ../manytests/typed/006partial2.ml
- ../manytests/typed/006partial3.ml
- ../manytests/typed/007order.ml
- ../compiler/tests/017op.ml
- ../compiler/tests/018and.ml
- ))
+ (deps
+  ./demoLlVM.exe
+  ../manytests/typed/001fac.ml
+  ../manytests/typed/002fac.ml
+  ../manytests/typed/003fib.ml
+  ../manytests/typed/004manyargs.ml
+  ../manytests/typed/005fix.ml
+  ../manytests/typed/006partial.ml
+  ../manytests/typed/006partial2.ml
+  ../manytests/typed/006partial3.ml
+  ../manytests/typed/007order.ml
+  ../compiler/tests/017op.ml
+  ../compiler/tests/018and.ml))

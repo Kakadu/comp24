@@ -5,4 +5,4 @@ let main =
   let () = print_int (fac 4) in
   let () = print_int (another_fac 4) in
   0
-
+;;
