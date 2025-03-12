@@ -74,12 +74,17 @@ let rec generate_immexpr (expr : immexpr) : llvalue =
          "boxed_unit"
          llvm_builder)
   | ImmVar name ->
-    let value = find_symbol name in
-    (match classify_value value with
+    let v = find_symbol name in
+    let loaded =
+      if Llvm.classify_value v = Llvm.ValueKind.GlobalVariable
+      then build_load (Llvm.type_of v) v ("load_" ^ name) llvm_builder
+      else v
+    in
+    (match classify_value loaded with
      | ValueKind.Function ->
-       let arity = Array.length (params value) in
-       generate_closure value arity
-     | _ -> value)
+       let arity = Array.length (params loaded) in
+       generate_closure loaded arity
+     | _ -> loaded)
   | ImmTuple (e1, e2, rest) ->
     let elements = List.map generate_immexpr (e1 :: e2 :: rest) in
     build_call
@@ -201,27 +206,26 @@ let generate_main program =
   let main_func = Llvm.declare_function "main" main_type llvm_module in
   let entry = append_block llvm_context "entry" main_func in
   position_at_end entry llvm_builder;
-  (match
-     List.find_opt
-       (function
-         | ADLet (NonRec, name, [], _) when name = "()" -> true
-         | _ -> false)
-       program
-   with
-   | Some (ADLet (_, "()", [], body)) -> ignore (generate_aexpr body)
-   | _ ->
-     List.iter
-       (function
-         | ADLet (NonRec, name, [], body) when name <> "()" ->
+  List.iter
+    (function
+      | ADLet (NonRec, "()", [], body) ->
+        (* Генерируем тело, но не сохраняем результат *)
+        ignore (generate_aexpr body)
+      | ADLet (NonRec, name, [], body) ->
+        let value = generate_aexpr body in
+        register_symbol name value;
+        (match body with
+         | ACExpr (CImm (ImmVar _)) -> ()
+         | _ ->
            let global_var =
              define_global name (const_null value_pointer_type) llvm_module
            in
            register_symbol name global_var;
-           let compiled_val = generate_aexpr body in
-           ignore (build_store compiled_val global_var llvm_builder)
-         | _ -> ())
-       program);
-  ignore (build_ret (const_int int32_type 0) llvm_builder)
+           ignore (build_store value global_var llvm_builder))
+      | _ -> ())
+    program;
+  ignore (build_ret (const_int int32_type 0) llvm_builder);
+  main_func
 ;;
 
 (* Регистрация заглушек runtime-функций *)
@@ -354,6 +358,6 @@ let compile_program (program : aprogram) : Llvm.llmodule =
         ignore (generate_function (rec_flag, name, args, body))
       | _ -> ())
     program;
-  generate_main program;
+  ignore (generate_main program);
   llvm_module
 ;;
