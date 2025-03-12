@@ -168,11 +168,16 @@ extern "C" Value *apply(Value *v, int count, ...) {
   auto copy = new Value(v->get_func());
 
   auto &func = copy->get_func();
+  std::vector<Value *> next;
   va_list varargs;
   va_start(varargs, count);
   for (auto _ : std::views::iota(0, count)) {
     auto c = va_arg(varargs, Value *);
-    func.args.emplace_back(c);
+    if (func.can_call()) {
+      next.emplace_back(c);
+    } else {
+      func.args.emplace_back(c);
+    }
   }
   va_end(varargs);
 
@@ -192,6 +197,9 @@ extern "C" Value *apply(Value *v, int count, ...) {
 
     Value *result;
     ffi_call(&cif, FFI_FN(func.func), &result, args.data());
+    if (!next.empty()) {
+      result = apply(result, next.size(), next.data());
+    }
     return result;
   }
   return copy;
