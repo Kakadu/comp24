@@ -122,7 +122,7 @@ let get_from_tuple =
 
 let same_cons =
   { name = "same_cons"
-  ; t = "'a -> string -> bool"
+  ; t = "'a -> int -> bool"
   ; alt_name = "same_cons"
   ; llvm_t = bin_op_type
   }
