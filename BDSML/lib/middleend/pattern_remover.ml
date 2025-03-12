@@ -35,20 +35,12 @@ let fun_get_n tup n =
   @@ RExp_constant (Const_int n)
 ;;
 
-let disassemble_constructor name v =
-  two_arg_fun_helper
-    Utils.Predefined_ops.disassemble_constructor.alt_name
-    (RExp_constant (Const_string name))
-    v
+let disassemble_constructor v =
+  RExp_apply (RExp_ident Utils.Predefined_ops.disassemble_constructor.alt_name, v)
 ;;
 
 let var_nothing = Utils.Predefined_ops.var_nothing
 let same_constructor l r = two_arg_fun_helper Utils.Predefined_ops.same_cons.alt_name l r
-
-let get_cons_params cons par =
-  two_arg_fun_helper Utils.Predefined_ops.get_cons_param.alt_name cons par
-;;
-
 let exp_or = two_arg_fun_helper Utils.Predefined_ops.op_or.alt_name
 let exp_and = two_arg_fun_helper Utils.Predefined_ops.op_and.alt_name
 let exp_eq = two_arg_fun_helper Utils.Predefined_ops.op_eq.alt_name
@@ -70,11 +62,11 @@ let rec pattern_binder rexp = function
     if not @@ List.is_empty @@ l @ r
     then fail (Invalid_pattern "BDSML doesn't allow vars in or patter")
     else return []
-  | Pat_construct (name, Some v) -> pattern_binder (disassemble_constructor name rexp) v
+  | Pat_construct (_, Some v) -> pattern_binder (disassemble_constructor rexp) v
   | Pat_any -> return [ var_nothing, rexp ]
   | Pat_constant s -> return [ var_nothing, exp_eq rexp @@ RExp_constant s ]
   | Pat_construct (name, None) ->
-    return [ var_nothing, same_constructor rexp @@ RExp_construct (name, None) ]
+    return [ var_nothing, same_constructor rexp @@ RExp_constant (Const_string name) ]
 ;;
 
 let rec let_bindings_unpack r bindings =
@@ -138,7 +130,7 @@ and match_cases exp cases =
     | Pat_or (l, r) -> exp_or (construct_bool exp l) (construct_bool exp r)
     | Pat_construct (name, p) ->
       let check = same_constructor exp (RExp_constant (Const_string name)) in
-      let params = get_cons_params (RExp_constant (Const_string name)) exp in
+      let params = disassemble_constructor exp in
       (match p with
        | Some pat -> exp_and check @@ construct_bool params pat
        | None -> check)
