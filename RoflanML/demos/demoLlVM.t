@@ -839,6 +839,101 @@
   
   
   
+  
+  --------------- ../manytests/typed/007order.ml
+  ; ModuleID = 'Roflan'
+  source_filename = "Roflan"
+  
+  @main.1 = global ptr null
+  
+  declare ptr @RoflanML_eq(ptr, ptr)
+  
+  declare ptr @RoflanML_neq(ptr, ptr)
+  
+  declare ptr @RoflanML_gt(ptr, ptr)
+  
+  declare ptr @RoflanML_ge(ptr, ptr)
+  
+  declare ptr @RoflanML_lt(ptr, ptr)
+  
+  declare ptr @RoflanML_le(ptr, ptr)
+  
+  declare ptr @RoflanML_or(ptr, ptr)
+  
+  declare ptr @RoflanML_and(ptr, ptr)
+  
+  declare ptr @RoflanML_add(ptr, ptr)
+  
+  declare ptr @RoflanML_sub(ptr, ptr)
+  
+  declare ptr @RoflanML_mul(ptr, ptr)
+  
+  declare ptr @RoflanML_div(ptr, ptr)
+  
+  declare ptr @Create_int(i64)
+  
+  declare ptr @Create_bool(i1)
+  
+  declare ptr @Create_unit()
+  
+  declare ptr @Apply(ptr, ...)
+  
+  declare i64 @Get_int(ptr)
+  
+  declare i1 @Get_bool(ptr)
+  
+  declare ptr @print_int(ptr)
+  
+  declare ptr @print_bool(ptr)
+  
+  declare ptr @Create_closure(ptr, i64)
+  
+  define ptr @alpha_0(ptr %"()", ptr %alpha_1, ptr %a, ptr %alpha_2, ptr %b, ptr %_c, ptr %alpha_3, ptr %d, ptr %__) {
+  entry:
+    %closure = call ptr @Create_closure(ptr @RoflanML_add, i64 2)
+    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %a, ptr %b)
+    %closure1 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %apply_result2 = call ptr (ptr, ...) @Apply(ptr %closure1, i64 1, ptr %apply_result)
+    %closure3 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %apply_result4 = call ptr (ptr, ...) @Apply(ptr %closure3, i64 1, ptr %__)
+    %closure5 = call ptr @Create_closure(ptr @RoflanML_mul, i64 2)
+    %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure5, i64 2, ptr %a, ptr %b)
+    %closure7 = call ptr @Create_closure(ptr @RoflanML_div, i64 2)
+    %apply_result8 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 2, ptr %apply_result6, ptr %_c)
+    %closure9 = call ptr @Create_closure(ptr @RoflanML_add, i64 2)
+    %apply_result10 = call ptr (ptr, ...) @Apply(ptr %closure9, i64 2, ptr %apply_result8, ptr %d)
+    ret ptr %apply_result10
+  }
+  
+  define i32 @main() {
+  entry:
+    %closure = call ptr @Create_closure(ptr @print_int, i64 1)
+    %boxed_int = call ptr @Create_int(i64 1)
+    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 1, ptr %boxed_int)
+    %closure1 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %boxed_int2 = call ptr @Create_int(i64 2)
+    %apply_result3 = call ptr (ptr, ...) @Apply(ptr %closure1, i64 1, ptr %boxed_int2)
+    %closure4 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %boxed_int5 = call ptr @Create_int(i64 4)
+    %apply_result6 = call ptr (ptr, ...) @Apply(ptr %closure4, i64 1, ptr %boxed_int5)
+    %closure7 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %boxed_int8 = call ptr @Create_int(i64 -1)
+    %apply_result9 = call ptr (ptr, ...) @Apply(ptr %closure7, i64 1, ptr %boxed_int8)
+    %closure10 = call ptr @Create_closure(ptr @alpha_0, i64 9)
+    %boxed_int11 = call ptr @Create_int(i64 3)
+    %boxed_int12 = call ptr @Create_int(i64 100)
+    %boxed_int13 = call ptr @Create_int(i64 1000)
+    %boxed_int14 = call ptr @Create_int(i64 10000)
+    %boxed_int15 = call ptr @Create_int(i64 -555555)
+    %apply_result16 = call ptr (ptr, ...) @Apply(ptr %closure10, i64 9, ptr %apply_result, ptr %apply_result3, ptr %boxed_int11, ptr %apply_result6, ptr %boxed_int12, ptr %boxed_int13, ptr %apply_result9, ptr %boxed_int14, ptr %boxed_int15)
+    %closure17 = call ptr @Create_closure(ptr @print_int, i64 1)
+    %apply_result18 = call ptr (ptr, ...) @Apply(ptr %closure17, i64 1, ptr %apply_result16)
+    store ptr %apply_result18, ptr @main.1, align 8
+    ret i32 0
+  }
+  
+  
+  
   $ for prog in ../compiler/tests/*; do
   > echo "\n--------------- $prog"
   > dune exec ./demoLlVM.exe < $prog
@@ -946,74 +1041,7 @@
   
   
   
-  --------------- ../compiler/tests/018ac.ml
-  ; ModuleID = 'Roflan'
-  source_filename = "Roflan"
-  
-  declare ptr @RoflanML_eq(ptr, ptr)
-  
-  declare ptr @RoflanML_neq(ptr, ptr)
-  
-  declare ptr @RoflanML_gt(ptr, ptr)
-  
-  declare ptr @RoflanML_ge(ptr, ptr)
-  
-  declare ptr @RoflanML_lt(ptr, ptr)
-  
-  declare ptr @RoflanML_le(ptr, ptr)
-  
-  declare ptr @RoflanML_or(ptr, ptr)
-  
-  declare ptr @RoflanML_and(ptr, ptr)
-  
-  declare ptr @RoflanML_add(ptr, ptr)
-  
-  declare ptr @RoflanML_sub(ptr, ptr)
-  
-  declare ptr @RoflanML_mul(ptr, ptr)
-  
-  declare ptr @RoflanML_div(ptr, ptr)
-  
-  declare ptr @Create_int(i64)
-  
-  declare ptr @Create_bool(i1)
-  
-  declare ptr @Create_unit()
-  
-  declare ptr @Apply(ptr, ...)
-  
-  declare i64 @Get_int(ptr)
-  
-  declare i1 @Get_bool(ptr)
-  
-  declare ptr @print_int(ptr)
-  
-  declare ptr @print_bool(ptr)
-  
-  declare ptr @Create_closure(ptr, i64)
-  
-  define ptr @alpha_0(ptr %x) {
-  entry:
-    %closure = call ptr @Create_closure(ptr @print_bool, i64 1)
-    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 1, ptr %x)
-    ret ptr %apply_result
-  }
-  
-  define i32 @main() {
-  entry:
-    %closure = call ptr @Create_closure(ptr @RoflanML_and, i64 2)
-    %boxed_bool = call ptr @Create_bool(i1 true)
-    %boxed_bool1 = call ptr @Create_bool(i1 false)
-    %apply_result = call ptr (ptr, ...) @Apply(ptr %closure, i64 2, ptr %boxed_bool, ptr %boxed_bool1)
-    %closure2 = call ptr @Create_closure(ptr @alpha_0, i64 1)
-    %apply_result3 = call ptr (ptr, ...) @Apply(ptr %closure2, i64 1, ptr %apply_result)
-    ret i32 0
-  }
-  
-  
-  
-  
-  --------------- ../compiler/tests/019and.ml
+  --------------- ../compiler/tests/018and.ml
   ; ModuleID = 'Roflan'
   source_filename = "Roflan"
   

@@ -99,3 +99,15 @@
   > let g y = x + y
   > let main = let () = print_int (f 1) in 
   > let () = print_int (g 1) in 0
+  
+  let x = 1
+  
+  let f y = ( + ) x y
+  
+  let alpha_0 = 2
+  
+  let g y = ( + ) alpha_0 y
+  
+  let main = 
+  let () = print_int (f 1) in 
+  let alpha_1 = print_int (g 1) in 0
