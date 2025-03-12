@@ -2,7 +2,6 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-
 open Angstrom
 open Ast
 open Base
@@ -50,11 +49,6 @@ let is_type = function
   | _ -> false
 ;;
 
-let is_type = function
-  | "int" | "bool" | "string" -> true
-  | _ -> false
-;;
-
 let is_whitespace = function
   | ' ' | '\n' | '\t' | '\r' -> true
   | _ -> false
@@ -79,8 +73,10 @@ let brackets_or_not p = brackets p <|> p
 
 let chainl1 e op =
   let rec go acc = lift2 (fun f x -> f acc x) op e >>= go <|> return acc in
-  e >>= fun init -> go init
+  e >>= go
 ;;
+
+(** Const parsers *)
 
 let parse_bool =
   parse_white_space
@@ -103,7 +99,7 @@ let parse_int =
 let parse_nil = parse_white_space *> ((fun _ -> CNil) <$> string "[]")
 
 (* Var parsers *)
-let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool") 
+let constr_type = (fun _ -> TInt) <$> string "int" <|> ((fun _ -> TBool) <$> string "bool")
 let parse_arrow = parse_empty @@ stoken "->"
 
 let parse_types =
@@ -116,20 +112,19 @@ let parse_type =
   <|> ((fun _ -> TUnknown) <$> string "")
 ;;
 
-
-let var cond =
+let check_var cond =
   parse_white_space *> take_while1 cond
   >>= fun v ->
-  if (phys_equal (String.length v) 0)
-  then fail "Not identifier"
-  else if is_keyword v
-  then fail ("You can not use" ^ v ^ "keywords as vars")
+  if is_keyword v
+  then fail ("You can not use \"" ^ v ^ "\" keywords as vars")
   else if Char.is_digit @@ String.get v 0
-  then fail "Identifier first sumbol is letter, not digit"
+  then fail "Identifier first symbol is letter, not digit"
   else return v
 ;;
 
-let p_var =
+let parse_var =
+  parse_white_space
+  *>
   let is_entry = function
     | c -> is_char c || is_underscore c || is_digit c
   in
@@ -314,15 +309,6 @@ let parse_rec =
 
 let parse_name = parse_rename <|> parse_var
 
-let parse_name_list =
-  brackets_or_not
-  @@ lift2
-       (fun a b -> a :: b)
-       (parse_rename <|> parse_var <* stoken ",")
-       (sep_by1 (stoken ",") (parse_rename <|> parse_var))
-  <|> (parse_rename <|> parse_var >>| fun x -> [ x ])
-;;
-
 let parse_eletin expr =
   let lift5 f p1 p2 p3 p4 p5 = f <$> p1 <*> p2 <*> p3 <*> p4 <*> p5 in
   lift5
@@ -384,30 +370,6 @@ let parse_ematch matching parse_expr =
 
 (* Expression parsers *)
 
-let ebinop_p expr =
-  let helper p op =
-    parse_white_space *> p *> return (fun e1 e2 -> EBinaryOp (op, e1, e2))
-  in
-  let add = helper (char '+') Add in
-  let sub = helper (char '-') Sub in
-  let mul = helper (char '*') Mul in
-  let div = helper (char '/') Div in
-  let and_p = helper (string "&&") And in
-  let or_p = helper (string "||") Or in
-  let eq = helper (char '=') Eq in
-  let neq = helper (string "<>") Neq in
-  let gre = helper (char '>') Gre in
-  let less = helper (char '<') Less in
-  let greq = helper (string ">=") Greq in
-  let leq = helper (string "<=") Leq in
-  let muldiv = chainl1 expr (mul <|> div) in
-  let addsub = chainl1 muldiv (add <|> sub) in
-  let compare = chainl1 addsub (neq <|> gre <|> greq <|> less <|> leq <|> eq) in
-  let and_op = chainl1 compare and_p in
-  let or_op = chainl1 and_op or_p in
-  or_op
-;;
-
 let parse_expression =
   fix
   @@ fun pack ->
@@ -437,11 +399,10 @@ let parse_expression =
   in
   let app_left pack =
     evar
-    <|> 
-          (brackets_or_not @@ parse_eifelse parse_if (expression pack)
-           <|> parse_efun pack
-           <|> parse_eapp pack pack
-           <|> parse_eletin pack)
+    <|> (brackets_or_not @@ parse_eifelse parse_if (expression pack)
+         <|> parse_efun pack
+         <|> brackets @@ parse_eapp pack pack
+         <|> parse_eletin pack)
   in
   let app_right pack =
     brackets_or_not

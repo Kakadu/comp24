@@ -1,6 +1,6 @@
 (** Copyright 2024-2025, Perevalov Efim, Ermolovich Anna *)
 
-(** SPDX-License-Identifier: LGPL-3.0 *)
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
 type binder = int [@@deriving eq, show { with_path = false }]
 

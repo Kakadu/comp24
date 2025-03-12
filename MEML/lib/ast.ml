@@ -2,17 +2,17 @@
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
 
-type name = string [@@deriving show { with_path = false }]
+type name = string [@@deriving eq, show { with_path = false }]
 
 type const =
   | CInt of int (** integer number: ..., 0, 1, 2, ...*)
-  | CString of string (** string values: "Ocaml" *)
   | CBool of bool (** boolean values: true and false *)
-[@@deriving show { with_path = false }]
+  | CNil (** [] *)
+[@@deriving eq, show { with_path = false }]
 
 type binary_op =
   | Add (** 1 + 2 *)
-  | Sub (** 1 - 2 *)
+  | Sub (** 2 - 1 *)
   | Mul (** * *)
   | Div (** / *)
   | And (** && *)
@@ -23,7 +23,14 @@ type binary_op =
   | Gre (** > *)
   | Leq (** <= *)
   | Greq (** >= *)
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]
+
+type type_of_var =
+  | TInt (** int type for variable *)
+  | TBool (** bool type for variable *)
+  | TUnknown (** unknown type for variable *)
+  | TArrow of type_of_var * type_of_var (** type int -> int... *)
+[@@deriving eq, show { with_path = false }]
 
 type pattern =
   | PWild (** _ *)
@@ -33,14 +40,14 @@ type pattern =
   | PCon of pattern * pattern (** hd :: tl *)
 [@@deriving eq, show { with_path = false }]
 
-type rec_flag = 
+type rec_flag =
   | Rec (** let rec v = ... *)
   | Notrec (** let z = ...*)
-[@@deriving show { with_path = false }]
+[@@deriving eq, show { with_path = false }]
 
 type expression =
   | EConst of const (** constant *)
-  | EVar of name (** variable *)
+  | EVar of name * type_of_var (** variable *)
   | EBinaryOp of binary_op * expression * expression (** binary operation *)
   | EApp of expression * expression * type_of_var (** application *)
   | EIfElse of expression * expression * expression (** if z then v else n*)
