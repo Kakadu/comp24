@@ -23,17 +23,17 @@ let%test _ = lex "(* comment!!! *)" = []
 
 let%test _ =
   lex
-    "let rec sum list =\n\
+    "let rec sum lst =\n\
     \   match list with\n\
     \   | [] -> 0\n\
     \   | head :: tail -> head + sum tail"
   = [ LET
     ; REC
     ; IDENTIFIER "sum"
-    ; IDENTIFIER "list"
+    ; IDENTIFIER "lst"
     ; EQUAL
     ; MATCH
-    ; IDENTIFIER "list"
+    ; LIST
     ; WITH
     ; BAR
     ; LEFT_SQ_BRACKET

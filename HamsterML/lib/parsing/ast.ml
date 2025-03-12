@@ -12,6 +12,11 @@ type dataType =
   | PInt
   | PBool
   | PString
+  | PUnit
+  | PVar of id
+  | PList of dataType
+  | PTuple of dataType list
+  | PArrow of dataType * dataType
 [@@deriving show]
 
 type bop =
@@ -101,5 +106,15 @@ module BinOperator = struct
     | AND -> "&&"
     | OR -> "||"
     | CONCAT -> "^"
+  ;;
+end
+
+module UnOperator = struct
+  let list : uop list = [ NOT; UMINUS; UPLUS ]
+
+  let to_string : uop -> string = function
+    | NOT -> "not"
+    | UMINUS -> "-"
+    | UPLUS -> "+"
   ;;
 end

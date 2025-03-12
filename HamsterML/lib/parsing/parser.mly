@@ -14,6 +14,8 @@
 %token INT
 %token BOOL
 %token STRING
+%token LIST
+%token <string> POLY
 
 %token <string> IDENTIFIER
 
@@ -93,11 +95,6 @@
 %%
 
 // --- Subs ---
-
-%inline paramType:
-    | INT                   { PInt }
-    | BOOL                  { PBool }
-    | STRING                { PString }
 
 %inline bop:
     | PLUS                  { ADD }                 
@@ -356,5 +353,21 @@ tuple_simple (rule):
 %inline _bind:
     | pattern; list(pattern); EQUAL; expr { ($1, $2, $4) } (* f x y = x + y *)
 
+%inline param_type:
+    | INT                   { PInt }
+    | BOOL                  { PBool }
+    | STRING                { PString }
+    | POLY                  { PVar $1 }
+
+%inline list_param_type:
+    | param_type             { $1 }
+    | param_type; LIST       { PList $1 }
+
+mixed_param_type:
+    | LEFT_PARENTHESIS; mixed_param_type; RIGHT_PARENTHESIS                                   { $2 }
+    | list_param_type                                                                         { $1 }
+    | list_param_type; ARROW; mixed_param_type                                                { PArrow ($1, $3) }
+    | list_param_type; ASTERISK; list_param_type; separated_list(ASTERISK, list_param_type)   { PTuple ($1 :: $3 :: $4) }
+
 %inline _constraint (rule): 
-    | LEFT_PARENTHESIS; rule; COLON; paramType; RIGHT_PARENTHESIS { ($2, $4) }
+    | LEFT_PARENTHESIS; rule; COLON; mixed_param_type; RIGHT_PARENTHESIS { ($2, $4) }

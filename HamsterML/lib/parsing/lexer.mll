@@ -17,9 +17,13 @@ let string  = '\"' sym* '\"'
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
+let poly_name = '\'' id
+
 let comment = "(*" comment_sym* "*)"
 
 let unit = '(' ' '* ')'
+
+let sep = ";;"
 
 rule read =
     parse
@@ -64,7 +68,10 @@ rule read =
     | ">="      { GREATER_THAN_EQUAL }
     | '<'       { LESS_THAN }
     | "<="      { LESS_THAN_EQUAL }
+    | "list"    { LIST }
+    | poly_name { POLY (Lexing.lexeme lexbuf) }
     | comment   { read lexbuf }
+    | sep       { read lexbuf }
     | unit      { TYPE_UNIT }
     | int       { TYPE_INT (int_of_string (Lexing.lexeme lexbuf)) }
     | string    { let str = Lexing.lexeme lexbuf in

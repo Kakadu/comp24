@@ -403,10 +403,38 @@ module Infer = struct
     | Unit -> return (Subst.empty, TUnit)
   ;;
 
-  let infer_data_type : Ast.dataType -> (Subst.t * inf_type) R.t = function
-    | PInt -> return (Subst.empty, TInt)
-    | PBool -> return (Subst.empty, TBool)
-    | PString -> return (Subst.empty, TString)
+  let rec infer_data_type (env : TypeEnv.t) : Ast.dataType -> (TypeEnv.t * inf_type) R.t
+    = function
+    | PInt -> return (env, TInt)
+    | PBool -> return (env, TBool)
+    | PString -> return (env, TString)
+    | PUnit -> return (env, TUnit)
+    | PVar id ->
+      (match TypeEnv.find id env with
+       | None ->
+         let* fr = fresh_var in
+         let env = TypeEnv.extend id (Scheme.create fr) env in
+         return (env, fr)
+       | Some s ->
+         (match s with
+          | Scheme (_, typ) -> return (env, typ)))
+    | PList dt ->
+      let* env, t = infer_data_type env dt in
+      return (env, TList t)
+    | PArrow (t1, t2) ->
+      let* env, ty1 = infer_data_type env t1 in
+      let* env, ty2 = infer_data_type env t2 in
+      return (env, TArrow (ty1, ty2))
+    | PTuple dts ->
+      let* env, typs =
+        R.fold
+          dts
+          ~init:(return (env, []))
+          ~f:(fun (env, types) dt ->
+            let* env, t = infer_data_type env dt in
+            return (env, t :: types))
+      in
+      return (env, TTuple (List.rev typs))
   ;;
 
   let infer_pattern (env : TypeEnv.t) (v : Ast.pattern) : (TypeEnv.t * inf_type) R.t =
@@ -458,7 +486,7 @@ module Infer = struct
         R.return (env, TTuple (List.rev tl_t))
       | Constraint (p, dt) ->
         let* env, p_t = helper env p in
-        let* _, dt_t = infer_data_type dt in
+        let* env, dt_t = infer_data_type env dt in
         let* s = Subst.unify p_t dt_t in
         R.return (TypeEnv.apply s env, dt_t)
       | Operation (Binary bop) ->
@@ -545,9 +573,9 @@ module Infer = struct
         R.return (subs, r_t)
       | EConstraint (e, dt) ->
         let* e_s, e_t = helper env e in
-        let* dt_s, dt_t = infer_data_type dt in
+        let* _, dt_t = infer_data_type env dt in
         let* u = Subst.unify e_t dt_t in
-        let* subs = Subst.compose_all [ e_s; dt_s; u ] in
+        let* subs = Subst.compose_all [ e_s; u ] in
         R.return (subs, dt_t)
       | If (i, th, el) ->
         let* if_s, if_t = helper env i in
