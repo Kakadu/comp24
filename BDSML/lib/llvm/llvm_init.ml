@@ -40,7 +40,7 @@ let predefined_funcs =
   ; "create_bool", function_type ptr_t [| bool_t |]
   ; "create_unit", function_type ptr_t [||]
   ; "create_char", function_type ptr_t [| char_t |]
-  ; "create_string", var_arg_function_type ptr_t [||]
+  ; "create_string", var_arg_function_type ptr_t [| int_t |]
   ; "apply", var_arg_function_type ptr_t [| ptr_t; int_t |]
   ; "create_tuple", var_arg_function_type ptr_t [| int_t |]
   ; "create_constructor", function_type ptr_t [| int_t; ptr_t |]

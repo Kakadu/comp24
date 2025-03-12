@@ -27,7 +27,12 @@ let rec compile_aexpr = function
        compile_simple_type "create_bool" [| const_int bool_t (if b then 1 else 0) |]
      | Const_char c ->
        compile_simple_type "create_char" [| const_int char_t @@ Char.code c |]
-     | Const_string s -> compile_simple_type "create_string" [| const_stringz context s |]
+     | Const_string s ->
+       compile_simple_type
+         "create_string"
+         (Array.append
+            [| const_int int_t (String.length s) |]
+            (Array.init (String.length s) (fun i -> const_int char_t @@ Char.code s.[i])))
      | Const_unit -> compile_simple_type "create_unit" [||])
   | AExp_tuple elems ->
     let args = List.map compile_aexpr elems in
