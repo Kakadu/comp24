@@ -7,6 +7,11 @@ open Parser.Ast
 open Middleend_utils
 open Monads
 
+let is_empty = function
+  | [] -> true
+  | _ -> false
+;;
+
 let fresh_var =
   let+ f = fresh in
   "__reserved_" ^ Int.to_string f
@@ -59,7 +64,7 @@ let rec pattern_binder rexp = function
   | Pat_or (l, r) ->
     let* l = pattern_binder rexp l in
     let* r = pattern_binder rexp r in
-    if not @@ List.is_empty @@ l @ r
+    if not @@ is_empty @@ l @ r
     then fail (Invalid_pattern "BDSML doesn't allow vars in or patter")
     else return []
   | Pat_construct (_, Some v) -> pattern_binder (disassemble_constructor rexp) v
