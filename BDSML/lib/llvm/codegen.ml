@@ -49,7 +49,7 @@ let rec compile_aexpr = function
   | AExp_construct (_, _) -> failwith "Not implemented"
   | AExp_ident id ->
     let value = find variable_value_table id in
-    maybe_closure (build_load ptr_t value id builder)
+    maybe_closure value
 
 and maybe_closure value =
   match classify_value value with
@@ -85,18 +85,16 @@ let rec compile_cexpr = function
     build_phi [ then_val, then_bb; else_val, else_bb ] "ite_result" builder
   | CExp_apply (s, ael) ->
     let func = lookup_function s my_module in
-    (match func with
-     | None -> failwith ("Undefined function: " ^ s)
-     | Some fn ->
-       let fn' = maybe_closure fn in
-       let ael' = Array.of_list (List.map compile_aexpr ael) in
-       compile_simple_type
-         "apply"
-         (Array.append
-            [| fn'
-             ; compile_simple_type "create_int" [| const_int int_t (Array.length ael') |]
-            |]
-            ael'))
+    let fn =
+      match func with
+      | None -> find variable_value_table s
+      | Some fn -> fn
+    in
+    let fn' = maybe_closure fn in
+    let ael' = Array.of_list (List.map compile_aexpr ael) in
+    compile_simple_type
+      "apply"
+      (Array.append [| fn'; const_int int_t (Array.length ael') |] ael')
   | CExp_atom ae -> compile_aexpr ae
 
 and compile_lexpr = function
@@ -107,8 +105,8 @@ and compile_lexpr = function
   | LComplex c -> compile_cexpr c
 ;;
 
-let compile_func f =
-  let name, args, body = f in
+let declare_first f =
+  let name, args, _ = f in
   let () =
     ignore
     @@ declare_function
@@ -116,6 +114,12 @@ let compile_func f =
          (function_type ptr_t (Array.init (List.length args) (fun _ -> ptr_t)))
          my_module
   in
+  let func = lookup_func name in
+  Hashtbl.add variable_value_table name func
+;;
+
+let compile_func f =
+  let name, args, body = f in
   let func = lookup_func name in
   let entry = append_block context "entry" func in
   position_at_end entry builder;
@@ -132,8 +136,12 @@ let compile_func f =
 ;;
 
 let compile_funcs = function
-  | AbsStr_func f -> ignore @@ compile_func f
-  | AbsStr_value_rec fl -> List.iter (fun f -> ignore @@ compile_func f) fl
+  | AbsStr_func f ->
+    let () = declare_first f in
+    ignore @@ compile_func f
+  | AbsStr_value_rec fl ->
+    List.iter (fun f -> declare_first f) fl;
+    List.iter (fun f -> ignore @@ compile_func f) fl
   | AbsStr_value (s, _) ->
     let global_var = define_global s (const_null ptr_t) my_module in
     Hashtbl.add variable_value_table s global_var
