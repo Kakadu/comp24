@@ -1,9 +1,0 @@
-(executable
- (name test_codegen)
- (modules test_codegen)
- (public_name test_codegen)
- (libraries my_llvm middleend stdio))
-
-(cram
- (applies_to test_codegen)
- (deps ./test_codegen.exe))
