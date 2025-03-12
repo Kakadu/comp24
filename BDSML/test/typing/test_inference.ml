@@ -385,7 +385,5 @@ let%expect_test "test poly inference" =
   test {|
     let f a b = if a=b then b=a else true
   |};
-  [%expect {|
-
-    |}]
+  [%expect {| val f : 'o -> 'o -> bool |}]
 ;;

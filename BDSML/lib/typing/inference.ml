@@ -166,8 +166,10 @@ let rec infer_pattern env = function
 let rec infer_if env cond bthen belse =
   let bool_type = TBase TBool in
   let* s1, t1 = infer_expression env cond in
+  let* s2 = Subst.unify t1 bool_type in
+  let* s1 = Subst.compose s1 s2 in
+  let env = TypeEnv.apply s1 env in
   let* s2, t2 = infer_expression env bthen in
-  let* s3 = Subst.unify t1 bool_type in
   let* else_branch_subs, res_type =
     match belse with
     | Some exp ->
@@ -176,7 +178,7 @@ let rec infer_if env cond bthen belse =
       [ s4; s5 ], Subst.apply s5 t2
     | None -> return ([], t2)
   in
-  let+ united_sub = Subst.compose_all @@ else_branch_subs @ [ s3; s2; s1 ] in
+  let+ united_sub = Subst.compose_all @@ else_branch_subs @ [ s2; s1 ] in
   united_sub, res_type
 
 and infer_fun env args exp =
