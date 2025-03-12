@@ -394,7 +394,7 @@ let is_keyword = function
   | <span data-count="0">"</span>do"
   | <span data-count="0">"</span>done"
   | <span data-count="0">"</span>downto"
-  | <span data-count="826">"</span>else"
+  | <span data-count="830">"</span>else"
   | <span data-count="0">"</span>end"
   | <span data-count="0">"</span>exception"
   | <span data-count="0">"</span>external"
@@ -410,12 +410,12 @@ let is_keyword = function
   | <span data-count="0">"</span>initializer"
   | <span data-count="0">"</span>land"
   | <span data-count="0">"</span>lazy"
-  | <span data-count="4347">"</span>let"
+  | <span data-count="4353">"</span>let"
   | <span data-count="0">"</span>lor"
   | <span data-count="0">"</span>lsl"
   | <span data-count="0">"</span>lsr"
   | <span data-count="0">"</span>lxor"
-  | <span data-count="202">"</span>match"
+  | <span data-count="203">"</span>match"
   | <span data-count="0">"</span>method"
   | <span data-count="0">"</span>mod"
   | <span data-count="0">"</span>module"
@@ -430,7 +430,7 @@ let is_keyword = function
   | <span data-count="0">"</span>rec"
   | <span data-count="0">"</span>sig"
   | <span data-count="0">"</span>struct"
-  | <span data-count="841">"</span>then"
+  | <span data-count="845">"</span>then"
   | <span data-count="0">"</span>to"
   | <span data-count="60">"</span>true"
   | <span data-count="0">"</span>try"
@@ -439,38 +439,38 @@ let is_keyword = function
   | <span data-count="0">"</span>virtual"
   | <span data-count="0">"</span>when"
   | <span data-count="0">"</span>while"
-  | <span data-count="862">"</span>with"
+  | <span data-count="866">"</span>with"
   | <span data-count="0">"</span>|" -&gt; true
-  | <span data-count="40574">_</span> -&gt; false
+  | <span data-count="40660">_</span> -&gt; false
 ;;
 
 let parse_lowercase_ident =
   let* parse_first =
     satisf<span data-count="123">y</span> (function
-      | <span data-count="51828">'</span>a' .. 'z' | <span data-count="936">'</span>_' -&gt; true
-      | <span data-count="43371">_</span> -&gt; false)
+      | <span data-count="51933">'</span>a' .. 'z' | <span data-count="940">'</span>_' -&gt; true
+      | <span data-count="43425">_</span> -&gt; false)
   in
-  <span data-count="52764">l</span>et parse_rest =
+  <span data-count="52873">l</span>et parse_rest =
     let is_rest = function
-      | <span data-count="1316">'</span>A' .. 'Z' | <span data-count="98538">'</span>a' .. 'z' | <span data-count="2182">'</span>0' .. '9' | <span data-count="4189">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
-      | <span data-count="50619">_</span> -&gt; false
+      | <span data-count="1316">'</span>A' .. 'Z' | <span data-count="98590">'</span>a' .. 'z' | <span data-count="2182">'</span>0' .. '9' | <span data-count="4189">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
+      | <span data-count="50727">_</span> -&gt; false
     in
     match parse_first with
-    | <span data-count="936">'</span>_' -&gt; take_while<span data-count="936">1</span> is_rest
-    | <span data-count="51828">_</span> -&gt; take_whil<span data-count="51828">e</span> is_rest
+    | <span data-count="940">'</span>_' -&gt; take_while<span data-count="940">1</span> is_rest
+    | <span data-count="51933">_</span> -&gt; take_whil<span data-count="51933">e</span> is_rest
   in
-  lift<span data-count="52764">2</span> String.( ^ ) (retur<span data-count="52764">n</span> (Char.escape<span data-count="52764">d</span> parse_first)) parse_rest
+  lift<span data-count="52873">2</span> String.( ^ ) (retur<span data-count="52873">n</span> (Char.escape<span data-count="52873">d</span> parse_first)) parse_rest
   &gt;&gt;= fun name -&gt;
-  <span data-count="52146">i</span>f not (is_keywor<span data-count="52146">d</span> name)
-  then <span data-count="40574">r</span>eturn name
-  else <span data-count="11572">f</span>ail (name ^ " keyword can't be used as ident")
+  <span data-count="52251">i</span>f not (is_keywor<span data-count="52251">d</span> name)
+  then <span data-count="40660">r</span>eturn name
+  else <span data-count="11591">f</span>ail (name ^ " keyword can't be used as ident")
 ;;
 
 let parse_capitalized_ident =
   let parse_first =
     satisf<span data-count="123">y</span> (function
       | <span data-count="153">'</span>A' .. 'Z' -&gt; true
-      | <span data-count="20207">_</span> -&gt; false)
+      | <span data-count="20252">_</span> -&gt; false)
     &gt;&gt;| String.of_char
   in
   <span data-count="123">l</span>et parse_rest =
@@ -482,11 +482,11 @@ let parse_capitalized_ident =
 ;;
 
 let parse_ident_name = ws *<span data-count="123">&gt;</span> parse_lowercase_ident
-let rec chainr1 e op = <span data-count="2725">e</span> &gt;&gt;= fun a -&gt; <span data-count="155988">o</span>p &gt;&gt;<span data-count="155988">=</span> (fun f -&gt; <span data-count="1911">c</span>hainr<span data-count="1911">1</span> e op &gt;&gt;| <span data-count="1911">f</span> a) &lt;|&gt; retur<span data-count="155988">n</span> a
+let rec chainr1 e op = <span data-count="2725">e</span> &gt;&gt;= fun a -&gt; <span data-count="156259">o</span>p &gt;&gt;<span data-count="156259">=</span> (fun f -&gt; <span data-count="1911">c</span>hainr<span data-count="1911">1</span> e op &gt;&gt;| <span data-count="1911">f</span> a) &lt;|&gt; retur<span data-count="156259">n</span> a
 
 let chainl1 e op =
-  <span data-count="698">l</span>et rec go acc = <span data-count="168388">l</span>ift<span data-count="168388">2</span> (fun f x -&gt; <span data-count="17651">f</span> acc x) op e &gt;&gt;<span data-count="168388">=</span> go &lt;|&gt; retur<span data-count="168388">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="150737">g</span>o init
+  <span data-count="698">l</span>et rec go acc = <span data-count="168682">l</span>ift<span data-count="168682">2</span> (fun f x -&gt; <span data-count="17675">f</span> acc x) op e &gt;&gt;<span data-count="168682">=</span> go &lt;|&gt; retur<span data-count="168682">n</span> acc in
+  e &gt;&gt;= fun init -&gt; <span data-count="151007">g</span>o init
 ;;
 
 let choice_pass_prev parsers_list prev =

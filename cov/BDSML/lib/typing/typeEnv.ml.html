@@ -105,36 +105,36 @@ module Map = Map.Make (String)
 type t = Scheme.t Map.t
 
 let find : string -&gt; t -&gt; Scheme.t option = Map.find_opt
-let extend map name scheme = <span data-count="5214">M</span>ap.add name scheme map
+let extend map name scheme = <span data-count="5290">M</span>ap.add name scheme map
 let empty : t = Map.empty
 
 let init values =
-  <span data-count="169">l</span>et rec helper map = function
-    | <span data-count="3718">(</span>k, v) :: tl -&gt; helper (exten<span data-count="3718">d</span> map k v) tl
-    | <span data-count="169">_</span> -&gt; map
+  <span data-count="172">l</span>et rec helper map = function
+    | <span data-count="3784">(</span>k, v) :: tl -&gt; helper (exten<span data-count="3784">d</span> map k v) tl
+    | <span data-count="172">_</span> -&gt; map
   in
   helper empty values
 ;;
 
 let free_vars (map : t) : VarSet.t =
-  <span data-count="4455">M</span>ap.fold
-    (fun _ scheme acc -&gt; <span data-count="24866">V</span>arSet.union acc @@ Scheme.free_var<span data-count="24866">s</span> scheme)
+  <span data-count="4524">M</span>ap.fold
+    (fun _ scheme acc -&gt; <span data-count="24932">V</span>arSet.union acc @@ Scheme.free_var<span data-count="24932">s</span> scheme)
     map
     VarSet.empty
 ;;
 
-let apply s env = <span data-count="2801">M</span>ap.map (Scheme.appl<span data-count="2801">y</span> s) env
+let apply s env = <span data-count="3258">M</span>ap.map (Scheme.appl<span data-count="3258">y</span> s) env
 
 let diff (env1 : t) (env2 : t) : t =
-  <span data-count="295">M</span>ap.filter
+  <span data-count="298">M</span>ap.filter
     (fun key v -&gt;
-      <span data-count="7259">m</span>atch Map.find_opt key env2 with
-      | <span data-count="6961">S</span>ome v2 -&gt; not (Scheme.equa<span data-count="6961">l</span> v v2)
-      | <span data-count="298">N</span>one -&gt; true)
+      <span data-count="7328">m</span>atch Map.find_opt key env2 with
+      | <span data-count="7027">S</span>ome v2 -&gt; not (Scheme.equa<span data-count="7027">l</span> v v2)
+      | <span data-count="301">N</span>one -&gt; true)
     env1
 ;;
 
-let to_list env = <span data-count="295">M</span>ap.bindings env
+let to_list env = <span data-count="298">M</span>ap.bindings env
 </code></pre>
       </div>
     </div>

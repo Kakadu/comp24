@@ -212,14 +212,14 @@ let parse_pconst =
 
 let parse_var =
   let+ ident = ws *<span data-count="123">&gt;</span> parse_lowercase_ident in
-  <span data-count="9847">P</span>at_var ident
+  <span data-count="9872">P</span>at_var ident
 ;;
 
 let parse_ptuple p =
   <span data-count="118">s</span>ep_by<span data-count="118">1</span> (check_cha<span data-count="118">r</span> ',') p
   &gt;&gt;= function
   | <span data-count="0">[</span>] -&gt; fail "It cannot be this way"
-  | <span data-count="11554">[</span> h ] -&gt; return h
+  | <span data-count="11583">[</span> h ] -&gt; return h
   | <span data-count="1050">h</span> :: tl -&gt; return (Pat_tuple (h :: tl))
 ;;
 

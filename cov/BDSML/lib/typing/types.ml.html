@@ -263,7 +263,7 @@ module TVarId = struct
   <span data-count="0">t</span>ype t = <span data-count="0">i</span>nt [@@deriving show { with_path = false }]
 
   let to_string n = <span data-count="0">I</span>nt.to_string n
-  let create n : t = <span data-count="7053">n</span>
+  let create n : t = <span data-count="7119">n</span>
   let compare = Int.compare
   let add = ( + )
 end
@@ -276,11 +276,11 @@ type base_type =
   | TUnit
 
 let show_base_type = function
-  | <span data-count="327">T</span>Int -&gt; "int"
+  | <span data-count="326">T</span>Int -&gt; "int"
   | <span data-count="9">T</span>Char -&gt; "char"
   | <span data-count="5">T</span>String -&gt; "string"
-  | <span data-count="46">T</span>Bool -&gt; "bool"
-  | <span data-count="26">T</span>Unit -&gt; "unit"
+  | <span data-count="50">T</span>Bool -&gt; "bool"
+  | <span data-count="28">T</span>Unit -&gt; "unit"
 ;;
 
 let pp_base_type fmt ty = <span data-count="0">F</span>ormat.fprintf fmt "%s" @@ show_base_typ<span data-count="0">e</span> ty
@@ -292,25 +292,25 @@ type type_val =
   | TTuple of type_val list (** e.g. [int * int] *)
   | TArrow of type_val * type_val (** e.g. [int -&gt; int] *)
 
-let enclose s = <span data-count="82">"</span>(" ^ s ^ ")"
+let enclose s = <span data-count="83">"</span>(" ^ s ^ ")"
 
 let rec show_type_val = function
-  | <span data-count="413">T</span>Base b -&gt; show_base_type b
-  | <span data-count="371">T</span>Arrow (l, r) -&gt;
+  | <span data-count="418">T</span>Base b -&gt; show_base_type b
+  | <span data-count="378">T</span>Arrow (l, r) -&gt;
     let modifier =
       match l with
       | <span data-count="41">T</span>Arrow _ -&gt; enclose
-      | <span data-count="330">_</span> -&gt; Fun.id
+      | <span data-count="337">_</span> -&gt; Fun.id
     in
-    modifie<span data-count="371">r</span> (show_type_va<span data-count="371">l</span> l) ^ " -&gt; " ^ show_type_va<span data-count="371">l</span> r
-  | <span data-count="41">T</span>Tuple l -&gt; enclose @@ String.conca<span data-count="41">t</span> " * " (List.ma<span data-count="41">p</span> show_type_val l)
-  | <span data-count="230">T</span>Var id -&gt;
-    let alph_size = Char.cod<span data-count="230">e</span> 'z' - Char.cod<span data-count="230">e</span> 'a' in
+    modifie<span data-count="378">r</span> (show_type_va<span data-count="378">l</span> l) ^ " -&gt; " ^ show_type_va<span data-count="378">l</span> r
+  | <span data-count="42">T</span>Tuple l -&gt; enclose @@ String.conca<span data-count="42">t</span> " * " (List.ma<span data-count="42">p</span> show_type_val l)
+  | <span data-count="236">T</span>Var id -&gt;
+    let alph_size = Char.cod<span data-count="236">e</span> 'z' - Char.cod<span data-count="236">e</span> 'a' in
     let rec helper num =
-      <span data-count="592">l</span>et symb = Char.chr @@ (Char.cod<span data-count="592">e</span> 'a' + (num mod alph_size)) in
-      <span data-count="592">i</span>f num &lt;&gt; 0 then <span data-count="362">C</span>har.escape<span data-count="362">d</span> symb ^ helpe<span data-count="362">r</span> (num / alph_size) else <span data-count="230">"</span>"
+      <span data-count="604">l</span>et symb = Char.chr @@ (Char.cod<span data-count="604">e</span> 'a' + (num mod alph_size)) in
+      <span data-count="604">i</span>f num &lt;&gt; 0 then <span data-count="368">C</span>har.escape<span data-count="368">d</span> symb ^ helpe<span data-count="368">r</span> (num / alph_size) else <span data-count="236">"</span>"
     in
-    "'" ^ helpe<span data-count="230">r</span> id
+    "'" ^ helpe<span data-count="236">r</span> id
   | <span data-count="48">T</span>Constructor (Some t1, name) -&gt; show_type_va<span data-count="48">l</span> t1 ^ " " ^ name
   | <span data-count="1">T</span>Constructor (None, name) -&gt; name
 ;;
@@ -336,35 +336,35 @@ module Monads =
 module VarSet = Set.Make (TVarId)
 
 let rec occurs_in (v : TVarId.t) = function
-  | <span data-count="1179241">T</span>Var b -&gt; b = v
-  | <span data-count="30019">T</span>Constructor (Some l, _) -&gt; occurs_in v l
+  | <span data-count="1179862">T</span>Var b -&gt; b = v
+  | <span data-count="30088">T</span>Constructor (Some l, _) -&gt; occurs_in v l
   | <span data-count="8039">T</span>Tuple l -&gt; List.fold_left (fun acc el -&gt; <span data-count="16078">a</span>c<span data-count="0">c</span> || occurs_in v el) false l
-  | <span data-count="595573">T</span>Arrow (l, r) -&gt; occurs_i<span data-count="595573">n</span> v <span data-count="0">l</span> || occurs_in v r
-  | <span data-count="1099530">_</span> -&gt; false
+  | <span data-count="584452">T</span>Arrow (l, r) -&gt; occurs_i<span data-count="584452">n</span> v <span data-count="0">l</span> || occurs_in v r
+  | <span data-count="1099572">_</span> -&gt; false
 ;;
 
 let free_vars =
   let rec helper acc = function
-    | <span data-count="26208">T</span>Var b -&gt; VarSet.add b acc
-    | <span data-count="39625">T</span>Arrow (l, r) -&gt; helper (helpe<span data-count="39625">r</span> acc l) r
-    | <span data-count="1024">T</span>Tuple l -&gt; List.fold_left (fun acc l -&gt; <span data-count="2048">h</span>elper acc l) acc l
+    | <span data-count="26431">T</span>Var b -&gt; VarSet.add b acc
+    | <span data-count="39951">T</span>Arrow (l, r) -&gt; helper (helpe<span data-count="39951">r</span> acc l) r
+    | <span data-count="1025">T</span>Tuple l -&gt; List.fold_left (fun acc l -&gt; <span data-count="2050">h</span>elper acc l) acc l
     | <span data-count="619">T</span>Constructor (Some l, _) -&gt; helper acc l
-    | <span data-count="43762">_</span> -&gt; acc
+    | <span data-count="44001">_</span> -&gt; acc
   in
   helpe<span data-count="92">r</span> VarSet.empty
 ;;
 
 let print_types res =
-  <span data-count="103">l</span>et rec helper acc = function
-    | <span data-count="221">(</span>id, v) :: tl -&gt;
+  <span data-count="106">l</span>et rec helper acc = function
+    | <span data-count="224">(</span>id, v) :: tl -&gt;
       acc
-      ^ (if id = "" then <span data-count="39">"</span>" else <span data-count="182">"</span>val " ^ id ^ " : ")
-      ^ show_type_va<span data-count="221">l</span> v
+      ^ (if id = "" then <span data-count="39">"</span>" else <span data-count="185">"</span>val " ^ id ^ " : ")
+      ^ show_type_va<span data-count="224">l</span> v
       ^ "\n"
-      ^ helpe<span data-count="221">r</span> acc tl
-    | <span data-count="103">_</span> -&gt; acc
+      ^ helpe<span data-count="224">r</span> acc tl
+    | <span data-count="106">_</span> -&gt; acc
   in
-  Format.print_string @@ helpe<span data-count="103">r</span> "" res
+  Format.print_string @@ helpe<span data-count="106">r</span> "" res
 ;;
 </code></pre>
       </div>

@@ -79,7 +79,7 @@ open Utils
 
 let parse_str_value =
   let+ rec_flag, bindings = Expr_parser.parse_let_main_par<span data-count="123">t</span> Expr_parser.parse_expr in
-  <span data-count="319">S</span>tr_value (rec_flag, bindings)
+  <span data-count="322">S</span>tr_value (rec_flag, bindings)
 ;;
 
 let parse_str_eval =
@@ -89,7 +89,7 @@ let parse_str_eval =
 
 let semicolon_opt = man<span data-count="123">y</span> (ws *<span data-count="123">&gt;</span> strin<span data-count="123">g</span> ";;")
 let parse_structure = man<span data-count="123">y</span> (parse_str_eval &lt;|<span data-count="123">&gt;</span> parse_str_value &lt;<span data-count="123">*</span> semicolon_opt) &lt;<span data-count="123">*</span> ws
-let parse str = <span data-count="194">A</span>ngstrom.parse_string ~consume:Angstrom.Consume.All parse_structure str
+let parse str = <span data-count="197">A</span>ngstrom.parse_string ~consume:Angstrom.Consume.All parse_structure str
 </code></pre>
       </div>
     </div>
