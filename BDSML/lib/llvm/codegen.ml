@@ -89,12 +89,12 @@ let rec compile_cexpr = function
      | None -> failwith ("Undefined function: " ^ s)
      | Some fn ->
        let fn' = maybe_closure fn in
-       List.fold_left
-         (fun acc_closure arg ->
-           let compiled_arg = compile_aexpr arg in
-           compile_simple_type "apply" [| acc_closure; compiled_arg |])
-         fn'
-         ael)
+       let ael' = Array.of_list (List.map compile_aexpr ael) in
+       compile_simple_type
+         "apply"
+         (Array.append
+            [| fn'; compile_simple_type "int" [| const_int int_t (Array.length ael') |] |]
+            ael'))
   | CExp_atom ae -> compile_aexpr ae
 
 and compile_lexpr = function
