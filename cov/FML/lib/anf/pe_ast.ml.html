@@ -260,7 +260,7 @@ let const_to_str = function
 let rec expr_to_str = function
   | <span data-count="8">P</span>e_EUnit -&gt; "()"
   | <span data-count="48">P</span>e_ENill -&gt; "[]"
-  | <span data-count="2126">P</span>e_EIdentifier a -&gt; a
+  | <span data-count="2158">P</span>e_EIdentifier a -&gt; a
   | <span data-count="513">P</span>e_EConst c -&gt; const_to_str c
   | <span data-count="147">P</span>e_EIf (e1, e2, e3) -&gt;
     Format.sprintf
@@ -270,7 +270,7 @@ let rec expr_to_str = function
       (expr_to_st<span data-count="147">r</span> e3)
   | <span data-count="232">P</span>e_EFun (args, e) -&gt;
     Format.sprintf "(fun %s -&gt; %s)" (String.conca<span data-count="232">t</span> " " args) (expr_to_st<span data-count="232">r</span> e)
-  | <span data-count="1726">P</span>e_EApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="1726">r</span> e1) (expr_to_st<span data-count="1726">r</span> e2)
+  | <span data-count="1758">P</span>e_EApp (e1, e2) -&gt; Format.sprintf "(%s %s)" (expr_to_st<span data-count="1758">r</span> e1) (expr_to_st<span data-count="1758">r</span> e2)
   | <span data-count="295">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
     Format.sprintf "let %s = %s in\n%s" name (expr_to_st<span data-count="295">r</span> e1) (expr_to_st<span data-count="295">r</span> e2)
   | <span data-count="8">P</span>e_ELet (Rec, name1, e1, e2) -&gt;

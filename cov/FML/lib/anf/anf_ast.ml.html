@@ -237,62 +237,62 @@ type anf_decl =
 type anf_prog = anf_decl list
 
 let imm_id id = <span data-count="0">I</span>mmIdentifier id
-let cimmexpr immexpr = <span data-count="84">C</span>ImmExpr immexpr
+let cimmexpr immexpr = <span data-count="67">C</span>ImmExpr immexpr
 
 let rec atom_to_str = function
-  | <span data-count="248">I</span>mmInt i -&gt; Int.to_string i
+  | <span data-count="220">I</span>mmInt i -&gt; Int.to_string i
   | <span data-count="10">I</span>mmBool b -&gt; Bool.to_string b
-  | <span data-count="4">I</span>mmUnit -&gt; "()"
-  | <span data-count="910">I</span>mmIdentifier v -&gt; v
-  | <span data-count="24">I</span>mmNill -&gt; "[]"
-  | <span data-count="10">I</span>mmTuple l -&gt;
+  | <span data-count="2">I</span>mmUnit -&gt; "()"
+  | <span data-count="570">I</span>mmIdentifier v -&gt; v
+  | <span data-count="6">I</span>mmNill -&gt; "[]"
+  | <span data-count="8">I</span>mmTuple l -&gt;
     Format.sprintf
       "(%s)"
-      (atom_to_st<span data-count="10">r</span> (Base.List.hd_ex<span data-count="10">n</span> l)
-       ^ Base.List.fold_lef<span data-count="10">t</span>
-           ~f:(fun acc e -&gt; <span data-count="14">a</span>cc ^ Format.sprint<span data-count="14">f</span> ", %s" (atom_to_st<span data-count="14">r</span> e))
+      (atom_to_st<span data-count="8">r</span> (Base.List.hd_ex<span data-count="8">n</span> l)
+       ^ Base.List.fold_lef<span data-count="8">t</span>
+           ~f:(fun acc e -&gt; <span data-count="12">a</span>cc ^ Format.sprint<span data-count="12">f</span> ", %s" (atom_to_st<span data-count="12">r</span> e))
            ~init:""
-           (Base.List.tl_ex<span data-count="10">n</span> l))
+           (Base.List.tl_ex<span data-count="8">n</span> l))
 ;;
 
 let rec cexp_to_str = function
-  | <span data-count="116">C</span>ImmExpr a -&gt; atom_to_str a
-  | <span data-count="588">C</span>EApply (a1, a_list) -&gt; String.concat " " (a1 :: List.ma<span data-count="588">p</span> atom_to_str a_list)
-  | <span data-count="74">C</span>EIf (e1, e2, e3) -&gt;
+  | <span data-count="82">C</span>ImmExpr a -&gt; atom_to_str a
+  | <span data-count="380">C</span>EApply (a1, a_list) -&gt; String.concat " " (a1 :: List.ma<span data-count="380">p</span> atom_to_str a_list)
+  | <span data-count="40">C</span>EIf (e1, e2, e3) -&gt;
     Format.sprintf
       "if %s\nthen %s\nelse %s"
-      (atom_to_st<span data-count="74">r</span> e1)
-      (exp_to_st<span data-count="74">r</span> e2)
-      (exp_to_st<span data-count="74">r</span> e3)
-  | <span data-count="54">C</span>ECons (e1, e2) -&gt; Format.sprintf "(%s::%s)" (atom_to_st<span data-count="54">r</span> e1) (atom_to_st<span data-count="54">r</span> e2)
+      (atom_to_st<span data-count="40">r</span> e1)
+      (exp_to_st<span data-count="40">r</span> e2)
+      (exp_to_st<span data-count="40">r</span> e3)
+  | <span data-count="14">C</span>ECons (e1, e2) -&gt; Format.sprintf "(%s::%s)" (atom_to_st<span data-count="14">r</span> e1) (atom_to_st<span data-count="14">r</span> e2)
 
 and exp_to_str = function
-  | <span data-count="528">A</span>LetIn (name, c, e) -&gt;
-    Format.sprintf "let %s = %s in\n%s" name (cexp_to_st<span data-count="528">r</span> c) (exp_to_st<span data-count="528">r</span> e)
-  | <span data-count="304">A</span>CExpr e -&gt; cexp_to_str e
+  | <span data-count="302">A</span>LetIn (name, c, e) -&gt;
+    Format.sprintf "let %s = %s in\n%s" name (cexp_to_st<span data-count="302">r</span> c) (exp_to_st<span data-count="302">r</span> e)
+  | <span data-count="214">A</span>CExpr e -&gt; cexp_to_str e
 ;;
 
 let fun_to_str = function
-  | <span data-count="156">A</span>Let (name, args, body) -&gt;
-    Format.sprintf "%s = %s" (String.conca<span data-count="156">t</span> " " (name :: args)) (exp_to_st<span data-count="156">r</span> body)
+  | <span data-count="134">A</span>Let (name, args, body) -&gt;
+    Format.sprintf "%s = %s" (String.conca<span data-count="134">t</span> " " (name :: args)) (exp_to_st<span data-count="134">r</span> body)
 ;;
 
 let declaration_to_str = function
-  | <span data-count="116">A</span>DNoRec func_list -&gt;
+  | <span data-count="108">A</span>DNoRec func_list -&gt;
     let funs = List.map fun_to_str func_list in
-    <span data-count="116">"</span>let " ^ String.conca<span data-count="116">t</span> "\nand " funs
-  | <span data-count="38">A</span>DREC func_list -&gt;
+    <span data-count="108">"</span>let " ^ String.conca<span data-count="108">t</span> "\nand " funs
+  | <span data-count="24">A</span>DREC func_list -&gt;
     let funs = List.map fun_to_str func_list in
-    <span data-count="38">"</span>let rec " ^ String.conca<span data-count="38">t</span> "\nand " funs
+    <span data-count="24">"</span>let rec " ^ String.conca<span data-count="24">t</span> "\nand " funs
 ;;
 
 let pp_anf_program ppf p =
-  <span data-count="34">l</span>et len = List.length p in
-  <span data-count="34">B</span>ase.List.iteri
+  <span data-count="32">l</span>et len = List.length p in
+  <span data-count="32">B</span>ase.List.iteri
     ~f:(fun i a -&gt;
-      <span data-count="154">i</span>f i = len - 1
-      then <span data-count="34">F</span>ormat.fprintf ppf "%s" (declaration_to_st<span data-count="34">r</span> a)
-      else <span data-count="120">F</span>ormat.fprintf ppf "%s\n\n" (declaration_to_st<span data-count="120">r</span> a))
+      <span data-count="132">i</span>f i = len - 1
+      then <span data-count="32">F</span>ormat.fprintf ppf "%s" (declaration_to_st<span data-count="32">r</span> a)
+      else <span data-count="100">F</span>ormat.fprintf ppf "%s\n\n" (declaration_to_st<span data-count="100">r</span> a))
     p
 ;;
 </code></pre>
