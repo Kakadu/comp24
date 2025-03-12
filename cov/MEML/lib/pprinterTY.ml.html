@@ -216,19 +216,19 @@
 open Ty
 
 let pp_typ ppf typ names_mapping =
-  <span data-count="131">l</span>et rec helper ppf = function
-    | <span data-count="77">T</span>Var n -&gt;
+  <span data-count="99">l</span>et rec helper ppf = function
+    | <span data-count="74">T</span>Var n -&gt;
       (match names_mapping with
-       | <span data-count="77">S</span>ome names -&gt;
-         (try Format.fprint<span data-count="77">f</span> ppf "%s" (Base.Map.find_ex<span data-count="77">n</span> names n) with
+       | <span data-count="74">S</span>ome names -&gt;
+         (try Format.fprint<span data-count="74">f</span> ppf "%s" (Base.Map.find_ex<span data-count="74">n</span> names n) with
           | <span data-count="0">B</span>ase.Not_found_s _ | <span data-count="0">S</span>tdlib.Not_found -&gt;
             Format.fprintf ppf "Names for types are counted incorrectly")
        | <span data-count="0">N</span>one -&gt; Format.fprintf ppf "%i" n)
-    | <span data-count="261">T</span>Prim s -&gt; Format.fprintf ppf "%s" s
-    | <span data-count="197">T</span>Arrow (l, r) -&gt;
+    | <span data-count="215">T</span>Prim s -&gt; Format.fprintf ppf "%s" s
+    | <span data-count="180">T</span>Arrow (l, r) -&gt;
       (match l with
        | <span data-count="19">T</span>Arrow _ -&gt; Format.fprintf ppf "(%a) -&gt; %a" helper l helper r
-       | <span data-count="178">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
+       | <span data-count="161">_</span> -&gt; Format.fprintf ppf "%a -&gt; %a" helper l helper r)
     | <span data-count="10">T</span>Tuple (h :: list) -&gt;
       let print_item item fmt =
         <span data-count="20">m</span>atch item with
@@ -246,40 +246,40 @@ let pp_typ ppf typ names_mapping =
 ;;
 
 let get_type_var_names typ =
-  <span data-count="131">l</span>et calc_name letter num =
-    <span data-count="77">"</span>\'"
+  <span data-count="99">l</span>et calc_name letter num =
+    <span data-count="74">"</span>\'"
     ^
     if num = 0
-    then <span data-count="77">B</span>ase.Char.to_strin<span data-count="77">g</span> letter
+    then <span data-count="74">B</span>ase.Char.to_strin<span data-count="74">g</span> letter
     else <span data-count="0">B</span>ase.Char.to_strin<span data-count="0">g</span> letter ^ Int.to_strin<span data-count="0">g</span> num
   in
-  let next_letter c = <span data-count="30">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="30">t</span> c + 1) in
+  let next_letter c = <span data-count="27">B</span>ase.Char.of_int_exn (Base.Char.to_in<span data-count="27">t</span> c + 1) in
   let next letter num =
-    <span data-count="30">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="30">n</span>ext_lette<span data-count="30">r</span> letter, num
+    <span data-count="27">i</span>f Char.equal letter 'z' then <span data-count="0">'</span>a', num + 1 else <span data-count="27">n</span>ext_lette<span data-count="27">r</span> letter, num
   in
   let rec helper names letter num = function
-    | <span data-count="77">T</span>Var n -&gt;
-      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="77">e</span> letter num) with
-       | <span data-count="30">`</span>Ok new_names -&gt; new_names, nex<span data-count="30">t</span> letter num
+    | <span data-count="74">T</span>Var n -&gt;
+      (match Base.Map.add names ~key:n ~data:(calc_nam<span data-count="74">e</span> letter num) with
+       | <span data-count="27">`</span>Ok new_names -&gt; new_names, nex<span data-count="27">t</span> letter num
        | <span data-count="47">`</span>Duplicate -&gt; names, (letter, num))
-    | <span data-count="197">T</span>Arrow (l, r) -&gt;
+    | <span data-count="180">T</span>Arrow (l, r) -&gt;
       let names, (letter, num) = helper names letter num l in
-      <span data-count="197">h</span>elper names letter num r
+      <span data-count="180">h</span>elper names letter num r
     | <span data-count="0">T</span>List t -&gt; helper names letter num t
     | <span data-count="10">T</span>Tuple (h :: list) -&gt;
       List.fold_left
         (fun (names, (letter, num)) -&gt; <span data-count="20">h</span>elper names letter num)
         (names, (letter, num))
         (h :: list)
-    | <span data-count="261">_</span> -&gt; names, (letter, num)
+    | <span data-count="215">_</span> -&gt; names, (letter, num)
   in
-  let names, (_, _) = helper (Base.Map.empt<span data-count="131">y</span> (module Base.Int)) 'a' 0 typ in
-  <span data-count="131">n</span>ames
+  let names, (_, _) = helper (Base.Map.empt<span data-count="99">y</span> (module Base.Int)) 'a' 0 typ in
+  <span data-count="99">n</span>ames
 ;;
 
 let pp_typ ppf t =
-  <span data-count="131">l</span>et names = get_type_var_names t in
-  <span data-count="131">p</span>p_typ ppf t (Some names)
+  <span data-count="99">l</span>et names = get_type_var_names t in
+  <span data-count="99">p</span>p_typ ppf t (Some names)
 ;;
 
 let pp_error ppf : error -&gt; _ =

@@ -1094,8 +1094,8 @@ let start_parsing parser string = <span data-count="36">p</span>arse_string ~con
 (* Base *)
 
 let is_char = function
-  | <span data-count="138419281">'</span>a' .. 'z' -&gt; true
-  | <span data-count="302874112">_</span> -&gt; false
+  | <span data-count="138422556">'</span>a' .. 'z' -&gt; true
+  | <span data-count="302874547">_</span> -&gt; false
 ;;
 
 let is_bchar = function
@@ -1104,14 +1104,14 @@ let is_bchar = function
 ;;
 
 let is_digit = function
-  | <span data-count="24279450">'</span>0' .. '9' -&gt; true
-  | <span data-count="337217513">_</span> -&gt; false
+  | <span data-count="24279438">'</span>0' .. '9' -&gt; true
+  | <span data-count="337218181">_</span> -&gt; false
 ;;
 
 let is_keyword = function
-  | <span data-count="1562002">"</span>let"
+  | <span data-count="1562089">"</span>let"
   | <span data-count="1448570">"</span>rec"
-  | <span data-count="23730">"</span>fun"
+  | <span data-count="23732">"</span>fun"
   | <span data-count="0">"</span>if"
   | <span data-count="57536">"</span>then"
   | <span data-count="16878">"</span>else"
@@ -1122,7 +1122,7 @@ let is_keyword = function
   | <span data-count="0">"</span>val"
   | <span data-count="15091498">"</span>in"
   | <span data-count="20585969">"</span>and" -&gt; true
-  | <span data-count="34756573">_</span> -&gt; false
+  | <span data-count="34757336">_</span> -&gt; false
 ;;
 
 let is_type = function
@@ -1131,12 +1131,12 @@ let is_type = function
 ;;
 
 let is_whitespace = function
-  | <span data-count="1569914309">'</span> ' | <span data-count="185923627">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="2848728259">_</span> -&gt; false
+  | <span data-count="1569920460">'</span> ' | <span data-count="185924498">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="2848737628">_</span> -&gt; false
 ;;
 
 let is_underscore = function
-  | <span data-count="302874112">c</span> -&gt; Char.equal c '_'
+  | <span data-count="302874547">c</span> -&gt; Char.equal c '_'
 ;;
 
 (* S1mple parsers *)
@@ -1153,7 +1153,7 @@ let brackets p = <span data-count="10503">s</span>toke<span data-count="10503">n
 let brackets_or_not p = <span data-count="6966">b</span>racket<span data-count="6966">s</span> p &lt;|&gt; p
 
 let chainl1 e op =
-  <span data-count="25200">l</span>et rec go acc = <span data-count="52107553">l</span>ift<span data-count="52107553">2</span> (fun f x -&gt; <span data-count="1426251">f</span> acc x) op e &gt;&gt;<span data-count="52107553">=</span> go &lt;|&gt; retur<span data-count="52107553">n</span> acc in
+  <span data-count="25200">l</span>et rec go acc = <span data-count="52108233">l</span>ift<span data-count="52108233">2</span> (fun f x -&gt; <span data-count="1426252">f</span> acc x) op e &gt;&gt;<span data-count="52108233">=</span> go &lt;|&gt; retur<span data-count="52108233">n</span> acc in
   e &gt;&gt;= go
 ;;
 
@@ -1168,7 +1168,7 @@ let parse_bool =
 
 let parse_uint =
   let pd = parse_white_space *&gt; take_while<span data-count="122">1</span> is_digit in
-  <span data-count="122">l</span>if<span data-count="122">t</span> (fun digit -&gt; <span data-count="4622338">C</span>Int (Int.of_strin<span data-count="4622338">g</span> @@ digit)) pd
+  <span data-count="122">l</span>if<span data-count="122">t</span> (fun digit -&gt; <span data-count="4622337">C</span>Int (Int.of_strin<span data-count="4622337">g</span> @@ digit)) pd
 ;;
 
 let parse_int =
@@ -1190,24 +1190,24 @@ let parse_types =
 
 let parse_type =
   parse_white_space *<span data-count="122">&gt;</span> cha<span data-count="122">r</span> ':' *<span data-count="122">&gt;</span> parse_white_space *<span data-count="122">&gt;</span> parse_types
-  &lt;|<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="5259412">T</span>Unknown) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "")
+  &lt;|<span data-count="122">&gt;</span> ((fun _ -&gt; <span data-count="5259513">T</span>Unknown) &lt;$<span data-count="122">&gt;</span> strin<span data-count="122">g</span> "")
 ;;
 
 let check_var cond =
   <span data-count="122">p</span>arse_white_space *<span data-count="122">&gt;</span> take_while<span data-count="122">1</span> cond
   &gt;&gt;= fun v -&gt;
-  <span data-count="73547625">i</span>f is_keyword v
-  then <span data-count="38791052">f</span>ail ("You can not use \"" ^ v ^ "\" keywords as vars")
-  else <span data-count="34756573">i</span>f Char.is_digit @@ String.ge<span data-count="34756573">t</span> v 0
-  then <span data-count="19077675">f</span>ail "Identifier first symbol is letter, not digit"
-  else <span data-count="15678898">r</span>eturn v
+  <span data-count="73548477">i</span>f is_keyword v
+  then <span data-count="38791141">f</span>ail ("You can not use \"" ^ v ^ "\" keywords as vars")
+  else <span data-count="34757336">i</span>f Char.is_digit @@ String.ge<span data-count="34757336">t</span> v 0
+  then <span data-count="19077664">f</span>ail "Identifier first symbol is letter, not digit"
+  else <span data-count="15679672">r</span>eturn v
 ;;
 
 let parse_var =
   parse_white_space
   *<span data-count="122">&gt;</span>
   let is_entry = function
-    | <span data-count="441293393">c</span> -&gt; is_cha<span data-count="441293393">r</span> <span data-count="138419281">c</span> || is_underscor<span data-count="302874112">e</span> <span data-count="685730">c</span> || is_digit c
+    | <span data-count="441297103">c</span> -&gt; is_cha<span data-count="441297103">r</span> <span data-count="138422556">c</span> || is_underscor<span data-count="302874547">e</span> <span data-count="685745">c</span> || is_digit c
   in
   strin<span data-count="122">g</span> "()" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "()" &lt;|<span data-count="122">&gt;</span> check_va<span data-count="122">r</span> is_entry
 ;;
@@ -1245,7 +1245,7 @@ let parse_pvar =
           else <span data-count="0">P</span>Wild)
         parse_rename
       &lt;|<span data-count="122">&gt;</span> lift<span data-count="122">2</span>
-            (fun a b -&gt; <span data-count="1911382">i</span>f String.( &lt;&gt; ) a "_" then <span data-count="1911310">P</span>Var (a, b) else <span data-count="72">P</span>Wild)
+            (fun a b -&gt; <span data-count="1911484">i</span>f String.( &lt;&gt; ) a "_" then <span data-count="1911412">P</span>Var (a, b) else <span data-count="72">P</span>Wild)
             parse_var
             parse_type)
 ;;
@@ -1294,7 +1294,7 @@ let parse_pattern =
 
 (* EConst *)
 
-let parse_econst = (fun v -&gt; <span data-count="4622377">E</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_bool ]
+let parse_econst = (fun v -&gt; <span data-count="4622376">E</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_bool ]
 
 let parse_econst_int =
   (fun v -&gt; <span data-count="74480">E</span>Const v) &lt;$<span data-count="122">&gt;</span> choic<span data-count="122">e</span> [ parse_uint; parse_int; parse_bool ]
@@ -1304,12 +1304,12 @@ let parse_econst_int =
 
 let parse_evar =
   bracket<span data-count="122">s</span> @@ lift<span data-count="122">2</span> (fun a b -&gt; <span data-count="1475040">E</span>Var (a, b)) parse_var parse_type
-  &lt;|<span data-count="122">&gt;</span> lif<span data-count="122">t</span> (fun a -&gt; <span data-count="11391590">E</span>Var (a, TUnknown)) parse_var
+  &lt;|<span data-count="122">&gt;</span> lif<span data-count="122">t</span> (fun a -&gt; <span data-count="11392211">E</span>Var (a, TUnknown)) parse_var
 ;;
 
 (* EBinaryOp *)
 
-let parse_op char_op op = <span data-count="1586">s</span>toke<span data-count="1586">n</span> char_op *&gt; retur<span data-count="1586">n</span> (fun e1 e2 -&gt; <span data-count="1426251">E</span>BinaryOp (op, e1, e2))
+let parse_op char_op op = <span data-count="1586">s</span>toke<span data-count="1586">n</span> char_op *&gt; retur<span data-count="1586">n</span> (fun e1 e2 -&gt; <span data-count="1426252">E</span>BinaryOp (op, e1, e2))
 let pmulti = parse_o<span data-count="122">p</span> "*" Mul &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "/" Div
 let padd = parse_o<span data-count="122">p</span> "+" Add &lt;|<span data-count="122">&gt;</span> parse_o<span data-count="122">p</span> "-" Sub
 
@@ -1342,7 +1342,7 @@ let parse_eifelse i expr =
 
 (* EFun *)
 
-let constr_efun pl e = <span data-count="528863">L</span>ist.fold_right ~init:e ~f:(fun p e -&gt; <span data-count="16890">E</span>Fun (p, e)) pl
+let constr_efun pl e = <span data-count="528864">L</span>ist.fold_right ~init:e ~f:(fun p e -&gt; <span data-count="16890">E</span>Fun (p, e)) pl
 let parse_fun_args = fi<span data-count="122">x</span> @@ fun p -&gt; <span data-count="53">m</span>any<span data-count="53">1</span> parse_pattern &lt;|&gt; bracket<span data-count="53">s</span> p
 
 let parse_efun expr =
@@ -1357,35 +1357,35 @@ let parse_eapp e1 e2 =
   <span data-count="3120">p</span>arse_evar
   &lt;|<span data-count="3120">&gt;</span> e1
   &gt;&gt;= fun f -&gt;
-  <span data-count="8047082">m</span>any<span data-count="8047082">1</span> (parse_evar &lt;|<span data-count="8047082">&gt;</span> e2)
+  <span data-count="8047496">m</span>any<span data-count="8047496">1</span> (parse_evar &lt;|<span data-count="8047496">&gt;</span> e2)
   &gt;&gt;= fun args -&gt;
   (* Строим выражение без типов *)
-  <span data-count="1873091">l</span>et app_without_type =
+  <span data-count="1873090">l</span>et app_without_type =
     List.fold_left
-      ~f:(fun f_acc arg -&gt; <span data-count="2428220">E</span>App (f_acc, arg, TUnknown))
+      ~f:(fun f_acc arg -&gt; <span data-count="2428219">E</span>App (f_acc, arg, TUnknown))
         (* Используем TUnknown как временный тип *)
       ~init:f
       args
   in
   (* Парсим тип для внешней аппликации *)
-  <span data-count="1873091">p</span>arse_type
+  <span data-count="1873090">p</span>arse_type
   &gt;&gt;= fun ty -&gt;
   (* Заменяем TUnknown на вычисленный тип для внешней аппликации *)
-  <span data-count="1873091">l</span>et replace_outer_type expr new_ty =
-    <span data-count="1873091">m</span>atch expr with
-    | <span data-count="1873091">E</span>App (e1, e2, TUnknown) -&gt;
+  <span data-count="1873090">l</span>et replace_outer_type expr new_ty =
+    <span data-count="1873090">m</span>atch expr with
+    | <span data-count="1873090">E</span>App (e1, e2, TUnknown) -&gt;
       EApp (e1, e2, new_ty) (* Заменяем тип только для внешней аппликации *)
     | <span data-count="0">E</span>App (e1, e2, _) -&gt; EApp (e1, e2, TUnknown)
     | <span data-count="0">_</span> -&gt; expr
   in
-  return (replace_outer_typ<span data-count="1873091">e</span> app_without_type ty)
+  return (replace_outer_typ<span data-count="1873090">e</span> app_without_type ty)
 ;;
 
 (* ELetIn *)
 
 let parse_rec =
   optio<span data-count="122">n</span> "false" (stoken<span data-count="122">1</span> "rec ")
-  &gt;&gt;<span data-count="122">|</span> fun x -&gt; <span data-count="1413235">i</span>f String.( &lt;&gt; ) x "false" then <span data-count="724378">R</span>ec else <span data-count="688857">N</span>otrec
+  &gt;&gt;<span data-count="122">|</span> fun x -&gt; <span data-count="1413286">i</span>f String.( &lt;&gt; ) x "false" then <span data-count="724378">R</span>ec else <span data-count="688908">N</span>otrec
 ;;
 
 let parse_name = parse_rename &lt;|<span data-count="122">&gt;</span> parse_var

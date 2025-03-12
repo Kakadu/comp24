@@ -634,7 +634,7 @@ open Cast
 open Name_helper
 
 let rec arguments acc = function
-  | <span data-count="370">E</span>Fun (p, e) -&gt; arguments (p :: acc) e
+  | <span data-count="369">E</span>Fun (p, e) -&gt; arguments (p :: acc) e
   | <span data-count="453">e</span> -&gt; List.re<span data-count="453">v</span> acc, e
 ;;
 
@@ -643,41 +643,41 @@ let rec create_let acc = function
   | <span data-count="60">(</span>n, args, lle) :: tl -&gt; CLetIn (Notrec, n, args, lle, create_le<span data-count="60">t</span> acc tl)
 ;;
 
-let existence set_vars v = <span data-count="1876">S</span>et.mem set_vars v
-let find gvars lvars v = <span data-count="988">e</span>xistenc<span data-count="988">e</span> lvars <span data-count="100">v</span> || existence gvars v
+let existence set_vars v = <span data-count="1875">S</span>et.mem set_vars v
+let find gvars lvars v = <span data-count="987">e</span>xistenc<span data-count="987">e</span> lvars <span data-count="99">v</span> || existence gvars v
 
 let rec pattern_to_string_list = function
   | <span data-count="0">P</span>Wild -&gt; []
   | <span data-count="0">P</span>Const _ -&gt; []
-  | <span data-count="158">P</span>Var (name, _) -&gt; [ name ]
+  | <span data-count="156">P</span>Var (name, _) -&gt; [ name ]
   | <span data-count="12">P</span>Tuple patterns -&gt; List.concat_map patterns ~f:pattern_to_string_list
   | <span data-count="0">P</span>Con (hd, tl) -&gt; pattern_to_string_lis<span data-count="0">t</span> hd @ pattern_to_string_lis<span data-count="0">t</span> tl
 ;;
 
 let rec closure_expression id gvars lvars new_lets = function
-  | <span data-count="917">E</span>Var (v, _) -&gt; CVar v, new_lets, id, gvars, lvars, []
-  | <span data-count="526">E</span>Const c -&gt; CConst c, new_lets, id, gvars, lvars, []
-  | <span data-count="269">E</span>BinaryOp (op, e1, e2) -&gt;
+  | <span data-count="916">E</span>Var (v, _) -&gt; CVar v, new_lets, id, gvars, lvars, []
+  | <span data-count="525">E</span>Const c -&gt; CConst c, new_lets, id, gvars, lvars, []
+  | <span data-count="268">E</span>BinaryOp (op, e1, e2) -&gt;
     let lle1, lets1, id, gvars, lvars, lambadi1 =
       closure_expression id gvars lvars new_lets e1
     in
-    <span data-count="269">l</span>et lle2, lets2, id, gvars, lvars, lambadi2 =
+    <span data-count="268">l</span>et lle2, lets2, id, gvars, lvars, lambadi2 =
       closure_expression id gvars lvars new_lets e2
     in
-    <span data-count="269">(</span> CEbinOp (op, lle1, lle2)
+    <span data-count="268">(</span> CEbinOp (op, lle1, lle2)
     , new_lets @ lets1 @ lets2
     , id
     , gvars
     , lvars
     , lambadi1 @ lambadi2 )
-  | <span data-count="640">E</span>App (e1, e2, _) -&gt;
+  | <span data-count="639">E</span>App (e1, e2, _) -&gt;
     let lle1, lets1, id, gvars, lvars, lambadi1 =
       closure_expression id gvars lvars new_lets e1
     in
-    <span data-count="640">l</span>et lle2, lets2, id, gvars, lvars, lambadi2 =
+    <span data-count="639">l</span>et lle2, lets2, id, gvars, lvars, lambadi2 =
       closure_expression id gvars lvars new_lets e2
     in
-    <span data-count="640">C</span>App (lle1, lle2), new_lets @ lets1 @ lets2, id, gvars, lvars, lambadi1 @ lambadi2
+    <span data-count="639">C</span>App (lle1, lle2), new_lets @ lets1 @ lets2, id, gvars, lvars, lambadi1 @ lambadi2
   | <span data-count="0">E</span>List (hd, tl) -&gt;
     let lle1, lets1, id, gvars, lvars, lambadi1 =
       closure_expression id gvars lvars new_lets hd
@@ -715,7 +715,7 @@ let rec closure_expression id gvars lvars new_lets = function
   | <span data-count="174">E</span>LetIn (r, n_list, e, ine) -&gt;
     let args, e_body = arguments [] e in
     <span data-count="174">l</span>et str_args =
-      List.fold ~init:[] ~f:(fun acc arg -&gt; <span data-count="16">a</span>cc @ pattern_to_string_lis<span data-count="16">t</span> arg) args
+      List.fold ~init:[] ~f:(fun acc arg -&gt; <span data-count="15">a</span>cc @ pattern_to_string_lis<span data-count="15">t</span> arg) args
     in
     <span data-count="174">l</span>et lle, letse, id, gvars, lvars, lambadi1 =
       closure_expression id gvars str_args new_lets e_body
@@ -765,28 +765,28 @@ let rec closure_expression id gvars lvars new_lets = function
 ;;
 
 let rec free_vars gvars lvars uvars lambadi = function
-  | <span data-count="526">C</span>Const c -&gt; CConst c, gvars, lvars, uvars, []
-  | <span data-count="977">C</span>Var v -&gt;
+  | <span data-count="525">C</span>Const c -&gt; CConst c, gvars, lvars, uvars, []
+  | <span data-count="976">C</span>Var v -&gt;
     let new_app, new_vars =
       match Map.find uvars v with
       | <span data-count="22">S</span>ome p -&gt; List.fol<span data-count="22">d</span> ~init:(CVar v) ~f:(fun acc a -&gt; <span data-count="33">C</span>App (acc, CVar a)) p, p
-      | <span data-count="955">N</span>one -&gt; CVar v, [ v ]
+      | <span data-count="954">N</span>one -&gt; CVar v, [ v ]
     in
     let new_args =
       List.fold
         ~init:[]
-        ~f:(fun acc new_v -&gt; <span data-count="988">i</span>f find gvars lvars v then <span data-count="277">a</span>cc else <span data-count="711">n</span>ew_v :: acc)
+        ~f:(fun acc new_v -&gt; <span data-count="987">i</span>f find gvars lvars v then <span data-count="276">a</span>cc else <span data-count="711">n</span>ew_v :: acc)
         new_vars
     in
-    <span data-count="977">n</span>ew_app, gvars, lvars, uvars, new_args
-  | <span data-count="640">C</span>App (l, r) -&gt;
+    <span data-count="976">n</span>ew_app, gvars, lvars, uvars, new_args
+  | <span data-count="639">C</span>App (l, r) -&gt;
     let l, gvars, lvars, uvars, new_argsl = free_vars gvars lvars uvars lambadi l in
-    <span data-count="640">l</span>et r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
-    <span data-count="640">C</span>App (l, r), gvars, lvars, uvars, new_argsl @ new_argsr
-  | <span data-count="269">C</span>EbinOp (op, l, r) -&gt;
+    <span data-count="639">l</span>et r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
+    <span data-count="639">C</span>App (l, r), gvars, lvars, uvars, new_argsl @ new_argsr
+  | <span data-count="268">C</span>EbinOp (op, l, r) -&gt;
     let l, gvars, lvars, uvars, new_argsl = free_vars gvars lvars uvars lambadi l in
-    <span data-count="269">l</span>et r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
-    <span data-count="269">C</span>EbinOp (op, l, r), gvars, lvars, uvars, new_argsl @ new_argsr
+    <span data-count="268">l</span>et r, gvars, lvars, uvars, new_argsr = free_vars gvars lvars uvars lambadi r in
+    <span data-count="268">C</span>EbinOp (op, l, r), gvars, lvars, uvars, new_argsl @ new_argsr
   | <span data-count="51">C</span>IfElse (i, t, e) -&gt;
     let i, gvars, lvars, uvars, new_argsi = free_vars gvars lvars uvars lambadi i in
     <span data-count="51">l</span>et t, gvars, lvars, uvars, new_argst = free_vars gvars lvars uvars lambadi t in
@@ -800,10 +800,10 @@ let rec free_vars gvars lvars uvars lambadi = function
     <span data-count="12">C</span>PatLetIn (names, lle, lline), new_gvars, lvars, new_uvars, []
   | <span data-count="234">C</span>LetIn (r, n, args, lle, lline) -&gt;
     let string_args =
-      List.rev (List.fol<span data-count="234">d</span> ~init:[] ~f:(fun acc p -&gt; <span data-count="88">p</span>attern_to_string_lis<span data-count="88">t</span> p @ acc) args)
+      List.rev (List.fol<span data-count="234">d</span> ~init:[] ~f:(fun acc p -&gt; <span data-count="87">p</span>attern_to_string_lis<span data-count="87">t</span> p @ acc) args)
     in
     <span data-count="234">l</span>et new_lvars =
-      List.fold string_args ~init:lvars ~f:(fun acc arg -&gt; <span data-count="88">S</span>et.add acc arg)
+      List.fold string_args ~init:lvars ~f:(fun acc arg -&gt; <span data-count="87">S</span>et.add acc arg)
     in
     <span data-count="234">l</span>et new_gvars = Set.add gvars n in
     <span data-count="234">l</span>et lle, _, new_lvars, uvars, new_argslle =
