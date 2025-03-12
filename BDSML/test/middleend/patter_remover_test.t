@@ -126,10 +126,10 @@ Test function with constructors
   $ ./run_remove_patterns.exe <<- EOF
   > function | Some (x, y) -> x + 3 | None -> 0 
   > EOF
-  (fun __reserved_0 -> (if ((op_and (((same_cons __reserved_0) "Some"))) (((op_and (((op_and true) true))) true))) then (let __reserved_1 = (disassemble __reserved_0) in 
+  (fun __reserved_0 -> (if ((op_and (((same_cons __reserved_0) 1))) (((op_and (((op_and true) true))) true))) then (let __reserved_1 = (disassemble __reserved_0) in 
    (let __var_x = ((get_from_tuple __reserved_1) 0) in 
    (let __var_y = ((get_from_tuple __reserved_1) 1) in 
-   ((op_plus __var_x) 3)))) else (if ((same_cons __reserved_0) "None") then (let __nothing = ((same_cons __reserved_0) 0) in 
+   ((op_plus __var_x) 3)))) else (if ((same_cons __reserved_0) 0) then (let __nothing = ((same_cons __reserved_0) 0) in 
    0) else (exception "Match_failure"))));;
 Test or
   $ ./run_remove_patterns.exe <<- EOF

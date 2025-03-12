@@ -45,7 +45,19 @@ let disassemble_constructor v =
 ;;
 
 let var_nothing = Utils.Predefined_ops.var_nothing
-let same_constructor l r = two_arg_fun_helper Utils.Predefined_ops.same_cons.alt_name l r
+
+let same_constructor l r =
+  let matcher = function
+    | "None" -> 0
+    | "Some" -> 1
+    | "::" -> 2
+    | "[]" -> 3
+    | _ -> 5
+  in
+  two_arg_fun_helper Utils.Predefined_ops.same_cons.alt_name l
+  @@ RExp_constant (Const_int (matcher r))
+;;
+
 let exp_or = two_arg_fun_helper Utils.Predefined_ops.op_or.alt_name
 let exp_and = two_arg_fun_helper Utils.Predefined_ops.op_and.alt_name
 let exp_eq = two_arg_fun_helper Utils.Predefined_ops.op_eq.alt_name
@@ -70,16 +82,7 @@ let rec pattern_binder rexp = function
   | Pat_construct (_, Some v) -> pattern_binder (disassemble_constructor rexp) v
   | Pat_any -> return [ var_nothing, rexp ]
   | Pat_constant s -> return [ var_nothing, exp_eq rexp @@ RExp_constant s ]
-  | Pat_construct (name, None) ->
-    let matcher = function
-      | "None" -> 0
-      | "Some" -> 1
-      | "::" -> 2
-      | "[]" -> 3
-      | _ -> 5
-    in
-    return
-      [ var_nothing, same_constructor rexp @@ RExp_constant (Const_int (matcher name)) ]
+  | Pat_construct (name, None) -> return [ var_nothing, same_constructor rexp name ]
 ;;
 
 let rec let_bindings_unpack r bindings =
@@ -142,7 +145,7 @@ and match_cases exp cases =
       res
     | Pat_or (l, r) -> exp_or (construct_bool exp l) (construct_bool exp r)
     | Pat_construct (name, p) ->
-      let check = same_constructor exp (RExp_constant (Const_string name)) in
+      let check = same_constructor exp name in
       let params = disassemble_constructor exp in
       (match p with
        | Some pat -> exp_and check @@ construct_bool params pat

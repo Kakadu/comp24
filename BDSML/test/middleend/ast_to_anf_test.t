@@ -39,11 +39,12 @@ Test let with let rec in
   val length_tail : 'r list -> int
   
   Types after anf:
-  Inference error: Type infering error: failed unification of types int and string
+  val __var_helper : int -> 'p -> int
+  val __var_length_tail : 'p -> int
   
-  let rec __var_helper __reserved_0 __reserved_1 = (let __anf_0 = ((same_cons __reserved_1) "[]") in 
+  let rec __var_helper __reserved_0 __reserved_1 = (let __anf_0 = ((same_cons __reserved_1) 3) in 
    (if __anf_0 then (let __nothing = ((same_cons __reserved_1) 3) in 
-   __reserved_0) else (let __anf_1 = ((same_cons __reserved_1) "::") in 
+   __reserved_0) else (let __anf_1 = ((same_cons __reserved_1) 2) in 
    (let __anf_2 = ((( && ) true) true) in 
    (let __anf_3 = ((( && ) __anf_2) true) in 
    (let __anf_4 = ((( && ) __anf_1) __anf_3) in 
@@ -66,11 +67,12 @@ Test let with let rec in with several capture
   val f : int -> 's list -> int
   
   Types after anf:
-  Inference error: Type infering error: failed unification of types int and string
+  val __var_helper : int -> int -> 'q -> int
+  val __var_f : int -> 'q -> int
   
-  let rec __var_helper __var_a0 __reserved_1 __reserved_2 = (let __anf_0 = ((same_cons __reserved_2) "[]") in 
+  let rec __var_helper __var_a0 __reserved_1 __reserved_2 = (let __anf_0 = ((same_cons __reserved_2) 3) in 
    (if __anf_0 then (let __nothing = ((same_cons __reserved_2) 3) in 
-   __reserved_1) else (let __anf_1 = ((same_cons __reserved_2) "::") in 
+   __reserved_1) else (let __anf_1 = ((same_cons __reserved_2) 2) in 
    (let __anf_2 = ((( && ) true) true) in 
    (let __anf_3 = ((( && ) __anf_2) true) in 
    (let __anf_4 = ((( && ) __anf_1) __anf_3) in 

@@ -883,7 +883,7 @@
                 ],
               (Exp_if (
                  (Exp_apply (
-                    (Exp_apply ((Exp_ident "( == )"), (Exp_ident "n"))),
+                    (Exp_apply ((Exp_ident "( = )"), (Exp_ident "n"))),
                     (Exp_constant (Const_int 0)))),
                  (Exp_constant (Const_int 1)),
                  (Some (Exp_apply ((Exp_ident "o"),
@@ -904,7 +904,7 @@
                 ],
               (Exp_if (
                  (Exp_apply (
-                    (Exp_apply ((Exp_ident "( == )"), (Exp_ident "n"))),
+                    (Exp_apply ((Exp_ident "( = )"), (Exp_ident "n"))),
                     (Exp_constant (Const_int 0)))),
                  (Exp_constant (Const_int 0)),
                  (Some (Exp_apply ((Exp_ident "e"),

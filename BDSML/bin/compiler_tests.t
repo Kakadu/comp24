@@ -5,17 +5,18 @@
   > ./compiler.exe < $f
   > clang-16 -lstdc++ -std=c++20 -lffi out.ll runtime.o -o a.out
   > cat $f
-  > echo "Answer:"
+  > echo "\nAnswer:"
   > ./a.out
   > rm a.out
   > done
   
   ----------------------------------- manytests/typed/001fac.ml
-  let rec fac n = if n<=1 then 1 else n * fac (n-1)
+  let rec fac n = if n <= 1 then 1 else n * fac (n - 1)
   
   let main =
     let () = print_int (fac 4) in
     0
+  ;;
   
   Answer:
   24
@@ -28,6 +29,7 @@
   let main =
     let () = print_int (fac_cps 4 (fun print_int -> print_int)) in
     0
+  
   
   Answer:
   24
@@ -49,6 +51,7 @@
     let () = print_int (fib_acc 0 1 4) in
     let () = print_int (fib 4) in
     0
+  
   
   Answer:
   3
@@ -74,6 +77,7 @@
     let temp2 = wrap test3 1 10 100 in
     0
   
+  
   Answer:
   1111111111
   1
@@ -89,6 +93,7 @@
     let () = print_int (fix fac 6) in
     0
   
+  
   Answer:
   720
   
@@ -98,7 +103,8 @@
   let foo x = foo true (foo false (foo true (foo false x)))
   let main =
     let () = print_int (foo 11) in
-    0Answer:
+    0
+  Answer:
   1122
   
   ----------------------------------- manytests/typed/006partial2.ml
@@ -113,7 +119,8 @@
     let foo = foo 2 in
     let foo = foo 3 in
     let () = print_int foo in
-    0Answer:
+    0
+  Answer:
   1
   2
   3
@@ -127,7 +134,8 @@
   
   let main =
     let () = foo 4 8 9 in
-    0Answer:
+    0
+  Answer:
   4
   8
   9
@@ -140,7 +148,8 @@
   
   
   let main =
-    print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))Answer:
+    print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
+  Answer:
   1
   2
   4
@@ -154,13 +163,15 @@
   
   let main =
     let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start -> _start/2 = 0) 4) in
-    0Answer:
+    0
+  Answer:
   8
   
   ----------------------------------- manytests/typed/009let_poly.ml
   let temp =
     let f = fun x -> x in
-    (f 1, f true)Answer:
+    (f 1, f true)
+  Answer:
   
   ----------------------------------- manytests/typed/015tuples.ml
   let rec fix f x = f (fix f) x
@@ -169,10 +180,10 @@
     fix (fun self l -> map (fun li x -> li (self l) x) l) l
   let feven p n =
     let (e, o) = p in
-    if n == 0 then 1 else o (n - 1)
+    if n = 0 then 1 else o (n - 1)
   let fodd p n =
     let (e, o) = p in
-    if n == 0 then 0 else e (n - 1)
+    if n = 0 then 0 else e (n - 1)
   let tie = fixpoly (feven, fodd)
   
   let rec meven n = if n = 0 then 1 else modd (n - 1)
@@ -185,10 +196,12 @@
     let () = print_int (even 4) in
     0
   
+  
   Answer:
   1
   1
-  Segmentation fault (core dumped)
+  1
+  1
   
   ----------------------------------- manytests/typed/016lists.ml
   let rec length xs =
@@ -232,8 +245,9 @@
     let () = iter print_int [1;2;3] in
     let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
     0
+  
   Answer:
-  terminate called after throwing an instance of 'std::runtime_error'
-    what():  Invalid value, expected l, got index 3, error "std::get: wrong index for variant"
-  Aborted (core dumped)
-
+  1
+  2
+  3
+  8

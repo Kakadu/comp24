@@ -148,13 +148,13 @@
    (let __reserved_12 = __var_p in 
    (let __var_e = ((get_from_tuple __reserved_12) 0) in 
    (let __var_o = ((get_from_tuple __reserved_12) 1) in 
-   (if ((op_phys_eq __var_n) 0) then 1 else (__var_o (((op_minus __var_n) 1))))))))));;
+   (if ((op_eq __var_n) 0) then 1 else (__var_o (((op_minus __var_n) 1))))))))));;
   let __var_fodd = (fun __reserved_13 __reserved_14 -> (let __var_p = __reserved_13 in 
    (let __var_n = __reserved_14 in 
    (let __reserved_15 = __var_p in 
    (let __var_e = ((get_from_tuple __reserved_15) 0) in 
    (let __var_o = ((get_from_tuple __reserved_15) 1) in 
-   (if ((op_phys_eq __var_n) 0) then 0 else (__var_e (((op_minus __var_n) 1))))))))));;
+   (if ((op_eq __var_n) 0) then 0 else (__var_e (((op_minus __var_n) 1))))))))));;
   let __var_tie = (__var_fixpoly ((__var_feven, __var_fodd)));;
   let rec __var_meven = (fun __reserved_16 -> (let __var_n = __reserved_16 in 
    (if ((op_eq __var_n) 0) then 1 else (__var_modd (((op_minus __var_n) 1))))))
@@ -171,16 +171,16 @@
   $ ../middleend/run_lambda_lifting.exe run_to_anf < manytests_link/typed/016lists.ml
   let rec __var_length = (fun __reserved_0 -> (let __var_xs = __reserved_0 in 
    (let __reserved_1 = __var_xs in 
-   (if ((same_cons __reserved_1) "[]") then (let __nothing = ((same_cons __reserved_1) 3) in 
-   0) else (if ((op_and (((same_cons __reserved_1) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_2 = (disassemble __reserved_1) in 
+   (if ((same_cons __reserved_1) 3) then (let __nothing = ((same_cons __reserved_1) 3) in 
+   0) else (if ((op_and (((same_cons __reserved_1) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_2 = (disassemble __reserved_1) in 
    (let __var_h = ((get_from_tuple __reserved_2) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_2) 1) in 
    ((op_plus 1) ((__var_length __var_tl)))))) else (exception "Match_failure"))))));;
   let rec __var_helper = (fun __reserved_3 __reserved_4 -> (let __var_acc = __reserved_3 in 
    (let __var_xs = __reserved_4 in 
    (let __reserved_5 = __var_xs in 
-   (if ((same_cons __reserved_5) "[]") then (let __nothing = ((same_cons __reserved_5) 3) in 
-   __var_acc) else (if ((op_and (((same_cons __reserved_5) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_6 = (disassemble __reserved_5) in 
+   (if ((same_cons __reserved_5) 3) then (let __nothing = ((same_cons __reserved_5) 3) in 
+   __var_acc) else (if ((op_and (((same_cons __reserved_5) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_6 = (disassemble __reserved_5) in 
    (let __var_h = ((get_from_tuple __reserved_6) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_6) 1) in 
    ((__var_helper (((op_plus __var_acc) 1))) __var_tl)))) else (exception "Match_failure")))))));;
@@ -188,23 +188,23 @@
   let rec __var_map = (fun __reserved_7 __reserved_8 -> (let __var_f = __reserved_7 in 
    (let __var_xs = __reserved_8 in 
    (let __reserved_9 = __var_xs in 
-   (if ((same_cons __reserved_9) "[]") then (let __nothing = ((same_cons __reserved_9) 3) in 
-   ([])) else (if ((op_and (((same_cons __reserved_9) "::"))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) "[]"))))) then (let __reserved_19 = (disassemble __reserved_9) in 
+   (if ((same_cons __reserved_9) 3) then (let __nothing = ((same_cons __reserved_9) 3) in 
+   ([])) else (if ((op_and (((same_cons __reserved_9) 2))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) 3))))) then (let __reserved_19 = (disassemble __reserved_9) in 
    (let __var_a = ((get_from_tuple __reserved_19) 0) in 
    (let __nothing = ((same_cons (((get_from_tuple __reserved_19) 1))) 3) in 
-   ((__var_f __var_a) :: ([]))))) else (if ((op_and (((same_cons __reserved_9) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) "::"))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) "[]"))))))))) then (let __reserved_17 = (disassemble __reserved_9) in 
+   ((__var_f __var_a) :: ([]))))) else (if ((op_and (((same_cons __reserved_9) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) 2))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) 3))))))))) then (let __reserved_17 = (disassemble __reserved_9) in 
    (let __var_a = ((get_from_tuple __reserved_17) 0) in 
    (let __reserved_18 = (disassemble (((get_from_tuple __reserved_17) 1))) in 
    (let __var_b = ((get_from_tuple __reserved_18) 0) in 
    (let __nothing = ((same_cons (((get_from_tuple __reserved_18) 1))) 3) in 
-   ((__var_f __var_a) :: ((__var_f __var_b) :: ([])))))))) else (if ((op_and (((same_cons __reserved_9) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) "::"))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))))) 1))) "[]"))))))))))))) then (let __reserved_14 = (disassemble __reserved_9) in 
+   ((__var_f __var_a) :: ((__var_f __var_b) :: ([])))))))) else (if ((op_and (((same_cons __reserved_9) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) 2))) (((op_and (((op_and true) true))) (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))))) 1))) 3))))))))))))) then (let __reserved_14 = (disassemble __reserved_9) in 
    (let __var_a = ((get_from_tuple __reserved_14) 0) in 
    (let __reserved_15 = (disassemble (((get_from_tuple __reserved_14) 1))) in 
    (let __var_b = ((get_from_tuple __reserved_15) 0) in 
    (let __reserved_16 = (disassemble (((get_from_tuple __reserved_15) 1))) in 
    (let __var_c = ((get_from_tuple __reserved_16) 0) in 
    (let __nothing = ((same_cons (((get_from_tuple __reserved_16) 1))) 3) in 
-   ((__var_f __var_a) :: ((__var_f __var_b) :: ((__var_f __var_c) :: ([]))))))))))) else (if ((op_and (((same_cons __reserved_9) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) "::"))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))))) 1))) "::"))) (((op_and (((op_and true) true))) true))))))))))))))) then (let __reserved_10 = (disassemble __reserved_9) in 
+   ((__var_f __var_a) :: ((__var_f __var_b) :: ((__var_f __var_c) :: ([]))))))))))) else (if ((op_and (((same_cons __reserved_9) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble __reserved_9))) 1))) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))) 2))) (((op_and (((op_and true) true))) (((op_and (((same_cons (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble (((get_from_tuple ((disassemble __reserved_9))) 1))))) 1))))) 1))) 2))) (((op_and (((op_and true) true))) true))))))))))))))) then (let __reserved_10 = (disassemble __reserved_9) in 
    (let __var_a = ((get_from_tuple __reserved_10) 0) in 
    (let __reserved_11 = (disassemble (((get_from_tuple __reserved_10) 1))) in 
    (let __var_b = ((get_from_tuple __reserved_11) 0) in 
@@ -217,15 +217,15 @@
   let rec __var_append = (fun __reserved_20 __reserved_21 -> (let __var_xs = __reserved_20 in 
    (let __var_ys = __reserved_21 in 
    (let __reserved_22 = __var_xs in 
-   (if ((same_cons __reserved_22) "[]") then (let __nothing = ((same_cons __reserved_22) 3) in 
-   __var_ys) else (if ((op_and (((same_cons __reserved_22) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_23 = (disassemble __reserved_22) in 
+   (if ((same_cons __reserved_22) 3) then (let __nothing = ((same_cons __reserved_22) 3) in 
+   __var_ys) else (if ((op_and (((same_cons __reserved_22) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_23 = (disassemble __reserved_22) in 
    (let __var_x = ((get_from_tuple __reserved_23) 0) in 
    (let __var_xs0 = ((get_from_tuple __reserved_23) 1) in 
    (__var_x :: ((__var_append __var_xs0) __var_ys))))) else (exception "Match_failure")))))));;
   let rec __var_helper = (fun __reserved_24 -> (let __var_xs = __reserved_24 in 
    (let __reserved_25 = __var_xs in 
-   (if ((same_cons __reserved_25) "[]") then (let __nothing = ((same_cons __reserved_25) 3) in 
-   ([])) else (if ((op_and (((same_cons __reserved_25) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_26 = (disassemble __reserved_25) in 
+   (if ((same_cons __reserved_25) 3) then (let __nothing = ((same_cons __reserved_25) 3) in 
+   ([])) else (if ((op_and (((same_cons __reserved_25) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_26 = (disassemble __reserved_25) in 
    (let __var_h = ((get_from_tuple __reserved_26) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_26) 1) in 
    ((__var_append __var_h) ((__var_helper __var_tl)))))) else (exception "Match_failure"))))));;
@@ -233,8 +233,8 @@
   let rec __var_iter = (fun __reserved_27 __reserved_28 -> (let __var_f = __reserved_27 in 
    (let __var_xs = __reserved_28 in 
    (let __reserved_29 = __var_xs in 
-   (if ((same_cons __reserved_29) "[]") then (let __nothing = ((same_cons __reserved_29) 3) in 
-   ()) else (if ((op_and (((same_cons __reserved_29) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_30 = (disassemble __reserved_29) in 
+   (if ((same_cons __reserved_29) 3) then (let __nothing = ((same_cons __reserved_29) 3) in 
+   ()) else (if ((op_and (((same_cons __reserved_29) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_30 = (disassemble __reserved_29) in 
    (let __var_h = ((get_from_tuple __reserved_30) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_30) 1) in 
    (let __nothing = ((op_eq ((__var_f __var_h))) ()) in 
@@ -244,8 +244,8 @@
   let rec __var_cartesian = (fun __reserved_31 __reserved_32 -> (let __var_xs = __reserved_31 in 
    (let __var_ys = __reserved_32 in 
    (let __reserved_33 = __var_xs in 
-   (if ((same_cons __reserved_33) "[]") then (let __nothing = ((same_cons __reserved_33) 3) in 
-   ([])) else (if ((op_and (((same_cons __reserved_33) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_34 = (disassemble __reserved_33) in 
+   (if ((same_cons __reserved_33) 3) then (let __nothing = ((same_cons __reserved_33) 3) in 
+   ([])) else (if ((op_and (((same_cons __reserved_33) 2))) (((op_and (((op_and true) true))) true))) then (let __reserved_34 = (disassemble __reserved_33) in 
    (let __var_h = ((get_from_tuple __reserved_34) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_34) 1) in 
    ((__var_append (((__var_map ((lifted_0 __var_h))) __var_ys))) (((__var_cartesian __var_tl) __var_ys)))))) else (exception "Match_failure")))))));;
