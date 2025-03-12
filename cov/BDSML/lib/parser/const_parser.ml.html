@@ -113,7 +113,7 @@ open Utils
 let parse_int =
   take_while<span data-count="123">1</span> (function
     | <span data-count="18489">'</span>0' .. '9' -&gt; true
-    | <span data-count="80618">_</span> -&gt; false)
+    | <span data-count="80664">_</span> -&gt; false)
   &gt;&gt;<span data-count="123">|</span> fun i -&gt; <span data-count="11482">C</span>onst_int (Int.of_strin<span data-count="11482">g</span> i)
 ;;
 
@@ -130,7 +130,7 @@ let parse_string =
 
 let parse_bool =
   let+ res = strin<span data-count="123">g</span> "true" *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> true &lt;|<span data-count="123">&gt;</span> strin<span data-count="123">g</span> "false" *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> false in
-  <span data-count="428">C</span>onst_bool res
+  <span data-count="432">C</span>onst_bool res
 ;;
 
 let parse_unit = cha<span data-count="123">r</span> '(' *<span data-count="123">&gt;</span> ws *<span data-count="123">&gt;</span> cha<span data-count="123">r</span> ')' *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> Const_unit

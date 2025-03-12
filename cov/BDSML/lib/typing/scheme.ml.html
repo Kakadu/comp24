@@ -69,20 +69,20 @@
 
 type t = VarSet.t * type_val
 
-let create set ty : t = <span data-count="5189">s</span>et, ty
-let free_vars (set, ty) = <span data-count="24844">V</span>arSet.diff (free_var<span data-count="24844">s</span> ty) set
+let create set ty : t = <span data-count="5214">s</span>et, ty
+let free_vars (set, ty) = <span data-count="24866">V</span>arSet.diff (free_var<span data-count="24866">s</span> ty) set
 
 let apply sub (names, ty) =
-  <span data-count="88019">l</span>et s2 = VarSet.fold (fun k s -&gt; <span data-count="44163">S</span>ubst.remove k s) names sub in
-  <span data-count="88019">n</span>ames, Subst.appl<span data-count="88019">y</span> s2 ty
+  <span data-count="90864">l</span>et s2 = VarSet.fold (fun k s -&gt; <span data-count="45643">S</span>ubst.remove k s) names sub in
+  <span data-count="90864">n</span>ames, Subst.appl<span data-count="90864">y</span> s2 ty
 ;;
 
-let get_type (_, ty) = <span data-count="304">t</span>y
+let get_type (_, ty) = <span data-count="305">t</span>y
 
 let equal (_, t1) (_, t2) =
-  <span data-count="6939">m</span>atch Monads.run (Subst.unif<span data-count="6939">y</span> t1 t2) @@ TVarId.creat<span data-count="6939">e</span> 0 with
+  <span data-count="6961">m</span>atch Monads.run (Subst.unif<span data-count="6961">y</span> t1 t2) @@ TVarId.creat<span data-count="6961">e</span> 0 with
   | <span data-count="7">E</span>rror _ -&gt; false
-  | <span data-count="6932">_</span> -&gt; true
+  | <span data-count="6954">_</span> -&gt; true
 ;;
 </code></pre>
       </div>

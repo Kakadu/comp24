@@ -584,26 +584,26 @@ open Angstrom
 open Ast
 open Utils
 
-let enclose s = <span data-count="3348">"</span>( " ^ s ^ " )"
+let enclose s = <span data-count="3356">"</span>( " ^ s ^ " )"
 
 let parse_const =
   let+ const = Const_parser.parse_const in
-  <span data-count="11732">E</span>xp_constant const
+  <span data-count="11736">E</span>xp_constant const
 ;;
 
 (** https://ocaml.org/manual/5.2/lex.html#sss:lex-ops-symbols
     '|' moved from core by purpose *)
 let is_core_operator_char = function
-  | <span data-count="0">'</span>$' | <span data-count="0">'</span>&amp;' | <span data-count="208">'</span>*' | <span data-count="1414">'</span>+' | <span data-count="892">'</span>-' | <span data-count="65">'</span>/' | <span data-count="700">'</span>=' | <span data-count="8">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' -&gt; true
-  | <span data-count="14179">_</span> -&gt; false
+  | <span data-count="0">'</span>$' | <span data-count="0">'</span>&amp;' | <span data-count="208">'</span>*' | <span data-count="1414">'</span>+' | <span data-count="892">'</span>-' | <span data-count="65">'</span>/' | <span data-count="708">'</span>=' | <span data-count="8">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' -&gt; true
+  | <span data-count="14187">_</span> -&gt; false
 ;;
 
 let is_operator_char a =
-  <span data-count="4600">i</span>s_core_operator_cha<span data-count="4600">r</span> <span data-count="82">a</span>
+  <span data-count="4608">i</span>s_core_operator_cha<span data-count="4608">r</span> <span data-count="82">a</span>
   ||
   match a with
   | <span data-count="0">'</span>~' | <span data-count="0">'</span>!' | <span data-count="0">'</span>?' | <span data-count="0">'</span>%' | <span data-count="0">'</span>&lt;' | <span data-count="0">'</span>:' | <span data-count="0">'</span>.' | <span data-count="1">'</span>|' -&gt; true
-  | <span data-count="4517">_</span> -&gt; fals<span data-count="1">e</span>
+  | <span data-count="4525">_</span> -&gt; fals<span data-count="1">e</span>
 ;;
 
 let parse_prefix_op =
@@ -634,10 +634,10 @@ let parse_infix_op prefix =
   let case2 =
     let+ first_el = satisf<span data-count="2323">y</span> is_core_operator_char &lt;|<span data-count="2323">&gt;</span> cha<span data-count="2323">r</span> '%' &lt;|<span data-count="2323">&gt;</span> cha<span data-count="2323">r</span> '&lt;'
     and+ other_el = take_whil<span data-count="2323">e</span> is_operator_char in
-    <span data-count="3338">C</span>har.escape<span data-count="3338">d</span> first_el ^ other_el
+    <span data-count="3346">C</span>har.escape<span data-count="3346">d</span> first_el ^ other_el
   in
   let* check_prefix = peek_strin<span data-count="2323">g</span> @@ String.lengt<span data-count="2323">h</span> prefix in
-  <span data-count="346794">i</span>f String.equal check_prefix prefix then <span data-count="12867">c</span>ase1 &lt;|&gt; case2 else <span data-count="333927">f</span>ail ""
+  <span data-count="346994">i</span>f String.equal check_prefix prefix then <span data-count="12875">c</span>ase1 &lt;|&gt; case2 else <span data-count="334119">f</span>ail ""
 ;;
 
 let parse_ident =
@@ -647,7 +647,7 @@ let parse_ident =
         &lt;|<span data-count="123">&gt;</span> parse_prefix_op
         &lt;|<span data-count="123">&gt;</span> (remove_parent<span data-count="123">s</span> @@ parse_infix_o<span data-count="123">p</span> "" &gt;&gt;<span data-count="123">|</span> enclose))
   in
-  <span data-count="20272">E</span>xp_ident ident
+  <span data-count="20288">E</span>xp_ident ident
 ;;
 
 let rec unary_chain (func : string t) arg_parser =
@@ -661,8 +661,8 @@ let parse_infix_with_prefixes prefixes = <span data-count="492">c</span>hoice (L
 
 let parse_bop (op : string t) =
   <span data-count="1044">l</span>et+ parsed = ws *<span data-count="1044">&gt;</span> op in
-  <span data-count="3167">l</span>et ident = Exp_ident (enclos<span data-count="3167">e</span> parsed) in
-  fun e1 e2 -&gt; <span data-count="3167">E</span>xp_apply (Exp_apply (ident, e1), e2)
+  <span data-count="3175">l</span>et ident = Exp_ident (enclos<span data-count="3175">e</span> parsed) in
+  fun e1 e2 -&gt; <span data-count="3175">E</span>xp_apply (Exp_apply (ident, e1), e2)
 ;;
 
 let prefix_op parser prev = <span data-count="232">u</span>nary_chai<span data-count="232">n</span> parser prev &lt;|&gt; prev
@@ -680,7 +680,7 @@ let tuple prev =
   <span data-count="116">s</span>ep_by<span data-count="116">1</span> (check_cha<span data-count="116">r</span> ',') prev
   &gt;&gt;= function
   | <span data-count="619">_</span> :: _ :: _ as l -&gt; return @@ Exp_tuple l
-  | <span data-count="21406">[</span> e ] -&gt; return e
+  | <span data-count="21418">[</span> e ] -&gt; return e
   | <span data-count="0">_</span> -&gt; fail ""
 ;;
 
@@ -693,9 +693,9 @@ let parse_let_main_part prev =
         let+ typexpr = optio<span data-count="355">n</span> None (Typexpr_parser.parse_typexpr &gt;&gt;<span data-count="355">|</span> Option.some)
         and+ _ = check_cha<span data-count="355">r</span> '='
         and+ expr = prev in
-        <span data-count="7730">m</span>atch typexpr with
+        <span data-count="7734">m</span>atch typexpr with
         | <span data-count="33">S</span>ome typexpr -&gt; Exp_type (expr, typexpr)
-        | <span data-count="7697">_</span> -&gt; expr
+        | <span data-count="7701">_</span> -&gt; expr
       in
       let pat_bind =
         let+ pat = ws *<span data-count="355">&gt;</span> Pattern_parser.parse_pattern
@@ -712,13 +712,13 @@ let parse_let_main_part prev =
           &lt;|<span data-count="355">&gt;</span> additio<span data-count="355">n</span> (remove_parent<span data-count="355">s</span> (parse_prefix_op &lt;|<span data-count="355">&gt;</span> parse_infix_o<span data-count="355">p</span> ""))
         and+ pats = sep_b<span data-count="355">y</span> ws1 Pattern_parser.parse_pattern
         and+ expr = parse_expr in
-        <span data-count="4750">V</span>al_binding (ident, pats, expr)
+        <span data-count="4754">V</span>al_binding (ident, pats, expr)
       in
       val_bind &lt;|<span data-count="355">&gt;</span> pat_bind
     in
     sep_by<span data-count="355">1</span> (check_strin<span data-count="355">g</span> "and" &lt;<span data-count="355">*</span> ws1) pat_expr
   in
-  <span data-count="7280">r</span>ec_flag, bindings
+  <span data-count="7284">r</span>ec_flag, bindings
 ;;
 
 let let_parser prev =
@@ -780,9 +780,9 @@ let if_parser prev =
     @@
     let+ _ = check_strin<span data-count="232">g</span> "else" &lt;<span data-count="232">*</span> ws1
     and+ expr3 = prev in
-    <span data-count="822">S</span>ome expr3
+    <span data-count="826">S</span>ome expr3
   in
-  <span data-count="837">E</span>xp_if (expr1, expr2, else_res)
+  <span data-count="841">E</span>xp_if (expr1, expr2, else_res)
 ;;
 
 let exp_list_cons prev =

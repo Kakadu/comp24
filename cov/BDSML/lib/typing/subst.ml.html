@@ -211,45 +211,45 @@ module VarMap = Map.Make (TVarId)
 type t = type_val VarMap.t
 
 let fold_left (map : t) init f =
-  <span data-count="64147">V</span>arMap.fold
+  <span data-count="64091">V</span>arMap.fold
     (fun key data acc -&gt;
-      <span data-count="1672022">l</span>et* acc = acc in
-      <span data-count="1672022">f</span> acc (key, data))
+      <span data-count="1671576">l</span>et* acc = acc in
+      <span data-count="1671576">f</span> acc (key, data))
     map
     init
 ;;
 
 let empty : t = VarMap.empty
-let mapping (k : TVarId.t) v = <span data-count="1675596">i</span>f occurs_in k v then <span data-count="0">f</span>ail Occurs_check else <span data-count="1675596">r</span>eturn (k, v)
+let mapping (k : TVarId.t) v = <span data-count="1675159">i</span>f occurs_in k v then <span data-count="0">f</span>ail Occurs_check else <span data-count="1675159">r</span>eturn (k, v)
 
 let singleton k v : t Monads.t =
-  <span data-count="41077">l</span>et+ k, v = mappin<span data-count="41077">g</span> k v in
-  <span data-count="41077">V</span>arMap.singleton k v
+  <span data-count="40967">l</span>et+ k, v = mappin<span data-count="40967">g</span> k v in
+  <span data-count="40967">V</span>arMap.singleton k v
 ;;
 
 let apply (sub : t) =
-  <span data-count="1795290">l</span>et rec helper = function
-    | <span data-count="1278149">T</span>Var b as ty -&gt;
+  <span data-count="1797832">l</span>et rec helper = function
+    | <span data-count="1281329">T</span>Var b as ty -&gt;
       (match VarMap.find_opt b sub with
-       | <span data-count="1272355">N</span>one -&gt; ty
-       | <span data-count="5794">S</span>ome x -&gt; x)
-    | <span data-count="734286">T</span>Arrow (l, r) -&gt; TArrow (helpe<span data-count="734286">r</span> l, helpe<span data-count="734286">r</span> r)
-    | <span data-count="13723">T</span>Tuple m -&gt; TTuple (List.ma<span data-count="13723">p</span> helper m)
-    | <span data-count="32617">T</span>Constructor (Some t, name) -&gt; TConstructor (Some (helpe<span data-count="32617">r</span> t), name)
-    | <span data-count="1265150">_</span> as x -&gt; x
+       | <span data-count="1275532">N</span>one -&gt; ty
+       | <span data-count="5797">S</span>ome x -&gt; x)
+    | <span data-count="739288">T</span>Arrow (l, r) -&gt; TArrow (helpe<span data-count="739288">r</span> l, helpe<span data-count="739288">r</span> r)
+    | <span data-count="14083">T</span>Tuple m -&gt; TTuple (List.ma<span data-count="14083">p</span> helper m)
+    | <span data-count="32641">T</span>Constructor (Some t, name) -&gt; TConstructor (Some (helpe<span data-count="32641">r</span> t), name)
+    | <span data-count="1269874">_</span> as x -&gt; x
   in
   helper
 ;;
 
 let rec unify l r =
-  <span data-count="41561">m</span>atch l, r with
-  | <span data-count="14423">T</span>Base a, TBase b when a = b -&gt; <span data-count="14413">r</span>eturn empty
-  | <span data-count="8338">T</span>Var a, TVar b when a = b -&gt; <span data-count="7671">r</span>eturn empty
-  | <span data-count="1326">T</span>Var b, t | <span data-count="2064">t</span>, TVar b -&gt; singleton b t
-  | <span data-count="14905">T</span>Arrow (l1, r1), TArrow (l2, r2) -&gt;
-    let* subs1 = unif<span data-count="14905">y</span> l1 l2 in
-    <span data-count="14901">l</span>et* subs2 = unif<span data-count="14901">y</span> (appl<span data-count="14901">y</span> subs1 r1) (appl<span data-count="14901">y</span> subs1 r2) in
-    <span data-count="14900">c</span>ompose subs1 subs2
+  <span data-count="41625">m</span>atch l, r with
+  | <span data-count="14466">T</span>Base a, TBase b when a = b -&gt; <span data-count="14456">r</span>eturn empty
+  | <span data-count="8357">T</span>Var a, TVar b when a = b -&gt; <span data-count="7690">r</span>eturn empty
+  | <span data-count="1324">T</span>Var b, t | <span data-count="2027">t</span>, TVar b -&gt; singleton b t
+  | <span data-count="14946">T</span>Arrow (l1, r1), TArrow (l2, r2) -&gt;
+    let* subs1 = unif<span data-count="14946">y</span> l1 l2 in
+    <span data-count="14942">l</span>et* subs2 = unif<span data-count="14942">y</span> (appl<span data-count="14942">y</span> subs1 r1) (appl<span data-count="14942">y</span> subs1 r2) in
+    <span data-count="14941">c</span>ompose subs1 subs2
   | <span data-count="590">T</span>Constructor (Some t1, _), TConstructor (Some t2, _) -&gt; unify t1 t2
   | <span data-count="1">T</span>Constructor _, TConstructor _ -&gt; return empty
   | <span data-count="580">T</span>Tuple l, TTuple r -&gt;
@@ -262,30 +262,30 @@ let rec unify l r =
   | <span data-count="11">_</span> -&gt; fail (Unification_failed (l, r))
 
 and extend s (k, v) =
-  <span data-count="37503">m</span>atch VarMap.find_opt k s with
-  | <span data-count="37175">N</span>one -&gt;
+  <span data-count="37384">m</span>atch VarMap.find_opt k s with
+  | <span data-count="37102">N</span>one -&gt;
     let v = apply s v in
-    <span data-count="37175">l</span>et* acc_map = singleto<span data-count="37175">n</span> k v in
-    <span data-count="37175">f</span>old_left s (retur<span data-count="37175">n</span> acc_map) (fun acc (k, v) -&gt;
-      <span data-count="1634519">l</span>et v = apply acc_map v in
-      <span data-count="1634519">l</span>et+ k, v = mappin<span data-count="1634519">g</span> k v in
-      <span data-count="1634519">V</span>arMap.add k v acc)
-  | <span data-count="328">S</span>ome v2 -&gt;
-    let* s2 = unif<span data-count="328">y</span> v v2 in
-    <span data-count="327">c</span>ompose s s2
+    <span data-count="37102">l</span>et* acc_map = singleto<span data-count="37102">n</span> k v in
+    <span data-count="37102">f</span>old_left s (retur<span data-count="37102">n</span> acc_map) (fun acc (k, v) -&gt;
+      <span data-count="1634192">l</span>et v = apply acc_map v in
+      <span data-count="1634192">l</span>et+ k, v = mappin<span data-count="1634192">g</span> k v in
+      <span data-count="1634192">V</span>arMap.add k v acc)
+  | <span data-count="282">S</span>ome v2 -&gt;
+    let* s2 = unif<span data-count="282">y</span> v v2 in
+    <span data-count="281">c</span>ompose s s2
 
-and compose s1 s2 = <span data-count="26972">f</span>old_left s2 (retur<span data-count="26972">n</span> s1) extend
+and compose s1 s2 = <span data-count="26989">f</span>old_left s2 (retur<span data-count="26989">n</span> s1) extend
 
 let compose_all ss =
-  <span data-count="2213">L</span>ist.fold_left
+  <span data-count="2218">L</span>ist.fold_left
     (fun acc ss -&gt;
-      <span data-count="7056">l</span>et* acc = acc in
-      <span data-count="7056">c</span>ompose acc ss)
-    (retur<span data-count="2213">n</span> empty)
+      <span data-count="6979">l</span>et* acc = acc in
+      <span data-count="6979">c</span>ompose acc ss)
+    (retur<span data-count="2218">n</span> empty)
     ss
 ;;
 
-let remove var (sub : t) : t = <span data-count="44163">V</span>arMap.remove var sub
+let remove var (sub : t) : t = <span data-count="45643">V</span>arMap.remove var sub
 </code></pre>
       </div>
     </div>

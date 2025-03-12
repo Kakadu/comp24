@@ -71,17 +71,17 @@
 open Typing
 
 let ( &gt;&gt;= ) a b =
-  <span data-count="74">m</span>atch a with
-  | <span data-count="74">O</span>k x -&gt; b x
+  <span data-count="75">m</span>atch a with
+  | <span data-count="75">O</span>k x -&gt; b x
   | <span data-count="0">E</span>rror _ as e -&gt; e
 ;;
 
 let print_types = function
-  | <span data-count="68">R</span>esult.Ok res -&gt; Typing.Types.print_types res
+  | <span data-count="69">R</span>esult.Ok res -&gt; Typing.Types.print_types res
   | <span data-count="6">R</span>esult.Error s -&gt; Format.eprintf "Error%s" s
 ;;
 
-let test str = <span data-count="74">P</span>arser.Main_parser.pars<span data-count="74">e</span> str &gt;&gt;= Inference.infer_program |&gt; <span data-count="74">p</span>rint_types
+let test str = <span data-count="75">P</span>arser.Main_parser.pars<span data-count="75">e</span> str &gt;&gt;= Inference.infer_program |&gt; <span data-count="75">p</span>rint_types
 </code></pre>
       </div>
     </div>

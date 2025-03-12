@@ -404,6 +404,13 @@
 <a id="L380"></a><span > </span>
 <a id="L381"></a><span class="visited"> </span>
 <a id="L382"></a><span > </span>
+<a id="L383"></a><span > </span>
+<a id="L384"></a><span > </span>
+<a id="L385"></a><span class="visited"> </span>
+<a id="L386"></a><span > </span>
+<a id="L387"></a><span > </span>
+<a id="L388"></a><span class="visited"> </span>
+<a id="L389"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -790,6 +797,13 @@
 <a href="#L380">380</a>
 <a href="#L381">381</a>
 <a href="#L382">382</a>
+<a href="#L383">383</a>
+<a href="#L384">384</a>
+<a href="#L385">385</a>
+<a href="#L386">386</a>
+<a href="#L387">387</a>
+<a href="#L388">388</a>
+<a href="#L389">389</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, Kuarni and LeonidElkin *)
 
@@ -1144,7 +1158,7 @@ let%expect_test "test not equal" =
 ;;
 
 let%expect_test "test match list" =
-  <span data-count="1">t</span>est {|let rec a n = match n with 
+  <span data-count="1">t</span>est {|let rec a n = match n with
   | h :: tl -&gt; h + a tl
   | [] -&gt; 0
   |};
@@ -1172,6 +1186,13 @@ let%expect_test "test poly inference" =
     (int * int)
     (char * char)
     |}<span data-count="5">]</span>
+;;
+
+let%expect_test "test poly inference" =
+  <span data-count="1">t</span>est {|
+    let f a b = if a=b then b=a else true
+  |};
+  <span data-count="1">[</span>%expect {| val f : 'o -&gt; 'o -&gt; bool |}<span data-count="5">]</span>
 ;;
 </code></pre>
       </div>
