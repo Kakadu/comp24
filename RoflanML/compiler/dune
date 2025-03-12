@@ -1,12 +1,12 @@
 (executable
- (name compiler)
+ (name Compiler)
  (modules Compiler)
- (public_name compiler)
+ (public_name Compiler)
  (libraries RoflanML.Lib stdio))
 
 (cram
- (applies_to compiler)
- (deps ./compiler.exe
+ (applies_to Compiler)
+ (deps ./Compiler.exe
  runtime.cpp
  ../manytests/typed/001fac.ml
  ../manytests/typed/002fac.ml
@@ -16,4 +16,6 @@
  ../manytests/typed/006partial.ml
  ../manytests/typed/006partial2.ml
  ../manytests/typed/006partial3.ml
+ tests/017op.ml
+ tests/018print.ml
  ))

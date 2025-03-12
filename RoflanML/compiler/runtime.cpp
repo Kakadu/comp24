@@ -159,41 +159,6 @@ extern "C" RoflanMLObject* Create_closure(Ptr function, uint32_t arity) {
     return new RoflanMLObject(new Closure{function, arity, {}});
 }
 
-RoflanMLObject* ApplySingle(RoflanMLObject* closure, RoflanMLObject* arg) {
-    auto as_closure_type = *std::get<Closure*>(*closure);
-
-    auto new_closure = new Closure{as_closure_type.function,
-                                   as_closure_type.arity, as_closure_type.args};
-
-    new_closure->args.push_back(arg);
-
-    if (new_closure->args.size() < new_closure->arity) {
-        return new RoflanMLObject(new_closure);
-    }
-
-    ffi_cif cif;
-    auto arg_types = new ffi_type*[new_closure->arity];
-    for (int i = 0; i < new_closure->arity; ++i) {
-        arg_types[i] = &ffi_type_pointer;
-    }
-    auto args_ptrs = new void*[new_closure->arity];
-    for (int i = 0; i < new_closure->arity; ++i) {
-        args_ptrs[i] = &new_closure->args[i];
-    }
-
-    if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, new_closure->arity,
-                     &ffi_type_pointer, arg_types) != FFI_OK) {
-        throw std::runtime_error("Failed ffi_prep_cif");
-    }
-    RoflanMLObject* apply_result = nullptr;
-    ffi_call(&cif, FFI_FN(new_closure->function), &apply_result, args_ptrs);
-
-    delete[] arg_types;
-    delete[] args_ptrs;
-    delete new_closure;
-    return apply_result;
-}
-
 extern "C" RoflanMLObject* Apply(RoflanMLObject* closure, ...) {
     va_list args;
     va_start(args, closure);
@@ -201,9 +166,49 @@ extern "C" RoflanMLObject* Apply(RoflanMLObject* closure, ...) {
 
     auto as_closure_type = *std::get<Closure*>(*closure);
 
-    RoflanMLObject* temp = closure;
+    auto new_closure = new Closure{as_closure_type.function,
+                                   as_closure_type.arity, as_closure_type.args};
+
+    RoflanMLObject* apply_result = nullptr;
+    // As we already typechecked, we can be sure that only last result will be
+    // not closure
     for (int i = 0; i < number_of_args; ++i) {
-        temp = ApplySingle(temp, va_arg(args, RoflanMLObject*));
+        new_closure->args.push_back(va_arg(args, RoflanMLObject*));
+
+        if (new_closure->args.size() < new_closure->arity) {
+            continue;
+        }
+
+        ffi_cif cif;
+        auto arg_types = new ffi_type*[new_closure->arity];
+        for (int i = 0; i < new_closure->arity; ++i) {
+            arg_types[i] = &ffi_type_pointer;
+        }
+        auto args_ptrs = new void*[new_closure->arity];
+        for (int i = 0; i < new_closure->arity; ++i) {
+            args_ptrs[i] = &new_closure->args[i];
+        }
+
+        if (ffi_prep_cif(&cif, FFI_DEFAULT_ABI, new_closure->arity,
+                         &ffi_type_pointer, arg_types) != FFI_OK) {
+            throw std::runtime_error("Failed ffi_prep_cif");
+        }
+        ffi_call(&cif, FFI_FN(new_closure->function), &apply_result, args_ptrs);
+
+        delete[] arg_types;
+        delete[] args_ptrs;
+        delete new_closure;
+
+        if (i == number_of_args - 1) {
+            return apply_result;
+        }
+
+        new_closure = std::get<Closure*>(*apply_result);
     }
-    return temp;
+
+    if (apply_result == nullptr) {
+        apply_result = new RoflanMLObject(new_closure);
+    }
+
+    return apply_result;
 }
