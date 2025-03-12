@@ -351,7 +351,7 @@ let%expect_test "test not equal" =
 ;;
 
 let%expect_test "test match list" =
-  test {|let rec a n = match n with 
+  test {|let rec a n = match n with
   | h :: tl -> h + a tl
   | [] -> 0
   |};
@@ -378,5 +378,14 @@ let%expect_test "test poly inference" =
     val f : 'n -> 'o -> ('n * 'o)
     (int * int)
     (char * char)
+    |}]
+;;
+
+let%expect_test "test poly inference" =
+  test {|
+    let f a b = if a=b then b=a else true
+  |};
+  [%expect {|
+
     |}]
 ;;
