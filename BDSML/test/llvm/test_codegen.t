@@ -21,7 +21,7 @@
   
   declare ptr @create_string(...)
   
-  declare ptr @create_apply(...)
+  declare ptr @apply(ptr %0, ptr %1, ...)
   
   declare ptr @create_tuple(i64 %0, ...)
   
@@ -31,7 +31,7 @@
   
   declare ptr @create_cons(i1 %0, ptr %1)
   
-  declare ptr @create_closure(ptr %0, i64 %1)
+  declare ptr @create_function(ptr %0, i64 %1)
   
   declare i64 @get_int(ptr %0)
   
@@ -86,54 +86,57 @@
   define ptr @__var_fac(ptr %__reserved_0) {
   entry:
     %__reserved_01 = load ptr, ptr %__reserved_0, align 8
-    %boxed_closure = call ptr @create_closure(ptr @op_le, i64 2)
+    %boxed_create_function = call ptr @create_function(ptr @op_le, i64 2)
     %__var_n = load ptr, ptr %__reserved_01, align 8
-    %boxed_apply = call ptr @create_apply(ptr %boxed_closure, ptr %__var_n)
-    %boxed_int = call ptr @create_int(i64 1)
-    %boxed_apply2 = call ptr @create_apply(ptr %boxed_apply, ptr %boxed_int)
-    %__anf_0 = load ptr, ptr %boxed_apply2, align 8
+    %boxed_create_int = call ptr @create_int(i64 1)
+    %boxed_create_int2 = call ptr @create_int(i64 2)
+    %boxed_apply = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function, ptr %boxed_create_int2, ptr %__var_n, ptr %boxed_create_int)
+    %__anf_0 = load ptr, ptr %boxed_apply, align 8
     %cond_bool = call i1 @get_bool(ptr %__anf_0)
     br i1 %cond_bool, label %then, label %else
   
   then:                                             ; preds = %entry
-    %boxed_int3 = call ptr @create_int(i64 1)
+    %boxed_create_int3 = call ptr @create_int(i64 1)
     br label %merge
   
   else:                                             ; preds = %entry
-    %boxed_closure4 = call ptr @create_closure(ptr @op_minus, i64 2)
+    %boxed_create_function4 = call ptr @create_function(ptr @op_minus, i64 2)
     %__var_n5 = load ptr, ptr %__reserved_01, align 8
-    %boxed_apply6 = call ptr @create_apply(ptr %boxed_closure4, ptr %__var_n5)
-    %boxed_int7 = call ptr @create_int(i64 1)
-    %boxed_apply8 = call ptr @create_apply(ptr %boxed_apply6, ptr %boxed_int7)
-    %boxed_closure9 = call ptr @create_closure(ptr @__var_fac, i64 1)
+    %boxed_create_int6 = call ptr @create_int(i64 1)
+    %boxed_create_int7 = call ptr @create_int(i64 2)
+    %boxed_apply8 = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function4, ptr %boxed_create_int7, ptr %__var_n5, ptr %boxed_create_int6)
+    %boxed_create_function9 = call ptr @create_function(ptr @__var_fac, i64 1)
     %__anf_1 = load ptr, ptr %boxed_apply8, align 8
-    %boxed_apply10 = call ptr @create_apply(ptr %boxed_closure9, ptr %__anf_1)
-    %boxed_closure11 = call ptr @create_closure(ptr @op_mult, i64 2)
-    %__var_n12 = load ptr, ptr %__reserved_01, align 8
-    %boxed_apply13 = call ptr @create_apply(ptr %boxed_closure11, ptr %__var_n12)
-    %__anf_2 = load ptr, ptr %boxed_apply10, align 8
-    %boxed_apply14 = call ptr @create_apply(ptr %boxed_apply13, ptr %__anf_2)
+    %boxed_create_int10 = call ptr @create_int(i64 1)
+    %boxed_apply11 = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function9, ptr %boxed_create_int10, ptr %__anf_1)
+    %boxed_create_function12 = call ptr @create_function(ptr @op_mult, i64 2)
+    %__var_n13 = load ptr, ptr %__reserved_01, align 8
+    %__anf_2 = load ptr, ptr %boxed_apply11, align 8
+    %boxed_create_int14 = call ptr @create_int(i64 2)
+    %boxed_apply15 = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function12, ptr %boxed_create_int14, ptr %__var_n13, ptr %__anf_2)
     br label %merge
   
   merge:                                            ; preds = %else, %then
-    %ite_result = phi ptr [ %boxed_int3, %then ], [ %boxed_apply14, %else ]
+    %ite_result = phi ptr [ %boxed_create_int3, %then ], [ %boxed_apply15, %else ]
     ret ptr %ite_result
   }
   
   define i64 @main() {
   entry:
-    %boxed_closure = call ptr @create_closure(ptr @__var_fac, i64 1)
-    %boxed_int = call ptr @create_int(i64 4)
-    %boxed_apply = call ptr @create_apply(ptr %boxed_closure, ptr %boxed_int)
-    %boxed_closure1 = call ptr @create_closure(ptr @print_int, i64 1)
+    %boxed_create_function = call ptr @create_function(ptr @__var_fac, i64 1)
+    %boxed_create_int = call ptr @create_int(i64 4)
+    %boxed_create_int1 = call ptr @create_int(i64 1)
+    %boxed_apply = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function, ptr %boxed_create_int1, ptr %boxed_create_int)
+    %boxed_create_function2 = call ptr @create_function(ptr @print_int, i64 1)
     %__anf_3 = load ptr, ptr %boxed_apply, align 8
-    %boxed_apply2 = call ptr @create_apply(ptr %boxed_closure1, ptr %__anf_3)
-    %boxed_closure3 = call ptr @create_closure(ptr @op_eq, i64 2)
-    %__anf_4 = load ptr, ptr %boxed_apply2, align 8
-    %boxed_apply4 = call ptr @create_apply(ptr %boxed_closure3, ptr %__anf_4)
-    %boxed_unit = call ptr @create_unit()
-    %boxed_apply5 = call ptr @create_apply(ptr %boxed_apply4, ptr %boxed_unit)
-    %boxed_int6 = call ptr @create_int(i64 0)
-    store ptr %boxed_int6, ptr @__var_main, align 8
+    %boxed_create_int3 = call ptr @create_int(i64 1)
+    %boxed_apply4 = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function2, ptr %boxed_create_int3, ptr %__anf_3)
+    %boxed_create_function5 = call ptr @create_function(ptr @op_eq, i64 2)
+    %__anf_4 = load ptr, ptr %boxed_apply4, align 8
+    %boxed_create_unit = call ptr @create_unit()
+    %boxed_create_int6 = call ptr @create_int(i64 2)
+    %boxed_apply7 = call ptr (ptr, ptr, ...) @apply(ptr %boxed_create_function5, ptr %boxed_create_int6, ptr %__anf_4, ptr %boxed_create_unit)
+    %boxed_create_int8 = call ptr @create_int(i64 0)
+    store ptr %boxed_create_int8, ptr @__var_main, align 8
     ret i64 0
   }
