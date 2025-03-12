@@ -1,10 +1,35 @@
 (library
  (name MEML_lib)
  (public_name MEML.Lib)
- (modules Ast Parser Inferencer Ty)
- (libraries base angstrom)
+ (modules
+  Ast
+  Parser
+  Inferencer
+  Ty
+  PprinterTY
+  Closure
+  PprinterAST
+  Cast
+  PprinterCAST
+  Lambdalift
+  Llast
+  PprinterLLAST
+  Anf
+  Anfast
+  Anf_to_ast
+  PprinterANF
+  Pattern_helper
+  Name_helper
+  Codegen)
+ (libraries base angstrom llvm llvm.analysis)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (instrumentation
   (backend bisect_ppx))
  (inline_tests))
+
+(rule
+ (targets runtime.so)
+ (deps runtime.c)
+ (action
+  (run gcc -fPIC -shared %{deps} -o %{targets})))
