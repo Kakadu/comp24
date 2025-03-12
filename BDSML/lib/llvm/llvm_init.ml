@@ -43,9 +43,7 @@ let predefined_funcs =
   ; "create_string", var_arg_function_type ptr_t [||]
   ; "apply", var_arg_function_type ptr_t [| ptr_t; int_t |]
   ; "create_tuple", var_arg_function_type ptr_t [| int_t |]
-  ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
-  ; "create_empty_list", function_type ptr_t [||]
-  ; "create_cons", function_type ptr_t [| bool_t; ptr_t |]
+  ; "create_constructor", function_type ptr_t [| int_t; ptr_t |]
   ; "create_function", function_type ptr_t [| ptr_t; int_t |]
   ; "get_int", function_type int_t [| ptr_t |]
   ; "get_bool", function_type bool_t [| ptr_t |]
@@ -55,7 +53,9 @@ let predefined_funcs =
 
 (*Hashtable*)
 
-let variable_value_table : (string, Llvm.llvalue) Hashtbl.t = Hashtbl.create 10
+let variable_value_table : (string, Llvm.llvalue) Hashtbl.t =
+  Hashtbl.create (List.length predefined_funcs * 2)
+;;
 
 let variable_type_table : (string, Llvm.lltype) Hashtbl.t =
   Hashtbl.create (List.length predefined_funcs * 2)
@@ -64,16 +64,19 @@ let variable_type_table : (string, Llvm.lltype) Hashtbl.t =
 let find t key =
   match Hashtbl.find_opt t key with
   | Some v -> v
-  | None -> failwith ("Couldn't find value for key" ^ key)
+  | None -> failwith ("Couldn't find value for key: " ^ key)
 ;;
 
 let predefined_init () =
-  ignore
-  @@ List.map
-       (fun (str, t) ->
-         let () = ignore @@ declare_function str t my_module in
-         Hashtbl.add variable_type_table str t)
-       predefined_funcs;
+  let () =
+    ignore
+    @@ List.map
+         (fun (str, t) ->
+           let func = declare_function str t my_module in
+           let () = Hashtbl.add variable_type_table str t in
+           Hashtbl.add variable_value_table str func)
+         predefined_funcs
+  in
   ignore
   @@ List.map
        (fun op ->
@@ -82,7 +85,8 @@ let predefined_init () =
            | "print_int" -> op.llvm_t void_t ptr_t
            | _ -> op.llvm_t ptr_t ptr_t
          in
-         let () = ignore @@ declare_function op.alt_name t my_module in
-         Hashtbl.add variable_type_table op.alt_name t)
+         let func = declare_function op.alt_name t my_module in
+         let () = Hashtbl.add variable_type_table op.alt_name t in
+         Hashtbl.add variable_value_table op.alt_name func)
        predefine_operators
 ;;

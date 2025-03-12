@@ -36,16 +36,22 @@ let rec compile_aexpr = function
   | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) ->
     let head' = compile_aexpr head in
     let tail' = compile_aexpr tail in
-    compile_simple_type "create_list" [| head'; tail' |]
-  | AExp_construct ("[]", _) -> compile_simple_type "create_empty_list" [||]
+    let t =
+      compile_simple_type
+        "create_tuple"
+        (Array.of_list (const_int int_t 2 :: [ head'; tail' ]))
+    in
+    compile_simple_type "create_list" [| const_int int_t 2; t |]
+  | AExp_construct ("[]", _) ->
+    compile_simple_type "create_constructor" [| const_int int_t 3; const_null ptr_t |]
   | AExp_construct ("None", _) ->
-    compile_simple_type "create_cons" [| const_int bool_t 0; const_null ptr_t |]
+    compile_simple_type "create_constructor" [| const_int int_t 0; const_null ptr_t |]
   | AExp_construct ("Some", x) ->
     (match x with
      | None -> failwith "Impossible"
      | Some x ->
        let x' = compile_aexpr x in
-       compile_simple_type "create_cons" [| const_int bool_t 0; x' |])
+       compile_simple_type "create_constructor" [| const_int int_t 1; x' |])
   | AExp_construct (_, _) -> failwith "Not implemented"
   | AExp_ident id ->
     let value = find variable_value_table id in
