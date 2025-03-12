@@ -294,4 +294,9 @@ let pexpr_fun () =
 let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* skip_many (pstoken ";;") <* pspaces)
+
+let parse =
+  parse_string
+    ~consume:Consume.All
+    (many1 (plet_decl pexpr) <* skip_many (pstoken ";;") <* pspaces)
+;;
