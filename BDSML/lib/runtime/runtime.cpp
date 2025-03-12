@@ -19,6 +19,9 @@ template <class... Ts> struct overloaded : Ts... {
 template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 void add_to_tuple();
+class Value;
+extern "C" Value *create_tuple(int count, ...);
+extern "C" Value *create_bool(char v);
 
 class Value {
 public:
@@ -27,8 +30,13 @@ public:
     explicit ValuePtr(Value *val) : std::unique_ptr<Value>(val) {}
 
     ValuePtr(const ValuePtr &val)
-        : std::unique_ptr<Value>(std::make_unique<Value>(*val)) {}
-    bool operator==(const ValuePtr &b) const { return (*this)->operator==(*b); }
+        : std::unique_ptr<Value>(val ? std::make_unique<Value>(*val)
+                                     : std::unique_ptr<Value>()) {}
+    bool operator==(const ValuePtr &b) const {
+      if (!(this->get() && b.get()))
+        return false;
+      return (*this)->operator==(*b);
+    }
   };
 
   using TupleType = std::vector<ValuePtr>;
@@ -46,17 +54,72 @@ public:
     bool operator==(const FuncObject &) const { return false; }
   };
 
-private:
-  class Constructor;
+  class ConstructorT {
+    using option = std::optional<ValuePtr>;
+    using list = std::pair<ValuePtr, ValuePtr>;
+    std::variant<option, list> args;
 
-  std::variant<int64_t, char, bool, std::string, TupleType, FuncObject> value;
+  public:
+    ConstructorT() = default;
+
+    ConstructorT(std::string name, Value *param) {
+      if (name == "[]") {
+        args.emplace<list>(ValuePtr(nullptr), ValuePtr(nullptr));
+      } else if (name == "::") {
+        auto &params = param->get_tuple();
+        args.emplace<list>(params[0], params[1]);
+      } else if (name == "Some") {
+        args.emplace<option>(ValuePtr(param));
+      } else if (name == "None") {
+        args.emplace<option>();
+      } else {
+        throw std::invalid_argument("Unknown constructor: " + name);
+      }
+    }
+
+    Value *disassemble() {
+      return std::visit(overloaded{[&](list &list) {
+                                     if (!list.first) {
+                                       throw std::runtime_error(
+                                           "Try to disassemble empty list");
+                                     }
+                                     return create_tuple(
+                                         2, ValuePtr(list.first).release(),
+                                         ValuePtr(list.second).release());
+                                   },
+                                   [&](option &option) {
+                                     return ValuePtr(option.value()).release();
+                                   }},
+                        args);
+    }
+
+    Value *same_cons(std::string name) {
+      return std::visit(
+          overloaded{[&](list &arg) {
+                       return create_bool((name == "[]" && !arg.second) ||
+                                          (name == "::" && arg.second));
+                     },
+                     [&](option &arg) {
+                       return create_bool((name == "None" && !arg) ||
+                                          (name == "Some" && arg));
+                     }},
+          args);
+    }
+
+    bool operator==(const ConstructorT &b) const { return args == b.args; }
+  };
+
+private:
+  std::variant<int64_t, char, bool, std::string, TupleType, FuncObject,
+               ConstructorT>
+      value;
 
   template <typename Type> Type &get() {
     try {
       return std::get<Type>(value);
     } catch (const std::bad_variant_access &e) {
       throw std::runtime_error(
-          std::format("Invalid value, expected {}, got index {}, error {}",
+          std::format("Invalid value, expected {}, got index {}, error \"{}\"",
                       typeid(Type).name(), value.index(), e.what()));
     }
   }
@@ -69,8 +132,11 @@ public:
   static auto Bool(bool v) { return new Value(v); }
   static auto Char(char v) { return new Value(v); }
   static auto String(std::string str) { return new Value(std::move(str)); }
-  static auto Tuple(TupleType elems) { return new Value(std::move(elems)); }
+  static Value *Tuple(TupleType elems) { return new Value(std::move(elems)); }
   static auto Unit() { return new Value(); }
+  static auto Constructor(std::string name, Value *param) {
+    return new Value(ConstructorT(std::move(name), param));
+  }
 
   static auto Function(void *func, size_t args_count) {
     return new Value(FuncObject(func, args_count));
@@ -83,51 +149,17 @@ public:
   [[nodiscard]] auto get_bool() { return get<bool>(); }
 
   [[nodiscard]] auto get_char() { return get<char>(); }
-
   [[nodiscard]] auto &get_string() { return get<std::string>(); }
-  [[nodiscard]] auto &get_tuple() { return get<TupleType>(); }
+
+  [[nodiscard]] TupleType &get_tuple() { return get<TupleType>(); }
+  [[nodiscard]] Value *disassemble() {
+    return get<ConstructorT>().disassemble();
+  }
+  [[nodiscard]] Value *same_cons(std::string name) {
+    return get<ConstructorT>().same_cons(std::move(name));
+  }
 
   bool operator==(const Value &b) const { return value == b.value; }
-
-private:
-  class Constructor {
-    using option = std::optional<ValuePtr>;
-    using list = std::pair<ValuePtr, ValuePtr>;
-    std::variant<option, list> args;
-
-  public:
-    Constructor(std::string name, Value *param) {
-      if (name == "[]") {
-        delete param;
-        args.emplace<list>(nullptr, nullptr);
-      } else if (name == "::") {
-        auto &params = param->get_tuple();
-        args.emplace<list>(params[0], params[1]);
-      } else if (name == "Some") {
-        args.emplace<option>(ValuePtr(param));
-      } else if (name == "None") {
-        delete param;
-        args.emplace<option>();
-      } else {
-        throw std::invalid_argument("Unknown constructor: " + name);
-      }
-    }
-
-    Value *dissasembdle(std::string name) {
-      if (name == "::") {
-        auto &list = std::get<std::pair<ValuePtr, ValuePtr>>(args);
-        if (!list.first) {
-          throw std::runtime_error("Try to disassemble empty list");
-        }
-        return Tuple({ValuePtr(list.first), ValuePtr(list.second)});
-      }
-      if (name == "Some") {
-        auto &option = std::get<std::optional<ValuePtr>>(args);
-        return ValuePtr(option.value()).release();
-      }
-      throw std::invalid_argument("Unknown constructor: " + name);
-    }
-  };
 };
 
 extern "C" Value *copy(Value *v) { return new Value(*v); }
@@ -194,8 +226,18 @@ extern "C" Value *create_tuple(int count, ...) {
   va_end(args);
   return Value::Tuple(std::move(vector));
 }
+extern "C" Value *get_from_tuple(Value *tuple, int index) {
+  return Value::ValuePtr(tuple->get_tuple()[index]).release();
+}
 extern "C" Value *create_function(void *func, size_t args_count) {
   return Value::Function(func, args_count);
+}
+extern "C" Value *create_constructor(const char *c, Value *arg) {
+  return Value::Constructor(c, arg);
+}
+extern "C" Value *disassemble(Value *name) { return name->disassemble(); }
+extern "C" Value *same_cons(Value *cons, const char *name) {
+  return cons->same_cons(name);
 }
 
 #define BIN_OP_INT(name, op)                                                   \

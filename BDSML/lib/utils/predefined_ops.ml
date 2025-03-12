@@ -114,17 +114,9 @@ let get_from_tuple =
 
 let same_cons =
   { name = "same_cons"
-  ; t = "'a -> 'b -> bool"
+  ; t = "'a -> string -> bool"
   ; alt_name = "same_cons"
   ; llvm_t = bin_op_type
-  }
-;;
-
-let get_cons_param =
-  { name = "get_cons_param"
-  ; t = "'a -> 'b"
-  ; alt_name = "get_cons_param"
-  ; llvm_t = un_op_type
   }
 ;;
 
@@ -154,7 +146,6 @@ let predefine_operators =
   ; disassemble_constructor
   ; get_from_tuple
   ; same_cons
-  ; get_cons_param
   ; exception_
   ]
 ;;
