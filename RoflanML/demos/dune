@@ -75,7 +75,7 @@
  ../manytests/typed/006partial.ml
  ../manytests/typed/006partial2.ml
  ../manytests/typed/006partial3.ml
+ ../manytests/typed/007order.ml
  ../compiler/tests/017op.ml
- ../compiler/tests/018ac.ml
- ../compiler/tests/019and.ml
+ ../compiler/tests/018and.ml
  ))

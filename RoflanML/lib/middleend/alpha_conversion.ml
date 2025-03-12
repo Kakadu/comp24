@@ -182,6 +182,7 @@ let alpha_convert_program prog =
   run
   @@
   let bindings = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String) in
+  let bindings = Set.add bindings "_start" in 
   let renames = Map.empty (module String) in
   let* prog, _, _ =
     List.fold_left

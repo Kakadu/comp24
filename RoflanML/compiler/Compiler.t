@@ -155,6 +155,26 @@
   4
   8
   9
+  
+  --------------- ../manytests/typed/007order.ml
+  
+  let _start () () a () b _c () d __ =
+    let () = print_int (a+b) in
+    let () = print_int __ in
+    a*b / _c + d
+  
+  
+  let main =
+    print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
+  Output:
+  
+  1
+  2
+  4
+  -1
+  103
+  -555555
+  10000
   $ for prog in tests/*; do
   > echo "\n--------------- $prog\n"
   > dune exec ./Compiler.exe < $prog > out.ll
@@ -183,16 +203,7 @@
   2
   1
   
-  --------------- tests/018ac.ml
-  
-  let print_int x = print_bool x
-  let () = print_int (true && false)
-  
-  Output:
-  
-  false
-  
-  --------------- tests/019and.ml
+  --------------- tests/018and.ml
   
   let rec fac n = if n <= 1 then 1 else n * another_fac (n - 1)
   and another_fac n = if n <= 1 then 1 else n * fac (n - 1)
