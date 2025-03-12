@@ -172,37 +172,37 @@ open Utils
 
 (** [int] *)
 let parse_single =
-  let+ prefix = ws *<span data-count="46">&gt;</span> optio<span data-count="46">n</span> "" (strin<span data-count="46">g</span> "\'")
+  let+ prefix = ws *<span data-count="123">&gt;</span> optio<span data-count="123">n</span> "" (strin<span data-count="123">g</span> "\'")
   and+ id = parse_ident_name in
-  <span data-count="845">T</span>ype_single (prefix ^ id)
+  <span data-count="5694">T</span>ype_single (prefix ^ id)
 ;;
 
 (** [int t list] *)
 let parse_typeconstr prev =
-  <span data-count="70">l</span>et rec go acc =
-    <span data-count="920">(</span>let+ main_type = ws1 *<span data-count="920">&gt;</span> parse_ident_name in
+  <span data-count="224">l</span>et rec go acc =
+    <span data-count="5769">(</span>let+ main_type = ws1 *<span data-count="5769">&gt;</span> parse_ident_name in
      <span data-count="23">T</span>ype_constructor_param (acc, main_type))
-    &gt;&gt;<span data-count="920">=</span> go
-    &lt;|&gt; retur<span data-count="920">n</span> acc
+    &gt;&gt;<span data-count="5769">=</span> go
+    &lt;|&gt; retur<span data-count="5769">n</span> acc
   in
   prev &gt;&gt;= go
 ;;
 
 (** [int * string * int] *)
 let parse_tuple prev =
-  <span data-count="70">s</span>ep_by<span data-count="70">1</span> (check_cha<span data-count="70">r</span> '*') prev
+  <span data-count="224">s</span>ep_by<span data-count="224">1</span> (check_cha<span data-count="224">r</span> '*') prev
   &gt;&gt;= function
   | <span data-count="27">_</span> :: _ :: _ as t_list -&gt; return @@ Type_tuple t_list
-  | <span data-count="817">[</span> t ] -&gt; return t
+  | <span data-count="5666">[</span> t ] -&gt; return t
   | <span data-count="0">_</span> -&gt; fail "invalid state in tuple type"
 ;;
 
 (** [int -&gt; int] *)
 let parse_fun prev =
-  <span data-count="24">s</span>ep_by<span data-count="24">1</span> (check_strin<span data-count="24">g</span> "-&gt;") prev
+  <span data-count="101">s</span>ep_by<span data-count="101">1</span> (check_strin<span data-count="101">g</span> "-&gt;") prev
   &gt;&gt;= function
-  | <span data-count="256">_</span> :: _ :: _ as t_list -&gt; return @@ Type_fun t_list
-  | <span data-count="154">[</span> t ] -&gt; return t
+  | <span data-count="2055">_</span> :: _ :: _ as t_list -&gt; return @@ Type_fun t_list
+  | <span data-count="190">[</span> t ] -&gt; return t
   | <span data-count="0">_</span> -&gt; fail "invalid state in function type"
 ;;
 
@@ -210,22 +210,22 @@ let parse_fun prev =
 let priority = [ parse_typeconstr; parse_tuple; parse_fun ]
 
 let parse_typexpr_by_prior =
-  fi<span data-count="46">x</span> (fun self -&gt;
-    <span data-count="24">p</span>arse_by_priority priority @@ choic<span data-count="24">e</span> [ parse_single; remove_parent<span data-count="24">s</span> self ])
+  fi<span data-count="123">x</span> (fun self -&gt;
+    <span data-count="101">p</span>arse_by_priority priority @@ choic<span data-count="101">e</span> [ parse_single; remove_parent<span data-count="101">s</span> self ])
 ;;
 
 (** for [fun pat: typexpr -&gt; expr] parse *)
 let parse_skip_fun =
-  check_cha<span data-count="46">r</span> ':'
-  *<span data-count="46">&gt;</span> (parse_by_priority [ parse_typeconstr; parse_tuple <span data-count="46">]</span>
-      @@ choic<span data-count="46">e</span> [ parse_single; remove_parent<span data-count="46">s</span> parse_typexpr_by_prior ])
+  check_cha<span data-count="123">r</span> ':'
+  *<span data-count="123">&gt;</span> (parse_by_priority [ parse_typeconstr; parse_tuple <span data-count="123">]</span>
+      @@ choic<span data-count="123">e</span> [ parse_single; remove_parent<span data-count="123">s</span> parse_typexpr_by_prior ])
 ;;
 
 (** [:int] *)
-let parse_typexpr : typexpr t = check_cha<span data-count="46">r</span> ':' *<span data-count="46">&gt;</span> parse_typexpr_by_prior
+let parse_typexpr : typexpr t = check_cha<span data-count="123">r</span> ':' *<span data-count="123">&gt;</span> parse_typexpr_by_prior
 
 let parse_typexpr_str str =
-  <span data-count="225">A</span>ngstrom.parse_string ~consume:Angstrom.Consume.All parse_typexpr @@ ":" ^ str
+  <span data-count="2024">A</span>ngstrom.parse_string ~consume:Angstrom.Consume.All parse_typexpr @@ ":" ^ str
 ;;
 </code></pre>
       </div>

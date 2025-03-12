@@ -360,38 +360,50 @@
 <a id="L336"></a><span > </span>
 <a id="L337"></a><span class="visited"> </span>
 <a id="L338"></a><span class="visited"> </span>
-<a id="L339"></a><span class="visited"> </span>
+<a id="L339"></a><span > </span>
 <a id="L340"></a><span > </span>
 <a id="L341"></a><span > </span>
-<a id="L342"></a><span > </span>
+<a id="L342"></a><span class="visited"> </span>
 <a id="L343"></a><span class="visited"> </span>
 <a id="L344"></a><span class="visited"> </span>
-<a id="L345"></a><span class="visited"> </span>
+<a id="L345"></a><span > </span>
 <a id="L346"></a><span > </span>
 <a id="L347"></a><span > </span>
-<a id="L348"></a><span > </span>
+<a id="L348"></a><span class="visited"> </span>
 <a id="L349"></a><span class="visited"> </span>
 <a id="L350"></a><span class="visited"> </span>
-<a id="L351"></a><span class="visited"> </span>
+<a id="L351"></a><span > </span>
 <a id="L352"></a><span > </span>
 <a id="L353"></a><span > </span>
-<a id="L354"></a><span > </span>
-<a id="L355"></a><span class="visited"> </span>
+<a id="L354"></a><span class="visited"> </span>
+<a id="L355"></a><span > </span>
 <a id="L356"></a><span > </span>
 <a id="L357"></a><span > </span>
-<a id="L358"></a><span > </span>
+<a id="L358"></a><span class="visited"> </span>
 <a id="L359"></a><span class="visited"> </span>
-<a id="L360"></a><span class="visited"> </span>
+<a id="L360"></a><span > </span>
 <a id="L361"></a><span > </span>
 <a id="L362"></a><span > </span>
-<a id="L363"></a><span > </span>
-<a id="L364"></a><span class="visited"> </span>
+<a id="L363"></a><span class="visited"> </span>
+<a id="L364"></a><span > </span>
 <a id="L365"></a><span > </span>
 <a id="L366"></a><span > </span>
-<a id="L367"></a><span > </span>
+<a id="L367"></a><span class="visited"> </span>
 <a id="L368"></a><span class="visited"> </span>
-<a id="L369"></a><span class="visited"> </span>
+<a id="L369"></a><span > </span>
 <a id="L370"></a><span > </span>
+<a id="L371"></a><span > </span>
+<a id="L372"></a><span class="visited"> </span>
+<a id="L373"></a><span > </span>
+<a id="L374"></a><span > </span>
+<a id="L375"></a><span > </span>
+<a id="L376"></a><span > </span>
+<a id="L377"></a><span class="visited"> </span>
+<a id="L378"></a><span > </span>
+<a id="L379"></a><span > </span>
+<a id="L380"></a><span > </span>
+<a id="L381"></a><span class="visited"> </span>
+<a id="L382"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -766,6 +778,18 @@
 <a href="#L368">368</a>
 <a href="#L369">369</a>
 <a href="#L370">370</a>
+<a href="#L371">371</a>
+<a href="#L372">372</a>
+<a href="#L373">373</a>
+<a href="#L374">374</a>
+<a href="#L375">375</a>
+<a href="#L376">376</a>
+<a href="#L377">377</a>
+<a href="#L378">378</a>
+<a href="#L379">379</a>
+<a href="#L380">380</a>
+<a href="#L381">381</a>
+<a href="#L382">382</a>
 </pre>
 <pre><code class="ocaml">(** Copyright 2024-2025, Kuarni and LeonidElkin *)
 
@@ -805,17 +829,17 @@ let%expect_test "test if without else inference" =
 
 let%expect_test "test fun inference" =
   <span data-count="1">t</span>est "fun a -&gt; a";
-  <span data-count="1">[</span>%expect {| 'h -&gt; 'h |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| 'n -&gt; 'n |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test fun with several arguments inference" =
   <span data-count="1">t</span>est "fun a b c -&gt; b";
-  <span data-count="1">[</span>%expect {| 'h -&gt; 'i -&gt; 'j -&gt; 'i |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| 'n -&gt; 'o -&gt; 'p -&gt; 'o |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test let fun" =
   <span data-count="1">t</span>est "let a b = b in a";
-  <span data-count="1">[</span>%expect {| 'i -&gt; 'i |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| 'o -&gt; 'o |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test let fun apply" =
@@ -840,7 +864,7 @@ let%expect_test "test tuple" =
 
 let%expect_test "test difficult tuple" =
   <span data-count="1">t</span>est "(let b = 4 in b, (3, 5), fun a -&gt; a, 'a')";
-  <span data-count="1">[</span>%expect {| (int * (int * int) * 'h -&gt; ('h * char)) |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| (int * (int * int) * 'n -&gt; ('n * char)) |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test let rec" =
@@ -856,7 +880,7 @@ let%expect_test "test let rec fun" =
 let%expect_test "test let rec and" =
   <span data-count="1">t</span>est {|let rec f a b = if b then g a b else m
   and g a b = f a b and m = 4 in f|};
-  <span data-count="1">[</span>%expect {| 'o -&gt; bool -&gt; int |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| 'u -&gt; bool -&gt; int |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test invalid let rec with pat binding" =
@@ -893,8 +917,8 @@ let%expect_test "test let rec and statements" =
   and g b = true
   let c = f (g 4)|};
   <span data-count="1">[</span>%expect {|
-    val f : 'k -&gt; 'k
-    val g : 'j -&gt; bool
+    val f : 'q -&gt; 'q
+    val g : 'p -&gt; bool
     val c : bool
     |}<span data-count="5">]</span>
 ;;
@@ -908,7 +932,7 @@ let%expect_test "test wrong let exp and statements" =
 
 let%expect_test "test constructor" =
   <span data-count="1">t</span>est {|let a = []|};
-  <span data-count="1">[</span>%expect {| val a : 'h list |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| val a : 'n list |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test constructor some with" =
@@ -1104,8 +1128,7 @@ let%expect_test "test op not" =
 
 let%expect_test "test equal" =
   <span data-count="1">t</span>est {|(=)|};
-  <span data-count="1">[</span>%expect {|
-    'e -&gt; 'e -&gt; bool |}<span data-count="5">]</span>
+  <span data-count="1">[</span>%expect {| 'n -&gt; 'n -&gt; bool |}<span data-count="5">]</span>
 ;;
 
 let%expect_test "test less" =
@@ -1136,6 +1159,19 @@ let%expect_test "test function with list" =
   |};
   <span data-count="1">[</span>%expect {|
     val a : int list -&gt; int |}<span data-count="5">]</span>
+;;
+
+let%expect_test "test poly inference" =
+  <span data-count="1">t</span>est {|
+    let f a b = a, b;;
+    f 3 4;;
+    f 'a' 'b';;
+  |};
+  <span data-count="1">[</span>%expect {|
+    val f : 'n -&gt; 'o -&gt; ('n * 'o)
+    (int * int)
+    (char * char)
+    |}<span data-count="5">]</span>
 ;;
 </code></pre>
       </div>

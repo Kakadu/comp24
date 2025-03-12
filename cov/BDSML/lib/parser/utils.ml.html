@@ -365,26 +365,26 @@
 open Base
 open Angstrom
 
-let skip_ws = skip_whil<span data-count="46">e</span> Char.is_whitespace *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> ()
+let skip_ws = skip_whil<span data-count="123">e</span> Char.is_whitespace *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> ()
 
 let skip_comments =
-  skip_ws *<span data-count="46">&gt;</span> strin<span data-count="46">g</span> "(*" *<span data-count="46">&gt;</span> many_til<span data-count="46">l</span> any_char (strin<span data-count="46">g</span> "*)") *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> ()
+  skip_ws *<span data-count="123">&gt;</span> strin<span data-count="123">g</span> "(*" *<span data-count="123">&gt;</span> many_til<span data-count="123">l</span> any_char (strin<span data-count="123">g</span> "*)") *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> ()
 ;;
 
-let ws = man<span data-count="46">y</span> skip_comments *<span data-count="46">&gt;</span> skip_ws
-let check_char c = <span data-count="2209">w</span>s *&gt; cha<span data-count="2209">r</span> c
-let check_string s = <span data-count="1334">w</span>s *&gt; strin<span data-count="1334">g</span> s
+let ws = man<span data-count="123">y</span> skip_comments *<span data-count="123">&gt;</span> skip_ws
+let check_char c = <span data-count="6444">w</span>s *&gt; cha<span data-count="6444">r</span> c
+let check_string s = <span data-count="3952">w</span>s *&gt; strin<span data-count="3952">g</span> s
 
 let ws1 =
-  let skip_ws1 = take_while<span data-count="46">1</span> Char.is_whitespace *&gt; retur<span data-count="46">n</span> () in
-  <span data-count="46">(</span>skip_ws1 *<span data-count="46">&gt;</span> man<span data-count="46">y</span> skip_comments &lt;|<span data-count="46">&gt;</span> many<span data-count="46">1</span> skip_comments) *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> ()
+  let skip_ws1 = take_while<span data-count="123">1</span> Char.is_whitespace *&gt; retur<span data-count="123">n</span> () in
+  <span data-count="123">(</span>skip_ws1 *<span data-count="123">&gt;</span> man<span data-count="123">y</span> skip_comments &lt;|<span data-count="123">&gt;</span> many<span data-count="123">1</span> skip_comments) *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> ()
 ;;
 
-let remove_parents x = <span data-count="400">c</span>heck_cha<span data-count="400">r</span> '(' *<span data-count="400">&gt;</span> ws *<span data-count="400">&gt;</span> x &lt;* check_cha<span data-count="400">r</span> ')'
-let remove_square_brackets x = <span data-count="242">c</span>heck_cha<span data-count="242">r</span> '[' *<span data-count="242">&gt;</span> x &lt;* check_cha<span data-count="242">r</span> ']'
+let remove_parents x = <span data-count="1170">c</span>heck_cha<span data-count="1170">r</span> '(' *<span data-count="1170">&gt;</span> ws *<span data-count="1170">&gt;</span> x &lt;* check_cha<span data-count="1170">r</span> ')'
+let remove_square_brackets x = <span data-count="704">c</span>heck_cha<span data-count="704">r</span> '[' *<span data-count="704">&gt;</span> x &lt;* check_cha<span data-count="704">r</span> ']'
 
 let is_keyword = function
-  | <span data-count="330">"</span>and"
+  | <span data-count="446">"</span>and"
   | <span data-count="0">"</span>as"
   | <span data-count="0">"</span>assert"
   | <span data-count="0">"</span>asr"
@@ -394,28 +394,28 @@ let is_keyword = function
   | <span data-count="0">"</span>do"
   | <span data-count="0">"</span>done"
   | <span data-count="0">"</span>downto"
-  | <span data-count="348">"</span>else"
+  | <span data-count="822">"</span>else"
   | <span data-count="0">"</span>end"
   | <span data-count="0">"</span>exception"
   | <span data-count="0">"</span>external"
   | <span data-count="55">"</span>false"
   | <span data-count="0">"</span>for"
-  | <span data-count="26">"</span>fun"
-  | <span data-count="3">"</span>function"
+  | <span data-count="63">"</span>fun"
+  | <span data-count="4">"</span>function"
   | <span data-count="0">"</span>functor"
   | <span data-count="2">"</span>if"
-  | <span data-count="1566">"</span>in"
+  | <span data-count="3864">"</span>in"
   | <span data-count="0">"</span>include"
   | <span data-count="0">"</span>inherit"
   | <span data-count="0">"</span>initializer"
   | <span data-count="0">"</span>land"
   | <span data-count="0">"</span>lazy"
-  | <span data-count="1834">"</span>let"
+  | <span data-count="4345">"</span>let"
   | <span data-count="0">"</span>lor"
   | <span data-count="0">"</span>lsl"
   | <span data-count="0">"</span>lsr"
   | <span data-count="0">"</span>lxor"
-  | <span data-count="76">"</span>match"
+  | <span data-count="202">"</span>match"
   | <span data-count="0">"</span>method"
   | <span data-count="0">"</span>mod"
   | <span data-count="0">"</span>module"
@@ -430,7 +430,7 @@ let is_keyword = function
   | <span data-count="0">"</span>rec"
   | <span data-count="0">"</span>sig"
   | <span data-count="0">"</span>struct"
-  | <span data-count="363">"</span>then"
+  | <span data-count="837">"</span>then"
   | <span data-count="0">"</span>to"
   | <span data-count="60">"</span>true"
   | <span data-count="0">"</span>try"
@@ -439,64 +439,64 @@ let is_keyword = function
   | <span data-count="0">"</span>virtual"
   | <span data-count="0">"</span>when"
   | <span data-count="0">"</span>while"
-  | <span data-count="352">"</span>with"
+  | <span data-count="862">"</span>with"
   | <span data-count="0">"</span>|" -&gt; true
-  | <span data-count="15623">_</span> -&gt; false
+  | <span data-count="40546">_</span> -&gt; false
 ;;
 
 let parse_lowercase_ident =
   let* parse_first =
-    satisf<span data-count="46">y</span> (function
-      | <span data-count="20470">'</span>a' .. 'z' | <span data-count="783">'</span>_' -&gt; true
-      | <span data-count="18059">_</span> -&gt; false)
+    satisf<span data-count="123">y</span> (function
+      | <span data-count="51790">'</span>a' .. 'z' | <span data-count="936">'</span>_' -&gt; true
+      | <span data-count="43355">_</span> -&gt; false)
   in
-  <span data-count="21253">l</span>et parse_rest =
+  <span data-count="52726">l</span>et parse_rest =
     let is_rest = function
-      | <span data-count="1316">'</span>A' .. 'Z' | <span data-count="38197">'</span>a' .. 'z' | <span data-count="1708">'</span>0' .. '9' | <span data-count="2415">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
-      | <span data-count="20907">_</span> -&gt; false
+      | <span data-count="1316">'</span>A' .. 'Z' | <span data-count="98510">'</span>a' .. 'z' | <span data-count="2182">'</span>0' .. '9' | <span data-count="4189">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
+      | <span data-count="50581">_</span> -&gt; false
     in
     match parse_first with
-    | <span data-count="783">'</span>_' -&gt; take_while<span data-count="783">1</span> is_rest
-    | <span data-count="20470">_</span> -&gt; take_whil<span data-count="20470">e</span> is_rest
+    | <span data-count="936">'</span>_' -&gt; take_while<span data-count="936">1</span> is_rest
+    | <span data-count="51790">_</span> -&gt; take_whil<span data-count="51790">e</span> is_rest
   in
-  lift<span data-count="21253">2</span> String.( ^ ) (retur<span data-count="21253">n</span> (Char.escape<span data-count="21253">d</span> parse_first)) parse_rest
+  lift<span data-count="52726">2</span> String.( ^ ) (retur<span data-count="52726">n</span> (Char.escape<span data-count="52726">d</span> parse_first)) parse_rest
   &gt;&gt;= fun name -&gt;
-  <span data-count="20638">i</span>f not (is_keywor<span data-count="20638">d</span> name)
-  then <span data-count="15623">r</span>eturn name
-  else <span data-count="5015">f</span>ail (name ^ " keyword can't be used as ident")
+  <span data-count="52108">i</span>f not (is_keywor<span data-count="52108">d</span> name)
+  then <span data-count="40546">r</span>eturn name
+  else <span data-count="11562">f</span>ail (name ^ " keyword can't be used as ident")
 ;;
 
 let parse_capitalized_ident =
   let parse_first =
-    satisf<span data-count="46">y</span> (function
-      | <span data-count="143">'</span>A' .. 'Z' -&gt; true
-      | <span data-count="9564">_</span> -&gt; false)
+    satisf<span data-count="123">y</span> (function
+      | <span data-count="153">'</span>A' .. 'Z' -&gt; true
+      | <span data-count="20194">_</span> -&gt; false)
     &gt;&gt;| String.of_char
   in
-  <span data-count="46">l</span>et parse_rest =
+  <span data-count="123">l</span>et parse_rest =
     take_while (function
-      | <span data-count="83">'</span>A' .. 'Z' | <span data-count="299">'</span>a' .. 'z' | <span data-count="4">'</span>0' .. '9' | <span data-count="35">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
-      | <span data-count="140">_</span> -&gt; false)
+      | <span data-count="83">'</span>A' .. 'Z' | <span data-count="329">'</span>a' .. 'z' | <span data-count="4">'</span>0' .. '9' | <span data-count="35">'</span>_' | <span data-count="0">'</span>\'' -&gt; true
+      | <span data-count="150">_</span> -&gt; false)
   in
-  <span data-count="46">l</span>ift<span data-count="46">2</span> String.( ^ ) parse_first parse_rest
+  <span data-count="123">l</span>ift<span data-count="123">2</span> String.( ^ ) parse_first parse_rest
 ;;
 
-let parse_ident_name = ws *<span data-count="46">&gt;</span> parse_lowercase_ident
-let rec chainr1 e op = <span data-count="1072">e</span> &gt;&gt;= fun a -&gt; <span data-count="67986">o</span>p &gt;&gt;<span data-count="67986">=</span> (fun f -&gt; <span data-count="797">c</span>hainr<span data-count="797">1</span> e op &gt;&gt;| <span data-count="797">f</span> a) &lt;|&gt; retur<span data-count="67986">n</span> a
+let parse_ident_name = ws *<span data-count="123">&gt;</span> parse_lowercase_ident
+let rec chainr1 e op = <span data-count="2725">e</span> &gt;&gt;= fun a -&gt; <span data-count="155884">o</span>p &gt;&gt;<span data-count="155884">=</span> (fun f -&gt; <span data-count="1911">c</span>hainr<span data-count="1911">1</span> e op &gt;&gt;| <span data-count="1911">f</span> a) &lt;|&gt; retur<span data-count="155884">n</span> a
 
 let chainl1 e op =
-  <span data-count="236">l</span>et rec go acc = <span data-count="72214">l</span>ift<span data-count="72214">2</span> (fun f x -&gt; <span data-count="7168">f</span> acc x) op e &gt;&gt;<span data-count="72214">=</span> go &lt;|&gt; retur<span data-count="72214">n</span> acc in
-  e &gt;&gt;= fun init -&gt; <span data-count="65046">g</span>o init
+  <span data-count="698">l</span>et rec go acc = <span data-count="168280">l</span>ift<span data-count="168280">2</span> (fun f x -&gt; <span data-count="17643">f</span> acc x) op e &gt;&gt;<span data-count="168280">=</span> go &lt;|&gt; retur<span data-count="168280">n</span> acc in
+  e &gt;&gt;= fun init -&gt; <span data-count="150637">g</span>o init
 ;;
 
 let choice_pass_prev parsers_list prev =
-  <span data-count="236">c</span>hoice @@ List.ma<span data-count="236">p</span> ~f:(fun el -&gt; <span data-count="706">e</span>l prev) parsers_list
+  <span data-count="698">c</span>hoice @@ List.ma<span data-count="698">p</span> ~f:(fun el -&gt; <span data-count="2092">e</span>l prev) parsers_list
 ;;
 
 let parse_by_priority priority init =
-  <span data-count="150">l</span>et rec parse_priority prev = function
-    | <span data-count="991">h</span> :: tl -&gt; parse_priority (<span data-count="991">h</span> prev) tl
-    | <span data-count="150">[</span>] -&gt; prev
+  <span data-count="458">l</span>et rec parse_priority prev = function
+    | <span data-count="2993">h</span> :: tl -&gt; parse_priority (<span data-count="2993">h</span> prev) tl
+    | <span data-count="458">[</span>] -&gt; prev
   in
   parse_priority init priority
 ;;

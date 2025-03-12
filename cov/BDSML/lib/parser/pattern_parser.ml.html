@@ -203,63 +203,63 @@ open Angstrom
 open Const_parser
 open Ast
 
-let parse_any = check_cha<span data-count="46">r</span> '_' *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> Pat_any
+let parse_any = check_cha<span data-count="123">r</span> '_' *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> Pat_any
 
 let parse_pconst =
   let+ c = parse_const in
-  <span data-count="1657">P</span>at_constant c
+  <span data-count="3112">P</span>at_constant c
 ;;
 
 let parse_var =
-  let+ ident = ws *<span data-count="46">&gt;</span> parse_lowercase_ident in
-  <span data-count="4250">P</span>at_var ident
+  let+ ident = ws *<span data-count="123">&gt;</span> parse_lowercase_ident in
+  <span data-count="9839">P</span>at_var ident
 ;;
 
 let parse_ptuple p =
-  <span data-count="41">s</span>ep_by<span data-count="41">1</span> (check_cha<span data-count="41">r</span> ',') p
+  <span data-count="118">s</span>ep_by<span data-count="118">1</span> (check_cha<span data-count="118">r</span> ',') p
   &gt;&gt;= function
   | <span data-count="0">[</span>] -&gt; fail "It cannot be this way"
-  | <span data-count="5541">[</span> h ] -&gt; return h
-  | <span data-count="527">h</span> :: tl -&gt; return (Pat_tuple (h :: tl))
+  | <span data-count="11546">[</span> h ] -&gt; return h
+  | <span data-count="1050">h</span> :: tl -&gt; return (Pat_tuple (h :: tl))
 ;;
 
 let parse_pcons p =
-  <span data-count="41">l</span>et constructor =
-    let+ ident = ws *<span data-count="41">&gt;</span> parse_capitalized_ident
-    and+ arg = p &gt;&gt;<span data-count="41">|</span> Option.some &lt;|<span data-count="41">&gt;</span> retur<span data-count="41">n</span> None in
-    <span data-count="87">P</span>at_construct (ident, arg)
+  <span data-count="118">l</span>et constructor =
+    let+ ident = ws *<span data-count="118">&gt;</span> parse_capitalized_ident
+    and+ arg = p &gt;&gt;<span data-count="118">|</span> Option.some &lt;|<span data-count="118">&gt;</span> retur<span data-count="118">n</span> None in
+    <span data-count="89">P</span>at_construct (ident, arg)
   in
   let list_cons =
     let helper =
-      check_strin<span data-count="41">g</span> "::"
-      *&gt; retur<span data-count="41">n</span> (fun p1 p2 -&gt; <span data-count="628">P</span>at_construct ("::", Some (Pat_tuple [ p1; p2 ])))
+      check_strin<span data-count="118">g</span> "::"
+      *&gt; retur<span data-count="118">n</span> (fun p1 p2 -&gt; <span data-count="1517">P</span>at_construct ("::", Some (Pat_tuple [ p1; p2 ])))
     in
-    <span data-count="41">c</span>hainr<span data-count="41">1</span> p helper
+    <span data-count="118">c</span>hainr<span data-count="118">1</span> p helper
   in
-  constructor &lt;|<span data-count="41">&gt;</span> list_cons &lt;|&gt; p
+  constructor &lt;|<span data-count="118">&gt;</span> list_cons &lt;|&gt; p
 ;;
 
 let parse_por p =
-  <span data-count="41">l</span>et helper = check_cha<span data-count="41">r</span> '|' *&gt; retur<span data-count="41">n</span> (fun ptr1 ptr2 -&gt; <span data-count="44">P</span>at_or (ptr1, ptr2)) in
-  <span data-count="41">c</span>hainl1 p helper
+  <span data-count="118">l</span>et helper = check_cha<span data-count="118">r</span> '|' *&gt; retur<span data-count="118">n</span> (fun ptr1 ptr2 -&gt; <span data-count="45">P</span>at_or (ptr1, ptr2)) in
+  <span data-count="118">c</span>hainl1 p helper
 ;;
 
 let parse_plist p =
-  <span data-count="82">l</span>et parse_list =
-    sep_b<span data-count="82">y</span> (check_cha<span data-count="82">r</span> ';') p
+  <span data-count="236">l</span>et parse_list =
+    sep_b<span data-count="236">y</span> (check_cha<span data-count="236">r</span> ';') p
     &gt;&gt;| fun l -&gt;
-    <span data-count="37">l</span>et rec helper = function
-      | <span data-count="52">h</span> :: tl -&gt; Pat_construct ("::", Some (Pat_tuple [ h; helpe<span data-count="52">r</span> tl ]))
-      | <span data-count="37">[</span>] -&gt; Pat_construct ("[]", None)
+    <span data-count="42">l</span>et rec helper = function
+      | <span data-count="58">h</span> :: tl -&gt; Pat_construct ("::", Some (Pat_tuple [ h; helpe<span data-count="58">r</span> tl ]))
+      | <span data-count="42">[</span>] -&gt; Pat_construct ("[]", None)
     in
     helper l
   in
-  <span data-count="82">r</span>emove_square_bracket<span data-count="82">s</span> (retur<span data-count="82">n</span> (Pat_construct ("[]", None)))
-  &lt;|&gt; remove_square_bracket<span data-count="82">s</span> parse_list
+  <span data-count="236">r</span>emove_square_bracket<span data-count="236">s</span> (retur<span data-count="236">n</span> (Pat_construct ("[]", None)))
+  &lt;|&gt; remove_square_bracket<span data-count="236">s</span> parse_list
 ;;
 
 let pat_typexpr p =
-  <span data-count="41">r</span>emove_parents
+  <span data-count="118">r</span>emove_parents
   @@
   let+ pat = p
   and+ typexpr = Typexpr_parser.parse_typexpr in
@@ -268,19 +268,19 @@ let pat_typexpr p =
 
 (** https://ocaml.org/manual/5.2/patterns.html#start-section *)
 let priority =
-  [ choice_pass_pre<span data-count="46">v</span> [ parse_plist; Fun.id ]; parse_pcons; parse_ptuple; parse_por ]
+  [ choice_pass_pre<span data-count="123">v</span> [ parse_plist; Fun.id ]; parse_pcons; parse_ptuple; parse_por ]
 ;;
 
 let parse_pattern =
-  fi<span data-count="46">x</span> (fun self -&gt;
-    <span data-count="41">p</span>arse_by_priority priority
-    @@ choic<span data-count="41">e</span>
+  fi<span data-count="123">x</span> (fun self -&gt;
+    <span data-count="118">p</span>arse_by_priority priority
+    @@ choic<span data-count="118">e</span>
          [ parse_var
          ; parse_pconst
          ; parse_any
-         ; pat_typexp<span data-count="41">r</span> self
-         ; remove_parent<span data-count="41">s</span> self
-         ; parse_plis<span data-count="41">t</span> self
+         ; pat_typexp<span data-count="118">r</span> self
+         ; remove_parent<span data-count="118">s</span> self
+         ; parse_plis<span data-count="118">t</span> self
          ])
 ;;
 </code></pre>

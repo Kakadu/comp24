@@ -111,32 +111,32 @@ open Ast
 open Utils
 
 let parse_int =
-  take_while<span data-count="46">1</span> (function
-    | <span data-count="7857">'</span>0' .. '9' -&gt; true
-    | <span data-count="35074">_</span> -&gt; false)
-  &gt;&gt;<span data-count="46">|</span> fun i -&gt; <span data-count="5002">C</span>onst_int (Int.of_strin<span data-count="5002">g</span> i)
+  take_while<span data-count="123">1</span> (function
+    | <span data-count="18489">'</span>0' .. '9' -&gt; true
+    | <span data-count="80618">_</span> -&gt; false)
+  &gt;&gt;<span data-count="123">|</span> fun i -&gt; <span data-count="11482">C</span>onst_int (Int.of_strin<span data-count="11482">g</span> i)
 ;;
 
-let parse_char = cha<span data-count="46">r</span> '\'' *<span data-count="46">&gt;</span> any_char &lt;<span data-count="46">*</span> cha<span data-count="46">r</span> '\'' &gt;&gt;<span data-count="46">|</span> fun c -&gt; <span data-count="144">C</span>onst_char c
+let parse_char = cha<span data-count="123">r</span> '\'' *<span data-count="123">&gt;</span> any_char &lt;<span data-count="123">*</span> cha<span data-count="123">r</span> '\'' &gt;&gt;<span data-count="123">|</span> fun c -&gt; <span data-count="148">C</span>onst_char c
 
 let parse_string =
-  cha<span data-count="46">r</span> '\"'
-  *<span data-count="46">&gt;</span> take_til<span data-count="46">l</span> (function
-    | <span data-count="219">'</span>\"' -&gt; true
-    | <span data-count="844">_</span> -&gt; false)
-  &lt;<span data-count="46">*</span> cha<span data-count="46">r</span> '\"'
-  &gt;&gt;<span data-count="46">|</span> fun s -&gt; <span data-count="219">C</span>onst_string s
+  cha<span data-count="123">r</span> '\"'
+  *<span data-count="123">&gt;</span> take_til<span data-count="123">l</span> (function
+    | <span data-count="223">'</span>\"' -&gt; true
+    | <span data-count="861">_</span> -&gt; false)
+  &lt;<span data-count="123">*</span> cha<span data-count="123">r</span> '\"'
+  &gt;&gt;<span data-count="123">|</span> fun s -&gt; <span data-count="223">C</span>onst_string s
 ;;
 
 let parse_bool =
-  let+ res = strin<span data-count="46">g</span> "true" *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> true &lt;|<span data-count="46">&gt;</span> strin<span data-count="46">g</span> "false" *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> false in
-  <span data-count="299">C</span>onst_bool res
+  let+ res = strin<span data-count="123">g</span> "true" *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> true &lt;|<span data-count="123">&gt;</span> strin<span data-count="123">g</span> "false" *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> false in
+  <span data-count="428">C</span>onst_bool res
 ;;
 
-let parse_unit = cha<span data-count="46">r</span> '(' *<span data-count="46">&gt;</span> ws *<span data-count="46">&gt;</span> cha<span data-count="46">r</span> ')' *<span data-count="46">&gt;</span> retur<span data-count="46">n</span> Const_unit
+let parse_unit = cha<span data-count="123">r</span> '(' *<span data-count="123">&gt;</span> ws *<span data-count="123">&gt;</span> cha<span data-count="123">r</span> ')' *<span data-count="123">&gt;</span> retur<span data-count="123">n</span> Const_unit
 
 let parse_const =
-  ws *<span data-count="46">&gt;</span> choic<span data-count="46">e</span> [ parse_int; parse_char; parse_string; parse_bool; parse_unit ]
+  ws *<span data-count="123">&gt;</span> choic<span data-count="123">e</span> [ parse_int; parse_char; parse_string; parse_bool; parse_unit ]
 ;;
 </code></pre>
       </div>
