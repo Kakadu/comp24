@@ -81,7 +81,16 @@ let pid =
 ;;
 
 let pbind_id = poperator <|> pstoken "()" <|> pid
-let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
+
+let pint =
+  let ppos = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) in
+  let pneg =
+    pparens
+      (pstoken "-" *> take_while1 is_digit
+       >>| fun digits -> CInt (Int.of_string ("-" ^ digits)))
+  in
+  pneg <|> ppos <?> "integer"
+;;
 
 let pbool =
   ptoken
