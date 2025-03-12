@@ -5,12 +5,10 @@
 open Base
 open Result
 open Roflanml_lib
-open Roflanml_lib.Roflanml_stdlib
 
 let ( let* ) = ( >>= )
 
 let () =
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String) in
   let input = Stdio.In_channel.input_all Stdlib.stdin in
   let llvm_prog =
     let* prog = Parser.parse input in
@@ -21,7 +19,7 @@ let () =
         Stdlib.Format.printf "%a" Typing.pp_error err;
         fail "Typecheck error"
     in
-    let prog = Closure_conversion.close_program prog env in
+    let prog = Closure_conversion.close_program prog in
     let* prog = Lambda_lifting.lift_program prog in
     let* prog = Anf.anf_program prog in
     return (Llvm_gen.compile_program prog)

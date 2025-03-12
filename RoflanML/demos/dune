@@ -1,4 +1,14 @@
 (executable
+ (name demoAC)
+ (modules demoAC)
+ (public_name demoAC)
+ (libraries Roflanml_lib stdio))
+
+(cram
+ (applies_to demoAC)
+ (deps ./demoAC.exe))
+
+(executable
  (name demoCC)
  (modules demoCC)
  (public_name demoCC)

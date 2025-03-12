@@ -6,7 +6,6 @@ open Base
 open Roflanml_lib
 open Roflanml_lib.Ast
 open Roflanml_lib.Typing
-open Roflanml_lib.Roflanml_stdlib
 open Roflanml_lib.Closure_conversion
 open Roflanml_lib.Lambda_lifting
 open Roflanml_lib.Anf_ast
@@ -26,7 +25,6 @@ let get_bindings prog =
 let () =
   let open Result in
   let ( let* ) = ( >>= ) in
-  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String) in
   let input = Stdio.In_channel.input_all Stdlib.stdin in
   let tyenvs =
     let* prog = Parser.parse input in
@@ -48,7 +46,7 @@ let () =
         Stdlib.Format.printf "%a" pp_error err;
         fail "Typecheck error"
     in
-    let prog = close_program prog env in
+    let prog = close_program prog in
     let* prog = lift_program prog in
     let* prog = anf_program prog in
     let prog = List.map prog ~f:(fun decl -> anf_to_ast decl) in
