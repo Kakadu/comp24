@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>tests.ml &mdash; Coverage report</title>
-    <meta name="description" content="95.52% coverage in lib/tests.ml">
+    <meta name="description" content="98.52% coverage in lib/tests.ml">
     <link rel="stylesheet" href="../coverage.css"/>
     <script src="../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,19 +15,12 @@
           <span class="dirname">lib/</span>tests.ml
         </a>
       </h1>
-      <h2>95.52%</h2>
+      <h2>98.52%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:2.20%"></span>
-      <span class="unvisited" style="top:3.15%"></span>
-      <span class="unvisited" style="bottom:47.09%"></span>
-      <span class="unvisited" style="bottom:5.20%"></span>
-      <span class="unvisited" style="bottom:3.62%"></span>
-      <span class="unvisited" style="bottom:2.99%"></span>
-      <span class="unvisited" style="bottom:2.83%"></span>
-      <span class="unvisited" style="bottom:2.68%"></span>
-      <span class="unvisited" style="bottom:2.52%"></span>
-      <span class="unvisited" style="bottom:2.20%"></span>
+      <span class="unvisited" style="top:2.36%"></span>
+      <span class="unvisited" style="top:3.37%"></span>
+      <span class="unvisited" style="bottom:43.43%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -626,47 +619,6 @@
 <a id="L592"></a><span class="visited"> </span>
 <a id="L593"></a><span > </span>
 <a id="L594"></a><span > </span>
-<a id="L595"></a><span > </span>
-<a id="L596"></a><span > </span>
-<a id="L597"></a><span > </span>
-<a id="L598"></a><span > </span>
-<a id="L599"></a><span > </span>
-<a id="L600"></a><span class="visited"> </span>
-<a id="L601"></a><span class="visited"> </span>
-<a id="L602"></a><span class="unvisited"> </span>
-<a id="L603"></a><span > </span>
-<a id="L604"></a><span > </span>
-<a id="L605"></a><span > </span>
-<a id="L606"></a><span > </span>
-<a id="L607"></a><span > </span>
-<a id="L608"></a><span class="visited"> </span>
-<a id="L609"></a><span class="visited"> </span>
-<a id="L610"></a><span class="visited"> </span>
-<a id="L611"></a><span class="visited"> </span>
-<a id="L612"></a><span class="unvisited"> </span>
-<a id="L613"></a><span > </span>
-<a id="L614"></a><span > </span>
-<a id="L615"></a><span > </span>
-<a id="L616"></a><span class="unvisited"> </span>
-<a id="L617"></a><span class="unvisited"> </span>
-<a id="L618"></a><span class="unvisited"> </span>
-<a id="L619"></a><span class="unvisited"> </span>
-<a id="L620"></a><span > </span>
-<a id="L621"></a><span class="unvisited"> </span>
-<a id="L622"></a><span > </span>
-<a id="L623"></a><span > </span>
-<a id="L624"></a><span > </span>
-<a id="L625"></a><span class="visited"> </span>
-<a id="L626"></a><span class="visited"> </span>
-<a id="L627"></a><span class="visited"> </span>
-<a id="L628"></a><span > </span>
-<a id="L629"></a><span > </span>
-<a id="L630"></a><span > </span>
-<a id="L631"></a><span > </span>
-<a id="L632"></a><span > </span>
-<a id="L633"></a><span class="visited"> </span>
-<a id="L634"></a><span > </span>
-<a id="L635"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -1265,47 +1217,6 @@
 <a href="#L592">592</a>
 <a href="#L593">593</a>
 <a href="#L594">594</a>
-<a href="#L595">595</a>
-<a href="#L596">596</a>
-<a href="#L597">597</a>
-<a href="#L598">598</a>
-<a href="#L599">599</a>
-<a href="#L600">600</a>
-<a href="#L601">601</a>
-<a href="#L602">602</a>
-<a href="#L603">603</a>
-<a href="#L604">604</a>
-<a href="#L605">605</a>
-<a href="#L606">606</a>
-<a href="#L607">607</a>
-<a href="#L608">608</a>
-<a href="#L609">609</a>
-<a href="#L610">610</a>
-<a href="#L611">611</a>
-<a href="#L612">612</a>
-<a href="#L613">613</a>
-<a href="#L614">614</a>
-<a href="#L615">615</a>
-<a href="#L616">616</a>
-<a href="#L617">617</a>
-<a href="#L618">618</a>
-<a href="#L619">619</a>
-<a href="#L620">620</a>
-<a href="#L621">621</a>
-<a href="#L622">622</a>
-<a href="#L623">623</a>
-<a href="#L624">624</a>
-<a href="#L625">625</a>
-<a href="#L626">626</a>
-<a href="#L627">627</a>
-<a href="#L628">628</a>
-<a href="#L629">629</a>
-<a href="#L630">630</a>
-<a href="#L631">631</a>
-<a href="#L632">632</a>
-<a href="#L633">633</a>
-<a href="#L634">634</a>
-<a href="#L635">635</a>
 </pre>
 <pre><code class="ocaml">(* Copyright 2024, Ilya Syresenkov, Akhmetov Tamerlan *)
 
@@ -1899,47 +1810,6 @@ module UnparseTests = struct
     in
     <span data-count="1">S</span>tdlib.Format.printf "%s\n" printed;
     <span data-count="1">[</span>%expect {| fun (x : int) -&gt; if x then 1 else 0 |}<span data-count="5">]</span>
-  ;;
-end
-
-module QCheckTests = struct
-  open Check
-
-  let arbitrary_ast =
-    QCheck.mak<span data-count="2">e</span>
-      (QCheck.Gen.size<span data-count="2">d</span> (fun _ -&gt; <span data-count="10">G</span>enerator.gen_program))
-      ~print:(fun prog -&gt; <span data-count="0">U</span>nparse.unparse_program prog)
-      ~shrink:Shrinker.shrink_program
-  ;;
-
-  let test =
-    QCheck.(
-      Test.mak<span data-count="2">e</span> ~count:10 arbitrary_ast (fun ast -&gt;
-        <span data-count="10">l</span>et src = Unparse.unparse_program ast in
-        <span data-count="10">m</span>atch Parser.parse src with
-        | <span data-count="10">R</span>esult.Ok ast' when Stdlib.( = <span data-count="10">)</span> ast' ast -&gt; <span data-count="10">t</span>rue
-        | <span data-count="0">R</span>esult.Ok ast' -&gt;
-          Stdlib.Format.printf
-            "\n\n!!! AST DIFFERS !!!\nSource: %S\nParsed: %s\nOriginal: %s\n"
-            src
-            (Ast.show_progra<span data-count="0">m</span> ast')
-            (Ast.show_progra<span data-count="0">m</span> ast);
-          <span data-count="0">f</span>alse
-        | <span data-count="0">R</span>esult.Error err -&gt;
-          Stdlib.Format.printf "\n\n[!]: Parser error: %s\nOn source:\n%S\n" err src;
-          <span data-count="0">f</span>alse))
-  ;;
-
-  let%expect_test "QuickCheck test for parser" =
-    <span data-count="1">Q</span>Check_runner.set_seed 79;
-    <span data-count="1">l</span>et _ = QCheck_runner.run_tests ~colors:false [ test ] in
-    <span data-count="1">(</span>);
-    [%expect
-      {|
-      random seed: 79
-      ================================================================================
-      success (ran 1 tests)
-      |}<span data-count="5">]</span>
   ;;
 end
 </code></pre>

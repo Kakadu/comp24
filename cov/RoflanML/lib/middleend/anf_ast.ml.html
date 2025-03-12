@@ -185,28 +185,28 @@ type aprogram = adecl list
 
 let anf_to_ast =
   let rec imm_to_ast = function
-    | <span data-count="67">I</span>mmConst c -&gt; EConst c
-    | <span data-count="220">I</span>mmVar id -&gt; EVar id
+    | <span data-count="72">I</span>mmConst c -&gt; EConst c
+    | <span data-count="247">I</span>mmVar id -&gt; EVar id
     | <span data-count="2">I</span>mmTuple (imm1, imm2, imms) -&gt;
       ETuple (imm_to_as<span data-count="2">t</span> imm1, imm_to_as<span data-count="2">t</span> imm2, List.ma<span data-count="2">p</span> imms ~f:imm_to_ast)
     | <span data-count="2">I</span>mmList imms -&gt; EList (List.ma<span data-count="2">p</span> imms ~f:imm_to_ast)
   in
   let rec cexpr_to_ast = function
-    | <span data-count="65">C</span>Imm imm -&gt; imm_to_ast imm
-    | <span data-count="8">C</span>Branch (cond, t, f) -&gt; EBranch (imm_to_as<span data-count="8">t</span> cond, aexpr_to_as<span data-count="8">t</span> t, aexpr_to_as<span data-count="8">t</span> f)
-    | <span data-count="76">C</span>App (imm, args) -&gt;
-      List.fold_left args ~init:(imm_to_as<span data-count="76">t</span> imm) ~f:(fun acc arg -&gt;
-        <span data-count="132">E</span>App (acc, imm_to_as<span data-count="132">t</span> arg))
+    | <span data-count="72">C</span>Imm imm -&gt; imm_to_ast imm
+    | <span data-count="9">C</span>Branch (cond, t, f) -&gt; EBranch (imm_to_as<span data-count="9">t</span> cond, aexpr_to_as<span data-count="9">t</span> t, aexpr_to_as<span data-count="9">t</span> f)
+    | <span data-count="85">C</span>App (imm, args) -&gt;
+      List.fold_left args ~init:(imm_to_as<span data-count="85">t</span> imm) ~f:(fun acc arg -&gt;
+        <span data-count="147">E</span>App (acc, imm_to_as<span data-count="147">t</span> arg))
   and aexpr_to_ast = function
-    | <span data-count="93">A</span>LetIn (id, ce, ae) -&gt; ELetIn (NonRec, id, cexpr_to_as<span data-count="93">t</span> ce, aexpr_to_as<span data-count="93">t</span> ae)
-    | <span data-count="56">A</span>CExpr ce -&gt; cexpr_to_ast ce
+    | <span data-count="104">A</span>LetIn (id, ce, ae) -&gt; ELetIn (NonRec, id, cexpr_to_as<span data-count="104">t</span> ce, aexpr_to_as<span data-count="104">t</span> ae)
+    | <span data-count="62">A</span>CExpr ce -&gt; cexpr_to_ast ce
   in
   let adecl_to_ast = function
-    | <span data-count="36">A</span>DLet (is_rec, id, args, ae) -&gt;
+    | <span data-count="40">A</span>DLet (is_rec, id, args, ae) -&gt;
       let e =
-        List.fold_right args ~init:(aexpr_to_as<span data-count="36">t</span> ae) ~f:(fun arg e -&gt; <span data-count="39">E</span>Fun (arg, e))
+        List.fold_right args ~init:(aexpr_to_as<span data-count="40">t</span> ae) ~f:(fun arg e -&gt; <span data-count="45">E</span>Fun (arg, e))
       in
-      <span data-count="36">D</span>Let (is_rec, id, e)
+      <span data-count="40">D</span>Let (is_rec, id, e)
     | <span data-count="2">A</span>DMutualLet decls -&gt;
       let decls =
         List.map decls ~f:(fun (id, args, ae) -&gt;

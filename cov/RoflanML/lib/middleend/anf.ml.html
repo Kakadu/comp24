@@ -247,34 +247,34 @@ open Anf_ast
 open Common
 open Common.Counter_Monad
 
-let gen_name = gen_nam<span data-count="20">e</span> "anf"
+let gen_name = gen_nam<span data-count="43">e</span> "anf"
 
 let get_bindings prog =
-  <span data-count="38">L</span>ist.fold
+  <span data-count="112">L</span>ist.fold
     prog
-    ~init:(Set.empt<span data-count="38">y</span> (module String))
+    ~init:(Set.empt<span data-count="112">y</span> (module String))
     ~f:(fun acc decl -&gt;
-      <span data-count="104">m</span>atch decl with
-      | <span data-count="102">L</span>LDLet (_, id, _, _) -&gt; Set.add acc id
-      | <span data-count="2">L</span>LDMutualLet decls -&gt;
-        List.fold decls ~init:acc ~f:(fun acc (id, _, _) -&gt; <span data-count="4">S</span>et.add acc id))
+      <span data-count="366">m</span>atch decl with
+      | <span data-count="360">L</span>LDLet (_, id, _, _) -&gt; Set.add acc id
+      | <span data-count="6">L</span>LDMutualLet decls -&gt;
+        List.fold decls ~init:acc ~f:(fun acc (id, _, _) -&gt; <span data-count="12">S</span>et.add acc id))
 ;;
 
 let fold_app e =
-  <span data-count="76">l</span>et rec helper e k =
-    <span data-count="208">m</span>atch e with
-    | <span data-count="132">L</span>LApp (l, r) -&gt; helper l (fun args -&gt; <span data-count="132">k</span> (r :: args))
-    | <span data-count="76">e</span> -&gt; e, List.re<span data-count="76">v</span> (<span data-count="76">k</span> [])
+  <span data-count="301">l</span>et rec helper e k =
+    <span data-count="834">m</span>atch e with
+    | <span data-count="533">L</span>LApp (l, r) -&gt; helper l (fun args -&gt; <span data-count="533">k</span> (r :: args))
+    | <span data-count="301">e</span> -&gt; e, List.re<span data-count="301">v</span> (<span data-count="301">k</span> [])
   in
-  helper e (fun x -&gt; <span data-count="76">x</span>)
+  helper e (fun x -&gt; <span data-count="301">x</span>)
 ;;
 
 let anf_llexpr e expr_with_hole bindings =
-  <span data-count="40">l</span>et gen_name = gen_name bindings in
-  <span data-count="40">l</span>et rec helper e expr_with_hole =
-    <span data-count="292">m</span>atch e with
-    | <span data-count="67">L</span>LConst c -&gt; expr_with_hole (ImmConst c)
-    | <span data-count="132">L</span>LVar id -&gt; expr_with_hole (ImmVar id)
+  <span data-count="116">l</span>et gen_name = gen_name bindings in
+  <span data-count="116">l</span>et rec helper e expr_with_hole =
+    <span data-count="1177">m</span>atch e with
+    | <span data-count="242">L</span>LConst c -&gt; expr_with_hole (ImmConst c)
+    | <span data-count="535">L</span>LVar id -&gt; expr_with_hole (ImmVar id)
     | <span data-count="2">L</span>LTuple (e1, e2, es) -&gt;
       helper e1 (fun imm1 -&gt;
         <span data-count="2">h</span>elper e2 (fun imm2 -&gt;
@@ -287,30 +287,30 @@ let anf_llexpr e expr_with_hole bindings =
         <span data-count="2">l</span>et* name = gen_name in
         <span data-count="2">l</span>et* ae = expr_with_hol<span data-count="2">e</span> (ImmVar name) in
         <span data-count="2">r</span>eturn @@ ALetIn (name, CImm (ImmList imms), ae))
-    | <span data-count="8">L</span>LBranch (cond, t, f) -&gt;
+    | <span data-count="27">L</span>LBranch (cond, t, f) -&gt;
       helper cond (fun imm -&gt;
-        <span data-count="8">l</span>et* name = gen_name in
-        <span data-count="8">l</span>et* body = expr_with_hol<span data-count="8">e</span> (ImmVar name) in
-        <span data-count="8">l</span>et* t_aexpr = helpe<span data-count="8">r</span> t (fun imm -&gt; <span data-count="8">r</span>eturn @@ ACExpr (CImm imm)) in
-        <span data-count="8">l</span>et* f_aexpr = helpe<span data-count="8">r</span> f (fun imm -&gt; <span data-count="8">r</span>eturn @@ ACExpr (CImm imm)) in
-        <span data-count="8">r</span>eturn (ALetIn (name, CBranch (imm, t_aexpr, f_aexpr), body)))
-    | <span data-count="5">L</span>LLetIn (id, e1, e2) -&gt;
+        <span data-count="27">l</span>et* name = gen_name in
+        <span data-count="27">l</span>et* body = expr_with_hol<span data-count="27">e</span> (ImmVar name) in
+        <span data-count="27">l</span>et* t_aexpr = helpe<span data-count="27">r</span> t (fun imm -&gt; <span data-count="27">r</span>eturn @@ ACExpr (CImm imm)) in
+        <span data-count="27">l</span>et* f_aexpr = helpe<span data-count="27">r</span> f (fun imm -&gt; <span data-count="27">r</span>eturn @@ ACExpr (CImm imm)) in
+        <span data-count="27">r</span>eturn (ALetIn (name, CBranch (imm, t_aexpr, f_aexpr), body)))
+    | <span data-count="68">L</span>LLetIn (id, e1, e2) -&gt;
       helper e1 (fun imm -&gt;
-        <span data-count="5">l</span>et* ae = helpe<span data-count="5">r</span> e2 expr_with_hole in
-        <span data-count="5">r</span>eturn @@ ALetIn (id, CImm imm, ae))
-    | <span data-count="76">L</span>LApp _ -&gt;
+        <span data-count="68">l</span>et* ae = helpe<span data-count="68">r</span> e2 expr_with_hole in
+        <span data-count="68">r</span>eturn @@ ALetIn (id, CImm imm, ae))
+    | <span data-count="301">L</span>LApp _ -&gt;
       let e, args = fold_app e in
-      <span data-count="76">h</span>elper e (fun imm -&gt;
-        <span data-count="76">a</span>nf_many args (fun imms -&gt;
-          <span data-count="76">l</span>et* name = gen_name in
-          <span data-count="76">l</span>et* ae = expr_with_hol<span data-count="76">e</span> (ImmVar name) in
-          <span data-count="76">l</span>et app = CApp (imm, imms) in
+      <span data-count="301">h</span>elper e (fun imm -&gt;
+        <span data-count="301">a</span>nf_many args (fun imms -&gt;
+          <span data-count="301">l</span>et* name = gen_name in
+          <span data-count="301">l</span>et* ae = expr_with_hol<span data-count="301">e</span> (ImmVar name) in
+          <span data-count="301">l</span>et app = CApp (imm, imms) in
           return @@ ALetIn (name, app, ae)))
     | <span data-count="0">L</span>LMatch _ -&gt; fail "Match is not implemented yet"
   and anf_many es k =
-    <span data-count="80">l</span>et rec fold acc = function
-      | <span data-count="138">h</span> :: tl -&gt; helper h (fun imm -&gt; <span data-count="138">f</span>old (imm :: acc) tl)
-      | <span data-count="80">[</span>] -&gt; k (List.re<span data-count="80">v</span> acc)
+    <span data-count="305">l</span>et rec fold acc = function
+      | <span data-count="539">h</span> :: tl -&gt; helper h (fun imm -&gt; <span data-count="539">f</span>old (imm :: acc) tl)
+      | <span data-count="305">[</span>] -&gt; k (List.re<span data-count="305">v</span> acc)
     in
     fold [] es
   in
@@ -318,28 +318,28 @@ let anf_llexpr e expr_with_hole bindings =
 ;;
 
 let rec anf_decl decl bindings =
-  <span data-count="42">m</span>atch decl with
-  | <span data-count="40">L</span>LDLet (is_rec, id, args, e) -&gt;
-    let* e = anf_llexp<span data-count="40">r</span> e (fun imm -&gt; <span data-count="40">r</span>eturn @@ ACExpr (CImm imm)) bindings in
-    <span data-count="40">r</span>eturn @@ ADLet (is_rec, id, args, e)
-  | <span data-count="2">L</span>LDMutualLet decls -&gt;
+  <span data-count="120">m</span>atch decl with
+  | <span data-count="116">L</span>LDLet (is_rec, id, args, e) -&gt;
+    let* e = anf_llexp<span data-count="116">r</span> e (fun imm -&gt; <span data-count="116">r</span>eturn @@ ACExpr (CImm imm)) bindings in
+    <span data-count="116">r</span>eturn @@ ADLet (is_rec, id, args, e)
+  | <span data-count="4">L</span>LDMutualLet decls -&gt;
     let* decls =
-      List.fold_righ<span data-count="2">t</span> decls ~init:(retur<span data-count="2">n</span> []) ~f:(fun (id, args, e) decls -&gt;
-        <span data-count="4">l</span>et* decls = decls in
-        <span data-count="4">l</span>et* decl = anf_dec<span data-count="4">l</span> (LLDLet (Rec, id, args, e)) bindings in
-        <span data-count="4">m</span>atch decl with
-        | <span data-count="4">A</span>DLet (_, id, args, e) -&gt; return ((id, args, e) :: decls)
+      List.fold_righ<span data-count="4">t</span> decls ~init:(retur<span data-count="4">n</span> []) ~f:(fun (id, args, e) decls -&gt;
+        <span data-count="8">l</span>et* decls = decls in
+        <span data-count="8">l</span>et* decl = anf_dec<span data-count="8">l</span> (LLDLet (Rec, id, args, e)) bindings in
+        <span data-count="8">m</span>atch decl with
+        | <span data-count="8">A</span>DLet (_, id, args, e) -&gt; return ((id, args, e) :: decls)
         | <span data-count="0">_</span> -&gt; fail "Unreachable")
     in
-    <span data-count="2">r</span>eturn (ADMutualLet decls)
+    <span data-count="4">r</span>eturn (ADMutualLet decls)
 ;;
 
 let anf_program prog =
-  <span data-count="17">r</span>un
-  @@ List.fold_righ<span data-count="17">t</span> prog ~init:(retur<span data-count="17">n</span> []) ~f:(fun decl acc -&gt;
-    <span data-count="38">l</span>et* acc = acc in
-    <span data-count="38">l</span>et* decl = anf_dec<span data-count="38">l</span> decl (get_binding<span data-count="38">s</span> prog) in
-    <span data-count="38">r</span>eturn (decl :: acc))
+  <span data-count="40">r</span>un
+  @@ List.fold_righ<span data-count="40">t</span> prog ~init:(retur<span data-count="40">n</span> []) ~f:(fun decl acc -&gt;
+    <span data-count="112">l</span>et* acc = acc in
+    <span data-count="112">l</span>et* decl = anf_dec<span data-count="112">l</span> decl (get_binding<span data-count="112">s</span> prog) in
+    <span data-count="112">r</span>eturn (decl :: acc))
 ;;
 </code></pre>
       </div>

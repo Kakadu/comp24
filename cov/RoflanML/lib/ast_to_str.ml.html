@@ -369,18 +369,18 @@ open Ast
 open Common.Middleend_Common
 
 let is_operator op =
-  <span data-count="391">l</span>et is_operator_char = function
-    | <span data-count="41">'</span>+' | <span data-count="14">'</span>-' | <span data-count="8">'</span>*' | <span data-count="5">'</span>/' | <span data-count="12">'</span>=' | <span data-count="0">'</span>&lt;' | <span data-count="0">'</span>&gt;' | <span data-count="0">'</span>!' | <span data-count="0">'</span>%' | <span data-count="8">'</span>&amp;' | <span data-count="0">'</span>|' | <span data-count="0">'</span>^' | <span data-count="0">'</span>:' -&gt; true
-    | <span data-count="307">_</span> -&gt; false
+  <span data-count="501">l</span>et is_operator_char = function
+    | <span data-count="57">'</span>+' | <span data-count="16">'</span>-' | <span data-count="11">'</span>*' | <span data-count="5">'</span>/' | <span data-count="15">'</span>=' | <span data-count="0">'</span>&lt;' | <span data-count="0">'</span>&gt;' | <span data-count="0">'</span>!' | <span data-count="0">'</span>%' | <span data-count="8">'</span>&amp;' | <span data-count="0">'</span>|' | <span data-count="0">'</span>^' | <span data-count="0">'</span>:' -&gt; true
+    | <span data-count="393">_</span> -&gt; false
   in
-  String.fold op ~init:true ~f:(fun acc ch -&gt; <span data-count="960">a</span>cc &amp;&amp; <span data-count="395">i</span>s_operator_char ch)
+  String.fold op ~init:true ~f:(fun acc ch -&gt; <span data-count="1303">a</span>cc &amp;&amp; <span data-count="505">i</span>s_operator_char ch)
 ;;
 
 let ast_to_str =
   let open Stdlib.Format in
   let const_to_str = function
-    | <span data-count="96">C</span>Int x -&gt; sprintf "%d" x
-    | <span data-count="18">C</span>Bool x -&gt; sprintf "%B" x
+    | <span data-count="140">C</span>Int x -&gt; sprintf "%d" x
+    | <span data-count="22">C</span>Bool x -&gt; sprintf "%B" x
     | <span data-count="0">C</span>Unit -&gt; sprintf "()"
   in
   let rec type_to_str = function
@@ -424,8 +424,8 @@ let ast_to_str =
         | <span data-count="0">_</span> -&gt; sprintf "%s%s(%s)" acc delim (pattern_to_st<span data-count="0">r</span> p))
   in
   let rec expr_to_str = function
-    | <span data-count="114">E</span>Const c -&gt; const_to_str c
-    | <span data-count="391">E</span>Var x -&gt; if is_operator x then <span data-count="84">s</span>printf "( %s )" x else <span data-count="307">x</span>
+    | <span data-count="162">E</span>Const c -&gt; const_to_str c
+    | <span data-count="501">E</span>Var x -&gt; if is_operator x then <span data-count="108">s</span>printf "( %s )" x else <span data-count="393">x</span>
     | <span data-count="4">E</span>Tuple (e1, e2, es) -&gt;
       let init = expr_to_str e1 in
       <span data-count="4">L</span>ist.fold_left (e2 :: es) ~init ~f:(fun acc e -&gt; <span data-count="6">a</span>cc ^ ", " ^ expr_to_st<span data-count="6">r</span> e)
@@ -435,8 +435,8 @@ let ast_to_str =
           <span data-count="4">i</span>f String.is_empty acc then <span data-count="2">e</span>xpr_to_str e else <span data-count="2">a</span>cc ^ "; " ^ expr_to_st<span data-count="2">r</span> e)
       in
       <span data-count="2">s</span>printf "[ %s ]" inner
-    | <span data-count="14">E</span>Branch (cond, t, f) -&gt;
-      sprintf "if %s then %s else %s" (expr_to_st<span data-count="14">r</span> cond) (expr_to_st<span data-count="14">r</span> t) (expr_to_st<span data-count="14">r</span> f)
+    | <span data-count="18">E</span>Branch (cond, t, f) -&gt;
+      sprintf "if %s then %s else %s" (expr_to_st<span data-count="18">r</span> cond) (expr_to_st<span data-count="18">r</span> t) (expr_to_st<span data-count="18">r</span> f)
     | <span data-count="0">E</span>Match (e, cases) -&gt;
       let cases =
         List.fold_left cases ~init:"" ~f:(fun acc (p, e) -&gt;
@@ -457,49 +457,49 @@ let ast_to_str =
         | <span data-count="7">N</span>onRec -&gt; ""
       in
       sprintf "\nlet%s %s %s= %s in %s" rec_flag id args (expr_to_st<span data-count="7">r</span> e) (expr_to_st<span data-count="7">r</span> e2)
-    | <span data-count="103">E</span>LetIn (is_rec, id, e1, e2) -&gt;
+    | <span data-count="129">E</span>LetIn (is_rec, id, e1, e2) -&gt;
       let rec_flag =
         match is_rec with
         | <span data-count="0">R</span>ec -&gt; " rec"
-        | <span data-count="103">N</span>onRec -&gt; ""
+        | <span data-count="129">N</span>onRec -&gt; ""
       in
-      sprintf "\nlet%s %s = %s in %s" rec_flag id (expr_to_st<span data-count="103">r</span> e1) (expr_to_st<span data-count="103">r</span> e2)
-    | <span data-count="16">E</span>Fun _ as e -&gt;
+      sprintf "\nlet%s %s = %s in %s" rec_flag id (expr_to_st<span data-count="129">r</span> e1) (expr_to_st<span data-count="129">r</span> e2)
+    | <span data-count="20">E</span>Fun _ as e -&gt;
       let args, e = uncurry e in
-      <span data-count="16">l</span>et args =
+      <span data-count="20">l</span>et args =
         List.fold_left args ~init:"" ~f:(fun acc (id, ty) -&gt;
-          <span data-count="25">m</span>atch ty with
+          <span data-count="29">m</span>atch ty with
           | <span data-count="0">S</span>ome ty -&gt; acc ^ sprint<span data-count="0">f</span> "(%s : %s) " id (type_to_st<span data-count="0">r</span> ty)
-          | <span data-count="25">N</span>one -&gt; acc ^ sprint<span data-count="25">f</span> "%s " id)
+          | <span data-count="29">N</span>one -&gt; acc ^ sprint<span data-count="29">f</span> "%s " id)
       in
-      <span data-count="16">s</span>printf "(fun %s-&gt; %s)" args (expr_to_st<span data-count="16">r</span> e)
-    | <span data-count="277">E</span>App (e1, e2) -&gt;
+      <span data-count="20">s</span>printf "(fun %s-&gt; %s)" args (expr_to_st<span data-count="20">r</span> e)
+    | <span data-count="376">E</span>App (e1, e2) -&gt;
       (match e2 with
-       | <span data-count="21">E</span>App _ -&gt; sprintf "%s (%s)" (expr_to_st<span data-count="21">r</span> e1) (expr_to_st<span data-count="21">r</span> e2)
-       | <span data-count="256">_</span> -&gt; sprintf "%s %s" (expr_to_st<span data-count="256">r</span> e1) (expr_to_st<span data-count="256">r</span> e2))
+       | <span data-count="39">E</span>App _ -&gt; sprintf "%s (%s)" (expr_to_st<span data-count="39">r</span> e1) (expr_to_st<span data-count="39">r</span> e2)
+       | <span data-count="337">_</span> -&gt; sprintf "%s %s" (expr_to_st<span data-count="337">r</span> e1) (expr_to_st<span data-count="337">r</span> e2))
   in
   let decl_to_str = function
-    | <span data-count="47">D</span>Let (is_rec, id, (EFun _ as e)) -&gt;
+    | <span data-count="61">D</span>Let (is_rec, id, (EFun _ as e)) -&gt;
       let args, e = uncurry e in
-      <span data-count="47">l</span>et args =
+      <span data-count="61">l</span>et args =
         List.fold_left args ~init:"" ~f:(fun acc (id, ty) -&gt;
-          <span data-count="81">m</span>atch ty with
+          <span data-count="111">m</span>atch ty with
           | <span data-count="0">S</span>ome ty -&gt; acc ^ sprint<span data-count="0">f</span> "(%s : %s) " id (type_to_st<span data-count="0">r</span> ty)
-          | <span data-count="81">N</span>one -&gt; acc ^ sprint<span data-count="81">f</span> "%s " id)
+          | <span data-count="111">N</span>one -&gt; acc ^ sprint<span data-count="111">f</span> "%s " id)
       in
-      <span data-count="47">l</span>et rec_flag =
+      <span data-count="61">l</span>et rec_flag =
         match is_rec with
-        | <span data-count="4">R</span>ec -&gt; " rec"
-        | <span data-count="43">N</span>onRec -&gt; ""
+        | <span data-count="6">R</span>ec -&gt; " rec"
+        | <span data-count="55">N</span>onRec -&gt; ""
       in
-      sprintf "\nlet%s %s %s= %s" rec_flag id args (expr_to_st<span data-count="47">r</span> e)
-    | <span data-count="25">D</span>Let (is_rec, id, e) -&gt;
+      sprintf "\nlet%s %s %s= %s" rec_flag id args (expr_to_st<span data-count="61">r</span> e)
+    | <span data-count="36">D</span>Let (is_rec, id, e) -&gt;
       let rec_flag =
         match is_rec with
         | <span data-count="0">R</span>ec -&gt; " rec"
-        | <span data-count="25">N</span>onRec -&gt; ""
+        | <span data-count="36">N</span>onRec -&gt; ""
       in
-      sprintf "\nlet%s %s = %s" rec_flag id (expr_to_st<span data-count="25">r</span> e)
+      sprintf "\nlet%s %s = %s" rec_flag id (expr_to_st<span data-count="36">r</span> e)
     | <span data-count="5">D</span>MutualLet (_, decls) -&gt;
       List.fold_left decls ~init:"" ~f:(fun acc (id, e) -&gt;
         <span data-count="10">i</span>f String.is_empty acc

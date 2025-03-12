@@ -323,28 +323,28 @@ open Common
 open Common.Counter_Monad
 open Common.Middleend_Common
 
-let gen_name = gen_nam<span data-count="31">e</span> "ll"
+let gen_name = gen_nam<span data-count="54">e</span> "ll"
 
 let get_bindings prog =
-  <span data-count="34">L</span>ist.fold
+  <span data-count="94">L</span>ist.fold
     prog
-    ~init:(Set.empt<span data-count="34">y</span> (module String))
+    ~init:(Set.empt<span data-count="94">y</span> (module String))
     ~f:(fun acc decl -&gt;
-      <span data-count="52">m</span>atch decl with
-      | <span data-count="48">D</span>Let (_, id, _) -&gt; Set.add acc id
-      | <span data-count="4">D</span>MutualLet (_, decls) -&gt;
-        List.fold decls ~init:acc ~f:(fun acc (id, _) -&gt; <span data-count="8">S</span>et.add acc id))
+      <span data-count="222">m</span>atch decl with
+      | <span data-count="214">D</span>Let (_, id, _) -&gt; Set.add acc id
+      | <span data-count="8">D</span>MutualLet (_, decls) -&gt;
+        List.fold decls ~init:acc ~f:(fun acc (id, _) -&gt; <span data-count="16">S</span>et.add acc id))
 ;;
 
 let lift decl bindings =
-  <span data-count="34">l</span>et gen_name = gen_name bindings in
-  <span data-count="34">l</span>et rec lift_expr e lifted renames =
-    <span data-count="585">m</span>atch e with
-    | <span data-count="94">E</span>Const c -&gt; return (LLConst c, lifted)
-    | <span data-count="217">E</span>Var x -&gt;
+  <span data-count="94">l</span>et gen_name = gen_name bindings in
+  <span data-count="94">l</span>et rec lift_expr e lifted renames =
+    <span data-count="1646">m</span>atch e with
+    | <span data-count="269">E</span>Const c -&gt; return (LLConst c, lifted)
+    | <span data-count="606">E</span>Var x -&gt;
       (match Map.find renames x with
        | <span data-count="29">S</span>ome id -&gt; return (LLVar id, lifted)
-       | <span data-count="188">N</span>one -&gt; return (LLVar x, lifted))
+       | <span data-count="577">N</span>one -&gt; return (LLVar x, lifted))
     | <span data-count="3">E</span>Tuple (e1, e2, es) -&gt;
       let* e1, lifted = lift_exp<span data-count="3">r</span> e1 lifted renames in
       <span data-count="3">l</span>et* e2, lifted = lift_exp<span data-count="3">r</span> e2 lifted renames in
@@ -369,11 +369,11 @@ let lift decl bindings =
             <span data-count="4">r</span>eturn (e :: es, lifted))
       in
       <span data-count="2">r</span>eturn (LLList (List.re<span data-count="2">v</span> es), lifted)
-    | <span data-count="11">E</span>Branch (cond, t, f) -&gt;
-      let* cond, lifted = lift_exp<span data-count="11">r</span> cond lifted renames in
-      <span data-count="11">l</span>et* t, lifted = lift_exp<span data-count="11">r</span> t lifted renames in
-      <span data-count="11">l</span>et* f, lifted = lift_exp<span data-count="11">r</span> f lifted renames in
-      <span data-count="11">r</span>eturn (LLBranch (cond, t, f), lifted)
+    | <span data-count="30">E</span>Branch (cond, t, f) -&gt;
+      let* cond, lifted = lift_exp<span data-count="30">r</span> cond lifted renames in
+      <span data-count="30">l</span>et* t, lifted = lift_exp<span data-count="30">r</span> t lifted renames in
+      <span data-count="30">l</span>et* f, lifted = lift_exp<span data-count="30">r</span> f lifted renames in
+      <span data-count="30">r</span>eturn (LLBranch (cond, t, f), lifted)
     | <span data-count="0">E</span>Match (e, cases) -&gt;
       let* e, lifted = lift_exp<span data-count="0">r</span> e lifted renames in
       <span data-count="0">l</span>et* cases, lifted =
@@ -399,55 +399,55 @@ let lift decl bindings =
       let renames = Map.update renames id ~f:(fun _ -&gt; <span data-count="20">n</span>ew_name) in
       <span data-count="20">l</span>et* e2, lifted = lift_exp<span data-count="20">r</span> e2 lifted renames in
       <span data-count="20">r</span>eturn (e2, lifted)
-    | <span data-count="10">E</span>LetIn (_, id, e1, e2) -&gt;
-      let* e1, lifted = lift_exp<span data-count="10">r</span> e1 lifted renames in
-      <span data-count="10">l</span>et* e2, lifted = lift_exp<span data-count="10">r</span> e2 lifted renames in
-      <span data-count="10">r</span>eturn (LLLetIn (id, e1, e2), lifted)
-    | <span data-count="14">E</span>Fun _ as f -&gt;
+    | <span data-count="73">E</span>LetIn (_, id, e1, e2) -&gt;
+      let* e1, lifted = lift_exp<span data-count="73">r</span> e1 lifted renames in
+      <span data-count="73">l</span>et* e2, lifted = lift_exp<span data-count="73">r</span> e2 lifted renames in
+      <span data-count="73">r</span>eturn (LLLetIn (id, e1, e2), lifted)
+    | <span data-count="28">E</span>Fun _ as f -&gt;
       let args, e = uncurry f in
-      <span data-count="14">l</span>et* new_name = gen_name in
-      <span data-count="14">l</span>et* e, lifted = lift_exp<span data-count="14">r</span> e lifted renames in
-      <span data-count="14">l</span>et lifted = LLDLet (NonRec, new_name, args, e) :: lifted in
+      <span data-count="28">l</span>et* new_name = gen_name in
+      <span data-count="28">l</span>et* e, lifted = lift_exp<span data-count="28">r</span> e lifted renames in
+      <span data-count="28">l</span>et lifted = LLDLet (NonRec, new_name, args, e) :: lifted in
       return (LLVar new_name, lifted)
-    | <span data-count="214">E</span>App (e1, e2) -&gt;
-      let* e1, lifted = lift_exp<span data-count="214">r</span> e1 lifted renames in
-      <span data-count="214">l</span>et* e2, lifted = lift_exp<span data-count="214">r</span> e2 lifted renames in
-      <span data-count="214">r</span>eturn (LLApp (e1, e2), lifted)
+    | <span data-count="615">E</span>App (e1, e2) -&gt;
+      let* e1, lifted = lift_exp<span data-count="615">r</span> e1 lifted renames in
+      <span data-count="615">l</span>et* e2, lifted = lift_exp<span data-count="615">r</span> e2 lifted renames in
+      <span data-count="615">r</span>eturn (LLApp (e1, e2), lifted)
   in
   let rec lift_decl decl lifted renames =
-    <span data-count="42">m</span>atch decl with
-    | <span data-count="19">D</span>Let (is_rec, id, (EFun _ as f)) -&gt;
+    <span data-count="106">m</span>atch decl with
+    | <span data-count="58">D</span>Let (is_rec, id, (EFun _ as f)) -&gt;
       let args, e = uncurry f in
-      <span data-count="19">l</span>et* e, lifted = lift_exp<span data-count="19">r</span> e lifted renames in
-      <span data-count="19">r</span>eturn (LLDLet (is_rec, id, args, e), lifted)
-    | <span data-count="19">D</span>Let (is_rec, id, e) -&gt;
-      let* e, lifted = lift_exp<span data-count="19">r</span> e lifted renames in
-      <span data-count="19">r</span>eturn (LLDLet (is_rec, id, [], e), lifted)
-    | <span data-count="4">D</span>MutualLet (_, decls) -&gt;
+      <span data-count="58">l</span>et* e, lifted = lift_exp<span data-count="58">r</span> e lifted renames in
+      <span data-count="58">r</span>eturn (LLDLet (is_rec, id, args, e), lifted)
+    | <span data-count="42">D</span>Let (is_rec, id, e) -&gt;
+      let* e, lifted = lift_exp<span data-count="42">r</span> e lifted renames in
+      <span data-count="42">r</span>eturn (LLDLet (is_rec, id, [], e), lifted)
+    | <span data-count="6">D</span>MutualLet (_, decls) -&gt;
       let* decls, lifted =
-        List.fold_righ<span data-count="4">t</span>
+        List.fold_righ<span data-count="6">t</span>
           decls
-          ~init:(retur<span data-count="4">n</span> ([], []))
+          ~init:(retur<span data-count="6">n</span> ([], []))
           ~f:(fun (id, e) acc -&gt;
-            <span data-count="8">l</span>et* decls, lifted = acc in
-            <span data-count="8">l</span>et* lifted = lift_dec<span data-count="8">l</span> (DLet (Rec, id, e)) lifted renames in
-            <span data-count="8">m</span>atch lifted with
-            | <span data-count="8">L</span>LDLet (_, id, args, e), lifted -&gt; return ((id, args, e) :: decls, lifted)
+            <span data-count="12">l</span>et* decls, lifted = acc in
+            <span data-count="12">l</span>et* lifted = lift_dec<span data-count="12">l</span> (DLet (Rec, id, e)) lifted renames in
+            <span data-count="12">m</span>atch lifted with
+            | <span data-count="12">L</span>LDLet (_, id, args, e), lifted -&gt; return ((id, args, e) :: decls, lifted)
             | <span data-count="0">_</span> -&gt; fail "Unreachable")
       in
-      <span data-count="4">r</span>eturn (LLDMutualLet decls, lifted)
+      <span data-count="6">r</span>eturn (LLDMutualLet decls, lifted)
   in
-  lift_decl decl [] (Map.empt<span data-count="34">y</span> (module String))
+  lift_decl decl [] (Map.empt<span data-count="94">y</span> (module String))
 ;;
 
 let lift_program prog =
-  <span data-count="28">l</span>et helper prog =
-    <span data-count="28">L</span>ist.fold_left prog ~init:(retur<span data-count="28">n</span> []) ~f:(fun acc decl -&gt;
-      <span data-count="34">l</span>et* acc = acc in
-      <span data-count="34">l</span>et* decl, lifted = lif<span data-count="34">t</span> decl (get_binding<span data-count="34">s</span> prog) in
-      <span data-count="34">r</span>eturn (List.conca<span data-count="34">t</span> [ acc; List.re<span data-count="34">v</span> (decl :: lifted) ]))
+  <span data-count="51">l</span>et helper prog =
+    <span data-count="51">L</span>ist.fold_left prog ~init:(retur<span data-count="51">n</span> []) ~f:(fun acc decl -&gt;
+      <span data-count="94">l</span>et* acc = acc in
+      <span data-count="94">l</span>et* decl, lifted = lif<span data-count="94">t</span> decl (get_binding<span data-count="94">s</span> prog) in
+      <span data-count="94">r</span>eturn (List.conca<span data-count="94">t</span> [ acc; List.re<span data-count="94">v</span> (decl :: lifted) ]))
   in
-  run (helpe<span data-count="28">r</span> prog)
+  run (helpe<span data-count="51">r</span> prog)
 ;;
 </code></pre>
       </div>
