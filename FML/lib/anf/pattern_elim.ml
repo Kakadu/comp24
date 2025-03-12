@@ -13,10 +13,9 @@ type value_to_get =
   | Other
 
 let get_element e = function
-  | Tuple i ->
-    Pe_EApp (Pe_EApp (Pe_EIdentifier "#tuple_element", e), Pe_EConst (Pe_Cint i))
-  | Cons_head -> Pe_EApp (Pe_EIdentifier "#list_head", e)
-  | Cons_tail -> Pe_EApp (Pe_EIdentifier "#list_tail", e)
+  | Tuple i -> Pe_EApp (Pe_EApp (Pe_EIdentifier "tuple_element", e), Pe_EConst (Pe_Cint i))
+  | Cons_head -> Pe_EApp (Pe_EIdentifier "list_head", e)
+  | Cons_tail -> Pe_EApp (Pe_EIdentifier "list_tail", e)
   | Other -> e
 ;;
 
@@ -41,12 +40,12 @@ let check_pattern expr pat =
       @@ List.mapi pl ~f:(fun i p -> helper true (get_element expr (Tuple i)) p)
     | PCons (l, r) ->
       let check =
-        Pe_EApp (Pe_EIdentifier "not", Pe_EApp (Pe_EIdentifier "#is_empty", expr))
+        Pe_EApp (Pe_EIdentifier "not", Pe_EApp (Pe_EIdentifier "is_empty", expr))
       in
       let l = helper true (get_element expr Cons_head) l in
       let r = helper false (get_element expr Cons_tail) r in
       if add then (check :: l) @ r else l @ r
-    | PNill -> [ Pe_EApp (Pe_EIdentifier "#is_empty", expr) ]
+    | PNill -> [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
     | _ -> []
   in
   helper true expr pat
@@ -147,7 +146,7 @@ let rec pe_expr =
      | 1 ->
        let pat = List.hd_exn pat_list in
        let to_match = Pe_EIdentifier (List.hd_exn args_to_match) in
-       let case_expr = make_case to_match pat new_body (Pe_EIdentifier "#fail_match") in
+       let case_expr = make_case to_match pat new_body (Pe_EIdentifier "fail_match") in
        return @@ Pe_EFun (new_args, case_expr)
      | _ ->
        let pat = PTuple pat_list in
@@ -157,7 +156,7 @@ let rec pe_expr =
        in
        let* fresh_name = fresh >>| get_id in
        let case_expr =
-         make_case (Pe_EIdentifier fresh_name) pat new_body (Pe_EIdentifier "#fail_match")
+         make_case (Pe_EIdentifier fresh_name) pat new_body (Pe_EIdentifier "fail_match")
        in
        return @@ Pe_EFun (new_args, Pe_ELet (NoRec, fresh_name, to_match, case_expr)))
   | EMatch (e_last, case_list) ->
@@ -177,12 +176,12 @@ let rec pe_expr =
      | _ ->
        (match e1 with
         | Pe_EIdentifier _ ->
-          let case_expr = make_case e1 pat e2 (Pe_EIdentifier "#fail_match") in
+          let case_expr = make_case e1 pat e2 (Pe_EIdentifier "fail_match") in
           return case_expr
         | _ ->
           let* fresh_name = fresh >>| get_id in
           let case_expr =
-            make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "#fail_match")
+            make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match")
           in
           return @@ Pe_ELet (NoRec, fresh_name, e1, case_expr)))
   | ELetIn (Rec, pat, e1, e2) ->
@@ -194,7 +193,7 @@ let rec pe_expr =
      | _ ->
        let* fresh_name = fresh >>| get_id in
        let case_expr =
-         make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "#fail_match")
+         make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match")
        in
        return @@ Pe_ELet (Rec, fresh_name, e1, case_expr))
 
@@ -217,7 +216,7 @@ and pe_match to_match = function
     else
       let* match_e = pe_match to_match tl in
       return @@ make_condition checks let_in match_e
-  | _ -> return @@ Pe_EIdentifier "#fail_match"
+  | _ -> return @@ Pe_EIdentifier "fail_match"
 ;;
 
 let pe_declaration = function

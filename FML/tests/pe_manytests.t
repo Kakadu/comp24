@@ -104,22 +104,22 @@
   ((f 1), (f true))
 
   $ ./pe_runner.exe < manytests/typed/011mapcps.ml
-  let rec map = (fun f xs k -> if (#is_empty xs)
+  let rec map = (fun f xs k -> if (is_empty xs)
   then (k [])
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   (((map f) tl) (fun tl -> (k ((f h)::tl))))
-  else #fail_match)
+  else fail_match)
   
-  let rec iter = (fun f xs -> if (#is_empty xs)
+  let rec iter = (fun f xs -> if (is_empty xs)
   then ()
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   let w = (f h) in
   ((iter f) tl)
-  else #fail_match)
+  else fail_match)
   
   let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
   $ ./pe_runner.exe < manytests/typed/012fibcps.ml
@@ -131,13 +131,13 @@
   $ ./pe_runner.exe < manytests/typed/013foldfoldr.ml
   let id = (fun x -> x)
   
-  let rec fold_right = (fun f acc xs -> if (#is_empty xs)
+  let rec fold_right = (fun f acc xs -> if (is_empty xs)
   then acc
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   ((f h) (((fold_right f) acc) tl))
-  else #fail_match)
+  else fail_match)
   
   let foldl = (fun f a bs -> ((((fold_right (fun b g x -> (g ((f x) b)))) id) bs) a))
   
@@ -146,20 +146,20 @@
   $ ./pe_runner.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f x -> ((f (fix f)) x))
   
-  let map = (fun f p -> let a = ((#tuple_element p) 0) in
-  let b = ((#tuple_element p) 1) in
+  let map = (fun f p -> let a = ((tuple_element p) 0) in
+  let b = ((tuple_element p) 1) in
   ((f a), (f b)))
   
   let fixpoly = (fun l -> ((fix (fun self l -> ((map (fun li x -> ((li (self l)) x))) l))) l))
   
-  let feven = (fun p n -> let e = ((#tuple_element p) 0) in
-  let o = ((#tuple_element p) 1) in
+  let feven = (fun p n -> let e = ((tuple_element p) 0) in
+  let o = ((tuple_element p) 1) in
   if ((( = ) n) 0)
   then 1
   else (o ((( - ) n) 1)))
   
-  let fodd = (fun p n -> let e = ((#tuple_element p) 0) in
-  let o = ((#tuple_element p) 1) in
+  let fodd = (fun p n -> let e = ((tuple_element p) 0) in
+  let o = ((tuple_element p) 1) in
   if ((( = ) n) 0)
   then 0
   else (e ((( - ) n) 1)))
@@ -175,86 +175,86 @@
   
   let main = let () = (print_int (modd 1)) in
   let () = (print_int (meven 2)) in
-  let even = ((#tuple_element tie) 0) in
-  let odd = ((#tuple_element tie) 1) in
+  let even = ((tuple_element tie) 0) in
+  let odd = ((tuple_element tie) 1) in
   let () = (print_int (odd 3)) in
   let () = (print_int (even 4)) in
   0
 
   $ ./pe_runner.exe < manytests/typed/016lists.ml
-  let rec length = (fun xs -> if (#is_empty xs)
+  let rec length = (fun xs -> if (is_empty xs)
   then 0
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   ((( + ) 1) (length tl))
-  else #fail_match)
+  else fail_match)
   
-  let length_tail = let rec helper = (fun acc xs -> if (#is_empty xs)
+  let length_tail = let rec helper = (fun acc xs -> if (is_empty xs)
   then acc
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   ((helper ((( + ) acc) 1)) tl)
-  else #fail_match) in
+  else fail_match) in
   (helper 0)
   
-  let rec map = (fun f xs -> if (#is_empty xs)
+  let rec map = (fun f xs -> if (is_empty xs)
   then []
-  else if ((( && ) (not (#is_empty xs))) (#is_empty (#list_tail xs)))
-  then let a = (#list_head xs) in
+  else if ((( && ) (not (is_empty xs))) (is_empty (list_tail xs)))
+  then let a = (list_head xs) in
   ((f a)::[])
-  else if ((( && ) (not (#is_empty xs))) (#is_empty (#list_tail (#list_tail xs))))
-  then let a = (#list_head xs) in
-  let b = (#list_head (#list_tail xs)) in
+  else if ((( && ) (not (is_empty xs))) (is_empty (list_tail (list_tail xs))))
+  then let a = (list_head xs) in
+  let b = (list_head (list_tail xs)) in
   ((f a)::((f b)::[]))
-  else if ((( && ) (not (#is_empty xs))) (#is_empty (#list_tail (#list_tail (#list_tail xs)))))
-  then let a = (#list_head xs) in
-  let b = (#list_head (#list_tail xs)) in
-  let c = (#list_head (#list_tail (#list_tail xs))) in
+  else if ((( && ) (not (is_empty xs))) (is_empty (list_tail (list_tail (list_tail xs)))))
+  then let a = (list_head xs) in
+  let b = (list_head (list_tail xs)) in
+  let c = (list_head (list_tail (list_tail xs))) in
   ((f a)::((f b)::((f c)::[])))
-  else if (not (#is_empty xs))
-  then let a = (#list_head xs) in
-  let b = (#list_head (#list_tail xs)) in
-  let c = (#list_head (#list_tail (#list_tail xs))) in
-  let d = (#list_head (#list_tail (#list_tail (#list_tail xs)))) in
-  let tl = (#list_tail (#list_tail (#list_tail (#list_tail xs)))) in
+  else if (not (is_empty xs))
+  then let a = (list_head xs) in
+  let b = (list_head (list_tail xs)) in
+  let c = (list_head (list_tail (list_tail xs))) in
+  let d = (list_head (list_tail (list_tail (list_tail xs)))) in
+  let tl = (list_tail (list_tail (list_tail (list_tail xs)))) in
   ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
-  else #fail_match)
+  else fail_match)
   
-  let rec append = (fun xs ys -> if (#is_empty xs)
+  let rec append = (fun xs ys -> if (is_empty xs)
   then ys
-  else if (not (#is_empty xs))
-  then let x = (#list_head xs) in
-  let xs = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let x = (list_head xs) in
+  let xs = (list_tail xs) in
   (x::((append xs) ys))
-  else #fail_match)
+  else fail_match)
   
-  let concat = let rec helper = (fun xs -> if (#is_empty xs)
+  let concat = let rec helper = (fun xs -> if (is_empty xs)
   then []
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   ((append h) (helper tl))
-  else #fail_match) in
+  else fail_match) in
   helper
   
-  let rec iter = (fun f xs -> if (#is_empty xs)
+  let rec iter = (fun f xs -> if (is_empty xs)
   then ()
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   let () = (f h) in
   ((iter f) tl)
-  else #fail_match)
+  else fail_match)
   
-  let rec cartesian = (fun xs ys -> if (#is_empty xs)
+  let rec cartesian = (fun xs ys -> if (is_empty xs)
   then []
-  else if (not (#is_empty xs))
-  then let h = (#list_head xs) in
-  let tl = (#list_tail xs) in
+  else if (not (is_empty xs))
+  then let h = (list_head xs) in
+  let tl = (list_tail xs) in
   ((append ((map (fun a -> (h, a))) ys)) ((cartesian tl) ys))
-  else #fail_match)
+  else fail_match)
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in
