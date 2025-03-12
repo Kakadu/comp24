@@ -212,5 +212,9 @@ let%expect_test "test typexpr 2" =
 let%expect_test "test redefine operator" =
   test_expr "let (+) a b = a - b in let (!) m = m in 5 + !4";
   [%expect
-    {| (let ( + ) a b = ((( - ) a) b) in (let ( ! ) m = m in ((( + ) 5) ((! 4))))) |}]
+    {|
+    (let ( + ) a b = ((( - ) a) b) in
+     (let ( ! ) m = m in
+     ((( + ) 5) ((! 4)))))
+    |}]
 ;;

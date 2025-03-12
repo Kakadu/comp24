@@ -25,6 +25,7 @@
 
 (cram
  (deps
+  ./run_lambda_lifting.exe
   ./run_remove_patterns.exe
   ./run_alpha_conversion.exe
   ./run_closure_conversion.exe

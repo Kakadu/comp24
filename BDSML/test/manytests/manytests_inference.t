@@ -2,7 +2,7 @@
   val fac : int -> int
   val main : int
   $ dune exec manytests_inference < manytests_link/typed/002fac.ml
-  val fac_cps : int -> (int -> 'cb) -> 'cb
+  val fac_cps : int -> (int -> 'bb) -> 'bb
   val main : int
   $ dune exec manytests_inference < manytests_link/typed/003fib.ml
   val fib_acc : int -> int -> int -> int

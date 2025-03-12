@@ -173,10 +173,13 @@ let rec infer_if env cond bthen belse =
   let* else_branch_subs, res_type =
     match belse with
     | Some exp ->
+      let env = TypeEnv.apply s2 env in
       let* s4, t3 = infer_expression env exp in
       let+ s5 = Subst.unify t2 t3 in
       [ s4; s5 ], Subst.apply s5 t2
-    | None -> return ([], t2)
+    | None ->
+      let+ s4 = Subst.unify t2 (TBase TUnit) in
+      [ s4 ], Subst.apply s4 t2
   in
   let+ united_sub = Subst.compose_all @@ else_branch_subs @ [ s2; s1 ] in
   united_sub, res_type
@@ -256,13 +259,14 @@ and infer_apply env left right =
   sub, ty
 
 and infer_tuple env l =
-  let+ sub, tys =
+  let+ sub, tys, _ =
     fold_left
-      (fun (sub, tys) exp ->
+      (fun (sub, tys, env) exp ->
         let* sub1, ty1 = infer_expression env exp in
+        let env = TypeEnv.apply sub1 env in
         let+ sub = Subst.compose sub1 sub in
-        sub, ty1 :: tys)
-      (return (Subst.empty, []))
+        sub, ty1 :: tys, env)
+      (return (Subst.empty, [], env))
       l
   in
   sub, TTuple (List.rev tys)
@@ -316,6 +320,7 @@ and infer_cases env cases =
 
 and infer_match env exp cases =
   let* sub, ty = infer_expression env exp in
+  let env = TypeEnv.apply sub env in
   let* sub2, ty1, ty2 = infer_cases env cases in
   let* sub3 = Subst.unify ty ty1 in
   let+ sub = Subst.compose_all [ sub; sub2; sub3 ] in

@@ -30,8 +30,8 @@ let%expect_test "test wrong if inference" =
 ;;
 
 let%expect_test "test if without else inference" =
-  test "if true then 4";
-  [%expect {| int |}]
+  test "fun a -> if true then a";
+  [%expect {| unit -> unit |}]
 ;;
 
 let%expect_test "test fun inference" =
@@ -264,20 +264,17 @@ let%expect_test "test patter matching" =
 
 let%expect_test "test patter matching wrong left type" =
   test {|match 4 with 4 -> 4| a -> a | _ -> 'c'|};
-  [%expect {|
-    ErrorType infering error: failed unification of types int and char |}]
+  [%expect {| ErrorType infering error: failed unification of types int and char |}]
 ;;
 
 let%expect_test "test patter matching wrong right type" =
   test {|match 4 with true -> 4| a -> a | _ -> 4|};
-  [%expect {|
-    ErrorType infering error: failed unification of types int and bool |}]
+  [%expect {| ErrorType infering error: failed unification of types int and bool |}]
 ;;
 
 let%expect_test "test patter matching wrong right type and expr" =
   test {|match 4 with true -> 4 | _ -> 4|};
-  [%expect {|
-    ErrorType infering error: failed unification of types int and bool |}]
+  [%expect {| ErrorType infering error: failed unification of types int and bool |}]
 ;;
 
 let%expect_test "test patter matching tuple" =
@@ -288,8 +285,7 @@ let%expect_test "test patter matching tuple" =
 
 let%expect_test "test patter matching tuple" =
   test {|fun a -> match a with (m: bool) -> m|};
-  [%expect {|
-    bool -> bool |}]
+  [%expect {| bool -> bool |}]
 ;;
 
 let%expect_test "test patter matching tuple" =
@@ -300,8 +296,7 @@ let%expect_test "test patter matching tuple" =
 
 let%expect_test "test function" =
   test {|function | (a: cool_type) -> 3 | _ -> 4|};
-  [%expect {|
-    cool_type -> int |}]
+  [%expect {| cool_type -> int |}]
 ;;
 
 let%expect_test "test fun with pattern" =
@@ -381,9 +376,30 @@ let%expect_test "test poly inference" =
     |}]
 ;;
 
-let%expect_test "test poly inference" =
+let%expect_test "test if env update" =
   test {|
     let f a b = if a=b then b=a else true
+  |};
+  [%expect {| val f : 'o -> 'o -> bool |}]
+;;
+
+let%expect_test "test if env update 2" =
+  test {|
+    let f a b = if true then a=b else b=a
+  |};
+  [%expect {| val f : 'o -> 'o -> bool |}]
+;;
+
+let%expect_test "test tuple env update" =
+  test {|
+    let f a b = a=b, b=a
+  |};
+  [%expect {| val f : 'o -> 'o -> (bool * bool) |}]
+;;
+
+let%expect_test "test match env update" =
+  test {|
+    let f a b = match a=b with | _ -> b=a
   |};
   [%expect {| val f : 'o -> 'o -> bool |}]
 ;;

@@ -17,7 +17,7 @@
    0)));;
   $ ../middleend/run_to_anf.exe run_to_anf < manytests_link/typed/002fac.ml
   Types before middleend:
-  val fac_cps : int -> (int -> 'cb) -> 'cb
+  val fac_cps : int -> (int -> 'bb) -> 'bb
   val main : int
   
   Types after anf:

@@ -1,4 +1,4 @@
 (library
  (name typing)
  (public_name BDSML.Typing)
- (libraries base BDSML.Parser))
+ (libraries base BDSML.Parser BDSML.Utils))
