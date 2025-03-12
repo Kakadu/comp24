@@ -148,7 +148,7 @@ let%expect_test _ =
   [%expect
     {|
     let ll_2 cont n_0 res = (cont (( * ) n_0 res))
-    let rec ll_helper_1 n_0 cont =
+    let ll_helper_1 n_0 cont =
       if (( <= ) n_0 1)
       then (cont 1)
       else (ll_helper_1 (( - ) n_0 1) (ll_2 cont n_0))
@@ -172,7 +172,7 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec ll_helper_1 acc n_0 =
+    let ll_helper_1 acc n_0 =
       if (( <= ) n_0 1)
       then 1
       else (ll_helper_1 (( * ) acc n_0) (( - ) n_0 1))
@@ -226,11 +226,11 @@ let%expect_test _ =
     |};
   [%expect
     {|
-    let rec map f list =
-      if (not (ml_list_is_empty list))
+    let map f list =
+      if (not (`list_is_empty list))
       then
-        let hd = (ml_list_hd list) in
-        let tl = (ml_list_tl list) in
+        let hd = (`list_hd list) in
+        let tl = (`list_tl list) in
         (( :: ) (f hd) (map f tl))
       else []
     |}]
@@ -293,7 +293,7 @@ let%expect_test _ =
   |};
   [%expect
     {|
-    let rec ll_helper_1 x acc n_0 =
+    let ll_helper_1 x acc n_0 =
       if (( = ) n_0 0)
       then acc
       else let n_1 = n_0 in
@@ -374,31 +374,6 @@ let%expect_test _ =
     let main = let one = 1 in
       let f1 = ll_f1_3 in
       let f2 = __var_ll_2 in
-      ()
-    |}]
-;;
-
-let%expect_test _ =
-  test_ll
-    {|
-  let main = 
-      let () = println_int (( + ) 42 42) in
-      let (+) a b = a - b in
-      let () = println_int (( + ) 42 42) in
-      let println_int x = println_int (x + 1) in
-      let () = println_int ((+) 42 42) in
-      ()
-  |};
-  [%expect
-    {|
-    let ll___ml_add_2 a b = (( - ) a b)
-    let ll___ml_println_int_4 __ml_add x = (println_int (__ml_add x 1))
-    let main =
-      let () = (println_int (( + ) 42 42)) in
-      let __ml_add = ll___ml_add_2 in
-      let () = (println_int (__ml_add 42 42)) in
-      let __ml_println_int = ll___ml_println_int_4 in
-      let () = (__ml_println_int __ml_add (__ml_add 42 42)) in
       ()
     |}]
 ;;

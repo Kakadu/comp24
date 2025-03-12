@@ -28,11 +28,10 @@
   ppx_deriving
   ppx_expect
   qcheck
-  stdio
   ppx_deriving_qcheck
   (ppx_inline_test :with-test)
   (odoc :with-doc)
   (ocamlformat :build)
-  ; (llvm (= "16.0.6+nnp"))
+  (llvm (= "16.0.6+nnp"))
   )
  (tags ()))

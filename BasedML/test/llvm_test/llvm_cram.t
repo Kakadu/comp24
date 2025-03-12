@@ -39,8 +39,6 @@ Other
   @land_ml_glob_llvm = global i64 0
   @lor_ml_glob_llvm = global i64 0
   @mlrt_create_cons_glob_llvm = global i64 0
-  @mlrt_compact_glob_llvm = global i64 0
-  @mlrt_print_gc_info_glob_llvm = global i64 0
   @ll_0_glob_llvm = global i64 0
   @fact_cps_0_glob_llvm = global i64 0
   @ll_1_glob_llvm = global i64 0
@@ -52,43 +50,38 @@ Other
   
   define i64 @init_llvm() {
   entry:
-    %0 = call i64 (i64, ...) @mlrt_handle_global_vars(i64 26, i64 ptrtoint (ptr @unit_list_0_glob_llvm to i64), i64 ptrtoint (ptr @print_fac_0_glob_llvm to i64), i64 ptrtoint (ptr @map_1_glob_llvm to i64), i64 ptrtoint (ptr @ll_2_glob_llvm to i64), i64 ptrtoint (ptr @map_0_glob_llvm to i64), i64 ptrtoint (ptr @ll_1_glob_llvm to i64), i64 ptrtoint (ptr @fact_cps_0_glob_llvm to i64), i64 ptrtoint (ptr @ll_0_glob_llvm to i64), i64 ptrtoint (ptr @mlrt_print_gc_info_glob_llvm to i64), i64 ptrtoint (ptr @mlrt_compact_glob_llvm to i64), i64 ptrtoint (ptr @mlrt_create_cons_glob_llvm to i64), i64 ptrtoint (ptr @lor_ml_glob_llvm to i64), i64 ptrtoint (ptr @land_ml_glob_llvm to i64), i64 ptrtoint (ptr @print_int_glob_llvm to i64), i64 ptrtoint (ptr @pneq_ml_glob_llvm to i64), i64 ptrtoint (ptr @neq_ml_glob_llvm to i64), i64 ptrtoint (ptr @peq_ml_glob_llvm to i64), i64 ptrtoint (ptr @eq_ml_glob_llvm to i64), i64 ptrtoint (ptr @ge_ml_glob_llvm to i64), i64 ptrtoint (ptr @g_ml_glob_llvm to i64), i64 ptrtoint (ptr @le_ml_glob_llvm to i64), i64 ptrtoint (ptr @l_ml_glob_llvm to i64), i64 ptrtoint (ptr @div_mlint_glob_llvm to i64), i64 ptrtoint (ptr @mult_mlint_glob_llvm to i64), i64 ptrtoint (ptr @minus_mlint_glob_llvm to i64), i64 ptrtoint (ptr @plus_mlint_glob_llvm to i64))
-    %1 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @plus_mlint to i64), i64 2)
-    store i64 %1, ptr @plus_mlint_glob_llvm, align 4
-    %2 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @minus_mlint to i64), i64 2)
-    store i64 %2, ptr @minus_mlint_glob_llvm, align 4
-    %3 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mult_mlint to i64), i64 2)
-    store i64 %3, ptr @mult_mlint_glob_llvm, align 4
-    %4 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @div_mlint to i64), i64 2)
-    store i64 %4, ptr @div_mlint_glob_llvm, align 4
-    %5 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @l_ml to i64), i64 2)
-    store i64 %5, ptr @l_ml_glob_llvm, align 4
-    %6 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @le_ml to i64), i64 2)
-    store i64 %6, ptr @le_ml_glob_llvm, align 4
-    %7 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @g_ml to i64), i64 2)
-    store i64 %7, ptr @g_ml_glob_llvm, align 4
-    %8 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @ge_ml to i64), i64 2)
-    store i64 %8, ptr @ge_ml_glob_llvm, align 4
-    %9 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @eq_ml to i64), i64 2)
-    store i64 %9, ptr @eq_ml_glob_llvm, align 4
-    %10 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @peq_ml to i64), i64 2)
-    store i64 %10, ptr @peq_ml_glob_llvm, align 4
-    %11 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @neq_ml to i64), i64 2)
-    store i64 %11, ptr @neq_ml_glob_llvm, align 4
-    %12 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @pneq_ml to i64), i64 2)
-    store i64 %12, ptr @pneq_ml_glob_llvm, align 4
-    %13 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @print_int to i64), i64 1)
-    store i64 %13, ptr @print_int_glob_llvm, align 4
-    %14 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @land_ml to i64), i64 2)
-    store i64 %14, ptr @land_ml_glob_llvm, align 4
-    %15 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @lor_ml to i64), i64 2)
-    store i64 %15, ptr @lor_ml_glob_llvm, align 4
-    %16 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mlrt_create_cons to i64), i64 2)
-    store i64 %16, ptr @mlrt_create_cons_glob_llvm, align 4
-    %17 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mlrt_compact to i64), i64 1)
-    store i64 %17, ptr @mlrt_compact_glob_llvm, align 4
-    %18 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mlrt_print_gc_info to i64), i64 1)
-    store i64 %18, ptr @mlrt_print_gc_info_glob_llvm, align 4
+    %0 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @plus_mlint to i64), i64 2)
+    store i64 %0, ptr @plus_mlint_glob_llvm, align 4
+    %1 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @minus_mlint to i64), i64 2)
+    store i64 %1, ptr @minus_mlint_glob_llvm, align 4
+    %2 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mult_mlint to i64), i64 2)
+    store i64 %2, ptr @mult_mlint_glob_llvm, align 4
+    %3 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @div_mlint to i64), i64 2)
+    store i64 %3, ptr @div_mlint_glob_llvm, align 4
+    %4 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @l_ml to i64), i64 2)
+    store i64 %4, ptr @l_ml_glob_llvm, align 4
+    %5 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @le_ml to i64), i64 2)
+    store i64 %5, ptr @le_ml_glob_llvm, align 4
+    %6 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @g_ml to i64), i64 2)
+    store i64 %6, ptr @g_ml_glob_llvm, align 4
+    %7 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @ge_ml to i64), i64 2)
+    store i64 %7, ptr @ge_ml_glob_llvm, align 4
+    %8 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @eq_ml to i64), i64 2)
+    store i64 %8, ptr @eq_ml_glob_llvm, align 4
+    %9 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @peq_ml to i64), i64 2)
+    store i64 %9, ptr @peq_ml_glob_llvm, align 4
+    %10 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @neq_ml to i64), i64 2)
+    store i64 %10, ptr @neq_ml_glob_llvm, align 4
+    %11 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @pneq_ml to i64), i64 2)
+    store i64 %11, ptr @pneq_ml_glob_llvm, align 4
+    %12 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @print_int to i64), i64 1)
+    store i64 %12, ptr @print_int_glob_llvm, align 4
+    %13 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @land_ml to i64), i64 2)
+    store i64 %13, ptr @land_ml_glob_llvm, align 4
+    %14 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @lor_ml to i64), i64 2)
+    store i64 %14, ptr @lor_ml_glob_llvm, align 4
+    %15 = call i64 @mlrt_create_empty_closure(i64 ptrtoint (ptr @mlrt_create_cons to i64), i64 2)
+    store i64 %15, ptr @mlrt_create_cons_glob_llvm, align 4
     ret i64 0
   }
   
@@ -135,12 +128,6 @@ Other
   declare i64 @mlrt_create_empty_closure(i64)
   
   declare i64 @mlrt_apply_args_to_closure(i64, i64, ...)
-  
-  declare i64 @mlrt_handle_global_vars(i64, ...)
-  
-  declare i64 @mlrt_compact(i64)
-  
-  declare i64 @mlrt_print_gc_info(i64)
   
   define i64 @main() {
   entry:
@@ -301,7 +288,7 @@ Operation/Function overide
   8
   35
   13
-  24
+  42
 
 Test struct and physic equal
   $ ./llvm_demo.exe << EOF
@@ -536,55 +523,3 @@ Some llcode demonstration
     %0 = call i64 @f_0(i64 5, i64 7)
     ret i64 %0
   }
-
-GC Tests
-  $ ./llvm_demo.exe << EOF
-  > let init_lst i =
-  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
-  >  help i []
-  > let dont_remove_live_vars =
-  >   let _ = print_gc_info () in
-  >   let big_lst = init_lst 1000 in
-  >   let _ = compact () in
-  >   let _ = print_gc_info () in
-  >   let hd :: tl= big_lst in
-  >   hd
-
-  $ ./riscv_run.sh out.ll
-  Memory used:    0x280/   0x400
-  Memory used:   0x6058/  0x8000
-
-
-  $ ./llvm_demo.exe << EOF
-  > let init_lst i =
-  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
-  >  help i []
-  > let auto_remove_useless_var =
-  >   let _ = print_gc_info () in
-  >   let big_lst = init_lst 1000 in
-  >   let _ = print_gc_info () in
-  >   let smaller_lst = init_lst 500 in 
-  >   let _ = print_gc_info () in
-  >   ()
-
-  $ ./riscv_run.sh out.ll
-  Memory used:    0x280/   0x400
-  Memory used:   0x6058/  0x8000
-  Memory used:   0x3178/ 0x10000
-
-  $ ./llvm_demo.exe << EOF
-  > let init_lst i =
-  >  let rec help i acc = if i < 0 then acc else help (i - 1) (i :: acc) in
-  >  help i []
-  > let hand_remove_useless_var =
-  >   let _ = print_gc_info () in
-  >   let big_lst = init_lst 1000 in
-  >   let _ = print_gc_info () in
-  >   let _ = compact () in 
-  >   let _ = print_gc_info () in
-  >   ()
-
-  $ ./riscv_run.sh out.ll
-  Memory used:    0x280/   0x400
-  Memory used:   0x6058/  0x8000
-  Memory used:    0x280/  0x8000

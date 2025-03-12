@@ -13,7 +13,7 @@ type cf_expr =
   | CFTuple of cf_expr * cf_expr * cf_expr list
   | CFList of cf_expr list
 
-and cf_definition = CFLet of rec_flag * id * id list * cf_expr
+and cf_definition = CFLet of id * id list * cf_expr
 
 type program = cf_definition list
 
@@ -24,9 +24,7 @@ let cf_if_else cond if_expr else_expr = CFIfElse (cond, if_expr, else_expr)
 let cf_let_in id body exp = CFLetIn (id, body, exp)
 let cf_tuple e1 e2 es = CFTuple (e1, e2, es)
 let cf_list exprs = CFList exprs
-let cf_def id args expr = CFLet (NonRec, id, args, expr)
-let cf_def_rec id args expr = CFLet (Rec, id, args, expr)
-let cf_def_flag f id args expr = CFLet (f, id, args, expr)
+let cf_def id args expr = CFLet (id, args, expr)
 
 open Base
 open Format
@@ -59,23 +57,11 @@ let rec pp_expr fmt = function
   | CFList xs -> pp_list ~op:"[" ~cl:"]" ~sep:"; " fmt pp_expr xs
 
 and pp_definition fmt = function
-  | CFLet (flag, id, args, e) ->
-    let let_ =
-      match flag with
-      | NonRec -> "let"
-      | Rec -> "let rec"
-    in
+  | CFLet (id, args, e) ->
     (match args with
-     | [] -> fprintf fmt "@[<2>@,%s %s =@ %a@]" let_ id pp_expr e
+     | [] -> fprintf fmt "@[<2>@,let %s =@ %a@]" id pp_expr e
      | _ ->
-       fprintf
-         fmt
-         "@[<2>@,%s %s %s =@ %a@]"
-         let_
-         id
-         (String.concat args ~sep:" ")
-         pp_expr
-         e)
+       fprintf fmt "@[<2>@,let %s %s =@ %a@]" id (String.concat args ~sep:" ") pp_expr e)
 ;;
 
 let pp_program fmt p = List.iter p ~f:(fun d -> fprintf fmt "%a@." pp_definition d)

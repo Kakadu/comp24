@@ -4,10 +4,6 @@
 
 #include "ml_runtimelib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 int64_t plus_mlint(int64_t x, int64_t y);
 int64_t minus_mlint(int64_t x, int64_t y);
 int64_t mult_mlint(int64_t x, int64_t y);
@@ -26,7 +22,3 @@ int64_t print_int(int64_t a);
 
 int64_t lor_ml(int64_t x, int64_t y);
 int64_t land_ml(int64_t x, int64_t y);
-
-#ifdef __cplusplus
-}
-#endif

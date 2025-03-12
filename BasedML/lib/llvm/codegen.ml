@@ -124,19 +124,6 @@ let build_mlrt_create_empty_closure
   return clos
 ;;
 
-let build_mlrt_handle_global_vars : Llvm.llbuilder -> (state, Llvm.llvalue) t =
-  fun builder ->
-  let globs =
-    Llvm.fold_left_globals
-      (fun lst glb -> Llvm.build_ptrtoint glb i64_t "" builder :: lst)
-      []
-      the_module
-  in
-  let globs = Llvm.const_int i64_t (List.length globs) :: globs in
-  let* clos = build_fun_call "mlrt_handle_global_vars" (Array.of_list globs) builder in
-  return clos
-;;
-
 let declare_and_define_rt_globs : Llvm.llbuilder -> (state, unit) t =
   fun builder ->
   let help : Stdlib_funs.std_fun -> (state, unit) t =
@@ -356,17 +343,10 @@ let create_main : Llvm.llvalue -> anf_prog -> (state, unit) t =
   *> return ()
 ;;
 
-let add_global_handling : Llvm.llvalue -> (state, unit) t =
-  fun init_fun ->
-  let eb = Llvm.entry_block init_fun in
-  let ebuilder = Llvm.builder_at the_context (Llvm.instr_begin eb) in
-  build_mlrt_handle_global_vars ebuilder *> return ()
-;;
-
 let start_compile : anf_prog -> (state, unit) t =
   fun prog ->
   let* init_fun = declare_all_std_funs () *> create_init () in
-  create_main init_fun prog >>= fun _ -> add_global_handling init_fun
+  create_main init_fun prog
 ;;
 
 let compile out_name prog =

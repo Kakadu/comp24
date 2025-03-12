@@ -1,4 +1,3 @@
-open AefjnvMl_lib
-open Common
-open Base_lib
+open AefjnvMl_lib.Ast
+open AefjnvMl_lib.Parser
 open Angstrom;;

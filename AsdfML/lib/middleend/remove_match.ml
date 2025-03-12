@@ -24,21 +24,18 @@ let and_ l r =
 let not_ e = SApp (SVar "not", e)
 
 let tuple_field lst idx =
-  s_app (s_app (s_var "ml_get_tuple_field") lst) (s_const (CInt idx))
+  s_app (s_app (s_var "`get_tuple_field") lst) (s_const (CInt idx))
 ;;
 
-let check_list_len lst len =
-  check_eq (s_app (s_var "ml_list_len") lst) (s_const (CInt len))
-;;
-let list_field lst idx = s_app (s_app (s_var "ml_list_field") lst) (s_const (CInt idx))
-let list_hd lst = s_app (s_var "ml_list_hd") lst
-let list_tl lst = s_app (s_var "ml_list_tl") lst
-let list_is_empty lst = s_app (s_var "ml_list_is_empty") lst
+let check_list_len lst len = check_eq (s_app (s_var "`list_len") lst) (s_const (CInt len))
+let list_field lst idx = s_app (s_app (s_var "`list_field") lst) (s_const (CInt idx))
+let list_hd lst = s_app (s_var "`list_hd") lst
+let list_tl lst = s_app (s_var "`list_tl") lst
+let list_is_empty lst = s_app (s_var "`list_is_empty") lst
 
 let pat_as_id = function
   | PIdent x -> x
   | PWild -> "_"
-  | PConst CUnit -> "()"
   | p -> failwith (Format.asprintf "remove_match: non-id pattern %a" Ast.pp_pattern p)
 ;;
 
@@ -108,7 +105,6 @@ let remove_match prog =
       let rec case_matched match_exp = function
         | PConst (CInt _ as c) | PConst (CBool _ as c) -> check_eq match_exp (SConst c)
         | PConst CNil -> list_is_empty match_exp
-        (* | PConst CUnit -> check_eq match_exp (SConst CUnit) *)
         | PTuple (x1, x2, xs) ->
           let xs = x1 :: x2 :: xs in
           List.foldi xs ~init:true_ ~f:(fun idx acc x ->

@@ -21,7 +21,7 @@ if [ ! -f "$SOURCE_FILE" ]; then
 fi
 
 # Compile the program
-clang++-16                      \
+clang-16                        \
    --target=riscv64-linux-gnu   \
    -L../../runtime/riscv        \
    -lmlstd                      \

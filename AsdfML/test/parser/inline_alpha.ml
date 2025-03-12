@@ -1,7 +1,3 @@
-(** Copyright 2024, Artem Khelmianov *)
-
-(** SPDX-License-Identifier: LGPL-2.1 *)
-
 open Base
 open Format
 open Lib
@@ -210,14 +206,11 @@ let%expect_test _ =
 ;;
 
 let%expect_test _ =
-  test
-    {|
+  test {|
   let ll_0 = fun x -> x
   let anf = 42
   let x = anf
   let y = ll_0 anf
-  let init_x = 42
-  let ml_list_hd _ = []
   |};
   [%expect
     {|
@@ -225,30 +218,5 @@ let%expect_test _ =
     let __var_anf = 42
     let x_0 = __var_anf
     let y = (__var_ll_0 __var_anf)
-    let __var_init_x = 42
-    let __var_ml_list_hd = (fun _ -> [])
-    |}]
-;;
-
-let%expect_test _ =
-  test
-    {|
-    let main = 
-      let () = println_int (( + ) 42 42) in
-      let (+) a b = a - b in
-      let () = println_int (( + ) 42 42) in
-      let println_int x = println_int (x + 1) in
-      let () = println_int ((+) 42 42) in
-      ()
-  |};
-  [%expect
-    {|
-    let main =
-      let () = (println_int (( + ) 42 42)) in
-      let __ml_add = (fun a b -> (( - ) a b)) in
-      let () = (println_int (__ml_add 42 42)) in
-      let __ml_println_int = (fun x -> (println_int (__ml_add x 1))) in
-      let () = (__ml_println_int (__ml_add 42 42)) in
-      ()
     |}]
 ;;

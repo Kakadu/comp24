@@ -9,9 +9,6 @@
   13
   21
   34
-  Warning: GC not implemented function mlrt_print_gc_info() don't have effect
-  Warning: GC not implemented function mlrt_compact() don't have effect
-  Warning: GC not implemented function mlrt_print_gc_info() don't have effect
 
   $ ln -s ../../runtime/riscv/libffi.so ../../runtime/riscv/libffi.so.8
   $ qemu-riscv64 -L /usr/riscv64-linux-gnu/ -E LD_LIBRARY_PATH=../../runtime/riscv ./fib_cps_riscv.elf
@@ -25,5 +22,3 @@
   13
   21
   34
-  Memory used:   0x1eb0/  0x4000
-  Memory used:     0x80/  0x4000

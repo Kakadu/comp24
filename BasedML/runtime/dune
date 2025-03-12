@@ -1,6 +1,6 @@
 (rule
  (targets libmlrt.so)
- (deps ml_runtimelib.c ml_runtimelib.h ml_gc.h)
+ (deps ml_runtimelib.c ml_runtimelib.h)
  (action
   (run
    clang-16

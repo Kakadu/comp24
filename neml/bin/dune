@@ -1,17 +1,2 @@
 (executable
- (public_name neml)
- (libraries
-  base
-  stdio
-  llvm
-  llvm.executionengine
-  llvm.bitreader
-  LMisc
-  LAst
-  LPrint
-  LParse
-  LTypes
-  LInfer
-  LMiddle
-  LBack
-  LBuiltin))
+ (public_name neml))

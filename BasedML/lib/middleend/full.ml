@@ -15,11 +15,11 @@ let ( let$ ) x f =
 ;;
 
 let middleend_transform_prog prog =
-  let$ alpha_converted = Alpha_conversion.transform prog in
-  let@ simplified = Egraphs.simplify alpha_converted in
+  let@ simplified = Egraphs.simplify prog in
+  let$ alpha_converted = Alpha_conversion.transform simplified in
   let$ match_free =
     Match_elimination.transform
-      (Lambda_lifting.lift_ast (Closure_conversion.convert_ast simplified))
+      (Lambda_lifting.lift_ast (Closure_conversion.convert_ast alpha_converted))
   in
   let _, ast = Anf.transform_anf match_free in
   ast

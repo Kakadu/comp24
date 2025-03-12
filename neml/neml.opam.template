@@ -1,3 +1,0 @@
-depexts: [
-  [ "llvm-16-dev" "clang-16" "libffi-dev" ] {os-distribution = "ubuntu"}
-]

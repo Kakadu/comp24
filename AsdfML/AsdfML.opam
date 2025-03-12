@@ -13,11 +13,11 @@ depends: [
   "ppx_deriving"
   "ppx_expect"
   "qcheck"
-  "stdio"
   "ppx_deriving_qcheck"
   "ppx_inline_test" {with-test}
   "odoc" {with-doc}
   "ocamlformat" {build}
+  "llvm" {= "16.0.6+nnp"}
 ]
 build: [
   ["dune" "subst"] {dev}
@@ -34,8 +34,3 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/ArtemKhel/comp24.git"
-depexts: [
-  [ "pkg-config" 
-    "qemu-user-static" "binutils-riscv64-linux-gnu" "gcc-riscv64-linux-gnu"
-  ] {os-distribution = "ubuntu"}
-]

@@ -62,4 +62,4 @@ let pstr_item = ws *> choice [plet; pty_decl; peval]
 
 let p : structure t =
   let sep = ws <* string ";;" <|> ws1 in
-  sep_by sep pstr_item <* ws <* opt (string ";;") <* ws
+  sep_by sep pstr_item <* ws <* opt (string ";;")

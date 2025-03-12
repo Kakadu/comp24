@@ -83,12 +83,10 @@ let from_expr : Expr.t -> (t, err) Result.t =
         let* sim2 = f exp2 in
         return (Apply (sim1, sim2))
     | Let (Nonrec, bindings, expr) ->
-        (* let x = A in B  --->  (fun x -> B) A *)
         let* sim = f expr in
         List.fold_result (List1.to_list bindings) ~init:sim
           ~f:(fun acc {pat; expr= rhs} ->
             let* rhs = f rhs in
-
             match pat with
             | Var id ->
                 return (Apply (Fun (Nonrec, List1.of_list_exn [id], acc), rhs))

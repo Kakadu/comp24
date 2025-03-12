@@ -156,7 +156,7 @@
   let anf_app_2 = print_int c_0  in
   let c_1 = anf_app_2 in
   0;;
-  let  test10_0 a_2 b_2 c_2 d_0 e_0 f_1 g_0 h_0 i_0 j_0 = let anf_app_0 = ( + ) a_2 b_2 in
+  let  test10_0 a_2 b_2 c_2 d_0 e_0 f_1 g_0 h_0 i_0 j_0 = let anf_app_0 = ( + ) b_2 a_2 in
   let anf_app_1 = ( + ) c_2 anf_app_0 in
   let anf_app_2 = ( + ) d_0 anf_app_1 in
   let anf_app_3 = ( + ) e_0 anf_app_2 in
@@ -577,7 +577,7 @@
   anf_app_0;;
   let  g_0 a_1 = let anf_app_0 = funct_0 5  in
   anf_app_0;;
-  let  funct_1 a_2 = let anf_app_0 = ( + ) a_2 500 in
+  let  funct_1 a_2 = let anf_app_0 = ( + ) 500 a_2 in
   anf_app_0;;
   let  global_unit_0  = let anf_app_0 = g_0 5  in
   let anf_app_1 = print_int anf_app_0  in

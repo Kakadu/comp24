@@ -1,23 +1,13 @@
 (rule
  (targets libmlrt.so)
- (deps
-  libffi_include
-  libffi.so
-  ../ml_runtimelib.h
-  ../ml_runtimelib.c
-  ../ml_gc.h
-  ../ml_gc.cpp
-  platform_spec_gc.h
-  platform_spec_gc.c)
+ (deps libffi_include libffi.so ../ml_runtimelib.c ../ml_runtimelib.h)
  (action
   (run
-   clang++-16
+   clang-16
    --target=riscv64-linux-gnu
    -fPIC
    -shared
    ../ml_runtimelib.c
-   ../ml_gc.cpp
-   platform_spec_gc.c
    -Ilibffi_include
    -L./
    -lffi
@@ -31,13 +21,13 @@
  (deps
   libffi_include
   libffi.so
-  ../ml_stdlib.h
   ../ml_stdlib.c
+  ../ml_stdlib.h
   ../ml_runtimelib.h
   libmlrt.so)
  (action
   (run
-   clang++-16
+   clang-16
    --target=riscv64-linux-gnu
    -fPIC
    -shared

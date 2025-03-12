@@ -1,7 +1,3 @@
-(** Copyright 2024, Artem Khelmianov *)
-
-(** SPDX-License-Identifier: LGPL-2.1 *)
-
 open Base
 open Ast
 open Utils
@@ -25,9 +21,8 @@ open State
 open State.Syntax
 
 let default_ctx =
-  let reserved = List.map Std.stdlib ~f:(fun x -> x.name) in
-  { count = reserved |> List.map ~f:(fun x -> x, 0) |> Map.of_alist_exn (module String)
-  ; reserved = reserved |> Set.of_list (module String)
+  { count = Map.empty (module String)
+  ; reserved = List.map Std.stdlib ~f:(fun x -> x.name) |> Set.of_list (module String)
   }
 ;;
 
@@ -38,14 +33,14 @@ let remaps_to_str r =
   Map.to_alist r |> List.map ~f:(fun (k, v) -> k ^ " -> " ^ v) |> String.concat ~sep:", "
 ;;
 
-let reserved_prefixes = [ "__"; "anf"; "ll_"; "ml_"; "init_"; "_start" ]
+let reserved_prefixes = [ "__"; "anf"; "ll_" ]
 let renamed_prefix = "__var_"
 
 let is_internal id =
   List.exists reserved_prefixes ~f:(fun p -> String.is_prefix id ~prefix:p)
 ;;
 
-let alpha_id ?(is_def = false) (remaps : remaps) id =
+let alpha_id (remaps : remaps) id =
   let rec gen_new_id ctx id =
     match Map.find ctx.count id with
     | None ->
@@ -64,16 +59,10 @@ let alpha_id ?(is_def = false) (remaps : remaps) id =
   | Some new_id -> return (new_id, remaps)
   | None ->
     let* ctx = get in
-    dbg "%s %b %b@\n" id (Set.mem ctx.reserved id) is_def;
-    if Set.mem ctx.reserved id && not is_def
+    if Set.mem ctx.reserved id
     then return (id, remaps)
     else (
-      let id_ext =
-        if Set.mem ctx.reserved id && is_def
-        then "__" ^ (Std.lookup_extern id |> Option.value_exn)
-        else id
-      in
-      let new_id, ctx = gen_new_id ctx id_ext in
+      let new_id, ctx = gen_new_id ctx id in
       let* () = put ctx in
       let remaps = Map.set remaps ~key:id ~data:new_id in
       return (new_id, remaps))
@@ -181,16 +170,6 @@ let rec alpha_expr remaps = function
     return (EMatch (exp, cases), remaps)
 
 and alpha_def remaps = function
-  | DLet (r, PIdent id, e) when Std.lookup_extern id |> Option.is_some ->
-    let* id, remaps' = alpha_id remaps id ~is_def:true in
-    let remaps' = remaps_merge remaps remaps' in
-    dbg "remaps: %s@\n" (remaps_to_str remaps');
-    let* e, _ =
-      match r with
-      | Rec -> alpha_expr remaps' e
-      | NonRec -> alpha_expr remaps e
-    in
-    return (DLet (r, PIdent id, e), remaps')
   | DLet (r, p, e) ->
     let* p, remaps' = alpha_pattern remaps_empty p in
     let remaps' = remaps_merge remaps remaps' in

@@ -17,7 +17,7 @@
   ../../runtime/riscv/libmlstd.so)
  (action
   (run
-   clang++-16
+   clang-16
    --target=riscv64-linux-gnu
    ./attachments/fib_test.c
    -I../../runtime/
