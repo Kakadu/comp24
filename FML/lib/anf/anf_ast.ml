@@ -72,10 +72,10 @@ let fun_to_str = function
 let declaration_to_str = function
   | ADNoRec func_list ->
     let funs = List.map fun_to_str func_list in
-    "let " ^ String.concat "\nand " funs
+    "let " ^ String.concat "\nand " funs ^ "\n;;"
   | ADREC func_list ->
     let funs = List.map fun_to_str func_list in
-    "let rec " ^ String.concat "\nand " funs
+    "let rec " ^ String.concat "\nand " funs ^ "\n;;"
 ;;
 
 let pp_anf_program ppf p =

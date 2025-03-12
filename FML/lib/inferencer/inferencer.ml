@@ -642,6 +642,8 @@ let start_env =
     ; "( - )", TFunction (TInt, TFunction (TInt, TInt))
     ; "( / )", TFunction (TInt, TFunction (TInt, TInt))
     ; "( * )", TFunction (TInt, TFunction (TInt, TInt))
+    ; "( && )", TFunction (TBool, TFunction (TBool, TBool))
+    ; "( || )", TFunction (TBool, TFunction (TBool, TBool))
     ; "( < )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( > )", TFunction (TVar 1, TFunction (TVar 1, TBool))
     ; "( <= )", TFunction (TVar 1, TFunction (TVar 1, TBool))
@@ -653,6 +655,11 @@ let start_env =
     ; "( ~+ )", TFunction (TInt, TInt)
     ; "not", TFunction (TBool, TBool)
     ; "print_int", TFunction (TInt, TUnit)
+    ; "is_empty", TFunction (TList (TVar 1), TBool)
+    ; "list_head", TFunction (TList (TVar 1), TVar 1)
+    ; "list_tail", TFunction (TList (TVar 1), TList (TVar 1))
+    ; "tuple_element", TFunction (TVar 1, TVar 2)
+    ; "fail_match", TVar 1
     ]
   in
   let env = TypeEnv.empty in
