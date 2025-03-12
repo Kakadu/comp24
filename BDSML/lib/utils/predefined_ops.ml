@@ -99,6 +99,14 @@ let print_int =
   { name = "print_int"; t = "int -> unit"; alt_name = "print_int"; llvm_t = un_op_type }
 ;;
 
+let print_string =
+  { name = "print_string"
+  ; t = "string -> unit"
+  ; alt_name = "print_string"
+  ; llvm_t = un_op_type
+  }
+;;
+
 (** special pattern remover *)
 let disassemble_constructor =
   { name = "disassemble"; t = "'a -> 'b"; alt_name = "disassemble"; llvm_t = un_op_type }
@@ -143,6 +151,7 @@ let predefine_operators =
   ; op_and
   ; op_phys_eq
   ; print_int
+  ; print_string
   ; disassemble_constructor
   ; get_from_tuple
   ; same_cons
