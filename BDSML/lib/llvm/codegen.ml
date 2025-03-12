@@ -10,42 +10,42 @@ open Parser.Ast
 let lookup_func str =
   match lookup_function str my_module with
   | Some f -> f
-  | None -> failwith "func defenetly should be defined"
+  | None -> failwith ("func defenetly should be defined " ^ str)
 ;;
 
-let compile_simple_type t v =
-  let name = "create_" ^ t in
+let compile_simple_type name v =
   let func = lookup_func name in
   let ft = find variable_type_table name in
-  build_call ft func v ("boxed_" ^ t) builder
+  build_call ft func v ("boxed_" ^ name) builder
 ;;
 
 let rec compile_aexpr = function
   | AExp_constant c ->
     (match c with
-     | Const_int i -> compile_simple_type "int" [| const_int int_t i |]
+     | Const_int i -> compile_simple_type "create_int" [| const_int int_t i |]
      | Const_bool b ->
-       compile_simple_type "bool" [| const_int bool_t (if b then 1 else 0) |]
-     | Const_char c -> compile_simple_type "char" [| const_int char_t @@ Char.code c |]
-     | Const_string s -> compile_simple_type "string" [| const_stringz context s |]
-     | Const_unit -> compile_simple_type "unit" [||])
+       compile_simple_type "create_bool" [| const_int bool_t (if b then 1 else 0) |]
+     | Const_char c ->
+       compile_simple_type "create_char" [| const_int char_t @@ Char.code c |]
+     | Const_string s -> compile_simple_type "create_string" [| const_stringz context s |]
+     | Const_unit -> compile_simple_type "create_unit" [||])
   | AExp_tuple elems ->
     let args = List.map compile_aexpr elems in
     let len = List.length args in
-    compile_simple_type "tuple" (Array.of_list (const_int int_t len :: args))
+    compile_simple_type "create_tuple" (Array.of_list (const_int int_t len :: args))
   | AExp_construct ("::", Some (AExp_tuple [ head; tail ])) ->
     let head' = compile_aexpr head in
     let tail' = compile_aexpr tail in
-    compile_simple_type "list" [| head'; tail' |]
-  | AExp_construct ("[]", _) -> compile_simple_type "empty_list" [||]
+    compile_simple_type "create_list" [| head'; tail' |]
+  | AExp_construct ("[]", _) -> compile_simple_type "create_empty_list" [||]
   | AExp_construct ("None", _) ->
-    compile_simple_type "cons" [| const_int bool_t 0; const_null ptr_t |]
+    compile_simple_type "create_cons" [| const_int bool_t 0; const_null ptr_t |]
   | AExp_construct ("Some", x) ->
     (match x with
      | None -> failwith "Impossible"
      | Some x ->
        let x' = compile_aexpr x in
-       compile_simple_type "cons" [| const_int bool_t 0; x' |])
+       compile_simple_type "create_cons" [| const_int bool_t 0; x' |])
   | AExp_construct (_, _) -> failwith "Not implemented"
   | AExp_ident id ->
     let value = find variable_value_table id in
@@ -56,7 +56,7 @@ and maybe_closure value =
   | ValueKind.Function ->
     let arity = Array.length (params value) in
     let function_ptr = build_bitcast value ptr_t "func_ptr_cast" builder in
-    compile_simple_type "closure" [| function_ptr; const_int int_t arity |]
+    compile_simple_type "create_function" [| function_ptr; const_int int_t arity |]
   | _ -> value
 ;;
 
@@ -93,7 +93,9 @@ let rec compile_cexpr = function
        compile_simple_type
          "apply"
          (Array.append
-            [| fn'; compile_simple_type "int" [| const_int int_t (Array.length ael') |] |]
+            [| fn'
+             ; compile_simple_type "create_int" [| const_int int_t (Array.length ael') |]
+            |]
             ael'))
   | CExp_atom ae -> compile_aexpr ae
 
