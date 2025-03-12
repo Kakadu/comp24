@@ -66,7 +66,15 @@ let rec pattern_binder rexp = function
   | Pat_any -> return [ var_nothing, rexp ]
   | Pat_constant s -> return [ var_nothing, exp_eq rexp @@ RExp_constant s ]
   | Pat_construct (name, None) ->
-    return [ var_nothing, same_constructor rexp @@ RExp_constant (Const_string name) ]
+    let matcher = function
+      | "None" -> 0
+      | "Some" -> 1
+      | "::" -> 2
+      | "[]" -> 3
+      | _ -> 5
+    in
+    return
+      [ var_nothing, same_constructor rexp @@ RExp_constant (Const_int (matcher name)) ]
 ;;
 
 let rec let_bindings_unpack r bindings =
