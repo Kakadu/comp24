@@ -1095,7 +1095,7 @@ let start_parsing parser string = <span data-count="36">p</span>arse_string ~con
 
 let is_char = function
   | <span data-count="138422556">'</span>a' .. 'z' -&gt; true
-  | <span data-count="302874547">_</span> -&gt; false
+  | <span data-count="302872097">_</span> -&gt; false
 ;;
 
 let is_bchar = function
@@ -1105,7 +1105,7 @@ let is_bchar = function
 
 let is_digit = function
   | <span data-count="24279438">'</span>0' .. '9' -&gt; true
-  | <span data-count="337218181">_</span> -&gt; false
+  | <span data-count="337215486">_</span> -&gt; false
 ;;
 
 let is_keyword = function
@@ -1131,12 +1131,12 @@ let is_type = function
 ;;
 
 let is_whitespace = function
-  | <span data-count="1569920460">'</span> ' | <span data-count="185924498">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
-  | <span data-count="2848737628">_</span> -&gt; false
+  | <span data-count="1569907043">'</span> ' | <span data-count="185921068">'</span>\n' | <span data-count="0">'</span>\t' | <span data-count="0">'</span>\r' -&gt; true
+  | <span data-count="2848728817">_</span> -&gt; false
 ;;
 
 let is_underscore = function
-  | <span data-count="302874547">c</span> -&gt; Char.equal c '_'
+  | <span data-count="302872097">c</span> -&gt; Char.equal c '_'
 ;;
 
 (* S1mple parsers *)
@@ -1207,7 +1207,7 @@ let parse_var =
   parse_white_space
   *<span data-count="122">&gt;</span>
   let is_entry = function
-    | <span data-count="441297103">c</span> -&gt; is_cha<span data-count="441297103">r</span> <span data-count="138422556">c</span> || is_underscor<span data-count="302874547">e</span> <span data-count="685745">c</span> || is_digit c
+    | <span data-count="441294653">c</span> -&gt; is_cha<span data-count="441294653">r</span> <span data-count="138422556">c</span> || is_underscor<span data-count="302872097">e</span> <span data-count="685745">c</span> || is_digit c
   in
   strin<span data-count="122">g</span> "()" *<span data-count="122">&gt;</span> retur<span data-count="122">n</span> "()" &lt;|<span data-count="122">&gt;</span> check_va<span data-count="122">r</span> is_entry
 ;;
