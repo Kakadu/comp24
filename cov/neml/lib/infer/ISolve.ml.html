@@ -433,54 +433,54 @@ module Sub = struct
   (** Substitution maps type variables to types *)
   type t = (Var.t, Ty.t, Var.comparator_witness) Map.t
 
-  let empty : t = Map.empt<span data-count="3">y</span> (module Var)
-  let single x y : t = <span data-count="1809">M</span>ap.singleton (module Var) x y
+  let empty : t = Map.empt<span data-count="18">y</span> (module Var)
+  let single x y : t = <span data-count="2269">M</span>ap.singleton (module Var) x y
 
   let apply (sub : t) : Ty.t -&gt; Ty.t =
-    <span data-count="38568">l</span>et rec f = function
-      | <span data-count="50822">T</span>y.Var var as ty -&gt;
-          Map.find sub var |&gt; <span data-count="50822">O</span>ption.value ~default:ty
-      | <span data-count="20247">A</span>rr (ty1, ty2) -&gt;
-          Arr (<span data-count="20247">f</span> ty1, <span data-count="20247">f</span> ty2)
-      | <span data-count="4708">T</span>uple tys -&gt;
-          Tuple (List2.ma<span data-count="4708">p</span> tys ~f)
-      | <span data-count="19826">C</span>on (id, args) -&gt;
-          Con (id, List.ma<span data-count="19826">p</span> args ~f)
+    <span data-count="48611">l</span>et rec f = function
+      | <span data-count="61678">T</span>y.Var var as ty -&gt;
+          Map.find sub var |&gt; <span data-count="61678">O</span>ption.value ~default:ty
+      | <span data-count="27726">A</span>rr (ty1, ty2) -&gt;
+          Arr (<span data-count="27726">f</span> ty1, <span data-count="27726">f</span> ty2)
+      | <span data-count="4720">T</span>uple tys -&gt;
+          Tuple (List2.ma<span data-count="4720">p</span> tys ~f)
+      | <span data-count="26477">C</span>on (id, args) -&gt;
+          Con (id, List.ma<span data-count="26477">p</span> args ~f)
     in
     f
 
   let compose s1 s2 =
-    <span data-count="2333">M</span>ap.merge_skewed
-      ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="2">v</span>2)
-      (Map.ma<span data-count="2333">p</span> s2 ~f:(appl<span data-count="2333">y</span> s1))
+    <span data-count="2961">M</span>ap.merge_skewed
+      ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="3">v</span>2)
+      (Map.ma<span data-count="2961">p</span> s2 ~f:(appl<span data-count="2961">y</span> s1))
       s1
 
   let apply_sc : t -&gt; Sc.t -&gt; Sc.t =
    fun sub (Forall (quantified, ty)) -&gt;
     (* remove quantified vars from substitution *)
-    <span data-count="5108">l</span>et sub = Set.fold quantified ~init:sub ~f:Map.remove in
-    <span data-count="5108">F</span>orall (quantified, appl<span data-count="5108">y</span> sub ty)
+    <span data-count="6398">l</span>et sub = Set.fold quantified ~init:sub ~f:Map.remove in
+    <span data-count="6398">F</span>orall (quantified, appl<span data-count="6398">y</span> sub ty)
 
   let apply_varset : t -&gt; VarSet.t -&gt; VarSet.t =
    fun sub -&gt;
     (* construct new varset by adding all vars occuring in types
        on the right hand side of respective substitutions *)
-    <span data-count="1632">S</span>et.fold ~init:VarSet.empty ~f:(fun acc var -&gt;
-        <span data-count="3346">l</span>et vars =
+    <span data-count="1704">S</span>et.fold ~init:VarSet.empty ~f:(fun acc var -&gt;
+        <span data-count="3475">l</span>et vars =
           Map.find sub var
-          |&gt; <span data-count="3346">O</span>ption.value_map ~default:(VarSet.singl<span data-count="3346">e</span> var) ~f:Ty.vars
+          |&gt; <span data-count="3475">O</span>ption.value_map ~default:(VarSet.singl<span data-count="3475">e</span> var) ~f:Ty.vars
         in
-        <span data-count="3346">S</span>et.union acc vars )
+        <span data-count="3475">S</span>et.union acc vars )
 
   let apply_conset : t -&gt; ConSet.t -&gt; ConSet.t =
    fun sub -&gt;
-    <span data-count="1454">l</span>et f : Con.t -&gt; Con.t = function
-      | <span data-count="10204">T</span>yEq (ty1, ty2) -&gt;
-          TyEq (appl<span data-count="10204">y</span> sub ty1, appl<span data-count="10204">y</span> sub ty2)
-      | <span data-count="1632">I</span>mplInst (ty1, bound, ty2) -&gt;
-          ImplInst (appl<span data-count="1632">y</span> sub ty1, apply_varse<span data-count="1632">t</span> sub bound, appl<span data-count="1632">y</span> sub ty2)
-      | <span data-count="5108">E</span>xplInst (ty, sc) -&gt;
-          ExplInst (appl<span data-count="5108">y</span> sub ty, apply_s<span data-count="5108">c</span> sub sc)
+    <span data-count="1882">l</span>et f : Con.t -&gt; Con.t = function
+      | <span data-count="13224">T</span>yEq (ty1, ty2) -&gt;
+          TyEq (appl<span data-count="13224">y</span> sub ty1, appl<span data-count="13224">y</span> sub ty2)
+      | <span data-count="1704">I</span>mplInst (ty1, bound, ty2) -&gt;
+          ImplInst (appl<span data-count="1704">y</span> sub ty1, apply_varse<span data-count="1704">t</span> sub bound, appl<span data-count="1704">y</span> sub ty2)
+      | <span data-count="6398">E</span>xplInst (ty, sc) -&gt;
+          ExplInst (appl<span data-count="6398">y</span> sub ty, apply_s<span data-count="6398">c</span> sub sc)
     in
     Set.map (module Con) ~f
 end
@@ -503,110 +503,110 @@ end = struct
       end)
       (IError)
 
-  let run m = <span data-count="151">r</span>un m {counter= 0} |&gt; <span data-count="151">s</span>nd
+  let run m = <span data-count="200">r</span>un m {counter= 0} |&gt; <span data-count="200">s</span>nd
 
   let fresh =
     let* {counter} = get in
-    <span data-count="162">l</span>et* () = pu<span data-count="162">t</span> {counter= counter + 1} in
-    <span data-count="162">r</span>eturn (Var.V ("solve" ^ Int.to_strin<span data-count="162">g</span> counter))
+    <span data-count="169">l</span>et* () = pu<span data-count="169">t</span> {counter= counter + 1} in
+    <span data-count="169">r</span>eturn (Var.V ("solve" ^ Int.to_strin<span data-count="169">g</span> counter))
 end
 
 open Monad
 
-let occurs_check var ty = <span data-count="1649">S</span>et.mem (Ty.var<span data-count="1649">s</span> ty) var
+let occurs_check var ty = <span data-count="2102">S</span>et.mem (Ty.var<span data-count="2102">s</span> ty) var
 
 (** Tries to construct substitution that's
     when applied to both types would yield unified type *)
 let rec unify (ty1 : Ty.t) (ty2 : Ty.t) : Sub.t t =
-  <span data-count="2319">m</span>atch (ty1, ty2) with
-  | <span data-count="2319">_</span>, _ when Ty.equa<span data-count="2319">l</span> ty1 ty2 -&gt;
-      <span data-count="200">r</span>eturn Sub.empty
-  | <span data-count="1518">V</span>ar var, ty | <span data-count="131">t</span>y, Var var -&gt;
+  <span data-count="2970">m</span>atch (ty1, ty2) with
+  | <span data-count="2970">_</span>, _ when Ty.equa<span data-count="2970">l</span> ty1 ty2 -&gt;
+      <span data-count="286">r</span>eturn Sub.empty
+  | <span data-count="1954">V</span>ar var, ty | <span data-count="148">t</span>y, Var var -&gt;
       if occurs_check var ty then <span data-count="2">f</span>ail (OccursIn (var, ty))
-      else <span data-count="1647">r</span>eturn (Sub.singl<span data-count="1647">e</span> var ty)
-  | <span data-count="336">A</span>rr (l1, r1), Arr (l2, r2) -&gt;
+      else <span data-count="2100">r</span>eturn (Sub.singl<span data-count="2100">e</span> var ty)
+  | <span data-count="447">A</span>rr (l1, r1), Arr (l2, r2) -&gt;
       unify_many [l1; r1] [l2; r2]
   | <span data-count="63">T</span>uple tys1, Tuple tys2 -&gt;
       unify_many (List2.to_lis<span data-count="63">t</span> tys1) (List2.to_lis<span data-count="63">t</span> tys2)
   | <span data-count="65">C</span>on (id1, tys1), Con (id2, tys2) when Id.equa<span data-count="65">l</span> id1 id2 -&gt;
       <span data-count="57">u</span>nify_many tys1 tys2
-  | <span data-count="14">_</span> -&gt;
+  | <span data-count="15">_</span> -&gt;
       fail (UnificationFail (ty1, ty2))
 
 and unify_many (tys1 : Ty.t list) (tys2 : Ty.t list) =
-  <span data-count="456">L</span>ist.fold2 tys1 tys2 ~init:(retur<span data-count="456">n</span> Sub.empty) ~f:(fun acc ty1 ty2 -&gt;
-      <span data-count="851">l</span>et* acc = acc in
-      <span data-count="847">l</span>et* sub = unif<span data-count="847">y</span> (Sub.appl<span data-count="847">y</span> acc ty1) (Sub.appl<span data-count="847">y</span> acc ty2) in
-      <span data-count="842">r</span>eturn (Sub.compos<span data-count="842">e</span> acc sub) )
-  |&gt; <span data-count="456">f</span>unction
-  | <span data-count="2">U</span>nequal_lengths -&gt; fail (UnificationMismatch (tys1, tys2)) | <span data-count="454">O</span>k x -&gt; x
+  <span data-count="567">L</span>ist.fold2 tys1 tys2 ~init:(retur<span data-count="567">n</span> Sub.empty) ~f:(fun acc ty1 ty2 -&gt;
+      <span data-count="1073">l</span>et* acc = acc in
+      <span data-count="1069">l</span>et* sub = unif<span data-count="1069">y</span> (Sub.appl<span data-count="1069">y</span> acc ty1) (Sub.appl<span data-count="1069">y</span> acc ty2) in
+      <span data-count="1064">r</span>eturn (Sub.compos<span data-count="1064">e</span> acc sub) )
+  |&gt; <span data-count="567">f</span>unction
+  | <span data-count="2">U</span>nequal_lengths -&gt; fail (UnificationMismatch (tys1, tys2)) | <span data-count="565">O</span>k x -&gt; x
 
 let instantiate : Sc.t -&gt; Ty.t t =
  fun (Forall (quantified, ty)) -&gt;
-  <span data-count="363">l</span>et* sub =
-    Set.fol<span data-count="363">d</span> quantified ~init:(retur<span data-count="363">n</span> Sub.empty) ~f:(fun acc qvar -&gt;
-        <span data-count="162">l</span>et* acc = acc in
-        <span data-count="162">l</span>et* var = fresh in
-        <span data-count="162">r</span>eturn (Sub.compos<span data-count="162">e</span> acc (Sub.singl<span data-count="162">e</span> qvar (Var var))) )
+  <span data-count="448">l</span>et* sub =
+    Set.fol<span data-count="448">d</span> quantified ~init:(retur<span data-count="448">n</span> Sub.empty) ~f:(fun acc qvar -&gt;
+        <span data-count="169">l</span>et* acc = acc in
+        <span data-count="169">l</span>et* var = fresh in
+        <span data-count="169">r</span>eturn (Sub.compos<span data-count="169">e</span> acc (Sub.singl<span data-count="169">e</span> qvar (Var var))) )
   in
-  <span data-count="363">r</span>eturn (Sub.appl<span data-count="363">y</span> sub ty)
+  <span data-count="448">r</span>eturn (Sub.appl<span data-count="448">y</span> sub ty)
 
 let activevars : ConSet.t -&gt; VarSet.t =
   let f : Con.t -&gt; VarSet.t = function
-    | <span data-count="1080">T</span>yEq (ty1, ty2) -&gt;
-        Set.union (Ty.var<span data-count="1080">s</span> ty1) (Ty.var<span data-count="1080">s</span> ty2)
-    | <span data-count="560">I</span>mplInst (ty1, bound, ty2) -&gt;
-        Set.union (Ty.var<span data-count="560">s</span> ty1) (Set.inte<span data-count="560">r</span> bound (Ty.var<span data-count="560">s</span> ty2))
-    | <span data-count="1079">E</span>xplInst (ty, sc) -&gt;
-        Set.union (Ty.var<span data-count="1079">s</span> ty) (Sc.var<span data-count="1079">s</span> sc)
+    | <span data-count="1103">T</span>yEq (ty1, ty2) -&gt;
+        Set.union (Ty.var<span data-count="1103">s</span> ty1) (Ty.var<span data-count="1103">s</span> ty2)
+    | <span data-count="568">I</span>mplInst (ty1, bound, ty2) -&gt;
+        Set.union (Ty.var<span data-count="568">s</span> ty1) (Set.inte<span data-count="568">r</span> bound (Ty.var<span data-count="568">s</span> ty2))
+    | <span data-count="1116">E</span>xplInst (ty, sc) -&gt;
+        Set.union (Ty.var<span data-count="1116">s</span> ty) (Sc.var<span data-count="1116">s</span> sc)
   in
-  Set.fold ~init:VarSet.empty ~f:(fun acc con -&gt; <span data-count="2719">S</span>et.union acc (<span data-count="2719">f</span> con))
+  Set.fold ~init:VarSet.empty ~f:(fun acc con -&gt; <span data-count="2787">S</span>et.union acc (<span data-count="2787">f</span> con))
 
 let rec solve_cs (cs : ConSet.t) : Sub.t t =
   (* find next constraint that should be solved *)
-  <span data-count="2024">l</span>et next_solvable : (Con.t * ConSet.t) option =
-    Set.find_ma<span data-count="2024">p</span> cs ~f:(fun (con : Con.t) -&gt;
-        <span data-count="2145">l</span>et rest = Set.remove cs con in
-        <span data-count="2145">l</span>et ok = Some (con, rest) in
+  <span data-count="2589">l</span>et next_solvable : (Con.t * ConSet.t) option =
+    Set.find_ma<span data-count="2589">p</span> cs ~f:(fun (con : Con.t) -&gt;
+        <span data-count="2674">l</span>et rest = Set.remove cs con in
+        <span data-count="2674">l</span>et ok = Some (con, rest) in
         let no = None in
 
         (* enforce order in which constraints must be solved *)
         match con with
-        | <span data-count="1472">T</span>yEq _ | <span data-count="363">E</span>xplInst _ -&gt;
+        | <span data-count="1901">T</span>yEq _ | <span data-count="448">E</span>xplInst _ -&gt;
             ok
-        | <span data-count="310">I</span>mplInst (_, bound, ty2)
+        | <span data-count="325">I</span>mplInst (_, bound, ty2)
         (* solve ImplInst only after all other constraints on ty2 are solved *)
-          when Set.is_empt<span data-count="310">y</span>
-               @@ Set.inte<span data-count="310">r</span> (activevar<span data-count="310">s</span> rest) (Set.dif<span data-count="310">f</span> (Ty.var<span data-count="310">s</span> ty2) bound) -&gt;
-            <span data-count="56">o</span>k
-        | <span data-count="254">I</span>mplInst _ -&gt;
+          when Set.is_empt<span data-count="325">y</span>
+               @@ Set.inte<span data-count="325">r</span> (activevar<span data-count="325">s</span> rest) (Set.dif<span data-count="325">f</span> (Ty.var<span data-count="325">s</span> ty2) bound) -&gt;
+            <span data-count="59">o</span>k
+        | <span data-count="266">I</span>mplInst _ -&gt;
             no )
   in
   match next_solvable with
-  | <span data-count="1891">S</span>ome (con, rest) -&gt;
+  | <span data-count="2408">S</span>ome (con, rest) -&gt;
       (* found some constraint to solve *)
       solve_con con rest
-  | <span data-count="133">N</span>one -&gt;
+  | <span data-count="181">N</span>one -&gt;
       (* no constraint left to solve.
          that can only happen if constraint set is empty.
          otherwise there's bug in the algo *)
-      assert <span data-count="133">(</span>Set.is_empt<span data-count="133">y</span> cs) ;
+      assert <span data-count="181">(</span>Set.is_empt<span data-count="181">y</span> cs) ;
       return Sub.empty
 
 and solve_con (con : Con.t) (rest : ConSet.t) : Sub.t t =
-  <span data-count="1891">i</span>f !debug then <span data-count="0">S</span>tdlib.Format.print<span data-count="0">f</span> "solving %a\n" Con.pp con ;
-  <span data-count="1891">m</span>atch con with
-  | <span data-count="1472">T</span>yEq (ty1, ty2) -&gt;
-      let* sub1 = unif<span data-count="1472">y</span> ty1 ty2 in
-      <span data-count="1454">l</span>et* sub2 = solve_c<span data-count="1454">s</span> (Sub.apply_conse<span data-count="1454">t</span> sub1 rest) in
-      <span data-count="1329">r</span>eturn (Sub.compos<span data-count="1329">e</span> sub2 sub1)
-  | <span data-count="56">I</span>mplInst (ty1, bound, ty2) -&gt;
-      solve_cs (Set.ad<span data-count="56">d</span> rest (ExplInst (ty1, generaliz<span data-count="56">e</span> bound ty2)))
-  | <span data-count="363">E</span>xplInst (ty, sc) -&gt;
-      let* inst = instantiat<span data-count="363">e</span> sc in
-      <span data-count="363">s</span>olve_cs (Set.ad<span data-count="363">d</span> rest (TyEq (ty, inst)))
+  <span data-count="2408">i</span>f !debug then <span data-count="0">S</span>tdlib.Format.print<span data-count="0">f</span> "solving %a\n" Con.pp con ;
+  <span data-count="2408">m</span>atch con with
+  | <span data-count="1901">T</span>yEq (ty1, ty2) -&gt;
+      let* sub1 = unif<span data-count="1901">y</span> ty1 ty2 in
+      <span data-count="1882">l</span>et* sub2 = solve_c<span data-count="1882">s</span> (Sub.apply_conse<span data-count="1882">t</span> sub1 rest) in
+      <span data-count="1728">r</span>eturn (Sub.compos<span data-count="1728">e</span> sub2 sub1)
+  | <span data-count="59">I</span>mplInst (ty1, bound, ty2) -&gt;
+      solve_cs (Set.ad<span data-count="59">d</span> rest (ExplInst (ty1, generaliz<span data-count="59">e</span> bound ty2)))
+  | <span data-count="448">E</span>xplInst (ty, sc) -&gt;
+      let* inst = instantiat<span data-count="448">e</span> sc in
+      <span data-count="448">s</span>olve_cs (Set.ad<span data-count="448">d</span> rest (TyEq (ty, inst)))
 
-let solve (cs : ConSet.t) : (Sub.t, IError.t) Result.t = <span data-count="151">r</span>un (solve_c<span data-count="151">s</span> cs)
+let solve (cs : ConSet.t) : (Sub.t, IError.t) Result.t = <span data-count="200">r</span>un (solve_c<span data-count="200">s</span> cs)
 </code></pre>
       </div>
     </div>

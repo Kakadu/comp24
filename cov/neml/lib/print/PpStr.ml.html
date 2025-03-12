@@ -162,9 +162,9 @@ open PpCommon
 let pp_stritem : StrItem.t -&gt; document =
   let open StrItem in
   function
-  | <span data-count="81">E</span>val expr -&gt;
+  | <span data-count="84">E</span>val expr -&gt;
       PpExpr.pp expr
-  | <span data-count="110">L</span>et (rec_flag, bindings) -&gt;
+  | <span data-count="142">L</span>et (rec_flag, bindings) -&gt;
       plet PpPat.pp PpExpr.pp rec_flag bindings None
   | <span data-count="13">T</span>ype {id; params; variants} -&gt;
       let id = pp_id id in
@@ -201,9 +201,9 @@ let pp_stritem : StrItem.t -&gt; document =
       group @@ strin<span data-count="13">g</span> "type" ^<span data-count="13">^</span> grou<span data-count="13">p</span> (brea<span data-count="13">k</span> 1) ^<span data-count="13">^</span> params ^<span data-count="13">^</span> id ^<span data-count="13">^</span> variants
 
 let pp_structure (str : structure) : document =
-  <span data-count="117">l</span>et open PPrint in
+  <span data-count="120">l</span>et open PPrint in
   let str = List.map str ~f:pp_stritem in
-  <span data-count="117">f</span>low (strin<span data-count="117">g</span> ";;" ^<span data-count="117">^</span> hardline) str
+  <span data-count="120">f</span>low (strin<span data-count="120">g</span> ";;" ^<span data-count="120">^</span> hardline) str
 </code></pre>
       </div>
     </div>

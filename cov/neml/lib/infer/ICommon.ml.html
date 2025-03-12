@@ -230,7 +230,7 @@ open LTypes
 let debug = ref false
 
 module IError = struct
-  <span data-count="56">t</span>ype t =
+  <span data-count="65">t</span>ype t =
     | UnboundVariable of Id.t
         (** Failed to find a variable in the environment *)
     | UnificationFail of Ty.t * Ty.t  (** Failed to unify two types *)
@@ -265,11 +265,11 @@ module Sc = struct
   [@@deriving show {with_path= false}, ord, sexp_of]
 
   let vars : t -&gt; VarSet.t =
-   fun (Forall (quantified, ty)) -&gt; <span data-count="1079">S</span>et.diff (Ty.var<span data-count="1079">s</span> ty) quantified
+   fun (Forall (quantified, ty)) -&gt; <span data-count="1116">S</span>et.diff (Ty.var<span data-count="1116">s</span> ty) quantified
 end
 
 let generalize (bound : VarSet.t) (ty : Ty.t) : Sc.t =
-  <span data-count="272">F</span>orall (Set.dif<span data-count="272">f</span> (Ty.var<span data-count="272">s</span> ty) bound, ty)
+  <span data-count="338">F</span>orall (Set.dif<span data-count="338">f</span> (Ty.var<span data-count="338">s</span> ty) bound, ty)
 
 module Con = struct
   module T = struct
@@ -293,7 +293,7 @@ module ConSet = struct
   (** Set of type constraints *)
   type t = (Con.t, Con.comparator_witness) Set.t
 
-  let empty : t = Set.empt<span data-count="3">y</span> (module Con)
+  let empty : t = Set.empt<span data-count="18">y</span> (module Con)
   let single x : t = <span data-count="0">S</span>et.singleton (module Con) x
 end
 
@@ -301,7 +301,7 @@ module DefTys = struct
   (** Holds defined types' names and their arity *)
   type t = (Id.t, Int.t, Id.comparator_witness) Map.t
 
-  let empty : t = Map.empt<span data-count="3">y</span> (module Id)
+  let empty : t = Map.empt<span data-count="18">y</span> (module Id)
   let single x y : t = <span data-count="0">M</span>ap.singleton (module Id) x y
 end
 </code></pre>

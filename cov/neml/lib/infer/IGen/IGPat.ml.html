@@ -173,39 +173,39 @@ open IGCommon
 open IGMonad
 
 let rec gen : Pat.t -&gt; (As.t * Bounds.t * Ty.t) IGMonad.t = function
-  | <span data-count="375">V</span>ar id -&gt;
+  | <span data-count="475">V</span>ar id -&gt;
       let* var = fresh in
-      <span data-count="375">r</span>eturn (As.empty, Bounds.singl<span data-count="375">e</span> id var, Ty.Var var)
-  | <span data-count="8">A</span>ny -&gt;
+      <span data-count="475">r</span>eturn (As.empty, Bounds.singl<span data-count="475">e</span> id var, Ty.Var var)
+  | <span data-count="9">A</span>ny -&gt;
       let* var = fresh in
-      <span data-count="8">r</span>eturn (As.empty, Bounds.empty, Ty.Var var)
+      <span data-count="9">r</span>eturn (As.empty, Bounds.empty, Ty.Var var)
   | <span data-count="1">C</span>onst const -&gt;
       return (As.empty, Bounds.empty, typeof_cons<span data-count="1">t</span> const)
-  | <span data-count="37">T</span>uple pats -&gt;
-      let* asm, bounds, tys = gen_man<span data-count="37">y</span> ~dir:`Right (List2.to_lis<span data-count="37">t</span> pats) in
-      <span data-count="36">r</span>eturn (asm, bounds, Ty.Tuple (List2.of_list_ex<span data-count="36">n</span> tys))
+  | <span data-count="42">T</span>uple pats -&gt;
+      let* asm, bounds, tys = gen_man<span data-count="42">y</span> ~dir:`Right (List2.to_lis<span data-count="42">t</span> pats) in
+      <span data-count="41">r</span>eturn (asm, bounds, Ty.Tuple (List2.of_list_ex<span data-count="41">n</span> tys))
   | <span data-count="47">C</span>onstraint (pat, ty) -&gt;
       let* asm, bounds, ty_pat = ge<span data-count="47">n</span> pat in
       <span data-count="47">l</span>et* () = c<span data-count="47">s</span> [ty_pat == ty] in
       <span data-count="47">r</span>eturn (asm, bounds, ty_pat)
-  | <span data-count="84">C</span>onstruct (id, arg) -&gt;
+  | <span data-count="107">C</span>onstruct (id, arg) -&gt;
       let* var = fresh in
-      <span data-count="84">l</span>et as_con = As.single id (VarSet.singl<span data-count="84">e</span> var) in
-      <span data-count="84">l</span>et ty_con = Ty.Var var in
+      <span data-count="107">l</span>et as_con = As.single id (VarSet.singl<span data-count="107">e</span> var) in
+      <span data-count="107">l</span>et ty_con = Ty.Var var in
 
-      let* ty_res = fresh &gt;&gt;<span data-count="84">|</span> fun var -&gt; <span data-count="84">T</span>y.Var var in
-      <span data-count="84">l</span>et* as_arg, bounds_arg =
+      let* ty_res = fresh &gt;&gt;<span data-count="107">|</span> fun var -&gt; <span data-count="107">T</span>y.Var var in
+      <span data-count="107">l</span>et* as_arg, bounds_arg =
         match arg with
-        | <span data-count="46">N</span>one -&gt;
-            let* () = c<span data-count="46">s</span> [ty_con == ty_res] in
-            <span data-count="46">r</span>eturn (As.empty, Bounds.empty)
-        | <span data-count="38">S</span>ome arg -&gt;
-            let* as_arg, bounds_arg, ty_arg = ge<span data-count="38">n</span> arg in
-            <span data-count="38">l</span>et* () = c<span data-count="38">s</span> [ty_con == Arr (ty_arg, ty_res)] in
-            <span data-count="38">r</span>eturn (as_arg, bounds_arg)
+        | <span data-count="61">N</span>one -&gt;
+            let* () = c<span data-count="61">s</span> [ty_con == ty_res] in
+            <span data-count="61">r</span>eturn (As.empty, Bounds.empty)
+        | <span data-count="46">S</span>ome arg -&gt;
+            let* as_arg, bounds_arg, ty_arg = ge<span data-count="46">n</span> arg in
+            <span data-count="46">l</span>et* () = c<span data-count="46">s</span> [ty_con == Arr (ty_arg, ty_res)] in
+            <span data-count="46">r</span>eturn (as_arg, bounds_arg)
       in
 
-      <span data-count="84">r</span>eturn (as_con +<span data-count="84">+</span> as_arg, bounds_arg, ty_res)
+      <span data-count="107">r</span>eturn (as_con +<span data-count="107">+</span> as_arg, bounds_arg, ty_res)
   | <span data-count="4">O</span>r _ -&gt;
       fail (NotImplemented "or patterns")
 
@@ -214,11 +214,11 @@ and gen_many :
     -&gt; Pat.t list
     -&gt; (As.t * Bounds.t * Ty.t list) IGMonad.t =
  fun ~dir l -&gt;
-  <span data-count="160">f</span>old ~dir l ~init:(As.empty, Bounds.empty, [])
+  <span data-count="193">f</span>old ~dir l ~init:(As.empty, Bounds.empty, [])
     ~f:(fun (as_acc, bounds_acc, tys_acc) pat -&gt;
-      <span data-count="272">l</span>et* as_pat, bounds_pat, ty_pat = ge<span data-count="272">n</span> pat in
-      <span data-count="272">l</span>et* bounds = Bounds.merg<span data-count="272">e</span> bounds_acc bounds_pat in
-      <span data-count="270">r</span>eturn (as_acc +<span data-count="270">+</span> as_pat, bounds, ty_pat :: tys_acc) )
+      <span data-count="340">l</span>et* as_pat, bounds_pat, ty_pat = ge<span data-count="340">n</span> pat in
+      <span data-count="340">l</span>et* bounds = Bounds.merg<span data-count="340">e</span> bounds_acc bounds_pat in
+      <span data-count="338">r</span>eturn (as_acc +<span data-count="338">+</span> as_pat, bounds, ty_pat :: tys_acc) )
 </code></pre>
       </div>
     </div>

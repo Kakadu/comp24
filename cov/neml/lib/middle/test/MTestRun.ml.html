@@ -164,45 +164,45 @@ module Format = Stdlib.Format
 type err = ParseError | SimplError of MSimpl.err
 
 let run' (ir : [`Simpl | `SimplOpt | `CLess | `Anf]) s =
-  <span data-count="39">l</span>et globals =
+  <span data-count="40">l</span>et globals =
     IdSet.of_list
       [I "+"; I "-"; I "*"; I "/"; I "&lt;"; I "&lt;="; I "="; I "print_int"]
   in
 
-  <span data-count="39">l</span>et open Result in
+  <span data-count="40">l</span>et open Result in
   let ( let* ) = ( &gt;&gt;= ) in
 
   let* structure =
-    LParse.parse s |&gt; <span data-count="39">O</span>ption.value_ma<span data-count="39">p</span> ~default:(fai<span data-count="39">l</span> ParseError) ~f:return
+    LParse.parse s |&gt; <span data-count="40">O</span>ption.value_ma<span data-count="40">p</span> ~default:(fai<span data-count="40">l</span> ParseError) ~f:return
   in
 
-  <span data-count="39">l</span>et* sim =
-    MSimpl.from_structure structure |&gt; <span data-count="39">m</span>ap_erro<span data-count="39">r</span> ~f:(fun err -&gt; <span data-count="8">S</span>implError err)
+  <span data-count="40">l</span>et* sim =
+    MSimpl.from_structure structure |&gt; <span data-count="40">m</span>ap_erro<span data-count="40">r</span> ~f:(fun err -&gt; <span data-count="8">S</span>implError err)
   in
-  <span data-count="31">l</span>et opt = MOpt.opt sim in
-  <span data-count="31">l</span>et cls = MCLess.from_simpl globals opt in
+  <span data-count="32">l</span>et opt = MOpt.opt sim in
+  <span data-count="32">l</span>et cls = MCLess.from_simpl ~globals opt in
 
-  <span data-count="31">l</span>et print = PPrint.ToChannel.pretty 1. 50 stdout in
-  <span data-count="31">(</span> match ir with
+  <span data-count="32">l</span>et print = PPrint.ToChannel.pretty 1. 50 stdout in
+  <span data-count="32">(</span> match ir with
   | <span data-count="0">`</span>Simpl -&gt;
       LPrint.pp_expr (MSimpl.to_exp<span data-count="0">r</span> sim) |&gt; <span data-count="0">p</span>rin<span data-count="0">t</span>
   | <span data-count="8">`</span>SimplOpt -&gt;
       LPrint.pp_expr (MSimpl.to_exp<span data-count="8">r</span> opt) |&gt; <span data-count="8">p</span>rin<span data-count="8">t</span>
   | <span data-count="8">`</span>CLess -&gt;
       LPrint.pp_structure (MCLess.to_structur<span data-count="8">e</span> cls) |&gt; <span data-count="8">p</span>rin<span data-count="8">t</span>
-  | <span data-count="15">`</span>Anf -&gt;
+  | <span data-count="16">`</span>Anf -&gt;
       let anf = MAnf.from_cless cls in
-      <span data-count="15">L</span>Print.pp_structure (MAnf.to_structur<span data-count="15">e</span> anf) |&gt; <span data-count="15">p</span>rin<span data-count="15">t</span> ) ;
+      <span data-count="16">L</span>Print.pp_structure (MAnf.to_structur<span data-count="16">e</span> anf) |&gt; <span data-count="16">p</span>rin<span data-count="16">t</span> ) ;
 
   return ()
 
 let run ir s =
-  <span data-count="39">m</span>atch run' ir s with
+  <span data-count="40">m</span>atch run' ir s with
   | <span data-count="0">E</span>rror ParseError -&gt;
       print_endline "syntax error"
   | <span data-count="8">E</span>rror (SimplError err) -&gt;
       MSimpl.pp_err Format.std_formatter err
-  | <span data-count="31">O</span>k _ -&gt;
+  | <span data-count="32">O</span>k _ -&gt;
       ()
 </code></pre>
       </div>

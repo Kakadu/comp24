@@ -266,7 +266,7 @@ open! Base
 (** Identifiers *)
 module Id = struct
   module T = struct
-    <span data-count="104">t</span>ype t = <span data-count="1342">I</span> of <span data-count="10131">s</span>trin<span data-count="10183">g</span>
+    <span data-count="116">t</span>ype t = <span data-count="1988">I</span> of <span data-count="15264">s</span>trin<span data-count="15322">g</span>
     [@@deriving show {with_path= false}, ord, sexp_of, eq]
   end
 
@@ -279,49 +279,49 @@ module List1 = struct
   <span data-count="0">t</span>ype 'a t = <span data-count="0">'</span>a * <span data-count="0">'</span>a lis<span data-count="0">t</span> [@@deriving show {with_path= false}]
 
   let of_list_exn : 'a list -&gt; 'a t = function
-    | <span data-count="12350">h</span>d :: tl -&gt;
+    | <span data-count="17191">h</span>d :: tl -&gt;
         (hd, tl)
     | <span data-count="0">[</span>] -&gt;
         raise (Invalid_argument "empty list")
 
-  let to_list : 'a t -&gt; 'a list = fun (hd, tl) -&gt; <span data-count="1205">h</span>d :: tl
+  let to_list : 'a t -&gt; 'a list = fun (hd, tl) -&gt; <span data-count="1823">h</span>d :: tl
 
-  let map ((hd, tl) : 'a t) ~(f : 'a -&gt; 'b) : 'b t = <span data-count="105">(</span><span data-count="105">f</span> hd, List.ma<span data-count="105">p</span> tl ~f)
+  let map ((hd, tl) : 'a t) ~(f : 'a -&gt; 'b) : 'b t = <span data-count="141">(</span><span data-count="141">f</span> hd, List.ma<span data-count="141">p</span> tl ~f)
 
   let cons (hd : 'a) ((fst, snd) : 'a t) : 'a t = <span data-count="1">(</span>hd, fst :: snd)
 end
 
 (** List containing at least 2 elements *)
 module List2 = struct
-  <span data-count="0">t</span>ype 'a t = <span data-count="2">'</span>a * <span data-count="1">'</span><span data-count="1">a</span> * <span data-count="1011">'</span>a lis<span data-count="2">t</span>
+  <span data-count="0">t</span>ype 'a t = <span data-count="2">'</span>a * <span data-count="1">'</span><span data-count="1">a</span> * <span data-count="1014">'</span>a lis<span data-count="2">t</span>
   [@@deriving show {with_path= false}, ord, sexp_of, eq]
 
   let of_list_exn : 'a list -&gt; 'a t = function
-    | <span data-count="107">f</span>st :: snd :: tl -&gt;
+    | <span data-count="127">f</span>st :: snd :: tl -&gt;
         (fst, snd, tl)
     | <span data-count="0">_</span> :: [] | <span data-count="0">[</span>] -&gt;
         raise (Invalid_argument "not enough elements")
 
-  let to_list : 'a t -&gt; 'a list = fun (fst, snd, tl) -&gt; <span data-count="1935">f</span>st :: snd :: tl
+  let to_list : 'a t -&gt; 'a list = fun (fst, snd, tl) -&gt; <span data-count="1979">f</span>st :: snd :: tl
 
   let map ((fst, snd, tl) : 'a t) ~(f : 'a -&gt; 'b) : 'b t =
-    <span data-count="4784">(</span><span data-count="4784">f</span> fst, <span data-count="4784">f</span> snd, List.ma<span data-count="4784">p</span> tl ~f)
+    <span data-count="4790">(</span><span data-count="4790">f</span> fst, <span data-count="4790">f</span> snd, List.ma<span data-count="4790">p</span> tl ~f)
 end
 
 (* https://ocaml.org/manual/5.0/lex.html#sss:lex-ops-symbols *)
 let is_op_first_char = function
-  | <span data-count="0">'</span>$' | <span data-count="2">'</span>&amp;' | <span data-count="15">'</span>*' | <span data-count="70">'</span>+' | <span data-count="40">'</span>-' | <span data-count="4">'</span>/' | <span data-count="21">'</span>=' | <span data-count="18">'</span>&lt;' | <span data-count="5">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' | <span data-count="0">'</span>|' | <span data-count="1">'</span>%'
+  | <span data-count="0">'</span>$' | <span data-count="2">'</span>&amp;' | <span data-count="16">'</span>*' | <span data-count="83">'</span>+' | <span data-count="49">'</span>-' | <span data-count="4">'</span>/' | <span data-count="26">'</span>=' | <span data-count="18">'</span>&lt;' | <span data-count="5">'</span>&gt;' | <span data-count="0">'</span>@' | <span data-count="0">'</span>^' | <span data-count="0">'</span>|' | <span data-count="1">'</span>%'
     -&gt;
       true
-  | <span data-count="15328">_</span> -&gt;
+  | <span data-count="20112">_</span> -&gt;
       false
 
 let is_op_char = function
-  | <span data-count="4159">c</span>h when is_op_first_cha<span data-count="4159">r</span> ch -&gt;
-      <span data-count="127">t</span>rue
+  | <span data-count="5313">c</span>h when is_op_first_cha<span data-count="5313">r</span> ch -&gt;
+      <span data-count="144">t</span>rue
   | <span data-count="6">'</span>~' | <span data-count="4">'</span>!' | <span data-count="0">'</span>?' | <span data-count="0">'</span>:' | <span data-count="0">'</span>.' -&gt;
       true
-  | <span data-count="4022">_</span> -&gt;
+  | <span data-count="5159">_</span> -&gt;
       false
 
 module type MONAD = sig
@@ -347,21 +347,21 @@ module MakeSEMonad (StateT : T) (ErrorT : T) : sig
 end = struct
   type 'a t = StateT.t -&gt; StateT.t * ('a, ErrorT.t) Result.t
 
-  let run m = <span data-count="321">m</span>
-  let return x st = <span data-count="12916">(</span>st, Ok x)
-  let fail err st = <span data-count="254">(</span>st, Error err)
+  let run m = <span data-count="433">m</span>
+  let return x st = <span data-count="18434">(</span>st, Ok x)
+  let fail err st = <span data-count="285">(</span>st, Error err)
 
   let ( &gt;&gt;= ) (m : 'a t) (f : 'a -&gt; 'b t) st =
-    <span data-count="19601">l</span>et st, x = m st in
-    <span data-count="19601">m</span>atch x with <span data-count="19382">O</span>k x -&gt; f x st | <span data-count="219">E</span>rror err -&gt; fail err st
+    <span data-count="28496">l</span>et st, x = m st in
+    <span data-count="28496">m</span>atch x with <span data-count="28247">O</span>k x -&gt; f x st | <span data-count="249">E</span>rror err -&gt; fail err st
 
   let ( let* ) = ( &gt;&gt;= )
 
-  let ( &gt;&gt;| ) m f = <span data-count="578">m</span> &gt;&gt;= fun x -&gt; <span data-count="578">r</span>eturn (<span data-count="578">f</span> x)
-  let ( *&gt; ) m1 m2 = <span data-count="26">m</span>1 &gt;&gt;= fun _ -&gt; <span data-count="26">m</span>2
+  let ( &gt;&gt;| ) m f = <span data-count="776">m</span> &gt;&gt;= fun x -&gt; <span data-count="776">r</span>eturn (<span data-count="776">f</span> x)
+  let ( *&gt; ) m1 m2 = <span data-count="35">m</span>1 &gt;&gt;= fun _ -&gt; <span data-count="35">m</span>2
 
-  let put st _ = <span data-count="3254">(</span>st, Ok ())
-  let get st = <span data-count="3498">(</span>st, Ok st)
+  let put st _ = <span data-count="4707">(</span>st, Ok ())
+  let get st = <span data-count="5503">(</span>st, Ok st)
 end
 </code></pre>
       </div>

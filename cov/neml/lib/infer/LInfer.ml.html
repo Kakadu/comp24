@@ -262,14 +262,14 @@ let debug = debug
 
 (** Rename vars in type to a, b, ... z, t1, t2, ...*)
 let rename (ty : Ty.t) : Ty.t =
-  <span data-count="145">l</span>et next cnt : Ty.t =
-    <span data-count="87">l</span>et () = cnt := !cnt + 1 in
+  <span data-count="206">l</span>et next cnt : Ty.t =
+    <span data-count="95">l</span>et () = cnt := !cnt + 1 in
 
     let a = Char.to_int 'a' in
-    <span data-count="87">l</span>et z = Char.to_int 'z' in
-    <span data-count="87">l</span>et code = !cnt + a in
+    <span data-count="95">l</span>et z = Char.to_int 'z' in
+    <span data-count="95">l</span>et code = !cnt + a in
 
-    if code &lt;= z then <span data-count="87">V</span>ar (V (Char.of_int_exn code |&gt; <span data-count="87">C</span>har.to_strin<span data-count="87">g</span>))
+    if code &lt;= z then <span data-count="95">V</span>ar (V (Char.of_int_exn code |&gt; <span data-count="95">C</span>har.to_strin<span data-count="95">g</span>))
     else <span data-count="0">V</span>ar (V ("t" ^ Int.to_strin<span data-count="0">g</span> !cnt))
   in
 
@@ -278,74 +278,74 @@ let rename (ty : Ty.t) : Ty.t =
 
   let cnt = ref (-1) in
   let rec traverse : Ty.t -&gt; unit = function
-    | <span data-count="164">V</span>ar var when not (Map.me<span data-count="164">m</span> !sub var) -&gt;
-        <span data-count="87">s</span>ub := Map.se<span data-count="87">t</span> !sub ~key:var ~data:(nex<span data-count="87">t</span> cnt)
-    | <span data-count="77">V</span>ar _ -&gt;
+    | <span data-count="182">V</span>ar var when not (Map.me<span data-count="182">m</span> !sub var) -&gt;
+        <span data-count="95">s</span>ub := Map.se<span data-count="95">t</span> !sub ~key:var ~data:(nex<span data-count="95">t</span> cnt)
+    | <span data-count="87">V</span>ar _ -&gt;
         ()
-    | <span data-count="200">A</span>rr (ty1, ty2) -&gt;
-        traverse ty1 ; <span data-count="200">t</span>raverse ty2
-    | <span data-count="20">T</span>uple tys -&gt;
-        List.iter (List2.to_lis<span data-count="20">t</span> tys) ~f:traverse
-    | <span data-count="260">C</span>on (_, tys) -&gt;
+    | <span data-count="246">A</span>rr (ty1, ty2) -&gt;
+        traverse ty1 ; <span data-count="246">t</span>raverse ty2
+    | <span data-count="21">T</span>uple tys -&gt;
+        List.iter (List2.to_lis<span data-count="21">t</span> tys) ~f:traverse
+    | <span data-count="350">C</span>on (_, tys) -&gt;
         List.iter tys ~f:traverse
   in
   traverse ty ;
 
-  <span data-count="145">I</span>Solve.Sub.apply !sub ty
+  <span data-count="206">I</span>Solve.Sub.apply !sub ty
 
 module Env = struct
   (** Type environment contains info about defined types
       &amp; identifiers' bindings to their types *)
   type t = {types: DefTys.t; bounds: (Id.t, Ty.t, Id.comparator_witness) Map.t}
 
-  let empty : t = {types= DefTys.empty; bounds= Map.empt<span data-count="3">y</span> (module Id)}
+  let empty : t = {types= DefTys.empty; bounds= Map.empt<span data-count="18">y</span> (module Id)}
 end
 
 type output = {ty: Ty.t option; env: Env.t; bounds: Id.t list}
 
 let infer (env : Env.t) (item : StrItem.t) : (output, IError.t) Result.t =
-  <span data-count="170">l</span>et open Result in
+  <span data-count="223">l</span>et open Result in
   let ( let* ) = ( &gt;&gt;= ) in
 
   (* generate type constraints *)
   let* {defined_types= new_types; assumptions= asm; bounds; constraints= cs; ty}
       =
-    IGen.ge<span data-count="170">n</span> env.types item
+    IGen.ge<span data-count="223">n</span> env.types item
   in
 
   (* persist newly defined types in environment *)
-  <span data-count="153">l</span>et env = {env with types= new_types} in
+  <span data-count="206">l</span>et env = {env with types= new_types} in
 
   (* everything left in assumptions are unknown identifiers.
      try to find them in environment and assign respective type
      by adding ExplInst constraints *)
   let* cs =
-    Map.fol<span data-count="153">d</span> asm ~init:(retur<span data-count="153">n</span> cs) ~f:(fun ~key:id ~data:vars acc -&gt;
-        <span data-count="218">l</span>et* (acc : ConSet.t) = acc in
+    Map.fol<span data-count="206">d</span> asm ~init:(retur<span data-count="206">n</span> cs) ~f:(fun ~key:id ~data:vars acc -&gt;
+        <span data-count="288">l</span>et* (acc : ConSet.t) = acc in
 
-        <span data-count="218">l</span>et* sc =
+        <span data-count="285">l</span>et* sc =
           Map.find env.bounds id
-          |&gt; <span data-count="218">O</span>ption.value_ma<span data-count="218">p</span> ~default:(fai<span data-count="218">l</span> (IError.UnboundVariable id))
-               ~f:(fun ty -&gt; <span data-count="216">r</span>eturn (generaliz<span data-count="216">e</span> VarSet.empty ty) )
+          |&gt; <span data-count="285">O</span>ption.value_ma<span data-count="285">p</span> ~default:(fai<span data-count="285">l</span> (IError.UnboundVariable id))
+               ~f:(fun ty -&gt; <span data-count="279">r</span>eturn (generaliz<span data-count="279">e</span> VarSet.empty ty) )
         in
-        <span data-count="216">S</span>et.fold vars ~init:acc ~f:(fun acc var -&gt;
-            <span data-count="323">S</span>et.add acc (ExplInst (Var var, sc)) )
-        |&gt; <span data-count="216">r</span>eturn )
+        <span data-count="279">S</span>et.fold vars ~init:acc ~f:(fun acc var -&gt;
+            <span data-count="411">S</span>et.add acc (ExplInst (Var var, sc)) )
+        |&gt; <span data-count="279">r</span>eturn )
   in
 
   (* solve type constraints *)
-  <span data-count="151">l</span>et* sub = ISolve.solv<span data-count="151">e</span> cs in
-  <span data-count="133">l</span>et close ty = <span data-count="145">I</span>Solve.Sub.apply sub ty |&gt; <span data-count="145">r</span>ename in
+  <span data-count="200">l</span>et* sub = ISolve.solv<span data-count="200">e</span> cs in
+  <span data-count="181">l</span>et close ty = <span data-count="206">I</span>Solve.Sub.apply sub ty |&gt; <span data-count="206">r</span>ename in
 
   (* apply substitution &amp; add new bounds to type environment *)
   let new_bounds =
     Map.fold bounds ~init:env.bounds ~f:(fun ~key ~data:var -&gt;
-        <span data-count="124">M</span>ap.set ~key ~data:(clos<span data-count="124">e</span> (Var var)) )
+        <span data-count="185">M</span>ap.set ~key ~data:(clos<span data-count="185">e</span> (Var var)) )
   in
-  <span data-count="133">l</span>et env = {env with bounds= new_bounds} in
+  <span data-count="181">l</span>et env = {env with bounds= new_bounds} in
   let ty = Option.map ty ~f:close in
 
-  <span data-count="133">r</span>eturn {ty; env; bounds= Map.key<span data-count="133">s</span> bounds}
+  <span data-count="181">r</span>eturn {ty; env; bounds= Map.key<span data-count="181">s</span> bounds}
 </code></pre>
       </div>
     </div>

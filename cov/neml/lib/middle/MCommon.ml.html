@@ -176,14 +176,14 @@ open LAst
 module IdSet = struct
   type t = (Id.t, Id.comparator_witness) Set.t
 
-  let empty : t = Set.empt<span data-count="3">y</span> (module Id)
-  let single x : t = <span data-count="519">S</span>et.singleton (module Id) x
+  let empty : t = Set.empt<span data-count="18">y</span> (module Id)
+  let single x : t = <span data-count="950">S</span>et.singleton (module Id) x
 
-  let of_list : Id.t list -&gt; t = Set.of_lis<span data-count="3">t</span> (module Id)
+  let of_list : Id.t list -&gt; t = Set.of_lis<span data-count="18">t</span> (module Id)
 end
 
 module IdTagged = struct
-  <span data-count="0">t</span>ype tag = <span data-count="82">G</span>en <span data-count="11">|</span> User [@@deriving eq]
+  <span data-count="0">t</span>ype tag = <span data-count="136">G</span>en <span data-count="20">|</span> User [@@deriving eq]
   <span data-count="0">t</span>ype t = Id.t * tag [@@deriving eq]
 end
 
@@ -193,10 +193,10 @@ module FuncDef = struct
 
   let to_stritem (to_expr : 'a -&gt; Expr.t)
       (Func {recf; id= id, _; args; body} : 'a t) : StrItem.t =
-    <span data-count="86">l</span>et efunc : Expr.t =
-      Fun (List1.ma<span data-count="86">p</span> args ~f:(fun id -&gt; <span data-count="150">P</span>at.Var id), to_exp<span data-count="86">r</span> body)
+    <span data-count="118">l</span>et efunc : Expr.t =
+      Fun (List1.ma<span data-count="118">p</span> args ~f:(fun id -&gt; <span data-count="210">P</span>at.Var id), to_exp<span data-count="118">r</span> body)
     in
-    Let (recf, List1.of_list_ex<span data-count="86">n</span> [Expr.{pat= Pat.Var id; expr= efunc}])
+    Let (recf, List1.of_list_ex<span data-count="118">n</span> [Expr.{pat= Pat.Var id; expr= efunc}])
 end
 
 module Const = struct
@@ -204,7 +204,7 @@ module Const = struct
   [@@deriving show {with_path= false}]
 
   let to_expr : t -&gt; Expr.t = function
-    | <span data-count="138">I</span>nt i -&gt;
+    | <span data-count="161">I</span>nt i -&gt;
         Const (Int i)
     | <span data-count="0">C</span>har c -&gt;
         Const (Char c)
@@ -212,11 +212,11 @@ module Const = struct
         Const (String s)
     | <span data-count="4">B</span>ool b -&gt;
         Construct (I (if b then <span data-count="2">"</span>true" else <span data-count="2">"</span>false"), None)
-    | <span data-count="12">U</span>nit -&gt;
+    | <span data-count="14">U</span>nit -&gt;
         Expr.unit
 
   let from_const : LAst.Const.t -&gt; t = function
-    | <span data-count="148">I</span>nt i -&gt;
+    | <span data-count="227">I</span>nt i -&gt;
         Int i
     | <span data-count="0">C</span>har c -&gt;
         Char c

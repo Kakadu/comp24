@@ -146,40 +146,40 @@ open LTypes
 open PCommon
 
 (** 'a, 'b *)
-let pvar = pty_var &gt;&gt;<span data-count="10">|</span> fun id -&gt; <span data-count="36">T</span>y.Var id
+let pvar = pty_var &gt;&gt;<span data-count="25">|</span> fun id -&gt; <span data-count="36">T</span>y.Var id
 
 (** ('k, 'v) map *)
 let pmulti_args_app pty =
-  <span data-count="7">l</span>et* args = paren<span data-count="7">s</span> @@ sep_by<span data-count="7">1</span> (ws *<span data-count="7">&gt;</span> cha<span data-count="7">r</span> ',') pty in
+  <span data-count="21">l</span>et* args = paren<span data-count="21">s</span> @@ sep_by<span data-count="21">1</span> (ws *<span data-count="21">&gt;</span> cha<span data-count="21">r</span> ',') pty in
   <span data-count="7">l</span>et* id = ws *<span data-count="7">&gt;</span> pty_con_id in
   <span data-count="3">r</span>eturn (Ty.Con (id, args))
 
 let poprnd pty =
-  <span data-count="7">w</span>s
-  *&gt; choic<span data-count="7">e</span>
-       [ (pty_con_id &gt;&gt;<span data-count="7">|</span> fun id -&gt; <span data-count="198">T</span>y.Con (id, []))
+  <span data-count="21">w</span>s
+  *&gt; choic<span data-count="21">e</span>
+       [ (pty_con_id &gt;&gt;<span data-count="21">|</span> fun id -&gt; <span data-count="320">T</span>y.Con (id, []))
        ; pvar
-       ; pmulti_args_ap<span data-count="7">p</span> pty
-       ; paren<span data-count="7">s</span> pty ]
+       ; pmulti_args_ap<span data-count="21">p</span> pty
+       ; paren<span data-count="21">s</span> pty ]
 
 (**
   int list
   ('k, 'v) map option option
 *)
 let papp pty =
-  <span data-count="7">l</span>et* arg = poprn<span data-count="7">d</span> pty in
-  <span data-count="241">l</span>et rec pcons acc =
-    <span data-count="254">o</span>ption acc (ws1 *<span data-count="254">&gt;</span> pty_con_id &gt;&gt;<span data-count="254">=</span> fun id -&gt; <span data-count="13">p</span>cons (Ty.Con (id, [acc])))
+  <span data-count="21">l</span>et* arg = poprn<span data-count="21">d</span> pty in
+  <span data-count="363">l</span>et rec pcons acc =
+    <span data-count="376">o</span>ption acc (ws1 *<span data-count="376">&gt;</span> pty_con_id &gt;&gt;<span data-count="376">=</span> fun id -&gt; <span data-count="13">p</span>cons (Ty.Con (id, [acc])))
   in
   pcons arg
 
 let table =
-  let ptuple = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "*" &gt;&gt;| fun _ list2 -&gt; <span data-count="11">T</span>y.Tuple list2 in
-  <span data-count="10">l</span>et parr = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "-&gt;" &gt;&gt;| fun _ lhs rhs -&gt; <span data-count="82">T</span>y.Arr (lhs, rhs) in
+  let ptuple = ws *<span data-count="25">&gt;</span> strin<span data-count="25">g</span> "*" &gt;&gt;| fun _ list2 -&gt; <span data-count="11">T</span>y.Tuple list2 in
+  <span data-count="25">l</span>et parr = ws *<span data-count="25">&gt;</span> strin<span data-count="25">g</span> "-&gt;" &gt;&gt;| fun _ lhs rhs -&gt; <span data-count="157">T</span>y.Arr (lhs, rhs) in
 
-  <span data-count="10">[</span>[InfixN ptuple]; [InfixR parr]]
+  <span data-count="25">[</span>[InfixN ptuple]; [InfixR parr]]
 
-let p : Ty.t t = fi<span data-count="10">x</span> (fun pty -&gt; <span data-count="7">p</span>operators ~table ~poprnd:(pap<span data-count="7">p</span> pty))
+let p : Ty.t t = fi<span data-count="25">x</span> (fun pty -&gt; <span data-count="21">p</span>operators ~table ~poprnd:(pap<span data-count="21">p</span> pty))
 </code></pre>
       </div>
     </div>

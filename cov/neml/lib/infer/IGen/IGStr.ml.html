@@ -216,37 +216,37 @@ let check_type (deftys : DefTys.t) (params : VarSet.t) : Ty.t -&gt; unit t =
   f
 
 let gen (deftys : DefTys.t) :
-    StrItem.t -&gt; (DefTys.t * As.t * Bounds.t * Ty.t option) t = <span data-count="170">f</span>unction
+    StrItem.t -&gt; (DefTys.t * As.t * Bounds.t * Ty.t option) t = <span data-count="223">f</span>unction
   | <span data-count="41">E</span>val expr -&gt;
       let* asm, ty = IGExpr.ge<span data-count="41">n</span> expr in
       <span data-count="32">r</span>eturn (deftys, asm, Bounds.empty, Some ty)
-  | <span data-count="100">L</span>et (recf, bindings) -&gt;
-      let* asm, bounds = IGExpr.gen_le<span data-count="100">t</span> recf (List1.to_lis<span data-count="100">t</span> bindings) in
-      <span data-count="96">r</span>eturn (deftys, asm, bounds, None)
-  | <span data-count="29">T</span>ype {id; params; variants} -&gt;
-      let deftys = Map.set deftys ~key:id ~data:(Set.lengt<span data-count="29">h</span> params) in
-      <span data-count="29">l</span>et defined : Ty.t =
-        Con (id, List.ma<span data-count="29">p</span> (Set.to_lis<span data-count="29">t</span> params) ~f:(fun var -&gt; <span data-count="14">T</span>y.Var var))
+  | <span data-count="127">L</span>et (recf, bindings) -&gt;
+      let* asm, bounds = IGExpr.gen_le<span data-count="127">t</span> recf (List1.to_lis<span data-count="127">t</span> bindings) in
+      <span data-count="123">r</span>eturn (deftys, asm, bounds, None)
+  | <span data-count="55">T</span>ype {id; params; variants} -&gt;
+      let deftys = Map.set deftys ~key:id ~data:(Set.lengt<span data-count="55">h</span> params) in
+      <span data-count="55">l</span>et defined : Ty.t =
+        Con (id, List.ma<span data-count="55">p</span> (Set.to_lis<span data-count="55">t</span> params) ~f:(fun var -&gt; <span data-count="14">T</span>y.Var var))
       in
 
       let* bounds =
-        fol<span data-count="29">d</span> ~dir:`Left variants ~init:Bounds.empty
+        fol<span data-count="55">d</span> ~dir:`Left variants ~init:Bounds.empty
           ~f:(fun acc {id= id_con; arg} -&gt;
-            <span data-count="36">l</span>et* var = fresh in
+            <span data-count="75">l</span>et* var = fresh in
 
-            <span data-count="36">l</span>et* () =
+            <span data-count="75">l</span>et* () =
               match arg with
-              | <span data-count="19">N</span>one -&gt;
-                  c<span data-count="19">s</span> [Var var == defined]
+              | <span data-count="58">N</span>one -&gt;
+                  c<span data-count="58">s</span> [Var var == defined]
               | <span data-count="17">S</span>ome arg -&gt;
                   let* () = check_typ<span data-count="17">e</span> deftys params arg in
                   <span data-count="13">c</span>s [Var var == Arr (arg, defined)]
             in
 
-            <span data-count="32">r</span>eturn (Map.se<span data-count="32">t</span> acc ~key:id_con ~data:var) )
+            <span data-count="71">r</span>eturn (Map.se<span data-count="71">t</span> acc ~key:id_con ~data:var) )
       in
 
-      <span data-count="25">r</span>eturn (deftys, As.empty, bounds, None)
+      <span data-count="51">r</span>eturn (deftys, As.empty, bounds, None)
 </code></pre>
       </div>
     </div>

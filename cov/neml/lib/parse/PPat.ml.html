@@ -180,57 +180,57 @@ open LMisc
 open LAst
 open PCommon
 
-let pvar = pvalue_id &gt;&gt;<span data-count="10">|</span> function <span data-count="169">I</span> "_" -&gt; Pat.Any | <span data-count="6887">i</span>d -&gt; Pat.Var id
-let pconst = pconst &gt;&gt;<span data-count="10">|</span> fun const -&gt; <span data-count="272">P</span>at.Const const
+let pvar = pvalue_id &gt;&gt;<span data-count="25">|</span> function <span data-count="249">I</span> "_" -&gt; Pat.Any | <span data-count="9565">i</span>d -&gt; Pat.Var id
+let pconst = pconst &gt;&gt;<span data-count="25">|</span> fun const -&gt; <span data-count="343">P</span>at.Const const
 
 (** [Cons (hd, tl)] *)
 let pconstruct poprnd =
-  <span data-count="7">l</span>et* id = pconstruct_id in
-  <span data-count="3572">l</span>et* arg = op<span data-count="3572">t</span> poprnd in
-  <span data-count="3572">r</span>eturn (Pat.Construct (id, arg))
+  <span data-count="21">l</span>et* id = pconstruct_id in
+  <span data-count="4852">l</span>et* arg = op<span data-count="4852">t</span> poprnd in
+  <span data-count="4852">r</span>eturn (Pat.Construct (id, arg))
 
 (** [a; b; c] *)
 let plist ppat =
-  <span data-count="7">l</span>et pelements =
-    sep_by<span data-count="7">1</span> (ws *<span data-count="7">&gt;</span> cha<span data-count="7">r</span> ';') ppat
+  <span data-count="21">l</span>et pelements =
+    sep_by<span data-count="21">1</span> (ws *<span data-count="21">&gt;</span> cha<span data-count="21">r</span> ';') ppat
     &gt;&gt;| List.fold_right
           ~init:(Pat.Construct (Id.I "[]", None))
           ~f:(fun pat acc -&gt;
             <span data-count="8">P</span>at.Construct (Id.I "::", Some (Pat.Tuple (pat, acc, []))) )
   in
-  <span data-count="7">c</span>ha<span data-count="7">r</span> '[' *<span data-count="7">&gt;</span> pelements &lt;<span data-count="7">*</span> ws &lt;<span data-count="7">*</span> op<span data-count="7">t</span> (cha<span data-count="7">r</span> ';') &lt;<span data-count="7">*</span> ws &lt;* cha<span data-count="7">r</span> ']'
+  <span data-count="21">c</span>ha<span data-count="21">r</span> '[' *<span data-count="21">&gt;</span> pelements &lt;<span data-count="21">*</span> ws &lt;<span data-count="21">*</span> op<span data-count="21">t</span> (cha<span data-count="21">r</span> ';') &lt;<span data-count="21">*</span> ws &lt;* cha<span data-count="21">r</span> ']'
 
 (**
   [ (pat) ]
   [ (pat: ty) ]
 *)
 let pparens ppat =
-  <span data-count="7">l</span>et p =
+  <span data-count="21">l</span>et p =
     let* pat = ppat in
-    <span data-count="360">o</span>p<span data-count="360">t</span> (ws *<span data-count="360">&gt;</span> cha<span data-count="360">r</span> ':')
+    <span data-count="361">o</span>p<span data-count="361">t</span> (ws *<span data-count="361">&gt;</span> cha<span data-count="361">r</span> ':')
     &gt;&gt;= function
-    | <span data-count="311">N</span>one -&gt; return pat | <span data-count="49">S</span>ome _ -&gt; PTy.p &gt;&gt;| fun ty -&gt; <span data-count="49">P</span>at.Constraint (pat, ty)
+    | <span data-count="312">N</span>one -&gt; return pat | <span data-count="49">S</span>ome _ -&gt; PTy.p &gt;&gt;| fun ty -&gt; <span data-count="49">P</span>at.Constraint (pat, ty)
   in
   parens p
 
 let poprnd ppat =
-  <span data-count="7">f</span>ix (fun poprnd -&gt;
-      <span data-count="7">w</span>s *&gt; choic<span data-count="7">e</span> [pvar; pconst; pconstruc<span data-count="7">t</span> poprnd; plis<span data-count="7">t</span> ppat; pparen<span data-count="7">s</span> ppat] )
+  <span data-count="21">f</span>ix (fun poprnd -&gt;
+      <span data-count="21">w</span>s *&gt; choic<span data-count="21">e</span> [pvar; pconst; pconstruc<span data-count="21">t</span> poprnd; plis<span data-count="21">t</span> ppat; pparen<span data-count="21">s</span> ppat] )
 
 (* ======= Operators ======= *)
 
 let table =
   let plist =
-    ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "::"
+    ws *<span data-count="25">&gt;</span> strin<span data-count="25">g</span> "::"
     &gt;&gt;| fun _ lhs rhs -&gt;
-    <span data-count="804">P</span>at.Construct (Id.I "::", Some (Pat.Tuple (lhs, rhs, [])))
+    <span data-count="1183">P</span>at.Construct (Id.I "::", Some (Pat.Tuple (lhs, rhs, [])))
   in
-  <span data-count="10">l</span>et ptuple = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "," &gt;&gt;| fun _ list2 -&gt; <span data-count="345">P</span>at.Tuple list2 in
-  <span data-count="10">l</span>et por = ws *<span data-count="10">&gt;</span> strin<span data-count="10">g</span> "|" &gt;&gt;| fun _ lhs rhs -&gt; <span data-count="81">P</span>at.Or (lhs, rhs) in
+  <span data-count="25">l</span>et ptuple = ws *<span data-count="25">&gt;</span> strin<span data-count="25">g</span> "," &gt;&gt;| fun _ list2 -&gt; <span data-count="357">P</span>at.Tuple list2 in
+  <span data-count="25">l</span>et por = ws *<span data-count="25">&gt;</span> strin<span data-count="25">g</span> "|" &gt;&gt;| fun _ lhs rhs -&gt; <span data-count="81">P</span>at.Or (lhs, rhs) in
 
-  <span data-count="10">[</span>[InfixR plist]; [InfixN ptuple]; [InfixL por]]
+  <span data-count="25">[</span>[InfixR plist]; [InfixN ptuple]; [InfixL por]]
 
-let p : Pat.t t = fi<span data-count="10">x</span> (fun ppat -&gt; <span data-count="7">p</span>operators ~table ~poprnd:(poprn<span data-count="7">d</span> ppat))
+let p : Pat.t t = fi<span data-count="25">x</span> (fun ppat -&gt; <span data-count="21">p</span>operators ~table ~poprnd:(poprn<span data-count="21">d</span> ppat))
 </code></pre>
       </div>
     </div>

@@ -295,12 +295,12 @@ type def = cl FuncDef.t
 type t = def list * cl
 
 let rec to_expr : cl -&gt; Expr.t = function
-  | <span data-count="68">I</span>d (id, _) -&gt;
+  | <span data-count="76">I</span>d (id, _) -&gt;
       Id id
   | <span data-count="28">C</span>onst const -&gt;
       Const.to_expr const
-  | <span data-count="65">A</span>pply (cl1, cl2) -&gt;
-      Apply (to_exp<span data-count="65">r</span> cl1, to_exp<span data-count="65">r</span> cl2)
+  | <span data-count="69">A</span>pply (cl1, cl2) -&gt;
+      Apply (to_exp<span data-count="69">r</span> cl1, to_exp<span data-count="69">r</span> cl2)
   | <span data-count="1">I</span>f (ccond, cthen, celse) -&gt;
       If (to_exp<span data-count="1">r</span> ccond, to_exp<span data-count="1">r</span> cthen, Some (to_exp<span data-count="1">r</span> celse))
   | <span data-count="2">S</span>eq cls -&gt;
@@ -309,47 +309,47 @@ let rec to_expr : cl -&gt; Expr.t = function
 let to_structure ((defs, cl) : t) : structure =
   <span data-count="8">L</span>ist.fold_right defs
     ~init:[Eval (to_exp<span data-count="8">r</span> cl)]
-    ~f:(fun def acc -&gt; <span data-count="19">F</span>uncDef.to_strite<span data-count="19">m</span> to_expr def :: acc)
+    ~f:(fun def acc -&gt; <span data-count="23">F</span>uncDef.to_strite<span data-count="23">m</span> to_expr def :: acc)
 
 let subst ~(from : IdTagged.t) ~(to_ : IdTagged.t) : cl -&gt; cl =
-  <span data-count="9">l</span>et rec f = function
-    | <span data-count="73">I</span>d id when IdTagged.equa<span data-count="73">l</span> id from -&gt;
-        <span data-count="11">I</span>d to_
-    | <span data-count="70">A</span>pply (cl1, cl2) -&gt;
-        Apply (<span data-count="70">f</span> cl1, <span data-count="70">f</span> cl2)
+  <span data-count="16">l</span>et rec f = function
+    | <span data-count="130">I</span>d id when IdTagged.equa<span data-count="130">l</span> id from -&gt;
+        <span data-count="20">I</span>d to_
+    | <span data-count="124">A</span>pply (cl1, cl2) -&gt;
+        Apply (<span data-count="124">f</span> cl1, <span data-count="124">f</span> cl2)
     | <span data-count="0">S</span>eq cls -&gt;
         Seq (List2.ma<span data-count="0">p</span> cls ~f)
-    | <span data-count="8">I</span>f (ccond, cthen, celse) -&gt;
-        If (<span data-count="8">f</span> ccond, <span data-count="8">f</span> cthen, <span data-count="8">f</span> celse)
-    | (<span data-count="62">I</span>d _ | <span data-count="22">C</span>onst _) as cl -&gt;
+    | <span data-count="14">I</span>f (ccond, cthen, celse) -&gt;
+        If (<span data-count="14">f</span> ccond, <span data-count="14">f</span> cthen, <span data-count="14">f</span> celse)
+    | (<span data-count="110">I</span>d _ | <span data-count="38">C</span>onst _) as cl -&gt;
         cl
   in
   f
 
 (** Converts Simpl to C(losure)Less IR.
     Performs closure conversion and lambda lifting *)
-let from_simpl (globals : IdSet.t) (sim : MSimpl.t) : t =
-  <span data-count="31">l</span>et cnt = ref (-1) in
+let from_simpl ~(globals : IdSet.t) (sim : MSimpl.t) : t =
+  <span data-count="42">l</span>et cnt = ref (-1) in
   let defs : def list ref = ref [] in
 
   (* lifts lambda to the top level with the new generated name *)
   let define ~(recf : MSimpl.rec_flag) ~(args : Id.t List1.t) ~(body : cl) :
       IdTagged.t =
-    <span data-count="105">l</span>et fresh : IdTagged.t =
+    <span data-count="189">l</span>et fresh : IdTagged.t =
       cnt := !cnt + 1 ;
-      (I ("f" ^ Int.to_strin<span data-count="105">g</span> !cnt), Gen)
+      (I ("f" ^ Int.to_strin<span data-count="189">g</span> !cnt), Gen)
     in
 
     let def : def =
       match recf with
-      | <span data-count="96">N</span>onrec -&gt;
+      | <span data-count="173">N</span>onrec -&gt;
           Func {recf= Nonrec; id= fresh; args; body}
-      | <span data-count="9">R</span>ec id_rec -&gt;
+      | <span data-count="16">R</span>ec id_rec -&gt;
           Func
             { recf= Rec
             ; id= fresh
             ; args
-            ; body= subs<span data-count="9">t</span> ~from:(id_rec, User) ~to_:fresh body }
+            ; body= subs<span data-count="16">t</span> ~from:(id_rec, User) ~to_:fresh body }
     in
 
     defs := def :: !defs ;
@@ -357,35 +357,35 @@ let from_simpl (globals : IdSet.t) (sim : MSimpl.t) : t =
   in
 
   let rec f : MSimpl.t -&gt; cl = function
-    | <span data-count="105">F</span>un (recf, args, sim) -&gt;
+    | <span data-count="189">F</span>un (recf, args, sim) -&gt;
         let args = List1.to_list args in
-        <span data-count="105">l</span>et bound =
-          (match recf with <span data-count="96">N</span>onrec -&gt; args | <span data-count="9">R</span>ec id_rec -&gt; id_rec :: args)
-          |&gt; IdSet.of_list |&gt; <span data-count="105">S</span>et.union globals
+        <span data-count="189">l</span>et bound =
+          (match recf with <span data-count="173">N</span>onrec -&gt; args | <span data-count="16">R</span>ec id_rec -&gt; id_rec :: args)
+          |&gt; IdSet.of_list |&gt; <span data-count="189">S</span>et.union globals
         in
-        <span data-count="105">l</span>et free = Set.diff (MSimpl.fre<span data-count="105">e</span> sim) bound |&gt; <span data-count="105">S</span>et.to_list in
+        <span data-count="189">l</span>et free = Set.diff (MSimpl.fre<span data-count="189">e</span> sim) bound |&gt; <span data-count="189">S</span>et.to_list in
 
-        <span data-count="105">l</span>et id_func =
+        <span data-count="189">l</span>et id_func =
           define ~recf
-            ~args:(List.concat [free; args] |&gt; <span data-count="105">L</span>ist1.of_list_ex<span data-count="105">n</span>)
-            ~body:(<span data-count="105">f</span> sim)
+            ~args:(List.concat [free; args] |&gt; <span data-count="189">L</span>ist1.of_list_ex<span data-count="189">n</span>)
+            ~body:(<span data-count="189">f</span> sim)
         in
         List.fold free ~init:(Id id_func) ~f:(fun acc id -&gt;
-            <span data-count="21">A</span>pply (acc, Id (id, User)) )
-    | <span data-count="291">I</span>d id -&gt;
+            <span data-count="78">A</span>pply (acc, Id (id, User)) )
+    | <span data-count="478">I</span>d id -&gt;
         Id (id, User)
-    | <span data-count="370">A</span>pply (sim1, sim2) -&gt;
-        Apply (<span data-count="370">f</span> sim1, <span data-count="370">f</span> sim2)
-    | <span data-count="12">I</span>f (scond, sthen, selse) -&gt;
-        If (<span data-count="12">f</span> scond, <span data-count="12">f</span> sthen, <span data-count="12">f</span> selse)
-    | <span data-count="20">S</span>eq sims -&gt;
-        Seq (List2.ma<span data-count="20">p</span> sims ~f)
-    | <span data-count="154">C</span>onst const -&gt;
+    | <span data-count="602">A</span>pply (sim1, sim2) -&gt;
+        Apply (<span data-count="602">f</span> sim1, <span data-count="602">f</span> sim2)
+    | <span data-count="22">I</span>f (scond, sthen, selse) -&gt;
+        If (<span data-count="22">f</span> scond, <span data-count="22">f</span> sthen, <span data-count="22">f</span> selse)
+    | <span data-count="33">S</span>eq sims -&gt;
+        Seq (List2.ma<span data-count="33">p</span> sims ~f)
+    | <span data-count="243">C</span>onst const -&gt;
         Const const
   in
 
   let cl = f sim in
-  <span data-count="31">(</span>List.re<span data-count="31">v</span> !defs, cl)
+  <span data-count="42">(</span>List.re<span data-count="42">v</span> !defs, cl)
 </code></pre>
       </div>
     </div>

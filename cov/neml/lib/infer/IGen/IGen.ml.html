@@ -118,11 +118,11 @@ type output =
 
 (** Tries to generate type constraints for structure item *)
 let gen (deftys : DefTys.t) (item : StrItem.t) : (output, IError.t) Result.t =
-  <span data-count="170">l</span>et open Result in
-  let constraints, res = IGCommon.IGMonad.run (IGStr.ge<span data-count="170">n</span> deftys item) in
-  <span data-count="170">r</span>es
+  <span data-count="223">l</span>et open Result in
+  let constraints, res = IGCommon.IGMonad.run (IGStr.ge<span data-count="223">n</span> deftys item) in
+  <span data-count="223">r</span>es
   &gt;&gt;| fun (defined_types, assumptions, bounds, ty) -&gt;
-  <span data-count="153">{</span>defined_types; assumptions; bounds; constraints; ty}
+  <span data-count="206">{</span>defined_types; assumptions; bounds; constraints; ty}
 </code></pre>
       </div>
     </div>

@@ -261,47 +261,47 @@ open LMisc
 open PPrint
 
 let parens p =
-  <span data-count="153">g</span>roup @@ alig<span data-count="153">n</span> @@ cha<span data-count="153">r</span> '(' ^<span data-count="153">^</span> alig<span data-count="153">n</span> (brea<span data-count="153">k</span> 0 ^<span data-count="153">^</span> p) ^<span data-count="153">^</span> brea<span data-count="153">k</span> 0 ^<span data-count="153">^</span> cha<span data-count="153">r</span> ')'
+  <span data-count="151">g</span>roup @@ alig<span data-count="151">n</span> @@ cha<span data-count="151">r</span> '(' ^<span data-count="151">^</span> alig<span data-count="151">n</span> (brea<span data-count="151">k</span> 0 ^<span data-count="151">^</span> p) ^<span data-count="151">^</span> brea<span data-count="151">k</span> 0 ^<span data-count="151">^</span> cha<span data-count="151">r</span> ')'
 
 let infixl op l r = <span data-count="84">g</span>roup @@ l ^<span data-count="84">^</span> grou<span data-count="84">p</span> (brea<span data-count="84">k</span> 1 ^<span data-count="84">^</span> op ^<span data-count="84">^</span> r)
-let infixr op l r = <span data-count="306">g</span>roup @@ l ^<span data-count="306">^</span> grou<span data-count="306">p</span> (brea<span data-count="306">k</span> 1) ^<span data-count="306">^</span> op ^<span data-count="306">^</span> r
+let infixr op l r = <span data-count="352">g</span>roup @@ l ^<span data-count="352">^</span> grou<span data-count="352">p</span> (brea<span data-count="352">k</span> 1) ^<span data-count="352">^</span> op ^<span data-count="352">^</span> r
 
 let pp_id (Id.I id) =
-  <span data-count="2160">m</span>atch id with
-  | <span data-count="2160">i</span>d when is_op_cha<span data-count="2160">r</span> (String.ge<span data-count="2160">t</span> id 0) -&gt;
-      <span data-count="116">P</span>Print.parens (cha<span data-count="116">r</span> ' ' ^<span data-count="116">^</span> strin<span data-count="116">g</span> id ^<span data-count="116">^</span> cha<span data-count="116">r</span> ' ')
-  | <span data-count="2044">i</span>d -&gt;
+  <span data-count="2557">m</span>atch id with
+  | <span data-count="2557">i</span>d when is_op_cha<span data-count="2557">r</span> (String.ge<span data-count="2557">t</span> id 0) -&gt;
+      <span data-count="130">P</span>Print.parens (cha<span data-count="130">r</span> ' ' ^<span data-count="130">^</span> strin<span data-count="130">g</span> id ^<span data-count="130">^</span> cha<span data-count="130">r</span> ' ')
+  | <span data-count="2427">i</span>d -&gt;
       string id
 
 let pp_const =
   let open LAst.Const in
   function
-  | <span data-count="345">I</span>nt x -&gt; OCaml.int x | <span data-count="0">C</span>har x -&gt; OCaml.char x | <span data-count="0">S</span>tring x -&gt; OCaml.string x
+  | <span data-count="368">I</span>nt x -&gt; OCaml.int x | <span data-count="0">C</span>har x -&gt; OCaml.char x | <span data-count="0">S</span>tring x -&gt; OCaml.string x
 
 let plet ppat pexpr rec_flag bindings expr =
-  <span data-count="203">l</span>et open LAst.Expr in
-  let rec_flag = match rec_flag with <span data-count="11">R</span>ec -&gt; strin<span data-count="11">g</span> " rec" | <span data-count="192">N</span>onrec -&gt; empty in
+  <span data-count="267">l</span>et open LAst.Expr in
+  let rec_flag = match rec_flag with <span data-count="12">R</span>ec -&gt; strin<span data-count="12">g</span> " rec" | <span data-count="255">N</span>onrec -&gt; empty in
 
   let bindings =
     let docs =
-      List.map (List1.to_lis<span data-count="203">t</span> bindings) ~f:(fun {pat; expr} -&gt;
-          <span data-count="209">g</span>roup @@ nest <span data-count="209">2</span> @@ ppa<span data-count="209">t</span> pat ^<span data-count="209">^</span> grou<span data-count="209">p</span> (strin<span data-count="209">g</span> " =" ^/<span data-count="209">^</span> pexp<span data-count="209">r</span> expr) )
+      List.map (List1.to_lis<span data-count="267">t</span> bindings) ~f:(fun {pat; expr} -&gt;
+          <span data-count="273">g</span>roup @@ nest <span data-count="273">2</span> @@ ppa<span data-count="273">t</span> pat ^<span data-count="273">^</span> grou<span data-count="273">p</span> (strin<span data-count="273">g</span> " =" ^/<span data-count="273">^</span> pexp<span data-count="273">r</span> expr) )
     in
-    <span data-count="203">s</span>eparat<span data-count="203">e</span> (brea<span data-count="203">k</span> 1 ^<span data-count="203">^</span> strin<span data-count="203">g</span> "and" ^<span data-count="203">^</span> nes<span data-count="203">t</span> 2 (brea<span data-count="203">k</span> 1)) docs
+    <span data-count="267">s</span>eparat<span data-count="267">e</span> (brea<span data-count="267">k</span> 1 ^<span data-count="267">^</span> strin<span data-count="267">g</span> "and" ^<span data-count="267">^</span> nes<span data-count="267">t</span> 2 (brea<span data-count="267">k</span> 1)) docs
   in
 
   let in_, expr =
     match expr with
-    | <span data-count="110">N</span>one -&gt;
+    | <span data-count="142">N</span>one -&gt;
         (empty, empty)
-    | <span data-count="93">S</span>ome expr -&gt;
-        (brea<span data-count="93">k</span> 1 ^<span data-count="93">^</span> strin<span data-count="93">g</span> "in", brea<span data-count="93">k</span> 1 ^<span data-count="93">^</span> pexp<span data-count="93">r</span> expr)
+    | <span data-count="125">S</span>ome expr -&gt;
+        (brea<span data-count="125">k</span> 1 ^<span data-count="125">^</span> strin<span data-count="125">g</span> "in", brea<span data-count="125">k</span> 1 ^<span data-count="125">^</span> pexp<span data-count="125">r</span> expr)
   in
 
-  group @@ strin<span data-count="203">g</span> "let" ^<span data-count="203">^</span> rec_flag
-  ^<span data-count="203">^</span> grou<span data-count="203">p</span> (brea<span data-count="203">k</span> 1)
-  ^<span data-count="203">^</span> grou<span data-count="203">p</span> (bindings ^<span data-count="203">^</span> in_)
-  ^<span data-count="203">^</span> expr
+  group @@ strin<span data-count="267">g</span> "let" ^<span data-count="267">^</span> rec_flag
+  ^<span data-count="267">^</span> grou<span data-count="267">p</span> (brea<span data-count="267">k</span> 1)
+  ^<span data-count="267">^</span> grou<span data-count="267">p</span> (bindings ^<span data-count="267">^</span> in_)
+  ^<span data-count="267">^</span> expr
 
 module PrecedencePrinter (Prec : sig
   type t
@@ -313,23 +313,23 @@ end) =
 struct
   type 'a t = P of (int -&gt; 'a)
 
-  let run' (P f) = <span data-count="16899">f</span>
-  let run (P f) = <span data-count="1178">f</span> Prec.min
-  let runf p x = <span data-count="1178">r</span>un (<span data-count="1178">p</span> x)
+  let run' (P f) = <span data-count="18671">f</span>
+  let run (P f) = <span data-count="1504">f</span> Prec.min
+  let runf p x = <span data-count="1504">r</span>un (<span data-count="1504">p</span> x)
 
-  let ( let* ) p f = <span data-count="7170">P</span> (fun lvl -&gt; <span data-count="7170">r</span>un' (<span data-count="7170">f</span> (run<span data-count="7170">'</span> p lvl)) lvl)
+  let ( let* ) p f = <span data-count="7935">P</span> (fun lvl -&gt; <span data-count="7935">r</span>un' (<span data-count="7935">f</span> (run<span data-count="7935">'</span> p lvl)) lvl)
 
   let cur_lvl = P Fn.id
 
-  let pure x = <span data-count="7170">P</span> (fun _ -&gt; <span data-count="7170">x</span>)
+  let pure x = <span data-count="7935">P</span> (fun _ -&gt; <span data-count="7935">x</span>)
 
   let return' lvl doc =
-    <span data-count="3737">l</span>et* cur = cur_lvl in
-    <span data-count="3737">p</span>ure @@ if cur &gt; lvl then <span data-count="141">P</span>rec.paren<span data-count="141">s</span> doc else <span data-count="3596">d</span>oc
+    <span data-count="4305">l</span>et* cur = cur_lvl in
+    <span data-count="4305">p</span>ure @@ if cur &gt; lvl then <span data-count="139">P</span>rec.paren<span data-count="139">s</span> doc else <span data-count="4166">d</span>oc
 
-  let return lvl = <span data-count="2729">r</span>eturn' (Prec.to_enu<span data-count="2729">m</span> lvl)
+  let return lvl = <span data-count="3176">r</span>eturn' (Prec.to_enu<span data-count="3176">m</span> lvl)
 
-  let with_lvl lvl p = <span data-count="2559">p</span>ure @@ run<span data-count="2559">'</span> p lvl
+  let with_lvl lvl p = <span data-count="2801">p</span>ure @@ run<span data-count="2801">'</span> p lvl
 
   let rprefix lvl op p =
     <span data-count="37">l</span>et lvl = Prec.to_enum lvl in
@@ -337,26 +337,26 @@ struct
     <span data-count="37">r</span>eturn' lvl (o<span data-count="37">p</span> doc)
 
   let rinfixl lvl op l r =
-    <span data-count="567">l</span>et lvl = Prec.to_enum lvl in
-    <span data-count="567">l</span>et* l = with_lv<span data-count="567">l</span> lvl l in
-    <span data-count="567">l</span>et* r = with_lv<span data-count="567">l</span> (lvl + 1) r in
-    <span data-count="567">r</span>eturn' lvl (o<span data-count="567">p</span> l r)
+    <span data-count="657">l</span>et lvl = Prec.to_enum lvl in
+    <span data-count="657">l</span>et* l = with_lv<span data-count="657">l</span> lvl l in
+    <span data-count="657">l</span>et* r = with_lv<span data-count="657">l</span> (lvl + 1) r in
+    <span data-count="657">r</span>eturn' lvl (o<span data-count="657">p</span> l r)
 
   let rinfixr lvl op l r =
-    <span data-count="306">l</span>et lvl = Prec.to_enum lvl in
-    <span data-count="306">l</span>et* l = with_lv<span data-count="306">l</span> (lvl + 1) l in
-    <span data-count="306">l</span>et* r = with_lv<span data-count="306">l</span> lvl r in
-    <span data-count="306">r</span>eturn' lvl (o<span data-count="306">p</span> l r)
+    <span data-count="352">l</span>et lvl = Prec.to_enum lvl in
+    <span data-count="352">l</span>et* l = with_lv<span data-count="352">l</span> (lvl + 1) l in
+    <span data-count="352">l</span>et* r = with_lv<span data-count="352">l</span> lvl r in
+    <span data-count="352">r</span>eturn' lvl (o<span data-count="352">p</span> l r)
 
   let rinfixn lvl op ps =
-    <span data-count="98">l</span>et lvl = Prec.to_enum lvl in
-    <span data-count="98">l</span>et* docs =
-      List.fold_righ<span data-count="98">t</span> ps ~init:(pur<span data-count="98">e</span> []) ~f:(fun p acc -&gt;
-          <span data-count="776">l</span>et* acc = acc in
-          <span data-count="776">l</span>et* doc = with_lv<span data-count="776">l</span> (lvl + 1) p in
-          <span data-count="776">p</span>ure (doc :: acc) )
+    <span data-count="83">l</span>et lvl = Prec.to_enum lvl in
+    <span data-count="83">l</span>et* docs =
+      List.fold_righ<span data-count="83">t</span> ps ~init:(pur<span data-count="83">e</span> []) ~f:(fun p acc -&gt;
+          <span data-count="746">l</span>et* acc = acc in
+          <span data-count="746">l</span>et* doc = with_lv<span data-count="746">l</span> (lvl + 1) p in
+          <span data-count="746">p</span>ure (doc :: acc) )
     in
-    <span data-count="98">r</span>eturn' lvl (o<span data-count="98">p</span> docs)
+    <span data-count="83">r</span>eturn' lvl (o<span data-count="83">p</span> docs)
 end
 </code></pre>
       </div>

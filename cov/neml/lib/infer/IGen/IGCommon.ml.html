@@ -343,44 +343,44 @@ end = struct
       (IError)
 
   let run m =
-    <span data-count="170">l</span>et {conset; _}, x =
+    <span data-count="223">l</span>et {conset; _}, x =
       run m {counter= 0; conset= ConSet.empty; bound_vars= VarSet.empty}
     in
-    <span data-count="170">(</span>conset, x)
+    <span data-count="223">(</span>conset, x)
 
   let fresh =
     let* st = get in
-    <span data-count="1638">l</span>et* () = pu<span data-count="1638">t</span> {st with counter= st.counter + 1} in
-    <span data-count="1638">r</span>eturn (Var.V ("gen" ^ Int.to_strin<span data-count="1638">g</span> st.counter))
+    <span data-count="2180">l</span>et* () = pu<span data-count="2180">t</span> {st with counter= st.counter + 1} in
+    <span data-count="2180">r</span>eturn (Var.V ("gen" ^ Int.to_strin<span data-count="2180">g</span> st.counter))
 
   let cs new_cs =
-    <span data-count="1196">l</span>et* st = get in
-    <span data-count="1196">p</span>ut {st with conset= Set.unio<span data-count="1196">n</span> st.conset (Set.of_lis<span data-count="1196">t</span> (module Con) new_cs)}
+    <span data-count="1605">l</span>et* st = get in
+    <span data-count="1605">p</span>ut {st with conset= Set.unio<span data-count="1605">n</span> st.conset (Set.of_lis<span data-count="1605">t</span> (module Con) new_cs)}
 
   let bound_vars =
     let* {bound_vars; _} = get in
-    <span data-count="244">r</span>eturn bound_vars
+    <span data-count="307">r</span>eturn bound_vars
 
   let extend_vars vars m =
-    <span data-count="129">l</span>et* st = get in
-    <span data-count="129">l</span>et* () = pu<span data-count="129">t</span> {st with bound_vars= Set.unio<span data-count="129">n</span> st.bound_vars vars} in
+    <span data-count="157">l</span>et* st = get in
+    <span data-count="157">l</span>et* () = pu<span data-count="157">t</span> {st with bound_vars= Set.unio<span data-count="157">n</span> st.bound_vars vars} in
 
-    <span data-count="129">l</span>et* x = m in
-    <span data-count="129">l</span>et* new_st = get in
-    <span data-count="129">l</span>et* () = pu<span data-count="129">t</span> {new_st with bound_vars= st.bound_vars} in
-    <span data-count="129">r</span>eturn x
+    <span data-count="157">l</span>et* x = m in
+    <span data-count="157">l</span>et* new_st = get in
+    <span data-count="157">l</span>et* () = pu<span data-count="157">t</span> {new_st with bound_vars= st.bound_vars} in
+    <span data-count="157">r</span>eturn x
 
   let fold l ~dir ~init ~f =
-    <span data-count="434">l</span>et init = return init in
-    <span data-count="434">l</span>et f acc x =
-      <span data-count="630">l</span>et* acc = acc in
-      <span data-count="630">f</span> acc x
+    <span data-count="545">l</span>et init = return init in
+    <span data-count="545">l</span>et f acc x =
+      <span data-count="794">l</span>et* acc = acc in
+      <span data-count="794">f</span> acc x
     in
     match dir with
-    | <span data-count="351">`</span>Left -&gt;
+    | <span data-count="455">`</span>Left -&gt;
         List.fold_left l ~init ~f
-    | <span data-count="83">`</span>Right -&gt;
-        List.fold_right l ~init ~f:(fun acc x -&gt; <span data-count="169">f</span> x acc)
+    | <span data-count="90">`</span>Right -&gt;
+        List.fold_right l ~init ~f:(fun acc x -&gt; <span data-count="183">f</span> x acc)
 end
 
 module As = struct
@@ -391,39 +391,39 @@ module As = struct
   *)
   type t = (Id.t, VarSet.t, Id.comparator_witness) Map.t
 
-  let empty : t = Map.empt<span data-count="3">y</span> (module Id)
-  let single x y : t = <span data-count="641">M</span>ap.singleton (module Id) x y
-  let merge = Map.merge_skewed ~combine:(fun ~key:_ -&gt; <span data-count="182">S</span>et.union)
+  let empty : t = Map.empt<span data-count="18">y</span> (module Id)
+  let single x y : t = <span data-count="845">M</span>ap.singleton (module Id) x y
+  let merge = Map.merge_skewed ~combine:(fun ~key:_ -&gt; <span data-count="239">S</span>et.union)
 end
 
 module Bounds = struct
   (** Represents identifiers bound in patterns *)
   type t = (Id.t, Var.t, Id.comparator_witness) Map.t
 
-  let empty : t = Map.empt<span data-count="3">y</span> (module Id)
-  let single x y : t = <span data-count="375">M</span>ap.singleton (module Id) x y
+  let empty : t = Map.empt<span data-count="18">y</span> (module Id)
+  let single x y : t = <span data-count="475">M</span>ap.singleton (module Id) x y
 
   exception Rebound of Id.t
   let merge m1 m2 =
-    <span data-count="431">l</span>et open IGMonad in
+    <span data-count="546">l</span>et open IGMonad in
     try
-      retur<span data-count="429">n</span>
-      @@ Map.merge_skewe<span data-count="429">d</span> m1 m2 ~combine:(fun ~key:id _ _ -&gt;
+      retur<span data-count="544">n</span>
+      @@ Map.merge_skewe<span data-count="544">d</span> m1 m2 ~combine:(fun ~key:id _ _ -&gt;
              <span data-count="2">r</span>aise (Rebound id) )
     with <span data-count="2">R</span>ebound id -&gt; fail (PatVarBoundSeveralTimes id)
 end
 
 let typeof_const : Const.t -&gt; Ty.t = function
-  | <span data-count="172">I</span>nt _ -&gt;
+  | <span data-count="233">I</span>nt _ -&gt;
       Ty.int
   | <span data-count="0">C</span>har _ -&gt;
       Ty.char
   | <span data-count="6">S</span>tring _ -&gt;
       Ty.string
 
-let ( == ) t1 t2 = <span data-count="1149">C</span>on.TyEq (t1, t2)
+let ( == ) t1 t2 = <span data-count="1556">C</span>on.TyEq (t1, t2)
 let ( ++ ) = As.merge
-let ( -- ) asm = <span data-count="244">L</span>ist.fold ~init:asm ~f:Map.remove
+let ( -- ) asm = <span data-count="307">L</span>ist.fold ~init:asm ~f:Map.remove
 </code></pre>
       </div>
     </div>

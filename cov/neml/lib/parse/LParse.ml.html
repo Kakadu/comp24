@@ -37,6 +37,9 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -56,6 +59,9 @@
 <a href="#L13">13</a>
 <a href="#L14">14</a>
 <a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
 </pre>
 <pre><code class="ocaml">[@@@ocaml.text "/*"]
 
@@ -71,7 +77,10 @@ open Angstrom
 open LAst
 
 let parse : string -&gt; structure option =
- fun s -&gt; <span data-count="219">p</span>arse_string ~consume:All PStr.p s |&gt; <span data-count="219">R</span>esult.ok
+ fun s -&gt; <span data-count="235">p</span>arse_string ~consume:All PStr.p s |&gt; <span data-count="235">R</span>esult.ok
+
+let parse_ty : string -&gt; LTypes.Ty.t option =
+ fun s -&gt; <span data-count="45">p</span>arse_string ~consume:All PTy.p s |&gt; <span data-count="45">R</span>esult.ok
 </code></pre>
       </div>
     </div>

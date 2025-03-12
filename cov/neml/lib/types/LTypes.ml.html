@@ -186,7 +186,7 @@ module Format = Stdlib.Format
 
 module Var = struct
   module T = struct
-    <span data-count="46">t</span>ype t = <span data-count="1708">V</span> of <span data-count="159687">s</span>trin<span data-count="159710">g</span>
+    <span data-count="48">t</span>ype t = <span data-count="2000">V</span> of <span data-count="187366">s</span>trin<span data-count="187390">g</span>
     [@@deriving show {with_path= false}, ord, sexp_of, eq]
   end
 
@@ -200,8 +200,8 @@ module VarSet = struct
   let compare = Set.compare_direct
   let sexp_of_t set = <span data-count="0">S</span>et.sexp_of_m__t (module Var) set
 
-  let empty : t = Set.empt<span data-count="10">y</span> (module Var)
-  let single x : t = <span data-count="15577">S</span>et.singleton (module Var) x
+  let empty : t = Set.empt<span data-count="25">y</span> (module Var)
+  let single x : t = <span data-count="16512">S</span>et.singleton (module Var) x
 
   let pp ppf (set : t) =
     <span data-count="0">l</span>et pp_contents =
@@ -213,11 +213,11 @@ module VarSet = struct
 end
 
 module Ty = struct
-  <span data-count="85">t</span>ype t =
-    <span data-count="854">|</span> Var of Var.t  (** A type variable such as ['a] *)
-    <span data-count="760">|</span> Arr of t * <span data-count="538">t</span>  (** [T1 -&gt; T2] *)
+  <span data-count="90">t</span>ype t =
+    <span data-count="1000">|</span> Var of Var.t  (** A type variable such as ['a] *)
+    <span data-count="1125">|</span> Arr of t * <span data-count="768">t</span>  (** [T1 -&gt; T2] *)
     <span data-count="121">|</span> Tuple of t List2.<span data-count="121">t</span>  (** [T1 * ... * Tn] *)
-    <span data-count="2316">|</span> Con of Id.t * <span data-count="10641">t</span> lis<span data-count="618">t</span>
+    <span data-count="3356">|</span> Con of Id.t * <span data-count="13257">t</span> lis<span data-count="830">t</span>
         (** [Con(tconstr, l)] represents:
           - [tconstr]               when [l=[]]
           - [T tconstr]             when [l=[T]]
@@ -232,14 +232,14 @@ module Ty = struct
   let string = Con (I "string", [])
 
   let rec vars = function
-    | <span data-count="11590">V</span>ar var -&gt;
+    | <span data-count="12192">V</span>ar var -&gt;
         VarSet.single var
-    | <span data-count="4087">A</span>rr (ty1, ty2) -&gt;
-        Set.union_list (module Var) [var<span data-count="4087">s</span> ty1; var<span data-count="4087">s</span> ty2]
-    | <span data-count="1559">T</span>uple tys -&gt;
-        List.map ~f:vars (List2.to_lis<span data-count="1559">t</span> tys) |&gt; <span data-count="1559">S</span>et.union_list (module Var)
-    | <span data-count="4589">C</span>on (_, tys) -&gt;
-        List.map ~f:vars tys |&gt; <span data-count="4589">S</span>et.union_list (module Var)
+    | <span data-count="4708">A</span>rr (ty1, ty2) -&gt;
+        Set.union_list (module Var) [var<span data-count="4708">s</span> ty1; var<span data-count="4708">s</span> ty2]
+    | <span data-count="1560">T</span>uple tys -&gt;
+        List.map ~f:vars (List2.to_lis<span data-count="1560">t</span> tys) |&gt; <span data-count="1560">S</span>et.union_list (module Var)
+    | <span data-count="5286">C</span>on (_, tys) -&gt;
+        List.map ~f:vars tys |&gt; <span data-count="5286">S</span>et.union_list (module Var)
 end
 </code></pre>
       </div>

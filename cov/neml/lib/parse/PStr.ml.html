@@ -179,49 +179,49 @@ open PCommon
   [let rec ValId1 PArg1 = E1 and P1 = E2 and ...]
 *)
 let plet =
-  let* rec_flag, bindings = ple<span data-count="10">t</span> PExpr.p PPat.p PTy.p in
-  <span data-count="231">o</span>p<span data-count="231">t</span> @@ space<span data-count="231">d</span> (strin<span data-count="231">g</span> "in")
+  let* rec_flag, bindings = ple<span data-count="25">t</span> PExpr.p PPat.p PTy.p in
+  <span data-count="282">o</span>p<span data-count="282">t</span> @@ space<span data-count="282">d</span> (strin<span data-count="282">g</span> "in")
   &gt;&gt;= function
-  | <span data-count="201">N</span>one -&gt;
+  | <span data-count="251">N</span>one -&gt;
       return (StrItem.Let (rec_flag, bindings))
-  | <span data-count="30">S</span>ome _ -&gt;
-      PExpr.p &gt;&gt;| fun expr -&gt; <span data-count="30">S</span>trItem.Eval (Expr.Let (rec_flag, bindings, expr))
+  | <span data-count="31">S</span>ome _ -&gt;
+      PExpr.p &gt;&gt;| fun expr -&gt; <span data-count="31">S</span>trItem.Eval (Expr.Let (rec_flag, bindings, expr))
 
 let pty_params_ =
-  let pmultiple = parens @@ sep_by<span data-count="10">1</span> (ws *<span data-count="10">&gt;</span> cha<span data-count="10">r</span> ',') (ws *<span data-count="10">&gt;</span> pty_var) in
-  <span data-count="10">l</span>et psingle = pty_var &gt;&gt;| List.return in
-  <span data-count="10">p</span>single &lt;|<span data-count="10">&gt;</span> pmultiple &lt;|<span data-count="10">&gt;</span> retur<span data-count="10">n</span> []
+  let pmultiple = parens @@ sep_by<span data-count="25">1</span> (ws *<span data-count="25">&gt;</span> cha<span data-count="25">r</span> ',') (ws *<span data-count="25">&gt;</span> pty_var) in
+  <span data-count="25">l</span>et psingle = pty_var &gt;&gt;| List.return in
+  <span data-count="25">p</span>single &lt;|<span data-count="25">&gt;</span> pmultiple &lt;|<span data-count="25">&gt;</span> retur<span data-count="25">n</span> []
 
 (** [Foo of string], [Bar of int] *)
 let pconstruct_decl_ =
   let* id = pconstruct_id in
-  <span data-count="53">l</span>et* arg =
-    op<span data-count="53">t</span> @@ space<span data-count="53">d</span> (strin<span data-count="53">g</span> "of")
-    &gt;&gt;<span data-count="53">=</span> function <span data-count="20">N</span>one -&gt; return None | <span data-count="33">S</span>ome _ -&gt; PTy.p &gt;&gt;| Option.some
+  <span data-count="92">l</span>et* arg =
+    op<span data-count="92">t</span> @@ space<span data-count="92">d</span> (strin<span data-count="92">g</span> "of")
+    &gt;&gt;<span data-count="92">=</span> function <span data-count="59">N</span>one -&gt; return None | <span data-count="33">S</span>ome _ -&gt; PTy.p &gt;&gt;| Option.some
   in
-  <span data-count="53">r</span>eturn StrItem.{id; arg}
+  <span data-count="92">r</span>eturn StrItem.{id; arg}
 
 (** [type foo = Foo of string | Bar of int] *)
 let pty_decl =
   let* params =
-    strin<span data-count="10">g</span> "type" *<span data-count="10">&gt;</span> ws1 *<span data-count="10">&gt;</span> pty_params_ &gt;&gt;<span data-count="10">|</span> Set.of_lis<span data-count="10">t</span> (module Var)
+    strin<span data-count="25">g</span> "type" *<span data-count="25">&gt;</span> ws1 *<span data-count="25">&gt;</span> pty_params_ &gt;&gt;<span data-count="25">|</span> Set.of_lis<span data-count="25">t</span> (module Var)
   in
-  <span data-count="45">l</span>et* id = ws *<span data-count="45">&gt;</span> pty_con_id in
-  <span data-count="45">l</span>et* variants =
-    option [<span data-count="45">]</span>
-    @@ ws *<span data-count="45">&gt;</span> strin<span data-count="45">g</span> "=" *<span data-count="45">&gt;</span> ws
-       *<span data-count="45">&gt;</span> op<span data-count="45">t</span> (strin<span data-count="45">g</span> "|")
-       *<span data-count="45">&gt;</span> sep_by<span data-count="45">1</span> (ws *<span data-count="45">&gt;</span> cha<span data-count="45">r</span> '|') (ws *<span data-count="45">&gt;</span> pconstruct_decl_)
+  <span data-count="71">l</span>et* id = ws *<span data-count="71">&gt;</span> pty_con_id in
+  <span data-count="71">l</span>et* variants =
+    option [<span data-count="71">]</span>
+    @@ ws *<span data-count="71">&gt;</span> strin<span data-count="71">g</span> "=" *<span data-count="71">&gt;</span> ws
+       *<span data-count="71">&gt;</span> op<span data-count="71">t</span> (strin<span data-count="71">g</span> "|")
+       *<span data-count="71">&gt;</span> sep_by<span data-count="71">1</span> (ws *<span data-count="71">&gt;</span> cha<span data-count="71">r</span> '|') (ws *<span data-count="71">&gt;</span> pconstruct_decl_)
   in
-  <span data-count="45">r</span>eturn (StrItem.Type {id; params; variants})
+  <span data-count="71">r</span>eturn (StrItem.Type {id; params; variants})
 
-let peval = PExpr.p &gt;&gt;<span data-count="10">|</span> fun expr -&gt; <span data-count="94">S</span>trItem.Eval expr
+let peval = PExpr.p &gt;&gt;<span data-count="25">|</span> fun expr -&gt; <span data-count="94">S</span>trItem.Eval expr
 
-let pstr_item = ws *<span data-count="10">&gt;</span> choic<span data-count="10">e</span> [plet; pty_decl; peval]
+let pstr_item = ws *<span data-count="25">&gt;</span> choic<span data-count="25">e</span> [plet; pty_decl; peval]
 
 let p : structure t =
-  let sep = ws &lt;<span data-count="10">*</span> strin<span data-count="10">g</span> ";;" &lt;|&gt; ws1 in
-  <span data-count="10">s</span>ep_b<span data-count="10">y</span> sep pstr_item &lt;<span data-count="10">*</span> ws &lt;<span data-count="10">*</span> op<span data-count="10">t</span> (strin<span data-count="10">g</span> ";;")
+  let sep = ws &lt;<span data-count="25">*</span> strin<span data-count="25">g</span> ";;" &lt;|&gt; ws1 in
+  <span data-count="25">s</span>ep_b<span data-count="25">y</span> sep pstr_item &lt;<span data-count="25">*</span> ws &lt;<span data-count="25">*</span> op<span data-count="25">t</span> (strin<span data-count="25">g</span> ";;") &lt;<span data-count="25">*</span> ws
 </code></pre>
       </div>
     </div>

@@ -140,15 +140,15 @@ module Prec = struct
   let parens = parens
 end
 
-let pp_var (Var.V var) : document = <span data-count="136">s</span>trin<span data-count="136">g</span> "'" ^^ strin<span data-count="136">g</span> var
+let pp_var (Var.V var) : document = <span data-count="154">s</span>trin<span data-count="154">g</span> "'" ^^ strin<span data-count="154">g</span> var
 
 let pp : Ty.t -&gt; document =
   let open PrecedencePrinter (Prec) in
   let rec p = function
-    | <span data-count="131">T</span>y.Var var -&gt;
-        return Prec.Highest (pp_va<span data-count="131">r</span> var)
-    | <span data-count="249">C</span>on (id, []) -&gt;
-        return Prec.Highest (pp_i<span data-count="249">d</span> id)
+    | <span data-count="149">T</span>y.Var var -&gt;
+        return Prec.Highest (pp_va<span data-count="149">r</span> var)
+    | <span data-count="339">C</span>on (id, []) -&gt;
+        return Prec.Highest (pp_i<span data-count="339">d</span> id)
     | <span data-count="37">C</span>on (id, [arg]) -&gt;
         let op arg = <span data-count="37">g</span>roup @@ arg ^<span data-count="37">^</span> space ^<span data-count="37">^</span> pp_i<span data-count="37">d</span> id in
         rprefix Prec.Con op (<span data-count="37">p</span> arg)
@@ -158,14 +158,14 @@ let pp : Ty.t -&gt; document =
           group @@ paren<span data-count="2">s</span> (flo<span data-count="2">w</span> (comma ^<span data-count="2">^</span> brea<span data-count="2">k</span> 1) args) ^<span data-count="2">^</span> space ^<span data-count="2">^</span> pp_i<span data-count="2">d</span> id
         in
         <span data-count="2">r</span>eturn Prec.Con doc
-    | <span data-count="22">T</span>uple list2 -&gt;
-        let op docs = <span data-count="22">g</span>roup @@ flo<span data-count="22">w</span> (brea<span data-count="22">k</span> 1 ^<span data-count="22">^</span> strin<span data-count="22">g</span> "* ") docs in
-        rinfixn Prec.Tuple op (List.ma<span data-count="22">p</span> (List2.to_lis<span data-count="22">t</span> list2) ~f:p)
-    | <span data-count="207">A</span>rr (l, r) -&gt;
-        rinfixr Prec.Arr (infix<span data-count="207">r</span> (strin<span data-count="207">g</span> "-&gt; ")) (<span data-count="207">p</span> l) (<span data-count="207">p</span> r)
+    | <span data-count="23">T</span>uple list2 -&gt;
+        let op docs = <span data-count="23">g</span>roup @@ flo<span data-count="23">w</span> (brea<span data-count="23">k</span> 1 ^<span data-count="23">^</span> strin<span data-count="23">g</span> "* ") docs in
+        rinfixn Prec.Tuple op (List.ma<span data-count="23">p</span> (List2.to_lis<span data-count="23">t</span> list2) ~f:p)
+    | <span data-count="253">A</span>rr (l, r) -&gt;
+        rinfixr Prec.Arr (infix<span data-count="253">r</span> (strin<span data-count="253">g</span> "-&gt; ")) (<span data-count="253">p</span> l) (<span data-count="253">p</span> r)
   in
 
-  run<span data-count="10">f</span> p
+  run<span data-count="25">f</span> p
 </code></pre>
       </div>
     </div>

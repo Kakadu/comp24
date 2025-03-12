@@ -293,25 +293,25 @@ let pp : Expr.t -&gt; document =
   let open Expr in
   let open PrecedencePrinter (Prec) in
   let rec p = function
-    | <span data-count="985">I</span>d id -&gt;
-        return Prec.Highest (pp_i<span data-count="985">d</span> id)
-    | <span data-count="221">C</span>onst x -&gt;
-        return Prec.Highest (pp_cons<span data-count="221">t</span> x)
-    | <span data-count="93">L</span>et (rec_flag, bindings, expr) -&gt;
-        let doc = plet PpPat.pp (run<span data-count="93">f</span> p) rec_flag bindings (Some expr) in
-        <span data-count="93">r</span>eturn Prec.Open doc
-    | <span data-count="113">F</span>un (args, expr) -&gt;
-        let args = List.map (List1.to_lis<span data-count="113">t</span> args) ~f:PpPat.pp in
-        <span data-count="113">l</span>et expr = runf p expr in
+    | <span data-count="1105">I</span>d id -&gt;
+        return Prec.Highest (pp_i<span data-count="1105">d</span> id)
+    | <span data-count="244">C</span>onst x -&gt;
+        return Prec.Highest (pp_cons<span data-count="244">t</span> x)
+    | <span data-count="125">L</span>et (rec_flag, bindings, expr) -&gt;
+        let doc = plet PpPat.pp (run<span data-count="125">f</span> p) rec_flag bindings (Some expr) in
+        <span data-count="125">r</span>eturn Prec.Open doc
+    | <span data-count="149">F</span>un (args, expr) -&gt;
+        let args = List.map (List1.to_lis<span data-count="149">t</span> args) ~f:PpPat.pp in
+        <span data-count="149">l</span>et expr = runf p expr in
 
-        <span data-count="113">l</span>et doc =
-          group @@ strin<span data-count="113">g</span> "fun"
-          ^<span data-count="113">^</span> grou<span data-count="113">p</span> (brea<span data-count="113">k</span> 1)
-          ^<span data-count="113">^</span> flo<span data-count="113">w</span> (brea<span data-count="113">k</span> 1) args
-          ^<span data-count="113">^</span> strin<span data-count="113">g</span> " -&gt;"
-          ^<span data-count="113">^</span> nes<span data-count="113">t</span> 2 (brea<span data-count="113">k</span> 1 ^<span data-count="113">^</span> expr)
+        <span data-count="149">l</span>et doc =
+          group @@ strin<span data-count="149">g</span> "fun"
+          ^<span data-count="149">^</span> grou<span data-count="149">p</span> (brea<span data-count="149">k</span> 1)
+          ^<span data-count="149">^</span> flo<span data-count="149">w</span> (brea<span data-count="149">k</span> 1) args
+          ^<span data-count="149">^</span> strin<span data-count="149">g</span> " -&gt;"
+          ^<span data-count="149">^</span> nes<span data-count="149">t</span> 2 (brea<span data-count="149">k</span> 1 ^<span data-count="149">^</span> expr)
         in
-        <span data-count="113">r</span>eturn Prec.Open doc
+        <span data-count="149">r</span>eturn Prec.Open doc
     | <span data-count="4">F</span>unction cases -&gt;
         let cases =
           List.map (List1.to_lis<span data-count="4">t</span> cases) ~f:(fun {pat; expr} -&gt;
@@ -341,38 +341,38 @@ let pp : Expr.t -&gt; document =
                ^<span data-count="6">^</span> separat<span data-count="6">e</span> (brea<span data-count="6">k</span> 1 ^<span data-count="6">^</span> strin<span data-count="6">g</span> "| ") cases )
         in
         <span data-count="6">r</span>eturn Prec.Open doc
-    | <span data-count="483">A</span>pply (expr, arg) -&gt;
-        let op expr arg = <span data-count="483">g</span>roup @@ expr ^<span data-count="483">^</span> grou<span data-count="483">p</span> (nes<span data-count="483">t</span> 2 (brea<span data-count="483">k</span> 1 ^<span data-count="483">^</span> arg)) in
-        rinfixl Prec.Apply op (<span data-count="483">p</span> expr) (<span data-count="483">p</span> arg)
-    | <span data-count="22">I</span>f (if_, then_, else_) -&gt;
+    | <span data-count="573">A</span>pply (expr, arg) -&gt;
+        let op expr arg = <span data-count="573">g</span>roup @@ expr ^<span data-count="573">^</span> grou<span data-count="573">p</span> (nes<span data-count="573">t</span> 2 (brea<span data-count="573">k</span> 1 ^<span data-count="573">^</span> arg)) in
+        rinfixl Prec.Apply op (<span data-count="573">p</span> expr) (<span data-count="573">p</span> arg)
+    | <span data-count="24">I</span>f (if_, then_, else_) -&gt;
         let if_ = runf p if_ in
-        <span data-count="22">l</span>et then_ = runf p then_ in
+        <span data-count="24">l</span>et then_ = runf p then_ in
 
-        <span data-count="22">l</span>et else_ = Option.map ~f:(run<span data-count="22">f</span> p) else_ in
-        <span data-count="22">l</span>et else_ =
+        <span data-count="24">l</span>et else_ = Option.map ~f:(run<span data-count="24">f</span> p) else_ in
+        <span data-count="24">l</span>et else_ =
           optional
             (fun else_ -&gt;
-              <span data-count="18">g</span>roup @@ brea<span data-count="18">k</span> 1 ^<span data-count="18">^</span> strin<span data-count="18">g</span> "else"
-              ^<span data-count="18">^</span> grou<span data-count="18">p</span> (nes<span data-count="18">t</span> 2 (brea<span data-count="18">k</span> 1 ^<span data-count="18">^</span> else_)) )
+              <span data-count="20">g</span>roup @@ brea<span data-count="20">k</span> 1 ^<span data-count="20">^</span> strin<span data-count="20">g</span> "else"
+              ^<span data-count="20">^</span> grou<span data-count="20">p</span> (nes<span data-count="20">t</span> 2 (brea<span data-count="20">k</span> 1 ^<span data-count="20">^</span> else_)) )
             else_
         in
 
-        <span data-count="22">l</span>et doc =
-          group @@ strin<span data-count="22">g</span> "if"
-          ^<span data-count="22">^</span> grou<span data-count="22">p</span> (nes<span data-count="22">t</span> 2 (brea<span data-count="22">k</span> 1 ^<span data-count="22">^</span> if_))
-          ^/<span data-count="22">^</span> strin<span data-count="22">g</span> "then"
-          ^<span data-count="22">^</span> grou<span data-count="22">p</span> (nes<span data-count="22">t</span> 2 (brea<span data-count="22">k</span> 1 ^<span data-count="22">^</span> then_))
-          ^<span data-count="22">^</span> else_
+        <span data-count="24">l</span>et doc =
+          group @@ strin<span data-count="24">g</span> "if"
+          ^<span data-count="24">^</span> grou<span data-count="24">p</span> (nes<span data-count="24">t</span> 2 (brea<span data-count="24">k</span> 1 ^<span data-count="24">^</span> if_))
+          ^/<span data-count="24">^</span> strin<span data-count="24">g</span> "then"
+          ^<span data-count="24">^</span> grou<span data-count="24">p</span> (nes<span data-count="24">t</span> 2 (brea<span data-count="24">k</span> 1 ^<span data-count="24">^</span> then_))
+          ^<span data-count="24">^</span> else_
         in
-        <span data-count="22">r</span>eturn Prec.Open doc
-    | <span data-count="29">S</span>eq list2 -&gt;
-        let op docs = <span data-count="29">g</span>roup @@ flo<span data-count="29">w</span> (semi ^<span data-count="29">^</span> brea<span data-count="29">k</span> 1) docs in
-        rinfixn Prec.Seq op (List.ma<span data-count="29">p</span> (List2.to_lis<span data-count="29">t</span> list2) ~f:p)
+        <span data-count="24">r</span>eturn Prec.Open doc
+    | <span data-count="13">S</span>eq list2 -&gt;
+        let op docs = <span data-count="13">g</span>roup @@ flo<span data-count="13">w</span> (semi ^<span data-count="13">^</span> brea<span data-count="13">k</span> 1) docs in
+        rinfixn Prec.Seq op (List.ma<span data-count="13">p</span> (List2.to_lis<span data-count="13">t</span> list2) ~f:p)
     | <span data-count="26">T</span>uple list2 -&gt;
         let op docs = <span data-count="26">g</span>roup @@ flo<span data-count="26">w</span> (comma ^<span data-count="26">^</span> brea<span data-count="26">k</span> 1) docs in
         rinfixn Prec.Tuple op (List.ma<span data-count="26">p</span> (List2.to_lis<span data-count="26">t</span> list2) ~f:p)
-    | <span data-count="40">C</span>onstruct (id, None) -&gt;
-        return Prec.Apply (pp_i<span data-count="40">d</span> id)
+    | <span data-count="42">C</span>onstruct (id, None) -&gt;
+        return Prec.Apply (pp_i<span data-count="42">d</span> id)
     | <span data-count="10">C</span>onstruct (I "::", Some (Tuple (l, r, []))) -&gt;
         rinfixr Prec.List (infix<span data-count="10">r</span> (strin<span data-count="10">g</span> ":: ")) (<span data-count="10">p</span> l) (<span data-count="10">p</span> r)
     | <span data-count="7">C</span>onstruct (id, Some arg) -&gt;
@@ -384,7 +384,7 @@ let pp : Expr.t -&gt; document =
         <span data-count="6">r</span>eturn Prec.Highest doc
   in
 
-  run<span data-count="10">f</span> p
+  run<span data-count="25">f</span> p
 </code></pre>
       </div>
     </div>

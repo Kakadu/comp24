@@ -437,99 +437,99 @@ open IGCommon
 open IGMonad
 
 let rec gen : Expr.t -&gt; (As.t * Ty.t) IGMonad.t = function
-  | <span data-count="468">I</span>d id -&gt;
+  | <span data-count="646">I</span>d id -&gt;
       let* var = fresh in
-      <span data-count="468">r</span>eturn (As.singl<span data-count="468">e</span> id (VarSet.singl<span data-count="468">e</span> var), Ty.Var var)
-  | <span data-count="177">C</span>onst const -&gt;
-      return (As.empty, typeof_cons<span data-count="177">t</span> const)
-  | <span data-count="376">A</span>pply (efun, earg) -&gt;
-      let* as_fun, ty_fun = ge<span data-count="376">n</span> efun in
-      <span data-count="376">l</span>et* as_arg, ty_arg = ge<span data-count="376">n</span> earg in
-      <span data-count="376">l</span>et* ty_res = fresh &gt;&gt;<span data-count="376">|</span> fun var -&gt; <span data-count="376">T</span>y.Var var in
+      <span data-count="646">r</span>eturn (As.singl<span data-count="646">e</span> id (VarSet.singl<span data-count="646">e</span> var), Ty.Var var)
+  | <span data-count="238">C</span>onst const -&gt;
+      return (As.empty, typeof_cons<span data-count="238">t</span> const)
+  | <span data-count="545">A</span>pply (efun, earg) -&gt;
+      let* as_fun, ty_fun = ge<span data-count="545">n</span> efun in
+      <span data-count="545">l</span>et* as_arg, ty_arg = ge<span data-count="545">n</span> earg in
+      <span data-count="545">l</span>et* ty_res = fresh &gt;&gt;<span data-count="545">|</span> fun var -&gt; <span data-count="545">T</span>y.Var var in
 
-      <span data-count="376">l</span>et* () = c<span data-count="376">s</span> [ty_fun == Arr (ty_arg, ty_res)] in
-      <span data-count="376">r</span>eturn (as_fun +<span data-count="376">+</span> as_arg, ty_res)
-  | <span data-count="123">F</span>un (args, expr) -&gt;
+      <span data-count="545">l</span>et* () = c<span data-count="545">s</span> [ty_fun == Arr (ty_arg, ty_res)] in
+      <span data-count="545">r</span>eturn (as_fun +<span data-count="545">+</span> as_arg, ty_res)
+  | <span data-count="151">F</span>un (args, expr) -&gt;
       let* as_args, bounds, ty_args =
-        IGPat.gen_man<span data-count="123">y</span> ~dir:`Left (List1.to_lis<span data-count="123">t</span> args)
+        IGPat.gen_man<span data-count="151">y</span> ~dir:`Left (List1.to_lis<span data-count="151">t</span> args)
       in
 
-      <span data-count="122">l</span>et* as_expr, ty_expr =
-        extend_var<span data-count="122">s</span> (Set.of_lis<span data-count="122">t</span> (module Var) (Map.dat<span data-count="122">a</span> bounds)) (ge<span data-count="122">n</span> expr)
+      <span data-count="150">l</span>et* as_expr, ty_expr =
+        extend_var<span data-count="150">s</span> (Set.of_lis<span data-count="150">t</span> (module Var) (Map.dat<span data-count="150">a</span> bounds)) (ge<span data-count="150">n</span> expr)
       in
-      <span data-count="122">l</span>et* () = resolve_as<span data-count="122">m</span> bounds as_expr `Eq in
+      <span data-count="150">l</span>et* () = resolve_as<span data-count="150">m</span> bounds as_expr `Eq in
 
-      <span data-count="122">l</span>et ty_res =
+      <span data-count="150">l</span>et ty_res =
         List.fold ty_args ~init:ty_expr ~f:(fun acc ty_arg -&gt;
-            <span data-count="196">T</span>y.Arr (ty_arg, acc) )
+            <span data-count="254">T</span>y.Arr (ty_arg, acc) )
       in
 
-      <span data-count="122">r</span>eturn (as_args +<span data-count="122">+</span> (as_expr -<span data-count="122">-</span> Map.key<span data-count="122">s</span> bounds), ty_res)
-  | <span data-count="46">T</span>uple exprs -&gt;
-      let* asm, tys = gen_man<span data-count="46">y</span> ~dir:`Right (List2.to_lis<span data-count="46">t</span> exprs) in
-      <span data-count="46">r</span>eturn (asm, Ty.Tuple (List2.of_list_ex<span data-count="46">n</span> tys))
-  | <span data-count="21">I</span>f (econd, ethen, eelse) -&gt;
-      let* as_cond, ty_cond = ge<span data-count="21">n</span> econd in
-      <span data-count="21">l</span>et* as_then, ty_then = ge<span data-count="21">n</span> ethen in
-      <span data-count="21">l</span>et* as_else, ty_else =
-        match eelse with <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> (As.empty, Ty.unit) | <span data-count="21">S</span>ome e -&gt; ge<span data-count="21">n</span> e
+      <span data-count="150">r</span>eturn (as_args +<span data-count="150">+</span> (as_expr -<span data-count="150">-</span> Map.key<span data-count="150">s</span> bounds), ty_res)
+  | <span data-count="48">T</span>uple exprs -&gt;
+      let* asm, tys = gen_man<span data-count="48">y</span> ~dir:`Right (List2.to_lis<span data-count="48">t</span> exprs) in
+      <span data-count="48">r</span>eturn (asm, Ty.Tuple (List2.of_list_ex<span data-count="48">n</span> tys))
+  | <span data-count="29">I</span>f (econd, ethen, eelse) -&gt;
+      let* as_cond, ty_cond = ge<span data-count="29">n</span> econd in
+      <span data-count="29">l</span>et* as_then, ty_then = ge<span data-count="29">n</span> ethen in
+      <span data-count="29">l</span>et* as_else, ty_else =
+        match eelse with <span data-count="0">N</span>one -&gt; retur<span data-count="0">n</span> (As.empty, Ty.unit) | <span data-count="29">S</span>ome e -&gt; ge<span data-count="29">n</span> e
       in
 
-      <span data-count="21">l</span>et* () = c<span data-count="21">s</span> [ty_cond == Ty.bool; ty_then == ty_else] in
-      <span data-count="21">r</span>eturn (as_cond +<span data-count="21">+</span> as_then +<span data-count="21">+</span> as_else, ty_then)
+      <span data-count="29">l</span>et* () = c<span data-count="29">s</span> [ty_cond == Ty.bool; ty_then == ty_else] in
+      <span data-count="29">r</span>eturn (as_cond +<span data-count="29">+</span> as_then +<span data-count="29">+</span> as_else, ty_then)
   | <span data-count="4">S</span>eq exprs -&gt;
       let* asm, tys = gen_man<span data-count="4">y</span> ~dir:`Left (List2.to_lis<span data-count="4">t</span> exprs) in
       <span data-count="4">r</span>eturn (asm, List.hd_ex<span data-count="4">n</span> tys)
-  | <span data-count="89">C</span>onstruct (id, arg) -&gt;
+  | <span data-count="92">C</span>onstruct (id, arg) -&gt;
       let* var = fresh in
-      <span data-count="89">l</span>et as_con = As.single id (VarSet.singl<span data-count="89">e</span> var) in
-      <span data-count="89">l</span>et ty_con = Ty.Var var in
+      <span data-count="92">l</span>et as_con = As.single id (VarSet.singl<span data-count="92">e</span> var) in
+      <span data-count="92">l</span>et ty_con = Ty.Var var in
 
-      let* ty_res = fresh &gt;&gt;<span data-count="89">|</span> fun var -&gt; <span data-count="89">T</span>y.Var var in
-      <span data-count="89">l</span>et* as_arg =
+      let* ty_res = fresh &gt;&gt;<span data-count="92">|</span> fun var -&gt; <span data-count="92">T</span>y.Var var in
+      <span data-count="92">l</span>et* as_arg =
         match arg with
-        | <span data-count="48">N</span>one -&gt;
-            let* () = c<span data-count="48">s</span> [ty_con == ty_res] in
-            <span data-count="48">r</span>eturn As.empty
-        | <span data-count="41">S</span>ome arg -&gt;
-            let* as_arg, ty_arg = ge<span data-count="41">n</span> arg in
-            <span data-count="41">l</span>et* () = c<span data-count="41">s</span> [ty_con == Arr (ty_arg, ty_res)] in
-            <span data-count="41">r</span>eturn as_arg
+        | <span data-count="49">N</span>one -&gt;
+            let* () = c<span data-count="49">s</span> [ty_con == ty_res] in
+            <span data-count="49">r</span>eturn As.empty
+        | <span data-count="43">S</span>ome arg -&gt;
+            let* as_arg, ty_arg = ge<span data-count="43">n</span> arg in
+            <span data-count="43">l</span>et* () = c<span data-count="43">s</span> [ty_con == Arr (ty_arg, ty_res)] in
+            <span data-count="43">r</span>eturn as_arg
       in
 
-      <span data-count="89">r</span>eturn (as_con +<span data-count="89">+</span> as_arg, ty_res)
-  | <span data-count="3">C</span>onstraint (expr, ty) -&gt;
-      let* as_expr, ty_expr = ge<span data-count="3">n</span> expr in
-      <span data-count="3">l</span>et* () = c<span data-count="3">s</span> [ty_expr == ty] in
-      <span data-count="3">r</span>eturn (as_expr, ty_expr)
-  | <span data-count="65">L</span>et (recf, bindings, expr) -&gt;
-      let* as_bindings, bounds = gen_le<span data-count="65">t</span> recf (List1.to_lis<span data-count="65">t</span> bindings) in
-      <span data-count="61">l</span>et* as_expr, ty_expr = ge<span data-count="61">n</span> expr in
+      <span data-count="92">r</span>eturn (as_con +<span data-count="92">+</span> as_arg, ty_res)
+  | <span data-count="5">C</span>onstraint (expr, ty) -&gt;
+      let* as_expr, ty_expr = ge<span data-count="5">n</span> expr in
+      <span data-count="5">l</span>et* () = c<span data-count="5">s</span> [ty_expr == ty] in
+      <span data-count="5">r</span>eturn (as_expr, ty_expr)
+  | <span data-count="85">L</span>et (recf, bindings, expr) -&gt;
+      let* as_bindings, bounds = gen_le<span data-count="85">t</span> recf (List1.to_lis<span data-count="85">t</span> bindings) in
+      <span data-count="81">l</span>et* as_expr, ty_expr = ge<span data-count="81">n</span> expr in
 
-      <span data-count="61">l</span>et* () = resolve_as<span data-count="61">m</span> bounds as_expr `ImplInst in
-      <span data-count="61">r</span>eturn (as_bindings +<span data-count="61">+</span> (as_expr -<span data-count="61">-</span> Map.key<span data-count="61">s</span> bounds), ty_expr)
-  | <span data-count="13">M</span>atch (scrutinee, cases) -&gt;
-      let* as_scr, ty_scr = ge<span data-count="13">n</span> scrutinee in
+      <span data-count="81">l</span>et* () = resolve_as<span data-count="81">m</span> bounds as_expr `ImplInst in
+      <span data-count="81">r</span>eturn (as_bindings +<span data-count="81">+</span> (as_expr -<span data-count="81">-</span> Map.key<span data-count="81">s</span> bounds), ty_expr)
+  | <span data-count="16">M</span>atch (scrutinee, cases) -&gt;
+      let* as_scr, ty_scr = ge<span data-count="16">n</span> scrutinee in
 
-      <span data-count="13">l</span>et gen_case Expr.{pat; expr= erhs} =
-        <span data-count="28">l</span>et* as_pat, bounds, ty_pat = IGPat.ge<span data-count="28">n</span> pat in
-        <span data-count="28">l</span>et* as_rhs, ty_rhs = ge<span data-count="28">n</span> erhs in
+      <span data-count="16">l</span>et gen_case Expr.{pat; expr= erhs} =
+        <span data-count="34">l</span>et* as_pat, bounds, ty_pat = IGPat.ge<span data-count="34">n</span> pat in
+        <span data-count="34">l</span>et* as_rhs, ty_rhs = ge<span data-count="34">n</span> erhs in
 
-        <span data-count="28">l</span>et* () = c<span data-count="28">s</span> [ty_pat == ty_scr] in
-        <span data-count="28">l</span>et* () = resolve_as<span data-count="28">m</span> bounds as_rhs `ImplInst in
+        <span data-count="34">l</span>et* () = c<span data-count="34">s</span> [ty_pat == ty_scr] in
+        <span data-count="34">l</span>et* () = resolve_as<span data-count="34">m</span> bounds as_rhs `ImplInst in
 
-        <span data-count="28">r</span>eturn (as_pat +<span data-count="28">+</span> (as_rhs -<span data-count="28">-</span> Map.key<span data-count="28">s</span> bounds), ty_rhs)
+        <span data-count="34">r</span>eturn (as_pat +<span data-count="34">+</span> (as_rhs -<span data-count="34">-</span> Map.key<span data-count="34">s</span> bounds), ty_rhs)
       in
 
-      let* ty_res = fresh &gt;&gt;<span data-count="13">|</span> fun var -&gt; <span data-count="13">T</span>y.Var var in
-      <span data-count="13">l</span>et* as_cases =
-        fol<span data-count="13">d</span> ~dir:`Left (List1.to_lis<span data-count="13">t</span> cases) ~init:As.empty ~f:(fun acc case -&gt;
-            <span data-count="28">l</span>et* as_case, ty_case = gen_cas<span data-count="28">e</span> case in
-            <span data-count="28">l</span>et* () = c<span data-count="28">s</span> [ty_case == ty_res] in
-            <span data-count="28">r</span>eturn (acc +<span data-count="28">+</span> as_case) )
+      let* ty_res = fresh &gt;&gt;<span data-count="16">|</span> fun var -&gt; <span data-count="16">T</span>y.Var var in
+      <span data-count="16">l</span>et* as_cases =
+        fol<span data-count="16">d</span> ~dir:`Left (List1.to_lis<span data-count="16">t</span> cases) ~init:As.empty ~f:(fun acc case -&gt;
+            <span data-count="34">l</span>et* as_case, ty_case = gen_cas<span data-count="34">e</span> case in
+            <span data-count="34">l</span>et* () = c<span data-count="34">s</span> [ty_case == ty_res] in
+            <span data-count="34">r</span>eturn (acc +<span data-count="34">+</span> as_case) )
       in
 
-      <span data-count="13">r</span>eturn (as_scr +<span data-count="13">+</span> as_cases, ty_res)
+      <span data-count="16">r</span>eturn (as_scr +<span data-count="16">+</span> as_cases, ty_res)
   | <span data-count="8">F</span>unction cases -&gt;
       let* ty_scr = fresh &gt;&gt;<span data-count="8">|</span> fun var -&gt; <span data-count="8">T</span>y.Var var in
 
@@ -558,37 +558,37 @@ let rec gen : Expr.t -&gt; (As.t * Ty.t) IGMonad.t = function
 and gen_many :
     dir:[`Left | `Right] -&gt; Expr.t list -&gt; (As.t * Ty.t list) IGMonad.t =
  fun ~dir l -&gt;
-  <span data-count="50">f</span>old l ~dir ~init:(As.empty, []) ~f:(fun (as_acc, tys_acc) expr -&gt;
-      <span data-count="103">l</span>et* as_expr, ty_expr = ge<span data-count="103">n</span> expr in
-      <span data-count="103">r</span>eturn (as_acc +<span data-count="103">+</span> as_expr, ty_expr :: tys_acc) )
+  <span data-count="52">f</span>old l ~dir ~init:(As.empty, []) ~f:(fun (as_acc, tys_acc) expr -&gt;
+      <span data-count="107">l</span>et* as_expr, ty_expr = ge<span data-count="107">n</span> expr in
+      <span data-count="107">r</span>eturn (as_acc +<span data-count="107">+</span> as_expr, ty_expr :: tys_acc) )
 
 (** Create constraints for the type of every pattern and its occurrences in expression *)
 and resolve_asm (bounds : Bounds.t) (asm : As.t) (con : [`Eq | `ImplInst]) =
-  <span data-count="244">l</span>et* bound_vars = bound_vars in
-  <span data-count="244">M</span>ap.fold bounds ~init:(retur<span data-count="244">n</span> ()) ~f:(fun ~key:id ~data:var_pat acc -&gt;
-      <span data-count="299">l</span>et* () = acc in
+  <span data-count="307">l</span>et* bound_vars = bound_vars in
+  <span data-count="307">M</span>ap.fold bounds ~init:(retur<span data-count="307">n</span> ()) ~f:(fun ~key:id ~data:var_pat acc -&gt;
+      <span data-count="381">l</span>et* () = acc in
 
-      <span data-count="299">l</span>et vars_expr = Map.find asm id |&gt; <span data-count="299">O</span>ption.value ~default:VarSet.empty in
-      <span data-count="299">S</span>et.fold vars_expr ~init:(retur<span data-count="299">n</span> ()) ~f:(fun acc var_expr -&gt;
-          <span data-count="315">l</span>et* () = acc in
+      <span data-count="381">l</span>et vars_expr = Map.find asm id |&gt; <span data-count="381">O</span>ption.value ~default:VarSet.empty in
+      <span data-count="381">S</span>et.fold vars_expr ~init:(retur<span data-count="381">n</span> ()) ~f:(fun acc var_expr -&gt;
+          <span data-count="421">l</span>et* () = acc in
 
-          <span data-count="315">l</span>et con =
+          <span data-count="421">l</span>et con =
             match con with
-            | <span data-count="247">`</span>Eq -&gt;
+            | <span data-count="343">`</span>Eq -&gt;
                 Var var_expr == Var var_pat
-            | <span data-count="68">`</span>ImplInst -&gt;
+            | <span data-count="78">`</span>ImplInst -&gt;
                 ImplInst (Var var_expr, bound_vars, Var var_pat)
           in
           cs [con] ) )
 
 and gen_let (recf : Expr.rec_flag) (bindings : Expr.value_binding list) =
   (* checks recursive binding for forbidden expressions *)
-  <span data-count="165">l</span>et check_rec (vb : Expr.value_binding) : unit t =
-    <span data-count="35">l</span>et* bound =
-      match vb.pat with <span data-count="30">V</span>ar id -&gt; retur<span data-count="30">n</span> id | <span data-count="5">p</span>at -&gt; fai<span data-count="5">l</span> (NotVarLHSRec pat)
+  <span data-count="212">l</span>et check_rec (vb : Expr.value_binding) : unit t =
+    <span data-count="44">l</span>et* bound =
+      match vb.pat with <span data-count="39">V</span>ar id -&gt; retur<span data-count="39">n</span> id | <span data-count="5">p</span>at -&gt; fai<span data-count="5">l</span> (NotVarLHSRec pat)
     in
-    <span data-count="30">m</span>atch vb.expr with
-    | <span data-count="26">F</span>un _ | <span data-count="0">F</span>unction _ | <span data-count="1">C</span>onst _ -&gt;
+    <span data-count="39">m</span>atch vb.expr with
+    | <span data-count="35">F</span>un _ | <span data-count="0">F</span>unction _ | <span data-count="1">C</span>onst _ -&gt;
         return ()
     | <span data-count="1">I</span>d id when not (Id.equa<span data-count="1">l</span> id bound) -&gt;
         <span data-count="1">r</span>eturn ()
@@ -597,22 +597,22 @@ and gen_let (recf : Expr.rec_flag) (bindings : Expr.value_binding list) =
   in
 
   let* asm, bounds =
-    fol<span data-count="165">d</span> ~dir:`Left bindings ~init:(As.empty, Bounds.empty)
+    fol<span data-count="212">d</span> ~dir:`Left bindings ~init:(As.empty, Bounds.empty)
       ~f:(fun (as_acc, bounds_acc) vb -&gt;
-        <span data-count="167">l</span>et* () = match recf with <span data-count="35">R</span>ec -&gt; check_re<span data-count="35">c</span> vb | <span data-count="132">N</span>onrec -&gt; retur<span data-count="132">n</span> () in
+        <span data-count="214">l</span>et* () = match recf with <span data-count="44">R</span>ec -&gt; check_re<span data-count="44">c</span> vb | <span data-count="170">N</span>onrec -&gt; retur<span data-count="170">n</span> () in
 
-        <span data-count="160">l</span>et* as_pat, bounds_pat, ty_pat = IGPat.ge<span data-count="160">n</span> vb.pat in
-        <span data-count="159">l</span>et* as_expr, ty_expr = ge<span data-count="159">n</span> vb.expr in
+        <span data-count="207">l</span>et* as_pat, bounds_pat, ty_pat = IGPat.ge<span data-count="207">n</span> vb.pat in
+        <span data-count="206">l</span>et* as_expr, ty_expr = ge<span data-count="206">n</span> vb.expr in
 
-        <span data-count="159">l</span>et* () = c<span data-count="159">s</span> [ty_pat == ty_expr] in
-        <span data-count="159">l</span>et* bounds = Bounds.merg<span data-count="159">e</span> bounds_acc bounds_pat in
-        <span data-count="159">r</span>eturn (as_acc +<span data-count="159">+</span> as_pat +<span data-count="159">+</span> as_expr, bounds) )
+        <span data-count="206">l</span>et* () = c<span data-count="206">s</span> [ty_pat == ty_expr] in
+        <span data-count="206">l</span>et* bounds = Bounds.merg<span data-count="206">e</span> bounds_acc bounds_pat in
+        <span data-count="206">r</span>eturn (as_acc +<span data-count="206">+</span> as_pat +<span data-count="206">+</span> as_expr, bounds) )
   in
 
-  <span data-count="157">m</span>atch recf with
-  | <span data-count="26">R</span>ec -&gt;
-      resolve_as<span data-count="26">m</span> bounds asm `Eq *&gt; retur<span data-count="26">n</span> (asm -<span data-count="26">-</span> Map.key<span data-count="26">s</span> bounds, bounds)
-  | <span data-count="131">N</span>onrec -&gt;
+  <span data-count="204">m</span>atch recf with
+  | <span data-count="35">R</span>ec -&gt;
+      resolve_as<span data-count="35">m</span> bounds asm `Eq *&gt; retur<span data-count="35">n</span> (asm -<span data-count="35">-</span> Map.key<span data-count="35">s</span> bounds, bounds)
+  | <span data-count="169">N</span>onrec -&gt;
       return (asm, bounds)
 </code></pre>
       </div>
