@@ -41,7 +41,7 @@ let predefined_funcs =
   ; "create_unit", function_type ptr_t [||]
   ; "create_char", function_type ptr_t [| char_t |]
   ; "create_string", var_arg_function_type ptr_t [||]
-  ; "apply", var_arg_function_type ptr_t [| ptr_t; ptr_t |]
+  ; "apply", var_arg_function_type ptr_t [| ptr_t; int_t |]
   ; "create_tuple", var_arg_function_type ptr_t [| int_t |]
   ; "create_list", function_type ptr_t [| ptr_t; ptr_t |]
   ; "create_empty_list", function_type ptr_t [||]

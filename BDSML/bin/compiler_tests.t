@@ -1,16 +1,14 @@
+
   $ clang-16 -std=c++20 -c runtime/runtime.cpp -o runtime.o
   $ for f in manytests/typed/*.ml; do
+  > echo "\n----------------------------------- $f"
   > ./compiler.exe < $f
   > clang-16 -lstdc++ -std=c++20 -lffi out.ll runtime.o -o a.out
-  > echo "\n----------------------------------- $f"
   > cat $f
-  > echo "\n"
+  > echo "Answer:"
   > ./a.out
   > rm a.out
   > done
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-cf6ae5.o: in function `main':
-  BDSML:(.text+0x25a): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   
   ----------------------------------- manytests/typed/001fac.ml
   let rec fac n = if n<=1 then 1 else n * fac (n-1)
@@ -19,20 +17,8 @@
     let () = print_int (fac 4) in
     0
   
-  
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_k0")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs in file "lib/llvm/codegen.ml", line 135, characters 31-45
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-8fb482.o: in function `main':
-  BDSML:(.text+0x25a): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+  Answer:
+  24
   
   ----------------------------------- manytests/typed/002fac.ml
   let rec fac_cps n k =
@@ -43,14 +29,8 @@
     let () = print_int (fac_cps 4 (fun print_int -> print_int)) in
     0
   
-  
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-a0673c.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+  Answer:
+  24
   
   ----------------------------------- manytests/typed/003fib.ml
   let rec fib_acc a b n =
@@ -70,25 +50,9 @@
     let () = print_int (fib 4) in
     0
   
-  
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Couldn't find value for key__var_test10")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
-  Called from Stdlib__List.map in file "list.ml", line 86, characters 15-19
-  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 92, characters 32-60
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 104, characters 16-31
-  Called from My_llvm__Codegen.compile_values in file "lib/llvm/codegen.ml", line 145, characters 23-38
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_main in file "lib/llvm/codegen.ml", line 162, characters 11-33
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 169, characters 11-31
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-160406.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+  Answer:
+  3
+  3
   
   ----------------------------------- manytests/typed/004manyargs.ml
   let wrap f = if 1 = 1 then f else f
@@ -110,22 +74,10 @@
     let temp2 = wrap test3 1 10 100 in
     0
   
-  
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_f")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs.(fun) in file "lib/llvm/codegen.ml", line 136, characters 57-71
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-d56ca9.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+  Answer:
+  terminate called after throwing an instance of 'std::runtime_error'
+    what():  Invalid value, expected l, got index 5, error std::get: wrong index for variant
+  Aborted (core dumped)
   
   ----------------------------------- manytests/typed/005fix.ml
   let rec fix f x = f (fix f) x
@@ -136,23 +88,8 @@
     let () = print_int (fix fac 6) in
     0
   
-  
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Couldn't find value for keylifted_0")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
-  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 77, characters 19-35
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs in file "lib/llvm/codegen.ml", line 135, characters 31-45
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-e9eeba.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+  Answer:
+  720
   
   ----------------------------------- manytests/typed/006partial.ml
   let foo b = if b then (fun foo -> foo+2) else (fun foo -> foo*10)
@@ -160,22 +97,10 @@
   let foo x = foo true (foo false (foo true (foo false x)))
   let main =
     let () = print_int (foo 11) in
-    0
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_foo2")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 104, characters 16-31
-  Called from My_llvm__Codegen.compile_values in file "lib/llvm/codegen.ml", line 145, characters 23-38
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_main in file "lib/llvm/codegen.ml", line 162, characters 11-33
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 169, characters 11-31
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-a87285.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    0Answer:
+  terminate called after throwing an instance of 'std::runtime_error'
+    what():  Invalid value, expected l, got index 5, error std::get: wrong index for variant
+  Aborted (core dumped)
   
   ----------------------------------- manytests/typed/006partial2.ml
   let foo a b c =
@@ -189,22 +114,11 @@
     let foo = foo 2 in
     let foo = foo 3 in
     let () = print_int foo in
-    0
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Couldn't find value for keylifted_1")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs in file "lib/llvm/codegen.ml", line 135, characters 31-45
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-6be5e5.o: in function `main':
-  BDSML:(.text+0x546): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x63c): undefined reference to `create_unit'
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    0Answer:
+  1
+  2
+  3
+  7
   
   ----------------------------------- manytests/typed/006partial3.ml
   let foo a =
@@ -214,18 +128,7 @@
   
   let main =
     let () = foo 4 8 9 in
-    0
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-0a6a3a.o: in function `__var__start':
-  BDSML:(.text+0x74): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0xc4): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x124): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x19d): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x2fc): undefined reference to `create_unit'
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-0a6a3a.o:BDSML:(.text+0x3bf): more undefined references to `create_unit' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    0Answer:
   
   ----------------------------------- manytests/typed/007order.ml
   let _start () () a () b _c () d __ =
@@ -235,79 +138,39 @@
   
   
   let main =
-    print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_g")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 104, characters 16-31
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs in file "lib/llvm/codegen.ml", line 135, characters 31-45
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-cb8ff9.o: in function `__var__start':
-  BDSML:(.text+0x74): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0xc4): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x124): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x19d): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x2fc): undefined reference to `create_unit'
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-cb8ff9.o:BDSML:(.text+0x3bf): more undefined references to `create_unit' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    print_int (_start (print_int 1) (print_int 2) 3 (print_int 4) 100 1000 (print_int (-1)) 10000 (-555555))Answer:
+  1
+  2
+  4
+  -1
+  103
+  -35
+  4
   
   ----------------------------------- manytests/typed/008ascription.ml
   let addi = fun f g x -> (f x (g x: bool) : int)
   
   let main =
     let () = print_int (addi (fun x b -> if b then x+1 else x*2) (fun _start -> _start/2 = 0) 4) in
-    0
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Couldn't find value for keylifted_0")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 104, characters 16-31
-  Called from My_llvm__Codegen.compile_values in file "lib/llvm/codegen.ml", line 145, characters 23-38
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_main in file "lib/llvm/codegen.ml", line 162, characters 11-33
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 169, characters 11-31
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-251886.o: in function `__var__start':
-  BDSML:(.text+0x74): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0xc4): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x124): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x19d): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x2fc): undefined reference to `create_unit'
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-251886.o:BDSML:(.text+0x3bf): more undefined references to `create_unit' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    0Answer:
+  8
   
   ----------------------------------- manytests/typed/009let_poly.ml
   let temp =
     let f = fun x -> x in
-    (f 1, f true)
-  
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_f")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs.(fun) in file "lib/llvm/codegen.ml", line 136, characters 57-71
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-92f63b.o: in function `__var__start':
-  BDSML:(.text+0x74): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0xc4): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x124): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x19d): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x2fc): undefined reference to `create_unit'
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-92f63b.o:BDSML:(.text+0x3bf): more undefined references to `create_unit' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
+    (f 1, f true)Answer:
   
   ----------------------------------- manytests/typed/015tuples.ml
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_map':
+  BDSML:(.text+0x71): undefined reference to `get_from_tuple'
+  /usr/bin/ld: BDSML:(.text+0xac): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_feven':
+  BDSML:(.text+0x261): undefined reference to `get_from_tuple'
+  /usr/bin/ld: BDSML:(.text+0x299): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_fodd':
+  BDSML:(.text+0x3b1): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o:BDSML:(.text+0x3ee): more undefined references to `get_from_tuple' follow
+  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   let rec fix f x = f (fix f) x
   let map f p = let (a,b) = p in (f a, f b)
   let fixpoly l =
@@ -330,31 +193,32 @@
     let () = print_int (even 4) in
     0
   
-  
-  
+  Answer:
   ./a.out: not found
   rm: cannot remove 'a.out': No such file or directory
-  Fatal error: exception Failure("Undefined function: __var_f")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 104, characters 16-31
-  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 77, characters 19-35
-  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 81, characters 19-35
-  Called from My_llvm__Codegen.compile_func in file "lib/llvm/codegen.ml", line 129, characters 19-37
-  Called from My_llvm__Codegen.compile_funcs.(fun) in file "lib/llvm/codegen.ml", line 136, characters 57-71
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 168, characters 11-37
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-75fe40.o: in function `__var__start':
-  BDSML:(.text+0x74): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0xc4): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x124): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x19d): undefined reference to `create_unit'
-  /usr/bin/ld: BDSML:(.text+0x2fc): undefined reference to `create_unit'
-  /usr/bin/ld: /tmp/build_9a60d5_dune/out-75fe40.o:BDSML:(.text+0x3bf): more undefined references to `create_unit' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   
   ----------------------------------- manytests/typed/016lists.ml
+  Fatal error: exception Failure("Couldn't find value for keyprint_int")
+  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
+  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
+  Called from Stdlib__List.map in file "list.ml", line 86, characters 15-19
+  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 94, characters 29-57
+  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 102, characters 16-31
+  Called from My_llvm__Codegen.compile_values in file "lib/llvm/codegen.ml", line 153, characters 23-38
+  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
+  Called from My_llvm__Codegen.compile_main in file "lib/llvm/codegen.ml", line 170, characters 11-33
+  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 177, characters 11-31
+  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_map':
+  BDSML:(.text+0x71): undefined reference to `get_from_tuple'
+  /usr/bin/ld: BDSML:(.text+0xac): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_feven':
+  BDSML:(.text+0x261): undefined reference to `get_from_tuple'
+  /usr/bin/ld: BDSML:(.text+0x299): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_fodd':
+  BDSML:(.text+0x3b1): undefined reference to `get_from_tuple'
+  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o:BDSML:(.text+0x3ee): more undefined references to `get_from_tuple' follow
+  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   let rec length xs =
     match xs with
     | [] -> 0
@@ -396,8 +260,8 @@
     let () = iter print_int [1;2;3] in
     let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
     0
-  
-  
+  Answer:
   ./a.out: not found
   rm: cannot remove 'a.out': No such file or directory
   [1]
+

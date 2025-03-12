@@ -160,7 +160,6 @@ extern "C" Value *apply(Value *v, int count, ...) {
 
     Value *result;
     ffi_call(&cif, FFI_FN(func.func), &result, args.data());
-    delete copy;
     return result;
   }
   return copy;
