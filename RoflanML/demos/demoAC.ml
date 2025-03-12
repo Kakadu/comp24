@@ -5,7 +5,7 @@
 open Base
 open Roflanml_lib
 open Roflanml_lib.Typing
-open Roflanml_lib.Closure_conversion
+open Roflanml_lib.Alpha_conversion
 open Roflanml_lib.Ast_to_str
 
 let () =
@@ -21,7 +21,7 @@ let () =
         Stdlib.Format.printf "%a" pp_error err;
         fail "Typecheck error"
     in
-    return (close_program prog)
+    alpha_convert_program prog
   in
   match prog with
   | Ok prog ->
