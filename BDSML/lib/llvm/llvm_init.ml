@@ -83,6 +83,7 @@ let predefined_init () =
          let t =
            match op.alt_name with
            | "print_int" -> op.llvm_t void_t ptr_t
+           | "print_string" -> op.llvm_t void_t ptr_t
            | _ -> op.llvm_t ptr_t ptr_t
          in
          let func = declare_function op.alt_name t my_module in

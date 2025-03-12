@@ -21,7 +21,7 @@ template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 void add_to_tuple();
 class Value;
 extern "C" Value *create_tuple(int count, ...);
-extern "C" Value *create_bool(char v);
+extern "C" Value *create_bool(bool v);
 
 class Value {
 public:
@@ -60,20 +60,34 @@ public:
     std::variant<option, list> args;
 
   public:
+    enum ConsType {
+      None = 0,
+      Some = 1,
+      ListAdd = 2,
+      EmptyList = 3,
+    };
+
     ConstructorT() = default;
 
-    ConstructorT(std::string name, Value *param) {
-      if (name == "[]") {
-        args.emplace<list>(ValuePtr(nullptr), ValuePtr(nullptr));
-      } else if (name == "::") {
+    ConstructorT(ConsType name, Value *param) {
+      switch (name) {
+      case ConsType::None:
+        args.emplace<option>();
+        return;
+      case ConsType::Some:
+        args.emplace<option>(ValuePtr(param));
+        return;
+      case ConsType::ListAdd: {
         auto &params = param->get_tuple();
         args.emplace<list>(params[0], params[1]);
-      } else if (name == "Some") {
-        args.emplace<option>(ValuePtr(param));
-      } else if (name == "None") {
-        args.emplace<option>();
-      } else {
-        throw std::invalid_argument("Unknown constructor: " + name);
+        return;
+      }
+      case ConsType::EmptyList:
+        args.emplace<list>(ValuePtr(nullptr), ValuePtr(nullptr));
+        return;
+      default:
+        throw std::invalid_argument(
+            std::format("Unknown constructor: {}", static_cast<int>(name)));
       }
     }
 
@@ -93,17 +107,32 @@ public:
                         args);
     }
 
-    Value *same_cons(std::string name) {
-      return std::visit(
-          overloaded{[&](list &arg) {
-                       return create_bool((name == "[]" && !arg.second) ||
-                                          (name == "::" && arg.second));
-                     },
-                     [&](option &arg) {
-                       return create_bool((name == "None" && !arg) ||
-                                          (name == "Some" && arg));
-                     }},
-          args);
+    Value *same_cons(ConsType name) {
+      return std::visit(overloaded{[&](list &arg) {
+                                     switch (name) {
+                                     case EmptyList:
+                                       return create_bool(!arg.second.get());
+                                     case ListAdd:
+                                       return create_bool(arg.second.get());
+                                     default:
+                                       throw std::invalid_argument(std::format(
+                                           "Unknown constructor: {}",
+                                           static_cast<int>(name)));
+                                     }
+                                   },
+                                   [&](option &arg) {
+                                     switch (name) {
+                                     case None:
+                                       return create_bool(!arg);
+                                     case Some:
+                                       return create_bool(arg.has_value());
+                                     default:
+                                       throw std::invalid_argument(std::format(
+                                           "Unknown constructor: {}",
+                                           static_cast<int>(name)));
+                                     }
+                                   }},
+                        args);
     }
 
     bool operator==(const ConstructorT &b) const { return args == b.args; }
@@ -134,8 +163,8 @@ public:
   static auto String(std::string str) { return new Value(std::move(str)); }
   static Value *Tuple(TupleType elems) { return new Value(std::move(elems)); }
   static auto Unit() { return new Value(); }
-  static auto Constructor(std::string name, Value *param) {
-    return new Value(ConstructorT(std::move(name), param));
+  static auto Constructor(int name, Value *param) {
+    return new Value(ConstructorT(ConstructorT::ConsType(name), param));
   }
 
   static auto Function(void *func, size_t args_count) {
@@ -155,8 +184,8 @@ public:
   [[nodiscard]] Value *disassemble() {
     return get<ConstructorT>().disassemble();
   }
-  [[nodiscard]] Value *same_cons(std::string name) {
-    return get<ConstructorT>().same_cons(std::move(name));
+  [[nodiscard]] Value *same_cons(int name) {
+    return get<ConstructorT>().same_cons(ConstructorT::ConsType(name));
   }
 
   bool operator==(const Value &b) const { return value == b.value; }
@@ -164,23 +193,31 @@ public:
 
 extern "C" Value *copy(Value *v) { return new Value(*v); }
 
-extern "C" Value *apply(Value *v, int count, ...) {
+#define PRINT(type)                                                            \
+  extern "C" void print_##type(Value *v) {                                     \
+    auto res = std::format("{}", v->get_##type());                             \
+    std::cout << res << std::endl;                                             \
+  }
+
+using string = std::string;
+
+PRINT(bool)
+PRINT(int)
+PRINT(char)
+PRINT(string)
+
+Value *apply_cpp(Value *v, std::vector<Value *> const &args) {
   auto copy = new Value(v->get_func());
 
   auto &func = copy->get_func();
   std::vector<Value *> next;
-  va_list varargs;
-  va_start(varargs, count);
-  for (auto _ : std::views::iota(0, count)) {
-    auto c = va_arg(varargs, Value *);
+  for (auto &arg : args) {
     if (func.can_call()) {
-      next.emplace_back(c);
+      next.emplace_back(arg);
     } else {
-      func.args.emplace_back(c);
+      func.args.emplace_back(arg);
     }
   }
-  va_end(varargs);
-
   if (func.can_call()) {
     ffi_cif cif;
     auto arg_types = std::vector(func.args_count, &ffi_type_pointer);
@@ -198,30 +235,32 @@ extern "C" Value *apply(Value *v, int count, ...) {
     Value *result;
     ffi_call(&cif, FFI_FN(func.func), &result, args.data());
     if (!next.empty()) {
-      result = apply(result, next.size(), next.data());
+      result = apply_cpp(result, next);
     }
     return result;
   }
   return copy;
 }
 
+extern "C" Value *apply(Value *v, int count, ...) {
+  std::vector<Value *> args;
+  va_list varargs;
+  va_start(varargs, count);
+  for (auto _ : std::views::iota(0, count)) {
+    auto c = va_arg(varargs, Value *);
+    args.emplace_back(c);
+  }
+  va_end(varargs);
+
+  return apply_cpp(v, args);
+}
+
 extern "C" bool get_bool(Value *v) { return v->get_bool(); }
 extern "C" Value *create_unit() { return Value::Unit(); }
-extern "C" Value *create_int(const char v) { return Value::Int(v); }
-extern "C" Value *create_bool(const char v) { return Value::Bool(v); }
+extern "C" Value *create_int(const int64_t v) { return Value::Int(v); }
+extern "C" Value *create_bool(const bool v) { return Value::Bool(v); }
 extern "C" Value *create_char(const char v) { return Value::Char(v); }
-extern "C" Value *create_string(int count, ...) {
-  std::string string;
-  string.reserve(count);
-  va_list args;
-  va_start(args, count);
-  for (auto _ : std::views::iota(0, count)) {
-    int c = va_arg(args, int);
-    string.push_back(static_cast<char>(c));
-  }
-  va_end(args);
-  return Value::String(std::move(string));
-}
+extern "C" Value *create_string(const char *str) { return Value::String(str); }
 extern "C" Value *create_tuple(int count, ...) {
   Value::TupleType vector;
   vector.reserve(count);
@@ -240,11 +279,11 @@ extern "C" Value *get_from_tuple(Value *tuple, int index) {
 extern "C" Value *create_function(void *func, size_t args_count) {
   return Value::Function(func, args_count);
 }
-extern "C" Value *create_constructor(const char *c, Value *arg) {
-  return Value::Constructor(c, arg);
+extern "C" Value *create_constructor(int name, Value *arg) {
+  return Value::Constructor(name, arg);
 }
 extern "C" Value *disassemble(Value *name) { return name->disassemble(); }
-extern "C" Value *same_cons(Value *cons, const char *name) {
+extern "C" Value *same_cons(Value *cons, int name) {
   return cons->same_cons(name);
 }
 
@@ -286,19 +325,6 @@ extern "C" Value *op_eq(Value *a, Value *b) {
 }
 extern "C" Value *op_neq(Value *a, Value *b) { return op_not(op_eq(a, b)); }
 extern "C" Value *op_phys_eq(Value *a, Value *b) { return Value::Bool(a == b); }
-
-#define PRINT(type)                                                            \
-  extern "C" void print_##type(Value *v) {                                     \
-    auto res = std::format("{}", v->get_##type());                             \
-    std::cout << res << std::endl;                                             \
-  }
-
-using string = std::string;
-
-PRINT(bool)
-PRINT(int)
-PRINT(char)
-PRINT(string)
 
 extern "C" void exception(Value *s) {
   throw std::runtime_error(s->get_string());
