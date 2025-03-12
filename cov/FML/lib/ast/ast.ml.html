@@ -270,32 +270,32 @@
 
 <span data-count="0">t</span>ype program = <span data-count="334">d</span>eclaration lis<span data-count="74">t</span> [@@deriving show { with_path = false }]
 
-let cint x = <span data-count="64422">C</span>Int x
-let cbool x = <span data-count="417">C</span>Bool x
+let cint x = <span data-count="134258">C</span>Int x
+let cbool x = <span data-count="407">C</span>Bool x
 
 (* Constructors for patterns *)
 let pany _ = <span data-count="8">P</span>Any
-let pnill _ = <span data-count="1013">P</span>Nill
-let punit _ = <span data-count="3464">P</span>Unit
+let pnill _ = <span data-count="2361">P</span>Nill
+let punit _ = <span data-count="6484">P</span>Unit
 let pconst c = <span data-count="2">P</span>Const c
-let pident v = <span data-count="15547">P</span>Identifier v
-let pcons l r = <span data-count="1146">P</span>Cons (l, r)
-let ptuple l = <span data-count="98">P</span>Tuple l
+let pident v = <span data-count="27892">P</span>Identifier v
+let pcons l r = <span data-count="2662">P</span>Cons (l, r)
+let ptuple l = <span data-count="221">P</span>Tuple l
 let pconstraint p t = <span data-count="1">P</span>Constraint (p, t)
 
 (* ------------------------- *)
 
 (* Constructors for expressions *)
 
-let econst c = <span data-count="64837">E</span>Const c
-let eidentifier v = <span data-count="45170">E</span>Identifier v
-let etuple l = <span data-count="2484">E</span>Tuple l
-let efun arg expr = <span data-count="7733">E</span>Fun (arg, expr)
+let econst c = <span data-count="134663">E</span>Const c
+let eidentifier v = <span data-count="89963">E</span>Identifier v
+let etuple l = <span data-count="5778">E</span>Tuple l
+let efun arg expr = <span data-count="14402">E</span>Fun (arg, expr)
 let econstraint e t = <span data-count="17">E</span>Constraint (e, t)
 (* ---------------------------- *)
 
 (* Constructor for declaration *)
-let ddeclaration pat expr = <span data-count="397">D</span>Declaration (pat, expr)
+let ddeclaration pat expr = <span data-count="542">D</span>Declaration (pat, expr)
 </code></pre>
       </div>
     </div>

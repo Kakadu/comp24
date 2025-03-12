@@ -367,56 +367,56 @@ open Common
 open Base
 
 let rec free_vars binded =
-  <span data-count="2489">l</span>et open StrSet in
+  <span data-count="3777">l</span>et open StrSet in
   function
-  | <span data-count="178">P</span>e_EConst _ | <span data-count="7">P</span>e_ENill | <span data-count="2">P</span>e_EUnit -&gt; StrSet.empty
-  | <span data-count="1115">P</span>e_EIdentifier id -&gt; if find binded id then <span data-count="532">e</span>mpty else <span data-count="583">s</span>ingleton id
-  | <span data-count="71">P</span>e_EIf (e1, e2, e3) -&gt;
-    union_list [ free_var<span data-count="71">s</span> binded e1; free_var<span data-count="71">s</span> binded e2; free_var<span data-count="71">s</span> binded e3 ]
-  | <span data-count="115">P</span>e_EFun (args, body) -&gt;
-    let binded = union binded (of_lis<span data-count="115">t</span> args) in
-    <span data-count="115">f</span>ree_vars binded body
-  | <span data-count="889">P</span>e_EApp (e1, e2) -&gt; union (free_var<span data-count="889">s</span> binded e1) (free_var<span data-count="889">s</span> binded e2)
-  | <span data-count="90">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
-    union (free_var<span data-count="90">s</span> binded e1) (free_var<span data-count="90">s</span> (ad<span data-count="90">d</span> binded name) e2)
+  | <span data-count="222">P</span>e_EConst _ | <span data-count="21">P</span>e_ENill | <span data-count="6">P</span>e_EUnit -&gt; StrSet.empty
+  | <span data-count="1737">P</span>e_EIdentifier id -&gt; if find binded id then <span data-count="988">e</span>mpty else <span data-count="749">s</span>ingleton id
+  | <span data-count="125">P</span>e_EIf (e1, e2, e3) -&gt;
+    union_list [ free_var<span data-count="125">s</span> binded e1; free_var<span data-count="125">s</span> binded e2; free_var<span data-count="125">s</span> binded e3 ]
+  | <span data-count="143">P</span>e_EFun (args, body) -&gt;
+    let binded = union binded (of_lis<span data-count="143">t</span> args) in
+    <span data-count="143">f</span>ree_vars binded body
+  | <span data-count="1305">P</span>e_EApp (e1, e2) -&gt; union (free_var<span data-count="1305">s</span> binded e1) (free_var<span data-count="1305">s</span> binded e2)
+  | <span data-count="164">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
+    union (free_var<span data-count="164">s</span> binded e1) (free_var<span data-count="164">s</span> (ad<span data-count="164">d</span> binded name) e2)
   | <span data-count="3">P</span>e_ELet (Rec, name, e1, e2) -&gt;
     let binded = add binded name in
     <span data-count="3">u</span>nion (free_var<span data-count="3">s</span> binded e1) (free_var<span data-count="3">s</span> binded e2)
-  | <span data-count="13">P</span>e_ECons (e1, e2) -&gt; union (free_var<span data-count="13">s</span> binded e1) (free_var<span data-count="13">s</span> binded e2)
-  | <span data-count="6">P</span>e_ETuple es -&gt;
-    List.fold es ~init:empty ~f:(fun acc e -&gt; <span data-count="18">u</span>nion acc (free_var<span data-count="18">s</span> binded e))
+  | <span data-count="39">P</span>e_ECons (e1, e2) -&gt; union (free_var<span data-count="39">s</span> binded e1) (free_var<span data-count="39">s</span> binded e2)
+  | <span data-count="12">P</span>e_ETuple es -&gt;
+    List.fold es ~init:empty ~f:(fun acc e -&gt; <span data-count="30">u</span>nion acc (free_var<span data-count="30">s</span> binded e))
 ;;
 
 let make_apply expr args env =
-  <span data-count="110">L</span>ist.fold args ~init:expr ~f:(fun acc name -&gt;
-    <span data-count="85">l</span>et arg =
+  <span data-count="156">L</span>ist.fold args ~init:expr ~f:(fun acc name -&gt;
+    <span data-count="51">l</span>et arg =
       match StrMap.find env name with
       | <span data-count="0">S</span>ome e -&gt; e
-      | <span data-count="85">N</span>one -&gt; Pe_EIdentifier name
+      | <span data-count="51">N</span>one -&gt; Pe_EIdentifier name
     in
     Pe_EApp (acc, arg))
 ;;
 
 let rec cc_expr global_env bindings = function
-  | <span data-count="1117">P</span>e_EIdentifier id as v -&gt;
+  | <span data-count="1753">P</span>e_EIdentifier id as v -&gt;
     (match StrMap.find bindings id with
-     | <span data-count="16">S</span>ome new_expr -&gt; new_expr
-     | <span data-count="1101">N</span>one -&gt; v)
-  | <span data-count="68">P</span>e_EIf (e1, e2, e3) -&gt;
+     | <span data-count="24">S</span>ome new_expr -&gt; new_expr
+     | <span data-count="1729">N</span>one -&gt; v)
+  | <span data-count="122">P</span>e_EIf (e1, e2, e3) -&gt;
     let e1 = cc_expr global_env bindings e1 in
-    <span data-count="68">l</span>et e2 = cc_expr global_env bindings e2 in
-    <span data-count="68">l</span>et e3 = cc_expr global_env bindings e3 in
-    <span data-count="68">P</span>e_EIf (e1, e2, e3)
-  | <span data-count="60">P</span>e_EFun (args, body) as v -&gt;
-    let fvs = free_vars global_env v |&gt; <span data-count="60">S</span>trSet.to_list in
-    <span data-count="60">l</span>et body = cc_expr global_env empty body in
-    <span data-count="60">l</span>et e = Pe_EFun (fvs @ args, body) in
+    <span data-count="122">l</span>et e2 = cc_expr global_env bindings e2 in
+    <span data-count="122">l</span>et e3 = cc_expr global_env bindings e3 in
+    <span data-count="122">P</span>e_EIf (e1, e2, e3)
+  | <span data-count="76">P</span>e_EFun (args, body) as v -&gt;
+    let fvs = free_vars global_env v |&gt; <span data-count="76">S</span>trSet.to_list in
+    <span data-count="76">l</span>et body = cc_expr global_env empty body in
+    <span data-count="76">l</span>et e = Pe_EFun (fvs @ args, body) in
     make_apply e fvs bindings
-  | <span data-count="1020">P</span>e_EApp (e1, e2) -&gt;
+  | <span data-count="1468">P</span>e_EApp (e1, e2) -&gt;
     let e1 = cc_expr global_env bindings e1 in
-    <span data-count="1020">l</span>et e2 = cc_expr global_env bindings e2 in
-    <span data-count="1020">P</span>e_EApp (e1, e2)
-  | <span data-count="159">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
+    <span data-count="1468">l</span>et e2 = cc_expr global_env bindings e2 in
+    <span data-count="1468">P</span>e_EApp (e1, e2)
+  | <span data-count="249">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
     let e1, env1 =
       match e1 with
       | <span data-count="3">P</span>e_EFun (args, body) -&gt;
@@ -425,99 +425,99 @@ let rec cc_expr global_env bindings = function
         <span data-count="3">l</span>et e = Pe_EFun (fvs @ args, body) in
         let apply = make_apply (Pe_EIdentifier name) fvs bindings in
         <span data-count="3">e</span>, StrMap.singleto<span data-count="3">n</span> name apply
-      | <span data-count="156">e</span>xpr -&gt; cc_exp<span data-count="156">r</span> global_env bindings expr, empty
+      | <span data-count="246">e</span>xpr -&gt; cc_exp<span data-count="246">r</span> global_env bindings expr, empty
     in
     let env2 = StrMap.merge_two bindings env1 in
-    <span data-count="159">l</span>et e2 = cc_expr global_env env2 e2 in
-    <span data-count="159">P</span>e_ELet (NoRec, name, e1, e2)
-  | <span data-count="5">P</span>e_ELet (Rec, name, e1, e2) -&gt;
+    <span data-count="249">l</span>et e2 = cc_expr global_env env2 e2 in
+    <span data-count="249">P</span>e_ELet (NoRec, name, e1, e2)
+  | <span data-count="9">P</span>e_ELet (Rec, name, e1, e2) -&gt;
     let e1, env1 =
       match e1 with
-      | <span data-count="5">P</span>e_EFun (args, body) -&gt;
+      | <span data-count="9">P</span>e_EFun (args, body) -&gt;
         let fvs =
-          StrSet.(to_lis<span data-count="5">t</span> (dif<span data-count="5">f</span> (free_var<span data-count="5">s</span> global_env body) (of_lis<span data-count="5">t</span> (name :: args))))
+          StrSet.(to_lis<span data-count="9">t</span> (dif<span data-count="9">f</span> (free_var<span data-count="9">s</span> global_env body) (of_lis<span data-count="9">t</span> (name :: args))))
         in
         let apply = make_apply (Pe_EIdentifier name) fvs bindings in
-        <span data-count="5">l</span>et body = cc_expr global_env (StrMap.singleto<span data-count="5">n</span> name apply) body in
-        <span data-count="5">l</span>et e = Pe_EFun (fvs @ args, body) in
+        <span data-count="9">l</span>et body = cc_expr global_env (StrMap.singleto<span data-count="9">n</span> name apply) body in
+        <span data-count="9">l</span>et e = Pe_EFun (fvs @ args, body) in
         let apply = make_apply (Pe_EIdentifier name) fvs bindings in
-        <span data-count="5">e</span>, StrMap.singleto<span data-count="5">n</span> name apply
+        <span data-count="9">e</span>, StrMap.singleto<span data-count="9">n</span> name apply
       | <span data-count="0">e</span>xpr -&gt; cc_exp<span data-count="0">r</span> global_env bindings expr, empty
     in
     let env2 = StrMap.merge_two bindings env1 in
-    <span data-count="5">l</span>et e2 = cc_expr global_env env2 e2 in
-    <span data-count="5">P</span>e_ELet (Rec, name, e1, e2)
-  | <span data-count="27">P</span>e_ECons (e1, e2) -&gt;
+    <span data-count="9">l</span>et e2 = cc_expr global_env env2 e2 in
+    <span data-count="9">P</span>e_ELet (Rec, name, e1, e2)
+  | <span data-count="81">P</span>e_ECons (e1, e2) -&gt;
     let e1 = cc_expr global_env bindings e1 in
-    <span data-count="27">l</span>et e2 = cc_expr global_env bindings e2 in
-    <span data-count="27">P</span>e_ECons (e1, e2)
-  | <span data-count="9">P</span>e_ETuple el -&gt;
-    let el = List.map el ~f:(cc_exp<span data-count="9">r</span> global_env bindings) in
-    <span data-count="9">P</span>e_ETuple el
-  | <span data-count="385">c</span> -&gt; c
+    <span data-count="81">l</span>et e2 = cc_expr global_env bindings e2 in
+    <span data-count="81">P</span>e_ECons (e1, e2)
+  | <span data-count="15">P</span>e_ETuple el -&gt;
+    let el = List.map el ~f:(cc_exp<span data-count="15">r</span> global_env bindings) in
+    <span data-count="15">P</span>e_ETuple el
+  | <span data-count="507">c</span> -&gt; c
 ;;
 
 let cc_nonrec global_env decl_list =
-  <span data-count="103">l</span>et f1 (decl_acc, env) (name, expr) =
-    <span data-count="103">m</span>atch expr with
-    | <span data-count="48">P</span>e_EFun (args, body) -&gt;
-      let fvs = StrSet.(to_lis<span data-count="48">t</span> (dif<span data-count="48">f</span> (free_var<span data-count="48">s</span> global_env body) (of_lis<span data-count="48">t</span> args))) in
+  <span data-count="129">l</span>et f1 (decl_acc, env) (name, expr) =
+    <span data-count="129">m</span>atch expr with
+    | <span data-count="60">P</span>e_EFun (args, body) -&gt;
+      let fvs = StrSet.(to_lis<span data-count="60">t</span> (dif<span data-count="60">f</span> (free_var<span data-count="60">s</span> global_env body) (of_lis<span data-count="60">t</span> args))) in
       let body = cc_expr global_env empty body in
-      <span data-count="48">l</span>et e = Pe_EFun (fvs @ args, body) in
-      (name, e) :: decl_acc, StrSet.ad<span data-count="48">d</span> env name
-    | <span data-count="55">e</span>xpr -&gt; (name, cc_exp<span data-count="55">r</span> global_env empty expr) :: decl_acc, StrSet.ad<span data-count="55">d</span> env name
+      <span data-count="60">l</span>et e = Pe_EFun (fvs @ args, body) in
+      (name, e) :: decl_acc, StrSet.ad<span data-count="60">d</span> env name
+    | <span data-count="69">e</span>xpr -&gt; (name, cc_exp<span data-count="69">r</span> global_env empty expr) :: decl_acc, StrSet.ad<span data-count="69">d</span> env name
   in
   List.fold decl_list ~init:([], global_env) ~f:f1
 ;;
 
 let cc_rec global_env prev_env cl =
-  <span data-count="36">l</span>et ids = List.map cl ~f:fst in
-  <span data-count="36">l</span>et f1 (free, env) (name, expr) =
-    <span data-count="37">m</span>atch expr with
-    | <span data-count="37">P</span>e_EFun (args, body) -&gt;
-      let remove = StrSet.union (StrSet.of_lis<span data-count="37">t</span> ids) (StrSet.of_lis<span data-count="37">t</span> args) in
-      <span data-count="37">l</span>et fvs = StrSet.diff (free_var<span data-count="37">s</span> global_env body) remove |&gt; <span data-count="37">S</span>trSet.to_list in
-      <span data-count="37">l</span>et bind = make_apply (Pe_EIdentifier name) fvs prev_env in
-      <span data-count="37">l</span>et env = StrMap.update env name ~f:(fun _ -&gt; <span data-count="37">b</span>ind) in
-      <span data-count="37">f</span>vs :: free, env
+  <span data-count="56">l</span>et ids = List.map cl ~f:fst in
+  <span data-count="56">l</span>et f1 (free, env) (name, expr) =
+    <span data-count="59">m</span>atch expr with
+    | <span data-count="59">P</span>e_EFun (args, body) -&gt;
+      let remove = StrSet.union (StrSet.of_lis<span data-count="59">t</span> ids) (StrSet.of_lis<span data-count="59">t</span> args) in
+      <span data-count="59">l</span>et fvs = StrSet.diff (free_var<span data-count="59">s</span> global_env body) remove |&gt; <span data-count="59">S</span>trSet.to_list in
+      <span data-count="59">l</span>et bind = make_apply (Pe_EIdentifier name) fvs prev_env in
+      <span data-count="59">l</span>et env = StrMap.update env name ~f:(fun _ -&gt; <span data-count="59">b</span>ind) in
+      <span data-count="59">f</span>vs :: free, env
     | <span data-count="0">_</span> -&gt; [] :: free, env
   in
   let fvs, env = List.fold cl ~init:([], prev_env) ~f:f1 in
-  <span data-count="36">l</span>et fvs = List.rev fvs in
-  <span data-count="36">l</span>et to_fold = List.zip_exn cl fvs in
-  <span data-count="36">l</span>et f1 decl_acc ((name, e), free) =
-    <span data-count="37">m</span>atch e with
-    | <span data-count="37">P</span>e_EFun (args, body) -&gt;
+  <span data-count="56">l</span>et fvs = List.rev fvs in
+  <span data-count="56">l</span>et to_fold = List.zip_exn cl fvs in
+  <span data-count="56">l</span>et f1 decl_acc ((name, e), free) =
+    <span data-count="59">m</span>atch e with
+    | <span data-count="59">P</span>e_EFun (args, body) -&gt;
       let new_body = cc_expr global_env empty body in
-      <span data-count="37">l</span>et efun = Pe_EFun (free @ args, new_body) in
+      <span data-count="59">l</span>et efun = Pe_EFun (free @ args, new_body) in
       (name, efun) :: decl_acc
     | <span data-count="0">_</span> -&gt;
       let e = cc_expr global_env env e in
       <span data-count="0">(</span>name, e) :: decl_acc
   in
   let cl = List.fold to_fold ~init:[] ~f:f1 in
-  <span data-count="36">l</span>et cl = List.rev cl in
-  <span data-count="36">c</span>l, env
+  <span data-count="56">l</span>et cl = List.rev cl in
+  <span data-count="56">c</span>l, env
 ;;
 
 let cc_declaration global_env = function
-  | <span data-count="103">P</span>e_Nonrec decl_list -&gt;
+  | <span data-count="129">P</span>e_Nonrec decl_list -&gt;
     let decl_list, env = cc_nonrec global_env decl_list in
-    <span data-count="103">e</span>nv, Pe_Nonrec decl_list
-  | <span data-count="36">P</span>e_Rec decl_list -&gt;
+    <span data-count="129">e</span>nv, Pe_Nonrec decl_list
+  | <span data-count="56">P</span>e_Rec decl_list -&gt;
     let ids = List.map decl_list ~f:fst in
-    <span data-count="36">l</span>et cl, _ = cc_rec global_env empty decl_list in
-    <span data-count="36">l</span>et env = List.fold ids ~init:global_env ~f:(fun acc name -&gt; <span data-count="37">S</span>trSet.add acc name) in
-    <span data-count="36">e</span>nv, Pe_Rec cl
+    <span data-count="56">l</span>et cl, _ = cc_rec global_env empty decl_list in
+    <span data-count="56">l</span>et env = List.fold ids ~init:global_env ~f:(fun acc name -&gt; <span data-count="59">S</span>trSet.add acc name) in
+    <span data-count="56">e</span>nv, Pe_Rec cl
 ;;
 
 let run_cc ast =
-  <span data-count="55">l</span>et builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
-  <span data-count="55">l</span>et rec helper last_env = function
-    | <span data-count="55">[</span>] -&gt; []
-    | <span data-count="139">h</span>d :: tl -&gt;
+  <span data-count="63">l</span>et builtins = List.fold Common.builtins ~init:StrSet.empty ~f:StrSet.add in
+  <span data-count="63">l</span>et rec helper last_env = function
+    | <span data-count="63">[</span>] -&gt; []
+    | <span data-count="185">h</span>d :: tl -&gt;
       let env, ast = cc_declaration last_env hd in
-      <span data-count="139">a</span>st :: helpe<span data-count="139">r</span> env tl
+      <span data-count="185">a</span>st :: helpe<span data-count="185">r</span> env tl
   in
   helper builtins ast
 ;;

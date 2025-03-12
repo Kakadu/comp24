@@ -329,12 +329,12 @@ open Pe_ast
 module StrMap = struct
   type 'a t = (string, 'a, String.comparator_witness) Map.t
 
-  let empty = Map.empt<span data-count="88">y</span> (module String)
-  let singleton str = <span data-count="13">M</span>ap.singleton (module String) str
-  let find m str = <span data-count="2524">M</span>ap.find m str
+  let empty = Map.empt<span data-count="119">y</span> (module String)
+  let singleton str = <span data-count="21">M</span>ap.singleton (module String) str
+  let find m str = <span data-count="4080">M</span>ap.find m str
   let add = Map.add
   let update = Map.update
-  let merge_two fst snd = <span data-count="164">M</span>ap.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
+  let merge_two fst snd = <span data-count="258">M</span>ap.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -&gt; <span data-count="0">v</span>2)
 end
 
 let builtins =
@@ -353,29 +353,29 @@ let builtins =
   ; "( || )"
   ; "not"
   ; "print_int"
-  ; "#list_head"
-  ; "#list_tail"
-  ; "#tuple_element"
-  ; "#is_empty"
-  ; "#fail_match"
+  ; "list_head"
+  ; "list_tail"
+  ; "tuple_element"
+  ; "is_empty"
+  ; "fail_match"
   ]
 ;;
 
-let make_apply op expr1 expr2 = <span data-count="3">P</span>e_EApp (Pe_EApp (Pe_EIdentifier op, expr1), expr2)
+let make_apply op expr1 expr2 = <span data-count="15">P</span>e_EApp (Pe_EApp (Pe_EIdentifier op, expr1), expr2)
 
 module StrSet = struct
   open Base
 
   type t = (string, String.comparator_witness) Set.t
 
-  let empty = Set.empt<span data-count="88">y</span> (module String)
-  let singleton str = <span data-count="2660">S</span>et.singleton (module String) str
+  let empty = Set.empt<span data-count="119">y</span> (module String)
+  let singleton str = <span data-count="4066">S</span>et.singleton (module String) str
   let union = Set.union
-  let union_list lst = <span data-count="153">S</span>et.union_list (module String) lst
-  let find s str = <span data-count="1747">S</span>et.mem s str
+  let union_list lst = <span data-count="275">S</span>et.union_list (module String) lst
+  let find s str = <span data-count="2705">S</span>et.mem s str
   let add = Set.add
   let to_list = Set.to_list
-  let of_list = Set.of_lis<span data-count="88">t</span> (module String)
+  let of_list = Set.of_lis<span data-count="119">t</span> (module String)
   let fold = Set.fold
   let diff = Set.diff
 end
@@ -383,9 +383,9 @@ end
 type bindings = (int, Int.comparator_witness) Set.t
 
 let contains ng id =
-  <span data-count="251">m</span>atch Set.find ng ~f:(Int.equa<span data-count="251">l</span> id) with
+  <span data-count="399">m</span>atch Set.find ng ~f:(Int.equa<span data-count="399">l</span> id) with
   | <span data-count="0">S</span>ome _ -&gt; true
-  | <span data-count="251">N</span>one -&gt; false
+  | <span data-count="399">N</span>one -&gt; false
 ;;
 
 module MonadCounter = struct
@@ -393,74 +393,74 @@ module MonadCounter = struct
 
   type 'a t = bindings * int -&gt; bindings * int * 'a
 
-  let return x (binds, var) = <span data-count="16754">b</span>inds, var, x
+  let return x (binds, var) = <span data-count="24979">b</span>inds, var, x
 
   let fresh (binds, var) =
-    <span data-count="251">l</span>et rec helper num = <span data-count="251">i</span>f contains binds num then <span data-count="0">h</span>elper (num + 1) else <span data-count="251">n</span>um in
+    <span data-count="399">l</span>et rec helper num = <span data-count="399">i</span>f contains binds num then <span data-count="0">h</span>elper (num + 1) else <span data-count="399">n</span>um in
     let next = helper var in
-    <span data-count="251">b</span>inds, next + 1, next
+    <span data-count="399">b</span>inds, next + 1, next
   ;;
 
   let bind (m : 'a t) (f : 'a -&gt; 'b t) : 'b t =
-    <span data-count="16790">f</span>un t -&gt;
-    <span data-count="16790">l</span>et binds, var, x = m t in
-    <span data-count="16790">f</span> x (binds, var)
+    <span data-count="25127">f</span>un t -&gt;
+    <span data-count="25127">l</span>et binds, var, x = m t in
+    <span data-count="25127">f</span> x (binds, var)
   ;;
 
   let ( &gt;&gt;= ) = bind
   let ( let* ) = bind
 
   let ( &gt;&gt;| ) (m : 'a t) (f : 'a -&gt; 'b) : 'b t =
-    <span data-count="197">f</span>un t -&gt;
-    <span data-count="197">l</span>et binds, var, x = m t in
-    <span data-count="197">b</span>inds, var, <span data-count="197">f</span> x
+    <span data-count="339">f</span>un t -&gt;
+    <span data-count="339">l</span>et binds, var, x = m t in
+    <span data-count="339">b</span>inds, var, <span data-count="339">f</span> x
   ;;
 
-  let run (m : 'a t) binds start = <span data-count="215">m</span> (binds, start)
+  let run (m : 'a t) binds start = <span data-count="251">m</span> (binds, start)
 
   let map (xs : 'a list) ~(f : 'a -&gt; 'b t) : 'b list t =
-    <span data-count="420">l</span>et* xs =
-      List.fol<span data-count="420">d</span> xs ~init:(retur<span data-count="420">n</span> []) ~f:(fun acc x -&gt;
-        <span data-count="464">l</span>et* acc = acc in
-        <span data-count="464">l</span>et* x = <span data-count="464">f</span> x in
-        <span data-count="464">r</span>eturn (x :: acc))
+    <span data-count="595">l</span>et* xs =
+      List.fol<span data-count="595">d</span> xs ~init:(retur<span data-count="595">n</span> []) ~f:(fun acc x -&gt;
+        <span data-count="672">l</span>et* acc = acc in
+        <span data-count="672">l</span>et* x = <span data-count="672">f</span> x in
+        <span data-count="672">r</span>eturn (x :: acc))
     in
-    <span data-count="420">r</span>eturn @@ List.re<span data-count="420">v</span> xs
+    <span data-count="595">r</span>eturn @@ List.re<span data-count="595">v</span> xs
   ;;
 
   let fold_left (xs : 'a list) ~(init : 'b t) ~(f : 'b -&gt; 'a -&gt; 'b t) : 'b t =
-    <span data-count="667">L</span>ist.fold xs ~init ~f:(fun acc x -&gt;
-      <span data-count="1454">l</span>et* acc = acc in
-      <span data-count="1454">f</span> acc x)
+    <span data-count="1062">L</span>ist.fold xs ~init ~f:(fun acc x -&gt;
+      <span data-count="2230">l</span>et* acc = acc in
+      <span data-count="2230">f</span> acc x)
   ;;
 
   let fold_right xs ~init ~f =
-    <span data-count="128">L</span>ist.fold_right xs ~init ~f:(fun x acc -&gt;
-      <span data-count="172">l</span>et* acc = acc in
-      <span data-count="172">f</span> x acc)
+    <span data-count="216">L</span>ist.fold_right xs ~init ~f:(fun x acc -&gt;
+      <span data-count="346">l</span>et* acc = acc in
+      <span data-count="346">f</span> x acc)
   ;;
 end
 
 let rec get_binds_pat = function
   | <span data-count="0">P</span>Constraint (pat, _) -&gt; get_binds_pat pat
-  | <span data-count="0">P</span>Any | <span data-count="0">P</span>Const _ | <span data-count="26">P</span>Nill | <span data-count="149">P</span>Unit -&gt; StrSet.empty
-  | <span data-count="742">P</span>Identifier ident -&gt; StrSet.singleton ident
-  | <span data-count="38">P</span>Cons (p1, p2) -&gt; StrSet.union (get_binds_pa<span data-count="38">t</span> p1) (get_binds_pa<span data-count="38">t</span> p2)
-  | <span data-count="13">P</span>Tuple pl -&gt;
+  | <span data-count="0">P</span>Any | <span data-count="0">P</span>Const _ | <span data-count="130">P</span>Nill | <span data-count="177">P</span>Unit -&gt; StrSet.empty
+  | <span data-count="1338">P</span>Identifier ident -&gt; StrSet.singleton ident
+  | <span data-count="190">P</span>Cons (p1, p2) -&gt; StrSet.union (get_binds_pa<span data-count="190">t</span> p1) (get_binds_pa<span data-count="190">t</span> p2)
+  | <span data-count="45">P</span>Tuple pl -&gt;
     Base.List.fold pl ~init:StrSet.empty ~f:(fun acc p -&gt;
-      <span data-count="36">S</span>trSet.union acc (get_binds_pa<span data-count="36">t</span> p))
+      <span data-count="100">S</span>trSet.union acc (get_binds_pa<span data-count="100">t</span> p))
 ;;
 
 let make_condition checks e1 e2 =
-  <span data-count="23">l</span>et cond =
-    List.fold (List.tl_ex<span data-count="23">n</span> checks) ~init:(List.hd_ex<span data-count="23">n</span> checks) ~f:(fun acc a -&gt;
-      <span data-count="3">m</span>ake_apply "( &amp;&amp; )" acc a)
+  <span data-count="115">l</span>et cond =
+    List.fold (List.tl_ex<span data-count="115">n</span> checks) ~init:(List.hd_ex<span data-count="115">n</span> checks) ~f:(fun acc a -&gt;
+      <span data-count="15">m</span>ake_apply "( &amp;&amp; )" acc a)
   in
-  <span data-count="23">P</span>e_EIf (cond, e1, e2)
+  <span data-count="115">P</span>e_EIf (cond, e1, e2)
 ;;
 
-let get_id i = <span data-count="251">"</span>a" ^ Int.to_strin<span data-count="251">g</span> i
-let empty = Base.Map.empt<span data-count="88">y</span> (module Base.String)
+let get_id i = <span data-count="399">"</span>a" ^ Int.to_strin<span data-count="399">g</span> i
+let empty = Base.Map.empt<span data-count="119">y</span> (module Base.String)
 </code></pre>
       </div>
     </div>

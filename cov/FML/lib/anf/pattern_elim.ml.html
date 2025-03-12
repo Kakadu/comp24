@@ -698,16 +698,16 @@ type value_to_get =
   | Other
 
 let get_element e = function
-  | <span data-count="36">T</span>uple i -&gt; Pe_EApp (Pe_EApp (Pe_EIdentifier "tuple_element", e), Pe_EConst (Pe_Cint i))
-  | <span data-count="38">C</span>ons_head -&gt; Pe_EApp (Pe_EIdentifier "list_head", e)
-  | <span data-count="42">C</span>ons_tail -&gt; Pe_EApp (Pe_EIdentifier "list_tail", e)
-  | <span data-count="37">O</span>ther -&gt; e
+  | <span data-count="100">T</span>uple i -&gt; Pe_EApp (Pe_EApp (Pe_EIdentifier "tuple_element", e), Pe_EConst (Pe_Cint i))
+  | <span data-count="190">C</span>ons_head -&gt; Pe_EApp (Pe_EIdentifier "list_head", e)
+  | <span data-count="210">C</span>ons_tail -&gt; Pe_EApp (Pe_EIdentifier "list_tail", e)
+  | <span data-count="185">O</span>ther -&gt; e
 ;;
 
 let const_to_peconst const =
-  <span data-count="524">l</span>et pe_const =
+  <span data-count="680">l</span>et pe_const =
     match const with
-    | <span data-count="495">C</span>Int i -&gt; Pe_Cint i
+    | <span data-count="651">C</span>Int i -&gt; Pe_Cint i
     | <span data-count="29">C</span>Bool b -&gt; Pe_CBool b
   in
   Pe_EConst pe_const
@@ -717,117 +717,117 @@ open Base
 open MonadCounter
 
 let check_pattern expr pat =
-  <span data-count="32">l</span>et rec helper add expr = function
+  <span data-count="140">l</span>et rec helper add expr = function
     | <span data-count="0">P</span>Constraint (p, _) -&gt; helper add expr p
     | <span data-count="0">P</span>Const c -&gt; [ make_appl<span data-count="0">y</span> "( = )" expr (const_to_pecons<span data-count="0">t</span> c) ]
-    | <span data-count="9">P</span>Tuple pl -&gt;
+    | <span data-count="25">P</span>Tuple pl -&gt;
       List.concat
-      @@ List.map<span data-count="9">i</span> pl ~f:(fun i p -&gt; <span data-count="28">h</span>elper true (get_elemen<span data-count="28">t</span> expr (Tuple i)) p)
-    | <span data-count="19">P</span>Cons (l, r) -&gt;
+      @@ List.map<span data-count="25">i</span> pl ~f:(fun i p -&gt; <span data-count="60">h</span>elper true (get_elemen<span data-count="60">t</span> expr (Tuple i)) p)
+    | <span data-count="95">P</span>Cons (l, r) -&gt;
       let check =
         Pe_EApp (Pe_EIdentifier "not", Pe_EApp (Pe_EIdentifier "is_empty", expr))
       in
-      let l = helper true (get_elemen<span data-count="19">t</span> expr Cons_head) l in
-      <span data-count="19">l</span>et r = helper false (get_elemen<span data-count="19">t</span> expr Cons_tail) r in
-      <span data-count="19">i</span>f add then <span data-count="13">(</span>check :: l) @ r else <span data-count="6">l</span> @ r
-    | <span data-count="13">P</span>Nill -&gt; [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
-    | <span data-count="57">_</span> -&gt; []
+      let l = helper true (get_elemen<span data-count="95">t</span> expr Cons_head) l in
+      <span data-count="95">l</span>et r = helper false (get_elemen<span data-count="95">t</span> expr Cons_tail) r in
+      <span data-count="95">i</span>f add then <span data-count="65">(</span>check :: l) @ r else <span data-count="30">l</span> @ r
+    | <span data-count="65">P</span>Nill -&gt; [ Pe_EApp (Pe_EIdentifier "is_empty", expr) ]
+    | <span data-count="205">_</span> -&gt; []
   in
   helper true expr pat
 ;;
 
 let check_declaration expr pat =
-  <span data-count="32">l</span>et rec helper name = function
+  <span data-count="140">l</span>et rec helper name = function
     | <span data-count="0">P</span>Constraint (p, _) -&gt; helper name p
-    | <span data-count="42">P</span>Cons (l, r) -&gt;
+    | <span data-count="210">P</span>Cons (l, r) -&gt;
       (match helper name l with
-       | <span data-count="19">_</span> :: _ as lst -&gt; Cons_head :: lst
-       | <span data-count="23">_</span> -&gt; Cons_tail :: helpe<span data-count="23">r</span> name r)
-    | <span data-count="8">P</span>Tuple pl -&gt;
-      let t = List.map pl ~f:(helpe<span data-count="8">r</span> name) in
-      <span data-count="8">(</span>match List.findi t ~f:(fun _ a -&gt; <span data-count="12">n</span>ot @@ List.is_empt<span data-count="12">y</span> a) with
-       | <span data-count="8">S</span>ome (i, lst) -&gt; Tuple i :: lst
+       | <span data-count="95">_</span> :: _ as lst -&gt; Cons_head :: lst
+       | <span data-count="115">_</span> -&gt; Cons_tail :: helpe<span data-count="115">r</span> name r)
+    | <span data-count="40">P</span>Tuple pl -&gt;
+      let t = List.map pl ~f:(helpe<span data-count="40">r</span> name) in
+      <span data-count="40">(</span>match List.findi t ~f:(fun _ a -&gt; <span data-count="60">n</span>ot @@ List.is_empt<span data-count="60">y</span> a) with
+       | <span data-count="40">S</span>ome (i, lst) -&gt; Tuple i :: lst
        | <span data-count="0">N</span>one -&gt; [])
-    | <span data-count="68">P</span>Identifier v when String.equa<span data-count="68">l</span> v name -&gt; <span data-count="37">[</span> Other ]
-    | <span data-count="31">_</span> -&gt; []
+    | <span data-count="340">P</span>Identifier v when String.equa<span data-count="340">l</span> v name -&gt; <span data-count="185">[</span> Other ]
+    | <span data-count="155">_</span> -&gt; []
   in
   let create_expr name =
-    <span data-count="37">L</span>ist.fold_left (helpe<span data-count="37">r</span> name pat) ~init:expr ~f:(fun acc unpack -&gt;
-      <span data-count="87">g</span>et_element acc unpack)
+    <span data-count="185">L</span>ist.fold_left (helpe<span data-count="185">r</span> name pat) ~init:expr ~f:(fun acc unpack -&gt;
+      <span data-count="435">g</span>et_element acc unpack)
   in
   let names = get_binds_pat pat in
-  <span data-count="32">l</span>et decls = List.map (StrSet.to_lis<span data-count="32">t</span> names) ~f:(fun name -&gt; <span data-count="37">n</span>ame, create_exp<span data-count="37">r</span> name) in
-  <span data-count="32">P</span>e_Nonrec decls
+  <span data-count="140">l</span>et decls = List.map (StrSet.to_lis<span data-count="140">t</span> names) ~f:(fun name -&gt; <span data-count="185">n</span>ame, create_exp<span data-count="185">r</span> name) in
+  <span data-count="140">P</span>e_Nonrec decls
 ;;
 
 let make_case expr pat case_expr not_match_expr =
-  <span data-count="9">l</span>et checks = check_pattern expr pat in
-  <span data-count="9">l</span>et decl = check_declaration expr pat in
-  <span data-count="9">l</span>et let_expr =
+  <span data-count="25">l</span>et checks = check_pattern expr pat in
+  <span data-count="25">l</span>et decl = check_declaration expr pat in
+  <span data-count="25">l</span>et let_expr =
     match decl with
-    | <span data-count="9">P</span>e_Nonrec decl_list -&gt;
-      List.fold_righ<span data-count="9">t</span> decl_list ~init:case_expr ~f:(fun (name, value) acc -&gt;
-        <span data-count="8">P</span>e_ELet (NoRec, name, value, acc))
+    | <span data-count="25">P</span>e_Nonrec decl_list -&gt;
+      List.fold_righ<span data-count="25">t</span> decl_list ~init:case_expr ~f:(fun (name, value) acc -&gt;
+        <span data-count="40">P</span>e_ELet (NoRec, name, value, acc))
     | <span data-count="0">P</span>e_Rec decl_list -&gt;
       List.fold_righ<span data-count="0">t</span> decl_list ~init:case_expr ~f:(fun (name, value) acc -&gt;
         <span data-count="0">P</span>e_ELet (Rec, name, value, acc))
   in
-  if List.is_empty checks then <span data-count="9">l</span>et_expr else <span data-count="0">m</span>ake_condition checks let_expr not_match_expr
+  if List.is_empty checks then <span data-count="25">l</span>et_expr else <span data-count="0">m</span>ake_condition checks let_expr not_match_expr
 ;;
 
 let rec pe_expr =
   let open Ast in
   function
-  | <span data-count="2">E</span>Unit -&gt; return @@ Pe_EUnit
-  | <span data-count="12">E</span>Nill -&gt; return @@ Pe_ENill
+  | <span data-count="10">E</span>Unit -&gt; return @@ Pe_EUnit
+  | <span data-count="60">E</span>Nill -&gt; return @@ Pe_ENill
   | <span data-count="12">E</span>Constraint (e, _) -&gt; pe_expr e
-  | <span data-count="524">E</span>Const c -&gt; return @@ const_to_pecons<span data-count="524">t</span> c
-  | <span data-count="1335">E</span>Identifier v -&gt; return @@ Pe_EIdentifier v
-  | <span data-count="1305">E</span>Application (e1, e2) -&gt;
-    let* e1 = pe_exp<span data-count="1305">r</span> e1 in
-    <span data-count="1305">l</span>et* e2 = pe_exp<span data-count="1305">r</span> e2 in
-    <span data-count="1305">r</span>eturn @@ Pe_EApp (e1, e2)
-  | <span data-count="64">E</span>If (e1, e2, e3) -&gt;
-    let* e1 = pe_exp<span data-count="64">r</span> e1 in
-    <span data-count="64">l</span>et* e2 = pe_exp<span data-count="64">r</span> e2 in
-    <span data-count="64">l</span>et* e3 = pe_exp<span data-count="64">r</span> e3 in
-    <span data-count="64">r</span>eturn @@ Pe_EIf (e1, e2, e3)
-  | <span data-count="27">E</span>Cons (e1, e2) -&gt;
-    let* e1 = pe_exp<span data-count="27">r</span> e1 in
-    <span data-count="27">l</span>et* e2 = pe_exp<span data-count="27">r</span> e2 in
-    <span data-count="27">r</span>eturn @@ Pe_ECons (e1, e2)
-  | <span data-count="8">E</span>Tuple e_list -&gt;
-    let* e_list = ma<span data-count="8">p</span> e_list ~f:(fun e -&gt; <span data-count="16">p</span>e_expr e) in
-    <span data-count="8">r</span>eturn @@ Pe_ETuple e_list
-  | <span data-count="213">E</span>Fun (p, e) -&gt;
+  | <span data-count="680">E</span>Const c -&gt; return @@ const_to_pecons<span data-count="680">t</span> c
+  | <span data-count="1979">E</span>Identifier v -&gt; return @@ Pe_EIdentifier v
+  | <span data-count="1765">E</span>Application (e1, e2) -&gt;
+    let* e1 = pe_exp<span data-count="1765">r</span> e1 in
+    <span data-count="1765">l</span>et* e2 = pe_exp<span data-count="1765">r</span> e2 in
+    <span data-count="1765">r</span>eturn @@ Pe_EApp (e1, e2)
+  | <span data-count="80">E</span>If (e1, e2, e3) -&gt;
+    let* e1 = pe_exp<span data-count="80">r</span> e1 in
+    <span data-count="80">l</span>et* e2 = pe_exp<span data-count="80">r</span> e2 in
+    <span data-count="80">l</span>et* e3 = pe_exp<span data-count="80">r</span> e3 in
+    <span data-count="80">r</span>eturn @@ Pe_EIf (e1, e2, e3)
+  | <span data-count="135">E</span>Cons (e1, e2) -&gt;
+    let* e1 = pe_exp<span data-count="135">r</span> e1 in
+    <span data-count="135">l</span>et* e2 = pe_exp<span data-count="135">r</span> e2 in
+    <span data-count="135">r</span>eturn @@ Pe_ECons (e1, e2)
+  | <span data-count="20">E</span>Tuple e_list -&gt;
+    let* e_list = ma<span data-count="20">p</span> e_list ~f:(fun e -&gt; <span data-count="40">p</span>e_expr e) in
+    <span data-count="20">r</span>eturn @@ Pe_ETuple e_list
+  | <span data-count="321">E</span>Fun (p, e) -&gt;
     let rec extract_body = function
-      | <span data-count="206">E</span>Fun (_, e) -&gt; extract_body e
-      | <span data-count="213">e</span> -&gt; e
+      | <span data-count="290">E</span>Fun (_, e) -&gt; extract_body e
+      | <span data-count="321">e</span> -&gt; e
     in
     let body = extract_body e in
-    <span data-count="213">l</span>et rec extract_args = function
-      | <span data-count="206">E</span>Fun (p, e) -&gt; p :: extract_arg<span data-count="206">s</span> e
-      | <span data-count="213">_</span> -&gt; []
+    <span data-count="321">l</span>et rec extract_args = function
+      | <span data-count="290">E</span>Fun (p, e) -&gt; p :: extract_arg<span data-count="290">s</span> e
+      | <span data-count="321">_</span> -&gt; []
     in
     let other = extract_args e in
-    <span data-count="213">l</span>et last_args = p :: other in
+    <span data-count="321">l</span>et last_args = p :: other in
     let f1 (new_args, args_to_match, pat_list) arg =
-      <span data-count="419">m</span>atch arg with
-      | <span data-count="399">P</span>Identifier v when not (List.me<span data-count="399">m</span> new_args v ~equal:String.equal) -&gt;
-        <span data-count="399">r</span>eturn (v :: new_args, args_to_match, pat_list)
+      <span data-count="611">m</span>atch arg with
+      | <span data-count="591">P</span>Identifier v when not (List.me<span data-count="591">m</span> new_args v ~equal:String.equal) -&gt;
+        <span data-count="591">r</span>eturn (v :: new_args, args_to_match, pat_list)
       | <span data-count="20">_</span> -&gt;
         let* fresh_name = fresh &gt;&gt;<span data-count="20">|</span> get_id in
         <span data-count="20">r</span>eturn (fresh_name :: new_args, fresh_name :: args_to_match, arg :: pat_list)
     in
     let* new_args, args_to_match, pat_list =
-      fold_lef<span data-count="213">t</span> last_args ~init:(retur<span data-count="213">n</span> ([], [], [])) ~f:f1
+      fold_lef<span data-count="321">t</span> last_args ~init:(retur<span data-count="321">n</span> ([], [], [])) ~f:f1
     in
-    <span data-count="213">l</span>et new_args = List.rev new_args in
-    <span data-count="213">l</span>et args_to_match = List.rev args_to_match in
-    <span data-count="213">l</span>et pat_list = List.rev pat_list in
-    <span data-count="213">l</span>et* new_body = pe_exp<span data-count="213">r</span> body in
-    <span data-count="213">(</span>match List.length args_to_match with
-     | <span data-count="208">0</span> -&gt; return @@ Pe_EFun (new_args, new_body)
+    <span data-count="321">l</span>et new_args = List.rev new_args in
+    <span data-count="321">l</span>et args_to_match = List.rev args_to_match in
+    <span data-count="321">l</span>et pat_list = List.rev pat_list in
+    <span data-count="321">l</span>et* new_body = pe_exp<span data-count="321">r</span> body in
+    <span data-count="321">(</span>match List.length args_to_match with
+     | <span data-count="316">0</span> -&gt; return @@ Pe_EFun (new_args, new_body)
      | <span data-count="0">1</span> -&gt;
        let pat = List.hd_exn pat_list in
        <span data-count="0">l</span>et to_match = Pe_EIdentifier (List.hd_ex<span data-count="0">n</span> args_to_match) in
@@ -844,36 +844,36 @@ let rec pe_expr =
          make_case (Pe_EIdentifier fresh_name) pat new_body (Pe_EIdentifier "fail_match")
        in
        <span data-count="5">r</span>eturn @@ Pe_EFun (new_args, Pe_ELet (NoRec, fresh_name, to_match, case_expr)))
-  | <span data-count="10">E</span>Match (e_last, case_list) -&gt;
-    let* e = pe_exp<span data-count="10">r</span> e_last in
-    <span data-count="10">(</span>match e_last with
-     | <span data-count="10">E</span>Identifier _ | <span data-count="0">E</span>Const _ -&gt; pe_match e case_list
+  | <span data-count="50">E</span>Match (e_last, case_list) -&gt;
+    let* e = pe_exp<span data-count="50">r</span> e_last in
+    <span data-count="50">(</span>match e_last with
+     | <span data-count="50">E</span>Identifier _ | <span data-count="0">E</span>Const _ -&gt; pe_match e case_list
      | <span data-count="0">_</span> -&gt;
        let* fresh_name = fresh &gt;&gt;<span data-count="0">|</span> get_id in
        <span data-count="0">l</span>et* e_match = pe_matc<span data-count="0">h</span> (Pe_EIdentifier fresh_name) case_list in
        <span data-count="0">r</span>eturn @@ Pe_ELet (NoRec, fresh_name, e, e_match))
-  | <span data-count="179">E</span>LetIn (NoRec, pat, e1, e2) -&gt;
-    let* e1 = pe_exp<span data-count="179">r</span> e1 in
-    <span data-count="179">l</span>et* e2 = pe_exp<span data-count="179">r</span> e2 in
-    <span data-count="179">(</span>match pat with
-     | <span data-count="66">P</span>Identifier name -&gt; return @@ Pe_ELet (NoRec, name, e1, e2)
-     | <span data-count="109">P</span>Unit -&gt; return @@ Pe_ELet (NoRec, "()", e1, e2)
-     | <span data-count="4">_</span> -&gt;
+  | <span data-count="227">E</span>LetIn (NoRec, pat, e1, e2) -&gt;
+    let* e1 = pe_exp<span data-count="227">r</span> e1 in
+    <span data-count="227">l</span>et* e2 = pe_exp<span data-count="227">r</span> e2 in
+    <span data-count="227">(</span>match pat with
+     | <span data-count="70">P</span>Identifier name -&gt; return @@ Pe_ELet (NoRec, name, e1, e2)
+     | <span data-count="137">P</span>Unit -&gt; return @@ Pe_ELet (NoRec, "()", e1, e2)
+     | <span data-count="20">_</span> -&gt;
        (match e1 with
-        | <span data-count="4">P</span>e_EIdentifier _ -&gt;
+        | <span data-count="20">P</span>e_EIdentifier _ -&gt;
           let case_expr = make_case e1 pat e2 (Pe_EIdentifier "fail_match") in
-          <span data-count="4">r</span>eturn case_expr
+          <span data-count="20">r</span>eturn case_expr
         | <span data-count="0">_</span> -&gt;
           let* fresh_name = fresh &gt;&gt;<span data-count="0">|</span> get_id in
           <span data-count="0">l</span>et case_expr =
             make_case (Pe_EIdentifier fresh_name) pat e2 (Pe_EIdentifier "fail_match")
           in
           <span data-count="0">r</span>eturn @@ Pe_ELet (NoRec, fresh_name, e1, case_expr)))
-  | <span data-count="6">E</span>LetIn (Rec, pat, e1, e2) -&gt;
-    let* e1 = pe_exp<span data-count="6">r</span> e1 in
-    <span data-count="6">l</span>et* e2 = pe_exp<span data-count="6">r</span> e2 in
-    <span data-count="6">(</span>match pat with
-     | <span data-count="6">P</span>Identifier name -&gt; return @@ Pe_ELet (Rec, name, e1, e2)
+  | <span data-count="14">E</span>LetIn (Rec, pat, e1, e2) -&gt;
+    let* e1 = pe_exp<span data-count="14">r</span> e1 in
+    <span data-count="14">l</span>et* e2 = pe_exp<span data-count="14">r</span> e2 in
+    <span data-count="14">(</span>match pat with
+     | <span data-count="14">P</span>Identifier name -&gt; return @@ Pe_ELet (Rec, name, e1, e2)
      | <span data-count="0">P</span>Unit -&gt; return @@ Pe_ELet (Rec, "()", e1, e2)
      | <span data-count="0">_</span> -&gt;
        let* fresh_name = fresh &gt;&gt;<span data-count="0">|</span> get_id in
@@ -883,15 +883,15 @@ let rec pe_expr =
        <span data-count="0">r</span>eturn @@ Pe_ELet (Rec, fresh_name, e1, case_expr))
 
 and pe_match to_match = function
-  | <span data-count="23">(</span>p, e) :: tl -&gt;
+  | <span data-count="115">(</span>p, e) :: tl -&gt;
     let checks = check_pattern to_match p in
-    <span data-count="23">l</span>et decls = check_declaration to_match p in
-    <span data-count="23">l</span>et* e = pe_exp<span data-count="23">r</span> e in
-    <span data-count="23">l</span>et let_in =
+    <span data-count="115">l</span>et decls = check_declaration to_match p in
+    <span data-count="115">l</span>et* e = pe_exp<span data-count="115">r</span> e in
+    <span data-count="115">l</span>et let_in =
       match decls with
-      | <span data-count="23">P</span>e_Nonrec decl_list -&gt;
-        List.fold_righ<span data-count="23">t</span> decl_list ~init:e ~f:(fun (name, value) acc -&gt;
-          <span data-count="29">P</span>e_ELet (NoRec, name, value, acc))
+      | <span data-count="115">P</span>e_Nonrec decl_list -&gt;
+        List.fold_righ<span data-count="115">t</span> decl_list ~init:e ~f:(fun (name, value) acc -&gt;
+          <span data-count="145">P</span>e_ELet (NoRec, name, value, acc))
       | <span data-count="0">P</span>e_Rec decl_list -&gt;
         List.fold_righ<span data-count="0">t</span> decl_list ~init:e ~f:(fun (name, value) acc -&gt;
           <span data-count="0">P</span>e_ELet (Rec, name, value, acc))
@@ -899,99 +899,99 @@ and pe_match to_match = function
     if List.is_empty checks
     then <span data-count="0">r</span>eturn let_in
     else
-      <span data-count="23">l</span>et* match_e = pe_matc<span data-count="23">h</span> to_match tl in
-      <span data-count="23">r</span>eturn @@ make_conditio<span data-count="23">n</span> checks let_in match_e
-  | <span data-count="10">_</span> -&gt; return @@ Pe_EIdentifier "fail_match"
+      <span data-count="115">l</span>et* match_e = pe_matc<span data-count="115">h</span> to_match tl in
+      <span data-count="115">r</span>eturn @@ make_conditio<span data-count="115">n</span> checks let_in match_e
+  | <span data-count="50">_</span> -&gt; return @@ Pe_EIdentifier "fail_match"
 ;;
 
 let pe_declaration = function
-  | <span data-count="148">N</span>oRecDecl decl_list -&gt;
+  | <span data-count="200">N</span>oRecDecl decl_list -&gt;
     let* decls =
-      ma<span data-count="148">p</span> decl_list ~f:(fun (Ast.DDeclaration (pat, e)) -&gt;
-        <span data-count="148">l</span>et* e = pe_exp<span data-count="148">r</span> e in
-        <span data-count="148">m</span>atch pat with
-        | <span data-count="148">P</span>Identifier name -&gt; return (name, e)
+      ma<span data-count="200">p</span> decl_list ~f:(fun (Ast.DDeclaration (pat, e)) -&gt;
+        <span data-count="200">l</span>et* e = pe_exp<span data-count="200">r</span> e in
+        <span data-count="200">m</span>atch pat with
+        | <span data-count="200">P</span>Identifier name -&gt; return (name, e)
         | <span data-count="0">P</span>Unit -&gt; return ("()", e)
         | <span data-count="0">_</span> -&gt;
           let* fresh_name = fresh &gt;&gt;<span data-count="0">|</span> get_id in
           <span data-count="0">r</span>eturn (fresh_name, e))
     in
-    <span data-count="148">r</span>eturn (Pe_Nonrec decls)
-  | <span data-count="48">R</span>ecDecl decl_list -&gt;
+    <span data-count="200">r</span>eturn (Pe_Nonrec decls)
+  | <span data-count="88">R</span>ecDecl decl_list -&gt;
     let* decls =
-      ma<span data-count="48">p</span> decl_list ~f:(fun (Ast.DDeclaration (pat, e)) -&gt;
-        <span data-count="49">l</span>et* e = pe_exp<span data-count="49">r</span> e in
-        <span data-count="49">m</span>atch pat with
-        | <span data-count="49">P</span>Identifier v -&gt; return (v, e)
+      ma<span data-count="88">p</span> decl_list ~f:(fun (Ast.DDeclaration (pat, e)) -&gt;
+        <span data-count="93">l</span>et* e = pe_exp<span data-count="93">r</span> e in
+        <span data-count="93">m</span>atch pat with
+        | <span data-count="93">P</span>Identifier v -&gt; return (v, e)
         | <span data-count="0">_</span> -&gt; return ("()", e))
     in
-    <span data-count="48">r</span>eturn (Pe_Rec decls)
+    <span data-count="88">r</span>eturn (Pe_Rec decls)
 ;;
 
 let pe_prog program =
-  <span data-count="80">l</span>et rec helper = function
-    | <span data-count="80">[</span>] -&gt; return []
-    | <span data-count="196">h</span>d :: tl -&gt;
-      let* hd = pe_declaratio<span data-count="196">n</span> hd in
-      <span data-count="196">l</span>et* tl = helpe<span data-count="196">r</span> tl in
-      <span data-count="196">r</span>eturn @@ (hd :: tl)
+  <span data-count="96">l</span>et rec helper = function
+    | <span data-count="96">[</span>] -&gt; return []
+    | <span data-count="288">h</span>d :: tl -&gt;
+      let* hd = pe_declaratio<span data-count="288">n</span> hd in
+      <span data-count="288">l</span>et* tl = helpe<span data-count="288">r</span> tl in
+      <span data-count="288">r</span>eturn @@ (hd :: tl)
   in
   helper program
 ;;
 
 let rec get_binds_expr = function
   | <span data-count="12">E</span>Constraint (e, _) -&gt; get_binds_expr e
-  | <span data-count="524">E</span>Const _ | <span data-count="2">E</span>Unit | <span data-count="12">E</span>Nill -&gt; StrSet.empty
-  | <span data-count="1335">E</span>Identifier ident -&gt; StrSet.singleton ident
-  | <span data-count="27">E</span>Cons (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="27">r</span> e1) (get_binds_exp<span data-count="27">r</span> e2)
-  | <span data-count="1305">E</span>Application (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="1305">r</span> e1) (get_binds_exp<span data-count="1305">r</span> e2)
-  | <span data-count="419">E</span>Fun (pat, e) -&gt; StrSet.union (get_binds_pa<span data-count="419">t</span> pat) (get_binds_exp<span data-count="419">r</span> e)
-  | <span data-count="64">E</span>If (e1, e2, e3) -&gt;
-    StrSet.union_list [ get_binds_exp<span data-count="64">r</span> e1; get_binds_exp<span data-count="64">r</span> e2; get_binds_exp<span data-count="64">r</span> e3 ]
-  | <span data-count="185">E</span>LetIn (_, p, e1, e2) -&gt;
-    StrSet.union (get_binds_pa<span data-count="185">t</span> p) (StrSet.unio<span data-count="185">n</span> (get_binds_exp<span data-count="185">r</span> e1) (get_binds_exp<span data-count="185">r</span> e2))
-  | <span data-count="10">E</span>Match (e, p_list) -&gt;
+  | <span data-count="680">E</span>Const _ | <span data-count="10">E</span>Unit | <span data-count="60">E</span>Nill -&gt; StrSet.empty
+  | <span data-count="1979">E</span>Identifier ident -&gt; StrSet.singleton ident
+  | <span data-count="135">E</span>Cons (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="135">r</span> e1) (get_binds_exp<span data-count="135">r</span> e2)
+  | <span data-count="1765">E</span>Application (e1, e2) -&gt; StrSet.union (get_binds_exp<span data-count="1765">r</span> e1) (get_binds_exp<span data-count="1765">r</span> e2)
+  | <span data-count="611">E</span>Fun (pat, e) -&gt; StrSet.union (get_binds_pa<span data-count="611">t</span> pat) (get_binds_exp<span data-count="611">r</span> e)
+  | <span data-count="80">E</span>If (e1, e2, e3) -&gt;
+    StrSet.union_list [ get_binds_exp<span data-count="80">r</span> e1; get_binds_exp<span data-count="80">r</span> e2; get_binds_exp<span data-count="80">r</span> e3 ]
+  | <span data-count="241">E</span>LetIn (_, p, e1, e2) -&gt;
+    StrSet.union (get_binds_pa<span data-count="241">t</span> p) (StrSet.unio<span data-count="241">n</span> (get_binds_exp<span data-count="241">r</span> e1) (get_binds_exp<span data-count="241">r</span> e2))
+  | <span data-count="50">E</span>Match (e, p_list) -&gt;
     StrSet.union_list
-      (get_binds_exp<span data-count="10">r</span> e
-       :: List.ma<span data-count="10">p</span> p_list ~f:(fun (p, e) -&gt;
-         <span data-count="23">S</span>trSet.union (get_binds_pa<span data-count="23">t</span> p) (get_binds_exp<span data-count="23">r</span> e)))
-  | <span data-count="8">E</span>Tuple e_list -&gt; StrSet.union_list @@ List.ma<span data-count="8">p</span> e_list ~f:get_binds_expr
+      (get_binds_exp<span data-count="50">r</span> e
+       :: List.ma<span data-count="50">p</span> p_list ~f:(fun (p, e) -&gt;
+         <span data-count="115">S</span>trSet.union (get_binds_pa<span data-count="115">t</span> p) (get_binds_exp<span data-count="115">r</span> e)))
+  | <span data-count="20">E</span>Tuple e_list -&gt; StrSet.union_list @@ List.ma<span data-count="20">p</span> e_list ~f:get_binds_expr
 
 and get_binds_declaration = function
-  | <span data-count="148">N</span>oRecDecl decl_list -&gt;
+  | <span data-count="200">N</span>oRecDecl decl_list -&gt;
     List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) -&gt;
-      <span data-count="148">S</span>trSet.union acc (StrSet.unio<span data-count="148">n</span> (get_binds_pa<span data-count="148">t</span> pat) (get_binds_exp<span data-count="148">r</span> e)))
-  | <span data-count="48">R</span>ecDecl decl_list -&gt;
+      <span data-count="200">S</span>trSet.union acc (StrSet.unio<span data-count="200">n</span> (get_binds_pa<span data-count="200">t</span> pat) (get_binds_exp<span data-count="200">r</span> e)))
+  | <span data-count="88">R</span>ecDecl decl_list -&gt;
     List.fold decl_list ~init:StrSet.empty ~f:(fun acc (DDeclaration (pat, e)) -&gt;
-      <span data-count="49">S</span>trSet.union acc (StrSet.unio<span data-count="49">n</span> (get_binds_pa<span data-count="49">t</span> pat) (get_binds_exp<span data-count="49">r</span> e)))
+      <span data-count="93">S</span>trSet.union acc (StrSet.unio<span data-count="93">n</span> (get_binds_pa<span data-count="93">t</span> pat) (get_binds_exp<span data-count="93">r</span> e)))
 ;;
 
 let create_bundle structure =
-  <span data-count="80">l</span>et make_id id =
-    <span data-count="821">l</span>et is_digit = function
+  <span data-count="96">l</span>et make_id id =
+    <span data-count="1125">l</span>et is_digit = function
       | <span data-count="0">'</span>0' .. '9' -&gt; true
-      | <span data-count="15">_</span> -&gt; false
+      | <span data-count="27">_</span> -&gt; false
     in
     let char_to_digit c = <span data-count="0">C</span>har.to_in<span data-count="0">t</span> c - Char.to_in<span data-count="0">t</span> '0' in
     let rec helper acc = function
       | <span data-count="0">[</span>] -&gt; Some acc
-      | <span data-count="15">h</span>d :: tl -&gt;
-        if is_digit hd then <span data-count="0">h</span>elper ((acc * 10) + char_to_digi<span data-count="0">t</span> hd) tl else <span data-count="15">N</span>one
+      | <span data-count="27">h</span>d :: tl -&gt;
+        if is_digit hd then <span data-count="0">h</span>elper ((acc * 10) + char_to_digi<span data-count="0">t</span> hd) tl else <span data-count="27">N</span>one
     in
     let char_list = String.to_list id in
-    <span data-count="821">m</span>atch List.length char_list with
-    | <span data-count="821">x</span> when x &gt;= 2 &amp;&amp; <span data-count="526">x</span> &lt;= 10 &amp;&amp; <span data-count="525">C</span>har.equa<span data-count="525">l</span> (List.hd_ex<span data-count="525">n</span> char_list) 'a' -&gt;
-      <span data-count="15">h</span>elper 0 (List.tl_ex<span data-count="15">n</span> char_list)
-    | <span data-count="806">_</span> -&gt; None
+    <span data-count="1125">m</span>atch List.length char_list with
+    | <span data-count="1125">x</span> when x &gt;= 2 &amp;&amp; <span data-count="718">x</span> &lt;= 10 &amp;&amp; <span data-count="713">C</span>har.equa<span data-count="713">l</span> (List.hd_ex<span data-count="713">n</span> char_list) 'a' -&gt;
+      <span data-count="27">h</span>elper 0 (List.tl_ex<span data-count="27">n</span> char_list)
+    | <span data-count="1098">_</span> -&gt; None
   in
   let idents =
     List.fold_left structure ~init:StrSet.empty ~f:(fun acc t -&gt;
-      <span data-count="196">S</span>trSet.union acc (get_binds_declaratio<span data-count="196">n</span> t))
+      <span data-count="288">S</span>trSet.union acc (get_binds_declaratio<span data-count="288">n</span> t))
   in
-  <span data-count="80">S</span>et.filter_map (module Int) idents ~f:make_id
+  <span data-count="96">S</span>et.filter_map (module Int) idents ~f:make_id
 ;;
 
-let run_pe program = <span data-count="80">r</span>un (pe_pro<span data-count="80">g</span> program) (create_bundl<span data-count="80">e</span> program) 0
+let run_pe program = <span data-count="96">r</span>un (pe_pro<span data-count="96">g</span> program) (create_bundl<span data-count="96">e</span> program) 0
 </code></pre>
       </div>
     </div>

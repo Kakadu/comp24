@@ -233,94 +233,94 @@ open Common
 open Common.MonadCounter
 
 let rec ll_expr env = function
-  | <span data-count="2">P</span>e_EUnit -&gt; return ([], Pe_EUnit)
-  | <span data-count="12">P</span>e_ENill -&gt; return ([], Pe_ENill)
-  | <span data-count="289">P</span>e_EConst _ as v -&gt; return ([], v)
-  | <span data-count="958">P</span>e_EIdentifier id as v -&gt;
+  | <span data-count="4">P</span>e_EUnit -&gt; return ([], Pe_EUnit)
+  | <span data-count="24">P</span>e_ENill -&gt; return ([], Pe_ENill)
+  | <span data-count="336">P</span>e_EConst _ as v -&gt; return ([], v)
+  | <span data-count="1267">P</span>e_EIdentifier id as v -&gt;
     (match Map.find env id with
-     | <span data-count="12">S</span>ome x -&gt; return ([], Pe_EIdentifier x)
-     | <span data-count="946">N</span>one -&gt; return ([], v))
-  | <span data-count="862">P</span>e_EApp (e1, e2) -&gt;
-    let* str1, e1 = ll_exp<span data-count="862">r</span> env e1 in
-    <span data-count="862">l</span>et* sl2, e2 = ll_exp<span data-count="862">r</span> env e2 in
-    <span data-count="862">r</span>eturn (str1 @ sl2, Pe_EApp (e1, e2))
-  | <span data-count="58">P</span>e_EIf (e1, e2, e3) -&gt;
-    let* str1, e1 = ll_exp<span data-count="58">r</span> env e1 in
-    <span data-count="58">l</span>et* str2, e2 = ll_exp<span data-count="58">r</span> env e2 in
-    <span data-count="58">l</span>et* str3, e3 = ll_exp<span data-count="58">r</span> env e3 in
-    <span data-count="58">r</span>eturn (str1 @ str2 @ str3, Pe_EIf (e1, e2, e3))
-  | <span data-count="47">P</span>e_EFun (args, body) -&gt;
-    let* fresh = fresh &gt;&gt;<span data-count="47">|</span> get_id in
-    <span data-count="47">l</span>et new_env = List.fold args ~init:env ~f:Map.remove in
-    <span data-count="47">l</span>et* str, body = ll_exp<span data-count="47">r</span> new_env body in
-    <span data-count="47">r</span>eturn (str @ [ Pe_Nonrec [ fresh, Pe_EFun (args, body) ] ], Pe_EIdentifier fresh)
-  | <span data-count="27">P</span>e_ECons (e1, e2) -&gt;
-    let* str1, e1 = ll_exp<span data-count="27">r</span> env e1 in
-    <span data-count="27">l</span>et* str2, e2 = ll_exp<span data-count="27">r</span> env e2 in
-    <span data-count="27">r</span>eturn (str1 @ str2, Pe_ECons (e1, e2))
-  | <span data-count="7">P</span>e_ETuple e_list -&gt;
-    let* t = ma<span data-count="7">p</span> e_list ~f:(ll_exp<span data-count="7">r</span> env) in
-    <span data-count="7">l</span>et str, el = List.unzip t in
-    <span data-count="7">r</span>eturn (List.conca<span data-count="7">t</span> str, Pe_ETuple el)
-  | <span data-count="4">P</span>e_ELet (Rec, name, e1, e2) -&gt;
-    let* fresh_name = fresh &gt;&gt;<span data-count="4">|</span> get_id in
-    <span data-count="4">l</span>et env = Map.set env ~key:name ~data:fresh_name in
-    <span data-count="4">l</span>et* str1, e1 = ll_inne<span data-count="4">r</span> env e1 in
-    <span data-count="4">l</span>et* str2, e2 = ll_exp<span data-count="4">r</span> env e2 in
-    <span data-count="4">r</span>eturn (str1 @ [ Pe_Rec [ fresh_name, e1 ] ] @ str2, e2)
-  | <span data-count="130">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
-    let* str1, e1 = ll_inne<span data-count="130">r</span> env e1 in
-    <span data-count="130">(</span>match e1 with
+     | <span data-count="16">S</span>ome x -&gt; return ([], Pe_EIdentifier x)
+     | <span data-count="1251">N</span>one -&gt; return ([], v))
+  | <span data-count="1077">P</span>e_EApp (e1, e2) -&gt;
+    let* str1, e1 = ll_exp<span data-count="1077">r</span> env e1 in
+    <span data-count="1077">l</span>et* sl2, e2 = ll_exp<span data-count="1077">r</span> env e2 in
+    <span data-count="1077">r</span>eturn (str1 @ sl2, Pe_EApp (e1, e2))
+  | <span data-count="85">P</span>e_EIf (e1, e2, e3) -&gt;
+    let* str1, e1 = ll_exp<span data-count="85">r</span> env e1 in
+    <span data-count="85">l</span>et* str2, e2 = ll_exp<span data-count="85">r</span> env e2 in
+    <span data-count="85">l</span>et* str3, e3 = ll_exp<span data-count="85">r</span> env e3 in
+    <span data-count="85">r</span>eturn (str1 @ str2 @ str3, Pe_EIf (e1, e2, e3))
+  | <span data-count="55">P</span>e_EFun (args, body) -&gt;
+    let* fresh = fresh &gt;&gt;<span data-count="55">|</span> get_id in
+    <span data-count="55">l</span>et new_env = List.fold args ~init:env ~f:Map.remove in
+    <span data-count="55">l</span>et* str, body = ll_exp<span data-count="55">r</span> new_env body in
+    <span data-count="55">r</span>eturn (str @ [ Pe_Nonrec [ fresh, Pe_EFun (args, body) ] ], Pe_EIdentifier fresh)
+  | <span data-count="54">P</span>e_ECons (e1, e2) -&gt;
+    let* str1, e1 = ll_exp<span data-count="54">r</span> env e1 in
+    <span data-count="54">l</span>et* str2, e2 = ll_exp<span data-count="54">r</span> env e2 in
+    <span data-count="54">r</span>eturn (str1 @ str2, Pe_ECons (e1, e2))
+  | <span data-count="10">P</span>e_ETuple e_list -&gt;
+    let* t = ma<span data-count="10">p</span> e_list ~f:(ll_exp<span data-count="10">r</span> env) in
+    <span data-count="10">l</span>et str, el = List.unzip t in
+    <span data-count="10">r</span>eturn (List.conca<span data-count="10">t</span> str, Pe_ETuple el)
+  | <span data-count="6">P</span>e_ELet (Rec, name, e1, e2) -&gt;
+    let* fresh_name = fresh &gt;&gt;<span data-count="6">|</span> get_id in
+    <span data-count="6">l</span>et env = Map.set env ~key:name ~data:fresh_name in
+    <span data-count="6">l</span>et* str1, e1 = ll_inne<span data-count="6">r</span> env e1 in
+    <span data-count="6">l</span>et* str2, e2 = ll_exp<span data-count="6">r</span> env e2 in
+    <span data-count="6">r</span>eturn (str1 @ [ Pe_Rec [ fresh_name, e1 ] ] @ str2, e2)
+  | <span data-count="175">P</span>e_ELet (NoRec, name, e1, e2) -&gt;
+    let* str1, e1 = ll_inne<span data-count="175">r</span> env e1 in
+    <span data-count="175">(</span>match e1 with
      | <span data-count="2">P</span>e_EFun _ -&gt;
        let* fresh_name = fresh &gt;&gt;<span data-count="2">|</span> get_id in
        <span data-count="2">l</span>et bindings = Map.set env ~key:name ~data:fresh_name in
        <span data-count="2">l</span>et* str2, e2 = ll_exp<span data-count="2">r</span> bindings e2 in
        <span data-count="2">r</span>eturn (str1 @ [ Pe_Nonrec [ fresh_name, e1 ] ] @ str2, e2)
-     | <span data-count="128">_</span> -&gt;
-       let* str2, e2 = ll_exp<span data-count="128">r</span> env e2 in
-       <span data-count="128">r</span>eturn (str1 @ str2, Pe_ELet (NoRec, name, e1, e2)))
+     | <span data-count="173">_</span> -&gt;
+       let* str2, e2 = ll_exp<span data-count="173">r</span> env e2 in
+       <span data-count="173">r</span>eturn (str1 @ str2, Pe_ELet (NoRec, name, e1, e2)))
 
 and ll_inner env = function
-  | <span data-count="74">P</span>e_EFun (args, body) -&gt;
+  | <span data-count="93">P</span>e_EFun (args, body) -&gt;
     let env = List.fold args ~init:env ~f:Map.remove in
-    <span data-count="74">l</span>et* str, body = ll_exp<span data-count="74">r</span> env body in
-    <span data-count="74">r</span>eturn (str, Pe_EFun (args, body))
-  | <span data-count="171">e</span> -&gt;
-    let* str, e = ll_exp<span data-count="171">r</span> env e in
-    <span data-count="171">r</span>eturn (str, e)
+    <span data-count="93">l</span>et* str, body = ll_exp<span data-count="93">r</span> env body in
+    <span data-count="93">r</span>eturn (str, Pe_EFun (args, body))
+  | <span data-count="223">e</span> -&gt;
+    let* str, e = ll_exp<span data-count="223">r</span> env e in
+    <span data-count="223">r</span>eturn (str, e)
 ;;
 
 let ll_str_item = function
-  | <span data-count="80">P</span>e_Nonrec bindings -&gt;
+  | <span data-count="93">P</span>e_Nonrec bindings -&gt;
     let* lifted_bindings =
-      ma<span data-count="80">p</span> bindings ~f:(fun (name, e) -&gt;
-        <span data-count="80">l</span>et* str, new_e = ll_inne<span data-count="80">r</span> empty e in
-        <span data-count="80">r</span>eturn (str, (name, new_e)))
+      ma<span data-count="93">p</span> bindings ~f:(fun (name, e) -&gt;
+        <span data-count="93">l</span>et* str, new_e = ll_inne<span data-count="93">r</span> empty e in
+        <span data-count="93">r</span>eturn (str, (name, new_e)))
     in
-    <span data-count="80">l</span>et strs, new_bindings = List.unzip lifted_bindings in
-    <span data-count="80">r</span>eturn (List.conca<span data-count="80">t</span> strs @ [ Pe_Nonrec new_bindings ])
-  | <span data-count="30">P</span>e_Rec bindings -&gt;
+    <span data-count="93">l</span>et strs, new_bindings = List.unzip lifted_bindings in
+    <span data-count="93">r</span>eturn (List.conca<span data-count="93">t</span> strs @ [ Pe_Nonrec new_bindings ])
+  | <span data-count="40">P</span>e_Rec bindings -&gt;
     let* lifted_bindings =
-      ma<span data-count="30">p</span> bindings ~f:(fun (name, e) -&gt;
-        <span data-count="31">l</span>et* str, new_e = ll_inne<span data-count="31">r</span> empty e in
-        <span data-count="31">r</span>eturn (str, (name, new_e)))
+      ma<span data-count="40">p</span> bindings ~f:(fun (name, e) -&gt;
+        <span data-count="42">l</span>et* str, new_e = ll_inne<span data-count="42">r</span> empty e in
+        <span data-count="42">r</span>eturn (str, (name, new_e)))
     in
-    <span data-count="30">l</span>et strs, new_bindings = List.unzip lifted_bindings in
-    <span data-count="30">r</span>eturn (List.conca<span data-count="30">t</span> strs @ [ Pe_Rec new_bindings ])
+    <span data-count="40">l</span>et strs, new_bindings = List.unzip lifted_bindings in
+    <span data-count="40">r</span>eturn (List.conca<span data-count="40">t</span> strs @ [ Pe_Rec new_bindings ])
 ;;
 
 let ll_structure structure =
-  <span data-count="42">l</span>et rec helper = function
-    | <span data-count="42">[</span>] -&gt; return []
-    | <span data-count="110">h</span>d :: tl -&gt;
-      let* str1 = ll_str_ite<span data-count="110">m</span> hd in
-      <span data-count="110">l</span>et* str2 = helpe<span data-count="110">r</span> tl in
-      <span data-count="110">r</span>eturn @@ str1 @ str2
+  <span data-count="46">l</span>et rec helper = function
+    | <span data-count="46">[</span>] -&gt; return []
+    | <span data-count="133">h</span>d :: tl -&gt;
+      let* str1 = ll_str_ite<span data-count="133">m</span> hd in
+      <span data-count="133">l</span>et* str2 = helpe<span data-count="133">r</span> tl in
+      <span data-count="133">r</span>eturn @@ str1 @ str2
   in
   helper structure
 ;;
 
-let run_ll bindings init_num p = <span data-count="42">r</span>un (ll_structur<span data-count="42">e</span> p) bindings init_num
+let run_ll bindings init_num p = <span data-count="46">r</span>un (ll_structur<span data-count="46">e</span> p) bindings init_num
 </code></pre>
       </div>
     </div>
