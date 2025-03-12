@@ -8,7 +8,7 @@ module TVarId = struct
   let to_string n = Int.to_string n
   let create n : t = n
   let compare = Int.compare
-  let ( + ) = ( + )
+  let add = ( + )
 end
 
 type base_type =
@@ -49,9 +49,11 @@ let rec show_type_val = function
   | TTuple l -> enclose @@ String.concat " * " (List.map show_type_val l)
   | TVar id ->
     let alph_size = Char.code 'z' - Char.code 'a' in
-    let symb = Char.chr @@ (Char.code 'a' + (id mod alph_size)) in
-    let count = (id / alph_size) + 1 in
-    "'" ^ String.make count symb
+    let rec helper num =
+      let symb = Char.chr @@ (Char.code 'a' + (num mod alph_size)) in
+      if num <> 0 then Char.escaped symb ^ helper (num / alph_size) else ""
+    in
+    "'" ^ helper id
   | TConstructor (Some t1, name) -> show_type_val t1 ^ " " ^ name
   | TConstructor (None, name) -> name
 ;;
@@ -66,6 +68,13 @@ type error =
   | Invalid_list_constructor_argument
   | Invalid_ast of string
   | Invalid_predefined_operators of string
+
+module Monads =
+  Utils.Counter_monad.Make
+    (TVarId)
+    (struct
+      type t = error
+    end)
 
 module VarSet = Set.Make (TVarId)
 
@@ -86,4 +95,17 @@ let free_vars =
     | _ -> acc
   in
   helper VarSet.empty
+;;
+
+let print_types res =
+  let rec helper acc = function
+    | (id, v) :: tl ->
+      acc
+      ^ (if id = "" then "" else "val " ^ id ^ " : ")
+      ^ show_type_val v
+      ^ "\n"
+      ^ helper acc tl
+    | _ -> acc
+  in
+  Format.print_string @@ helper "" res
 ;;

@@ -10,20 +10,9 @@ let ( >>= ) a b =
   | Error _ as e -> e
 ;;
 
-let test str =
-  Parser.Main_parser.parse str
-  >>= Inference.infer_program
-  |> function
-  | Result.Ok res ->
-    let rec helper acc = function
-      | (id, v) :: tl ->
-        acc
-        ^ (if id = "" then "" else "val " ^ id ^ " : ")
-        ^ Types.show_type_val v
-        ^ "\n"
-        ^ helper acc tl
-      | _ -> acc
-    in
-    Format.print_string @@ helper "" res
+let print_types = function
+  | Result.Ok res -> Typing.Types.print_types res
   | Result.Error s -> Format.eprintf "Error%s" s
 ;;
+
+let test str = Parser.Main_parser.parse str >>= Inference.infer_program |> print_types

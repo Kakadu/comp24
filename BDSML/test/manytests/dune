@@ -52,3 +52,39 @@
   manytests_link/typed/009let_poly.ml
   manytests_link/typed/015tuples.ml
   manytests_link/typed/016lists.ml))
+
+(cram
+ (applies_to manytests_anf)
+ (deps
+  ../middleend/run_to_anf.exe
+  manytests_link/typed/001fac.ml
+  manytests_link/typed/002fac.ml
+  manytests_link/typed/003fib.ml
+  manytests_link/typed/004manyargs.ml
+  manytests_link/typed/005fix.ml
+  manytests_link/typed/006partial.ml
+  manytests_link/typed/006partial2.ml
+  manytests_link/typed/006partial3.ml
+  manytests_link/typed/007order.ml
+  manytests_link/typed/008ascription.ml
+  manytests_link/typed/009let_poly.ml
+  manytests_link/typed/015tuples.ml
+  manytests_link/typed/016lists.ml))
+
+(cram
+ (applies_to manytests_ll)
+ (deps
+  ../middleend/run_lambda_lifting.exe
+  manytests_link/typed/001fac.ml
+  manytests_link/typed/002fac.ml
+  manytests_link/typed/003fib.ml
+  manytests_link/typed/004manyargs.ml
+  manytests_link/typed/005fix.ml
+  manytests_link/typed/006partial.ml
+  manytests_link/typed/006partial2.ml
+  manytests_link/typed/006partial3.ml
+  manytests_link/typed/007order.ml
+  manytests_link/typed/008ascription.ml
+  manytests_link/typed/009let_poly.ml
+  manytests_link/typed/015tuples.ml
+  manytests_link/typed/016lists.ml))

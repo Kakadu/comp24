@@ -8,7 +8,7 @@ module TVarId : sig
   val to_string : t -> string
   val create : int -> t
   val compare : t -> t -> int
-  val ( + ) : t -> int -> t
+  val add : t -> int -> t
 end
 
 type base_type =
@@ -37,7 +37,9 @@ type error =
   | Invalid_ast of string
   | Invalid_predefined_operators of string
 
+module Monads : Utils.Counter_monad.S with type counter = TVarId.t with type error = error
 module VarSet : Set.S with type elt = TVarId.t
 
 val occurs_in : TVarId.t -> type_val -> bool
 val free_vars : type_val -> VarSet.t
+val print_types : (string * type_val) list -> unit
