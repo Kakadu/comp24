@@ -5,3 +5,9 @@
  (release
   (flags
    (:standard -warn-error -A -w -58))))
+
+(cram
+ (deps
+  ./bin/neml.exe
+  ./lib/back/runtime.c
+  (glob_files_rec "./manytests/*")))

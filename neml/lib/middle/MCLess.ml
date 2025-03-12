@@ -59,7 +59,7 @@ let subst ~(from : IdTagged.t) ~(to_ : IdTagged.t) : cl -> cl =
 
 (** Converts Simpl to C(losure)Less IR.
     Performs closure conversion and lambda lifting *)
-let from_simpl (globals : IdSet.t) (sim : MSimpl.t) : t =
+let from_simpl ~(globals : IdSet.t) (sim : MSimpl.t) : t =
   let cnt = ref (-1) in
   let defs : def list ref = ref [] in
 

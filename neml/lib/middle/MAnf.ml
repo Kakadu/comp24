@@ -21,7 +21,6 @@ type anf =
   | Let of IdTagged.t * cmplx * anf
   | Cmplx of cmplx
   | If of imm * anf * anf
-  | Seq of anf List2.t
 
 type def = anf FuncDef.t
 type t = def list * anf
@@ -49,8 +48,6 @@ let rec to_expr : anf -> Expr.t = function
       cmplx_to_expr cmplx
   | If (icond, ithen, ielse) ->
       If (imm_to_expr icond, to_expr ithen, Some (to_expr ielse))
-  | Seq cmplxs ->
-      Seq (List2.map cmplxs ~f:to_expr)
 
 let to_structure ((defs, cl) : t) : structure =
   List.fold_right defs
@@ -104,7 +101,9 @@ let from_cl (cl : MCLess.cl) : anf =
         let aelse = f celse k in
         If (icond, athen, aelse)
     | Seq cls ->
-        Seq (List2.map cls ~f:(fun cl -> f cl k))
+        List.fold_right (List2.to_list cls) ~init:k
+          ~f:(fun x k _ -> f x k)
+          (Const Unit)
   in
   f cl (fun imm -> Cmplx (Imm imm))
 

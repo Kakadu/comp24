@@ -25,14 +25,17 @@ let%expect_test _ =
 
 let code = {| let a = 1 in let b = 2 in b |}
 
-let%expect_test _ = run `SimplOpt code ; [%expect {| (fun a b -> b) 1 2 |}]
+let%expect_test _ =
+  run `SimplOpt code ; [%expect {| (fun a -> (fun b -> b) 2) 1 |}]
 
 let%expect_test _ =
-  run `CLess code ; [%expect {|
-    let f0 = fun a b -> b;;
-    f0 1 2
+  run `CLess code ;
+  [%expect
+    {|
+    let f0 = fun b -> b;;
+    let f1 = fun a -> f0 2;;
+    f1 1
     |}]
-
 let code =
   {| let a = 1 and b = 2;;
      let f x y = x + y in
@@ -45,10 +48,13 @@ let%expect_test _ =
   [%expect
     {|
     (
-     fun b a ->
-       (fun f -> f 5) (fun x y -> ( + ) x y);
-       ( + ) a b
-    ) 2 1
+     fun b ->
+       (
+        fun a ->
+          (fun f -> f 5) (fun x y -> ( + ) x y);
+          ( + ) a b
+       ) 1
+    ) 2
     |}]
 
 let%expect_test _ =
@@ -58,7 +64,8 @@ let%expect_test _ =
     let f0 = fun x y -> ( + ) x y;;
     let f1 = fun f -> f 5;;
     let f2 = fun b a -> f1 f0; ( + ) a b;;
-    f2 2 1
+    let f3 = fun b -> f2 b 1;;
+    f3 2
     |}]
 
 let%expect_test _ =
@@ -67,22 +74,34 @@ let%expect_test _ =
     {|
     let f0 = fun x y -> ( + ) x y;;
     let f1 = fun f -> f 5;;
-    let f2 = fun b a -> f1 f0; ( + ) a b;;
-    f2 2 1
+    let f2 = fun b a -> let v0 = f1 f0 in ( + ) a b;;
+    let f3 = fun b -> f2 b 1;;
+    f3 2
     |}]
 
 let code = {| let x = 1 + 2 and y = 3 and z = 4 in x - z + y |}
 
 let%expect_test _ =
   run `SimplOpt code ;
-  [%expect {| (fun z y x -> ( + ) (( - ) x z) y) 4 (( + ) 1 2) 3 |}]
+  [%expect
+    {|
+    (
+     fun z ->
+       (
+        fun y ->
+          (fun x -> ( + ) (( - ) x z) y) (( + ) 1 2)
+       ) 3
+    ) 4
+    |}]
 
 let%expect_test _ =
   run `CLess code ;
   [%expect
     {|
-    let f0 = fun z y x -> ( + ) (( - ) x z) y;;
-    f0 4 (( + ) 1 2) 3
+    let f0 = fun y z x -> ( + ) (( - ) x z) y;;
+    let f1 = fun z y -> f0 y z (( + ) 1 2);;
+    let f2 = fun z -> f1 z 3;;
+    f2 4
     |}]
 
 let%expect_test _ =
@@ -90,8 +109,11 @@ let%expect_test _ =
   [%expect
     {|
     let f0 =
-      fun z y x -> let v0 = ( - ) x z in ( + ) v0 y;;
-    let v0 = ( + ) 1 2 in f0 4 v0 3
+      fun y z x -> let v0 = ( - ) x z in ( + ) v0 y;;
+    let f1 =
+      fun z y -> let v0 = ( + ) 1 2 in f0 y z v0;;
+    let f2 = fun z -> f1 z 3;;
+    f2 4
     |}]
 
 let code =
@@ -239,4 +261,12 @@ let%expect_test _ =
           let v2 = f0 v1 in ( * ) n v2;;
     let f1 = fun fact -> fact 5;;
     f1 f0
+    |}]
+
+let%expect_test _ =
+  run `Anf {| let x = (f x; f y) in x + 1 |} ;
+  [%expect
+    {|
+    let f0 = fun x -> ( + ) x 1;;
+    let v0 = f x in let v1 = f y in f0 v1
     |}]
