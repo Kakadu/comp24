@@ -5,6 +5,7 @@
 open Typedtree
 
 type parse_error = Syntax_error of string
+type illegal_state_error = Illegal_state_error of string
 
 type infer_error =
   | Occurs_check of int * ty
@@ -17,6 +18,8 @@ type infer_error =
 type error =
   | Parser of parse_error
   | Infer of infer_error
+  | Middleend of illegal_state_error
+  | Llvm_gen of illegal_state_error
 
 let occurs_check (b, t) = Infer (Occurs_check (b, t))
 let unbound_variable v = Infer (Unbound_variable v)
@@ -24,3 +27,5 @@ let unification_failed (t1, t2) = Infer (Unification_failed (t1, t2))
 let several_bounds v = Infer (Several_bounds v)
 let not_specify_rec = Infer Not_specify_rec
 let no_variable_rec = Infer No_variable_rec
+let illegal_state msg = Middleend (Illegal_state_error msg)
+let llvm_error msg = Llvm_gen (Illegal_state_error msg)

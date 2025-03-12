@@ -1,18 +1,54 @@
 (executable
  (name parser_runner)
  (public_name psrser_runner)
+ (modules parser_runner)
  (libraries aefjnvMl_lib stdio))
 
 (executable
  (name inferencer_runner)
  (public_name inferencer_runner)
+ (modules inferencer_runner)
  (libraries aefjnvMl_lib stdio))
 
+(executable
+ (name cc_runner)
+ (public_name cc_runner)
+ (modules cc_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
+(executable
+ (name ll_runner)
+ (public_name ll_runner)
+ (modules ll_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
+(executable
+ (name me_runner)
+ (public_name me_runner)
+ (modules me_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
+(executable
+ (name anf_runner)
+ (public_name anf_runner)
+ (modules anf_runner)
+ (libraries aefjnvMl_lib stdio middleend))
+
 (cram
- (applies_to inferencer_manytests parser_manytests)
+ (applies_to
+  inferencer_manytests
+  parser_manytests
+  me_manytests
+  cc_manytests
+  ll_manytests
+  anf_manytests)
  (deps
   ./inferencer_runner.exe
   ./parser_runner.exe
+  ./me_runner.exe
+  ./cc_runner.exe
+  ./ll_runner.exe
+  ./anf_runner.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml
@@ -30,9 +66,16 @@
   manytests/typed/008ascription.ml
   manytests/typed/009let_poly.ml
   manytests/typed/010sukharev.ml
+  manytests/typed/011mapcps.ml
+  manytests/typed/012fibcps.ml
+  manytests/typed/013foldfoldr.ml
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
 
 (cram
  (applies_to inferencer_tests)
  (deps ./inferencer_runner.exe))
+
+(cram
+ (applies_to cc_tests)
+ (deps ./cc_runner.exe))
