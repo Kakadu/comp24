@@ -24,7 +24,7 @@ let rec closure_exp apps env = function
   | RExp_fun (args, exp) ->
     let exp, vars = closure_exp apps env exp in
     let new_args = UsedIdents.diff vars @@ UsedIdents.of_list args in
-    let new_args_list = UsedIdents.to_list new_args in
+    let new_args_list = UsedIdents.elements new_args in
     let exp =
       List.fold_left
         (fun exp el -> RExp_apply (exp, RExp_ident el))
@@ -46,13 +46,13 @@ let rec closure_exp apps env = function
           | RExp_fun (args, exp) ->
             let exp, vars2 = closure_exp apps env exp in
             let new_args = UsedIdents.diff vars2 @@ UsedIdents.of_list (name :: args) in
-            let new_args_list = UsedIdents.to_list new_args in
+            let new_args_list = UsedIdents.elements new_args in
             ( (UsedIdents.add name new_vars, UsedIdents.union vars new_args)
             , ((name, RExp_fun (new_args_list @ args, exp)), (name, new_args_list)) )
           | _ as exp ->
             let exp, vars2 = closure_exp apps env exp in
             ( (UsedIdents.add name new_vars, UsedIdents.union vars vars2)
-            , ((name, exp), (name, TopDecl.to_list vars2)) ))
+            , ((name, exp), (name, TopDecl.elements vars2)) ))
         (UsedIdents.empty, UsedIdents.empty)
         binds
     in
