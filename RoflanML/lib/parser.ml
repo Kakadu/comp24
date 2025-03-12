@@ -73,6 +73,7 @@ let pid =
   let pfirst = satisfy (fun ch -> is_letter ch || Char.equal ch '_') >>| Char.escaped in
   let plast = take_while (fun ch -> is_letter ch || is_digit ch || Char.equal ch '_') in
   ptoken (lift2 ( ^ ) pfirst plast)
+  <|> pstoken "()"
   >>= fun s ->
   if is_keyword s
   then fail ("Keyword identifiers are forbidden: " ^ s)
@@ -80,7 +81,16 @@ let pid =
 ;;
 
 let pbind_id = poperator <|> pstoken "()" <|> pid
-let pint = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) <?> "integer"
+
+let pint =
+  let ppos = ptoken (take_while1 is_digit >>| fun x -> CInt (Int.of_string x)) in
+  let pneg =
+    pparens
+      (pstoken "-" *> take_while1 is_digit
+       >>| fun digits -> CInt (Int.of_string ("-" ^ digits)))
+  in
+  pneg <|> ppos <?> "integer"
+;;
 
 let pbool =
   ptoken
@@ -259,7 +269,7 @@ let pexpr_fun () =
       lift2
         (fun f args -> List.fold_left ~f:(fun f arg -> EApp (f, arg)) ~init:f args)
         pe_base
-        (many (char ' ' *> ptoken pe_base))
+        (many (pspaces *> ptoken pe_base))
     in
     let pe_bin =
       let op_bin pe ops = plbinop pe ops in
@@ -284,4 +294,9 @@ let pexpr_fun () =
 let pexpr = pexpr_fun ()
 let parse_expr = parse_string ~consume:Consume.All (pexpr <* pspaces)
 let parse_decl = parse_string ~consume:Consume.All (plet_decl pexpr <* pspaces)
-let parse = parse_string ~consume:Consume.All (many1 (plet_decl pexpr) <* pspaces)
+
+let parse =
+  parse_string
+    ~consume:Consume.All
+    (many1 (plet_decl pexpr) <* skip_many (pstoken ";;") <* pspaces)
+;;
