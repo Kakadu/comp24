@@ -41,7 +41,7 @@ let rec compile_aexpr = function
         "create_tuple"
         (Array.of_list (const_int int_t 2 :: [ head'; tail' ]))
     in
-    compile_simple_type "create_list" [| const_int int_t 2; t |]
+    compile_simple_type "create_constructor" [| const_int int_t 2; t |]
   | AExp_construct ("[]", _) ->
     compile_simple_type "create_constructor" [| const_int int_t 3; const_null ptr_t |]
   | AExp_construct ("None", _) ->
