@@ -35,15 +35,15 @@ Test let with patterns
   $ ./run_remove_patterns.exe <<- EOF
   > let [(a, _); (4, c)] = [ (1, 2); (3, 4) ] in a
   > EOF
-  (let __reserved_0 = ((disassemble "::") (((1, 2) :: ((3, 4) :: ([]))))) in 
+  (let __reserved_0 = (disassemble (((1, 2) :: ((3, 4) :: ([]))))) in 
    (let __reserved_1 = ((get_from_tuple __reserved_0) 0) in 
    (let __var_a = ((get_from_tuple __reserved_1) 0) in 
    (let __nothing = ((get_from_tuple __reserved_1) 1) in 
-   (let __reserved_2 = ((disassemble "::") (((get_from_tuple __reserved_0) 1))) in 
+   (let __reserved_2 = (disassemble (((get_from_tuple __reserved_0) 1))) in 
    (let __reserved_3 = ((get_from_tuple __reserved_2) 0) in 
    (let __nothing = ((op_eq (((get_from_tuple __reserved_3) 0))) 4) in 
    (let __var_c = ((get_from_tuple __reserved_3) 1) in 
-   (let __nothing = ((same_cons (((get_from_tuple __reserved_2) 1))) (([]))) in 
+   (let __nothing = ((same_cons (((get_from_tuple __reserved_2) 1))) 3) in 
    __var_a)))))))));;
 Test let fun
   $ ./run_remove_patterns.exe <<- EOF
@@ -66,9 +66,9 @@ Test struct items
   let __reserved_0 = (1, 2);;
   let __var_a = ((get_from_tuple __reserved_0) 0);;
   let __var_b = ((get_from_tuple __reserved_0) 1);;
-  let __reserved_1 = ((disassemble "::") ((3 :: ([]))));;
+  let __reserved_1 = (disassemble ((3 :: ([]))));;
   let __var_c = ((get_from_tuple __reserved_1) 0);;
-  let __nothing = ((same_cons (((get_from_tuple __reserved_1) 1))) (([])));;
+  let __nothing = ((same_cons (((get_from_tuple __reserved_1) 1))) 3);;
   let __var_f = (fun __reserved_2 -> (let __var_a = __reserved_2 in 
    __var_a));;
   let rec __var_g = (fun __reserved_3 -> (let __var_a = __reserved_3 in 
@@ -126,10 +126,10 @@ Test function with constructors
   $ ./run_remove_patterns.exe <<- EOF
   > function | Some (x, y) -> x + 3 | None -> 0 
   > EOF
-  (fun __reserved_0 -> (if ((op_and (((same_cons __reserved_0) "Some"))) (((op_and (((op_and true) true))) true))) then (let __reserved_1 = ((disassemble "Some") __reserved_0) in 
+  (fun __reserved_0 -> (if ((op_and (((same_cons __reserved_0) "Some"))) (((op_and (((op_and true) true))) true))) then (let __reserved_1 = (disassemble __reserved_0) in 
    (let __var_x = ((get_from_tuple __reserved_1) 0) in 
    (let __var_y = ((get_from_tuple __reserved_1) 1) in 
-   ((op_plus __var_x) 3)))) else (if ((same_cons __reserved_0) "None") then (let __nothing = ((same_cons __reserved_0) ((None))) in 
+   ((op_plus __var_x) 3)))) else (if ((same_cons __reserved_0) "None") then (let __nothing = ((same_cons __reserved_0) 0) in 
    0) else (exception "Match_failure"))));;
 Test or
   $ ./run_remove_patterns.exe <<- EOF

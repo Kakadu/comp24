@@ -75,9 +75,10 @@
     0
   
   Answer:
-  terminate called after throwing an instance of 'std::runtime_error'
-    what():  Invalid value, expected l, got index 5, error std::get: wrong index for variant
-  Aborted (core dumped)
+  1111111111
+  1
+  10
+  100
   
   ----------------------------------- manytests/typed/005fix.ml
   let rec fix f x = f (fix f) x
@@ -98,9 +99,7 @@
   let main =
     let () = print_int (foo 11) in
     0Answer:
-  terminate called after throwing an instance of 'std::runtime_error'
-    what():  Invalid value, expected l, got index 5, error std::get: wrong index for variant
-  Aborted (core dumped)
+  1122
   
   ----------------------------------- manytests/typed/006partial2.ml
   let foo a b c =
@@ -129,6 +128,9 @@
   let main =
     let () = foo 4 8 9 in
     0Answer:
+  4
+  8
+  9
   
   ----------------------------------- manytests/typed/007order.ml
   let _start () () a () b _c () d __ =
@@ -144,8 +146,8 @@
   4
   -1
   103
-  -35
-  4
+  -555555
+  10000
   
   ----------------------------------- manytests/typed/008ascription.ml
   let addi = fun f g x -> (f x (g x: bool) : int)
@@ -161,16 +163,6 @@
     (f 1, f true)Answer:
   
   ----------------------------------- manytests/typed/015tuples.ml
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_map':
-  BDSML:(.text+0x71): undefined reference to `get_from_tuple'
-  /usr/bin/ld: BDSML:(.text+0xac): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_feven':
-  BDSML:(.text+0x261): undefined reference to `get_from_tuple'
-  /usr/bin/ld: BDSML:(.text+0x299): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o: in function `__var_fodd':
-  BDSML:(.text+0x3b1): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-9d900d.o:BDSML:(.text+0x3ee): more undefined references to `get_from_tuple' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   let rec fix f x = f (fix f) x
   let map f p = let (a,b) = p in (f a, f b)
   let fixpoly l =
@@ -194,31 +186,11 @@
     0
   
   Answer:
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
+  1
+  1
+  Segmentation fault (core dumped)
   
   ----------------------------------- manytests/typed/016lists.ml
-  Fatal error: exception Failure("Couldn't find value for keyprint_int")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from My_llvm__Codegen.compile_aexpr in file "lib/llvm/codegen.ml", line 51, characters 16-44
-  Called from Stdlib__List.map in file "list.ml", line 86, characters 15-19
-  Called from My_llvm__Codegen.compile_cexpr in file "lib/llvm/codegen.ml", line 94, characters 29-57
-  Called from My_llvm__Codegen.compile_lexpr in file "lib/llvm/codegen.ml", line 102, characters 16-31
-  Called from My_llvm__Codegen.compile_values in file "lib/llvm/codegen.ml", line 153, characters 23-38
-  Called from Stdlib__List.iter in file "list.ml", line 112, characters 12-15
-  Called from My_llvm__Codegen.compile_main in file "lib/llvm/codegen.ml", line 170, characters 11-33
-  Called from My_llvm__Codegen.compile_program in file "lib/llvm/codegen.ml", line 177, characters 11-31
-  Called from Dune__exe__Compiler in file "bin/compiler.ml", line 28, characters 30-57
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_map':
-  BDSML:(.text+0x71): undefined reference to `get_from_tuple'
-  /usr/bin/ld: BDSML:(.text+0xac): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_feven':
-  BDSML:(.text+0x261): undefined reference to `get_from_tuple'
-  /usr/bin/ld: BDSML:(.text+0x299): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o: in function `__var_fodd':
-  BDSML:(.text+0x3b1): undefined reference to `get_from_tuple'
-  /usr/bin/ld: /tmp/build_0bf79c_dune/out-588cdd.o:BDSML:(.text+0x3ee): more undefined references to `get_from_tuple' follow
-  clang: error: linker command failed with exit code 1 (use -v to see invocation)
   let rec length xs =
     match xs with
     | [] -> 0
@@ -261,7 +233,7 @@
     let () = print_int (length (cartesian [1;2] [1;2;3;4])) in
     0
   Answer:
-  ./a.out: not found
-  rm: cannot remove 'a.out': No such file or directory
-  [1]
+  terminate called after throwing an instance of 'std::runtime_error'
+    what():  Invalid value, expected l, got index 3, error "std::get: wrong index for variant"
+  Aborted (core dumped)
 

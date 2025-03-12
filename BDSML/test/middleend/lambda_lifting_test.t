@@ -44,8 +44,8 @@ Test let with let rec in
   let rec __var_helper = (fun __reserved_0 __reserved_1 -> (let __var_acc = __reserved_0 in 
    (let __var_xs = __reserved_1 in 
    (let __reserved_2 = __var_xs in 
-   (if ((same_cons __reserved_2) "[]") then (let __nothing = ((same_cons __reserved_2) (([]))) in 
-   __var_acc) else (if ((op_and (((same_cons __reserved_2) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_3 = ((disassemble "::") __reserved_2) in 
+   (if ((same_cons __reserved_2) "[]") then (let __nothing = ((same_cons __reserved_2) 3) in 
+   __var_acc) else (if ((op_and (((same_cons __reserved_2) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_3 = (disassemble __reserved_2) in 
    (let __var_h = ((get_from_tuple __reserved_3) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_3) 1) in 
    ((__var_helper (((op_plus __var_acc) 1))) __var_tl)))) else (exception "Match_failure")))))));;
@@ -62,8 +62,8 @@ Test let with let rec in with several capture
   let rec __var_helper = (fun __var_a0 __reserved_1 __reserved_2 -> (let __var_acc = __reserved_1 in 
    (let __var_xs = __reserved_2 in 
    (let __reserved_3 = __var_xs in 
-   (if ((same_cons __reserved_3) "[]") then (let __nothing = ((same_cons __reserved_3) (([]))) in 
-   __var_acc) else (if ((op_and (((same_cons __reserved_3) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_4 = ((disassemble "::") __reserved_3) in 
+   (if ((same_cons __reserved_3) "[]") then (let __nothing = ((same_cons __reserved_3) 3) in 
+   __var_acc) else (if ((op_and (((same_cons __reserved_3) "::"))) (((op_and (((op_and true) true))) true))) then (let __reserved_4 = (disassemble __reserved_3) in 
    (let __var_h = ((get_from_tuple __reserved_4) 0) in 
    (let __var_tl = ((get_from_tuple __reserved_4) 1) in 
    (((__var_helper __var_a0) (((op_plus __var_acc) __var_a0))) __var_tl)))) else (exception "Match_failure")))))));;
