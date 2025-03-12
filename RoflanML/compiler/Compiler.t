@@ -1,11 +1,10 @@
   $ clang-16 -std=c++17 -c runtime.cpp -o runtime.o
   $ for prog in ../manytests/typed/*; do
   > echo "\n--------------- $prog\n"
-  > dune exec ./compiler.exe < $prog > out.ll
-  > clang-16 -Wno-override-module -lstdc++ -std=c++17 -lffi -v out.ll runtime.o -o a.out
+  > dune exec ./Compiler.exe < $prog > out.ll
+  > clang-16 -Wno-override-module -lstdc++ -std=c++17 -lffi out.ll runtime.o -o a.out
   > cat $prog
-  > echo "\n\n"
-  > echo "Output:\n"
+  > echo "\nOutput:\n"
   > ./a.out
   > rm out.ll
   > rm a.out
@@ -18,8 +17,6 @@
   let main =
     let () = print_int (fac 4) in
     0
-  
-  
   
   
   Output:
@@ -35,8 +32,6 @@
   let main =
     let () = print_int (fac_cps 4 (fun print_int -> print_int)) in
     0
-  
-  
   
   
   Output:
@@ -61,8 +56,6 @@
     let () = print_int (fib_acc 0 1 4) in
     let () = print_int (fib 4) in
     0
-  
-  
   
   
   Output:
@@ -92,8 +85,6 @@
     0
   
   
-  
-  
   Output:
   
   1111111111
@@ -112,8 +103,6 @@
     0
   
   
-  
-  
   Output:
   
   720
@@ -126,8 +115,6 @@
   let main =
     let () = print_int (foo 11) in
     0
-  
-  
   Output:
   
   1122
@@ -146,8 +133,6 @@
     let foo = foo 3 in
     let () = print_int foo in
     0
-  
-  
   Output:
   
   1
@@ -165,11 +150,45 @@
   let main =
     let () = foo 4 8 9 in
     0
-  
-  
   Output:
   
   4
   8
   9
+  $ for prog in tests/*; do
+  > echo "\n--------------- $prog\n"
+  > dune exec ./Compiler.exe < $prog > out.ll
+  > clang-16 -Wno-override-module -lstdc++ -std=c++17 -lffi out.ll runtime.o -o a.out
+  > cat $prog
+  > echo "\nOutput:\n"
+  > ./a.out
+  > rm out.ll
+  > rm a.out
+  > done
+  
+  --------------- tests/017op.ml
+  
+  let ( + ) x y z = x + y - z
+  
+  let ( - ) x y = x * y
+  
+  let ( * ) x y = x + y
+  
+  let main = let () = print_int ((+) 1 2 3) in 
+  let () = print_int (1 - 2) in 
+  let () = print_int ((2 * 3) 4) in 0
+  Output:
+  
+  0
+  2
+  1
+  
+  --------------- tests/018print.ml
+  
+  let print_int x = print_bool x
+  let () = print_int (true && false)
+  
+  Output:
+  
+  false
 

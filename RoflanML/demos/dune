@@ -75,4 +75,6 @@
  ../manytests/typed/006partial.ml
  ../manytests/typed/006partial2.ml
  ../manytests/typed/006partial3.ml
+ ../compiler/tests/017op.ml
+ ../compiler/tests/018print.ml
  ))
