@@ -1,26 +1,39 @@
 (library
+ (name HamsterML)
+ (public_name HamsterML)
  (modules
+  ;; parsing directory
   Ast
   Parser
   Lexer
+  ;; typing directory
   Typing
+  ;; middleend directory
   Anf
-  CC
-  Utils
-  LL
   AC
+  CC
+  LL
   ME
+  Utils
+  ;; llvm directory
+  Compiler
+  Compiler_utils
+  ;; pretty_printers directory
   PrinterAst
+  PrinterAnf
   PrinterLL
-  PrinterME
-  PrinterAnf)
- (libraries llvm)
+  PrinterME)
+ (libraries llvm base llvm.analysis)
  (preprocess
   (pps ppx_expect ppx_deriving.show ppx_deriving.eq))
  (inline_tests)
  (instrumentation
-  (backend bisect_ppx))
- (name HamsterML)
- (public_name HamsterML))
+  (backend bisect_ppx)))
+
+(rule
+ (targets runtime.so)
+ (deps runtime.c)
+ (action
+  (run gcc -fPIC -shared %{deps} -o %{targets})))
 
 (include_subdirs unqualified)

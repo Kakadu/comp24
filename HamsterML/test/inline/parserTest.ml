@@ -283,6 +283,22 @@ let%test _ =
   = EListConcat (EConstraint (EVar "x", PInt), EList [ EVar "x" ])
 ;;
 
+let%test _ =
+  parse_expr "let foo (f: 'a -> 'b -> 'c * 'c list) = 10"
+  = Let
+      ( Nonrecursive
+      , [ ( Var "foo"
+          , [ Constraint
+                ( Var "f"
+                , PArrow
+                    ( PVar "'a"
+                    , PArrow (PVar "'b", PTuple [ PVar "'c"; PList (PVar "'c") ]) ) )
+            ]
+          , EConst (Int 10) )
+        ]
+      , None )
+;;
+
 (* Pattern matching *)
 
 let%test _ =

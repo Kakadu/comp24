@@ -32,10 +32,6 @@ type anf_decl =
 
 type anf_prog = anf_decl list
 
-module NameEnv = struct
-  include Utils.NameEnv
-end
-
 let _let_in pattern body scope = ALetIn (pattern, body, scope)
 let _ac x = ACExpr (CImm x)
 
@@ -149,11 +145,11 @@ and convert_expr (expr : me_expr) (k : imm_expr -> aexpr t) =
       match other_binds with
       | hd :: tl ->
         let new_scope = MELet (rec_flag, hd :: tl, Some scope) in
-        convert_expr new_scope (fun imm_scope ->
-          return @@ _let_in pattern (CImm imm_first_body) (_ac imm_scope))
+        let* new_scope = convert_expr new_scope k in
+        return @@ _let_in pattern (CImm imm_first_body) new_scope
       | [] ->
-        convert_expr scope (fun imm_scope ->
-          return @@ _let_in pattern (CImm imm_first_body) (_ac imm_scope)))
+        let* scope = convert_expr scope k in
+        return @@ _let_in pattern (CImm imm_first_body) scope)
   | MELet (_, _, None) -> failwith "Inner Let can't exist without scope"
 ;;
 
@@ -182,7 +178,11 @@ let anf_decl (decl : me_expr) =
   in
   match decl with
   | MELet (rec_flag, binds, None) ->
-    let* single_anf_binds = map_list binds ~f:_single_anf_binding in
+    let* single_anf_binds =
+      fold_list binds ~init:[] ~f:(fun binds bind ->
+        let* bind = _single_anf_binding bind in
+        return (binds @ [ bind ]))
+    in
     if List.length single_anf_binds = 1
     then return @@ ADSingleLet (rec_flag, List.hd_exn single_anf_binds)
     else return @@ ADMutualRecDecl single_anf_binds

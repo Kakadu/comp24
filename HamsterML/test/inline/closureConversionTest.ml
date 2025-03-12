@@ -43,7 +43,7 @@ let%expect_test _ =
   [%expect {| let var_3 arg_0 arg_1 = let var_2 = arg_0 in (var_2 + arg_1) |}]
 ;;
 
-(* 001fac.ml *)
+(* manytests *)
 
 let%expect_test "001fac.ml" =
   pp_closure_conv_prog

@@ -78,6 +78,19 @@ and pretty_print_datatype = function
   | PInt -> "int"
   | PBool -> "bool"
   | PString -> "string"
+  | PUnit -> "unit"
+  | PVar id -> id
+  | PList dt -> Printf.sprintf "[%s]" (pretty_print_datatype dt)
+  | PTuple dts ->
+    let contents = String.concat ~sep:" * " (List.map dts ~f:pretty_print_datatype) in
+    Printf.sprintf "(%s)" contents
+  | PArrow (t1, t2) ->
+    let left =
+      match t1 with
+      | PArrow _ -> Printf.sprintf "(%s)" (pretty_print_datatype t1)
+      | _ -> pretty_print_datatype t1
+    in
+    Printf.sprintf "%s -> %s" left (pretty_print_datatype t2)
 
 and pretty_print_pattern = function
   | Const v -> pretty_print_value v

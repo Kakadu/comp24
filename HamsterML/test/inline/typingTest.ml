@@ -306,3 +306,10 @@ let%test _ =
      else meven (n - 1) in meven 10"
   = TInt
 ;;
+
+(* Constraints *)
+
+let%test _ =
+  infer_expr "let foo (f: 'a -> 'b -> 'c * 'c list) = 10"
+  = TArrow (TArrow (TPVar 1, TArrow (TPVar 2, TTuple [ TPVar 3; TList (TPVar 3) ])), TInt)
+;;

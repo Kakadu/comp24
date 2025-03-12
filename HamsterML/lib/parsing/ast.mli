@@ -25,6 +25,11 @@ type dataType =
   | PInt (* Integer type *)
   | PBool (* Boolean type *)
   | PString (* String type *)
+  | PUnit
+  | PVar of id
+  | PList of dataType
+  | PTuple of dataType list
+  | PArrow of dataType * dataType
 
 (* Pretty-print a data type *)
 val pp_dataType : Format.formatter -> dataType -> unit
@@ -145,11 +150,20 @@ val pp_prog : Format.formatter -> prog -> unit
 (* Convert a program to a string *)
 val show_prog : prog -> string
 
-(* Operators converter *)
+(* Binary operators converter *)
 module BinOperator : sig
   (* List of all binary operators *)
   val list : bop list
 
   (* Convert binary operator to string *)
   val to_string : bop -> string
+end
+
+(* Unary operators converter *)
+module UnOperator : sig
+  (* List of all unary operators *)
+  val list : uop list
+
+  (* Convert unary operator to string *)
+  val to_string : uop -> string
 end
