@@ -30,5 +30,6 @@
   ppx_expect
   pprint
   angstrom
+  llvm
   ppx_deriving
   ppx_sexp_conv))
