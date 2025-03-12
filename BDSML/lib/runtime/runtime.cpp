@@ -163,7 +163,7 @@ public:
   static auto String(std::string str) { return new Value(std::move(str)); }
   static Value *Tuple(TupleType elems) { return new Value(std::move(elems)); }
   static auto Unit() { return new Value(); }
-  static auto Constructor(int name, Value *param) {
+  static auto Constructor(int64_t name, Value *param) {
     return new Value(ConstructorT(ConstructorT::ConsType(name), param));
   }
 
@@ -184,7 +184,7 @@ public:
   [[nodiscard]] Value *disassemble() {
     return get<ConstructorT>().disassemble();
   }
-  [[nodiscard]] Value *same_cons(int name) {
+  [[nodiscard]] Value *same_cons(int64_t name) {
     return get<ConstructorT>().same_cons(ConstructorT::ConsType(name));
   }
 
@@ -206,7 +206,7 @@ PRINT(int)
 PRINT(char)
 PRINT(string)
 
-Value *apply_cpp(Value *v, std::vector<Value *> const &args) {
+Value *apply_cpp(Value *v, std::vector<Value *> &args) {
   auto copy = new Value(v->get_func());
 
   auto &func = copy->get_func();
@@ -260,7 +260,18 @@ extern "C" Value *create_unit() { return Value::Unit(); }
 extern "C" Value *create_int(const int64_t v) { return Value::Int(v); }
 extern "C" Value *create_bool(const bool v) { return Value::Bool(v); }
 extern "C" Value *create_char(const char v) { return Value::Char(v); }
-extern "C" Value *create_string(const char *str) { return Value::String(str); }
+extern "C" Value *create_string(int count, ...) {
+  std::string string;
+  string.reserve(count);
+  va_list args;
+  va_start(args, count);
+  for (auto _ : std::views::iota(0, count)) {
+    int c = va_arg(args, int);
+    string.push_back(static_cast<char>(c));
+  }
+  va_end(args);
+  return Value::String(std::move(string));
+}
 extern "C" Value *create_tuple(int count, ...) {
   Value::TupleType vector;
   vector.reserve(count);
@@ -268,22 +279,22 @@ extern "C" Value *create_tuple(int count, ...) {
   va_start(args, count);
   for (auto _ : std::views::iota(0, count)) {
     auto c = va_arg(args, Value *);
-    vector.emplace_back(c);
+    vector.emplace_back(copy(c));
   }
   va_end(args);
   return Value::Tuple(std::move(vector));
 }
-extern "C" Value *get_from_tuple(Value *tuple, int index) {
-  return Value::ValuePtr(tuple->get_tuple()[index]).release();
+extern "C" Value *get_from_tuple(Value *tuple, Value *index) {
+  return Value::ValuePtr(tuple->get_tuple()[index->get_int()]).release();
 }
 extern "C" Value *create_function(void *func, size_t args_count) {
   return Value::Function(func, args_count);
 }
-extern "C" Value *create_constructor(int name, Value *arg) {
+extern "C" Value *create_constructor(int64_t name, Value *arg) {
   return Value::Constructor(name, arg);
 }
 extern "C" Value *disassemble(Value *name) { return name->disassemble(); }
-extern "C" Value *same_cons(Value *cons, int name) {
+extern "C" Value *same_cons(Value *cons, int64_t name) {
   return cons->same_cons(name);
 }
 
