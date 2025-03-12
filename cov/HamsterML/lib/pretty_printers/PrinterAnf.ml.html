@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>PrinterAnf.ml &mdash; Coverage report</title>
-    <meta name="description" content="77.55% coverage in lib/pretty_printers/PrinterAnf.ml">
+    <meta name="description" content="69.39% coverage in lib/pretty_printers/PrinterAnf.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,16 @@
           <span class="dirname">lib/pretty_printers/</span>PrinterAnf.ml
         </a>
       </h1>
-      <h2>77.55%</h2>
+      <h2>69.39%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:9.84%"></span>
       <span class="unvisited" style="top:14.75%"></span>
+      <span class="unvisited" style="top:18.03%"></span>
       <span class="unvisited" style="top:42.62%"></span>
       <span class="unvisited" style="top:44.26%"></span>
+      <span class="unvisited" style="top:45.90%"></span>
+      <span class="unvisited" style="top:47.54%"></span>
       <span class="unvisited" style="bottom:11.48%"></span>
       <span class="unvisited" style="bottom:8.20%"></span>
       <span class="unvisited" style="bottom:4.92%"></span>
@@ -39,7 +42,7 @@
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span class="unvisited"> </span>
 <a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L11"></a><span class="unvisited"> </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
@@ -56,8 +59,8 @@
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="unvisited"> </span>
 <a id="L27"></a><span class="unvisited"> </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
@@ -159,56 +162,56 @@
 <pre><code class="ocaml">open Anf
 
 let rec pretty_print_imm = function
-  | <span data-count="85">I</span>mmOperation op -&gt; PrinterAst.pretty_print_op op
-  | <span data-count="99">I</span>mmInt n -&gt; string_of_int n
+  | <span data-count="40">I</span>mmOperation op -&gt; PrinterAst.pretty_print_op op
+  | <span data-count="70">I</span>mmInt n -&gt; string_of_int n
   | <span data-count="0">I</span>mmString s -&gt; Printf.sprintf "\"%s\"" s
-  | <span data-count="25">I</span>mmBool b -&gt; string_of_bool b
-  | <span data-count="649">I</span>mmId id -&gt; id
+  | <span data-count="5">I</span>mmBool b -&gt; string_of_bool b
+  | <span data-count="246">I</span>mmId id -&gt; id
   | <span data-count="0">I</span>mmList lst -&gt; "[" ^ String.conca<span data-count="0">t</span> "; " (List.ma<span data-count="0">p</span> pretty_print_imm lst) ^ "]"
-  | <span data-count="14">I</span>mmTuple lst -&gt; "(" ^ String.conca<span data-count="14">t</span> ", " (List.ma<span data-count="14">p</span> pretty_print_imm lst) ^ ")"
-  | <span data-count="3">I</span>mmUnit -&gt; "()"
+  | <span data-count="1">I</span>mmTuple lst -&gt; "(" ^ String.conca<span data-count="1">t</span> ", " (List.ma<span data-count="1">p</span> pretty_print_imm lst) ^ ")"
+  | <span data-count="0">I</span>mmUnit -&gt; "()"
 ;;
 
 let rec pretty_print_cexpr = function
-  | <span data-count="253">C</span>Application (f, arg, args) -&gt;
+  | <span data-count="98">C</span>Application (f, arg, args) -&gt;
     let f_str = pretty_print_cexpr f in
-    <span data-count="253">l</span>et arg_str = pretty_print_cexpr arg in
-    <span data-count="253">l</span>et args_str = String.concat " " (List.ma<span data-count="253">p</span> pretty_print_cexpr args) in
-    <span data-count="253">P</span>rintf.sprintf "%s %s%s" f_str arg_str (if args = [] then <span data-count="132">"</span>" else <span data-count="121">"</span> " ^ args_str)
-  | <span data-count="37">C</span>If (cond, then_expr, Some else_expr) -&gt;
+    <span data-count="98">l</span>et arg_str = pretty_print_cexpr arg in
+    <span data-count="98">l</span>et args_str = String.concat " " (List.ma<span data-count="98">p</span> pretty_print_cexpr args) in
+    <span data-count="98">P</span>rintf.sprintf "%s %s%s" f_str arg_str (if args = [] then <span data-count="43">"</span>" else <span data-count="55">"</span> " ^ args_str)
+  | <span data-count="8">C</span>If (cond, then_expr, Some else_expr) -&gt;
     Printf.sprintf
       "if %s then %s else %s"
-      (pretty_print_im<span data-count="37">m</span> cond)
-      (pretty_print_aexp<span data-count="37">r</span> then_expr)
-      (pretty_print_aexp<span data-count="37">r</span> else_expr)
+      (pretty_print_im<span data-count="8">m</span> cond)
+      (pretty_print_aexp<span data-count="8">r</span> then_expr)
+      (pretty_print_aexp<span data-count="8">r</span> else_expr)
   | <span data-count="0">C</span>If (cond, then_expr, None) -&gt;
     Printf.sprintf "if %s then %s" (pretty_print_im<span data-count="0">m</span> cond) (pretty_print_aexp<span data-count="0">r</span> then_expr)
-  | <span data-count="3">C</span>ConstructList (hd, tl) -&gt;
-    Printf.sprintf "%s :: %s" (pretty_print_im<span data-count="3">m</span> hd) (pretty_print_im<span data-count="3">m</span> tl)
-  | <span data-count="819">C</span>Imm imm -&gt; pretty_print_imm imm
+  | <span data-count="0">C</span>ConstructList (hd, tl) -&gt;
+    Printf.sprintf "%s :: %s" (pretty_print_im<span data-count="0">m</span> hd) (pretty_print_im<span data-count="0">m</span> tl)
+  | <span data-count="352">C</span>Imm imm -&gt; pretty_print_imm imm
 
 and pretty_print_aexpr = function
-  | <span data-count="348">A</span>LetIn (pat, expr, body) -&gt;
+  | <span data-count="134">A</span>LetIn (pat, expr, body) -&gt;
     Printf.sprintf
       "let %s = %s in\n%s"
-      (PrinterAst.pretty_print_patter<span data-count="348">n</span> pat)
-      (pretty_print_cexp<span data-count="348">r</span> expr)
-      (pretty_print_aexp<span data-count="348">r</span> body)
-  | <span data-count="117">A</span>CExpr cexpr -&gt; pretty_print_cexpr cexpr
+      (PrinterAst.pretty_print_patter<span data-count="134">n</span> pat)
+      (pretty_print_cexp<span data-count="134">r</span> expr)
+      (pretty_print_aexp<span data-count="134">r</span> body)
+  | <span data-count="51">A</span>CExpr cexpr -&gt; pretty_print_cexpr cexpr
 ;;
 
 let pretty_print_single_binding rec_flag (ALet (pat, args, body)) =
-  <span data-count="43">m</span>atch rec_flag with
-  | <span data-count="10">A</span>st.Recursive -&gt;
+  <span data-count="35">m</span>atch rec_flag with
+  | <span data-count="5">A</span>st.Recursive -&gt;
     let args_str = String.concat " " args in
-    <span data-count="10">P</span>rintf.sprintf "let rec %s %s = %s" pat args_str (pretty_print_aexp<span data-count="10">r</span> body)
-  | <span data-count="33">_</span> -&gt;
+    <span data-count="5">P</span>rintf.sprintf "let rec %s %s = %s" pat args_str (pretty_print_aexp<span data-count="5">r</span> body)
+  | <span data-count="30">_</span> -&gt;
     let args_str = String.concat " " args in
-    <span data-count="33">P</span>rintf.sprintf "let %s %s = %s" pat args_str (pretty_print_aexp<span data-count="33">r</span> body)
+    <span data-count="30">P</span>rintf.sprintf "let %s %s = %s" pat args_str (pretty_print_aexp<span data-count="30">r</span> body)
 ;;
 
 let pretty_print_anf_decl = function
-  | <span data-count="43">A</span>DSingleLet (rec_flag, binding) -&gt; pretty_print_single_binding rec_flag binding
+  | <span data-count="35">A</span>DSingleLet (rec_flag, binding) -&gt; pretty_print_single_binding rec_flag binding
   | <span data-count="0">A</span>DMutualRecDecl bindings -&gt;
     "let rec\n  "
     ^ String.conca<span data-count="0">t</span>

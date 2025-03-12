@@ -351,13 +351,13 @@ and pretty_print_value = function
   | <span data-count="299">I</span>nt i -&gt; Int.to_string i
   | <span data-count="20">B</span>ool b -&gt; Bool.to_string b
   | <span data-count="0">S</span>tring s -&gt; "\"" ^ s ^ "\""
-  | <span data-count="68">U</span>nit -&gt; "()"
+  | <span data-count="70">U</span>nit -&gt; "()"
 
 and pretty_print_op = function
-  | <span data-count="83">B</span>inary bop -&gt; pretty_print_bop bop
+  | <span data-count="38">B</span>inary bop -&gt; pretty_print_bop bop
   | <span data-count="6">U</span>nary uop -&gt; pretty_print_uop uop
 
-and pretty_print_bop bop = <span data-count="83">"</span>( " ^ BinOperator.to_strin<span data-count="83">g</span> bop ^ " )"
+and pretty_print_bop bop = <span data-count="38">"</span>( " ^ BinOperator.to_strin<span data-count="38">g</span> bop ^ " )"
 
 and pretty_print_uop = function
   | <span data-count="0">N</span>OT -&gt; "not"
@@ -370,8 +370,8 @@ and pretty_print_datatype = function
   | <span data-count="0">P</span>String -&gt; "string"
 
 and pretty_print_pattern = function
-  | <span data-count="66">C</span>onst v -&gt; pretty_print_value v
-  | <span data-count="827">V</span>ar id -&gt; id
+  | <span data-count="68">C</span>onst v -&gt; pretty_print_value v
+  | <span data-count="620">V</span>ar id -&gt; id
   | <span data-count="1">W</span>ildcard -&gt; "_"
   | <span data-count="9">T</span>uple (p1, p2, rest) -&gt;
     "("
@@ -382,8 +382,8 @@ and pretty_print_pattern = function
        then <span data-count="9">"</span>"
        else <span data-count="0">"</span>, " ^ String.conca<span data-count="0">t</span> ~sep:", " (List.ma<span data-count="0">p</span> ~f:pretty_print_pattern rest))
     ^ ")"
-  | <span data-count="38">L</span>ist pats -&gt;
-    "[" ^ String.conca<span data-count="38">t</span> ~sep:"; " (List.ma<span data-count="38">p</span> ~f:pretty_print_pattern pats) ^ "]"
+  | <span data-count="29">L</span>ist pats -&gt;
+    "[" ^ String.conca<span data-count="29">t</span> ~sep:"; " (List.ma<span data-count="29">p</span> ~f:pretty_print_pattern pats) ^ "]"
   | <span data-count="42">L</span>istConcat (p1, p2) -&gt; pretty_print_patter<span data-count="42">n</span> p1 ^ "::" ^ pretty_print_patter<span data-count="42">n</span> p2
   | <span data-count="0">C</span>onstraint (p, dt) -&gt;
     "(" ^ pretty_print_patter<span data-count="0">n</span> p ^ " : " ^ pretty_print_datatyp<span data-count="0">e</span> dt ^ ")"

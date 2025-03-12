@@ -389,9 +389,9 @@ open LL
 
 module ListConverter = struct
   let get lst i = <span data-count="15">M</span>EApplication (MEApplication (MEVar "list_get", lst), MEConst (Int i))
-  let len lst = <span data-count="29">M</span>EApplication (MEVar "list_length", lst)
-  let head lst = <span data-count="57">M</span>EApplication (MEVar "list_head", lst)
-  let tail lst = <span data-count="57">M</span>EApplication (MEVar "list_tail", lst)
+  let len lst = <span data-count="13">M</span>EApplication (MEVar "list_length", lst)
+  let head lst = <span data-count="25">M</span>EApplication (MEVar "list_head", lst)
+  let tail lst = <span data-count="25">M</span>EApplication (MEVar "list_tail", lst)
 end
 
 module TupleConverter = struct
@@ -400,135 +400,135 @@ end
 
 (* AND for conditions *)
 let ( &lt;|&gt; ) a b =
-  <span data-count="35">m</span>atch a, b with
+  <span data-count="23">m</span>atch a, b with
   | <span data-count="4">M</span>EConst (Bool true), _ -&gt; b
   | <span data-count="0">_</span>, MEConst (Bool true) -&gt; a
-  | <span data-count="31">_</span> -&gt; MEApplication (MEApplication (MEOperation (Binary AND), a), b)
+  | <span data-count="19">_</span> -&gt; MEApplication (MEApplication (MEOperation (Binary AND), a), b)
 ;;
 
-let bin_op op a b = <span data-count="56">M</span>EApplication (MEApplication (MEOperation (Binary op), a), b)
-let _if i t e = <span data-count="47">M</span>EIf (i, t, e)
+let bin_op op a b = <span data-count="34">M</span>EApplication (MEApplication (MEOperation (Binary op), a), b)
+let _if i t e = <span data-count="35">M</span>EIf (i, t, e)
 let _true = MEConst (Bool true)
 let _false = MEConst (Bool false)
-let _int num = <span data-count="29">M</span>EConst (Int num)
-let _let name body scope = <span data-count="61">M</span>ELet (Nonrecursive, [ name, [], body ], Some scope)
+let _int num = <span data-count="13">M</span>EConst (Int num)
+let _let name body scope = <span data-count="29">M</span>ELet (Nonrecursive, [ name, [], body ], Some scope)
 
 let rec match_compare_pattern (matched : me_expr) (pattern : pattern) =
-  <span data-count="58">m</span>atch pattern with
+  <span data-count="36">m</span>atch pattern with
   | <span data-count="13">C</span>onst v -&gt; bin_op EQ (MEConst v) matched
-  | <span data-count="14">V</span>ar id -&gt; bin_op EQ (MEVar id) matched
+  | <span data-count="8">V</span>ar id -&gt; bin_op EQ (MEVar id) matched
   | <span data-count="0">W</span>ildcard | <span data-count="0">O</span>peration _ -&gt; _true
   | <span data-count="0">C</span>onstraint (p, _) -&gt; match_compare_pattern matched p
   | <span data-count="2">T</span>uple (p1, p2, pts) -&gt;
     List.foldi (p1 :: p2 :: pts) ~init:_true ~f:(fun i cond pattern_i -&gt;
       <span data-count="4">c</span>ond &lt;|&gt; match_compare_patter<span data-count="4">n</span> (TupleConverter.ge<span data-count="4">t</span> matched i) pattern_i)
-  | <span data-count="13">L</span>istConcat (hd, tl) -&gt;
+  | <span data-count="7">L</span>istConcat (hd, tl) -&gt;
     let matched_hd = ListConverter.head matched in
-    <span data-count="13">l</span>et matched_tl = ListConverter.tail matched in
-    <span data-count="13">l</span>et matched_len = ListConverter.len matched in
-    <span data-count="13">_</span>let hd matched_hd
-    @@ _let tl matched_t<span data-count="13">l</span>
-    @@ (bin_o<span data-count="13">p</span> GTE matched_len (_in<span data-count="13">t</span> 2)
-        &lt;|<span data-count="13">&gt;</span> match_compare_patter<span data-count="13">n</span> matched_hd hd
-        &lt;|<span data-count="13">&gt;</span> match_compare_patter<span data-count="13">n</span> matched_tl tl)
-  | <span data-count="16">L</span>ist pts -&gt;
-    let pattern_list_len = _int (List.lengt<span data-count="16">h</span> pts) in
-    <span data-count="16">l</span>et matched_list_len = ListConverter.len matched in
-    <span data-count="16">l</span>et correctness = bin_op EQ pattern_list_len matched_list_len in
-    <span data-count="16">l</span>et result =
+    <span data-count="7">l</span>et matched_tl = ListConverter.tail matched in
+    <span data-count="7">l</span>et matched_len = ListConverter.len matched in
+    <span data-count="7">_</span>let hd matched_hd
+    @@ _let tl matched_t<span data-count="7">l</span>
+    @@ (bin_o<span data-count="7">p</span> GTE matched_len (_in<span data-count="7">t</span> 2)
+        &lt;|<span data-count="7">&gt;</span> match_compare_patter<span data-count="7">n</span> matched_hd hd
+        &lt;|<span data-count="7">&gt;</span> match_compare_patter<span data-count="7">n</span> matched_tl tl)
+  | <span data-count="6">L</span>ist pts -&gt;
+    let pattern_list_len = _int (List.lengt<span data-count="6">h</span> pts) in
+    <span data-count="6">l</span>et matched_list_len = ListConverter.len matched in
+    <span data-count="6">l</span>et correctness = bin_op EQ pattern_list_len matched_list_len in
+    <span data-count="6">l</span>et result =
       List.foldi pts ~init:_true ~f:(fun i cond pattern_i -&gt;
         <span data-count="5">c</span>ond &lt;|&gt; match_compare_patter<span data-count="5">n</span> (ListConverter.ge<span data-count="5">t</span> matched i) pattern_i)
     in
-    <span data-count="16">_</span>if correctness result (Some _false)
+    <span data-count="6">_</span>if correctness result (Some _false)
 ;;
 
 (* match [matched] with [pattern] -&gt; [action] *)
 let rec convert_match_case (matched : me_expr) (pattern : pattern) (action : me_expr) =
   (* match arg_0 with arg_1 :: arg_2 -&gt; arg_1 *)
-  <span data-count="112">m</span>atch pattern with
-  | <span data-count="6">W</span>ildcard | <span data-count="0">O</span>peration _ | <span data-count="17">C</span>onst _ | <span data-count="41">V</span>ar _ -&gt; action
+  <span data-count="67">m</span>atch pattern with
+  | <span data-count="6">W</span>ildcard | <span data-count="0">O</span>peration _ | <span data-count="21">C</span>onst _ | <span data-count="18">V</span>ar _ -&gt; action
   | <span data-count="0">C</span>onstraint (p, _) -&gt; convert_match_case matched p action
   | <span data-count="3">T</span>uple (p1, p2, pts) -&gt;
     List.foldi (p1 :: p2 :: pts) ~init:action ~f:(fun i action pattern_i -&gt;
       <span data-count="7">c</span>onvert_match_case (TupleConverter.ge<span data-count="7">t</span> matched i) pattern_i action)
-  | <span data-count="28">L</span>istConcat (hd, tl) -&gt;
-    convert_match_case (ListConverter.tai<span data-count="28">l</span> matched) tl action
-    |&gt; <span data-count="28">c</span>onvert_match_case (ListConverter.hea<span data-count="28">d</span> matched) hd
-  | <span data-count="17">L</span>ist pts -&gt;
+  | <span data-count="12">L</span>istConcat (hd, tl) -&gt;
+    convert_match_case (ListConverter.tai<span data-count="12">l</span> matched) tl action
+    |&gt; <span data-count="12">c</span>onvert_match_case (ListConverter.hea<span data-count="12">d</span> matched) hd
+  | <span data-count="7">L</span>ist pts -&gt;
     List.foldi pts ~init:action ~f:(fun i action pattern_i -&gt;
       <span data-count="5">c</span>onvert_match_case (ListConverter.ge<span data-count="5">t</span> matched i) pattern_i action)
 ;;
 
 let rec get_match_context (matched : me_expr) (pattern : pattern) : me_expr -&gt; me_expr =
   (* match x with *)
-  <span data-count="56">m</span>atch pattern with
+  <span data-count="43">m</span>atch pattern with
   | <span data-count="3">V</span>ar _ as var -&gt; _let var matched
-  | <span data-count="6">W</span>ildcard | <span data-count="0">O</span>peration _ | <span data-count="17">C</span>onst _ -&gt; fun x -&gt; <span data-count="23">x</span>
+  | <span data-count="6">W</span>ildcard | <span data-count="0">O</span>peration _ | <span data-count="21">C</span>onst _ -&gt; fun x -&gt; <span data-count="27">x</span>
   | <span data-count="0">C</span>onstraint (p, _) -&gt; convert_match_case matched p
   | <span data-count="3">T</span>uple (p1, p2, pts) -&gt;
     let patterns = p1 :: p2 :: pts in
     fun id -&gt;
       <span data-count="3">L</span>ist.foldi patterns ~init:id ~f:(fun i acc pattern_i -&gt;
         <span data-count="7">g</span>et_match_context (TupleConverter.ge<span data-count="7">t</span> matched i) pattern_i acc)
-  | <span data-count="11">L</span>ist pts -&gt;
+  | <span data-count="4">L</span>ist pts -&gt;
     fun act -&gt;
-      <span data-count="11">L</span>ist.foldi pts ~init:act ~f:(fun i acc pattern_i -&gt;
+      <span data-count="4">L</span>ist.foldi pts ~init:act ~f:(fun i acc pattern_i -&gt;
         <span data-count="5">g</span>et_match_context (ListConverter.ge<span data-count="5">t</span> matched i) pattern_i acc)
-  | <span data-count="16">L</span>istConcat (hd, tl) -&gt;
+  | <span data-count="6">L</span>istConcat (hd, tl) -&gt;
     let matched_hd = ListConverter.head matched in
-    <span data-count="16">l</span>et matched_tl = ListConverter.tail matched in
-    <span data-count="16">f</span>un id -&gt; <span data-count="16">_</span>let hd matched_hd id |&gt; <span data-count="16">_</span>let tl matched_tl
+    <span data-count="6">l</span>et matched_tl = ListConverter.tail matched in
+    <span data-count="6">f</span>un id -&gt; <span data-count="6">_</span>let hd matched_hd id |&gt; <span data-count="6">_</span>let tl matched_tl
 ;;
 
 let rec convert_match (matched : ll_expr) (cases : ll_case list) =
-  <span data-count="44">m</span>atch cases with
+  <span data-count="31">m</span>atch cases with
   | <span data-count="0">[</span>] -&gt; failwith "No cases provided"
-  | <span data-count="44">(</span>pattern, action) :: tail_cases -&gt;
+  | <span data-count="31">(</span>pattern, action) :: tail_cases -&gt;
     let me_action = convert_expr action in
-    <span data-count="44">l</span>et me_matched = convert_expr matched in
-    <span data-count="44">l</span>et branch = convert_match_case me_matched pattern me_action in
-    <span data-count="44">g</span>et_match_context me_matched pattern
+    <span data-count="31">l</span>et me_matched = convert_expr matched in
+    <span data-count="31">l</span>et branch = convert_match_case me_matched pattern me_action in
+    <span data-count="31">g</span>et_match_context me_matched pattern
     @@
       (match tail_cases with
-      | <span data-count="21">[</span>] -&gt; branch
-      | <span data-count="23">_</span> -&gt;
-        _i<span data-count="23">f</span>
-          (match_compare_patter<span data-count="23">n</span> me_matched pattern)
+      | <span data-count="18">[</span>] -&gt; branch
+      | <span data-count="13">_</span> -&gt;
+        _i<span data-count="13">f</span>
+          (match_compare_patter<span data-count="13">n</span> me_matched pattern)
           branch
-          (Some (convert_matc<span data-count="23">h</span> matched tail_cases)))
+          (Some (convert_matc<span data-count="13">h</span> matched tail_cases)))
 
 and convert_expr (expr : ll_expr) : me_expr =
-  <span data-count="795">m</span>atch expr with
-  | <span data-count="117">L</span>LConst v -&gt; MEConst v
-  | <span data-count="262">L</span>LVar id -&gt; MEVar id
-  | <span data-count="43">L</span>LOperation op -&gt; MEOperation op
-  | <span data-count="2">L</span>LConstraint (l, dt) -&gt; MEConstraint (convert_exp<span data-count="2">r</span> l, dt)
-  | <span data-count="9">L</span>LListConcat (l, r) -&gt; MEListConcat (convert_exp<span data-count="9">r</span> l, convert_exp<span data-count="9">r</span> r)
-  | <span data-count="227">L</span>LApplication (l, r) -&gt; MEApplication (convert_exp<span data-count="227">r</span> l, convert_exp<span data-count="227">r</span> r)
-  | <span data-count="15">L</span>LList lst -&gt; MEList (List.ma<span data-count="15">p</span> lst ~f:convert_expr)
-  | <span data-count="4">L</span>LTuple (a, b, tl) -&gt;
+  <span data-count="1136">m</span>atch expr with
+  | <span data-count="174">L</span>LConst v -&gt; MEConst v
+  | <span data-count="331">L</span>LVar id -&gt; MEVar id
+  | <span data-count="82">L</span>LOperation op -&gt; MEOperation op
+  | <span data-count="4">L</span>LConstraint (l, dt) -&gt; MEConstraint (convert_exp<span data-count="4">r</span> l, dt)
+  | <span data-count="4">L</span>LListConcat (l, r) -&gt; MEListConcat (convert_exp<span data-count="4">r</span> l, convert_exp<span data-count="4">r</span> r)
+  | <span data-count="365">L</span>LApplication (l, r) -&gt; MEApplication (convert_exp<span data-count="365">r</span> l, convert_exp<span data-count="365">r</span> r)
+  | <span data-count="6">L</span>LList lst -&gt; MEList (List.ma<span data-count="6">p</span> lst ~f:convert_expr)
+  | <span data-count="3">L</span>LTuple (a, b, tl) -&gt;
     let a = convert_expr a in
-    <span data-count="4">l</span>et b = convert_expr b in
-    <span data-count="4">l</span>et tl = List.map tl ~f:convert_expr in
-    <span data-count="4">M</span>ETuple (a, b, tl)
-  | <span data-count="8">L</span>LIf (i, t, Some e) -&gt; _if (convert_exp<span data-count="8">r</span> i) (convert_exp<span data-count="8">r</span> t) (Some (convert_exp<span data-count="8">r</span> e))
+    <span data-count="3">l</span>et b = convert_expr b in
+    <span data-count="3">l</span>et tl = List.map tl ~f:convert_expr in
+    <span data-count="3">M</span>ETuple (a, b, tl)
+  | <span data-count="16">L</span>LIf (i, t, Some e) -&gt; _if (convert_exp<span data-count="16">r</span> i) (convert_exp<span data-count="16">r</span> t) (Some (convert_exp<span data-count="16">r</span> e))
   | <span data-count="0">L</span>LIf (i, t, None) -&gt; _if (convert_exp<span data-count="0">r</span> i) (convert_exp<span data-count="0">r</span> t) None
-  | <span data-count="28">L</span>LLet (rec_flag, binds, Some scope) -&gt;
+  | <span data-count="54">L</span>LLet (rec_flag, binds, Some scope) -&gt;
     let binds =
       Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
-        <span data-count="28">(</span>name, args, convert_exp<span data-count="28">r</span> body) :: acc)
+        <span data-count="54">(</span>name, args, convert_exp<span data-count="54">r</span> body) :: acc)
     in
-    <span data-count="28">M</span>ELet (rec_flag, List.re<span data-count="28">v</span> binds, Some (convert_exp<span data-count="28">r</span> scope))
-  | <span data-count="59">L</span>LLet (rec_flag, binds, None) -&gt;
+    <span data-count="54">M</span>ELet (rec_flag, List.re<span data-count="54">v</span> binds, Some (convert_exp<span data-count="54">r</span> scope))
+  | <span data-count="79">L</span>LLet (rec_flag, binds, None) -&gt;
     let binds =
       Base.List.fold binds ~init:[] ~f:(fun acc (name, args, body) -&gt;
-        <span data-count="59">(</span>name, args, convert_exp<span data-count="59">r</span> body) :: acc)
+        <span data-count="79">(</span>name, args, convert_exp<span data-count="79">r</span> body) :: acc)
     in
-    <span data-count="59">M</span>ELet (rec_flag, List.re<span data-count="59">v</span> binds, None)
-  | <span data-count="21">L</span>LMatch (matched, cases) -&gt; List.rev cases |&gt; <span data-count="21">c</span>onvert_match matched
+    <span data-count="79">M</span>ELet (rec_flag, List.re<span data-count="79">v</span> binds, None)
+  | <span data-count="18">L</span>LMatch (matched, cases) -&gt; List.rev cases |&gt; <span data-count="18">c</span>onvert_match matched
 ;;
 
-let convert_prog (prog : ll_prog) : me_prog = <span data-count="25">L</span>ist.map prog ~f:convert_expr
+let convert_prog (prog : ll_prog) : me_prog = <span data-count="32">L</span>ist.map prog ~f:convert_expr
 </code></pre>
       </div>
     </div>
