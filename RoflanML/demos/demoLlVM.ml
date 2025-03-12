@@ -19,10 +19,7 @@ let () =
         Stdlib.Format.printf "%a" Typing.pp_error err;
         fail "Typecheck error"
     in
-<<<<<<< HEAD
     let* prog = Alpha_conversion.alpha_convert_program prog in
-=======
->>>>>>> 0a44bae (add alpha conversion and working compiler)
     let prog = Closure_conversion.close_program prog in
     let* prog = Lambda_lifting.lift_program prog in
     let* prog = Anf.anf_program prog in
