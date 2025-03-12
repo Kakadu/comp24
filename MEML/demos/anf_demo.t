@@ -35,30 +35,28 @@
   > let vosem = 
   >   let odin = 1 in 
   >   let dva = 2 in
-  >   let odin_plus_dva_plus x = x + (fun i -> odin + dva + i) 0 in
-  >   odin_plus_dva_plus 5
+  >   let odin_plus_dva_plus = (fun i -> odin + dva + i) 0 in
+  >   odin_plus_dva_plus
   > let tri = odin
   Types: 
-  val dva: int
-  val lambada: int -> int
+  val lambada: int -> int -> int -> int
   val odin: int
-  val odin0: int
-  val odin_plus_dva_plus: int -> int
   val tri: int
   val vosem: int
   
   let  odin  = 2
-  let  odin0  = 1
-  let  dva  = 2
-  let  lambada i = 
+  let  lambada dva odin0 i = 
     let bin_op0 = (odin0 + dva)
     in 
     let bin_op = (bin_op0 + i)
     in bin_op
-  let  odin_plus_dva_plus x = 
-    let bin_op = (x + (lambada 0))
-    in bin_op
-  let  vosem  = (odin_plus_dva_plus 5)
+  let  vosem  = 
+    let odin0 = 1
+    in 
+    let dva = 2
+    in 
+    let odin_plus_dva_plus = (((lambada dva) odin0) 0)
+    in odin_plus_dva_plus
   let  tri  = odin
 
   $ ./anf_demo.exe << EOF
@@ -111,7 +109,6 @@
   Types: 
   val fac: int -> int
   val main: int
-  val unit: unit
   
   let rec fac n = 
     let bin_op = (n <= 1)
@@ -123,17 +120,17 @@
     in 
     let bin_op0 = (n * (fac bin_op1))
     in bin_op0
-  let  unit  = 
+  let  main  = 
     let app = (fac 4)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
   $ ./anf_demo.exe < manytests/typed/002fac.ml
   Types: 
   val fac_cps: int -> (int -> 'a) -> 'a
   val lambada: (int -> 'a) -> int -> int -> 'a
   val lambada0: 'a -> 'a
   val main: int
-  val unit: unit
   
   let  lambada k n p = 
     let bin_op = (p * n)
@@ -149,36 +146,31 @@
     let app = ((lambada k) n)
     in ((fac_cps bin_op0) app)
   let  lambada0 print_int = print_int
-  let  unit  = 
+  let  main  = 
     let app = ((fac_cps 4) lambada0)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
   $ ./anf_demo.exe < manytests/typed/003fib.ml
   Types: 
-  val ab: int -> int -> int
   val fib: int -> int
   val fib_acc: int -> int -> int -> int
   val main: int
-  val n1: int -> int
-  val unit: unit
-  val unit0: unit
   
-  let  n1 n = 
-    let bin_op = (n - 1)
-    in bin_op
-  let  ab a b = 
-    let bin_op = (a + b)
-    in bin_op
   let rec fib_acc a b n = 
     let bin_op = (n = 1)
     in 
     if bin_op
     then b
     else 
-    let app0 = ((ab a) b)
+    let bin_op0 = (n - 1)
     in 
-    let app = (n1 n)
-    in (((fib_acc b) app0) app)
+    let bin_op1 = (a + b)
+    in 
+    let n1 = bin_op0
+    in 
+    let ab = bin_op1
+    in (((fib_acc b) ab) n1)
   let rec fib n = 
     let bin_op = (n < 2)
     in 
@@ -191,24 +183,20 @@
     in 
     let bin_op0 = ((fib bin_op1) + (fib bin_op2))
     in bin_op0
-  let  unit  = 
+  let  main  = 
     let app = (((fib_acc 0) 1) 4)
-    in (print_int app)
-  let  unit0  = 
-    let app = (fib 4)
-    in (print_int app)
-  let  main  = unit; unit0; 0
+    in 
+    let app0 = (fib 4)
+    in 
+    let () = (print_int app)
+    in 
+    let () = (print_int app0)
+    in 0
   $ ./anf_demo.exe < manytests/typed/004manyargs.ml
   Types: 
-  val a0: int -> unit
-  val b0: int -> unit
-  val c0: int -> unit
   val main: int
-  val rez: int
-  val temp2: int
   val test10: int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
-  val test3: 'a -> 'b -> 'c -> int
-  val unit: unit
+  val test3: int -> int -> int -> int
   val wrap: 'a -> 'a
   
   let  wrap f = 
@@ -217,10 +205,13 @@
     if bin_op
     then f
     else f
-  let  a0 a = (print_int a)
-  let  b0 b = (print_int b)
-  let  c0 c = (print_int c)
-  let  test3 a b c = 0
+  let  test3 a b c = 
+    let a0 = (print_int a)
+    in 
+    let b0 = (print_int b)
+    in 
+    let c0 = (print_int c)
+    in 0
   let  test10 a b c d e f g h i j = 
     let bin_op7 = (a + b)
     in 
@@ -240,16 +231,18 @@
     in 
     let bin_op = (bin_op0 + j)
     in bin_op
-  let  rez  = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000)
-  let  unit  = (print_int rez)
-  let  temp2  = ((((wrap test3) 1) 10) 100)
-  let  main  = unit; 0
+  let  main  = 
+    let rez = (((((((((((wrap test10) 1) 10) 100) 1000) 10000) 100000) 1000000) 10000000) 100000000) 1000000000)
+    in 
+    let () = (print_int rez)
+    in 
+    let temp2 = ((((wrap test3) 1) 10) 100)
+    in 0
   $ ./anf_demo.exe < manytests/typed/005fix.ml
   Types: 
   val fac: (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val main: int
-  val unit: unit
   
   let rec fix f x = 
     let app = (fix f)
@@ -264,10 +257,11 @@
     in 
     let bin_op0 = (n * (self bin_op1))
     in bin_op0
-  let  unit  = 
+  let  main  = 
     let app = ((fix fac) 6)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
   $ ./anf_demo.exe < manytests/typed/006partial.ml
   Types: 
   val foo: bool -> int -> int
@@ -275,7 +269,6 @@
   val lambada: int -> int
   val lambada0: int -> int
   val main: int
-  val unit: unit
   
   let  lambada foo = 
     let bin_op = (foo + 2)
@@ -292,70 +285,71 @@
     in 
     let app = ((foo false) ((foo true) app0))
     in ((foo true) app)
-  let  unit  = 
+  let  main  = 
     let app = (foo0 11)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
   $ ./anf_demo.exe < manytests/typed/006partial2.ml
   Types: 
   val foo: int -> int -> int -> int
-  val foo0: int -> int -> int
-  val foo1: int -> int
-  val foo2: int
   val main: int
-  val unit: int -> unit
-  val unit0: int -> unit
-  val unit1: int -> unit
-  val unit2: unit
   
-  let  unit a = (print_int a)
-  let  unit0 b = (print_int b)
-  let  unit1 c = (print_int c)
   let  foo a b c = 
     let bin_op0 = (b * c)
     in 
     let bin_op = (a + bin_op0)
-    in (unit a); (unit0 b); (unit1 c); bin_op
-  let  foo0  = (foo 1)
-  let  foo1  = (foo0 2)
-  let  foo2  = (foo1 3)
-  let  unit2  = (print_int foo2)
-  let  main  = unit2; 0
+    in 
+    let () = (print_int a)
+    in 
+    let () = (print_int b)
+    in 
+    let () = (print_int c)
+    in bin_op
+  let  main  = 
+    let foo0 = (foo 1)
+    in 
+    let foo1 = (foo0 2)
+    in 
+    let foo2 = (foo1 3)
+    in 
+    let () = (print_int foo2)
+    in 0
   $ ./anf_demo.exe < manytests/typed/006partial3.ml
   Types: 
   val foo: int -> int -> int -> unit
   val lambada: int -> int -> unit
   val lambada0: ('a -> 'b) -> 'a -> 'b
   val main: int
-  val unit: int -> unit
-  val unit0: int -> unit
-  val unit1: unit
   
   let  lambada0 print_int c = (print_int c)
-  let  unit b = (print_int b)
-  let  lambada b = (unit b); (lambada0 print_int)
-  let  unit0 a = (print_int a)
-  let  foo a = (unit0 a); lambada
-  let  unit1  = (((foo 4) 8) 9)
-  let  main  = unit1; 0
+  let  lambada b = 
+    let () = (print_int b)
+    in (lambada0 print_int)
+  let  foo a = 
+    let () = (print_int a)
+    in lambada
+  let  main  = 
+    let () = (((foo 4) 8) 9)
+    in 0
   $ ./anf_demo.exe < manytests/typed/007order.ml
   Types: 
   val _start: unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
   val main: unit
-  val unit: int -> int -> unit
-  val unit0: int -> unit
   
-  let  unit a b = 
-    let bin_op = (a + b)
-    in (print_int bin_op)
-  let  unit0 __ = (print_int __)
   let  _start () () a () b _c () d __ = 
-    let bin_op1 = (a * b)
+    let bin_op = (a + b)
     in 
-    let bin_op0 = (bin_op1 / _c)
+    let bin_op2 = (a * b)
     in 
-    let bin_op = (bin_op0 + d)
-    in ((unit a) b); (unit0 __); bin_op
+    let bin_op1 = (bin_op2 / _c)
+    in 
+    let bin_op0 = (bin_op1 + d)
+    in 
+    let () = (print_int bin_op)
+    in 
+    let () = (print_int __)
+    in bin_op0
   let  main  = 
     let app3 = (print_int 1)
     in 
@@ -373,7 +367,6 @@
   val lambada: int -> bool -> int
   val lambada0: int -> bool
   val main: int
-  val unit: unit
   
   let  addi f g x = 
     let app = (g x)
@@ -391,10 +384,11 @@
     in 
     let bin_op = (bin_op0 = 0)
     in bin_op
-  let  unit  = 
+  let  main  = 
     let app = (((addi lambada) lambada0) 4)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
 
   $ ./anf_demo.exe << EOF
   > let a = 5
@@ -403,15 +397,15 @@
   > let b = a
   Types: 
   val a: int
-  val a1: int -> int
   val b: int
   val sum: int -> int
   
   let  a  = 5
-  let  a1 a0 = 
+  let  sum a0 = 
     let bin_op = (a0 + 3)
-    in bin_op
-  let  sum a0 = (a1 a0)
+    in 
+    let a1 = bin_op
+    in a1
   let  b  = a
 
   $ ./anf_demo.exe << EOF
@@ -431,7 +425,6 @@
   val add: int -> int
   val main: int
   val sum: int -> int -> int
-  val unit: unit
   
   let  sum a b = 
     let bin_op = (a + b)
@@ -452,10 +445,11 @@
     if (a = 5)
     then ((sum 5) 0)
     else ((sum 0) 0)
-  let  unit  = 
+  let  main  = 
     let app = (add 0)
-    in (print_int app)
-  let  main  = unit; 0
+    in 
+    let () = (print_int app)
+    in 0
 
   $ ./anf_demo.exe << EOF
   > let bin_op = 1 + 2

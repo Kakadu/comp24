@@ -86,6 +86,10 @@ let rec anf_llexpression new_letin gvars = function
         , fvars )
     in
     convert_match new_lets gvars anf_m b
+  | LLLetIn (n, e, ine) ->
+    let anf_e, new_letin, gvars = anf_llexpression new_letin gvars e in
+    let anf_ine, new_letin, gvars = anf_llexpression new_letin gvars ine in
+    ALetIn (n, anf_e, anf_ine), new_letin, gvars
   | LLPatLetIn _ | LLTuple _ | LLList _ -> failwith ""
 ;;
 

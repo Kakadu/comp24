@@ -55,6 +55,15 @@ let rec pp_llexpression formatter e =
       e
       pp_llexpression
       ine
+  | LLLetIn (n, e, ine) ->
+    Format.fprintf
+      formatter
+      "\n  let %s = %a\n  in %a"
+      n
+      pp_llexpression
+      e
+      pp_llexpression
+      ine
 ;;
 
 let pp_llbindings formatter bindings =

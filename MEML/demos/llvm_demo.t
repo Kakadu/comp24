@@ -10,6 +10,9 @@
   3
   $ ./llvm_demo.exe < manytests/typed/004manyargs.ml | lli-16 -load ../lib/runtime.so
   1111111111
+  1
+  10
+  100
 
   $ ./llvm_demo.exe < manytests/typed/005fix.ml | lli-16 -load ../lib/runtime.so
   720

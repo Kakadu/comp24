@@ -34,6 +34,19 @@ let rec lift_llexpression new_lllet gvars fvars lvars = function
     let check_l, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars l in
     let check_r, new_lllet, fvars = lift_llexpression new_lllet gvars fvars lvars r in
     LLApp (check_l, check_r), new_lllet, fvars
+  | CLetIn (r, n, [], e, ine) ->
+    let new_names, new_lvars, new_fvars =
+      if String.( = ) n "()" then n, lvars, fvars else update_name n lvars fvars
+    in
+    let lle, new_lllet, new_fvars =
+      if Poly.( = ) r Rec
+      then lift_llexpression new_lllet gvars new_fvars new_lvars e
+      else lift_llexpression new_lllet gvars new_fvars lvars e
+    in
+    let llein, new_lllet, fvars =
+      lift_llexpression new_lllet gvars new_fvars new_lvars ine
+    in
+    LLLetIn (new_names, lle, llein), new_lllet, fvars
   | CLetIn (r, n, args, e, ine) ->
     let new_names, new_lvars, new_fvars =
       if String.( = ) n "()"
@@ -188,10 +201,16 @@ let rec find_free gvars new_app = function
   | LLVar v ->
     let a =
       match Map.find new_app v with
-      | Some p -> List.fold ~init:(LLVar v) ~f:(fun acc a -> LLApp (acc, LLVar a)) p
-      | None -> LLVar v
+      | Some p ->
+        List.fold
+          ~init:(LLVar v, gvars)
+          ~f:(fun acc a ->
+            let app, gvars = acc in
+            LLApp (app, LLVar a), Set.add gvars a)
+          p
+      | None -> LLVar v, Set.add gvars v
     in
-    a, Set.add gvars v
+    a
   | LLConst c -> LLConst c, gvars
   | LLApp (e1, e2) ->
     let new_e1, update_gvars = find_free gvars new_app e1 in
@@ -242,6 +261,11 @@ let rec find_free gvars new_app = function
         b
     in
     LLMatch (new_m, new_b), new_gvars
+  | LLLetIn (n, lle, llein) ->
+    let new_lle, new_gvars = find_free gvars new_app lle in
+    let new_llein, new_gvars = find_free new_gvars new_app llein in
+    let new_gvars = Set.remove new_gvars n in
+    LLLetIn (n, new_lle, new_llein), new_gvars
   | LLPatLetIn (names, lle, llein) ->
     let new_lle, new_gvars = find_free gvars new_app lle in
     let new_llein, new_gvars = find_free new_gvars new_app llein in
