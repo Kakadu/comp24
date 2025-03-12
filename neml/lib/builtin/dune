@@ -1,0 +1,8 @@
+(include_subdirs qualified)
+
+(library
+ (name LBuiltin)
+ (public_name neml.Builtin)
+ (libraries base llvm LMisc LAst LTypes LParse LInfer LBack)
+ (instrumentation
+  (backend bisect_ppx)))

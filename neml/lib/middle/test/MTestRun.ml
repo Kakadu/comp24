@@ -32,7 +32,7 @@ let run' (ir : [`Simpl | `SimplOpt | `CLess | `Anf]) s =
     MSimpl.from_structure structure |> map_error ~f:(fun err -> SimplError err)
   in
   let opt = MOpt.opt sim in
-  let cls = MCLess.from_simpl globals opt in
+  let cls = MCLess.from_simpl ~globals opt in
 
   let print = PPrint.ToChannel.pretty 1. 50 stdout in
   ( match ir with

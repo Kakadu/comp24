@@ -9,10 +9,12 @@
 open! Base
 
 module IdSet = MCommon.IdSet
+module IdTagged = MCommon.IdTagged
+module FuncDef = MCommon.FuncDef
 
 (**
   Middleend IRs.
-  LAst.Expr.t -> MSimpl.t --MOpt.opt--> MSimpl.t -> MCless.t -> MAnf.t
+  LAst.Expr.t -> MSimpl.t --MOpt.opt--> MSimpl.t -> MCLess.t -> MAnf.t
 *)
 
 module MSimpl = MSimpl
