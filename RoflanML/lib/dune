@@ -16,6 +16,7 @@
   Ast_to_str
   Anf_ast
   Anf
+  Alpha_conversion
   Llvm_gen)
  (libraries base angstrom qcheck llvm)
  (inline_tests)

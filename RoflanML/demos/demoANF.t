@@ -131,3 +131,32 @@
   let anf_1 = if anf_0 then false else 
   let anf_2 = ( - ) x 1 in 
   let anf_3 = even anf_2 in anf_3 in anf_1)
+
+  $ dune exec ./demoANF.exe << EOF
+  > let rec fac_cps n k =
+  > if n=1 then k 1 else
+  > fac_cps (n-1) (fun p -> k (p*n))
+  > 
+  > let main =
+  > let () = print_int (fac_cps 4 (fun print_int -> print_int)) in
+  > 0
+  > EOF
+  
+  let ll_0 k n p = 
+  let anf_8 = ( * ) p n in 
+  let anf_9 = k anf_8 in anf_9
+  
+  let rec fac_cps n k = 
+  let anf_2 = ( = ) n 1 in 
+  let anf_3 = if anf_2 then 
+  let anf_4 = k 1 in anf_4 else 
+  let anf_5 = ( - ) n 1 in 
+  let anf_6 = ll_0 k n in 
+  let anf_7 = fac_cps anf_5 anf_6 in anf_7 in anf_3
+  
+  let ll_1 print_int = print_int
+  
+  let main = 
+  let anf_0 = fac_cps 4 ll_1 in 
+  let anf_1 = print_int anf_0 in 
+  let () = anf_1 in 0

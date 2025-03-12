@@ -5,6 +5,7 @@
 open Ast
 open Base
 open Common.Middleend_Common
+open Roflanml_stdlib
 
 let find_free_vars =
   let rec find_vars_pattern pat =
@@ -171,7 +172,8 @@ let close e env =
   close_decl e (Map.empty (module String)) env
 ;;
 
-let close_program prog env =
+let close_program prog =
+  let env = RoflanML_Stdlib.default |> Map.keys |> Set.of_list (module String) in
   let prog, _ =
     List.fold_left prog ~init:([], env) ~f:(fun (closed, env) decl ->
       match decl with
