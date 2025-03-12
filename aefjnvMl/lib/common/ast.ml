@@ -31,10 +31,10 @@ type core_type =
 [@@deriving show { with_path = false }]
 
 type pattern =
-  | Pat_const of const (** Patterns such as [1], [true] *)
-  | Pat_var of ident (** A variable pattern such as [x] *)
-  | Pat_cons of pattern * pattern (** The pattern such as [P1::P2] *)
   | Pat_any (** The pattern [_] *)
+  | Pat_var of ident (** A variable pattern such as [x] *)
+  | Pat_const of const (** Patterns such as [1], [true] *)
+  | Pat_cons of pattern * pattern (** The pattern such as [P1::P2] *)
   | Pat_tuple of pattern list (** Patterns [(P1, ..., P2)]
                                   Invariant : [n >= 2]*)
   | Pat_constraint of pattern * core_type

@@ -61,10 +61,10 @@
   val temp: int * bool
 
   $ ./inferencer_runner.exe < manytests/typed/015tuples.ml
-  val feven: (int -> int) * 'a -> int -> int
+  val feven: 'a * (int -> int) -> int -> int
   val fix: (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val fixpoly: ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) * ((('a -> 'b) * ('a -> 'b)) -> ('a -> 'b)) -> ('a -> 'b) * ('a -> 'b)
-  val fodd: 'a * (int -> int) -> int -> int
+  val fodd: (int -> int) * 'a -> int -> int
   val main: int
   val map: ('a -> 'b) -> 'a * 'a -> 'b * 'b
   val meven: int -> int
