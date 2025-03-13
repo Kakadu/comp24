@@ -45,6 +45,19 @@
   $ ./inferencer_runner.exe < manytests/typed/009let_poly.ml
   val temp : int * bool
 
+  $ ./inferencer_runner.exe < manytests/typed/011mapcps.ml
+  val map : ('a -> 'b) -> 'a list -> ('b list -> 'c) -> 'c
+  val iter : ('a -> 'b) -> 'a list -> unit
+  val main : unit
+  $ ./inferencer_runner.exe < manytests/typed/012fibcps.ml
+  val fib : int -> (int -> 'a) -> 'a
+  val main : unit
+  $ ./inferencer_runner.exe < manytests/typed/013foldfoldr.ml
+  val id : 'a -> 'a
+  val fold_right : ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
+  val foldl : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+  val main : unit
+
   $ ./inferencer_runner.exe < manytests/typed/015tuples.ml
   val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val map : ('a -> 'b) -> 'a * 'a -> 'b * 'b
@@ -78,5 +91,4 @@
 
   $ ./inferencer_runner.exe < manytests/do_not_type/015tuples.ml
   Type error: Only variables are allowed as left-hand side of `let rec'
-
 
