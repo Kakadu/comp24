@@ -5,8 +5,8 @@ synopsis: "SlarnML"
 maintainer: ["Ivan Shurenkov"]
 authors: ["Ivan Shurenkov"]
 license: "LGPL-3.0-or-later"
-homepage: "https://github.com/ioannessh/comp23hw"
-bug-reports: "https://github.com/ioannessh/comp23hw/issues"
+homepage: "https://github.com/ioannessh/comp24"
+bug-reports: "https://github.com/ioannessh/comp24/issues"
 depends: [
   "ocaml"
   "dune" {>= "2.9"}
@@ -35,4 +35,4 @@ build: [
   ]
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
-dev-repo: "git+https://github.com/ioannessh/comp23hw.git"
+dev-repo: "git+https://github.com/ioannessh/comp24.git"

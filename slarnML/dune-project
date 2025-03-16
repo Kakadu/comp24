@@ -9,7 +9,7 @@
 (license LGPL-3.0-or-later)
 
 (source
- (github ioannessh/comp23hw))
+ (github ioannessh/comp24))
 
 (authors "Ivan Shurenkov")
 
