@@ -1,0 +1,6 @@
+.vscode
+_build
+trash
+
+*.o
+*.out

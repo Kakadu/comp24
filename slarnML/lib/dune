@@ -1,0 +1,31 @@
+(library
+ (name slarnML_lib)
+ (public_name slarnML.lib)
+ (modules
+  Res
+  Pprint_ast
+  Pprint_cc
+  Pprint_ll
+  Pprint_anf
+  Pprint_riscv
+  Ast
+  Parser
+  Typedtree
+  Quick_check ; Inferencer 
+  Cc_ast
+  Clos_conv
+  Ll_ast
+  Lambda_lifting
+  Anf_ast
+  Anf_conv
+  Anf_test
+  Riscv_ast
+  Call_define
+  Riscv
+  Pprint)
+ (libraries base angstrom) ; llvm)
+ (preprocess
+  (pps ppx_expect ppx_inline_test))
+ (inline_tests))
+
+(include_subdirs unqualified)
