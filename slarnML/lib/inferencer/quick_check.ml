@@ -1,17 +1,9 @@
+(** Copyright 2023-2025, Ivan Shurenkov *)
+
+(** SPDX-License-Identifier: LGPL-2.1-or-later *)
+
 open Ast
-
-type ty =
-  | TVar of tv ref
-  | TInt
-  | TBool
-  | TUnit
-  | TFun of ty * ty
-
-and tv =
-  | Unbound of int * int
-  | Link of ty
-
-type context = (string * ty) list
+open Quick_check_ast
 
 let fresh_id =
   let counter = ref 0 in
@@ -206,22 +198,7 @@ let quick_check ast_lst =
   >>= fun (lst, _) -> Result lst
 ;;
 
-(* let () =
-   let id = Fun(["x"], Id"x") in
-   let t = type_check id in
-   Printf.printf "Identity function type: %s\n" (string_of_ty t);
 
-   let app1 = App(id, [Const (CInt 5)]) in
-   let t = type_check app1 in
-   Printf.printf "Applied to int: %s\n" (string_of_ty t);
-
-   let app_err = App(App(id, [Const (CInt 5)]), [Const (CBool true)]) in
-   try
-   let _ = type_check app_err in
-   print_endline "No error (WRONG!)"
-   with Failure msg ->
-   Printf.printf "Error caught: %s\n" msg
-   ;; *)
 (* let () =
    let ast =
    [ Let

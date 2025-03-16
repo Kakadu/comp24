@@ -1,4 +1,4 @@
-(** Copyright 2023-2024, Ivan Shurenkov *)
+(** Copyright 2023-2025, Ivan Shurenkov *)
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 

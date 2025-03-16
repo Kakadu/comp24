@@ -22,7 +22,8 @@
   Riscv_ast
   Call_define
   Riscv
-  Pprint)
+  Pprint
+  Quick_check_ast)
  (libraries base angstrom) ; llvm)
  (preprocess
   (pps ppx_expect ppx_inline_test))
