@@ -222,9 +222,9 @@ let quick_check ast_lst =
    with Failure msg ->
    Printf.printf "Error caught: %s\n" msg
    ;; *)
-let () =
-  let ast =
-    [ Let
+(* let () =
+   let ast =
+   [ Let
         ( Decl ("fac", [ "n" ])
         , LetIn
             ( DeclRec ("help", [ "acc"; "n" ])
@@ -263,16 +263,16 @@ let () =
       (* App(Id"id_i", [Const CUnit]); *)
       (* App(Id"f", [Const(CInt 1);Const(CBool true);Id"id_i";Id"id_b"]) *)
     ]
-  in
-  match quick_check ast with
-  | Error e -> print_endline e
-  | Result list ->
-    print_endline
-      (String.concat
-         "\n"
-         (List.map
-            (fun (ast, t) -> Pprint_ast.pp_expr ast ^ "\n[" ^ string_of_ty t ^ "]\n")
-            list))
-;;
+   in
+   match quick_check ast with
+   | Error e -> print_endline e
+   | Result list ->
+   print_endline
+   (String.concat
+   "\n"
+   (List.map
+   (fun (ast, t) -> Pprint_ast.pp_expr ast ^ "\n[" ^ string_of_ty t ^ "]\n")
+   list))
+   ;; *)
 
-print_endline "\n\n\n"
+(* print_endline "\n\n\n" *)
