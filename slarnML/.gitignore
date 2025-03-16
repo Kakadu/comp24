@@ -4,3 +4,4 @@ trash
 
 *.o
 *.out
+demo/main.S
