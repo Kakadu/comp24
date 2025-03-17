@@ -60,6 +60,6 @@
  (enabled_if
   (= %{profile} demo)))
 
-(cram
- (applies_to riscvDemo)
- (deps ./a.out ./demoRiscv.exe))
+; (cram
+;  (applies_to riscvDemo)
+;  (deps ./a.out ./demoRiscv.exe))

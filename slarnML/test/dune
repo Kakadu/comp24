@@ -1,2 +1,9 @@
-(test
- (name slarnML))
+(executable
+ (name parser_test)
+ (public_name parser_test)
+ (modules parser_test)
+ (libraries slarnML.lib stdio))
+
+(cram (applies_to parset_tests))
+
+

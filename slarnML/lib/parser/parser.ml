@@ -173,7 +173,9 @@ let parse_expr =
         (else_e expr <|> return (Const CUnit))
     in
     let let_ex =
-      let let_d = (skip_empty *> string "let" <* take_empty1) *> declaration false in
+      let let_d = 
+        (skip_empty *> string "let" <* take_empty1) 
+        *> (declaration false <|> (unit_e *> return (Decl("()", [])))) in
       let let_rd =
         (skip_empty *> string "let" *> take_empty1 *> string "rec" <* take_empty1)
         *> declaration true
@@ -182,7 +184,8 @@ let parse_expr =
       lift2 (fun le eq -> Let (le, eq)) (let_rd <|> let_d) (eq_e expr)
     in
     let let_in_ex =
-      let let_d = (skip_empty *> string "let" <* take_empty1) *> declaration false in
+      let let_d = (skip_empty *> string "let" <* take_empty1) 
+      *> (declaration false <|> (unit_e *> return (Decl("()", [])))) in
       let let_rd =
         (skip_empty *> string "let" *> take_empty1 *> string "rec" <* take_empty1)
         *> declaration true
@@ -607,13 +610,15 @@ let%test _ =
        , LetIn (Decl ("b", []), Const (CInt 1), LetIn (Decl ("c", []), Id "b", Id "c")) ))
 ;;
 
+let%test _ = parse_ok "let () = b" (Let (Decl("()", []), Id "b"))
+
+
 let%test _ = parse_fail "fun -> b"
 let%test _ = parse_fail "(let a = b"
 let%test _ = parse_fail "let a = b)"
 let%test _ = parse_fail "let = b"
 let%test _ = parse_fail "let a = "
 let%test _ = parse_fail "let (a) = b"
-let%test _ = parse_fail "let () = b"
 let%test _ = parse_fail "let rec = b"
 let%test _ = parse_fail "let rec a = "
 let%test _ = parse_fail "let = b in c"
