@@ -32,4 +32,78 @@
   $ dune exec parser_test << EOF
   > (a b 2 1+3 * b d (-2) (r f)) + 3
   > EOF
-  ((a->b->2->(1+(3*b))->d->(-2)->(r->f))+3)
+  (((a->b->2->1)+(3*(b->d->(-2)->(r->f))))+3)
+  $ dune exec parser_test << EOF
+  > a b c
+  > EOF
+  (a->b->c)
+  $ dune exec parser_test << EOF
+  > (a + (f 2 x (g 3*z y)) * 3)
+  > EOF
+  (a+((f->2->x->((g->3)*(z->y)))*3))
+  $ dune exec parser_test << EOF
+  > (a + f 2 x (g 3*z y) * 3)
+  > EOF
+  (a+(f->2->x->(((g->3)*(z->y))*3)))
+  $ dune exec parser_test << EOF
+  > a + 2 <= b * 3
+  > EOF
+  ((a+2)<=(b*3))
+  $ dune exec parser_test << EOF
+  > a < 2 && b = 3
+  > EOF
+  ((a<2)&&(b=3))
+  $ dune exec parser_test << EOF
+  > (a b 2 1+3 * b d (-2) (r f)) + 3
+  > EOF
+  (((a->b->2->1)+(3*(b->d->(-2)->(r->f))))+3)
+  $ dune exec parser_test << EOF
+  > let fac n = 
+  >   let rec fack n f = 
+  >     if n <= 1
+  >     then f 1
+  >     else fack (n - 1) (fun x -> x * f n)
+  >   in
+  >   fack n (fun x -> x)
+  > ;;
+  > EOF
+  (let fac n=(let rec fack n f=if ((n<=1)) then ((f->1)) else ((fack->(n-1)->(fun x->(x*(f->n))))) in (fack->n->(fun x->x))))
+  $ dune exec parser_test << EOF
+  > let fac n = 
+  >   let rec fack n = if n < 1 then n else n * fack (n - 1) in
+  >   fack n
+  > ;;
+  > EOF
+  (let fac n=(let rec fack n=if ((n<1)) then (n) else ((n*(fack->(n-1)))) in (fack->n)))
+  $ dune exec parser_test << EOF
+  > let x = fack n
+  > ;;
+  > EOF
+  (let x=(fack->n))
+  $ dune exec parser_test < manytests/typed/001fac.ml
+  (let rec fac n=if ((n<=1)) then (1) else ((n*(fac->(n-1)))))	
+  (let main=(let ()=(print_int->(fac->4)) in 0))
+  $ dune exec parser_test < manytests/typed/002fac.ml
+  (let rec fac_cps n k=if ((n=1)) then ((k->1)) else ((fac_cps->(n-1)->(fun p->(k->(p*n)))->(let main=(let ()=(print_int->(fac_cps->4->(fun print_int->print_int))) in 0)))))
+  $ dune exec parser_test < manytests/typed/003fib.ml
+  Error: : end_of_input
+  $ dune exec parser_test < manytests/typed/004manyargs.ml
+  (let wrap f=if ((1=1)) then (f) else ((f->(let test3 a b c=(let a=(print_int->a) in (let b=(print_int->b) in (let c=(print_int->c) in 0))))->(let test10 a b c d e f g h i j=(((((((((a+b)+c)+d)+e)+f)+g)+h)+i)+j))->(let main=(let temp0=(wrap->test10->1->10->100->1000->10000->100000->1000000->10000000->100000000->1000000000) in (let temp1=(print_int->temp0) in (let temp2=(wrap->test3->1->10->100) in 0)))))))
+  $ dune exec parser_test < manytests/typed/005fix.ml
+  (let rec fix f x=(f->(fix->f)->x->(let fac self n=if ((n<=1)) then (1) else ((n*(self->(n-1)))))->(let main=(let ()=(print_int->(fix->fac->6)) in 0))))
+  $ dune exec parser_test < manytests/typed/006partial.ml
+  (let foo b=if (b) then ((fun foo->(foo+2))) else ((fun foo->(foo*10))))	
+  (let foo x=(foo->true->(foo->false->(foo->true->(foo->false->x)))->(let main=(let ()=(print_int->(foo->11)) in 0))))
+  $ dune exec parser_test < manytests/typed/006partial2.ml
+  (let foo a b c=(let ()=(print_int->a) in (let ()=(print_int->b) in (let ()=(print_int->c) in (a+(b*c))))))	
+  (let main=(let foo=(foo->1) in (let foo=(foo->2) in (let foo=(foo->3) in (let ()=(print_int->foo) in 0)))))
+  $ dune exec parser_test < manytests/typed/006partial3.ml
+  (let foo a=(let ()=(print_int->a) in (fun b->(let ()=(print_int->b) in (fun c->(print_int->c->(let main=(let ()=(foo->4->8->9) in 0))))))))
+  $ dune exec parser_test < manytests/typed/007order.ml
+  Error: : end_of_input
+  $ dune exec parser_test < manytests/typed/008ascription.ml
+  Error: : end_of_input
+  $ dune exec parser_test < manytests/typed/015tuples.ml
+  Error: : end_of_input
+  $ dune exec parser_test < manytests/typed/016lists.ml
+  Error: : end_of_input

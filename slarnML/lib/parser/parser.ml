@@ -168,14 +168,15 @@ let parse_expr =
       let else_e ex = (skip_empty *> string "else" <* take_empty1) *> ex in
       lift3
         (fun i t e -> If (i, t, e))
-        (if_e expr)
-        (then_e expr)
-        (else_e expr <|> return (Const CUnit))
+        (if_e (parens expr <|> expr))
+        (then_e (parens expr <|> expr))
+        (else_e (parens expr <|> expr) <|> return (Const CUnit))
     in
     let let_ex =
-      let let_d = 
-        (skip_empty *> string "let" <* take_empty1) 
-        *> (declaration false <|> (unit_e *> return (Decl("()", [])))) in
+      let let_d =
+        (skip_empty *> string "let" <* take_empty1)
+        *> (declaration false <|> unit_e *> return (Decl ("()", [])))
+      in
       let let_rd =
         (skip_empty *> string "let" *> take_empty1 *> string "rec" <* take_empty1)
         *> declaration true
@@ -184,8 +185,10 @@ let parse_expr =
       lift2 (fun le eq -> Let (le, eq)) (let_rd <|> let_d) (eq_e expr)
     in
     let let_in_ex =
-      let let_d = (skip_empty *> string "let" <* take_empty1) 
-      *> (declaration false <|> (unit_e *> return (Decl("()", [])))) in
+      let let_d =
+        (skip_empty *> string "let" <* take_empty1)
+        *> (declaration false <|> unit_e *> return (Decl ("()", [])))
+      in
       let let_rd =
         (skip_empty *> string "let" *> take_empty1 *> string "rec" <* take_empty1)
         *> declaration true
@@ -199,23 +202,25 @@ let parse_expr =
       let arrow_e ex = skip_empty *> string "->" *> ex in
       lift2 (fun a f -> Fun (a, f)) fun_a (arrow_e e)
     in
+    let integer_e = integer >>= fun c -> return @@ Const c in
+    let bool_e = boolean >>= fun b -> return @@ Const b in
     let app_ex e =
-      let args_app = many1 @@ (parens @@ fun_ex e <|> e) in
-      let id = skip_empty *> (parens @@ fun_ex e) <|> identifier_expr in
+      let arg = bool_e <|> integer_e <|> identifier_expr <|> e in
+      let args_app = many1 @@ (skip_empty *> (parens @@ (fun_ex e <|> arg) <|> arg)) in
+      let id = skip_empty *> identifier_expr <|> parens @@ fun_ex e in
       let args = skip_empty *> args_app in
-      lift2 (fun id args -> App (id, args)) id args
+      lift2 (fun id args -> App (id, args)) id args <* skip_empty
     in
     let parse_math2 =
       fix (fun m_expr ->
         let not_e ex = not_op >>= fun f -> lift f ex in
-        let integer_e = integer >>= fun c -> return @@ Const c in
-        let bool_e = boolean >>= fun b -> return @@ Const b in
         let factor =
           take_empty1 *> m_expr
           <|> parens m_expr
           <|> bool_e
           <|> integer_e
-          <|> parens @@ app_ex m_expr
+          <|> app_ex m_expr
+          (* <|> parens @@ app_ex m_expr *)
           <|> parens @@ fun_ex expr
           <|> identifier_expr
         in
@@ -232,14 +237,18 @@ let parse_expr =
     <|> let_in_ex
     <|> let_ex
     <|> if_ex
-    <|> parse_math2
     <|> app_ex expr
+    <|> parse_math2
     <|> fun_ex expr
     <|> unit_e
+    <|> identifier_expr
     (* <|> (parse_math identifier_expr) *))
 ;;
 
-let parse_exprs = many (parse_expr <* (string ";;" <|> string "")) <* skip_empty
+let parse_exprs =
+  many (parse_expr <* skip_empty <* (string ";;" <|> string "")) <* skip_empty
+;;
+
 let parser str = parse_string ~consume:Consume.All parse_exprs str
 
 (*=============================*)
@@ -519,15 +528,12 @@ let%test _ =
   parse_ok
     "(a b 2 1+3 * b d (-2) (r f)) + 3"
     (Add
-       ( App
-           ( Id "a"
-           , [ Id "b"
-             ; Const (CInt 2)
-             ; Add (Const (CInt 1), Mul (Const (CInt 3), Id "b"))
-             ; Id "d"
-             ; Const (CInt (-2))
-             ; App (Id "r", [ Id "f" ])
-             ] )
+       ( Add
+           ( App (Id "a", [ Id "b"; Const (CInt 2); Const (CInt 1) ])
+           , Mul
+               ( Const (CInt 3)
+               , App (Id "b", [ Id "d"; Const (CInt (-2)); App (Id "r", [ Id "f" ]) ]) )
+           )
        , Const (CInt 3) ))
 ;;
 
@@ -560,7 +566,7 @@ let%test _ =
                ( Id "f"
                , [ Const (CInt 2)
                  ; Id "x"
-                 ; App (Id "g", [ Mul (Const (CInt 3), Id "z"); Id "y" ])
+                 ; Mul (App (Id "g", [ Const (CInt 3) ]), App (Id "z", [ Id "y" ]))
                  ] )
            , Const (CInt 3) ) ))
 ;;
@@ -610,9 +616,7 @@ let%test _ =
        , LetIn (Decl ("b", []), Const (CInt 1), LetIn (Decl ("c", []), Id "b", Id "c")) ))
 ;;
 
-let%test _ = parse_ok "let () = b" (Let (Decl("()", []), Id "b"))
-
-
+let%test _ = parse_ok "let () = b" (Let (Decl ("()", []), Id "b"))
 let%test _ = parse_fail "fun -> b"
 let%test _ = parse_fail "(let a = b"
 let%test _ = parse_fail "let a = b)"
@@ -670,10 +674,9 @@ let%test _ =
 
 let%test _ =
   parse_ok
-    "let a = b in c;; let a = b let a = b in c"
+    "let a = b in c;; let a = let c = b in c"
     [ LetIn (Decl ("a", []), Id "b", Id "c")
-    ; Let (Decl ("a", []), Id "b")
-    ; LetIn (Decl ("a", []), Id "b", Id "c")
+    ; Let (Decl ("a", []), LetIn (Decl ("c", []), Id "b", Id "c"))
     ]
 ;;
 
@@ -699,4 +702,5 @@ let%test _ =
     ]
 ;;
 
+let%test _ = parse_ok "a b c" [ App (Id "a", [ Id "b"; Id "c" ]) ]
 let%test _ = parse_fail ";;"
