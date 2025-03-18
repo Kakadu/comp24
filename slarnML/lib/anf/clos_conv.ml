@@ -119,6 +119,11 @@ let rec simplify ast lvl f res =
       | Decl (id, args) -> id, args, args, fun id args -> Decl (id, args)
       | DeclRec (id, args) -> id, args, id :: args, fun id args -> DeclRec (id, args)
     in
+    let res =
+      match d with
+      | DeclRec (id, _) -> res |> update_func (fun f -> id :: f)
+      | Decl _ -> res
+    in
     res
     |> update_args env (lvl + 1)
     |> simplify e (lvl + 1) f_id
@@ -136,6 +141,11 @@ let rec simplify ast lvl f res =
       match d with
       | Decl (id, args) -> id, args, args, fun id args -> Decl (id, args)
       | DeclRec (id, args) -> id, args, id :: args, fun id args -> DeclRec (id, args)
+    in
+    let res =
+      match d with
+      | DeclRec (id, _) -> res |> update_func (fun f -> id :: f)
+      | Decl _ -> res
     in
     res
     |> update_args env (lvl + 1)
@@ -193,6 +203,8 @@ let get_func ast =
   match ast with
   | CLet (Decl (id, _), _) -> [ id ]
   | CLetIn (Decl (id, _), _, _) -> [ id ]
+  | CLet (DeclRec (id, _), _) -> [ id ]
+  | CLetIn (DeclRec (id, _), _, _) -> [ id ]
   | _ -> []
 ;;
 

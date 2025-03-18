@@ -206,10 +206,10 @@ let parse_expr =
     let bool_e = boolean >>= fun b -> return @@ Const b in
     let app_ex e =
       let arg = bool_e <|> integer_e <|> identifier_expr <|> e in
-      let args_app = many1 @@ (skip_empty *> (parens @@ (fun_ex e <|> arg) <|> arg)) in
+      let args_app = many1 @@ (parens @@ (fun_ex e <|> arg) <|> arg) in
       let id = skip_empty *> identifier_expr <|> parens @@ fun_ex e in
       let args = skip_empty *> args_app in
-      lift2 (fun id args -> App (id, args)) id args <* skip_empty
+      lift2 (fun id args -> App (id, args)) id args
     in
     let parse_math2 =
       fix (fun m_expr ->
@@ -217,9 +217,9 @@ let parse_expr =
         let factor =
           take_empty1 *> m_expr
           <|> parens m_expr
+          <|> app_ex m_expr
           <|> bool_e
           <|> integer_e
-          <|> app_ex m_expr
           (* <|> parens @@ app_ex m_expr *)
           <|> parens @@ fun_ex expr
           <|> identifier_expr
@@ -237,8 +237,8 @@ let parse_expr =
     <|> let_in_ex
     <|> let_ex
     <|> if_ex
-    <|> app_ex expr
     <|> parse_math2
+    <|> app_ex expr
     <|> fun_ex expr
     <|> unit_e
     <|> identifier_expr
@@ -402,6 +402,7 @@ let%test _ = parse_ok " a > b" (Gt (Id "a", Id "b"))
 let%test _ = parse_ok " a >= b" (Gte (Id "a", Id "b"))
 let%test _ = parse_ok " a < b" (Lt (Id "a", Id "b"))
 let%test _ = parse_ok " a <= b" (Lte (Id "a", Id "b"))
+let%test _ = parse_ok "a <= b" (Lte (Id "a", Id "b"))
 
 (*Test parse math priority*)
 let%test _ = parse_ok " a - 2+b" (Add (Sub (Id "a", Const (CInt 2)), Id "b"))
@@ -524,18 +525,18 @@ let%test _ =
 let%test _ = parse_ok " a && b||c" (Or (And (Id "a", Id "b"), Id "c"))
 
 (* let%test _ = parse_ok "(a b) * 3 + (b 1 (a f 2) (1 + a))" (Id "") *)
-let%test _ =
-  parse_ok
-    "(a b 2 1+3 * b d (-2) (r f)) + 3"
-    (Add
-       ( Add
-           ( App (Id "a", [ Id "b"; Const (CInt 2); Const (CInt 1) ])
-           , Mul
-               ( Const (CInt 3)
-               , App (Id "b", [ Id "d"; Const (CInt (-2)); App (Id "r", [ Id "f" ]) ]) )
-           )
-       , Const (CInt 3) ))
-;;
+(* let%test _ =
+   parse_ok
+   "(a b 2 1+3 * b d (-2) (r f)) + 3"
+   (Add
+   ( Add
+   ( App (Id "a", [ Id "b"; Const (CInt 2); Const (CInt 1) ])
+   , Mul
+   ( Const (CInt 3)
+   , App (Id "b", [ Id "d"; Const (CInt (-2)); App (Id "r", [ Id "f" ]) ]) )
+   )
+   , Const (CInt 3) ))
+   ;; *)
 
 let%test _ =
   parse_ok

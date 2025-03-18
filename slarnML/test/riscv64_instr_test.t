@@ -271,3 +271,626 @@
   	ld s0,40(sp)
   	addi sp,sp,64
   ret
+  $ dune exec riscv64_instr_test < manytests/typed/001fac.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  fac:
+  	addi sp,sp,-96
+  	sd ra,80(sp)
+  	sd s0,72(sp)
+  	addi s0,sp,96
+  	sd a0,-88(s0)
+  	li t0,1
+  ble t0,a0,.tag_anf_op_1
+  	li t1,1
+  	mv a0,t1
+  	j .tag_anf_op_1_t
+  .tag_anf_op_1:
+  	ld a0,-88(s0)
+  	li t2,1
+  	sub t3,a0,t2
+  	sd t3,-24(s0)
+  	lui a0,%hi(fac)
+  	addi a0,a0,%lo(fac)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	ld t3,-88(s0)
+  	mul t2,t3,a0
+  	sd a0,-32(s0)
+  	mv a0,t2
+  .tag_anf_op_1_t:
+  	mv a0,a0
+  	ld ra,80(sp)
+  	ld s0,72(sp)
+  	addi sp,sp,96
+  ret
+  ()_main:
+  	addi sp,sp,-80
+  	sd ra,72(sp)
+  	sd s0,64(sp)
+  	addi s0,sp,80
+  	lui a0,%hi(fac)
+  	addi a0,a0,%lo(fac)
+  	li a3,4
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,72(sp)
+  	ld s0,64(sp)
+  	addi sp,sp,80
+  ret
+  main:
+  	addi sp,sp,-16
+  	sd ra,8(sp)
+  	sd s0,0(sp)
+  	addi s0,sp,16
+  	li t0,0
+  	mv a0,t0
+  	ld ra,8(sp)
+  	ld s0,0(sp)
+  	addi sp,sp,16
+  ret
+  $ dune exec riscv64_instr_test < manytests/typed/002fac.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  anon_1_fac_cps:
+  	addi sp,sp,-80
+  	sd ra,72(sp)
+  	sd s0,64(sp)
+  	addi s0,sp,80
+  	sd a2,-80(s0)
+  	sd a1,-72(s0)
+  	sd a0,-64(s0)
+  	mul t0,a2,a0
+  	sd t0,-24(s0)
+  	ld a0,-72(s0)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	mv a0,a0
+  	ld ra,72(sp)
+  	ld s0,64(sp)
+  	addi sp,sp,80
+  ret
+  fac_cps:
+  	addi sp,sp,-160
+  	sd ra,144(sp)
+  	sd s0,136(sp)
+  	addi s0,sp,160
+  	sd a1,-152(s0)
+  	sd a0,-144(s0)
+  	li t0,1
+  beq a0,t0,.tag_anf_op_3
+  	ld a0,-152(s0)
+  	li a3,1
+  	li a2,1
+  	li a1,0
+  call part_app
+  	j .tag_anf_op_3_t
+  .tag_anf_op_3:
+  	ld t0,-144(s0)
+  	li a1,1
+  	sub t1,t0,a1
+  	sd a0,-24(s0)
+  	sd t1,-32(s0)
+  	lui a0,%hi(anon_1_fac_cps)
+  	addi a0,a0,%lo(anon_1_fac_cps)
+  	ld a4,-152(s0)
+  	ld a3,-144(s0)
+  	li a2,2
+  	li a1,3
+  call part_app
+  	sd a0,-40(s0)
+  	lui a0,%hi(fac_cps)
+  	addi a0,a0,%lo(fac_cps)
+  	ld a4,-40(s0)
+  	ld a3,-32(s0)
+  	li a2,2
+  	li a1,2
+  call part_app
+  .tag_anf_op_3_t:
+  	sd a0,-48(s0)
+  	mv a0,a0
+  	ld ra,144(sp)
+  	ld s0,136(sp)
+  	addi sp,sp,160
+  ret
+  anon_1_()_main:
+  	addi sp,sp,-32
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	addi s0,sp,32
+  	sd a0,-24(s0)
+  	mv a0,a0
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	addi sp,sp,32
+  ret
+  ()_main:
+  	addi sp,sp,-112
+  	sd ra,104(sp)
+  	sd s0,96(sp)
+  	addi s0,sp,112
+  	lui a0,%hi(anon_1_()_main)
+  	addi a0,a0,%lo(anon_1_()_main)
+  	li a2,0
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(fac_cps)
+  	addi a0,a0,%lo(fac_cps)
+  	ld a4,-24(s0)
+  	li a3,4
+  	li a2,2
+  	li a1,2
+  call part_app
+  	sd a0,-32(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-32(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,104(sp)
+  	ld s0,96(sp)
+  	addi sp,sp,112
+  ret
+  main:
+  	addi sp,sp,-16
+  	sd ra,8(sp)
+  	sd s0,0(sp)
+  	addi s0,sp,16
+  	li t0,0
+  	mv a0,t0
+  	ld ra,8(sp)
+  	ld s0,0(sp)
+  	addi sp,sp,16
+  ret
+  $ dune exec riscv64_instr_test < manytests/typed/003fib.ml
+  : end_of_input
+  $ dune exec riscv64_instr_test < manytests/typed/004manyargs.ml
+  a#test3 not found
+  $ dune exec riscv64_instr_test < manytests/typed/005fix.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  fix:
+  	addi sp,sp,-96
+  	sd ra,88(sp)
+  	sd s0,80(sp)
+  	addi s0,sp,96
+  	sd a1,-96(s0)
+  	sd a0,-88(s0)
+  	lui a0,%hi(fix)
+  	addi a0,a0,%lo(fix)
+  	ld a3,-88(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-24(s0)
+  	ld a0,-88(s0)
+  	ld a4,-96(s0)
+  	ld a3,-24(s0)
+  	li a2,2
+  	li a1,0
+  call part_app
+  	mv a0,a0
+  	ld ra,88(sp)
+  	ld s0,80(sp)
+  	addi sp,sp,96
+  ret
+  fac:
+  	addi sp,sp,-96
+  	sd ra,88(sp)
+  	sd s0,80(sp)
+  	addi s0,sp,96
+  	sd a1,-96(s0)
+  	sd a0,-88(s0)
+  	li t0,1
+  ble t0,a1,.tag_anf_op_3
+  	li t1,1
+  	mv a0,t1
+  	j .tag_anf_op_3_t
+  .tag_anf_op_3:
+  	li a0,1
+  	sub t2,a1,a0
+  	sd t2,-24(s0)
+  	ld a0,-88(s0)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	ld t2,-96(s0)
+  	mul t1,t2,a0
+  	sd a0,-32(s0)
+  	mv a0,t1
+  .tag_anf_op_3_t:
+  	mv a0,a0
+  	ld ra,88(sp)
+  	ld s0,80(sp)
+  	addi sp,sp,96
+  ret
+  ()_main:
+  	addi sp,sp,-112
+  	sd ra,104(sp)
+  	sd s0,96(sp)
+  	addi s0,sp,112
+  	lui a0,%hi(fac)
+  	addi a0,a0,%lo(fac)
+  	li a2,0
+  	li a1,2
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(fix)
+  	addi a0,a0,%lo(fix)
+  	li a4,6
+  	ld a3,-24(s0)
+  	li a2,2
+  	li a1,2
+  call part_app
+  	sd a0,-32(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-32(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,104(sp)
+  	ld s0,96(sp)
+  	addi sp,sp,112
+  ret
+  main:
+  	addi sp,sp,-16
+  	sd ra,8(sp)
+  	sd s0,0(sp)
+  	addi s0,sp,16
+  	li t0,0
+  	mv a0,t0
+  	ld ra,8(sp)
+  	ld s0,0(sp)
+  	addi sp,sp,16
+  ret
+  $ dune exec riscv64_instr_test < manytests/typed/006partial.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  anon_1_foo:
+  	addi sp,sp,-32
+  	sd ra,24(sp)
+  	sd s0,16(sp)
+  	addi s0,sp,32
+  	sd a0,-32(s0)
+  	li t0,2
+  	add t1,a0,t0
+  	mv a0,t1
+  	ld ra,24(sp)
+  	ld s0,16(sp)
+  	addi sp,sp,32
+  ret
+  anon_2_foo:
+  	addi sp,sp,-32
+  	sd ra,24(sp)
+  	sd s0,16(sp)
+  	addi s0,sp,32
+  	sd a0,-32(s0)
+  	li t0,10
+  	mul t1,a0,t0
+  	mv a0,t1
+  	ld ra,24(sp)
+  	ld s0,16(sp)
+  	addi sp,sp,32
+  ret
+  foo:
+  	addi sp,sp,-96
+  	sd ra,88(sp)
+  	sd s0,80(sp)
+  	addi s0,sp,96
+  	sd a0,-96(s0)
+  beqz a0,.tag_if_bnch
+  	lui a0,%hi(anon_1_foo)
+  	addi a0,a0,%lo(anon_1_foo)
+  	li a2,0
+  	li a1,1
+  call part_app
+  	j .tag_if_bnch_t
+  .tag_if_bnch:
+  	sd a0,-24(s0)
+  	lui a0,%hi(anon_2_foo)
+  	addi a0,a0,%lo(anon_2_foo)
+  	li a2,0
+  	li a1,1
+  call part_app
+  .tag_if_bnch_t:
+  	sd a0,-32(s0)
+  	mv a0,a0
+  	ld ra,88(sp)
+  	ld s0,80(sp)
+  	addi sp,sp,96
+  ret
+  foo:
+  	addi sp,sp,-160
+  	sd ra,144(sp)
+  	sd s0,136(sp)
+  	addi s0,sp,160
+  	sd a0,-152(s0)
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	ld a4,-152(s0)
+  	li a3,0
+  	li a2,2
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	ld a4,-24(s0)
+  	li a3,1
+  	li a2,2
+  	li a1,1
+  call part_app
+  	sd a0,-32(s0)
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	ld a4,-32(s0)
+  	li a3,0
+  	li a2,2
+  	li a1,1
+  call part_app
+  	sd a0,-40(s0)
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	ld a4,-40(s0)
+  	li a3,1
+  	li a2,2
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,144(sp)
+  	ld s0,136(sp)
+  	addi sp,sp,160
+  ret
+  ()_main:
+  	addi sp,sp,-80
+  	sd ra,72(sp)
+  	sd s0,64(sp)
+  	addi s0,sp,80
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	li a3,11
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,72(sp)
+  	ld s0,64(sp)
+  	addi sp,sp,80
+  ret
+  main:
+  	addi sp,sp,-16
+  	sd ra,8(sp)
+  	sd s0,0(sp)
+  	addi s0,sp,16
+  	li t0,0
+  	mv a0,t0
+  	ld ra,8(sp)
+  	ld s0,0(sp)
+  	addi sp,sp,16
+  ret
+  $ dune exec riscv64_instr_test < manytests/typed/006partial2.ml
+  foo#main not found
+  $ dune exec riscv64_instr_test < manytests/typed/006partial3.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  ()_foo:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-56(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-56(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  ()_anon_1_foo:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-56(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-56(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  anon_2_anon_1_foo:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-56(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-56(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  anon_1_foo:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-56(s0)
+  	lui a0,%hi(anon_2_anon_1_foo)
+  	addi a0,a0,%lo(anon_2_anon_1_foo)
+  	li a2,0
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  foo:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-56(s0)
+  	lui a0,%hi(anon_1_foo)
+  	addi a0,a0,%lo(anon_1_foo)
+  	li a2,0
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  ()_main:
+  	addi sp,sp,-48
+  	sd ra,40(sp)
+  	sd s0,32(sp)
+  	addi s0,sp,48
+  	lui a0,%hi(foo)
+  	addi a0,a0,%lo(foo)
+  	li a5,9
+  	li a4,8
+  	li a3,4
+  	li a2,3
+  	li a1,1
+  call part_app
+  	mv a0,a0
+  	ld ra,40(sp)
+  	ld s0,32(sp)
+  	addi sp,sp,48
+  ret
+  main:
+  	addi sp,sp,-16
+  	sd ra,8(sp)
+  	sd s0,0(sp)
+  	addi s0,sp,16
+  	li t0,0
+  	mv a0,t0
+  	ld ra,8(sp)
+  	ld s0,0(sp)
+  	addi sp,sp,16
+  ret
+  $ dune exec riscv64_instr_test < manytests/typed/007order.ml
+  : end_of_input
+  $ dune exec riscv64_instr_test < manytests/typed/008ascription.ml
+  : end_of_input
+  $ dune exec riscv64_instr_test < manytests/typed/015tuples.ml
+  : end_of_input
+  $ dune exec riscv64_instr_test < manytests/typed/016lists.ml
+  : end_of_input

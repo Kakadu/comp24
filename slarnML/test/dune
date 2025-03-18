@@ -45,13 +45,65 @@
   manytests/typed/016lists.ml))
 
 (cram
- (applies_to clos_conv_test))
+ (applies_to clos_conv_test)
+ (deps
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
 
 (cram
- (applies_to lambda_lifting_test))
+ (applies_to lambda_lifting_test)
+ (deps
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
 
 (cram
- (applies_to anf_conv_test))
+ (applies_to anf_conv_test)
+ (deps
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
 
 (cram
- (applies_to riscv64_instr_test))
+ (applies_to riscv64_instr_test)
+ (deps
+  manytests/typed/001fac.ml
+  manytests/typed/002fac.ml
+  manytests/typed/003fib.ml
+  manytests/typed/004manyargs.ml
+  manytests/typed/005fix.ml
+  manytests/typed/006partial.ml
+  manytests/typed/006partial2.ml
+  manytests/typed/006partial3.ml
+  manytests/typed/007order.ml
+  manytests/typed/008ascription.ml
+  manytests/typed/015tuples.ml
+  manytests/typed/016lists.ml))
