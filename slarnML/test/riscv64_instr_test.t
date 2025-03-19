@@ -4,121 +4,7 @@
   >   (fack n (fun x -> x))
   > ;;
   > EOF
-  .attribute unaligned_access, 0
-  .attribute stack_align, 16
-  .global _start
-  _start:
-  	addi sp,sp,-24
-  	sd ra,16(sp)
-  	sd s0,8(sp)
-  	sd s1,0(sp)
-  	addi s0,sp,24
-  call init_part_apps
-  call main
-  	ld ra,16(sp)
-  	ld s0,8(sp)
-  	ld s1,0(sp)
-  	addi sp,sp,24
-  	li a7,93
-  ecall
-  anon_1_fack_fac:
-  	addi sp,sp,-80
-  	sd ra,72(sp)
-  	sd s0,64(sp)
-  	addi s0,sp,80
-  	sd a2,-80(s0)
-  	sd a1,-72(s0)
-  	sd a0,-64(s0)
-  	ld a0,-72(s0)
-  	ld a3,-64(s0)
-  	li a2,1
-  	li a1,0
-  call part_app
-  	ld a1,-80(s0)
-  	mul a2,a1,a0
-  	mv a0,a2
-  	ld ra,72(sp)
-  	ld s0,64(sp)
-  	addi sp,sp,80
-  ret
-  fack_fac:
-  	addi sp,sp,-160
-  	sd ra,144(sp)
-  	sd s0,136(sp)
-  	addi s0,sp,160
-  	sd a1,-152(s0)
-  	sd a0,-144(s0)
-  	li t0,1
-  ble t0,a0,.tag_anf_op_3
-  	ld a0,-152(s0)
-  	li a3,1
-  	li a2,1
-  	li a1,0
-  call part_app
-  	j .tag_anf_op_3_t
-  .tag_anf_op_3:
-  	ld t0,-144(s0)
-  	li a1,1
-  	sub t1,t0,a1
-  	sd a0,-24(s0)
-  	sd t1,-32(s0)
-  	lui a0,%hi(anon_1_fack_fac)
-  	addi a0,a0,%lo(anon_1_fack_fac)
-  	ld a4,-152(s0)
-  	ld a3,-144(s0)
-  	li a2,2
-  	li a1,3
-  call part_app
-  	sd a0,-40(s0)
-  	lui a0,%hi(fack_fac)
-  	addi a0,a0,%lo(fack_fac)
-  	ld a4,-40(s0)
-  	ld a3,-32(s0)
-  	li a2,2
-  	li a1,2
-  call part_app
-  .tag_anf_op_3_t:
-  	sd a0,-48(s0)
-  	mv a0,a0
-  	ld ra,144(sp)
-  	ld s0,136(sp)
-  	addi sp,sp,160
-  ret
-  anon_2_fac:
-  	addi sp,sp,-32
-  	sd ra,16(sp)
-  	sd s0,8(sp)
-  	addi s0,sp,32
-  	sd a0,-24(s0)
-  	mv a0,a0
-  	ld ra,16(sp)
-  	ld s0,8(sp)
-  	addi sp,sp,32
-  ret
-  fac:
-  	addi sp,sp,-96
-  	sd ra,80(sp)
-  	sd s0,72(sp)
-  	addi s0,sp,96
-  	sd a0,-88(s0)
-  	lui a0,%hi(anon_2_fac)
-  	addi a0,a0,%lo(anon_2_fac)
-  	li a2,0
-  	li a1,1
-  call part_app
-  	sd a0,-24(s0)
-  	lui a0,%hi(fack_fac)
-  	addi a0,a0,%lo(fack_fac)
-  	ld a4,-24(s0)
-  	ld a3,-88(s0)
-  	li a2,2
-  	li a1,2
-  call part_app
-  	mv a0,a0
-  	ld ra,80(sp)
-  	ld s0,72(sp)
-  	addi sp,sp,96
-  ret
+  f not found
   $ dune exec riscv64_instr_test << EOF
   > let fac n = 
   >   let rec fack n = if (n < 1) then n else n * (fack (n - 1)) in
@@ -172,21 +58,46 @@
   	addi sp,sp,96
   ret
   fac:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
+  	addi sp,sp,-160
+  	sd ra,144(sp)
+  	sd s0,136(sp)
+  	addi s0,sp,160
+  	sd a0,-152(s0)
+  	li t0,1
+  blt t0,a0,.tag_anf_op_6
+  	j .tag_anf_op_6_t
+  .tag_anf_op_6:
+  	li t1,1
+  	sub t2,a0,t1
+  	sd t2,-24(s0)
+  	lui a0,%hi(fack_fac)
+  	addi a0,a0,%lo(fack_fac)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	ld t2,-152(s0)
+  	mul t1,t2,a0
+  	sd a0,-32(s0)
+  	mv a0,t1
+  .tag_anf_op_6_t:
+  	sd t1,-40(s0)
+  	sd a0,-48(s0)
+  	ld a0,-48(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	sd a0,-56(s0)
   	lui a0,%hi(fack_fac)
   	addi a0,a0,%lo(fack_fac)
-  	ld a3,-56(s0)
+  	ld a3,-152(s0)
   	li a2,1
   	li a1,1
   call part_app
   	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
+  	ld ra,144(sp)
+  	ld s0,136(sp)
+  	addi sp,sp,160
   ret
   $ dune exec riscv64_instr_test << EOF
   > let f a =
@@ -196,81 +107,7 @@
   >   in
   >   (g 2 3)
   > EOF
-  .attribute unaligned_access, 0
-  .attribute stack_align, 16
-  .global _start
-  _start:
-  	addi sp,sp,-24
-  	sd ra,16(sp)
-  	sd s0,8(sp)
-  	sd s1,0(sp)
-  	addi s0,sp,24
-  call init_part_apps
-  call main
-  	ld ra,16(sp)
-  	ld s0,8(sp)
-  	ld s1,0(sp)
-  	addi sp,sp,24
-  	li a7,93
-  ecall
-  h_g_f:
-  	addi sp,sp,-80
-  	sd ra,64(sp)
-  	sd s0,56(sp)
-  	addi s0,sp,80
-  	sd a3,-72(s0)
-  	sd a2,-64(s0)
-  	sd a1,-56(s0)
-  	sd a0,-48(s0)
-  	mul t0,a2,a3
-  	add t1,a1,t0
-  	mul t2,a0,t1
-  	mv a0,t2
-  	ld ra,64(sp)
-  	ld s0,56(sp)
-  	addi sp,sp,80
-  ret
-  g_f:
-  	addi sp,sp,-80
-  	sd ra,64(sp)
-  	sd s0,56(sp)
-  	addi s0,sp,80
-  	sd a2,-72(s0)
-  	sd a1,-64(s0)
-  	sd a0,-56(s0)
-  	lui a0,%hi(h_g_f)
-  	addi a0,a0,%lo(h_g_f)
-  	li a6,4
-  	ld a5,-72(s0)
-  	ld a4,-64(s0)
-  	ld a3,-56(s0)
-  	li a2,4
-  	li a1,4
-  call part_app
-  	mv a0,a0
-  	ld ra,64(sp)
-  	ld s0,56(sp)
-  	addi sp,sp,80
-  ret
-  f:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
-  	sd a0,-56(s0)
-  	lui a0,%hi(g_f)
-  	addi a0,a0,%lo(g_f)
-  	li a5,3
-  	li a4,2
-  	ld a3,-56(s0)
-  	li a2,3
-  	li a1,3
-  call part_app
-  	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
-  ret
+  e not found
   $ dune exec riscv64_instr_test < manytests/typed/001fac.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -321,11 +158,11 @@
   	ld s0,72(sp)
   	addi sp,sp,96
   ret
-  ()_main:
-  	addi sp,sp,-80
-  	sd ra,72(sp)
-  	sd s0,64(sp)
-  	addi s0,sp,80
+  main:
+  	addi sp,sp,-112
+  	sd ra,104(sp)
+  	sd s0,96(sp)
+  	addi s0,sp,112
   	lui a0,%hi(fac)
   	addi a0,a0,%lo(fac)
   	li a3,4
@@ -339,21 +176,16 @@
   	li a2,1
   	li a1,1
   call part_app
-  	mv a0,a0
-  	ld ra,72(sp)
-  	ld s0,64(sp)
-  	addi sp,sp,80
-  ret
-  main:
-  	addi sp,sp,-16
-  	sd ra,8(sp)
-  	sd s0,0(sp)
-  	addi s0,sp,16
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	li t0,0
   	mv a0,t0
-  	ld ra,8(sp)
-  	ld s0,0(sp)
-  	addi sp,sp,16
+  	ld ra,104(sp)
+  	ld s0,96(sp)
+  	addi sp,sp,112
   ret
   $ dune exec riscv64_instr_test < manytests/typed/002fac.ml
   .attribute unaligned_access, 0
@@ -447,11 +279,11 @@
   	ld s0,8(sp)
   	addi sp,sp,32
   ret
-  ()_main:
-  	addi sp,sp,-112
-  	sd ra,104(sp)
-  	sd s0,96(sp)
-  	addi s0,sp,112
+  main:
+  	addi sp,sp,-144
+  	sd ra,136(sp)
+  	sd s0,128(sp)
+  	addi s0,sp,144
   	lui a0,%hi(anon_1_()_main)
   	addi a0,a0,%lo(anon_1_()_main)
   	li a2,0
@@ -472,21 +304,16 @@
   	li a2,1
   	li a1,1
   call part_app
-  	mv a0,a0
-  	ld ra,104(sp)
-  	ld s0,96(sp)
-  	addi sp,sp,112
-  ret
-  main:
-  	addi sp,sp,-16
-  	sd ra,8(sp)
-  	sd s0,0(sp)
-  	addi s0,sp,16
+  	sd a0,-40(s0)
+  	ld a0,-40(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	li t0,0
   	mv a0,t0
-  	ld ra,8(sp)
-  	ld s0,0(sp)
-  	addi sp,sp,16
+  	ld ra,136(sp)
+  	ld s0,128(sp)
+  	addi sp,sp,144
   ret
   $ dune exec riscv64_instr_test < manytests/typed/003fib.ml
   : end_of_input
@@ -566,11 +393,11 @@
   	ld s0,80(sp)
   	addi sp,sp,96
   ret
-  ()_main:
-  	addi sp,sp,-112
-  	sd ra,104(sp)
-  	sd s0,96(sp)
-  	addi s0,sp,112
+  main:
+  	addi sp,sp,-144
+  	sd ra,136(sp)
+  	sd s0,128(sp)
+  	addi s0,sp,144
   	lui a0,%hi(fac)
   	addi a0,a0,%lo(fac)
   	li a2,0
@@ -591,21 +418,16 @@
   	li a2,1
   	li a1,1
   call part_app
-  	mv a0,a0
-  	ld ra,104(sp)
-  	ld s0,96(sp)
-  	addi sp,sp,112
-  ret
-  main:
-  	addi sp,sp,-16
-  	sd ra,8(sp)
-  	sd s0,0(sp)
-  	addi s0,sp,16
+  	sd a0,-40(s0)
+  	ld a0,-40(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	li t0,0
   	mv a0,t0
-  	ld ra,8(sp)
-  	ld s0,0(sp)
-  	addi sp,sp,16
+  	ld ra,136(sp)
+  	ld s0,128(sp)
+  	addi sp,sp,144
   ret
   $ dune exec riscv64_instr_test < manytests/typed/006partial.ml
   .attribute unaligned_access, 0
@@ -720,11 +542,11 @@
   	ld s0,136(sp)
   	addi sp,sp,160
   ret
-  ()_main:
-  	addi sp,sp,-80
-  	sd ra,72(sp)
-  	sd s0,64(sp)
-  	addi s0,sp,80
+  main:
+  	addi sp,sp,-112
+  	sd ra,104(sp)
+  	sd s0,96(sp)
+  	addi s0,sp,112
   	lui a0,%hi(foo)
   	addi a0,a0,%lo(foo)
   	li a3,11
@@ -738,21 +560,16 @@
   	li a2,1
   	li a1,1
   call part_app
-  	mv a0,a0
-  	ld ra,72(sp)
-  	ld s0,64(sp)
-  	addi sp,sp,80
-  ret
-  main:
-  	addi sp,sp,-16
-  	sd ra,8(sp)
-  	sd s0,0(sp)
-  	addi s0,sp,16
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	li t0,0
   	mv a0,t0
-  	ld ra,8(sp)
-  	ld s0,0(sp)
-  	addi sp,sp,16
+  	ld ra,104(sp)
+  	ld s0,96(sp)
+  	addi sp,sp,112
   ret
   $ dune exec riscv64_instr_test < manytests/typed/006partial2.ml
   foo#main not found
@@ -774,40 +591,6 @@
   	addi sp,sp,24
   	li a7,93
   ecall
-  ()_foo:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
-  	sd a0,-56(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-56(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
-  ret
-  ()_anon_1_foo:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
-  	sd a0,-56(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-56(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
-  ret
   anon_2_anon_1_foo:
   	addi sp,sp,-64
   	sd ra,48(sp)
@@ -826,42 +609,66 @@
   	addi sp,sp,64
   ret
   anon_1_foo:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
-  	sd a0,-56(s0)
+  	addi sp,sp,-128
+  	sd ra,112(sp)
+  	sd s0,104(sp)
+  	addi s0,sp,128
+  	sd a0,-120(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-120(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	ld a0,-24(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	sd a0,-32(s0)
   	lui a0,%hi(anon_2_anon_1_foo)
   	addi a0,a0,%lo(anon_2_anon_1_foo)
   	li a2,0
   	li a1,1
   call part_app
   	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
+  	ld ra,112(sp)
+  	ld s0,104(sp)
+  	addi sp,sp,128
   ret
   foo:
-  	addi sp,sp,-64
-  	sd ra,48(sp)
-  	sd s0,40(sp)
-  	addi s0,sp,64
-  	sd a0,-56(s0)
+  	addi sp,sp,-128
+  	sd ra,112(sp)
+  	sd s0,104(sp)
+  	addi s0,sp,128
+  	sd a0,-120(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-120(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-24(s0)
+  	ld a0,-24(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	sd a0,-32(s0)
   	lui a0,%hi(anon_1_foo)
   	addi a0,a0,%lo(anon_1_foo)
   	li a2,0
   	li a1,1
   call part_app
   	mv a0,a0
-  	ld ra,48(sp)
-  	ld s0,40(sp)
-  	addi sp,sp,64
+  	ld ra,112(sp)
+  	ld s0,104(sp)
+  	addi sp,sp,128
   ret
-  ()_main:
-  	addi sp,sp,-48
-  	sd ra,40(sp)
-  	sd s0,32(sp)
-  	addi s0,sp,48
+  main:
+  	addi sp,sp,-80
+  	sd ra,72(sp)
+  	sd s0,64(sp)
+  	addi s0,sp,80
   	lui a0,%hi(foo)
   	addi a0,a0,%lo(foo)
   	li a5,9
@@ -870,21 +677,16 @@
   	li a2,3
   	li a1,1
   call part_app
-  	mv a0,a0
-  	ld ra,40(sp)
-  	ld s0,32(sp)
-  	addi sp,sp,48
-  ret
-  main:
-  	addi sp,sp,-16
-  	sd ra,8(sp)
-  	sd s0,0(sp)
-  	addi s0,sp,16
+  	sd a0,-24(s0)
+  	ld a0,-24(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
   	li t0,0
   	mv a0,t0
-  	ld ra,8(sp)
-  	ld s0,0(sp)
-  	addi sp,sp,16
+  	ld ra,72(sp)
+  	ld s0,64(sp)
+  	addi sp,sp,80
   ret
   $ dune exec riscv64_instr_test < manytests/typed/007order.ml
   : end_of_input

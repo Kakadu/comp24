@@ -52,10 +52,10 @@
   (let foo x=((foo ) true ((foo ) false ((foo ) true ((foo ) false x)))))
   (let main=(let ()=((print_int ) ((foo ) 11)) in 0))
   $ dune exec clos_conv_test < manytests/typed/006partial2.ml
-  (let foo a b c=(let () a=((print_int ) a) in (let () b=((print_int ) b) in (let () c=((print_int ) c) in (a+(b*c))))))
-  (let main=(let foo=((foo ) 1) in (let foo foo=((foo foo) 2) in (let foo foo=((foo foo) 3) in (let () foo=((print_int ) foo) in 0)))))
+  (let foo a b c=(let ()=((print_int ) a) in (let ()=((print_int ) b) in (let ()=((print_int ) c) in (a+(b*c))))))
+  (let main=(let foo=((foo ) 1) in (let foo foo=((foo foo) 2) in (let foo foo=((foo foo) 3) in (let ()=((print_int ) foo) in 0)))))
   $ dune exec clos_conv_test < manytests/typed/006partial3.ml
-  (let foo a=(let () a=((print_int ) a) in ((fun b->(let () b=((print_int ) b) in ((fun c->((print_int ) c)) ))) )))
+  (let foo a=(let ()=((print_int ) a) in ((fun b->(let ()=((print_int ) b) in ((fun c->((print_int ) c)) ))) )))
   (let main=(let ()=((foo ) 4 8 9) in 0))
   $ dune exec clos_conv_test < manytests/typed/007order.ml
   : end_of_input

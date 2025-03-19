@@ -134,7 +134,10 @@ let rec simplify ast lvl f res =
     |> update_args env (lvl + 1)
     |> simplify e (lvl + 1) f_id
     |> filter lvl
-    |> update_ast (fun a -> CLet (dec id (List.append new_args args), a))
+    |> update_ast (fun a ->
+      if id = "()"
+      then CLet (dec id args, a)
+      else CLet (dec id (List.append new_args args), a))
     |> update_args [ id ] lvl
   | LetIn (d, e1, e2) ->
     let id, args, env, dec =
@@ -164,7 +167,10 @@ let rec simplify ast lvl f res =
     |> filter lvl
     |> update_args [ id ] lvl
     |> simplify e2 lvl f_id
-    |> update_ast (fun a2 -> CLetIn (dec id (List.append new_args args), a1, a2))
+    |> update_ast (fun a2 ->
+      if id = "()"
+      then CLetIn (dec id args, a1, a2)
+      else CLetIn (dec id (List.append new_args args), a1, a2))
   | Fun (a, e) ->
     (match a with
      | [] -> Error "Fun hasn't args"
