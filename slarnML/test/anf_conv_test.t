@@ -201,6 +201,20 @@
   	in
   	anf_app#34)))))))))))))))
   )
+  $ dune exec anf_conv_test < manytests/do_not_type/001.ml
+  fac not exist
+  $ dune exec anf_conv_test < manytests/do_not_type/002if.ml
+  (fun main()->
+  	(let anf_if#1=if (true)
+  		then (
+  			1
+  		) else (
+  			false)
+  	in
+  	anf_if#1)
+  )
+  $ dune exec anf_conv_test < manytests/do_not_type/003occurs.ml
+  f not exist
   $ dune exec anf_conv_test < manytests/typed/001fac.ml
   (fun fac(n)->
   	(let anf_op#1=(n<=1)

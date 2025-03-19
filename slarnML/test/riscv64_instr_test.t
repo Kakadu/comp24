@@ -113,6 +113,47 @@
   >   (g 2 3)
   > EOF
   e not found
+  $ dune exec riscv64_instr_test < manytests/do_not_type/001.ml
+  fac not exist
+  $ dune exec riscv64_instr_test < manytests/do_not_type/002if.ml
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  main:
+  	addi sp,sp,-32
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	addi s0,sp,32
+  	li t0,1
+  beqz t0,.tag_if_bnch
+  	li t1,1
+  	mv a0,t1
+  	j .tag_if_bnch_t
+  .tag_if_bnch:
+  	li t2,0
+  	mv a0,t2
+  .tag_if_bnch_t:
+  	mv a0,a0
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	addi sp,sp,32
+  ret
+  $ dune exec riscv64_instr_test < manytests/do_not_type/003occurs.ml
+  f not exist
   $ dune exec riscv64_instr_test < manytests/typed/001fac.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16

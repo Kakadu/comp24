@@ -91,6 +91,13 @@
   >   else (fib (n - 1) + fib (n - 2))
   > EOF
   (let rec fib n=if ((n<2)) then (n) else ((fib->((n-1)+(fib->(n-2))))))
+  $ dune exec parser_test < manytests/do_not_type/001.ml
+  (let recfac n=if ((n<=1)) then (1) else ((n*(fac->(n-1)))))
+  $ dune exec parser_test < manytests/do_not_type/002if.ml
+  (let main=if (true) then (1) else (false))
+  $ dune exec parser_test < manytests/do_not_type/003occurs.ml
+  (let fix f=(fun x->(f->(fun f->(x->x->f)))))	
+  (fun x->(f->(fun f->(x->x->f))))
   $ dune exec parser_test < manytests/typed/001fac.ml
   (let rec fac n=if ((n<=1)) then (1) else ((n*(fac->(n-1)))))	
   (let main=(let ()=(print_int->(fac->4)) in 0))

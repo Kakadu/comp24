@@ -27,6 +27,12 @@
   (fun h(a c d e)->(((a )*((c )+((d )*(e ))))))
   (fun g(a c d)->(let h = (((a )*((c )+((d )*(e )))) in (h (a ) (c ) (d ) 4))))
   (fun f(a)->(let g = (let h = (((a )*((c )+((d )*(e )))) in (h (a ) (c ) (d ) 4)) in (g (a ) 2 3))))
+  $ dune exec lambda_lifting_test < manytests/do_not_type/001.ml
+  fac not exist
+  $ dune exec lambda_lifting_test < manytests/do_not_type/002if.ml
+  (fun main()->(if (true) then (1) else (false)))
+  $ dune exec lambda_lifting_test < manytests/do_not_type/003occurs.ml
+  f not exist
   $ dune exec lambda_lifting_test < manytests/typed/001fac.ml
   (fun fac(n)->(if ((n<=1)) then (1) else ((n*(fac (n-1))))))
   (fun main()->(let () = ((print_int (fac 4)) in 0)))

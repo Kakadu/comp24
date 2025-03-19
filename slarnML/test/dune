@@ -31,6 +31,9 @@
 (cram
  (applies_to parser_tests)
  (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
@@ -47,6 +50,9 @@
 (cram
  (applies_to clos_conv_test)
  (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
@@ -63,6 +69,9 @@
 (cram
  (applies_to lambda_lifting_test)
  (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
@@ -79,6 +88,9 @@
 (cram
  (applies_to anf_conv_test)
  (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
@@ -95,6 +107,9 @@
 (cram
  (applies_to riscv64_instr_test)
  (deps
+  manytests/do_not_type/001.ml
+  manytests/do_not_type/002if.ml
+  manytests/do_not_type/003occurs.ml
   manytests/typed/001fac.ml
   manytests/typed/002fac.ml
   manytests/typed/003fib.ml
