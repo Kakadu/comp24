@@ -74,7 +74,7 @@ let rec anf_expr e expr_with_hole =
     ALet (name, AApp (AId id, []), expr_with_hole (AId name))
   | LIn (id, e1, e2) ->
     anf_expr e1 (fun limm ->
-      let name = get_name id in
+      let name = "anf_" ^ get_name id in
       ALet (name, AApp (limm, []), anf_expr e2 expr_with_hole))
 ;;
 

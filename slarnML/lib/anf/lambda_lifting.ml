@@ -12,7 +12,8 @@ let get_anon_name =
   map (fun (_, _, _, num) -> Result (String.concat "$" [ "anon"; string_of_int num ]))
 ;;
 
-let get_name id stack = String.concat "#" (id :: stack)
+let get_name id _ = id
+(* String.concat "#" (id :: stack) *)
 
 let find_name id =
   map (fun (_, _, env, _) ->
@@ -67,6 +68,15 @@ let rec lifting cc_ast stack lvl res =
   let update_env_decl args res =
     List.fold_left (fun r a -> r |> update_env_arg a lvl) res args
   in
+  let init_func d e1 res =
+    let id = get_id d in
+    let f1, f2 =
+      match d with
+      | Ast.Decl _ -> (fun x -> x), update_env_decl (get_args d)
+      | Ast.DeclRec _ -> update_env_decl (get_args d), fun x -> x
+    in
+    res |> f1 |> update_env_fun id stack lvl |> lifting e1 (id :: stack) (lvl + 1) |> f2
+  in
   match cc_ast with
   | CId id -> res |> find_name id >>= fun ast -> update_ast (fun _ -> Result ast) res
   | CConst c -> update_ast (fun _ -> Result (LConst c)) res
@@ -97,19 +107,15 @@ let rec lifting cc_ast stack lvl res =
     >>= fun a2 ->
     r2 |> lifting e3 stack lvl |> update_ast (fun a3 -> Result (LIf (a1, a2, a3)))
   | CLet (d, e) ->
-    let id = get_id d in
+    (* let id = get_id d in *)
     res
-    |> update_env_decl (get_args d)
-    |> update_env_fun id stack lvl
-    |> lifting e (id :: stack) (lvl + 1)
+    |> init_func d e
     |> fun r1 ->
     r1 |> get_ast >>= fun a -> r1 |> insert_let (get_fun_let (get_decl d) a) |> filter lvl
   | CLetIn (d, e1, e2) ->
     let id = get_id d in
     res
-    |> update_env_decl (get_args d)
-    |> update_env_fun id stack lvl
-    |> lifting e1 (id :: stack) (lvl + 1)
+    |> init_func d e1
     |> fun r1 ->
     r1
     |> get_ast
@@ -146,7 +152,14 @@ let rec lifting cc_ast stack lvl res =
       (res >>= fun r -> Result (r, []))
       args
     >>= fun (r, args) ->
-    let args = List.rev args in
+    let args =
+      List.map
+        (fun a ->
+          match a with
+          | LId id -> LApp (id, [])
+          | e -> e)
+        (List.rev args)
+    in
     Result r
     |> lifting e stack lvl
     |> update_ast (fun a ->

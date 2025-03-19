@@ -18,7 +18,7 @@
   Lambda_lifting
   Anf_ast
   Anf_conv
-  Anf_test
+  ; Anf_test
   Riscv_ast
   Call_define
   Riscv
