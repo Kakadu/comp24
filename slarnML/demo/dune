@@ -1,65 +1,72 @@
-(rule
- (targets part_app.o)
- (deps ../lib/riscv64/part_app.c)
- (mode
-  (promote (until-clean)))
- (action
-  (run
-   riscv64-linux-gnu-gcc
-   -march=rv64gc
-   -O2
-   -nostdlib
-   -nostartfiles
-   -ffreestanding
-   -c
-   %{deps}
-   -o
-   %{targets}))
- (enabled_if
-  (= %{profile} demo)))
-
-(rule
- (targets main.S)
- (deps
-  (:gen ../demo/demoRiscv.exe)
-  main.ml)
- (mode
-  (promote (until-clean)))
- (action
-  (run %{gen} ../demo/main.ml %{targets}))
- (enabled_if
-  (= %{profile} demo)))
-
-(rule
- (targets main.o)
- (deps main.S)
- (mode
-  (promote (until-clean)))
- (action
-  (run riscv64-linux-gnu-as -march=rv64gc %{deps} -o %{targets}))
- (enabled_if
-  (= %{profile} demo)))
-
-(rule
- (targets print.o)
- (deps ../lib/riscv64/print.S)
- (mode
-  (promote (until-clean)))
- (action
-  (run riscv64-linux-gnu-as -march=rv64gc %{deps} -o %{targets}))
- (enabled_if
-  (= %{profile} demo)))
-
-(rule
- (targets a.out)
- (deps print.o part_app.o main.o)
- (mode
-  (promote (until-clean)))
- (action
-  (run riscv64-linux-gnu-ld -lc %{deps} -o %{targets}))
- (enabled_if
-  (= %{profile} demo)))
-
+;(rule
+; (targets part_app.o)
+; (deps ../lib/riscv64/part_app.c)
+; (mode
+;  (promote (until-clean)))
+; (action
+;  (run
+;   riscv64-linux-gnu-gcc
+;   -march=rv64gc
+;   -O2
+;   -nostdlib
+;   -nostartfiles
+;   -ffreestanding
+;   -c
+;   %{deps}
+;   -o
+;   %{targets}))
+; (enabled_if
+;  (= %{profile} demo)))
+;
+;(rule
+; (targets main.S)
+; (deps
+;  demo.ml
+;  main.ml)
+; (mode
+;  (promote (until-clean)))
+; (action
+;  (run dune exec demo < main.ml))
+; (enabled_if
+;  (= %{profile} demo)))
+;
+;(rule
+; (targets main.o)
+; (deps main.S)
+; (mode
+;  (promote (until-clean)))
+; (action
+;  (run riscv64-linux-gnu-as -march=rv64gc %{deps} -o %{targets}))
+; (enabled_if
+;  (= %{profile} demo)))
+;
+;(rule
+; (targets print.o)
+; (deps ../lib/riscv64/print.S)
+; (mode
+;  (promote (until-clean)))
+; (action
+;  (run riscv64-linux-gnu-as -march=rv64gc %{deps} -o %{targets}))
+; (enabled_if
+;  (= %{profile} demo)))
+;
+;(rule
+; (targets a.out)
+; (deps print.o part_app.o main.o)
+; (mode
+;  (promote (until-clean)))
+; (action
+;  (run riscv64-linux-gnu-ld -lc %{deps} -o %{targets}))
+; (enabled_if
+;  (= %{profile} demo)))
+;
+;(executable
+; (name demo)
+; (public_name demo)
+; (modules demo)
+; (libraries slarnML.lib stdio))
+;
 ; (cram
 ;  (applies_to riscvDemo)
 ;  (deps ./a.out ./demoRiscv.exe))
+;
