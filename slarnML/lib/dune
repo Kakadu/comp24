@@ -1,6 +1,7 @@
 (library
  (name slarnML_lib)
  (public_name slarnML.lib)
+ (instrumentation (backend bisect_ppx))
  (modules
   Res
   Pprint_ast

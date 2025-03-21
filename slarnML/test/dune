@@ -2,30 +2,35 @@
  (name parser_test)
  (public_name parser_test)
  (modules parser_test)
+ (preprocess (pps bisect_ppx))
  (libraries slarnML.lib stdio))
 
 (executable
  (name clos_conv_test)
  (public_name clos_conv_test)
  (modules clos_conv_test)
+ (preprocess (pps bisect_ppx))
  (libraries slarnML.lib stdio))
 
 (executable
  (name lambda_lifting_test)
  (public_name lambda_lifting_test)
  (modules lambda_lifting_test)
+ (preprocess (pps bisect_ppx))
  (libraries slarnML.lib stdio))
 
 (executable
  (name anf_conv_test)
  (public_name anf_conv_test)
  (modules anf_conv_test)
+ (preprocess (pps bisect_ppx))
  (libraries slarnML.lib stdio))
 
 (executable
  (name riscv64_instr_test)
  (public_name riscv64_instr_test)
  (modules riscv64_instr_test)
+ (preprocess (pps bisect_ppx))
  (libraries slarnML.lib stdio))
 
 (cram
