@@ -65,6 +65,5 @@
   : end_of_input
   $ dune exec clos_conv_test < manytests/typed/015tuples.ml
   : end_of_input
-  $ dune exec clos_conv_test < test/manytests/typed/016lists.ml
-  test/manytests/typed/016lists.ml: No such file or directory
-  [1]
+  $ dune exec clos_conv_test < manytests/typed/016lists.ml
+  : end_of_input
