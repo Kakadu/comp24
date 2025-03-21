@@ -377,7 +377,200 @@
   ret
 
   $ dune exec riscv64_instr_test < manytests/typed/003fib.ml
-  : end_of_input
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global _start
+  _start:
+  	addi sp,sp,-24
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,24
+  call init_part_apps
+  call main
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,24
+  	li a7,93
+  ecall
+  n1:
+  	addi sp,sp,-32
+  	sd ra,24(sp)
+  	sd s0,16(sp)
+  	addi s0,sp,32
+  	sd a0,-32(s0)
+  	li t0,1
+  	sub t1,a0,t0
+  	mv a0,t1
+  	ld ra,24(sp)
+  	ld s0,16(sp)
+  	addi sp,sp,32
+  ret
+  ab:
+  	addi sp,sp,-48
+  	sd ra,32(sp)
+  	sd s0,24(sp)
+  	addi s0,sp,48
+  	sd a1,-40(s0)
+  	sd a0,-32(s0)
+  	add t0,a0,a1
+  	mv a0,t0
+  	ld ra,32(sp)
+  	ld s0,24(sp)
+  	addi sp,sp,48
+  ret
+  fib_acc:
+  	addi sp,sp,-272
+  	sd ra,256(sp)
+  	sd s0,248(sp)
+  	addi s0,sp,272
+  	sd a2,-264(s0)
+  	sd a1,-256(s0)
+  	sd a0,-248(s0)
+  	li t0,1
+  beq a2,t0,.tag_anf_op_3
+  	mv a0,a1
+  	j .tag_anf_op_3_t
+  .tag_anf_op_3:
+  	li a0,1
+  	sub t1,a2,a0
+  	sd t1,-24(s0)
+  	ld a0,-24(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	ld t1,-248(s0)
+  	ld t0,-256(s0)
+  	add a1,t1,t0
+  	sd a0,-32(s0)
+  	sd a1,-40(s0)
+  	ld a0,-40(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	sd a0,-48(s0)
+  	ld a0,-256(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	sd a0,-56(s0)
+  	lui a0,%hi(ab)
+  	addi a0,a0,%lo(ab)
+  	li a2,0
+  	li a1,2
+  call part_app
+  	sd a0,-64(s0)
+  	lui a0,%hi(n1)
+  	addi a0,a0,%lo(n1)
+  	li a2,0
+  	li a1,1
+  call part_app
+  	sd a0,-72(s0)
+  	lui a0,%hi(fib_acc)
+  	addi a0,a0,%lo(fib_acc)
+  	ld a5,-72(s0)
+  	ld a4,-64(s0)
+  	ld a3,-56(s0)
+  	li a2,3
+  	li a1,3
+  call part_app
+  .tag_anf_op_3_t:
+  	sd a0,-80(s0)
+  	mv a0,a0
+  	ld ra,256(sp)
+  	ld s0,248(sp)
+  	addi sp,sp,272
+  ret
+  fib:
+  	addi sp,sp,-128
+  	sd ra,120(sp)
+  	sd s0,112(sp)
+  	addi s0,sp,128
+  	sd a0,-128(s0)
+  	li t0,2
+  blt t0,a0,.tag_anf_op_13
+  	j .tag_anf_op_13_t
+  .tag_anf_op_13:
+  	li t1,1
+  	sub t2,a0,t1
+  	li t3,2
+  	sub t4,a0,t3
+  	sd t2,-24(s0)
+  	sd t4,-32(s0)
+  	lui a0,%hi(fib)
+  	addi a0,a0,%lo(fib)
+  	ld a3,-32(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	ld t4,-24(s0)
+  	add t3,t4,a0
+  	sd a0,-40(s0)
+  	sd t3,-48(s0)
+  	lui a0,%hi(fib)
+  	addi a0,a0,%lo(fib)
+  	ld a3,-48(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  .tag_anf_op_13_t:
+  	sd a0,-56(s0)
+  	mv a0,a0
+  	ld ra,120(sp)
+  	ld s0,112(sp)
+  	addi sp,sp,128
+  ret
+  main:
+  	addi sp,sp,-208
+  	sd ra,200(sp)
+  	sd s0,192(sp)
+  	addi s0,sp,208
+  	lui a0,%hi(fib_acc)
+  	addi a0,a0,%lo(fib_acc)
+  	li a5,4
+  	li a4,1
+  	li a3,0
+  	li a2,3
+  	li a1,3
+  call part_app
+  	sd a0,-24(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-24(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-32(s0)
+  	ld a0,-32(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	sd a0,-40(s0)
+  	lui a0,%hi(fib)
+  	addi a0,a0,%lo(fib)
+  	li a3,4
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-48(s0)
+  	lui a0,%hi(print_int)
+  	addi a0,a0,%lo(print_int)
+  	ld a3,-48(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-56(s0)
+  	ld a0,-56(s0)
+  	li a2,0
+  	li a1,0
+  call part_app
+  	li t0,0
+  	mv a0,t0
+  	ld ra,200(sp)
+  	ld s0,192(sp)
+  	addi sp,sp,208
+  ret
 
   $ dune exec riscv64_instr_test < manytests/typed/004manyargs.ml
   .attribute unaligned_access, 0
@@ -656,7 +849,7 @@
   	ld s0,456(sp)
   	addi sp,sp,480
   ret
-  temp0:
+  rez:
   	addi sp,sp,-112
   	sd ra,96(sp)
   	sd s0,88(sp)
@@ -693,29 +886,6 @@
   	ld ra,96(sp)
   	ld s0,88(sp)
   	addi sp,sp,112
-  ret
-  temp1:
-  	addi sp,sp,-96
-  	sd ra,80(sp)
-  	sd s0,72(sp)
-  	addi s0,sp,96
-  	sd a0,-88(s0)
-  	lui a0,%hi(temp0)
-  	addi a0,a0,%lo(temp0)
-  	li a2,0
-  	li a1,0
-  call part_app
-  	sd a0,-24(s0)
-  	lui a0,%hi(print_int)
-  	addi a0,a0,%lo(print_int)
-  	ld a3,-24(s0)
-  	li a2,1
-  	li a1,1
-  call part_app
-  	mv a0,a0
-  	ld ra,80(sp)
-  	ld s0,72(sp)
-  	addi sp,sp,96
   ret
   temp2:
   	addi sp,sp,-80
@@ -781,8 +951,8 @@
   	li a1,0
   call part_app
   	sd a0,-40(s0)
-  	lui a0,%hi(temp0)
-  	addi a0,a0,%lo(temp0)
+  	lui a0,%hi(rez)
+  	addi a0,a0,%lo(rez)
   	li a2,0
   	li a1,0
   call part_app

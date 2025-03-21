@@ -5,3 +5,5 @@ trash
 *.o
 *.out
 demo/main.S
+test/manytests
+test/manytests_

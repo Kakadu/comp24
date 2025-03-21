@@ -288,7 +288,79 @@
   	0))))
   )
   $ dune exec anf_conv_test < manytests/typed/003fib.ml
-  : end_of_input
+  (fun n1(n)->
+  	(let anf_op#1=(n-1)
+  	in
+  	anf_op#1)
+  )
+  (fun ab(a b)->
+  	(let anf_op#2=(a+b)
+  	in
+  	anf_op#2)
+  )
+  (fun fib_acc(a b n)->
+  	(let anf_op#3=(n=1)
+  	in
+  	(let anf_if#4=if (anf_op#3)
+  		then (
+  			b
+  		) else (
+  			(let anf_op#5=(n-1)
+  			in
+  			(let anf_n1#6=(anf_op#5 )
+  			in
+  			(let anf_op#7=(a+b)
+  			in
+  			(let anf_ab#8=(anf_op#7 )
+  			in
+  			(let anf_app#9=(b )
+  			in
+  			(let anf_app#10=(ab )
+  			in
+  			(let anf_app#11=(n1 )
+  			in
+  			(let anf_app#12=(fib_acc anf_app#9 anf_app#10 anf_app#11)
+  			in
+  			anf_app#12)))))))))
+  	in
+  	anf_if#4))
+  )
+  (fun fib(n)->
+  	(let anf_op#13=(n<2)
+  	in
+  	(let anf_if#14=if (anf_op#13)
+  		then (
+  			n
+  		) else (
+  			(let anf_op#15=(n-1)
+  			in
+  			(let anf_op#16=(n-2)
+  			in
+  			(let anf_app#17=(fib anf_op#16)
+  			in
+  			(let anf_op#18=(anf_op#15+anf_app#17)
+  			in
+  			(let anf_app#19=(fib anf_op#18)
+  			in
+  			anf_app#19))))))
+  	in
+  	anf_if#14))
+  )
+  (fun main()->
+  	(let anf_app#20=(fib_acc 0 1 4)
+  	in
+  	(let anf_app#21=(print_int anf_app#20)
+  	in
+  	(let anf_()#22=(anf_app#21 )
+  	in
+  	(let anf_app#23=(fib 4)
+  	in
+  	(let anf_app#24=(print_int anf_app#23)
+  	in
+  	(let anf_()#25=(anf_app#24 )
+  	in
+  	0))))))
+  )
   $ dune exec anf_conv_test < manytests/typed/004manyargs.ml
   (fun wrap(f)->
   	(let anf_op#1=(1=1)
@@ -388,45 +460,38 @@
   	in
   	anf_op#38)))))))))))))))))))
   )
-  (fun temp0()->
+  (fun rez()->
   	(let anf_app#39=(test10 )
   	in
   	(let anf_app#40=(wrap anf_app#39 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
   	in
   	anf_app#40))
   )
-  (fun temp1(temp0)->
-  	(let anf_app#41=(temp0 )
+  (fun temp2()->
+  	(let anf_app#41=(test3 )
   	in
-  	(let anf_app#42=(print_int anf_app#41)
+  	(let anf_app#42=(wrap anf_app#41 1 10 100)
   	in
   	anf_app#42))
   )
-  (fun temp2()->
-  	(let anf_app#43=(test3 )
-  	in
-  	(let anf_app#44=(wrap anf_app#43 1 10 100)
-  	in
-  	anf_app#44))
-  )
   (fun main()->
-  	(let anf_app#45=(test10 )
+  	(let anf_app#43=(test10 )
   	in
-  	(let anf_app#46=(wrap anf_app#45 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
+  	(let anf_app#44=(wrap anf_app#43 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
   	in
-  	(let anf_temp0#47=(anf_app#46 )
+  	(let anf_rez#45=(anf_app#44 )
   	in
-  	(let anf_app#48=(temp0 )
+  	(let anf_app#46=(rez )
   	in
-  	(let anf_app#49=(print_int anf_app#48)
+  	(let anf_app#47=(print_int anf_app#46)
   	in
-  	(let anf_temp1#50=(anf_app#49 )
+  	(let anf_()#48=(anf_app#47 )
   	in
-  	(let anf_app#51=(test3 )
+  	(let anf_app#49=(test3 )
   	in
-  	(let anf_app#52=(wrap anf_app#51 1 10 100)
+  	(let anf_app#50=(wrap anf_app#49 1 10 100)
   	in
-  	(let anf_temp2#53=(anf_app#52 )
+  	(let anf_temp2#51=(anf_app#50 )
   	in
   	0)))))))))
   )
