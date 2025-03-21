@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>anf_conv_test.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in test/anf_conv_test.ml">
+    <link rel="stylesheet" href="../coverage.css"/>
+    <script src="../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../index.html">
+          <span class="dirname">test/</span>anf_conv_test.ml
+        </a>
+      </h1>
+      <h2>100.00%</h2>
+    </div>
+    <div id="navbar">
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+</pre>
+<pre><code class="ocaml">open SlarnML_lib.Res
+
+let () =
+  let s = Stdio.In_channel.input_all Stdlib.stdin in
+  <span data-count="18">l</span>et result =
+    match SlarnML_lib.Parser.parser s with
+    | <span data-count="14">O</span>k ast -&gt;
+      SlarnML_lib.Clos_conv.clos_con<span data-count="14">v</span> ast
+      &gt;&gt;<span data-count="14">=</span> (fun ast -&gt; <span data-count="12">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
+      &gt;&gt;<span data-count="14">=</span> fun ast -&gt; <span data-count="12">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="12">f</span> ast)
+    | <span data-count="4">E</span>rror message -&gt; SlarnML_lib.Res.Error message
+  in
+  match result with
+  | <span data-count="12">S</span>larnML_lib.Res.Result r -&gt;
+    print_strin<span data-count="12">g</span> @@ String.conca<span data-count="12">t</span> "\n" (List.ma<span data-count="12">p</span> SlarnML_lib.Pprint_anf.pp_anf_afun r)
+  | <span data-count="6">E</span>rror e -&gt; Printf.eprint<span data-count="6">f</span> "%s" e
+;;
+</code></pre>
+      </div>
+    </div>
+    <script src="../coverage.js"></script>
+  </body>
+</html>
