@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Riscv (slarnML.SlarnML_lib.Riscv)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../_odoc-theme/odoc.css"/><meta name="generator" content="odoc 2.4.4"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../index.html">slarnML</a> &#x00BB; <a href="../index.html">SlarnML_lib</a> &#x00BB; Riscv</nav><header class="odoc-preamble"><h1>Module <code><span>SlarnML_lib.Riscv</span></code></h1></header><div class="odoc-content"><div class="odoc-spec"><div class="spec value anchored" id="val-split_at_n"><a href="#val-split_at_n" class="anchor"></a><code><span><span class="keyword">val</span> split_at_n : <span>int <span class="arrow">&#45;&gt;</span></span> <span><span><span class="type-var">'a</span> <span class="xref-unresolved">Stdlib</span>.List.t</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="type-var">'a</span> list</span> * <span><span class="type-var">'a</span> <span class="xref-unresolved">Stdlib</span>.List.t</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-int_of_bool"><a href="#val-int_of_bool" class="anchor"></a><code><span><span class="keyword">val</span> int_of_bool : <span>bool <span class="arrow">&#45;&gt;</span></span> int</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_offset"><a href="#val-get_offset" class="anchor"></a><code><span><span class="keyword">val</span> get_offset : 
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span>int <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_regs"><a href="#val-get_regs" class="anchor"></a><code><span><span class="keyword">val</span> get_regs : 
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_offsets"><a href="#val-get_offsets" class="anchor"></a><code><span><span class="keyword">val</span> get_offsets : 
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_free"><a href="#val-get_free" class="anchor"></a><code><span><span class="keyword">val</span> get_free : 
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_cond"><a href="#val-get_cond" class="anchor"></a><code><span><span class="keyword">val</span> get_cond : 
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-update_env"><a href="#val-update_env" class="anchor"></a><code><span><span class="keyword">val</span> update_env : 
+  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><span class="type-var">'c</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'d</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="type-var">'e</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'f</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><span class="type-var">'g</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'h</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'c</span> * <span class="type-var">'e</span> * <span class="type-var">'g</span> * <span class="type-var">'i</span> * <span class="type-var">'j</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'b</span> * <span class="type-var">'d</span> * <span class="type-var">'f</span> * <span class="type-var">'h</span> * <span class="type-var">'i</span> * <span class="type-var">'j</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-update_cond"><a href="#val-update_cond" class="anchor"></a><code><span><span class="keyword">val</span> update_cond : 
+  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'a</span> * <span class="type-var">'g</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'b</span> * <span class="type-var">'g</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-f_id"><a href="#val-f_id" class="anchor"></a><code><span><span class="keyword">val</span> f_id : <span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_fun"><a href="#val-get_fun" class="anchor"></a><code><span><span class="keyword">val</span> get_fun : 
+  <span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'b</span> * <span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span><span>(<span class="type-var">'a</span> * <span class="type-var">'g</span>)</span> list</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'g</span>)</span> option</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-update_funs"><a href="#val-update_funs" class="anchor"></a><code><span><span class="keyword">val</span> update_funs : 
+  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'g</span> * <span class="type-var">'a</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'g</span> * <span class="type-var">'b</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-add_fun"><a href="#val-add_fun" class="anchor"></a><code><span><span class="keyword">val</span> add_fun : 
+  <span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="type-var">'b</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'g</span> * <span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'c</span> * <span class="type-var">'d</span> * <span class="type-var">'e</span> * <span class="type-var">'f</span> * <span class="type-var">'g</span> * <span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-count_max_call_offset"><a href="#val-count_max_call_offset" class="anchor"></a><code><span><span class="keyword">val</span> count_max_call_offset : <span>int <span class="arrow">&#45;&gt;</span></span> <span><a href="../Anf_ast/index.html#type-aexpr">Anf_ast.aexpr</a> <span class="arrow">&#45;&gt;</span></span> int</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-count_offset_aexpr"><a href="#val-count_offset_aexpr" class="anchor"></a><code><span><span class="keyword">val</span> count_offset_aexpr : <span><a href="../Anf_ast/index.html#type-aexpr">Anf_ast.aexpr</a> <span class="arrow">&#45;&gt;</span></span> int</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-save_id"><a href="#val-save_id" class="anchor"></a><code><span><span class="keyword">val</span> save_id : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>string <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-free_some_reg"><a href="#val-free_some_reg" class="anchor"></a><code><span><span class="keyword">val</span> free_some_reg : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-free_reg"><a href="#val-free_reg" class="anchor"></a><code><span><span class="keyword">val</span> free_reg : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-block_reg"><a href="#val-block_reg" class="anchor"></a><code><span><span class="keyword">val</span> block_reg : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>string option</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-get_free_reg"><a href="#val-get_free_reg" class="anchor"></a><code><span><span class="keyword">val</span> get_free_reg : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> list</span>
+   * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-find_id"><a href="#val-find_id" class="anchor"></a><code><span><span class="keyword">val</span> find_id : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>string <span class="arrow">&#45;&gt;</span></span>
+  <span><span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> option</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-free_regs"><a href="#val-free_regs" class="anchor"></a><code><span><span class="keyword">val</span> free_regs : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-init_args"><a href="#val-init_args" class="anchor"></a><code><span><span class="keyword">val</span> init_args : 
+  <span><span><a href="../Anf_ast/index.html#type-immexpr">Anf_ast.immexpr</a> <span class="xref-unresolved">Stdlib</span>.List.t</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> list</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-save_args"><a href="#val-save_args" class="anchor"></a><code><span><span class="keyword">val</span> save_args : 
+  <span>int <span class="arrow">&#45;&gt;</span></span>
+  <span><span>string <span class="xref-unresolved">Stdlib</span>.List.t</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> list</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-load_imm"><a href="#val-load_imm" class="anchor"></a><code><span><span class="keyword">val</span> load_imm : 
+  <span><span>(<span>int <span class="arrow">&#45;&gt;</span></span> int)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Anf_ast/index.html#type-immexpr">Anf_ast.immexpr</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-filter_tag"><a href="#val-filter_tag" class="anchor"></a><code><span><span class="keyword">val</span> filter_tag : <span>string <span class="arrow">&#45;&gt;</span></span> string</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-build_aexpr"><a href="#val-build_aexpr" class="anchor"></a><code><span><span class="keyword">val</span> build_aexpr : 
+  <span><a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Anf_ast/index.html#type-aexpr">Anf_ast.aexpr</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> option</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> list</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> option</span>
+   * <span>(int
+      * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+      * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-init_fun"><a href="#val-init_fun" class="anchor"></a><code><span><span class="keyword">val</span> init_fun : 
+  <span><a href="../Anf_ast/index.html#type-afun">Anf_ast.afun</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(int
+   * <span><span>(<span>string option</span> * <a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(<a href="../Riscv_ast/index.html#type-addr">Riscv_ast.addr</a> * <a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a>)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> list</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> list</span> * <span><span>(string * int)</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>)</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-head"><a href="#val-head" class="anchor"></a><code><span><span class="keyword">val</span> head : <span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-default_res"><a href="#val-default_res" class="anchor"></a><code><span><span class="keyword">val</span> default_res : 
+  <span><span>(int
+   * <span><span class="type-var">'a</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span class="type-var">'b</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><a href="../Riscv_ast/index.html#type-reg">Riscv_ast.reg</a> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span class="type-var">'c</span> <span class="xref-unresolved">Stdlib</span>.List.t</span>
+   * <span><span>(string * int)</span> list</span>)</span>
+    <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-asm"><a href="#val-asm" class="anchor"></a><code><span><span class="keyword">val</span> asm : <span><span><a href="../Anf_ast/index.html#type-afun">Anf_ast.afun</a> list</span> <span class="arrow">&#45;&gt;</span></span> <span><span><a href="../Riscv_ast/index.html#type-instruction">Riscv_ast.instruction</a> <span class="xref-unresolved">Stdlib</span>.List.t</span> <a href="../Res/index.html#type-res">Res.res</a></span></span></code></div></div></div></body></html>
