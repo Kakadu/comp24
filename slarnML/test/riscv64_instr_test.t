@@ -115,6 +115,7 @@
   e not found
   $ dune exec riscv64_instr_test < manytests/do_not_type/001.ml
   fac not exist
+
   $ dune exec riscv64_instr_test < manytests/do_not_type/002if.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -152,8 +153,10 @@
   	ld s0,8(sp)
   	addi sp,sp,32
   ret
+
   $ dune exec riscv64_instr_test < manytests/do_not_type/003occurs.ml
   f not exist
+
   $ dune exec riscv64_instr_test < manytests/typed/001fac.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -233,6 +236,7 @@
   	ld s0,96(sp)
   	addi sp,sp,112
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/002fac.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -371,8 +375,10 @@
   	ld s0,128(sp)
   	addi sp,sp,144
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/003fib.ml
   : end_of_input
+
   $ dune exec riscv64_instr_test < manytests/typed/004manyargs.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -819,6 +825,7 @@
   	ld s0,312(sp)
   	addi sp,sp,336
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/005fix.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -954,6 +961,7 @@
   	ld s0,128(sp)
   	addi sp,sp,144
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/006partial.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -1106,6 +1114,7 @@
   	ld s0,96(sp)
   	addi sp,sp,112
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/006partial2.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -1348,6 +1357,7 @@
   	ld s0,352(sp)
   	addi sp,sp,368
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/006partial3.ml
   .attribute unaligned_access, 0
   .attribute stack_align, 16
@@ -1478,11 +1488,16 @@
   	ld s0,64(sp)
   	addi sp,sp,80
   ret
+
   $ dune exec riscv64_instr_test < manytests/typed/007order.ml
   : end_of_input
+
   $ dune exec riscv64_instr_test < manytests/typed/008ascription.ml
   : end_of_input
+
   $ dune exec riscv64_instr_test < manytests/typed/015tuples.ml
   : end_of_input
+
   $ dune exec riscv64_instr_test < manytests/typed/016lists.ml
   : end_of_input
+
