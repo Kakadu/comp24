@@ -364,6 +364,27 @@
   val fib : int -> (int -> 'a) -> 'a
   val a2 : 'a -> 'a
   val main : unit
+  $ ./anf_runner.exe << EOF
+  > let is_empty x = x+1
+  > let rec length xs = match xs with
+  > | [] -> 0
+  > | _::tl -> 1 + length xs
+  > EOF
+  let a0 x = ( + ) x 1
+  ;;
+  
+  let rec length xs = let a1 = a0 xs in
+  if a1
+  then 0
+  else let a3 = a0 xs in
+  let a2 = not a3 in
+  if a2
+  then let _ = list_head xs in
+  let tl = list_tail xs in
+  let a4 = length xs in
+  ( + ) 1 a4
+  else fail_match
+  ;;
   $ ./anf_runner.exe < manytests/typed/013foldfoldr.ml
   let id x = x
   ;;
