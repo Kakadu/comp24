@@ -193,11 +193,11 @@
   	in
   	anf_if#4))
   )
-  (fun anon$1(print_int)->
+  (fun anon$2(print_int)->
   	print_int
   )
   (fun main()->
-  	(let anf_app#11=(anon$1 )
+  	(let anf_app#11=(anon$2 )
   	in
   	(let anf_app#12=(fac_cps 4 anf_app#11)
   	in

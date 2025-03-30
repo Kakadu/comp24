@@ -34,6 +34,7 @@ let update_env_fun name stack lvl = update_env name (get_name name stack) lvl
 let update_env_arg name lvl = update_env name name lvl
 let get_ast = map (fun (ast, _, _, _) -> Result ast)
 let get_prog = map (fun (_, prog, _, _) -> Result prog)
+let get_num = map (fun (_, _, _, num) -> Result num)
 
 let update_ast f =
   map (fun (ast, prog, env, num) ->
@@ -122,8 +123,7 @@ let rec lifting cc_ast stack lvl res =
     >>= fun a1 ->
     (if id = "()" then r1 else r1 |> insert_let (get_fun_let (get_decl d) a1))
     |> lifting e2 stack lvl
-    |> update_ast (fun a2 ->
-      Result (if id = "()" then LIn (id, a1, a2)  else a2))
+    |> update_ast (fun a2 -> Result (if id = "()" then LIn (id, a1, a2) else a2))
     |> filter lvl
   | CFun (args, e) ->
     res
@@ -169,14 +169,19 @@ let rec lifting cc_ast stack lvl res =
       | _ -> Error "Apply on not correct expr")
 ;;
 
-let default_res = Result (LId "Error", [], [], 0)
+let default_res num = Result (LId "Error", [], [], num)
 
 let lambda_lifting cc_ast =
   List.fold_left
-    (fun ll_ast ast ->
-      ll_ast
-      >>= fun ll_ast ->
-      lifting ast [] 0 default_res |> get_prog >>= fun p -> Result (ll_ast @ List.rev p))
-    (Result [])
+    (fun prev_res ast ->
+      prev_res
+      >>= fun (anon_num, ll_ast) ->
+      lifting ast [] 0 (default_res anon_num)
+      |> fun res ->
+      res
+      |> get_num
+      >>= fun num -> res |> get_prog >>= fun p -> Result (num, ll_ast @ List.rev p))
+    (Result (0, []))
     cc_ast
+  >>= fun (_, ast) -> Result ast
 ;;

@@ -29,6 +29,10 @@ struct Func func_init(void *ptr, uint8_t cnt) {
     new.ptr = ptr;
     new.argscnt = cnt;
     new.argsfun = malloc(sizeof(int64_t)*min((int64_t)MAX_ARGS, cnt));
+    if (!new.argsfun) {
+        fprintf(stderr, "Memory allocation failed!");
+        exit(1);
+    }
     new.cnt = 0;
     return new;
 }
@@ -92,7 +96,7 @@ int64_t part_app(void *f_ptr, int argcnt, int appcnt, ...) {
         args[i] = va_arg(argptr, int64_t);
     }
     va_end(argptr);
-    if ((int64_t)&part_apps[0] <= (int64_t)f_ptr && (int64_t)f_ptr <= (int64_t)&part_apps[MAX_APPS]) {
+    if ((int64_t)&part_apps[0] <= (int64_t)f_ptr && (int64_t)f_ptr <= (int64_t)&part_apps[MAX_APPS-1]) {
         part_apps[last_app] = *(struct Func *)f_ptr;
     } else {
         part_apps[last_app] = func_init(f_ptr, argcnt);

@@ -8,17 +8,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   anon_1:
@@ -149,17 +149,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   fack:
@@ -225,17 +225,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   h:
@@ -346,17 +346,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   main:
@@ -387,17 +387,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   fac:
@@ -467,17 +467,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   anon_1:
@@ -553,7 +553,7 @@
   	ld s0,200(sp)
   	addi sp,sp,224
   ret
-  anon_1:
+  anon_2:
   	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
@@ -569,10 +569,10 @@
   	sd ra,136(sp)
   	sd s0,128(sp)
   	addi s0,sp,144
-  	lui a0,%hi(anon_1)
-  	addi a0,a0,%lo(anon_1)
+  	lui a0,%hi(anon_2)
+  	addi a0,a0,%lo(anon_2)
   	li a2,0
-  	li a1,3
+  	li a1,1
   call part_app
   	sd a0,-24(s0)
   	lui a0,%hi(fac_cps)
@@ -606,17 +606,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   n1:
@@ -785,17 +785,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   wrap:
@@ -1101,17 +1101,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   fix:
@@ -1237,17 +1237,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   anon_1:
@@ -1390,17 +1390,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   foo:
@@ -1583,17 +1583,17 @@
   .attribute stack_align, 16
   .global _start
   _start:
-  	addi sp,sp,-24
+  	addi sp,sp,-32
   	sd ra,16(sp)
   	sd s0,8(sp)
   	sd s1,0(sp)
-  	addi s0,sp,24
+  	addi s0,sp,32
   call init_part_apps
   call main
   	ld ra,16(sp)
   	ld s0,8(sp)
   	ld s1,0(sp)
-  	addi sp,sp,24
+  	addi sp,sp,32
   	li a7,93
   ecall
   anon_2:

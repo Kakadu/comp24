@@ -39,8 +39,8 @@
   $ dune exec lambda_lifting_test < manytests/typed/002fac.ml
   (fun anon$1(n k p)->((k (p*n))))
   (fun fac_cps(n k)->(if ((n=1)) then ((k 1)) else ((fac_cps (n-1) (anon$1 (n ) (k ))))))
-  (fun anon$1(print_int)->(print_int))
-  (fun main()->(let () = ((print_int (fac_cps 4 (anon$1 ))) in 0)))
+  (fun anon$2(print_int)->(print_int))
+  (fun main()->(let () = ((print_int (fac_cps 4 (anon$2 ))) in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/003fib.ml
   (fun n1(n)->((n-1)))
   (fun ab(a b)->((a+b)))
