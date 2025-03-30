@@ -1,3 +1,13 @@
+  $ ./pe_runner.exe << EOF
+  > let f n _ = n
+  > 
+  > let main = let () = print_int (f 6 5) in 0 
+  > EOF
+  let f = (fun n a0 -> n)
+  
+  let main = let () = (print_int ((f 6) 5)) in
+  0
+
   $ ./pe_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
   then 1

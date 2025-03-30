@@ -385,6 +385,8 @@
   ( + ) 1 a4
   else fail_match
   ;;
+  Типы после приведения в ANF:
+  Infer error.
   $ ./anf_runner.exe < manytests/typed/013foldfoldr.ml
   let id x = x
   ;;

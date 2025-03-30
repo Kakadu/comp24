@@ -1,4 +1,14 @@
   $ ./alpha_conv_runner.exe << EOF
+  > let f n _ = n
+  > 
+  > let main = let () = print_int (f 6 5) in 0 
+  > EOF
+  let f = (fun n a0 -> n)
+  
+  let main = let () = (print_int ((f 6) 5)) in
+  0
+
+  $ ./alpha_conv_runner.exe << EOF
   > let fac n =
   > let rec fack n k =
   > if n<=1 then k 1
