@@ -7,7 +7,7 @@
   (fun anon$1(n f x)->((x*(f (n )))))
   (fun fack(n f)->(if ((n<=1)) then ((f 1)) else ((fack (n-1) (anon$1 (n ) (f ))))))
   (fun anon$2(x)->(x))
-  (fun fac(n)->(let fack = (if ((n<=1)) then ((f 1)) else ((fack (n-1) (anon$1 (n ) (f )))) in (fack (n ) (anon$2 )))))
+  (fun fac(n)->((fack (n ) (anon$2 ))))
   $ dune exec lambda_lifting_test << EOF
   > let fac n = 
   >   let rec fack n = if (n < 1) then n else n * (fack (n - 1)) in
@@ -15,7 +15,7 @@
   > ;;
   > EOF
   (fun fack(n)->(if ((n<1)) then (n) else ((n*(fack (n-1))))))
-  (fun fac(n)->(let fack = (if ((n<1)) then (n) else ((n*(fack (n-1)))) in (fack (n )))))
+  (fun fac(n)->((fack (n ))))
   $ dune exec lambda_lifting_test << EOF
   > let f a =
   >   let g c d =
@@ -25,8 +25,8 @@
   >   (g 2 3)
   > EOF
   (fun h(a c d e)->(((a )*((c )+((d )*(e ))))))
-  (fun g(a c d)->(let h = (((a )*((c )+((d )*(e )))) in (h (a ) (c ) (d ) 4))))
-  (fun f(a)->(let g = (let h = (((a )*((c )+((d )*(e )))) in (h (a ) (c ) (d ) 4)) in (g (a ) 2 3))))
+  (fun g(a c d)->((h (a ) (c ) (d ) 4)))
+  (fun f(a)->((g (a ) 2 3)))
   $ dune exec lambda_lifting_test < manytests/do_not_type/001.ml
   fac not exist
   $ dune exec lambda_lifting_test < manytests/do_not_type/002if.ml
@@ -44,7 +44,7 @@
   $ dune exec lambda_lifting_test < manytests/typed/003fib.ml
   (fun n1(n)->((n-1)))
   (fun ab(a b)->((a+b)))
-  (fun fib_acc(a b n)->(if ((n=1)) then (b) else (let n1 = ((n-1) in let ab = ((a+b) in (fib_acc (b ) (ab ) (n1 )))))))
+  (fun fib_acc(a b n)->(if ((n=1)) then (b) else ((fib_acc (b ) (ab ) (n1 )))))
   (fun fib(n)->(if ((n<2)) then (n) else ((fib ((n-1)+(fib (n-2)))))))
   (fun main()->(let () = ((print_int (fib_acc 0 1 4)) in let () = ((print_int (fib 4)) in 0))))
   $ dune exec lambda_lifting_test < manytests/typed/004manyargs.ml
@@ -52,11 +52,11 @@
   (fun a(a)->((print_int (a ))))
   (fun b(b)->((print_int (b ))))
   (fun c(c)->((print_int (c ))))
-  (fun test3(a b c)->(let a = ((print_int (a )) in let b = ((print_int (b )) in let c = ((print_int (c )) in 0)))))
+  (fun test3(a b c)->(0))
   (fun test10(a b c d e f g h i j)->(((((((((((a )+(b ))+(c ))+(d ))+(e ))+(f ))+(g ))+(h ))+(i ))+(j ))))
   (fun rez()->((wrap (test10 ) 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)))
   (fun temp2()->((wrap (test3 ) 1 10 100)))
-  (fun main()->(let rez = ((wrap (test10 ) 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000) in let () = ((print_int (rez )) in let temp2 = ((wrap (test3 ) 1 10 100) in 0)))))
+  (fun main()->(let () = ((print_int (rez )) in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/005fix.ml
   (fun fix(f x)->((f (fix (f )) (x ))))
   (fun fac(self n)->(if (((n )<=1)) then (1) else (((n )*(self ((n )-1))))))
@@ -72,7 +72,7 @@
   (fun foo()->((foo 1)))
   (fun foo(foo)->((foo (foo ) 2)))
   (fun foo(foo)->((foo (foo ) 3)))
-  (fun main()->(let foo = ((foo 1) in let foo = ((foo (foo ) 2) in let foo = ((foo (foo ) 3) in let () = ((print_int (foo )) in 0))))))
+  (fun main()->(let () = ((print_int (foo )) in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/006partial3.ml
   (fun anon$2(c)->((print_int (c ))))
   (fun anon$1(b)->(let () = ((print_int (b )) in (anon$2 ))))

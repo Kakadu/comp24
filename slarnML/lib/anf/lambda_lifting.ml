@@ -123,7 +123,7 @@ let rec lifting cc_ast stack lvl res =
     (if id = "()" then r1 else r1 |> insert_let (get_fun_let (get_decl d) a1))
     |> lifting e2 stack lvl
     |> update_ast (fun a2 ->
-      Result (LIn ((if id = "()" then id else get_name id stack), a1, a2)))
+      Result (if id = "()" then LIn (id, a1, a2)  else a2))
     |> filter lvl
   | CFun (args, e) ->
     res

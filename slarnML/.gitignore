@@ -1,5 +1,6 @@
 .vscode
 _build
+_coverage
 trash
 
 *.o
