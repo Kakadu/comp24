@@ -15,6 +15,7 @@
   Pe_ast
   Alpha_conv
   A_conv
+  Match_elimination
   Closure_conv
   Lambda_lifting
   Anf_ast
