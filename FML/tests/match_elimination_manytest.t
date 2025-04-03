@@ -22,7 +22,7 @@
   else let match_tmp_me1 = match_tmp_me0 in
   if true
   then false
-  else false)
+  else (failwith "no matching"))
 
   $ ./match_elimination_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
@@ -130,7 +130,7 @@
 
   $ ./match_elimination_runner.exe < manytests/typed/011mapcps.ml
   let rec map = (fun f -> (fun xs -> (fun k -> let match_tmp_me0 = xs in
-  if (is_nil match_tmp_me0)
+  if (is_empty match_tmp_me0)
   then (k [])
   else let match_tmp_me1 = match_tmp_me0 in
   if if (is_cons match_tmp_me1)
@@ -139,10 +139,10 @@
   else false
   else false
   then (((map f) tl) (fun tl_ac0 -> (k ((f h)::tl_ac0))))
-  else false)))
+  else (failwith "no matching"))))
   
   let rec iter = (fun f -> (fun xs -> let match_tmp_me2 = xs in
-  if (is_nil match_tmp_me2)
+  if (is_empty match_tmp_me2)
   then ()
   else let match_tmp_me3 = match_tmp_me2 in
   if if (is_cons match_tmp_me3)
@@ -152,7 +152,7 @@
   else false
   then let w = (f h) in
   ((iter f) tl)
-  else false))
+  else (failwith "no matching")))
   
   let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
   $ ./match_elimination_runner.exe < manytests/typed/012fibcps.ml
@@ -165,7 +165,7 @@
   let id = (fun x -> x)
   
   let rec fold_right = (fun f -> (fun acc -> (fun xs -> let match_tmp_me0 = xs in
-  if (is_nil match_tmp_me0)
+  if (is_empty match_tmp_me0)
   then acc
   else let match_tmp_me1 = match_tmp_me0 in
   if if (is_cons match_tmp_me1)
@@ -174,34 +174,53 @@
   else false
   else false
   then ((f h) (((fold_right f) acc) tl))
-  else false)))
+  else (failwith "no matching"))))
   
   let foldl = (fun f -> (fun a -> (fun bs -> ((((fold_right (fun b -> (fun g -> (fun x -> (g ((f x) b)))))) id) bs) a))))
   
   let main = (print_int (((foldl (fun x -> (fun y -> ((( * ) x) y)))) 1) (1::(2::(3::[])))))
 
   $ ./match_elimination_runner.exe < manytests/typed/015tuples.ml
-  Fatal error: exception Failure("Only simple let bindings with 1 identifier are supported after alpha conversion")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.(>>=) in file "lib/anf/match_elimination.ml", line 34, characters 17-20
-  Called from Fml_lib__Match_elimination.StateMonad.run in file "lib/anf/match_elimination.ml" (inlined), line 68, characters 18-23
-  Called from Fml_lib__Match_elimination.match_elimination in file "lib/anf/match_elimination.ml", line 210, characters 2-150
-  Called from Dune__exe__Match_elimination_runner in file "tests/match_elimination_runner.ml", line 24, characters 17-38
-  [2]
+  let rec fix = (fun f -> (fun x -> ((f (fix f)) x)))
+  
+  let map = (fun f -> (fun p -> let a = (p (unpack_tuple 0)) in
+  let b = (p (unpack_tuple 1)) in
+  ((f a), (f b))))
+  
+  let fixpoly = (fun l -> ((fix (fun self -> (fun l_ac0 -> ((map (fun li -> (fun x -> ((li (self l_ac0)) x)))) l_ac0)))) l))
+  
+  let feven = (fun p -> (fun n -> let e = (p (unpack_tuple 0)) in
+  let o = (p (unpack_tuple 1)) in
+  if ((( = ) n) 0)
+  then 1
+  else (o ((( - ) n) 1))))
+  
+  let fodd = (fun p -> (fun n -> let e = (p (unpack_tuple 0)) in
+  let o = (p (unpack_tuple 1)) in
+  if ((( = ) n) 0)
+  then 0
+  else (e ((( - ) n) 1))))
+  
+  let tie = (fixpoly (feven, fodd))
+  
+  let rec meven = (fun n -> if ((( = ) n) 0)
+  then 1
+  else (modd ((( - ) n) 1)))
+  and modd = (fun n -> if ((( = ) n) 0)
+  then 1
+  else (meven ((( - ) n) 1)))
+  
+  let main = let () = (print_int (modd 1)) in
+  let () = (print_int (meven 2)) in
+  let even = (tie (unpack_tuple 0)) in
+  let odd = (tie (unpack_tuple 1)) in
+  let () = (print_int (odd 3)) in
+  let () = (print_int (even 4)) in
+  0
 
   $ ./match_elimination_runner.exe < manytests/typed/016lists.ml
   let rec length = (fun xs -> let match_tmp_me0 = xs in
-  if (is_nil match_tmp_me0)
+  if (is_empty match_tmp_me0)
   then 0
   else let match_tmp_me1 = match_tmp_me0 in
   if if (is_cons match_tmp_me1)
@@ -210,10 +229,10 @@
   else false
   else false
   then ((( + ) 1) (length tl))
-  else false)
+  else (failwith "no matching"))
   
   let length_tail = let rec helper = (fun acc -> (fun xs -> let match_tmp_me2 = xs in
-  if (is_nil match_tmp_me2)
+  if (is_empty match_tmp_me2)
   then acc
   else let match_tmp_me3 = match_tmp_me2 in
   if if (is_cons match_tmp_me3)
@@ -222,16 +241,16 @@
   else false
   else false
   then ((helper ((( + ) acc) 1)) tl)
-  else false)) in
+  else (failwith "no matching"))) in
   (helper 0)
   
   let rec map = (fun f -> (fun xs -> let match_tmp_me4 = xs in
-  if (is_nil match_tmp_me4)
+  if (is_empty match_tmp_me4)
   then []
   else let match_tmp_me5 = match_tmp_me4 in
   if if (is_cons match_tmp_me5)
   then if true
-  then (is_nil (tl match_tmp_me5))
+  then (is_empty (tl match_tmp_me5))
   else false
   else false
   then ((f a)::[])
@@ -240,7 +259,7 @@
   then if true
   then if (is_cons (tl match_tmp_me6))
   then if true
-  then (is_nil (tl (tl match_tmp_me6)))
+  then (is_empty (tl (tl match_tmp_me6)))
   else false
   else false
   else false
@@ -253,7 +272,7 @@
   then if true
   then if (is_cons (tl (tl match_tmp_me7)))
   then if true
-  then (is_nil (tl (tl (tl match_tmp_me7))))
+  then (is_empty (tl (tl (tl match_tmp_me7))))
   else false
   else false
   else false
@@ -280,10 +299,10 @@
   else false
   else false
   then ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
-  else false))
+  else (failwith "no matching")))
   
   let rec append = (fun xs -> (fun ys -> let match_tmp_me9 = xs in
-  if (is_nil match_tmp_me9)
+  if (is_empty match_tmp_me9)
   then ys
   else let match_tmp_me10 = match_tmp_me9 in
   if if (is_cons match_tmp_me10)
@@ -292,10 +311,10 @@
   else false
   else false
   then (x::((append xs_ac0) ys))
-  else false))
+  else (failwith "no matching")))
   
   let concat = let rec helper = (fun xs -> let match_tmp_me11 = xs in
-  if (is_nil match_tmp_me11)
+  if (is_empty match_tmp_me11)
   then []
   else let match_tmp_me12 = match_tmp_me11 in
   if if (is_cons match_tmp_me12)
@@ -304,11 +323,11 @@
   else false
   else false
   then ((append h) (helper tl))
-  else false) in
+  else (failwith "no matching")) in
   helper
   
   let rec iter = (fun f -> (fun xs -> let match_tmp_me13 = xs in
-  if (is_nil match_tmp_me13)
+  if (is_empty match_tmp_me13)
   then ()
   else let match_tmp_me14 = match_tmp_me13 in
   if if (is_cons match_tmp_me14)
@@ -318,10 +337,10 @@
   else false
   then let () = (f h) in
   ((iter f) tl)
-  else false))
+  else (failwith "no matching")))
   
   let rec cartesian = (fun xs -> (fun ys -> let match_tmp_me15 = xs in
-  if (is_nil match_tmp_me15)
+  if (is_empty match_tmp_me15)
   then []
   else let match_tmp_me16 = match_tmp_me15 in
   if if (is_cons match_tmp_me16)
@@ -330,7 +349,7 @@
   else false
   else false
   then ((append ((map (fun a -> (h, a))) ys)) ((cartesian tl) ys))
-  else false))
+  else (failwith "no matching")))
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in

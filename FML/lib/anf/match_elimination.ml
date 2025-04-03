@@ -14,6 +14,7 @@ module StateMonad : sig
 
   module RList : sig
     val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
+    val fold_right : 'a list -> init:'b t -> f:('a -> 'b -> 'b t) -> 'b t
   end
 
   module RMap : sig
@@ -62,6 +63,12 @@ end = struct
         let* acc = acc in
         f acc item)
     ;;
+
+    let fold_right lt ~init ~f =
+      Base.List.fold_right lt ~init ~f:(fun item acc ->
+        let* acc = acc in
+        f item acc)
+    ;;
   end
 
   (* Run and get the internal value. *)
@@ -108,13 +115,27 @@ let rec expr_to_mexpr expr =
     let* body' = expr_to_mexpr body in
     return @@ Pe_EFun (ids, body')
   | ELetIn (rec_flag, pat, e1, e2) ->
-    let ids = pattern_remove pat in
-    let* e1' = expr_to_mexpr e1 in
-    let* e2' = expr_to_mexpr e2 in
-    let rec_flag = rec_flags rec_flag in
-    (match ids with
-     | [id] -> return @@ Pe_ELet (rec_flag, id, e1', e2')
-     | _ -> failwith "Only simple let bindings with 1 identifier are supported after alpha conversion")
+  let ids = pattern_remove pat in
+  let* e1' = expr_to_mexpr e1 in
+  let* e2' = expr_to_mexpr e2 in
+  let rec_flag = rec_flags rec_flag in
+  (match ids with
+   | [id] -> return @@ Pe_ELet (rec_flag, id, e1', e2')
+   | ids_list ->
+     let transformed_e =
+       List.mapi ids_list ~f:(fun i id ->
+         let idx_expr = EConst (CInt i) in
+         let unpack_expr = EApplication (EIdentifier "unpack_tuple", idx_expr) in
+         let applied = EApplication (e1, unpack_expr) in
+         (PIdentifier id, applied)
+       )
+     in
+     let final_expr =
+       List.fold_right transformed_e ~init:e2 ~f:(fun (pat, expr) acc ->
+         ELetIn (NoRec, pat, expr, acc)
+       )
+     in
+     expr_to_mexpr final_expr)
   | ETuple exprs ->
     let* exprs' = RList.fold_left exprs ~init:(return []) ~f:(fun acc e ->
       let* e' = expr_to_mexpr e in
@@ -149,7 +170,7 @@ and desugar_match e branches =
                                                  expr),
                                        Pe_EConst (const_to_pe_const c))
       | PIdentifier _ -> return @@ Pe_EConst (Pe_CBool true)
-      | PNill -> return @@ Pe_EApp (Pe_EIdentifier "is_nil", expr)
+      | PNill -> return @@ Pe_EApp (Pe_EIdentifier "is_empty", expr)
       | PCons (hd, tl) ->
         let hd_expr = Pe_EApp (Pe_EIdentifier "hd", expr) in
         let tl_expr = Pe_EApp (Pe_EIdentifier "tl", expr) in
@@ -163,18 +184,17 @@ and desugar_match e branches =
           RList.fold_left (List.mapi pats ~f:(fun i p -> (i, p)))
             ~init:(return [])
             ~f:(fun acc (i, p) ->
-              let ith_expr = Pe_EApp (Pe_EIdentifier ("fst" ^ Int.to_string i), expr) in
+              let ith_expr = Pe_EApp (Pe_EIdentifier ("tuple_get"), Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
               let* cond = pattern_to_condition ith_expr p in
               return (acc @ [cond])) in
         return @@ List.fold_right conds ~init:(Pe_EConst (Pe_CBool true))
                     ~f:(fun c acc -> Pe_EIf (c, acc, Pe_EConst (Pe_CBool false)))
       | PConstraint (p, _) -> pattern_to_condition expr p
     in
-
     let* cond = pattern_to_condition bound_expr pat in
     let* rest_expr =
       match rest with
-      | [] -> return @@ Pe_EConst (Pe_CBool false) (* dummy fail case *)
+      | [] -> return @@ Pe_EApp (Pe_EIdentifier "failwith", Pe_EIdentifier "\"no matching\"") (* dummy fail case *)
       | _ -> desugar_match (EIdentifier tmp_var) rest
     in
     return @@ Pe_ELet (NoRec, tmp_var, e',
