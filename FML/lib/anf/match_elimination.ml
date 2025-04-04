@@ -4,7 +4,7 @@
 
 open Ast
 open Base 
-open Pe_ast
+open Me_ast
 
 module StateMonad : sig
   include Base.Monad.Infix
@@ -81,8 +81,8 @@ let get_new_id n name = String.concat [ name; "_me"; Int.to_string n ]
 open StateMonad
 
 let const_to_pe_const = function
-  | CInt a -> Pe_Cint a
-  | CBool a -> Pe_CBool a
+  | CInt a -> Me_Cint a
+  | CBool a -> Me_CBool a
 
 let rec pattern_remove pat =
   match pat with
@@ -95,32 +95,32 @@ let rec pattern_remove pat =
   | PConstraint (p, _) -> pattern_remove p
   | _ -> failwith "bye-bye, bro. im sleeping"
 
-let rec_flags : Ast.rec_flag -> Pe_ast.rec_flag = function
+let rec_flags : Ast.rec_flag -> Me_ast.rec_flag = function
   | Rec -> Rec
   | NoRec -> NoRec
 
 let rec expr_to_mexpr expr =
   match expr with
-  | EUnit -> return Pe_EUnit
-  | ENill -> return Pe_ENill
+  | EUnit -> return Me_EUnit
+  | ENill -> return Me_ENill
   | EConstraint (e, _) -> expr_to_mexpr e
-  | EConst c -> return @@ Pe_EConst (const_to_pe_const c)
-  | EIdentifier id -> return @@ Pe_EIdentifier id
+  | EConst c -> return @@ Me_EConst (const_to_pe_const c)
+  | EIdentifier id -> return @@ Me_EIdentifier id
   | EApplication (f, arg) ->
     let* f' = expr_to_mexpr f in
     let* arg' = expr_to_mexpr arg in
-    return @@ Pe_EApp (f', arg')
+    return @@ Me_EApp (f', arg')
   | EFun (pat, body) ->
     let ids = pattern_remove pat in
     let* body' = expr_to_mexpr body in
-    return @@ Pe_EFun (ids, body')
+    return @@ Me_EFun (ids, body')
   | ELetIn (rec_flag, pat, e1, e2) ->
     let ids = pattern_remove pat in
     let* e1' = expr_to_mexpr e1 in
     let* e2' = expr_to_mexpr e2 in
     let rec_flag = rec_flags rec_flag in
     (match ids with
-    | [id] -> return @@ Pe_ELet (rec_flag, id, e1', e2')
+    | [id] -> return @@ Me_ELet (rec_flag, id, e1', e2')
     | ids_list ->
       let transformed_e =
         List.mapi ids_list ~f:(fun i id ->
@@ -140,16 +140,16 @@ let rec expr_to_mexpr expr =
     let* exprs' = RList.fold_left exprs ~init:(return []) ~f:(fun acc e ->
       let* e' = expr_to_mexpr e in
       return (acc @ [e'])) in
-    return @@ Pe_ETuple exprs'
+    return @@ Me_ETuple exprs'
   | EIf (cond, then_, else_) ->
     let* cond' = expr_to_mexpr cond in
     let* then_' = expr_to_mexpr then_ in
     let* else_' = expr_to_mexpr else_ in
-    return @@ Pe_EIf (cond', then_', else_')
+    return @@ Me_EIf (cond', then_', else_')
   | ECons (hd, tl) ->
     let* hd' = expr_to_mexpr hd in
     let* tl' = expr_to_mexpr tl in
-    return @@ Pe_ECons (hd', tl')
+    return @@ Me_ECons (hd', tl')
   | EMatch (e, branches) ->
     desugar_match e branches
 
@@ -163,12 +163,12 @@ and desugar_match e branches =
       match pat with
       | PIdentifier id -> [ (id, expr) ]
       | PCons (hd, tl) ->
-        let hd_expr = Pe_EApp (Pe_EIdentifier "hd_list_get", expr) in
-        let tl_expr = Pe_EApp (Pe_EIdentifier "tl_list_get", expr) in
+        let hd_expr = Me_EApp (Me_EIdentifier "hd_list_get", expr) in
+        let tl_expr = Me_EApp (Me_EIdentifier "tl_list_get", expr) in
         pattern_bindings hd_expr hd @ pattern_bindings tl_expr tl
       | PTuple pats ->
         List.mapi pats ~f:(fun i p ->
-          let ith_expr = Pe_EApp (Pe_EIdentifier "tuple_get", Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
+          let ith_expr = Me_EApp (Me_EIdentifier "tuple_get", Me_ETuple [expr; Me_EConst (Me_Cint i)]) in
           pattern_bindings ith_expr p
         ) |> List.concat
       | PConstraint (p, _) -> pattern_bindings expr p
@@ -176,28 +176,28 @@ and desugar_match e branches =
     in
     let rec pattern_to_condition expr pat =
       match pat with
-      | PAny -> return @@ Pe_EConst (Pe_CBool true)
-      | PUnit -> return @@ Pe_EIf (Pe_EApp (Pe_EIdentifier "is_unit", expr), Pe_EConst (Pe_CBool true), Pe_EConst (Pe_CBool false))
-      | PConst c -> return @@ Pe_EApp (Pe_EApp (Pe_EIdentifier "(=)", expr), Pe_EConst (const_to_pe_const c))
-      | PIdentifier _ -> return @@ Pe_EConst (Pe_CBool true)
-      | PNill -> return @@ Pe_EApp (Pe_EIdentifier "is_empty", expr)
+      | PAny -> return @@ Me_EConst (Me_CBool true)
+      | PUnit -> return @@ Me_EIf (Me_EApp (Me_EIdentifier "is_unit", expr), Me_EConst (Me_CBool true), Me_EConst (Me_CBool false))
+      | PConst c -> return @@ Me_EApp (Me_EApp (Me_EIdentifier "(=)", expr), Me_EConst (const_to_pe_const c))
+      | PIdentifier _ -> return @@ Me_EConst (Me_CBool true)
+      | PNill -> return @@ Me_EApp (Me_EIdentifier "is_empty", expr)
       | PCons (hd, tl) ->
-        let hd_expr = Pe_EApp (Pe_EIdentifier "hd", expr) in
-        let tl_expr = Pe_EApp (Pe_EIdentifier "tl", expr) in
+        let hd_expr = Me_EApp (Me_EIdentifier "hd", expr) in
+        let tl_expr = Me_EApp (Me_EIdentifier "tl", expr) in
         let* cond_hd = pattern_to_condition hd_expr hd in
         let* cond_tl = pattern_to_condition tl_expr tl in
-        let is_cons_check = Pe_EApp (Pe_EIdentifier "is_cons", expr) in
+        let is_cons_check = Me_EApp (Me_EIdentifier "is_cons", expr) in
         let comb = match (cond_hd, cond_tl) with (* Если hd или tl — это PIdentifier или PAny, то if true then ... else false, что избыточно *)
-          | (Pe_EConst (Pe_CBool true), Pe_EConst (Pe_CBool true)) ->
+          | (Me_EConst (Me_CBool true), Me_EConst (Me_CBool true)) ->
               is_cons_check
-          | (Pe_EConst (Pe_CBool true), cond) ->
-              Pe_EIf (is_cons_check, cond, Pe_EConst (Pe_CBool false))
-          | (cond, Pe_EConst (Pe_CBool true)) ->
-              Pe_EIf (is_cons_check, cond, Pe_EConst (Pe_CBool false))
+          | (Me_EConst (Me_CBool true), cond) ->
+              Me_EIf (is_cons_check, cond, Me_EConst (Me_CBool false))
+          | (cond, Me_EConst (Me_CBool true)) ->
+              Me_EIf (is_cons_check, cond, Me_EConst (Me_CBool false))
           | (cond1, cond2) ->
-              Pe_EIf (is_cons_check,
-                      Pe_EIf (cond1, cond2, Pe_EConst (Pe_CBool false)),
-                      Pe_EConst (Pe_CBool false))
+              Me_EIf (is_cons_check,
+                      Me_EIf (cond1, cond2, Me_EConst (Me_CBool false)),
+                      Me_EConst (Me_CBool false))
         in
         return comb
       | PTuple pats ->
@@ -205,11 +205,11 @@ and desugar_match e branches =
           RList.fold_left (List.mapi pats ~f:(fun i p -> (i, p)))
             ~init:(return [])
             ~f:(fun acc (i, p) ->
-              let ith_expr = Pe_EApp (Pe_EIdentifier "tuple_get", Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
+              let ith_expr = Me_EApp (Me_EIdentifier "tuple_get", Me_ETuple [expr; Me_EConst (Me_Cint i)]) in
               let* cond = pattern_to_condition ith_expr p in
               return (acc @ [cond])) in
-        return @@ List.fold_right conds ~init:(Pe_EConst (Pe_CBool true))
-                    ~f:(fun c acc -> Pe_EIf (c, acc, Pe_EConst (Pe_CBool false)))
+        return @@ List.fold_right conds ~init:(Me_EConst (Me_CBool true))
+                    ~f:(fun c acc -> Me_EIf (c, acc, Me_EConst (Me_CBool false)))
       | PConstraint (p, _) -> pattern_to_condition expr p
     in
 
@@ -217,20 +217,20 @@ and desugar_match e branches =
     let tmp_var = get_new_id id_num "match_tmp" in
     let (bound_expr, bind_expr_opt) =
       match e' with
-      | Pe_EIdentifier _ -> (e', None)
-      | _ -> (Pe_EIdentifier tmp_var, Some (tmp_var, e'))
+      | Me_EIdentifier _ -> (e', None)
+      | _ -> (Me_EIdentifier tmp_var, Some (tmp_var, e'))
     in
 
     let* cond = pattern_to_condition bound_expr pat in
     let bindings = pattern_bindings bound_expr pat in
     let bound_rhs =
       List.fold_right bindings ~init:expr_rhs' ~f:(fun (id, expr) acc ->
-        Pe_ELet (NoRec, id, expr, acc))
+        Me_ELet (NoRec, id, expr, acc))
     in
 
     let* rest_expr =
       match rest with
-      | [] -> return @@ Pe_EApp (Pe_EIdentifier "failwith", Pe_EIdentifier "\"no matching\"")
+      | [] -> return @@ Me_EApp (Me_EIdentifier "failwith", Me_EIdentifier "\"no matching\"")
       | _ ->
         let new_e =
           match bind_expr_opt with
@@ -241,9 +241,9 @@ and desugar_match e branches =
     in
 
     match bind_expr_opt with
-    | None -> return @@ Pe_EIf (cond, bound_rhs, rest_expr)
+    | None -> return @@ Me_EIf (cond, bound_rhs, rest_expr)
     | Some (var, expr) ->
-      return @@ Pe_ELet (NoRec, var, expr, Pe_EIf (cond, bound_rhs, rest_expr))
+      return @@ Me_ELet (NoRec, var, expr, Me_EIf (cond, bound_rhs, rest_expr))
 
 
 let decl_to_pe_decl decl =
@@ -257,7 +257,7 @@ let decl_to_pe_decl decl =
           let* e' = expr_to_mexpr expr in
           return ((id, e') :: acc)
         | _ -> failwith "Bang-Bang. Only simple declarations supported") in
-    return @@ Pe_Nonrec (List.rev converted)
+    return @@ Me_Nonrec (List.rev converted)
   | RecDecl decls ->
     let* converted =
       RList.fold_left decls ~init:(return []) ~f:(fun acc (DDeclaration (pat, expr)) ->
@@ -267,7 +267,7 @@ let decl_to_pe_decl decl =
           let* e' = expr_to_mexpr expr in
           return ((id, e') :: acc)
         | _ -> failwith "Bang-Bang. Only simple declarations supported") in
-    return @@ Pe_Rec (List.rev converted)
+    return @@ Me_Rec (List.rev converted)
 
 let match_elimination prog  =
   StateMonad.run (

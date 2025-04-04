@@ -13,6 +13,7 @@
   Pattern_elim
   Common
   Pe_ast
+  Me_ast
   Alpha_conv
   A_conv
   Match_elimination
