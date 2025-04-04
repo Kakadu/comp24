@@ -115,27 +115,27 @@ let rec expr_to_mexpr expr =
     let* body' = expr_to_mexpr body in
     return @@ Pe_EFun (ids, body')
   | ELetIn (rec_flag, pat, e1, e2) ->
-  let ids = pattern_remove pat in
-  let* e1' = expr_to_mexpr e1 in
-  let* e2' = expr_to_mexpr e2 in
-  let rec_flag = rec_flags rec_flag in
-  (match ids with
-   | [id] -> return @@ Pe_ELet (rec_flag, id, e1', e2')
-   | ids_list ->
-     let transformed_e =
-       List.mapi ids_list ~f:(fun i id ->
-         let idx_expr = EConst (CInt i) in
-         let unpack_expr = EApplication (EIdentifier "unpack_tuple", idx_expr) in
-         let applied = EApplication (e1, unpack_expr) in
-         (PIdentifier id, applied)
-       )
-     in
-     let final_expr =
-       List.fold_right transformed_e ~init:e2 ~f:(fun (pat, expr) acc ->
-         ELetIn (NoRec, pat, expr, acc)
-       )
-     in
-     expr_to_mexpr final_expr)
+    let ids = pattern_remove pat in
+    let* e1' = expr_to_mexpr e1 in
+    let* e2' = expr_to_mexpr e2 in
+    let rec_flag = rec_flags rec_flag in
+    (match ids with
+    | [id] -> return @@ Pe_ELet (rec_flag, id, e1', e2')
+    | ids_list ->
+      let transformed_e =
+        List.mapi ids_list ~f:(fun i id ->
+          let idx_expr = EConst (CInt i) in
+          let unpack_expr = EApplication (EIdentifier "unpack_tuple", idx_expr) in
+          let applied = EApplication (e1, unpack_expr) in
+          (PIdentifier id, applied)
+        )
+      in
+      let final_expr =
+        List.fold_right transformed_e ~init:e2 ~f:(fun (pat, expr) acc ->
+          ELetIn (NoRec, pat, expr, acc)
+        )
+      in
+      expr_to_mexpr final_expr)
   | ETuple exprs ->
     let* exprs' = RList.fold_left exprs ~init:(return []) ~f:(fun acc e ->
       let* e' = expr_to_mexpr e in
@@ -158,17 +158,27 @@ and desugar_match e branches =
   match branches with
   | [] -> failwith "Empty match expression"
   | (pat, expr_rhs) :: rest ->
-    let* id_num = fresh in
-    let tmp_var = get_new_id id_num "match_tmp" in
-    let bound_expr = Pe_EIdentifier tmp_var in
     let* expr_rhs' = expr_to_mexpr expr_rhs in
+    let rec pattern_bindings expr pat =
+      match pat with
+      | PIdentifier id -> [ (id, expr) ]
+      | PCons (hd, tl) ->
+        let hd_expr = Pe_EApp (Pe_EIdentifier "hd_list_get", expr) in
+        let tl_expr = Pe_EApp (Pe_EIdentifier "tl_list_get", expr) in
+        pattern_bindings hd_expr hd @ pattern_bindings tl_expr tl
+      | PTuple pats ->
+        List.mapi pats ~f:(fun i p ->
+          let ith_expr = Pe_EApp (Pe_EIdentifier "tuple_get", Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
+          pattern_bindings ith_expr p
+        ) |> List.concat
+      | PConstraint (p, _) -> pattern_bindings expr p
+      | _ -> []
+    in
     let rec pattern_to_condition expr pat =
       match pat with
       | PAny -> return @@ Pe_EConst (Pe_CBool true)
       | PUnit -> return @@ Pe_EIf (Pe_EApp (Pe_EIdentifier "is_unit", expr), Pe_EConst (Pe_CBool true), Pe_EConst (Pe_CBool false))
-      | PConst c -> return @@ Pe_EApp (Pe_EApp (Pe_EIdentifier "(=)",
-                                                 expr),
-                                       Pe_EConst (const_to_pe_const c))
+      | PConst c -> return @@ Pe_EApp (Pe_EApp (Pe_EIdentifier "(=)", expr), Pe_EConst (const_to_pe_const c))
       | PIdentifier _ -> return @@ Pe_EConst (Pe_CBool true)
       | PNill -> return @@ Pe_EApp (Pe_EIdentifier "is_empty", expr)
       | PCons (hd, tl) ->
@@ -176,30 +186,65 @@ and desugar_match e branches =
         let tl_expr = Pe_EApp (Pe_EIdentifier "tl", expr) in
         let* cond_hd = pattern_to_condition hd_expr hd in
         let* cond_tl = pattern_to_condition tl_expr tl in
-        return @@ Pe_EIf (Pe_EApp (Pe_EIdentifier "is_cons", expr),
-                          Pe_EIf (cond_hd, cond_tl, Pe_EConst (Pe_CBool false)),
-                          Pe_EConst (Pe_CBool false))
+        let is_cons_check = Pe_EApp (Pe_EIdentifier "is_cons", expr) in
+        let comb = match (cond_hd, cond_tl) with (* Если hd или tl — это PIdentifier или PAny, то if true then ... else false, что избыточно *)
+          | (Pe_EConst (Pe_CBool true), Pe_EConst (Pe_CBool true)) ->
+              is_cons_check
+          | (Pe_EConst (Pe_CBool true), cond) ->
+              Pe_EIf (is_cons_check, cond, Pe_EConst (Pe_CBool false))
+          | (cond, Pe_EConst (Pe_CBool true)) ->
+              Pe_EIf (is_cons_check, cond, Pe_EConst (Pe_CBool false))
+          | (cond1, cond2) ->
+              Pe_EIf (is_cons_check,
+                      Pe_EIf (cond1, cond2, Pe_EConst (Pe_CBool false)),
+                      Pe_EConst (Pe_CBool false))
+        in
+        return comb
       | PTuple pats ->
         let* conds =
           RList.fold_left (List.mapi pats ~f:(fun i p -> (i, p)))
             ~init:(return [])
             ~f:(fun acc (i, p) ->
-              let ith_expr = Pe_EApp (Pe_EIdentifier ("tuple_get"), Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
+              let ith_expr = Pe_EApp (Pe_EIdentifier "tuple_get", Pe_ETuple [expr; Pe_EConst (Pe_Cint i)]) in
               let* cond = pattern_to_condition ith_expr p in
               return (acc @ [cond])) in
         return @@ List.fold_right conds ~init:(Pe_EConst (Pe_CBool true))
                     ~f:(fun c acc -> Pe_EIf (c, acc, Pe_EConst (Pe_CBool false)))
       | PConstraint (p, _) -> pattern_to_condition expr p
     in
+
+    let* id_num = fresh in
+    let tmp_var = get_new_id id_num "match_tmp" in
+    let (bound_expr, bind_expr_opt) =
+      match e' with
+      | Pe_EIdentifier _ -> (e', None)
+      | _ -> (Pe_EIdentifier tmp_var, Some (tmp_var, e'))
+    in
+
     let* cond = pattern_to_condition bound_expr pat in
+    let bindings = pattern_bindings bound_expr pat in
+    let bound_rhs =
+      List.fold_right bindings ~init:expr_rhs' ~f:(fun (id, expr) acc ->
+        Pe_ELet (NoRec, id, expr, acc))
+    in
+
     let* rest_expr =
       match rest with
-      | [] -> return @@ Pe_EApp (Pe_EIdentifier "failwith", Pe_EIdentifier "\"no matching\"") (* dummy fail case *)
-      | _ -> desugar_match (EIdentifier tmp_var) rest
+      | [] -> return @@ Pe_EApp (Pe_EIdentifier "failwith", Pe_EIdentifier "\"no matching\"")
+      | _ ->
+        let new_e =
+          match bind_expr_opt with
+          | None -> e
+          | Some (name, _) -> EIdentifier name
+        in
+        desugar_match new_e rest
     in
-    return @@ Pe_ELet (NoRec, tmp_var, e',
-               Pe_EIf (cond, expr_rhs', rest_expr))
-  
+
+    match bind_expr_opt with
+    | None -> return @@ Pe_EIf (cond, bound_rhs, rest_expr)
+    | Some (var, expr) ->
+      return @@ Pe_ELet (NoRec, var, expr, Pe_EIf (cond, bound_rhs, rest_expr))
+
 
 let decl_to_pe_decl decl =
   match decl with
