@@ -1,4 +1,11 @@
   $ ./pe_runner.exe << EOF
+  > let length xs = match xs with
+  > | a::b::[] -> 2
+  > | a::[] -> 1
+  > | [] -> 0
+  > EOF
+  
+  $ ./pe_runner.exe << EOF
   > let f n _ = n
   > 
   > let main = let () = print_int (f 6 5) in 0 

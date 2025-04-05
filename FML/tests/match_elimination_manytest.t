@@ -1,4 +1,11 @@
   $ ./match_elimination_runner.exe << EOF
+  > let length xs = match xs with
+  > | a::b::[] -> 2
+  > | a::[] -> 1
+  > | [] -> 0
+  > EOF
+
+  $ ./match_elimination_runner.exe << EOF
   > let is_empty x = x+1
   > let rec length xs = match xs with
   > | [] -> 0
