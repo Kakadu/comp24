@@ -1,4 +1,24 @@
   $ ./match_elimination_runner.exe << EOF
+  > let is_empty x = x+1
+  > let rec length xs = match xs with
+  > | [] -> 0
+  > | _::tl -> 1 + length xs
+  > EOF
+  let is_empty_ac0 = (fun x -> ((( + ) x) 1))
+  
+  let rec length = (fun xs -> if (is_empty xs)
+  then 0
+  else if (is_cons xs)
+  then let _ = (hd_list_get xs) in
+  let tl = (tl_list_get xs) in
+  ((( + ) 1) (length xs))
+  else (failwith "no matching"))
+
+  $ ./match_elimination_runner.exe << EOF
+  > let (a, b) = (5,6)
+  > EOF
+
+  $ ./match_elimination_runner.exe << EOF
   > let fac n =
   > let rec fack n k =
   > if n<=1 then k 1
