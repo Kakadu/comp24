@@ -4,6 +4,22 @@
   > | a::[] -> 1
   > | [] -> 0
   > EOF
+  let length = (fun xs -> if if (is_cons xs)
+  then if (is_cons (tl xs))
+  then (is_empty (tl (tl xs)))
+  else false
+  else false
+  then let a = (hd_list_get xs) in
+  let b = (hd_list_get (tl_list_get xs)) in
+  2
+  else if if (is_cons xs)
+  then (is_empty (tl xs))
+  else false
+  then let a = (hd_list_get xs) in
+  1
+  else if (is_empty xs)
+  then 0
+  else (failwith "no matching"))
 
   $ ./match_elimination_runner.exe << EOF
   > let is_empty x = x+1
@@ -202,20 +218,20 @@
   $ ./match_elimination_runner.exe < manytests/typed/015tuples.ml
   let rec fix = (fun f -> (fun x -> ((f (fix f)) x)))
   
-  let map = (fun f -> (fun p -> let a = (p (unpack_tuple 0)) in
-  let b = (p (unpack_tuple 1)) in
+  let map = (fun f -> (fun p -> let a = ((tuple_get p) 0) in
+  let b = ((tuple_get p) 1) in
   ((f a), (f b))))
   
   let fixpoly = (fun l -> ((fix (fun self -> (fun l_ac0 -> ((map (fun li -> (fun x -> ((li (self l_ac0)) x)))) l_ac0)))) l))
   
-  let feven = (fun p -> (fun n -> let e = (p (unpack_tuple 0)) in
-  let o = (p (unpack_tuple 1)) in
+  let feven = (fun p -> (fun n -> let e = ((tuple_get p) 0) in
+  let o = ((tuple_get p) 1) in
   if ((( = ) n) 0)
   then 1
   else (o ((( - ) n) 1))))
   
-  let fodd = (fun p -> (fun n -> let e = (p (unpack_tuple 0)) in
-  let o = (p (unpack_tuple 1)) in
+  let fodd = (fun p -> (fun n -> let e = ((tuple_get p) 0) in
+  let o = ((tuple_get p) 1) in
   if ((( = ) n) 0)
   then 0
   else (e ((( - ) n) 1))))
@@ -231,8 +247,8 @@
   
   let main = let () = (print_int (modd 1)) in
   let () = (print_int (meven 2)) in
-  let even = (tie (unpack_tuple 0)) in
-  let odd = (tie (unpack_tuple 1)) in
+  let even = ((tuple_get tie) 0) in
+  let odd = ((tuple_get tie) 1) in
   let () = (print_int (odd 3)) in
   let () = (print_int (even 4)) in
   0

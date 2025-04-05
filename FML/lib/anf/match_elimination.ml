@@ -144,10 +144,16 @@ let rec expr_to_mexpr expr =
      | ids_list ->
        let transformed_e =
          List.mapi ids_list ~f:(fun i id ->
-           let idx_expr = EConst (CInt i) in
-           let unpack_expr = EApplication (EIdentifier "unpack_tuple", idx_expr) in
-           let applied = EApplication (e1, unpack_expr) in
-           PIdentifier id, applied)
+           let get_expr =
+             EApplication (
+               EApplication (
+                 EIdentifier "tuple_get",
+                 e1
+               ),
+               EConst (CInt i)
+             )
+           in
+           PIdentifier id, get_expr)
        in
        let final_expr =
          List.fold_right transformed_e ~init:e2 ~f:(fun (pat, expr) acc ->
