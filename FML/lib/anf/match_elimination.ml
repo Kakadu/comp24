@@ -199,8 +199,8 @@ and desugar_match e branches =
       | PIdentifier _ -> return @@ Me_EConst (Me_CBool true)
       | PNill -> return @@ Me_EApp (Me_EIdentifier "is_empty", expr)
       | PCons (hd, tl) ->
-        let hd_expr = Me_EApp (Me_EIdentifier "hd", expr) in
-        let tl_expr = Me_EApp (Me_EIdentifier "tl", expr) in
+        let hd_expr = Me_EApp (Me_EIdentifier "hd_list_get", expr) in
+        let tl_expr = Me_EApp (Me_EIdentifier "tl_list_get", expr) in
         let* cond_hd = pattern_to_condition hd_expr hd in
         let* cond_tl = pattern_to_condition tl_expr tl in
         let is_cons_check = Me_EApp (Me_EIdentifier "is_cons", expr) in

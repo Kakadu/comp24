@@ -5,15 +5,15 @@
   > | [] -> 0
   > EOF
   let length = (fun xs -> if if (is_cons xs)
-  then if (is_cons (tl xs))
-  then (is_empty (tl (tl xs)))
+  then if (is_cons (tl_list_get xs))
+  then (is_empty (tl_list_get (tl_list_get xs)))
   else false
   else false
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   2
   else if if (is_cons xs)
-  then (is_empty (tl xs))
+  then (is_empty (tl_list_get xs))
   else false
   then let a = (hd_list_get xs) in
   1
@@ -274,22 +274,22 @@
   let rec map = (fun f -> (fun xs -> if (is_empty xs)
   then []
   else if if (is_cons xs)
-  then (is_empty (tl xs))
+  then (is_empty (tl_list_get xs))
   else false
   then let a = (hd_list_get xs) in
   ((f a)::[])
   else if if (is_cons xs)
-  then if (is_cons (tl xs))
-  then (is_empty (tl (tl xs)))
+  then if (is_cons (tl_list_get xs))
+  then (is_empty (tl_list_get (tl_list_get xs)))
   else false
   else false
   then let a = (hd_list_get xs) in
   let b = (hd_list_get (tl_list_get xs)) in
   ((f a)::((f b)::[]))
   else if if (is_cons xs)
-  then if (is_cons (tl xs))
-  then if (is_cons (tl (tl xs)))
-  then (is_empty (tl (tl (tl xs))))
+  then if (is_cons (tl_list_get xs))
+  then if (is_cons (tl_list_get (tl_list_get xs)))
+  then (is_empty (tl_list_get (tl_list_get (tl_list_get xs))))
   else false
   else false
   else false
@@ -298,9 +298,9 @@
   let c = (hd_list_get (tl_list_get (tl_list_get xs))) in
   ((f a)::((f b)::((f c)::[])))
   else if if (is_cons xs)
-  then if (is_cons (tl xs))
-  then if (is_cons (tl (tl xs)))
-  then (is_cons (tl (tl (tl xs))))
+  then if (is_cons (tl_list_get xs))
+  then if (is_cons (tl_list_get (tl_list_get xs)))
+  then (is_cons (tl_list_get (tl_list_get (tl_list_get xs))))
   else false
   else false
   else false
