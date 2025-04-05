@@ -96,6 +96,24 @@ let rec pattern_remove pat =
   | _ -> failwith "bye-bye, bro. im sleeping"
 ;;
 
+let rec pattern_bindings expr pat =
+  match pat with
+  | PIdentifier id -> [ id, expr ]
+  | PCons (hd, tl) ->
+    let hd_expr = Me_EApp (Me_EIdentifier "hd_list_get", expr) in
+    let tl_expr = Me_EApp (Me_EIdentifier "tl_list_get", expr) in
+    pattern_bindings hd_expr hd @ pattern_bindings tl_expr tl
+  | PTuple pats ->
+    List.mapi pats ~f:(fun i p ->
+      let ith_expr =
+        Me_EApp (Me_EIdentifier "tuple_get", Me_ETuple [ expr; Me_EConst (Me_Cint i) ])
+      in
+      pattern_bindings ith_expr p)
+    |> List.concat
+  | PConstraint (p, _) -> pattern_bindings expr p
+  | _ -> []
+;;
+
 let rec_flags : Ast.rec_flag -> Me_ast.rec_flag = function
   | Rec -> Rec
   | NoRec -> NoRec
@@ -160,23 +178,6 @@ and desugar_match e branches =
   | [] -> failwith "Empty match expression"
   | (pat, expr_rhs) :: rest ->
     let* expr_rhs' = expr_to_mexpr expr_rhs in
-    let rec pattern_bindings expr pat =
-      match pat with
-      | PIdentifier id -> [ id, expr ]
-      | PCons (hd, tl) ->
-        let hd_expr = Me_EApp (Me_EIdentifier "hd_list_get", expr) in
-        let tl_expr = Me_EApp (Me_EIdentifier "tl_list_get", expr) in
-        pattern_bindings hd_expr hd @ pattern_bindings tl_expr tl
-      | PTuple pats ->
-        List.mapi pats ~f:(fun i p ->
-          let ith_expr =
-            Me_EApp (Me_EIdentifier "tuple_get", Me_ETuple [ expr; Me_EConst (Me_Cint i) ])
-          in
-          pattern_bindings ith_expr p)
-        |> List.concat
-      | PConstraint (p, _) -> pattern_bindings expr p
-      | _ -> []
-    in
     let rec pattern_to_condition expr pat =
       match pat with
       | PAny -> return @@ Me_EConst (Me_CBool true)
@@ -261,19 +262,35 @@ and desugar_match e branches =
        return @@ Me_ELet (NoRec, var, expr, Me_EIf (cond, bound_rhs, rest_expr)))
 ;;
 
-let decl_to_pe_decl decl =
-  match decl with
+
+
+let decl_to_pe_decl decls =
+  let process_binding pat expr =
+    let ids = pattern_remove pat in
+    match ids with
+    | [ id ] ->
+      let* e' = expr_to_mexpr expr in
+      return [ (id, e') ]
+    | _ ->
+      let* tmp_id_num = fresh in
+      let tmp_var = get_new_id tmp_id_num "tmp" in
+      let* e' = expr_to_mexpr expr in
+      let tmp_expr = Me_EIdentifier tmp_var in
+      let bindings =
+        pattern_bindings tmp_expr pat
+        |> List.map ~f:(fun (id, expr) -> (id, expr))
+      in
+      return ((tmp_var, e') :: bindings)
+  in
+  match decls with
   | NoRecDecl decls ->
     let* converted =
       RList.fold_left decls ~init:(return []) ~f:(fun acc (DDeclaration (pat, expr)) ->
-        let ids = pattern_remove pat in
-        match ids with
-        | [ id ] ->
-          let* e' = expr_to_mexpr expr in
-          return ((id, e') :: acc)
-        | _ -> failwith "Bang-Bang. Only simple declarations supported")
+        let* bindings = process_binding pat expr in
+        return (acc @ bindings))
     in
-    return @@ Me_Nonrec (List.rev converted)
+    return @@ Me_Nonrec converted
+
   | RecDecl decls ->
     let* converted =
       RList.fold_left decls ~init:(return []) ~f:(fun acc (DDeclaration (pat, expr)) ->
@@ -282,10 +299,10 @@ let decl_to_pe_decl decl =
         | [ id ] ->
           let* e' = expr_to_mexpr expr in
           return ((id, e') :: acc)
-        | _ -> failwith "Bang-Bang. Only simple declarations supported")
+        | _ ->
+          failwith "Simple patterns on rec, otherwise it's crazt")
     in
     return @@ Me_Rec (List.rev converted)
-;;
 
 let match_elimination prog =
   StateMonad.run
