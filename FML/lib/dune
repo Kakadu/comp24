@@ -17,6 +17,7 @@
   Alpha_conv
   A_conv
   Match_elimination
+  Lambda_lift
   Closure_conv
   Lambda_lifting
   Anf_ast
