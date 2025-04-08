@@ -39,8 +39,16 @@ let f_id x = x
 
 let get_fun name =
   map (fun (_, _, _, _, _, funs) ->
-    Result (List.find_opt (fun (f_name, _) -> f_name = name) funs))
+    Result
+      (List.find_opt
+         (fun (f_name, _) ->
+           f_name = name
+           || (String.length f_name > String.length name
+               && String.sub f_name 0 (String.length name) = name))
+         funs))
 ;;
+
+let get_funs = map (fun (_, _, _, _, _, funs) -> Result funs)
 
 let update_funs f =
   map (fun (offset, regs, offsets, free, conds, funs) ->
@@ -50,6 +58,17 @@ let update_funs f =
 let add_fun name args_cnt =
   map (fun (offset, regs, offsets, free, conds, funs) ->
     Result (offset, regs, offsets, free, conds, (name, args_cnt) :: funs))
+;;
+
+let replace_fun name args_cnt =
+  map (fun (offset, regs, offsets, free, conds, funs) ->
+    Result
+      ( offset
+      , regs
+      , offsets
+      , free
+      , conds
+      , (name, args_cnt) :: List.filter (fun (f_name, _) -> f_name <> name) funs ))
 ;;
 
 let rec count_max_call_offset offset a =
@@ -378,7 +397,21 @@ let load_imm f a res =
   | AUnit -> load_const (fun _ -> [])
 ;;
 
-let filter_tag = String.map (fun c -> if c = '#' || c = '$' then '_' else c)
+let filter_tag tag =
+  if tag = "main"
+  then tag ^ "2"
+  else String.map (fun c -> if c = '#' || c = '$' then '_' else c) tag
+;;
+
+let get_unique_tag id env =
+  let rec find_unique base counter =
+    let candidate = if counter = 0 then base else base ^ "_" ^ string_of_int counter in
+    if List.exists (fun (f_name, _) -> f_name = candidate) env
+    then find_unique base (counter + 1)
+    else candidate
+  in
+  if id = "main" then "main" else find_unique id 0
+;;
 
 let rec build_aexpr tag a res =
   let f o = o - 8 in
@@ -576,7 +609,12 @@ let init_fun anf res =
     let offset_full = offset_call + offset_args + offset_expr + offset_reserved in
     let offset_align = 16 * ((offset_full + 15) / 16) in
     res
-    |> add_fun id (List.length args)
+    |> get_funs
+    >>= fun funs ->
+    let unique_id = get_unique_tag id funs in
+    let args_cnt = List.length args in
+    let res = res |> add_fun unique_id args_cnt in
+    res
     |> save_args (-offset_full) args
     >>= fun (s_argsi, env) ->
     Result ([], None, env)
@@ -586,7 +624,7 @@ let init_fun anf res =
      | None -> Error "Void?"
      | Some reg ->
        Result
-         ( (Tag (filter_tag id)
+         ( (Tag (filter_tag unique_id)
             :: [ Mathi (Add, Sp, Sp, ImmInt (-offset_align))
                ; Sd (Ra, ImmInt (offset_full - 8), Sp)
                ; Sd (S 0, ImmInt (offset_full - 16), Sp)
@@ -600,21 +638,24 @@ let init_fun anf res =
              ; Mathi (Add, Sp, Sp, ImmInt offset_align)
              ; Ret
              ]
-         , [ id, List.length args ] ))
+         , [ unique_id, args_cnt ] ))
 ;;
 
 let head =
   [ Attribute "unaligned_access, 0"
   ; Attribute "stack_align, 16"
-  ; Global "_start"
-  ; Tag "_start"
+  ; Global "main"
+  ; Tag "main"
   ; Mathi (Add, Sp, Sp, ImmInt (-32))
   ; Sd (Ra, ImmInt 16, Sp)
   ; Sd (S 0, ImmInt 8, Sp)
   ; Sd (S 1, ImmInt 0, Sp)
   ; Mathi (Add, S 0, Sp, ImmInt 32)
   ; Call (Id "init_part_apps")
-  ; Call (Id "main")
+  ; Call (Id "main2")
+  ; Sd (A 0, ImmInt 24, Sp)
+  ; Call (Id "cleanup_part_apps")
+  ; Ld (A 0, ImmInt 24, Sp)
   ; Ld (Ra, ImmInt 16, Sp)
   ; Ld (S 0, ImmInt 8, Sp)
   ; Ld (S 1, ImmInt 0, Sp)
@@ -626,7 +667,7 @@ let head =
 
 let default_res =
   Result
-    ( -24
+    ( -32
     , []
     , []
     , [ T 0; T 1; T 2; T 3; T 4; T 5; T 6; A 0; A 1; A 2; A 3; A 4; A 5; A 6; A 7 ]
@@ -634,10 +675,6 @@ let default_res =
     , default_func )
 ;;
 
-(* let asm anf =
-   List.fold_left (fun prog r -> prog >>= (fun prog -> r >>= (fun (a, _)->Result(prog@a)))) (Result [])
-   (List.map (init_fun default_res) anf)
-   ;; *)
 let asm anf_lst =
   List.fold_left
     (fun r anf ->

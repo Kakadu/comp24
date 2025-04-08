@@ -12,15 +12,30 @@ let get_anon_name =
   map (fun (_, _, _, num) -> Result (String.concat "$" [ "anon"; string_of_int num ]))
 ;;
 
-let get_name id _ = id
-(* String.concat "#" (id :: stack) *)
+let get_name id _ =
+  if String.contains id '#' then String.sub id 0 (String.index id '#') else id
+;;
+
+let replace_fun _ id env =
+  let base_id =
+    if String.contains id '#' then String.sub id 0 (String.index id '#') else id
+  in
+  let rec find_unique base counter =
+    let candidate = if counter = 0 then base else base ^ "_" ^ string_of_int counter in
+    if List.exists (fun (_, name, _) -> name = candidate) env
+    then find_unique base (counter + 1)
+    else candidate
+  in
+  find_unique base_id 0
+;;
 
 let find_name id =
   map (fun (_, _, env, _) ->
-    match List.find_opt (fun (_, name, _) -> name = id) env with
-    | None ->
-      Result (LApp (id, []))
-      (* Error (String.concat "" ["Not found new name '"; id; "'\n"]) *)
+    let base_id =
+      if String.contains id '#' then String.sub id 0 (String.index id '#') else id
+    in
+    match List.find_opt (fun (_, name, _) -> name = id || name = base_id) env with
+    | None -> Result (LApp (id, []))
     | Some (_, _, new_name) -> Result (LId new_name))
 ;;
 
@@ -30,7 +45,12 @@ let update_env name new_name lvl =
   map (fun (ast, prog, env, num) -> Result (ast, prog, (lvl, name, new_name) :: env, num))
 ;;
 
-let update_env_fun name stack lvl = update_env name (get_name name stack) lvl
+let update_env_fun name stack lvl =
+  map (fun (ast, prog, env, num) ->
+    let new_name = replace_fun name (get_name name stack) env in
+    Result (ast, prog, (lvl, name, new_name) :: env, num))
+;;
+
 let update_env_arg name lvl = update_env name name lvl
 let get_ast = map (fun (ast, _, _, _) -> Result ast)
 let get_prog = map (fun (_, prog, _, _) -> Result prog)
@@ -152,14 +172,7 @@ let rec lifting cc_ast stack lvl res =
       (res >>= fun r -> Result (r, []))
       args
     >>= fun (r, args) ->
-    let args =
-      List.map
-        (fun a ->
-          match a with
-          | LId id -> LApp (id, [])
-          | e -> e)
-        (List.rev args)
-    in
+    let args = List.rev args in
     Result r
     |> lifting e stack lvl
     |> update_ast (fun a ->

@@ -12,9 +12,8 @@ let () =
       >>= (fun anf -> SlarnML_lib.Riscv.asm anf)
       >>= fun prog ->
       Result
-        (String.concat
-           "\n"
-           (List.map (SlarnML_lib.Pprint_riscv.pp_instruction "\t") prog))
+        (String.concat "\n" (List.map (SlarnML_lib.Pprint_riscv.pp_instruction "\t") prog)
+         ^ "\n")
     | Error message -> SlarnML_lib.Res.Error message
   in
   match result with
