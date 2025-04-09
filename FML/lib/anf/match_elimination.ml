@@ -10,7 +10,6 @@ open StateMonad
 
 let get_new_id n name = String.concat [ name; "_me"; Int.to_string n ]
 
-
 let const_to_pe_const = function
   | CInt a -> Me_Cint a
   | CBool a -> Me_CBool a
@@ -77,13 +76,7 @@ let rec expr_to_mexpr expr =
        let transformed_e =
          List.mapi ids_list ~f:(fun i id ->
            let get_expr =
-             EApplication (
-               EApplication (
-                 EIdentifier "tuple_get",
-                 e1
-               ),
-               EConst (CInt i)
-             )
+             EApplication (EApplication (EIdentifier "tuple_get", e1), EConst (CInt i))
            in
            PIdentifier id, get_expr)
        in
@@ -200,23 +193,20 @@ and desugar_match e branches =
        return @@ Me_ELet (NoRec, var, expr, Me_EIf (cond, bound_rhs, rest_expr)))
 ;;
 
-
-
 let decl_to_pe_decl decls =
   let process_binding pat expr =
     let ids = pattern_remove pat in
     match ids with
     | [ id ] ->
       let* e' = expr_to_mexpr expr in
-      return [ (id, e') ]
+      return [ id, e' ]
     | _ ->
       let* tmp_id_num = fresh in
       let tmp_var = get_new_id tmp_id_num "tmp" in
       let* e' = expr_to_mexpr expr in
       let tmp_expr = Me_EIdentifier tmp_var in
       let bindings =
-        pattern_bindings tmp_expr pat
-        |> List.map ~f:(fun (id, expr) -> (id, expr))
+        pattern_bindings tmp_expr pat |> List.map ~f:(fun (id, expr) -> id, expr)
       in
       return ((tmp_var, e') :: bindings)
   in
@@ -228,7 +218,6 @@ let decl_to_pe_decl decls =
         return (acc @ bindings))
     in
     return @@ Me_Nonrec converted
-
   | RecDecl decls ->
     let* converted =
       RList.fold_left decls ~init:(return []) ~f:(fun acc (DDeclaration (pat, expr)) ->
@@ -237,10 +226,10 @@ let decl_to_pe_decl decls =
         | [ id ] ->
           let* e' = expr_to_mexpr expr in
           return ((id, e') :: acc)
-        | _ ->
-          failwith "Simple patterns on rec, otherwise it's crazt")
+        | _ -> failwith "Simple patterns on rec, otherwise it's crazt")
     in
     return @@ Me_Rec (List.rev converted)
+;;
 
 let match_elimination prog =
   StateMonad.run

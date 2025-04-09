@@ -20,12 +20,16 @@
  (modules inferencer_runner)
  (libraries fml_lib stdio))
 
-
-
 (executable
  (name a_conv_runner)
  (public_name a_conv_runner)
  (modules a_conv_runner)
+ (libraries fml_lib stdio))
+
+(executable
+ (name c_conv_runner)
+ (public_name c_conv_runner)
+ (modules c_conv_runner)
  (libraries fml_lib stdio))
 
 (executable
@@ -171,9 +175,9 @@
   manytests/typed/016lists.ml))
 
 (cram
- (applies_to closure_conv_manytest)
+ (applies_to c_conv_manytest)
  (deps
-  ./closure_conv_runner.exe
+  ./c_conv_runner.exe
   manytests/do_not_type/001.ml
   manytests/do_not_type/002if.ml
   manytests/do_not_type/003occurs.ml

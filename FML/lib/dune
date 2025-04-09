@@ -13,6 +13,7 @@
   Common
   Me_ast
   A_conv
+  C_conv
   Match_elimination
   Anf_ast
   Anf

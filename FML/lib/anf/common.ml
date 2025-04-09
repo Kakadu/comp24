@@ -27,18 +27,18 @@ let builtins =
   ; "( >= )"
   ; "( <> )"
   ; "( = )"
-  ; "( != )"  
+  ; "( != )"
   ; "( || )"
   ; "not"
   ; "print_int"
-  ; "tuple_element"
+  ; "tuple_get"
   ; "is_empty"
-  ; "list_head"
-  ; "list_tail"
-  ; "fail_match"
+  ; "is_cons"
+  ; "hd_list_get"
+  ; "tl_list_get"
+  ; "failwith"
   ]
 ;;
-
 
 module StrSet = struct
   open Base
@@ -55,7 +55,6 @@ module StrSet = struct
   let diff = Set.diff
   let union_list lst = Set.union_list (module String) lst
   let find s str = Set.mem s str
-  
 end
 
 module StateMonad : sig
