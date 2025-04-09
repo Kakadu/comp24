@@ -4,7 +4,6 @@
 
 open Base
 open Ast
-open Pe_ast
 
 module StrMap = struct
   type 'a t = (string, 'a, String.comparator_witness) Map.t
@@ -41,7 +40,6 @@ let builtins =
   ]
 ;;
 
-let make_apply op expr1 expr2 = Pe_EApp (Pe_EApp (Pe_EIdentifier op, expr1), expr2)
 
 module StrSet = struct
   open Base
@@ -131,13 +129,6 @@ let rec get_binds_pat = function
       StrSet.union acc (get_binds_pat p))
 ;;
 
-let make_condition checks e1 e2 =
-  let cond =
-    List.fold (List.tl_exn checks) ~init:(List.hd_exn checks) ~f:(fun acc a ->
-      make_apply "( && )" acc a)
-  in
-  Pe_EIf (cond, e1, e2)
-;;
 
 let get_id i = "a" ^ Int.to_string i
 let empty = Base.Map.empty (module Base.String)

@@ -20,17 +20,7 @@
  (modules inferencer_runner)
  (libraries fml_lib stdio))
 
-(executable
- (name pe_runner)
- (public_name pe_runner)
- (modules pe_runner)
- (libraries fml_lib stdio))
 
-(executable
- (name alpha_conv_runner)
- (public_name alpha_conv_runner)
- (modules alpha_conv_runner)
- (libraries fml_lib stdio))
 
 (executable
  (name a_conv_runner)
@@ -48,24 +38,6 @@
  (name lambda_lift_runner)
  (public_name lambda_lift_runner)
  (modules lambda_lift_runner)
- (libraries fml_lib stdio))
-
-(executable
- (name closure_conv_runner)
- (public_name closure_conv_runner)
- (modules closure_conv_runner)
- (libraries fml_lib stdio))
-
-(executable
- (name lambda_lifting_runner)
- (public_name lambda_lifting_runner)
- (modules lambda_lifting_runner)
- (libraries fml_lib stdio))
-
-(executable
- (name anf_runner)
- (public_name anf_runner)
- (modules anf_runner)
  (libraries fml_lib stdio))
 
 (cram

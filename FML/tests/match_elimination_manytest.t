@@ -1,4 +1,10 @@
   $ ./match_elimination_runner.exe << EOF
+  > let f = let y x = x + 1 in y 3;;
+  > EOF
+  let f = let y = (fun x -> ((( + ) x) 1)) in
+  (y 3)
+
+  $ ./match_elimination_runner.exe << EOF
   > let length xs = match xs with
   > | a::b::[] -> 2
   > | a::[] -> 1

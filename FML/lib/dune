@@ -10,19 +10,11 @@
   Inf_pprint
   Inferencer
   Typedtree
-  Pattern_elim
   Common
-  Pe_ast
   Me_ast
-  Alpha_conv
   A_conv
   Match_elimination
-  Lambda_lift
-  Closure_conv
-  Lambda_lifting
-  Anf_ast
-  Anf
-  Codegen)
+  Lambda_lift)
  (modules_without_implementation inf_errors)
  (libraries base angstrom llvm llvm.analysis llvm.executionengine)
  (preprocess
