@@ -5,79 +5,11 @@
 open Ast
 open Base
 open Me_ast
-
-module StateMonad : sig
-  include Base.Monad.Infix
-
-  val return : 'a -> 'a t
-  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-
-  module RList : sig
-    val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
-    val fold_right : 'a list -> init:'b t -> f:('a -> 'b -> 'b t) -> 'b t
-  end
-
-  module RMap : sig
-    val fold_left
-      :  ('a, 'b, 'c) Base.Map.t
-      -> init:'d t
-      -> f:('a -> 'b -> 'd -> 'd t)
-      -> 'd t
-  end
-
-  val fresh : int t
-  val run : 'a t -> 'a
-end = struct
-  type 'a t = int -> int * 'a (* State and Result monad composition *)
-
-  let ( >>= ) : 'a 'b. 'a t -> ('a -> 'b t) -> 'b t =
-    fun m f s ->
-    let s', v' = m s in
-    f v' s'
-  ;;
-
-  let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
-    fun m f s ->
-    let s', x = m s in
-    s', f x
-  ;;
-
-  let return v last = last, v
-  let bind x ~f = x >>= f
-  let fresh last = last + 1, last (* Get new state *)
-  let ( let* ) x f = bind x ~f (* Syntax sugar for bind *)
-
-  module RMap = struct
-    (* Classic map folding. *)
-    let fold_left mp ~init ~f =
-      Base.Map.fold mp ~init ~f:(fun ~key ~data acc ->
-        let* acc = acc in
-        f key data acc)
-    ;;
-  end
-
-  module RList = struct
-    (* Classic list folding. *)
-    let fold_left lt ~init ~f =
-      Base.List.fold_left lt ~init ~f:(fun acc item ->
-        let* acc = acc in
-        f acc item)
-    ;;
-
-    let fold_right lt ~init ~f =
-      Base.List.fold_right lt ~init ~f:(fun item acc ->
-        let* acc = acc in
-        f item acc)
-    ;;
-  end
-
-  (* Run and get the internal value. *)
-  let run m = snd (m 0)
-end
+open Common
+open StateMonad
 
 let get_new_id n name = String.concat [ name; "_me"; Int.to_string n ]
 
-open StateMonad
 
 let const_to_pe_const = function
   | CInt a -> Me_Cint a

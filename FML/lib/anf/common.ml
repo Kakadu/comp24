@@ -3,39 +3,38 @@
 (** SPDX-License-Identifier: LGPL-2.1 *)
 
 open Base
-open Ast
 
 module StrMap = struct
   type 'a t = (string, 'a, String.comparator_witness) Map.t
 
   let empty = Map.empty (module String)
   let singleton str = Map.singleton (module String) str
-  let find m str = Map.find m str
   let add = Map.add
   let update = Map.update
+  let find m str = Map.find m str
   let merge_two fst snd = Map.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -> v2)
 end
 
 let builtins =
   [ "( + )"
   ; "( - )"
+  ; "( > )"
+  ; "( <= )"
+  ; "( && )"
   ; "( / )"
   ; "( * )"
   ; "( < )"
-  ; "( > )"
-  ; "( <= )"
   ; "( >= )"
   ; "( <> )"
   ; "( = )"
-  ; "( != )"
-  ; "( && )"
+  ; "( != )"  
   ; "( || )"
   ; "not"
   ; "print_int"
-  ; "list_head"
-  ; "list_tail"
   ; "tuple_element"
   ; "is_empty"
+  ; "list_head"
+  ; "list_tail"
   ; "fail_match"
   ]
 ;;
@@ -46,89 +45,84 @@ module StrSet = struct
 
   type t = (string, String.comparator_witness) Set.t
 
+  let add = Set.add
   let empty = Set.empty (module String)
   let singleton str = Set.singleton (module String) str
   let union = Set.union
-  let union_list lst = Set.union_list (module String) lst
-  let find s str = Set.mem s str
-  let add = Set.add
   let to_list = Set.to_list
   let of_list = Set.of_list (module String)
   let fold = Set.fold
   let diff = Set.diff
+  let union_list lst = Set.union_list (module String) lst
+  let find s str = Set.mem s str
+  
 end
 
-type bindings = (int, Int.comparator_witness) Set.t
+module StateMonad : sig
+  include Base.Monad.Infix
 
-let contains ng id =
-  match Set.find ng ~f:(Int.equal id) with
-  | Some _ -> true
-  | None -> false
-;;
+  val return : 'a -> 'a t
+  val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
-module MonadCounter = struct
-  open Base
+  module RList : sig
+    val fold_left : 'a list -> init:'b t -> f:('b -> 'a -> 'b t) -> 'b t
+    val fold_right : 'a list -> init:'b t -> f:('a -> 'b -> 'b t) -> 'b t
+  end
 
-  type 'a t = bindings * int -> bindings * int * 'a
+  module RMap : sig
+    val fold_left
+      :  ('a, 'b, 'c) Base.Map.t
+      -> init:'d t
+      -> f:('a -> 'b -> 'd -> 'd t)
+      -> 'd t
+  end
 
-  let return x (binds, var) = binds, var, x
+  val fresh : int t
+  val run : 'a t -> 'a
+end = struct
+  type 'a t = int -> int * 'a (* State and Result monad composition *)
 
-  let fresh (binds, var) =
-    let rec helper num = if contains binds num then helper (num + 1) else num in
-    let next = helper var in
-    binds, next + 1, next
+  let ( >>= ) : 'a 'b. 'a t -> ('a -> 'b t) -> 'b t =
+    fun m f s ->
+    let s', v' = m s in
+    f v' s'
   ;;
 
-  let bind (m : 'a t) (f : 'a -> 'b t) : 'b t =
-    fun t ->
-    let binds, var, x = m t in
-    f x (binds, var)
+  let ( >>| ) : 'a 'b. 'a t -> ('a -> 'b) -> 'b t =
+    fun m f s ->
+    let s', x = m s in
+    s', f x
   ;;
 
-  let ( >>= ) = bind
-  let ( let* ) = bind
+  let return v last = last, v
+  let bind x ~f = x >>= f
+  let fresh last = last + 1, last (* Get new state *)
+  let ( let* ) x f = bind x ~f (* Syntax sugar for bind *)
 
-  let ( >>| ) (m : 'a t) (f : 'a -> 'b) : 'b t =
-    fun t ->
-    let binds, var, x = m t in
-    binds, var, f x
-  ;;
-
-  let run (m : 'a t) binds start = m (binds, start)
-
-  let map (xs : 'a list) ~(f : 'a -> 'b t) : 'b list t =
-    let* xs =
-      List.fold xs ~init:(return []) ~f:(fun acc x ->
+  module RMap = struct
+    (* Classic map folding. *)
+    let fold_left mp ~init ~f =
+      Base.Map.fold mp ~init ~f:(fun ~key ~data acc ->
         let* acc = acc in
-        let* x = f x in
-        return (x :: acc))
-    in
-    return @@ List.rev xs
-  ;;
+        f key data acc)
+    ;;
+  end
 
-  let fold_left (xs : 'a list) ~(init : 'b t) ~(f : 'b -> 'a -> 'b t) : 'b t =
-    List.fold xs ~init ~f:(fun acc x ->
-      let* acc = acc in
-      f acc x)
-  ;;
+  module RList = struct
+    (* Classic list folding. *)
+    let fold_left lt ~init ~f =
+      Base.List.fold_left lt ~init ~f:(fun acc item ->
+        let* acc = acc in
+        f acc item)
+    ;;
 
-  let fold_right xs ~init ~f =
-    List.fold_right xs ~init ~f:(fun x acc ->
-      let* acc = acc in
-      f x acc)
-  ;;
+    let fold_right lt ~init ~f =
+      Base.List.fold_right lt ~init ~f:(fun item acc ->
+        let* acc = acc in
+        f item acc)
+    ;;
+  end
+
+  (* Run and get the internal value. *)
+  let run m = snd (m 0)
 end
-
-let rec get_binds_pat = function
-  | PConstraint (pat, _) -> get_binds_pat pat
-  | PAny | PConst _ | PNill | PUnit -> StrSet.empty
-  | PIdentifier ident -> StrSet.singleton ident
-  | PCons (p1, p2) -> StrSet.union (get_binds_pat p1) (get_binds_pat p2)
-  | PTuple pl ->
-    Base.List.fold pl ~init:StrSet.empty ~f:(fun acc p ->
-      StrSet.union acc (get_binds_pat p))
-;;
-
-
-let get_id i = "a" ^ Int.to_string i
-let empty = Base.Map.empty (module Base.String)

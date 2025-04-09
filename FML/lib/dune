@@ -14,6 +14,8 @@
   Me_ast
   A_conv
   Match_elimination
+  Anf_ast
+  Anf
   Lambda_lift)
  (modules_without_implementation inf_errors)
  (libraries base angstrom llvm llvm.analysis llvm.executionengine)
