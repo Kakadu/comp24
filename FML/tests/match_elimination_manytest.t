@@ -25,7 +25,7 @@
   1
   else if (is_empty xs)
   then 0
-  else (failwith "no matching"))
+  else fail)
 
   $ ./match_elimination_runner.exe << EOF
   > let is_empty x = x+1
@@ -41,7 +41,7 @@
   then let _ = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((( + ) 1) (length xs))
-  else (failwith "no matching"))
+  else fail)
 
   $ ./match_elimination_runner.exe << EOF
   > let (a, b) = (5,6)
@@ -75,7 +75,7 @@
   then 12
   else if true
   then 325
-  else (failwith "no matching"))
+  else fail)
 
   $ ./match_elimination_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
@@ -188,7 +188,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   (((map f) tl) (fun tl_ac0 -> (k ((f h)::tl_ac0))))
-  else (failwith "no matching"))))
+  else fail)))
   
   let rec iter = (fun f -> (fun xs -> if (is_empty xs)
   then ()
@@ -197,7 +197,7 @@
   let tl = (tl_list_get xs) in
   let w = (f h) in
   ((iter f) tl)
-  else (failwith "no matching")))
+  else fail))
   
   let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
   $ ./match_elimination_runner.exe < manytests/typed/012fibcps.ml
@@ -215,7 +215,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((f h) (((fold_right f) acc) tl))
-  else (failwith "no matching"))))
+  else fail)))
   
   let foldl = (fun f -> (fun a -> (fun bs -> ((((fold_right (fun b -> (fun g -> (fun x -> (g ((f x) b)))))) id) bs) a))))
   
@@ -266,7 +266,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((( + ) 1) (length tl))
-  else (failwith "no matching"))
+  else fail)
   
   let length_tail = let rec helper = (fun acc -> (fun xs -> if (is_empty xs)
   then acc
@@ -274,7 +274,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((helper ((( + ) acc) 1)) tl)
-  else (failwith "no matching"))) in
+  else fail)) in
   (helper 0)
   
   let rec map = (fun f -> (fun xs -> if (is_empty xs)
@@ -316,7 +316,7 @@
   let d = (hd_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   let tl = (tl_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
-  else (failwith "no matching")))
+  else fail))
   
   let rec append = (fun xs -> (fun ys -> if (is_empty xs)
   then ys
@@ -324,7 +324,7 @@
   then let x = (hd_list_get xs) in
   let xs_ac0 = (tl_list_get xs) in
   (x::((append xs_ac0) ys))
-  else (failwith "no matching")))
+  else fail))
   
   let concat = let rec helper = (fun xs -> if (is_empty xs)
   then []
@@ -332,7 +332,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append h) (helper tl))
-  else (failwith "no matching")) in
+  else fail) in
   helper
   
   let rec iter = (fun f -> (fun xs -> if (is_empty xs)
@@ -342,7 +342,7 @@
   let tl = (tl_list_get xs) in
   let () = (f h) in
   ((iter f) tl)
-  else (failwith "no matching")))
+  else fail))
   
   let rec cartesian = (fun xs -> (fun ys -> if (is_empty xs)
   then []
@@ -350,7 +350,7 @@
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append ((map (fun a -> (h, a))) ys)) ((cartesian tl) ys))
-  else (failwith "no matching")))
+  else fail))
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in

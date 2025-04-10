@@ -178,7 +178,7 @@ and desugar_match e branches =
     let* rest_expr =
       match rest with
       | [] ->
-        return @@ Me_EApp (Me_EIdentifier "failwith", Me_EIdentifier "\"no matching\"")
+        return @@ Me_EIdentifier "fail"
       | _ ->
         let new_e =
           match bind_expr_opt with

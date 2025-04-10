@@ -1,8 +1,8 @@
   $ ./c_conv_runner.exe << EOF
   > let f x = let g y = x + y in g 5;;
   > EOF
-  let f = let y = (fun x -> ((( + ) x) 1)) in
-  (y 3)
+  let f = (fun x -> let g = (fun x y -> ((( + ) x) y)) in
+  ((g x) 5))
 
   $ ./c_conv_runner.exe << EOF
   > let length xs = match xs with
@@ -10,7 +10,7 @@
   > | a::[] -> 1
   > | [] -> 0
   > EOF
-  let length = ((fun "no matching" xs -> if if (is_cons xs)
+  let length = (fun xs -> if if (is_cons xs)
   then if (is_cons (tl_list_get xs))
   then (is_empty (tl_list_get (tl_list_get xs)))
   else false
@@ -25,7 +25,7 @@
   1
   else if (is_empty xs)
   then 0
-  else (failwith "no matching")) "no matching")
+  else fail)
 
   $ ./c_conv_runner.exe << EOF
   > let is_empty x = x+1
@@ -35,13 +35,13 @@
   > EOF
   let is_empty_ac0 = (fun x -> ((( + ) x) 1))
   
-  let rec length = ((fun "no matching" xs -> if (is_empty xs)
+  let rec length = (fun xs -> if (is_empty xs)
   then 0
   else if (is_cons xs)
   then let _ = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((( + ) 1) (length xs))
-  else (failwith "no matching")) "no matching")
+  else fail)
 
   $ ./c_conv_runner.exe << EOF
   > let (a, b) = (5,6)
@@ -69,13 +69,13 @@
   > | 12 -> 12
   > | _ -> 325
   > EOF
-  let f = (((fun "no matching" (=) x -> if (((=) x) 1)
+  let f = ((fun (=) x -> if (((=) x) 1)
   then 12
   else if (((=) x) 12)
   then 12
   else if true
   then 325
-  else (failwith "no matching")) "no matching") (=))
+  else fail) (=))
 
   $ ./c_conv_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
@@ -182,22 +182,22 @@
   ((f 1), (f true))
 
   $ ./c_conv_runner.exe < manytests/typed/011mapcps.ml
-  let rec map = ((fun "no matching" f -> (((fun "no matching" f xs -> ((((fun "no matching" f xs k -> if (is_empty xs)
+  let rec map = (fun f -> ((fun f xs -> (((fun f xs k -> if (is_empty xs)
   then (k [])
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   (((map f) tl) ((((fun f h k tl_ac0 -> (k ((f h)::tl_ac0))) f) h) k))
-  else (failwith "no matching")) "no matching") f) xs)) "no matching") f)) "no matching")
+  else fail) f) xs)) f))
   
-  let rec iter = ((fun "no matching" f -> (((fun "no matching" f xs -> if (is_empty xs)
+  let rec iter = (fun f -> ((fun f xs -> if (is_empty xs)
   then ()
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   let w = (f h) in
   ((iter f) tl)
-  else (failwith "no matching")) "no matching") f)) "no matching")
+  else fail) f))
   
   let main = ((iter print_int) (((map (fun x -> ((( + ) x) 1))) (1::(2::(3::[])))) (fun x -> x)))
   $ ./c_conv_runner.exe < manytests/typed/012fibcps.ml
@@ -209,13 +209,13 @@
   $ ./c_conv_runner.exe < manytests/typed/013foldfoldr.ml
   let id = (fun x -> x)
   
-  let rec fold_right = ((fun "no matching" f -> (((fun "no matching" f acc -> ((((fun "no matching" acc f xs -> if (is_empty xs)
+  let rec fold_right = (fun f -> ((fun f acc -> (((fun acc f xs -> if (is_empty xs)
   then acc
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((f h) (((fold_right f) acc) tl))
-  else (failwith "no matching")) "no matching") acc) f)) "no matching") f)) "no matching")
+  else fail) acc) f)) f))
   
   let foldl = (fun f -> ((fun f a -> (((fun a f bs -> ((((fold_right ((fun f b -> (((fun b f g -> ((((fun b f g x -> (g ((f x) b))) b) f) g)) b) f)) f)) id) bs) a)) a) f)) f))
   
@@ -260,24 +260,24 @@
   0
 
   $ ./c_conv_runner.exe < manytests/typed/016lists.ml
-  let rec length = ((fun "no matching" xs -> if (is_empty xs)
+  let rec length = (fun xs -> if (is_empty xs)
   then 0
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((( + ) 1) (length tl))
-  else (failwith "no matching")) "no matching")
+  else fail)
   
-  let length_tail = let rec helper = (fun "no matching" acc -> (((fun "no matching" acc xs -> if (is_empty xs)
+  let length_tail = let rec helper = (fun acc -> ((fun acc xs -> if (is_empty xs)
   then acc
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((helper ((( + ) acc) 1)) tl)
-  else (failwith "no matching")) "no matching") acc)) in
-  ((helper "no matching") 0)
+  else fail) acc)) in
+  (helper 0)
   
-  let rec map = ((fun "no matching" f -> (((fun "no matching" f xs -> if (is_empty xs)
+  let rec map = (fun f -> ((fun f xs -> if (is_empty xs)
   then []
   else if if (is_cons xs)
   then (is_empty (tl_list_get xs))
@@ -316,41 +316,41 @@
   let d = (hd_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   let tl = (tl_list_get (tl_list_get (tl_list_get (tl_list_get xs)))) in
   ((f a)::((f b)::((f c)::((f d)::((map f) tl)))))
-  else (failwith "no matching")) "no matching") f)) "no matching")
+  else fail) f))
   
-  let rec append = ((fun "no matching" xs -> (((fun "no matching" xs ys -> if (is_empty xs)
+  let rec append = (fun xs -> ((fun xs ys -> if (is_empty xs)
   then ys
   else if (is_cons xs)
   then let x = (hd_list_get xs) in
   let xs_ac0 = (tl_list_get xs) in
   (x::((append xs_ac0) ys))
-  else (failwith "no matching")) "no matching") xs)) "no matching")
+  else fail) xs))
   
-  let concat = let rec helper = (fun "no matching" xs -> if (is_empty xs)
+  let concat = let rec helper = (fun xs -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
-  ((append h) ((helper "no matching") tl))
-  else (failwith "no matching")) in
-  (helper "no matching")
+  ((append h) (helper tl))
+  else fail) in
+  helper
   
-  let rec iter = ((fun "no matching" f -> (((fun "no matching" f xs -> if (is_empty xs)
+  let rec iter = (fun f -> ((fun f xs -> if (is_empty xs)
   then ()
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   let () = (f h) in
   ((iter f) tl)
-  else (failwith "no matching")) "no matching") f)) "no matching")
+  else fail) f))
   
-  let rec cartesian = ((fun "no matching" xs -> (((fun "no matching" xs ys -> if (is_empty xs)
+  let rec cartesian = (fun xs -> ((fun xs ys -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append ((map ((fun h a -> (h, a)) h)) ys)) ((cartesian tl) ys))
-  else (failwith "no matching")) "no matching") xs)) "no matching")
+  else fail) xs))
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in

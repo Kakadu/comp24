@@ -9,22 +9,34 @@ open StateMonad
 
 let get_new_id n name = Base.String.concat [ name; "_ll"; Int.to_string n ]
 
-(* добавляем в списочек свободные переменные *)
-let rec free_vars expr bound =
-  match expr with
-  | Me_EUnit | Me_ENill | Me_EConst _ -> []
-  | Me_EIdentifier x -> if Set.mem bound x then [] else [ x ]
-  | Me_EIf (e1, e2, e3) -> free_vars e1 bound @ free_vars e2 bound @ free_vars e3 bound
-  | Me_EFun (args, body) ->
-    let bound' = List.fold_left ~f:Set.add ~init:bound args in
-    free_vars body bound'
-  | Me_EApp (e1, e2) -> free_vars e1 bound @ free_vars e2 bound
-  | Me_ELet (_, name, e1, e2) ->
-    let fv1 = free_vars e1 bound in
-    let fv2 = free_vars e2 (Set.add bound name) in
-    fv1 @ fv2
-  | Me_ECons (e1, e2) -> free_vars e1 bound @ free_vars e2 bound
-  | Me_ETuple lst -> List.fold_left lst ~init:[] ~f:(fun acc e -> acc @ free_vars e bound)
+let free_vars expr bound =
+  let builtins_set = StrSet.of_list builtins in
+  let is_builtin x = StrSet.find builtins_set x in
+  
+  let rec helper expr bound =
+    match expr with
+    | Me_EUnit | Me_ENill | Me_EConst _ -> []
+    | Me_EIdentifier x -> 
+        if Set.mem bound x || is_builtin x then 
+          [] 
+        else 
+          [x]
+    | Me_EIf (e1, e2, e3) -> 
+        helper e1 bound @ helper e2 bound @ helper e3 bound
+    | Me_EFun (args, body) ->
+      let bound' = List.fold_left ~f:Set.add ~init:bound args in
+      helper body bound'
+    | Me_EApp (e1, e2) -> helper e1 bound @ helper e2 bound
+    | Me_ELet (_, name, e1, e2) ->
+      let fv1 = helper e1 bound in
+      let fv2 = helper e2 (Set.add bound name) in
+      fv1 @ fv2
+    | Me_ECons (e1, e2) -> helper e1 bound @ helper e2 bound
+    | Me_ETuple lst -> 
+        List.fold_left lst ~init:[] ~f:(fun acc e -> acc @ helper e bound)
+  in
+  
+  helper expr bound
 ;;
 
 let rec ll_expr expr =
