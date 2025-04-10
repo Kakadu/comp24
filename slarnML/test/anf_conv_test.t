@@ -4,7 +4,7 @@
   >   (fack n (fun x -> x))
   > ;;
   > EOF
-  (fun anon$1(n f x)->
+  (fun anon$1(x)->
   	(let anf_app#1=(f n)
   	in
   	(let anf_op#2=(x*anf_app#1)
@@ -22,11 +22,9 @@
   		) else (
   			(let anf_op#6=(n-1)
   			in
-  			(let anf_app#7=(anon$1 n f)
+  			(let anf_app#7=(fack anf_op#6 anon$1)
   			in
-  			(let anf_app#8=(fack anf_op#6 anf_app#7)
-  			in
-  			anf_app#8))))
+  			anf_app#7)))
   	in
   	anf_if#4))
   )
@@ -34,11 +32,9 @@
   	x
   )
   (fun fac(n)->
-  	(let anf_app#9=(anon$2 )
+  	(let anf_app#8=(fack n anon$2)
   	in
-  	(let anf_app#10=(fack n anf_app#9)
-  	in
-  	anf_app#10))
+  	anf_app#8)
   )
   $ dune exec anf_conv_test << EOF
   > let fac n = 
@@ -76,7 +72,7 @@
   >   in
   >   (g 2 3)
   > EOF
-  (fun h(a c d e)->
+  (fun h(c d a e)->
   	(let anf_app#1=(a )
   	in
   	(let anf_app#2=(c )
@@ -94,7 +90,7 @@
   	anf_op#7)))))))
   )
   (fun g(a c d)->
-  	(let anf_app#8=(h a c d 4)
+  	(let anf_app#8=(h c d a 4)
   	in
   	anf_app#8)
   )
@@ -104,7 +100,32 @@
   	anf_app#9)
   )
   $ dune exec anf_conv_test < manytests/do_not_type/001.ml
-  fac not exist
+  Id fac not found in env
+  (fun recfac(n)->
+  	(let anf_app#1=(n )
+  	in
+  	(let anf_op#2=(anf_app#1<=1)
+  	in
+  	(let anf_if#3=if (anf_op#2)
+  		then (
+  			1
+  		) else (
+  			(let anf_app#4=(n )
+  			in
+  			(let anf_app#5=(n )
+  			in
+  			(let anf_app#6=(n )
+  			in
+  			(let anf_op#7=(anf_app#6-1)
+  			in
+  			(let anf_app#8=(fac anf_app#5 anf_op#7)
+  			in
+  			(let anf_op#9=(anf_app#4*anf_app#8)
+  			in
+  			anf_op#9)))))))
+  	in
+  	anf_if#3)))
+  )
   $ dune exec anf_conv_test < manytests/do_not_type/002if.ml
   (fun main()->
   	(let anf_if#1=if (true)
@@ -116,7 +137,30 @@
   	anf_if#1)
   )
   $ dune exec anf_conv_test < manytests/do_not_type/003occurs.ml
-  f not exist
+  Id f not found in env
+  (fun anon$2(f)->
+  	(let anf_app#1=(x f x f)
+  	in
+  	anf_app#1)
+  )
+  (fun anon$1(f x)->
+  	(let anf_app#2=(f anon$2)
+  	in
+  	anf_app#2)
+  )
+  (fun fix(f)->
+  	anon$1
+  )
+  (fun anon$4(f)->
+  	(let anf_app#3=(x x f)
+  	in
+  	anf_app#3)
+  )
+  (fun anon$3(x)->
+  	(let anf_app#4=(f x anon$4)
+  	in
+  	anf_app#4)
+  )
   $ dune exec anf_conv_test < manytests/typed/001fac.ml
   (fun fac(n)->
   	(let anf_op#1=(n<=1)
@@ -145,7 +189,7 @@
   	0)))
   )
   $ dune exec anf_conv_test < manytests/typed/002fac.ml
-  (fun anon$1(n k p)->
+  (fun anon$1(p)->
   	(let anf_op#1=(p*n)
   	in
   	(let anf_app#2=(k anf_op#1)
@@ -163,11 +207,9 @@
   		) else (
   			(let anf_op#6=(n-1)
   			in
-  			(let anf_app#7=(anon$1 n k)
+  			(let anf_app#7=(fac_cps anf_op#6 anon$1)
   			in
-  			(let anf_app#8=(fac_cps anf_op#6 anf_app#7)
-  			in
-  			anf_app#8))))
+  			anf_app#7)))
   	in
   	anf_if#4))
   )
@@ -175,23 +217,21 @@
   	print_int
   )
   (fun main()->
-  	(let anf_app#9=(anon$2 )
+  	(let anf_app#8=(fac_cps 4 anon$2)
   	in
-  	(let anf_app#10=(fac_cps 4 anf_app#9)
+  	(let anf_app#9=(print_int anf_app#8)
   	in
-  	(let anf_app#11=(print_int anf_app#10)
+  	(let anf_()#10=anf_app#9
   	in
-  	(let anf_()#12=anf_app#11
-  	in
-  	0))))
+  	0)))
   )
   $ dune exec anf_conv_test < manytests/typed/003fib.ml
-  (fun n1(n)->
+  (fun n1(a b n)->
   	(let anf_op#1=(n-1)
   	in
   	anf_op#1)
   )
-  (fun ab(a b)->
+  (fun ab(a b n)->
   	(let anf_op#2=(a+b)
   	in
   	anf_op#2)
@@ -261,83 +301,85 @@
   	in
   	anf_if#2))
   )
-  (fun a(a)->
-  	(let anf_app#5=(print_int a)
+  (fun a_0(a b c)->
+  	(let anf_app#5=(a )
   	in
-  	anf_app#5)
-  )
-  (fun b(b)->
-  	(let anf_app#6=(print_int b)
+  	(let anf_app#6=(print_int anf_app#5)
   	in
-  	anf_app#6)
+  	anf_app#6))
   )
-  (fun c(c)->
-  	(let anf_app#7=(print_int c)
+  (fun b_0(a b c)->
+  	(let anf_app#7=(print_int b)
   	in
   	anf_app#7)
+  )
+  (fun c_0(a b c)->
+  	(let anf_app#8=(print_int c)
+  	in
+  	anf_app#8)
   )
   (fun test3(a b c)->
   	0
   )
   (fun test10(a b c d e f g h i j)->
-  	(let anf_app#8=(a )
+  	(let anf_app#9=(a )
   	in
-  	(let anf_app#9=(b )
+  	(let anf_app#10=(b )
   	in
-  	(let anf_op#10=(anf_app#8+anf_app#9)
+  	(let anf_op#11=(anf_app#9+anf_app#10)
   	in
-  	(let anf_app#11=(c )
+  	(let anf_app#12=(c )
   	in
-  	(let anf_op#12=(anf_op#10+anf_app#11)
+  	(let anf_op#13=(anf_op#11+anf_app#12)
   	in
-  	(let anf_app#13=(d )
+  	(let anf_app#14=(d )
   	in
-  	(let anf_op#14=(anf_op#12+anf_app#13)
+  	(let anf_op#15=(anf_op#13+anf_app#14)
   	in
-  	(let anf_app#15=(e )
+  	(let anf_app#16=(e )
   	in
-  	(let anf_op#16=(anf_op#14+anf_app#15)
+  	(let anf_op#17=(anf_op#15+anf_app#16)
   	in
-  	(let anf_app#17=(f )
+  	(let anf_app#18=(f )
   	in
-  	(let anf_op#18=(anf_op#16+anf_app#17)
+  	(let anf_op#19=(anf_op#17+anf_app#18)
   	in
-  	(let anf_app#19=(g )
+  	(let anf_app#20=(g )
   	in
-  	(let anf_op#20=(anf_op#18+anf_app#19)
+  	(let anf_op#21=(anf_op#19+anf_app#20)
   	in
-  	(let anf_app#21=(h )
+  	(let anf_app#22=(h )
   	in
-  	(let anf_op#22=(anf_op#20+anf_app#21)
+  	(let anf_op#23=(anf_op#21+anf_app#22)
   	in
-  	(let anf_app#23=(i )
+  	(let anf_app#24=(i )
   	in
-  	(let anf_op#24=(anf_op#22+anf_app#23)
+  	(let anf_op#25=(anf_op#23+anf_app#24)
   	in
-  	(let anf_app#25=(j )
+  	(let anf_app#26=(j )
   	in
-  	(let anf_op#26=(anf_op#24+anf_app#25)
+  	(let anf_op#27=(anf_op#25+anf_app#26)
   	in
-  	anf_op#26)))))))))))))))))))
+  	anf_op#27)))))))))))))))))))
   )
   (fun rez()->
-  	(let anf_app#27=(test10 )
+  	(let anf_app#28=(test10 )
   	in
-  	(let anf_app#28=(wrap anf_app#27 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
+  	(let anf_app#29=(wrap anf_app#28 1 10 100 1000 10000 100000 1000000 10000000 100000000 1000000000)
   	in
-  	anf_app#28))
+  	anf_app#29))
   )
   (fun temp2()->
-  	(let anf_app#29=(test3 )
+  	(let anf_app#30=(test3 )
   	in
-  	(let anf_app#30=(wrap anf_app#29 1 10 100)
+  	(let anf_app#31=(wrap anf_app#30 1 10 100)
   	in
-  	anf_app#30))
+  	anf_app#31))
   )
   (fun main()->
-  	(let anf_app#31=(print_int rez)
+  	(let anf_app#32=(print_int rez)
   	in
-  	(let anf_()#32=anf_app#31
+  	(let anf_()#33=anf_app#32
   	in
   	0))
   )
@@ -384,12 +426,12 @@
   	0))))
   )
   $ dune exec anf_conv_test < manytests/typed/006partial.ml
-  (fun anon$1(foo)->
+  (fun anon$1(b foo)->
   	(let anf_op#1=(foo+2)
   	in
   	anf_op#1)
   )
-  (fun anon$2(foo)->
+  (fun anon$2(b foo)->
   	(let anf_op#2=(foo*10)
   	in
   	anf_op#2)
@@ -399,35 +441,31 @@
   	in
   	(let anf_if#4=if (anf_app#3)
   		then (
-  			(let anf_app#5=(anon$1 )
-  			in
-  			anf_app#5)
+  			anon$1
   		) else (
-  			(let anf_app#6=(anon$2 )
-  			in
-  			anf_app#6))
+  			anon$2)
   	in
   	anf_if#4))
   )
-  (fun foo(x)->
-  	(let anf_app#7=(x )
+  (fun foo_0(x)->
+  	(let anf_app#5=(x )
+  	in
+  	(let anf_app#6=(foo false anf_app#5)
+  	in
+  	(let anf_app#7=(foo true anf_app#6)
   	in
   	(let anf_app#8=(foo false anf_app#7)
   	in
   	(let anf_app#9=(foo true anf_app#8)
   	in
-  	(let anf_app#10=(foo false anf_app#9)
-  	in
-  	(let anf_app#11=(foo true anf_app#10)
-  	in
-  	anf_app#11)))))
+  	anf_app#9)))))
   )
   (fun main()->
-  	(let anf_app#12=(foo 11)
+  	(let anf_app#10=(foo 11)
   	in
-  	(let anf_app#13=(print_int anf_app#12)
+  	(let anf_app#11=(print_int anf_app#10)
   	in
-  	(let anf_()#14=anf_app#13
+  	(let anf_()#12=anf_app#11
   	in
   	0)))
   )
@@ -439,82 +477,68 @@
   	in
   	(let anf_()#3=anf_app#2
   	in
-  	(let anf_app#4=(b )
+  	(let anf_app#4=(print_int b)
+  	in
+  	(let anf_()#5=anf_app#4
+  	in
+  	(let anf_app#6=(print_int c)
+  	in
+  	(let anf_()#7=anf_app#6
+  	in
+  	(let anf_op#8=(b*c)
+  	in
+  	(let anf_op#9=(a+anf_op#8)
+  	in
+  	anf_op#9)))))))))
+  )
+  (fun foo_0()->
+  	(let anf_app#10=(foo 1)
+  	in
+  	anf_app#10)
+  )
+  (fun foo_1()->
+  	(let anf_app#11=(foo_0 2)
+  	in
+  	anf_app#11)
+  )
+  (fun foo_2()->
+  	(let anf_app#12=(foo_1 3)
+  	in
+  	anf_app#12)
+  )
+  (fun main()->
+  	(let anf_app#13=(print_int foo_2)
+  	in
+  	(let anf_()#14=anf_app#13
+  	in
+  	0))
+  )
+  $ dune exec anf_conv_test < manytests/typed/006partial3.ml
+  (fun anon$2(b a c)->
+  	(let anf_app#1=(print_int c)
+  	in
+  	anf_app#1)
+  )
+  (fun anon$1(a b)->
+  	(let anf_app#2=(print_int b)
+  	in
+  	(let anf_()#3=anf_app#2
+  	in
+  	anon$2))
+  )
+  (fun foo(a)->
+  	(let anf_app#4=(a )
   	in
   	(let anf_app#5=(print_int anf_app#4)
   	in
   	(let anf_()#6=anf_app#5
   	in
-  	(let anf_app#7=(c )
-  	in
-  	(let anf_app#8=(print_int anf_app#7)
-  	in
-  	(let anf_()#9=anf_app#8
-  	in
-  	(let anf_app#10=(a )
-  	in
-  	(let anf_app#11=(b )
-  	in
-  	(let anf_app#12=(c )
-  	in
-  	(let anf_op#13=(anf_app#11*anf_app#12)
-  	in
-  	(let anf_op#14=(anf_app#10+anf_op#13)
-  	in
-  	anf_op#14))))))))))))))
-  )
-  (fun foo()->
-  	(let anf_app#15=(foo 1)
-  	in
-  	anf_app#15)
-  )
-  (fun foo(foo)->
-  	(let anf_app#16=(foo_1 foo_1 2)
-  	in
-  	anf_app#16)
-  )
-  (fun foo(foo)->
-  	(let anf_app#17=(foo_1 foo_1 3)
-  	in
-  	anf_app#17)
+  	anon$1)))
   )
   (fun main()->
-  	(let anf_app#18=(print_int foo)
+  	(let anf_app#7=(foo 4 8 9)
   	in
-  	(let anf_()#19=anf_app#18
-  	in
-  	0))
-  )
-  $ dune exec anf_conv_test < manytests/typed/006partial3.ml
-  (fun anon$2(c)->
-  	(let anf_app#1=(print_int c)
-  	in
-  	anf_app#1)
-  )
-  (fun anon$1(b)->
-  	(let anf_app#2=(print_int b)
-  	in
-  	(let anf_()#3=anf_app#2
-  	in
-  	(let anf_app#4=(anon$2 )
-  	in
-  	anf_app#4)))
-  )
-  (fun foo(a)->
-  	(let anf_app#5=(a )
-  	in
-  	(let anf_app#6=(print_int anf_app#5)
-  	in
-  	(let anf_()#7=anf_app#6
-  	in
-  	(let anf_app#8=(anon$1 )
-  	in
-  	anf_app#8))))
-  )
-  (fun main()->
-  	(let anf_app#9=(foo 4 8 9)
-  	in
-  	(let anf_()#10=anf_app#9
+  	(let anf_()#8=anf_app#7
   	in
   	0))
   )

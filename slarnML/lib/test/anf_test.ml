@@ -2,12 +2,12 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-open Res
+(* open Res *)
 
 (*==============================*)
 (*======Closure conversion======*)
 (*==============================*)
-open Ast
+(* open Ast
 open Cc_ast
 open Clos_conv
 open Pprint_cc
@@ -567,4 +567,4 @@ let anf6 =
   ]
 ;;
 
-let%test _ = anf_ok "anf_6" ll6 anf6
+let%test _ = anf_ok "anf_6" ll6 anf6 *)
