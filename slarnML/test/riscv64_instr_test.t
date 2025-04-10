@@ -452,7 +452,7 @@
   anon$1 not found
 
   $ dune exec riscv64_instr_test < manytests/typed/006partial2.ml
-  foo_2 not found
+  foo_0_1_2 not found
 
   $ dune exec riscv64_instr_test < manytests/typed/006partial3.ml
   anon$2 not found

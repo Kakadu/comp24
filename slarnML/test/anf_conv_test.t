@@ -461,7 +461,7 @@
   	anf_app#9)))))
   )
   (fun main()->
-  	(let anf_app#10=(foo 11)
+  	(let anf_app#10=(foo_0 11)
   	in
   	(let anf_app#11=(print_int anf_app#10)
   	in
@@ -477,39 +477,49 @@
   	in
   	(let anf_()#3=anf_app#2
   	in
-  	(let anf_app#4=(print_int b)
+  	(let anf_app#4=(b )
   	in
-  	(let anf_()#5=anf_app#4
+  	(let anf_app#5=(print_int anf_app#4)
   	in
-  	(let anf_app#6=(print_int c)
+  	(let anf_()#6=anf_app#5
   	in
-  	(let anf_()#7=anf_app#6
+  	(let anf_app#7=(c )
   	in
-  	(let anf_op#8=(b*c)
+  	(let anf_app#8=(print_int anf_app#7)
   	in
-  	(let anf_op#9=(a+anf_op#8)
+  	(let anf_()#9=anf_app#8
   	in
-  	anf_op#9)))))))))
+  	(let anf_app#10=(a )
+  	in
+  	(let anf_app#11=(b )
+  	in
+  	(let anf_app#12=(c )
+  	in
+  	(let anf_op#13=(anf_app#11*anf_app#12)
+  	in
+  	(let anf_op#14=(anf_app#10+anf_op#13)
+  	in
+  	anf_op#14))))))))))))))
   )
   (fun foo_0()->
-  	(let anf_app#10=(foo 1)
+  	(let anf_app#15=(foo 1)
   	in
-  	anf_app#10)
+  	anf_app#15)
   )
-  (fun foo_1()->
-  	(let anf_app#11=(foo_0 2)
+  (fun foo_0_1()->
+  	(let anf_app#16=(foo_0 2)
   	in
-  	anf_app#11)
+  	anf_app#16)
   )
-  (fun foo_2()->
-  	(let anf_app#12=(foo_1 3)
+  (fun foo_0_1_2()->
+  	(let anf_app#17=(foo_0_1 3)
   	in
-  	anf_app#12)
+  	anf_app#17)
   )
   (fun main()->
-  	(let anf_app#13=(print_int foo_2)
+  	(let anf_app#18=(print_int foo_0_1_2)
   	in
-  	(let anf_()#14=anf_app#13
+  	(let anf_()#19=anf_app#18
   	in
   	0))
   )

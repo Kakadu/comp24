@@ -7,8 +7,7 @@ open Cc_ast
 open Res
 
 let default_fun = List.map (fun (id, _) -> (id, id, 0, [])) Call_define.default_func
-let remove_args args prt_args =
-  List.filter (fun x -> not (List.mem x args)) prt_args
+let remove_args id args prt_args = if id = "()" then [] else List.filter (fun x -> not (List.mem x args)) prt_args
 ;;
 
 let get_new_name id cnt = if id = "()" then id else id^"_"^(string_of_int cnt);;
@@ -34,31 +33,31 @@ let rec closure_conversion ?(env=[]) ?(prt_args=[]) = function
   CIf (closure_conversion ~env ~prt_args cond, closure_conversion ~env ~prt_args then_expr, closure_conversion ~env ~prt_args else_expr)
 | Ast.Let (decl, body) ->
   let id, args, declared, next_name = (match decl with
-    | Ast.Decl (id, args) -> id, args, (fun id args -> Ast.Decl (id, (remove_args args prt_args)@args)), (fun old _ -> old)
-    | Ast.DeclRec (id, args) -> id,  args, (fun id args -> Ast.DeclRec (id, (remove_args args prt_args)@args)), (fun _ new_name -> new_name))
+    | Ast.Decl (id, args) -> id, args, (fun id args -> Ast.Decl (id, (remove_args id args prt_args)@args)), (fun old _ -> old)
+    | Ast.DeclRec (id, args) -> id,  args, (fun id args -> Ast.DeclRec (id, (remove_args id args prt_args)@args)), (fun _ new_name -> new_name))
   in
   let env_args = (List.map (fun arg -> (arg, arg, 0, [])) args) @ env in
   (match List.find_opt (fun (name, _, _, _) -> name = id) env with
-  | None -> CLet (declared id args, closure_conversion ~env:((id, id, 0, (remove_args args prt_args)) :: env_args) ~prt_args:(args@prt_args) body)
+  | None -> CLet (declared id args, closure_conversion ~env:((id, id, 0, (remove_args id args prt_args)) :: env_args) ~prt_args:(args@prt_args) body)
   | Some (_, old_name, cnt, _) ->
-    let new_name = get_new_name id cnt in
-    let body_converted = closure_conversion ~env:((id, next_name old_name new_name, cnt + 1, (remove_args args prt_args)) :: env_args) ~prt_args:(args @ prt_args) body in
+    let new_name = get_new_name old_name cnt in
+    let body_converted = closure_conversion ~env:((id, next_name old_name new_name, cnt + 1, (remove_args id args prt_args)) :: env_args) ~prt_args:(args @ prt_args) body in
     CLet (declared new_name args, body_converted))
 | Ast.LetIn (decl, expr1, expr2) ->
   let id, args, declared, next_name = (match decl with
-    | Ast.Decl (id, args) -> id, args, (fun id args -> Ast.Decl (id, (remove_args args prt_args)@args)), (fun old _ -> old)
-    | Ast.DeclRec (id, args) -> id,  args, (fun id args -> Ast.DeclRec (id, (remove_args args prt_args)@args)), (fun _ new_name -> new_name))
+    | Ast.Decl (id, args) -> id, args, (fun id args -> Ast.Decl (id, (remove_args id args prt_args)@args)), (fun old _ -> old)
+    | Ast.DeclRec (id, args) -> id,  args, (fun id args -> Ast.DeclRec (id, (remove_args id args prt_args)@args)), (fun _ new_name -> new_name))
   in
   let env_args = (List.map (fun arg -> (arg, arg, 0, [])) args) @ env in
   (match List.find_opt (fun (name, _, _, _) -> name = id) env with
   | None -> 
-    let decl_converted = closure_conversion ~env:((id, id, 0, (remove_args args prt_args)) :: env_args) ~prt_args:(args @ prt_args) expr1 in
-    let expr2_converted = closure_conversion ~env:((id, id, 0, (remove_args args prt_args)) :: env) ~prt_args expr2 in
+    let decl_converted = closure_conversion ~env:((id, id, 0, (remove_args id args prt_args)) :: env_args) ~prt_args:(args @ prt_args) expr1 in
+    let expr2_converted = closure_conversion ~env:((id, id, 0, (remove_args id args prt_args)) :: env) ~prt_args expr2 in
     CLetIn (declared id args, decl_converted, expr2_converted)
   | Some (_, old_name, cnt, _) ->
-    let new_name = get_new_name id cnt in
-    let decl_converted = closure_conversion ~env:((id, next_name old_name new_name, cnt + 1, (remove_args args prt_args)) :: env) ~prt_args:(args @ prt_args) expr1 in
-    let expr2_converted = closure_conversion ~env:((id, new_name, cnt + 1, (remove_args args prt_args)) :: env) ~prt_args expr2 in
+    let new_name = get_new_name old_name cnt in
+    let decl_converted = closure_conversion ~env:((id, next_name old_name new_name, cnt + 1, (remove_args id args prt_args)) :: env) ~prt_args:(args @ prt_args) expr1 in
+    let expr2_converted = closure_conversion ~env:((id, new_name, cnt + 1, (remove_args id args prt_args)) :: env) ~prt_args expr2 in
     CLetIn (declared new_name args, decl_converted, expr2_converted))
 | Ast.Fun (args, body) ->
   let env_args = (List.map (fun arg -> (arg, arg, 0, [])) args) @ env in
@@ -81,13 +80,17 @@ let clos_conv ast =
     (fun cc_ast ast ->
       cc_ast
       >>= fun (cc_ast, funs) ->
-      let ast = closure_conversion ~env:funs ast in
-      let new_funs = match ast with
+      let c_ast = closure_conversion ~env:funs ast in
+      let new_funs = match c_ast with
       | CLet (d, _) | CLetIn (d, _, _) -> 
-        (match d with | Ast.Decl (id, _) | Ast.DeclRec (id, _) -> (id, id, 0, []) :: funs)
+        (match d with | Ast.Decl (new_name, _) | Ast.DeclRec (new_name, _) -> 
+          (match ast with 
+          | Ast.Let (d, _) | Ast.LetIn (d, _, _) ->
+            (match d with | Ast.Decl (old_name, _) | Ast.DeclRec (old_name, _) -> (old_name, new_name, 0, []) :: funs)
+          | _ -> (new_name, new_name, 0, []) :: funs))
       | _ -> funs
       in
-      Result (cc_ast @ [ast], new_funs))
+      Result (cc_ast @ [c_ast], new_funs))
     (Result ([], default_fun))
     ast
   >>= fun (ast, _) -> Result ast

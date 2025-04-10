@@ -72,13 +72,13 @@
   (fun anon$2(b foo)->((foo*10)))
   (fun foo(b)->(if ((b )) then (anon$1) else (anon$2)))
   (fun foo_0(x)->((foo true (foo false (foo true (foo false (x )))))))
-  (fun main()->(let () = ((print_int (foo 11)) in 0)))
+  (fun main()->(let () = ((print_int (foo_0 11)) in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/006partial2.ml
-  (fun foo(a b c)->(let () = ((print_int (a )) in let () = ((print_int b) in let () = ((print_int c) in (a+(b*c)))))))
+  (fun foo(a b c)->(let () = ((print_int (a )) in let () = ((print_int (b )) in let () = ((print_int (c )) in ((a )+((b )*(c ))))))))
   (fun foo_0()->((foo 1)))
-  (fun foo_1()->((foo_0 2)))
-  (fun foo_2()->((foo_1 3)))
-  (fun main()->(let () = ((print_int foo_2) in 0)))
+  (fun foo_0_1()->((foo_0 2)))
+  (fun foo_0_1_2()->((foo_0_1 3)))
+  (fun main()->(let () = ((print_int foo_0_1_2) in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/006partial3.ml
   (fun anon$2(b a c)->((print_int c)))
   (fun anon$1(a b)->(let () = ((print_int b) in anon$2)))
