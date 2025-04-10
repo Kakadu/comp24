@@ -18,18 +18,23 @@ let const_to_pe_const = function
 let rec pattern_remove pat =
   match pat with
   | PUnit -> [ "()" ]
+  | PAny -> []
   | PConst _ -> []
   | PIdentifier id -> [ id ]
   | PNill -> [ "[]" ]
   | PTuple pats -> List.concat_map ~f:pattern_remove pats
   | PCons (hd, tl) -> pattern_remove hd @ pattern_remove tl
   | PConstraint (p, _) -> pattern_remove p
-  | _ -> failwith "bye-bye, bro. im sleeping"
 ;;
 
 let rec pattern_bindings expr pat =
   match pat with
-  | PIdentifier id -> [ id, expr ]
+  | PIdentifier id when String.(id <> "_") -> [ id, expr ]
+  | PIdentifier _ -> []
+  | PAny -> []
+  | PConst _ -> []
+  | PUnit -> []
+  | PNill -> []
   | PCons (hd, tl) ->
     let hd_expr = Me_EApp (Me_EIdentifier "hd_list_get", expr) in
     let tl_expr = Me_EApp (Me_EIdentifier "tl_list_get", expr) in
@@ -42,8 +47,6 @@ let rec pattern_bindings expr pat =
       pattern_bindings ith_expr p)
     |> List.concat
   | PConstraint (p, _) -> pattern_bindings expr p
-  | _ -> []
-;;
 
 let rec_flags : Ast.rec_flag -> Me_ast.rec_flag = function
   | Rec -> Rec
@@ -158,7 +161,7 @@ and desugar_match e branches =
               return (acc @ [ cond ]))
         in
         return
-        @@ List.fold_right conds ~init:(Me_EConst (Me_CBool true)) ~f:(fun c acc ->
+        @@ List.fold_right conds ~init:(Me_EConst (Me_CBool true)) ~f:(fun c acc -> 
           Me_EIf (c, acc, Me_EConst (Me_CBool false)))
       | PConstraint (p, _) -> pattern_to_condition expr p
     in

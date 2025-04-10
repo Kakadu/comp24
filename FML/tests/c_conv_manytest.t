@@ -38,8 +38,7 @@
   let rec length = (fun xs -> if (is_empty xs)
   then 0
   else if (is_cons xs)
-  then let _ = (hd_list_get xs) in
-  let tl = (tl_list_get xs) in
+  then let tl = (tl_list_get xs) in
   ((( + ) 1) (length xs))
   else fail)
 
