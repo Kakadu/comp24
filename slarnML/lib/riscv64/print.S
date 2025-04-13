@@ -61,7 +61,7 @@ print_uint:
     ld      ra,56(sp)
     ld      s0,48(sp)
     addi    sp,sp,64
-    ret
+    ret                    # make the syscall
 
 print_int:
     addi    sp,sp,-48

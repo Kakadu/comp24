@@ -16,27 +16,12 @@ let get_name id _ =
   if String.contains id '#' then String.sub id 0 (String.index id '#') else id
 ;;
 
-let replace_fun _ id env =
-  let base_id =
-    if String.contains id '#' then String.sub id 0 (String.index id '#') else id
-  in
-  let rec find_unique base counter =
-    let candidate = if counter = 0 then base else base ^ "_" ^ string_of_int counter in
-    if List.exists (fun (_, name, _) -> name = candidate) env
-    then find_unique base (counter + 1)
-    else candidate
-  in
-  find_unique base_id 0
-;;
-
-let find_name id =
+let find_name fun_ids id =
   map (fun (_, _, env, _) ->
-    let base_id =
-      if String.contains id '#' then String.sub id 0 (String.index id '#') else id
-    in
-    match List.find_opt (fun (_, name, _) -> name = id || name = base_id) env with
-    | None -> Result (LApp (id, []))
-    | Some (_, _, new_name) -> Result (LId new_name))
+    (* print_endline ("find_name " ^ id ^ " " ^ String.concat ", " fun_ids); *)
+    match List.find_opt (fun (_, name, _) -> name = id) env with
+    | None -> if List.mem id fun_ids then Result (LApp (id, [])) else Result (LId id)
+    | Some (_, _, new_name) -> if List.mem id fun_ids then Result (LApp (new_name, [])) else Result (LId new_name))
 ;;
 
 let insert_let a = map (fun (ast, lst, env, num) -> Result (ast, a :: lst, env, num))
@@ -47,7 +32,7 @@ let update_env name new_name lvl =
 
 let update_env_fun name stack lvl =
   map (fun (ast, prog, env, num) ->
-    let new_name = replace_fun name (get_name name stack) env in
+    let new_name = get_name name stack in
     Result (ast, prog, (lvl, name, new_name) :: env, num))
 ;;
 
@@ -66,14 +51,14 @@ let filter lvl =
     Result (ast, prog, List.filter (fun (l, _, _) -> l < lvl) env, num))
 ;;
 
-let rec lifting cc_ast stack lvl res =
+let rec lifting cc_ast fun_ids stack lvl res =
   let lifting_bin_op f e1 e2 =
     res
-    |> lifting e1 stack lvl
+    |> lifting e1 fun_ids stack lvl
     |> fun r1 ->
     r1
     |> get_ast
-    >>= fun a1 -> r1 |> lifting e2 stack lvl |> update_ast (fun a2 -> Result (f a1 a2))
+    >>= fun a1 -> r1 |> lifting e2 fun_ids stack lvl |> update_ast (fun a2 -> Result (f a1 a2))
   in
   let get_id = function
     | Ast.Decl (id, _) | Ast.DeclRec (id, _) -> id
@@ -96,12 +81,12 @@ let rec lifting cc_ast stack lvl res =
       | Ast.Decl _ -> (fun x -> x), update_env_decl (get_args d)
       | Ast.DeclRec _ -> update_env_decl (get_args d), fun x -> x
     in
-    res |> f1 |> update_env_fun id stack lvl |> lifting e1 (id :: stack) (lvl + 1) |> f2
+    res |> f1 |> update_env_fun id stack lvl |> lifting e1 (id :: fun_ids) (id :: stack) (lvl + 1) |> f2
   in
   match cc_ast with
-  | CId id -> res |> find_name id >>= fun ast -> update_ast (fun _ -> Result ast) res
+  | CId id -> res |> find_name fun_ids id >>= fun ast -> update_ast (fun _ -> Result ast) res
   | CConst c -> update_ast (fun _ -> Result (LConst c)) res
-  | CNot e -> res |> lifting e stack lvl
+  | CNot e -> res |> lifting e fun_ids stack lvl
   | COr (e1, e2) -> lifting_bin_op (fun a1 a2 -> LOr (a1, a2)) e1 e2
   | CAnd (e1, e2) -> lifting_bin_op (fun a1 a2 -> LAnd (a1, a2)) e1 e2
   | CEq (e1, e2) -> lifting_bin_op (fun a1 a2 -> LEq (a1, a2)) e1 e2
@@ -115,18 +100,18 @@ let rec lifting cc_ast stack lvl res =
   | CDiv (e1, e2) -> lifting_bin_op (fun a1 a2 -> LDiv (a1, a2)) e1 e2
   | CIf (e1, e2, e3) ->
     res
-    |> lifting e1 stack lvl
+    |> lifting e1 fun_ids stack lvl
     |> fun r1 ->
     r1
     |> get_ast
     >>= fun a1 ->
     r1
-    |> lifting e2 stack lvl
+    |> lifting e2 fun_ids stack lvl
     |> fun r2 ->
     r2
     |> get_ast
     >>= fun a2 ->
-    r2 |> lifting e3 stack lvl |> update_ast (fun a3 -> Result (LIf (a1, a2, a3)))
+    r2 |> lifting e3 fun_ids stack lvl |> update_ast (fun a3 -> Result (LIf (a1, a2, a3)))
   | CLet (d, e) ->
     (* let id = get_id d in *)
     res
@@ -142,7 +127,7 @@ let rec lifting cc_ast stack lvl res =
     |> get_ast
     >>= fun a1 ->
     (if id = "()" then r1 else r1 |> insert_let (get_fun_let (get_decl d) a1))
-    |> lifting e2 stack lvl
+    |> lifting e2 (id::fun_ids) stack lvl
     |> update_ast (fun a2 -> Result (if id = "()" then LIn (id, a1, a2) else a2))
     |> filter lvl
   | CFun (args, e) ->
@@ -155,26 +140,26 @@ let rec lifting cc_ast stack lvl res =
     >>= fun name ->
     let new_name = get_name name stack in
     res
-    |> lifting e (name :: stack) (lvl + 1)
+    |> lifting e fun_ids (name :: stack) (lvl + 1)
     |> fun r ->
     r
     |> get_ast
     >>= (fun a -> r |> insert_let (get_fun_let (Ast.Decl (new_name, args)) a))
-    |> update_ast (fun _ -> Result (LId new_name))
+    |> update_ast (fun _ -> Result (LApp (new_name, [])))
   | CApp (e, args) ->
     List.fold_left
       (fun r e ->
         r
         >>= fun (r, lst) ->
         Result r
-        |> lifting e stack lvl
+        |> lifting e fun_ids stack lvl
         >>= fun res -> Result res |> get_ast >>= fun a -> Result (res, a :: lst))
       (res >>= fun r -> Result (r, []))
       args
     >>= fun (r, args) ->
     let args = List.rev args in
     Result r
-    |> lifting e stack lvl
+    |> lifting e fun_ids stack lvl
     |> update_ast (fun a ->
       match a with
       | LApp (a, new_args) -> Result (LApp (a, List.append new_args args))
@@ -189,7 +174,8 @@ let lambda_lifting cc_ast =
     (fun prev_res ast ->
       prev_res
       >>= fun (anon_num, ll_ast) ->
-      lifting ast [] 0 (default_res anon_num)
+      let funs = List.map (fun e -> match e with | LFun (id, _, _) -> id) ll_ast in
+      lifting ast funs [] 0 (default_res anon_num)
       |> fun res ->
       res
       |> get_num

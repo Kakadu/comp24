@@ -454,10 +454,10 @@ let rec build_aexpr tag a res =
     | AMul (i1, i2) -> bin_op (fun rd r1 r2 -> Math (Mul, rd, r1, r2)) i1 i2
     | ADiv (i1, i2) -> bin_op (fun rd r1 r2 -> Math (Div, rd, r1, r2)) i1 i2
     | AEq (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Beq, r1, r2, tag)) i1 i2
-    | AGte (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Bge, r2, r1, tag)) i1 i2
-    | ALte (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Ble, r2, r1, tag)) i1 i2
-    | AGt (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Bgt, r2, r1, tag)) i1 i2
-    | ALt (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Blt, r2, r1, tag)) i1 i2
+    | AGte (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Bge, r1, r2, tag)) i1 i2
+    | ALte (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Ble, r1, r2, tag)) i1 i2
+    | AGt (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Bgt, r1, r2, tag)) i1 i2
+    | ALt (i1, i2) -> cond_op (fun r1 r2 -> Bnch (Blt, r1, r2, tag)) i1 i2
     | ANot i ->
       res
       |> load_imm f i
@@ -549,7 +549,7 @@ let rec build_aexpr tag a res =
             res
             >>= (fun env ->
             Result ([], None, env)
-            |> build_aexpr tag e1
+            |> build_aexpr tag e2
             >>= fun (instr1, reg1, env) ->
             (match reg1 with
              | Some reg when reg <> A 0 ->
@@ -565,7 +565,7 @@ let rec build_aexpr tag a res =
                 @ [ Jmp (get_true_tag_addr id); Tag (get_tag id) ]
               , Some (A 0)
               , env ))
-            |> build_aexpr tag e2
+            |> build_aexpr tag e1
             >>= fun (instr1, reg2, env) ->
             (match reg2 with
              | Some reg when reg <> A 0 ->
