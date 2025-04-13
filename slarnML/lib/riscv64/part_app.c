@@ -74,6 +74,44 @@ struct Func func_init(void *ptr, uint8_t cnt) {
     return new;
 }
 
+struct Func copy_func(const struct Func *original) {
+    struct Func copy;
+
+    copy.argscnt = original->argscnt;
+    copy.cnt = original->cnt;
+
+    copy.ptr = original->ptr;
+
+    copy.argsfun = malloc(sizeof(int64_t) * original->argscnt);
+    if (!copy.argsfun) {
+        fprintf(stderr, "Memory allocation failed for argsfun!\n");
+    }
+    memcpy(copy.argsfun, original->argsfun, sizeof(int64_t) * original->argscnt);
+
+    copy.cif = malloc(sizeof(ffi_cif));
+    if (!copy.cif) {
+        fprintf(stderr, "Memory allocation failed for cif!\n");
+    }
+    memcpy(copy.cif, original->cif, sizeof(ffi_cif));
+
+    copy.arg_types = malloc(sizeof(ffi_type*) * (original->argscnt + 1));
+    if (!copy.arg_types) {
+        fprintf(stderr, "Memory allocation failed for arg_types!\n");
+    }
+    for (int i = 0; i < original->argscnt; i++) {
+        copy.arg_types[i] = original->arg_types[i];
+    }
+    copy.arg_types[original->argscnt] = NULL;
+
+    copy.arg_values = malloc(sizeof(void*) * original->argscnt);
+    if (!copy.arg_values) {
+        fprintf(stderr, "Memory allocation failed for arg_values!\n");
+    }
+    memcpy(copy.arg_values, original->arg_values, sizeof(void*) * original->argscnt);
+
+    return copy;
+}
+
 void func_free(struct Func *f) {
     if (f) {
         free(f->argsfun);
@@ -154,17 +192,22 @@ int64_t part_app(void *f_ptr, int argcnt, int appcnt, ...) {
         fprintf(stderr, "Error: NULL function pointer\n");
         return -1;
     }
+    int app_idx = 0;
     
     if ((int64_t)&part_apps[0] <= (int64_t)f_ptr && (int64_t)f_ptr <= (int64_t)&part_apps[MAX_APPS-1]) {
-        part_apps[last_app] = *(struct Func *)f_ptr;
+        part_apps[last_app] = copy_func(f_ptr);
+        used_apps[last_app] = 1;
+        app_idx = last_app;
+        // app_idx = ((int64_t)f_ptr - (int64_t)&part_apps[0]) / sizeof(struct Func);
     } else {
         part_apps[last_app] = func_init(f_ptr, argcnt);
         used_apps[last_app] = 1;
+        app_idx = last_app;
     }
     
     last_app = (last_app + 1) % MAX_APPS;
     
-    return app(&part_apps[last_app-1], appcnt, args);
+    return app(&part_apps[app_idx], appcnt, args);
 }
 
 void init_part_apps() {

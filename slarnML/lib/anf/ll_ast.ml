@@ -18,7 +18,7 @@ type l_expr =
   | LMul of l_expr * l_expr
   | LDiv of l_expr * l_expr
   | LIf of l_expr * l_expr * l_expr
-  | LApp of string * l_expr list
+  | LApp of l_expr * l_expr list
   | LIn of string * l_expr * l_expr
 [@@deriving show { with_path = false }]
 
