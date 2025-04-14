@@ -60,20 +60,20 @@ let rec anf_expr e expr_with_hole =
       ALet (name, AIf (cimm, t_anf, f_anf), expr_with_hole (AId name)))
   | LApp (func, arg :: args) ->
     anf_expr func (fun func_imm ->
-    let args = List.rev args in
-    anf_expr arg (fun imm_arg ->
-      (List.fold_left
-         (fun f a lst imm0 -> anf_expr a (fun imm1 -> f (imm0 :: lst) imm1))
-         (fun lst imm ->
-           let name = get_name "anf_app" in
-           ALet (name, AApp (func_imm, List.rev (imm :: lst)), expr_with_hole (AId name)))
-         args)
-        []
-        imm_arg))
+      let args = List.rev args in
+      anf_expr arg (fun imm_arg ->
+        (List.fold_left
+           (fun f a lst imm0 -> anf_expr a (fun imm1 -> f (imm0 :: lst) imm1))
+           (fun lst imm ->
+             let name = get_name "anf_app" in
+             ALet (name, AApp (func_imm, List.rev (imm :: lst)), expr_with_hole (AId name)))
+           args)
+          []
+          imm_arg))
   | LApp (func, []) ->
     anf_expr func (fun func_imm ->
-    let name = get_name "anf_app" in
-    ALet (name, AApp (func_imm, []), expr_with_hole (AId name)))
+      let name = get_name "anf_app" in
+      ALet (name, AApp (func_imm, []), expr_with_hole (AId name)))
   | LIn (id, e1, e2) ->
     anf_expr e1 (fun limm ->
       (* let name = "anf_" ^ get_name id in *)

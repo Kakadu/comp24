@@ -40,11 +40,7 @@ let f_id x = x
 let get_fun name =
   map (fun (_, _, _, _, _, funs) ->
     (* print_endline ("get_fun " ^ name ^ " " ^ (String.concat ", " (List.map (fun (f_name, cnt) -> f_name^"("^string_of_int cnt^")") funs))); *)
-    Result
-      (List.find_opt
-         (fun (f_name, _) ->
-           f_name = name)
-         funs))
+    Result (List.find_opt (fun (f_name, _) -> f_name = name) funs))
 ;;
 
 let get_funs = map (fun (_, _, _, _, _, funs) -> Result funs)

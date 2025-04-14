@@ -21,7 +21,10 @@ let find_name args fun_ids id =
     (* print_endline ("find_name " ^ id ^ " " ^ String.concat ", " fun_ids); *)
     match List.find_opt (fun (_, name, _) -> name = id) env with
     | None -> if List.mem id fun_ids then Result (LApp (LId id, [])) else Result (LId id)
-    | Some (_, _, new_name) -> if (List.mem id fun_ids && not (List.mem new_name args)) then Result (LApp (LId new_name, [])) else Result (LId new_name))
+    | Some (_, _, new_name) ->
+      if List.mem id fun_ids && not (List.mem new_name args)
+      then Result (LApp (LId new_name, []))
+      else Result (LId new_name))
 ;;
 
 let insert_let a = map (fun (ast, lst, env, num) -> Result (ast, a :: lst, env, num))
@@ -58,7 +61,8 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
     |> fun r1 ->
     r1
     |> get_ast
-    >>= fun a1 -> r1 |> lifting e2 fun_ids g_args stack lvl |> update_ast (fun a2 -> Result (f a1 a2))
+    >>= fun a1 ->
+    r1 |> lifting e2 fun_ids g_args stack lvl |> update_ast (fun a2 -> Result (f a1 a2))
   in
   let get_id = function
     | Ast.Decl (id, _) | Ast.DeclRec (id, _) -> id
@@ -76,17 +80,22 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
   in
   let init_func d e1 res =
     let id = get_id d in
-    let args = (get_args d) @ g_args in
+    let args = get_args d @ g_args in
     let f1, f2 =
       match d with
       | Ast.Decl _ -> (fun x -> x), update_env_decl (get_args d)
       | Ast.DeclRec _ -> update_env_decl (get_args d), fun x -> x
     in
     let funs = if List.length args = 0 then fun_ids else id :: fun_ids in
-    res |> f1 |> update_env_fun id stack lvl |> lifting e1 funs args (id :: stack) (lvl + 1) |> f2
+    res
+    |> f1
+    |> update_env_fun id stack lvl
+    |> lifting e1 funs args (id :: stack) (lvl + 1)
+    |> f2
   in
   match cc_ast with
-  | CId id -> res |> find_name g_args fun_ids id >>= fun ast -> update_ast (fun _ -> Result ast) res
+  | CId id ->
+    res |> find_name g_args fun_ids id >>= fun ast -> update_ast (fun _ -> Result ast) res
   | CConst c -> update_ast (fun _ -> Result (LConst c)) res
   | CNot e -> res |> lifting e fun_ids g_args stack lvl
   | COr (e1, e2) -> lifting_bin_op (fun a1 a2 -> LOr (a1, a2)) e1 e2
@@ -113,7 +122,9 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
     r2
     |> get_ast
     >>= fun a2 ->
-    r2 |> lifting e3 fun_ids g_args stack lvl |> update_ast (fun a3 -> Result (LIf (a1, a2, a3)))
+    r2
+    |> lifting e3 fun_ids g_args stack lvl
+    |> update_ast (fun a3 -> Result (LIf (a1, a2, a3)))
   | CLet (d, e) ->
     (* let id = get_id d in *)
     res
@@ -129,7 +140,9 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
     r1
     |> get_ast
     >>= fun a1 ->
-    (if List.length (get_args d) = 0 then r1 else r1 |> insert_let (get_fun_let (get_decl d) a1))
+    (if List.length (get_args d) = 0
+     then r1
+     else r1 |> insert_let (get_fun_let (get_decl d) a1))
     |> lifting e2 e2_funs g_args stack lvl
     |> update_ast (fun a2 -> Result (LIn (id, a1, a2)))
     |> filter lvl
@@ -172,12 +185,17 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
 
 let rec unwrap_app expr =
   match expr with
-  | LApp (id, args) -> (match args with
-    | [] -> expr
-    | [arg] -> LApp (unwrap_app id, [unwrap_app arg])
-    | fst :: args -> List.fold_left (fun app arg -> LApp (app, [unwrap_app arg])) (LApp (unwrap_app id, [unwrap_app fst])) args)
+  | LApp (id, args) ->
+    (match args with
+     | [] -> expr
+     | [ arg ] -> LApp (unwrap_app id, [ unwrap_app arg ])
+     | fst :: args ->
+       List.fold_left
+         (fun app arg -> LApp (app, [ unwrap_app arg ]))
+         (LApp (unwrap_app id, [ unwrap_app fst ]))
+         args)
   | LId _ | LConst _ -> expr
-  | LNot (e) -> LNot (unwrap_app e)
+  | LNot e -> LNot (unwrap_app e)
   | LOr (e1, e2) -> LOr (unwrap_app e1, unwrap_app e2)
   | LAnd (e1, e2) -> LAnd (unwrap_app e1, unwrap_app e2)
   | LEq (e1, e2) -> LEq (unwrap_app e1, unwrap_app e2)
@@ -200,7 +218,13 @@ let lambda_lifting cc_ast =
     (fun prev_res ast ->
       prev_res
       >>= fun (anon_num, ll_ast) ->
-      let funs = List.map (fun e -> match e with | LFun (id, _, _) -> id) ll_ast in
+      let funs =
+        List.map
+          (fun e ->
+            match e with
+            | LFun (id, _, _) -> id)
+          ll_ast
+      in
       lifting ast funs [] [] 0 (default_res anon_num)
       |> fun res ->
       res
@@ -208,9 +232,14 @@ let lambda_lifting cc_ast =
       >>= fun num -> res |> get_prog >>= fun p -> Result (num, ll_ast @ List.rev p))
     (Result (0, []))
     cc_ast
-  >>= fun (_, ast) -> Result ast
-  >>= fun g_ast -> Result (
-    List.fold_left (fun acc ast -> match ast with
-    | LFun (id, args, e) -> acc @ [(LFun (id, args, unwrap_app e))]
-  ) [] g_ast)
+  >>= fun (_, ast) ->
+  Result ast
+  >>= fun g_ast ->
+  Result
+    (List.fold_left
+       (fun acc ast ->
+         match ast with
+         | LFun (id, args, e) -> acc @ [ LFun (id, args, unwrap_app e) ])
+       []
+       g_ast)
 ;;
