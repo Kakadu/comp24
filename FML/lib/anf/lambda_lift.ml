@@ -9,51 +9,25 @@ open StateMonad
 
 let get_new_id n name = Base.String.concat [ name; "_ll"; Int.to_string n ]
 
-let free_vars expr bound =
-  let builtins_set = StrSet.of_list builtins in
-  let is_builtin x = StrSet.find builtins_set x in
-  
-  let rec helper expr bound =
-    match expr with
-    | Me_EUnit | Me_ENill | Me_EConst _ -> []
-    | Me_EIdentifier x -> 
-        if Set.mem bound x || is_builtin x then 
-          [] 
-        else 
-          [x]
-    | Me_EIf (e1, e2, e3) -> 
-        helper e1 bound @ helper e2 bound @ helper e3 bound
-    | Me_EFun (args, body) ->
-      let bound' = List.fold_left ~f:Set.add ~init:bound args in
-      helper body bound'
-    | Me_EApp (e1, e2) -> helper e1 bound @ helper e2 bound
-    | Me_ELet (_, name, e1, e2) ->
-      let fv1 = helper e1 bound in
-      let fv2 = helper e2 (Set.add bound name) in
-      fv1 @ fv2
-    | Me_ECons (e1, e2) -> helper e1 bound @ helper e2 bound
-    | Me_ETuple lst -> 
-        List.fold_left lst ~init:[] ~f:(fun acc e -> acc @ helper e bound)
-  in
-  
-  helper expr bound
-;;
-
-let rec ll_expr  expr =
+let rec ll_expr bindings expr =
   match expr with
-  | Me_EUnit | Me_ENill | Me_EConst _ | Me_EIdentifier _ -> return ([], expr)
+  | Me_EUnit | Me_ENill | Me_EConst _ -> return ([], expr)
+  | Me_EIdentifier id ->
+    (match StrMap.find bindings id with
+     | Some name -> return ([], Me_EIdentifier name)
+     | None -> return ([], expr))
   | Me_EIf (e1, e2, e3) ->
-    let* defs1, e1' = ll_expr e1 in
-    let* defs2, e2' = ll_expr e2 in
-    let* defs3, e3' = ll_expr e3 in
+    let* defs1, e1' = ll_expr bindings e1 in
+    let* defs2, e2' = ll_expr bindings e2 in
+    let* defs3, e3' = ll_expr bindings e3 in
     return (defs1 @ defs2 @ defs3, Me_EIf (e1', e2', e3'))
   | Me_EApp (e1, e2) ->
-    let* defs1, e1' = ll_expr e1 in
-    let* defs2, e2' = ll_expr e2 in
+    let* defs1, e1' = ll_expr bindings e1 in
+    let* defs2, e2' = ll_expr bindings e2 in
     return (defs1 @ defs2, Me_EApp (e1', e2'))
   | Me_ECons (e1, e2) ->
-    let* defs1, e1' = ll_expr e1 in
-    let* defs2, e2' = ll_expr e2 in
+    let* defs1, e1' = ll_expr bindings e1 in
+    let* defs2, e2' = ll_expr bindings e2 in
     return (defs1 @ defs2, Me_ECons (e1', e2'))
   | Me_ETuple lst ->
     let* results =
@@ -61,57 +35,54 @@ let rec ll_expr  expr =
         lst
         ~init:(return ([], []))
         ~f:(fun (acc_defs, acc_exprs) e ->
-          let* defs, e' = ll_expr e in
+          let* defs, e' = ll_expr bindings e in
           return (acc_defs @ defs, acc_exprs @ [ e' ]))
     in
     let defs, exprs = results in
     return (defs, Me_ETuple exprs)
-  | Me_ELet (flag, name, e1, e2) ->
-    let* defs1, e1' = ll_expr e1 in
-    let* defs2, e2' = ll_expr e2 in
-    (match e1' with
-     | Me_EFun (args, body) ->
-       let fvs = free_vars e1' (Set.of_list (module String) args) in
-       if List.is_empty fvs
-       then return (defs1 @ defs2, Me_ELet (flag, name, e1', e2'))
-       else (
-         let* id = fresh in
-         let new_name = get_new_id id name in
-         let new_args = fvs @ args in
-         let new_fun = Me_EFun (new_args, body) in
-         let def = new_name, new_fun in
-         let call_expr =
-           List.fold_left
-             (List.map ~f:(fun x -> Me_EIdentifier x) fvs)
-             ~init:(Me_EIdentifier new_name)
-             ~f:(fun acc arg -> Me_EApp (acc, arg))
-         in
-         return (defs1 @ [ def ] @ defs2, Me_ELet (flag, name, call_expr, e2')))
-     | _ -> return (defs1 @ defs2, Me_ELet (flag, name, e1', e2')))
+  | Me_ELet (NoRec, name, e1, e2) ->
+    (match e1 with
+     | Me_EFun (args, e1) ->
+       let* defs1, e1' = ll_expr bindings e1 in
+       let* id = fresh in
+       let new_name = get_new_id id name in
+       let def = new_name, Me_EFun (args, e1') in
+       let* defs2, e2' =
+         ll_expr (StrMap.update bindings name ~f:(fun _ -> new_name)) e2
+       in
+       return (defs1 @ [ def ] @ defs2, e2')
+     | e1 ->
+       let* defs1, e1' = ll_expr bindings e1 in
+       let* defs2, e2' = ll_expr bindings e2 in
+       return (defs1 @ defs2, Me_ELet (NoRec, name, e1', e2')))
+  | Me_ELet (Rec, name, e1, e2) ->
+    (match e1 with
+     | Me_EFun (args, e1) ->
+       let* id = fresh in
+       let new_name = get_new_id id name in
+       let bindings' = StrMap.update bindings name ~f:(fun _ -> new_name) in
+       let* defs1, e1' = ll_expr bindings' e1 in
+       let def = new_name, Me_EFun (args, e1') in
+       let* defs2, e2' = ll_expr bindings' e2 in
+       return (defs1 @ [ def ] @ defs2, e2')
+     | _ -> failwith "Not reachable")
   | Me_EFun (args, body) ->
-    let bound = Set.of_list (module String) args in
-    let fvs = free_vars expr bound in
-      if List.is_empty fvs
-        then return ([], expr)
-      else
-        let* id = fresh in
-        let name = get_new_id id "lam" in
-        let all_args = fvs @ args in
-        let* defs, body' = ll_expr body in
-        let new_fun = Me_EFun (all_args, body') in
-        let def = name, new_fun in
-        let call_expr =
-          List.fold_left
-            (List.map ~f:(fun x -> Me_EIdentifier x) fvs)
-            ~init:(Me_EIdentifier name)
-            ~f:(fun acc arg -> Me_EApp (acc, arg))
-        in
-        return (defs @ [ def ], call_expr)
+    let* id = fresh in
+    let name = get_new_id id "lam" in
+    let* defs, body' = ll_expr bindings body in
+    let new_fun = Me_EFun (args, body') in
+    let def = name, new_fun in
+    return (defs @ [ def ], Me_EIdentifier name)
 ;;
 
 let ll_binding (name, expr) =
-  let* defs, expr' = ll_expr expr in
-  return (defs @ [ name, expr' ])
+  match expr with
+  | Me_EFun (args, expr) ->
+    let* defs, expr' = ll_expr StrMap.empty expr in
+    return (defs @ [ name, Me_EFun (args, expr') ])
+  | expr ->
+    let* defs, expr' = ll_expr StrMap.empty expr in
+    return (defs @ [ name, expr' ])
 ;;
 
 let ll_decl decl =
@@ -124,10 +95,12 @@ let ll_decl decl =
     in
     return (Me_Nonrec all_defs)
   | Me_Rec bindings ->
-    RList.fold_left bindings ~init:(return []) ~f:(fun acc (name, expr) ->
-      let* defs, expr' = ll_expr expr in
-      return (acc @ defs @ [ name, expr' ]))
-    >>= fun all -> return (Me_Rec all)
+    let* all_defs =
+      RList.fold_left bindings ~init:(return []) ~f:(fun acc b ->
+        let* lifted = ll_binding b in
+        return (acc @ lifted))
+    in
+    return (Me_Rec all_defs)
 ;;
 
 let lambda_lift prog =

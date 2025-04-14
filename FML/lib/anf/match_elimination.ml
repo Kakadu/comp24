@@ -47,6 +47,7 @@ let rec pattern_bindings expr pat =
       pattern_bindings ith_expr p)
     |> List.concat
   | PConstraint (p, _) -> pattern_bindings expr p
+;;
 
 let rec_flags : Ast.rec_flag -> Me_ast.rec_flag = function
   | Rec -> Rec
@@ -65,9 +66,13 @@ let rec expr_to_mexpr expr =
     let* arg' = expr_to_mexpr arg in
     return @@ Me_EApp (f', arg')
   | EFun (pat, body) ->
-    let ids = pattern_remove pat in
-    let* body' = expr_to_mexpr body in
-    return @@ Me_EFun (ids, body')
+    let rec helper acc = function
+      | EFun (pat, body) -> helper (acc @ pattern_remove pat) body
+      | expr ->
+        let* body = expr_to_mexpr expr in
+        return @@ Me_EFun (acc, body)
+    in
+    helper (pattern_remove pat) body
   | ELetIn (rec_flag, pat, e1, e2) ->
     let ids = pattern_remove pat in
     let* e1' = expr_to_mexpr e1 in
@@ -161,7 +166,7 @@ and desugar_match e branches =
               return (acc @ [ cond ]))
         in
         return
-        @@ List.fold_right conds ~init:(Me_EConst (Me_CBool true)) ~f:(fun c acc -> 
+        @@ List.fold_right conds ~init:(Me_EConst (Me_CBool true)) ~f:(fun c acc ->
           Me_EIf (c, acc, Me_EConst (Me_CBool false)))
       | PConstraint (p, _) -> pattern_to_condition expr p
     in
@@ -180,8 +185,7 @@ and desugar_match e branches =
     in
     let* rest_expr =
       match rest with
-      | [] ->
-        return @@ Me_EIdentifier "fail"
+      | [] -> return @@ Me_EIdentifier "fail"
       | _ ->
         let new_e =
           match bind_expr_opt with
