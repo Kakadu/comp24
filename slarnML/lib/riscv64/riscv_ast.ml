@@ -33,6 +33,7 @@ type math_i =
   | Srl (* >> *)
   | Or (* | *)
   | Xor (* ^ *)
+[@@deriving show { with_path = false }]
 
 type math_op =
   | I of math_i

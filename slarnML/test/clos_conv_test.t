@@ -1,4 +1,56 @@
   $ dune exec clos_conv_test << EOF
+  > let fac n =
+  >   let rec fack n k = if (n<=1) 
+  >     then n (n-1)
+  >     else (fun m -> k * m*n)
+  >   in fack n (fun x -> x)
+  > ;;
+  > EOF
+  (let fac n=(let rec fack n k=if ((n<=1)) then ((n (n-1))) else (((fun n k n m->((k*m)*n)) n k n)) in (fack n ((fun n x->x) n))))
+  $ dune exec clos_conv_test << EOF
+  > let f a=
+  >   let g c d =
+  >     let h e = a*(c+d*e) in 
+  >     h 4 in 
+  >     g 2 3
+  > ;;
+  > EOF
+  (let f a=(let g a c d=(let h c d a e=(a*(c+(d*e))) in ((h c d a) 4)) in ((g a) 2 3)))
+  $ dune exec clos_conv_test << EOF
+  > let f a b =
+  >   let g c =
+  >     let h = (fun x -> x*(a (c*b))) in 
+  >     h a in
+  >     g 3
+  >  ;;
+  > EOF
+  (let f a b=(let g a b c=(let h c a b=((fun c a b x->(x*(a (c*b)))) c a b) in ((h c a b) a)) in ((g a b) 3)))
+  $ dune exec clos_conv_test << EOF
+  > let f a =
+  >   let g a b=
+  >     let h b c= a*(b/c) in 
+  >     h 2 3 in 
+  >     g (1+0) a
+  > ;;
+  > EOF
+  (let f a=(let g a b=(let h a a b c=(a*(b/c)) in ((h a a) 2 3)) in (g (1+0) a)))
+  $ dune exec clos_conv_test << EOF
+  > let f a =
+  >   let g b = a / b in 
+  >   let h c = (a * c) in 
+  >   ((h 1) + (g 2))
+  > ;;
+  > EOF
+  (let f a=(let g a b=(a/b) in (let h a c=(a*c) in (((h a) 1)+((g a) 2)))))
+  $ dune exec clos_conv_test << EOF
+  > let f a =
+  >   let g = (fun x -> x) in 
+  >   let h = (fun x -> a * x) in 
+  >   ((g a) + (h a))
+  > ;;
+  > EOF
+  (let f a=(let g a=((fun a x->x) a) in (let h a=((fun a x->(a*x)) a) in (((g a) a)+((h a) a)))))
+  $ dune exec clos_conv_test << EOF
   > let fac n = 
   >   let rec fack n f = if (n <= 1) then (f 1) else (fack (n - 1) (fun x -> x * (f n))) in
   >   (fack n (fun x -> x))
@@ -20,7 +72,7 @@
   >   in
   >   (g 2 3)
   > EOF
-  (let f a=(let g a c d=(let h c a e d=(a*(c+(d*e))) in ((h c a) c a 4)) in ((g a) a 2 3)))
+  (let f a=(let g a c d=(let h c a e d=(a*(c+(d*e))) in ((h c a) 4)) in ((g a) 2 3)))
   $ dune exec clos_conv_test << EOF
   > let rec fac n = if n<=1 then 1 else n * fac (n-1)
   > 

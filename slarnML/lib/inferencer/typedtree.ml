@@ -12,6 +12,7 @@ type constTy =
   | UnitTy
   | IntTy
   | BoolTy
+[@@deriving show { with_path = false }]
 
 type ty =
   | PrimTy of constTy
@@ -23,6 +24,7 @@ type undefinedType =
   | Type of ty
   | Key of binder
   | Undefined
+[@@deriving show { with_path = false }]
 
 open Res
 

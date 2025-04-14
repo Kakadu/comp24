@@ -1,4 +1,144 @@
   $ dune exec riscv64_instr_test << EOF
+  > let f a =
+  >   let g = (fun x -> x) in 
+  >   let h = (fun x -> a * x) in 
+  >   ((g a) + (h a))
+  > ;;
+  > EOF
+  .attribute unaligned_access, 0
+  .attribute stack_align, 16
+  .global main
+  main:
+  	addi sp,sp,-32
+  	sd ra,16(sp)
+  	sd s0,8(sp)
+  	sd s1,0(sp)
+  	addi s0,sp,32
+  call init_part_apps
+  call main2
+  	sd a0,24(sp)
+  call cleanup_part_apps
+  	ld a0,24(sp)
+  	ld ra,16(sp)
+  	ld s0,8(sp)
+  	ld s1,0(sp)
+  	addi sp,sp,32
+  	li a7,93
+  ecall
+  anon_1:
+  	addi sp,sp,-32
+  	sd ra,24(sp)
+  	sd s0,16(sp)
+  	addi s0,sp,32
+  	sd a1,-32(s0)
+  	sd a0,-24(s0)
+  	mv a0,a1
+  	ld ra,24(sp)
+  	ld s0,16(sp)
+  	addi sp,sp,32
+  ret
+  g:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-64(s0)
+  	lui a0,%hi(anon_1)
+  	addi a0,a0,%lo(anon_1)
+  	ld a3,-64(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  anon_2:
+  	addi sp,sp,-48
+  	sd ra,32(sp)
+  	sd s0,24(sp)
+  	addi s0,sp,48
+  	sd a1,-48(s0)
+  	sd a0,-40(s0)
+  	mul t0,a0,a1
+  	mv a0,t0
+  	ld ra,32(sp)
+  	ld s0,24(sp)
+  	addi sp,sp,48
+  ret
+  h:
+  	addi sp,sp,-64
+  	sd ra,48(sp)
+  	sd s0,40(sp)
+  	addi s0,sp,64
+  	sd a0,-64(s0)
+  	lui a0,%hi(anon_2)
+  	addi a0,a0,%lo(anon_2)
+  	ld a3,-64(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	mv a0,a0
+  	ld ra,48(sp)
+  	ld s0,40(sp)
+  	addi sp,sp,64
+  ret
+  f:
+  	addi sp,sp,-240
+  	sd ra,232(sp)
+  	sd s0,224(sp)
+  	addi s0,sp,240
+  	sd a0,-240(s0)
+  	lui a0,%hi(anon_1)
+  	addi a0,a0,%lo(anon_1)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-32(s0)
+  	sd a0,-40(s0)
+  	lui a0,%hi(anon_2)
+  	addi a0,a0,%lo(anon_2)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,2
+  call part_app
+  	sd a0,-48(s0)
+  	sd a0,-56(s0)
+  	lui a0,%hi(g)
+  	addi a0,a0,%lo(g)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-64(s0)
+  	ld a0,-64(s0)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	sd a0,-72(s0)
+  	lui a0,%hi(h)
+  	addi a0,a0,%lo(h)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,1
+  call part_app
+  	sd a0,-80(s0)
+  	ld a0,-80(s0)
+  	ld a3,-240(s0)
+  	li a2,1
+  	li a1,0
+  call part_app
+  	ld t0,-72(s0)
+  	add t1,t0,a0
+  	mv a0,t1
+  	ld ra,232(sp)
+  	ld s0,224(sp)
+  	addi sp,sp,240
+  ret
+  $ dune exec riscv64_instr_test << EOF
   > let fac n = 
   >   let rec fack n f = if (n <= 1) then (f 1) else (fack (n - 1) (fun x -> x * (f n))) in
   >   (fack n (fun x -> x))

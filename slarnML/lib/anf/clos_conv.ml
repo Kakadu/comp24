@@ -141,7 +141,7 @@ let rec closure_conversion ?(env = []) ?(prt_args = []) = function
   | Ast.App (func, args) ->
     let func_converted = closure_conversion ~env ~prt_args func in
     let args_converted = List.map (closure_conversion ~env ~prt_args) args in
-    let prt_args =
+    (* let prt_args =
       List.map
         (fun arg -> CId arg)
         (match func with
@@ -150,8 +150,8 @@ let rec closure_conversion ?(env = []) ?(prt_args = []) = function
             | None -> prt_args
             | Some (_, _, _, args) -> args)
          | _ -> prt_args)
-    in
-    CApp (func_converted, prt_args @ args_converted)
+    in *)
+    CApp (func_converted, args_converted)
 ;;
 
 let clos_conv ast =

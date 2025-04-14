@@ -23,4 +23,6 @@ type l_expr =
 [@@deriving show { with_path = false }]
 
 type gl_expr = LFun of string * string list * l_expr (* declare function *)
+[@@deriving show { with_path = false }]
+
 type ll_ast = gl_expr list [@@deriving show { with_path = false }]

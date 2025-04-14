@@ -26,9 +26,9 @@
   Riscv
   Pprint
   Quick_check_ast)
- (libraries base angstrom) ; llvm)
+ (libraries base angstrom ppx_deriving) ; llvm)
  (preprocess
-  (pps ppx_expect ppx_inline_test))
+  (pps ppx_deriving.show ppx_expect ppx_inline_test))
  (inline_tests))
 
 (include_subdirs unqualified)
