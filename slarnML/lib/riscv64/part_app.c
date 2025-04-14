@@ -91,12 +91,17 @@ struct Func copy_func(const struct Func *original) {
     copy.cif = malloc(sizeof(ffi_cif));
     if (!copy.cif) {
         fprintf(stderr, "Memory allocation failed for cif!\n");
+        free(copy.argsfun);
+        exit(1);
     }
     memcpy(copy.cif, original->cif, sizeof(ffi_cif));
 
     copy.arg_types = malloc(sizeof(ffi_type*) * (original->argscnt + 1));
     if (!copy.arg_types) {
         fprintf(stderr, "Memory allocation failed for arg_types!\n");
+        free(copy.argsfun);
+        free(copy.cif);
+        exit(1);
     }
     for (int i = 0; i < original->argscnt; i++) {
         copy.arg_types[i] = original->arg_types[i];
@@ -106,6 +111,10 @@ struct Func copy_func(const struct Func *original) {
     copy.arg_values = malloc(sizeof(void*) * original->argscnt);
     if (!copy.arg_values) {
         fprintf(stderr, "Memory allocation failed for arg_values!\n");
+        free(copy.argsfun);
+        free(copy.cif);
+        free(copy.arg_types);
+        exit(1);
     }
     memcpy(copy.arg_values, original->arg_values, sizeof(void*) * original->argscnt);
 
@@ -142,6 +151,13 @@ int64_t app_n(struct Func *f) {
 }
 
 int64_t app(struct Func *f, uint8_t cnt, int64_t *args) {
+    fprintf(stdout, "Warning: %p(%ld) [%d %d]", f->ptr, (int64_t)f, f->argscnt, f->cnt);
+    if (cnt > 0) {
+        fprintf(stdout, " -> %ld\n", args[0]);
+    } else {
+        fprintf(stdout, "\n");
+    }
+
     if (f == NULL || args == NULL) {
         fprintf(stderr, "Error: NULL pointer in app function\n");
         return -1;
@@ -160,6 +176,7 @@ int64_t app(struct Func *f, uint8_t cnt, int64_t *args) {
         int64_t ret = app_n(f);
         
         if (new_cnt > f->argscnt) {
+            fprintf(stdout, "Warning: overflow args\n");
             int64_t new_args[MAX_ARGS];
             for (int i = 0; i < new_cnt - f->argscnt && i < MAX_ARGS; i++) {
                 new_args[i] = args[i + (f->argscnt - f_cnt)];
@@ -195,10 +212,10 @@ int64_t part_app(void *f_ptr, int argcnt, int appcnt, ...) {
     int app_idx = 0;
     
     if ((int64_t)&part_apps[0] <= (int64_t)f_ptr && (int64_t)f_ptr <= (int64_t)&part_apps[MAX_APPS-1]) {
-        part_apps[last_app] = copy_func(f_ptr);
-        used_apps[last_app] = 1;
-        app_idx = last_app;
-        // app_idx = ((int64_t)f_ptr - (int64_t)&part_apps[0]) / sizeof(struct Func);
+        // part_apps[last_app] = copy_func(f_ptr);
+        // used_apps[last_app] = 1;
+        // app_idx = last_app;
+        app_idx = ((int64_t)f_ptr - (int64_t)&part_apps[0]) / sizeof(struct Func);
     } else {
         part_apps[last_app] = func_init(f_ptr, argcnt);
         used_apps[last_app] = 1;
@@ -207,7 +224,9 @@ int64_t part_app(void *f_ptr, int argcnt, int appcnt, ...) {
     
     last_app = (last_app + 1) % MAX_APPS;
     
-    return app(&part_apps[app_idx], appcnt, args);
+    int64_t ret = app(&part_apps[app_idx], appcnt, args);
+    fprintf(stdout, "Result: %ld\n", ret);
+    return ret;
 }
 
 void init_part_apps() {
@@ -248,7 +267,7 @@ void cleanup_part_apps() {
 
 #include <stdio.h>
 void print_int2(int number) {
-    printf("%d", number);
+    fprintf(stdout, "%d", number);
 }
 
 

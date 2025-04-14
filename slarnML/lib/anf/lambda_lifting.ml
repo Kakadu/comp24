@@ -82,7 +82,8 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
       | Ast.Decl _ -> (fun x -> x), update_env_decl (get_args d)
       | Ast.DeclRec _ -> update_env_decl (get_args d), fun x -> x
     in
-    res |> f1 |> update_env_fun id stack lvl |> lifting e1 (id :: fun_ids) args (id :: stack) (lvl + 1) |> f2
+    let funs = if List.length args = 0 then fun_ids else id :: fun_ids in
+    res |> f1 |> update_env_fun id stack lvl |> lifting e1 funs args (id :: stack) (lvl + 1) |> f2
   in
   match cc_ast with
   | CId id -> res |> find_name g_args fun_ids id >>= fun ast -> update_ast (fun _ -> Result ast) res
@@ -121,6 +122,7 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
     r1 |> get_ast >>= fun a -> r1 |> insert_let (get_fun_let (get_decl d) a) |> filter lvl
   | CLetIn (d, e1, e2) ->
     let id = get_id d in
+    let e2_funs = if List.length (get_args d) = 0 then fun_ids else id :: fun_ids in
     res
     |> init_func d e1
     |> fun r1 ->
@@ -128,7 +130,7 @@ let rec lifting cc_ast fun_ids g_args stack lvl res =
     |> get_ast
     >>= fun a1 ->
     (if List.length (get_args d) = 0 then r1 else r1 |> insert_let (get_fun_let (get_decl d) a1))
-    |> lifting e2 (id::fun_ids) g_args stack lvl
+    |> lifting e2 e2_funs g_args stack lvl
     |> update_ast (fun a2 -> Result (LIn (id, a1, a2)))
     |> filter lvl
   | CFun (args, e) ->
@@ -172,8 +174,8 @@ let rec unwrap_app expr =
   match expr with
   | LApp (id, args) -> (match args with
     | [] -> expr
-    | [arg] -> LApp (id, [unwrap_app arg])
-    | fst :: args -> List.fold_left (fun app arg -> LApp (app, [unwrap_app arg])) (LApp (id, [unwrap_app fst])) args)
+    | [arg] -> LApp (unwrap_app id, [unwrap_app arg])
+    | fst :: args -> List.fold_left (fun app arg -> LApp (app, [unwrap_app arg])) (LApp (unwrap_app id, [unwrap_app fst])) args)
   | LId _ | LConst _ -> expr
   | LNot (e) -> LNot (unwrap_app e)
   | LOr (e1, e2) -> LOr (unwrap_app e1, unwrap_app e2)

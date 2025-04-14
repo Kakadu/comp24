@@ -60,7 +60,7 @@
   (fun c_0(a b c)->({print_int c}))
   (fun test3(a b c)->(let a_0 = ({print_int a} in let b_0 = ({print_int b} in let c_0 = ({print_int c} in 0)))))
   (fun test10(a b c d e f g h i j)->((((((((((a+b)+c)+d)+e)+f)+g)+h)+i)+j)))
-  (fun main()->(let rez = ({{{{{{{{{{{wrap {test10 }} 1} 10} 100} 1000} 10000} 100000} 1000000} 10000000} 100000000} 1000000000} in let () = ({print_int {rez }} in let temp3 = ({{{{wrap {test3 }} 1} 10} 100} in let () = ({print_int {temp3 }} in 0))))))
+  (fun main()->(let rez = ({{{{{{{{{{{wrap {test10 }} 1} 10} 100} 1000} 10000} 100000} 1000000} 10000000} 100000000} 1000000000} in let () = ({print_int rez} in let temp3 = ({{{{wrap {test3 }} 1} 10} 100} in let () = ({print_int temp3} in 0))))))
   $ dune exec lambda_lifting_test < manytests/typed/005fix.ml
   (fun fix(f x)->({{f {fix f}} x}))
   (fun fac(self n)->(if ((n<=1)) then (1) else ((n*{self (n-1)}))))
@@ -73,7 +73,7 @@
   (fun main()->(let () = ({print_int {foo_0 11}} in 0)))
   $ dune exec lambda_lifting_test < manytests/typed/006partial2.ml
   (fun foo(a b c)->(let () = ({print_int a} in let () = ({print_int b} in let () = ({print_int c} in (a+(b*c)))))))
-  (fun main()->(let foo_0 = ({foo 1} in let foo_0_2 = ({foo_0 2} in let foo_0_2_4 = ({foo_0_2 3} in let () = ({print_int {foo_0_2_4 }} in 0))))))
+  (fun main()->(let foo_0 = ({foo 1} in let foo_0_2 = ({foo_0 2} in let foo_0_2_4 = ({foo_0_2 3} in let () = ({print_int foo_0_2_4} in 0))))))
   $ dune exec lambda_lifting_test < manytests/typed/006partial3.ml
   (fun anon$2(b a c)->({print_int c}))
   (fun anon$1(a b)->(let () = ({print_int b} in {{anon$2 b} a})))

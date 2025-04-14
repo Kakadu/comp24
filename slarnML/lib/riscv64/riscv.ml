@@ -39,12 +39,11 @@ let f_id x = x
 
 let get_fun name =
   map (fun (_, _, _, _, _, funs) ->
+    (* print_endline ("get_fun " ^ name ^ " " ^ (String.concat ", " (List.map (fun (f_name, cnt) -> f_name^"("^string_of_int cnt^")") funs))); *)
     Result
       (List.find_opt
          (fun (f_name, _) ->
-           f_name = name
-           || (String.length f_name > String.length name
-               && String.sub f_name 0 (String.length name) = name))
+           f_name = name)
          funs))
 ;;
 
@@ -615,7 +614,7 @@ let init_fun anf res =
     let args_cnt = List.length args in
     let res = res |> add_fun unique_id args_cnt in
     res
-    |> save_args (-offset_full) args
+    |> save_args (-offset_align) args
     >>= fun (s_argsi, env) ->
     Result ([], None, env)
     |> build_aexpr (Id "") e

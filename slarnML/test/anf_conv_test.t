@@ -515,31 +515,27 @@
   	in
   	(let rez=anf_app#29
   	in
-  	(let anf_app#30=(rez )
+  	(let anf_app#30=(print_int rez)
   	in
-  	(let anf_app#31=(print_int anf_app#30)
+  	(let ()=anf_app#30
   	in
-  	(let ()=anf_app#31
+  	(let anf_app#31=(test3 )
   	in
-  	(let anf_app#32=(test3 )
+  	(let anf_app#32=(wrap anf_app#31)
   	in
-  	(let anf_app#33=(wrap anf_app#32)
+  	(let anf_app#33=(anf_app#32 1)
   	in
-  	(let anf_app#34=(anf_app#33 1)
+  	(let anf_app#34=(anf_app#33 10)
   	in
-  	(let anf_app#35=(anf_app#34 10)
+  	(let anf_app#35=(anf_app#34 100)
   	in
-  	(let anf_app#36=(anf_app#35 100)
+  	(let temp3=anf_app#35
   	in
-  	(let temp3=anf_app#36
+  	(let anf_app#36=(print_int temp3)
   	in
-  	(let anf_app#37=(temp3 )
+  	(let ()=anf_app#36
   	in
-  	(let anf_app#38=(print_int anf_app#37)
-  	in
-  	(let ()=anf_app#38
-  	in
-  	0)))))))))))))))))))))))))
+  	0)))))))))))))))))))))))
   )
   $ dune exec anf_conv_test < manytests/typed/005fix.ml
   (fun fix(f x)->
@@ -666,13 +662,11 @@
   	in
   	(let foo_0_2_4=anf_app#8
   	in
-  	(let anf_app#9=(foo_0_2_4 )
+  	(let anf_app#9=(print_int foo_0_2_4)
   	in
-  	(let anf_app#10=(print_int anf_app#9)
+  	(let ()=anf_app#9
   	in
-  	(let ()=anf_app#10
-  	in
-  	0)))))))))
+  	0))))))))
   )
   $ dune exec anf_conv_test < manytests/typed/006partial3.ml
   (fun anon$2(b a c)->
