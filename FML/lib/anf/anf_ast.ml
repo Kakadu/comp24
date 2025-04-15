@@ -71,7 +71,7 @@ let fun_to_str = function
 ;;
 
 let declaration_to_str = function
-  | Based_value (name, e) -> Format.sprintf "let %s =\n  %s" name (exp_to_str e)
+  | Based_value (name, e) -> Format.sprintf "let %s = %s\n;;" name (exp_to_str e)
   | ADNoRec func_list ->
     let funs = List.map fun_to_str func_list in
     "let " ^ String.concat "\nand " funs ^ "\n;;"

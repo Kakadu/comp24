@@ -90,20 +90,25 @@ let anf_decl =
       ~init:(return @@ ACExpr expr)
       ~f:(fun (name, cexp) acc -> return @@ ALetIn(name, cexp, acc))
   in
+  let is_based_value = function
+  | Me_EConst _ | Me_EIdentifier _ | Me_EUnit | Me_ENill -> true
+  | _ -> false in
   function
   | Me_Nonrec decls ->
-  RList.fold_left decls ~init:(return []) ~f:(fun acc (name, e) ->
-    let* new_expr =
+    RList.fold_left decls ~init:(return []) ~f:(fun acc (name, e) ->
       match e with
       | Me_EFun (args, body) ->
         let* body' = handle_for_let body in
-        return (ALet (name, args, body'))
+        return (acc @ [ADNoRec [ALet (name, args, body')]])
+
+      | _ when is_based_value e ->
+        let* body' = handle_for_let e in
+        return (acc @ [Based_value (name, body')])
+
       | _ ->
         let* expr' = handle_for_let e in
-        return (ALet (name, [], expr'))
-    in
-    return (acc @ [ADNoRec [new_expr]])
-  )
+        return (acc @ [ADNoRec [ALet (name, [], expr')]])
+    )
 
   | Me_Rec decls ->
     let* bindings =
