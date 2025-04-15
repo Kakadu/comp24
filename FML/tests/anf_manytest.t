@@ -68,12 +68,10 @@
   let tmp_me0 = (5, 6)
   ;;
   
-  let a = let anf0 = (tmp_me0, 0) in
-  tuple_get anf0
+  let a = tuple_get tmp_me0 0
   ;;
   
-  let b = let anf1 = (tmp_me0, 1) in
-  tuple_get anf1
+  let b = tuple_get tmp_me0 1
   ;;
 
   $ ./anf_runner.exe << EOF
@@ -88,7 +86,7 @@
   k_ac1 anf0
   ;;
   
-  let fack_ll0 n_ac0 k = let anf1 = ( <= ) n_ac0 1 in
+  let rec fack_ll0 n_ac0 k = let anf1 = ( <= ) n_ac0 1 in
   if anf1
   then k 1
   else let anf2 = ( - ) n_ac0 1 in
@@ -137,9 +135,11 @@
   ;;
 
   $ ./anf_runner.exe < manytests/typed/002fac.ml
-  let rec lam_ll0 k n p = let anf0 = ( * ) p n in
+  let lam_ll0 k n p = let anf0 = ( * ) p n in
   k anf0
-  and fac_cps n k = let anf1 = ( = ) n 1 in
+  ;;
+  
+  let rec fac_cps n k = let anf1 = ( = ) n 1 in
   if anf1
   then k 1
   else let anf2 = ( - ) n 1 in
@@ -328,10 +328,12 @@
   ;;
 
   $ ./anf_runner.exe < manytests/typed/011mapcps.ml
-  let rec lam_ll0 f h k tl_ac0 = let anf1 = f h in
+  let lam_ll0 f h k tl_ac0 = let anf1 = f h in
   let anf0 = (anf1::tl_ac0) in
   k anf0
-  and map f xs k = let anf2 = is_empty xs in
+  ;;
+  
+  let rec map f xs k = let anf2 = is_empty xs in
   if anf2
   then k []
   else let anf3 = is_cons xs in
@@ -368,12 +370,16 @@
   iter print_int anf7
   ;;
   $ ./anf_runner.exe < manytests/typed/012fibcps.ml
-  let rec lam_ll1 a k b = let anf0 = ( + ) a b in
+  let lam_ll1 a k b = let anf0 = ( + ) a b in
   k anf0
-  and lam_ll0 k n a = let anf1 = ( - ) n 2 in
+  ;;
+  
+  let lam_ll0 k n a = let anf1 = ( - ) n 2 in
   let anf2 = lam_ll1 a k in
   fib anf1 anf2
-  and fib n k = let anf3 = ( < ) n 2 in
+  ;;
+  
+  let rec fib n k = let anf3 = ( < ) n 2 in
   if anf3
   then k n
   else let anf4 = ( - ) n 1 in
@@ -504,7 +510,7 @@
   else fail
   ;;
   
-  let helper_ll0 acc xs = let anf3 = is_empty xs in
+  let rec helper_ll0 acc xs = let anf3 = is_empty xs in
   if anf3
   then acc
   else let anf4 = is_cons xs in
@@ -633,7 +639,7 @@
   else fail
   ;;
   
-  let helper_ll1 xs = let anf69 = is_empty xs in
+  let rec helper_ll1 xs = let anf69 = is_empty xs in
   if anf69
   then []
   else let anf70 = is_cons xs in
@@ -660,8 +666,10 @@
   else fail
   ;;
   
-  let rec lam_ll2 h a = (h, a)
-  and cartesian xs ys = let anf74 = is_empty xs in
+  let lam_ll2 h a = (h, a)
+  ;;
+  
+  let rec cartesian xs ys = let anf74 = is_empty xs in
   if anf74
   then []
   else let anf75 = is_cons xs in

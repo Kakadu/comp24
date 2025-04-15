@@ -2,6 +2,7 @@
   > let f x = let g y = x + y in g 5;;
   > EOF
   let g_ll0 = (fun x y -> ((( + ) x) y))
+  
   let f = (fun x -> ((g_ll0 x) 5))
 
   $ ./lambda_lift_runner.exe << EOF
@@ -110,6 +111,7 @@
   else if true
   then 325
   else fail)
+  
   let f = (lam_ll0 (=))
 
   $ ./lambda_lift_runner.exe < manytests/typed/001fac.ml
@@ -121,7 +123,7 @@
   0
 
   $ ./lambda_lift_runner.exe < manytests/typed/002fac.ml
-  let lam_ll0 = (fun p -> (k ((( * ) p) n)))
+  let lam_ll0 = (fun k n p -> (k ((( * ) p) n)))
   
   let rec fac_cps = (fun n k -> if ((( = ) n) 1)
   then (k 1)
@@ -234,7 +236,7 @@
   let temp = ((f_ll0 1), (f_ll0 true))
 
   $ ./lambda_lift_runner.exe < manytests/typed/011mapcps.ml
-  let lam_ll0 = (fun tl_ac0 -> (k ((f h)::tl_ac0)))
+  let lam_ll0 = (fun f h k tl_ac0 -> (k ((f h)::tl_ac0)))
   
   let rec map = (fun f xs k -> if (is_empty xs)
   then (k [])
@@ -259,9 +261,9 @@
   
   let main = ((iter print_int) (((map lam_ll1) (1::(2::(3::[])))) lam_ll2))
   $ ./lambda_lift_runner.exe < manytests/typed/012fibcps.ml
-  let lam_ll1 = (fun b -> (k ((( + ) a) b)))
+  let lam_ll1 = (fun a k b -> (k ((( + ) a) b)))
   
-  let lam_ll0 = (fun a -> ((fib ((( - ) n) 2)) lam_ll1))
+  let lam_ll0 = (fun k n a -> ((fib ((( - ) n) 2)) ((lam_ll1 a) k)))
   
   let rec fib = (fun n k -> if ((( < ) n) 2)
   then (k n)
@@ -281,9 +283,9 @@
   ((f h) (((fold_right f) acc) tl))
   else fail)
   
-  let lam_ll0 = (fun b g x -> (g ((f x) b)))
+  let lam_ll0 = (fun f b g x -> (g ((f x) b)))
   
-  let foldl = (fun f a bs -> ((((fold_right lam_ll0) id) bs) a))
+  let foldl = (fun f a bs -> ((((fold_right (lam_ll0 f)) id) bs) a))
   
   let lam_ll1 = (fun x y -> ((( * ) x) y))
   
@@ -296,9 +298,9 @@
   let b = ((tuple_get p) 1) in
   ((f a), (f b)))
   
-  let lam_ll1 = (fun li x -> ((li (self l_ac0)) x))
+  let lam_ll1 = (fun l_ac0 self li x -> ((li (self l_ac0)) x))
   
-  let lam_ll0 = (fun self l_ac0 -> ((map lam_ll1) l_ac0))
+  let lam_ll0 = (fun self l_ac0 -> ((map ((lam_ll1 l_ac0) self)) l_ac0))
   
   let fixpoly = (fun l -> ((fix lam_ll0) l))
   
@@ -418,7 +420,7 @@
   ((iter f) tl)
   else fail)
   
-  let lam_ll2 = (fun a -> (h, a))
+  let lam_ll2 = (fun h a -> (h, a))
   
   let rec cartesian = (fun xs ys -> if (is_empty xs)
   then []
