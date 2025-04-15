@@ -656,9 +656,10 @@ let start_env =
     ; "not", TFunction (TBool, TBool)
     ; "print_int", TFunction (TInt, TUnit)
     ; "is_empty", TFunction (TList (TVar 1), TBool)
-    ; "list_head", TFunction (TList (TVar 1), TVar 1)
-    ; "list_tail", TFunction (TList (TVar 1), TList (TVar 1))
-    ; "tuple_element", TFunction (TVar 1, TFunction (TInt, TVar 2))
+    ; "is_cons", TFunction (TList (TVar 1), TBool)
+    ; "hd_list_get", TFunction (TList (TVar 1), TVar 1)
+    ; "tl_list_get", TFunction (TList (TVar 1), TList (TVar 1))
+    ; "tuple_get", TFunction (TVar 1, TFunction (TInt, TVar 2))
     ; "fail", TVar 1
     ]
   in

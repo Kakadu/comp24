@@ -6,6 +6,13 @@
   
   let f x = g_ll0 x 5
   ;;
+  
+  Типы до приведения в ANF:
+  val f : int -> int
+  
+  Типы после приведения в ANF:
+  val g_ll0 : int -> int -> int
+  val f : int -> int
 
   $ ./anf_runner.exe << EOF
   > let length xs = match xs with
@@ -41,6 +48,12 @@
   then 0
   else fail
   ;;
+  
+  Типы до приведения в ANF:
+  val length : 'a list -> int
+  
+  Типы после приведения в ANF:
+  val length : 'a list -> int
 
   $ ./anf_runner.exe << EOF
   > let is_empty x = x+1
@@ -61,6 +74,14 @@
   ( + ) 1 anf2
   else fail
   ;;
+  
+  Типы до приведения в ANF:
+  val is_empty : int -> int
+  val length : 'a list -> int
+  
+  Типы после приведения в ANF:
+  val is_empty_ac0 : int -> int
+  val length : 'a list -> int
 
   $ ./anf_runner.exe << EOF
   > let (a, b) = (5,6)
@@ -73,6 +94,15 @@
   
   let b = tuple_get tmp_me0 1
   ;;
+  
+  Типы до приведения в ANF:
+  val a : int
+  val b : int
+  
+  Типы после приведения в ANF:
+  val tmp_me0 : int * int
+  val a : int * int
+  val b : 'a
 
   $ ./anf_runner.exe << EOF
   > let fac n =
@@ -99,6 +129,15 @@
   
   let fac n = fack_ll0 n lam_ll2
   ;;
+  
+  Типы до приведения в ANF:
+  val fac : int -> int
+  
+  Типы после приведения в ANF:
+  val lam_ll1 : (int -> 'a) -> int -> int -> 'a
+  val fack_ll0 : int -> (int -> 'a) -> 'a
+  val lam_ll2 : 'a -> 'a
+  val fac : int -> int
 
   $ ./anf_runner.exe << EOF
   > let f x = match x with
@@ -119,6 +158,13 @@
   
   let f = lam_ll0 (=)
   ;;
+  
+  Типы до приведения в ANF:
+  val f : int -> int
+  
+  Типы после приведения в ANF:
+  val lam_ll0 : ('a -> int -> bool) -> 'a -> int
+  val f : int -> int
 
   $ ./anf_runner.exe < manytests/typed/001fac.ml
   let rec fac n = let anf0 = ( <= ) n 1 in
@@ -133,6 +179,14 @@
   let () = print_int anf3 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val fac : int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val fac : int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/002fac.ml
   let lam_ll0 k n p = let anf0 = ( * ) p n in
@@ -154,6 +208,16 @@
   let () = print_int anf4 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val fac_cps : int -> (int -> 'a) -> 'a
+  val main : int
+  
+  Типы после приведения в ANF:
+  val lam_ll0 : (int -> 'a) -> int -> int -> 'a
+  val fac_cps : int -> (int -> 'a) -> 'a
+  val lam_ll1 : 'a -> 'a
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/003fib.ml
   let rec fib_acc a b n = let anf0 = ( = ) n 1 in
@@ -180,6 +244,16 @@
   let () = print_int anf7 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val fib_acc : int -> int -> int -> int
+  val fib : int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val fib_acc : int -> int -> int -> int
+  val fib : int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/004manyargs.ml
   let wrap f = let anf0 = ( = ) 1 1 in
@@ -210,6 +284,18 @@
   let temp2 = wrap test3 1 10 100 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val wrap : 'a -> 'a
+  val test3 : int -> int -> int -> int
+  val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val wrap : 'a -> 'a
+  val test3 : int -> int -> int -> int
+  val test10 : int -> int -> int -> int -> int -> int -> int -> int -> int -> int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/005fix.ml
   let rec fix f x = let anf0 = fix f in
@@ -228,6 +314,16 @@
   let () = print_int anf4 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fac : (int -> int) -> int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val fac : (int -> int) -> int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/006partial.ml
   let lam_ll0 foo = ( + ) foo 2
@@ -251,6 +347,17 @@
   let () = print_int anf3 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val foo : int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val lam_ll0 : int -> int
+  val lam_ll1 : int -> int
+  val foo : bool -> int -> int
+  val foo_ac0 : int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/006partial2.ml
   let foo a b c = let () = print_int a in
@@ -266,6 +373,14 @@
   let () = print_int foo_ac2 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val foo : int -> int -> int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val foo : int -> int -> int -> int
+  val main : int
   $ ./anf_runner.exe < manytests/typed/006partial3.ml
   let lam_ll1 c = print_int c
   ;;
@@ -281,6 +396,16 @@
   let main = let () = foo 4 8 9 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val foo : int -> int -> int -> unit
+  val main : int
+  
+  Типы после приведения в ANF:
+  val lam_ll1 : int -> unit
+  val lam_ll0 : int -> int -> unit
+  val foo : int -> int -> int -> unit
+  val main : int
   $ ./anf_runner.exe < manytests/typed/007order.ml
   let _start () () a () b _c () d __ = let anf0 = ( + ) a b in
   let () = print_int anf0 in
@@ -299,6 +424,14 @@
   let anf3 = _start anf4 anf5 3 anf6 100 1000 anf7 10000 anf9 in
   print_int anf3
   ;;
+  
+  Типы до приведения в ANF:
+  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main : unit
+  
+  Типы после приведения в ANF:
+  val _start : unit -> unit -> int -> unit -> int -> int -> unit -> int -> int -> int
+  val main : unit
   $ ./anf_runner.exe < manytests/typed/008ascription.ml
   let addi f g x = let anf0 = g x in
   f x anf0
@@ -317,6 +450,16 @@
   let () = print_int anf2 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val addi : ('a -> bool -> int) -> ('a -> bool) -> 'a -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val addi : ('a -> 'b -> 'c) -> ('a -> 'b) -> 'a -> 'c
+  val lam_ll0 : int -> bool -> int
+  val lam_ll1 : int -> bool
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/009let_poly.ml
   let f_ll0 x = x
@@ -326,6 +469,13 @@
   let anf1 = f_ll0 true in
   (anf0, anf1)
   ;;
+  
+  Типы до приведения в ANF:
+  val temp : int * bool
+  
+  Типы после приведения в ANF:
+  val f_ll0 : 'a -> 'a
+  val temp : int * bool
 
   $ ./anf_runner.exe < manytests/typed/011mapcps.ml
   let lam_ll0 f h k tl_ac0 = let anf1 = f h in
@@ -369,6 +519,19 @@
   let anf7 = map lam_ll1 anf8 lam_ll2 in
   iter print_int anf7
   ;;
+  
+  Типы до приведения в ANF:
+  val map : ('a -> 'b) -> 'a list -> ('b list -> 'c) -> 'c
+  val iter : ('a -> 'b) -> 'a list -> unit
+  val main : unit
+  
+  Типы после приведения в ANF:
+  val lam_ll0 : ('a -> 'b) -> 'a -> ('b list -> 'c) -> 'b list -> 'c
+  val map : ('a -> 'b) -> 'a list -> ('b list -> 'c) -> 'c
+  val iter : ('a -> 'b) -> 'a list -> unit
+  val lam_ll1 : int -> int
+  val lam_ll2 : 'a -> 'a
+  val main : unit
   $ ./anf_runner.exe < manytests/typed/012fibcps.ml
   let lam_ll1 a k b = let anf0 = ( + ) a b in
   k anf0
@@ -393,6 +556,13 @@
   let main = let anf6 = fib 6 lam_ll2 in
   print_int anf6
   ;;
+  
+  Типы до приведения в ANF:
+  val fib : int -> (int -> 'a) -> 'a
+  val main : unit
+  
+  Типы после приведения в ANF:
+  Infer error:
   $ ./anf_runner.exe < manytests/typed/013foldfoldr.ml
   let id x = x
   ;;
@@ -426,6 +596,20 @@
   let anf5 = foldl lam_ll1 1 anf6 in
   print_int anf5
   ;;
+  
+  Типы до приведения в ANF:
+  val id : 'a -> 'a
+  val fold_right : ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
+  val foldl : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+  val main : unit
+  
+  Типы после приведения в ANF:
+  val id : 'a -> 'a
+  val fold_right : ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
+  val lam_ll0 : ('a -> 'b -> 'c) -> 'b -> ('c -> 'd) -> 'a -> 'd
+  val foldl : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+  val lam_ll1 : int -> int -> int
+  val main : unit
 
   $ ./anf_runner.exe < manytests/typed/015tuples.ml
   let rec fix f x = let anf0 = fix f in
@@ -496,6 +680,30 @@
   let () = print_int anf17 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val map : ('a -> 'b) -> 'a * 'a -> 'b * 'b
+  val fixpoly : (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) * (('a -> 'b) * ('a -> 'b) -> 'a -> 'b) -> ('a -> 'b) * ('a -> 'b)
+  val feven : 'a * (int -> int) -> int -> int
+  val fodd : (int -> int) * 'a -> int -> int
+  val tie : (int -> int) * (int -> int)
+  val meven : int -> int
+  val modd : int -> int
+  val main : int
+  
+  Типы после приведения в ANF:
+  val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
+  val map : ('a -> 'b) -> 'c -> 'b * 'b
+  val lam_ll1 : 'a -> ('a -> 'b) -> ('b -> 'c -> 'd) -> 'c -> 'd
+  val lam_ll0 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+  val fixpoly : 'a -> ('b -> 'c) * ('b -> 'c)
+  val feven : 'a -> int -> int
+  val fodd : 'a -> int -> int
+  val tie : ('a -> 'b) * ('a -> 'b)
+  val meven : int -> int
+  val modd : int -> int
+  val main : int
 
   $ ./anf_runner.exe < manytests/typed/016lists.ml
   let rec length xs = let anf0 = is_empty xs in
@@ -698,3 +906,26 @@
   let () = print_int anf82 in
   0
   ;;
+  
+  Типы до приведения в ANF:
+  val length : 'a list -> int
+  val length_tail : 'a list -> int
+  val map : ('a -> 'b) -> 'a list -> 'b list
+  val append : 'a list -> 'a list -> 'a list
+  val concat : 'a list list -> 'a list
+  val iter : ('a -> unit) -> 'a list -> unit
+  val cartesian : 'a list -> 'b list -> 'a * 'b list
+  val main : int
+  
+  Типы после приведения в ANF:
+  val length : 'a list -> int
+  val helper_ll0 : int -> 'a list -> int
+  val length_tail : 'a list -> int
+  val map : ('a -> 'b) -> 'a list -> 'b list
+  val append : 'a list -> 'a list -> 'a list
+  val helper_ll1 : 'a list list -> 'a list
+  val concat : 'a list list -> 'a list
+  val iter : ('a -> unit) -> 'a list -> unit
+  val lam_ll2 : 'a -> 'b -> 'a * 'b
+  val cartesian : 'a list -> 'b list -> 'a * 'b list
+  val main : int
