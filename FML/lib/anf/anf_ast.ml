@@ -23,6 +23,7 @@ and aexpr =
 type anf_binding = ALet of string * string list * aexpr
 
 type anf_decl =
+  | Based_value of string * aexpr
   | ADNoRec of anf_binding list
   | ADREC of anf_binding list
 
