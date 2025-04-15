@@ -659,7 +659,7 @@ let start_env =
     ; "list_head", TFunction (TList (TVar 1), TVar 1)
     ; "list_tail", TFunction (TList (TVar 1), TList (TVar 1))
     ; "tuple_element", TFunction (TVar 1, TFunction (TInt, TVar 2))
-    ; "fail_match", TVar 1
+    ; "fail", TVar 1
     ]
   in
   let env = TypeEnv.empty in

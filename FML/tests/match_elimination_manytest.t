@@ -55,8 +55,8 @@
   > let (a, b) = (5,6)
   > EOF
   let tmp_me0 = (5, 6)
-  let a = (tuple_get (tmp_me0, 0))
-  let b = (tuple_get (tmp_me0, 1))
+  let a = ((tuple_get tmp_me0) 0)
+  let b = ((tuple_get tmp_me0) 1)
 
   $ ./match_elimination_runner.exe << EOF
   > let fac n =

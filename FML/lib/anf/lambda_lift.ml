@@ -9,13 +9,12 @@ open StateMonad
 
 let get_new_id n name = Base.String.concat [ name; "_ll"; Int.to_string n ]
 
-let rec ll_expr bindings expr =
-  match expr with
-  | Me_EUnit | Me_ENill | Me_EConst _ -> return ([], expr)
+let rec ll_expr bindings = function
+  | (Me_EUnit | Me_ENill | Me_EConst _) as expr -> return ([], expr)
   | Me_EIdentifier id ->
     (match StrMap.find bindings id with
      | Some name -> return ([], Me_EIdentifier name)
-     | None -> return ([], expr))
+     | None -> return ([], Me_EIdentifier id))
   | Me_EIf (e1, e2, e3) ->
     let* defs1, e1' = ll_expr bindings e1 in
     let* defs2, e2' = ll_expr bindings e2 in
@@ -46,7 +45,7 @@ let rec ll_expr bindings expr =
        let* defs1, e1' = ll_expr bindings e1 in
        let* id = fresh in
        let new_name = get_new_id id name in
-       let def = new_name, Me_EFun (args, e1') in
+       let def = Me_Nonrec [ new_name, Me_EFun (args, e1') ] in
        let* defs2, e2' =
          ll_expr (StrMap.update bindings name ~f:(fun _ -> new_name)) e2
        in
@@ -62,7 +61,7 @@ let rec ll_expr bindings expr =
        let new_name = get_new_id id name in
        let bindings' = StrMap.update bindings name ~f:(fun _ -> new_name) in
        let* defs1, e1' = ll_expr bindings' e1 in
-       let def = new_name, Me_EFun (args, e1') in
+       let def = Me_Rec [ new_name, Me_EFun (args, e1') ] in
        let* defs2, e2' = ll_expr bindings' e2 in
        return (defs1 @ [ def ] @ defs2, e2')
      | _ -> failwith "Not reachable")
@@ -71,7 +70,7 @@ let rec ll_expr bindings expr =
     let name = get_new_id id "lam" in
     let* defs, body' = ll_expr bindings body in
     let new_fun = Me_EFun (args, body') in
-    let def = name, new_fun in
+    let def = Me_Nonrec [ name, new_fun ] in
     return (defs @ [ def ], Me_EIdentifier name)
 ;;
 
@@ -79,33 +78,39 @@ let ll_binding (name, expr) =
   match expr with
   | Me_EFun (args, expr) ->
     let* defs, expr' = ll_expr StrMap.empty expr in
-    return (defs @ [ name, Me_EFun (args, expr') ])
+    return (defs, (name, Me_EFun (args, expr')))
   | expr ->
     let* defs, expr' = ll_expr StrMap.empty expr in
-    return (defs @ [ name, expr' ])
+    return (defs, (name, expr'))
 ;;
 
 let ll_decl decl =
   match decl with
   | Me_Nonrec bindings ->
-    let* all_defs =
-      RList.fold_left bindings ~init:(return []) ~f:(fun acc b ->
-        let* lifted = ll_binding b in
-        return (acc @ lifted))
+    let* all_defs, curr_defs =
+      RList.fold_left
+        bindings
+        ~init:(return ([], []))
+        ~f:(fun (acc_defs, acc_curr) b ->
+          let* defs, binding = ll_binding b in
+          return (acc_defs @ defs, acc_curr @ [ binding ]))
     in
-    return (Me_Nonrec all_defs)
+    return (all_defs, Me_Nonrec curr_defs)
   | Me_Rec bindings ->
-    let* all_defs =
-      RList.fold_left bindings ~init:(return []) ~f:(fun acc b ->
-        let* lifted = ll_binding b in
-        return (acc @ lifted))
+    let* all_defs, curr_defs =
+      RList.fold_left
+        bindings
+        ~init:(return ([], []))
+        ~f:(fun (acc_defs, acc_curr) b ->
+          let* defs, binding = ll_binding b in
+          return (acc_defs @ defs, acc_curr @ [ binding ]))
     in
-    return (Me_Rec all_defs)
+    return (all_defs, Me_Rec curr_defs)
 ;;
 
 let lambda_lift prog =
   StateMonad.run
     (RList.fold_left prog ~init:(return []) ~f:(fun acc decl ->
-       let* d = ll_decl decl in
-       return (acc @ [ d ])))
+       let* decls, d = ll_decl decl in
+       return (acc @ decls @ [ d ])))
 ;;

@@ -31,6 +31,7 @@
   > let f = let y x = x + 1 in y 3;;
   > EOF
   let y_ll0 = (fun x -> ((( + ) x) 1))
+  
   let f = (y_ll0 3)
 
   $ ./lambda_lift_runner.exe << EOF
@@ -75,8 +76,8 @@
   > let (a, b) = (5,6)
   > EOF
   let tmp_me0 = (5, 6)
-  let a = (tuple_get (tmp_me0, 0))
-  let b = (tuple_get (tmp_me0, 1))
+  let a = ((tuple_get tmp_me0) 0)
+  let b = ((tuple_get tmp_me0) 1)
 
   $ ./lambda_lift_runner.exe << EOF
   > let fac n =
@@ -87,10 +88,13 @@
   > fack n (fun x -> x)
   > EOF
   let lam_ll1 = (fun k_ac1 n_ac2 m -> (k_ac1 ((( * ) m) n_ac2)))
-  let fack_ll0 = (fun n_ac0 k -> if ((( <= ) n_ac0) 1)
+  
+  let rec fack_ll0 = (fun n_ac0 k -> if ((( <= ) n_ac0) 1)
   then (k 1)
   else ((fack_ll0 ((( - ) n_ac0) 1)) ((lam_ll1 k) n_ac0)))
+  
   let lam_ll2 = (fun x -> x)
+  
   let fac = (fun n -> ((fack_ll0 n) lam_ll2))
 
   $ ./lambda_lift_runner.exe << EOF
@@ -117,12 +121,14 @@
   0
 
   $ ./lambda_lift_runner.exe < manytests/typed/002fac.ml
-  let rec lam_ll0 = (fun k n p -> (k ((( * ) p) n)))
-  and fac_cps = (fun n k -> if ((( = ) n) 1)
+  let lam_ll0 = (fun p -> (k ((( * ) p) n)))
+  
+  let rec fac_cps = (fun n k -> if ((( = ) n) 1)
   then (k 1)
   else ((fac_cps ((( - ) n) 1)) ((lam_ll0 k) n)))
   
   let lam_ll1 = (fun print_int_ac0 -> print_int_ac0)
+  
   let main = let () = (print_int ((fac_cps 4) lam_ll1)) in
   0
 
@@ -170,7 +176,9 @@
 
   $ ./lambda_lift_runner.exe < manytests/typed/006partial.ml
   let lam_ll0 = (fun foo -> ((( + ) foo) 2))
+  
   let lam_ll1 = (fun foo -> ((( * ) foo) 10))
+  
   let foo = (fun b -> if b
   then lam_ll0
   else lam_ll1)
@@ -193,8 +201,10 @@
   0
   $ ./lambda_lift_runner.exe < manytests/typed/006partial3.ml
   let lam_ll1 = (fun c -> (print_int c))
+  
   let lam_ll0 = (fun b -> let () = (print_int b) in
   lam_ll1)
+  
   let foo = (fun a -> let () = (print_int a) in
   lam_ll0)
   
@@ -212,17 +222,21 @@
   let lam_ll0 = (fun x b -> if b
   then ((( + ) x) 1)
   else ((( * ) x) 2))
+  
   let lam_ll1 = (fun _start -> ((( = ) ((( / ) _start) 2)) 0))
+  
   let main = let () = (print_int (((addi lam_ll0) lam_ll1) 4)) in
   0
 
   $ ./lambda_lift_runner.exe < manytests/typed/009let_poly.ml
   let f_ll0 = (fun x -> x)
+  
   let temp = ((f_ll0 1), (f_ll0 true))
 
   $ ./lambda_lift_runner.exe < manytests/typed/011mapcps.ml
-  let rec lam_ll0 = (fun f h k tl_ac0 -> (k ((f h)::tl_ac0)))
-  and map = (fun f xs k -> if (is_empty xs)
+  let lam_ll0 = (fun tl_ac0 -> (k ((f h)::tl_ac0)))
+  
+  let rec map = (fun f xs k -> if (is_empty xs)
   then (k [])
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
@@ -240,16 +254,21 @@
   else fail)
   
   let lam_ll1 = (fun x -> ((( + ) x) 1))
+  
   let lam_ll2 = (fun x -> x)
+  
   let main = ((iter print_int) (((map lam_ll1) (1::(2::(3::[])))) lam_ll2))
   $ ./lambda_lift_runner.exe < manytests/typed/012fibcps.ml
-  let rec lam_ll1 = (fun a k b -> (k ((( + ) a) b)))
-  and lam_ll0 = (fun k n a -> ((fib ((( - ) n) 2)) ((lam_ll1 a) k)))
-  and fib = (fun n k -> if ((( < ) n) 2)
+  let lam_ll1 = (fun b -> (k ((( + ) a) b)))
+  
+  let lam_ll0 = (fun a -> ((fib ((( - ) n) 2)) lam_ll1))
+  
+  let rec fib = (fun n k -> if ((( < ) n) 2)
   then (k n)
   else ((fib ((( - ) n) 1)) ((lam_ll0 k) n)))
   
   let lam_ll2 = (fun x -> x)
+  
   let main = (print_int ((fib 6) lam_ll2))
   $ ./lambda_lift_runner.exe < manytests/typed/013foldfoldr.ml
   let id = (fun x -> x)
@@ -262,10 +281,12 @@
   ((f h) (((fold_right f) acc) tl))
   else fail)
   
-  let lam_ll0 = (fun f b g x -> (g ((f x) b)))
-  let foldl = (fun f a bs -> ((((fold_right (lam_ll0 f)) id) bs) a))
+  let lam_ll0 = (fun b g x -> (g ((f x) b)))
+  
+  let foldl = (fun f a bs -> ((((fold_right lam_ll0) id) bs) a))
   
   let lam_ll1 = (fun x y -> ((( * ) x) y))
+  
   let main = (print_int (((foldl lam_ll1) 1) (1::(2::(3::[])))))
 
   $ ./lambda_lift_runner.exe < manytests/typed/015tuples.ml
@@ -275,8 +296,10 @@
   let b = ((tuple_get p) 1) in
   ((f a), (f b)))
   
-  let lam_ll1 = (fun l_ac0 self li x -> ((li (self l_ac0)) x))
-  let lam_ll0 = (fun self l_ac0 -> ((map ((lam_ll1 l_ac0) self)) l_ac0))
+  let lam_ll1 = (fun li x -> ((li (self l_ac0)) x))
+  
+  let lam_ll0 = (fun self l_ac0 -> ((map lam_ll1) l_ac0))
+  
   let fixpoly = (fun l -> ((fix lam_ll0) l))
   
   let feven = (fun p n -> let e = ((tuple_get p) 0) in
@@ -317,13 +340,14 @@
   ((( + ) 1) (length tl))
   else fail)
   
-  let helper_ll0 = (fun acc xs -> if (is_empty xs)
+  let rec helper_ll0 = (fun acc xs -> if (is_empty xs)
   then acc
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((helper_ll0 ((( + ) acc) 1)) tl)
   else fail)
+  
   let length_tail = (helper_ll0 0)
   
   let rec map = (fun f xs -> if (is_empty xs)
@@ -375,13 +399,14 @@
   (x::((append xs_ac0) ys))
   else fail)
   
-  let helper_ll1 = (fun xs -> if (is_empty xs)
+  let rec helper_ll1 = (fun xs -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
   ((append h) (helper_ll1 tl))
   else fail)
+  
   let concat = helper_ll1
   
   let rec iter = (fun f xs -> if (is_empty xs)
@@ -393,8 +418,9 @@
   ((iter f) tl)
   else fail)
   
-  let rec lam_ll2 = (fun h a -> (h, a))
-  and cartesian = (fun xs ys -> if (is_empty xs)
+  let lam_ll2 = (fun a -> (h, a))
+  
+  let rec cartesian = (fun xs ys -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in

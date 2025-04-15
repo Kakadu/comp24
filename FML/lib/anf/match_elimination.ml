@@ -42,7 +42,7 @@ let rec pattern_bindings expr pat =
   | PTuple pats ->
     List.mapi pats ~f:(fun i p ->
       let ith_expr =
-        Me_EApp (Me_EIdentifier "tuple_get", Me_ETuple [ expr; Me_EConst (Me_Cint i) ])
+        Me_EApp (Me_EApp (Me_EIdentifier "tuple_get", expr), Me_EConst (Me_Cint i))
       in
       pattern_bindings ith_expr p)
     |> List.concat
@@ -159,8 +159,7 @@ and desugar_match e branches =
             ~init:(return [])
             ~f:(fun acc (i, p) ->
               let ith_expr =
-                Me_EApp
-                  (Me_EIdentifier "tuple_get", Me_ETuple [ expr; Me_EConst (Me_Cint i) ])
+                Me_EApp (Me_EApp (Me_EIdentifier "tuple_get", expr), Me_EConst (Me_Cint i))
               in
               let* cond = pattern_to_condition ith_expr p in
               return (acc @ [ cond ]))
