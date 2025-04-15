@@ -6,9 +6,10 @@ open Fml_lib.Parser
 open Fml_lib.Inferencer
 open Fml_lib.A_conv
 open Fml_lib.Match_elimination
-open Fml_lib.Lambda_lift
-open Fml_lib.Me_ast
 open Fml_lib.C_conv
+open Fml_lib.Anf
+open Fml_lib.Lambda_lift
+open Fml_lib.Anf_ast
 
 let () =
   let input = Stdio.In_channel.input_all Stdlib.stdin in
@@ -26,6 +27,7 @@ let () =
     let ast_me = match_elimination ast in
     let ast_cc = cc_program ast_me in
     let ast_ll = lambda_lift ast_cc in
-    Format.printf "%a\n" pp_me_program ast_ll
+    let ast_anf = anf ast_ll in
+    Format.printf "%a\n" pp_anf_program ast_anf
   | Error message -> Format.printf "%s" message
 ;;

@@ -1,4 +1,10 @@
   $ ./lambda_lift_runner.exe << EOF
+  > let f x = let g y = x + y in g 5;;
+  > EOF
+  let g_ll0 = (fun x y -> ((( + ) x) y))
+  let f = (fun x -> ((g_ll0 x) 5))
+
+  $ ./lambda_lift_runner.exe << EOF
   > let length xs = match xs with
   > | a::b::[] -> 2
   > | a::[] -> 1
@@ -93,13 +99,14 @@
   > | 12 -> 12
   > | _ -> 325
   > EOF
-  let f = (fun x -> if (((=) x) 1)
+  let lam_ll0 = (fun (=) x -> if (((=) x) 1)
   then 12
   else if (((=) x) 12)
   then 12
   else if true
   then 325
   else fail)
+  let f = (lam_ll0 (=))
 
   $ ./lambda_lift_runner.exe < manytests/typed/001fac.ml
   let rec fac = (fun n -> if ((( <= ) n) 1)
@@ -110,10 +117,10 @@
   0
 
   $ ./lambda_lift_runner.exe < manytests/typed/002fac.ml
-  let rec lam_ll0 = (fun p -> (k ((( * ) p) n)))
+  let rec lam_ll0 = (fun k n p -> (k ((( * ) p) n)))
   and fac_cps = (fun n k -> if ((( = ) n) 1)
   then (k 1)
-  else ((fac_cps ((( - ) n) 1)) lam_ll0))
+  else ((fac_cps ((( - ) n) 1)) ((lam_ll0 k) n)))
   
   let lam_ll1 = (fun print_int_ac0 -> print_int_ac0)
   let main = let () = (print_int ((fac_cps 4) lam_ll1)) in
@@ -214,13 +221,13 @@
   let temp = ((f_ll0 1), (f_ll0 true))
 
   $ ./lambda_lift_runner.exe < manytests/typed/011mapcps.ml
-  let rec lam_ll0 = (fun tl_ac0 -> (k ((f h)::tl_ac0)))
+  let rec lam_ll0 = (fun f h k tl_ac0 -> (k ((f h)::tl_ac0)))
   and map = (fun f xs k -> if (is_empty xs)
   then (k [])
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
-  (((map f) tl) lam_ll0)
+  (((map f) tl) (((lam_ll0 f) h) k))
   else fail)
   
   let rec iter = (fun f xs -> if (is_empty xs)
@@ -236,11 +243,11 @@
   let lam_ll2 = (fun x -> x)
   let main = ((iter print_int) (((map lam_ll1) (1::(2::(3::[])))) lam_ll2))
   $ ./lambda_lift_runner.exe < manytests/typed/012fibcps.ml
-  let rec lam_ll1 = (fun b -> (k ((( + ) a) b)))
-  and lam_ll0 = (fun a -> ((fib ((( - ) n) 2)) lam_ll1))
+  let rec lam_ll1 = (fun a k b -> (k ((( + ) a) b)))
+  and lam_ll0 = (fun k n a -> ((fib ((( - ) n) 2)) ((lam_ll1 a) k)))
   and fib = (fun n k -> if ((( < ) n) 2)
   then (k n)
-  else ((fib ((( - ) n) 1)) lam_ll0))
+  else ((fib ((( - ) n) 1)) ((lam_ll0 k) n)))
   
   let lam_ll2 = (fun x -> x)
   let main = (print_int ((fib 6) lam_ll2))
@@ -255,8 +262,8 @@
   ((f h) (((fold_right f) acc) tl))
   else fail)
   
-  let lam_ll0 = (fun b g x -> (g ((f x) b)))
-  let foldl = (fun f a bs -> ((((fold_right lam_ll0) id) bs) a))
+  let lam_ll0 = (fun f b g x -> (g ((f x) b)))
+  let foldl = (fun f a bs -> ((((fold_right (lam_ll0 f)) id) bs) a))
   
   let lam_ll1 = (fun x y -> ((( * ) x) y))
   let main = (print_int (((foldl lam_ll1) 1) (1::(2::(3::[])))))
@@ -268,8 +275,8 @@
   let b = ((tuple_get p) 1) in
   ((f a), (f b)))
   
-  let lam_ll1 = (fun li x -> ((li (self l_ac0)) x))
-  let lam_ll0 = (fun self l_ac0 -> ((map lam_ll1) l_ac0))
+  let lam_ll1 = (fun l_ac0 self li x -> ((li (self l_ac0)) x))
+  let lam_ll0 = (fun self l_ac0 -> ((map ((lam_ll1 l_ac0) self)) l_ac0))
   let fixpoly = (fun l -> ((fix lam_ll0) l))
   
   let feven = (fun p n -> let e = ((tuple_get p) 0) in
@@ -386,29 +393,16 @@
   ((iter f) tl)
   else fail)
   
-  let rec lam_ll2 = (fun a -> (h, a))
+  let rec lam_ll2 = (fun h a -> (h, a))
   and cartesian = (fun xs ys -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
-  ((append ((map lam_ll2) ys)) ((cartesian tl) ys))
+  ((append ((map (lam_ll2 h)) ys)) ((cartesian tl) ys))
   else fail)
   
   let main = let () = ((iter print_int) (1::(2::(3::[])))) in
   let () = (print_int (length ((cartesian (1::(2::[]))) (1::(2::(3::(4::[]))))))) in
   0
  
-  $ ./lambda_lift_runner.exe < manytests/do_not_type/001.ml
-  Infer error:
-  $ ./lambda_lift_runner.exe < manytests/do_not_type/002if.ml
-  Infer error:
-  $ ./lambda_lift_runner.exe < manytests/do_not_type/003occurs.ml
-  Infer error:
-
-  $ ./lambda_lift_runner.exe < manytests/do_not_type/004let_poly.ml
-  Infer error:
-
-  $ ./lambda_lift_runner.exe < manytests/do_not_type/015tuples.ml
-  Infer error:
-
