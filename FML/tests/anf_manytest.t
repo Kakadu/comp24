@@ -1,4 +1,44 @@
   $ ./anf_runner.exe << EOF
+  > let main = 
+  > let rec fib n k =
+  > if n < 2
+  > then k n
+  > else fib (n - 1) (fun a -> fib (n - 2) (fun b -> k (a + b))) in print_int(fib 6 (fun x -> x))
+  > EOF
+  let lam_ll2 a k b = let anf0 = ( + ) a b in
+  k anf0
+  ;;
+  
+  let lam_ll1 fib_ll0 k n a = let anf1 = ( - ) n 2 in
+  let anf2 = lam_ll2 a k in
+  fib_ll0 anf1 anf2
+  ;;
+  
+  let rec fib_ll0 n k = let anf3 = ( < ) n 2 in
+  if anf3
+  then k n
+  else let anf4 = ( - ) n 1 in
+  let anf5 = lam_ll1 fib_ll0 k n in
+  fib_ll0 anf4 anf5
+  ;;
+  
+  let lam_ll3 x = x
+  ;;
+  
+  let main = let anf6 = fib_ll0 6 lam_ll3 in
+  print_int anf6
+  ;;
+  
+  Типы до приведения в ANF:
+  val main : unit
+  
+  Типы после приведения в ANF:
+  val lam_ll2 : int -> (int -> 'a) -> int -> 'a
+  val lam_ll1 : (int -> (int -> 'a) -> 'b) -> (int -> 'a) -> int -> int -> 'b
+  val fib_ll0 : int -> (int -> 'a) -> 'a
+  val lam_ll3 : 'a -> 'a
+  val main : unit
+  $ ./anf_runner.exe << EOF
   > let f x = let g y = x + y in g 5;;
   > EOF
   let g_ll0 x y = ( + ) x y
@@ -537,7 +577,7 @@
   k anf0
   ;;
   
-  let lam_ll0 k n a = let anf1 = ( - ) n 2 in
+  let lam_ll0 fib k n a = let anf1 = ( - ) n 2 in
   let anf2 = lam_ll1 a k in
   fib anf1 anf2
   ;;
@@ -546,7 +586,7 @@
   if anf3
   then k n
   else let anf4 = ( - ) n 1 in
-  let anf5 = lam_ll0 k n in
+  let anf5 = lam_ll0 fib k n in
   fib anf4 anf5
   ;;
   
@@ -562,7 +602,11 @@
   val main : unit
   
   Типы после приведения в ANF:
-  Infer error:
+  val lam_ll1 : int -> (int -> 'a) -> int -> 'a
+  val lam_ll0 : (int -> (int -> 'a) -> 'b) -> (int -> 'a) -> int -> int -> 'b
+  val fib : int -> (int -> 'a) -> 'a
+  val lam_ll2 : 'a -> 'a
+  val main : unit
   $ ./anf_runner.exe < manytests/typed/013foldfoldr.ml
   let id x = x
   ;;
@@ -579,21 +623,24 @@
   else fail
   ;;
   
-  let lam_ll0 f b g x = let anf3 = f x b in
+  let lam_ll1 f b g x = let anf3 = f x b in
   g anf3
   ;;
   
-  let foldl f a bs = let anf4 = lam_ll0 f in
+  let lam_ll0 fold_right f a bs = let anf4 = lam_ll1 f in
   fold_right anf4 id bs a
   ;;
   
-  let lam_ll1 x y = ( * ) x y
+  let foldl = lam_ll0 fold_right
+  ;;
+  
+  let lam_ll2 x y = ( * ) x y
   ;;
   
   let main = let anf8 = (3::[]) in
   let anf7 = (2::anf8) in
   let anf6 = (1::anf7) in
-  let anf5 = foldl lam_ll1 1 anf6 in
+  let anf5 = foldl lam_ll2 1 anf6 in
   print_int anf5
   ;;
   
@@ -606,9 +653,10 @@
   Типы после приведения в ANF:
   val id : 'a -> 'a
   val fold_right : ('a -> 'b -> 'b) -> 'b -> 'a list -> 'b
-  val lam_ll0 : ('a -> 'b -> 'c) -> 'b -> ('c -> 'd) -> 'a -> 'd
+  val lam_ll1 : ('a -> 'b -> 'c) -> 'b -> ('c -> 'd) -> 'a -> 'd
+  val lam_ll0 : (('a -> ('b -> 'c) -> 'd -> 'c) -> ('e -> 'e) -> 'f -> 'g -> 'h) -> ('d -> 'a -> 'b) -> 'g -> 'f -> 'h
   val foldl : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
-  val lam_ll1 : int -> int -> int
+  val lam_ll2 : int -> int -> int
   val main : unit
 
   $ ./anf_runner.exe < manytests/typed/015tuples.ml
@@ -623,15 +671,18 @@
   (anf1, anf2)
   ;;
   
-  let lam_ll1 l_ac0 self li x = let anf3 = self l_ac0 in
+  let lam_ll2 l_ac0 self li x = let anf3 = self l_ac0 in
   li anf3 x
   ;;
   
-  let lam_ll0 self l_ac0 = let anf4 = lam_ll1 l_ac0 self in
+  let lam_ll1 self l_ac0 = let anf4 = lam_ll2 l_ac0 self in
   map anf4 l_ac0
   ;;
   
-  let fixpoly l = fix lam_ll0 l
+  let lam_ll0 fix l = fix lam_ll1 l
+  ;;
+  
+  let fixpoly = lam_ll0 fix
   ;;
   
   let feven p n = let e = tuple_get p 0 in
@@ -695,8 +746,9 @@
   Типы после приведения в ANF:
   val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b
   val map : ('a -> 'b) -> 'c -> 'b * 'b
-  val lam_ll1 : 'a -> ('a -> 'b) -> ('b -> 'c -> 'd) -> 'c -> 'd
-  val lam_ll0 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+  val lam_ll2 : 'a -> ('a -> 'b) -> ('b -> 'c -> 'd) -> 'c -> 'd
+  val lam_ll1 : ('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)
+  val lam_ll0 : ((('a -> 'b) -> 'a -> ('c -> 'd) * ('c -> 'd)) -> 'e -> 'f) -> 'e -> 'f
   val fixpoly : 'a -> ('b -> 'c) * ('b -> 'c)
   val feven : 'a -> int -> int
   val fodd : 'a -> int -> int
@@ -847,19 +899,19 @@
   else fail
   ;;
   
-  let rec helper_ll1 xs = let anf69 = is_empty xs in
+  let rec helper_ll1 append xs = let anf69 = is_empty xs in
   if anf69
   then []
   else let anf70 = is_cons xs in
   if anf70
   then let h = hd_list_get xs in
   let tl = tl_list_get xs in
-  let anf71 = helper_ll1 tl in
+  let anf71 = helper_ll1 append tl in
   append h anf71
   else fail
   ;;
   
-  let concat = helper_ll1
+  let concat = helper_ll1 append
   ;;
   
   let rec iter f xs = let anf72 = is_empty xs in
@@ -923,7 +975,7 @@
   val length_tail : 'a list -> int
   val map : ('a -> 'b) -> 'a list -> 'b list
   val append : 'a list -> 'a list -> 'a list
-  val helper_ll1 : 'a list list -> 'a list
+  val helper_ll1 : ('a -> 'b list -> 'b list) -> 'a list -> 'b list
   val concat : 'a list list -> 'a list
   val iter : ('a -> unit) -> 'a list -> unit
   val lam_ll2 : 'a -> 'b -> 'a * 'b

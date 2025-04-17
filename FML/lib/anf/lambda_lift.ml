@@ -45,7 +45,13 @@ let rec ll_expr bindings = function
        let* defs1, e1' = ll_expr bindings e1 in
        let* id = fresh in
        let new_name = get_new_id id name in
-       let def = Me_Nonrec [ new_name, Me_EFun (args, e1') ] in
+       let new_args =
+         List.map args ~f:(fun arg ->
+           match StrMap.find bindings arg with
+           | Some id -> id
+           | None -> arg)
+       in
+       let def = Me_Nonrec [ new_name, Me_EFun (new_args, e1') ] in
        let* defs2, e2' =
          ll_expr (StrMap.update bindings name ~f:(fun _ -> new_name)) e2
        in
@@ -61,7 +67,13 @@ let rec ll_expr bindings = function
        let new_name = get_new_id id name in
        let bindings' = StrMap.update bindings name ~f:(fun _ -> new_name) in
        let* defs1, e1' = ll_expr bindings' e1 in
-       let def = Me_Rec [ new_name, Me_EFun (args, e1') ] in
+       let new_args =
+         List.map args ~f:(fun arg ->
+           match StrMap.find bindings arg with
+           | Some id -> id
+           | None -> arg)
+       in
+       let def = Me_Rec [ new_name, Me_EFun (new_args, e1') ] in
        let* defs2, e2' = ll_expr bindings' e2 in
        return (defs1 @ [ def ] @ defs2, e2')
      | _ -> failwith "Not reachable")
@@ -69,7 +81,13 @@ let rec ll_expr bindings = function
     let* id = fresh in
     let name = get_new_id id "lam" in
     let* defs, body' = ll_expr bindings body in
-    let new_fun = Me_EFun (args, body') in
+    let new_args =
+      List.map args ~f:(fun arg ->
+        match StrMap.find bindings arg with
+        | Some id -> id
+        | None -> arg)
+    in
+    let new_fun = Me_EFun (new_args, body') in
     let def = Me_Nonrec [ name, new_fun ] in
     return (defs @ [ def ], Me_EIdentifier name)
 ;;

@@ -62,11 +62,10 @@ let rec cc_expr env bindings = function
     let new_e2 = cc_expr env bindings e2 in
     Me_ELet (NoRec, name, new_e1, new_e2)
   | Me_ELet (Rec, name, e1, e2) ->
-    let env = StrSet.add env name in
     let new_e1, bindings =
       match e1 with
       | Me_EFun (args, expr) as e ->
-        let fvs = StrSet.to_list (expr_free_vars env e) in
+        let fvs = StrSet.to_list (expr_free_vars (StrSet.add env name) e) in
         let apply =
           List.fold_left
             (fun acc arg -> Me_EApp (acc, Me_EIdentifier arg))
@@ -78,22 +77,10 @@ let rec cc_expr env bindings = function
         new_expr, StrMap.update bindings name ~f:(fun _ -> apply)
       | expr -> cc_expr env StrMap.empty expr, bindings
     in
-    let new_e2 = cc_expr env bindings e2 in
+    let new_e2 = cc_expr (StrSet.add env name) bindings e2 in
     Me_ELet (Rec, name, new_e1, new_e2)
   | expr -> expr
 ;;
-
-(* let cc_nonrec env decls =
-   let decls = List.map (fun (name, expr) -> name, cc_expr env StrMap.empty expr) decls in
-   let env = List.fold_left (fun acc (name, _) -> StrSet.add acc name) env decls in
-   decls, env
-   ;;
-
-   let cc_rec env decls =
-   let env = List.fold_left (fun acc (name, _) -> StrSet.add acc name) env decls in
-   let decls = List.map (fun (name, expr) -> name, cc_expr env StrMap.empty expr) decls in
-   decls, env
-   ;; *)
 
 let cc_decl env = function
   | Me_Nonrec decls ->
@@ -103,9 +90,14 @@ let cc_decl env = function
     let env = List.fold_left (fun acc (name, _) -> StrSet.add acc name) env decls in
     Me_Nonrec decls, env
   | Me_Rec decls ->
-    let env = List.fold_left (fun acc (name, _) -> StrSet.add acc name) env decls in
+    (* let env = List.fold_left (fun acc (name, _) -> StrSet.add acc name) env decls in *)
     let decls =
-      List.map (fun (name, expr) -> name, cc_expr env StrMap.empty expr) decls
+      List.map
+        (fun (name, expr) ->
+          match expr with
+          | Me_EFun (args, expr) -> name, Me_EFun (args, cc_expr env StrMap.empty expr)
+          | expr -> name, cc_expr env StrMap.empty expr)
+        decls
     in
     Me_Rec decls, env
 ;;

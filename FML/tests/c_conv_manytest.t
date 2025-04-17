@@ -1,4 +1,16 @@
   $ ./c_conv_runner.exe << EOF
+  > let main = 
+  > let rec fib n k =
+  > if n < 2
+  > then k n
+  > else fib (n - 1) (fun a -> fib (n - 2) (fun b -> k (a + b))) in print_int(fib 6 (fun x -> x))
+  > EOF
+  let main = let rec fib = (fun n k -> if ((( < ) n) 2)
+  then (k n)
+  else ((fib ((( - ) n) 1)) ((((fun fib k n a -> ((fib ((( - ) n) 2)) (((fun a k b -> (k ((( + ) a) b))) a) k))) fib) k) n))) in
+  (print_int ((fib 6) (fun x -> x)))
+
+  $ ./c_conv_runner.exe << EOF
   > let f x = let g y = x + y in g 5;;
   > EOF
   let f = (fun x -> let g = (fun x y -> ((( + ) x) y)) in
@@ -202,7 +214,7 @@
   $ ./c_conv_runner.exe < manytests/typed/012fibcps.ml
   let rec fib = (fun n k -> if ((( < ) n) 2)
   then (k n)
-  else ((fib ((( - ) n) 1)) (((fun k n a -> ((fib ((( - ) n) 2)) (((fun a k b -> (k ((( + ) a) b))) a) k))) k) n)))
+  else ((fib ((( - ) n) 1)) ((((fun fib k n a -> ((fib ((( - ) n) 2)) (((fun a k b -> (k ((( + ) a) b))) a) k))) fib) k) n)))
   
   let main = (print_int ((fib 6) (fun x -> x)))
   $ ./c_conv_runner.exe < manytests/typed/013foldfoldr.ml
@@ -216,7 +228,7 @@
   ((f h) (((fold_right f) acc) tl))
   else fail)
   
-  let foldl = (fun f a bs -> ((((fold_right ((fun f b g x -> (g ((f x) b))) f)) id) bs) a))
+  let foldl = ((fun fold_right f a bs -> ((((fold_right ((fun f b g x -> (g ((f x) b))) f)) id) bs) a)) fold_right)
   
   let main = (print_int (((foldl (fun x y -> ((( * ) x) y))) 1) (1::(2::(3::[])))))
 
@@ -227,7 +239,7 @@
   let b = ((tuple_get p) 1) in
   ((f a), (f b)))
   
-  let fixpoly = (fun l -> ((fix (fun self l_ac0 -> ((map (((fun l_ac0 self li x -> ((li (self l_ac0)) x)) l_ac0) self)) l_ac0))) l))
+  let fixpoly = ((fun fix l -> ((fix (fun self l_ac0 -> ((map (((fun l_ac0 self li x -> ((li (self l_ac0)) x)) l_ac0) self)) l_ac0))) l)) fix)
   
   let feven = (fun p n -> let e = ((tuple_get p) 0) in
   let o = ((tuple_get p) 1) in
@@ -325,14 +337,14 @@
   (x::((append xs_ac0) ys))
   else fail)
   
-  let concat = let rec helper = (fun xs -> if (is_empty xs)
+  let concat = let rec helper = (fun append xs -> if (is_empty xs)
   then []
   else if (is_cons xs)
   then let h = (hd_list_get xs) in
   let tl = (tl_list_get xs) in
-  ((append h) (helper tl))
+  ((append h) ((helper append) tl))
   else fail) in
-  helper
+  (helper append)
   
   let rec iter = (fun f xs -> if (is_empty xs)
   then ()
