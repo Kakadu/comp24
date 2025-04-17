@@ -25,7 +25,7 @@ type anf_binding = ALet of string * string list * aexpr
 type anf_decl =
   | Based_value of string * aexpr
   | ADNoRec of anf_binding list
-  | ADREC of anf_binding list
+  | ADRec of anf_binding list
 
 type anf_prog = anf_decl list
 
@@ -75,7 +75,7 @@ let declaration_to_str = function
   | ADNoRec func_list ->
     let funs = List.map fun_to_str func_list in
     "let " ^ String.concat "\nand " funs ^ "\n;;"
-  | ADREC func_list ->
+  | ADRec func_list ->
     let funs = List.map fun_to_str func_list in
     "let rec " ^ String.concat "\nand " funs ^ "\n;;"
 ;;
