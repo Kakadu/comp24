@@ -2,7 +2,9 @@
   > let f (x,y) = x+y;;
   > let main = let () = print_int ( f (1,2) ) in 0;;
   > EOF
-  let f = (fun x y -> ((( + ) x) y))
+  let f = (fun me_me0 -> let x = ((tuple_get me_me0) 0) in
+  let y = ((tuple_get me_me0) 1) in
+  ((( + ) x) y))
   
   let main = let () = (print_int (f (1, 2))) in
   0

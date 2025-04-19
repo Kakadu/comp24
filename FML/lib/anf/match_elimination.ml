@@ -65,14 +65,28 @@ let rec expr_to_mexpr expr =
     let* f' = expr_to_mexpr f in
     let* arg' = expr_to_mexpr arg in
     return @@ Me_EApp (f', arg')
-  | EFun (pat, body) ->
-    let rec helper acc = function
-      | EFun (pat, body) -> helper (acc @ pattern_remove pat) body
-      | expr ->
-        let* body = expr_to_mexpr expr in
-        return @@ Me_EFun (acc, body)
-    in
-    helper (pattern_remove pat) body
+  | EFun (pat, body) -> (
+    match pat with
+    | PTuple _ ->
+      (* Случай: let f (x, y) = ... *)
+      let* id_num = fresh in
+      let arg_id = get_new_id id_num "me" in
+      let arg_expr = Me_EIdentifier arg_id in
+      let bindings = pattern_bindings arg_expr pat in
+      let* body' = expr_to_mexpr body in
+      let body_with_bindings =
+      List.fold_right bindings ~init:body' ~f:(fun (id, expr) acc ->
+      Me_ELet (NoRec, id, expr, acc))
+      in return @@ Me_EFun ([arg_id], body_with_bindings)
+    | _ ->
+      let rec helper acc = function
+        | EFun (pat, body) -> helper (acc @ pattern_remove pat) body
+        | expr ->
+          let* body = expr_to_mexpr expr in
+          return @@ Me_EFun (acc, body)
+      in
+      helper (pattern_remove pat) body
+  )
   | ELetIn (rec_flag, pat, e1, e2) ->
     let ids = pattern_remove pat in
     let* e1' = expr_to_mexpr e1 in
