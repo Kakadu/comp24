@@ -9,17 +9,17 @@
   k anf0
   ;;
   
-  let lam_ll1 fib_ll0 k n a = let anf1 = ( - ) n 2 in
-  let anf2 = lam_ll2 a k in
-  fib_ll0 anf1 anf2
+  let lam_ll1 fib_ll0 k n a = let anf1 = lam_ll2 a k in
+  let anf2 = ( - ) n 2 in
+  fib_ll0 anf2 anf1
   ;;
   
   let rec fib_ll0 n k = let anf3 = ( < ) n 2 in
   if anf3
   then k n
-  else let anf4 = ( - ) n 1 in
-  let anf5 = lam_ll1 fib_ll0 k n in
-  fib_ll0 anf4 anf5
+  else let anf4 = lam_ll1 fib_ll0 k n in
+  let anf5 = ( - ) n 1 in
+  fib_ll0 anf5 anf4
   ;;
   
   let lam_ll3 x = x
@@ -159,9 +159,9 @@
   let rec fack_ll0 n_ac0 k = let anf1 = ( <= ) n_ac0 1 in
   if anf1
   then k 1
-  else let anf2 = ( - ) n_ac0 1 in
-  let anf3 = lam_ll1 k n_ac0 in
-  fack_ll0 anf2 anf3
+  else let anf2 = lam_ll1 k n_ac0 in
+  let anf3 = ( - ) n_ac0 1 in
+  fack_ll0 anf3 anf2
   ;;
   
   let lam_ll2 x = x
@@ -236,9 +236,9 @@
   let rec fac_cps n k = let anf1 = ( = ) n 1 in
   if anf1
   then k 1
-  else let anf2 = ( - ) n 1 in
-  let anf3 = lam_ll0 k n in
-  fac_cps anf2 anf3
+  else let anf2 = lam_ll0 k n in
+  let anf3 = ( - ) n 1 in
+  fac_cps anf3 anf2
   ;;
   
   let lam_ll1 print_int_ac0 = print_int_ac0
@@ -271,11 +271,11 @@
   let rec fib n = let anf1 = ( < ) n 2 in
   if anf1
   then n
-  else let anf3 = ( - ) n 1 in
+  else let anf3 = ( - ) n 2 in
   let anf2 = fib anf3 in
-  let anf5 = ( - ) n 2 in
+  let anf5 = ( - ) n 1 in
   let anf4 = fib anf5 in
-  ( + ) anf2 anf4
+  ( + ) anf4 anf2
   ;;
   
   let main = let anf6 = fib_acc 0 1 4 in
@@ -455,13 +455,13 @@
   ( + ) anf1 d
   ;;
   
-  let main = let anf4 = print_int 1 in
-  let anf5 = print_int 2 in
-  let anf6 = print_int 4 in
-  let anf8 = ( ~- ) 1 in
-  let anf7 = print_int anf8 in
-  let anf9 = ( ~- ) 555555 in
-  let anf3 = _start anf4 anf5 3 anf6 100 1000 anf7 10000 anf9 in
+  let main = let anf4 = ( ~- ) 555555 in
+  let anf6 = ( ~- ) 1 in
+  let anf5 = print_int anf6 in
+  let anf7 = print_int 4 in
+  let anf8 = print_int 2 in
+  let anf9 = print_int 1 in
+  let anf3 = _start anf9 anf8 3 anf7 100 1000 anf5 10000 anf4 in
   print_int anf3
   ;;
   
@@ -577,17 +577,17 @@
   k anf0
   ;;
   
-  let lam_ll0 fib k n a = let anf1 = ( - ) n 2 in
-  let anf2 = lam_ll1 a k in
-  fib anf1 anf2
+  let lam_ll0 fib k n a = let anf1 = lam_ll1 a k in
+  let anf2 = ( - ) n 2 in
+  fib anf2 anf1
   ;;
   
   let rec fib n k = let anf3 = ( < ) n 2 in
   if anf3
   then k n
-  else let anf4 = ( - ) n 1 in
-  let anf5 = lam_ll0 fib k n in
-  fib anf4 anf5
+  else let anf4 = lam_ll0 fib k n in
+  let anf5 = ( - ) n 1 in
+  fib anf5 anf4
   ;;
   
   let lam_ll2 x = x
@@ -936,10 +936,10 @@
   if anf75
   then let h = hd_list_get xs in
   let tl = tl_list_get xs in
-  let anf77 = lam_ll2 h in
-  let anf76 = map anf77 ys in
-  let anf78 = cartesian tl ys in
-  append anf76 anf78
+  let anf76 = cartesian tl ys in
+  let anf78 = lam_ll2 h in
+  let anf77 = map anf78 ys in
+  append anf77 anf76
   else fail
   ;;
   
@@ -947,13 +947,13 @@
   let anf80 = (2::anf81) in
   let anf79 = (1::anf80) in
   let () = iter print_int anf79 in
-  let anf85 = (2::[]) in
+  let anf87 = (4::[]) in
+  let anf86 = (3::anf87) in
+  let anf85 = (2::anf86) in
   let anf84 = (1::anf85) in
-  let anf89 = (4::[]) in
-  let anf88 = (3::anf89) in
-  let anf87 = (2::anf88) in
-  let anf86 = (1::anf87) in
-  let anf83 = cartesian anf84 anf86 in
+  let anf89 = (2::[]) in
+  let anf88 = (1::anf89) in
+  let anf83 = cartesian anf88 anf84 in
   let anf82 = length anf83 in
   let () = print_int anf82 in
   0

@@ -50,11 +50,11 @@ let rec to_cexp : me_expr -> ((string * cexpr) list * cexpr) t = function
     let* binds_f, fun_imm = check_hard_expr f_expr in
     let* binds_args, imm_args =
       RList.fold_left
-        args
+        (List.rev args)
         ~init:(return ([], []))
         ~f:(fun (acc_binds, acc_args) arg ->
           let* binds_arg, imm_arg = check_hard_expr arg in
-          return (acc_binds @ binds_arg, acc_args @ [ imm_arg ]))
+          return (acc_binds @ binds_arg, imm_arg :: acc_args))
     in
     (match fun_imm with
      | ImmIdentifier f_name -> return (binds_f @ binds_args, CEApply (f_name, imm_args))
