@@ -1,3 +1,7 @@
+(** Copyright 2024-2025, Dmitry Pilyuk, Aleksandr Rozhkov *)
+
+(** SPDX-License-Identifier: LGPL-2.1 *)
+
 open Anf_ast
 open Me_ast
 open Common
@@ -66,8 +70,7 @@ let rec to_cexp : me_expr -> ((string * cexpr) list * cexpr) t = function
   | _ -> failwith "See you later space cowboy"
 
 (* для обработки сложных выражений в условиях *)
-and check_hard_expr e =
-  match e with
+and check_hard_expr = function
   | Me_EIdentifier v -> return ([], ImmIdentifier v)
   | Me_EConst c -> return ([], const_to_immexp c)
   | Me_EUnit -> return ([], ImmUnit)

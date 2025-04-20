@@ -102,8 +102,7 @@ let ll_binding (name, expr) =
     return (defs, (name, expr'))
 ;;
 
-let ll_decl decl =
-  match decl with
+let ll_decl = function
   | Me_Nonrec bindings ->
     let* all_defs, curr_defs =
       RList.fold_left

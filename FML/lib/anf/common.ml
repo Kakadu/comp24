@@ -11,7 +11,7 @@ module StrMap = struct
   let singleton str = Map.singleton (module String) str
   let add = Map.add
   let update = Map.update
-  let find m str = Map.find m str
+  let find = Map.find
   let merge_two fst snd = Map.merge_skewed fst snd ~combine:(fun ~key:_ _ v2 -> v2)
 end
 
@@ -54,7 +54,7 @@ module StrSet = struct
   let fold = Set.fold
   let diff = Set.diff
   let union_list lst = Set.union_list (module String) lst
-  let find s str = Set.mem s str
+  let find = Set.mem
 end
 
 module StateMonad : sig

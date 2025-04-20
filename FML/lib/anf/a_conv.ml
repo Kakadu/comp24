@@ -10,14 +10,12 @@ open StateMonad
 let get_new_id n name = String.concat [ name; "_ac"; Int.to_string n ]
 
 let rec ac_pattern env bindings = function
-  | PIdentifier name as pat ->
-    if StrSet.find env name
-    then
-      let* fr = fresh in
-      let id = get_new_id fr name in
-      return
-        (StrSet.add env id, StrMap.update bindings name ~f:(fun _ -> id), PIdentifier id)
-    else return (StrSet.add env name, bindings, pat)
+  | PIdentifier name when StrSet.find env name ->
+    let* fr = fresh in
+    let id = get_new_id fr name in
+    return
+      (StrSet.add env id, StrMap.update bindings name ~f:(fun _ -> id), PIdentifier id)
+  | PIdentifier name as pat -> return (StrSet.add env name, bindings, pat)
   | PConstraint (pat, _) -> ac_pattern env bindings pat
   | PCons (hd, tl) ->
     let* env', bindings', hd_pat = ac_pattern env bindings hd in

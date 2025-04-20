@@ -9,7 +9,8 @@ let rec expr_free_vars binded =
   let open StrSet in
   function
   | Me_EConst _ | Me_ENill | Me_EUnit -> StrSet.empty
-  | Me_EIdentifier id -> if find binded id then empty else singleton id
+  | Me_EIdentifier id when find binded id -> empty
+  | Me_EIdentifier id -> singleton id
   | Me_EIf (e1, e2, e3) ->
     union_list
       [ expr_free_vars binded e1; expr_free_vars binded e2; expr_free_vars binded e3 ]

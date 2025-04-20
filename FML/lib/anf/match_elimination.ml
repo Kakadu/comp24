@@ -15,8 +15,7 @@ let const_to_pe_const = function
   | CBool a -> Me_CBool a
 ;;
 
-let rec pattern_remove pat =
-  match pat with
+let rec pattern_remove = function
   | PUnit -> [ "()" ]
   | PAny -> []
   | PConst _ -> []
@@ -27,8 +26,7 @@ let rec pattern_remove pat =
   | PConstraint (p, _) -> pattern_remove p
 ;;
 
-let rec pattern_bindings expr pat =
-  match pat with
+let rec pattern_bindings expr = function
   | PIdentifier id when String.(id <> "_") -> [ id, expr ]
   | PIdentifier _ -> []
   | PAny -> []
@@ -54,8 +52,7 @@ let rec_flags : Ast.rec_flag -> Me_ast.rec_flag = function
   | NoRec -> NoRec
 ;;
 
-let rec expr_to_mexpr expr =
-  match expr with
+let rec expr_to_mexpr = function
   | EUnit -> return Me_EUnit
   | ENill -> return Me_ENill
   | EConstraint (e, _) -> expr_to_mexpr e
@@ -65,28 +62,27 @@ let rec expr_to_mexpr expr =
     let* f' = expr_to_mexpr f in
     let* arg' = expr_to_mexpr arg in
     return @@ Me_EApp (f', arg')
-  | EFun (pat, body) -> (
-    match pat with
-    | PTuple _ | PCons _ ->
-      let* id_num = fresh in
-      let arg_id = get_new_id id_num "me" in
-      let arg_expr = Me_EIdentifier arg_id in
-      let bindings = pattern_bindings arg_expr pat in
-      let* body' = expr_to_mexpr body in
-      let body_with_bindings =
-        List.fold_right bindings ~init:body' ~f:(fun (id, expr) acc ->
-          Me_ELet (NoRec, id, expr, acc))
-      in
-      return @@ Me_EFun ([arg_id], body_with_bindings)
-    | _ ->
-      let rec helper acc = function
-        | EFun (pat, body) -> helper (acc @ pattern_remove pat) body
-        | expr ->
-          let* body = expr_to_mexpr expr in
-          return @@ Me_EFun (acc, body)
-      in
-      helper (pattern_remove pat) body
-  )
+  | EFun (pat, body) ->
+    (match pat with
+     | PTuple _ | PCons _ ->
+       let* id_num = fresh in
+       let arg_id = get_new_id id_num "me" in
+       let arg_expr = Me_EIdentifier arg_id in
+       let bindings = pattern_bindings arg_expr pat in
+       let* body' = expr_to_mexpr body in
+       let body_with_bindings =
+         List.fold_right bindings ~init:body' ~f:(fun (id, expr) acc ->
+           Me_ELet (NoRec, id, expr, acc))
+       in
+       return @@ Me_EFun ([ arg_id ], body_with_bindings)
+     | _ ->
+       let rec helper acc = function
+         | EFun (pat, body) -> helper (acc @ pattern_remove pat) body
+         | expr ->
+           let* body = expr_to_mexpr expr in
+           return @@ Me_EFun (acc, body)
+       in
+       helper (pattern_remove pat) body)
   | ELetIn (rec_flag, pat, e1, e2) ->
     let ids = pattern_remove pat in
     let* e1' = expr_to_mexpr e1 in
@@ -131,8 +127,7 @@ and desugar_match e branches =
   | [] -> failwith "Empty match expression"
   | (pat, expr_rhs) :: rest ->
     let* expr_rhs' = expr_to_mexpr expr_rhs in
-    let rec pattern_to_condition expr pat =
-      match pat with
+    let rec pattern_to_condition expr = function
       | PAny -> return @@ Me_EConst (Me_CBool true)
       | PUnit ->
         return
@@ -225,9 +220,7 @@ let decl_to_pe_decl decls =
       let tmp_var = get_new_id tmp_id_num "tmp" in
       let* e' = expr_to_mexpr expr in
       let tmp_expr = Me_EIdentifier tmp_var in
-      let bindings =
-        pattern_bindings tmp_expr pat |> List.map ~f:(fun (id, expr) -> id, expr)
-      in
+      let bindings = pattern_bindings tmp_expr pat in
       return ((tmp_var, e') :: bindings)
   in
   match decls with

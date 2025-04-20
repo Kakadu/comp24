@@ -310,7 +310,6 @@
   manytests/typed/015tuples.ml
   manytests/typed/016lists.ml))
 
-
 (cram
  (applies_to anf_manytest)
  (deps

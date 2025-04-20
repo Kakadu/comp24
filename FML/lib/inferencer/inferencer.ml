@@ -299,7 +299,7 @@ let annotation_to_type =
     | AUnit -> tunit
     | AFunction (l, r) -> tfunction (helper l) (helper r)
     | AList a -> tlist (helper a)
-    | ATuple a -> ttuple @@ List.map (fun x -> helper x) a
+    | ATuple a -> ttuple @@ List.map helper a
   in
   helper
 ;;
@@ -309,12 +309,10 @@ let check_unique_vars =
      Used to detect severeal bound errors in tuple patterns,
      list constructor patterns. *)
   let rec helper var_set = function
-    | PIdentifier v ->
-      if VarSet.mem v var_set
-      then
-        (* If at least one variable is found twice, we raise an error. *)
-        fail (`Several_bounds v)
-      else return (VarSet.add v var_set)
+    | PIdentifier v when VarSet.mem v var_set ->
+      (* If at least one variable is found twice, we raise an error. *)
+      fail (`Several_bounds v)
+    | PIdentifier v -> return (VarSet.add v var_set)
     | PAny -> return var_set
     | PNill -> return var_set
     | PUnit -> return var_set
@@ -331,10 +329,8 @@ let check_unique_vars =
 let check_unique_vars_list patterns =
   let rec helper var_set = function
     | [] -> return var_set
-    | PIdentifier name :: rest ->
-      if VarSet.mem name var_set
-      then fail (`Several_bounds name)
-      else helper (VarSet.add name var_set) rest
+    | PIdentifier name :: _ when VarSet.mem name var_set -> fail (`Several_bounds name)
+    | PIdentifier name :: rest -> helper (VarSet.add name var_set) rest
     | PAny :: rest -> helper var_set rest
     | PNill :: rest -> helper var_set rest
     | PUnit :: rest -> helper var_set rest

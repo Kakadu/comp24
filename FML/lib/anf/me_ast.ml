@@ -29,7 +29,8 @@ type me_declaration =
 type me_program = me_declaration list
 
 let const_to_str = function
-  | Me_CBool b -> if b then "true" else "false"
+  | Me_CBool b when b -> "true"
+  | Me_CBool _ -> "false"
   | Me_Cint i -> Format.sprintf "%i" i
 ;;
 
