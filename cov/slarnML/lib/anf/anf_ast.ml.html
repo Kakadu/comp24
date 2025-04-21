@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>anf_ast.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in lib/anf/anf_ast.ml">
+    <meta name="description" content="0.00% coverage in lib/anf/anf_ast.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,18 @@
           <span class="dirname">lib/anf/</span>anf_ast.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>0.00%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="top:14.29%"></span>
+      <span class="unvisited" style="top:17.14%"></span>
+      <span class="unvisited" style="top:20.00%"></span>
+      <span class="unvisited" style="top:22.86%"></span>
+      <span class="unvisited" style="top:34.29%"></span>
+      <span class="unvisited" style="bottom:22.86%"></span>
+      <span class="unvisited" style="bottom:14.29%"></span>
+      <span class="unvisited" style="bottom:11.43%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -26,14 +35,14 @@
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
-<a id="L5"></a><span > </span>
-<a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
-<a id="L8"></a><span > </span>
+<a id="L5"></a><span class="unvisited"> </span>
+<a id="L6"></a><span class="unvisited"> </span>
+<a id="L7"></a><span class="unvisited"> </span>
+<a id="L8"></a><span class="unvisited"> </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span > </span>
+<a id="L12"></a><span class="unvisited"> </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
@@ -48,15 +57,15 @@
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
+<a id="L35"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -101,14 +110,14 @@
 
 (** SPDX-License-Identifier: LGPL-2.1-or-later *)
 
-type immexpr =
-  | AId of string
-  | AInt of int
-  | ABool of bool
+<span data-count="0">t</span>ype immexpr =
+  | AId of strin<span data-count="0">g</span>
+  | AInt of in<span data-count="0">t</span>
+  | ABool of boo<span data-count="0">l</span>
   | AUnit
 [@@deriving show { with_path = false }]
 
-type cexpr =
+<span data-count="0">t</span>ype cexpr =
   | ANot of immexpr
   | AOr of immexpr * immexpr
   | AAnd of immexpr * immexpr
@@ -123,15 +132,15 @@ type cexpr =
   | ADiv of immexpr * immexpr
   | CImmExpr of immexpr
   | AIf of immexpr * aexpr * aexpr
-  | AApp of immexpr * immexpr list
+  | AApp of immexpr * <span data-count="0">i</span>mmexpr lis<span data-count="0">t</span>
 [@@deriving show { with_path = false }]
 
-and aexpr =
-  | ALet of string * cexpr * aexpr
+<span data-count="0">a</span>nd aexpr =
+  | ALet of strin<span data-count="0">g</span> * cexpr * aexpr
   | ACExpr of cexpr
 [@@deriving show { with_path = false }]
 
-type afun = AFun of string * string list * aexpr [@@deriving show { with_path = false }]
+<span data-count="0">t</span>ype afun = AFun of strin<span data-count="0">g</span> * <span data-count="0">s</span>trin<span data-count="0">g</span> lis<span data-count="0">t</span> * aexpr [@@deriving show { with_path = false }]
 </code></pre>
       </div>
     </div>

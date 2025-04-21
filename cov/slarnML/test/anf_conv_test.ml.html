@@ -65,18 +65,18 @@
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="18">l</span>et result =
+  <span data-count="24">l</span>et result =
     match SlarnML_lib.Parser.parser s with
-    | <span data-count="14">O</span>k ast -&gt;
-      SlarnML_lib.Clos_conv.clos_con<span data-count="14">v</span> ast
-      &gt;&gt;<span data-count="14">=</span> (fun ast -&gt; <span data-count="12">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
-      &gt;&gt;<span data-count="14">=</span> fun ast -&gt; <span data-count="12">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="12">f</span> ast)
+    | <span data-count="20">O</span>k ast -&gt;
+      SlarnML_lib.Clos_conv.clos_con<span data-count="20">v</span> ast
+      &gt;&gt;<span data-count="20">=</span> (fun ast -&gt; <span data-count="20">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
+      &gt;&gt;<span data-count="20">=</span> fun ast -&gt; <span data-count="20">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="20">f</span> ast)
     | <span data-count="4">E</span>rror message -&gt; SlarnML_lib.Res.Error message
   in
   match result with
-  | <span data-count="12">S</span>larnML_lib.Res.Result r -&gt;
-    print_strin<span data-count="12">g</span> @@ String.conca<span data-count="12">t</span> "\n" (List.ma<span data-count="12">p</span> SlarnML_lib.Pprint_anf.pp_anf_afun r)
-  | <span data-count="6">E</span>rror e -&gt; Printf.eprint<span data-count="6">f</span> "%s" e
+  | <span data-count="20">S</span>larnML_lib.Res.Result r -&gt;
+    print_strin<span data-count="20">g</span> @@ String.conca<span data-count="20">t</span> "\n" (List.ma<span data-count="20">p</span> SlarnML_lib.Pprint_anf.pp_anf_afun r)
+  | <span data-count="4">E</span>rror e -&gt; Printf.eprint<span data-count="4">f</span> "%s" e
 ;;
 </code></pre>
       </div>

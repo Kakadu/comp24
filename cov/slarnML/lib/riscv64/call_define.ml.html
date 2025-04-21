@@ -24,15 +24,27 @@
         <pre>
 <a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
 <a href="#L1">1</a>
 <a href="#L2">2</a>
+<a href="#L3">3</a>
+<a href="#L4">4</a>
+<a href="#L5">5</a>
+<a href="#L6">6</a>
 </pre>
-<pre><code class="ocaml">let exit = 93
+<pre><code class="ocaml">open Riscv_ast
+
+let exit = 93
 let default_func = [ "print_int", 1; "print_char", 1 ]
+let init_part_apps = Call (Id "init_part_apps")
+let part_app = Call (Id "part_app")
 </code></pre>
       </div>
     </div>

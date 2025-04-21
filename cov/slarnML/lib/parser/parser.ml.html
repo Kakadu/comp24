@@ -1491,58 +1491,58 @@ let is_keyword = function
   | <span data-count="404">_</span> -&gt; false
 ;;
 
-let skip_empty = skip_whil<span data-count="2">e</span> is_empty_char
-let take_empty1 = take_while<span data-count="2">1</span> is_empty_char
-let parens p = <span data-count="24">c</span>ha<span data-count="24">r</span> '(' *<span data-count="24">&gt;</span> p &lt;* cha<span data-count="24">r</span> ')'
+let skip_empty = skip_whil<span data-count="3">e</span> is_empty_char
+let take_empty1 = take_while<span data-count="3">1</span> is_empty_char
+let parens p = <span data-count="29">c</span>ha<span data-count="29">r</span> '(' *<span data-count="29">&gt;</span> p &lt;* cha<span data-count="29">r</span> ')'
 
 let integer =
-  let minus = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "-" *&gt; retur<span data-count="2">n</span> (-1) in
+  let minus = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "-" *&gt; retur<span data-count="3">n</span> (-1) in
   (* let plus = skip_empty *&gt; (string "+" &lt;|&gt; string "") *&gt; return 1 in *)
-  <span data-count="2">l</span>et number sign =
-    <span data-count="4">s</span>kip_empty *<span data-count="4">&gt;</span> take_while<span data-count="4">1</span> is_digit
+  <span data-count="3">l</span>et number sign =
+    <span data-count="5">s</span>kip_empty *<span data-count="5">&gt;</span> take_while<span data-count="5">1</span> is_digit
     &gt;&gt;= fun num -&gt; <span data-count="77">r</span>eturn (CInt (sign * int_of_strin<span data-count="77">g</span> num))
   in
   (* (minus &lt;|&gt; plus) &gt;&gt;= number *)
-  numbe<span data-count="2">r</span> 1 &lt;|<span data-count="2">&gt;</span> skip_empty *<span data-count="2">&gt;</span> paren<span data-count="2">s</span> (minus &gt;&gt;<span data-count="2">=</span> number &lt;<span data-count="2">*</span> skip_empty)
+  numbe<span data-count="3">r</span> 1 &lt;|<span data-count="3">&gt;</span> skip_empty *<span data-count="3">&gt;</span> paren<span data-count="3">s</span> (minus &gt;&gt;<span data-count="3">=</span> number &lt;<span data-count="3">*</span> skip_empty)
 ;;
 
 let boolean1 =
-  let true_w = take_empty1 *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "true" *&gt; retur<span data-count="2">n</span> (CBool true) in
-  <span data-count="2">l</span>et false_w = take_empty1 *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "false" *&gt; retur<span data-count="2">n</span> (CBool false) in
-  <span data-count="2">t</span>rue_w &lt;|<span data-count="2">&gt;</span> false_w
+  let true_w = take_empty1 *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "true" *&gt; retur<span data-count="3">n</span> (CBool true) in
+  <span data-count="3">l</span>et false_w = take_empty1 *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "false" *&gt; retur<span data-count="3">n</span> (CBool false) in
+  <span data-count="3">t</span>rue_w &lt;|<span data-count="3">&gt;</span> false_w
 ;;
 
 let boolean =
-  let true_w = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "true" *&gt; retur<span data-count="2">n</span> (CBool true) in
-  <span data-count="2">l</span>et false_w = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "false" *&gt; retur<span data-count="2">n</span> (CBool false) in
-  <span data-count="2">t</span>rue_w &lt;|<span data-count="2">&gt;</span> false_w
+  let true_w = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "true" *&gt; retur<span data-count="3">n</span> (CBool true) in
+  <span data-count="3">l</span>et false_w = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "false" *&gt; retur<span data-count="3">n</span> (CBool false) in
+  <span data-count="3">t</span>rue_w &lt;|<span data-count="3">&gt;</span> false_w
 ;;
 
-let unit_c = paren<span data-count="2">s</span> @@ (strin<span data-count="2">g</span> "" *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> CUnit)
+let unit_c = paren<span data-count="3">s</span> @@ (strin<span data-count="3">g</span> "" *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> CUnit)
 
 let identifier =
   let word =
-    skip_empty *&gt; take_while<span data-count="2">1</span> (fun c -&gt; <span data-count="1736">C</span>har.equa<span data-count="1736">l</span> c '_<span data-count="16">'</span> || is_digi<span data-count="1720">t</span> <span data-count="38">c</span> || is_letter c)
+    skip_empty *&gt; take_while<span data-count="3">1</span> (fun c -&gt; <span data-count="1736">C</span>har.equa<span data-count="1736">l</span> c '_<span data-count="16">'</span> || is_digi<span data-count="1720">t</span> <span data-count="38">c</span> || is_letter c)
   in
-  <span data-count="2">l</span>et checker word =
+  <span data-count="3">l</span>et checker word =
     <span data-count="599">i</span>f is_digi<span data-count="599">t</span> (String.ge<span data-count="599">t</span> word 0<span data-count="28">)</span> || is_keywor<span data-count="571">d</span> wor<span data-count="167">d</span>
     then <span data-count="195">f</span>ail "Not correct identifier"
     else <span data-count="404">r</span>eturn word
   in
-  word &gt;&gt;<span data-count="2">=</span> checker
+  word &gt;&gt;<span data-count="3">=</span> checker
 ;;
 
 let tuple el =
-  <span data-count="6">s</span>kip_empty
-  *&gt; paren<span data-count="6">s</span>
-       (lift<span data-count="6">2</span>
+  <span data-count="9">s</span>kip_empty
+  *&gt; paren<span data-count="9">s</span>
+       (lift<span data-count="9">2</span>
           (fun lst el -&gt; <span data-count="15">L</span>ist.concat [ lst; [ el ] ])
-          (man<span data-count="6">y</span> (el &lt;<span data-count="6">*</span> skip_empty &lt;<span data-count="6">*</span> cha<span data-count="6">r</span> ','))
-          (el &lt;<span data-count="6">*</span> skip_empty))
+          (man<span data-count="9">y</span> (el &lt;<span data-count="9">*</span> skip_empty &lt;<span data-count="9">*</span> cha<span data-count="9">r</span> ','))
+          (el &lt;<span data-count="9">*</span> skip_empty))
 ;;
 
-let arguments = tupl<span data-count="2">e</span> identifier &lt;|<span data-count="2">&gt;</span> man<span data-count="2">y</span> identifier
-let arguments1 = tupl<span data-count="2">e</span> identifier &lt;|<span data-count="2">&gt;</span> many<span data-count="2">1</span> identifier
+let arguments = tupl<span data-count="3">e</span> identifier &lt;|<span data-count="3">&gt;</span> man<span data-count="3">y</span> identifier
+let arguments1 = tupl<span data-count="3">e</span> identifier &lt;|<span data-count="3">&gt;</span> many<span data-count="3">1</span> identifier
 
 let declaration is_rec =
   <span data-count="10">s</span>kip_empty *<span data-count="10">&gt;</span> identifier
@@ -1552,12 +1552,12 @@ let declaration is_rec =
   <span data-count="77">i</span>f is_rec then <span data-count="11">r</span>eturn (DeclRec (id, arg_lst)) else <span data-count="66">r</span>eturn (Decl (id, arg_lst))
 ;;
 
-let add = skip_empty *<span data-count="2">&gt;</span> cha<span data-count="2">r</span> '+' *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="20">A</span>dd (e1, e2))
-let sub = skip_empty *<span data-count="2">&gt;</span> cha<span data-count="2">r</span> '-' *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="4">S</span>ub (e1, e2))
-let mul = skip_empty *<span data-count="2">&gt;</span> cha<span data-count="2">r</span> '*' *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="18">M</span>ul (e1, e2))
-let div = skip_empty *<span data-count="2">&gt;</span> cha<span data-count="2">r</span> '/' *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="4">D</span>iv (e1, e2))
-let and_o = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "&amp;&amp;" *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="8">A</span>nd (e1, e2))
-let or_o = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "||" *<span data-count="2">&gt;</span> retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="8">O</span>r (e1, e2))
+let add = skip_empty *<span data-count="3">&gt;</span> cha<span data-count="3">r</span> '+' *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="20">A</span>dd (e1, e2))
+let sub = skip_empty *<span data-count="3">&gt;</span> cha<span data-count="3">r</span> '-' *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="4">S</span>ub (e1, e2))
+let mul = skip_empty *<span data-count="3">&gt;</span> cha<span data-count="3">r</span> '*' *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="18">M</span>ul (e1, e2))
+let div = skip_empty *<span data-count="3">&gt;</span> cha<span data-count="3">r</span> '/' *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="4">D</span>iv (e1, e2))
+let and_o = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "&amp;&amp;" *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="8">A</span>nd (e1, e2))
+let or_o = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "||" *<span data-count="3">&gt;</span> retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="8">O</span>r (e1, e2))
 
 let not_op =
   let is_parens =
@@ -1566,21 +1566,21 @@ let not_op =
     | <span data-count="4">'</span>(' -&gt; return ""
     | <span data-count="4">_</span> -&gt; take_empty1
   in
-  <span data-count="2">l</span>et not_o = (skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "not" &lt;<span data-count="2">*</span> is_parens) *&gt; retur<span data-count="2">n</span> (fun e -&gt; <span data-count="8">N</span>ot e) in
-  <span data-count="2">l</span>et empty_o = skip_empty *&gt; retur<span data-count="2">n</span> (fun e -&gt; <span data-count="243">e</span>) in
-  <span data-count="2">n</span>ot_o &lt;|<span data-count="2">&gt;</span> empty_o
+  <span data-count="3">l</span>et not_o = (skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "not" &lt;<span data-count="3">*</span> is_parens) *&gt; retur<span data-count="3">n</span> (fun e -&gt; <span data-count="8">N</span>ot e) in
+  <span data-count="3">l</span>et empty_o = skip_empty *&gt; retur<span data-count="3">n</span> (fun e -&gt; <span data-count="243">e</span>) in
+  <span data-count="3">n</span>ot_o &lt;|<span data-count="3">&gt;</span> empty_o
 ;;
 
 let compare_op =
-  let gt = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "&gt;" *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="2">G</span>t (e1, e2)) in
-  <span data-count="2">l</span>et lt = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "&lt;" *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="6">L</span>t (e1, e2)) in
-  <span data-count="2">l</span>et gte = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "&gt;=" *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="2">G</span>te (e1, e2)) in
-  <span data-count="2">l</span>et lte = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "&lt;=" *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="4">L</span>te (e1, e2)) in
-  <span data-count="2">l</span>et eq = skip_empty *<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "=" *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="8">E</span>q (e1, e2)) in
-  <span data-count="2">l</span>et neq =
-    skip_empty *<span data-count="2">&gt;</span> (strin<span data-count="2">g</span> "&lt;&gt;" &lt;|<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "!=") *&gt; retur<span data-count="2">n</span> (fun e1 e2 -&gt; <span data-count="3">N</span>ot (Eq (e1, e2)))
+  let gt = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "&gt;" *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="2">G</span>t (e1, e2)) in
+  <span data-count="3">l</span>et lt = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "&lt;" *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="6">L</span>t (e1, e2)) in
+  <span data-count="3">l</span>et gte = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "&gt;=" *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="2">G</span>te (e1, e2)) in
+  <span data-count="3">l</span>et lte = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "&lt;=" *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="4">L</span>te (e1, e2)) in
+  <span data-count="3">l</span>et eq = skip_empty *<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "=" *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="8">E</span>q (e1, e2)) in
+  <span data-count="3">l</span>et neq =
+    skip_empty *<span data-count="3">&gt;</span> (strin<span data-count="3">g</span> "&lt;&gt;" &lt;|<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "!=") *&gt; retur<span data-count="3">n</span> (fun e1 e2 -&gt; <span data-count="3">N</span>ot (Eq (e1, e2)))
   in
-  <span data-count="2">e</span>q &lt;|<span data-count="2">&gt;</span> neq &lt;|<span data-count="2">&gt;</span> gte &lt;|<span data-count="2">&gt;</span> lte &lt;|<span data-count="2">&gt;</span> gt &lt;|<span data-count="2">&gt;</span> lt
+  <span data-count="3">e</span>q &lt;|<span data-count="3">&gt;</span> neq &lt;|<span data-count="3">&gt;</span> gte &lt;|<span data-count="3">&gt;</span> lte &lt;|<span data-count="3">&gt;</span> gt &lt;|<span data-count="3">&gt;</span> lt
 ;;
 
 let chainl1 e op =
@@ -1588,10 +1588,10 @@ let chainl1 e op =
   e &gt;&gt;= fun init -&gt; <span data-count="950">g</span>o init
 ;;
 
-let identifier_expr = identifier &gt;&gt;<span data-count="2">=</span> fun id -&gt; <span data-count="259">r</span>eturn @@ Id id
+let identifier_expr = identifier &gt;&gt;<span data-count="3">=</span> fun id -&gt; <span data-count="259">r</span>eturn @@ Id id
 
 let parse_math id_f =
-  <span data-count="4">f</span>ix (fun expr -&gt;
+  <span data-count="6">f</span>ix (fun expr -&gt;
     <span data-count="2">l</span>et not_e ex = <span data-count="2">n</span>ot_op &gt;&gt;= fun f -&gt; <span data-count="127">l</span>ift f ex in
     let integer_e = integer &gt;&gt;= fun c -&gt; <span data-count="34">r</span>eturn @@ Const c in
     <span data-count="2">l</span>et id_e = id_f in
@@ -1613,7 +1613,7 @@ let parse_math id_f =
 ;;
 
 let parse_expr =
-  fi<span data-count="2">x</span> (fun expr -&gt;
+  fi<span data-count="3">x</span> (fun expr -&gt;
     <span data-count="1">l</span>et unit_e = unit_c &gt;&gt;= fun c -&gt; <span data-count="5">r</span>eturn @@ Const c in
     <span data-count="1">l</span>et if_ex =
       let if_e ex = <span data-count="1">(</span>skip_empty *<span data-count="1">&gt;</span> strin<span data-count="1">g</span> "if" &lt;<span data-count="1">*</span> take_empty1) *&gt; ex in
@@ -1699,7 +1699,7 @@ let parse_expr =
 ;;
 
 let parse_exprs =
-  man<span data-count="2">y</span> (parse_expr &lt;<span data-count="2">*</span> skip_empty &lt;<span data-count="2">*</span> (strin<span data-count="2">g</span> ";;" &lt;|<span data-count="2">&gt;</span> strin<span data-count="2">g</span> "")) &lt;<span data-count="2">*</span> skip_empty
+  man<span data-count="3">y</span> (parse_expr &lt;<span data-count="3">*</span> skip_empty &lt;<span data-count="3">*</span> (strin<span data-count="3">g</span> ";;" &lt;|<span data-count="3">&gt;</span> strin<span data-count="3">g</span> "")) &lt;<span data-count="3">*</span> skip_empty
 ;;
 
 let parser str = <span data-count="0">p</span>arse_string ~consume:Consume.All parse_exprs str
@@ -1728,8 +1728,8 @@ let test_fail parser input =
 ;;
 
 (*== Test parse integer ==*)
-let parse_ok = test_o<span data-count="2">k</span> integer
-let parse_fail = test_fai<span data-count="2">l</span> integer
+let parse_ok = test_o<span data-count="3">k</span> integer
+let parse_fail = test_fai<span data-count="3">l</span> integer
 let%test _ = <span data-count="1">p</span>arse_ok " 1" (CInt 1)
 let%test _ = <span data-count="1">p</span>arse_ok " (-1234567890)" (CInt (-1234567890))
 let%test _ = <span data-count="1">p</span>arse_ok " 0901" (CInt 901)
@@ -1739,8 +1739,8 @@ let%test _ = <span data-count="1">p</span>arse_fail "aa"
 let%test _ = <span data-count="1">p</span>arse_fail " "
 
 (*== Test parse boolean ==*)
-let parse_ok = test_o<span data-count="2">k</span> boolean1
-let parse_fail = test_fai<span data-count="2">l</span> boolean1
+let parse_ok = test_o<span data-count="3">k</span> boolean1
+let parse_fail = test_fai<span data-count="3">l</span> boolean1
 let%test _ = <span data-count="1">p</span>arse_ok " true" (CBool true)
 let%test _ = <span data-count="1">p</span>arse_ok " false" (CBool false)
 let%test _ = <span data-count="1">p</span>arse_fail "1"
@@ -1749,8 +1749,8 @@ let%test _ = <span data-count="1">p</span>arse_fail " "
 let%test _ = <span data-count="1">p</span>arse_fail ""
 
 (*== Test parse identifier ==*)
-let parse_ok = test_o<span data-count="2">k</span> identifier
-let parse_fail = test_fai<span data-count="2">l</span> identifier
+let parse_ok = test_o<span data-count="3">k</span> identifier
+let parse_fail = test_fai<span data-count="3">l</span> identifier
 let%test _ = <span data-count="1">p</span>arse_ok " _" "_"
 let%test _ = <span data-count="1">p</span>arse_ok " a" "a"
 
@@ -1785,14 +1785,14 @@ let%test _ = <span data-count="1">p</span>arse_fail ""
 
 (*== Test parse tuple ==*)
 let common_tuple =
-  let constant_e = boolean &lt;|<span data-count="2">&gt;</span> integer &lt;|<span data-count="2">&gt;</span> unit_c &gt;&gt;= fun c -&gt; <span data-count="6">r</span>eturn @@ Const c in
-  <span data-count="2">l</span>et identifier_e = identifier &gt;&gt;= fun id -&gt; <span data-count="13">r</span>eturn @@ Id id in
-  <span data-count="2">l</span>et tuple_el = skip_empty *&gt; (constant_e &lt;|<span data-count="2">&gt;</span> identifier_e) in
-  <span data-count="2">t</span>upl<span data-count="2">e</span> tuple_el
+  let constant_e = boolean &lt;|<span data-count="3">&gt;</span> integer &lt;|<span data-count="3">&gt;</span> unit_c &gt;&gt;= fun c -&gt; <span data-count="6">r</span>eturn @@ Const c in
+  <span data-count="3">l</span>et identifier_e = identifier &gt;&gt;= fun id -&gt; <span data-count="13">r</span>eturn @@ Id id in
+  <span data-count="3">l</span>et tuple_el = skip_empty *&gt; (constant_e &lt;|<span data-count="3">&gt;</span> identifier_e) in
+  <span data-count="3">t</span>upl<span data-count="3">e</span> tuple_el
 ;;
 
-let parse_ok = test_o<span data-count="2">k</span> common_tuple
-let parse_fail = test_fai<span data-count="2">l</span> common_tuple
+let parse_ok = test_o<span data-count="3">k</span> common_tuple
+let parse_fail = test_fai<span data-count="3">l</span> common_tuple
 let%test _ = <span data-count="1">p</span>arse_ok "(())" [ Const CUnit ]
 let%test _ = <span data-count="1">p</span>arse_ok "(true)" [ Const (CBool true) ]
 let%test _ = <span data-count="1">p</span>arse_ok "(1)" [ Const (CInt 1) ]
@@ -1807,8 +1807,8 @@ let%test _ = <span data-count="1">p</span>arse_fail "()"
 (*== Test parse argiments ==*)
 (* TODO: arguments can accept Const(CUnit, CInt, CBool) and Id(string) *)
 
-let parse_ok = test_o<span data-count="2">k</span> arguments
-let parse_fail = test_fai<span data-count="2">l</span> arguments
+let parse_ok = test_o<span data-count="3">k</span> arguments
+let parse_fail = test_fai<span data-count="3">l</span> arguments
 let%test _ = <span data-count="1">p</span>arse_ok " _" [ "_" ]
 let%test _ = <span data-count="1">p</span>arse_ok " _ _" [ "_"; "_" ]
 let%test _ = <span data-count="1">p</span>arse_ok "a b" [ "a"; "b" ]
@@ -1830,8 +1830,8 @@ let%test _ = <span data-count="1">p</span>arse_fail true ""
 let%test _ = <span data-count="1">p</span>arse_fail false ""
 
 (*== Test parse math operations ==*)
-let parse_ok = test_o<span data-count="2">k</span> (parse_mat<span data-count="2">h</span> identifier_expr)
-let parse_fail = test_fai<span data-count="2">l</span> (parse_mat<span data-count="2">h</span> identifier_expr)
+let parse_ok = test_o<span data-count="3">k</span> (parse_mat<span data-count="3">h</span> identifier_expr)
+let parse_fail = test_fai<span data-count="3">l</span> (parse_mat<span data-count="3">h</span> identifier_expr)
 let%test _ = <span data-count="1">p</span>arse_ok " ( a )" (Id "a")
 let%test _ = <span data-count="1">p</span>arse_ok " a" (Id "a")
 let%test _ = <span data-count="1">p</span>arse_ok "(a)" (Id "a")
@@ -1939,7 +1939,7 @@ let%test _ = <span data-count="1">p</span>arse_fail "a &amp;&amp; b||c)"
 
 (*== Test parse apply ==*)
 
-let parse_ok = test_o<span data-count="2">k</span> parse_expr
+let parse_ok = test_o<span data-count="3">k</span> parse_expr
 
 let%test _ =
   <span data-count="1">p</span>arse_ok
@@ -1954,8 +1954,8 @@ let%test _ =
 (* let%test _ = parse_ok_anon "(fun x -&gt; x)" (Fun(["x"], Id "x")) *)
 
 (*== Test parse common expretion ==*)
-let parse_ok = test_o<span data-count="2">k</span> parse_expr
-let parse_fail = test_fai<span data-count="2">l</span> parse_expr
+let parse_ok = test_o<span data-count="3">k</span> parse_expr
+let parse_fail = test_fai<span data-count="3">l</span> parse_expr
 
 let%test _ =
   <span data-count="1">p</span>arse_ok
@@ -2088,7 +2088,7 @@ let%test _ = <span data-count="1">p</span>arse_fail "let rec a = b in "
 let%test _ = <span data-count="1">p</span>arse_fail "if a else b"
 
 (*== Test parse ==*)
-let parse_ok = test_o<span data-count="2">k</span> parse_exprs
+let parse_ok = test_o<span data-count="3">k</span> parse_exprs
 (*let parse_fail = test_fail parse_exprs*)
 
 let%test _ =

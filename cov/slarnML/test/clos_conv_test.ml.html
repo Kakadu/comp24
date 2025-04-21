@@ -53,14 +53,14 @@
 </pre>
 <pre><code class="ocaml">let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="16">l</span>et result =
+  <span data-count="22">l</span>et result =
     match SlarnML_lib.Parser.parser s with
-    | <span data-count="12">O</span>k ast -&gt; SlarnML_lib.Clos_conv.clos_con<span data-count="12">v</span> ast
+    | <span data-count="18">O</span>k ast -&gt; SlarnML_lib.Clos_conv.clos_con<span data-count="18">v</span> ast
     | <span data-count="4">E</span>rror message -&gt; SlarnML_lib.Res.Error message
   in
   match result with
-  | <span data-count="12">S</span>larnML_lib.Res.Result r -&gt;
-    print_strin<span data-count="12">g</span> @@ String.conca<span data-count="12">t</span> "\n" (List.ma<span data-count="12">p</span> SlarnML_lib.Pprint_cc.pp_cc_expr r)
+  | <span data-count="18">S</span>larnML_lib.Res.Result r -&gt;
+    print_strin<span data-count="18">g</span> @@ String.conca<span data-count="18">t</span> "\n" (List.ma<span data-count="18">p</span> SlarnML_lib.Pprint_cc.pp_cc_expr r)
   | <span data-count="4">E</span>rror e -&gt; Printf.eprint<span data-count="4">f</span> "%s" e
 ;;
 </code></pre>

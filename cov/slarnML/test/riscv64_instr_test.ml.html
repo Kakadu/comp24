@@ -39,12 +39,11 @@
 <a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
+<a id="L22"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -71,29 +70,27 @@
 <a href="#L20">20</a>
 <a href="#L21">21</a>
 <a href="#L22">22</a>
-<a href="#L23">23</a>
 </pre>
 <pre><code class="ocaml">open SlarnML_lib.Res
 
 let () =
   let s = Stdio.In_channel.input_all Stdlib.stdin in
-  <span data-count="18">l</span>et result =
+  <span data-count="19">l</span>et result =
     match SlarnML_lib.Parser.parser s with
-    | <span data-count="14">O</span>k ast -&gt;
-      SlarnML_lib.Clos_conv.clos_con<span data-count="14">v</span> ast
-      &gt;&gt;<span data-count="14">=</span> (fun ast -&gt; <span data-count="12">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
-      &gt;&gt;<span data-count="14">=</span> fun ast -&gt;
-      <span data-count="12">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="12">f</span> ast)
-      &gt;&gt;<span data-count="12">=</span> (fun anf -&gt; <span data-count="12">S</span>larnML_lib.Riscv.asm anf)
+    | <span data-count="15">O</span>k ast -&gt;
+      SlarnML_lib.Clos_conv.clos_con<span data-count="15">v</span> ast
+      &gt;&gt;<span data-count="15">=</span> (fun ast -&gt; <span data-count="15">S</span>larnML_lib.Lambda_lifting.lambda_lifting ast)
+      &gt;&gt;<span data-count="15">=</span> fun ast -&gt;
+      <span data-count="15">R</span>esult (SlarnML_lib.Anf_conv.an<span data-count="15">f</span> ast)
+      &gt;&gt;<span data-count="15">=</span> (fun anf -&gt; <span data-count="15">S</span>larnML_lib.Riscv.asm anf)
       &gt;&gt;= fun prog -&gt;
-      <span data-count="10">R</span>esult
-        (String.conca<span data-count="10">t</span>
-           "\n"
-           (List.ma<span data-count="10">p</span> (SlarnML_lib.Pprint_riscv.pp_instructio<span data-count="10">n</span> "\t") prog))
+      <span data-count="11">R</span>esult
+        (String.conca<span data-count="11">t</span> "\n" (List.ma<span data-count="11">p</span> (SlarnML_lib.Pprint_riscv.pp_instructio<span data-count="11">n</span> "\t") prog)
+         ^ "\n")
     | <span data-count="4">E</span>rror message -&gt; SlarnML_lib.Res.Error message
   in
   match result with
-  | <span data-count="10">S</span>larnML_lib.Res.Result r -&gt; print_strin<span data-count="10">g</span> @@ r
+  | <span data-count="11">S</span>larnML_lib.Res.Result r -&gt; print_strin<span data-count="11">g</span> @@ r
   | <span data-count="8">E</span>rror e -&gt; Printf.eprint<span data-count="8">f</span> "%s" e
 ;;
 </code></pre>
