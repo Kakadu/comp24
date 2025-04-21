@@ -55,7 +55,7 @@ let rec pp_anf_aexpr tab ae =
   | ALet (id, e1, e2) ->
     concat
       ""
-      [ "(let "
+      [ "let "
       ; id
       ; "="
       ; pp_anf_cexpr next_tab e1
@@ -64,12 +64,12 @@ let rec pp_anf_aexpr tab ae =
       ; "in\n"
       ; tab
       ; pp_anf_aexpr tab e2
-      ; ")"
+      ; ""
       ]
   | ACExpr e -> pp_anf_cexpr tab e
 ;;
 
 let pp_anf_afun = function
   | AFun (id, args, e) ->
-    concat "" [ "(fun "; id; "("; concat " " args; ")->\n\t"; pp_anf_aexpr "\t" e; "\n)" ]
+    concat "" [ "let "; id; " "; concat " " args; "=\n\t"; pp_anf_aexpr "\t" e; "\n" ]
 ;;

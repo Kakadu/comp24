@@ -9,7 +9,7 @@ open Res
 let new_anon = map (fun (ast, prog, env, num) -> Result (ast, prog, env, num + 1))
 
 let get_anon_name =
-  map (fun (_, _, _, num) -> Result (String.concat "$" [ "anon"; string_of_int num ]))
+  map (fun (_, _, _, num) -> Result (String.concat "_" [ "anon"; string_of_int num ]))
 ;;
 
 let get_name id _ =

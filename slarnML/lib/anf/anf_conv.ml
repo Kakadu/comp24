@@ -19,7 +19,7 @@ let clear_free _ =
 
 let get_name name =
   let num = next_free () in
-  String.concat "" [ name; "#"; string_of_int num ]
+  String.concat "" [ name; "_"; string_of_int num ]
 ;;
 
 let rec anf_expr e expr_with_hole =
